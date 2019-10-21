@@ -316,10 +316,12 @@ public:
 	//! set list data to HObject before preview and 
 	bool ListToHObject(bool preview_control = false);
 	//! set the list data from HObject
-	bool HObjectToList(StHObject* obj);
+	bool HObjectToList(StHObject* projObj);
 	void resetLists();
 	void resetObjects();
 	bool isPreviewEnable();
+
+	void addCameraData(const BlockDB::blkCameraInfo & info);
 	std::vector<BlockDB::blkCameraInfo> getCameraData();
 
 	listData::Container m_points_data;
@@ -333,7 +335,6 @@ public:
 	bdrPosImportDlg* m_posImportDlg;
 	bdrPGConnDlg* m_pgConnDlg;
 	bdrLasTilesDlg*	m_lasTilesDlg;
-	bdrCameraParaDlg* m_camParaDlg;
 };
 
 #endif //BDR_PROJECT_DLG_HEADER

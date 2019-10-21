@@ -164,13 +164,22 @@ public:
 };
 
 inline bool isDatabaseProject(StHObject* object) {
-	return (object->isA(CC_TYPES::ST_PROJECT) && object->getDBSourceType() == CC_TYPES::DB_MAINDB);
+	return object && object->isA(CC_TYPES::ST_PROJECT) && object->getDBSourceType() == CC_TYPES::DB_MAINDB;
+}
+inline DataBaseHObject* ToDatabaseProject(StHObject* object) {
+	return isDatabaseProject(object) ? static_cast<DataBaseHObject*>(object) : nullptr;
 }
 inline bool isBuildingProject(StHObject* object) {
-	return (object->isA(CC_TYPES::ST_PROJECT) && object->getDBSourceType() == CC_TYPES::DB_BUILDING);
+	return object && object->isA(CC_TYPES::ST_PROJECT) && object->getDBSourceType() == CC_TYPES::DB_BUILDING;
+}
+inline BDBaseHObject* ToBuildingProject(StHObject* object) {
+	return isBuildingProject(object) ? static_cast<BDBaseHObject*>(object) : nullptr;
 }
 inline bool isImageProject(StHObject* object) {
-	return (object->isA(CC_TYPES::ST_PROJECT) && object->getDBSourceType() == CC_TYPES::DB_IMAGE);
+	return object && object->isA(CC_TYPES::ST_PROJECT) && object->getDBSourceType() == CC_TYPES::DB_IMAGE;
+}
+inline BDImageBaseHObject* ToImageProject(StHObject* object) {
+	return isImageProject(object) ? static_cast<BDImageBaseHObject*>(object) : nullptr;
 }
 
 DataBaseHObject* GetRootDataBase(StHObject* obj);

@@ -68,6 +68,12 @@ void listData::toBlkDataInfo(BlockDB::blkDataInfo * info)
 
 void listData::fromBlkDataInfo(BlockDB::blkDataInfo * info)
 {
+	if (info) {
+		m_path = QString::fromLocal8Bit(info->sPath);
+		m_name = QString::fromLocal8Bit(info->sName);
+		m_index = QString::fromLocal8Bit(info->sID).toInt();
+		m_groupID = info->nGroupID;
+	}
 }
 
 void pointsListData::createObject(BlockDB::blkDataInfo* info)
@@ -99,7 +105,11 @@ void pointsListData::toBlkDataInfo(BlockDB::blkDataInfo * info)
 
 void pointsListData::fromBlkDataInfo(BlockDB::blkDataInfo * info)
 {
-
+	listData::fromBlkDataInfo(info);
+	if (info && info->dataType() == BlockDB::Blk_PtCld) {
+		BlockDB::blkPtCldInfo* pInfo = static_cast<BlockDB::blkPtCldInfo*>(info);
+		m_level = QString::fromStdString(pInfo->getStrLevel());
+	}
 }
 
 void imagesListData::createObject(BlockDB::blkDataInfo* info)
@@ -114,6 +124,7 @@ void imagesListData::createObject(BlockDB::blkDataInfo* info)
 
 void imagesListData::toBlkDataInfo(BlockDB::blkDataInfo * info)
 {
+	listData::toBlkDataInfo(info);
 	if (info) {
 		auto pInfo = static_cast<BlockDB::blkImageInfo*>(info);
 		if (_finite(posXs)) pInfo->posXs = posXs;
@@ -133,6 +144,23 @@ void imagesListData::toBlkDataInfo(BlockDB::blkDataInfo * info)
 
 void imagesListData::fromBlkDataInfo(BlockDB::blkDataInfo * info)
 {
+	listData::fromBlkDataInfo(info);
+	if (info && info->dataType() == BlockDB::Blk_Image) {
+		BlockDB::blkImageInfo* pInfo = static_cast<BlockDB::blkImageInfo*>(info);
+		m_level = QString::fromStdString(pInfo->getStrLevel());
+		this->posXs = pInfo->posXs;
+		this->posYs = pInfo->posYs;
+		this->posZs = pInfo->posZs;
+		this->posPhi = pInfo->posPhi;
+		this->posOmega = pInfo->posOmega;
+		this->posKappa = pInfo->posKappa;
+		this->gps_time = pInfo->gps_time;
+		this->gpsLat = pInfo->gpsLat;
+		this->gpsLon = pInfo->gpsLon;
+		this->gpsHeight = pInfo->gpsHeight;
+
+		this->m_cam = QString::fromStdString(pInfo->getStrCamera());
+	}
 }
 
 void miscsListData::createObject(BlockDB::blkDataInfo* info)
@@ -289,7 +317,6 @@ bdrProjectDlg::bdrProjectDlg(QWidget* parent)
 	m_viewerCtrlDlg = new bdrViewerControlDlg(this, m_preview->getGLWindow());
 	m_posImportDlg = new bdrPosImportDlg(this);
 	m_pgConnDlg = new bdrPGConnDlg(this);
-	m_camParaDlg = new bdrCameraParaDlg(this);
 	m_lasTilesDlg = new bdrLasTilesDlg(this);
 	m_UI->previewVerticalLayout->addWidget(m_viewerCtrlDlg);
 
@@ -759,6 +786,7 @@ bool bdrProjectDlg::insertItemToTable(listData * data)
 		tableWidget->item(table_index, ImagesCol_Level)->setText(data->m_level);
 
 		imagesListData* pData = static_cast<imagesListData*>(data);
+		tableWidget->item(table_index, ImagesCol_CamName)->setText(pData->m_cam);
 		if (_finite(pData->posXs)) tableWidget->item(table_index, ImagesCol_PosXs)->setText(QString::number(pData->posXs, 'f', 6));
 		if (_finite(pData->posYs)) tableWidget->item(table_index, ImagesCol_PosYs)->setText(QString::number(pData->posYs, 'f', 6));
 		if (_finite(pData->posZs)) tableWidget->item(table_index, ImagesCol_PosZs)->setText(QString::number(pData->posZs, 'f', 6));
@@ -931,12 +959,43 @@ bool bdrProjectDlg::ListToHObject(bool preview_control)
 	return true;
 }
 
-bool bdrProjectDlg::HObjectToList(StHObject* obj)
+bool bdrProjectDlg::HObjectToList(StHObject* projObj)
 {
 	resetLists();
-	if (!obj) { return false; }
+	DataBaseHObject* baseObj = ToDatabaseProject(projObj); if (!baseObj) { return false; }
 	
+	for (auto info : baseObj->m_blkData->getPtClds()) {
+		listData::Container& list_datas = getListDatas(IMPORT_POINTS);
+		listData* data = listData::New(IMPORT_POINTS);
+		data->fromBlkDataInfo(&info);
 
+		if (!insertItemToTable(data)) {
+			if (data) {
+				delete data;
+				data = nullptr;
+			}
+			continue;
+		}
+		list_datas.push_back(data);
+	}
+	for (auto info : baseObj->m_blkData->getImages()) {
+		listData::Container& list_datas = getListDatas(IMPORT_IMAGES);
+		listData* data = listData::New(IMPORT_IMAGES);
+		data->fromBlkDataInfo(&info);
+
+		if (!insertItemToTable(data)) {
+			if (data) {
+				delete data;
+				data = nullptr;
+			}
+			continue;
+		}
+		list_datas.push_back(data);
+	}
+	for (auto info : baseObj->m_blkData->getCameras()) {
+		addCameraData(info);
+	}
+	
 	return true;
 }
 
@@ -960,17 +1019,6 @@ bool bdrProjectDlg::isPreviewEnable()
 	return m_preview && m_preview->getGLWindow() && m_UI->previewDockWidget->isVisible();
 }
 
-std::vector<BlockDB::blkCameraInfo> bdrProjectDlg::getCameraData()
-{
-	std::vector<BlockDB::blkCameraInfo> camData;
-	for (size_t i = 0; i < m_UI->cameraComboBox->count() - 1; i++) {
-		QVariant v = m_UI->cameraComboBox->itemData(i);
-		if (v.canConvert<BlockDB::blkCameraInfo>())	{
-			camData.push_back(v.value<BlockDB::blkCameraInfo>());
-		}
-	}
-	return camData;
-}
 
 void bdrProjectDlg::doActionOpenProject()
 {
@@ -1254,15 +1302,35 @@ void bdrProjectDlg::doActionImageUndistort()
 {
 }
 
+void bdrProjectDlg::addCameraData(const BlockDB::blkCameraInfo & info)
+{
+	int index = m_UI->cameraComboBox->count() - 1;
+	if (index < 0) { index = 0; } // in case the end of camera combobox is not "add new camera"
+	m_UI->cameraComboBox->insertItem(index, QString::fromLocal8Bit(info.sName), QVariant::fromValue(info));
+	m_UI->cameraComboBox->setCurrentIndex(index);
+}
+
+std::vector<BlockDB::blkCameraInfo> bdrProjectDlg::getCameraData()
+{
+	std::vector<BlockDB::blkCameraInfo> camData;
+	for (size_t i = 0; i < m_UI->cameraComboBox->count() - 1; i++) {
+		QVariant v = m_UI->cameraComboBox->itemData(i);
+		if (v.canConvert<BlockDB::blkCameraInfo>()) {
+			camData.push_back(v.value<BlockDB::blkCameraInfo>());
+		}
+	}
+	return camData;
+}
+
 void bdrProjectDlg::clicked_CameraComboBox(int index)
 {
 	if (index == m_UI->cameraComboBox->count() - 1) {
-		m_camParaDlg->setCameraData(getCameraData());
-		if (m_camParaDlg->exec()) {
-			BlockDB::blkCameraInfo info = m_camParaDlg->getCameraInfo();
-			
-			m_UI->cameraComboBox->insertItem(m_UI->cameraComboBox->count() - 1, QString::fromLocal8Bit(info.sName), QVariant::fromValue(info));
-			m_UI->cameraComboBox->setCurrentIndex(m_UI->cameraComboBox->count() - 2);
+
+		bdrCameraParaDlg* camParaDlg = new bdrCameraParaDlg(this);
+		camParaDlg->setCameraData(getCameraData());
+		if (camParaDlg->exec()) {
+			BlockDB::blkCameraInfo info = camParaDlg->getCameraInfo();
+			addCameraData(info);
 		}
 	}
 }
@@ -1272,9 +1340,10 @@ void bdrProjectDlg::doActionCameraOptions()
 	QVariant v = m_UI->cameraComboBox->currentData();
 	if (v.canConvert<BlockDB::blkCameraInfo>()) {
 		BlockDB::blkCameraInfo info = v.value<BlockDB::blkCameraInfo>();
-		m_camParaDlg->setCameraInfo(info);
-		if (m_camParaDlg->exec()) {
-			info = m_camParaDlg->getCameraInfo();
+		bdrCameraParaDlg* camParaDlg = new bdrCameraParaDlg(this);
+		camParaDlg->setCameraInfo(info);
+		if (camParaDlg->exec()) {
+			info = camParaDlg->getCameraInfo();
 			m_UI->cameraComboBox->setItemData(m_UI->cameraComboBox->currentIndex(), QVariant::fromValue(info));
 		}
 	}

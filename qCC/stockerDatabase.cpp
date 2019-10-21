@@ -422,7 +422,7 @@ ccPointCloud * BDBaseHObject::GetTodoPoint(QString buildig_name)
 	StHObject::Container todo_children;
 	todo_group->filterChildrenByName(todo_children, false, BDDB_TODOPOINT_PREFIX, true, CC_TYPES::POINT_CLOUD);
 	if (!todo_children.empty()) {
-		return StHObjectCaster::ToPointCloud(todo_children.front());
+		return ccHObjectCaster::ToPointCloud(todo_children.front());
 	}
 	else {
 		ccPointCloud* todo_point = new ccPointCloud(BDDB_TODOPOINT_PREFIX);
@@ -445,7 +445,7 @@ ccPointCloud * BDBaseHObject::GetTodoLine(QString buildig_name)
 	StHObject::Container todo_children;
 	todo_group->filterChildrenByName(todo_children, false, BDDB_TODOLINE_PREFIX, true, CC_TYPES::POINT_CLOUD);
 	if (!todo_children.empty()) {
-		return StHObjectCaster::ToPointCloud(todo_children.front());
+		return ccHObjectCaster::ToPointCloud(todo_children.front());
 	}
 	else {
 		ccPointCloud* todo_point = new ccPointCloud(BDDB_TODOLINE_PREFIX);

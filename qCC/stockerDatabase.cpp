@@ -54,7 +54,7 @@ BDImageBaseHObject* GetRootImageBase(StHObject* obj) {
 	return nullptr;
 }
 
-StHObject* getChildGroupByName(StHObject* group, QString name, bool auto_create, bool add_to_db)
+StHObject* getChildGroupByName(StHObject* group, QString name, bool auto_create, bool add_to_db, bool keep_dir_hier)
 {
 	StHObject* find_obj = nullptr;
 	for (size_t i = 0; i < group->getChildrenNumber(); i++) {
@@ -65,24 +65,26 @@ StHObject* getChildGroupByName(StHObject* group, QString name, bool auto_create,
 	}
 	if (!find_obj && auto_create) {
 		find_obj = new StHObject(name);
-		QString path = group->getPath() + "/" + name;
-		if (StCreatDir(path)) {
-			find_obj->setPath(path);
+		if (keep_dir_hier) {
+			QString path = group->getPath() + "/" + name;
+			if (StCreatDir(path)) {
+				find_obj->setPath(path);
+			}
+			else {
+				delete find_obj; find_obj = nullptr;
+				return nullptr;
+			}
 		}
-		else {
-			delete find_obj; find_obj = nullptr;
-			return nullptr;
-		}
+
 		group->addChild(find_obj);
 		if (add_to_db) {
 			MainWindow::TheInstance()->addToDB(find_obj, group->getDBSourceType());
 		}
 	}
-	else {
+	else if (find_obj) {
 		QString path = find_obj->getPath();
-		if (path.isEmpty() ||
-			(!QFileInfo(path).exists() && !StCreatDir(path))) {
-			return nullptr;
+		if (path.isEmpty() && QFileInfo(path).isDir()) {
+			StCreatDir(path);
 		}
 	}
 	return find_obj;
@@ -99,28 +101,28 @@ inline void DataBaseHObject::setPath(const QString & tp)
 
 StHObject * DataBaseHObject::getPointCloudGroup()
 {
-	return getChildGroupByName(this, "pointClouds");
+	return getChildGroupByName(this, PtCld_Dir_NAME);
 }
 
 StHObject * DataBaseHObject::getImagesGroup()
 {
-	return getChildGroupByName(this, "images");
+	return getChildGroupByName(this, IMAGE_Dir_NAME);
 }
 
 StHObject * DataBaseHObject::getMiscsGroup()
 {
-	return getChildGroupByName(this, "miscs");
+	return getChildGroupByName(this, MISCS_Dir_NAME);
 }
 
 StHObject* DataBaseHObject::getProductGroup() {
-	return getChildGroupByName(this, "products");
+	return getChildGroupByName(this, PRODS_Dir_NAME);
 }
 
 StHObject * DataBaseHObject::getProductItem(QString name)
 {
 	StHObject* products = getProductGroup();
 	if (!products) { return nullptr; }
-	return getChildGroupByName(products, name);
+	return getChildGroupByName(products, name, true, false, true);
 }
 StHObject* DataBaseHObject::getProductFiltered() 
 {
@@ -181,37 +183,38 @@ DataBaseHObject * DataBaseHObject::Create(QString absolute_path)
 
 	//! point clouds
 	{
-		StHObject* points = new_database->getPointCloudGroup();
-		if (!points) {
-			return nullptr;
-		}
+		StHObject* points = new StHObject(PtCld_Dir_NAME);
+		new_database->addChild(points);
 		points->setLocked(true);
 	}
 
 	//! images
 	{
-		StHObject* images = new_database->getImagesGroup();
+		StHObject* images = new StHObject(IMAGE_Dir_NAME);
 		if (!images) {
 			return nullptr;
 		}
+		new_database->addChild(images);
 		images->setLocked(true);
 	}
 
 	//! miscellaneous
 	{
-		StHObject* misc = new_database->getMiscsGroup();
+		StHObject* misc = new StHObject(MISCS_Dir_NAME);
 		if (!misc) {
 			return nullptr;
 		}
+		new_database->addChild(misc);
 		misc->setLocked(true);
 	}
 
 	//! products
 	{
-		StHObject* products = new_database->getProductGroup();
+		StHObject* products = new StHObject(PRODS_Dir_NAME);
 		if (!products) {
 			return nullptr;
 		}
+		new_database->addChild(products);
 		products->setLocked(true);
 
 		StHObject* groundFilter = new_database->getProductFiltered();
@@ -314,7 +317,13 @@ void DataBaseHObject::clear()
 	if (m_blkData) {
 		m_blkData->clear();
 	}
-	removeAllChildren();
+	StHObject* group = getImagesGroup(); if (group)group->removeAllChildren();
+	group = getPointCloudGroup(); if (group)group->removeAllChildren();
+	group = getMiscsGroup(); if (group)group->removeAllChildren();
+	group = getProductFiltered(); if (group)group->removeAllChildren();
+	group = getProductClassified(); if (group)group->removeAllChildren();
+	group = getProductSegmented(); if (group)group->removeAllChildren();
+	group = getProductModels(); if (group)group->removeAllChildren();
 }
 
 bool DataBaseHObject::load()
@@ -323,29 +332,48 @@ bool DataBaseHObject::load()
 		m_blkData = new BlockDB::BlockDBaseIO;
 		setPath(getPath());
 	}
+	clear();
+
+	std::cout << "loading project" << getPath().toStdString() << std::endl;
 	if (!m_blkData->loadProject()) { 
-		std::cout << "cannot load project from: " + m_blkData->getErrorInfo() << std::endl;
+		std::cout << "cannot load project: " + m_blkData->getErrorInfo() << std::endl;
 		return false; 
 	}
+	std::cout << "project loaded" << std::endl;
+	StHObject* group = getPointCloudGroup();
+	if (group) {
+		group->setPath(QFileInfo(m_blkData->projHdr().lasListPath).absolutePath());
+	}
+	else return false;
+	
 	for (auto & info : m_blkData->getPtClds()) {
 		addDataExist(&info);
 	}
+	std::cout << QString::number(group->getChildrenNumber()).toStdString() << " point clouds added" << std::endl;
+
+	group = getImagesGroup();
+	if (group) {
+		group->setPath(QFileInfo(m_blkData->projHdr().imgListPath).absolutePath());
+	}
+	else return false;
+
 	for (auto & info : m_blkData->getImages()) {
 		addDataExist(&info);
 	}
-	for (auto & info : m_blkData->getCameras()) {
-		addDataExist(&info);
-	}
+	std::cout << QString::number(group->getChildrenNumber()).toStdString() << " images added" << std::endl;
 
-	// 	BlockDB::BlockDBaseIO blkDBase;
-// 	if (!blkDBase.loadProject(xml_file.toLocal8Bit())) {
-// 		return false;
-// 	}
-// 	//! add 
-// 	BlockDB::blkImageInfo* images = blkDBase.images();
-// 	blkDBase.images();
-// 	blkDBase.cameras();
-	
+	int cam_count(0);
+	for (auto & info : m_blkData->getCameras()) {
+		if (addDataExist(&info))
+			cam_count++;
+	}
+	std::cout << cam_count << " cameras added" << std::endl;
+
+	group = getMiscsGroup();
+	if (group) {
+		group->setPath(QFileInfo(m_blkData->projHdr().m_strProdGCDPN).absolutePath());
+	}
+	else return false;
 
 	return true;
 }

@@ -2916,8 +2916,8 @@ void MainWindow::echoImageCursorPos(const CCVector3d & P, bool b3d)
 
 void MainWindow::pointSnapBufferChanged(int buffer)
 {
-	if (GetActiveGLWindow())
-		GetActiveGLWindow()->setPointPickBuffer(buffer);
+	if (getActiveGLWindow())
+		getActiveGLWindow()->setPointPickBuffer(buffer);
 }
 
 void MainWindow::setStatusImageCoord(const CCVector3d & P, bool b3d)
@@ -7983,7 +7983,7 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 		if (db_prj) {
 			ccHObject* product_pool = db_prj->getProductSegmented(); 
 			if (product_pool) {
-				ccGroup = getChildGroupByName(product_pool, cloud->getName());
+				ccGroup = getChildGroupByName(product_pool, cloud->getName(), true);
 			}
 		}
 		if (!ccGroup) {
@@ -14463,7 +14463,7 @@ ccHObject * MainWindow::getCameraGroup(QString name)
 
 void MainWindow::doActionShowBestImage()
 {
-	ccGLWindow* glwin = GetActiveGLWindow(); assert(glwin); if (!glwin) return;
+	ccGLWindow* glwin = getActiveGLWindow(); assert(glwin); if (!glwin) return;
 	ccViewportParameters params = glwin->getViewportParameters();
 	ccGLCameraParameters camParas; glwin->getGLCameraParameters(camParas);
 
@@ -14812,7 +14812,10 @@ void MainWindow::doActionEditDatabase()
 	m_pbdrPrjDlg->linkWithProject(projObj);
 	m_pbdrPrjDlg->setProjectPath(projObj->getPath());
 	if (m_pbdrPrjDlg->exec()) {
-		projObj->load();
+		if (projObj->load()) {
+			addToDB_Main(projObj);
+			projObj->setDisplay_recursive(projObj->getDisplay() ? projObj->getDisplay() : getActiveGLWindow());
+		}
 	}
 }
 

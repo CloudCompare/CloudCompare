@@ -66,7 +66,9 @@ struct blkProjHdr
 		memset(camParPath, 0, _MAX_PATH);
 		memset(imgListPath, 0, _MAX_PATH);
 		memset(lasListPath, 0, _MAX_PATH);
-		memset(camParPath, 0, _MAX_PATH);
+		memset(m_strProdGCDPN, 0, _MAX_PATH);
+		memset(m_strGcpGCDPN, 0, _MAX_PATH);
+		memset(m_str7parPN, 0, _MAX_PATH);
 	}
 	char sDirPath[_MAX_PATH];
 	char sName[_MAX_FNAME];

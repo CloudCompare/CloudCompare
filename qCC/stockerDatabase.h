@@ -58,6 +58,11 @@ Q_DECLARE_METATYPE(BlockDB::blkCameraInfo)
 
 #define BLK_DATA_METAKEY "BlkDataInfo"
 
+#define PtCld_Dir_NAME "pointClouds"
+#define IMAGE_Dir_NAME "images"
+#define MISCS_Dir_NAME "miscs"
+#define PRODS_Dir_NAME "products"
+
 class DataBaseHObject : public BDBaseHObject_
 {
 public:
@@ -186,7 +191,7 @@ DataBaseHObject* GetRootDataBase(StHObject* obj);
 BDBaseHObject* GetRootBDBase(StHObject* obj);
 BDImageBaseHObject* GetRootImageBase(StHObject* obj);
 
-StHObject* getChildGroupByName(StHObject* group, QString name, bool auto_create = true, bool add_to_db = false);
+StHObject* getChildGroupByName(StHObject* group, QString name, bool auto_create = false, bool add_to_db = false, bool keep_dir_hier = false);
 
 StHObject * findChildByName(StHObject * parent, bool recursive, QString filter, bool strict, CC_CLASS_ENUM type_filter = CC_TYPES::OBJECT, bool auto_create = false, ccGenericGLDisplay * inDisplay = 0);
 

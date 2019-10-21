@@ -419,10 +419,13 @@ bool BlockDBaseIO::loadProject()
 	::GetPrivateProfileString("PRJ_HEADER", "ProjectID", "", strValue, 1024, lpstrXmlPN); sscanf(strValue, "%d", &m_projHdr.projectID);
 	::GetPrivateProfileString("PRJ_HEADER", "GroupID", "", strValue, 1024, lpstrXmlPN); sscanf(strValue, "%d", &m_projHdr.groupID);
 
-	//::GetPrivateProfileString("PRJ_HEADER", "")
-	::GetPrivateProfileString("DATA_FILE_INFO", "LASList", "", m_projHdr.lasListPath, 1024, lpstrXmlPN);
-	::GetPrivateProfileString("DATA_FILE_INFO", "IMGList", "", m_projHdr.imgListPath, 1024, lpstrXmlPN);
-	::GetPrivateProfileString("DATA_FILE_INFO", "CAMList", "", m_projHdr.camParPath, 1024, lpstrXmlPN);
+	::GetPrivateProfileString("DATA_FILE_INFO", "LASList", "", m_projHdr.lasListPath, _MAX_PATH, lpstrXmlPN);
+	::GetPrivateProfileString("DATA_FILE_INFO", "IMGList", "", m_projHdr.imgListPath, _MAX_PATH, lpstrXmlPN);
+	::GetPrivateProfileString("DATA_FILE_INFO", "CAMList", "", m_projHdr.camParPath, _MAX_PATH, lpstrXmlPN);
+
+	::GetPrivateProfileString("DATA_FILE_INFO", "GCDProd", "Data/miscs/GCDProd.ini", m_projHdr.m_strProdGCDPN, _MAX_PATH, lpstrXmlPN);
+	::GetPrivateProfileString("DATA_FILE_INFO", "GCDGcp", "Data/miscs/GCDgCP.ini", m_projHdr.m_strGcpGCDPN, _MAX_PATH, lpstrXmlPN);
+	::GetPrivateProfileString("DATA_FILE_INFO", "GCD7Par", "Data/miscs/GCD7par.ini", m_projHdr.m_str7parPN, _MAX_PATH, lpstrXmlPN);
 
 	//! load files
 	if (!loadPoints(m_ptClds, m_projHdr.lasListPath)) {
@@ -451,6 +454,7 @@ bool BlockDBaseIO::saveProject(bool save_regisprj)
 		m_error_info = "cannot save to: " + std::string(lpstrXmlPN);
 		return false;
 	}
+	fclose(fp);
 	// deduce the dir
 	if (strlen(m_projHdr.lasListPath) == 0) sprintf(m_projHdr.lasListPath, "%s%s", m_projHdr.sDirPath, "Data/points/LasFile.ini");
 	CreateDir(GetFileDirectory(m_projHdr.lasListPath));
@@ -458,6 +462,13 @@ bool BlockDBaseIO::saveProject(bool save_regisprj)
 	CreateDir(GetFileDirectory(m_projHdr.imgListPath));
 	if (strlen(m_projHdr.camParPath) == 0) sprintf(m_projHdr.camParPath, "%s%s", m_projHdr.sDirPath, "Data/images/CamFile.ini");
 	CreateDir(GetFileDirectory(m_projHdr.camParPath));
+	
+	if (strlen(m_projHdr.m_strProdGCDPN) == 0) sprintf(m_projHdr.m_strProdGCDPN, "%s%s", m_projHdr.sDirPath, "Data/miscs/GCDproduct.ini");
+	CreateDir(GetFileDirectory(m_projHdr.m_strProdGCDPN));
+	if (strlen(m_projHdr.m_strGcpGCDPN) == 0) sprintf(m_projHdr.m_strGcpGCDPN, "%s%s", m_projHdr.sDirPath, "Data/miscs/GCDGcp.ini");
+	CreateDir(GetFileDirectory(m_projHdr.m_strGcpGCDPN));
+	if (strlen(m_projHdr.m_str7parPN) == 0) sprintf(m_projHdr.m_str7parPN, "%s%s", m_projHdr.sDirPath, "Data/miscs/GCD7par.ini");
+	CreateDir(GetFileDirectory(m_projHdr.m_str7parPN));	
 
 	//! save files
 	if (!savePoints(m_ptClds, m_projHdr.lasListPath)) {
@@ -484,6 +495,10 @@ bool BlockDBaseIO::saveProject(bool save_regisprj)
 	::WritePrivateProfileString("DATA_FILE_INFO", "LASList", m_projHdr.lasListPath,  lpstrXmlPN);
 	::WritePrivateProfileString("DATA_FILE_INFO", "IMGList", m_projHdr.imgListPath,  lpstrXmlPN);
 	::WritePrivateProfileString("DATA_FILE_INFO", "CAMList", m_projHdr.camParPath, lpstrXmlPN);
+
+	::WritePrivateProfileString("DATA_FILE_INFO", "GCDProd", m_projHdr.m_strProdGCDPN, lpstrXmlPN);
+	::WritePrivateProfileString("DATA_FILE_INFO", "GCDGcp", m_projHdr.m_strGcpGCDPN, lpstrXmlPN);
+	::WritePrivateProfileString("DATA_FILE_INFO", "GCD7Par", m_projHdr.m_str7parPN, lpstrXmlPN);
 
 	if (save_regisprj) {
 		char regis_path[_MAX_PATH];

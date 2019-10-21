@@ -373,6 +373,10 @@ void bdrProjectDlg::clear()
 			tableWidget->removeRow(0);
 		}
 	}
+
+	while (m_UI->cameraComboBox->count() > 1) {
+		m_UI->cameraComboBox->removeItem(0);
+	}
 }
 
 void bdrProjectDlg::linkWithProject(DataBaseHObject * proj)
@@ -382,8 +386,8 @@ void bdrProjectDlg::linkWithProject(DataBaseHObject * proj)
 		if (m_associateProject)	{
 			//! CLEAR
 			resetObjects();
-			m_ownProject = new DataBaseHObject(m_associateProject->getName());
-			m_ownProject->setPath(m_associateProject->getPath());
+			m_ownProject = DataBaseHObject::Create(m_associateProject->getPath());
+			//m_ownProject->setPath(m_associateProject->getPath());
 			if (m_preview) {
 				m_preview->getGLWindow()->addToOwnDB(m_ownProject);
 			}

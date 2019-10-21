@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1365</width>
-    <height>1024</height>
+    <height>1038</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -127,7 +127,6 @@
     <addaction name="menuToolbars"/>
     <addaction name="menuLanguage"/>
     <addaction name="actionResetGUIElementsPos"/>
-    <addaction name="actionImageViewer"/>
     <addaction name="actionPointViewEditMode"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -559,9 +558,6 @@
      <addaction name="actionDisplayFace"/>
      <addaction name="actionDisplayNormalPerFace"/>
      <addaction name="actionDisplayNormalPerVertex"/>
-     <addaction name="actionSetPivotAlwaysOn"/>
-     <addaction name="actionSetPivotRotationOnly"/>
-     <addaction name="actionSetPivotOff"/>
     </widget>
     <widget class="QMenu" name="menuLoD2">
      <property name="title">
@@ -633,6 +629,8 @@
      <string>Image</string>
     </property>
     <addaction name="actionImageLiDARRegistration"/>
+    <addaction name="separator"/>
+    <addaction name="actionImageViewer"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -1600,7 +1598,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <enum>TopToolBarArea</enum>
    </attribute>
    <attribute name="toolBarBreak">
-    <bool>false</bool>
+    <bool>true</bool>
    </attribute>
    <addaction name="actionGroundFilteringBatch"/>
    <addaction name="actionClassificationBatch"/>
@@ -1611,7 +1609,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </widget>
   <widget class="QToolBar" name="toolBarRegistration">
    <property name="windowTitle">
-    <string>toolBar</string>
+    <string>Registration tools</string>
    </property>
    <property name="toolButtonStyle">
     <enum>Qt::ToolButtonTextUnderIcon</enum>
@@ -1620,7 +1618,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <enum>TopToolBarArea</enum>
    </attribute>
    <attribute name="toolBarBreak">
-    <bool>true</bool>
+    <bool>false</bool>
    </attribute>
    <addaction name="actionImageLiDARRegistration"/>
   </widget>
@@ -1906,7 +1904,7 @@ QTreeView::branch:open:has-children:has-siblings  {
           <x>0</x>
           <y>0</y>
           <width>304</width>
-          <height>69</height>
+          <height>71</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -5056,13 +5054,13 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionImageLiDARRegistration">
    <property name="icon">
     <iconset resource="../icones.qrc">
-     <normaloff>:/CC/Stocker/images/stocker/link.png</normaloff>:/CC/Stocker/images/stocker/link.png</iconset>
+     <normaloff>:/CC/Stocker/images/stocker/registration.png</normaloff>:/CC/Stocker/images/stocker/registration.png</iconset>
    </property>
    <property name="text">
     <string>Registration</string>
    </property>
    <property name="iconText">
-    <string>Regis</string>
+    <string>Register</string>
    </property>
   </action>
  </widget>

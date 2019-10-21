@@ -1,3 +1,12 @@
+/*
+File	:		BlockDBaseIO.cpp
+Brief	:		The cpp file of BlockDBaseIO
+
+Author	:		Xinyi Liu
+Date	:		2019/10/20
+E-mail	:		liuxy0319@outlook.com
+*/
+
 #include "BlockDBaseIO.h"
 
 #include "LasPrjIO.h"
@@ -218,7 +227,7 @@ std::string blkCameraInfo::getStrFxy(std::string * key) const
 	par += std::to_string(f) + ";";
 	par += std::to_string(x0) + ";";
 	par += std::to_string(y0) + ";";
-	return std::string();
+	return par;
 }
 
 bool blkCameraInfo::setStrDistPar(std::string str)
@@ -405,7 +414,7 @@ bool BlockDBaseIO::loadProject()
 
 	// load file header
 	::GetPrivateProfileString("PRJ_HEADER", "PrjName", "", m_projHdr.sName, 1024, lpstrXmlPN);
-	::GetPrivateProfileString("PRJ_HEADER", "PrjPath", "", m_projHdr.sDirPath, 1024, lpstrXmlPN);
+	::GetPrivateProfileString("PRJ_HEADER", "PrjDirPath", "", m_projHdr.sDirPath, 1024, lpstrXmlPN);
 
 	::GetPrivateProfileString("PRJ_HEADER", "ProjectID", "", strValue, 1024, lpstrXmlPN); sscanf(strValue, "%d", &m_projHdr.projectID);
 	::GetPrivateProfileString("PRJ_HEADER", "GroupID", "", strValue, 1024, lpstrXmlPN); sscanf(strValue, "%d", &m_projHdr.groupID);
@@ -434,7 +443,8 @@ bool BlockDBaseIO::loadProject()
 bool BlockDBaseIO::saveProject(bool save_regisprj)
 {
 	char lpstrXmlPN[_MAX_PATH]; strcpy(lpstrXmlPN, m_project_path);
-
+	
+	GetUnixDir(m_projHdr.sDirPath);
 	CreateDir(m_projHdr.sDirPath);
 	FILE* fp = fopen(lpstrXmlPN, "w");
 	if (!fp) {
@@ -442,11 +452,11 @@ bool BlockDBaseIO::saveProject(bool save_regisprj)
 		return false;
 	}
 	// deduce the dir
-	if (strlen(m_projHdr.lasListPath) == 0) sprintf(m_projHdr.lasListPath, "%s/%s", m_projHdr.sDirPath, "Data/points/LasFile.ini");
+	if (strlen(m_projHdr.lasListPath) == 0) sprintf(m_projHdr.lasListPath, "%s%s", m_projHdr.sDirPath, "Data/points/LasFile.ini");
 	CreateDir(GetFileDirectory(m_projHdr.lasListPath));
-	if (strlen(m_projHdr.imgListPath) == 0) sprintf(m_projHdr.imgListPath, "%s/%s", m_projHdr.sDirPath, "Data/images/ImgFile.ini");
+	if (strlen(m_projHdr.imgListPath) == 0) sprintf(m_projHdr.imgListPath, "%s%s", m_projHdr.sDirPath, "Data/images/ImgFile.ini");
 	CreateDir(GetFileDirectory(m_projHdr.imgListPath));
-	if (strlen(m_projHdr.camParPath) == 0) sprintf(m_projHdr.camParPath, "%s/%s", m_projHdr.sDirPath, "Data/images/CamFile.ini");
+	if (strlen(m_projHdr.camParPath) == 0) sprintf(m_projHdr.camParPath, "%s%s", m_projHdr.sDirPath, "Data/images/CamFile.ini");
 	CreateDir(GetFileDirectory(m_projHdr.camParPath));
 
 	//! save files
@@ -465,7 +475,7 @@ bool BlockDBaseIO::saveProject(bool save_regisprj)
 	::WritePrivateProfileString("FILE_TAG", "Ver", prj_file_ver, lpstrXmlPN);
 	// write prj header
 	::WritePrivateProfileString("PRJ_HEADER", "PrjName", m_projHdr.sName, lpstrXmlPN);
-	::WritePrivateProfileString("PRJ_HEADER", "PrjDirPath", m_projHdr.sDirPath, lpstrXmlPN);
+	::WritePrivateProfileString("PRJ_HEADER", "PrjDirPath", m_projHdr.sDirPath, lpstrXmlPN); 
 	sprintf(strValue, "%d", m_projHdr.projectID);
 	::WritePrivateProfileString("PRJ_HEADER", "ProjectID", strValue, lpstrXmlPN);
 	sprintf(strValue, "%d", m_projHdr.groupID);
@@ -478,12 +488,17 @@ bool BlockDBaseIO::saveProject(bool save_regisprj)
 	if (save_regisprj) {
 		char regis_path[_MAX_PATH];
 		std::string value;
-		if (!getMetaValue("RegisPrjPath", value)) {
-			sprintf(regis_path, "%s%s%s%s%s%s%s%s", m_projHdr.sDirPath, "/", IF_PROCESS_DIR, "/", g_strTaskDirName[TASK_REGIS], "/", m_projHdr.sName, ".xml");
+		if (!getMetaValue(REGISPRJ_PATH_KEY, value)) {
+			sprintf(regis_path, "%s%s%s%s%s%s%s", m_projHdr.sDirPath, IF_PROCESS_DIR, "/", g_strTaskDirName[TASK_REGIS], "/", m_projHdr.sName, ".xml");
+			addMetaValue(REGISPRJ_PATH_KEY, regis_path);
 		}
-		if (saveRegistrationProject(regis_path)) {
+		else {
+			sprintf(regis_path, value.c_str());
+		}
+
+		if (!saveRegistrationProject(regis_path)) {
 			m_error_info = "cannot save registration project to: " + std::string(regis_path);
-			return false;
+			//return false;
 		}
 	}
 
@@ -496,6 +511,7 @@ bool BlockDBaseIO::saveProject(bool save_regisprj)
 
 bool BlockDBaseIO::saveRegistrationProject(const char * path)
 {
+	CreateDir(GetFileDirectory(path));
 	LasPrjIO regis_xml;
 	regis_xml.m_PrjHdr.ProjectID = m_projHdr.projectID;
 	regis_xml.m_PrjHdr.BlockID = m_projHdr.groupID;
@@ -506,13 +522,12 @@ bool BlockDBaseIO::saveRegistrationProject(const char * path)
 	strcpy(regis_xml.m_PrjHdr.RegisPrjPath, path);
 	strcpy(strrchr(regis_xml.m_PrjHdr.RegisPrjPath, '.'), ".regisprj");
 
-	char dir[_MAX_PATH];
-	strcpy(dir, path); strcpy(strrchr(dir, '/') + 1, "");
+	char dir[_MAX_PATH]; strcpy(dir, GetFileDirectory(path)); GetUnixDir(dir);
 	
-	sprintf(regis_xml.m_PrjHdr.CamParFilePath, "%s%s", dir, "Data/CamParFile.txt");
-	sprintf(regis_xml.m_PrjHdr.ImgListPath, "%s%s", dir, "Data/ImgListFile.txt");
-	sprintf(regis_xml.m_PrjHdr.PosFilePath, "%s%s", dir, "Data/PosFile.txt");
-	sprintf(regis_xml.m_PrjHdr.LasListPath, "%s%s", dir, "Data/LasFile.txt");
+	sprintf(regis_xml.m_PrjHdr.CamParFilePath, "%s%s", dir, "Data/CamParFile.txt");		CreateDir(GetFileDirectory(regis_xml.m_PrjHdr.CamParFilePath));
+	sprintf(regis_xml.m_PrjHdr.ImgListPath, "%s%s", dir, "Data/ImgListFile.txt");		CreateDir(GetFileDirectory(regis_xml.m_PrjHdr.ImgListPath));
+	sprintf(regis_xml.m_PrjHdr.PosFilePath, "%s%s", dir, "Data/PosFile.txt");			CreateDir(GetFileDirectory(regis_xml.m_PrjHdr.PosFilePath));
+	sprintf(regis_xml.m_PrjHdr.LasListPath, "%s%s", dir, "Data/LasFile.txt");			CreateDir(GetFileDirectory(regis_xml.m_PrjHdr.LasListPath));
 
 	for (auto & info : m_ptClds) {
 		LasStrip las_strip;

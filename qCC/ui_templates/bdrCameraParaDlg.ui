@@ -181,6 +181,9 @@
          <property name="decimals">
           <number>6</number>
          </property>
+         <property name="minimum">
+          <double>-1000000.000000000000000</double>
+         </property>
          <property name="maximum">
           <double>1000000.000000000000000</double>
          </property>
@@ -327,6 +330,9 @@
          </property>
          <property name="decimals">
           <number>6</number>
+         </property>
+         <property name="minimum">
+          <double>-1000000.000000000000000</double>
          </property>
          <property name="maximum">
           <double>1000000.000000000000000</double>
@@ -954,6 +960,33 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>cameraNameLineEdit</tabstop>
+  <tabstop>comboBox</tabstop>
+  <tabstop>toolButton</tabstop>
+  <tabstop>pixelSizeDoubleSpinBox</tabstop>
+  <tabstop>focalDoubleSpinBox</tabstop>
+  <tabstop>widthSpinBox</tabstop>
+  <tabstop>heightSpinBox</tabstop>
+  <tabstop>pxDoubleSpinBox</tabstop>
+  <tabstop>pyDoubleSpinBox</tabstop>
+  <tabstop>dist0DoubleSpinBox</tabstop>
+  <tabstop>dist1DoubleSpinBox</tabstop>
+  <tabstop>dist2DoubleSpinBox</tabstop>
+  <tabstop>dist3DoubleSpinBox</tabstop>
+  <tabstop>dist4DoubleSpinBox</tabstop>
+  <tabstop>dist5DoubleSpinBox</tabstop>
+  <tabstop>dist6DoubleSpinBox</tabstop>
+  <tabstop>dist7DoubleSpinBox</tabstop>
+  <tabstop>groupBox_2</tabstop>
+  <tabstop>bias0DoubleSpinBox</tabstop>
+  <tabstop>bias1DoubleSpinBox</tabstop>
+  <tabstop>bias2DoubleSpinBox</tabstop>
+  <tabstop>bias3DoubleSpinBox</tabstop>
+  <tabstop>bias4DoubleSpinBox</tabstop>
+  <tabstop>bias5DoubleSpinBox</tabstop>
+  <tabstop>saveToDBToolButton</tabstop>
+ </tabstops>
  <resources>
   <include location="../icones.qrc"/>
  </resources>

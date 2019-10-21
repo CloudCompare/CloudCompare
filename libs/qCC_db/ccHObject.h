@@ -538,7 +538,5 @@ public:
 	ccHObject* GetHObj(CC_CLASS_ENUM type, QString suffix, QString basename = QString(), bool check_enable = false);
 };
 
+#define StHObject ccHObject
 #endif //CC_HIERARCHY_OBJECT_HEADER
-
-
-typedef ccHObject StHObject;

@@ -1,3 +1,12 @@
+/*
+File	:		bdrProjectDlg.h
+Brief	:		The header file of bdrProjectDlg
+
+Author	:		Xinyi Liu
+Date	:		2019/10/20
+E-mail	:		liuxy0319@outlook.com
+*/
+
 #ifndef BDR_PROJECT_DLG_HEADER
 #define BDR_PROJECT_DLG_HEADER
 #include <vector>
@@ -6,7 +15,7 @@
 #include "stocker_parser.h"
 #include "ccBBox.h"
 
-class ccHObject;
+class StHObject;
 class bdr2Point5DEditor;
 class bdrViewerControlDlg;
 class bdrPosImportDlg;
@@ -30,19 +39,18 @@ public:
 		, m_object(nullptr)
 		, m_displayed(false)
 	{}
-	~listData() {
-// 		if (m_object) {
-// 			delete m_object;
-// 			m_object = nullptr;
-// 		}
-	}
+	~listData() {}
 	using Container = std::vector<listData*>;
 	static listData* New(importDataType type);
 public:
 	virtual importDataType getDataType() const { return IMPORT_TYPE_END; };
-	ccHObject* getObject() { return m_object; }
-	void setObject(ccHObject* obj) { m_object = obj; }
+	StHObject* getObject() { return m_object; }
+	void setObject(StHObject* obj) { m_object = obj; }
 	virtual void createObject(BlockDB::blkDataInfo* info);
+
+	virtual void toBlkDataInfo(BlockDB::blkDataInfo* info);
+	virtual void fromBlkDataInfo(BlockDB::blkDataInfo* info);
+
 	bool isDisplayed() { return m_displayed; }
 	void setDisplayed(bool dis) { m_displayed = dis; }
 	int m_index;
@@ -51,7 +59,7 @@ public:
 	QString m_path;
 	QString m_level;
 protected:
-	ccHObject* m_object;
+	StHObject* m_object;
 private:
 	bool m_displayed;
 };
@@ -76,14 +84,12 @@ public:
 	~pointsListData() {}
 	virtual importDataType getDataType() const override { return IMPORT_POINTS; }
 	virtual void createObject(BlockDB::blkDataInfo* info) override;
+
+	virtual void toBlkDataInfo(BlockDB::blkDataInfo* info) override;
+	virtual void fromBlkDataInfo(BlockDB::blkDataInfo* info) override;
+
 	size_t m_pointCnt;
 	QStringList m_assLevels;
-	void toBlkPointInfo(BlockDB::blkPtCldInfo* info) {
-		if (info) {
-			// level
-			info->setStrLevel(m_level.toStdString());
-		}
-	}
 protected:
 private:
 };
@@ -117,26 +123,13 @@ public:
 	~imagesListData() {}
 	virtual importDataType getDataType() const override { return IMPORT_IMAGES; }
 	virtual void createObject(BlockDB::blkDataInfo* info) override;
+
+	virtual void toBlkDataInfo(BlockDB::blkDataInfo* info) override;
+	virtual void fromBlkDataInfo(BlockDB::blkDataInfo* info) override;
+
 	QString m_cam;
 	double posXs, posYs, posZs, posPhi, posOmega, posKappa;
 	double gpsLat, gpsLon, gpsHeight, gps_time;
-
-	void toBlkImageInfo(BlockDB::blkImageInfo* info) {
-		if (info) {
-			info->posXs = posXs;
-			info->posYs = posYs;
-			info->posZs = posZs;
-			info->posPhi = posPhi;
-			info->posOmega = posOmega;
-			info->posKappa = posKappa;
-			info->cameraName = m_cam.toStdString();
-			info->gpsLat = gpsLat;
-			info->gpsLon = gpsLon;
-			info->gpsHeight = gpsHeight;
-			info->setStrLevel(m_level.toStdString());
-		}
-	}
-
 protected:
 private:
 };
@@ -301,7 +294,7 @@ protected:
 
 	DataBaseHObject* m_associateProject;
 	DataBaseHObject* m_ownProject;
-	ccHObject* m_postGIS;
+	StHObject* m_postGIS;
 
 	bool insertItemToTable(listData* data);
 	importDataType getCurrentTab();
@@ -323,7 +316,7 @@ public:
 	//! set list data to HObject before preview and 
 	bool ListToHObject(bool preview_control = false);
 	//! set the list data from HObject
-	bool HObjectToList(ccHObject* obj);
+	bool HObjectToList(StHObject* obj);
 	void resetLists();
 	void resetObjects();
 	bool isPreviewEnable();

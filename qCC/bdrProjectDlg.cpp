@@ -1,3 +1,12 @@
+/*
+File	:		bdrProjectDlg.h
+Brief	:		The header file of bdrProjectDlg
+
+Author	:		Xinyi Liu
+Date	:		2019/10/20
+E-mail	:		liuxy0319@outlook.com
+*/
+
 #include "bdrProjectDlg.h"
 #include "stocker_parser.h"
 #include <cfloat>
@@ -45,6 +54,10 @@ listData * listData::New(importDataType type)
 
 void listData::createObject(BlockDB::blkDataInfo* info)
 {
+}
+
+void listData::toBlkDataInfo(BlockDB::blkDataInfo * info)
+{
 	if (info) {
 		strcpy(info->sPath, m_path.toLocal8Bit());
 		strcpy(info->sName, m_name.toLocal8Bit());
@@ -53,24 +66,40 @@ void listData::createObject(BlockDB::blkDataInfo* info)
 	}
 }
 
+void listData::fromBlkDataInfo(BlockDB::blkDataInfo * info)
+{
+}
+
 void pointsListData::createObject(BlockDB::blkDataInfo* info)
 {
 	listData::createObject(info);
+	this->toBlkDataInfo(info);
+	m_object = createObjectFromBlkDataInfo(info);
 
+	//! sceneID
+	if (m_object && info) {
+		BlockDB::blkPtCldInfo* pInfo = static_cast<BlockDB::blkPtCldInfo*>(info);
+		ccBBox box = m_object->getBB_recursive();
+		pInfo->scene_info.setMinMax(
+			box.minCorner().x, box.minCorner().y, box.minCorner().z,
+			box.maxCorner().x, box.maxCorner().y, box.maxCorner().z);
+		strcpy(pInfo->scene_info.sceneID, pInfo->sName);
+	}	
+}
+
+void pointsListData::toBlkDataInfo(BlockDB::blkDataInfo * info)
+{
+	listData::toBlkDataInfo(info);
 	if (info) {
 		BlockDB::blkPtCldInfo* pInfo = static_cast<BlockDB::blkPtCldInfo*>(info);
-		this->toBlkPointInfo(pInfo);
-		m_object = createObjectFromBlkDataInfo(pInfo);
-
-		//! sceneID
-		if (m_object) {
-			ccBBox box = m_object->getBB_recursive();
-			pInfo->scene_info.setMinMax(
-				box.minCorner().x, box.minCorner().y, box.minCorner().z,
-				box.maxCorner().x, box.maxCorner().y, box.maxCorner().z);
-			strcpy(pInfo->scene_info.sceneID, pInfo->sName);
-		}
+		// level
+		pInfo->setStrLevel(m_level.toStdString());
 	}
+}
+
+void pointsListData::fromBlkDataInfo(BlockDB::blkDataInfo * info)
+{
+
 }
 
 void imagesListData::createObject(BlockDB::blkDataInfo* info)
@@ -78,10 +107,32 @@ void imagesListData::createObject(BlockDB::blkDataInfo* info)
 	listData::createObject(info);
 
 	if (info) {
-		BlockDB::blkImageInfo* pInfo = static_cast<BlockDB::blkImageInfo*>(info);
-		this->toBlkImageInfo(pInfo);
-		m_object = createObjectFromBlkDataInfo(pInfo);		
+		this->toBlkDataInfo(info);
+		m_object = createObjectFromBlkDataInfo(info);
 	}
+}
+
+void imagesListData::toBlkDataInfo(BlockDB::blkDataInfo * info)
+{
+	if (info) {
+		auto pInfo = static_cast<BlockDB::blkImageInfo*>(info);
+		if (_finite(posXs)) pInfo->posXs = posXs;
+		if (_finite(posYs)) pInfo->posYs = posYs;
+		if (_finite(posZs)) pInfo->posZs = posZs;
+		if (_finite(posPhi)) pInfo->posPhi = posPhi;
+		if (_finite(posOmega)) pInfo->posOmega = posOmega;
+		if (_finite(posKappa)) pInfo->posKappa = posKappa;		
+		if (_finite(gpsLat)) pInfo->gpsLat = gpsLat;
+		if (_finite(gpsLon)) pInfo->gpsLon = gpsLon;
+		if (_finite(gpsHeight)) pInfo->gpsHeight = gpsHeight;
+
+		pInfo->cameraName = m_cam.toStdString();
+		pInfo->setStrLevel(m_level.toStdString());
+	}
+}
+
+void imagesListData::fromBlkDataInfo(BlockDB::blkDataInfo * info)
+{
 }
 
 void miscsListData::createObject(BlockDB::blkDataInfo* info)
@@ -518,10 +569,6 @@ void bdrProjectDlg::onDataFilesChanged(int index)
 	default:
 		break;
 	}
-	
-	
-	
-	
 }
 
 void bdrProjectDlg::onItemChanged(QTableWidgetItem * item)
@@ -533,13 +580,16 @@ void bdrProjectDlg::onItemChanged(QTableWidgetItem * item)
 	listData* data = bdItem->m_list_data;
 
 	if (!data || !data->isDisplayed()) return;
+
+	int iCol = item->column();
+	QString iText = item->text();
 	
-	if (item->column() == ListCol_ID) {
-		data->m_index = item->text().toInt();
+	if (iCol == ListCol_ID) {
+		data->m_index = iText.toInt();
 		return;
 	}
-	else if (item->column() == ListCol_Name) {
-		data->m_name = item->text();
+	else if (iCol == ListCol_Name) {
+		data->m_name = iText;
 		return;
 	}
 
@@ -547,30 +597,86 @@ void bdrProjectDlg::onItemChanged(QTableWidgetItem * item)
 	{
 	case IMPORT_POINTS: {
 		pointsListData* pd = static_cast<pointsListData*>(data);
-		if (item->column() == PointsCol_Level) {
-			pd->m_level = item->text();
-		}
-		else if (item->column() == PointsCol_GroupID) {
-			pd->m_groupID = item->text().toInt();
-		}
-		else if (item->column() == PointsCol_AssLv) {
-			pd->m_assLevels = item->text().simplified().split(QChar(';'), QString::SkipEmptyParts);
-		}
-		else if (item->column() == PointsCol_PtsCnt) {
+		switch (iCol)
+		{
+		case PointsCol_PtsCnt:
 			pd->m_pointCnt = item->text().toUInt();
-		}
-		else if (item->column() == PointsCol_Path) {
-			pd->m_path = item->text();
-			return;
+			break;
+		case PointsCol_Level:
+			pd->m_level = iText;
+			break;
+		case PointsCol_AssLv:
+			pd->m_assLevels = iText.simplified().split(QChar(';'), QString::SkipEmptyParts);
+			break;
+		case PointsCol_GroupID:
+			pd->m_groupID = iText.toInt();
+			break;
+		case PointsCol_Path:
+			pd->m_path = iText;
+			break;
+		default:
+			break;
 		}
 		break;
 	}
 	case IMPORT_IMAGES: {
-
+		imagesListData* pd = static_cast<imagesListData*>(data);
+		switch (iCol)
+		{
+		case ImagesCol_CamName:
+			pd->m_cam = iText;
+			break;
+		case ImagesCol_PosXs:
+			pd->posXs = iText.toDouble();
+			break;
+		case ImagesCol_PosYs:
+			pd->posYs = iText.toDouble();
+			break;
+		case ImagesCol_PosZs:
+			pd->posZs = iText.toDouble();
+			break;
+		case ImagesCol_PosPhi:
+			pd->posPhi = iText.toDouble();
+			break;
+		case ImagesCol_PosOmega:
+			pd->posOmega = iText.toDouble();
+			break;
+		case ImagesCol_PosKappa:
+			pd->posKappa = iText.toDouble();
+			break;
+		case ImagesCol_GpsLat:
+			pd->gpsLat = iText.toDouble();
+			break;
+		case ImagesCol_GpsLot:
+			pd->gpsLon = iText.toDouble();
+			break;
+		case ImagesCol_GpsHgt:
+			pd->gpsHeight = iText.toDouble();
+			break;
+		case ImagesCol_GpsTime:
+			pd->gps_time = iText.toDouble();
+			break;
+		case ImagesCol_GroupID:
+			pd->m_groupID = iText.toInt();
+			break;
+		case ImagesCol_Level:
+			pd->m_level = iText;
+			break;
+		case ImagesCol_Path:
+			pd->m_path = iText;
+			break;
+		default:
+			break;
+		}
 	}
 		break;
-	case IMPORT_TYPE_END:
+	case IMPORT_MISCS:
 		break;
+	case IMPORT_MODELS:
+		break;
+	case IMPORT_POSTGIS:
+		break;
+	case IMPORT_TYPE_END:
 	default:
 		break;
 	}
@@ -825,7 +931,7 @@ bool bdrProjectDlg::ListToHObject(bool preview_control)
 	return true;
 }
 
-bool bdrProjectDlg::HObjectToList(ccHObject* obj)
+bool bdrProjectDlg::HObjectToList(StHObject* obj)
 {
 	resetLists();
 	if (!obj) { return false; }

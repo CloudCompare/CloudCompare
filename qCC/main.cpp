@@ -26,6 +26,7 @@
 #include <QTime>
 #include <QTimer>
 #include <QTranslator>
+#include <QTextCodec>
 
 //qCC_db
 #include <ccColorScalesManager.h>

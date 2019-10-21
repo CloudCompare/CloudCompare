@@ -351,53 +351,7 @@ bool DataBaseHObject::load()
 }
 
 bool DataBaseHObject::save()
-{
-	QString xml_file = getPath() + "/" + QFileInfo(getPath()).completeBaseName() + ".xml";
-//	BlockDB::BlockDBaseIO blkDBase(xml_file.toLocal8Bit());
-
-	//! collect block data
-	
-// 	std::vector<BlockDB::blkPtCldInfo> pointsData;
-// 	std::vector<BlockDB::blkImageInfo> imagesData;
-// 	std::vector<BlockDB::blkCameraInfo> camerasData;
-// 	std::vector<BlockDB::blkMiscsInfo> miscsData;
-// 	for (auto & obj_info : m_obj_blkInfo) {
-// 		if (obj_info.first) {	// maybe deleted ??
-// 			BlockDB::blkDataInfo* info = obj_info.second;
-// 
-// 			switch (info->dataType())
-// 			{
-// 			case BlockDB::Blk_unset: {
-// 				std::cout << "unknown data type" << std::endl;
-// 			}
-// 				break;
-// 			case BlockDB::Blk_PtCld: {
-// 				BlockDB::blkPtCldInfo* pInfo = static_cast<BlockDB::blkPtCldInfo*>(info);
-// 				pointsData.push_back(*pInfo);
-// 			}
-// 				break;
-// 			case BlockDB::Blk_Image: {
-// 				BlockDB::blkImageInfo* pInfo = static_cast<BlockDB::blkImageInfo*>(info);
-// 				imagesData.push_back(*pInfo);
-// 			}
-// 				break;
-// 			case BlockDB::Blk_Camera: {
-// 				BlockDB::blkCameraInfo* pInfo = static_cast<BlockDB::blkCameraInfo*>(info);
-// 				camerasData.push_back(*pInfo);
-// 			}
-// 				break;
-// 			case BlockDB::Blk_Miscs: {
-// 				BlockDB::blkMiscsInfo* pInfo = static_cast<BlockDB::blkMiscsInfo*>(info);
-// 				miscsData.push_back(*pInfo);
-// 			}
-// 				break;
-// 			default:
-// 				break;
-// 			}
-// 		}
-// 	}
-	// other information in the prj.ini
-
+{	
 	if (!m_blkData->saveProject()) {
 		std::cout << m_blkData->getErrorInfo() << std::endl;
 		return false;

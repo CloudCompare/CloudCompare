@@ -1,4 +1,4 @@
-//##########################################################################
+﻿//##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
 //#                                                                        #
@@ -15285,6 +15285,23 @@ inline QStringList createTasksFiles(DataBaseHObject* db_prj,
 	}
 	fclose(fp);
 	return result_files;
+}
+
+void MainWindow::doActionImageLiDARRegistration()
+{
+	ccHObject* current = getCurrentMainDatabase(true);
+	if (!current) { current = getCurrentMainDatabase(false); }
+	if (!current) { ccLog::Error("请先载入工程!"); ccLog::Error(QString::fromLocal8Bit("请先载入工程!")); return; }
+
+	DataBaseHObject* baseObj = static_cast<DataBaseHObject*>(current);
+	if (baseObj && baseObj->m_blkData) {
+		if (!baseObj->m_blkData->saveProject(true)) {
+			ccLog::Error("无法生成配准工程!");
+			return;
+		}
+	}
+
+
 }
 
 void LoadSettingsFiltering()

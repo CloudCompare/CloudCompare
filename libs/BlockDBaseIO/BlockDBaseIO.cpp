@@ -569,8 +569,10 @@ bool BlockDBaseIO::saveRegistrationProject(const char * path)
 		LasStrip las_strip;
 		sscanf(info.sID, "%d", &las_strip.nIdx);
 		las_strip.BlockID = info.nGroupID;
-		strcpy(las_strip.szPath, info.sPath);
-		strcpy(las_strip.szName, info.sName);
+		strcpy(las_strip.szPath, info.sPath); Unix2Dos(las_strip.szPath);
+		strcpy(las_strip.szName, las_strip.szPath);
+		strcpy(las_strip.szName, strrchr(las_strip.szName, '\\') + 1);
+
 		regis_xml.m_LasInfo.push_back(las_strip);
 	}
 
@@ -608,9 +610,12 @@ bool BlockDBaseIO::saveRegistrationProject(const char * path)
 		if (img_data.CameraID == -1) {
 			continue;
 		}
+				
+		strcpy(img_data.szImgPath, info.sPath); Unix2Dos(img_data.szImgPath);
 
-		strcpy(img_data.szImgName, info.sName);
-		strcpy(img_data.szImgPath, info.sPath);
+		strcpy(img_data.szImgName, info.sPath); Unix2Dos(img_data.szImgName);
+		strcpy(img_data.szImgName, strrchr(img_data.szImgName, '\\') + 1);
+
 		sscanf(info.sID, "%d", &img_data.ImageID);
 		img_data.BlockID = info.nGroupID;
 		img_data.Lat = info.gpsLat;

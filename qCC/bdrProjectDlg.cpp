@@ -80,17 +80,7 @@ void pointsListData::createObject(BlockDB::blkDataInfo* info)
 {
 	listData::createObject(info);
 	this->toBlkDataInfo(info);
-	m_object = createObjectFromBlkDataInfo(info);
-
-	//! sceneID
-	if (m_object && info) {
-		BlockDB::blkPtCldInfo* pInfo = static_cast<BlockDB::blkPtCldInfo*>(info);
-		ccBBox box = m_object->getBB_recursive();
-		pInfo->scene_info.setMinMax(
-			box.minCorner().x, box.minCorner().y, box.minCorner().z,
-			box.maxCorner().x, box.maxCorner().y, box.maxCorner().z);
-		strcpy(pInfo->scene_info.sceneID, pInfo->sName);
-	}	
+	m_object = createObjectFromBlkDataInfo(info, true);
 }
 
 void pointsListData::toBlkDataInfo(BlockDB::blkDataInfo * info)
@@ -118,7 +108,7 @@ void imagesListData::createObject(BlockDB::blkDataInfo* info)
 
 	if (info) {
 		this->toBlkDataInfo(info);
-		m_object = createObjectFromBlkDataInfo(info);
+		m_object = createObjectFromBlkDataInfo(info, false);
 	}
 }
 
@@ -930,7 +920,7 @@ bool bdrProjectDlg::ListToHObject(bool preview_control)
 		//! firstly, save the camera data
 		std::vector<BlockDB::blkCameraInfo> camData = getCameraData();
 		for (size_t i = 0; i < camData.size(); i++) {
-			StHObject* camObj = createObjectFromBlkDataInfo(&camData[i]);
+			StHObject* camObj = createObjectFromBlkDataInfo(&camData[i], false);
 			m_ownProject->addData(camObj, &camData[i], false);
 		}
 		for (listData* data : m_images_data) if (data) {

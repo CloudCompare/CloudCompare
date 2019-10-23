@@ -623,6 +623,8 @@
      <string>Schedule</string>
     </property>
     <addaction name="actionScheduleProjectID"/>
+    <addaction name="actionScheduleGCServer"/>
+    <addaction name="actionScheduleGCNode"/>
    </widget>
    <widget class="QMenu" name="menuImage">
     <property name="title">
@@ -1904,7 +1906,7 @@ QTreeView::branch:open:has-children:has-siblings  {
           <x>0</x>
           <y>0</y>
           <width>304</width>
-          <height>71</height>
+          <height>69</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -5061,6 +5063,16 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="iconText">
     <string>Register</string>
+   </property>
+  </action>
+  <action name="actionScheduleGCServer">
+   <property name="text">
+    <string>调度中心GCSvr</string>
+   </property>
+  </action>
+  <action name="actionScheduleGCNode">
+   <property name="text">
+    <string>本机节点GCNode</string>
    </property>
   </action>
  </widget>

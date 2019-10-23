@@ -103,11 +103,15 @@ public:
 	void clear();
 	bool load();
 	bool save();
+	bool parseResults(BlockDB::BLOCK_TASK_ID task_id, QStringList results, int copy_mode);
+	bool retrieveResults(BlockDB::BLOCK_TASK_ID task_id);
+	// copy mode, 0 - copy, 1 - move, 2 - use the origin path
+	bool retrieveResults(BlockDB::BLOCK_TASK_ID task_id, QStringList results, int copy_mode);
 
 	BlockDB::BlockDBaseIO* m_blkData;
 };
 
-StHObject * createObjectFromBlkDataInfo(BlockDB::blkDataInfo * info);
+StHObject * createObjectFromBlkDataInfo(BlockDB::blkDataInfo * info, bool return_scene = false);
 
 class BDBaseHObject : public BDBaseHObject_
 {
@@ -206,7 +210,7 @@ int GetMaxNumberExcludeChildPrefix(StHObject * obj, QString prefix);
 
 bool StCreatDir(QString dir);
 
-QStringList moveFilesToDir(QStringList list, QString dir);
-QStringList copyFilesToDir(QStringList list, QString dir);
+// return new result files, if force success, will return all the existing files whatever the files are successfully moved or not
+QStringList moveFilesToDir(QStringList list, QString dir, bool remove_old, QStringList* failed_files = nullptr, bool force_success = false);
 
 #endif

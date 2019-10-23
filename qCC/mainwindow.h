@@ -83,6 +83,7 @@ class PolyFitObj;
 class StDBMainRoot;
 class StDBBuildingRoot;
 class StDBImageRoot;
+class DataBaseHObject;
 
 namespace Ui {
 	class MainWindow;
@@ -242,8 +243,8 @@ public:
 
 	ccHObject::Container getMainDatabases(bool check_enable);
 
-	ccHObject* getCurrentMainDatabase(bool check_enable);
-	ccHObject* getCurrentMainDatabase();
+	DataBaseHObject* getCurrentMainDatabase(bool check_enable);
+	DataBaseHObject* getCurrentMainDatabase();
 
 private slots:
 	//! Creates a new 3D GL sub-window
@@ -652,6 +653,8 @@ private slots:
 	void doActionSettingsBuildingSeg();
 	
 	void doActionScheduleProjectID();
+	void doActionScheduleGCServer();
+	void doActionScheduleGCNode();
 
 	void doActionClearEmptyItems();
 

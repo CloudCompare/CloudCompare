@@ -1037,7 +1037,7 @@ void MainWindow::connectActions()
 	connect(m_UI->createBuildingProjectToolButton,	&QAbstractButton::clicked, this, &MainWindow::doActionCreateBuildingProject);
 	connect(m_UI->loadSubstanceToolButton,			&QAbstractButton::clicked, this, &MainWindow::doActionLoadSubstance);
 	
-	connect(m_UI->actionImageLiDARRegistration, &QAction::triggered, this, &MainWindow::doActionImageLiDARRegistration);
+	connect(m_UI->actionImageLiDARRegistration,		&QAction::triggered, this, &MainWindow::doActionImageLiDARRegistration);
 
 	//! Segmentation
 	connect(m_UI->actionGroundFilteringBatch,		&QAction::triggered, this, &MainWindow::doActionGroundFilteringBatch);
@@ -1047,14 +1047,16 @@ void MainWindow::connectActions()
 	connect(m_UI->actionBuildingSegmentEditor,		&QAction::triggered, this, &MainWindow::doActionBuildingSegmentEditor);
 	connect(m_UI->actionPointClassEditor,			&QAction::triggered, this, &MainWindow::doActionPointClassEditor);
 
-	connect(m_UI->actionSettingsGroundFiltering, &QAction::triggered, this, &MainWindow::doAactionSettingsGroundFiltering);
-	connect(m_UI->actionSettingsClassification, &QAction::triggered, this, &MainWindow::doActionSettingsClassification);
-	connect(m_UI->actionSettingsBuildingSeg, &QAction::triggered, this, &MainWindow::doActionSettingsBuildingSeg);
+	connect(m_UI->actionSettingsGroundFiltering,	&QAction::triggered, this, &MainWindow::doAactionSettingsGroundFiltering);
+	connect(m_UI->actionSettingsClassification,		&QAction::triggered, this, &MainWindow::doActionSettingsClassification);
+	connect(m_UI->actionSettingsBuildingSeg,		&QAction::triggered, this, &MainWindow::doActionSettingsBuildingSeg);
 
 	//! schedule
-	connect(m_UI->actionScheduleProjectID, &QAction::triggered, this, &MainWindow::doActionScheduleProjectID);
+	connect(m_UI->actionScheduleProjectID,			&QAction::triggered, this, &MainWindow::doActionScheduleProjectID);
+	connect(m_UI->actionScheduleGCServer,			&QAction::triggered, this, &MainWindow::doActionScheduleGCServer);
+	connect(m_UI->actionScheduleGCNode,				&QAction::triggered, this, &MainWindow::doActionScheduleGCNode);
 	
-	connect(m_UI->actionClearEmptyItems, &QAction::triggered, this, &MainWindow::doActionClearEmptyItems);
+	connect(m_UI->actionClearEmptyItems,			&QAction::triggered, this, &MainWindow::doActionClearEmptyItems);
 	
 }
 
@@ -14801,8 +14803,7 @@ void MainWindow::doActionEditDatabase()
 {
 	if (!m_pbdrPrjDlg) { m_pbdrPrjDlg = new bdrProjectDlg(this); m_pbdrPrjDlg->setModal(true); }
 	
-	ccHObject* current_database = getCurrentMainDatabase(true);
-	DataBaseHObject* projObj = current_database ? static_cast<DataBaseHObject*>(current_database) : nullptr;
+	DataBaseHObject* projObj = getCurrentMainDatabase();
 	if (!projObj) {
 		//! new
 		doActionCreateDatabase();
@@ -14930,7 +14931,7 @@ ccHObject::Container MainWindow::getMainDatabases(bool check_enable)
 	return GetEnabledObjFromGroup(root, CC_TYPES::ST_PROJECT, check_enable, true);
 }
 
-ccHObject* MainWindow::getCurrentMainDatabase(bool check_enable)
+DataBaseHObject* MainWindow::getCurrentMainDatabase(bool check_enable)
 {
 	ccHObject* baseObj = nullptr;
 	ccHObject::Container dbs = getMainDatabases(check_enable);
@@ -14945,12 +14946,12 @@ ccHObject* MainWindow::getCurrentMainDatabase(bool check_enable)
 			baseObj = askUserToSelect(CC_TYPES::ST_PROJECT, dbs.front(), "please select the current active project", db(CC_TYPES::DB_MAINDB)->getRootEntity());
 		}
 	}
-	return baseObj;
+	return ToDatabaseProject(baseObj);
 }
 
-ccHObject * MainWindow::getCurrentMainDatabase()
+DataBaseHObject * MainWindow::getCurrentMainDatabase()
 {
-	ccHObject* baseObj = getCurrentMainDatabase(true);
+	DataBaseHObject* baseObj = getCurrentMainDatabase(true);
 	if (!baseObj) {
 		baseObj = getCurrentMainDatabase(false);
 	}
@@ -15165,7 +15166,7 @@ void MainWindow::doActionCreateBuildingProject()
 						"image list (*.txt)");
 				if (QFileInfo(Filename).exists()) {
 					QStringList list; list.append(Filename);
-					QStringList file = copyFilesToDir(list, image_dir);
+					QStringList file = moveFilesToDir(list, image_dir, false);
 					if (!file.isEmpty() && QFileInfo(file.front()).exists()) {
 						image_list = file.front();
 					}
@@ -15182,7 +15183,7 @@ void MainWindow::doActionCreateBuildingProject()
 					"sfm out (*.out)");
 			if (QFileInfo(Filename).exists()) {
 				QStringList list; list.append(Filename);
-				QStringList file = copyFilesToDir(list, image_dir);
+				QStringList file = moveFilesToDir(list, image_dir, false);
 				if (!file.isEmpty() && QFileInfo(file.front()).exists()) {
 					sfm_out = file.front();
 				}
@@ -15313,7 +15314,7 @@ inline QStringList createTasksFiles(DataBaseHObject* db_prj,
 	QStringList result_files;
 
 	//! generate tsk
-	char strIfDir[256]; sprintf(strIfDir, "%s%s%s%s%s", db_prj->getPath(), "/", IF_PROCESS_DIR, "/", BlockDB::g_strTaskDirName[task_id]);
+	char strIfDir[256]; sprintf(strIfDir, "%s%s%s%s%s", db_prj->getPath().toStdString().c_str(), "/", IF_PROCESS_DIR, "/", BlockDB::g_strTaskDirName[task_id]);
 	QString if_dir = QString::fromLocal8Bit(strIfDir); StCreatDir(if_dir);
 	QString tsk_dir = if_dir + "/TSK"; StCreatDir(tsk_dir);
 	QString output_dir = if_dir + "/OUTPUT"; StCreatDir(output_dir);
@@ -15358,7 +15359,7 @@ inline QStringList createTasksFiles(DataBaseHObject* db_prj,
 
 void MainWindow::doActionImageLiDARRegistration()
 {
-	DataBaseHObject* baseObj = ToDatabaseProject(getCurrentMainDatabase());
+	DataBaseHObject* baseObj = getCurrentMainDatabase();
 	if (!baseObj) { ccLog::Error(QString::fromLocal8Bit("请先载入工程!")); return; }
 
 	if (baseObj->m_blkData) {
@@ -15367,8 +15368,13 @@ void MainWindow::doActionImageLiDARRegistration()
 			return;
 		}
 	}
-
-	//QProcess::execute(cmd);
+	QString exe_path = QCoreApplication::applicationDirPath() + "/bin/Registration/RegisLiDAR_Image.exe";
+	std::string regis_path;
+	baseObj->m_blkData->getMetaValue(REGISPRJ_PATH_KEY, regis_path);
+	QString xml = QString::fromStdString(regis_path);
+	if (QFileInfo(xml).exists()) {
+		QProcess::execute(exe_path + " " + xml);
+	}
 }
 
 void LoadSettingsFiltering()
@@ -15378,7 +15384,7 @@ void LoadSettingsFiltering()
 
 void MainWindow::doActionGroundFilteringBatch()
 {
-	DataBaseHObject* baseObj = ToDatabaseProject(getCurrentMainDatabase());
+	DataBaseHObject* baseObj = getCurrentMainDatabase();
 	if (!baseObj) { ccLog::Error(QString::fromLocal8Bit("请先载入工程!")); return; }
 
 	//! get valid data by level
@@ -15396,25 +15402,6 @@ void MainWindow::doActionGroundFilteringBatch()
 		}
 	}
 
-
-
-// 	if (!haveSelection()) {
-// 		return;
-// 	}
-// 	ccHObject* sel = m_selectedEntities.front();
-// 	DataBaseHObject* db_prj = GetRootDataBase(sel);
-// 	if (!db_prj) { return; }
-
-// 	ccHObject::Container tasks;
-// 	{
-// 		if (sel->isGroup()) {
-// 			tasks = GetEnabledObjFromGroup(sel, CC_TYPES::POINT_CLOUD, true, false);
-// 		}
-// 		else if (sel->isA(CC_TYPES::POINT_CLOUD)) {
-// 			tasks.push_back(sel);
-// 		}
-// 	}
-
 	QStringList result_files;
 	{
 		//! parameters
@@ -15425,7 +15412,7 @@ void MainWindow::doActionGroundFilteringBatch()
 		result_files = createTasksFiles(baseObj, poinclouds,
 			BlockDB::TASK_ID_FILTER,
 			"/bin/FILTERING/filtering_knl.exe",
-			"/filtering.gctsk",
+			"/filtering.gtsk",
 			output_suffix,
 			para_settings);
 	}
@@ -15433,6 +15420,15 @@ void MainWindow::doActionGroundFilteringBatch()
 	QString cmd = getCmdLine(baseObj, BlockDB::TASK_ID_FILTER, baseObj->m_blkData->projHdr().projectID);
 	std::cout << "cmd: " << cmd.toStdString() << std::endl;
 	if (cmd.isEmpty()) return;
+
+	//! whether wait for results
+	QMessageBox *messageBox = new QMessageBox(this);
+	messageBox->setIcon(QMessageBox::Question);
+	messageBox->setWindowTitle(QString::fromLocal8Bit("结果自动返回"));
+	messageBox->setText(QString::fromLocal8Bit("是否等待界面返回滤波结果?"));
+	messageBox->addButton(QString::fromLocal8Bit("是"), QMessageBox::AcceptRole);
+	messageBox->addButton(QString::fromLocal8Bit("否"), QMessageBox::RejectRole);
+	bool waitForResult = (messageBox->exec() == QDialog::Accepted);
 
 	ccHObject* product_pool = baseObj->getProductFiltered(); if (!product_pool) { return; }
 
@@ -15446,8 +15442,13 @@ void MainWindow::doActionGroundFilteringBatch()
 
 	QFutureWatcher<void> executer;
 	connect(&executer, &QFutureWatcher<void>::finished, this, [=]() {
-		QStringList new_results = moveFilesToDir(result_files, product_pool->getPath());
-		addPointsToDatabase(new_results, product_pool, true, true, true);
+		if (waitForResult) {
+			//! the results should be moved to dirs in the check process
+			baseObj->parseResults(BlockDB::TASK_ID_FILTER, result_files, 1);
+			//! otherwise open dialog --> import folders automatically
+			baseObj->retrieveResults(BlockDB::TASK_ID_FILTER);
+		}
+		QMessageBox::information(this, "Finished!", "The filtering task is completed");
 	});
 	QObject::connect(&executer, SIGNAL(finished()), pDlg.data(), SLOT(reset()));
 	executer.setFuture(QtConcurrent::run([&cmd]() { QProcess::execute(cmd); }));
@@ -15483,12 +15484,12 @@ void MainWindow::doActionClassificationBatch()
 		result_files = createTasksFiles(db_prj, tasks,
 			"IF_CLASSIFICATION",
 			"/bin/CLASSIFY/Classify_KNL.exe",
-			"/classification.gctsk",
+			"/classification.gtsk",
 			output_suffix,
 			para_settings);
 	}
 
-	QString cmd = getCmdLine(db_prj, "CLASSIFICATION", m_GCSvr_prj_id);
+	QString cmd = getCmdLine(db_prj, "CLASSIFICATION", db_prj->m_blkData->projHdr().projectID);
 	std::cout << "cmd: " << cmd.toStdString() << std::endl;
 	if (cmd.isEmpty()) return;
 
@@ -15504,8 +15505,8 @@ void MainWindow::doActionClassificationBatch()
 
 	QFutureWatcher<void> executer;
 	connect(&executer, &QFutureWatcher<void>::finished, this, [=]() {
-		QStringList new_results = moveFilesToDir(result_files, product_pool->getPath());
-		addPointsToDatabase(new_results, product_pool, true, true, true);
+//		QStringList new_results = moveFilesToDir(result_files, product_pool->getPath());
+//		addPointsToDatabase(new_results, product_pool, true, true, true);
 	});
 	QObject::connect(&executer, SIGNAL(finished()), pDlg.data(), SLOT(reset()));
 	executer.setFuture(QtConcurrent::run([&cmd]() { QProcess::execute(cmd); }));
@@ -15544,7 +15545,7 @@ void MainWindow::doActionBuildingSegmentationBatch()
 			output_suffix, para_settings);
 	}
 
-	QString cmd = getCmdLine(db_prj, "BUILDINGSEG", m_GCSvr_prj_id);
+	QString cmd = getCmdLine(db_prj, "BUILDINGSEG", db_prj->m_blkData->projHdr().projectID);
 	std::cout << "cmd: " << cmd.toStdString() << std::endl;
 	if (cmd.isEmpty()) return;
 
@@ -15574,7 +15575,7 @@ void MainWindow::doActionBuildingSegmentationBatch()
 					QString & s = const_cast<QString&>(building_files.at(i));
 					s = result_dir + "/" + s;
 				}
-				QStringList new_results = moveFilesToDir(building_files, pool->getPath());
+				QStringList new_results;// = moveFilesToDir(building_files, pool->getPath());
 				ccHObject::Container added_files = addPointsToDatabase(new_results, pool, true, false, false);
 				int bd_num = GetMaxNumberExcludeChildPrefix(pool, BDDB_BUILDING_PREFIX) + 1;
 				for (ccHObject* pc : added_files) {
@@ -15753,11 +15754,29 @@ void MainWindow::doActionSettingsBuildingSeg()
 
 void MainWindow::doActionScheduleProjectID()
 {
-	bool ok;
-	int getint = QInputDialog::getInt(this, "Compute Kd-tree", "Max error per leaf cell:", m_GCSvr_prj_id, 0, 99, 1, &ok);
-	if (ok) {
-		m_GCSvr_prj_id = getint;
+	DataBaseHObject* base = getCurrentMainDatabase();
+	if (base) {
+		bool ok;
+		int getint = QInputDialog::getInt(this, "Project ID", "Project ID:", base->m_blkData->projHdr().projectID, 0, 99, 1, &ok);
+		if (ok) {
+			base->m_blkData->projHdr().projectID = getint;
+		}
 	}
+}
+
+void MainWindow::doActionScheduleGCServer()
+{
+	QString runPath = QCoreApplication::applicationDirPath() + "/bin/WGCS/GCSvr.exe";
+	QProcess process;
+	process.startDetached(runPath, QStringList(runPath));
+	
+}
+
+void MainWindow::doActionScheduleGCNode()
+{
+	QString runPath = QCoreApplication::applicationDirPath() + "/bin/WGCS/GCNode.exe";
+	QProcess process;
+	process.startDetached(runPath, QStringList(runPath));
 }
 
 void MainWindow::doActionClearEmptyItems()

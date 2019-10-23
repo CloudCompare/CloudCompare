@@ -141,7 +141,7 @@ StHObject * DataBaseHObject::getProductModels()
 	return getProductItem("models");
 }
 
-StHObject* createObjectFromBlkDataInfo(BlockDB::blkDataInfo* info)
+StHObject* createObjectFromBlkDataInfo(BlockDB::blkDataInfo* info, bool return_scene)
 {
 	StHObject* object = nullptr;
 	if (!info || !info->isValid()) return object;
@@ -156,6 +156,14 @@ StHObject* createObjectFromBlkDataInfo(BlockDB::blkDataInfo* info)
 			parameters.loadMode = 0;
 		}
 		object = FileIOFilter::LoadFromFile(QString::fromLocal8Bit(info->sPath), parameters, result, QString());
+		if (return_scene && object)	{
+			BlockDB::blkPtCldInfo* pInfo = static_cast<BlockDB::blkPtCldInfo*>(info);
+			ccBBox box = object->getBB_recursive();
+			pInfo->scene_info.setMinMax(
+				box.minCorner().x, box.minCorner().y, box.minCorner().z,
+				box.maxCorner().x, box.maxCorner().y, box.maxCorner().z);
+			strcpy(pInfo->scene_info.sceneID, pInfo->sName);
+		}
 	}
 		break;
 	case BlockDB::Blk_Image:
@@ -306,7 +314,7 @@ bool DataBaseHObject::addData(StHObject * obj, BlockDB::blkDataInfo* info, bool 
 
 bool DataBaseHObject::addDataExist(BlockDB::blkDataInfo * info)
 {
-	StHObject* obj = createObjectFromBlkDataInfo(info);
+	StHObject* obj = createObjectFromBlkDataInfo(info, false);
 	if (!obj) { return false; }
 	
 	return addData(obj, info, true);
@@ -404,6 +412,147 @@ bool DataBaseHObject::save()
 		return false;
 	}
 	
+	return true;
+}
+
+bool DataBaseHObject::parseResults(BlockDB::BLOCK_TASK_ID task_id, QStringList results, int copy_mode)
+{
+	QStringList new_results;
+
+	if (copy_mode == 2) {
+		new_results = results;
+	}
+	else {
+		QString target_dir;
+		//! get target dir
+		switch (task_id)
+		{
+		case BlockDB::TASK_ID_TILE:
+			break;
+		case BlockDB::TASK_ID_FILTER:
+		{
+			StHObject*group = getProductFiltered();
+			if (group) {
+				target_dir = group->getPath();
+			}
+		}
+		break;
+		case BlockDB::TASK_ID_REGIS:
+			break;
+		case BlockDB::TASK_ID_CLASS:
+		{
+			StHObject*group = getProductClassified();
+			if (group) {
+				target_dir = group->getPath();
+			}
+		}
+		break;
+		case BlockDB::TASK_ID_BDSEG:
+		{
+			StHObject*group = getProductSegmented();
+			if (group) {
+				target_dir = group->getPath();
+			}
+		}
+		break;
+		case BlockDB::TASK_ID_RECON:
+			break;
+		default:
+			break;
+		}
+		if (!target_dir.isEmpty()) {
+			QStringList errors;
+			new_results = moveFilesToDir(results, target_dir, true, &errors, false);
+		}
+	}
+	return new_results.size() == results.size();
+}
+
+bool DataBaseHObject::retrieveResults(BlockDB::BLOCK_TASK_ID task_id)
+{
+	assert(false);
+	return false;
+	// get directory
+	QStringList new_results;
+	QString target_dir;
+	//! get target dir
+	switch (task_id)
+	{
+	case BlockDB::TASK_ID_TILE:
+		break;
+	case BlockDB::TASK_ID_FILTER:
+	{
+		StHObject*group = getProductFiltered();
+		if (group) {
+			target_dir = group->getPath();
+		}
+	}
+	break;
+	case BlockDB::TASK_ID_REGIS:
+		break;
+	case BlockDB::TASK_ID_CLASS:
+	{
+		StHObject*group = getProductClassified();
+		if (group) {
+			target_dir = group->getPath();
+		}
+	}
+	break;
+	case BlockDB::TASK_ID_BDSEG:
+	{
+		StHObject*group = getProductSegmented();
+		if (group) {
+			target_dir = group->getPath();
+		}
+	}
+	break;
+	case BlockDB::TASK_ID_RECON:
+		break;
+	default:
+		break;
+	}
+	if (!target_dir.isEmpty()) {
+		//new_results = moveFilesToDir(results, target_dir, true, &errors, false);
+	}
+
+	for (auto & pc : m_blkData->getPtClds()) {
+		if (pc.nGroupID == m_blkData->projHdr().groupID) {
+			QString result = target_dir + "/" + QFileInfo(QString::fromLatin1(pc.sPath)).fileName();
+			if (QFileInfo(result).exists()) {
+				new_results.push_back(result);
+			}
+		}
+	}
+
+	for (size_t i = 0; i < new_results.size(); i++) {
+		if (task_id == BlockDB::TASK_ID_TILE || 
+			task_id == BlockDB::TASK_ID_FILTER ||
+			task_id == BlockDB::TASK_ID_CLASS ||
+			task_id == BlockDB::TASK_ID_BDSEG) 
+		{
+			BlockDB::blkPtCldInfo info;
+			// TODO:
+			//info->sID
+			strcpy(info.sPath, new_results[i].toStdString().c_str());
+			if (task_id == BlockDB::TASK_ID_TILE) info.level = BlockDB::PCLEVEL_TILE;
+			else if (task_id == BlockDB::TASK_ID_FILTER) info.level = BlockDB::PCLEVEL_FILTER;
+			else if (task_id == BlockDB::TASK_ID_CLASS) info.level = BlockDB::PCLEVEL_CLASS;
+			else if (task_id == BlockDB::TASK_ID_BDSEG) info.level = BlockDB::PCLEVEL_BUILD;
+			StHObject* object = createObjectFromBlkDataInfo(&info, true);
+			if (object)	{
+				addData(object, &info, false);
+			}
+		}
+		else if (task_id == BlockDB::TASK_ID_RECON)	
+		{
+
+		}
+		else if (task_id == BlockDB::TASK_ID_REGIS)	
+		{
+
+		}
+	}
+
 	return true;
 }
 
@@ -600,48 +749,37 @@ bool StCreatDir(QString dir)
 	return CreateDir(dir.toStdString().c_str());
 }
 
-QStringList moveFilesToDir(QStringList list, QString dir)
+QStringList moveFilesToDir(QStringList list, QString dir, bool remove_old, QStringList* failed_files, bool force_success)
 {
 	QStringList new_files;
 	if (StCreatDir(dir)) {
 		for (size_t i = 0; i < list.size(); i++) {
 			QString & file = const_cast<QString&>(list[i]);
 			QFileInfo file_info(file);
+
+			if (file_info.absolutePath() == dir) {
+				new_files.append(file);
+				continue;
+			}
+
 			QString new_file = dir + "/" + file_info.fileName();
 			if (QFile::copy(file, new_file)) {
-				QFile::remove(file);
+				if (remove_old) { QFile::remove(file); }
 				new_files.append(new_file);
 			}
-			else {
+			else if (force_success) {
 				new_files.append(file);
+			}
+			else if (failed_files) {
+				(*failed_files).push_back(file);
 			}
 		}
 	}
-	else {
+	else if (force_success) {
 		return list;
 	}
-
-	return new_files;
-}
-
-QStringList copyFilesToDir(QStringList list, QString dir)
-{
-	QStringList new_files;
-	if (StCreatDir(dir)) {
-		for (size_t i = 0; i < list.size(); i++) {
-			QString & file = const_cast<QString&>(list[i]);
-			QFileInfo file_info(file);
-			QString new_file = dir + "/" + file_info.fileName();
-			if (QFile::copy(file, new_file)) {
-				new_files.append(new_file);
-			}
-			else {
-				new_files.append(file);
-			}
-		}
-	}
 	else {
-		return list;
+		(*failed_files) = list;
 	}
 
 	return new_files;

@@ -470,8 +470,6 @@ bool DataBaseHObject::parseResults(BlockDB::BLOCK_TASK_ID task_id, QStringList r
 
 bool DataBaseHObject::retrieveResults(BlockDB::BLOCK_TASK_ID task_id)
 {
-	assert(false);
-	return false;
 	// get directory
 	QStringList new_results;
 	QString target_dir;

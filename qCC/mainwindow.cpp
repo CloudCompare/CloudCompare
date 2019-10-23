@@ -15364,7 +15364,7 @@ void MainWindow::doActionImageLiDARRegistration()
 
 	if (baseObj->m_blkData) {
 		if (!baseObj->m_blkData->saveProject(true)) {
-			ccLog::Error(QString::fromLocal8Bit("无法生成配准工程!"));
+			QMessageBox::critical(this, "Error!", QString::fromLocal8Bit("无法生成配准工程"));
 			return;
 		}
 	}
@@ -15374,6 +15374,9 @@ void MainWindow::doActionImageLiDARRegistration()
 	QString xml = QString::fromStdString(regis_path);
 	if (QFileInfo(xml).exists()) {
 		QProcess::execute(exe_path + " " + xml);
+	}
+	else {
+		QMessageBox::critical(this, "Error!", QString::fromLocal8Bit("无法打开配准工程"));
 	}
 }
 
@@ -15426,52 +15429,49 @@ void MainWindow::doActionGroundFilteringBatch()
 	messageBox->setIcon(QMessageBox::Question);
 	messageBox->setWindowTitle(QString::fromLocal8Bit("结果自动返回"));
 	messageBox->setText(QString::fromLocal8Bit("是否等待界面返回滤波结果?"));
-	messageBox->addButton(QString::fromLocal8Bit("是"), QMessageBox::AcceptRole);
 	messageBox->addButton(QString::fromLocal8Bit("否"), QMessageBox::RejectRole);
+	messageBox->addButton(QString::fromLocal8Bit("是"), QMessageBox::AcceptRole);
 	bool waitForResult = (messageBox->exec() == QDialog::Accepted);
 
-	ccHObject* product_pool = baseObj->getProductFiltered(); if (!product_pool) { return; }
+	if (waitForResult) {
+		QScopedPointer<ccProgressDialog> pDlg(nullptr);
+		pDlg.reset(new ccProgressDialog(false, this));
+		pDlg->setMethodTitle(QObject::tr("Ground Filtering"));
+		pDlg->setInfo(QObject::tr("Please wait... filtering in progress"));
+		pDlg->setRange(0, 0);
+		pDlg->setModal(false);
+		pDlg->start();
 
-	QScopedPointer<ccProgressDialog> pDlg(nullptr);
-	pDlg.reset(new ccProgressDialog(false, this));
-	pDlg->setMethodTitle(QObject::tr("Ground Filtering"));
-	pDlg->setInfo(QObject::tr("Please wait... filtering in progress"));
-	pDlg->setRange(0, 0);
-	pDlg->setModal(false);
-	pDlg->start();
-
-	QFutureWatcher<void> executer;
-	connect(&executer, &QFutureWatcher<void>::finished, this, [=]() {
-		if (waitForResult) {
+		QFutureWatcher<void> executer;
+		connect(&executer, &QFutureWatcher<void>::finished, this, [=]() {
 			//! the results should be moved to dirs in the check process
 			baseObj->parseResults(BlockDB::TASK_ID_FILTER, result_files, 1);
 			//! otherwise open dialog --> import folders automatically
 			baseObj->retrieveResults(BlockDB::TASK_ID_FILTER);
-		}
-		QMessageBox::information(this, "Finished!", "The filtering task is completed");
-	});
-	QObject::connect(&executer, SIGNAL(finished()), pDlg.data(), SLOT(reset()));
-	executer.setFuture(QtConcurrent::run([&cmd]() { QProcess::execute(cmd); }));
-	pDlg->exec();
-	executer.waitForFinished();
+			
+			QMessageBox::information(this, "Finished!", "The filtering task is completed");
+		});
+		QObject::connect(&executer, SIGNAL(finished()), pDlg.data(), SLOT(reset()));
+		executer.setFuture(QtConcurrent::run([&cmd]() { QProcess::execute(cmd); }));
+		pDlg->exec();
+		executer.waitForFinished();
+	}
+	else {
+		QProcess::startDetached(cmd);
+	}
 }
 
 void MainWindow::doActionClassificationBatch()
 {
-	if (!haveSelection()) {
-		return;
-	}
-	ccHObject* sel = m_selectedEntities.front();
-	DataBaseHObject* db_prj = GetRootDataBase(sel);
-	if (!db_prj) { return; }
-	
-	ccHObject::Container tasks;
-	{
-		if (sel->isGroup()) {
-			tasks = GetEnabledObjFromGroup(sel, CC_TYPES::POINT_CLOUD, true, false);
-		}
-		else if (sel->isA(CC_TYPES::POINT_CLOUD)) {
-			tasks.push_back(sel);
+	DataBaseHObject* baseObj = getCurrentMainDatabase();
+	if (!baseObj) { ccLog::Error(QString::fromLocal8Bit("请先载入工程!")); return; }
+
+	//! get valid data by level
+	std::vector<BlockDB::blkPtCldInfo> poinclouds;
+	BlockDB::BLOCK_PtCldLevel _level = BlockDB::PCLEVEL_FILTER;
+	for (auto & pt : baseObj->m_blkData->getPtClds()) {
+		if (pt.level == _level && pt.nGroupID == baseObj->m_blkData->projHdr().groupID) {
+			poinclouds.push_back(pt);
 		}
 	}
 
@@ -15481,116 +15481,122 @@ void MainWindow::doActionClassificationBatch()
 		QStringList para_settings;
 		//! filters
 		QString output_suffix = ".las";		
-		result_files = createTasksFiles(db_prj, tasks,
-			"IF_CLASSIFICATION",
+		result_files = createTasksFiles(baseObj, poinclouds,
+			BlockDB::TASK_ID_CLASS,
 			"/bin/CLASSIFY/Classify_KNL.exe",
 			"/classification.gtsk",
 			output_suffix,
 			para_settings);
 	}
 
-	QString cmd = getCmdLine(db_prj, "CLASSIFICATION", db_prj->m_blkData->projHdr().projectID);
+	QString cmd = getCmdLine(baseObj, BlockDB::TASK_ID_FILTER, baseObj->m_blkData->projHdr().projectID);
 	std::cout << "cmd: " << cmd.toStdString() << std::endl;
 	if (cmd.isEmpty()) return;
 
-	ccHObject* product_pool = db_prj->getProductClassified(); if (!product_pool) { return; }
-	
-  	QScopedPointer<ccProgressDialog> pDlg(nullptr);
-  	pDlg.reset(new ccProgressDialog(false, this));
-  	pDlg->setMethodTitle(QObject::tr("Classification"));
-  	pDlg->setInfo(QObject::tr("Please wait... classifying in progress"));
-  	pDlg->setRange(0, 0);
-  	pDlg->setModal(false);
-  	pDlg->start();
+	//! whether wait for results
+	QMessageBox *messageBox = new QMessageBox(this);
+	messageBox->setIcon(QMessageBox::Question);
+	messageBox->setWindowTitle(QString::fromLocal8Bit("结果自动返回"));
+	messageBox->setText(QString::fromLocal8Bit("是否等待界面返回分类结果?"));
+	messageBox->addButton(QString::fromLocal8Bit("否"), QMessageBox::RejectRole);
+	messageBox->addButton(QString::fromLocal8Bit("是"), QMessageBox::AcceptRole);
+	bool waitForResult = (messageBox->exec() == QDialog::Accepted);
+		
+	if (waitForResult) {
+		QScopedPointer<ccProgressDialog> pDlg(nullptr);
+		pDlg.reset(new ccProgressDialog(false, this));
+		pDlg->setMethodTitle(QObject::tr("Ground Filtering"));
+		pDlg->setInfo(QObject::tr("Please wait... filtering in progress"));
+		pDlg->setRange(0, 0);
+		pDlg->setModal(false);
+		pDlg->start();
 
-	QFutureWatcher<void> executer;
-	connect(&executer, &QFutureWatcher<void>::finished, this, [=]() {
-//		QStringList new_results = moveFilesToDir(result_files, product_pool->getPath());
-//		addPointsToDatabase(new_results, product_pool, true, true, true);
-	});
-	QObject::connect(&executer, SIGNAL(finished()), pDlg.data(), SLOT(reset()));
-	executer.setFuture(QtConcurrent::run([&cmd]() { QProcess::execute(cmd); }));
-	pDlg->exec();
-	executer.waitForFinished();
+		QFutureWatcher<void> executer;
+		connect(&executer, &QFutureWatcher<void>::finished, this, [=]() {
+			//! the results should be moved to dirs in the check process
+			baseObj->parseResults(BlockDB::TASK_ID_CLASS, result_files, 1);
+			//! otherwise open dialog --> import folders automatically
+			baseObj->retrieveResults(BlockDB::TASK_ID_CLASS);
+
+			QMessageBox::information(this, "Finished!", "The filtering task is completed");
+		});
+		QObject::connect(&executer, SIGNAL(finished()), pDlg.data(), SLOT(reset()));
+		executer.setFuture(QtConcurrent::run([&cmd]() { QProcess::execute(cmd); }));
+		pDlg->exec();
+		executer.waitForFinished();
+	}
+	else {
+		QProcess::startDetached(cmd);
+	}
 }
 
 void MainWindow::doActionBuildingSegmentationBatch()
 {
-	if (!haveSelection()) {
-		return;
-	}
-	ccHObject* sel = m_selectedEntities.front();
-	DataBaseHObject* db_prj = GetRootDataBase(sel);
-	if (!db_prj) { return; }
+	DataBaseHObject* baseObj = getCurrentMainDatabase();
+	if (!baseObj) { ccLog::Error(QString::fromLocal8Bit("请先载入工程!")); return; }
 
-	ccHObject::Container tasks;
-	if (sel->isGroup()) {
-		tasks = GetEnabledObjFromGroup(sel, CC_TYPES::POINT_CLOUD, true, false);
+	//! get valid data by level
+	std::vector<BlockDB::blkPtCldInfo> poinclouds;
+	BlockDB::BLOCK_PtCldLevel _level = BlockDB::PCLEVEL_CLASS;
+	for (auto & pt : baseObj->m_blkData->getPtClds()) {
+		if (pt.level == _level && pt.nGroupID == baseObj->m_blkData->projHdr().groupID) {
+			poinclouds.push_back(pt);
+		}
 	}
-	else if (sel->isA(CC_TYPES::POINT_CLOUD)) {
-		tasks.push_back(sel);
-	}
-	
+
 	QStringList result_files;
 	{
 		//! parameters
-		if (!m_pbdrSettingBDSegDlg) { m_pbdrSettingBDSegDlg = new bdrSettingBDSegDlg(this); }
-		QStringList para_settings = m_pbdrSettingBDSegDlg->getParameters();
-		// it's a directory
-		QString output_suffix = "/";
-		result_files = createTasksFiles(db_prj, tasks,
-			"IF_BUILDINGSEG",
-			"/bin/BUILDINGSEG/BUILDINGSEG_KNL.exe", 
-			"/BUILDINGSEG.gctsk",
-			output_suffix, para_settings);
+		QStringList para_settings;
+		//! filters
+		QString output_suffix = ".las";
+		result_files = createTasksFiles(baseObj, poinclouds,
+			BlockDB::TASK_ID_BDSEG,
+			"/bin/BUILDINGSEG/BUIDINGSEG_KNL.exe",
+			"/segmentation.gtsk",
+			output_suffix,
+			para_settings);
 	}
 
-	QString cmd = getCmdLine(db_prj, "BUILDINGSEG", db_prj->m_blkData->projHdr().projectID);
+	QString cmd = getCmdLine(baseObj, BlockDB::TASK_ID_BDSEG, baseObj->m_blkData->projHdr().projectID);
 	std::cout << "cmd: " << cmd.toStdString() << std::endl;
 	if (cmd.isEmpty()) return;
 
-	ccHObject* product_pool = db_prj->getProductSegmented(); if (!product_pool) { return; }
+	//! whether wait for results
+	QMessageBox *messageBox = new QMessageBox(this);
+	messageBox->setIcon(QMessageBox::Question);
+	messageBox->setWindowTitle(QString::fromLocal8Bit("结果自动返回"));
+	messageBox->setText(QString::fromLocal8Bit("是否等待界面返回分类结果?"));
+	messageBox->addButton(QString::fromLocal8Bit("否"), QMessageBox::RejectRole);
+	messageBox->addButton(QString::fromLocal8Bit("是"), QMessageBox::AcceptRole);
+	bool waitForResult = (messageBox->exec() == QDialog::Accepted);
 
-	QScopedPointer<ccProgressDialog> pDlg(nullptr);
-	pDlg.reset(new ccProgressDialog(false, this));
-	pDlg->setMethodTitle(QObject::tr("Building Segmentation"));
-	pDlg->setInfo(QObject::tr("Please wait... building segmentation in progress"));
-	pDlg->setRange(0, 0);
-	pDlg->setModal(false);
-	pDlg->start();
-	
-	QFutureWatcher<void> executer;
-	connect(&executer, &QFutureWatcher<void>::finished, this, [=]() {
-		//! get result files
-		QStringList nameFilters; nameFilters << "*.las" << "*.laz" << "*.ply" << "*.obj";
-		for (QString res : result_files) {
-			QString result_dir = res;
-			if (res.back() == "/" || res.back() == "\\") {
-				result_dir.chop(1);
-			}
-			ccHObject* pool = getChildGroupByName(product_pool, QFileInfo(result_dir).fileName());
-			if (pool) {
-				QStringList building_files = QDir(res).entryList(nameFilters, QDir::Files | QDir::Readable, QDir::Name);
-				for (size_t i = 0; i < building_files.size(); i++) {
-					QString & s = const_cast<QString&>(building_files.at(i));
-					s = result_dir + "/" + s;
-				}
-				QStringList new_results;// = moveFilesToDir(building_files, pool->getPath());
-				ccHObject::Container added_files = addPointsToDatabase(new_results, pool, true, false, false);
-				int bd_num = GetMaxNumberExcludeChildPrefix(pool, BDDB_BUILDING_PREFIX) + 1;
-				for (ccHObject* pc : added_files) {
-					pc->setName(BuildingNameByNumber(bd_num++));
-				}
-				db(pool->getDBSourceType())->sortItemChildren(pool, ccDBRoot::SORT_A2Z);
-			}
-		}
-		refreshAll();
-		updateUI();
-	});
-	QObject::connect(&executer, SIGNAL(finished()), pDlg.data(), SLOT(reset()));
-	executer.setFuture(QtConcurrent::run([&cmd]() { QProcess::execute(cmd); }));
-	pDlg->exec();
-	executer.waitForFinished();
+	if (waitForResult) {
+		QScopedPointer<ccProgressDialog> pDlg(nullptr);
+		pDlg.reset(new ccProgressDialog(false, this));
+		pDlg->setMethodTitle(QObject::tr("Ground Filtering"));
+		pDlg->setInfo(QObject::tr("Please wait... filtering in progress"));
+		pDlg->setRange(0, 0);
+		pDlg->setModal(false);
+		pDlg->start();
+
+		QFutureWatcher<void> executer;
+		connect(&executer, &QFutureWatcher<void>::finished, this, [=]() {
+			//! the results should be moved to dirs in the check process
+			baseObj->parseResults(BlockDB::TASK_ID_BDSEG, result_files, 1);
+			//! otherwise open dialog --> import folders automatically
+			baseObj->retrieveResults(BlockDB::TASK_ID_BDSEG);
+
+			QMessageBox::information(this, "Finished!", "The filtering task is completed");
+		});
+		QObject::connect(&executer, SIGNAL(finished()), pDlg.data(), SLOT(reset()));
+		executer.setFuture(QtConcurrent::run([&cmd]() { QProcess::execute(cmd); }));
+		pDlg->exec();
+		executer.waitForFinished();
+	}
+	else {
+		QProcess::startDetached(cmd);
+	}
 }
 
 void MainWindow::doActionPointClassEditor()
@@ -15767,16 +15773,13 @@ void MainWindow::doActionScheduleProjectID()
 void MainWindow::doActionScheduleGCServer()
 {
 	QString runPath = QCoreApplication::applicationDirPath() + "/bin/WGCS/GCSvr.exe";
-	QProcess process;
-	process.startDetached(runPath, QStringList(runPath));
-	
+	QProcess::startDetached(runPath, QStringList(runPath));
 }
 
 void MainWindow::doActionScheduleGCNode()
 {
 	QString runPath = QCoreApplication::applicationDirPath() + "/bin/WGCS/GCNode.exe";
-	QProcess process;
-	process.startDetached(runPath, QStringList(runPath));
+	QProcess::startDetached(runPath, QStringList(runPath));
 }
 
 void MainWindow::doActionClearEmptyItems()

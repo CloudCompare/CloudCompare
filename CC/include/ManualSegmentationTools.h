@@ -128,12 +128,12 @@ public:
 		{}
 	};
 
-	static bool segmentMeshWitAAPlane(GenericIndexedMesh* mesh,
+	static bool segmentMeshWithAAPlane(GenericIndexedMesh* mesh,
 		GenericIndexedCloudPersist* vertices,
 		MeshCutterParams& ioParams,
 		GenericProgressCallback* progressCb = nullptr);
 
-	static bool segmentMeshWitAABox(GenericIndexedMesh* mesh,
+	static bool segmentMeshWithAABox(GenericIndexedMesh* mesh,
 		GenericIndexedCloudPersist* vertices,
 		MeshCutterParams& ioParams,
 		GenericProgressCallback* progressCb = nullptr);

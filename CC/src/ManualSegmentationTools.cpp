@@ -608,7 +608,7 @@ bool ImportSourceVertices(GenericIndexedCloudPersist* srcVertices,
 
 	return true;
 }
-bool ManualSegmentationTools::segmentMeshWitAAPlane(GenericIndexedMesh* mesh,
+bool ManualSegmentationTools::segmentMeshWithAAPlane(GenericIndexedMesh* mesh,
 	GenericIndexedCloudPersist* vertices,
 	MeshCutterParams& ioParams,
 	GenericProgressCallback* progressCb/*=0*/)
@@ -895,7 +895,7 @@ bool ManualSegmentationTools::segmentMeshWitAAPlane(GenericIndexedMesh* mesh,
 	return true;
 }
 
-bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
+bool ManualSegmentationTools::segmentMeshWithAABox(GenericIndexedMesh* origMesh,
 	GenericIndexedCloudPersist* origVertices,
 	MeshCutterParams& ioParams,
 	GenericProgressCallback* progressCb/*=0*/)

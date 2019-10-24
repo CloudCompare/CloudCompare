@@ -15505,8 +15505,8 @@ void MainWindow::doActionClassificationBatch()
 	if (waitForResult) {
 		QScopedPointer<ccProgressDialog> pDlg(nullptr);
 		pDlg.reset(new ccProgressDialog(false, this));
-		pDlg->setMethodTitle(QObject::tr("Ground Filtering"));
-		pDlg->setInfo(QObject::tr("Please wait... filtering in progress"));
+		pDlg->setMethodTitle(QObject::tr("Classification"));
+		pDlg->setInfo(QObject::tr("Please wait... classifying in progress"));
 		pDlg->setRange(0, 0);
 		pDlg->setModal(false);
 		pDlg->start();
@@ -15518,7 +15518,7 @@ void MainWindow::doActionClassificationBatch()
 			//! otherwise open dialog --> import folders automatically
 			baseObj->retrieveResults(BlockDB::TASK_ID_CLASS);
 
-			QMessageBox::information(this, "Finished!", "The filtering task is completed");
+			QMessageBox::information(this, "Finished!", "The classification task is completed");
 		});
 		QObject::connect(&executer, SIGNAL(finished()), pDlg.data(), SLOT(reset()));
 		executer.setFuture(QtConcurrent::run([&cmd]() { QProcess::execute(cmd); }));
@@ -15566,7 +15566,7 @@ void MainWindow::doActionBuildingSegmentationBatch()
 	QMessageBox *messageBox = new QMessageBox(this);
 	messageBox->setIcon(QMessageBox::Question);
 	messageBox->setWindowTitle(QString::fromLocal8Bit("结果自动返回"));
-	messageBox->setText(QString::fromLocal8Bit("是否等待界面返回分类结果?"));
+	messageBox->setText(QString::fromLocal8Bit("是否等待界面返回分割结果?"));
 	messageBox->addButton(QString::fromLocal8Bit("否"), QMessageBox::RejectRole);
 	messageBox->addButton(QString::fromLocal8Bit("是"), QMessageBox::AcceptRole);
 	bool waitForResult = (messageBox->exec() == QDialog::Accepted);
@@ -15574,8 +15574,8 @@ void MainWindow::doActionBuildingSegmentationBatch()
 	if (waitForResult) {
 		QScopedPointer<ccProgressDialog> pDlg(nullptr);
 		pDlg.reset(new ccProgressDialog(false, this));
-		pDlg->setMethodTitle(QObject::tr("Ground Filtering"));
-		pDlg->setInfo(QObject::tr("Please wait... filtering in progress"));
+		pDlg->setMethodTitle(QObject::tr("Building segmentation"));
+		pDlg->setInfo(QObject::tr("Please wait... segmentation in progress"));
 		pDlg->setRange(0, 0);
 		pDlg->setModal(false);
 		pDlg->start();
@@ -15587,7 +15587,7 @@ void MainWindow::doActionBuildingSegmentationBatch()
 			//! otherwise open dialog --> import folders automatically
 			baseObj->retrieveResults(BlockDB::TASK_ID_BDSEG);
 
-			QMessageBox::information(this, "Finished!", "The filtering task is completed");
+			QMessageBox::information(this, "Finished!", "The segmentation task is completed");
 		});
 		QObject::connect(&executer, SIGNAL(finished()), pDlg.data(), SLOT(reset()));
 		executer.setFuture(QtConcurrent::run([&cmd]() { QProcess::execute(cmd); }));

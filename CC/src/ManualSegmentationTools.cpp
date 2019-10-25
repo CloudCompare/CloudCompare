@@ -57,7 +57,7 @@ ReferenceCloud* ManualSegmentationTools::segment(GenericIndexedCloudPersist* aCl
 		{
 			if (!Y->addPointIndex(i))
 			{
-				//not engouh memory
+				//not enough memory
 				delete Y;
 				Y = nullptr;
 				break;
@@ -154,7 +154,7 @@ ReferenceCloud* ManualSegmentationTools::segmentReferenceCloud(ReferenceCloud* c
 		{
 			if (!Y->addPointIndex(cloud->getPointGlobalIndex(i)))
 			{
-				//not engouh memory
+				//not enough memory
 				delete Y;
 				Y = nullptr;
 				break;
@@ -192,7 +192,7 @@ ReferenceCloud* ManualSegmentationTools::segment(	GenericIndexedCloudPersist* cl
 		{
 			if (!Y->addPointIndex(i))
 			{
-				//not engouh memory
+				//not enough memory
 				delete Y;
 				Y = nullptr;
 				break;

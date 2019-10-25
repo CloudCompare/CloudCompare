@@ -52,6 +52,16 @@ public:
 
 	//! Selects the points which associated scalar value fall inside or outside a specified interval
 	/** \warning: be sure to activate an OUTPUT scalar field on the input cloud
+		\param cloud the RefrenceCloud to segment
+		\param minDist the lower boundary
+		\param maxDist the upper boundary
+		\param outside whether to select the points inside or outside
+		\return a new cloud structure containing the extracted points (references to - no duplication)
+	**/
+	static ReferenceCloud* segmentReferenceCloud(ReferenceCloud * cloud, ScalarType minDist, ScalarType maxDist, bool outside);
+
+	//! Selects the points which associated scalar value fall inside or outside a specified interval
+	/** \warning: be sure to activate an OUTPUT scalar field on the input cloud
 		\param cloud the cloud to segment
 		\param minDist the lower boundary
 		\param maxDist the upper boundary
@@ -128,12 +138,12 @@ public:
 		{}
 	};
 
-	static bool segmentMeshWitAAPlane(GenericIndexedMesh* mesh,
+	static bool segmentMeshWithAAPlane(GenericIndexedMesh* mesh,
 		GenericIndexedCloudPersist* vertices,
 		MeshCutterParams& ioParams,
 		GenericProgressCallback* progressCb = nullptr);
 
-	static bool segmentMeshWitAABox(GenericIndexedMesh* mesh,
+	static bool segmentMeshWithAABox(GenericIndexedMesh* mesh,
 		GenericIndexedCloudPersist* vertices,
 		MeshCutterParams& ioParams,
 		GenericProgressCallback* progressCb = nullptr);

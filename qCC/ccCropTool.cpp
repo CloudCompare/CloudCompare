@@ -90,7 +90,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 			cropVertices = rotatedVertices;
 		}
 
-		if (!CCLib::ManualSegmentationTools::segmentMeshWitAABox(mesh, cropVertices, params))
+		if (!CCLib::ManualSegmentationTools::segmentMeshWithAABox(mesh, cropVertices, params))
 		{
 			//process failed!
 			ccLog::Warning(QString("[Crop] Failed to crop mesh '%1'!").arg(mesh->getName()));

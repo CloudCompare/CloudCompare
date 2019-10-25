@@ -57,7 +57,7 @@ ReferenceCloud* ManualSegmentationTools::segment(GenericIndexedCloudPersist* aCl
 		{
 			if (!Y->addPointIndex(i))
 			{
-				//not engouh memory
+				//not enough memory
 				delete Y;
 				Y = nullptr;
 				break;
@@ -133,6 +133,39 @@ bool ManualSegmentationTools::isPointInsidePoly(const CCVector2& P,
 	return inside;
 }
 
+ReferenceCloud* ManualSegmentationTools::segmentReferenceCloud(ReferenceCloud* cloud,
+	ScalarType minDist,
+	ScalarType maxDist,
+	bool outside/*=false*/)
+{
+	if (!cloud)
+	{
+		assert(false);
+		return nullptr;
+	}
+	ReferenceCloud* Y = new ReferenceCloud(cloud->getAssociatedCloud());
+
+	//for each point
+	for (unsigned i = 0; i < cloud->size(); ++i)
+	{
+		const ScalarType dist = cloud->getPointScalarValue(i);
+		//we test if its associated scalar value falls inside the specified interval
+		if ((dist >= minDist && dist <= maxDist) ^ outside)
+		{
+			if (!Y->addPointIndex(cloud->getPointGlobalIndex(i)))
+			{
+				//not enough memory
+				delete Y;
+				Y = nullptr;
+				break;
+			}
+		}
+	}
+
+	return Y;
+
+}
+
 ReferenceCloud* ManualSegmentationTools::segment(	GenericIndexedCloudPersist* cloud,
 													ScalarType minDist,
 													ScalarType maxDist,
@@ -143,6 +176,10 @@ ReferenceCloud* ManualSegmentationTools::segment(	GenericIndexedCloudPersist* cl
 		assert(false);
 		return nullptr;
 	}
+
+	ReferenceCloud* cloudREFTest = dynamic_cast<ReferenceCloud*>(cloud);
+	if (cloudREFTest)
+		return segmentReferenceCloud(cloudREFTest, minDist, maxDist, outside);
 
 	ReferenceCloud* Y = new ReferenceCloud(cloud);
 
@@ -155,7 +192,7 @@ ReferenceCloud* ManualSegmentationTools::segment(	GenericIndexedCloudPersist* cl
 		{
 			if (!Y->addPointIndex(i))
 			{
-				//not engouh memory
+				//not enough memory
 				delete Y;
 				Y = nullptr;
 				break;
@@ -608,7 +645,7 @@ bool ImportSourceVertices(GenericIndexedCloudPersist* srcVertices,
 
 	return true;
 }
-bool ManualSegmentationTools::segmentMeshWitAAPlane(GenericIndexedMesh* mesh,
+bool ManualSegmentationTools::segmentMeshWithAAPlane(GenericIndexedMesh* mesh,
 	GenericIndexedCloudPersist* vertices,
 	MeshCutterParams& ioParams,
 	GenericProgressCallback* progressCb/*=0*/)
@@ -895,7 +932,7 @@ bool ManualSegmentationTools::segmentMeshWitAAPlane(GenericIndexedMesh* mesh,
 	return true;
 }
 
-bool ManualSegmentationTools::segmentMeshWitAABox(GenericIndexedMesh* origMesh,
+bool ManualSegmentationTools::segmentMeshWithAABox(GenericIndexedMesh* origMesh,
 	GenericIndexedCloudPersist* origVertices,
 	MeshCutterParams& ioParams,
 	GenericProgressCallback* progressCb/*=0*/)

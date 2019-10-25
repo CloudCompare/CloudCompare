@@ -89,7 +89,7 @@ struct ShortScalar
 
 struct UShortScalar
 {
-	short S5c4laR;
+	unsigned short S5c4laR;
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 } EIGEN_ALIGN16;

@@ -99,6 +99,15 @@ public:
 		i.e. Nx.x + Ny.y + Nz.z + constVal = 0
 	**/
 	void getEquation(CCVector3& N, PointCoordinateType& constVal) const;
+	
+	
+	//! Returns the equation of the plane
+	/** Equation:
+		planeEquation plane equation : [a, b, c, d] as 'ax+by+cz=d'
+		Same equation used in Neighbourhood and DistanceComputationTools 
+	**/
+	const PointCoordinateType* getEquation();
+
 
 	//! Flips the plane
 	void flip();
@@ -118,6 +127,9 @@ protected:
 
 	//! Width along 'Y' dimension
 	PointCoordinateType m_yWidth;
+
+	// Array [a,b,c,d] such that ax+by+cz = d
+	PointCoordinateType m_PlaneEquation[4];
 };
 
 #endif //CC_PLANE_PRIMITIVE_HEADER

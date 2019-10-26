@@ -1787,7 +1787,7 @@ int DistanceComputationTools::computeCloud2MeshDistance(	GenericIndexedCloudPers
 		params.maxSearchDist = 0;
 	}
 
-	//compute the (cubical) bounding box that contains both the cloud and the mehs BBs
+	//compute the (cubical) bounding box that contains both the cloud and the mesh BBs
 	CCVector3 cloudMinBB,cloudMaxBB;
 	CCVector3 meshMinBB,meshMaxBB;
 	CCVector3 minBB,maxBB;

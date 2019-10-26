@@ -69,12 +69,6 @@ bool ccPlane::buildUp()
 	addTriangle(0, 3, 2); //A D C
 	addTriangleNormalIndexes(0, 0, 0);
 
-	CCVector3 N = getNormal();	
-	m_PlaneEquation[0] = N.x;
-	m_PlaneEquation[1] = N.y;
-	m_PlaneEquation[2] = N.z;
-	m_PlaneEquation[3] = getCenter().dot(N); //a point on the plane dot the plane normal
-
 	return true;
 }
 
@@ -106,6 +100,11 @@ void ccPlane::getEquation(CCVector3& N, PointCoordinateType& constVal) const
 
 const PointCoordinateType* ccPlane::getEquation()
 {
+	CCVector3 N = getNormal();
+	m_PlaneEquation[0] = N.x;
+	m_PlaneEquation[1] = N.y;
+	m_PlaneEquation[2] = N.z;
+	m_PlaneEquation[3] = getCenter().dot(N); //a point on the plane dot the plane normal
 	return m_PlaneEquation;
 }
 

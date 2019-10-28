@@ -266,8 +266,8 @@ public: //distance to simple entities (triangles, planes, etc.)
 	//! Computes the distance between each point in a cloud and a plane
 	/** \param cloud a 3D point cloud
 		\param planeEquation plane equation: [a,b,c,d] as 'ax+by+cz=d' with norm(a,bc)==1
-		\param signedDist whether to compute the signed or positive (absolute) distance
-		\param rms will be set with the Root Mean Square (RMS) distance between a cloud and a plane
+		\param signedDist whether to compute the signed or positive (absolute) distance (optional)
+		\param[out] rms will be set with the Root Mean Square (RMS) distance between a cloud and a plane (optional)
 		\return negative error code or a positive value in case of success
 	**/
 	static int computeCloud2PlaneEquation(GenericIndexedCloudPersist* cloud, const PointCoordinateType* planeEquation, bool signedDistances = true, double * rms = nullptr);

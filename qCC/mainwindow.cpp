@@ -4045,7 +4045,7 @@ void MainWindow::doActionLabelConnectedComponents()
 				theOctree = cloud->computeOctree(&pOctreeDlg);
 				if (!theOctree)
 				{
-					ccConsole::Error(QString("Couldn't compute octree for cloud '%s'!").arg(cloud->getName()));
+					ccConsole::Error(QString("Couldn't compute octree for cloud '%1'!").arg(cloud->getName()));
 					break;
 				}
 			}

@@ -88,12 +88,15 @@ ccPointCloud* sm2ccConverter::getCloud()
 
 	//create cloud
 	ccPointCloud* cloud = new ccPointCloud();
-
-	//push points inside
-	if (!addXYZ(cloud))
+	size_t expectedPointCount = GetNumberOfPoints(m_sm_cloud);
+	if (expectedPointCount != 0)
 	{
-		delete cloud;
-		return 0;
+		//push points inside
+		if (!addXYZ(cloud))
+		{
+			delete cloud;
+			return 0;
+		}
 	}
 
 	//remove x,y,z fields from the vector of field names
@@ -203,11 +206,12 @@ bool sm2ccConverter::addRGB(ccPointCloud * cloud)
 
 	pcl::PointCloud<OnlyRGB>::Ptr pcl_cloud_rgb (new pcl::PointCloud<OnlyRGB>);
 	FROM_PCL_CLOUD(*m_sm_cloud, *pcl_cloud_rgb);
-
+	size_t pointCount = GetNumberOfPoints(m_sm_cloud);
+	if (pointCount == 0)
+		return true;
 	if (!cloud->reserveTheRGBTable())
 		return false;
 
-	size_t pointCount = GetNumberOfPoints(m_sm_cloud);
 
 	//loop
 	for (size_t i = 0; i < pointCount; ++i)

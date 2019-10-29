@@ -335,8 +335,8 @@ PCLCloud::Ptr cc2smReader::getFloatScalarField(const std::string& field_name) co
 
 bool cc2smReader::checkIfFieldExists(const std::string& field_name) const
 {
-	if ( (field_name == "x") || (field_name == "y") || (field_name == "z") || (field_name == "xyz") )
-		return (m_cc_cloud->size() != 0);
+	if ((field_name == "x") || (field_name == "y") || (field_name == "z") || (field_name == "xyz"))
+		return true;// (m_cc_cloud->size() != 0);
 
 	else if ( (field_name == "normal_x") || (field_name == "normal_y") || (field_name == "normal_z") || (field_name == "normal_xyz") )
 		return m_cc_cloud->hasNormals();
@@ -409,7 +409,7 @@ PCLCloud::Ptr cc2smReader::getAsSM(std::list<std::string>& requested_fields) con
 PCLCloud::Ptr cc2smReader::getAsSM() const
 {
 	//does the cloud have some points?
-	if (!m_cc_cloud || m_cc_cloud->size() == 0)
+	if (!m_cc_cloud)// || m_cc_cloud->size() == 0)
 	{
 		assert(false);
 		return PCLCloud::Ptr(static_cast<PCLCloud*>(0));

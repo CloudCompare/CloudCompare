@@ -96,6 +96,7 @@ CC_FILE_ERROR PcdFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	PCLCloud::Ptr pclCloud = cc2smReader(ccCloud).getAsSM();
 	if (!pclCloud)
 	{
+		ccLog::Print("!pclCloud");
 		return CC_FERR_THIRD_PARTY_LIB_FAILURE;
 	}
 
@@ -125,7 +126,17 @@ CC_FILE_ERROR PcdFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		//now translate to a quaternion notation
 		ori = Eigen::Quaternionf(eigrot);
 	}
+	if (ccCloud->size() == 0)
+	{
+		pcl::PCDWriter p;
+		QFile file(filename);
+		if (!file.open(QFile::WriteOnly | QFile::Truncate))
+			return CC_FERR_WRITING;
+		QTextStream stream(&file);
 
+		stream << QString(p.generateHeaderBinary(*pclCloud, pos, ori).c_str()) << "DATA binary\n";
+		return CC_FERR_NO_ERROR;
+	}
 	if (pcl::io::savePCDFile( qPrintable(filename), *pclCloud, pos, ori, true) < 0) //DGM: warning, toStdString doesn't preserve "local" characters
 	{
 		return CC_FERR_THIRD_PARTY_LIB_FAILURE;

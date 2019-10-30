@@ -45,7 +45,9 @@ private:
 	void setupMenu();
 
 	void on3DMouseKeyUp(int key);
+	void on3DMouseCMDKeyUp(int cmd);
 	void on3DMouseKeyDown(int key);
+	void on3DMouseCMDKeyDown(int cmd);
 	void on3DMouseMove(std::vector<float> &vec);
 	void on3DMouseReleased();
 

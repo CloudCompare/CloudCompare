@@ -112,7 +112,7 @@ bool Mouse3DInput::connect(QWidget* mainWidget, QString appName)
 	SiOpenWinAddHintBoolEnum(&oData, SI_HINT_USESV3DCMDS, SPW_TRUE);
 	//3DxWare device handle
 	m_siHandle = SiOpenEx(qUtf16Printable(appName), SI_ANY_DEVICE, SI_NO_MASK, SI_EVENT, &oData);
-
+	
 	if (m_siHandle == SI_NO_HANDLE)
 	{
 		/* Get and display initialization error */
@@ -169,7 +169,7 @@ bool Mouse3DInput::onSiEvent(void* siGetEventData)
 		return false;
 	}
 	switch (siEvent.type)
-	{
+	{		
 	case SI_MOTION_EVENT:
 		{
 			const SiSpwData& eventData = siEvent.u.spwData;
@@ -204,6 +204,7 @@ bool Mouse3DInput::onSiEvent(void* siGetEventData)
 
 	case SI_BUTTON_EVENT:
 		{
+		//ccLog::Print(QString("SI_BUTTON_EVENT"));
 			SPWuint32 buttonNumber = siEvent.u.hwButtonEvent.buttonNumber;
 			if (buttonNumber != 0)
 			{
@@ -216,17 +217,31 @@ bool Mouse3DInput::onSiEvent(void* siGetEventData)
 		break;
 
 	case SI_BUTTON_PRESS_EVENT:
+		//ccLog::Print(QString("SI_BUTTON_PRESS_EVENT"));
 		on3dmouseKeyDown(siEvent.u.hwButtonEvent.buttonNumber);
 		break;
 
 	case SI_BUTTON_RELEASE_EVENT:
+		//ccLog::Print(QString("SI_BUTTON_RELEASE_EVENT"));
 		on3dmouseKeyUp(siEvent.u.hwButtonEvent.buttonNumber);
 		break;
 	case SI_CMD_EVENT:
-		on3dmouseKeyDown(siEvent.u.cmdEventData.functionNumber);
+		//ccLog::Print(QString("SI_CMD_EVENT"));
+		if (siEvent.u.cmdEventData.pressed)
+		{
+			if(siEvent.u.cmdEventData.functionNumber == V3DCMD_MENU_OPTIONS)
+				SiSetUiMode(m_siHandle, SI_UI_ALL_CONTROLS);
+			else
+			on3dmouseCMDKeyDown(siEvent.u.cmdEventData.functionNumber);
+		}
+		else
+		{
+			on3dmouseCMDKeyUp(siEvent.u.cmdEventData.functionNumber);
+		}
 		break;
 
 	default:
+		//ccLog::Print(QString("siEvent.type = %1").arg(siEvent.type));
 		break;
 	}
 
@@ -243,9 +258,19 @@ void Mouse3DInput::on3dmouseKeyDown(int virtualKeyCode)
 	emit sigOn3dmouseKeyDown(virtualKeyCode);
 }
 
+void Mouse3DInput::on3dmouseCMDKeyDown(int virtualCMDCode)
+{
+	emit sigOn3dmouseCMDKeyDown(virtualCMDCode);
+}
+
 void Mouse3DInput::on3dmouseKeyUp(int virtualKeyCode)
 {
 	emit sigOn3dmouseKeyUp(virtualKeyCode);
+}
+
+void Mouse3DInput::on3dmouseCMDKeyUp(int virtualCMDCode)
+{
+	emit sigOn3dmouseCMDKeyUp(virtualCMDCode);
 }
 
 void Mouse3DInput::GetMatrix(const std::vector<float>& vec, ccGLMatrixd& mat)

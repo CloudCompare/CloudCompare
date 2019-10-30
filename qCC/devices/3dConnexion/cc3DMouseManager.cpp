@@ -108,6 +108,7 @@ void cc3DMouseManager::on3DMouseKeyDown(int key)
 {
 	switch(key)
 	{
+		ccLog::Print(QString("Key = %1").arg(key));
 		case Mouse3DInput::V3DK_MENU:
 			//should be handled by the driver now!
 			break;

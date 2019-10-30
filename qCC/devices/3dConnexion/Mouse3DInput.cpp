@@ -39,9 +39,11 @@
 #endif
 
 //3DxWare
+#include <spwmacro.h>
 #include <si.h>
 #include <siapp.h>
 #include <spwmath.h>
+
 
 //! Object angular velocity per mouse tick (in radians per ms per count)
 static const double c_3dmouseAngularVelocity = 1.0e-6;
@@ -105,14 +107,16 @@ bool Mouse3DInput::connect(QWidget* mainWidget, QString appName)
 	SiInitialize();
 
 	//Platform-specific device data
-	SiOpenData oData;
-	SiOpenWinInit(&oData, (HWND)mainWidget->winId() );
+	SiOpenDataEx oData;
+	SiOpenWinInitEx(&oData, (HWND)mainWidget->winId() );
+	SiOpenWinAddHintBoolEnum(&oData, SI_HINT_USESV3DCMDS, SPW_TRUE);
 	//3DxWare device handle
-	m_siHandle = SiOpen(qPrintable(appName), SI_ANY_DEVICE, SI_NO_MASK, SI_EVENT, &oData);
+	m_siHandle = SiOpenEx(qUtf16Printable(appName), SI_ANY_DEVICE, SI_NO_MASK, SI_EVENT, &oData);
 
 	if (m_siHandle == SI_NO_HANDLE)
 	{
 		/* Get and display initialization error */
+		SiTerminate();
 		ccLog::Warning("[3D Mouse] Could not open a 3DxWare device");
 		return false;
 	}
@@ -164,7 +168,6 @@ bool Mouse3DInput::onSiEvent(void* siGetEventData)
 	{
 		return false;
 	}
-
 	switch (siEvent.type)
 	{
 	case SI_MOTION_EVENT:
@@ -218,6 +221,9 @@ bool Mouse3DInput::onSiEvent(void* siGetEventData)
 
 	case SI_BUTTON_RELEASE_EVENT:
 		on3dmouseKeyUp(siEvent.u.hwButtonEvent.buttonNumber);
+		break;
+	case SI_CMD_EVENT:
+		on3dmouseKeyDown(siEvent.u.cmdEventData.functionNumber);
 		break;
 
 	default:

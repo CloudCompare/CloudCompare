@@ -96,7 +96,6 @@ CC_FILE_ERROR PcdFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	PCLCloud::Ptr pclCloud = cc2smReader(ccCloud).getAsSM();
 	if (!pclCloud)
 	{
-		ccLog::Print("!pclCloud");
 		return CC_FERR_THIRD_PARTY_LIB_FAILURE;
 	}
 

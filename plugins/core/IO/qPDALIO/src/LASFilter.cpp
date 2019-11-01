@@ -1037,11 +1037,10 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 		unsigned nbOfPoints = static_cast<unsigned>(lasHeader.pointCount());
 		if (nbOfPoints == 0)
 		{
-			ccPointCloud* emptyCloud = new ccPointCloud((QString("empty")).toLocal8Bit());
+			ccPointCloud* emptyCloud = new ccPointCloud("empty");
 			container.addChild(emptyCloud);
-			//strange file ;)
-			return CC_FERR_NO_ERROR;;
-			//return CC_FERR_NO_LOAD;
+			//strange file ;) 
+			return CC_FERR_NO_ERROR; //Its still strange
 		}
 
 		//The VLR record describing the extra bytes has been added to LAS 1.4 to formalize

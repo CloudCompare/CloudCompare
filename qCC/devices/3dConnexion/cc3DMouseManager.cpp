@@ -63,6 +63,8 @@ void cc3DMouseManager::enableDevice(bool state, bool silent)
 			connect(m3dMouseInput, &Mouse3DInput::sigReleased, this, &cc3DMouseManager::on3DMouseReleased);
 			connect(m3dMouseInput, &Mouse3DInput::sigOn3dmouseKeyDown, this, &cc3DMouseManager::on3DMouseKeyDown);
 			connect(m3dMouseInput, &Mouse3DInput::sigOn3dmouseKeyUp, this, &cc3DMouseManager::on3DMouseKeyUp);
+			connect(m3dMouseInput, &Mouse3DInput::sigOn3dmouseCMDKeyDown, this, &cc3DMouseManager::on3DMouseCMDKeyDown);
+			connect(m3dMouseInput, &Mouse3DInput::sigOn3dmouseCMDKeyUp, this, &cc3DMouseManager::on3DMouseCMDKeyUp);
 		}
 		else
 		{
@@ -103,15 +105,108 @@ void cc3DMouseManager::on3DMouseKeyUp(int)
 	//nothing right now
 }
 
-// ANY CHANGE/BUG FIX SHOULD BE REFLECTED TO THE EQUIVALENT METHODS IN QCC "MainWindow.cpp" FILE!
+void cc3DMouseManager::on3DMouseCMDKeyUp(int)
+{
+	//nothing right now
+}
+
 void cc3DMouseManager::on3DMouseKeyDown(int key)
 {
 	switch(key)
 	{
-		case Mouse3DInput::V3DK_MENU:
-			//should be handled by the driver now!
-			break;
-		case Mouse3DInput::V3DK_FIT:
+		//ccLog::Print(QString("on3DMouseKeyDown Key = %1").arg(key));
+	case Mouse3DInput::V3DK_MENU:
+		//should be handled by the driver now!
+		break;
+	case Mouse3DInput::V3DK_FIT:
+	{
+		if (m_appInterface->getSelectedEntities().empty())
+		{
+			m_appInterface->setGlobalZoom();
+		}
+		else
+		{
+			m_appInterface->zoomOnSelectedEntities();
+		}
+	}
+	break;
+	case Mouse3DInput::V3DK_TOP:
+		m_appInterface->setView(CC_TOP_VIEW);
+		break;
+	case Mouse3DInput::V3DK_LEFT:
+		m_appInterface->setView(CC_LEFT_VIEW);
+		break;
+	case Mouse3DInput::V3DK_RIGHT:
+		m_appInterface->setView(CC_RIGHT_VIEW);
+		break;
+	case Mouse3DInput::V3DK_FRONT:
+		m_appInterface->setView(CC_FRONT_VIEW);
+		break;
+	case Mouse3DInput::V3DK_BOTTOM:
+		m_appInterface->setView(CC_BOTTOM_VIEW);
+		break;
+	case Mouse3DInput::V3DK_BACK:
+		m_appInterface->setView(CC_BACK_VIEW);
+		break;
+	case Mouse3DInput::V3DK_ROTATE:
+		//should be handled by the driver now!
+		break;
+	case Mouse3DInput::V3DK_PANZOOM:
+		//should be handled by the driver now!
+		break;
+	case Mouse3DInput::V3DK_ISO1:
+		m_appInterface->setView(CC_ISO_VIEW_1);
+		break;
+	case Mouse3DInput::V3DK_ISO2:
+		m_appInterface->setView(CC_ISO_VIEW_2);
+		break;
+	case Mouse3DInput::V3DK_PLUS:
+		//should be handled by the driver now!
+		break;
+	case Mouse3DInput::V3DK_MINUS:
+		//should be handled by the driver now!
+		break;
+	case Mouse3DInput::V3DK_DOMINANT:
+		//should be handled by the driver now!
+		break;
+	case Mouse3DInput::V3DK_CW:
+	case Mouse3DInput::V3DK_CCW:
+	{
+		ccGLWindow* activeWin = m_appInterface->getActiveGLWindow();
+		if (activeWin != nullptr)
+		{
+			CCVector3d axis(0,0,-1);
+			CCVector3d trans(0,0,0);
+			ccGLMatrixd mat;
+			double angle = M_PI/2;
+			if (key == Mouse3DInput::V3DK_CCW)
+			{
+				angle = -angle;
+			}
+			mat.initFromParameters(angle,axis,trans);
+			activeWin->rotateBaseViewMat(mat);
+			activeWin->redraw();
+		}
+	}
+	break;
+	case Mouse3DInput::V3DK_ESC:
+	case Mouse3DInput::V3DK_ALT:
+	case Mouse3DInput::V3DK_SHIFT:
+	case Mouse3DInput::V3DK_CTRL:
+	default:
+		ccLog::Warning("[3D mouse] This button is not handled (yet)");
+		//TODO
+		break;
+	}
+}
+
+
+void cc3DMouseManager::on3DMouseCMDKeyDown(int cmd)
+{
+	switch(cmd)
+	{
+		//ccLog::Print(QString("on3DMouseCMDKeyDown Cmd = %1").arg(cmd));
+		case Mouse3DInput::V3DCMD_VIEW_FIT:
 		{
 			if (m_appInterface->getSelectedEntities().empty())
 			{
@@ -123,47 +218,32 @@ void cc3DMouseManager::on3DMouseKeyDown(int key)
 			}
 		}
 			break;
-		case Mouse3DInput::V3DK_TOP:
+		case Mouse3DInput::V3DCMD_VIEW_TOP:
 			m_appInterface->setView(CC_TOP_VIEW);
 			break;
-		case Mouse3DInput::V3DK_LEFT:
+		case Mouse3DInput::V3DCMD_VIEW_LEFT:
 			m_appInterface->setView(CC_LEFT_VIEW);
 			break;
-		case Mouse3DInput::V3DK_RIGHT:
+		case Mouse3DInput::V3DCMD_VIEW_RIGHT:
 			m_appInterface->setView(CC_RIGHT_VIEW);
 			break;
-		case Mouse3DInput::V3DK_FRONT:
+		case Mouse3DInput::V3DCMD_VIEW_FRONT:
 			m_appInterface->setView(CC_FRONT_VIEW);
 			break;
-		case Mouse3DInput::V3DK_BOTTOM:
+		case Mouse3DInput::V3DCMD_VIEW_BOTTOM:
 			m_appInterface->setView(CC_BOTTOM_VIEW);
 			break;
-		case Mouse3DInput::V3DK_BACK:
+		case Mouse3DInput::V3DCMD_VIEW_BACK:
 			m_appInterface->setView(CC_BACK_VIEW);
 			break;
-		case Mouse3DInput::V3DK_ROTATE:
-			//should be handled by the driver now!
-			break;
-		case Mouse3DInput::V3DK_PANZOOM:
-			//should be handled by the driver now!
-			break;
-		case Mouse3DInput::V3DK_ISO1:
+		case Mouse3DInput::V3DCMD_VIEW_ISO1:
 			m_appInterface->setView(CC_ISO_VIEW_1);
 			break;
-		case Mouse3DInput::V3DK_ISO2:
+		case Mouse3DInput::V3DCMD_VIEW_ISO2:
 			m_appInterface->setView(CC_ISO_VIEW_2);
 			break;
-		case Mouse3DInput::V3DK_PLUS:
-			//should be handled by the driver now!
-			break;
-		case Mouse3DInput::V3DK_MINUS:
-			//should be handled by the driver now!
-			break;
-		case Mouse3DInput::V3DK_DOMINANT:
-			//should be handled by the driver now!
-			break;
-		case Mouse3DInput::V3DK_CW:
-		case Mouse3DInput::V3DK_CCW:
+		case Mouse3DInput::V3DCMD_VIEW_ROLLCW:
+		case Mouse3DInput::V3DCMD_VIEW_ROLLCCW:
 		{
 			ccGLWindow* activeWin = m_appInterface->getActiveGLWindow();
 			if (activeWin != nullptr)
@@ -172,7 +252,7 @@ void cc3DMouseManager::on3DMouseKeyDown(int key)
 				CCVector3d trans(0,0,0);
 				ccGLMatrixd mat;
 				double angle = M_PI/2;
-				if (key == Mouse3DInput::V3DK_CCW)
+				if (cmd == Mouse3DInput::V3DCMD_VIEW_ROLLCCW)
 				{
 					angle = -angle;
 				}
@@ -182,10 +262,45 @@ void cc3DMouseManager::on3DMouseKeyDown(int key)
 			}
 		}
 			break;
-		case Mouse3DInput::V3DK_ESC:
-		case Mouse3DInput::V3DK_ALT:
-		case Mouse3DInput::V3DK_SHIFT:
-		case Mouse3DInput::V3DK_CTRL:
+		case Mouse3DInput::V3DCMD_VIEW_SPINCW:
+		case Mouse3DInput::V3DCMD_VIEW_SPINCCW:
+		{
+			ccGLWindow* activeWin = m_appInterface->getActiveGLWindow();
+			if (activeWin != nullptr)
+			{
+				CCVector3d axis(0, 1, 0);
+				CCVector3d trans(0, 0, 0);
+				ccGLMatrixd mat;
+				double angle = M_PI / 2;
+				if (cmd == Mouse3DInput::V3DCMD_VIEW_SPINCCW)
+				{
+					angle = -angle;
+				}
+				mat.initFromParameters(angle, axis, trans);
+				activeWin->rotateBaseViewMat(mat);
+				activeWin->redraw();
+			}
+		}
+		case Mouse3DInput::V3DCMD_VIEW_TILTCW:
+		case Mouse3DInput::V3DCMD_VIEW_TILTCCW:
+		{
+			ccGLWindow* activeWin = m_appInterface->getActiveGLWindow();
+			if (activeWin != nullptr)
+			{
+				CCVector3d axis(1, 0, 0);
+				CCVector3d trans(0, 0, 0);
+				ccGLMatrixd mat;
+				double angle = M_PI / 2;
+				if (cmd == Mouse3DInput::V3DCMD_VIEW_TILTCCW)
+				{
+					angle = -angle;
+				}
+				mat.initFromParameters(angle, axis, trans);
+				activeWin->rotateBaseViewMat(mat);
+				activeWin->redraw();
+			}
+		}
+		break;
 		default:
 			ccLog::Warning("[3D mouse] This button is not handled (yet)");
 			//TODO

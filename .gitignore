@@ -130,3 +130,8 @@ private_plugins
 /data/
 /misc/
 CCCoreLibExport.h
+/.vs/CloudCompare/v15
+/.vs/ProjectSettings.json
+/.vs/slnx.sqlite
+/.vs
+/CMakeSettings.json

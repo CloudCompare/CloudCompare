@@ -225,7 +225,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	if (numberOfPoints == 0)
 	{
 		ccLog::Warning("[LAS] Cloud is empty!");
-		return CC_FERR_NO_SAVE;
+		//return CC_FERR_NO_SAVE;
 	}
 
 	//colors
@@ -304,7 +304,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	CCVector3d bbMin, bbMax;
 	if (!theCloud->getGlobalBB(bbMin, bbMax))
 	{
-		return CC_FERR_NO_SAVE;
+		//return CC_FERR_NO_SAVE;
 	}
 
 	CCVector3d diag = bbMax - bbMin;
@@ -1037,8 +1037,10 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 		unsigned nbOfPoints = static_cast<unsigned>(lasHeader.pointCount());
 		if (nbOfPoints == 0)
 		{
-			//strange file ;)
-			return CC_FERR_NO_LOAD;
+			ccPointCloud* emptyCloud = new ccPointCloud("empty");
+			container.addChild(emptyCloud);
+			//strange file ;) 
+			return CC_FERR_NO_ERROR; //Its still strange
 		}
 
 		//The VLR record describing the extra bytes has been added to LAS 1.4 to formalize

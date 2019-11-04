@@ -47,8 +47,8 @@ PcdFilter::PcdFilter()
                     QStringList{ "pcd" },
                     "pcd",
                     QStringList{ "Point Cloud Library cloud (*.pcd)" },
-                    QStringList(),
-                    Import
+                    QStringList{ "Point Cloud Library cloud (*.pcd)" },
+                    Import | Export
                     } )
 {
 }
@@ -125,7 +125,17 @@ CC_FILE_ERROR PcdFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		//now translate to a quaternion notation
 		ori = Eigen::Quaternionf(eigrot);
 	}
+	if (ccCloud->size() == 0)
+	{
+		pcl::PCDWriter p;
+		QFile file(filename);
+		if (!file.open(QFile::WriteOnly | QFile::Truncate))
+			return CC_FERR_WRITING;
+		QTextStream stream(&file);
 
+		stream << QString(p.generateHeaderBinary(*pclCloud, pos, ori).c_str()) << "DATA binary\n";
+		return CC_FERR_NO_ERROR;
+	}
 	if (pcl::io::savePCDFile( qPrintable(filename), *pclCloud, pos, ori, true) < 0) //DGM: warning, toStdString doesn't preserve "local" characters
 	{
 		return CC_FERR_THIRD_PARTY_LIB_FAILURE;
@@ -138,12 +148,26 @@ CC_FILE_ERROR PcdFilter::loadFile(const QString& filename, ccHObject& container,
 {
 	Eigen::Vector4f origin;
 	Eigen::Quaternionf orientation;
-
+	int pcd_version;
+	int data_type;
+	unsigned int data_idx;
+	size_t pointCount = -1;
 	PCLCloud::Ptr cloud_ptr_in(new PCLCloud);
 	//Load the given file
-	if (pcl::io::loadPCDFile(qPrintable(filename), *cloud_ptr_in, origin, orientation) < 0) //DGM: warning, toStdString doesn't preserve "local" characters
+	pcl::PCDReader p;
+
+	p.readHeader(qPrintable(filename), *cloud_ptr_in, origin, orientation, pcd_version, data_type, data_idx);
+	if (cloud_ptr_in)
 	{
-		return CC_FERR_THIRD_PARTY_LIB_FAILURE;
+		pointCount = cloud_ptr_in->width * cloud_ptr_in->height;
+		ccLog::Print(QString("%1: Point Count: %2").arg(qPrintable(filename)).arg(pointCount));
+	}
+	if (pointCount > 0)
+	{
+		if (pcl::io::loadPCDFile(qPrintable(filename), *cloud_ptr_in, origin, orientation) < 0) //DGM: warning, toStdString doesn't preserve "local" characters
+		{
+			return CC_FERR_THIRD_PARTY_LIB_FAILURE;
+		}
 	}
 
 	if (!cloud_ptr_in) //loading failed?

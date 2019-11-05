@@ -2150,7 +2150,7 @@ ScalarType DistanceComputationTools::computePoint2PlaneDistance(const CCVector3*
 	return static_cast<ScalarType>((CCVector3::vdot(P->u, planeEquation) - planeEquation[3])/*/CCVector3::vnorm(planeEquation)*/); //norm == 1.0!
 }
 
-int DistanceComputationTools::computeCloud2SphereEquation(GenericIndexedCloudPersist *cloud, const CCVector3 SphereCenter, const PointCoordinateType SphereRadius, bool signedDistances/*=true*/, double* rms/*=0*/)
+int DistanceComputationTools::computeCloud2SphereEquation(GenericIndexedCloudPersist *cloud, const CCVector3& SphereCenter, const PointCoordinateType SphereRadius, bool signedDistances/*=true*/, double* rms/*=0*/)
 {
 	if (!cloud)
 		return -1;
@@ -2176,7 +2176,7 @@ int DistanceComputationTools::computeCloud2SphereEquation(GenericIndexedCloudPer
 	}
 	if (rms)
 	{
-		*rms = dSumSq;
+		*rms = sqrt(dSumSq / count);
 	}
 
 	return count;
@@ -2216,7 +2216,7 @@ int DistanceComputationTools::computeCloud2PlaneEquation(GenericIndexedCloudPers
 	}
 	if (rms)
 	{
-		*rms = dSumSq;
+		*rms = sqrt(dSumSq / count);
 	}
 
 	return count;

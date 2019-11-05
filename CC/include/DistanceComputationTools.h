@@ -271,7 +271,7 @@ public: //distance to simple entities (triangles, planes, etc.)
 		\param[out] rms will be set with the Root Mean Square (RMS) distance between a cloud and a plane (optional)
 		\return negative error code or a positive value in case of success
 	**/
-	static int computeCloud2SphereEquation(GenericIndexedCloudPersist *cloud, const CCVector3 SphereCenter, const PointCoordinateType SphereRadius, bool signedDistances = true, double* rms = nullptr);
+	static int computeCloud2SphereEquation(GenericIndexedCloudPersist *cloud, const CCVector3& SphereCenter, const PointCoordinateType SphereRadius, bool signedDistances = true, double* rms = nullptr);
 
 	//! Computes the distance between each point in a cloud and a plane
 	/** \param cloud a 3D point cloud

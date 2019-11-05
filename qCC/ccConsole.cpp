@@ -49,6 +49,8 @@
 static ccSingleton<ccConsole> s_console;
 
 bool ccConsole::s_showQtMessagesInConsole = false;
+bool ccConsole::s_redirectToStdOut = false;
+
 
 // ccCustomQListWidget
 ccCustomQListWidget::ccCustomQListWidget(QWidget *parent)
@@ -188,7 +190,8 @@ void ccConsole::EnableQtMessages(bool state)
 
 void ccConsole::Init(	QListWidget* textDisplay/*=0*/,
 						QWidget* parentWidget/*=0*/,
-						MainWindow* parentWindow/*=0*/)
+						MainWindow* parentWindow/*=0*/,
+						bool redirectToStdOut/*=false*/)
 {
 	//should be called only once!
 	if (s_console.instance)
@@ -201,7 +204,7 @@ void ccConsole::Init(	QListWidget* textDisplay/*=0*/,
 	s_console.instance->m_textDisplay = textDisplay;
 	s_console.instance->m_parentWidget = parentWidget;
 	s_console.instance->m_parentWindow = parentWindow;
-
+	s_redirectToStdOut = redirectToStdOut;
 	//auto-start
 	if (textDisplay)
 	{
@@ -216,7 +219,6 @@ void ccConsole::Init(	QListWidget* textDisplay/*=0*/,
 
 		s_console.instance->setAutoRefresh(true);
 	}
-
 	ccLog::RegisterInstance(s_console.instance);
 }
 
@@ -314,7 +316,10 @@ void ccConsole::logMessage(const QString& message, int level)
 #endif
 
 	QString formatedMessage = QStringLiteral("[") + QTime::currentTime().toString() + QStringLiteral("] ") + message;
-
+	if (s_redirectToStdOut)
+	{
+		printf("%s\n", qPrintable(message));
+	}
 	if (m_textDisplay || m_logStream)
 	{
 		m_mutex.lock();

@@ -629,6 +629,9 @@ void ccCommandLineParser::registerBuiltInCommands()
 	registerCommand(Command::Shared(new CommandComputeMeshVolume));
 	registerCommand(Command::Shared(new CommandSFColorScale));
 	registerCommand(Command::Shared(new CommandSFConvertToRGB));
+	registerCommand(Command::Shared(new CommandMoment));
+	registerCommand(Command::Shared(new CommandFeature));
+
 }
 
 void ccCommandLineParser::cleanup()

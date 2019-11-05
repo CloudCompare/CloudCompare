@@ -67,8 +67,7 @@
 #include "ccUtils.h"
 
 // This is included only for temporarily removing an object from the tree.
-//	TODO figure out a cleaner way to do this without having to include all of mainwindow.h
-#include "mainwindow.h"
+#include "ccMainAppInterface.h"
 
 #include <unordered_set>
 
@@ -1641,8 +1640,8 @@ namespace ccEntityAction
 				Q_ASSERT(mesh != nullptr);
 				
 				//we remove temporarily the mesh as its normals may be removed (and they can be a child object)
-				MainWindow* instance = dynamic_cast<MainWindow*>(parent);
-				MainWindow::ccHObjectContext objContext;
+				ccMainAppInterface* instance = dynamic_cast<ccMainAppInterface*>(parent);
+				ccMainAppInterface::ccHObjectContext objContext;
 				if (instance)
 					objContext = instance->removeObjectTemporarilyFromDBTree(mesh);
 				mesh->clearTriNormals();
@@ -1991,8 +1990,8 @@ namespace ccEntityAction
 		{
 			//we temporarily detach entity, as it may undergo
 			//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::computeOctree
-			MainWindow* instance = dynamic_cast<MainWindow*>(parent);
-			MainWindow::ccHObjectContext objContext;
+			ccMainAppInterface* instance = dynamic_cast<ccMainAppInterface*>(parent);
+			ccMainAppInterface::ccHObjectContext objContext;
 			if (instance)
 				objContext = instance->removeObjectTemporarilyFromDBTree(cloud);
 
@@ -2079,8 +2078,8 @@ namespace ccEntityAction
 				{
 					mesh->showNormals(false);
 					
-					MainWindow* instance = dynamic_cast<MainWindow*>(parent);
-					MainWindow::ccHObjectContext objContext;
+					ccMainAppInterface* instance = dynamic_cast<ccMainAppInterface*>(parent);
+					ccMainAppInterface::ccHObjectContext objContext;
 					if (instance)
 						objContext = instance->removeObjectTemporarilyFromDBTree(mesh);
 					mesh->clearTriNormals();

@@ -4076,11 +4076,11 @@ bool CommandFeature::process(ccCommandLineInterface &cmd)
 		return cmd.error(QObject::tr("Missing parameter: feature type after \"-%1\"").arg(COMMAND_FEATURE));
 
 	QString featureTypeStr = cmd.arguments().takeFirst().toUpper();
-	CCLib::Neighbourhood::GeomFeature featureType = CCLib::Neighbourhood::EigenValuesSum;
+	CCLib::Neighbourhood::GeomFeature featureType;
 
 	if (featureTypeStr == "SUM_OF_EIGENVALUES")
 	{
-		//curvType = CCLib::Neighbourhood::MEAN_CURV;
+		featureType = CCLib::Neighbourhood::EigenValuesSum;
 	}
 	else if (featureTypeStr == "OMNIVARIANCE")
 	{

@@ -403,6 +403,7 @@
      </property>
      <addaction name="actionCloudCloudDist"/>
      <addaction name="actionCloudMeshDist"/>
+     <addaction name="actionCloudPrimitiveDist"/>
      <addaction name="actionCPS"/>
     </widget>
     <widget class="QMenu" name="menuRegistration">
@@ -692,6 +693,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    <addaction name="actionSamplePointsOnMesh"/>
    <addaction name="actionCloudCloudDist"/>
    <addaction name="actionCloudMeshDist"/>
+   <addaction name="actionCloudPrimitiveDist"/>
    <addaction name="actionLabelConnectedComponents"/>
    <addaction name="actionPrimitiveFactory"/>
    <addaction name="actionRasterize"/>
@@ -3021,6 +3023,21 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Flip triangles (if vertices are ordered in the non-direct order)</string>
    </property>
   </action>
+  <action name="actionCloudPrimitiveDist">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/images/ccCloudPrimitiveDistance.png</normaloff>:/CC/images/ccCloudPrimitiveDistance.png</iconset>
+   </property>
+   <property name="text">
+    <string>Cloud/Primitive Dist</string>
+   </property>
+   <property name="toolTip">
+    <string>Compute cloud/Primitive distance</string>
+   </property>
+   <property name="statusTip">
+    <string>Compute cloud/Primitive distance</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -3049,8 +3066,8 @@ QTreeView::branch:open:has-children:has-siblings  {
      <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>519</x>
-     <y>579</y>
+     <x>554</x>
+     <y>747</y>
     </hint>
    </hints>
   </connection>
@@ -3061,8 +3078,8 @@ QTreeView::branch:open:has-children:has-siblings  {
    <slot>setChecked(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>519</x>
-     <y>579</y>
+     <x>554</x>
+     <y>747</y>
     </hint>
     <hint type="destinationlabel">
      <x>-1</x>
@@ -3097,8 +3114,8 @@ QTreeView::branch:open:has-children:has-siblings  {
      <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>679</x>
-     <y>59</y>
+     <x>1023</x>
+     <y>54</y>
     </hint>
    </hints>
   </connection>
@@ -3113,8 +3130,8 @@ QTreeView::branch:open:has-children:has-siblings  {
      <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>36</x>
-     <y>95</y>
+     <x>34</x>
+     <y>150</y>
     </hint>
    </hints>
   </connection>

@@ -84,6 +84,7 @@
 #include "ccClippingBoxTool.h"
 #include "ccColorScaleEditorDlg.h"
 #include "ccComparisonDlg.h"
+#include "ccPrimitiveDistanceDlg.h"
 #include "ccFilterByValueDlg.h"
 #include "ccGBLSensorProjectionDlg.h"
 #include "ccGeomFeaturesDlg.h"
@@ -624,6 +625,7 @@ void MainWindow::connectActions()
 	//"Tools > Distances" menu
 	connect(m_UI->actionCloudCloudDist,				&QAction::triggered, this, &MainWindow::doActionCloudCloudDist);
 	connect(m_UI->actionCloudMeshDist,				&QAction::triggered, this, &MainWindow::doActionCloudMeshDist);
+	connect(m_UI->actionCloudPrimitiveDist,			&QAction::triggered, this, &MainWindow::doActionCloudPrimitiveDist);
 	connect(m_UI->actionCPS,						&QAction::triggered, this, &MainWindow::doActionComputeCPS);
 	//"Tools > Volume" menu
 	connect(m_UI->actionCompute2HalfDimVolume,		&QAction::triggered, this, &MainWindow::doCompute2HalfDimVolume);
@@ -8857,6 +8859,110 @@ void MainWindow::doActionCloudMeshDist()
 	freezeUI(true);
 }
 
+void MainWindow::doActionCloudPrimitiveDist()
+{
+	bool foundPrimitive = false;
+	unsigned primitiveIndx;
+	ccHObject::Container clouds;
+	clouds.clear();
+	ccPlane* refPlane = nullptr;
+	ccSphere* refSphere = nullptr;
+	for (unsigned i = 0; i < getSelectedEntities().size(); ++i)
+	{
+		if (m_selectedEntities[i]->isA(CC_TYPES::PLANE) || m_selectedEntities[i]->isA(CC_TYPES::SPHERE))
+		{
+			if (foundPrimitive)
+			{
+				ccConsole::Error("Select only a single Plane/Sphere Primitive");
+				return;
+			}
+			foundPrimitive = true;
+			refPlane = ccHObjectCaster::ToPlane(m_selectedEntities[i]);
+			refSphere = ccHObjectCaster::ToSphere(m_selectedEntities[i]);
+		}
+		else if (m_selectedEntities[i]->isKindOf(CC_TYPES::POINT_CLOUD))
+		{
+			clouds.push_back(m_selectedEntities[i]);
+		}
+	}
+
+	if (!foundPrimitive)
+	{
+		ccConsole::Error("Select at least one Plane/Sphere Primitive!");
+		return;
+	}
+	if (clouds.size() <= 0)
+	{
+		ccConsole::Error("Select at least one cloud!");
+		return;
+	}
+		
+	ccPrimitiveDistanceDlg pDD{ this };
+	if (pDD.exec())
+	{
+		bool signedDist = pDD.signedDistances();
+		bool flippedNormals = signedDist && pDD.flipNormals();
+		for (auto &cloud : clouds)
+		{
+			ccPointCloud* compEnt = ccHObjectCaster::ToPointCloud(cloud);
+			int sfIdx = compEnt->getScalarFieldIndexByName(CC_TEMP_DISTANCES_DEFAULT_SF_NAME);
+			if (sfIdx < 0)
+			{
+				//we need to create a new scalar field
+				sfIdx = compEnt->addScalarField(CC_TEMP_DISTANCES_DEFAULT_SF_NAME);
+				if (sfIdx < 0)
+				{
+					ccLog::Error(QString("[Cloud: %1] Couldn't allocate a new scalar field for computing distances! Try to free some memory ...").arg(compEnt->getName()));
+					continue;
+				}
+			}
+			compEnt->setCurrentScalarField(sfIdx);
+			compEnt->enableScalarField();
+			compEnt->forEach(CCLib::ScalarFieldTools::SetScalarValueToNaN);
+
+			if (refSphere)
+			{
+				CCLib::DistanceComputationTools::computeCloud2SphereEquation(compEnt, refSphere->getOwnBB().getCenter(), refSphere->getRadius(), signedDist);
+				
+			}
+			else if (refPlane)
+			{
+				CCLib::DistanceComputationTools::computeCloud2PlaneEquation(compEnt, refPlane->getEquation(), signedDist);
+			}
+
+			QString m_sfName;
+			m_sfName.clear();
+			m_sfName = QString(signedDist ? CC_CLOUD2PRIMITIVE_SIGNED_DISTANCES_DEFAULT_SF_NAME : CC_CLOUD2PRIMITIVE_DISTANCES_DEFAULT_SF_NAME);
+			if (flippedNormals)
+			{
+				compEnt->forEach(CCLib::ScalarFieldTools::SetScalarValueInverted);
+				m_sfName += QString("[-]");
+			}
+			
+			int _sfIdx = compEnt->getScalarFieldIndexByName(qPrintable(m_sfName));
+			if (_sfIdx >= 0)
+			{
+				compEnt->deleteScalarField(_sfIdx);
+				//we update sfIdx because indexes are all messed up after deletion
+				sfIdx = compEnt->getScalarFieldIndexByName(CC_TEMP_DISTANCES_DEFAULT_SF_NAME);
+			}
+			compEnt->renameScalarField(sfIdx, qPrintable(m_sfName));
+			
+			ccScalarField* sf = static_cast<ccScalarField*>(compEnt->getScalarField(sfIdx));
+			if (sf)
+			{
+				sf->computeMinAndMax();
+			}
+			compEnt->setCurrentDisplayedScalarField(sfIdx);
+			compEnt->showSF(sfIdx >= 0);
+			compEnt->prepareDisplayForRefresh_recursive();
+		}
+	MainWindow::UpdateUI();
+	MainWindow::RefreshAllGLWindow(false);
+	}
+}
+
+
 void MainWindow::deactivateComparisonMode(int result)
 {
 	//DGM: a bug apperead with recent changes (from CC or QT?)
@@ -10261,6 +10367,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionAlign->setEnabled(exactlyTwoEntities); //Aurelien BEY le 13/11/2008
 	m_UI->actionCloudCloudDist->setEnabled(exactlyTwoClouds);
 	m_UI->actionCloudMeshDist->setEnabled(exactlyTwoEntities && atLeastOneMesh);
+	m_UI->actionCloudPrimitiveDist->setEnabled(atLeastOneCloud && atLeastOneMesh);
 	m_UI->actionCPS->setEnabled(exactlyTwoClouds);
 	m_UI->actionScalarFieldArithmetic->setEnabled(exactlyOneEntity && atLeastOneSF);
 

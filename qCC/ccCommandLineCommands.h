@@ -403,4 +403,18 @@ struct CommandSetNoTimestamp : public ccCommandLineInterface::Command
 	bool process(ccCommandLineInterface& cmd) override;
 };
 
+struct CommandMoment : public ccCommandLineInterface::Command
+{
+	CommandMoment();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
+struct CommandFeature : public ccCommandLineInterface::Command
+{
+	CommandFeature();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
 #endif //COMMAND_LINE_COMMANDS_HEADER

@@ -26,6 +26,14 @@ v2.11 (Anoia) - (in development)
 	- all parameters should now be properly remembered from one call to the other (during the same session)
 	- the current box/slice position can now be exported (resp. imported) to (resp. from) the clipboard via the 'Advanced' menu
   - Command line tool:
+	- The 1st Order Moment tool (Tools>Other>Compute geometric features) can now be accessed via 
+		the command line mode with option -MOMENT {kernel size}
+	    - Computes 1st order moment on all opened clouds and auto saved by default.
+	- The Feature tools (Tools>Other>Compute geometric features) can now be accessed via
+		the command line mode with option -FEATURE {type} {kernel size}
+		- type can be the following: SUM_OF_EIGENVALUES, OMNIVARIANCE, EIGENTROPY, ANISOTROPY, PLANARITY, 
+			LINEARITY, PCA1, PCA2, SURFACE_VARIATION, SPHERICITY, or VERTICALITY.
+		- Computes 1st order moment on all opened clouds and auto saved by default.
     - The C2M_DIST command (Cloud-to-Mesh distances) can now be called with 2 meshes as input.
         In this case the first mesh vertices are used as compared cloud.
 	- New suboption for the -O -GLOBAL_SHIFT option: 'FIRST'

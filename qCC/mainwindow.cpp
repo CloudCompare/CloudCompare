@@ -8867,6 +8867,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 	clouds.clear();
 	ccPlane* refPlane = nullptr;
 	ccSphere* refSphere = nullptr;
+	QString PrimitiveName;
 	for (unsigned i = 0; i < getSelectedEntities().size(); ++i)
 	{
 		if (m_selectedEntities[i]->isA(CC_TYPES::PLANE) || m_selectedEntities[i]->isA(CC_TYPES::SPHERE))
@@ -8879,6 +8880,8 @@ void MainWindow::doActionCloudPrimitiveDist()
 			foundPrimitive = true;
 			refPlane = ccHObjectCaster::ToPlane(m_selectedEntities[i]);
 			refSphere = ccHObjectCaster::ToSphere(m_selectedEntities[i]);
+			PrimitiveName = m_selectedEntities[i]->getName();
+			
 		}
 		else if (m_selectedEntities[i]->isKindOf(CC_TYPES::POINT_CLOUD))
 		{
@@ -8930,28 +8933,31 @@ void MainWindow::doActionCloudPrimitiveDist()
 				CCLib::DistanceComputationTools::computeCloud2PlaneEquation(compEnt, refPlane->getEquation(), signedDist);
 			}
 
-			QString m_sfName;
-			m_sfName.clear();
-			m_sfName = QString(signedDist ? CC_CLOUD2PRIMITIVE_SIGNED_DISTANCES_DEFAULT_SF_NAME : CC_CLOUD2PRIMITIVE_DISTANCES_DEFAULT_SF_NAME);
+			QString sfName;
+			sfName.clear();
+			sfName = QString(signedDist ? CC_CLOUD2PRIMITIVE_SIGNED_DISTANCES_DEFAULT_SF_NAME : CC_CLOUD2PRIMITIVE_DISTANCES_DEFAULT_SF_NAME);
 			if (flippedNormals)
 			{
 				compEnt->forEach(CCLib::ScalarFieldTools::SetScalarValueInverted);
-				m_sfName += QString("[-]");
+				sfName += QString("[-]");
 			}
 			
-			int _sfIdx = compEnt->getScalarFieldIndexByName(qPrintable(m_sfName));
+			int _sfIdx = compEnt->getScalarFieldIndexByName(qPrintable(sfName));
 			if (_sfIdx >= 0)
 			{
 				compEnt->deleteScalarField(_sfIdx);
 				//we update sfIdx because indexes are all messed up after deletion
 				sfIdx = compEnt->getScalarFieldIndexByName(CC_TEMP_DISTANCES_DEFAULT_SF_NAME);
 			}
-			compEnt->renameScalarField(sfIdx, qPrintable(m_sfName));
+			compEnt->renameScalarField(sfIdx, qPrintable(sfName));
 			
 			ccScalarField* sf = static_cast<ccScalarField*>(compEnt->getScalarField(sfIdx));
 			if (sf)
 			{
+				ScalarType mean, variance;				
 				sf->computeMinAndMax();
+				sf->computeMeanAndVariance(mean, &variance);
+				ccLog::Print("[Compute Primitive Distances] [Primitive: %s] [Cloud: %s] [%s] Mean distance = %f / std deviation = %f", qPrintable(PrimitiveName), qPrintable(compEnt->getName()), qPrintable(sfName), mean, sqrt(variance));
 			}
 			compEnt->setCurrentDisplayedScalarField(sfIdx);
 			compEnt->showSF(sfIdx >= 0);

@@ -47,7 +47,9 @@ static int      s_finalOverlap = 100;
 static int      s_rotComboIndex = 0;
 static bool     s_transCheckboxes[3] = { true, true, true };
 static int		s_maxThreadCount = 0;
-
+static bool		s_pointsRemoval = false;
+static bool		s_useDataSFAsWeights = false;
+static bool		s_useModelSFAsWeights = false;
 
 ccRegistrationDlg::ccRegistrationDlg(ccHObject *data, ccHObject *model, QWidget* parent/*=0*/)
 	: QDialog(parent, Qt::Tool)
@@ -92,6 +94,9 @@ ccRegistrationDlg::ccRegistrationDlg(ccHObject *data, ccHObject *model, QWidget*
 		TxCheckBox->setChecked(s_transCheckboxes[0]);
 		TyCheckBox->setChecked(s_transCheckboxes[1]);
 		TzCheckBox->setChecked(s_transCheckboxes[2]);
+		pointsRemoval->setChecked(s_pointsRemoval);
+		checkBoxUseDataSFAsWeights->setChecked(s_useDataSFAsWeights && checkBoxUseDataSFAsWeights->isEnabled());
+		checkBoxUseModelSFAsWeights->setChecked(s_useModelSFAsWeights && checkBoxUseModelSFAsWeights->isEnabled());
 	}
 
 	connect(swapButton, &QAbstractButton::clicked, this, &ccRegistrationDlg::swapModelAndData);
@@ -126,6 +131,9 @@ void ccRegistrationDlg::saveParameters() const
 	s_transCheckboxes[0] = TxCheckBox->isChecked();
 	s_transCheckboxes[1] = TyCheckBox->isChecked();
 	s_transCheckboxes[2] = TzCheckBox->isChecked();
+	s_pointsRemoval = removeFarthestPoints();
+	s_useDataSFAsWeights = checkBoxUseDataSFAsWeights->isChecked();
+	s_useModelSFAsWeights = checkBoxUseModelSFAsWeights->isChecked();
 }
 
 ccHObject *ccRegistrationDlg::getDataEntity()

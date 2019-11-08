@@ -11,7 +11,7 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#          COPYRIGHT: Chris Brown                                        #
 //#                                                                        #
 //##########################################################################
 
@@ -25,6 +25,8 @@
 //System
 #include <assert.h>
 
+static bool s_signedDist = true;
+static bool s_flipNormals = false;
 ccPrimitiveDistanceDlg::ccPrimitiveDistanceDlg(QWidget* parent)
 	: QDialog(parent, Qt::Tool)
 	, Ui::primitiveDistanceDlg()
@@ -33,14 +35,13 @@ ccPrimitiveDistanceDlg::ccPrimitiveDistanceDlg(QWidget* parent)
 
 	
 
-	signedDistCheckBox->setChecked(true);
-	flipNormalsCheckBox->setEnabled(true);
-	
+	signedDistCheckBox->setChecked(s_signedDist);
+	flipNormalsCheckBox->setEnabled(s_signedDist);
+	flipNormalsCheckBox->setChecked(s_flipNormals);
+
 	connect(cancelButton, SIGNAL(clicked()), this, SLOT(cancelAndExit()));
 	connect(okButton, SIGNAL(clicked()), this, SLOT(applyAndExit()));
 	connect(signedDistCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleSigned(bool)));
-	show();
-	QCoreApplication::processEvents();
 }
 
 ccPrimitiveDistanceDlg::~ccPrimitiveDistanceDlg()
@@ -49,6 +50,8 @@ ccPrimitiveDistanceDlg::~ccPrimitiveDistanceDlg()
 
 void ccPrimitiveDistanceDlg::applyAndExit()
 {
+	s_signedDist = signedDistances();
+	s_flipNormals = flipNormals();
 	accept();
 }
 

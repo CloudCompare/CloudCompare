@@ -62,6 +62,9 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
 								int maxThreadCount/*=0*/,
 								QWidget* parent/*=0*/)
 {
+	bool restoreColorState = false;
+	bool restoreSFState = false;
+
 	//progress bar
 	QScopedPointer<ccProgressDialog> progressDlg;
 	if (parent)
@@ -109,6 +112,8 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
 	if (data->isA(CC_TYPES::POINT_CLOUD))
 	{
 		ccPointCloud* pc = static_cast<ccPointCloud*>(data);
+		restoreColorState = pc->colorsShown();
+		restoreSFState = pc->sfShown();
 		dataDisplayedSF = pc->getCurrentDisplayedScalarField();
 		oldDataSfIdx = pc->getCurrentInScalarFieldIndex();
 		dataSfIdx = pc->getScalarFieldIndexByName(REGISTRATION_DISTS_SF);
@@ -194,7 +199,7 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
 			ParallelSort(distances.begin(), distances.end());
 			
 			//now look for the max value at 'finalOverlapRatio+margin' percent
-			maxSearchDist = distances[static_cast<unsigned>(std::max(1.0,count*(finalOverlapRatio+s_overlapMarginRatio)))-1];
+			maxSearchDist = distances[static_cast<size_t>(std::max(1.0,count*(finalOverlapRatio+s_overlapMarginRatio)))-1];
 		}
 
 		//evntually select the points with distance below 'maxSearchDist'
@@ -307,6 +312,8 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
 		ccPointCloud* pc = static_cast<ccPointCloud*>(data);
 		pc->setCurrentScalarField(oldDataSfIdx);
 		pc->deleteScalarField(dataSfIdx);
+		pc->showColors(restoreColorState);
+		pc->showSF(restoreSFState);
 	}
 
 	return (result < CCLib::ICPRegistrationTools::ICP_ERROR);

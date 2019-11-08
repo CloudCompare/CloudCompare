@@ -172,6 +172,7 @@ public:
 	**/
 	static void SetScalarValueToZero(const CCVector3 &P, ScalarType& scalarValue);
 
+	static void SetScalarValueInverted(const CCVector3 &P, ScalarType& scalarValue);
 protected:
 
 	//! "Cellular" function to compute the gradient norms of points inside an octree cell

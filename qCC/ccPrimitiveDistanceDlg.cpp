@@ -38,10 +38,10 @@ ccPrimitiveDistanceDlg::ccPrimitiveDistanceDlg(QWidget* parent)
 	signedDistCheckBox->setChecked(s_signedDist);
 	flipNormalsCheckBox->setEnabled(s_signedDist);
 	flipNormalsCheckBox->setChecked(s_flipNormals);
-
-	connect(cancelButton, SIGNAL(clicked()), this, SLOT(cancelAndExit()));
-	connect(okButton, SIGNAL(clicked()), this, SLOT(applyAndExit()));
-	connect(signedDistCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleSigned(bool)));
+	
+	connect(cancelButton, &QPushButton::clicked, this, &ccPrimitiveDistanceDlg::cancelAndExit);
+	connect(okButton, &QPushButton::clicked, this, &ccPrimitiveDistanceDlg::applyAndExit);
+	connect(signedDistCheckBox, &QCheckBox::toggled, this, &ccPrimitiveDistanceDlg::toggleSigned);
 }
 
 ccPrimitiveDistanceDlg::~ccPrimitiveDistanceDlg()

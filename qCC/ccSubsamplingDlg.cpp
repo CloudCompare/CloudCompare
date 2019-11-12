@@ -47,9 +47,9 @@ ccSubsamplingDlg::ccSubsamplingDlg(unsigned maxPointCount, double maxCloudRadius
 	samplingMethod->addItem("Space");
 	samplingMethod->addItem("Octree");
 
-	connect(slider,         SIGNAL(sliderMoved(int)),         this, SLOT(sliderMoved(int)));
-	connect(samplingValue,  SIGNAL(valueChanged(double)),     this, SLOT(samplingRateChanged(double)));
-	connect(samplingMethod, SIGNAL(currentIndexChanged(int)), this, SLOT(changeSamplingMethod(int)));
+	connect(slider, &QSlider::sliderMoved, this, &ccSubsamplingDlg::sliderMoved);
+	connect(samplingValue,  static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccSubsamplingDlg::samplingRateChanged);
+	connect(samplingMethod, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),		  this, &ccSubsamplingDlg::changeSamplingMethod);
 
 	samplingMethod->setCurrentIndex(1);
 	sliderMoved(slider->sliderPosition());
@@ -87,7 +87,7 @@ CCLib::ReferenceCloud* ccSubsamplingDlg::getSampledCloud(ccGenericPointCloud* cl
 				modParams.enabled = sfGroupBox->isEnabled() && sfGroupBox->isChecked();
 				if (modParams.enabled)
 				{
-					double deltaSF = m_sfMax - m_sfMin;
+					double deltaSF = static_cast<double>(m_sfMax) - m_sfMin;
 					assert(deltaSF >= 0);
 					if (deltaSF > ZERO_TOLERANCE)
 					{
@@ -168,7 +168,7 @@ void ccSubsamplingDlg::updateLabels()
 
 void ccSubsamplingDlg::sliderMoved(int sliderPos)
 {
-	double sliderRange = static_cast<double>(slider->maximum()-slider->minimum());
+	double sliderRange = static_cast<double>(slider->maximum())-slider->minimum();
 	double rate = static_cast<double>(sliderPos)/sliderRange;
 	if (samplingMethod->currentIndex() == SPACE)
 	{
@@ -199,7 +199,7 @@ void ccSubsamplingDlg::samplingRateChanged(double value)
 	}
 
 	slider->blockSignals(true);
-	double sliderRange = static_cast<double>(slider->maximum()-slider->minimum());
+	double sliderRange = static_cast<double>(slider->maximum())-slider->minimum();
 	slider->setSliderPosition(slider->minimum() + static_cast<int>(rate * sliderRange));
 	slider->blockSignals(false);
 }

@@ -139,10 +139,9 @@ ccComparisonDlg::ccComparisonDlg(	ccHObject* compEntity,
 
 	//be sure to show the dialog before computing the approx distances
 	//(otherwise the progress bars appear anywhere!)
-	QTimer::singleShot(0, this, [=]() { //singleshot 0 time will fire once after all events in the queue are processed
-					QCoreApplication::processEvents();	
-					computeApproxDistances();//compute approximate results and unlock GUI
-					});
+	QTimer::singleShot(0, this, &ccComparisonDlg::computeApproxDistances); //singleshot 0 time will fire once after all events in the queue are processed
+																		   //compute approximate results and unlock GUI
+					
 }
 
 ccComparisonDlg::~ccComparisonDlg()

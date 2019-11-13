@@ -8862,9 +8862,7 @@ void MainWindow::doActionCloudMeshDist()
 void MainWindow::doActionCloudPrimitiveDist()
 {
 	bool foundPrimitive = false;
-	unsigned primitiveIndx;
 	ccHObject::Container clouds;
-	clouds.clear();
 	ccPlane* refPlane = nullptr;
 	ccSphere* refSphere = nullptr;
 	QString primitiveName;

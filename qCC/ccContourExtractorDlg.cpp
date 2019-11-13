@@ -54,7 +54,6 @@ void ccContourExtractorDlg::init()
 	}
 
 	connect(nextPushButton, &QAbstractButton::clicked, &m_loop, &QEventLoop::quit);
-	//connect(nextPushButton, SIGNAL(clicked()), this, SLOT(accept()));
 	connect(skipPushButton, &QAbstractButton::clicked, this, &ccContourExtractorDlg::onSkipButtonClicked);
 	nextPushButton->setFocus();
 

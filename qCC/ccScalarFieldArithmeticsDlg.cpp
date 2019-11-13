@@ -76,8 +76,8 @@ ccScalarFieldArithmeticsDlg::ccScalarFieldArithmeticsDlg(	ccPointCloud* cloud,
 	}
 
 	//connect signals/slots
-	connect(m_ui->operationComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onOperationIndexChanged(int)));
-	connect(m_ui->sf2ComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onSF2IndexChanged(int)));
+	connect(m_ui->operationComboBox,	static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccScalarFieldArithmeticsDlg::onOperationIndexChanged);
+	connect(m_ui->sf2ComboBox,			static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccScalarFieldArithmeticsDlg::onSF2IndexChanged);
 	
 	m_ui->operationComboBox->setCurrentIndex(s_previouslySelectedOperationIndex);
 	m_ui->constantDoubleSpinBox->setValue(s_previousConstValue);

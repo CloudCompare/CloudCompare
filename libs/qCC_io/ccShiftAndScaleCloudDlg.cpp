@@ -129,14 +129,14 @@ void ccShiftAndScaleCloudDlg::init()
 
 	updateGlobalAndLocalSystems();
 
-	connect(m_ui->loadComboBox,				SIGNAL(currentIndexChanged(int)),	this,	SLOT(onLoadIndexChanged(int)));
-	connect(m_ui->moreInfoToolButton,		SIGNAL(clicked()),					this,	SLOT(displayMoreInfo()));
-	connect(m_ui->buttonBox,				SIGNAL(clicked(QAbstractButton*)),	this,	SLOT(onClick(QAbstractButton*)));
-	connect(m_ui->shiftX,					SIGNAL(valueChanged(double)),		this,	SLOT(updateGlobalAndLocalSystems()));
-	connect(m_ui->shiftY,					SIGNAL(valueChanged(double)),		this,	SLOT(updateGlobalAndLocalSystems()));
-	connect(m_ui->shiftZ,					SIGNAL(valueChanged(double)),		this,	SLOT(updateGlobalAndLocalSystems()));
-	connect(m_ui->scaleSpinBox,				SIGNAL(valueChanged(double)),		this,	SLOT(updateGlobalAndLocalSystems()));
-	connect(m_ui->keepGlobalPosCheckBox,	SIGNAL(toggled(bool)),				this,	SLOT(onGlobalPosCheckBoxToggled(bool)));
+	connect(m_ui->moreInfoToolButton,		&QToolButton::clicked, this,	&ccShiftAndScaleCloudDlg::displayMoreInfo);
+	connect(m_ui->keepGlobalPosCheckBox,	&QCheckBox::toggled,   this,	&ccShiftAndScaleCloudDlg::onGlobalPosCheckBoxToggled);
+	connect(m_ui->loadComboBox,				static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),					this,	&ccShiftAndScaleCloudDlg::onLoadIndexChanged);
+	connect(m_ui->buttonBox,				static_cast<void (QDialogButtonBox::*)(QAbstractButton*)>(&QDialogButtonBox::clicked),	this,	&ccShiftAndScaleCloudDlg::onClick);
+	connect(m_ui->shiftX,					static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),			this,	&ccShiftAndScaleCloudDlg::updateGlobalAndLocalSystems);
+	connect(m_ui->shiftY,					static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),			this,	&ccShiftAndScaleCloudDlg::updateGlobalAndLocalSystems);
+	connect(m_ui->shiftZ,					static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),			this,	&ccShiftAndScaleCloudDlg::updateGlobalAndLocalSystems);
+	connect(m_ui->scaleSpinBox,				static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),			this,	&ccShiftAndScaleCloudDlg::updateGlobalAndLocalSystems);
 }
 
 void ccShiftAndScaleCloudDlg::displayMoreInfo()

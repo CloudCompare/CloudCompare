@@ -12035,8 +12035,8 @@ void QCPAxisRect::setupFullAxesBox(bool connectRanges)
   
   if (connectRanges)
   {
-    connect(xAxis, SIGNAL(rangeChanged(QCPRange)), xAxis2, SLOT(setRange(QCPRange)));
-    connect(yAxis, SIGNAL(rangeChanged(QCPRange)), yAxis2, SLOT(setRange(QCPRange)));
+    connect(xAxis, static_cast<void (QCPAxis::*)(const QCPRange &)>(&QCPAxis::rangeChanged), xAxis2, static_cast<void (QCPAxis::*)(const QCPRange&)>(&QCPAxis::setRange));
+    connect(yAxis, static_cast<void (QCPAxis::*)(const QCPRange &)>(&QCPAxis::rangeChanged), yAxis2, static_cast<void (QCPAxis::*)(const QCPRange&)>(&QCPAxis::setRange));
   }
 }
 
@@ -13891,8 +13891,8 @@ void QCPColorScale::setType(QCPAxis::AxisType type)
       labelTransfer = mColorAxis.data()->label();
       logBaseTransfer = mColorAxis.data()->scaleLogBase();
       mColorAxis.data()->setLabel(QString());
-      disconnect(mColorAxis.data(), SIGNAL(rangeChanged(QCPRange)), this, SLOT(setDataRange(QCPRange)));
-      disconnect(mColorAxis.data(), SIGNAL(scaleTypeChanged(QCPAxis::ScaleType)), this, SLOT(setDataScaleType(QCPAxis::ScaleType)));
+      disconnect(mColorAxis.data(), static_cast<void (QCPAxis::*)(const QCPRange&)>(&QCPAxis::rangeChanged), this, &QCPColorScale::setDataRange);
+	  disconnect(mColorAxis.data(), &QCPAxis::scaleTypeChanged, this, &QCPColorScale::setDataScaleType);
     }
     QList<QCPAxis::AxisType> allAxisTypes = QList<QCPAxis::AxisType>() << QCPAxis::atLeft << QCPAxis::atRight << QCPAxis::atBottom << QCPAxis::atTop;
     foreach (QCPAxis::AxisType atype, allAxisTypes)
@@ -13906,8 +13906,8 @@ void QCPColorScale::setType(QCPAxis::AxisType type)
     mColorAxis.data()->setRange(rangeTransfer); // transfer range of old axis to new one (necessary if axis changes from vertical to horizontal or vice versa)
     mColorAxis.data()->setLabel(labelTransfer);
     mColorAxis.data()->setScaleLogBase(logBaseTransfer); // scaleType is synchronized among axes in realtime via signals (connected in QCPColorScale ctor), so we only need to take care of log base here
-    connect(mColorAxis.data(), SIGNAL(rangeChanged(QCPRange)), this, SLOT(setDataRange(QCPRange)));
-    connect(mColorAxis.data(), SIGNAL(scaleTypeChanged(QCPAxis::ScaleType)), this, SLOT(setDataScaleType(QCPAxis::ScaleType)));
+    connect(mColorAxis.data(), static_cast<void (QCPAxis::*)(const QCPRange&)>(&QCPAxis::rangeChanged), this, &QCPColorScale::setDataRange);
+    connect(mColorAxis.data(), &QCPAxis::scaleTypeChanged, this, &QCPColorScale::setDataScaleType);
     mAxisRect.data()->setRangeDragAxes(QCPAxis::orientation(mType) == Qt::Horizontal ? mColorAxis.data() : 0,
                                        QCPAxis::orientation(mType) == Qt::Vertical ? mColorAxis.data() : 0);
   }
@@ -14235,24 +14235,24 @@ QCPColorScaleAxisRectPrivate::QCPColorScaleAxisRectPrivate(QCPColorScale *parent
     axis(type)->setVisible(true);
     axis(type)->grid()->setVisible(false);
     axis(type)->setPadding(0);
-    connect(axis(type), SIGNAL(selectionChanged(QCPAxis::SelectableParts)), this, SLOT(axisSelectionChanged(QCPAxis::SelectableParts)));
-    connect(axis(type), SIGNAL(selectableChanged(QCPAxis::SelectableParts)), this, SLOT(axisSelectableChanged(QCPAxis::SelectableParts)));
+    connect(axis(type), &QCPAxis::selectionChanged, this, &QCPColorScaleAxisRectPrivate::axisSelectionChanged);
+    connect(axis(type), &QCPAxis::selectableChanged, this, &QCPColorScaleAxisRectPrivate::axisSelectionChanged);
   }
 
-  connect(axis(QCPAxis::atLeft), SIGNAL(rangeChanged(QCPRange)), axis(QCPAxis::atRight), SLOT(setRange(QCPRange)));
-  connect(axis(QCPAxis::atRight), SIGNAL(rangeChanged(QCPRange)), axis(QCPAxis::atLeft), SLOT(setRange(QCPRange)));
-  connect(axis(QCPAxis::atBottom), SIGNAL(rangeChanged(QCPRange)), axis(QCPAxis::atTop), SLOT(setRange(QCPRange)));
-  connect(axis(QCPAxis::atTop), SIGNAL(rangeChanged(QCPRange)), axis(QCPAxis::atBottom), SLOT(setRange(QCPRange)));
-  connect(axis(QCPAxis::atLeft), SIGNAL(scaleTypeChanged(QCPAxis::ScaleType)), axis(QCPAxis::atRight), SLOT(setScaleType(QCPAxis::ScaleType)));
-  connect(axis(QCPAxis::atRight), SIGNAL(scaleTypeChanged(QCPAxis::ScaleType)), axis(QCPAxis::atLeft), SLOT(setScaleType(QCPAxis::ScaleType)));
-  connect(axis(QCPAxis::atBottom), SIGNAL(scaleTypeChanged(QCPAxis::ScaleType)), axis(QCPAxis::atTop), SLOT(setScaleType(QCPAxis::ScaleType)));
-  connect(axis(QCPAxis::atTop), SIGNAL(scaleTypeChanged(QCPAxis::ScaleType)), axis(QCPAxis::atBottom), SLOT(setScaleType(QCPAxis::ScaleType)));
+  connect(axis(QCPAxis::atLeft),  static_cast<void (QCPAxis::*)(const QCPRange&)>(&QCPAxis::rangeChanged), axis(QCPAxis::atRight),  static_cast<void (QCPAxis::*)(const QCPRange&)>(&QCPAxis::setRange));
+  connect(axis(QCPAxis::atRight), static_cast<void (QCPAxis::*)(const QCPRange&)>(&QCPAxis::rangeChanged), axis(QCPAxis::atLeft),   static_cast<void (QCPAxis::*)(const QCPRange&)>(&QCPAxis::setRange));
+  connect(axis(QCPAxis::atBottom),static_cast<void (QCPAxis::*)(const QCPRange&)>(&QCPAxis::rangeChanged), axis(QCPAxis::atTop),    static_cast<void (QCPAxis::*)(const QCPRange&)>(&QCPAxis::setRange));
+  connect(axis(QCPAxis::atTop),   static_cast<void (QCPAxis::*)(const QCPRange&)>(&QCPAxis::rangeChanged), axis(QCPAxis::atBottom), static_cast<void (QCPAxis::*)(const QCPRange&)>(&QCPAxis::setRange));
+  connect(axis(QCPAxis::atLeft),   &QCPAxis::scaleTypeChanged, axis(QCPAxis::atRight),  &QCPAxis::setScaleType);
+  connect(axis(QCPAxis::atRight),  &QCPAxis::scaleTypeChanged, axis(QCPAxis::atLeft),   &QCPAxis::setScaleType);
+  connect(axis(QCPAxis::atBottom), &QCPAxis::scaleTypeChanged, axis(QCPAxis::atTop),    &QCPAxis::setScaleType);
+  connect(axis(QCPAxis::atTop),    &QCPAxis::scaleTypeChanged, axis(QCPAxis::atBottom), &QCPAxis::setScaleType);
   
   // make layer transfers of color scale transfer to axis rect and axes
   // the axes must be set after axis rect, such that they appear above color gradient drawn by axis rect:
-  connect(parentColorScale, SIGNAL(layerChanged(QCPLayer*)), this, SLOT(setLayer(QCPLayer*)));
+  connect(parentColorScale, &QCPColorScale::layerChanged, this, static_cast<bool (QCPLayerable::*)(QCPLayer*)>(&QCPLayerable::setLayer));
   foreach (QCPAxis::AxisType type, allAxisTypes)
-    connect(parentColorScale, SIGNAL(layerChanged(QCPLayer*)), axis(type), SLOT(setLayer(QCPLayer*)));
+    connect(parentColorScale, &QCPColorScale::layerChanged, axis(type), static_cast<bool (QCPLayerable::*)(QCPLayer*)>(&QCPLayerable::setLayer));
 }
 
 /*! \internal
@@ -20222,12 +20222,12 @@ void QCPColorMap::setColorScale(QCPColorScale *colorScale)
 {
   if (mColorScale) // unconnect signals from old color scale
   {
-    disconnect(this, SIGNAL(dataRangeChanged(QCPRange)), mColorScale.data(), SLOT(setDataRange(QCPRange)));
-    disconnect(this, SIGNAL(dataScaleTypeChanged(QCPAxis::ScaleType)), mColorScale.data(), SLOT(setDataScaleType(QCPAxis::ScaleType)));
-    disconnect(this, SIGNAL(gradientChanged(QCPColorGradient)), mColorScale.data(), SLOT(setGradient(QCPColorGradient)));
-    disconnect(mColorScale.data(), SIGNAL(dataRangeChanged(QCPRange)), this, SLOT(setDataRange(QCPRange)));
-    disconnect(mColorScale.data(), SIGNAL(gradientChanged(QCPColorGradient)), this, SLOT(setGradient(QCPColorGradient)));
-    disconnect(mColorScale.data(), SIGNAL(dataScaleTypeChanged(QCPAxis::ScaleType)), this, SLOT(setDataScaleType(QCPAxis::ScaleType)));
+    disconnect(this, &QCPColorMap::dataRangeChanged, mColorScale.data(), &QCPColorScale::setDataRange);
+    disconnect(this, &QCPColorMap::dataScaleTypeChanged, mColorScale.data(), &QCPColorScale::setDataScaleType);
+    disconnect(this, &QCPColorMap::gradientChanged, mColorScale.data(), &QCPColorScale::setGradient);
+    disconnect(mColorScale.data(), &QCPColorScale::dataRangeChanged, this, &QCPColorMap::setDataRange);
+    disconnect(mColorScale.data(), &QCPColorScale::gradientChanged, this, &QCPColorMap::setGradient);
+    disconnect(mColorScale.data(), &QCPColorScale::dataScaleTypeChanged, this, &QCPColorMap::setDataScaleType);
   }
   mColorScale = colorScale;
   if (mColorScale) // connect signals to new color scale
@@ -20235,12 +20235,12 @@ void QCPColorMap::setColorScale(QCPColorScale *colorScale)
     setGradient(mColorScale.data()->gradient());
     setDataRange(mColorScale.data()->dataRange());
     setDataScaleType(mColorScale.data()->dataScaleType());
-    connect(this, SIGNAL(dataRangeChanged(QCPRange)), mColorScale.data(), SLOT(setDataRange(QCPRange)));
-    connect(this, SIGNAL(dataScaleTypeChanged(QCPAxis::ScaleType)), mColorScale.data(), SLOT(setDataScaleType(QCPAxis::ScaleType)));
-    connect(this, SIGNAL(gradientChanged(QCPColorGradient)), mColorScale.data(), SLOT(setGradient(QCPColorGradient)));
-    connect(mColorScale.data(), SIGNAL(dataRangeChanged(QCPRange)), this, SLOT(setDataRange(QCPRange)));
-    connect(mColorScale.data(), SIGNAL(gradientChanged(QCPColorGradient)), this, SLOT(setGradient(QCPColorGradient)));
-    connect(mColorScale.data(), SIGNAL(dataScaleTypeChanged(QCPAxis::ScaleType)), this, SLOT(setDataScaleType(QCPAxis::ScaleType)));
+    connect(this, &QCPColorMap::dataRangeChanged, mColorScale.data(), &QCPColorScale::setDataRange);
+    connect(this, &QCPColorMap::dataScaleTypeChanged, mColorScale.data(), &QCPColorScale::setDataScaleType);
+    connect(this, &QCPColorMap::gradientChanged, mColorScale.data(), &QCPColorScale::setGradient);
+    connect(mColorScale.data(), &QCPColorScale::dataRangeChanged, this,     &QCPColorMap::setDataRange);
+    connect(mColorScale.data(), &QCPColorScale::gradientChanged, this,      &QCPColorMap::setGradient);
+    connect(mColorScale.data(), &QCPColorScale::dataScaleTypeChanged, this, &QCPColorMap::setDataScaleType);
   }
 }
 

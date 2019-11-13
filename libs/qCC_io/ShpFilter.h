@@ -69,10 +69,6 @@ private:
 
 	//! Whether to save the 3D height in .dbf file
 	bool m_save3DPolyHeightInDBF = false;
-
-	int m_poly2DVertDim = 2;
-
-	double m_dbfFieldImportScale = 1.0;
 };
 
 #endif //CC_SHP_SUPPORT

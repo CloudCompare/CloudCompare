@@ -60,23 +60,23 @@ ccVolumeCalcTool::ccVolumeCalcTool(ccGenericPointCloud* cloud1, ccGenericPointCl
 {
 	setupUi(this);
 
-	connect(buttonBox,						SIGNAL(accepted()),					this,	SLOT(saveSettingsAndAccept()));
-	connect(buttonBox,						SIGNAL(rejected()),					this,	SLOT(reject()));
-	connect(gridStepDoubleSpinBox,			SIGNAL(valueChanged(double)),		this,	SLOT(updateGridInfo()));
-	connect(gridStepDoubleSpinBox,			SIGNAL(valueChanged(double)),		this,	SLOT(gridOptionChanged()));
-	connect(groundEmptyValueDoubleSpinBox,	SIGNAL(valueChanged(double)),		this,	SLOT(gridOptionChanged()));
-	connect(ceilEmptyValueDoubleSpinBox,	SIGNAL(valueChanged(double)),		this,	SLOT(gridOptionChanged()));
-	connect(projDimComboBox,				SIGNAL(currentIndexChanged(int)),	this,	SLOT(projectionDirChanged(int)));
-	connect(updatePushButton,				SIGNAL(clicked()),					this,	SLOT(updateGridAndDisplay()));
-	connect(heightProjectionComboBox,		SIGNAL(currentIndexChanged(int)),	this,	SLOT(gridOptionChanged()));
-	connect(fillGroundEmptyCellsComboBox,	SIGNAL(currentIndexChanged(int)),	this,	SLOT(groundFillEmptyCellStrategyChanged(int)));
-	connect(fillCeilEmptyCellsComboBox,		SIGNAL(currentIndexChanged(int)),	this,	SLOT(ceilFillEmptyCellStrategyChanged(int)));
-	connect(swapToolButton,					SIGNAL(clicked()),					this,	SLOT(swapRoles()));
-	connect(groundComboBox,					SIGNAL(currentIndexChanged(int)),	this,	SLOT(groundSourceChanged(int)));
-	connect(ceilComboBox,					SIGNAL(currentIndexChanged(int)),	this,	SLOT(ceilSourceChanged(int)));
-	connect(clipboardPushButton,			SIGNAL(clicked()),					this,	SLOT(exportToClipboard()));
-	connect(exportGridPushButton,			SIGNAL(clicked()),					this,	SLOT(exportGridAsCloud()));
-	connect(precisionSpinBox,				SIGNAL(valueChanged(int)),			this,	SLOT(setDisplayedNumberPrecision(int)));
+	connect(buttonBox,						&QDialogButtonBox::accepted,														this,	&ccVolumeCalcTool::saveSettingsAndAccept);
+	connect(buttonBox,						&QDialogButtonBox::rejected,														this,	&ccVolumeCalcTool::reject);
+	connect(gridStepDoubleSpinBox,			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),		this,	&ccVolumeCalcTool::updateGridInfo);
+	connect(gridStepDoubleSpinBox,			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),		this,	&ccVolumeCalcTool::gridOptionChanged);
+	connect(groundEmptyValueDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),		this,	&ccVolumeCalcTool::gridOptionChanged);
+	connect(ceilEmptyValueDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),		this,	&ccVolumeCalcTool::gridOptionChanged);
+	connect(projDimComboBox,				static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),				this,	&ccVolumeCalcTool::projectionDirChanged);
+	connect(updatePushButton,				&QPushButton::clicked,																this,	&ccVolumeCalcTool::updateGridAndDisplay);
+	connect(heightProjectionComboBox,		static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),				this,	&ccVolumeCalcTool::gridOptionChanged);
+	connect(fillGroundEmptyCellsComboBox,	static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),				this,	&ccVolumeCalcTool::groundFillEmptyCellStrategyChanged);
+	connect(fillCeilEmptyCellsComboBox,		static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),				this,	&ccVolumeCalcTool::ceilFillEmptyCellStrategyChanged);
+	connect(swapToolButton,					&QToolButton::clicked,																this,	&ccVolumeCalcTool::swapRoles);
+	connect(groundComboBox,					static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),				this,	&ccVolumeCalcTool::groundSourceChanged);
+	connect(ceilComboBox,					static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),				this,	&ccVolumeCalcTool::ceilSourceChanged);
+	connect(clipboardPushButton,			&QPushButton::clicked,																this,	&ccVolumeCalcTool::exportToClipboard);
+	connect(exportGridPushButton,			&QPushButton::clicked,																this,	&ccVolumeCalcTool::exportGridAsCloud);
+	connect(precisionSpinBox,				static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),						this,	&ccVolumeCalcTool::setDisplayedNumberPrecision);
 
 	if (m_cloud1 && !m_cloud2)
 	{
@@ -94,7 +94,7 @@ ccVolumeCalcTool::ccVolumeCalcTool(ccGenericPointCloud* cloud1, ccGenericPointCl
 	if (gridBBox.isValid())
 	{
 		createBoundingBoxEditor(gridBBox, this);
-		connect(editGridToolButton, SIGNAL(clicked()), this, SLOT(showGridBoxEditor()));
+		connect(editGridToolButton, &QToolButton::clicked, this, &ccVolumeCalcTool::showGridBoxEditor);
 	}
 	else
 	{

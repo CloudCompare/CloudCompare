@@ -75,17 +75,17 @@ ccTracePolylineTool::ccTracePolylineTool(ccPickingHub* pickingHub, QWidget* pare
 	setupUi(this);
 	setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
 
-	connect(saveToolButton, SIGNAL(clicked()), this, SLOT(exportLine()));
-	connect(resetToolButton, SIGNAL(clicked()), this, SLOT(resetLine()));
-	connect(continueToolButton, SIGNAL(clicked()), this, SLOT(continueEdition()));
-	connect(validButton, SIGNAL(clicked()), this, SLOT(apply()));
-	connect(cancelButton, SIGNAL(clicked()), this, SLOT(cancel()));
-	connect(widthSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onWidthSizeChanged(int)));
+	connect(saveToolButton,		&QToolButton::clicked, this, &ccTracePolylineTool::exportLine);
+	connect(resetToolButton,	&QToolButton::clicked, this, &ccTracePolylineTool::resetLine);
+	connect(continueToolButton, &QToolButton::clicked, this, &ccTracePolylineTool::continueEdition);
+	connect(validButton,		&QToolButton::clicked, this, &ccTracePolylineTool::apply);
+	connect(cancelButton,		&QToolButton::clicked, this, &ccTracePolylineTool::cancel);
+	connect(widthSpinBox, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &ccTracePolylineTool::onWidthSizeChanged);
 
 	//add shortcuts
 	addOverridenShortcut(Qt::Key_Escape); //escape key for the "cancel" button
 	addOverridenShortcut(Qt::Key_Return); //return key for the "apply" button
-	connect(this, SIGNAL(shortcutTriggered(int)), this, SLOT(onShortcutTriggered(int)));
+	connect(this, &ccTracePolylineTool::shortcutTriggered, this, &ccTracePolylineTool::onShortcutTriggered);
 
 	m_polyTipVertices = new ccPointCloud("Tip vertices");
 	m_polyTipVertices->reserve(2);
@@ -317,8 +317,8 @@ bool ccTracePolylineTool::linkWith(ccGLWindow* win)
 
 	if (m_associatedWin)
 	{
-		connect(m_associatedWin, SIGNAL(rightButtonClicked(int, int)), this, SLOT(closePolyLine(int, int)));
-		connect(m_associatedWin, SIGNAL(mouseMoved(int, int, Qt::MouseButtons)), this, SLOT(updatePolyLineTip(int, int, Qt::MouseButtons)));
+		connect(m_associatedWin, &ccGLWindow::rightButtonClicked, this, &ccTracePolylineTool::closePolyLine);
+		connect(m_associatedWin, &ccGLWindow::mouseMoved,		  this, &ccTracePolylineTool::updatePolyLineTip);
 	}
 
 	return true;

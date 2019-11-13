@@ -190,10 +190,10 @@ bool ccGraphicalSegmentationTool::linkWith(ccGLWindow* win)
 	
 	if (m_associatedWin)
 	{
-		connect(m_associatedWin, SIGNAL(leftButtonClicked(int, int)), this, SLOT(addPointToPolyline(int, int)));
-		connect(m_associatedWin, SIGNAL(rightButtonClicked(int, int)), this, SLOT(closePolyLine(int, int)));
-		connect(m_associatedWin, SIGNAL(mouseMoved(int, int, Qt::MouseButtons)), this, SLOT(updatePolyLine(int, int, Qt::MouseButtons)));
-		connect(m_associatedWin, SIGNAL(buttonReleased()), this, SLOT(closeRectangle()));
+		connect(m_associatedWin, &ccGLWindow::leftButtonClicked,	this, ccGraphicalSegmentationTool::addPointToPolyline);
+		connect(m_associatedWin, &ccGLWindow::rightButtonClicked,	this, ccGraphicalSegmentationTool::closePolyLine);
+		connect(m_associatedWin, &ccGLWindow::mouseMoved,			this, ccGraphicalSegmentationTool::updatePolyLine);
+		connect(m_associatedWin, &ccGLWindow::buttonReleased,		this, ccGraphicalSegmentationTool::closeRectangle);
 
 		if (m_segmentationPoly)
 		{

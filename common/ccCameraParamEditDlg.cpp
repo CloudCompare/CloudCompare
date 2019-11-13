@@ -246,7 +246,7 @@ void ccCameraParamEditDlg::pickPointAsPivot(bool state)
 		else
 		{
 			m_associatedWin->setPickingMode(ccGLWindow::DEFAULT_PICKING);
-			connect(m_associatedWin, &ccGLWindow::itemPicked, this, &ccCameraParamEditDlg::processPickedItem);
+			disconnect(m_associatedWin, &ccGLWindow::itemPicked, this, &ccCameraParamEditDlg::processPickedItem);
 		}
 	}
 

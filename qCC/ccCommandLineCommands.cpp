@@ -2384,7 +2384,26 @@ bool CommandCrop::process(ccCommandLineInterface &cmd)
 						return cmd.error(errorStr);
 				}
 			}
-			//otherwise an error message has already been issued
+			else
+			{
+				//otherwise an error message has already been issued
+				delete cmd.clouds()[i].pc;
+				cmd.clouds()[i].pc = nullptr; //will be removed after this loop
+				//cmd.clouds()[i].basename += "_FULLY_CROPPED";
+			}
+		}
+
+		//now clean the set of clouds in case some have been 'cropped out'
+		for (auto it = cmd.clouds().begin(); it != cmd.clouds().end(); )
+		{
+			if (it->pc == nullptr)
+			{
+				it = cmd.clouds().erase(it);
+			}
+			else
+			{
+				++it;
+			}
 		}
 	}
 	
@@ -2406,7 +2425,26 @@ bool CommandCrop::process(ccCommandLineInterface &cmd)
 						return cmd.error(errorStr);
 				}
 			}
-			//otherwise an error message has already been issued
+			else
+			{
+				//otherwise an error message has already been issued
+				delete cmd.meshes()[i].mesh;
+				cmd.meshes()[i].mesh = nullptr; //will be removed after this loop
+				//cmd.meshes()[i].basename += "_FULLY_CROPPED";
+			}
+		}
+
+		//now clean the set of meshes in case some have been 'cropped out'
+		for (auto it = cmd.meshes().begin(); it != cmd.meshes().end(); )
+		{
+			if (it->mesh == nullptr)
+			{
+				it = cmd.meshes().erase(it);
+			}
+			else
+			{
+				++it;
+			}
 		}
 	}
 	

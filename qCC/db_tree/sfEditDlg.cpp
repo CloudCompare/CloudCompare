@@ -58,21 +58,21 @@ sfEditDlg::sfEditDlg(QWidget* parent/*=0*/)
 		m_associatedSFHisto->yAxis->setAutoTickCount(3);
 	}
 
-	connect(minValSpinBox,				SIGNAL(valueChanged(double)),			this,	SLOT(minValSBChanged(double)));
-	connect(maxValSpinBox,				SIGNAL(valueChanged(double)),			this,	SLOT(maxValSBChanged(double)));
-	connect(minSatSpinBox,				SIGNAL(valueChanged(double)),			this,	SLOT(minSatSBChanged(double)));
-	connect(maxSatSpinBox,				SIGNAL(valueChanged(double)),			this,	SLOT(maxSatSBChanged(double)));
+	connect(minValSpinBox,				static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,	&sfEditDlg::minValSBChanged);
+	connect(maxValSpinBox,				static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,	&sfEditDlg::maxValSBChanged);
+	connect(minSatSpinBox,				static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,	&sfEditDlg::minSatSBChanged);
+	connect(maxSatSpinBox,				static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,	&sfEditDlg::maxSatSBChanged);
 
-	connect(m_associatedSFHisto,		SIGNAL(sfMinDispValChanged(double)),	this,	SLOT(minValHistoChanged(double)));
-	connect(m_associatedSFHisto,		SIGNAL(sfMaxDispValChanged(double)),	this,	SLOT(maxValHistoChanged(double)));
-	connect(m_associatedSFHisto,		SIGNAL(sfMinSatValChanged(double)),		this,	SLOT(minSatHistoChanged(double)));
-	connect(m_associatedSFHisto,		SIGNAL(sfMaxSatValChanged(double)),		this,	SLOT(maxSatHistoChanged(double)));
+	connect(m_associatedSFHisto,		&ccHistogramWindow::sfMinDispValChanged,	this,	&sfEditDlg::minValHistoChanged);
+	connect(m_associatedSFHisto,		&ccHistogramWindow::sfMaxDispValChanged,	this,	&sfEditDlg::maxValHistoChanged);
+	connect(m_associatedSFHisto,		&ccHistogramWindow::sfMinSatValChanged,		this,	&sfEditDlg::minSatHistoChanged);
+	connect(m_associatedSFHisto,		&ccHistogramWindow::sfMaxSatValChanged,		this,	&sfEditDlg::maxSatHistoChanged);
 
 	//checkboxes
-	connect(nanInGreyCheckBox,			SIGNAL(toggled(bool)),					this,	SLOT(nanInGrayChanged(bool)));
-	connect(alwaysShow0CheckBox,		SIGNAL(toggled(bool)),					this,	SLOT(alwaysShow0Changed(bool)));
-	connect(symmetricalScaleCheckBox,	SIGNAL(toggled(bool)),					this,	SLOT(symmetricalScaleChanged(bool)));
-	connect(logScaleCheckBox,			SIGNAL(toggled(bool)),					this,	SLOT(logScaleChanged(bool)));
+	connect(nanInGreyCheckBox,			&QCheckBox::toggled,					this,	&sfEditDlg::nanInGrayChanged);
+	connect(alwaysShow0CheckBox,		&QCheckBox::toggled,					this,	&sfEditDlg::alwaysShow0Changed);
+	connect(symmetricalScaleCheckBox,	&QCheckBox::toggled,					this,	&sfEditDlg::symmetricalScaleChanged);
+	connect(logScaleCheckBox,			&QCheckBox::toggled,					this,	&sfEditDlg::logScaleChanged);
 
 	show();
 }

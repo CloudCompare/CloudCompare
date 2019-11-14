@@ -123,6 +123,8 @@ v2.11 (Anoia) - (in development)
 	- the Clipping-box tool 'edit' dialog would sometimes move the box in an unepected way when opening and closing it without making any change
 	- M3C2: the 'subsampling' option was not properly restored when loading the parameters from a file (if 'SubsampleEnabled = false')
 	- Orienting normals with a sensor position could lead to a crash
+	- Shapefile: at export time, the SHX file (created next to the SHP file) was malformed (preventing from loading the file in most GIS tools!)
+	             (+ polylines were mistakenly exported as polygons!)
 
 v2.10.3 (Zephyrus) - 13/06/2019
 ----------------------

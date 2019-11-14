@@ -61,7 +61,7 @@ public:
 
 private:
 	//! Whether to consider closed polylines as polygons or not
-	bool m_closedPolylinesAsPolygons = true;
+	bool m_closedPolylinesAsPolygons = false;
 
 	//! Whether to save 3D poly as 2D
 	//! Note that all Polylines from shapefiles are loaded as 3D

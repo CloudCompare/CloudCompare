@@ -60,20 +60,20 @@ ccGraphicalSegmentationTool::ccGraphicalSegmentationTool(QWidget* parent)
 
 	setupUi(this);
 
-	connect(inButton,							SIGNAL(clicked()),		this,	SLOT(segmentIn()));
-	connect(outButton,							SIGNAL(clicked()),		this,	SLOT(segmentOut()));
-	connect(razButton,							SIGNAL(clicked()),		this,	SLOT(reset()));
-	connect(validButton,						SIGNAL(clicked()),		this,	SLOT(apply()));
-	connect(validAndDeleteButton,				SIGNAL(clicked()),		this,	SLOT(applyAndDelete()));
-	connect(cancelButton,						SIGNAL(clicked()),		this,	SLOT(cancel()));
-	connect(pauseButton,						SIGNAL(toggled(bool)),	this,	SLOT(pauseSegmentationMode(bool)));
+	connect(inButton,							&QToolButton::clicked,		this,	&ccGraphicalSegmentationTool::segmentIn);
+	connect(outButton,							&QToolButton::clicked,		this,	&ccGraphicalSegmentationTool::segmentOut);
+	connect(razButton,							&QToolButton::clicked,		this,	&ccGraphicalSegmentationTool::reset);
+	connect(validButton,						&QToolButton::clicked,		this,	&ccGraphicalSegmentationTool::apply);
+	connect(validAndDeleteButton,				&QToolButton::clicked,		this,	&ccGraphicalSegmentationTool::applyAndDelete);
+	connect(cancelButton,						&QToolButton::clicked,		this,	&ccGraphicalSegmentationTool::cancel);
+	connect(pauseButton,						&QToolButton::toggled,		this,	&ccGraphicalSegmentationTool::pauseSegmentationMode);
 
 	//selection modes
-	connect(actionSetPolylineSelection,			SIGNAL(triggered()),	this,	SLOT(doSetPolylineSelection()));
-	connect(actionSetRectangularSelection,		SIGNAL(triggered()),	this,	SLOT(doSetRectangularSelection()));
+	connect(actionSetPolylineSelection,			&QAction::triggered,	this,	&ccGraphicalSegmentationTool::doSetPolylineSelection);
+	connect(actionSetRectangularSelection,		&QAction::triggered,	this,	&ccGraphicalSegmentationTool::doSetRectangularSelection);
 	//import/export options
-	connect(actionUseExistingPolyline,			SIGNAL(triggered()),	this,	SLOT(doActionUseExistingPolyline()));
-	connect(actionExportSegmentationPolyline,	SIGNAL(triggered()),	this,	SLOT(doExportSegmentationPolyline()));
+	connect(actionUseExistingPolyline,			&QAction::triggered,	this,	&ccGraphicalSegmentationTool::doActionUseExistingPolyline);
+	connect(actionExportSegmentationPolyline,	&QAction::triggered,	this,	&ccGraphicalSegmentationTool::doExportSegmentationPolyline);
 
 	//add shortcuts
 	addOverridenShortcut(Qt::Key_Space);  //space bar for the "pause" button
@@ -83,7 +83,7 @@ ccGraphicalSegmentationTool::ccGraphicalSegmentationTool(QWidget* parent)
 	addOverridenShortcut(Qt::Key_Tab);    //tab key to switch between rectangular and polygonal selection modes
 	addOverridenShortcut(Qt::Key_I);      //'I' key for the "segment in" button
 	addOverridenShortcut(Qt::Key_O);      //'O' key for the "segment out" button
-	connect(this, SIGNAL(shortcutTriggered(int)), this, SLOT(onShortcutTriggered(int)));
+	connect(this, &ccOverlayDialog::shortcutTriggered, this, &ccGraphicalSegmentationTool::onShortcutTriggered);
 
 	QMenu* selectionModeMenu = new QMenu(this);
 	selectionModeMenu->addAction(actionSetPolylineSelection);
@@ -190,10 +190,10 @@ bool ccGraphicalSegmentationTool::linkWith(ccGLWindow* win)
 	
 	if (m_associatedWin)
 	{
-		connect(m_associatedWin, SIGNAL(leftButtonClicked(int, int)), this, SLOT(addPointToPolyline(int, int)));
-		connect(m_associatedWin, SIGNAL(rightButtonClicked(int, int)), this, SLOT(closePolyLine(int, int)));
-		connect(m_associatedWin, SIGNAL(mouseMoved(int, int, Qt::MouseButtons)), this, SLOT(updatePolyLine(int, int, Qt::MouseButtons)));
-		connect(m_associatedWin, SIGNAL(buttonReleased()), this, SLOT(closeRectangle()));
+		connect(m_associatedWin, &ccGLWindow::leftButtonClicked,	this, &ccGraphicalSegmentationTool::addPointToPolyline);
+		connect(m_associatedWin, &ccGLWindow::rightButtonClicked,	this, &ccGraphicalSegmentationTool::closePolyLine);
+		connect(m_associatedWin, &ccGLWindow::mouseMoved,			this, &ccGraphicalSegmentationTool::updatePolyLine);
+		connect(m_associatedWin, &ccGLWindow::buttonReleased,		this, &ccGraphicalSegmentationTool::closeRectangle);
 
 		if (m_segmentationPoly)
 		{

@@ -65,28 +65,28 @@ ccApplyTransformationDlg::ccApplyTransformationDlg(QWidget* parent/*=0*/)
 	onMatrixTextChange(); //provoke the update of the other forms
 	tabWidget->setCurrentIndex(s_currentFormIndex);
 
-	connect(buttonBox,				SIGNAL(accepted()),							this,	SLOT(checkMatrixValidityAndAccept()));
-	connect(buttonBox,				SIGNAL(clicked(QAbstractButton*)),			this,	SLOT(buttonClicked(QAbstractButton*)));
+	connect(buttonBox,				 &QDialogButtonBox::accepted,	this, &ccApplyTransformationDlg::checkMatrixValidityAndAccept);
+	connect(buttonBox,				 &QDialogButtonBox::clicked,	this, &ccApplyTransformationDlg::buttonClicked);
 
-	connect(matrixTextEdit,			SIGNAL(textChanged()),			this,	SLOT(onMatrixTextChange()));
-	connect(fromFileToolButton,		SIGNAL(clicked()),				this,	SLOT(loadFromASCIIFile()));
-	connect(fromClipboardToolButton, SIGNAL(clicked()),				this,	SLOT(loadFromClipboard()));
-	connect(fromDipDipDirToolButton, SIGNAL(clicked()),				this,	SLOT(initFromDipAndDipDir()));
+	connect(matrixTextEdit,			 &QPlainTextEdit::textChanged,	this, &ccApplyTransformationDlg::onMatrixTextChange);
+	connect(fromFileToolButton,		 &QToolButton::clicked,			this, &ccApplyTransformationDlg::loadFromASCIIFile);
+	connect(fromClipboardToolButton, &QToolButton::clicked,			this, &ccApplyTransformationDlg::loadFromClipboard);
+	connect(fromDipDipDirToolButton, &QToolButton::clicked,			this, &ccApplyTransformationDlg::initFromDipAndDipDir);
 
-	connect(rxAxisDoubleSpinBox,	SIGNAL(valueChanged(double)),	this,	SLOT(onRotAngleValueChanged(double)));
-	connect(ryAxisDoubleSpinBox,	SIGNAL(valueChanged(double)),	this,	SLOT(onRotAngleValueChanged(double)));
-	connect(rzAxisDoubleSpinBox,	SIGNAL(valueChanged(double)),	this,	SLOT(onRotAngleValueChanged(double)));
-	connect(rAngleDoubleSpinBox,	SIGNAL(valueChanged(double)),	this,	SLOT(onRotAngleValueChanged(double)));
-	connect(txAxisDoubleSpinBox,	SIGNAL(valueChanged(double)),	this,	SLOT(onRotAngleValueChanged(double)));
-	connect(tyAxisDoubleSpinBox,	SIGNAL(valueChanged(double)),	this,	SLOT(onRotAngleValueChanged(double)));
-	connect(tzAxisDoubleSpinBox,	SIGNAL(valueChanged(double)),	this,	SLOT(onRotAngleValueChanged(double)));
+	connect(rxAxisDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onRotAngleValueChanged);
+	connect(ryAxisDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onRotAngleValueChanged);
+	connect(rzAxisDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onRotAngleValueChanged);
+	connect(rAngleDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onRotAngleValueChanged);
+	connect(txAxisDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onRotAngleValueChanged);
+	connect(tyAxisDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onRotAngleValueChanged);
+	connect(tzAxisDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onRotAngleValueChanged);
 
-	connect(ePhiDoubleSpinBox,		SIGNAL(valueChanged(double)),	this,	SLOT(onEulerValueChanged(double)));
-	connect(eThetaDoubleSpinBox,	SIGNAL(valueChanged(double)),	this,	SLOT(onEulerValueChanged(double)));
-	connect(ePsiDoubleSpinBox,		SIGNAL(valueChanged(double)),	this,	SLOT(onEulerValueChanged(double)));
-	connect(etxAxisDoubleSpinBox,	SIGNAL(valueChanged(double)),	this,	SLOT(onEulerValueChanged(double)));
-	connect(etyAxisDoubleSpinBox,	SIGNAL(valueChanged(double)),	this,	SLOT(onEulerValueChanged(double)));
-	connect(etzAxisDoubleSpinBox,	SIGNAL(valueChanged(double)),	this,	SLOT(onEulerValueChanged(double)));
+	connect(ePhiDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onEulerValueChanged);
+	connect(eThetaDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onEulerValueChanged);
+	connect(ePsiDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onEulerValueChanged);
+	connect(etxAxisDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onEulerValueChanged);
+	connect(etyAxisDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onEulerValueChanged);
+	connect(etzAxisDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onEulerValueChanged);
 }
 
 void ccApplyTransformationDlg::onMatrixTextChange()

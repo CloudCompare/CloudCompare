@@ -38,8 +38,8 @@ ccNormalComputationDlg::ccNormalComputationDlg(bool withScanGrid, bool withSenso
 	//by default, the 'auto' button is hidden (as long as setCloud is not called)
 	autoRadiusToolButton->setVisible(false);
 
-	connect(localModelComboBox,			SIGNAL(currentIndexChanged(int)), this, SLOT(localModelChanged(int)));
-	connect(autoRadiusToolButton,		SIGNAL(clicked()),                this, SLOT(autoEstimateRadius()));
+	connect(localModelComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccNormalComputationDlg::localModelChanged);
+	connect(autoRadiusToolButton, &QToolButton::clicked,												this, &ccNormalComputationDlg::autoEstimateRadius);
 
 	if (withScanGrid)
 	{

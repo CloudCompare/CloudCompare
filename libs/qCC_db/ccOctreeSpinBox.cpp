@@ -32,7 +32,7 @@ ccOctreeSpinBox::ccOctreeSpinBox(QWidget* parent/*=0*/)
 	setRange(0, CCLib::DgmOctree::MAX_OCTREE_LEVEL);
 	
 	//we'll catch any modification of the spinbox value and update the suffix consequently
-	connect(this, SIGNAL(valueChanged(int)), this, SLOT(onValueChange(int)));
+	connect(this, static_cast<void (ccOctreeSpinBox::*)(int)>(&ccOctreeSpinBox::valueChanged), this, &ccOctreeSpinBox::onValueChange);
 }
 
 void ccOctreeSpinBox::setCloud(ccGenericPointCloud* cloud)

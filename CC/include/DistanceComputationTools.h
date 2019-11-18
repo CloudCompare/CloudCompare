@@ -263,6 +263,18 @@ public: //distance to simple entities (triangles, planes, etc.)
 	**/
 	static ScalarType computePoint2PlaneDistance(const CCVector3* P, const PointCoordinateType* planeEquation);
 
+	//! Computes the distance between each point in a cloud and a cylinder
+	/** \param cloud a 3D point cloud
+		\param cylinderP1 center bottom point
+		\param cylinderP2 center top point
+		\param cylinderRadius cylinder radius
+		\param signedDist whether to compute the signed or positive (absolute) distance (optional)
+		\param solutionType if true the scalar field will be set to which solution was selected 1-4 (optional)
+		\param[out] rms will be set with the Root Mean Square (RMS) distance between a cloud and a cylinder (optional)
+		\return negative error code or a positive value in case of success
+	**/
+	static int computeCloud2CylinderEquation(GenericIndexedCloudPersist* cloud, const CCVector3& cylinderP1, const CCVector3& cylinderP2, const PointCoordinateType cylinderRadius, bool signedDistances = true, bool solutionType = false, double* rms = nullptr);
+
 	//! Computes the distance between each point in a cloud and a sphere
 	/** \param cloud a 3D point cloud
 		\param sphereCenter sphere 3d center point

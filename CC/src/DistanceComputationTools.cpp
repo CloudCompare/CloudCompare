@@ -2150,6 +2150,100 @@ ScalarType DistanceComputationTools::computePoint2PlaneDistance(const CCVector3*
 	return static_cast<ScalarType>((CCVector3::vdot(P->u, planeEquation) - planeEquation[3])/*/CCVector3::vnorm(planeEquation)*/); //norm == 1.0!
 }
 
+
+// This algorithm is a modification of the distance computation between a point and a cylinder from 
+// Barbier & Galin's Fast Distance Computation Between a Point and Cylinders, Cones, Line Swept Spheres and Cone-Spheres.
+// The modifications from the paper are to compute the closest distance when the point is interior to the capped cylinder.
+// http://liris.cnrs.fr/Documents/Liris-1297.pdf
+// solutionType 1 = exterior to the cylinder and within the bounds of the axis
+// solutionType 2 = interior to the cylinder and either closer to an end-cap or the cylinder wall
+// solutionType 3 = beyond the bounds of the cylinder's axis and radius
+// solutionType 4 = beyond the bounds of the cylinder's axis but within the bounds of it's radius
+int DistanceComputationTools::computeCloud2CylinderEquation(GenericIndexedCloudPersist* cloud, const CCVector3& cylinderP1, const CCVector3& cylinderP2, const PointCoordinateType cylinderRadius, bool signedDistances/*=true*/, bool solutionType/*=false*/, double* rms/*=0*/)
+{
+	if (!cloud)
+		return -1;
+	unsigned count = cloud->size();
+	if (count == 0)
+		return -2;
+	if (!cloud->enableScalarField())
+		return -3;
+	double dSumSq = 0.0;
+
+	CCVector3 cylinderCenter = (cylinderP1 + cylinderP2) / 2.;
+
+	CCVector3 cylinderAxis = cylinderP2 - cylinderP1;
+	double h = cylinderAxis.normd() / 2.;
+	cylinderAxis.normalize();
+	double cylinderRadius2 = static_cast<double>(cylinderRadius)* cylinderRadius;
+
+	for (unsigned i = 0; i < count; ++i)
+	{
+		const CCVector3* P = cloud->getPoint(i);
+		CCVector3 n = *P - cylinderCenter;
+
+		double x = std::abs(n.dot(cylinderAxis));
+		double xx = x * x;
+		double yy = (n.norm2d()) - xx;
+		double y = 0;
+		double d = 0;
+		if (x <= h)
+		{
+			if (yy >= cylinderRadius2)
+			{
+				if(!solutionType)
+					d = sqrt(yy) - cylinderRadius; //exterior to the cylinder and within the bounds of the axis
+				else
+					d = 1;
+			}
+			else
+			{
+				if (!solutionType)
+					d = -std::min(std::abs(sqrt(yy) - cylinderRadius), std::abs(h - x)); //interior to the cylinder and either closer to an end-cap or the cylinder wall
+				else
+					d = 2;
+			}
+		}
+		else
+		{
+			if (yy >= cylinderRadius2)
+			{
+				if (!solutionType) 
+				{
+				y = sqrt(yy);
+				d = sqrt(((y - cylinderRadius) * (y - cylinderRadius)) + ((x - h) * (x - h))); //beyond the bounds of the cylinder's axis and radius
+				}
+				else
+					d = 3;
+			}
+			else
+			{
+				if (!solutionType)
+					d = x - h; //beyond the bounds of the cylinder's axis but within the bounds of it's radius
+				else
+					d = 4;
+			}
+
+		}
+
+		if (signedDistances)
+		{
+			cloud->setPointScalarValue(i, static_cast<ScalarType>(d));
+		}
+		else
+		{
+			cloud->setPointScalarValue(i, static_cast<ScalarType>(std::abs(d)));
+		}
+		dSumSq += d * d;
+	}
+	if (rms)
+	{
+		*rms = sqrt(dSumSq / count);
+	}
+
+	return count;
+}
+
 int DistanceComputationTools::computeCloud2SphereEquation(GenericIndexedCloudPersist *cloud, const CCVector3& sphereCenter, const PointCoordinateType sphereRadius, bool signedDistances/*=true*/, double* rms/*=0*/)
 {
 	if (!cloud)

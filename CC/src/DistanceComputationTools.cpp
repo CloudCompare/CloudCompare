@@ -2150,7 +2150,7 @@ ScalarType DistanceComputationTools::computePoint2PlaneDistance(const CCVector3*
 	return static_cast<ScalarType>((CCVector3::vdot(P->u, planeEquation) - planeEquation[3])/*/CCVector3::vnorm(planeEquation)*/); //norm == 1.0!
 }
 
-int DistanceComputationTools::computeCloud2SphereEquation(GenericIndexedCloudPersist *cloud, const CCVector3& SphereCenter, const PointCoordinateType SphereRadius, bool signedDistances/*=true*/, double* rms/*=0*/)
+int DistanceComputationTools::computeCloud2SphereEquation(GenericIndexedCloudPersist *cloud, const CCVector3& sphereCenter, const PointCoordinateType sphereRadius, bool signedDistances/*=true*/, double* rms/*=0*/)
 {
 	if (!cloud)
 		return -1;
@@ -2163,7 +2163,7 @@ int DistanceComputationTools::computeCloud2SphereEquation(GenericIndexedCloudPer
 	for (unsigned i = 0; i < count; ++i)
 	{
 		const CCVector3* P = cloud->getPoint(i);
-		double d = (*P - SphereCenter).norm() - SphereRadius;
+		double d = (*P - sphereCenter).normd() - sphereRadius;
 		if (signedDistances)
 		{
 			cloud->setPointScalarValue(i, static_cast<ScalarType>(d));
@@ -2203,7 +2203,7 @@ int DistanceComputationTools::computeCloud2PlaneEquation(GenericIndexedCloudPers
 	for (unsigned i = 0; i < count; ++i)
 	{
 		const CCVector3* P = cloud->getPoint(i);
-		double d = static_cast<double>(CCVector3::vdot(P->u, planeEquation) - planeEquation[3]);
+		double d = static_cast<double>(CCVector3::vdotd(P->u, planeEquation) - planeEquation[3]);
 		if (signedDistances)
 		{
 			cloud->setPointScalarValue(i, static_cast<ScalarType>(d));

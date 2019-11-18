@@ -64,16 +64,16 @@ ccPlaneEditDlg::ccPlaneEditDlg(ccPickingHub* pickingHub, QWidget* parent)
 	cyAxisDoubleSpinBox->setValue(s_center.y);
 	czAxisDoubleSpinBox->setValue(s_center.z);
 
-	connect(pickCenterToolButton,	SIGNAL(toggled(bool)),			this, SLOT(pickPointAsCenter(bool)));
-	connect(dipDoubleSpinBox,		SIGNAL(valueChanged(double)),	this, SLOT(onDipDirChanged(double)));
-	connect(dipDirDoubleSpinBox,	SIGNAL(valueChanged(double)),	this, SLOT(onDipDirChanged(double)));
-	connect(upwardCheckBox,			SIGNAL(toggled(bool)),			this, SLOT(onDipDirModified(bool)));
-	connect(nxDoubleSpinBox,		SIGNAL(valueChanged(double)),	this, SLOT(onNormalChanged(double)));
-	connect(nyDoubleSpinBox,		SIGNAL(valueChanged(double)),	this, SLOT(onNormalChanged(double)));
-	connect(nzDoubleSpinBox,		SIGNAL(valueChanged(double)),	this, SLOT(onNormalChanged(double)));
+	connect(pickCenterToolButton,	&QCheckBox::toggled, this, &ccPlaneEditDlg::pickPointAsCenter);
+	connect(upwardCheckBox,			&QCheckBox::toggled, this, &ccPlaneEditDlg::onDipDirModified);
+	connect(dipDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccPlaneEditDlg::onDipDirChanged);
+	connect(dipDirDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccPlaneEditDlg::onDipDirChanged);
+	connect(nxDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccPlaneEditDlg::onNormalChanged);
+	connect(nyDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccPlaneEditDlg::onNormalChanged);
+	connect(nzDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccPlaneEditDlg::onNormalChanged);
 
-	connect(buttonBox, SIGNAL(accepted()), this, SLOT(saveParamsAndAccept()));
-	connect(buttonBox, SIGNAL(rejected()), this, SLOT(deleteLater()));
+	connect(buttonBox, &QDialogButtonBox::accepted, this, &ccPlaneEditDlg::saveParamsAndAccept);
+	connect(buttonBox, &QDialogButtonBox::rejected, this, &ccPlaneEditDlg::deleteLater);
 
 	//auto disable picking mode on quit
 	connect(this, &QDialog::finished, [&]()

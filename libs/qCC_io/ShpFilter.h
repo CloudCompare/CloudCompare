@@ -61,7 +61,7 @@ public:
 
 private:
 	//! Whether to consider closed polylines as polygons or not
-	bool m_closedPolylinesAsPolygons = true;
+	bool m_closedPolylinesAsPolygons = false;
 
 	//! Whether to save 3D poly as 2D
 	//! Note that all Polylines from shapefiles are loaded as 3D
@@ -69,10 +69,6 @@ private:
 
 	//! Whether to save the 3D height in .dbf file
 	bool m_save3DPolyHeightInDBF = false;
-
-	int m_poly2DVertDim = 2;
-
-	double m_dbfFieldImportScale = 1.0;
 };
 
 #endif //CC_SHP_SUPPORT

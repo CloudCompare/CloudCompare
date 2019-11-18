@@ -60,10 +60,12 @@ public:
 		\param textDisplay text output widget (optional)
 		\param parentWidget parent widget (optional)
 		\param parentWindow parent window (if any - optional)
+		\param silentCommandLineMode will cause logmessage to printf (optional)
 	**/
 	static void Init(	QListWidget* textDisplay = nullptr,
 						QWidget* parentWidget = nullptr,
-						MainWindow* parentWindow = nullptr);
+						MainWindow* parentWindow = nullptr,
+						bool redirectToStdOut = false);
 
 	//! Returns the (unique) static instance
 	/** \param autoInit automatically initialize the console instance (with no widget!) if not done already
@@ -131,6 +133,7 @@ protected:
 
 	//! Whether to show Qt messages (qDebug / qWarning / etc.) in Console
 	static bool s_showQtMessagesInConsole;
+	static bool s_redirectToStdOut;
 };
 
 #endif

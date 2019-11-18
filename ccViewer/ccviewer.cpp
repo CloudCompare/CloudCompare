@@ -99,60 +99,58 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 #endif
 
 	//Signals & slots connection
-	connect(m_glWindow,								SIGNAL(filesDropped(const QStringList&)),	this,	SLOT(addToDB(QStringList)), Qt::QueuedConnection);
-	connect(m_glWindow,								SIGNAL(entitySelectionChanged(ccHObject*)),	this,	SLOT(selectEntity(ccHObject*)));
-	connect(m_glWindow,								SIGNAL(exclusiveFullScreenToggled(bool)),	this,	SLOT(onExclusiveFullScreenToggled(bool)));
-	//connect(m_glWindow,							SIGNAL(entitiesSelectionChanged(std::unordered_set<int>)),	this,		SLOT(selectEntities(std::unordered_set<int>))); //not supported!
-	//connect(m_glWindow,							SIGNAL(newLabel(ccHObject*),						this,		SLOT(handleNewEntity(ccHObject*))); //nothing to do in ccViewer!
-
+	connect(m_glWindow,								&ccGLWindow::filesDropped,				this, static_cast<void (ccViewer::*)(QStringList)>(&ccViewer::addToDB), Qt::QueuedConnection);
+	connect(m_glWindow,								&ccGLWindow::entitySelectionChanged,	this,	&ccViewer::selectEntity);
+	connect(m_glWindow,								&ccGLWindow::exclusiveFullScreenToggled,this,	&ccViewer::onExclusiveFullScreenToggled);
+	
 	//"Options" menu
-	connect(ui.actionDisplayParameters,				SIGNAL(triggered()),						this,	SLOT(showDisplayParameters()));
-	connect(ui.actionEditCamera,					SIGNAL(triggered()),						this,	SLOT(doActionEditCamera()));
+	connect(ui.actionDisplayParameters,				&QAction::triggered,					this,	&ccViewer::showDisplayParameters);
+	connect(ui.actionEditCamera,					&QAction::triggered,					this,	&ccViewer::doActionEditCamera);
 	//"Display > Standard views" menu
-	connect(ui.actionSetViewTop,					SIGNAL(triggered()),						this,	SLOT(setTopView()));
-	connect(ui.actionSetViewBottom,					SIGNAL(triggered()),						this,	SLOT(setBottomView()));
-	connect(ui.actionSetViewFront,					SIGNAL(triggered()),						this,	SLOT(setFrontView()));
-	connect(ui.actionSetViewBack,					SIGNAL(triggered()),						this,	SLOT(setBackView()));
-	connect(ui.actionSetViewLeft,					SIGNAL(triggered()),						this,	SLOT(setLeftView()));
-	connect(ui.actionSetViewRight,					SIGNAL(triggered()),						this,	SLOT(setRightView()));
-	connect(ui.actionSetViewIso1,					SIGNAL(triggered()),						this,	SLOT(setIsoView1()));
-	connect(ui.actionSetViewIso2,					SIGNAL(triggered()),						this,	SLOT(setIsoView2()));
+	connect(ui.actionSetViewTop,					&QAction::triggered,					this,	&ccViewer::setTopView);
+	connect(ui.actionSetViewBottom,					&QAction::triggered,					this,	&ccViewer::setBottomView);
+	connect(ui.actionSetViewFront,					&QAction::triggered,					this,	&ccViewer::setFrontView);
+	connect(ui.actionSetViewBack,					&QAction::triggered,					this,	&ccViewer::setBackView);
+	connect(ui.actionSetViewLeft,					&QAction::triggered,					this,	&ccViewer::setLeftView);
+	connect(ui.actionSetViewRight,					&QAction::triggered,					this,	&ccViewer::setRightView);
+	connect(ui.actionSetViewIso1,					&QAction::triggered,					this,	&ccViewer::setIsoView1);
+	connect(ui.actionSetViewIso2,					&QAction::triggered,					this,	&ccViewer::setIsoView2);
 
 	//"Options > Perspective" menu
-	connect(ui.actionSetOrthoView,					SIGNAL(triggered()),						this,	SLOT(setOrthoView()));
-	connect(ui.actionSetCenteredPerspectiveView,	SIGNAL(triggered()),						this,	SLOT(setCenteredPerspectiveView()));
-	connect(ui.actionSetViewerPerspectiveView,		SIGNAL(triggered()),						this,	SLOT(setViewerPerspectiveView()));
+	connect(ui.actionSetOrthoView,					&QAction::triggered,					this,	&ccViewer::setOrthoView);
+	connect(ui.actionSetCenteredPerspectiveView,	&QAction::triggered,					this,	&ccViewer::setCenteredPerspectiveView);
+	connect(ui.actionSetViewerPerspectiveView,		&QAction::triggered,					this,	&ccViewer::setViewerPerspectiveView);
 	//"Options > Rotation symbol" menu
-	connect(ui.actionSetPivotAlwaysOn,				SIGNAL(triggered()),						this,	SLOT(setPivotAlwaysOn()));
-	connect(ui.actionSetPivotRotationOnly,			SIGNAL(triggered()),						this,	SLOT(setPivotRotationOnly()));
-	connect(ui.actionSetPivotOff,					SIGNAL(triggered()),						this,	SLOT(setPivotOff()));
+	connect(ui.actionSetPivotAlwaysOn,				&QAction::triggered,					this,	&ccViewer::setPivotAlwaysOn);
+	connect(ui.actionSetPivotRotationOnly,			&QAction::triggered,					this,	&ccViewer::setPivotRotationOnly);
+	connect(ui.actionSetPivotOff,					&QAction::triggered,					this,	&ccViewer::setPivotOff);
 	//"Options > 3D mouse" menu
-	connect(ui.actionEnable3DMouse,					SIGNAL(toggled(bool)),						this,	SLOT(enable3DMouse(bool)));
+	connect(ui.actionEnable3DMouse,					&QAction::toggled,						this,	&ccViewer::enable3DMouse);
 	//"Display > Lights & Materials" menu
-	connect(ui.actionToggleSunLight,				SIGNAL(toggled(bool)),						this,	SLOT(toggleSunLight(bool)));
-	connect(ui.actionToggleCustomLight,				SIGNAL(toggled(bool)),						this,	SLOT(toggleCustomLight(bool)));
+	connect(ui.actionToggleSunLight,				&QAction::toggled,						this,	&ccViewer::toggleSunLight);
+	connect(ui.actionToggleCustomLight,				&QAction::toggled,						this,	&ccViewer::toggleCustomLight);
 	//"Options" menu
-	connect(ui.actionGlobalZoom,					SIGNAL(triggered()),						this,	SLOT(setGlobalZoom()));
-	connect(ui.actionEnableStereo,					SIGNAL(toggled(bool)),						this,	SLOT(toggleStereoMode(bool)));
-	connect(ui.actionFullScreen,					SIGNAL(toggled(bool)),						this,	SLOT(toggleFullScreen(bool)));
-	connect(ui.actionLockRotationVertAxis,			SIGNAL(triggered()),						this,	SLOT(toggleRotationAboutVertAxis()));
+	connect(ui.actionGlobalZoom,					&QAction::triggered,					this,	&ccViewer::setGlobalZoom);
+	connect(ui.actionEnableStereo,					&QAction::toggled,						this,	&ccViewer::toggleStereoMode);
+	connect(ui.actionFullScreen,					&QAction::toggled,						this,	&ccViewer::toggleFullScreen);
+	connect(ui.actionLockRotationVertAxis,			&QAction::triggered,					this,   &ccViewer::toggleRotationAboutVertAxis);
 
 	//"Options > Selected" menu
-	connect(ui.actionShowColors,					SIGNAL(toggled(bool)),						this,	SLOT(toggleColorsShown(bool)));
-	connect(ui.actionShowNormals,					SIGNAL(toggled(bool)),						this,	SLOT(toggleNormalsShown(bool)));
-	connect(ui.actionShowMaterials,					SIGNAL(toggled(bool)),						this,	SLOT(toggleMaterialsShown(bool)));
-	connect(ui.actionShowScalarField,				SIGNAL(toggled(bool)),						this,	SLOT(toggleScalarShown(bool)));
-	connect(ui.actionShowColorRamp,					SIGNAL(toggled(bool)),						this,	SLOT(toggleColorbarShown(bool)));
-	connect(ui.actionZoomOnSelectedEntity,			SIGNAL(triggered()),						this,	SLOT(zoomOnSelectedEntity()));
-	connect(ui.actionDelete,						SIGNAL(triggered()),						this,	SLOT(doActionDeleteSelectedEntity()));
+	connect(ui.actionShowColors,					&QAction::toggled,						this,	&ccViewer::toggleColorsShown);
+	connect(ui.actionShowNormals,					&QAction::toggled,						this,	&ccViewer::toggleNormalsShown);
+	connect(ui.actionShowMaterials,					&QAction::toggled,						this,	&ccViewer::toggleMaterialsShown);
+	connect(ui.actionShowScalarField,				&QAction::toggled,						this,	&ccViewer::toggleScalarShown);
+	connect(ui.actionShowColorRamp,					&QAction::toggled,						this,	&ccViewer::toggleColorbarShown);
+	connect(ui.actionZoomOnSelectedEntity,			&QAction::triggered,					this,	&ccViewer::zoomOnSelectedEntity);
+	connect(ui.actionDelete,						&QAction::triggered,					this,	&ccViewer::doActionDeleteSelectedEntity);
 
 
 	//"Shaders" menu
-	connect(ui.actionNoFilter,						SIGNAL(triggered()),						this,	SLOT(doDisableGLFilter()));
+	connect(ui.actionNoFilter,						&QAction::triggered,					this,	&ccViewer::doDisableGLFilter);
 
 	//"Help" menu
-	connect(ui.actionAbout,							SIGNAL(triggered()),						this,	SLOT(doActionAbout()));
-	connect(ui.actionHelpShortctus,					SIGNAL(triggered()),						this,	SLOT(doActionDisplayShortcuts()));
+	connect(ui.actionAbout,							&QAction::triggered,					this,	&ccViewer::doActionAbout);
+	connect(ui.actionHelpShortctus,					&QAction::triggered,					this,	&ccViewer::doActionDisplayShortcuts);
 
 	loadPlugins();
 }
@@ -378,7 +376,7 @@ void ccViewer::selectEntity(ccHObject* toSelect)
 				action->setCheckable(true);
 				if (currentSFIndex == static_cast<int>(i))
 					action->setChecked(true);
-				connect(action, SIGNAL(toggled(bool)), this, SLOT(changeCurrentScalarField(bool)));
+				connect(action, &QAction::toggled, this, &ccViewer::changeCurrentScalarField);
 			}
 		}
 
@@ -572,7 +570,7 @@ void ccViewer::showDisplayParameters()
 {
 	ccDisplayOptionsDlg clmDlg(this);
 
-	connect(&clmDlg, SIGNAL(aspectHasChanged()), this, SLOT(updateDisplay()));
+	connect(&clmDlg, &ccDisplayOptionsDlg::aspectHasChanged, this, &ccViewer::updateDisplay);
 
 	clmDlg.exec();
 
@@ -1075,10 +1073,12 @@ void ccViewer::enable3DMouse(bool state)
 		m_3dMouseInput = new Mouse3DInput(this);
 		if (m_3dMouseInput->connect(this,"ccViewer"))
 		{
-			QObject::connect(m_3dMouseInput, SIGNAL(sigMove3d(std::vector<float>&)),	this,	SLOT(on3DMouseMove(std::vector<float>&)));
-			QObject::connect(m_3dMouseInput, SIGNAL(sigReleased()),						this,	SLOT(on3DMouseReleased()));
-			QObject::connect(m_3dMouseInput, SIGNAL(sigOn3dmouseKeyDown(int)),			this,	SLOT(on3DMouseKeyDown(int)));
-			QObject::connect(m_3dMouseInput, SIGNAL(sigOn3dmouseKeyUp(int)),			this,	SLOT(on3DMouseKeyUp(int)));
+			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigMove3d,				this,	&ccViewer::on3DMouseMove);
+			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigReleased,			this,	&ccViewer::on3DMouseReleased);
+			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigOn3dmouseKeyDown,	this,	&ccViewer::on3DMouseKeyDown);
+			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigOn3dmouseKeyUp,		this,	&ccViewer::on3DMouseKeyUp);
+			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigOn3dmouseCMDKeyDown, this,	&ccViewer::on3DMouseCMDKeyDown);
+			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigOn3dmouseCMDKeyUp,	this,	&ccViewer::on3DMouseCMDKeyUp);
 		}
 		else
 		{
@@ -1191,6 +1191,106 @@ void ccViewer::on3DMouseKeyDown(int key)
 		break;
 	}
 
+#endif
+}
+void ccViewer::on3DMouseCMDKeyUp(int cmd)
+{
+	//nothing right now
+}
+
+void ccViewer::on3DMouseCMDKeyDown(int cmd)
+{
+#ifdef CC_3DXWARE_SUPPORT
+	switch (cmd)
+	{
+		//ccLog::Print(QString("on3DMouseCMDKeyDown Cmd = %1").arg(cmd));
+	case Mouse3DInput::V3DCMD_VIEW_FIT:
+	{
+		if (m_selectedObject)
+			zoomOnSelectedEntity();
+		else
+			setGlobalZoom();
+	}
+	break;
+	case Mouse3DInput::V3DCMD_VIEW_TOP:
+		setTopView();
+		break;
+	case Mouse3DInput::V3DCMD_VIEW_LEFT:
+		setLeftView();
+		break;
+	case Mouse3DInput::V3DCMD_VIEW_RIGHT:
+		setRightView();
+		break;
+	case Mouse3DInput::V3DCMD_VIEW_FRONT:
+		setFrontView();
+		break;
+	case Mouse3DInput::V3DCMD_VIEW_BOTTOM:
+		setBottomView();
+		break;
+	case Mouse3DInput::V3DCMD_VIEW_BACK:
+		setBackView();
+		break;
+	case Mouse3DInput::V3DCMD_VIEW_ISO1:
+		setIsoView1();
+		break;
+	case Mouse3DInput::V3DCMD_VIEW_ISO2:
+		setIsoView2();
+		break;
+	case Mouse3DInput::V3DCMD_VIEW_ROLLCW:
+	case Mouse3DInput::V3DCMD_VIEW_ROLLCCW:
+	{
+		if (m_glWindow)
+		{
+			CCVector3d axis(0, 0, -1);
+			CCVector3d trans(0, 0, 0);
+			ccGLMatrixd mat;
+			double angle = M_PI / 2;
+			if (cmd == Mouse3DInput::V3DCMD_VIEW_ROLLCCW)
+				angle = -angle;
+			mat.initFromParameters(angle, axis, trans);
+			m_glWindow->rotateBaseViewMat(mat);
+			m_glWindow->redraw();
+		}
+	}
+	break;
+	case Mouse3DInput::V3DCMD_VIEW_SPINCW:
+	case Mouse3DInput::V3DCMD_VIEW_SPINCCW:
+	{
+		if (m_glWindow)
+		{
+			CCVector3d axis(0, 1, 0);
+			CCVector3d trans(0, 0, 0);
+			ccGLMatrixd mat;
+			double angle = M_PI / 2;
+			if (cmd == Mouse3DInput::V3DCMD_VIEW_SPINCCW)
+				angle = -angle;
+			mat.initFromParameters(angle, axis, trans);
+			m_glWindow->rotateBaseViewMat(mat);
+			m_glWindow->redraw();
+		}
+	}
+	case Mouse3DInput::V3DCMD_VIEW_TILTCW:
+	case Mouse3DInput::V3DCMD_VIEW_TILTCCW:
+	{
+		if (m_glWindow)
+		{
+			CCVector3d axis(1, 0, 0);
+			CCVector3d trans(0, 0, 0);
+			ccGLMatrixd mat;
+			double angle = M_PI / 2;
+			if (cmd == Mouse3DInput::V3DCMD_VIEW_TILTCCW)
+				angle = -angle;
+			mat.initFromParameters(angle, axis, trans);
+			m_glWindow->rotateBaseViewMat(mat);
+			m_glWindow->redraw();
+		}
+	}
+	break;
+	default:
+		ccLog::Warning("[3D mouse] This button is not handled (yet)");
+		//TODO
+		break;
+	}
 #endif
 }
 

@@ -54,14 +54,14 @@ ccAlignDlg::ccAlignDlg(ccGenericPointCloud *data, ccGenericPointCloud *model, QW
 	changeSamplingMethod(samplingMethod->currentIndex());
 	toggleNbMaxCandidates(isNbCandLimited->isChecked());
 
-	connect(swapButton, SIGNAL(clicked()), this, SLOT(swapModelAndData()));
-	connect(modelSample, SIGNAL(sliderReleased()), this, SLOT(modelSliderReleased()));
-	connect(dataSample, SIGNAL(sliderReleased()), this, SLOT(dataSliderReleased()));
-	connect(modelSamplingRate, SIGNAL(valueChanged(double)), this, SLOT(modelSamplingRateChanged(double)));
-	connect(dataSamplingRate, SIGNAL(valueChanged(double)), this, SLOT(dataSamplingRateChanged(double)));
-	connect(deltaEstimation, SIGNAL(clicked()), this, SLOT(estimateDelta()));
-	connect(samplingMethod, SIGNAL(currentIndexChanged(int)), this, SLOT(changeSamplingMethod(int)));
-	connect(isNbCandLimited, SIGNAL(toggled(bool)), this, SLOT(toggleNbMaxCandidates(bool)));
+	connect(swapButton, &QPushButton::clicked, this, &ccAlignDlg::swapModelAndData);
+	connect(modelSample, &QSlider::sliderReleased, this, &ccAlignDlg::modelSliderReleased);
+	connect(dataSample,  &QSlider::sliderReleased, this, &ccAlignDlg::dataSliderReleased);
+	connect(modelSamplingRate, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccAlignDlg::modelSamplingRateChanged);
+	connect(dataSamplingRate,  static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccAlignDlg::dataSamplingRateChanged);
+	connect(deltaEstimation, &QPushButton::clicked, this, &ccAlignDlg::estimateDelta);
+	connect(samplingMethod, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccAlignDlg::changeSamplingMethod);
+	connect(isNbCandLimited, &QCheckBox::toggled, this, &ccAlignDlg::toggleNbMaxCandidates);
 }
 
 ccAlignDlg::~ccAlignDlg()

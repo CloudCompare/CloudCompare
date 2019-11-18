@@ -75,9 +75,9 @@ ccRenderToFileDlg::ccRenderToFileDlg(unsigned baseWidth, unsigned baseHeight, QW
 
 	zoomDoubleSpinBox->setValue(s_renderZoom);
 
-	connect(chooseFileButton,		SIGNAL(clicked()),				this, SLOT(chooseFile()));
-	connect(zoomDoubleSpinBox,		SIGNAL(valueChanged(double)),	this, SLOT(updateInfo()));
-	connect(buttonBox,				SIGNAL(accepted()),				this, SLOT(saveSettings()));
+	connect(chooseFileButton,	&QToolButton::clicked,			this, &ccRenderToFileDlg::chooseFile);
+	connect(buttonBox,	 		&QDialogButtonBox::accepted,	this, &ccRenderToFileDlg::saveSettings);
+	connect(zoomDoubleSpinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccRenderToFileDlg::updateInfo);
 
 	updateInfo();
 }

@@ -47,8 +47,8 @@ ccColorLevelsDlg::ccColorLevelsDlg(QWidget* parent, ccGenericPointCloud* pointCl
 	setupUi(this);
 
 	//connect GUI elements
-	connect(channelComboBox,							SIGNAL(currentIndexChanged(int)),	this,	SLOT(onChannelChanged(int)));
-	connect(buttonBox->button(QDialogButtonBox::Apply),	SIGNAL(clicked()),					this,	SLOT(onApply()));
+	connect(channelComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),	this,	&ccColorLevelsDlg::onChannelChanged);
+	connect(buttonBox->button(QDialogButtonBox::Apply), &QPushButton::clicked,							this,	&ccColorLevelsDlg::onApply);
 
 	//create histogram view
 	m_histogram = new ccHistogramWindow(this);

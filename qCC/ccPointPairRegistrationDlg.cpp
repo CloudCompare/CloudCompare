@@ -88,26 +88,26 @@ ccPointPairRegistrationDlg::ccPointPairRegistrationDlg(ccPickingHub* pickingHub,
 		autoZoomCheckBox->setChecked(autoUpdateZoom);
 	}
 
-	connect(showAlignedCheckBox,	SIGNAL(toggled(bool)),				this,	SLOT(showAlignedEntities(bool)));
-	connect(showReferenceCheckBox,	SIGNAL(toggled(bool)),				this,	SLOT(showReferenceEntities(bool)));
+	connect(showAlignedCheckBox,	&QCheckBox::toggled,	this,	&ccPointPairRegistrationDlg::showAlignedEntities);
+	connect(showReferenceCheckBox,	&QCheckBox::toggled,	this,	&ccPointPairRegistrationDlg::showReferenceEntities);
 
-	connect(typeAlignToolButton,	SIGNAL(clicked()),					this,	SLOT(addManualAlignedPoint()));
-	connect(typeRefToolButton,		SIGNAL(clicked()),					this,	SLOT(addManualRefPoint()));
+	connect(typeAlignToolButton,	&QToolButton::clicked,	this,	&ccPointPairRegistrationDlg::addManualAlignedPoint);
+	connect(typeRefToolButton,		&QToolButton::clicked,	this,	&ccPointPairRegistrationDlg::addManualRefPoint);
 
-	connect(unstackAlignToolButton,	SIGNAL(clicked()),					this,	SLOT(unstackAligned()));
-	connect(unstackRefToolButton,	SIGNAL(clicked()),					this,	SLOT(unstackRef()));
+	connect(unstackAlignToolButton,	&QToolButton::clicked,	this,	&ccPointPairRegistrationDlg::unstackAligned);
+	connect(unstackRefToolButton,	&QToolButton::clicked,	this,	&ccPointPairRegistrationDlg::unstackRef);
 
-	connect(alignToolButton,		SIGNAL(clicked()),					this,	SLOT(align()));
-	connect(resetToolButton,		SIGNAL(clicked()),					this,	SLOT(reset()));
+	connect(alignToolButton,		&QToolButton::clicked,	this,	&ccPointPairRegistrationDlg::align);
+	connect(resetToolButton,		&QToolButton::clicked,	this,	&ccPointPairRegistrationDlg::reset);
 
-	connect(validToolButton,		SIGNAL(clicked()),					this,	SLOT(apply()));
-	connect(cancelToolButton,		SIGNAL(clicked()),					this,	SLOT(cancel()));
+	connect(validToolButton,		&QToolButton::clicked,	this,	&ccPointPairRegistrationDlg::apply);
+	connect(cancelToolButton,		&QToolButton::clicked,	this,	&ccPointPairRegistrationDlg::cancel);
 
-	connect(adjustScaleCheckBox,	SIGNAL(toggled(bool)),				this,	SLOT(updateAlignInfo()));
-	connect(TxCheckBox,				SIGNAL(toggled(bool)),				this,	SLOT(updateAlignInfo()));
-	connect(TyCheckBox,				SIGNAL(toggled(bool)),				this,	SLOT(updateAlignInfo()));
-	connect(TzCheckBox,				SIGNAL(toggled(bool)),				this,	SLOT(updateAlignInfo()));
-	connect(rotComboBox,			SIGNAL(currentIndexChanged(int)),	this,	SLOT(updateAlignInfo()));
+	connect(adjustScaleCheckBox,	&QCheckBox::toggled,	this,	&ccPointPairRegistrationDlg::updateAlignInfo);
+	connect(TxCheckBox,				&QCheckBox::toggled,	this,	&ccPointPairRegistrationDlg::updateAlignInfo);
+	connect(TyCheckBox,				&QCheckBox::toggled,	this,	&ccPointPairRegistrationDlg::updateAlignInfo);
+	connect(TzCheckBox,				&QCheckBox::toggled,	this,	&ccPointPairRegistrationDlg::updateAlignInfo);
+	connect(rotComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),	this, &ccPointPairRegistrationDlg::updateAlignInfo);
 
 	m_alignedPoints.setEnabled(true);
 	m_alignedPoints.setVisible(false);
@@ -675,7 +675,7 @@ void ccPointPairRegistrationDlg::addPointToTable(QTableWidget* tableWidget, int 
 		//QTableWidgetItem* item = new QTableWidgetItem();
 		//tableWidget->setItem(rowIndex, DEL_BUTTON_COL_INDEX, item);
 		QToolButton* delButton = CreateDeleteButton();
-		connect(delButton, SIGNAL(clicked()), this, SLOT(onDelButtonPushed()));
+		connect(delButton, &QToolButton::clicked, this, &ccPointPairRegistrationDlg::onDelButtonPushed);
 		tableWidget->setCellWidget(rowIndex, DEL_BUTTON_COL_INDEX, delButton);
 	}
 }

@@ -45,13 +45,13 @@ ccPointPropertiesDlg::ccPointPropertiesDlg(ccPickingHub* pickingHub, QWidget* pa
 {
 	setupUi(this);
 
-	connect(closeButton,				SIGNAL(clicked()), this, SLOT(onClose()));
-	connect(pointPropertiesButton,		SIGNAL(clicked()), this, SLOT(activatePointPropertiesDisplay()));
-	connect(pointPointDistanceButton,	SIGNAL(clicked()), this, SLOT(activateDistanceDisplay()));
-	connect(pointsAngleButton,			SIGNAL(clicked()), this, SLOT(activateAngleDisplay()));
-	connect(rectZoneToolButton,			SIGNAL(clicked()), this, SLOT(activate2DZonePicking()));
-	connect(saveLabelButton,			SIGNAL(clicked()), this, SLOT(exportCurrentLabel()));
-	connect(razButton,					SIGNAL(clicked()), this, SLOT(initializeState()));
+	connect(closeButton,				&QToolButton::clicked, this, &ccPointPropertiesDlg::onClose);
+	connect(pointPropertiesButton,		&QToolButton::clicked, this, &ccPointPropertiesDlg::activatePointPropertiesDisplay);
+	connect(pointPointDistanceButton,	&QToolButton::clicked, this, &ccPointPropertiesDlg::activateDistanceDisplay);
+	connect(pointsAngleButton,			&QToolButton::clicked, this, &ccPointPropertiesDlg::activateAngleDisplay);
+	connect(rectZoneToolButton,			&QToolButton::clicked, this, &ccPointPropertiesDlg::activate2DZonePicking);
+	connect(saveLabelButton,			&QToolButton::clicked, this, &ccPointPropertiesDlg::exportCurrentLabel);
+	connect(razButton,					&QToolButton::clicked, this, &ccPointPropertiesDlg::initializeState);
 
 	//for points picking
 	m_label = new cc2DLabel();
@@ -103,9 +103,9 @@ bool ccPointPropertiesDlg::linkWith(ccGLWindow* win)
 	{
 		m_associatedWin->addToOwnDB(m_label);
 		m_associatedWin->addToOwnDB(m_rect2DLabel);
-		connect(m_associatedWin, SIGNAL(mouseMoved(int, int, Qt::MouseButtons)), this, SLOT(update2DZone(int, int, Qt::MouseButtons)));
-		connect(m_associatedWin, SIGNAL(leftButtonClicked(int, int)), this, SLOT(processClickedPoint(int, int)));
-		connect(m_associatedWin, SIGNAL(buttonReleased()), this, SLOT(close2DZone()));
+		connect(m_associatedWin, &ccGLWindow::mouseMoved,		 this, &ccPointPropertiesDlg::update2DZone);
+		connect(m_associatedWin, &ccGLWindow::leftButtonClicked, this, &ccPointPropertiesDlg::processClickedPoint);
+		connect(m_associatedWin, &ccGLWindow::buttonReleased,	 this, &ccPointPropertiesDlg::close2DZone);
 	}
 
 	return true;

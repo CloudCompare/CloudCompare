@@ -129,24 +129,19 @@ ccComparisonDlg::ccComparisonDlg(	ccHObject* compEntity,
 		filterVisibilityCheckBox->setEnabled(m_refCloud && m_refCloud->isA(CC_TYPES::POINT_CLOUD) && static_cast<ccPointCloud*>(m_refCloud)->hasSensor());
 	}
 
-	connect(cancelButton,			SIGNAL(clicked()),					this,	SLOT(cancelAndExit()));
-	connect(okButton,				SIGNAL(clicked()),					this,	SLOT(applyAndExit()));
-	connect(computeButton,			SIGNAL(clicked()),					this,	SLOT(computeDistances()));
-	connect(histoButton,			SIGNAL(clicked()),					this,	SLOT(showHisto()));
-	connect(localModelComboBox,		SIGNAL(currentIndexChanged(int)),	this,	SLOT(locaModelChanged(int)));
-	connect(maxDistCheckBox,		SIGNAL(toggled(bool)),				this,	SLOT(maxDistUpdated()));
-	connect(maxSearchDistSpinBox,	SIGNAL(valueChanged(double)),		this,	SLOT(maxDistUpdated()));
+	connect(cancelButton,			&QPushButton::clicked,					this,	&ccComparisonDlg::cancelAndExit);
+	connect(okButton,				&QPushButton::clicked,					this,	&ccComparisonDlg::applyAndExit);
+	connect(computeButton,			&QPushButton::clicked,					this,	&ccComparisonDlg::computeDistances);
+	connect(histoButton,			&QPushButton::clicked,					this,	&ccComparisonDlg::showHisto);
+	connect(maxDistCheckBox,		&QCheckBox::toggled,					this,	&ccComparisonDlg::maxDistUpdated);
+	connect(localModelComboBox, static_cast<void (QComboBox::*)(int)> (&QComboBox::currentIndexChanged),		this,	&ccComparisonDlg::locaModelChanged);
+	connect(maxSearchDistSpinBox, static_cast<void (QDoubleSpinBox::*)(double)> (&QDoubleSpinBox::valueChanged),this,	&ccComparisonDlg::maxDistUpdated);
 
 	//be sure to show the dialog before computing the approx distances
 	//(otherwise the progress bars appear anywhere!)
-	if (!m_noDisplay)
-	{
-		show();
-		QCoreApplication::processEvents();
-	}
-
-	//compute approximate results and unlock GUI
-	computeApproxDistances();
+	QTimer::singleShot(0, this, &ccComparisonDlg::computeApproxDistances); //singleshot 0 time will fire once after all events in the queue are processed
+																		   //compute approximate results and unlock GUI
+					
 }
 
 ccComparisonDlg::~ccComparisonDlg()

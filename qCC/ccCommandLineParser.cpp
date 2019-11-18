@@ -38,28 +38,18 @@ constexpr char COMMAND_SILENT_MODE[]	= "SILENT";
 void ccCommandLineParser::print(const QString& message) const
 {
 	ccConsole::Print(message);
-	if (m_silentMode)
-	{
-		printf("%s\n", qPrintable(message));
-	}
 }
 
 void ccCommandLineParser::warning(const QString& message) const
 {
 	ccConsole::Warning(message);
-	if (m_silentMode)
-	{
-		printf("[WARNING] %s\n", qPrintable(message));
-	}
+	
 }
 
 bool ccCommandLineParser::error(const QString& message) const
 {
 	ccConsole::Error(message);
-	if (m_silentMode)
-	{
-		printf("[ERROR] %s\n", qPrintable(message));
-	}
+	
 
 	return false;
 }
@@ -101,6 +91,13 @@ int ccCommandLineParser::Parse(int nargs, char** args, ccPluginInterfaceList& pl
 		consoleDlg->show();
 		ccConsole::Init(commandLineDlg.consoleWidget, consoleDlg.data());
 		parser->fileLoadingParams().parentWidget = consoleDlg.data();
+		QApplication::processEvents(); //Get rid of the spinner
+	}
+	else
+	{
+		//allows ccLog ccConsole or ccCommandLineParser (print,warning,error) 
+		//to output to the console 
+		ccConsole::Init(nullptr, nullptr, nullptr, true); 
 	}
 
 	//load the plugins commands
@@ -629,6 +626,9 @@ void ccCommandLineParser::registerBuiltInCommands()
 	registerCommand(Command::Shared(new CommandComputeMeshVolume));
 	registerCommand(Command::Shared(new CommandSFColorScale));
 	registerCommand(Command::Shared(new CommandSFConvertToRGB));
+	registerCommand(Command::Shared(new CommandMoment));
+	registerCommand(Command::Shared(new CommandFeature));
+
 }
 
 void ccCommandLineParser::cleanup()
@@ -660,6 +660,7 @@ int ccCommandLineParser::start(QDialog* parent/*=0*/)
 	bool success = true;
 	while (success && !m_arguments.empty())
 	{
+		QApplication::processEvents();	//Without this the console is just a spinner until the end of all processing
 		QString argument = m_arguments.takeFirst();
 
 		if (!argument.startsWith("-"))

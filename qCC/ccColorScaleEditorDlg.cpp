@@ -70,37 +70,37 @@ ccColorScaleEditorDialog::ccColorScaleEditorDialog(	ccColorScalesManager* manage
 	colorScaleEditorFrame->layout()->addWidget(m_scaleWidget);
 
 	//main combo box
-	connect(rampComboBox, SIGNAL(activated(int)), this, SLOT(colorScaleChanged(int)));
+	connect(rampComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::activated), this, &ccColorScaleEditorDialog::colorScaleChanged);
 
 	//import/export buttons
-	connect(exportToolButton,		SIGNAL(clicked()),				this,	SLOT(exportCurrentScale()));
-	connect(importToolButton,		SIGNAL(clicked()),				this,	SLOT(importScale()));
+	connect(exportToolButton,		&QToolButton::clicked,				this,	&ccColorScaleEditorDialog::exportCurrentScale);
+	connect(importToolButton,		&QToolButton::clicked,				this,	&ccColorScaleEditorDialog::importScale);
 
 	//upper buttons
-	connect(renameToolButton,		SIGNAL(clicked()),				this,	SLOT(renameCurrentScale()));
-	connect(saveToolButton,			SIGNAL(clicked()),				this,	SLOT(saveCurrentScale()));
-	connect(deleteToolButton,		SIGNAL(clicked()),				this,	SLOT(deleteCurrentScale()));
-	connect(copyToolButton,			SIGNAL(clicked()),				this,	SLOT(copyCurrentScale()));
-	connect(newToolButton,			SIGNAL(clicked()),				this,	SLOT(createNewScale()));
-	connect(scaleModeComboBox,		SIGNAL(activated(int)),			this,	SLOT(relativeModeChanged(int)));
+	connect(renameToolButton,		&QToolButton::clicked,				this,	&ccColorScaleEditorDialog::renameCurrentScale);
+	connect(saveToolButton,			&QToolButton::clicked,				this,	&ccColorScaleEditorDialog::saveCurrentScale);
+	connect(deleteToolButton,		&QToolButton::clicked,				this,	&ccColorScaleEditorDialog::deleteCurrentScale);
+	connect(copyToolButton,			&QToolButton::clicked,				this,	&ccColorScaleEditorDialog::copyCurrentScale);
+	connect(newToolButton,			&QToolButton::clicked,				this,	&ccColorScaleEditorDialog::createNewScale);
+	connect(scaleModeComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::activated),			this,	&ccColorScaleEditorDialog::relativeModeChanged);
 
 	//scale widget
-	connect(m_scaleWidget,			SIGNAL(stepSelected(int)),		this,	SLOT(onStepSelected(int)));
-	connect(m_scaleWidget,			SIGNAL(stepModified(int)),		this,	SLOT(onStepModified(int)));
+	connect(m_scaleWidget,		&ccColorScaleEditorWidget::stepSelected,this,	&ccColorScaleEditorDialog::onStepSelected);
+	connect(m_scaleWidget,		&ccColorScaleEditorWidget::stepModified,this,	&ccColorScaleEditorDialog::onStepModified);
 
 	//slider editor
-	connect(deleteSliderToolButton,	SIGNAL(clicked()),				this,	SLOT(deletecSelectedStep()));
-	connect(colorToolButton,		SIGNAL(clicked()),				this,	SLOT(changeSelectedStepColor()));
-	connect(valueDoubleSpinBox,		SIGNAL(valueChanged(double)),	this,	SLOT(changeSelectedStepValue(double)));
+	connect(deleteSliderToolButton,	&QToolButton::clicked,				this,	&ccColorScaleEditorDialog::deletecSelectedStep);
+	connect(colorToolButton,		&QToolButton::clicked,				this,	&ccColorScaleEditorDialog::changeSelectedStepColor);
+	connect(valueDoubleSpinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &ccColorScaleEditorDialog::changeSelectedStepValue);
 
 	//labels list widget
-	connect(customLabelsGroupBox,		SIGNAL(toggled(bool)),		this,	SLOT(toggleCustomLabelsList(bool)));
-	connect(customLabelsPlainTextEdit,	SIGNAL(textChanged()),		this,	SLOT(onCustomLabelsListChanged()));
+	connect(customLabelsGroupBox, &QGroupBox::toggled,					this, &ccColorScaleEditorDialog::toggleCustomLabelsList);
+	connect(customLabelsPlainTextEdit, &QPlainTextEdit::textChanged,	this, &ccColorScaleEditorDialog::onCustomLabelsListChanged);
 
 	//apply button
-	connect(applyPushButton,		SIGNAL(clicked()),				this,	SLOT(onApply()));
+	connect(applyPushButton, &QPushButton::clicked,				this, &ccColorScaleEditorDialog::onApply);
 	//close button
-	connect(closePushButton,		SIGNAL(clicked()),				this,	SLOT(onClose()));
+	connect(closePushButton, &QPushButton::clicked,				this, &ccColorScaleEditorDialog::onClose);
 
 	//populate main combox box with all known scales
 	updateMainComboBox();

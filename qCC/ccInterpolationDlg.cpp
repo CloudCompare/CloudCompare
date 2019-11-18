@@ -26,7 +26,7 @@ ccInterpolationDlg::ccInterpolationDlg(QWidget* parent/*=0*/)
 {
 	setupUi(this);
 
-	connect(radiusDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(onRadiusUpdated(double)));
+	connect(radiusDoubleSpinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccInterpolationDlg::onRadiusUpdated);
 }
 
 ccPointCloudInterpolator::Parameters::Method ccInterpolationDlg::getInterpolationMethod() const

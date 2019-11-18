@@ -14,6 +14,9 @@ v2.11 (Anoia) - (in development)
   - Edit > Plane > Flip: to flip the selected planes
   - Edit > Plane > Compare: to compare the two selected planes (angle and relative distances)
   - Edit > Mesh > Flip triangles: to flip the triangles (vertices) in case they are defined in the wrong order
+  - Tools > Distances > Cloud/Primitive Dist
+	- [Used to calculate distance to primitive shape (supports sphere and planes) rather than the mesh of that shape (more accurate results for spheres)
+		for planes this works with the planes equation rather than the mesh so it works as if the plane is infinite.]
 
 - Improvements
   - Align (Point-pair based registration) tool
@@ -26,6 +29,14 @@ v2.11 (Anoia) - (in development)
 	- all parameters should now be properly remembered from one call to the other (during the same session)
 	- the current box/slice position can now be exported (resp. imported) to (resp. from) the clipboard via the 'Advanced' menu
   - Command line tool:
+	- The 1st Order Moment tool (Tools>Other>Compute geometric features) can now be accessed via 
+		the command line mode with option -MOMENT {kernel size}
+	    - Computes 1st order moment on all opened clouds and auto saved by default.
+	- The Feature tools (Tools>Other>Compute geometric features) can now be accessed via
+		the command line mode with option -FEATURE {type} {kernel size}
+		- type can be the following: SUM_OF_EIGENVALUES, OMNIVARIANCE, EIGENTROPY, ANISOTROPY, PLANARITY, 
+			LINEARITY, PCA1, PCA2, SURFACE_VARIATION, SPHERICITY, or VERTICALITY.
+		- Computes 1st order moment on all opened clouds and auto saved by default.
     - The C2M_DIST command (Cloud-to-Mesh distances) can now be called with 2 meshes as input.
         In this case the first mesh vertices are used as compared cloud.
 	- New suboption for the -O -GLOBAL_SHIFT option: 'FIRST'
@@ -34,6 +45,7 @@ v2.11 (Anoia) - (in development)
 		- Option -PCV (see https://www.cloudcompare.org/doc/wiki/index.php?title=Command_line_mode for sub-options)
 		- Can be called on any number of clouds or meshes
 		- (the tool was already accessible in V2.10, but in a very limited way)
+	- The CROP command will now remove the input cloud if it's totally 'cropped out' (instead of leaving the full original cloud loaded)
 	- the 'FWF_O' command (to load LAS files with associated waveform data) nows properly supports the '-GLOBAL_SHIFT' option
 	- no more popup will appear when loading a raster file via the command line mode in SILENT mode (raster is never loaded as a textured quad, and invalid points are always ignored and not loaded)
   - Raster import:
@@ -111,6 +123,8 @@ v2.11 (Anoia) - (in development)
 	- the Clipping-box tool 'edit' dialog would sometimes move the box in an unepected way when opening and closing it without making any change
 	- M3C2: the 'subsampling' option was not properly restored when loading the parameters from a file (if 'SubsampleEnabled = false')
 	- Orienting normals with a sensor position could lead to a crash
+	- Shapefile: at export time, the SHX file (created next to the SHP file) was malformed (preventing from loading the file in most GIS tools!)
+	             (+ polylines were mistakenly exported as polygons!)
 
 v2.10.3 (Zephyrus) - 13/06/2019
 ----------------------

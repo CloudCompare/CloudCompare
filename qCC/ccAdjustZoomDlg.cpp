@@ -44,9 +44,9 @@ ccAdjustZoomDlg::ccAdjustZoomDlg(ccGLWindow* win, QWidget* parent/*=0*/)
 		windowLabel->setText("Error");
 	}
 
-	connect(zoomDoubleSpinBox,		SIGNAL(valueChanged(double)),	this, SLOT(onZoomChanged(double)));
-	connect(pixelSizeDoubleSpinBox,	SIGNAL(valueChanged(double)),	this, SLOT(onPixelSizeChanged(double)));
-	connect(pixelCountSpinBox,		SIGNAL(valueChanged(int)),		this, SLOT(onPixelCountChanged(int)));
+	connect(zoomDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &ccAdjustZoomDlg::onZoomChanged);
+	connect(pixelSizeDoubleSpinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &ccAdjustZoomDlg::onPixelSizeChanged);
+	connect(pixelCountSpinBox,		static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),					this, &ccAdjustZoomDlg::onPixelCountChanged);
 }
 
 double ccAdjustZoomDlg::getZoom() const

@@ -116,6 +116,8 @@ constexpr char COMMAND_POP_CLOUDS[]						= "POP_CLOUDS";
 constexpr char COMMAND_CLEAR_MESHES[]					= "CLEAR_MESHES";
 constexpr char COMMAND_POP_MESHES[]						= "POP_MESHES";
 constexpr char COMMAND_NO_TIMESTAMP[]					= "NO_TIMESTAMP";
+constexpr char COMMAND_MOMENT[]							= "MOMENT";
+constexpr char COMMAND_FEATURE[]						= "FEATURE";
 
 //options / modifiers
 constexpr char COMMAND_MAX_THREAD_COUNT[]				= "MAX_TCOUNT";
@@ -2382,7 +2384,26 @@ bool CommandCrop::process(ccCommandLineInterface &cmd)
 						return cmd.error(errorStr);
 				}
 			}
-			//otherwise an error message has already been issued
+			else
+			{
+				//otherwise an error message has already been issued
+				delete cmd.clouds()[i].pc;
+				cmd.clouds()[i].pc = nullptr; //will be removed after this loop
+				//cmd.clouds()[i].basename += "_FULLY_CROPPED";
+			}
+		}
+
+		//now clean the set of clouds in case some have been 'cropped out'
+		for (auto it = cmd.clouds().begin(); it != cmd.clouds().end(); )
+		{
+			if (it->pc == nullptr)
+			{
+				it = cmd.clouds().erase(it);
+			}
+			else
+			{
+				++it;
+			}
 		}
 	}
 	
@@ -2404,7 +2425,26 @@ bool CommandCrop::process(ccCommandLineInterface &cmd)
 						return cmd.error(errorStr);
 				}
 			}
-			//otherwise an error message has already been issued
+			else
+			{
+				//otherwise an error message has already been issued
+				delete cmd.meshes()[i].mesh;
+				cmd.meshes()[i].mesh = nullptr; //will be removed after this loop
+				//cmd.meshes()[i].basename += "_FULLY_CROPPED";
+			}
+		}
+
+		//now clean the set of meshes in case some have been 'cropped out'
+		for (auto it = cmd.meshes().begin(); it != cmd.meshes().end(); )
+		{
+			if (it->mesh == nullptr)
+			{
+				it = cmd.meshes().erase(it);
+			}
+			else
+			{
+				++it;
+			}
 		}
 	}
 	
@@ -4025,5 +4065,132 @@ CommandSetNoTimestamp::CommandSetNoTimestamp()
 bool CommandSetNoTimestamp::process(ccCommandLineInterface &cmd)
 {
 	cmd.toggleAddTimestamp(false);
+	return true;
+}
+
+CommandMoment::CommandMoment()
+	: ccCommandLineInterface::Command("1st order moment", COMMAND_MOMENT)
+{}
+
+bool CommandMoment::process(ccCommandLineInterface &cmd)
+{
+	if (cmd.arguments().empty())
+		return cmd.error("Missing parameter: kernel size");
+
+	bool paramOk = false;
+	QString kernelStr = cmd.arguments().takeFirst();
+	PointCoordinateType kernelSize = static_cast<PointCoordinateType>(kernelStr.toDouble(&paramOk));
+	if (!paramOk)
+		return cmd.error(QObject::tr("Failed to read a numerical parameter: kernel size. Got '%1' instead.").arg(kernelStr));
+	cmd.print(QObject::tr("\tKernel size: %1").arg(kernelSize));
+
+	if (cmd.clouds().empty())
+		return cmd.error(QObject::tr("No point cloud on which to compute first order moment! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_MOMENT));
+
+	//Call MainWindow generic method
+	ccHObject::Container entities;
+	entities.resize(cmd.clouds().size());
+	for (size_t i = 0; i < cmd.clouds().size(); ++i)
+		entities[i] = cmd.clouds()[i].pc;
+
+	if (ccLibAlgorithms::ComputeGeomCharacteristic(CCLib::GeometricalAnalysisTools::MomentOrder1, 0, kernelSize, entities, cmd.widgetParent()))
+	{
+		//save output
+		if (cmd.autoSaveMode() && !cmd.saveClouds(QObject::tr("MOMENT_KERNEL_%2").arg(kernelSize)))
+			return false;
+	}
+	return true;
+}
+
+CommandFeature::CommandFeature()
+	: ccCommandLineInterface::Command("Feature", COMMAND_FEATURE)
+{}
+
+bool CommandFeature::process(ccCommandLineInterface &cmd)
+{
+	cmd.print("[FEATURE]");
+
+	if (cmd.arguments().empty())
+		return cmd.error(QObject::tr("Missing parameter: feature type after \"-%1\"").arg(COMMAND_FEATURE));
+
+	QString featureTypeStr = cmd.arguments().takeFirst().toUpper();
+	CCLib::Neighbourhood::GeomFeature featureType;
+
+	if (featureTypeStr == "SUM_OF_EIGENVALUES")
+	{
+		featureType = CCLib::Neighbourhood::EigenValuesSum;
+	}
+	else if (featureTypeStr == "OMNIVARIANCE")
+	{
+		featureType = CCLib::Neighbourhood::Omnivariance;
+	}
+	else if (featureTypeStr == "EIGENTROPY")
+	{
+		featureType = CCLib::Neighbourhood::EigenEntropy;
+	}
+	else if (featureTypeStr == "ANISOTROPY")
+	{
+		featureType = CCLib::Neighbourhood::Anisotropy;
+	}
+	else if (featureTypeStr == "PLANARITY")
+	{
+		featureType = CCLib::Neighbourhood::Planarity;
+	}
+	else if (featureTypeStr == "LINEARITY")
+	{
+		featureType = CCLib::Neighbourhood::Linearity;
+	}
+	else if (featureTypeStr == "PCA1")
+	{
+		featureType = CCLib::Neighbourhood::PCA1;
+	}
+	else if (featureTypeStr == "PCA2")
+	{
+		featureType = CCLib::Neighbourhood::PCA2;
+	}
+	else if (featureTypeStr == "SURFACE_VARIATION")
+	{
+		featureType = CCLib::Neighbourhood::SurfaceVariation;
+	}
+	else if (featureTypeStr == "SPHERICITY")
+	{
+		featureType = CCLib::Neighbourhood::Sphericity;
+	}
+	else if (featureTypeStr == "VERTICALITY")
+	{
+		featureType = CCLib::Neighbourhood::Verticality;
+	}
+	else
+	{
+		return cmd.error(QObject::tr("Invalid feature type after \"-%1\". Got '%2' instead of: \
+SUM_OF_EIGENVALUES or OMNIVARIANCE or EIGENTROPY or ANISOTROPY or PLANARITY or LINEARITY or \
+PCA1 or PCA2 or SURFACE_VARIATION or SPHERICITY or VERTICALITY").arg(COMMAND_FEATURE, featureTypeStr));
+	}
+
+	if (cmd.arguments().empty())
+		return cmd.error("Missing parameter: kernel size after feature type");
+
+	bool paramOk = false;
+	QString kernelStr = cmd.arguments().takeFirst();
+	PointCoordinateType kernelSize = static_cast<PointCoordinateType>(kernelStr.toDouble(&paramOk));
+	if (!paramOk)
+		return cmd.error(QObject::tr("Failed to read a numerical parameter: kernel size. Got '%1' instead.").arg(kernelStr));
+	cmd.print(QObject::tr("\tKernel size: %1").arg(kernelSize));
+
+	if (cmd.clouds().empty())
+		return cmd.error(QObject::tr("No point cloud on which to compute feature! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_FEATURE));
+
+	//Call MainWindow generic method
+	ccHObject::Container entities;
+	entities.resize(cmd.clouds().size());
+	for (size_t i = 0; i < cmd.clouds().size(); ++i)
+		entities[i] = cmd.clouds()[i].pc;
+
+	if (ccLibAlgorithms::ComputeGeomCharacteristic(CCLib::GeometricalAnalysisTools::Feature, featureType, kernelSize, entities, cmd.widgetParent()))
+	{
+		//save output
+		if (cmd.autoSaveMode() && !cmd.saveClouds(QObject::tr("%1_FEATURE_KERNEL_%2").arg(featureTypeStr).arg(kernelSize)))
+			return false;
+	}
 	return true;
 }

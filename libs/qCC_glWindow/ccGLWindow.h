@@ -391,7 +391,7 @@ public:
 	//! Sets line width
 	/** \param width lines width (between MIN_LINE_WIDTH_F and MAX_LINE_WIDTH_F)
 	**/
-	virtual void setLineWidth(float width);
+	virtual void setLineWidth(float width, bool silent = false);
 
 	//! Returns current font size
 	virtual int getFontPointSize() const;

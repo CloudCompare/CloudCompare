@@ -47,6 +47,7 @@
 #include <ccProgressDialog.h>
 #include <ccQuadric.h>
 #include <ccSphere.h>
+#include <ccCylinder.h>
 #include <ccSubMesh.h>
 
 //qCC_io
@@ -8865,10 +8866,11 @@ void MainWindow::doActionCloudPrimitiveDist()
 	ccHObject::Container clouds;
 	ccPlane* refPlane = nullptr;
 	ccSphere* refSphere = nullptr;
+	ccCylinder* refCylinder = nullptr;
 	QString primitiveName;
 	for (unsigned i = 0; i < getSelectedEntities().size(); ++i)
 	{
-		if (m_selectedEntities[i]->isA(CC_TYPES::PLANE) || m_selectedEntities[i]->isA(CC_TYPES::SPHERE))
+		if (m_selectedEntities[i]->isA(CC_TYPES::PLANE) || m_selectedEntities[i]->isA(CC_TYPES::SPHERE) || m_selectedEntities[i]->isA(CC_TYPES::CYLINDER))
 		{
 			if (foundPrimitive)
 			{
@@ -8878,6 +8880,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 			foundPrimitive = true;
 			refPlane = ccHObjectCaster::ToPlane(m_selectedEntities[i]);
 			refSphere = ccHObjectCaster::ToSphere(m_selectedEntities[i]);
+			refCylinder = ccHObjectCaster::ToCylinder(m_selectedEntities[i]);
 			primitiveName = m_selectedEntities[i]->getName();
 			
 		}
@@ -8889,7 +8892,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 
 	if (!foundPrimitive)
 	{
-		ccConsole::Error("[Compute Primitive Distances] Select at least one Plane/Sphere Primitive!");
+		ccConsole::Error("[Compute Primitive Distances] Select at least one Plane/Sphere/Cylinder Primitive!");
 		return;
 	}
 	if (clouds.size() <= 0)
@@ -8929,6 +8932,16 @@ void MainWindow::doActionCloudPrimitiveDist()
 			else if (refPlane)
 			{
 				CCLib::DistanceComputationTools::computeCloud2PlaneEquation(compEnt, refPlane->getEquation(), signedDist);
+			}
+			else if (refCylinder)
+			{
+				PointCoordinateType hh = refCylinder->getHeight() / 2;
+				ccGLMatrix trans = refCylinder->getGLTransformationHistory();
+				CCVector3 cylinderP1{ 0, 0, -hh };
+				CCVector3 cylinderP2{ 0, 0, hh };
+				trans.apply(cylinderP1);
+				trans.apply(cylinderP2);				
+				CCLib::DistanceComputationTools::computeCloud2CylinderEquation(compEnt, cylinderP1, cylinderP2, refCylinder->getBottomRadius(), signedDist);
 			}
 
 			QString sfName;

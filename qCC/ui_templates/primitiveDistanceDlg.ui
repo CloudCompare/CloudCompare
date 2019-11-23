@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>381</width>
-    <height>301</height>
+    <width>450</width>
+    <height>312</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,12 +18,12 @@
     <rect>
      <x>30</x>
      <y>20</y>
-     <width>291</width>
-     <height>81</height>
+     <width>351</width>
+     <height>91</height>
     </rect>
    </property>
    <property name="text">
-    <string>[NOTE]: This tool will measure each clouds points to either an infinite plane or sphere, if distance to a bounded plane is required use the cloud/mesh distance tool.</string>
+    <string>[NOTE]: This tool will measure each clouds points to either an infinite plane, sphere, cylinder, or cone, if distance to a bounded plane is required use the cloud/mesh distance tool.</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -79,7 +79,7 @@
      <x>4</x>
      <y>270</y>
      <width>371</width>
-     <height>25</height>
+     <height>30</height>
     </rect>
    </property>
    <layout class="QHBoxLayout">

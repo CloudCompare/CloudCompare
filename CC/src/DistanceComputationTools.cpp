@@ -2150,6 +2150,154 @@ ScalarType DistanceComputationTools::computePoint2PlaneDistance(const CCVector3*
 	return static_cast<ScalarType>((CCVector3::vdot(P->u, planeEquation) - planeEquation[3])/*/CCVector3::vnorm(planeEquation)*/); //norm == 1.0!
 }
 
+// This algorithm is a modification of the distance computation between a point and a cone from 
+// Barbier & Galin's Fast Distance Computation Between a Point and Cylinders, Cones, Line Swept Spheres and Cone-Spheres.
+// The modifications from the paper are to compute the closest distance when the point is interior to the cone.
+// http://liris.cnrs.fr/Documents/Liris-1297.pdf
+int DistanceComputationTools::computeCloud2ConeEquation(GenericIndexedCloudPersist* cloud, const CCVector3& coneP1, const CCVector3& coneP2, const PointCoordinateType coneR1, const PointCoordinateType coneR2, bool signedDistances/*=true*/, bool solutionType/*=false*/, double* rms/*=nullptr*/)
+{
+	if (!cloud)
+		return -1;
+	unsigned count = cloud->size();
+	if (count == 0)
+		return -2;
+	if (!cloud->enableScalarField())
+		return -3;
+	if (coneR1 < coneR2)
+		return -4;
+	double dSumSq = 0.0;
+
+	CCVector3 coneAxis = coneP2 - coneP1;
+	double axisLength = coneAxis.normd();
+	coneAxis.normalize();
+	double delta = static_cast<double>(coneR2) - coneR1;
+	double rr1 = static_cast<double>(coneR1) * coneR1;
+	double rr2 = static_cast<double>(coneR2) * coneR2;
+	double coneLength = sqrt((axisLength * axisLength) + (delta * delta));
+	CCVector3d side{ axisLength, delta, 0.0};
+	side /= coneLength;
+	
+	for (unsigned i = 0; i < count; ++i)
+	{
+		const CCVector3* P = cloud->getPoint(i);
+		CCVector3 n = *P - coneP1;
+		double x = n.dot(coneAxis);
+		double xx = x * x;
+		double yy = (n.norm2d()) - xx;
+		double y = 0;
+		double d = 0;
+		double rx = 0; 
+		double ry = 0;
+		if (yy < 0) yy = 0;
+		if(x<=0) //Below the bottom point
+		{
+			if (yy < rr1)
+			{
+				if (!solutionType)
+					d = -x; //Below the bottom point within larger disk radius
+				else
+					d = 1; //Works
+			}
+			else 
+			{
+				if (!solutionType)
+				{
+					y = sqrt(yy) - coneR1;
+					d = sqrt((y * y) + xx); //Below the bottom point not within larger disk radius
+				}
+				else
+					d = 2; //Works
+			}
+
+		}
+		else //Above the bottom point
+		{
+			if (yy < rr2) // within smaller disk radius
+			{
+				if (x > axisLength) //outside cone within smaller disk
+				{
+					if (!solutionType)
+						d = x - axisLength; // Above the top point within top disk radius
+					else
+						d = 3;
+				}
+				else //inside cone within smaller disk
+				{
+					if (!solutionType) 
+					{
+						y = sqrt(yy) - coneR1;
+						ry = y * side[0] - x * side[1]; //rotated y value (distance from the coneside axis)
+						d = std::min(axisLength - x, x); //determine whether closer to either radii 
+						d = std::min(d, abs(ry)); //or to side
+						d = -d; //negative inside
+					}
+					else
+					{
+						d = 4;
+					}
+				}
+			}
+			else // Outside smaller disk radius
+			{
+				y = sqrt(yy)-coneR1;
+				{
+					rx = y * side[1] + x * side[0]; //rotated x value (distance along the coneside axis)
+					if (rx < 0)
+					{
+						if (!solutionType)
+							d = sqrt(y * y + xx);
+						else
+							d = 7; // point projects onto the large cap
+					}
+					else
+					{
+						ry = y * side[0] - x * side[1]; //rotated y value (distance from the coneside axis)
+						if (rx > coneLength)
+						{
+							if (!solutionType)
+							{
+								rx -= coneLength;
+								d = sqrt(ry * ry + rx * rx);
+							}
+							else
+								d = 8; // point projects onto the small cap
+						}
+						else
+						{
+							if (!solutionType)
+							{
+								d = ry; // point projects onto the side of cone
+								if (ry < 0) 
+								{//point is interior to the cone
+									d = std::min(axisLength - x, x); //determine whether closer to either radii 
+									d = std::min(d, abs(ry)); //or to side
+									d = -d; //negative inside
+								}
+							}
+							else
+								d = 9;
+						}
+					}
+
+				}
+			}
+		}
+		if (signedDistances)
+		{
+			cloud->setPointScalarValue(i, static_cast<ScalarType>(d));
+		}
+		else
+		{
+			cloud->setPointScalarValue(i, static_cast<ScalarType>(std::abs(d)));
+		}
+		dSumSq += d * d;
+	}
+	if (rms)
+	{
+		*rms = sqrt(dSumSq / count);
+	}
+	return count;
+}
 
 // This algorithm is a modification of the distance computation between a point and a cylinder from 
 // Barbier & Galin's Fast Distance Computation Between a Point and Cylinders, Cones, Line Swept Spheres and Cone-Spheres.

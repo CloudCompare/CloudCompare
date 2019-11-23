@@ -8867,10 +8867,11 @@ void MainWindow::doActionCloudPrimitiveDist()
 	ccPlane* refPlane = nullptr;
 	ccSphere* refSphere = nullptr;
 	ccCylinder* refCylinder = nullptr;
+	ccCone* refCone = nullptr;
 	QString primitiveName;
 	for (unsigned i = 0; i < getSelectedEntities().size(); ++i)
 	{
-		if (m_selectedEntities[i]->isA(CC_TYPES::PLANE) || m_selectedEntities[i]->isA(CC_TYPES::SPHERE) || m_selectedEntities[i]->isA(CC_TYPES::CYLINDER))
+		if (m_selectedEntities[i]->isA(CC_TYPES::PLANE) || m_selectedEntities[i]->isA(CC_TYPES::SPHERE) || m_selectedEntities[i]->isA(CC_TYPES::CYLINDER) || m_selectedEntities[i]->isA(CC_TYPES::CONE))
 		{
 			if (foundPrimitive)
 			{
@@ -8881,6 +8882,16 @@ void MainWindow::doActionCloudPrimitiveDist()
 			refPlane = ccHObjectCaster::ToPlane(m_selectedEntities[i]);
 			refSphere = ccHObjectCaster::ToSphere(m_selectedEntities[i]);
 			refCylinder = ccHObjectCaster::ToCylinder(m_selectedEntities[i]);
+			if (!refCylinder)
+			{
+				refCone = ccHObjectCaster::ToCone(m_selectedEntities[i]);
+				if (refCone->isSnoutMode()) // Snout mode cone not supported
+				{
+					ccConsole::Error("[Compute Primitive Distances] Snout mode Cone Primitives are not supported");
+					refCone = nullptr;
+					return;
+				}
+			}
 			primitiveName = m_selectedEntities[i]->getName();
 			
 		}
@@ -8892,7 +8903,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 
 	if (!foundPrimitive)
 	{
-		ccConsole::Error("[Compute Primitive Distances] Select at least one Plane/Sphere/Cylinder Primitive!");
+		ccConsole::Error("[Compute Primitive Distances] Select at least one Plane/Sphere/Cylinder/Cone Primitive!");
 		return;
 	}
 	if (clouds.size() <= 0)
@@ -8934,14 +8945,12 @@ void MainWindow::doActionCloudPrimitiveDist()
 				CCLib::DistanceComputationTools::computeCloud2PlaneEquation(compEnt, refPlane->getEquation(), signedDist);
 			}
 			else if (refCylinder)
+			{	
+				CCLib::DistanceComputationTools::computeCloud2CylinderEquation(compEnt, refCylinder->getBottomCenter(), refCylinder->getTopCenter(), refCylinder->getBottomRadius(), signedDist);
+			}
+			else if (refCone)
 			{
-				PointCoordinateType hh = refCylinder->getHeight() / 2;
-				ccGLMatrix trans = refCylinder->getGLTransformationHistory();
-				CCVector3 cylinderP1{ 0, 0, -hh };
-				CCVector3 cylinderP2{ 0, 0, hh };
-				trans.apply(cylinderP1);
-				trans.apply(cylinderP2);				
-				CCLib::DistanceComputationTools::computeCloud2CylinderEquation(compEnt, cylinderP1, cylinderP2, refCylinder->getBottomRadius(), signedDist);
+				CCLib::DistanceComputationTools::computeCloud2ConeEquation(compEnt, refCone->getLargeCenter(), refCone->getSmallCenter(), refCone->getLargeRadius(), refCone->getSmallRadius(), signedDist);
 			}
 
 			QString sfName;

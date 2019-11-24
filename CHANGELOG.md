@@ -18,6 +18,8 @@ v2.11 (Anoia) - (in development)
 	- [Used to calculate distance to primitive shape (supports spheres, planes, cylinders and cones) rather than the mesh of that shape (more accurate results for spheres)
 		for planes this works with the planes equation rather than the mesh so it works as if the plane is infinite.
 		for cones this will not work with Snout mode cones.]
+  - Command line:
+    - NORMALS_TO_DIP: converts the loaded cloud normals to dip and dip direction (scalar fields)
 
 - Improvements
   - Align (Point-pair based registration) tool
@@ -48,7 +50,9 @@ v2.11 (Anoia) - (in development)
 		- (the tool was already accessible in V2.10, but in a very limited way)
 	- The CROP command will now remove the input cloud if it's totally 'cropped out' (instead of leaving the full original cloud loaded)
 	- the 'FWF_O' command (to load LAS files with associated waveform data) nows properly supports the '-GLOBAL_SHIFT' option
-	- no more popup will appear when loading a raster file via the command line mode in SILENT mode (raster is never loaded as a textured quad, and invalid points are always ignored and not loaded)
+	- No more popup will appear when loading a raster file via the command line mode in SILENT mode (raster is never loaded as a textured quad, and invalid points are always ignored and not loaded)
+	- One can now use the 'auto' value for the radius value input after -OCTREE_NORMALS
+	    (to let CC automatically guess the normal computation radius)
   - Raster import:
     - new "Apply all" option when CC asks whether invalid pixels of a raster should be ignored or not
   - Point picking:

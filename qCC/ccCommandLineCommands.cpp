@@ -32,6 +32,9 @@
 //Qt
 #include "ccCommandLineCommands.h"
 
+//Local
+#include "ccEntityAction.h"
+
 #include <QDateTime>
 
 //commands
@@ -103,6 +106,7 @@ constexpr char COMMAND_ICP_ROT[]						= "ROT";
 constexpr char COMMAND_PLY_EXPORT_FORMAT[]				= "PLY_EXPORT_FMT";
 constexpr char COMMAND_COMPUTE_GRIDDED_NORMALS[]		= "COMPUTE_NORMALS";
 constexpr char COMMAND_COMPUTE_OCTREE_NORMALS[]			= "OCTREE_NORMALS";
+constexpr char COMMAND_CONVERT_NORMALS_TO_DIP[]			= "NORMALS_TO_DIP";
 constexpr char COMMAND_CLEAR_NORMALS[]					= "CLEAR_NORMALS";
 constexpr char COMMAND_MESH_VOLUME[]                    = "MESH_VOLUME";
 constexpr char COMMAND_VOLUME_TO_FILE[]					= "TO_FILE";
@@ -481,7 +485,7 @@ bool CommandOctreeNormal::process(ccCommandLineInterface &cmd)
 	cmd.print("[OCTREE NORMALS CALCULATION]");
 	if (cmd.clouds().empty())
 	{
-		return cmd.error(QObject::tr("No point cloud to normal calculation (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_COMPUTE_OCTREE_NORMALS));
+		return cmd.error(QObject::tr("No point cloud to compute normals (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_COMPUTE_OCTREE_NORMALS));
 	}
 	
 	if (cmd.arguments().empty())
@@ -489,15 +493,19 @@ bool CommandOctreeNormal::process(ccCommandLineInterface &cmd)
 		return cmd.error(QObject::tr("Missing parameter: radius after \"-%1\"").arg(COMMAND_COMPUTE_OCTREE_NORMALS));
 	}
 	
-	bool ok;
-	float radius = cmd.arguments().takeFirst().toFloat(&ok);
-	if (!ok)
+	float radius = std::numeric_limits<float>::quiet_NaN(); //if this stays 
+	QString radiusArg = cmd.arguments().takeFirst();
+	if (radiusArg.toUpper() != "AUTO")
 	{
-		return cmd.error(QObject::tr("Invalid radius"));
+		bool ok = false;
+		radius = radiusArg.toFloat(&ok);
+		if (!ok)
+		{
+			return cmd.error(QObject::tr("Invalid radius"));
+		}
 	}
-	
-	cmd.print(QObject::tr("\tRadius: %1").arg(radius));
-	
+	cmd.print(QObject::tr("\tRadius: %1").arg(radiusArg));
+
 	CC_LOCAL_MODEL_TYPES model = QUADRIC;
 	ccNormalVectors::Orientation  orientation = ccNormalVectors::Orientation::UNDEFINED;
 	
@@ -569,8 +577,35 @@ bool CommandOctreeNormal::process(ccCommandLineInterface &cmd)
 	for (const CLCloudDesc& thisCloudDesc : cmd.clouds())
 	{
 		ccPointCloud* cloud = thisCloudDesc.pc;
-		cmd.print("computeNormalsWithOctree started...\n");
-		bool success = cloud->computeNormalsWithOctree(model, orientation, radius, nullptr);
+
+		QScopedPointer<ccProgressDialog> progressDialog(nullptr);
+		if (!cmd.silentMode())
+		{
+			progressDialog.reset(new ccProgressDialog(true, cmd.widgetParent()));
+			progressDialog->setAutoClose(false);
+		}
+
+		if (!cloud->getOctree())
+		{
+			if (!cloud->computeOctree(progressDialog.data()))
+			{
+				return cmd.error(QString("Failed to compute octree for cloud '%1'").arg(cloud->getName()));
+			}
+		}
+
+		float thisCloudRadius = radius;
+		if (std::isnan(thisCloudRadius))
+		{
+			thisCloudRadius = ccNormalVectors::GuessBestRadius(cloud, cloud->getOctree().data());
+			if (thisCloudRadius == 0)
+			{
+				return cmd.error(QString("Failed to determine best normal radius for cloud '%1'").arg(cloud->getName()));
+			}
+			cmd.print(QObject::tr("\tCloud %1 radius = %2").arg(cloud->getName()).arg(thisCloudRadius));
+		}
+
+		cmd.print("computeNormalsWithOctree started...");
+		bool success = cloud->computeNormalsWithOctree(model, orientation, thisCloudRadius, progressDialog.data());
 		if(success)
 		{
 			cmd.print("computeNormalsWithOctree success");
@@ -593,6 +628,48 @@ bool CommandOctreeNormal::process(ccCommandLineInterface &cmd)
 		}
 	}
 	
+	return true;
+}
+
+CommandConvertNormalsToDipAndDipDir::CommandConvertNormalsToDipAndDipDir()
+	: ccCommandLineInterface::Command("Convert normals to dip and dip. dir.", COMMAND_CONVERT_NORMALS_TO_DIP)
+{}
+
+bool CommandConvertNormalsToDipAndDipDir::process(ccCommandLineInterface &cmd)
+{
+	cmd.print("[CONVERT NORMALS TO DIP/DIP DIR]");
+	if (cmd.clouds().empty())
+	{
+		return cmd.error(QObject::tr("No input point cloud (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_CONVERT_NORMALS_TO_DIP));
+	}
+
+	for (CLCloudDesc& thisCloudDesc : cmd.clouds())
+	{
+		ccPointCloud* cloud = thisCloudDesc.pc;
+
+		if (!cloud->hasNormals())
+		{
+			cmd.warning(QString("Cloud %1 has no normals").arg(cloud->getName()));
+			continue;
+		}
+
+		ccHObject::Container container;
+		container.push_back(cloud);
+		if (!ccEntityAction::convertNormalsTo(container, ccEntityAction::NORMAL_CONVERSION_DEST::DIP_DIR_SFS))
+		{
+			return cmd.error("Failed to convert normals to dip and dip direction");
+		}
+
+		if (cmd.autoSaveMode())
+		{
+			QString errorStr = cmd.exportEntity(thisCloudDesc, "_DIP_AND_DIP_DIR");
+			if (!errorStr.isEmpty())
+			{
+				return cmd.error(errorStr);
+			}
+		}
+	}
+
 	return true;
 }
 
@@ -1431,6 +1508,18 @@ bool CommandSFConvertToRGB::process(ccCommandLineInterface &cmd)
 CommandFilterBySFValue::CommandFilterBySFValue()
 	: ccCommandLineInterface::Command("Filter by SF value", COMMAND_FILTER_SF_BY_VALUE)
 {}
+
+//special SF values that can be used instead of explicit ones
+enum USE_SPECIAL_SF_VALUE
+{
+	USE_NONE,
+	USE_MIN,
+	USE_DISP_MIN,
+	USE_SAT_MIN,
+	USE_MAX,
+	USE_DISP_MAX,
+	USE_SAT_MAX
+};
 
 bool CommandFilterBySFValue::process(ccCommandLineInterface &cmd)
 {

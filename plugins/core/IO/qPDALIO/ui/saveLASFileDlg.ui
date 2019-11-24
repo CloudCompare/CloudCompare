@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>395</width>
-    <height>452</height>
+    <width>454</width>
+    <height>500</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -43,7 +43,7 @@
      <item>
       <widget class="QRadioButton" name="bestRadioButton">
        <property name="text">
-        <string>Highest resolution</string>
+        <string>Optimal resolution</string>
        </property>
       </widget>
      </item>
@@ -70,7 +70,7 @@
     </layout>
    </item>
    <item>
-    <widget class="QLabel" name="label_2">
+    <widget class="QLabel" name="labelOptimal">
      <property name="font">
       <font>
        <italic>true</italic>
@@ -80,7 +80,7 @@
       <string>Ensures optimal accuracy (up to 10^-7 absolute)</string>
      </property>
      <property name="text">
-      <string>will decrease LAZ compression efficiency</string>
+      <string>may decrease LAZ compression efficiency  </string>
      </property>
      <property name="alignment">
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -125,15 +125,15 @@
     </layout>
    </item>
    <item>
-    <widget class="QLabel" name="label_4">
+    <widget class="QLabel" name="labelOriginal">
      <property name="font">
       <font>
        <italic>true</italic>
       </font>
      </property>
      <property name="text">
-      <string>might not preserve data accuracy
-(especially if you have transformed the original data)</string>
+      <string>might not preserve data accuracy  
+(especially if you have transformed the original data)  </string>
      </property>
      <property name="alignment">
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -187,14 +187,14 @@
     </layout>
    </item>
    <item>
-    <widget class="QLabel" name="label_3">
+    <widget class="QLabel" name="labelCustom">
      <property name="font">
       <font>
        <italic>true</italic>
       </font>
      </property>
      <property name="text">
-      <string>bigger scale = best LAZ compression = lower resolution(*)</string>
+      <string>bigger scale = best LAZ compression = lower resolution(*)  </string>
      </property>
      <property name="alignment">
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -212,7 +212,7 @@
       <string notr="true">color: red;</string>
      </property>
      <property name="text">
-      <string>(*) careful, if chosen too low coordinates will loose accuracy</string>
+      <string>(*) potential accuracy loss if chosen too low  </string>
      </property>
      <property name="alignment">
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

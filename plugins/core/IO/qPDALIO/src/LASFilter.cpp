@@ -304,21 +304,28 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	CCVector3d bbMin, bbMax;
 	if (!theCloud->getGlobalBB(bbMin, bbMax))
 	{
-		//return CC_FERR_NO_SAVE;
+		if (theCloud->size() != 0)
+		{
+			//it can only be acceptable if the cloud is empty
+			//(yes, some people expect to save empty clouds!)
+			return CC_FERR_NO_SAVE;
+		}
+		else
+		{
+			bbMax = bbMin = CCVector3d(0.0, 0.0, 0.0);
+		}
 	}
-
-	CCVector3d diag = bbMax - bbMin;
 
 	//let the user choose between the original scale and the 'optimal' one (for accuracy, not for compression ;)
 	bool hasScaleMetaData = false;
-	CCVector3d lasScale(0, 0, 0);
-	lasScale.x = theCloud->getMetaData(LAS_SCALE_X_META_DATA).toDouble(&hasScaleMetaData);
+	CCVector3d originalLasScale(0, 0, 0);
+	originalLasScale.x = theCloud->getMetaData(LAS_SCALE_X_META_DATA).toDouble(&hasScaleMetaData);
 	if (hasScaleMetaData)
 	{
-		lasScale.y = theCloud->getMetaData(LAS_SCALE_Y_META_DATA).toDouble(&hasScaleMetaData);
+		originalLasScale.y = theCloud->getMetaData(LAS_SCALE_Y_META_DATA).toDouble(&hasScaleMetaData);
 		if (hasScaleMetaData)
 		{
-			lasScale.z = theCloud->getMetaData(LAS_SCALE_Z_META_DATA).toDouble(&hasScaleMetaData);
+			originalLasScale.z = theCloud->getMetaData(LAS_SCALE_Z_META_DATA).toDouble(&hasScaleMetaData);
 		}
 	}
 
@@ -334,24 +341,69 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		}
 	}
 
-	//optimal scale (for accuracy) --> 1e-9 because the maximum integer is roughly +/-2e+9
+	//Set offset & scale, as points will be stored as boost::int32_t values (between -2147483648 and 2147483647)
+	//int_value = (double_value-offset)/scale
+	if (hasOffsetMetaData & ccGlobalShiftManager::NeedShift(bbMax - lasOffset))
+	{
+		//the previous offset can't be used
+		hasOffsetMetaData = false;
+		lasOffset = CCVector3d(0, 0, 0);
+	}
+	if (!hasOffsetMetaData && ccGlobalShiftManager::NeedShift(bbMax))
+	{
+		//we have no choice, we'll use the min bounding box
+		lasOffset = bbMin;
+	}
+
+	//optimal scale (for accuracy) --> 1e-8 because the maximum integer is roughly +/-2e+9
+	CCVector3d diag = bbMax - lasOffset;
 	CCVector3d optimalScale(1.0e-9 * std::max<double>(diag.x, ZERO_TOLERANCE),
 	                        1.0e-9 * std::max<double>(diag.y, ZERO_TOLERANCE),
 	                        1.0e-9 * std::max<double>(diag.z, ZERO_TOLERANCE));
+
+	bool canUseOriginalScale = false;
+	if (hasScaleMetaData)
+	{
+		//we may not be able to use the previous LAS scale
+		canUseOriginalScale = (		originalLasScale.x >= optimalScale.x
+								&&	originalLasScale.y >= optimalScale.y
+								&&	originalLasScale.z >= optimalScale.z );
+	}
+
+	//uniformize the value to make it less disturbing to some lastools users ;)
+	{
+		double maxScale = std::max(optimalScale.x, std::max(optimalScale.y, optimalScale.z));
+		double n = ceil(log10(maxScale)); //ceil because n should be negative
+		maxScale = pow(10.0, n);
+		optimalScale.x = optimalScale.y = optimalScale.z = maxScale;
+	}
+
+	CCVector3d lasScale = (canUseOriginalScale ? originalLasScale : optimalScale);
 
 	if (parameters.alwaysDisplaySaveDialog)
 	{
 		if (!s_saveDlg)
 			s_saveDlg = QSharedPointer<LASSaveDlg>(new LASSaveDlg(nullptr));
+		
 		s_saveDlg->bestAccuracyLabel->setText(QString("(%1, %2, %3)").arg(optimalScale.x).arg(optimalScale.y).arg(optimalScale.z));
 
 		if (hasScaleMetaData)
 		{
-			s_saveDlg->origAccuracyLabel->setText(QString("(%1, %2, %3)").arg(lasScale.x).arg(lasScale.y).arg(lasScale.z));
+			s_saveDlg->origAccuracyLabel->setText(QString("(%1, %2, %3)").arg(originalLasScale.x).arg(originalLasScale.y).arg(originalLasScale.z));
+
+			if (!canUseOriginalScale)
+			{
+				s_saveDlg->labelOriginal->setText(QObject::tr("Original scale is too small for this cloud  ")); //add two whitespaces to avoid issues with italic characters justification
+				s_saveDlg->labelOriginal->setStyleSheet("color: red;");
+			}
 		}
 		else
 		{
 			s_saveDlg->origAccuracyLabel->setText("none");
+		}
+
+		if (!hasScaleMetaData || !canUseOriginalScale)
+		{
 			if (s_saveDlg->origRadioButton->isChecked())
 				s_saveDlg->bestRadioButton->setChecked(true);
 			s_saveDlg->origRadioButton->setEnabled(false);
@@ -370,15 +422,15 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		{
 			lasScale = optimalScale;
 		}
+		else if (s_saveDlg->origRadioButton->isChecked())
+		{
+			lasScale = originalLasScale;
+		}
 		else if (s_saveDlg->customRadioButton->isChecked())
 		{
 			double s = s_saveDlg->customScaleDoubleSpinBox->value();
 			lasScale = CCVector3d(s, s, s);
 		}
-	}
-	else if (!hasScaleMetaData)
-	{
-		lasScale = optimalScale;
 	}
 
 	std::vector<ExtraLasField::Shared> extraFieldsToSave;
@@ -545,19 +597,6 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		}
 		writerOptions.add("dataformat_id", minPointFormat);
 
-		//Set offset & scale, as points will be stored as boost::int32_t values (between 0 and 4294967296)
-		//int_value = (double_value-offset)/scale
-		if (hasOffsetMetaData & ccGlobalShiftManager::NeedShift(bbMax - lasOffset))
-		{
-			//the previous offset can't be used
-			hasOffsetMetaData = false;
-			lasOffset = CCVector3d(0, 0, 0);
-		}
-		if (!hasOffsetMetaData && ccGlobalShiftManager::NeedShift(bbMax))
-		{
-			//we have no choice, we'll use the min bounding box
-			lasOffset = bbMin;
-		}
 		writerOptions.add("offset_x", lasOffset.x);
 		writerOptions.add("offset_y", lasOffset.y);
 		writerOptions.add("offset_z", lasOffset.z);

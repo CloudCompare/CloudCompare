@@ -80,8 +80,10 @@ v2.11 (Anoia) - (in development)
   - LAS files:
 	- the standard LAS Filter now handles the OVERLAP classification bit (for point format >= 6)
 	- improved/fixed management of classification and classification flags
-	- LAS offset (chosen at saving time) should be a little bit smarter (CC will try to keep the previous one,
-		or use the bounding-box min corner ONLY if the coordinates are too large)
+	- LAS offset (chosen at saving time) should be a little bit smarter:
+		- CC will try to keep the previous one, or use the bounding-box min corner ONLY if the coordinates are too large
+		- CC won't use the previous scale if it is too small for the current cloud
+		- the 'optimal' scale is simpler (round values + the same for all dimensions)
   - ASCII files:
 	- CloudCompare can now load ASCII files with mixed whitespaces (spaces / tabs)
 	- the ASCII load dialog option has now an option to load numerical values with a comma as digit separator

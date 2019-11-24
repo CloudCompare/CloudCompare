@@ -130,6 +130,8 @@ constexpr char OPTION_ON[]								= "ON";
 constexpr char OPTION_OFF[]								= "OFF";
 constexpr char OPTION_LAST[]							= "LAST";
 constexpr char OPTION_FILE_NAMES[]						= "FILE";
+constexpr char OPTION_ORIENT[]							= "ORIENT";
+constexpr char OPTION_MODEL[]							= "MODEL";
 
 CommandChangeOutputFormat::CommandChangeOutputFormat(const QString& name, const QString& keyword)
     : ccCommandLineInterface::Command(name, keyword)
@@ -511,8 +513,8 @@ bool CommandOctreeNormal::process(ccCommandLineInterface &cmd)
 	
 	while (!cmd.arguments().isEmpty())
 	{
-		auto arg = cmd.arguments().front().toUpper();
-		if (arg.left(6) == "ORIENT")
+		QString argument = cmd.arguments().front().toUpper();
+		if (ccCommandLineInterface::IsCommand(argument, OPTION_ORIENT))
 		{
 			cmd.arguments().takeFirst();
 			if (!cmd.arguments().isEmpty())
@@ -548,7 +550,7 @@ bool CommandOctreeNormal::process(ccCommandLineInterface &cmd)
 				return cmd.error(QObject::tr("Missing orientation"));
 			}
 		}
-		else if (arg == "MODEL")
+		else if (ccCommandLineInterface::IsCommand(argument, OPTION_MODEL))
 		{
 			cmd.arguments().takeFirst();
 			if (!cmd.arguments().isEmpty())

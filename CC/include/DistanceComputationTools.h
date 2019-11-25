@@ -263,15 +263,40 @@ public: //distance to simple entities (triangles, planes, etc.)
 	**/
 	static ScalarType computePoint2PlaneDistance(const CCVector3* P, const PointCoordinateType* planeEquation);
 
-	//! Computes the distance between each point in a cloud and a sphere
+	//! Computes the distance between each point in a cloud and a cone
 	/** \param cloud a 3D point cloud
-		\param SphereCenter sphere 3d center point
-		\param SphereRadius sphere radius
+		\param coneP1 center point associated with the larger radii
+		\param coneP2 center point associated with the smaller radii
+		\param coneR1 cone radius at coneP1 (larger)
+		\param coneR2 cone radius at coneP2 (smaller)
 		\param signedDist whether to compute the signed or positive (absolute) distance (optional)
-		\param[out] rms will be set with the Root Mean Square (RMS) distance between a cloud and a plane (optional)
+		\param solutionType if true the scalar field will be set to which solution was selected 1-4 (optional)
+		\param[out] rms will be set with the Root Mean Square (RMS) distance between a cloud and a cylinder (optional)
 		\return negative error code or a positive value in case of success
 	**/
-	static int computeCloud2SphereEquation(GenericIndexedCloudPersist *cloud, const CCVector3& SphereCenter, const PointCoordinateType SphereRadius, bool signedDistances = true, double* rms = nullptr);
+	static int computeCloud2ConeEquation(GenericIndexedCloudPersist* cloud, const CCVector3& coneP1, const CCVector3& coneP2, const PointCoordinateType coneR1, const PointCoordinateType coneR2, bool signedDistances = true, bool solutionType = false, double* rms = nullptr);
+
+	//! Computes the distance between each point in a cloud and a cylinder
+	/** \param cloud a 3D point cloud
+		\param cylinderP1 center bottom point
+		\param cylinderP2 center top point
+		\param cylinderRadius cylinder radius
+		\param signedDist whether to compute the signed or positive (absolute) distance (optional)
+		\param solutionType if true the scalar field will be set to which solution was selected 1-4 (optional)
+		\param[out] rms will be set with the Root Mean Square (RMS) distance between a cloud and a cylinder (optional)
+		\return negative error code or a positive value in case of success
+	**/
+	static int computeCloud2CylinderEquation(GenericIndexedCloudPersist* cloud, const CCVector3& cylinderP1, const CCVector3& cylinderP2, const PointCoordinateType cylinderRadius, bool signedDistances = true, bool solutionType = false, double* rms = nullptr);
+
+	//! Computes the distance between each point in a cloud and a sphere
+	/** \param cloud a 3D point cloud
+		\param sphereCenter sphere 3d center point
+		\param sphereRadius sphere radius
+		\param signedDist whether to compute the signed or positive (absolute) distance (optional)
+		\param[out] rms will be set with the Root Mean Square (RMS) distance between a cloud and a sphere (optional)
+		\return negative error code or a positive value in case of success
+	**/
+	static int computeCloud2SphereEquation(GenericIndexedCloudPersist *cloud, const CCVector3& sphereCenter, const PointCoordinateType sphereRadius, bool signedDistances = true, double* rms = nullptr);
 
 	//! Computes the distance between each point in a cloud and a plane
 	/** \param cloud a 3D point cloud

@@ -1421,7 +1421,7 @@ namespace ccEntityAction
 						}
 					}
 
-					//does the cloud has a former radius value saved as meta-data?
+					//does the cloud have a former radius value saved as meta-data?
 					if (cloud->hasMetaData(s_NormalScaleKey))
 					{
 						bool ok = false;
@@ -1752,7 +1752,7 @@ namespace ccEntityAction
 		return true;
 	}
 	
-	bool	orientNormalsMST(const ccHObject::Container &selectedEntities, QWidget *parent)
+	bool	orientNormalsMST(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr)
 	{
 		if (selectedEntities.empty())
 		{
@@ -1816,8 +1816,9 @@ namespace ccEntityAction
 	
 	bool	convertNormalsTo(const ccHObject::Container &selectedEntities, NORMAL_CONVERSION_DEST dest)
 	{
-		unsigned errorCount = 0;
-		
+		size_t errorCount = 0;
+		size_t successCount = 0;
+
 		size_t selNum = selectedEntities.size();
 		for (size_t i = 0; i < selNum; ++i)
 		{
@@ -1890,6 +1891,7 @@ namespace ccEntityAction
 								dipDirSF->setColorScale(dipDirScale);
 								ccCloud->setCurrentDisplayedScalarField(dipDirSFIndex); //dip dir. seems more interesting by default
 								ccCloud->showSF(true);
+								++successCount;
 							}
 							else
 							{
@@ -1925,7 +1927,7 @@ namespace ccEntityAction
 			ccConsole::Error("Error(s) occurred! (see console)");
 		}
 		
-		return true;
+		return (successCount != 0);
 	}
 	
 	//////////

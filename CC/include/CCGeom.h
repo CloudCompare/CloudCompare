@@ -236,6 +236,7 @@ public:
 	static inline void vmultiply(const Type p[], Type s, Type r[]) { r[0] = p[0] * s; r[1] = p[1] * s; r[2] = p[2] * s; }
 	static inline void vmultiply(Type p[], Type s) { p[0] *= s; p[1] *= s; p[2] *= s; }
 	static inline Type vdot(const Type p[], const Type q[]) { return (p[0] * q[0]) + (p[1] * q[1]) + (p[2] * q[2]); }
+	static inline double vdotd(const Type p[], const Type q[]) { return (static_cast<double>(p[0])* q[0]) + (static_cast<double>(p[1])* q[1]) + (static_cast<double>(p[2])* q[2]); }
 	static inline void vcross(const Type p[], const Type q[], Type r[]) { r[0] = (p[1] * q[2]) - (p[2] * q[1]); r[1] = (p[2] * q[0]) - (p[0] * q[2]); r[2] = (p[0] * q[1]) - (p[1] * q[0]); }
 	static inline void vcopy(const Type p[], Type q[]) { q[0] = p[0]; q[1] = p[1]; q[2] = p[2]; }
 	static inline void vset(Type p[], Type s) { p[0] = p[1] = p[2] = s; }

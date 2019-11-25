@@ -48,6 +48,13 @@ struct CommandOctreeNormal : public ccCommandLineInterface::Command
 	bool process(ccCommandLineInterface& cmd) override;
 };
 
+struct CommandConvertNormalsToDipAndDipDir : public ccCommandLineInterface::Command
+{
+	CommandConvertNormalsToDipAndDipDir();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
 struct CommandSubsample : public ccCommandLineInterface::Command
 {
 	CommandSubsample();
@@ -128,18 +135,6 @@ struct CommandSFConvertToRGB : public ccCommandLineInterface::Command
 struct CommandFilterBySFValue : public ccCommandLineInterface::Command
 {
 	CommandFilterBySFValue();
-
-	//special SF values that can be used instead of explicit ones
-	enum USE_SPECIAL_SF_VALUE
-	{
-		USE_NONE,
-		USE_MIN,
-		USE_DISP_MIN,
-		USE_SAT_MIN,
-		USE_MAX,
-		USE_DISP_MAX,
-		USE_SAT_MAX
-	};
 
 	bool process(ccCommandLineInterface& cmd) override;
 };

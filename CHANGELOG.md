@@ -15,8 +15,19 @@ v2.11 (Anoia) - (in development)
   - Edit > Plane > Compare: to compare the two selected planes (angle and relative distances)
   - Edit > Mesh > Flip triangles: to flip the triangles (vertices) in case they are defined in the wrong order
   - Tools > Distances > Cloud/Primitive Dist
-	- [Used to calculate distance to primitive shape (supports sphere and planes) rather than the mesh of that shape (more accurate results for spheres)
-		for planes this works with the planes equation rather than the mesh so it works as if the plane is infinite.]
+	- [Used to calculate distance to primitive shape (supports spheres, planes, cylinders and cones) rather than the mesh of that shape (more accurate results for spheres)
+		for planes this works with the planes equation rather than the mesh so it works as if the plane is infinite.
+		for cones this will not work with Snout mode cones.]
+  - Command line:
+	- The 1st Order Moment tool (Tools>Other>Compute geometric features) can now be accessed via 
+		the command line mode with option -MOMENT {kernel size}
+	    - Computes 1st order moment on all opened clouds and auto saved by default.
+	- The Feature tools (Tools>Other>Compute geometric features) can now be accessed via
+		the command line mode with option -FEATURE {type} {kernel size}
+		- type can be the following: SUM_OF_EIGENVALUES, OMNIVARIANCE, EIGENTROPY, ANISOTROPY, PLANARITY, 
+			LINEARITY, PCA1, PCA2, SURFACE_VARIATION, SPHERICITY, or VERTICALITY.
+		- Computes 1st order moment on all opened clouds and auto saved by default.
+    - NORMALS_TO_DIP: converts the loaded cloud normals to dip and dip direction (scalar fields)
 
 - Improvements
   - Align (Point-pair based registration) tool
@@ -29,14 +40,6 @@ v2.11 (Anoia) - (in development)
 	- all parameters should now be properly remembered from one call to the other (during the same session)
 	- the current box/slice position can now be exported (resp. imported) to (resp. from) the clipboard via the 'Advanced' menu
   - Command line tool:
-	- The 1st Order Moment tool (Tools>Other>Compute geometric features) can now be accessed via 
-		the command line mode with option -MOMENT {kernel size}
-	    - Computes 1st order moment on all opened clouds and auto saved by default.
-	- The Feature tools (Tools>Other>Compute geometric features) can now be accessed via
-		the command line mode with option -FEATURE {type} {kernel size}
-		- type can be the following: SUM_OF_EIGENVALUES, OMNIVARIANCE, EIGENTROPY, ANISOTROPY, PLANARITY, 
-			LINEARITY, PCA1, PCA2, SURFACE_VARIATION, SPHERICITY, or VERTICALITY.
-		- Computes 1st order moment on all opened clouds and auto saved by default.
     - The C2M_DIST command (Cloud-to-Mesh distances) can now be called with 2 meshes as input.
         In this case the first mesh vertices are used as compared cloud.
 	- New suboption for the -O -GLOBAL_SHIFT option: 'FIRST'
@@ -47,7 +50,9 @@ v2.11 (Anoia) - (in development)
 		- (the tool was already accessible in V2.10, but in a very limited way)
 	- The CROP command will now remove the input cloud if it's totally 'cropped out' (instead of leaving the full original cloud loaded)
 	- the 'FWF_O' command (to load LAS files with associated waveform data) nows properly supports the '-GLOBAL_SHIFT' option
-	- no more popup will appear when loading a raster file via the command line mode in SILENT mode (raster is never loaded as a textured quad, and invalid points are always ignored and not loaded)
+	- No more popup will appear when loading a raster file via the command line mode in SILENT mode (raster is never loaded as a textured quad, and invalid points are always ignored and not loaded)
+	- One can now use the 'auto' value for the radius value input after -OCTREE_NORMALS
+	    (to let CC automatically guess the normal computation radius)
   - Raster import:
     - new "Apply all" option when CC asks whether invalid pixels of a raster should be ignored or not
   - Point picking:
@@ -79,8 +84,10 @@ v2.11 (Anoia) - (in development)
   - LAS files:
 	- the standard LAS Filter now handles the OVERLAP classification bit (for point format >= 6)
 	- improved/fixed management of classification and classification flags
-	- LAS offset (chosen at saving time) should be a little bit smarter (CC will try to keep the previous one,
-		or use the bounding-box min corner ONLY if the coordinates are too large)
+	- LAS offset (chosen at saving time) should be a little bit smarter:
+		- CC will try to keep the previous one, or use the bounding-box min corner ONLY if the coordinates are too large
+		- CC won't use the previous scale if it is too small for the current cloud
+		- the 'optimal' scale is simpler (round values + the same for all dimensions)
   - ASCII files:
 	- CloudCompare can now load ASCII files with mixed whitespaces (spaces / tabs)
 	- the ASCII load dialog option has now an option to load numerical values with a comma as digit separator

@@ -2228,7 +2228,7 @@ int DistanceComputationTools::computeCloud2ConeEquation(GenericIndexedCloudPersi
 						y = sqrt(yy) - coneR1;
 						ry = y * side[0] - x * side[1]; //rotated y value (distance from the coneside axis)
 						d = std::min(axisLength - x, x); //determine whether closer to either radii 
-						d = std::min(d, static_cast<double>(abs(ry))); //or to side
+						d = std::min(d, static_cast<double>(std::abs(ry))); //or to side
 						d = -d; //negative inside
 					}
 					else
@@ -2270,7 +2270,7 @@ int DistanceComputationTools::computeCloud2ConeEquation(GenericIndexedCloudPersi
 								if (ry < 0) 
 								{//point is interior to the cone
 									d = std::min(axisLength - x, x); //determine whether closer to either radii 
-									d = std::min(d, static_cast<double>(abs(ry))); //or to side
+									d = std::min(d, static_cast<double>(std::abs(ry))); //or to side
 									d = -d; //negative inside
 								}
 							}

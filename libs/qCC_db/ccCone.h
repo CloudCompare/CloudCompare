@@ -83,6 +83,24 @@ public:
 	**/
 	virtual void setTopRadius(PointCoordinateType radius);
 
+	//! Returns cone axis bottom end point after applying transformation
+	virtual CCVector3 getBottomCenter() const;
+	//! Returns cone axis top end point after applying transformation
+	virtual CCVector3 getTopCenter() const;
+
+	//! Returns cone axis end point associated with whichever radii is smaller
+	virtual CCVector3 getSmallCenter() const;
+	//! Returns cone axis end point associated with whichever radii is larger
+	virtual CCVector3 getLargeCenter() const;
+
+	//! Returns whichever cone radii is smaller
+	virtual PointCoordinateType getSmallRadius() const;
+	//! Returns whichever cone radii is larger
+	virtual PointCoordinateType getLargeRadius() const;
+
+	//! Returns true if the Cone was created in snout mode 
+	virtual bool isSnoutMode() const { return (m_xOff != 0 || m_yOff != 0); }
+
 	//inherited from ccGenericPrimitive
 	virtual QString getTypeName() const override { return "Cone"; }
 	virtual bool hasDrawingPrecision() const override { return true; }

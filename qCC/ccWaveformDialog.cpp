@@ -391,12 +391,12 @@ ccWaveDialog::ccWaveDialog(	ccPointCloud* cloud,
 		}
 	}
 
-	connect(m_gui->pointIndexSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onPointIndexChanged(int)));
-	connect(m_gui->logScaleCheckBox, SIGNAL(toggled(bool)), this, SLOT(updateCurrentWaveform()));
-	connect(m_gui->fixedAmplitudeCheckBox, SIGNAL(toggled(bool)), this, SLOT(updateCurrentWaveform()));
-	connect(m_gui->pointPickingToolButton, SIGNAL(toggled(bool)), SLOT(onPointPickingButtonToggled(bool)));
+	connect(m_gui->pointIndexSpinBox, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &ccWaveDialog::onPointIndexChanged);
+	connect(m_gui->logScaleCheckBox,		&QCheckBox::toggled,	this,	&ccWaveDialog::updateCurrentWaveform);
+	connect(m_gui->fixedAmplitudeCheckBox,	&QCheckBox::toggled,	this,	&ccWaveDialog::updateCurrentWaveform);
+	connect(m_gui->pointPickingToolButton,	&QToolButton::toggled,	this,	&ccWaveDialog::onPointPickingButtonToggled);
+	connect(m_gui->saveWaveToolButton,		&QToolButton::clicked,	this,	&ccWaveDialog::onExportWaveAsCSV);
 	connect(this, &QDialog::finished, [&]() { m_gui->pointPickingToolButton->setChecked(false); }); //auto disable picking mode when the dialog is closed
-	connect(m_gui->saveWaveToolButton, SIGNAL(clicked()), SLOT(onExportWaveAsCSV()));
 
 
 	//force update

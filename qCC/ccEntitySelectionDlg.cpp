@@ -39,8 +39,8 @@ ccEntitySelectionDialog::ccEntitySelectionDialog(	const ccHObject::Container& en
 	{
 		m_ui->label->setText(tr("Select one or several entities:"));
 		m_ui->listWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
-		connect(m_ui->selectAllPushButton, SIGNAL(clicked()), this, SLOT(selectAll()));
-		connect(m_ui->selectNonePushButton, SIGNAL(clicked()), this, SLOT(selectNone()));
+		connect(m_ui->selectAllPushButton,  &QPushButton::clicked, this, &ccEntitySelectionDialog::selectAll);
+		connect(m_ui->selectNonePushButton, &QPushButton::clicked, this, &ccEntitySelectionDialog::selectNone);
 	}
 	else
 	{

@@ -114,17 +114,17 @@ AsciiOpenDlg::AsciiOpenDlg(QWidget* parent)
 	//spinBoxSkipLines->setValue(0);
 	m_ui->commentLinesSkippedLabel->hide();
 
-	connect(m_ui->applyButton,			SIGNAL(clicked()),						this, SLOT(apply()));
-	connect(m_ui->applyAllButton,		SIGNAL(clicked()),						this, SLOT(applyAll()));
-	connect(m_ui->cancelButton,			SIGNAL(clicked()),						this, SLOT(reject()));
-	connect(m_ui->lineEditSeparator,	SIGNAL(textChanged(const QString &)),	this, SLOT(onSeparatorChange(const QString &)));
-	connect(m_ui->spinBoxSkipLines,		SIGNAL(valueChanged(int)),				this, SLOT(setSkippedLines(int)));
-	connect(m_ui->commaDecimalCheckBox, SIGNAL(toggled(bool)),					this, SLOT(commaDecimalCheckBoxToggled(bool)));
+	connect(m_ui->applyButton,		&QPushButton::clicked,		this, &AsciiOpenDlg::apply);
+	connect(m_ui->applyAllButton,	&QPushButton::clicked,		this, &AsciiOpenDlg::applyAll);
+	connect(m_ui->cancelButton,		&QPushButton::clicked,		this, &AsciiOpenDlg::reject);
+	connect(m_ui->lineEditSeparator, &QLineEdit::textChanged,	this, &AsciiOpenDlg::onSeparatorChange);
+	connect(m_ui->commaDecimalCheckBox, &QCheckBox::toggled,	this, &AsciiOpenDlg::commaDecimalCheckBoxToggled);
+	connect(m_ui->spinBoxSkipLines,	static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &AsciiOpenDlg::setSkippedLines);
 
 	//shortcut buttons
-	connect(m_ui->toolButtonShortcutSpace,		SIGNAL(clicked()), this, SLOT(shortcutButtonPressed()));
-	connect(m_ui->toolButtonShortcutComma,		SIGNAL(clicked()), this, SLOT(shortcutButtonPressed()));
-	connect(m_ui->toolButtonShortcutSemicolon,	SIGNAL(clicked()), this, SLOT(shortcutButtonPressed()));
+	connect(m_ui->toolButtonShortcutSpace,		&QToolButton::clicked, this, &AsciiOpenDlg::shortcutButtonPressed);
+	connect(m_ui->toolButtonShortcutComma,		&QToolButton::clicked, this, &AsciiOpenDlg::shortcutButtonPressed);
+	connect(m_ui->toolButtonShortcutSemicolon,	&QToolButton::clicked, this, &AsciiOpenDlg::shortcutButtonPressed);
 
 	m_ui->maxCloudSizeDoubleSpinBox->setMaximum(CC_MAX_NUMBER_OF_POINTS_PER_CLOUD / 1.0e6);
 	m_ui->maxCloudSizeDoubleSpinBox->setValue(s_maxCloudSizeDoubleSpinBoxValue);
@@ -560,7 +560,7 @@ void AsciiOpenDlg::updateTable()
 				columnHeaderWidget->setItemIcon(ASCII_OPEN_DLG_Label, LabelIcon);
 				columnHeaderWidget->setItemIcon(ASCII_OPEN_DLG_Scalar, ScalarIcon);
 
-				connect(columnHeaderWidget, SIGNAL(currentIndexChanged(int)), this, SLOT(columnsTypeHasChanged(int)));
+				connect(columnHeaderWidget, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &AsciiOpenDlg::columnsTypeHasChanged);
 			}
 
 			while (m_columnType.size() <= static_cast<size_t>(i))

@@ -40,6 +40,11 @@ void ScalarFieldTools::SetScalarValueToZero(const CCVector3& P, ScalarType& scal
 	scalarValue = 0;
 }
 
+void ScalarFieldTools::SetScalarValueInverted(const CCVector3& P, ScalarType& scalarValue)
+{
+	scalarValue = -scalarValue;
+}
+
 int ScalarFieldTools::computeScalarFieldGradient(	GenericIndexedCloudPersist* theCloud,
 													PointCoordinateType radius,
 													bool euclideanDistances,

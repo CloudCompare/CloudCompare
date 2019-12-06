@@ -551,7 +551,7 @@ ccColorScaleEditorWidget::ccColorScaleEditorWidget(QWidget* parent/*=0*/, Qt::Or
 		m_colorBarWidget->setContentsMargins(0,0,0,0);
 		layout()->addWidget(m_colorBarWidget);
 
-		connect(m_colorBarWidget, SIGNAL(pointClicked(double)), this, SLOT(onPointClicked(double)));
+		connect(m_colorBarWidget, &ColorBarWidget::pointClicked, this, &ccColorScaleEditorWidget::onPointClicked);
 	}
 
 	//sliders widget
@@ -564,8 +564,8 @@ ccColorScaleEditorWidget::ccColorScaleEditorWidget(QWidget* parent/*=0*/, Qt::Or
 		m_slidersWidget->addNewSlider(0.0,Qt::blue);
 		m_slidersWidget->addNewSlider(1.0,Qt::red);
 
-		connect(m_slidersWidget, SIGNAL(sliderModified(int)), this, SLOT(onSliderModified(int)));
-		connect(m_slidersWidget, SIGNAL(sliderSelected(int)), this, SLOT(onSliderSelected(int)));
+		connect(m_slidersWidget, &SlidersWidget::sliderModified, this, &ccColorScaleEditorWidget::onSliderModified);
+		connect(m_slidersWidget, &SlidersWidget::sliderSelected, this, &ccColorScaleEditorWidget::onSliderSelected);
 	}
 
 	//Labels widget

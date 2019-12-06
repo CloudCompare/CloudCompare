@@ -55,36 +55,36 @@ ccClippingBoxTool::ccClippingBoxTool(QWidget* parent)
 {
 	setupUi(this);
 
-	connect(editBoxToolButton,				SIGNAL(clicked()),				this, SLOT(editBox()));
-	connect(extractContourToolButton,		SIGNAL(clicked()),				this, SLOT(extractContour()));
-	connect(removeLastContourToolButton,	SIGNAL(clicked()),				this, SLOT(removeLastContour()));
-	connect(exportButton,					SIGNAL(clicked()),				this, SLOT(exportSlice()));
-	connect(exportMultButton,				SIGNAL(clicked()),				this, SLOT(exportMultSlices()));
-	connect(resetButton,					SIGNAL(clicked()),				this, SLOT(reset()));
-	connect(restoreToolButton,				SIGNAL(clicked()),				this, SLOT(restoreLastBox()));
-	connect(closeButton,					SIGNAL(clicked()),				this, SLOT(closeDialog()));
+	connect(editBoxToolButton,				&QToolButton::clicked,				this, &ccClippingBoxTool::editBox);
+	connect(extractContourToolButton,		&QToolButton::clicked,				this, &ccClippingBoxTool::extractContour);
+	connect(removeLastContourToolButton,	&QToolButton::clicked,				this, &ccClippingBoxTool::removeLastContour);
+	connect(exportButton,					&QToolButton::clicked,				this, &ccClippingBoxTool::exportSlice);
+	connect(exportMultButton,				&QToolButton::clicked,				this, &ccClippingBoxTool::exportMultSlices);
+	connect(resetButton,					&QToolButton::clicked,				this, &ccClippingBoxTool::reset);
+	connect(restoreToolButton,				&QToolButton::clicked,				this, &ccClippingBoxTool::restoreLastBox);
+	connect(closeButton,					&QToolButton::clicked,				this, &ccClippingBoxTool::closeDialog);
 
-	connect(showBoxToolButton,				SIGNAL(toggled(bool)),			this, SLOT(toggleBox(bool)));
-	connect(showInteractorsToolButton,		SIGNAL(toggled(bool)),			this, SLOT(toggleInteractors(bool)));
+	connect(showBoxToolButton,				&QToolButton::toggled,				this, &ccClippingBoxTool::toggleBox);
+	connect(showInteractorsToolButton,		&QToolButton::toggled,				this, &ccClippingBoxTool::toggleInteractors);
 
-	connect(thickXDoubleSpinBox,			SIGNAL(valueChanged(double)),	this, SLOT(thicknessChanged(double)));
-	connect(thickYDoubleSpinBox,			SIGNAL(valueChanged(double)),	this, SLOT(thicknessChanged(double)));
-	connect(thickZDoubleSpinBox,			SIGNAL(valueChanged(double)),	this, SLOT(thicknessChanged(double)));
+	connect(thickXDoubleSpinBox,			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &ccClippingBoxTool::thicknessChanged);
+	connect(thickYDoubleSpinBox,			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &ccClippingBoxTool::thicknessChanged);
+	connect(thickZDoubleSpinBox,			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &ccClippingBoxTool::thicknessChanged);
 
-	connect(minusXShiftToolButton,			SIGNAL(clicked()),				this, SLOT(shiftXMinus()));
-	connect(plusXShiftToolButton,			SIGNAL(clicked()),				this, SLOT(shiftXPlus()));
-	connect(minusYShiftToolButton,			SIGNAL(clicked()),				this, SLOT(shiftYMinus()));
-	connect(plusYShiftToolButton,			SIGNAL(clicked()),				this, SLOT(shiftYPlus()));
-	connect(minusZShiftToolButton,			SIGNAL(clicked()),				this, SLOT(shiftZMinus()));
-	connect(plusZShiftToolButton,			SIGNAL(clicked()),				this, SLOT(shiftZPlus()));
+	connect(minusXShiftToolButton,			&QToolButton::clicked,				this, &ccClippingBoxTool::shiftXMinus);
+	connect(plusXShiftToolButton,			&QToolButton::clicked,				this, &ccClippingBoxTool::shiftXPlus);
+	connect(minusYShiftToolButton,			&QToolButton::clicked,				this, &ccClippingBoxTool::shiftYMinus);
+	connect(plusYShiftToolButton,			&QToolButton::clicked,				this, &ccClippingBoxTool::shiftYPlus);
+	connect(minusZShiftToolButton,			&QToolButton::clicked,				this, &ccClippingBoxTool::shiftZMinus);
+	connect(plusZShiftToolButton,			&QToolButton::clicked,				this, &ccClippingBoxTool::shiftZPlus);
 
 	viewButtonsFrame->setEnabled(true);
-	connect(viewUpToolButton,				SIGNAL(clicked()),				this, SLOT(setTopView()));
-	connect(viewDownToolButton,				SIGNAL(clicked()),				this, SLOT(setBottomView()));
-	connect(viewFrontToolButton,			SIGNAL(clicked()),				this, SLOT(setFrontView()));
-	connect(viewBackToolButton,				SIGNAL(clicked()),				this, SLOT(setBackView()));
-	connect(viewLeftToolButton,				SIGNAL(clicked()),				this, SLOT(setLeftView()));
-	connect(viewRightToolButton,			SIGNAL(clicked()),				this, SLOT(setRightView()));
+	connect(viewUpToolButton,				&QToolButton::clicked,				this, &ccClippingBoxTool::setTopView);
+	connect(viewDownToolButton,				&QToolButton::clicked,				this, &ccClippingBoxTool::setBottomView);
+	connect(viewFrontToolButton,			&QToolButton::clicked,				this, &ccClippingBoxTool::setFrontView);
+	connect(viewBackToolButton,				&QToolButton::clicked,				this, &ccClippingBoxTool::setBackView);
+	connect(viewLeftToolButton,				&QToolButton::clicked,				this, &ccClippingBoxTool::setLeftView);
+	connect(viewRightToolButton,			&QToolButton::clicked,				this, &ccClippingBoxTool::setRightView);
 
 	s_maxEdgeLength = -1.0;
 	//s_lastContourUniqueIDs.clear();
@@ -302,7 +302,7 @@ bool ccClippingBoxTool::linkWith(ccGLWindow* win)
 			m_clipBox->setVisible(true);
 			m_clipBox->setEnabled(true);
 			m_clipBox->setSelected(showInteractorsToolButton->isChecked());
-			connect(m_clipBox, SIGNAL(boxModified(const ccBBox*)), this, SLOT(onBoxModified(const ccBBox*)));
+			connect(m_clipBox, &ccClipBox::boxModified, this, &ccClippingBoxTool::onBoxModified);
 		}
 		m_associatedWin->addToOwnDB(m_clipBox);
 	}

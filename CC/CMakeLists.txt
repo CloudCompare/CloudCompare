@@ -40,7 +40,7 @@ if ( WIN32 )
 	# Add Qt5 natvis file
 	if ( COMPILE_CC_CORE_LIB_WITH_QT )
 		list( APPEND header_list ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/windows/qt5.natvis )
-		message(${header_list})
+		#message(${header_list})
 	endif()
 endif()
 

@@ -67,8 +67,7 @@
 #include "ccUtils.h"
 
 // This is included only for temporarily removing an object from the tree.
-//	TODO figure out a cleaner way to do this without having to include all of mainwindow.h
-#include "mainwindow.h"
+#include "ccMainAppInterface.h"
 
 #include <unordered_set>
 
@@ -1422,7 +1421,7 @@ namespace ccEntityAction
 						}
 					}
 
-					//does the cloud has a former radius value saved as meta-data?
+					//does the cloud have a former radius value saved as meta-data?
 					if (cloud->hasMetaData(s_NormalScaleKey))
 					{
 						bool ok = false;
@@ -1641,8 +1640,8 @@ namespace ccEntityAction
 				Q_ASSERT(mesh != nullptr);
 				
 				//we remove temporarily the mesh as its normals may be removed (and they can be a child object)
-				MainWindow* instance = dynamic_cast<MainWindow*>(parent);
-				MainWindow::ccHObjectContext objContext;
+				ccMainAppInterface* instance = dynamic_cast<ccMainAppInterface*>(parent);
+				ccMainAppInterface::ccHObjectContext objContext;
 				if (instance)
 					objContext = instance->removeObjectTemporarilyFromDBTree(mesh);
 				mesh->clearTriNormals();
@@ -1753,7 +1752,7 @@ namespace ccEntityAction
 		return true;
 	}
 	
-	bool	orientNormalsMST(const ccHObject::Container &selectedEntities, QWidget *parent)
+	bool	orientNormalsMST(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr)
 	{
 		if (selectedEntities.empty())
 		{
@@ -1817,8 +1816,9 @@ namespace ccEntityAction
 	
 	bool	convertNormalsTo(const ccHObject::Container &selectedEntities, NORMAL_CONVERSION_DEST dest)
 	{
-		unsigned errorCount = 0;
-		
+		size_t errorCount = 0;
+		size_t successCount = 0;
+
 		size_t selNum = selectedEntities.size();
 		for (size_t i = 0; i < selNum; ++i)
 		{
@@ -1891,6 +1891,7 @@ namespace ccEntityAction
 								dipDirSF->setColorScale(dipDirScale);
 								ccCloud->setCurrentDisplayedScalarField(dipDirSFIndex); //dip dir. seems more interesting by default
 								ccCloud->showSF(true);
+								++successCount;
 							}
 							else
 							{
@@ -1926,7 +1927,7 @@ namespace ccEntityAction
 			ccConsole::Error("Error(s) occurred! (see console)");
 		}
 		
-		return true;
+		return (successCount != 0);
 	}
 	
 	//////////
@@ -1991,8 +1992,8 @@ namespace ccEntityAction
 		{
 			//we temporarily detach entity, as it may undergo
 			//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::computeOctree
-			MainWindow* instance = dynamic_cast<MainWindow*>(parent);
-			MainWindow::ccHObjectContext objContext;
+			ccMainAppInterface* instance = dynamic_cast<ccMainAppInterface*>(parent);
+			ccMainAppInterface::ccHObjectContext objContext;
 			if (instance)
 				objContext = instance->removeObjectTemporarilyFromDBTree(cloud);
 
@@ -2079,8 +2080,8 @@ namespace ccEntityAction
 				{
 					mesh->showNormals(false);
 					
-					MainWindow* instance = dynamic_cast<MainWindow*>(parent);
-					MainWindow::ccHObjectContext objContext;
+					ccMainAppInterface* instance = dynamic_cast<ccMainAppInterface*>(parent);
+					ccMainAppInterface::ccHObjectContext objContext;
 					if (instance)
 						objContext = instance->removeObjectTemporarilyFromDBTree(mesh);
 					mesh->clearTriNormals();

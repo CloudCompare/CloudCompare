@@ -119,6 +119,8 @@ protected slots:
 	void on3DMouseMove(std::vector<float>&);
 	void on3DMouseKeyUp(int);
 	void on3DMouseKeyDown(int);
+	void on3DMouseCMDKeyDown(int);
+	void on3DMouseCMDKeyUp(int);
 	void on3DMouseReleased();
 	void enable3DMouse(bool state);
 

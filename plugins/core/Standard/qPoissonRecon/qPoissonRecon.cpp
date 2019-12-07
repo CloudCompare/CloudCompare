@@ -315,12 +315,26 @@ void qPoissonRecon::doAction()
 		return;
 	}
 
+	static unsigned s_lastEntityID = 0;
+	static double s_defaultResolution = 0.0;
+	static bool s_depthMode = true;
+	if (s_defaultResolution == 0.0 || s_lastEntityID != pc->getUniqueID())
+	{
+		s_defaultResolution = pc->getOwnBB().getDiagNormd() / 200.0;
+		s_lastEntityID = pc->getUniqueID();
+	}
+	
 	bool cloudHasColors = pc->hasColors();
 	PoissonReconParamDlg prpDlg(m_app->getMainWindow());
 	prpDlg.importColorsCheckBox->setVisible(cloudHasColors);
+	if (s_depthMode)
+		prpDlg.depthRadioButton->setChecked(true);
+	else
+		prpDlg.resolutionRadioButton->setChecked(true);
 
 	//init dialog with semi-persistent settings
-	prpDlg.octreeLevelSpinBox->setValue(s_params.depth);
+	prpDlg.depthSpinBox->setValue(s_params.depth);
+	prpDlg.resolutionDoubleSpinBox->setValue(s_defaultResolution);
 	prpDlg.samplesPerNodeSpinBox->setValue(s_params.samplesPerNode);
 	prpDlg.importColorsCheckBox->setChecked(s_params.withColors);
 	prpDlg.densityCheckBox->setChecked(s_params.density);
@@ -346,7 +360,11 @@ void qPoissonRecon::doAction()
 		return;
 
 	//set parameters with dialog settings
-	s_params.depth = prpDlg.octreeLevelSpinBox->value();
+	s_depthMode = prpDlg.depthRadioButton->isChecked();
+	s_defaultResolution = prpDlg.resolutionDoubleSpinBox->value();
+	
+	s_params.depth = (s_depthMode ? prpDlg.depthSpinBox->value() : 0);
+	s_params.finestCellWidth = static_cast<float>(s_depthMode ? 0.0 : s_defaultResolution);
 	s_params.samplesPerNode = static_cast<float>(prpDlg.samplesPerNodeSpinBox->value());
 	s_params.withColors = prpDlg.importColorsCheckBox->isChecked();
 	s_params.density = prpDlg.densityCheckBox->isChecked();
@@ -391,7 +409,14 @@ void qPoissonRecon::doAction()
 		pDlg.show();
 		//QApplication::processEvents();
 
-		pDlg.setLabelText(QString("Reconstruction in progress\nlevel: %1 [%2 thread(s)]").arg(s_params.depth).arg(s_params.threads));
+		QString progressLabel("Reconstruction in progress\n");
+		if (s_depthMode)
+			progressLabel += QString("level: %1").arg(s_params.depth);
+		else
+			progressLabel += QString("resolution: %1").arg(s_params.finestCellWidth);
+		progressLabel += QString(" [%1 thread(s)]").arg(s_params.threads);
+
+		pDlg.setLabelText(progressLabel);
 		QApplication::processEvents();
 
 		//run in a separate thread

@@ -271,7 +271,7 @@ bool doReconstruct()
 		return false;
 	}
 
-	MeshWrapper<PointCoordinateType> meshWrapper(*s_mesh, *s_meshVertices);
+	MeshWrapper<PointCoordinateType> meshWrapper(*s_mesh, *s_meshVertices, s_densitySF);
 	PointCloudWrapper<PointCoordinateType> cloudWrapper(*s_cloud);
 	
 	if (!PoissonReconLib::Reconstruct(s_params, cloudWrapper, meshWrapper) || meshWrapper.isInErrorState())
@@ -321,11 +321,11 @@ void qPoissonRecon::doAction()
 
 	//init dialog with semi-persistent settings
 	prpDlg.octreeLevelSpinBox->setValue(s_params.depth);
-	prpDlg.weightDoubleSpinBox->setValue(s_params.pointWeight);
-	prpDlg.fullDepthSpinBox->setValue(s_params.fullDepth);
 	prpDlg.samplesPerNodeSpinBox->setValue(s_params.samplesPerNode);
+	prpDlg.importColorsCheckBox->setChecked(s_params.withColors);
 	prpDlg.densityCheckBox->setChecked(s_params.density);
-	prpDlg.importColorsCheckBox->setChecked(true);
+	prpDlg.weightDoubleSpinBox->setValue(s_params.pointWeight);
+	prpDlg.linearFitCheckBox->setChecked(s_params.linearFit);
 	switch (s_params.boundary)
 	{
 	case PoissonReconLib::Parameters::FREE:
@@ -347,10 +347,11 @@ void qPoissonRecon::doAction()
 
 	//set parameters with dialog settings
 	s_params.depth = prpDlg.octreeLevelSpinBox->value();
-	s_params.pointWeight = static_cast<float>(prpDlg.weightDoubleSpinBox->value());
-	s_params.fullDepth = prpDlg.fullDepthSpinBox->value();
 	s_params.samplesPerNode = static_cast<float>(prpDlg.samplesPerNodeSpinBox->value());
+	s_params.withColors = prpDlg.importColorsCheckBox->isChecked();
 	s_params.density = prpDlg.densityCheckBox->isChecked();
+	s_params.pointWeight = static_cast<float>(prpDlg.weightDoubleSpinBox->value());
+	s_params.linearFit = prpDlg.linearFitCheckBox->isChecked();
 	switch (prpDlg.boundaryComboBox->currentIndex())
 	{
 	case 0:
@@ -366,7 +367,6 @@ void qPoissonRecon::doAction()
 		assert(false);
 		break;
 	}
-	//bool withColors = pc->hasColors() && prpDlg.importColorsCheckBox->isChecked();
 
 	/*** RECONSTRUCTION PROCESS ***/
 
@@ -449,7 +449,12 @@ void qPoissonRecon::doAction()
 	newPC->setEnabled(false);
 	newMesh->setVisible(true);
 	newMesh->computeNormals(true);
-	newMesh->showColors(newMesh->hasColors());
+	if (!cloudHasColors)
+	{
+		newPC->unallocateColors();
+		newPC->showColors(false);
+	}
+	newMesh->showColors(newPC->hasColors());
 
 	if (densitySF)
 	{

@@ -15,8 +15,8 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
+    <layout class="QFormLayout" name="formLayout">
+     <item row="0" column="0">
       <widget class="QLabel" name="label">
        <property name="toolTip">
         <string>maximum reconstruction depth</string>
@@ -26,7 +26,7 @@
        </property>
       </widget>
      </item>
-     <item>
+     <item row="0" column="1">
       <widget class="QSpinBox" name="octreeLevelSpinBox">
        <property name="toolTip">
         <string>The maximum depth of the tree that will be used for surface reconstruction</string>
@@ -39,6 +39,42 @@
        </property>
        <property name="value">
         <number>8</number>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_3">
+       <property name="toolTip">
+        <string>The minimum number of sample points that should fall within an octree node
+as the octree construction is adapted to sampling density. For noise-free
+samples, small values in the range [1.0 - 5.0] can be used. For more noisy
+samples, larger values in the range [15.0 - 20.0] may be needed to provide
+a smoother, noise-reduced, reconstruction.</string>
+       </property>
+       <property name="text">
+        <string>Samples per node</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QDoubleSpinBox" name="samplesPerNodeSpinBox">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Minimum number of sample points that should fall within an octree node as the octree construction is adapted to sampling density.&lt;/p&gt;&lt;p&gt;For noise-free samples, small values in the range [1.0 - 5.0] can be used.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; color:#ff0000;&quot;&gt;For more noisy samples&lt;/span&gt;, larger values in the range [15.0 - 20.0] may be needed to provide a smoother, noise-reduced, reconstruction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="decimals">
+        <number>2</number>
+       </property>
+       <property name="minimum">
+        <double>1.000000000000000</double>
+       </property>
+       <property name="maximum">
+        <double>20.000000000000000</double>
+       </property>
+       <property name="singleStep">
+        <double>0.500000000000000</double>
+       </property>
+       <property name="value">
+        <double>1.500000000000000</double>
        </property>
       </widget>
      </item>
@@ -86,12 +122,12 @@
           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Density is useful to reduce the extents of the output mesh to fit as much as possible the input point cloud.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;On the output mesh:&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;- Change the SF '&lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-style:italic;&quot;&gt;min displayed'&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;' value (in the mesh properties) until the visible part meets your expectations&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;- Eventually export this mesh as a new one with '&lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-style:italic;&quot;&gt;Edit &amp;gt; Scalar fields &amp;gt; Filter by Value&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;' (you can delete the 'density' scalar field afterwards) &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Density is useful to reduce the extents of the output mesh to fit as much as possible the input point cloud.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;On the output mesh:&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;- Change the SF '&lt;span style=&quot; font-style:italic;&quot;&gt;min displayed'&lt;/span&gt;' value (in the mesh properties) until the visible part meets your expectations&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;- Eventually export this mesh as a new one with '&lt;span style=&quot; font-style:italic;&quot;&gt;Edit &amp;gt; Scalar fields &amp;gt; Filter by Value&lt;/span&gt;' (you can delete the 'density' scalar field afterwards) &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
         </widget>
        </item>
@@ -102,100 +138,17 @@ p, li { white-space: pre-wrap; }
        <string>Advanced</string>
       </attribute>
       <layout class="QFormLayout" name="formLayout_2">
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_3">
-         <property name="toolTip">
-          <string>The minimum number of sample points that should fall within an octree node
-as the octree construction is adapted to sampling density. For noise-free
-samples, small values in the range [1.0 - 5.0] can be used. For more noisy
-samples, larger values in the range [15.0 - 20.0] may be needed to provide
-a smoother, noise-reduced, reconstruction.</string>
-         </property>
-         <property name="text">
-          <string>samples per node</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QDoubleSpinBox" name="samplesPerNodeSpinBox">
-         <property name="toolTip">
-          <string>The minimum number of sample points that should fall within an octree node
-as the octree construction is adapted to sampling density. For noise-free
-samples, small values in the range [1.0 - 5.0] can be used. For more noisy
-samples, larger values in the range [15.0 - 20.0] may be needed to provide
-a smoother, noise-reduced, reconstruction.</string>
-         </property>
-         <property name="decimals">
-          <number>2</number>
-         </property>
-         <property name="minimum">
-          <double>1.000000000000000</double>
-         </property>
-         <property name="maximum">
-          <double>20.000000000000000</double>
-         </property>
-         <property name="singleStep">
-          <double>1.000000000000000</double>
-         </property>
-         <property name="value">
-          <double>1.000000000000000</double>
-         </property>
-        </widget>
-       </item>
        <item row="1" column="0">
-        <widget class="QLabel" name="label_2">
-         <property name="toolTip">
-          <string>The maximum depth of the tree that will be used for surface reconstruction</string>
-         </property>
-         <property name="text">
-          <string>full depth</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QSpinBox" name="fullDepthSpinBox">
-         <property name="toolTip">
-          <string>The depth beyond depth the octree will be adapted. At coarser depths, the octree will be complete.</string>
-         </property>
-         <property name="value">
-          <number>5</number>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="label_5">
-         <property name="toolTip">
-          <string>The importance that interpolation of the point samples is given in the formulation of the screened Poisson equation</string>
-         </property>
-         <property name="text">
-          <string>point weight</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QDoubleSpinBox" name="weightDoubleSpinBox">
-         <property name="toolTip">
-          <string>The importance that interpolation of the point samples is given in the formulation of the screened Poisson equation</string>
-         </property>
-         <property name="maximum">
-          <double>999.990000000000009</double>
-         </property>
-         <property name="value">
-          <double>4.000000000000000</double>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0">
         <widget class="QLabel" name="label_4">
          <property name="text">
           <string>boundary</string>
          </property>
         </widget>
        </item>
-       <item row="3" column="1">
+       <item row="1" column="1">
         <widget class="QComboBox" name="boundaryComboBox">
          <property name="currentIndex">
-          <number>1</number>
+          <number>2</number>
          </property>
          <item>
           <property name="text">
@@ -212,6 +165,42 @@ a smoother, noise-reduced, reconstruction.</string>
            <string>Neumann</string>
           </property>
          </item>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_5">
+         <property name="toolTip">
+          <string>The importance that interpolation of the point samples is given in the formulation of the screened Poisson equation</string>
+         </property>
+         <property name="text">
+          <string>point weight</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QDoubleSpinBox" name="weightDoubleSpinBox">
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Interpolation weight (twice the b-spline degree by default)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="maximum">
+          <double>999.990000000000009</double>
+         </property>
+         <property name="value">
+          <double>2.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QCheckBox" name="linearFitCheckBox">
+         <property name="toolTip">
+          <string>Enabling this flag has the reconstructor use linear interpolation to estimate the positions of iso-vertices.</string>
+         </property>
+         <property name="text">
+          <string>Linear fit</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
         </widget>
        </item>
       </layout>

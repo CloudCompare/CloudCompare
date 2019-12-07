@@ -30,10 +30,11 @@ v2.11 (Anoia) - (in development)
     - NORMALS_TO_DIP: converts the loaded cloud normals to dip and dip direction (scalar fields)
 
 - Improvements
+  - Better support for High DPI screens (4K) on Windows
+  - Both the local and global bounding-box centers are now displyaed in the cloud properties (if the cloud has been shifted)
   - The PoissonRecon plugin now relies on the PoissonRecon V12 library
     - new algorithm
 	- option to set the final 'resolution' instead of the octree depth
-  - Both the local and global bounding-box centers are now displyaed in the cloud properties (if the cloud has been shifted)
   - Align (Point-pair based registration) tool
     - can now be used with several entities (both several aligned and several reference entities)
 	- option to pick the center of sphere entities as registration point(CC will ask whether to use the sphere center or not when picking a point anywhere on a sphere entity)

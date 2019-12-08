@@ -121,7 +121,7 @@ void ccPickingHub::processPickedItem(ccHObject* entity, unsigned itemIndex, int 
 
 			if (s_pickSphereCenter != QMessageBox::YesToAll && s_pickSphereCenter != QMessageBox::NoToAll)
 			{
-				s_pickSphereCenter = QMessageBox::question(m_activeGLWindow, tr("Sphere picking"), tr("From now on, do you want to pick sphere centers instead of a point on their surface?"), QMessageBox::YesToAll | QMessageBox::Yes | QMessageBox::No | QMessageBox::NoToAll, QMessageBox::YesToAll);
+				s_pickSphereCenter = QMessageBox::question(m_activeGLWindow->asWidget(), tr("Sphere picking"), tr("From now on, do you want to pick sphere centers instead of a point on their surface?"), QMessageBox::YesToAll | QMessageBox::Yes | QMessageBox::No | QMessageBox::NoToAll, QMessageBox::YesToAll);
 			}
 			if (s_pickSphereCenter == QMessageBox::Yes || s_pickSphereCenter == QMessageBox::YesToAll)
 			{

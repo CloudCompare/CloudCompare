@@ -127,6 +127,8 @@ v2.11 (Anoia) - (in development)
         - canLoadExtension
     - The GL plugin interface has changed, so if you have your own GL plugins, you will need to update them.
       - The interface name changed from `ccGLFilterPluginInterface` to `ccGLPluginInterface`.
+  - CC will now handle external matrices (loaded or input via the 'Edit > Apply Transformation' tool) with a 16th component different than 0
+    (this 16th component will be considered as the inverse scale)
 
 - Bug fix:
 	- LAS classification flags were not always properly extracted/saved by the standard LAS filter (depending on the point format)

@@ -1088,7 +1088,7 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 
 							//we compute the transformation matrix in the global coordinate space
 							ccGLMatrixd globalTransMat = transMat;
-							globalTransMat.scale(1.0 / globalScale);
+							globalTransMat.scaleRotation(1.0 / globalScale);
 							globalTransMat.setTranslation(globalTransMat.getTranslationAsVec3D() - globalShift);
 							//and we apply it to the cloud bounding-box
 							ccBBox rotatedBox = cloud->getOwnBB() * globalTransMat;
@@ -1122,18 +1122,23 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 
 							if (sasDlg.exec())
 							{
+								//store the shift for next time!
+								double newScale = sasDlg.getScale();
+								CCVector3d newShift = sasDlg.getShift();
+								ccGlobalShiftManager::StoreShift(newShift, newScale);
+
 								//get the relative modification to existing global shift/scale info
 								assert(cloud->getGlobalScale() != 0);
-								scaleChange = sasDlg.getScale() / cloud->getGlobalScale();
-								shiftChange = (sasDlg.getShift() - cloud->getGlobalShift());
+								scaleChange = newScale / cloud->getGlobalScale();
+								shiftChange = newShift - cloud->getGlobalShift();
 
 								updateGlobalShiftAndScale = (scaleChange != 1.0 || shiftChange.norm2() != 0);
 
 								//update transformation matrix accordingly
 								if (updateGlobalShiftAndScale)
 								{
-									transMat.scale(scaleChange);
-									transMat.setTranslation(transMat.getTranslationAsVec3D() + shiftChange*scaleChange);
+									transMat.scaleRotation(scaleChange);
+									transMat.setTranslation(transMat.getTranslationAsVec3D() + newScale * shiftChange);
 								}
 							}
 							else if (sasDlg.cancelled())
@@ -1482,7 +1487,7 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 				{
 					ccGLMatrix transMat;
 					transMat.toIdentity();
-					transMat.scale(static_cast<float>(scaleCoef));
+					transMat.scaleRotation(static_cast<float>(scaleCoef));
 					transMat.setTranslation(T);
 
 					//DGM FIXME: we only test the entity own bounding box (and we update its shift & scale info) but we apply the transformation to all its children?!

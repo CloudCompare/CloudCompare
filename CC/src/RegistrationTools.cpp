@@ -864,7 +864,7 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P, //data
 {
 	//resulting transformation (R is invalid on initialization, T is (0,0,0) and s==1)
 	trans.R.invalidate();
-	trans.T = CCVector3(0,0,0);
+	trans.T = CCVector3(0, 0, 0);
 	trans.s = PC_ONE;
 
 	if (P == nullptr || X == nullptr || P->size() != X->size() || P->size() < 3)
@@ -883,9 +883,9 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P, //data
 		const CCVector3* Ap = P->getNextPoint();
 		const CCVector3* Bp = P->getNextPoint();
 		const CCVector3* Cp = P->getNextPoint();
-		CCVector3 Np(0,0,1);
+		CCVector3 Np(0, 0, 1);
 		{
-			Np = (*Bp-*Ap).cross(*Cp-*Ap);
+			Np = (*Bp - *Ap).cross(*Cp - *Ap);
 			double norm = Np.normd();
 			if (norm < ZERO_TOLERANCE)
 				return false;
@@ -896,9 +896,9 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P, //data
 		const CCVector3* Ax = X->getNextPoint();
 		const CCVector3* Bx = X->getNextPoint();
 		const CCVector3* Cx = X->getNextPoint();
-		CCVector3 Nx(0,0,1);
+		CCVector3 Nx(0, 0, 1);
 		{
-			Nx = (*Bx-*Ax).cross(*Cx-*Ax);
+			Nx = (*Bx - *Ax).cross(*Cx - *Ax);
 			double norm = Nx.normd();
 			if (norm < ZERO_TOLERANCE)
 				return false;
@@ -912,17 +912,17 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P, //data
 			trans.R.toIdentity();
 			if (Np.dot(Nx) < 0)
 			{
-				trans.R.scale(-1);
+				trans.R.scale(-PC_ONE);
 			}
 		}
 		else
 		{
 			double cos_t = Np.dot(Nx);
 			assert(cos_t > -1.0 && cos_t < 1.0); //see above
-			double s = sqrt((1+cos_t)*2);
-			double q[4] = { s/2, a.x/s, a.y/s, a.z/s };
+			double s = sqrt((1 + cos_t) * 2);
+			double q[4] = { s / 2, a.x / s, a.y / s, a.z / s };
 			//don't forget to normalize the quaternion
-			double qnorm = q[0]*q[0] + q[1]*q[1] + q[2]*q[2] + q[3]*q[3];
+			double qnorm = q[0] * q[0] + q[1] * q[1] + q[2] * q[2] + q[3] * q[3];
 			assert(qnorm >= ZERO_TOLERANCE);
 			qnorm = sqrt(qnorm);
 			q[0] /= qnorm;
@@ -934,11 +934,11 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P, //data
 
 		if (adjustScale)
 		{
-			double sumNormP = (*Bp-*Ap).norm() + (*Cp-*Bp).norm() + (*Ap-*Cp).norm();
+			double sumNormP = (*Bp - *Ap).norm() + (*Cp - *Bp).norm() + (*Ap - *Cp).norm();
 			sumNormP *= aPrioriScale;
 			if (sumNormP < ZERO_TOLERANCE)
 				return false;
-			double sumNormX = (*Bx-*Ax).norm() + (*Cx-*Bx).norm() + (*Ax-*Cx).norm();
+			double sumNormX = (*Bx - *Ax).norm() + (*Cx - *Bx).norm() + (*Ax - *Cx).norm();
 			trans.s = static_cast<PointCoordinateType>(sumNormX / sumNormP); //sumNormX / (sumNormP * Sa) in fact
 		}
 
@@ -953,9 +953,9 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P, //data
 
 			double C = 0;
 			double S = 0;
-			CCVector3 Ssum(0,0,0);
-			CCVector3 rx,rp;
-			
+			CCVector3 Ssum(0, 0, 0);
+			CCVector3 rx, rp;
+
 			rx = *Ax - Gx;
 			rp = App - Gx;
 			C = rx.dot(rp);
@@ -972,10 +972,10 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P, //data
 			Ssum += rx.cross(rp);
 
 			S = Ssum.dot(Nx);
-			double Q = sqrt(S*S + C*C);
+			double Q = sqrt(S*S + C * C);
 			if (Q < ZERO_TOLERANCE)
 				return false;
-			
+
 			PointCoordinateType sin_t = static_cast<PointCoordinateType>(S / Q);
 			PointCoordinateType cos_t = static_cast<PointCoordinateType>(C / Q);
 			PointCoordinateType inv_cos_t = 1 - cos_t;
@@ -984,24 +984,24 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P, //data
 			const PointCoordinateType& l2 = Nx.y;
 			const PointCoordinateType& l3 = Nx.z;
 
-			PointCoordinateType l1_inv_cos_t = l1*inv_cos_t;
-			PointCoordinateType l3_inv_cos_t = l3*inv_cos_t;
+			PointCoordinateType l1_inv_cos_t = l1 * inv_cos_t;
+			PointCoordinateType l3_inv_cos_t = l3 * inv_cos_t;
 
 			SquareMatrix R(3);
 			//1st column
-			R.m_values[0][0] = cos_t + l1*l1_inv_cos_t;
-			R.m_values[0][1] = l2*l1_inv_cos_t+l3*sin_t;
-			R.m_values[0][2] = l3*l1_inv_cos_t-l2*sin_t;
+			R.m_values[0][0] = cos_t + l1 * l1_inv_cos_t;
+			R.m_values[0][1] = l2 * l1_inv_cos_t + l3 * sin_t;
+			R.m_values[0][2] = l3 * l1_inv_cos_t - l2 * sin_t;
 
 			//2nd column
-			R.m_values[1][0] = l2*l1_inv_cos_t-l3*sin_t;
-			R.m_values[1][1] = cos_t+l2*l2*inv_cos_t;
-			R.m_values[1][2] = l2*l3_inv_cos_t+l1*sin_t;
+			R.m_values[1][0] = l2 * l1_inv_cos_t - l3 * sin_t;
+			R.m_values[1][1] = cos_t + l2 * l2*inv_cos_t;
+			R.m_values[1][2] = l2 * l3_inv_cos_t + l1 * sin_t;
 
 			//3rd column
-			R.m_values[2][0] = l3*l1_inv_cos_t+l2*sin_t;
-			R.m_values[2][1] = l2*l3_inv_cos_t-l1*sin_t;
-			R.m_values[2][2] = cos_t+l3*l3_inv_cos_t;
+			R.m_values[2][0] = l3 * l1_inv_cos_t + l2 * sin_t;
+			R.m_values[2][1] = l2 * l3_inv_cos_t - l1 * sin_t;
+			R.m_values[2][2] = cos_t + l3 * l3_inv_cos_t;
 
 			trans.R = R * trans.R;
 			trans.T = Gx - (trans.R*Gp) * (aPrioriScale*trans.s); //update T as well
@@ -1009,22 +1009,22 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P, //data
 	}
 	else
 	{
-		CCVector3 bbMin,bbMax;
-		X->getBoundingBox(bbMin,bbMax);
+		CCVector3 bbMin, bbMax;
+		X->getBoundingBox(bbMin, bbMax);
 
 		//if the data cloud is equivalent to a single point (for instance
 		//it's the case when the two clouds are very far away from
 		//each other in the ICP process) we try to get the two clouds closer
-		CCVector3 diag = bbMax-bbMin;
+		CCVector3 diag = bbMax - bbMin;
 		if (std::abs(diag.x) + std::abs(diag.y) + std::abs(diag.z) < ZERO_TOLERANCE)
 		{
-			trans.T = Gx - Gp*aPrioriScale;
+			trans.T = Gx - Gp * aPrioriScale;
 			return true;
 		}
 
 		//Cross covariance matrix, eq #24 in Besl92 (but with weights, if any)
 		SquareMatrixd Sigma_px = (coupleWeights ? GeometricalAnalysisTools::ComputeWeightedCrossCovarianceMatrix(P, X, Gp, Gx, coupleWeights)
-												: GeometricalAnalysisTools::ComputeCrossCovarianceMatrix(P,X,Gp,Gx) );
+			: GeometricalAnalysisTools::ComputeCrossCovarianceMatrix(P, X, Gp, Gx));
 		if (!Sigma_px.isValid())
 			return false;
 
@@ -1092,7 +1092,7 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P, //data
 
 			unsigned count = X->size();
 			assert(P->size() == count);
-			for (unsigned i=0; i<count; ++i)
+			for (unsigned i = 0; i < count; ++i)
 			{
 				//'a' refers to the data 'A' (moving) = P
 				//'b' refers to the model 'B' (not moving) = X

@@ -61,7 +61,8 @@ int main(int argc, char **argv)
 
 #ifdef _WIN32 //This will allow printf to function on windows when opened from command line	
 	DWORD stdout_type = GetFileType(GetStdHandle(STD_OUTPUT_HANDLE));
-	if (AttachConsole(ATTACH_PARENT_PROCESS)) {
+	if (AttachConsole(ATTACH_PARENT_PROCESS))
+	{
 		if (stdout_type == FILE_TYPE_UNKNOWN) // this will allow std redirection (./executable > out.txt)
 		{
 			freopen("CONOUT$", "w", stdout);

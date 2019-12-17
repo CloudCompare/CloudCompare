@@ -28,6 +28,7 @@
 #include <ScalarField.h>
 #include <ScalarFieldTools.h>
 #include <SimpleTriangle.h>
+#include <SquareMatrix.h>
 
 //system
 #include <algorithm>
@@ -2461,6 +2462,144 @@ int DistanceComputationTools::computeCloud2PlaneEquation(GenericIndexedCloudPers
 		*rms = sqrt(dSumSq / count);
 	}
 
+	return count;
+}
+
+int DistanceComputationTools::computeCloud2RectangleEquation(GenericIndexedCloudPersist *cloud, const PointCoordinateType* planeEquation, const PointCoordinateType widthX, const PointCoordinateType widthY, const CCVector3 center, CCVector3 xColumnGL, CCVector3 yColumnGL, CCVector3 zColumnGL) {
+	// p3---------------------p2
+	// ^					  |
+	// |e1					  |
+	// |					  |
+	// |		  e0		  |
+	// p0-------------------->p1
+	//Rect(s,t)=p0 + s*0e + t*e1 
+	//for s,t in {0,1}
+	SquareMatrix rotationTransform = SquareMatrix::SquareMatrixTpl(3);
+	rotationTransform.setValue(0, 0, xColumnGL[0]);
+	rotationTransform.setValue(1, 0, xColumnGL[1]);
+	rotationTransform.setValue(2, 0, xColumnGL[2]);
+	rotationTransform.setValue(0, 1, yColumnGL[0]);
+	rotationTransform.setValue(1, 1, yColumnGL[1]);
+	rotationTransform.setValue(2, 1, yColumnGL[2]);
+	rotationTransform.setValue(0, 2, zColumnGL[0]);
+	rotationTransform.setValue(1, 2, zColumnGL[1]);
+	rotationTransform.setValue(2, 2, zColumnGL[2]);
+	float d = static_cast<float>(widthX);
+	CCVector3 widthXVec(static_cast<float>(widthX),0,0);
+	CCVector3 widthYVec(0, static_cast<float>(widthY), 0);
+
+	widthXVec = rotationTransform*widthXVec;
+	widthYVec = rotationTransform * widthYVec;
+
+	CCVector3 rectangleP0 = center - (widthXVec / 2) - (widthYVec / 2);
+	CCVector3 rectangleP1 = center + (widthXVec / 2) - (widthYVec / 2);
+	CCVector3 rectangleP2 = center + (widthXVec / 2) + (widthYVec / 2);
+	CCVector3 rectangleP3 = center - (widthXVec / 2) + (widthYVec / 2);
+	CCVector3 e0 = rectangleP1 - rectangleP0;
+	CCVector3 e1 = rectangleP3 - rectangleP0;
+	unsigned count = cloud->size();
+	for (unsigned i = 0; i < count; ++i) {
+		const CCVector3* Pe = cloud->getPoint(i);
+		CCVector3 dist = (*Pe - rectangleP0);
+		float s = e0.dot(dist);
+		if (s > 0) {
+			float dot0 = e0.dot(e0);
+			if (s < dot0)
+				dist = dist - (s / dot0)*e0;
+			else
+				dist = dist - e0;
+		}
+
+		float t = e1.dot(dist);
+		if (t > 0) {
+			float dot1 = e1.dot(e1);
+			if (t < dot1)
+				dist = dist - (t / dot1)*e1;
+			else
+				dist = dist - e1;
+		}
+		
+		cloud->setPointScalarValue(i, static_cast<ScalarType>( sqrt( (dist.x*dist.x) + (dist.y*dist.y) + (dist.z*dist.z)) ));
+	}
+	return count;
+}
+
+int DistanceComputationTools::computeCloud2BoxEquation(GenericIndexedCloudPersist* cloud, CCVector3 boxDimensions, CCVector3 xColumnGL, CCVector3 yColumnGL, CCVector3 zColumnGL, CCVector3 transColumnGL,bool signedDist) {
+	
+	// box half lengths hu hv and hw
+	float hu = boxDimensions.x / 2;
+	float hv = boxDimensions.y / 2;
+	float hw = boxDimensions.z / 2;
+	// box coordinates unit vectors u,v, and w
+	CCVector3 u(1, 0, 0);
+	CCVector3 v(0, 1, 0);
+	CCVector3 w(0, 0, 1);
+	SquareMatrix rotationTransform = SquareMatrix::SquareMatrixTpl(3);
+	rotationTransform.setValue(0, 0, xColumnGL[0]);
+	rotationTransform.setValue(1, 0, xColumnGL[1]);
+	rotationTransform.setValue(2, 0, xColumnGL[2]);
+	rotationTransform.setValue(0, 1, yColumnGL[0]);
+	rotationTransform.setValue(1, 1, yColumnGL[1]);
+	rotationTransform.setValue(2, 1, yColumnGL[2]);
+	rotationTransform.setValue(0, 2, zColumnGL[0]);
+	rotationTransform.setValue(1, 2, zColumnGL[1]);
+	rotationTransform.setValue(2, 2, zColumnGL[2]);
+	u = rotationTransform*u;
+	v = rotationTransform*v;
+	w = rotationTransform*w;
+	CCVector3 boxCenter( transColumnGL.x, transColumnGL.y, transColumnGL.z);
+	float distX; float distY; float distZ;
+	unsigned count = cloud->size();
+	bool insideBox;
+	for (unsigned i = 0; i < count; ++i) {
+		const CCVector3* P = cloud->getPoint(i);
+		CCVector3 pointCenterDifference = (*P - boxCenter);
+		CCVector3 P_inBoxCoords(pointCenterDifference.dot(u), pointCenterDifference.dot(v), pointCenterDifference.dot(w));
+		distX = 0; distY = 0; distZ = 0;
+		insideBox = false;
+		if (P_inBoxCoords.x > -hu && P_inBoxCoords.x < hu && P_inBoxCoords.y > -hv && P_inBoxCoords.y < hv && P_inBoxCoords.z > -hw && P_inBoxCoords.z < hw)
+			insideBox = true;
+
+		if (P_inBoxCoords.x < -hu)
+			distX = -(P_inBoxCoords.x + hu);
+		else if (P_inBoxCoords.x > hu)
+			distX = P_inBoxCoords.x - hu;
+		else if (insideBox)
+			distX = abs(P_inBoxCoords.x) - hu;
+
+		if (P_inBoxCoords.y < -hv)
+			distY = -(P_inBoxCoords.y + hv);
+		else if (P_inBoxCoords.y > hv)
+			distY = P_inBoxCoords.y - hv;
+		else if (insideBox)
+			distY = abs(P_inBoxCoords.y) - hv;
+
+		if (P_inBoxCoords.z < -hw)
+			distZ = -(P_inBoxCoords.z + hw);
+		else if (P_inBoxCoords.z > hw)
+			distZ = P_inBoxCoords.z - hw;
+		else if (insideBox)
+			distZ = abs(P_inBoxCoords.z) - hw;
+
+		if (insideBox){ //take min distance inside box
+			if (distX >= distY && distX >= distZ) {
+				distY = 0;
+				distZ = 0;
+			}
+			else if (distY >= distX && distY >= distZ) {
+				distX = 0;
+				distZ = 0;
+			}
+			else if (distZ >= distX && distZ >= distY) {
+				distX = 0;
+				distY = 0;
+			}
+		}
+		if (signedDist)
+			cloud->setPointScalarValue(i, static_cast<ScalarType>(distX + distY+ distZ));
+		else
+			cloud->setPointScalarValue(i, static_cast<ScalarType>(sqrt((distX*distX) + (distY*distY) + (distZ*distZ))));
+	}
 	return count;
 }
 

@@ -306,7 +306,11 @@ public: //distance to simple entities (triangles, planes, etc.)
 		\return negative error code or a positive value in case of success
 	**/
 	static int computeCloud2PlaneEquation(GenericIndexedCloudPersist* cloud, const PointCoordinateType* planeEquation, bool signedDistances = true, double * rms = nullptr);
+	
+	static int computeCloud2RectangleEquation(GenericIndexedCloudPersist *cloud, const PointCoordinateType* planeEquation, const PointCoordinateType widthX, const PointCoordinateType widthY, const CCVector3 center, CCVector3 xColumnGL, CCVector3 yColumnGL, CCVector3 zColumnGL);
 
+	static int computeCloud2BoxEquation(GenericIndexedCloudPersist* cloud, CCVector3 boxDimensions, CCVector3 xColumnGL, CCVector3 yColumnGL, CCVector3 zColumnGL, CCVector3 transColumnGL, bool signedDist);
+	
 	//! Error estimators
 	enum ERROR_MEASURES
 	{

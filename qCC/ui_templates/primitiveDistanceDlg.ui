@@ -23,7 +23,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>[NOTE]: This tool will measure each clouds points to either an infinite plane, sphere, cylinder, or cone, if distance to a bounded plane is required use the cloud/mesh distance tool.</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;[NOTE]: This tool will measure each clouds points to either a plane, box, sphere, cylinder, or cone.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -120,6 +120,28 @@
      </widget>
     </item>
    </layout>
+  </widget>
+  <widget class="QCheckBox" name="treatPlanesAsBoundedCheckBox">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>110</y>
+     <width>151</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string/>
+   </property>
+   <property name="statusTip">
+    <string/>
+   </property>
+   <property name="text">
+    <string>Treat planes as bounded</string>
+   </property>
   </widget>
  </widget>
  <resources/>

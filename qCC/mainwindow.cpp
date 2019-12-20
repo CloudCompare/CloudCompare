@@ -8913,7 +8913,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 	{
 		bool signedDist = pDD.signedDistances();
 		bool flippedNormals = signedDist && pDD.flipNormals();
-		bool treatPlanesasBounded = pDD.treatPlanesAsBounded();
+		bool treatPlanesAsBounded = pDD.treatPlanesAsBounded();
 		for (auto &cloud : clouds)
 		{
 			ccPointCloud* compEnt = ccHObjectCaster::ToPointCloud(cloud);
@@ -8940,16 +8940,16 @@ void MainWindow::doActionCloudPrimitiveDist()
 				break;
 			case CC_TYPES::PLANE: {
 				ccPlane* plane = static_cast<ccPlane*>(refEntity);
-				if (treatPlanesasBounded)
+				if (treatPlanesAsBounded)
 				{
 					CCLib::SquareMatrix rotationTransform(plane->getTransformation().data(), true);
 					if (!(returnCode = CCLib::DistanceComputationTools::computeCloud2RectangleEquation(compEnt, plane->getXWidth(), plane->getYWidth(), rotationTransform, plane->getCenter(), signedDist)))
-						ccConsole::Error(errString, "Plane", returnCode);
+						ccConsole::Error(errString, "Bounded Plane", returnCode);
 				}
 				else
 				{
 					if (!(returnCode = CCLib::DistanceComputationTools::computeCloud2PlaneEquation(compEnt, static_cast<ccPlane*>(refEntity)->getEquation(), signedDist)))
-						ccConsole::Error(errString, "Plane", returnCode);
+						ccConsole::Error(errString, "Infinite Plane", returnCode);
 				}
 				break;
 			}

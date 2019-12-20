@@ -2523,10 +2523,8 @@ int DistanceComputationTools::computeCloud2RectangleEquation(GenericIndexedCloud
 		}
 		d = dist.normd();
 		dSumSq += d * d;
-		if (signedDist) {
-			double normDotProduct = static_cast<double>(CCVector3::vdotd(Pe->u, normalVector.u)- planeDistance);
-			
-			if (normDotProduct < 0)
+		if (signedDist) {			
+			if (CCVector3::vdotd(Pe->u, normalVector.u) - planeDistance < 0)
 				d = -d;
 		}
 		cloud->setPointScalarValue(i, static_cast<ScalarType>(d));
@@ -2563,34 +2561,34 @@ int DistanceComputationTools::computeCloud2BoxEquation(GenericIndexedCloudPersis
 	double d = 0.0;
 	double dSumSq = 0.0;
 	for (unsigned i = 0; i < count; ++i) {
-		const CCVector3* P = cloud->getPoint(i);
-		CCVector3 pointCenterDifference = (*P - boxCenter);
-		CCVector3 P_inBoxCoords(pointCenterDifference.dot(u), pointCenterDifference.dot(v), pointCenterDifference.dot(w));
+		const CCVector3* p = cloud->getPoint(i);
+		CCVector3 pointCenterDifference = (*p - boxCenter);
+		CCVector3 p_inBoxCoords(pointCenterDifference.dot(u), pointCenterDifference.dot(v), pointCenterDifference.dot(w));
 		dist.x = 0; dist.y = 0; dist.z = 0;
 		insideBox = false;
-		if (P_inBoxCoords.x > -hu && P_inBoxCoords.x < hu && P_inBoxCoords.y > -hv && P_inBoxCoords.y < hv && P_inBoxCoords.z > -hw && P_inBoxCoords.z < hw)
+		if (p_inBoxCoords.x > -hu && p_inBoxCoords.x < hu && p_inBoxCoords.y > -hv && p_inBoxCoords.y < hv && p_inBoxCoords.z > -hw && p_inBoxCoords.z < hw)
 			insideBox = true;
 
-		if (P_inBoxCoords.x < -hu)
-			dist.x = -(P_inBoxCoords.x + hu);
-		else if (P_inBoxCoords.x > hu)
-			dist.x = P_inBoxCoords.x - hu;
+		if (p_inBoxCoords.x < -hu)
+			dist.x = -(p_inBoxCoords.x + hu);
+		else if (p_inBoxCoords.x > hu)
+			dist.x = p_inBoxCoords.x - hu;
 		else if (insideBox)
-			dist.x = abs(P_inBoxCoords.x) - hu;
+			dist.x = abs(p_inBoxCoords.x) - hu;
 
-		if (P_inBoxCoords.y < -hv)
-			dist.y = -(P_inBoxCoords.y + hv);
-		else if (P_inBoxCoords.y > hv)
-			dist.y = P_inBoxCoords.y - hv;
+		if (p_inBoxCoords.y < -hv)
+			dist.y = -(p_inBoxCoords.y + hv);
+		else if (p_inBoxCoords.y > hv)
+			dist.y = p_inBoxCoords.y - hv;
 		else if (insideBox)
-			dist.y = abs(P_inBoxCoords.y) - hv;
+			dist.y = abs(p_inBoxCoords.y) - hv;
 
-		if (P_inBoxCoords.z < -hw)
-			dist.z = -(P_inBoxCoords.z + hw);
-		else if (P_inBoxCoords.z > hw)
-			dist.z = P_inBoxCoords.z - hw;
+		if (p_inBoxCoords.z < -hw)
+			dist.z = -(p_inBoxCoords.z + hw);
+		else if (p_inBoxCoords.z > hw)
+			dist.z = p_inBoxCoords.z - hw;
 		else if (insideBox)
-			dist.z = abs(P_inBoxCoords.z) - hw;
+			dist.z = abs(p_inBoxCoords.z) - hw;
 
 		if (insideBox){ //take min distance inside box
 			if (dist.x >= dist.y && dist.x >= dist.z) {
@@ -2608,9 +2606,8 @@ int DistanceComputationTools::computeCloud2BoxEquation(GenericIndexedCloudPersis
 		}
 		d = dist.normd();
 		dSumSq += d * d;
-		if (signedDist)
-			if (insideBox)
-				d = -d;
+		if (signedDist && insideBox)
+			d = -d;
 		cloud->setPointScalarValue(i, static_cast<ScalarType>(d));
 	}
 	if (rms)

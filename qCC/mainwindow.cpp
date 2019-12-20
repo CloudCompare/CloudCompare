@@ -8907,10 +8907,13 @@ void MainWindow::doActionCloudPrimitiveDist()
 	}
 		
 	ccPrimitiveDistanceDlg pDD{ this };
+	if (refEntity->isA(CC_TYPES::PLANE))
+		pDD.treatPlanesAsBoundedCheckBox->setUpdatesEnabled(true);
 	if (pDD.exec())
 	{
 		bool signedDist = pDD.signedDistances();
 		bool flippedNormals = signedDist && pDD.flipNormals();
+		bool treatPlanesasBounded = pDD.treatPlanesAsBounded();
 		for (auto &cloud : clouds)
 		{
 			ccPointCloud* compEnt = ccHObjectCaster::ToPointCloud(cloud);
@@ -8936,13 +8939,18 @@ void MainWindow::doActionCloudPrimitiveDist()
 					ccConsole::Error(errString, "Sphere", returnCode);
 				break;
 			case CC_TYPES::PLANE: {
-				ccGLMatrix GLtransform = refEntity->getGLTransformationHistory();
 				ccPlane* plane = static_cast<ccPlane*>(refEntity);
-				CCVector3 xColumnGL = GLtransform.getColumnAsVec3D(0);
-				CCVector3 yColumnGL = GLtransform.getColumnAsVec3D(1);
-				CCVector3 zColumnGL = GLtransform.getColumnAsVec3D(2);
-				if (!(returnCode = CCLib::DistanceComputationTools::computeCloud2RectangleEquation(compEnt, plane->getEquation(), plane->getXWidth(), plane->getYWidth(), plane->getCenter(),xColumnGL,yColumnGL,zColumnGL)))
-					ccConsole::Error(errString, "Plane", returnCode);
+				if (treatPlanesasBounded)
+				{
+					CCLib::SquareMatrix rotationTransform(plane->getTransformation().data(), true);
+					if (!(returnCode = CCLib::DistanceComputationTools::computeCloud2RectangleEquation(compEnt, plane->getXWidth(), plane->getYWidth(), rotationTransform, plane->getCenter(), signedDist)))
+						ccConsole::Error(errString, "Plane", returnCode);
+				}
+				else
+				{
+					if (!(returnCode = CCLib::DistanceComputationTools::computeCloud2PlaneEquation(compEnt, static_cast<ccPlane*>(refEntity)->getEquation(), signedDist)))
+						ccConsole::Error(errString, "Plane", returnCode);
+				}
 				break;
 			}
 			case CC_TYPES::CYLINDER:
@@ -8954,13 +8962,10 @@ void MainWindow::doActionCloudPrimitiveDist()
 					ccConsole::Error(errString, "Cone", returnCode);
 				break;
 			case CC_TYPES::BOX: {
-				ccGLMatrix GLtransform = refEntity->getGLTransformationHistory();
-				ccBox* box = static_cast<ccBox*>(refEntity);
-				CCVector3 xColumnGL = GLtransform.getColumnAsVec3D(0);
-				CCVector3 yColumnGL = GLtransform.getColumnAsVec3D(1);
-				CCVector3 zColumnGL = GLtransform.getColumnAsVec3D(2);
-				CCVector3 transColumnGL = GLtransform.getColumnAsVec3D(3);
-				if (!(returnCode = CCLib::DistanceComputationTools::computeCloud2BoxEquation(compEnt, box->getDimensions(), xColumnGL, yColumnGL, zColumnGL, transColumnGL, signedDist)))
+				ccGLMatrix glTransform = refEntity->getGLTransformationHistory();
+				CCLib::SquareMatrix rotationTransform(glTransform.data(), true);
+				CCVector3 boxCenter = glTransform.getColumnAsVec3D(3);
+				if (!(returnCode = CCLib::DistanceComputationTools::computeCloud2BoxEquation(compEnt, static_cast<ccBox*>(refEntity)->getDimensions(), rotationTransform, boxCenter, signedDist)))
 					ccConsole::Error(errString, "Box", returnCode);
 				break; 
 			}

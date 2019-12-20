@@ -38,7 +38,7 @@ ccPrimitiveDistanceDlg::ccPrimitiveDistanceDlg(QWidget* parent)
 	signedDistCheckBox->setChecked(s_signedDist);
 	flipNormalsCheckBox->setEnabled(s_signedDist);
 	flipNormalsCheckBox->setChecked(s_flipNormals);
-	
+	treatPlanesAsBoundedCheckBox->setUpdatesEnabled(false);
 	connect(cancelButton, &QPushButton::clicked, this, &ccPrimitiveDistanceDlg::cancelAndExit);
 	connect(okButton, &QPushButton::clicked, this, &ccPrimitiveDistanceDlg::applyAndExit);
 	connect(signedDistCheckBox, &QCheckBox::toggled, this, &ccPrimitiveDistanceDlg::toggleSigned);

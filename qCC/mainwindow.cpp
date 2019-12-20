@@ -8908,7 +8908,9 @@ void MainWindow::doActionCloudPrimitiveDist()
 		
 	ccPrimitiveDistanceDlg pDD{ this };
 	if (refEntity->isA(CC_TYPES::PLANE))
+	{
 		pDD.treatPlanesAsBoundedCheckBox->setUpdatesEnabled(true);
+	}
 	if (pDD.exec())
 	{
 		bool signedDist = pDD.signedDistances();
@@ -8938,7 +8940,8 @@ void MainWindow::doActionCloudPrimitiveDist()
 				if (!(returnCode = CCLib::DistanceComputationTools::computeCloud2SphereEquation(compEnt, refEntity->getOwnBB().getCenter(), static_cast<ccSphere*>(refEntity)->getRadius(), signedDist)))
 					ccConsole::Error(errString, "Sphere", returnCode);
 				break;
-			case CC_TYPES::PLANE: {
+			case CC_TYPES::PLANE: 
+			{
 				ccPlane* plane = static_cast<ccPlane*>(refEntity);
 				if (treatPlanesAsBounded)
 				{
@@ -8961,7 +8964,8 @@ void MainWindow::doActionCloudPrimitiveDist()
 				if(!(returnCode = CCLib::DistanceComputationTools::computeCloud2ConeEquation(compEnt, static_cast<ccCone*>(refEntity)->getLargeCenter(), static_cast<ccCone*>(refEntity)->getSmallCenter(), static_cast<ccCone*>(refEntity)->getLargeRadius(), static_cast<ccCone*>(refEntity)->getSmallRadius(), signedDist)))
 					ccConsole::Error(errString, "Cone", returnCode);
 				break;
-			case CC_TYPES::BOX: {
+			case CC_TYPES::BOX: 
+			{
 				ccGLMatrix glTransform = refEntity->getGLTransformationHistory();
 				CCLib::SquareMatrix rotationTransform(glTransform.data(), true);
 				CCVector3 boxCenter = glTransform.getColumnAsVec3D(3);

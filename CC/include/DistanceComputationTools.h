@@ -23,6 +23,7 @@
 #include "CCConst.h"
 #include "CCToolbox.h"
 #include "DgmOctree.h"
+#include "SquareMatrix.h"
 
 namespace CCLib
 {
@@ -306,7 +307,11 @@ public: //distance to simple entities (triangles, planes, etc.)
 		\return negative error code or a positive value in case of success
 	**/
 	static int computeCloud2PlaneEquation(GenericIndexedCloudPersist* cloud, const PointCoordinateType* planeEquation, bool signedDistances = true, double * rms = nullptr);
+	
+	static int computeCloud2RectangleEquation(GenericIndexedCloudPersist *cloud, const PointCoordinateType widthX, const PointCoordinateType widthY, const SquareMatrix rotationTransform, const CCVector3 center, bool signedDist = true, double* rms = nullptr);
 
+	static int computeCloud2BoxEquation(GenericIndexedCloudPersist* cloud, const CCVector3 boxDimensions, const SquareMatrix rotationTransform, const CCVector3 boxCenter, bool signedDist = true, double* rms = nullptr);
+	
 	//! Error estimators
 	enum ERROR_MEASURES
 	{

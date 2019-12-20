@@ -15,8 +15,8 @@ v2.11 (Anoia) - (in development)
   - Edit > Plane > Compare: to compare the two selected planes (angle and relative distances)
   - Edit > Mesh > Flip triangles: to flip the triangles (vertices) in case they are defined in the wrong order
   - Tools > Distances > Cloud/Primitive Dist
-	- [Used to calculate distance to primitive shape (supports spheres, planes, cylinders and cones) rather than the mesh of that shape (more accurate results for spheres)
-		for planes this works with the planes equation rather than the mesh so it works as if the plane is infinite.
+	- [Used to calculate distance to primitive shape (supports spheres, planes, cylinders, cones and boxes) rather than the mesh of that shape (more accurate results for spheres)
+		planes are now optionally treated as bounded or unbounded.
 		for cones this will not work with Snout mode cones.]
   - Command line:
 	- The 1st Order Moment tool (Tools>Other>Compute geometric features) can now be accessed via 

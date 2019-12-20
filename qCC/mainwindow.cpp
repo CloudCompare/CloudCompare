@@ -8876,11 +8876,12 @@ void MainWindow::doActionCloudPrimitiveDist()
 			if (m_selectedEntities[i]->isA(CC_TYPES::PLANE) || 
 				m_selectedEntities[i]->isA(CC_TYPES::SPHERE) ||
 				m_selectedEntities[i]->isA(CC_TYPES::CYLINDER) ||
-				m_selectedEntities[i]->isA(CC_TYPES::CONE))
+				m_selectedEntities[i]->isA(CC_TYPES::CONE) ||
+				m_selectedEntities[i]->isA(CC_TYPES::BOX))
 			{
 				if (foundPrimitive)
 				{
-					ccConsole::Error("[Compute Primitive Distances] Select only a single Plane/Sphere/Cylinder/Cone Primitive");
+					ccConsole::Error("[Compute Primitive Distances] Select only a single Plane/Box/Sphere/Cylinder/Cone Primitive");
 					return;
 				}
 				foundPrimitive = true;
@@ -8896,7 +8897,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 
 	if (!foundPrimitive)
 	{
-		ccConsole::Error("[Compute Primitive Distances] Select at least one Plane/Sphere/Cylinder/Cone Primitive!");
+		ccConsole::Error("[Compute Primitive Distances] Select at least one Plane/Box/Sphere/Cylinder/Cone Primitive!");
 		return;
 	}
 	if (clouds.size() <= 0)
@@ -8906,10 +8907,15 @@ void MainWindow::doActionCloudPrimitiveDist()
 	}
 		
 	ccPrimitiveDistanceDlg pDD{ this };
+	if (refEntity->isA(CC_TYPES::PLANE))
+	{
+		pDD.treatPlanesAsBoundedCheckBox->setUpdatesEnabled(true);
+	}
 	if (pDD.exec())
 	{
 		bool signedDist = pDD.signedDistances();
 		bool flippedNormals = signedDist && pDD.flipNormals();
+		bool treatPlanesAsBounded = pDD.treatPlanesAsBounded();
 		for (auto &cloud : clouds)
 		{
 			ccPointCloud* compEnt = ccHObjectCaster::ToPointCloud(cloud);
@@ -8934,10 +8940,22 @@ void MainWindow::doActionCloudPrimitiveDist()
 				if (!(returnCode = CCLib::DistanceComputationTools::computeCloud2SphereEquation(compEnt, refEntity->getOwnBB().getCenter(), static_cast<ccSphere*>(refEntity)->getRadius(), signedDist)))
 					ccConsole::Error(errString, "Sphere", returnCode);
 				break;
-			case CC_TYPES::PLANE:
-				if (!(returnCode = CCLib::DistanceComputationTools::computeCloud2PlaneEquation(compEnt, static_cast<ccPlane*>(refEntity)->getEquation(), signedDist)))
-					ccConsole::Error(errString, "Plane", returnCode);
+			case CC_TYPES::PLANE: 
+			{
+				ccPlane* plane = static_cast<ccPlane*>(refEntity);
+				if (treatPlanesAsBounded)
+				{
+					CCLib::SquareMatrix rotationTransform(plane->getTransformation().data(), true);
+					if (!(returnCode = CCLib::DistanceComputationTools::computeCloud2RectangleEquation(compEnt, plane->getXWidth(), plane->getYWidth(), rotationTransform, plane->getCenter(), signedDist)))
+						ccConsole::Error(errString, "Bounded Plane", returnCode);
+				}
+				else
+				{
+					if (!(returnCode = CCLib::DistanceComputationTools::computeCloud2PlaneEquation(compEnt, static_cast<ccPlane*>(refEntity)->getEquation(), signedDist)))
+						ccConsole::Error(errString, "Infinite Plane", returnCode);
+				}
 				break;
+			}
 			case CC_TYPES::CYLINDER:
 				if (!(returnCode = CCLib::DistanceComputationTools::computeCloud2CylinderEquation(compEnt, static_cast<ccCylinder*>(refEntity)->getBottomCenter(), static_cast<ccCylinder*>(refEntity)->getTopCenter(), static_cast<ccCylinder*>(refEntity)->getBottomRadius(), signedDist)))
 					ccConsole::Error(errString, "Cylinder", returnCode);
@@ -8946,6 +8964,15 @@ void MainWindow::doActionCloudPrimitiveDist()
 				if(!(returnCode = CCLib::DistanceComputationTools::computeCloud2ConeEquation(compEnt, static_cast<ccCone*>(refEntity)->getLargeCenter(), static_cast<ccCone*>(refEntity)->getSmallCenter(), static_cast<ccCone*>(refEntity)->getLargeRadius(), static_cast<ccCone*>(refEntity)->getSmallRadius(), signedDist)))
 					ccConsole::Error(errString, "Cone", returnCode);
 				break;
+			case CC_TYPES::BOX: 
+			{
+				ccGLMatrix glTransform = refEntity->getGLTransformationHistory();
+				CCLib::SquareMatrix rotationTransform(glTransform.data(), true);
+				CCVector3 boxCenter = glTransform.getColumnAsVec3D(3);
+				if (!(returnCode = CCLib::DistanceComputationTools::computeCloud2BoxEquation(compEnt, static_cast<ccBox*>(refEntity)->getDimensions(), rotationTransform, boxCenter, signedDist)))
+					ccConsole::Error(errString, "Box", returnCode);
+				break; 
+			}
 			default:
 				ccConsole::Error("[Compute Primitive Distances] Unsupported primitive type"); //Shouldn't ever reach here...
 				break;

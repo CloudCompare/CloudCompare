@@ -300,6 +300,11 @@ void AsciiOpenDlg::updateTable()
 		for (unsigned i = 0; i < m_skippedLines;)
 		{
 			QString currentLine = stream.readLine();
+			if (currentLine.isNull())
+			{
+				//end of file reached
+				break;
+			}
 			if (currentLine.isEmpty())
 			{
 				//empty lines are ignored

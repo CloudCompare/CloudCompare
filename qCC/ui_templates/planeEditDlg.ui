@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>300</width>
-    <height>458</height>
+    <height>499</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -37,7 +37,7 @@
           <string notr="true">°</string>
          </property>
          <property name="decimals">
-          <number>3</number>
+          <number>4</number>
          </property>
          <property name="minimum">
           <double>0.000000000000000</double>
@@ -96,7 +96,7 @@
           <string notr="true">Nx = </string>
          </property>
          <property name="decimals">
-          <number>6</number>
+          <number>8</number>
          </property>
          <property name="minimum">
           <double>-1000000.000000000000000</double>
@@ -112,7 +112,7 @@
           <string notr="true">Ny = </string>
          </property>
          <property name="decimals">
-          <number>6</number>
+          <number>8</number>
          </property>
          <property name="minimum">
           <double>-1000000.000000000000000</double>
@@ -128,7 +128,7 @@
           <string notr="true">Nz = </string>
          </property>
          <property name="decimals">
-          <number>6</number>
+          <number>8</number>
          </property>
          <property name="minimum">
           <double>-1000000.000000000000000</double>
@@ -164,7 +164,7 @@
          <string>Plane width</string>
         </property>
         <property name="decimals">
-         <number>6</number>
+         <number>8</number>
         </property>
         <property name="minimum">
          <double>0.000001000000000</double>
@@ -190,7 +190,7 @@
          <string>Plane height</string>
         </property>
         <property name="decimals">
-         <number>6</number>
+         <number>8</number>
         </property>
         <property name="minimum">
          <double>0.000001000000000</double>

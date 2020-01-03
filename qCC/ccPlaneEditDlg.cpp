@@ -112,7 +112,10 @@ void ccPlaneEditDlg::saveParamsAndAccept()
 	}
 	else //creation
 	{
-		ccPlane* plane = new ccPlane();
+		PointCoordinateType width = static_cast<PointCoordinateType>(wDoubleSpinBox->value());
+		PointCoordinateType height = static_cast<PointCoordinateType>(hDoubleSpinBox->value());
+
+		ccPlane* plane = new ccPlane(width, height);
 		updatePlane(plane);
 		if (m_pickingWin)
 		{
@@ -287,16 +290,12 @@ void ccPlaneEditDlg::updatePlane(ccPlane* plane)
 
 	//shall we transform (translate and / or rotate) the plane?
 	ccGLMatrix trans;
-	bool needToApplyTrans = false;
-	bool needToApplyRot = false;
-
-	needToApplyRot = (fabs(N.dot(Nd) - PC_ONE) > std::numeric_limits<PointCoordinateType>::epsilon());
-	needToApplyTrans = needToApplyRot || ((C - Cd).norm2d() != 0);
+	bool needToApplyRot = (fabs(N.dot(Nd) - PC_ONE) > std::numeric_limits<PointCoordinateType>::epsilon());
+	bool needToApplyTrans = (needToApplyRot || ((C - Cd).norm2d() != 0));
 
 	if (needToApplyTrans)
 	{
 		trans.setTranslation(-C);
-		needToApplyTrans = true;
 	}
 	if (needToApplyRot)
 	{

@@ -2465,7 +2465,7 @@ int DistanceComputationTools::computeCloud2PlaneEquation(GenericIndexedCloudPers
 	return count;
 }
 
-int DistanceComputationTools::computeCloud2RectangleEquation(GenericIndexedCloudPersist *cloud, const PointCoordinateType widthX, const PointCoordinateType widthY, SquareMatrix rotationTransform, CCVector3 center, bool signedDist/*=true*/, double* rms/*= nullptr*/) {
+int DistanceComputationTools::computeCloud2RectangleEquation(GenericIndexedCloudPersist *cloud, PointCoordinateType widthX, PointCoordinateType widthY, const SquareMatrix& rotationTransform, const CCVector3& center, bool signedDist/*=true*/, double* rms/*= nullptr*/) {
 	// p3---------------------p2
 	// ^					  |
 	// |e1					  |
@@ -2493,8 +2493,8 @@ int DistanceComputationTools::computeCloud2RectangleEquation(GenericIndexedCloud
 		return -4;
 	}
 	
-	CCVector3 widthXVec(widthX,0,0);
-	CCVector3 widthYVec(0,widthY,0);
+	CCVector3 widthXVec(widthX, 0, 0);
+	CCVector3 widthYVec(0, widthY, 0);
 	CCVector3 normalVector(0, 0, 1);
 
 	widthXVec = rotationTransform * widthXVec;
@@ -2516,28 +2516,28 @@ int DistanceComputationTools::computeCloud2RectangleEquation(GenericIndexedCloud
 		PointCoordinateType s = e0.dot(dist);
 		if (s > 0) 
 		{
-			PointCoordinateType dot0 = e0.dot(e0);
+			PointCoordinateType dot0 = e0.norm2();
 			if (s < dot0)
 			{
-				dist = dist - (s / dot0)*e0;
+				dist -= (s / dot0)*e0;
 			}
 			else
 			{
-				dist = dist - e0;
+				dist -= e0;
 			}
 		}
 
 		PointCoordinateType t = e1.dot(dist);
 		if (t > 0) 
 		{
-			PointCoordinateType dot1 = e1.dot(e1);
+			PointCoordinateType dot1 = e1.norm2();
 			if (t < dot1)
 			{
-				dist = dist - (t / dot1)*e1;
+				dist -= (t / dot1)*e1;
 			}
 			else
 			{
-				dist = dist - e1;
+				dist -= e1;
 			}
 		}
 		d = dist.normd();
@@ -2555,7 +2555,7 @@ int DistanceComputationTools::computeCloud2RectangleEquation(GenericIndexedCloud
 	return count;
 }
 
-int DistanceComputationTools::computeCloud2BoxEquation(GenericIndexedCloudPersist* cloud, CCVector3 boxDimensions, SquareMatrix rotationTransform, CCVector3 boxCenter, bool signedDist/*=true*/, double* rms/*= nullptr*/) {
+int DistanceComputationTools::computeCloud2BoxEquation(GenericIndexedCloudPersist* cloud, const CCVector3& boxDimensions, const SquareMatrix& rotationTransform, const CCVector3& boxCenter, bool signedDist/*=true*/, double* rms/*= nullptr*/) {
 	assert(cloud);
 	if (!cloud)
 	{
@@ -2582,9 +2582,9 @@ int DistanceComputationTools::computeCloud2BoxEquation(GenericIndexedCloudPersis
 	CCVector3 u(1, 0, 0);
 	CCVector3 v(0, 1, 0);
 	CCVector3 w(0, 0, 1);
-	u = rotationTransform*u;
-	v = rotationTransform*v;
-	w = rotationTransform*w;
+	u = rotationTransform * u;
+	v = rotationTransform * v;
+	w = rotationTransform * w;
 	CCVector3 dist;
 	bool insideBox;
 	double d = 0.0;

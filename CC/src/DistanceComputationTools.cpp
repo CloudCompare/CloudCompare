@@ -2500,9 +2500,9 @@ int DistanceComputationTools::computeCloud2RectangleEquation(GenericIndexedCloud
 	widthXVec = rotationTransform * widthXVec;
 	widthYVec = rotationTransform * widthYVec;
 	normalVector = rotationTransform * normalVector;
-	PointCoordinateType planeDistance = CCVector3::vdotd(center.u, normalVector.u);
-	PointCoordinateType d = 0.0;
-	PointCoordinateType dSumSq = 0.0;
+	PointCoordinateType planeDistance = center.dot(normalVector);
+	PointCoordinateType d = 0;
+	PointCoordinateType dSumSq = 0;
 	CCVector3 rectangleP0 = center - (widthXVec / 2) - (widthYVec / 2);
 	CCVector3 rectangleP1 = center + (widthXVec / 2) - (widthYVec / 2);
 	CCVector3 rectangleP3 = center - (widthXVec / 2) + (widthYVec / 2);
@@ -2511,8 +2511,8 @@ int DistanceComputationTools::computeCloud2RectangleEquation(GenericIndexedCloud
 
 	for (unsigned i = 0; i < count; ++i) 
 	{
-		const CCVector3* Pe = cloud->getPoint(i);
-		CCVector3 dist = (*Pe - rectangleP0);
+		const CCVector3* pe = cloud->getPoint(i);
+		CCVector3 dist = (*pe - rectangleP0);
 		PointCoordinateType s = e0.dot(dist);
 		if (s > 0) 
 		{
@@ -2542,7 +2542,7 @@ int DistanceComputationTools::computeCloud2RectangleEquation(GenericIndexedCloud
 		}
 		d = dist.normd();
 		dSumSq += d * d;
-		if (signedDist && CCVector3::vdotd(Pe->u, normalVector.u) - planeDistance < 0)
+		if (signedDist && pe->dot(normalVector) - planeDistance < 0)
 		{			
 			d = -d;
 		}
@@ -2587,8 +2587,8 @@ int DistanceComputationTools::computeCloud2BoxEquation(GenericIndexedCloudPersis
 	w = rotationTransform * w;
 	CCVector3 dist;
 	bool insideBox;
-	PointCoordinateType d = 0.0;
-	PointCoordinateType dSumSq = 0.0;
+	PointCoordinateType d = 0;
+	PointCoordinateType dSumSq = 0;
 	for (unsigned i = 0; i < count; ++i) 
 	{
 		const CCVector3* p = cloud->getPoint(i);

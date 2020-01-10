@@ -2465,7 +2465,8 @@ int DistanceComputationTools::computeCloud2PlaneEquation(GenericIndexedCloudPers
 	return count;
 }
 
-int DistanceComputationTools::computeCloud2RectangleEquation(GenericIndexedCloudPersist *cloud, PointCoordinateType widthX, PointCoordinateType widthY, const SquareMatrix& rotationTransform, const CCVector3& center, bool signedDist/*=true*/, double* rms/*= nullptr*/) {
+int DistanceComputationTools::computeCloud2RectangleEquation(GenericIndexedCloudPersist *cloud, PointCoordinateType widthX, PointCoordinateType widthY, const SquareMatrix& rotationTransform, const CCVector3& center, bool signedDist/*=true*/, double* rms/*= nullptr*/) 
+{
 	// p3---------------------p2
 	// ^					  |
 	// |e1					  |
@@ -2555,7 +2556,8 @@ int DistanceComputationTools::computeCloud2RectangleEquation(GenericIndexedCloud
 	return count;
 }
 
-int DistanceComputationTools::computeCloud2BoxEquation(GenericIndexedCloudPersist* cloud, const CCVector3& boxDimensions, const SquareMatrix& rotationTransform, const CCVector3& boxCenter, bool signedDist/*=true*/, double* rms/*= nullptr*/) {
+int DistanceComputationTools::computeCloud2BoxEquation(GenericIndexedCloudPersist* cloud, const CCVector3& boxDimensions, const SquareMatrix& rotationTransform, const CCVector3& boxCenter, bool signedDist/*=true*/, double* rms/*= nullptr*/) 
+{
 	assert(cloud);
 	if (!cloud)
 	{

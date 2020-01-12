@@ -43,6 +43,7 @@ namespace ccEntityAction
 	bool	sfAddIdField(const ccHObject::Container &selectedEntities);
 	bool	sfSetAsCoord(const ccHObject::Container &selectedEntities, QWidget *parent);
 	bool	exportCoordToSF(const ccHObject::Container &selectedEntities, QWidget *parent);
+	bool	exportNormalToSF(const ccHObject::Container &selectedEntities, QWidget *parent, bool* exportDimensions = nullptr);
 	bool	sfArithmetic(const ccHObject::Container &selectedEntities, QWidget *parent);
 	bool	sfFromColor(const ccHObject::Container &selectedEntities, QWidget *parent);
 	bool	interpolateSFs(const ccHObject::Container &selectedEntities, ccMainAppInterface *parent);

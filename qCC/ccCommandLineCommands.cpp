@@ -107,6 +107,7 @@ constexpr char COMMAND_PLY_EXPORT_FORMAT[]				= "PLY_EXPORT_FMT";
 constexpr char COMMAND_COMPUTE_GRIDDED_NORMALS[]		= "COMPUTE_NORMALS";
 constexpr char COMMAND_COMPUTE_OCTREE_NORMALS[]			= "OCTREE_NORMALS";
 constexpr char COMMAND_CONVERT_NORMALS_TO_DIP[]			= "NORMALS_TO_DIP";
+constexpr char COMMAND_CONVERT_NORMALS_TO_SFS[]			= "NORMALS_TO_SFS";
 constexpr char COMMAND_CLEAR_NORMALS[]					= "CLEAR_NORMALS";
 constexpr char COMMAND_MESH_VOLUME[]                    = "MESH_VOLUME";
 constexpr char COMMAND_VOLUME_TO_FILE[]					= "TO_FILE";
@@ -665,6 +666,51 @@ bool CommandConvertNormalsToDipAndDipDir::process(ccCommandLineInterface &cmd)
 		if (cmd.autoSaveMode())
 		{
 			QString errorStr = cmd.exportEntity(thisCloudDesc, "_DIP_AND_DIP_DIR");
+			if (!errorStr.isEmpty())
+			{
+				return cmd.error(errorStr);
+			}
+		}
+	}
+
+	return true;
+}
+
+
+CommandConvertNormalsToSFs::CommandConvertNormalsToSFs()
+	: ccCommandLineInterface::Command("Convert normals to scalar fields", COMMAND_CONVERT_NORMALS_TO_SFS)
+{}
+
+bool CommandConvertNormalsToSFs::process(ccCommandLineInterface &cmd)
+{
+	cmd.print("[CONVERT NORMALS TO SCALAR FIELD(S)]");
+	if (cmd.clouds().empty())
+	{
+		return cmd.error(QObject::tr("No input point cloud (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_CONVERT_NORMALS_TO_SFS));
+	}
+
+	for (CLCloudDesc& thisCloudDesc : cmd.clouds())
+	{
+		ccPointCloud* cloud = thisCloudDesc.pc;
+
+		if (!cloud->hasNormals())
+		{
+			cmd.warning(QString("Cloud %1 has no normals").arg(cloud->getName()));
+			continue;
+		}
+
+		bool exportDims[3] = { true, true, true };
+
+		ccHObject::Container container;
+		container.push_back(cloud);
+		if (!ccEntityAction::exportNormalToSF(container, cmd.widgetParent(), exportDims))
+		{
+			return cmd.error("Failed to convert normals to scalar fields");
+		}
+
+		if (cmd.autoSaveMode())
+		{
+			QString errorStr = cmd.exportEntity(thisCloudDesc, "_NORM_TO_SF");
 			if (!errorStr.isEmpty())
 			{
 				return cmd.error(errorStr);

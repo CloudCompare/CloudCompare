@@ -515,6 +515,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionInvertNormals,				&QAction::triggered, this, &MainWindow::doActionInvertNormals);
 	connect(m_UI->actionConvertNormalToHSV,			&QAction::triggered, this, &MainWindow::doActionConvertNormalsToHSV);
 	connect(m_UI->actionConvertNormalToDipDir,		&QAction::triggered, this, &MainWindow::doActionConvertNormalsToDipDir);
+	connect(m_UI->actionExportNormalToSF,			&QAction::triggered, this, &MainWindow::doActionExportNormalToSF);
 	connect(m_UI->actionOrientNormalsMST,			&QAction::triggered, this, &MainWindow::doActionOrientNormalsMST);
 	connect(m_UI->actionOrientNormalsFM,			&QAction::triggered, this, &MainWindow::doActionOrientNormalsFM);
 	connect(m_UI->actionClearNormals, &QAction::triggered, this, [=]() {
@@ -614,7 +615,8 @@ void MainWindow::connectActions()
 	connect(m_UI->actionRasterize,					&QAction::triggered, this, &MainWindow::doActionRasterize);
 	connect(m_UI->actionConvertPolylinesToMesh,		&QAction::triggered, this, &MainWindow::doConvertPolylinesToMesh);
 	//connect(m_UI->actionCreateSurfaceBetweenTwoPolylines, &QAction::triggered, this, &MainWindow::doMeshTwoPolylines); //DGM: already connected to actionMeshTwoPolylines
-	connect(m_UI->actionExportCoordToSF,			&QAction::triggered, this, &MainWindow::doActionExportCoordToSF);
+	connect(m_UI->actionExportCoordToSF, &QAction::triggered, this, &MainWindow::doActionExportCoordToSF);
+	
 	//"Tools > Registration" menu
 	connect(m_UI->actionMatchBBCenters,				&QAction::triggered, this, &MainWindow::doActionMatchBBCenters);
 	connect(m_UI->actionMatchScales,				&QAction::triggered, this, &MainWindow::doActionMatchScales);
@@ -4154,6 +4156,17 @@ void MainWindow::doActionSetSFAsCoord()
 void MainWindow::doActionExportCoordToSF()
 {
 	if (!ccEntityAction::exportCoordToSF(m_selectedEntities, this))
+	{
+		return;
+	}
+
+	refreshAll();
+	updateUI();
+}
+
+void MainWindow::doActionExportNormalToSF()
+{
+	if (!ccEntityAction::exportNormalToSF(m_selectedEntities, this))
 	{
 		return;
 	}
@@ -10287,6 +10300,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionClone->setEnabled(atLeastOneEntity);
 	m_UI->actionDelete->setEnabled(atLeastOneEntity);
 	m_UI->actionExportCoordToSF->setEnabled(atLeastOneEntity);
+	m_UI->actionExportNormalToSF->setEnabled(atLeastOneNormal);
 	m_UI->actionSegment->setEnabled(atLeastOneEntity && activeWindow);
 	m_UI->actionTranslateRotate->setEnabled(atLeastOneEntity && activeWindow);
 	m_UI->actionShowDepthBuffer->setEnabled(atLeastOneGBLSensor);

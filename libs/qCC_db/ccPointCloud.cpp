@@ -5903,3 +5903,62 @@ bool ccPointCloud::exportCoordToSF(bool exportDims[3])
 
 	return true;
 }
+
+bool ccPointCloud::exportNormalToSF(bool exportDims[3])
+{
+	if (!exportDims[0] && !exportDims[1] && !exportDims[2])
+	{
+		//nothing to do?!
+		assert(false);
+		return true;
+	}
+
+	if (!hasNormals())
+	{
+		ccLog::Warning("Cloud has no normals");
+		return false;
+	}
+
+	const QString defaultSFName[3] = { "Nx", "Ny", "Nz" };
+
+	unsigned ptsCount = static_cast<unsigned>(m_normals->size());
+
+	//test each dimension
+	for (unsigned d = 0; d < 3; ++d)
+	{
+		if (!exportDims[d])
+		{
+			continue;
+		}
+
+		int sfIndex = getScalarFieldIndexByName(qPrintable(defaultSFName[d]));
+		if (sfIndex < 0)
+		{
+			sfIndex = addScalarField(qPrintable(defaultSFName[d]));
+		}
+		if (sfIndex < 0)
+		{
+			ccLog::Warning("[ccPointCloud::exportNormalToSF] Not enough memory!");
+			return false;
+		}
+
+		CCLib::ScalarField* sf = getScalarField(sfIndex);
+		if (!sf)
+		{
+			assert(false);
+			return false;
+		}
+
+		for (unsigned k = 0; k < ptsCount; ++k)
+		{
+			ScalarType s = static_cast<ScalarType>(getPointNormal(k).u[d]);
+			sf->setValue(k, s);
+		}
+		sf->computeMinAndMax();
+
+		setCurrentDisplayedScalarField(sfIndex);
+		showSF(true);
+	}
+
+	return true;
+}

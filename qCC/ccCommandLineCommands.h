@@ -55,6 +55,13 @@ struct CommandConvertNormalsToDipAndDipDir : public ccCommandLineInterface::Comm
 	bool process(ccCommandLineInterface& cmd) override;
 };
 
+struct CommandConvertNormalsToSFs : public ccCommandLineInterface::Command
+{
+	CommandConvertNormalsToSFs();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
 struct CommandSubsample : public ccCommandLineInterface::Command
 {
 	CommandSubsample();

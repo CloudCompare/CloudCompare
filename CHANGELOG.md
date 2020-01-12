@@ -18,6 +18,9 @@ v2.11 (Anoia) - (in development)
 	- [Used to calculate distance to primitive shape (supports spheres, planes, cylinders, cones and boxes) rather than the mesh of that shape (more accurate results for spheres)
 		planes are now optionally treated as bounded or unbounded.
 		for cones this will not work with Snout mode cones.]
+  - New tool:
+	  - 'Edit > Normals > Export normals to SF(s)' (or equivalently 'Edit > Scalar fields > Export normals to SF(s)')
+	  - command line argument: '-NORMALS_TO_SFS' (all dimensions are exported by default, as 3 scalar fields)
   - Command line:
 	- The 1st Order Moment tool (Tools>Other>Compute geometric features) can now be accessed via 
 		the command line mode with option -MOMENT {kernel size}
@@ -28,6 +31,7 @@ v2.11 (Anoia) - (in development)
 			LINEARITY, PCA1, PCA2, SURFACE_VARIATION, SPHERICITY, or VERTICALITY.
 		- Computes 1st order moment on all opened clouds and auto saved by default.
     - NORMALS_TO_DIP: converts the loaded cloud normals to dip and dip direction (scalar fields)
+	- NORMALS_TO_SFS: converts the loaded cloud normals to 3 scalar fields (Nx, Ny and Nz)
 
 - Improvements
   - Better support for High DPI screens (4K) on Windows

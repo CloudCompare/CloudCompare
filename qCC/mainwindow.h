@@ -364,6 +364,7 @@ private slots:
 	void doConvertPolylinesToMesh();
 	void doMeshTwoPolylines();
 	void doActionExportCoordToSF();
+	void doActionExportNormalToSF();
 	void doComputeBestFitBB();
 	void doActionCrop();
 

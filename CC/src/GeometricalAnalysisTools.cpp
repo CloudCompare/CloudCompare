@@ -670,7 +670,7 @@ CCLib::SquareMatrixd GeometricalAnalysisTools::ComputeCrossCovarianceMatrix(Gene
 		l3[2] += Pt.z * Qt.z;
 	}
 
-	covMat.scale(1.0/static_cast<double>(count));
+	covMat.scale(1.0 / count);
 
 	return covMat;
 }
@@ -733,7 +733,9 @@ CCLib::SquareMatrixd GeometricalAnalysisTools::ComputeWeightedCrossCovarianceMat
 	}
 
 	if (wSum != 0.0)
+	{
 		covMat.scale(1.0 / wSum);
+	}
 
 	return covMat;
 }

@@ -67,18 +67,18 @@ public:
 	ccGLMatrixTpl() { toIdentity(); }
 
 	//! Copy constructor
-	ccGLMatrixTpl(const ccGLMatrixTpl<T>& mat)  { for (unsigned i=0; i<OPENGL_MATRIX_SIZE; ++i) m_mat[i] = mat.m_mat[i]; }
+	ccGLMatrixTpl(const ccGLMatrixTpl<T>& mat) { for (unsigned i = 0; i < OPENGL_MATRIX_SIZE; ++i) m_mat[i] = mat.m_mat[i]; }
 
 	//! Constructor from a float GL matrix array
 	/** \param mat16f a 16 elements array (column major order)
 	**/
-	explicit ccGLMatrixTpl(const float* mat16f) { for (unsigned i=0; i<OPENGL_MATRIX_SIZE; ++i) m_mat[i] = static_cast<T>(mat16f[i]); }
+	explicit ccGLMatrixTpl(const float* mat16f) { for (unsigned i = 0; i < OPENGL_MATRIX_SIZE; ++i) m_mat[i] = static_cast<T>(mat16f[i]); internalRescale(); }
 
 	//! Constructor from a double GL matrix array
 	/** \warning Will implicitly cast the elements to float!
 		\param mat16d a 16 elements array (column major order)
 	**/
-	explicit ccGLMatrixTpl(const double* mat16d) { for (unsigned i=0; i<OPENGL_MATRIX_SIZE; ++i) m_mat[i] = static_cast<T>(mat16d[i]); }
+	explicit ccGLMatrixTpl(const double* mat16d) { for (unsigned i = 0; i < OPENGL_MATRIX_SIZE; ++i) m_mat[i] = static_cast<T>(mat16d[i]); internalRescale(); }
 
 	//! Constructor from 4 columns (X,Y,Z,T)
 	/** \param X 3 first elements of the 1st column (last one is 0)
@@ -107,7 +107,7 @@ public:
 
 		Vector3Tpl<T> axis,Tr;
 		T alpha;
-		m12.getParameters(alpha,axis,Tr);
+		m12.getParameters(alpha, axis, Tr);
 
 		//we only have to interpolate the angle value
 		alpha *= coef;
@@ -115,7 +115,7 @@ public:
 		Tr *= coef;
 
 		//we build-up the resulting matrix
-		m12.initFromParameters(alpha,axis,Tr);
+		m12.initFromParameters(alpha, axis, Tr);
 
 		//eventually we build-up resulting transformation
 		return glMat1 * m12;
@@ -133,10 +133,10 @@ public:
 		T f = (c < 0 ? -c : c);
 		ccGLMatrixTpl<T> result;
 
-		if (1.0-f < ZERO_TOLERANCE) //"from" and "to"-vector almost parallel
+		if (1.0 - f < ZERO_TOLERANCE) //"from" and "to"-vector almost parallel
 		{
 			// "to" vector most nearly orthogonal to "from"
-			Vector3Tpl<T> x(0,0,0);
+			Vector3Tpl<T> x(0, 0, 0);
 			if (fabs(from.x) < fabs(from.y))
 			{
 				if (fabs(from.x) < fabs(from.z))
@@ -152,23 +152,23 @@ public:
 					x.z = static_cast<T>(1);
 			}
 
-			Vector3Tpl<T> u = x-from;
-			Vector3Tpl<T> v = x-to;
+			Vector3Tpl<T> u = x - from;
+			Vector3Tpl<T> v = x - to;
 
 			T c1 = 2 / u.dot(u);
 			T c2 = 2 / v.dot(v);
 			T c3 = c1 * c2  * u.dot(v);
 
 			T* mat = result.data();
-			for (unsigned i=0; i<3; i++)
+			for (unsigned i = 0; i < 3; i++)
 			{
-				for (unsigned j=0; j<3; j++)
+				for (unsigned j = 0; j < 3; j++)
 				{
 					mat[i*4+j] =  c3 * v.u[i] * u.u[j]
 								- c2 * v.u[i] * v.u[j]
 								- c1 * u.u[i] * u.u[j];
 				}
-				mat[i*4+i] += static_cast<T>(1);
+				mat[i * 4 + i] += static_cast<T>(1);
 			}
 		}
 		else  // the most common case, unless "from"="to", or "from"=-"to"
@@ -184,16 +184,16 @@ public:
 			T hvyz = hvz * v.y;
 
 			T* mat = result.data();
-			mat[0]  = c + hvx * v.x;
-			mat[1]  = hvxy + v.z;
-			mat[2]  = hvxz - v.y;
+			mat[0] = c + hvx * v.x;
+			mat[1] = hvxy + v.z;
+			mat[2] = hvxz - v.y;
 
-			mat[4]  = hvxy - v.z;
-			mat[5]  = c + h * v.y * v.y;
-			mat[6]  = hvyz + v.x;
+			mat[4] = hvxy - v.z;
+			mat[5] = c + h * v.y * v.y;
+			mat[6] = hvyz + v.x;
 
-			mat[8]  = hvxz + v.y;
-			mat[9]  = hvyz - v.x;
+			mat[8] = hvxz + v.y;
+			mat[9] = hvyz - v.x;
 			mat[10] = c + hvz * v.z;
 		}
 
@@ -213,10 +213,10 @@ public:
 
 		//diagonal
 		{
-			Tq q00 = q[0]*q[0];
-			Tq q11 = q[1]*q[1];
-			Tq q22 = q[2]*q[2];
-			Tq q33 = q[3]*q[3];
+			Tq q00 = q[0] * q[0];
+			Tq q11 = q[1] * q[1];
+			Tq q22 = q[2] * q[2];
+			Tq q33 = q[3] * q[3];
 
 			mat[0]	= static_cast<T>(q00 + q11 - q22 - q33);
 			mat[5]	= static_cast<T>(q00 - q11 + q22 - q33);
@@ -226,19 +226,19 @@ public:
 
 		//non-diagonal elements
 		{
-			Tq q03 = q[0]*q[3];
-			Tq q13 = q[1]*q[3];
-			Tq q23 = q[2]*q[3];
-			Tq q02 = q[0]*q[2];
-			Tq q12 = q[1]*q[2];
-			Tq q01 = q[0]*q[1];
+			Tq q03 = q[0] * q[3];
+			Tq q13 = q[1] * q[3];
+			Tq q23 = q[2] * q[3];
+			Tq q02 = q[0] * q[2];
+			Tq q12 = q[1] * q[2];
+			Tq q01 = q[0] * q[1];
 
-			mat[1]	= static_cast<T>((q12+q03)*2);
-			mat[2]	= static_cast<T>((q13-q02)*2);
-			mat[4]	= static_cast<T>((q12-q03)*2);
-			mat[6]	= static_cast<T>((q23+q01)*2);
-			mat[8]	= static_cast<T>((q13+q02)*2);
-			mat[9]	= static_cast<T>((q23-q01)*2);
+			mat[1] = static_cast<T>((q12 + q03) * 2);
+			mat[2] = static_cast<T>((q13 - q02) * 2);
+			mat[4] = static_cast<T>((q12 - q03) * 2);
+			mat[6] = static_cast<T>((q23 + q01) * 2);
+			mat[8] = static_cast<T>((q13 + q02) * 2);
+			mat[9] = static_cast<T>((q23 - q01) * 2);
 		}
 
 		return rotMat;
@@ -302,12 +302,14 @@ public:
 
 		ccGLMatrixTpl<T> matrix;
 		T* matValues = matrix.data();
-		for (unsigned i=0; i<OPENGL_MATRIX_SIZE; ++i)
+		for (unsigned i = 0; i < OPENGL_MATRIX_SIZE; ++i)
 		{
-			matValues[i] = static_cast<T>(valuesStr[(i%4)*4+(i>>2)].toDouble(&success));
+			matValues[i] = static_cast<T>(valuesStr[(i % 4) * 4 + (i >> 2)].toDouble(&success));
 			if (!success)
 				return ccGLMatrixTpl<T>();
 		}
+
+		matrix.internalRescale();
 
 		success = true;
 		return matrix;
@@ -321,11 +323,11 @@ public:
 	QString toString(int precision = 12, QChar separator = ' ') const
 	{
 		QString str;
-		for (unsigned l=0; l<4; ++l) //lines
+		for (unsigned l = 0; l < 4; ++l) //lines
 		{
-			for (unsigned c=0; c<4; ++c) //columns
+			for (unsigned c = 0; c < 4; ++c) //columns
 			{
-				str.append(QString::number(m_mat[c*4+l],'f',precision));
+				str.append(QString::number(m_mat[c * 4 + l], 'f', precision));
 				if (c != 3)
 					str.append(separator);
 			}
@@ -367,13 +369,15 @@ public:
 
 		QTextStream stream(&fp);
 
-		for (unsigned i=0; i<4; ++i)
+		for (unsigned i = 0; i < 4; ++i)
 		{
-			stream >> m_mat[i];
-			stream >> m_mat[i+4];
-			stream >> m_mat[i+8];
-			stream >> m_mat[i+12];
+			stream >> m_mat[i     ];
+			stream >> m_mat[i +  4];
+			stream >> m_mat[i +  8];
+			stream >> m_mat[i + 12];
 		}
+
+		internalRescale();
 
 		return (fp.error() == QFile::NoError);
 	}
@@ -392,7 +396,7 @@ public:
 		}
 		T phi = -asin(CC_MAT_R13);
 		T cos_phi = cos(phi);
-		T theta = atan2(CC_MAT_R23/cos_phi,CC_MAT_R33/cos_phi);
+		T theta = atan2(CC_MAT_R23 / cos_phi, CC_MAT_R33 / cos_phi);
 
 		newRotMat.CC_MAT_R22 = newRotMat.CC_MAT_R33 = cos(theta);
 		newRotMat.CC_MAT_R32 = newRotMat.CC_MAT_R23 = sin(theta);
@@ -417,7 +421,7 @@ public:
 		}
 		T theta = asin(CC_MAT_R32);
 		T cos_theta = cos(theta);
-		T phi = atan2(-CC_MAT_R31/cos_theta,CC_MAT_R33/cos_theta);
+		T phi = atan2(-CC_MAT_R31 / cos_theta, CC_MAT_R33 / cos_theta);
 
 		newRotMat.CC_MAT_R11 = newRotMat.CC_MAT_R33 = cos(phi);
 		newRotMat.CC_MAT_R31 = newRotMat.CC_MAT_R13 = sin(phi);
@@ -432,22 +436,21 @@ public:
 	ccGLMatrixTpl<T> zRotation() const
 	{
 		//we can use the standard Euler angles convention here
-		T phi,theta,psi;
+		T phi, theta, psi;
 		Vector3Tpl<T> Tr;
-		getParameters(phi,theta,psi,Tr);
+		getParameters(phi, theta, psi, Tr);
 		assert(Tr.norm2() == 0);
 
 		ccGLMatrixTpl<T> newRotMat;
-		newRotMat.initFromParameters(phi,0,0,Tr);
+		newRotMat.initFromParameters(phi, 0, 0, Tr);
 
 		return newRotMat;
 	}
 
-
 	//! Clears matrix
 	/** Matrix is set to 0.
 	**/
-	inline virtual void toZero() { memset(m_mat,0,OPENGL_MATRIX_SIZE*sizeof(T)); }
+	inline virtual void toZero() { memset(m_mat, 0, OPENGL_MATRIX_SIZE * sizeof(T)); }
 
 	//! Sets matrix to identity
 	inline virtual void toIdentity() { toZero(); CC_MAT_R11 = CC_MAT_R22 = CC_MAT_R33 = CC_MAT_R44 = static_cast<T>(1); }
@@ -478,25 +481,25 @@ public:
 		const T& l2 = uAxis3D.y;
 		const T& l3 = uAxis3D.z;
 
-		T l1_inv_cos_t = l1*inv_cos_t;
-		T l3_inv_cos_t = l3*inv_cos_t;
+		T l1_inv_cos_t = l1 * inv_cos_t;
+		T l3_inv_cos_t = l3 * inv_cos_t;
 
 		//1st column
-		CC_MAT_R11 = cos_t + l1*l1_inv_cos_t;
-		CC_MAT_R21 = l2*l1_inv_cos_t+l3*sin_t;
-		CC_MAT_R31 = l3*l1_inv_cos_t-l2*sin_t;
+		CC_MAT_R11 = cos_t + l1 * l1_inv_cos_t;
+		CC_MAT_R21 = l2 * l1_inv_cos_t + l3 * sin_t;
+		CC_MAT_R31 = l3 * l1_inv_cos_t - l2 * sin_t;
 		CC_MAT_R41 = 0;
 
 		//2nd column
-		CC_MAT_R12 = l2*l1_inv_cos_t-l3*sin_t;
-		CC_MAT_R22 = cos_t+l2*l2*inv_cos_t;
-		CC_MAT_R32 = l2*l3_inv_cos_t+l1*sin_t;
+		CC_MAT_R12 = l2 * l1_inv_cos_t - l3 * sin_t;
+		CC_MAT_R22 = cos_t + l2 * l2*inv_cos_t;
+		CC_MAT_R32 = l2 * l3_inv_cos_t + l1 * sin_t;
 		CC_MAT_R42 = 0;
 
 		//3rd column
-		CC_MAT_R13 = l3*l1_inv_cos_t+l2*sin_t;
-		CC_MAT_R23 = l2*l3_inv_cos_t-l1*sin_t;
-		CC_MAT_R33 = cos_t+l3*l3_inv_cos_t;
+		CC_MAT_R13 = l3 * l1_inv_cos_t + l2 * sin_t;
+		CC_MAT_R23 = l2 * l3_inv_cos_t - l1 * sin_t;
+		CC_MAT_R33 = cos_t + l3 * l3_inv_cos_t;
 		CC_MAT_R43 = 0;
 
 		//4th column
@@ -528,28 +531,28 @@ public:
 		T s3 = sin(psi_rad);
 
 		//1st column
-		CC_MAT_R11 = c2*c1;
-		CC_MAT_R21 = c2*s1;
+		CC_MAT_R11 = c2 * c1;
+		CC_MAT_R21 = c2 * s1;
 		CC_MAT_R31 = -s2;
 		CC_MAT_R41 = 0;
 
 		//2nd column
-		CC_MAT_R12 = s3*s2*c1-c3*s1;
-		CC_MAT_R22 = s3*s2*s1+c3*c1;
-		CC_MAT_R32 = s3*c2;
+		CC_MAT_R12 = s3 * s2*c1 - c3 * s1;
+		CC_MAT_R22 = s3 * s2*s1 + c3 * c1;
+		CC_MAT_R32 = s3 * c2;
 		CC_MAT_R42 = 0;
 
 		//3rd column
-		CC_MAT_R13 = c3*s2*c1+s3*s1;
-		CC_MAT_R23 = c3*s2*s1-s3*c1;
-		CC_MAT_R33 = c3*c2;
+		CC_MAT_R13 = c3 * s2*c1 + s3 * s1;
+		CC_MAT_R23 = c3 * s2*s1 - s3 * c1;
+		CC_MAT_R33 = c3 * c2;
 		CC_MAT_R43 = 0;
 
 		//4th column
 		CC_MAT_R14 = t3D.x;
 		CC_MAT_R24 = t3D.y;
 		CC_MAT_R34 = t3D.z;
-		CC_MAT_R44 = static_cast<T>(1.0);
+		CC_MAT_R44 = static_cast<T>(1);
 	}
 
 	//! Returns equivalent parameters: a rotation axis, an angle and a translation
@@ -562,7 +565,7 @@ public:
 						Vector3Tpl<T>& t3D) const
 	{
 		T trace = CC_MAT_R11 + CC_MAT_R22 + CC_MAT_R33;
-		T cos_t = (trace - 1)/2;
+		T cos_t = (trace - 1) / 2;
 		if (fabs(cos_t) <= 1)
 		{
 			alpha_rad = acos(cos_t); //result in [0;pi]
@@ -572,9 +575,9 @@ public:
 			alpha_rad = 0;
 		}
 
-		axis3D.x = CC_MAT_R32-CC_MAT_R23;
-		axis3D.y = CC_MAT_R13-CC_MAT_R31;
-		axis3D.z = CC_MAT_R21-CC_MAT_R12;
+		axis3D.x = CC_MAT_R32 - CC_MAT_R23;
+		axis3D.y = CC_MAT_R13 - CC_MAT_R31;
+		axis3D.z = CC_MAT_R21 - CC_MAT_R12;
 
 		//normalize axis
 		T n2 = axis3D.norm2();
@@ -585,7 +588,7 @@ public:
 		else
 		{
 			//axis is too small!
-			axis3D = Vector3Tpl<T>(0,0,1);
+			axis3D = Vector3Tpl<T>(0, 0, 1);
 		}
 
 		t3D.x = CC_MAT_R14;
@@ -682,13 +685,13 @@ public:
 	/** \param index column index (between 0 and 3)
 		\return pointer to the first element of the corresponding column
 	**/
-	inline T* getColumn(unsigned index) { return m_mat+(index<<2); }
+	inline T* getColumn(unsigned index) { return m_mat + (index << 2); }
 
 	//! Returns a const pointer to a given column
 	/** \param index column index (between 0 and 3)
 		\return pointer to the first element of the corresponding column
 	**/
-	inline const T* getColumn(unsigned index) const { return m_mat+(index<<2); }
+	inline const T* getColumn(unsigned index) const { return m_mat + (index << 2); }
 
 	//! Returns a copy of a given column as a CCVector3
 	/** 4th value is ignored.
@@ -701,13 +704,13 @@ public:
 	/** \param index column index (between 0 and 3)
 		\param v new column values
 	**/
-	inline void setColumn(unsigned index, const Vector3Tpl<T>& v) { T* col = m_mat+(index<<2); col[0] = v.x; col[1] = v.y; col[2] = v.z; }
+	inline void setColumn(unsigned index, const Vector3Tpl<T>& v) { T* col = m_mat + (index << 2); col[0] = v.x; col[1] = v.y; col[2] = v.z; }
 
 	//! Sets the content of a given column
 	/** \param index column index (between 0 and 3)
 		\param v new column values
 	**/
-	inline void setColumn(unsigned index, const Tuple4Tpl<T>& v) { T* col = m_mat+(index<<2); col[0] = v.x; col[1] = v.y; col[2] = v.z; col[3] = v.w; }
+	inline void setColumn(unsigned index, const Tuple4Tpl<T>& v) { T* col = m_mat + (index << 2); col[0] = v.x; col[1] = v.y; col[2] = v.z; col[3] = v.w; }
 
 	//! Multiplication by a matrix operator
 	ccGLMatrixTpl<T> operator * (const ccGLMatrixTpl<T>& mat) const
@@ -718,27 +721,27 @@ public:
 		const T* B = mat.m_mat;
 		T* C = result.m_mat;
 
-		for (unsigned j=0; j<4; ++j, B+=4)
-			for (unsigned i=0; i<4; ++i)
-				*C++ = A[i]*B[0] + A[i+4]*B[1] + A[i+8]*B[2] + A[i+12]*B[3];
+		for (unsigned j = 0; j < 4; ++j, B += 4)
+			for (unsigned i = 0; i < 4; ++i)
+				*C++ = A[i] * B[0] + A[i + 4] * B[1] + A[i + 8] * B[2] + A[i + 12] * B[3];
 
 		return result;
 	}
 
 	//! Multiplication by a vector operator (float version)
-	inline Vector3Tpl<float> operator * (const Vector3Tpl<float>& vec) const { return Vector3Tpl<float>(applyX(vec),applyY(vec),applyZ(vec)); }
+	inline Vector3Tpl<float> operator * (const Vector3Tpl<float>& vec) const { return Vector3Tpl<float>(applyX(vec), applyY(vec), applyZ(vec)); }
 	//! Multiplication by a vector operator (double version)
-	inline Vector3Tpl<double> operator * (const Vector3Tpl<double>& vec) const { return Vector3Tpl<double>(applyX(vec),applyY(vec),applyZ(vec)); }
+	inline Vector3Tpl<double> operator * (const Vector3Tpl<double>& vec) const { return Vector3Tpl<double>(applyX(vec), applyY(vec), applyZ(vec)); }
 
 	//! Multiplication by a 4D vector operator (float version)
-	inline Tuple4Tpl<float> operator * (const Tuple4Tpl<float>& vec) const { return Tuple4Tpl<float>(applyX(vec),applyY(vec),applyZ(vec),applyW(vec)); }
+	inline Tuple4Tpl<float> operator * (const Tuple4Tpl<float>& vec) const { return Tuple4Tpl<float>(applyX(vec), applyY(vec), applyZ(vec), applyW(vec)); }
 	//! Multiplication by a 4D vector operator (double version)
-	inline Tuple4Tpl<double> operator * (const Tuple4Tpl<double>& vec) const { return Tuple4Tpl<double>(applyX(vec),applyY(vec),applyZ(vec),applyW(vec)); }
+	inline Tuple4Tpl<double> operator * (const Tuple4Tpl<double>& vec) const { return Tuple4Tpl<double>(applyX(vec), applyY(vec), applyZ(vec), applyW(vec)); }
 
 	//! (in place) Addition operator
 	ccGLMatrixTpl<T>& operator += (const ccGLMatrixTpl<T>& mat)
 	{
-		for (unsigned i=0; i<OPENGL_MATRIX_SIZE; ++i)
+		for (unsigned i = 0; i < OPENGL_MATRIX_SIZE; ++i)
 			m_mat[i] += mat.m_mat[i];
 		return (*this);
 	}
@@ -746,7 +749,7 @@ public:
 	//! (in place) Difference operator
 	ccGLMatrixTpl<T>& operator -= (const ccGLMatrixTpl<T>& mat)
 	{
-		for (unsigned i=0; i<OPENGL_MATRIX_SIZE; ++i)
+		for (unsigned i = 0; i < OPENGL_MATRIX_SIZE; ++i)
 			m_mat[i] -= mat.m_mat[i];
 		return (*this);
 	}
@@ -800,7 +803,7 @@ public:
 	//! Applies transformation to a 3D vector (in place) - float version
 	/** Input vector is directly modified after calling this method
 	**/
-	inline void apply(Vector3Tpl<float>& vec) const	{ vec = (*this)*vec; }
+	inline void apply(Vector3Tpl<float>& vec) const { vec = (*this)*vec; }
 	//! Applies transformation to a 3D vector (in place) - double version
 	/** Input vector is directly modified after calling this method
 	**/
@@ -1036,12 +1039,12 @@ public:
 	//! Transposes matrix (in place)
 	void transpose()
 	{
-		std::swap(CC_MAT_R21,CC_MAT_R12);
-		std::swap(CC_MAT_R31,CC_MAT_R13);
-		std::swap(CC_MAT_R41,CC_MAT_R14);
-		std::swap(CC_MAT_R32,CC_MAT_R23);
-		std::swap(CC_MAT_R42,CC_MAT_R24);
-		std::swap(CC_MAT_R43,CC_MAT_R34);
+		std::swap(CC_MAT_R21, CC_MAT_R12);
+		std::swap(CC_MAT_R31, CC_MAT_R13);
+		std::swap(CC_MAT_R41, CC_MAT_R14);
+		std::swap(CC_MAT_R32, CC_MAT_R23);
+		std::swap(CC_MAT_R42, CC_MAT_R24);
+		std::swap(CC_MAT_R43, CC_MAT_R34);
 	}
 
 	//! Returns transposed matrix
@@ -1061,24 +1064,22 @@ public:
 		T s2 = getColumnAsVec3D(0).norm2();
 
 		//we invert rotation
-		std::swap(CC_MAT_R21,CC_MAT_R12);
-		std::swap(CC_MAT_R31,CC_MAT_R13);
-		std::swap(CC_MAT_R32,CC_MAT_R23);
+		std::swap(CC_MAT_R21, CC_MAT_R12);
+		std::swap(CC_MAT_R31, CC_MAT_R13);
+		std::swap(CC_MAT_R32, CC_MAT_R23);
 
 		if (s2 != 0 && s2 != 1)
 		{
-			CC_MAT_R11 /= s2; CC_MAT_R12 /= s2; CC_MAT_R13 /= s2;
-			CC_MAT_R21 /= s2; CC_MAT_R22 /= s2; CC_MAT_R23 /= s2;
-			CC_MAT_R31 /= s2; CC_MAT_R32 /= s2; CC_MAT_R33 /= s2;
+			scaleRotation(1 / s2);
 		}
 
 		//eventually we invert translation
-		applyRotation(m_mat+12);
+		applyRotation(m_mat + 12);
 		CC_MAT_R14 = -CC_MAT_R14;
 		CC_MAT_R24 = -CC_MAT_R24;
 		CC_MAT_R34 = -CC_MAT_R34;
 
-	 }
+	}
 
 	//! Returns inverse transformation
 	ccGLMatrixTpl<T> inverse() const
@@ -1089,36 +1090,42 @@ public:
 		return t;
 	}
 
-	//! Scales the whole matrix
-	/** \param coef scaling coef.
+	//! Scales the rotation part of the matrix
+	/**	\param coef scaling coef.
 	**/
-	inline void scale(T coef) { for (auto &cell : m_mat) cell *= coef; }
+	inline void scaleRotation(T coef)
+	{
+		CC_MAT_R11 *= coef; CC_MAT_R12 *= coef; CC_MAT_R13 *= coef;
+		CC_MAT_R21 *= coef; CC_MAT_R22 *= coef; CC_MAT_R23 *= coef;
+		CC_MAT_R31 *= coef; CC_MAT_R32 *= coef; CC_MAT_R33 *= coef;
+	}
 
-	//! Scales one line of the matrix
-	/** \param lineIndex (0-3)
+	//! Scales one row of the matrix
+	/** \param rowIndex tow index (0-3)
 		\param coef scaling coef.
 	**/
-	void scaleLine(unsigned lineIndex, T coef)
+	void scaleRow(unsigned rowIndex, T coef)
 	{
-		assert(lineIndex<4);
-		m_mat[   lineIndex] *= coef;
-		m_mat[ 4+lineIndex] *= coef;
-		m_mat[ 8+lineIndex] *= coef;
-		m_mat[12+lineIndex] *= coef;
+		assert(rowIndex < 4);
+		m_mat[   rowIndex] *= coef;
+		m_mat[ 4+rowIndex] *= coef;
+		m_mat[ 8+rowIndex] *= coef;
+		m_mat[12+rowIndex] *= coef;
 	}
 
 	//! Scales one column of the matrix
-	/** \param colIndex (0-3)
+	/** \warning The last row is never scaled
+		\param colIndex column index (0-3)
 		\param coef scaling coef.
 	**/
 	void scaleColumn(unsigned colIndex, T coef)
 	{
-		assert(colIndex<4);
+		assert(colIndex < 4);
 		T* col = getColumn(colIndex);
 		col[0] *= coef;
 		col[1] *= coef;
 		col[2] *= coef;
-		col[3] *= coef;
+		//col[3] *= coef;
 	}
 
 	//inherited from ccSerializableObject
@@ -1128,7 +1135,7 @@ public:
 		assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
 
 		//data (dataVersion>=20)
-		if (out.write(reinterpret_cast<const char*>(m_mat),sizeof(T)*OPENGL_MATRIX_SIZE) < 0)
+		if (out.write(reinterpret_cast<const char*>(m_mat), sizeof(T)*OPENGL_MATRIX_SIZE) < 0)
 			return WriteError();
 
 		return true;
@@ -1138,17 +1145,27 @@ public:
 	{
 		assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
 
-		if (dataVersion<20)
+		if (dataVersion < 20)
 			return CorruptError();
 
 		//data (dataVersion>=20)
-		if (in.read(reinterpret_cast<char*>(m_mat),sizeof(T)*OPENGL_MATRIX_SIZE) < 0)
+		if (in.read(reinterpret_cast<char*>(m_mat), sizeof(T)*OPENGL_MATRIX_SIZE) < 0)
 			return ReadError();
 
 		return true;
 	}
 
 protected:
+
+	//! Transfers the homogenous coordinate (scale) to the whole matrix
+	void internalRescale()
+	{
+		if (CC_MAT_R44 != static_cast<T>(1) && CC_MAT_R44 != 0)
+		{
+			scaleRotation(1.0 / CC_MAT_R44);
+			CC_MAT_R44 = static_cast<T>(1);
+		}
+	}
 
 	//! Internal 4x4 GL-style matrix data
 	T m_mat[OPENGL_MATRIX_SIZE];

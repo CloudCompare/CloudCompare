@@ -817,7 +817,19 @@ bool ccGLWindow::initialize()
 		//VBO support
 		if (context()->hasExtension(QByteArrayLiteral("GL_ARB_vertex_buffer_object")))
 		{
-			if (params.useVBOs && (!vendorName || vendorNameStr.startsWith("ATI")))
+			QStringList glVersion = QString((const char*)glFunc->glGetString(GL_VERSION)).split('.');
+			int majorVersion = 0, minorVersion = 0;
+			if (glVersion.size() >= 2)
+			{
+				majorVersion = glVersion[0].toInt();
+				minorVersion = glVersion[1].toInt();
+			}
+			else
+			{
+				assert(false);
+			}
+
+			if (params.useVBOs && (!vendorName || (vendorNameStr.startsWith("ATI") && (majorVersion < 4 || (majorVersion == 4 && minorVersion < 6))))) //only if OpenGL version is earlier than 4.6
 			{
 				if (!m_silentInitialization)
 					ccLog::Warning("[3D View %i] VBO support has been disabled as it may not work on %s cards!\nYou can manually activate it in the display settings (at your own risk!)", m_uniqueID, vendorName);

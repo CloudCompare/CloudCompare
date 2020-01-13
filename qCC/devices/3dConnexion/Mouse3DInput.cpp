@@ -104,7 +104,11 @@ bool Mouse3DInput::connect(QWidget* mainWidget, QString appName)
 	/*** Attempt to connect with the 3DxWare driver ***/
 	assert(m_siHandle == SI_NO_HANDLE);
 
-	SiInitialize();
+	if (SiInitialize() == SPW_DLL_LOAD_ERROR)
+	{
+		ccLog::Warning("[3D Mouse] Could not load SiAppDll dll files");
+		return false;
+	}
 
 	//Platform-specific device data
 	SiOpenDataEx oData;
@@ -127,12 +131,14 @@ bool Mouse3DInput::connect(QWidget* mainWidget, QString appName)
 	SiDevInfo info;
 	if (SiGetDeviceInfo(m_siHandle, &info) == SPW_NO_ERROR)
 	{
-		if (info.majorVersion == 0 && info.minorVersion == 0)
-		{
-			/* Not a real device */
-			ccLog::Warning("[3D Mouse] Couldn't find a connected device");
-			return false;
-		}
+		//DGM: strangely, we get these wrong versions on real wireless devices?!
+		//if (info.majorVersion == 0 && info.minorVersion == 0)
+		//{
+		//	/* Not a real device */
+		//	SiTerminate();
+		//	ccLog::Warning("[3D Mouse] Couldn't find a connected device");
+		//	return false;
+		//}
 
 		SiDeviceName name;
 		SiGetDeviceName(m_siHandle, &name);
@@ -142,6 +148,9 @@ bool Mouse3DInput::connect(QWidget* mainWidget, QString appName)
 	{
 		ccLog::Warning("[3D Mouse] Failed to retrieve device info?!");
 	}
+
+	//to avoid drift
+	SiRezero(m_siHandle);
 
 	return true;
 }

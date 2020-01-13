@@ -515,6 +515,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionInvertNormals,				&QAction::triggered, this, &MainWindow::doActionInvertNormals);
 	connect(m_UI->actionConvertNormalToHSV,			&QAction::triggered, this, &MainWindow::doActionConvertNormalsToHSV);
 	connect(m_UI->actionConvertNormalToDipDir,		&QAction::triggered, this, &MainWindow::doActionConvertNormalsToDipDir);
+	connect(m_UI->actionExportNormalToSF,			&QAction::triggered, this, &MainWindow::doActionExportNormalToSF);
 	connect(m_UI->actionOrientNormalsMST,			&QAction::triggered, this, &MainWindow::doActionOrientNormalsMST);
 	connect(m_UI->actionOrientNormalsFM,			&QAction::triggered, this, &MainWindow::doActionOrientNormalsFM);
 	connect(m_UI->actionClearNormals, &QAction::triggered, this, [=]() {
@@ -614,7 +615,8 @@ void MainWindow::connectActions()
 	connect(m_UI->actionRasterize,					&QAction::triggered, this, &MainWindow::doActionRasterize);
 	connect(m_UI->actionConvertPolylinesToMesh,		&QAction::triggered, this, &MainWindow::doConvertPolylinesToMesh);
 	//connect(m_UI->actionCreateSurfaceBetweenTwoPolylines, &QAction::triggered, this, &MainWindow::doMeshTwoPolylines); //DGM: already connected to actionMeshTwoPolylines
-	connect(m_UI->actionExportCoordToSF,			&QAction::triggered, this, &MainWindow::doActionExportCoordToSF);
+	connect(m_UI->actionExportCoordToSF, &QAction::triggered, this, &MainWindow::doActionExportCoordToSF);
+	
 	//"Tools > Registration" menu
 	connect(m_UI->actionMatchBBCenters,				&QAction::triggered, this, &MainWindow::doActionMatchBBCenters);
 	connect(m_UI->actionMatchScales,				&QAction::triggered, this, &MainWindow::doActionMatchScales);
@@ -1088,7 +1090,7 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 
 							//we compute the transformation matrix in the global coordinate space
 							ccGLMatrixd globalTransMat = transMat;
-							globalTransMat.scale(1.0 / globalScale);
+							globalTransMat.scaleRotation(1.0 / globalScale);
 							globalTransMat.setTranslation(globalTransMat.getTranslationAsVec3D() - globalShift);
 							//and we apply it to the cloud bounding-box
 							ccBBox rotatedBox = cloud->getOwnBB() * globalTransMat;
@@ -1122,18 +1124,23 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 
 							if (sasDlg.exec())
 							{
+								//store the shift for next time!
+								double newScale = sasDlg.getScale();
+								CCVector3d newShift = sasDlg.getShift();
+								ccGlobalShiftManager::StoreShift(newShift, newScale);
+
 								//get the relative modification to existing global shift/scale info
 								assert(cloud->getGlobalScale() != 0);
-								scaleChange = sasDlg.getScale() / cloud->getGlobalScale();
-								shiftChange = (sasDlg.getShift() - cloud->getGlobalShift());
+								scaleChange = newScale / cloud->getGlobalScale();
+								shiftChange = newShift - cloud->getGlobalShift();
 
 								updateGlobalShiftAndScale = (scaleChange != 1.0 || shiftChange.norm2() != 0);
 
 								//update transformation matrix accordingly
 								if (updateGlobalShiftAndScale)
 								{
-									transMat.scale(scaleChange);
-									transMat.setTranslation(transMat.getTranslationAsVec3D() + shiftChange*scaleChange);
+									transMat.scaleRotation(scaleChange);
+									transMat.setTranslation(transMat.getTranslationAsVec3D() + newScale * shiftChange);
 								}
 							}
 							else if (sasDlg.cancelled())
@@ -1482,7 +1489,7 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 				{
 					ccGLMatrix transMat;
 					transMat.toIdentity();
-					transMat.scale(static_cast<float>(scaleCoef));
+					transMat.scaleRotation(static_cast<float>(scaleCoef));
 					transMat.setTranslation(T);
 
 					//DGM FIXME: we only test the entity own bounding box (and we update its shift & scale info) but we apply the transformation to all its children?!
@@ -4149,6 +4156,17 @@ void MainWindow::doActionSetSFAsCoord()
 void MainWindow::doActionExportCoordToSF()
 {
 	if (!ccEntityAction::exportCoordToSF(m_selectedEntities, this))
+	{
+		return;
+	}
+
+	refreshAll();
+	updateUI();
+}
+
+void MainWindow::doActionExportNormalToSF()
+{
+	if (!ccEntityAction::exportNormalToSF(m_selectedEntities, this))
 	{
 		return;
 	}
@@ -8864,36 +8882,30 @@ void MainWindow::doActionCloudPrimitiveDist()
 {
 	bool foundPrimitive = false;
 	ccHObject::Container clouds;
-	ccPlane* refPlane = nullptr;
-	ccSphere* refSphere = nullptr;
-	ccCylinder* refCylinder = nullptr;
-	ccCone* refCone = nullptr;
-	QString primitiveName;
+	ccHObject* refEntity = nullptr;
+	CC_CLASS_ENUM entityType = CC_TYPES::OBJECT;
+	const char* errString = "[Compute Primitive Distances] Cloud to %s failed, error code = %i!";
+
 	for (unsigned i = 0; i < getSelectedEntities().size(); ++i)
 	{
-		if (m_selectedEntities[i]->isA(CC_TYPES::PLANE) || m_selectedEntities[i]->isA(CC_TYPES::SPHERE) || m_selectedEntities[i]->isA(CC_TYPES::CYLINDER) || m_selectedEntities[i]->isA(CC_TYPES::CONE))
+		
+		if (m_selectedEntities[i]->isKindOf(CC_TYPES::PRIMITIVE))
 		{
-			if (foundPrimitive)
+			if (m_selectedEntities[i]->isA(CC_TYPES::PLANE) || 
+				m_selectedEntities[i]->isA(CC_TYPES::SPHERE) ||
+				m_selectedEntities[i]->isA(CC_TYPES::CYLINDER) ||
+				m_selectedEntities[i]->isA(CC_TYPES::CONE) ||
+				m_selectedEntities[i]->isA(CC_TYPES::BOX))
 			{
-				ccConsole::Error("[Compute Primitive Distances] Select only a single Plane/Sphere Primitive");
-				return;
-			}
-			foundPrimitive = true;
-			refPlane = ccHObjectCaster::ToPlane(m_selectedEntities[i]);
-			refSphere = ccHObjectCaster::ToSphere(m_selectedEntities[i]);
-			refCylinder = ccHObjectCaster::ToCylinder(m_selectedEntities[i]);
-			if (!refCylinder)
-			{
-				refCone = ccHObjectCaster::ToCone(m_selectedEntities[i]);
-				if (refCone->isSnoutMode()) // Snout mode cone not supported
+				if (foundPrimitive)
 				{
-					ccConsole::Error("[Compute Primitive Distances] Snout mode Cone Primitives are not supported");
-					refCone = nullptr;
+					ccConsole::Error("[Compute Primitive Distances] Select only a single Plane/Box/Sphere/Cylinder/Cone Primitive");
 					return;
 				}
+				foundPrimitive = true;
+				refEntity = m_selectedEntities[i];
+				entityType = refEntity->getClassID();
 			}
-			primitiveName = m_selectedEntities[i]->getName();
-			
 		}
 		else if (m_selectedEntities[i]->isKindOf(CC_TYPES::POINT_CLOUD))
 		{
@@ -8903,7 +8915,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 
 	if (!foundPrimitive)
 	{
-		ccConsole::Error("[Compute Primitive Distances] Select at least one Plane/Sphere/Cylinder/Cone Primitive!");
+		ccConsole::Error("[Compute Primitive Distances] Select at least one Plane/Box/Sphere/Cylinder/Cone Primitive!");
 		return;
 	}
 	if (clouds.size() <= 0)
@@ -8913,10 +8925,15 @@ void MainWindow::doActionCloudPrimitiveDist()
 	}
 		
 	ccPrimitiveDistanceDlg pDD{ this };
+	if (refEntity->isA(CC_TYPES::PLANE))
+	{
+		pDD.treatPlanesAsBoundedCheckBox->setUpdatesEnabled(true);
+	}
 	if (pDD.exec())
 	{
 		bool signedDist = pDD.signedDistances();
 		bool flippedNormals = signedDist && pDD.flipNormals();
+		bool treatPlanesAsBounded = pDD.treatPlanesAsBounded();
 		for (auto &cloud : clouds)
 		{
 			ccPointCloud* compEnt = ccHObjectCaster::ToPointCloud(cloud);
@@ -8934,25 +8951,58 @@ void MainWindow::doActionCloudPrimitiveDist()
 			compEnt->setCurrentScalarField(sfIdx);
 			compEnt->enableScalarField();
 			compEnt->forEach(CCLib::ScalarFieldTools::SetScalarValueToNaN);
-
-			if (refSphere)
+			int returnCode;
+			switch (entityType)
 			{
-				CCLib::DistanceComputationTools::computeCloud2SphereEquation(compEnt, refSphere->getOwnBB().getCenter(), refSphere->getRadius(), signedDist);
-				
+				case CC_TYPES::SPHERE:
+				{
+					if (!(returnCode = CCLib::DistanceComputationTools::computeCloud2SphereEquation(compEnt, refEntity->getOwnBB().getCenter(), static_cast<ccSphere*>(refEntity)->getRadius(), signedDist)))
+						ccConsole::Error(errString, "Sphere", returnCode);
+					break;
+				}
+				case CC_TYPES::PLANE: 
+				{
+					ccPlane* plane = static_cast<ccPlane*>(refEntity);
+					if (treatPlanesAsBounded)
+					{
+						CCLib::SquareMatrix rotationTransform(plane->getTransformation().data(), true);
+						if (!(returnCode = CCLib::DistanceComputationTools::computeCloud2RectangleEquation(compEnt, plane->getXWidth(), plane->getYWidth(), rotationTransform, plane->getCenter(), signedDist)))
+							ccConsole::Error(errString, "Bounded Plane", returnCode);
+					}
+					else
+					{
+						if (!(returnCode = CCLib::DistanceComputationTools::computeCloud2PlaneEquation(compEnt, static_cast<ccPlane*>(refEntity)->getEquation(), signedDist)))
+							ccConsole::Error(errString, "Infinite Plane", returnCode);
+					}
+					break;
+				}
+				case CC_TYPES::CYLINDER:
+				{
+					if (!(returnCode = CCLib::DistanceComputationTools::computeCloud2CylinderEquation(compEnt, static_cast<ccCylinder*>(refEntity)->getBottomCenter(), static_cast<ccCylinder*>(refEntity)->getTopCenter(), static_cast<ccCylinder*>(refEntity)->getBottomRadius(), signedDist)))
+						ccConsole::Error(errString, "Cylinder", returnCode);
+					break;
+				}
+				case CC_TYPES::CONE:
+				{
+					if (!(returnCode = CCLib::DistanceComputationTools::computeCloud2ConeEquation(compEnt, static_cast<ccCone*>(refEntity)->getLargeCenter(), static_cast<ccCone*>(refEntity)->getSmallCenter(), static_cast<ccCone*>(refEntity)->getLargeRadius(), static_cast<ccCone*>(refEntity)->getSmallRadius(), signedDist)))
+						ccConsole::Error(errString, "Cone", returnCode);
+					break;
+				}
+				case CC_TYPES::BOX: 
+				{
+					const ccGLMatrix& glTransform = refEntity->getGLTransformationHistory();
+					CCLib::SquareMatrix rotationTransform(glTransform.data(), true);
+					CCVector3 boxCenter = glTransform.getColumnAsVec3D(3);
+					if (!(returnCode = CCLib::DistanceComputationTools::computeCloud2BoxEquation(compEnt, static_cast<ccBox*>(refEntity)->getDimensions(), rotationTransform, boxCenter, signedDist)))
+						ccConsole::Error(errString, "Box", returnCode);
+					break; 
+				}
+				default:
+				{
+					ccConsole::Error("[Compute Primitive Distances] Unsupported primitive type"); //Shouldn't ever reach here...
+					break;
+				}
 			}
-			else if (refPlane)
-			{
-				CCLib::DistanceComputationTools::computeCloud2PlaneEquation(compEnt, refPlane->getEquation(), signedDist);
-			}
-			else if (refCylinder)
-			{	
-				CCLib::DistanceComputationTools::computeCloud2CylinderEquation(compEnt, refCylinder->getBottomCenter(), refCylinder->getTopCenter(), refCylinder->getBottomRadius(), signedDist);
-			}
-			else if (refCone)
-			{
-				CCLib::DistanceComputationTools::computeCloud2ConeEquation(compEnt, refCone->getLargeCenter(), refCone->getSmallCenter(), refCone->getLargeRadius(), refCone->getSmallRadius(), signedDist);
-			}
-
 			QString sfName;
 			sfName.clear();
 			sfName = QString(signedDist ? CC_CLOUD2PRIMITIVE_SIGNED_DISTANCES_DEFAULT_SF_NAME : CC_CLOUD2PRIMITIVE_DISTANCES_DEFAULT_SF_NAME);
@@ -8977,7 +9027,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 				ScalarType mean, variance;				
 				sf->computeMinAndMax();
 				sf->computeMeanAndVariance(mean, &variance);
-				ccLog::Print("[Compute Primitive Distances] [Primitive: %s] [Cloud: %s] [%s] Mean distance = %f / std deviation = %f", qPrintable(primitiveName), qPrintable(compEnt->getName()), qPrintable(sfName), mean, sqrt(variance));
+				ccLog::Print("[Compute Primitive Distances] [Primitive: %s] [Cloud: %s] [%s] Mean distance = %f / std deviation = %f", qPrintable(refEntity->getName()), qPrintable(compEnt->getName()), qPrintable(sfName), mean, sqrt(variance));			
 			}
 			compEnt->setCurrentDisplayedScalarField(sfIdx);
 			compEnt->showSF(sfIdx >= 0);
@@ -10250,6 +10300,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionClone->setEnabled(atLeastOneEntity);
 	m_UI->actionDelete->setEnabled(atLeastOneEntity);
 	m_UI->actionExportCoordToSF->setEnabled(atLeastOneEntity);
+	m_UI->actionExportNormalToSF->setEnabled(atLeastOneNormal);
 	m_UI->actionSegment->setEnabled(atLeastOneEntity && activeWindow);
 	m_UI->actionTranslateRotate->setEnabled(atLeastOneEntity && activeWindow);
 	m_UI->actionShowDepthBuffer->setEnabled(atLeastOneGBLSensor);

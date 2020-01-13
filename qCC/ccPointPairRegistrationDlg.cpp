@@ -1347,7 +1347,9 @@ void ccPointPairRegistrationDlg::apply()
 		//apply (scaled) transformation (if not fixed)
 		bool adjustScale = adjustScaleCheckBox->isChecked();
 		if (adjustScale && trans.R.isValid())
+		{
 			trans.R.scale(trans.s);
+		}
 		ccGLMatrix transMat = FromCCLibMatrix<PointCoordinateType,float>(trans.R,trans.T);
 		//...for real this time!
 		assert(!m_alignedEntities.empty());

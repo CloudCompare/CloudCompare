@@ -39,90 +39,182 @@
 
 //System
 #if defined(CC_WINDOWS)
-#include "windows.h"
+#include "Windows.h"
 #else
 #include <time.h>
 #include <unistd.h>
 #endif
 
-//Dedicated 'OrientedPointStream' for the ccPointCloud structure
-template <class Real> class ccPointStream : public OrientedPointStream<Real>
+template <typename Real>
+class PointCloudWrapper : public PoissonReconLib::ICloud<Real>
 {
 public:
-	explicit ccPointStream( ccPointCloud* cloud ) : m_cloud(cloud), m_index(0) {}
-	virtual void reset( void ) { m_index = 0; }
-	virtual bool nextPoint( OrientedPoint3D< Real >& out )
+	explicit PointCloudWrapper( const ccPointCloud& cloud ) : m_cloud(cloud) {}
+
+	virtual size_t size() const { return m_cloud.size(); }
+	virtual bool hasNormals() const { return m_cloud.hasNormals(); }
+	virtual bool hasColors() const { return m_cloud.hasColors(); }
+	virtual void getPoint(size_t index, Real* coords) const
 	{
-		if (!m_cloud || m_index == m_cloud->size())
+		if (index >= m_cloud.size())
 		{
-			return false;
+			assert(false);
+			return;
 		}
 		//point
-		const CCVector3* P = m_cloud->getPoint(m_index);
-		out.p[0] = static_cast<Real>(P->x);
-		out.p[1] = static_cast<Real>(P->y);
-		out.p[2] = static_cast<Real>(P->z);
+		const CCVector3* P = m_cloud.getPoint(static_cast<unsigned>(index));
+		coords[0] = static_cast<Real>(P->x);
+		coords[1] = static_cast<Real>(P->y);
+		coords[2] = static_cast<Real>(P->z);
+	}
 
-		//normal
-		assert(m_cloud->hasNormals());
-		const CCVector3& N = m_cloud->getPointNormal(m_index);
-		//DGM: strangely, this new version of PoissonRecon seems to require inverted normals
-		out.n[0] = -static_cast<Real>(N.x);
-		out.n[1] = -static_cast<Real>(N.y);
-		out.n[2] = -static_cast<Real>(N.z);
+	virtual void getNormal(size_t index, Real* coords) const
+	{
+		if (index >= m_cloud.size() || !m_cloud.hasNormals())
+		{
+			assert(false);
+			return;
+		}
 
-		//auto-forward
-		++m_index;
+		const CCVector3& N = m_cloud.getPointNormal(static_cast<unsigned>(index));
+		coords[0] = static_cast<Real>(N.x);
+		coords[1] = static_cast<Real>(N.y);
+		coords[2] = static_cast<Real>(N.z);
+	}
+	
+	virtual void getColor(size_t index, Real* rgb) const
+	{
+		if (index >= m_cloud.size() || !m_cloud.hasColors())
+		{
+			assert(false);
+			return;
+		}
 
-		return true;
+		const ccColor::Rgb& color = m_cloud.getPointColor(static_cast<unsigned>(index));
+		rgb[0] = static_cast<Real>(color.r);
+		rgb[1] = static_cast<Real>(color.g);
+		rgb[2] = static_cast<Real>(color.b);
 	}
 
 protected:
-	ccPointCloud* m_cloud;
-	unsigned m_index;
+	const ccPointCloud& m_cloud;
 };
 
-//Dedicated 'OrientedPointStream' for the ccPointCloud structure (with colors)
-template <class Real> class ccColoredPointStream : public OrientedPointStreamWithData<Real , Point3D< Real > >
+template <typename Real>
+class MeshWrapper : public PoissonReconLib::IMesh<Real>
 {
 public:
-	explicit ccColoredPointStream( ccPointCloud* cloud ) : m_cloud(cloud), m_index(0) { assert(cloud && cloud->hasColors()); }
-	virtual void reset( void ) { m_index = 0; }
-	virtual bool nextPoint( OrientedPoint3D< Real >& out, Point3D< Real >& d )
+	explicit MeshWrapper(ccMesh& mesh, ccPointCloud& vertices, CCLib::ScalarField* densitySF = nullptr)
+		: m_mesh(mesh)
+		, m_vertices(vertices)
+		, m_densitySF(densitySF)
+		, m_error(false)
+	{}
+
+	bool checkMeshCapacity()
 	{
-		if (!m_cloud || m_index == m_cloud->size())
+		if (m_error)
 		{
+			//no need to go further
 			return false;
 		}
-		//point
-		const CCVector3* P = m_cloud->getPoint(m_index);
-		out.p[0] = static_cast<Real>(P->x);
-		out.p[1] = static_cast<Real>(P->y);
-		out.p[2] = static_cast<Real>(P->z);
-
-		//normal
-		assert(m_cloud->hasNormals());
-		const CCVector3& N = m_cloud->getPointNormal(m_index);
-		out.n[0] = -static_cast<Real>(N.x);
-		out.n[1] = -static_cast<Real>(N.y);
-		out.n[2] = -static_cast<Real>(N.z);
-
-		//color
-		assert(m_cloud->hasColors());
-		const ccColor::Rgb& rgb = m_cloud->getPointColor(m_index);
-		d[0] = static_cast<Real>(rgb.r);
-		d[1] = static_cast<Real>(rgb.g);
-		d[2] = static_cast<Real>(rgb.b);
-
-		//auto-forward
-		++m_index;
-
+		if (m_mesh.size() == m_mesh.capacity() && !m_mesh.reserve(m_mesh.size() + 1024))
+		{
+			m_error = true;
+			return false;
+		}
 		return true;
 	}
 
+	bool checkVertexCapacity()
+	{
+		if (m_error)
+		{
+			//no need to go further
+			return false;
+		}
+		if (m_vertices.size() == m_vertices.capacity() && !m_vertices.reserve(m_vertices.size() + 4096))
+		{
+			m_error = true;
+			return false;
+		}
+		return true;
+	}
+
+	virtual void addVertex(const Real* coords) override
+	{
+		if (!checkVertexCapacity())
+		{
+			return;
+		}
+		CCVector3 P = CCVector3::fromArray(coords);
+		m_vertices.addPoint(P);
+	}
+
+	virtual void addNormal(const Real* coords) override
+	{
+		if (!checkVertexCapacity())
+		{
+			return;
+		}
+		if (!m_vertices.hasNormals() && !m_vertices.reserveTheNormsTable())
+		{
+			m_error = true;
+			return;
+		}
+		CCVector3 N = CCVector3::fromArray(coords);
+		m_vertices.addNorm(N);
+	}
+
+	virtual void addColor(const Real* rgb) override
+	{
+		if (!checkVertexCapacity())
+		{
+			return;
+		}
+		if (!m_vertices.hasColors())
+		{
+			if (!m_vertices.reserveTheRGBTable())
+			{
+				m_error = true;
+				return;
+			}
+		}
+		m_vertices.addRGBColor(	static_cast<ColorCompType>(std::min((Real)255, std::max((Real)0, rgb[0]))),
+								static_cast<ColorCompType>(std::min((Real)255, std::max((Real)0, rgb[1]))),
+								static_cast<ColorCompType>(std::min((Real)255, std::max((Real)0, rgb[2]))) );
+	}
+
+	virtual void addDensity(double d) override
+	{
+		if (!m_densitySF)
+		{
+			return;
+		}
+		if (m_densitySF->size() == m_densitySF->capacity() && !m_densitySF->reserveSafe(m_densitySF->size() + 4096))
+		{
+			m_error = true;
+			return;
+		}
+		m_densitySF->addElement(static_cast<ScalarType>(d));
+	}
+
+	void addTriangle(size_t i1, size_t i2, size_t i3) override
+	{
+		if (!checkMeshCapacity())
+		{
+			return;
+		}
+		m_mesh.addTriangle(static_cast<unsigned>(i1), static_cast<unsigned>(i2), static_cast<unsigned>(i3));
+	}
+
+	bool isInErrorState() const { return m_error; }
+
 protected:
-	ccPointCloud* m_cloud;
-	unsigned m_index;
+	ccMesh& m_mesh;
+	ccPointCloud& m_vertices;
+	bool m_error;
+	CCLib::ScalarField* m_densitySF;
 };
 
 //dialog for qPoissonRecon plugin
@@ -165,40 +257,29 @@ QList<QAction *> qPoissonRecon::getActions()
 	return QList<QAction *>{ m_action };
 }
 
-typedef PlyValueVertex< PointCoordinateType > Vertex;
-typedef CoredVectorMeshData< Vertex > PoissonMesh;
-
-typedef PlyColorAndValueVertex< PointCoordinateType > ColoredVertex;
-typedef CoredVectorMeshData< ColoredVertex > ColoredPoissonMesh;
-
 static PoissonReconLib::Parameters s_params;
-static ccPointCloud* s_cloud = 0;
-static PoissonMesh* s_mesh = 0;
-static ColoredPoissonMesh* s_coloredMesh = 0;
-static XForm4x4< PointCoordinateType > s_iXForm;
+static ccPointCloud* s_cloud = nullptr;
+static ccMesh* s_mesh = nullptr;
+static ccPointCloud* s_meshVertices = nullptr;
+static CCLib::ScalarField* s_densitySF = nullptr;
 
 bool doReconstruct()
 {
 	//invalid parameters
-	if (!s_cloud || !s_mesh)
+	if (!s_cloud || !s_mesh || !s_meshVertices)
 	{
 		return false;
 	}
 
-	ccPointStream<PointCoordinateType> pointStream(s_cloud);
-	return PoissonReconLib::Reconstruct(s_params, &pointStream, *s_mesh, s_iXForm);
-}
-
-bool doReconstructWithColors()
-{
-	//invalid parameters
-	if (!s_cloud || !s_coloredMesh || !s_cloud->hasColors())
+	MeshWrapper<PointCoordinateType> meshWrapper(*s_mesh, *s_meshVertices, s_densitySF);
+	PointCloudWrapper<PointCoordinateType> cloudWrapper(*s_cloud);
+	
+	if (!PoissonReconLib::Reconstruct(s_params, cloudWrapper, meshWrapper) || meshWrapper.isInErrorState())
 	{
 		return false;
 	}
 
-	ccColoredPointStream<PointCoordinateType> pointStream(s_cloud);
-	return PoissonReconLib::Reconstruct(s_params, &pointStream, *s_coloredMesh, s_iXForm);
+	return true;
 }
 
 void qPoissonRecon::doAction()
@@ -212,17 +293,17 @@ void qPoissonRecon::doAction()
 	//we need one point cloud
 	if (!m_app->haveOneSelection())
 	{
-		m_app->dispToConsole("Select only one cloud!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		m_app->dispToConsole("Select only one cloud!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
 	}
 
 	//a real point cloud
 	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
-	
+
 	ccHObject* ent = selectedEntities[0];
 	if (!ent->isA(CC_TYPES::POINT_CLOUD))
 	{
-		m_app->dispToConsole("Select a cloud!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		m_app->dispToConsole("Select a cloud!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
 	}
 
@@ -230,21 +311,35 @@ void qPoissonRecon::doAction()
 	ccPointCloud* pc = static_cast<ccPointCloud*>(ent);
 	if (!pc->hasNormals())
 	{
-		m_app->dispToConsole("Cloud must have normals!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		m_app->dispToConsole("Cloud must have normals!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
 	}
 
+	static unsigned s_lastEntityID = 0;
+	static double s_defaultResolution = 0.0;
+	static bool s_depthMode = true;
+	if (s_defaultResolution == 0.0 || s_lastEntityID != pc->getUniqueID())
+	{
+		s_defaultResolution = pc->getOwnBB().getDiagNormd() / 200.0;
+		s_lastEntityID = pc->getUniqueID();
+	}
+	
 	bool cloudHasColors = pc->hasColors();
 	PoissonReconParamDlg prpDlg(m_app->getMainWindow());
 	prpDlg.importColorsCheckBox->setVisible(cloudHasColors);
+	if (s_depthMode)
+		prpDlg.depthRadioButton->setChecked(true);
+	else
+		prpDlg.resolutionRadioButton->setChecked(true);
 
 	//init dialog with semi-persistent settings
-	prpDlg.octreeLevelSpinBox->setValue(s_params.depth);
-	prpDlg.weightDoubleSpinBox->setValue(s_params.pointWeight);
-	prpDlg.fullDepthSpinBox->setValue(s_params.fullDepth);
+	prpDlg.depthSpinBox->setValue(s_params.depth);
+	prpDlg.resolutionDoubleSpinBox->setValue(s_defaultResolution);
 	prpDlg.samplesPerNodeSpinBox->setValue(s_params.samplesPerNode);
+	prpDlg.importColorsCheckBox->setChecked(s_params.withColors);
 	prpDlg.densityCheckBox->setChecked(s_params.density);
-	prpDlg.importColorsCheckBox->setChecked(true);
+	prpDlg.weightDoubleSpinBox->setValue(s_params.pointWeight);
+	prpDlg.linearFitCheckBox->setChecked(s_params.linearFit);
 	switch (s_params.boundary)
 	{
 	case PoissonReconLib::Parameters::FREE:
@@ -265,11 +360,16 @@ void qPoissonRecon::doAction()
 		return;
 
 	//set parameters with dialog settings
-	s_params.depth = prpDlg.octreeLevelSpinBox->value();
-	s_params.pointWeight = static_cast<float>(prpDlg.weightDoubleSpinBox->value());
-	s_params.fullDepth = prpDlg.fullDepthSpinBox->value();
+	s_depthMode = prpDlg.depthRadioButton->isChecked();
+	s_defaultResolution = prpDlg.resolutionDoubleSpinBox->value();
+	
+	s_params.depth = (s_depthMode ? prpDlg.depthSpinBox->value() : 0);
+	s_params.finestCellWidth = static_cast<float>(s_depthMode ? 0.0 : s_defaultResolution);
 	s_params.samplesPerNode = static_cast<float>(prpDlg.samplesPerNodeSpinBox->value());
+	s_params.withColors = prpDlg.importColorsCheckBox->isChecked();
 	s_params.density = prpDlg.densityCheckBox->isChecked();
+	s_params.pointWeight = static_cast<float>(prpDlg.weightDoubleSpinBox->value());
+	s_params.linearFit = prpDlg.linearFitCheckBox->isChecked();
 	switch (prpDlg.boundaryComboBox->currentIndex())
 	{
 	case 0:
@@ -285,21 +385,23 @@ void qPoissonRecon::doAction()
 		assert(false);
 		break;
 	}
-	bool withColors = pc->hasColors() && prpDlg.importColorsCheckBox->isChecked();
 
 	/*** RECONSTRUCTION PROCESS ***/
 
-	PoissonMesh mesh;
-	ColoredPoissonMesh coloredMesh;
-	s_cloud = 0;
-	s_mesh = 0;
-	s_coloredMesh = 0;
+	assert(s_cloud == nullptr);
+	assert(s_mesh == nullptr);
+	assert(s_meshVertices == nullptr);
+
+	ccScalarField* densitySF = nullptr;
+	ccPointCloud* newPC = new ccPointCloud("vertices");
+	ccMesh* newMesh = new ccMesh(newPC);
+	newMesh->addChild(newPC);
 
 	//run in a separate thread
 	bool result = false;
 	{
 		//start message
-		m_app->dispToConsole(QString("[PoissonRecon] Job started (level %1)").arg(s_params.depth),ccMainAppInterface::STD_CONSOLE_MESSAGE);
+		m_app->dispToConsole(QString("[PoissonRecon] Job started (level %1)").arg(s_params.depth), ccMainAppInterface::STD_CONSOLE_MESSAGE);
 
 		//progress dialog (Qtconcurrent::run can't be canceled!)
 		QProgressDialog pDlg("Initialization", QString(), 0, 0, m_app->getMainWindow());
@@ -307,23 +409,27 @@ void qPoissonRecon::doAction()
 		pDlg.show();
 		//QApplication::processEvents();
 
-		pDlg.setLabelText(QString("Reconstruction in progress\nlevel: %1 [%2 thread(s)]").arg(s_params.depth).arg(s_params.threads));
+		QString progressLabel("Reconstruction in progress\n");
+		if (s_depthMode)
+			progressLabel += QString("level: %1").arg(s_params.depth);
+		else
+			progressLabel += QString("resolution: %1").arg(s_params.finestCellWidth);
+		progressLabel += QString(" [%1 thread(s)]").arg(s_params.threads);
+
+		pDlg.setLabelText(progressLabel);
 		QApplication::processEvents();
 
-		QFuture<bool> future;
-			
 		//run in a separate thread
 		s_cloud = pc;
-		if (withColors)
+		s_mesh = newMesh;
+		s_meshVertices = newPC;
+
+		if (s_params.density)
 		{
-			s_coloredMesh = &coloredMesh;
-			future = QtConcurrent::run(doReconstructWithColors);
+			s_densitySF = (densitySF = new ccScalarField("Density"));
 		}
-		else
-		{
-			s_mesh = &mesh;
-			future = QtConcurrent::run(doReconstruct);
-		}
+
+		QFuture<bool> future = QtConcurrent::run(doReconstruct);
 
 		//wait until process is finished!
 		while (!future.isFinished())
@@ -340,229 +446,63 @@ void qPoissonRecon::doAction()
 
 		result = future.result();
 
+		s_cloud = nullptr;
+		s_mesh = nullptr;
+		s_meshVertices = nullptr;
+
 		pDlg.hide();
 		QApplication::processEvents();
 	}
 
-	if (result
-		&&	(!s_mesh || s_mesh->polygonCount() > 0)
-		&&	(!s_coloredMesh || s_coloredMesh->polygonCount() > 0))
+	if (!result)
 	{
-		unsigned nic = 0, noc = 0, nr_faces = 0;
-		if (s_coloredMesh)
+		if (densitySF)
 		{
-			s_coloredMesh->resetIterator();
-			nic			= static_cast<unsigned>(s_coloredMesh->inCorePoints.size());
-			noc			= static_cast<unsigned>(s_coloredMesh->outOfCorePointCount());
-			nr_faces	= static_cast<unsigned>(s_coloredMesh->polygonCount());
+			densitySF->release();
+			densitySF = nullptr;
 		}
-		else //if (s_mesh)
-		{
-			s_mesh->resetIterator();
-			nic			= static_cast<unsigned>(s_mesh->inCorePoints.size());
-			noc			= static_cast<unsigned>(s_mesh->outOfCorePointCount());
-			nr_faces	= static_cast<unsigned>(s_mesh->polygonCount());
-		}
-		unsigned nr_vertices = nic+noc;
-
-		//end message
-		m_app->dispToConsole(QString("[PoissonRecon] Job finished (%1 triangles, %2 vertices)").arg(nr_faces).arg(nr_vertices),ccMainAppInterface::STD_CONSOLE_MESSAGE);
-
-		ccPointCloud* newPC = new ccPointCloud("vertices");
-		ccMesh* newMesh = new ccMesh(newPC);
-		newMesh->addChild(newPC);
-
-		if (newPC->reserve(nr_vertices) && newMesh->reserve(nr_faces))
-		{
-			ccScalarField* densitySF = 0;
-			if (s_params.density)
-			{
-				densitySF = new ccScalarField("Density");
-				if (!densitySF->reserveSafe(nr_vertices))
-				{
-					m_app->dispToConsole(QString("[PoissonRecon] Failed to allocate memory for storing density!"),ccMainAppInterface::WRN_CONSOLE_MESSAGE);
-					densitySF->release();
-					densitySF = 0;
-				}
-			}
-
-			if (s_coloredMesh)
-			{
-				bool importColors = newPC->reserveTheRGBTable();
-				if (!importColors)
-				{
-					if (m_app)
-						m_app->dispToConsole("Not enough memory to import colors!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-				}
-				//add 'in core' points
-				{
-					for (unsigned i = 0; i < nic; i++)
-					{
-						ColoredVertex p = s_iXForm * s_coloredMesh->inCorePoints[i];
-						CCVector3 p2(	static_cast<PointCoordinateType>(p.point.coords[0]),
-										static_cast<PointCoordinateType>(p.point.coords[1]),
-										static_cast<PointCoordinateType>(p.point.coords[2]) );
-						newPC->addPoint(p2);
-
-						if (importColors)
-						{
-							ccColor::Rgb C(	static_cast<ColorCompType>(std::min(255.0f, std::max<float>(p.color[0], 0.0))),
-											static_cast<ColorCompType>(std::min(255.0f, std::max<float>(p.color[1], 0.0))),
-											static_cast<ColorCompType>(std::min(255.0f, std::max<float>(p.color[2], 0.0))) );
-							newPC->addRGBColor(C);
-						}
-
-						if (densitySF)
-						{
-							ScalarType sf = static_cast<ScalarType>(p.value);
-							densitySF->addElement(sf);
-						}
-					}
-				}
-				//add 'out of core' points
-				{
-					for (unsigned i = 0; i < noc; i++)
-					{
-						ColoredVertex p;
-						s_coloredMesh->nextOutOfCorePoint(p);
-						p = s_iXForm * p;
-						CCVector3 p2(	static_cast<PointCoordinateType>(p.point.coords[0]),
-										static_cast<PointCoordinateType>(p.point.coords[1]),
-										static_cast<PointCoordinateType>(p.point.coords[2]) );
-						newPC->addPoint(p2);
-
-						if (importColors)
-						{
-							ccColor::Rgb C(	static_cast<ColorCompType>(std::min(255.0f, std::max<float>(p.color[0], 0.0))),
-											static_cast<ColorCompType>(std::min(255.0f, std::max<float>(p.color[1], 0.0))),
-											static_cast<ColorCompType>(std::min(255.0f, std::max<float>(p.color[2], 0.0))) );
-							newPC->addRGBColor(C);
-						}
-
-						if (densitySF)
-						{
-							ScalarType sf = static_cast<ScalarType>(p.value);
-							densitySF->addElement(sf);
-						}
-					}
-				}
-
-				newPC->showColors(importColors);
-			}
-			else
-			{
-				//add 'in core' points
-				{
-					for (unsigned i = 0; i < nic; i++)
-					{
-						Vertex p = s_iXForm * s_mesh->inCorePoints[i];
-						CCVector3 p2(	static_cast<PointCoordinateType>(p.point.coords[0]),
-										static_cast<PointCoordinateType>(p.point.coords[1]),
-										static_cast<PointCoordinateType>(p.point.coords[2]) );
-						newPC->addPoint(p2);
-
-						if (densitySF)
-						{
-							ScalarType sf = static_cast<ScalarType>(p.value);
-							densitySF->addElement(sf);
-						}
-					}
-				}
-				//add 'out of core' points
-				{
-					for (unsigned i = 0; i < noc; i++)
-					{
-						Vertex p;
-						s_mesh->nextOutOfCorePoint(p);
-						p = s_iXForm * p;
-						CCVector3 p2(	static_cast<PointCoordinateType>(p.point.coords[0]),
-										static_cast<PointCoordinateType>(p.point.coords[1]),
-										static_cast<PointCoordinateType>(p.point.coords[2]) );
-						newPC->addPoint(p2);
-
-						if (densitySF)
-						{
-							ScalarType sf = static_cast<ScalarType>(p.value);
-							densitySF->addElement(sf);
-						}
-					}
-				}
-				newPC->showColors(false);
-			}
-
-			// density SF
-			if (densitySF)
-			{
-				densitySF->computeMinAndMax();
-				densitySF->showNaNValuesInGrey(false);
-				int sfIdx = newPC->addScalarField(densitySF);
-				newPC->setCurrentDisplayedScalarField(sfIdx);
-				newPC->showSF(true);
-				newMesh->showColors(newPC->colorsShown());
-				newMesh->showSF(true);
-			}
-
-			//add faces
-			{
-				for (unsigned i = 0; i < nr_faces; i++)
-				{
-					std::vector<CoredVertexIndex> triangleIndexes;
-					if (s_mesh)
-						s_mesh->nextPolygon(triangleIndexes);
-					else
-						s_coloredMesh->nextPolygon(triangleIndexes);
-
-					if (triangleIndexes.size() == 3)
-					{
-						for (std::vector<CoredVertexIndex>::iterator it = triangleIndexes.begin(); it != triangleIndexes.end(); ++it)
-							if (!it->inCore)
-								it->idx += nic;
-
-						newMesh->addTriangle(	triangleIndexes[0].idx,
-												triangleIndexes[1].idx,
-												triangleIndexes[2].idx );
-					}
-					else
-					{
-						//Can't handle anything else than triangles yet!
-						assert(false);
-					}
-				}
-			}
-
-			newMesh->setName(QString("Mesh[%1] (level %2)").arg(pc->getName()).arg(s_params.depth));
-			newPC->setEnabled(false);
-			newMesh->setVisible(true);
-			newMesh->computeNormals(true);
-			newMesh->showColors(newMesh->hasColors());
-
-			//copy Global Shift & Scale information
-			newPC->setGlobalShift(pc->getGlobalShift());
-			newPC->setGlobalScale(pc->getGlobalScale());
-
-			//output mesh
-			m_app->addToDB(newMesh);
-			m_app->setSelectedInDB(ent, false);
-			m_app->setSelectedInDB(newMesh, true);
-		}
-		else
-		{
-			delete newMesh;
-			newMesh = 0;
-			m_app->dispToConsole("Not enough memory!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		}
-
-		//currently selected entities parameters may have changed!
-		m_app->updateUI();
-		//currently selected entities appearance may have changed!
-		m_app->refreshAll();
-	}
-	else
-	{
+		delete newMesh;
+		newMesh = nullptr;
 		m_app->dispToConsole("Reconstruction failed!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
+	
+	//success message
+	m_app->dispToConsole(QString("[PoissonRecon] Job finished (%1 triangles, %2 vertices)").arg(newMesh->size()).arg(newPC->size()), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+
+	newMesh->setName(QString("Mesh[%1] (level %2)").arg(pc->getName()).arg(s_params.depth));
+	newPC->setEnabled(false);
+	newMesh->setVisible(true);
+	newMesh->computeNormals(true);
+	if (!cloudHasColors)
+	{
+		newPC->unallocateColors();
+		newPC->showColors(false);
+	}
+	newMesh->showColors(newPC->hasColors());
+
+	if (densitySF)
+	{
+		densitySF->computeMinAndMax();
+		densitySF->showNaNValuesInGrey(false);
+		int sfIdx = newPC->addScalarField(densitySF);
+		newPC->setCurrentDisplayedScalarField(sfIdx);
+		newPC->showSF(true);
+		newMesh->showColors(newPC->colorsShown());
+		newMesh->showSF(true);
 	}
 
-	s_cloud = 0;
-	s_mesh = 0;
-	s_coloredMesh = 0;
+	//copy Global Shift & Scale information
+	newPC->setGlobalShift(pc->getGlobalShift());
+	newPC->setGlobalScale(pc->getGlobalScale());
+
+	//output mesh
+	m_app->addToDB(newMesh);
+	m_app->setSelectedInDB(ent, false);
+	m_app->setSelectedInDB(newMesh, true);
+
+	//currently selected entities parameters may have changed!
+	m_app->updateUI();
+	//currently selected entities appearance may have changed!
+	m_app->refreshAll();
 }

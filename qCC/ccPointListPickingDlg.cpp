@@ -160,13 +160,8 @@ void ccPointListPickingDlg::linkWithEntity(ccHObject* entity)
 		}
 	}
 
-	ccGenericPointCloud* asCloud = ccHObjectCaster::ToGenericPointCloud(entity);
-	if (!asCloud)
-	{
-		assert(false);
-	}
-
-	showGlobalCoordsCheckBox->setEnabled(asCloud ? asCloud->isShifted() : false);
+	ccShiftedObject* shifted = ccHObjectCaster::ToShifted(entity);
+	showGlobalCoordsCheckBox->setEnabled(shifted ? shifted->isShifted() : false);
 	updateList();
 }
 

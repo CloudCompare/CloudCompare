@@ -39,7 +39,7 @@
      <x>0</x>
      <y>0</y>
      <width>1024</width>
-     <height>21</height>
+     <height>31</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -149,6 +149,7 @@
      <addaction name="actionAddConstantSF"/>
      <addaction name="actionAddIdField"/>
      <addaction name="actionExportCoordToSF"/>
+     <addaction name="actionExportNormalToSF"/>
      <addaction name="actionSetSFAsCoord"/>
      <addaction name="actionInterpolateSFs"/>
      <addaction name="actionScalarFieldArithmetic"/>
@@ -196,6 +197,7 @@
      <addaction name="actionInvertNormals"/>
      <addaction name="menuOrientNormals"/>
      <addaction name="menuConvert_to"/>
+     <addaction name="actionExportNormalToSF"/>
      <addaction name="separator"/>
      <addaction name="actionClearNormals"/>
     </widget>
@@ -609,8 +611,8 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="minimumSize">
     <size>
-     <width>91</width>
-     <height>128</height>
+     <width>103</width>
+     <height>137</height>
     </size>
    </property>
    <property name="maximumSize">
@@ -728,8 +730,8 @@ QTreeView::branch:open:has-children:has-siblings  {
   <widget class="QDockWidget" name="DockableProperties">
    <property name="minimumSize">
     <size>
-     <width>109</width>
-     <height>135</height>
+     <width>133</width>
+     <height>164</height>
     </size>
    </property>
    <property name="floating">
@@ -3036,6 +3038,14 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="statusTip">
     <string>Compute cloud/Primitive distance</string>
+   </property>
+  </action>
+  <action name="actionExportNormalToSF">
+   <property name="text">
+    <string>Export normals to SF(s)</string>
+   </property>
+   <property name="toolTip">
+    <string>Export normals to one or several scalar fields</string>
    </property>
   </action>
  </widget>

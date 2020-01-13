@@ -1195,7 +1195,69 @@ namespace ccEntityAction
 		
 		return true;
 	}
-	
+
+	bool	exportNormalToSF(const ccHObject::Container& selectedEntities, QWidget* parent, bool* exportDimensions/*=nullptr*/)
+	{
+		bool exportDims[3] = { false, false, false };
+		if (exportDimensions)
+		{
+			exportDims[0] = exportDimensions[0];
+			exportDims[1] = exportDimensions[1];
+			exportDims[2] = exportDimensions[2];
+		}
+		else
+		{
+			//ask the user
+			ccExportCoordToSFDlg ectsDlg(parent);
+			ectsDlg.setWindowTitle(QObject::tr("Export normals to SF(s)"));
+
+			if (!ectsDlg.exec())
+			{
+				return false;
+			}
+
+			exportDims[0] = ectsDlg.exportX();
+			exportDims[1] = ectsDlg.exportY();
+			exportDims[2] = ectsDlg.exportZ();
+		}
+
+		if (!exportDims[0] && !exportDims[1] && !exportDims[2]) //nothing to do?!
+		{
+			return false;
+		}
+
+		//for each selected cloud (or vertices set)
+		for (ccHObject* entity : selectedEntities)
+		{
+			ccPointCloud* pc = ccHObjectCaster::ToPointCloud(entity);
+			if (pc == nullptr)
+			{
+				// TODO do something with error?
+				continue;
+			}
+
+			if (!pc->hasNormals())
+			{
+				ccLog::Warning(QString("Cloud '%1' has no normals").arg(pc->getName()));
+				continue;
+			}
+
+			if (!pc->exportNormalToSF(exportDims))
+			{
+				ccLog::Error("The process failed!");
+				return true; //true because we want the UI to be updated anyway
+			}
+
+			if (entity != pc)
+			{
+				entity->showSF(true); //for meshes
+			}
+			entity->prepareDisplayForRefresh_recursive();
+		}
+
+		return true;
+	}
+
 	bool	sfArithmetic(const ccHObject::Container &selectedEntities, QWidget *parent)
 	{
 		Q_ASSERT(!selectedEntities.empty());

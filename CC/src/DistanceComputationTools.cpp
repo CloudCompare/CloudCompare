@@ -28,6 +28,7 @@
 #include <ScalarField.h>
 #include <ScalarFieldTools.h>
 #include <SimpleTriangle.h>
+#include <SquareMatrix.h>
 
 //system
 #include <algorithm>
@@ -2228,7 +2229,7 @@ int DistanceComputationTools::computeCloud2ConeEquation(GenericIndexedCloudPersi
 						y = sqrt(yy) - coneR1;
 						ry = y * side[0] - x * side[1]; //rotated y value (distance from the coneside axis)
 						d = std::min(axisLength - x, x); //determine whether closer to either radii 
-						d = std::min(d, static_cast<double>(abs(ry))); //or to side
+						d = std::min(d, static_cast<double>(std::abs(ry))); //or to side
 						d = -d; //negative inside
 					}
 					else
@@ -2270,7 +2271,7 @@ int DistanceComputationTools::computeCloud2ConeEquation(GenericIndexedCloudPersi
 								if (ry < 0) 
 								{//point is interior to the cone
 									d = std::min(axisLength - x, x); //determine whether closer to either radii 
-									d = std::min(d, static_cast<double>(abs(ry))); //or to side
+									d = std::min(d, static_cast<double>(std::abs(ry))); //or to side
 									d = -d; //negative inside
 								}
 							}
@@ -2461,6 +2462,218 @@ int DistanceComputationTools::computeCloud2PlaneEquation(GenericIndexedCloudPers
 		*rms = sqrt(dSumSq / count);
 	}
 
+	return count;
+}
+
+int DistanceComputationTools::computeCloud2RectangleEquation(GenericIndexedCloudPersist *cloud, PointCoordinateType widthX, PointCoordinateType widthY, const SquareMatrix& rotationTransform, const CCVector3& center, bool signedDist/*=true*/, double* rms/*= nullptr*/) 
+{
+	// p3---------------------p2
+	// ^					  |
+	// |e1					  |
+	// |					  |
+	// |		  e0		  |
+	// p0-------------------->p1
+	//Rect(s,t)=p0 + s*0e + t*e1 
+	//for s,t in {0,1}
+	assert(cloud);
+	if (!cloud)
+	{
+		return -1;
+	}
+	unsigned count = cloud->size();
+	if (count == 0) 
+	{
+		return -2;
+	}
+	if (!cloud->enableScalarField())
+	{
+		return -3;
+	}
+	if (widthX <= 0 || widthY <= 0)
+	{
+		return -4;
+	}
+	
+	CCVector3 widthXVec(widthX, 0, 0);
+	CCVector3 widthYVec(0, widthY, 0);
+	CCVector3 normalVector(0, 0, 1);
+
+	widthXVec = rotationTransform * widthXVec;
+	widthYVec = rotationTransform * widthYVec;
+	normalVector = rotationTransform * normalVector;
+	PointCoordinateType planeDistance = center.dot(normalVector);
+	PointCoordinateType d = 0;
+	PointCoordinateType dSumSq = 0;
+	CCVector3 rectangleP0 = center - (widthXVec / 2) - (widthYVec / 2);
+	CCVector3 rectangleP1 = center + (widthXVec / 2) - (widthYVec / 2);
+	CCVector3 rectangleP3 = center - (widthXVec / 2) + (widthYVec / 2);
+	CCVector3 e0 = rectangleP1 - rectangleP0;
+	CCVector3 e1 = rectangleP3 - rectangleP0;
+
+	for (unsigned i = 0; i < count; ++i) 
+	{
+		const CCVector3* pe = cloud->getPoint(i);
+		CCVector3 dist = (*pe - rectangleP0);
+		PointCoordinateType s = e0.dot(dist);
+		if (s > 0) 
+		{
+			PointCoordinateType dot0 = e0.norm2();
+			if (s < dot0)
+			{
+				dist -= (s / dot0)*e0;
+			}
+			else
+			{
+				dist -= e0;
+			}
+		}
+
+		PointCoordinateType t = e1.dot(dist);
+		if (t > 0) 
+		{
+			PointCoordinateType dot1 = e1.norm2();
+			if (t < dot1)
+			{
+				dist -= (t / dot1)*e1;
+			}
+			else
+			{
+				dist -= e1;
+			}
+		}
+		d = dist.normd();
+		dSumSq += d * d;
+		if (signedDist && pe->dot(normalVector) - planeDistance < 0)
+		{			
+			d = -d;
+		}
+		cloud->setPointScalarValue(i, static_cast<ScalarType>(d));
+	}
+	if (rms)
+	{
+		*rms = sqrt(dSumSq / count);
+	}
+	return count;
+}
+
+int DistanceComputationTools::computeCloud2BoxEquation(GenericIndexedCloudPersist* cloud, const CCVector3& boxDimensions, const SquareMatrix& rotationTransform, const CCVector3& boxCenter, bool signedDist/*=true*/, double* rms/*= nullptr*/) 
+{
+	assert(cloud);
+	if (!cloud)
+	{
+		return -1;
+	}
+	unsigned count = cloud->size();
+	if (count == 0)
+	{
+		return -2;
+	}
+	if (!cloud->enableScalarField())
+	{
+		return -3;
+	}
+	if (boxDimensions.x <= 0 || boxDimensions.y <= 0 || boxDimensions.z <= 0)
+	{
+		return -4;
+	}
+	// box half lengths hu hv and hw
+	const PointCoordinateType hu = boxDimensions.x / 2;
+	const PointCoordinateType hv = boxDimensions.y / 2;
+	const PointCoordinateType hw = boxDimensions.z / 2;
+	// box coordinates unit vectors u,v, and w
+	CCVector3 u(1, 0, 0);
+	CCVector3 v(0, 1, 0);
+	CCVector3 w(0, 0, 1);
+	u = rotationTransform * u;
+	v = rotationTransform * v;
+	w = rotationTransform * w;
+	CCVector3 dist;
+	bool insideBox;
+	PointCoordinateType d = 0;
+	PointCoordinateType dSumSq = 0;
+	for (unsigned i = 0; i < count; ++i) 
+	{
+		const CCVector3* p = cloud->getPoint(i);
+		CCVector3 pointCenterDifference = (*p - boxCenter);
+		CCVector3 p_inBoxCoords(pointCenterDifference.dot(u), pointCenterDifference.dot(v), pointCenterDifference.dot(w));
+		dist.x = 0; 
+		dist.y = 0; 
+		dist.z = 0;
+		insideBox = false;
+		if (p_inBoxCoords.x > -hu && p_inBoxCoords.x < hu && p_inBoxCoords.y > -hv && p_inBoxCoords.y < hv && p_inBoxCoords.z > -hw && p_inBoxCoords.z < hw)
+		{
+			insideBox = true;
+		}
+
+		if (p_inBoxCoords.x < -hu)
+		{
+			dist.x = -(p_inBoxCoords.x + hu);
+		}
+		else if (p_inBoxCoords.x > hu)
+		{
+			dist.x = p_inBoxCoords.x - hu;
+		}
+		else if (insideBox)
+		{
+			dist.x = abs(p_inBoxCoords.x) - hu;
+		}
+
+		if (p_inBoxCoords.y < -hv)
+		{
+			dist.y = -(p_inBoxCoords.y + hv);
+		}
+		else if (p_inBoxCoords.y > hv)
+		{
+			dist.y = p_inBoxCoords.y - hv;
+		}
+		else if (insideBox)
+		{
+			dist.y = abs(p_inBoxCoords.y) - hv;
+		}
+
+		if (p_inBoxCoords.z < -hw)
+		{
+			dist.z = -(p_inBoxCoords.z + hw);
+		}
+		else if (p_inBoxCoords.z > hw)
+		{
+			dist.z = p_inBoxCoords.z - hw;
+		}
+		else if (insideBox)
+		{
+			dist.z = abs(p_inBoxCoords.z) - hw;
+		}
+
+		if (insideBox)//take min distance inside box
+		{ 
+			if (dist.x >= dist.y && dist.x >= dist.z) 
+			{
+				dist.y = 0;
+				dist.z = 0;
+			}
+			else if (dist.y >= dist.x && dist.y >= dist.z) 
+			{
+				dist.x = 0;
+				dist.z = 0;
+			}
+			else if (dist.z >= dist.x && dist.z >= dist.y) 
+			{
+				dist.x = 0;
+				dist.y = 0;
+			}
+		}
+		d = dist.normd();
+		dSumSq += d * d;
+		if (signedDist && insideBox)
+		{
+			d = -d;
+		}
+		cloud->setPointScalarValue(i, static_cast<ScalarType>(d));
+	}
+	if (rms)
+	{
+		*rms = sqrt(dSumSq / count);
+	}
 	return count;
 }
 

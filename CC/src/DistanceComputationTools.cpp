@@ -1928,9 +1928,10 @@ ScalarType DistanceComputationTools::computePoint2TriangleDistance(const CCVecto
 
 	//we do all computations with double precision, otherwise
 	//some triangles with sharp angles will give very poor results.
-	CCVector3d AP(P->x - A->x, P->y - A->y, P->z - A->z);
-	CCVector3d AB(B->x - A->x, B->y - A->y, B->z - A->z);
-	CCVector3d AC(C->x - A->x, C->y - A->y, C->z - A->z);
+	//slight precision improvement by casting to double prior to subtraction
+	CCVector3d AP(static_cast<double>(P->x) - A->x, static_cast<double>(P->y) - A->y, static_cast<double>(P->z) - A->z);
+	CCVector3d AB(static_cast<double>(B->x) - A->x, static_cast<double>(B->y) - A->y, static_cast<double>(B->z) - A->z);
+	CCVector3d AC(static_cast<double>(C->x) - A->x, static_cast<double>(C->y) - A->y, static_cast<double>(C->z) - A->z);
 
     double a00 =  AB.dot(AB);
     double a01 =  AB.dot(AC);

@@ -2158,7 +2158,11 @@ ScalarType DistanceComputationTools::computePoint2LineSegmentDistSquared(const C
 	CCVector3 vec;
 	ScalarType distSq;
 	PointCoordinateType t = line.dot(*p - *start);
-	t /= line.norm2();
+	PointCoordinateType normSq = line.norm2();
+	if (normSq != 0) 
+	{
+		t /= normSq;
+	}
 	if (t < 0)
 	{
 		vec = *p - *start;

@@ -2723,7 +2723,7 @@ int DistanceComputationTools::computeCloud2PolylineEquation(GenericIndexedCloudP
 	ScalarType dSumSq = 0;
 	for (unsigned i = 0; i < count; ++i)
 	{
-		ScalarType distSq = INFINITY;
+		ScalarType distSq = NAN_VALUE;
 		const CCVector3* p = cloud->getPoint(i);
 		for (unsigned j = 0; j < polyline->size() - 1; j++)
 		{
@@ -2749,7 +2749,14 @@ int DistanceComputationTools::computeCloud2PolylineEquation(GenericIndexedCloudP
 			{
 				continue;
 			}
-			distSq = std::min(distSq, computePoint2LineSegmentDistSquared(p, start, end));
+			if (std::isnan(distSq)) 
+			{
+				distSq = computePoint2LineSegmentDistSquared(p, start, end);
+			}
+			else 
+			{
+				distSq = std::min(distSq, computePoint2LineSegmentDistSquared(p, start, end));
+			}
 		}
 		d = sqrt(distSq);
 		dSumSq += distSq;

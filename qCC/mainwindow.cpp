@@ -9006,6 +9006,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 				case CC_TYPES::POLY_LINE:
 				{
 					signedDist = false;
+					flippedNormals = false;
 					ccPolyline* line = static_cast<ccPolyline*>(refEntity);
 					returnCode = CCLib::DistanceComputationTools::computeCloud2PolylineEquation(compEnt, line);
 					if (!returnCode)

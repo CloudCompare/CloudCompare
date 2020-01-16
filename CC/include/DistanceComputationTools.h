@@ -24,6 +24,7 @@
 #include "CCToolbox.h"
 #include "DgmOctree.h"
 #include "SquareMatrix.h"
+#include "Polyline.h"
 
 namespace CCLib
 {
@@ -264,6 +265,14 @@ public: //distance to simple entities (triangles, planes, etc.)
 	**/
 	static ScalarType computePoint2PlaneDistance(const CCVector3* P, const PointCoordinateType* planeEquation);
 
+	//! Computes the square of the distance between a point and a line segment
+	/** \param point a 3D point
+		\param start the start of line segment
+		\param end the end of line segment
+		\return the distance squared between the point and the line segment
+	**/
+	static ScalarType computePoint2LineSegmentDistSquared(const CCVector3* point, const CCVector3* start, const CCVector3* end);
+
 	//! Computes the distance between each point in a cloud and a cone
 	/** \param cloud a 3D point cloud
 		\param coneP1 center point associated with the larger radii
@@ -312,6 +321,14 @@ public: //distance to simple entities (triangles, planes, etc.)
 
 	static int computeCloud2BoxEquation(GenericIndexedCloudPersist* cloud, const CCVector3& boxDimensions, const SquareMatrix& rotationTransform, const CCVector3& boxCenter, bool signedDist = true, double* rms = nullptr);
 	
+	//! Computes the distance between each point in a cloud and a polyline
+	/** \param cloud a 3D point cloud
+		\param polyline the polyline to measure to
+		\param[out] rms will be set with the Root Mean Square (RMS) distance between a cloud and a plane (optional)
+		\return negative error code or a positive value in case of success
+	**/
+	static int computeCloud2PolylineEquation(GenericIndexedCloudPersist* cloud, const Polyline* polyline, double* rms = nullptr);
+
 	//! Error estimators
 	enum ERROR_MEASURES
 	{

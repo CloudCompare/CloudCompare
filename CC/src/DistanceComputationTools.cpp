@@ -29,6 +29,7 @@
 #include <ScalarFieldTools.h>
 #include <SimpleTriangle.h>
 #include <SquareMatrix.h>
+#include <Polyline.h>
 
 //system
 #include <algorithm>
@@ -2151,6 +2152,35 @@ ScalarType DistanceComputationTools::computePoint2PlaneDistance(const CCVector3*
 	return static_cast<ScalarType>((CCVector3::vdot(P->u, planeEquation) - planeEquation[3])/*/CCVector3::vnorm(planeEquation)*/); //norm == 1.0!
 }
 
+ScalarType DistanceComputationTools::computePoint2LineSegmentDistSquared(const CCVector3* p, const CCVector3* start, const CCVector3* end)
+{
+	CCVector3 line = *end - *start;
+	CCVector3 vec;
+	ScalarType distSq;
+	PointCoordinateType t = line.dot(*p - *start);
+	PointCoordinateType normSq = line.norm2();
+	if (normSq != 0) 
+	{
+		t /= normSq;
+	}
+	if (t < 0)
+	{
+		vec = *p - *start;
+	}
+	else if (t > 1)
+	{
+		vec = *p - *end;
+	}
+	else
+	{
+		CCVector3 pProjectedOnLine = *start + t * line;
+		vec = *p - pProjectedOnLine;
+	}
+
+	distSq = vec.norm2();
+	return distSq;
+}
+
 // This algorithm is a modification of the distance computation between a point and a cone from 
 // Barbier & Galin's Fast Distance Computation Between a Point and Cylinders, Cones, Line Swept Spheres and Cone-Spheres.
 // The modifications from the paper are to compute the closest distance when the point is interior to the cone.
@@ -2670,6 +2700,73 @@ int DistanceComputationTools::computeCloud2BoxEquation(GenericIndexedCloudPersis
 		}
 		cloud->setPointScalarValue(i, static_cast<ScalarType>(d));
 	}
+	if (rms)
+	{
+		*rms = sqrt(dSumSq / count);
+	}
+	return count;
+}
+
+int DistanceComputationTools::computeCloud2PolylineEquation(GenericIndexedCloudPersist* cloud, const Polyline* polyline, double* rms /*= nullptr*/)
+{
+	assert(cloud);
+	if (!cloud)
+	{
+		return -1;
+	}
+	unsigned count = cloud->size();
+	if (count == 0)
+	{
+		return -2;
+	}
+	if (!cloud->enableScalarField())
+	{
+		return -3;
+	}
+	ScalarType d = 0;
+	ScalarType dSumSq = 0;
+	for (unsigned i = 0; i < count; ++i)
+	{
+		ScalarType distSq = NAN_VALUE;
+		const CCVector3* p = cloud->getPoint(i);
+		for (unsigned j = 0; j < polyline->size() - 1; j++)
+		{
+			const CCVector3* start = polyline->getPoint(j);
+			const CCVector3* end = polyline->getPoint(j + 1);
+			PointCoordinateType startXMinusA = start->x - p->x;
+			PointCoordinateType startYMinusB = start->y - p->y;
+			PointCoordinateType startZMinusC = start->z - p->z;
+			PointCoordinateType endXMinusA = end->x - p->x;
+			PointCoordinateType endYMinusB = end->y - p->y;
+			PointCoordinateType endZMinusC = end->z - p->z;
+			PointCoordinateType startXMinusASq = startXMinusA * startXMinusA;
+			PointCoordinateType startYMinusBSq = startYMinusB * startYMinusB;
+			PointCoordinateType startZMinusCSq = startZMinusC * startZMinusC;
+			PointCoordinateType endXMinusASq = endXMinusA * endXMinusA;
+			PointCoordinateType endYMinusBSq = endYMinusB * endYMinusB;
+			PointCoordinateType endZMinusCSq = endZMinusC * endZMinusC;
+
+			//Rejection test
+			if (((startXMinusASq >= distSq) && (endXMinusASq >= distSq) && (startXMinusA * endXMinusA > ZERO_TOLERANCE)) ||
+				((startYMinusBSq >= distSq) && (endYMinusBSq >= distSq) && (startYMinusB * endYMinusB > ZERO_TOLERANCE)) ||
+				((startZMinusCSq >= distSq) && (endZMinusCSq >= distSq) && (startZMinusC * endZMinusC > ZERO_TOLERANCE)))
+			{
+				continue;
+			}
+			if (std::isnan(distSq)) 
+			{
+				distSq = computePoint2LineSegmentDistSquared(p, start, end);
+			}
+			else 
+			{
+				distSq = std::min(distSq, computePoint2LineSegmentDistSquared(p, start, end));
+			}
+		}
+		d = sqrt(distSq);
+		dSumSq += distSq;
+		cloud->setPointScalarValue(i, d);
+	}
+
 	if (rms)
 	{
 		*rms = sqrt(dSumSq / count);

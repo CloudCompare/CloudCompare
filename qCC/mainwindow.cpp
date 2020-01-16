@@ -8889,17 +8889,18 @@ void MainWindow::doActionCloudPrimitiveDist()
 	for (unsigned i = 0; i < getSelectedEntities().size(); ++i)
 	{
 		
-		if (m_selectedEntities[i]->isKindOf(CC_TYPES::PRIMITIVE))
+		if (m_selectedEntities[i]->isKindOf(CC_TYPES::PRIMITIVE) || m_selectedEntities[i]->isA(CC_TYPES::POLY_LINE))
 		{
 			if (m_selectedEntities[i]->isA(CC_TYPES::PLANE) || 
 				m_selectedEntities[i]->isA(CC_TYPES::SPHERE) ||
 				m_selectedEntities[i]->isA(CC_TYPES::CYLINDER) ||
 				m_selectedEntities[i]->isA(CC_TYPES::CONE) ||
-				m_selectedEntities[i]->isA(CC_TYPES::BOX))
+				m_selectedEntities[i]->isA(CC_TYPES::BOX) ||
+				m_selectedEntities[i]->isA(CC_TYPES::POLY_LINE))
 			{
 				if (foundPrimitive)
 				{
-					ccConsole::Error("[Compute Primitive Distances] Select only a single Plane/Box/Sphere/Cylinder/Cone Primitive");
+					ccConsole::Error("[Compute Primitive Distances] Select only a single Plane/Box/Sphere/Cylinder/Cone/Polyline Primitive");
 					return;
 				}
 				foundPrimitive = true;
@@ -8915,7 +8916,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 
 	if (!foundPrimitive)
 	{
-		ccConsole::Error("[Compute Primitive Distances] Select at least one Plane/Box/Sphere/Cylinder/Cone Primitive!");
+		ccConsole::Error("[Compute Primitive Distances] Select at least one Plane/Box/Sphere/Cylinder/Cone/Polyline Primitive!");
 		return;
 	}
 	if (clouds.size() <= 0)
@@ -8929,7 +8930,12 @@ void MainWindow::doActionCloudPrimitiveDist()
 	{
 		pDD.treatPlanesAsBoundedCheckBox->setUpdatesEnabled(true);
 	}
-	if (pDD.exec())
+	bool execute = true;
+	if (!refEntity->isA(CC_TYPES::POLY_LINE))
+	{
+		execute = pDD.exec();
+	}
+	if (execute)
 	{
 		bool signedDist = pDD.signedDistances();
 		bool flippedNormals = signedDist && pDD.flipNormals();
@@ -8996,6 +9002,18 @@ void MainWindow::doActionCloudPrimitiveDist()
 					if (!(returnCode = CCLib::DistanceComputationTools::computeCloud2BoxEquation(compEnt, static_cast<ccBox*>(refEntity)->getDimensions(), rotationTransform, boxCenter, signedDist)))
 						ccConsole::Error(errString, "Box", returnCode);
 					break; 
+				}
+				case CC_TYPES::POLY_LINE:
+				{
+					signedDist = false;
+					flippedNormals = false;
+					ccPolyline* line = static_cast<ccPolyline*>(refEntity);
+					returnCode = CCLib::DistanceComputationTools::computeCloud2PolylineEquation(compEnt, line);
+					if (!returnCode)
+					{
+						ccConsole::Error(errString, "Polyline", returnCode);
+					}
+					break;
 				}
 				default:
 				{
@@ -10444,7 +10462,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionAlign->setEnabled(exactlyTwoEntities); //Aurelien BEY le 13/11/2008
 	m_UI->actionCloudCloudDist->setEnabled(exactlyTwoClouds);
 	m_UI->actionCloudMeshDist->setEnabled(exactlyTwoEntities && atLeastOneMesh);
-	m_UI->actionCloudPrimitiveDist->setEnabled(atLeastOneCloud && atLeastOneMesh);
+	m_UI->actionCloudPrimitiveDist->setEnabled(atLeastOneCloud && atLeastOneMesh || atLeastOnePolyline);
 	m_UI->actionCPS->setEnabled(exactlyTwoClouds);
 	m_UI->actionScalarFieldArithmetic->setEnabled(exactlyOneEntity && atLeastOneSF);
 

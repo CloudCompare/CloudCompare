@@ -944,7 +944,7 @@ int DistanceComputationTools::intersectMeshWithOctree(	OctreeAndMeshIntersection
 														+ _pointsPosition[12] + _pointsPosition[13];
 
 											//if all the sub-cube vertices are not on the same side, then the triangle may intersect the cell
-											if (abs(sum) < 8)
+											if (std::abs(sum) < 8)
 											{
 												//we make newCell point on next cell in array (we copy current info by the way)
 												cellsToTest[++cellsToTestCount] = *_newCell;
@@ -1224,7 +1224,7 @@ void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 
 		for (int i = -a; i <= b; ++i)
 		{
-			bool imax = (abs(i) == dist);
+			bool imax = (std::abs(i) == dist);
 			Tuple3i cellPos(startPos.x + i, 0, 0);
 
 			for (int j = -c; j <= d; j++)
@@ -1232,7 +1232,7 @@ void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 				cellPos.y = startPos.y + j;
 
 				//if i or j is 'maximal'
-				if (imax || abs(j) == dist)
+				if (imax || std::abs(j) == dist)
 				{
 					//we must be on the border of the neighborhood
 					for (int k = -e; k <= f; k++)
@@ -1570,7 +1570,7 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 
 				for (int i = -a; i <= b; i++)
 				{
-					bool imax = (abs(i) == dist);
+					bool imax = (std::abs(i) == dist);
 					Tuple3i cellPos(startPos.x + i, 0, 0);
 
 					for (int j = -c; j <= d; j++)
@@ -1578,7 +1578,7 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 						cellPos.y = startPos.y + j;
 
 						//if i or j is 'maximal'
-						if (imax || abs(j) == dist)
+						if (imax || std::abs(j) == dist)
 						{
 							//we must be on the border of the neighborhood
 							for (int k = -e; k <= f; k++)
@@ -2646,7 +2646,7 @@ int DistanceComputationTools::computeCloud2BoxEquation(GenericIndexedCloudPersis
 		}
 		else if (insideBox)
 		{
-			dist.x = abs(p_inBoxCoords.x) - hu;
+			dist.x = std::abs(p_inBoxCoords.x) - hu;
 		}
 
 		if (p_inBoxCoords.y < -hv)
@@ -2659,7 +2659,7 @@ int DistanceComputationTools::computeCloud2BoxEquation(GenericIndexedCloudPersis
 		}
 		else if (insideBox)
 		{
-			dist.y = abs(p_inBoxCoords.y) - hv;
+			dist.y = std::abs(p_inBoxCoords.y) - hv;
 		}
 
 		if (p_inBoxCoords.z < -hw)
@@ -2672,7 +2672,7 @@ int DistanceComputationTools::computeCloud2BoxEquation(GenericIndexedCloudPersis
 		}
 		else if (insideBox)
 		{
-			dist.z = abs(p_inBoxCoords.z) - hw;
+			dist.z = std::abs(p_inBoxCoords.z) - hw;
 		}
 
 		if (insideBox)//take min distance inside box

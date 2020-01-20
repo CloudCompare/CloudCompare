@@ -138,12 +138,35 @@ int DistanceComputationTools::computeCloud2CloudDistance(	GenericIndexedCloudPer
 															DgmOctree* refOctree/*=0*/)
 {
 	assert(comparedCloud && referenceCloud);
+	if (!comparedCloud)
+	{
+		assert(false);
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_NULL_COMPAREDCLOUD;
+	}
+
+	if (comparedCloud->size() == 0)
+	{
+		assert(false);
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_EMPTY_COMPAREDCLOUD;
+	}
+
+	if (!referenceCloud)
+	{
+		assert(false);
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_NULL_REFERENCECLOUD;
+	}
+
+	if (referenceCloud->size() == 0)
+	{
+		assert(false);
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_EMPTY_REFERENCECLOUD;
+	}
 
 	if (params.CPSet && params.maxSearchDist > 0)
 	{
 		//we can't use a 'max search distance' criterion if the "Closest Point Set" is requested
 		assert(false);
-		return -666;
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_CANT_USE_MAX_SEARCH_DIST_AND_CLOSEST_POINT_SET;
 	}
 
 	//we spatially 'synchronize' the octrees
@@ -158,14 +181,14 @@ int DistanceComputationTools::computeCloud2CloudDistance(	GenericIndexedCloudPer
 	if (soCode != SYNCHRONIZED && soCode != DISJOINT)
 	{
 		//not enough memory (or invalid input)
-		return -1;
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_SYNCHRONIZE_OCTREES_FAILURE;
 	}
 
 	//we 'enable' a scalar field  (if it is not already done) to store resulting distances
 	if (!comparedCloud->enableScalarField())
 	{
 		//not enough memory
-		return -1;
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_OUT_OF_MEMORY;
 	}
 
 	//internally we don't use the maxSearchDist parameters as is, but the square of it
@@ -183,7 +206,7 @@ int DistanceComputationTools::computeCloud2CloudDistance(	GenericIndexedCloudPer
 				delete comparedOctree;
 			if (referenceOctree && !refOctree)
 				delete referenceOctree;
-			return -1;
+			return DISTANCE_COMPUTATION_RESULTS::ERROR_OUT_OF_MEMORY;
 		}
 	}
 
@@ -201,7 +224,7 @@ int DistanceComputationTools::computeCloud2CloudDistance(	GenericIndexedCloudPer
 	if (maxSearchSquareDistd > 0 && soCode == DISJOINT)
 	{
 		//nothing to do! (all points are farther than 'maxSearchDist'
-		return 0;
+		return DISTANCE_COMPUTATION_RESULTS::SUCCESS;
 	}
 
 	//if necessary we try to guess the best octree level for distances computation
@@ -231,20 +254,26 @@ int DistanceComputationTools::computeCloud2CloudDistance(	GenericIndexedCloudPer
 										reinterpret_cast<void*>(&computeSplitDistances)
 	};
 
-	int result = 0;
+	int result = DISTANCE_COMPUTATION_RESULTS::SUCCESS;
 
-	if ( (comparedOctree != nullptr) &&
-		 comparedOctree->executeFunctionForAllCellsAtLevel(	params.octreeLevel,
-															params.localModel == NO_MODEL ? computeCellHausdorffDistance : computeCellHausdorffDistanceWithLocalModel,
-															additionalParameters,
-															params.multiThread,
-															progressCb,
-															"Cloud-Cloud Distance",
-															params.maxThreadCount) == 0)
+	if (!comparedOctree)
+	{
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_NULL_COMPAREDOCTREE;
+	}
+	
+	result = comparedOctree->executeFunctionForAllCellsAtLevel(params.octreeLevel,
+		params.localModel == NO_MODEL ? computeCellHausdorffDistance : computeCellHausdorffDistanceWithLocalModel,
+		additionalParameters,
+		params.multiThread,
+		progressCb,
+		"Cloud-Cloud Distance",
+		params.maxThreadCount);
+	if(result == 0) //executeFunctionForAllCellsAtLevel returns zero if error or canceled
 	{
 		//something went wrong
-		result = -2;
+		result = DISTANCE_COMPUTATION_RESULTS::ERROR_EXECUTE_FUNCTION_FOR_ALL_CELLS_AT_LEVEL_FAILURE;				
 	}
+	
 
 	if (comparedOctree && !compOctree)
 	{
@@ -269,12 +298,17 @@ DistanceComputationTools::SOReturnCode
 													GenericProgressCallback* progressCb/*=0*/)
 {
 	assert(comparedCloud && referenceCloud);
-
+	if (!comparedCloud || !referenceCloud)
+	{
+		return EMPTY_CLOUD;
+	}
 	unsigned nA = comparedCloud->size();
 	unsigned nB = referenceCloud->size();
 
 	if (nA == 0 || nB == 0)
+	{
 		return EMPTY_CLOUD;
+	}
 
 	//we compute the bounding box of BOTH clouds
 	CCVector3 minsA, minsB, maxsA, maxsB;
@@ -733,15 +767,21 @@ int DistanceComputationTools::intersectMeshWithOctree(	OctreeAndMeshIntersection
 	if (!intersection)
 	{
 		assert(false);
-		return -1;
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_NULL_OCTREE_AND_MESH_INTERSECTION;
 	}
 
 	DgmOctree* octree = intersection->octree;
 	GenericIndexedMesh* mesh = intersection->mesh;
-	if (!octree || !mesh)
+	if (!octree)
 	{
 		assert(false);
-		return -1;
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_NULL_OCTREE;
+	}
+
+	if (!mesh)
+	{
+		assert(false);
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_NULL_REFERENCEMESH;
 	}
 
 	//cell dimension
@@ -773,7 +813,7 @@ int DistanceComputationTools::intersectMeshWithOctree(	OctreeAndMeshIntersection
 
 	//For each triangle: look for intersecting cells
 	mesh->placeIteratorAtBeginning();
-	int result = 0;
+	int result = DISTANCE_COMPUTATION_RESULTS::SUCCESS;
 	for (unsigned n=0; n<numberOfTriangles; ++n)
 	{
 		//get the positions (in the grid) of each vertex 
@@ -909,7 +949,7 @@ int DistanceComputationTools::intersectMeshWithOctree(	OctreeAndMeshIntersection
 						catch (const std::bad_alloc&)
 						{
 							//out of memory
-							return -1;
+							return DISTANCE_COMPUTATION_RESULTS::ERROR_OUT_OF_MEMORY;
 						}
 					}
 
@@ -963,7 +1003,7 @@ int DistanceComputationTools::intersectMeshWithOctree(	OctreeAndMeshIntersection
 		if (progressCb && !nProgress.oneStep())
 		{
 			//cancel by user
-			result = -2;
+			result = DISTANCE_COMPUTATION_RESULTS::CANCELED_BY_USER;
 			break;
 		}
 	}
@@ -1090,6 +1130,7 @@ static DgmOctree* s_octree_MT = nullptr;
 static NormalizedProgress* s_normProgressCb_MT = nullptr;
 static OctreeAndMeshIntersection* s_intersection_MT = nullptr;
 static bool s_cellFunc_MT_success = true;
+static int s_cellFunc_MT_results = DistanceComputationTools::DISTANCE_COMPUTATION_RESULTS::SUCCESS;
 static CCLib::DistanceComputationTools::Cloud2MeshDistanceComputationParams s_params_MT;
 
 //'processTriangles' mechanism (based on bit mask)
@@ -1108,6 +1149,7 @@ void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 	if (s_normProgressCb_MT && !s_normProgressCb_MT->oneStep())
 	{
 		s_cellFunc_MT_success = false;
+		s_cellFunc_MT_results = DistanceComputationTools::DISTANCE_COMPUTATION_RESULTS::CANCELED_BY_USER;
 		return;
 	}
 
@@ -1126,6 +1168,7 @@ void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 	{
 		//not enough memory
 		s_cellFunc_MT_success = false;
+		s_cellFunc_MT_results = DistanceComputationTools::DISTANCE_COMPUTATION_RESULTS::ERROR_OUT_OF_MEMORY;
 		return;
 	}
 
@@ -1360,13 +1403,18 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 	assert(intersection);
 	assert(!params.signedDistances || !intersection->distanceTransform); //signed distances are not compatible with Distance Transform acceleration
 	assert(!params.multiThread || params.maxSearchDist <= 0); //maxSearchDist is not compatible with parallel processing
-
+	if (!intersection)
+	{
+		//invalid input
+		assert(false);
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_NULL_OCTREE_AND_MESH_INTERSECTION;
+	}
 	DgmOctree* octree = intersection->octree;
 	if (!octree)
 	{
 		//invalid input
 		assert(false);
-		return -2;
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_NULL_OCTREE;
 	}
 
 	//Closest Point Set
@@ -1379,7 +1427,7 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 		if (!params.CPSet->resize(octree->associatedCloud()->size()))
 		{
 			//not enough memory
-			return -1;
+			return DISTANCE_COMPUTATION_RESULTS::ERROR_OUT_OF_MEMORY;
 		}
 	}
 
@@ -1397,7 +1445,7 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 		if (!octree->getCellCodesAndIndexes(params.octreeLevel, cellCodesAndIndexes, true))
 		{
 			//not enough memory
-			return -1;
+			return DISTANCE_COMPUTATION_RESULTS::ERROR_OUT_OF_MEMORY;
 		}
 
 		unsigned numberOfCells = static_cast<unsigned>(cellCodesAndIndexes.size());
@@ -1439,7 +1487,7 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 				//Yk.clear(); //useless
 			}
 
-			return 0;
+			return DISTANCE_COMPUTATION_RESULTS::SUCCESS;
 		}
 
 		//otherwise we have to compute the distance from each point to its nearest triangle
@@ -1489,7 +1537,10 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 		//for each cell
 		for (unsigned cellIndex = 1; cellIndex <= numberOfCells; ++cellIndex, ++pCodeAndIndex) //cellIndex = unique ID for the current cell
 		{
-			octree->getPointsInCellByCellIndex(&Yk, pCodeAndIndex->theIndex, params.octreeLevel);
+			if (!octree->getPointsInCellByCellIndex(&Yk, pCodeAndIndex->theIndex, params.octreeLevel))
+			{
+				return DISTANCE_COMPUTATION_RESULTS::ERROR_EXECUTE_GET_POINTS_IN_CELL_BY_INDEX_FAILURE;
+			}
 
 			//get cell pos
 			Tuple3i startPos;
@@ -1524,7 +1575,7 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 				catch (const std::bad_alloc&) //out of memory
 				{
 					//not enough memory
-					return -1;
+					return DISTANCE_COMPUTATION_RESULTS::ERROR_OUT_OF_MEMORY;
 				}
 			}
 
@@ -1691,18 +1742,21 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 			if (progressCb && !nProgress.oneStep())
 			{
 				//process cancelled by the user
-				break;
+				return DISTANCE_COMPUTATION_RESULTS::CANCELED_BY_USER;
 			}
 		}
 
-		return 0;
+		return DISTANCE_COMPUTATION_RESULTS::SUCCESS;
 	}
 #ifdef ENABLE_CLOUD2MESH_DIST_MT
 	else
 	{
 		//extraction des indexes et codes des cellules du niveau "octreeLevel"
 		DgmOctree::cellsContainer cellsDescs;
-		octree->getCellCodesAndIndexes(params.octreeLevel,cellsDescs,true);
+		if (!octree->getCellCodesAndIndexes(params.octreeLevel, cellsDescs, true))
+		{
+			return DISTANCE_COMPUTATION_RESULTS::ERROR_GET_CELL_CODES_AND_INDEXES_FAILURE;
+		}
 
 		unsigned numberOfCells = static_cast<unsigned>(cellsDescs.size());
 
@@ -1724,6 +1778,7 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 		s_octree_MT = octree;
 		s_normProgressCb_MT = &nProgress;
 		s_cellFunc_MT_success = true;
+		s_cellFunc_MT_results = DISTANCE_COMPUTATION_RESULTS::SUCCESS;
 		s_params_MT = params;
 		s_intersection_MT = intersection;
 		//acceleration structure
@@ -1751,8 +1806,11 @@ int DistanceComputationTools::computeCloud2MeshDistanceWithOctree(	OctreeAndMesh
 			delete s_bitArrayPool_MT.back();
 			s_bitArrayPool_MT.pop_back();
 		}
-
-		return (s_cellFunc_MT_success ? 0 : -2);
+		if (!s_cellFunc_MT_success && s_cellFunc_MT_results == DISTANCE_COMPUTATION_RESULTS::SUCCESS)
+		{
+			s_cellFunc_MT_results = DISTANCE_COMPUTATION_RESULTS::ERROR_EXECUTE_CLOUD_MESH_DIST_CELL_FUNC_MT_FAILURE;
+		}
+		return (s_cellFunc_MT_success ? DISTANCE_COMPUTATION_RESULTS::SUCCESS : s_cellFunc_MT_results);
 	}
 #endif
 }
@@ -1771,11 +1829,30 @@ int DistanceComputationTools::computeCloud2MeshDistance(	GenericIndexedCloudPers
 															DgmOctree* cloudOctree/*=0*/)
 {
 	//check the input
-	if (!pointCloud || pointCloud->size() == 0 || !mesh || mesh->size() == 0)
+	if (!pointCloud)
 	{
 		assert(false);
-		return -2;
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_NULL_COMPAREDCLOUD;
 	}
+
+	if (pointCloud->size() == 0)
+	{
+		assert(false);
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_EMPTY_COMPAREDCLOUD;
+	}
+
+	if (!mesh)
+	{
+		assert(false);
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_NULL_REFERENCEMESH;
+	}
+
+	if (mesh->size() == 0)
+	{
+		assert(false);
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_EMPTY_REFERENCEMESH;
+	}
+
 
 	if (params.signedDistances)
 	{
@@ -1841,7 +1918,7 @@ int DistanceComputationTools::computeCloud2MeshDistance(	GenericIndexedCloudPers
 		//build the octree
 		if (octree->build(minCubifiedBB,maxCubifiedBB,&cloudMinBB,&cloudMaxBB,progressCb) <= 0)
 		{
-			return -36;
+			return DISTANCE_COMPUTATION_RESULTS::ERROR_BUILD_OCTREE_FAILURE;
 		}
 	}
 
@@ -1868,7 +1945,7 @@ int DistanceComputationTools::computeCloud2MeshDistance(	GenericIndexedCloudPers
 		intersection.distanceTransform = new SaitoSquaredDistanceTransform;
 		if ( !intersection.distanceTransform || !intersection.distanceTransform->initGrid(gridSize))
 		{
-			return -5;
+			return DISTANCE_COMPUTATION_RESULTS::ERROR_INIT_DISTANCE_TRANSFORM_GRID_FAILURE;
 		}
 		params.multiThread = false; //not necessary/supported
 	}
@@ -1877,15 +1954,20 @@ int DistanceComputationTools::computeCloud2MeshDistance(	GenericIndexedCloudPers
 		//we need to build the list of triangles intersecting each cell of the 3D grid
 		if (!intersection.perCellTriangleList.init(gridSize.x, gridSize.y, gridSize.z, 0, nullptr))
 		{
-			return -4;
+			return DISTANCE_COMPUTATION_RESULTS::ERROR_INIT_PER_CELL_TRIANGLE_LIST_FAILURE;
 		}
 	}
 
 	//INTERSECT THE OCTREE WITH THE MESH
 	int result = intersectMeshWithOctree(&intersection,params.octreeLevel,progressCb);
-	if (result < 0)
+	if (result < DISTANCE_COMPUTATION_RESULTS::SUCCESS)
 	{
-		return -6;
+		if (!(result == DISTANCE_COMPUTATION_RESULTS::ERROR_OUT_OF_MEMORY ||
+			result == DISTANCE_COMPUTATION_RESULTS::CANCELED_BY_USER))
+		{
+			return result;
+		}
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_INTERSECT_MESH_WITH_OCTREE_FAILURE;
 	}
 
 	//reset the output distances
@@ -1895,24 +1977,34 @@ int DistanceComputationTools::computeCloud2MeshDistance(	GenericIndexedCloudPers
     //acceleration by approximating the distance
 	if (params.useDistanceMap && intersection.distanceTransform)
 	{
-        intersection.distanceTransform->propagateDistance(progressCb);
+		if (!intersection.distanceTransform->propagateDistance(progressCb))
+		{
+			return DISTANCE_COMPUTATION_RESULTS::ERROR_PROPAGATE_DISTANCE_FAILURE;
+		}
 	}
 
 	//WE CAN EVENTUALLY COMPUTE THE DISTANCES!
 	result = computeCloud2MeshDistanceWithOctree(&intersection, params, progressCb);
 
 	//don't forget to compute the square root of the (squared) unsigned distances
-	if (result == 0 && !params.signedDistances && !params.useDistanceMap)
+	if (result == DISTANCE_COMPUTATION_RESULTS::SUCCESS && 
+		!params.signedDistances && 
+		!params.useDistanceMap)
 	{
 		pointCloud->forEach(applySqrtToPointDist);
 	}
 
-	if (result < 0)
+	if (result < DISTANCE_COMPUTATION_RESULTS::SUCCESS)
 	{
-        return -7;
+		if (!(result == DISTANCE_COMPUTATION_RESULTS::ERROR_OUT_OF_MEMORY ||
+			result == DISTANCE_COMPUTATION_RESULTS::CANCELED_BY_USER))
+		{
+			return result;
+		}
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_COMPUTE_CLOUD2_MESH_DISTANCE_WITH_OCTREE_FAILURE;
 	}
 
-	return 0;
+	return DISTANCE_COMPUTATION_RESULTS::SUCCESS;
 }
 
 // Inspired from documents and code by:
@@ -2155,6 +2247,7 @@ ScalarType DistanceComputationTools::computePoint2PlaneDistance(const CCVector3*
 
 ScalarType DistanceComputationTools::computePoint2LineSegmentDistSquared(const CCVector3* p, const CCVector3* start, const CCVector3* end)
 {
+	assert(p && start && end);
 	CCVector3 line = *end - *start;
 	CCVector3 vec;
 	ScalarType distSq;
@@ -2189,14 +2282,22 @@ ScalarType DistanceComputationTools::computePoint2LineSegmentDistSquared(const C
 int DistanceComputationTools::computeCloud2ConeEquation(GenericIndexedCloudPersist* cloud, const CCVector3& coneP1, const CCVector3& coneP2, const PointCoordinateType coneR1, const PointCoordinateType coneR2, bool signedDistances/*=true*/, bool solutionType/*=false*/, double* rms/*=nullptr*/)
 {
 	if (!cloud)
-		return -1;
+	{
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_NULL_COMPAREDCLOUD;
+	}
 	unsigned count = cloud->size();
 	if (count == 0)
-		return -2;
+	{
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_EMPTY_COMPAREDCLOUD;
+	}
 	if (!cloud->enableScalarField())
-		return -3;
+	{
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_ENABLE_SCALAR_FIELD_FAILURE;
+	}
 	if (coneR1 < coneR2)
-		return -4;
+	{
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_CONE_R1_LT_CONE_R2;
+	}
 	double dSumSq = 0.0;
 
 	CCVector3 coneAxis = coneP2 - coneP1;
@@ -2220,15 +2321,22 @@ int DistanceComputationTools::computeCloud2ConeEquation(GenericIndexedCloudPersi
 		double d = 0;
 		double rx = 0; 
 		double ry = 0;
-		if (yy < 0) yy = 0;
-		if(x<=0) //Below the bottom point
+		if (yy < 0)
+		{
+			yy = 0;
+		}
+		if(x <= 0) //Below the bottom point
 		{
 			if (yy < rr1)
 			{
 				if (!solutionType)
+				{
 					d = -x; //Below the bottom point within larger disk radius
+				}
 				else
+				{
 					d = 1; //Works
+				}
 			}
 			else 
 			{
@@ -2238,7 +2346,9 @@ int DistanceComputationTools::computeCloud2ConeEquation(GenericIndexedCloudPersi
 					d = sqrt((y * y) + xx); //Below the bottom point not within larger disk radius
 				}
 				else
+				{
 					d = 2; //Works
+				}
 			}
 
 		}
@@ -2249,9 +2359,13 @@ int DistanceComputationTools::computeCloud2ConeEquation(GenericIndexedCloudPersi
 				if (x > axisLength) //outside cone within smaller disk
 				{
 					if (!solutionType)
+					{
 						d = x - axisLength; // Above the top point within top disk radius
+					}
 					else
+					{
 						d = 3;
+					}
 				}
 				else //inside cone within smaller disk
 				{
@@ -2271,15 +2385,19 @@ int DistanceComputationTools::computeCloud2ConeEquation(GenericIndexedCloudPersi
 			}
 			else // Outside smaller disk radius
 			{
-				y = sqrt(yy)-coneR1;
+				y = sqrt(yy) - coneR1;
 				{
 					rx = y * side[1] + x * side[0]; //rotated x value (distance along the coneside axis)
 					if (rx < 0)
 					{
 						if (!solutionType)
+						{
 							d = sqrt(y * y + xx);
+						}
 						else
+						{
 							d = 7; // point projects onto the large cap
+						}
 					}
 					else
 					{
@@ -2292,7 +2410,9 @@ int DistanceComputationTools::computeCloud2ConeEquation(GenericIndexedCloudPersi
 								d = sqrt(ry * ry + rx * rx);
 							}
 							else
+							{
 								d = 8; // point projects onto the small cap
+							}
 						}
 						else
 						{
@@ -2307,7 +2427,9 @@ int DistanceComputationTools::computeCloud2ConeEquation(GenericIndexedCloudPersi
 								}
 							}
 							else
+							{
 								d = 9;
+							}
 						}
 					}
 
@@ -2328,7 +2450,7 @@ int DistanceComputationTools::computeCloud2ConeEquation(GenericIndexedCloudPersi
 	{
 		*rms = sqrt(dSumSq / count);
 	}
-	return count;
+	return DISTANCE_COMPUTATION_RESULTS::SUCCESS;
 }
 
 // This algorithm is a modification of the distance computation between a point and a cylinder from 
@@ -2342,12 +2464,18 @@ int DistanceComputationTools::computeCloud2ConeEquation(GenericIndexedCloudPersi
 int DistanceComputationTools::computeCloud2CylinderEquation(GenericIndexedCloudPersist* cloud, const CCVector3& cylinderP1, const CCVector3& cylinderP2, const PointCoordinateType cylinderRadius, bool signedDistances/*=true*/, bool solutionType/*=false*/, double* rms/*=0*/)
 {
 	if (!cloud)
-		return -1;
+	{
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_NULL_COMPAREDCLOUD;
+	}
 	unsigned count = cloud->size();
 	if (count == 0)
-		return -2;
+	{
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_EMPTY_COMPAREDCLOUD;
+	}
 	if (!cloud->enableScalarField())
-		return -3;
+	{
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_ENABLE_SCALAR_FIELD_FAILURE;
+	}
 	double dSumSq = 0.0;
 
 	CCVector3 cylinderCenter = (cylinderP1 + cylinderP2) / 2.;
@@ -2371,17 +2499,25 @@ int DistanceComputationTools::computeCloud2CylinderEquation(GenericIndexedCloudP
 		{
 			if (yy >= cylinderRadius2)
 			{
-				if(!solutionType)
+				if (!solutionType)
+				{
 					d = sqrt(yy) - cylinderRadius; //exterior to the cylinder and within the bounds of the axis
+				}
 				else
+				{
 					d = 1;
+				}
 			}
 			else
 			{
 				if (!solutionType)
+				{
 					d = -std::min(std::abs(sqrt(yy) - cylinderRadius), std::abs(h - x)); //interior to the cylinder and either closer to an end-cap or the cylinder wall
+				}
 				else
+				{
 					d = 2;
+				}
 			}
 		}
 		else
@@ -2390,18 +2526,24 @@ int DistanceComputationTools::computeCloud2CylinderEquation(GenericIndexedCloudP
 			{
 				if (!solutionType) 
 				{
-				y = sqrt(yy);
-				d = sqrt(((y - cylinderRadius) * (y - cylinderRadius)) + ((x - h) * (x - h))); //beyond the bounds of the cylinder's axis and radius
+					y = sqrt(yy);
+					d = sqrt(((y - cylinderRadius) * (y - cylinderRadius)) + ((x - h) * (x - h))); //beyond the bounds of the cylinder's axis and radius
 				}
 				else
+				{
 					d = 3;
+				}
 			}
 			else
 			{
 				if (!solutionType)
+				{
 					d = x - h; //beyond the bounds of the cylinder's axis but within the bounds of it's radius
+				}
 				else
+				{
 					d = 4;
+				}
 			}
 
 		}
@@ -2421,18 +2563,24 @@ int DistanceComputationTools::computeCloud2CylinderEquation(GenericIndexedCloudP
 		*rms = sqrt(dSumSq / count);
 	}
 
-	return count;
+	return DISTANCE_COMPUTATION_RESULTS::SUCCESS;
 }
 
 int DistanceComputationTools::computeCloud2SphereEquation(GenericIndexedCloudPersist *cloud, const CCVector3& sphereCenter, const PointCoordinateType sphereRadius, bool signedDistances/*=true*/, double* rms/*=0*/)
 {
 	if (!cloud)
-		return -1;
+	{
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_NULL_COMPAREDCLOUD;
+	}
 	unsigned count = cloud->size();
 	if (count == 0)
-		return -2;
+	{
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_EMPTY_COMPAREDCLOUD;
+	}
 	if (!cloud->enableScalarField())
-		return -3;
+	{
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_ENABLE_SCALAR_FIELD_FAILURE;
+	}
 	double dSumSq = 0.0;
 	for (unsigned i = 0; i < count; ++i)
 	{
@@ -2453,26 +2601,38 @@ int DistanceComputationTools::computeCloud2SphereEquation(GenericIndexedCloudPer
 		*rms = sqrt(dSumSq / count);
 	}
 
-	return count;
+	return DISTANCE_COMPUTATION_RESULTS::SUCCESS;
 }
 
 int DistanceComputationTools::computeCloud2PlaneEquation(GenericIndexedCloudPersist *cloud, const PointCoordinateType* planeEquation, bool signedDistances/*=true*/, double* rms/*=0*/)
 {
 	assert(cloud && planeEquation);
-	if(!cloud || !planeEquation)
-		return -1;
+	if (!cloud)
+	{
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_NULL_COMPAREDCLOUD;
+	}
+	if (!planeEquation)
+	{
+		return DISTANCE_COMPUTATION_RESULTS::NULL_PLANE_EQUATION;
+	}
 	unsigned count = cloud->size();
 	if (count == 0)
-		return -2;
+	{
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_EMPTY_COMPAREDCLOUD;
+	}
 	if (!cloud->enableScalarField())
-		return -3;
+	{
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_ENABLE_SCALAR_FIELD_FAILURE;
+	}
 
 	//point to plane distance: d = std::abs(a0*x+a1*y+a2*z-a3) / sqrt(a0^2+a1^2+a2^2) <-- "norm"
 	//but the norm should always be equal to 1.0!
 	PointCoordinateType norm2 = CCVector3::vnorm2(planeEquation);
 	assert(std::abs(sqrt(norm2) - PC_ONE) <= std::numeric_limits<PointCoordinateType>::epsilon());
 	if (norm2 < ZERO_TOLERANCE)
-		return -4;
+	{
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_PLANE_NORMAL_LT_ZERO;
+	}
 	double dSumSq = 0.0;
 	for (unsigned i = 0; i < count; ++i)
 	{
@@ -2493,7 +2653,7 @@ int DistanceComputationTools::computeCloud2PlaneEquation(GenericIndexedCloudPers
 		*rms = sqrt(dSumSq / count);
 	}
 
-	return count;
+	return DISTANCE_COMPUTATION_RESULTS::SUCCESS;
 }
 
 int DistanceComputationTools::computeCloud2RectangleEquation(GenericIndexedCloudPersist *cloud, PointCoordinateType widthX, PointCoordinateType widthY, const SquareMatrix& rotationTransform, const CCVector3& center, bool signedDist/*=true*/, double* rms/*= nullptr*/) 
@@ -2509,20 +2669,20 @@ int DistanceComputationTools::computeCloud2RectangleEquation(GenericIndexedCloud
 	assert(cloud);
 	if (!cloud)
 	{
-		return -1;
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_NULL_COMPAREDCLOUD;
 	}
 	unsigned count = cloud->size();
 	if (count == 0) 
 	{
-		return -2;
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_EMPTY_COMPAREDCLOUD;
 	}
 	if (!cloud->enableScalarField())
 	{
-		return -3;
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_ENABLE_SCALAR_FIELD_FAILURE;
 	}
 	if (widthX <= 0 || widthY <= 0)
 	{
-		return -4;
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_INVALID_PRIMITIVE_DIMENSIONS;
 	}
 	
 	CCVector3 widthXVec(widthX, 0, 0);
@@ -2584,7 +2744,7 @@ int DistanceComputationTools::computeCloud2RectangleEquation(GenericIndexedCloud
 	{
 		*rms = sqrt(dSumSq / count);
 	}
-	return count;
+	return DISTANCE_COMPUTATION_RESULTS::SUCCESS;
 }
 
 int DistanceComputationTools::computeCloud2BoxEquation(GenericIndexedCloudPersist* cloud, const CCVector3& boxDimensions, const SquareMatrix& rotationTransform, const CCVector3& boxCenter, bool signedDist/*=true*/, double* rms/*= nullptr*/) 
@@ -2592,20 +2752,20 @@ int DistanceComputationTools::computeCloud2BoxEquation(GenericIndexedCloudPersis
 	assert(cloud);
 	if (!cloud)
 	{
-		return -1;
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_NULL_COMPAREDCLOUD;
 	}
 	unsigned count = cloud->size();
 	if (count == 0)
 	{
-		return -2;
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_EMPTY_COMPAREDCLOUD;
 	}
 	if (!cloud->enableScalarField())
 	{
-		return -3;
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_ENABLE_SCALAR_FIELD_FAILURE;
 	}
 	if (boxDimensions.x <= 0 || boxDimensions.y <= 0 || boxDimensions.z <= 0)
 	{
-		return -4;
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_INVALID_PRIMITIVE_DIMENSIONS;
 	}
 	// box half lengths hu hv and hw
 	const PointCoordinateType hu = boxDimensions.x / 2;
@@ -2705,7 +2865,7 @@ int DistanceComputationTools::computeCloud2BoxEquation(GenericIndexedCloudPersis
 	{
 		*rms = sqrt(dSumSq / count);
 	}
-	return count;
+	return DISTANCE_COMPUTATION_RESULTS::SUCCESS;
 }
 
 int DistanceComputationTools::computeCloud2PolylineEquation(GenericIndexedCloudPersist* cloud, const Polyline* polyline, double* rms /*= nullptr*/)
@@ -2713,16 +2873,16 @@ int DistanceComputationTools::computeCloud2PolylineEquation(GenericIndexedCloudP
 	assert(cloud);
 	if (!cloud)
 	{
-		return -1;
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_NULL_COMPAREDCLOUD;
 	}
 	unsigned count = cloud->size();
 	if (count == 0)
 	{
-		return -2;
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_EMPTY_COMPAREDCLOUD;
 	}
 	if (!cloud->enableScalarField())
 	{
-		return -3;
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_ENABLE_SCALAR_FIELD_FAILURE;
 	}
 	ScalarType d = 0;
 	ScalarType dSumSq = 0;
@@ -2772,18 +2932,23 @@ int DistanceComputationTools::computeCloud2PolylineEquation(GenericIndexedCloudP
 	{
 		*rms = sqrt(dSumSq / count);
 	}
-	return count;
+	return DISTANCE_COMPUTATION_RESULTS::SUCCESS;
 }
 
 ScalarType DistanceComputationTools::computeCloud2PlaneDistanceRMS(	GenericCloud* cloud,
 																	const PointCoordinateType* planeEquation)
 {
     assert(cloud && planeEquation);
-
+	if (!cloud)
+	{
+		return 0;
+	}
 	//point count
 	unsigned count = cloud->size();
 	if (count == 0)
+	{
 		return 0;
+	}
 
 	//point to plane distance: d = std::abs(a0*x+a1*y+a2*z-a3) / sqrt(a0^2+a1^2+a2^2) <-- "norm"
 	//but the norm should always be equal to 1.0!
@@ -2799,7 +2964,7 @@ ScalarType DistanceComputationTools::computeCloud2PlaneDistanceRMS(	GenericCloud
 	for (unsigned i=0; i<count; ++i)
 	{
 		const CCVector3* P = cloud->getNextPoint();
-		double d = static_cast<double>(CCVector3::vdot(P->u,planeEquation) - planeEquation[3])/*/norm*/; //norm == 1.0
+		double d = static_cast<double>(CCVector3::vdotd(P->u,planeEquation) - planeEquation[3])/*/norm*/; //norm == 1.0
 		
 		dSumSq += d*d;
 	}
@@ -2814,16 +2979,24 @@ ScalarType DistanceComputationTools::ComputeCloud2PlaneRobustMax(	GenericCloud* 
     assert(cloud && planeEquation);
 	assert(percent < 1.0f);
 
+	if (!cloud)
+	{
+		return 0;
+	}
 	//point count
 	unsigned count = cloud->size();
 	if (count == 0)
+	{
 		return 0;
+	}
 
 	//point to plane distance: d = std::abs(a0*x+a1*y+a2*z-a3) / sqrt(a0^2+a1^2+a2^2) <-- "norm"
 	//but the norm should always be equal to 1.0!
 	PointCoordinateType norm2 = CCVector3::vnorm2(planeEquation);
 	if (norm2 < ZERO_TOLERANCE)
-        return NAN_VALUE;
+	{
+		return NAN_VALUE;
+	}
 	assert(std::abs(sqrt(norm2) - PC_ONE) <= std::numeric_limits<PointCoordinateType>::epsilon());
 
 	//we search the max @ 'percent'% (to avoid outliers)
@@ -2869,11 +3042,16 @@ ScalarType DistanceComputationTools::ComputeCloud2PlaneMaxDistance(	GenericCloud
 																	const PointCoordinateType* planeEquation)
 {
 	assert(cloud && planeEquation);
-
+	if (!cloud)
+	{
+		return 0;
+	}
 	//point count
 	unsigned count = cloud->size();
 	if (count == 0)
+	{
 		return 0;
+	}
 
 	//point to plane distance: d = std::abs(a0*x+a1*y+a2*z-a3) / sqrt(a0^2+a1^2+a2^2) <-- "norm"
 	//but the norm should always be equal to 1.0!
@@ -2924,7 +3102,10 @@ ScalarType DistanceComputationTools::ComputeCloud2PlaneDistance(CCLib::GenericCl
 bool DistanceComputationTools::computeGeodesicDistances(GenericIndexedCloudPersist* cloud, unsigned seedPointIndex, unsigned char octreeLevel, GenericProgressCallback* progressCb)
 {
 	assert(cloud);
-
+	if (!cloud)
+	{
+		return false;
+	}
 	unsigned n = cloud->size();
 	if (n == 0 || seedPointIndex >= n)
 		return false;
@@ -2965,13 +3146,26 @@ int DistanceComputationTools::diff(	GenericIndexedCloudPersist* comparedCloud,
 									GenericIndexedCloudPersist* referenceCloud,
 									GenericProgressCallback* progressCb)
 {
-	if (!comparedCloud || !referenceCloud)
-		return -1;
+	if (!comparedCloud)
+	{
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_NULL_COMPAREDCLOUD;
+	}
+
+	if (!referenceCloud)
+	{
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_NULL_REFERENCECLOUD;
+	}
 
 	unsigned nA = comparedCloud->size();
 	if (nA == 0)
-		return -2;
+	{
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_EMPTY_COMPAREDCLOUD;
+	}
 
+	if (referenceCloud->size() == 0)
+	{
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_EMPTY_REFERENCECLOUD;
+	}
 	//Reference cloud to store closest point set
 	ReferenceCloud A_in_B(referenceCloud);
 
@@ -2980,8 +3174,14 @@ int DistanceComputationTools::diff(	GenericIndexedCloudPersist* comparedCloud,
 	params.CPSet = &A_in_B;
 
 	int result = computeCloud2CloudDistance(comparedCloud,referenceCloud,params,progressCb);
-	if (result < 0)
-		return -3;
+	if (result < DISTANCE_COMPUTATION_RESULTS::SUCCESS)
+	{
+		if (result == DISTANCE_COMPUTATION_RESULTS::ERROR_OUT_OF_MEMORY)
+		{
+			return result;
+		}
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_COMPUTE_CLOUD2_CLOUD_DISTANCE_FAILURE;
+	}
 
 	for (unsigned i=0; i<nA; ++i)
 	{
@@ -2992,7 +3192,7 @@ int DistanceComputationTools::diff(	GenericIndexedCloudPersist* comparedCloud,
 		comparedCloud->setPointScalarValue(i,ScalarField::ValidValue(dA) && ScalarField::ValidValue(dB) ? dA-dB : NAN_VALUE);
 	}
 
-	return 0;
+	return DISTANCE_COMPUTATION_RESULTS::SUCCESS;
 }
 
 int DistanceComputationTools::computeApproxCloud2CloudDistance(	GenericIndexedCloudPersist* comparedCloud,
@@ -3003,27 +3203,39 @@ int DistanceComputationTools::computeApproxCloud2CloudDistance(	GenericIndexedCl
 																DgmOctree* compOctree/*=0*/,
 																DgmOctree* refOctree/*=0*/)
 {
-	if (!comparedCloud || !referenceCloud)
-		return -1;
-	if (octreeLevel < 1 || octreeLevel > DgmOctree::MAX_OCTREE_LEVEL)
-		return -2;
-
+	if (!comparedCloud)
+	{
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_NULL_COMPAREDCLOUD;
+	}
+	if (!referenceCloud)
+	{
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_NULL_REFERENCECLOUD;
+	}
+	if (octreeLevel < 1)
+	{
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_OCTREE_LEVEL_LT_ONE;
+	}
+	if (octreeLevel > DgmOctree::MAX_OCTREE_LEVEL)
+	{
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_OCTREE_LEVEL_GT_MAX_OCTREE_LEVEL;
+	}
 	//compute octrees with the same bounding-box
 	DgmOctree *octreeA = compOctree, *octreeB = refOctree;
 	if (synchronizeOctrees(comparedCloud, referenceCloud, octreeA, octreeB, maxSearchDist, progressCb) != SYNCHRONIZED)
-		return -3;
-
+	{
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_SYNCHRONIZE_OCTREES_FAILURE;
+	}
 	const int* minIndexesA = octreeA->getMinFillIndexes(octreeLevel);
 	const int* maxIndexesA = octreeA->getMaxFillIndexes(octreeLevel);
 	const int* minIndexesB = octreeB->getMinFillIndexes(octreeLevel);
 	const int* maxIndexesB = octreeB->getMaxFillIndexes(octreeLevel);
 
-	Tuple3i minIndexes(	std::min(minIndexesA[0],minIndexesB[0]),
-						std::min(minIndexesA[1],minIndexesB[1]),
-						std::min(minIndexesA[2],minIndexesB[2]) );
-	Tuple3i maxIndexes(	std::max(maxIndexesA[0],maxIndexesB[0]),
-						std::max(maxIndexesA[1],maxIndexesB[1]),
-						std::max(maxIndexesA[2],maxIndexesB[2]) );
+	Tuple3i minIndexes(	std::min(minIndexesA[0], minIndexesB[0]),
+						std::min(minIndexesA[1], minIndexesB[1]),
+						std::min(minIndexesA[2], minIndexesB[2]) );
+	Tuple3i maxIndexes(	std::max(maxIndexesA[0], maxIndexesB[0]),
+						std::max(maxIndexesA[1], maxIndexesB[1]),
+						std::max(maxIndexesA[2], maxIndexesB[2]) );
 	
 	Tuple3ui boxSize(	static_cast<unsigned>(maxIndexes.x - minIndexes.x + 1),
 						static_cast<unsigned>(maxIndexes.y - minIndexes.y + 1),
@@ -3032,7 +3244,7 @@ int DistanceComputationTools::computeApproxCloud2CloudDistance(	GenericIndexedCl
 	if (!comparedCloud->enableScalarField())
 	{
 		//not enough memory
-		return -1;
+		return DISTANCE_COMPUTATION_RESULTS::ERROR_ENABLE_SCALAR_FIELD_FAILURE;
 	}
 	if (maxSearchDist > 0)
 	{
@@ -3045,7 +3257,7 @@ int DistanceComputationTools::computeApproxCloud2CloudDistance(	GenericIndexedCl
 		}
 	}
 
-	int result = 0;
+	int result = DISTANCE_COMPUTATION_RESULTS::SUCCESS;
 
 	//instantiate the Distance Transform grid
 	SaitoSquaredDistanceTransform dtGrid;
@@ -3054,7 +3266,10 @@ int DistanceComputationTools::computeApproxCloud2CloudDistance(	GenericIndexedCl
 		//project the (filled) cells of octree B in the DT grid
 		{
 			DgmOctree::cellCodesContainer theCodes;
-			octreeB->getCellCodes(octreeLevel, theCodes, true);
+			if (!octreeB->getCellCodes(octreeLevel, theCodes, true))
+			{
+				return DISTANCE_COMPUTATION_RESULTS::ERROR_GET_CELL_CODES_FAILURE;
+			}
 
 			while (!theCodes.empty())
 			{
@@ -3068,7 +3283,10 @@ int DistanceComputationTools::computeApproxCloud2CloudDistance(	GenericIndexedCl
 		}
 
 		//propagate the Distance Transform over the grid
-		dtGrid.propagateDistance(progressCb);
+		if (!dtGrid.propagateDistance(progressCb))
+		{
+			return DISTANCE_COMPUTATION_RESULTS::ERROR_PROPAGATE_DISTANCE_FAILURE;
+		}
 
 		//eventually get the approx. distance for each cell of octree A
 		//and assign it to the points inside
@@ -3082,7 +3300,7 @@ int DistanceComputationTools::computeApproxCloud2CloudDistance(	GenericIndexedCl
 				delete octreeA;
 			if (!refOctree)
 				delete octreeB;
-			return -5;
+			return DISTANCE_COMPUTATION_RESULTS::ERROR_GET_CELL_INDEXES_FAILURE;
 		}
 
 		ScalarType maxD = 0;
@@ -3099,14 +3317,21 @@ int DistanceComputationTools::computeApproxCloud2CloudDistance(	GenericIndexedCl
 			unsigned di = dtGrid.getValue(cellPos);
 			ScalarType d = sqrt(static_cast<ScalarType>(di)) * cellSize;
 			if (d > maxD)
+			{
 				maxD = d;
+			}
 			
 			//the maximum distance is 'maxSearchDist' (if defined)
 			if (maxSearchDist <= 0 || d < maxSearchDist)
 			{
-				octreeA->getPointsInCellByCellIndex(&Yk,theIndex,octreeLevel);
-				for (unsigned j=0; j<Yk.size(); ++j)
-					Yk.setPointScalarValue(j,d);
+				if (!octreeA->getPointsInCellByCellIndex(&Yk, theIndex, octreeLevel))
+				{
+					return DISTANCE_COMPUTATION_RESULTS::ERROR_EXECUTE_GET_POINTS_IN_CELL_BY_INDEX_FAILURE;
+				}
+				for (unsigned j = 0; j < Yk.size(); ++j)
+				{
+					Yk.setPointScalarValue(j, d);
+				}
 			}
 		}
 
@@ -3114,7 +3339,7 @@ int DistanceComputationTools::computeApproxCloud2CloudDistance(	GenericIndexedCl
 	}
 	else //DT grid init failed
 	{
-		result = -4;
+		result = DISTANCE_COMPUTATION_RESULTS::ERROR_INIT_DISTANCE_TRANSFORM_GRID_FAILURE;
 	}
 
 	if (!compOctree)

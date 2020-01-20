@@ -3176,7 +3176,8 @@ int DistanceComputationTools::diff(	GenericIndexedCloudPersist* comparedCloud,
 	int result = computeCloud2CloudDistance(comparedCloud,referenceCloud,params,progressCb);
 	if (result < DISTANCE_COMPUTATION_RESULTS::SUCCESS)
 	{
-		if (result == DISTANCE_COMPUTATION_RESULTS::ERROR_OUT_OF_MEMORY)
+		if (!(result == DISTANCE_COMPUTATION_RESULTS::ERROR_OUT_OF_MEMORY ||
+			result == DISTANCE_COMPUTATION_RESULTS::CANCELED_BY_USER))
 		{
 			return result;
 		}

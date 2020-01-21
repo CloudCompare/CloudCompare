@@ -2533,7 +2533,6 @@ int DistanceComputationTools::computeCloud2RectangleEquation(GenericIndexedCloud
 	widthYVec = rotationTransform * widthYVec;
 	normalVector = rotationTransform * normalVector;
 	PointCoordinateType planeDistance = center.dot(normalVector);
-	PointCoordinateType d = 0;
 	PointCoordinateType dSumSq = 0;
 	CCVector3 rectangleP0 = center - (widthXVec / 2) - (widthYVec / 2);
 	CCVector3 rectangleP1 = center + (widthXVec / 2) - (widthYVec / 2);
@@ -2572,7 +2571,7 @@ int DistanceComputationTools::computeCloud2RectangleEquation(GenericIndexedCloud
 				dist -= e1;
 			}
 		}
-		d = dist.normd();
+		PointCoordinateType d = static_cast<PointCoordinateType>(dist.normd());
 		dSumSq += d * d;
 		if (signedDist && pe->dot(normalVector) - planeDistance < 0)
 		{			
@@ -2618,24 +2617,19 @@ int DistanceComputationTools::computeCloud2BoxEquation(GenericIndexedCloudPersis
 	u = rotationTransform * u;
 	v = rotationTransform * v;
 	w = rotationTransform * w;
-	CCVector3 dist;
-	bool insideBox;
-	PointCoordinateType d = 0;
 	PointCoordinateType dSumSq = 0;
 	for (unsigned i = 0; i < count; ++i) 
 	{
 		const CCVector3* p = cloud->getPoint(i);
 		CCVector3 pointCenterDifference = (*p - boxCenter);
 		CCVector3 p_inBoxCoords(pointCenterDifference.dot(u), pointCenterDifference.dot(v), pointCenterDifference.dot(w));
-		dist.x = 0; 
-		dist.y = 0; 
-		dist.z = 0;
-		insideBox = false;
+		bool insideBox = false;
 		if (p_inBoxCoords.x > -hu && p_inBoxCoords.x < hu && p_inBoxCoords.y > -hv && p_inBoxCoords.y < hv && p_inBoxCoords.z > -hw && p_inBoxCoords.z < hw)
 		{
 			insideBox = true;
 		}
 
+		CCVector3 dist(0, 0, 0);
 		if (p_inBoxCoords.x < -hu)
 		{
 			dist.x = -(p_inBoxCoords.x + hu);
@@ -2693,7 +2687,7 @@ int DistanceComputationTools::computeCloud2BoxEquation(GenericIndexedCloudPersis
 				dist.y = 0;
 			}
 		}
-		d = dist.normd();
+		PointCoordinateType d = static_cast<PointCoordinateType>(dist.normd());
 		dSumSq += d * d;
 		if (signedDist && insideBox)
 		{

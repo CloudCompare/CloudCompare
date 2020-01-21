@@ -143,6 +143,7 @@ v2.11 (Anoia) - (in development)
 	- Orienting normals with a sensor position could lead to a crash
 	- Shapefile: at export time, the SHX file (created next to the SHP file) was malformed (preventing from loading the file in most GIS tools!)
 	             (+ polylines were mistakenly exported as polygons!)
+	- SRS (Spatial Reference System) information could be lost when loading LAS files
 
 v2.10.3 (Zephyrus) - 13/06/2019
 ----------------------

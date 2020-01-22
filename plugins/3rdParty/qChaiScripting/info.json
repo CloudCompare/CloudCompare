@@ -1,0 +1,24 @@
+{
+  "type": "Standard",
+  "name": "ChaiScripting (Standard Plugin)",
+  "icon": ":/CC/plugin/qChaiScripting/images/icon.png",
+  "description": "This plugin will be used to integrate the ChaiScript interface, and eventualy include a code editor",
+  "authors": [
+    {
+      "name": "Chris S Brown",
+      "email": "brown.s.chris@gmail.com"
+    }
+  ],
+  "maintainers": [
+    {
+      "name": "Chris S Brown",
+      "email": "brown.s.chris@gmail.com"
+    }
+  ],
+  "references": [
+    {
+      "text": "The ChaiScript project",
+      "url": "https://chaiscript.com/index.html"
+    }
+  ]
+}

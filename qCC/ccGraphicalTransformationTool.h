@@ -62,6 +62,9 @@ public:
 	//! Sets the rotation center
 	void setRotationCenter(CCVector3d& center);
 
+	void arbitraryVectorTranslate(CCVector3d& vectorToTranslate, const CCVector3d& vec);
+
+
 protected slots:
 
 	//! Applies transformation to selected entities

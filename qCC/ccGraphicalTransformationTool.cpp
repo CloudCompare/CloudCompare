@@ -225,12 +225,91 @@ void ccGraphicalTransformationTool::stop(bool state)
 	ccOverlayDialog::stop(state);
 }
 
+void ccGraphicalTransformationTool::arbitraryVectorTranslate(CCVector3d& vectorToTranslate, const CCVector3d& vec)
+{
+	PointCoordinateType theta;
+	PointCoordinateType phi;
+
+	if (std::abs(vec.z) < ZERO_TOLERANCE)
+	{
+		if (std::abs(vec.y) < ZERO_TOLERANCE)
+		{
+			theta = 0;
+		}
+		else if (vec.y < 0)
+		{
+			theta = -M_PI_2; //atan of -infinity is -pi/2
+		}
+		else
+		{
+			theta = M_PI_2; //atan of +infinity is pi/2
+		}
+	}
+	else
+	{
+		theta = std::atan(vec.y / vec.z);
+		if (vec.y < 0 && vec.z < 0)
+		{
+			theta = M_PI + theta;
+		}
+		else if (vec.z < 0 && vec.y > 0)
+		{
+			theta = M_PI_2 - theta;
+		}
+	}
+
+	PointCoordinateType phiDenominator = std::sqrt((vec.y * vec.y) + (vec.z * vec.z));
+	if (phiDenominator < ZERO_TOLERANCE)
+	{
+		if (std::abs(vec.x) < ZERO_TOLERANCE)
+		{
+			phi = 0;
+		}
+		else if (vec.x < 0)
+		{
+			phi = -M_PI_2; //atan of -infinity is -pi/2
+		}
+		else
+		{
+			phi = M_PI_2; //atan of +infinity is pi/2
+		}
+	}
+	else
+	{
+		phi = std::atan(vec.x / phiDenominator);
+	}
+
+
+	ccGLMatrix xRotation = ccGLMatrix();
+	xRotation.setColumn(1, CCVector3(0, std::cos(theta), -std::sin(theta)));
+	xRotation.setColumn(2, CCVector3(0, std::sin(theta), std::cos(theta)));
+	ccGLMatrix yRotation = ccGLMatrix();
+	yRotation.setColumn(0, CCVector3(std::cos(phi), 0, -std::sin(phi)));
+	yRotation.setColumn(2, CCVector3(std::sin(phi), 0, std::cos(phi)));
+
+	ccGLMatrix arbitraryVectorTranslationAdjust = xRotation * yRotation;
+
+	//special case 
+	if (std::abs(vec.x) < ZERO_TOLERANCE && std::abs(vec.y) < ZERO_TOLERANCE && vec.z < 0)
+	{
+		arbitraryVectorTranslationAdjust.scaleRotation(-1);
+	}
+	arbitraryVectorTranslationAdjust.applyRotation(vectorToTranslate);
+}
+
 void ccGraphicalTransformationTool::glTranslate(const CCVector3d& realT)
 {
 	CCVector3d t(	realT.x * (TxCheckBox->isChecked() ? 1 : 0),
 					realT.y * (TyCheckBox->isChecked() ? 1 : 0),
 					realT.z * (TzCheckBox->isChecked() ? 1 : 0));
 
+	bool arbitraryVectorTranslation = true;
+	if (arbitraryVectorTranslation) 
+	{
+		CCVector3d vec(-.20, -.20, -.20);
+		arbitraryVectorTranslate(t, vec);
+	}
+		
 	if (t.norm2() != 0)
 	{
 		m_translation += t;

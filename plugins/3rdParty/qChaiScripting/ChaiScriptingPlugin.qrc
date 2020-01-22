@@ -1,6 +1,17 @@
 <RCC>
-  <qresource prefix="/CC/plugin/ChaiScriptingPlugin" >
-    <file>images/icon.png</file>
-    <file>info.json</file>
-  </qresource>
+    <qresource prefix="/CC/plugin/ChaiScriptingPlugin">
+        <file>images/icon.png</file>
+        <file>info.json</file>
+        <file>images/ccConsole.png</file>
+        <file>images/ccDelete.png</file>
+        <file>images/ccOpen.png</file>
+        <file>images/ccPencil.png</file>
+        <file>images/ccSave.png</file>
+        <file>images/dbHObjectSymbol.png</file>
+        <file>images/dbHObjectSymbolLocked.png</file>
+        <file>images/dbLockSymbol.png</file>
+        <file>images/smallTrash.png</file>
+        <file>images/smallValidate.png</file>
+        <file>images/store.png</file>
+    </qresource>
 </RCC>

@@ -1,6 +1,6 @@
 //##########################################################################
 //#                                                                        #
-//#                CLOUDCOMPARE PLUGIN: ChaiScriptingPlugin                      #
+//#                CLOUDCOMPARE PLUGIN: ChaiScriptingPlugin                #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
@@ -22,14 +22,17 @@
 
 #include "extern/ChaiScript/include/chaiscript/chaiscript.hpp"
 #include "extern/ChaiScript/include/chaiscript/chaiscript_stdlib.hpp"
+#include "chaiScriptCodeEditorMainWindow.h"
 //#include "extern/ChaiScript/include/chaiscript/dispatchkit/bootstrap_stl.hpp"
 //#include "extern/ChaiScript/include/chaiscript/dispatchkit/function_call.hpp"
 chaiscript::ChaiScript* chai;
+chaiScriptCodeEditorMainWindow* cseMW;
 ChaiScriptingPlugin::ChaiScriptingPlugin( QObject *parent )
 	: QObject( parent )
 	, ccStdPluginInterface( ":/CC/plugin/ChaiScriptingPlugin/info.json" )
 	, m_action( nullptr )
 {
+	cseMW = chaiScriptCodeEditorMainWindow::TheInstance();
 	using namespace chaiscript;
 	chai = new ChaiScript(chaiscript::Std_Lib::library());
 	chai->add_global(var(this), "chaiScriptingPlugin");
@@ -94,6 +97,8 @@ void ChaiScriptingPlugin::doAction()
 		
 		return;
 	}
+	cseMW->show();
+
 	int i = chai->eval<int>("5+5");
 	if(i==10)
 		m_app->dispToConsole("Evaled 5+5 == 10 in chai", ccMainAppInterface::STD_CONSOLE_MESSAGE);

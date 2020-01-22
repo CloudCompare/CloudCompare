@@ -8,9 +8,9 @@ if ( PLUGIN_STANDARD_QCHAISCRIPTING )
     add_definitions(-DCHAISCRIPT_NO_THREADS) #avoiding a crash that happens when destroying chai with threads enabled
     
     include_directories( extern/ChaiScript/include)
-    #include_directories( src )
-	#add_subdirectory( src )
-    #add_subdirectory( ui )
+    include_directories( src )
+	add_subdirectory( src )
+    add_subdirectory( ui )
 	if(MSVC)
   add_definitions(/W4 /w14545 /w34242 /w34254 /w34287 /w44263 /w44265 /w44296 /w44311 /w44826 /we4289 /w14546 /w14547 /w14549 /w14555 /w14619 /w14905 /w14906 /w14928)
 

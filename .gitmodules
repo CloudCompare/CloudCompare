@@ -4,7 +4,3 @@
 [submodule "plugins/core/IO/qE57IO/extern/libE57Format"]
 	path = plugins/core/IO/qE57IO/extern/libE57Format
 	url = https://github.com/asmaloney/libE57Format
-[submodule "plugins/3rdParty/qChaiScripting/extern/ChaiScript"]
-	path = plugins/3rdParty/qChaiScripting/extern/ChaiScript
-	url = https://github.com/ChaiScript/ChaiScript
-	branch = release-5.x

@@ -41,6 +41,7 @@ private:
 	/*** ADD YOUR CUSTOM ACTIONS HERE ***/
 	void doAction();
 	void calledAction();
+	void openScriptEditor();
 	
 	//! Default action
 	/** You can add as many actions as you want in a plugin.

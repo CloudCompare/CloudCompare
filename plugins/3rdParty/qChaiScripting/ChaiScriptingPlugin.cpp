@@ -20,11 +20,11 @@
 
 #include "ChaiScriptingPlugin.h"
 
-#include "extern/ChaiScript/include/chaiscript/chaiscript.hpp"
-#include "extern/ChaiScript/include/chaiscript/chaiscript_stdlib.hpp"
+#include <chaiscript/chaiscript.hpp>
+#include <chaiscript/chaiscript_stdlib.hpp>
+
 #include "chaiScriptCodeEditorMainWindow.h"
-//#include "extern/ChaiScript/include/chaiscript/dispatchkit/bootstrap_stl.hpp"
-//#include "extern/ChaiScript/include/chaiscript/dispatchkit/function_call.hpp"
+
 chaiscript::ChaiScript* chai;
 chaiScriptCodeEditorMainWindow* cseMW;
 ChaiScriptingPlugin::ChaiScriptingPlugin( QObject *parent )
@@ -77,10 +77,24 @@ QList<QAction *> ChaiScriptingPlugin::getActions()
 		m_action->setIcon( getIcon() );
 		
 		// Connect appropriate signal
-		connect( m_action, &QAction::triggered, this, &ChaiScriptingPlugin::doAction );
+		connect( m_action, &QAction::triggered, this, &ChaiScriptingPlugin::openScriptEditor);
 	}
 
 	return { m_action };
+}
+
+void ChaiScriptingPlugin::openScriptEditor()
+{
+	if (!cseMW)
+	{
+		cseMW = chaiScriptCodeEditorMainWindow::TheInstance();
+	}
+	if (!cseMW)
+	{
+		m_app->dispToConsole("Failed to open chaiScriptCodeEditorMainWindow", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
+	cseMW->show();
 }
 
 // This is an example of an action's method called when the corresponding action
@@ -97,7 +111,7 @@ void ChaiScriptingPlugin::doAction()
 		
 		return;
 	}
-	cseMW->show();
+	
 
 	int i = chai->eval<int>("5+5");
 	if(i==10)

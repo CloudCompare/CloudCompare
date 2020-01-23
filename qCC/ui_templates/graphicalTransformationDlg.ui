@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>146</width>
-    <height>109</height>
+    <height>141</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -20,6 +20,9 @@
    <string>Graphical Transformation</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="sizeConstraint">
+    <enum>QLayout::SetDefaultConstraint</enum>
+   </property>
    <property name="leftMargin">
     <number>6</number>
    </property>
@@ -256,6 +259,31 @@
        <property name="checked">
         <bool>true</bool>
        </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <item>
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Advanced</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="advComboBox">
+       <item>
+        <property name="text">
+         <string>None</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Translate</string>
+        </property>
+       </item>
       </widget>
      </item>
     </layout>

@@ -79,6 +79,8 @@ protected slots:
 	//! Pauses the transformation mode
 	void pause(bool);
 
+	void advancedModeChanged(int);
+
 	//! Applies translation (graphically) to selected entities
 	void glTranslate(const CCVector3d&);
 

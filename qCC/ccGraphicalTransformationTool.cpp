@@ -37,7 +37,8 @@ ccGraphicalTransformationTool::ccGraphicalTransformationTool(QWidget* parent)
 	connect(okButton,       &QAbstractButton::clicked,	this, &ccGraphicalTransformationTool::apply);
 	connect(razButton,	  &QAbstractButton::clicked,	this, &ccGraphicalTransformationTool::reset);
 	connect(cancelButton,   &QAbstractButton::clicked,	this, &ccGraphicalTransformationTool::cancel);
-
+	connect(advComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &ccGraphicalTransformationTool::advancedModeChanged);
+	
 	//add shortcuts
 	addOverridenShortcut(Qt::Key_Space); //space bar for the "pause" button
 	addOverridenShortcut(Qt::Key_Escape); //escape key for the "cancel" button
@@ -86,7 +87,16 @@ void ccGraphicalTransformationTool::pause(bool state)
 	else
 	{
 		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_ENTITIES());
-		m_associatedWin->displayNewMessage("[Rotation/Translation mode]",ccGLWindow::UPPER_CENTER_MESSAGE,false,3600,ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
+		if (advComboBox->currentIndex() == 1)
+		{
+			m_associatedWin->displayNewMessage("[Advanced Translation mode]", ccGLWindow::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
+			m_associatedWin->displayNewMessage("[Select Plane or Line to translate along]", ccGLWindow::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
+			m_associatedWin->displayNewMessage("[If plane selected, translation will be along the plane normal]", ccGLWindow::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
+		}
+		else 
+		{
+			m_associatedWin->displayNewMessage("[Rotation/Translation mode]", ccGLWindow::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
+		}
 	}
 
 	//update mini-GUI
@@ -94,6 +104,34 @@ void ccGraphicalTransformationTool::pause(bool state)
 	pauseButton->setChecked(state);
 	pauseButton->blockSignals(false);
 
+	m_associatedWin->redraw(true, false);
+}
+
+void ccGraphicalTransformationTool::advancedModeChanged(int)
+{
+	if (!m_associatedWin)
+		return;
+	switch (advComboBox->currentIndex())
+	{
+		case 0: //None
+		{
+			if (!pauseButton->isChecked())
+			{
+				m_associatedWin->displayNewMessage("[Rotation/Translation mode]", ccGLWindow::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
+			}
+			break;
+		}
+		case 1: //advanced translate mode
+		{
+			if (!pauseButton->isChecked())
+			{
+				m_associatedWin->displayNewMessage("[Advanced Translation mode]", ccGLWindow::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
+				m_associatedWin->displayNewMessage("[Select Plane or Line to translate along]", ccGLWindow::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
+				m_associatedWin->displayNewMessage("[If plane selected, translation will be along the plane normal]", ccGLWindow::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
+			}
+			break;
+		}
+	}
 	m_associatedWin->redraw(true, false);
 }
 

@@ -62,7 +62,7 @@ public:
 	//! Sets the rotation center
 	void setRotationCenter(CCVector3d& center);
 
-	void arbitraryVectorTranslate(CCVector3d& vectorToTranslate, const CCVector3d& vec);
+	ccGLMatrix getArbitraryVectorTranslationTransform(const CCVector3& vec);
 
 
 protected slots:
@@ -80,6 +80,10 @@ protected slots:
 	void pause(bool);
 
 	void advancedModeChanged(int);
+
+	bool setAdvancedTranslationTransform();
+
+	void updateDisplayMessage();
 
 	//! Applies translation (graphically) to selected entities
 	void glTranslate(const CCVector3d&);
@@ -106,6 +110,8 @@ protected:
 
 	//! Current translation
 	CCVector3d m_translation;
+
+	ccGLMatrix m_advancedTranslationTransform;
 
 	//! Rotation center
 	/** The rotation center is actually the center of gravity of the selected 'entities'

@@ -21,9 +21,13 @@
 #include <ccGLUtils.h>
 #include <ccGLWindow.h>
 
+#include "ccItemSelectionDlg.h"
+
 //qCC_db
 #include <ccLog.h>
 #include <ccMesh.h>
+#include <ccPolyline.h>
+#include <ccPlane.h>
 
 
 ccGraphicalTransformationTool::ccGraphicalTransformationTool(QWidget* parent)
@@ -83,20 +87,13 @@ void ccGraphicalTransformationTool::pause(bool state)
 		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA());
 		m_associatedWin->displayNewMessage("Transformation [PAUSED]",ccGLWindow::UPPER_CENTER_MESSAGE,false,3600,ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
 		m_associatedWin->displayNewMessage("Unpause to transform again",ccGLWindow::UPPER_CENTER_MESSAGE,true,3600,ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
+		advComboBox->setEnabled(false);
 	}
 	else
 	{
+		advComboBox->setEnabled(true);
 		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_ENTITIES());
-		if (advComboBox->currentIndex() == 1)
-		{
-			m_associatedWin->displayNewMessage("[Advanced Translation mode]", ccGLWindow::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
-			m_associatedWin->displayNewMessage("[Select Plane or Line to translate along]", ccGLWindow::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
-			m_associatedWin->displayNewMessage("[If plane selected, translation will be along the plane normal]", ccGLWindow::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
-		}
-		else 
-		{
-			m_associatedWin->displayNewMessage("[Rotation/Translation mode]", ccGLWindow::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
-		}
+		updateDisplayMessage();
 	}
 
 	//update mini-GUI
@@ -115,24 +112,92 @@ void ccGraphicalTransformationTool::advancedModeChanged(int)
 	{
 		case 0: //None
 		{
-			if (!pauseButton->isChecked())
-			{
-				m_associatedWin->displayNewMessage("[Rotation/Translation mode]", ccGLWindow::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
-			}
+			TxCheckBox->setEnabled(true);
+			TyCheckBox->setEnabled(true);
 			break;
 		}
 		case 1: //advanced translate mode
 		{
-			if (!pauseButton->isChecked())
+			m_associatedWin->displayNewMessage("[Advanced Translation mode]", ccGLWindow::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
+			m_associatedWin->displayNewMessage("[Select Plane or Line to translate along]", ccGLWindow::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
+			m_associatedWin->displayNewMessage("[If line selected, translation will be limited in Z direction]", ccGLWindow::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
+			m_associatedWin->redraw(true, false);
+			if (!setAdvancedTranslationTransform())
 			{
-				m_associatedWin->displayNewMessage("[Advanced Translation mode]", ccGLWindow::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
-				m_associatedWin->displayNewMessage("[Select Plane or Line to translate along]", ccGLWindow::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
-				m_associatedWin->displayNewMessage("[If plane selected, translation will be along the plane normal]", ccGLWindow::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
+				advComboBox->setCurrentIndex(0);
 			}
 			break;
 		}
 	}
-	m_associatedWin->redraw(true, false);
+	updateDisplayMessage();
+}
+
+bool ccGraphicalTransformationTool::setAdvancedTranslationTransform() 
+{
+	if (!m_associatedWin)
+	{
+		assert(false);
+		return false;
+	}
+
+	MainWindow* mainWindow = MainWindow::TheInstance();
+	if (mainWindow)
+	{
+		ccHObject* root = mainWindow->dbRootObject();
+		ccHObject::Container polylines;
+		ccHObject::Container planesAndLineSegments;
+		if (root)
+		{
+			root->filterChildren(polylines, true, CC_TYPES::POLY_LINE);
+			root->filterChildren(planesAndLineSegments, true, CC_TYPES::PLANE);
+		}
+		if (!polylines.empty())
+		{
+			for (int i = 0; i < polylines.size(); i++)
+			{
+				ccPolyline* poly = static_cast<ccPolyline*>(polylines[i]);
+				if (poly->size() == 2) //only single segment polylines allowed
+				{
+					planesAndLineSegments.push_back(polylines[i]);
+				}
+			}
+		}
+		if (!planesAndLineSegments.empty())
+		{
+			int index = ccItemSelectionDlg::SelectEntity(planesAndLineSegments, 0, m_associatedWin);
+			if (index < 0)
+			{
+				return false;
+			}
+
+			assert(index >= 0 && index < static_cast<int>(planesAndLineSegments.size()));
+			assert(planesAndLineSegments[index]->isA(CC_TYPES::POLY_LINE) || 
+					planesAndLineSegments[index]->isA(CC_TYPES::PLANE));
+
+			if (planesAndLineSegments[index]->isA(CC_TYPES::POLY_LINE))
+			{
+				ccPolyline* line = static_cast<ccPolyline*>(planesAndLineSegments[index]);
+				CCVector3 arbitraryVec = *line->getPoint(1) - *line->getPoint(0);
+				m_advancedTranslationTransform = getArbitraryVectorTranslationTransform(arbitraryVec);
+				TxCheckBox->setChecked(false);
+				TyCheckBox->setChecked(false);
+				TxCheckBox->setEnabled(false);
+				TyCheckBox->setEnabled(false);
+				return true;
+			}
+			else if (planesAndLineSegments[index]->isA(CC_TYPES::PLANE))
+			{
+				ccPlane* plane = static_cast<ccPlane*>(planesAndLineSegments[index]);
+				m_advancedTranslationTransform = plane->getTransformation();
+				return true;
+			}			
+		}
+		else
+		{
+			ccLog::Error("Cannot translate along line segment or plane normal: \nNo plane or single segment polyline found in DB!");
+		}
+	}
+	return false;
 }
 
 void ccGraphicalTransformationTool::clear()
@@ -218,6 +283,26 @@ bool ccGraphicalTransformationTool::linkWith(ccGLWindow* win)
 	return true;
 }
 
+void ccGraphicalTransformationTool::updateDisplayMessage()
+{
+	switch (advComboBox->currentIndex())
+	{
+		case 0: //None
+		{
+			m_associatedWin->displayNewMessage("[Rotation/Translation mode]", ccGLWindow::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
+			break;
+		}
+		case 1: //advanced translate mode
+		{
+			m_associatedWin->displayNewMessage("[Advanced Translation mode]", ccGLWindow::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
+			m_associatedWin->displayNewMessage("[Select Plane or Line to translate along]", ccGLWindow::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
+			m_associatedWin->displayNewMessage("[If line selected, translation will be limited in Z direction]", ccGLWindow::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
+			break;
+		}
+	}
+	m_associatedWin->redraw(true, false);
+}
+
 bool ccGraphicalTransformationTool::start()
 {
 	assert(!m_processing);
@@ -241,7 +326,11 @@ bool ccGraphicalTransformationTool::start()
 	connect(m_associatedWin, &ccGLWindow::rotation, this, &ccGraphicalTransformationTool::glRotate);
 	connect(m_associatedWin, &ccGLWindow::translation, this, &ccGraphicalTransformationTool::glTranslate);
 	m_associatedWin->displayNewMessage(QString(),ccGLWindow::UPPER_CENTER_MESSAGE); //clear the area
-	m_associatedWin->displayNewMessage("[Rotation/Translation mode]",ccGLWindow::UPPER_CENTER_MESSAGE,false,3600,ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
+	pauseButton->setChecked(false);
+	TxCheckBox->setEnabled(true);
+	TyCheckBox->setEnabled(true);
+	advComboBox->setCurrentIndex(0);
+	updateDisplayMessage();
 	m_associatedWin->redraw(true, false);
 
 	return ccOverlayDialog::start();
@@ -263,7 +352,7 @@ void ccGraphicalTransformationTool::stop(bool state)
 	ccOverlayDialog::stop(state);
 }
 
-void ccGraphicalTransformationTool::arbitraryVectorTranslate(CCVector3d& vectorToTranslate, const CCVector3d& vec)
+ccGLMatrix ccGraphicalTransformationTool::getArbitraryVectorTranslationTransform(const CCVector3& vec)
 {
 	PointCoordinateType theta;
 	PointCoordinateType phi;
@@ -332,7 +421,7 @@ void ccGraphicalTransformationTool::arbitraryVectorTranslate(CCVector3d& vectorT
 	{
 		arbitraryVectorTranslationAdjust.scaleRotation(-1);
 	}
-	arbitraryVectorTranslationAdjust.applyRotation(vectorToTranslate);
+	return arbitraryVectorTranslationAdjust;
 }
 
 void ccGraphicalTransformationTool::glTranslate(const CCVector3d& realT)
@@ -341,11 +430,9 @@ void ccGraphicalTransformationTool::glTranslate(const CCVector3d& realT)
 					realT.y * (TyCheckBox->isChecked() ? 1 : 0),
 					realT.z * (TzCheckBox->isChecked() ? 1 : 0));
 
-	bool arbitraryVectorTranslation = true;
-	if (arbitraryVectorTranslation) 
+	if (advComboBox->currentIndex() == 1) //advance translate mode
 	{
-		CCVector3d vec(-.20, -.20, -.20);
-		arbitraryVectorTranslate(t, vec);
+		m_advancedTranslationTransform.applyRotation(t);
 	}
 		
 	if (t.norm2() != 0)

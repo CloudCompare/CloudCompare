@@ -43,6 +43,8 @@ static const char LAS_OFFSET_Z_META_DATA[] = "LAS.offset.z";
 static const char LAS_VERSION_MAJOR_META_DATA[] = "LAS.version.major";
 static const char LAS_VERSION_MINOR_META_DATA[] = "LAS.version.minor";
 static const char LAS_POINT_FORMAT_META_DATA[] = "LAS.point_format";
+static const char LAS_GLOBAL_ENCODING_META_DATA[] = "LAS.global_encoding";
+static const char LAS_PROJECT_UUID_META_DATA[] = "LAS.project_uuid";
 
 enum LAS_FIELDS {
 	LAS_X = 0,

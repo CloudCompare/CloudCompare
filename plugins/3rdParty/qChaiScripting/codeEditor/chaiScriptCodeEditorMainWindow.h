@@ -25,6 +25,16 @@
 #include <QMainWindow>
 #include <QSettings>
 
+class CodeEditor;
+QT_BEGIN_NAMESPACE
+class QAction;
+class QMenu;
+class QMdiArea;
+class QMdiSubWindow;
+QT_END_NAMESPACE
+
+
+
 class ccMainAppInterface;
 
 
@@ -37,20 +47,68 @@ public:
 
 	//! Default constructor
 	chaiScriptCodeEditorMainWindow();
-
+	void changeEvent(QEvent* e);
 	static chaiScriptCodeEditorMainWindow* TheInstance();
+	bool openFile(const QString& fileName);
+	static QString settingsApplicationName();
+
+protected:
+	void closeEvent(QCloseEvent* event) override;
+signals:
+	void executionCalled(const std::string &evalStatement);
+	void reset_Chai_to_initial_state();
+	void save_Chai_state();
+	void reset_chai_to_last_save();
+
 
 protected slots:
+	void newFile();
+	void open();
+	void save();
+	void saveAs();
+	void updateRecentFileActions();
+	void openRecentFile();
+#ifndef QT_NO_CLIPBOARD
+	void cut();
+	void copy();
+	void paste();
+#endif
+	void about();
+	void updateMenus();
+	void updateWindowMenu();
+	CodeEditor* createChildCodeEditor();
 
-	
+private:
+	enum { MaxRecentFiles = 10 };
 
-protected: //methods
+	void createActions();
+	void runExecute();
+	void createStatusBar();
+	void readSettings();
+	void writeSettings();
+	bool loadFile(const QString& fileName);
+	static bool hasRecentFiles();
+	void prependToRecentFiles(const QString& fileName);
+	void setRecentFilesVisible(bool visible);
+	CodeEditor* activeChildCodeEditor() const;
+	QMdiSubWindow* findChildCodeEditor(const QString& fileName) const;
 
+	QMdiArea* mdiArea;
 
-protected: //members
+	QMenu* windowMenu;
 
-	ccMainAppInterface* m_app;
+	QAction* recentFileActs[MaxRecentFiles];
+	QAction* recentFileSeparator;
+	QAction* recentFileSubMenuAct;
+
+	QAction* closeAct;
+	QAction* closeAllAct;
+	QAction* tileAct;
+	QAction* cascadeAct;
+	QAction* nextAct;
+	QAction* previousAct;
+	QAction* windowMenuSeparatorAct;
 
 };
 
-#endif //Q_M3C2_DIALOG_HEADER
+#endif CHAISCRIPT_CODE_EDITOR_MAIN_WINDOW

@@ -10,9 +10,13 @@ if ( PLUGIN_STANDARD_QCHAISCRIPTING )
     
     add_subdirectory(cmake)
     include_directories(${chaiscript_SOURCE_DIR}/include)
-    include_directories( src )
-	add_subdirectory( src )
+    include_directories( codeEditor )
+    include_directories( bootstrap )
+
+	add_subdirectory( codeEditor )
     add_subdirectory( ui )
+    add_subdirectory( bootstrap )
+
     add_definitions(/bigobj) # REQUIRED
     
     include( ../../CMakePluginTpl.cmake )

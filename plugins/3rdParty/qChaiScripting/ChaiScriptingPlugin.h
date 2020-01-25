@@ -32,22 +32,20 @@ class ChaiScriptingPlugin : public QObject, public ccStdPluginInterface
 public:
 	explicit ChaiScriptingPlugin( QObject *parent = nullptr );
 	~ChaiScriptingPlugin();// override = default;
-	
-	// inherited from ccStdPluginInterface
-	void onNewSelection( const ccHObject::Container &selectedEntities ) override;
+
 	QList<QAction *> getActions() override;
 	
 private:
-	/*** ADD YOUR CUSTOM ACTIONS HERE ***/
-	void doAction();
-	void calledAction();
+	void setupChaiScriptEngine();
+
 	void openScriptEditor();
-	
+	void dispToConsole(const std::string &str, const int lvl);
+	void executionCalled(const std::string& evalStatement);
+	void resetToDefaultChaiState();
+	void saveChaiState();
+	void resetToSavedChaiState();
+
 	//! Default action
-	/** You can add as many actions as you want in a plugin.
-		Each action will correspond to an icon in the dedicated
-		toolbar and an entry in the plugin menu.
-	**/
 	QAction* m_action;
 	
 	

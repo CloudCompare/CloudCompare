@@ -13,5 +13,10 @@
         <file>images/smallTrash.png</file>
         <file>images/smallValidate.png</file>
         <file>images/store.png</file>
+        <file>images/plus.png</file>
+        <file>images/arrow_right.png</file>
+        <file>images/ccSegment.png</file>
+        <file>images/paste.png</file>
+        <file>images/copy.png</file>
     </qresource>
 </RCC>

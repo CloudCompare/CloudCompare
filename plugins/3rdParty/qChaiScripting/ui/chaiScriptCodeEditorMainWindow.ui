@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>984</width>
+    <height>734</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,6 +19,10 @@
   <property name="windowTitle">
    <string>Cloud Compare - Chai Script Editor</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../ChaiScriptingPlugin.qrc">
+    <normaloff>:/CC/plugin/ChaiScriptingPlugin/images/icon.png</normaloff>:/CC/plugin/ChaiScriptingPlugin/images/icon.png</iconset>
+  </property>
   <property name="documentMode">
    <bool>true</bool>
   </property>
@@ -28,13 +32,13 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>984</width>
      <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>File</string>
+     <string>&amp;File</string>
     </property>
     <addaction name="actionNew"/>
     <addaction name="actionOpen"/>
@@ -42,7 +46,28 @@
     <addaction name="actionSave_As"/>
     <addaction name="actionClose"/>
    </widget>
+   <widget class="QMenu" name="menuRun">
+    <property name="title">
+     <string>&amp;Run</string>
+    </property>
+    <addaction name="actionRun"/>
+    <addaction name="actionReset_Chai_to_initial_state"/>
+    <addaction name="actionSave_Chai_state"/>
+    <addaction name="actionReset_chai_to_last_save"/>
+   </widget>
+   <widget class="QMenu" name="menu_Edit">
+    <property name="title">
+     <string>&amp;Edit</string>
+    </property>
+    <addaction name="actionCu_t"/>
+    <addaction name="action_Copy"/>
+    <addaction name="action_Paste"/>
+    <addaction name="action_Delete"/>
+    <addaction name="action_Select_All"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menu_Edit"/>
+   <addaction name="menuRun"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
@@ -64,8 +89,94 @@
    <addaction name="actionNew"/>
    <addaction name="actionOpen"/>
    <addaction name="actionSave"/>
+   <addaction name="separator"/>
+   <addaction name="actionCu_t"/>
+   <addaction name="action_Copy"/>
+   <addaction name="action_Paste"/>
+   <addaction name="separator"/>
+   <addaction name="actionRun"/>
+  </widget>
+  <widget class="QDockWidget" name="projectBrowser">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>146</width>
+     <height>525</height>
+    </size>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="features">
+    <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
+   </property>
+   <property name="windowTitle">
+    <string>Project Browser</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents">
+    <layout class="QVBoxLayout">
+     <item>
+      <widget class="QTreeView" name="PBtreeView">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>126</width>
+         <height>234</height>
+        </size>
+       </property>
+       <property name="autoFillBackground">
+        <bool>false</bool>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="uniformRowHeights">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="scriptOutputConsoledock">
+   <property name="features">
+    <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
+   </property>
+   <property name="windowTitle">
+    <string>Script Output Console</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_2">
+    <layout class="QVBoxLayout">
+     <item>
+      <widget class="QListWidget" name="scriptOutputConsole"/>
+     </item>
+    </layout>
+   </widget>
   </widget>
   <action name="actionNew">
+   <property name="icon">
+    <iconset resource="../ChaiScriptingPlugin.qrc">
+     <normaloff>:/CC/plugin/ChaiScriptingPlugin/images/plus.png</normaloff>:/CC/plugin/ChaiScriptingPlugin/images/plus.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;New</string>
    </property>
@@ -77,6 +188,10 @@
    </property>
   </action>
   <action name="actionOpen">
+   <property name="icon">
+    <iconset resource="../ChaiScriptingPlugin.qrc">
+     <normaloff>:/CC/plugin/ChaiScriptingPlugin/images/ccOpen.png</normaloff>:/CC/plugin/ChaiScriptingPlugin/images/ccOpen.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Open</string>
    </property>
@@ -85,6 +200,10 @@
    </property>
   </action>
   <action name="actionSave">
+   <property name="icon">
+    <iconset resource="../ChaiScriptingPlugin.qrc">
+     <normaloff>:/CC/plugin/ChaiScriptingPlugin/images/ccSave.png</normaloff>:/CC/plugin/ChaiScriptingPlugin/images/ccSave.png</iconset>
+   </property>
    <property name="text">
     <string>Save</string>
    </property>
@@ -111,7 +230,73 @@
     <string>Alt+Q</string>
    </property>
   </action>
+  <action name="actionRun">
+   <property name="icon">
+    <iconset resource="../ChaiScriptingPlugin.qrc">
+     <normaloff>:/CC/plugin/ChaiScriptingPlugin/images/arrow_right.png</normaloff>:/CC/plugin/ChaiScriptingPlugin/images/arrow_right.png</iconset>
+   </property>
+   <property name="text">
+    <string>Run</string>
+   </property>
+   <property name="shortcut">
+    <string>F5</string>
+   </property>
+  </action>
+  <action name="actionCu_t">
+   <property name="icon">
+    <iconset resource="../ChaiScriptingPlugin.qrc">
+     <normaloff>:/CC/plugin/ChaiScriptingPlugin/images/ccSegment.png</normaloff>:/CC/plugin/ChaiScriptingPlugin/images/ccSegment.png</iconset>
+   </property>
+   <property name="text">
+    <string>Cu&amp;t</string>
+   </property>
+  </action>
+  <action name="action_Copy">
+   <property name="icon">
+    <iconset resource="../ChaiScriptingPlugin.qrc">
+     <normaloff>:/CC/plugin/ChaiScriptingPlugin/images/copy.png</normaloff>:/CC/plugin/ChaiScriptingPlugin/images/copy.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Copy</string>
+   </property>
+  </action>
+  <action name="action_Paste">
+   <property name="icon">
+    <iconset resource="../ChaiScriptingPlugin.qrc">
+     <normaloff>:/CC/plugin/ChaiScriptingPlugin/images/paste.png</normaloff>:/CC/plugin/ChaiScriptingPlugin/images/paste.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Paste</string>
+   </property>
+  </action>
+  <action name="action_Delete">
+   <property name="text">
+    <string>&amp;Delete</string>
+   </property>
+  </action>
+  <action name="action_Select_All">
+   <property name="text">
+    <string>&amp;Select All</string>
+   </property>
+  </action>
+  <action name="actionReset_Chai_to_initial_state">
+   <property name="text">
+    <string>Reset Chai to initial state</string>
+   </property>
+  </action>
+  <action name="actionSave_Chai_state">
+   <property name="text">
+    <string>Save Chai state</string>
+   </property>
+  </action>
+  <action name="actionReset_chai_to_last_save">
+   <property name="text">
+    <string>Reset chai to last save</string>
+   </property>
+  </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="../ChaiScriptingPlugin.qrc"/>
+ </resources>
  <connections/>
 </ui>

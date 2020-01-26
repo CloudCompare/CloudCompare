@@ -25,11 +25,16 @@
 #include <chaiscript/dispatchkit/bootstrap_stl.hpp>
 #include <chaiscript/dispatchkit/function_call.hpp>
 
+#include "bootstrap/qCC/qCCBootstrap.hpp"
+#include "bootstrap/CC/CCBootstrap.hpp"
 
 #include "chaiScriptCodeEditorMainWindow.h"
 
 
 chaiscript::ChaiScript* chai;
+chaiscript::ModulePtr mqCCLib = chaiscript::cloudCompare::qCC::bootstrap();
+chaiscript::ModulePtr mCCLib = chaiscript::cloudCompare::CC::bootstrap();
+
 	/// \brief Represents the current state of the ChaiScript system. State and be saved and restored
 	/// \warning State object does not contain the user defined type conversions of the engine. They
 	///          are left out due to performance considerations involved in tracking the state
@@ -91,7 +96,10 @@ void ChaiScriptingPlugin::setupChaiScriptEngine()
 		{
 			chai = new ChaiScript(chaiscript::Std_Lib::library());
 			
+			chai->add(mCCLib);
+			chai->add(mqCCLib);
 			chai->add(chaiscript::type_conversion<std::string, QString>([](const std::string& str) {return QString::fromStdString(str); }));
+			chai->add(fun([](const std::string& str) {return QString::fromUtf8(str.c_str()); }), "to_QString");
 			chai->add(chaiscript::vector_conversion<std::vector<int>>());
 			chai->add(chaiscript::map_conversion<std::map<std::string, int>>());
 
@@ -99,7 +107,7 @@ void ChaiScriptingPlugin::setupChaiScriptEngine()
 			chai->add_global(var(m_app), "m_app");
 			chai->add(fun(&ccMainAppInterface::addToDB), "addToDB");
 			chai->add(fun([=]() { return m_app->haveSelection(); }), "haveSelection");
-			chai->add(fun([=]() { return m_app->addToDB(); }), "haveSelection");
+			//chai->add(fun([=]() { return m_app->addToDB(); }), "haveSelection");
 			
 			chai->add(fun(&ChaiScriptingPlugin::dispToConsole), "dispToConsole");
 			chai->add(chaiscript::user_type<ccMainAppInterface>(), "ccMainAppInterface");

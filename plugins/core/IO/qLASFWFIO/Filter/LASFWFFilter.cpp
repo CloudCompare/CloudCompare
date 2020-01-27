@@ -1025,8 +1025,8 @@ CC_FILE_ERROR LASFWFFilter::loadFile(const QString& filename, ccHObject& contain
 			}
 
 			//release the cloud
-			delete cloud;
-			cloud = 0;
+			//delete cloud;
+			//cloud = 0;
 		}
 		else
 		{

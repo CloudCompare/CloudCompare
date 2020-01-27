@@ -592,8 +592,8 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		if (theCloud->hasMetaData(s_LAS_SRS_Key))
 		{
 			//restore the SRS if possible
-			QString srs = theCloud->getMetaData(s_LAS_SRS_Key).value<QString>();
-			writerOptions.add("a_srs", srs.toStdString());
+			QString wkt = theCloud->getMetaData(s_LAS_SRS_Key).value<QString>();
+			writerOptions.add("a_srs", wkt.toStdString());
 		}
 		writerOptions.add("dataformat_id", minPointFormat);
 
@@ -1327,11 +1327,15 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 
 				//save the Spatial reference as meta-data
 				SpatialReference srs = lasHeader.srs();
-				if (srs.valid())
+				if (!srs.empty())
 				{
-					QString proj4 = QString::fromStdString(srs.getProj4());
-					ccLog::Print("[LAS] Spatial reference: " + proj4);
-					pointChunk.loadedCloud->setMetaData(s_LAS_SRS_Key, proj4);
+					QString wkt = QString::fromStdString(srs.getWKT());
+					ccLog::Print("[LAS] Spatial reference: " + wkt);
+					pointChunk.loadedCloud->setMetaData(s_LAS_SRS_Key, wkt);
+				}
+				else if (lasHeader.incompatibleSrs())
+				{
+					ccLog::Warning("[LAS] Incompatible spatial reference");
 				}
 				else
 				{

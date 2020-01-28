@@ -9417,6 +9417,10 @@ void MainWindow::addToDB(	ccHObject* obj,
 							bool checkDimensions/*=true*/,
 							bool autoRedraw/*=true*/)
 {
+	if (!obj)
+	{
+		return;
+	}
 	//let's check that the new entity is not too big nor too far from scene center!
 	if (checkDimensions)
 	{

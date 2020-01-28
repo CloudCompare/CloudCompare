@@ -241,6 +241,22 @@ namespace CCLib
 			}
 		}
 
+		inline CCVector3d operator * (const CCVector3d& V) const
+		{
+			if (m_matrixSize == 3)
+			{
+
+				CCVector3d result;
+				apply(V.u, result.u);
+
+				return result;
+			}
+			else
+			{
+				return V;
+			}
+		}
+
 		//! In-place multiplication
 		inline const SquareMatrixTpl& operator *= (const SquareMatrixTpl& B)
 		{
@@ -253,13 +269,14 @@ namespace CCLib
 		/** Vec must have the same size as matrix.
 			Returns result = M.Vec.
 		**/
-		void apply(const Scalar Vec[], Scalar result[]) const
+		template<typename inT, typename resT>
+		void apply(const inT Vec[], resT result[]) const
 		{
 			for (unsigned r = 0; r < m_matrixSize; r++)
 			{
-				Scalar sum = 0;
+				resT sum = 0;
 				for (unsigned k = 0; k < m_matrixSize; k++)
-					sum += m_values[r][k] * static_cast<Scalar>(Vec[k]);
+					sum += static_cast<resT>(m_values[r][k])* static_cast<resT>(Vec[k]);
 				result[r] = sum;
 			}
 		}

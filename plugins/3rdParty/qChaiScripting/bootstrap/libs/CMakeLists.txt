@@ -1,0 +1,13 @@
+include_directories( CC )
+include_directories( CCFbo )
+include_directories( qCC_db )
+include_directories( qCC_glWindow )
+include_directories( qCC_io )
+include_directories( qcustomplot )
+
+add_subdirectory( CC )
+add_subdirectory( CCFbo )
+add_subdirectory( qCC_db )
+add_subdirectory( qCC_glWindow )
+add_subdirectory( qCC_io )
+add_subdirectory( qcustomplot )

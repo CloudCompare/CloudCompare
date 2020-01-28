@@ -1,5 +1,5 @@
-#ifndef CHAISCRIPTING_BOOTSTRAP_QCC_HPP
-#define CHAISCRIPTING_BOOTSTRAP_QCC_HPP
+#ifndef CHAISCRIPTING_BOOTSTRAP_LIBS_HPP
+#define CHAISCRIPTING_BOOTSTRAP_LIBS_HPP
 
 //##########################################################################
 //#                                                                        #
@@ -22,26 +22,27 @@
 #include <memory>
 
 #include <chaiscript/chaiscript.hpp>
-#include "qCCEnums.hpp"
-#include "qCCClasses.hpp"
-#include "qCCStaticFunctions.hpp"
+#include "qCC_db/qCC_dbBootstrap.hpp"
+#include "qCC_io/qCC_ioBootstrap.hpp"
+#include "qCC_glWindow/qCC_glWindowBootstrap.hpp"
+
 
 namespace chaiscript
 {
 	namespace cloudCompare
 	{
-		namespace qCC
+		namespace libs
 		{
 
 			ModulePtr bootstrap(ModulePtr m = std::make_shared<Module>())
 			{
-				bootstrap_enum(m);
-				bootstrap_classes(m);
-				bootstrap_static_functions(m);
+				qCC_db::bootstrap(m);
+				qCC_io::bootstrap(m);
+				qCC_glWindow::bootstrap(m);
 				return m;
 			}
 		}
 	}
 }
 
-#endif CHAISCRIPTING_BOOTSTRAP_QCC_HPP
+#endif CHAISCRIPTING_BOOTSTRAP_LIBS_HPP

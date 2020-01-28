@@ -23,7 +23,13 @@
 #include <chaiscript/utility/utility.hpp>
 
 #include <CCGeom.h>
+#include <SquareMatrix.h>
 #include <BoundingBox.h>
+#include <GenericCloud.h>
+#include <PointCloud.h>
+#include <GenericIndexedCloudPersist.h>
+#include <ReferenceCloud.h>
+#include <ScalarField.h>
 
 namespace chaiscript
 {
@@ -65,6 +71,37 @@ namespace chaiscript
 					}
 					);
 				chaiscript::bootstrap::array<T[2]>("u_Array", m);
+				return m;
+			}
+
+			template<typename T>
+			ModulePtr bs_Tuple3Tpl(const std::string& shortCutName, ModulePtr m = std::make_shared<Module>())
+			{
+
+				chaiscript::utility::add_class<Tuple3Tpl<T>>(*m,
+					shortCutName,
+					{
+						chaiscript::constructor<Tuple3Tpl<T>()>(),
+						chaiscript::constructor<Tuple3Tpl<T>(T, T, T)>(),
+						chaiscript::constructor<Tuple3Tpl<T>(const T p[])>(),
+					},
+					{
+						{ fun(&Tuple3Tpl<T>::x), "x" },
+						{ fun(&Tuple3Tpl<T>::y), "y" },
+						{ fun(&Tuple3Tpl<T>::z), "z" },
+						{ fun(&Tuple3Tpl<T>::u), "u" },
+						//{ fun(static_cast<Tuple3Tpl<T> (Tuple3Tpl<T>::*)()const>(&Tuple3Tpl<T>::operator-() )), "-" }, // Inverse Operator
+						{ fun(static_cast<Tuple3Tpl<T> & (Tuple3Tpl<T>::*)(const Tuple3Tpl<T>&)>(&Tuple3Tpl<T>::operator+=)), "+=" },
+						{ fun(static_cast<Tuple3Tpl<T> & (Tuple3Tpl<T>::*)(const Tuple3Tpl<T>&)>(&Tuple3Tpl<T>::operator-=)), "-=" },
+						{ fun(static_cast<Tuple3Tpl<T> & (Tuple3Tpl<T>::*)(T)>(&Tuple3Tpl<T>::operator*=)), "*=" },
+						{ fun(static_cast<Tuple3Tpl<T> & (Tuple3Tpl<T>::*)(T)>(&Tuple3Tpl<T>::operator/=)), "/=" },
+						{ fun(static_cast<Tuple3Tpl<T>(Tuple3Tpl<T>::*)(const Tuple3Tpl<T>&)const>(&Tuple3Tpl<T>::operator+)), "+" },
+						{ fun(static_cast<Tuple3Tpl<T>(Tuple3Tpl<T>::*)(const Tuple3Tpl<T>&)const>(&Tuple3Tpl<T>::operator-)), "-" },
+						{ fun(static_cast<Tuple3Tpl<T>(Tuple3Tpl<T>::*)(T)const>(&Tuple3Tpl<T>::operator*)), "*" },
+						{ fun(static_cast<Tuple3Tpl<T>(Tuple3Tpl<T>::*)(T)const>(&Tuple3Tpl<T>::operator/)), "/" },
+					}
+					);
+				chaiscript::bootstrap::array<T[3]>("u_Array", m);
 				return m;
 			}
 
@@ -131,10 +168,247 @@ namespace chaiscript
 				return m;
 			}
 
+			template<typename T>
+			ModulePtr bs_Tuple4Tpl(const std::string& shortCutName, ModulePtr m = std::make_shared<Module>())
+			{
+
+				chaiscript::utility::add_class<Tuple4Tpl<T>>(*m,
+					shortCutName,
+					{
+						chaiscript::constructor<Tuple4Tpl<T>()>(),
+						chaiscript::constructor<Tuple4Tpl<T>(T, T, T, T)>(),
+						chaiscript::constructor<Tuple4Tpl<T>(const T p[])>(),
+					},
+					{
+						{ fun(&Tuple4Tpl<T>::x), "x" },
+						{ fun(&Tuple4Tpl<T>::y), "y" },
+						{ fun(&Tuple4Tpl<T>::z), "z" },
+						{ fun(&Tuple4Tpl<T>::z), "w" },
+						{ fun(&Tuple4Tpl<T>::u), "u" },
+						{ fun(static_cast<Tuple4Tpl<T> & (Tuple4Tpl<T>::*)(const Tuple4Tpl<T>&)>(&Tuple4Tpl<T>::operator=)), "=" },
+						//{ fun(static_cast<Tuple4Tpl<T> & (Tuple4Tpl<T>::*)(const Tuple4Tpl<T>&)>(&Tuple4Tpl<T>::operator-())), "-" },
+						{ fun(static_cast<Tuple4Tpl<T> & (Tuple4Tpl<T>::*)(const Tuple4Tpl<T>&)>(&Tuple4Tpl<T>::operator+=)), "+=" },
+						{ fun(static_cast<Tuple4Tpl<T> & (Tuple4Tpl<T>::*)(const Tuple4Tpl<T>&)>(&Tuple4Tpl<T>::operator-=)), "-=" },
+						{ fun(static_cast<Tuple4Tpl<T> & (Tuple4Tpl<T>::*)(T)>(&Tuple4Tpl<T>::operator*=)), "*=" },
+						{ fun(static_cast<Tuple4Tpl<T> & (Tuple4Tpl<T>::*)(T)>(&Tuple4Tpl<T>::operator/=)), "/=" },
+						{ fun(static_cast<Tuple4Tpl<T>(Tuple4Tpl<T>::*)(const Tuple4Tpl<T>&)const>(&Tuple4Tpl<T>::operator+)), "+" },
+						{ fun(static_cast<Tuple4Tpl<T>(Tuple4Tpl<T>::*)(const Tuple4Tpl<T>&)const>(&Tuple4Tpl<T>::operator-)), "-" },
+						{ fun(static_cast<Tuple4Tpl<T>(Tuple4Tpl<T>::*)(T)const>(&Tuple4Tpl<T>::operator*)), "*" },
+						{ fun(static_cast<Tuple4Tpl<T>(Tuple4Tpl<T>::*)(T)const>(&Tuple4Tpl<T>::operator/)), "/" },
+					}
+					);
+				chaiscript::bootstrap::array<T[4]>("u_Array", m);
+				return m;
+			}
 
 
 
-			ModulePtr boundingBox(ModulePtr m = std::make_shared<Module>())
+			template<typename T>
+			ModulePtr bs_SquareMatrixTpl(const std::string& shortCutName, ModulePtr m = std::make_shared<Module>())
+			{
+				using namespace CCLib;
+				chaiscript::utility::add_class<SquareMatrixTpl<T>>(*m,
+					shortCutName,
+					{
+						chaiscript::constructor<SquareMatrixTpl<T>()>(),
+						chaiscript::constructor<SquareMatrixTpl<T>(unsigned)>(),
+						chaiscript::constructor<SquareMatrixTpl<T>(const SquareMatrixTpl<T>&)>(),
+						chaiscript::constructor<SquareMatrixTpl<T>(const float p[], bool)>(),
+						chaiscript::constructor<SquareMatrixTpl<T>(const double p[], bool)>()
+					},
+					{
+						{ fun(&SquareMatrixTpl<T>::size), "size" },
+						{ fun(&SquareMatrixTpl<T>::isValid), "isValid" },
+						{ fun(&SquareMatrixTpl<T>::invalidate), "invalidate" },
+						{ fun(&SquareMatrixTpl<T>::m_values), "m_values" },
+						{ fun(&SquareMatrixTpl<T>::row), "row" },
+						{ fun(&SquareMatrixTpl<T>::setValue), "setValue" },
+						{ fun(&SquareMatrixTpl<T>::getValue), "getValue" },
+						{ fun(static_cast<SquareMatrixTpl<T> & (SquareMatrixTpl<T>::*)(const SquareMatrixTpl<T>&)>(&SquareMatrixTpl<T>::operator=)), "=" },
+						{ fun(static_cast<SquareMatrixTpl<T>(SquareMatrixTpl<T>::*)(const SquareMatrixTpl<T>&)const>(&SquareMatrixTpl<T>::operator+)), "+" },
+						{ fun(static_cast<const SquareMatrixTpl<T> & (SquareMatrixTpl<T>::*)(const SquareMatrixTpl<T>&)>(&SquareMatrixTpl<T>::operator+=)), "+=" },
+						{ fun(static_cast<SquareMatrixTpl<T>(SquareMatrixTpl<T>::*)(const SquareMatrixTpl<T>&)const>(&SquareMatrixTpl<T>::operator-)), "-" },
+						{ fun(static_cast<const SquareMatrixTpl<T> & (SquareMatrixTpl<T>::*)(const SquareMatrixTpl<T>&)>(&SquareMatrixTpl<T>::operator-=)), "-=" },
+						{ fun(static_cast<SquareMatrixTpl<T>(SquareMatrixTpl<T>::*)(const const SquareMatrixTpl<T>&)const>(&SquareMatrixTpl<T>::operator*)), "*" },
+						{ fun(static_cast<CCVector3(SquareMatrixTpl<T>::*)(const CCVector3&)const>(&SquareMatrixTpl<T>::operator*)), "*" },
+						{ fun(static_cast<CCVector3d(SquareMatrixTpl<T>::*)(const CCVector3d&)const>(&SquareMatrixTpl<T>::operator*)), "*" },
+						{ fun(static_cast<const SquareMatrixTpl<T> & (SquareMatrixTpl<T>::*)(const SquareMatrixTpl<T>&)>(&SquareMatrixTpl<T>::operator*=)), "*=" },
+						{ fun(static_cast<void(SquareMatrixTpl<T>::*)(const float in[], float out[])const>(&SquareMatrixTpl<T>::apply)), "apply" },
+						{ fun(static_cast<void(SquareMatrixTpl<T>::*)(const double in[], double out[])const>(&SquareMatrixTpl<T>::apply)), "apply" },
+						{ fun(static_cast<void(SquareMatrixTpl<T>::*)(const double in[], float out[])const>(&SquareMatrixTpl<T>::apply)), "apply" },
+						{ fun(static_cast<void(SquareMatrixTpl<T>::*)(const float in[], double out[])const>(&SquareMatrixTpl<T>::apply)), "apply" },
+						{ fun(&SquareMatrixTpl<T>::transpose), "transpose" },
+						{ fun(&SquareMatrixTpl<T>::transposed), "transposed" },
+						{ fun(&SquareMatrixTpl<T>::clear), "clear" },
+						{ fun(&SquareMatrixTpl<T>::inv), "inv" },
+						{ fun(&SquareMatrixTpl<T>::print), "print" },
+						{ fun(&SquareMatrixTpl<T>::toIdentity), "toIdentity" },
+						{ fun(&SquareMatrixTpl<T>::scale), "scale" },
+						{ fun(&SquareMatrixTpl<T>::trace), "trace" },
+						{ fun(&SquareMatrixTpl<T>::computeDet), "computeDet" },
+						{ fun(static_cast<void(SquareMatrixTpl<T>::*)(const float q[])>(&SquareMatrixTpl<T>::initFromQuaternion)), "initFromQuaternion" },
+						{ fun(static_cast<void(SquareMatrixTpl<T>::*)(const double q[])>(&SquareMatrixTpl<T>::initFromQuaternion)), "initFromQuaternion" },
+						{ fun(&SquareMatrixTpl<T>::toQuaternion), "toQuaternion" },
+						{ fun(&SquareMatrixTpl<T>::deltaDeterminant), "deltaDeterminant" },
+						{ fun(static_cast<void(SquareMatrixTpl<T>::*)(float M16f[])const>(&SquareMatrixTpl<T>::toGlMatrix)), "toGlMatrix" },
+						{ fun(static_cast<void(SquareMatrixTpl<T>::*)(double M16d[])const>(&SquareMatrixTpl<T>::toGlMatrix)), "toGlMatrix" },
+
+
+					}
+					);
+				return m;
+			}
+
+			template<typename T>
+			ModulePtr bs_PointCloudTpl(const std::string& shortCutName, ModulePtr m = std::make_shared<Module>())
+			{
+				using namespace CCLib;
+				chaiscript::utility::add_class<PointCloudTpl<T>>(*m,
+					shortCutName,
+					{
+						chaiscript::constructor<PointCloudTpl<T>()>()						
+					},
+					{
+						{ fun(&PointCloudTpl<T>::size), "size" },
+						{ fun(&PointCloudTpl<T>::forEach), "forEach" },
+						{ fun(&PointCloudTpl<T>::getBoundingBox), "getBoundingBox" },
+						{ fun(&PointCloudTpl<T>::enableScalarField), "enableScalarField" },
+						{ fun(&PointCloudTpl<T>::isScalarFieldEnabled), "isScalarFieldEnabled" },
+						{ fun(&PointCloudTpl<T>::setPointScalarValue), "setPointScalarValue" },
+						{ fun(&PointCloudTpl<T>::getPointScalarValue), "getPointScalarValue" },
+						
+
+					}
+					);
+				return m;
+			}
+
+
+			ModulePtr bs_PointCloud(ModulePtr m = std::make_shared<Module>())
+			{
+				chaiscript::utility::add_class<CCLib::PointCloud>(*m,
+					"PointCloud",
+					{
+						chaiscript::constructor<CCLib::PointCloud()>()
+					},
+					{
+
+						{ fun(&CCLib::PointCloud::size), "size" },
+						{ fun(&CCLib::PointCloud::forEach), "forEach" },
+						{ fun(&CCLib::PointCloud::getBoundingBox), "getBoundingBox" },
+						{ fun(&CCLib::PointCloud::testVisibility), "testVisibility" },
+						{ fun(&CCLib::PointCloud::placeIteratorAtBeginning), "placeIteratorAtBeginning" },
+						{ fun(&CCLib::PointCloud::getNextPoint), "getNextPoint" },
+						{ fun(&CCLib::PointCloud::enableScalarField), "enableScalarField" },
+						{ fun(&CCLib::PointCloud::isScalarFieldEnabled), "isScalarFieldEnabled" },
+						{ fun(&CCLib::PointCloud::setPointScalarValue), "setPointScalarValue" },
+						{ fun(&CCLib::PointCloud::getPointScalarValue), "getPointScalarValue" },
+						{ fun(static_cast<const CCVector3*(CCLib::PointCloud::*)(unsigned index)const>(&CCLib::PointCloud::getPoint)), "getPoint" },
+						{ fun(static_cast<void(CCLib::PointCloud::*)(unsigned index, CCVector3 &)const>(&CCLib::PointCloud::getPoint)), "getPoint" },
+						{ fun(&CCLib::PointCloud::getPointPersistentPtr), "getPointPersistentPtr" }, //GenericIndexedCloudPersist
+						{ fun(&CCLib::PointCloud::resize), "resize" },
+						{ fun(&CCLib::PointCloud::reserve), "reserve" },
+						{ fun(&CCLib::PointCloud::reset), "reset" },
+						{ fun(&CCLib::PointCloud::addPoint), "addPoint" },
+						{ fun(&CCLib::PointCloud::invalidateBoundingBox), "invalidateBoundingBox" },
+						{ fun(&CCLib::PointCloud::getNumberOfScalarFields), "getNumberOfScalarFields" },
+						{ fun(&CCLib::PointCloud::getScalarField), "getScalarField" },
+						{ fun(&CCLib::PointCloud::getScalarFieldName), "getScalarFieldName" },
+						{ fun(&CCLib::PointCloud::getScalarFieldIndexByName), "getScalarFieldIndexByName" },
+						{ fun(&CCLib::PointCloud::getCurrentInScalarField), "getCurrentInScalarField" },
+						{ fun(&CCLib::PointCloud::getCurrentOutScalarField), "getCurrentOutScalarField" },
+						{ fun(&CCLib::PointCloud::setCurrentInScalarField), "setCurrentInScalarField" },
+						{ fun(&CCLib::PointCloud::getCurrentInScalarFieldIndex), "getCurrentInScalarFieldIndex" },
+						{ fun(&CCLib::PointCloud::setCurrentOutScalarField), "setCurrentOutScalarField" },
+						{ fun(&CCLib::PointCloud::getCurrentOutScalarFieldIndex), "getCurrentOutScalarFieldIndex" },
+						{ fun(&CCLib::PointCloud::setCurrentScalarField), "setCurrentScalarField" },
+						{ fun(&CCLib::PointCloud::addScalarField), "addScalarField" },
+						{ fun(&CCLib::PointCloud::renameScalarField), "renameScalarField" },
+						{ fun(&CCLib::PointCloud::deleteScalarField), "deleteScalarField" },
+						{ fun(&CCLib::PointCloud::deleteAllScalarFields), "deleteAllScalarFields" },
+						{ fun(&CCLib::PointCloud::capacity), "capacity" }
+					}
+				);
+				return m;
+			}
+
+			ModulePtr bs_ReferenceCloud(ModulePtr m = std::make_shared<Module>())
+			{
+				chaiscript::utility::add_class<CCLib::ReferenceCloud>(*m,
+					"ReferenceCloud",
+					{
+						chaiscript::constructor<CCLib::ReferenceCloud(CCLib::GenericIndexedCloudPersist*)>(),
+						chaiscript::constructor<CCLib::ReferenceCloud(const CCLib::ReferenceCloud&)>()
+					},
+					{
+
+						{ fun(&CCLib::ReferenceCloud::size), "size" },
+						{ fun(&CCLib::ReferenceCloud::forEach), "forEach" },
+						{ fun(&CCLib::ReferenceCloud::getBoundingBox), "getBoundingBox" },
+						{ fun(&CCLib::ReferenceCloud::testVisibility), "testVisibility" },
+						{ fun(&CCLib::ReferenceCloud::placeIteratorAtBeginning), "placeIteratorAtBeginning" },
+						{ fun(&CCLib::ReferenceCloud::getNextPoint), "getNextPoint" },
+						{ fun(&CCLib::ReferenceCloud::enableScalarField), "enableScalarField" },
+						{ fun(&CCLib::ReferenceCloud::isScalarFieldEnabled), "isScalarFieldEnabled" },
+						{ fun(&CCLib::ReferenceCloud::setPointScalarValue), "setPointScalarValue" },
+						{ fun(&CCLib::ReferenceCloud::getPointScalarValue), "getPointScalarValue" },
+						{ fun(static_cast<const CCVector3 * (CCLib::ReferenceCloud::*)(unsigned index)const>(&CCLib::ReferenceCloud::getPoint)), "getPoint" },
+						{ fun(static_cast<void(CCLib::ReferenceCloud::*)(unsigned index, CCVector3&)const>(&CCLib::ReferenceCloud::getPoint)), "getPoint" },
+						{ fun(&CCLib::ReferenceCloud::getPointPersistentPtr), "getPointPersistentPtr" }, //GenericIndexedCloudPersist
+						{ fun(&CCLib::ReferenceCloud::resize), "resize" },
+						{ fun(&CCLib::ReferenceCloud::reserve), "reserve" },
+						{ fun(&CCLib::ReferenceCloud::invalidateBoundingBox), "invalidateBoundingBox" },						
+						{ fun(&CCLib::ReferenceCloud::getPointGlobalIndex), "getPointGlobalIndex" },
+						{ fun(&CCLib::ReferenceCloud::getCurrentPointCoordinates), "getCurrentPointCoordinates" },
+						{ fun(&CCLib::ReferenceCloud::getCurrentPointGlobalIndex), "getCurrentPointGlobalIndex" },
+						{ fun(&CCLib::ReferenceCloud::getCurrentPointScalarValue), "getCurrentPointScalarValue" },
+						{ fun(&CCLib::ReferenceCloud::setCurrentPointScalarValue), "setCurrentPointScalarValue" },
+						{ fun(&CCLib::ReferenceCloud::forwardIterator), "forwardIterator" },
+						{ fun(&CCLib::ReferenceCloud::clear), "clear" },
+						{ fun(static_cast<bool(CCLib::ReferenceCloud::*)(unsigned)>(&CCLib::ReferenceCloud::addPointIndex)), "addPointIndex" },
+						{ fun(static_cast<bool(CCLib::ReferenceCloud::*)(unsigned,unsigned)>(&CCLib::ReferenceCloud::addPointIndex)), "addPointIndex" },
+						{ fun(&CCLib::ReferenceCloud::setPointIndex), "setPointIndex" },
+						{ fun(&CCLib::ReferenceCloud::capacity), "capacity" },
+						{ fun(&CCLib::ReferenceCloud::swap), "swap" },
+						{ fun(&CCLib::ReferenceCloud::removeCurrentPointGlobalIndex), "removeCurrentPointGlobalIndex" },
+						{ fun(&CCLib::ReferenceCloud::removePointGlobalIndex), "removePointGlobalIndex" },
+						{ fun(static_cast<CCLib::GenericIndexedCloudPersist*(CCLib::ReferenceCloud::*)()>(&CCLib::ReferenceCloud::getAssociatedCloud)), "getAssociatedCloud" },
+						{ fun(static_cast<const CCLib::GenericIndexedCloudPersist*(CCLib::ReferenceCloud::*)()const>(&CCLib::ReferenceCloud::getAssociatedCloud)), "getAssociatedCloud" },
+						{ fun(&CCLib::ReferenceCloud::setAssociatedCloud), "setAssociatedCloud" },
+						{ fun(&CCLib::ReferenceCloud::add), "add" },
+					}
+					);
+				return m;
+			}
+
+			ModulePtr bs_ScalarField(ModulePtr m = std::make_shared<Module>())
+			{
+				m->add(chaiscript::user_type<CCLib::ScalarField>(), "ScalarField");
+				//m->add(chaiscript::constructor<CCLib::ScalarField(const char*)>());
+				//m->add(chaiscript::constructor<CCLib::ScalarField(const CCLib::ScalarField&)>());
+				m->add(fun(&CCLib::ScalarField::setName), "setName");
+				m->add(fun(&CCLib::ScalarField::getName), "getName");
+				m->add(fun(&CCLib::ScalarField::NaN), "NaN");
+				m->add(fun(&CCLib::ScalarField::computeMeanAndVariance), "computeMeanAndVariance");
+				m->add(fun(&CCLib::ScalarField::computeMinAndMax), "computeMinAndMax");
+				m->add(fun(&CCLib::ScalarField::ValidValue), "ValidValue");
+				m->add(fun(&CCLib::ScalarField::flagValueAsInvalid), "flagValueAsInvalid");
+				m->add(fun(&CCLib::ScalarField::getMin), "getMin");
+				m->add(fun(&CCLib::ScalarField::getMax), "getMax");
+				m->add(fun(&CCLib::ScalarField::fill), "fill");
+				m->add(fun(&CCLib::ScalarField::reserveSafe), "reserveSafe");
+				m->add(fun(&CCLib::ScalarField::resizeSafe), "resizeSafe");
+				m->add(fun(static_cast<ScalarType & (CCLib::ScalarField::*)(std::size_t)>(&CCLib::ScalarField::getValue)), "getValue");
+				m->add(fun(static_cast<const ScalarType & (CCLib::ScalarField::*)(std::size_t)const>(&CCLib::ScalarField::getValue)), "getValue");
+				m->add(fun(&CCLib::ScalarField::setValue), "setValue");
+				m->add(fun(&CCLib::ScalarField::addElement), "addElement");
+				m->add(fun(&CCLib::ScalarField::currentSize), "currentSize");
+				m->add(fun(&CCLib::ScalarField::swap), "swap");
+				
+				return m;
+			}
+
+			ModulePtr bs_boundingBox(ModulePtr m = std::make_shared<Module>())
 			{
 				chaiscript::utility::add_class<CCLib::BoundingBox>(*m,
 					"BoundingBox",
@@ -143,10 +417,28 @@ namespace chaiscript
 						chaiscript::constructor<CCLib::BoundingBox(const CCVector3&, const CCVector3&)>()
 					},
 					{
+						{ fun(static_cast<CCLib::BoundingBox(CCLib::BoundingBox::*)(const CCLib::BoundingBox&)const>(&CCLib::BoundingBox::operator+)), "+" },
+						{ fun(static_cast<const CCLib::BoundingBox & (CCLib::BoundingBox::*)(const CCLib::BoundingBox&)>(&CCLib::BoundingBox::operator+=)), "+=" },
+						{ fun(static_cast<const CCLib::BoundingBox & (CCLib::BoundingBox::*)(const CCVector3&)>(&CCLib::BoundingBox::operator+=)), "+=" },
+						{ fun(static_cast<const CCLib::BoundingBox & (CCLib::BoundingBox::*)(const CCVector3&)>(&CCLib::BoundingBox::operator-=)), "-=" },
+						{ fun(static_cast<const CCLib::BoundingBox & (CCLib::BoundingBox::*)(PointCoordinateType)>(&CCLib::BoundingBox::operator*=)), "*=" },
+						//{ fun(static_cast<const CCLib::BoundingBox & (CCLib::BoundingBox::*)(const SquareMatrix&)>(&CCLib::BoundingBox::operator*=)), "*=" },
 						{ fun(&CCLib::BoundingBox::clear), "clear" },
 						{ fun(&CCLib::BoundingBox::add), "add" },
+						{ fun(static_cast<const CCVector3 & (CCLib::BoundingBox::*)()const>(&CCLib::BoundingBox::minCorner)), "minCorner" },
+						{ fun(static_cast<const CCVector3 & (CCLib::BoundingBox::*)()const>(&CCLib::BoundingBox::maxCorner)), "maxCorner" },
+						{ fun(static_cast<CCVector3 & (CCLib::BoundingBox::*)()>(&CCLib::BoundingBox::minCorner)), "minCorner" },
+						{ fun(static_cast<CCVector3 & (CCLib::BoundingBox::*)()>(&CCLib::BoundingBox::maxCorner)), "maxCorner" },
 						{ fun(&CCLib::BoundingBox::getCenter), "getCenter" },
-						{ fun(&CCLib::BoundingBox::getDiagVec), "getDiagVec" }
+						{ fun(&CCLib::BoundingBox::getDiagVec), "getDiagVec" },
+						{ fun(&CCLib::BoundingBox::getDiagNormd), "getDiagNormd" },
+						{ fun(&CCLib::BoundingBox::getMinBoxDim), "getMinBoxDim" },
+						{ fun(&CCLib::BoundingBox::getMaxBoxDim), "getMaxBoxDim" },
+						{ fun(&CCLib::BoundingBox::computeVolume), "computeVolume" },
+						{ fun(&CCLib::BoundingBox::setValidity), "setValidity" },
+						{ fun(&CCLib::BoundingBox::isValid), "isValid" },
+						{ fun(&CCLib::BoundingBox::minDistTo), "minDistTo" },
+						{ fun(&CCLib::BoundingBox::contains), "contains" }
 					}
 					);
 				return m;
@@ -157,13 +449,27 @@ namespace chaiscript
 			{
 				bs_Vector2Tpl<PointCoordinateType>("CCVector2", m);
 				bs_Vector2Tpl<double>("CCVector2d", m);
-				bs_Vector2Tpl<int>("CCVector2i", m); 
+				bs_Vector2Tpl<int>("CCVector2i", m);
+
+				bs_Tuple3Tpl<unsigned char>("Tuple3ub", m);
+				bs_Tuple3Tpl<short>("Tuple3s", m);
+				bs_Tuple3Tpl<int>("Tuple3i", m);
+				bs_Tuple3Tpl<unsigned int>("Tuple3ui", m);
 
 				bs_Vector3Tpl<PointCoordinateType>("CCVector3", m);
 				bs_Vector3Tpl<float>("CCVector3f", m);
 				bs_Vector3Tpl<double>("CCVector3d", m);
 
-				boundingBox(m);
+				bs_SquareMatrixTpl<PointCoordinateType>("SquareMatrix", m);
+				bs_SquareMatrixTpl<float>("SquareMatrixf", m);
+				bs_SquareMatrixTpl<double>("SquareMatrixd", m);
+
+				bs_PointCloudTpl<CCLib::GenericIndexedCloudPersist>("PointCloudTpl", m);
+
+				bs_PointCloud(m);
+				bs_ReferenceCloud(m);
+				bs_ScalarField(m);
+				bs_boundingBox(m);
 				return m;
 			}
 		}

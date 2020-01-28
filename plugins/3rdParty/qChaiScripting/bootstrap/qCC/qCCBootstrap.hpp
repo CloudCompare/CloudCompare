@@ -23,6 +23,7 @@
 
 #include <chaiscript/chaiscript.hpp>
 #include "qCCEnums.hpp"
+#include "qCCClasses.hpp"
 
 namespace chaiscript
 {
@@ -34,6 +35,7 @@ namespace chaiscript
 			ModulePtr bootstrap(ModulePtr m = std::make_shared<Module>())
 			{
 				bootstrap_enum(m);
+				bootstrap_classes(m);
 				return m;
 			}
 		}

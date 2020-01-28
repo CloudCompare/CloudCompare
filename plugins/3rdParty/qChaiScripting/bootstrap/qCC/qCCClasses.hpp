@@ -40,6 +40,7 @@ namespace chaiscript
 			ModulePtr bs_ccMainAppInterface(ModulePtr m = std::make_shared<Module>())
 			{
 				m->add(chaiscript::user_type<ccMainAppInterface>(), "ccMainAppInterface");
+				m->add(fun([](ccMainAppInterface* ma, ccHObject* p1) {ma->addToDB(p1); }), "addToDB");
 				m->add(fun([](ccMainAppInterface* ma, ccHObject* p1, bool b1) {ma->addToDB(p1, b1); }), "addToDB");
 				m->add(fun([](ccMainAppInterface* ma, ccHObject* p1, bool b1, bool b2) {ma->addToDB(p1, b1, b2); }), "addToDB");
 				m->add(fun([](ccMainAppInterface* ma, ccHObject* p1, bool b1, bool b2, bool b3) {ma->addToDB(p1, b1, b2, b3); }), "addToDB");
@@ -74,9 +75,9 @@ namespace chaiscript
 				m->add(fun(&ccMainAppInterface::forceConsoleDisplay), "forceConsoleDisplay");
 				m->add(fun(&ccMainAppInterface::dbRootObject), "dbRootObject");
 				m->add(fun(&ccMainAppInterface::redrawAll), "redrawAll");
-				m->add(fun([](ccMainAppInterface* ma) { return ma->redrawAll(); }), "redrawAll");
+				m->add(fun([](ccMainAppInterface* ma) { ma->redrawAll(); }), "redrawAll");
 				m->add(fun(&ccMainAppInterface::refreshAll), "refreshAll");
-				m->add(fun([](ccMainAppInterface* ma) { return ma->refreshAll(); }), "refreshAll");
+				m->add(fun([](ccMainAppInterface* ma) { ma->refreshAll(); }), "refreshAll");
 				m->add(fun(&ccMainAppInterface::enableAll), "enableAll");
 				m->add(fun(&ccMainAppInterface::disableAll), "disableAll");
 				m->add(fun(&ccMainAppInterface::disableAllBut), "disableAllBut");

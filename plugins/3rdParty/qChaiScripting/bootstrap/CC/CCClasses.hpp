@@ -30,6 +30,8 @@
 #include <GenericIndexedCloudPersist.h>
 #include <ReferenceCloud.h>
 #include <ScalarField.h>
+#include <GenericMesh.h>
+#include <GenericIndexedMesh.h>
 
 namespace chaiscript
 {
@@ -444,6 +446,55 @@ namespace chaiscript
 				return m;
 			}
 
+			ModulePtr bs_GenericMesh(ModulePtr m = std::make_shared<Module>())
+			{
+				using namespace CCLib;
+				m->add(chaiscript::user_type<GenericMesh>(), "GenericMesh");
+				
+				m->add(fun(&GenericMesh::size), "size");
+				m->add(fun(&GenericMesh::forEach), "forEach");
+				m->add(fun(&GenericMesh::getBoundingBox), "getBoundingBox");
+				m->add(fun(&GenericMesh::placeIteratorAtBeginning), "placeIteratorAtBeginning");
+				m->add(fun(&GenericMesh::_getNextTriangle), "_getNextTriangle");
+
+				return m;
+			}
+
+			ModulePtr bs_VerticesIndexes(ModulePtr m = std::make_shared<Module>())
+			{
+				using namespace CCLib;
+				m->add(chaiscript::user_type<VerticesIndexes>(), "VerticesIndexes");
+				m->add(chaiscript::constructor<VerticesIndexes()>(), "VerticesIndexes");
+				m->add(chaiscript::constructor<VerticesIndexes(unsigned,unsigned,unsigned)>(), "VerticesIndexes");
+				m->add(fun(&VerticesIndexes::i1), "i1");
+				m->add(fun(&VerticesIndexes::i2), "i2");
+				m->add(fun(&VerticesIndexes::i3), "i3");
+				m->add(fun(&VerticesIndexes::i), "i");
+				chaiscript::bootstrap::array<unsigned[3]>("i_Array", m);
+				return m;
+			}
+
+			ModulePtr bs_GenericIndexedMesh(ModulePtr m = std::make_shared<Module>())
+			{
+				using namespace CCLib;
+				m->add(chaiscript::user_type<GenericIndexedMesh>(), "GenericIndexedMesh");
+
+				m->add(fun(&GenericIndexedMesh::size), "size");
+				m->add(fun(&GenericIndexedMesh::forEach), "forEach");
+				m->add(fun(&GenericIndexedMesh::getBoundingBox), "getBoundingBox");
+				m->add(fun(&GenericIndexedMesh::placeIteratorAtBeginning), "placeIteratorAtBeginning");
+				m->add(fun(&GenericIndexedMesh::_getNextTriangle), "_getNextTriangle");
+				m->add(fun(&GenericIndexedMesh::_getTriangle), "_getTriangle");
+				m->add(fun(&GenericIndexedMesh::getTriangleVertIndexes), "getTriangleVertIndexes");
+				m->add(fun(&GenericIndexedMesh::getTriangleVertices), "getTriangleVertices");
+				m->add(fun(&GenericIndexedMesh::getNextTriangleVertIndexes), "getNextTriangleVertIndexes");
+				return m;
+			}
+
+			
+
+
+
 
 			ModulePtr bootstrap_classes(ModulePtr m = std::make_shared<Module>())
 			{
@@ -470,6 +521,10 @@ namespace chaiscript
 				bs_ReferenceCloud(m);
 				bs_ScalarField(m);
 				bs_boundingBox(m);
+				bs_GenericMesh(m);
+				bs_VerticesIndexes(m);
+				bs_GenericIndexedMesh(m);
+
 				return m;
 			}
 		}

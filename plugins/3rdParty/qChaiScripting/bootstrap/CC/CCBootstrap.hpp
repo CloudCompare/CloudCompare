@@ -24,6 +24,7 @@
 #include <chaiscript/chaiscript.hpp>
 #include "CCEnums.hpp"
 #include "CCClasses.hpp"
+#include "CCStaticFunctions.hpp"
 
 namespace chaiscript
 {
@@ -36,6 +37,7 @@ namespace chaiscript
 			{
 				bootstrap_enum(m);
 				bootstrap_classes(m);
+				bootstrap_static_functions(m);
 				return m;
 			}
 		}

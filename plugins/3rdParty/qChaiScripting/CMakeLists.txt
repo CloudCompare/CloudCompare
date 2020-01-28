@@ -6,7 +6,7 @@ if ( PLUGIN_STANDARD_QCHAISCRIPTING )
 	
     # Name the plugin
     project( QCHAISCRIPTING )
-    add_definitions(-DCHAISCRIPT_NO_THREADS) #avoiding a crash that happens when destroying chai with threads enabled
+    #add_definitions(-DCHAISCRIPT_NO_THREADS) #avoiding a crash that happens when destroying chai with threads enabled
     
     add_subdirectory(cmake)
     include_directories(${chaiscript_SOURCE_DIR}/include)

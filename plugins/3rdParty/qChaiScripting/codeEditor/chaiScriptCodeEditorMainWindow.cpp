@@ -43,6 +43,7 @@ chaiScriptCodeEditorMainWindow::chaiScriptCodeEditorMainWindow() : Ui::chaiScrip
 	updateMenus();
 
 	readSettings();
+	newFile();
 }
 
 void chaiScriptCodeEditorMainWindow::closeEvent(QCloseEvent* event)
@@ -54,6 +55,7 @@ void chaiScriptCodeEditorMainWindow::closeEvent(QCloseEvent* event)
 	}
 	else 
 	{
+		emit destroy_chai();
 		writeSettings();
 		event->accept();
 	}

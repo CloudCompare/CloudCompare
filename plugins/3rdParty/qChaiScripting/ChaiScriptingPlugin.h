@@ -43,7 +43,9 @@ private:
 	void executionCalled(const std::string& evalStatement);
 	void resetToDefaultChaiState();
 	void saveChaiState();
+	void destroyChai();
 	void resetToSavedChaiState();
+	std::string chaiSystemDump();
 
 	//! Default action
 	QAction* m_action;

@@ -59,6 +59,7 @@ signals:
 	void reset_Chai_to_initial_state();
 	void save_Chai_state();
 	void reset_chai_to_last_save();
+	void destroy_chai();
 
 
 protected slots:

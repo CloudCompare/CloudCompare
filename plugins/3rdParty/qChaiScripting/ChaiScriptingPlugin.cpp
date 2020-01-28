@@ -30,8 +30,13 @@
 
 #include "chaiScriptCodeEditorMainWindow.h"
 
+template<typename T, typename... Args>
+std::unique_ptr<T> make_unique(Args&&... args)
+{
+	return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
 
-chaiscript::ChaiScript* chai;
+std::unique_ptr<chaiscript::ChaiScript> chai;
 chaiscript::ModulePtr mqCCLib = chaiscript::cloudCompare::qCC::bootstrap();
 chaiscript::ModulePtr mCCLib = chaiscript::cloudCompare::CC::bootstrap();
 
@@ -52,11 +57,11 @@ ChaiScriptingPlugin::ChaiScriptingPlugin( QObject *parent )
 	, m_action( nullptr )
 {
 	cseMW = chaiScriptCodeEditorMainWindow::TheInstance();
-	setupChaiScriptEngine();
 	connect(cseMW, &chaiScriptCodeEditorMainWindow::executionCalled, this, &ChaiScriptingPlugin::executionCalled);
 	connect(cseMW, &chaiScriptCodeEditorMainWindow::reset_Chai_to_initial_state, this, &ChaiScriptingPlugin::resetToDefaultChaiState);
 	connect(cseMW, &chaiScriptCodeEditorMainWindow::save_Chai_state, this, &ChaiScriptingPlugin::saveChaiState);
 	connect(cseMW, &chaiScriptCodeEditorMainWindow::reset_chai_to_last_save, this, &ChaiScriptingPlugin::resetToSavedChaiState);
+	connect(cseMW, &chaiScriptCodeEditorMainWindow::destroy_chai, this, &ChaiScriptingPlugin::destroyChai);
 }
 
 bool throws_exception(const std::function<void()>& f)
@@ -94,23 +99,21 @@ void ChaiScriptingPlugin::setupChaiScriptEngine()
 	{
 		if (!chai)
 		{
-			chai = new ChaiScript(chaiscript::Std_Lib::library());
+			chai = std::make_unique<chaiscript::ChaiScript>(chaiscript::Std_Lib::library());;
 			
 			chai->add(mCCLib);
 			chai->add(mqCCLib);
 			chai->add(chaiscript::type_conversion<std::string, QString>([](const std::string& str) {return QString::fromStdString(str); }));
 			chai->add(fun([](const std::string& str) {return QString::fromUtf8(str.c_str()); }), "to_QString");
 			chai->add(chaiscript::vector_conversion<std::vector<int>>());
+			chai->add(chaiscript::vector_conversion<std::vector<std::string>>());
+
 			chai->add(chaiscript::map_conversion<std::map<std::string, int>>());
 
 			chai->add_global(var(this), "chaiScriptingPlugin");
 			chai->add_global(var(m_app), "m_app");
-			chai->add(fun(&ccMainAppInterface::addToDB), "addToDB");
-			chai->add(fun([=]() { return m_app->haveSelection(); }), "haveSelection");
-			//chai->add(fun([=]() { return m_app->addToDB(); }), "haveSelection");
-			
+
 			chai->add(fun(&ChaiScriptingPlugin::dispToConsole), "dispToConsole");
-			chai->add(chaiscript::user_type<ccMainAppInterface>(), "ccMainAppInterface");
 			chai->add(chaiscript::user_type<QString>(), "QString");
 			chai->add(chaiscript::fun(&throws_exception), "throws_exception");
 			chai->add(chaiscript::fun(&get_eval_error), "get_eval_error");
@@ -197,6 +200,39 @@ void ChaiScriptingPlugin::resetToSavedChaiState()
 	}
 }
 
+std::string ChaiScriptingPlugin::chaiSystemDump()
+{
+	std::function<void()> cs_dump_system = chai->eval<std::function<void()> >("dump_system");
+
+	std::stringstream buffer;
+	std::streambuf* old = std::cout.rdbuf(buffer.rdbuf());
+	cs_dump_system(); // call the ChaiScript function dump_system, from C++
+	std::string text = buffer.str();
+	std::cout.rdbuf(old);
+	return text;
+}
+
+
+// Work around to allow multi threading on windows
+// destroyChai must be called prior to its the class destructor
+// This is because the Thread_Storage object is destructed before 
+// the final ChaiScript object is destructed.
+void ChaiScriptingPlugin::destroyChai() 
+{
+	if (chai)
+	{
+		try
+		{
+			chaiscript::ChaiScript* mp = chai.release();
+			delete mp;
+		}
+		catch (...)
+		{
+
+		}
+	}
+}
+
 QList<QAction *> ChaiScriptingPlugin::getActions()
 {
 	if ( !m_action )
@@ -214,6 +250,10 @@ QList<QAction *> ChaiScriptingPlugin::getActions()
 
 void ChaiScriptingPlugin::openScriptEditor()
 {
+	if (!chai)
+	{
+		setupChaiScriptEngine();
+	}
 	if (!cseMW)
 	{
 		cseMW = chaiScriptCodeEditorMainWindow::TheInstance();
@@ -224,17 +264,13 @@ void ChaiScriptingPlugin::openScriptEditor()
 		return;
 	}
 	cseMW->show();
+	cseMW->raise();
+	cseMW->activateWindow();
+
 }
 
 
 ChaiScriptingPlugin::~ChaiScriptingPlugin()
 {
-	try
-	{
-		delete chai;
-	}
-	catch (...)
-	{
-			
-	}
+	
 }

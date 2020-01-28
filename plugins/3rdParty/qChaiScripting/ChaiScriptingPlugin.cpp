@@ -25,8 +25,9 @@
 #include <chaiscript/dispatchkit/bootstrap_stl.hpp>
 #include <chaiscript/dispatchkit/function_call.hpp>
 
-#include "bootstrap/qCC/qCCBootstrap.hpp"
-#include "bootstrap/CC/CCBootstrap.hpp"
+//#include "bootstrap/qCC/qCCBootstrap.hpp"
+//#include "bootstrap/CC/CCBootstrap.hpp"
+#include "bootstrap/systemBootstrap.hpp"
 
 #include "chaiScriptCodeEditorMainWindow.h"
 
@@ -37,8 +38,10 @@ std::unique_ptr<T> make_unique(Args&&... args)
 }
 
 std::unique_ptr<chaiscript::ChaiScript> chai;
-chaiscript::ModulePtr mqCCLib = chaiscript::cloudCompare::qCC::bootstrap();
-chaiscript::ModulePtr mCCLib = chaiscript::cloudCompare::CC::bootstrap();
+//chaiscript::ModulePtr mqCCLib = chaiscript::cloudCompare::qCC::bootstrap();
+//chaiscript::ModulePtr mlibsLib = chaiscript::cloudCompare::libs::bootstrap();
+//chaiscript::ModulePtr mCCLib = chaiscript::cloudCompare::CC::bootstrap();
+chaiscript::ModulePtr systemBootstrap = chaiscript::cloudCompare::bootstrapSystem::bootstrap();
 
 	/// \brief Represents the current state of the ChaiScript system. State and be saved and restored
 	/// \warning State object does not contain the user defined type conversions of the engine. They
@@ -101,8 +104,9 @@ void ChaiScriptingPlugin::setupChaiScriptEngine()
 		{
 			chai = std::make_unique<chaiscript::ChaiScript>(chaiscript::Std_Lib::library());;
 			
-			chai->add(mCCLib);
-			chai->add(mqCCLib);
+			/*chai->add(mCCLib);
+			chai->add(mqCCLib);*/
+			chai->add(systemBootstrap);
 			chai->add(chaiscript::type_conversion<std::string, QString>([](const std::string& str) {return QString::fromStdString(str); }));
 			chai->add(fun([](const std::string& str) {return QString::fromUtf8(str.c_str()); }), "to_QString");
 			chai->add(chaiscript::vector_conversion<std::vector<int>>());

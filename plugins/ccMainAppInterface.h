@@ -92,6 +92,16 @@ public:
 							bool checkDimensions = false,
 							bool autoRedraw = true) = 0;
 
+
+	//! Tries to load several files (and then pushes them into main DB)
+	/** \param filenames list of all filenames
+		\param fileFilter selected file filter (i.e. type)
+		\param destWin destination window (0 = active one)
+	**/
+	virtual void addToDB(const QStringList& filenames,
+		QString fileFilter = QString(),
+		ccGLWindow* destWin = nullptr) = 0;
+
 	//! Removes an entity from main db tree
 	/** Object is automatically detached from its parent.
 		\param obj entity

@@ -118,9 +118,9 @@ public:
 		\param fileFilter selected file filter (i.e. type)
 		\param destWin destination window (0 = active one)
 	**/
-	virtual void addToDB( const QStringList& filenames,
+	void addToDB( const QStringList& filenames,
 						  QString fileFilter = QString(),
-						  ccGLWindow* destWin = nullptr );
+						  ccGLWindow* destWin = nullptr ) override;
 	
 	//inherited from ccMainAppInterface
 	void addToDB( ccHObject* obj,

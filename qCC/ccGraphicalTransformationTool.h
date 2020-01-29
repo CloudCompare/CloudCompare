@@ -62,6 +62,7 @@ public:
 	//! Sets the rotation center
 	void setRotationCenter(CCVector3d& center);
 
+	//! Calculates the transform for translating along an arbitrary vector
 	ccGLMatrix getArbitraryVectorTranslationTransform(const CCVector3& vec);
 
 
@@ -79,10 +80,13 @@ protected slots:
 	//! Pauses the transformation mode
 	void pause(bool);
 
-	void advancedModeChanged(int);
+	//! Togggles the visibility of the advanced mode ui
+	void advModeVisible(bool state);
 
-	bool setAdvancedTranslationTransform();
+	//! Updates the transform for advanced mode when translate ref changed
+	void advTranslateRefChanged(int index);
 
+	//! Updates the top center display message according to the mode
 	void updateDisplayMessage();
 
 	//! Applies translation (graphically) to selected entities
@@ -102,6 +106,12 @@ protected:
 	//! Updates all selected entities GL transformation matrices
 	void updateAllGLTransformations();
 
+	//! Sets Advanced translate/rotation mode reference items
+	void populateAdvModeItems();
+
+	//! Sets the transform used in advanced translate/rotate mode
+	bool setAdvancedTranslationTransform(ccHObject* translateRef);
+
 	//! List of entities to be transformed
 	ccHObject m_toTransform;
 
@@ -111,12 +121,16 @@ protected:
 	//! Current translation
 	CCVector3d m_translation;
 
+	//! Transform used in advanced translate/rotate mode
 	ccGLMatrix m_advancedTranslationTransform;
 
 	//! Rotation center
 	/** The rotation center is actually the center of gravity of the selected 'entities'
 	**/
 	CCVector3d m_rotationCenter;
+
+	//! Planes and line segments found in the dbtree for adv transate/rotate
+	ccHObject::Container m_planesAndLineSegments;
 };
 
 #endif //CC_GRAPHICAL_TRANSFORMATION_TOOL_HEADER

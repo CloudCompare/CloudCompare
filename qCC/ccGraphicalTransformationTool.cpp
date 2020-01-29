@@ -28,6 +28,7 @@
 #include <ccMesh.h>
 #include <ccPolyline.h>
 #include <ccPlane.h>
+#include <ccDBRoot.h>
 
 
 ccGraphicalTransformationTool::ccGraphicalTransformationTool(QWidget* parent)
@@ -41,13 +42,16 @@ ccGraphicalTransformationTool::ccGraphicalTransformationTool(QWidget* parent)
 	connect(okButton,       &QAbstractButton::clicked,	this, &ccGraphicalTransformationTool::apply);
 	connect(razButton,	  &QAbstractButton::clicked,	this, &ccGraphicalTransformationTool::reset);
 	connect(cancelButton,   &QAbstractButton::clicked,	this, &ccGraphicalTransformationTool::cancel);
-	connect(advComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &ccGraphicalTransformationTool::advancedModeChanged);
+	connect(advPushButton, &QPushButton::toggled, this, &ccGraphicalTransformationTool::advModeVisible);
+	connect(translateComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &ccGraphicalTransformationTool::advTranslateRefChanged);
 	
 	//add shortcuts
 	addOverridenShortcut(Qt::Key_Space); //space bar for the "pause" button
 	addOverridenShortcut(Qt::Key_Escape); //escape key for the "cancel" button
 	addOverridenShortcut(Qt::Key_Return); //return key for the "ok" button
 	connect(this, &ccOverlayDialog::shortcutTriggered, this, &ccGraphicalTransformationTool::onShortcutTriggered);
+
+	advModeVisible(false);
 }
 
 ccGraphicalTransformationTool::~ccGraphicalTransformationTool()
@@ -87,11 +91,9 @@ void ccGraphicalTransformationTool::pause(bool state)
 		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA());
 		m_associatedWin->displayNewMessage("Transformation [PAUSED]",ccGLWindow::UPPER_CENTER_MESSAGE,false,3600,ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
 		m_associatedWin->displayNewMessage("Unpause to transform again",ccGLWindow::UPPER_CENTER_MESSAGE,true,3600,ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
-		advComboBox->setEnabled(false);
 	}
 	else
 	{
-		advComboBox->setEnabled(true);
 		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_ENTITIES());
 		updateDisplayMessage();
 	}
@@ -104,52 +106,49 @@ void ccGraphicalTransformationTool::pause(bool state)
 	m_associatedWin->redraw(true, false);
 }
 
-void ccGraphicalTransformationTool::advancedModeChanged(int)
+void ccGraphicalTransformationTool::advModeVisible(bool state)
 {
-	if (!m_associatedWin)
-		return;
-	switch (advComboBox->currentIndex())
+	rotateComboBox->setVisible(state);
+	translateComboBox->setVisible(state);
+	translateLabel->setVisible(state);
+	rotateLabel->setVisible(state);
+	int wPrev = this->width();
+	if (state)
 	{
-		case 0: //None
-		{
-			TxCheckBox->setEnabled(true);
-			TyCheckBox->setEnabled(true);
-			break;
-		}
-		case 1: //advanced translate mode
-		{
-			m_associatedWin->displayNewMessage("[Advanced Translation mode]", ccGLWindow::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
-			m_associatedWin->displayNewMessage("[Select Plane or Line to translate along]", ccGLWindow::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
-			m_associatedWin->displayNewMessage("[If line selected, translation will be limited in Z direction]", ccGLWindow::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
-			m_associatedWin->redraw(true, false);
-			if (!setAdvancedTranslationTransform())
-			{
-				advComboBox->setCurrentIndex(0);
-			}
-			break;
-		}
+		this->setGeometry(this->x() + (wPrev - 200), this->y(), 200, 235);
 	}
+	else
+	{
+		TxCheckBox->setEnabled(true);
+		TyCheckBox->setEnabled(true);
+		this->setGeometry(this->x() , this->y(), 0, 0);
+		this->adjustSize(); //adjust size will minimize the display height with the dropdowns blocked
+		this->setGeometry(this->x() + (wPrev - 200), this->y(), 200, this->height());
+	}
+	//update mini-GUI
+	advPushButton->blockSignals(true);
+	advPushButton->setChecked(state);
+	advPushButton->blockSignals(false);
 	updateDisplayMessage();
 }
 
-bool ccGraphicalTransformationTool::setAdvancedTranslationTransform() 
+void ccGraphicalTransformationTool::populateAdvModeItems()
 {
-	if (!m_associatedWin)
-	{
-		assert(false);
-		return false;
-	}
-
+	rotateComboBox->clear();
+	translateComboBox->clear();
+	rotateComboBox->insertItem(0, "Origin");
+	translateComboBox->insertItem(0, "Origin");
+	rotateComboBox->setCurrentIndex(0);
+	translateComboBox->setCurrentIndex(0);
 	MainWindow* mainWindow = MainWindow::TheInstance();
 	if (mainWindow)
 	{
 		ccHObject* root = mainWindow->dbRootObject();
 		ccHObject::Container polylines;
-		ccHObject::Container planesAndLineSegments;
 		if (root)
 		{
 			root->filterChildren(polylines, true, CC_TYPES::POLY_LINE);
-			root->filterChildren(planesAndLineSegments, true, CC_TYPES::PLANE);
+			root->filterChildren(m_planesAndLineSegments, true, CC_TYPES::PLANE);
 		}
 		if (!polylines.empty())
 		{
@@ -158,46 +157,101 @@ bool ccGraphicalTransformationTool::setAdvancedTranslationTransform()
 				ccPolyline* poly = static_cast<ccPolyline*>(polylines[i]);
 				if (poly->size() == 2) //only single segment polylines allowed
 				{
-					planesAndLineSegments.push_back(polylines[i]);
+					m_planesAndLineSegments.push_back(polylines[i]);
 				}
 			}
 		}
-		if (!planesAndLineSegments.empty())
+		if (!m_planesAndLineSegments.empty())
 		{
-			int index = ccItemSelectionDlg::SelectEntity(planesAndLineSegments, 0, m_associatedWin);
-			if (index < 0)
+			for (int i = 0; i < m_planesAndLineSegments.size(); ++i)
 			{
-				return false;
+				//add one line per entity
+				QString item = QString("%1 (ID=%2)").arg(m_planesAndLineSegments[i]->getName()).arg(m_planesAndLineSegments[i]->getUniqueID());
+				translateComboBox->insertItem(i+1, item, QVariant(m_planesAndLineSegments[i]->getUniqueID()));
+				rotateComboBox->insertItem(i+1, item, QVariant(m_planesAndLineSegments[i]->getUniqueID()));
 			}
-
-			assert(index >= 0 && index < static_cast<int>(planesAndLineSegments.size()));
-			assert(planesAndLineSegments[index]->isA(CC_TYPES::POLY_LINE) || 
-					planesAndLineSegments[index]->isA(CC_TYPES::PLANE));
-
-			if (planesAndLineSegments[index]->isA(CC_TYPES::POLY_LINE))
-			{
-				ccPolyline* line = static_cast<ccPolyline*>(planesAndLineSegments[index]);
-				CCVector3 arbitraryVec = *line->getPoint(1) - *line->getPoint(0);
-				m_advancedTranslationTransform = getArbitraryVectorTranslationTransform(arbitraryVec);
-				TxCheckBox->setChecked(false);
-				TyCheckBox->setChecked(false);
-				TxCheckBox->setEnabled(false);
-				TyCheckBox->setEnabled(false);
-				return true;
-			}
-			else if (planesAndLineSegments[index]->isA(CC_TYPES::PLANE))
-			{
-				ccPlane* plane = static_cast<ccPlane*>(planesAndLineSegments[index]);
-				m_advancedTranslationTransform = plane->getTransformation();
-				return true;
-			}			
 		}
-		else
+		
+	}
+}
+
+bool ccGraphicalTransformationTool::setAdvancedTranslationTransform(ccHObject* translateRef) 
+{
+	if (!m_associatedWin)
+	{
+		assert(false);
+		return false;
+	}
+	
+	if (translateRef->isA(CC_TYPES::POLY_LINE))
+	{
+		ccPolyline* line = static_cast<ccPolyline*>(translateRef);
+		CCVector3 arbitraryVec = *line->getPoint(1) - *line->getPoint(0);
+		m_advancedTranslationTransform = getArbitraryVectorTranslationTransform(arbitraryVec);
+		TxCheckBox->setChecked(false);
+		TyCheckBox->setChecked(false);
+		TxCheckBox->setEnabled(false);
+		TyCheckBox->setEnabled(false);
+		return true;
+	}
+	else if (translateRef->isA(CC_TYPES::PLANE))
+	{
+		ccPlane* plane = static_cast<ccPlane*>(translateRef);
+		m_advancedTranslationTransform = plane->getTransformation();
+		TxCheckBox->setEnabled(true);
+		TyCheckBox->setEnabled(true);
+		return true;
+	}	
+	else
+	{
+		TxCheckBox->setEnabled(true);
+		TyCheckBox->setEnabled(true);
+		return false;
+	}
+}
+
+void ccGraphicalTransformationTool::advTranslateRefChanged(int index)
+{
+	if (m_planesAndLineSegments.empty())
+	{
+		return;
+	}
+	int id = translateComboBox->itemData(index).toInt();
+	int selectedObjectIndex = -1;
+	for (int i; i < m_planesAndLineSegments.size(); i++)
+	{
+		if (id == m_planesAndLineSegments[i]->getUniqueID())
 		{
-			ccLog::Error("Cannot translate along line segment or plane normal: \nNo plane or single segment polyline found in DB!");
+			selectedObjectIndex = i;
 		}
 	}
-	return false;
+	MainWindow* mainWindow = MainWindow::TheInstance();
+	if (mainWindow)
+	{
+		for (int i; i < m_planesAndLineSegments.size(); i++)
+		{
+			mainWindow->db()->unselectEntity(m_planesAndLineSegments[i]);
+			if (selectedObjectIndex == i)
+			{
+				mainWindow->db()->selectEntity(m_planesAndLineSegments[selectedObjectIndex], true);
+			}
+		}
+	}
+	if (selectedObjectIndex != -1)
+	{
+		if (!setAdvancedTranslationTransform(m_planesAndLineSegments[selectedObjectIndex]))
+		{
+			ccLog::Error("Error calculating adv translation transform, cannot translate along selected item");
+			m_advancedTranslationTransform.toIdentity();
+		}
+	}
+	else
+	{
+		TxCheckBox->setEnabled(true);
+		TyCheckBox->setEnabled(true);
+		m_advancedTranslationTransform.toIdentity();
+	}
+
 }
 
 void ccGraphicalTransformationTool::clear()
@@ -285,20 +339,19 @@ bool ccGraphicalTransformationTool::linkWith(ccGLWindow* win)
 
 void ccGraphicalTransformationTool::updateDisplayMessage()
 {
-	switch (advComboBox->currentIndex())
+	if (!m_associatedWin)
 	{
-		case 0: //None
-		{
-			m_associatedWin->displayNewMessage("[Rotation/Translation mode]", ccGLWindow::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
-			break;
-		}
-		case 1: //advanced translate mode
-		{
-			m_associatedWin->displayNewMessage("[Advanced Translation mode]", ccGLWindow::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
-			m_associatedWin->displayNewMessage("[Select Plane or Line to translate along]", ccGLWindow::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
-			m_associatedWin->displayNewMessage("[If line selected, translation will be limited in Z direction]", ccGLWindow::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
-			break;
-		}
+		return;
+	}
+	if (advPushButton->isChecked())
+	{
+		m_associatedWin->displayNewMessage("[Advanced mode]", ccGLWindow::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
+		m_associatedWin->displayNewMessage("[Select Plane or Line to update reference frame]", ccGLWindow::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
+		m_associatedWin->displayNewMessage("[If plane selected, rotation will be around normal vector]", ccGLWindow::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
+	}
+	else
+	{
+		m_associatedWin->displayNewMessage("[Rotation/Translation mode]", ccGLWindow::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
 	}
 	m_associatedWin->redraw(true, false);
 }
@@ -329,10 +382,10 @@ bool ccGraphicalTransformationTool::start()
 	pauseButton->setChecked(false);
 	TxCheckBox->setEnabled(true);
 	TyCheckBox->setEnabled(true);
-	advComboBox->setCurrentIndex(0);
+	m_planesAndLineSegments.clear();
+	populateAdvModeItems();
 	updateDisplayMessage();
 	m_associatedWin->redraw(true, false);
-
 	return ccOverlayDialog::start();
 }
 
@@ -430,7 +483,7 @@ void ccGraphicalTransformationTool::glTranslate(const CCVector3d& realT)
 					realT.y * (TyCheckBox->isChecked() ? 1 : 0),
 					realT.z * (TzCheckBox->isChecked() ? 1 : 0));
 
-	if (advComboBox->currentIndex() == 1) //advance translate mode
+	if (advPushButton->isChecked()) //advance translate mode
 	{
 		m_advancedTranslationTransform.applyRotation(t);
 	}

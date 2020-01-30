@@ -491,7 +491,18 @@ namespace chaiscript
 				return m;
 			}
 
-			
+			ModulePtr bs_CCShareable(ModulePtr m = std::make_shared<Module>())
+			{
+				m->add(chaiscript::user_type<CCShareable>(), "CCShareable");
+				m->add(fun(&CCShareable::link), "link");
+				m->add(fun(&CCShareable::release), "release");
+				m->add(fun(&CCShareable::getLinkCount), "getLinkCount");
+				#ifdef CC_TRACK_ALIVE_SHARED_OBJECTS
+					m->add(fun(&CCShareable::GetAliveCount), "GetAliveCount");
+				#endif
+
+				return m;
+			}
 
 
 

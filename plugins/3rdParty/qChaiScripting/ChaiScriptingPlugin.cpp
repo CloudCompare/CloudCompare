@@ -109,6 +109,7 @@ void ChaiScriptingPlugin::setupChaiScriptEngine()
 			chai->add(systemBootstrap);
 			chai->add(chaiscript::type_conversion<std::string, QString>([](const std::string& str) {return QString::fromStdString(str); }));
 			chai->add(fun([](const std::string& str) {return QString::fromUtf8(str.c_str()); }), "to_QString");
+			chai->add(fun([](const QString& str) {std::string ret = str.toLocal8Bit().constData(); return ret; }), "to_string");
 			chai->add(chaiscript::vector_conversion<std::vector<int>>());
 			chai->add(chaiscript::vector_conversion<std::vector<std::string>>());
 

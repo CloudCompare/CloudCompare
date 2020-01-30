@@ -32,15 +32,34 @@
 #include <GenericProgressCallback.h>
 #include <ccPointCloud.h>
 #include <ccMesh.h>
-#include <ccGenericPointCloud.h>
-#include <ccDrawableObject.h>
-#include <ccPolyline.h>
-#include <ccProgressDialog.h>
+#include <ccSubMesh.h>
+#include <ccSphere.h>
+#include <ccCylinder.h>
+#include <cc2DLabel.h>
+#include <cc2DViewportLabel.h>
+#include <cc2DViewportObject.h>
+#include <ccCone.h>
+#include <ccExtru.h>
+#include <ccGBLSensor.h>
+#include <ccCameraSensor.h>
+#include <ccDish.h>
+#include <ccFacet.h>
 #include <ccGenericPrimitive.h>
+#include <ccImage.h>
+#include <ccIndexedTransformationBuffer.h>
+#include <ccKdTree.h>
+#include <ccOctree.h>
+#include <ccOctreeProxy.h>
 #include <ccPlanarEntityInterface.h>
 #include <ccPlane.h>
-
+#include <ccPolyline.h>
+#include <ccSensor.h>
+#include <ccShiftedObject.h>
+#include <ccTorus.h>
+#include <ccDrawableObject.h>
+#include <ccProgressDialog.h>
 #include <GenericIndexedMesh.h>
+
 
 namespace chaiscript
 {
@@ -117,6 +136,108 @@ namespace chaiscript
 					m->add(fun(&ccHObject::metaData), "metaData");
 					return m;
 				}
+
+				template<typename T>
+				ModulePtr bs_ccGLMatrixTpl(const std::string& shortCutName, ModulePtr m = std::make_shared<Module>())
+				{
+					chaiscript::utility::add_class<ccGLMatrixTpl<T>>(*m,
+						shortCutName,
+						{
+							chaiscript::constructor<ccGLMatrixTpl<T>()>(),
+							chaiscript::constructor<ccGLMatrixTpl<T>(ccGLMatrixTpl<T>)>(),
+							chaiscript::constructor<ccGLMatrixTpl<T>(const float*)>(),
+							chaiscript::constructor<ccGLMatrixTpl<T>(const double*)>(),
+							chaiscript::constructor<ccGLMatrixTpl<T>(const Vector3Tpl<T>&, const Vector3Tpl<T>&, const Vector3Tpl<T>&, const Vector3Tpl<T>&)>()
+						},
+					{
+						{ fun(&ccGLMatrixTpl<T>::Interpolate), "Interpolate" },
+						{ fun(&ccGLMatrixTpl<T>::FromToRotation), "FromToRotation" },
+						//{ fun(static_cast<ccGLMatrixTpl<T>(ccGLMatrixTpl<T>::*)(const float*)>(&ccGLMatrixTpl<T>::FromQuaternion)), "FromQuaternion" },
+						//{ fun(static_cast<ccGLMatrixTpl<T>(ccGLMatrixTpl<T>::*)(const double*)>(&ccGLMatrixTpl<T>::FromQuaternion)), "FromQuaternion" },
+						{ fun(&ccGLMatrixTpl<T>::FromViewDirAndUpDir), "FromViewDirAndUpDir" },
+						{ fun(&ccGLMatrixTpl<T>::FromString), "FromString" },
+						{ fun(&ccGLMatrixTpl<T>::toString), "toString" },
+						{ fun([](ccGLMatrixTpl<T>* mat, int p1) {return mat->toString(p1).toLocal8Bit().constData();; }), "toString"},
+						{ fun([](ccGLMatrixTpl<T>* mat) {return mat->toString(); }), "toString"},
+						{ fun([](ccGLMatrixTpl<T>* mat) {std::string ret = mat->toString().toLocal8Bit().constData(); return ret; }), "to_string"}, //Chai script calls "to_string" to try to convert to std::string
+						{ fun(&ccGLMatrixTpl<T>::toAsciiFile), "toAsciiFile" },
+						{ fun(&ccGLMatrixTpl<T>::fromAsciiFile), "fromAsciiFile" },
+						{ fun(&ccGLMatrixTpl<T>::xRotation), "xRotation" },
+						{ fun(&ccGLMatrixTpl<T>::yRotation), "yRotation" },
+						{ fun(&ccGLMatrixTpl<T>::zRotation), "zRotation" },
+						{ fun(&ccGLMatrixTpl<T>::toZero), "toZero" },
+						{ fun(&ccGLMatrixTpl<T>::toIdentity), "toIdentity" },
+						{ fun(&ccGLMatrixTpl<T>::clearTranslation), "clearTranslation" },
+						{ fun(static_cast<void(ccGLMatrixTpl<T>::*)(T,const Vector3Tpl<T>&,const Vector3Tpl<T>&)>(&ccGLMatrixTpl<T>::initFromParameters)), "initFromParameters" },
+						{ fun(static_cast<void(ccGLMatrixTpl<T>::*)(T,T,T,const Vector3Tpl<T>&)>(&ccGLMatrixTpl<T>::initFromParameters)), "initFromParameters" },
+						{ fun(static_cast<void(ccGLMatrixTpl<T>::*)(T&,Vector3Tpl<T>&,Vector3Tpl<T>&)const>(&ccGLMatrixTpl<T>::getParameters)), "getParameters" },
+						{ fun(static_cast<void(ccGLMatrixTpl<T>::*)(T&,T&,T&,Vector3Tpl<T>&)const>(&ccGLMatrixTpl<T>::getParameters)), "getParameters" },
+						{ fun(static_cast<T*(ccGLMatrixTpl<T>::*)()>(&ccGLMatrixTpl<T>::data)), "data" },
+						{ fun(static_cast<const T*(ccGLMatrixTpl<T>::*)()const>(&ccGLMatrixTpl<T>::data)), "data" },
+						{ fun(static_cast<T*(ccGLMatrixTpl<T>::*)()>(&ccGLMatrixTpl<T>::getTranslation)), "getTranslation" },
+						{ fun(static_cast<const T*(ccGLMatrixTpl<T>::*)()const>(&ccGLMatrixTpl<T>::getTranslation)), "getTranslation" },
+						{ fun(&ccGLMatrixTpl<T>::getTranslationAsVec3D), "getTranslationAsVec3D" },
+						{ fun(static_cast<void(ccGLMatrixTpl<T>::*)(const Vector3Tpl<float>&)>(&ccGLMatrixTpl<T>::setTranslation)), "setTranslation" },
+						{ fun(static_cast<void(ccGLMatrixTpl<T>::*)(const Vector3Tpl<double>&)>(&ccGLMatrixTpl<T>::setTranslation)), "setTranslation" },
+						{ fun(static_cast<void(ccGLMatrixTpl<T>::*)(const float Tr[3])>(&ccGLMatrixTpl<T>::setTranslation)), "setTranslation" },
+						{ fun(static_cast<void(ccGLMatrixTpl<T>::*)(const double Tr[3])>(&ccGLMatrixTpl<T>::setTranslation)), "setTranslation" },
+						{ fun(static_cast<T*(ccGLMatrixTpl<T>::*)(unsigned)>(&ccGLMatrixTpl<T>::getColumn)), "getColumn" },
+						{ fun(static_cast<const T*(ccGLMatrixTpl<T>::*)(unsigned)const>(&ccGLMatrixTpl<T>::getColumn)), "getColumn" },
+						{ fun(&ccGLMatrixTpl<T>::getColumnAsVec3D), "getColumnAsVec3D" },
+						{ fun(static_cast<void(ccGLMatrixTpl<T>::*)(unsigned, const Vector3Tpl<T>&)>(&ccGLMatrixTpl<T>::setColumn)), "setColumn" },
+						{ fun(static_cast<void(ccGLMatrixTpl<T>::*)(unsigned, const Tuple4Tpl<T>&)>(&ccGLMatrixTpl<T>::setColumn)), "setColumn" },
+						{ fun(static_cast<ccGLMatrixTpl<T> (ccGLMatrixTpl<T>::*)(const ccGLMatrixTpl<T>&)const>(&ccGLMatrixTpl<T>::operator*)), "*" },
+						{ fun(static_cast<Vector3Tpl<float>(ccGLMatrixTpl<T>::*)(const Vector3Tpl<float>&)const>(&ccGLMatrixTpl<T>::operator*)), "*" },
+						{ fun(static_cast<Vector3Tpl<double>(ccGLMatrixTpl<T>::*)(const Vector3Tpl<double>&)const>(&ccGLMatrixTpl<T>::operator*)), "*" },
+						{ fun(static_cast<Tuple4Tpl<float>(ccGLMatrixTpl<T>::*)(const Tuple4Tpl<float>&)const>(&ccGLMatrixTpl<T>::operator*)), "*" },
+						{ fun(static_cast<Tuple4Tpl<double>(ccGLMatrixTpl<T>::*)(const Tuple4Tpl<double>&)const>(&ccGLMatrixTpl<T>::operator*)), "*" },
+						{ fun(static_cast<ccGLMatrixTpl<T>&(ccGLMatrixTpl<T>::*)(const ccGLMatrixTpl<T>&)>(&ccGLMatrixTpl<T>::operator+=)), "+=" },
+						{ fun(static_cast<ccGLMatrixTpl<T>&(ccGLMatrixTpl<T>::*)(const ccGLMatrixTpl<T>&)>(&ccGLMatrixTpl<T>::operator-=)), "-=" },
+						{ fun(static_cast<ccGLMatrixTpl<T>&(ccGLMatrixTpl<T>::*)(const ccGLMatrixTpl<T>&)>(&ccGLMatrixTpl<T>::operator*=)), "*=" },
+						{ fun(static_cast<ccGLMatrixTpl<T>&(ccGLMatrixTpl<T>::*)(const Vector3Tpl<float>&)>(&ccGLMatrixTpl<T>::operator+=)), "+=" },
+						{ fun(static_cast<ccGLMatrixTpl<T>&(ccGLMatrixTpl<T>::*)(const Vector3Tpl<double>&)>(&ccGLMatrixTpl<T>::operator+=)), "+=" },
+						{ fun(static_cast<ccGLMatrixTpl<T>&(ccGLMatrixTpl<T>::*)(const Vector3Tpl<float>&)>(&ccGLMatrixTpl<T>::operator-=)), "-=" },
+						{ fun(static_cast<ccGLMatrixTpl<T>&(ccGLMatrixTpl<T>::*)(const Vector3Tpl<double>&)>(&ccGLMatrixTpl<T>::operator-=)), "-=" },
+						{ fun(static_cast<void(ccGLMatrixTpl<T>::*)(Vector3Tpl<float>&)const> (&ccGLMatrixTpl<T>::apply)), "apply" },
+						{ fun(static_cast<void(ccGLMatrixTpl<T>::*)(Vector3Tpl<double>&)const>(&ccGLMatrixTpl<T>::apply)), "apply" },
+						{ fun(static_cast<void(ccGLMatrixTpl<T>::*)(Tuple4Tpl<float>&)const> (&ccGLMatrixTpl<T>::apply)), "apply" },
+						{ fun(static_cast<void(ccGLMatrixTpl<T>::*)(Tuple4Tpl<double>&)const> (&ccGLMatrixTpl<T>::apply)), "apply" },
+						{ fun(static_cast<float (ccGLMatrixTpl<T>::*)(const Vector3Tpl<float>&)const> (&ccGLMatrixTpl<T>::applyX)), "applyX" },
+						{ fun(static_cast<double(ccGLMatrixTpl<T>::*)(const Vector3Tpl<double>&)const>(&ccGLMatrixTpl<T>::applyX)), "applyX" },
+						{ fun(static_cast<float (ccGLMatrixTpl<T>::*)(const Vector3Tpl<float>&)const> (&ccGLMatrixTpl<T>::applyY)), "applyY" },
+						{ fun(static_cast<double(ccGLMatrixTpl<T>::*)(const Vector3Tpl<double>&)const>(&ccGLMatrixTpl<T>::applyY)), "applyY" },
+						{ fun(static_cast<float (ccGLMatrixTpl<T>::*)(const Vector3Tpl<float>&)const> (&ccGLMatrixTpl<T>::applyZ)), "applyZ" },
+						{ fun(static_cast<double(ccGLMatrixTpl<T>::*)(const Vector3Tpl<double>&)const>(&ccGLMatrixTpl<T>::applyZ)), "applyZ" },
+						{ fun(static_cast<float (ccGLMatrixTpl<T>::*)(const Tuple4Tpl<float>&)const> (&ccGLMatrixTpl<T>::applyX)), "applyX" },
+						{ fun(static_cast<double(ccGLMatrixTpl<T>::*)(const Tuple4Tpl<double>&)const>(&ccGLMatrixTpl<T>::applyX)), "applyX" },
+						{ fun(static_cast<float (ccGLMatrixTpl<T>::*)(const Tuple4Tpl<float>&)const> (&ccGLMatrixTpl<T>::applyY)), "applyY" },
+						{ fun(static_cast<double(ccGLMatrixTpl<T>::*)(const Tuple4Tpl<double>&)const>(&ccGLMatrixTpl<T>::applyY)), "applyY" },
+						{ fun(static_cast<float (ccGLMatrixTpl<T>::*)(const Tuple4Tpl<float>&)const> (&ccGLMatrixTpl<T>::applyZ)), "applyZ" },
+						{ fun(static_cast<double(ccGLMatrixTpl<T>::*)(const Tuple4Tpl<double>&)const>(&ccGLMatrixTpl<T>::applyZ)), "applyZ" },
+						{ fun(static_cast<float (ccGLMatrixTpl<T>::*)(const Tuple4Tpl<float>&)const> (&ccGLMatrixTpl<T>::applyW)), "applyW" },
+						{ fun(static_cast<double(ccGLMatrixTpl<T>::*)(const Tuple4Tpl<double>&)const>(&ccGLMatrixTpl<T>::applyW)), "applyW" },
+						{ fun(static_cast<void(ccGLMatrixTpl<T>::*)(Vector3Tpl<float>&)const> (&ccGLMatrixTpl<T>::applyRotation)), "applyRotation" },
+						{ fun(static_cast<void(ccGLMatrixTpl<T>::*)(Vector3Tpl<double>&)const>(&ccGLMatrixTpl<T>::applyRotation)), "applyRotation" },
+						{ fun(static_cast<void(ccGLMatrixTpl<T>::*)(float vec[3])const> (&ccGLMatrixTpl<T>::applyRotation)), "applyRotation" },
+						{ fun(static_cast<void(ccGLMatrixTpl<T>::*)(double vec[3])const>(&ccGLMatrixTpl<T>::applyRotation)), "applyRotation" },
+						{ fun(&ccGLMatrixTpl<T>::shiftRotationCenter), "shiftRotationCenter" },
+						{ fun(&ccGLMatrixTpl<T>::transpose), "transpose" },
+						{ fun(&ccGLMatrixTpl<T>::transposed), "transposed" },
+						{ fun(&ccGLMatrixTpl<T>::invert), "invert" },
+						{ fun(&ccGLMatrixTpl<T>::inverse), "inverse" },
+						{ fun(&ccGLMatrixTpl<T>::scaleRotation), "scaleRotation" },
+						{ fun(&ccGLMatrixTpl<T>::scaleRow), "scaleRow" },
+						{ fun(&ccGLMatrixTpl<T>::scaleColumn), "scaleColumn" },
+						{ fun(&ccGLMatrixTpl<T>::isSerializable), "isSerializable" },
+						{ fun(&ccGLMatrixTpl<T>::toFile), "toFile" },
+						{ fun(&ccGLMatrixTpl<T>::fromFile), "fromFile" },
+					
+					}
+					);
+
+					return m;
+				}
+
 
 				ModulePtr bs_ccGLMatrix(ModulePtr m = std::make_shared<Module>())
 				{
@@ -663,12 +784,828 @@ namespace chaiscript
 					return m;
 				}
 
+				ModulePtr bs_ccSphere(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccSphere>(), "ccSphere");
+					m->add(chaiscript::constructor<ccSphere(PointCoordinateType, const ccGLMatrix*, QString, unsigned)>(), "ccSphere");
+					m->add(chaiscript::constructor<ccSphere(QString)>(), "ccSphere");
+
+					m->add(fun([](PointCoordinateType rad, const ccGLMatrix* mtrx, QString name, unsigned p) {return new ccSphere(rad, mtrx, name, p); }), "create_ccSphere");
+					m->add(fun(&ccSphere::setAssociatedCloud), "setAssociatedCloud");
+					m->add(fun(&ccSphere::cloneMesh), "cloneMesh");
+					m->add(fun(&ccSphere::Triangulate), "Triangulate");
+					m->add(fun(&ccSphere::TriangulateTwoPolylines), "TriangulateTwoPolylines");
+					m->add(fun(&ccSphere::merge), "merge");
+					m->add(fun(&ccSphere::shiftTriangleIndexes), "shiftTriangleIndexes");
+					m->add(fun(&ccSphere::flipTriangles), "flipTriangles");
+					m->add(fun(&ccSphere::addTriangle), "addTriangle");
+					m->add(fun(&ccSphere::reserve), "reserve");
+					m->add(fun(&ccSphere::resize), "resize");
+					m->add(fun(&ccSphere::shrinkToFit), "shrinkToFit");
+					m->add(fun(&ccSphere::setTriNormsTable), "setTriNormsTable");
+					m->add(fun(&ccSphere::clearTriNormals), "clearTriNormals");
+					m->add(fun(&ccSphere::arePerTriangleNormalsEnabled), "arePerTriangleNormalsEnabled");
+					m->add(fun(&ccSphere::reservePerTriangleNormalIndexes), "reservePerTriangleNormalIndexes");
+					m->add(fun(&ccSphere::addTriangleNormalIndexes), "addTriangleNormalIndexes");
+					m->add(fun(&ccSphere::setTriangleNormalIndexes), "setTriangleNormalIndexes");
+					m->add(fun(&ccSphere::removePerTriangleNormalIndexes), "removePerTriangleNormalIndexes");
+					m->add(fun(&ccSphere::convertMaterialsToVertexColors), "convertMaterialsToVertexColors");
+					m->add(fun(&ccSphere::hasPerTriangleMtlIndexes), "hasPerTriangleMtlIndexes");
+					m->add(fun(&ccSphere::reservePerTriangleMtlIndexes), "reservePerTriangleMtlIndexes");
+					m->add(fun(&ccSphere::removePerTriangleMtlIndexes), "removePerTriangleMtlIndexes");
+					m->add(fun(&ccSphere::addTriangleMtlIndex), "addTriangleMtlIndex");
+					m->add(fun(&ccSphere::setTriangleMtlIndexesTable), "setTriangleMtlIndexesTable");
+					m->add(fun(&ccSphere::getTriangleMtlIndexesTable), "getTriangleMtlIndexesTable");
+					m->add(fun(&ccSphere::setTriangleMtlIndex), "setTriangleMtlIndex");
+					m->add(fun(&ccSphere::setMaterialSet), "setMaterialSet"); //TODO add default version(s)
+					m->add(fun(&ccSphere::setTexCoordinatesTable), "setTexCoordinatesTable");
+					m->add(fun(&ccSphere::reservePerTriangleTexCoordIndexes), "reservePerTriangleTexCoordIndexes");
+					m->add(fun(&ccSphere::removePerTriangleTexCoordIndexes), "removePerTriangleTexCoordIndexes");
+					m->add(fun(&ccSphere::addTriangleTexCoordIndexes), "addTriangleTexCoordIndexes");
+					m->add(fun(&ccSphere::setTriangleTexCoordIndexes), "setTriangleTexCoordIndexes");
+					m->add(fun(&ccSphere::computeNormals), "computeNormals");
+					m->add(fun(&ccSphere::computePerVertexNormals), "computePerVertexNormals");
+					m->add(fun(&ccSphere::computePerTriangleNormals), "computePerTriangleNormals");
+					m->add(fun(&ccSphere::laplacianSmooth), "laplacianSmooth");
+					m->add(fun(&ccSphere::processScalarField), "processScalarField");
+					m->add(fun(&ccSphere::subdivide), "subdivide");
+					m->add(fun(&ccSphere::createNewMeshFromSelection), "createNewMeshFromSelection");
+					m->add(fun(&ccSphere::swapTriangles), "swapTriangles");
+					m->add(fun(&ccSphere::transformTriNormals), "transformTriNormals");
+					m->add(fun(&ccSphere::size), "size");
+					m->add(fun(&ccSphere::forEach), "forEach");
+					m->add(fun(&ccSphere::getBoundingBox), "getBoundingBox");
+					m->add(fun(&ccSphere::placeIteratorAtBeginning), "placeIteratorAtBeginning");
+					m->add(fun(&ccSphere::_getNextTriangle), "_getNextTriangle");
+					m->add(fun(&ccSphere::_getTriangle), "_getTriangle");
+					m->add(fun(&ccSphere::getTriangleVertices), "getTriangleVertices");
+					m->add(fun(&ccSphere::getNextTriangleVertIndexes), "getNextTriangleVertIndexes");
+					m->add(fun(&ccSphere::showNormals), "showNormals");
+					m->add(fun(&ccSphere::isSerializable), "isSerializable");
+					m->add(fun(&ccSphere::getAssociatedCloud), "getAssociatedCloud");
+					m->add(fun(&ccSphere::refreshBB), "refreshBB");
+					m->add(fun(&ccSphere::capacity), "capacity");
+					m->add(fun(&ccSphere::hasMaterials), "hasMaterials");
+					m->add(fun(&ccSphere::getMaterialSet), "getMaterialSet");
+					m->add(fun(&ccSphere::getTriangleMtlIndex), "getTriangleMtlIndex");
+					m->add(fun(&ccSphere::hasTextures), "hasTextures");
+					m->add(fun(&ccSphere::getTexCoordinatesTable), "getTexCoordinatesTable");
+					m->add(fun(&ccSphere::getTriangleTexCoordinates), "getTriangleTexCoordinates");
+					m->add(fun(&ccSphere::hasPerTriangleTexCoordIndexes), "hasPerTriangleTexCoordIndexes");
+					m->add(fun(&ccSphere::getTriangleTexCoordinatesIndexes), "getTriangleTexCoordinatesIndexes");
+					m->add(fun(&ccSphere::hasTriNormals), "hasTriNormals");
+					m->add(fun(&ccSphere::getTriangleNormalIndexes), "getTriangleNormalIndexes");
+					m->add(fun(&ccSphere::getTriangleNormals), "getTriangleNormals");
+					m->add(fun(&ccSphere::getTriNormsTable), "getTriNormsTable");
+					m->add(fun(&ccSphere::interpolateNormalsBC), "interpolateNormalsBC");
+					m->add(fun(&ccSphere::interpolateColorsBC), "interpolateColorsBC");
+					m->add(fun(&ccSphere::getColorFromMaterial), "getColorFromMaterial");
+					m->add(fun(&ccSphere::getVertexColorFromMaterial), "getVertexColorFromMaterial");
+					m->add(fun(&ccSphere::isShownAsWire), "isShownAsWire");
+					m->add(fun(&ccSphere::showWired), "showWired");
+					m->add(fun(&ccSphere::triNormsShown), "triNormsShown");
+					m->add(fun(&ccSphere::showTriNorms), "showTriNorms");
+					m->add(fun(&ccSphere::materialsShown), "materialsShown");
+					m->add(fun(&ccSphere::showMaterials), "showMaterials");
+					m->add(fun(&ccSphere::stipplingEnabled), "stipplingEnabled");
+					m->add(fun(&ccSphere::enableStippling), "enableStippling");
+					m->add(fun(&ccSphere::samplePoints), "samplePoints"); //TODO add default version(s)
+					m->add(fun(&ccSphere::importParametersFrom), "importParametersFrom");
+					m->add(fun(&ccSphere::computePointPosition), "computePointPosition");
+					m->add(fun(&ccSphere::GetCurrentDBVersion), "GetCurrentDBVersion");
+					m->add(fun(&ccSphere::SetUniqueIDGenerator), "SetUniqueIDGenerator");
+					m->add(fun(&ccSphere::GetUniqueIDGenerator), "GetUniqueIDGenerator");
+					m->add(fun(&ccSphere::getClassID), "getClassID");
+					m->add(fun(&ccSphere::getName), "getName");
+					m->add(fun(&ccSphere::setName), "setName");
+					m->add(fun(&ccSphere::getUniqueID), "getUniqueID");
+					m->add(fun(&ccSphere::setUniqueID), "setUniqueID");
+					m->add(fun(&ccSphere::isEnabled), "isEnabled");
+					m->add(fun(&ccSphere::setEnabled), "setEnabled");
+					m->add(fun(&ccSphere::toggleActivation), "toggleActivation");
+					m->add(fun(&ccSphere::isLocked), "isLocked");
+					m->add(fun(&ccSphere::setLocked), "setLocked");
+					m->add(fun(&ccSphere::isLeaf), "isLeaf");
+					m->add(fun(&ccSphere::isCustom), "isCustom");
+					m->add(fun(&ccSphere::isHierarchy), "isHierarchy");
+					m->add(fun(&ccSphere::isKindOf), "isKindOf");
+					m->add(fun(&ccSphere::isA), "isA");
+					m->add(fun(&ccSphere::GetNextUniqueID), "GetNextUniqueID");
+					m->add(fun(&ccSphere::GetLastUniqueID), "GetLastUniqueID");
+					m->add(fun(&ccSphere::ReadClassIDFromFile), "ReadClassIDFromFile");
+					m->add(fun(&ccSphere::getMetaData), "getMetaData");
+					m->add(fun(&ccSphere::removeMetaData), "removeMetaData");
+					m->add(fun(static_cast<void(ccSphere::*)(const  QString&, const QVariant&)>(&ccSphere::setMetaData)), "setMetaData");
+					m->add(fun(static_cast<void(ccSphere::*)(const QVariantMap&, bool)>(&ccSphere::setMetaData)), "setMetaData");
+					m->add(fun(&ccSphere::hasMetaData), "hasMetaData");
+					m->add(fun(&ccSphere::metaData), "metaData");
+					m->add(fun(&ccSphere::getUniqueIDForDisplay), "getUniqueIDForDisplay");
+					m->add(fun(&ccSphere::getOwnBB), "getOwnBB");
+					m->add(fun(&ccSphere::getGLTransformationHistory), "getGLTransformationHistory");
+					m->add(fun(&ccSphere::getGLTransformationHistory), "getGLTransformationHistory");
+					m->add(fun(&ccSphere::getTypeName), "getTypeName");
+					m->add(fun(&ccSphere::clone), "clone");
+					m->add(fun(&ccSphere::setColor), "setColor");
+					m->add(fun(&ccSphere::operator+=), "+=");
+					m->add(fun(&ccSphere::hasDrawingPrecision), "hasDrawingPrecision");
+					m->add(fun(&ccSphere::setDrawingPrecision), "setDrawingPrecision");
+					m->add(fun(&ccSphere::getDrawingPrecision), "getDrawingPrecision");
+					m->add(fun(static_cast<ccGLMatrix & (ccSphere::*)()>(&ccSphere::getTransformation)), "getTransformation");
+					m->add(fun(static_cast<const ccGLMatrix & (ccSphere::*)()const>(&ccSphere::getTransformation)), "getTransformation");
+					m->add(fun(&ccSphere::getGLTransformationHistory), "getGLTransformationHistory");
+					m->add(fun(&ccSphere::getOwnFitBB), "getOwnFitBB");
+					m->add(fun(&ccSphere::getRadius), "getRadius");
+					m->add(fun(&ccSphere::setRadius), "setRadius");
+					return m;
+				}
+
+				ModulePtr bs_ccCone(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccCone>(), "ccCone");
+					m->add(chaiscript::constructor<ccCone(PointCoordinateType, PointCoordinateType, PointCoordinateType, PointCoordinateType, PointCoordinateType, const ccGLMatrix*, QString, unsigned)>(), "ccCone");
+					m->add(chaiscript::constructor<ccCone(QString)>(), "ccCone");
+					m->add(fun([](PointCoordinateType br, PointCoordinateType tr, PointCoordinateType h) {return new ccCone(br, tr, h); }), "create_ccCone");
+					m->add(fun([](PointCoordinateType br, PointCoordinateType tr, PointCoordinateType h, PointCoordinateType xOff) {return new ccCone(br, tr, h, xOff); }), "create_ccCone");
+					m->add(fun([](PointCoordinateType br, PointCoordinateType tr, PointCoordinateType h, PointCoordinateType xOff, PointCoordinateType yOff) {return new ccCone(br, tr, h, xOff, yOff); }), "create_ccCone");
+					m->add(fun([](PointCoordinateType br, PointCoordinateType tr, PointCoordinateType h, PointCoordinateType xOff, PointCoordinateType yOff, const ccGLMatrix* transMat) {return new ccCone(br, tr, h, xOff, yOff, transMat); }), "create_ccCone");
+					m->add(fun([](PointCoordinateType br, PointCoordinateType tr, PointCoordinateType h, PointCoordinateType xOff, PointCoordinateType yOff, const ccGLMatrix* transMat, QString name) {return new ccCone(br, tr, h, xOff, yOff, transMat, name); }), "create_ccCone");
+					m->add(fun([](PointCoordinateType br, PointCoordinateType tr, PointCoordinateType h, PointCoordinateType xOff, PointCoordinateType yOff, const ccGLMatrix* transMat, QString name, unsigned p) {return new ccCone(br, tr, h, xOff, yOff,transMat, name, p); }), "create_ccCone");
+					m->add(fun(&ccCone::setAssociatedCloud), "setAssociatedCloud");
+					m->add(fun(&ccCone::cloneMesh), "cloneMesh");
+					m->add(fun(&ccCone::Triangulate), "Triangulate");
+					m->add(fun(&ccCone::TriangulateTwoPolylines), "TriangulateTwoPolylines");
+					m->add(fun(&ccCone::merge), "merge");
+					m->add(fun(&ccCone::shiftTriangleIndexes), "shiftTriangleIndexes");
+					m->add(fun(&ccCone::flipTriangles), "flipTriangles");
+					m->add(fun(&ccCone::addTriangle), "addTriangle");
+					m->add(fun(&ccCone::reserve), "reserve");
+					m->add(fun(&ccCone::resize), "resize");
+					m->add(fun(&ccCone::shrinkToFit), "shrinkToFit");
+					m->add(fun(&ccCone::setTriNormsTable), "setTriNormsTable");
+					m->add(fun(&ccCone::clearTriNormals), "clearTriNormals");
+					m->add(fun(&ccCone::arePerTriangleNormalsEnabled), "arePerTriangleNormalsEnabled");
+					m->add(fun(&ccCone::reservePerTriangleNormalIndexes), "reservePerTriangleNormalIndexes");
+					m->add(fun(&ccCone::addTriangleNormalIndexes), "addTriangleNormalIndexes");
+					m->add(fun(&ccCone::setTriangleNormalIndexes), "setTriangleNormalIndexes");
+					m->add(fun(&ccCone::removePerTriangleNormalIndexes), "removePerTriangleNormalIndexes");
+					m->add(fun(&ccCone::convertMaterialsToVertexColors), "convertMaterialsToVertexColors");
+					m->add(fun(&ccCone::hasPerTriangleMtlIndexes), "hasPerTriangleMtlIndexes");
+					m->add(fun(&ccCone::reservePerTriangleMtlIndexes), "reservePerTriangleMtlIndexes");
+					m->add(fun(&ccCone::removePerTriangleMtlIndexes), "removePerTriangleMtlIndexes");
+					m->add(fun(&ccCone::addTriangleMtlIndex), "addTriangleMtlIndex");
+					m->add(fun(&ccCone::setTriangleMtlIndexesTable), "setTriangleMtlIndexesTable");
+					m->add(fun(&ccCone::getTriangleMtlIndexesTable), "getTriangleMtlIndexesTable");
+					m->add(fun(&ccCone::setTriangleMtlIndex), "setTriangleMtlIndex");
+					m->add(fun(&ccCone::setMaterialSet), "setMaterialSet"); //TODO add default version(s)
+					m->add(fun(&ccCone::setTexCoordinatesTable), "setTexCoordinatesTable");
+					m->add(fun(&ccCone::reservePerTriangleTexCoordIndexes), "reservePerTriangleTexCoordIndexes");
+					m->add(fun(&ccCone::removePerTriangleTexCoordIndexes), "removePerTriangleTexCoordIndexes");
+					m->add(fun(&ccCone::addTriangleTexCoordIndexes), "addTriangleTexCoordIndexes");
+					m->add(fun(&ccCone::setTriangleTexCoordIndexes), "setTriangleTexCoordIndexes");
+					m->add(fun(&ccCone::computeNormals), "computeNormals");
+					m->add(fun(&ccCone::computePerVertexNormals), "computePerVertexNormals");
+					m->add(fun(&ccCone::computePerTriangleNormals), "computePerTriangleNormals");
+					m->add(fun(&ccCone::laplacianSmooth), "laplacianSmooth");
+					m->add(fun(&ccCone::processScalarField), "processScalarField");
+					m->add(fun(&ccCone::subdivide), "subdivide");
+					m->add(fun(&ccCone::createNewMeshFromSelection), "createNewMeshFromSelection");
+					m->add(fun(&ccCone::swapTriangles), "swapTriangles");
+					m->add(fun(&ccCone::transformTriNormals), "transformTriNormals");
+					m->add(fun(&ccCone::size), "size");
+					m->add(fun(&ccCone::forEach), "forEach");
+					m->add(fun(&ccCone::getBoundingBox), "getBoundingBox");
+					m->add(fun(&ccCone::placeIteratorAtBeginning), "placeIteratorAtBeginning");
+					m->add(fun(&ccCone::_getNextTriangle), "_getNextTriangle");
+					m->add(fun(&ccCone::_getTriangle), "_getTriangle");
+					m->add(fun(&ccCone::getTriangleVertices), "getTriangleVertices");
+					m->add(fun(&ccCone::getNextTriangleVertIndexes), "getNextTriangleVertIndexes");
+					m->add(fun(&ccCone::showNormals), "showNormals");
+					m->add(fun(&ccCone::isSerializable), "isSerializable");
+					m->add(fun(&ccCone::getAssociatedCloud), "getAssociatedCloud");
+					m->add(fun(&ccCone::refreshBB), "refreshBB");
+					m->add(fun(&ccCone::capacity), "capacity");
+					m->add(fun(&ccCone::hasMaterials), "hasMaterials");
+					m->add(fun(&ccCone::getMaterialSet), "getMaterialSet");
+					m->add(fun(&ccCone::getTriangleMtlIndex), "getTriangleMtlIndex");
+					m->add(fun(&ccCone::hasTextures), "hasTextures");
+					m->add(fun(&ccCone::getTexCoordinatesTable), "getTexCoordinatesTable");
+					m->add(fun(&ccCone::getTriangleTexCoordinates), "getTriangleTexCoordinates");
+					m->add(fun(&ccCone::hasPerTriangleTexCoordIndexes), "hasPerTriangleTexCoordIndexes");
+					m->add(fun(&ccCone::getTriangleTexCoordinatesIndexes), "getTriangleTexCoordinatesIndexes");
+					m->add(fun(&ccCone::hasTriNormals), "hasTriNormals");
+					m->add(fun(&ccCone::getTriangleNormalIndexes), "getTriangleNormalIndexes");
+					m->add(fun(&ccCone::getTriangleNormals), "getTriangleNormals");
+					m->add(fun(&ccCone::getTriNormsTable), "getTriNormsTable");
+					m->add(fun(&ccCone::interpolateNormalsBC), "interpolateNormalsBC");
+					m->add(fun(&ccCone::interpolateColorsBC), "interpolateColorsBC");
+					m->add(fun(&ccCone::getColorFromMaterial), "getColorFromMaterial");
+					m->add(fun(&ccCone::getVertexColorFromMaterial), "getVertexColorFromMaterial");
+					m->add(fun(&ccCone::isShownAsWire), "isShownAsWire");
+					m->add(fun(&ccCone::showWired), "showWired");
+					m->add(fun(&ccCone::triNormsShown), "triNormsShown");
+					m->add(fun(&ccCone::showTriNorms), "showTriNorms");
+					m->add(fun(&ccCone::materialsShown), "materialsShown");
+					m->add(fun(&ccCone::showMaterials), "showMaterials");
+					m->add(fun(&ccCone::stipplingEnabled), "stipplingEnabled");
+					m->add(fun(&ccCone::enableStippling), "enableStippling");
+					m->add(fun(&ccCone::samplePoints), "samplePoints"); //TODO add default version(s)
+					m->add(fun(&ccCone::importParametersFrom), "importParametersFrom");
+					m->add(fun(&ccCone::computePointPosition), "computePointPosition");
+					m->add(fun(&ccCone::GetCurrentDBVersion), "GetCurrentDBVersion");
+					m->add(fun(&ccCone::SetUniqueIDGenerator), "SetUniqueIDGenerator");
+					m->add(fun(&ccCone::GetUniqueIDGenerator), "GetUniqueIDGenerator");
+					m->add(fun(&ccCone::getClassID), "getClassID");
+					m->add(fun(&ccCone::getName), "getName");
+					m->add(fun(&ccCone::setName), "setName");
+					m->add(fun(&ccCone::getUniqueID), "getUniqueID");
+					m->add(fun(&ccCone::setUniqueID), "setUniqueID");
+					m->add(fun(&ccCone::isEnabled), "isEnabled");
+					m->add(fun(&ccCone::setEnabled), "setEnabled");
+					m->add(fun(&ccCone::toggleActivation), "toggleActivation");
+					m->add(fun(&ccCone::isLocked), "isLocked");
+					m->add(fun(&ccCone::setLocked), "setLocked");
+					m->add(fun(&ccCone::isLeaf), "isLeaf");
+					m->add(fun(&ccCone::isCustom), "isCustom");
+					m->add(fun(&ccCone::isHierarchy), "isHierarchy");
+					m->add(fun(&ccCone::isKindOf), "isKindOf");
+					m->add(fun(&ccCone::isA), "isA");
+					m->add(fun(&ccCone::GetNextUniqueID), "GetNextUniqueID");
+					m->add(fun(&ccCone::GetLastUniqueID), "GetLastUniqueID");
+					m->add(fun(&ccCone::ReadClassIDFromFile), "ReadClassIDFromFile");
+					m->add(fun(&ccCone::getMetaData), "getMetaData");
+					m->add(fun(&ccCone::removeMetaData), "removeMetaData");
+					m->add(fun(static_cast<void(ccCone::*)(const  QString&, const QVariant&)>(&ccCone::setMetaData)), "setMetaData");
+					m->add(fun(static_cast<void(ccCone::*)(const QVariantMap&, bool)>(&ccCone::setMetaData)), "setMetaData");
+					m->add(fun(&ccCone::hasMetaData), "hasMetaData");
+					m->add(fun(&ccCone::metaData), "metaData");
+					m->add(fun(&ccCone::getUniqueIDForDisplay), "getUniqueIDForDisplay");
+					m->add(fun(&ccCone::getOwnBB), "getOwnBB");
+					m->add(fun(&ccCone::getGLTransformationHistory), "getGLTransformationHistory");
+					m->add(fun(&ccCone::getGLTransformationHistory), "getGLTransformationHistory");
+					m->add(fun(&ccCone::getTypeName), "getTypeName");
+					m->add(fun(&ccCone::clone), "clone");
+					m->add(fun(&ccCone::setColor), "setColor");
+					m->add(fun(&ccCone::operator+=), "+=");
+					m->add(fun(&ccCone::hasDrawingPrecision), "hasDrawingPrecision");
+					m->add(fun(&ccCone::setDrawingPrecision), "setDrawingPrecision");
+					m->add(fun(&ccCone::getDrawingPrecision), "getDrawingPrecision");
+					m->add(fun(static_cast<ccGLMatrix & (ccCone::*)()>(&ccCone::getTransformation)), "getTransformation");
+					m->add(fun(static_cast<const ccGLMatrix & (ccCone::*)()const>(&ccCone::getTransformation)), "getTransformation");
+					m->add(fun(&ccCone::getGLTransformationHistory), "getGLTransformationHistory");
+					m->add(fun(&ccCone::getOwnFitBB), "getOwnFitBB");
+					m->add(fun(&ccCone::getHeight), "getHeight");
+					m->add(fun(&ccCone::setHeight), "setHeight");
+					m->add(fun(&ccCone::getBottomRadius), "getBottomRadius");
+					m->add(fun(&ccCone::setBottomRadius), "setBottomRadius");
+					m->add(fun(&ccCone::getTopRadius), "getTopRadius");
+					m->add(fun(&ccCone::setTopRadius), "setTopRadius");
+					m->add(fun(&ccCone::getBottomCenter), "getBottomCenter");
+					m->add(fun(&ccCone::getTopCenter), "getTopCenter");
+					m->add(fun(&ccCone::getSmallCenter), "getSmallCenter");
+					m->add(fun(&ccCone::getLargeCenter), "getLargeCenter");
+					m->add(fun(&ccCone::getSmallRadius), "getSmallRadius");
+					m->add(fun(&ccCone::getLargeRadius), "getLargeRadius");
+					m->add(fun(&ccCone::isSnoutMode), "isSnoutMode");
+					return m;
+				}
+
+				ModulePtr bs_ccCylinder(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccCylinder>(), "ccCylinder");
+					m->add(chaiscript::constructor<ccCylinder(PointCoordinateType, PointCoordinateType, const ccGLMatrix*, QString, unsigned)>(), "ccCylinder");
+					m->add(chaiscript::constructor<ccCylinder(QString)>(), "ccCylinder");
+					m->add(fun([](PointCoordinateType r, PointCoordinateType h) {return new ccCylinder(r, h); }), "create_ccCylinder");
+					m->add(fun([](PointCoordinateType r, PointCoordinateType h, const ccGLMatrix* transMat) {return new ccCylinder(r, h, transMat); }), "create_ccCylinder");
+					m->add(fun([](PointCoordinateType r, PointCoordinateType h, const ccGLMatrix* transMat, QString name) {return new ccCylinder(r, h, transMat, name); }), "create_ccCylinder");
+					m->add(fun([](PointCoordinateType r, PointCoordinateType h, const ccGLMatrix* transMat, QString name, unsigned p) {return new ccCylinder(r, h, transMat, name, p); }), "create_ccCylinder");
+					m->add(fun(&ccCylinder::setAssociatedCloud), "setAssociatedCloud");
+					m->add(fun(&ccCylinder::cloneMesh), "cloneMesh");
+					m->add(fun(&ccCylinder::Triangulate), "Triangulate");
+					m->add(fun(&ccCylinder::TriangulateTwoPolylines), "TriangulateTwoPolylines");
+					m->add(fun(&ccCylinder::merge), "merge");
+					m->add(fun(&ccCylinder::shiftTriangleIndexes), "shiftTriangleIndexes");
+					m->add(fun(&ccCylinder::flipTriangles), "flipTriangles");
+					m->add(fun(&ccCylinder::addTriangle), "addTriangle");
+					m->add(fun(&ccCylinder::reserve), "reserve");
+					m->add(fun(&ccCylinder::resize), "resize");
+					m->add(fun(&ccCylinder::shrinkToFit), "shrinkToFit");
+					m->add(fun(&ccCylinder::setTriNormsTable), "setTriNormsTable");
+					m->add(fun(&ccCylinder::clearTriNormals), "clearTriNormals");
+					m->add(fun(&ccCylinder::arePerTriangleNormalsEnabled), "arePerTriangleNormalsEnabled");
+					m->add(fun(&ccCylinder::reservePerTriangleNormalIndexes), "reservePerTriangleNormalIndexes");
+					m->add(fun(&ccCylinder::addTriangleNormalIndexes), "addTriangleNormalIndexes");
+					m->add(fun(&ccCylinder::setTriangleNormalIndexes), "setTriangleNormalIndexes");
+					m->add(fun(&ccCylinder::removePerTriangleNormalIndexes), "removePerTriangleNormalIndexes");
+					m->add(fun(&ccCylinder::convertMaterialsToVertexColors), "convertMaterialsToVertexColors");
+					m->add(fun(&ccCylinder::hasPerTriangleMtlIndexes), "hasPerTriangleMtlIndexes");
+					m->add(fun(&ccCylinder::reservePerTriangleMtlIndexes), "reservePerTriangleMtlIndexes");
+					m->add(fun(&ccCylinder::removePerTriangleMtlIndexes), "removePerTriangleMtlIndexes");
+					m->add(fun(&ccCylinder::addTriangleMtlIndex), "addTriangleMtlIndex");
+					m->add(fun(&ccCylinder::setTriangleMtlIndexesTable), "setTriangleMtlIndexesTable");
+					m->add(fun(&ccCylinder::getTriangleMtlIndexesTable), "getTriangleMtlIndexesTable");
+					m->add(fun(&ccCylinder::setTriangleMtlIndex), "setTriangleMtlIndex");
+					m->add(fun(&ccCylinder::setMaterialSet), "setMaterialSet"); //TODO add default version(s)
+					m->add(fun(&ccCylinder::setTexCoordinatesTable), "setTexCoordinatesTable");
+					m->add(fun(&ccCylinder::reservePerTriangleTexCoordIndexes), "reservePerTriangleTexCoordIndexes");
+					m->add(fun(&ccCylinder::removePerTriangleTexCoordIndexes), "removePerTriangleTexCoordIndexes");
+					m->add(fun(&ccCylinder::addTriangleTexCoordIndexes), "addTriangleTexCoordIndexes");
+					m->add(fun(&ccCylinder::setTriangleTexCoordIndexes), "setTriangleTexCoordIndexes");
+					m->add(fun(&ccCylinder::computeNormals), "computeNormals");
+					m->add(fun(&ccCylinder::computePerVertexNormals), "computePerVertexNormals");
+					m->add(fun(&ccCylinder::computePerTriangleNormals), "computePerTriangleNormals");
+					m->add(fun(&ccCylinder::laplacianSmooth), "laplacianSmooth");
+					m->add(fun(&ccCylinder::processScalarField), "processScalarField");
+					m->add(fun(&ccCylinder::subdivide), "subdivide");
+					m->add(fun(&ccCylinder::createNewMeshFromSelection), "createNewMeshFromSelection");
+					m->add(fun(&ccCylinder::swapTriangles), "swapTriangles");
+					m->add(fun(&ccCylinder::transformTriNormals), "transformTriNormals");
+					m->add(fun(&ccCylinder::size), "size");
+					m->add(fun(&ccCylinder::forEach), "forEach");
+					m->add(fun(&ccCylinder::getBoundingBox), "getBoundingBox");
+					m->add(fun(&ccCylinder::placeIteratorAtBeginning), "placeIteratorAtBeginning");
+					m->add(fun(&ccCylinder::_getNextTriangle), "_getNextTriangle");
+					m->add(fun(&ccCylinder::_getTriangle), "_getTriangle");
+					m->add(fun(&ccCylinder::getTriangleVertices), "getTriangleVertices");
+					m->add(fun(&ccCylinder::getNextTriangleVertIndexes), "getNextTriangleVertIndexes");
+					m->add(fun(&ccCylinder::showNormals), "showNormals");
+					m->add(fun(&ccCylinder::isSerializable), "isSerializable");
+					m->add(fun(&ccCylinder::getAssociatedCloud), "getAssociatedCloud");
+					m->add(fun(&ccCylinder::refreshBB), "refreshBB");
+					m->add(fun(&ccCylinder::capacity), "capacity");
+					m->add(fun(&ccCylinder::hasMaterials), "hasMaterials");
+					m->add(fun(&ccCylinder::getMaterialSet), "getMaterialSet");
+					m->add(fun(&ccCylinder::getTriangleMtlIndex), "getTriangleMtlIndex");
+					m->add(fun(&ccCylinder::hasTextures), "hasTextures");
+					m->add(fun(&ccCylinder::getTexCoordinatesTable), "getTexCoordinatesTable");
+					m->add(fun(&ccCylinder::getTriangleTexCoordinates), "getTriangleTexCoordinates");
+					m->add(fun(&ccCylinder::hasPerTriangleTexCoordIndexes), "hasPerTriangleTexCoordIndexes");
+					m->add(fun(&ccCylinder::getTriangleTexCoordinatesIndexes), "getTriangleTexCoordinatesIndexes");
+					m->add(fun(&ccCylinder::hasTriNormals), "hasTriNormals");
+					m->add(fun(&ccCylinder::getTriangleNormalIndexes), "getTriangleNormalIndexes");
+					m->add(fun(&ccCylinder::getTriangleNormals), "getTriangleNormals");
+					m->add(fun(&ccCylinder::getTriNormsTable), "getTriNormsTable");
+					m->add(fun(&ccCylinder::interpolateNormalsBC), "interpolateNormalsBC");
+					m->add(fun(&ccCylinder::interpolateColorsBC), "interpolateColorsBC");
+					m->add(fun(&ccCylinder::getColorFromMaterial), "getColorFromMaterial");
+					m->add(fun(&ccCylinder::getVertexColorFromMaterial), "getVertexColorFromMaterial");
+					m->add(fun(&ccCylinder::isShownAsWire), "isShownAsWire");
+					m->add(fun(&ccCylinder::showWired), "showWired");
+					m->add(fun(&ccCylinder::triNormsShown), "triNormsShown");
+					m->add(fun(&ccCylinder::showTriNorms), "showTriNorms");
+					m->add(fun(&ccCylinder::materialsShown), "materialsShown");
+					m->add(fun(&ccCylinder::showMaterials), "showMaterials");
+					m->add(fun(&ccCylinder::stipplingEnabled), "stipplingEnabled");
+					m->add(fun(&ccCylinder::enableStippling), "enableStippling");
+					m->add(fun(&ccCylinder::samplePoints), "samplePoints"); //TODO add default version(s)
+					m->add(fun(&ccCylinder::importParametersFrom), "importParametersFrom");
+					m->add(fun(&ccCylinder::computePointPosition), "computePointPosition");
+					m->add(fun(&ccCylinder::GetCurrentDBVersion), "GetCurrentDBVersion");
+					m->add(fun(&ccCylinder::SetUniqueIDGenerator), "SetUniqueIDGenerator");
+					m->add(fun(&ccCylinder::GetUniqueIDGenerator), "GetUniqueIDGenerator");
+					m->add(fun(&ccCylinder::getClassID), "getClassID");
+					m->add(fun(&ccCylinder::getName), "getName");
+					m->add(fun(&ccCylinder::setName), "setName");
+					m->add(fun(&ccCylinder::getUniqueID), "getUniqueID");
+					m->add(fun(&ccCylinder::setUniqueID), "setUniqueID");
+					m->add(fun(&ccCylinder::isEnabled), "isEnabled");
+					m->add(fun(&ccCylinder::setEnabled), "setEnabled");
+					m->add(fun(&ccCylinder::toggleActivation), "toggleActivation");
+					m->add(fun(&ccCylinder::isLocked), "isLocked");
+					m->add(fun(&ccCylinder::setLocked), "setLocked");
+					m->add(fun(&ccCylinder::isLeaf), "isLeaf");
+					m->add(fun(&ccCylinder::isCustom), "isCustom");
+					m->add(fun(&ccCylinder::isHierarchy), "isHierarchy");
+					m->add(fun(&ccCylinder::isKindOf), "isKindOf");
+					m->add(fun(&ccCylinder::isA), "isA");
+					m->add(fun(&ccCylinder::GetNextUniqueID), "GetNextUniqueID");
+					m->add(fun(&ccCylinder::GetLastUniqueID), "GetLastUniqueID");
+					m->add(fun(&ccCylinder::ReadClassIDFromFile), "ReadClassIDFromFile");
+					m->add(fun(&ccCylinder::getMetaData), "getMetaData");
+					m->add(fun(&ccCylinder::removeMetaData), "removeMetaData");
+					m->add(fun(static_cast<void(ccCylinder::*)(const  QString&, const QVariant&)>(&ccCylinder::setMetaData)), "setMetaData");
+					m->add(fun(static_cast<void(ccCylinder::*)(const QVariantMap&, bool)>(&ccCylinder::setMetaData)), "setMetaData");
+					m->add(fun(&ccCylinder::hasMetaData), "hasMetaData");
+					m->add(fun(&ccCylinder::metaData), "metaData");
+					m->add(fun(&ccCylinder::getUniqueIDForDisplay), "getUniqueIDForDisplay");
+					m->add(fun(&ccCylinder::getOwnBB), "getOwnBB");
+					m->add(fun(&ccCylinder::getGLTransformationHistory), "getGLTransformationHistory");
+					m->add(fun(&ccCylinder::getGLTransformationHistory), "getGLTransformationHistory");
+					m->add(fun(&ccCylinder::getTypeName), "getTypeName");
+					m->add(fun(&ccCylinder::clone), "clone");
+					m->add(fun(&ccCylinder::setColor), "setColor");
+					m->add(fun(&ccCylinder::operator+=), "+=");
+					m->add(fun(&ccCylinder::hasDrawingPrecision), "hasDrawingPrecision");
+					m->add(fun(&ccCylinder::setDrawingPrecision), "setDrawingPrecision");
+					m->add(fun(&ccCylinder::getDrawingPrecision), "getDrawingPrecision");
+					m->add(fun(static_cast<ccGLMatrix & (ccCylinder::*)()>(&ccCylinder::getTransformation)), "getTransformation");
+					m->add(fun(static_cast<const ccGLMatrix & (ccCylinder::*)()const>(&ccCylinder::getTransformation)), "getTransformation");
+					m->add(fun(&ccCylinder::getGLTransformationHistory), "getGLTransformationHistory");
+					m->add(fun(&ccCylinder::getOwnFitBB), "getOwnFitBB");
+					m->add(fun(&ccCylinder::getHeight), "getHeight");
+					m->add(fun(&ccCylinder::setHeight), "setHeight");
+					m->add(fun(&ccCylinder::getBottomRadius), "getBottomRadius");
+					m->add(fun(&ccCylinder::getTopRadius), "getTopRadius");
+					m->add(fun(&ccCylinder::setTopRadius), "setTopRadius");
+					m->add(fun(&ccCylinder::getBottomCenter), "getBottomCenter");
+					m->add(fun(&ccCylinder::getTopCenter), "getTopCenter");
+					m->add(fun(&ccCylinder::getSmallCenter), "getSmallCenter");
+					m->add(fun(&ccCylinder::getLargeCenter), "getLargeCenter");
+					m->add(fun(&ccCylinder::getSmallRadius), "getSmallRadius");
+					m->add(fun(&ccCylinder::getLargeRadius), "getLargeRadius");
+					m->add(fun(&ccCylinder::isSnoutMode), "isSnoutMode");
+					return m;
+				}
+
+				ModulePtr bs_ccDish(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccDish>(), "ccDish");
+					m->add(chaiscript::constructor<ccDish(PointCoordinateType, PointCoordinateType, PointCoordinateType, const ccGLMatrix*, QString, unsigned)>(), "ccCylinder");
+					m->add(chaiscript::constructor<ccDish(QString)>(), "ccDish");
+					m->add(fun([](PointCoordinateType r, PointCoordinateType h) {return new ccDish(r, h); }), "create_ccDish");
+					m->add(fun([](PointCoordinateType r, PointCoordinateType h, PointCoordinateType r2, const ccGLMatrix* transMat) {return new ccDish(r, h, r2, transMat); }), "create_ccDish");
+					m->add(fun([](PointCoordinateType r, PointCoordinateType h, PointCoordinateType r2, const ccGLMatrix* transMat, QString name) {return new ccDish(r, h, r2, transMat, name); }), "create_ccDish");
+					m->add(fun([](PointCoordinateType r, PointCoordinateType h, PointCoordinateType r2, const ccGLMatrix* transMat, QString name, unsigned p) {return new ccDish(r, h, r2, transMat, name, p); }), "create_ccDish");
+					m->add(fun(&ccDish::setAssociatedCloud), "setAssociatedCloud");
+					m->add(fun(&ccDish::cloneMesh), "cloneMesh");
+					m->add(fun(&ccDish::Triangulate), "Triangulate");
+					m->add(fun(&ccDish::TriangulateTwoPolylines), "TriangulateTwoPolylines");
+					m->add(fun(&ccDish::merge), "merge");
+					m->add(fun(&ccDish::shiftTriangleIndexes), "shiftTriangleIndexes");
+					m->add(fun(&ccDish::flipTriangles), "flipTriangles");
+					m->add(fun(&ccDish::addTriangle), "addTriangle");
+					m->add(fun(&ccDish::reserve), "reserve");
+					m->add(fun(&ccDish::resize), "resize");
+					m->add(fun(&ccDish::shrinkToFit), "shrinkToFit");
+					m->add(fun(&ccDish::setTriNormsTable), "setTriNormsTable");
+					m->add(fun(&ccDish::clearTriNormals), "clearTriNormals");
+					m->add(fun(&ccDish::arePerTriangleNormalsEnabled), "arePerTriangleNormalsEnabled");
+					m->add(fun(&ccDish::reservePerTriangleNormalIndexes), "reservePerTriangleNormalIndexes");
+					m->add(fun(&ccDish::addTriangleNormalIndexes), "addTriangleNormalIndexes");
+					m->add(fun(&ccDish::setTriangleNormalIndexes), "setTriangleNormalIndexes");
+					m->add(fun(&ccDish::removePerTriangleNormalIndexes), "removePerTriangleNormalIndexes");
+					m->add(fun(&ccDish::convertMaterialsToVertexColors), "convertMaterialsToVertexColors");
+					m->add(fun(&ccDish::hasPerTriangleMtlIndexes), "hasPerTriangleMtlIndexes");
+					m->add(fun(&ccDish::reservePerTriangleMtlIndexes), "reservePerTriangleMtlIndexes");
+					m->add(fun(&ccDish::removePerTriangleMtlIndexes), "removePerTriangleMtlIndexes");
+					m->add(fun(&ccDish::addTriangleMtlIndex), "addTriangleMtlIndex");
+					m->add(fun(&ccDish::setTriangleMtlIndexesTable), "setTriangleMtlIndexesTable");
+					m->add(fun(&ccDish::getTriangleMtlIndexesTable), "getTriangleMtlIndexesTable");
+					m->add(fun(&ccDish::setTriangleMtlIndex), "setTriangleMtlIndex");
+					m->add(fun(&ccDish::setMaterialSet), "setMaterialSet"); //TODO add default version(s)
+					m->add(fun(&ccDish::setTexCoordinatesTable), "setTexCoordinatesTable");
+					m->add(fun(&ccDish::reservePerTriangleTexCoordIndexes), "reservePerTriangleTexCoordIndexes");
+					m->add(fun(&ccDish::removePerTriangleTexCoordIndexes), "removePerTriangleTexCoordIndexes");
+					m->add(fun(&ccDish::addTriangleTexCoordIndexes), "addTriangleTexCoordIndexes");
+					m->add(fun(&ccDish::setTriangleTexCoordIndexes), "setTriangleTexCoordIndexes");
+					m->add(fun(&ccDish::computeNormals), "computeNormals");
+					m->add(fun(&ccDish::computePerVertexNormals), "computePerVertexNormals");
+					m->add(fun(&ccDish::computePerTriangleNormals), "computePerTriangleNormals");
+					m->add(fun(&ccDish::laplacianSmooth), "laplacianSmooth");
+					m->add(fun(&ccDish::processScalarField), "processScalarField");
+					m->add(fun(&ccDish::subdivide), "subdivide");
+					m->add(fun(&ccDish::createNewMeshFromSelection), "createNewMeshFromSelection");
+					m->add(fun(&ccDish::swapTriangles), "swapTriangles");
+					m->add(fun(&ccDish::transformTriNormals), "transformTriNormals");
+					m->add(fun(&ccDish::size), "size");
+					m->add(fun(&ccDish::forEach), "forEach");
+					m->add(fun(&ccDish::getBoundingBox), "getBoundingBox");
+					m->add(fun(&ccDish::placeIteratorAtBeginning), "placeIteratorAtBeginning");
+					m->add(fun(&ccDish::_getNextTriangle), "_getNextTriangle");
+					m->add(fun(&ccDish::_getTriangle), "_getTriangle");
+					m->add(fun(&ccDish::getTriangleVertices), "getTriangleVertices");
+					m->add(fun(&ccDish::getNextTriangleVertIndexes), "getNextTriangleVertIndexes");
+					m->add(fun(&ccDish::showNormals), "showNormals");
+					m->add(fun(&ccDish::isSerializable), "isSerializable");
+					m->add(fun(&ccDish::getAssociatedCloud), "getAssociatedCloud");
+					m->add(fun(&ccDish::refreshBB), "refreshBB");
+					m->add(fun(&ccDish::capacity), "capacity");
+					m->add(fun(&ccDish::hasMaterials), "hasMaterials");
+					m->add(fun(&ccDish::getMaterialSet), "getMaterialSet");
+					m->add(fun(&ccDish::getTriangleMtlIndex), "getTriangleMtlIndex");
+					m->add(fun(&ccDish::hasTextures), "hasTextures");
+					m->add(fun(&ccDish::getTexCoordinatesTable), "getTexCoordinatesTable");
+					m->add(fun(&ccDish::getTriangleTexCoordinates), "getTriangleTexCoordinates");
+					m->add(fun(&ccDish::hasPerTriangleTexCoordIndexes), "hasPerTriangleTexCoordIndexes");
+					m->add(fun(&ccDish::getTriangleTexCoordinatesIndexes), "getTriangleTexCoordinatesIndexes");
+					m->add(fun(&ccDish::hasTriNormals), "hasTriNormals");
+					m->add(fun(&ccDish::getTriangleNormalIndexes), "getTriangleNormalIndexes");
+					m->add(fun(&ccDish::getTriangleNormals), "getTriangleNormals");
+					m->add(fun(&ccDish::getTriNormsTable), "getTriNormsTable");
+					m->add(fun(&ccDish::interpolateNormalsBC), "interpolateNormalsBC");
+					m->add(fun(&ccDish::interpolateColorsBC), "interpolateColorsBC");
+					m->add(fun(&ccDish::getColorFromMaterial), "getColorFromMaterial");
+					m->add(fun(&ccDish::getVertexColorFromMaterial), "getVertexColorFromMaterial");
+					m->add(fun(&ccDish::isShownAsWire), "isShownAsWire");
+					m->add(fun(&ccDish::showWired), "showWired");
+					m->add(fun(&ccDish::triNormsShown), "triNormsShown");
+					m->add(fun(&ccDish::showTriNorms), "showTriNorms");
+					m->add(fun(&ccDish::materialsShown), "materialsShown");
+					m->add(fun(&ccDish::showMaterials), "showMaterials");
+					m->add(fun(&ccDish::stipplingEnabled), "stipplingEnabled");
+					m->add(fun(&ccDish::enableStippling), "enableStippling");
+					m->add(fun(&ccDish::samplePoints), "samplePoints"); //TODO add default version(s)
+					m->add(fun(&ccDish::importParametersFrom), "importParametersFrom");
+					m->add(fun(&ccDish::computePointPosition), "computePointPosition");
+					m->add(fun(&ccDish::GetCurrentDBVersion), "GetCurrentDBVersion");
+					m->add(fun(&ccDish::SetUniqueIDGenerator), "SetUniqueIDGenerator");
+					m->add(fun(&ccDish::GetUniqueIDGenerator), "GetUniqueIDGenerator");
+					m->add(fun(&ccDish::getClassID), "getClassID");
+					m->add(fun(&ccDish::getName), "getName");
+					m->add(fun(&ccDish::setName), "setName");
+					m->add(fun(&ccDish::getUniqueID), "getUniqueID");
+					m->add(fun(&ccDish::setUniqueID), "setUniqueID");
+					m->add(fun(&ccDish::isEnabled), "isEnabled");
+					m->add(fun(&ccDish::setEnabled), "setEnabled");
+					m->add(fun(&ccDish::toggleActivation), "toggleActivation");
+					m->add(fun(&ccDish::isLocked), "isLocked");
+					m->add(fun(&ccDish::setLocked), "setLocked");
+					m->add(fun(&ccDish::isLeaf), "isLeaf");
+					m->add(fun(&ccDish::isCustom), "isCustom");
+					m->add(fun(&ccDish::isHierarchy), "isHierarchy");
+					m->add(fun(&ccDish::isKindOf), "isKindOf");
+					m->add(fun(&ccDish::isA), "isA");
+					m->add(fun(&ccDish::GetNextUniqueID), "GetNextUniqueID");
+					m->add(fun(&ccDish::GetLastUniqueID), "GetLastUniqueID");
+					m->add(fun(&ccDish::ReadClassIDFromFile), "ReadClassIDFromFile");
+					m->add(fun(&ccDish::getMetaData), "getMetaData");
+					m->add(fun(&ccDish::removeMetaData), "removeMetaData");
+					m->add(fun(static_cast<void(ccDish::*)(const  QString&, const QVariant&)>(&ccDish::setMetaData)), "setMetaData");
+					m->add(fun(static_cast<void(ccDish::*)(const QVariantMap&, bool)>(&ccDish::setMetaData)), "setMetaData");
+					m->add(fun(&ccDish::hasMetaData), "hasMetaData");
+					m->add(fun(&ccDish::metaData), "metaData");
+					m->add(fun(&ccDish::getUniqueIDForDisplay), "getUniqueIDForDisplay");
+					m->add(fun(&ccDish::getOwnBB), "getOwnBB");
+					m->add(fun(&ccDish::getGLTransformationHistory), "getGLTransformationHistory");
+					m->add(fun(&ccDish::getGLTransformationHistory), "getGLTransformationHistory");
+					m->add(fun(&ccDish::getTypeName), "getTypeName");
+					m->add(fun(&ccDish::clone), "clone");
+					m->add(fun(&ccDish::setColor), "setColor");
+					m->add(fun(&ccDish::operator+=), "+=");
+					m->add(fun(&ccDish::hasDrawingPrecision), "hasDrawingPrecision");
+					m->add(fun(&ccDish::setDrawingPrecision), "setDrawingPrecision");
+					m->add(fun(&ccDish::getDrawingPrecision), "getDrawingPrecision");
+					m->add(fun(static_cast<ccGLMatrix & (ccDish::*)()>(&ccDish::getTransformation)), "getTransformation");
+					m->add(fun(static_cast<const ccGLMatrix & (ccDish::*)()const>(&ccDish::getTransformation)), "getTransformation");
+					m->add(fun(&ccDish::getGLTransformationHistory), "getGLTransformationHistory");
+					m->add(fun(&ccDish::getOwnFitBB), "getOwnFitBB");
+					return m;
+				}
+
+				ModulePtr bs_ccExtru(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccExtru>(), "ccExtru");
+					m->add(chaiscript::constructor<ccExtru(const std::vector<CCVector2>&, PointCoordinateType, const ccGLMatrix*, QString)>(), "ccExtru");
+					m->add(chaiscript::constructor<ccExtru(QString)>(), "ccExtru");
+					m->add(fun([](const std::vector<CCVector2>& profile, PointCoordinateType h) {return new ccExtru(profile, h); }), "create_ccExtru");
+					m->add(fun([](const std::vector<CCVector2>& profile, PointCoordinateType h, const ccGLMatrix* transMat) {return new ccExtru(profile, h, transMat); }), "create_ccExtru");
+					m->add(fun([](const std::vector<CCVector2>& profile, PointCoordinateType h, const ccGLMatrix* transMat, QString name) {return new ccExtru(profile, h, transMat, name); }), "create_ccExtru");
+					m->add(fun(&ccExtru::setAssociatedCloud), "setAssociatedCloud");
+					m->add(fun(&ccExtru::cloneMesh), "cloneMesh");
+					m->add(fun(&ccExtru::Triangulate), "Triangulate");
+					m->add(fun(&ccExtru::TriangulateTwoPolylines), "TriangulateTwoPolylines");
+					m->add(fun(&ccExtru::merge), "merge");
+					m->add(fun(&ccExtru::shiftTriangleIndexes), "shiftTriangleIndexes");
+					m->add(fun(&ccExtru::flipTriangles), "flipTriangles");
+					m->add(fun(&ccExtru::addTriangle), "addTriangle");
+					m->add(fun(&ccExtru::reserve), "reserve");
+					m->add(fun(&ccExtru::resize), "resize");
+					m->add(fun(&ccExtru::shrinkToFit), "shrinkToFit");
+					m->add(fun(&ccExtru::setTriNormsTable), "setTriNormsTable");
+					m->add(fun(&ccExtru::clearTriNormals), "clearTriNormals");
+					m->add(fun(&ccExtru::arePerTriangleNormalsEnabled), "arePerTriangleNormalsEnabled");
+					m->add(fun(&ccExtru::reservePerTriangleNormalIndexes), "reservePerTriangleNormalIndexes");
+					m->add(fun(&ccExtru::addTriangleNormalIndexes), "addTriangleNormalIndexes");
+					m->add(fun(&ccExtru::setTriangleNormalIndexes), "setTriangleNormalIndexes");
+					m->add(fun(&ccExtru::removePerTriangleNormalIndexes), "removePerTriangleNormalIndexes");
+					m->add(fun(&ccExtru::convertMaterialsToVertexColors), "convertMaterialsToVertexColors");
+					m->add(fun(&ccExtru::hasPerTriangleMtlIndexes), "hasPerTriangleMtlIndexes");
+					m->add(fun(&ccExtru::reservePerTriangleMtlIndexes), "reservePerTriangleMtlIndexes");
+					m->add(fun(&ccExtru::removePerTriangleMtlIndexes), "removePerTriangleMtlIndexes");
+					m->add(fun(&ccExtru::addTriangleMtlIndex), "addTriangleMtlIndex");
+					m->add(fun(&ccExtru::setTriangleMtlIndexesTable), "setTriangleMtlIndexesTable");
+					m->add(fun(&ccExtru::getTriangleMtlIndexesTable), "getTriangleMtlIndexesTable");
+					m->add(fun(&ccExtru::setTriangleMtlIndex), "setTriangleMtlIndex");
+					m->add(fun(&ccExtru::setMaterialSet), "setMaterialSet"); //TODO add default version(s)
+					m->add(fun(&ccExtru::setTexCoordinatesTable), "setTexCoordinatesTable");
+					m->add(fun(&ccExtru::reservePerTriangleTexCoordIndexes), "reservePerTriangleTexCoordIndexes");
+					m->add(fun(&ccExtru::removePerTriangleTexCoordIndexes), "removePerTriangleTexCoordIndexes");
+					m->add(fun(&ccExtru::addTriangleTexCoordIndexes), "addTriangleTexCoordIndexes");
+					m->add(fun(&ccExtru::setTriangleTexCoordIndexes), "setTriangleTexCoordIndexes");
+					m->add(fun(&ccExtru::computeNormals), "computeNormals");
+					m->add(fun(&ccExtru::computePerVertexNormals), "computePerVertexNormals");
+					m->add(fun(&ccExtru::computePerTriangleNormals), "computePerTriangleNormals");
+					m->add(fun(&ccExtru::laplacianSmooth), "laplacianSmooth");
+					m->add(fun(&ccExtru::processScalarField), "processScalarField");
+					m->add(fun(&ccExtru::subdivide), "subdivide");
+					m->add(fun(&ccExtru::createNewMeshFromSelection), "createNewMeshFromSelection");
+					m->add(fun(&ccExtru::swapTriangles), "swapTriangles");
+					m->add(fun(&ccExtru::transformTriNormals), "transformTriNormals");
+					m->add(fun(&ccExtru::size), "size");
+					m->add(fun(&ccExtru::forEach), "forEach");
+					m->add(fun(&ccExtru::getBoundingBox), "getBoundingBox");
+					m->add(fun(&ccExtru::placeIteratorAtBeginning), "placeIteratorAtBeginning");
+					m->add(fun(&ccExtru::_getNextTriangle), "_getNextTriangle");
+					m->add(fun(&ccExtru::_getTriangle), "_getTriangle");
+					m->add(fun(&ccExtru::getTriangleVertices), "getTriangleVertices");
+					m->add(fun(&ccExtru::getNextTriangleVertIndexes), "getNextTriangleVertIndexes");
+					m->add(fun(&ccExtru::showNormals), "showNormals");
+					m->add(fun(&ccExtru::isSerializable), "isSerializable");
+					m->add(fun(&ccExtru::getAssociatedCloud), "getAssociatedCloud");
+					m->add(fun(&ccExtru::refreshBB), "refreshBB");
+					m->add(fun(&ccExtru::capacity), "capacity");
+					m->add(fun(&ccExtru::hasMaterials), "hasMaterials");
+					m->add(fun(&ccExtru::getMaterialSet), "getMaterialSet");
+					m->add(fun(&ccExtru::getTriangleMtlIndex), "getTriangleMtlIndex");
+					m->add(fun(&ccExtru::hasTextures), "hasTextures");
+					m->add(fun(&ccExtru::getTexCoordinatesTable), "getTexCoordinatesTable");
+					m->add(fun(&ccExtru::getTriangleTexCoordinates), "getTriangleTexCoordinates");
+					m->add(fun(&ccExtru::hasPerTriangleTexCoordIndexes), "hasPerTriangleTexCoordIndexes");
+					m->add(fun(&ccExtru::getTriangleTexCoordinatesIndexes), "getTriangleTexCoordinatesIndexes");
+					m->add(fun(&ccExtru::hasTriNormals), "hasTriNormals");
+					m->add(fun(&ccExtru::getTriangleNormalIndexes), "getTriangleNormalIndexes");
+					m->add(fun(&ccExtru::getTriangleNormals), "getTriangleNormals");
+					m->add(fun(&ccExtru::getTriNormsTable), "getTriNormsTable");
+					m->add(fun(&ccExtru::interpolateNormalsBC), "interpolateNormalsBC");
+					m->add(fun(&ccExtru::interpolateColorsBC), "interpolateColorsBC");
+					m->add(fun(&ccExtru::getColorFromMaterial), "getColorFromMaterial");
+					m->add(fun(&ccExtru::getVertexColorFromMaterial), "getVertexColorFromMaterial");
+					m->add(fun(&ccExtru::isShownAsWire), "isShownAsWire");
+					m->add(fun(&ccExtru::showWired), "showWired");
+					m->add(fun(&ccExtru::triNormsShown), "triNormsShown");
+					m->add(fun(&ccExtru::showTriNorms), "showTriNorms");
+					m->add(fun(&ccExtru::materialsShown), "materialsShown");
+					m->add(fun(&ccExtru::showMaterials), "showMaterials");
+					m->add(fun(&ccExtru::stipplingEnabled), "stipplingEnabled");
+					m->add(fun(&ccExtru::enableStippling), "enableStippling");
+					m->add(fun(&ccExtru::samplePoints), "samplePoints"); //TODO add default version(s)
+					m->add(fun(&ccExtru::importParametersFrom), "importParametersFrom");
+					m->add(fun(&ccExtru::computePointPosition), "computePointPosition");
+					m->add(fun(&ccExtru::GetCurrentDBVersion), "GetCurrentDBVersion");
+					m->add(fun(&ccExtru::SetUniqueIDGenerator), "SetUniqueIDGenerator");
+					m->add(fun(&ccExtru::GetUniqueIDGenerator), "GetUniqueIDGenerator");
+					m->add(fun(&ccExtru::getClassID), "getClassID");
+					m->add(fun(&ccExtru::getName), "getName");
+					m->add(fun(&ccExtru::setName), "setName");
+					m->add(fun(&ccExtru::getUniqueID), "getUniqueID");
+					m->add(fun(&ccExtru::setUniqueID), "setUniqueID");
+					m->add(fun(&ccExtru::isEnabled), "isEnabled");
+					m->add(fun(&ccExtru::setEnabled), "setEnabled");
+					m->add(fun(&ccExtru::toggleActivation), "toggleActivation");
+					m->add(fun(&ccExtru::isLocked), "isLocked");
+					m->add(fun(&ccExtru::setLocked), "setLocked");
+					m->add(fun(&ccExtru::isLeaf), "isLeaf");
+					m->add(fun(&ccExtru::isCustom), "isCustom");
+					m->add(fun(&ccExtru::isHierarchy), "isHierarchy");
+					m->add(fun(&ccExtru::isKindOf), "isKindOf");
+					m->add(fun(&ccExtru::isA), "isA");
+					m->add(fun(&ccExtru::GetNextUniqueID), "GetNextUniqueID");
+					m->add(fun(&ccExtru::GetLastUniqueID), "GetLastUniqueID");
+					m->add(fun(&ccExtru::ReadClassIDFromFile), "ReadClassIDFromFile");
+					m->add(fun(&ccExtru::getMetaData), "getMetaData");
+					m->add(fun(&ccExtru::removeMetaData), "removeMetaData");
+					m->add(fun(static_cast<void(ccExtru::*)(const  QString&, const QVariant&)>(&ccExtru::setMetaData)), "setMetaData");
+					m->add(fun(static_cast<void(ccExtru::*)(const QVariantMap&, bool)>(&ccExtru::setMetaData)), "setMetaData");
+					m->add(fun(&ccExtru::hasMetaData), "hasMetaData");
+					m->add(fun(&ccExtru::metaData), "metaData");
+					m->add(fun(&ccExtru::getUniqueIDForDisplay), "getUniqueIDForDisplay");
+					m->add(fun(&ccExtru::getOwnBB), "getOwnBB");
+					m->add(fun(&ccExtru::getGLTransformationHistory), "getGLTransformationHistory");
+					m->add(fun(&ccExtru::getGLTransformationHistory), "getGLTransformationHistory");
+					m->add(fun(&ccExtru::getTypeName), "getTypeName");
+					m->add(fun(&ccExtru::clone), "clone");
+					m->add(fun(&ccExtru::setColor), "setColor");
+					m->add(fun(&ccExtru::operator+=), "+=");
+					m->add(fun(&ccExtru::hasDrawingPrecision), "hasDrawingPrecision");
+					m->add(fun(&ccExtru::setDrawingPrecision), "setDrawingPrecision");
+					m->add(fun(&ccExtru::getDrawingPrecision), "getDrawingPrecision");
+					m->add(fun(static_cast<ccGLMatrix & (ccExtru::*)()>(&ccExtru::getTransformation)), "getTransformation");
+					m->add(fun(static_cast<const ccGLMatrix & (ccExtru::*)()const>(&ccExtru::getTransformation)), "getTransformation");
+					m->add(fun(&ccExtru::getGLTransformationHistory), "getGLTransformationHistory");
+					m->add(fun(&ccExtru::getOwnFitBB), "getOwnFitBB");
+					m->add(fun(&ccExtru::getThickness), "getThickness");
+					m->add(fun(&ccExtru::getProfile), "getProfile");
+					return m;
+				}
+
+				ModulePtr bs_ccFacet(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::constructor<ccFacet(PointCoordinateType, QString)>(), "ccFacet");
+					m->add(fun([]() {return new ccFacet(); }), "create_ccFacet");
+					m->add(fun([](CCLib::GenericIndexedCloudPersist* cloud) {return ccFacet::Create(cloud); }), "create_ccFacet");
+					m->add(fun([](CCLib::GenericIndexedCloudPersist* cloud, PointCoordinateType maxEL) {return ccFacet::Create(cloud, maxEL); }), "create_ccFacet");
+					m->add(fun([](CCLib::GenericIndexedCloudPersist* cloud,PointCoordinateType maxEL, bool to) {return ccFacet::Create(cloud, maxEL, to); }), "create_ccFacet");
+					m->add(fun(&ccFacet::Create), "Create");
+					m->add(fun(&ccFacet::showNormals), "showNormals");
+					m->add(fun(&ccFacet::isSerializable), "isSerializable");					
+					m->add(fun(&ccFacet::GetCurrentDBVersion), "GetCurrentDBVersion");
+					m->add(fun(&ccFacet::SetUniqueIDGenerator), "SetUniqueIDGenerator");
+					m->add(fun(&ccFacet::GetUniqueIDGenerator), "GetUniqueIDGenerator");
+					m->add(fun(&ccFacet::getClassID), "getClassID");
+					m->add(fun(&ccFacet::getName), "getName");
+					m->add(fun(&ccFacet::setName), "setName");
+					m->add(fun(&ccFacet::getUniqueID), "getUniqueID");
+					m->add(fun(&ccFacet::setUniqueID), "setUniqueID");
+					m->add(fun(&ccFacet::isEnabled), "isEnabled");
+					m->add(fun(&ccFacet::setEnabled), "setEnabled");
+					m->add(fun(&ccFacet::toggleActivation), "toggleActivation");
+					m->add(fun(&ccFacet::isLocked), "isLocked");
+					m->add(fun(&ccFacet::setLocked), "setLocked");
+					m->add(fun(&ccFacet::isLeaf), "isLeaf");
+					m->add(fun(&ccFacet::isCustom), "isCustom");
+					m->add(fun(&ccFacet::isHierarchy), "isHierarchy");
+					m->add(fun(&ccFacet::isKindOf), "isKindOf");
+					m->add(fun(&ccFacet::isA), "isA");
+					m->add(fun(&ccFacet::GetNextUniqueID), "GetNextUniqueID");
+					m->add(fun(&ccFacet::GetLastUniqueID), "GetLastUniqueID");
+					m->add(fun(&ccFacet::ReadClassIDFromFile), "ReadClassIDFromFile");
+					m->add(fun(&ccFacet::getMetaData), "getMetaData");
+					m->add(fun(&ccFacet::removeMetaData), "removeMetaData");
+					m->add(fun(static_cast<void(ccFacet::*)(const  QString&, const QVariant&)>(&ccFacet::setMetaData)), "setMetaData");
+					m->add(fun(static_cast<void(ccFacet::*)(const QVariantMap&, bool)>(&ccFacet::setMetaData)), "setMetaData");
+					m->add(fun(&ccFacet::hasMetaData), "hasMetaData");
+					m->add(fun(&ccFacet::metaData), "metaData");
+					m->add(fun(&ccFacet::getUniqueIDForDisplay), "getUniqueIDForDisplay");
+					m->add(fun(&ccFacet::getOwnBB), "getOwnBB");
+					m->add(fun(&ccFacet::getGLTransformationHistory), "getGLTransformationHistory");
+					m->add(fun(&ccFacet::getGLTransformationHistory), "getGLTransformationHistory");
+					m->add(fun(&ccFacet::clone), "clone");
+					m->add(fun(&ccFacet::setColor), "setColor");
+					m->add(fun(&ccFacet::getGLTransformationHistory), "getGLTransformationHistory");
+					m->add(fun(&ccFacet::getOwnFitBB), "getOwnFitBB");
+					m->add(fun(&ccFacet::getCenter), "getCenter");				
+					m->add(fun(&ccFacet::getNormal), "getNormal");
+					m->add(fun(&ccFacet::getRMS), "getRMS");
+					m->add(fun(&ccFacet::getSurface), "getSurface");
+					m->add(fun(&ccFacet::getPlaneEquation), "getPlaneEquation");
+					m->add(fun(&ccFacet::invertNormal), "invertNormal");
+					m->add(fun(&ccFacet::getCenter), "getCenter");
+					m->add(fun(static_cast<ccMesh*(ccFacet::*)()>(&ccFacet::getPolygon)), "getPolygon");
+					m->add(fun(static_cast<const ccMesh*(ccFacet::*)()const>(&ccFacet::getPolygon)), "getPolygon");
+					m->add(fun(static_cast<ccPolyline*(ccFacet::*)()>(&ccFacet::getContour)), "getContour");
+					m->add(fun(static_cast<const ccPolyline*(ccFacet::*)()const>(&ccFacet::getContour)), "getContour");
+					m->add(fun(static_cast<ccPointCloud*(ccFacet::*)()>(&ccFacet::getContourVertices)), "getContourVertices");
+					m->add(fun(static_cast<const ccPointCloud*(ccFacet::*)()const>(&ccFacet::getContourVertices)), "getContourVertices");
+					m->add(fun(static_cast<ccPointCloud*(ccFacet::*)()>(&ccFacet::getOriginPoints)), "getOriginPoints");
+					m->add(fun(static_cast<const ccPointCloud*(ccFacet::*)()const>(&ccFacet::getOriginPoints)), "getOriginPoints");
+					m->add(fun(&ccFacet::setPolygon), "setPolygon");
+					m->add(fun(&ccFacet::setContour), "setContour");
+					m->add(fun(&ccFacet::setContourVertices), "setContourVertices");
+					m->add(fun(&ccFacet::setOriginPoints), "setOriginPoints");
+					m->add(fun(&ccFacet::setColor), "setColor");
+
+
+
+					return m;
+				}
+
+
+
+
+				ModulePtr bs_ccHObjectCaster(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccHObjectCaster>(), "ccHObjectCaster");
+					m->add(fun(&ccHObjectCaster::ToPointCloud), "ToPointCloud");
+					m->add(fun([](ccHObject* mat) {return ccHObjectCaster::ToPointCloud(mat); }), "ToPointCloud");
+					m->add(fun(&ccHObjectCaster::ToGenericPointCloud), "ToGenericPointCloud");
+					m->add(fun([](ccHObject* mat) {return ccHObjectCaster::ToGenericPointCloud(mat); }), "ToGenericPointCloud");
+					m->add(fun(&ccHObjectCaster::ToShifted), "ToShifted");
+					m->add(fun([](ccHObject *mat) {return ccHObjectCaster::ToShifted(mat); }), "ToShifted");
+					m->add(fun(&ccHObjectCaster::ToGenericMesh), "ToGenericMesh");
+					m->add(fun(&ccHObjectCaster::ToMesh), "ToMesh");
+					m->add(fun(&ccHObjectCaster::ToSubMesh), "ToSubMesh");
+					m->add(fun(&ccHObjectCaster::ToPolyline), "ToPolyline");
+					m->add(fun(&ccHObjectCaster::ToPlanarEntity), "ToPlanarEntity");
+					m->add(fun(&ccHObjectCaster::ToPrimitive), "ToPrimitive");
+					m->add(fun(&ccHObjectCaster::ToSphere), "ToSphere");
+					m->add(fun(&ccHObjectCaster::ToCylinder), "ToCylinder");
+					m->add(fun(&ccHObjectCaster::ToCone), "ToCone");
+					m->add(fun(&ccHObjectCaster::ToPlane), "ToPlane");
+					m->add(fun(&ccHObjectCaster::ToDish), "ToDish");
+					m->add(fun(&ccHObjectCaster::ToExtru), "ToExtru");
+					m->add(fun(&ccHObjectCaster::ToTorus), "ToTorus");
+					m->add(fun(&ccHObjectCaster::ToOctreeProxy), "ToOctreeProxy");
+					m->add(fun(&ccHObjectCaster::ToOctree), "ToOctree");
+					m->add(fun(&ccHObjectCaster::ToKdTree), "ToKdTree");
+					m->add(fun(&ccHObjectCaster::ToSensor), "ToSensor");
+					m->add(fun(&ccHObjectCaster::ToGBLSensor), "ToGBLSensor");
+					m->add(fun(&ccHObjectCaster::ToCameraSensor), "ToCameraSensor");
+					m->add(fun(&ccHObjectCaster::ToImage), "ToImage");
+					m->add(fun(&ccHObjectCaster::To2DLabel), "To2DLabel");
+					m->add(fun(&ccHObjectCaster::To2DViewportLabel), "To2DViewportLabel");
+					m->add(fun(&ccHObjectCaster::To2DViewportObject), "To2DViewportObject");
+					m->add(fun(&ccHObjectCaster::ToTransBuffer), "ToTransBuffer");
+					return m;
+				}
+
 
 				ModulePtr bs_class_relationships(ModulePtr m = std::make_shared<Module>())
 				{
 					m->add(chaiscript::base_class<ccObject, ccHObject>());
 					m->add(chaiscript::base_class<ccDrawableObject, ccHObject>());
 					
+					m->add(chaiscript::base_class<ccGLMatrixTpl<float>, ccGLMatrix>());
+					m->add(chaiscript::base_class<ccGLMatrixTpl<double>, ccGLMatrixd>());
+
 					m->add(chaiscript::base_class<ccDrawableObject, ccGenericMesh>());
 					m->add(chaiscript::base_class<ccHObject, ccGenericMesh>());
 					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccGenericMesh>());
@@ -692,15 +1629,58 @@ namespace chaiscript
 					m->add(chaiscript::base_class<ccGenericPrimitive, ccPlane>());
 					m->add(chaiscript::base_class<ccPlanarEntityInterface, ccPlane>());
 
+					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccSphere>());
+					m->add(chaiscript::base_class<ccHObject, ccSphere>());
+					m->add(chaiscript::base_class<ccObject, ccSphere>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccSphere>());
+					m->add(chaiscript::base_class<ccMesh, ccSphere>());
+					m->add(chaiscript::base_class<ccGenericPrimitive, ccSphere>());
+
+					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccCone>());
+					m->add(chaiscript::base_class<ccHObject, ccCone>());
+					m->add(chaiscript::base_class<ccObject, ccCone>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccCone>());
+					m->add(chaiscript::base_class<ccMesh, ccCone>());
+					m->add(chaiscript::base_class<ccGenericPrimitive, ccCone>());
+
+					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccCylinder>());
+					m->add(chaiscript::base_class<ccHObject, ccCylinder>());
+					m->add(chaiscript::base_class<ccObject, ccCylinder>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccCylinder>());
+					m->add(chaiscript::base_class<ccMesh, ccCylinder>());
+					m->add(chaiscript::base_class<ccGenericPrimitive, ccCylinder>());
+					m->add(chaiscript::base_class<ccCone, ccCylinder>());
+
+					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccDish>());
+					m->add(chaiscript::base_class<ccHObject, ccDish>());
+					m->add(chaiscript::base_class<ccObject, ccDish>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccDish>());
+					m->add(chaiscript::base_class<ccMesh, ccDish>());
+					m->add(chaiscript::base_class<ccGenericPrimitive, ccDish>());
+
+					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccExtru>());
+					m->add(chaiscript::base_class<ccHObject, ccExtru>());
+					m->add(chaiscript::base_class<ccObject, ccExtru>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccExtru>());
+					m->add(chaiscript::base_class<ccMesh, ccExtru>());
+					m->add(chaiscript::base_class<ccGenericPrimitive, ccExtru>());
+
+					
+					m->add(chaiscript::base_class<ccHObject, ccFacet>());
+					m->add(chaiscript::base_class<ccObject, ccFacet>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccFacet>());
+					m->add(chaiscript::base_class<ccPlanarEntityInterface, ccFacet>());
 
 					return m;
 				}
 
-
+				
 				ModulePtr bootstrap_classes(ModulePtr m = std::make_shared<Module>())
 				{
 					bs_ccObject(m);
 					bs_ccHObject(m);
+					bs_ccGLMatrixTpl<float>("ccGLMatrixTplf", m);
+					bs_ccGLMatrixTpl<double>("ccGLMatrixTpld", m);
 					bs_ccGLMatrix(m);
 					bs_ccGLMatrixd(m);
 					bs_ccPlanarEntityInterface(m);
@@ -709,8 +1689,15 @@ namespace chaiscript
 					bs_ccMesh(m);
 					bs_ccGenericPrimitive(m);
 					bs_ccPlane(m);
+					bs_ccSphere(m);
+					bs_ccCone(m);
+					bs_ccCylinder(m);
+					bs_ccDish(m);
+					bs_ccExtru(m);
+					bs_ccFacet(m);
 
 
+					bs_ccHObjectCaster(m);
 					bs_class_relationships(m);			
 					return m;
 				}

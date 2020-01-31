@@ -22,8 +22,11 @@
 #include <chaiscript/chaiscript.hpp>
 #include <chaiscript/utility/utility.hpp>
 
+#include <Qt>
 #include <QString>
 
+#include <ccGenericGLDisplay.h>
+#include <ccInteractor.h>
 #include <ccObject.h>
 #include <ccHObject.h>
 #include <ccGenericMesh.h>
@@ -59,6 +62,7 @@
 #include <ccDrawableObject.h>
 #include <ccProgressDialog.h>
 #include <GenericIndexedMesh.h>
+#include <ccScalarField.h>
 
 
 namespace chaiscript
@@ -105,6 +109,8 @@ namespace chaiscript
 				ModulePtr bs_ccHObject(ModulePtr m = std::make_shared<Module>())
 				{
 					m->add(chaiscript::user_type<ccHObject>(), "ccHObject");
+					m->add(chaiscript::user_type<ccHObject*>(), "ccHObject");
+					m->add(chaiscript::user_type<ccHObject&>(), "ccHObject");
 					m->add(chaiscript::constructor<ccHObject(const QString&)>(), "ccHObject");
 					m->add(chaiscript::constructor<ccHObject(const ccHObject&)>(), "ccHObject");
 					m->add(fun(&ccHObject::GetCurrentDBVersion), "GetCurrentDBVersion");
@@ -134,6 +140,96 @@ namespace chaiscript
 					m->add(fun(static_cast<void(ccHObject::*)(const QVariantMap&, bool)>(&ccHObject::setMetaData)), "setMetaData");
 					m->add(fun(&ccHObject::hasMetaData), "hasMetaData");
 					m->add(fun(&ccHObject::metaData), "metaData");
+					m->add(fun([](CC_CLASS_ENUM cce, const char* n) {return ccHObject::New(cce, n); }), "ccHObject_New");
+					m->add(fun([](CC_CLASS_ENUM cce) {return ccHObject::New(cce); }), "ccHObject_New");
+					m->add(fun([](const QString& pid, const QString& cid, const char* n) {return ccHObject::New(pid, cid, n); }), "ccHObject_New");
+					m->add(fun([](const QString& pid, const QString& cid) {return ccHObject::New(pid, cid); }), "ccHObject_New");
+					m->add(fun(&ccHObject::getClassID), "getClassID");
+					m->add(fun(&ccHObject::isGroup), "isGroup");
+					m->add(fun(&ccHObject::getParent), "getParent");
+					m->add(fun(&ccHObject::getIcon), "getIcon");
+					m->add(fun(&ccHObject::addDependency), "addDependency");
+					m->add(fun(&ccHObject::getDependencyFlagsWith), "getDependencyFlagsWith");
+					m->add(fun(&ccHObject::removeDependencyWith), "removeDependencyWith");
+					m->add(fun(&ccHObject::removeDependencyFlag), "removeDependencyFlag");
+					m->add(fun(&ccHObject::addChild), "addChild");
+					m->add(fun(&ccHObject::getChildrenNumber), "getChildrenNumber");
+					m->add(fun(&ccHObject::getChildCountRecursive), "getChildCountRecursive");
+					m->add(fun(&ccHObject::getChild), "getChild");
+					m->add(fun(&ccHObject::find), "find");
+					m->add(chaiscript::user_type<ccHObject::Container>(), "Container");
+					m->add(chaiscript::user_type<ccHObject::Shared>(), "Shared");
+					m->add(chaiscript::user_type<ccHObject::SharedContainer>(), "SharedContainer");
+					m->add(fun(&ccHObject::filterChildren), "filterChildren");
+					m->add(fun(&ccHObject::detachChild), "detachChild");
+					m->add(fun(&ccHObject::detatchAllChildren), "detatchAllChildren");
+					m->add(fun(static_cast<void(ccHObject::*)(ccHObject*)>(&ccHObject::removeChild)), "removeChild");
+					m->add(fun(static_cast<void(ccHObject::*)(int)>(&ccHObject::removeChild)), "removeChild");
+					m->add(fun(&ccHObject::removeAllChildren), "removeAllChildren");
+					m->add(fun(&ccHObject::getChildIndex), "getChildIndex");
+					m->add(fun(&ccHObject::swapChildren), "swapChildren");
+					m->add(fun(&ccHObject::getIndex), "getIndex");
+					m->add(fun(&ccHObject::transferChild), "transferChild");
+					m->add(fun(&ccHObject::transferChildren), "transferChildren");
+					m->add(fun(&ccHObject::getFirstChild), "getFirstChild");
+					m->add(fun(&ccHObject::getLastChild), "getLastChild");
+					m->add(fun(&ccHObject::isAncestorOf), "isAncestorOf");
+					m->add(fun(&ccHObject::getOwnBB), "getOwnBB");
+					m->add(fun(&ccHObject::getBB_recursive), "getBB_recursive");
+					m->add(fun(&ccHObject::getDisplayBB_recursive), "getDisplayBB_recursive");
+					m->add(fun(&ccHObject::getOwnFitBB), "getOwnFitBB");
+					m->add(fun(&ccHObject::getGlobalBB), "getGlobalBB");
+					m->add(fun(&ccHObject::drawBB), "drawBB");
+					m->add(fun(&ccHObject::draw), "draw");
+					m->add(fun(&ccHObject::getAbsoluteGLTransformation), "getAbsoluteGLTransformation");
+					m->add(fun(&ccHObject::isDisplayed), "isDisplayed");
+					m->add(fun(&ccHObject::isDisplayedIn), "isDisplayedIn");
+					m->add(fun(&ccHObject::isBranchEnabled), "isBranchEnabled");
+					m->add(fun(&ccHObject::setSelected), "setSelected");
+					m->add(fun(&ccHObject::setDisplay), "setDisplay");
+					m->add(fun(&ccHObject::removeFromDisplay), "removeFromDisplay");
+					m->add(fun(&ccHObject::prepareDisplayForRefresh), "prepareDisplayForRefresh");
+					m->add(fun(&ccHObject::refreshDisplay), "refreshDisplay");
+					m->add(fun(&ccHObject::resetGLTransformationHistory), "resetGLTransformationHistory");
+					m->add(fun(&ccHObject::toggleActivation), "toggleActivation");
+					m->add(fun(&ccHObject::toggleVisibility), "toggleVisibility");
+					m->add(fun(&ccHObject::toggleColors), "toggleColors");
+					m->add(fun(&ccHObject::toggleNormals), "toggleNormals");
+					m->add(fun(&ccHObject::toggleSF), "toggleSF");
+					m->add(fun(&ccHObject::toggleShowName), "toggleShowName");
+					m->add(fun(&ccHObject::toggleMaterials), "toggleMaterials");
+					m->add(fun(&ccHObject::setSelected_recursive), "setSelected_recursive");
+					m->add(fun(&ccHObject::setDisplay_recursive), "setDisplay_recursive");
+					m->add(fun(&ccHObject::removeFromDisplay_recursive), "removeFromDisplay_recursive");
+					m->add(fun(&ccHObject::prepareDisplayForRefresh_recursive), "prepareDisplayForRefresh_recursive");
+					m->add(fun(&ccHObject::refreshDisplay_recursive), "refreshDisplay_recursive");
+					m->add(fun(&ccHObject::resetGLTransformationHistory_recursive), "resetGLTransformationHistory_recursive");
+					m->add(fun(&ccHObject::toggleActivation_recursive), "toggleActivation_recursive");
+					m->add(fun(&ccHObject::toggleVisibility_recursive), "toggleVisibility_recursive");
+					m->add(fun(&ccHObject::toggleColors_recursive), "toggleColors_recursive");
+					m->add(fun(&ccHObject::toggleNormals_recursive), "toggleNormals_recursive");
+					m->add(fun(&ccHObject::toggleSF_recursive), "toggleSF_recursive");
+					m->add(fun(&ccHObject::toggleShowName_recursive), "toggleShowName_recursive");
+					m->add(fun(&ccHObject::toggleMaterials_recursive), "toggleMaterials_recursive");
+					m->add(fun(&ccHObject::transferDisplay), "transferDisplay");
+					m->add(fun(&ccHObject::findMaxUniqueID_recursive), "findMaxUniqueID_recursive");
+					m->add(fun(&ccHObject::applyGLTransformation_recursive), "applyGLTransformation_recursive");
+					m->add(fun(&ccHObject::notifyGeometryUpdate), "notifyGeometryUpdate");
+					m->add(fun(&ccHObject::isSerializable), "isSerializable");
+					m->add(fun(&ccHObject::toFile), "toFile");
+					m->add(fun(&ccHObject::fromFile), "fromFile");
+					m->add(fun(&ccHObject::fromFileNoChildren), "fromFileNoChildren");
+					m->add(fun(&ccHObject::isShareable), "isShareable");
+					m->add(fun(&ccHObject::setSelectionBehavior), "setSelectionBehavior");
+					m->add(fun(&ccHObject::getSelectionBehavior), "getSelectionBehavior");
+					m->add(fun(&ccHObject::getUniqueIDForDisplay), "getUniqueIDForDisplay");
+					m->add(fun(&ccHObject::getGLTransformationHistory), "getGLTransformationHistory");
+					m->add(fun(&ccHObject::setGLTransformationHistory), "setGLTransformationHistory");
+					m->add(fun(&ccHObject::resetGLTransformationHistory), "resetGLTransformationHistory");
+					
+
+
+
 					return m;
 				}
 
@@ -261,6 +357,417 @@ namespace chaiscript
 					return m;
 				}
 
+				ModulePtr bs_ccInteractor(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccInteractor>(), "ccInteractor");
+					m->add(fun(&ccInteractor::acceptClick), "acceptClick");
+					m->add(fun(&ccInteractor::move2D), "move2D");
+					m->add(fun(&ccInteractor::move3D), "move3D");
+					return m;
+				}
+
+				ModulePtr bs_cc2DLabel(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<cc2DLabel>(), "cc2DLabel");
+					m->add(chaiscript::constructor<cc2DLabel(QString)>(), "cc2DLabel");
+					m->add(fun(&cc2DLabel::acceptClick), "acceptClick");
+					m->add(fun(&cc2DLabel::move2D), "move2D");
+					m->add(fun(&cc2DLabel::move3D), "move3D");
+					m->add(fun(&cc2DLabel::GetCurrentDBVersion), "GetCurrentDBVersion");
+					m->add(fun(&cc2DLabel::SetUniqueIDGenerator), "SetUniqueIDGenerator");
+					m->add(fun(&cc2DLabel::GetUniqueIDGenerator), "GetUniqueIDGenerator");
+					m->add(fun(&cc2DLabel::getClassID), "getClassID");
+					m->add(fun(&cc2DLabel::getName), "getName");
+					m->add(fun(&cc2DLabel::setName), "setName");
+					m->add(fun(&cc2DLabel::getUniqueID), "getUniqueID");
+					m->add(fun(&cc2DLabel::setUniqueID), "setUniqueID");
+					m->add(fun(&cc2DLabel::isEnabled), "isEnabled");
+					m->add(fun(&cc2DLabel::setEnabled), "setEnabled");
+					m->add(fun(&cc2DLabel::toggleActivation), "toggleActivation");
+					m->add(fun(&cc2DLabel::isLocked), "isLocked");
+					m->add(fun(&cc2DLabel::setLocked), "setLocked");
+					m->add(fun(&cc2DLabel::isLeaf), "isLeaf");
+					m->add(fun(&cc2DLabel::isCustom), "isCustom");
+					m->add(fun(&cc2DLabel::isHierarchy), "isHierarchy");
+					m->add(fun(&cc2DLabel::isKindOf), "isKindOf");
+					m->add(fun(&cc2DLabel::isA), "isA");
+					m->add(fun(&cc2DLabel::GetNextUniqueID), "GetNextUniqueID");
+					m->add(fun(&cc2DLabel::GetLastUniqueID), "GetLastUniqueID");
+					m->add(fun(&cc2DLabel::ReadClassIDFromFile), "ReadClassIDFromFile");
+					m->add(fun(&cc2DLabel::getMetaData), "getMetaData");
+					m->add(fun(&cc2DLabel::removeMetaData), "removeMetaData");
+					m->add(fun(static_cast<void(cc2DLabel::*)(const  QString&, const QVariant&)>(&cc2DLabel::setMetaData)), "setMetaData");
+					m->add(fun(static_cast<void(cc2DLabel::*)(const QVariantMap&, bool)>(&cc2DLabel::setMetaData)), "setMetaData");
+					m->add(fun(&cc2DLabel::hasMetaData), "hasMetaData");
+					m->add(fun(&cc2DLabel::metaData), "metaData");
+					m->add(fun(&cc2DLabel::getRawName), "getRawName");
+					m->add(fun(&cc2DLabel::getLabelContent), "getLabelContent");
+					m->add(fun(&cc2DLabel::getTitle), "getTitle");
+					m->add(fun(&cc2DLabel::setPosition), "setPosition");
+					m->add(fun(&cc2DLabel::getPosition), "getPosition");
+					m->add(fun(&cc2DLabel::clear), "clear");
+					m->add(fun(&cc2DLabel::size), "size");
+					m->add(fun(static_cast<bool(cc2DLabel::*)(ccGenericPointCloud*, unsigned, bool)>(&cc2DLabel::addPickedPoint)), "addPickedPoint");
+					m->add(fun(static_cast<bool(cc2DLabel::*)(ccGenericMesh*, unsigned, const CCVector2d&, bool)>(&cc2DLabel::addPickedPoint)), "addPickedPoint");
+					m->add(fun(&cc2DLabel::setCollapsed), "setCollapsed");
+					m->add(fun(&cc2DLabel::isCollapsed), "isCollapsed");
+					m->add(fun(&cc2DLabel::displayPointLegend), "displayPointLegend");
+					m->add(fun(&cc2DLabel::isPointLegendDisplayed), "isPointLegendDisplayed");
+					m->add(fun(&cc2DLabel::setDisplayedIn2D), "setDisplayedIn2D");
+					m->add(fun(&cc2DLabel::isDisplayedIn2D), "isDisplayedIn2D");
+						m->add(chaiscript::user_type<cc2DLabel::PickedPoint>(), "PickedPoint");
+						m->add(chaiscript::constructor<cc2DLabel::PickedPoint()>(), "PickedPoint");
+						m->add(chaiscript::constructor<cc2DLabel::PickedPoint(ccGenericPointCloud*, unsigned, bool)>(), "PickedPoint");
+						m->add(chaiscript::constructor<cc2DLabel::PickedPoint(ccGenericMesh*, unsigned, const CCVector2d&, bool)>(), "PickedPoint");
+						m->add(fun(&cc2DLabel::PickedPoint::_cloud), "_cloud");
+						m->add(fun(&cc2DLabel::PickedPoint::_mesh), "_mesh");
+						m->add(fun(&cc2DLabel::PickedPoint::index), "index");
+						m->add(fun(&cc2DLabel::PickedPoint::pos2D), "pos2D");
+						m->add(fun(&cc2DLabel::PickedPoint::uv), "uv");
+						m->add(fun(&cc2DLabel::PickedPoint::entityCenterPoint), "entityCenterPoint");
+						m->add(fun(&cc2DLabel::PickedPoint::getPointPosition), "getPointPosition");
+						m->add(fun(&cc2DLabel::PickedPoint::cloudOrVertices), "cloudOrVertices");
+						m->add(fun(&cc2DLabel::PickedPoint::getUniqueID), "getUniqueID");
+						m->add(fun(&cc2DLabel::PickedPoint::entity), "entity");
+						m->add(fun(&cc2DLabel::PickedPoint::itemTitle), "itemTitle");
+						m->add(fun(&cc2DLabel::PickedPoint::prefix), "prefix");
+					m->add(fun(static_cast<bool(cc2DLabel::*)(const cc2DLabel::PickedPoint&)>(&cc2DLabel::addPickedPoint)), "addPickedPoint");
+					m->add(fun(&cc2DLabel::getPickedPoint), "getPickedPoint");
+					m->add(fun(&cc2DLabel::setRelativeMarkerScale), "setRelativeMarkerScale");
+					return m;
+				}
+
+				ModulePtr bs_cc2DViewportObject(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<cc2DViewportObject>(), "cc2DViewportObject");
+					m->add(chaiscript::constructor<cc2DViewportObject(QString)>(), "cc2DViewportObject");
+					m->add(fun(&cc2DViewportObject::GetCurrentDBVersion), "GetCurrentDBVersion");
+					m->add(fun(&cc2DViewportObject::SetUniqueIDGenerator), "SetUniqueIDGenerator");
+					m->add(fun(&cc2DViewportObject::GetUniqueIDGenerator), "GetUniqueIDGenerator");
+					m->add(fun(&cc2DViewportObject::getClassID), "getClassID");
+					m->add(fun(&cc2DViewportObject::getName), "getName");
+					m->add(fun(&cc2DViewportObject::setName), "setName");
+					m->add(fun(&cc2DViewportObject::getUniqueID), "getUniqueID");
+					m->add(fun(&cc2DViewportObject::setUniqueID), "setUniqueID");
+					m->add(fun(&cc2DViewportObject::isEnabled), "isEnabled");
+					m->add(fun(&cc2DViewportObject::setEnabled), "setEnabled");
+					m->add(fun(&cc2DViewportObject::toggleActivation), "toggleActivation");
+					m->add(fun(&cc2DViewportObject::isLocked), "isLocked");
+					m->add(fun(&cc2DViewportObject::setLocked), "setLocked");
+					m->add(fun(&cc2DViewportObject::isLeaf), "isLeaf");
+					m->add(fun(&cc2DViewportObject::isCustom), "isCustom");
+					m->add(fun(&cc2DViewportObject::isHierarchy), "isHierarchy");
+					m->add(fun(&cc2DViewportObject::isKindOf), "isKindOf");
+					m->add(fun(&cc2DViewportObject::isA), "isA");
+					m->add(fun(&cc2DViewportObject::GetNextUniqueID), "GetNextUniqueID");
+					m->add(fun(&cc2DViewportObject::GetLastUniqueID), "GetLastUniqueID");
+					m->add(fun(&cc2DViewportObject::ReadClassIDFromFile), "ReadClassIDFromFile");
+					m->add(fun(&cc2DViewportObject::getMetaData), "getMetaData");
+					m->add(fun(&cc2DViewportObject::removeMetaData), "removeMetaData");
+					m->add(fun(static_cast<void(cc2DViewportObject::*)(const  QString&, const QVariant&)>(&cc2DViewportObject::setMetaData)), "setMetaData");
+					m->add(fun(static_cast<void(cc2DViewportObject::*)(const QVariantMap&, bool)>(&cc2DViewportObject::setMetaData)), "setMetaData");
+					m->add(fun(&cc2DViewportObject::hasMetaData), "hasMetaData");
+					m->add(fun(&cc2DViewportObject::metaData), "metaData");
+					m->add(fun(&cc2DViewportObject::setParameters), "setParameters");
+					m->add(fun(&cc2DViewportObject::getParameters), "getParameters");
+					return m;
+				}
+
+				ModulePtr bs_cc2DViewportLabel(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<cc2DViewportLabel>(), "cc2DViewportLabel");
+					m->add(chaiscript::constructor<cc2DViewportLabel(QString)>(), "cc2DViewportLabel");
+					m->add(fun(&cc2DViewportLabel::GetCurrentDBVersion), "GetCurrentDBVersion");
+					m->add(fun(&cc2DViewportLabel::SetUniqueIDGenerator), "SetUniqueIDGenerator");
+					m->add(fun(&cc2DViewportLabel::GetUniqueIDGenerator), "GetUniqueIDGenerator");
+					m->add(fun(&cc2DViewportLabel::getClassID), "getClassID");
+					m->add(fun(&cc2DViewportLabel::getName), "getName");
+					m->add(fun(&cc2DViewportLabel::setName), "setName");
+					m->add(fun(&cc2DViewportLabel::getUniqueID), "getUniqueID");
+					m->add(fun(&cc2DViewportLabel::setUniqueID), "setUniqueID");
+					m->add(fun(&cc2DViewportLabel::isEnabled), "isEnabled");
+					m->add(fun(&cc2DViewportLabel::setEnabled), "setEnabled");
+					m->add(fun(&cc2DViewportLabel::toggleActivation), "toggleActivation");
+					m->add(fun(&cc2DViewportLabel::isLocked), "isLocked");
+					m->add(fun(&cc2DViewportLabel::setLocked), "setLocked");
+					m->add(fun(&cc2DViewportLabel::isLeaf), "isLeaf");
+					m->add(fun(&cc2DViewportLabel::isCustom), "isCustom");
+					m->add(fun(&cc2DViewportLabel::isHierarchy), "isHierarchy");
+					m->add(fun(&cc2DViewportLabel::isKindOf), "isKindOf");
+					m->add(fun(&cc2DViewportLabel::isA), "isA");
+					m->add(fun(&cc2DViewportLabel::GetNextUniqueID), "GetNextUniqueID");
+					m->add(fun(&cc2DViewportLabel::GetLastUniqueID), "GetLastUniqueID");
+					m->add(fun(&cc2DViewportLabel::ReadClassIDFromFile), "ReadClassIDFromFile");
+					m->add(fun(&cc2DViewportLabel::getMetaData), "getMetaData");
+					m->add(fun(&cc2DViewportLabel::removeMetaData), "removeMetaData");
+					m->add(fun(static_cast<void(cc2DViewportLabel::*)(const  QString&, const QVariant&)>(&cc2DViewportLabel::setMetaData)), "setMetaData");
+					m->add(fun(static_cast<void(cc2DViewportLabel::*)(const QVariantMap&, bool)>(&cc2DViewportLabel::setMetaData)), "setMetaData");
+					m->add(fun(&cc2DViewportLabel::hasMetaData), "hasMetaData");
+					m->add(fun(&cc2DViewportLabel::metaData), "metaData");
+					m->add(fun(&cc2DViewportLabel::setParameters), "setParameters");
+					m->add(fun(&cc2DViewportLabel::getParameters), "getParameters");
+					m->add(fun(&cc2DViewportLabel::roi), "roi");
+					m->add(fun(&cc2DViewportLabel::setRoi), "setRoi");
+					return m;
+				}
+
+				ModulePtr bs_ccSensor(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccSensor>(), "ccSensor");
+					m->add(chaiscript::constructor<ccSensor(const QString&)>(), "ccSensor");
+					m->add(chaiscript::constructor<ccSensor(const ccSensor&)>(), "ccSensor");
+					m->add(fun(&ccSensor::GetCurrentDBVersion), "GetCurrentDBVersion");
+					m->add(fun(&ccSensor::SetUniqueIDGenerator), "SetUniqueIDGenerator");
+					m->add(fun(&ccSensor::GetUniqueIDGenerator), "GetUniqueIDGenerator");
+					m->add(fun(&ccSensor::getClassID), "getClassID");
+					m->add(fun(&ccSensor::getName), "getName");
+					m->add(fun(&ccSensor::setName), "setName");
+					m->add(fun(&ccSensor::getUniqueID), "getUniqueID");
+					m->add(fun(&ccSensor::setUniqueID), "setUniqueID");
+					m->add(fun(&ccSensor::isEnabled), "isEnabled");
+					m->add(fun(&ccSensor::setEnabled), "setEnabled");
+					m->add(fun(&ccSensor::toggleActivation), "toggleActivation");
+					m->add(fun(&ccSensor::isLocked), "isLocked");
+					m->add(fun(&ccSensor::setLocked), "setLocked");
+					m->add(fun(&ccSensor::isLeaf), "isLeaf");
+					m->add(fun(&ccSensor::isCustom), "isCustom");
+					m->add(fun(&ccSensor::isHierarchy), "isHierarchy");
+					m->add(fun(&ccSensor::isKindOf), "isKindOf");
+					m->add(fun(&ccSensor::isA), "isA");
+					m->add(fun(&ccSensor::GetNextUniqueID), "GetNextUniqueID");
+					m->add(fun(&ccSensor::GetLastUniqueID), "GetLastUniqueID");
+					m->add(fun(&ccSensor::ReadClassIDFromFile), "ReadClassIDFromFile");
+					m->add(fun(&ccSensor::getMetaData), "getMetaData");
+					m->add(fun(&ccSensor::removeMetaData), "removeMetaData");
+					m->add(fun(static_cast<void(ccSensor::*)(const  QString&, const QVariant&)>(&ccSensor::setMetaData)), "setMetaData");
+					m->add(fun(static_cast<void(ccSensor::*)(const QVariantMap&, bool)>(&ccSensor::setMetaData)), "setMetaData");
+					m->add(fun(&ccSensor::hasMetaData), "hasMetaData");
+					m->add(fun(&ccSensor::metaData), "metaData");
+					m->add(fun(&ccSensor::getType), "getType");
+					m->add(fun(&ccSensor::checkVisibility), "checkVisibility");
+					m->add(fun(static_cast<ccIndexedTransformationBuffer*(ccSensor::*)()>(&ccSensor::getPositions)), "getPositions");
+					m->add(fun(static_cast<const ccIndexedTransformationBuffer*(ccSensor::*)()const>(&ccSensor::getPositions)), "getPositions");
+					m->add(fun(&ccSensor::setPositions), "setPositions");
+					m->add(fun(&ccSensor::addPosition), "addPosition");
+					m->add(fun(&ccSensor::getAbsoluteTransformation), "getAbsoluteTransformation");
+					m->add(fun(&ccSensor::getActiveAbsoluteTransformation), "getActiveAbsoluteTransformation");
+					m->add(fun(&ccSensor::getActiveAbsoluteCenter), "getActiveAbsoluteCenter");
+					m->add(fun(&ccSensor::getActiveAbsoluteRotation), "getActiveAbsoluteRotation");
+					m->add(fun(&ccSensor::setRigidTransformation), "setRigidTransformation");
+					m->add(fun(static_cast<ccGLMatrix& (ccSensor::*)()>(&ccSensor::getRigidTransformation)), "getRigidTransformation");
+					m->add(fun(static_cast<const ccGLMatrix& (ccSensor::*)()const>(&ccSensor::getRigidTransformation)), "getRigidTransformation");
+					m->add(fun(&ccSensor::getIndexBounds), "getIndexBounds");
+					m->add(fun(&ccSensor::getActiveIndex), "getActiveIndex");
+					m->add(fun(&ccSensor::setActiveIndex), "setActiveIndex");
+					m->add(fun(&ccSensor::setGraphicScale), "setGraphicScale");
+					m->add(fun(&ccSensor::getGraphicScale), "getGraphicScale");
+					m->add(fun(&ccSensor::applyViewport), "applyViewport");
+					m->add(fun(&ccSensor::applyGLTransformation), "applyGLTransformation");
+					return m;
+				}
+
+				ModulePtr bs_ccCameraSensor(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccCameraSensor>(), "ccCameraSensor");
+					m->add(chaiscript::constructor<ccCameraSensor()>(), "ccCameraSensor");
+					m->add(chaiscript::constructor<ccCameraSensor(const ccCameraSensor&)>(), "ccCameraSensor");
+					m->add(chaiscript::constructor<ccCameraSensor(const ccCameraSensor::IntrinsicParameters&)>(), "ccCameraSensor");
+					m->add(fun(&ccCameraSensor::GetCurrentDBVersion), "GetCurrentDBVersion");
+					m->add(fun(&ccCameraSensor::SetUniqueIDGenerator), "SetUniqueIDGenerator");
+					m->add(fun(&ccCameraSensor::GetUniqueIDGenerator), "GetUniqueIDGenerator");
+					m->add(fun(&ccCameraSensor::getClassID), "getClassID");
+					m->add(fun(&ccCameraSensor::getName), "getName");
+					m->add(fun(&ccCameraSensor::setName), "setName");
+					m->add(fun(&ccCameraSensor::getUniqueID), "getUniqueID");
+					m->add(fun(&ccCameraSensor::setUniqueID), "setUniqueID");
+					m->add(fun(&ccCameraSensor::isEnabled), "isEnabled");
+					m->add(fun(&ccCameraSensor::setEnabled), "setEnabled");
+					m->add(fun(&ccCameraSensor::toggleActivation), "toggleActivation");
+					m->add(fun(&ccCameraSensor::isLocked), "isLocked");
+					m->add(fun(&ccCameraSensor::setLocked), "setLocked");
+					m->add(fun(&ccCameraSensor::isLeaf), "isLeaf");
+					m->add(fun(&ccCameraSensor::isCustom), "isCustom");
+					m->add(fun(&ccCameraSensor::isHierarchy), "isHierarchy");
+					m->add(fun(&ccCameraSensor::isKindOf), "isKindOf");
+					m->add(fun(&ccCameraSensor::isA), "isA");
+					m->add(fun(&ccCameraSensor::GetNextUniqueID), "GetNextUniqueID");
+					m->add(fun(&ccCameraSensor::GetLastUniqueID), "GetLastUniqueID");
+					m->add(fun(&ccCameraSensor::ReadClassIDFromFile), "ReadClassIDFromFile");
+					m->add(fun(&ccCameraSensor::getMetaData), "getMetaData");
+					m->add(fun(&ccCameraSensor::removeMetaData), "removeMetaData");
+					m->add(fun(static_cast<void(ccCameraSensor::*)(const  QString&, const QVariant&)>(&ccCameraSensor::setMetaData)), "setMetaData");
+					m->add(fun(static_cast<void(ccCameraSensor::*)(const QVariantMap&, bool)>(&ccCameraSensor::setMetaData)), "setMetaData");
+					m->add(fun(&ccCameraSensor::hasMetaData), "hasMetaData");
+					m->add(fun(&ccCameraSensor::metaData), "metaData");
+					m->add(fun(&ccCameraSensor::getType), "getType");
+					m->add(fun(&ccCameraSensor::checkVisibility), "checkVisibility");
+					m->add(fun(static_cast<ccIndexedTransformationBuffer * (ccCameraSensor::*)()>(&ccCameraSensor::getPositions)), "getPositions");
+					m->add(fun(static_cast<const ccIndexedTransformationBuffer * (ccCameraSensor::*)()const>(&ccCameraSensor::getPositions)), "getPositions");
+					m->add(fun(&ccCameraSensor::setPositions), "setPositions");
+					m->add(fun(&ccCameraSensor::addPosition), "addPosition");
+					m->add(fun(&ccCameraSensor::getAbsoluteTransformation), "getAbsoluteTransformation");
+					m->add(fun(&ccCameraSensor::getActiveAbsoluteTransformation), "getActiveAbsoluteTransformation");
+					m->add(fun(&ccCameraSensor::getActiveAbsoluteCenter), "getActiveAbsoluteCenter");
+					m->add(fun(&ccCameraSensor::getActiveAbsoluteRotation), "getActiveAbsoluteRotation");
+					m->add(fun(&ccCameraSensor::setRigidTransformation), "setRigidTransformation");
+					m->add(fun(static_cast<ccGLMatrix & (ccCameraSensor::*)()>(&ccCameraSensor::getRigidTransformation)), "getRigidTransformation");
+					m->add(fun(static_cast<const ccGLMatrix & (ccCameraSensor::*)()const>(&ccCameraSensor::getRigidTransformation)), "getRigidTransformation");
+					m->add(fun(&ccCameraSensor::getIndexBounds), "getIndexBounds");
+					m->add(fun(&ccCameraSensor::getActiveIndex), "getActiveIndex");
+					m->add(fun(&ccCameraSensor::setActiveIndex), "setActiveIndex");
+					m->add(fun(&ccCameraSensor::setGraphicScale), "setGraphicScale");
+					m->add(fun(&ccCameraSensor::getGraphicScale), "getGraphicScale");
+					m->add(fun(&ccCameraSensor::applyViewport), "applyViewport");
+					m->add(fun(&ccCameraSensor::applyGLTransformation), "applyGLTransformation");
+						m->add(chaiscript::user_type<ccCameraSensor::IntrinsicParameters>(), "IntrinsicParameters");
+						m->add(fun(&ccCameraSensor::IntrinsicParameters::GetKinectDefaults), "GetKinectDefaults");
+						m->add(fun(&ccCameraSensor::IntrinsicParameters::vertFocal_pix), "vertFocal_pix");
+						m->add(fun(&ccCameraSensor::IntrinsicParameters::pixelSize_mm), "pixelSize_mm");						
+						m->add(fun(&ccCameraSensor::IntrinsicParameters::skew), "skew");
+						m->add(fun(&ccCameraSensor::IntrinsicParameters::vFOV_rad), "vFOV_rad");
+						m->add(fun(&ccCameraSensor::IntrinsicParameters::zNear_mm), "zNear_mm");
+						m->add(fun(&ccCameraSensor::IntrinsicParameters::zFar_mm), "zFar_mm");
+						m->add(fun(&ccCameraSensor::IntrinsicParameters::arrayWidth), "arrayWidth");
+						m->add(fun(&ccCameraSensor::IntrinsicParameters::arrayHeight), "arrayHeight");
+						m->add(fun(&ccCameraSensor::IntrinsicParameters::principal_point), "principal_point");
+						m->add(fun(&ccCameraSensor::IntrinsicParameters::horizFocal_pix), "horizFocal_pix");
+						m->add(chaiscript::user_type<ccCameraSensor::LensDistortionParameters>(), "LensDistortionParameters");
+						m->add(fun(&ccCameraSensor::LensDistortionParameters::getModel), "getModel");
+						m->add(chaiscript::user_type<ccCameraSensor::LensDistortionParameters::Shared>(), "LensDistortionParameters_Shared");
+						
+						m->add(chaiscript::user_type<ccCameraSensor::RadialDistortionParameters>(), "RadialDistortionParameters");
+						m->add(fun(&ccCameraSensor::RadialDistortionParameters::getModel), "getModel");
+						m->add(chaiscript::user_type<ccCameraSensor::RadialDistortionParameters::Shared>(), "RadialDistortionParameters_Shared");
+						m->add(fun(&ccCameraSensor::RadialDistortionParameters::k1), "k1");
+						m->add(fun(&ccCameraSensor::RadialDistortionParameters::k2), "k2");
+						m->add(chaiscript::base_class<ccCameraSensor::LensDistortionParameters, ccCameraSensor::RadialDistortionParameters>());
+
+						m->add(chaiscript::user_type<ccCameraSensor::ExtendedRadialDistortionParameters>(), "ExtendedRadialDistortionParameters");
+						m->add(fun(&ccCameraSensor::ExtendedRadialDistortionParameters::getModel), "getModel");
+						m->add(chaiscript::user_type<ccCameraSensor::ExtendedRadialDistortionParameters::Shared>(), "ExtendedRadialDistortionParameters_Shared");
+						m->add(fun(&ccCameraSensor::ExtendedRadialDistortionParameters::k1), "k1");
+						m->add(fun(&ccCameraSensor::ExtendedRadialDistortionParameters::k2), "k2");
+						m->add(fun(&ccCameraSensor::ExtendedRadialDistortionParameters::k3), "k3");
+						m->add(chaiscript::base_class<ccCameraSensor::LensDistortionParameters, ccCameraSensor::ExtendedRadialDistortionParameters>());
+						m->add(chaiscript::base_class<ccCameraSensor::RadialDistortionParameters, ccCameraSensor::ExtendedRadialDistortionParameters>());
+
+						m->add(chaiscript::user_type<ccCameraSensor::BrownDistortionParameters>(), "BrownDistortionParameters");
+						m->add(fun(&ccCameraSensor::BrownDistortionParameters::getModel), "getModel");
+						m->add(chaiscript::user_type<ccCameraSensor::BrownDistortionParameters::Shared>(), "BrownDistortionParameters_Shared");
+						m->add(fun(&ccCameraSensor::BrownDistortionParameters::GetKinectDefaults), "GetKinectDefaults");
+						m->add(fun(&ccCameraSensor::BrownDistortionParameters::principalPointOffset), "principalPointOffset");
+						m->add(fun(&ccCameraSensor::BrownDistortionParameters::linearDisparityParams), "linearDisparityParams");
+						m->add(fun(&ccCameraSensor::BrownDistortionParameters::K_BrownParams), "K_BrownParams");
+						m->add(fun(&ccCameraSensor::BrownDistortionParameters::P_BrownParams), "P_BrownParams");
+						m->add(chaiscript::base_class<ccCameraSensor::LensDistortionParameters, ccCameraSensor::BrownDistortionParameters>());
+
+						m->add(chaiscript::user_type<ccCameraSensor::FrustumInformation>(), "FrustumInformation");
+						m->add(fun(&ccCameraSensor::FrustumInformation::initFrustumCorners), "initFrustumCorners");
+						m->add(fun(&ccCameraSensor::FrustumInformation::initFrustumHull), "initFrustumHull");
+						m->add(fun(&ccCameraSensor::FrustumInformation::isComputed), "isComputed");
+						m->add(fun(&ccCameraSensor::FrustumInformation::drawFrustum), "drawFrustum");
+						m->add(fun(&ccCameraSensor::FrustumInformation::drawSidePlanes), "drawSidePlanes");
+						m->add(fun(&ccCameraSensor::FrustumInformation::frustumCorners), "frustumCorners");
+						m->add(fun(&ccCameraSensor::FrustumInformation::frustumHull), "frustumHull");
+						m->add(fun(&ccCameraSensor::FrustumInformation::center), "center");
+					m->add(fun(&ccCameraSensor::setVertFocal_pix), "setVertFocal_pix");
+					m->add(fun(&ccCameraSensor::getVertFocal_pix), "getVertFocal_pix");
+					m->add(fun(&ccCameraSensor::getHorizFocal_pix), "getHorizFocal_pix");
+					m->add(fun(&ccCameraSensor::setVerticalFov_rad), "setVerticalFov_rad");
+					m->add(fun(&ccCameraSensor::getVerticalFov_rad), "getVerticalFov_rad");
+					m->add(fun(&ccCameraSensor::getIntrinsicParameters), "getIntrinsicParameters");
+					m->add(fun(&ccCameraSensor::setIntrinsicParameters), "setIntrinsicParameters");
+					m->add(fun(&ccCameraSensor::getDistortionParameters), "getDistortionParameters");
+					m->add(fun(&ccCameraSensor::setDistortionParameters), "setDistortionParameters");
+					m->add(fun(&ccCameraSensor::getProjectionMatrix), "getProjectionMatrix");
+					m->add(fun(&ccCameraSensor::frustumIsDrawn), "frustumIsDrawn");
+					m->add(fun(&ccCameraSensor::drawFrustum), "drawFrustum");
+					m->add(fun(&ccCameraSensor::frustumPlanesAreDrawn), "frustumPlanesAreDrawn");
+					m->add(fun(&ccCameraSensor::drawFrustumPlanes), "drawFrustumPlanes");
+					m->add(fun(&ccCameraSensor::fromLocalCoordToGlobalCoord), "fromLocalCoordToGlobalCoord");
+					m->add(fun(&ccCameraSensor::fromGlobalCoordToLocalCoord), "fromGlobalCoordToLocalCoord");
+					m->add(fun(&ccCameraSensor::fromLocalCoordToImageCoord), "fromLocalCoordToImageCoord");
+					m->add(fun(&ccCameraSensor::fromImageCoordToLocalCoord), "fromImageCoordToLocalCoord");
+					m->add(fun(&ccCameraSensor::fromGlobalCoordToImageCoord), "fromGlobalCoordToImageCoord");
+					m->add(fun(&ccCameraSensor::fromImageCoordToGlobalCoord), "fromImageCoordToGlobalCoord");
+					m->add(fun(&ccCameraSensor::fromRealImCoordToIdealImCoord), "fromRealImCoordToIdealImCoord");
+					m->add(fun(&ccCameraSensor::orthoRectifyAsCloud), "orthoRectifyAsCloud");
+					m->add(fun(&ccCameraSensor::orthoRectifyAsImage), "orthoRectifyAsImage");
+					m->add(fun(&ccCameraSensor::orthoRectifyAsImageDirect), "orthoRectifyAsImageDirect");
+					m->add(fun(&ccCameraSensor::OrthoRectifyAsImages), "OrthoRectifyAsImages");
+					m->add(fun(&ccCameraSensor::computeOrthoRectificationParams), "computeOrthoRectificationParams");
+					m->add(fun(static_cast<bool(ccCameraSensor::*)(const CCVector2&, const float, Vector3Tpl<ScalarType>&)const>(&ccCameraSensor::computeUncertainty)), "computeUncertainty");
+					m->add(fun(static_cast<bool(ccCameraSensor::*)(CCLib::ReferenceCloud*, std::vector<Vector3Tpl<ScalarType>>&)>(&ccCameraSensor::computeUncertainty)), "computeUncertainty");
+					m->add(fun(static_cast<QImage(ccCameraSensor::*)(const QImage&)const>(&ccCameraSensor::undistort)), "undistort");
+					m->add(fun(static_cast<ccImage*(ccCameraSensor::*)(ccImage*, bool)const>(&ccCameraSensor::undistort)), "undistort");
+					m->add(fun(&ccCameraSensor::isGlobalCoordInFrustum), "isGlobalCoordInFrustum");
+					m->add(fun(&ccCameraSensor::computeGlobalPlaneCoefficients), "computeGlobalPlaneCoefficients");
+					m->add(fun(&ccCameraSensor::ConvertFocalPixToMM), "ConvertFocalPixToMM");
+					m->add(fun(&ccCameraSensor::ConvertFocalMMToPix), "ConvertFocalMMToPix");
+					m->add(fun(&ccCameraSensor::ComputeFovRadFromFocalPix), "ComputeFovRadFromFocalPix");
+					m->add(fun(&ccCameraSensor::ComputeFovRadFromFocalMm), "ComputeFovRadFromFocalMm");
+					
+					return m;
+				}
+
+				
+				ModulePtr bs_ccGBLSensor(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccGBLSensor>(), "ccGBLSensor");
+					m->add(chaiscript::constructor<ccGBLSensor()>(), "ccGBLSensor");
+					m->add(chaiscript::constructor<ccGBLSensor(const ccGBLSensor&)>(), "ccGBLSensor");
+					m->add(chaiscript::constructor<ccGBLSensor(const ccGBLSensor::ROTATION_ORDER)>(), "ccGBLSensor");
+					m->add(fun(&ccGBLSensor::GetCurrentDBVersion), "GetCurrentDBVersion");
+					m->add(fun(&ccGBLSensor::SetUniqueIDGenerator), "SetUniqueIDGenerator");
+					m->add(fun(&ccGBLSensor::GetUniqueIDGenerator), "GetUniqueIDGenerator");
+					m->add(fun(&ccGBLSensor::getClassID), "getClassID");
+					m->add(fun(&ccGBLSensor::getName), "getName");
+					m->add(fun(&ccGBLSensor::setName), "setName");
+					m->add(fun(&ccGBLSensor::getUniqueID), "getUniqueID");
+					m->add(fun(&ccGBLSensor::setUniqueID), "setUniqueID");
+					m->add(fun(&ccGBLSensor::isEnabled), "isEnabled");
+					m->add(fun(&ccGBLSensor::setEnabled), "setEnabled");
+					m->add(fun(&ccGBLSensor::toggleActivation), "toggleActivation");
+					m->add(fun(&ccGBLSensor::isLocked), "isLocked");
+					m->add(fun(&ccGBLSensor::setLocked), "setLocked");
+					m->add(fun(&ccGBLSensor::isLeaf), "isLeaf");
+					m->add(fun(&ccGBLSensor::isCustom), "isCustom");
+					m->add(fun(&ccGBLSensor::isHierarchy), "isHierarchy");
+					m->add(fun(&ccGBLSensor::isKindOf), "isKindOf");
+					m->add(fun(&ccGBLSensor::isA), "isA");
+					m->add(fun(&ccGBLSensor::GetNextUniqueID), "GetNextUniqueID");
+					m->add(fun(&ccGBLSensor::GetLastUniqueID), "GetLastUniqueID");
+					m->add(fun(&ccGBLSensor::ReadClassIDFromFile), "ReadClassIDFromFile");
+					m->add(fun(&ccGBLSensor::getMetaData), "getMetaData");
+					m->add(fun(&ccGBLSensor::removeMetaData), "removeMetaData");
+					m->add(fun(static_cast<void(ccGBLSensor::*)(const  QString&, const QVariant&)>(&ccGBLSensor::setMetaData)), "setMetaData");
+					m->add(fun(static_cast<void(ccGBLSensor::*)(const QVariantMap&, bool)>(&ccGBLSensor::setMetaData)), "setMetaData");
+					m->add(fun(&ccGBLSensor::hasMetaData), "hasMetaData");
+					m->add(fun(&ccGBLSensor::metaData), "metaData");
+					m->add(fun(&ccGBLSensor::getType), "getType");
+					m->add(fun(&ccGBLSensor::checkVisibility), "checkVisibility");
+					m->add(fun(static_cast<ccIndexedTransformationBuffer * (ccGBLSensor::*)()>(&ccGBLSensor::getPositions)), "getPositions");
+					m->add(fun(static_cast<const ccIndexedTransformationBuffer * (ccGBLSensor::*)()const>(&ccGBLSensor::getPositions)), "getPositions");
+					m->add(fun(&ccGBLSensor::setPositions), "setPositions");
+					m->add(fun(&ccGBLSensor::addPosition), "addPosition");
+					m->add(fun(&ccGBLSensor::getAbsoluteTransformation), "getAbsoluteTransformation");
+					m->add(fun(&ccGBLSensor::getActiveAbsoluteTransformation), "getActiveAbsoluteTransformation");
+					m->add(fun(&ccGBLSensor::getActiveAbsoluteCenter), "getActiveAbsoluteCenter");
+					m->add(fun(&ccGBLSensor::getActiveAbsoluteRotation), "getActiveAbsoluteRotation");
+					m->add(fun(&ccGBLSensor::setRigidTransformation), "setRigidTransformation");
+					m->add(fun(static_cast<ccGLMatrix & (ccGBLSensor::*)()>(&ccGBLSensor::getRigidTransformation)), "getRigidTransformation");
+					m->add(fun(static_cast<const ccGLMatrix & (ccGBLSensor::*)()const>(&ccGBLSensor::getRigidTransformation)), "getRigidTransformation");
+					m->add(fun(&ccGBLSensor::getIndexBounds), "getIndexBounds");
+					m->add(fun(&ccGBLSensor::getActiveIndex), "getActiveIndex");
+					m->add(fun(&ccGBLSensor::setActiveIndex), "setActiveIndex");
+					m->add(fun(&ccGBLSensor::setGraphicScale), "setGraphicScale");
+					m->add(fun(&ccGBLSensor::getGraphicScale), "getGraphicScale");
+					m->add(fun(&ccGBLSensor::applyViewport), "applyViewport");
+					m->add(fun(&ccGBLSensor::applyGLTransformation), "applyGLTransformation");
+					
+
+					return m;
+				}
 
 				ModulePtr bs_ccPlanarEntityInterface(ModulePtr m = std::make_shared<Module>())
 				{
@@ -1558,14 +2065,313 @@ namespace chaiscript
 					return m;
 				}
 
+				ModulePtr bs_ccShiftedObject(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccShiftedObject>(), "ccShiftedObject");
+					m->add(chaiscript::constructor<ccShiftedObject(QString)>(), "ccShiftedObject");
+					m->add(chaiscript::constructor<ccShiftedObject(const ccShiftedObject&)>(), "ccShiftedObject");
+					m->add(fun(&ccShiftedObject::GetCurrentDBVersion), "GetCurrentDBVersion");
+					m->add(fun(&ccShiftedObject::SetUniqueIDGenerator), "SetUniqueIDGenerator");
+					m->add(fun(&ccShiftedObject::GetUniqueIDGenerator), "GetUniqueIDGenerator");
+					m->add(fun(&ccShiftedObject::getClassID), "getClassID");
+					m->add(fun(&ccShiftedObject::getName), "getName");
+					m->add(fun(&ccShiftedObject::setName), "setName");
+					m->add(fun(&ccShiftedObject::getUniqueID), "getUniqueID");
+					m->add(fun(&ccShiftedObject::setUniqueID), "setUniqueID");
+					m->add(fun(&ccShiftedObject::isEnabled), "isEnabled");
+					m->add(fun(&ccShiftedObject::setEnabled), "setEnabled");
+					m->add(fun(&ccShiftedObject::toggleActivation), "toggleActivation");
+					m->add(fun(&ccShiftedObject::isLocked), "isLocked");
+					m->add(fun(&ccShiftedObject::setLocked), "setLocked");
+					m->add(fun(&ccShiftedObject::isLeaf), "isLeaf");
+					m->add(fun(&ccShiftedObject::isCustom), "isCustom");
+					m->add(fun(&ccShiftedObject::isHierarchy), "isHierarchy");
+					m->add(fun(&ccShiftedObject::isKindOf), "isKindOf");
+					m->add(fun(&ccShiftedObject::isA), "isA");
+					m->add(fun(&ccShiftedObject::GetNextUniqueID), "GetNextUniqueID");
+					m->add(fun(&ccShiftedObject::GetLastUniqueID), "GetLastUniqueID");
+					m->add(fun(&ccShiftedObject::ReadClassIDFromFile), "ReadClassIDFromFile");
+					m->add(fun(&ccShiftedObject::getMetaData), "getMetaData");
+					m->add(fun(&ccShiftedObject::removeMetaData), "removeMetaData");
+					m->add(fun(static_cast<void(ccShiftedObject::*)(const  QString&, const QVariant&)>(&ccShiftedObject::setMetaData)), "setMetaData");
+					m->add(fun(static_cast<void(ccShiftedObject::*)(const QVariantMap&, bool)>(&ccShiftedObject::setMetaData)), "setMetaData");
+					m->add(fun(&ccShiftedObject::hasMetaData), "hasMetaData");
+					m->add(fun(&ccShiftedObject::metaData), "metaData");
+					m->add(fun(static_cast<void(ccShiftedObject::*)(const CCVector3d&)>(&ccShiftedObject::setGlobalShift)), "setGlobalShift");
+					m->add(fun(static_cast<void(ccShiftedObject::*)(double, double, double)>(&ccShiftedObject::setGlobalShift)), "setGlobalShift");
+					m->add(fun(&ccShiftedObject::getGlobalShift), "getGlobalShift");
+					m->add(fun(&ccShiftedObject::setGlobalScale), "setGlobalScale");
+					m->add(fun(&ccShiftedObject::isShifted), "isShifted");
+					m->add(fun(&ccShiftedObject::getGlobalScale), "getGlobalScale");
+					m->add(fun(static_cast<CCVector3d(ccShiftedObject::*)(const Vector3Tpl<float>&)const>(&ccShiftedObject::toGlobal3d)), "toGlobal3d");
+					m->add(fun(static_cast<CCVector3d(ccShiftedObject::*)(const Vector3Tpl<double>&)const>(&ccShiftedObject::toGlobal3d)), "toGlobal3d");
+					m->add(fun(static_cast<CCVector3d(ccShiftedObject::*)(const Vector3Tpl<float>&)const>(&ccShiftedObject::toLocal3d)), "toLocal3d");
+					m->add(fun(static_cast<CCVector3d(ccShiftedObject::*)(const Vector3Tpl<double>&)const>(&ccShiftedObject::toLocal3d)), "toLocal3d");
+					m->add(fun(static_cast<CCVector3(ccShiftedObject::*)(const Vector3Tpl<float>&)const>(&ccShiftedObject::toLocal3pc)), "toLocal3pc");
+					m->add(fun(static_cast<CCVector3(ccShiftedObject::*)(const Vector3Tpl<double>&)const>(&ccShiftedObject::toLocal3pc)), "toLocal3pc");
+					m->add(fun(&ccShiftedObject::getGlobalBB), "getGlobalBB");					
+					return m;
+				}
+
+				ModulePtr bs_ccGenericPointCloud(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccGenericPointCloud>(), "ccGenericPointCloud");
+					m->add(fun(&ccGenericPointCloud::GetCurrentDBVersion), "GetCurrentDBVersion");
+					m->add(fun(&ccGenericPointCloud::SetUniqueIDGenerator), "SetUniqueIDGenerator");
+					m->add(fun(&ccGenericPointCloud::GetUniqueIDGenerator), "GetUniqueIDGenerator");
+					m->add(fun(&ccGenericPointCloud::getClassID), "getClassID");
+					m->add(fun(&ccGenericPointCloud::getName), "getName");
+					m->add(fun(&ccGenericPointCloud::setName), "setName");
+					m->add(fun(&ccGenericPointCloud::getUniqueID), "getUniqueID");
+					m->add(fun(&ccGenericPointCloud::setUniqueID), "setUniqueID");
+					m->add(fun(&ccGenericPointCloud::isEnabled), "isEnabled");
+					m->add(fun(&ccGenericPointCloud::setEnabled), "setEnabled");
+					m->add(fun(&ccGenericPointCloud::toggleActivation), "toggleActivation");
+					m->add(fun(&ccGenericPointCloud::isLocked), "isLocked");
+					m->add(fun(&ccGenericPointCloud::setLocked), "setLocked");
+					m->add(fun(&ccGenericPointCloud::isLeaf), "isLeaf");
+					m->add(fun(&ccGenericPointCloud::isCustom), "isCustom");
+					m->add(fun(&ccGenericPointCloud::isHierarchy), "isHierarchy");
+					m->add(fun(&ccGenericPointCloud::isKindOf), "isKindOf");
+					m->add(fun(&ccGenericPointCloud::isA), "isA");
+					m->add(fun(&ccGenericPointCloud::GetNextUniqueID), "GetNextUniqueID");
+					m->add(fun(&ccGenericPointCloud::GetLastUniqueID), "GetLastUniqueID");
+					m->add(fun(&ccGenericPointCloud::ReadClassIDFromFile), "ReadClassIDFromFile");
+					m->add(fun(&ccGenericPointCloud::getMetaData), "getMetaData");
+					m->add(fun(&ccGenericPointCloud::removeMetaData), "removeMetaData");
+					m->add(fun(static_cast<void(ccGenericPointCloud::*)(const  QString&, const QVariant&)>(&ccGenericPointCloud::setMetaData)), "setMetaData");
+					m->add(fun(static_cast<void(ccGenericPointCloud::*)(const QVariantMap&, bool)>(&ccGenericPointCloud::setMetaData)), "setMetaData");
+					m->add(fun(&ccGenericPointCloud::hasMetaData), "hasMetaData");
+					m->add(fun(&ccGenericPointCloud::metaData), "metaData");
+					m->add(fun(&ccGenericPointCloud::clone), "clone");
+					m->add(fun(&ccGenericPointCloud::clear), "clear");
+					m->add(fun(&ccGenericPointCloud::computeOctree), "computeOctree");
+					m->add(fun(&ccGenericPointCloud::getOctree), "getOctree");
+					m->add(fun(&ccGenericPointCloud::setOctree), "setOctree");
+					m->add(fun(&ccGenericPointCloud::getOctreeProxy), "getOctreeProxy");
+					m->add(fun(&ccGenericPointCloud::deleteOctree), "deleteOctree");
+					m->add(fun(&ccGenericPointCloud::geScalarValueColor), "geScalarValueColor");
+					m->add(fun(&ccGenericPointCloud::getPointScalarValueColor), "getPointScalarValueColor");
+					m->add(fun(&ccGenericPointCloud::getPointDisplayedDistance), "getPointDisplayedDistance");
+					m->add(fun(&ccGenericPointCloud::getPointColor), "getPointColor");
+					m->add(fun(&ccGenericPointCloud::getPointNormalIndex), "getPointNormalIndex");
+					m->add(fun(&ccGenericPointCloud::getPointNormal), "getPointNormal");
+					m->add(chaiscript::user_type<ccGenericPointCloud::VisibilityTableType>(), "VisibilityTableType");
+					m->add(fun(static_cast<ccGenericPointCloud::VisibilityTableType&(ccGenericPointCloud::*)()>(&ccGenericPointCloud::getTheVisibilityArray)), "getTheVisibilityArray");
+					m->add(fun(static_cast<const ccGenericPointCloud::VisibilityTableType& (ccGenericPointCloud::*)()const>(&ccGenericPointCloud::getTheVisibilityArray)), "getTheVisibilityArray");
+					m->add(fun(&ccGenericPointCloud::getTheVisiblePoints), "getTheVisiblePoints");
+					m->add(fun(&ccGenericPointCloud::isVisibilityTableInstantiated), "isVisibilityTableInstantiated");
+					m->add(fun(&ccGenericPointCloud::resetVisibilityArray), "resetVisibilityArray");
+					m->add(fun(&ccGenericPointCloud::invertVisibilityArray), "invertVisibilityArray");
+					m->add(fun(&ccGenericPointCloud::unallocateVisibilityArray), "unallocateVisibilityArray");
+					m->add(fun(&ccGenericPointCloud::getOwnBB), "getOwnBB");
+					m->add(fun(&ccGenericPointCloud::refreshBB), "refreshBB");
+					m->add(fun(&ccGenericPointCloud::createNewCloudFromVisibilitySelection), "createNewCloudFromVisibilitySelection");
+					m->add(fun(&ccGenericPointCloud::applyRigidTransformation), "applyRigidTransformation");
+					m->add(fun(&ccGenericPointCloud::crop), "crop");
+					m->add(fun(&ccGenericPointCloud::scale), "scale");
+					m->add(fun(&ccGenericPointCloud::isSerializable), "isSerializable");
+					m->add(fun(&ccGenericPointCloud::setPointSize), "setPointSize");
+					m->add(fun(&ccGenericPointCloud::getPointSize), "getPointSize");
+					m->add(fun(&ccGenericPointCloud::importParametersFrom), "importParametersFrom");
+					m->add(fun(&ccGenericPointCloud::pointPicking), "pointPicking");
+					return m;
+				}
+
+
+				ModulePtr bs_ccPointCloud(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccPointCloud>(), "ccPointCloud");
+					m->add(fun(&ccPointCloud::GetCurrentDBVersion), "GetCurrentDBVersion");
+					m->add(fun(&ccPointCloud::SetUniqueIDGenerator), "SetUniqueIDGenerator");
+					m->add(fun(&ccPointCloud::GetUniqueIDGenerator), "GetUniqueIDGenerator");
+					m->add(fun(&ccPointCloud::getClassID), "getClassID");
+					m->add(fun(&ccPointCloud::getName), "getName");
+					m->add(fun(&ccPointCloud::setName), "setName");
+					m->add(fun(&ccPointCloud::getUniqueID), "getUniqueID");
+					m->add(fun(&ccPointCloud::setUniqueID), "setUniqueID");
+					m->add(fun(&ccPointCloud::isEnabled), "isEnabled");
+					m->add(fun(&ccPointCloud::setEnabled), "setEnabled");
+					m->add(fun(&ccPointCloud::toggleActivation), "toggleActivation");
+					m->add(fun(&ccPointCloud::isLocked), "isLocked");
+					m->add(fun(&ccPointCloud::setLocked), "setLocked");
+					m->add(fun(&ccPointCloud::isLeaf), "isLeaf");
+					m->add(fun(&ccPointCloud::isCustom), "isCustom");
+					m->add(fun(&ccPointCloud::isHierarchy), "isHierarchy");
+					m->add(fun(&ccPointCloud::isKindOf), "isKindOf");
+					m->add(fun(&ccPointCloud::isA), "isA");
+					m->add(fun(&ccPointCloud::GetNextUniqueID), "GetNextUniqueID");
+					m->add(fun(&ccPointCloud::GetLastUniqueID), "GetLastUniqueID");
+					m->add(fun(&ccPointCloud::ReadClassIDFromFile), "ReadClassIDFromFile");
+					m->add(fun(&ccPointCloud::getMetaData), "getMetaData");
+					m->add(fun(&ccPointCloud::removeMetaData), "removeMetaData");
+					m->add(fun(static_cast<void(ccPointCloud::*)(const  QString&, const QVariant&)>(&ccPointCloud::setMetaData)), "setMetaData");
+					m->add(fun(static_cast<void(ccPointCloud::*)(const QVariantMap&, bool)>(&ccPointCloud::setMetaData)), "setMetaData");
+					m->add(fun(&ccPointCloud::hasMetaData), "hasMetaData");
+					m->add(fun(&ccPointCloud::metaData), "metaData");
+
+					//m->add(fun(static_cast<ccPointCloud*(ccPointCloud::*)(const CCLib::GenericIndexedCloud*, const ccGenericPointCloud*)>(&ccPointCloud::From)), "From");
+					//m->add(fun(static_cast<ccPointCloud* (ccPointCloud::*)(const CCLib::GenericCloud*, const ccGenericPointCloud*)>(&ccPointCloud::From)), "From");
+
+					m->add(fun(&ccPointCloud::partialClone), "partialClone");
+					m->add(fun(&ccPointCloud::cloneThis), "cloneThis");
+					m->add(fun(&ccPointCloud::clone), "clone");
+					m->add(fun(&ccPointCloud::operator+=), "+=");
+					m->add(fun(&ccPointCloud::clear), "clear");
+					m->add(fun(&ccPointCloud::unallocatePoints), "unallocatePoints");
+					m->add(fun(&ccPointCloud::unallocateColors), "unallocateColors");
+					m->add(fun(&ccPointCloud::unallocateNorms), "unallocateNorms");
+					m->add(fun(&ccPointCloud::colorsHaveChanged), "colorsHaveChanged");
+					m->add(fun(&ccPointCloud::normalsHaveChanged), "normalsHaveChanged");
+					m->add(fun(&ccPointCloud::pointsHaveChanged), "pointsHaveChanged");
+					m->add(fun(&ccPointCloud::reserveThePointsTable), "reserveThePointsTable");
+					m->add(fun(&ccPointCloud::reserveTheRGBTable), "reserveTheRGBTable");
+					m->add(fun(&ccPointCloud::resizeTheRGBTable), "resizeTheRGBTable");
+					m->add(fun(&ccPointCloud::reserveTheNormsTable), "reserveTheNormsTable");
+					m->add(fun(&ccPointCloud::resizeTheNormsTable), "resizeTheNormsTable");
+					m->add(fun(&ccPointCloud::reserve), "reserve");
+					m->add(fun(&ccPointCloud::resize), "resize");
+					m->add(fun(&ccPointCloud::shrinkToFit), "shrinkToFit");
+					m->add(fun(&ccPointCloud::getCurrentDisplayedScalarField), "getCurrentDisplayedScalarField");
+					m->add(fun(&ccPointCloud::getCurrentDisplayedScalarFieldIndex), "getCurrentDisplayedScalarFieldIndex");
+					m->add(fun(&ccPointCloud::setCurrentDisplayedScalarField), "setCurrentDisplayedScalarField");
+					m->add(fun(&ccPointCloud::deleteScalarField), "deleteScalarField");
+					m->add(fun(&ccPointCloud::deleteAllScalarFields), "deleteAllScalarFields");
+					m->add(fun(static_cast<int(ccPointCloud::*)(const char*)>(&ccPointCloud::addScalarField)), "addScalarField");
+					m->add(fun(&ccPointCloud::sfColorScaleShown), "sfColorScaleShown");
+					m->add(fun(&ccPointCloud::showSFColorsScale), "showSFColorsScale");
+					//GRID
+					m->add(chaiscript::user_type<ccPointCloud::Grid>(), "Grid");
+					m->add(chaiscript::constructor<ccPointCloud::Grid()>(), "Grid");
+					m->add(chaiscript::constructor<ccPointCloud::Grid(const ccPointCloud::Grid&)>(), "Grid");
+					m->add(fun(&ccPointCloud::Grid::toImage), "toImage");
+					m->add(fun(&ccPointCloud::Grid::w), "w");
+					m->add(fun(&ccPointCloud::Grid::h), "h");
+					m->add(fun(&ccPointCloud::Grid::validCount), "validCount");
+					m->add(fun(&ccPointCloud::Grid::minValidIndex), "minValidIndex");
+					m->add(fun(&ccPointCloud::Grid::maxValidIndex), "maxValidIndex");
+					m->add(fun(&ccPointCloud::Grid::indexes), "indexes");
+					m->add(chaiscript::vector_conversion<std::vector<ccColor::Rgb>>());
+					m->add(fun(&ccPointCloud::Grid::sensorPosition), "sensorPosition");
+
+					m->add(fun(&ccPointCloud::gridCount), "gridCount");
+					m->add(fun(static_cast<ccPointCloud::Grid::Shared&(ccPointCloud::*)(size_t)>(&ccPointCloud::grid)), "grid");
+					m->add(fun(static_cast<const ccPointCloud::Grid::Shared&(ccPointCloud::*)(size_t)const>(&ccPointCloud::grid)), "grid");
+					m->add(fun(&ccPointCloud::addGrid), "addGrid");
+					m->add(fun(&ccPointCloud::removeGrids), "removeGrids");
+					m->add(fun(&ccPointCloud::triangulateGrid), "triangulateGrid");
+					m->add(fun(&ccPointCloud::computeNormalsWithGrids), "computeNormalsWithGrids");
+					m->add(fun(&ccPointCloud::orientNormalsWithGrids), "orientNormalsWithGrids");
+					m->add(fun(&ccPointCloud::orientNormalsTowardViewPoint), "orientNormalsTowardViewPoint");
+					m->add(fun(&ccPointCloud::computeNormalsWithOctree), "computeNormalsWithOctree");
+					m->add(fun(&ccPointCloud::orientNormalsWithMST), "orientNormalsWithMST");
+					m->add(fun(&ccPointCloud::orientNormalsWithFM), "orientNormalsWithFM");
+					m->add(fun(&ccPointCloud::hasFWF), "hasFWF");
+					m->add(fun(&ccPointCloud::waveformProxy), "waveformProxy");
+					m->add(chaiscript::user_type<ccPointCloud::FWFDescriptorSet>(), "FWFDescriptorSet");
+					m->add(chaiscript::user_type<ccPointCloud::FWFDataContainer>(), "FWFDescriptorSet");
+					m->add(chaiscript::user_type<ccPointCloud::SharedFWFDataContainer>(), "FWFDescriptorSet");
+					m->add(chaiscript::vector_conversion<std::vector<uint8_t>>());
+					m->add(fun(static_cast<ccPointCloud::FWFDescriptorSet&(ccPointCloud::*)()>(&ccPointCloud::fwfDescriptors)), "fwfDescriptors");
+					m->add(fun(static_cast<const ccPointCloud::FWFDescriptorSet & (ccPointCloud::*)()const>(&ccPointCloud::fwfDescriptors)), "fwfDescriptors");
+					m->add(fun(static_cast<std::vector<ccWaveform> & (ccPointCloud::*)()>(&ccPointCloud::waveforms)), "waveforms");
+					m->add(fun(static_cast<const std::vector<ccWaveform> & (ccPointCloud::*)()const>(&ccPointCloud::waveforms)), "waveforms");
+					m->add(chaiscript::vector_conversion<std::vector<ccWaveform>>());
+					m->add(fun(&ccPointCloud::reserveTheFWFTable), "reserveTheFWFTable");
+					m->add(fun(&ccPointCloud::resizeTheFWFTable), "resizeTheFWFTable");
+					m->add(fun(static_cast<ccPointCloud::SharedFWFDataContainer& (ccPointCloud::*)()>(&ccPointCloud::fwfData)), "fwfData");
+					m->add(fun(static_cast<const ccPointCloud::SharedFWFDataContainer& (ccPointCloud::*)()const>(&ccPointCloud::fwfData)), "fwfData");
+					m->add(fun(&ccPointCloud::compressFWFData), "compressFWFData");
+					m->add(fun(&ccPointCloud::computeFWFAmplitude), "computeFWFAmplitude");
+					m->add(fun(&ccPointCloud::clearFWFData), "clearFWFData");
+					m->add(fun(&ccPointCloud::computeGravityCenter), "computeGravityCenter");
+					m->add(fun(&ccPointCloud::invalidateBoundingBox), "invalidateBoundingBox");
+					m->add(fun(&ccPointCloud::getDrawingParameters), "getDrawingParameters");
+					m->add(fun(&ccPointCloud::getUniqueIDForDisplay), "getUniqueIDForDisplay");
+					m->add(fun(&ccPointCloud::hasColors), "hasColors");
+					m->add(fun(&ccPointCloud::hasNormals), "hasNormals");
+					m->add(fun(&ccPointCloud::hasScalarFields), "hasScalarFields");
+					m->add(fun(&ccPointCloud::hasDisplayedScalarField), "hasDisplayedScalarField");
+					m->add(fun(&ccPointCloud::removeFromDisplay), "removeFromDisplay");
+					m->add(fun(&ccPointCloud::setDisplay), "setDisplay");
+					m->add(fun(&ccPointCloud::testVisibility), "testVisibility");
+					m->add(fun(&ccPointCloud::geScalarValueColor), "geScalarValueColor");
+					m->add(fun(&ccPointCloud::getPointScalarValueColor), "getPointScalarValueColor");
+					m->add(fun(&ccPointCloud::getPointDisplayedDistance), "getPointDisplayedDistance");
+					m->add(fun(&ccPointCloud::getPointColor), "getPointColor");
+					m->add(fun(&ccPointCloud::getPointNormalIndex), "getPointNormalIndex");
+					m->add(fun(&ccPointCloud::getPointNormal), "getPointNormal");
+					m->add(fun(&ccPointCloud::crop), "crop");
+					m->add(fun(&ccPointCloud::scale), "scale");
+					m->add(fun(&ccPointCloud::createNewCloudFromVisibilitySelection), "createNewCloudFromVisibilitySelection");
+					m->add(fun(&ccPointCloud::applyRigidTransformation), "applyRigidTransformation");
+					m->add(fun(&ccPointCloud::refreshBB), "refreshBB");
+					m->add(fun(&ccPointCloud::enableVisibilityCheck), "enableVisibilityCheck");
+					m->add(fun(&ccPointCloud::hasSensor), "hasSensor");
+					m->add(fun(&ccPointCloud::computeCPSet), "computeCPSet");
+					m->add(chaiscript::user_type<QSharedPointer<CCLib::ReferenceCloud>>(), "ReferenceCloud");
+					m->add(fun(&ccPointCloud::interpolateColorsFrom), "interpolateColorsFrom");
+					m->add(fun(&ccPointCloud::setPointColor), "setPointColor");
+					m->add(fun(&ccPointCloud::setPointNormalIndex), "setPointNormalIndex");
+					m->add(fun(&ccPointCloud::setPointNormal), "setPointNormal");
+					m->add(fun(&ccPointCloud::addNormIndex), "addNormIndex");
+					m->add(fun(&ccPointCloud::addNorm), "addNorm");
+					m->add(fun(&ccPointCloud::addNormAtIndex), "addNormAtIndex");
+					m->add(fun(&ccPointCloud::setNormsTable), "setNormsTable");
+					m->add(fun(&ccPointCloud::convertNormalToRGB), "convertNormalToRGB");
+					m->add(fun(&ccPointCloud::convertNormalToDipDirSFs), "convertNormalToDipDirSFs");
+					m->add(fun(static_cast<void(ccPointCloud::*)(const ccColor::Rgb&)>(&ccPointCloud::addRGBColor)), "addRGBColor");
+					m->add(fun(static_cast<void(ccPointCloud::*)(ColorCompType, ColorCompType, ColorCompType)>(&ccPointCloud::addRGBColor)), "addRGBColor");
+					m->add(fun(&ccPointCloud::addGreyColor), "addGreyColor");
+					m->add(fun(&ccPointCloud::convertRGBToGreyScale), "convertRGBToGreyScale");
+					m->add(fun(&ccPointCloud::colorize), "colorize");
+					m->add(fun(&ccPointCloud::setRGBColorByHeight), "setRGBColorByHeight");
+					m->add(fun(&ccPointCloud::setRGBColorByBanding), "setRGBColorByBanding");
+					m->add(fun(&ccPointCloud::setRGBColorWithCurrentScalarField), "setRGBColorWithCurrentScalarField");
+					m->add(fun(static_cast<bool(ccPointCloud::*)(ColorCompType, ColorCompType, ColorCompType)>(&ccPointCloud::setRGBColor)), "setRGBColor");
+					m->add(fun(static_cast<bool(ccPointCloud::*)(const ccColor::Rgb&)>(&ccPointCloud::setRGBColor)), "setRGBColor");
+					m->add(fun(&ccPointCloud::invertNormals), "invertNormals");
+					m->add(fun(&ccPointCloud::translate), "translate");
+					m->add(fun(&ccPointCloud::filterPointsByScalarValue), "filterPointsByScalarValue");
+					m->add(fun(&ccPointCloud::hidePointsByScalarValue), "hidePointsByScalarValue");
+					///UNROLL STUFF
+					m->add(chaiscript::user_type<ccPointCloud::UnrollBaseParams>(), "UnrollBaseParams");
+					m->add(fun(&ccPointCloud::UnrollBaseParams::radius), "radius");
+					m->add(fun(&ccPointCloud::UnrollBaseParams::axisDim), "axisDim");
+					m->add(chaiscript::user_type<ccPointCloud::UnrollCylinderParams>(), "UnrollCylinderParams");
+					m->add(fun(&ccPointCloud::UnrollCylinderParams::center), "center");
+					m->add(chaiscript::user_type<ccPointCloud::UnrollConeParams>(), "UnrollConeParams");
+					m->add(fun(&ccPointCloud::UnrollConeParams::apex), "apex");
+					m->add(fun(&ccPointCloud::UnrollConeParams::coneAngle_deg), "coneAngle_deg");
+					m->add(chaiscript::base_class<ccPointCloud::UnrollBaseParams, ccPointCloud::UnrollCylinderParams>());
+					m->add(chaiscript::base_class<ccPointCloud::UnrollBaseParams, ccPointCloud::UnrollConeParams>());
+
+					m->add(fun(&ccPointCloud::unroll), "unroll");
+					m->add(fun(&ccPointCloud::addColorRampInfo), "addColorRampInfo");
+					m->add(fun(static_cast<int(ccPointCloud::*)(ccScalarField*)>(&ccPointCloud::addScalarField)), "addScalarField");
+					m->add(fun(&ccPointCloud::rgbColors), "rgbColors");
+					m->add(fun(&ccPointCloud::normals), "normals");
+					m->add(fun(&ccPointCloud::crop2D), "crop2D");
+					m->add(fun(&ccPointCloud::append), "append");
+					m->add(fun(&ccPointCloud::enhanceRGBWithIntensitySF), "enhanceRGBWithIntensitySF");
+					m->add(fun(&ccPointCloud::exportCoordToSF), "exportCoordToSF");
+					m->add(fun(&ccPointCloud::exportNormalToSF), "exportNormalToSF");
+					return m;
+				}
+
 
 
 
 				ModulePtr bs_ccHObjectCaster(ModulePtr m = std::make_shared<Module>())
 				{
 					m->add(chaiscript::user_type<ccHObjectCaster>(), "ccHObjectCaster");
-					m->add(fun(&ccHObjectCaster::ToPointCloud), "ToPointCloud");
-					m->add(fun([](ccHObject* mat) {return ccHObjectCaster::ToPointCloud(mat); }), "ToPointCloud");
+					//m->add(fun(&ccHObjectCaster::ToPointCloud), "ToPointCloud");
+					////TO DO decide on style for the ccHObjectCaster functions, chaiscript is not evaluating to nullptr
+					//// even when conversion fails a new instance of the type is generated rather than being set to null
+					//// I found that if I make the calls lambdas with an extra bool ptr to set based on success will work
+					//// but it feels a bit like a hack
+					m->add(fun([](ccHObject* mat, bool* l, bool* s)->ccPointCloud* {ccPointCloud* pc = ccHObjectCaster::ToPointCloud(mat, l); *s = pc != nullptr; return pc; }), "ToPointCloud");
+					m->add(fun([](ccHObject* mat, bool* s)->ccPointCloud* {ccPointCloud* pc = ccHObjectCaster::ToPointCloud(mat); *s = pc != nullptr; return pc; }), "ToPointCloud");
 					m->add(fun(&ccHObjectCaster::ToGenericPointCloud), "ToGenericPointCloud");
 					m->add(fun([](ccHObject* mat) {return ccHObjectCaster::ToGenericPointCloud(mat); }), "ToGenericPointCloud");
 					m->add(fun(&ccHObjectCaster::ToShifted), "ToShifted");
@@ -1610,6 +2416,29 @@ namespace chaiscript
 					m->add(chaiscript::base_class<ccHObject, ccGenericMesh>());
 					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccGenericMesh>());
 					
+					m->add(chaiscript::base_class<ccInteractor, cc2DLabel>());
+					m->add(chaiscript::base_class<ccHObject, cc2DLabel>());
+					m->add(chaiscript::base_class<ccObject, cc2DLabel>());
+					m->add(chaiscript::base_class<ccDrawableObject, cc2DLabel>());
+
+					m->add(chaiscript::base_class<ccHObject, cc2DViewportObject>());
+					m->add(chaiscript::base_class<ccObject, cc2DViewportObject>());
+					m->add(chaiscript::base_class<ccDrawableObject, cc2DViewportObject>());
+
+					m->add(chaiscript::base_class<cc2DViewportObject, cc2DViewportLabel>());
+					m->add(chaiscript::base_class<ccHObject, cc2DViewportLabel>());
+					m->add(chaiscript::base_class<ccObject, cc2DViewportLabel>());
+					m->add(chaiscript::base_class<ccDrawableObject, cc2DViewportLabel>());
+
+					m->add(chaiscript::base_class<ccHObject, ccSensor>());
+					m->add(chaiscript::base_class<ccObject, ccSensor>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccSensor>());
+
+					m->add(chaiscript::base_class<ccHObject, ccCameraSensor>());
+					m->add(chaiscript::base_class<ccObject, ccCameraSensor>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccCameraSensor>());
+					m->add(chaiscript::base_class<ccSensor, ccCameraSensor>());
+
 					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccMesh>());
 					m->add(chaiscript::base_class<ccHObject, ccMesh>());
 					m->add(chaiscript::base_class<ccObject, ccMesh>());
@@ -1671,6 +2500,24 @@ namespace chaiscript
 					m->add(chaiscript::base_class<ccDrawableObject, ccFacet>());
 					m->add(chaiscript::base_class<ccPlanarEntityInterface, ccFacet>());
 
+					m->add(chaiscript::base_class<ccHObject, ccShiftedObject>());
+					m->add(chaiscript::base_class<ccObject, ccShiftedObject>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccShiftedObject>());
+
+					m->add(chaiscript::base_class<ccHObject, ccGenericPointCloud>());
+					m->add(chaiscript::base_class<ccObject, ccGenericPointCloud>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccGenericPointCloud>());
+					m->add(chaiscript::base_class<ccShiftedObject, ccGenericPointCloud>());
+					m->add(chaiscript::base_class<CCLib::GenericIndexedCloudPersist, ccGenericPointCloud>());
+
+					m->add(chaiscript::base_class<ccHObject, ccPointCloud>());
+					m->add(chaiscript::base_class<ccObject, ccPointCloud>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccPointCloud>());
+					m->add(chaiscript::base_class<ccShiftedObject, ccPointCloud>());
+					m->add(chaiscript::base_class<CCLib::PointCloudTpl<ccGenericPointCloud>, ccPointCloud>());
+					m->add(chaiscript::base_class<ccGenericPointCloud, ccPointCloud>());
+					m->add(chaiscript::base_class<CCLib::GenericIndexedCloudPersist, ccPointCloud>());
+
 					return m;
 				}
 
@@ -1683,6 +2530,13 @@ namespace chaiscript
 					bs_ccGLMatrixTpl<double>("ccGLMatrixTpld", m);
 					bs_ccGLMatrix(m);
 					bs_ccGLMatrixd(m);
+					bs_ccInteractor(m);
+					bs_cc2DLabel(m);
+					bs_cc2DViewportObject(m);
+					bs_cc2DViewportLabel(m);
+					bs_ccSensor(m);
+					bs_ccCameraSensor(m);
+					bs_ccGBLSensor(m);
 					bs_ccPlanarEntityInterface(m);
 					bs_ccDrawableObject(m);
 					bs_ccGenericMesh(m);
@@ -1695,7 +2549,9 @@ namespace chaiscript
 					bs_ccDish(m);
 					bs_ccExtru(m);
 					bs_ccFacet(m);
-
+					bs_ccShiftedObject(m);
+					bs_ccGenericPointCloud(m);
+					bs_ccPointCloud(m);
 
 					bs_ccHObjectCaster(m);
 					bs_class_relationships(m);			

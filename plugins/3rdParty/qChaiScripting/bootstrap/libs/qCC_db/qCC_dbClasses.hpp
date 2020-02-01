@@ -63,7 +63,8 @@
 #include <ccProgressDialog.h>
 #include <GenericIndexedMesh.h>
 #include <ccScalarField.h>
-
+#include <ccArray.h>
+#include <ccBasicTypes.h>
 
 namespace chaiscript
 {
@@ -230,6 +231,108 @@ namespace chaiscript
 
 
 
+					return m;
+				}
+
+				template<typename Type, int N, class ComponentType>
+				ModulePtr bs_ccArray(const std::string& shortCutName, ModulePtr m = std::make_shared<Module>())
+				{
+					using Base = ccArray<Type, N, ComponentType>;
+					m->add(chaiscript::user_type<Base>(), shortCutName);
+					m->add(fun(&Base::clone), "clone");
+					m->add(fun(&Base::copy), "copy");
+					m->add(fun(&Base::reserveSafe), "reserveSafe");
+					m->add(fun(&Base::isAllocated), "isAllocated");
+					m->add(fun(&Base::resizeSafe), "resizeSafe");
+					m->add(fun(&Base::getClassID), "getClassID");
+					m->add(fun(&Base::isShareable), "isShareable");
+					m->add(fun(&Base::isSerializable), "isSerializable");
+					m->add(fun(static_cast<Type&(Base::*)(size_t)>(&Base::getValue)), "getValue");
+					m->add(fun(static_cast<const Type&(Base::*)(size_t)const>(&Base::getValue)), "getValue");
+					m->add(fun(&Base::setValue), "setValue");
+					m->add(fun(&Base::addElement), "addElement");
+					m->add(fun(&Base::fill), "fill");
+					m->add(fun(&Base::currentSize), "currentSize");
+					m->add(fun(&Base::clear), "clear");
+					m->add(fun(&Base::swap), "swap");
+					return m;
+				}
+
+				ModulePtr bs_NormsIndexesTableType(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<NormsIndexesTableType>(), "NormsIndexesTableType");
+					m->add(chaiscript::constructor<NormsIndexesTableType()>(), "NormsIndexesTableType");
+					m->add(fun(&NormsIndexesTableType::getClassID), "getClassID");
+					m->add(fun(&NormsIndexesTableType::clone), "clone");
+					m->add(fun(&NormsIndexesTableType::fromFile_MeOnly), "fromFile_MeOnly");
+
+					m->add(chaiscript::base_class<ccHObject, NormsIndexesTableType>());
+					m->add(chaiscript::base_class<ccObject, NormsIndexesTableType>());
+					m->add(chaiscript::base_class<ccDrawableObject, NormsIndexesTableType>());
+					m->add(chaiscript::base_class<CCShareable, NormsIndexesTableType>());
+					m->add(chaiscript::base_class<std::vector<CompressedNormType>, NormsIndexesTableType>());
+
+					return m;
+				}
+
+				ModulePtr bs_NormsTableType(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<NormsTableType>(), "NormsIndexesTableType");
+					m->add(chaiscript::constructor<NormsTableType()>(), "NormsIndexesTableType");
+					m->add(fun(&NormsTableType::getClassID), "getClassID");
+					m->add(fun(&NormsTableType::clone), "clone");
+
+					m->add(chaiscript::base_class<ccHObject, NormsTableType>());
+					m->add(chaiscript::base_class<ccObject, NormsTableType>());
+					m->add(chaiscript::base_class<ccDrawableObject, NormsTableType>());
+					m->add(chaiscript::base_class<CCShareable, NormsTableType>());
+					m->add(chaiscript::base_class<std::vector<CCVector3>, NormsTableType>());
+					m->add(chaiscript::vector_conversion<std::vector<CCVector3>>());
+					return m;
+				}
+
+				ModulePtr bs_ColorsTableType(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ColorsTableType>(), "ColorsTableType");
+					m->add(chaiscript::constructor<ColorsTableType()>(), "ColorsTableType");
+					m->add(fun(&ColorsTableType::getClassID), "getClassID");
+					m->add(fun(&ColorsTableType::clone), "clone");
+
+					m->add(chaiscript::base_class<ccHObject, ColorsTableType>());
+					m->add(chaiscript::base_class<ccObject, ColorsTableType>());
+					m->add(chaiscript::base_class<ccDrawableObject, ColorsTableType>());
+					m->add(chaiscript::base_class<CCShareable, ColorsTableType>());
+					m->add(chaiscript::base_class<std::vector<ccColor::Rgb>, ColorsTableType>());
+					m->add(chaiscript::vector_conversion<std::vector<ccColor::Rgb>>());
+
+					return m;
+				}
+
+				ModulePtr bs_TexCoords2D(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<TexCoords2D>(), "TexCoords2D");
+					m->add(chaiscript::constructor<TexCoords2D()>(), "TexCoords2D");
+					m->add(chaiscript::constructor<TexCoords2D(float, float)>(), "TexCoords2D");
+					m->add(fun(&TexCoords2D::tx), "tx");
+					m->add(fun(&TexCoords2D::ty), "ty");
+					m->add(fun(&TexCoords2D::t), "t");
+					chaiscript::bootstrap::array<float[2]>("t_Array", m);
+					return m;
+				}
+
+				ModulePtr bs_TextureCoordsContainer(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<TextureCoordsContainer>(), "TextureCoordsContainer");
+					m->add(chaiscript::constructor<TextureCoordsContainer()>(), "TextureCoordsContainer");
+					m->add(fun(&TextureCoordsContainer::getClassID), "getClassID");
+					m->add(fun(&TextureCoordsContainer::clone), "clone");
+
+					m->add(chaiscript::base_class<ccHObject, TextureCoordsContainer>());
+					m->add(chaiscript::base_class<ccObject, TextureCoordsContainer>());
+					m->add(chaiscript::base_class<ccDrawableObject, TextureCoordsContainer>());
+					m->add(chaiscript::base_class<CCShareable, TextureCoordsContainer>());
+					m->add(chaiscript::base_class<std::vector<TexCoords2D>, TextureCoordsContainer>());
+					m->add(chaiscript::vector_conversion<std::vector<TexCoords2D>>());
 					return m;
 				}
 
@@ -2528,6 +2631,15 @@ namespace chaiscript
 					bs_ccHObject(m);
 					bs_ccGLMatrixTpl<float>("ccGLMatrixTplf", m);
 					bs_ccGLMatrixTpl<double>("ccGLMatrixTpld", m);
+					bs_ccArray<CompressedNormType, 1, CompressedNormType>("internal_compressed_normal_array", m);
+					bs_ccArray<CCVector3, 3, PointCoordinateType>("internal_normal_array", m);
+					bs_ccArray<ccColor::Rgb, 3, ColorCompType>("internal_rgb_array", m);
+					bs_ccArray<TexCoords2D, 2, float>("internal_tex2d_array", m);
+					bs_NormsIndexesTableType(m);
+					bs_NormsTableType(m);
+					bs_ColorsTableType(m);
+					bs_TexCoords2D(m);
+					bs_TextureCoordsContainer(m);
 					bs_ccGLMatrix(m);
 					bs_ccGLMatrixd(m);
 					bs_ccInteractor(m);
@@ -2562,4 +2674,5 @@ namespace chaiscript
 	}
 }
 
-#endif //CHAISCRIPTING_BOOTSTRAP_QCC_DB_CLASSES_HPP
+#endif 
+//CHAISCRIPTING_BOOTSTRAP_QCC_DB_CLASSES_HPP

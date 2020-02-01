@@ -100,15 +100,43 @@ void ChaiScriptingPlugin::setupChaiScriptEngine()
 	{
 		if (!chai)
 		{
-			chai = std::make_unique<chaiscript::ChaiScript>(chaiscript::Std_Lib::library());;
+			QDir  workingDir = QCoreApplication::applicationDirPath();
+			
+			std::vector<std::string> paths;
+			paths.push_back(workingDir.absolutePath().toStdString());
+			paths.push_back((workingDir.absolutePath() + QDir::separator() + "chaiScripts" + QDir::separator()).toLocal8Bit().constData());
+
+			//ChaiScript t = ChaiScript(chaiscript::Std_Lib::library(), { workingDir.absolutePath().toStdString() }, { workingDir.absolutePath() });
+			chai = std::make_unique<chaiscript::ChaiScript>(chaiscript::Std_Lib::library(), paths, paths);;
 			if (systemBootstrap == nullptr)
 			{
 				systemBootstrap = chaiscript::cloudCompare::bootstrapSystem::bootstrap();
 			}
 			chai->add(systemBootstrap);
 			chai->add(chaiscript::type_conversion<std::string, QString>([](const std::string& str) {return QString::fromStdString(str); }));
+			chai->add(chaiscript::type_conversion<QString, std::string>([](const QString& str) {std::string ret = str.toLocal8Bit().constData(); return ret; }));
+			chai->add(chaiscript::type_conversion<QStringList, std::vector<std::string>>([](const QStringList& str)
+				{	
+					std::vector<QString> tmp = str.toVector().toStdVector();
+					std::vector<std::string> ret;
+					for (QString itm : tmp)
+					{
+						ret.push_back(itm.toLocal8Bit().constData());
+					} 
+					return ret; 
+				}));
+			chai->add(chaiscript::type_conversion<std::vector<std::string>, QStringList>([](const std::vector<std::string>& str)
+				{
+					QStringList ret;
+					for (std::string itm : str)
+					{
+						ret.push_back(QString::fromStdString(itm));
+					}
+					return ret;
+				}));
 			chai->add(fun([](const std::string& str) {return QString::fromUtf8(str.c_str()); }), "to_QString");
 			chai->add(fun([](const QString& str) {std::string ret = str.toLocal8Bit().constData(); return ret; }), "to_string");
+
 			chai->add(chaiscript::vector_conversion<std::vector<int>>());
 			chai->add(chaiscript::vector_conversion<std::vector<std::string>>());
 
@@ -127,8 +155,6 @@ void ChaiScriptingPlugin::setupChaiScriptEngine()
 					})");
 			chaiInitialState = chai->get_state();
 		}
-		
-
 	}
 	catch (const chaiscript::exception::eval_error & ee) {
 		m_app->dispToConsole(ee.what(), ccMainAppInterface::ERR_CONSOLE_MESSAGE);

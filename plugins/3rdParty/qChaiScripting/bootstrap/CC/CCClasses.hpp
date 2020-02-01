@@ -231,7 +231,7 @@ namespace chaiscript
 						{ fun(static_cast<const SquareMatrixTpl<T> & (SquareMatrixTpl<T>::*)(const SquareMatrixTpl<T>&)>(&SquareMatrixTpl<T>::operator+=)), "+=" },
 						{ fun(static_cast<SquareMatrixTpl<T>(SquareMatrixTpl<T>::*)(const SquareMatrixTpl<T>&)const>(&SquareMatrixTpl<T>::operator-)), "-" },
 						{ fun(static_cast<const SquareMatrixTpl<T> & (SquareMatrixTpl<T>::*)(const SquareMatrixTpl<T>&)>(&SquareMatrixTpl<T>::operator-=)), "-=" },
-						{ fun(static_cast<SquareMatrixTpl<T>(SquareMatrixTpl<T>::*)(const const SquareMatrixTpl<T>&)const>(&SquareMatrixTpl<T>::operator*)), "*" },
+						{ fun(static_cast<SquareMatrixTpl<T>(SquareMatrixTpl<T>::*)(const SquareMatrixTpl<T>&)const>(&SquareMatrixTpl<T>::operator*)), "*" },
 						{ fun(static_cast<CCVector3(SquareMatrixTpl<T>::*)(const CCVector3&)const>(&SquareMatrixTpl<T>::operator*)), "*" },
 						{ fun(static_cast<CCVector3d(SquareMatrixTpl<T>::*)(const CCVector3d&)const>(&SquareMatrixTpl<T>::operator*)), "*" },
 						{ fun(static_cast<const SquareMatrixTpl<T> & (SquareMatrixTpl<T>::*)(const SquareMatrixTpl<T>&)>(&SquareMatrixTpl<T>::operator*=)), "*=" },

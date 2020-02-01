@@ -23,6 +23,6 @@ if (NOT chaiscript_FOUND)
     set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
     set(BUILD_LIBFUZZ_TESTER OFF CACHE BOOL "" FORCE)
     
-    add_subdirectory(${chaiscript_SOURCE_DIR} ${chaiscript_BINARY_DIR})
+    add_subdirectory(${chaiscript_SOURCE_DIR} ${chaiscript_BINARY_DIR} EXCLUDE_FROM_ALL)
   endif()
 endif()

@@ -51,6 +51,7 @@
 #include <pdal/io/BufferReader.hpp>
 #include <pdal/Filter.hpp>
 #include <pdal/filters/StreamCallbackFilter.hpp>
+
 Q_DECLARE_METATYPE(pdal::SpatialReference)
 
 using namespace pdal::Dimension;
@@ -607,6 +608,21 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 
 		writerOptions.add("filename", filename.toStdString());
 		writerOptions.add("extra_dims", "all");
+
+		if (theCloud->hasMetaData(LAS_GLOBAL_ENCODING_META_DATA))
+		{
+			bool ok = false;
+			unsigned int global_encoding = theCloud->getMetaData(LAS_GLOBAL_ENCODING_META_DATA).toUInt(&ok);
+			if (ok) {
+				writerOptions.add("global_encoding", global_encoding);
+			}
+		}
+
+		if (theCloud->hasMetaData(LAS_PROJECT_UUID_META_DATA))
+		{
+			QString uuid = theCloud->getMetaData(LAS_PROJECT_UUID_META_DATA).toString();
+			writerOptions.add("project_id", uuid.toStdString());
+		}
 
 		if (theCloud->hasMetaData(LAS_VERSION_MINOR_META_DATA))
 		{
@@ -1611,6 +1627,15 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 					loadedCloud->setMetaData(LAS_OFFSET_X_META_DATA, QVariant(lasOffset.x));
 					loadedCloud->setMetaData(LAS_OFFSET_Y_META_DATA, QVariant(lasOffset.y));
 					loadedCloud->setMetaData(LAS_OFFSET_Z_META_DATA, QVariant(lasOffset.z));
+					loadedCloud->setMetaData(LAS_GLOBAL_ENCODING_META_DATA, QVariant(lasHeader.globalEncoding()));
+
+					const pdal::Uuid projectUUID = lasHeader.projectId();
+					if (!projectUUID.isNull()) {
+						loadedCloud->setMetaData(
+							LAS_PROJECT_UUID_META_DATA,
+							QVariant(QString::fromStdString(projectUUID.toString()))
+						);
+					}
 
 					loadedCloud->setMetaData(LAS_VERSION_MAJOR_META_DATA, QVariant(lasHeader.versionMajor()));
 					loadedCloud->setMetaData(LAS_VERSION_MINOR_META_DATA, QVariant(lasHeader.versionMinor()));

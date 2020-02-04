@@ -19,7 +19,7 @@
 //##########################################################################
 
 #include "ccStdPluginInterface.h"
-
+#include <chaiscript/chaiscript.hpp>
 
 
 class ChaiScriptingPlugin : public QObject, public ccStdPluginInterface
@@ -46,6 +46,7 @@ private:
 	void destroyChai();
 	void resetToSavedChaiState();
 	std::string chaiSystemDump();
+	std::map<std::string, chaiscript::Boxed_Value> getChaiObjects();
 
 	//! Default action
 	QAction* m_action;

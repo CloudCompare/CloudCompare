@@ -25,8 +25,7 @@
 #include <chaiscript/dispatchkit/bootstrap_stl.hpp>
 #include <chaiscript/dispatchkit/function_call.hpp>
 
-//#include "bootstrap/qCC/qCCBootstrap.hpp"
-//#include "bootstrap/CC/CCBootstrap.hpp"
+
 #include "bootstrap/systemBootstrap.hpp"
 
 #include "chaiScriptCodeEditorMainWindow.h"
@@ -105,8 +104,7 @@ void ChaiScriptingPlugin::setupChaiScriptEngine()
 			std::vector<std::string> paths;
 			paths.push_back(workingDir.absolutePath().toStdString());
 			paths.push_back((workingDir.absolutePath() + QDir::separator() + "chaiScripts" + QDir::separator()).toLocal8Bit().constData());
-
-			//ChaiScript t = ChaiScript(chaiscript::Std_Lib::library(), { workingDir.absolutePath().toStdString() }, { workingDir.absolutePath() });
+			
 			chai = std::make_unique<chaiscript::ChaiScript>(chaiscript::Std_Lib::library(), paths, paths);;
 			if (systemBootstrap == nullptr)
 			{
@@ -141,6 +139,7 @@ void ChaiScriptingPlugin::setupChaiScriptEngine()
 			chai->add(chaiscript::vector_conversion<std::vector<std::string>>());
 
 			chai->add(chaiscript::map_conversion<std::map<std::string, int>>());
+			chai->add(chaiscript::map_conversion<std::map<std::string, Boxed_Value>>());
 
 			chai->add_global(var(this), "chaiScriptingPlugin");
 			chai->add_global(var(m_app), "m_app");
@@ -240,6 +239,19 @@ std::string ChaiScriptingPlugin::chaiSystemDump()
 	std::string text = buffer.str();
 	std::cout.rdbuf(old);
 	return text;
+}
+
+
+std::map<std::string, chaiscript::Boxed_Value> ChaiScriptingPlugin::getChaiObjects()
+{
+	auto cs_get_objects = chai->eval<std::function<std::map<std::string, chaiscript::Boxed_Value>()> >("get_objects");
+	auto rtrnd = cs_get_objects(); // call the ChaiScript function get_objects, from C++
+	for (std::pair<std::string, chaiscript::Boxed_Value> i : rtrnd)
+	{
+		////testing output
+		//m_app->dispToConsole(QString(";Object name;%1;Object Type Name;%2;").arg(i.first.c_str()).arg(i.second.get_type_info().name().c_str()), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+	}
+	return rtrnd;
 }
 
 

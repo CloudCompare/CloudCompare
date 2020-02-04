@@ -23,6 +23,11 @@
 #include <chaiscript/utility/utility.hpp>
 
 #include <ccObject.h>
+#include <ccOctree.h>
+#include <ccPointCloudInterpolator.h>
+#include <ccNormalVectors.h>
+#include <ccGenericGLDisplay.h>
+#include <ccClipBox.h>
 
 namespace chaiscript
 {
@@ -155,9 +160,114 @@ namespace chaiscript
 				}
 
 
+				ModulePtr bs_DisplayMode(ModulePtr m = std::make_shared<Module>())
+				{
+					chaiscript::utility::add_class<ccOctree::DisplayMode>(*m,
+						"DisplayMode",
+						{
+							{ ccOctree::DisplayMode::WIRE, "WIRE" },
+							{ ccOctree::DisplayMode::MEAN_POINTS, "MEAN_POINTS" },
+							{ ccOctree::DisplayMode::MEAN_CUBES, "MEAN_CUBES" }
+						}
+					);
+					return m;
+				}
+
+				ModulePtr bs_Parameters(ModulePtr m = std::make_shared<Module>())
+				{
+					chaiscript::utility::add_class<ccPointCloudInterpolator::Parameters::Method>(*m,
+						"Method",
+						{
+							{ ccPointCloudInterpolator::Parameters::Method::NEAREST_NEIGHBOR, "NEAREST_NEIGHBOR" },
+							{ ccPointCloudInterpolator::Parameters::Method::K_NEAREST_NEIGHBORS, "K_NEAREST_NEIGHBORS" },
+							{ ccPointCloudInterpolator::Parameters::Method::RADIUS, "RADIUS" }
+						}
+					);
+					chaiscript::utility::add_class<ccPointCloudInterpolator::Parameters::Algo>(*m,
+						"Algo",
+						{
+							{ ccPointCloudInterpolator::Parameters::Algo::AVERAGE, "AVERAGE" },
+							{ ccPointCloudInterpolator::Parameters::Algo::MEDIAN, "MEDIAN" },
+							{ ccPointCloudInterpolator::Parameters::Algo::NORMAL_DIST, "NORMAL_DIST" }
+						}
+					);
+
+					return m;
+				}
+
+				ModulePtr bs_Orientation(ModulePtr m = std::make_shared<Module>())
+				{
+					chaiscript::utility::add_class<ccNormalVectors::Orientation>(*m,
+						"Orientation",
+						{
+							{ ccNormalVectors::Orientation::PLUS_X, "PLUS_X" },
+							{ ccNormalVectors::Orientation::MINUS_X, "MINUS_X" },
+							{ ccNormalVectors::Orientation::PLUS_Y, "PLUS_Y" },
+							{ ccNormalVectors::Orientation::MINUS_Y, "MINUS_Y" },
+							{ ccNormalVectors::Orientation::PLUS_Z, "PLUS_Z" },
+							{ ccNormalVectors::Orientation::MINUS_Z, "MINUS_Z" },
+							{ ccNormalVectors::Orientation::PLUS_BARYCENTER, "PLUS_BARYCENTER" },
+							{ ccNormalVectors::Orientation::MINUS_BARYCENTER, "MINUS_BARYCENTER" },
+							{ ccNormalVectors::Orientation::PLUS_ZERO, "PLUS_ZERO" },
+							{ ccNormalVectors::Orientation::MINUS_ZERO, "MINUS_ZERO" },
+							{ ccNormalVectors::Orientation::PREVIOUS, "PREVIOUS" },
+							{ ccNormalVectors::Orientation::UNDEFINED, "UNDEFINED" },
+						}
+					);
+					return m;
+				}
+
+				ModulePtr bs_TextAlign(ModulePtr m = std::make_shared<Module>())
+				{
+					chaiscript::utility::add_class<ccGenericGLDisplay::TextAlign>(*m,
+						"TextAlign",
+						{
+							{ ccGenericGLDisplay::TextAlign::ALIGN_HLEFT, "ALIGN_HLEFT" },
+							{ ccGenericGLDisplay::TextAlign::ALIGN_HMIDDLE, "ALIGN_HMIDDLE" },
+							{ ccGenericGLDisplay::TextAlign::ALIGN_HRIGHT, "ALIGN_HRIGHT" },
+							{ ccGenericGLDisplay::TextAlign::ALIGN_VTOP, "ALIGN_VTOP" },
+							{ ccGenericGLDisplay::TextAlign::ALIGN_VMIDDLE, "ALIGN_VMIDDLE" },
+							{ ccGenericGLDisplay::TextAlign::ALIGN_VBOTTOM, "ALIGN_VBOTTOM" },
+							{ ccGenericGLDisplay::TextAlign::ALIGN_DEFAULT, "ALIGN_DEFAULT" },
+						}
+					);
+					return m;
+				}
+
+				ModulePtr bs_Components(ModulePtr m = std::make_shared<Module>())
+				{
+					chaiscript::utility::add_class<ccClipBox::Components>(*m,
+						"Components",
+						{
+							{ ccClipBox::Components::NONE, "NONE" },
+							{ ccClipBox::Components::X_MINUS_ARROW, "X_MINUS_ARROW" },
+							{ ccClipBox::Components::X_PLUS_ARROW, "X_PLUS_ARROW" },
+							{ ccClipBox::Components::Y_MINUS_ARROW, "Y_MINUS_ARROW" },
+							{ ccClipBox::Components::Y_PLUS_ARROW, "Y_PLUS_ARROW" },
+							{ ccClipBox::Components::Z_MINUS_ARROW, "Z_MINUS_ARROW" },
+							{ ccClipBox::Components::Z_PLUS_ARROW, "Z_PLUS_ARROW" },
+							{ ccClipBox::Components::CROSS, "CROSS" },
+							{ ccClipBox::Components::SPHERE, "SPHERE" },
+							{ ccClipBox::Components::X_MINUS_TORUS, "X_MINUS_TORUS" },
+							{ ccClipBox::Components::Y_MINUS_TORUS, "Y_MINUS_TORUS" },
+							{ ccClipBox::Components::Z_MINUS_TORUS, "Z_MINUS_TORUS" },
+							{ ccClipBox::Components::X_PLUS_TORUS, "X_PLUS_TORUS" },
+							{ ccClipBox::Components::Y_PLUS_TORUS, "Y_PLUS_TORUS" },
+							{ ccClipBox::Components::Z_PLUS_TORUS, "Z_PLUS_TORUS" },
+						}
+					);
+					return m;
+				}
+
+
 				ModulePtr bootstrap_enum(ModulePtr m = std::make_shared<Module>())
 				{
 					bs_CC_CLASS_ENUM(m);
+					bs_DisplayMode(m);
+					bs_Parameters(m);
+					bs_Orientation(m);
+					bs_TextAlign(m);
+					bs_Components(m);
 					return m;
 				}
 			}

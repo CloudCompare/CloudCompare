@@ -18,5 +18,9 @@
         <file>images/ccSegment.png</file>
         <file>images/paste.png</file>
         <file>images/copy.png</file>
+        <file>images/comment.png</file>
+        <file>images/uncomment.png</file>
+        <file>images/indent_less.png</file>
+        <file>images/indent_more.png</file>
     </qresource>
 </RCC>

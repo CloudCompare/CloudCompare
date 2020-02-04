@@ -35,6 +35,10 @@ public:
     bool saveFile(const QString& fileName);
     QString userFriendlyCurrentFile();
     QString currentFile() { return curFile; }
+    void comment();
+    void uncomment();
+    void indentMore();
+    void indentLess();
 
 
 protected:
@@ -59,6 +63,7 @@ private:
     bool matchLeftPairedChars(QTextBlock currentBlock, int i, int numLeftPairedChars, char lhs, char rhs);
     bool matchRightPairedChars(QTextBlock currentBlock, int i, int numRightPairedChars, char lhs, char rhs);
     void createPairedCharsSelection(int pos);
+    int getSelectedLineCount();
     ChaiScriptSyntaxHighlighter* highlighter;
     QString curFile;
     bool isUntitled;

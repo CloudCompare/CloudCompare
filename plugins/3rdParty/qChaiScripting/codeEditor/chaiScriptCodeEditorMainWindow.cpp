@@ -260,6 +260,35 @@ void chaiScriptCodeEditorMainWindow::paste()
 }
 #endif
 
+void chaiScriptCodeEditorMainWindow::comment() 
+{
+	if (activeChildCodeEditor())
+	{
+		activeChildCodeEditor()->comment();
+	}
+}
+void chaiScriptCodeEditorMainWindow::uncomment() 
+{
+	if (activeChildCodeEditor())
+	{
+		activeChildCodeEditor()->uncomment();
+	}
+}
+void chaiScriptCodeEditorMainWindow::indentMore() 
+{
+	if (activeChildCodeEditor())
+	{
+		activeChildCodeEditor()->indentMore();
+	}
+}
+void chaiScriptCodeEditorMainWindow::indentLess() 
+{
+	if (activeChildCodeEditor())
+	{
+		activeChildCodeEditor()->indentLess();
+	}
+}
+
 void chaiScriptCodeEditorMainWindow::about()
 {
 
@@ -299,6 +328,12 @@ void chaiScriptCodeEditorMainWindow::createActions()
 	connect(actionCu_t, &QAction::triggered, this, &chaiScriptCodeEditorMainWindow::cut);
 	connect(action_Copy, &QAction::triggered, this, &chaiScriptCodeEditorMainWindow::copy);
 	connect(action_Paste, &QAction::triggered, this, &chaiScriptCodeEditorMainWindow::paste);
+
+	connect(actionComment, &QAction::triggered, this, &chaiScriptCodeEditorMainWindow::comment);
+	connect(actionUncomment, &QAction::triggered, this, &chaiScriptCodeEditorMainWindow::uncomment);
+	connect(actionIndent_More, &QAction::triggered, this, &chaiScriptCodeEditorMainWindow::indentMore);
+	connect(actionIndent_Less, &QAction::triggered, this, &chaiScriptCodeEditorMainWindow::indentLess);
+
 
 	windowMenu = menuBar()->addMenu(tr("&Window"));
 	connect(windowMenu, &QMenu::aboutToShow, this, &chaiScriptCodeEditorMainWindow::updateWindowMenu);

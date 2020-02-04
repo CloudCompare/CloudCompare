@@ -64,6 +64,10 @@
     <addaction name="action_Paste"/>
     <addaction name="action_Delete"/>
     <addaction name="action_Select_All"/>
+    <addaction name="actionComment"/>
+    <addaction name="actionUncomment"/>
+    <addaction name="actionIndent_More"/>
+    <addaction name="actionIndent_Less"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menu_Edit"/>
@@ -95,6 +99,12 @@
    <addaction name="action_Paste"/>
    <addaction name="separator"/>
    <addaction name="actionRun"/>
+   <addaction name="separator"/>
+   <addaction name="actionComment"/>
+   <addaction name="actionUncomment"/>
+   <addaction name="separator"/>
+   <addaction name="actionIndent_More"/>
+   <addaction name="actionIndent_Less"/>
   </widget>
   <widget class="QDockWidget" name="projectBrowser">
    <property name="sizePolicy">
@@ -292,6 +302,42 @@
   <action name="actionReset_chai_to_last_save">
    <property name="text">
     <string>Reset chai to last save</string>
+   </property>
+  </action>
+  <action name="actionComment">
+   <property name="icon">
+    <iconset resource="../ChaiScriptingPlugin.qrc">
+     <normaloff>:/CC/plugin/ChaiScriptingPlugin/images/comment.png</normaloff>:/CC/plugin/ChaiScriptingPlugin/images/comment.png</iconset>
+   </property>
+   <property name="text">
+    <string>Comment</string>
+   </property>
+  </action>
+  <action name="actionUncomment">
+   <property name="icon">
+    <iconset resource="../ChaiScriptingPlugin.qrc">
+     <normaloff>:/CC/plugin/ChaiScriptingPlugin/images/uncomment.png</normaloff>:/CC/plugin/ChaiScriptingPlugin/images/uncomment.png</iconset>
+   </property>
+   <property name="text">
+    <string>Uncomment</string>
+   </property>
+  </action>
+  <action name="actionIndent_More">
+   <property name="icon">
+    <iconset resource="../ChaiScriptingPlugin.qrc">
+     <normaloff>:/CC/plugin/ChaiScriptingPlugin/images/indent_more.png</normaloff>:/CC/plugin/ChaiScriptingPlugin/images/indent_more.png</iconset>
+   </property>
+   <property name="text">
+    <string>Indent More</string>
+   </property>
+  </action>
+  <action name="actionIndent_Less">
+   <property name="icon">
+    <iconset resource="../ChaiScriptingPlugin.qrc">
+     <normaloff>:/CC/plugin/ChaiScriptingPlugin/images/indent_less.png</normaloff>:/CC/plugin/ChaiScriptingPlugin/images/indent_less.png</iconset>
+   </property>
+   <property name="text">
+    <string>Indent Less</string>
    </property>
   </action>
  </widget>

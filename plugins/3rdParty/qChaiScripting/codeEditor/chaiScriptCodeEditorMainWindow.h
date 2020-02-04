@@ -74,6 +74,10 @@ protected slots:
 	void copy();
 	void paste();
 #endif
+	void comment();
+	void uncomment();
+	void indentMore();
+	void indentLess();
 	void about();
 	void updateMenus();
 	void updateWindowMenu();

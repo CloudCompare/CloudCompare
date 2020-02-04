@@ -24,6 +24,9 @@
 
 #include <Qt>
 #include <QString>
+#include <QSharedPointer>
+#include <QOpenGLTexture>
+#include <QtGui/qopengl.h>
 
 #include <ccGenericGLDisplay.h>
 #include <ccInteractor.h>
@@ -65,6 +68,23 @@
 #include <ccScalarField.h>
 #include <ccArray.h>
 #include <ccBasicTypes.h>
+#include <ccSingleton.h>
+#include <ccQuadric.h>
+#include <ccPointCloudInterpolator.h>
+#include <ccNormalVectors.h>
+#include <GeometricalAnalysisTools.h>
+#include <ccMinimumSpanningTreeForNormsDirection.h>
+#include <ccIncludeGL.h>
+#include <ccGriddedTools.h>
+#include <ccGenericGLDisplay.h>
+#include <ccFlags.h>
+#include <ccFileUtils.h>
+#include <ccFastMarchingForNormsDirection.h>
+#include <ccCustomObject.h>
+#include <ccColorTypes.h>
+#include <ccClipBox.h>
+#include <ccColorScalesManager.h>
+
 
 namespace chaiscript
 {
@@ -104,6 +124,9 @@ namespace chaiscript
 					m->add(fun(static_cast<void(ccObject::*)(const QVariantMap&, bool)>(&ccObject::setMetaData)), "setMetaData");
 					m->add(fun(&ccObject::hasMetaData), "hasMetaData");
 					m->add(fun(&ccObject::metaData), "metaData");
+
+					m->add(chaiscript::base_class<ccSerializableObject, ccObject>());
+
 					return m;
 				}
 
@@ -229,10 +252,50 @@ namespace chaiscript
 					m->add(fun(&ccHObject::resetGLTransformationHistory), "resetGLTransformationHistory");
 					
 
+					m->add(chaiscript::base_class<ccObject, ccHObject>());
+					m->add(chaiscript::base_class<ccSerializableObject, ccHObject>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccHObject>());
+
+					return m;
+				}
+
+				ModulePtr bs_ccCustomHObject(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccCustomHObject>(), "ccCustomHObject");
+					
+					m->add(chaiscript::constructor<ccCustomHObject(const QString&)>(), "ccCustomHObject");
+					m->add(chaiscript::constructor<ccCustomHObject(const ccCustomHObject&)>(), "ccCustomHObject");
+					m->add(fun(&ccCustomHObject::isSerializable), "isSerializable");
+					m->add(fun(&ccCustomHObject::getClassID), "getClassID");
+					m->add(fun(&ccCustomHObject::DefautMetaDataClassName), "DefautMetaDataClassName");
+					m->add(fun(&ccCustomHObject::DefautMetaDataPluginName), "DefautMetaDataPluginName");
+
+					m->add(chaiscript::base_class<ccObject, ccCustomHObject>());
+					m->add(chaiscript::base_class<ccSerializableObject, ccCustomHObject>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccCustomHObject>());
+					m->add(chaiscript::base_class<ccHObject, ccCustomHObject>());
+
+					return m;
+				}
+
+				ModulePtr bs_ccCustomLeafObject(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccCustomLeafObject>(), "ccCustomLeafObject");
+					m->add(chaiscript::constructor<ccCustomLeafObject(const QString&)>(), "ccCustomHObject");
+					m->add(fun(&ccCustomLeafObject::getClassID), "getClassID");
+					
+					m->add(chaiscript::base_class<ccObject, ccCustomLeafObject>());
+					m->add(chaiscript::base_class<ccSerializableObject, ccCustomLeafObject>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccCustomLeafObject>());
+					m->add(chaiscript::base_class<ccHObject, ccCustomLeafObject>());
+					m->add(chaiscript::base_class<ccCustomHObject, ccCustomLeafObject>());
 
 
 					return m;
 				}
+
+
+					
 
 				template<typename Type, int N, class ComponentType>
 				ModulePtr bs_ccArray(const std::string& shortCutName, ModulePtr m = std::make_shared<Module>())
@@ -268,6 +331,7 @@ namespace chaiscript
 
 					m->add(chaiscript::base_class<ccHObject, NormsIndexesTableType>());
 					m->add(chaiscript::base_class<ccObject, NormsIndexesTableType>());
+					m->add(chaiscript::base_class<ccSerializableObject, NormsIndexesTableType>());
 					m->add(chaiscript::base_class<ccDrawableObject, NormsIndexesTableType>());
 					m->add(chaiscript::base_class<CCShareable, NormsIndexesTableType>());
 					m->add(chaiscript::base_class<std::vector<CompressedNormType>, NormsIndexesTableType>());
@@ -284,6 +348,7 @@ namespace chaiscript
 
 					m->add(chaiscript::base_class<ccHObject, NormsTableType>());
 					m->add(chaiscript::base_class<ccObject, NormsTableType>());
+					m->add(chaiscript::base_class<ccSerializableObject, NormsTableType>());
 					m->add(chaiscript::base_class<ccDrawableObject, NormsTableType>());
 					m->add(chaiscript::base_class<CCShareable, NormsTableType>());
 					m->add(chaiscript::base_class<std::vector<CCVector3>, NormsTableType>());
@@ -300,6 +365,7 @@ namespace chaiscript
 
 					m->add(chaiscript::base_class<ccHObject, ColorsTableType>());
 					m->add(chaiscript::base_class<ccObject, ColorsTableType>());
+					m->add(chaiscript::base_class<ccSerializableObject, ColorsTableType>());
 					m->add(chaiscript::base_class<ccDrawableObject, ColorsTableType>());
 					m->add(chaiscript::base_class<CCShareable, ColorsTableType>());
 					m->add(chaiscript::base_class<std::vector<ccColor::Rgb>, ColorsTableType>());
@@ -329,6 +395,7 @@ namespace chaiscript
 
 					m->add(chaiscript::base_class<ccHObject, TextureCoordsContainer>());
 					m->add(chaiscript::base_class<ccObject, TextureCoordsContainer>());
+					m->add(chaiscript::base_class<ccSerializableObject, TextureCoordsContainer>());
 					m->add(chaiscript::base_class<ccDrawableObject, TextureCoordsContainer>());
 					m->add(chaiscript::base_class<CCShareable, TextureCoordsContainer>());
 					m->add(chaiscript::base_class<std::vector<TexCoords2D>, TextureCoordsContainer>());
@@ -433,7 +500,7 @@ namespace chaiscript
 					
 					}
 					);
-
+					m->add(chaiscript::base_class<ccSerializableObject, ccGLMatrixTpl<T>>());
 					return m;
 				}
 
@@ -446,6 +513,9 @@ namespace chaiscript
 					m->add(chaiscript::constructor<ccGLMatrix(const float*)>(), "ccGLMatrix");
 					m->add(chaiscript::constructor<ccGLMatrix(const double*)>(), "ccGLMatrix");
 					m->add(chaiscript::constructor<ccGLMatrix(const Vector3Tpl<float>&, const Vector3Tpl<float>&, const Vector3Tpl<float>&, const Vector3Tpl<float>&)>(), "ccGLMatrix");
+					
+					m->add(chaiscript::base_class<ccGLMatrixTpl<float>, ccGLMatrix>());
+					
 					return m;
 				}
 
@@ -457,6 +527,9 @@ namespace chaiscript
 					m->add(chaiscript::constructor<ccGLMatrixd(const float*)>(), "ccGLMatrixd");
 					m->add(chaiscript::constructor<ccGLMatrixd(const double*)>(), "ccGLMatrixd");
 					m->add(chaiscript::constructor<ccGLMatrixd(const Vector3Tpl<double>&, const Vector3Tpl<double>&, const Vector3Tpl<double>&, const Vector3Tpl<double>&)>(), "ccGLMatrixd");
+
+					m->add(chaiscript::base_class<ccGLMatrixTpl<double>, ccGLMatrixd>());
+
 					return m;
 				}
 
@@ -537,6 +610,13 @@ namespace chaiscript
 					m->add(fun(static_cast<bool(cc2DLabel::*)(const cc2DLabel::PickedPoint&)>(&cc2DLabel::addPickedPoint)), "addPickedPoint");
 					m->add(fun(&cc2DLabel::getPickedPoint), "getPickedPoint");
 					m->add(fun(&cc2DLabel::setRelativeMarkerScale), "setRelativeMarkerScale");
+
+					m->add(chaiscript::base_class<ccInteractor, cc2DLabel>());
+					m->add(chaiscript::base_class<ccHObject, cc2DLabel>());
+					m->add(chaiscript::base_class<ccObject, cc2DLabel>());
+					m->add(chaiscript::base_class<ccSerializableObject, cc2DLabel>());
+					m->add(chaiscript::base_class<ccDrawableObject, cc2DLabel>());
+
 					return m;
 				}
 
@@ -573,6 +653,12 @@ namespace chaiscript
 					m->add(fun(&cc2DViewportObject::metaData), "metaData");
 					m->add(fun(&cc2DViewportObject::setParameters), "setParameters");
 					m->add(fun(&cc2DViewportObject::getParameters), "getParameters");
+
+					m->add(chaiscript::base_class<ccHObject, cc2DViewportObject>());
+					m->add(chaiscript::base_class<ccObject, cc2DViewportObject>());
+					m->add(chaiscript::base_class<ccSerializableObject, cc2DViewportObject>());
+					m->add(chaiscript::base_class<ccDrawableObject, cc2DViewportObject>());
+
 					return m;
 				}
 
@@ -611,6 +697,13 @@ namespace chaiscript
 					m->add(fun(&cc2DViewportLabel::getParameters), "getParameters");
 					m->add(fun(&cc2DViewportLabel::roi), "roi");
 					m->add(fun(&cc2DViewportLabel::setRoi), "setRoi");
+
+					m->add(chaiscript::base_class<cc2DViewportObject, cc2DViewportLabel>());
+					m->add(chaiscript::base_class<ccHObject, cc2DViewportLabel>());
+					m->add(chaiscript::base_class<ccObject, cc2DViewportLabel>());
+					m->add(chaiscript::base_class<ccSerializableObject, cc2DViewportLabel>());
+					m->add(chaiscript::base_class<ccDrawableObject, cc2DViewportLabel>());
+
 					return m;
 				}
 
@@ -666,6 +759,12 @@ namespace chaiscript
 					m->add(fun(&ccSensor::getGraphicScale), "getGraphicScale");
 					m->add(fun(&ccSensor::applyViewport), "applyViewport");
 					m->add(fun(&ccSensor::applyGLTransformation), "applyGLTransformation");
+
+					m->add(chaiscript::base_class<ccHObject, ccSensor>());
+					m->add(chaiscript::base_class<ccObject, ccSensor>());
+					m->add(chaiscript::base_class<ccSerializableObject, ccSensor>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccSensor>());
+
 					return m;
 				}
 
@@ -810,6 +909,12 @@ namespace chaiscript
 					m->add(fun(&ccCameraSensor::ComputeFovRadFromFocalPix), "ComputeFovRadFromFocalPix");
 					m->add(fun(&ccCameraSensor::ComputeFovRadFromFocalMm), "ComputeFovRadFromFocalMm");
 					
+					m->add(chaiscript::base_class<ccHObject, ccCameraSensor>());
+					m->add(chaiscript::base_class<ccObject, ccCameraSensor>());
+					m->add(chaiscript::base_class<ccSerializableObject, ccCameraSensor>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccCameraSensor>());
+					m->add(chaiscript::base_class<ccSensor, ccCameraSensor>());
+
 					return m;
 				}
 
@@ -867,6 +972,13 @@ namespace chaiscript
 					m->add(fun(&ccGBLSensor::getGraphicScale), "getGraphicScale");
 					m->add(fun(&ccGBLSensor::applyViewport), "applyViewport");
 					m->add(fun(&ccGBLSensor::applyGLTransformation), "applyGLTransformation");
+
+
+					m->add(chaiscript::base_class<ccHObject, ccGBLSensor>());
+					m->add(chaiscript::base_class<ccObject, ccGBLSensor>());
+					m->add(chaiscript::base_class<ccSerializableObject, ccGBLSensor>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccGBLSensor>());
+					m->add(chaiscript::base_class<ccSensor, ccGBLSensor>());
 					
 
 					return m;
@@ -885,6 +997,12 @@ namespace chaiscript
 
 				ModulePtr bs_ccDrawableObject(ModulePtr m = std::make_shared<Module>())
 				{
+					m->add(chaiscript::user_type<ccClipPlane>(), "ccClipPlane");
+					m->add(fun(&ccClipPlane::equation), "equation");
+					m->add(chaiscript::vector_conversion<ccClipPlaneSet>());
+					m->add(chaiscript::user_type<ccClipPlaneSet>(), "ccClipPlaneSet");
+
+
 					m->add(chaiscript::user_type<ccDrawableObject>(), "ccDrawableObject");
 					m->add(fun(&ccDrawableObject::draw), "draw");
 					m->add(fun(&ccDrawableObject::isVisible), "isVisible");
@@ -983,15 +1101,14 @@ namespace chaiscript
 					m->add(fun(&ccGenericMesh::importParametersFrom), "importParametersFrom");
 					//m->add(fun(&ccGenericMesh::trianglePicking), "trianglePicking"); //TODO add default version(s)
 					m->add(fun(&ccGenericMesh::computePointPosition), "computePointPosition");
-					/*m->add(fun(&ccGenericMesh::XX), "XX");
-					m->add(fun(&ccGenericMesh::XX), "XX");
-					m->add(fun(&ccGenericMesh::XX), "XX");
-					m->add(fun(&ccGenericMesh::XX), "XX");
-					m->add(fun(&ccGenericMesh::XX), "XX");
-					m->add(fun(&ccGenericMesh::XX), "XX");
-					m->add(fun(&ccGenericMesh::XX), "XX");
-					m->add(fun(&ccGenericMesh::XX), "XX");
-					m->add(fun(&ccGenericMesh::XX), "XX");*/
+					
+					m->add(chaiscript::base_class<ccObject, ccGenericMesh>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccGenericMesh>());
+					m->add(chaiscript::base_class<ccHObject, ccGenericMesh>());
+					m->add(chaiscript::base_class<ccSerializableObject, ccGenericMesh>());
+					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccGenericMesh>());
+
+
 					return m;
 				}
 
@@ -1112,6 +1229,14 @@ namespace chaiscript
 					m->add(fun(&ccMesh::getOwnBB), "getOwnBB");
 					m->add(fun(&ccMesh::getGLTransformationHistory), "getGLTransformationHistory");
 					
+					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccMesh>());
+					m->add(chaiscript::base_class<ccHObject, ccMesh>());
+					m->add(chaiscript::base_class<ccObject, ccMesh>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccMesh>());
+					m->add(chaiscript::base_class<ccSerializableObject, ccMesh>());
+					m->add(chaiscript::base_class<ccGenericMesh, ccMesh>());
+
+
 					return m;
 				}
 
@@ -1241,6 +1366,47 @@ namespace chaiscript
 					m->add(fun(static_cast<ccGLMatrix&(ccGenericPrimitive::*)()>(&ccGenericPrimitive::getTransformation)), "getTransformation");
 					m->add(fun(static_cast<const ccGLMatrix&(ccGenericPrimitive::*)()const>(&ccGenericPrimitive::getTransformation)), "getTransformation");
 					m->add(fun(&ccGenericPrimitive::getGLTransformationHistory), "getGLTransformationHistory");
+					
+					
+					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccGenericPrimitive>());
+					m->add(chaiscript::base_class<ccHObject, ccGenericPrimitive>());
+					m->add(chaiscript::base_class<ccObject, ccGenericPrimitive>());
+					m->add(chaiscript::base_class<ccSerializableObject, ccGenericPrimitive>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccGenericPrimitive>());
+					m->add(chaiscript::base_class<ccMesh, ccGenericPrimitive>());
+					m->add(chaiscript::base_class<ccGenericMesh, ccGenericPrimitive>());
+					
+					return m;
+				}
+
+				ModulePtr bs_ccImage(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccImage>(), "ccImage");
+					m->add(chaiscript::constructor<ccImage()>(), "ccImage");
+					m->add(chaiscript::constructor<ccImage(const QImage&, const QString&)>(), "ccImage");
+
+					m->add(fun(&ccImage::isSerializable), "isSerializable");
+					m->add(fun(&ccImage::getClassID), "getClassID");
+					m->add(fun(&ccImage::load), "load");
+					m->add(fun(static_cast<QImage&(ccImage::*)()>(&ccImage::data)), "data");
+					m->add(fun(static_cast<const QImage&(ccImage::*)()const>(&ccImage::data)), "data");
+					m->add(fun(&ccImage::setData), "setData");
+					m->add(fun(&ccImage::getW), "getW");
+					m->add(fun(&ccImage::getH), "getH");
+					m->add(fun(&ccImage::setAlpha), "setAlpha");
+					m->add(fun(&ccImage::getAlpha), "getAlpha");
+					m->add(fun(&ccImage::setAspectRatio), "setAspectRatio");
+					m->add(fun(&ccImage::getAspectRatio), "getAspectRatio");
+					m->add(fun(&ccImage::setAssociatedSensor), "setAssociatedSensor");
+					m->add(fun(static_cast<ccCameraSensor*(ccImage::*)()>(&ccImage::getAssociatedSensor)), "getAssociatedSensor");
+					m->add(fun(static_cast<const ccCameraSensor*(ccImage::*)()const>(&ccImage::getAssociatedSensor)), "getAssociatedSensor");
+					m->add(fun(&ccImage::getOwnFitBB), "getOwnFitBB");
+
+					m->add(chaiscript::base_class<ccHObject, ccImage>());
+					m->add(chaiscript::base_class<ccObject, ccImage>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccImage>());
+					m->add(chaiscript::base_class<ccSerializableObject, ccImage>());
+					
 					return m;
 				}
 
@@ -1391,6 +1557,17 @@ namespace chaiscript
 					m->add(fun(static_cast<void(ccPlane::*)(CCVector3&, PointCoordinateType&)const>(&ccPlane::getEquation)), "getEquation");
 					m->add(fun(static_cast<const PointCoordinateType*(ccPlane::*)()>(&ccPlane::getEquation)), "getEquation");
 					m->add(fun(&ccPlane::flip), "flip");
+
+					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccPlane>());
+					m->add(chaiscript::base_class<ccHObject, ccPlane>());
+					m->add(chaiscript::base_class<ccObject, ccPlane>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccPlane>());
+					m->add(chaiscript::base_class<ccMesh, ccPlane>());
+					m->add(chaiscript::base_class<ccGenericMesh, ccPlane>());
+					m->add(chaiscript::base_class<ccGenericPrimitive, ccPlane>());
+					m->add(chaiscript::base_class<ccPlanarEntityInterface, ccPlane>());
+					m->add(chaiscript::base_class<ccSerializableObject, ccPlane>());
+
 					return m;
 				}
 
@@ -1526,6 +1703,16 @@ namespace chaiscript
 					m->add(fun(&ccSphere::getOwnFitBB), "getOwnFitBB");
 					m->add(fun(&ccSphere::getRadius), "getRadius");
 					m->add(fun(&ccSphere::setRadius), "setRadius");
+
+					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccSphere>());
+					m->add(chaiscript::base_class<ccHObject, ccSphere>());
+					m->add(chaiscript::base_class<ccObject, ccSphere>());
+					m->add(chaiscript::base_class<ccSerializableObject, ccSphere>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccSphere>());
+					m->add(chaiscript::base_class<ccMesh, ccSphere>());
+					m->add(chaiscript::base_class<ccGenericPrimitive, ccSphere>());
+					m->add(chaiscript::base_class<ccGenericMesh, ccSphere>());
+
 					return m;
 				}
 
@@ -1676,6 +1863,16 @@ namespace chaiscript
 					m->add(fun(&ccCone::getSmallRadius), "getSmallRadius");
 					m->add(fun(&ccCone::getLargeRadius), "getLargeRadius");
 					m->add(fun(&ccCone::isSnoutMode), "isSnoutMode");
+
+					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccCone>());
+					m->add(chaiscript::base_class<ccHObject, ccCone>());
+					m->add(chaiscript::base_class<ccObject, ccCone>());
+					m->add(chaiscript::base_class<ccSerializableObject, ccCone>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccCone>());
+					m->add(chaiscript::base_class<ccMesh, ccCone>());
+					m->add(chaiscript::base_class<ccGenericPrimitive, ccCone>());
+					m->add(chaiscript::base_class<ccGenericMesh, ccCone>());
+
 					return m;
 				}
 
@@ -1823,6 +2020,17 @@ namespace chaiscript
 					m->add(fun(&ccCylinder::getSmallRadius), "getSmallRadius");
 					m->add(fun(&ccCylinder::getLargeRadius), "getLargeRadius");
 					m->add(fun(&ccCylinder::isSnoutMode), "isSnoutMode");
+
+					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccCylinder>());
+					m->add(chaiscript::base_class<ccHObject, ccCylinder>());
+					m->add(chaiscript::base_class<ccObject, ccCylinder>());
+					m->add(chaiscript::base_class<ccSerializableObject, ccCylinder>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccCylinder>());
+					m->add(chaiscript::base_class<ccMesh, ccCylinder>());
+					m->add(chaiscript::base_class<ccGenericPrimitive, ccCylinder>());
+					m->add(chaiscript::base_class<ccGenericMesh, ccCylinder>());
+					m->add(chaiscript::base_class<ccCone, ccCylinder>());
+
 					return m;
 				}
 
@@ -1958,6 +2166,16 @@ namespace chaiscript
 					m->add(fun(static_cast<const ccGLMatrix & (ccDish::*)()const>(&ccDish::getTransformation)), "getTransformation");
 					m->add(fun(&ccDish::getGLTransformationHistory), "getGLTransformationHistory");
 					m->add(fun(&ccDish::getOwnFitBB), "getOwnFitBB");
+
+					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccDish>());
+					m->add(chaiscript::base_class<ccHObject, ccDish>());
+					m->add(chaiscript::base_class<ccObject, ccDish>());
+					m->add(chaiscript::base_class<ccSerializableObject, ccDish>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccDish>());
+					m->add(chaiscript::base_class<ccMesh, ccDish>());
+					m->add(chaiscript::base_class<ccGenericPrimitive, ccDish>());
+					m->add(chaiscript::base_class<ccGenericMesh, ccDish>());
+
 					return m;
 				}
 
@@ -2094,6 +2312,16 @@ namespace chaiscript
 					m->add(fun(&ccExtru::getOwnFitBB), "getOwnFitBB");
 					m->add(fun(&ccExtru::getThickness), "getThickness");
 					m->add(fun(&ccExtru::getProfile), "getProfile");
+
+					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccExtru>());
+					m->add(chaiscript::base_class<ccHObject, ccExtru>());
+					m->add(chaiscript::base_class<ccObject, ccExtru>());
+					m->add(chaiscript::base_class<ccSerializableObject, ccExtru>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccExtru>());
+					m->add(chaiscript::base_class<ccMesh, ccExtru>());
+					m->add(chaiscript::base_class<ccGenericPrimitive, ccExtru>());
+					m->add(chaiscript::base_class<ccGenericMesh, ccExtru>());
+
 					return m;
 				}
 
@@ -2163,7 +2391,11 @@ namespace chaiscript
 					m->add(fun(&ccFacet::setOriginPoints), "setOriginPoints");
 					m->add(fun(&ccFacet::setColor), "setColor");
 
-
+					m->add(chaiscript::base_class<ccHObject, ccFacet>());
+					m->add(chaiscript::base_class<ccObject, ccFacet>());
+					m->add(chaiscript::base_class<ccSerializableObject, ccFacet>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccFacet>());
+					m->add(chaiscript::base_class<ccPlanarEntityInterface, ccFacet>());
 
 					return m;
 				}
@@ -2212,7 +2444,13 @@ namespace chaiscript
 					m->add(fun(static_cast<CCVector3d(ccShiftedObject::*)(const Vector3Tpl<double>&)const>(&ccShiftedObject::toLocal3d)), "toLocal3d");
 					m->add(fun(static_cast<CCVector3(ccShiftedObject::*)(const Vector3Tpl<float>&)const>(&ccShiftedObject::toLocal3pc)), "toLocal3pc");
 					m->add(fun(static_cast<CCVector3(ccShiftedObject::*)(const Vector3Tpl<double>&)const>(&ccShiftedObject::toLocal3pc)), "toLocal3pc");
-					m->add(fun(&ccShiftedObject::getGlobalBB), "getGlobalBB");					
+					m->add(fun(&ccShiftedObject::getGlobalBB), "getGlobalBB");		
+
+					m->add(chaiscript::base_class<ccHObject, ccShiftedObject>());
+					m->add(chaiscript::base_class<ccObject, ccShiftedObject>());
+					m->add(chaiscript::base_class<ccSerializableObject, ccShiftedObject>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccShiftedObject>());
+
 					return m;
 				}
 
@@ -2278,6 +2516,15 @@ namespace chaiscript
 					m->add(fun(&ccGenericPointCloud::getPointSize), "getPointSize");
 					m->add(fun(&ccGenericPointCloud::importParametersFrom), "importParametersFrom");
 					m->add(fun(&ccGenericPointCloud::pointPicking), "pointPicking");
+
+					m->add(chaiscript::base_class<ccHObject, ccGenericPointCloud>());
+					m->add(chaiscript::base_class<ccObject, ccGenericPointCloud>());
+					m->add(chaiscript::base_class<ccSerializableObject, ccGenericPointCloud>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccGenericPointCloud>());
+					m->add(chaiscript::base_class<ccShiftedObject, ccGenericPointCloud>());
+					m->add(chaiscript::base_class<CCLib::GenericIndexedCloudPersist, ccGenericPointCloud>());
+
+
 					return m;
 				}
 
@@ -2459,6 +2706,977 @@ namespace chaiscript
 					m->add(fun(&ccPointCloud::enhanceRGBWithIntensitySF), "enhanceRGBWithIntensitySF");
 					m->add(fun(&ccPointCloud::exportCoordToSF), "exportCoordToSF");
 					m->add(fun(&ccPointCloud::exportNormalToSF), "exportNormalToSF");
+
+					m->add(chaiscript::base_class<ccHObject, ccPointCloud>());
+					m->add(chaiscript::base_class<ccObject, ccPointCloud>());
+					m->add(chaiscript::base_class<ccSerializableObject, ccPointCloud>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccPointCloud>());
+					m->add(chaiscript::base_class<ccShiftedObject, ccPointCloud>());
+					m->add(chaiscript::base_class<CCLib::PointCloudTpl<ccGenericPointCloud>, ccPointCloud>());
+					m->add(chaiscript::base_class<ccGenericPointCloud, ccPointCloud>());
+					m->add(chaiscript::base_class<CCLib::GenericIndexedCloudPersist, ccPointCloud>());
+
+					return m;
+				}
+
+
+				ModulePtr bs_ccKdTree(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccKdTree>(), "ccKdTree");
+					m->add(chaiscript::constructor<ccKdTree(ccGenericPointCloud*)>(), "ccKdTree");
+					m->add(fun(&ccKdTree::multiplyBoundingBox), "multiplyBoundingBox");
+					m->add(fun(&ccKdTree::translateBoundingBox), "translateBoundingBox");
+					m->add(fun(&ccKdTree::getClassID), "getClassID");
+					m->add(fun(&ccKdTree::getOwnBB), "getOwnBB");
+					m->add(fun(&ccKdTree::convertCellIndexToSF), "convertCellIndexToSF");
+					m->add(fun(&ccKdTree::convertCellIndexToRandomColor), "convertCellIndexToRandomColor");
+					m->add(fun(&ccKdTree::getCellBBox), "getCellBBox");
+					m->add(chaiscript::user_type<ccKdTree::LeafSet>(), "LeafSet");
+					m->add(fun(&ccKdTree::getNeighborLeaves), "getNeighborLeaves");
+					m->add(fun(&ccKdTree::associatedGenericCloud), "associatedGenericCloud");
+
+
+					m->add(chaiscript::base_class<ccObject, ccKdTree>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccKdTree>());
+					m->add(chaiscript::base_class<ccHObject, ccKdTree>());
+					m->add(chaiscript::base_class<ccSerializableObject, ccKdTree>());
+					m->add(chaiscript::base_class<CCLib::TrueKdTree, ccKdTree>());
+
+
+					return m;
+				}
+
+
+				ModulePtr bs_ccOctree(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccOctree>(), "ccOctree");
+					m->add(chaiscript::user_type<ccOctree::Shared>(), "Shared");
+					m->add(chaiscript::constructor<ccOctree(ccGenericPointCloud*)>(), "ccOctree");
+					m->add(fun(&ccOctree::multiplyBoundingBox), "multiplyBoundingBox");
+					m->add(fun(&ccOctree::translateBoundingBox), "translateBoundingBox");
+					m->add(fun(&ccOctree::getSquareBB), "getSquareBB");
+					m->add(fun(&ccOctree::getPointsBB), "getPointsBB");
+					m->add(fun(&ccOctree::clear), "clear");
+					m->add(fun(&ccOctree::getDisplayedLevel), "getDisplayedLevel");
+					m->add(fun(&ccOctree::setDisplayedLevel), "setDisplayedLevel");
+					m->add(fun(&ccOctree::getDisplayMode), "getDisplayMode");
+					m->add(fun(&ccOctree::setDisplayMode), "setDisplayMode");
+					m->add(fun(&ccOctree::draw), "draw");
+					m->add(fun(&ccOctree::intersectWithFrustum), "intersectWithFrustum");
+					m->add(fun(&ccOctree::pointPicking), "pointPicking");
+					m->add(fun(&ccOctree::ComputeAverageColor), "ComputeAverageColor");
+					m->add(fun(&ccOctree::ComputeAverageNorm), "ComputeAverageNorm");
+					m->add(fun(&ccOctree::updated), "updated");
+					
+
+					m->add(chaiscript::base_class<QObject, ccOctree>());
+					m->add(chaiscript::base_class<CCLib::DgmOctree, ccOctree>());
+					
+
+
+					return m;
+				}
+
+				ModulePtr bs_ccOctreeProxy(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccOctreeProxy>(), "ccOctreeProxy");
+
+					m->add(chaiscript::constructor<ccOctreeProxy(ccOctree::Shared)>(), "ccOctreeProxy");
+					m->add(fun(&ccOctreeProxy::setOctree), "setOctree");
+					m->add(fun(&ccOctreeProxy::getOctree), "getOctree");
+					m->add(fun(&ccOctreeProxy::getClassID), "getClassID");
+					m->add(fun(&ccOctreeProxy::getOwnBB), "getOwnBB");
+					
+
+					//m->add(chaiscript::base_class<QObject, ccOctreeProxy>());
+					//m->add(chaiscript::base_class<CCLib::DgmOctree, ccOctreeProxy>());
+					m->add(chaiscript::base_class<ccHObject, ccOctreeProxy>());
+					m->add(chaiscript::base_class<ccObject, ccOctreeProxy>());
+					m->add(chaiscript::base_class<ccSerializableObject, ccOctreeProxy>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccOctreeProxy>());
+
+
+					return m;
+				}
+
+				ModulePtr bs_ccPolyline(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccPolyline>(), "ccPolyline");
+
+					m->add(chaiscript::constructor<ccPolyline(CCLib::GenericIndexedCloudPersist*)>(), "ccPolyline");
+					m->add(chaiscript::constructor<ccPolyline(const ccPolyline&)>(), "ccPolyline");
+					m->add(fun(&ccPolyline::getClassID), "getClassID");
+					m->add(fun(&ccPolyline::isSerializable), "isSerializable");
+					m->add(fun(&ccPolyline::hasColors), "hasColors");
+					m->add(fun(&ccPolyline::applyGLTransformation), "applyGLTransformation");
+					m->add(fun(&ccPolyline::getUniqueIDForDisplay), "getUniqueIDForDisplay");
+					m->add(fun(&ccPolyline::setGlobalShift), "setGlobalShift");
+					m->add(fun(&ccPolyline::setGlobalScale), "setGlobalScale");
+					m->add(fun(&ccPolyline::set2DMode), "set2DMode");
+					m->add(fun(&ccPolyline::is2DMode), "is2DMode");
+					m->add(fun(&ccPolyline::setForeground), "setForeground");
+					m->add(fun(&ccPolyline::setColor), "setColor");
+					m->add(fun(&ccPolyline::setWidth), "setWidth");
+					m->add(fun(&ccPolyline::getWidth), "getWidth");
+					m->add(fun(&ccPolyline::getColor), "getColor");
+					m->add(fun(&ccPolyline::getOwnBB), "getOwnBB");
+					m->add(fun(&ccPolyline::drawBB), "drawBB");
+					m->add(fun(&ccPolyline::split), "split");
+					m->add(fun(&ccPolyline::computeLength), "computeLength");
+					m->add(fun(&ccPolyline::showVertices), "showVertices");
+					m->add(fun(&ccPolyline::verticesShown), "verticesShown");
+					m->add(fun(&ccPolyline::setVertexMarkerWidth), "setVertexMarkerWidth");
+					m->add(fun(&ccPolyline::getVertexMarkerWidth), "getVertexMarkerWidth");
+					m->add(fun(&ccPolyline::initWith), "initWith");
+					m->add(fun(&ccPolyline::importParametersFrom), "importParametersFrom");
+					m->add(fun(&ccPolyline::showArrow), "showArrow");
+					m->add(fun(&ccPolyline::segmentCount), "segmentCount");
+					m->add(fun(&ccPolyline::samplePoints), "samplePoints");
+					m->add(fun(&ccPolyline::MetaKeyUpDir), "MetaKeyUpDir");
+					m->add(fun(&ccPolyline::MetaKeyConstAltitude), "MetaKeyConstAltitude");
+					m->add(fun(&ccPolyline::MetaKeyAbscissa), "MetaKeyAbscissa");
+					m->add(fun(&ccPolyline::MetaKeyPrefixCenter), "MetaKeyPrefixCenter");
+					m->add(fun(&ccPolyline::MetaKeyPrefixDirection), "MetaKeyPrefixDirection");
+				
+
+					
+					m->add(chaiscript::base_class<CCLib::Polyline, ccPolyline>());
+					m->add(chaiscript::base_class<ccHObject, ccPolyline>());
+					m->add(chaiscript::base_class<ccObject, ccPolyline>());
+					m->add(chaiscript::base_class<ccSerializableObject, ccPolyline>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccPolyline>());
+					m->add(chaiscript::base_class<ccShiftedObject, ccPolyline>());
+
+					return m;
+				}
+
+				ModulePtr bs_ccSubMesh(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccSubMesh>(), "ccSubMesh");
+
+					m->add(chaiscript::constructor<ccSubMesh(ccMesh*)>(), "ccSubMesh");
+					m->add(fun(&ccSubMesh::getClassID), "getClassID");
+					m->add(fun(&ccSubMesh::getOwnBB), "getOwnBB");
+					m->add(fun(&ccSubMesh::isSerializable), "isSerializable");
+					m->add(fun(&ccSubMesh::getAssociatedCloud), "getAssociatedCloud");
+					m->add(fun(&ccSubMesh::refreshBB), "refreshBB");
+					m->add(fun(&ccSubMesh::interpolateNormals), "interpolateNormals");
+					m->add(fun(&ccSubMesh::interpolateNormalsBC), "interpolateNormalsBC");
+					m->add(fun(&ccSubMesh::interpolateColors), "interpolateColors");
+					m->add(fun(&ccSubMesh::interpolateColorsBC), "interpolateColorsBC");
+					m->add(fun(&ccSubMesh::getColorFromMaterial), "getColorFromMaterial");
+					m->add(fun(&ccSubMesh::getVertexColorFromMaterial), "getVertexColorFromMaterial");
+					m->add(fun(&ccSubMesh::hasMaterials), "hasMaterials");
+					m->add(fun(&ccSubMesh::getMaterialSet), "getMaterialSet");
+					m->add(fun(&ccSubMesh::getTriangleMtlIndex), "getTriangleMtlIndex");
+					m->add(fun(&ccSubMesh::hasTextures), "hasTextures");
+					m->add(fun(&ccSubMesh::getTexCoordinatesTable), "getTexCoordinatesTable");
+					m->add(fun(&ccSubMesh::getTriangleTexCoordinates), "getTriangleTexCoordinates");
+					m->add(fun(&ccSubMesh::hasPerTriangleTexCoordIndexes), "hasPerTriangleTexCoordIndexes");
+					m->add(fun(&ccSubMesh::getTriangleTexCoordinatesIndexes), "getTriangleTexCoordinatesIndexes");
+					m->add(fun(&ccSubMesh::hasTriNormals), "hasTriNormals");
+					m->add(fun(&ccSubMesh::getTriangleNormalIndexes), "getTriangleNormalIndexes");
+					m->add(fun(&ccSubMesh::getTriangleNormals), "getTriangleNormals");
+					m->add(fun(&ccSubMesh::getTriNormsTable), "getTriNormsTable");
+					m->add(fun(&ccSubMesh::capacity), "capacity");
+					m->add(fun(&ccSubMesh::hasColors), "hasColors");
+					m->add(fun(&ccSubMesh::hasNormals), "hasNormals");
+					m->add(fun(&ccSubMesh::hasScalarFields), "hasScalarFields");
+					m->add(fun(&ccSubMesh::hasDisplayedScalarField), "hasDisplayedScalarField");
+					m->add(fun(&ccSubMesh::normalsShown), "normalsShown");
+					m->add(fun(&ccSubMesh::size), "size");
+					m->add(fun(&ccSubMesh::forEach), "forEach");
+					m->add(fun(&ccSubMesh::placeIteratorAtBeginning), "placeIteratorAtBeginning");
+					m->add(fun(&ccSubMesh::_getNextTriangle), "_getNextTriangle");
+					m->add(fun(&ccSubMesh::_getTriangle), "_getTriangle");
+					m->add(fun(&ccSubMesh::getNextTriangleVertIndexes), "getNextTriangleVertIndexes");
+					m->add(fun(&ccSubMesh::getTriangleVertIndexes), "getTriangleVertIndexes");
+					m->add(fun(&ccSubMesh::getTriangleVertices), "getTriangleVertices");
+					m->add(fun(&ccSubMesh::getBoundingBox), "getBoundingBox");
+					m->add(fun(&ccSubMesh::getTriGlobalIndex), "getTriGlobalIndex");
+					m->add(fun(&ccSubMesh::getCurrentTriGlobalIndex), "getCurrentTriGlobalIndex");
+					m->add(fun(&ccSubMesh::forwardIterator), "forwardIterator");
+					m->add(fun(&ccSubMesh::clear), "clear");
+					m->add(fun(static_cast<bool(ccSubMesh::*)(unsigned)>(&ccSubMesh::addTriangleIndex)), "addTriangleIndex");
+					m->add(fun(static_cast<bool(ccSubMesh::*)(unsigned,unsigned)>(&ccSubMesh::addTriangleIndex)), "addTriangleIndex");
+					m->add(fun(&ccSubMesh::setTriangleIndex), "setTriangleIndex");
+					m->add(fun(&ccSubMesh::reserve), "reserve");
+					m->add(fun(&ccSubMesh::resize), "resize");
+					m->add(fun(static_cast<ccMesh*(ccSubMesh::*)()>(&ccSubMesh::getAssociatedMesh)), "getAssociatedMesh");
+					m->add(fun(static_cast<const ccMesh*(ccSubMesh::*)()const>(&ccSubMesh::getAssociatedMesh)), "getAssociatedMesh");
+					m->add(fun(&ccSubMesh::setAssociatedMesh), "setAssociatedMesh");
+					m->add(chaiscript::user_type<ccSubMesh::IndexMap>(), "IndexMap");
+					m->add(fun(&ccSubMesh::createNewSubMeshFromSelection), "createNewSubMeshFromSelection");
+
+
+
+					m->add(chaiscript::base_class<ccGenericMesh, ccSubMesh>());
+					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccSubMesh>());
+					m->add(chaiscript::base_class<ccHObject, ccSubMesh>());
+					m->add(chaiscript::base_class<ccObject, ccSubMesh>());
+					m->add(chaiscript::base_class<ccSerializableObject, ccSubMesh>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccSubMesh>());
+
+					return m;
+				}
+
+
+				ModulePtr bs_ccScalarField(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccScalarField>(), "ccScalarField");
+
+					//protected destructor
+					//m->add(chaiscript::constructor<ccScalarField(const char*)>(), "ccScalarField");
+					//m->add(chaiscript::constructor<ccScalarField(const ccScalarField&)>(), "ccScalarField");
+
+					m->add(chaiscript::user_type<ccScalarField::Range>(), "Range");
+					m->add(chaiscript::constructor<ccScalarField::Range()>(), "Range");
+					m->add(fun(&ccScalarField::Range::min), "min");
+					m->add(fun(&ccScalarField::Range::start), "start");
+					m->add(fun(&ccScalarField::Range::stop), "stop");
+					m->add(fun(&ccScalarField::Range::max), "max");
+					m->add(fun(&ccScalarField::Range::range), "range");
+					m->add(fun(&ccScalarField::Range::maxRange), "maxRange");
+					m->add(fun(&ccScalarField::Range::setBounds), "setBounds");
+					m->add(fun(&ccScalarField::Range::setStart), "setStart");
+					m->add(fun(&ccScalarField::Range::setStop), "setStop");
+					m->add(fun(&ccScalarField::Range::inbound), "inbound");
+					m->add(fun(&ccScalarField::Range::isInbound), "isInbound");
+					m->add(fun(&ccScalarField::Range::isInRange), "isInRange");
+					m->add(fun(&ccScalarField::displayRange), "displayRange");
+					m->add(fun(&ccScalarField::saturationRange), "saturationRange");
+					m->add(fun(&ccScalarField::logSaturationRange), "logSaturationRange");
+					m->add(fun(&ccScalarField::setMinDisplayed), "setMinDisplayed");
+					m->add(fun(&ccScalarField::setMaxDisplayed), "setMaxDisplayed");
+					m->add(fun(&ccScalarField::setSaturationStart), "setSaturationStart");
+					m->add(fun(&ccScalarField::setSaturationStop), "setSaturationStop");
+					m->add(fun(&ccScalarField::getColor), "getColor");
+					m->add(fun(&ccScalarField::getValueColor), "getValueColor");
+					m->add(fun(&ccScalarField::showNaNValuesInGrey), "showNaNValuesInGrey");
+					m->add(fun(&ccScalarField::areNaNValuesShownInGrey), "areNaNValuesShownInGrey");
+					m->add(fun(&ccScalarField::alwaysShowZero), "alwaysShowZero");
+					m->add(fun(&ccScalarField::isZeroAlwaysShown), "isZeroAlwaysShown");
+					m->add(fun(&ccScalarField::setSymmetricalScale), "setSymmetricalScale");
+					m->add(fun(&ccScalarField::symmetricalScale), "symmetricalScale");
+					m->add(fun(&ccScalarField::setLogScale), "setLogScale");
+					m->add(fun(&ccScalarField::logScale), "logScale");
+					m->add(fun(&ccScalarField::computeMinAndMax), "computeMinAndMax");
+					m->add(fun(&ccScalarField::getColorScale), "getColorScale");
+					m->add(fun(&ccScalarField::setColorScale), "setColorScale");
+					m->add(fun(&ccScalarField::getColorRampSteps), "getColorRampSteps");
+					m->add(fun(&ccScalarField::setColorRampSteps), "setColorRampSteps");
+					m->add(chaiscript::user_type<ccScalarField::Histogram>(), "Histogram");
+					m->add(fun(&ccScalarField::Histogram::maxValue), "maxValue");
+					m->add(chaiscript::base_class<std::vector<unsigned>, ccScalarField::Histogram>());
+
+					m->add(fun(&ccScalarField::getHistogram), "getHistogram");
+					m->add(fun(&ccScalarField::mayHaveHiddenValues), "mayHaveHiddenValues");
+					m->add(fun(&ccScalarField::setModificationFlag), "setModificationFlag");
+					m->add(fun(&ccScalarField::getModificationFlag), "getModificationFlag");
+					m->add(fun(&ccScalarField::importParametersFrom), "importParametersFrom");
+					m->add(fun(&ccScalarField::isSerializable), "isSerializable");
+					m->add(fun(&ccScalarField::toFile), "toFile");
+					m->add(fun(&ccScalarField::fromFile), "fromFile");
+					m->add(fun(&ccScalarField::getGlobalShift), "getGlobalShift");
+					m->add(fun(&ccScalarField::setGlobalShift), "setGlobalShift");
+
+					m->add(chaiscript::base_class<CCLib::ScalarField, ccScalarField>());
+					m->add(chaiscript::base_class<ccSerializableObject, ccScalarField>());
+
+					return m;
+				}
+
+
+				ModulePtr bs_ccQuadric(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccQuadric>(), "ccQuadric");
+					m->add(chaiscript::constructor<ccQuadric(QString)>(), "ccQuadric");
+					m->add(chaiscript::constructor<ccQuadric(CCVector2,	CCVector2, const PointCoordinateType [6],const Tuple3ub*,const ccGLMatrix*,QString,unsigned)>(), "ccQuadric");
+					//m->add(fun(&ccQuadric::DEFAULT_DRAWING_PRECISION), "DEFAULT_DRAWING_PRECISION");
+					m->add(fun(&ccQuadric::getClassID), "getClassID");
+					m->add(fun(&ccQuadric::getTypeName), "getTypeName");
+					m->add(fun(&ccQuadric::hasDrawingPrecision), "hasDrawingPrecision");
+					m->add(fun(&ccQuadric::clone), "clone");
+					m->add(fun(&ccQuadric::getOwnFitBB), "getOwnFitBB");
+					m->add(fun(&ccQuadric::getMinCorner), "getMinCorner");
+					m->add(fun(&ccQuadric::getMaxCorner), "getMaxCorner");
+					m->add(fun(&ccQuadric::getEquationCoefs), "getEquationCoefs");
+					m->add(fun(&ccQuadric::getEquationDims), "getEquationDims");
+					m->add(fun(&ccQuadric::projectOnQuadric), "projectOnQuadric");
+					m->add(fun(&ccQuadric::getEquationString), "getEquationString");
+					m->add(fun(&ccQuadric::Fit), "Fit");
+
+					chaiscript::bootstrap::array<PointCoordinateType[6]>("eq_Array", m);
+					chaiscript::bootstrap::array<const PointCoordinateType[6]>("eq_Array", m);
+
+					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccQuadric>());
+					m->add(chaiscript::base_class<ccHObject, ccQuadric>());
+					m->add(chaiscript::base_class<ccObject, ccQuadric>());
+					m->add(chaiscript::base_class<ccSerializableObject, ccQuadric>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccQuadric>());
+					m->add(chaiscript::base_class<ccMesh, ccQuadric>());
+					m->add(chaiscript::base_class<ccGenericMesh, ccQuadric>());
+					m->add(chaiscript::base_class<ccGenericPrimitive, ccQuadric>());
+
+
+					return m;
+				}
+
+				ModulePtr bs_ccProgressDialog(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccProgressDialog>(), "ccProgressDialog");
+					m->add(chaiscript::constructor<ccProgressDialog(bool, QWidget*)>(), "ccProgressDialog");
+					m->add(fun(&ccProgressDialog::update), "update");
+					m->add(fun(static_cast<void(ccProgressDialog::*)(const char*)>(&ccProgressDialog::setMethodTitle)), "setMethodTitle");
+					m->add(fun(static_cast<void(ccProgressDialog::*)(const char*)>(&ccProgressDialog::setInfo)), "setInfo");
+					m->add(fun(&ccProgressDialog::isCancelRequested), "isCancelRequested");
+					m->add(fun(&ccProgressDialog::start), "start");
+					m->add(fun(&ccProgressDialog::stop), "stop");
+					m->add(fun(static_cast<void(ccProgressDialog::*)(QString)>(&ccProgressDialog::setMethodTitle)), "setMethodTitle");
+					m->add(fun(static_cast<void(ccProgressDialog::*)(QString)>(&ccProgressDialog::setInfo)), "setInfo");
+					m->add(fun(&ccProgressDialog::scheduleRefresh), "scheduleRefresh");
+					
+
+
+
+					m->add(chaiscript::base_class<CCLib::GenericProgressCallback, ccProgressDialog>());
+					m->add(chaiscript::base_class<QProgressDialog, ccProgressDialog>());
+
+
+
+					return m;
+				}
+
+				ModulePtr bs_ccPointCloudInterpolator(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccPointCloudInterpolator>(), "ccPointCloudInterpolator");
+					m->add(chaiscript::user_type<ccPointCloudInterpolator::Parameters>(), "Parameters");
+					m->add(fun(&ccPointCloudInterpolator::Parameters::method), "method");
+					m->add(fun(&ccPointCloudInterpolator::Parameters::algo), "algo");
+					m->add(fun(&ccPointCloudInterpolator::Parameters::knn), "knn");
+					m->add(fun(&ccPointCloudInterpolator::Parameters::radius), "radius");
+					m->add(fun(&ccPointCloudInterpolator::Parameters::sigma), "sigma");
+
+					m->add(fun(&ccPointCloudInterpolator::InterpolateScalarFieldsFrom), "InterpolateScalarFieldsFrom");
+					
+
+
+
+
+					m->add(chaiscript::base_class<CCLib::GenericProgressCallback, ccProgressDialog>());
+					m->add(chaiscript::base_class<QProgressDialog, ccProgressDialog>());
+
+
+
+					return m;
+				}
+
+				ModulePtr bs_ccNormalVectors(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccNormalVectors>(), "ccNormalVectors");
+					
+					m->add(fun(&ccNormalVectors::GetUniqueInstance), "GetUniqueInstance");
+					m->add(fun(&ccNormalVectors::ReleaseUniqueInstance), "ReleaseUniqueInstance");
+					m->add(fun(&ccNormalVectors::GetNumberOfVectors), "GetNumberOfVectors");
+					m->add(fun(&ccNormalVectors::GetNormal), "GetNormal");
+					m->add(fun(&ccNormalVectors::getNormal), "getNormal");
+					m->add(fun([](ccNormalVectors* nvs, const PointCoordinateType N[]) {return nvs->GetNormIndex(N); }), "GetNormIndex");
+					m->add(fun([](ccNormalVectors* nvs, const CCVector3& N) {return nvs->GetNormIndex(N); }), "GetNormIndex");
+					m->add(fun(&ccNormalVectors::ComputeCloudNormals), "ComputeCloudNormals");
+					m->add(fun(&ccNormalVectors::GuessNaiveRadius), "GuessNaiveRadius");
+					m->add(fun(&ccNormalVectors::GuessBestRadius), "GuessBestRadius");
+					m->add(fun(&ccNormalVectors::UpdateNormalOrientations), "UpdateNormalOrientations");
+					m->add(fun(&ccNormalVectors::ConvertNormalToStrikeAndDip), "ConvertNormalToStrikeAndDip");
+					m->add(fun(&ccNormalVectors::ConvertNormalToDipAndDipDir), "ConvertNormalToDipAndDipDir");
+					m->add(fun(&ccNormalVectors::ConvertDipAndDipDirToNormal), "ConvertDipAndDipDirToNormal");
+					m->add(fun(&ccNormalVectors::ConvertStrikeAndDipToString), "ConvertStrikeAndDipToString");
+					m->add(fun(&ccNormalVectors::ConvertDipAndDipDirToString), "ConvertDipAndDipDirToString");
+					m->add(fun(&ccNormalVectors::ConvertNormalToHSV), "ConvertNormalToHSV");
+					m->add(fun(&ccNormalVectors::ConvertNormalToRGB), "ConvertNormalToRGB");
+					m->add(fun(&ccNormalVectors::enableNormalHSVColorsArray), "enableNormalHSVColorsArray");
+					m->add(fun(&ccNormalVectors::getNormalHSVColor), "getNormalHSVColor");
+					m->add(fun(&ccNormalVectors::getNormalHSVColorArray), "getNormalHSVColorArray");
+					m->add(fun(&ccNormalVectors::ComputeNormalWithLS), "ComputeNormalWithLS");
+					m->add(fun(&ccNormalVectors::ComputeNormalWithTri), "ComputeNormalWithTri");
+					m->add(fun(&ccNormalVectors::ComputeNormalWithQuadric), "ComputeNormalWithQuadric");
+
+					return m;
+				}
+
+				ModulePtr bs_ccNormalCompressor(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccNormalCompressor>(), "ccNormalCompressor");
+
+					m->add(fun(&ccNormalCompressor::Compress), "Compress");
+					m->add(fun(&ccNormalCompressor::Decompress), "Decompress");
+					m->add(fun(&ccNormalCompressor::InvertNormal), "InvertNormal");
+					//m->add(const_var(ccNormalCompressor::QUANTIZE_LEVEL), "QUANTIZE_LEVEL"); // TODO fix these constant vals
+					//m->add(const_var(ccNormalCompressor::MAX_VALID_NORM_CODE), "MAX_VALID_NORM_CODE");
+					//m->add(const_var(ccNormalCompressor::NULL_NORM_CODE), "NULL_NORM_CODE");
+					return m;
+				}
+
+				/*
+				ModulePtr bs_ccMinimumSpanningTreeForNormsDirection(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccMinimumSpanningTreeForNormsDirection>(), "ccMinimumSpanningTreeForNormsDirection");
+					m->add(fun(&ccMinimumSpanningTreeForNormsDirection::OrientNormals), "OrientNormals");
+					return m;
+				}
+
+				ModulePtr bs_ccFastMarchingForNormsDirection(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccFastMarchingForNormsDirection>(), "ccFastMarchingForNormsDirection");
+					m->add(chaiscript::constructor<ccFastMarchingForNormsDirection()>(), "ccFastMarchingForNormsDirection");
+					m->add(fun(&ccFastMarchingForNormsDirection::OrientNormals), "OrientNormals");
+					m->add(fun(&ccFastMarchingForNormsDirection::init), "init");
+					m->add(fun(&ccFastMarchingForNormsDirection::updateResolvedTable), "updateResolvedTable");
+					m->add(fun(&ccFastMarchingForNormsDirection::propagate), "propagate");
+					
+					m->add(chaiscript::base_class<CCLib::FastMarching, ccFastMarchingForNormsDirection>());
+
+					return m;
+				}*/
+
+				ModulePtr bs_ccMaterialSet(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccMaterialSet>(), "ccMaterialSet");
+					m->add(fun(&ccMaterialSet::getClassID), "getClassID");
+					m->add(fun(&ccMaterialSet::isShareable), "isShareable");
+					m->add(fun(&ccMaterialSet::findMaterialByName), "findMaterialByName");
+					m->add(fun(&ccMaterialSet::findMaterialByUniqueID), "findMaterialByUniqueID");
+					m->add(fun(&ccMaterialSet::addMaterial), "addMaterial");
+					m->add(fun(&ccMaterialSet::ParseMTL), "ParseMTL");
+					m->add(fun(&ccMaterialSet::saveAsMTL), "saveAsMTL");
+					m->add(fun(&ccMaterialSet::clone), "clone");
+					m->add(fun(&ccMaterialSet::append), "append");
+					m->add(fun(&ccMaterialSet::isSerializable), "isSerializable");
+
+					m->add(chaiscript::vector_conversion<std::vector<ccMaterial::CShared>>());
+
+					m->add(chaiscript::base_class<std::vector<ccMaterial::CShared>, ccMaterialSet>());
+					m->add(chaiscript::base_class<ccHObject, ccMaterialSet>());
+					m->add(chaiscript::base_class<ccObject, ccMaterialSet>());
+					m->add(chaiscript::base_class<ccSerializableObject, ccMaterialSet>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccMaterialSet>());
+					m->add(chaiscript::base_class<CCShareable, ccMaterialSet>());
+
+
+					return m;
+				}
+
+				ModulePtr bs_ccMaterial(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccMaterial>(), "ccMaterial");
+					m->add(chaiscript::constructor<ccMaterial(QString)>(), "ccMaterial");
+					m->add(chaiscript::constructor<ccMaterial(const ccMaterial&)>(), "ccMaterial");
+					m->add(chaiscript::user_type<ccMaterial::CShared>(), "CShared");
+					m->add(chaiscript::user_type<ccMaterial::Shared>(), "Shared");
+
+					m->add(fun(&ccMaterial::getName), "getName");
+					m->add(fun(&ccMaterial::getTextureFilename), "getTextureFilename");
+					m->add(fun(&ccMaterial::setName), "setName");
+					m->add(fun(&ccMaterial::setDiffuse), "setDiffuse");
+					m->add(fun(&ccMaterial::setDiffuseFront), "setDiffuseFront");
+					m->add(fun(&ccMaterial::setDiffuseBack), "setDiffuseBack");
+					m->add(fun(&ccMaterial::getDiffuseFront), "getDiffuseFront");
+					m->add(fun(&ccMaterial::getDiffuseBack), "getDiffuseBack");
+					m->add(fun(&ccMaterial::setAmbient), "setAmbient");
+					m->add(fun(&ccMaterial::getAmbient), "getAmbient");
+					m->add(fun(&ccMaterial::setSpecular), "setSpecular");
+					m->add(fun(&ccMaterial::getSpecular), "getSpecular");
+					m->add(fun(&ccMaterial::setEmission), "setEmission");
+					m->add(fun(&ccMaterial::getEmission), "getEmission");
+					m->add(fun(&ccMaterial::setShininess), "setShininess");
+					m->add(fun(&ccMaterial::setShininessFront), "setShininessFront");
+					m->add(fun(&ccMaterial::setShininessBack), "setShininessBack");
+					m->add(fun(&ccMaterial::getShininessFront), "getShininessFront");
+					m->add(fun(&ccMaterial::getShininessBack), "getShininessBack");
+					m->add(fun(&ccMaterial::setTransparency), "setTransparency");
+					m->add(fun(&ccMaterial::applyGL), "applyGL");
+					m->add(fun(&ccMaterial::hasTexture), "hasTexture");
+					m->add(fun(&ccMaterial::setTexture), "setTexture");
+					m->add(fun(&ccMaterial::loadAndSetTexture), "loadAndSetTexture");
+					m->add(fun(&ccMaterial::getTexture), "getTexture");
+					m->add(fun(&ccMaterial::getTextureID), "getTextureID");
+					m->add(fun(&ccMaterial::MakeLightsNeutral), "MakeLightsNeutral");
+					m->add(fun(&ccMaterial::GetTexture), "GetTexture");
+					m->add(fun(&ccMaterial::AddTexture), "AddTexture");
+					m->add(fun(&ccMaterial::ReleaseTextures), "ReleaseTextures");
+					m->add(fun(&ccMaterial::releaseTexture), "releaseTexture");
+					m->add(fun(&ccMaterial::compare), "compare");
+					m->add(fun(&ccMaterial::isSerializable), "isSerializable");
+					m->add(fun(&ccMaterial::toFile), "toFile");
+					m->add(fun(&ccMaterial::fromFile), "fromFile");
+					m->add(fun(&ccMaterial::getUniqueIdentifier), "getUniqueIdentifier");
+					m->add(fun(&ccMaterial::setTextureMinMagFilters), "setTextureMinMagFilters");
+
+
+					m->add(chaiscript::base_class<ccSerializableObject, ccMaterial>());
+
+
+
+					return m;
+				}
+
+
+				ModulePtr bs_ccLog(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccLog>(), "ccLog");					
+					m->add(fun(&ccLog::TheInstance), "TheInstance");
+					m->add(fun(&ccLog::RegisterInstance), "RegisterInstance");
+					m->add(fun(&ccLog::EnableMessageBackup), "EnableMessageBackup");
+					m->add(fun(&ccLog::LogMessage), "LogMessage");
+					m->add(fun(&ccLog::Print), "Print");
+					m->add(fun(&ccLog::PrintDebug), "PrintDebug");
+					m->add(fun(&ccLog::Warning), "Warning");
+					m->add(fun(&ccLog::WarningDebug), "WarningDebug");
+					m->add(fun(&ccLog::Error), "Error");
+					m->add(fun(&ccLog::ErrorDebug), "ErrorDebug");
+					return m;
+				}
+
+				ModulePtr bs_ccIndexedTransformation(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccIndexedTransformation>(), "ccIndexedTransformation");
+					m->add(chaiscript::constructor<ccIndexedTransformation()>(), "ccIndexedTransformation");
+					m->add(chaiscript::constructor<ccIndexedTransformation(const ccGLMatrix&)>(), "ccIndexedTransformation");
+					m->add(chaiscript::constructor<ccIndexedTransformation(const ccGLMatrix&, double)>(), "ccIndexedTransformation");
+					m->add(chaiscript::constructor<ccIndexedTransformation(const ccIndexedTransformation&)>(), "ccIndexedTransformation");
+					m->add(fun(&ccIndexedTransformation::getIndex), "getIndex");
+					m->add(fun(&ccIndexedTransformation::setIndex), "setIndex");
+					m->add(fun(&ccIndexedTransformation::Interpolate), "Interpolate");
+					m->add(fun(&ccIndexedTransformation::operator*), "*");
+					m->add(fun(&ccIndexedTransformation::operator*=), "*=");
+					m->add(fun(&ccIndexedTransformation::operator+=), "+=");
+					m->add(fun(&ccIndexedTransformation::operator-=), "-=");
+					m->add(fun(&ccIndexedTransformation::transposed), "transposed");
+					m->add(fun(&ccIndexedTransformation::inverse), "inverse");
+					m->add(fun(&ccIndexedTransformation::toAsciiFile), "toAsciiFile");
+					m->add(fun(&ccIndexedTransformation::fromAsciiFile), "fromAsciiFile");
+					m->add(fun(&ccIndexedTransformation::isSerializable), "isSerializable");
+					m->add(fun(&ccIndexedTransformation::toFile), "toFile");
+					m->add(fun(&ccIndexedTransformation::fromFile), "fromFile");
+
+
+					m->add(chaiscript::base_class<ccGLMatrixTpl<float>, ccIndexedTransformation>());
+					m->add(chaiscript::base_class<ccGLMatrix, ccIndexedTransformation>());
+
+					return m;
+				}
+
+				ModulePtr bs_ccIndexedTransformationBuffer(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccIndexedTransformationBuffer>(), "ccIndexedTransformationBuffer");
+					m->add(chaiscript::constructor<ccIndexedTransformationBuffer(QString)>(), "ccIndexedTransformationBuffer");
+					m->add(chaiscript::constructor<ccIndexedTransformationBuffer(const ccIndexedTransformationBuffer&)>(), "ccIndexedTransformationBuffer");
+					m->add(fun(&ccIndexedTransformationBuffer::getClassID), "getClassID");
+					m->add(fun(&ccIndexedTransformationBuffer::isSerializable), "isSerializable");
+					m->add(fun(&ccIndexedTransformationBuffer::sort), "sort");
+					m->add(fun(&ccIndexedTransformationBuffer::findNearest), "findNearest");
+					m->add(fun(&ccIndexedTransformationBuffer::getInterpolatedTransformation), "getInterpolatedTransformation");
+					m->add(fun(&ccIndexedTransformationBuffer::triherdonsShown), "triherdonsShown");
+					m->add(fun(&ccIndexedTransformationBuffer::showTriherdons), "showTriherdons");
+					m->add(fun(&ccIndexedTransformationBuffer::triherdonsDisplayScale), "triherdonsDisplayScale");
+					m->add(fun(&ccIndexedTransformationBuffer::setTriherdonsDisplayScale), "setTriherdonsDisplayScale");
+					m->add(fun(&ccIndexedTransformationBuffer::isPathShownAsPolyline), "isPathShownAsPolyline");
+					m->add(fun(&ccIndexedTransformationBuffer::showPathAsPolyline), "showPathAsPolyline");
+					m->add(fun(&ccIndexedTransformationBuffer::invalidateBoundingBox), "invalidateBoundingBox");
+					m->add(fun(&ccIndexedTransformationBuffer::getOwnBB), "getOwnBB");
+					m->add(chaiscript::vector_conversion<std::vector<ccIndexedTransformation>>());
+
+
+					m->add(chaiscript::base_class<std::vector<ccIndexedTransformation>, ccIndexedTransformationBuffer>());
+					m->add(chaiscript::base_class<ccHObject, ccIndexedTransformationBuffer>());
+					m->add(chaiscript::base_class<ccObject, ccIndexedTransformationBuffer>());
+					m->add(chaiscript::base_class<ccSerializableObject, ccIndexedTransformationBuffer>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccIndexedTransformationBuffer>());
+
+					return m;
+				}
+
+				ModulePtr bs_ccGL(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccGL>(), "ccGL");
+					m->add(fun(static_cast<void (*)(QOpenGLFunctions_2_1*, const float*)>(&ccGL::Vertex3v)), "Vertex3v");
+					m->add(fun(static_cast<void (*)(QOpenGLFunctions_2_1*, const double*)>(&ccGL::Vertex3v)), "Vertex3v");
+					m->add(fun(static_cast<void (*)(QOpenGLFunctions_2_1*, float, float, float)>(&ccGL::Vertex3)), "Vertex3");
+					m->add(fun(static_cast<void (*)(QOpenGLFunctions_2_1*, double, double, double)>(&ccGL::Vertex3)), "Vertex3");
+					m->add(fun(static_cast<void (*)(QOpenGLFunctions_2_1*, float, float, float)>(&ccGL::Scale)), "Scale");
+					m->add(fun(static_cast<void (*)(QOpenGLFunctions_2_1*, double, double, double)>(&ccGL::Scale)), "Scale");
+					m->add(fun(static_cast<void (*)(QOpenGLFunctions_2_1*, const float*)>(&ccGL::Normal3v)), "Normal3v");
+					m->add(fun(static_cast<void (*)(QOpenGLFunctions_2_1*, const double*)>(&ccGL::Normal3v)), "Normal3v");
+					m->add(fun(static_cast<void (*)(QOpenGLFunctions_2_1*, float, float, float, float)>(&ccGL::Rotate)), "Rotate");
+					m->add(fun(static_cast<void (*)(QOpenGLFunctions_2_1*, double, double, double, double)>(&ccGL::Rotate)), "Rotate");
+					m->add(fun(static_cast<void (*)(QOpenGLFunctions_2_1*, float, float, float)>(&ccGL::Translate)), "Translate");
+					m->add(fun(static_cast<void (*)(QOpenGLFunctions_2_1*, double, double, double)>(&ccGL::Translate)), "Translate");
+					m->add(fun(static_cast<void (*)(QOpenGLFunctions_2_1*, const unsigned char*)>(&ccGL::Color3v)), "Color3v");
+					m->add(fun(static_cast<void (*)(QOpenGLFunctions_2_1*, const float*)>(&ccGL::Color3v)), "Color3v");
+					m->add(fun(&ccGL::Frustum), "Frustum");
+					m->add(fun(&ccGL::Perspective), "Perspective");
+					m->add(fun(&ccGL::Ortho), "Ortho");
+					m->add(fun(&ccGL::Project<float, float>), "Project");
+					m->add(fun(&ccGL::Project<float, double>), "Project");
+					m->add(fun(&ccGL::Project<double, double>), "Project");
+					m->add(fun(&ccGL::Project<double, float>), "Project");
+					m->add(fun(static_cast<double(*)(const double*,int,int)>(&ccGL::MAT)), "MAT");
+					m->add(fun(static_cast<float(*)(const float*,int,int)>(&ccGL::MAT)), "MAT");
+					m->add(fun(static_cast<double&(*)(double*, int, int) > (&ccGL::MAT)), "MAT");
+					m->add(fun(static_cast<float&(*)(float*,int,int)>(&ccGL::MAT)), "MAT");
+					m->add(fun(&ccGL::InvertMatrix<float>), "InvertMatrix");
+					m->add(fun(&ccGL::InvertMatrix<double>), "InvertMatrix");
+					m->add(fun(&ccGL::Unproject<float, float>), "Unproject");
+					m->add(fun(&ccGL::Unproject<float, double>), "Unproject");
+					m->add(fun(&ccGL::Unproject<double, double>), "Unproject");
+					m->add(fun(&ccGL::Unproject<double, float>), "Unproject");
+					m->add(fun(&ccGL::PickMatrix), "PickMatrix");
+
+					return m;
+				}
+
+				ModulePtr bs_ccGriddedTools(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccGriddedTools>(), "ccGriddedTools");
+					m->add(chaiscript::user_type<ccGriddedTools::GridParameters>(), "GridParameters");
+					m->add(chaiscript::constructor<ccGriddedTools::GridParameters()>(), "GridParameters");
+					m->add(fun(&ccGriddedTools::GridParameters::minPhi), "minPhi");
+					m->add(fun(&ccGriddedTools::GridParameters::maxPhi), "maxPhi");
+					m->add(fun(&ccGriddedTools::GridParameters::minTheta), "minTheta");
+					m->add(fun(&ccGriddedTools::GridParameters::maxTheta), "maxTheta");
+					m->add(fun(&ccGriddedTools::GridParameters::deltaPhiRad), "deltaPhiRad");
+					m->add(fun(&ccGriddedTools::GridParameters::deltaThetaRad), "deltaThetaRad");
+					m->add(fun(&ccGriddedTools::GridParameters::maxRange), "maxRange");
+					m->add(fun(&ccGriddedTools::DetectParameters), "DetectParameters");
+					m->add(fun(&ccGriddedTools::ComputeBestSensor), "ComputeBestSensor");
+					
+
+					return m;
+				}
+
+
+				ModulePtr bs_ccViewportParameters(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccViewportParameters>(), "ccViewportParameters");
+					m->add(chaiscript::constructor<ccViewportParameters()>(), "ccViewportParameters");
+					m->add(chaiscript::constructor<ccViewportParameters(const ccViewportParameters&)>(), "ccViewportParameters");
+					m->add(fun(&ccViewportParameters::isSerializable), "isSerializable");
+					m->add(fun(&ccViewportParameters::toFile), "toFile");
+					m->add(fun(&ccViewportParameters::fromFile), "fromFile");
+					m->add(fun(&ccViewportParameters::pixelSize), "pixelSize");
+					m->add(fun(&ccViewportParameters::zoom), "zoom");
+					m->add(fun(&ccViewportParameters::viewMat), "viewMat");
+					m->add(fun(&ccViewportParameters::defaultPointSize), "defaultPointSize");
+					m->add(fun(&ccViewportParameters::defaultLineWidth), "defaultLineWidth");
+					m->add(fun(&ccViewportParameters::perspectiveView), "perspectiveView");
+					m->add(fun(&ccViewportParameters::objectCenteredView), "objectCenteredView");
+					m->add(fun(&ccViewportParameters::zNearCoef), "zNearCoef");
+					m->add(fun(&ccViewportParameters::zNear), "zNear");
+					m->add(fun(&ccViewportParameters::zFar), "zFar");
+					m->add(fun(&ccViewportParameters::pivotPoint), "pivotPoint");
+					m->add(fun(&ccViewportParameters::cameraCenter), "cameraCenter");
+					m->add(fun(&ccViewportParameters::fov), "fov");
+					m->add(fun(&ccViewportParameters::perspectiveAspectRatio), "perspectiveAspectRatio");
+					m->add(fun(&ccViewportParameters::orthoAspectRatio), "orthoAspectRatio");
+					m->add(fun(&ccViewportParameters::IncrementToZNearCoef), "IncrementToZNearCoef");
+					m->add(fun(&ccViewportParameters::ZNearCoefToIncrement), "ZNearCoefToIncrement");
+					return m;
+				}
+
+				ModulePtr bs_ccGLCameraParameters(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccGLCameraParameters>(), "ccGLCameraParameters");
+					m->add(chaiscript::constructor<ccGLCameraParameters()>(), "ccGLCameraParameters");
+					
+					m->add(fun(static_cast<bool(ccGLCameraParameters::*)(const CCVector3d&, CCVector3d&, bool)const>(&ccGLCameraParameters::project)), "project");
+					m->add(fun(static_cast<bool(ccGLCameraParameters::*)(const CCVector3&, CCVector3d&, bool)const>(&ccGLCameraParameters::project)), "project");
+					m->add(fun(static_cast<bool(ccGLCameraParameters::*)(const CCVector3d&, CCVector3d&)const>(&ccGLCameraParameters::unproject)), "unproject");
+					m->add(fun(static_cast<bool(ccGLCameraParameters::*)(const CCVector3&, CCVector3d&)const>(&ccGLCameraParameters::unproject)), "unproject");
+					m->add(fun(&ccGLCameraParameters::modelViewMat), "modelViewMat");
+					m->add(fun(&ccGLCameraParameters::projectionMat), "projectionMat");
+					m->add(fun(&ccGLCameraParameters::viewport), "viewport");
+					m->add(fun(&ccGLCameraParameters::perspective), "perspective");
+					m->add(fun(&ccGLCameraParameters::fov_deg), "fov_deg");
+					m->add(fun(&ccGLCameraParameters::pixelSize), "pixelSize");
+					
+					return m;
+				}
+
+
+				ModulePtr bs_ccGenericGLDisplay(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccGenericGLDisplay>(), "ccGenericGLDisplay");
+
+					m->add(fun(&ccGenericGLDisplay::getScreenSize), "getScreenSize");
+					m->add(fun(&ccGenericGLDisplay::redraw), "redraw");
+					m->add(fun(&ccGenericGLDisplay::toBeRefreshed), "toBeRefreshed");
+					m->add(fun(&ccGenericGLDisplay::refresh), "refresh");
+					m->add(fun(&ccGenericGLDisplay::invalidateViewport), "invalidateViewport");
+					m->add(fun(&ccGenericGLDisplay::deprecate3DLayer), "deprecate3DLayer");
+					m->add(fun(&ccGenericGLDisplay::getTextDisplayFont), "getTextDisplayFont");
+					m->add(fun(&ccGenericGLDisplay::getLabelDisplayFont), "getLabelDisplayFont");
+					m->add(fun(&ccGenericGLDisplay::displayText), "displayText");
+					m->add(fun(&ccGenericGLDisplay::display3DLabel), "display3DLabel");
+					m->add(fun(&ccGenericGLDisplay::getGLCameraParameters), "getGLCameraParameters");
+					m->add(fun(&ccGenericGLDisplay::toCenteredGLCoordinates), "toCenteredGLCoordinates");
+					m->add(fun(&ccGenericGLDisplay::toCornerGLCoordinates), "toCornerGLCoordinates");
+					m->add(fun(&ccGenericGLDisplay::getViewportParameters), "getViewportParameters");
+					m->add(fun(&ccGenericGLDisplay::setupProjectiveViewport), "setupProjectiveViewport");
+					m->add(fun(&ccGenericGLDisplay::asWidget), "asWidget");
+
+
+					return m;
+				}
+
+
+				ModulePtr bs_ccFlags(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccFlags>(), "ccFlags");
+
+					m->add(fun(&ccFlags::reset), "reset");
+					m->add(fun(&ccFlags::fromByte), "fromByte");
+					m->add(fun(&ccFlags::toByte), "toByte");
+					m->add(fun(&ccFlags::table), "table");
+				
+					chaiscript::bootstrap::array<bool[8]>("bool_table_Array", m);
+
+
+					return m;
+				}
+
+				ModulePtr bs_ccFileUtils(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(fun(&ccFileUtils::defaultDocPath), "defaultDocPath");
+					return m;
+				}
+
+				ModulePtr bs_ccDepthBuffer(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccDepthBuffer>(), "ccDepthBuffer");
+					m->add(chaiscript::constructor<ccDepthBuffer()>(), "ccDepthBuffer");
+					
+					m->add(fun(&ccDepthBuffer::zBuff), "zBuff");
+					m->add(fun(&ccDepthBuffer::deltaPhi), "deltaPhi");
+					m->add(fun(&ccDepthBuffer::deltaTheta), "deltaTheta");
+					m->add(fun(&ccDepthBuffer::width), "width");
+					m->add(fun(&ccDepthBuffer::height), "height");
+					m->add(fun(&ccDepthBuffer::clear), "clear");
+					m->add(fun(&ccDepthBuffer::fillHoles), "fillHoles");
+										
+					return m;
+				}
+
+				
+
+				template<typename T>
+				ModulePtr bs_RgbTpl(const std::string& shortCutName, ModulePtr m = std::make_shared<Module>())
+				{
+					chaiscript::utility::add_class<ccColor::RgbTpl<T>>(*m,
+						shortCutName,
+						{
+							chaiscript::constructor<ccColor::RgbTpl<T>()>(),
+							chaiscript::constructor<ccColor::RgbTpl<T>(T,T,T)>(),
+							chaiscript::constructor<ccColor::RgbTpl<T>(const T c[3])>(),
+						},
+					{
+						{ fun(&ccColor::RgbTpl<T>::r), "r" },
+						{ fun(&ccColor::RgbTpl<T>::g), "g" },
+						{ fun(&ccColor::RgbTpl<T>::b), "b" },
+						{ fun(&ccColor::RgbTpl<T>::rgb), "rgb" },
+						{ fun(&ccColor::RgbTpl<T>::operator!=), "!=" },
+					}
+					);
+					chaiscript::bootstrap::array<T[3]>("rgb_Array", m);
+				
+					return m;
+				}
+
+				template<typename T>
+				ModulePtr bs_RgbaTpl(const std::string& shortCutName, ModulePtr m = std::make_shared<Module>())
+				{
+					chaiscript::utility::add_class<ccColor::RgbaTpl<T>>(*m,
+						shortCutName,
+						{
+							chaiscript::constructor<ccColor::RgbaTpl<T>()>(),
+							chaiscript::constructor<ccColor::RgbaTpl<T>(T,T,T,T)>(),
+							chaiscript::constructor<ccColor::RgbaTpl<T>(const T c[4])>(),
+							chaiscript::constructor<ccColor::RgbaTpl<T>(const T c[3])>(),
+							chaiscript::constructor<ccColor::RgbaTpl<T>(const ccColor::RgbTpl<T>, T)>(),
+						},
+					{
+						{ fun(&ccColor::RgbaTpl<T>::r), "r" },
+						{ fun(&ccColor::RgbaTpl<T>::g), "g" },
+						{ fun(&ccColor::RgbaTpl<T>::b), "b" },
+						{ fun(&ccColor::RgbaTpl<T>::a), "a" },
+						{ fun(&ccColor::RgbaTpl<T>::rgba), "rgba" },
+						{ fun(&ccColor::RgbaTpl<T>::operator!=), "!=" },
+					}
+					);
+					chaiscript::bootstrap::array<T[4]>("rgba_Array", m);
+					m->add(chaiscript::type_conversion<ccColor::RgbaTpl<T>, ccColor::RgbTpl<T>>());
+					return m;
+				}
+
+				ModulePtr bs_ccColor(ModulePtr m = std::make_shared<Module>())
+				{
+					bs_RgbTpl<float>("Rgbf", m);
+					bs_RgbTpl<unsigned char>("Rgbub", m);
+					bs_RgbTpl<ColorCompType>("Rgb", m);
+
+					bs_RgbaTpl<float>("Rgbaf", m);
+					bs_RgbaTpl<unsigned char>("Rgbaub", m);
+					bs_RgbaTpl<ColorCompType>("Rgba", m);
+
+					m->add(chaiscript::user_type<ccColor::Generator>(), "Generator");
+					m->add(fun(&ccColor::Generator::Random), "Random");
+
+					m->add(chaiscript::user_type<ccColor::Convert>(), "Convert");
+					m->add(fun(&ccColor::Convert::hsl2rgb), "hsl2rgb");
+					m->add(fun(&ccColor::Convert::hsv2rgb), "hsv2rgb");
+
+					m->add(fun(static_cast<ccColor::Rgb(*)(const ccColor::Rgbf&)>(&ccColor::FromRgbf)), "FromRgbf");
+					m->add(fun(static_cast<ccColor::Rgb(*)(const ccColor::Rgbaf&)>(&ccColor::FromRgbf)), "FromRgbf");
+					m->add(fun(static_cast<ccColor::Rgb(*)(QRgb)>(&ccColor::FromQRgb)), "FromQRgb");
+					m->add(fun(static_cast<ccColor::Rgba(*)(QRgb)>(&ccColor::FromQRgba)), "FromQRgba");
+					m->add(fun(static_cast<ccColor::Rgb(*)(const QColor&)>(&ccColor::FromQColor)), "FromQColor");
+					m->add(fun(static_cast<ccColor::Rgba(*)(const QColor&)>(&ccColor::FromQColora)), "FromQColora");
+					m->add(fun(static_cast<ccColor::Rgbf(*)(const QColor&)>(&ccColor::FromQColorf)), "FromQColorf");
+					m->add(fun(static_cast<ccColor::Rgbaf(*)(const QColor&)>(&ccColor::FromQColoraf)), "FromQColoraf");
+
+					return m;
+
+
+				}
+
+
+
+
+				ModulePtr bs_ccColorScalesManager(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccColorScalesManager>(), "ccColorScalesManager");
+
+
+					m->add(fun(&ccColorScalesManager::GetUniqueInstance), "GetUniqueInstance");
+					m->add(fun(&ccColorScalesManager::ReleaseUniqueInstance), "ReleaseUniqueInstance");
+					m->add(fun(&ccColorScalesManager::GetDefaultScaleUUID), "GetDefaultScaleUUID");
+					m->add(fun(&ccColorScalesManager::GetDefaultScale), "GetDefaultScale");
+					m->add(fun(&ccColorScalesManager::getDefaultScale), "getDefaultScale");
+					m->add(fun(&ccColorScalesManager::getScale), "getScale");
+					m->add(fun(&ccColorScalesManager::addScale), "addScale");
+					m->add(fun(&ccColorScalesManager::removeScale), "removeScale");
+					m->add(chaiscript::user_type<ccColorScalesManager::ScalesMap>(), "ScalesMap");
+					m->add(fun(static_cast<ccColorScalesManager::ScalesMap&(ccColorScalesManager::*)()>(&ccColorScalesManager::map)), "map");
+					m->add(fun(static_cast<const ccColorScalesManager::ScalesMap&(ccColorScalesManager::*)()const>(&ccColorScalesManager::map)), "map");
+					m->add(fun(&ccColorScalesManager::fromPersistentSettings), "fromPersistentSettings");
+					m->add(fun(&ccColorScalesManager::toPersistentSettings), "toPersistentSettings");
+					return m;
+				}
+
+				ModulePtr bs_ccColorScaleElement(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccColorScaleElement>(), "ccColorScaleElement");
+					m->add(chaiscript::constructor<ccColorScaleElement()>(), "ccColorScaleElement");
+					m->add(chaiscript::constructor<ccColorScaleElement(double,const QColor&)>(), "ccColorScaleElement");
+
+					m->add(fun(&ccColorScaleElement::setRelativePos), "setRelativePos");
+					m->add(fun(&ccColorScaleElement::getRelativePos), "getRelativePos");
+					m->add(fun(&ccColorScaleElement::setColor), "setColor");
+					m->add(fun(&ccColorScaleElement::getColor), "getColor");
+					m->add(fun(&ccColorScaleElement::IsSmaller), "IsSmaller");
+					return m;
+				}
+
+				ModulePtr bs_ccColorScale(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccColorScale>(), "ccColorScale");
+					m->add(chaiscript::user_type<ccColorScale::Shared>(), "Shared");
+					m->add(chaiscript::constructor<ccColorScale(QString, const QString&)>(), "ccColorScale");
+
+					m->add(fun(&ccColorScale::Create), "Create");
+					m->add(fun(&ccColorScale::getName), "getName");
+					m->add(fun(&ccColorScale::setName), "setName");
+					m->add(fun(&ccColorScale::getUuid), "getUuid");
+					m->add(fun(&ccColorScale::setUuid), "setUuid");
+					m->add(fun(&ccColorScale::generateNewUuid), "generateNewUuid");
+					m->add(fun(&ccColorScale::isRelative), "isRelative");
+					m->add(fun(&ccColorScale::setRelative), "setRelative");
+					m->add(fun(&ccColorScale::setAbsolute), "setAbsolute");
+					m->add(fun(&ccColorScale::getAbsoluteBoundaries), "getAbsoluteBoundaries");
+					m->add(fun(&ccColorScale::isLocked), "isLocked");
+					m->add(fun(&ccColorScale::setLocked), "setLocked");
+					m->add(chaiscript::user_type<ccColorScale::LabelSet>(), "LabelSet");
+					m->add(fun(static_cast<ccColorScale::LabelSet&(ccColorScale::*)()>(&ccColorScale::customLabels)), "customLabels");
+					m->add(fun(static_cast<const ccColorScale::LabelSet & (ccColorScale::*)()const>(&ccColorScale::customLabels)), "customLabels");
+					m->add(fun(&ccColorScale::setCustomLabels), "setCustomLabels");
+					m->add(fun(&ccColorScale::stepCount), "stepCount");
+					m->add(fun(static_cast<ccColorScaleElement& (ccColorScale::*)(int)>(&ccColorScale::step)), "step");
+					m->add(fun(static_cast<const ccColorScaleElement& (ccColorScale::*)(int)const>(&ccColorScale::step)), "step");
+					m->add(fun(&ccColorScale::insert), "insert");
+					m->add(fun(&ccColorScale::remove), "remove");
+					m->add(fun(&ccColorScale::clear), "clear");
+					m->add(fun(&ccColorScale::update), "update");
+					m->add(fun(&ccColorScale::getRelativePosition), "getRelativePosition");
+					m->add(fun(&ccColorScale::getColorByValue), "getColorByValue");
+					m->add(fun(static_cast<const ccColor::Rgb*(ccColorScale::*)(double, const ccColor::Rgb*)const>(&ccColorScale::getColorByRelativePos)), "getColorByRelativePos");
+					m->add(fun(static_cast<const ccColor::Rgb*(ccColorScale::*)(double, unsigned, const ccColor::Rgb*)const>(&ccColorScale::getColorByRelativePos)), "getColorByRelativePos");
+					m->add(fun(&ccColorScale::getColorByIndex), "getColorByIndex");
+					m->add(fun(&ccColorScale::saveAsXML), "saveAsXML");
+					m->add(fun(&ccColorScale::LoadFromXML), "LoadFromXML");
+					m->add(fun(&ccColorScale::isSerializable), "isSerializable");
+					m->add(fun(&ccColorScale::toFile), "toFile");
+					m->add(fun(&ccColorScale::fromFile), "fromFile");
+
+					m->add(chaiscript::base_class<ccSerializableObject, ccColorScale>());
+
+
+					return m;
+				}
+
+				ModulePtr bs_ccClipBox(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(chaiscript::user_type<ccClipBox>(), "ccClipBox");
+					m->add(chaiscript::constructor<ccClipBox(QString)>(), "ccClipBox");
+
+					m->add(fun(&ccClipBox::addAssociatedEntity), "addAssociatedEntity");
+					m->add(fun(&ccClipBox::releaseAssociatedEntities), "releaseAssociatedEntities");
+					m->add(fun(&ccClipBox::getOwnBB), "getOwnBB");
+					m->add(fun(&ccClipBox::move2D), "move2D");
+					m->add(fun(&ccClipBox::move3D), "move3D");
+					m->add(fun(&ccClipBox::setClickedPoint), "setClickedPoint");
+					m->add(fun(&ccClipBox::setActiveComponent), "setActiveComponent");
+					m->add(fun(&ccClipBox::getClassID), "getClassID");
+					m->add(fun(&ccClipBox::getBox), "getBox");
+					m->add(fun(&ccClipBox::showBox), "showBox");
+					m->add(fun(&ccClipBox::setBox), "setBox");
+					m->add(fun(&ccClipBox::shift), "shift");
+					m->add(fun(&ccClipBox::flagPointsInside), "flagPointsInside");
+					m->add(fun(&ccClipBox::reset), "reset");
+					m->add(fun(&ccClipBox::set), "set");
+					m->add(fun(&ccClipBox::get), "get");
+					m->add(fun(&ccClipBox::getContainer), "getContainer");
+					m->add(fun(&ccClipBox::boxModified), "boxModified");
+
+
+					m->add(chaiscript::base_class<ccHObject, ccClipBox>());
+					m->add(chaiscript::base_class<ccInteractor, ccClipBox>());
+					m->add(chaiscript::base_class<ccObject, ccClipBox>());
+					m->add(chaiscript::base_class<ccDrawableObject, ccClipBox>());
+					m->add(chaiscript::base_class<ccSerializableObject, ccClipBox>());
+
+
+					return m;
+				}
+
+				
+
+
+				template<typename T>
+				ModulePtr bs_ccSingleton(const std::string& shortCutName, ModulePtr m = std::make_shared<Module>())
+				{
+
+					m->add(chaiscript::user_type<ccSingleton<T>>(), shortCutName);
+					m->add(chaiscript::constructor<ccSingleton<T>()>(), shortCutName);
+					m->add(fun(&ccSingleton<T>::release), "release");
+					m->add(fun(&ccSingleton<T>::instance), "instance");
 					return m;
 				}
 
@@ -2507,128 +3725,14 @@ namespace chaiscript
 				}
 
 
-				ModulePtr bs_class_relationships(ModulePtr m = std::make_shared<Module>())
-				{
-					m->add(chaiscript::base_class<ccObject, ccHObject>());
-					m->add(chaiscript::base_class<ccDrawableObject, ccHObject>());
-					
-					m->add(chaiscript::base_class<ccGLMatrixTpl<float>, ccGLMatrix>());
-					m->add(chaiscript::base_class<ccGLMatrixTpl<double>, ccGLMatrixd>());
-
-					m->add(chaiscript::base_class<ccDrawableObject, ccGenericMesh>());
-					m->add(chaiscript::base_class<ccHObject, ccGenericMesh>());
-					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccGenericMesh>());
-					
-					m->add(chaiscript::base_class<ccInteractor, cc2DLabel>());
-					m->add(chaiscript::base_class<ccHObject, cc2DLabel>());
-					m->add(chaiscript::base_class<ccObject, cc2DLabel>());
-					m->add(chaiscript::base_class<ccDrawableObject, cc2DLabel>());
-
-					m->add(chaiscript::base_class<ccHObject, cc2DViewportObject>());
-					m->add(chaiscript::base_class<ccObject, cc2DViewportObject>());
-					m->add(chaiscript::base_class<ccDrawableObject, cc2DViewportObject>());
-
-					m->add(chaiscript::base_class<cc2DViewportObject, cc2DViewportLabel>());
-					m->add(chaiscript::base_class<ccHObject, cc2DViewportLabel>());
-					m->add(chaiscript::base_class<ccObject, cc2DViewportLabel>());
-					m->add(chaiscript::base_class<ccDrawableObject, cc2DViewportLabel>());
-
-					m->add(chaiscript::base_class<ccHObject, ccSensor>());
-					m->add(chaiscript::base_class<ccObject, ccSensor>());
-					m->add(chaiscript::base_class<ccDrawableObject, ccSensor>());
-
-					m->add(chaiscript::base_class<ccHObject, ccCameraSensor>());
-					m->add(chaiscript::base_class<ccObject, ccCameraSensor>());
-					m->add(chaiscript::base_class<ccDrawableObject, ccCameraSensor>());
-					m->add(chaiscript::base_class<ccSensor, ccCameraSensor>());
-
-					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccMesh>());
-					m->add(chaiscript::base_class<ccHObject, ccMesh>());
-					m->add(chaiscript::base_class<ccObject, ccMesh>());
-					m->add(chaiscript::base_class<ccDrawableObject, ccMesh>());
-
-					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccGenericPrimitive>());
-					m->add(chaiscript::base_class<ccHObject, ccGenericPrimitive>());
-					m->add(chaiscript::base_class<ccObject, ccGenericPrimitive>());
-					m->add(chaiscript::base_class<ccDrawableObject, ccGenericPrimitive>());
-					m->add(chaiscript::base_class<ccMesh, ccGenericPrimitive>());
-
-					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccPlane>());
-					m->add(chaiscript::base_class<ccHObject, ccPlane>());
-					m->add(chaiscript::base_class<ccObject, ccPlane>());
-					m->add(chaiscript::base_class<ccDrawableObject, ccPlane>());
-					m->add(chaiscript::base_class<ccMesh, ccPlane>());
-					m->add(chaiscript::base_class<ccGenericPrimitive, ccPlane>());
-					m->add(chaiscript::base_class<ccPlanarEntityInterface, ccPlane>());
-
-					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccSphere>());
-					m->add(chaiscript::base_class<ccHObject, ccSphere>());
-					m->add(chaiscript::base_class<ccObject, ccSphere>());
-					m->add(chaiscript::base_class<ccDrawableObject, ccSphere>());
-					m->add(chaiscript::base_class<ccMesh, ccSphere>());
-					m->add(chaiscript::base_class<ccGenericPrimitive, ccSphere>());
-
-					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccCone>());
-					m->add(chaiscript::base_class<ccHObject, ccCone>());
-					m->add(chaiscript::base_class<ccObject, ccCone>());
-					m->add(chaiscript::base_class<ccDrawableObject, ccCone>());
-					m->add(chaiscript::base_class<ccMesh, ccCone>());
-					m->add(chaiscript::base_class<ccGenericPrimitive, ccCone>());
-
-					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccCylinder>());
-					m->add(chaiscript::base_class<ccHObject, ccCylinder>());
-					m->add(chaiscript::base_class<ccObject, ccCylinder>());
-					m->add(chaiscript::base_class<ccDrawableObject, ccCylinder>());
-					m->add(chaiscript::base_class<ccMesh, ccCylinder>());
-					m->add(chaiscript::base_class<ccGenericPrimitive, ccCylinder>());
-					m->add(chaiscript::base_class<ccCone, ccCylinder>());
-
-					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccDish>());
-					m->add(chaiscript::base_class<ccHObject, ccDish>());
-					m->add(chaiscript::base_class<ccObject, ccDish>());
-					m->add(chaiscript::base_class<ccDrawableObject, ccDish>());
-					m->add(chaiscript::base_class<ccMesh, ccDish>());
-					m->add(chaiscript::base_class<ccGenericPrimitive, ccDish>());
-
-					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccExtru>());
-					m->add(chaiscript::base_class<ccHObject, ccExtru>());
-					m->add(chaiscript::base_class<ccObject, ccExtru>());
-					m->add(chaiscript::base_class<ccDrawableObject, ccExtru>());
-					m->add(chaiscript::base_class<ccMesh, ccExtru>());
-					m->add(chaiscript::base_class<ccGenericPrimitive, ccExtru>());
-
-					
-					m->add(chaiscript::base_class<ccHObject, ccFacet>());
-					m->add(chaiscript::base_class<ccObject, ccFacet>());
-					m->add(chaiscript::base_class<ccDrawableObject, ccFacet>());
-					m->add(chaiscript::base_class<ccPlanarEntityInterface, ccFacet>());
-
-					m->add(chaiscript::base_class<ccHObject, ccShiftedObject>());
-					m->add(chaiscript::base_class<ccObject, ccShiftedObject>());
-					m->add(chaiscript::base_class<ccDrawableObject, ccShiftedObject>());
-
-					m->add(chaiscript::base_class<ccHObject, ccGenericPointCloud>());
-					m->add(chaiscript::base_class<ccObject, ccGenericPointCloud>());
-					m->add(chaiscript::base_class<ccDrawableObject, ccGenericPointCloud>());
-					m->add(chaiscript::base_class<ccShiftedObject, ccGenericPointCloud>());
-					m->add(chaiscript::base_class<CCLib::GenericIndexedCloudPersist, ccGenericPointCloud>());
-
-					m->add(chaiscript::base_class<ccHObject, ccPointCloud>());
-					m->add(chaiscript::base_class<ccObject, ccPointCloud>());
-					m->add(chaiscript::base_class<ccDrawableObject, ccPointCloud>());
-					m->add(chaiscript::base_class<ccShiftedObject, ccPointCloud>());
-					m->add(chaiscript::base_class<CCLib::PointCloudTpl<ccGenericPointCloud>, ccPointCloud>());
-					m->add(chaiscript::base_class<ccGenericPointCloud, ccPointCloud>());
-					m->add(chaiscript::base_class<CCLib::GenericIndexedCloudPersist, ccPointCloud>());
-
-					return m;
-				}
-
+				
 				
 				ModulePtr bootstrap_classes(ModulePtr m = std::make_shared<Module>())
 				{
 					bs_ccObject(m);
 					bs_ccHObject(m);
+					bs_ccCustomHObject(m);
+					bs_ccCustomLeafObject(m);
 					bs_ccGLMatrixTpl<float>("ccGLMatrixTplf", m);
 					bs_ccGLMatrixTpl<double>("ccGLMatrixTpld", m);
 					bs_ccArray<CompressedNormType, 1, CompressedNormType>("internal_compressed_normal_array", m);
@@ -2643,6 +3747,7 @@ namespace chaiscript
 					bs_ccGLMatrix(m);
 					bs_ccGLMatrixd(m);
 					bs_ccInteractor(m);
+					bs_ccImage(m);
 					bs_cc2DLabel(m);
 					bs_cc2DViewportObject(m);
 					bs_cc2DViewportLabel(m);
@@ -2664,9 +3769,41 @@ namespace chaiscript
 					bs_ccShiftedObject(m);
 					bs_ccGenericPointCloud(m);
 					bs_ccPointCloud(m);
+					bs_ccKdTree(m);
+					bs_ccOctree(m);
+					bs_ccOctreeProxy(m);
+					bs_ccPolyline(m);
+					bs_ccSubMesh(m);
+					bs_ccScalarField(m);
+					bs_ccQuadric(m);
+					bs_ccProgressDialog(m);
+					bs_ccPointCloudInterpolator(m);
+					bs_ccNormalVectors(m);
+					bs_ccNormalCompressor(m);
+					//bs_ccMinimumSpanningTreeForNormsDirection(m);
+					//bs_ccFastMarchingForNormsDirection(m);
+					bs_ccMaterialSet(m);
+					bs_ccMaterial(m);
+					bs_ccLog(m);
+					bs_ccIndexedTransformation(m);
+					bs_ccIndexedTransformationBuffer(m);
+					bs_ccGL(m);
+					bs_ccGriddedTools(m);
+					bs_ccViewportParameters(m);
+					bs_ccGLCameraParameters(m);
+					bs_ccGenericGLDisplay(m);
+					bs_ccFlags(m);
+					bs_ccFileUtils(m);
+					bs_ccDepthBuffer(m);
+					bs_ccColor(m);
+					bs_ccColor(m);
+					bs_ccColorScalesManager(m);
+					bs_ccColorScaleElement(m);
+					bs_ccColorScale(m);
+					bs_ccClipBox(m);
 
+	
 					bs_ccHObjectCaster(m);
-					bs_class_relationships(m);			
 					return m;
 				}
 			}

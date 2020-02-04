@@ -77,6 +77,10 @@ bool PlyFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) con
 
 static e_ply_storage_mode s_defaultOutputFormat = PLY_DEFAULT;
 
+static void errorCallback(p_ply _ply, const char *message) {
+	ccLog::Error("[PLY] '%s'", message);
+}
+
 void PlyFilter::SetDefaultOutputFormat(e_ply_storage_mode format)
 {
 	s_defaultOutputFormat = format;
@@ -119,9 +123,9 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 	if (!vertices)
 		return CC_FERR_BAD_ENTITY_TYPE;
 
-	p_ply ply = ply_create(qPrintable(filename), storageType, nullptr, 0, nullptr);
+	p_ply ply = ply_create(qPrintable(filename), storageType, errorCallback, 0, nullptr);
 	if (!ply)
-		return CC_FERR_WRITING;
+		return CC_FERR_THIRD_PARTY_LIB_FAILURE;
 
 	//Has the cloud been recentered?
 	e_ply_type coordType = vertices->isShifted() || sizeof(PointCoordinateType) > 4 ? PLY_DOUBLE : PLY_FLOAT; //we use double coordinates for shifted vertices (i.e. >1e6)
@@ -385,7 +389,7 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 	if (!result)
 	{
 		ply_close(ply);
-		return CC_FERR_WRITING;
+		return CC_FERR_THIRD_PARTY_LIB_FAILURE;
 	}
 
 	//save the point cloud (=vertices)
@@ -881,16 +885,15 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 	/****************/
 
 	//open a PLY file for reading
-	p_ply ply = ply_open(qPrintable(filename), nullptr, 0, nullptr);
+	p_ply ply = ply_open(qPrintable(filename), errorCallback, 0, nullptr);
 	if (!ply)
-		return CC_FERR_READING;
-
+		return CC_FERR_THIRD_PARTY_LIB_FAILURE;
 	ccLog::PrintDebug(QString("[PLY] Opening file '%1' ...").arg(filename));
 
 	if (!ply_read_header(ply))
 	{
 		ply_close(ply);
-		return CC_FERR_WRONG_FILE_TYPE;
+		return CC_FERR_THIRD_PARTY_LIB_FAILURE;
 	}
 
 	//storage mode: little/big endian
@@ -1699,7 +1702,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 		if (mesh)
 			delete mesh;
 		delete cloud; 
-		return CC_FERR_READING;
+		return s_NotEnoughMemory ? CC_FERR_NOT_ENOUGH_MEMORY : CC_FERR_THIRD_PARTY_LIB_FAILURE;
 	}
 
 	//we check mesh

@@ -111,41 +111,13 @@ void ChaiScriptingPlugin::setupChaiScriptEngine()
 				systemBootstrap = chaiscript::cloudCompare::bootstrapSystem::bootstrap();
 			}
 			chai->add(systemBootstrap);
-			chai->add(chaiscript::type_conversion<std::string, QString>([](const std::string& str) {return QString::fromStdString(str); }));
-			chai->add(chaiscript::type_conversion<QString, std::string>([](const QString& str) {std::string ret = str.toLocal8Bit().constData(); return ret; }));
-			chai->add(chaiscript::type_conversion<QStringList, std::vector<std::string>>([](const QStringList& str)
-				{	
-					std::vector<QString> tmp = str.toVector().toStdVector();
-					std::vector<std::string> ret;
-					for (QString itm : tmp)
-					{
-						ret.push_back(itm.toLocal8Bit().constData());
-					} 
-					return ret; 
-				}));
-			chai->add(chaiscript::type_conversion<std::vector<std::string>, QStringList>([](const std::vector<std::string>& str)
-				{
-					QStringList ret;
-					for (std::string itm : str)
-					{
-						ret.push_back(QString::fromStdString(itm));
-					}
-					return ret;
-				}));
-			chai->add(fun([](const std::string& str) {return QString::fromUtf8(str.c_str()); }), "to_QString");
-			chai->add(fun([](const QString& str) {std::string ret = str.toLocal8Bit().constData(); return ret; }), "to_string");
 
-			chai->add(chaiscript::vector_conversion<std::vector<int>>());
-			chai->add(chaiscript::vector_conversion<std::vector<std::string>>());
-
-			chai->add(chaiscript::map_conversion<std::map<std::string, int>>());
-			chai->add(chaiscript::map_conversion<std::map<std::string, Boxed_Value>>());
 
 			chai->add_global(var(this), "chaiScriptingPlugin");
 			chai->add_global(var(m_app), "m_app");
 
 			chai->add(fun(&ChaiScriptingPlugin::dispToConsole), "dispToConsole");
-			chai->add(chaiscript::user_type<QString>(), "QString");
+
 			chai->add(chaiscript::fun(&throws_exception), "throws_exception");
 			chai->add(chaiscript::fun(&get_eval_error), "get_eval_error");
 			chai->eval(R"(global print = fun(x){chaiScriptingPlugin.dispToConsole(x.to_string(),1);})");

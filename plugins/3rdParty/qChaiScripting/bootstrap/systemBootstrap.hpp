@@ -25,6 +25,7 @@
 #include "CC/CCBootstrap.hpp"
 #include "libs/libsBootstrap.hpp"
 #include "qCC/qCCBootstrap.hpp"
+#include "generalUtility/gUBootstrap.hpp"
 
 namespace chaiscript
 {
@@ -38,6 +39,7 @@ namespace chaiscript
 				CC::bootstrap(m);
 				libs::bootstrap(m);
 				qCC::bootstrap(m);
+				generalUtility::bootstrap(m);
 				return m;
 			}
 		}

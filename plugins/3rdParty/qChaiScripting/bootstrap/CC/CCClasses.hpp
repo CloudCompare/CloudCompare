@@ -282,6 +282,7 @@ namespace chaiscript
 
 					}
 					);
+				
 				return m;
 			}
 
@@ -331,6 +332,10 @@ namespace chaiscript
 						{ fun(&CCLib::PointCloud::capacity), "capacity" }
 					}
 				);
+				m->add(chaiscript::base_class< CCLib::GenericIndexedCloud, CCLib::PointCloud>());
+				m->add(chaiscript::base_class< CCLib::GenericCloud, CCLib::PointCloud>());
+				m->add(chaiscript::base_class< CCLib::GenericIndexedCloudPersist, CCLib::PointCloud>());
+				m->add(chaiscript::base_class<CCLib::PointCloudTpl<CCLib::GenericIndexedCloudPersist>, CCLib::PointCloud>());
 				return m;
 			}
 
@@ -380,6 +385,9 @@ namespace chaiscript
 						{ fun(&CCLib::ReferenceCloud::add), "add" },
 					}
 					);
+				m->add(chaiscript::base_class< CCLib::GenericIndexedCloud, CCLib::ReferenceCloud>());
+				m->add(chaiscript::base_class< CCLib::GenericCloud, CCLib::ReferenceCloud>());
+				m->add(chaiscript::base_class< CCLib::GenericIndexedCloudPersist, CCLib::ReferenceCloud>());
 				return m;
 			}
 
@@ -406,7 +414,9 @@ namespace chaiscript
 				m->add(fun(&CCLib::ScalarField::addElement), "addElement");
 				m->add(fun(&CCLib::ScalarField::currentSize), "currentSize");
 				m->add(fun(&CCLib::ScalarField::swap), "swap");
-				
+				m->add(chaiscript::base_class<std::vector<ScalarType>, CCLib::ScalarField>());
+				m->add(chaiscript::base_class<CCShareable, CCLib::ScalarField>());
+
 				return m;
 			}
 
@@ -491,6 +501,18 @@ namespace chaiscript
 				return m;
 			}
 
+			ModulePtr bs_GenericIndexedCloudPersist(ModulePtr m = std::make_shared<Module>())
+			{
+				using namespace CCLib;
+				m->add(chaiscript::user_type<GenericIndexedCloudPersist>(), "GenericIndexedCloudPersist");
+
+				m->add(fun(&GenericIndexedCloudPersist::getPointPersistentPtr), "getPointPersistentPtr");
+				m->add(chaiscript::base_class< GenericIndexedCloud, GenericIndexedCloudPersist>());
+				m->add(chaiscript::base_class< GenericCloud, GenericIndexedCloudPersist>());
+				
+				return m;
+			}
+
 			ModulePtr bs_CCShareable(ModulePtr m = std::make_shared<Module>())
 			{
 				m->add(chaiscript::user_type<CCShareable>(), "CCShareable");
@@ -527,6 +549,9 @@ namespace chaiscript
 				bs_SquareMatrixTpl<double>("SquareMatrixd", m);
 
 				bs_PointCloudTpl<CCLib::GenericIndexedCloudPersist>("PointCloudTpl", m);
+				m->add(chaiscript::base_class< CCLib::GenericIndexedCloud, CCLib::PointCloudTpl<CCLib::GenericIndexedCloudPersist>>());
+				m->add(chaiscript::base_class< CCLib::GenericCloud, CCLib::PointCloudTpl<CCLib::GenericIndexedCloudPersist>>());
+				m->add(chaiscript::base_class< CCLib::GenericIndexedCloudPersist, CCLib::PointCloudTpl<CCLib::GenericIndexedCloudPersist>>());
 
 				bs_PointCloud(m);
 				bs_ReferenceCloud(m);

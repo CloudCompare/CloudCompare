@@ -63,7 +63,7 @@ public:
 	void setRotationCenter(CCVector3d& center);
 
 	//! Calculates the transform for translating along an arbitrary vector
-	ccGLMatrix getArbitraryVectorTranslationTransform(const CCVector3& vec);
+	ccGLMatrixd getArbitraryVectorTranslationTransform(const CCVector3& vec);
 
 
 protected slots:
@@ -83,8 +83,14 @@ protected slots:
 	//! Togggles the visibility of the advanced mode ui
 	void advModeVisible(bool state);
 
-	//! Updates the transform for advanced mode when translate ref changed
+	//! Updates the transform for advanced mode rotation when translate ref changed
 	void advTranslateRefChanged(int index);
+
+	//! Updates the transform for advanced mode rotation when rotate ref changed
+	void advRotateRefChanged(int index);
+
+	//! Updates the axis center of rotation in adv rotate/translate mode
+	void advAxisRefChanged(bool state);
 
 	//! Updates the top center display message according to the mode
 	void updateDisplayMessage();
@@ -109,8 +115,11 @@ protected:
 	//! Sets Advanced translate/rotation mode reference items
 	void populateAdvModeItems();
 
-	//! Sets the transform used in advanced translate/rotate mode
+	//! Sets the translation transform used in advanced translate/rotate mode
 	bool setAdvancedTranslationTransform(ccHObject* translateRef);
+
+	//! Sets the rotation transform used in advaced translate/rotate mode
+	bool setAdvancedRotationTransform(ccHObject* translateRef);
 
 	//! List of entities to be transformed
 	ccHObject m_toTransform;
@@ -121,8 +130,16 @@ protected:
 	//! Current translation
 	CCVector3d m_translation;
 
+	//! Current position
+	ccGLMatrixd m_position;
+
 	//! Transform used in advanced translate/rotate mode
-	ccGLMatrix m_advancedTranslationTransform;
+	ccGLMatrixd m_advTranslationTransform;
+
+	//! Current rotation axis for adv translate/rotate mode
+	CCVector3d m_advRotationAxis;
+
+	CCVector3d m_advRotationRefObjCenter;
 
 	//! Rotation center
 	/** The rotation center is actually the center of gravity of the selected 'entities'

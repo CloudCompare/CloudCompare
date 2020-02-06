@@ -81,13 +81,13 @@ protected slots:
 	void pause(bool);
 
 	//! Togggles the visibility of the advanced mode ui
-	void advModeVisible(bool state);
+	void advModeToggle(bool state);
 
 	//! Updates the transform for advanced mode rotation when translate ref changed
-	void advTranslateRefChanged(int index);
+	void advTranslateRefUpdate(int index);
 
 	//! Updates the transform for advanced mode rotation when rotate ref changed
-	void advRotateRefChanged(int index);
+	void advRotateRefUpdate(int index);
 
 	//! Updates the axis center of rotation in adv rotate/translate mode
 	void advAxisRefChanged(bool state);
@@ -116,13 +116,22 @@ protected:
 	void populateAdvModeItems();
 
 	//! Sets the translation transform used in advanced translate/rotate mode
-	bool setAdvancedTranslationTransform(ccHObject* translateRef);
+	bool setAdvTranslationTransform(ccHObject* translateRef);
 
 	//! Sets the rotation transform used in advaced translate/rotate mode
-	bool setAdvancedRotationTransform(ccHObject* translateRef);
+	bool setAdvRotationAxis(ccHObject* rotateRef);
+
+	//! Flag for advanced mode
+	bool m_advMode;
 
 	//! List of entities to be transformed
 	ccHObject m_toTransform;
+
+	//! Current advanced translate mode ref object
+	ccHObject* m_advTranslateRef = nullptr;
+
+	//! Current advanced rotate mode ref object
+	ccHObject* m_advRotateRef = nullptr;
 
 	//! Current rotation
 	ccGLMatrixd m_rotation;
@@ -136,9 +145,10 @@ protected:
 	//! Transform used in advanced translate/rotate mode
 	ccGLMatrixd m_advTranslationTransform;
 
-	//! Current rotation axis for adv translate/rotate mode
+	//! Current rotation axis vector for adv translate/rotate mode (not neccesarily rotation center)
 	CCVector3d m_advRotationAxis;
 
+	//! Current reference object for rotation center point
 	CCVector3d m_advRotationRefObjCenter;
 
 	//! Rotation center

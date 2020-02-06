@@ -305,7 +305,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="translateComboBox">
+      <widget class="QComboBox" name="advTranslateComboBox">
        <property name="sizePolicy">
         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -337,7 +337,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="rotateComboBox">
+      <widget class="QComboBox" name="advRotateComboBox">
        <property name="sizePolicy">
         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
          <horstretch>0</horstretch>

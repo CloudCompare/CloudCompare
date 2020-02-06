@@ -34,6 +34,23 @@ namespace chaiscript
 	{
 		namespace generalUtility
 		{
+
+			ModulePtr bs_vector_conversions(ModulePtr m = std::make_shared<Module>())
+			{
+				m->add(chaiscript::vector_conversion<std::vector<int>>());
+				m->add(chaiscript::vector_conversion<std::vector<unsigned>>());
+				m->add(chaiscript::vector_conversion<std::vector<std::string>>());
+				return m;
+			}
+
+			ModulePtr bs_map_conversions(ModulePtr m = std::make_shared<Module>())
+			{
+				m->add(chaiscript::map_conversion<std::map<std::string, int>>());
+				m->add(chaiscript::map_conversion<std::map<std::string, Boxed_Value>>());
+				//m->add(chaiscript::map_conversion< std::map<unsigned long long, unsigned>>());
+				return m;
+			}
+
 			
 			ModulePtr bs_QChar(ModulePtr m = std::make_shared<Module>())
 			{
@@ -153,10 +170,8 @@ namespace chaiscript
 				m->add(fun([](const std::string& str) {return QString::fromUtf8(str.c_str()); }), "to_QString");
 				m->add(fun([](const QString& str) {std::string ret = str.toLocal8Bit().constData(); return ret; }), "to_string");
 
-				m->add(chaiscript::vector_conversion<std::vector<int>>());
-				m->add(chaiscript::vector_conversion<std::vector<std::string>>());
-				m->add(chaiscript::map_conversion<std::map<std::string, int>>());
-				m->add(chaiscript::map_conversion<std::map<std::string, Boxed_Value>>());
+				
+				
 				return m;
 			}
 
@@ -207,6 +222,8 @@ namespace chaiscript
 			{
 				chaiscript::extras::math::bootstrap(m);
 				chaiscript::extras::string_methods::bootstrap(m);
+				bs_vector_conversions(m);
+				bs_map_conversions(m);
 				bs_QChar(m);
 				bs_QString(m);
 				bs_QStringList(m);

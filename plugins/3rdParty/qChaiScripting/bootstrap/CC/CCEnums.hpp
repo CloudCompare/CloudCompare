@@ -23,6 +23,8 @@
 #include <chaiscript/utility/utility.hpp>
 
 #include <CCConst.h>
+#include <CloudSamplingTools.h>
+#include <DgmOctree.h>
 
 namespace chaiscript
 {
@@ -32,7 +34,7 @@ namespace chaiscript
 		{
 			
 
-			ModulePtr CCConst(ModulePtr m = std::make_shared<Module>())
+			ModulePtr bs_CCConst(ModulePtr m = std::make_shared<Module>())
 			{
 				chaiscript::utility::add_class<CC_LOCAL_MODEL_TYPES>(*m,
 					"CC_LOCAL_MODEL_TYPES",
@@ -56,9 +58,47 @@ namespace chaiscript
 			}
 
 
+			ModulePtr bs_CloudSamplingToolsEnum(ModulePtr m = std::make_shared<Module>())
+			{
+				using namespace CCLib;
+				chaiscript::utility::add_class<CloudSamplingTools::RESAMPLING_CELL_METHOD>(*m,
+					"RESAMPLING_CELL_METHOD",
+					{
+						{ CloudSamplingTools::RESAMPLING_CELL_METHOD::CELL_CENTER, "CELL_CENTER" },
+						{ CloudSamplingTools::RESAMPLING_CELL_METHOD::CELL_GRAVITY_CENTER, "CELL_GRAVITY_CENTER" },
+					}
+				);
+
+				chaiscript::utility::add_class<CloudSamplingTools::SUBSAMPLING_CELL_METHOD>(*m,
+					"SUBSAMPLING_CELL_METHOD",
+					{
+						{ CloudSamplingTools::SUBSAMPLING_CELL_METHOD::RANDOM_POINT, "RANDOM_POINT" },
+						{ CloudSamplingTools::SUBSAMPLING_CELL_METHOD::NEAREST_POINT_TO_CELL_CENTER, "NEAREST_POINT_TO_CELL_CENTER" }
+					}
+				);
+
+				return m;
+			}
+
+			ModulePtr bs_DgmOctreeEnum(ModulePtr m = std::make_shared<Module>())
+			{
+				using namespace CCLib;
+				chaiscript::utility::add_class<DgmOctree::RayCastProcess>(*m,
+					"RayCastProcess",
+					{
+						{ DgmOctree::RayCastProcess::RC_NEAREST_POINT, "RC_NEAREST_POINT" },
+						{ DgmOctree::RayCastProcess::RC_CLOSE_POINTS, "RC_CLOSE_POINTS" },
+					}
+				);
+				return m;
+			}
+
+
 			ModulePtr bootstrap_enum(ModulePtr m = std::make_shared<Module>())
 			{
-				CCConst(m);
+				bs_CCConst(m);
+				bs_CloudSamplingToolsEnum(m);
+				bs_DgmOctreeEnum(m);
 				return m;
 			}
 		}

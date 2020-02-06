@@ -22,6 +22,7 @@
 #include <chaiscript/chaiscript.hpp>
 #include <chaiscript/utility/utility.hpp>
 
+#include <CCTypes.h>
 #include <CCGeom.h>
 #include <SquareMatrix.h>
 #include <BoundingBox.h>
@@ -32,6 +33,22 @@
 #include <ScalarField.h>
 #include <GenericMesh.h>
 #include <GenericIndexedMesh.h>
+#include <ChamferDistanceTransform.h>
+#include <Grid3D.h>
+#include <ConjugateGradient.h>
+#include <Delaunay2dMesh.h>
+#include <DgmOctree.h>
+#include <DgmOctreeReferenceCloud.h>
+#include <FastMarching.h>
+#include <FastMarchingForPropagation.h>
+#include <Garbage.h>
+#include <GenericDistribution.h>
+#include <KdTree.h>
+#include <LocalModel.h>
+#include <ManualSegmentationTools.h>
+#include <NormalDistribution.h>
+#include <WeibullDistribution.h>
+
 
 namespace chaiscript
 {
@@ -286,6 +303,39 @@ namespace chaiscript
 				return m;
 			}
 
+			template <typename T>
+			ModulePtr bs_Grid3D(const std::string& shortCutName, ModulePtr m = std::make_shared<Module>())
+			{
+				using namespace CCLib;
+				using GridElement = T;
+				m->add(user_type<Grid3D<T>>(), shortCutName);
+				m->add(constructor<Grid3D<T>()>(), shortCutName);
+
+				m->add(fun(&Grid3D<T>::size), "size");
+				m->add(fun(&Grid3D<T>::isInitialized), "isInitialized");
+				m->add(fun(&Grid3D<T>::init), "init");
+				m->add(user_type<Grid3D<T>::CellToTest>(), "CellToTest");
+				m->add(fun(&Grid3D<T>::CellToTest::pos), "pos");
+				m->add(fun(&Grid3D<T>::CellToTest::cellSize), "cellSize");
+				m->add(fun(static_cast<bool(Grid3D<T>::*)(GenericIndexedMesh*, PointCoordinateType, const CCVector3&, GridElement, GenericProgressCallback*)>(&Grid3D<T>::intersecthWith)), "intersecthWith");
+				m->add(fun(static_cast<bool(Grid3D<T>::*)(GenericCloud*, PointCoordinateType, const CCVector3&, GridElement, GenericProgressCallback*)>(&Grid3D<T>::intersecthWith)), "intersecthWith");
+				m->add(fun(static_cast<void(Grid3D<T>::*)(int, int, int, GridElement)>(&Grid3D<T>::setValue)), "setValue");
+				m->add(fun(static_cast<void(Grid3D<T>::*)(Tuple3i&, GridElement)>(&Grid3D<T>::setValue)), "setValue");
+				m->add(fun(static_cast<const GridElement & (Grid3D<T>::*)(int, int, int)const>(&Grid3D<T>::getValue)), "getValue");
+				m->add(fun(static_cast<GridElement & (Grid3D<T>::*)(int, int, int)>(&Grid3D<T>::getValue)), "getValue");
+				m->add(fun(static_cast<const GridElement & (Grid3D<T>::*)(Tuple3i&)const>(&Grid3D<T>::getValue)), "getValue");
+				m->add(fun(static_cast<GridElement & (Grid3D<T>::*)(Tuple3i&)>(&Grid3D<T>::getValue)), "getValue");
+				m->add(fun(static_cast<const GridElement * (Grid3D<T>::*)()const>(&Grid3D<T>::data)), "data");
+				m->add(fun(static_cast<GridElement * (Grid3D<T>::*)()>(&Grid3D<T>::data)), "data");
+				m->add(fun(&Grid3D<T>::innerCellCount), "innerCellCount");
+				m->add(fun(&Grid3D<T>::totalCellCount), "totalCellCount");
+
+
+
+				m->add(base_class<Grid3D<unsigned short>, ChamferDistanceTransform>());
+
+				return m;
+			}
 
 			ModulePtr bs_PointCloud(ModulePtr m = std::make_shared<Module>())
 			{
@@ -425,8 +475,8 @@ namespace chaiscript
 				chaiscript::utility::add_class<CCLib::BoundingBox>(*m,
 					"BoundingBox",
 					{
-						chaiscript::constructor<CCLib::BoundingBox()>(),
-						chaiscript::constructor<CCLib::BoundingBox(const CCVector3&, const CCVector3&)>()
+						constructor<CCLib::BoundingBox()>(),
+						constructor<CCLib::BoundingBox(const CCVector3&, const CCVector3&)>()
 					},
 					{
 						{ fun(static_cast<CCLib::BoundingBox(CCLib::BoundingBox::*)(const CCLib::BoundingBox&)const>(&CCLib::BoundingBox::operator+)), "+" },
@@ -470,6 +520,26 @@ namespace chaiscript
 				return m;
 			}
 
+			ModulePtr bs_GenericCloud(ModulePtr m = std::make_shared<Module>())
+			{
+				using namespace CCLib;
+				m->add(chaiscript::user_type<GenericCloud>(), "GenericCloud");
+				m->add(chaiscript::user_type<GenericCloud::genericPointAction>(), "genericPointAction");
+				m->add(fun(&GenericCloud::size), "size");
+				m->add(fun(&GenericCloud::forEach), "forEach");
+				m->add(fun(&GenericCloud::getBoundingBox), "getBoundingBox");
+				m->add(fun(&GenericCloud::testVisibility), "testVisibility");
+				m->add(fun(&GenericCloud::placeIteratorAtBeginning), "placeIteratorAtBeginning");
+				m->add(fun(&GenericCloud::getNextPoint), "getNextPoint");
+				m->add(fun(&GenericCloud::enableScalarField), "enableScalarField");
+				m->add(fun(&GenericCloud::isScalarFieldEnabled), "isScalarFieldEnabled");
+				m->add(fun(&GenericCloud::setPointScalarValue), "setPointScalarValue");
+				m->add(fun(&GenericCloud::getPointScalarValue), "getPointScalarValue");
+
+				return m;
+			}
+
+
 			ModulePtr bs_VerticesIndexes(ModulePtr m = std::make_shared<Module>())
 			{
 				using namespace CCLib;
@@ -498,6 +568,8 @@ namespace chaiscript
 				m->add(fun(&GenericIndexedMesh::getTriangleVertIndexes), "getTriangleVertIndexes");
 				m->add(fun(&GenericIndexedMesh::getTriangleVertices), "getTriangleVertices");
 				m->add(fun(&GenericIndexedMesh::getNextTriangleVertIndexes), "getNextTriangleVertIndexes");
+
+				m->add(chaiscript::base_class< GenericMesh, GenericIndexedMesh>());
 				return m;
 			}
 
@@ -526,10 +598,439 @@ namespace chaiscript
 				return m;
 			}
 
+			
+
+			ModulePtr bs_ChamferDistanceTransform(ModulePtr m = std::make_shared<Module>())
+			{
+				using namespace CCLib;
+				m->add(user_type<ChamferDistanceTransform>(), "ChamferDistanceTransform");
+				m->add(fun(&ChamferDistanceTransform::init), "init");
+				m->add(fun(&ChamferDistanceTransform::propagateDistance), "propagateDistance");
+
+				m->add(base_class<Grid3D<unsigned short>, ChamferDistanceTransform>());
+
+				return m;
+			}
 
 
+			template<int N, class T>
+			ModulePtr bs_ConjugateGradient(const std::string& shortCutName, ModulePtr m = std::make_shared<Module>())
+			{
+				using namespace CCLib;
+				using Base = ConjugateGradient<N, T>;
+				chaiscript::utility::add_class<Base>(*m,
+					shortCutName,
+					{
+						chaiscript::constructor<Base()>(),
+					},
+					{
+						{ fun(&Base::A), "A" },
+						{ fun(&Base::b), "b" },
+						{ fun(&Base::initConjugateGradient), "initConjugateGradient" },
+						{ fun(&Base::iterConjugateGradient), "iterConjugateGradient" },
+					}
+					);
+				return m;
+			}
 
-			ModulePtr bootstrap_classes(ModulePtr m = std::make_shared<Module>())
+
+			ModulePtr bs_Delaunay2dMesh(ModulePtr m = std::make_shared<Module>())
+			{
+				using namespace CCLib;
+				m->add(user_type<Delaunay2dMesh>(), "Delaunay2dMesh");
+				m->add(constructor<Delaunay2dMesh()>(), "Delaunay2dMesh");
+
+				m->add(fun(&Delaunay2dMesh::Available), "Delaunay2dMesh_Available");
+				m->add(fun(&Delaunay2dMesh::linkMeshWith), "linkMeshWith");
+				m->add(fun(static_cast<bool(Delaunay2dMesh::*)(const std::vector<CCVector2>&, std::size_t, char*)>(&Delaunay2dMesh::buildMesh)), "buildMesh");
+				m->add(fun(static_cast<bool(Delaunay2dMesh::*)(const std::vector<CCVector2>&, const std::vector<int>&, char*)>(&Delaunay2dMesh::buildMesh)), "buildMesh");	
+				m->add(fun(&Delaunay2dMesh::removeOuterTriangles), "removeOuterTriangles");
+				m->add(fun(&Delaunay2dMesh::size), "size");
+				m->add(fun(&Delaunay2dMesh::forEach), "forEach");
+				m->add(fun(&Delaunay2dMesh::getBoundingBox), "getBoundingBox");
+				m->add(fun(&Delaunay2dMesh::placeIteratorAtBeginning), "placeIteratorAtBeginning");
+				m->add(fun(&Delaunay2dMesh::_getNextTriangle), "_getNextTriangle");
+				m->add(fun(&Delaunay2dMesh::_getTriangle), "_getTriangle");
+				m->add(fun(&Delaunay2dMesh::getNextTriangleVertIndexes), "getNextTriangleVertIndexes");
+				m->add(fun(&Delaunay2dMesh::getTriangleVertIndexes), "getTriangleVertIndexes");
+				m->add(fun(&Delaunay2dMesh::getTriangleVertices), "getTriangleVertices");
+				m->add(fun(&Delaunay2dMesh::getTriangleVertIndexesArray), "getTriangleVertIndexesArray");
+				m->add(fun(&Delaunay2dMesh::removeTrianglesWithEdgesLongerThan), "removeTrianglesWithEdgesLongerThan");
+				m->add(fun(&Delaunay2dMesh::getAssociatedCloud), "getAssociatedCloud");
+				m->add(fun(static_cast<Delaunay2dMesh*(*)(const std::vector<CCVector2>&)>(&Delaunay2dMesh::TesselateContour)), "TesselateContour");
+				m->add(fun(static_cast<Delaunay2dMesh*(*)(GenericIndexedCloudPersist*,int)>(&Delaunay2dMesh::TesselateContour)), "TesselateContour");
+				m->add(chaiscript::base_class< GenericMesh, Delaunay2dMesh>());
+				m->add(chaiscript::base_class< GenericIndexedMesh, Delaunay2dMesh>());
+				
+				return m;
+			}
+
+
+			ModulePtr bs_DgmOctreeReferenceCloud(ModulePtr m = std::make_shared<Module>())
+			{
+				using namespace CCLib;
+				m->add(user_type<DgmOctreeReferenceCloud>(), "DgmOctreeReferenceCloud");
+				m->add(constructor<DgmOctreeReferenceCloud(DgmOctree::NeighboursSet*,unsigned)>(), "DgmOctreeReferenceCloud");
+
+				m->add(fun(&DgmOctreeReferenceCloud::size), "size");
+				m->add(fun(&DgmOctreeReferenceCloud::forEach), "forEach");
+				m->add(fun(&DgmOctreeReferenceCloud::getBoundingBox), "getBoundingBox");
+				m->add(fun(&DgmOctreeReferenceCloud::placeIteratorAtBeginning), "placeIteratorAtBeginning");
+				m->add(fun(&DgmOctreeReferenceCloud::getNextPoint), "getNextPoint");
+				m->add(fun(&DgmOctreeReferenceCloud::enableScalarField), "enableScalarField");
+				m->add(fun(&DgmOctreeReferenceCloud::isScalarFieldEnabled), "isScalarFieldEnabled");
+				m->add(fun(&DgmOctreeReferenceCloud::setPointScalarValue), "setPointScalarValue");
+				m->add(fun(&DgmOctreeReferenceCloud::getPointScalarValue), "getPointScalarValue");
+				m->add(fun(static_cast<const CCVector3*(DgmOctreeReferenceCloud::*)(unsigned)const>(&DgmOctreeReferenceCloud::getPoint)), "getPoint");
+				m->add(fun(static_cast<void(DgmOctreeReferenceCloud::*)(unsigned, CCVector3&)const>(&DgmOctreeReferenceCloud::getPoint)), "getPoint");
+				m->add(fun(&DgmOctreeReferenceCloud::getPointPersistentPtr), "getPointPersistentPtr");
+				m->add(fun(&DgmOctreeReferenceCloud::forwardIterator), "forwardIterator");
+				
+				m->add(base_class<GenericIndexedCloud, DgmOctreeReferenceCloud>());
+				m->add(base_class<GenericCloud, DgmOctreeReferenceCloud>());
+				m->add(base_class<GenericIndexedCloudPersist, DgmOctreeReferenceCloud>());
+				return m;
+			}
+
+
+			ModulePtr bs_DgmOctree(ModulePtr m = std::make_shared<Module>())
+			{
+				using namespace CCLib;
+				
+				m->add(user_type<GenericOctree>(), "GenericOctree");
+				m->add(user_type<DgmOctree>(), "DgmOctree");
+				m->add(constructor<DgmOctree(GenericIndexedCloudPersist*)>(), "DgmOctree");
+
+				m->add(fun(&DgmOctree::GET_BIT_SHIFT), "GET_BIT_SHIFT");
+				m->add(fun(&DgmOctree::OCTREE_LENGTH), "OCTREE_LENGTH");
+
+				m->add(user_type<DgmOctree::CellCode>(), "CellCode");
+				m->add_global_const(const_var(DgmOctree::MAX_OCTREE_LEVEL), "MAX_OCTREE_LEVEL");
+				m->add_global_const(const_var(DgmOctree::MAX_OCTREE_LENGTH), "MAX_OCTREE_LENGTH");
+				m->add_global_const(const_var(DgmOctree::INVALID_CELL_CODE), "INVALID_CELL_CODE");
+				m->add(user_type<DgmOctree::cellCodesContainer>(), "cellCodesContainer");
+				m->add(user_type<DgmOctree::cellIndexesContainer>(), "cellIndexesContainer");
+				m->add(user_type<DgmOctree::PointDescriptor>(), "PointDescriptor");
+				m->add(constructor<DgmOctree::PointDescriptor()>(), "PointDescriptor");
+				m->add(constructor<DgmOctree::PointDescriptor(const CCVector3*, unsigned)>(), "PointDescriptor");
+				m->add(constructor<DgmOctree::PointDescriptor(const CCVector3*, unsigned,double)>(), "PointDescriptor");
+				m->add(fun(&DgmOctree::PointDescriptor::point), "point");
+				m->add(fun(&DgmOctree::PointDescriptor::pointIndex), "pointIndex");
+				m->add(fun(&DgmOctree::PointDescriptor::squareDistd), "squareDistd");
+				m->add(fun(&DgmOctree::PointDescriptor::distComp), "distComp");
+				m->add(user_type<DgmOctree::NeighboursSet>(), "NeighboursSet");
+				m->add(user_type<DgmOctree::CellDescriptor>(), "CellDescriptor");
+				m->add(constructor<DgmOctree::CellDescriptor()>(), "CellDescriptor");
+				m->add(constructor<DgmOctree::CellDescriptor(const CCVector3&, unsigned)>(), "CellDescriptor");
+				m->add(fun(&DgmOctree::CellDescriptor::center), "center");
+				m->add(fun(&DgmOctree::CellDescriptor::index), "index");
+				m->add(user_type<DgmOctree::NeighbourCellsSet>(), "NeighbourCellsSet");
+				m->add(user_type<DgmOctree::NearestNeighboursSearchStruct>(), "NearestNeighboursSearchStruct");
+				m->add(constructor<DgmOctree::NearestNeighboursSearchStruct()>(), "NearestNeighboursSearchStruct");
+				m->add(fun(&DgmOctree::NearestNeighboursSearchStruct::queryPoint), "queryPoint");
+				m->add(fun(&DgmOctree::NearestNeighboursSearchStruct::level), "level");
+				m->add(fun(&DgmOctree::NearestNeighboursSearchStruct::minNumberOfNeighbors), "minNumberOfNeighbors");
+				m->add(fun(&DgmOctree::NearestNeighboursSearchStruct::cellPos), "cellPos");
+				m->add(fun(&DgmOctree::NearestNeighboursSearchStruct::cellCenter), "cellCenter");
+				m->add(fun(&DgmOctree::NearestNeighboursSearchStruct::maxSearchSquareDistd), "maxSearchSquareDistd");
+				m->add(fun(&DgmOctree::NearestNeighboursSearchStruct::minimalCellsSetToVisit), "minimalCellsSetToVisit");
+				m->add(fun(&DgmOctree::NearestNeighboursSearchStruct::pointsInNeighbourhood), "pointsInNeighbourhood");
+				m->add(fun(&DgmOctree::NearestNeighboursSearchStruct::alreadyVisitedNeighbourhoodSize), "alreadyVisitedNeighbourhoodSize");
+				m->add(fun(&DgmOctree::NearestNeighboursSearchStruct::theNearestPointIndex), "theNearestPointIndex");
+
+				m->add(user_type<DgmOctree::NearestNeighboursSphericalSearchStruct>(), "NearestNeighboursSphericalSearchStruct");
+				m->add(constructor<DgmOctree::NearestNeighboursSphericalSearchStruct()>(), "NearestNeighboursSphericalSearchStruct");
+#ifdef TEST_CELLS_FOR_SPHERICAL_NN
+				m->add(fun(&DgmOctree::NearestNeighboursSphericalSearchStruct::pointsInSphericalNeighbourhood), "pointsInSphericalNeighbourhood");
+				m->add(fun(&DgmOctree::NearestNeighboursSphericalSearchStruct::cellsInNeighbourhood), "cellsInNeighbourhood");
+				m->add(fun(&DgmOctree::NearestNeighboursSphericalSearchStruct::maxInD2), "maxInD2");
+				m->add(fun(&DgmOctree::NearestNeighboursSphericalSearchStruct::minOutD2), "minOutD2");
+#endif
+				m->add(fun(&DgmOctree::NearestNeighboursSphericalSearchStruct::ready), "ready");
+				m->add(fun(&DgmOctree::NearestNeighboursSphericalSearchStruct::prepare), "prepare");
+				m->add(chaiscript::base_class< DgmOctree::NearestNeighboursSearchStruct, DgmOctree::NearestNeighboursSphericalSearchStruct>());
+				
+				m->add(user_type<DgmOctree::IndexAndCode>(), "IndexAndCode");
+				m->add(constructor<DgmOctree::IndexAndCode()>(), "IndexAndCode");
+				m->add(constructor<DgmOctree::IndexAndCode(unsigned, DgmOctree::CellCode)>(), "IndexAndCode");
+				m->add(constructor<DgmOctree::IndexAndCode(DgmOctree::IndexAndCode&)>(), "IndexAndCode");
+				m->add(fun(&DgmOctree::IndexAndCode::theIndex), "theIndex");
+				m->add(fun(&DgmOctree::IndexAndCode::theCode), "theCode");
+				m->add(fun(&DgmOctree::IndexAndCode::operator<), "<");
+				m->add(fun(&DgmOctree::IndexAndCode::operator>), ">");
+				m->add(fun(&DgmOctree::IndexAndCode::codeComp), "codeComp");
+				m->add(fun(&DgmOctree::IndexAndCode::indexComp), "indexComp");
+
+				m->add(user_type<DgmOctree::cellsContainer>(), "cellsContainer");
+				m->add(user_type<DgmOctree::octreeCell>(), "octreeCell");
+				//m->add(constructor<DgmOctree::octreeCell(const DgmOctree*)>(), "octreeCell");
+				m->add(fun(&DgmOctree::octreeCell::parentOctree), "parentOctree");
+				m->add(fun(&DgmOctree::octreeCell::truncatedCode), "truncatedCode");
+				m->add(fun(&DgmOctree::octreeCell::index), "index");
+				m->add(fun(&DgmOctree::octreeCell::points), "points");
+				m->add(fun(&DgmOctree::octreeCell::level), "level");
+				m->add(user_type<DgmOctree::octreeCellFunc>(), "octreeCellFunc");
+				m->add(fun(&DgmOctree::clear), "clear");
+				m->add(fun(static_cast<int(DgmOctree::*)(GenericProgressCallback*)>(&DgmOctree::build)), "build");
+				m->add(fun(static_cast<int(DgmOctree::*)(const CCVector3&, const CCVector3&, const CCVector3*, const CCVector3*,GenericProgressCallback*)>(&DgmOctree::build)), "build");
+				m->add(fun([](DgmOctree* dgmOT) {return dgmOT->build(); }), "build");
+				m->add(fun([](DgmOctree* dgmOT, const CCVector3& a, const CCVector3& b) {return dgmOT->build(a, b); }), "build");
+				m->add(fun([](DgmOctree* dgmOT, const CCVector3& a, const CCVector3& b, const CCVector3* c) {return dgmOT->build(a, b, c); }), "build");
+				m->add(fun([](DgmOctree* dgmOT, const CCVector3& a, const CCVector3& b, const CCVector3* c, const CCVector3* d) {return dgmOT->build(a, b, c, d); }), "build");
+				m->add(fun(&DgmOctree::getNumberOfProjectedPoints), "getNumberOfProjectedPoints");
+				m->add(fun(&DgmOctree::getOctreeMins), "getOctreeMins");
+				m->add(fun(&DgmOctree::getOctreeMaxs), "getOctreeMaxs");
+				m->add(fun(&DgmOctree::getBoundingBox), "getBoundingBox");
+				m->add(fun(&DgmOctree::getMinFillIndexes), "getMinFillIndexes");
+				m->add(fun(&DgmOctree::getMaxFillIndexes), "getMaxFillIndexes");
+				m->add(fun(&DgmOctree::getCellSize), "getCellSize");
+				m->add(fun(static_cast<void(DgmOctree::*)(const Tuple3i&, unsigned char, int*)const>(&DgmOctree::getCellDistanceFromBorders)), "getCellDistanceFromBorders");
+				m->add(fun(static_cast<void(DgmOctree::*)(const Tuple3i&, unsigned char, int, int*)const>(&DgmOctree::getCellDistanceFromBorders)), "getCellDistanceFromBorders");
+				m->add(fun(&DgmOctree::getPointsInCellByCellIndex), "getPointsInCellByCellIndex");
+				m->add(fun(&DgmOctree::getPointsInCell), "getPointsInCell");
+				m->add(fun(&DgmOctree::getPointsInCellsWithSortedCellCodes), "getPointsInCellsWithSortedCellCodes");
+				m->add(fun(&DgmOctree::findPointNeighbourhood), "findPointNeighbourhood");
+				m->add(fun(&DgmOctree::findTheNearestNeighborStartingFromCell), "findTheNearestNeighborStartingFromCell");
+				m->add(fun(&DgmOctree::findNearestNeighborsStartingFromCell), "findNearestNeighborsStartingFromCell");
+				m->add(fun(&DgmOctree::findNeighborsInASphereStartingFromCell), "findNeighborsInASphereStartingFromCell");
+				m->add(fun(&DgmOctree::getPointsInSphericalNeighbourhood), "getPointsInSphericalNeighbourhood");
+				
+				m->add(user_type<DgmOctree::CylindricalNeighbourhood>(), "CylindricalNeighbourhood");
+				m->add(constructor<DgmOctree::CylindricalNeighbourhood()>(), "CylindricalNeighbourhood");
+				m->add(fun(&DgmOctree::CylindricalNeighbourhood::center), "center");
+				m->add(fun(&DgmOctree::CylindricalNeighbourhood::dir), "dir");
+				m->add(fun(&DgmOctree::CylindricalNeighbourhood::radius), "radius");
+				m->add(fun(&DgmOctree::CylindricalNeighbourhood::maxHalfLength), "maxHalfLength");
+				m->add(fun(&DgmOctree::CylindricalNeighbourhood::neighbours), "neighbours");
+				m->add(fun(&DgmOctree::CylindricalNeighbourhood::level), "level");
+				m->add(fun(&DgmOctree::CylindricalNeighbourhood::onlyPositiveDir), "onlyPositiveDir");
+				m->add(fun(&DgmOctree::getPointsInCylindricalNeighbourhood), "getPointsInCylindricalNeighbourhood");
+				m->add(user_type<DgmOctree::ProgressiveCylindricalNeighbourhood>(), "ProgressiveCylindricalNeighbourhood");
+				m->add(constructor<DgmOctree::ProgressiveCylindricalNeighbourhood()>(), "ProgressiveCylindricalNeighbourhood");
+				m->add(fun(&DgmOctree::ProgressiveCylindricalNeighbourhood::currentHalfLength), "currentHalfLength");
+				m->add(fun(&DgmOctree::ProgressiveCylindricalNeighbourhood::potentialCandidates), "potentialCandidates");
+				m->add(fun(&DgmOctree::ProgressiveCylindricalNeighbourhood::prevMinCornerPos), "prevMinCornerPos");
+				m->add(fun(&DgmOctree::ProgressiveCylindricalNeighbourhood::prevMaxCornerPos), "prevMaxCornerPos");
+				m->add(chaiscript::base_class< DgmOctree::CylindricalNeighbourhood, DgmOctree::ProgressiveCylindricalNeighbourhood>());
+				
+				m->add(fun(&DgmOctree::getPointsInCylindricalNeighbourhoodProgressive), "getPointsInCylindricalNeighbourhoodProgressive");
+				
+				m->add(user_type<DgmOctree::BoxNeighbourhood>(), "BoxNeighbourhood");
+				m->add(constructor<DgmOctree::BoxNeighbourhood()>(), "BoxNeighbourhood");
+				m->add(fun(&DgmOctree::BoxNeighbourhood::center), "center");
+				m->add(fun(&DgmOctree::BoxNeighbourhood::axes), "axes");
+				m->add(fun(&DgmOctree::BoxNeighbourhood::dimensions), "dimensions");
+				m->add(fun(&DgmOctree::BoxNeighbourhood::neighbours), "neighbours");
+				m->add(fun(&DgmOctree::BoxNeighbourhood::level), "level");
+				
+				m->add(fun(&DgmOctree::getPointsInBoxNeighbourhood), "getPointsInBoxNeighbourhood");
+				
+				m->add(fun(static_cast<DgmOctree::CellCode(*)(const Tuple3i&, unsigned char)>(&DgmOctree::GenerateTruncatedCellCode)), "GenerateTruncatedCellCode");
+				m->add(fun(static_cast<void(DgmOctree::*)(const CCVector3*, Tuple3i&)const>(&DgmOctree::getTheCellPosWhichIncludesThePoint)), "getTheCellPosWhichIncludesThePoint");
+				m->add(fun(static_cast<void(DgmOctree::*)(const CCVector3*, Tuple3i&, unsigned char)const>(&DgmOctree::getTheCellPosWhichIncludesThePoint)), "getTheCellPosWhichIncludesThePoint");
+				m->add(fun(static_cast<void(DgmOctree::*)(const CCVector3*, Tuple3i&, unsigned char, bool&)const>(&DgmOctree::getTheCellPosWhichIncludesThePoint)), "getTheCellPosWhichIncludesThePoint");
+
+				m->add(fun(&DgmOctree::getCellPos), "getCellPos");
+				m->add(fun(static_cast<void(DgmOctree::*)(DgmOctree::CellCode, unsigned char, CCVector3&, bool)const>(&DgmOctree::computeCellCenter)), "computeCellCenter");
+				m->add(fun(static_cast<void(DgmOctree::*)(const Tuple3i&, unsigned char, CCVector3&)const>(&DgmOctree::computeCellCenter)), "computeCellCenter");
+#ifndef OCTREE_CODES_64_BITS
+				m->add(fun(static_cast<DgmOctree::CellCode(*)(const Tuple3s&, unsigned char)>(&DgmOctree::GenerateTruncatedCellCode)), "GenerateTruncatedCellCode");
+				m->add(fun(static_cast<void(DgmOctree::*)(const Tuple3s&, unsigned char, CCVector3&)const>(&DgmOctree::computeCellCenter)), "computeCellCenter");
+#endif
+				m->add(fun(&DgmOctree::computeCellLimits), "computeCellLimits");
+				m->add(fun(&DgmOctree::findBestLevelForAGivenNeighbourhoodSizeExtraction), "findBestLevelForAGivenNeighbourhoodSizeExtraction");
+				m->add(fun(&DgmOctree::findBestLevelForComparisonWithOctree), "findBestLevelForComparisonWithOctree");
+				m->add(fun(&DgmOctree::findBestLevelForAGivenPopulationPerCell), "findBestLevelForAGivenPopulationPerCell");
+				m->add(fun(&DgmOctree::findBestLevelForAGivenCellNumber), "findBestLevelForAGivenCellNumber");
+				m->add(fun(&DgmOctree::getCellCode), "getCellCode");
+				m->add(fun(&DgmOctree::getCellCodes), "getCellCodes");
+				m->add(fun(&DgmOctree::getCellIndexes), "getCellIndexes");
+				m->add(fun(&DgmOctree::getCellCodesAndIndexes), "getCellCodesAndIndexes");
+				m->add(fun(static_cast<void(DgmOctree::*)(const DgmOctree::cellCodesContainer&, const DgmOctree::cellCodesContainer&, DgmOctree::cellCodesContainer&, DgmOctree::cellCodesContainer&)const> (&DgmOctree::diff)), "diff");
+				m->add(fun(static_cast<bool(DgmOctree::*)(unsigned char, const DgmOctree::cellsContainer&, const DgmOctree::cellsContainer&, int&, int&, int&, int&)const> (&DgmOctree::diff)), "diff");
+
+				m->add(fun(&DgmOctree::getCellNumber), "getCellNumber");
+				m->add(fun(&DgmOctree::computeMeanOctreeDensity), "computeMeanOctreeDensity");
+				m->add(fun(&DgmOctree::ComputeMinDistanceToCellBorder), "ComputeMinDistanceToCellBorder");
+				m->add(fun(static_cast<int(DgmOctree::*)(const DgmOctree::cellCodesContainer&, unsigned char, bool, GenericProgressCallback*)const>(&DgmOctree::extractCCs)), "extractCCs");
+				m->add(fun([](DgmOctree* dgmOT, const DgmOctree::cellCodesContainer& a, unsigned char b, bool c) {return dgmOT->extractCCs(a, b, c); }), "extractCCs");
+				m->add(fun(static_cast<int(DgmOctree::*)(unsigned char, bool, GenericProgressCallback*)const>(&DgmOctree::extractCCs)), "extractCCs");
+				m->add(fun([](DgmOctree* dgmOT, unsigned char a, bool b) {return dgmOT->extractCCs(a, b); }), "extractCCs");
+				m->add(fun(&DgmOctree::executeFunctionForAllCellsStartingAtLevel), "executeFunctionForAllCellsStartingAtLevel");
+				m->add(fun(&DgmOctree::executeFunctionForAllCellsAtLevel), "executeFunctionForAllCellsAtLevel");
+				m->add(fun(&DgmOctree::rayCast), "rayCast");
+				m->add(fun(&DgmOctree::associatedCloud), "associatedCloud");
+				m->add(fun(&DgmOctree::pointsAndTheirCellCodes), "pointsAndTheirCellCodes");
+				m->add(fun(&DgmOctree::MultiThreadSupport), "MultiThreadSupport");
+
+				m->add(chaiscript::base_class< GenericOctree, DgmOctree>());
+				return m;
+			}
+
+			ModulePtr bs_KDTree(ModulePtr m = std::make_shared<Module>())
+			{
+				using namespace CCLib;
+				m->add(user_type<KDTree>(), "KDTree");
+				m->add(constructor<KDTree()>(), "KDTree");
+				m->add(fun(&KDTree::buildFromCloud), "buildFromCloud");
+				m->add(fun(&KDTree::getAssociatedCloud), "getAssociatedCloud");
+				m->add(fun(&KDTree::findNearestNeighbour), "findNearestNeighbour");
+				m->add(fun(&KDTree::findPointBelowDistance), "findPointBelowDistance");
+				m->add(fun(&KDTree::findPointsLyingToDistance), "findPointsLyingToDistance");
+				return m;
+			}
+
+			/*ModulePtr bs_LocalModel(ModulePtr m = std::make_shared<Module>())
+			{
+				using namespace CCLib;
+				m->add(user_type<LocalModel>(), "LocalModel");
+				m->add(fun(&LocalModel::New), "LocalModel_New");
+				m->add(fun(&LocalModel::getType), "getType");
+				m->add(fun(&LocalModel::getCenter), "getCenter");
+				m->add(fun(&LocalModel::getSquareSize), "getSquareSize");
+				m->add(fun(&LocalModel::computeDistanceFromModelToPoint), "computeDistanceFromModelToPoint");
+				m->add(fun([](LocalModel* lm,const CCVector3* a) {return lm->computeDistanceFromModelToPoint(a); }), "computeDistanceFromModelToPoint");
+				return m;
+			}*/
+
+
+			ModulePtr bs_FastMarching(ModulePtr m = std::make_shared<Module>())
+			{
+				using namespace CCLib;
+				m->add(user_type<FastMarching>(), "FastMarching");
+
+				m->add(fun(&FastMarching::setSeedCell), "setSeedCell");
+				m->add(fun(&FastMarching::propagate), "propagate");
+				m->add(fun(&FastMarching::cleanLastPropagation), "cleanLastPropagation");
+				m->add(fun(&FastMarching::getTime), "getTime");
+				m->add(fun(&FastMarching::setExtendedConnectivity), "setExtendedConnectivity");
+				return m;
+			}
+
+			/*ModulePtr bs_FastMarchingForPropagation(ModulePtr m = std::make_shared<Module>())
+			{
+				using namespace CCLib;
+				m->add(user_type<FastMarchingForPropagation>(), "FastMarchingForPropagation");
+				m->add(constructor<FastMarchingForPropagation()>(), "FastMarchingForPropagation");
+				m->add(fun(&FastMarchingForPropagation::init), "init");
+				m->add(fun(&FastMarchingForPropagation::extractPropagatedPoints), "extractPropagatedPoints");
+				m->add(fun(&FastMarchingForPropagation::setPropagationTimingsAsDistances), "setPropagationTimingsAsDistances");
+				m->add(fun(&FastMarchingForPropagation::setDetectionThreshold), "setDetectionThreshold");
+				m->add(fun(&FastMarchingForPropagation::setJumpCoef), "setJumpCoef");
+				m->add(fun(&FastMarchingForPropagation::findPeaks), "findPeaks");
+				m->add(fun(&FastMarchingForPropagation::propagate), "propagate");
+
+				m->add(chaiscript::base_class< FastMarching, FastMarchingForPropagation>());
+
+				return m;
+			}*/
+
+			template<typename T>
+			ModulePtr bs_Garbage(const std::string& shortCutName, ModulePtr m = std::make_shared<Module>())
+			{
+				using namespace CCLib;
+				using Base = Garbage<T>;
+				chaiscript::utility::add_class<Base>(*m,
+					shortCutName,
+					{
+						chaiscript::constructor<Base()>(),
+					},
+					{
+						{ fun(&Base::add), "add" },
+						{ fun(&Base::remove), "remove" },
+						{ fun(&Base::destroy), "destroy" },
+						{ fun(&Base::m_items), "m_items" },
+					}
+					);
+				return m;
+			}
+
+			ModulePtr bs_GenericDistribution(ModulePtr m = std::make_shared<Module>())
+			{
+				using namespace CCLib;
+				m->add(user_type<GenericDistribution>(), "GenericDistribution");
+				m->add(fun(&GenericDistribution::getName), "getName");
+				m->add(fun(&GenericDistribution::isValid), "isValid");
+				m->add(user_type<GenericDistribution::ScalarContainer>(), "ScalarContainer");
+				m->add(fun(&GenericDistribution::computeParameters), "computeParameters");
+				m->add(fun(static_cast<double(GenericDistribution::*)(ScalarType)const>(&GenericDistribution::computeP)), "computeP");
+				m->add(fun(&GenericDistribution::computePfromZero), "computePfromZero");
+				m->add(fun(static_cast<double(GenericDistribution::*)(ScalarType, ScalarType)const>(&GenericDistribution::computeP)), "computeP");
+				m->add(fun(&GenericDistribution::computeChi2Dist), "computeChi2Dist");
+				return m;
+			}
+
+			ModulePtr bs_NormalDistribution(ModulePtr m = std::make_shared<Module>())
+			{
+				using namespace CCLib;
+				m->add(user_type<NormalDistribution>(), "NormalDistribution");
+				m->add(constructor<NormalDistribution()>(), "NormalDistribution");
+				m->add(constructor<NormalDistribution(ScalarType, ScalarType)>(), "NormalDistribution");
+				m->add(fun(static_cast<bool(NormalDistribution::*)(const GenericDistribution::ScalarContainer&)>(&NormalDistribution::computeParameters)), "computeParameters");
+				m->add(fun(static_cast<double(NormalDistribution::*)(ScalarType)const>(&NormalDistribution::computeP)), "computeP");
+				m->add(fun(&NormalDistribution::computePfromZero), "computePfromZero");
+				m->add(fun(static_cast<double(NormalDistribution::*)(ScalarType, ScalarType)const>(&NormalDistribution::computeP)), "computeP");
+				m->add(fun(&NormalDistribution::computeChi2Dist), "computeChi2Dist");
+				m->add(fun(&NormalDistribution::getName), "getName");
+				m->add(fun(&NormalDistribution::getParameters), "getParameters");
+				m->add(fun(&NormalDistribution::setParameters), "setParameters");
+				m->add(fun(&NormalDistribution::getMu), "getMu");
+				m->add(fun(&NormalDistribution::getSigma2), "getSigma2");
+				m->add(fun(static_cast<bool(NormalDistribution::*)(const GenericCloud*)>(&NormalDistribution::computeParameters)), "computeParameters");
+				m->add(fun(&NormalDistribution::computeRobustParameters), "computeRobustParameters");
+				m->add(chaiscript::base_class< GenericDistribution, NormalDistribution>());
+				return m;
+			}
+
+			ModulePtr bs_WeibullDistribution(ModulePtr m = std::make_shared<Module>())
+			{
+				using namespace CCLib;
+				m->add(user_type<WeibullDistribution>(), "WeibullDistribution");
+				m->add(constructor<WeibullDistribution()>(), "WeibullDistribution");
+				m->add(constructor<WeibullDistribution(ScalarType, ScalarType, ScalarType)>(), "WeibullDistribution");
+				m->add(fun(&WeibullDistribution::getParameters), "getParameters");
+				m->add(fun(&WeibullDistribution::getOtherParameters), "getOtherParameters");
+				m->add(fun(&WeibullDistribution::computeMode), "computeMode");
+				m->add(fun(&WeibullDistribution::computeSkewness), "computeSkewness");
+				m->add(fun(&WeibullDistribution::setParameters), "setParameters");
+				m->add(fun(&WeibullDistribution::setValueShift), "setValueShift");
+				m->add(fun(&WeibullDistribution::getValueShift), "getValueShift");
+				m->add(fun(static_cast<bool(WeibullDistribution::*)(const GenericDistribution::ScalarContainer&)>(&WeibullDistribution::computeParameters)), "computeParameters");
+				m->add(fun(static_cast<double(WeibullDistribution::*)(ScalarType)const>(&WeibullDistribution::computeP)), "computeP");
+				m->add(fun(&WeibullDistribution::computePfromZero), "computePfromZero");
+				m->add(fun(static_cast<double(WeibullDistribution::*)(ScalarType, ScalarType)const>(&WeibullDistribution::computeP)), "computeP");
+				m->add(fun(&WeibullDistribution::computeChi2Dist), "computeChi2Dist");
+				m->add(fun(&WeibullDistribution::getName), "getName");
+				m->add(chaiscript::base_class< GenericDistribution, WeibullDistribution>());
+				return m;
+			}
+
+
+			ModulePtr bs_GenericProgressCallback(ModulePtr m = std::make_shared<Module>())
+			{
+				using namespace CCLib;
+				m->add(user_type<GenericProgressCallback>(), "GenericProgressCallback");
+				m->add(fun(&GenericProgressCallback::update), "update");
+				m->add(fun(&GenericProgressCallback::setMethodTitle), "setMethodTitle");
+				m->add(fun(&GenericProgressCallback::setInfo), "setInfo");
+				m->add(fun(&GenericProgressCallback::start), "start");
+				m->add(fun(&GenericProgressCallback::stop), "stop");
+				m->add(fun(&GenericProgressCallback::isCancelRequested), "isCancelRequested");
+				m->add(fun(&GenericProgressCallback::textCanBeEdited), "textCanBeEdited");
+
+				m->add(user_type<NormalizedProgress>(), "GenericProgressCallback");
+				m->add(constructor<NormalizedProgress(GenericProgressCallback*, unsigned, unsigned)>(), "GenericProgressCallback");
+				m->add(fun(&NormalizedProgress::scale), "scale");
+				m->add(fun(&NormalizedProgress::reset), "reset");
+				m->add(fun(&NormalizedProgress::oneStep), "oneStep");
+				m->add(fun(&NormalizedProgress::steps), "steps");
+				return m;
+			}
+
+			
+
+
+			ModulePtr bs_CCGeom(ModulePtr m = std::make_shared<Module>())
 			{
 				bs_Vector2Tpl<PointCoordinateType>("CCVector2", m);
 				bs_Vector2Tpl<double>("CCVector2d", m);
@@ -543,10 +1044,27 @@ namespace chaiscript
 				bs_Vector3Tpl<PointCoordinateType>("CCVector3", m);
 				bs_Vector3Tpl<float>("CCVector3f", m);
 				bs_Vector3Tpl<double>("CCVector3d", m);
+				return m;
+			}
 
+			ModulePtr bs_CCTypes(ModulePtr m = std::make_shared<Module>())
+			{
+				m->add(user_type<ScalarType>(), "ScalarType");
+				m->add(user_type<PointCoordinateType>(), "PointCoordinateType");
+
+				return m;
+			}
+
+			ModulePtr bootstrap_classes(ModulePtr m = std::make_shared<Module>())
+			{
+				
+				bs_CCTypes(m);
+				bs_CCGeom(m);
 				bs_SquareMatrixTpl<PointCoordinateType>("SquareMatrix", m);
 				bs_SquareMatrixTpl<float>("SquareMatrixf", m);
 				bs_SquareMatrixTpl<double>("SquareMatrixd", m);
+
+				bs_Grid3D<unsigned short>("Grid3Dus", m);
 
 				bs_PointCloudTpl<CCLib::GenericIndexedCloudPersist>("PointCloudTpl", m);
 				m->add(chaiscript::base_class< CCLib::GenericIndexedCloud, CCLib::PointCloudTpl<CCLib::GenericIndexedCloudPersist>>());
@@ -558,9 +1076,25 @@ namespace chaiscript
 				bs_ScalarField(m);
 				bs_boundingBox(m);
 				bs_GenericMesh(m);
+				bs_GenericCloud(m);
 				bs_VerticesIndexes(m);
 				bs_GenericIndexedMesh(m);
-
+				bs_ChamferDistanceTransform(m);
+				bs_ConjugateGradient<6, double>("ConjugateGradient_N6", m);
+				bs_ConjugateGradient<8, double>("ConjugateGradient_N8", m);
+				bs_Garbage<CCLib::ScalarField>("ScalarFieldGarbage", m);
+				bs_Garbage<CCLib::GenericIndexedCloudPersist>("CloudGarbage", m);
+				bs_GenericDistribution(m);
+				bs_NormalDistribution(m);
+				bs_WeibullDistribution(m);
+				bs_Delaunay2dMesh(m);
+				bs_DgmOctree(m);
+				bs_DgmOctreeReferenceCloud(m);
+				bs_FastMarching(m);
+				//bs_FastMarchingForPropagation(m);
+				bs_GenericProgressCallback(m);
+				//bs_LocalModel(m);
+				
 				return m;
 			}
 		}

@@ -158,6 +158,9 @@ protected:
 
 	//! Planes and line segments found in the dbtree for adv transate/rotate
 	ccHObject::Container m_planesAndLineSegments;
+
+	//! rotComboBox enum
+	enum rotComboBoxItems {XYZ, X, Y, Z, NONE};
 };
 
 #endif //CC_GRAPHICAL_TRANSFORMATION_TOOL_HEADER

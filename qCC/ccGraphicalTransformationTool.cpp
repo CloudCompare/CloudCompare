@@ -132,7 +132,6 @@ void ccGraphicalTransformationTool::advModeToggle(bool state)
 	}
 	else
 	{
-		rotComboBox->setEnabled(true);
 		TxCheckBox->setEnabled(true);
 		TyCheckBox->setEnabled(true);
 		this->setGeometry(this->x() , this->y(), 0, 0);
@@ -166,7 +165,7 @@ void ccGraphicalTransformationTool::populateAdvModeItems()
 		}
 		if (!polylines.empty())
 		{
-			for (int i = 0; i < polylines.size(); i++)
+			for (size_t i = 0; i < polylines.size(); i++)
 			{
 				ccPolyline* poly = static_cast<ccPolyline*>(polylines[i]);
 				if (poly->size() == 2) //only single segment polylines allowed
@@ -177,7 +176,7 @@ void ccGraphicalTransformationTool::populateAdvModeItems()
 		}
 		if (!m_planesAndLineSegments.empty())
 		{
-			for (int i = 0; i < m_planesAndLineSegments.size(); ++i)
+			for (size_t i = 0; i < m_planesAndLineSegments.size(); ++i)
 			{
 				QString item = QString("%1 (ID=%2)").arg(m_planesAndLineSegments[i]->getName()).arg(m_planesAndLineSegments[i]->getUniqueID());
 				advTranslateComboBox->insertItem(i+1, item, QVariant(m_planesAndLineSegments[i]->getUniqueID()));
@@ -363,7 +362,6 @@ bool ccGraphicalTransformationTool::setAdvRotationAxis(ccHObject* rotateRef)
 		CCVector3d newCenter = CCVector3d::fromArray(m_toTransform.getBB_recursive().getCenter().u);
 		setRotationCenter(newCenter);
 		advRotateComboBox->setCurrentIndex(0);
-		rotComboBox->setEnabled(true);
 		return false;
 	}
 }
@@ -384,7 +382,7 @@ void ccGraphicalTransformationTool::advTranslateRefUpdate(int index)
 		return;
 	}
 	int id = advTranslateComboBox->itemData(index).toInt();
-	for (int i = 0; i < m_planesAndLineSegments.size(); i++)
+	for (size_t i = 0; i < m_planesAndLineSegments.size(); i++)
 	{
 		if (id == m_planesAndLineSegments[i]->getUniqueID())
 		{
@@ -425,7 +423,7 @@ void ccGraphicalTransformationTool::advRotateRefUpdate(int index)
 			rotComboBox->insertItem(2, "Y");
 			rotComboBox->insertItem(3, "Z");
 			rotComboBox->insertItem(4, "None");
-			rotComboBox->setCurrentIndex(3);
+			rotComboBox->setCurrentIndex(rotComboBoxItems::Z);
 		}
 		CCVector3d center = CCVector3d::fromArray(m_toTransform.getBB_recursive().getCenter().u);
 		setRotationCenter(center);
@@ -440,7 +438,7 @@ void ccGraphicalTransformationTool::advRotateRefUpdate(int index)
 		return;
 	}
 	int id = advRotateComboBox->itemData(index).toInt();
-	for (int i = 0; i < m_planesAndLineSegments.size(); i++)
+	for (size_t i = 0; i < m_planesAndLineSegments.size(); i++)
 	{
 		if (id == m_planesAndLineSegments[i]->getUniqueID())
 		{
@@ -687,19 +685,19 @@ void ccGraphicalTransformationTool::glRotate(const ccGLMatrixd& rotMat)
 	{
 		switch (rotComboBox->currentIndex())
 		{
-		case 0: //XYZ
+		case rotComboBoxItems::XYZ:
 			m_rotation = rotMat * m_rotation;
 			break;
-		case 1: //X
+		case rotComboBoxItems::X:
 			m_rotation = rotMat.xRotation() * m_rotation;
 			break;
-		case 2: //Y
+		case rotComboBoxItems::Y:
 			m_rotation = rotMat.yRotation() * m_rotation;
 			break;
-		case 3: //Z
+		case rotComboBoxItems::Z:
 			m_rotation = rotMat.zRotation() * m_rotation;
 			break;
-		case 4: //None
+		case rotComboBoxItems::NONE:
 			break;
 		}
 	}

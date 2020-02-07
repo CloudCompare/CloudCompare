@@ -40,6 +40,9 @@ namespace chaiscript
 				m->add(chaiscript::vector_conversion<std::vector<int>>());
 				m->add(chaiscript::vector_conversion<std::vector<unsigned>>());
 				m->add(chaiscript::vector_conversion<std::vector<std::string>>());
+				m->add(chaiscript::vector_conversion<std::vector<CLCloudDesc>>());
+				m->add(chaiscript::vector_conversion<std::vector<CLMeshDesc>>());
+
 				return m;
 			}
 

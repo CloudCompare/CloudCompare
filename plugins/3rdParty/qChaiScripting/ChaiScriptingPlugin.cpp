@@ -30,38 +30,20 @@
 
 #include "chaiScriptCodeEditorMainWindow.h"
 
-template<typename T, typename... Args>
-std::unique_ptr<T> make_unique(Args&&... args)
-{
-	return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
-}
 
-std::unique_ptr<chaiscript::ChaiScript> chai;
-
-chaiscript::ModulePtr systemBootstrap = nullptr;// = chaiscript::cloudCompare::bootstrapSystem::bootstrap();
-
-	/// \brief Represents the current state of the ChaiScript system. State and be saved and restored
-	/// \warning State object does not contain the user defined type conversions of the engine. They
-	///          are left out due to performance considerations involved in tracking the state
-	/// \sa ChaiScript::get_state
-	/// \sa ChaiScript::set_state
-chaiscript::ChaiScript::State chaiInitialState;
-chaiscript::ChaiScript::State chaiSaveState;
 
 chaiScriptCodeEditorMainWindow* cseMW;
-
+static ChaiScriptingPlugin* s_instance;
 using namespace chaiscript;
 ChaiScriptingPlugin::ChaiScriptingPlugin( QObject *parent )
 	: QObject( parent )
 	, ccStdPluginInterface( ":/CC/plugin/ChaiScriptingPlugin/info.json" )
 	, m_action( nullptr )
 {
-	cseMW = chaiScriptCodeEditorMainWindow::TheInstance();
-	connect(cseMW, &chaiScriptCodeEditorMainWindow::executionCalled, this, &ChaiScriptingPlugin::executionCalled);
-	connect(cseMW, &chaiScriptCodeEditorMainWindow::reset_Chai_to_initial_state, this, &ChaiScriptingPlugin::resetToDefaultChaiState);
-	connect(cseMW, &chaiScriptCodeEditorMainWindow::save_Chai_state, this, &ChaiScriptingPlugin::saveChaiState);
-	connect(cseMW, &chaiScriptCodeEditorMainWindow::reset_chai_to_last_save, this, &ChaiScriptingPlugin::resetToSavedChaiState);
-	connect(cseMW, &chaiScriptCodeEditorMainWindow::destroy_chai, this, &ChaiScriptingPlugin::destroyChai);
+	if (!s_instance)
+	{
+		s_instance = this;
+	}
 }
 
 bool throws_exception(const std::function<void()>& f)
@@ -112,15 +94,21 @@ void ChaiScriptingPlugin::setupChaiScriptEngine()
 			}
 			chai->add(systemBootstrap);
 
-
+			chai->add(user_type<CommandCHAIDerived>(), "CommandCHAIDerived");
+			chai->add(constructor< CommandCHAIDerived(const QString&, const QString&)>(), "CommandCHAIDerived");
+			chai->add(fun(&CommandCHAIDerived::chai_process), "chai_process");
 			chai->add_global(var(this), "chaiScriptingPlugin");
-			chai->add_global(var(m_app), "m_app");
+			chai->add(fun(&ChaiScriptingPlugin::registerCommand), "registerCommand");
+			if (m_app)
+			{
+				chai->add_global(var(m_app), "m_app");
+			}
 
 			chai->add(fun(&ChaiScriptingPlugin::dispToConsole), "dispToConsole");
 
 			chai->add(chaiscript::fun(&throws_exception), "throws_exception");
 			chai->add(chaiscript::fun(&get_eval_error), "get_eval_error");
-			chai->eval(R"(global print = fun(x){chaiScriptingPlugin.dispToConsole(x.to_string(),1);})");
+			chai->eval(R"(global print = fun(x){chaiScriptingPlugin.dispToConsole(x.to_string(),0);})");
 			chai->eval(R"(def method_missing(int i, string name, Vector v) {
 					print("method_missing(${i}, ${name}), ${v.size()} params");
 					})");
@@ -145,7 +133,22 @@ void ChaiScriptingPlugin::setupChaiScriptEngine()
 
 void ChaiScriptingPlugin::dispToConsole(const std::string &str,const int lvl)
 {
-	m_app->dispToConsole(QString::fromStdString(str), (ccMainAppInterface::ConsoleMessageLevel)lvl);
+	
+	switch ((ccMainAppInterface::ConsoleMessageLevel)lvl)
+	{
+		case ccMainAppInterface::ConsoleMessageLevel::STD_CONSOLE_MESSAGE:
+			ccLog::Print(QString::fromStdString(str));
+			break;
+		case ccMainAppInterface::ConsoleMessageLevel::WRN_CONSOLE_MESSAGE:
+			ccLog::Warning(QString::fromStdString(str));
+			break;
+		case ccMainAppInterface::ConsoleMessageLevel::ERR_CONSOLE_MESSAGE:
+			ccLog::Error(QString::fromStdString(str));
+			break;
+	default:
+		ccLog::Print(QString::fromStdString(str));
+		break;
+	}
 }
 
 
@@ -156,18 +159,18 @@ void ChaiScriptingPlugin::executionCalled(const std::string& evalStatement)
 	{
 		chai->eval(evalStatement);
 	}
-	catch (const chaiscript::exception::eval_error & ee) 
+	catch (const chaiscript::exception::eval_error & ee)
 	{
-		m_app->dispToConsole(ee.what(), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		if (ee.call_stack.size() > 0) 
+		ccLog::Error(ee.what());
+		if (ee.call_stack.size() > 0)
 		{
-			m_app->dispToConsole(QString("during evaluation at (%1, %2)").arg(ee.call_stack[0]->start().line).arg(ee.call_stack[0]->start().column), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+			ccLog::Warning(QString("during evaluation at (%1, %2)").arg(ee.call_stack[0]->start().line).arg(ee.call_stack[0]->start().column));
 		}
 		std::cout << std::endl;
 	}
-	catch (const std::exception & e) 
+	catch (const std::exception & e)
 	{
-		m_app->dispToConsole(e.what(), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		ccLog::Error(e.what());
 
 	}
 }
@@ -247,6 +250,37 @@ void ChaiScriptingPlugin::destroyChai()
 	}
 }
 
+bool ChaiScriptingPlugin::loadChaiFile(const QString& file)
+{
+	if (!chai)
+	{
+		setupChaiScriptEngine();
+	}
+	try 
+	{
+	chai->eval_file(file.toLocal8Bit().constData());
+
+	}
+	catch (const chaiscript::exception::eval_error & ee)
+	{
+		ccLog::Error(ee.what());
+		if (ee.call_stack.size() > 0)
+		{
+			ccLog::Warning(QString("during evaluation at (%1, %2)").arg(ee.call_stack[0]->start().line).arg(ee.call_stack[0]->start().column));
+		}
+		std::cout << std::endl;
+		destroyChai();
+		return false;
+	}
+	catch (const std::exception & e)
+	{
+		ccLog::Error(e.what());
+		destroyChai();
+		return false;
+	}
+	return true;
+}
+
 QList<QAction *> ChaiScriptingPlugin::getActions()
 {
 	if ( !m_action )
@@ -258,6 +292,13 @@ QList<QAction *> ChaiScriptingPlugin::getActions()
 		// Connect appropriate signal
 		connect( m_action, &QAction::triggered, this, &ChaiScriptingPlugin::openScriptEditor);
 	}
+
+	cseMW = chaiScriptCodeEditorMainWindow::TheInstance();
+	connect(cseMW, &chaiScriptCodeEditorMainWindow::executionCalled, this, &ChaiScriptingPlugin::executionCalled);
+	connect(cseMW, &chaiScriptCodeEditorMainWindow::reset_Chai_to_initial_state, this, &ChaiScriptingPlugin::resetToDefaultChaiState);
+	connect(cseMW, &chaiScriptCodeEditorMainWindow::save_Chai_state, this, &ChaiScriptingPlugin::saveChaiState);
+	connect(cseMW, &chaiScriptCodeEditorMainWindow::reset_chai_to_last_save, this, &ChaiScriptingPlugin::resetToSavedChaiState);
+	connect(cseMW, &chaiScriptCodeEditorMainWindow::destroy_chai, this, &ChaiScriptingPlugin::destroyChai);
 
 	return { m_action };
 }
@@ -284,6 +325,50 @@ void ChaiScriptingPlugin::openScriptEditor()
 
 }
 
+void ChaiScriptingPlugin::registerCommands(ccCommandLineInterface* cmd)
+{
+	if (!cmd)
+	{
+		assert(false);
+		return;
+	}
+	if (!chai)
+	{
+		setupChaiScriptEngine();
+	}
+	storedCMDLine = cmd;
+	chai->add_global(var(cmd), "m_cmd");
+	chai->eval(R"(global print = fun(x){m_cmd.print(x.to_QString());})");
+	cmd->arguments().append(QString("-%1").arg(COMMAND_CHAIKILL));
+	cmd->registerCommand(ccCommandLineInterface::Command::Shared(new CommandCHAI()));
+	cmd->registerCommand(ccCommandLineInterface::Command::Shared(new CommandCHAIKILL()));
+	
+}
+
+void ChaiScriptingPlugin::registerCommand(CommandCHAIDerived newCmd)
+{
+	if (storedCMDLine)
+	{
+		ccLog::Print(QString("Attempting to register %1 : %2").arg(newCmd.m_keyword).arg(newCmd.m_name));
+		if (storedCMDLine->registerCommand(ccCommandLineInterface::Command::Shared(new CommandCHAIDerived(newCmd.m_name, newCmd.m_keyword.toUpper(), newCmd.chai_process))))
+		{
+			ccLog::Print("registerCommand success!");
+		}
+		else
+		{
+			ccLog::Error("registerCommand Failed");
+		}
+	}
+}
+
+ChaiScriptingPlugin* ChaiScriptingPlugin::TheInstance()
+{
+	if (!s_instance)
+	{
+		s_instance = new ChaiScriptingPlugin();
+	}
+	return s_instance;
+}
 
 ChaiScriptingPlugin::~ChaiScriptingPlugin()
 {

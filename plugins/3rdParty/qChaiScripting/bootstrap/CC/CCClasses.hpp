@@ -27,6 +27,7 @@
 #include <SquareMatrix.h>
 #include <BoundingBox.h>
 #include <GenericCloud.h>
+#include <GenericTriangle.h>
 #include <PointCloud.h>
 #include <GenericIndexedCloudPersist.h>
 #include <ReferenceCloud.h>
@@ -48,7 +49,12 @@
 #include <ManualSegmentationTools.h>
 #include <NormalDistribution.h>
 #include <WeibullDistribution.h>
-
+#include <TrueKdTree.h>
+#include <DistanceComputationTools.h>
+#include <SimpleTriangle.h>
+#include <SimpleMesh.h>
+#include <RayAndBox.h>
+#include <Jacobi.h>
 
 namespace chaiscript
 {
@@ -337,6 +343,60 @@ namespace chaiscript
 				return m;
 			}
 
+			template<typename T>
+			ModulePtr bs_Ray(const std::string& shortCutName, ModulePtr m = std::make_shared<Module>())
+			{
+				using namespace CCLib;
+				chaiscript::utility::add_class<Ray<T>>(*m,
+					shortCutName,
+					{
+						chaiscript::constructor<Ray<T>(const Vector3Tpl<T>&, const Vector3Tpl<T>&)>(),
+					},
+					{
+						{ fun(&Ray<T>::radialSquareDistance), "radialSquareDistance" },
+						{ fun(&Ray<T>::squareDistanceToOrigin), "squareDistanceToOrigin" },
+						{ fun(&Ray<T>::squareDistances), "squareDistances" },
+						{ fun(&Ray<T>::dir), "dir" },
+						{ fun(&Ray<T>::origin), "origin" },
+						{ fun(&Ray<T>::invDir), "invDir" },
+						{ fun(&Ray<T>::sign), "sign" },						
+					}
+					);
+				return m;
+			}
+
+			template<typename T>
+			ModulePtr bs_AABB(const std::string& shortCutName, ModulePtr m = std::make_shared<Module>())
+			{
+				using namespace CCLib;
+				chaiscript::utility::add_class<AABB<T>>(*m,
+					shortCutName,
+					{
+						chaiscript::constructor<AABB<T>(const Vector3Tpl<T>&, const Vector3Tpl<T>&)>(),
+					},
+					{
+						{ fun(&AABB<T>::intersects), "intersects" },
+						{ fun(&AABB<T>::corners), "corners" },
+					}
+					);
+				chaiscript::bootstrap::array<Vector3Tpl<T>[2]>("corners_Array", m);
+				return m;
+			}
+
+			template<typename T>
+			ModulePtr bs_Jacobi(ModulePtr m = std::make_shared<Module>())
+			{
+				using Base = Jacobi<T>;
+				m->add(fun(&Base::ComputeEigenValuesAndVectors2), "ComputeEigenValuesAndVectors2");
+				m->add(fun(&Base::ComputeEigenValuesAndVectors), "ComputeEigenValuesAndVectors");
+				m->add(fun(&Base::SortEigenValuesAndVectors), "SortEigenValuesAndVectors");
+				m->add(fun(&Base::GetEigenVector), "GetEigenVector");
+				m->add(fun(&Base::GetMaxEigenValueAndVector), "GetMaxEigenValueAndVector");
+				m->add(fun(&Base::GetMinEigenValueAndVector), "GetMinEigenValueAndVector");
+				return m;
+			}
+
+
 			ModulePtr bs_PointCloud(ModulePtr m = std::make_shared<Module>())
 			{
 				chaiscript::utility::add_class<CCLib::PointCloud>(*m,
@@ -441,6 +501,23 @@ namespace chaiscript
 				return m;
 			}
 
+			ModulePtr bs_Polyline(ModulePtr m = std::make_shared<Module>())
+			{
+				using namespace CCLib;
+				m->add(user_type<CCLib::Polyline>(), "Polyline");
+				m->add(constructor<CCLib::Polyline(GenericIndexedCloudPersist*)>(), "Polyline");
+
+				m->add(fun(&CCLib::Polyline::isClosed), "isClosed");
+				m->add(fun(&CCLib::Polyline::setClosed), "setClosed");
+				m->add(fun(&CCLib::Polyline::clear), "clear");
+
+				m->add(chaiscript::base_class< ReferenceCloud, CCLib::Polyline>());
+				m->add(chaiscript::base_class< GenericIndexedCloud, CCLib::Polyline>());
+				m->add(chaiscript::base_class< GenericCloud, CCLib::Polyline>());
+				m->add(chaiscript::base_class< GenericIndexedCloudPersist, CCLib::Polyline>());
+				return m;
+			}
+
 			ModulePtr bs_ScalarField(ModulePtr m = std::make_shared<Module>())
 			{
 				m->add(chaiscript::user_type<CCLib::ScalarField>(), "ScalarField");
@@ -540,6 +617,48 @@ namespace chaiscript
 			}
 
 
+			ModulePtr bs_GenericTriangle(ModulePtr m = std::make_shared<Module>())
+			{
+				using namespace CCLib;
+				m->add(user_type<GenericTriangle>(), "GenericTriangle");
+				m->add(fun(&GenericTriangle::_getA), "_getA");
+				m->add(fun(&GenericTriangle::_getB), "_getB");
+				m->add(fun(&GenericTriangle::_getC), "_getC");				
+				return m;
+			}
+
+			ModulePtr bs_SimpleTriangle(ModulePtr m = std::make_shared<Module>())
+			{
+				using namespace CCLib;
+				m->add(user_type<SimpleTriangle>(), "SimpleTriangle");
+				m->add(constructor<SimpleTriangle()>(), "SimpleTriangle");
+				m->add(constructor<SimpleTriangle(const CCVector3&, const CCVector3&, const CCVector3&)>(), "SimpleTriangle");
+				m->add(fun(&SimpleTriangle::_getA), "_getA");
+				m->add(fun(&SimpleTriangle::_getB), "_getB");
+				m->add(fun(&SimpleTriangle::_getC), "_getC");
+				m->add(fun(&SimpleTriangle::A), "A");
+				m->add(fun(&SimpleTriangle::B), "B");
+				m->add(fun(&SimpleTriangle::C), "C");
+				m->add(chaiscript::base_class< GenericTriangle, SimpleTriangle>());
+				return m;
+			}
+
+			ModulePtr bs_SimpleRefTriangle(ModulePtr m = std::make_shared<Module>())
+			{
+				using namespace CCLib;
+				m->add(user_type<SimpleRefTriangle>(), "SimpleRefTriangle");
+				m->add(constructor<SimpleRefTriangle()>(), "SimpleRefTriangle");
+				m->add(constructor<SimpleRefTriangle(const CCVector3*, const CCVector3*, const CCVector3*)>(), "SimpleRefTriangle");
+				m->add(fun(&SimpleRefTriangle::_getA), "_getA");
+				m->add(fun(&SimpleRefTriangle::_getB), "_getB");
+				m->add(fun(&SimpleRefTriangle::_getC), "_getC");
+				m->add(fun(&SimpleRefTriangle::A), "A");
+				m->add(fun(&SimpleRefTriangle::B), "B");
+				m->add(fun(&SimpleRefTriangle::C), "C");
+				m->add(chaiscript::base_class< GenericTriangle, SimpleRefTriangle>());
+				return m;
+			}
+
 			ModulePtr bs_VerticesIndexes(ModulePtr m = std::make_shared<Module>())
 			{
 				using namespace CCLib;
@@ -570,6 +689,33 @@ namespace chaiscript
 				m->add(fun(&GenericIndexedMesh::getNextTriangleVertIndexes), "getNextTriangleVertIndexes");
 
 				m->add(chaiscript::base_class< GenericMesh, GenericIndexedMesh>());
+				return m;
+			}
+
+			ModulePtr bs_SimpleMesh(ModulePtr m = std::make_shared<Module>())
+			{
+				using namespace CCLib;
+				m->add(user_type<SimpleMesh>(), "SimpleMesh");
+				m->add(constructor<SimpleMesh(GenericIndexedCloud*, bool)>(), "SimpleMesh");
+
+				m->add(fun(&SimpleMesh::forEach), "forEach");
+				m->add(fun(&SimpleMesh::placeIteratorAtBeginning), "placeIteratorAtBeginning");
+				m->add(fun(&SimpleMesh::_getNextTriangle), "_getNextTriangle");
+				m->add(fun(&SimpleMesh::_getTriangle), "_getTriangle");
+				m->add(fun(&SimpleMesh::getNextTriangleVertIndexes), "getNextTriangleVertIndexes");
+				m->add(fun(&SimpleMesh::getTriangleVertIndexes), "getTriangleVertIndexes");
+				m->add(fun(&SimpleMesh::size), "size");
+				m->add(fun(&SimpleMesh::getBoundingBox), "getBoundingBox");
+				m->add(fun(&SimpleMesh::getTriangleVertices), "getTriangleVertices");
+				m->add(fun(&SimpleMesh::capacity), "capacity");
+				m->add(fun(&SimpleMesh::vertices), "vertices");
+				m->add(fun(&SimpleMesh::clear), "clear");
+				m->add(fun(&SimpleMesh::addTriangle), "addTriangle");
+				m->add(fun(&SimpleMesh::reserve), "reserve");
+				m->add(fun(&SimpleMesh::resize), "resize");
+
+				m->add(chaiscript::base_class< GenericMesh, SimpleMesh>());
+				m->add(chaiscript::base_class< GenericIndexedMesh, SimpleMesh>());
 				return m;
 			}
 
@@ -659,8 +805,8 @@ namespace chaiscript
 				m->add(fun(&Delaunay2dMesh::getAssociatedCloud), "getAssociatedCloud");
 				m->add(fun(static_cast<Delaunay2dMesh*(*)(const std::vector<CCVector2>&)>(&Delaunay2dMesh::TesselateContour)), "TesselateContour");
 				m->add(fun(static_cast<Delaunay2dMesh*(*)(GenericIndexedCloudPersist*,int)>(&Delaunay2dMesh::TesselateContour)), "TesselateContour");
-				m->add(chaiscript::base_class< GenericMesh, Delaunay2dMesh>());
-				m->add(chaiscript::base_class< GenericIndexedMesh, Delaunay2dMesh>());
+				
+
 				
 				return m;
 			}
@@ -1027,9 +1173,50 @@ namespace chaiscript
 				return m;
 			}
 
+			ModulePtr bs_TrueKdTree(ModulePtr m = std::make_shared<Module>())
+			{
+				using namespace CCLib;
+				m->add(user_type<TrueKdTree>(), "TrueKdTree");
+				m->add(constructor<TrueKdTree(GenericIndexedCloudPersist*)>(), "TrueKdTree");
+				m->add(fun(&TrueKdTree::associatedCloud), "associatedCloud");
+				m->add(fun(&TrueKdTree::build), "build");
+				m->add(fun([](TrueKdTree* tkdt, double a, DistanceComputationTools::ERROR_MEASURES b, unsigned c, unsigned d) {return tkdt->build(a, b, c, d); }), "build");
+				m->add(fun([](TrueKdTree* tkdt, double a, DistanceComputationTools::ERROR_MEASURES b, unsigned c) {return tkdt->build(a, b, c); }), "build");
+				m->add(fun([](TrueKdTree* tkdt, double a, DistanceComputationTools::ERROR_MEASURES b) {return tkdt->build(a, b); }), "build");
+				m->add(fun([](TrueKdTree* tkdt, double a) {return tkdt->build(a); }), "build");
+				m->add(fun(&TrueKdTree::clear), "clear");
+				m->add(fun(&TrueKdTree::getMaxError), "getMaxError");
+				m->add(fun(&TrueKdTree::getMaxErrorType), "getMaxErrorType");
+				m->add(fun(&TrueKdTree::getLeaves), "getLeaves");
+
+
+				m->add(user_type<TrueKdTree::BaseNode>(), "BaseNode");
+				m->add(fun(&TrueKdTree::BaseNode::isNode), "isNode");
+				m->add(fun(&TrueKdTree::BaseNode::isLeaf), "isLeaf");
+				m->add(fun(&TrueKdTree::BaseNode::parent), "parent");
+				m->add(user_type<TrueKdTree::Node>(), "Node");
+				m->add(constructor<TrueKdTree::Node()>(), "Node");
+				m->add(fun(&TrueKdTree::Node::splitValue), "splitValue");
+				m->add(fun(&TrueKdTree::Node::leftChild), "leftChild");
+				m->add(fun(&TrueKdTree::Node::rightChild), "rightChild");
+				m->add(fun(&TrueKdTree::Node::splitDim), "splitDim");
+
+				m->add(user_type<TrueKdTree::Leaf>(), "Leaf");
+				m->add(constructor<TrueKdTree::Leaf(ReferenceCloud*, const PointCoordinateType [], ScalarType)>(), "Leaf");
+				m->add(fun(&TrueKdTree::Leaf::points), "points");
+				m->add(fun(&TrueKdTree::Leaf::planeEq), "planeEq");
+				m->add(fun(&TrueKdTree::Leaf::error), "error");
+				m->add(fun(&TrueKdTree::Leaf::userData), "userData");
+
+				m->add(user_type<TrueKdTree::LeafVector>(), "LeafVector");
+				m->add(chaiscript::base_class< TrueKdTree::BaseNode, TrueKdTree::Node>());
+				m->add(chaiscript::base_class< TrueKdTree::BaseNode, TrueKdTree::Leaf>());
+
+
+				return m;
+			}
+
 			
-
-
 			ModulePtr bs_CCGeom(ModulePtr m = std::make_shared<Module>())
 			{
 				bs_Vector2Tpl<PointCoordinateType>("CCVector2", m);
@@ -1063,7 +1250,16 @@ namespace chaiscript
 				bs_SquareMatrixTpl<PointCoordinateType>("SquareMatrix", m);
 				bs_SquareMatrixTpl<float>("SquareMatrixf", m);
 				bs_SquareMatrixTpl<double>("SquareMatrixd", m);
+				
+				bs_Ray<float>("Rayf", m);
+				bs_Ray<double>("Rayd", m);
+				bs_AABB<float>("AABBf", m);
+				bs_AABB<double>("AABBd", m);
 
+				bs_Jacobi<float>(m);
+				bs_Jacobi<double>(m);
+
+				
 				bs_Grid3D<unsigned short>("Grid3Dus", m);
 
 				bs_PointCloudTpl<CCLib::GenericIndexedCloudPersist>("PointCloudTpl", m);
@@ -1094,7 +1290,13 @@ namespace chaiscript
 				//bs_FastMarchingForPropagation(m);
 				bs_GenericProgressCallback(m);
 				//bs_LocalModel(m);
-				
+				bs_TrueKdTree(m);
+				bs_GenericTriangle(m);
+				bs_SimpleTriangle(m);
+				bs_SimpleRefTriangle(m);
+				bs_SimpleMesh(m);
+				bs_KDTree(m);
+				bs_Polyline(m);
 				return m;
 			}
 		}

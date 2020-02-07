@@ -31,6 +31,7 @@
 #include <StatisticalTestingTools.h>
 #include <ManualSegmentationTools.h>
 #include <SimpleMesh.h>
+#include <ScalarFieldTools.h>
 
 namespace chaiscript
 {
@@ -162,14 +163,14 @@ namespace chaiscript
 			{
 				using namespace CCLib;
 				m->add(user_type<ManualSegmentationTools>(), "ManualSegmentationTools");
-				m->add(fun(static_cast<ReferenceCloud*(*)(GenericIndexedCloudPersist*, const CCLib::Polyline*, bool, const float* )> (&ManualSegmentationTools::segment)), "segment");
+				m->add(fun(static_cast<ReferenceCloud*(*)(GenericIndexedCloudPersist*, const CCLib::Polyline*, bool, const float* )> (&ManualSegmentationTools::segment)), "segment"); //TODO Add Default Params
 				m->add(fun(&ManualSegmentationTools::segmentReferenceCloud), "segmentReferenceCloud");
-				m->add(fun(static_cast<ReferenceCloud*(*)(GenericIndexedCloudPersist*, ScalarType, ScalarType, bool)> (&ManualSegmentationTools::segment)), "segment");
+				m->add(fun(static_cast<ReferenceCloud*(*)(GenericIndexedCloudPersist*, ScalarType, ScalarType, bool)> (&ManualSegmentationTools::segment)), "segment"); //TODO Add Default Params
 				m->add(fun(static_cast<bool(*)(const CCVector2&, const GenericIndexedCloud*)> (&ManualSegmentationTools::isPointInsidePoly)), "isPointInsidePoly");
 				m->add(fun(static_cast<bool(*)(const CCVector2&, const std::vector<CCVector2>&)> (&ManualSegmentationTools::isPointInsidePoly)), "isPointInsidePoly");
-				m->add(fun(&ManualSegmentationTools::segmentMesh), "segmentMesh");
-				m->add(fun(&ManualSegmentationTools::segmentMeshWithAAPlane), "segmentMeshWithAAPlane");
-				m->add(fun(&ManualSegmentationTools::segmentMeshWithAABox), "segmentMeshWithAABox");
+				m->add(fun(&ManualSegmentationTools::segmentMesh), "segmentMesh");//TODO Add Default Params
+				m->add(fun(&ManualSegmentationTools::segmentMeshWithAAPlane), "segmentMeshWithAAPlane");//TODO Add Default Params
+				m->add(fun(&ManualSegmentationTools::segmentMeshWithAABox), "segmentMeshWithAABox"); //TODO Add Default Params
 				
 				m->add(user_type<ManualSegmentationTools::MeshCutterParams>(), "MeshCutterParams");
 				m->add(constructor<ManualSegmentationTools::MeshCutterParams()>(), "MeshCutterParams");
@@ -208,6 +209,46 @@ namespace chaiscript
 				return m;
 			}
 
+			ModulePtr bs_ScalarFieldTools(ModulePtr m = std::make_shared<Module>())
+			{
+				using namespace CCLib;
+
+				m->add(user_type<KMeanClass>(), "KMeanClass");
+				m->add(fun(&KMeanClass::mean), "mean");
+				m->add(fun(&KMeanClass::minValue), "minValue");
+				m->add(fun(&KMeanClass::maxValue), "maxValue");
+				
+
+				m->add(fun(&ScalarFieldTools::computeMeanScalarValue), "computeMeanScalarValue");
+				m->add(fun(&ScalarFieldTools::computeMeanSquareScalarValue), "computeMeanSquareScalarValue");
+				m->add(fun(&ScalarFieldTools::computeScalarFieldGradient), "computeScalarFieldGradient");
+				m->add(fun([](GenericIndexedCloudPersist* a, PointCoordinateType b, bool c, bool d, GenericProgressCallback* e) { return ScalarFieldTools::computeScalarFieldGradient(a, b, c, d, e); }), "computeScalarFieldGradient");
+				m->add(fun([](GenericIndexedCloudPersist* a, PointCoordinateType b, bool c, bool d) { return ScalarFieldTools::computeScalarFieldGradient(a, b, c, d); }), "computeScalarFieldGradient");
+				m->add(fun([](GenericIndexedCloudPersist* a, PointCoordinateType b, bool c) { return ScalarFieldTools::computeScalarFieldGradient(a, b, c); }), "computeScalarFieldGradient");
+
+				m->add(fun(&ScalarFieldTools::applyScalarFieldGaussianFilter), "applyScalarFieldGaussianFilter");
+				m->add(fun([](PointCoordinateType a, GenericIndexedCloudPersist* b,  PointCoordinateType c, GenericProgressCallback* d) { return ScalarFieldTools::applyScalarFieldGaussianFilter(a, b, c, d); }), "applyScalarFieldGaussianFilter");
+				m->add(fun([](PointCoordinateType a, GenericIndexedCloudPersist* b,  PointCoordinateType c) { return ScalarFieldTools::applyScalarFieldGaussianFilter(a, b, c); }), "applyScalarFieldGaussianFilter");
+				
+				m->add(fun(&ScalarFieldTools::multiplyScalarFields), "multiplyScalarFields");
+				m->add(fun([](GenericIndexedCloud* a, GenericIndexedCloud* b) { return ScalarFieldTools::multiplyScalarFields(a, b); }), "multiplyScalarFields");
+				
+				m->add(fun(&ScalarFieldTools::computeScalarFieldHistogram), "computeScalarFieldHistogram");
+				m->add(fun(&ScalarFieldTools::computeScalarFieldExtremas), "computeScalarFieldExtremas");
+				m->add(fun(&ScalarFieldTools::countScalarFieldValidValues), "countScalarFieldValidValues");
+				
+				m->add(fun(&ScalarFieldTools::computeKmeans), "computeKmeans");
+				m->add(fun([](const GenericCloud* a, unsigned char b, KMeanClass c[]) { return ScalarFieldTools::computeKmeans(a, b, c); }), "computeKmeans");
+				
+				m->add(fun(&ScalarFieldTools::SetScalarValueToNaN), "SetScalarValueToNaN");
+				m->add(fun(&ScalarFieldTools::SetScalarValueToZero), "SetScalarValueToZero");
+				m->add(fun(&ScalarFieldTools::SetScalarValueInverted), "SetScalarValueInverted");
+
+
+
+				return m;
+			}
+
 
 			ModulePtr bootstrap_static_functions(ModulePtr m = std::make_shared<Module>())
 			{
@@ -219,6 +260,7 @@ namespace chaiscript
 				bs_GeometricalAnalysisTools(m);
 				bs_ManualSegmentationTools(m);
 				bs_StatisticalTestingTools(m);
+				bs_ScalarFieldTools(m);
 				return m;
 			}
 		}

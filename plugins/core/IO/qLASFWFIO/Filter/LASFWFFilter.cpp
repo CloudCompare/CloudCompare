@@ -261,6 +261,7 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 			minPointFormat = LasField::UpdateMinPointFormat(minPointFormat, hasColors, hasFWF, false); //no legacy format with this plugin
 			
 			lasheader.point_data_format = minPointFormat;
+			lasheader.version_minor = LasField::VersionMinorForPointFormat(minPointFormat);
 			lasheader.point_data_record_length = LasField::GetFormatRecordLength(lasheader.point_data_format);
 
 			//FWF descriptors and other parameters

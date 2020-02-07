@@ -263,11 +263,22 @@ int main(int argc, char **argv)
 		{
 			QMessageBox::warning(0, "CC crashed!", "Hum, it seems that CC has crashed... Sorry about that :)");
 		}
+	}
 
-		//release the plugins
-		for ( ccPluginInterface *plugin : ccPluginManager::get().pluginList() )
+	//release the plugins
+	for ( ccPluginInterface *plugin : ccPluginManager::get().pluginList())
+	{
+		try
 		{
 			plugin->stop(); //just in case
+		}
+		catch (const std::exception & e)
+		{
+			QMessageBox::warning(0, QString("%1 - crashed!").arg(plugin->getName()), QString("%1 - crashed while attempting to stop\n%2").arg(plugin->getName()).arg(e.what()));
+		}
+		catch (...)
+		{
+			QMessageBox::warning(0, QString("%1 - crashed!").arg(plugin->getName()), QString("%1 - crashed while attempting to stop\n").arg(plugin->getName()));
 		}
 	}
 

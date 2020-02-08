@@ -218,6 +218,10 @@ struct LasField
 		}
 	}
 
+	static uint8_t VersionMinorForPointFormat(uint8_t pointFormat) {
+		return pointFormat >= 6 ? 4 : 2;
+	}
+
 	static uint8_t UpdateMinPointFormat(uint8_t minPointFormat, bool withRGB, bool withFWF, bool allowLegacyFormats = true)
 	{
 		//can we keep the (short) legacy formats?

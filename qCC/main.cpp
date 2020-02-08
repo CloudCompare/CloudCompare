@@ -26,6 +26,7 @@
 #include <QTime>
 #include <QTimer>
 #include <QTranslator>
+#include <QGamepadManager>
 
 //qCC_db
 #include <ccColorScalesManager.h>
@@ -58,7 +59,6 @@
 
 int main(int argc, char **argv)
 {
-
 #ifdef _WIN32 //This will allow printf to function on windows when opened from command line	
 	DWORD stdout_type = GetFileType(GetStdHandle(STD_OUTPUT_HANDLE));
 	if (AttachConsole(ATTACH_PARENT_PROCESS))
@@ -80,6 +80,10 @@ int main(int argc, char **argv)
 	if ( !commandLine )
 	{
 		ccApplication::initOpenGL();
+
+#ifdef CC_GAMEPADS_SUPPORT
+		QGamepadManager::instance(); //potential workaround to bug https://bugreports.qt.io/browse/QTBUG-61553
+#endif
 	}
 	
 	ccApplication app(argc, argv, commandLine);

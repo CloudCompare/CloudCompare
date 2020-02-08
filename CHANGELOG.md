@@ -133,6 +133,7 @@ v2.11 (Anoia) - (in development)
       - The interface name changed from `ccGLFilterPluginInterface` to `ccGLPluginInterface`.
   - CC will now handle external matrices (loaded or input via the 'Edit > Apply Transformation' tool) with a 16th component different than 0
     (this 16th component will be considered as the inverse scale)
+  - Attempt to improve gamepads detection/connection
 
 - Bug fix:
 	- LAS classification flags were not always properly extracted/saved by the standard LAS filter (depending on the point format)

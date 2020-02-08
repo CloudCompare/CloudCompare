@@ -26,7 +26,9 @@
 #include <QTime>
 #include <QTimer>
 #include <QTranslator>
+#ifdef CC_GAMEPADS_SUPPORT
 #include <QGamepadManager>
+#endif
 
 //qCC_db
 #include <ccColorScalesManager.h>

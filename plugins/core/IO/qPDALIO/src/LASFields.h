@@ -107,7 +107,7 @@ struct LasField
 	//! Default constructor
 	LasField(LAS_FIELDS fieldType = LAS_INVALID, double defaultVal = 0, double min = 0.0, double max = -1.0, uint8_t _minPointFormat = 0)
 		: type(fieldType)
-		, sf(0)
+		, sf(nullptr)
 		, firstValue(0.0)
 		, minValue(min)
 		, maxValue(max)
@@ -291,6 +291,22 @@ struct LasField
 		}
 
 		return minPointFormat;
+	}
+
+	static QString SanitizeString(QString str)
+	{
+		QString sanitizedStr;
+		if (str.size() > 32)
+		{
+			sanitizedStr = str.left(32);
+		}
+		else
+		{
+			sanitizedStr = str;
+		}
+		sanitizedStr.replace('=', '_');
+
+		return sanitizedStr;
 	}
 
 	LAS_FIELDS type;

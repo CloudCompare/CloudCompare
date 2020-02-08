@@ -66,6 +66,33 @@ using namespace pdal;
 
 static const char s_LAS_SRS_Key[] = "LAS.spatialReference.nosave"; //DGM: added the '.nosave' suffix because this custom type can't be streamed properly
 
+//! Custom ("Extra bytes") field (EVLR)
+struct ExtraLasField : LasField
+{
+	//! Default constructor
+	ExtraLasField(QString name, Id id, double defaultVal = 0.0, double min = 0.0, double max = -1.0)
+		: LasField(LAS_EXTRA, defaultVal, min, max)
+		, fieldName(SanitizeString(name))
+		, pdalId(id)
+		, scale(1.0)
+		, offset(0.0)
+	{
+		if (fieldName != name)
+		{
+			ccLog::Warning(QString("Extra field '%1' renamed '%2' to comply to LAS specifications").arg(name).arg(fieldName));
+		}
+	}
+
+	typedef QSharedPointer<ExtraLasField> Shared;
+
+	inline QString getName() const override { return fieldName; }
+
+	QString fieldName;
+	Id pdalId;
+	double scale;
+	double offset;
+};
+
 //! LAS Save dialog
 class LASSaveDlg : public QDialog, public Ui::SaveLASFileDialog
 {
@@ -77,7 +104,6 @@ public:
 		setupUi(this);
 		clearEVLRs();
 	}
-
 
 	void clearEVLRs()
 	{
@@ -131,28 +157,6 @@ bool LASFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) con
 	}
 	return false;
 }
-
-//! Custom ("Extra bytes") field
-struct ExtraLasField : LasField
-{
-	//! Default constructor
-	ExtraLasField(QString name, Id id, double defaultVal = 0.0, double min = 0.0, double max = -1.0)
-	    : LasField(LAS_EXTRA, defaultVal, min, max)
-	    , fieldName(name)
-	    , pdalId(id)
-	    , scale(1.0)
-	    , offset(0.0)
-	{}
-
-	typedef QSharedPointer<ExtraLasField> Shared;
-
-	inline QString getName() const override { return fieldName; }
-
-	QString fieldName;
-	Id pdalId;
-	double scale;
-	double offset;
-};
 
 //! Semi persistent save dialog
 QSharedPointer<LASSaveDlg> s_saveDlg(nullptr);
@@ -255,7 +259,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 			auto pos = std::find_if(fieldsToSave.begin(), fieldsToSave.end(), name_matches);
 			if (pos == fieldsToSave.end())
 			{
-				auto *extraField = new ExtraLasField(QString(sf->getName()), Id::Unknown);
+				ExtraLasField::Shared extraField(new ExtraLasField(QString(sf->getName()), Id::Unknown));
 				extraFields.emplace_back(extraField);
 				extraFields.back()->sf = sf;
 			}

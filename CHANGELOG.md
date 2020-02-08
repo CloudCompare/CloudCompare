@@ -97,6 +97,10 @@ v2.11 (Anoia) - (in development)
 		- CC will try to keep the previous one, or use the bounding-box min corner ONLY if the coordinates are too large
 		- CC won't use the previous scale if it is too small for the current cloud
 		- the 'optimal' scale is simpler (round values + the same for all dimensions)
+	- the LAS 1.3/1.4 filter (Windows only) has been improved:
+		- option to save any scalar field as extra bytes (and load extra bytes as scalar fields)
+		- proper minor version setting
+		- proper header size
   - ASCII files:
 	- CloudCompare can now load ASCII files with mixed whitespaces (spaces / tabs)
 	- the ASCII load dialog option has now an option to load numerical values with a comma as digit separator

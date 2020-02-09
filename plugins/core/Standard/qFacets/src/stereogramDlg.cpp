@@ -76,7 +76,7 @@ public:
 };
 
 StereogramWidget::StereogramWidget(QWidget *parent)
-	: QLabel("",parent)
+	: QLabel(QString(), parent)
 	, m_angularStep_deg(0)
 	, m_densityGrid(0)
 	, m_meanDipDir_deg(-1.0)
@@ -90,7 +90,7 @@ StereogramWidget::StereogramWidget(QWidget *parent)
 	, m_clickDipDir_deg(0.0)
 	, m_clickDipSpan_deg(30.0)
 	, m_clickDipDirSpan_deg(30.0)
-	, m_center(0,0)
+	, m_center(0, 0)
 	, m_radius(0)
 {
 	setVisible(true);
@@ -591,7 +591,7 @@ StereogramDialog::StereogramDialog(ccMainAppInterface* app/*=0*/)
 		ccColorScalesManager* csManager = m_app->getColorScalesManager();
 		m_colorScaleSelector = new ccColorScaleSelector(csManager, this, QString::fromUtf8(":/CC/plugin/qFacets/images/gearIcon.png"));
 		m_colorScaleSelector->init();
-		ccColorScale::Shared scale = csManager->getDefaultScale(ccColorScalesManager::BGYR);
+		ccColorScale::Shared scale = csManager->getDefaultScale(ccColorScalesManager::HIGH_CONTRAST);
 		if (scale)
 		{
 			m_colorScaleSelector->setSelectedScale(scale->getUuid());

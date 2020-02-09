@@ -32,6 +32,11 @@ v2.11 (Anoia) - (in development)
 		- Computes 1st order moment on all opened clouds and auto saved by default.
     - NORMALS_TO_DIP: converts the loaded cloud normals to dip and dip direction (scalar fields)
 	- NORMALS_TO_SFS: converts the loaded cloud normals to 3 scalar fields (Nx, Ny and Nz)
+  - 4 new default color scales:
+	- Brown > Yellow 
+	- Yellow > Brown
+	- Topo Landserf
+	- High contrast
 
 - Improvements
   - Better support for High DPI screens (4K) on Windows
@@ -88,8 +93,6 @@ v2.11 (Anoia) - (in development)
 	- new (argentinian) Spanish translation
   - M3C2:
 	- the computation speed should be improved when using a small projection radius (smarter selection of the octree level)
-  - Others:
-    - CC now saves the radius (parameter) after computing normals (as meta-data associated to the cloud)
   - LAS files:
 	- the standard LAS Filter now handles the OVERLAP classification bit (for point format >= 6)
 	- improved/fixed management of classification and classification flags
@@ -121,6 +124,9 @@ v2.11 (Anoia) - (in development)
   - SBF files
     - format slightly updated to accomodate with scalar fields 'shift' (backward compatibiltiy maintained)
 	- format descritpion is here: https://www.cloudcompare.org/doc/wiki/index.php?title=SBF
+  - Others:
+    - CC now saves the radius (parameter) after computing normals (as meta-data associated to the cloud)
+	- The Stereogram tool of the Facets plugin now uses the new 'High contrast' color scale by default
 
 - Changes
   - Command line tool:

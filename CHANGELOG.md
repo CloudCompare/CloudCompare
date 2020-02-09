@@ -106,8 +106,9 @@ v2.11 (Anoia) - (in development)
 	- the ASCII load dialog option has now an option to load numerical values with a comma as digit separator
 		('use comma as decimal character' checkbox)
   - E57 files:
-    - Sensors are now automatically created below each scan (if a sensor position is defined in the file)
+    - sensors are now automatically created below each scan (if a sensor position is defined in the file)
 	    (they can be used to orient the normals for instance)
+    - after loading an E57 file, the scan (sensor) origin and orientation is stored as meta-data and should be properly restored and saved when exporting the scan(s) back to E57
   - Unroll
 	- ability to set the start and stop angles for the cone unrolling options
 	- new unrolling mode: 'Straightened cone' (the previous one has been renamed 'Straightened cone (fixed radius)'). This new mode unrolls the cone as a cylinder but with a varying radius.
@@ -117,8 +118,10 @@ v2.11 (Anoia) - (in development)
   - Stereo mode updated:
 	- New stereo mode (Generic stereo display) to handle more stereo displays (PluraView, etc.)
 	- New stereo parameters (screen/display size, distance to screen, and eye separation)
-  - E57 files:
-    - after loading an E57 file, the scan (sensor) origin and orientation is stored as meta-data and should be properly restored and saved when exporting the scan(s) back to E57
+  - SBF files
+    - format slightly updated to accomodate with scalar fields 'shift' (backward compatibiltiy maintained)
+	- format descritpion is here: https://www.cloudcompare.org/doc/wiki/index.php?title=SBF
+
 - Changes
   - Command line tool:
     - The `-FBX_EXPORT_FMT` command is now split. Use `-FBX -EXPORT_FMT`.

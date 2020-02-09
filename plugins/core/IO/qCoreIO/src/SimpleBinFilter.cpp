@@ -114,6 +114,15 @@ CC_FILE_ERROR SimpleBinFilter::saveToFile(ccHObject* root, const QString& filena
 				QStringList tokens;
 				tokens << sfName;
 
+				ccScalarField* sf = static_cast<ccScalarField*>(cloud->getScalarField(i));
+
+				//global shift
+				if (sf && sf->getGlobalShift() != 0.0)
+				{
+					tokens << "s=" + QString::number(sf->getGlobalShift(), 'f', 12);
+				}
+
+				//precision
 				QString precisionKey = QString("{%1}.precision").arg(sfName);
 				if (cloud->hasMetaData(precisionKey))
 				{
@@ -121,7 +130,7 @@ CC_FILE_ERROR SimpleBinFilter::saveToFile(ccHObject* root, const QString& filena
 					double precision = cloud->getMetaData(precisionKey).toDouble(&ok);
 					if (ok)
 					{
-						tokens << QString::number(precision, 'f', 12);
+						tokens << "p=" + QString::number(precision, 'f', 12);
 					}
 				}
 
@@ -236,6 +245,7 @@ struct SFDescriptor
 {
 	QString name;
 	double precision = std::numeric_limits<double>::quiet_NaN();
+	double shift = 0.0;
 	ccScalarField* sf = nullptr;
 };
 
@@ -364,13 +374,30 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(const QString& filename, ccHObject& cont
 				if (!tokens.empty())
 				{
 					descriptor.SFs[i].name = tokens[0];
-					if (tokens.size() > 1)
+					for (int k = 1; k < tokens.size(); ++k)
 					{
-						descriptor.SFs[i].precision = tokens[1].toDouble(&ok);
-						if (!ok)
+						QString token = tokens[k];
+						if (token.startsWith("s="))
 						{
-							ccLog::Error(QString("[SBF] Invalid %1 description (precision)").arg(key));
-							return CC_FERR_MALFORMED_FILE;
+							token = token.mid(2);
+							double shift = token.toDouble(&ok);
+							if (!ok)
+							{
+								ccLog::Error(QString("[SBF] Invalid %1 description (shift)").arg(key));
+								return CC_FERR_MALFORMED_FILE;
+							}
+							descriptor.SFs[i].shift = shift;
+						}
+						else
+						{
+							if (token.startsWith("p="))
+								token = token.mid(2);
+							descriptor.SFs[i].precision = token.toDouble(&ok);
+							if (!ok)
+							{
+								ccLog::Error(QString("[SBF] Invalid %1 description (precision)").arg(key));
+								return CC_FERR_MALFORMED_FILE;
+							}
 						}
 					}
 				}
@@ -507,6 +534,12 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(const QString& filename, ccHObject& cont
 			sfDesc.sf = nullptr;
 			return CC_FERR_NOT_ENOUGH_MEMORY;
 		}
+
+		if (sfDesc.shift != 0)
+		{
+			sfDesc.sf->setGlobalShift(sfDesc.shift);
+		}
+
 		cloud->addScalarField(sfDesc.sf);
 
 		//for now we save the 'precision' info as meta-data of the cloud

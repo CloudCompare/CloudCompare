@@ -121,7 +121,7 @@ void ccGraphicalTransformationTool::advModeToggle(bool state)
 	int wPrev = this->width();
 	if (state)
 	{
-		this->setGeometry(this->x() + (-wPrev + 200), this->y(), 200, 225);
+		this->setGeometry(this->x() + (-wPrev + 250), this->y(), 250, 225);
 		if (advTranslateComboBox->currentIndex() != 0)
 		{
 			TxCheckBox->setEnabled(false);
@@ -136,7 +136,7 @@ void ccGraphicalTransformationTool::advModeToggle(bool state)
 		TyCheckBox->setEnabled(true);
 		this->setGeometry(this->x() , this->y(), 0, 0);
 		this->adjustSize(); //adjust size will minimize the display height with the dropdowns not visible
-		this->setGeometry(this->x() + (wPrev - 200), this->y(), 200, this->height());
+		this->setGeometry(this->x() + (wPrev - 250), this->y(), 250, this->height());
 		advRotateRefUpdate(0); //index 0 is always the origin
 		advTranslateRefUpdate(0); //index 0 is always the origin
 	}
@@ -626,15 +626,20 @@ void ccGraphicalTransformationTool::stop(bool state)
 
 void ccGraphicalTransformationTool::glTranslate(const CCVector3d& realT)
 {
-	CCVector3d t(	realT.x * (TxCheckBox->isChecked() ? 1 : 0),
-					realT.y * (TyCheckBox->isChecked() ? 1 : 0),
-					realT.z * (TzCheckBox->isChecked() ? 1 : 0));
-
+	CCVector3d mouseMove = realT;
+	if (m_advMode)
+	{
+		m_advTranslationTransform.inverse().applyRotation(mouseMove);
+	}
+	CCVector3d t(	mouseMove.x * (TxCheckBox->isChecked() ? 1 : 0),
+					mouseMove.y * (TyCheckBox->isChecked() ? 1 : 0),
+					mouseMove.z * (TzCheckBox->isChecked() ? 1 : 0));
+		
 	if (m_advMode)
 	{
 		m_advTranslationTransform.applyRotation(t);
 	}
-		
+
 	if (t.norm2() != 0)
 	{
 		m_translation += t;

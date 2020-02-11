@@ -22,6 +22,9 @@
 #include <chaiscript/chaiscript.hpp>
 #include <chaiscript/utility/utility.hpp>
 
+#include <ccGLUtils.h>
+#include <ccRenderingTools.h>
+
 
 namespace chaiscript
 {
@@ -32,12 +35,33 @@ namespace chaiscript
 			namespace qCC_glWindow
 			{
 
+				ModulePtr bs_ccGLUtils(ModulePtr m = std::make_shared<Module>())
+				{
 
+					m->add(fun(static_cast<void(*)(QImage, int, int, int, int, unsigned char)>(&ccGLUtils::DisplayTexture2DPosition)), "DisplayTexture2DPosition");
+					m->add(fun(static_cast<void(*)(QImage, int, int, unsigned char)>(&ccGLUtils::DisplayTexture2D)), "DisplayTexture2D");
+					m->add(fun(static_cast<void(*)(GLuint, int, int, int, int, unsigned char)>(&ccGLUtils::DisplayTexture2DPosition)), "DisplayTexture2DPosition");
+					m->add(fun(static_cast<void(*)(GLuint, int, int, unsigned char)>(&ccGLUtils::DisplayTexture2D)), "DisplayTexture2D");
+
+					m->add(fun(&ccGLUtils::GenerateViewMat), "GenerateViewMat");
+					return m;
+				}
+
+				ModulePtr bs_ccRenderingTools(ModulePtr m = std::make_shared<Module>())
+				{
+					m->add(fun(&ccRenderingTools::ShowDepthBuffer), "ShowDepthBuffer");
+					m->add(fun([](ccGBLSensor* a, QWidget* b) {ccRenderingTools::ShowDepthBuffer(a, b); }), "ShowDepthBuffer");
+					m->add(fun([](ccGBLSensor* a) {ccRenderingTools::ShowDepthBuffer(a); }), "ShowDepthBuffer");
+					m->add(fun(static_cast<void(*)(const CC_DRAW_CONTEXT&)>(&ccRenderingTools::DrawColorRamp)), "DrawColorRamp");
+					m->add(fun(static_cast<void(*)(const CC_DRAW_CONTEXT&, const ccScalarField*, ccGLWindow*, int, int, float)>(&ccRenderingTools::DrawColorRamp)), "DrawColorRamp");
+					return m;
+				}
 
 
 				ModulePtr bootstrap_static_functions(ModulePtr m = std::make_shared<Module>())
 				{
-
+					bs_ccGLUtils(m);
+					bs_ccRenderingTools(m);
 					return m;
 				}
 			}

@@ -26,6 +26,7 @@
 
 #include "chaiscript_math.hpp"
 #include "chaiscript_string_methods.hpp"
+#include <qobject.h>
 
 
 namespace chaiscript
@@ -54,6 +55,14 @@ namespace chaiscript
 				return m;
 			}
 
+			ModulePtr bs_QObject(ModulePtr m = std::make_shared<Module>())
+			{
+				m->add(user_type<QObject>(), "QObject");
+				m->add(fun(static_cast<QMetaObject::Connection(*)(const QObject*, const char*, const QObject*, const char*, Qt::ConnectionType)>(&QObject::connect)), "connect");
+				//m->add(fun(static_cast<QMetaObject::Connection(*)(const QObject*, const QMetaMethod&, const QObject*, const QMetaMethod&, Qt::ConnectionType)>(&QObject::connect)), "connect");
+				
+				return m;
+			}
 			
 			ModulePtr bs_QChar(ModulePtr m = std::make_shared<Module>())
 			{

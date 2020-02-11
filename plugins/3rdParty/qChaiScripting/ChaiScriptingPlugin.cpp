@@ -42,6 +42,7 @@ ChaiScriptingPlugin::ChaiScriptingPlugin( QObject *parent )
 {
 	if (!s_instance)
 	{
+		qAddPostRoutine([]() {ChaiScriptingPlugin::TheInstance()->destroyChai(); });
 		s_instance = this;
 	}
 }
@@ -93,19 +94,19 @@ void ChaiScriptingPlugin::setupChaiScriptEngine()
 				systemBootstrap = chaiscript::cloudCompare::bootstrapSystem::bootstrap();
 			}
 			chai->add(systemBootstrap);
-
+			if (m_app)
+			{
+				chai->add_global(var(m_app), "m_app");
+			}
 			chai->add(user_type<CommandCHAIDerived>(), "CommandCHAIDerived");
 			chai->add(constructor< CommandCHAIDerived(const QString&, const QString&)>(), "CommandCHAIDerived");
 			chai->add(fun(&CommandCHAIDerived::chai_process), "chai_process");
 			chai->add_global(var(this), "chaiScriptingPlugin");
 			chai->add(fun(&ChaiScriptingPlugin::registerCommand), "registerCommand");
-			if (m_app)
-			{
-				chai->add_global(var(m_app), "m_app");
-			}
+			
 
 			chai->add(fun(&ChaiScriptingPlugin::dispToConsole), "dispToConsole");
-
+			chai->add(fun(&ChaiScriptingPlugin::chai_onNewSelection), "chai_onNewSelection");
 			chai->add(chaiscript::fun(&throws_exception), "throws_exception");
 			chai->add(chaiscript::fun(&get_eval_error), "get_eval_error");
 			chai->eval(R"(global print = fun(x){chaiScriptingPlugin.dispToConsole(x.to_string(),0);})");
@@ -115,17 +116,18 @@ void ChaiScriptingPlugin::setupChaiScriptEngine()
 			chaiInitialState = chai->get_state();
 		}
 	}
-	catch (const chaiscript::exception::eval_error & ee) {
-		m_app->dispToConsole(ee.what(), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		if (ee.call_stack.size() > 0) {
-			m_app->dispToConsole(QString("during evaluation at (%1, %2)").arg(ee.call_stack[0]->start().line).arg(ee.call_stack[0]->start().column), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-			//std::cout << "during evaluation at (" << ee.call_stack[0]->start().line << ", " << ee.call_stack[0]->start().column << ")";
+	catch (const chaiscript::exception::eval_error & ee)
+	{
+		ccLog::Error(ee.what());
+		if (ee.call_stack.size() > 0)
+		{
+			ccLog::Warning(QString("during evaluation at (%1, %2)").arg(ee.call_stack[0]->start().line).arg(ee.call_stack[0]->start().column));
 		}
 		std::cout << std::endl;
 	}
-	catch (const std::exception & e) {
-		m_app->dispToConsole(e.what(), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-
+	catch (const std::exception & e)
+	{
+		ccLog::Error(e.what());
 	}
 
 }
@@ -171,7 +173,6 @@ void ChaiScriptingPlugin::executionCalled(const std::string& evalStatement)
 	catch (const std::exception & e)
 	{
 		ccLog::Error(e.what());
-
 	}
 }
 
@@ -269,13 +270,11 @@ bool ChaiScriptingPlugin::loadChaiFile(const QString& file)
 			ccLog::Warning(QString("during evaluation at (%1, %2)").arg(ee.call_stack[0]->start().line).arg(ee.call_stack[0]->start().column));
 		}
 		std::cout << std::endl;
-		destroyChai();
 		return false;
 	}
 	catch (const std::exception & e)
 	{
 		ccLog::Error(e.what());
-		destroyChai();
 		return false;
 	}
 	return true;
@@ -303,6 +302,11 @@ QList<QAction *> ChaiScriptingPlugin::getActions()
 	return { m_action };
 }
 
+void ChaiScriptingPlugin::stop()
+{
+	destroyChai();
+}
+
 void ChaiScriptingPlugin::openScriptEditor()
 {
 	
@@ -326,7 +330,7 @@ void ChaiScriptingPlugin::openScriptEditor()
 }
 
 void ChaiScriptingPlugin::registerCommands(ccCommandLineInterface* cmd)
-{
+{	
 	if (!cmd)
 	{
 		assert(false);
@@ -339,10 +343,7 @@ void ChaiScriptingPlugin::registerCommands(ccCommandLineInterface* cmd)
 	storedCMDLine = cmd;
 	chai->add_global(var(cmd), "m_cmd");
 	chai->eval(R"(global print = fun(x){m_cmd.print(x.to_QString());})");
-	cmd->arguments().append(QString("-%1").arg(COMMAND_CHAIKILL));
-	cmd->registerCommand(ccCommandLineInterface::Command::Shared(new CommandCHAI()));
-	cmd->registerCommand(ccCommandLineInterface::Command::Shared(new CommandCHAIKILL()));
-	
+	cmd->registerCommand(ccCommandLineInterface::Command::Shared(new CommandCHAI()));	
 }
 
 void ChaiScriptingPlugin::registerCommand(CommandCHAIDerived newCmd)
@@ -358,6 +359,38 @@ void ChaiScriptingPlugin::registerCommand(CommandCHAIDerived newCmd)
 		{
 			ccLog::Error("registerCommand Failed");
 		}
+	}
+}
+
+void ChaiScriptingPlugin::onNewSelection(const ccHObject::Container& selectedEntities)
+{
+	if (chai_onNewSelection)
+	{
+		std::vector<std::shared_ptr<ccHObject>> sel;
+		try
+		{
+			for each (auto objectName in selectedEntities)
+			{
+				ccHObject test = ccHObject(*objectName);
+				sel.push_back(std::shared_ptr<ccHObject>());
+
+			}
+			chai_onNewSelection(sel);
+		}
+		catch (const chaiscript::exception::eval_error & ee)
+		{
+			ccLog::Error(ee.what());
+			if (ee.call_stack.size() > 0)
+			{
+				ccLog::Warning(QString("during evaluation at (%1, %2)").arg(ee.call_stack[0]->start().line).arg(ee.call_stack[0]->start().column));
+			}
+			std::cout << std::endl;
+		}
+		catch (const std::exception & e)
+		{
+			ccLog::Error(e.what());
+		}
+		
 	}
 }
 

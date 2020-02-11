@@ -44,36 +44,26 @@ public:
 	~ChaiScriptingPlugin();// override = default;
 
 	QList<QAction *> getActions() override;
+	virtual void stop() override;
 	virtual void registerCommands(ccCommandLineInterface* cmd) override;
 
 	struct CommandCHAI : public ccCommandLineInterface::Command
 	{
-		CommandCHAI() : ccCommandLineInterface::Command(COMMAND_CHAI, COMMAND_CHAI) {}
+		CommandCHAI() : ccCommandLineInterface::Command("ChaiScript file evaluator", COMMAND_CHAI) {}
 
 		virtual bool process(ccCommandLineInterface& cmd) override
 		{
 			cmd.print(QString("[%1]").arg(COMMAND_CHAI));
 			if (cmd.arguments().empty())
 			{
-				return cmd.error(QString("Missing parameter: parameters filename after \"-%1\"").arg(COMMAND_CHAI));
+				ChaiScriptingPlugin::TheInstance()->destroyChai();
+				return cmd.error(QString("Missing parameter: script filename after \"-%1\"").arg(COMMAND_CHAI));
 			}
 
 			//open specified file
 			QString paramFilename(cmd.arguments().takeFirst());
-			cmd.print(QString("Parameters file: '%1'").arg(paramFilename));
+			cmd.print(QString("Script file: '%1'").arg(paramFilename));
 			return ChaiScriptingPlugin::TheInstance()->loadChaiFile(paramFilename);
-		}
-	};
-
-	struct CommandCHAIKILL : public ccCommandLineInterface::Command
-	{
-		CommandCHAIKILL() : ccCommandLineInterface::Command(COMMAND_CHAIKILL, COMMAND_CHAIKILL) {}
-
-		virtual bool process(ccCommandLineInterface& cmd) override
-		{
-			cmd.print(QString("[%1]").arg(COMMAND_CHAIKILL));
-			ChaiScriptingPlugin::TheInstance()->destroyChai();
-			return true;
 		}
 	};
 
@@ -95,17 +85,22 @@ public:
 			}
 			else
 			{
-				cmd.print(QString("[%1] chai_process is not implemented in script").arg(m_keyword));
+				cmd.error(QString("[%1] chai_process is not implemented in script").arg(m_keyword));
+				ChaiScriptingPlugin::TheInstance()->destroyChai();
 				return false;
 			}
 		}
 	};
 
+
 	void setupChaiScriptEngine();
 	void destroyChai();
 	bool loadChaiFile(const QString& file);
 	void registerCommand(CommandCHAIDerived newCmd);
-
+	void onNewSelection(const ccHObject::Container& selectedEntities) override;
+	//std::function<void(const ccHObject::Container&)> chai_onNewSelection;
+	std::function<void(std::vector<std::shared_ptr<ccHObject>>)> chai_onNewSelection;
+	
 private:
 
 	void openScriptEditor();

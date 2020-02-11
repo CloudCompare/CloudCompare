@@ -281,9 +281,20 @@ void ccPluginUIManager::handleSelectionChanged()
 	{
 		if ( plugin->getType() == CC_STD_PLUGIN )
 		{
-			ccStdPluginInterface	*stdPlugin = static_cast<ccStdPluginInterface *>(plugin);
-			
-			stdPlugin->onNewSelection( selectedEntities );
+			try
+			{
+				ccStdPluginInterface* stdPlugin = static_cast<ccStdPluginInterface*>(plugin);
+
+				stdPlugin->onNewSelection(selectedEntities);
+			}
+			catch (const std::exception& e)
+			{
+				ccLog::Error(QString("%1 - Plugin has caused an exception\n%2").arg(plugin->getName()).arg(e.what()));
+			}
+			catch (...)
+			{
+				ccLog::Error(QString("%1 - Plugin has caused an unknown exception\n").arg(plugin->getName()));
+			}
 		}
 	}
 }

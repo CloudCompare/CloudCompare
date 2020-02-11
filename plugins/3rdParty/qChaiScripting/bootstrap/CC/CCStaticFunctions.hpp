@@ -39,9 +39,9 @@ namespace chaiscript
 	{
 		namespace CC
 		{
-			using namespace CCLib;
 			ModulePtr bs_DistanceComputationTools(ModulePtr m = std::make_shared<Module>())
 			{
+				using namespace CCLib;
 				m->add(fun(&DistanceComputationTools::computeCloud2CloudDistance), "computeCloud2CloudDistance");
 				m->add(fun(&DistanceComputationTools::computeCloud2MeshDistance), "computeCloud2MeshDistance");
 				m->add(fun(&DistanceComputationTools::computeApproxCloud2CloudDistance), "computeApproxCloud2CloudDistance");
@@ -69,6 +69,7 @@ namespace chaiscript
 			
 			ModulePtr bs_CCMiscTools(ModulePtr m = std::make_shared<Module>())
 			{
+				using namespace CCLib;
 				m->add(fun(&CCMiscTools::EnlargeBox), "EnlargeBox");
 				m->add(fun(&CCMiscTools::MakeMinAndMaxCubical), "MakeMinAndMaxCubical");
 				m->add(fun(static_cast<void(*)(const CCVector3&,CCVector3&,	CCVector3&)>(&CCMiscTools::ComputeBaseVectors)), "ComputeBaseVectors");
@@ -82,6 +83,7 @@ namespace chaiscript
 
 			ModulePtr bs_AutoSegmentationTools(ModulePtr m = std::make_shared<Module>())
 			{
+				using namespace CCLib;
 				m->add(user_type<ReferenceCloudContainer>(), "ReferenceCloudContainer");
 				m->add(fun(&AutoSegmentationTools::labelConnectedComponents), "labelConnectedComponents");
 				m->add(fun([](GenericIndexedCloudPersist* theCloud, unsigned char l) {return AutoSegmentationTools::labelConnectedComponents(theCloud, l); }), "labelConnectedComponents");
@@ -100,6 +102,7 @@ namespace chaiscript
 
 			ModulePtr bs_CloudSamplingTools(ModulePtr m = std::make_shared<Module>())
 			{
+				using namespace CCLib;
 				m->add(user_type<CloudSamplingTools::SFModulationParams>(), "SFModulationParams");
 				m->add(constructor<CloudSamplingTools::SFModulationParams(bool)>(), "SFModulationParams");
 				m->add(fun(&CloudSamplingTools::SFModulationParams::enabled), "enabled");
@@ -125,6 +128,7 @@ namespace chaiscript
 
 			ModulePtr bs_ErrorFunction(ModulePtr m = std::make_shared<Module>())
 			{
+				using namespace CCLib;
 				m->add(fun(&ErrorFunction::erfc), "ErrorFunction_erfc");
 				m->add(fun(&ErrorFunction::erf), "ErrorFunction_erf");
 				return m;
@@ -132,6 +136,7 @@ namespace chaiscript
 
 			ModulePtr bs_GeometricalAnalysisTools(ModulePtr m = std::make_shared<Module>())
 			{
+				using namespace CCLib;
 				m->add(fun(&GeometricalAnalysisTools::ComputeCharactersitic), "ComputeCharactersitic");
 				m->add(fun([](GeometricalAnalysisTools::GeomCharacteristic a, int b, GenericIndexedCloudPersist* c, PointCoordinateType d, GenericProgressCallback* e) {return GeometricalAnalysisTools::ComputeCharactersitic(a, b, c, d, e); }), "ComputeCharactersitic");
 				m->add(fun([](GeometricalAnalysisTools::GeomCharacteristic a, int b, GenericIndexedCloudPersist* c, PointCoordinateType d) {return GeometricalAnalysisTools::ComputeCharactersitic(a, b, c, d); }), "ComputeCharactersitic");

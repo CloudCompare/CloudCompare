@@ -89,8 +89,11 @@ protected slots:
 	//! Updates the transform for advanced mode rotation when rotate ref changed
 	void advRotateRefUpdate(int index);
 
-	//! Updates the axis center of rotation in adv rotate/translate mode
-	void advAxisRefChanged(bool state);
+	//! Updates the axis center of rotation to the ref object in adv rotate/translate mode
+	void advRefAxisCenter(bool state);
+
+	//! Updates the axis center of rotation to the object center in adv rotate/translate mode
+	void advObjectCenterAxis(bool state);
 
 	//! Updates the top center display message according to the mode
 	void updateDisplayMessage();

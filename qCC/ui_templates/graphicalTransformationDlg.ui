@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>250</width>
-    <height>225</height>
+    <height>235</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -369,36 +369,29 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_7">
      <item>
-      <widget class="QGroupBox" name="groupBox">
-       <property name="title">
-        <string/>
+      <widget class="QRadioButton" name="objCenterRadio">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
-       <widget class="QRadioButton" name="refAxisRadio">
-        <property name="geometry">
-         <rect>
-          <x>90</x>
-          <y>0</y>
-          <width>91</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Reference Axis</string>
-        </property>
-       </widget>
-       <widget class="QRadioButton" name="objCenterRadio">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>91</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Object Center</string>
-        </property>
-       </widget>
+       <property name="text">
+        <string>Object Center</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="refAxisRadio">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Reference Axis</string>
+       </property>
       </widget>
      </item>
     </layout>

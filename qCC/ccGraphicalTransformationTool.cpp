@@ -43,8 +43,8 @@ ccGraphicalTransformationTool::ccGraphicalTransformationTool(QWidget* parent)
 	connect(advPushButton, &QPushButton::toggled, this, &ccGraphicalTransformationTool::advModeToggle);
 	connect(advTranslateComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccGraphicalTransformationTool::advTranslateRefUpdate);
 	connect(advRotateComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccGraphicalTransformationTool::advRotateRefUpdate);
-	connect(refAxisRadio, &QRadioButton::toggled, this, &ccGraphicalTransformationTool::advAxisRefChanged);
-
+	connect(refAxisRadio, &QRadioButton::toggled, this, &ccGraphicalTransformationTool::advRefAxisCenter);
+	connect(objCenterRadio, &QRadioButton::toggled, this, &ccGraphicalTransformationTool::advObjectCenterAxis);
 	//add shortcuts
 	addOverridenShortcut(Qt::Key_Space); //space bar for the "pause" button
 	addOverridenShortcut(Qt::Key_Escape); //escape key for the "cancel" button
@@ -116,12 +116,11 @@ void ccGraphicalTransformationTool::advModeToggle(bool state)
 	rotAxisLabel->setVisible(state);
 	objCenterRadio->setVisible(state);
 	refAxisRadio->setVisible(state);
-	groupBox->setVisible(state);
 	m_advMode = state;
 	int wPrev = this->width();
 	if (state)
 	{
-		this->setGeometry(this->x() + (-wPrev + 250), this->y(), 250, 225);
+		this->setGeometry(this->x() + (-wPrev + 250), this->y(), 250, 235);
 		if (advTranslateComboBox->currentIndex() != 0)
 		{
 			TxCheckBox->setEnabled(false);
@@ -467,9 +466,22 @@ void ccGraphicalTransformationTool::advRotateRefUpdate(int index)
 	advRotateRefUpdate(0);
 }
 
-void ccGraphicalTransformationTool::advAxisRefChanged(bool state)
+void ccGraphicalTransformationTool::advRefAxisCenter(bool state)
 {
-	advRotateRefUpdate(advRotateComboBox->currentIndex()); //force an update
+	if (state)
+	{
+		advRotateRefUpdate(advRotateComboBox->currentIndex()); //force an update
+		objCenterRadio->setChecked(false);
+	}
+}
+
+void ccGraphicalTransformationTool::advObjectCenterAxis(bool state)
+{
+	if (state)
+	{
+		advRotateRefUpdate(advRotateComboBox->currentIndex()); //force an update
+		refAxisRadio->setChecked(false);
+	}
 }
 
 void ccGraphicalTransformationTool::clear()

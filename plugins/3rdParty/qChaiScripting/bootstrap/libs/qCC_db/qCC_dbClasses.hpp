@@ -86,6 +86,7 @@
 #include <ccColorScalesManager.h>
 
 
+
 namespace chaiscript
 {
 	namespace cloudCompare
@@ -133,16 +134,16 @@ namespace chaiscript
 				ModulePtr bs_ccHObject(ModulePtr m = std::make_shared<Module>())
 				{
 					m->add(chaiscript::user_type<ccHObject>(), "ccHObject");
-					m->add(chaiscript::user_type<ccHObject*>(), "ccHObject");
-					m->add(chaiscript::user_type<ccHObject&>(), "ccHObject");
+					//m->add(chaiscript::user_type<ccHObject*>(), "ccHObject");
+					//m->add(chaiscript::user_type<ccHObject&>(), "ccHObject");
 					m->add(chaiscript::constructor<ccHObject(const QString&)>(), "ccHObject");
 					m->add(chaiscript::constructor<ccHObject(const ccHObject&)>(), "ccHObject");
 					m->add(fun(&ccHObject::GetCurrentDBVersion), "GetCurrentDBVersion");
 					m->add(fun(&ccHObject::SetUniqueIDGenerator), "SetUniqueIDGenerator");
 					m->add(fun(&ccHObject::GetUniqueIDGenerator), "GetUniqueIDGenerator");
 					m->add(fun(&ccHObject::getClassID), "getClassID");
-					m->add(fun(&ccHObject::getName), "getName");
-					m->add(fun(&ccHObject::setName), "setName");
+					//m->add(fun(&ccHObject::getName), "getName");
+					//m->add(fun(&ccHObject::setName), "setName");
 					m->add(fun(&ccHObject::getUniqueID), "getUniqueID");
 					m->add(fun(&ccHObject::setUniqueID), "setUniqueID");
 					m->add(fun(&ccHObject::isEnabled), "isEnabled");
@@ -181,10 +182,19 @@ namespace chaiscript
 					m->add(fun(&ccHObject::getChildCountRecursive), "getChildCountRecursive");
 					m->add(fun(&ccHObject::getChild), "getChild");
 					m->add(fun(&ccHObject::find), "find");
-					m->add(chaiscript::user_type<ccHObject::Container>(), "Container");
+					//m->add(chaiscript::user_type<ccHObject::Container>(), "Container");
+					m->add(chaiscript::vector_conversion<ccHObject::Container>());
+					m->add(chaiscript::bootstrap::standard_library::vector_type<ccHObject::Container>("Container"));
+					m->add(chaiscript::bootstrap::standard_library::vector_type<std::vector<std::shared_ptr<ccHObject>>>("ContainerSTDShare"));
+					
 					m->add(chaiscript::user_type<ccHObject::Shared>(), "Shared");
 					m->add(chaiscript::user_type<ccHObject::SharedContainer>(), "SharedContainer");
+					m->add(chaiscript::vector_conversion<ccHObject::SharedContainer>());
 					m->add(fun(&ccHObject::filterChildren), "filterChildren");
+					m->add(fun([](ccHObject* obj, ccHObject::Container& a, bool b, CC_CLASS_ENUM c, bool d) {return obj->filterChildren(a,b,c,d); }), "filterChildren");
+					m->add(fun([](ccHObject* obj, ccHObject::Container& a, bool b, CC_CLASS_ENUM c) {return obj->filterChildren(a, b, c); }), "filterChildren");
+					m->add(fun([](ccHObject* obj, ccHObject::Container& a, bool b) {return obj->filterChildren(a, b); }), "filterChildren");
+					m->add(fun([](ccHObject* obj, ccHObject::Container& a) {return obj->filterChildren(a); }), "filterChildren");
 					m->add(fun(&ccHObject::detachChild), "detachChild");
 					m->add(fun(&ccHObject::detatchAllChildren), "detatchAllChildren");
 					m->add(fun(static_cast<void(ccHObject::*)(ccHObject*)>(&ccHObject::removeChild)), "removeChild");
@@ -1502,8 +1512,8 @@ namespace chaiscript
 					m->add(fun(&ccPlane::SetUniqueIDGenerator), "SetUniqueIDGenerator");
 					m->add(fun(&ccPlane::GetUniqueIDGenerator), "GetUniqueIDGenerator");
 					m->add(fun(&ccPlane::getClassID), "getClassID");
-					m->add(fun(&ccPlane::getName), "getName");
-					m->add(fun(&ccPlane::setName), "setName");
+					//m->add(fun(&ccPlane::getName), "getName");
+					//m->add(fun(&ccPlane::setName), "setName");
 					m->add(fun(&ccPlane::getUniqueID), "getUniqueID");
 					m->add(fun(&ccPlane::setUniqueID), "setUniqueID");
 					m->add(fun(&ccPlane::isEnabled), "isEnabled");
@@ -3356,9 +3366,9 @@ namespace chaiscript
 
 				ModulePtr bs_ccViewportParameters(ModulePtr m = std::make_shared<Module>())
 				{
-					m->add(chaiscript::user_type<ccViewportParameters>(), "ccViewportParameters");
-					m->add(chaiscript::constructor<ccViewportParameters()>(), "ccViewportParameters");
-					m->add(chaiscript::constructor<ccViewportParameters(const ccViewportParameters&)>(), "ccViewportParameters");
+					m->add(user_type<ccViewportParameters>(), "ccViewportParameters");
+					m->add(constructor<ccViewportParameters()>(), "ccViewportParameters");
+					m->add(constructor<ccViewportParameters(const ccViewportParameters&)>(), "ccViewportParameters");
 					m->add(fun(&ccViewportParameters::isSerializable), "isSerializable");
 					m->add(fun(&ccViewportParameters::toFile), "toFile");
 					m->add(fun(&ccViewportParameters::fromFile), "fromFile");
@@ -3379,14 +3389,16 @@ namespace chaiscript
 					m->add(fun(&ccViewportParameters::orthoAspectRatio), "orthoAspectRatio");
 					m->add(fun(&ccViewportParameters::IncrementToZNearCoef), "IncrementToZNearCoef");
 					m->add(fun(&ccViewportParameters::ZNearCoefToIncrement), "ZNearCoefToIncrement");
+
+					m->add(chaiscript::base_class<ccSerializableObject, ccViewportParameters>());
+
 					return m;
 				}
 
 				ModulePtr bs_ccGLCameraParameters(ModulePtr m = std::make_shared<Module>())
 				{
-					m->add(chaiscript::user_type<ccGLCameraParameters>(), "ccGLCameraParameters");
-					m->add(chaiscript::constructor<ccGLCameraParameters()>(), "ccGLCameraParameters");
-					
+					m->add(user_type<ccGLCameraParameters>(), "ccGLCameraParameters");
+					m->add(constructor<ccGLCameraParameters()>(), "ccGLCameraParameters");
 					m->add(fun(static_cast<bool(ccGLCameraParameters::*)(const CCVector3d&, CCVector3d&, bool)const>(&ccGLCameraParameters::project)), "project");
 					m->add(fun(static_cast<bool(ccGLCameraParameters::*)(const CCVector3&, CCVector3d&, bool)const>(&ccGLCameraParameters::project)), "project");
 					m->add(fun(static_cast<bool(ccGLCameraParameters::*)(const CCVector3d&, CCVector3d&)const>(&ccGLCameraParameters::unproject)), "unproject");
@@ -3397,14 +3409,12 @@ namespace chaiscript
 					m->add(fun(&ccGLCameraParameters::perspective), "perspective");
 					m->add(fun(&ccGLCameraParameters::fov_deg), "fov_deg");
 					m->add(fun(&ccGLCameraParameters::pixelSize), "pixelSize");
-					
 					return m;
 				}
 
-
 				ModulePtr bs_ccGenericGLDisplay(ModulePtr m = std::make_shared<Module>())
 				{
-					m->add(chaiscript::user_type<ccGenericGLDisplay>(), "ccGenericGLDisplay");
+					m->add(user_type<ccGenericGLDisplay>(), "ccGenericGLDisplay");
 
 					m->add(fun(&ccGenericGLDisplay::getScreenSize), "getScreenSize");
 					m->add(fun(&ccGenericGLDisplay::redraw), "redraw");
@@ -3415,14 +3425,23 @@ namespace chaiscript
 					m->add(fun(&ccGenericGLDisplay::getTextDisplayFont), "getTextDisplayFont");
 					m->add(fun(&ccGenericGLDisplay::getLabelDisplayFont), "getLabelDisplayFont");
 					m->add(fun(&ccGenericGLDisplay::displayText), "displayText");
+					m->add(fun([](ccGenericGLDisplay* obj, QString a, int b, int c, unsigned char d, float e, const unsigned char* f) {obj->displayText(a, b, c, d, e, f); }), "displayText");
+					m->add(fun([](ccGenericGLDisplay* obj, QString a, int b, int c, unsigned char d, float e) {obj->displayText(a, b, c, d, e); }), "displayText");
+					m->add(fun([](ccGenericGLDisplay* obj, QString a, int b, int c, unsigned char d) {obj->displayText(a, b, c, d); }), "displayText");
+					m->add(fun([](ccGenericGLDisplay* obj, QString a, int b, int c) {obj->displayText(a, b, c); }), "displayText");
 					m->add(fun(&ccGenericGLDisplay::display3DLabel), "display3DLabel");
+					m->add(fun([](ccGenericGLDisplay* obj, const QString& a, const CCVector3& b, const unsigned char* c) {obj->display3DLabel(a, b, c); }), "display3DLabel");
+					m->add(fun([](ccGenericGLDisplay* obj, const QString& a, const CCVector3& b) {obj->display3DLabel(a, b); }), "display3DLabel");
 					m->add(fun(&ccGenericGLDisplay::getGLCameraParameters), "getGLCameraParameters");
 					m->add(fun(&ccGenericGLDisplay::toCenteredGLCoordinates), "toCenteredGLCoordinates");
 					m->add(fun(&ccGenericGLDisplay::toCornerGLCoordinates), "toCornerGLCoordinates");
 					m->add(fun(&ccGenericGLDisplay::getViewportParameters), "getViewportParameters");
 					m->add(fun(&ccGenericGLDisplay::setupProjectiveViewport), "setupProjectiveViewport");
+					m->add(fun([](ccGenericGLDisplay* obj, const ccGLMatrixd& a, float b, float c, bool d) {obj->setupProjectiveViewport(a, b, c, d); }), "setupProjectiveViewport");
+					m->add(fun([](ccGenericGLDisplay* obj, const ccGLMatrixd& a, float b, float c) {obj->setupProjectiveViewport(a, b, c); }), "setupProjectiveViewport");
+					m->add(fun([](ccGenericGLDisplay* obj, const ccGLMatrixd& a, float b) {obj->setupProjectiveViewport(a, b); }), "setupProjectiveViewport");
+					m->add(fun([](ccGenericGLDisplay* obj, const ccGLMatrixd& a) {obj->setupProjectiveViewport(a); }), "setupProjectiveViewport");
 					m->add(fun(&ccGenericGLDisplay::asWidget), "asWidget");
-
 
 					return m;
 				}
@@ -3529,7 +3548,7 @@ namespace chaiscript
 					m->add(chaiscript::user_type<ccColor::Generator>(), "Generator");
 					m->add(fun(&ccColor::Generator::Random), "Random");
 
-					m->add(chaiscript::user_type<ccColor::Convert>(), "Convert");
+					//m->add(chaiscript::user_type<ccColor::Convert>(), "Convert");
 					m->add(fun(&ccColor::Convert::hsl2rgb), "hsl2rgb");
 					m->add(fun(&ccColor::Convert::hsv2rgb), "hsv2rgb");
 
@@ -3668,7 +3687,6 @@ namespace chaiscript
 
 				
 
-
 				template<typename T>
 				ModulePtr bs_ccSingleton(const std::string& shortCutName, ModulePtr m = std::make_shared<Module>())
 				{
@@ -3795,7 +3813,6 @@ namespace chaiscript
 					bs_ccFlags(m);
 					bs_ccFileUtils(m);
 					bs_ccDepthBuffer(m);
-					bs_ccColor(m);
 					bs_ccColor(m);
 					bs_ccColorScalesManager(m);
 					bs_ccColorScaleElement(m);

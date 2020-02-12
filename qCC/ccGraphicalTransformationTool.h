@@ -62,8 +62,11 @@ public:
 	//! Sets the rotation center
 	void setRotationCenter(CCVector3d& center);
 
-	//! Calculates the transform for translating along an arbitrary vector
-	ccGLMatrixd getArbitraryVectorTranslationTransform(const CCVector3& vec);
+	//! Returns the transform for translating along an arbitrary vector
+	ccGLMatrixd arbitraryVectorTranslation(const CCVector3& vec);
+
+	//! Returns the transform for rotation around an arbitrary vector
+	ccGLMatrixd arbitraryVectorRotation(double angle, const CCVector3d&);
 
 
 protected slots:
@@ -90,10 +93,10 @@ protected slots:
 	void advRotateRefUpdate(int index);
 
 	//! Updates the axis center of rotation to the ref object in adv rotate/translate mode
-	void advRefAxisCenter(bool state);
+	void advRefAxisRadioToggled(bool state);
 
 	//! Updates the axis center of rotation to the object center in adv rotate/translate mode
-	void advObjectCenterAxis(bool state);
+	void advObjectAxisRadioToggled(bool state);
 
 	//! Updates the top center display message according to the mode
 	void updateDisplayMessage();
@@ -124,8 +127,17 @@ protected:
 	//! Sets the rotation transform used in advaced translate/rotate mode
 	bool setAdvRotationAxis(ccHObject* rotateRef);
 
+	//! Check if the entitry is in m_toTransform
+	bool entityInTransformList(ccHObject* entity);
+
 	//! Flag for advanced mode
 	bool m_advMode;
+
+	//! Flag if the rotation reference object is in m_toTransform
+	bool m_advRotateRefIsChild;
+
+	//! Flag if the translate reference object is in m_toTransform
+	bool m_advTranslateRefIsChild;
 
 	//! List of entities to be transformed
 	ccHObject m_toTransform;

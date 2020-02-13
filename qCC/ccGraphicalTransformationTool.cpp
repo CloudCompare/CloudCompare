@@ -211,11 +211,11 @@ ccGLMatrixd ccGraphicalTransformationTool::arbitraryVectorTranslation(const CCVe
 		theta = std::atan(vec.y / vec.z);
 		if (vec.y < 0 && vec.z < 0)
 		{
-			theta = M_PI + theta;
+			theta = theta - M_PI;
 		}
 		else if (vec.z < 0 && vec.y > 0)
 		{
-			theta = M_PI_2 - theta;
+			theta = M_PI + theta;
 		}
 	}
 
@@ -239,7 +239,7 @@ ccGLMatrixd ccGraphicalTransformationTool::arbitraryVectorTranslation(const CCVe
 	{
 		phi = std::atan(vec.x / phiDenominator);
 	}
-
+	
 
 	ccGLMatrixd xRotation = ccGLMatrixd();
 	xRotation.setColumn(1, CCVector3d(0, std::cos(theta), -std::sin(theta)));

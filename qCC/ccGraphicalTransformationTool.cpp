@@ -856,7 +856,8 @@ void ccGraphicalTransformationTool::updateAllGLTransformations()
 		else if (m_advTranslateRef->isA(CC_TYPES::POLY_LINE))
 		{
 			ccPolyline* line = static_cast<ccPolyline*>(m_advTranslateRef);
-			m_advTranslationTransform = m_position * arbitraryVectorTranslation(*line->getPoint(1) - *line->getPoint(0));
+			CCVector3 arbitraryVec = line->getGLTransformation() * (*line->getPoint(1) - *line->getPoint(0));
+			m_advTranslationTransform = m_position * arbitraryVectorTranslation(arbitraryVec);
 		}
 	}
 	

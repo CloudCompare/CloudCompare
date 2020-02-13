@@ -531,8 +531,12 @@ void ccGraphicalTransformationTool::advRotateRefUpdate(int index)
 					mainWindow->db()->unselectEntity(m_advRotateRef);
 				}
 				m_advRotateRef = m_planesAndLineSegments[i];
-				m_advRotateRefIsChild = entityInTransformList(m_advRotateRef);
+				if (m_advTranslateRef != m_advRotateRef) // already selected
+				{
+					mainWindow->db()->selectEntity(m_advRotateRef, true);
+				}
 				refAxisRadio->setEnabled(true);
+				m_advRotateRefIsChild = entityInTransformList(m_advRotateRef);
 				if (m_advRotateRefIsChild)
 				{
 					refAxisRadio->setChecked(true);
@@ -541,10 +545,6 @@ void ccGraphicalTransformationTool::advRotateRefUpdate(int index)
 				else
 				{
 					objCenterRadio->setEnabled(true);
-				}
-				if (m_advTranslateRef != m_advRotateRef) // already selected
-				{
-					mainWindow->db()->selectEntity(m_advRotateRef, true);
 				}
 			}
 			if (!setAdvRotationAxis(m_advRotateRef))
@@ -584,6 +584,21 @@ void ccGraphicalTransformationTool::clear()
 	m_rotation.toIdentity();
 	m_translation = CCVector3d(0,0,0);
 	m_rotationCenter = CCVector3d(0,0,0);
+}
+
+void ccGraphicalTransformationTool::clearAdvModeEntities()
+{
+	MainWindow* mainWindow = MainWindow::TheInstance();
+	if (mainWindow && m_advTranslateRef != nullptr && m_associatedWin)
+	{
+		mainWindow->db()->unselectEntity(m_advTranslateRef);
+		m_advTranslateRef = nullptr;
+	}
+	if (mainWindow && m_advRotateRef != nullptr && m_associatedWin)
+	{
+		mainWindow->db()->unselectEntity(m_advRotateRef);
+		m_advRotateRef = nullptr;
+	}
 }
 
 bool ccGraphicalTransformationTool::addEntity(ccHObject* entity)
@@ -834,7 +849,15 @@ void ccGraphicalTransformationTool::updateAllGLTransformations()
 	if (m_advTranslateRefIsChild && m_advTranslateRef != nullptr) 
 	{
 		//update m_advTranslationTransform if the ref object is translated/rotated by virtue of being in m_toTransform
-		m_advTranslationTransform = m_position * ccGLMatrixd(m_advTranslateRef->getGLTransformationHistory().data());
+		if (m_advTranslateRef->isA(CC_TYPES::PLANE))
+		{
+			m_advTranslationTransform = m_position * ccGLMatrixd(m_advTranslateRef->getGLTransformationHistory().data());
+		}
+		else if (m_advTranslateRef->isA(CC_TYPES::POLY_LINE))
+		{
+			ccPolyline* line = static_cast<ccPolyline*>(m_advTranslateRef);
+			m_advTranslationTransform = m_position * arbitraryVectorTranslation(*line->getPoint(1) - *line->getPoint(0));
+		}
 	}
 	
 	MainWindow::RefreshAllGLWindow(false);
@@ -905,6 +928,8 @@ void ccGraphicalTransformationTool::apply()
 		}
 	}
 
+	clearAdvModeEntities();
+
 	stop(true);
 
 	clear();
@@ -931,15 +956,7 @@ void ccGraphicalTransformationTool::cancel()
 		child->prepareDisplayForRefresh_recursive();
 	}
 
-	MainWindow* mainWindow = MainWindow::TheInstance();
-	if (mainWindow && m_advTranslateRef != nullptr)
-	{
-		mainWindow->db()->unselectEntity(m_advTranslateRef);
-	}
-	if (mainWindow && m_advRotateRef != nullptr)
-	{
-		mainWindow->db()->unselectEntity(m_advRotateRef);
-	}
+	clearAdvModeEntities();
 
 	stop(false);
 

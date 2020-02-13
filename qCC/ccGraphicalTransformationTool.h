@@ -47,6 +47,9 @@ public:
 	virtual bool start() override;
 	virtual void stop(bool state) override;
 
+	//! unselect all advanced mode references
+	void ccGraphicalTransformationTool::clearAdvModeEntities();
+
 	//! Adds an entity to the 'selected' entities set
 	/** Only the 'selected' entities are moved.
 		\return success, if the entity is eligible for graphical transformation

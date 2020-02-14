@@ -44,6 +44,7 @@ chaiScriptCodeEditorMainWindow::chaiScriptCodeEditorMainWindow() : Ui::chaiScrip
 
 	readSettings();
 	newFile();
+	QCoreApplication::instance()->installEventFilter(this);
 }
 
 void chaiScriptCodeEditorMainWindow::closeEvent(QCloseEvent* event)
@@ -58,6 +59,7 @@ void chaiScriptCodeEditorMainWindow::closeEvent(QCloseEvent* event)
 		emit destroy_chai();
 		writeSettings();
 		event->accept();
+		QCoreApplication::instance()->removeEventFilter(this);
 	}
 }
 
@@ -216,6 +218,30 @@ void chaiScriptCodeEditorMainWindow::openRecentFile()
 	}
 }
 
+bool chaiScriptCodeEditorMainWindow::eventFilter(QObject* obj, QEvent* e)
+{
+	switch (e->type()) 
+	{
+		case QEvent::Shortcut: 
+		{
+			QShortcutEvent* sev = static_cast<QShortcutEvent*>(e);
+			if (sev->isAmbiguous()) 
+			{
+				foreach(const auto & action, actions())
+				{
+					if (action->shortcut() == sev->key())
+					{
+						action->trigger(); // Trigger the action that matches the ambigous shortcut event.
+						return true;
+					}
+				}
+			}
+		}
+		default: break;
+	}
+	return false;
+}
+
 void chaiScriptCodeEditorMainWindow::save()
 {
 	if (activeChildCodeEditor() && activeChildCodeEditor()->save())
@@ -301,6 +327,10 @@ void chaiScriptCodeEditorMainWindow::createActions()
 	connect(actionOpen, &QAction::triggered, this, &chaiScriptCodeEditorMainWindow::open);
 	connect(actionSave_As, &QAction::triggered, this, &chaiScriptCodeEditorMainWindow::saveAs);
 	connect(actionRun, &QAction::triggered, this, &chaiScriptCodeEditorMainWindow::runExecute);
+	connect(actionClose, &QAction::triggered, this, [=]() {close(); });
+	
+
+	
 	connect(actionSave_Chai_state, &QAction::triggered, this, [=]() { emit save_Chai_state(); });
 	connect(actionReset_Chai_to_initial_state, &QAction::triggered, this, [=]() { emit reset_Chai_to_initial_state(); });
 	connect(actionReset_chai_to_last_save, &QAction::triggered, this, [=]() { emit reset_chai_to_last_save(); });
@@ -378,6 +408,16 @@ void chaiScriptCodeEditorMainWindow::createActions()
 	QAction* aboutAct = helpMenu->addAction(tr("&About"), this, &chaiScriptCodeEditorMainWindow::about);
 	aboutAct->setStatusTip(tr("Show the application's About box"));
 
+	addAction(actionNew); //Actions must be added to be able to find shortcuts in event filter
+	addAction(actionSave);
+	addAction(actionOpen);
+	addAction(actionSave_As);
+	addAction(actionRun);
+	addAction(actionClose);
+	addAction(actionComment);
+	addAction(actionUncomment);
+	addAction(actionIndent_More);
+	addAction(actionIndent_Less);
 
 }
 
@@ -405,6 +445,11 @@ void chaiScriptCodeEditorMainWindow::updateMenus()
 	nextAct->setEnabled(hasChildCodeEditor);
 	previousAct->setEnabled(hasChildCodeEditor);
 	windowMenuSeparatorAct->setVisible(hasChildCodeEditor);
+	actionComment->setEnabled(hasChildCodeEditor);
+	actionUncomment->setEnabled(hasChildCodeEditor);
+	actionIndent_More->setEnabled(hasChildCodeEditor);
+	actionIndent_Less->setEnabled(hasChildCodeEditor);
+
 
 #ifndef QT_NO_CLIPBOARD
 	action_Paste->setEnabled(hasChildCodeEditor);
@@ -524,7 +569,7 @@ void chaiScriptCodeEditorMainWindow::runExecute()
 {
 	if (activeChildCodeEditor())
 	{
-		emit executionCalled(activeChildCodeEditor()->toPlainText().toUtf8().constData());
+		emit executionCalled(qPrintable(activeChildCodeEditor()->userFriendlyCurrentFile()), qPrintable(activeChildCodeEditor()->toPlainText()));
 	}
 }
 

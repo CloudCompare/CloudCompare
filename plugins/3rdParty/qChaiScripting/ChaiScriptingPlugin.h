@@ -106,7 +106,7 @@ private:
 	void openScriptEditor();
 	void dispToConsole(const std::string &str, const int lvl);
 
-	void executionCalled(const std::string& evalStatement);
+	void executionCalled(const std::string& evalFileName, const std::string& evalStatement);
 	void resetToDefaultChaiState();
 	void saveChaiState();
 	void resetToSavedChaiState();

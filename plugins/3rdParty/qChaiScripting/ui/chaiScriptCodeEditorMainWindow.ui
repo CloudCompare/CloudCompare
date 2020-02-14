@@ -312,6 +312,9 @@
    <property name="text">
     <string>Comment</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+K, Ctrl+C</string>
+   </property>
   </action>
   <action name="actionUncomment">
    <property name="icon">
@@ -320,6 +323,9 @@
    </property>
    <property name="text">
     <string>Uncomment</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+K, Ctrl+U</string>
    </property>
   </action>
   <action name="actionIndent_More">

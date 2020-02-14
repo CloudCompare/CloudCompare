@@ -155,11 +155,11 @@ void ChaiScriptingPlugin::dispToConsole(const std::string &str,const int lvl)
 
 
 
-void ChaiScriptingPlugin::executionCalled(const std::string& evalStatement)
+void ChaiScriptingPlugin::executionCalled(const std::string& evalFileName, const std::string& evalStatement)
 {
 	try
 	{
-		chai->eval(evalStatement);
+		chai->eval(evalStatement, nullptr, evalFileName);
 	}
 	catch (const chaiscript::exception::eval_error & ee)
 	{

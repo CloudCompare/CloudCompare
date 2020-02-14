@@ -55,7 +55,7 @@ public:
 protected:
 	void closeEvent(QCloseEvent* event) override;
 signals:
-	void executionCalled(const std::string &evalStatement);
+	void executionCalled(const std::string& evalFileName, const std::string &evalStatement);
 	void reset_Chai_to_initial_state();
 	void save_Chai_state();
 	void reset_chai_to_last_save();
@@ -69,6 +69,7 @@ protected slots:
 	void saveAs();
 	void updateRecentFileActions();
 	void openRecentFile();
+	bool eventFilter(QObject* obj, QEvent* e) override;
 #ifndef QT_NO_CLIPBOARD
 	void cut();
 	void copy();

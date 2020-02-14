@@ -25,6 +25,7 @@
 //Qt
 #include <QAction>
 #include <QMainWindow>
+#include <QGuiApplication>
 #include <QMenu>
 
 ccGamepadManager::ccGamepadManager( ccMainAppInterface *appInterface, QObject *parent )
@@ -82,29 +83,41 @@ void ccGamepadManager::enableDevice(bool state, bool silent, int deviceID/*=-1*/
 			
 			if (deviceID < 0)
 			{
+				ccLog::Print("[Gamepad] Looking for connected gamepads...");
 				QList<int> gamepads;
-				for (int i = 0; i < 4; ++i)
+				for (int i = 0; i < 3; ++i)
 				{
-					m_gamepadInput->setDeviceId(i);
-					if (m_gamepadInput->isConnected())
+					QGuiApplication::processEvents();
+					gamepads = manager->connectedGamepads();
+					if (!gamepads.empty())
 					{
-						gamepads.push_back(i);
+						break;
 					}
 				}
+
 				if (gamepads.empty())
 				{
 					showMessage("[Gamepad] No device registered", silent);
 					state = false;
 					break;
 				}
-				deviceID = gamepads[0];
+				else
+				{
+					ccLog::Print(QString("[Gamepad] Found %1 gamepad(s)").arg(gamepads.size()));
+				}
+				deviceID = gamepads.front();
 				if (!silent && gamepads.size() > 1)
 				{
 					//ask the user for the right gamepad
-					ccPickOneElementDlg poeDlg("Gamepad", "Connected gamepads", m_appInterface ? m_appInterface->getMainWindow() : 0);
+					ccPickOneElementDlg poeDlg("Gamepad", "Connected gamepads", m_appInterface ? m_appInterface->getMainWindow() : nullptr);
 					for (int id : gamepads)
 					{
-						poeDlg.addElement(QString("%1 (%2)").arg(QGamepad(id).name()).arg(manager->isGamepadConnected(id) ? "ON" : "OFF"));
+						QString name = QGamepad(id).name();
+						if (name.isEmpty())
+						{
+							name = QString("Gamepad #%1").arg(id);
+						}
+						poeDlg.addElement(name);
 					}
 					if (!poeDlg.exec())
 					{

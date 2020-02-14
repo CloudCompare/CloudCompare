@@ -32,6 +32,11 @@ v2.11 (Anoia) - (in development)
 		- Computes 1st order moment on all opened clouds and auto saved by default.
     - NORMALS_TO_DIP: converts the loaded cloud normals to dip and dip direction (scalar fields)
 	- NORMALS_TO_SFS: converts the loaded cloud normals to 3 scalar fields (Nx, Ny and Nz)
+  - 4 new default color scales:
+	- Brown > Yellow 
+	- Yellow > Brown
+	- Topo Landserf
+	- High contrast
 
 - Improvements
   - Better support for High DPI screens (4K) on Windows
@@ -88,8 +93,6 @@ v2.11 (Anoia) - (in development)
 	- new (argentinian) Spanish translation
   - M3C2:
 	- the computation speed should be improved when using a small projection radius (smarter selection of the octree level)
-  - Others:
-    - CC now saves the radius (parameter) after computing normals (as meta-data associated to the cloud)
   - LAS files:
 	- the standard LAS Filter now handles the OVERLAP classification bit (for point format >= 6)
 	- improved/fixed management of classification and classification flags
@@ -97,13 +100,18 @@ v2.11 (Anoia) - (in development)
 		- CC will try to keep the previous one, or use the bounding-box min corner ONLY if the coordinates are too large
 		- CC won't use the previous scale if it is too small for the current cloud
 		- the 'optimal' scale is simpler (round values + the same for all dimensions)
+	- the LAS 1.3/1.4 filter (Windows only) has been improved:
+		- option to save any scalar field as extra bytes (and load extra bytes as scalar fields)
+		- proper minor version setting
+		- proper header size
   - ASCII files:
 	- CloudCompare can now load ASCII files with mixed whitespaces (spaces / tabs)
 	- the ASCII load dialog option has now an option to load numerical values with a comma as digit separator
 		('use comma as decimal character' checkbox)
   - E57 files:
-    - Sensors are now automatically created below each scan (if a sensor position is defined in the file)
+    - sensors are now automatically created below each scan (if a sensor position is defined in the file)
 	    (they can be used to orient the normals for instance)
+    - after loading an E57 file, the scan (sensor) origin and orientation is stored as meta-data and should be properly restored and saved when exporting the scan(s) back to E57
   - Unroll
 	- ability to set the start and stop angles for the cone unrolling options
 	- new unrolling mode: 'Straightened cone' (the previous one has been renamed 'Straightened cone (fixed radius)'). This new mode unrolls the cone as a cylinder but with a varying radius.
@@ -113,8 +121,13 @@ v2.11 (Anoia) - (in development)
   - Stereo mode updated:
 	- New stereo mode (Generic stereo display) to handle more stereo displays (PluraView, etc.)
 	- New stereo parameters (screen/display size, distance to screen, and eye separation)
-  - E57 files:
-    - after loading an E57 file, the scan (sensor) origin and orientation is stored as meta-data and should be properly restored and saved when exporting the scan(s) back to E57
+  - SBF files
+    - format slightly updated to accomodate with scalar fields 'shift' (backward compatibiltiy maintained)
+	- format descritpion is here: https://www.cloudcompare.org/doc/wiki/index.php?title=SBF
+  - Others:
+    - CC now saves the radius (parameter) after computing normals (as meta-data associated to the cloud)
+	- The Stereogram tool of the Facets plugin now uses the new 'High contrast' color scale by default
+
 - Changes
   - Command line tool:
     - The `-FBX_EXPORT_FMT` command is now split. Use `-FBX -EXPORT_FMT`.
@@ -133,6 +146,7 @@ v2.11 (Anoia) - (in development)
       - The interface name changed from `ccGLFilterPluginInterface` to `ccGLPluginInterface`.
   - CC will now handle external matrices (loaded or input via the 'Edit > Apply Transformation' tool) with a 16th component different than 0
     (this 16th component will be considered as the inverse scale)
+  - Attempt to improve gamepads detection/connection
 
 - Bug fix:
 	- LAS classification flags were not always properly extracted/saved by the standard LAS filter (depending on the point format)
@@ -144,6 +158,8 @@ v2.11 (Anoia) - (in development)
 	- Shapefile: at export time, the SHX file (created next to the SHP file) was malformed (preventing from loading the file in most GIS tools!)
 	             (+ polylines were mistakenly exported as polygons!)
 	- SRS (Spatial Reference System) information could be lost when loading LAS files
+	- The cartesian bounding-box of exported E57 files was wrongly expressed in the file-level coordinate system (instead of the local one)
+	- Data could be lost when merging two clouds with FWF data
 
 v2.10.3 (Zephyrus) - 13/06/2019
 ----------------------

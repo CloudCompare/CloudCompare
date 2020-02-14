@@ -13,7 +13,7 @@ description: |
 icon: snap/gui/cloudcompare.png
 
 grade: stable
-confinement: strict
+confinement: classic
 base: core18
 
 apps:

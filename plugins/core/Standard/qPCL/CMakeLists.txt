@@ -15,6 +15,8 @@ if (PLUGIN_STANDARD_QPCL)
     
     project( QPCL_PLUGIN )
     
+	include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
+
     #documentation
     add_subdirectory(doc)
     

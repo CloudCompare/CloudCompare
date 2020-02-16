@@ -5,6 +5,8 @@ option( PLUGIN_IO_QPHOTOSCAN "Check to install qPhotoscan I/O plugin" OFF )
 # CloudCompare Photoscan I/O plugin
 if (PLUGIN_IO_QPHOTOSCAN)
     
+	include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
+
 	include( src/contrib/QuazipLibSupport.cmake )
 	
 	project( QPHOTOSCAN_IO_PLUGIN )

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-cmake_policy(PUSH)
+set (CC_CMAKE_SCRIPTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 project( CloudCompareProjects )
 
@@ -115,6 +115,3 @@ add_subdirectory( qCC )
 if( ${OPTION_BUILD_CCVIEWER} )
 	add_subdirectory( ccViewer )
 endif()
-
-cmake_policy(POP)
-

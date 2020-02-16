@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
 
-cmake_policy(PUSH)
-
 # Options
 option( COMPILE_CC_CORE_LIB_WITH_QT "Check to compile CC_CORE_LIB with Qt (to enable parallel processing)" ON )
 option( COMPILE_CC_CORE_LIB_WITH_CGAL "Check to compile CC_CORE_LIB with CGAL lib. (to enable Delaunay 2.5D triangulation with a GPL compliant licence)" OFF )
@@ -111,4 +109,3 @@ endif()
 set( CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DCC_DEBUG" )
 set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DCC_DEBUG" )
 
-cmake_policy(POP)

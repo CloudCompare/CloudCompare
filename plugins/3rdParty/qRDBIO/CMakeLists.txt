@@ -6,6 +6,8 @@ option( PLUGIN_IO_QRDB "Check to install RDB 2 I/O plugin" OFF )
 if (PLUGIN_IO_QRDB)
 	project( QRDB_IO_PLUGIN )
 
+	include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
+
 	# find rdb
 	# if not defined globally define path to rdb-config.cmake by settin the
 	# cmake variable rdb_DIR

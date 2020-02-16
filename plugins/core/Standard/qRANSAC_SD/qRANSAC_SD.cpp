@@ -63,32 +63,35 @@
 #include <time.h>
 #endif
 
+static ccMainAppInterface* s_app = nullptr;
+
 qRansacSD::qRansacSD(QObject* parent/*=nullptr*/)
-    : QObject(parent)
-    , ccStdPluginInterface(":/CC/plugin/qRANSAC_SD/info.json")
-    , m_action(nullptr)
+	: QObject(parent)
+	, ccStdPluginInterface(":/CC/plugin/qRANSAC_SD/info.json")
+	, m_action(nullptr)
 {
+	s_app = m_app;
 }
 
 void qRansacSD::onNewSelection(const ccHObject::Container& selectedEntities)
 {
 	if (m_action)
-		m_action->setEnabled(selectedEntities.size()==1 && selectedEntities[0]->isA(CC_TYPES::POINT_CLOUD));
+		m_action->setEnabled(selectedEntities.size() == 1 && selectedEntities[0]->isA(CC_TYPES::POINT_CLOUD));
 }
 
-QList<QAction *> qRansacSD::getActions()
+QList<QAction*> qRansacSD::getActions()
 {
 	//default action
 	if (!m_action)
 	{
-		m_action = new QAction(getName(),this);
+		m_action = new QAction(getName(), this);
 		m_action->setToolTip(getDescription());
 		m_action->setIcon(getIcon());
 		//connect signal
 		connect(m_action, SIGNAL(triggered()), this, SLOT(doAction()));
 	}
 
-	return QList<QAction *>{ m_action };
+	return QList<QAction*>{ m_action };
 }
 
 static MiscLib::Vector< std::pair< MiscLib::RefCountPtr< PrimitiveShape >, size_t > >* s_shapes; // stores the detected shapes
@@ -104,10 +107,10 @@ void doDetection()
 }
 
 //for parameters persistence
-static unsigned s_supportPoints    = 500;	// this is the minimal numer of points required for a primitive
+static unsigned s_supportPoints = 500;	// this is the minimal numer of points required for a primitive
 static double   s_maxNormalDev_deg = 25.0;	// maximal normal deviation from ideal shape (in degrees)
-static double   s_proba            = 0.01;	// probability that no better candidate was overlooked during sampling
-static bool s_primEnabled[5] = {true,true,true,false,false};
+static double   s_proba = 0.01;	// probability that no better candidate was overlooked during sampling
+static bool s_primEnabled[5] = { true,true,true,false,false };
 
 void qRansacSD::doAction()
 {
@@ -117,9 +120,9 @@ void qRansacSD::doAction()
 
 	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
 	size_t selNum = selectedEntities.size();
-	if (selNum!=1)
+	if (selNum != 1)
 	{
-		m_app->dispToConsole("Select only one cloud!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		ccLog::Error("Select only one cloud!");
 		return;
 	}
 
@@ -127,68 +130,19 @@ void qRansacSD::doAction()
 	assert(ent);
 	if (!ent || !ent->isA(CC_TYPES::POINT_CLOUD))
 	{
-		m_app->dispToConsole("Select a real point cloud!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		ccLog::Error("Select a real point cloud!");
 		return;
 	}
 
 	ccPointCloud* pc = static_cast<ccPointCloud*>(ent);
 
 	//input cloud
-	unsigned count = pc->size();
-	bool hasNorms = pc->hasNormals();
 	CCVector3 bbMin, bbMax;
-	pc->getBoundingBox(bbMin,bbMax);
-	const CCVector3d& globalShift = pc->getGlobalShift();
-	double globalScale = pc->getGlobalScale();
+	pc->getBoundingBox(bbMin, bbMax);
+	CCVector3 diff = bbMax - bbMin;
+	float scale = std::max(std::max(diff[0], diff[1]), diff[2]);
 
-	//Convert CC point cloud to RANSAC_SD type
-	PointCloud cloud;
-	{
-		try
-		{
-			cloud.reserve(count);
-		}
-		catch(...)
-		{
-			m_app->dispToConsole("Not enough memory!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-			return;
-		}
-
-		//default point & normal
-		Point Pt;
-		Pt.normal[0] = 0.0;
-		Pt.normal[1] = 0.0;
-		Pt.normal[2] = 0.0;
-		for (unsigned i=0; i<count; ++i)
-		{
-			const CCVector3* P = pc->getPoint(i);
-			Pt.pos[0] = static_cast<float>(P->x);
-			Pt.pos[1] = static_cast<float>(P->y);
-			Pt.pos[2] = static_cast<float>(P->z);
-			if (hasNorms)
-			{
-				const CCVector3& N = pc->getPointNormal(i);
-				Pt.normal[0] = static_cast<float>(N.x);
-				Pt.normal[1] = static_cast<float>(N.y);
-				Pt.normal[2] = static_cast<float>(N.z);
-			}
-			cloud.push_back(Pt);
-		}
-		
-		//manually set bounding box!
-		Vec3f cbbMin,cbbMax;
-		cbbMin[0] = static_cast<float>(bbMin.x);
-		cbbMin[1] = static_cast<float>(bbMin.y);
-		cbbMin[2] = static_cast<float>(bbMin.z);
-		cbbMax[0] = static_cast<float>(bbMax.x);
-		cbbMax[1] = static_cast<float>(bbMax.y);
-		cbbMax[2] = static_cast<float>(bbMax.z);
-		cloud.setBBox(cbbMin,cbbMax);
-	}
-
-	//cloud scale (useful for setting several parameters
-	const float scale = cloud.getScale();
-
+	
 	//init dialog with default values
 	ccRansacSDDlg rsdDlg(m_app->getMainWindow());
 	rsdDlg.epsilonDoubleSpinBox->setValue(.005f * scale);		// set distance threshold to 0.5% of bounding box width
@@ -205,52 +159,134 @@ void qRansacSD::doAction()
 	if (!rsdDlg.exec())
 		return;
 
-	//for parameters persistence
+	RansacParams params;
 	{
-		s_supportPoints = rsdDlg.supportPointsSpinBox->value();
-		s_maxNormalDev_deg = rsdDlg.maxNormDevAngleSpinBox->value();
-		s_proba = rsdDlg.probaDoubleSpinBox->value();
+		params.epsilon = static_cast<float>(rsdDlg.epsilonDoubleSpinBox->value());
+		params.bitmapEpsilon = static_cast<float>(rsdDlg.bitmapEpsilonDoubleSpinBox->value());
+		params.maxNormalDev_deg = static_cast<float>(rsdDlg.maxNormDevAngleSpinBox->value());
+		params.probability = static_cast<float>(rsdDlg.probaDoubleSpinBox->value());
+		params.randomColor = true;
+		params.supportPoints = static_cast<unsigned>(rsdDlg.supportPointsSpinBox->value());
+		params.primEnabled[RPT_PLANE] = rsdDlg.planeCheckBox->isChecked();
+		params.primEnabled[RPT_SPHERE] = rsdDlg.sphereCheckBox->isChecked();
+		params.primEnabled[RPT_CYLINDER] = rsdDlg.cylinderCheckBox->isChecked();
+		params.primEnabled[RPT_CONE] = rsdDlg.coneCheckBox->isChecked();
+		params.primEnabled[RPT_TORUS] = rsdDlg.torusCheckBox->isChecked();
+	}
 
-		//consistency check
+	ccHObject* group = executeRANSAC(pc, params, false);
+	
+
+	if (group)
+	{
+		m_app->addToDB(group);
+		m_app->refreshAll();
+	}
+}
+
+
+ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, RansacParams& params, bool silent)
+{
+	//consistency check
+	{
+		unsigned char primCount = 0;
+		for (unsigned char k = 0; k < 5; ++k)
+			primCount += (unsigned)params.primEnabled[k];
+		if (primCount == 0)
 		{
-			unsigned char primCount = 0;
-			for (unsigned char k=0;k<5;++k)
-				primCount += (unsigned)s_primEnabled[k];
-			if (primCount==0)
-			{
-				m_app->dispToConsole("No primitive type selected!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-				return;
-			}
+			ccLog::Error("[qRansacSD] No primitive type selected!");
+			return nullptr;
+		}
+	}
+	for (unsigned char k = 0; k < 5; ++k)
+	{
+		s_primEnabled[k] = params.primEnabled[k];
+	}
+	s_supportPoints = params.supportPoints;
+	s_maxNormalDev_deg = params.maxNormalDev_deg;
+	s_proba = params.probability;
+	unsigned count = ccPC->size();
+	bool hasNorms = ccPC->hasNormals();
+	CCVector3 bbMin, bbMax;
+	ccPC->getBoundingBox(bbMin, bbMax);
+	const CCVector3d& globalShift = ccPC->getGlobalShift();
+	double globalScale = ccPC->getGlobalScale();
+	PointCloud cloud;
+	{
+		try
+		{
+			cloud.reserve(count);
+		}
+		catch (...)
+		{
+			ccLog::Error("[qRansacSD] Could not create temporary cloud, Not enough memory!");
+			return nullptr;
 		}
 
-		s_primEnabled[0] = rsdDlg.planeCheckBox->isChecked();
-		s_primEnabled[1] = rsdDlg.sphereCheckBox->isChecked();
-		s_primEnabled[2] = rsdDlg.cylinderCheckBox->isChecked();
-		s_primEnabled[3] = rsdDlg.coneCheckBox->isChecked();
-		s_primEnabled[4] = rsdDlg.torusCheckBox->isChecked();
+		//default point & normal
+		Point Pt;
+		Pt.normal[0] = 0.0;
+		Pt.normal[1] = 0.0;
+		Pt.normal[2] = 0.0;
+		for (unsigned i = 0; i < count; ++i)
+		{
+			const CCVector3* P = ccPC->getPoint(i);
+			Pt.pos[0] = static_cast<float>(P->x);
+			Pt.pos[1] = static_cast<float>(P->y);
+			Pt.pos[2] = static_cast<float>(P->z);
+			if (hasNorms)
+			{
+				const CCVector3& N = ccPC->getPointNormal(i);
+				Pt.normal[0] = static_cast<float>(N.x);
+				Pt.normal[1] = static_cast<float>(N.y);
+				Pt.normal[2] = static_cast<float>(N.z);
+			}
+			cloud.push_back(Pt);
+		}
+
+		//manually set bounding box!
+		Vec3f cbbMin, cbbMax;
+		cbbMin[0] = static_cast<float>(bbMin.x);
+		cbbMin[1] = static_cast<float>(bbMin.y);
+		cbbMin[2] = static_cast<float>(bbMin.z);
+		cbbMax[0] = static_cast<float>(bbMax.x);
+		cbbMax[1] = static_cast<float>(bbMax.y);
+		cbbMax[2] = static_cast<float>(bbMax.z);
+		cloud.setBBox(cbbMin, cbbMax);
 	}
 
-	//import parameters from dialog
 	RansacShapeDetector::Options ransacOptions;
 	{
-		ransacOptions.m_epsilon			= static_cast<float>(rsdDlg.epsilonDoubleSpinBox->value());
-		ransacOptions.m_bitmapEpsilon	= static_cast<float>(rsdDlg.bitmapEpsilonDoubleSpinBox->value());
-		ransacOptions.m_normalThresh	= static_cast<float>(cos(rsdDlg.maxNormDevAngleSpinBox->value() * CC_DEG_TO_RAD));
-		assert( ransacOptions.m_normalThresh >= 0 );
-		ransacOptions.m_probability		= static_cast<float>(rsdDlg.probaDoubleSpinBox->value());
-		ransacOptions.m_minSupport		= static_cast<unsigned>(rsdDlg.supportPointsSpinBox->value());
+		ransacOptions.m_epsilon = params.epsilon;
+		ransacOptions.m_bitmapEpsilon = params.bitmapEpsilon;
+		ransacOptions.m_normalThresh = static_cast<float>(cos(params.maxNormalDev_deg * CC_DEG_TO_RAD));
+		assert(ransacOptions.m_normalThresh >= 0);
+		ransacOptions.m_probability = params.probability;
+		ransacOptions.m_minSupport = params.supportPoints;
 	}
+	const float scale = cloud.getScale();
 
 	if (!hasNorms)
 	{
-		QProgressDialog pDlg("Computing normals (please wait)",QString(),0,0,m_app->getMainWindow());
-		pDlg.setWindowTitle("Ransac Shape Detection");
-		pDlg.show();
+		QProgressDialog* pDlg = nullptr;
+		if (!silent)
+		{
+			if (s_app)
+			{
+				pDlg = new QProgressDialog("Computing normals (please wait)", QString(), 0, 0, s_app->getMainWindow());
+			}
+			else
+			{
+				pDlg = new QProgressDialog("Computing normals (please wait)", QString(), 0, 0, nullptr);
+			}
+			pDlg->setWindowTitle("Ransac Shape Detection");
+			pDlg->show();
+		}
 		QApplication::processEvents();
 
 		cloud.calcNormals(.01f * scale);
 
-		if (pc->reserveTheNormsTable())
+		if (ccPC->reserveTheNormsTable())
 		{
 			for (unsigned i = 0; i < count; ++i)
 			{
@@ -258,33 +294,43 @@ void qRansacSD::doAction()
 				CCVector3 Ni = CCVector3::fromArray(Nvi);
 				//normalize the vector in case of
 				Ni.normalize();
-				pc->addNorm(Ni);
+				ccPC->addNorm(Ni);
 			}
-			pc->showNormals(true);
-			
+			ccPC->showNormals(true);
+
 			//currently selected entities appearance may have changed!
-			pc->prepareDisplayForRefresh_recursive();
+			ccPC->prepareDisplayForRefresh_recursive();
 		}
 		else
 		{
-			m_app->dispToConsole("Not enough memory to compute normals!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-			return;
+			ccLog::Error("[qRansacSD] Not enough memory to compute normals!");
+			if (pDlg)
+			{
+				pDlg->hide();
+				delete pDlg;
+			}
+			return nullptr;
+		}
+		if (pDlg)
+		{
+			pDlg->hide();
+			delete pDlg;
 		}
 	}
 
-	// set which primitives are to be detected by adding the respective constructors
 	RansacShapeDetector detector(ransacOptions); // the detector object
 
-	if (rsdDlg.planeCheckBox->isChecked())
+	if (params.primEnabled[RPT_PLANE])
 		detector.Add(new PlanePrimitiveShapeConstructor());
-	if (rsdDlg.sphereCheckBox->isChecked())
+	if (params.primEnabled[RPT_SPHERE])
 		detector.Add(new SpherePrimitiveShapeConstructor());
-	if (rsdDlg.cylinderCheckBox->isChecked())
+	if (params.primEnabled[RPT_CYLINDER])
 		detector.Add(new CylinderPrimitiveShapeConstructor());
-	if (rsdDlg.coneCheckBox->isChecked())
+	if (params.primEnabled[RPT_CONE])
 		detector.Add(new ConePrimitiveShapeConstructor());
-	if (rsdDlg.torusCheckBox->isChecked())
+	if (params.primEnabled[RPT_TORUS])
 		detector.Add(new TorusPrimitiveShapeConstructor());
+
 
 	unsigned remaining = count;
 	typedef std::pair< MiscLib::RefCountPtr< PrimitiveShape >, size_t > DetectedShape;
@@ -301,10 +347,20 @@ void qRansacSD::doAction()
 
 	{
 		//progress dialog (Qtconcurrent::run can't be canceled!)
-		QProgressDialog pDlg("Operation in progress (please wait)",QString(),0,0,m_app->getMainWindow());
-		pDlg.setWindowTitle("Ransac Shape Detection");
-		pDlg.show();
-		QApplication::processEvents();
+		QProgressDialog* pDlg = nullptr;
+		if (!silent)
+		{
+			if (s_app)
+			{
+				pDlg = new QProgressDialog("Operation in progress (please wait)", QString(), 0, 0, s_app->getMainWindow());
+			}
+			else
+			{
+				pDlg = new QProgressDialog("Operation in progress (please wait)", QString(), 0, 0, nullptr);
+			}
+			pDlg->setWindowTitle("Ransac Shape Detection");
+			pDlg->show();
+		}
 
 		//run in a separate thread
 		s_detector = &detector;
@@ -319,55 +375,58 @@ void qRansacSD::doAction()
 #else
 			usleep(500 * 1000);
 #endif
-			pDlg.setValue(pDlg.value() + 1);
+			if (!silent && pDlg)
+			{
+				pDlg->setValue(pDlg->value() + 1);
+			}
 			QApplication::processEvents();
 		}
-
 		remaining = static_cast<unsigned>(s_remainingPoints);
 
-		pDlg.hide();
 		QApplication::processEvents();
+		if (pDlg)
+		{
+			pDlg->hide();
+			delete pDlg;
+		}
 	}
-	//else
-	//{
-	//	remaining = detector.Detect(cloud, 0, cloud.size(), &shapes);
-	//}
 
 #if 0 //def _DEBUG
-	FILE* fp = fopen("RANS_SD_trace.txt","wt");
+	FILE* fp = fopen("RANS_SD_trace.txt", "wt");
 
-	fprintf(fp,"[Options]\n");
-	fprintf(fp,"epsilon=%f\n",ransacOptions.m_epsilon);
-	fprintf(fp,"bitmap epsilon=%f\n",ransacOptions.m_bitmapEpsilon);
-	fprintf(fp,"normal thresh=%f\n",ransacOptions.m_normalThresh);
-	fprintf(fp,"min support=%i\n",ransacOptions.m_minSupport);
-	fprintf(fp,"probability=%f\n",ransacOptions.m_probability);
+	fprintf(fp, "[Options]\n");
+	fprintf(fp, "epsilon=%f\n", ransacOptions.m_epsilon);
+	fprintf(fp, "bitmap epsilon=%f\n", ransacOptions.m_bitmapEpsilon);
+	fprintf(fp, "normal thresh=%f\n", ransacOptions.m_normalThresh);
+	fprintf(fp, "min support=%i\n", ransacOptions.m_minSupport);
+	fprintf(fp, "probability=%f\n", ransacOptions.m_probability);
 
-	fprintf(fp,"\n[Statistics]\n");
-	fprintf(fp,"input points=%i\n",count);
-	fprintf(fp,"segmented=%i\n",count-remaining);
-	fprintf(fp,"remaining=%i\n",remaining);
+	fprintf(fp, "\n[Statistics]\n");
+	fprintf(fp, "input points=%i\n", count);
+	fprintf(fp, "segmented=%i\n", count - remaining);
+	fprintf(fp, "remaining=%i\n", remaining);
 
-	if (shapes.size()>0)
+	if (shapes.size() > 0)
 	{
-		fprintf(fp,"\n[Shapes]\n");
-		for (unsigned i=0;i<shapes.size();++i)
+		fprintf(fp, "\n[Shapes]\n");
+		for (unsigned i = 0; i < shapes.size(); ++i)
 		{
 			PrimitiveShape* shape = shapes[i].first;
 			size_t shapePointsCount = shapes[i].second;
 
 			std::string desc;
 			shape->Description(&desc);
-			fprintf(fp,"#%i - %s - %i points\n",i+1,desc.c_str(),shapePointsCount);
+			fprintf(fp, "#%i - %s - %i points\n", i + 1, desc.c_str(), shapePointsCount);
 		}
 	}
 	fclose(fp);
 #endif
 
+
 	if (remaining == count)
 	{
-		m_app->dispToConsole("Segmentation failed...", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		return;
+		ccLog::Error("[qRansacSD] Segmentation failed...");
+		return nullptr;
 	}
 
 	if (shapes.size() > 0)
@@ -381,7 +440,7 @@ void qRansacSD::doAction()
 			//too many points?!
 			if (shapePointsCount > count)
 			{
-				m_app->dispToConsole("Inconsistent result!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+				ccLog::Error("[qRansacSD] Inconsistent result!");
 				break;
 			}
 
@@ -394,10 +453,10 @@ void qRansacSD::doAction()
 			//we fill cloud with sub-part points
 			if (!pcShape->reserve(static_cast<unsigned>(shapePointsCount)))
 			{
-				m_app->dispToConsole("Not enough memory!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+				ccLog::Error("[qRansacSD] Not enough memory!");
 				delete pcShape;
 				break;
-			}			
+			}
 			bool saveNormals = pcShape->reserveTheNormsTable();
 
 			for (unsigned j = 0; j < shapePointsCount; ++j)
@@ -417,11 +476,11 @@ void qRansacSD::doAction()
 			pcShape->setGlobalScale(globalScale);
 
 			//convert detected primitive into a CC primitive type
-			ccGenericPrimitive* prim = 0;
-			switch(shape->Identifier())
+			ccGenericPrimitive* prim = nullptr;
+			switch (shape->Identifier())
 			{
-			case 0: //plane
-				{
+			case RPT_PLANE: //plane
+			{
 				const PlanePrimitiveShape* plane = static_cast<const PlanePrimitiveShape*>(shape);
 				Vec3f G = plane->Internal().getPosition();
 				Vec3f N = plane->Internal().getNormal();
@@ -429,11 +488,11 @@ void qRansacSD::doAction()
 				Vec3f Y = plane->getYDim();
 
 				//we look for real plane extents
-				float minX,maxX,minY,maxY;
-				for (unsigned j=0; j<shapePointsCount; ++j)
+				float minX, maxX, minY, maxY;
+				for (unsigned j = 0; j < shapePointsCount; ++j)
 				{
-					std::pair<float,float> param;
-					plane->Parameters(cloud[count-1-j].pos,&param);
+					std::pair<float, float> param;
+					plane->Parameters(cloud[count - 1 - j].pos, &param);
 					if (j != 0)
 					{
 						if (minX < param.first)
@@ -453,43 +512,43 @@ void qRansacSD::doAction()
 				}
 
 				//we recenter plane (as it is not always the case!)
-				float dX = maxX-minX;
-				float dY = maxY-minY;
-				G += X * (minX+dX/2);
-				G += Y * (minY+dY/2);
+				float dX = maxX - minX;
+				float dY = maxY - minY;
+				G += X * (minX + dX / 2);
+				G += Y * (minY + dY / 2);
 
 				//we build matrix from these vectors
-				ccGLMatrix glMat(	CCVector3::fromArray(X.getValue()),
-									CCVector3::fromArray(Y.getValue()),
-									CCVector3::fromArray(N.getValue()),
-									CCVector3::fromArray(G.getValue()) );
+				ccGLMatrix glMat(CCVector3::fromArray(X.getValue()),
+					CCVector3::fromArray(Y.getValue()),
+					CCVector3::fromArray(N.getValue()),
+					CCVector3::fromArray(G.getValue()));
 
 				//plane primitive
-				prim = new ccPlane(dX,dY,&glMat);
-			
-				}
-				break;
+				prim = new ccPlane(dX, dY, &glMat);
 
-			case 1: //sphere
-				{
+			}
+			break;
+
+			case RPT_SPHERE: //sphere
+			{
 				const SpherePrimitiveShape* sphere = static_cast<const SpherePrimitiveShape*>(shape);
 				float radius = sphere->Internal().Radius();
 				Vec3f CC = sphere->Internal().Center();
 
-				pcShape->setName(QString("Sphere (r=%1)").arg(radius,0,'f'));
+				pcShape->setName(QString("Sphere (r=%1)").arg(radius, 0, 'f'));
 
 				//we build matrix from these vecctors
 				ccGLMatrix glMat;
 				glMat.setTranslation(CC.getValue());
 				//sphere primitive
-				prim = new ccSphere(radius,&glMat);
+				prim = new ccSphere(radius, &glMat);
 				prim->setEnabled(false);
-			
-				}
-				break;
 
-			case 2: //cylinder
-				{
+			}
+			break;
+
+			case RPT_CYLINDER: //cylinder
+			{
 				const CylinderPrimitiveShape* cyl = static_cast<const CylinderPrimitiveShape*>(shape);
 				Vec3f G = cyl->Internal().AxisPosition();
 				Vec3f N = cyl->Internal().AxisDirection();
@@ -498,26 +557,26 @@ void qRansacSD::doAction()
 				float r = cyl->Internal().Radius();
 				float hMin = cyl->MinHeight();
 				float hMax = cyl->MaxHeight();
-				float h = hMax-hMin;
-				G += N * (hMin+h/2);
+				float h = hMax - hMin;
+				G += N * (hMin + h / 2);
 
-				pcShape->setName(QString("Cylinder (r=%1/h=%2)").arg(r,0,'f').arg(h,0,'f'));
+				pcShape->setName(QString("Cylinder (r=%1/h=%2)").arg(r, 0, 'f').arg(h, 0, 'f'));
 
 				//we build matrix from these vecctors
-				ccGLMatrix glMat(	CCVector3::fromArray(X.getValue()),
-									CCVector3::fromArray(Y.getValue()),
-									CCVector3::fromArray(N.getValue()),
-									CCVector3::fromArray(G.getValue()) );
+				ccGLMatrix glMat(CCVector3::fromArray(X.getValue()),
+					CCVector3::fromArray(Y.getValue()),
+					CCVector3::fromArray(N.getValue()),
+					CCVector3::fromArray(G.getValue()));
 
 				//cylinder primitive
-				prim = new ccCylinder(r,h,&glMat);
+				prim = new ccCylinder(r, h, &glMat);
 				prim->setEnabled(false);
 
-				}
-				break;
+			}
+			break;
 
-			case 3: //cone
-				{
+			case RPT_CONE: //cone
+			{
 				const ConePrimitiveShape* cone = static_cast<const ConePrimitiveShape*>(shape);
 				Vec3f CC = cone->Internal().Center();
 				Vec3f CA = cone->Internal().AxisDirection();
@@ -528,7 +587,7 @@ void qRansacSD::doAction()
 				float minHeight, maxHeight;
 				minP = maxP = cloud[0].pos;
 				minHeight = maxHeight = cone->Internal().Height(cloud[0].pos);
-				for (size_t j=1; j<shapePointsCount; ++j)
+				for (size_t j = 1; j < shapePointsCount; ++j)
 				{
 					float h = cone->Internal().Height(cloud[j].pos);
 					if (h < minHeight)
@@ -544,45 +603,45 @@ void qRansacSD::doAction()
 
 				}
 
-				pcShape->setName(QString("Cone (alpha=%1/h=%2)").arg(alpha,0,'f').arg(maxHeight-minHeight,0,'f'));
+				pcShape->setName(QString("Cone (alpha=%1/h=%2)").arg(alpha, 0, 'f').arg(maxHeight - minHeight, 0, 'f'));
 
-				float minRadius = tan(alpha)*minHeight;
-				float maxRadius = tan(alpha)*maxHeight;
+				float minRadius = tan(alpha) * minHeight;
+				float maxRadius = tan(alpha) * maxHeight;
 
 				//let's build the cone primitive
 				{
 					//the bottom should be the largest part so we inverse the axis direction
 					CCVector3 Z = -CCVector3::fromArray(CA.getValue());
 					Z.normalize();
-				
+
 					//the center is halfway between the min and max height
-					float midHeight = (minHeight + maxHeight)/2;
+					float midHeight = (minHeight + maxHeight) / 2;
 					CCVector3 C = CCVector3::fromArray((CC + CA * midHeight).getValue());
 
 					//radial axis
 					CCVector3 X = CCVector3::fromArray((maxP - (CC + maxHeight * CA)).getValue());
 					X.normalize();
-				
+
 					//orthogonal radial axis
 					CCVector3 Y = Z * X;
 
 					//we build the transformation matrix from these vecctors
-					ccGLMatrix glMat(X,Y,Z,C);
+					ccGLMatrix glMat(X, Y, Z, C);
 
 					//eventually create the cone primitive
-					prim = new ccCone(maxRadius, minRadius, maxHeight-minHeight, 0, 0, &glMat);
+					prim = new ccCone(maxRadius, minRadius, maxHeight - minHeight, 0, 0, &glMat);
 					prim->setEnabled(false);
 				}
 
-				}
-				break;
+			}
+			break;
 
-			case 4: //torus
-				{
+			case RPT_TORUS: //torus
+			{
 				const TorusPrimitiveShape* torus = static_cast<const TorusPrimitiveShape*>(shape);
 				if (torus->Internal().IsAppleShaped())
 				{
-					m_app->dispToConsole("[qRansacSD] Apple-shaped torus are not handled by CloudCompare!",ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+					ccLog::Warning("[qRansacSD] Apple-shaped torus are not handled by CloudCompare!");
 				}
 				else
 				{
@@ -591,7 +650,7 @@ void qRansacSD::doAction()
 					float minRadius = torus->Internal().MinorRadius();
 					float maxRadius = torus->Internal().MajorRadius();
 
-					pcShape->setName(QString("Torus (r=%1/R=%2)").arg(minRadius,0,'f').arg(maxRadius,0,'f'));
+					pcShape->setName(QString("Torus (r=%1/R=%2)").arg(minRadius, 0, 'f').arg(maxRadius, 0, 'f'));
 
 					CCVector3 Z = CCVector3::fromArray(CA.getValue());
 					CCVector3 C = CCVector3::fromArray(CC.getValue());
@@ -600,15 +659,15 @@ void qRansacSD::doAction()
 					CCVector3 Y = Z * X;
 
 					//we build matrix from these vecctors
-					ccGLMatrix glMat(X,Y,Z,C);
+					ccGLMatrix glMat(X, Y, Z, C);
 
 					//torus primitive
-					prim = new ccTorus(maxRadius-minRadius,maxRadius+minRadius,M_PI*2.0,false,0,&glMat);
+					prim = new ccTorus(maxRadius - minRadius, maxRadius + minRadius, M_PI * 2.0, false, 0, &glMat);
 					prim->setEnabled(false);
 				}
 
-				}
-				break;
+			}
+			break;
 			}
 
 			//is there a primitive to add to part cloud?
@@ -623,7 +682,7 @@ void qRansacSD::doAction()
 			}
 
 			if (!group)
-				group = new ccHObject(QString("Ransac Detected Shapes (%1)").arg(ent->getName()));
+				group = new ccHObject(QString("Ransac Detected Shapes (%1)").arg(ccPC->getName()));
 			group->addChild(pcShape);
 
 			count -= shapePointsCount;
@@ -634,17 +693,17 @@ void qRansacSD::doAction()
 		if (group)
 		{
 			assert(group->getChildrenNumber() != 0);
-			
+
 			//we hide input cloud
-			pc->setEnabled(false);
-			m_app->dispToConsole("[qRansacSD] Input cloud has been automtically hidden!",ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+			ccPC->setEnabled(false);
+			ccLog::Warning("[qRansacSD] Input cloud has been automtically hidden!");
 
-			//we add new group to DB/display
+			
 			group->setVisible(true);
-			group->setDisplay_recursive(pc->getDisplay());
-			m_app->addToDB(group);
-
-			m_app->refreshAll();		
+			group->setDisplay_recursive(ccPC->getDisplay());
+			return group;
 		}
 	}
+
+	return nullptr;
 }

@@ -8,6 +8,16 @@ option( COMPILE_CC_CORE_LIB_WITH_CGAL "Check to compile CC_CORE_LIB with CGAL li
 option( COMPILE_CC_CORE_LIB_WITH_TBB " Check to compile CC_CORE_LIB with Intel Threading Building Blocks lib (enables some parallel processing )" OFF )
 option( COMPILE_CC_CORE_LIB_SHARED "Check to compile CC_CORE_LIB as a shared library (DLL/so)" ON )
 
+# ScalarType as float (default) or double
+option( OPTION_SCALAR_DOUBLE "Check to define ScalarType as double" OFF )
+
+if ( OPTION_SCALAR_DOUBLE )
+	add_definitions( -DSCALAR_TYPE_DOUBLE )
+	set (USE_SCALAR_TYPE_DOUBLE ON PARENT_SCOPE)
+else()
+	add_definitions( -DSCALAR_TYPE_FLOAT )
+endif()
+
 # to compile CCLib only! (CMake implicitly imposes to declare a project before anything...)
 project( CC_CORE_LIB VERSION 1.0 )
 

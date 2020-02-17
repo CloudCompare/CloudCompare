@@ -26,7 +26,30 @@
 //Local
 #include "qRANSAC_SD.h"
 
-static const char COMMAND_RANSAC[] = "RANSAC";
+constexpr char COMMAND_RANSAC[] = "RANSAC";
+constexpr char EPSILON_ABSOLUTE[] = "EPSILON_ABSOLUTE";
+constexpr char EPSILON_PERCENTAGE_OF_SCALE[] = "EPSILON_PERCENTAGE_OF_SCALE";
+constexpr char BITMAP_EPSILON_PERCENTAGE_OF_SCALE[] = "BITMAP_EPSILON_PERCENTAGE_OF_SCALE";
+constexpr char BITMAP_EPSILON_ABSOLUTE[] = "BITMAP_EPSILON_ABSOLUTE";
+constexpr char SUPPORT_POINTS[] = "SUPPORT_POINTS";
+constexpr char MAX_NORMAL_DEV[] = "MAX_NORMAL_DEV";
+constexpr char PROBABILITY[] = "PROBABILITY";
+constexpr char ENABLE_PRIMITIVE[] = "ENABLE_PRIMITIVE";
+constexpr char OUT_CLOUD_DIR[] = "OUT_CLOUD_DIR";
+constexpr char OUT_MESH_DIR[] = "OUT_MESH_DIR";
+constexpr char OUT_PAIR_DIR[] = "OUT_PAIR_DIR";
+constexpr char OUT_GROUP_DIR[] = "OUT_GROUP_DIR";
+constexpr char OUTPUT_INDIVIDUAL_PRIMITIVES[] = "OUTPUT_INDIVIDUAL_PRIMITIVES";
+constexpr char OUTPUT_INDIVIDUAL_SUBCLOUDS[] = "OUTPUT_INDIVIDUAL_SUBCLOUDS";
+constexpr char OUTPUT_INDIVIDUAL_PAIRED_CLOUD_PRIMITIVE[] = "OUTPUT_INDIVIDUAL_PAIRED_CLOUD_PRIMITIVE";
+constexpr char OUTPUT_GROUPED[] = "OUTPUT_GROUPED";
+
+constexpr char PRIM_PLANE[] = "PLANE";
+constexpr char PRIM_SPHERE[] = "SPHERE";
+constexpr char PRIM_CYLINDER[] = "CYLINDER";
+constexpr char PRIM_CONE[] = "CONE";
+constexpr char PRIM_TORUS[] = "TORUS";
+
 
 struct CommandRANSAC : public ccCommandLineInterface::Command
 {
@@ -39,8 +62,23 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 			return cmd.error(QObject::tr("No point cloud to attempt RANSAC on (be sure to open one with \"-O [cloud filename]\" before \"-%2\")").arg(COMMAND_RANSAC));
 		}
 		qRansacSD::RansacParams params;
-		QStringList paramNames = QStringList() << "EPSILON_ABSOLUTE" << "EPSILON_PERCENTAGE_OF_SCALE" << "BITMAP_EPSILON_PERCENTAGE_OF_SCALE" << "BITMAP_EPSILON_ABSOLUTE" << "SUPPORT_POINTS" << "MAX_NORMAL_DEV" << "PROBABILITY" << "ENABLE_PRIMITIVE";
-		QStringList primitiveNames = QStringList() << "PLANE" << "SPHERE" << "CYLINDER" << "CONE" << "TORUS";
+		QStringList paramNames = QStringList() << EPSILON_ABSOLUTE << EPSILON_PERCENTAGE_OF_SCALE <<
+			BITMAP_EPSILON_PERCENTAGE_OF_SCALE << BITMAP_EPSILON_ABSOLUTE <<
+			SUPPORT_POINTS << MAX_NORMAL_DEV << PROBABILITY << ENABLE_PRIMITIVE <<
+			OUT_CLOUD_DIR << OUT_MESH_DIR << OUT_GROUP_DIR << OUT_PAIR_DIR << OUTPUT_INDIVIDUAL_PRIMITIVES <<
+			OUTPUT_INDIVIDUAL_SUBCLOUDS << OUTPUT_GROUPED << OUTPUT_INDIVIDUAL_PAIRED_CLOUD_PRIMITIVE;
+		QStringList primitiveNames = QStringList() << PRIM_PLANE << PRIM_SPHERE << PRIM_CYLINDER << PRIM_CONE << PRIM_TORUS;
+		QString outputCloudsDir = "";
+		QString outputMeshesDir = "";
+		QString outputPairDir = "";
+		QString outputGroupDir = "";
+		bool outputIndividualClouds = false;
+		bool outputIndividualPrimitives = false;
+		bool outputIndividualPairs = false;
+		bool outputGrouped = false;
+
+
+
 		float epsilonABS = -1.0f;
 		float epsilonPercentage = -1.0f;
 		float bitmapEpsilonABS = -1.0f;
@@ -50,19 +88,19 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 
 		for (unsigned char k = 0; k < 5; ++k)
 			params.primEnabled[k] = false;
-		
+
 		if (!cmd.arguments().empty())
 		{
 
 			QString param = cmd.arguments().takeFirst().toUpper();
-			cmd.print(QObject::tr("\tMethod: ") + param);
 			while (paramNames.contains(param))
 			{
-				if (param == "EPSILON_ABSOLUTE")
+				cmd.print(QObject::tr("\t%1 : %2").arg(COMMAND_RANSAC, param));
+				if (param == EPSILON_ABSOLUTE)
 				{
 					if (cmd.arguments().empty())
 					{
-						return cmd.error(QObject::tr("Missing parameter: number after \"-%1 EPSILON_ABSOLUTE\"").arg(COMMAND_RANSAC));
+						return cmd.error(QObject::tr("Missing parameter: number after \"-%1 %2\"").arg(COMMAND_RANSAC, EPSILON_ABSOLUTE));
 					}
 					bool ok;
 					float val = cmd.arguments().takeFirst().toFloat(&ok);
@@ -73,11 +111,11 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 					cmd.print(QObject::tr("\tEpsilon : %1").arg(val));
 					epsilonABS = val;
 				}
-				else if (param == "EPSILON_PERCENTAGE_OF_SCALE")
+				else if (param == EPSILON_PERCENTAGE_OF_SCALE)
 				{
 					if (cmd.arguments().empty())
 					{
-						return cmd.error(QObject::tr("Missing parameter: number after \"-%1 EPSILON_PERCENTAGE_OF_SCALE\"").arg(COMMAND_RANSAC));
+						return cmd.error(QObject::tr("Missing parameter: number after \"-%1 %2\"").arg(COMMAND_RANSAC, EPSILON_PERCENTAGE_OF_SCALE));
 					}
 					bool ok;
 					float val = cmd.arguments().takeFirst().toFloat(&ok);
@@ -88,11 +126,11 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 					cmd.print(QObject::tr("\tEpsilon : %1").arg(val));
 					epsilonPercentage = val;
 				}
-				else if (param == "BITMAP_EPSILON_ABSOLUTE")
+				else if (param == BITMAP_EPSILON_ABSOLUTE)
 				{
 					if (cmd.arguments().empty())
 					{
-						return cmd.error(QObject::tr("Missing parameter: number after \"-%1 BITMAP_EPSILON_ABSOLUTE\"").arg(COMMAND_RANSAC));
+						return cmd.error(QObject::tr("Missing parameter: number after \"-%1 %2\"").arg(COMMAND_RANSAC, BITMAP_EPSILON_ABSOLUTE));
 					}
 					bool ok;
 					float val = cmd.arguments().takeFirst().toFloat(&ok);
@@ -103,11 +141,11 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 					cmd.print(QObject::tr("\tBitmap Epsilon : %1").arg(val));
 					bitmapEpsilonABS = val;
 				}
-				else if (param == "BITMAP_EPSILON_PERCENTAGE_OF_SCALE")
+				else if (param == BITMAP_EPSILON_PERCENTAGE_OF_SCALE)
 				{
 					if (cmd.arguments().empty())
 					{
-						return cmd.error(QObject::tr("Missing parameter: number after \"-%1 BITMAP_EPSILON_PERCENTAGE_OF_SCALE\"").arg(COMMAND_RANSAC));
+						return cmd.error(QObject::tr("Missing parameter: number after \"-%1 %2\"").arg(COMMAND_RANSAC, BITMAP_EPSILON_PERCENTAGE_OF_SCALE));
 					}
 					bool ok;
 					float val = cmd.arguments().takeFirst().toFloat(&ok);
@@ -118,11 +156,11 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 					cmd.print(QObject::tr("\tBitmap Epsilon : %1").arg(val));
 					bitmapEpsilonPercentage = val;
 				}
-				else if (param == "SUPPORT_POINTS")
+				else if (param == SUPPORT_POINTS)
 				{
 					if (cmd.arguments().empty())
 					{
-						return cmd.error(QObject::tr("Missing parameter: number after \"-%1 SUPPORT_POINTS\"").arg(COMMAND_RANSAC));
+						return cmd.error(QObject::tr("Missing parameter: number after \"-%1 %2\"").arg(COMMAND_RANSAC, SUPPORT_POINTS));
 					}
 					bool ok;
 					unsigned count = cmd.arguments().takeFirst().toUInt(&ok);
@@ -133,11 +171,11 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 					cmd.print(QObject::tr("\tsupport points: %1").arg(count));
 					params.supportPoints = count;
 				}
-				else if (param == "MAX_NORMAL_DEV")
+				else if (param == MAX_NORMAL_DEV)
 				{
 					if (cmd.arguments().empty())
 					{
-						return cmd.error(QObject::tr("Missing parameter: number after \"-%1 MAX_NORMAL_DEV\"").arg(COMMAND_RANSAC));
+						return cmd.error(QObject::tr("Missing parameter: number after \"-%1 %2\"").arg(COMMAND_RANSAC, MAX_NORMAL_DEV));
 					}
 					bool ok;
 					float val = cmd.arguments().takeFirst().toFloat(&ok);
@@ -148,11 +186,11 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 					cmd.print(QObject::tr("\tMax Normal Deviation : %1").arg(val));
 					params.maxNormalDev_deg = val;
 				}
-				else if (param == "PROBABILITY")
+				else if (param == PROBABILITY)
 				{
 					if (cmd.arguments().empty())
 					{
-						return cmd.error(QObject::tr("Missing parameter: number after \"-%1 PROBABILITY\"").arg(COMMAND_RANSAC));
+						return cmd.error(QObject::tr("Missing parameter: number after \"-%1 %2\"").arg(COMMAND_RANSAC, PROBABILITY));
 					}
 					bool ok;
 					float val = cmd.arguments().takeFirst().toFloat(&ok);
@@ -163,37 +201,121 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 					cmd.print(QObject::tr("\tProbability : %1").arg(val));
 					params.probability = val;
 				}
-				else if (param == "ENABLE_PRIMITIVE")
+				else if (param == OUT_CLOUD_DIR)
 				{
 					if (cmd.arguments().empty())
 					{
-						return cmd.error(QObject::tr("Missing parameter: primitive type after \"-%1 ENABLE_PRIMITIVE\"").arg(COMMAND_RANSAC));
+						return cmd.error(QObject::tr("\nMissing parameter: Directory after \"-%1 %2\"").arg(COMMAND_RANSAC, OUT_CLOUD_DIR));
+					}
+					QString arg = cmd.arguments().takeFirst();
+					QDir dir(arg);
+					if (!dir.exists())
+					{
+						cmd.print(QObject::tr("\n%1 Does not exist\tcreating path").arg(arg));
+						dir.mkpath(arg);
+					}
+					outputCloudsDir = dir.cleanPath(arg);
+					cmd.print(QObject::tr("\t%1 : %2").arg(OUT_GROUP_DIR, outputCloudsDir));
+					outputIndividualClouds = true;
+				}
+				else if (param == OUT_MESH_DIR)
+				{
+					if (cmd.arguments().empty())
+					{
+						return cmd.error(QObject::tr("\nMissing parameter: Directory after \"-%1 %2\"").arg(COMMAND_RANSAC, OUT_MESH_DIR));
+					}
+					QString arg = cmd.arguments().takeFirst();
+					QDir dir(arg);
+					if (!dir.exists())
+					{
+						cmd.print(QObject::tr("\n%1 Does not exist\tcreating path").arg(arg));
+						dir.mkpath(arg);
+					}
+					outputMeshesDir = dir.cleanPath(arg);
+					cmd.print(QObject::tr("\t%1 : %2").arg(OUT_GROUP_DIR, outputMeshesDir));
+					outputIndividualPrimitives = true;
+				}
+				else if (param == OUT_GROUP_DIR)
+				{
+					if (cmd.arguments().empty())
+					{
+						return cmd.error(QObject::tr("\nMissing parameter: Directory after \"-%1 %2\"").arg(COMMAND_RANSAC, OUT_GROUP_DIR));
+					}
+					QString arg = cmd.arguments().takeFirst();
+					QDir dir(arg);
+					if (!dir.exists())
+					{
+						cmd.print(QObject::tr("\n%1 Does not exist\tcreating path").arg(arg));
+						dir.mkpath(arg);
+					}
+					outputGroupDir = dir.cleanPath(arg);
+					cmd.print(QObject::tr("\t%1 : %2").arg(OUT_GROUP_DIR, outputGroupDir));
+					outputGrouped = true;
+				}
+				else if (param == OUT_PAIR_DIR)
+				{
+				if (cmd.arguments().empty())
+				{
+					return cmd.error(QObject::tr("\nMissing parameter: Directory after \"-%1 %2\"").arg(COMMAND_RANSAC, OUT_PAIR_DIR));
+				}
+				QString arg = cmd.arguments().takeFirst();
+				QDir dir(arg);
+				if (!dir.exists())
+				{
+					cmd.print(QObject::tr("\n%1 Does not exist\tcreating path").arg(arg));
+					dir.mkpath(arg);
+				}
+				outputPairDir  = dir.cleanPath(arg);
+				cmd.print(QObject::tr("\t%1 : %2").arg(OUT_PAIR_DIR, outputPairDir));
+				outputIndividualPairs = true;
+				}
+				else if (param == OUTPUT_INDIVIDUAL_SUBCLOUDS)
+				{
+					outputIndividualClouds = true;
+				}
+				else if (param == OUTPUT_INDIVIDUAL_PRIMITIVES)
+				{
+					outputIndividualPrimitives = true;
+				}
+				else if (param == OUTPUT_INDIVIDUAL_PAIRED_CLOUD_PRIMITIVE)
+				{
+					outputIndividualPairs = true;
+				}
+				else if (param == OUTPUT_GROUPED)
+				{
+					outputGrouped = true;
+				}
+				else if (param == ENABLE_PRIMITIVE)
+				{
+					if (cmd.arguments().empty())
+					{
+						return cmd.error(QObject::tr("Missing parameter: primitive type after \"-%1 %2\"").arg(COMMAND_RANSAC, ENABLE_PRIMITIVE));
 					}
 					QString prim = cmd.arguments().takeFirst().toUpper();
 					unsigned primCount = 0;
 					while (primitiveNames.contains(prim))
 					{
-						if (prim == "PLANE")
+						if (prim == PRIM_PLANE)
 						{
 							params.primEnabled[qRansacSD::RPT_PLANE] = true;
 							primCount++;
 						}
-						else if (prim == "SPHERE")
+						else if (prim == PRIM_SPHERE)
 						{
 							params.primEnabled[qRansacSD::RPT_SPHERE] = true;
 							primCount++;
 						}
-						else if (prim == "CYLINDER")
+						else if (prim == PRIM_CYLINDER)
 						{
 							params.primEnabled[qRansacSD::RPT_CYLINDER] = true;
 							primCount++;
 						}
-						else if (prim == "CONE")
+						else if (prim == PRIM_CONE)
 						{
 							params.primEnabled[qRansacSD::RPT_CONE] = true;
 							primCount++;
 						}
-						else if (prim == "TORUS")
+						else if (prim == PRIM_TORUS)
 						{
 							params.primEnabled[qRansacSD::RPT_TORUS] = true;
 							primCount++;
@@ -213,7 +335,7 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 					}
 					else
 					{
-						return cmd.error(QObject::tr("No valid parameter: primitive type after \"-%1 ENABLE_PRIMITIVE\"").arg(COMMAND_RANSAC));
+						return cmd.error(QObject::tr("No valid parameter: primitive type after \"-%1 %2\"").arg(COMMAND_RANSAC, ENABLE_PRIMITIVE));
 					}
 				}
 				if (cmd.arguments().empty())
@@ -229,15 +351,23 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 		}
 		unsigned char primCount = 0;
 		for (unsigned char k = 0; k < 5; ++k)
+		{
 			primCount += (unsigned)params.primEnabled[k];
+		}
 		if (primCount == 0)
 		{
+			cmd.print(QObject::tr("\tDefault Shape Search == : %1").arg(PRIM_PLANE));
 			params.primEnabled[qRansacSD::RPT_PLANE] = true;
+		}
+		if (!outputIndividualClouds && !outputIndividualPrimitives && !outputGrouped && !outputIndividualPairs)
+		{
+			cmd.print(QObject::tr("\tDefault output == : %1").arg(OUTPUT_GROUPED));
+			outputGrouped = true;
 		}
 
 		for (CLCloudDesc clCloud : cmd.clouds())
 		{
-			
+
 			CCVector3 bbMin, bbMax;
 			clCloud.pc->getBoundingBox(bbMin, bbMax);
 			CCVector3 diff = bbMax - bbMin;
@@ -276,50 +406,101 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 			}
 			if (group)
 			{
-				ccHObject::Container meshGroup;
-				unsigned meshCount = group->filterChildren(meshGroup, true, CC_TYPES::MESH);
-				unsigned planeCount = 1;
-				unsigned sphereCount = 1;
-				unsigned cylinderCount = 1;
-				unsigned coneCount = 1;
-				unsigned torusCount = 1;
-
-				for (auto meshObj : meshGroup)
+				if (outputGrouped)
 				{
-					auto mesh = ccHObjectCaster::ToMesh(meshObj);
-					QString suffix;
-					if (meshObj->isA(CC_TYPES::PLANE))
-					{
-						suffix = QString("_%1").arg(planeCount);
-						planeCount++;
-					}
-					else if (meshObj->isA(CC_TYPES::SPHERE))
-					{
-						suffix = QString("_%1").arg(sphereCount);
-						sphereCount++;
-					}
-					else if (meshObj->isA(CC_TYPES::CYLINDER))
-					{
-						suffix = QString("_%1").arg(cylinderCount);
-						cylinderCount++;
-					}
-					else if (meshObj->isA(CC_TYPES::CONE))
-					{
-						suffix = QString("_%1").arg(coneCount);
-						coneCount++;
-					}
-					else if (meshObj->isA(CC_TYPES::TORUS))
-					{
-						suffix = QString("_%1").arg(torusCount);
-						torusCount++;
-					}
-					CLMeshDesc clMesh(mesh, clCloud.basename + "_" + clCloud.pc->getName() + "_" + mesh->getName() + suffix, clCloud.path);
-					cmd.meshes().push_back(clMesh);
+					CLGroupDesc clGroup(group, clCloud.basename + "_" + clCloud.pc->getName() + "_RANSAC_DETECTED_SHAPES", outputGroupDir != "" ? outputGroupDir : clCloud.path);
 					if (cmd.autoSaveMode())
 					{
-						QString errorStr = cmd.exportEntity(clMesh);
+						QString errorStr = cmd.exportEntity(clGroup);
 						if (!errorStr.isEmpty())
 							cmd.warning(errorStr);
+					}
+				}
+				if (outputIndividualPrimitives || outputIndividualClouds || outputIndividualPairs)
+				{
+					ccHObject::Container meshGroup;
+					unsigned meshCount = group->filterChildren(meshGroup, true, CC_TYPES::MESH);
+					unsigned planeCount = 1;
+					unsigned sphereCount = 1;
+					unsigned cylinderCount = 1;
+					unsigned coneCount = 1;
+					unsigned torusCount = 1;
+
+					for (auto meshObj : meshGroup)
+					{
+						auto mesh = ccHObjectCaster::ToMesh(meshObj);
+						if (mesh)
+						{
+							QString suffix;
+							if (meshObj->isA(CC_TYPES::PLANE))
+							{
+								suffix = QString("_%1").arg(planeCount);
+								planeCount++;
+							}
+							else if (meshObj->isA(CC_TYPES::SPHERE))
+							{
+								suffix = QString("_%1").arg(sphereCount);
+								sphereCount++;
+							}
+							else if (meshObj->isA(CC_TYPES::CYLINDER))
+							{
+								suffix = QString("_%1").arg(cylinderCount);
+								cylinderCount++;
+							}
+							else if (meshObj->isA(CC_TYPES::CONE))
+							{
+								suffix = QString("_%1").arg(coneCount);
+								coneCount++;
+							}
+							else if (meshObj->isA(CC_TYPES::TORUS))
+							{
+								suffix = QString("_%1").arg(torusCount);
+								torusCount++;
+							}
+							auto cld = ccHObjectCaster::ToPointCloud(mesh->getParent());
+							if (outputIndividualPairs)
+							{
+								CLCloudDesc clCloud(cld, clCloud.basename + "_" + clCloud.pc->getName() + "_" + mesh->getName() + suffix + QString("_pair"), outputPairDir != "" ? outputPairDir : clCloud.path);
+								if (cmd.autoSaveMode())
+								{
+									QString errorStr = cmd.exportEntity(clCloud);
+									if (!errorStr.isEmpty())
+									{
+										cmd.warning(errorStr);
+									}
+								}
+							}
+							if (cld)
+							{
+								cld->detachChild(mesh);
+							}
+							CLCloudDesc clCloud(cld, clCloud.basename + "_" + clCloud.pc->getName() + "_" + mesh->getName() + suffix + QString("_cloud"), outputCloudsDir != "" ? outputCloudsDir : clCloud.path);
+							cmd.clouds().push_back(clCloud);
+							CLMeshDesc clMesh(mesh, clCloud.basename + "_" + clCloud.pc->getName() + "_" + mesh->getName() + suffix, outputMeshesDir != "" ? outputMeshesDir : clCloud.path);
+							cmd.meshes().push_back(clMesh);
+							if (outputIndividualClouds)
+							{
+								if (cmd.autoSaveMode())
+								{
+									QString errorStr = cmd.exportEntity(clCloud);
+									if (!errorStr.isEmpty())
+									{
+										cmd.warning(errorStr);
+									}
+								}
+							}
+							if (outputIndividualPrimitives)
+							{
+								if (cmd.autoSaveMode())
+								{
+									QString errorStr = cmd.exportEntity(clMesh);
+									if (!errorStr.isEmpty())
+									{
+										cmd.warning(errorStr);
+									}
+								}
+							}
+						}
 					}
 				}
 			}

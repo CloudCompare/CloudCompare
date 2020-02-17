@@ -76,6 +76,8 @@ public:
 	//inherited from ccStdPluginInterface
 	virtual void onNewSelection(const ccHObject::Container& selectedEntities);
 	virtual QList<QAction *> getActions() override;
+	virtual void registerCommands(ccCommandLineInterface* cmd) override;
+
 	static ccHObject* executeRANSAC(ccPointCloud* ccPC, RansacParams& params, bool silent = false);
 protected slots:
 

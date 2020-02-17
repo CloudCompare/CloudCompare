@@ -16,6 +16,7 @@
 //##########################################################################
 
 #include "qRANSAC_SD.h"
+#include "qRANSAC_SD_Commands.h"
 
 //PrimitiveShapes/MiscLib
 #include <RansacShapeDetector.h>
@@ -94,6 +95,16 @@ QList<QAction*> qRansacSD::getActions()
 	return QList<QAction*>{ m_action };
 }
 
+void qRansacSD::registerCommands(ccCommandLineInterface* cmd)
+{
+	if (!cmd)
+	{
+		assert(false);
+		return;
+	}
+	cmd->registerCommand(ccCommandLineInterface::Command::Shared(new CommandRANSAC));
+}
+
 static MiscLib::Vector< std::pair< MiscLib::RefCountPtr< PrimitiveShape >, size_t > >* s_shapes; // stores the detected shapes
 static size_t s_remainingPoints = 0;
 static RansacShapeDetector* s_detector = 0;
@@ -122,7 +133,7 @@ void qRansacSD::doAction()
 	size_t selNum = selectedEntities.size();
 	if (selNum != 1)
 	{
-		ccLog::Error("Select only one cloud!");
+		ccLog::Error("[qRansacSD] Select only one cloud!");
 		return;
 	}
 
@@ -130,7 +141,7 @@ void qRansacSD::doAction()
 	assert(ent);
 	if (!ent || !ent->isA(CC_TYPES::POINT_CLOUD))
 	{
-		ccLog::Error("Select a real point cloud!");
+		ccLog::Error("[qRansacSD] Select a real point cloud!");
 		return;
 	}
 

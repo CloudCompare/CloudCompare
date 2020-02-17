@@ -37,6 +37,10 @@ v2.11 (Anoia) - (in development)
 	- Yellow > Brown
 	- Topo Landserf
 	- High contrast
+  - Translate/Rotate Tool:
+	- Advanced translate mode to translate along a single segment polyline or plane normal vector.
+	- Advanced rotate mode to update the axis of rotation to a single segment polyline or plane normal vector.
+	  - Rotation center can be set to either the object center, or the polyline/plane normal.
 
 - Improvements
   - Better support for High DPI screens (4K) on Windows

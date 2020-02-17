@@ -8,7 +8,9 @@ if (PLUGIN_STANDARD_QFACETS)
 		message( SEND_ERROR "ShapeLib is required to compile this plugin (enable OPTION_USE_SHAPE_LIB)" )
 	endif()
 
-	project( QFACETS_PLUGINL )
+	project( QFACETS_PLUGIN )
+
+	include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
 
 	# we need includes from the main CC source dir
 	include_directories( ${CloudCompare_SOURCE_DIR} )

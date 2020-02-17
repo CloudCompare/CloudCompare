@@ -3047,6 +3047,11 @@ bool CommandDist::process(ccCommandLineInterface &cmd)
 							m_cloud2meshDist ? ccComparisonDlg::CLOUDMESH_DIST : ccComparisonDlg::CLOUDCLOUD_DIST,
 							cmd.widgetParent(),
 							true);
+
+	if (!compDlg.initDialog())
+	{
+		return cmd.error("Failed to initialize comparison dialog");
+	}
 	
 	//update parameters
 	if (maxDist > 0)

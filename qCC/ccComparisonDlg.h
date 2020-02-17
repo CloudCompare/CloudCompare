@@ -56,6 +56,9 @@ public:
 	//! Default destructor
 	~ccComparisonDlg();
 
+	//! Should be called once after the dialog is created
+	inline bool initDialog() { return computeApproxDistances(); }
+
 	//! Returns compared entity
 	ccHObject* getComparedEntity() const { return m_compEnt; }
 	//! Returns compared entity

@@ -53,6 +53,7 @@ qFacets plugin:
 [*] Add the facet perimeter to the set of exported values
 
 Various:
+[*] Option to ADD a global shift at saving time via the command line (https://www.cloudcompare.org/forum/viewtopic.php?t=4307)
 [*] Let the user choose the color scale in the '2.5D Volume computation' tool (https://www.cloudcompare.org/forum/viewtopic.php?t=4196)
 [*] Update the two-point-distance label 'in real time' when the mouse hovers points (https://www.cloudcompare.org/forum/viewtopic.php?t=3765)
 [*] Ability to change the mouse buttons mapping (http://www.cloudcompare.org/forum/viewtopic.php?t=2676)

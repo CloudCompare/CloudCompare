@@ -42,7 +42,7 @@ class StereogramParamsDlg : public QDialog, public Ui::StereogramParamsDlg
 public:
 
 	//! Default constructor
-	StereogramParamsDlg(QWidget* parent = 0)
+	StereogramParamsDlg(QWidget* parent = nullptr)
 		: QDialog(parent, Qt::Tool)
 		, Ui::StereogramParamsDlg()
 	{
@@ -58,7 +58,7 @@ class StereogramWidget : public QLabel
 public:
 
 	//! Default constructor
-	StereogramWidget(QWidget *parent = 0);
+	StereogramWidget(QWidget *parent = nullptr);
 
 	//! Destructor
 	virtual ~StereogramWidget();
@@ -72,7 +72,7 @@ public:
 	void getMeanDir(double& meanDip_deg, double& meanDipDir_deg) { meanDip_deg = m_meanDip_deg; meanDipDir_deg = m_meanDipDir_deg; }
 
 	//inherited from QWidget (to get a square widget!)
-	virtual int	heightForWidth (int w) const { return w; }
+	int	heightForWidth (int w) const override { return w; }
 
 	//! Sets density color scale
 	void setDensityColorScale(ccColorScale::Shared colorScale) { m_densityColorScale = colorScale; }
@@ -90,7 +90,7 @@ public:
 	void showHSVRing(bool state) { m_showHSVRing = state; }
 
 	//! Enables or not the mouse tracking mode
-	void enableMouseTracking(bool state, double dipSpan_deg = 30, double dipDirSpan_deg = 30);
+	void enableMouseTracking(bool state, double dipSpan_deg = 30.0, double dipDirSpan_deg = 30.0);
 
 	//! Sets tracked center position
 	void setTrackedCenter(double dip_deg, double dipDir_deg);
@@ -157,7 +157,7 @@ class StereogramDialog : public QDialog, public Ui::StereogramDialog
 public:
 
 	//! Default constructor
-	StereogramDialog(ccMainAppInterface* app/*=0*/);
+	StereogramDialog(ccMainAppInterface* app = nullptr);
 
 	//! Inits dialog
 	/** Warning: input 'facetGroup' should not be deleted before this dialog is closed!

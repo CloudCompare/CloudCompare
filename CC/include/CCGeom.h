@@ -230,6 +230,7 @@ public:
 	inline const Type& operator [] (unsigned i) const { return u[i]; }
 	//! Returns the angle to another vector (in radians - in [0, pi]
 	Type angle_rad(const Vector3Tpl& v) const { return vangle_rad(u, v.u); }
+	double angle_radd(const Vector3Tpl& v) const { return vangle_radd(u, v.u); }
 
 	static inline void vdivide(const Type p[], Type s, Type r[]) { r[0] = p[0] / s; r[1] = p[1] / s; r[2] = p[2] / s; }
 	static inline void vdivide(Type p[], Type s) { p[0] /= s; p[1] /= s; p[2] /= s; }
@@ -248,9 +249,13 @@ public:
 	static inline void vcombination(const Type p[], Type b, const Type q[], Type r[]) { r[0] = p[0] + (b*q[0]); r[1] = p[1] + (b*q[1]); r[2] = p[2] + (b*q[2]); }
 	static inline void vnormalize(Type p[]) { Type n = vnorm2(p); if (n > 0) vdivide(p, std::sqrt(n)); }
 	static inline Type vnorm2(const Type p[]) { return (p[0] * p[0]) + (p[1] * p[1]) + (p[2] * p[2]); }
+	static inline double vnorm2d(const Type p[]) { return (static_cast<double>(p[0]) * p[0]) + (static_cast<double>(p[1]) * p[1]) + (static_cast<double>(p[2]) * p[2]); }
 	static inline Type vdistance2(const Type p[], const Type q[]) { return ((p[0] - q[0])*(p[0] - q[0])) + ((p[1] - q[1])*(p[1] - q[1])) + ((p[2] - q[2])*(p[2] - q[2])); }
+	static inline double vdistance2d(const Type p[], const Type q[]) { return ((static_cast<double>(p[0]) - q[0]) * (static_cast<double>(p[0]) - q[0])) + ((static_cast<double>(p[1]) - q[1]) * (static_cast<double>(p[1]) - q[1])) + ((static_cast<double>(p[2]) - q[2]) * (static_cast<double>(p[2]) - q[2])); }
 	static inline Type vnorm(const Type p[]) { return std::sqrt(vnorm2(p)); }
+	static inline double vnormd(const Type p[]) { return std::sqrt(vnorm2d(p)); }
 	static inline Type vdistance(const Type p[], const Type q[]) { return std::sqrt(vdistance2(p, q)); }
+	static inline double vdistanced(const Type p[], const Type q[]) { return std::sqrt(vdistance2d(p, q)); }
 
 	static void vorthogonal(const Type p[], Type q[])
 	{
@@ -279,6 +284,18 @@ public:
 
 		Type cosAngle = vdot(p, q) / productNorm;
 		return acos(std::max(std::min(cosAngle, static_cast<Type>(1.0)), static_cast<Type>(-1.0)));
+	}
+
+	static double vangle_radd(const Type p[], const Type q[])
+	{
+		double productNorm = vnormd(p) * vnormd(q);
+		if (productNorm < std::numeric_limits<double>::epsilon())
+		{
+			return std::numeric_limits<double>::quiet_NaN();
+		}
+
+		double cosAngle = vdotd(p, q) / productNorm;
+		return acos(std::max(std::min(cosAngle, 1.0), -1.0));
 	}
 
 };

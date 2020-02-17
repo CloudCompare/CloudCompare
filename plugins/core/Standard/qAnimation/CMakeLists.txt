@@ -8,6 +8,8 @@ if (PLUGIN_STANDARD_QANIMATION)
 
 	project( QANIMATION_PLUGIN )
 
+	include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
+
 	if (WITH_FFMPEG_SUPPORT)
 		add_subdirectory( src/QTFFmpegWrapper )
 		include_directories( ${QTFFMPEG_LIB_SOURCE_DIR} )

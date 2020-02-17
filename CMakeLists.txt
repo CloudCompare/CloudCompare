@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-cmake_policy(PUSH)
+set (CC_CMAKE_SCRIPTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 project( CloudCompareProjects )
 
@@ -37,15 +37,6 @@ OPTION( OPTION_BUILD_CCVIEWER "Check to compile CCViewer project" ON )
 
 # Quad buffer stereo support
 OPTION( OPTION_GL_QUAD_BUFFER_SUPPORT "Check to compile CloudCompare and ccViewer with Quad Buffer support" OFF )
-
-# ScalarType as float (default) or double
-option( OPTION_SCALAR_DOUBLE "Check to define ScalarType as double" OFF )
-
-if ( OPTION_SCALAR_DOUBLE )
-	add_definitions( -DSCALAR_TYPE_DOUBLE )
-else()
-	add_definitions( -DSCALAR_TYPE_FLOAT )
-endif()
 
 # Define target folders
 # (now that ccViewer can have its own plugins, qCC and ccViewer must fall in separate folders!
@@ -94,6 +85,13 @@ include( cmake/CMakeInclude.cmake )
 
 add_subdirectory( CC )
 
+# Propagate the choice to use doubles for ScalarType
+if ( ${USE_SCALAR_TYPE_DOUBLE} )
+	add_definitions( -DSCALAR_TYPE_DOUBLE )
+else()
+	add_definitions( -DSCALAR_TYPE_FLOAT )
+endif()
+
 # Add external libraries
 include( cmake/CMakeExternalLibs.cmake )
 
@@ -117,6 +115,3 @@ add_subdirectory( qCC )
 if( ${OPTION_BUILD_CCVIEWER} )
 	add_subdirectory( ccViewer )
 endif()
-
-cmake_policy(POP)
-

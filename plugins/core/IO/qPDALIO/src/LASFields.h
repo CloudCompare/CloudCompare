@@ -43,6 +43,8 @@ static const char LAS_OFFSET_Z_META_DATA[] = "LAS.offset.z";
 static const char LAS_VERSION_MAJOR_META_DATA[] = "LAS.version.major";
 static const char LAS_VERSION_MINOR_META_DATA[] = "LAS.version.minor";
 static const char LAS_POINT_FORMAT_META_DATA[] = "LAS.point_format";
+static const char LAS_GLOBAL_ENCODING_META_DATA[] = "LAS.global_encoding";
+static const char LAS_PROJECT_UUID_META_DATA[] = "LAS.project_uuid";
 
 enum LAS_FIELDS {
 	LAS_X = 0,
@@ -105,7 +107,7 @@ struct LasField
 	//! Default constructor
 	LasField(LAS_FIELDS fieldType = LAS_INVALID, double defaultVal = 0, double min = 0.0, double max = -1.0, uint8_t _minPointFormat = 0)
 		: type(fieldType)
-		, sf(0)
+		, sf(nullptr)
 		, firstValue(0.0)
 		, minValue(min)
 		, maxValue(max)
@@ -216,6 +218,10 @@ struct LasField
 		}
 	}
 
+	static uint8_t VersionMinorForPointFormat(uint8_t pointFormat) {
+		return pointFormat >= 6 ? 4 : 2;
+	}
+
 	static uint8_t UpdateMinPointFormat(uint8_t minPointFormat, bool withRGB, bool withFWF, bool allowLegacyFormats = true)
 	{
 		//can we keep the (short) legacy formats?
@@ -285,6 +291,22 @@ struct LasField
 		}
 
 		return minPointFormat;
+	}
+
+	static QString SanitizeString(QString str)
+	{
+		QString sanitizedStr;
+		if (str.size() > 32)
+		{
+			sanitizedStr = str.left(32);
+		}
+		else
+		{
+			sanitizedStr = str;
+		}
+		sanitizedStr.replace('=', '_');
+
+		return sanitizedStr;
 	}
 
 	LAS_FIELDS type;

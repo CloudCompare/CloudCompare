@@ -6,6 +6,8 @@ option( PLUGIN_STANDARD_QHPR "Check to install qHPR plugin" OFF )
 if (PLUGIN_STANDARD_QHPR)
     project( QHPR_PLUGIN )
     	
+	include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
+
 	include_directories( src )
 	
 	add_subdirectory( src )

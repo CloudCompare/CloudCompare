@@ -136,12 +136,6 @@ ccComparisonDlg::ccComparisonDlg(	ccHObject* compEntity,
 	connect(maxDistCheckBox,		&QCheckBox::toggled,					this,	&ccComparisonDlg::maxDistUpdated);
 	connect(localModelComboBox, static_cast<void (QComboBox::*)(int)> (&QComboBox::currentIndexChanged),		this,	&ccComparisonDlg::locaModelChanged);
 	connect(maxSearchDistSpinBox, static_cast<void (QDoubleSpinBox::*)(double)> (&QDoubleSpinBox::valueChanged),this,	&ccComparisonDlg::maxDistUpdated);
-
-	//be sure to show the dialog before computing the approx distances
-	//(otherwise the progress bars appear anywhere!)
-	QTimer::singleShot(0, this, &ccComparisonDlg::computeApproxDistances); //singleshot 0 time will fire once after all events in the queue are processed
-																		   //compute approximate results and unlock GUI
-					
 }
 
 ccComparisonDlg::~ccComparisonDlg()

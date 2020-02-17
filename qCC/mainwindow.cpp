@@ -8805,7 +8805,16 @@ void MainWindow::doActionCloudCloudDist()
 	//assert(!m_compDlg);
 	if (m_compDlg)
 		delete m_compDlg;
+
 	m_compDlg = new ccComparisonDlg(compCloud, refCloud, ccComparisonDlg::CLOUDCLOUD_DIST, this);
+	if (!m_compDlg->initDialog())
+	{
+		ccConsole::Error("Failed to initialize comparison dialog");
+		delete m_compDlg;
+		m_compDlg = nullptr;
+		return;
+	}
+
 	connect(m_compDlg, &QDialog::finished, this, &MainWindow::deactivateComparisonMode);
 	m_compDlg->show();
 	//cDlg.setModal(false);
@@ -8872,6 +8881,14 @@ void MainWindow::doActionCloudMeshDist()
 	if (m_compDlg)
 		delete m_compDlg;
 	m_compDlg = new ccComparisonDlg(compEnt, refMesh, ccComparisonDlg::CLOUDMESH_DIST, this);
+	if (!m_compDlg->initDialog())
+	{
+		ccConsole::Error("Failed to initialize comparison dialog");
+		delete m_compDlg;
+		m_compDlg = nullptr;
+		return;
+	}
+
 	connect(m_compDlg, &QDialog::finished, this, &MainWindow::deactivateComparisonMode);
 	m_compDlg->show();
 

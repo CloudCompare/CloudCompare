@@ -179,8 +179,8 @@ void ccGraphicalTransformationTool::populateAdvModeItems()
 			for (size_t i = 0; i < m_planesAndLineSegments.size(); ++i)
 			{
 				QString item = QString("%1 (ID=%2)").arg(m_planesAndLineSegments[i]->getName()).arg(m_planesAndLineSegments[i]->getUniqueID());
-				advTranslateComboBox->insertItem(i+1, item, QVariant(m_planesAndLineSegments[i]->getUniqueID()));
-				advRotateComboBox->insertItem(i+1, item, QVariant(m_planesAndLineSegments[i]->getUniqueID()));
+				advTranslateComboBox->insertItem(static_cast<int>(i) + 1, item, QVariant(m_planesAndLineSegments[i]->getUniqueID()));
+				advRotateComboBox->insertItem(static_cast<int>(i) + 1, item, QVariant(m_planesAndLineSegments[i]->getUniqueID()));
 			}
 		}
 	}
@@ -188,8 +188,7 @@ void ccGraphicalTransformationTool::populateAdvModeItems()
 
 ccGLMatrixd ccGraphicalTransformationTool::arbitraryVectorTranslation(const CCVector3& vec)
 {
-	PointCoordinateType theta;
-	PointCoordinateType phi;
+	double theta = 0;
 
 	if (std::abs(vec.z) < ZERO_TOLERANCE)
 	{
@@ -211,15 +210,17 @@ ccGLMatrixd ccGraphicalTransformationTool::arbitraryVectorTranslation(const CCVe
 		theta = std::atan(vec.y / vec.z);
 		if (vec.y < 0 && vec.z < 0)
 		{
-			theta = theta - M_PI;
+			theta = M_PI + theta;
 		}
 		else if (vec.z < 0 && vec.y > 0)
 		{
-			theta = M_PI + theta;
+			theta = M_PI_2 - theta;
 		}
 	}
 
-	PointCoordinateType phiDenominator = std::sqrt((vec.y * vec.y) + (vec.z * vec.z));
+	double phiDenominator = std::sqrt((vec.y * vec.y) + (vec.z * vec.z));
+	double phi = 0;
+
 	if (phiDenominator < ZERO_TOLERANCE)
 	{
 		if (std::abs(vec.x) < ZERO_TOLERANCE)
@@ -239,7 +240,6 @@ ccGLMatrixd ccGraphicalTransformationTool::arbitraryVectorTranslation(const CCVe
 	{
 		phi = std::atan(vec.x / phiDenominator);
 	}
-	
 
 	ccGLMatrixd xRotation = ccGLMatrixd();
 	xRotation.setColumn(1, CCVector3d(0, std::cos(theta), -std::sin(theta)));

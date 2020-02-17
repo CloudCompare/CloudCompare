@@ -26,12 +26,16 @@ function( target_link_GDAL ) # 2 arguments: ARGV0 = project name / ARGV1 = base 
 			if( WIN32 )
 				#install DLLs
 				if ( ARGV1 )
+					message( STATUS "Looking for GDAL DLLs" )
+
 					file( GLOB GDAL_DLL_FILES ${GDAL_BIN_DIR}/*.dll )
+					message( STATUS "Looked in: " ${GDAL_BIN_DIR} )
+					message( STATUS ${GDAL_DLL_FILES} )
+
 					file( GLOB GDAL_DLL_FILES2 ${GDAL_INCLUDE_DIR}/../bin/*.dll )
-					message( "GDAL DLLs" )
-					message( "Looked in: " ${GDAL_BIN_DIR} )
-					message( ${GDAL_DLL_FILES} )
-					message( ${GDAL_DLL_FILES2} )
+					message( STATUS "Looked in: " ${GDAL_INCLUDE_DIR}/../bin )
+					message( STATUS ${GDAL_DLL_FILES2} )
+
 					copy_files("${GDAL_DLL_FILES}" ${ARGV1} ) #mind the quotes!
 					copy_files("${GDAL_DLL_FILES2}" ${ARGV1} ) #mind the quotes!
 				endif()

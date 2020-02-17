@@ -17,6 +17,8 @@ if (PLUGIN_STANDARD_QHOUGH_NORMALS)
 
 	project( QHOUGH_NORMALS_PLUGIN )
 
+	include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
+
 	include_directories( src )
 	include_directories( src/normals_Hough )
 	

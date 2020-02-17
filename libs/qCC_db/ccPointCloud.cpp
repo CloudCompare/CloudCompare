@@ -688,11 +688,11 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				FWFDataContainer* mergedContainer = new FWFDataContainer;
 				try
 				{
+					fwfDataOffset = fwfData()->size();
 					mergedContainer->reserve(fwfData()->size() + addedCloud->fwfData()->size());
 					mergedContainer->insert(mergedContainer->end(), fwfData()->begin(), fwfData()->end());
 					mergedContainer->insert(mergedContainer->end(), addedCloud->fwfData()->begin(), addedCloud->fwfData()->end());
 					fwfData() = SharedFWFDataContainer(mergedContainer);
-					fwfDataOffset = addedCloud->fwfData()->size();
 				}
 				catch (const std::bad_alloc&)
 				{
@@ -725,9 +725,9 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 						std::queue<uint8_t> freeDescriptorIDs;
 						for (uint8_t k = 0; k < 255; ++k)
 						{
-							if (!m_fwfDescriptors.contains(k))
+							if (!m_fwfDescriptors.contains(k + 1))
 							{
-								freeDescriptorIDs.push(k);
+								freeDescriptorIDs.push(k + 1);
 								//if we have found enough free descriptor IDs
 								if (freeDescriptorIDs.size() == newKeyCount)
 								{

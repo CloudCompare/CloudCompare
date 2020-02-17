@@ -51,6 +51,7 @@
 #include <pdal/io/BufferReader.hpp>
 #include <pdal/Filter.hpp>
 #include <pdal/filters/StreamCallbackFilter.hpp>
+
 Q_DECLARE_METATYPE(pdal::SpatialReference)
 
 using namespace pdal::Dimension;
@@ -65,6 +66,33 @@ using namespace pdal;
 
 static const char s_LAS_SRS_Key[] = "LAS.spatialReference.nosave"; //DGM: added the '.nosave' suffix because this custom type can't be streamed properly
 
+//! Custom ("Extra bytes") field (EVLR)
+struct ExtraLasField : LasField
+{
+	//! Default constructor
+	ExtraLasField(QString name, Id id, double defaultVal = 0.0, double min = 0.0, double max = -1.0)
+		: LasField(LAS_EXTRA, defaultVal, min, max)
+		, fieldName(SanitizeString(name))
+		, pdalId(id)
+		, scale(1.0)
+		, offset(0.0)
+	{
+		if (fieldName != name)
+		{
+			ccLog::Warning(QString("Extra field '%1' renamed '%2' to comply to LAS specifications").arg(name).arg(fieldName));
+		}
+	}
+
+	typedef QSharedPointer<ExtraLasField> Shared;
+
+	inline QString getName() const override { return fieldName; }
+
+	QString fieldName;
+	Id pdalId;
+	double scale;
+	double offset;
+};
+
 //! LAS Save dialog
 class LASSaveDlg : public QDialog, public Ui::SaveLASFileDialog
 {
@@ -76,7 +104,6 @@ public:
 		setupUi(this);
 		clearEVLRs();
 	}
-
 
 	void clearEVLRs()
 	{
@@ -130,28 +157,6 @@ bool LASFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) con
 	}
 	return false;
 }
-
-//! Custom ("Extra bytes") field
-struct ExtraLasField : LasField
-{
-	//! Default constructor
-	ExtraLasField(QString name, Id id, double defaultVal = 0.0, double min = 0.0, double max = -1.0)
-	    : LasField(LAS_EXTRA, defaultVal, min, max)
-	    , fieldName(name)
-	    , pdalId(id)
-	    , scale(1.0)
-	    , offset(0.0)
-	{}
-
-	typedef QSharedPointer<ExtraLasField> Shared;
-
-	inline QString getName() const override { return fieldName; }
-
-	QString fieldName;
-	Id pdalId;
-	double scale;
-	double offset;
-};
 
 //! Semi persistent save dialog
 QSharedPointer<LASSaveDlg> s_saveDlg(nullptr);
@@ -254,7 +259,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 			auto pos = std::find_if(fieldsToSave.begin(), fieldsToSave.end(), name_matches);
 			if (pos == fieldsToSave.end())
 			{
-				auto *extraField = new ExtraLasField(QString(sf->getName()), Id::Unknown);
+				ExtraLasField::Shared extraField(new ExtraLasField(QString(sf->getName()), Id::Unknown));
 				extraFields.emplace_back(extraField);
 				extraFields.back()->sf = sf;
 			}
@@ -592,8 +597,8 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		if (theCloud->hasMetaData(s_LAS_SRS_Key))
 		{
 			//restore the SRS if possible
-			QString srs = theCloud->getMetaData(s_LAS_SRS_Key).value<QString>();
-			writerOptions.add("a_srs", srs.toStdString());
+			QString wkt = theCloud->getMetaData(s_LAS_SRS_Key).value<QString>();
+			writerOptions.add("a_srs", wkt.toStdString());
 		}
 		writerOptions.add("dataformat_id", minPointFormat);
 
@@ -607,6 +612,21 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 
 		writerOptions.add("filename", filename.toStdString());
 		writerOptions.add("extra_dims", "all");
+
+		if (theCloud->hasMetaData(LAS_GLOBAL_ENCODING_META_DATA))
+		{
+			bool ok = false;
+			unsigned int global_encoding = theCloud->getMetaData(LAS_GLOBAL_ENCODING_META_DATA).toUInt(&ok);
+			if (ok) {
+				writerOptions.add("global_encoding", global_encoding);
+			}
+		}
+
+		if (theCloud->hasMetaData(LAS_PROJECT_UUID_META_DATA))
+		{
+			QString uuid = theCloud->getMetaData(LAS_PROJECT_UUID_META_DATA).toString();
+			writerOptions.add("project_id", uuid.toStdString());
+		}
 
 		if (theCloud->hasMetaData(LAS_VERSION_MINOR_META_DATA))
 		{
@@ -1327,11 +1347,15 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 
 				//save the Spatial reference as meta-data
 				SpatialReference srs = lasHeader.srs();
-				if (srs.valid())
+				if (!srs.empty())
 				{
-					QString proj4 = QString::fromStdString(srs.getProj4());
-					ccLog::Print("[LAS] Spatial reference: " + proj4);
-					pointChunk.loadedCloud->setMetaData(s_LAS_SRS_Key, proj4);
+					QString wkt = QString::fromStdString(srs.getWKT());
+					ccLog::Print("[LAS] Spatial reference: " + wkt);
+					pointChunk.loadedCloud->setMetaData(s_LAS_SRS_Key, wkt);
+				}
+				else if (lasHeader.incompatibleSrs())
+				{
+					ccLog::Warning("[LAS] Incompatible spatial reference");
 				}
 				else
 				{
@@ -1607,6 +1631,15 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 					loadedCloud->setMetaData(LAS_OFFSET_X_META_DATA, QVariant(lasOffset.x));
 					loadedCloud->setMetaData(LAS_OFFSET_Y_META_DATA, QVariant(lasOffset.y));
 					loadedCloud->setMetaData(LAS_OFFSET_Z_META_DATA, QVariant(lasOffset.z));
+					loadedCloud->setMetaData(LAS_GLOBAL_ENCODING_META_DATA, QVariant(lasHeader.globalEncoding()));
+
+					const pdal::Uuid projectUUID = lasHeader.projectId();
+					if (!projectUUID.isNull()) {
+						loadedCloud->setMetaData(
+							LAS_PROJECT_UUID_META_DATA,
+							QVariant(QString::fromStdString(projectUUID.toString()))
+						);
+					}
 
 					loadedCloud->setMetaData(LAS_VERSION_MAJOR_META_DATA, QVariant(lasHeader.versionMajor()));
 					loadedCloud->setMetaData(LAS_VERSION_MINOR_META_DATA, QVariant(lasHeader.versionMinor()));

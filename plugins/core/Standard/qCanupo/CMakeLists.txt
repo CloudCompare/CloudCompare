@@ -7,6 +7,8 @@ if (PLUGIN_STANDARD_QCANUPO)
 	#CloudCompare 'Canupo' plugin
 	project( QCANUPO_PLUGIN )
 	
+	include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
+
 	set( DLIB_ROOT "" CACHE PATH "DLib library root directory" )
 	if ( NOT DLIB_ROOT )
 		message( SEND_ERROR "No DLib library root specified (DLIB_ROOT)" )

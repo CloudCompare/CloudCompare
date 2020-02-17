@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.0)
 #CloudCompare PCL I/O plugin (for PCD files)
 project( QPCL_IO_PLUGIN )
 
+include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
+
 include_directories( ${QPCL_PLUGIN_UTILS_LIB_SOURCE_DIR}/filters )
 include_directories( ${QPCL_PLUGIN_UTILS_LIB_SOURCE_DIR}/utils )
 include_directories( ${PCL_INCLUDE_DIRS} )

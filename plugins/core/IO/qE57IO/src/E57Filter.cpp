@@ -186,7 +186,7 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 		if (Tshift.norm2d() != 0)
 		{
 			shiftedPoseMat = localPoseMat;
-			shiftedPoseMat.setTranslation((-Tshift).u);
+			shiftedPoseMat.setTranslation((localPoseMat.getTranslationAsVec3D() - Tshift).u);
 			SavePoseInformation(scanNode, imf, shiftedPoseMat);
 		}
 		else if (hasPoseMat)
@@ -194,7 +194,6 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 			shiftedPoseMat = localPoseMat;
 			SavePoseInformation(scanNode, imf, shiftedPoseMat);
 		}
-
 	}
 
 	CCVector3d bbMin, bbMax;
@@ -205,7 +204,7 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 		{
 			const CCVector3* Plocal = cloud->getPointPersistentPtr(i);
 			CCVector3d Pg = CCVector3d::fromArray(Plocal->u) / globalScale;
-			Pg = shiftedPoseMat * Pg;
+			//Pg = shiftedPoseMat * Pg; //DGM: according to E57 specifications, the bounding-box is local
 			if (i != 0)
 			{
 				bbMin.x = std::min(bbMin.x, Pg.x);

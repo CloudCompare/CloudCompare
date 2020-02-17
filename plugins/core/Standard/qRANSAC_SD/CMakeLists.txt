@@ -6,6 +6,8 @@ option( PLUGIN_STANDARD_QRANSAC_SD "Check to install qRansac_SD (Shape Detection
 if (PLUGIN_STANDARD_QRANSAC_SD)
 	project( QRANSAC_SD_PLUGIN )
 
+	include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
+
 	add_subdirectory (RANSAC_SD_orig)
 
 	include( ../../../CMakePluginTpl.cmake )

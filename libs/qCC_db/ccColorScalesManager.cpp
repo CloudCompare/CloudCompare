@@ -339,6 +339,10 @@ ccColorScalesManager::ccColorScalesManager()
 		addScale(Create(DIP_BRYW));
 		addScale(Create(DIP_DIR_REPEAT));
 		addScale(Create(VIRIDIS));
+		addScale(Create(BROWN_YELLOW));
+		addScale(Create(YELLOW_BROWN));
+		addScale(Create(TOPO_LANDSERF));
+		addScale(Create(HIGH_CONTRAST));
 	}
 }
 
@@ -533,6 +537,17 @@ ccColorScale::Shared ccColorScalesManager::Create(DEFAULT_SCALES scaleType)
 				return QStringLiteral("Dip direction (repeat) [0-360]");
 			case VIRIDIS:
 				return QStringLiteral("Viridis");
+			case BROWN_YELLOW:
+				return QStringLiteral("Brown>Yellow");
+			case YELLOW_BROWN:
+				return QStringLiteral("Yellow>Brown");
+			case TOPO_LANDSERF:
+				return QStringLiteral("Topo landserf");
+			case HIGH_CONTRAST:
+				return QStringLiteral("High contrast");
+			default:
+				assert(false);
+				break;
 		}
 		return QString();
 	}();
@@ -648,8 +663,41 @@ ccColorScale::Shared ccColorScalesManager::Create(DEFAULT_SCALES scaleType)
 		}
 		break;
 	}
+	case BROWN_YELLOW:
+		scale->insert(ccColorScaleElement(0.0 , qRgb(153, 51 , 3   )), false);
+		scale->insert(ccColorScaleElement(0.25, qRgb(217, 91 , 13  )), false);
+		scale->insert(ccColorScaleElement(0.5 , qRgb(254, 151, 41  )), false);
+		scale->insert(ccColorScaleElement(0.75, qRgb(254, 217, 142 )), false);
+		scale->insert(ccColorScaleElement(1.0 , qRgb(255, 255, 212 )), false);
+		break;
+	case YELLOW_BROWN:
+		scale->insert(ccColorScaleElement(0.0 , qRgb(255, 255, 212 )), false);
+		scale->insert(ccColorScaleElement(0.25, qRgb(254, 217, 142 )), false);
+		scale->insert(ccColorScaleElement(0.5 , qRgb(254, 151, 41  )), false);
+		scale->insert(ccColorScaleElement(0.75, qRgb(217, 91 , 13  )), false);
+		scale->insert(ccColorScaleElement(1.0 , qRgb(153, 51 , 3   )), false);
+		break;
+	case TOPO_LANDSERF:
+		scale->insert(ccColorScaleElement(0.0 , qRgb(109, 158, 93  )), false);
+		scale->insert(ccColorScaleElement(0.25, qRgb(255, 255, 127 )), false);
+		scale->insert(ccColorScaleElement(0.5 , qRgb(194, 108, 54  )), false);
+		scale->insert(ccColorScaleElement(0.75, qRgb(85 , 63 , 50  )), false);
+		scale->insert(ccColorScaleElement(1.0 , qRgb(255, 255, 255 )), false);
+		break;
+	case HIGH_CONTRAST:
+		scale->insert(ccColorScaleElement(0.0 , qRgb(170, 255, 255 )), false);
+		scale->insert(ccColorScaleElement(0.01, qRgb(158, 158, 158 )), false);
+		scale->insert(ccColorScaleElement(0.02, qRgb(0  , 0  , 127 )), false);
+		scale->insert(ccColorScaleElement(0.04, qRgb(0  , 255, 0   )), false);
+		scale->insert(ccColorScaleElement(0.08, qRgb(0  , 85 , 0   )), false);
+		scale->insert(ccColorScaleElement(0.16, qRgb(255, 255, 0   )), false);
+		scale->insert(ccColorScaleElement(0.32, qRgb(255, 0  , 0   )), false);
+		scale->insert(ccColorScaleElement(0.5 , qRgb(135, 0  , 0   )), false);
+		scale->insert(ccColorScaleElement(1.0 , qRgb(232, 232, 232 )), false);
+		break;
 	default:
 		assert(false);
+		break;
 	}
 
 	//don't forget to update internal representation!

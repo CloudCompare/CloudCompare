@@ -278,14 +278,46 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 			{
 				ccHObject::Container meshGroup;
 				unsigned meshCount = group->filterChildren(meshGroup, true, CC_TYPES::MESH);
+				unsigned planeCount = 1;
+				unsigned sphereCount = 1;
+				unsigned cylinderCount = 1;
+				unsigned coneCount = 1;
+				unsigned torusCount = 1;
+
 				for (auto meshObj : meshGroup)
 				{
 					auto mesh = ccHObjectCaster::ToMesh(meshObj);
-					CLMeshDesc clMesh(mesh, clCloud.basename + mesh->getName(), clCloud.path);
+					QString suffix;
+					if (meshObj->isA(CC_TYPES::PLANE))
+					{
+						suffix = QString("_%1").arg(planeCount);
+						planeCount++;
+					}
+					else if (meshObj->isA(CC_TYPES::SPHERE))
+					{
+						suffix = QString("_%1").arg(sphereCount);
+						sphereCount++;
+					}
+					else if (meshObj->isA(CC_TYPES::CYLINDER))
+					{
+						suffix = QString("_%1").arg(cylinderCount);
+						cylinderCount++;
+					}
+					else if (meshObj->isA(CC_TYPES::CONE))
+					{
+						suffix = QString("_%1").arg(coneCount);
+						coneCount++;
+					}
+					else if (meshObj->isA(CC_TYPES::TORUS))
+					{
+						suffix = QString("_%1").arg(torusCount);
+						torusCount++;
+					}
+					CLMeshDesc clMesh(mesh, clCloud.basename + "_" + clCloud.pc->getName() + "_" + mesh->getName() + suffix, clCloud.path);
 					cmd.meshes().push_back(clMesh);
 					if (cmd.autoSaveMode())
 					{
-						QString errorStr = cmd.exportEntity(clMesh); // The original cloud may have had normals added
+						QString errorStr = cmd.exportEntity(clMesh);
 						if (!errorStr.isEmpty())
 							cmd.warning(errorStr);
 					}

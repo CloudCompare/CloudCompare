@@ -8,6 +8,8 @@ if (PLUGIN_GL_QSSAO)
     
     project( QSSAO_GL_PLUGIN )
     
+	include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
+
     set( CC_SHADER_FOLDER SSAO )
     include( ../../../CMakePluginTpl.cmake )
     

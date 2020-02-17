@@ -5,6 +5,8 @@ option( PLUGIN_IO_QFBX "Install qFBXIO plugin to read & write AutoDesk FBX files
 if ( PLUGIN_IO_QFBX )
 	project( QFBX_IO_PLUGIN )
 
+	include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
+
 	set( CC_IS_IO_PLUGIN 1 )
 
 	# FBX SDK

@@ -5,7 +5,10 @@ include_directories( ${CC_CORE_LIB_SOURCE_DIR}/include )
 
 project( PCV_LIB )
 
+# no Qt stuff here
 set( CMAKE_AUTOMOC OFF )
+set( CMAKE_AUTOUIC OFF )
+set( CMAKE_AUTORCC OFF )
 
 file( GLOB header_list *.h )
 file( GLOB source_list *.cpp )

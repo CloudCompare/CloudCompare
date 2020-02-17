@@ -897,6 +897,17 @@ public:	/***** CELLS POSITION HANDLING *****/
 	**/
 	void computeCellLimits(CellCode code, unsigned char level, CCVector3& cellMin, CCVector3& cellMax, bool isCodeTruncated = false) const;
 
+	//! Returns the index of a given cell represented by its code
+	/** The index is found thanks to a binary search. The index of an existing cell
+		is between 0 and the number of points projected in the octree minus 1. If
+		the cell code cannot be found in the octree structure, then the method returns
+		an index equal to the number of projected points (m_numberOfProjectedPoints).
+		\param truncatedCellCode truncated cell code (i.e. original cell code shifted of 'bitDec' bits)
+		\param bitDec binary shift corresponding to the level of subdivision (see GET_BIT_SHIFT)
+		\return the index of the cell (or 'm_numberOfProjectedPoints' if none found)
+	**/
+	unsigned getCellIndex(CellCode truncatedCellCode, unsigned char bitDec) const;
+
 	/**** OCTREE DIAGNOSIS ****/
 
 	//! Determines the best level of subdivision of the octree at which to apply the nearest neighbours search algorithm (inside a sphere) depending on the sphere radius
@@ -1245,17 +1256,6 @@ protected:
 												int minNeighbourhoodLength,
 												int maxNeighbourhoodLength) const;
 #endif
-
-	//! Returns the index of a given cell represented by its code
-	/** The index is found thanks to a binary search. The index of an existing cell
-		is between 0 and the number of points projected in the octree minus 1. If
-		the cell code cannot be found in the octree structure, then the method returns
-		an index equal to the number of projected points (m_numberOfProjectedPoints).
-		\param truncatedCellCode truncated cell code (i.e. original cell code shifted of 'bitDec' bits)
-		\param bitDec binary shift corresponding to the level of subdivision (see GET_BIT_SHIFT)
-		\return the index of the cell (or 'm_numberOfProjectedPoints' if none found)
-	**/
-	unsigned getCellIndex(CellCode truncatedCellCode, unsigned char bitDec) const;
 
 	//! Returns the index of a given cell represented by its code
 	/** Same algorithm as the other "getCellIndex" method, but in an optimized form.

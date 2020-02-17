@@ -260,11 +260,11 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 			}
 			if (params.epsilon < 0.0f)
 			{
-				params.epsilon = (0.005 * scale);
+				params.epsilon = (0.005f * scale);
 			}
 			if (params.bitmapEpsilon < 0.0f)
 			{
-				params.bitmapEpsilon = (0.01 * scale);
+				params.bitmapEpsilon = (0.01f * scale);
 			}
 
 			ccHObject* group = qRansacSD::executeRANSAC(clCloud.pc, params, cmd.silentMode());
@@ -274,20 +274,23 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 				if (!errorStr.isEmpty())
 					cmd.warning(errorStr);
 			}
-			ccHObject::Container meshGroup;
-			unsigned meshCount = group->filterChildren(meshGroup, true, CC_TYPES::MESH);
-			for (auto meshObj : meshGroup)
+			if (group)
 			{
-				auto mesh = ccHObjectCaster::ToMesh(meshObj);
-				CLMeshDesc clMesh(mesh, clCloud.basename + mesh->getName(), clCloud.path);
-				cmd.meshes().push_back(clMesh);
-				if (cmd.autoSaveMode())
+				ccHObject::Container meshGroup;
+				unsigned meshCount = group->filterChildren(meshGroup, true, CC_TYPES::MESH);
+				for (auto meshObj : meshGroup)
 				{
-					QString errorStr = cmd.exportEntity(clMesh); // The original cloud may have had normals added
-					if (!errorStr.isEmpty())
-						cmd.warning(errorStr);
+					auto mesh = ccHObjectCaster::ToMesh(meshObj);
+					CLMeshDesc clMesh(mesh, clCloud.basename + mesh->getName(), clCloud.path);
+					cmd.meshes().push_back(clMesh);
+					if (cmd.autoSaveMode())
+					{
+						QString errorStr = cmd.exportEntity(clMesh); // The original cloud may have had normals added
+						if (!errorStr.isEmpty())
+							cmd.warning(errorStr);
+					}
 				}
-			}			
+			}
 		}
 
 

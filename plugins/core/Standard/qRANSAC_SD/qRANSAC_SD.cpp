@@ -196,7 +196,7 @@ void qRansacSD::doAction()
 }
 
 
-ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, RansacParams& params, bool silent)
+ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& params, bool silent)
 {
 	//consistency check
 	{

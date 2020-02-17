@@ -78,7 +78,7 @@ public:
 	virtual QList<QAction *> getActions() override;
 	virtual void registerCommands(ccCommandLineInterface* cmd) override;
 
-	static ccHObject* executeRANSAC(ccPointCloud* ccPC, RansacParams& params, bool silent = false);
+	static ccHObject* executeRANSAC(ccPointCloud* ccPC, const RansacParams& params, bool silent = false);
 protected slots:
 
 	//! Slot called when associated ation is triggered

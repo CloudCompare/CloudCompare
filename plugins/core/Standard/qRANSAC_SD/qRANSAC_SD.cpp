@@ -202,7 +202,9 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 	{
 		unsigned char primCount = 0;
 		for (unsigned char k = 0; k < 5; ++k)
-			primCount += (unsigned)params.primEnabled[k];
+		{
+			primCount += static_cast<unsigned>(params.primEnabled[k]);
+		}
 		if (primCount == 0)
 		{
 			ccLog::Error("[qRansacSD] No primitive type selected!");

@@ -68,10 +68,10 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 			OUT_CLOUD_DIR << OUT_MESH_DIR << OUT_GROUP_DIR << OUT_PAIR_DIR << OUTPUT_INDIVIDUAL_PRIMITIVES <<
 			OUTPUT_INDIVIDUAL_SUBCLOUDS << OUTPUT_GROUPED << OUTPUT_INDIVIDUAL_PAIRED_CLOUD_PRIMITIVE;
 		QStringList primitiveNames = QStringList() << PRIM_PLANE << PRIM_SPHERE << PRIM_CYLINDER << PRIM_CONE << PRIM_TORUS;
-		QString outputCloudsDir = "";
-		QString outputMeshesDir = "";
-		QString outputPairDir = "";
-		QString outputGroupDir = "";
+		QString outputCloudsDir;
+		QString outputMeshesDir;
+		QString outputPairDir;
+		QString outputGroupDir;
 		bool outputIndividualClouds = false;
 		bool outputIndividualPrimitives = false;
 		bool outputIndividualPairs = false;
@@ -352,7 +352,7 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 		unsigned char primCount = 0;
 		for (unsigned char k = 0; k < 5; ++k)
 		{
-			primCount += (unsigned)params.primEnabled[k];
+			primCount += static_cast<unsigned>(params.primEnabled[k]);
 		}
 		if (primCount == 0)
 		{

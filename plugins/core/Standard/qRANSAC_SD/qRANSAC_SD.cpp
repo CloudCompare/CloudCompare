@@ -252,6 +252,9 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 				Pt.normal[1] = static_cast<float>(N.y);
 				Pt.normal[2] = static_cast<float>(N.z);
 			}
+#ifdef POINTSWITHINDEX
+			Pt.index = i;
+#endif
 			cloud.push_back(Pt);
 		}
 
@@ -459,32 +462,65 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 			shape->Description(&desc);
 
 			//new cloud for sub-part
-			ccPointCloud* pcShape = new ccPointCloud(desc.c_str());
-
+			ccPointCloud* pcShape = nullptr;
+			bool saveNormals = true;
+#ifdef POINTSWITHINDEX
+			CCLib::ReferenceCloud* refPcShape= new CCLib::ReferenceCloud(ccPC);
 			//we fill cloud with sub-part points
+			if (!refPcShape->reserve(static_cast<unsigned>(shapePointsCount)))
+			{
+				ccLog::Error("[qRansacSD] Not enough memory!");
+				delete refPcShape;
+				break;
+			}
+
+			for (unsigned j = 0; j < shapePointsCount; ++j)
+			{
+				refPcShape->addPointIndex(cloud[count - 1 - j].index);
+			}
+			int warnings = 0;
+			pcShape = ccPC->partialClone(refPcShape, &warnings);
+			if (warnings != 0)
+			{
+				if ((warnings & ccPointCloud::WRN_OUT_OF_MEM_FOR_NORMALS) == ccPointCloud::WRN_OUT_OF_MEM_FOR_NORMALS)
+				{
+					saveNormals = false;
+				}
+			}
+			pcShape->setName(desc.c_str());
+#else
+			pcShape = new ccPointCloud(desc.c_str());
 			if (!pcShape->reserve(static_cast<unsigned>(shapePointsCount)))
 			{
 				ccLog::Error("[qRansacSD] Not enough memory!");
 				delete pcShape;
 				break;
 			}
-			bool saveNormals = pcShape->reserveTheNormsTable();
+			saveNormals = pcShape->reserveTheNormsTable();
 
 			for (unsigned j = 0; j < shapePointsCount; ++j)
 			{
 				pcShape->addPoint(CCVector3::fromArray(cloud[count - 1 - j].pos));
 				if (saveNormals)
+				{
 					pcShape->addNorm(CCVector3::fromArray(cloud[count - 1 - j].normal));
-			}
+				}
 
-			//random color
-			ccColor::Rgb col = ccColor::Generator::Random();
-			pcShape->setRGBColor(col);
-			pcShape->showColors(true);
-			pcShape->showNormals(saveNormals);
-			pcShape->setVisible(true);
+			}
 			pcShape->setGlobalShift(globalShift);
 			pcShape->setGlobalScale(globalScale);
+#endif
+			//random color
+			ccColor::Rgb col = ccColor::Generator::Random();
+			if (params.randomColor)
+			{
+				pcShape->setRGBColor(col);
+				pcShape->showSF(false);
+				pcShape->showColors(true);
+			}
+			pcShape->showNormals(saveNormals);
+			pcShape->setVisible(true);
+			
 
 			//convert detected primitive into a CC primitive type
 			ccGenericPrimitive* prim = nullptr;

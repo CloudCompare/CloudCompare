@@ -215,7 +215,7 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 						dir.mkpath(arg);
 					}
 					outputCloudsDir = dir.cleanPath(arg);
-					cmd.print(QObject::tr("\t%1 : %2").arg(OUT_GROUP_DIR, outputCloudsDir));
+					cmd.print(QObject::tr("\t%1 : %2").arg(OUT_CLOUD_DIR, outputCloudsDir));
 					outputIndividualClouds = true;
 				}
 				else if (param == OUT_MESH_DIR)
@@ -232,7 +232,7 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 						dir.mkpath(arg);
 					}
 					outputMeshesDir = dir.cleanPath(arg);
-					cmd.print(QObject::tr("\t%1 : %2").arg(OUT_GROUP_DIR, outputMeshesDir));
+					cmd.print(QObject::tr("\t%1 : %2").arg(OUT_MESH_DIR, outputMeshesDir));
 					outputIndividualPrimitives = true;
 				}
 				else if (param == OUT_GROUP_DIR)
@@ -356,12 +356,12 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 		}
 		if (primCount == 0)
 		{
-			cmd.print(QObject::tr("\tDefault Shape Search == : %1").arg(PRIM_PLANE));
+			cmd.print(QObject::tr("\tDefault Shape Search == %1").arg(PRIM_PLANE));
 			params.primEnabled[qRansacSD::RPT_PLANE] = true;
 		}
 		if (!outputIndividualClouds && !outputIndividualPrimitives && !outputGrouped && !outputIndividualPairs)
 		{
-			cmd.print(QObject::tr("\tDefault output == : %1").arg(OUTPUT_GROUPED));
+			cmd.print(QObject::tr("\tDefault output == %1").arg(OUTPUT_GROUPED));
 			outputGrouped = true;
 		}
 

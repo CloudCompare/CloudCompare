@@ -5,7 +5,12 @@ option( PLUGIN_STANDARD_QRANSAC_SD "Check to install qRansac_SD (Shape Detection
 # CloudCompare 'Ransac Shape Detection' plugin
 if (PLUGIN_STANDARD_QRANSAC_SD)
 	project( QRANSAC_SD_PLUGIN )
+
 	add_definitions( -DPOINTSWITHINDEX ) #Causes the sub clouds to be generated as partial clones of original cloud
+
+	include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
+
+
 	add_subdirectory (RANSAC_SD_orig)
 
 	include( ../../../CMakePluginTpl.cmake )

@@ -22,6 +22,29 @@ v2.11 (Anoia) - (in development)
 	  - 'Edit > Normals > Export normals to SF(s)' (or equivalently 'Edit > Scalar fields > Export normals to SF(s)')
 	  - command line argument: '-NORMALS_TO_SFS' (all dimensions are exported by default, as 3 scalar fields)
   - Command line:
+     - qRansac_SD plugin support added, all parameters below are optional and can be added in any order, will work on all clouds opened already loaded when called.
+       - -RANSAC (main command)
+         - 'EPSILON_ABSOLUTE' (Max distance to primitive)
+	     - 'EPSILON_PERCENTAGE_OF_SCALE' (Max distance to primitive as a percentage of cloud scale 0.0-1.0 exclusive)
+	     - 'BITMAP_EPSILON_PERCENTAGE_OF_SCALE' (Sampling resolution as a percentage of cloud scale 0.0-1.0 exclusive)
+	     - 'BITMAP_EPSILON_ABSOLUTE' (Sampling resolution)
+	     - 'SUPPORT_POINTS' (Min Support points per primitive)
+	     - 'MAX_NORMAL_DEV' (Max normal deviation from the ideal shape normal vector [in Degrees])
+	     - 'PROBABILITY' (Probability that no better candidate was overlooked during sampling, lower the better!)
+         - 'OUT_CLOUD_DIR' (path to save detected shapes clouds to, current dir if unspecified)
+         - 'OUT_MESH_DIR' (path to save detected shapes meshes to, current dir if unspecified)
+         - 'OUT_PAIR_DIR' (path to save detected shapes clouds & meshes to, current dir if unspecified)
+         - 'OUT_GROUP_DIR' (path to save all shapes and primitives to as a single file, current dir if unspecified)
+         - 'OUTPUT_INDIVIDUAL_SUBCLOUDS' (specify to output detected shapes clouds)
+         - 'OUTPUT_INDIVIDUAL_PRIMITIVES' (specify to output detected shapes meshes)
+         - 'OUTPUT_INDIVIDUAL_PAIRED_CLOUD_PRIMITIVE' (specify to output detected shapes clouds & meshes)
+         - 'OUTPUT_GROUPED' (specify to output all detected shapes clouds & meshes as single file)
+	     - 'ENABLE_PRIMITIVE' (each shape listed after this option will be searched for )
+	       - 'PLANE' 
+	       - 'SPHERE' 
+	       - 'CYLINDER' 
+	       - 'CONE' 
+	       - 'TORUS'
 	- The 1st Order Moment tool (Tools>Other>Compute geometric features) can now be accessed via 
 		the command line mode with option -MOMENT {kernel size}
 	    - Computes 1st order moment on all opened clouds and auto saved by default.

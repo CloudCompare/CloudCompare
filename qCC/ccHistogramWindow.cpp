@@ -364,7 +364,7 @@ void ccHistogramWindow::refresh()
 		minVal = std::min(minVal, minSat);
 		maxVal = std::max(maxVal, maxSat);
 	}
-	xAxis->setRange(minVal, maxVal);
+	xAxis->setRange(minVal, std::max(minVal + std::numeric_limits<ScalarType>::epsilon(), maxVal));
 	yAxis->setRange(0, m_maxHistoVal);
 
 	if (!m_titleStr.isEmpty())

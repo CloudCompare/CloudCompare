@@ -59,6 +59,10 @@ public:
 	static inline void Color3v(QOpenGLFunctions_2_1* glFunc, const unsigned char* v) { glFunc->glColor3ubv(v); }
 	static inline void Color3v(QOpenGLFunctions_2_1* glFunc, const float* v) { glFunc->glColor3fv(v); }
 
+	//type-less glColor4Xv call (X=f,ub)
+	static inline void Color4v(QOpenGLFunctions_2_1* glFunc, const unsigned char* v) { glFunc->glColor4ubv(v); }
+	static inline void Color4v(QOpenGLFunctions_2_1* glFunc, const float* v) { glFunc->glColor4fv(v); }
+
 public: //GLU equivalent methods
 
 	static ccGLMatrixd Frustum(double left, double right, double bottom, double top, double znear, double zfar)

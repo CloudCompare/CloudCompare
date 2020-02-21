@@ -861,9 +861,14 @@ bool qCanupoTools::TrainClassifier(	Classifier& classifier,
 				desc = &evaluationDescriptors->at(i-nsamples);
 				//col = &ccColor::lightGrey;
 			}
+			else
+			{
+				assert(false);
+				continue;
+			}
 
 			assert(desc && col);
-			size_t shift = (paramsCount - scaleCount)*dimPerScale; //if we use less scales than parameters
+			size_t shift = (paramsCount - scaleCount) * dimPerScale; //if we use less scales than parameters
 			for (size_t j = 0; j < fdim; ++j)
 			{
 				sample(j) = desc->params[shift + j];
@@ -876,7 +881,7 @@ bool qCanupoTools::TrainClassifier(	Classifier& classifier,
 											0) );
 			if (hasColors && col)
 			{
-				mscCloud->addRGBColor(*col);
+				mscCloud->addColor(*col);
 			}
 		}
 

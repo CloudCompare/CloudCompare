@@ -77,6 +77,16 @@ bool AsciiSaveDlg::saveFloatColors() const
 	return m_ui->saveFloatColorsCheckBox->isChecked();
 }
 
+void AsciiSaveDlg::setSaveAlphaChannel(bool state)
+{
+	m_ui->saveAlphaChannelCheckBox->setChecked(state);
+}
+
+bool AsciiSaveDlg::saveAlphaChannel() const
+{
+	return m_ui->saveAlphaChannelCheckBox->isChecked();
+}
+
 unsigned char AsciiSaveDlg::getSeparator() const
 {
 	switch(m_ui->separatorComboBox->currentIndex())
@@ -144,6 +154,7 @@ void AsciiSaveDlg::initFromPersistentSettings()
 	int separatorIndex		= settings.value("separator", m_ui->separatorComboBox->currentIndex()).toInt();
 	int orderIndex			= settings.value("saveOrder", m_ui->orderComboBox->currentIndex()).toInt();
 	bool saveFloatColors	= settings.value("saveFloatColors", m_ui->saveFloatColorsCheckBox->isChecked()).toBool();
+	bool saveAlphaChannel	= settings.value("saveAlphaChannel", m_ui->saveAlphaChannelCheckBox->isChecked()).toBool();
 
 	//apply parameters
 	m_ui->columnsHeaderCheckBox->setChecked(saveColHeader);
@@ -153,6 +164,7 @@ void AsciiSaveDlg::initFromPersistentSettings()
 	m_ui->separatorComboBox->setCurrentIndex(separatorIndex);
 	m_ui->orderComboBox->setCurrentIndex(orderIndex);
 	m_ui->saveFloatColorsCheckBox->setChecked(saveFloatColors);
+	m_ui->saveAlphaChannelCheckBox->setChecked(saveAlphaChannel);
 
 	settings.endGroup();
 }
@@ -170,6 +182,7 @@ void AsciiSaveDlg::acceptAndSaveSettings()
 	settings.setValue("separator", m_ui->separatorComboBox->currentIndex());
 	settings.setValue("saveOrder", m_ui->orderComboBox->currentIndex());
 	settings.setValue("saveFloatColors", m_ui->saveFloatColorsCheckBox->isChecked());
+	settings.setValue("saveAlphaChannel", m_ui->saveAlphaChannelCheckBox->isChecked());
 
 	settings.endGroup();
 }

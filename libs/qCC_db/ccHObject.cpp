@@ -152,6 +152,8 @@ ccHObject* ccHObject::New(CC_CLASS_ENUM objectType, const char* name/*=0*/)
 		return new NormsIndexesTableType();
 	case CC_TYPES::RGB_COLOR_ARRAY:
 		return new ColorsTableType();
+	case CC_TYPES::RGBA_COLOR_ARRAY:
+		return new RGBAColorsTableType();
 	case CC_TYPES::TEX_COORDS_ARRAY:
 		return new TextureCoordsContainer();
 	case CC_TYPES::IMAGE:
@@ -717,7 +719,7 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 			(  m_selected || !MACRO_SkipUnselected(context) ))
 		{
 			//apply default color (in case of)
-			ccGL::Color3v(glFunc, context.pointsDefaultCol.rgb);
+			ccGL::Color4v(glFunc, context.pointsDefaultCol.rgba);
 
 			//enable clipping planes (if any)
 			bool useClipPlanes = (draw3D && !m_clipPlanes.empty());
@@ -1134,7 +1136,7 @@ bool ccHObject::toFile_MeOnly(QFile& out) const
 	if (m_colorIsOverriden)
 	{
 		//'tempColor' (dataVersion>=20)
-		if (out.write(reinterpret_cast<const char*>(m_tempColor.rgb), sizeof(ColorCompType)*3) < 0)
+		if (out.write(reinterpret_cast<const char*>(m_tempColor.rgba), sizeof(ColorCompType)*3) < 0) //TODO: save the alpha channel?
 		{
 			return WriteError();
 		}
@@ -1184,8 +1186,9 @@ bool ccHObject::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	if (m_colorIsOverriden)
 	{
 		//'tempColor' (dataVersion>=20)
-		if (in.read(reinterpret_cast<char*>(m_tempColor.rgb), sizeof(ColorCompType)*3) < 0)
+		if (in.read(reinterpret_cast<char*>(m_tempColor.rgba), sizeof(ColorCompType)*3) < 0)
 			return ReadError();
+		m_tempColor.a = ccColor::MAX;
 	}
 	//'glTransEnabled' state (dataVersion>=20)
 	if (in.read(reinterpret_cast<char*>(&m_glTransEnabled), sizeof(bool)) < 0)

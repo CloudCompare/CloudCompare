@@ -145,7 +145,7 @@ public:
 	//! Returns color corresponding to a given point
 	/** WARNING: color array must be enabled! (see ccDrawableObject::hasColors)
 	**/
-	virtual const ccColor::Rgb& getPointColor(unsigned pointIndex) const = 0;
+	virtual const ccColor::Rgba& getPointColor(unsigned pointIndex) const = 0;
 
 	//! Returns compressed normal corresponding to a given point
 	/** WARNING: normals array must be enabled! (see ccDrawableObject::hasNormals)

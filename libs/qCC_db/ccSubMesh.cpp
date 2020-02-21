@@ -111,40 +111,60 @@ bool ccSubMesh::interpolateNormalsBC(unsigned triIndex, const CCVector3d& w, CCV
 	return false;
 }
 
-bool ccSubMesh::interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgb& rgb)
+bool ccSubMesh::interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgb& color)
 {
 	if (m_associatedMesh && triIndex < size())
-		return m_associatedMesh->interpolateColors(getTriGlobalIndex(triIndex), P, rgb);
+		return m_associatedMesh->interpolateColors(getTriGlobalIndex(triIndex), P, color);
 
 	//shouldn't happen
 	assert(false);
 	return false;
 }
 
-bool ccSubMesh::interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccColor::Rgb& rgb)
+bool ccSubMesh::interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccColor::Rgb& color)
 {
 	if (m_associatedMesh && triIndex < size())
-		return m_associatedMesh->interpolateColorsBC(getTriGlobalIndex(triIndex), w, rgb);
+		return m_associatedMesh->interpolateColorsBC(getTriGlobalIndex(triIndex), w, color);
 
 	//shouldn't happen
 	assert(false);
 	return false;
 }
 
-bool ccSubMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor::Rgb& rgb, bool interpolateColorIfNoTexture)
+bool ccSubMesh::interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgba& color)
 {
 	if (m_associatedMesh && triIndex < size())
-		return m_associatedMesh->getColorFromMaterial(getTriGlobalIndex(triIndex), P, rgb, interpolateColorIfNoTexture);
+		return m_associatedMesh->interpolateColors(getTriGlobalIndex(triIndex), P, color);
 
 	//shouldn't happen
 	assert(false);
 	return false;
 }
 
-bool ccSubMesh::getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, ccColor::Rgb& rgb, bool returnColorIfNoTexture)
+bool ccSubMesh::interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccColor::Rgba& color)
 {
 	if (m_associatedMesh && triIndex < size())
-		return m_associatedMesh->getVertexColorFromMaterial(getTriGlobalIndex(triIndex), vertIndex, rgb, returnColorIfNoTexture);
+		return m_associatedMesh->interpolateColorsBC(getTriGlobalIndex(triIndex), w, color);
+
+	//shouldn't happen
+	assert(false);
+	return false;
+}
+
+bool ccSubMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor::Rgba& color, bool interpolateColorIfNoTexture)
+{
+	if (m_associatedMesh && triIndex < size())
+		return m_associatedMesh->getColorFromMaterial(getTriGlobalIndex(triIndex), P, color, interpolateColorIfNoTexture);
+
+	//shouldn't happen
+	assert(false);
+	return false;
+}
+
+bool ccSubMesh::getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, ccColor::Rgba& color, bool returnColorIfNoTexture)
+{
+	if (m_associatedMesh && triIndex < size())
+		return m_associatedMesh->getVertexColorFromMaterial(getTriGlobalIndex(triIndex), vertIndex, color, returnColorIfNoTexture);
 
 	//shouldn't happen
 	assert(false);

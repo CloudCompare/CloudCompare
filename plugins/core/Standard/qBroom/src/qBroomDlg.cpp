@@ -292,7 +292,7 @@ bool qBroomDlg::CloudBackup::backupColors()
 	//we backup the colors (as we are going to change them)
 	if (ref->hasColors())
 	{
-		colors = new ColorsTableType;
+		colors = new RGBAColorsTableType;
 		if (!colors->resizeSafe(ref->size()))
 		{
 			//not enough memory

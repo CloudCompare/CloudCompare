@@ -40,10 +40,12 @@ public:
 	virtual void refreshBB() override {}
 	virtual bool interpolateNormals(unsigned triIndex, const CCVector3& P, CCVector3& N) override { return false; }
 	virtual bool interpolateNormalsBC(unsigned triIndex, const CCVector3d& w, CCVector3& N) override { return false; }
-	virtual bool interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgb& rgb) override { return false; }
-	virtual bool interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccColor::Rgb& rgb) override { return false; }
-	virtual bool getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor::Rgb& rgb, bool interpolateColorIfNoTexture) override { return false; }
-	virtual bool getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, ccColor::Rgb& rgb, bool returnColorIfNoTexture) override { return false; }
+	virtual bool interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgb& color) override { return false; }
+	virtual bool interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccColor::Rgb& color) override { return false; }
+	virtual bool interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgba& color) override { return false; }
+	virtual bool interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccColor::Rgba& color) override { return false; }
+	virtual bool getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor::Rgba& color, bool interpolateColorIfNoTexture) override { return false; }
+	virtual bool getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, ccColor::Rgba& color, bool returnColorIfNoTexture) override { return false; }
 	virtual bool hasMaterials() const override { return false; }
 	virtual const ccMaterialSet* getMaterialSet() const override { return 0; }
 	virtual int getTriangleMtlIndex(unsigned triangleIndex) const override { return -1; }

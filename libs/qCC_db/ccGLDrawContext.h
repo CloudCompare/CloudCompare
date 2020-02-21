@@ -98,7 +98,7 @@ struct ccGLDrawContext
 	//! Default color for mesh (back side)
 	ccColor::Rgbaf defaultMeshBackDiff;
 	//! Default point color
-	ccColor::Rgbub pointsDefaultCol;
+	ccColor::Rgba pointsDefaultCol;
 	//! Default text color
 	ccColor::Rgbub textDefaultCol;
 	//! Default label background color
@@ -168,7 +168,7 @@ struct ccGLDrawContext
 		, defaultMat(new ccMaterial("default"))
 		, defaultMeshFrontDiff(ccColor::defaultMeshFrontDiff)
 		, defaultMeshBackDiff(ccColor::defaultMeshBackDiff)
-		, pointsDefaultCol(ccColor::defaultColor)
+		, pointsDefaultCol(ccColor::defaultColor, ccColor::MAX)
 		, textDefaultCol(ccColor::defaultColor)
 		, labelDefaultBkgCol(ccColor::defaultLabelBkgColor)
 		, labelDefaultMarkerCol(ccColor::defaultLabelMarkerColor)

@@ -2330,15 +2330,15 @@ ccPointCloud* ccCameraSensor::orthoRectifyAsCloud(	const ccImage* image,
 
 	//ortho rectification
 	{
-		for (unsigned pi = 0; pi<width; ++pi)
+		for (unsigned pi = 0; pi < width; ++pi)
 		{
 			double xi = static_cast<double>(pi) - 0.5*width;
 			for (unsigned pj = 0; pj < height; ++pj)
 			{
-				double yi = static_cast<double>(pj)-0.5*height;
+				double yi = static_cast<double>(pj) - 0.5*height;
 				double qi = 1.0 + c1*xi + c2*yi;
-				CCVector3 P(static_cast<PointCoordinateType>((a0 + a1*xi + a2*yi) / qi),
-							static_cast<PointCoordinateType>((b0 + b1*xi + b2*yi) / qi),
+				CCVector3 P(static_cast<PointCoordinateType>((a0 + a1 * xi + a2 * yi) / qi),
+							static_cast<PointCoordinateType>((b0 + b1 * xi + b2 * yi) / qi),
 							defaultZ);
 
 				//and color?
@@ -2346,15 +2346,17 @@ ccPointCloud* ccCameraSensor::orthoRectifyAsCloud(	const ccImage* image,
 				int r = qRed(rgb);
 				int g = qGreen(rgb);
 				int b = qBlue(rgb);
-				if (r+g+b > 0)
+				if (r + g + b > 0)
 				{
 					//add point
 					proj->addPoint(P);
 					//and color
-					ccColor::Rgb C(	static_cast<ColorCompType>(r),
-									static_cast<ColorCompType>(g),
-									static_cast<ColorCompType>(b) );
-					proj->addRGBColor(C);
+					int a = qAlpha(rgb);
+					ccColor::Rgba color(static_cast<ColorCompType>(r),
+										static_cast<ColorCompType>(g),
+										static_cast<ColorCompType>(b),
+										static_cast<ColorCompType>(a));
+					proj->addColor(color);
 					++realCount;
 				}
 			}

@@ -140,7 +140,13 @@ public: //Temporary color
 	inline virtual bool isColorOverriden() const { return m_colorIsOverriden; }
 
 	//! Returns current temporary (unique) color
-	inline virtual const ccColor::Rgb& getTempColor() const { return m_tempColor; }
+	inline virtual const ccColor::Rgba& getTempColor() const { return m_tempColor; }
+
+	//! Sets current temporary (unique)
+	/** \param col rgba color
+		\param autoActivate auto activates temporary color
+	**/
+	virtual void setTempColor(const ccColor::Rgba& col, bool autoActivate = true);
 
 	//! Sets current temporary (unique)
 	/** \param col rgb color
@@ -261,7 +267,7 @@ protected: //members
 	bool m_sfDisplayed;
 
 	//! Temporary (unique) color
-	ccColor::Rgb m_tempColor;
+	ccColor::Rgba m_tempColor;
 	//! Temporary (unique) color activation state
 	bool m_colorIsOverriden;
 

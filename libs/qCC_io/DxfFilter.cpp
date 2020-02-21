@@ -141,7 +141,7 @@ public:
 			if (m_points->hasColors())
 			{
 				//simply add the new color
-				m_points->addRGBColor(col);
+				m_points->addColor(col);
 			}
 			else
 			{
@@ -152,13 +152,13 @@ public:
 					return;
 				}
 				m_points->showColors(true);
-				m_points->setPointColor(m_points->size() - 1, ccColor::white); //replace the last color
+				m_points->setPointColor(m_points->size() - 1, ccColor::Rgba(ccColor::white, ccColor::MAX)); //replace the last color
 			}
 		}
 		else if (m_points->hasColors())
 		{
 			//add default color if none is defined!
-			m_points->addRGBColor(ccColor::white);
+			m_points->addColor(ccColor::white);
 		}
 	}
 
@@ -260,6 +260,8 @@ public:
 		if (getCurrentColour(col))
 			faceCol = &col;
 
+		static ccColor::Rgba s_whiteRGBA(ccColor::white, ccColor::MAX);
+
 		//look for already defined vertices
 		unsigned vertCount = vertices->size();
 		if (vertCount)
@@ -278,7 +280,7 @@ public:
 						if (faceCol || vertices->hasColors())
 						{
 							const ccColor::Rgb* _faceCol = faceCol ? faceCol : &ccColor::white;
-							const ccColor::Rgb* _vertCol = vertices->hasColors() ? &vertices->getPointColor(j) : &ccColor::white;
+							const ccColor::Rgba* _vertCol = vertices->hasColors() ? &vertices->getPointColor(j) : &s_whiteRGBA;
 							useCurrentVertex = (_faceCol->r == _vertCol->r && _faceCol->g == _vertCol->g && _faceCol->b == _vertCol->b);
 						}
 
@@ -388,14 +390,14 @@ public:
 			if (vertices->hasColors())
 			{
 				for (unsigned i = 0; i < createdVertCount; ++i)
-					vertices->addRGBColor(*faceCol);
+					vertices->addColor(*faceCol);
 			}
 			//otherwise, reserve memory and set all previous points to white by default
 			else if (vertices->setRGBColor(ccColor::white))
 			{
 				//then replace the last color(s) by the current one
 				for (unsigned i = 0; i < createdVertCount; ++i)
-					vertices->setPointColor(vertCount - 1 - i, *faceCol);
+					vertices->setPointColor(vertCount - 1 - i, ccColor::Rgba(*faceCol, ccColor::MAX));
 				m_faces->showColors(true);
 			}
 		}
@@ -403,7 +405,7 @@ public:
 		{
 			//add default color if none is defined!
 			for (unsigned i = 0; i < createdVertCount; ++i)
-				vertices->addRGBColor(ccColor::white);
+				vertices->addColor(ccColor::white);
 		}
 	}
 

@@ -108,6 +108,32 @@ public:
 	}
 };
 
+//! Array of RGBA colors for each point
+class RGBAColorsTableType : public ccArray<ccColor::Rgba, 4, ColorCompType>
+{
+public:
+	//! Default constructor
+	RGBAColorsTableType() : ccArray<ccColor::Rgba, 4, ColorCompType>("RGBA colors") {}
+	virtual ~RGBAColorsTableType() = default;
+
+	//inherited from ccArray/ccHObject
+	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::RGBA_COLOR_ARRAY; }
+
+	//! Duplicates array (overloaded from ccArray::clone)
+	RGBAColorsTableType* clone() override
+	{
+		RGBAColorsTableType* cloneArray = new RGBAColorsTableType();
+		if (!copy(*cloneArray))
+		{
+			ccLog::Warning("[RGBAColorsTableType::clone] Failed to clone array (not enough memory)");
+			cloneArray->release();
+			return nullptr;
+		}
+		cloneArray->setName(getName());
+		return cloneArray;
+	}
+};
+
 //! 2D texture coordinates
 struct TexCoords2D
 {

@@ -677,7 +677,7 @@ void cc2DLabel::getLabelInfo1(LabelInfo1& info) const
 			info.hasRGB = pp._cloud->hasColors();
 			if (info.hasRGB)
 			{
-				info.rgb = pp._cloud->getPointColor(pp.index);
+				info.color = pp._cloud->getPointColor(pp.index);
 			}
 			//scalar field
 			info.hasSF = pp._cloud->hasDisplayedScalarField();
@@ -721,7 +721,7 @@ void cc2DLabel::getLabelInfo1(LabelInfo1& info) const
 			info.hasRGB = pp._mesh->hasColors();
 			if (info.hasRGB)
 			{
-				pp._mesh->interpolateColorsBC(pp.index, w, info.rgb);
+				pp._mesh->interpolateColorsBC(pp.index, w, info.color);
 			}
 			//scalar field
 			info.hasSF = pp._mesh->hasDisplayedScalarField();
@@ -862,7 +862,7 @@ QStringList cc2DLabel::getLabelContent(int precision) const
 		//color
 		if (info.hasRGB)
 		{
-			QString colorStr = QString("Color: (%1;%2;%3)").arg(info.rgb.r).arg(info.rgb.g).arg(info.rgb.b);
+			QString colorStr = QString("Color: (%1;%2;%3;%4)").arg(info.color.r).arg(info.color.g).arg(info.color.b).arg(info.color.a);
 			body << colorStr;
 		}
 		//scalar field
@@ -1421,9 +1421,9 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 						if (info.hasRGB)
 						{
 							int c = tab.add2x3Block();
-							tab.colContent[c] << "R"; tab.colContent[c + 1] << QString::number(info.rgb.r);
-							tab.colContent[c] << "G"; tab.colContent[c + 1] << QString::number(info.rgb.g);
-							tab.colContent[c] << "B"; tab.colContent[c + 1] << QString::number(info.rgb.b);
+							tab.colContent[c] << "R"; tab.colContent[c + 1] << QString::number(info.color.r);
+							tab.colContent[c] << "G"; tab.colContent[c + 1] << QString::number(info.color.g);
+							tab.colContent[c] << "B"; tab.colContent[c + 1] << QString::number(info.color.b);
 						}
 					}
 					else if (count == 2)

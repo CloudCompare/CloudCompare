@@ -916,11 +916,11 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 
 					if (interpolateColors)
 					{
-						ccColor::Rgb col(	static_cast<ColorCompType>(std::min(255.0, aCell->color.x)),
-											static_cast<ColorCompType>(std::min(255.0, aCell->color.y)),
-											static_cast<ColorCompType>(std::min(255.0, aCell->color.z)) );
+						ccColor::Rgb col(	static_cast<ColorCompType>(std::min(static_cast<double>(ccColor::MAX), aCell->color.x)),
+											static_cast<ColorCompType>(std::min(static_cast<double>(ccColor::MAX), aCell->color.y)),
+											static_cast<ColorCompType>(std::min(static_cast<double>(ccColor::MAX), aCell->color.z)) );
 						
-						cloudGrid->addRGBColor(col);
+						cloudGrid->addColor(col);
 					}
 				}
 
@@ -1009,7 +1009,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 
 					if (interpolateColors)
 					{
-						cloudGrid->addRGBColor(ccColor::black);
+						cloudGrid->addColor(ccColor::black);
 					}
 				}
 

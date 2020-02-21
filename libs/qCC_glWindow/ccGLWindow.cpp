@@ -3597,7 +3597,7 @@ void ccGLWindow::getContext(CC_DRAW_CONTEXT& CONTEXT)
 	CONTEXT.defaultMat->setShininessFront(30);
 	CONTEXT.defaultMat->setShininessBack(50);
 	//default colors
-	CONTEXT.pointsDefaultCol = guiParams.pointsDefaultCol;
+	CONTEXT.pointsDefaultCol = ccColor::Rgba(guiParams.pointsDefaultCol, ccColor::MAX);
 	CONTEXT.textDefaultCol = guiParams.textDefaultCol;
 	CONTEXT.labelDefaultBkgCol = guiParams.labelBackgroundCol;
 	CONTEXT.labelDefaultMarkerCol = guiParams.labelMarkerCol;

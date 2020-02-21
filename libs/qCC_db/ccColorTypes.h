@@ -215,21 +215,30 @@ namespace ccColor
 	};
 
 	//! Conversion from Rgbf
-	inline Rgb FromRgbf(const Rgbf& color)
+	inline Rgb FromRgbfToRgb(const Rgbf& color)
 	{
 		return Rgb( static_cast<ColorCompType>(color.r * MAX),
 					static_cast<ColorCompType>(color.g * MAX),
 					static_cast<ColorCompType>(color.b * MAX) );
 	}
 	
-	//! Conversion from Rgbaf
-	inline Rgb FromRgbf(const Rgbaf& color)
+	//! Conversion from Rgbaf to Rgb
+	inline Rgb FromRgbafToRgb(const Rgbaf& color)
 	{
 		return Rgb( static_cast<ColorCompType>(color.r * MAX),
 					static_cast<ColorCompType>(color.g * MAX),
 					static_cast<ColorCompType>(color.b * MAX) );
 	}
 	
+	//! Conversion from Rgbaf to Rgba
+	inline Rgba FromRgbafToRgba(const Rgbaf& color)
+	{
+		return Rgba( static_cast<ColorCompType>(color.r * MAX),
+					 static_cast<ColorCompType>(color.g * MAX),
+					 static_cast<ColorCompType>(color.b * MAX),
+					 static_cast<ColorCompType>(color.a * MAX));
+	}
+
 	//! Conversion from QRgb
 	inline Rgb FromQRgb(QRgb qColor)
 	{

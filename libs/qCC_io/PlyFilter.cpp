@@ -609,7 +609,7 @@ static int rgb_cb(p_ply_argument argument)
 
 	if (flags & ELEM_EOL)
 	{
-		cloud->addRGBColor(s_color);
+		cloud->addColor(s_color); //TODO: handle alpha channel
 		++s_ColorCount;
 
 		if ((s_ColorCount % PROCESS_EVENTS_FREQ) == 0)

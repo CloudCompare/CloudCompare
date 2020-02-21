@@ -196,7 +196,7 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 		glFunc->glPushName(getUniqueIDForDisplay());
 
 	if (isColorOverriden())
-		ccGL::Color3v(glFunc, getTempColor().rgb);
+		ccGL::Color4v(glFunc, getTempColor().rgba);
 	else if (colorsShown())
 		ccGL::Color3v(glFunc, m_rgbColor.rgb);
 

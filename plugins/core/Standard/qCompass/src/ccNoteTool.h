@@ -27,8 +27,7 @@
 /*
 Tool used to create notes and associated them with points in a cloud.
 */
-class ccNoteTool :
-	public ccTool
+class ccNoteTool : public ccTool
 {
 public:
 	ccNoteTool();

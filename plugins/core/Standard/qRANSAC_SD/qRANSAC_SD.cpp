@@ -468,9 +468,9 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 			bool saveNormals = true;
 			{
 #ifdef POINTSWITHINDEX
-				QSharedPointer<CCLib::ReferenceCloud> refPcShape(new CCLib::ReferenceCloud(ccPC));
+				CCLib::ReferenceCloud refPcShape(ccPC);
 				//we fill cloud with sub-part points
-				if (!refPcShape->reserve(static_cast<unsigned>(shapePointsCount)))
+				if (!refPcShape.reserve(static_cast<unsigned>(shapePointsCount)))
 				{
 					ccLog::Error("[qRansacSD] Not enough memory!");
 					break;
@@ -478,10 +478,10 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 
 				for (unsigned j = 0; j < shapePointsCount; ++j)
 				{
-					refPcShape->addPointIndex(cloud[count - 1 - j].index);
+					refPcShape.addPointIndex(cloud[count - 1 - j].index);
 				}
 				int warnings = 0;
-				pcShape = ccPC->partialClone(refPcShape.data(), &warnings);
+				pcShape = ccPC->partialClone(&refPcShape, &warnings);
 				if (warnings != 0)
 				{
 					if ((warnings & ccPointCloud::WRN_OUT_OF_MEM_FOR_NORMALS) == ccPointCloud::WRN_OUT_OF_MEM_FOR_NORMALS)

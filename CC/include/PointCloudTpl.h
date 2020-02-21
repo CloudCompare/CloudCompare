@@ -123,7 +123,7 @@ namespace CCLib
 				m_currentOutScalarFieldIndex = m_currentInScalarFieldIndex;
 			}
 
-			return currentInScalarField->resizeSafe(m_points.capacity());
+			return currentInScalarField->resizeSafe(m_points.size());
 		}
 		
 		bool isScalarFieldEnabled() const override
@@ -373,7 +373,7 @@ namespace CCLib
 
 			//create requested scalar field
 			ScalarField* sf = new ScalarField(uniqueName);
-			if (!sf || (size() && !sf->resizeSafe(size())))
+			if (!sf || (size() && !sf->resizeSafe(m_points.size())))
 			{
 				//Not enough memory!
 				if (sf)

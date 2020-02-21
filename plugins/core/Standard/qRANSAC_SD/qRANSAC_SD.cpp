@@ -466,52 +466,53 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 			//new cloud for sub-part
 			ccPointCloud* pcShape = nullptr;
 			bool saveNormals = true;
+			{
 #ifdef POINTSWITHINDEX
-			CCLib::ReferenceCloud* refPcShape= new CCLib::ReferenceCloud(ccPC);
-			//we fill cloud with sub-part points
-			if (!refPcShape->reserve(static_cast<unsigned>(shapePointsCount)))
-			{
-				ccLog::Error("[qRansacSD] Not enough memory!");
-				delete refPcShape;
-				break;
-			}
-
-			for (unsigned j = 0; j < shapePointsCount; ++j)
-			{
-				refPcShape->addPointIndex(cloud[count - 1 - j].index);
-			}
-			int warnings = 0;
-			pcShape = ccPC->partialClone(refPcShape, &warnings);
-			if (warnings != 0)
-			{
-				if ((warnings & ccPointCloud::WRN_OUT_OF_MEM_FOR_NORMALS) == ccPointCloud::WRN_OUT_OF_MEM_FOR_NORMALS)
+				QSharedPointer<CCLib::ReferenceCloud> refPcShape(new CCLib::ReferenceCloud(ccPC));
+				//we fill cloud with sub-part points
+				if (!refPcShape->reserve(static_cast<unsigned>(shapePointsCount)))
 				{
-					saveNormals = false;
+					ccLog::Error("[qRansacSD] Not enough memory!");
+					break;
 				}
-			}
-			pcShape->setName(desc.c_str());
+
+				for (unsigned j = 0; j < shapePointsCount; ++j)
+				{
+					refPcShape->addPointIndex(cloud[count - 1 - j].index);
+				}
+				int warnings = 0;
+				pcShape = ccPC->partialClone(refPcShape.data(), &warnings);
+				if (warnings != 0)
+				{
+					if ((warnings & ccPointCloud::WRN_OUT_OF_MEM_FOR_NORMALS) == ccPointCloud::WRN_OUT_OF_MEM_FOR_NORMALS)
+					{
+						saveNormals = false;
+					}
+				}
+				pcShape->setName(desc.c_str());
 #else
-			pcShape = new ccPointCloud(desc.c_str());
-			if (!pcShape->reserve(static_cast<unsigned>(shapePointsCount)))
-			{
-				ccLog::Error("[qRansacSD] Not enough memory!");
-				delete pcShape;
-				break;
-			}
-			saveNormals = pcShape->reserveTheNormsTable();
-
-			for (unsigned j = 0; j < shapePointsCount; ++j)
-			{
-				pcShape->addPoint(CCVector3::fromArray(cloud[count - 1 - j].pos));
-				if (saveNormals)
+				pcShape = new ccPointCloud(desc.c_str());
+				if (!pcShape->reserve(static_cast<unsigned>(shapePointsCount)))
 				{
-					pcShape->addNorm(CCVector3::fromArray(cloud[count - 1 - j].normal));
+					ccLog::Error("[qRansacSD] Not enough memory!");
+					delete pcShape;
+					break;
 				}
+				saveNormals = pcShape->reserveTheNormsTable();
 
-			}
-			pcShape->setGlobalShift(globalShift);
-			pcShape->setGlobalScale(globalScale);
+				for (unsigned j = 0; j < shapePointsCount; ++j)
+				{
+					pcShape->addPoint(CCVector3::fromArray(cloud[count - 1 - j].pos));
+					if (saveNormals)
+					{
+						pcShape->addNorm(CCVector3::fromArray(cloud[count - 1 - j].normal));
+					}
+
+				}
+				pcShape->setGlobalShift(globalShift);
+				pcShape->setGlobalScale(globalScale);
 #endif
+			}
 			//random color
 			ccColor::Rgb col = ccColor::Generator::Random();
 			if (params.randomColor)

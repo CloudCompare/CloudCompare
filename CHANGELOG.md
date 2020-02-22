@@ -66,6 +66,11 @@ v2.11 (Anoia) - (in development)
 	  - Rotation center can be set to either the object center, or the polyline/plane normal.
 
 - Improvements
+  - CloudCompare now handles RGBA colors for points, mesh vertices, text and labels
+    - partial ability to display these elements with some transparency (warning: points and triangles are not depth-sorted yet - display of clouds and meshes might not be very nice ;)
+	- default materials and colors (Display > Display settings) now have an editable 'alpha' channel
+	- the 'Edit > Colors > Set unique' and 'Edit > Colors > Colorize' tools also have an editable 'alpha' channel
+	- this fixes a bug with ATI cards (when using VBOs - see below)
   - Better support for High DPI screens (4K) on Windows
   - Both the local and global bounding-box centers are now displyaed in the cloud properties (if the cloud has been shifted)
   - The PoissonRecon plugin now relies on the PoissonRecon V12 library
@@ -187,6 +192,7 @@ v2.11 (Anoia) - (in development)
 	- SRS (Spatial Reference System) information could be lost when loading LAS files
 	- The cartesian bounding-box of exported E57 files was wrongly expressed in the file-level coordinate system (instead of the local one)
 	- Data could be lost when merging two clouds with FWF data
+	- When VBOs were activated with an ATI card, CloudCompare could crash (because ATI only supports 32bit aligned VBOs :p)
 
 v2.10.3 (Zephyrus) - 13/06/2019
 ----------------------

@@ -1506,21 +1506,21 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 		float l = static_cast<float>(fabs(upperLeftPoint.z)/2);
 
 		// right vector
-		ccGL::Color3v(glFunc, ccColor::red.rgb);
+		ccGL::Color4v(glFunc, ccColor::red.rgba);
 		glFunc->glBegin(GL_LINES);
 		glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
 		glFunc->glVertex3f(l, 0.0f, 0.0f);
 		glFunc->glEnd();
 
 		// up vector
-		ccGL::Color3v(glFunc, ccColor::green.rgb);
+		ccGL::Color4v(glFunc, ccColor::green.rgba);
 		glFunc->glBegin(GL_LINES);
 		glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
 		glFunc->glVertex3f(0.0f, l, 0.0f);
 		glFunc->glEnd();
 
 		// view vector
-		ccGL::Color3v(glFunc, ccColor::blue.rgb);
+		ccGL::Color4v(glFunc, ccColor::blue.rgba);
 		glFunc->glBegin(GL_LINES);
 		glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
 		glFunc->glVertex3f(0.0f, 0.0f, -l);

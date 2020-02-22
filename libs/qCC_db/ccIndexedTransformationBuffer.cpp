@@ -300,7 +300,7 @@ void ccIndexedTransformationBuffer::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 	//show path
 	{
-		ccGL::Color3v(glFunc, ccColor::green.rgb);
+		ccGL::Color4v(glFunc, ccColor::green.rgba);
 		glFunc->glBegin(count > 1 && m_showAsPolyline ? GL_LINE_STRIP : GL_POINTS); //show path as a polyline or points?
 		for (ccIndexedTransformationBuffer::const_iterator it=begin(); it!=end(); ++it)
 			glFunc->glVertex3fv(it->getTranslation());

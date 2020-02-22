@@ -586,7 +586,7 @@ static int rgb_cb(p_ply_argument argument)
 	e_ply_type type;
 	ply_get_property_info(prop, nullptr, &type, nullptr, nullptr);
 
-	static ccColor::Rgb s_color(0, 0, 0);
+	static ccColor::Rgba s_color(0, 0, 0, ccColor::MAX);
 
 	switch(type)
 	{
@@ -594,16 +594,16 @@ static int rgb_cb(p_ply_argument argument)
 	case PLY_DOUBLE:
 	case PLY_FLOAT32:
 	case PLY_FLOAT64:
-		s_color.rgb[flags & POS_MASK] = static_cast<ColorCompType>(std::min(std::max(0.0, ply_get_argument_value(argument)), 1.0) * ccColor::MAX);
+		s_color.rgba[flags & POS_MASK] = static_cast<ColorCompType>(std::min(std::max(0.0, ply_get_argument_value(argument)), 1.0) * ccColor::MAX);
 		break;
 	case PLY_INT8:
 	case PLY_UINT8:
 	case PLY_CHAR:
 	case PLY_UCHAR:
-		s_color.rgb[flags & POS_MASK] = static_cast<ColorCompType>(ply_get_argument_value(argument));
+		s_color.rgba[flags & POS_MASK] = static_cast<ColorCompType>(ply_get_argument_value(argument));
 		break;
 	default:
-		s_color.rgb[flags & POS_MASK] = static_cast<ColorCompType>(ply_get_argument_value(argument));
+		s_color.rgba[flags & POS_MASK] = static_cast<ColorCompType>(ply_get_argument_value(argument));
 		break;
 	}
 

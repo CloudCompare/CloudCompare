@@ -152,7 +152,7 @@ public:
 					return;
 				}
 				m_points->showColors(true);
-				m_points->setPointColor(m_points->size() - 1, ccColor::Rgba(ccColor::white, ccColor::MAX)); //replace the last color
+				m_points->setPointColor(m_points->size() - 1, ccColor::white); //replace the last color
 			}
 		}
 		else if (m_points->hasColors())
@@ -260,8 +260,6 @@ public:
 		if (getCurrentColour(col))
 			faceCol = &col;
 
-		static ccColor::Rgba s_whiteRGBA(ccColor::white, ccColor::MAX);
-
 		//look for already defined vertices
 		unsigned vertCount = vertices->size();
 		if (vertCount)
@@ -279,8 +277,8 @@ public:
 						//We must also check that the color is the same (if any)
 						if (faceCol || vertices->hasColors())
 						{
-							const ccColor::Rgb* _faceCol = faceCol ? faceCol : &ccColor::white;
-							const ccColor::Rgba* _vertCol = vertices->hasColors() ? &vertices->getPointColor(j) : &s_whiteRGBA;
+							const ccColor::Rgb* _faceCol = faceCol ? faceCol : &ccColor::whiteRGB;
+							const ccColor::Rgba* _vertCol = vertices->hasColors() ? &vertices->getPointColor(j) : &ccColor::white;
 							useCurrentVertex = (_faceCol->r == _vertCol->r && _faceCol->g == _vertCol->g && _faceCol->b == _vertCol->b);
 						}
 

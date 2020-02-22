@@ -21,9 +21,11 @@
 //Always first
 #include "ccIncludeGL.h"
 
-#include <QFont>
+//Local
+#include "ccColorTypes.h"
 
 //Qt
+#include <QFont>
 class QFile;
 class QWidget;
 
@@ -217,7 +219,7 @@ public:
 								int y,
 								unsigned char align = ALIGN_DEFAULT,
 								float bkgAlpha = 0.0f,
-								const unsigned char* rgbColor = nullptr,
+								const ccColor::Rgba* color = nullptr,
 								const QFont* font = nullptr) = 0;
 
 	//! Displays a string at a given 3D position
@@ -229,7 +231,7 @@ public:
 	**/
 	virtual void display3DLabel(const QString& str,
 								const CCVector3& pos3D,
-								const unsigned char* rgbColor = nullptr,
+								const ccColor::Rgba* color = nullptr,
 								const QFont& font=QFont()) = 0;
 
 	//! Returns the current OpenGL camera parameters

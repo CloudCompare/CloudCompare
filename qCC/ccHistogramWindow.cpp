@@ -340,7 +340,7 @@ void ccHistogramWindow::refreshBars()
 
 			const ccColor::Rgb* col = m_associatedSF->getColor(static_cast<ScalarType>(keyData[i]));
 			if (!col) //hidden values may have no associated color!
-				col = &ccColor::lightGrey;
+				col = &ccColor::lightGreyRGB;
 			colors[i] = QColor(col->r, col->g, col->b);
 		}
 
@@ -483,7 +483,7 @@ void ccHistogramWindow::refresh()
 					col = colorScale->getColorByRelativePos(normVal);
 				}
 				if (!col) //hidden values may have no associated color!
-					col = &ccColor::lightGrey;
+					col = &ccColor::lightGreyRGB;
 				colors[i] = QColor(col->r, col->g, col->b);
 			}
 		}

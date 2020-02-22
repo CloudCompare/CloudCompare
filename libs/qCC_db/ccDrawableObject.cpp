@@ -30,7 +30,7 @@ ccDrawableObject::ccDrawableObject()
 	showNormals(false);
 	showSF(false);
 	enableTempColor(false);
-	setTempColor(ccColor::white,false);
+	setTempColor(ccColor::white, false);
 	resetGLTransformation();
 	showNameIn3D(false);
 }

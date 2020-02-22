@@ -242,7 +242,7 @@ void ccSymbolCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 													static_cast<int>(Q2D.y + ypShift),
 													m_labelAlignFlags,
 													0,
-													color->rgba,
+													color,
 													&font);
 				}
 

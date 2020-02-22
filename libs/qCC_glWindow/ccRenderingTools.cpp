@@ -407,11 +407,11 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccSca
 					if (customLabels)
 					{
 						assert(sf->getColorScale() && !sf->getColorScale()->isRelative());
-						col = sf->getColorScale()->getColorByValue(value, &ccColor::lightGrey);
+						col = sf->getColorScale()->getColorByValue(value, &ccColor::lightGreyRGB);
 					}
 					else
 					{
-						col = &ccColor::lightGrey;
+						col = &ccColor::lightGreyRGB;
 					}
 				}
 				assert(col);
@@ -451,7 +451,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccSca
 			if (logScale)
 				value = exp(value*c_log10);
 			const ccColor::Rgb* col = sf->getColor(static_cast<ScalarType>(value));
-			glFunc->glColor3ubv(col ? col->rgb : ccColor::lightGrey.rgb);
+			glFunc->glColor3ubv(col ? col->rgb : ccColor::lightGreyRGB.rgb);
 			glFunc->glBegin(GL_POLYGON);
 			glFunc->glVertex2i(x,y);
 			glFunc->glVertex2i(x+scaleWidth,y);

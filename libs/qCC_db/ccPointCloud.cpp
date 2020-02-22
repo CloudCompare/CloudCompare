@@ -1794,7 +1794,7 @@ bool ccPointCloud::setRGBColorByHeight(unsigned char heightDim, ccColorScale::Sh
 		const ccColor::Rgb* col = colorScale->getColorByRelativePos(realtivePos);
 		if (!col) //DGM: yes it happens if we encounter a point with NaN coordinates!!!
 		{
-			col = &ccColor::black;
+			col = &ccColor::blackRGB;
 		}
 		m_rgbaColors->setValue(i, ccColor::Rgba(*col, ccColor::MAX));
 	}
@@ -2736,7 +2736,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							const ccColor::Rgb* col = m_currentDisplayedScalarField->getValueColor(pointIndex);
 							//we force display of points hidden because of their scalar field value
 							//to be sure that the user doesn't miss them (during manual segmentation for instance)
-							glFunc->glColor3ubv(col ? col->rgb : ccColor::lightGrey.rgb);
+							glFunc->glColor4ubv(col ? col->rgb : ccColor::lightGreyRGB.rgb);
 						}
 						else if (glParams.showColors)
 						{
@@ -3404,7 +3404,7 @@ bool ccPointCloud::convertCurrentScalarFieldToColors(bool mixWithExistingColor/*
 		for (unsigned i = 0; i < count; i++)
 		{
 			const ccColor::Rgb* col = getPointScalarValueColor(i);
-			setPointColor(i, col ? *col : ccColor::black);
+			setPointColor(i, col ? *col : ccColor::blackRGB);
 		}
 	}
 	else //mix with existing colors
@@ -4913,7 +4913,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 								//we need to convert scalar value to color into a temporary structure
 								const ccColor::Rgb* col = m_vboManager.sourceSF->getColor(*_sf);
 								if (!col)
-									col = &ccColor::lightGrey;
+									col = &ccColor::lightGreyRGB;
 								*_sfColors++ = col->r;
 								*_sfColors++ = col->g;
 								*_sfColors++ = col->b;

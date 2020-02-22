@@ -1767,8 +1767,6 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		glFunc->glPushAttrib(GL_LIGHTING_BIT | GL_TRANSFORM_BIT | GL_ENABLE_BIT);
 
-		glFunc->glEnable(GL_BLEND);
-
 		//materials or color?
 		bool colorMaterial = false;
 		if (glParams.showSF || glParams.showColors)
@@ -1805,6 +1803,8 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glFunc->glEnable(GL_LIGHTING);
 			context.defaultMat->applyGL(context.qGLContext, true, colorMaterial);
 		}
+
+		glFunc->glEnable(GL_BLEND);
 
 		//in the case we need normals (i.e. lighting)
 		NormsIndexesTableType* normalsIndexesTable = nullptr;
@@ -3304,7 +3304,7 @@ bool ccMesh::getVertexColorFromMaterial(unsigned triIndex, unsigned char vertInd
 
 	if (!foundMaterial && returnColorIfNoTexture && hasColors())
 	{
-		color = ccColor::Rgba(m_associatedCloud->getPointColor(tri.i[vertIndex]));
+		color = m_associatedCloud->getPointColor(tri.i[vertIndex]);
 		foundMaterial = true;
 	}
 

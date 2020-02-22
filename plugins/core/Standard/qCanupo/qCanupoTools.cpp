@@ -844,22 +844,22 @@ bool qCanupoTools::TrainClassifier(	Classifier& classifier,
 			sample.set_size(fdim);
 
 			const CorePointDesc* desc = nullptr;
-			const ccColor::Rgb* col = &ccColor::lightGrey;
+			const ccColor::Rgb* col = &ccColor::lightGreyRGB;
 
 			if (i < nsamples1)
 			{
 				desc = &descriptors1[i];
-				col = &ccColor::blue;
+				col = &ccColor::blueRGB;
 			}
 			else if (i < nsamples)
 			{
 				desc = &descriptors2[i-nsamples1];
-				col = &ccColor::red;
+				col = &ccColor::redRGB;
 			}
 			else if (evaluationDescriptors)
 			{
 				desc = &evaluationDescriptors->at(i-nsamples);
-				//col = &ccColor::lightGrey;
+				//col = &ccColor::lightGreyRGB;
 			}
 			else
 			{

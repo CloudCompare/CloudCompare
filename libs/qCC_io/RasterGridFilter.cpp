@@ -392,8 +392,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 											}
 											else
 											{
-												const ccColor::Rgb& origColor = pc->getPointColor(pointIndex);
-												C = ccColor::Rgba(origColor, ccColor::MAX);
+												C = pc->getPointColor(pointIndex);
 											}
 
 											switch (colorInterp)

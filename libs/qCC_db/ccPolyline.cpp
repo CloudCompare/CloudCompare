@@ -672,12 +672,12 @@ ccPointCloud* ccPolyline::samplePoints(	bool densityBased,
 		if (isColorOverriden())
 		{
 			//we use the default 'temporary' color
-			cloud->setRGBColor(getTempColor());
+			cloud->setColor(getTempColor());
 		}
 		else if (colorsShown())
 		{
 			//we use the default color
-			cloud->setRGBColor(m_rgbColor);
+			cloud->setColor(m_rgbColor);
 		}
 	}
 

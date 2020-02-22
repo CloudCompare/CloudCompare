@@ -600,10 +600,10 @@ public: //other methods
 	**/
 	bool setRGBColorByBanding(unsigned char dim, double freq);
 
-	//! Sets RGB colors with current scalar field (values & parameters)
+	//! Converts current scalar field (values & display parameters) to RGB colors
 	/** \return success
 	**/
-	bool setRGBColorWithCurrentScalarField(bool mixWithExistingColor = false);
+	bool convertCurrentScalarFieldToColors(bool mixWithExistingColor = false);
 
 	//! Set a unique color for the whole cloud (shortcut)
 	/** Color array is automatically allocated if necessary.
@@ -613,21 +613,21 @@ public: //other methods
 		\param a alpha component
 		\return success
 	**/
-	inline bool setRGBColor(ColorCompType r, ColorCompType g, ColorCompType b, ColorCompType a = ccColor::MAX) { return setRGBColor(ccColor::Rgba(r, g, b, a)); }
+	inline bool setColor(ColorCompType r, ColorCompType g, ColorCompType b, ColorCompType a = ccColor::MAX) { return setColor(ccColor::Rgba(r, g, b, a)); }
 
-	//! Set a unique color for the whole cloud
+	//! Set a unique color for the whole cloud (RGB version)
 	/** Color array is automatically allocated if necessary.
 		\param col RGB color
 		\return success
 	**/
-	inline bool setRGBColor(const ccColor::Rgb& col) { return  setRGBAColor(ccColor::Rgba(col, ccColor::MAX)); }
+	inline bool setColor(const ccColor::Rgb& col) { return setColor(ccColor::Rgba(col, ccColor::MAX)); }
 
-	//! Set a unique color for the whole cloud
+	//! Set a unique color for the whole cloud (RGBA version)
 	/** Color array is automatically allocated if necessary.
 		\param col RGBA color
 		\return success
 	**/
-	bool setRGBAColor(const ccColor::Rgba& col);
+	bool setColor(const ccColor::Rgba& col);
 
 	//! Inverts normals (if any)
 	void invertNormals();

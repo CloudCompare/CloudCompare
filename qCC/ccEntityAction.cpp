@@ -905,7 +905,7 @@ namespace ccEntityAction
 				//if there is no displayed SF --> nothing to do!
 				if (pc->getCurrentDisplayedScalarField())
 				{
-					if (pc->setRGBColorWithCurrentScalarField(mixWithExistingColors))
+					if (pc->convertCurrentScalarFieldToColors(mixWithExistingColors))
 					{
 						ent->showColors(true);
 						ent->showSF(false); //just in case

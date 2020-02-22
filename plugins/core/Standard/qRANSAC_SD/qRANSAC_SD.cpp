@@ -517,7 +517,7 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 			ccColor::Rgb col = ccColor::Generator::Random();
 			if (params.randomColor)
 			{
-				pcShape->setRGBColor(col);
+				pcShape->setColor(col);
 				pcShape->showSF(false);
 				pcShape->showColors(true);
 			}

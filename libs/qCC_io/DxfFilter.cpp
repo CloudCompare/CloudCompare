@@ -146,7 +146,7 @@ public:
 			else
 			{
 				//reserve memory (and fill the previous points with a default color if necessary)
-				if (!m_points->setRGBColor(ccColor::white))
+				if (!m_points->setColor(ccColor::white))
 				{
 					ccLog::Error("[DxfImporter] Not enough memory!");
 					return;
@@ -393,7 +393,7 @@ public:
 					vertices->addColor(*faceCol);
 			}
 			//otherwise, reserve memory and set all previous points to white by default
-			else if (vertices->setRGBColor(ccColor::white))
+			else if (vertices->setColor(ccColor::white))
 			{
 				//then replace the last color(s) by the current one
 				for (unsigned i = 0; i < createdVertCount; ++i)

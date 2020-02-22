@@ -1783,7 +1783,7 @@ bool ccPointCloud::setRGBColorByHeight(unsigned char heightDim, ccColorScale::Sh
 	if (fabs(height) < ZERO_TOLERANCE) //flat cloud!
 	{
 		const ccColor::Rgb& col = colorScale->getColorByIndex(0);
-		return setRGBColor(col);
+		return setColor(col);
 	}
 
 	unsigned count = size();
@@ -1805,7 +1805,7 @@ bool ccPointCloud::setRGBColorByHeight(unsigned char heightDim, ccColorScale::Sh
 	return true;
 }
 
-bool ccPointCloud::setRGBAColor(const ccColor::Rgba& col)
+bool ccPointCloud::setColor(const ccColor::Rgba& col)
 {
 	enableTempColor(false);
 
@@ -3403,7 +3403,7 @@ void ccPointCloud::deleteAllScalarFields()
 	showSF(false);
 }
 
-bool ccPointCloud::setRGBColorWithCurrentScalarField(bool mixWithExistingColor/*=false*/)
+bool ccPointCloud::convertCurrentScalarFieldToColors(bool mixWithExistingColor/*=false*/)
 {
 	if (!hasDisplayedScalarField())
 	{
@@ -3415,17 +3415,18 @@ bool ccPointCloud::setRGBColorWithCurrentScalarField(bool mixWithExistingColor/*
 
 	if (!mixWithExistingColor || !hasColors())
 	{
-		if (!hasColors())
-			if (!resizeTheRGBTable(false))
-				return false;
+		if (!hasColors() && !resizeTheRGBTable(false))
+		{
+			return false;
+		}
 
 		for (unsigned i = 0; i < count; i++)
 		{
 			const ccColor::Rgb* col = getPointScalarValueColor(i);
-			m_rgbaColors->setValue(i, ccColor::Rgba(col ? *col : ccColor::black, ccColor::MAX));
+			setPointColor(i, col ? *col : ccColor::black);
 		}
 	}
-	else
+	else //mix with existing colors
 	{
 		for (unsigned i = 0; i < count; i++)
 		{

@@ -1533,7 +1533,7 @@ bool CommandSFConvertToRGB::process(ccCommandLineInterface &cmd)
 			int displaySFIndex = pc->getCurrentDisplayedScalarFieldIndex();
 			pc->setCurrentDisplayedScalarField(activeSFIndex);
 			
-			if (pc->setRGBColorWithCurrentScalarField(mixWithExistingColors))
+			if (pc->convertCurrentScalarFieldToColors(mixWithExistingColors))
 			{
 				pc->showColors(true);
 				pc->showSF(false);

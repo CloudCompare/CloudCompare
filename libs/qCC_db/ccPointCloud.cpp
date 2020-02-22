@@ -2653,14 +2653,14 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 
 		//ccLog::Print(QString("Rendering %1 points starting from index %2 (LoD = %3 / PN = %4)").arg(toDisplay.count).arg(toDisplay.startIndex).arg(toDisplay.indexMap ? "yes" : "no").arg(pushName ? "yes" : "no"));
-		bool colorMaterialEnabled = false;
+
+		glFunc->glPushAttrib(GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT | GL_TRANSFORM_BIT | GL_POINT_BIT);
 
 		if (glParams.showSF || glParams.showColors)
 		{
 			glFunc->glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
 			glFunc->glEnable(GL_COLOR_MATERIAL);
 			glFunc->glEnable(GL_BLEND);
-			colorMaterialEnabled = true;
 		}
 
 		if (glParams.showColors && isColorOverriden())
@@ -2687,20 +2687,18 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			if (glParams.showSF)
 			{
 				//we must get rid of lights 'color' if a scalar field is displayed!
-				glFunc->glPushAttrib(GL_LIGHTING_BIT);
 				ccMaterial::MakeLightsNeutral(context.qGLContext);
 			}
 		}
 
 		/*** DISPLAY ***/
 
-		glFunc->glPushAttrib(GL_COLOR_BUFFER_BIT | GL_POINT_BIT);
-		
 		//rounded points
 		if (context.drawRoundedPoints)
 		{
+			glFunc->glPushAttrib(GL_POINT_BIT);
 			//DGM: alpha/blending doesn't work well because it creates a halo around points with a potentially wrong color (due to the display order)
-			glFunc->glDisable(GL_BLEND);
+			//glFunc->glDisable(GL_BLEND);
 			glFunc->glEnable(GL_POINT_SMOOTH);
 			//glFunc->glEnable(GL_ALPHA_TEST);
 			//glFunc->glAlphaFunc(GL_GREATER, 0.5);
@@ -3158,27 +3156,10 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		if (context.drawRoundedPoints)
 		{
-			glFunc->glDisable(GL_POINT_SPRITE);
-		}
-		glFunc->glPopAttrib(); //GL_COLOR_BUFFER_BIT | GL_POINT_BIT
-
-		if (colorMaterialEnabled)
-		{
-			glFunc->glEnable(GL_BLEND);
-			glFunc->glDisable(GL_COLOR_MATERIAL);
+			glFunc->glPopAttrib(); //GL_POINT_BIT
 		}
 
-		//we can now switch the light off
-		if (glParams.showNorms)
-		{
-			if (glParams.showSF)
-			{
-				glFunc->glPopAttrib(); //GL_LIGHTING_BIT
-			}
-
-			glFunc->glDisable(GL_RESCALE_NORMAL);
-			glFunc->glDisable(GL_LIGHTING);
-		}
+		glFunc->glPopAttrib(); //GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT | GL_TRANSFORM_BIT | GL_POINT_BIT --> will switch the light off
 
 		if (pushName)
 		{

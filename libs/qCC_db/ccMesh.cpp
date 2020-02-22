@@ -1698,7 +1698,9 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		getDrawingParameters(glParams);
 		//no normals shading without light!
 		if (!MACRO_LightIsEnabled(context))
+		{
 			glParams.showNorms = false;
+		}
 
 		//vertices visibility
 		const ccGenericPointCloud::VisibilityTableType& verticesVisibility = m_associatedCloud->getTheVisibilityArray();
@@ -1763,6 +1765,10 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			}
 		}
 
+		glFunc->glPushAttrib(GL_LIGHTING_BIT | GL_TRANSFORM_BIT | GL_ENABLE_BIT);
+
+		glFunc->glEnable(GL_BLEND);
+
 		//materials or color?
 		bool colorMaterial = false;
 		if (glParams.showSF || glParams.showColors)
@@ -1790,7 +1796,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 		else
 		{
-			glFunc->glColor3fv(context.defaultMat->getDiffuseFront().rgba);
+			glFunc->glColor4fv(context.defaultMat->getDiffuseFront().rgba);
 		}
 
 		if (glParams.showNorms)
@@ -1967,7 +1973,6 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 			if (showTextures)
 			{
-				glFunc->glPushAttrib(GL_ENABLE_BIT);
 				glFunc->glEnable(GL_TEXTURE_2D);
 			}
 
@@ -2139,7 +2144,6 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 					glFunc->glBindTexture(GL_TEXTURE_2D, 0);
 					currentTexID = 0;
 				}
-				glFunc->glPopAttrib();
 			}
 		}
 
@@ -2148,16 +2152,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			EnableGLStippleMask(context.qGLContext, false);
 		}
 
-		if (colorMaterial)
-		{
-			glFunc->glDisable(GL_COLOR_MATERIAL);
-		}
-
-		if (glParams.showNorms)
-		{
-			glFunc->glDisable(GL_LIGHTING);
-			glFunc->glDisable(GL_RESCALE_NORMAL);
-		}
+		glFunc->glPopAttrib(); // GL_LIGHTING_BIT | GL_TRANSFORM_BIT | GL_ENABLE_BIT
 
 		if (pushName)
 		{

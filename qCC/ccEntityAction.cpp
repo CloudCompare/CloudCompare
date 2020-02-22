@@ -98,7 +98,7 @@ namespace ccEntityAction
 	// Colours
 	bool setColor(ccHObject::Container selectedEntities, bool colorize, QWidget *parent)
 	{
-		QColor colour = QColorDialog::getColor(Qt::white, parent);
+		QColor colour = QColorDialog::getColor(Qt::white, parent, QString(), QColorDialog::ShowAlphaChannel);
 		
 		if (!colour.isValid())
 			return false;
@@ -139,11 +139,12 @@ namespace ccEntityAction
 				{
 					cloud->colorize(static_cast<float>(colour.redF()),
 									static_cast<float>(colour.greenF()),
-									static_cast<float>(colour.blueF()) );
+									static_cast<float>(colour.blueF()),
+									static_cast<float>(colour.alphaF()));
 				}
 				else
 				{
-					cloud->setRGBColor(	ccColor::FromQColor(colour) );
+					cloud->setColor(ccColor::FromQColora(colour));
 				}
 				cloud->showColors(true);
 				cloud->showSF(false); //just in case

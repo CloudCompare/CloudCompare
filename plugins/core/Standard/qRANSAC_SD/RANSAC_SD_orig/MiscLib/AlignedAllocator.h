@@ -11,6 +11,21 @@
 #include <xmmintrin.h>
 #endif
 
+#ifdef _mm_malloc
+#ifndef a_malloc
+#define a_malloc(align,sz) _mm_malloc((align),(sz))
+#endif // !a_malloc
+#endif // !_mm_malloc
+#ifdef _mm_free
+#ifndef a_free
+#define a_free(ptr)  _mm_free((ptr))
+#endif // !a_free
+#endif // !_mm_free
+
+#ifndef a_free  
+#define a_free(a)      free(a) 
+#endif // !_mm_free
+#ifndef a_malloc
 #ifndef _WIN32
 void* _aligned_malloc(size_t size, size_t alignment) {
 	void* buffer;
@@ -18,18 +33,6 @@ void* _aligned_malloc(size_t size, size_t alignment) {
 	return buffer;
 }
 #endif
-
-#ifdef _mm_malloc
-#define a_malloc(align,sz) _mm_malloc((align),(sz))
-#endif
-#ifdef _mm_free
-#define a_free(ptr)  _mm_free((ptr))
-#endif
-
-#ifndef a_free  
-#define a_free(a)      free(a) 
-#endif // !_mm_free
-#ifndef a_malloc
 #define a_malloc(a, b) _aligned_malloc(a, b)
 #endif // !_mm_malloc
 

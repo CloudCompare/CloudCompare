@@ -6,7 +6,34 @@
 #else
 #include <stdlib.h>
 #endif
+
+#if defined(__x86_64__) || defined(__i386__) || defined(_M_IX86) || defined(_M_X64)
 #include <xmmintrin.h>
+#endif
+
+#ifndef _WIN32
+void* _aligned_malloc(size_t size, size_t alignment) {
+	void* buffer;
+	posix_memalign(&buffer, alignment, size);
+	return buffer;
+}
+#endif
+
+#ifdef _mm_malloc
+#define a_malloc(align,sz) _mm_malloc((align),(sz))
+#endif
+#ifdef _mm_free
+#define a_free(ptr)  _mm_free((ptr))
+#endif
+
+#ifndef a_free  
+#define a_free(a)      free(a) 
+#endif // !_mm_free
+#ifndef a_malloc
+#define a_malloc(a, b) _aligned_malloc(a, b)
+#endif // !_mm_malloc
+
+
 #include <limits>
 #ifdef max
 #undef max
@@ -38,8 +65,8 @@ public:
 	pointer address(reference x) const { return &x; }
 	const_pointer address(const_reference x) const { return &x; }
 	pointer allocate(size_type s, std::allocator< void >::const_pointer hint = 0)
-	{ return (T *)_mm_malloc(s * sizeof(T), Align); }
-	void deallocate(pointer p, size_type) { _mm_free(p); }
+	{ return (T *)a_malloc(s * sizeof(T), Align); }
+	void deallocate(pointer p, size_type) { a_free(p); }
 	size_type max_size() const throw() { return std::numeric_limits< size_type >::max(); }
 	void construct(pointer p, const T& val) { new(static_cast< void * >(p)) T(val); }
 	void destroy(pointer p) { p->~T(); }

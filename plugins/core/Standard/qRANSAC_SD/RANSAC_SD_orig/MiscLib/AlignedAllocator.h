@@ -26,13 +26,6 @@
 #define a_free(a)      free(a) 
 #endif // !_mm_free
 #ifndef a_malloc
-#ifndef _WIN32
-void* _aligned_malloc(size_t size, size_t alignment) {
-	void* buffer;
-	posix_memalign(&buffer, alignment, size);
-	return buffer;
-}
-#endif
 #define a_malloc(a, b) _aligned_malloc(a, b)
 #endif // !_mm_malloc
 

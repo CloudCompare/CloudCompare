@@ -77,7 +77,7 @@ void ccRenderingTools::ShowDepthBuffer(ccGBLSensor* sensor, QWidget* parent/*=0*
 			double avg = sumDist / count;
 			double stdDev = sqrt(fabs(sumDist2 / count - avg*avg));
 			//for better dynamics
-			maxDist = std::min(maxDist, static_cast<ScalarType>(avg + 1.0 * stdDev));
+			maxDist = std::min(maxDist, static_cast<PointCoordinateType>(avg + 1.0 * stdDev));
 		}
 	}
 

@@ -51,11 +51,12 @@ before_script:
   -DPLUGIN_STANDARD_QPCV=ON
   -DPLUGIN_STANDARD_QPOISSON_RECON=ON
   -DPLUGIN_STANDARD_QSRA=ON
+  -DPLUGIN_STANDARD_QRANSAC_SD=ON
   -DBUILD_TESTING=ON
   ..
 script:
 - if [[ $CXX == "clang++" ]]; then export LD_LIBRARY_PATH=/usr/local/clang/lib:$LD_LIBRARY_PATH; fi
-- if [[ $TRAVIS_BRANCH != "beta_builds" ]] && [[ $SCALAR_DOUBLE != "ON" ]]; then make -j2 && xvfb-run ctest -V; fi
+- if [[ $TRAVIS_BRANCH != "beta_builds" ]]; then make -j2 && if [[ $SCALAR_DOUBLE != "ON" ]]; then xvfb-run ctest -V; fi; fi
 - cd ..
 after_success:
 - openssl aes-256-cbc -K $encrypted_d04fcf964026_key -iv $encrypted_d04fcf964026_iv

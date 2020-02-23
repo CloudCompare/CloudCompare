@@ -196,7 +196,7 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 		glFunc->glPushName(getUniqueIDForDisplay());
 
 	if (isColorOverriden())
-		ccGL::Color3v(glFunc, getTempColor().rgb);
+		ccGL::Color4v(glFunc, getTempColor().rgba);
 	else if (colorsShown())
 		ccGL::Color3v(glFunc, m_rgbColor.rgb);
 
@@ -672,12 +672,12 @@ ccPointCloud* ccPolyline::samplePoints(	bool densityBased,
 		if (isColorOverriden())
 		{
 			//we use the default 'temporary' color
-			cloud->setRGBColor(getTempColor());
+			cloud->setColor(getTempColor());
 		}
 		else if (colorsShown())
 		{
 			//we use the default color
-			cloud->setRGBColor(m_rgbColor);
+			cloud->setColor(m_rgbColor);
 		}
 	}
 

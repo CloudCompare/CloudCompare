@@ -272,6 +272,10 @@ void ccPropertiesTreeDelegate::fillModel(ccHObject* hObject)
 	{
 		fillWithCCArray(static_cast<ColorsTableType*>(m_currentObject));
 	}
+	else if (m_currentObject->isA(CC_TYPES::RGBA_COLOR_ARRAY))
+	{
+		fillWithCCArray(static_cast<RGBAColorsTableType*>(m_currentObject));
+	}
 	else if (m_currentObject->isA(CC_TYPES::TRANS_BUFFER))
 	{
 		fillWithTransBuffer(static_cast<ccIndexedTransformationBuffer*>(m_currentObject));

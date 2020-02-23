@@ -134,31 +134,31 @@ void ccColorScale::update()
 		else
 		{
 			unsigned j = 0; //current interval
-			for (unsigned i=0; i<MAX_STEPS; ++i)
+			for (unsigned i = 0; i < MAX_STEPS; ++i)
 			{
-				const double relativePos = static_cast<double>(i)/(MAX_STEPS-1);
+				const double relativePos = static_cast<double>(i) / (MAX_STEPS - 1);
 
 				//forward to the right intervale
 				while (j+2 < stepCount && m_steps[j+1].getRelativePos() < relativePos)
 					++j;
 
 				// linear interpolation
-				const CCVector3d colBefore (	m_steps[j].getColor().redF(),
-										m_steps[j].getColor().greenF(),
-										m_steps[j].getColor().blueF() );
-				const CCVector3d colNext (	m_steps[j+1].getColor().redF(),
-										m_steps[j+1].getColor().greenF(),
-										m_steps[j+1].getColor().blueF() );
+				const CCVector3d colBefore (m_steps[j].getColor().redF(),
+											m_steps[j].getColor().greenF(),
+											m_steps[j].getColor().blueF());
+				
+				const CCVector3d colNext(	m_steps[j + 1].getColor().redF(),
+											m_steps[j + 1].getColor().greenF(),
+											m_steps[j + 1].getColor().blueF());
 
 				//interpolation coef
 				const double alpha = (relativePos - m_steps[j].getRelativePos()) / (m_steps[j+1].getRelativePos() - m_steps[j].getRelativePos());
 
 				const CCVector3d interpCol = colBefore + (colNext-colBefore) * alpha;
 
-				m_rgbaScale[i] = ccColor::Rgba(	static_cast<ColorCompType>(interpCol.x * ccColor::MAX),
+				m_rgbaScale[i] = ccColor::Rgb(	static_cast<ColorCompType>(interpCol.x * ccColor::MAX),
 												static_cast<ColorCompType>(interpCol.y * ccColor::MAX),
-												static_cast<ColorCompType>(interpCol.z * ccColor::MAX),
-												ccColor::MAX);
+												static_cast<ColorCompType>(interpCol.z * ccColor::MAX) );
 			}
 		
 			m_updated = true;
@@ -172,8 +172,10 @@ void ccColorScale::update()
 	if (!m_updated)
 	{
 		//I saw an invalid scale and I want it painted black ;)
-		for (unsigned i=0; i<MAX_STEPS; ++i)
+		for (unsigned i = 0; i < MAX_STEPS; ++i)
+		{
 			m_rgbaScale[i] = ccColor::black;
+		}
 	}
 }
 

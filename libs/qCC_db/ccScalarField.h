@@ -133,7 +133,7 @@ public:
 	inline const ccColor::Rgb* getColor(ScalarType value) const
 	{
 		assert(m_colorScale);
-		return m_colorScale->getColorByRelativePos(normalize(value), m_colorRampSteps, m_showNaNValuesInGrey ? &ccColor::lightGrey : nullptr);
+		return m_colorScale->getColorByRelativePos(normalize(value), m_colorRampSteps, m_showNaNValuesInGrey ? &ccColor::lightGreyRGB : nullptr);
 	}
 
 	//! Shortcut to getColor

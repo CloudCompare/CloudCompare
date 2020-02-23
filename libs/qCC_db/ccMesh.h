@@ -99,9 +99,11 @@ public:
 	bool interpolateNormalsBC(unsigned triIndex, const CCVector3d& w, CCVector3& N) override;
 	bool interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgb& C) override;
 	bool interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccColor::Rgb& C) override;
+	bool interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgba& C) override;
+	bool interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccColor::Rgba& C) override;
 	void computeInterpolationWeights(unsigned triIndex, const CCVector3& P, CCVector3d& weights) const override;
-	bool getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor::Rgb& C, bool interpolateColorIfNoTexture) override;
-	bool getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, ccColor::Rgb& C, bool returnColorIfNoTexture) override;
+	bool getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor::Rgba& C, bool interpolateColorIfNoTexture) override;
+	bool getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, ccColor::Rgba& color, bool returnColorIfNoTexture) override;
 	unsigned capacity() const override;
 
 	//inherited methods (GenericIndexedMesh)
@@ -401,6 +403,8 @@ protected: //methods
 	bool interpolateNormals(const CCLib::VerticesIndexes& vertIndexes, const CCVector3d& w, CCVector3& N, const Tuple3i* triNormIndexes = nullptr);
 	//! Same as other 'interpolateColors' method with a set of 3 vertices indexes
 	bool interpolateColors(const CCLib::VerticesIndexes& vertIndexes, const CCVector3d& w, ccColor::Rgb& C);
+	//! Same as other 'interpolateColors' method with a set of 3 vertices indexes
+	bool interpolateColors(const CCLib::VerticesIndexes& vertIndexes, const CCVector3d& w, ccColor::Rgba& C);
 
 	//! Used internally by 'subdivide'
 	bool pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, unsigned indexB, unsigned indexC);

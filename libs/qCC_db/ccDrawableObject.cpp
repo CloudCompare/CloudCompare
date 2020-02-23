@@ -30,7 +30,7 @@ ccDrawableObject::ccDrawableObject()
 	showNormals(false);
 	showSF(false);
 	enableTempColor(false);
-	setTempColor(ccColor::white,false);
+	setTempColor(ccColor::white, false);
 	resetGLTransformation();
 	showNameIn3D(false);
 }
@@ -129,9 +129,17 @@ void ccDrawableObject::resetGLTransformation()
 	m_glTrans.toIdentity();
 }
 
-void ccDrawableObject::setTempColor(const ccColor::Rgb& col, bool autoActivate/*=true*/)
+void ccDrawableObject::setTempColor(const ccColor::Rgba& col, bool autoActivate/*=true*/)
 {
 	m_tempColor = col;
+
+	if (autoActivate)
+		enableTempColor(true);
+}
+
+void ccDrawableObject::setTempColor(const ccColor::Rgb& col, bool autoActivate/*=true*/)
+{
+	m_tempColor = ccColor::Rgba(col, ccColor::MAX);
 
 	if (autoActivate)
 		enableTempColor(true);

@@ -404,12 +404,12 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 					delete keypointsCloud;
 					return CC_FERR_READING;
 				}
-				QStringList colorParts = currentLine.split(" ",QString::SkipEmptyParts);
+				QStringList colorParts = currentLine.split(" ", QString::SkipEmptyParts);
 				if (colorParts.size() == 3)
 				{
 					if (hasColors)
 					{
-						QStringList tokens = currentLine.simplified().split(QChar(' '),QString::SkipEmptyParts);
+						QStringList tokens = currentLine.simplified().split(QChar(' '), QString::SkipEmptyParts);
 						if (tokens.size() < 3)
 						{
 							delete keypointsCloud;
@@ -418,20 +418,22 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 						int R = tokens[0].toInt();
 						int G = tokens[1].toInt();
 						int B = tokens[2].toInt();
-						keypointsCloud->addRGBColor(static_cast<ColorCompType>(std::min<int>(R, ccColor::MAX)),
+						int A = (tokens.size() > 3 ? tokens[3].toInt() : ccColor::MAX);
+						keypointsCloud->addColor(	static_cast<ColorCompType>(std::min<int>(R, ccColor::MAX)),
 													static_cast<ColorCompType>(std::min<int>(G, ccColor::MAX)),
-													static_cast<ColorCompType>(std::min<int>(B, ccColor::MAX)));
+													static_cast<ColorCompType>(std::min<int>(B, ccColor::MAX)),
+													static_cast<ColorCompType>(std::min<int>(A, ccColor::MAX)) );
 					}
 
 					currentLine = stream.readLine();
 				}
 				else if (colorParts.size() > 3)
 				{
-					//sometimes, it appears that keypoints has no associated color!
+					//sometimes, it appears that keypoints have no associated color!
 					//so we skip the line and assume it's in fact the keypoint description...
 					ccLog::Warning("[Bundler] Keypoint #%i has no associated color!",i);
 					if (hasColors)
-						keypointsCloud->addRGBColor(0,0,0); //black by default
+						keypointsCloud->addColor(ccColor::black); //black by default
 				}
 				else
 				{
@@ -1163,14 +1165,14 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 				const int* col = mntColors.data();
 				for (unsigned i = 0; i < sampleCount; ++i, col += 4)
 				{
-					if (col[3] > 0) //accum
+					if (col[3] > 0) //accumulation (not alpha ;)
 					{
 						const CCVector3* X = mntSamples->getPointPersistentPtr(i);
 						ccColor::Rgb avgCol(static_cast<ColorCompType>(col[0] / col[3]),
 											static_cast<ColorCompType>(col[1] / col[3]),
 											static_cast<ColorCompType>(col[2] / col[3]) );
 						mntCloud->addPoint(*X);
-						mntCloud->addRGBColor(avgCol);
+						mntCloud->addColor(avgCol);
 						++realCount;
 					}
 				}

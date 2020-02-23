@@ -276,13 +276,17 @@ protected:
 		if (mLeftSide)
 		{
 			int x2 = static_cast<int>(ceil(currentPosd));
-			assert(x2 >= rect.x());
+			//assert(x2 >= rect.x());
+			if (x2 < rect.x())
+				return;
 			rect.setWidth(x2 - rect.x());
 		}
 		else
 		{
 			int x1 = static_cast<int>(floor(currentPosd));
-			assert(x1 >= rect.x());
+			//assert(x1 >= rect.x());
+			if (x1 < rect.x())
+				return;
 			int newWidth = rect.width() - (x1 - rect.x());
 			rect.setX(x1);
 			rect.setWidth(newWidth);

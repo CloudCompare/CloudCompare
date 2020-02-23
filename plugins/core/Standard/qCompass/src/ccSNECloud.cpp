@@ -86,11 +86,11 @@ void ccSNECloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		const ccViewportParameters& viewportParams = context.display->getViewportParameters();
 		
 		//get point size for drawing
-		float pSize;
+		float pSize = 0.0f;
 		glFunc->glGetFloatv(GL_POINT_SIZE, &pSize);
 
 		//setup
-		if (pSize != 0)
+		if (pSize != 0.0f)
 		{
 			glFunc->glPushAttrib(GL_LINE_BIT);
 			glFunc->glLineWidth(static_cast<GLfloat>(pSize));
@@ -98,6 +98,8 @@ void ccSNECloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		glFunc->glMatrixMode(GL_MODELVIEW);
 		glFunc->glPushMatrix();
+
+		glFunc->glPushAttrib(GL_COLOR_BUFFER_BIT);
 		glFunc->glEnable(GL_BLEND);
 
 		//get normal vector properties
@@ -145,7 +147,7 @@ void ccSNECloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			}
 
 			//get length from thickness (if defined)
-			float length = 1.0;
+			float length = 1.0f;
 			if (thickID != -1)
 			{
 				length = getScalarField(thickID)->getValue(p);
@@ -162,9 +164,12 @@ void ccSNECloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 		glFunc->glEnd();
 			
+		glFunc->glPopAttrib(); //GL_COLOR_BUFFER_BIT
+
 		//cleanup
-		if (pSize != 0) {
-			glFunc->glPopAttrib();
+		if (pSize != 0.0f)
+		{
+			glFunc->glPopAttrib(); //GL_LINE_BIT
 		}
 		glFunc->glPopMatrix();
 	}

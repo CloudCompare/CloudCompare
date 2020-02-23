@@ -3949,7 +3949,7 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 					if (randomColors)
 					{
 						ccColor::Rgb col = ccColor::Generator::Random();
-						compCloud->setRGBColor(col);
+						compCloud->setColor(col);
 						compCloud->showColors(true);
 						compCloud->showSF(false);
 					}

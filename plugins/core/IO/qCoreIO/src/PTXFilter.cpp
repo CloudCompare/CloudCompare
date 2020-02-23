@@ -405,7 +405,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	const QString& filename,
 
 						if (pointIsValid)
 						{
-							cloud->addRGBColor(color);
+							cloud->addColor(color);
 						}
 						if (loadGridColors)
 						{

@@ -1034,7 +1034,7 @@ CC_FILE_ERROR LASFWFFilter::loadFile(const QString& filename, ccHObject& contain
 							for (unsigned i = 0; i < cloud->size(); ++i)
 							{
 								//set all previous colors!
-								cloud->addRGBColor(ccColor::black);
+								cloud->addColor(ccColor::black);
 							}
 						}
 					}
@@ -1064,7 +1064,7 @@ CC_FILE_ERROR LASFWFFilter::loadFile(const QString& filename, ccHObject& contain
 										static_cast<unsigned char>((point.rgb[1] >> colorBitDec) & 255),
 										static_cast<unsigned char>((point.rgb[2] >> colorBitDec) & 255));
 
-					cloud->addRGBColor(color);
+					cloud->addColor(color);
 				}
 			}
 

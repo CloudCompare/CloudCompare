@@ -41,7 +41,7 @@ class ccScalarField;
 class ccProgressDialog;
 class ccGenericGLDisplay;
 class ccMainAppInterface;
-class ColorsTableType;
+class RGBAColorsTableType;
 
 //! Dialog for the qBroom plugin
 class qBroomDlg : public QDialog, public Ui::BroomDialog
@@ -177,7 +177,7 @@ protected: //members
 	struct CloudBackup
 	{
 		ccPointCloud* ref;
-		ColorsTableType* colors;
+		RGBAColorsTableType* colors;
 		bool hadColors;
 		int displayedSFIndex;
 		ccGenericGLDisplay* originDisplay;

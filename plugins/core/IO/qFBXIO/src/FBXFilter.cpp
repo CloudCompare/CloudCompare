@@ -803,9 +803,10 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 							for (int i = 0; i < vertCount; ++i)
 							{
 								FbxColor c = vertColor->GetDirectArray().GetAt(i);
-								vertices->addRGBColor(static_cast<ColorCompType>(c.mRed	* ccColor::MAX),
-								    static_cast<ColorCompType>(c.mGreen	* ccColor::MAX),
-								    static_cast<ColorCompType>(c.mBlue	* ccColor::MAX));
+								vertices->addColor(	static_cast<ColorCompType>(c.mRed	* ccColor::MAX),
+													static_cast<ColorCompType>(c.mGreen	* ccColor::MAX),
+													static_cast<ColorCompType>(c.mBlue	* ccColor::MAX),
+													static_cast<ColorCompType>(c.mAlpha	* ccColor::MAX));
 							}
 						}
 						break;
@@ -815,9 +816,10 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 							{
 								int id = vertColor->GetIndexArray().GetAt(i);
 								FbxColor c = vertColor->GetDirectArray().GetAt(id);
-								vertices->addRGBColor(static_cast<ColorCompType>(c.mRed	* ccColor::MAX),
-								    static_cast<ColorCompType>(c.mGreen	* ccColor::MAX),
-								    static_cast<ColorCompType>(c.mBlue	* ccColor::MAX));
+								vertices->addColor(	static_cast<ColorCompType>(c.mRed	* ccColor::MAX),
+													static_cast<ColorCompType>(c.mGreen	* ccColor::MAX),
+													static_cast<ColorCompType>(c.mBlue	* ccColor::MAX),
+													static_cast<ColorCompType>(c.mAlpha	* ccColor::MAX));
 							}
 						}
 						break;

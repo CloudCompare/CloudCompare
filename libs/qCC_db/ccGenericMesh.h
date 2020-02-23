@@ -134,36 +134,52 @@ public:
 	//! Interpolates RGB colors inside a given triangle
 	/** \param triIndex triangle index
 		\param P point where to interpolate (should be inside the triangle!)
-		\param[out] C interpolated color
+		\param[out] color interpolated color
 		\return success
 	**/
-	virtual bool interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgb& C) = 0;
+	virtual bool interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgb& color) = 0;
 
 	//! Interpolates RGB colors inside a given triangle
 	/** \param triIndex triangle index
 		\param w barycentric coordinates
-		\param[out] C interpolated color
+		\param[out] color interpolated color
 		\return success
 	**/
-	virtual bool interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccColor::Rgb& C) = 0;
+	virtual bool interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccColor::Rgb& color) = 0;
+
+	//! Interpolates RGBA colors inside a given triangle
+	/** \param triIndex triangle index
+		\param P point where to interpolate (should be inside the triangle!)
+		\param[out] color interpolated color
+		\return success
+	**/
+	virtual bool interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgba& color) = 0;
+
+	//! Interpolates RGBA colors inside a given triangle
+	/** \param triIndex triangle index
+		\param w barycentric coordinates
+		\param[out] color interpolated color
+		\return success
+	**/
+	virtual bool interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccColor::Rgba& color) = 0;
 
 	//! Returns RGB color fom a given triangle material/texture
 	/** \param triIndex triangle index
 		\param P point where to grab color (should be inside the triangle!)
-		\param[out] C texel color
+		\param[out] color texel color
 		\param interpolateColorIfNoTexture whether to return the color interpolated from the RGB field if no texture/material is associated to the given triangles
 		\return success
 	**/
-	virtual bool getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor::Rgb& C, bool interpolateColorIfNoTexture) = 0;
+	virtual bool getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor::Rgba& color, bool interpolateColorIfNoTexture) = 0;
 
 	//! Returns RGB color of a vertex fom a given triangle material/texture
 	/** \param triIndex triangle index
 		\param vertIndex vertex index inside triangle (i.e. 0, 1 or 2!)
-		\param[out] C texel color
+		\param[out] color texel color
 		\param returnColorIfNoTexture whether to return the color from the vertex RGB field if no texture/material is associated to the given triangle
 		\return success
 	**/
-	virtual bool getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, ccColor::Rgb& C, bool returnColorIfNoTexture) = 0;
+	virtual bool getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, ccColor::Rgba& color, bool returnColorIfNoTexture) = 0;
 
 	//! Returns whether the mesh is displayed as wired or with plain facets
 	virtual bool isShownAsWire() const { return m_showWired; }
@@ -229,7 +245,7 @@ protected:
 	//Static arrays for OpenGL drawing
 	static CCVector3* GetVertexBuffer();
 	static CCVector3* GetNormalsBuffer();
-	static ccColor::Rgb* GetColorsBuffer();
+	static ColorCompType* GetColorsBuffer();
 
 	//! Triangle picking (single triangle)
 	virtual bool trianglePicking(	unsigned triIndex,

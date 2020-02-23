@@ -179,7 +179,7 @@ public: //features allocation/resize
 	bool reserveThePointsTable(unsigned _numberOfPoints);
 
 	//! Reserves memory to store the RGB colors
-	/** Before adding colors to the cloud (with addRGBColor())
+	/** Before adding colors to the cloud (with addColor())
 		be sure to reserve the necessary amount of memory
 		with this method. This method reserves memory for as
 		many colors as the number of points in the cloud
@@ -455,7 +455,7 @@ public: //other methods
 	const ccColor::Rgb* geScalarValueColor(ScalarType d) const override;
 	const ccColor::Rgb* getPointScalarValueColor(unsigned pointIndex) const override;
 	ScalarType getPointDisplayedDistance(unsigned pointIndex) const override;
-	const ccColor::Rgb& getPointColor(unsigned pointIndex) const override;
+	const ccColor::Rgba& getPointColor(unsigned pointIndex) const override;
 	const CompressedNormType& getPointNormalIndex(unsigned pointIndex) const override;
 	const CCVector3& getPointNormal(unsigned pointIndex) const override;
 	CCLib::ReferenceCloud* crop(const ccBBox& box, bool inside = true) override;
@@ -490,7 +490,12 @@ public: //other methods
 	//! Sets a particular point color
 	/** WARNING: colors must be enabled.
 	**/
-	void setPointColor(unsigned pointIndex, const ccColor::Rgb& col);
+	void setPointColor(unsigned pointIndex, const ccColor::Rgba& col);
+
+	//! Sets a particular point color
+	/** WARNING: colors must be enabled.
+	**/
+	inline void setPointColor(unsigned pointIndex, const ccColor::Rgb& col) { setPointColor(pointIndex, ccColor::Rgba(col, ccColor::MAX)); }
 
 	//! Sets a particular point compressed normal
 	/** WARNING: normals must be enabled.
@@ -537,23 +542,29 @@ public: //other methods
 	**/
 	bool convertNormalToDipDirSFs(ccScalarField* dipSF, ccScalarField* dipDirSF);
 
-	//! Pushes an RGB color on stack
-	/** \param C RGB color
+	//! Pushes an RGBA color on stack
+	/** \param C RGBA color
 	**/
-	void addRGBColor(const ccColor::Rgb& C);
+	void addColor(const ccColor::Rgba& C);
+
+	//! Pushes an RGB color on stack
+	/** Will be converted to an RGBA color automatically.
+		\param C RGB color
+	**/
+	inline void addColor(const ccColor::Rgb& C) { addColor(ccColor::Rgba(C, ccColor::MAX)); }
 
 	//! Pushes an RGB color on stack (shortcut)
 	/** \param r red component
 		\param g green component
 		\param b blue component
 	**/
-	inline void addRGBColor(ColorCompType r, ColorCompType g, ColorCompType b) { addRGBColor(ccColor::Rgb(r, g, b)); }
+	inline void addColor(ColorCompType r, ColorCompType g, ColorCompType b, ColorCompType a = ccColor::MAX) { addColor(ccColor::Rgba(r, g, b, a)); }
 
 	//! Pushes a grey color on stack (shortcut)
 	/** Shortcut: color is converted to RGB(g, g, g)
 		\param g grey component
 	**/
-	inline void addGreyColor(ColorCompType g) { addRGBColor(ccColor::Rgb(g, g, g)); }
+	inline void addGreyColor(ColorCompType g) { addColor(ccColor::Rgba(g, g, g, ccColor::MAX)); }
 
 	//! Converts RGB to grey scale colors
 	/** \return success
@@ -566,9 +577,10 @@ public: //other methods
 		\param r red component
 		\param g green component
 		\param b blue component
+		\param a alpha component
 		\return success
 	**/
-	bool colorize(float r, float g, float b);
+	bool colorize(float r, float g, float b, float a = 1.0f);
 
 	//! Assigns color to points proportionnaly to their 'height'
 	/** Height is defined wrt to the specified dimension (heightDim).
@@ -588,26 +600,34 @@ public: //other methods
 	**/
 	bool setRGBColorByBanding(unsigned char dim, double freq);
 
-	//! Sets RGB colors with current scalar field (values & parameters)
+	//! Converts current scalar field (values & display parameters) to RGB colors
 	/** \return success
 	**/
-	bool setRGBColorWithCurrentScalarField(bool mixWithExistingColor = false);
+	bool convertCurrentScalarFieldToColors(bool mixWithExistingColor = false);
 
 	//! Set a unique color for the whole cloud (shortcut)
 	/** Color array is automatically allocated if necessary.
 		\param r red component
 		\param g green component
 		\param b blue component
+		\param a alpha component
 		\return success
 	**/
-	inline bool setRGBColor(ColorCompType r, ColorCompType g, ColorCompType b) { return setRGBColor(ccColor::Rgb(r, g, b)); }
+	inline bool setColor(ColorCompType r, ColorCompType g, ColorCompType b, ColorCompType a = ccColor::MAX) { return setColor(ccColor::Rgba(r, g, b, a)); }
 
-	//! Set a unique color for the whole cloud
+	//! Set a unique color for the whole cloud (RGB version)
 	/** Color array is automatically allocated if necessary.
-		\param col RGB color (size: 3)
+		\param col RGB color
 		\return success
 	**/
-	bool setRGBColor(const ccColor::Rgb& col);
+	inline bool setColor(const ccColor::Rgb& col) { return setColor(ccColor::Rgba(col, ccColor::MAX)); }
+
+	//! Set a unique color for the whole cloud (RGBA version)
+	/** Color array is automatically allocated if necessary.
+		\param col RGBA color
+		\return success
+	**/
+	bool setColor(const ccColor::Rgba& col);
 
 	//! Inverts normals (if any)
 	void invertNormals();
@@ -678,8 +698,8 @@ public: //other methods
 	**/
 	int addScalarField(ccScalarField* sf);
 
-	//! Returns pointer on RGB colors table
-	ColorsTableType* rgbColors() const { return m_rgbColors; }
+	//! Returns pointer on RGBA colors table
+	RGBAColorsTableType* rgbaColors() const { return m_rgbaColors; }
 
 	//! Returns pointer on compressed normals indexes table
 	NormsIndexesTableType* normals() const { return m_normals; }
@@ -726,7 +746,7 @@ protected:
 	void swapPoints(unsigned firstIndex, unsigned secondIndex) override;
 
 	//! Colors
-	ColorsTableType* m_rgbColors;
+	RGBAColorsTableType* m_rgbaColors;
 
 	//! Normals (compressed)
 	NormsIndexesTableType* m_normals;

@@ -120,28 +120,28 @@ void ccDisplayOptionsDlg::refresh()
 	meshFrontDiff.setRgbF(mfc.r, mfc.g, mfc.b, mfc.a);
 	ccQtHelpers::SetButtonColor(m_ui->meshFrontColorButton, meshFrontDiff);
 
-	const ccColor::Rgbub& bbc = parameters.bbDefaultCol;
-	bbDefaultCol.setRgb(bbc.r, bbc.g, bbc.b);
+	const ccColor::Rgba& bbc = parameters.bbDefaultCol;
+	bbDefaultCol.setRgb(bbc.r, bbc.g, bbc.b, bbc.a);
 	ccQtHelpers::SetButtonColor(m_ui->bbColorButton, bbDefaultCol);
 
 	const ccColor::Rgbub& bgc = parameters.backgroundCol;
 	backgroundCol.setRgb(bgc.r, bgc.g, bgc.b);
 	ccQtHelpers::SetButtonColor(m_ui->bkgColorButton, backgroundCol);
 
-	const ccColor::Rgbub& lblbc = parameters.labelBackgroundCol;
-	labelBackgroundCol.setRgb(lblbc.r, lblbc.g, lblbc.b);
+	const ccColor::Rgba& lblbc = parameters.labelBackgroundCol;
+	labelBackgroundCol.setRgb(lblbc.r, lblbc.g, lblbc.b, lblbc.a);
 	ccQtHelpers::SetButtonColor(m_ui->labelBkgColorButton, labelBackgroundCol);
 
-	const ccColor::Rgbub& lblmc = parameters.labelMarkerCol;
-	labelMarkerCol.setRgb(lblmc.r, lblmc.g, lblmc.b);
+	const ccColor::Rgba& lblmc = parameters.labelMarkerCol;
+	labelMarkerCol.setRgb(lblmc.r, lblmc.g, lblmc.b, lblmc.a);
 	ccQtHelpers::SetButtonColor(m_ui->labelMarkerColorButton, labelMarkerCol);
 
-	const ccColor::Rgbub& pdc = parameters.pointsDefaultCol;
-	pointsDefaultCol.setRgb(pdc.r, pdc.g, pdc.b);
+	const ccColor::Rgba& pdc = parameters.pointsDefaultCol;
+	pointsDefaultCol.setRgb(pdc.r, pdc.g, pdc.b, pdc.a);
 	ccQtHelpers::SetButtonColor(m_ui->pointsColorButton, pointsDefaultCol);
 
-	const ccColor::Rgbub& tdc = parameters.textDefaultCol;
-	textDefaultCol.setRgb(tdc.r, tdc.g, tdc.b);
+	const ccColor::Rgba& tdc = parameters.textDefaultCol;
+	textDefaultCol.setRgb(tdc.r, tdc.g, tdc.b, tdc.a);
 	ccQtHelpers::SetButtonColor(m_ui->textColorButton, textDefaultCol);
 
 	m_ui->doubleSidedCheckBox->setChecked(parameters.lightDoubleSided);
@@ -214,7 +214,7 @@ void ccDisplayOptionsDlg::changeLightSpecularColor()
 
 void ccDisplayOptionsDlg::changeMeshFrontDiffuseColor()
 {
-	QColor newCol = QColorDialog::getColor(meshFrontDiff, this);
+	QColor newCol = QColorDialog::getColor(meshFrontDiff, this, QString(), QColorDialog::ShowAlphaChannel);
 	if (!newCol.isValid())
 		return;
 
@@ -228,7 +228,7 @@ void ccDisplayOptionsDlg::changeMeshFrontDiffuseColor()
 
 void ccDisplayOptionsDlg::changeMeshBackDiffuseColor()
 {
-	QColor newCol = QColorDialog::getColor(meshBackDiff, this);
+	QColor newCol = QColorDialog::getColor(meshBackDiff, this, QString(), QColorDialog::ShowAlphaChannel);
 	if (!newCol.isValid())
 		return;
 
@@ -241,7 +241,7 @@ void ccDisplayOptionsDlg::changeMeshBackDiffuseColor()
 
 void ccDisplayOptionsDlg::changeMeshSpecularColor()
 {
-	QColor newCol = QColorDialog::getColor(meshSpecularColor, this);
+	QColor newCol = QColorDialog::getColor(meshSpecularColor, this, QString(), QColorDialog::ShowAlphaChannel);
 	if (!newCol.isValid())
 		return;
 
@@ -254,39 +254,39 @@ void ccDisplayOptionsDlg::changeMeshSpecularColor()
 
 void ccDisplayOptionsDlg::changePointsColor()
 {
-	QColor newCol = QColorDialog::getColor(pointsDefaultCol, this);
+	QColor newCol = QColorDialog::getColor(pointsDefaultCol, this, QString(), QColorDialog::ShowAlphaChannel);
 	if (!newCol.isValid())
 		return;
 
 	pointsDefaultCol = newCol;
 	ccQtHelpers::SetButtonColor(m_ui->pointsColorButton, pointsDefaultCol);
-	parameters.pointsDefaultCol = ccColor::FromQColor(pointsDefaultCol);
+	parameters.pointsDefaultCol = ccColor::FromQColora(pointsDefaultCol);
 
 	update();
 }
 
 void ccDisplayOptionsDlg::changeBBColor()
 {
-	QColor newCol = QColorDialog::getColor(bbDefaultCol, this);
+	QColor newCol = QColorDialog::getColor(bbDefaultCol, this, QString(), QColorDialog::ShowAlphaChannel);
 	if (!newCol.isValid())
 		return;
 
 	bbDefaultCol = newCol;
 	ccQtHelpers::SetButtonColor(m_ui->bbColorButton, bbDefaultCol);
-	parameters.bbDefaultCol = ccColor::FromQColor(bbDefaultCol);
+	parameters.bbDefaultCol = ccColor::FromQColora(bbDefaultCol);
 
 	update();
 }
 
 void ccDisplayOptionsDlg::changeTextColor()
 {
-	QColor newCol = QColorDialog::getColor(textDefaultCol, this);
+	QColor newCol = QColorDialog::getColor(textDefaultCol, this, QString(), QColorDialog::ShowAlphaChannel);
 	if (!newCol.isValid())
 		return;
 
 	textDefaultCol = newCol;
 	ccQtHelpers::SetButtonColor(m_ui->textColorButton, textDefaultCol);
-	parameters.textDefaultCol = ccColor::FromQColor(textDefaultCol);
+	parameters.textDefaultCol = ccColor::FromQColora(textDefaultCol);
 
 	update();
 }
@@ -306,27 +306,27 @@ void ccDisplayOptionsDlg::changeBackgroundColor()
 
 void ccDisplayOptionsDlg::changeLabelBackgroundColor()
 {
-	QColor newCol = QColorDialog::getColor(labelBackgroundCol, this);
+	QColor newCol = QColorDialog::getColor(labelBackgroundCol, this, QString(), QColorDialog::ShowAlphaChannel);
 	if (!newCol.isValid())
 		return;
 
 	labelBackgroundCol = newCol;
 	ccQtHelpers::SetButtonColor(m_ui->labelBkgColorButton, labelBackgroundCol);
-	parameters.labelBackgroundCol = ccColor::FromQColor(labelBackgroundCol);
+	parameters.labelBackgroundCol = ccColor::FromQColora(labelBackgroundCol);
 
 	update();
 }
 
 void ccDisplayOptionsDlg::changeLabelMarkerColor()
 {
-	QColor newCol = QColorDialog::getColor(labelMarkerCol, this);
+	QColor newCol = QColorDialog::getColor(labelMarkerCol, this, QString(), QColorDialog::ShowAlphaChannel);
 	if (!newCol.isValid())
 		return;
 
 	labelMarkerCol = newCol;
 	ccQtHelpers::SetButtonColor(m_ui->labelMarkerColorButton, labelMarkerCol);
 
-	parameters.labelMarkerCol = ccColor::FromQColor(labelMarkerCol);
+	parameters.labelMarkerCol = ccColor::FromQColora(labelMarkerCol);
 
 	update();
 }

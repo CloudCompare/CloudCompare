@@ -677,7 +677,7 @@ void cc2DLabel::getLabelInfo1(LabelInfo1& info) const
 			info.hasRGB = pp._cloud->hasColors();
 			if (info.hasRGB)
 			{
-				info.rgb = pp._cloud->getPointColor(pp.index);
+				info.color = pp._cloud->getPointColor(pp.index);
 			}
 			//scalar field
 			info.hasSF = pp._cloud->hasDisplayedScalarField();
@@ -721,7 +721,7 @@ void cc2DLabel::getLabelInfo1(LabelInfo1& info) const
 			info.hasRGB = pp._mesh->hasColors();
 			if (info.hasRGB)
 			{
-				pp._mesh->interpolateColorsBC(pp.index, w, info.rgb);
+				pp._mesh->interpolateColorsBC(pp.index, w, info.color);
 			}
 			//scalar field
 			info.hasSF = pp._mesh->hasDisplayedScalarField();
@@ -862,7 +862,7 @@ QStringList cc2DLabel::getLabelContent(int precision) const
 		//color
 		if (info.hasRGB)
 		{
-			QString colorStr = QString("Color: (%1;%2;%3)").arg(info.rgb.r).arg(info.rgb.g).arg(info.rgb.b);
+			QString colorStr = QString("Color: (%1;%2;%3;%4)").arg(info.color.r).arg(info.color.g).arg(info.color.b).arg(info.color.a);
 			body << colorStr;
 		}
 		//scalar field
@@ -1139,7 +1139,7 @@ static const int c_tabMarginY = 2;
 static const int c_arrowBaseSize = 3;
 //static const int c_buttonSize = 10;
 
-static const ccColor::Rgb c_darkGreen(0, 200, 0);
+static const ccColor::Rgba c_darkGreen(0, 200, 0, 255);
 
 //! Data table
 struct Tab
@@ -1265,9 +1265,9 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 
 				//we draw the segments
 				if (isSelected())
-					ccGL::Color3v(glFunc, ccColor::red.rgb);
+					ccGL::Color4v(glFunc, ccColor::red.rgba);
 				else
-					ccGL::Color3v(glFunc, context.labelDefaultMarkerCol.rgb/*ccColor::green.rgba*/);
+					ccGL::Color4v(glFunc, context.labelDefaultMarkerCol.rgba/*ccColor::green.rgba*/);
 
 				glFunc->glBegin(count == 2 ? GL_LINES : GL_LINE_LOOP);
 				for (unsigned j = 0; j < count; ++j)
@@ -1300,7 +1300,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 						static_cast<int>(m_pickedPoints[j].pos2D.y) + context.labelMarkerTextShift_pix,
 						ccGenericGLDisplay::ALIGN_DEFAULT,
 						context.labelOpacity / 100.0f,
-						ccColor::white.rgb,
+						&ccColor::white,
 						&font);
 				}
 			}
@@ -1421,9 +1421,9 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 						if (info.hasRGB)
 						{
 							int c = tab.add2x3Block();
-							tab.colContent[c] << "R"; tab.colContent[c + 1] << QString::number(info.rgb.r);
-							tab.colContent[c] << "G"; tab.colContent[c + 1] << QString::number(info.rgb.g);
-							tab.colContent[c] << "B"; tab.colContent[c + 1] << QString::number(info.rgb.b);
+							tab.colContent[c] << "R"; tab.colContent[c + 1] << QString::number(info.color.r);
+							tab.colContent[c] << "G"; tab.colContent[c + 1] << QString::number(info.color.g);
+							tab.colContent[c] << "B"; tab.colContent[c + 1] << QString::number(info.color.b);
 						}
 					}
 					else if (count == 2)
@@ -1668,7 +1668,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 	}
 
 	//draw close button
-	//glFunc->glColor3ubv(ccColor::black);
+	//glFunc->glColor4ubv(ccColor::black.rgba);
 	//glFunc->glBegin(GL_LINE_LOOP);
 	//glFunc->glVertex2i(m_closeButtonROI.left(),-m_closeButtonROI.top());
 	//glFunc->glVertex2i(m_closeButtonROI.left(),-m_closeButtonROI.bottom());
@@ -1689,7 +1689,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 		int yStartRel = 0;
 		yStartRel -= titleHeight;
 
-		ccColor::Rgbub defaultTextColor;
+		ccColor::Rgba defaultTextColor;
 		if (context.labelOpacity < 40)
 		{
 			//under a given opacity level, we use the default text color instead!
@@ -1697,9 +1697,10 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 		}
 		else
 		{
-			defaultTextColor = ccColor::Rgbub(255 - context.labelDefaultBkgCol.r,
-				255 - context.labelDefaultBkgCol.g,
-				255 - context.labelDefaultBkgCol.b);
+			defaultTextColor = ccColor::Rgba(	255 - context.labelDefaultBkgCol.r,
+												255 - context.labelDefaultBkgCol.g,
+												255 - context.labelDefaultBkgCol.b,
+												context.labelDefaultBkgCol.a);
 		}
 
 		//label title
@@ -1708,7 +1709,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 			yStart + yStartRel,
 			ccGenericGLDisplay::ALIGN_DEFAULT,
 			0,
-			defaultTextColor.rgb,
+			&defaultTextColor,
 			&titleFont);
 		yStartRel -= margin;
 
@@ -1725,7 +1726,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 				int actualRowCount = std::min(tab.rowCount, tab.colContent[c].size());
 
 				bool labelCol = ((c & 1) == 0);
-				const unsigned char* textColor = labelCol ? ccColor::white.rgb : defaultTextColor.rgb;
+				const ccColor::Rgba* textColor = labelCol ? &ccColor::white : &defaultTextColor;
 
 				for (int r = 0; r < actualRowCount; ++r)
 				{
@@ -1737,11 +1738,11 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 						//draw background
 						int rgbIndex = (r % 3);
 						if (rgbIndex == 0)
-							glFunc->glColor3ubv(ccColor::red.rgb);
+							glFunc->glColor4ubv(ccColor::red.rgba);
 						else if (rgbIndex == 1)
-							glFunc->glColor3ubv(c_darkGreen.rgb);
+							glFunc->glColor4ubv(c_darkGreen.rgba);
 						else if (rgbIndex == 2)
-							glFunc->glColor3ubv(ccColor::blue.rgb);
+							glFunc->glColor4ubv(ccColor::blue.rgba);
 
 						glFunc->glBegin(GL_QUADS);
 						glFunc->glVertex2i(m_labelROI.left() + xCol, -m_labelROI.top() + yRow);

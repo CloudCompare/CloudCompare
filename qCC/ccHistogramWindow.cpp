@@ -340,7 +340,7 @@ void ccHistogramWindow::refreshBars()
 
 			const ccColor::Rgb* col = m_associatedSF->getColor(static_cast<ScalarType>(keyData[i]));
 			if (!col) //hidden values may have no associated color!
-				col = &ccColor::lightGrey;
+				col = &ccColor::lightGreyRGB;
 			colors[i] = QColor(col->r, col->g, col->b);
 		}
 
@@ -364,7 +364,7 @@ void ccHistogramWindow::refresh()
 		minVal = std::min(minVal, minSat);
 		maxVal = std::max(maxVal, maxSat);
 	}
-	xAxis->setRange(minVal, maxVal);
+	xAxis->setRange(minVal, std::max(minVal + std::numeric_limits<ScalarType>::epsilon(), maxVal));
 	yAxis->setRange(0, m_maxHistoVal);
 
 	if (!m_titleStr.isEmpty())
@@ -483,7 +483,7 @@ void ccHistogramWindow::refresh()
 					col = colorScale->getColorByRelativePos(normVal);
 				}
 				if (!col) //hidden values may have no associated color!
-					col = &ccColor::lightGrey;
+					col = &ccColor::lightGreyRGB;
 				colors[i] = QColor(col->r, col->g, col->b);
 			}
 		}

@@ -355,7 +355,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 						else
 						{
 							//instantiate memory for RBG colors if necessary
-							if (!loadAsTexturedQuad && !pc->hasColors() && !pc->setRGBColor(ccColor::MAX, ccColor::MAX, ccColor::MAX))
+							if (!loadAsTexturedQuad && !pc->hasColors() && !pc->setColor(ccColor::white))
 							{
 								ccLog::Warning(QString("Failed to instantiate memory for storing color band '%1'!").arg(GDALGetColorInterpretationName(colorInterp)));
 							}
@@ -392,8 +392,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 											}
 											else
 											{
-												const ccColor::Rgb& origColor = pc->getPointColor(pointIndex);
-												C = ccColor::Rgba(origColor, ccColor::MAX);
+												C = pc->getPointColor(pointIndex);
 											}
 
 											switch (colorInterp)

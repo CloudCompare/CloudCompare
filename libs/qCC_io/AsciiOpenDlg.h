@@ -28,7 +28,7 @@
 //system
 #include <vector>
 
-const unsigned ASCII_OPEN_DLG_TYPES_COUNT = 18;
+const unsigned ASCII_OPEN_DLG_TYPES_COUNT = 20;
 
 enum CC_ASCII_OPEN_DLG_TYPES {	ASCII_OPEN_DLG_None			= 0,
 								ASCII_OPEN_DLG_X			= 1,
@@ -40,13 +40,15 @@ enum CC_ASCII_OPEN_DLG_TYPES {	ASCII_OPEN_DLG_None			= 0,
 								ASCII_OPEN_DLG_R			= 7,
 								ASCII_OPEN_DLG_G			= 8,
 								ASCII_OPEN_DLG_B			= 9,
-								ASCII_OPEN_DLG_Rf			= 10,
-								ASCII_OPEN_DLG_Gf			= 11,
-								ASCII_OPEN_DLG_Bf			= 12,
-								ASCII_OPEN_DLG_Grey			= 13,
-								ASCII_OPEN_DLG_RGB32i		= 14, //RGBA as a single 32 bits integer (PCL style)
-								ASCII_OPEN_DLG_RGB32f		= 15, //RGBA as a single 32 bits float (PCL style)
-								ASCII_OPEN_DLG_Label		= 16,
+								ASCII_OPEN_DLG_A			= 10,
+								ASCII_OPEN_DLG_Rf			= 11,
+								ASCII_OPEN_DLG_Gf			= 12,
+								ASCII_OPEN_DLG_Bf			= 13,
+								ASCII_OPEN_DLG_Af			= 14,
+								ASCII_OPEN_DLG_Grey			= 15,
+								ASCII_OPEN_DLG_RGB32i		= 16, //RGBA as a single 32 bits integer (PCL style)
+								ASCII_OPEN_DLG_RGB32f		= 17, //RGBA as a single 32 bits float (PCL style)
+								ASCII_OPEN_DLG_Label		= 18,
 								ASCII_OPEN_DLG_Scalar		= ASCII_OPEN_DLG_TYPES_COUNT - 1, //should always be the last one! (see AsciiOpenDlg::CheckOpenSequence)
 };
 
@@ -63,9 +65,11 @@ public:
 	static QString R()  { return "R";  }
 	static QString G()  { return "G";  }
 	static QString B()  { return "B";  }
+	static QString A()  { return "A";  }
 	static QString Rf() { return "Rf"; }
 	static QString Gf() { return "Gf"; }
 	static QString Bf() { return "Bf"; }
+	static QString Af() { return "Af"; }
 
 	static QString Grey()   { return "Intensity"; }
 	static QString Scalar() { return "SF"; }
@@ -74,7 +78,7 @@ public:
 	static QString Label()	{ return "Label"; }
 };
 
-const char ASCII_OPEN_DLG_TYPES_NAMES[ASCII_OPEN_DLG_TYPES_COUNT][24] = {	"Ignore",
+const char ASCII_OPEN_DLG_TYPES_NAMES[ASCII_OPEN_DLG_TYPES_COUNT][20] = {	"Ignore",
 																			"coord. X",
 																			"coord. Y",
 																			"coord. Z",
@@ -84,9 +88,11 @@ const char ASCII_OPEN_DLG_TYPES_NAMES[ASCII_OPEN_DLG_TYPES_COUNT][24] = {	"Ignor
 																			"Red (0-255)",
 																			"Green (0-255)",
 																			"Blue (0-255)",
+																			"Alpha (0-255)",
 																			"Red.float (0-1)",
 																			"Green.float (0-1)",
 																			"Blue.float (0-1)",
+																			"Alpha.float (0-1)",
 																			"Grey",
 																			"RGBAi",
 																			"RGBAf",

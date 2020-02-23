@@ -56,17 +56,17 @@ public:
 		ccColor::Rgbaf meshSpecular;
 
 		//! Default text color
-		ccColor::Rgbub textDefaultCol;
+		ccColor::Rgba textDefaultCol;
 		//! Default 3D points color
-		ccColor::Rgbub pointsDefaultCol;
+		ccColor::Rgba pointsDefaultCol;
 		//! Background color
 		ccColor::Rgbub backgroundCol;
 		//! Labels background color
-		ccColor::Rgbub labelBackgroundCol;
+		ccColor::Rgba labelBackgroundCol;
 		//! Labels marker color
-		ccColor::Rgbub labelMarkerCol;
+		ccColor::Rgba labelMarkerCol;
 		//! Bounding-boxes color
-		ccColor::Rgbub bbDefaultCol;
+		ccColor::Rgba bbDefaultCol;
 		
 		//! Use background gradient
 		bool drawBackgroundGradient;

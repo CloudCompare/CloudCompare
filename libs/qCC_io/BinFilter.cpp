@@ -83,6 +83,7 @@ bool BinFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) con
 	case CC_TYPES::NORMALS_ARRAY:
 	case CC_TYPES::NORMAL_INDEXES_ARRAY:
 	case CC_TYPES::RGB_COLOR_ARRAY:
+	case CC_TYPES::RGBA_COLOR_ARRAY:
 	case CC_TYPES::TEX_COORDS_ARRAY:
 	case CC_TYPES::LABEL_2D:
 	case CC_TYPES::TRANS_BUFFER:
@@ -1239,7 +1240,7 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 
 		const ScalarType FORMER_HIDDEN_POINTS = static_cast<ScalarType>(-1.0);
 
-		//lecture du fichier
+		//read the file
 		for (unsigned i = 0; i < nbOfPoints; ++i)
 		{
 			if (lineRead == fileChunkPos + fileChunkSize)
@@ -1288,7 +1289,7 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 					//Console::print("[BinFilter::loadModelFromBinaryFile] Error reading the %ith entity colors !\n",k);
 					return CC_FERR_READING;
 				}
-				loadedCloud->addRGBColor(C);
+				loadedCloud->addColor(C);
 			}
 
 			if (header.normals)

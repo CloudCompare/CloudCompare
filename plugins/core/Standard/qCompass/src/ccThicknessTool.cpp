@@ -19,7 +19,7 @@
 #include "ccGeoObject.h"
 #include "ccThicknessTool.h"
 
-ccColor::Rgb ccThicknessTool::ACTIVE_COLOR = ccColor::red;
+static ccColor::Rgba ACTIVE_COLOR = ccColor::red;
 bool ccThicknessTool::TWO_POINT_MODE = false;
 
 ccThicknessTool::ccThicknessTool()
@@ -48,7 +48,7 @@ void ccThicknessTool::onNewSelection(const ccHObject::Container& selectedEntitie
 			m_referencePlane = p; //set the reference plane used to calculate the thickness
 
 			//change colour
-			m_referencePlane->setTempColor(ccThicknessTool::ACTIVE_COLOR);
+			m_referencePlane->setTempColor(ACTIVE_COLOR);
 			m_referencePlane->enableTempColor(true);
 
 			//make all point clouds visible again

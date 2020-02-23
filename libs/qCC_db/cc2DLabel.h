@@ -192,7 +192,7 @@ protected:
 		bool hasNormal;
 		CCVector3 normal;
 		bool hasRGB;
-		ccColor::Rgb rgb;
+		ccColor::Rgba color;
 		bool hasSF;
 		ScalarType sfValue;
 		double sfShiftedValue;
@@ -203,7 +203,7 @@ protected:
 			: hasNormal(false)
 			, normal(0, 0, 0)
 			, hasRGB(false)
-			, rgb(0, 0, 0)
+			, color(0, 0, 0, 0)
 			, hasSF(false)
 			, sfValue(0)
 			, sfShiftedValue(0)

@@ -118,18 +118,32 @@ namespace ccColor
 	using Rgba = RgbaTpl<ColorCompType>;
 
 	// Predefined colors (default type)
-	constexpr Rgb white						(MAX, MAX, MAX);
-	constexpr Rgb lightGrey					(static_cast<ColorCompType>(MAX*0.8), static_cast<ColorCompType>(MAX*0.8), static_cast<ColorCompType>(MAX*0.8));
-	constexpr Rgb darkGrey					(MAX / 2, MAX / 2, MAX / 2);
-	constexpr Rgb red						(MAX, 0, 0);
-	constexpr Rgb green						(0, MAX, 0);
-	constexpr Rgb blue						(0, 0, MAX);
-	constexpr Rgb darkBlue					(0, 0, MAX / 2);
-	constexpr Rgb magenta					(MAX, 0, MAX);
-	constexpr Rgb cyan						(0, MAX, MAX);
-	constexpr Rgb orange					(MAX, MAX / 2, 0);
-	constexpr Rgb black						(0, 0, 0);
-	constexpr Rgb yellow					(MAX, MAX, 0);
+	constexpr Rgb whiteRGB					(MAX, MAX, MAX);
+	constexpr Rgb lightGreyRGB				(static_cast<ColorCompType>(MAX*0.8), static_cast<ColorCompType>(MAX*0.8), static_cast<ColorCompType>(MAX*0.8));
+	constexpr Rgb darkGreyRGB				(MAX / 2, MAX / 2, MAX / 2);
+	constexpr Rgb redRGB					(MAX, 0, 0);
+	constexpr Rgb greenRGB					(0, MAX, 0);
+	constexpr Rgb blueRGB					(0, 0, MAX);
+	constexpr Rgb darkBlueRGB				(0, 0, MAX / 2);
+	constexpr Rgb magentaRGB				(MAX, 0, MAX);
+	constexpr Rgb cyanRGB					(0, MAX, MAX);
+	constexpr Rgb orangeRGB					(MAX, MAX / 2, 0);
+	constexpr Rgb blackRGB					(0, 0, 0);
+	constexpr Rgb yellowRGB					(MAX, MAX, 0);
+
+	// Predefined colors (default type)
+	constexpr Rgba white					(MAX, MAX, MAX, MAX);
+	constexpr Rgba lightGrey				(static_cast<ColorCompType>(MAX*0.8), static_cast<ColorCompType>(MAX*0.8), static_cast<ColorCompType>(MAX*0.8), MAX);
+	constexpr Rgba darkGrey					(MAX / 2, MAX / 2, MAX / 2, MAX);
+	constexpr Rgba red						(MAX, 0, 0, MAX);
+	constexpr Rgba green					(0, MAX, 0, MAX);
+	constexpr Rgba blue						(0, 0, MAX, MAX);
+	constexpr Rgba darkBlue					(0, 0, MAX / 2, MAX);
+	constexpr Rgba magenta					(MAX, 0, MAX, MAX);
+	constexpr Rgba cyan						(0, MAX, MAX, MAX);
+	constexpr Rgba orange					(MAX, MAX / 2, 0, MAX);
+	constexpr Rgba black					(0, 0, 0, MAX);
+	constexpr Rgba yellow					(MAX, MAX, 0, MAX);
 
 	// Predefined materials (float)
 	constexpr Rgbaf bright					(1.00f, 1.00f, 1.00f, 1.00f);
@@ -144,10 +158,10 @@ namespace ccColor
 	constexpr Rgbaf defaultMeshBackDiff		(0.27f, 0.90f, 0.90f, 1.00f);
 
 	// Default foreground color (unsigned byte)
-	constexpr Rgbub defaultColor			(255, 255, 255);	// white
-	constexpr Rgbub defaultBkgColor			( 10, 102, 151);	// dark blue
-	constexpr Rgbub defaultLabelBkgColor	(255, 255, 255);	// white
-	constexpr Rgbub defaultLabelMarkerColor	(255,   0, 255);	// magenta
+	constexpr Rgbub defaultBkgColor			( 10, 102, 151);		// dark blue
+	constexpr Rgba defaultColor				(MAX, MAX, MAX, MAX);	// white
+	constexpr Rgba defaultLabelBkgColor		(MAX, MAX, MAX, MAX);	// white
+	constexpr Rgba defaultLabelMarkerColor	(MAX,   0, MAX, MAX);	// magenta
 
 	//! Colors generator
 	class Generator
@@ -215,21 +229,30 @@ namespace ccColor
 	};
 
 	//! Conversion from Rgbf
-	inline Rgb FromRgbf(const Rgbf& color)
+	inline Rgb FromRgbfToRgb(const Rgbf& color)
 	{
 		return Rgb( static_cast<ColorCompType>(color.r * MAX),
 					static_cast<ColorCompType>(color.g * MAX),
 					static_cast<ColorCompType>(color.b * MAX) );
 	}
 	
-	//! Conversion from Rgbaf
-	inline Rgb FromRgbf(const Rgbaf& color)
+	//! Conversion from Rgbaf to Rgb
+	inline Rgb FromRgbafToRgb(const Rgbaf& color)
 	{
 		return Rgb( static_cast<ColorCompType>(color.r * MAX),
 					static_cast<ColorCompType>(color.g * MAX),
 					static_cast<ColorCompType>(color.b * MAX) );
 	}
 	
+	//! Conversion from Rgbaf to Rgba
+	inline Rgba FromRgbafToRgba(const Rgbaf& color)
+	{
+		return Rgba( static_cast<ColorCompType>(color.r * MAX),
+					 static_cast<ColorCompType>(color.g * MAX),
+					 static_cast<ColorCompType>(color.b * MAX),
+					 static_cast<ColorCompType>(color.a * MAX));
+	}
+
 	//! Conversion from QRgb
 	inline Rgb FromQRgb(QRgb qColor)
 	{

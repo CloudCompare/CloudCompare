@@ -151,7 +151,7 @@ void ccOctree::draw(CC_DRAW_CONTEXT& context)
 		//(therefore we always render it dynamically)
 		
 		glFunc->glDisable(GL_LIGHTING);
-		ccGL::Color3v(glFunc, ccColor::green.rgb);
+		ccGL::Color4v(glFunc, ccColor::green.rgba);
 
 		void* additionalParameters[] = {	reinterpret_cast<void*>(m_frustumIntersector),
 											reinterpret_cast<void*>(glFunc)
@@ -181,7 +181,7 @@ void ccOctree::draw(CC_DRAW_CONTEXT& context)
 
 		if (!glParams.showColors)
 		{
-			ccGL::Color3v(glFunc, ccColor::white.rgb);
+			ccGL::Color4v(glFunc, ccColor::white.rgba);
 		}
 
 		//shall we recompile the GL list?
@@ -295,7 +295,7 @@ bool ccOctree::DrawCellAsABox(	const CCLib::DgmOctree::octreeCell& cell,
 	// outside
 	if (vis == ccOctreeFrustumIntersector::CELL_OUTSIDE_FRUSTUM)
 	{
-		ccGL::Color3v(glFunc, ccColor::green.rgb);
+		ccGL::Color4v(glFunc, ccColor::green.rgba);
 	}
 	else
 	{
@@ -303,10 +303,10 @@ bool ccOctree::DrawCellAsABox(	const CCLib::DgmOctree::octreeCell& cell,
 		glFunc->glLineWidth(2.0f);
 		// inside
 		if (vis == ccOctreeFrustumIntersector::CELL_INSIDE_FRUSTUM)
-			ccGL::Color3v(glFunc, ccColor::magenta.rgb);
+			ccGL::Color4v(glFunc, ccColor::magenta.rgba);
 		// intersecting
 		else
-			ccGL::Color3v(glFunc, ccColor::blue.rgb);
+			ccGL::Color4v(glFunc, ccColor::blue.rgba);
 	}
 
 	glFunc->glBegin(GL_LINE_LOOP);
@@ -357,7 +357,7 @@ bool ccOctree::DrawCellAsAPoint(const CCLib::DgmOctree::octreeCell& cell,
 	{
 		ScalarType dist = CCLib::ScalarFieldTools::computeMeanScalarValue(cell.points);
 		const ccColor::Rgb* col = cloud->geScalarValueColor(dist);
-		glFunc->glColor3ubv(col ? col->rgb : ccColor::lightGrey.rgb);
+		glFunc->glColor3ubv(col ? col->rgb : ccColor::lightGreyRGB.rgb);
 	}
 	else if (glParams->showColors)
 	{

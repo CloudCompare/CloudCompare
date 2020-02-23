@@ -292,7 +292,7 @@ bool qBroomDlg::CloudBackup::backupColors()
 	//we backup the colors (as we are going to change them)
 	if (ref->hasColors())
 	{
-		colors = new ColorsTableType;
+		colors = new RGBAColorsTableType;
 		if (!colors->resizeSafe(ref->size()))
 		{
 			//not enough memory
@@ -456,12 +456,12 @@ bool qBroomDlg::setCloud(ccPointCloud* cloud, bool ownCloud/*=false*/, bool auto
 			bool success = false;
 			if (cloud->hasDisplayedScalarField())
 			{
-				success = cloud->setRGBColorWithCurrentScalarField();
+				success = cloud->convertCurrentScalarFieldToColors();
 			}
 			//or we simply set white colors
 			else
 			{
-				success = cloud->setRGBColor(ccColor::white);
+				success = cloud->setColor(ccColor::white);
 			}
 			if (!success)
 			{

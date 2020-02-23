@@ -600,7 +600,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 					if (coordIndex == 2)
 					{
 						if (loadRGBColors)
-							vertices->addRGBColor(rgb);
+							vertices->addColor(rgb);
 						coordIndex = 0;
 						++iCol;
 					}

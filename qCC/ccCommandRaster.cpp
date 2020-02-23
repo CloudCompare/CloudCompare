@@ -668,7 +668,7 @@ bool CommandVolume25D::process(ccCommandLineInterface &cmd)
 			{
 				//convert SF to RGB
 				//rasterCloud->setCurrentDisplayedScalarField(0);
-				rasterCloud->setRGBColorWithCurrentScalarField(false);
+				rasterCloud->convertCurrentScalarFieldToColors(false);
 				rasterCloud->showColors(true);
 			}
 

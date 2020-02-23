@@ -35,22 +35,27 @@ ccScalarFieldFromColorDlg::ccScalarFieldFromColorDlg(QWidget* parent/*=0*/)
 	setupUi(this);
 }
 
-bool ccScalarFieldFromColorDlg::getRStatus()
+bool ccScalarFieldFromColorDlg::getRStatus() const
 {
 	return this->checkBoxR->isChecked();
 }
 
-bool ccScalarFieldFromColorDlg::getGStatus()
+bool ccScalarFieldFromColorDlg::getGStatus() const
 {
 	return this->checkBoxG->isChecked();
 }
 
-bool ccScalarFieldFromColorDlg::getBStatus()
+bool ccScalarFieldFromColorDlg::getBStatus() const
 {
 	return this->checkBoxB->isChecked();
 }
 
-bool ccScalarFieldFromColorDlg::getCompositeStatus()
+bool ccScalarFieldFromColorDlg::getAlphaStatus() const
+{
+	return this->checkBoxA->isChecked();
+}
+
+bool ccScalarFieldFromColorDlg::getCompositeStatus() const
 {
 	return this->checkBoxComposite->isChecked();
 }

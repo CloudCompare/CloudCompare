@@ -1867,7 +1867,7 @@ static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 				if (!arrays.blueData.empty())
 					C.b = static_cast<ColorCompType>(((arrays.blueData[i] - colorBlueOffset) * 255) / colorBlueRange);
 				
-				cloud->addRGBColor(C);
+				cloud->addColor(C);
 			}
 
 			if (!arrays.scanIndexData.empty())

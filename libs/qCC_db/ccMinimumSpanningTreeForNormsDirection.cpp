@@ -167,7 +167,7 @@ static bool ResolveNormalsWithMST(	ccPointCloud* cloud,
 //#define COLOR_PATCHES
 #ifdef COLOR_PATCHES
 	//Test: color patches
-	cloud->setRGBColor(ccColor::white);
+	cloud->setColor(ccColor::white);
 	cloud->showColors(true);
 
 	//Test: arrival time

@@ -33,16 +33,19 @@ public:
 	explicit ccScalarFieldFromColorDlg(QWidget* parent = 0);
 
 	//! Returns if to export R channel as SF
-	bool getRStatus();
+	bool getRStatus() const;
 
 	//! Returns if to export G channel as SF
-	bool getGStatus();
+	bool getGStatus() const;
 
 	//! Returns if to export B channel as SF
-	bool getBStatus();
+	bool getBStatus() const;
+
+	//! Returns if to export Alpha channel as SF
+	bool getAlphaStatus() const;
 
 	//! Returns if to export Composite channel as SF
-	bool getCompositeStatus();
+	bool getCompositeStatus() const;
 
 };
 

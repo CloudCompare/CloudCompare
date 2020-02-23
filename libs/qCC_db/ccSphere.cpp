@@ -219,6 +219,6 @@ void ccSphere::drawNameIn3D(CC_DRAW_CONTEXT& context)
 									static_cast<int>(Q2D.y),
 									ccGenericGLDisplay::ALIGN_HLEFT | ccGenericGLDisplay::ALIGN_VMIDDLE,
 									0.75f,
-									0,
+									nullptr,
 									&font);
 }

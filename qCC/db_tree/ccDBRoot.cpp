@@ -216,6 +216,7 @@ private:
 			{ CC_TYPES::NORMALS_ARRAY, containerIndex },
 			{ CC_TYPES::NORMAL_INDEXES_ARRAY, containerIndex },
 			{ CC_TYPES::RGB_COLOR_ARRAY, containerIndex },
+			{ CC_TYPES::RGBA_COLOR_ARRAY, containerIndex },
 			{ CC_TYPES::TEX_COORDS_ARRAY, containerIndex },
 			{ CC_TYPES::TRANS_BUFFER, containerIndex },
 			{ CC_TYPES::LABEL_2D, labelIndex },

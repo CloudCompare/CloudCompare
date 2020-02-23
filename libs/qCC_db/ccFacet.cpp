@@ -360,7 +360,7 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 
 void ccFacet::setColor(const ccColor::Rgb& rgb)
 {
-	if (m_contourVertices && m_contourVertices->setRGBColor(rgb))
+	if (m_contourVertices && m_contourVertices->setColor(rgb))
 	{
 		m_contourVertices->showColors(true);
 		if (m_polygonMesh)

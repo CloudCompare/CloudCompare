@@ -98,15 +98,15 @@ struct ccGLDrawContext
 	//! Default color for mesh (back side)
 	ccColor::Rgbaf defaultMeshBackDiff;
 	//! Default point color
-	ccColor::Rgbub pointsDefaultCol;
+	ccColor::Rgba pointsDefaultCol;
 	//! Default text color
-	ccColor::Rgbub textDefaultCol;
+	ccColor::Rgba textDefaultCol;
 	//! Default label background color
-	ccColor::Rgbub labelDefaultBkgCol;
+	ccColor::Rgba labelDefaultBkgCol;
 	//! Default label marker color
-	ccColor::Rgbub labelDefaultMarkerCol;
+	ccColor::Rgba labelDefaultMarkerCol;
 	//! Default bounding-box color
-	ccColor::Rgbub bbDefaultCol;
+	ccColor::Rgba bbDefaultCol;
 
 	//! Whether to decimate big clouds when updating the 3D view
 	bool decimateCloudOnMove;

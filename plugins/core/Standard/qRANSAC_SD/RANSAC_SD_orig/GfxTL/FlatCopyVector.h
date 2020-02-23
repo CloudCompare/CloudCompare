@@ -1,38 +1,6 @@
 #ifndef GfxTL__FLATCOPYVECTOR_HEADER__
 #define GfxTL__FLATCOPYVECTOR_HEADER__
-#ifndef __APPLE__
-#include <malloc.h>
-#else
-#include <stdlib.h>
-#endif
-#include <memory.h>
-#include <iterator>
-
-#if defined(__x86_64__) || defined(__i386__) || defined(_M_IX86) || defined(_M_X64)
-#include <xmmintrin.h>
-#endif
-
-#ifndef _WIN32
-void* _aligned_malloc(size_t size, size_t alignment) {
-	void* buffer;
-	posix_memalign(&buffer, alignment, size);
-	return buffer;
-}
-#endif
-
-#ifdef _mm_malloc
-#define a_malloc(align,sz) _mm_malloc((align),(sz))
-#endif
-#ifdef _mm_free
-#define a_free(ptr)  _mm_free((ptr))
-#endif
-
-#ifndef a_free  
-#define a_free(a)      free(a) 
-#endif // !_mm_free
-#ifndef a_malloc
-#define a_malloc(a, b) _aligned_malloc(a, b)
-#endif // !_mm_malloc
+#include "..\MiscLib\AlignedAllocator.h"
 
 namespace GfxTL
 {

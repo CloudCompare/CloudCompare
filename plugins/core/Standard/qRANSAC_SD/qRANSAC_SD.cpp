@@ -460,6 +460,12 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 				break;
 			}
 
+			if (shapePointsCount < params.supportPoints)
+			{
+				ccLog::Warning("[qRansacSD] Skipping shape, did not meet minimum point requirement");
+				continue;
+			}
+
 			std::string desc;
 			shape->Description(&desc);
 
@@ -573,8 +579,15 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 					CCVector3::fromArray(G.getValue()));
 
 				//plane primitive
-				prim = new ccPlane(dX, dY, &glMat);
-
+				//ccLog::Print(QString("dX: %1, dY: %2").arg(dX).arg(dY));
+				prim = new ccPlane(std::abs(dX), std::abs(dY), &glMat);
+				prim->setSelectionBehavior(ccHObject::SELECTION_FIT_BBOX);
+				prim->enableStippling(true);
+				PointCoordinateType dip = 0.0f;
+				PointCoordinateType dipDir = 0.0f;
+				ccNormalVectors::ConvertNormalToDipAndDipDir(CCVector3::fromArray(N.getValue()), dip, dipDir);
+				QString dipAndDipDirStr = ccNormalVectors::ConvertDipAndDipDirToString(dip, dipDir);
+				prim->setName(dipAndDipDirStr);
 			}
 			break;
 

@@ -165,9 +165,9 @@ bool ccSensor::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
+bool ccSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
-	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags))
+	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
 	//serialization wasn't possible before v3.4!
@@ -175,23 +175,23 @@ bool ccSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 		return false;
 
 	//rigid transformation (dataVersion>=34)
-	if (!m_rigidTransformation.fromFile(in,dataVersion,flags))
+	if (!m_rigidTransformation.fromFile(in, dataVersion, flags, oldToNewIDMap))
 		return ReadError();
 
 	//various parameters (dataVersion>=35)
 	QDataStream inStream(&in);
 	inStream >> m_activeIndex;
-	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_scale);
+	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_scale);
 
 	//color (dataVersion>=35)
-	if (in.read((char*)&m_color.rgb,sizeof(ColorCompType)*3) < 0)
+	if (in.read((char*)&m_color.rgb, sizeof(ColorCompType) * 3) < 0)
 		return ReadError();
 
 	//as the associated position buffer can't be saved directly (as it may be shared by multiple sensors)
 	//we only store its unique ID (dataVersion>=34) --> we hope we will find it at loading time (i.e. this
 	//is the responsibility of the caller to make sure that all dependencies are saved together)
 	uint32_t bufferUniqueID = 0;
-	if (in.read((char*)&bufferUniqueID,4) < 0)
+	if (in.read((char*)&bufferUniqueID, 4) < 0)
 		return ReadError();
 	//[DIRTY] WARNING: temporarily, we set the vertices unique ID in the 'm_posBuffer' pointer!!!
 	*(uint32_t*)(&m_posBuffer) = bufferUniqueID;

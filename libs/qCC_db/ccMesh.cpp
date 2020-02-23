@@ -2933,9 +2933,9 @@ bool ccMesh::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
+bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
-	if (!ccGenericMesh::fromFile_MeOnly(in, dataVersion, flags))
+	if (!ccGenericMesh::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
 	//as the associated cloud (=vertices) can't be saved directly (as it may be shared by multiple meshes)

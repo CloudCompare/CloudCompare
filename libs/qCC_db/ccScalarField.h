@@ -209,7 +209,7 @@ public:
 	//inherited from ccSerializableObject
 	inline bool isSerializable() const override { return true; }
 	bool toFile(QFile& out) const override;
-	bool fromFile(QFile& in, short dataVersion, int flags) override;
+	bool fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
 
 	//! Returns the global shift (if any)
 	inline double getGlobalShift() const { return m_globalShift; }

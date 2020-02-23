@@ -1141,7 +1141,7 @@ public:
 		return true;
 	}
 
-	bool fromFile(QFile& in, short dataVersion, int flags) override
+	bool fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override
 	{
 		assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
 

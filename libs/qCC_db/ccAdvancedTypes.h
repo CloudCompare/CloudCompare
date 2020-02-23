@@ -53,7 +53,7 @@ public:
 	}
 
 	//inherited from ccHObject/ccArray
-	QCC_DB_LIB_API bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	QCC_DB_LIB_API bool fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
 };
 
 //! Array of (uncompressed) 3D normals (Nx,Ny,Nz)

@@ -737,7 +737,7 @@ protected:
 	void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 	void applyGLTransformation(const ccGLMatrix& trans) override;
 	bool toFile_MeOnly(QFile& out) const override;
-	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
 	void notifyGeometryUpdate() override;
 
 	//inherited from PointCloud

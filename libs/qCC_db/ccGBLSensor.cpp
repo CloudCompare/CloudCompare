@@ -1030,9 +1030,9 @@ bool ccGBLSensor::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccGBLSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
+bool ccGBLSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
-	if (!ccSensor::fromFile_MeOnly(in, dataVersion, flags))
+	if (!ccSensor::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
 	//rotation order (dataVersion>=34)

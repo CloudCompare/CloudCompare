@@ -299,20 +299,20 @@ bool ccQuadric::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccQuadric::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
+bool ccQuadric::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
-	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags))
+	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
 	//parameters (dataVersion>=35)
 	QDataStream inStream(&in);
-	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_minCorner.x,1);
-	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_minCorner.y,1);
-	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_maxCorner.x,1);
-	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_maxCorner.y,1);
+	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_minCorner.x, 1);
+	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_minCorner.y, 1);
+	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_maxCorner.x, 1);
+	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_maxCorner.y, 1);
 
-	for (unsigned i=0; i<6; ++i)
-		ccSerializationHelper::CoordsFromDataStream(inStream,flags,m_eq+i,1);
+	for (unsigned i = 0; i < 6; ++i)
+		ccSerializationHelper::CoordsFromDataStream(inStream, flags, m_eq + i, 1);
 
 	return true;
 }
@@ -320,5 +320,5 @@ bool ccQuadric::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 ccBBox ccQuadric::getOwnFitBB(ccGLMatrix& trans)
 {
 	trans = m_transformation;
-	return ccBBox( CCVector3(m_minCorner.x,m_minCorner.y,m_minZ), CCVector3(m_maxCorner.x,m_maxCorner.y,m_maxZ) );
+	return ccBBox(CCVector3(m_minCorner.x, m_minCorner.y, m_minZ), CCVector3(m_maxCorner.x, m_maxCorner.y, m_maxZ));
 }

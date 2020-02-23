@@ -110,7 +110,7 @@ protected:
 
 	//inherited from ccGenericPrimitive
 	virtual bool toFile_MeOnly(QFile& out) const override;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
 	virtual bool buildUp() override;
 
 	//! Bottom radius

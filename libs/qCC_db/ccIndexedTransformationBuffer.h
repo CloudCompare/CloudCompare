@@ -101,7 +101,7 @@ protected:
 
 	//inherited from ccHObject
 	bool toFile_MeOnly(QFile& out) const override;
-	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
 	void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
 	//! Bounding box

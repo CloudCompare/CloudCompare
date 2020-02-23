@@ -682,9 +682,9 @@ bool ccGenericMesh::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccGenericMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
+bool ccGenericMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
-	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags))
+	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
 	//'show wired' state (dataVersion>=20)

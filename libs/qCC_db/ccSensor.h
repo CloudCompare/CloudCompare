@@ -132,7 +132,7 @@ protected:
 
 	//inherited from ccHObject
 	bool toFile_MeOnly(QFile& out) const override;
-	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
 
 	//! Positions buffer (optional)
 	ccIndexedTransformationBuffer* m_posBuffer;

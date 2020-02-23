@@ -97,13 +97,13 @@ public:
 	ccIndexedTransformation inverse() const;
 
 	//inherited from ccGLMatrix
-	virtual bool toAsciiFile(QString filename, int precision = 12) const;
-	virtual bool fromAsciiFile(QString filename);
+	bool toAsciiFile(QString filename, int precision = 12) const override;
+	bool fromAsciiFile(QString filename) override;
 
 	//inherited from ccSerializableObject
-	virtual bool isSerializable() const { return true; }
-	virtual bool toFile(QFile& out) const;
-	virtual bool fromFile(QFile& in, short dataVersion, int flags);
+	bool isSerializable() const override { return true; }
+	bool toFile(QFile& out) const override;
+	bool fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
 
 protected:
 

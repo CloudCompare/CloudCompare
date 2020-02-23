@@ -489,9 +489,9 @@ bool ccCameraSensor::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccCameraSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
+bool ccCameraSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
-	if (!ccSensor::fromFile_MeOnly(in, dataVersion, flags))
+	if (!ccSensor::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
 	//serialization wasn't possible before v3.5!
@@ -503,7 +503,7 @@ bool ccCameraSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	{
 		//we don't need to save/load this matrix as it is dynamically computed!
 		ccGLMatrix dummyMatrix;
-		if (!dummyMatrix.fromFile(in, dataVersion, flags))
+		if (!dummyMatrix.fromFile(in, dataVersion, flags, oldToNewIDMap))
 			return ReadError();
 	}
 	m_projectionMatrixIsValid = false;

@@ -236,7 +236,7 @@ bool ccColorScale::toFile(QFile& out) const
 	return true;
 }
 
-bool ccColorScale::fromFile(QFile& in, short dataVersion, int flags)
+bool ccColorScale::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
 	if (dataVersion < 27) //structure appeared at version 27!
 		return false;

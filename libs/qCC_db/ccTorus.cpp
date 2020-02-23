@@ -274,17 +274,17 @@ bool ccTorus::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccTorus::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
+bool ccTorus::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
-	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags))
+	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
 	//parameters (dataVersion>=21)
 	QDataStream inStream(&in);
-	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_insideRadius,1);
-	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_outsideRadius,1);
+	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_insideRadius, 1);
+	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_outsideRadius, 1);
 	inStream >> m_rectSection;
-	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_rectSectionHeight,1);
+	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_rectSectionHeight, 1);
 	inStream >> m_angle_rad;
 
 	return true;

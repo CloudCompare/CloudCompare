@@ -94,7 +94,8 @@ unsigned ccObject::GetNextUniqueID()
 		assert(false);
 		s_uniqueIDGenerator = ccUniqueIDGenerator::Shared(new ccUniqueIDGenerator);
 	}
-	return s_uniqueIDGenerator->fetchOne();
+	unsigned ID = s_uniqueIDGenerator->fetchOne();
+	return ID;
 }
 
 unsigned ccObject::GetLastUniqueID()
@@ -247,11 +248,11 @@ bool ccObject::hasMetaData(const QString& key) const
 	return m_metaData.contains(key);
 }
 
-bool ccObject::fromFile(QFile& in, short dataVersion, int flags)
+bool ccObject::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
 	assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
 
-	if (dataVersion<20)
+	if (dataVersion < 20)
 		return CorruptError();
 
 	//DGM: if we are here, we assume the class ID has already been read!
@@ -264,9 +265,10 @@ bool ccObject::fromFile(QFile& in, short dataVersion, int flags)
 	//unique ID (dataVersion>=20)
 	//DGM: this ID will be useful to recreate dynamic links between entities!
 	uint32_t uniqueID = 0;
-	if (in.read((char*)&uniqueID,4) < 0)
+	if (in.read((char*)&uniqueID, 4) < 0)
 		return ReadError();
-	m_uniqueID = (unsigned)uniqueID;
+	oldToNewIDMap[uniqueID] = m_uniqueID;
+	//m_uniqueID = (unsigned)uniqueID;
 
 	//name
 	if (dataVersion < 22) //old style

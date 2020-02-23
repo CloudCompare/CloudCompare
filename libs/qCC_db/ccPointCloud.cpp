@@ -4260,9 +4260,9 @@ bool ccPointCloud::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
+bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
-	if (!ccGenericPointCloud::fromFile_MeOnly(in, dataVersion, flags))
+	if (!ccGenericPointCloud::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
 	//points array (dataVersion>=20)
@@ -4325,7 +4325,7 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 			if (classID == CC_TYPES::RGB_COLOR_ARRAY)
 			{
 				QSharedPointer<ColorsTableType> oldRGBColors(new ColorsTableType);
-				if (!oldRGBColors->fromFile(in, dataVersion, flags))
+				if (!oldRGBColors->fromFile(in, dataVersion, flags, oldToNewIDMap))
 				{
 					return false;
 				}
@@ -4344,7 +4344,7 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 			}
 			else if (classID == CC_TYPES::RGBA_COLOR_ARRAY)
 			{
-				if (!m_rgbaColors->fromFile(in, dataVersion, flags))
+				if (!m_rgbaColors->fromFile(in, dataVersion, flags, oldToNewIDMap))
 				{
 					unallocateColors();
 					return false;
@@ -4372,7 +4372,7 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 			CC_CLASS_ENUM classID = ReadClassIDFromFile(in, dataVersion);
 			if (classID != CC_TYPES::NORMAL_INDEXES_ARRAY)
 				return CorruptError();
-			if (!m_normals->fromFile(in, dataVersion, flags))
+			if (!m_normals->fromFile(in, dataVersion, flags, oldToNewIDMap))
 			{
 				unallocateNorms();
 				return false;
@@ -4391,7 +4391,7 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 		for (uint32_t i = 0; i < sfCount; ++i)
 		{
 			ccScalarField* sf = new ccScalarField();
-			if (!sf->fromFile(in, dataVersion, flags))
+			if (!sf->fromFile(in, dataVersion, flags, oldToNewIDMap))
 			{
 				sf->release();
 				return false;
@@ -4451,7 +4451,7 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 			g->h = static_cast<unsigned>(h);
 
 			//sensor matrix
-			if (!g->sensorPosition.fromFile(in, dataVersion, flags))
+			if (!g->sensorPosition.fromFile(in, dataVersion, flags, oldToNewIDMap))
 				return WriteError();
 
 			try
@@ -4541,7 +4541,7 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 				}
 				//read the descriptor
 				WaveformDescriptor d;
-				if (!d.fromFile(in, dataVersion, flags))
+				if (!d.fromFile(in, dataVersion, flags, oldToNewIDMap))
 				{
 					return ReadError();
 				}
@@ -4566,7 +4566,7 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 			}
 			for (uint32_t i = 0; i < waveformCount; ++i)
 			{
-				if (!m_fwfWaveforms[i].fromFile(in, dataVersion, flags))
+				if (!m_fwfWaveforms[i].fromFile(in, dataVersion, flags, oldToNewIDMap))
 				{
 					return ReadError();
 				}

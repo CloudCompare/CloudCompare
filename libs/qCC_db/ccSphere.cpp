@@ -175,14 +175,14 @@ bool ccSphere::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccSphere::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
+bool ccSphere::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
-	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags))
+	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
 	//parameters (dataVersion >= 21)
 	QDataStream inStream(&in);
-	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_radius,1);
+	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_radius, 1);
 
 	return true;
 }

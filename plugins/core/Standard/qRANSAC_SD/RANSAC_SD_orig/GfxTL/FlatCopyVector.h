@@ -12,26 +12,23 @@
 #include <xmmintrin.h>
 #endif
 
-#ifndef _WIN32
-void* _aligned_malloc(size_t size, size_t alignment) {
-	void* buffer;
-	posix_memalign(&buffer, alignment, size);
-	return buffer;
-}
-#endif
 
 #ifdef _mm_malloc
+#ifndef a_malloc
 #define a_malloc(align,sz) _mm_malloc((align),(sz))
-#endif
+#endif // !a_malloc
+#endif // !_mm_malloc
 #ifdef _mm_free
+#ifndef a_free
 #define a_free(ptr)  _mm_free((ptr))
-#endif
+#endif // !a_free
+#endif // !_mm_free
 
 #ifndef a_free  
 #define a_free(a)      free(a) 
 #endif // !_mm_free
 #ifndef a_malloc
-#define a_malloc(a, b) _aligned_malloc(a, b)
+#define a_malloc(a, b) aligned_alloc(a, b)
 #endif // !_mm_malloc
 
 namespace GfxTL

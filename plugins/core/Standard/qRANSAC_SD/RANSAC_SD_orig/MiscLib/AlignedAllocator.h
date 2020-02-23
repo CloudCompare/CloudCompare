@@ -26,7 +26,7 @@
 #define a_free(a)      free(a) 
 #endif // !_mm_free
 #ifndef a_malloc
-#define a_malloc(a, b) _aligned_malloc(a, b)
+#define a_malloc(a, b) aligned_alloc(a, b)
 #endif // !_mm_malloc
 
 

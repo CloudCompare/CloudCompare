@@ -46,4 +46,4 @@ namespace chaiscript
 	}
 }
 
-#endif CHAISCRIPTING_BOOTSTRAP_SYSTEM_HPP
+#endif // CHAISCRIPTING_BOOTSTRAP_SYSTEM_HPP

@@ -47,4 +47,4 @@ namespace chaiscript
 	}
 }
 
-#endif CHAISCRIPTING_BOOTSTRAP_QCC_IO_HPP
+#endif // CHAISCRIPTING_BOOTSTRAP_QCC_IO_HPP

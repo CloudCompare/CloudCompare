@@ -100,4 +100,4 @@ private:
 	QList<ChaiScriptRule> rules;
 };
 
-#endif CHAISCRIPTSYNTAXHIGHLIGHTER_H
+#endif // CHAISCRIPTSYNTAXHIGHLIGHTER_H

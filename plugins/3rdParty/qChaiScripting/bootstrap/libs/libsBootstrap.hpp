@@ -45,4 +45,4 @@ namespace chaiscript
 	}
 }
 
-#endif CHAISCRIPTING_BOOTSTRAP_LIBS_HPP
+#endif // CHAISCRIPTING_BOOTSTRAP_LIBS_HPP

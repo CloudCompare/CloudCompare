@@ -91,4 +91,4 @@ private:
 };
 
 
-#endif CODEEDITOR_H
+#endif // CODEEDITOR_H

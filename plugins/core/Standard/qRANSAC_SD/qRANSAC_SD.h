@@ -74,7 +74,7 @@ public:
 	explicit qRansacSD(QObject* parent = nullptr);
 
 	//inherited from ccStdPluginInterface
-	virtual void onNewSelection(const ccHObject::Container& selectedEntities);
+	virtual void onNewSelection(const ccHObject::Container& selectedEntities) override;
 	virtual QList<QAction *> getActions() override;
 	virtual void registerCommands(ccCommandLineInterface* cmd) override;
 

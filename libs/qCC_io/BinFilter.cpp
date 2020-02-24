@@ -1014,53 +1014,6 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 		}
 	}
 
-	//check for unique IDs duplicate (yes it happens :-( )
-	//{
-	//	std::unordered_set<unsigned> uniqueIDs;
-	//	unsigned maxUniqueID = root->findMaxUniqueID_recursive();
-	//	assert(toCheck.empty());
-	//	toCheck.push_back(root);
-	//	while (!toCheck.empty())
-	//	{
-	//		ccHObject* currentObject = toCheck.back();
-	//		toCheck.pop_back();
-
-	//		assert(currentObject);
-
-	//		//check that the ID is not already used (strangely it happens!)
-	//		unsigned uniqueID = currentObject->getUniqueID();
-	//		if (uniqueIDs.find(uniqueID) != uniqueIDs.end())
-	//		{
-	//			ccLog::Warning(QString("[BIN] Duplicate 'unique ID' found! (ID = %1)").arg(uniqueID));
-	//			currentObject->setUniqueID(++maxUniqueID);
-	//		}
-	//		else
-	//		{
-	//			uniqueIDs.insert(uniqueID);
-	//		}
-
-	//		for (unsigned i = 0; i < currentObject->getChildrenNumber(); ++i)
-	//		{
-	//			toCheck.push_back(currentObject->getChild(i));
-	//		}
-	//	}
-	//}
-
-	//update 'unique IDs'
-	//toCheck.push_back(root);
-	//while (!toCheck.empty())
-	//{
-	//	ccHObject* currentObject = toCheck.back();
-	//	toCheck.pop_back();
-
-	//	currentObject->setUniqueID(lastUniqueIDBeforeLoad + currentObject->getUniqueID());
-
-	//	for (unsigned i = 0; i < currentObject->getChildrenNumber(); ++i)
-	//	{
-	//		toCheck.push_back(currentObject->getChild(i));
-	//	}
-	//}
-
 	if (root->isA(CC_TYPES::HIERARCHY_OBJECT))
 	{
 		//transfer children to container

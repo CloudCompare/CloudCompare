@@ -1,5 +1,5 @@
 sudo: required
-dist: xenial
+dist: bionic
 cache: ccache
 language: cpp
 compiler:
@@ -17,7 +17,7 @@ install:
   libboost-program-options-dev libcgal-dev libcgal-qt5-dev
   libdlib-dev libswscale-dev libtbb-dev
   libqt5opengl5-dev qt5-default qttools5-dev qttools5-dev-tools
-  libproj-dev libdlib-dev libxerces-c-dev xvfb
+  libproj-dev libdlib-dev libxerces-c-dev xvfb libpdal-dev
 - git submodule init && git submodule update
 
 before_script:
@@ -39,6 +39,7 @@ before_script:
   -DPLUGIN_IO_QCORE=ON
   -DPLUGIN_IO_QE57=ON
   -DPLUGIN_IO_QPHOTOSCAN=ON
+  -DPLUGIN_IO_QPDAL=ON
   -DPLUGIN_STANDARD_QANIMATION=ON
   -DPLUGIN_STANDARD_QBROOM=ON
   -DPLUGIN_STANDARD_QCANUPO=ON

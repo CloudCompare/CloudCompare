@@ -133,18 +133,22 @@ bool Torus::Init(const MiscLib::Vector< Vec3f > &samples)
 		majorRadius1 = minorCenter1[0];
 		// compute the distance of the points to the torus
 		distSum1 = 0;
-		for(size_t i = 3; i < spin1.size(); ++i)
-			distSum1 += (tmp = ((spin1[i] - minorCenter1).Length()
-				- minorRadius1)) * tmp;
+		for (size_t i = 3; i < spin1.size(); ++i)
+		{
+			tmp = ((spin1[i] - minorCenter1).Length() - minorRadius1);
+			distSum1 += tmp * tmp;
+		}
 	}
 	if(CircleFrom3Points(spin2.begin(), &minorRadius2, &minorCenter2))
 	{
 		majorRadius2 = minorCenter2[0];
 		// compute the distance of the points to the torus
 		distSum2 = 0;
-		for(size_t i = 3; i < spin2.size(); ++i)
-			distSum2 += (tmp = ((spin2[i] - minorCenter2).Length()
-				- minorRadius2)) * tmp;
+		for (size_t i = 3; i < spin2.size(); ++i)
+		{
+			tmp = ((spin2[i] - minorCenter2).Length() - minorRadius2);
+			distSum2 += tmp * tmp;
+		}
 	}
 	if(distSum1 != std::numeric_limits< float >::infinity()
 		&& distSum1 < distSum2)
@@ -262,18 +266,22 @@ foundAxis:
 		majorRadius1 = minorCenter1[0];
 		// compute the distance of the points to the torus
 		distSum1 = 0;
-		for(size_t i = 3; i < spin1.size(); ++i)
-			distSum1 += (tmp = ((spin1[i] - minorCenter1).Length()
-				- minorRadius1)) * tmp;
+		for (size_t i = 3; i < spin1.size(); ++i)
+		{
+			tmp = ((spin1[i] - minorCenter1).Length() - minorRadius1);
+			distSum1 += tmp * tmp;
+		}
 	}
 	if(CircleFrom3Points(spin2.begin(), &minorRadius2, &minorCenter2))
 	{
 		majorRadius2 = minorCenter2[0];
 		// compute the distance of the points to the torus
 		distSum2 = 0;
-		for(size_t i = 3; i < spin2.size(); ++i)
-			distSum2 += (tmp = ((spin2[i] - minorCenter2).Length()
-				- minorRadius2)) * tmp;
+		for (size_t i = 3; i < spin2.size(); ++i)
+		{
+			tmp = ((spin2[i] - minorCenter2).Length() - minorRadius2);
+			distSum2 += tmp * tmp;
+		}
 	}
 	if(distSum1 != std::numeric_limits< float >::infinity()
 		&& distSum1 < distSum2)
@@ -366,7 +374,8 @@ float TorusDistance(const float *param,	const float *x)
 	f += v * v;
 	f = std::sqrt(f);
 	float tmp;
-	return std::sqrt(g * g + ((tmp = (f - param[6])) * tmp)) - param[7];
+	tmp = (f - param[6]);
+	return std::sqrt(g * g + (tmp * tmp)) - param[7];
 }
 
 void TorusDistanceDerivatives(const float *param, const float *x,
@@ -399,7 +408,8 @@ void TorusDistanceDerivatives(const float *param, const float *x,
 	df[4] = g * df[1];
 	df[5] = g * df[2];
 	float tmp;
-	float d = std::sqrt(g * g + ((tmp = (f - param[6])) * tmp)) - param[7];
+	tmp = (f - param[6]);
+	float d = std::sqrt(g * g + (tmp * tmp)) - param[7];
 	float dr = d + param[7];
 	float fr = f - param[6];
 	for(unsigned int i = 0; i < 6; ++i)
@@ -449,8 +459,9 @@ public:
 			f = std::sqrt(f);
 			temp[idx] = f;
 			ScalarType tmp;
+			tmp = (f - params[6]);
 			chi += (values[idx] = WeightT::Weigh(
-				std::sqrt(g * g + ((tmp = (f - params[6])) * tmp)) - params[7]))
+				std::sqrt(g * g + (tmp * tmp)) - params[7]))
 				* values[idx];;
 		}
 		return chi;
@@ -487,7 +498,8 @@ public:
 			df[4] = g * df[1];
 			df[5] = g * df[2];
 			ScalarType tmp;
-			ScalarType d = std::sqrt(g * g + ((tmp = (temp[idx] - params[6])) * tmp)) - params[7];
+			tmp = (temp[idx] - params[6]);
+			ScalarType d = std::sqrt(g * g + (tmp * tmp)) - params[7];
 			ScalarType dr = d + params[7];
 			ScalarType fr = temp[idx] - params[6];
 			for(unsigned int j = 0; j < 6; ++j)

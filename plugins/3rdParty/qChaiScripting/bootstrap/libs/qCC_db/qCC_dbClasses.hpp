@@ -1042,7 +1042,8 @@ namespace chaiscript
 					m->add(fun(&ccDrawableObject::toggleShowName), "toggleShowName");
 					m->add(fun(&ccDrawableObject::isColorOverriden), "isColorOverriden");
 					m->add(fun(&ccDrawableObject::getTempColor), "getTempColor");
-					m->add(fun(&ccDrawableObject::setTempColor), "setTempColor");
+					m->add(fun(static_cast<void(ccDrawableObject::*)(const ccColor::Rgba&, bool)>(&ccDrawableObject::setTempColor)), "setTempColor");
+					m->add(fun(static_cast<void(ccDrawableObject::*)(const ccColor::Rgb&, bool)>(&ccDrawableObject::setTempColor)), "setTempColor");
 					m->add(fun(&ccDrawableObject::enableTempColor), "enableTempColor");
 					m->add(fun(&ccDrawableObject::removeFromDisplay), "removeFromDisplay");
 					m->add(fun(&ccDrawableObject::setDisplay), "setDisplay");
@@ -1095,8 +1096,10 @@ namespace chaiscript
 					m->add(fun(&ccGenericMesh::computeInterpolationWeights), "computeInterpolationWeights");
 					m->add(fun(&ccGenericMesh::interpolateNormals), "interpolateNormals");
 					m->add(fun(&ccGenericMesh::interpolateNormalsBC), "interpolateNormalsBC");
-					m->add(fun(&ccGenericMesh::interpolateColors), "interpolateColors");
-					m->add(fun(&ccGenericMesh::interpolateColorsBC), "interpolateColorsBC");
+					m->add(fun(static_cast<bool(ccGenericMesh::*)(unsigned, const CCVector3&, ccColor::Rgba&)>(&ccGenericMesh::interpolateColors)), "interpolateColors");
+					m->add(fun(static_cast<bool(ccGenericMesh::*)(unsigned, const CCVector3&, ccColor::Rgb&)>(&ccGenericMesh::interpolateColors)), "interpolateColors");
+					m->add(fun(static_cast<bool(ccGenericMesh::*)(unsigned, const CCVector3d&, ccColor::Rgba&)>(&ccGenericMesh::interpolateColorsBC)), "interpolateColorsBC");
+					m->add(fun(static_cast<bool(ccGenericMesh::*)(unsigned, const CCVector3d&, ccColor::Rgb&)>(&ccGenericMesh::interpolateColorsBC)), "interpolateColorsBC");
 					m->add(fun(&ccGenericMesh::getColorFromMaterial), "getColorFromMaterial");
 					m->add(fun(&ccGenericMesh::getVertexColorFromMaterial), "getVertexColorFromMaterial");
 					m->add(fun(&ccGenericMesh::isShownAsWire), "isShownAsWire");
@@ -1194,7 +1197,8 @@ namespace chaiscript
 					m->add(fun(&ccMesh::getTriangleNormals), "getTriangleNormals");
 					m->add(fun(&ccMesh::getTriNormsTable), "getTriNormsTable");
 					m->add(fun(&ccMesh::interpolateNormalsBC), "interpolateNormalsBC");
-					m->add(fun(&ccMesh::interpolateColorsBC), "interpolateColorsBC");
+					m->add(fun(static_cast<bool(ccMesh::*)(unsigned, const CCVector3d&, ccColor::Rgba&)>(&ccMesh::interpolateColorsBC)), "interpolateColorsBC");
+					m->add(fun(static_cast<bool(ccMesh::*)(unsigned, const CCVector3d&, ccColor::Rgb&)>(&ccMesh::interpolateColorsBC)), "interpolateColorsBC");
 					m->add(fun(&ccMesh::getColorFromMaterial), "getColorFromMaterial");
 					m->add(fun(&ccMesh::getVertexColorFromMaterial), "getVertexColorFromMaterial");
 					m->add(fun(&ccMesh::isShownAsWire), "isShownAsWire");
@@ -1321,7 +1325,8 @@ namespace chaiscript
 					m->add(fun(&ccGenericPrimitive::getTriangleNormals), "getTriangleNormals");
 					m->add(fun(&ccGenericPrimitive::getTriNormsTable), "getTriNormsTable");
 					m->add(fun(&ccGenericPrimitive::interpolateNormalsBC), "interpolateNormalsBC");
-					m->add(fun(&ccGenericPrimitive::interpolateColorsBC), "interpolateColorsBC");
+					m->add(fun(static_cast<bool(ccGenericPrimitive::*)(unsigned, const CCVector3d&, ccColor::Rgba&)>(&ccGenericPrimitive::interpolateColorsBC)), "interpolateColorsBC");
+					m->add(fun(static_cast<bool(ccGenericPrimitive::*)(unsigned, const CCVector3d&, ccColor::Rgb&)>(&ccGenericPrimitive::interpolateColorsBC)), "interpolateColorsBC");
 					m->add(fun(&ccGenericPrimitive::getColorFromMaterial), "getColorFromMaterial");
 					m->add(fun(&ccGenericPrimitive::getVertexColorFromMaterial), "getVertexColorFromMaterial");
 					m->add(fun(&ccGenericPrimitive::isShownAsWire), "isShownAsWire");
@@ -1494,7 +1499,8 @@ namespace chaiscript
 					m->add(fun(&ccPlane::getTriangleNormals), "getTriangleNormals");
 					m->add(fun(&ccPlane::getTriNormsTable), "getTriNormsTable");
 					m->add(fun(&ccPlane::interpolateNormalsBC), "interpolateNormalsBC");
-					m->add(fun(&ccPlane::interpolateColorsBC), "interpolateColorsBC");
+					m->add(fun(static_cast<bool(ccPlane::*)(unsigned, const CCVector3d&, ccColor::Rgba&)>(&ccPlane::interpolateColorsBC)), "interpolateColorsBC");
+					m->add(fun(static_cast<bool(ccPlane::*)(unsigned, const CCVector3d&, ccColor::Rgb&)>(&ccPlane::interpolateColorsBC)), "interpolateColorsBC");
 					m->add(fun(&ccPlane::getColorFromMaterial), "getColorFromMaterial");
 					m->add(fun(&ccPlane::getVertexColorFromMaterial), "getVertexColorFromMaterial");
 					m->add(fun(&ccPlane::isShownAsWire), "isShownAsWire");
@@ -1655,7 +1661,8 @@ namespace chaiscript
 					m->add(fun(&ccSphere::getTriangleNormals), "getTriangleNormals");
 					m->add(fun(&ccSphere::getTriNormsTable), "getTriNormsTable");
 					m->add(fun(&ccSphere::interpolateNormalsBC), "interpolateNormalsBC");
-					m->add(fun(&ccSphere::interpolateColorsBC), "interpolateColorsBC");
+					m->add(fun(static_cast<bool(ccSphere::*)(unsigned, const CCVector3d&, ccColor::Rgba&)>(&ccSphere::interpolateColorsBC)), "interpolateColorsBC");
+					m->add(fun(static_cast<bool(ccSphere::*)(unsigned, const CCVector3d&, ccColor::Rgb&)>(&ccSphere::interpolateColorsBC)), "interpolateColorsBC");
 					m->add(fun(&ccSphere::getColorFromMaterial), "getColorFromMaterial");
 					m->add(fun(&ccSphere::getVertexColorFromMaterial), "getVertexColorFromMaterial");
 					m->add(fun(&ccSphere::isShownAsWire), "isShownAsWire");
@@ -1804,7 +1811,8 @@ namespace chaiscript
 					m->add(fun(&ccCone::getTriangleNormals), "getTriangleNormals");
 					m->add(fun(&ccCone::getTriNormsTable), "getTriNormsTable");
 					m->add(fun(&ccCone::interpolateNormalsBC), "interpolateNormalsBC");
-					m->add(fun(&ccCone::interpolateColorsBC), "interpolateColorsBC");
+					m->add(fun(static_cast<bool(ccCone::*)(unsigned, const CCVector3d&, ccColor::Rgba&)>(&ccCone::interpolateColorsBC)), "interpolateColorsBC");
+					m->add(fun(static_cast<bool(ccCone::*)(unsigned, const CCVector3d&, ccColor::Rgb&)>(&ccCone::interpolateColorsBC)), "interpolateColorsBC");
 					m->add(fun(&ccCone::getColorFromMaterial), "getColorFromMaterial");
 					m->add(fun(&ccCone::getVertexColorFromMaterial), "getVertexColorFromMaterial");
 					m->add(fun(&ccCone::isShownAsWire), "isShownAsWire");
@@ -1962,7 +1970,8 @@ namespace chaiscript
 					m->add(fun(&ccCylinder::getTriangleNormals), "getTriangleNormals");
 					m->add(fun(&ccCylinder::getTriNormsTable), "getTriNormsTable");
 					m->add(fun(&ccCylinder::interpolateNormalsBC), "interpolateNormalsBC");
-					m->add(fun(&ccCylinder::interpolateColorsBC), "interpolateColorsBC");
+					m->add(fun(static_cast<bool(ccCylinder::*)(unsigned, const CCVector3d&, ccColor::Rgba&)>(&ccCylinder::interpolateColorsBC)), "interpolateColorsBC");
+					m->add(fun(static_cast<bool(ccCylinder::*)(unsigned, const CCVector3d&, ccColor::Rgb&)>(&ccCylinder::interpolateColorsBC)), "interpolateColorsBC");
 					m->add(fun(&ccCylinder::getColorFromMaterial), "getColorFromMaterial");
 					m->add(fun(&ccCylinder::getVertexColorFromMaterial), "getVertexColorFromMaterial");
 					m->add(fun(&ccCylinder::isShownAsWire), "isShownAsWire");
@@ -2120,7 +2129,8 @@ namespace chaiscript
 					m->add(fun(&ccDish::getTriangleNormals), "getTriangleNormals");
 					m->add(fun(&ccDish::getTriNormsTable), "getTriNormsTable");
 					m->add(fun(&ccDish::interpolateNormalsBC), "interpolateNormalsBC");
-					m->add(fun(&ccDish::interpolateColorsBC), "interpolateColorsBC");
+					m->add(fun(static_cast<bool(ccDish::*)(unsigned, const CCVector3d&, ccColor::Rgba&)>(&ccDish::interpolateColorsBC)), "interpolateColorsBC");
+					m->add(fun(static_cast<bool(ccDish::*)(unsigned, const CCVector3d&, ccColor::Rgb&)>(&ccDish::interpolateColorsBC)), "interpolateColorsBC");
 					m->add(fun(&ccDish::getColorFromMaterial), "getColorFromMaterial");
 					m->add(fun(&ccDish::getVertexColorFromMaterial), "getVertexColorFromMaterial");
 					m->add(fun(&ccDish::isShownAsWire), "isShownAsWire");
@@ -2264,7 +2274,8 @@ namespace chaiscript
 					m->add(fun(&ccExtru::getTriangleNormals), "getTriangleNormals");
 					m->add(fun(&ccExtru::getTriNormsTable), "getTriNormsTable");
 					m->add(fun(&ccExtru::interpolateNormalsBC), "interpolateNormalsBC");
-					m->add(fun(&ccExtru::interpolateColorsBC), "interpolateColorsBC");
+					m->add(fun(static_cast<bool(ccExtru::*)(unsigned, const CCVector3d&, ccColor::Rgba&)>(&ccExtru::interpolateColorsBC)), "interpolateColorsBC");
+					m->add(fun(static_cast<bool(ccExtru::*)(unsigned, const CCVector3d&, ccColor::Rgb&)>(&ccExtru::interpolateColorsBC)), "interpolateColorsBC");
 					m->add(fun(&ccExtru::getColorFromMaterial), "getColorFromMaterial");
 					m->add(fun(&ccExtru::getVertexColorFromMaterial), "getVertexColorFromMaterial");
 					m->add(fun(&ccExtru::isShownAsWire), "isShownAsWire");
@@ -2671,7 +2682,8 @@ namespace chaiscript
 					m->add(fun(&ccPointCloud::computeCPSet), "computeCPSet");
 					m->add(chaiscript::user_type<QSharedPointer<CCLib::ReferenceCloud>>(), "ReferenceCloud");
 					m->add(fun(&ccPointCloud::interpolateColorsFrom), "interpolateColorsFrom");
-					m->add(fun(&ccPointCloud::setPointColor), "setPointColor");
+					m->add(fun(static_cast<void(ccPointCloud::*)(unsigned, const ccColor::Rgb&)> (&ccPointCloud::setPointColor)), "setPointColor");
+					m->add(fun(static_cast<void(ccPointCloud::*)(unsigned, const ccColor::Rgba&)> (&ccPointCloud::setPointColor)), "setPointColor");
 					m->add(fun(&ccPointCloud::setPointNormalIndex), "setPointNormalIndex");
 					m->add(fun(&ccPointCloud::setPointNormal), "setPointNormal");
 					m->add(fun(&ccPointCloud::addNormIndex), "addNormIndex");
@@ -2680,16 +2692,18 @@ namespace chaiscript
 					m->add(fun(&ccPointCloud::setNormsTable), "setNormsTable");
 					m->add(fun(&ccPointCloud::convertNormalToRGB), "convertNormalToRGB");
 					m->add(fun(&ccPointCloud::convertNormalToDipDirSFs), "convertNormalToDipDirSFs");
-					m->add(fun(static_cast<void(ccPointCloud::*)(const ccColor::Rgb&)>(&ccPointCloud::addRGBColor)), "addRGBColor");
-					m->add(fun(static_cast<void(ccPointCloud::*)(ColorCompType, ColorCompType, ColorCompType)>(&ccPointCloud::addRGBColor)), "addRGBColor");
+					m->add(fun(static_cast<void(ccPointCloud::*)(const ccColor::Rgba&)>(&ccPointCloud::addColor)), "addColor");
+					m->add(fun(static_cast<void(ccPointCloud::*)(const ccColor::Rgb&)>(&ccPointCloud::addColor)), "addColor");
+					m->add(fun(static_cast<void(ccPointCloud::*)(ColorCompType, ColorCompType, ColorCompType, ColorCompType)>(&ccPointCloud::addColor)), "addColor");
 					m->add(fun(&ccPointCloud::addGreyColor), "addGreyColor");
 					m->add(fun(&ccPointCloud::convertRGBToGreyScale), "convertRGBToGreyScale");
 					m->add(fun(&ccPointCloud::colorize), "colorize");
 					m->add(fun(&ccPointCloud::setRGBColorByHeight), "setRGBColorByHeight");
 					m->add(fun(&ccPointCloud::setRGBColorByBanding), "setRGBColorByBanding");
-					m->add(fun(&ccPointCloud::setRGBColorWithCurrentScalarField), "setRGBColorWithCurrentScalarField");
-					m->add(fun(static_cast<bool(ccPointCloud::*)(ColorCompType, ColorCompType, ColorCompType)>(&ccPointCloud::setRGBColor)), "setRGBColor");
-					m->add(fun(static_cast<bool(ccPointCloud::*)(const ccColor::Rgb&)>(&ccPointCloud::setRGBColor)), "setRGBColor");
+					m->add(fun(&ccPointCloud::convertCurrentScalarFieldToColors), "convertCurrentScalarFieldToColors");
+					m->add(fun(static_cast<bool(ccPointCloud::*)(ColorCompType, ColorCompType, ColorCompType, ColorCompType)>(&ccPointCloud::setColor)), "setColor");
+					m->add(fun(static_cast<bool(ccPointCloud::*)(const ccColor::Rgb&)>(&ccPointCloud::setColor)), "setColor");
+					m->add(fun(static_cast<bool(ccPointCloud::*)(const ccColor::Rgba&)>(&ccPointCloud::setColor)), "setColor");
 					m->add(fun(&ccPointCloud::invertNormals), "invertNormals");
 					m->add(fun(&ccPointCloud::translate), "translate");
 					m->add(fun(&ccPointCloud::filterPointsByScalarValue), "filterPointsByScalarValue");
@@ -2709,7 +2723,7 @@ namespace chaiscript
 					m->add(fun(&ccPointCloud::unroll), "unroll");
 					m->add(fun(&ccPointCloud::addColorRampInfo), "addColorRampInfo");
 					m->add(fun(static_cast<int(ccPointCloud::*)(ccScalarField*)>(&ccPointCloud::addScalarField)), "addScalarField");
-					m->add(fun(&ccPointCloud::rgbColors), "rgbColors");
+					m->add(fun(&ccPointCloud::rgbaColors), "rgbaColors");
 					m->add(fun(&ccPointCloud::normals), "normals");
 					m->add(fun(&ccPointCloud::crop2D), "crop2D");
 					m->add(fun(&ccPointCloud::append), "append");
@@ -2872,8 +2886,10 @@ namespace chaiscript
 					m->add(fun(&ccSubMesh::refreshBB), "refreshBB");
 					m->add(fun(&ccSubMesh::interpolateNormals), "interpolateNormals");
 					m->add(fun(&ccSubMesh::interpolateNormalsBC), "interpolateNormalsBC");
-					m->add(fun(&ccSubMesh::interpolateColors), "interpolateColors");
-					m->add(fun(&ccSubMesh::interpolateColorsBC), "interpolateColorsBC");
+					m->add(fun(static_cast<bool(ccSubMesh::*)(unsigned, const CCVector3&, ccColor::Rgba&)>(&ccSubMesh::interpolateColors)), "interpolateColors");
+					m->add(fun(static_cast<bool(ccSubMesh::*)(unsigned, const CCVector3&, ccColor::Rgb&)>(&ccSubMesh::interpolateColors)), "interpolateColors");
+					m->add(fun(static_cast<bool(ccSubMesh::*)(unsigned, const CCVector3d&, ccColor::Rgba&)>(&ccSubMesh::interpolateColorsBC)), "interpolateColorsBC");
+					m->add(fun(static_cast<bool(ccSubMesh::*)(unsigned, const CCVector3d&, ccColor::Rgb&)>(&ccSubMesh::interpolateColorsBC)), "interpolateColorsBC");
 					m->add(fun(&ccSubMesh::getColorFromMaterial), "getColorFromMaterial");
 					m->add(fun(&ccSubMesh::getVertexColorFromMaterial), "getVertexColorFromMaterial");
 					m->add(fun(&ccSubMesh::hasMaterials), "hasMaterials");
@@ -3425,12 +3441,12 @@ namespace chaiscript
 					m->add(fun(&ccGenericGLDisplay::getTextDisplayFont), "getTextDisplayFont");
 					m->add(fun(&ccGenericGLDisplay::getLabelDisplayFont), "getLabelDisplayFont");
 					m->add(fun(&ccGenericGLDisplay::displayText), "displayText");
-					m->add(fun([](ccGenericGLDisplay* obj, QString a, int b, int c, unsigned char d, float e, const unsigned char* f) {obj->displayText(a, b, c, d, e, f); }), "displayText");
+					m->add(fun([](ccGenericGLDisplay* obj, QString a, int b, int c, unsigned char d, float e, const ccColor::Rgba* f) {obj->displayText(a, b, c, d, e, f); }), "displayText");
 					m->add(fun([](ccGenericGLDisplay* obj, QString a, int b, int c, unsigned char d, float e) {obj->displayText(a, b, c, d, e); }), "displayText");
 					m->add(fun([](ccGenericGLDisplay* obj, QString a, int b, int c, unsigned char d) {obj->displayText(a, b, c, d); }), "displayText");
 					m->add(fun([](ccGenericGLDisplay* obj, QString a, int b, int c) {obj->displayText(a, b, c); }), "displayText");
 					m->add(fun(&ccGenericGLDisplay::display3DLabel), "display3DLabel");
-					m->add(fun([](ccGenericGLDisplay* obj, const QString& a, const CCVector3& b, const unsigned char* c) {obj->display3DLabel(a, b, c); }), "display3DLabel");
+					m->add(fun([](ccGenericGLDisplay* obj, const QString& a, const CCVector3& b, const ccColor::Rgba* c) {obj->display3DLabel(a, b, c); }), "display3DLabel");
 					m->add(fun([](ccGenericGLDisplay* obj, const QString& a, const CCVector3& b) {obj->display3DLabel(a, b); }), "display3DLabel");
 					m->add(fun(&ccGenericGLDisplay::getGLCameraParameters), "getGLCameraParameters");
 					m->add(fun(&ccGenericGLDisplay::toCenteredGLCoordinates), "toCenteredGLCoordinates");
@@ -3551,16 +3567,15 @@ namespace chaiscript
 					//m->add(chaiscript::user_type<ccColor::Convert>(), "Convert");
 					m->add(fun(&ccColor::Convert::hsl2rgb), "hsl2rgb");
 					m->add(fun(&ccColor::Convert::hsv2rgb), "hsv2rgb");
-
-					m->add(fun(static_cast<ccColor::Rgb(*)(const ccColor::Rgbf&)>(&ccColor::FromRgbf)), "FromRgbf");
-					m->add(fun(static_cast<ccColor::Rgb(*)(const ccColor::Rgbaf&)>(&ccColor::FromRgbf)), "FromRgbf");
-					m->add(fun(static_cast<ccColor::Rgb(*)(QRgb)>(&ccColor::FromQRgb)), "FromQRgb");
-					m->add(fun(static_cast<ccColor::Rgba(*)(QRgb)>(&ccColor::FromQRgba)), "FromQRgba");
-					m->add(fun(static_cast<ccColor::Rgb(*)(const QColor&)>(&ccColor::FromQColor)), "FromQColor");
-					m->add(fun(static_cast<ccColor::Rgba(*)(const QColor&)>(&ccColor::FromQColora)), "FromQColora");
-					m->add(fun(static_cast<ccColor::Rgbf(*)(const QColor&)>(&ccColor::FromQColorf)), "FromQColorf");
-					m->add(fun(static_cast<ccColor::Rgbaf(*)(const QColor&)>(&ccColor::FromQColoraf)), "FromQColoraf");
-
+					m->add(fun(&ccColor::FromRgbfToRgb), "FromRgbfToRgb");
+					m->add(fun(&ccColor::FromRgbafToRgb), "FromRgbafToRgb");
+					m->add(fun(&ccColor::FromRgbafToRgba), "FromRgbafToRgba");
+					m->add(fun(&ccColor::FromQRgb), "FromQRgb");
+					m->add(fun(&ccColor::FromQRgba), "FromQRgba");
+					m->add(fun(&ccColor::FromQColor), "FromQColor");
+					m->add(fun(&ccColor::FromQColora), "FromQColora");
+					m->add(fun(&ccColor::FromQColorf), "FromQColorf");
+					m->add(fun(&ccColor::FromQColoraf), "FromQColoraf");
 					return m;
 
 

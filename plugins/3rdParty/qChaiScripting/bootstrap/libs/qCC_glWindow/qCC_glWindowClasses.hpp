@@ -66,12 +66,12 @@ namespace chaiscript
 					m->add(fun(&ccGLWindow::invalidateViewport), "invalidateViewport");
 					m->add(fun(&ccGLWindow::deprecate3DLayer), "deprecate3DLayer");
 					m->add(fun(&ccGLWindow::display3DLabel), "display3DLabel");
-					m->add(fun([](ccGLWindow* obj, QString a, int b, int c, unsigned char d, float e, const unsigned char* f) {obj->displayText(a, b, c, d, e, f); }), "displayText");
+					m->add(fun([](ccGLWindow* obj, QString a, int b, int c, unsigned char d, float e, const ccColor::Rgba* f) {obj->displayText(a, b, c, d, e, f); }), "displayText");
 					m->add(fun([](ccGLWindow* obj, QString a, int b, int c, unsigned char d, float e) {obj->displayText(a, b, c, d, e); }), "displayText");
 					m->add(fun([](ccGLWindow* obj, QString a, int b, int c, unsigned char d) {obj->displayText(a, b, c, d); }), "displayText");
 					m->add(fun([](ccGLWindow* obj, QString a, int b, int c) {obj->displayText(a, b, c); }), "displayText");
 					m->add(fun(&ccGLWindow::displayText), "displayText");
-					m->add(fun([](ccGLWindow* obj, const QString& a, const CCVector3& b, const unsigned char* c) {obj->display3DLabel(a, b, c); }), "display3DLabel");
+					m->add(fun([](ccGLWindow* obj, const QString& a, const CCVector3& b, const ccColor::Rgba* c) {obj->display3DLabel(a, b, c); }), "display3DLabel");
 					m->add(fun([](ccGLWindow* obj, const QString& a, const CCVector3& b) {obj->display3DLabel(a, b); }), "display3DLabel");
 					m->add(fun(&ccGLWindow::getTextDisplayFont), "getTextDisplayFont");
 					m->add(fun(&ccGLWindow::getLabelDisplayFont), "getLabelDisplayFont");

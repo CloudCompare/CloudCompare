@@ -88,7 +88,7 @@ void ChaiScriptingPlugin::setupChaiScriptEngine()
 			paths.push_back(workingDir.absolutePath().toStdString());
 			paths.push_back((workingDir.absolutePath() + QDir::separator() + "chaiScripts" + QDir::separator()).toLocal8Bit().constData());
 			
-			chai = std::make_unique<chaiscript::ChaiScript>(chaiscript::Std_Lib::library(), paths, paths);;
+			chai = make_unique<chaiscript::ChaiScript>(chaiscript::Std_Lib::library(), paths, paths);;
 			if (systemBootstrap == nullptr)
 			{
 				systemBootstrap = chaiscript::cloudCompare::bootstrapSystem::bootstrap();

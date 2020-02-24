@@ -489,7 +489,8 @@ void chaiScriptCodeEditorMainWindow::updateWindowMenu()
 			text = tr("%1 %2").arg(i + 1)
 				.arg(child->userFriendlyCurrentFile());
 		}
-		QAction* action = windowMenu->addAction(text, mdiSubWindow, [this, mdiSubWindow]() {
+		QAction* action = windowMenu->addAction(text);
+		connect(action, &QAction::triggered,  mdiSubWindow, [this, mdiSubWindow]() {
 			mdiArea->setActiveSubWindow(mdiSubWindow);
 			});
 		action->setCheckable(true);

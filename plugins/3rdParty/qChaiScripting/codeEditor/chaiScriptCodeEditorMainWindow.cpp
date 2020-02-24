@@ -343,7 +343,8 @@ void chaiScriptCodeEditorMainWindow::createActions()
 
 	for (int i = 0; i < MaxRecentFiles; ++i)
 	{
-		recentFileActs[i] = recentMenu->addAction(QString(), this, &chaiScriptCodeEditorMainWindow::openRecentFile);
+		recentFileActs[i] = recentMenu->addAction(QString());
+		connect(recentFileActs[i], &QAction::triggered, this, &chaiScriptCodeEditorMainWindow::openRecentFile);
 		recentFileActs[i]->setVisible(false);
 	}
 
@@ -405,7 +406,8 @@ void chaiScriptCodeEditorMainWindow::createActions()
 
 	QMenu* helpMenu = menuBar()->addMenu(tr("&Help"));
 
-	QAction* aboutAct = helpMenu->addAction(tr("&About"), this, &chaiScriptCodeEditorMainWindow::about);
+	QAction* aboutAct = helpMenu->addAction(tr("&About"));
+	connect(aboutAct, &QAction::triggered, this, &chaiScriptCodeEditorMainWindow::about);
 	aboutAct->setStatusTip(tr("Show the application's About box"));
 
 	addAction(actionNew); //Actions must be added to be able to find shortcuts in event filter
@@ -489,7 +491,8 @@ void chaiScriptCodeEditorMainWindow::updateWindowMenu()
 			text = tr("%1 %2").arg(i + 1)
 				.arg(child->userFriendlyCurrentFile());
 		}
-		QAction* action = windowMenu->addAction(text, mdiSubWindow, [this, mdiSubWindow]() {
+		QAction* action = windowMenu->addAction(text);
+		connect(action, &QAction::triggered,  mdiSubWindow, [this, mdiSubWindow]() {
 			mdiArea->setActiveSubWindow(mdiSubWindow);
 			});
 		action->setCheckable(true);

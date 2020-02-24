@@ -31,6 +31,7 @@
 
 //Qt
 #include <QDataStream>
+#include <QMultiMap>
 #include <QFile>
 
 //! Serializable object interface
@@ -59,7 +60,7 @@ public:
 	};
 
 	//! Map of loaded uniqie IDs (old ID --> new ID)
-	typedef QMap<unsigned, unsigned> LoadedIDMap;
+	typedef QMultiMap<unsigned, unsigned> LoadedIDMap;
 
 	//! Loads data from binay stream
 	/** \param in input file (already opened)

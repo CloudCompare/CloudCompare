@@ -94,8 +94,7 @@ unsigned ccObject::GetNextUniqueID()
 		assert(false);
 		s_uniqueIDGenerator = ccUniqueIDGenerator::Shared(new ccUniqueIDGenerator);
 	}
-	unsigned ID = s_uniqueIDGenerator->fetchOne();
-	return ID;
+	return s_uniqueIDGenerator->fetchOne();
 }
 
 unsigned ccObject::GetLastUniqueID()
@@ -263,12 +262,11 @@ bool ccObject::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& ol
 	//	return ReadError();
 
 	//unique ID (dataVersion>=20)
-	//DGM: this ID will be useful to recreate dynamic links between entities!
 	uint32_t uniqueID = 0;
 	if (in.read((char*)&uniqueID, 4) < 0)
 		return ReadError();
-	oldToNewIDMap[uniqueID] = m_uniqueID;
-	//m_uniqueID = (unsigned)uniqueID;
+	//DGM: this ID will be useful to recreate dynamic links between entities later!
+	oldToNewIDMap.insert(uniqueID, m_uniqueID);
 
 	//name
 	if (dataVersion < 22) //old style

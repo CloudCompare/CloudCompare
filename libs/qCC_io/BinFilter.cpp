@@ -433,73 +433,41 @@ inline bool Match(ccHObject* object, unsigned uniqueID, CC_CLASS_ENUM expectedTy
 	return object && object->getUniqueID() == uniqueID && object->isKindOf(expectedType);
 }
 
-ccHObject* FindRobust(ccHObject* root, ccHObject* source, unsigned uniqueID, CC_CLASS_ENUM expectedType)
+ccHObject* FindRobust(ccHObject* root, ccHObject* source, const ccObject::LoadedIDMap& oldToNewIDMap, unsigned oldUniqueID, CC_CLASS_ENUM expectedType)
 {
-	if (source)
+	ccObject::LoadedIDMap::const_iterator it = oldToNewIDMap.find(oldUniqueID);
+	while (it != oldToNewIDMap.end() && it.key() == oldUniqueID)
 	{
-		//1st test the parent
-		ccHObject* parent = source->getParent();
-		if (Match(parent, uniqueID, expectedType))
-			return parent;
+		unsigned uniqueID = it.value();
+		++it;
 
-		//now test the children
-		for (unsigned i = 0; i < source->getChildrenNumber(); ++i)
+		if (source)
 		{
-			ccHObject* child = source->getChild(i);
-			if (Match(child, uniqueID, expectedType))
-				return child;
-		}
-	}
+			//1st test the parent
+			ccHObject* parent = source->getParent();
+			if (Match(parent, uniqueID, expectedType))
+				return parent;
 
-	//now test the whole DB
-	ccHObject* foundObject = nullptr;
-	{
-		ccHObject::Container hiddenEntities;
-		while (true)
-		{
-			ccHObject* object = root->find(uniqueID);
-			if (object)
+			//now test the children
+			for (unsigned i = 0; i < source->getChildrenNumber(); ++i)
 			{
-				//if we found an object, we must also test its type!
-				if (object->isKindOf(expectedType))
-				{
-					foundObject = object;
-					break;
-				}
-
-				/********* BIG UGLY RECOVERY TRICK *********/
-
-				//if the type doesn't match, we may be in front of a degenerate case :(
-				//we'll look if there's other entities with the same ID!!!
-				try
-				{
-					hiddenEntities.push_back(object);
-					//we temporarily 'hide' this entity by removing its unique ID
-					object->setUniqueID(0);
-				}
-				catch (const std::bad_alloc&)
-				{
-					//not enough memory?! Stop this process (anyway it's already a degenerate case ;)
-					break;
-				}
-
-				/********* BIG UGLY RECOVERY TRICK *********/
-			}
-			else
-			{
-				break;
+				ccHObject* child = source->getChild(i);
+				if (Match(child, uniqueID, expectedType))
+					return child;
 			}
 		}
-		//restore original IDs (if necessary)
-		while (!hiddenEntities.empty())
+
+		//now test the whole DB
+		ccHObject* object = root->find(uniqueID);
+		//if we've found an object, we must also test its type!
+		if (object && object->isKindOf(expectedType))
 		{
-			hiddenEntities.back()->setUniqueID(uniqueID);
-			hiddenEntities.pop_back();
+			return object;
 		}
 	}
 
 	//no entity found!
-	return foundObject;
+	return nullptr;
 }
 
 CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
@@ -594,7 +562,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				intptr_t meshID = (intptr_t)subMesh->getAssociatedMesh();
 				if (meshID > 0)
 				{
-					ccHObject* mesh = FindRobust(root, subMesh, oldToNewIDMap[meshID], CC_TYPES::MESH);
+					ccHObject* mesh = FindRobust(root, subMesh, oldToNewIDMap, meshID, CC_TYPES::MESH);
 					if (mesh)
 					{
 						subMesh->setAssociatedMesh(ccHObjectCaster::ToMesh(mesh), false); //'false' because previous mesh is not null (= real mesh ID)!!!
@@ -627,7 +595,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				intptr_t cloudID = (intptr_t)mesh->getAssociatedCloud();
 				if (cloudID > 0)
 				{
-					ccHObject* cloud = FindRobust(root, mesh, oldToNewIDMap[cloudID], CC_TYPES::POINT_CLOUD);
+					ccHObject* cloud = FindRobust(root, mesh, oldToNewIDMap, cloudID, CC_TYPES::POINT_CLOUD);
 					if (cloud)
 					{
 						mesh->setAssociatedCloud(ccHObjectCaster::ToGenericPointCloud(cloud));
@@ -683,7 +651,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 					intptr_t matSetID = (intptr_t)mesh->getMaterialSet();
 					if (matSetID > 0)
 					{
-						materials = FindRobust(root, mesh, oldToNewIDMap[matSetID], CC_TYPES::MATERIAL_SET);
+						materials = FindRobust(root, mesh, oldToNewIDMap, matSetID, CC_TYPES::MATERIAL_SET);
 						if (materials)
 						{
 							mesh->setMaterialSet(static_cast<ccMaterialSet*>(materials), false);
@@ -707,7 +675,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 					intptr_t triNormsTableID = (intptr_t)mesh->getTriNormsTable();
 					if (triNormsTableID > 0)
 					{
-						triNormsTable = FindRobust(root, mesh, oldToNewIDMap[triNormsTableID], CC_TYPES::NORMAL_INDEXES_ARRAY);
+						triNormsTable = FindRobust(root, mesh, oldToNewIDMap, triNormsTableID, CC_TYPES::NORMAL_INDEXES_ARRAY);
 						if (triNormsTable)
 						{
 							mesh->setTriNormsTable(static_cast<NormsIndexesTableType*>(triNormsTable), false);
@@ -731,7 +699,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 					intptr_t texCoordArrayID = (intptr_t)mesh->getTexCoordinatesTable();
 					if (texCoordArrayID > 0)
 					{
-						texCoordsTable = FindRobust(root, mesh, oldToNewIDMap[texCoordArrayID], CC_TYPES::TEX_COORDS_ARRAY);
+						texCoordsTable = FindRobust(root, mesh, oldToNewIDMap, texCoordArrayID, CC_TYPES::TEX_COORDS_ARRAY);
 						if (texCoordsTable)
 						{
 							mesh->setTexCoordinatesTable(static_cast<TextureCoordsContainer*>(texCoordsTable), false);
@@ -802,7 +770,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 		{
 			ccPolyline* poly = ccHObjectCaster::ToPolyline(currentObject);
 			intptr_t cloudID = (intptr_t)poly->getAssociatedCloud();
-			ccHObject* cloud = FindRobust(root, poly, oldToNewIDMap[cloudID], CC_TYPES::POINT_CLOUD);
+			ccHObject* cloud = FindRobust(root, poly, oldToNewIDMap, cloudID, CC_TYPES::POINT_CLOUD);
 			if (cloud)
 			{
 				poly->setAssociatedCloud(ccHObjectCaster::ToGenericPointCloud(cloud));
@@ -824,7 +792,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 			intptr_t bufferID = (intptr_t)sensor->getPositions();
 			if (bufferID > 0)
 			{
-				ccHObject* buffer = FindRobust(root, sensor, oldToNewIDMap[bufferID], CC_TYPES::TRANS_BUFFER);
+				ccHObject* buffer = FindRobust(root, sensor, oldToNewIDMap, bufferID, CC_TYPES::TRANS_BUFFER);
 				if (buffer)
 				{
 					sensor->setPositions(ccHObjectCaster::ToTransBuffer(buffer));
@@ -857,7 +825,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				if (pp._cloud)
 				{
 					intptr_t cloudID = (intptr_t)pp._cloud;
-					ccHObject* cloud = FindRobust(root, label, oldToNewIDMap[cloudID], CC_TYPES::POINT_CLOUD);
+					ccHObject* cloud = FindRobust(root, label, oldToNewIDMap, cloudID, CC_TYPES::POINT_CLOUD);
 					if (cloud)
 					{
 						ccGenericPointCloud* genCloud = ccHObjectCaster::ToGenericPointCloud(cloud);
@@ -880,7 +848,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				else if (pp._mesh)
 				{
 					intptr_t meshID = (intptr_t)pp._mesh;
-					ccHObject* mesh = FindRobust(root, label, oldToNewIDMap[meshID], CC_TYPES::MESH);
+					ccHObject* mesh = FindRobust(root, label, oldToNewIDMap, meshID, CC_TYPES::MESH);
 					if (mesh)
 					{
 						ccGenericMesh* genMesh = ccHObjectCaster::ToGenericMesh(mesh);
@@ -928,7 +896,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				intptr_t cloudID = (intptr_t)facet->getOriginPoints();
 				if (cloudID > 0)
 				{
-					ccHObject* cloud = FindRobust(root, facet, oldToNewIDMap[cloudID], CC_TYPES::POINT_CLOUD);
+					ccHObject* cloud = FindRobust(root, facet, oldToNewIDMap, cloudID, CC_TYPES::POINT_CLOUD);
 					if (cloud && cloud->isA(CC_TYPES::POINT_CLOUD))
 					{
 						facet->setOriginPoints(ccHObjectCaster::ToPointCloud(cloud));
@@ -947,7 +915,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				intptr_t cloudID = (intptr_t)facet->getContourVertices();
 				if (cloudID > 0)
 				{
-					ccHObject* cloud = FindRobust(root, facet, oldToNewIDMap[cloudID], CC_TYPES::POINT_CLOUD);
+					ccHObject* cloud = FindRobust(root, facet, oldToNewIDMap, cloudID, CC_TYPES::POINT_CLOUD);
 					if (cloud)
 					{
 						facet->setContourVertices(ccHObjectCaster::ToPointCloud(cloud));
@@ -966,7 +934,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				intptr_t polyID = (intptr_t)facet->getContour();
 				if (polyID > 0)
 				{
-					ccHObject* poly = FindRobust(root, facet, oldToNewIDMap[polyID], CC_TYPES::POLY_LINE);
+					ccHObject* poly = FindRobust(root, facet, oldToNewIDMap, polyID, CC_TYPES::POLY_LINE);
 					if (poly)
 					{
 						facet->setContour(ccHObjectCaster::ToPolyline(poly));
@@ -985,7 +953,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				intptr_t polyID = (intptr_t)facet->getPolygon();
 				if (polyID > 0)
 				{
-					ccHObject* poly = FindRobust(root, facet, oldToNewIDMap[polyID], CC_TYPES::MESH);
+					ccHObject* poly = FindRobust(root, facet, oldToNewIDMap, polyID, CC_TYPES::MESH);
 					if (poly)
 					{
 						facet->setPolygon(ccHObjectCaster::ToMesh(poly));
@@ -1007,7 +975,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 			intptr_t sensorID = (intptr_t)image->getAssociatedSensor();
 			if (sensorID > 0)
 			{
-				ccHObject* sensor = FindRobust(root, image, oldToNewIDMap[sensorID], CC_TYPES::CAMERA_SENSOR);
+				ccHObject* sensor = FindRobust(root, image, oldToNewIDMap, sensorID, CC_TYPES::CAMERA_SENSOR);
 				if (sensor)
 				{
 					image->setAssociatedSensor(ccHObjectCaster::ToCameraSensor(sensor));

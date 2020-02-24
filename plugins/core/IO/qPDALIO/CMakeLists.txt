@@ -19,7 +19,7 @@ if ( PLUGIN_IO_QPDAL )
 		link_directories( ${PDAL_LIBRARY_DIRS} )
 	endif()
 
-    if (PDAL_VERSION LESS 2.0.0)
+	if (PDAL_VERSION LESS 2.0.0)
 		set(JSON_ROOT_DIR "" CACHE PATH "Jsoncpp root dir (PDAL/vendor/jsoncpp/dist)")
 		if (NOT JSON_ROOT_DIR)
 			message(WARNING "Jsoncpp root dir is not specified (JSON_ROOT_DIR)")

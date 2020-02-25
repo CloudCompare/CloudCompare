@@ -46,8 +46,8 @@
 //Qt
 #include <QIcon>
 
-ccHObject::ccHObject(const QString& name)
-	: ccObject(name)
+ccHObject::ccHObject(const QString& name, unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
+	: ccObject(name, uniqueID)
 	, ccDrawableObject()
 	, m_parent(nullptr)
 	, m_selectionBehavior(SELECTION_AA_BBOX)

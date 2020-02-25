@@ -43,8 +43,9 @@ public:
 
 	//! Default constructor
 	/** \param name object name
+		\param uniqueID unique ID (handle with care)
 	**/
-	ccGenericMesh(QString name = QString());
+	ccGenericMesh(QString name = QString(), unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID);
 
 	//! Destructor
 	~ccGenericMesh() override = default;

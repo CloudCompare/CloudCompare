@@ -35,8 +35,9 @@ public:
 
 	//! Default ccMesh constructor
 	/** \param vertices the vertices cloud
+		\param uniqueID unique ID (handle with care)
 	**/
-	explicit ccMesh(ccGenericPointCloud* vertices);
+	explicit ccMesh(ccGenericPointCloud* vertices, unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID);
 
 	//! ccMesh constructor (from a CCLib::GenericIndexedMesh)
 	/** The GenericIndexedMesh should refer to a known ccGenericPointCloud.

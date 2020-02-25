@@ -59,6 +59,8 @@ class QCC_DB_LIB_API ccGenericPointCloud : public ccShiftedObject,  public CCLib
 public:
 
 	//! Default constructor
+	/** \param name cloud name (optional)
+	**/
 	ccGenericPointCloud(QString name = QString());
 
 	//! Copy constructor

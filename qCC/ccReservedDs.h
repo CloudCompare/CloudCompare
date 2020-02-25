@@ -15,32 +15,13 @@
 //#                                                                        #
 //##########################################################################
 
-#include "ccCylinder.h"
+#ifndef CC_RESERVED_IDS_HEADER
+#define CC_RESERVED_IDS_HEADER
 
-ccCylinder::ccCylinder(	PointCoordinateType radius,
-						PointCoordinateType height,
-						const ccGLMatrix* transMat/*=0*/,
-						QString name/*=QString("Cylinder")*/,
-						unsigned precision/*=DEFAULT_DRAWING_PRECISION*/,
-						unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
-	: ccCone(radius, radius, height, 0, 0, transMat, name, precision, uniqueID)
+// Unique IDs reserved by CloudCompare for special entities (display elements, etc.)
+enum class ReservedIDs : unsigned
 {
-}
+	CLIPPING_BOX = 1
+};
 
-ccCylinder::ccCylinder(QString name/*=QString("Cylinder")*/)
-	: ccCone(name)
-{
-}
-
-ccGenericPrimitive* ccCylinder::clone() const
-{
-	return finishCloneJob(new ccCylinder(m_bottomRadius, m_height, &m_transformation, getName(), m_drawPrecision));
-}
-
-void ccCylinder::setBottomRadius(PointCoordinateType radius)
-{
-	//we set the top radius as well!
-	m_topRadius = radius;
-	ccCone::setBottomRadius(radius);
-}
-
+#endif //CC_RESERVED_IDS_HEADER

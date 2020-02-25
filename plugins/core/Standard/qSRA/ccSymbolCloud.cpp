@@ -166,7 +166,7 @@ void ccSymbolCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			if (MACRO_DrawFastNamesOnly(context))
 				return;
 
-			glFunc->glPushName(getUniqueID());
+			glFunc->glPushName(getUniqueIDForDisplay());
 			hasLabels = false; //no need to display labels in 'picking' mode
 		}
 

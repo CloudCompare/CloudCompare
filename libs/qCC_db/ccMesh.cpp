@@ -48,8 +48,8 @@
 
 static CCVector3 s_blankNorm(0, 0, 0);
 
-ccMesh::ccMesh(ccGenericPointCloud* vertices)
-	: ccGenericMesh("Mesh")
+ccMesh::ccMesh(ccGenericPointCloud* vertices, unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
+	: ccGenericMesh("Mesh", uniqueID)
 	, m_associatedCloud(nullptr)
 	, m_triNormals(nullptr)
 	, m_texCoords(nullptr)

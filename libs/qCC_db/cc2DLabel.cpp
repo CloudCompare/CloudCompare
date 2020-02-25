@@ -1225,7 +1225,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 	bool pushName = MACRO_DrawEntityNames(context);
 	if (pushName)
 	{
-		glFunc->glPushName(getUniqueID());
+		glFunc->glPushName(getUniqueIDForDisplay());
 	}
 
 	float halfW = context.glW / 2.0f;

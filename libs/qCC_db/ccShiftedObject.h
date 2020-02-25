@@ -32,8 +32,13 @@ class QCC_DB_LIB_API ccShiftedObject : public ccHObject
 public:
 
 	//! Default constructor
+	/** \param name cloud name (optional)
+	**/
 	ccShiftedObject(QString name = QString());
+
 	//! Copy constructor
+	/** \param s shifted object to copy
+	**/
 	ccShiftedObject(const ccShiftedObject& s);
 
 	//! Sets shift applied to original coordinates (information storage only)

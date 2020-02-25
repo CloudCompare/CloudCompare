@@ -1342,7 +1342,7 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 		//not particularly fast
 		if (MACRO_DrawFastNamesOnly(context))
 			return;
-		glFunc->glPushName(getUniqueID());
+		glFunc->glPushName(getUniqueIDForDisplay());
 	}
 
 	glFunc->glMatrixMode(GL_MODELVIEW);

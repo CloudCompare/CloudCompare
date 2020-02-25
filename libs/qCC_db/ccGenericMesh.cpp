@@ -41,9 +41,9 @@
 //system
 #include <cassert>
 
-ccGenericMesh::ccGenericMesh(QString name/*=QString()*/)
+ccGenericMesh::ccGenericMesh(QString name/*=QString()*/, unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
 	: GenericIndexedMesh()
-	, ccHObject(name)
+	, ccHObject(name, uniqueID)
 	, m_triNormsShown(false)
 	, m_materialsShown(false)
 	, m_showWired(false)

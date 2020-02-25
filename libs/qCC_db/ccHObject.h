@@ -31,8 +31,9 @@ public: //construction
 
 	//! Default constructor
 	/** \param name object name (optional)
+		\param uniqueID unique ID (handle with care)
 	**/
-	ccHObject(const QString& name = QString());
+	ccHObject(const QString& name = QString(), unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID);
 	//! Copy constructor
 	ccHObject(const ccHObject& object);
 

@@ -21,8 +21,10 @@
 #include "ccGenericPrimitive.h"
 #include "ccPointCloud.h"
 
-ccGenericPrimitive::ccGenericPrimitive(QString name/*=QString()*/, const ccGLMatrix* transMat/*=0*/)
-	: ccMesh(new ccPointCloud("vertices"))
+ccGenericPrimitive::ccGenericPrimitive(	QString name/*=QString()*/,
+										const ccGLMatrix* transMat/*=0*/,
+										unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
+	: ccMesh(new ccPointCloud("vertices"), uniqueID)
 	, m_drawPrecision(0)
 {
 	setName(name);

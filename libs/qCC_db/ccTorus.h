@@ -44,6 +44,7 @@ public:
 		\param transMat optional 3D transformation (can be set afterwards with ccDrawableObject::setGLTransformation)
 		\param name name
 		\param precision drawing precision (main loop angular step = 360/(4*precision), circular section angular step = 360/precision)
+		\param uniqueID unique ID (handle with care)
 	**/
 	ccTorus(PointCoordinateType insideRadius,
 			PointCoordinateType outsideRadius,
@@ -52,7 +53,8 @@ public:
 			PointCoordinateType rectSectionHeight = 0,
 			const ccGLMatrix* transMat = 0,
 			QString name = QString("Torus"),
-			unsigned precision = DEFAULT_DRAWING_PRECISION);
+			unsigned precision = DEFAULT_DRAWING_PRECISION,
+			unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID);
 
 	//! Simplified constructor
 	/** For ccHObject factory only!

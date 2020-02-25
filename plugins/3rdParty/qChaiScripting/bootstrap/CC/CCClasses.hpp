@@ -320,7 +320,7 @@ namespace chaiscript
 				m->add(fun(&Grid3D<T>::size), "size");
 				m->add(fun(&Grid3D<T>::isInitialized), "isInitialized");
 				m->add(fun(&Grid3D<T>::init), "init");
-				m->add(user_type<Grid3D<T>::CellToTest>(), "CellToTest");
+				m->add(user_type<typename Grid3D<T>::CellToTest>(), "CellToTest");
 				m->add(fun(&Grid3D<T>::CellToTest::pos), "pos");
 				m->add(fun(&Grid3D<T>::CellToTest::cellSize), "cellSize");
 				m->add(fun(static_cast<bool(Grid3D<T>::*)(GenericIndexedMesh*, PointCoordinateType, const CCVector3&, GridElement, GenericProgressCallback*)>(&Grid3D<T>::intersecthWith)), "intersecthWith");

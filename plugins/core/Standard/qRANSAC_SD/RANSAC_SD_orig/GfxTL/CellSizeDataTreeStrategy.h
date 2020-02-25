@@ -168,7 +168,7 @@ namespace GfxTL
 						cells[i] = NULL;
 				if(!cells[0] && childCount)
 					cells[0] = (CellType *)0x1;
-				delete sizes;
+				delete[] sizes;
 			}
 
 			template< class SplitterT >

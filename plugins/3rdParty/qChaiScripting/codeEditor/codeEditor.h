@@ -26,7 +26,7 @@ public:
 
     void lineNumberAreaPaintEvent(QPaintEvent* event);
     ~CodeEditor();
-    bool eventFilter(QObject* target, QEvent* event);
+    bool eventFilter(QObject* target, QEvent* event) override;
     int lineNumberAreaWidth();
     void newFile();
     bool loadFile(const QString& fileName);

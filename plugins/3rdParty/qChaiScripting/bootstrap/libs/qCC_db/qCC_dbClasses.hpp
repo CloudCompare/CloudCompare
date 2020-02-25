@@ -3253,12 +3253,12 @@ namespace chaiscript
 					m->add(fun(&ccLog::RegisterInstance), "RegisterInstance");
 					m->add(fun(&ccLog::EnableMessageBackup), "EnableMessageBackup");
 					m->add(fun(&ccLog::LogMessage), "LogMessage");
-					m->add(fun(&ccLog::Print), "Print");
-					m->add(fun(&ccLog::PrintDebug), "PrintDebug");
-					m->add(fun(&ccLog::Warning), "Warning");
-					m->add(fun(&ccLog::WarningDebug), "WarningDebug");
-					m->add(fun(&ccLog::Error), "Error");
-					m->add(fun(&ccLog::ErrorDebug), "ErrorDebug");
+					m->add(fun(static_cast<bool(*)(const QString&)>(&ccLog::Print)), "Print");
+					m->add(fun(static_cast<bool(*)(const QString&)>(&ccLog::PrintDebug)), "PrintDebug");
+					m->add(fun(static_cast<bool(*)(const QString&)>(&ccLog::Warning)), "Warning");
+					m->add(fun(static_cast<bool(*)(const QString&)>(&ccLog::WarningDebug)), "WarningDebug");
+					m->add(fun(static_cast<bool(*)(const QString&)>(&ccLog::Error)), "Error");
+					m->add(fun(static_cast<bool(*)(const QString&)>(&ccLog::ErrorDebug)), "ErrorDebug");
 					return m;
 				}
 

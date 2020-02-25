@@ -331,11 +331,12 @@ bool Torus::Init(bool binary, std::istream *i)
 void Torus::Init(FILE *i)
 {
 	float rot; // dummy rotation placeholder
-	fread(&m_normal, sizeof(m_normal), 1, i);
-	fread(&m_center, sizeof(m_center), 1, i);
-	fread(&m_rminor, sizeof(m_rminor), 1, i);
-	fread(&m_rmajor, sizeof(m_rmajor), 1, i);
-	fread(&rot, sizeof(rot), 1, i);
+	size_t readrtn; //unused return warning suppresion
+	readrtn = fread(&m_normal, sizeof(m_normal), 1, i);
+	readrtn = fread(&m_center, sizeof(m_center), 1, i);
+	readrtn = fread(&m_rminor, sizeof(m_rminor), 1, i);
+	readrtn = fread(&m_rmajor, sizeof(m_rmajor), 1, i);
+	readrtn = fread(&rot, sizeof(rot), 1, i);
 	m_appleShaped = m_rmajor < m_rminor;
 	ComputeAppleParams();
 }

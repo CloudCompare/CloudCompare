@@ -1002,8 +1002,8 @@ namespace chaiscript
 				m->add(fun([](DgmOctree* dgmOT, const DgmOctree::cellCodesContainer& a, unsigned char b, bool c) {return dgmOT->extractCCs(a, b, c); }), "extractCCs");
 				m->add(fun(static_cast<int(DgmOctree::*)(unsigned char, bool, GenericProgressCallback*)const>(&DgmOctree::extractCCs)), "extractCCs");
 				m->add(fun([](DgmOctree* dgmOT, unsigned char a, bool b) {return dgmOT->extractCCs(a, b); }), "extractCCs");
-				m->add(fun(&DgmOctree::executeFunctionForAllCellsStartingAtLevel), "executeFunctionForAllCellsStartingAtLevel");
-				m->add(fun(&DgmOctree::executeFunctionForAllCellsAtLevel), "executeFunctionForAllCellsAtLevel");
+//clang/gcc error	m->add(fun(&DgmOctree::executeFunctionForAllCellsStartingAtLevel), "executeFunctionForAllCellsStartingAtLevel");
+//clang/gcc error	m->add(fun(&DgmOctree::executeFunctionForAllCellsAtLevel), "executeFunctionForAllCellsAtLevel");
 				m->add(fun(&DgmOctree::rayCast), "rayCast");
 				m->add(fun(&DgmOctree::associatedCloud), "associatedCloud");
 				m->add(fun(&DgmOctree::pointsAndTheirCellCodes), "pointsAndTheirCellCodes");

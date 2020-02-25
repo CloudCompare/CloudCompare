@@ -47,7 +47,7 @@ public:
 
 	//! Default constructor
 	chaiScriptCodeEditorMainWindow();
-	void changeEvent(QEvent* e);
+	void changeEvent(QEvent* e) override;
 	static chaiScriptCodeEditorMainWindow* TheInstance();
 	bool openFile(const QString& fileName);
 	static QString settingsApplicationName();

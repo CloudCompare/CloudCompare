@@ -161,7 +161,7 @@ namespace GfxTL
 		intptr_t j, iq, ip, i;
 		T tresh, theta, tau, t, sm, s, h, g, c;
 		T volatile temp1, temp2;
-		auto_ptr< T > ab(new T[N]), az(new T[N]);
+		std::unique_ptr< T > ab(new T[N]), az(new T[N]);
 		T *b = ab.get(), *z = az.get();
 		for(ip = 0; ip < N; ip++)
 		{

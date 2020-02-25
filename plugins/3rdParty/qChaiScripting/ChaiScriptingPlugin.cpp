@@ -369,7 +369,7 @@ void ChaiScriptingPlugin::onNewSelection(const ccHObject::Container& selectedEnt
 		std::vector<std::shared_ptr<ccHObject>> sel;
 		try
 		{
-			for each (auto objectName in selectedEntities)
+			for (auto objectName : selectedEntities)
 			{
 				ccHObject test = ccHObject(*objectName);
 				sel.push_back(std::shared_ptr<ccHObject>());

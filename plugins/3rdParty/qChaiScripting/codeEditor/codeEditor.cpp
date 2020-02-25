@@ -20,7 +20,7 @@
 #include <QPlainTextEdit>
 
 
-#include "codeeditor.h"
+#include "codeEditor.h"
 #include "chaiScriptSyntaxHighlighter.h"
 
 CodeEditor::CodeEditor(QWidget* parent) : QPlainTextEdit(parent)

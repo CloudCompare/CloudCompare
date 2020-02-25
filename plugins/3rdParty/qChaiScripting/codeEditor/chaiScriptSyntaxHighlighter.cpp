@@ -27,7 +27,7 @@ ChaiScriptSyntaxHighlighter.cpp
 	   Author: klemens.morgenstern
  */
 
-#include "ChaiScriptSyntaxHighlighter.h"
+#include "chaiScriptSyntaxHighlighter.h"
 
 
 TextBlockData::TextBlockData()

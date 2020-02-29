@@ -24,9 +24,9 @@
 #include "ccCone.h"
 #include "ccPointCloud.h"
 
-ccPolyline::ccPolyline(GenericIndexedCloudPersist* associatedCloud)
+ccPolyline::ccPolyline(GenericIndexedCloudPersist* associatedCloud, unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
 	: Polyline(associatedCloud)
-	, ccShiftedObject("Polyline")
+	, ccShiftedObject("Polyline", uniqueID)
 {
 	set2DMode(false);
 	setForeground(true);

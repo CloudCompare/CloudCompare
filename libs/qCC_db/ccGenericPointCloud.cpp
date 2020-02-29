@@ -36,8 +36,8 @@
 #include "ccSensor.h"
 
 
-ccGenericPointCloud::ccGenericPointCloud(QString name)
-	: ccShiftedObject(name)
+ccGenericPointCloud::ccGenericPointCloud(QString name, unsigned uniqueID)
+	: ccShiftedObject(name, uniqueID)
 	, m_pointSize(0)
 {
 	setVisible(true);

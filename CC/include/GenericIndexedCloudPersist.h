@@ -30,8 +30,18 @@ namespace CCLib
 **/
 class CC_CORE_LIB_API GenericIndexedCloudPersist : virtual public GenericIndexedCloud
 {
-
 public:
+	//! Default constructor
+	GenericIndexedCloudPersist() : GenericIndexedCloud() {}
+
+	//! Mock constructor for compatibility with the PointCloudTpl interface
+	/** \warning Parameters are simply ignored
+		\param name ignored
+		\param ID ignored
+	**/
+	GenericIndexedCloudPersist(const char* name, unsigned ID) : GenericIndexedCloud() { /* input parameters are ignored */ }
+
+
 	//! Default destructor
 	 ~GenericIndexedCloudPersist() override = default;
 

@@ -33,8 +33,9 @@ public:
 
 	//! Default constructor
 	/** \param name cloud name (optional)
+		\param uniqueID unique ID (handle with care)
 	**/
-	ccShiftedObject(QString name = QString());
+	ccShiftedObject(QString name = QString(), unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID);
 
 	//! Copy constructor
 	/** \param s shifted object to copy

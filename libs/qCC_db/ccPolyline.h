@@ -35,8 +35,9 @@ public:
 
 	//! Default constructor
 	/** \param associatedCloud the associated point cloud (i.e. the vertices)
+		\param uniqueID unique ID (handle with care)
 	**/
-	explicit ccPolyline(GenericIndexedCloudPersist* associatedCloud);
+	explicit ccPolyline(GenericIndexedCloudPersist* associatedCloud, unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID);
 
 	//! Copy constructor
 	/** \param poly polyline to clone

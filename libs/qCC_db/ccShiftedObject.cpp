@@ -21,8 +21,8 @@
 #include "ccLog.h"
 #include "ccSerializableObject.h"
 
-ccShiftedObject::ccShiftedObject(QString name)
-	: ccHObject(name)
+ccShiftedObject::ccShiftedObject(QString name, unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
+	: ccHObject(name, uniqueID)
 	, m_globalShift(0, 0, 0)
 	, m_globalScale(1.0)
 {

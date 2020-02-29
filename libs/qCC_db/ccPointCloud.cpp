@@ -58,8 +58,8 @@
 
 static const char s_deviationSFName[] = "Deviation";
 
-ccPointCloud::ccPointCloud(QString name) throw()
-	: CCLib::PointCloudTpl<ccGenericPointCloud>()
+ccPointCloud::ccPointCloud(QString name/*=QString()*/, unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/) throw()
+	: BaseClass(name, uniqueID)
 	, m_rgbaColors(nullptr)
 	, m_normals(nullptr)
 	, m_sfColorScaleDisplayed(false)

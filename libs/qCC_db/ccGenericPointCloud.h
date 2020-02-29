@@ -60,8 +60,9 @@ public:
 
 	//! Default constructor
 	/** \param name cloud name (optional)
+		\param uniqueID unique ID (handle with care)
 	**/
-	ccGenericPointCloud(QString name = QString());
+	ccGenericPointCloud(QString name = QString(), unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID);
 
 	//! Copy constructor
 	ccGenericPointCloud(const ccGenericPointCloud& cloud);

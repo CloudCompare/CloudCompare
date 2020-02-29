@@ -51,7 +51,7 @@ v2.11 (Anoia) - (in development)
 	- The Feature tools (Tools>Other>Compute geometric features) can now be accessed via
 		the command line mode with option -FEATURE {type} {kernel size}
 		- type can be the following: SUM_OF_EIGENVALUES, OMNIVARIANCE, EIGENTROPY, ANISOTROPY, PLANARITY, 
-			LINEARITY, PCA1, PCA2, SURFACE_VARIATION, SPHERICITY, or VERTICALITY.
+			LINEARITY, PCA1, PCA2, SURFACE_VARIATION, SPHERICITY, VERTICALITY, EIGENVALUE1, EIGENVALUE2, EIGENVALUE3.
 		- Computes 1st order moment on all opened clouds and auto saved by default.
     - NORMALS_TO_DIP: converts the loaded cloud normals to dip and dip direction (scalar fields)
 	- NORMALS_TO_SFS: converts the loaded cloud normals to 3 scalar fields (Nx, Ny and Nz)
@@ -150,6 +150,7 @@ v2.11 (Anoia) - (in development)
 	- the 'Straightened cone' options are now using the real curvilinear abscissa (0 = cone apex)
   - Tools > Others > Compute geometric features
 	- option to compute the 1st moment added
+	- option to compute the 1st, 2nd and 3rd eigenvalues added
   - Stereo mode updated:
 	- New stereo mode (Generic stereo display) to handle more stereo displays (PluraView, etc.)
 	- New stereo parameters (screen/display size, distance to screen, and eye separation)

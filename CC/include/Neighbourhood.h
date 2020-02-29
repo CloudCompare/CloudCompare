@@ -187,7 +187,10 @@ class CC_CORE_LIB_API Neighbourhood
 			PCA2,
 			SurfaceVariation,
 			Sphericity,
-			Verticality
+			Verticality,
+			EigenValue1,
+			EigenValue2,
+			EigenValue3
 		};
 
 		//! Computes the given feature on a set of point

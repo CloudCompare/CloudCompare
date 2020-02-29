@@ -4302,11 +4302,35 @@ bool CommandFeature::process(ccCommandLineInterface &cmd)
 	{
 		featureType = CCLib::Neighbourhood::Verticality;
 	}
+	else if (featureTypeStr == "EIGENVALUE1")
+	{
+		featureType = CCLib::Neighbourhood::EigenValue1;
+	}
+	else if (featureTypeStr == "EIGENVALUE2")
+	{
+		featureType = CCLib::Neighbourhood::EigenValue2;
+	}
+	else if (featureTypeStr == "EIGENVALUE3")
+	{
+		featureType = CCLib::Neighbourhood::EigenValue3;
+	}
 	else
 	{
-		return cmd.error(QObject::tr("Invalid feature type after \"-%1\". Got '%2' instead of: \
-SUM_OF_EIGENVALUES or OMNIVARIANCE or EIGENTROPY or ANISOTROPY or PLANARITY or LINEARITY or \
-PCA1 or PCA2 or SURFACE_VARIATION or SPHERICITY or VERTICALITY").arg(COMMAND_FEATURE, featureTypeStr));
+		return cmd.error(QObject::tr("Invalid feature type after \"-%1\". Got '%2' instead of:\n\
+- SUM_OF_EIGENVALUES\n\
+- OMNIVARIANCE\n\
+- EIGENTROPY\n\
+- ANISOTROPY\n\
+- PLANARITY\n\
+- LINEARITY\n\
+- PCA1\n\
+- PCA2\n\
+- SURFACE_VARIATION\n\
+- SPHERICITY\n\
+- VERTICALITY\n\
+- EIGENVALUE1\n\
+- EIGENVALUE2\n\
+- EIGENVALUE3").arg(COMMAND_FEATURE, featureTypeStr));
 	}
 
 	if (cmd.arguments().empty())

@@ -950,6 +950,15 @@ double Neighbourhood::computeFeature(GeomFeature feature)
 			value = 1.0 - std::abs(Z.dot(e3));
 		}
 		break;
+	case EigenValue1:
+		value = l1;
+		break;
+	case EigenValue2:
+		value = l2;
+		break;
+	case EigenValue3:
+		value = l3;
+		break;
 	default:
 		assert(false);
 		break;

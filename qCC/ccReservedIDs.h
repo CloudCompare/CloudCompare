@@ -18,7 +18,9 @@
 #ifndef CC_RESERVED_IDS_HEADER
 #define CC_RESERVED_IDS_HEADER
 
-// Unique IDs reserved by CloudCompare for special entities (display elements, etc.)
+//! Unique IDs reserved by CloudCompare for special entities (display elements, etc.)
+/** They should all remain below ccUniqueIDGenerator::MinUniqueID (256)
+**/
 enum class ReservedIDs : unsigned
 {
 	CLIPPING_BOX = 1

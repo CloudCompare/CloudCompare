@@ -22,7 +22,7 @@
 #include "ccClippingBoxRepeatDlg.h"
 #include "ccCropTool.h"
 #include "ccGLWindow.h"
-#include "ccReservedDs.h"
+#include "ccReservedIDs.h"
 #include "mainwindow.h"
 
 #include "db_tree/ccDBRoot.h"

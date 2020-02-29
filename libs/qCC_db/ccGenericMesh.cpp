@@ -41,9 +41,9 @@
 //system
 #include <cassert>
 
-ccGenericMesh::ccGenericMesh(QString name/*=QString()*/)
+ccGenericMesh::ccGenericMesh(QString name/*=QString()*/, unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
 	: GenericIndexedMesh()
-	, ccHObject(name)
+	, ccHObject(name, uniqueID)
 	, m_triNormsShown(false)
 	, m_materialsShown(false)
 	, m_showWired(false)
@@ -682,9 +682,9 @@ bool ccGenericMesh::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccGenericMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
+bool ccGenericMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
-	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags))
+	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
 	//'show wired' state (dataVersion>=20)

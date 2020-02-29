@@ -30,7 +30,7 @@ public:
 	//inherited from ccSerializableObject
 	bool isSerializable() const override { return true; }
 	bool toFile(QFile& out) const override;
-	bool fromFile(QFile& in, short dataVersion, int flags) override;
+	bool fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
 
 	uint32_t numberOfSamples;	//!< Number of samples
 	uint32_t samplingRate_ps;	//!< Sampling rate in pico seconds
@@ -119,7 +119,7 @@ public:
 	//inherited from ccSerializableObject
 	bool isSerializable() const override { return true; }
 	bool toFile(QFile& out) const override;
-	bool fromFile(QFile& in, short dataVersion, int flags) override;
+	bool fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
 
 protected: //members
 

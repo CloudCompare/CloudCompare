@@ -387,7 +387,7 @@ bool ccScalarField::toFile(QFile& out) const
 	return true;
 }
 
-bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags)
+bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
 	assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
 
@@ -564,7 +564,7 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags)
 			if (hasColorScale)
 			{
 				ccColorScale::Shared colorScale = ccColorScale::Create("temp");
-				if (!colorScale->fromFile(in, dataVersion, flags))
+				if (!colorScale->fromFile(in, dataVersion, flags, oldToNewIDMap))
 					return ReadError();
 				m_colorScale = colorScale;
 

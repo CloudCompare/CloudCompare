@@ -61,19 +61,20 @@ const unsigned CC_MAX_NUMBER_OF_POINTS_PER_CLOUD = 2000000000; //we must keep it
 	- per-point visibility information (to hide/display subsets of points)
 	- other children objects (meshes, calibrated pictures, etc.)
 **/
-class QCC_DB_LIB_API ccPointCloud : public CCLib::PointCloudTpl<ccGenericPointCloud>
+class QCC_DB_LIB_API ccPointCloud : public CCLib::PointCloudTpl<ccGenericPointCloud, QString>
 {
 public:
 	//! Base class (shortcut)
-	using BaseClass = CCLib::PointCloudTpl<ccGenericPointCloud>;
+	using BaseClass = CCLib::PointCloudTpl<ccGenericPointCloud, QString>;
 
 	//! Default constructor
 	/** Creates an empty cloud without any feature. Each of them shoud be
 		specifically instantiated/created (once the points have been
 		added to this cloud, at least partially).
 		\param name cloud name (optional)
+		\param uniqueID unique ID (handle with care)
 	**/
-	ccPointCloud(QString name = QString()) throw();
+	ccPointCloud(QString name = QString(), unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID) throw();
 
 	//! Default destructor
 	~ccPointCloud() override;
@@ -737,7 +738,7 @@ protected:
 	void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 	void applyGLTransformation(const ccGLMatrix& trans) override;
 	bool toFile_MeOnly(QFile& out) const override;
-	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
 	void notifyGeometryUpdate() override;
 
 	//inherited from PointCloud

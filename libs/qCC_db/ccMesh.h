@@ -35,8 +35,9 @@ public:
 
 	//! Default ccMesh constructor
 	/** \param vertices the vertices cloud
+		\param uniqueID unique ID (handle with care)
 	**/
-	explicit ccMesh(ccGenericPointCloud* vertices);
+	explicit ccMesh(ccGenericPointCloud* vertices, unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID);
 
 	//! ccMesh constructor (from a CCLib::GenericIndexedMesh)
 	/** The GenericIndexedMesh should refer to a known ccGenericPointCloud.
@@ -392,7 +393,7 @@ protected: //methods
 	//inherited from ccHObject
 	void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 	bool toFile_MeOnly(QFile& out) const override;
-	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
 	void applyGLTransformation(const ccGLMatrix& trans) override;
 	void onUpdateOf(ccHObject* obj) override;
 	void onDeletionOf(const ccHObject* obj) override;

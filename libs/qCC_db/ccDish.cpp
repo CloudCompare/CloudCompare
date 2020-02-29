@@ -178,16 +178,16 @@ bool ccDish::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccDish::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
+bool ccDish::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
-	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags))
+	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
 	//parameters (dataVersion>=21)
 	QDataStream inStream(&in);
-	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_baseRadius);
-	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_secondRadius);
-	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_height);
+	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_baseRadius);
+	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_secondRadius);
+	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_height);
 
 	return true;
 }

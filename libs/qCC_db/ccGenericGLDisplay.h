@@ -42,7 +42,7 @@ public:
 	//inherited from ccSerializableObject
 	bool isSerializable() const override { return true; }
 	bool toFile(QFile& out) const override;
-	bool fromFile(QFile& in, short dataVersion, int flags) override;
+	bool fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
 
 	//! Current pixel size (in 'current unit'/pixel)
 	/** This scale is valid eveywhere in ortho. mode 

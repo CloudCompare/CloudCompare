@@ -28,8 +28,10 @@ ccCone::ccCone(PointCoordinateType bottomRadius,
 				PointCoordinateType yOff/*=0*/,
 				const ccGLMatrix* transMat/*=0*/,
 				QString name/*="Cylinder"*/,
-				unsigned precision/*=DEFAULT_DRAWING_PRECISION*/)
-	: ccGenericPrimitive(name, transMat)
+				unsigned precision/*=DEFAULT_DRAWING_PRECISION*/,
+				unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
+
+	: ccGenericPrimitive(name, transMat, uniqueID)
 	, m_bottomRadius(fabs(bottomRadius))
 	, m_topRadius(fabs(topRadius))
 	, m_xOff(xOff)
@@ -321,9 +323,9 @@ bool ccCone::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccCone::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
+bool ccCone::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
-	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags))
+	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
 	//parameters (dataVersion>=21)

@@ -103,9 +103,9 @@ bool ccBox::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccBox::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
+bool ccBox::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
-	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags))
+	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
 	//parameters (dataVersion>=21)

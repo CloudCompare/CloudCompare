@@ -191,9 +191,9 @@ bool ccImage::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccImage::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
+bool ccImage::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
-	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags))
+	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
 	//as the associated sensor can't be saved directly (as it may be shared by multiple images)

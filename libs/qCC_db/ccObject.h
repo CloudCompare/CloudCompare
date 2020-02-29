@@ -150,14 +150,17 @@ class QCC_DB_LIB_API ccUniqueIDGenerator
 {
 public:
 
+	static constexpr unsigned InvalidUniqueID = 0xFFFFFFFF;
+	static constexpr unsigned MinUniqueID = 0x00000100;
+
 	//! Shared type
 	using Shared = QSharedPointer<ccUniqueIDGenerator>;
 
 	//! Default constructor
-	ccUniqueIDGenerator() : m_lastUniqueID(0) {}
+	ccUniqueIDGenerator() : m_lastUniqueID(MinUniqueID) {}
 
 	//! Resets the unique ID
-	void reset() { m_lastUniqueID = 0; }
+	void reset() { m_lastUniqueID = MinUniqueID; }
 	//! Returns a (new) unique ID
 	unsigned fetchOne() { return ++m_lastUniqueID; }
 	//! Returns the value of the last generated unique ID
@@ -176,8 +179,9 @@ public:
 
 	//! Default constructor
 	/** \param name object name (optional)
+		\param uniqueID unique ID (handle with care! Will be auto generated if equal to ccUniqueIDGenerator::InvalidUniqueID)
 	**/
-	ccObject(const QString& name = QString());
+	ccObject(const QString& name = QString(), unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID);
 
 	//! Copy constructor
 	ccObject(const ccObject& object);
@@ -309,7 +313,7 @@ protected:
 		before calling this method, as the classID is voluntarily
 		skipped (in order to let the user instantiate the object first)
 	**/
-	bool fromFile(QFile& in, short dataVersion, int flags) override;
+	bool fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
 
 	//! Object name
 	QString m_name;

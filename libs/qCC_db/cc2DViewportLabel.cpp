@@ -56,9 +56,9 @@ bool cc2DViewportLabel::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool cc2DViewportLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
+bool cc2DViewportLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
-	if (!cc2DViewportObject::fromFile_MeOnly(in, dataVersion, flags))
+	if (!cc2DViewportObject::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
 	if (dataVersion < 21)

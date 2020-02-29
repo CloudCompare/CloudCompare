@@ -43,8 +43,9 @@ public:
 
 	//! Default constructor
 	/** \param name object name
+		\param uniqueID unique ID (handle with care)
 	**/
-	ccGenericMesh(QString name = QString());
+	ccGenericMesh(QString name = QString(), unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID);
 
 	//! Destructor
 	~ccGenericMesh() override = default;
@@ -240,7 +241,7 @@ protected:
 
 	//inherited from ccHObject
 	bool toFile_MeOnly(QFile& out) const override;
-	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
 
 	//Static arrays for OpenGL drawing
 	static CCVector3* GetVertexBuffer();

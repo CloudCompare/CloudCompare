@@ -22,6 +22,7 @@
 #include "ccClippingBoxRepeatDlg.h"
 #include "ccCropTool.h"
 #include "ccGLWindow.h"
+#include "ccReservedIDs.h"
 #include "mainwindow.h"
 
 #include "db_tree/ccDBRoot.h"
@@ -298,7 +299,7 @@ bool ccClippingBoxTool::linkWith(ccGLWindow* win)
 	{
 		if (!m_clipBox)
 		{
-			m_clipBox = new ccClipBox();
+			m_clipBox = new ccClipBox(QString(), static_cast<unsigned>(ReservedIDs::CLIPPING_BOX));
 			m_clipBox->setVisible(true);
 			m_clipBox->setEnabled(true);
 			m_clipBox->setSelected(showInteractorsToolButton->isChecked());

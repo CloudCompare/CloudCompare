@@ -441,7 +441,7 @@ bool ccMaterial::toFile(QFile& out) const
 	return true;
 }
 
-bool ccMaterial::fromFile(QFile& in, short dataVersion, int flags)
+bool ccMaterial::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
 	QDataStream inStream(&in);
 
@@ -452,7 +452,7 @@ bool ccMaterial::fromFile(QFile& in, short dataVersion, int flags)
 		//texture (dataVersion>=20)
 		QImage texture;
 		inStream >> texture;
-		setTexture(texture,QString(),false);
+		setTexture(texture, QString(), false);
 	}
 	else
 	{
@@ -460,15 +460,15 @@ bool ccMaterial::fromFile(QFile& in, short dataVersion, int flags)
 		inStream >> m_textureFilename;
 	}
 	//material colors (dataVersion>=20)
-	if (in.read((char*)m_diffuseFront.rgba,sizeof(float)*4) < 0) 
+	if (in.read((char*)m_diffuseFront.rgba, sizeof(float) * 4) < 0)
 		return ReadError();
-	if (in.read((char*)m_diffuseBack.rgba,sizeof(float)*4) < 0) 
+	if (in.read((char*)m_diffuseBack.rgba, sizeof(float) * 4) < 0)
 		return ReadError();
-	if (in.read((char*)m_ambient.rgba,sizeof(float)*4) < 0) 
+	if (in.read((char*)m_ambient.rgba, sizeof(float) * 4) < 0)
 		return ReadError();
-	if (in.read((char*)m_specular.rgba,sizeof(float)*4) < 0) 
+	if (in.read((char*)m_specular.rgba, sizeof(float) * 4) < 0)
 		return ReadError();
-	if (in.read((char*)m_emission.rgba,sizeof(float)*4) < 0) 
+	if (in.read((char*)m_emission.rgba, sizeof(float) * 4) < 0)
 		return ReadError();
 	//material shininess (dataVersion>=20)
 	inStream >> m_shininessFront;

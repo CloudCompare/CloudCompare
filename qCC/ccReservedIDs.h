@@ -15,43 +15,21 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_2D_VIEWPORT_LABEL_HEADER
-#define CC_2D_VIEWPORT_LABEL_HEADER
+#ifndef CC_RESERVED_IDS_HEADER
+#define CC_RESERVED_IDS_HEADER
 
-//Local
-#include "cc2DViewportObject.h"
-
-//! 2D viewport label
-class QCC_DB_LIB_API cc2DViewportLabel : public cc2DViewportObject
+//! Unique IDs reserved by CloudCompare for special entities (display elements, etc.)
+/** They should all remain below ccUniqueIDGenerator::MinUniqueID (256)
+**/
+enum class ReservedIDs : unsigned
 {
-public:
-
-	//! Default constructor
-	explicit cc2DViewportLabel(QString name = QString());
-
-	//inherited from ccHObject
-	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::VIEWPORT_2D_LABEL; }
-	virtual bool isSerializable() const override { return true; }
-
-	//! Returns ROI (relative to screen)
-	const float* roi() const { return m_roi; }
-
-	//! Sets ROI (relative to screen)
-	void setRoi(const float* roi);
-
-protected:
-
-	//inherited from ccHObject
-	virtual bool toFile_MeOnly(QFile& out) const override;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
-
-	//! Draws the entity only (not its children)
-	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
-
-	//! label ROI
-	/** ROI is relative to screen
-	**/
-	float m_roi[4];
+	CLIPPING_BOX = 1,
+	INTERACTIVE_SEGMENTATION_TOOL_POLYLINE = 2,
+	INTERACTIVE_SEGMENTATION_TOOL_POLYLINE_VERTICES = 3,
+	TRACE_POLYLINE_TOOL_POLYLINE_TIP = 4,
+	TRACE_POLYLINE_TOOL_POLYLINE_TIP_VERTICES = 5,
+	TRACE_POLYLINE_TOOL_POLYLINE = 6,
+	TRACE_POLYLINE_TOOL_POLYLINE_VERTICES = 7,
 };
 
-#endif //CC_2D_VIEWPORT_LABEL_HEADER
+#endif //CC_RESERVED_IDS_HEADER

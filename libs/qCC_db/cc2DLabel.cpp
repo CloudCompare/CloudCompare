@@ -494,9 +494,9 @@ bool cc2DLabel::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
+bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
-	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags))
+	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
 	//points count (dataVersion >= 20)
@@ -1225,7 +1225,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 	bool pushName = MACRO_DrawEntityNames(context);
 	if (pushName)
 	{
-		glFunc->glPushName(getUniqueID());
+		glFunc->glPushName(getUniqueIDForDisplay());
 	}
 
 	float halfW = context.glW / 2.0f;

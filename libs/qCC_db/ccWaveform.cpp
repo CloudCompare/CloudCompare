@@ -36,7 +36,7 @@ bool WaveformDescriptor::toFile(QFile& out) const
 	return true;
 }
 
-bool WaveformDescriptor::fromFile(QFile& in, short dataVersion, int flags)
+bool WaveformDescriptor::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
 	QDataStream inStream(&in);
 
@@ -276,7 +276,7 @@ bool ccWaveform::toFile(QFile& out) const
 	return true;
 }
 
-bool ccWaveform::fromFile(QFile& in, short dataVersion, int flags)
+bool ccWaveform::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
 	QDataStream inStream(&in);
 

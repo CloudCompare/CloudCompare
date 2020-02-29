@@ -48,8 +48,8 @@
 
 static CCVector3 s_blankNorm(0, 0, 0);
 
-ccMesh::ccMesh(ccGenericPointCloud* vertices)
-	: ccGenericMesh("Mesh")
+ccMesh::ccMesh(ccGenericPointCloud* vertices, unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
+	: ccGenericMesh("Mesh", uniqueID)
 	, m_associatedCloud(nullptr)
 	, m_triNormals(nullptr)
 	, m_texCoords(nullptr)
@@ -2933,9 +2933,9 @@ bool ccMesh::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
+bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
-	if (!ccGenericMesh::fromFile_MeOnly(in, dataVersion, flags))
+	if (!ccGenericMesh::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
 	//as the associated cloud (=vertices) can't be saved directly (as it may be shared by multiple meshes)

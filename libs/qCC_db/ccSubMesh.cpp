@@ -553,9 +553,9 @@ bool ccSubMesh::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccSubMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
+bool ccSubMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
-	if (!ccGenericMesh::fromFile_MeOnly(in, dataVersion, flags))
+	if (!ccGenericMesh::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
 	//as the associated mesh can't be saved directly

@@ -38,6 +38,7 @@ protected:
 	virtual void getParametersFromDialog();
 
 	NormalEstimationDialog* m_dialog;
+	bool m_dialogHasParent;
 	int m_knn_radius;
 	float m_radius;
 	bool m_useKnn;

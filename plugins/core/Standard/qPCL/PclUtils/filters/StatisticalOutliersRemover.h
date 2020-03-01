@@ -34,6 +34,7 @@ protected:
 	void getParametersFromDialog();
 
 	SORDialog* m_dialog;
+	bool m_dialogHasParent;
 	int m_k;
 	float m_std;
 };

@@ -51,7 +51,7 @@ StatisticalOutliersRemover::StatisticalOutliersRemover()
 									"Filter outlier data based on point neighborhood statistics",
 									"Filter the points that are farther of their neighbors than the average (plus a number of times the standard deviation)",
 									":/toolbar/PclUtils/icons/sor_outlier_remover.png"))
-	, m_dialog(0)
+	, m_dialog(nullptr)
 	, m_k(0)
 	, m_std(0.0f)
 {
@@ -60,7 +60,7 @@ StatisticalOutliersRemover::StatisticalOutliersRemover()
 StatisticalOutliersRemover::~StatisticalOutliersRemover()
 {
 	//we must delete parent-less dialogs ourselves!
-	if (m_dialog && m_dialog->parent() == 0)
+	if (!m_dialogHasParent && m_dialog && m_dialog->parent() == nullptr)
 		delete m_dialog;
 }
 
@@ -105,7 +105,8 @@ int StatisticalOutliersRemover::openInputDialog()
 {
 	if (!m_dialog)
 	{
-		m_dialog = new SORDialog(m_app ? m_app->getMainWindow() : 0);
+		m_dialog = new SORDialog(m_app ? m_app->getMainWindow() : nullptr);
+		m_dialogHasParent = (m_dialog->parent() != nullptr);
 	}
 
 	return m_dialog->exec() ? 1 : 0;

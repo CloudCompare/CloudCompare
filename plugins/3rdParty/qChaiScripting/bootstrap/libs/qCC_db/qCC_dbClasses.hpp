@@ -2736,7 +2736,7 @@ namespace chaiscript
 					m->add(chaiscript::base_class<ccSerializableObject, ccPointCloud>());
 					m->add(chaiscript::base_class<ccDrawableObject, ccPointCloud>());
 					m->add(chaiscript::base_class<ccShiftedObject, ccPointCloud>());
-					m->add(chaiscript::base_class<CCLib::PointCloudTpl<ccGenericPointCloud>, ccPointCloud>());
+					m->add(chaiscript::base_class<CCLib::PointCloudTpl<ccGenericPointCloud, QString>, ccPointCloud>());
 					m->add(chaiscript::base_class<ccGenericPointCloud, ccPointCloud>());
 					m->add(chaiscript::base_class<CCLib::GenericIndexedCloudPersist, ccPointCloud>());
 

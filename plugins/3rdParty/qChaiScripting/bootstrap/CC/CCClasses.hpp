@@ -284,27 +284,32 @@ namespace chaiscript
 				return m;
 			}
 
-			template<typename T>
+			template<class T, typename ST>
 			ModulePtr bs_PointCloudTpl(const std::string& shortCutName, ModulePtr m = std::make_shared<Module>())
 			{
 				using namespace CCLib;
-				chaiscript::utility::add_class<PointCloudTpl<T>>(*m,
+				chaiscript::utility::add_class<PointCloudTpl<T, ST>>(*m,
 					shortCutName,
 					{
-						chaiscript::constructor<PointCloudTpl<T>()>()						
+						chaiscript::constructor<PointCloudTpl<T, ST>()>(),
+						chaiscript::constructor<PointCloudTpl<T, ST>(ST, unsigned)>()
 					},
 					{
-						{ fun(&PointCloudTpl<T>::size), "size" },
-						{ fun(&PointCloudTpl<T>::forEach), "forEach" },
-						{ fun(&PointCloudTpl<T>::getBoundingBox), "getBoundingBox" },
-						{ fun(&PointCloudTpl<T>::enableScalarField), "enableScalarField" },
-						{ fun(&PointCloudTpl<T>::isScalarFieldEnabled), "isScalarFieldEnabled" },
-						{ fun(&PointCloudTpl<T>::setPointScalarValue), "setPointScalarValue" },
-						{ fun(&PointCloudTpl<T>::getPointScalarValue), "getPointScalarValue" },
+						{ fun(&PointCloudTpl<T, ST>::size), "size" },
+						{ fun(&PointCloudTpl<T, ST>::forEach), "forEach" },
+						{ fun(&PointCloudTpl<T, ST>::getBoundingBox), "getBoundingBox" },
+						{ fun(&PointCloudTpl<T, ST>::enableScalarField), "enableScalarField" },
+						{ fun(&PointCloudTpl<T, ST>::isScalarFieldEnabled), "isScalarFieldEnabled" },
+						{ fun(&PointCloudTpl<T, ST>::setPointScalarValue), "setPointScalarValue" },
+						{ fun(&PointCloudTpl<T, ST>::getPointScalarValue), "getPointScalarValue" },
 						
 
 					}
 					);
+
+				m->add(chaiscript::base_class< CCLib::GenericIndexedCloud, CCLib::PointCloudTpl<T,ST>>());
+				m->add(chaiscript::base_class< CCLib::GenericCloud, CCLib::PointCloudTpl<T, ST>>());
+				m->add(chaiscript::base_class< CCLib::GenericIndexedCloudPersist, CCLib::PointCloudTpl<T, ST>>());
 				
 				return m;
 			}
@@ -1262,10 +1267,9 @@ namespace chaiscript
 				
 				bs_Grid3D<unsigned short>("Grid3Dus", m);
 
-				bs_PointCloudTpl<CCLib::GenericIndexedCloudPersist>("PointCloudTpl", m);
-				m->add(chaiscript::base_class< CCLib::GenericIndexedCloud, CCLib::PointCloudTpl<CCLib::GenericIndexedCloudPersist>>());
-				m->add(chaiscript::base_class< CCLib::GenericCloud, CCLib::PointCloudTpl<CCLib::GenericIndexedCloudPersist>>());
-				m->add(chaiscript::base_class< CCLib::GenericIndexedCloudPersist, CCLib::PointCloudTpl<CCLib::GenericIndexedCloudPersist>>());
+				bs_PointCloudTpl<CCLib::GenericIndexedCloudPersist, const char*>("PointCloudTpl", m);
+				
+				
 
 				bs_PointCloud(m);
 				bs_ReferenceCloud(m);

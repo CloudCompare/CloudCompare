@@ -105,7 +105,7 @@ unsigned ccObject::GetLastUniqueID()
 ccObject::ccObject(const QString& name, unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
 	: m_name(name.isEmpty() ? "unnamed" : name)
 	, m_flags(CC_ENABLED)
-	, m_uniqueID(uniqueID != ccUniqueIDGenerator::InvalidUniqueID ? GetNextUniqueID() : uniqueID)
+	, m_uniqueID(uniqueID == ccUniqueIDGenerator::InvalidUniqueID ? GetNextUniqueID() : uniqueID)
 {}
 
 ccObject::ccObject(const ccObject& object)

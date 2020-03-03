@@ -182,9 +182,9 @@ bool ccIndexedTransformation::toFile(QFile& out) const
 	return true;
 }
 
-bool ccIndexedTransformation::fromFile(QFile& in, short dataVersion, int flags)
+bool ccIndexedTransformation::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
-	if (!ccGLMatrix::fromFile(in, dataVersion, flags))
+	if (!ccGLMatrix::fromFile(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
 	assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));

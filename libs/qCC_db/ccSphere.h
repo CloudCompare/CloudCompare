@@ -34,11 +34,13 @@ public:
 		\param transMat optional 3D transformation (can be set afterwards with ccDrawableObject::setGLTransformation)
 		\param name name
 		\param precision drawing precision (angular step = 360/precision)
+		\param uniqueID unique ID (handle with care)
 	**/
 	ccSphere(	PointCoordinateType radius,
 				const ccGLMatrix* transMat = 0,
 				QString name = QString("Sphere"),
-				unsigned precision = 24);
+				unsigned precision = 24,
+				unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID);
 
 	//! Simplified constructor
 	/** For ccHObject factory only!
@@ -63,9 +65,9 @@ public:
 protected:
 
 	//inherited from ccGenericPrimitive
-	virtual bool toFile_MeOnly(QFile& out) const override;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
-	virtual bool buildUp() override;
+	bool toFile_MeOnly(QFile& out) const override;
+	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	bool buildUp() override;
 
 	//inherited from ccHObject
 	virtual void drawNameIn3D(CC_DRAW_CONTEXT& context) override;

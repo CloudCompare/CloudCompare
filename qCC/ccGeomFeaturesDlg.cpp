@@ -50,6 +50,9 @@ ccGeomFeaturesDlg::ccGeomFeaturesDlg(QWidget* parent/*=nullptr*/)
 		m_options.push_back(Option(eigSurfaceVarCheckBox, CCLib::GeometricalAnalysisTools::Feature, CCLib::Neighbourhood::SurfaceVariation));
 		m_options.push_back(Option(eigSphericityCheckBox, CCLib::GeometricalAnalysisTools::Feature, CCLib::Neighbourhood::Sphericity));
 		m_options.push_back(Option(eigVerticalityCheckBox, CCLib::GeometricalAnalysisTools::Feature, CCLib::Neighbourhood::Verticality));
+		m_options.push_back(Option(eigenvalue1CheckBox, CCLib::GeometricalAnalysisTools::Feature, CCLib::Neighbourhood::EigenValue1));
+		m_options.push_back(Option(eigenvalue2CheckBox, CCLib::GeometricalAnalysisTools::Feature, CCLib::Neighbourhood::EigenValue2));
+		m_options.push_back(Option(eigenvalue3CheckBox, CCLib::GeometricalAnalysisTools::Feature, CCLib::Neighbourhood::EigenValue3));
 	}
 	catch (...)
 	{

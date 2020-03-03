@@ -116,7 +116,8 @@ MLSSmoothingUpsampling::MLSSmoothingUpsampling()
 									"Smooth using MLS, optionally upsample",
 									"Smooth the cloud using Moving Least Sqares algorithm, estimate normals and optionally upsample",
 									":/toolbar/PclUtils/icons/mls_smoothing.png"))
-	, m_dialog(0)
+	, m_dialog(nullptr)
+	, m_dialogHasParent(false)
 	, m_parameters(new MLSParameters)
 {
 }
@@ -124,7 +125,7 @@ MLSSmoothingUpsampling::MLSSmoothingUpsampling()
 MLSSmoothingUpsampling::~MLSSmoothingUpsampling()
 {
 	//we must delete parent-less dialogs ourselves!
-	if (m_dialog && m_dialog->parent() == 0)
+	if (!m_dialogHasParent && m_dialog && m_dialog->parent() == nullptr)
 		delete m_dialog;
 
 	if (m_parameters)
@@ -219,7 +220,10 @@ int MLSSmoothingUpsampling::compute()
 int MLSSmoothingUpsampling::openInputDialog()
 {
 	if (!m_dialog)
-		m_dialog = new MLSDialog(m_app ? m_app->getMainWindow() : 0);
+	{
+		m_dialog = new MLSDialog(m_app ? m_app->getMainWindow() : nullptr);
+		m_dialogHasParent = (m_app->getMainWindow() != nullptr);
+	}
 
 	return m_dialog->exec() ? 1 : 0;
 }

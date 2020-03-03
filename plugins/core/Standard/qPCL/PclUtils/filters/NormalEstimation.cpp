@@ -66,7 +66,8 @@ NormalEstimation::NormalEstimation()
 									"Estimate Normals and Curvature",
 									"Estimate Normals and Curvature for the selected entity",
 									":/toolbar/PclUtils/icons/normal_curvature.png"))
-	, m_dialog(0)
+	, m_dialog(nullptr)
+	, m_dialogHasParent(false)
 	, m_radius(0)
 	, m_knn_radius(10)
 	, m_useKnn(false)
@@ -78,7 +79,7 @@ NormalEstimation::NormalEstimation()
 NormalEstimation::~NormalEstimation()
 {
 	//we must delete parent-less dialogs ourselves!
-	if (m_dialog && m_dialog->parent() == 0)
+	if (!m_dialogHasParent && m_dialog && m_dialog->parent() == nullptr)
 		delete m_dialog;
 }
 
@@ -86,7 +87,8 @@ int NormalEstimation::openInputDialog()
 {
 	if (!m_dialog)
 	{
-		m_dialog = new NormalEstimationDialog(m_app ? m_app->getMainWindow() : 0);
+		m_dialog = new NormalEstimationDialog(m_app ? m_app->getMainWindow() : nullptr);
+		m_dialogHasParent = (m_dialog->parent() != nullptr);
 		
 		//initially these are invisible
 		m_dialog->surfaceComboBox->setVisible(false);
@@ -98,7 +100,7 @@ int NormalEstimation::openInputDialog()
 	{
 		ccBBox bBox = cloud->getOwnBB();
 		if (bBox.isValid())
-			m_dialog->radiusDoubleSpinBox->setValue(bBox.getDiagNorm() * 0.005);
+			m_dialog->radiusDoubleSpinBox->setValue(bBox.getDiagNorm() / 200);
 	}
 
 	return m_dialog->exec() ? 1 : 0;

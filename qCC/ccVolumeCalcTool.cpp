@@ -29,7 +29,6 @@
 #include <ccPointCloud.h>
 #include <ccScalarField.h>
 #include <ccProgressDialog.h>
-#include <ccPolyline.h>
 #include <ccMesh.h>
 
 //qCC_gl

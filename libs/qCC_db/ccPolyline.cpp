@@ -24,9 +24,9 @@
 #include "ccCone.h"
 #include "ccPointCloud.h"
 
-ccPolyline::ccPolyline(GenericIndexedCloudPersist* associatedCloud)
+ccPolyline::ccPolyline(GenericIndexedCloudPersist* associatedCloud, unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
 	: Polyline(associatedCloud)
-	, ccShiftedObject("Polyline")
+	, ccShiftedObject("Polyline", uniqueID)
 {
 	set2DMode(false);
 	setForeground(true);
@@ -361,9 +361,9 @@ bool ccPolyline::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
+bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
-	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags))
+	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
 	if (dataVersion < 28)

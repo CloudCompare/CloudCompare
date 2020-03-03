@@ -20,6 +20,7 @@
 //Local
 #include "mainwindow.h"
 #include "ccItemSelectionDlg.h"
+#include "ccReservedIDs.h"
 
 //CCLib
 #include <ManualSegmentationTools.h>
@@ -96,8 +97,8 @@ ccGraphicalSegmentationTool::ccGraphicalSegmentationTool(QWidget* parent)
 	importExportMenu->addAction(actionExportSegmentationPolyline);
 	loadSaveToolButton->setMenu(importExportMenu);
 
-	m_polyVertices = new ccPointCloud("vertices");
-	m_segmentationPoly = new ccPolyline(m_polyVertices);
+	m_polyVertices = new ccPointCloud("vertices", static_cast<unsigned>(ReservedIDs::INTERACTIVE_SEGMENTATION_TOOL_POLYLINE_VERTICES));
+	m_segmentationPoly = new ccPolyline(m_polyVertices, static_cast<unsigned>(ReservedIDs::INTERACTIVE_SEGMENTATION_TOOL_POLYLINE));
 	m_segmentationPoly->setForeground(true);
 	m_segmentationPoly->setColor(ccColor::green);
 	m_segmentationPoly->showColors(true);

@@ -149,7 +149,7 @@ public:
 	/** \warning Doesn't save the texture image!
 	**/
 	bool toFile(QFile& out) const override;
-	bool fromFile(QFile& in, short dataVersion, int flags) override;
+	bool fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
 
 	//! Returns unique identifier (UUID)
 	inline QString getUniqueIdentifier() const { return m_uniqueID; }

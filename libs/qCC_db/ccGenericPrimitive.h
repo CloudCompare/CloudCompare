@@ -33,8 +33,11 @@ public:
 		Use 'ccHObject::applyGLTransformation_recursive' to 'apply' it to the mesh).
 		\param name name
 		\param transMat optional 3D transformation applied to the primitive vertices (can be set afterwards with ccDrawableObject::setGLTransformation + ccDrawableObject::applyGLTransformation_recursive)
+		\param uniqueID unique ID (handle with care)
 	**/
-	ccGenericPrimitive(QString name = QString(), const ccGLMatrix* transMat = nullptr);
+	ccGenericPrimitive(	QString name = QString(),
+						const ccGLMatrix* transMat = nullptr,
+						unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID);
 
 	//! Returns type name (sphere, cylinder, etc.)
 	virtual QString getTypeName() const = 0;
@@ -92,7 +95,7 @@ protected:
 
 	//inherited from ccMesh
 	bool toFile_MeOnly(QFile& out) const override;
-	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
 
 	//! Builds primitive
 	/** Transformation will be applied afterwards!

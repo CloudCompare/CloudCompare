@@ -31,7 +31,7 @@ namespace CCLib
 {
 
 	//! A storage-efficient point cloud structure that can also handle an unlimited number of scalar fields
-	template<class T> class PointCloudTpl : public T
+	template<class T, typename StringType = const char*> class PointCloudTpl : public T
 	{
 		static_assert(
 				std::is_base_of<GenericIndexedCloudPersist, T>::value, 
@@ -42,6 +42,14 @@ namespace CCLib
 		//! Default constructor
 		PointCloudTpl()
 			: T()
+			, m_currentPointIndex(0)
+			, m_currentInScalarFieldIndex(-1)
+			, m_currentOutScalarFieldIndex(-1)
+		{}
+
+		//! Alternate constructor with a name and ID
+		PointCloudTpl(StringType name, unsigned ID)
+			: T(name, ID)
 			, m_currentPointIndex(0)
 			, m_currentInScalarFieldIndex(-1)
 			, m_currentOutScalarFieldIndex(-1)

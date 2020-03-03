@@ -44,6 +44,7 @@ public:
 		\param transMat optional 3D transformation (can be set afterwards with ccDrawableObject::setGLTransformation)
 		\param name name
 		\param precision drawing precision (main loop angular step = 360/(4*precision), circular section angular step = 360/precision)
+		\param uniqueID unique ID (handle with care)
 	**/
 	ccTorus(PointCoordinateType insideRadius,
 			PointCoordinateType outsideRadius,
@@ -52,7 +53,8 @@ public:
 			PointCoordinateType rectSectionHeight = 0,
 			const ccGLMatrix* transMat = 0,
 			QString name = QString("Torus"),
-			unsigned precision = DEFAULT_DRAWING_PRECISION);
+			unsigned precision = DEFAULT_DRAWING_PRECISION,
+			unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID);
 
 	//! Simplified constructor
 	/** For ccHObject factory only!
@@ -60,19 +62,19 @@ public:
 	ccTorus(QString name = QString("Torus"));
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::TORUS; }
+	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::TORUS; }
 
 	//inherited from ccGenericPrimitive
-	virtual QString getTypeName() const override { return "Torus"; }
-	virtual bool hasDrawingPrecision() const override { return true; }
-	virtual ccGenericPrimitive* clone() const override;
+	QString getTypeName() const override { return "Torus"; }
+	bool hasDrawingPrecision() const override { return true; }
+	ccGenericPrimitive* clone() const override;
 
 protected:
 
 	//inherited from ccGenericPrimitive
-	virtual bool toFile_MeOnly(QFile& out) const override;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
-	virtual bool buildUp() override;
+	bool toFile_MeOnly(QFile& out) const override;
+	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	bool buildUp() override;
 
 	//! Inside radius
 	PointCoordinateType m_insideRadius;

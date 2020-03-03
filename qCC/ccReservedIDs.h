@@ -1,6 +1,6 @@
 //##########################################################################
 //#                                                                        #
-//#                       CLOUDCOMPARE PLUGIN: qPCL                        #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
@@ -11,38 +11,25 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#                         COPYRIGHT: Luca Penasa                         #
+//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-#ifndef Q_PCL_PLUGIN_NORMALESTIMATION_HEADER
-#define Q_PCL_PLUGIN_NORMALESTIMATION_HEADER
 
-#include "BaseFilter.h"
+#ifndef CC_RESERVED_IDS_HEADER
+#define CC_RESERVED_IDS_HEADER
 
-class NormalEstimationDialog;
-
-class NormalEstimation : public BaseFilter
+//! Unique IDs reserved by CloudCompare for special entities (display elements, etc.)
+/** They should all remain below ccUniqueIDGenerator::MinUniqueID (256)
+**/
+enum class ReservedIDs : unsigned
 {
-public:
-	NormalEstimation();
-	virtual ~NormalEstimation();
-
-	//inherited from BaseFilter
-	virtual int compute();
-
-protected:
-
-	//inherited from BaseFilter
-	virtual int openInputDialog();
-	virtual void getParametersFromDialog();
-
-	NormalEstimationDialog* m_dialog;
-	bool m_dialogHasParent;
-	int m_knn_radius;
-	float m_radius;
-	bool m_useKnn;
-	bool m_overwrite_curvature;
+	CLIPPING_BOX = 1,
+	INTERACTIVE_SEGMENTATION_TOOL_POLYLINE = 2,
+	INTERACTIVE_SEGMENTATION_TOOL_POLYLINE_VERTICES = 3,
+	TRACE_POLYLINE_TOOL_POLYLINE_TIP = 4,
+	TRACE_POLYLINE_TOOL_POLYLINE_TIP_VERTICES = 5,
+	TRACE_POLYLINE_TOOL_POLYLINE = 6,
+	TRACE_POLYLINE_TOOL_POLYLINE_VERTICES = 7,
 };
 
-#endif // Q_PCL_PLUGIN_NORMALESTIMATION_HEADER
+#endif //CC_RESERVED_IDS_HEADER

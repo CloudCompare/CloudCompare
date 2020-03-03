@@ -216,6 +216,15 @@ namespace ccLibAlgorithms
 			case CCLib::Neighbourhood::Verticality:
 				sfName = "Verticality";
 				break;
+			case CCLib::Neighbourhood::EigenValue1:
+				sfName = "1st eigenvalue";
+				break;
+			case CCLib::Neighbourhood::EigenValue2:
+				sfName = "2nd eigenvalue";
+				break;
+			case CCLib::Neighbourhood::EigenValue3:
+				sfName = "3rd eigenvalue";
+				break;
 			default:
 				assert(false);
 				ccLog::Error("Internal error: invalid sub option for Feature computation");

@@ -460,10 +460,10 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 							auto cld = ccHObjectCaster::ToPointCloud(mesh->getParent());
 							if (outputIndividualPairs)
 							{
-								CLCloudDesc clCloud(cld, clCloud.basename + "_" + clCloud.pc->getName() + "_" + mesh->getName() + suffix + QString("_pair"), outputPairDir != "" ? outputPairDir : clCloud.path);
+								CLCloudDesc clCloudp(cld, clCloud.basename + "_" + clCloud.pc->getName() + "_" + mesh->getName() + suffix + QString("_pair"), outputPairDir != "" ? outputPairDir : clCloud.path);
 								if (cmd.autoSaveMode())
 								{
-									QString errorStr = cmd.exportEntity(clCloud);
+									QString errorStr = cmd.exportEntity(clCloudp);
 									if (!errorStr.isEmpty())
 									{
 										cmd.warning(errorStr);
@@ -474,8 +474,8 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 							{
 								cld->detachChild(mesh);
 							}
-							CLCloudDesc clCloud(cld, clCloud.basename + "_" + clCloud.pc->getName() + "_" + mesh->getName() + suffix + QString("_cloud"), outputCloudsDir != "" ? outputCloudsDir : clCloud.path);
-							cmd.clouds().push_back(clCloud);
+							CLCloudDesc clCloudp(cld, clCloud.basename + "_" + clCloud.pc->getName() + "_" + mesh->getName() + suffix + QString("_cloud"), outputCloudsDir != "" ? outputCloudsDir : clCloud.path);
+							cmd.clouds().push_back(clCloudp);
 							CLMeshDesc clMesh(mesh, clCloud.basename + "_" + clCloud.pc->getName() + "_" + mesh->getName() + suffix, outputMeshesDir != "" ? outputMeshesDir : clCloud.path);
 							cmd.meshes().push_back(clMesh);
 							if (outputIndividualClouds)

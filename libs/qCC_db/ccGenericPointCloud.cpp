@@ -36,8 +36,8 @@
 #include "ccSensor.h"
 
 
-ccGenericPointCloud::ccGenericPointCloud(QString name)
-	: ccShiftedObject(name)
+ccGenericPointCloud::ccGenericPointCloud(QString name, unsigned uniqueID)
+	: ccShiftedObject(name, uniqueID)
 	, m_pointSize(0)
 {
 	setVisible(true);
@@ -214,9 +214,9 @@ bool ccGenericPointCloud::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccGenericPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
+bool ccGenericPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
-	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags))
+	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
 	if (dataVersion < 20)

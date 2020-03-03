@@ -21,8 +21,10 @@
 #include "ccGenericPrimitive.h"
 #include "ccPointCloud.h"
 
-ccGenericPrimitive::ccGenericPrimitive(QString name/*=QString()*/, const ccGLMatrix* transMat/*=0*/)
-	: ccMesh(new ccPointCloud("vertices"))
+ccGenericPrimitive::ccGenericPrimitive(	QString name/*=QString()*/,
+										const ccGLMatrix* transMat/*=0*/,
+										unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
+	: ccMesh(new ccPointCloud("vertices"), uniqueID)
 	, m_drawPrecision(0)
 {
 	setName(name);
@@ -145,9 +147,9 @@ bool ccGenericPrimitive::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccGenericPrimitive::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
+bool ccGenericPrimitive::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
-	if (!ccMesh::fromFile_MeOnly(in, dataVersion, flags))
+	if (!ccMesh::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
 	//HACK: first, we have to remove any 'wrongly' associated vertices cloud!
@@ -157,11 +159,11 @@ bool ccGenericPrimitive::fromFile_MeOnly(QFile& in, short dataVersion, int flags
 		removeChild(0);
 
 	//Transformation matrix backup (dataVersion>=21)
-	if (!m_transformation.fromFile(in, dataVersion, flags))
+	if (!m_transformation.fromFile(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
 	//'drawing precision' (dataVersion>=21))
-	if (in.read((char*)&m_drawPrecision,sizeof(unsigned)) < 0)
+	if (in.read((char*)&m_drawPrecision, sizeof(unsigned)) < 0)
 		return ReadError();
 
 	return true;

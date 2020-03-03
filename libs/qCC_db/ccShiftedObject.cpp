@@ -21,9 +21,9 @@
 #include "ccLog.h"
 #include "ccSerializableObject.h"
 
-ccShiftedObject::ccShiftedObject(QString name)
-	: ccHObject(name)
-	, m_globalShift(0,0,0)
+ccShiftedObject::ccShiftedObject(QString name, unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
+	: ccHObject(name, uniqueID)
+	, m_globalShift(0, 0, 0)
 	, m_globalScale(1.0)
 {
 }
@@ -63,10 +63,10 @@ void ccShiftedObject::setGlobalScale(double scale)
 bool ccShiftedObject::saveShiftInfoToFile(QFile& out) const
 {
 	//'coordinates shift'
-	if (out.write((const char*)m_globalShift.u,sizeof(double)*3) < 0)
+	if (out.write((const char*)m_globalShift.u, sizeof(double) * 3) < 0)
 		return ccSerializableObject::WriteError();
 	//'global scale'
-	if (out.write((const char*)&m_globalScale,sizeof(double)) < 0)
+	if (out.write((const char*)&m_globalScale, sizeof(double)) < 0)
 		return ccSerializableObject::WriteError();
 
 	return true;
@@ -75,10 +75,10 @@ bool ccShiftedObject::saveShiftInfoToFile(QFile& out) const
 bool ccShiftedObject::loadShiftInfoFromFile(QFile& in)
 {
 	//'coordinates shift'
-	if (in.read((char*)m_globalShift.u,sizeof(double)*3) < 0)
+	if (in.read((char*)m_globalShift.u, sizeof(double) * 3) < 0)
 		return ccSerializableObject::ReadError();
 	//'global scale'
-	if (in.read((char*)&m_globalScale,sizeof(double)) < 0)
+	if (in.read((char*)&m_globalScale, sizeof(double)) < 0)
 		return ccSerializableObject::ReadError();
 
 	return true;

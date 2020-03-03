@@ -7,7 +7,7 @@
  */
 #include <stdio.h>
 #include "Random.h"
-
+#define register 
 using namespace MiscLib;
 
 #define KK 100

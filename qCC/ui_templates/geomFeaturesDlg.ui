@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>420</height>
+    <width>452</width>
+    <height>700</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,13 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_7">
    <item>
-    <widget class="QGroupBox" name="groupBox">
-     <property name="title">
-      <string>Local neighborhood radius</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
+    <widget class="QFrame" name="frame">
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
        <spacer name="horizontalSpacer">
@@ -39,7 +33,7 @@
       <item>
        <widget class="QLabel" name="label">
         <property name="text">
-         <string>radius</string>
+         <string>Local neighborhood radius</string>
         </property>
        </widget>
       </item>
@@ -212,7 +206,7 @@
           <string>Geometric features (based on local eigenvalues: (L1, L2, L3))</string>
          </property>
          <property name="title">
-          <string>Feature</string>
+          <string>Features</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
@@ -322,6 +316,27 @@
             </property>
             <property name="text">
              <string>Verticality</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="eigenvalue1CheckBox">
+            <property name="text">
+             <string>1st eigenvalue</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="eigenvalue2CheckBox">
+            <property name="text">
+             <string>2nd eigenvalue</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="eigenvalue3CheckBox">
+            <property name="text">
+             <string>3rd eigenvalue</string>
             </property>
            </widget>
           </item>

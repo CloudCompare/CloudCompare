@@ -134,6 +134,7 @@ CCCoreLibExport.h
 /.vs/ProjectSettings.json
 /.vs/slnx.sqlite
 /.vs
+.vscode
 /CMakeSettings.json
 #VS2019 default cmake build & install paths
 /out/

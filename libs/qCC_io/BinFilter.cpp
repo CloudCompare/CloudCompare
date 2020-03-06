@@ -1162,7 +1162,7 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 			loadedCloud->enableScalarField();
 
 		unsigned lineRead = 0;
-		int parts = 0;
+		unsigned parts = 0;
 
 		const ScalarType FORMER_HIDDEN_POINTS = static_cast<ScalarType>(-1.0);
 
@@ -1179,9 +1179,9 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 				container.addChild(loadedCloud);
 				fileChunkPos = lineRead;
 				fileChunkSize = std::min(nbOfPoints - lineRead, CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
-				char partName[64];
+				char partName[sizeof(cloudName) + 16];
 				++parts;
-				sprintf(partName, "%s.part_%i", cloudName, parts);
+				sprintf(partName, "%s.part_%u", cloudName, parts);
 				loadedCloud = new ccPointCloud(partName);
 				loadedCloud->reserveThePointsTable(fileChunkSize);
 

@@ -1,5 +1,6 @@
-name: cloudcompare
-version: '2.10-beta'
+name: cloudcompare 
+base: core18
+version: '2.11-beta' 
 summary: 3D point cloud and mesh processing software
 description: |
   CloudCompare is a 3D point cloud (and triangular mesh) processing software.
@@ -9,27 +10,38 @@ description: |
   algorithms (registration, resampling, color/normal/scalar fields handling,
   statistics computation, sensor management, interactive or automatic
   segmentation, display enhancement, etc.).
-
+type: app
 icon: snap/gui/cloudcompare.png
-
-grade: stable
-confinement: classic
-base: core18
+license: GPL-2.0
+grade: devel # TODO: change this to stable 
+confinement: devmode #TODO: change this to strict
+architectures:
+  - build-on: amd64 # only amd64 for now
+    run-on: amd64 # only amd64 for now
 
 apps:
   ccViewer:
-    command: launch ccViewer
-    plugs: [home, x11, mir, opengl, unity7, removable-media]
+    command: desktop-launch ccViewer
+    # $SNAP_ARCH_TRIPLET doesn't seems to be substitued in environement so it's hardcoded for now
+    environment: 
+      "LD_LIBRARY_PATH": "$SNAP/lib/cloudcompare:$SNAP/usr/lib/x86_64-linux-gnu/blas:$SNAP/usr/lib/x86_64-linux-gnu/lapack:$LD_LIBRARY_PATH"
+    extensions: [kde-neon]
+    plugs: [desktop, home, x11, wayland, unity7, opengl, removable-media]
   CloudCompare:
-    command: launch CloudCompare
-    plugs: [home, x11, mir, opengl, unity7, removable-media]
+    command: desktop-launch CloudCompare
+    environment: 
+      "LD_LIBRARY_PATH": "$SNAP/lib/cloudcompare:$SNAP/usr/lib/x86_64-linux-gnu/blas:$SNAP/usr/lib/x86_64-linux-gnu/lapack:$LD_LIBRARY_PATH"
+    extensions: [kde-neon]
+    plugs: [desktop, home, x11, wayland, unity7, opengl, removable-media]
+
 parts:
   cloudcompare:
-    after: [desktop-qt5, eigen, pdal, e57]
+    after: [eigen, pdal, e57]
     plugin: cmake
     source: https://github.com/CloudCompare/CloudCompare.git
+    source-type: git
+    source-depth: 10
     source-branch: master
-    source-depth: 1
     build-packages:
       - build-essential
       - libavcodec-dev
@@ -40,119 +52,145 @@ parts:
       - libcgal-dev
       - libcgal-qt5-dev
       - libdlib-dev
+      - libjsoncpp-dev
       - libswscale-dev
       - libtbb-dev
       - libqt5opengl5-dev
-      - qt5-default
       - qttools5-dev 
+      - libqt5svg5-dev 
       - qttools5-dev-tools
       - libgdal-dev
       - libxerces-c-dev
       - libpcl-dev
       - libproj-dev
-      - libqt5svg5-dev 
-    prepare: |
-      sed -i '/CMAKE_INSTALL_RPATH/d' ../src/CMakeLists.txt
-      ln -s /usr/lib/x86_64-linux-gnu/libvtkCommonCore-6.2.so /usr/lib/libvtkproj4.so
-#https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=819741
+    stage-packages:
+      - libaec0
+      - libarmadillo8
+      - libarpack2
+      - libdap25
+      - libdapclient6v5
+      - libepsilon1
+      - libfreexl1
+      - libfyba0
+      - libgdal20
+      - libgeos-3.6.2
+      - libgeos-c1v5
+      - libgeotiff2
+      - libgfortran4
+      - libgif7
+      - libhdf4-0-alt
+      - libhdf5-100
+      - libkmlbase1
+      - libkmldom1
+      - libkmlengine1
+      - libnetcdf13
+      - libogdi3.2
+      - libpoppler73
+      - libproj12
+      - libqhull7
+      - libquadmath0
+      - libspatialite7
+      - libsuperlu5
+      - libsz2
+      - libtbb2
+      - liburiparser1
+      - libxerces-c3.2
+      - odbcinst1debian2
     configflags:
       - -DCMAKE_BUILD_TYPE=Release
+# CCLib
       - -DCOMPILE_CC_CORE_LIB_WITH_CGAL=ON
       - -DCOMPILE_CC_CORE_LIB_WITH_TBB=ON
-      - -DINSTALL_QHPR_PLUGIN=ON
-      - -DINSTALL_QPOISSON_RECON_PLUGIN=ON
-      - -DPOISSON_RECON_WITH_OPEN_MP=ON
-      - -DINSTALL_QEDL_PLUGIN=ON
-      - -DINSTALL_QSRA_PLUGIN=ON
+# File Format
       - -DOPTION_USE_GDAL=ON
       - -DOPTION_USE_DXF_LIB=ON
-      - -DINSTALL_QSSAO_PLUGIN=ON
-      - -DINSTALL_QANIMATION_PLUGIN=ON
-      - -DINSTALL_QCSF_PLUGIN=ON
-      - -DINSTALL_QPHOTOSCAN_IO_PLUGIN=ON
+      - -DOPTION_USE_SHAPE_LIB=ON
+      - -DPLUGIN_IO_QPDAL=ON
+      - -DJSON_ROOT_DIR=/usr/include/jsoncpp
+      - -DPLUGIN_IO_QE57=ON
+      - -DLIBE57FORMAT_INSTALL_DIR=$SNAPCRAFT_STAGE
+# plugins
+  # Shaders
+      - -DPLUGIN_GL_QEDL=ON
+      - -DPLUGIN_GL_QSSAO=ON
+  # Hidden Points Removal
+      - -DPLUGIN_STANDARD_QHPR=ON
+  # PCV (AO from point cloud)
+      - -DPLUGIN_STANDARD_QPCV=ON
+  # Additional IO
+      - -DPLUGIN_IO_QADDITIONAL=ON
+      - -DPLUGIN_IO_QCORE=ON
+  # Poisson recon
+  # need to set SNAPCRAFT_BUILD_ENVIRONMENT_MEMORY=4G
+      - -DPLUGIN_STANDARD_QPOISSON_RECON=ON
+      - -DPOISSON_RECON_WITH_OPEN_MP=ON
+  # Animation (screen cast)
+      - -DPLUGIN_STANDARD_QANIMATION=ON
       - -DWITH_FFMPEG_SUPPORT=ON
       - -DFFMPEG_INCLUDE_DIR=/usr/include/x86_64-linux-gnu
       - -DFFMPEG_LIBRARY_DIR=/usr/lib/x86_64-linux-gnu
-      - -DINSTALL_QFACETS_PLUGIN=ON
-      - -DOPTION_USE_SHAPE_LIB=ON
-      - -DINSTALL_QPCV_PLUGIN=ON
-      - -DINSTALL_QM3C2_PLUGIN=ON
-      - -DINSTALL_QBROOM_PLUGIN=ON
-      - -DINSTALL_QHOUGH_NORMALS_PLUGIN=ON
-      - -DINSTALL_QCOMPASS_PLUGIN=ON
-      - -DINSTALL_QCANUPO_PLUGIN=ON
+  # Surface Revolution Analysis
+      - -DPLUGIN_STANDARD_QSRA=ON
+  # Cloth Simulation Filter (from MNS to MNT)
+      - -DPLUGIN_STANDARD_QCSF=ON
+  # Experimental Photoscan import
+      - -DPLUGIN_IO_QPHOTOSCAN=ON
+  # Facets (Extracts planar facets from a PC)
+      - -DPLUGIN_STANDARD_QFACETS=ON
+  # Broom (clean your PCs - the fun way)
+      - -DPLUGIN_STANDARD_QBROOM=ON
+  # Hough Normals (robust normal computation for unstructured PCs)
+      - -DPLUGIN_STANDARD_QHOUGH_NORMALS=ON
+      - -DEIGEN_ROOT_DIR=/usr/include/eigen3
+  # Compass (Geological toolbox)
+      - -DPLUGIN_STANDARD_QCOMPASS=ON
+  # M3C2 (Robust C2C Computation)
+      - -DPLUGIN_STANDARD_QM3C2=ON
+  # Canupo (Classify PCs with SVM)
+      - -DPLUGIN_STANDARD_QCANUPO=ON
       - -DDLIB_ROOT=/usr/include
-      - -DEIGEN_ROOT_DIR=$SNAPCRAFT_STAGE/include/eigen3
-      - -DOPTION_PDAL_LAS=ON
-      - -DJSON_ROOT_DIR=/usr/include/jsoncpp
-      - -DOPTION_USE_LIBE57FORMAT=ON
-      - -DLIBE57FORMAT_INSTALL_DIR=$SNAPCRAFT_STAGE
-      - -DCMAKE_INSTALL_PREFIX=$SNAPCRAFT_PART_INSTALL
-      - -DINSTALL_QPCL_PLUGIN=ON
-      - -DINSTALL_QADDITIONAL_IO_PLUGIN=ON
-    install: 
-      make install
-  e57:
+  # PCL (use Point Cloud Library with CC PCs)
+      #- -DPLUGIN_STANDARD_QPCL=ON
+  eigen:
     plugin: cmake
-    source: https://github.com/asmaloney/libE57Format.git
-    source-depth: 1
+    source: https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.bz2
     build-packages:
       - build-essential
     configflags:
-     - -DCMAKE_BUILD_TYPE=Release
-     - -DCMAKE_INSTALL_PREFIX=$SNAPCRAFT_PART_INSTALL
-    install: 
-     make install
-    stage: [ include/*, lib/* ]
-    prime: [ -* ]
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DCMAKE_INSTALL_PREFIX=/usr
   laszip:
     plugin: cmake
     source: https://github.com/LASzip/LASzip.git
-    source-tag: "3.2.9"
+    source-tag: "3.4.3"
     build-packages:
       - build-essential
     configflags:
       - -DCMAKE_BUILD_TYPE=Release
-    stage: [ include/*, lib/* ]
-    prime: [ lib/* ]
-    install: 
-      make install
-  eigen:
-    plugin: cmake
-    source: http://bitbucket.org/eigen/eigen/get/3.3.4.tar.bz2
-    configflags:
-      - -DCMAKE_BUILD_TYPE=Release
-      - -DCMAKE_INSTALL_PREFIX=$SNAPCRAFT_PART_INSTALL
-    install:
-      make install
-    stage: [ include/* ]
-    prime: [ -* ]
+      - -DCMAKE_INSTALL_PREFIX=/usr
   pdal:
     after: [laszip, eigen]
     plugin: cmake
     source: https://github.com/PDAL/PDAL.git
-    source-tag: "1.8.0"
+    source-tag: "2.0.1"
     build-packages:
       - build-essential
       - libgdal-dev
       - libgeotiff-dev
       - libjsoncpp-dev
-      - python-numpy
     configflags:
       - -DCMAKE_BUILD_TYPE=Release
-      - -DCMAKE_INSTALL_PREFIX=$SNAPCRAFT_PART_INSTALL
+      - -DCMAKE_INSTALL_PREFIX=/usr
       - -DWITH_TESTS=OFF
       - -DWITH_LASZIP=ON
       - -DBUILD_PLUGIN_PYTHON=OFF
       - -DBUILD_PLUGIN_PGPOINTCLOUD=OFF
-    install: 
-      make install
-    stage: [ include/*, lib/* ]
-    prime: [ lib/* ]
-  launcher:
-    plugin: dump
-    source: snap
-    organize:
-      launch: bin/launch
-    prime:
-      - bin/*
+  e57:
+    plugin: cmake
+    source: https://github.com/asmaloney/libE57Format.git
+    source-depth: 10
+    build-packages:
+      - build-essential
+    configflags:
+     - -DCMAKE_BUILD_TYPE=Release
+     - -DCMAKE_INSTALL_PREFIX=/usr

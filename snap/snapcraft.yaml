@@ -22,7 +22,7 @@ architectures:
 apps:
   ccViewer:
     command: desktop-launch ccViewer
-    # $SNAP_ARCH_TRIPLET doesn't seems to be substitued in environement so it's hardcoded for now
+    # $SNAP_ARCH_TRIPLET doesn't seems to be substitued in environment, so it's hardcoded for now
     environment: 
       "LD_LIBRARY_PATH": "$SNAP/lib/cloudcompare:$SNAP/usr/lib/x86_64-linux-gnu/blas:$SNAP/usr/lib/x86_64-linux-gnu/lapack:$LD_LIBRARY_PATH"
     extensions: [kde-neon]
@@ -36,10 +36,11 @@ apps:
 
 parts:
   cloudcompare:
-    after: [eigen, pdal, e57]
+    after: [eigen, pdal]
     plugin: cmake
-    source: https://github.com/CloudCompare/CloudCompare.git
-    source-type: git
+    source: .
+    # source: https://github.com/CloudCompare/CloudCompare.git
+    # source-type: git
     source-depth: 10
     source-branch: master
     build-packages:
@@ -96,6 +97,34 @@ parts:
       - liburiparser1
       - libxerces-c3.2
       - odbcinst1debian2
+      - libboost-chrono1.65.1
+# PCL deps
+      - libboost-filesystem1.65.1
+      - libboost-iostreams1.65.1
+      - libboost-system1.65.1
+      - libboost-thread1.65.1
+      - libflann1.9
+      - libhwloc5
+      - libjsoncpp1
+      - libnetcdf-c++4
+      - libopenmpi2
+      - libopenni0
+      - libopenni2-0
+      - libpcl-common1.8
+      - libpcl-features1.8
+      - libpcl-filters1.8
+      - libpcl-io1.8
+      - libpcl-kdtree1.8
+      - libpcl-ml1.8
+      - libpcl-octree1.8
+      - libpcl-recognition1.8
+      - libpcl-sample-consensus1.8
+      - libpcl-search1.8
+      - libpcl-segmentation1.8
+      - libpcl-surface1.8
+      - libtinyxml2.6.2v5
+      - libvtk6.3
+
     configflags:
       - -DCMAKE_BUILD_TYPE=Release
 # CCLib
@@ -106,9 +135,7 @@ parts:
       - -DOPTION_USE_DXF_LIB=ON
       - -DOPTION_USE_SHAPE_LIB=ON
       - -DPLUGIN_IO_QPDAL=ON
-      - -DJSON_ROOT_DIR=/usr/include/jsoncpp
       - -DPLUGIN_IO_QE57=ON
-      - -DLIBE57FORMAT_INSTALL_DIR=$SNAPCRAFT_STAGE
 # plugins
   # Shaders
       - -DPLUGIN_GL_QEDL=ON
@@ -121,7 +148,7 @@ parts:
       - -DPLUGIN_IO_QADDITIONAL=ON
       - -DPLUGIN_IO_QCORE=ON
   # Poisson recon
-  # need to set SNAPCRAFT_BUILD_ENVIRONMENT_MEMORY=4G
+  # Need to set SNAPCRAFT_BUILD_ENVIRONMENT_MEMORY=4G
       - -DPLUGIN_STANDARD_QPOISSON_RECON=ON
       - -DPOISSON_RECON_WITH_OPEN_MP=ON
   # Animation (screen cast)
@@ -150,7 +177,7 @@ parts:
       - -DPLUGIN_STANDARD_QCANUPO=ON
       - -DDLIB_ROOT=/usr/include
   # PCL (use Point Cloud Library with CC PCs)
-      #- -DPLUGIN_STANDARD_QPCL=ON
+      - -DPLUGIN_STANDARD_QPCL=ON
   eigen:
     plugin: cmake
     source: https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.bz2
@@ -162,6 +189,7 @@ parts:
   laszip:
     plugin: cmake
     source: https://github.com/LASzip/LASzip.git
+    source-type: git
     source-tag: "3.4.3"
     build-packages:
       - build-essential
@@ -172,6 +200,7 @@ parts:
     after: [laszip, eigen]
     plugin: cmake
     source: https://github.com/PDAL/PDAL.git
+    source-type: git
     source-tag: "2.0.1"
     build-packages:
       - build-essential
@@ -185,12 +214,3 @@ parts:
       - -DWITH_LASZIP=ON
       - -DBUILD_PLUGIN_PYTHON=OFF
       - -DBUILD_PLUGIN_PGPOINTCLOUD=OFF
-  e57:
-    plugin: cmake
-    source: https://github.com/asmaloney/libE57Format.git
-    source-depth: 10
-    build-packages:
-      - build-essential
-    configflags:
-     - -DCMAKE_BUILD_TYPE=Release
-     - -DCMAKE_INSTALL_PREFIX=/usr

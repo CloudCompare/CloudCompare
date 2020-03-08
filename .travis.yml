@@ -16,7 +16,7 @@ install:
   libavcodec-dev libavformat-dev libavutil-dev 
   libboost-program-options-dev libboost-thread-dev 
   libeigen3-dev 
-  libcgal-dev libcgal-qt5-dev libgdal-dev 
+  libcgal-dev libcgal-qt5-dev libgdal-dev libpcl-dev
   libdlib-dev libswscale-dev libproj-dev libxerces-c-dev xvfb libpdal-dev libjsoncpp-dev 
 - git submodule init && git submodule update
 
@@ -54,6 +54,7 @@ before_script:
   -DPLUGIN_STANDARD_QPOISSON_RECON=ON
   -DPLUGIN_STANDARD_QSRA=ON
   -DPLUGIN_STANDARD_QRANSAC_SD=ON
+  -DPLUGIN_STANDARD_QPCL=ON
   -DBUILD_TESTING=ON
   ..
 script:

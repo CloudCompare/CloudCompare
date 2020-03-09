@@ -14,35 +14,38 @@ type: app
 icon: snap/gui/cloudcompare.png
 license: GPL-2.0
 grade: devel # TODO: change this to stable 
-confinement: devmode #TODO: change this to strict
+confinement: strict #TODO: change this to strict
 architectures:
   - build-on: amd64 # only amd64 for now
     run-on: amd64 # only amd64 for now
 
 apps:
   ccViewer:
-    command: desktop-launch ccViewer
+    command: ccViewer
     # $SNAP_ARCH_TRIPLET doesn't seems to be substitued in environment, so it's hardcoded for now
     environment: 
       "LD_LIBRARY_PATH": "$SNAP/lib/cloudcompare:$SNAP/usr/lib/x86_64-linux-gnu/blas:$SNAP/usr/lib/x86_64-linux-gnu/lapack:$LD_LIBRARY_PATH"
     extensions: [kde-neon]
-    plugs: [desktop, home, x11, wayland, unity7, opengl, removable-media]
+    plugs: [desktop,  desktop-legacy, home, x11, wayland, unity7, opengl, removable-media]
   CloudCompare:
-    command: desktop-launch CloudCompare
+    command: CloudCompare
     environment: 
       "LD_LIBRARY_PATH": "$SNAP/lib/cloudcompare:$SNAP/usr/lib/x86_64-linux-gnu/blas:$SNAP/usr/lib/x86_64-linux-gnu/lapack:$LD_LIBRARY_PATH"
     extensions: [kde-neon]
-    plugs: [desktop, home, x11, wayland, unity7, opengl, removable-media]
+    plugs: [desktop, desktop-legacy, home, x11, wayland, unity7, opengl, removable-media]
 
 parts:
   cloudcompare:
     after: [eigen, pdal]
     plugin: cmake
     source: .
-    # source: https://github.com/CloudCompare/CloudCompare.git
-    # source-type: git
+    source: https://github.com/CloudCompare/CloudCompare.git
+    source-type: git
     source-depth: 10
     source-branch: master
+    build-snaps:
+      - kde-frameworks-5-core18-sdk
+      - kde-frameworks-5-core18
     build-packages:
       - build-essential
       - libavcodec-dev
@@ -56,10 +59,6 @@ parts:
       - libjsoncpp-dev
       - libswscale-dev
       - libtbb-dev
-      - libqt5opengl5-dev
-      - qttools5-dev 
-      - libqt5svg5-dev 
-      - qttools5-dev-tools
       - libgdal-dev
       - libxerces-c-dev
       - libpcl-dev

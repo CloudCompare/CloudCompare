@@ -141,7 +141,7 @@ CommandChangeOutputFormat::CommandChangeOutputFormat(const QString& name, const 
 QString CommandChangeOutputFormat::getFileFormatFilter(ccCommandLineInterface &cmd, QString &defaultExt)
 {
 	QString fileFilter;
-	defaultExt = QString();
+	defaultExt.clear();
 
 	if (!cmd.arguments().isEmpty())
 	{

@@ -42,12 +42,6 @@ public:
 									const QString& baseName,
 									const QString& imageSavePath,
 									QWidget* parentWidget = nullptr);
-
-private:
-	//! Supported (output) filters
-	QStringList m_outputFilters;
-	//! Supported (input) filters
-	QString m_inputFilter;
 };
 
 #endif //CC_IMAGE_FILE_FILTER_HEADER

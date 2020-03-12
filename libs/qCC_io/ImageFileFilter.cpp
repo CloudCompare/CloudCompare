@@ -48,14 +48,16 @@ ImageFileFilter::ImageFileFilter()
 		//we grab the list of supported image file formats (for writing)
 		QList<QByteArray> formats = QImageWriter::supportedImageFormats();
 		
+		QStringList exportFilters;
+
 		//we convert this list into a proper "filters" string
 		for (auto &format : formats)
 		{
-			m_outputFilters.append( QStringLiteral("%1 image (*.%2)")
+			exportFilters.append( QStringLiteral("%1 image (*.%2)")
 									.arg( QString( format.data() ).toUpper(), format.data() ) );
 		}
-		
-		setExportFileFilterStrings( m_outputFilters );
+
+		setExportFileFilterStrings(exportFilters);
 	}
 
 	//input filters
@@ -63,22 +65,20 @@ ImageFileFilter::ImageFileFilter()
 		//we grab the list of supported image file formats (for reading)
 		QList<QByteArray> formats = QImageReader::supportedImageFormats();
 		
-		QStringList imageExts;
-		
+		QStringList imageFilters, importExtensions;
 		for (auto &format : formats)
 		{
-			imageExts.append( QStringLiteral("*.%1").arg(format.data()) );
+			imageFilters.append(QStringLiteral("*.%1").arg(format.data()));
+			importExtensions.append(QStringLiteral("%1").arg(format.data()));
 		}
-		
-		setImportExtensions( imageExts );
-		
+		setImportExtensions(importExtensions);
+
 		//we convert this list into a proper "filters" string
-		if (!imageExts.empty())
+		if (!imageFilters.empty())
 		{
-			m_inputFilter = QString("Image (%1)").arg(imageExts.join(" "));
+			QString imageFilter = QString("Image (%1)").arg(imageFilters.join(" "));
+			setImportFileFilterStrings({ imageFilter });
 		}
-		
-		setImportFileFilterStrings( { m_inputFilter } );
 	}
 }
 

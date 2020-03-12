@@ -77,7 +77,7 @@ bool FileIOFilter::exportSupported() const
 	return m_filterInfo.features & Export;
 }
 
-QStringList FileIOFilter::getFileFilters( bool onImport ) const
+const QStringList& FileIOFilter::getFileFilters( bool onImport ) const
 {
 	if ( onImport )
 	{
@@ -111,7 +111,6 @@ void FileIOFilter::checkFilterInfo() const
 {
 #ifdef QT_DEBUG
 	// Check info for consistency
-	
 	if ( m_filterInfo.features & Import )
 	{
 		if ( m_filterInfo.importFileFilterStrings.isEmpty() )
@@ -435,8 +434,10 @@ CC_FILE_ERROR FileIOFilter::SaveToFile(	ccHObject* entities,
 	//if the file name has no extension, we had a default one!
 	QString completeFileName(filename);
 	if (QFileInfo(filename).suffix().isEmpty())
+	{
 		completeFileName += QString(".%1").arg(filter->getDefaultExtension());
-
+	}
+	
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 	try
 	{

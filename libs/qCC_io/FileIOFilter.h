@@ -120,11 +120,11 @@ public: //public interface
 		\param onImport whether the requested filters are for import or export
 		\return list of filters
 	**/
-	QCC_IO_LIB_API QStringList getFileFilters(bool onImport) const;
+	QCC_IO_LIB_API const QStringList& getFileFilters(bool onImport) const;
 	
 	//! Returns the default file extension
 	QCC_IO_LIB_API QString getDefaultExtension() const;
-	
+
 public: //public interface (to be reimplemented by each I/O filter)
 	
 	//! Loads one or more entities from a file
@@ -315,6 +315,8 @@ public:
 	Q_DECLARE_FLAGS( FilterFeatures, FilterFeature )
 	
 protected:
+	static constexpr float DEFAULT_PRIORITY = 25.0f;
+
 	struct FilterInfo
 	{
 		//! ID used to uniquely identify the filter (not user-visible)
@@ -323,14 +325,14 @@ protected:
 		//! Priority used to determine sort order and which one is the default in the
 		//! case of multiple FileIOFilters registering the same extension.
 		//! Default is 25.0 /see DEFAULT_PRIORITY.
-		float priority;
+		float priority = DEFAULT_PRIORITY;
 		
 		//! List of extensions this filter can read (lowercase)
 		//! e.g. "txt", "foo", "bin"
 		//! This is used in FindBestFilterForExtension()
 		QStringList importExtensions;
 		
-		//! The default file extension (for both import & export as applicable)
+		//! The default file extension (for export)
 		QString defaultExtension;
 		
 		//! List of file filters for import (e.g. "Test (*.txt)", "Foo (*.foo))
@@ -342,8 +344,6 @@ protected:
 		//! Supported features \see FilterFeature
 		FilterFeatures features;
 	};
-	
-	static constexpr float DEFAULT_PRIORITY = 25.0f;
 	
 	QCC_IO_LIB_API explicit FileIOFilter( const FilterInfo &info );
 	

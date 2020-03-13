@@ -1,0 +1,12 @@
+{
+	"type" : "Standard",
+	"name" : "Puzzler",
+	"icon" : ":/CC/plugin/puzzler/images/puzzle.png",
+	"description": "To create puzzle pieces from any image (don't ask me why ;)",
+	"authors" : [
+		{
+			"name" : "Daniel Girardeau-Montaut",
+			"email" : "daniel.girardeau@gmail.com"
+		}
+	]
+}

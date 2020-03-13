@@ -325,7 +325,7 @@ protected:
 		//! Priority used to determine sort order and which one is the default in the
 		//! case of multiple FileIOFilters registering the same extension.
 		//! Default is 25.0 /see DEFAULT_PRIORITY.
-		float priority = DEFAULT_PRIORITY;
+		float priority;
 		
 		//! List of extensions this filter can read (lowercase)
 		//! e.g. "txt", "foo", "bin"

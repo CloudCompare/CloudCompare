@@ -77,7 +77,7 @@ bool FileIOFilter::exportSupported() const
 	return m_filterInfo.features & Export;
 }
 
-const QStringList& FileIOFilter::getFileFilters( bool onImport ) const
+QStringList FileIOFilter::getFileFilters( bool onImport ) const
 {
 	if ( onImport )
 	{

@@ -120,7 +120,7 @@ public: //public interface
 		\param onImport whether the requested filters are for import or export
 		\return list of filters
 	**/
-	QCC_IO_LIB_API const QStringList& getFileFilters(bool onImport) const;
+	QCC_IO_LIB_API QStringList getFileFilters(bool onImport) const;
 	
 	//! Returns the default file extension
 	QCC_IO_LIB_API QString getDefaultExtension() const;

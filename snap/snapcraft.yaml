@@ -12,40 +12,50 @@ description: |
   segmentation, display enhancement, etc.).
 type: app
 icon: snap/gui/cloudcompare.png
-license: GPL-2.0
+license: GPL-3.0
 grade: devel # TODO: change this to stable 
 confinement: strict #TODO: change this to strict
 architectures:
   - build-on: amd64 # only amd64 for now
     run-on: amd64 # only amd64 for now
 
+
+plugs: # plugs for theming, font settings, cursor and to use gtk3 file chooser
+  gtk-3-themes:
+    interface: content
+    target: $SNAP/data-dir/themes
+    default-provider: gtk-common-themes:gtk-3-themes
+  icon-themes:
+    interface: content
+    target: $SNAP/data-dir/icons
+    default-provider: gtk-common-themes:icon-themes
+  sound-themes:
+    interface: content
+    target: $SNAP/data-dir/sounds
+    default-provider: gtk-common-themes:sounds-themes
+
 apps:
   ccViewer:
-    command: ccViewer
+    command: bin/desktop-launch ccViewer
     # $SNAP_ARCH_TRIPLET doesn't seems to be substitued in environment, so it's hardcoded for now
     environment: 
       "LD_LIBRARY_PATH": "$SNAP/lib/cloudcompare:$SNAP/usr/lib/x86_64-linux-gnu/blas:$SNAP/usr/lib/x86_64-linux-gnu/lapack:$LD_LIBRARY_PATH"
-    extensions: [kde-neon]
-    plugs: [desktop,  desktop-legacy, home, x11, wayland, unity7, opengl, removable-media]
+    plugs: [desktop, desktop-legacy, home, x11, wayland, unity7, opengl, removable-media]
   CloudCompare:
-    command: CloudCompare
+    command: bin/desktop-launch CloudCompare
     environment: 
       "LD_LIBRARY_PATH": "$SNAP/lib/cloudcompare:$SNAP/usr/lib/x86_64-linux-gnu/blas:$SNAP/usr/lib/x86_64-linux-gnu/lapack:$LD_LIBRARY_PATH"
-    extensions: [kde-neon]
     plugs: [desktop, desktop-legacy, home, x11, wayland, unity7, opengl, removable-media]
 
 parts:
   cloudcompare:
-    after: [eigen, pdal]
+    after: [eigen, pdal, desktop-qt5]
     plugin: cmake
     source: .
     source: https://github.com/CloudCompare/CloudCompare.git
     source-type: git
     source-depth: 10
     source-branch: master
-    build-snaps:
-      - kde-frameworks-5-core18-sdk
-      - kde-frameworks-5-core18
     build-packages:
       - build-essential
       - libavcodec-dev
@@ -63,6 +73,7 @@ parts:
       - libxerces-c-dev
       - libpcl-dev
       - libproj-dev
+      - libqt5svg5-dev
     stage-packages:
       - libaec0
       - libarmadillo8
@@ -97,6 +108,13 @@ parts:
       - libxerces-c3.2
       - odbcinst1debian2
       - libboost-chrono1.65.1
+      - libglu1-mesa
+      - libqt5concurrent5
+      - libqt5opengl5
+      - libqt5printsupport5
+      - qtwayland5
+      - qt5-gtk-platformtheme # for theming, font settings, cursor and to use gtk3 file chooser
+      
 # PCL deps
       - libboost-filesystem1.65.1
       - libboost-iostreams1.65.1
@@ -213,3 +231,27 @@ parts:
       - -DWITH_LASZIP=ON
       - -DBUILD_PLUGIN_PYTHON=OFF
       - -DBUILD_PLUGIN_PGPOINTCLOUD=OFF
+  desktop-qt5:
+    source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
+    source-subdir: qt
+    plugin: make
+    make-parameters: ["FLAVOR=qt5"]
+    build-packages:
+      - build-essential
+      - qtbase5-dev
+      - dpkg-dev
+    stage-packages:
+      - libxkbcommon0
+      - ttf-ubuntu-font-family
+      - dmz-cursor-theme
+      - light-themes
+      - adwaita-icon-theme
+      - gnome-themes-standard
+      - shared-mime-info
+      - libqt5gui5
+      - libgdk-pixbuf2.0-0
+      - libqt5svg5 # for loading icon themes which are svg
+      - try: [appmenu-qt5] # not available on core18
+      - locales-all
+      - xdg-user-dirs
+      - fcitx-frontend-qt5

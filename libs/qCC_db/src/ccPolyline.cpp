@@ -111,7 +111,6 @@ void ccPolyline::importParametersFrom(const ccPolyline& poly)
 	showColors(poly.colorsShown());
 	showVertices(poly.verticesShown());
 	setVertexMarkerWidth(poly.getVertexMarkerWidth());
-	setVisible(poly.isVisible());
 	showArrow(m_showArrow,m_arrowIndex,m_arrowLength);
 	setGlobalScale(poly.getGlobalScale());
 	setGlobalShift(poly.getGlobalShift());
@@ -687,4 +686,104 @@ ccPointCloud* ccPolyline::samplePoints(	bool densityBased,
 	cloud->setGLTransformationHistory(getGLTransformationHistory());
 
 	return cloud;
+}
+
+ccPolyline* ccPolyline::smoothChaikin(PointCoordinateType ratio, unsigned iterationCount) const
+{
+	if (iterationCount == 0)
+	{
+		assert(false);
+		ccLog::Warning("[ccPolyline::smoothChaikin] Invalid input (iteration count)");
+		return nullptr;
+	}
+
+	if (ratio < 0.05f || ratio > 0.45f)
+	{
+		assert(false);
+		ccLog::Warning("[ccPolyline::smoothChaikin] invalid ratio");
+		return nullptr;
+	}
+
+	if (size() < 2)
+	{
+		ccLog::Warning("[ccPolyline::smoothChaikin] not enough vertices");
+		return nullptr;
+	}
+
+	const CCLib::GenericIndexedCloudPersist* currentIterationVertices = this; //a polyline is actually a ReferenceCloud!
+	ccPolyline* smoothPoly = nullptr;
+
+	bool openPoly = !isClosed();
+
+	for (unsigned it = 0; it < iterationCount; ++it)
+	{
+		ccPointCloud* newStateVertices = new ccPointCloud("vertices");
+
+		//reserve memory for the new vertices
+		unsigned vertCount = currentIterationVertices->size();
+		unsigned segmentCount = (openPoly ? vertCount - 1 : vertCount);
+		
+		if (!newStateVertices->reserve(vertCount + segmentCount))
+		{
+			ccLog::Warning("[ccPolyline::smoothChaikin] not enough memory");
+			delete currentIterationVertices;
+			currentIterationVertices = nullptr;
+			return nullptr;
+		}
+
+		if (openPoly)
+		{
+			//we always keep the first vertex
+			newStateVertices->addPoint(*(currentIterationVertices ? currentIterationVertices->getPoint(0) : getPoint(0)));
+		}
+
+		for (unsigned i = 0; i < segmentCount; ++i)
+		{
+			unsigned iP = i;
+			unsigned iQ = ((iP + 1) % vertCount);
+
+			const CCVector3& P = *currentIterationVertices->getPoint(iP);
+			const CCVector3& Q = *currentIterationVertices->getPoint(iQ);
+
+			CCVector3 P0 = (PC_ONE - ratio) * P + ratio * Q;
+			CCVector3 P1 = ratio * P + (PC_ONE - ratio) * Q;
+
+			newStateVertices->addPoint(P0);
+			newStateVertices->addPoint(P1);
+		}
+
+		if (openPoly)
+		{
+			//we always keep the last vertex
+			newStateVertices->addPoint(*currentIterationVertices->getPoint(currentIterationVertices->size() - 1));
+		}
+
+		if (currentIterationVertices != this)
+		{
+			delete currentIterationVertices;
+			currentIterationVertices = nullptr;
+		}
+		currentIterationVertices = newStateVertices;
+
+		//last iteration?
+		if (it + 1 == iterationCount)
+		{
+			smoothPoly = new ccPolyline(newStateVertices);
+			smoothPoly->addChild(newStateVertices);
+			newStateVertices->setEnabled(false);
+			if (!smoothPoly->reserve(newStateVertices->size()))
+			{
+				ccLog::Warning("[ccPolyline::smoothChaikin] not enough memory");
+				delete smoothPoly;
+				return nullptr;
+			}
+			smoothPoly->addPointIndex(0, newStateVertices->size() - 1);
+
+			//copy state
+			smoothPoly->importParametersFrom(*this);
+			smoothPoly->setName(getName() + ".smoothed");
+		}
+	}
+
+	return smoothPoly;
 }

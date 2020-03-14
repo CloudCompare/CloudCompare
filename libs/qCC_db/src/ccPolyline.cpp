@@ -777,7 +777,7 @@ ccPolyline* ccPolyline::smoothChaikin(PointCoordinateType ratio, unsigned iterat
 				delete smoothPoly;
 				return nullptr;
 			}
-			smoothPoly->addPointIndex(0, newStateVertices->size() - 1);
+			smoothPoly->addPointIndex(0, newStateVertices->size());
 
 			//copy state
 			smoothPoly->importParametersFrom(*this);

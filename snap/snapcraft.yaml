@@ -13,14 +13,15 @@ description: |
 type: app
 icon: snap/gui/cloudcompare.png
 license: GPL-3.0
-grade: devel # TODO: change this to stable 
-confinement: strict #TODO: change this to strict
+grade: stable
+confinement: strict
 architectures:
   - build-on: amd64 # only amd64 for now
     run-on: amd64 # only amd64 for now
 
-
-plugs: # plugs for theming, font settings, cursor and to use gtk3 file chooser
+plugs:
+  # Support for common GTK themes
+  # https://forum.snapcraft.io/t/how-to-use-the-system-gtk-theme-via-the-gtk-common-themes-snap/6235
   gtk-3-themes:
     interface: content
     target: $SNAP/data-dir/themes
@@ -38,13 +39,15 @@ apps:
   ccViewer:
     command: bin/desktop-launch ccViewer
     # $SNAP_ARCH_TRIPLET doesn't seems to be substitued in environment, so it's hardcoded for now
-    environment: 
-      "LD_LIBRARY_PATH": "$SNAP/lib/cloudcompare:$SNAP/usr/lib/x86_64-linux-gnu/blas:$SNAP/usr/lib/x86_64-linux-gnu/lapack:$LD_LIBRARY_PATH"
+    environment:
+      QT_QPA_PLATFORMTHEME: "gtk3"
+      LD_LIBRARY_PATH: "$SNAP/lib/cloudcompare:$SNAP/usr/lib/x86_64-linux-gnu/blas:$SNAP/usr/lib/x86_64-linux-gnu/lapack:$LD_LIBRARY_PATH"
     plugs: [desktop, desktop-legacy, home, x11, wayland, unity7, opengl, removable-media]
   CloudCompare:
     command: bin/desktop-launch CloudCompare
-    environment: 
-      "LD_LIBRARY_PATH": "$SNAP/lib/cloudcompare:$SNAP/usr/lib/x86_64-linux-gnu/blas:$SNAP/usr/lib/x86_64-linux-gnu/lapack:$LD_LIBRARY_PATH"
+    environment:
+      QT_QPA_PLATFORMTHEME: "gtk3"
+      LD_LIBRARY_PATH: "$SNAP/lib/cloudcompare:$SNAP/usr/lib/x86_64-linux-gnu/blas:$SNAP/usr/lib/x86_64-linux-gnu/lapack:$LD_LIBRARY_PATH"
     plugs: [desktop, desktop-legacy, home, x11, wayland, unity7, opengl, removable-media]
 
 parts:
@@ -113,8 +116,8 @@ parts:
       - libqt5opengl5
       - libqt5printsupport5
       - qtwayland5
-      - qt5-gtk-platformtheme # for theming, font settings, cursor and to use gtk3 file chooser
-      
+      - qt5-gtk-platformtheme # see gtk plugs
+
 # PCL deps
       - libboost-filesystem1.65.1
       - libboost-iostreams1.65.1
@@ -151,8 +154,6 @@ parts:
       - -DOPTION_USE_GDAL=ON
       - -DOPTION_USE_DXF_LIB=ON
       - -DOPTION_USE_SHAPE_LIB=ON
-      - -DPLUGIN_IO_QPDAL=ON
-      - -DPLUGIN_IO_QE57=ON
 # plugins
   # Shaders
       - -DPLUGIN_GL_QEDL=ON
@@ -162,6 +163,8 @@ parts:
   # PCV (AO from point cloud)
       - -DPLUGIN_STANDARD_QPCV=ON
   # Additional IO
+      - -DPLUGIN_IO_QPDAL=ON
+      - -DPLUGIN_IO_QE57=ON
       - -DPLUGIN_IO_QADDITIONAL=ON
       - -DPLUGIN_IO_QCORE=ON
   # Poisson recon
@@ -219,6 +222,7 @@ parts:
     source: https://github.com/PDAL/PDAL.git
     source-type: git
     source-tag: "2.0.1"
+    # ! no stage-packages since gdal dynamic library are installed via the main "CloudCompare" part
     build-packages:
       - build-essential
       - libgdal-dev

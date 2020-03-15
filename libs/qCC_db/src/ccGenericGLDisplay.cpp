@@ -169,3 +169,93 @@ bool ccViewportParameters::fromFile(QFile& in, short dataVersion, int flags, Loa
 
 	return true;
 }
+
+int ccViewportParameters::ZNearCoefToIncrement(double coef, int iMax)
+{
+	assert(coef >= 0 && coef <= 1.0);
+	double id = -(iMax / 3.0) * log10(coef);
+	int i = static_cast<int>(id);
+	//cope with numerical inaccuracies
+	if (fabs(id - i) > fabs(id - (i + 1)))
+	{
+		++i;
+	}
+	assert(i >= 0 && i <= iMax);
+	return iMax - i;
+}
+
+ccGLMatrixd ccViewportParameters::computeViewMatrix(const CCVector3d& cameraCenter) const
+{
+	ccGLMatrixd viewMatd;
+	viewMatd.toIdentity();
+
+	//apply current camera parameters (see trunk/doc/rendering_pipeline.doc)
+	if (objectCenteredView)
+	{
+		//place origin on pivot point
+		viewMatd.setTranslation(/*viewMatd.getTranslationAsVec3D()*/ -pivotPoint);
+
+		//rotation (viewMat is simply a rotation matrix around the pivot here!)
+		viewMatd = viewMat * viewMatd;
+
+		//go back to initial origin
+		//then place origin on camera center
+		viewMatd.setTranslation(viewMatd.getTranslationAsVec3D() + pivotPoint - cameraCenter);
+	}
+	else
+	{
+		//place origin on camera center
+		viewMatd.setTranslation(/*viewMatd.getTranslationAsVec3D()*/ -cameraCenter);
+
+		//rotation (viewMat is the rotation around the camera center here - no pivot)
+		viewMatd = viewMat * viewMatd;
+	}
+
+	return viewMatd;
+}
+
+ccGLMatrixd ccViewportParameters::computeScaleMatrix(const QRect& glViewport) const
+{
+	ccGLMatrixd scaleMatd;
+	scaleMatd.toIdentity();
+	if (perspectiveView) //perspective mode
+	{
+		//for proper aspect ratio handling
+		if (glViewport.height() != 0)
+		{
+			double ar = static_cast<double>(glViewport.width() / (glViewport.height() * perspectiveAspectRatio));
+			if (ar < 1.0)
+			{
+				//glScalef(ar, ar, 1.0);
+				scaleMatd.data()[0] = ar;
+				scaleMatd.data()[5] = ar;
+			}
+		}
+	}
+	else //ortho. mode
+	{
+		//apply zoom
+		double totalZoom = zoom / pixelSize;
+		//glScalef(totalZoom,totalZoom,totalZoom);
+		scaleMatd.data()[0] = totalZoom;
+		scaleMatd.data()[5] = totalZoom;
+		scaleMatd.data()[10] = totalZoom;
+	}
+
+	return scaleMatd;
+}
+
+CCVector3d ccViewportParameters::computeCameraCenter(const ccBBox& visibleObjectsBBox) const
+{
+	if (perspectiveView)
+	{
+		//the camera center is always defined in perspective mode
+		return cameraCenter;
+	}
+
+	//in orthographic mode, we put the camera at the center of the
+	//visible objects (along the viewing direction)
+	return CCVector3d(cameraCenter.x,
+		cameraCenter.y,
+		visibleObjectsBBox.isValid() ? visibleObjectsBBox.getCenter().z : 0.0);
+}

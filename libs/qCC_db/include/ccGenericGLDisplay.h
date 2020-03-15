@@ -23,9 +23,11 @@
 
 //Local
 #include "ccColorTypes.h"
+#include "ccBBox.h"
 
 //Qt
 #include <QFont>
+#include <QRect>
 class QFile;
 class QWidget;
 
@@ -100,19 +102,18 @@ public:
 	}
 
 	//! Helper: converts a double (zNear) value in ]0 1] to integer increments in [0 iMax]
-	static int ZNearCoefToIncrement(double coef, int iMax)
-	{
-		assert(coef >= 0 && coef <= 1.0);
-		double id = -(iMax / 3.0) * log10(coef);
-		int i = static_cast<int>(id);
-		//cope with numerical inaccuracies
-		if (fabs(id-i) > fabs(id-(i+1)))
-		{
-			++i;
-		}
-		assert(i >= 0 && i <= iMax);
-		return iMax - i;
-	}
+	static int ZNearCoefToIncrement(double coef, int iMax);
+
+	//! Computes the view matrix
+	ccGLMatrixd computeViewMatrix(const CCVector3d& cameraCenter) const;
+
+	//! Computes the scale matrix
+	ccGLMatrixd computeScaleMatrix(const QRect& glViewport) const;
+
+	//! Computes the camera center
+	/** Maybe different if not perspective view
+	**/
+	CCVector3d computeCameraCenter(const ccBBox& visibleObjectsBBox) const;
 };
 
 //! OpenGL camera parameters

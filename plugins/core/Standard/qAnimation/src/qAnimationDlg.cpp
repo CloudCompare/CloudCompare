@@ -22,6 +22,8 @@
 
 //qCC_db
 #include <cc2DViewportObject.h>
+#include <ccPolyline.h>
+#include <ccPointCloud.h>
 //qCC_gl
 #include <ccGLWindow.h>
 
@@ -59,6 +61,9 @@ qAnimationDlg::qAnimationDlg(ccGLWindow* view3d, QWidget* parent)
 	: QDialog(parent, Qt::Tool)
 	, Ui::AnimationDialog()
 	, m_view3d(view3d)
+	, m_trajectory(nullptr)
+	, m_smoothTrajectory(nullptr)
+	, m_smoothTrajectoryReversed(nullptr)
 {
 	setupUi(this);
 
@@ -91,6 +96,8 @@ qAnimationDlg::qAnimationDlg(ccGLWindow* view3d, QWidget* parent)
 			int superRes = settings.value("superRes", superResolutionSpinBox->value()).toInt();
 			int renderingMode = settings.value("renderingMode", renderingModeComboBox->currentIndex()).toInt();
 			int bitRate = settings.value("bitRate", bitrateSpinBox->value()).toInt();
+			bool autoStepDuration = settings.value("autoStepDuration", autoStepDurationCheckBox->isChecked()).toBool();
+			bool smoothTrajectory = settings.value("smoothTrajectory", smoothTrajectoryCheckBox->isChecked()).toBool();
 
 			previewFromSelectedCheckBox->setChecked(startPreviewFromSelectedStep);
 			loopCheckBox->setChecked(loop);
@@ -98,10 +105,15 @@ qAnimationDlg::qAnimationDlg(ccGLWindow* view3d, QWidget* parent)
 			superResolutionSpinBox->setValue(superRes);
 			renderingModeComboBox->setCurrentIndex(renderingMode);
 			bitrateSpinBox->setValue(bitRate);
+			autoStepDurationCheckBox->setChecked(autoStepDuration); //this might be modified when init will be called!
+			smoothTrajectoryCheckBox->setChecked(smoothTrajectory);
 		}
 		
 		settings.endGroup();
 	}
+
+	connect ( autoStepDurationCheckBox,	&QAbstractButton::toggled,			this, &qAnimationDlg::onAutoStepsDurationToggled );
+	connect ( smoothTrajectoryCheckBox,	&QAbstractButton::toggled,			this, &qAnimationDlg::onSmoothTrajectoryToggled );
 
 	connect( fpsSpinBox,				static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &qAnimationDlg::onFPSChanged );
 	connect( totalTimeDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &qAnimationDlg::onTotalTimeChanged );
@@ -113,7 +125,21 @@ qAnimationDlg::qAnimationDlg(ccGLWindow* view3d, QWidget* parent)
 	connect( renderButton,			&QAbstractButton::clicked,		this, &qAnimationDlg::renderAnimation );
 	connect( exportFramesPushButton,&QAbstractButton::clicked,		this, &qAnimationDlg::renderFrames );
 	connect( buttonBox,				&QDialogButtonBox::accepted,	this, &qAnimationDlg::onAccept );
+	connect( buttonBox,				&QDialogButtonBox::rejected,	this, &qAnimationDlg::onReject );
 }
+
+qAnimationDlg::~qAnimationDlg()
+{
+	delete m_trajectory;
+	m_trajectory = nullptr;
+
+	delete m_smoothTrajectory;
+	m_smoothTrajectory = nullptr;
+
+	delete m_smoothTrajectoryReversed;
+	m_smoothTrajectoryReversed = nullptr;
+}
+
 
 bool qAnimationDlg::init(const std::vector<cc2DViewportObject*>& viewports)
 {
@@ -142,6 +168,10 @@ bool qAnimationDlg::init(const std::vector<cc2DViewportObject*>& viewports)
 		if (vp->hasMetaData(s_stepDurationKey))
 		{
 			duration_sec = vp->getMetaData(s_stepDurationKey).toDouble();
+			//disable "auto step duration"
+			autoStepDurationCheckBox->blockSignals(true);
+			autoStepDurationCheckBox->setChecked(false);
+			autoStepDurationCheckBox->blockSignals(false);
 		}
 		bool isChecked = true;
 		if (vp->hasMetaData(s_stepEnabledKey))
@@ -149,7 +179,7 @@ bool qAnimationDlg::init(const std::vector<cc2DViewportObject*>& viewports)
 			isChecked = vp->getMetaData(s_stepEnabledKey).toBool();
 		}
 
-		QString itemName = QString("step %1 (%2)").arg(QString::number(i+1), vp->getName());
+		QString itemName = QString("step %1 (%2)").arg(QString::number(i + 1), vp->getName());
 		QListWidgetItem* item = new QListWidgetItem(itemName, stepSelectionList);
 		item->setFlags(item->flags() | Qt::ItemIsUserCheckable); // set checkable flag
 		item->setCheckState(isChecked ? Qt::Checked : Qt::Unchecked); // initialize check state
@@ -157,6 +187,15 @@ bool qAnimationDlg::init(const std::vector<cc2DViewportObject*>& viewports)
 
 		m_videoSteps[i].viewport = vp;
 		m_videoSteps[i].duration_sec = duration_sec;
+	}
+
+	//manually trigger some actions if necessary
+
+	updateCameraTrajectory(); //also takes care of the smooth version!
+
+	if (autoStepDurationCheckBox->isChecked())
+	{
+		onAutoStepsDurationToggled(true);
 	}
 
 	connect( stepSelectionList, &QListWidget::currentRowChanged, this, &qAnimationDlg::onCurrentStepChanged );
@@ -169,6 +208,10 @@ bool qAnimationDlg::init(const std::vector<cc2DViewportObject*>& viewports)
 	return true;
 }
 
+void qAnimationDlg::onReject()
+{
+}
+
 void qAnimationDlg::onAccept()
 {
 	assert(stepSelectionList->count() >= m_videoSteps.size());
@@ -177,7 +220,11 @@ void qAnimationDlg::onAccept()
 		cc2DViewportObject* vp = m_videoSteps[i].viewport;
 
 		//save the step duration as meta data
-		vp->setMetaData(s_stepDurationKey, m_videoSteps[i].duration_sec);
+		if (!autoStepDurationCheckBox->isChecked())
+		{
+			vp->setMetaData(s_stepDurationKey, m_videoSteps[i].duration_sec);
+		}
+		//save whether the step is enabled or not as meta data
 		vp->setMetaData(s_stepEnabledKey, (stepSelectionList->item(static_cast<int>(i))->checkState() == Qt::Checked));
 	}
 
@@ -191,26 +238,344 @@ void qAnimationDlg::onAccept()
 		settings.setValue("renderingMode", renderingModeComboBox->currentIndex());
 		settings.setValue("superRes", superResolutionSpinBox->value());
 		settings.setValue("bitRate", bitrateSpinBox->value());
+		settings.setValue("autoStepDuration", autoStepDurationCheckBox->isChecked());
+		settings.setValue("smoothTrajectory", smoothTrajectoryCheckBox->isChecked());
 
 		settings.endGroup();
 	}
 }
 
-double qAnimationDlg::computeTotalTime()
+bool qAnimationDlg::updateCameraTrajectory()
 {
-	double totalDuration_sec = 0;
-	size_t vp1 = 0;
-	size_t vp2 = 0;
-	while (getNextSegment(vp1, vp2))
+	delete m_trajectory;
+	m_trajectory = nullptr;
+
+	delete m_smoothTrajectory;
+	m_smoothTrajectory = nullptr;
+
+	if (m_videoSteps.size() < 2)
 	{
-		assert(vp1 < stepSelectionList->count());
-		totalDuration_sec += m_videoSteps[static_cast<int>(vp1)].duration_sec;
-		if (vp2 == 0)
+		ccLog::Warning("Not enough animation steps");
+		return false;
+	}
+
+	//geneate the trajectory
+	ccPointCloud* vertices = new ccPointCloud("vertices");
+	m_trajectory = new ccPolyline(vertices);
+	m_trajectory->addChild(vertices);
+
+	unsigned maxStepCount = static_cast<unsigned>(m_videoSteps.size());
+	if (!vertices->reserve(maxStepCount) || !m_trajectory->reserve(maxStepCount))
+	{
+		delete m_trajectory;
+		m_trajectory = nullptr;
+		ccLog::Error("Not enough memory");
+		return false;
+	}
+
+	ccBBox visibleObjectsBBox;
+	m_view3d->getVisibleObjectsBB(visibleObjectsBBox);
+
+	size_t vp1Index = 0, vp2Index = 0;
+	while (getNextSegment(vp1Index, vp2Index))
+	{
+		assert(vp1Index < stepSelectionList->count());
+		const ccViewportParameters& vp = m_videoSteps[vp1Index].viewport->getParameters();
+
+		CCVector3d cameraCenter = vp.getRealCameraCenter(visibleObjectsBBox);
+		ccGLMatrixd viewMat = vp.computeViewMatrix(cameraCenter);
+		CCVector3 P = CCVector3::fromArray(viewMat.inverse().getTranslationAsVec3D().u);
+		vertices->addPoint(P);
+
+		if (vp2Index < vp1Index)
 		{
 			//loop case
 			break;
 		}
-		vp1 = vp2;
+		vp1Index = vp2Index;
+	}
+
+	if (!loopCheckBox->isChecked())
+	{
+		//don't forget the last point
+		const ccViewportParameters& vp = m_videoSteps[vp1Index].viewport->getParameters();
+
+		CCVector3d cameraCenter = vp.getRealCameraCenter(visibleObjectsBBox);
+		ccGLMatrixd viewMat = vp.computeViewMatrix(cameraCenter);
+		CCVector3 P = CCVector3::fromArray(viewMat.inverse().getTranslationAsVec3D().u);
+		vertices->addPoint(P);
+	}
+
+	m_trajectory->addPointIndex(0, vertices->size());
+	m_trajectory->setClosed(loopCheckBox->isChecked());
+
+	if (smoothTrajectoryCheckBox->isChecked())
+	{
+		return updateSmoothCameraTrajectory();
+	}
+	else
+	{
+		return true;
+	}
+}
+
+bool qAnimationDlg::updateSmoothCameraTrajectory()
+{
+	//reset existing data
+	if (m_smoothTrajectory)
+	{
+		delete m_smoothTrajectory;
+		m_smoothTrajectory = nullptr;
+	}
+
+	for (Step& step : m_videoSteps)
+	{
+		step.indexInSmoothTrajectory = -1;
+		step.distance = 0.0;
+	}
+
+	if (!smoothTrajectoryCheckBox->isChecked())
+	{
+		return true;
+	}
+
+	if (!m_trajectory)
+	{
+		//nothing we can do for now
+		return true;
+	}
+
+	static const unsigned s_ChaikinIterationCount = 5;
+	static const PointCoordinateType s_ChaikinRatio = static_cast<PointCoordinateType>(0.2);
+
+	m_smoothTrajectory = m_trajectory->smoothChaikin(s_ChaikinRatio, s_ChaikinIterationCount);
+
+	if (!m_smoothTrajectory)
+	{
+		ccLog::Error("Failed to generate the smooth trajectory");
+		smoothTrajectoryCheckBox->blockSignals(true);
+		smoothTrajectoryCheckBox->setChecked(false);
+		smoothTrajectoryCheckBox->blockSignals(false);
+		return false;
+	}
+
+	//generate the reversed trajectory
+	delete m_smoothTrajectoryReversed;
+	m_smoothTrajectoryReversed = nullptr;
+
+	ccPointCloud* reversedVertices = new ccPointCloud("reversed vertices");
+	m_smoothTrajectoryReversed = new ccPolyline(reversedVertices);
+	m_smoothTrajectoryReversed->addChild(reversedVertices);
+
+	if (!reversedVertices->reserve(m_smoothTrajectory->getAssociatedCloud()->size()) || !m_smoothTrajectoryReversed->reserve(m_smoothTrajectory->size()))
+	{
+		delete m_smoothTrajectoryReversed;
+		m_smoothTrajectoryReversed = nullptr;
+		delete m_smoothTrajectory;
+		m_smoothTrajectory = nullptr;
+		ccLog::Error("Not enough memory");
+		return false;
+	}
+
+	//we must update the vertices indexes
+	unsigned multiplier = (1 << s_ChaikinIterationCount);
+	unsigned originalSegmentCount = m_trajectory->size();
+	bool openPoly = !m_trajectory->isClosed();
+	if (openPoly)
+	{
+		--originalSegmentCount;
+	}
+
+	//now process each segment
+	size_t vp1Index = 0, vp2Index = 0;
+	unsigned trajectoryIndex = 0;
+	unsigned totalCount = 0;
+	while (getNextSegment(vp1Index, vp2Index))
+	{
+		assert(vp1Index < stepSelectionList->count());
+		Step& step1 = m_videoSteps[vp1Index];
+		step1.indexInSmoothTrajectory = totalCount;
+
+		const ccViewportParameters& vp = step1.viewport->getParameters();
+		step1.distance = 0.0;
+		unsigned count = multiplier;
+		if (openPoly && (trajectoryIndex == 0 || trajectoryIndex + 1 == originalSegmentCount))
+		{
+			count = 3 * (multiplier / 2);
+		}
+		for (unsigned i = 0; i < count; ++i)
+		{
+			unsigned iStart = static_cast<unsigned>(step1.indexInSmoothTrajectory) + i;
+			step1.distance += (*m_smoothTrajectory->getPoint((iStart + 1) % m_smoothTrajectory->size()) - *m_smoothTrajectory->getPoint(iStart)).norm();
+
+			//generate the reversed trajectory
+			const CCVector3* P = m_smoothTrajectory->getPoint(i);
+			CCVector3 Preversed;
+			if (vp.objectCenteredView)
+			{
+				CCVector3d P1 = vp.pivotPoint - CCVector3d::fromArray(P->u);
+				P1 = vp.viewMat * P1;
+				P1 -= vp.pivotPoint;
+				Preversed = CCVector3::fromArray(P1.u);
+			}
+			else
+			{
+				CCVector3d P1 = CCVector3d::fromArray(P->u);
+				P1 = vp.viewMat * P1;
+				Preversed = -CCVector3::fromArray(P1.u);
+			}
+			reversedVertices->addPoint(Preversed);
+		}
+
+		++trajectoryIndex;
+		totalCount += count;
+
+		if (vp2Index < vp1Index)
+		{
+			//loop mode
+			break;
+		}
+
+		vp1Index = vp2Index;
+	}
+
+	if (!loopCheckBox->isChecked())
+	{
+		assert(vp1Index < stepSelectionList->count());
+		m_videoSteps[vp1Index].indexInSmoothTrajectory = totalCount;
+		++trajectoryIndex;
+
+		//const ccViewportParameters& vp = m_videoSteps[vp1Index].viewport->getParameters();
+
+		////generate the reversed trajectory for the last point
+		//const CCVector3* P = m_smoothTrajectory->getPoint(m_smoothTrajectory->size() - 1);
+		//CCVector3 Preversed;
+		//if (vp.objectCenteredView)
+		//{
+		//	CCVector3d P1 = vp.pivotPoint - CCVector3d::fromArray(P->u);
+		//	P1 = vp.viewMat * P1;
+		//	P1 -= vp.pivotPoint;
+		//	Preversed = CCVector3::fromArray(P1.u);
+		//}
+		//else
+		//{
+		//	CCVector3d P1 = CCVector3d::fromArray(P->u);
+		//	P1 = vp.viewMat * P1;
+		//	Preversed = -CCVector3::fromArray(P1.u);
+		//}
+		//reversedVertices->addPoint(Preversed);
+	}
+
+	m_smoothTrajectoryReversed->addPointIndex(0, reversedVertices->size());
+	m_smoothTrajectoryReversed->setClosed(loopCheckBox->isChecked());
+
+	return true;
+}
+
+void qAnimationDlg::onAutoStepsDurationToggled(bool state)
+{
+	if (!state)
+	{
+		//'auto step duration' mode deactivated: nothing to do
+		return;
+	}
+
+	ccPolyline* trajectory = getTrajectory();
+	if (!trajectory)
+	{
+		assert(false);
+		return;
+	}
+
+	bool smoothMode = smoothTrajectoryCheckBox->isChecked();
+
+	//total length
+	PointCoordinateType sTotal = trajectory->computeLength();
+
+	//now process each segment
+	size_t vp1Index = 0, vp2Index = 0;
+	while (getNextSegment(vp1Index, vp2Index))
+	{
+		assert(vp1Index < stepSelectionList->count());
+		Step& step1 = m_videoSteps[vp1Index];
+		const Step& step2 = m_videoSteps[vp2Index];
+
+		int i1 = 0, i2 = 0;
+		if (smoothMode)
+		{
+			i1 = step1.indexInSmoothTrajectory;
+			i2 = step2.indexInSmoothTrajectory;
+		}
+		else
+		{
+			i1 = static_cast<int>(vp1Index);
+			i2 = static_cast<int>(vp2Index);
+		}
+
+		PointCoordinateType s = 0.0;
+		if (vp2Index < vp1Index)
+		{
+			//loop mode
+			i2 = trajectory->size();
+		}
+		assert(i1 >= 0 && i2 >= 0);
+		for (unsigned i = static_cast<unsigned>(i1); i < static_cast<unsigned>(i2); ++i)
+		{
+			s += (*trajectory->getPoint((i + 1) % trajectory->size()) - *trajectory->getPoint(i)).norm();
+		}
+
+		if (s >= ZERO_TOLERANCE)
+		{
+			step1.duration_sec = totalTimeDoubleSpinBox->value() * s / sTotal;
+		}
+		else
+		{
+			step1.duration_sec = 0.0;
+		}
+
+		if (vp2Index < vp1Index)
+		{
+			//loop case
+			break;
+		}
+		vp1Index = vp2Index;
+	}
+
+	onCurrentStepChanged(getCurrentStepIndex());
+}
+
+void qAnimationDlg::onSmoothTrajectoryToggled(bool state)
+{
+	if (state)
+	{
+		updateSmoothCameraTrajectory();
+	}
+}
+
+ccPolyline* qAnimationDlg::getTrajectory()
+{
+	return (smoothTrajectoryCheckBox->isChecked() ? m_smoothTrajectory : m_trajectory);
+}
+
+bool qAnimationDlg::exportTrajectoryOnExit()
+{
+	return exportTrajectoryCheckBox->isChecked();
+}
+
+double qAnimationDlg::computeTotalTime()
+{
+	double totalDuration_sec = 0;
+	size_t vp1Index = 0, vp2Index = 0;
+	while (getNextSegment(vp1Index, vp2Index))
+	{
+		assert(vp1Index < stepSelectionList->count());
+		totalDuration_sec += m_videoSteps[vp1Index].duration_sec;
+		if (vp2Index < vp1Index)
+		{
+			//loop case
+			break;
+		}
+		vp1Index = vp2Index;
 	}
 
 	return totalDuration_sec;
@@ -239,25 +604,31 @@ void qAnimationDlg::onFPSChanged(int fps)
 
 void qAnimationDlg::onTotalTimeChanged(double newTime_sec)
 {
+	if (autoStepDurationCheckBox->isChecked())
+	{
+		onAutoStepsDurationToggled(true);
+		return;
+	}
+
+	//'manual' mode
 	double previousTime_sec = computeTotalTime();
 	if (previousTime_sec != newTime_sec)
 	{
 		assert(previousTime_sec != 0);
 		double scale = newTime_sec / previousTime_sec;
 
-		size_t vp1 = 0;
-		size_t vp2 = 0;
-		while (getNextSegment(vp1, vp2))
+		size_t vp1Index = 0, vp2Index = 0;
+		while (getNextSegment(vp1Index, vp2Index))
 		{
-			assert(vp1 < stepSelectionList->count());
-			m_videoSteps[vp1].duration_sec *= scale;
+			assert(vp1Index < stepSelectionList->count());
+			m_videoSteps[vp1Index].duration_sec *= scale;
 
-			if (vp2 == 0)
+			if (vp2Index < vp1Index)
 			{
 				//loop case
 				break;
 			}
-			vp1 = vp2;
+			vp1Index = vp2Index;
 		}
 
 		//update current step
@@ -297,23 +668,23 @@ void qAnimationDlg::onBrowseButtonClicked()
 	outputFileLineEdit->setText(filename);
 }
 
-bool qAnimationDlg::getNextSegment(size_t& vp1, size_t& vp2) const
+bool qAnimationDlg::getNextSegment(size_t& vp1Index, size_t& vp2Index) const
 {
-	if( vp1 >= m_videoSteps.size())
+	if (vp1Index >= m_videoSteps.size())
 	{
 		assert(false);
 		return false;
 	}
 
-	size_t inputVP1 = vp1;
-	while (stepSelectionList->item(static_cast<int>(vp1))->checkState() == Qt::Unchecked)
+	size_t inputVP1Index = vp1Index;
+	while (stepSelectionList->item(static_cast<int>(vp1Index))->checkState() == Qt::Unchecked)
 	{
-		++vp1;
-		if (vp1 == m_videoSteps.size())
+		++vp1Index;
+		if (vp1Index == m_videoSteps.size())
 		{
 			if (loopCheckBox->isChecked())
 			{
-				vp1 = 0;
+				vp1Index = 0;
 			}
 			else
 			{
@@ -321,25 +692,25 @@ bool qAnimationDlg::getNextSegment(size_t& vp1, size_t& vp2) const
 				return false;
 			}
 		}
-		if (vp1 == inputVP1)
+		if (vp1Index == inputVP1Index)
 		{
 			return false;
 		}
 	}
 
 	//look for the next enabled viewport
-	for (vp2 = vp1+1; vp2 <= m_videoSteps.size(); ++vp2)
+	for (vp2Index = vp1Index + 1; vp2Index <= m_videoSteps.size(); ++vp2Index)
 	{
-		if (vp1 == vp2)
+		if (vp1Index == vp2Index)
 		{
 			return false;
 		}
 
-		if (vp2 == m_videoSteps.size())
+		if (vp2Index == m_videoSteps.size())
 		{
 			if (loopCheckBox->isChecked())
 			{
-				vp2 = 0;
+				vp2Index = 0;
 			}
 			else
 			{
@@ -347,8 +718,8 @@ bool qAnimationDlg::getNextSegment(size_t& vp1, size_t& vp2) const
 				break;
 			}
 		}
-		
-		if (stepSelectionList->item(static_cast<int>(vp2))->checkState() == Qt::Checked)
+
+		if (stepSelectionList->item(static_cast<int>(vp2Index))->checkState() == Qt::Checked)
 		{
 			//we have found a valid couple (vp1, vp2)
 			return true;
@@ -366,22 +737,22 @@ int qAnimationDlg::countFrames(size_t startIndex/*=0*/)
 	{
 		double fps = fpsSpinBox->value();
 
-		size_t vp1 = startIndex;
-		size_t vp2 = vp1+1;
+		size_t vp1Index = startIndex;
+		size_t vp2Index = vp1Index + 1;
 
-		while (getNextSegment(vp1, vp2))
+		while (getNextSegment(vp1Index, vp2Index))
 		{
-			const Step& currentStep = m_videoSteps[vp1];
-			int frameCount = static_cast<int>( fps * currentStep.duration_sec );
+			const Step& currentStep = m_videoSteps[vp1Index];
+			int frameCount = static_cast<int>(fps * currentStep.duration_sec);
 			totalFrameCount += frameCount;
 
 			//take care of the 'loop' case
-			if (vp2 == 0)
+			if (vp2Index < vp1Index)
 			{
 				assert(loopCheckBox->isChecked());
 				break;
 			}
-			vp1 = vp2;
+			vp1Index = vp2Index;
 		}
 	}
 
@@ -396,10 +767,10 @@ void qAnimationDlg::preview()
 
 	setEnabled(false);
 
-	size_t vp1 = previewFromSelectedCheckBox->isChecked() ? static_cast<size_t>(getCurrentStepIndex()) : 0;
+	size_t vp1Index = previewFromSelectedCheckBox->isChecked() ? static_cast<size_t>(getCurrentStepIndex()) : 0;
 
 	//count the total number of frames
-	int frameCount = countFrames(loopCheckBox->isChecked() ? 0 : vp1);
+	int frameCount = countFrames(loopCheckBox->isChecked() ? 0 : vp1Index);
 	int fps = fpsSpinBox->value();
 
 	//show progress dialog
@@ -413,23 +784,23 @@ void qAnimationDlg::preview()
 	assert(stepSelectionList->count() >= m_videoSteps.size());
 
 	int frameIndex = 0;
-	size_t vp2 = 0;
-	while (getNextSegment(vp1, vp2))
+	size_t vp2Index = 0;
+	while (getNextSegment(vp1Index, vp2Index))
 	{
-		Step& step1 = m_videoSteps[vp1];
-		Step& step2 = m_videoSteps[vp2];
+		Step& step1 = m_videoSteps[vp1Index];
+		Step& step2 = m_videoSteps[vp2Index];
 
 		//theoretical waiting time per frame
-		qint64 delay_ms = static_cast<int>(1000 * step1.duration_sec / fps);
-		int frameCount = static_cast<int>( fps * step1.duration_sec );
+		qint64 delay_ms = static_cast<qint64>(1000 * step1.duration_sec / fps);
+		int frameCount = static_cast<int>(fps * step1.duration_sec);
 
 		ViewInterpolate interpolator(step1.viewport, step2.viewport);
 		interpolator.setMaxStep(frameCount);
 		cc2DViewportObject currentParams;
-		while ( interpolator.nextView( currentParams ) )
+		while (interpolator.nextView(currentParams))
 		{
 			timer.restart();
-			applyViewport ( &currentParams );
+			applyViewport(&currentParams);
 			qint64 dt_ms = timer.elapsed();
 
 			progressDialog.setValue(++frameIndex);
@@ -444,9 +815,9 @@ void qAnimationDlg::preview()
 			{
 				int wait_ms = static_cast<int>(delay_ms - dt_ms);
 #if defined(CC_WINDOWS)
-				::Sleep( wait_ms );
+				::Sleep(wait_ms);
 #else
-				usleep( wait_ms * 1000 );
+				usleep(wait_ms * 1000);
 #endif
 			}
 		}
@@ -455,12 +826,12 @@ void qAnimationDlg::preview()
 			break;
 		}
 
-		if (vp2 == 0)
+		if (vp2Index < vp1Index)
 		{
 			assert(loopCheckBox->isChecked());
 			frameIndex = 0;
 		}
-		vp1 = vp2;
+		vp1Index = vp2Index;
 	}
 
 	//reset view
@@ -555,28 +926,27 @@ void qAnimationDlg::render(bool asSeparateFrames)
 	bool lodWasEnabled = m_view3d->isLODEnabled();
 	m_view3d->setLODEnabled(false);
 
-	QDir outputDir( QFileInfo(outputFilename).absolutePath() );
+	QDir outputDir(QFileInfo(outputFilename).absolutePath());
 
 	int frameIndex = 0;
 	bool success = true;
-	size_t vp1 = 0;
-	size_t vp2 = 0;
-	while (getNextSegment(vp1, vp2))
+	size_t vp1Index = 0, vp2Index = 0;
+	while (getNextSegment(vp1Index, vp2Index))
 	{
-		Step& step1 = m_videoSteps[vp1];
-		Step& step2 = m_videoSteps[vp2];
+		Step& step1 = m_videoSteps[vp1Index];
+		Step& step2 = m_videoSteps[vp2Index];
 
 		ViewInterpolate interpolator(step1.viewport, step2.viewport);
-		int frameCount = static_cast<int>( fps * step1.duration_sec );
+		int frameCount = static_cast<int>(fps * step1.duration_sec);
 		interpolator.setMaxStep(frameCount);
 
 		cc2DViewportObject current_params;
-		while ( interpolator.nextView( current_params ) )
+		while (interpolator.nextView(current_params))
 		{
-			applyViewport ( &current_params );
+			applyViewport(&current_params);
 
 			//render to image
-			QImage image = m_view3d->renderToImage(superRes, renderingMode == ZOOM, false, true );
+			QImage image = m_view3d->renderToImage(superRes, renderingMode == ZOOM, false, true);
 
 			if (image.isNull())
 			{
@@ -629,12 +999,12 @@ void qAnimationDlg::render(bool asSeparateFrames)
 			break;
 		}
 
-		if (vp2 == 0)
+		if (vp2Index < vp1Index)
 		{
 			//stop loop here!
 			break;
 		}
-		vp1 = vp2;
+		vp1Index = vp2Index;
 	}
 
 	m_view3d->setLODEnabled(lodWasEnabled);
@@ -685,25 +1055,36 @@ void qAnimationDlg::onItemChanged(QListWidgetItem*)
 	updateTotalDuration();
 
 	onCurrentStepChanged(stepSelectionList->currentRow());
+
+	updateCameraTrajectory();
 }
 
 void qAnimationDlg::onCurrentStepChanged(int index)
 {
 	//update current step descriptor
-	stepIndexLabel->setText(QString::number(index+1));
+	stepIndexLabel->setText(QString::number(index + 1));
 
 	updateCurrentStepDuration();
 
-	applyViewport( m_videoSteps[index].viewport );
+	applyViewport(m_videoSteps[index].viewport);
 
 	//check that the step is enabled
 	bool isEnabled = (stepSelectionList->item(index)->checkState() == Qt::Checked);
 	bool isLoop = loopCheckBox->isChecked();
-	currentStepGroupBox->setEnabled(isEnabled && (index+1 < m_videoSteps.size() || isLoop));
+	currentStepGroupBox->setEnabled(isEnabled && (index + 1 < m_videoSteps.size() || isLoop));
 }
 
-void qAnimationDlg::onLoopToggled(bool)
+void qAnimationDlg::onLoopToggled(bool enabled)
 {
+	if (m_trajectory)
+	{
+		m_trajectory->setClosed(enabled);
+	}
+	if (m_smoothTrajectory)
+	{
+		m_smoothTrajectory->setClosed(enabled);
+	}
+
 	updateTotalDuration();
 
 	onCurrentStepChanged(stepSelectionList->currentRow());

@@ -22,6 +22,8 @@
 
 //qCC_db
 #include <cc2DViewportObject.h>
+#include <ccPolyline.h>
+#include <ccPointCloud.h>
 
 //Qt
 #include <QtGui>
@@ -29,7 +31,7 @@
 
 typedef std::vector<cc2DViewportObject*> ViewPortList;
 
-static ViewPortList sGetSelectedViewPorts( const ccHObject::Container &selectedEntities )
+static ViewPortList GetSelectedViewPorts( const ccHObject::Container &selectedEntities )
 {
 	ViewPortList viewports;
 	
@@ -58,7 +60,7 @@ void qAnimation::onNewSelection(const ccHObject::Container& selectedEntities)
 		return;
 	}
 	
-	ViewPortList viewports = sGetSelectedViewPorts( selectedEntities );
+	ViewPortList viewports = GetSelectedViewPorts( selectedEntities );
 	
 	if ( viewports.size() >= 2 )
 	{
@@ -104,7 +106,7 @@ void qAnimation::doAction()
 		return;
 	}
 
-	ViewPortList viewports = sGetSelectedViewPorts( m_app->getSelectedEntities() );
+	ViewPortList viewports = GetSelectedViewPorts( m_app->getSelectedEntities() );
 
 	Q_ASSERT( viewports.size() >= 2 ); // action will not be active unless we have at least 2 viewports
 
@@ -119,4 +121,28 @@ void qAnimation::doAction()
 	}
 	
 	videoDlg.exec();
+
+	//Export trajectory (for debug)
+	if (videoDlg.exportTrajectoryOnExit() && videoDlg.getTrajectory())
+	{
+		ccPolyline* trajectory = new ccPolyline(*videoDlg.getTrajectory());
+		if (!trajectory)
+		{
+			ccLog::Error("Not enough memory");
+		}
+		else
+		{
+			ccPointCloud* vertices = dynamic_cast<ccPointCloud*>(trajectory->getAssociatedCloud());
+			if (vertices)
+			{
+				vertices->setPointSize(5);
+				vertices->setEnabled(true);
+			}
+			trajectory->setColor(ccColor::yellow);
+			trajectory->showColors(true);
+			trajectory->setWidth(2);
+
+			getMainAppInterface()->addToDB(trajectory);
+		}
+	}
 }

@@ -27,6 +27,7 @@
 #include "ui_animationDlg.h"
 
 class ccGLWindow;
+class ccPolyline;
 class cc2DViewportObject;
 class QListWidgetItem;
 
@@ -38,25 +39,33 @@ class qAnimationDlg : public QDialog, public Ui::AnimationDialog
 public:
 
 	//! Default constructor
-	qAnimationDlg(ccGLWindow* view3d,  QWidget* parent = 0);
+	qAnimationDlg(ccGLWindow* view3d,  QWidget* parent = nullptr);
+
+	//! Destrcuctor
+	virtual ~qAnimationDlg();
 
 	//! Initialize the dialog with a set of viewports
 	bool init(const std::vector<cc2DViewportObject*>& viewports);
 
+	ccPolyline* getTrajectory();
+	bool exportTrajectoryOnExit();
+
 protected:
 
 	void onFPSChanged(int);
-
 	void onTotalTimeChanged(double);
 	void onStepTimeChanged(double);
 	void onLoopToggled(bool);
 	void onCurrentStepChanged(int);
 	void onBrowseButtonClicked();
+	void onAutoStepsDurationToggled(bool);
+	void onSmoothTrajectoryToggled(bool);
 
 	void preview();
 	void renderAnimation() { render(false); }
 	void renderFrames() { render(true); }
 	void onAccept();
+	void onReject();
 
 	void onItemChanged(QListWidgetItem*);
 
@@ -72,6 +81,8 @@ protected: //methods
 
 	void updateCurrentStepDuration();
 	void updateTotalDuration();
+	bool updateCameraTrajectory();
+	bool updateSmoothCameraTrajectory();
 
 	bool getNextSegment(size_t& vp1, size_t& vp2) const;
 
@@ -82,15 +93,25 @@ protected: //members
 	//! Simple step (viewport + time)
 	struct Step
 	{
-		cc2DViewportObject* viewport;
-		double duration_sec;
-
-		Step() : viewport(0), duration_sec(0) {}
+		cc2DViewportObject* viewport = nullptr;
+		double duration_sec = 0.0;
+		double distance = 0.0;
+		int indexInSmoothTrajectory = -1;
 	};
 
+	//! Animation
 	std::vector<Step> m_videoSteps;
 
+	//! Associated 3D view
 	ccGLWindow* m_view3d;
+
+	//! Trajectory polyline
+	ccPolyline* m_trajectory;
+	//! Smooth trajectory polyline
+	ccPolyline* m_smoothTrajectory;
+	//! Smooth trajectory polyline (reversed)
+	ccPolyline* m_smoothTrajectoryReversed;
+
 };
 
 #endif

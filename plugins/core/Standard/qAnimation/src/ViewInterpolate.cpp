@@ -17,21 +17,51 @@
 
 #include "ViewInterpolate.h"
 
+//qCC_db
+#include <ccPolyline.h>
 
 ViewInterpolate::ViewInterpolate()
-    : m_view1 (nullptr)
-    , m_view2 (nullptr)
-    , m_totalSteps ( 0 )
-    , m_currentStep ( 0 )
+	: m_view1(nullptr)
+	, m_view2(nullptr)
+	, m_totalSteps(0)
+	, m_currentStep(0)
+	, smoothTrajectory(nullptr)
+	, smoothTrajectoryReversed(nullptr)
+	, smoothTrajStartIndex(0)
+	, smoothTrajStopIndex(0)
+	, smoothTrajCurrentIndex(0)
+	, smoothSegmentLength(0)
+	, smoothCurrentLength(0)
 {
 }
 
-ViewInterpolate::ViewInterpolate(cc2DViewportObject * viewParams1,  cc2DViewportObject * viewParams2, unsigned int stepCount )
-	: m_view1 ( viewParams1 )
-    , m_view2 ( viewParams2 )
-    , m_totalSteps ( stepCount )
-    , m_currentStep ( 0 )
+ViewInterpolate::ViewInterpolate(cc2DViewportObject * viewParams1, cc2DViewportObject * viewParams2, unsigned int stepCount)
+	: m_view1(viewParams1)
+	, m_view2(viewParams2)
+	, m_totalSteps(stepCount)
+	, m_currentStep(0)
+	, smoothTrajectory(nullptr)
+	, smoothTrajectoryReversed(nullptr)
+	, smoothTrajStartIndex(0)
+	, smoothTrajStopIndex(0)
+	, smoothTrajCurrentIndex(0)
+	, smoothSegmentLength(0)
+	, smoothCurrentLength(0)
 {
+}
+
+void ViewInterpolate::setSmoothTrajectory(	ccPolyline* _smoothTrajectory,
+											ccPolyline* _smoothTrajectoryReversed,
+											unsigned i1,
+											unsigned i2,
+											PointCoordinateType length )
+{
+	smoothTrajectory = _smoothTrajectory;
+	smoothTrajectoryReversed = _smoothTrajectoryReversed;
+	smoothTrajCurrentIndex = smoothTrajStartIndex = i1;
+	smoothTrajStopIndex = i2;
+	smoothSegmentLength = length;
+	smoothCurrentLength = 0;
 }
 
 //helper function for interpolating between simple numerical types
@@ -70,6 +100,32 @@ bool ViewInterpolate::nextView ( cc2DViewportObject& outViewport )
 	interpView.viewMat                = ccGLMatrixd::Interpolate(interpolate_fraction, viewParams1.viewMat, viewParams2.viewMat);
 	interpView.pivotPoint             = viewParams1.pivotPoint + (viewParams2.pivotPoint - viewParams1.pivotPoint) * interpolate_fraction;
 	interpView.cameraCenter           = viewParams1.cameraCenter + (viewParams2.cameraCenter - viewParams1.cameraCenter) * interpolate_fraction;
+
+	if (smoothTrajectory && smoothTrajectoryReversed)
+	{
+		PointCoordinateType targetLength = m_currentStep * (smoothSegmentLength / m_totalSteps);
+
+		while (true)
+		{
+			const CCVector3& A = *smoothTrajectory->getPoint(smoothTrajCurrentIndex);
+			const CCVector3& B = *smoothTrajectory->getPoint((smoothTrajCurrentIndex + 1) % smoothTrajectory->size());
+
+			PointCoordinateType l = (B - A).norm();
+			if (smoothCurrentLength + l < targetLength)
+			{
+				smoothCurrentLength += l;
+				++smoothTrajCurrentIndex;
+			}
+			else
+			{
+				PointCoordinateType frac = (l > ZERO_TOLERANCE ? (targetLength - smoothCurrentLength) / l : 0);
+				const CCVector3& Ar = *smoothTrajectoryReversed->getPoint(smoothTrajCurrentIndex);
+				const CCVector3& Br = *smoothTrajectoryReversed->getPoint((smoothTrajCurrentIndex + 1) % smoothTrajectory->size());
+				interpView.cameraCenter = CCVector3d::fromArray((Ar + frac * (Br - Ar)).u);
+				break;
+			}
+		}
+	}
 
     outViewport.setParameters( interpView );
 

@@ -23,6 +23,7 @@
 #include <cc2DViewportObject.h>
 
 class ccViewportParameters;
+class ccPolyline;
 
 //! The ViewInterpolate class
 /** This class takes pointers to two viewport objects, and returns intermediate viewports between over a set number of steps.
@@ -36,6 +37,13 @@ public:
 
 	//! Constructor from two viewports and a number of steps
     ViewInterpolate( cc2DViewportObject * view1,  cc2DViewportObject * view2, unsigned int stepCount = 0 );
+
+	//! Sets the smooth trajectory (optional)
+	void setSmoothTrajectory(	ccPolyline* smoothTrajectory,
+								ccPolyline* smoothTrajectoryReversed,
+								unsigned i1,
+								unsigned i2,
+								PointCoordinateType length);
 
     //! Sets the first viewport object
 	inline void setView1 ( cc2DViewportObject * view ) { m_view1 = view; }
@@ -72,6 +80,11 @@ private:
     unsigned int m_totalSteps;
 
     unsigned int m_currentStep;
+
+	ccPolyline *smoothTrajectory, *smoothTrajectoryReversed;
+	unsigned smoothTrajStartIndex, smoothTrajStopIndex, smoothTrajCurrentIndex;
+	PointCoordinateType smoothSegmentLength, smoothCurrentLength;
+
 };
 
 #endif // VIEWINTERPOLATE_H

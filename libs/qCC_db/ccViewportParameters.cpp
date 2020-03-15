@@ -15,9 +15,9 @@
 //#                                                                        #
 //##########################################################################
 
-#include "ccGenericGLDisplay.h"
+#include "ccViewportParameters.h"
 
-//CCCoreLib
+//CCLib
 #include <CCConst.h>
 
 ccViewportParameters::ccViewportParameters()
@@ -108,9 +108,7 @@ bool ccViewportParameters::fromFile(QFile& in, short dataVersion, int flags, Loa
 	inStream >> pixelSize;
 	//before version 25, we were saving the inverse of 'pixelSize' ('globalZoom')
 	if (dataVersion < 25)
-	{
-		pixelSize = (CCCoreLib::GreaterThanEpsilon( pixelSize ) ? 1.0f/pixelSize : 1.0f);
-	}
+		pixelSize = (pixelSize> ZERO_TOLERANCE ? 1.0f/pixelSize : 1.0f);
 	inStream >> zoom;
 	inStream >> defaultPointSize;
 	inStream >> defaultLineWidth;
@@ -245,7 +243,7 @@ ccGLMatrixd ccViewportParameters::computeScaleMatrix(const QRect& glViewport) co
 	return scaleMatd;
 }
 
-CCVector3d ccViewportParameters::computeCameraCenter(const ccBBox& visibleObjectsBBox) const
+CCVector3d ccViewportParameters::getRealCameraCenter(const ccBBox& visibleObjectsBBox) const
 {
 	if (perspectiveView)
 	{
@@ -255,7 +253,7 @@ CCVector3d ccViewportParameters::computeCameraCenter(const ccBBox& visibleObject
 
 	//in orthographic mode, we put the camera at the center of the
 	//visible objects (along the viewing direction)
-	return CCVector3d(cameraCenter.x,
-		cameraCenter.y,
-		visibleObjectsBBox.isValid() ? visibleObjectsBBox.getCenter().z : 0.0);
+	return CCVector3d(	cameraCenter.x,
+						cameraCenter.y,
+						visibleObjectsBBox.isValid() ? visibleObjectsBBox.getCenter().z : 0.0);
 }

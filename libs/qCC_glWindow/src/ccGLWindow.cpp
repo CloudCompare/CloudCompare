@@ -3190,20 +3190,13 @@ void ccGLWindow::drawTrihedron()
 
 CCVector3d ccGLWindow::getRealCameraCenter() const
 {
-	//the camera center is always defined in perspective mode
-	if (m_viewportParams.perspectiveView)
+	ccBBox box;
+	if (!m_viewportParams.perspectiveView)
 	{
-		return m_viewportParams.cameraCenter;
+		getVisibleObjectsBB(box);
 	}
 
-	//in orthographic mode, we put the camera at the center of the
-	//visible objects (along the viewing direction)
-	ccBBox box;
-	getVisibleObjectsBB(box);
-
-	return CCVector3d(	m_viewportParams.cameraCenter.x,
-						m_viewportParams.cameraCenter.y,
-						box.isValid() ? box.getCenter().z : 0.0);
+	return m_viewportParams.getRealCameraCenter(box);
 }
 
 void ccGLWindow::getVisibleObjectsBB(ccBBox& box) const
@@ -3231,7 +3224,7 @@ void ccGLWindow::invalidateViewport()
 	m_validProjectionMatrix = false;
 }
 
-ccGLMatrixd ccGLWindow::computeProjectionMatrix(const CCVector3d& cameraCenter, bool withGLfeatures, ProjectionMetrics* metrics/*=0*/, double* eyeOffset/*=0*/) const
+ccGLMatrixd ccGLWindow::computeProjectionMatrix(const CCVector3d& cameraCenter, bool withGLfeatures, ProjectionMetrics* metrics/*=nullptr*/, double* eyeOffset/*=nullptr*/) const
 {
 	double bbHalfDiag = 1.0;
 	CCVector3d bbCenter(0, 0, 0);
@@ -3410,56 +3403,9 @@ void ccGLWindow::invalidateVisualization()
 
 ccGLMatrixd ccGLWindow::computeModelViewMatrix(const CCVector3d& cameraCenter) const
 {
-	ccGLMatrixd viewMatd;
-	viewMatd.toIdentity();
+	ccGLMatrixd viewMatd = m_viewportParams.computeViewMatrix(cameraCenter);
 
-	//apply current camera parameters (see trunk/doc/rendering_pipeline.doc)
-	if (m_viewportParams.objectCenteredView)
-	{
-		//place origin on pivot point
-		viewMatd.setTranslation(/*viewMatd.getTranslationAsVec3D()*/ - m_viewportParams.pivotPoint);
-
-		//rotation (viewMat is simply a rotation matrix around the pivot here!)
-		viewMatd = m_viewportParams.viewMat * viewMatd;
-
-		//go back to initial origin
-		//then place origin on camera center
-		viewMatd.setTranslation(viewMatd.getTranslationAsVec3D() + m_viewportParams.pivotPoint - cameraCenter);
-	}
-	else
-	{
-		//place origin on camera center
-		viewMatd.setTranslation(/*viewMatd.getTranslationAsVec3D()*/ - cameraCenter);
-
-		//rotation (viewMat is the rotation around the camera center here - no pivot)
-		viewMatd = m_viewportParams.viewMat * viewMatd;
-	}
-
-	ccGLMatrixd scaleMatd;
-	scaleMatd.toIdentity();
-	if (m_viewportParams.perspectiveView) //perspective mode
-	{
-		//for proper aspect ratio handling
-		if (m_glViewport.height() != 0)
-		{
-			double ar = static_cast<double>(m_glViewport.width() / (m_glViewport.height() * m_viewportParams.perspectiveAspectRatio));
-			if (ar < 1.0)
-			{
-				//glScalef(ar, ar, 1.0);
-				scaleMatd.data()[0] = ar;
-				scaleMatd.data()[5] = ar;
-			}
-		}
-	}
-	else //ortho. mode
-	{
-		//apply zoom
-		double totalZoom = m_viewportParams.zoom / m_viewportParams.pixelSize;
-		//glScalef(totalZoom,totalZoom,totalZoom);
-		scaleMatd.data()[0] = totalZoom;
-		scaleMatd.data()[5] = totalZoom;
-		scaleMatd.data()[10] = totalZoom;
-	}
+	ccGLMatrixd scaleMatd = m_viewportParams.computeScaleMatrix(m_glViewport);
 
 	return scaleMatd * viewMatd;
 }

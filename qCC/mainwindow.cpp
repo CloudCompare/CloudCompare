@@ -4278,7 +4278,7 @@ void MainWindow::doMeshTwoPolylines()
 		useViewingDir = (QMessageBox::question(this, "Projection method", "Use best fit plane (yes) or the current viewing direction (no)", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No);
 		if (useViewingDir)
 		{
-			viewingDir = -CCVector3::fromArray(static_cast<ccGLWindow*>(p1->getDisplay())->getCurrentViewDir().u);
+			viewingDir = -CCVector3::fromArray(p1->getDisplay()->getViewportParameters().getViewDir().u);
 		}
 	}
 
@@ -7370,7 +7370,7 @@ void MainWindow::onItemPicked(const PickedItem& pi)
 				CCVector3 Y = *C - *A;
 				CCVector3 Z = X.cross(Y);
 				//we choose 'Z' so that it points 'upward' relatively to the camera (assuming the user will be looking from the top)
-				CCVector3d viewDir = s_pickingWindow->getCurrentViewDir();
+				CCVector3d viewDir = s_pickingWindow->getViewportParameters().getViewDir();
 				if (CCVector3d::fromArray(Z.u).dot(viewDir) > 0)
 				{
 					Z = -Z;

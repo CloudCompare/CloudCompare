@@ -250,10 +250,32 @@ CCVector3d ccViewportParameters::getRealCameraCenter(const ccBBox& visibleObject
 		//the camera center is always defined in perspective mode
 		return cameraCenter;
 	}
+	else
+	{
+		//in orthographic mode, we put the camera at the center of the
+		//visible objects (along the viewing direction)
+		return CCVector3d(	cameraCenter.x,
+							cameraCenter.y,
+							visibleObjectsBBox.isValid() ? visibleObjectsBBox.getCenter().z : 0.0);
+	}
+}
 
-	//in orthographic mode, we put the camera at the center of the
-	//visible objects (along the viewing direction)
-	return CCVector3d(	cameraCenter.x,
-						cameraCenter.y,
-						visibleObjectsBBox.isValid() ? visibleObjectsBBox.getCenter().z : 0.0);
+CCVector3d ccViewportParameters::getViewDir() const
+{
+	//view direction is (the opposite of) the 3rd line of the current view matrix
+	const double* M = viewMat.data();
+	CCVector3d axis(-M[2], -M[6], -M[10]);
+	axis.normalize();
+
+	return axis;
+}
+
+CCVector3d ccViewportParameters::getUpDir() const
+{
+	//up direction is the 2nd line of the current view matrix
+	const double* M = viewMat.data();
+	CCVector3d axis(M[1], M[5], M[9]);
+	axis.normalize();
+
+	return axis;
 }

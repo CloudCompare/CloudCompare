@@ -470,18 +470,6 @@ public:
 	//! Sets whether rectangular picking is allowed or not
 	void setRectangularPickingAllowed(bool state) { m_allowRectangularEntityPicking = state; }
 
-	//! Returns current viewing direction
-	/** This is the direction normal to the screen
-		(pointing 'inside') in world base.
-	**/
-	CCVector3d getCurrentViewDir() const;
-
-	//! Returns current up direction
-	/** This is the vertical direction of the screen
-		(pointing 'upward') in world base.
-	**/
-	CCVector3d getCurrentUpDir() const;
-
 	//! Returns current parameters for this display (const version)
 	/** Warning: may return overridden parameters!
 	**/

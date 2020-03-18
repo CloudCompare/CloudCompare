@@ -102,6 +102,18 @@ public:
 	//! Computes the scale matrix
 	ccGLMatrixd computeScaleMatrix(const QRect& glViewport) const;
 
+	//! Returns the viewing direction
+	/** This is the direction normal to the screen
+		(pointing 'forward') in the world coordinate system.
+	**/
+	CCVector3d getViewDir() const;
+
+	//! Returns the up direction
+	/** This is the vertical direction of the screen
+		(pointing 'upward') in the world coordinate system.
+	**/
+	CCVector3d getUpDir() const;
+
 	//! Returns the real camera center
 	/** Maybe different from the 'cameraCenter' member in orthographic view
 	**/

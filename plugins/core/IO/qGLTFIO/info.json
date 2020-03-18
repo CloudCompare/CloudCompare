@@ -1,0 +1,18 @@
+{
+    "type" : "I/O",
+    "core" : true,
+    "name" : "GLTF",
+    "description": "Add GLTF read/write capability using the fx-gltf library.",
+    "authors" : [
+        {
+            "name" : "Laurie O",
+            "email" : "laurie_opperman@hotmail.com"
+        }
+    ],
+    "references" : [
+        {
+            "text" : "fx-gltf git repo",
+            "url" : "https://github.com/jessey-git/fx-gltf"
+        }
+    ]
+}

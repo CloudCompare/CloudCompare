@@ -40,6 +40,7 @@
   - `PLUGIN_IO_QE57`: to add support for E57 files in CloudCompare/ccViewer with **libE57** - see [below](#optional-setup-for-libe57-support)
   - `OPTION_USE_SHAPE_LIB`: to add support for SHP files in CloudCompare/ccViewer
   - `PLUGIN_IO_QPDAL`: to add support for LAS files in CloudCompare/ccViewer with **PDAL** - see [below](#optional-setup-for-las-using-pdal)
+  - `PLUGIN_IO_QGLTF`: to add support for GLTF/GLB files in CloudCompare/ccViewer with **fs-gltf** - see [below](#optional-setup-for-gltf-support)
 
   The following are Windows-only options:
   - `OPTION_MP_BUILD`: for Visual Studio only *(multi-process build --> much faster but uses a lot of CPU power)*
@@ -172,3 +173,10 @@ Then, the CloudCompare CMake project will request that you set the following var
 1. `CORK_INCLUDE_DIR` and `MPIR_INCLUDE_DIR`: both libraries include directories (pretty straightforward ;)
 2. `CORK_RELEASE_LIBRARY_FILE` and `MPIR_RELEASE_LIBRARY_FILE`: both main library files
 3. and optionally `CORK_DEBUG_LIBRARY_FILE` and `MPIR_DEBUG_LIBRARY_FILE`: both main library files (for debug mode)
+
+### [Optional] Setup for GLTF support
+
+1. Install [nlohmann::json](https://github.com/nlohmann/json) library
+    * On Ubuntu install the package `nlohmann-json3-dev`
+    * Otherwise, download the header from [the releases](https://github.com/nlohmann/json/releases), and add the include directory to your compiler's include directories
+2. We use [fl-gltf](https://github.com/jessey-git/fx-gltf) for GLTF IO, as a Git submodule. Synchronise with `git submodule update --recursive`

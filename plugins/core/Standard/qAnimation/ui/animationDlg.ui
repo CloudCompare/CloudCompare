@@ -56,16 +56,6 @@
              </property>
             </spacer>
            </item>
-           <item>
-            <widget class="QCheckBox" name="showPathCheckBox">
-             <property name="statusTip">
-              <string>Show the animation path in 3D</string>
-             </property>
-             <property name="text">
-              <string>Show path</string>
-             </property>
-            </widget>
-           </item>
           </layout>
          </item>
         </layout>

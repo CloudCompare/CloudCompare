@@ -220,10 +220,15 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 					currentMaterial->setShininess(tokens[1].toFloat());
 			}
 			//transparent
-			else if (tokens.front() == "d" || tokens.front() == "Tr")
+			else if (tokens.front() == "d")
 			{
 				if (tokens.size() > 1)
 					currentMaterial->setTransparency(tokens[1].toFloat());
+			}
+			else if (tokens.front() == "Tr")
+			{
+				if (tokens.size() > 1)
+					currentMaterial->setTransparency(1.0f - tokens[1].toFloat());
 			}
 			//reflection
 			else if (tokens.front() == "r")

@@ -34,7 +34,7 @@ ccImage::ccImage()
 	, m_height(0)
 	, m_aspectRatio(1.0f)
 	, m_texAlpha(1.0f)
-	, m_associatedSensor(0)
+	, m_associatedSensor(nullptr)
 {
 	setVisible(true);
 	lockVisibility(false);
@@ -49,7 +49,7 @@ ccImage::ccImage(const QImage& image, const QString& name)
 	, m_aspectRatio(1.0f)
 	, m_texAlpha(1.0f)
 	, m_image(image)
-	, m_associatedSensor(0)
+	, m_associatedSensor(nullptr)
 {
 	updateAspectRatio();
 	setVisible(true);
@@ -157,7 +157,7 @@ void ccImage::setAssociatedSensor(ccCameraSensor* sensor)
 void ccImage::onDeletionOf(const ccHObject* obj)
 {
 	if (obj == m_associatedSensor)
-		setAssociatedSensor(0);
+		setAssociatedSensor(nullptr);
 
 	ccHObject::onDeletionOf(obj);
 }

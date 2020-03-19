@@ -385,7 +385,7 @@ unsigned FastMarchingForFacetExtraction::updateFlagsTable(	ccGenericPointCloud* 
 			//++pointCount;
 		}
 
-		m_theGrid[m_activeCells[i]] = 0;
+		m_theGrid[m_activeCells[i]] = nullptr;
 		delete aCell;
 	}
 

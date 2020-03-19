@@ -44,26 +44,26 @@
 
 ccHistogramWindow::ccHistogramWindow(QWidget* parent/*=0*/)
 	: QCustomPlot(parent)
-	, m_titlePlot(0)
+	, m_titlePlot(nullptr)
 	, m_colorScheme(USE_SOLID_COLOR)
 	, m_solidColor(Qt::blue)
 	, m_colorScale(ccColorScalesManager::GetDefaultScale())
-	, m_associatedSF(0)
+	, m_associatedSF(nullptr)
 	, m_numberOfClassesCanBeChanged(false)
-	, m_histogram(0)
+	, m_histogram(nullptr)
 	, m_minVal(0)
 	, m_maxVal(0)
 	, m_maxHistoVal(0)
-	, m_overlayCurve(0)
-	, m_vertBar(0)
+	, m_overlayCurve(nullptr)
+	, m_vertBar(nullptr)
 	, m_drawVerticalIndicator(false)
 	, m_verticalIndicatorPositionPercent(0)
 	, m_sfInteractionMode(false)
 	, m_selectedItem(NONE)
-	, m_areaLeft(0)
-	, m_areaRight(0)
-	, m_arrowLeft(0)
-	, m_arrowRight(0)
+	, m_areaLeft(nullptr)
+	, m_areaRight(nullptr)
+	, m_arrowLeft(nullptr)
+	, m_arrowRight(nullptr)
 	, m_lastMouseClick(0, 0)
 {
 	setWindowTitle("Histogram");
@@ -102,7 +102,7 @@ void ccHistogramWindow::clearInternal()
 	if (m_associatedSF)
 	{
 		m_associatedSF->release();
-		m_associatedSF = 0;
+		m_associatedSF = nullptr;
 	}
 
 	m_histoValues.resize(0);
@@ -379,7 +379,7 @@ void ccHistogramWindow::refresh()
 		{
 			//remove previous title
 			plotLayout()->remove(m_titlePlot);
-			m_titlePlot = 0;
+			m_titlePlot = nullptr;
 		}
 		m_titlePlot = new QCPPlotTitle(this, QString("%0 [%1 classes]").arg(m_titleStr).arg(m_histoValues.size()));
 		//title font
@@ -389,13 +389,13 @@ void ccHistogramWindow::refresh()
 	}
 
 	//clear previous display
-	m_histogram = 0;
-	m_vertBar = 0;
-	m_overlayCurve = 0;
-	m_areaLeft = 0;
-	m_areaRight = 0;
-	m_arrowLeft = 0;
-	m_arrowRight = 0;
+	m_histogram = nullptr;
+	m_vertBar = nullptr;
+	m_overlayCurve = nullptr;
+	m_areaLeft = nullptr;
+	m_areaRight = nullptr;
+	m_arrowLeft = nullptr;
+	m_arrowRight = nullptr;
 	this->clearGraphs();
 	this->clearPlottables();
 
@@ -469,7 +469,7 @@ void ccHistogramWindow::refresh()
 			//import color for the current bin
 			if (colorScheme != USE_SOLID_COLOR)
 			{
-				const ccColor::Rgb* col = 0;
+				const ccColor::Rgb* col = nullptr;
 				if (colorScheme == USE_SF_SCALE)
 				{
 					//equivalent SF value

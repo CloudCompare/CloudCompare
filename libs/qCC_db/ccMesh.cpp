@@ -2032,9 +2032,9 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 						assert(idx.u[0] < static_cast<int>(m_triNormals->size()));
 						assert(idx.u[1] < static_cast<int>(m_triNormals->size()));
 						assert(idx.u[2] < static_cast<int>(m_triNormals->size()));
-						N1 = (idx.u[0] >= 0 ? ccNormalVectors::GetNormal(m_triNormals->getValue(idx.u[0])).u : 0);
-						N2 = (idx.u[0] == idx.u[1] ? N1 : idx.u[1] >= 0 ? ccNormalVectors::GetNormal(m_triNormals->getValue(idx.u[1])).u : 0);
-						N3 = (idx.u[0] == idx.u[2] ? N1 : idx.u[2] >= 0 ? ccNormalVectors::GetNormal(m_triNormals->getValue(idx.u[2])).u : 0);
+						N1 = (idx.u[0] >= 0 ? ccNormalVectors::GetNormal(m_triNormals->getValue(idx.u[0])).u : nullptr);
+						N2 = (idx.u[0] == idx.u[1] ? N1 : idx.u[1] >= 0 ? ccNormalVectors::GetNormal(m_triNormals->getValue(idx.u[1])).u : nullptr);
+						N3 = (idx.u[0] == idx.u[2] ? N1 : idx.u[2] >= 0 ? ccNormalVectors::GetNormal(m_triNormals->getValue(idx.u[2])).u : nullptr);
 					}
 					else
 					{
@@ -3022,7 +3022,7 @@ bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMa
 		if (!ccSerializationHelper::GenericArrayFromFile<Tuple3i, 3, int>(*m_texCoordIndexes, in, dataVersion))
 		{
 			m_texCoordIndexes->release();
-			m_texCoordIndexes = 0;
+			m_texCoordIndexes = nullptr;
 			return false;
 		}
 	}

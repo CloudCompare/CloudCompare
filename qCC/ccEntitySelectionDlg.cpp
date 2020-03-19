@@ -72,7 +72,7 @@ ccEntitySelectionDialog::~ccEntitySelectionDialog()
 	if (m_ui)
 	{
 		delete m_ui;
-		m_ui = 0;
+		m_ui = nullptr;
 	}
 }
 

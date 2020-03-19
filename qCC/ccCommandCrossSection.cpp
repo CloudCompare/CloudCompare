@@ -345,7 +345,7 @@ bool CommandCrossSection::process(ccCommandLineInterface &cmd)
 								}
 
 								delete croppedEnt;
-								croppedEnt = 0;
+								croppedEnt = nullptr;
 
 								if (!errorStr.isEmpty())
 									return cmd.error(errorStr);

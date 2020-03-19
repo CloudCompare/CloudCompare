@@ -49,9 +49,9 @@
 qSRA::qSRA(QObject* parent/*=0*/)
 	: QObject(parent)
 	, ccStdPluginInterface(":/CC/plugin/qSRA/info.json")
-	, m_doLoadProfile(0)
-	, m_doCompareCloudToProfile(0)
-	, m_doProjectCloudDists(0)
+	, m_doLoadProfile(nullptr)
+	, m_doCompareCloudToProfile(nullptr)
+	, m_doProjectCloudDists(nullptr)
 {
 }
 
@@ -129,7 +129,7 @@ ccHObject* GetDefaultContainer(ccMainAppInterface* app)
 	if (!app || !app->dbRootObject())
 	{
 		assert(false);
-		return 0;
+		return nullptr;
 	}
 
 	//we look in qCC database for a group with the right name (i.e. if it has already been created)
@@ -246,7 +246,7 @@ static ccPolyline* GetConeProfile(ccCone* cone)
 	if (!cone)
 	{
 		assert(false);
-		return 0;
+		return nullptr;
 	}
 
 	//we deduce the profile orientation and position from the cone 4x4 transformation
@@ -268,7 +268,7 @@ static ccPolyline* GetConeProfile(ccCone* cone)
 		{
 			delete vertices;
 			ccLog::Error("Not enough memory");
-			return 0;
+			return nullptr;
 		}
 
 		vertices->addPoint(CCVector3(cone->getBottomRadius(), -height/2, 0));
@@ -282,7 +282,7 @@ static ccPolyline* GetConeProfile(ccCone* cone)
 		{
 			delete polyline;
 			ccLog::Error("Not enough memory");
-			return 0;
+			return nullptr;
 		}
 		polyline->addPointIndex(0, 2);
 		polyline->setClosed(false);
@@ -324,8 +324,8 @@ void qSRA::computeCloud2ProfileRadialDist() const
 	}
 
 	//retrieve input cloud and polyline
-	ccPointCloud* cloud = 0;
-	ccPolyline* polyline = 0;
+	ccPointCloud* cloud = nullptr;
+	ccPolyline* polyline = nullptr;
 	bool tempPolyline = false;
 	{
 		for (unsigned i = 0; i < 2; ++i)
@@ -372,7 +372,7 @@ void qSRA::computeCloud2ProfileRadialDist() const
 		if (doComputeRadialDists(cloud, polyline))
 		{
 			//automatically ask the user if he wants to generate a 2D map
-			if (QMessageBox::question(	m_app ? m_app->getMainWindow() : 0,
+			if (QMessageBox::question(	m_app ? m_app->getMainWindow() : nullptr,
 										"Generate map",
 										"Do you want to generate a 2D deviation map?",
 										QMessageBox::Yes,
@@ -391,7 +391,7 @@ void qSRA::computeCloud2ProfileRadialDist() const
 	if (polyline && tempPolyline)
 	{
 		delete polyline;
-		polyline = 0;
+		polyline = nullptr;
 	}
 }
 
@@ -438,8 +438,8 @@ void qSRA::projectCloudDistsInGrid() const
 	}
 
 	//retrieve input cloud and polyline
-	ccPointCloud* cloud = 0;
-	ccPolyline* polyline = 0;
+	ccPointCloud* cloud = nullptr;
+	ccPolyline* polyline = nullptr;
 	bool tempPolyline = false;
 	{
 		for (size_t i = 0; i < selectCount; ++i)
@@ -475,7 +475,7 @@ void qSRA::projectCloudDistsInGrid() const
 	if (polyline && tempPolyline)
 	{
 		delete polyline;
-		polyline = 0;
+		polyline = nullptr;
 	}
 }
 
@@ -486,7 +486,7 @@ void qSRA::doProjectCloudDistsInGrid(ccPointCloud* cloud, ccPolyline* polyline) 
 		return;
 
 	//get the scalar field to map
-	ccScalarField* sf = 0;
+	ccScalarField* sf = nullptr;
 	{
 		int sfIdx = cloud->getScalarFieldIndexByName(RADIAL_DIST_SF_NAME);
 		if (sfIdx < 0)
@@ -494,7 +494,7 @@ void qSRA::doProjectCloudDistsInGrid(ccPointCloud* cloud, ccPolyline* polyline) 
 			sf = cloud->getCurrentDisplayedScalarField();
 			if (sf)
 			{
-				if (QMessageBox::question(	m_app ? m_app->getMainWindow() : 0,
+				if (QMessageBox::question(	m_app ? m_app->getMainWindow() : nullptr,
 											"Distance field",
 											QString("Cloud has no '%1' field. Do you want to use the active scalar field instead?").arg(RADIAL_DIST_SF_NAME),
 											QMessageBox::Yes,

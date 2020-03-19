@@ -100,17 +100,17 @@ static double ConvertAngleToRad(double angle, DistanceMapGenerationDlg::ANGULAR_
 }
 
 DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalarField* sf, ccPolyline* polyline, ccMainAppInterface* app/*=0*/)
-	: QDialog(app ? app->getMainWindow() : 0)
+	: QDialog(app ? app->getMainWindow() : nullptr)
 	, m_app(app)
 	, m_cloud(cloud)
 	, m_profile(polyline)
 	, m_sf(sf)
-	, m_map(0)
+	, m_map(nullptr)
 	, m_angularUnits(ANG_GRAD)
-	, m_window(0)
-	, m_colorScaleSelector(0)
-	, m_xLabels(0)
-	, m_yLabels(0)
+	, m_window(nullptr)
+	, m_colorScaleSelector(nullptr)
+	, m_xLabels(nullptr)
+	, m_yLabels(nullptr)
 	, m_gridColor(Qt::gray)
 	, m_symbolColor(Qt::black)
 {
@@ -583,7 +583,7 @@ void DistanceMapGenerationDlg::clearView()
 		return;
 
 	//remove existing sf
-	m_window->setAssociatedScalarField(0);
+	m_window->setAssociatedScalarField(nullptr);
 	
 	//remove existing map (or maps?)
 	ccHObject::Container maps;
@@ -640,14 +640,14 @@ void DistanceMapGenerationDlg::update()
 	//update map
 	m_map = updateMap();
 	//and GUI
-	exportGroupBox->setEnabled(m_map != 0);
+	exportGroupBox->setEnabled(m_map != nullptr);
 
 	//auto update volumes
 	updateVolumes();
 
 	if (m_map && m_window)
 	{
-		ccMesh* mapMesh = 0;
+		ccMesh* mapMesh = nullptr;
 
 		ProjectionMode mode = getProjectionMode();
 		if (mode == PROJ_CYLINDRICAL)
@@ -750,7 +750,7 @@ void DistanceMapGenerationDlg::updateMapTexture()
 	}
 
 	//spawn "update" dialog
-	QProgressDialog progressDlg(QString("Updating..."),0,0,0,0,Qt::Popup);
+	QProgressDialog progressDlg(QString("Updating..."),nullptr,0,0,nullptr,Qt::Popup);
 	progressDlg.setMinimumDuration(0);
 	progressDlg.setModal(true);
 	progressDlg.show();
@@ -1117,7 +1117,7 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationDlg::updateM
 	if (!m_cloud || !m_sf || !m_profile)
 	{
 		assert(false);
-		return QSharedPointer<DistanceMapGenerationTool::Map>(0);
+		return QSharedPointer<DistanceMapGenerationTool::Map>(nullptr);
 	}
 
 	//profile parameters
@@ -1125,7 +1125,7 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationDlg::updateM
 	if (!DistanceMapGenerationTool::GetPoylineMetaData(m_profile, profileDesc))
 	{
 		assert(false);
-		return QSharedPointer<DistanceMapGenerationTool::Map>(0);
+		return QSharedPointer<DistanceMapGenerationTool::Map>(nullptr);
 	}
 	
 	//compute transformation from cloud to the surface (of revolution)
@@ -1250,7 +1250,7 @@ void DistanceMapGenerationDlg::exportMapAsGrid()
 	QString filter("Grid file (*.csv)");
 
 	//open file saving dialog
-	QString filename = QFileDialog::getSaveFileName(0,"Select output file",path,filter);
+	QString filename = QFileDialog::getSaveFileName(nullptr,"Select output file",path,filter);
 	if (filename.isEmpty())
 		return;
 
@@ -1411,7 +1411,7 @@ void DistanceMapGenerationDlg::loadOverlaySymbols()
 	QString filter("Symbols (*.txt)");
 
 	//open file loading dialog
-	QString filename = QFileDialog::getOpenFileName(0, "Select symbols file", path, filter);
+	QString filename = QFileDialog::getOpenFileName(nullptr, "Select symbols file", path, filter);
 	if (filename.isEmpty())
 		return;
 
@@ -1426,7 +1426,7 @@ void DistanceMapGenerationDlg::loadOverlaySymbols()
 	//save current impoort path to persistent settings
 	settings.setValue("importPath", fileInfo.absolutePath());
 
-	ccSymbolCloud* symbolCloud = 0;
+	ccSymbolCloud* symbolCloud = nullptr;
 	//try to load the file (as a "symbol" point cloud)
 	{
 		QFile file(filename);
@@ -1485,7 +1485,7 @@ void DistanceMapGenerationDlg::loadOverlaySymbols()
 		if (symbolCloud->size() == 0)
 		{
 			delete symbolCloud;
-			symbolCloud = 0;
+			symbolCloud = nullptr;
 		}
 		else
 		{
@@ -1553,7 +1553,7 @@ void DistanceMapGenerationDlg::loadOverlaySymbols()
 	{
 		assert(false);
 		delete symbolCloud;
-		symbolCloud = 0;
+		symbolCloud = nullptr;
 	}
 }
 
@@ -1875,7 +1875,7 @@ void DistanceMapGenerationDlg::toggleOverlayGrid(bool state)
 				else
 				{
 					delete vertices;
-					vertices = 0;
+					vertices = nullptr;
 				}
 
 				if (mode != PROJ_CONICAL && m_yLabels->isVisible())

@@ -1006,7 +1006,7 @@ bool AsciiOpenDlg::apply()
 	QString errorMessage;
 	if (!CheckOpenSequence(getOpenSequence(),errorMessage))
 	{
-		QMessageBox::warning(0, "Error", errorMessage);
+		QMessageBox::warning(nullptr, "Error", errorMessage);
 		return false;
 	}
 	else

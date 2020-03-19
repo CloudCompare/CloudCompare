@@ -150,7 +150,7 @@ bool ccFrameBufferObject::initColor(GLint internalformat/*=GL_RGBA*/,
 	m_glFunc.glTexParameteri(target, GL_TEXTURE_MIN_FILTER, minMagFilter);
 	m_glFunc.glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	m_glFunc.glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	m_glFunc.glTexImage2D(target, 0, internalformat, m_width, m_height, 0, format, type, 0);
+	m_glFunc.glTexImage2D(target, 0, internalformat, m_width, m_height, 0, format, type, nullptr);
 	m_glFunc.glBindTexture(target, 0);
 
 	m_glFunc.glPopAttrib();
@@ -242,7 +242,7 @@ bool ccFrameBufferObject::initDepth(GLint wrapParam/*=GL_CLAMP_TO_BORDER*/,
 	m_glFunc.glTexParameteri(target, GL_TEXTURE_COMPARE_MODE, GL_NONE);
 	m_glFunc.glTexParameteri(target, GL_TEXTURE_MIN_FILTER, minMagFilter);
 	m_glFunc.glTexParameteri(target, GL_TEXTURE_MAG_FILTER, minMagFilter);
-	m_glFunc.glTexImage2D   (target, 0, internalFormat, m_width, m_height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
+	m_glFunc.glTexImage2D   (target, 0, internalFormat, m_width, m_height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, nullptr);
 	m_glFunc.glBindTexture  (target, 0);
 
 	m_glFunc.glPopAttrib();

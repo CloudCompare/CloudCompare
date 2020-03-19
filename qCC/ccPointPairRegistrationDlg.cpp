@@ -118,7 +118,7 @@ ccPointPairRegistrationDlg::ccPointPairRegistrationDlg(ccPickingHub* pickingHub,
 
 ccPointPairRegistrationDlg::EntityContext::EntityContext(ccHObject* ent)
 	: entity(ent)
-	, originalDisplay(entity ? entity->getDisplay() : 0)
+	, originalDisplay(entity ? entity->getDisplay() : nullptr)
 	, wasVisible(entity ? entity->isVisible() : false)
 	, wasEnabled(entity ? entity->isEnabled() : false)
 	, wasSelected(entity ? entity->isSelected() : false)
@@ -198,9 +198,9 @@ bool ccPointPairRegistrationDlg::linkWith(ccGLWindow* win)
 		}
 
 		oldWin->removeFromOwnDB(&m_alignedPoints);
-		m_alignedPoints.setDisplay(0);
+		m_alignedPoints.setDisplay(nullptr);
 		oldWin->removeFromOwnDB(&m_refPoints);
-		m_refPoints.setDisplay(0);
+		m_refPoints.setDisplay(nullptr);
 
 		m_pickingHub->removeListener(this);
 	}
@@ -446,7 +446,7 @@ void ccPointPairRegistrationDlg::addManualRefPoint()
 
 	CCVector3d P(s_last_rx, s_last_ry, s_last_rz);
 
-	addReferencePoint(P, 0, shifted);
+	addReferencePoint(P, nullptr, shifted);
 }
 
 void ccPointPairRegistrationDlg::pause(bool state)
@@ -587,7 +587,7 @@ static QToolButton* CreateDeleteButton()
 	return delButton;
 }
 
-static cc2DLabel* CreateLabel(cc2DLabel* label, ccPointCloud* cloud, unsigned pointIndex, QString pointName, ccGenericGLDisplay* display = 0)
+static cc2DLabel* CreateLabel(cc2DLabel* label, ccPointCloud* cloud, unsigned pointIndex, QString pointName, ccGenericGLDisplay* display = nullptr)
 {
 	assert(label);
 	label->addPickedPoint(cloud, pointIndex);
@@ -600,7 +600,7 @@ static cc2DLabel* CreateLabel(cc2DLabel* label, ccPointCloud* cloud, unsigned po
 	return label;
 }
 
-static cc2DLabel* CreateLabel(ccPointCloud* cloud, unsigned pointIndex, QString pointName, ccGenericGLDisplay* display = 0)
+static cc2DLabel* CreateLabel(ccPointCloud* cloud, unsigned pointIndex, QString pointName, ccGenericGLDisplay* display = nullptr)
 {
 	return CreateLabel(new cc2DLabel, cloud, pointIndex, pointName, display);
 }
@@ -848,9 +848,9 @@ void ccPointPairRegistrationDlg::removeAlignedPoint(int index, bool autoRemoveDu
 
 bool ccPointPairRegistrationDlg::addReferencePoint(CCVector3d& Pin, ccHObject* entity/*=0*/, bool shifted/*=true*/)
 {
-	assert(entity == 0 || m_referenceEntities.contains(entity));
+	assert(entity == nullptr || m_referenceEntities.contains(entity));
 
-	ccGenericPointCloud* cloud = entity ? ccHObjectCaster::ToGenericPointCloud(entity) : 0;
+	ccGenericPointCloud* cloud = entity ? ccHObjectCaster::ToGenericPointCloud(entity) : nullptr;
 
 	//first point?
 	if (m_refPoints.size() == 0)
@@ -1279,7 +1279,7 @@ void ccPointPairRegistrationDlg::align()
 		//force clouds visibility
 		{
 			//we don't want the window zoom to change or the window to be be redrawn
-			ccGLWindow* associatedWin = 0;
+			ccGLWindow* associatedWin = nullptr;
 			std::swap(m_associatedWin,associatedWin);
 			if (!showAlignedCheckBox->isChecked())
 				showAlignedCheckBox->setChecked(true);

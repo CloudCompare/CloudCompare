@@ -574,7 +574,7 @@ void ccViewer::showDisplayParameters()
 
 	clmDlg.exec();
 
-	disconnect(&clmDlg, 0, 0, 0);
+	disconnect(&clmDlg, nullptr, nullptr, nullptr);
 }
 
 void ccViewer::doActionEditCamera()

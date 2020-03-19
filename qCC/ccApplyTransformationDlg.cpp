@@ -48,7 +48,7 @@ class DipDirTransformationDialog : public QDialog, public Ui::DipDirTransformati
 	
 public:
 
-	DipDirTransformationDialog(QWidget* parent = 0) : QDialog(parent) { setupUi(this); }
+	DipDirTransformationDialog(QWidget* parent = nullptr) : QDialog(parent) { setupUi(this); }
 };
 
 ccApplyTransformationDlg::ccApplyTransformationDlg(QWidget* parent/*=0*/)

@@ -417,7 +417,7 @@ ccHObject* qFacets::createFacets(ccPointCloud* cloud,
 {
 	if (!cloud)
 	{
-		return 0;
+		return nullptr;
 	}
 
 	//we create a new group to store all input CCs as 'facets'
@@ -454,7 +454,7 @@ ccHObject* qFacets::createFacets(ccPointCloud* cloud,
 				//not enough  memory!
 				error = true;
 				delete facetCloud;
-				facetCloud = 0;
+				facetCloud = nullptr;
 			}
 			else
 			{
@@ -844,7 +844,7 @@ void qFacets::exportFacets()
 
 			//create (temporary) new polyline
 			ccPolyline* newPoly = new ccPolyline(*poly);
-			ccPointCloud* pc = (newPoly ? dynamic_cast<ccPointCloud*>(newPoly->getAssociatedCloud()) : 0);
+			ccPointCloud* pc = (newPoly ? dynamic_cast<ccPointCloud*>(newPoly->getAssociatedCloud()) : nullptr);
 			if (pc)
 			{
 				pc->applyGLTransformation_recursive(&oriRotMat);

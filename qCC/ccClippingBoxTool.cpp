@@ -52,7 +52,7 @@ static QMap< unsigned, ccClipBoxParams > s_lastBoxParams;
 ccClippingBoxTool::ccClippingBoxTool(QWidget* parent)
 	: ccOverlayDialog(parent)
 	, Ui::ClippingBoxDlg()
-	, m_clipBox(0)
+	, m_clipBox(nullptr)
 {
 	setupUi(this);
 
@@ -96,7 +96,7 @@ ccClippingBoxTool::~ccClippingBoxTool()
 {
 	if (m_clipBox)
 		delete m_clipBox;
-	m_clipBox = 0;
+	m_clipBox = nullptr;
 }
 
 void ccClippingBoxTool::editBox()
@@ -286,7 +286,7 @@ bool ccClippingBoxTool::linkWith(ccGLWindow* win)
 		m_associatedWin->removeFromOwnDB(m_clipBox);
 		m_clipBox->disconnect(this);
 		delete m_clipBox;
-		m_clipBox = 0;
+		m_clipBox = nullptr;
 		m_associatedWin->redraw();
 	}
 
@@ -389,7 +389,7 @@ ccHObject* GetSlice(ccHObject* obj, ccClipBox* clipBox, bool silent)
 	if (!obj)
 	{
 		assert(false);
-		return 0;
+		return nullptr;
 	}
 
 	if (obj->isKindOf(CC_TYPES::POINT_CLOUD))
@@ -407,7 +407,7 @@ ccHObject* GetSlice(ccHObject* obj, ccClipBox* clipBox, bool silent)
 			{
 				ccLog::Error("Not enough memory!");
 			}
-			return 0;
+			return nullptr;
 		}
 		clipBox->flagPointsInside(inputCloud, &selectionTable);
 		
@@ -426,7 +426,7 @@ ccHObject* GetSlice(ccHObject* obj, ccClipBox* clipBox, bool silent)
 	}
 	else if (obj->isKindOf(CC_TYPES::MESH))
 	{
-		const ccGLMatrix* _transformation = 0;
+		const ccGLMatrix* _transformation = nullptr;
 		ccGLMatrix transformation;
 		if (clipBox->isGLTransEnabled())
 		{
@@ -440,12 +440,12 @@ ccHObject* GetSlice(ccHObject* obj, ccClipBox* clipBox, bool silent)
 		{
 			if (!silent)
 				ccLog::Error("Failed to segment the mesh!");
-			return 0;
+			return nullptr;
 		}
 		return mesh;
 	}
 
-	return 0;
+	return nullptr;
 }
 
 void ccClippingBoxTool::exportSlice()
@@ -629,7 +629,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 
 				//we'll potentially create up to one (ref.) cloud per input loud and per cell
 				std::vector<CCLib::ReferenceCloud*> refClouds;
-				refClouds.resize(cellCount * clouds.size(), 0);
+				refClouds.resize(cellCount * clouds.size(), nullptr);
 
 				if (progressDialog)
 				{
@@ -816,7 +816,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 				int indexMins[3], indexMaxs[3], gridDim[3];
 				unsigned cellCount = ComputeGridDimensions(localBox, repeatDimensions, indexMins, indexMaxs, gridDim, gridOrigin, cellSizePlusGap);
 
-				const ccGLMatrix* _transformation = 0;
+				const ccGLMatrix* _transformation = nullptr;
 				ccGLMatrix transformation;
 				if (clipBox.isGLTransEnabled())
 				{
@@ -1216,7 +1216,7 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 			sliceGroup->addChild(slice);
 		}
 
-		QMessageBox::warning(0, "Process finished", QString("%1 slices have been generated.\n(you may have to close the tool and hide the initial cloud to see them...)").arg(sliceGroup->getChildrenNumber()));
+		QMessageBox::warning(nullptr, "Process finished", QString("%1 slices have been generated.\n(you may have to close the tool and hide the initial cloud to see them...)").arg(sliceGroup->getChildrenNumber()));
 		if (m_clipBox->getContainer().getFirstChild())
 		{
 			sliceGroup->setDisplay_recursive(m_clipBox->getContainer().getFirstChild()->getDisplay());

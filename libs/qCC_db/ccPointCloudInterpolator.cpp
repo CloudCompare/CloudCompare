@@ -28,7 +28,7 @@
 
 struct SFPair
 {
-	SFPair(const CCLib::ScalarField* sfIn = 0, CCLib::ScalarField* sfOut = 0) : in(sfIn), out(sfOut) {}
+	SFPair(const CCLib::ScalarField* sfIn = nullptr, CCLib::ScalarField* sfOut = nullptr) : in(sfIn), out(sfOut) {}
 	const CCLib::ScalarField* in;
 	CCLib::ScalarField* out;
 };

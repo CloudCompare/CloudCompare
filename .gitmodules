@@ -4,3 +4,6 @@
 [submodule "plugins/core/IO/qE57IO/extern/libE57Format"]
 path = plugins/core/IO/qE57IO/extern/libE57Format
 url = https://github.com/asmaloney/libE57Format
+[submodule "plugins/3rdParty/MeshIO"]
+	path = plugins/3rdParty/MeshIO
+	url = https://github.com/asmaloney/MeshIO

@@ -50,7 +50,7 @@
       <number>1</number>
      </property>
      <property name="maximum">
-      <number>50</number>
+      <number>10</number>
      </property>
      <property name="value">
       <number>5</number>

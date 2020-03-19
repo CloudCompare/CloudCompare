@@ -114,12 +114,8 @@
               <property name="text">
                <string>Automatic steps duration</string>
               </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="smoothTrajectoryCheckBox">
-              <property name="text">
-               <string>Smooth trajectory</string>
+              <property name="checked">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
@@ -172,6 +168,41 @@
               </property>
               <property name="value">
                <double>1.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="smoothTrajectoryGroupBox">
+           <property name="title">
+            <string>Smooth trajectory</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_7">
+            <item>
+             <widget class="QLabel" name="label_5">
+              <property name="text">
+               <string>smooth ratio</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDoubleSpinBox" name="smoothRatioDoubleSpinBox">
+              <property name="minimum">
+               <double>0.050000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>0.450000000000000</double>
+              </property>
+              <property name="singleStep">
+               <double>0.050000000000000</double>
+              </property>
+              <property name="value">
+               <double>0.200000000000000</double>
               </property>
              </widget>
             </item>

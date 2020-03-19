@@ -132,12 +132,12 @@ void qAnimation::doAction()
 		}
 		else
 		{
-			ccPointCloud* vertices = dynamic_cast<ccPointCloud*>(trajectory->getAssociatedCloud());
-			if (vertices)
-			{
-				vertices->setPointSize(5);
-				vertices->setEnabled(true);
-			}
+			//ccPointCloud* vertices = dynamic_cast<ccPointCloud*>(trajectory->getAssociatedCloud());
+			//if (vertices)
+			//{
+			//	vertices->setPointSize(5);
+			//	vertices->setEnabled(true);
+			//}
 			trajectory->setColor(ccColor::yellow);
 			trajectory->showColors(true);
 			trajectory->setWidth(2);

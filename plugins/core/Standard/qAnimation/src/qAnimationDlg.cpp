@@ -97,7 +97,8 @@ qAnimationDlg::qAnimationDlg(ccGLWindow* view3d, QWidget* parent)
 			int renderingMode = settings.value("renderingMode", renderingModeComboBox->currentIndex()).toInt();
 			int bitRate = settings.value("bitRate", bitrateSpinBox->value()).toInt();
 			bool autoStepDuration = settings.value("autoStepDuration", autoStepDurationCheckBox->isChecked()).toBool();
-			bool smoothTrajectory = settings.value("smoothTrajectory", smoothTrajectoryCheckBox->isChecked()).toBool();
+			bool smoothTrajectory = settings.value("smoothTrajectory", smoothTrajectoryGroupBox->isChecked()).toBool();
+			double smoothRatio = settings.value("smoothRatio", smoothRatioDoubleSpinBox->value()).toDouble();
 
 			previewFromSelectedCheckBox->setChecked(startPreviewFromSelectedStep);
 			loopCheckBox->setChecked(loop);
@@ -106,7 +107,8 @@ qAnimationDlg::qAnimationDlg(ccGLWindow* view3d, QWidget* parent)
 			renderingModeComboBox->setCurrentIndex(renderingMode);
 			bitrateSpinBox->setValue(bitRate);
 			autoStepDurationCheckBox->setChecked(autoStepDuration); //this might be modified when init will be called!
-			smoothTrajectoryCheckBox->setChecked(smoothTrajectory);
+			smoothTrajectoryGroupBox->setChecked(smoothTrajectory);
+			smoothRatioDoubleSpinBox->setValue(smoothRatio);
 		}
 		
 		settings.endGroup();
@@ -114,7 +116,8 @@ qAnimationDlg::qAnimationDlg(ccGLWindow* view3d, QWidget* parent)
 
 	connect ( autoStepDurationCheckBox,	&QAbstractButton::toggled,			this, &qAnimationDlg::onAutoStepsDurationToggled );
 	connect ( smoothTrajectoryCheckBox,	&QAbstractButton::toggled,			this, &qAnimationDlg::onSmoothTrajectoryToggled );
-
+	connect ( smoothRatioDoubleSpinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),		this, &qAnimationDlg::onSmoothRatioChanged );
+	
 	connect( fpsSpinBox,				static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &qAnimationDlg::onFPSChanged );
 	connect( totalTimeDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &qAnimationDlg::onTotalTimeChanged );
 	connect( stepTimeDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &qAnimationDlg::onStepTimeChanged );
@@ -193,17 +196,11 @@ bool qAnimationDlg::init(const std::vector<cc2DViewportObject*>& viewports)
 
 	updateCameraTrajectory(); //also takes care of the smooth version!
 
-	if (autoStepDurationCheckBox->isChecked())
-	{
-		onAutoStepsDurationToggled(true);
-	}
-
 	connect( stepSelectionList, &QListWidget::currentRowChanged, this, &qAnimationDlg::onCurrentStepChanged );
 	connect( stepSelectionList, &QListWidget::itemChanged, this, &qAnimationDlg::onItemChanged );
 
 	stepSelectionList->setCurrentRow(0); //select the first one by default
 	onCurrentStepChanged(getCurrentStepIndex());
-	updateTotalDuration();
 
 	return true;
 }
@@ -239,7 +236,8 @@ void qAnimationDlg::onAccept()
 		settings.setValue("superRes", superResolutionSpinBox->value());
 		settings.setValue("bitRate", bitrateSpinBox->value());
 		settings.setValue("autoStepDuration", autoStepDurationCheckBox->isChecked());
-		settings.setValue("smoothTrajectory", smoothTrajectoryCheckBox->isChecked());
+		settings.setValue("smoothTrajectory", smoothTrajectoryGroupBox->isChecked());
+		settings.setValue("smoothRatio", smoothRatioDoubleSpinBox->value());
 
 		settings.endGroup();
 	}
@@ -256,6 +254,7 @@ bool qAnimationDlg::updateCameraTrajectory()
 	if (m_videoSteps.size() < 2)
 	{
 		ccLog::Warning("Not enough animation steps");
+		updateTotalDuration();
 		return false;
 	}
 
@@ -263,6 +262,7 @@ bool qAnimationDlg::updateCameraTrajectory()
 	ccPointCloud* vertices = new ccPointCloud("vertices");
 	m_trajectory = new ccPolyline(vertices);
 	m_trajectory->addChild(vertices);
+	m_trajectory->setName("qAnimation trajectory");
 
 	unsigned maxStepCount = static_cast<unsigned>(m_videoSteps.size());
 	if (!vertices->reserve(maxStepCount) || !m_trajectory->reserve(maxStepCount))
@@ -309,14 +309,22 @@ bool qAnimationDlg::updateCameraTrajectory()
 	m_trajectory->addPointIndex(0, vertices->size());
 	m_trajectory->setClosed(loopCheckBox->isChecked());
 
-	if (smoothTrajectoryCheckBox->isChecked())
+	bool result = true;
+	if (smoothTrajectoryGroupBox->isChecked())
 	{
-		return updateSmoothCameraTrajectory();
+		result = updateSmoothCameraTrajectory();
+	}
+
+	if (autoStepDurationCheckBox->isChecked())
+	{
+		onAutoStepsDurationToggled(true);
 	}
 	else
 	{
-		return true;
+		updateTotalDuration();
 	}
+
+	return result;
 }
 
 bool qAnimationDlg::updateSmoothCameraTrajectory()
@@ -334,30 +342,32 @@ bool qAnimationDlg::updateSmoothCameraTrajectory()
 		step.distance = 0.0;
 	}
 
-	if (!smoothTrajectoryCheckBox->isChecked())
+	if (!smoothTrajectoryGroupBox->isChecked())
 	{
 		return true;
 	}
 
-	if (!m_trajectory)
+	if (!m_trajectory || m_trajectory->size() < 3)
 	{
 		//nothing we can do for now
 		return true;
 	}
 
-	static const unsigned s_ChaikinIterationCount = 5;
-	static const PointCoordinateType s_ChaikinRatio = static_cast<PointCoordinateType>(0.2);
+	unsigned chaikinIterationCount = 10;
+	const PointCoordinateType chaikinRatio = static_cast<PointCoordinateType>(smoothRatioDoubleSpinBox->value());
 
-	m_smoothTrajectory = m_trajectory->smoothChaikin(s_ChaikinRatio, s_ChaikinIterationCount);
+	m_smoothTrajectory = m_trajectory->smoothChaikin(chaikinRatio, chaikinIterationCount);
 
 	if (!m_smoothTrajectory)
 	{
 		ccLog::Error("Failed to generate the smooth trajectory");
-		smoothTrajectoryCheckBox->blockSignals(true);
-		smoothTrajectoryCheckBox->setChecked(false);
-		smoothTrajectoryCheckBox->blockSignals(false);
+		smoothTrajectoryGroupBox->blockSignals(true);
+		smoothTrajectoryGroupBox->setChecked(false);
+		smoothTrajectoryGroupBox->blockSignals(false);
 		return false;
 	}
+
+	m_smoothTrajectory->setName(QString("qAnimation trajectory (smooth ratio=%1)").arg(chaikinRatio));
 
 	//generate the reversed trajectory
 	delete m_smoothTrajectoryReversed;
@@ -378,12 +388,24 @@ bool qAnimationDlg::updateSmoothCameraTrajectory()
 	}
 
 	//we must update the vertices indexes
-	unsigned multiplier = (1 << s_ChaikinIterationCount);
+	const unsigned multiplier = (1 << chaikinIterationCount);
 	unsigned originalSegmentCount = m_trajectory->size();
 	bool openPoly = !m_trajectory->isClosed();
 	if (openPoly)
 	{
 		--originalSegmentCount;
+	}
+
+	//1st and final segments (for open polylines)
+	unsigned partialSegmentSize = multiplier;
+	if (openPoly)
+	{
+		partialSegmentSize = 2;
+		for (unsigned i = 1; i < chaikinIterationCount; ++i)
+		{
+			unsigned segmentCount = partialSegmentSize - 1; //-1 to get the segment count
+			partialSegmentSize = 2 * segmentCount + 1; //2 vertices per segment + 1 vertex for the middle segment that 'surrounds' the 2nd (or last but one) original vertex
+		}
 	}
 
 	//now process each segment
@@ -401,7 +423,7 @@ bool qAnimationDlg::updateSmoothCameraTrajectory()
 		unsigned count = multiplier;
 		if (openPoly && (trajectoryIndex == 0 || trajectoryIndex + 1 == originalSegmentCount))
 		{
-			count = 3 * (multiplier / 2);
+			count = partialSegmentSize;
 		}
 		for (unsigned i = 0; i < count; ++i)
 		{
@@ -441,33 +463,15 @@ bool qAnimationDlg::updateSmoothCameraTrajectory()
 
 	if (!loopCheckBox->isChecked())
 	{
+		//update the last (original) vertex index
 		assert(vp1Index < stepSelectionList->count());
-		m_videoSteps[vp1Index].indexInSmoothTrajectory = totalCount;
-		++trajectoryIndex;
-
-		//const ccViewportParameters& vp = m_videoSteps[vp1Index].viewport->getParameters();
-
-		////generate the reversed trajectory for the last point
-		//const CCVector3* P = m_smoothTrajectory->getPoint(m_smoothTrajectory->size() - 1);
-		//CCVector3 Preversed;
-		//if (vp.objectCenteredView)
-		//{
-		//	CCVector3d P1 = vp.pivotPoint - CCVector3d::fromArray(P->u);
-		//	P1 = vp.viewMat * P1;
-		//	P1 -= vp.pivotPoint;
-		//	Preversed = CCVector3::fromArray(P1.u);
-		//}
-		//else
-		//{
-		//	CCVector3d P1 = CCVector3d::fromArray(P->u);
-		//	P1 = vp.viewMat * P1;
-		//	Preversed = -CCVector3::fromArray(P1.u);
-		//}
-		//reversedVertices->addPoint(Preversed);
+		m_videoSteps[vp1Index].indexInSmoothTrajectory = totalCount - 1;
 	}
 
 	m_smoothTrajectoryReversed->addPointIndex(0, reversedVertices->size());
 	m_smoothTrajectoryReversed->setClosed(loopCheckBox->isChecked());
+
+	assert(reversedVertices->size() == m_smoothTrajectory->size());
 
 	return true;
 }
@@ -487,7 +491,7 @@ void qAnimationDlg::onAutoStepsDurationToggled(bool state)
 		return;
 	}
 
-	bool smoothMode = smoothTrajectoryCheckBox->isChecked();
+	bool smoothMode = (smoothTrajectoryGroupBox->isChecked() && m_smoothTrajectory);
 
 	//total length
 	PointCoordinateType sTotal = trajectory->computeLength();
@@ -550,11 +554,22 @@ void qAnimationDlg::onSmoothTrajectoryToggled(bool state)
 	{
 		updateSmoothCameraTrajectory();
 	}
+
+	onAutoStepsDurationToggled(autoStepDurationCheckBox->isChecked());
 }
+
+void qAnimationDlg::onSmoothRatioChanged(double ratio)
+{
+	if (smoothTrajectoryGroupBox->isChecked())
+	{
+		onSmoothTrajectoryToggled(true);
+	}
+}
+
 
 ccPolyline* qAnimationDlg::getTrajectory()
 {
-	return (smoothTrajectoryCheckBox->isChecked() ? m_smoothTrajectory : m_trajectory);
+	return (smoothTrajectoryGroupBox->isChecked() && m_smoothTrajectory ? m_smoothTrajectory : m_trajectory);
 }
 
 bool qAnimationDlg::exportTrajectoryOnExit()
@@ -593,8 +608,6 @@ void qAnimationDlg::applyViewport( const cc2DViewportObject* viewport )
 		m_view3d->setViewportParameters( viewport->getParameters() );
 		m_view3d->redraw();
 	}
-
-	//QApplication::processEvents();
 }
 
 void qAnimationDlg::onFPSChanged(int fps)
@@ -638,7 +651,11 @@ void qAnimationDlg::onTotalTimeChanged(double newTime_sec)
 
 void qAnimationDlg::onStepTimeChanged(double time_sec)
 {
-	m_videoSteps[ getCurrentStepIndex() ].duration_sec = time_sec;
+	int currentStepIndex = getCurrentStepIndex();
+	if (currentStepIndex >= 0)
+	{
+		m_videoSteps[getCurrentStepIndex()].duration_sec = time_sec;
+	}
 
 	//update total duration
 	updateTotalDuration();
@@ -1045,15 +1062,12 @@ void qAnimationDlg::updateCurrentStepDuration()
 	int index = getCurrentStepIndex();
 
 	stepTimeDoubleSpinBox->blockSignals(true);
-	stepTimeDoubleSpinBox->setValue(m_videoSteps[index].duration_sec);
+	stepTimeDoubleSpinBox->setValue(index < 0 ? 0.0 : m_videoSteps[index].duration_sec);
 	stepTimeDoubleSpinBox->blockSignals(false);
 }
 
 void qAnimationDlg::onItemChanged(QListWidgetItem*)
 {
-	//update total duration
-	updateTotalDuration();
-
 	onCurrentStepChanged(stepSelectionList->currentRow());
 
 	updateCameraTrajectory();
@@ -1066,26 +1080,20 @@ void qAnimationDlg::onCurrentStepChanged(int index)
 
 	updateCurrentStepDuration();
 
-	applyViewport(m_videoSteps[index].viewport);
+	if (index >= 0)
+	{
+		applyViewport(m_videoSteps[index].viewport);
+	}
 
 	//check that the step is enabled
-	bool isEnabled = (stepSelectionList->item(index)->checkState() == Qt::Checked);
+	bool isEnabled = (index >= 0 && stepSelectionList->item(index)->checkState() == Qt::Checked);
 	bool isLoop = loopCheckBox->isChecked();
-	currentStepGroupBox->setEnabled(isEnabled && (index + 1 < m_videoSteps.size() || isLoop));
+	currentStepGroupBox->setEnabled(isEnabled && ((index >= 0 && index + 1 < m_videoSteps.size()) || isLoop));
 }
 
 void qAnimationDlg::onLoopToggled(bool enabled)
 {
-	if (m_trajectory)
-	{
-		m_trajectory->setClosed(enabled);
-	}
-	if (m_smoothTrajectory)
-	{
-		m_smoothTrajectory->setClosed(enabled);
-	}
-
-	updateTotalDuration();
+	updateCameraTrajectory();
 
 	onCurrentStepChanged(stepSelectionList->currentRow());
 }

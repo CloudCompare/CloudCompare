@@ -136,6 +136,7 @@ v2.11 (Anoia) - (in development)
 		- option to save any scalar field as extra bytes (and load extra bytes as scalar fields)
 		- proper minor version setting
 		- proper header size
+		- using the latest version of LASlib with proper management of UTF8/UTF16 ('foreign') characters
   - ASCII files:
 	- CloudCompare can now load ASCII files with mixed whitespaces (spaces / tabs)
 	- the ASCII load dialog option has now an option to load numerical values with a comma as digit separator
@@ -194,6 +195,7 @@ v2.11 (Anoia) - (in development)
 	- The cartesian bounding-box of exported E57 files was wrongly expressed in the file-level coordinate system (instead of the local one)
 	- Data could be lost when merging two clouds with FWF data
 	- When VBOs were activated with an ATI card, CloudCompare could crash (because ATI only supports 32bit aligned VBOs :p)
+	- the LAS 1.3/1.4 filter was not compressing files with a minor case 'laz' extension :(
 
 v2.10.3 (Zephyrus) - 13/06/2019
 ----------------------

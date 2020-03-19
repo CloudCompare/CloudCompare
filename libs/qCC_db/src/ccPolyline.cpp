@@ -704,9 +704,9 @@ ccPolyline* ccPolyline::smoothChaikin(PointCoordinateType ratio, unsigned iterat
 		return nullptr;
 	}
 
-	if (size() < 2)
+	if (size() < 3)
 	{
-		ccLog::Warning("[ccPolyline::smoothChaikin] not enough vertices");
+		ccLog::Warning("[ccPolyline::smoothChaikin] not enough segments");
 		return nullptr;
 	}
 
@@ -721,8 +721,9 @@ ccPolyline* ccPolyline::smoothChaikin(PointCoordinateType ratio, unsigned iterat
 
 		//reserve memory for the new vertices
 		unsigned vertCount = currentIterationVertices->size();
-		
-		if (!newStateVertices->reserve(vertCount * 2))
+		unsigned segmentCount = (openPoly ? vertCount - 1 : vertCount);
+
+		if (!newStateVertices->reserve(segmentCount * 2))
 		{
 			ccLog::Warning("[ccPolyline::smoothChaikin] not enough memory");
 			delete currentIterationVertices;
@@ -736,7 +737,6 @@ ccPolyline* ccPolyline::smoothChaikin(PointCoordinateType ratio, unsigned iterat
 			newStateVertices->addPoint(*(currentIterationVertices ? currentIterationVertices->getPoint(0) : getPoint(0)));
 		}
 
-		unsigned segmentCount = (openPoly ? vertCount - 1 : vertCount);
 		for (unsigned i = 0; i < segmentCount; ++i)
 		{
 			unsigned iP = i;
@@ -745,11 +745,17 @@ ccPolyline* ccPolyline::smoothChaikin(PointCoordinateType ratio, unsigned iterat
 			const CCVector3& P = *currentIterationVertices->getPoint(iP);
 			const CCVector3& Q = *currentIterationVertices->getPoint(iQ);
 
-			CCVector3 P0 = (PC_ONE - ratio) * P + ratio * Q;
-			newStateVertices->addPoint(P0);
+			if (!openPoly || i != 0)
+			{
+				CCVector3 P0 = (PC_ONE - ratio) * P + ratio * Q;
+				newStateVertices->addPoint(P0);
+			}
 
-			CCVector3 P1 = ratio * P + (PC_ONE - ratio) * Q;
-			newStateVertices->addPoint(P1);
+			if (!openPoly || i + 1 != segmentCount)
+			{
+				CCVector3 P1 = ratio * P + (PC_ONE - ratio) * Q;
+				newStateVertices->addPoint(P1);
+			}
 		}
 
 		if (openPoly)
@@ -781,7 +787,7 @@ ccPolyline* ccPolyline::smoothChaikin(PointCoordinateType ratio, unsigned iterat
 
 			//copy state
 			smoothPoly->importParametersFrom(*this);
-			smoothPoly->setName(getName() + ".smoothed");
+			smoothPoly->setName(getName() + QString(".smoothed (ratio=%1)").arg(ratio));
 		}
 	}
 

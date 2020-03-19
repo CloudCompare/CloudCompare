@@ -122,7 +122,7 @@ void ccNormalComputationDlg::setCloud(ccPointCloud* cloud)
 {
 	m_cloud = cloud;
 
-	autoRadiusToolButton->setVisible(m_cloud != 0);
+	autoRadiusToolButton->setVisible(m_cloud != nullptr);
 }
 
 PointCoordinateType ccNormalComputationDlg::getRadius() const

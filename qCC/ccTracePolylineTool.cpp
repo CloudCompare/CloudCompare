@@ -144,13 +144,13 @@ ccPolyline* ccTracePolylineTool::polylineOverSampling(unsigned steps) const
 	if (!m_poly3D || !m_poly3DVertices || m_segmentParams.size() != m_poly3DVertices->size())
 	{
 		assert(false);
-		return 0;
+		return nullptr;
 	}
 
 	if (steps <= 1)
 	{
 		//nothing to do
-		return 0;
+		return nullptr;
 	}
 
 	ccHObject::Container clouds;
@@ -162,7 +162,7 @@ ccPolyline* ccTracePolylineTool::polylineOverSampling(unsigned steps) const
 	{
 		//no entity is currently displayed?!
 		assert(false);
-		return 0;
+		return nullptr;
 	}
 
 	unsigned n_verts = m_poly3DVertices->size();
@@ -178,7 +178,7 @@ ccPolyline* ccTracePolylineTool::polylineOverSampling(unsigned steps) const
 	{
 		ccLog::Warning("[ccTracePolylineTool::PolylineOverSampling] Not enough memory");
 		delete newPoly;
-		return 0;
+		return nullptr;
 	}
 	newVertices->importParametersFrom(m_poly3DVertices);
 	newVertices->setName(m_poly3DVertices->getName());
@@ -186,7 +186,7 @@ ccPolyline* ccTracePolylineTool::polylineOverSampling(unsigned steps) const
 	newPoly->importParametersFrom(*m_poly3D);
 	newPoly->setDisplay_recursive(m_poly3D->getDisplay());
 
-	QProgressDialog pDlg(QString("Oversampling"), "Cancel", 0, static_cast<int>(end_size), m_associatedWin ? m_associatedWin->asWidget() : 0);
+	QProgressDialog pDlg(QString("Oversampling"), "Cancel", 0, static_cast<int>(end_size), m_associatedWin ? m_associatedWin->asWidget() : nullptr);
 	pDlg.show();
 	QCoreApplication::processEvents();
 
@@ -313,7 +313,7 @@ bool ccTracePolylineTool::linkWith(ccGLWindow* win)
 		oldWin->disconnect(this);
 
 		if (m_polyTip)
-			m_polyTip->setDisplay(0);
+			m_polyTip->setDisplay(nullptr);
 	}
 
 	if (m_associatedWin)
@@ -597,8 +597,8 @@ void ccTracePolylineTool::restart(bool reset)
 			delete m_poly3D;
 			m_segmentParams.resize(0);
 			//delete m_poly3DVertices;
-			m_poly3D = 0;
-			m_poly3DVertices = 0;
+			m_poly3D = nullptr;
+			m_poly3DVertices = nullptr;
 		}
 		else
 		{
@@ -648,7 +648,7 @@ void ccTracePolylineTool::exportLine()
 		{
 			delete m_poly3D;
 			m_segmentParams.resize(0);
-			m_poly3DVertices = 0;
+			m_poly3DVertices = nullptr;
 			m_poly3D = poly;
 		}
 	}
@@ -664,9 +664,9 @@ void ccTracePolylineTool::exportLine()
 		assert(false);
 	}
 
-	m_poly3D = 0;
+	m_poly3D = nullptr;
 	m_segmentParams.resize(0);
-	m_poly3DVertices = 0;
+	m_poly3DVertices = nullptr;
 
 	resetLine(); //to update the GUI
 }

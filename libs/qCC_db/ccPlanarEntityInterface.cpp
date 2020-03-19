@@ -13,8 +13,8 @@ ccPlanarEntityInterface::ccPlanarEntityInterface()
 }
 
 //unit normal representation
-static QSharedPointer<ccCylinder> c_unitNormalSymbol(0);
-static QSharedPointer<ccCone> c_unitNormalHeadSymbol(0);
+static QSharedPointer<ccCylinder> c_unitNormalSymbol(nullptr);
+static QSharedPointer<ccCone> c_unitNormalHeadSymbol(nullptr);
 
 void ccPlanarEntityInterface::glDrawNormal(CC_DRAW_CONTEXT& context, const CCVector3& pos, float scale, const ccColor::Rgb* color/*=0*/)
 {
@@ -27,7 +27,7 @@ void ccPlanarEntityInterface::glDrawNormal(CC_DRAW_CONTEXT& context, const CCVec
 
 	if (!c_unitNormalSymbol)
 	{
-		c_unitNormalSymbol = QSharedPointer<ccCylinder>(new ccCylinder(0.02f, 0.9f, 0, "UnitNormal", 12));
+		c_unitNormalSymbol = QSharedPointer<ccCylinder>(new ccCylinder(0.02f, 0.9f, nullptr, "UnitNormal", 12));
 		c_unitNormalSymbol->showColors(true);
 		c_unitNormalSymbol->setVisible(true);
 		c_unitNormalSymbol->setEnabled(true);
@@ -35,7 +35,7 @@ void ccPlanarEntityInterface::glDrawNormal(CC_DRAW_CONTEXT& context, const CCVec
 	}
 	if (!c_unitNormalHeadSymbol)
 	{
-		c_unitNormalHeadSymbol = QSharedPointer<ccCone>(new ccCone(0.05f, 0.0f, 0.1f, 0, 0, 0, "UnitNormalHead", 12));
+		c_unitNormalHeadSymbol = QSharedPointer<ccCone>(new ccCone(0.05f, 0.0f, 0.1f, 0, 0, nullptr, "UnitNormalHead", 12));
 		c_unitNormalHeadSymbol->showColors(true);
 		c_unitNormalHeadSymbol->setVisible(true);
 		c_unitNormalHeadSymbol->setEnabled(true);
@@ -45,7 +45,7 @@ void ccPlanarEntityInterface::glDrawNormal(CC_DRAW_CONTEXT& context, const CCVec
 	//build-up the normal representation own 'context'
 	CC_DRAW_CONTEXT normalContext = context;
 	normalContext.drawingFlags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the primitives don't push their own!
-	normalContext.display = 0;
+	normalContext.display = nullptr;
 
 	if (color)
 	{

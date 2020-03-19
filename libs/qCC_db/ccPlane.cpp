@@ -115,7 +115,7 @@ ccPlane* ccPlane::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/*=0*
 	if (count < 3)
 	{
 		ccLog::Warning("[ccPlane::Fit] Not enough points in input cloud to fit a plane!");
-		return 0;
+		return nullptr;
 	}
 
 	CCLib::Neighbourhood Yk(cloud);
@@ -125,7 +125,7 @@ ccPlane* ccPlane::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/*=0*
 	if (!theLSPlane)
 	{
 		ccLog::Warning("[ccPlane::Fit] Not enough points to fit a plane!");
-		return 0;
+		return nullptr;
 	}
 
 	//get the centroid
@@ -267,7 +267,7 @@ ccMaterial::Shared ccPlane::SetQuadTexture(ccMesh* quadMesh, QImage image, QStri
 		{
 			//not enough memory
 			ccLog::Warning("[ccPlane::setAsTexture] Not enough memory!");
-			quadMesh->setTexCoordinatesTable(0);
+			quadMesh->setTexCoordinatesTable(nullptr);
 			quadMesh->removePerTriangleMtlIndexes();
 			return ccMaterial::Shared(nullptr);
 		}
@@ -283,7 +283,7 @@ ccMaterial::Shared ccPlane::SetQuadTexture(ccMesh* quadMesh, QImage image, QStri
 		{
 			//not enough memory
 			ccLog::Warning("[ccPlane::setAsTexture] Not enough memory!");
-			quadMesh->setTexCoordinatesTable(0);
+			quadMesh->setTexCoordinatesTable(nullptr);
 			quadMesh->removePerTriangleTexCoordIndexes();
 			return ccMaterial::Shared(nullptr);
 		}

@@ -1397,12 +1397,12 @@ bool ManualSegmentationTools::segmentMeshWithAABox(GenericIndexedMesh* origMesh,
 		if (	!MergeOldTriangles(	origMesh, origVertices,
 									insideMesh, insideVertices,
 									*preservedTrianglesInside,
-									ioParams.trackOrigIndexes ? &ioParams.origTriIndexesMapInside : 0)
+									ioParams.trackOrigIndexes ? &ioParams.origTriIndexesMapInside : nullptr)
 			||	(	ioParams.generateOutsideMesh
 				&&	!MergeOldTriangles(	origMesh, origVertices,
 										outsideMesh, outsideVertices,
 										preservedTrianglesOutside,
-										ioParams.trackOrigIndexes ? &ioParams.origTriIndexesMapOutside : 0))
+										ioParams.trackOrigIndexes ? &ioParams.origTriIndexesMapOutside : nullptr))
 			)
 		{
 			error = true;

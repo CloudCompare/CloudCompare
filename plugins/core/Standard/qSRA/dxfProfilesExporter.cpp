@@ -525,7 +525,7 @@ bool DxfProfilesExporter::SaveVerticalProfiles(	const QSharedPointer<DistanceMap
 	dw->dxfEOF();
 	dw->close();
 	delete dw;
-	dw = 0;
+	dw = nullptr;
 
 	return true;
 
@@ -1056,7 +1056,7 @@ bool DxfProfilesExporter::SaveHorizontalProfiles(	const QSharedPointer<DistanceM
 	dw->dxfEOF();
 	dw->close();
 	delete dw;
-	dw = 0;
+	dw = nullptr;
 
 	return true;
 

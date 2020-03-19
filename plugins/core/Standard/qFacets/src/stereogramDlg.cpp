@@ -78,10 +78,10 @@ public:
 StereogramWidget::StereogramWidget(QWidget *parent)
 	: QLabel(QString(), parent)
 	, m_angularStep_deg(0)
-	, m_densityGrid(0)
+	, m_densityGrid(nullptr)
 	, m_meanDipDir_deg(-1.0)
 	, m_meanDip_deg(-1.0)
-	, m_densityColorScale(0)
+	, m_densityColorScale(nullptr)
 	, m_densityColorScaleSteps(ccColorScale::MAX_STEPS < 256 ? ccColorScale::MAX_STEPS : 256) //DGM: we can't pass a constant initializer (MAX_STEPS) by reference
 	, m_ticksFreq(3)
 	, m_showHSVRing(false)
@@ -114,7 +114,7 @@ bool StereogramWidget::init(double angularStep_deg,
 
 	if (m_densityGrid)
 		delete m_densityGrid;
-	m_densityGrid = 0;
+	m_densityGrid = nullptr;
 
 	if (!entity)
 		return false;
@@ -128,7 +128,7 @@ bool StereogramWidget::init(double angularStep_deg,
 	size_t count = 0;
 	ccHObject::Container facets;
 	ccHObject::Container planes;
-	ccPointCloud* cloud = 0;
+	ccPointCloud* cloud = nullptr;
 
 	//a set of facets or planes?
 	if (entity->isA(CC_TYPES::HIERARCHY_OBJECT))
@@ -275,7 +275,7 @@ bool StereogramWidget::init(double angularStep_deg,
 	{
 		//not enough memory!
 		delete densityGrid;
-		densityGrid = 0;
+		densityGrid = nullptr;
 	}
 
 	//replace old grid by new one! (even in case of failure! See below)
@@ -567,10 +567,10 @@ void StereogramWidget::paintEvent(QPaintEvent* event)
 }
 
 StereogramDialog::StereogramDialog(ccMainAppInterface* app/*=0*/)
-	: QDialog(app ? app->getMainWindow() : 0)
+	: QDialog(app ? app->getMainWindow() : nullptr)
 	, Ui::StereogramDialog()
-	, m_classifWidget(0)
-	, m_colorScaleSelector(0)
+	, m_classifWidget(nullptr)
+	, m_colorScaleSelector(nullptr)
 	, m_app(app)
 	, m_facetGroupUniqueID(0)
 {
@@ -726,7 +726,7 @@ void StereogramDialog::updateFacetsFilter(bool enable)
 
 	//try to find the associated entity
 	ccHObject* root = m_app->dbRootObject();
-	ccHObject* entity = (root ? root->find(m_facetGroupUniqueID) : 0);
+	ccHObject* entity = (root ? root->find(m_facetGroupUniqueID) : nullptr);
 	if (!entity)
 		return;
 
@@ -828,7 +828,7 @@ void StereogramDialog::exportCurrentSelection()
 
 	//try to find the associated entity
 	ccHObject* root = m_app->dbRootObject();
-	ccHObject* entity = (root ? root->find(m_facetGroupUniqueID) : 0);
+	ccHObject* entity = (root ? root->find(m_facetGroupUniqueID) : nullptr);
 	if (!entity)
 		return;
 
@@ -878,7 +878,7 @@ void StereogramDialog::exportCurrentSelection()
 		else
 		{
 			delete newGroup;
-			newGroup = 0;
+			newGroup = nullptr;
 		}
 	}
 	//or a cloud?

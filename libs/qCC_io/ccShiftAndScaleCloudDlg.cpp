@@ -46,7 +46,7 @@ ccShiftAndScaleCloudDlg::ccShiftAndScaleCloudDlg(const CCVector3d& Pg,
 												 double Dg/*=0*/,
 												 QWidget* parent/*=0*/)
 	: QDialog(parent)
-	, m_ui(0)
+	, m_ui(nullptr)
 	, m_applyAll(false)
 	, m_cancel(false)
 	, m_activeInfoIndex(-1)
@@ -71,7 +71,7 @@ ccShiftAndScaleCloudDlg::ccShiftAndScaleCloudDlg(	const CCVector3d& Pl,
 													double Dg,
 													QWidget* parent/*=0*/)
 	: QDialog(parent)
-	, m_ui(0)
+	, m_ui(nullptr)
 	, m_applyAll(false)
 	, m_cancel(false)
 	, m_activeInfoIndex(-1)
@@ -99,7 +99,7 @@ ccShiftAndScaleCloudDlg::~ccShiftAndScaleCloudDlg()
 	if (m_ui)
 	{
 		delete m_ui;
-		m_ui = 0;
+		m_ui = nullptr;
 	}
 }
 

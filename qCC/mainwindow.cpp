@@ -323,7 +323,7 @@ MainWindow::~MainWindow()
 	ccRoot->getRootEntity()->setDisplay_recursive(nullptr);
 	for (int i = 0; i < getGLWindowCount(); ++i)
 	{
-		getGLWindow(i)->setSceneDB(0);
+		getGLWindow(i)->setSceneDB(nullptr);
 	}
 	m_cpeDlg = nullptr;
 	m_gsTool = nullptr;
@@ -344,7 +344,7 @@ MainWindow::~MainWindow()
 
 		mdiDialog.dialog->disconnect();
 		mdiDialog.dialog->stop(false);
-		mdiDialog.dialog->setParent(0);
+		mdiDialog.dialog->setParent(nullptr);
 		delete mdiDialog.dialog;
 	}
 	//m_mdiDialogs.clear();
@@ -1591,7 +1591,7 @@ void MainWindow::doActionFlagMeshVertices()
 		if (entity->isKindOf(CC_TYPES::MESH))
 		{
 			ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(entity);
-			ccPointCloud* vertices = ccHObjectCaster::ToPointCloud(mesh ? mesh->getAssociatedCloud() : 0);
+			ccPointCloud* vertices = ccHObjectCaster::ToPointCloud(mesh ? mesh->getAssociatedCloud() : nullptr);
 			if (mesh && vertices)
 			{
 				//prepare a new scalar field
@@ -1746,7 +1746,7 @@ void MainWindow::doActionComputeDistancesFromSensor()
 			continue; //skip this entity
 
 		//get associated cloud
-		ccHObject* defaultCloud = sensor->getParent() && sensor->getParent()->isA(CC_TYPES::POINT_CLOUD) ? sensor->getParent() : 0;
+		ccHObject* defaultCloud = sensor->getParent() && sensor->getParent()->isA(CC_TYPES::POINT_CLOUD) ? sensor->getParent() : nullptr;
 		ccPointCloud* cloud = askUserToSelectACloud(defaultCloud, "Select a cloud on which to project the uncertainty:");
 		if (!cloud)
 		{
@@ -1810,7 +1810,7 @@ void MainWindow::doActionComputeScatteringAngles()
 		return;
 
 	//get associated cloud
-	ccHObject* defaultCloud = sensor->getParent() && sensor->getParent()->isA(CC_TYPES::POINT_CLOUD) ? sensor->getParent() : 0;
+	ccHObject* defaultCloud = sensor->getParent() && sensor->getParent()->isA(CC_TYPES::POINT_CLOUD) ? sensor->getParent() : nullptr;
 	ccPointCloud* cloud = askUserToSelectACloud(defaultCloud, "Select a cloud on which to project the uncertainty:");
 	if (!cloud)
 	{
@@ -2155,7 +2155,7 @@ void MainWindow::doActionProjectUncertainty()
 	}
 
 	//we need a cloud to project the uncertainty on!
-	ccHObject* defaultCloud = sensor->getParent() && sensor->getParent()->isA(CC_TYPES::POINT_CLOUD) ? sensor->getParent() : 0;
+	ccHObject* defaultCloud = sensor->getParent() && sensor->getParent()->isA(CC_TYPES::POINT_CLOUD) ? sensor->getParent() : nullptr;
 	ccPointCloud* pointCloud = askUserToSelectACloud(defaultCloud, "Select a cloud on which to project the uncertainty:");
 	if (!pointCloud)
 	{
@@ -2258,7 +2258,7 @@ void MainWindow::doActionCheckPointsInsideFrustum()
 		return;
 
 	//we need a cloud to filter!
-	ccHObject* defaultCloud = sensor->getParent() && sensor->getParent()->isA(CC_TYPES::POINT_CLOUD) ? sensor->getParent() : 0;
+	ccHObject* defaultCloud = sensor->getParent() && sensor->getParent()->isA(CC_TYPES::POINT_CLOUD) ? sensor->getParent() : nullptr;
 	ccPointCloud* pointCloud = askUserToSelectACloud(defaultCloud, "Select a cloud to filter:");
 	if (!pointCloud)
 	{
@@ -2446,7 +2446,7 @@ void MainWindow::doActionComputePointsVisibility()
 		return;
 
 	//we need a cloud to filter!
-	ccHObject* defaultCloud = sensor->getParent() && sensor->getParent()->isA(CC_TYPES::POINT_CLOUD) ? sensor->getParent() : 0;
+	ccHObject* defaultCloud = sensor->getParent() && sensor->getParent()->isA(CC_TYPES::POINT_CLOUD) ? sensor->getParent() : nullptr;
 	ccPointCloud* pointCloud = askUserToSelectACloud(defaultCloud, "Select a cloud to filter:");
 	if (!pointCloud)
 	{
@@ -3029,7 +3029,7 @@ void MainWindow::doActionRenameSF()
 
 void MainWindow::doActionOpenColorScalesManager()
 {
-	ccColorScaleEditorDialog cseDlg(ccColorScalesManager::GetUniqueInstance(), this, ccColorScale::Shared(0), this);
+	ccColorScaleEditorDialog cseDlg(ccColorScalesManager::GetUniqueInstance(), this, ccColorScale::Shared(nullptr), this);
 
 	if (cseDlg.exec())
 	{
@@ -3215,7 +3215,7 @@ void AddToRemoveList(ccHObject* toRemove, ccHObject::Container& toBeRemovedList)
 	{
 		if (toBeRemovedList[j]->isAncestorOf(toRemove))
 		{
-			toRemove = 0;
+			toRemove = nullptr;
 			break;
 		}
 		else if (toRemove->isAncestorOf(toBeRemovedList[j]))
@@ -3816,7 +3816,7 @@ void MainWindow::doActionSubsample()
 			ccPointCloud *newPointCloud = cloud->partialClone(sampledCloud,&warnings);
 
 			delete sampledCloud;
-			sampledCloud = 0;
+			sampledCloud = nullptr;
 
 			if (newPointCloud)
 			{
@@ -3928,7 +3928,7 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 
 	//we create "real" point clouds for all input components
 	{
-		ccPointCloud* pc = cloud->isA(CC_TYPES::POINT_CLOUD) ? static_cast<ccPointCloud*>(cloud) : 0;
+		ccPointCloud* pc = cloud->isA(CC_TYPES::POINT_CLOUD) ? static_cast<ccPointCloud*>(cloud) : nullptr;
 
 		//we create a new group to store all CCs
 		ccHObject* ccGroup = new ccHObject(cloud->getName() + QString(" [CCs]"));
@@ -4200,7 +4200,7 @@ void MainWindow::doMeshTwoPolylines()
 		}
 	}
 
-	ccMesh* mesh = ccMesh::TriangulateTwoPolylines(p1, p2, useViewingDir ? &viewingDir : 0);
+	ccMesh* mesh = ccMesh::TriangulateTwoPolylines(p1, p2, useViewingDir ? &viewingDir : nullptr);
 	if (mesh)
 	{
 		addToDB(mesh);
@@ -5324,7 +5324,7 @@ void MainWindow::doActionSORFilter()
 		CCLib::ReferenceCloud* selection = CCLib::CloudSamplingTools::sorFilter(cloud,
 																				s_sorFilterKnn,
 																				s_sorFilterNSigma,
-																				0,
+																				nullptr,
 																				&pDlg);
 
 		if (selection && cloud)
@@ -5445,7 +5445,7 @@ void MainWindow::doActionFilterNoise()
 																					s_noiseFilterKnn,
 																					s_noiseFilterUseAbsError,
 																					s_noiseFilterAbsError,
-																					0,
+																					nullptr,
 																					&pDlg);
 
 		if (selection && cloud)
@@ -5603,7 +5603,7 @@ ccGLWindow* MainWindow::getActiveGLWindow()
 {
 	if (!m_mdiArea)
 	{
-		return 0;
+		return nullptr;
 	}
 
 	QMdiSubWindow *activeSubWindow = m_mdiArea->activeSubWindow();
@@ -5620,7 +5620,7 @@ ccGLWindow* MainWindow::getActiveGLWindow()
 		}
 	}
 
-	return 0;
+	return nullptr;
 }
 
 QMdiSubWindow* MainWindow::getMDISubWindow(ccGLWindow* win)
@@ -5633,7 +5633,7 @@ QMdiSubWindow* MainWindow::getMDISubWindow(ccGLWindow* win)
 	}
 
 	//not found!
-	return 0;
+	return nullptr;
 }
 
 ccGLWindow* MainWindow::getGLWindow(int index) const
@@ -5648,7 +5648,7 @@ ccGLWindow* MainWindow::getGLWindow(int index) const
 	else
 	{
 		assert(false);
-		return 0;
+		return nullptr;
 	}
 }
 
@@ -7441,7 +7441,7 @@ ccPointCloud* MainWindow::askUserToSelectACloud(ccHObject* defaultCloudEntity/*=
 	if (clouds.empty())
 	{
 		ccConsole::Error("No cloud in database!");
-		return 0;
+		return nullptr;
 	}
 	//default selected index
 	int selectedIndex = 0;
@@ -7460,7 +7460,7 @@ ccPointCloud* MainWindow::askUserToSelectACloud(ccHObject* defaultCloudEntity/*=
 	{
 		selectedIndex = ccItemSelectionDlg::SelectEntity(clouds, selectedIndex, this, inviteMessage);
 		if (selectedIndex < 0)
-			return 0;
+			return nullptr;
 	}
 
 	assert(selectedIndex >= 0 && static_cast<size_t>(selectedIndex) < clouds.size());
@@ -7667,7 +7667,7 @@ void MainWindow::doActionClone()
 		else if (entity->isA(CC_TYPES::POLY_LINE))
 		{
 			ccPolyline* poly = ccHObjectCaster::ToPolyline(entity);
-			clone = (poly ? new ccPolyline(*poly) : 0);
+			clone = (poly ? new ccPolyline(*poly) : nullptr);
 			if (!clone)
 			{
 				ccConsole::Error(QString("An error occurred while cloning polyline %1").arg(entity->getName()));
@@ -7676,7 +7676,7 @@ void MainWindow::doActionClone()
 		else if (entity->isA(CC_TYPES::FACET))
 		{
 			ccFacet* facet = ccHObjectCaster::ToFacet(entity);
-			clone = (facet ? facet->clone() : 0);
+			clone = (facet ? facet->clone() : nullptr);
 			if (!clone)
 			{
 				ccConsole::Error(QString("An error occurred while cloning facet %1").arg(entity->getName()));
@@ -8426,7 +8426,7 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 						params.minRMSDecrease = 1.0e-6;
 					}
 
-					result = CCLib::ICPRegistrationTools::Register(A, 0, B, params, registerTrans, finalRMS, finalPointCount);
+					result = CCLib::ICPRegistrationTools::Register(A, nullptr, B, params, registerTrans, finalRMS, finalPointCount);
 
 					if (result >= CCLib::ICPRegistrationTools::ICP_ERROR)
 					{
@@ -10753,7 +10753,7 @@ void MainWindow::destroyGLWindow(ccGLWindow* view3D) const
 {
 	if (view3D)
 	{
-		view3D->setParent(0);
+		view3D->setParent(nullptr);
 		delete view3D;
 	}
 }

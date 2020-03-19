@@ -340,7 +340,7 @@ ccPointCloud* ccVolumeCalcTool::ConvertGridToCloud(	ccRasterGrid& grid,
 	assert(gridBox.isValid());
 	assert(vertDim < 3);
 
-	ccPointCloud* rasterCloud = 0;
+	ccPointCloud* rasterCloud = nullptr;
 	try
 	{
 		//we only compute the default 'height' layer
@@ -352,7 +352,7 @@ ccPointCloud* ccVolumeCalcTool::ConvertGridToCloud(	ccRasterGrid& grid,
 			false,
 			false,
 			false,
-			0,
+			nullptr,
 			vertDim,
 			gridBox,
 			false,
@@ -376,7 +376,7 @@ ccPointCloud* ccVolumeCalcTool::ConvertGridToCloud(	ccRasterGrid& grid,
 		if (rasterCloud)
 		{
 			delete rasterCloud;
-			rasterCloud = 0;
+			rasterCloud = nullptr;
 		}
 	}
 
@@ -385,7 +385,7 @@ ccPointCloud* ccVolumeCalcTool::ConvertGridToCloud(	ccRasterGrid& grid,
 
 ccPointCloud* ccVolumeCalcTool::convertGridToCloud(bool exportToOriginalCS) const
 {
-	ccPointCloud* rasterCloud = 0;
+	ccPointCloud* rasterCloud = nullptr;
 	try
 	{
 		//we only compute the default 'height' layer
@@ -396,7 +396,7 @@ ccPointCloud* ccVolumeCalcTool::convertGridToCloud(bool exportToOriginalCS) cons
 																false,
 																false,
 																false,
-																0,
+																nullptr,
 																false,
 																std::numeric_limits<double>::quiet_NaN(),
 																exportToOriginalCS);
@@ -418,7 +418,7 @@ ccPointCloud* ccVolumeCalcTool::convertGridToCloud(bool exportToOriginalCS) cons
 		if (rasterCloud)
 		{
 			delete rasterCloud;
-			rasterCloud = 0;
+			rasterCloud = nullptr;
 		}
 	}
 
@@ -435,7 +435,7 @@ void ccVolumeCalcTool::updateGridAndDisplay()
 		{
 			m_glWindow->removeFromOwnDB(m_rasterCloud);
 			delete m_rasterCloud;
-			m_rasterCloud = 0;
+			m_rasterCloud = nullptr;
 		}
 
 		m_rasterCloud = convertGridToCloud(false);
@@ -562,7 +562,7 @@ bool ccVolumeCalcTool::ComputeVolume(	ccRasterGrid& grid,
 	}
 
 	//progress dialog
-	QScopedPointer<ccProgressDialog> pDlg(0);
+	QScopedPointer<ccProgressDialog> pDlg(nullptr);
 	if (parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parentWidget));
@@ -783,7 +783,7 @@ bool ccVolumeCalcTool::updateGrid()
 	assert(gridStep != 0);
 
 	//ground
-	ccGenericPointCloud* groundCloud = 0;
+	ccGenericPointCloud* groundCloud = nullptr;
 	double groundHeight = 0;
 	switch (groundComboBox->currentIndex())
 	{
@@ -802,7 +802,7 @@ bool ccVolumeCalcTool::updateGrid()
 	}
 
 	//ceil
-	ccGenericPointCloud* ceilCloud = 0;
+	ccGenericPointCloud* ceilCloud = nullptr;
 	double ceilHeight = 0;
 	switch (ceilComboBox->currentIndex())
 	{

@@ -982,7 +982,7 @@ void cc2DLabel::drawMeOnly(CC_DRAW_CONTEXT& context)
 }
 
 //unit point marker
-static QSharedPointer<ccSphere> c_unitPointMarker(0);
+static QSharedPointer<ccSphere> c_unitPointMarker(nullptr);
 
 void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 {
@@ -1087,7 +1087,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 		{
 			if (!c_unitPointMarker)
 			{
-				c_unitPointMarker = QSharedPointer<ccSphere>(new ccSphere(1.0f, 0, "PointMarker", 12));
+				c_unitPointMarker = QSharedPointer<ccSphere>(new ccSphere(1.0f, nullptr, "PointMarker", 12));
 				c_unitPointMarker->showColors(true);
 				c_unitPointMarker->setVisible(true);
 				c_unitPointMarker->setEnabled(true);
@@ -1096,7 +1096,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 			//build-up point maker own 'context'
 			CC_DRAW_CONTEXT markerContext = context;
 			markerContext.drawingFlags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the sphere doesn't push its own!
-			markerContext.display = 0;
+			markerContext.display = nullptr;
 
 			if (isSelected() && !pushName)
 				c_unitPointMarker->setTempColor(ccColor::red);

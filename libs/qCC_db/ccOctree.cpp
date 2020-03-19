@@ -42,7 +42,7 @@ ccOctree::ccOctree(ccGenericPointCloud* aCloud)
 	, m_displayMode(WIRE)
 	, m_glListID(0)
 	, m_glListIsDeprecated(true)
-	, m_frustumIntersector(0)
+	, m_frustumIntersector(nullptr)
 {
 }
 
@@ -51,7 +51,7 @@ ccOctree::~ccOctree()
 	if (m_frustumIntersector)
 	{
 		delete m_frustumIntersector;
-		m_frustumIntersector = 0;
+		m_frustumIntersector = nullptr;
 	}
 }
 
@@ -242,7 +242,7 @@ void ccOctree::draw(CC_DRAW_CONTEXT& context)
 				//fake context
 				CC_DRAW_CONTEXT fakeContext = context;
 				fakeContext.drawingFlags = CC_DRAW_3D | CC_DRAW_FOREGROUND | CC_LIGHT_ENABLED;
-				fakeContext.display = 0;
+				fakeContext.display = nullptr;
 
 				void* additionalParameters[] = {	reinterpret_cast<void*>(&glParams),
 													reinterpret_cast<void*>(m_theAssociatedCloudAsGPC),
@@ -516,7 +516,7 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 							PointDescriptor& output,
 							double pickWidth_pix/*=3.0*/) const
 {
-	output.point = 0;
+	output.point = nullptr;
 	output.squareDistd = -1.0;
 
 	if (!m_theAssociatedCloudAsGPC)
@@ -605,10 +605,10 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 	Ray<PointCoordinateType> rayLocal(rayAxis, rayOrigin - m_dimMin);
 
 	//visibility table (if any)
-	const ccGenericPointCloud::VisibilityTableType* visTable = m_theAssociatedCloudAsGPC->isVisibilityTableInstantiated() ? &m_theAssociatedCloudAsGPC->getTheVisibilityArray() : 0;
+	const ccGenericPointCloud::VisibilityTableType* visTable = m_theAssociatedCloudAsGPC->isVisibilityTableInstantiated() ? &m_theAssociatedCloudAsGPC->getTheVisibilityArray() : nullptr;
 
 	//scalar field with hidden values (if any)
-	ccScalarField* activeSF = 0;
+	ccScalarField* activeSF = nullptr;
 	if (	m_theAssociatedCloudAsGPC->sfShown()
 		&&	m_theAssociatedCloudAsGPC->isA(CC_TYPES::POINT_CLOUD)
 		&&	!visTable //if the visibility table is instantiated, we always display ALL points

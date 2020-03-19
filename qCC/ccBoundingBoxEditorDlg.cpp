@@ -445,7 +445,7 @@ void ccBoundingBoxEditorDlg::onAxisValueChanged(double)
 	CCVector3d X, Y, Z;
 	getBoxAxes(X, Y, Z);
 
-	QDoubleSpinBox* vecSpinBoxes[3] = { 0, 0, 0 };
+	QDoubleSpinBox* vecSpinBoxes[3] = { nullptr, nullptr, nullptr };
 	CCVector3d N(0, 0, 0);
 	if (oriXCheckBox->isChecked())
 	{

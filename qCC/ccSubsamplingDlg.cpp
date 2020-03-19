@@ -60,7 +60,7 @@ CCLib::ReferenceCloud* ccSubsamplingDlg::getSampledCloud(ccGenericPointCloud* cl
 	if (!cloud || cloud->size() == 0)
 	{
 		ccLog::Warning("[ccSubsamplingDlg::getSampledCloud] Invalid input cloud!");
-		return 0;
+		return nullptr;
 	}
 
 	switch (samplingMethod->currentIndex())
@@ -139,7 +139,7 @@ CCLib::ReferenceCloud* ccSubsamplingDlg::getSampledCloud(ccGenericPointCloud* cl
 	}
 
 	//something went wrong!
-	return 0;
+	return nullptr;
 }
 
 void ccSubsamplingDlg::updateLabels()

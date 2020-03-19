@@ -41,9 +41,9 @@
 #include <assert.h>
 
 cc2Point5DimEditor::cc2Point5DimEditor()
-	: m_bbEditorDlg(0)
-	, m_glWindow(0)
-	, m_rasterCloud(0)
+	: m_bbEditorDlg(nullptr)
+	, m_glWindow(nullptr)
+	, m_rasterCloud(nullptr)
 {
 }
 
@@ -54,7 +54,7 @@ cc2Point5DimEditor::~cc2Point5DimEditor()
 		if (m_glWindow)
 			m_glWindow->removeFromOwnDB(m_rasterCloud);
 		delete m_rasterCloud;
-		m_rasterCloud = 0;
+		m_rasterCloud = nullptr;
 	}
 }
 
@@ -88,7 +88,7 @@ void cc2Point5DimEditor::create2DView(QFrame* parentFrame)
 {
 	if (!m_glWindow)
 	{
-		QWidget* glWidget = 0;
+		QWidget* glWidget = nullptr;
 		CreateGLWindow(m_glWindow, glWidget, false, true);
 		assert(m_glWindow && glWidget);
 		

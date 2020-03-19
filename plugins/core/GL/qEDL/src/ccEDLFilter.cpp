@@ -40,15 +40,15 @@ ccEDLFilter::ccEDLFilter()
 	: ccGlFilter("EyeDome Lighting (disable normals and increase points size for a better result!)")
 	, m_screenWidth(0)
 	, m_screenHeight(0)
-	, m_EDLShader(0)
-	, m_fboMix(0)
-	, m_mixShader(0)
+	, m_EDLShader(nullptr)
+	, m_fboMix(nullptr)
+	, m_mixShader(nullptr)
 	, m_expScale(100.0f)
 	, m_glFuncIsValid(false)
 {
 	for (unsigned i = 0; i < FBO_COUNT; ++i)
 	{
-		m_fbos[i] = 0;
+		m_fbos[i] = nullptr;
 	}
 
 	//smoothing filter for full resolution
@@ -104,27 +104,27 @@ void ccEDLFilter::reset()
 		if (m_fbos[i])
 		{
 			delete m_fbos[i];
-			m_fbos[i] = 0;
+			m_fbos[i] = nullptr;
 		}
 
 		if (m_bilateralFilters[i].filter)
 		{
 			delete m_bilateralFilters[i].filter;
-			m_bilateralFilters[i].filter = 0;
+			m_bilateralFilters[i].filter = nullptr;
 		}
 	}
 
 	if (m_fboMix)
 		delete m_fboMix;
-	m_fboMix = 0;
+	m_fboMix = nullptr;
 
 	if (m_EDLShader)
 		delete m_EDLShader;
-	m_EDLShader = 0;
+	m_EDLShader = nullptr;
 
 	if (m_mixShader)
 		delete m_mixShader;
-	m_mixShader = 0;
+	m_mixShader = nullptr;
 
 	m_screenWidth = m_screenHeight = 0;
 }
@@ -185,14 +185,14 @@ bool ccEDLFilter::init(unsigned width, unsigned height, GLenum internalFormat, G
 			else
 			{
 				delete m_bilateralFilters[i].filter;
-				m_bilateralFilters[i].filter = 0;
+				m_bilateralFilters[i].filter = nullptr;
 				m_bilateralFilters[i].enabled = false;
 			}
 		}
 		else if (m_bilateralFilters[i].filter)
 		{
 			delete m_bilateralFilters[i].filter;
-			m_bilateralFilters[i].filter = 0;
+			m_bilateralFilters[i].filter = nullptr;
 		}
 	}
 

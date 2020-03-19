@@ -50,7 +50,7 @@ void FacetsExportDlg::browseDestination()
 	}
 
 	//open file saving dialog
-	QString outputFilename = QFileDialog::getSaveFileName(0, "Select destination", destinationPathLineEdit->text(), saveFileFilter);
+	QString outputFilename = QFileDialog::getSaveFileName(nullptr, "Select destination", destinationPathLineEdit->text(), saveFileFilter);
 
 	if (outputFilename.isEmpty())
 		return;

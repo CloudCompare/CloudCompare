@@ -45,7 +45,8 @@ void ScalarField::setName(const char* name)
 
 void ScalarField::computeMeanAndVariance(ScalarType &mean, ScalarType* variance) const
 {
-	double _mean = 0.0, _std2 = 0.0;
+	double _mean = 0.0;
+	double _std2 = 0.0;
 	std::size_t count = 0;
 
 	for (std::size_t i = 0; i < size(); ++i)

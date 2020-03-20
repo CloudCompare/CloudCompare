@@ -68,7 +68,8 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 		return -1.0;
 
 	//compute min and max (valid) values
-	ScalarType minV = 0, maxV = 0;
+	ScalarType minV = 0;
+	ScalarType maxV = 0;
 	unsigned numberOfValidValues = 0;
 	{
 		bool firstValidValue = true;
@@ -332,12 +333,15 @@ double StatisticalTestingTools::testCloudWithStatisticalModel(const GenericDistr
 		return -3.0;
 	}
 
-	ScalarType* histoMin = nullptr, customHistoMin = 0;
-	ScalarType* histoMax = nullptr, customHistoMax = 0;
+	ScalarType* histoMin = nullptr;
+	ScalarType customHistoMin = 0;
+	ScalarType* histoMax = nullptr;
+	ScalarType customHistoMax = 0;
 	if (strcmp(distrib->getName(),"Gauss")==0)
 	{
 		const NormalDistribution* nDist = static_cast<const NormalDistribution*>(distrib);
-		ScalarType mu=0, sigma2=0;
+		ScalarType mu = 0;
+		ScalarType sigma2 = 0;
 		nDist->getParameters(mu, sigma2);
 		customHistoMin = mu - static_cast<ScalarType>(3.0) * sqrt(sigma2);
 		histoMin = &customHistoMin;
@@ -350,7 +354,7 @@ double StatisticalTestingTools::testCloudWithStatisticalModel(const GenericDistr
 		histoMin = &customHistoMin;
 	}
 
-	//additionnal parameters for local process
+	//additional parameters for local process
 	void* additionalParameters[] = {	reinterpret_cast<void*>(const_cast<GenericDistribution*>(distrib)),
 										reinterpret_cast<void*>(&numberOfNeighbours),
 										reinterpret_cast<void*>(&numberOfChi2Classes),

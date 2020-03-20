@@ -54,7 +54,8 @@ PointCloud* PointProjectionTools::developCloudOnCylinder(	GenericCloud* cloud,
 	CCVector3 C;
 	if (!center)
 	{
-		CCVector3 bbMin,bbMax;
+		CCVector3 bbMin;
+		CCVector3 bbMax;
 		cloud->getBoundingBox(bbMin,bbMax);
 		C = (bbMin+bbMax)/2;
 		center = &C;
@@ -603,7 +604,8 @@ bool PointProjectionTools::extractConcaveHull2D(std::vector<IndexedCCVector2>& p
 	//hack: compute the theoretical 'minimal' edge length
 	PointCoordinateType minSquareEdgeLength = 0;
 	{
-		CCVector2 minP,maxP;
+		CCVector2 minP;
+		CCVector2 maxP;
 		for (std::size_t i = 0; i < pointCount; ++i)
 		{
 			const IndexedCCVector2& P = points[i];

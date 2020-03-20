@@ -394,7 +394,8 @@ bool Neighbourhood::computeQuadric()
 	}
 
 	//compute the A matrix and b vector
-	std::vector<float> A, b;
+	std::vector<float> A;
+	std::vector<float> b;
 	try
 	{
 		A.resize(6 * count, 0);
@@ -778,7 +779,8 @@ GenericIndexedMesh* Neighbourhood::triangulateFromQuadric(unsigned nStepX, unsig
 	assert(G);
 
 	//bounding box
-	CCVector3 bbMin, bbMax;
+	CCVector3 bbMin;
+	CCVector3 bbMax;
 	m_associatedCloud->getBoundingBox(bbMin, bbMax);
 	CCVector3 bboxDiag = bbMax - bbMin;
 
@@ -853,7 +855,8 @@ ScalarType Neighbourhood::computeMomentOrder1(const CCVector3& P)
 
 	Jacobi<double>::SortEigenValuesAndVectors(eigVectors, eigValues); //sort the eigenvectors in decreasing order of their associated eigenvalues
 
-	double m1 = 0.0, m2 = 0.0;
+	double m1 = 0.0;
+	double m2 = 0.0;
 	CCVector3d e2;
 	Jacobi<double>::GetEigenVector(eigVectors, 1, e2.u);
 

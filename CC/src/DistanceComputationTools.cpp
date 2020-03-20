@@ -170,7 +170,8 @@ int DistanceComputationTools::computeCloud2CloudDistance(	GenericIndexedCloudPer
 	}
 
 	//we spatially 'synchronize' the octrees
-	DgmOctree *comparedOctree = compOctree, *referenceOctree = refOctree;
+	DgmOctree *comparedOctree = compOctree;
+	DgmOctree *referenceOctree = refOctree;
 	SOReturnCode soCode = synchronizeOctrees(	comparedCloud,
 												referenceCloud,
 												comparedOctree,
@@ -311,12 +312,16 @@ DistanceComputationTools::SOReturnCode
 	}
 
 	//we compute the bounding box of BOTH clouds
-	CCVector3 minsA, minsB, maxsA, maxsB;
+	CCVector3 minsA;
+	CCVector3 minsB;
+	CCVector3 maxsA;
+	CCVector3 maxsB;
 	comparedCloud->getBoundingBox(minsA, maxsA);
 	referenceCloud->getBoundingBox(minsB, maxsB);
 
 	//we compute the union of both bounding-boxes
-	CCVector3 maxD,minD;
+	CCVector3 maxD;
+	CCVector3 minD;
 	{
 		for (unsigned char k=0; k<3; k++)
 		{
@@ -837,7 +842,8 @@ int DistanceComputationTools::intersectMeshWithOctree(	OctreeAndMeshIntersection
 			octree->getTheCellPosWhichIncludesThePoint(triPoints[2], cellPos[2], octreeLevel);
 
 			//compute the triangle bounding-box
-			Tuple3i minPos,maxPos;
+			Tuple3i minPos;
+			Tuple3i maxPos;
 			for (int k=0; k<3; k++)
 			{
 				minPos.u[k] = std::min( cellPos[0].u[k], std::min( cellPos[1].u[k],cellPos[2].u[k] ));
@@ -1867,10 +1873,14 @@ int DistanceComputationTools::computeCloud2MeshDistance(	GenericIndexedCloudPers
 	}
 
 	//compute the (cubical) bounding box that contains both the cloud and the mesh BBs
-	CCVector3 cloudMinBB,cloudMaxBB;
-	CCVector3 meshMinBB,meshMaxBB;
-	CCVector3 minBB,maxBB;
-	CCVector3 minCubifiedBB,maxCubifiedBB;
+	CCVector3 cloudMinBB;
+	CCVector3 cloudMaxBB;
+	CCVector3 meshMinBB;
+	CCVector3 meshMaxBB;
+	CCVector3 minBB;
+	CCVector3 maxBB;
+	CCVector3 minCubifiedBB;
+	CCVector3 maxCubifiedBB;
 	{
 		pointCloud->getBoundingBox(cloudMinBB,cloudMaxBB);
 		mesh->getBoundingBox(meshMinBB,meshMaxBB);
@@ -2111,7 +2121,10 @@ ScalarType DistanceComputationTools::computePoint2TriangleDistance(const CCVecto
     }
     else
     {
-        double tmp0, tmp1, numer, denom;
+        double tmp0;
+		double tmp1;
+		double numer;
+		double denom;
 
         if (t0 < 0)  // region 2
         {
@@ -3215,7 +3228,8 @@ int DistanceComputationTools::computeApproxCloud2CloudDistance(	GenericIndexedCl
 		return DISTANCE_COMPUTATION_RESULTS::ERROR_OCTREE_LEVEL_GT_MAX_OCTREE_LEVEL;
 	}
 	//compute octrees with the same bounding-box
-	DgmOctree *octreeA = compOctree, *octreeB = refOctree;
+	DgmOctree *octreeA = compOctree;
+	DgmOctree *octreeB = refOctree;
 	if (synchronizeOctrees(comparedCloud, referenceCloud, octreeA, octreeB, maxSearchDist, progressCb) != SYNCHRONIZED)
 	{
 		return DISTANCE_COMPUTATION_RESULTS::ERROR_SYNCHRONIZE_OCTREES_FAILURE;

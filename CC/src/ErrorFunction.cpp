@@ -41,7 +41,9 @@ double ErrorFunction::erf(double x)
 	if (std::abs(x) > 2.2)
 		return 1.0 - erfc(x); //use continued fraction when std::abs(x) > 2.2
 
-	double sum = x, term = x, xsqr = x * x;
+	double sum = x;
+	double term = x;
+	double xsqr = x * x;
 	int j = 1;
 
 	do
@@ -72,9 +74,18 @@ double ErrorFunction::erfc(double x)
 	if (x < 1.0e-12) //continued fraction only valid for x>0
 		return 2.0 - erfc(-x);
 
-	double a = 1, b = x; //last two convergent numerators
-	double c = x, d = x * x + 0.5; //last two convergent denominators
-	double q1, q2 = b / d; //last two convergents (a/c and b/d)
+	//last two convergent numerators
+	double a = 1;
+	double b = x;
+	
+	//last two convergent denominators
+	double c = x;
+	double d = x * x + 0.5;
+	
+	//last two convergents (a/c and b/d)
+	double q1;
+	double q2 = b / d;
+	
 	double n = 1.0;
 
 	do

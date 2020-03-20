@@ -82,7 +82,8 @@ static double Gamma_cc(double x)
 		}
 	}
 
-	double z = 0.0, r = 0.0;
+	double z = 0.0;
+	double r = 0.0;
 	if (std::abs(x) > 1.0)
 	{
 		z = std::abs(x);
@@ -173,7 +174,8 @@ bool WeibullDistribution::computeParameters(const ScalarContainer& values)
 		return false;
 
 	//we look for the maximum value of the SF so as to avoid overflow
-	ScalarType minValue, maxValue;
+	ScalarType minValue;
+	ScalarType maxValue;
 	bool firstValue = true;
 	for (ScalarType s : values)
 	{
@@ -267,8 +269,11 @@ double WeibullDistribution::ComputeG(const ScalarContainer& values, double r, Sc
 	if (r <= 0.0 || n == 0)
 		return 1.0; //a positive value means that ComputeG failed
 
-	double p = 0, q = 0, s = 0;
-	unsigned counter = 0, zeroValues = 0;
+	double p = 0;
+	double q = 0;
+	double s = 0;
+	unsigned counter = 0;
+	unsigned zeroValues = 0;
 
 	for (unsigned i = 0; i < n; ++i)
 	{
@@ -315,9 +320,11 @@ double WeibullDistribution::ComputeG(const ScalarContainer& values, double r, Sc
 double WeibullDistribution::FindGRoot(const ScalarContainer& values, ScalarType valueShift, double valueRange)
 {
 	double r = -1.0;
-	double aMin = 1.0, aMax = 1.0;
-	double v, vMin, vMax;
-	vMin = vMax = v = ComputeG(values, aMin, valueShift, valueRange);
+	double aMin = 1.0;
+	double aMax = 1.0;
+	double v = ComputeG(values, aMin, valueShift, valueRange);
+	double vMin = v;
+	double vMax = v;
 
 	//find min value for binary search so that ComputeG(aMin) < 0
 	while (vMin > 0 && aMin > ZERO_TOLERANCE)

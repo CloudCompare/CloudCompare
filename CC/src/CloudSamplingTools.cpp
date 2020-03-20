@@ -298,7 +298,8 @@ ReferenceCloud* CloudSamplingTools::resampleCloudSpatially(GenericIndexedCloudPe
 	//best octree level (there may be several of them if we use parameter modulation)
 	std::vector<unsigned char> bestOctreeLevel;
 	bool modParamsEnabled = modParams.enabled;
-	ScalarType sfMin = 0, sfMax = 0;
+	ScalarType sfMin = 0;
+	ScalarType sfMax = 0;
 	try
 	{
 		if (modParams.enabled)
@@ -509,7 +510,9 @@ ReferenceCloud* CloudSamplingTools::sorFilter(	GenericIndexedCloudPersist* input
 			//not enough memory
 			break;
 		}
-		double avgDist = 0, stdDev = 0;
+		
+		double avgDist = 0;
+		double stdDev = 0;
 
 		//1st step: compute the average distance to the neighbors
 		{

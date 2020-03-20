@@ -388,7 +388,9 @@ void KDTree::updateOutsideBoundingBox(KdCell *cell)
 
 ScalarType KDTree::pointToCellSquareDistance(const PointCoordinateType *queryPoint, KdCell *cell)
 {
-    PointCoordinateType dx, dy, dz;
+    PointCoordinateType dx;
+	PointCoordinateType dy;
+	PointCoordinateType dz;
 
     //Each d(x)(y)(z) represents the distance to the nearest bounding box plane (if the point is outside)
     if (cell->inbbmin.x <= queryPoint[0] && queryPoint[0] <= cell->inbbmax.x)
@@ -414,7 +416,9 @@ void KDTree::pointToCellDistances(	const PointCoordinateType *queryPoint,
 									ScalarType& min,
 									ScalarType& max)
 {
-    PointCoordinateType dx, dy, dz;
+    PointCoordinateType dx;
+	PointCoordinateType dy;
+	PointCoordinateType dz;
 
     min = sqrt(pointToCellSquareDistance(queryPoint, cell));
     dx = std::max(std::abs(queryPoint[0]-cell->inbbmin.x), std::abs(queryPoint[0]-cell->inbbmax.x));
@@ -425,7 +429,10 @@ void KDTree::pointToCellDistances(	const PointCoordinateType *queryPoint,
 
 ScalarType KDTree::InsidePointToCellDistance(const PointCoordinateType *queryPoint, KdCell *cell)
 {
-    PointCoordinateType dx, dy, dz, max;
+    PointCoordinateType dx;
+	PointCoordinateType dy;
+	PointCoordinateType dz;
+	PointCoordinateType max;
 
     dx = dy = dz = -1;
 
@@ -527,7 +534,8 @@ void KDTree::distanceScanTree(
     KdCell *cell,
     std::vector<unsigned> &localArray)
 {
-    ScalarType min, max;
+    ScalarType min;
+	ScalarType max;
 
     pointToCellDistances(queryPoint, cell, min, max);
 

@@ -217,7 +217,8 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(	GenericIndexedClo
 		}
 	}
 
-	unsigned maxDistIndex = 0, begin = 0;
+	unsigned maxDistIndex = 0;
+	unsigned begin = 0;
 	CCVector3 startPoint;
 
 	while (true)

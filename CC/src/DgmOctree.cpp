@@ -480,7 +480,8 @@ void DgmOctree::computeCellsStatistics(unsigned char level)
 	unsigned counter = 0;
 	unsigned cellCounter = 0;
 	unsigned maxCellPop = 0;
-	double sum = 0.0, sum2 = 0.0;
+	double sum = 0.0;
+	double sum2 = 0.0;
 
 	for (; p != m_thePointsAndTheirCellCodes.end(); ++p)
 	{
@@ -1784,7 +1785,8 @@ std::size_t DgmOctree::getPointsInBoxNeighbourhood(BoxNeighbourhood& params) con
 
 	//we are going to test all the cells that may intersect this box
 	//first we extract the box... bounding box ;)
-	CCVector3 minCorner, maxCorner;
+	CCVector3 minCorner;
+	CCVector3 maxCorner;
 	if (params.axes)
 	{
 		//normalize axes (just in case)
@@ -2657,7 +2659,8 @@ ReferenceCloud* DgmOctree::getPointsInCellsWithSortedCellCodes(	cellCodesContain
     unsigned char bitDec2 = (areCodesTruncated ? 0 : bitDec1); //shift for the input codes
 
     cellsContainer::const_iterator p = m_thePointsAndTheirCellCodes.begin();
-    CellCode toExtractCode,currentCode = (p->theCode >> bitDec1); //pred value must be different than the first element's
+    CellCode toExtractCode;
+	CellCode currentCode = (p->theCode >> bitDec1); //pred value must be different than the first element's
 
     subset->clear();
 
@@ -2844,7 +2847,8 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
 	}
 
 	//we compute the position of each cell (grid coordinates)
-	Tuple3i indexMin, indexMax;
+	Tuple3i indexMin;
+	Tuple3i indexMax;
 	{
 		//binary shift for cell code truncation
 		unsigned char bitDec = GET_BIT_SHIFT(level);
@@ -2893,8 +2897,10 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
 	const int& step = gridSize.z;
 
 	//relative neighbos positions (either 6 or 26 total - but we only use half of it)
-	unsigned char neighborsInCurrentSlice = 0, neighborsInPrecedingSlice = 0;
-	int currentSliceNeighborsShifts[4], precedingSliceNeighborsShifts[9]; //maximum size to simplify code...
+	unsigned char neighborsInCurrentSlice = 0;
+	unsigned char neighborsInPrecedingSlice = 0;
+	int currentSliceNeighborsShifts[4];
+	int precedingSliceNeighborsShifts[9]; //maximum size to simplify code...
 
 	if (sixConnexity) //6-connexity
 	{
@@ -2926,7 +2932,8 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
 	}
 
 	//shared structures (to avoid repeated allocations)
-	std::vector<int> neighboursVal, neighboursMin;
+	std::vector<int> neighboursVal;
+	std::vector<int> neighboursMin;
 	try
 	{
 		neighboursVal.reserve(neighborsInCurrentSlice + neighborsInPrecedingSlice);
@@ -4216,7 +4223,8 @@ bool DgmOctree::rayCast(const CCVector3& rayAxis,
 
 				if (isFOV)
 				{
-					double radialSqDist, sqDistToOrigin;
+					double radialSqDist;
+					double sqDistToOrigin;
 					rayLocal.squareDistances(cellCenter, radialSqDist, sqDistToOrigin);
 
 					double dx = sqrt(sqDistToOrigin);

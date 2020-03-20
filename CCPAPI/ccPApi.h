@@ -13,14 +13,15 @@
 //#include <ccHObject.h>
 //#include <FileIOFilter.h>
 
-enum CC_SHIFT_MODE
-{
-    AUTO = 0, XYZ = 1
-};
-
 class ccPApi
 {
 public:
+
+    enum CC_SHIFT_MODE
+    {
+        AUTO = 0, XYZ = 1
+    };
+
     ccPApi();
     virtual ~ccPApi();
 

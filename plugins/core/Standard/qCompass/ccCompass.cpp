@@ -1580,7 +1580,13 @@ void ccCompass::estimateStructureNormals()
 
 			//now sort points along this vector
 			std::vector<unsigned> pid; //store link to point id in original cloud (for later data storage)
-			std::vector<double> dist, px, py, pz, nx, ny, nz;
+			std::vector<double> dist;
+			std::vector<double> px;
+			std::vector<double> py;
+			std::vector<double> pz;
+			std::vector<double> nx;
+			std::vector<double> ny;
+			std::vector<double> nz;
 			
 			//add first point
 			pid.push_back(0); dist.push_back(points[r]->getPoint(0)->dot(*longAxis));
@@ -1644,8 +1650,16 @@ void ccCompass::estimateStructureNormals()
 			//RECURSE THROUGH ALL POSSIBLE COMBINATIONS OF POINTS TO FIND THE BEST STRUCTURE NORMAL ESTIMATE
 			//***********************************************************************************************
 			//declare variables used in nested loops below
-			int n;
-			double mnx, mny, mnz, lpd, lsf, phi, theta, alpha, len;
+			int n = 0;
+			double mnx = 0.0;
+			double mny = 0.0;
+			double mnz = 0.0;
+			double lpd = 0.0;
+			double lsf = 0.0;
+			double phi = 0.0;
+			double theta = 0.0;
+			double alpha = 0.0;
+			double len = 0.0;
 			bool hasValidSNE = false; //becomes true once a valid plane is found
 			std::vector<double> bestPd(px.size(), std::numeric_limits<double>::lowest()); //best (log) probability density observed for each point
 			std::vector<double> bestPhi(px.size(), 0);
@@ -1960,7 +1974,11 @@ void ccCompass::estimateStructureNormals()
 					double e1 = bestE1[p];
 					double e2 = bestE2[p];
 					double e3 = bestE3[p];
-					double _phi, _theta, _alpha; //propsals
+					
+					//proposals
+					double _phi = 0.0;
+					double _theta = 0.0;
+					double _alpha = 0.0;
 
 					//generate chain
 					unsigned count = 0;
@@ -2228,9 +2246,12 @@ void ccCompass::estimateStrain()
 	}
 
 	//calculate bounding box of all traces
-	float minx = std::numeric_limits<float>::max(), maxx = std::numeric_limits<float>::lowest();
-	float miny = std::numeric_limits<float>::max(), maxy = std::numeric_limits<float>::lowest();
-	float minz = std::numeric_limits<float>::max(), maxz = std::numeric_limits<float>::lowest();
+	float minx = std::numeric_limits<float>::max();
+	float maxx = std::numeric_limits<float>::lowest();
+	float miny = std::numeric_limits<float>::max();
+	float maxy = std::numeric_limits<float>::lowest();
+	float minz = std::numeric_limits<float>::max();
+	float maxz = std::numeric_limits<float>::lowest();
 
 	if (lines.empty())
 	{
@@ -2241,7 +2262,8 @@ void ccCompass::estimateStrain()
 	//check bounds
 	for (ccPolyline* poly : lines)
 	{
-		CCVector3 bbMin, bbMax;
+		CCVector3 bbMin;
+		CCVector3 bbMax;
 		if (poly->size() > 0) //avoid (0,0,0),(0,0,0) bounding boxes...
 		{
 			poly->getBoundingBox(bbMin, bbMax);
@@ -2411,7 +2433,8 @@ void ccCompass::estimateStrain()
 
 					//TODO - write code that also tracks error/variability in orientation/length of dilation vectors?
 
-					int n_lower = 0, n_upper = 0;
+					int n_lower = 0;
+					int n_upper = 0;
 					ccHObject::Container objs;
 					g->filterChildren(objs, true, CC_TYPES::POINT_CLOUD,true); //look for SNE
 					for (ccHObject* c : objs)
@@ -3979,7 +4002,9 @@ int ccCompass::writePlanes(ccHObject* object, QTextStream* out, const QString &p
 			N *= -1.0;
 
 		//calculate strike/dip/dip direction
-		float strike, dip, dipdir;
+		float strike = 0.0f;
+		float dip = 0.0f;
+		float dipdir = 0.0f;
 		ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipdir);
 		ccNormalVectors::ConvertNormalToStrikeAndDip(N, strike, dip);
 
@@ -4034,7 +4059,8 @@ int ccCompass::writeTraces(ccHObject* object, QTextStream* out, const QString &p
 		ccTrace* p = static_cast<ccTrace*>(object);
 
 		//loop through points
-		CCVector3 start, end;
+		CCVector3 start;
+		CCVector3 end;
 		int cost;
 		int tID = object->getUniqueID();
 		if (p->size() >= 2)
@@ -4263,12 +4289,24 @@ int ccCompass::writeObjectXML(ccHObject* object, QXmlStreamWriter* out)
 			trace = static_cast<ccTrace*>(object);
 		}
 
-		QString x, y, z, nx, ny, nz, cost, wIDs,w_local_ids;
-
+		QString x;
+		QString y;
+		QString z;
+		QString nx;
+		QString ny;
+		QString nz;
+		QString cost;
+		QString wIDs;
+		QString w_local_ids;
 
 		//loop through points
-		CCVector3 p1, p2; //position
-		CCVector3 n1, n2; //normal vector (if defined)
+		//position
+		CCVector3 p1;
+		CCVector3 p2;
+		
+		//normal vector (if defined)
+		CCVector3 n1;
+		CCVector3 n2;
 
 		//becomes true if any valid normals are recieved
 		bool hasNormals = false;
@@ -4406,7 +4444,16 @@ int ccCompass::writeObjectXML(ccHObject* object, QXmlStreamWriter* out)
 			out->writeAttribute("count", QString::asprintf("%d", cloud->size()));
 
 			//gather data strings
-			QString x, y, z, nx, ny, nz, thickness, weight, trend, plunge;
+			QString x;
+			QString y;
+			QString z;
+			QString nx;
+			QString ny;
+			QString nz;
+			QString thickness;
+			QString weight;
+			QString trend;
+			QString plunge;
 			CCLib::ScalarField* wSF = cloud->getScalarField(cloud->getScalarFieldIndexByName("Weight"));
 			CCLib::ScalarField* trendSF = cloud->getScalarField(cloud->getScalarFieldIndexByName("Trend"));
 			CCLib::ScalarField* plungeSF = cloud->getScalarField(cloud->getScalarFieldIndexByName("Plunge"));

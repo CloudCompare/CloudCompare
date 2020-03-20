@@ -120,7 +120,8 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 		ccLog::Error("File should start by '# Bundle file vX.Y'!");
 		return CC_FERR_MALFORMED_FILE;
 	}
-	unsigned majorVer = 0, minorVer = 0;
+	unsigned majorVer = 0;
+	unsigned minorVer = 0;
 	sscanf(qPrintable(currentLine), "# Bundle file v%u.%u", &majorVer, &minorVer);
 	if (majorVer != 0 || (minorVer != 3 && minorVer != 4))
 	{
@@ -868,7 +869,8 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 							||	orthoRectMethod == BundlerImportDlg::DIRECT_UNDISTORTED );
 
 						//we take the keypoints 'middle altitude' by default
-						CCVector3 bbMin, bbMax;
+						CCVector3 bbMin;
+						CCVector3 bbMax;
 						_keypointsCloud->getBoundingBox(bbMin, bbMax);
 						PointCoordinateType Z0 = (bbMin.z + bbMax.z) / 2;
 

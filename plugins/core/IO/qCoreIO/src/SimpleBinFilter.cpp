@@ -270,7 +270,8 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(const QString& filename, ccHObject& cont
 		return CC_FERR_READING;
 	}
 
-	QString headerFilename, dataFilename;
+	QString headerFilename;
+	QString dataFilename;
 	if (filename.endsWith(".sbf.data", Qt::CaseInsensitive))
 	{
 		//we trim the '.data' and read the '.sbf' file instead

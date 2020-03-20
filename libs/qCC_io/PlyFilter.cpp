@@ -447,7 +447,9 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 			if (material) //texture coordinates
 			{
 				ply_write(ply, 6.0);
-				TexCoords2D *tx1 = nullptr, *tx2 = nullptr, *tx3 = nullptr;
+				TexCoords2D *tx1 = nullptr;
+				TexCoords2D *tx2 = nullptr;
+				TexCoords2D *tx3 = nullptr;
 				mesh->getTriangleTexCoordinates(i, tx1, tx2, tx3);
 				ply_write(ply, tx1 ? tx1->tx : -1.0);
 				ply_write(ply, tx1 ? tx1->ty : -1.0);
@@ -703,7 +705,8 @@ static int face_cb(p_ply_argument argument)
 		return 1;
 	}
 
-	long length, value_index;
+	long length = 0;
+	long value_index = 0;
 	ply_get_argument_property(argument, nullptr, &length, &value_index);
 	//unsupported polygon type!
 	if (length != 3 && length != 4)
@@ -785,7 +788,8 @@ static int texCoords_cb(p_ply_argument argument)
 		return 1;
 	}
 
-	long length, value_index;
+	long length = 0;
+	long value_index = 0;
 	ply_get_argument_property(argument, nullptr, &length, &value_index);
 	//unsupported/invalid coordinates!
 	if (length != 6 && length != 8)
@@ -1796,7 +1800,8 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 		mesh->shrinkToFit();
 
 		//check that vertex indices start at 0
-		unsigned minVertIndex = numberOfPoints, maxVertIndex = 0;
+		unsigned minVertIndex = numberOfPoints;
+		unsigned maxVertIndex = 0;
 		for (unsigned i = 0; i < s_triCount; ++i)
 		{
 			const CCLib::VerticesIndexes* tri = mesh->getTriangleVertIndexes(i);

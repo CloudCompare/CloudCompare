@@ -270,12 +270,13 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const QString& filename, c
 	//save "edges"
 	edge** theEdges = new edge*[numberOfVertexes];
 	memset(theEdges,0,sizeof(edge*)*numberOfVertexes);
-	unsigned ind[3], a, b;
+	unsigned ind[3]{ 0, 0, 0 };
+	unsigned a = 0;
+	unsigned b = 0;
 	int lastEdgeIndexPushed = -1;
 
 	int hard = 0; //Maya edges cab be "hard" or "soft" ...
 	{
-
 		theMesh->placeIteratorAtBeginning();
 		for (unsigned i = 0; i < numberOfTriangles; ++i)
 		{

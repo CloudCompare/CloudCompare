@@ -245,7 +245,8 @@ int IcmFilter::LoadCalibratedImages(ccHObject* entities, const QString& path, co
 			ccLog::Print("\t Description: '%s'",desc);
 
 			//Orientation
-			float axis[3], angle_rad;
+			float axis[3]{ 0.0f, 0.0f, 0.0f };
+			float angle_rad = 0.0f;
 			if (!fgets(line, MAX_ASCII_FILE_LINE_LENGTH , fp))
 			{
 				ccLog::Error("[IcmFilter] Read error (orientation)!");

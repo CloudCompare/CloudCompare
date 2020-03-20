@@ -818,7 +818,8 @@ bool ccGLWindow::initialize()
 		if (context()->hasExtension(QByteArrayLiteral("GL_ARB_vertex_buffer_object")))
 		{
 			QStringList glVersion = QString((const char*)glFunc->glGetString(GL_VERSION)).split('.');
-			int majorVersion = 0, minorVersion = 0;
+			int majorVersion = 0;
+			int minorVersion = 0;
 			if (glVersion.size() >= 2)
 			{
 				majorVersion = glVersion[0].toInt();
@@ -2309,7 +2310,8 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingPara
 	}
 
 	//model and projection matrices
-	ccGLMatrixd modelViewMat, projectionMat;
+	ccGLMatrixd modelViewMat;
+	ccGLMatrixd projectionMat;
 
 	//setup camera projection (DGM: AFTER THE LIGHTS)
 	if (m_stereoModeEnabled)
@@ -4231,7 +4233,8 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 					else //side view
 					{
 						//project the current pivot point on screen
-						CCVector3d A2D, B2D;
+						CCVector3d A2D;
+						CCVector3d B2D;
 						if (	camera.project(m_viewportParams.pivotPoint, A2D)
 							&&	camera.project(m_viewportParams.pivotPoint + m_viewportParams.zFar * m_lockedRotationAxis, B2D))
 						{
@@ -5169,7 +5172,8 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 
 					int nearestTriIndex = -1;
 					double nearestSquareDist = 0.0;
-					CCVector3d P, barycentricCoords;
+					CCVector3d P;
+					CCVector3d barycentricCoords;
 					if (mesh->trianglePicking(	clickedPos,
 												camera,
 												nearestTriIndex,

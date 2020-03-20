@@ -131,8 +131,10 @@ CC_FILE_ERROR PTXFilter::loadFile(	const QString& filename,
 
 	for (unsigned cloudIndex = 0; result == CC_FERR_NO_ERROR || result == CC_FERR_NO_LOAD; cloudIndex++)
 	{
-		unsigned width = 0, height = 0;
-		ccGLMatrixd sensorTransD, cloudTransD;
+		unsigned width = 0;
+		unsigned height = 0;
+		ccGLMatrixd sensorTransD;
+		ccGLMatrixd cloudTransD;
 
 		//read header
 		{

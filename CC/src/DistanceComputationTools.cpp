@@ -1,19 +1,19 @@
 //##########################################################################
-//#                                                                        #
-//#                               CCLIB                                    #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU Library General Public License as       #
-//#  published by the Free Software Foundation; version 2 or later of the  #
-//#  License.                                                              #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
+//#																		   #
+//#								  CCLIB									   #
+//#																		   #
+//#	 This program is free software; you can redistribute it and/or modify  #
+//#	 it under the terms of the GNU Library General Public License as	   #
+//#	 published by the Free Software Foundation; version 2 or later of the  #
+//#	 License.															   #
+//#																		   #
+//#	 This program is distributed in the hope that it will be useful,	   #
+//#	 but WITHOUT ANY WARRANTY; without even the implied warranty of		   #
+//#	 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the		   #
+//#	 GNU General Public License for more details.						   #
+//#																		   #
+//#			 COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)			   #
+//#																		   #
 //##########################################################################
 
 #include <DistanceComputationTools.h>
@@ -866,7 +866,7 @@ int DistanceComputationTools::intersectMeshWithOctree(	OctreeAndMeshIntersection
 			{
 				Tuple3i delta = maxPos - minPos + Tuple3i(1,1,1);
 				maxSize = std::max(delta.x, delta.y);
-			    maxSize = std::max(maxSize, delta.z);
+				maxSize = std::max(maxSize, delta.z);
 			}
 
 			//we deduce the smallest bounding 'octree' cell
@@ -970,23 +970,23 @@ int DistanceComputationTools::intersectMeshWithOctree(	OctreeAndMeshIntersection
 						_newCell->pos.x = currentCellPos.x + i*halfCellSize;
 						//quick test to determine if the cube is potentially intersecting the triangle's bbox
 						if (	static_cast<int>(_newCell->pos.x) + halfCellSize >= minPos.x
-							&&	static_cast<int>(_newCell->pos.x)                <= maxPos.x )
+							&&	static_cast<int>(_newCell->pos.x)				 <= maxPos.x )
 						{
 							for (int j=0; j<2; ++j)
 							{
 								_newCell->pos.y = currentCellPos.y + j*halfCellSize;
 								if (	static_cast<int>(_newCell->pos.y) + halfCellSize >= minPos.y
-									&&	static_cast<int>(_newCell->pos.y)                <= maxPos.y )
+									&&	static_cast<int>(_newCell->pos.y)				 <= maxPos.y )
 								{
 									for (int k=0; k<2; ++k)
 									{
 										_newCell->pos.z = currentCellPos.z + k*halfCellSize;
 										if (	static_cast<int>(_newCell->pos.z) + halfCellSize >= minPos.z
-											&&	static_cast<int>(_newCell->pos.z)                <= maxPos.z )
+											&&	static_cast<int>(_newCell->pos.z)				 <= maxPos.z )
 										{
 											const char* _pointsPosition = pointsPosition + (i*9+j*3+k);
-											char sum =	  _pointsPosition[0]  + _pointsPosition[1]  + _pointsPosition[3]
-														+ _pointsPosition[4]  + _pointsPosition[9]  + _pointsPosition[10]
+											char sum =	  _pointsPosition[0]  + _pointsPosition[1]	+ _pointsPosition[3]
+														+ _pointsPosition[4]  + _pointsPosition[9]	+ _pointsPosition[10]
 														+ _pointsPosition[12] + _pointsPosition[13];
 
 											//if all the sub-cube vertices are not on the same side, then the triangle may intersect the cell
@@ -1018,7 +1018,7 @@ int DistanceComputationTools::intersectMeshWithOctree(	OctreeAndMeshIntersection
 }
 
 //! Method used by computeCloud2MeshDistanceWithOctree
-void ComparePointsAndTriangles(	ReferenceCloud& Yk,
+void ComparePointsAndTriangles( ReferenceCloud& Yk,
 								unsigned& remainingPoints,
 								CCLib::GenericIndexedMesh* mesh,
 								std::vector<unsigned>& trianglesToTest,
@@ -1984,7 +1984,7 @@ int DistanceComputationTools::computeCloud2MeshDistance(	GenericIndexedCloudPers
 	pointCloud->enableScalarField();
 	pointCloud->forEach(ScalarFieldTools::SetScalarValueToNaN);
 
-    //acceleration by approximating the distance
+	//acceleration by approximating the distance
 	if (params.useDistanceMap && intersection.distanceTransform)
 	{
 		if (!intersection.distanceTransform->propagateDistance(progressCb))
@@ -2036,192 +2036,192 @@ ScalarType DistanceComputationTools::computePoint2TriangleDistance(const CCVecto
 	CCVector3d AB(static_cast<double>(B->x) - A->x, static_cast<double>(B->y) - A->y, static_cast<double>(B->z) - A->z);
 	CCVector3d AC(static_cast<double>(C->x) - A->x, static_cast<double>(C->y) - A->y, static_cast<double>(C->z) - A->z);
 
-    double a00 =  AB.dot(AB);
-    double a01 =  AB.dot(AC);
-    double a11 =  AC.dot(AC);
-    double b0  = -AP.dot(AB);
-    double b1  = -AP.dot(AC);
-    double det = a00 * a11 - a01 * a01;
-    double t0  = a01 * b1 - a11 * b0;
-    double t1  = a01 * b0 - a00 * b1;
+	double a00 =  AB.dot(AB);
+	double a01 =  AB.dot(AC);
+	double a11 =  AC.dot(AC);
+	double b0  = -AP.dot(AB);
+	double b1  = -AP.dot(AC);
+	double det = a00 * a11 - a01 * a01;
+	double t0  = a01 * b1 - a11 * b0;
+	double t1  = a01 * b0 - a00 * b1;
 
-    if (t0 + t1 <= det)
-    {
-        if (t0 < 0)
-        {
-            if (t1 < 0)  // region 4
-            {
-                if (b0 < 0)
-                {
-                    t1 = 0;
-                    if (-b0 >= a00)  // V0
-                    {
-                        t0 = 1.0;
-                    }
-                    else  // E01
-                    {
-                        t0 = -b0 / a00;
-                    }
-                }
-                else
-                {
-                    t0 = 0;
-                    if (b1 >= 0)  // V0
-                    {
-                        t1 = 0;
-                    }
-                    else if (-b1 >= a11)  // V2
-                    {
-                        t1 = 1.0;
-                    }
-                    else  // E20
-                    {
-                        t1 = -b1 / a11;
-                    }
-                }
-            }
-            else  // region 3
-            {
-                t0 = 0;
-                if (b1 >= 0)  // V0
-                {
-                    t1 = 0;
-                }
-                else if (-b1 >= a11)  // V2
-                {
-                    t1 = 1.0;
-                }
-                else  // E20
-                {
-                    t1 = -b1 / a11;
-                }
-            }
-        }
-        else if (t1 < 0)  // region 5
-        {
-            t1 = 0;
-            if (b0 >= 0)  // V0
-            {
-                t0 = 0;
-            }
-            else if (-b0 >= a00)  // V1
-            {
-                t0 = 1.0;
-            }
-            else  // E01
-            {
-                t0 = -b0 / a00;
-            }
-        }
-        else  // region 0, interior
-        {
-            t0 /= det;
-            t1 /= det;
-        }
-    }
-    else
-    {
-        double tmp0;
+	if (t0 + t1 <= det)
+	{
+		if (t0 < 0)
+		{
+			if (t1 < 0)	 // region 4
+			{
+				if (b0 < 0)
+				{
+					t1 = 0;
+					if (-b0 >= a00)	 // V0
+					{
+						t0 = 1.0;
+					}
+					else  // E01
+					{
+						t0 = -b0 / a00;
+					}
+				}
+				else
+				{
+					t0 = 0;
+					if (b1 >= 0)  // V0
+					{
+						t1 = 0;
+					}
+					else if (-b1 >= a11)  // V2
+					{
+						t1 = 1.0;
+					}
+					else  // E20
+					{
+						t1 = -b1 / a11;
+					}
+				}
+			}
+			else  // region 3
+			{
+				t0 = 0;
+				if (b1 >= 0)  // V0
+				{
+					t1 = 0;
+				}
+				else if (-b1 >= a11)  // V2
+				{
+					t1 = 1.0;
+				}
+				else  // E20
+				{
+					t1 = -b1 / a11;
+				}
+			}
+		}
+		else if (t1 < 0)  // region 5
+		{
+			t1 = 0;
+			if (b0 >= 0)  // V0
+			{
+				t0 = 0;
+			}
+			else if (-b0 >= a00)  // V1
+			{
+				t0 = 1.0;
+			}
+			else  // E01
+			{
+				t0 = -b0 / a00;
+			}
+		}
+		else  // region 0, interior
+		{
+			t0 /= det;
+			t1 /= det;
+		}
+	}
+	else
+	{
+		double tmp0;
 		double tmp1;
 		double numer;
 		double denom;
 
-        if (t0 < 0)  // region 2
-        {
-            tmp0 = a01 + b0;
-            tmp1 = a11 + b1;
-            if (tmp1 > tmp0)
-            {
-                numer = tmp1 - tmp0;
-                denom = a00 - 2*a01 + a11;
-                if (numer >= denom)  // V1
-                {
-                    t0 = 1.0;
-                    t1 = 0;
-                }
-                else  // E12
-                {
-                    t0 = numer / denom;
-                    t1 = 1.0 - t0;
-                }
-            }
-            else
-            {
-                t0 = 0;
-                if (tmp1 <= 0)  // V2
-                {
-                    t1 = 1.0;
-                }
-                else if (b1 >= 0)  // V0
-                {
-                    t1 = 0;
-                }
-                else  // E20
-                {
-                    t1 = -b1 / a11;
-                }
-            }
-        }
-        else if (t1 < 0)  // region 6
-        {
-            tmp0 = a01 + b1;
-            tmp1 = a00 + b0;
-            if (tmp1 > tmp0)
-            {
-                numer = tmp1 - tmp0;
-                denom = a00 - 2*a01 + a11;
-                if (numer >= denom)  // V2
-                {
-                    t1 = 1.0;
-                    t0 = 0;
-                }
-                else  // E12
-                {
-                    t1 = numer / denom;
-                    t0 = 1.0 - t1;
-                }
-            }
-            else
-            {
-                t1 = 0;
-                if (tmp1 <= 0)  // V1
-                {
-                    t0 = 1.0;
-                }
-                else if (b0 >= 0)  // V0
-                {
-                    t0 = 0;
-                }
-                else  // E01
-                {
-                    t0 = -b0 / a00;
-                }
-            }
-        }
-        else  // region 1
-        {
-            numer = a11 + b1 - a01 - b0;
-            if (numer <= 0)  // V2
-            {
-                t0 = 0;
-                t1 = 1.0;
-            }
-            else
-            {
-                denom = a00 - 2*a01 + a11;
-                if (numer >= denom)  // V1
-                {
-                    t0 = 1.0;
-                    t1 = 0;
-                }
-                else  // 12
-                {
-                    t0 = numer / denom;
-                    t1 = 1.0 - t0;
-                }
-            }
-        }
-    }
+		if (t0 < 0)	 // region 2
+		{
+			tmp0 = a01 + b0;
+			tmp1 = a11 + b1;
+			if (tmp1 > tmp0)
+			{
+				numer = tmp1 - tmp0;
+				denom = a00 - 2*a01 + a11;
+				if (numer >= denom)	 // V1
+				{
+					t0 = 1.0;
+					t1 = 0;
+				}
+				else  // E12
+				{
+					t0 = numer / denom;
+					t1 = 1.0 - t0;
+				}
+			}
+			else
+			{
+				t0 = 0;
+				if (tmp1 <= 0)	// V2
+				{
+					t1 = 1.0;
+				}
+				else if (b1 >= 0)  // V0
+				{
+					t1 = 0;
+				}
+				else  // E20
+				{
+					t1 = -b1 / a11;
+				}
+			}
+		}
+		else if (t1 < 0)  // region 6
+		{
+			tmp0 = a01 + b1;
+			tmp1 = a00 + b0;
+			if (tmp1 > tmp0)
+			{
+				numer = tmp1 - tmp0;
+				denom = a00 - 2*a01 + a11;
+				if (numer >= denom)	 // V2
+				{
+					t1 = 1.0;
+					t0 = 0;
+				}
+				else  // E12
+				{
+					t1 = numer / denom;
+					t0 = 1.0 - t1;
+				}
+			}
+			else
+			{
+				t1 = 0;
+				if (tmp1 <= 0)	// V1
+				{
+					t0 = 1.0;
+				}
+				else if (b0 >= 0)  // V0
+				{
+					t0 = 0;
+				}
+				else  // E01
+				{
+					t0 = -b0 / a00;
+				}
+			}
+		}
+		else  // region 1
+		{
+			numer = a11 + b1 - a01 - b0;
+			if (numer <= 0)	 // V2
+			{
+				t0 = 0;
+				t1 = 1.0;
+			}
+			else
+			{
+				denom = a00 - 2*a01 + a11;
+				if (numer >= denom)	 // V1
+				{
+					t0 = 1.0;
+					t1 = 0;
+				}
+				else  // 12
+				{
+					t0 = numer / denom;
+					t1 = 1.0 - t0;
+				}
+			}
+		}
+	}
 
 	//point on the plane (relative to A)
 	CCVector3d Q = t0 * AB + t1 * AC;
@@ -2942,10 +2942,10 @@ int DistanceComputationTools::computeCloud2PolylineEquation(GenericIndexedCloudP
 	return DISTANCE_COMPUTATION_RESULTS::SUCCESS;
 }
 
-ScalarType DistanceComputationTools::computeCloud2PlaneDistanceRMS(	GenericCloud* cloud,
+ScalarType DistanceComputationTools::computeCloud2PlaneDistanceRMS( GenericCloud* cloud,
 																	const PointCoordinateType* planeEquation)
 {
-    assert(cloud && planeEquation);
+	assert(cloud && planeEquation);
 	if (!cloud)
 	{
 		return 0;
@@ -2961,7 +2961,7 @@ ScalarType DistanceComputationTools::computeCloud2PlaneDistanceRMS(	GenericCloud
 	//but the norm should always be equal to 1.0!
 	PointCoordinateType norm2 = CCVector3::vnorm2(planeEquation);
 	if (norm2 < ZERO_TOLERANCE)
-        return NAN_VALUE;
+		return NAN_VALUE;
 	assert(std::abs(sqrt(norm2) - PC_ONE) <= std::numeric_limits<PointCoordinateType>::epsilon());
 
 	double dSumSq = 0.0;
@@ -2983,7 +2983,7 @@ ScalarType DistanceComputationTools::ComputeCloud2PlaneRobustMax(	GenericCloud* 
 																	const PointCoordinateType* planeEquation,
 																	float percent)
 {
-    assert(cloud && planeEquation);
+	assert(cloud && planeEquation);
 	assert(percent < 1.0f);
 
 	if (!cloud)
@@ -3045,7 +3045,7 @@ ScalarType DistanceComputationTools::ComputeCloud2PlaneRobustMax(	GenericCloud* 
 	return static_cast<ScalarType>(tail.back());
 }
 
-ScalarType DistanceComputationTools::ComputeCloud2PlaneMaxDistance(	GenericCloud* cloud,
+ScalarType DistanceComputationTools::ComputeCloud2PlaneMaxDistance( GenericCloud* cloud,
 																	const PointCoordinateType* planeEquation)
 {
 	assert(cloud && planeEquation);
@@ -3149,7 +3149,7 @@ bool DistanceComputationTools::computeGeodesicDistances(GenericIndexedCloudPersi
 	return result;
 }
 
-int DistanceComputationTools::diff(	GenericIndexedCloudPersist* comparedCloud,
+int DistanceComputationTools::diff( GenericIndexedCloudPersist* comparedCloud,
 									GenericIndexedCloudPersist* referenceCloud,
 									GenericProgressCallback* progressCb)
 {
@@ -3203,7 +3203,7 @@ int DistanceComputationTools::diff(	GenericIndexedCloudPersist* comparedCloud,
 	return DISTANCE_COMPUTATION_RESULTS::SUCCESS;
 }
 
-int DistanceComputationTools::computeApproxCloud2CloudDistance(	GenericIndexedCloudPersist* comparedCloud,
+int DistanceComputationTools::computeApproxCloud2CloudDistance( GenericIndexedCloudPersist* comparedCloud,
 																GenericIndexedCloudPersist* referenceCloud,
 																unsigned char octreeLevel,
 																PointCoordinateType maxSearchDist/*=-PC_ONE*/,
@@ -3239,10 +3239,10 @@ int DistanceComputationTools::computeApproxCloud2CloudDistance(	GenericIndexedCl
 	const int* minIndexesB = octreeB->getMinFillIndexes(octreeLevel);
 	const int* maxIndexesB = octreeB->getMaxFillIndexes(octreeLevel);
 
-	Tuple3i minIndexes(	std::min(minIndexesA[0], minIndexesB[0]),
+	Tuple3i minIndexes( std::min(minIndexesA[0], minIndexesB[0]),
 						std::min(minIndexesA[1], minIndexesB[1]),
 						std::min(minIndexesA[2], minIndexesB[2]) );
-	Tuple3i maxIndexes(	std::max(maxIndexesA[0], maxIndexesB[0]),
+	Tuple3i maxIndexes( std::max(maxIndexesA[0], maxIndexesB[0]),
 						std::max(maxIndexesA[1], maxIndexesB[1]),
 						std::max(maxIndexesA[2], maxIndexesB[2]) );
 	

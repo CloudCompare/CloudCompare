@@ -295,7 +295,8 @@ CC_FILE_ERROR PovFilter::loadFile(const QString& filename, ccHObject& container,
 				ccGLMatrix rot;
 				rot.toIdentity();
 				CCVector3 sensorCenter(0, 0, 0);
-				float dPhi = 1.0f, dTheta = 1.0f;
+				float dPhi = 1.0f;
+				float dTheta = 1.0f;
 
 				while (fgets(line, MAX_ASCII_FILE_LINE_LENGTH, fp))
 				{

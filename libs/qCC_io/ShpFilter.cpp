@@ -1067,7 +1067,8 @@ CC_FILE_ERROR SaveMesh(ccMesh *mesh, QDataStream &stream, int32_t recordNumber, 
 	stream.setByteOrder(QDataStream::LittleEndian);
 	stream << static_cast<int32_t >(ESRI_SHAPE_TYPE::MULTI_PATCH);
 
-	CCVector3d bbMing, bbMaxg;
+	CCVector3d bbMing;
+	CCVector3d bbMaxg;
 	mesh->getGlobalBB(bbMing, bbMaxg);
 
 	stream << bbMing.x << bbMing.y << bbMaxg.x << bbMaxg.y;
@@ -1309,7 +1310,8 @@ static CC_FILE_ERROR SavePolyline(ccPolyline* poly,
 	out << static_cast<int32_t>(outputShapeType);
 
 	//Byte 4: Box
-	CCVector3d bbMing, bbMaxg;
+	CCVector3d bbMing;
+	CCVector3d bbMaxg;
 	poly->getGlobalBB(bbMing, bbMaxg);
 	//The Bounding Box for the PolyLine stored in the order Xmin, Ymin, Xmax, Ymax (24 bytes)
 	out << bbMing.u[X] << bbMing.u[Y] << bbMaxg.u[X] << bbMaxg.u[Y];
@@ -1640,7 +1642,8 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 		return CC_FERR_BAD_ENTITY_TYPE;
 	}
 
-	CCVector3d bbMinCorner, bbMaxCorner;
+	CCVector3d bbMinCorner;
+	CCVector3d bbMaxCorner;
 	if (!bBoxOfHObjectContainer(toSave, bbMinCorner, bbMaxCorner))
 	{
 		ccLog::Error("Entity(ies) has(ve) an invalid bounding box?!");

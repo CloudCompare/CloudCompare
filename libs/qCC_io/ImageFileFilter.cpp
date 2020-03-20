@@ -65,7 +65,8 @@ ImageFileFilter::ImageFileFilter()
 		//we grab the list of supported image file formats (for reading)
 		QList<QByteArray> formats = QImageReader::supportedImageFormats();
 		
-		QStringList imageFilters, importExtensions;
+		QStringList imageFilters;
+		QStringList importExtensions;
 		for (auto &format : formats)
 		{
 			imageFilters.append(QStringLiteral("*.%1").arg(format.data()));

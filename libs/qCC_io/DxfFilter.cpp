@@ -581,7 +581,8 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const QString& filename, co
 		return CC_FERR_NO_SAVE;
 
 	//get global bounding box
-	CCVector3d bbMinCorner, bbMaxCorner;
+	CCVector3d bbMinCorner;
+	CCVector3d bbMaxCorner;
 	{
 		ccHObject::Container* containers[3] = { &polylines, &meshes, &clouds };
 
@@ -590,7 +591,8 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const QString& filename, co
 		{
 			for (size_t i = 0; i < containers[j]->size(); ++i)
 			{
-				CCVector3d minC, maxC;
+				CCVector3d minC;
+				CCVector3d maxC;
 				if (containers[j]->at(i)->getGlobalBB(minC, maxC))
 				{
 					//update global BB

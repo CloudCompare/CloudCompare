@@ -44,10 +44,6 @@ ccPrimitiveDistanceDlg::ccPrimitiveDistanceDlg(QWidget* parent)
 	connect(signedDistCheckBox, &QCheckBox::toggled, this, &ccPrimitiveDistanceDlg::toggleSigned);
 }
 
-ccPrimitiveDistanceDlg::~ccPrimitiveDistanceDlg()
-{
-}
-
 void ccPrimitiveDistanceDlg::applyAndExit()
 {
 	s_signedDist = signedDistances();

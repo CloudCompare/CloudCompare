@@ -38,7 +38,7 @@ public:
 	explicit BundlerImportDlg(QWidget* parent = 0);
 
 	//! Destructor
-	virtual ~BundlerImportDlg();
+	virtual ~BundlerImportDlg() = default;
 
 	//! Returns whether keypoints should be imported
 	bool importKeypoints() const;

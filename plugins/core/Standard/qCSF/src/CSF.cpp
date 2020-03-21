@@ -60,10 +60,6 @@ CSF::CSF(wl::PointCloud& cloud)
 	params.iterations = 500;
 }
 
-CSF::~CSF()
-{
-}
-
 bool CSF::readPointsFromFile(std::string filename)
 {
 	point_cloud.clear();

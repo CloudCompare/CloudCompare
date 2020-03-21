@@ -304,10 +304,6 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 	projectionModeChanged(-1);
 }
 
-DistanceMapGenerationDlg::~DistanceMapGenerationDlg()
-{
-}
-
 void DistanceMapGenerationDlg::updateMinAndMaxLimits()
 {
 	if (m_cloud && m_profile)

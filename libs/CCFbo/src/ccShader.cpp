@@ -29,10 +29,6 @@ ccShader::ccShader(QObject* parent/*=0*/)
 	: QOpenGLShaderProgram(parent)
 {}
 
-ccShader::~ccShader()
-{
-}
-
 bool ccShader::fromFile(QString shaderBasePath, QString shaderBaseFilename, QString& error)
 {
 	if (shaderBasePath.isEmpty() || shaderBaseFilename.isEmpty())

@@ -29,7 +29,7 @@ class ccTraceTool :
 {
 public:
 	ccTraceTool();
-	virtual ~ccTraceTool();
+	virtual ~ccTraceTool() = default;
 
 	//called when the tool is set to active (for initialization)
 	void toolActivated() override;

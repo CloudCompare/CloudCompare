@@ -133,10 +133,6 @@ ccVolumeCalcTool::ccVolumeCalcTool(ccGenericPointCloud* cloud1, ccGenericPointCl
 	gridIsUpToDate(false);
 }
 
-ccVolumeCalcTool::~ccVolumeCalcTool()
-{
-}
-
 void ccVolumeCalcTool::setDisplayedNumberPrecision(int precision)
 {
 	//update window

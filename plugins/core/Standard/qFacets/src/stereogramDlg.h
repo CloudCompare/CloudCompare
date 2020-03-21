@@ -106,8 +106,8 @@ signals:
 protected:
 
 	//inherited from QWidget
-	virtual void paintEvent(QPaintEvent* e);
-	virtual void mousePressEvent(QMouseEvent* e);
+	void paintEvent(QPaintEvent* e) override;
+	void mousePressEvent(QMouseEvent* e) override;
 
 	//! Angular step (in degrees)
 	double m_angularStep_deg;

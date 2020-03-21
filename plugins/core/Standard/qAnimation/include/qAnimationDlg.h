@@ -18,6 +18,9 @@
 #ifndef CC_ANIMATION_DLG_HEADER
 #define CC_ANIMATION_DLG_HEADER
 
+//qCC_db
+#include <ccViewportParameters.h>
+
 //Qt
 #include <QDialog>
 
@@ -73,10 +76,13 @@ protected:
 protected: //methods
 
 	int getCurrentStepIndex();
+	size_t countEnabledSteps() const;
+
+	bool smoothModeEnabled() const;
 
 	int countFrames(size_t startIndex = 0);
 
-	void applyViewport( const cc2DViewportObject* viewport );
+	void applyViewport(const ccViewportParameters& viewportParameters);
 
 	double computeTotalTime();
 
@@ -89,29 +95,44 @@ protected: //methods
 
 	void render(bool asSeparateFrames);
 
-protected: //members
+	bool smoothTrajectory(double ratio, unsigned iterationCount);
 
 	//! Simple step (viewport + time)
 	struct Step
 	{
 		cc2DViewportObject* viewport = nullptr;
+		ccViewportParameters viewportParams;
+		int indexInOriginalTrajectory = -1;
+		CCVector3d cameraCenter;
+
+
 		double duration_sec = 0.0;
-		double distance = 0.0;
+		double length = 0.0;
 		int indexInSmoothTrajectory = -1;
 	};
 
+	typedef std::vector<Step> Trajectory;
+
+	bool getCompressedTrajectory(Trajectory& compressedTrajectory) const;
+
+protected: //members
+
 	//! Animation
-	std::vector<Step> m_videoSteps;
+	Trajectory m_videoSteps;
+	//! Smoothed animation
+	Trajectory m_smoothVideoSteps;
 
 	//! Associated 3D view
 	ccGLWindow* m_view3d;
 
-	//! Trajectory polyline
-	ccPolyline* m_trajectory;
-	//! Smooth trajectory polyline
-	ccPolyline* m_smoothTrajectory;
-	//! Smooth trajectory polyline (reversed)
-	ccPolyline* m_smoothTrajectoryReversed;
+	////! Trajectory polyline
+	//ccPolyline* m_trajectory;
+	////! Trajectory polyline vertices
+	//ccPointCloud* m_trajectoryVertices;
+	////! Smooth trajectory polyline
+	//ccPolyline* m_smoothTrajectory;
+	////! Smooth trajectory polyline (reversed)
+	//ccPolyline* m_smoothTrajectoryReversed;
 
 };
 

@@ -20,7 +20,7 @@
 #define VIEWINTERPOLATE_H
 
 //qCC_db
-#include <cc2DViewportObject.h>
+#include <ccViewportParameters.h>
 
 class ccViewportParameters;
 class ccPolyline;
@@ -33,10 +33,10 @@ class ViewInterpolate
 public:
 
 	//! Default constructor
-    ViewInterpolate( );
+    //ViewInterpolate( );
 
 	//! Constructor from two viewports and a number of steps
-    ViewInterpolate( cc2DViewportObject * view1,  cc2DViewportObject * view2, unsigned int stepCount = 0 );
+    ViewInterpolate( const ccViewportParameters& view1,  const ccViewportParameters& view2, unsigned int stepCount = 0 );
 
 	//! Sets the smooth trajectory (optional)
 	void setSmoothTrajectory(	ccPolyline* smoothTrajectory,
@@ -45,18 +45,16 @@ public:
 								unsigned i2,
 								PointCoordinateType length);
 
-    //! Sets the first viewport object
-	inline void setView1 ( cc2DViewportObject * view ) { m_view1 = view; }
     //! Returns the first viewport object
-	inline cc2DViewportObject * view1 () const { return m_view1; }
-
-    // Sets the second viewport object
-	inline void setView2 ( cc2DViewportObject * view ) {  m_view2 = view; }
+	inline const ccViewportParameters& view1 () const { return m_view1; }
     // Returns the second viewport object
-	inline const cc2DViewportObject * view2 () const { return m_view2; }
+	inline const ccViewportParameters& view2 () const { return m_view2; }
 
-    //! Returns the next viewport
-    bool nextView ( cc2DViewportObject& a_returned_viewport );
+	//! Interpolates the 2 viewports at a given (relative) position
+	bool interpolate(ccViewportParameters& a_returned_viewport, double ratio ) const;
+	
+	//! Returns the next viewport
+    bool nextView (ccViewportParameters& a_returned_viewport );
 
     //! Returns the current step
 	inline unsigned int currentStep () { return m_currentStep; }
@@ -73,12 +71,10 @@ public:
 
 private:
 
-    cc2DViewportObject* m_view1;
-
-    cc2DViewportObject* m_view2;
+	const ccViewportParameters& m_view1;
+	const ccViewportParameters& m_view2;
 
     unsigned int m_totalSteps;
-
     unsigned int m_currentStep;
 
 	ccPolyline *smoothTrajectory, *smoothTrajectoryReversed;

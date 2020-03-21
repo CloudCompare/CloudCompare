@@ -717,15 +717,16 @@ ccPolyline* ccPolyline::smoothChaikin(PointCoordinateType ratio, unsigned iterat
 
 	for (unsigned it = 0; it < iterationCount; ++it)
 	{
-		ccPointCloud* newStateVertices = new ccPointCloud("vertices");
-
 		//reserve memory for the new vertices
 		unsigned vertCount = currentIterationVertices->size();
 		unsigned segmentCount = (openPoly ? vertCount - 1 : vertCount);
 
+		ccPointCloud* newStateVertices = new ccPointCloud("vertices");
 		if (!newStateVertices->reserve(segmentCount * 2))
 		{
 			ccLog::Warning("[ccPolyline::smoothChaikin] not enough memory");
+			delete newStateVertices;
+			newStateVertices = nullptr;
 			delete currentIterationVertices;
 			currentIterationVertices = nullptr;
 			return nullptr;
@@ -734,7 +735,7 @@ ccPolyline* ccPolyline::smoothChaikin(PointCoordinateType ratio, unsigned iterat
 		if (openPoly)
 		{
 			//we always keep the first vertex
-			newStateVertices->addPoint(*(currentIterationVertices ? currentIterationVertices->getPoint(0) : getPoint(0)));
+			newStateVertices->addPoint(*currentIterationVertices->getPoint(0));
 		}
 
 		for (unsigned i = 0; i < segmentCount; ++i)

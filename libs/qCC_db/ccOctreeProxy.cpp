@@ -38,10 +38,6 @@ ccOctreeProxy::ccOctreeProxy(	ccOctree::Shared octree/*=ccOctree::Shared(0)*/,
 	lockVisibility(false);
 }
 
-ccOctreeProxy::~ccOctreeProxy()
-{
-}
-
 ccBBox ccOctreeProxy::getOwnBB(bool withGLFeatures/*=false*/)
 {
 	if (!m_octree)

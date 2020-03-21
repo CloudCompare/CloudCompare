@@ -59,10 +59,6 @@ ccNormalVectors::ccNormalVectors()
 	init();
 }
 
-ccNormalVectors::~ccNormalVectors()
-{
-}
-
 CompressedNormType ccNormalVectors::GetNormIndex(const PointCoordinateType N[])
 {
 	unsigned index = ccNormalCompressor::Compress(N);

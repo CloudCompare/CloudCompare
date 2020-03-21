@@ -40,7 +40,7 @@ public:
 	//! Copy constructor
 	/** \param s shifted object to copy
 	**/
-	ccShiftedObject(const ccShiftedObject& s);
+	ccShiftedObject(const ccShiftedObject& s) = default;
 
 	//! Sets shift applied to original coordinates (information storage only)
 	/** Such a shift can typically be applied at loading time.

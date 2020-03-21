@@ -33,7 +33,7 @@ class ccTopologyTool :
 {
 public:
 	ccTopologyTool();
-	virtual ~ccTopologyTool();
+	virtual ~ccTopologyTool() = default;
 
 	//called when the tool is set to active (for initialization)
 	virtual void toolActivated() override;

@@ -174,7 +174,7 @@ public:
 public:
 
 	//! Default destructor
-	virtual ~ccNormalVectors();
+	virtual ~ccNormalVectors() = default;
 
 	//! Allocates normal HSV colors array
 	/** Mandatory for HSV color related methods (getNormalHSVColor, etc.)

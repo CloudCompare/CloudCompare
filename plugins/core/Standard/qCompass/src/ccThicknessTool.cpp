@@ -27,10 +27,6 @@ ccThicknessTool::ccThicknessTool()
 {
 }
 
-ccThicknessTool::~ccThicknessTool()
-{
-}
-
 //called when the selection is changed while this tool is active
 void ccThicknessTool::onNewSelection(const ccHObject::Container& selectedEntities)
 {

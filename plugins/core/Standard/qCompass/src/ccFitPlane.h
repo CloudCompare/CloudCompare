@@ -32,7 +32,7 @@ class ccFitPlane :
 {
 public:
 	ccFitPlane(ccPlane* p);
-	~ccFitPlane();
+	~ccFitPlane() = default;
 
 	//update the metadata attributes of this plane
 	void updateAttributes(float rms, float search_r);

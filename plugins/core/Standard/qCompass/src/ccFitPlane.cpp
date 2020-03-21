@@ -59,10 +59,6 @@ ccFitPlane::ccFitPlane(ccPlane* p)
 	showNormalVector(ccCompass::drawNormals);
 }
 
-ccFitPlane::~ccFitPlane()
-{
-}
-
 void ccFitPlane::updateAttributes(float rms, float search_r)
 {
 	//calculate and store plane attributes

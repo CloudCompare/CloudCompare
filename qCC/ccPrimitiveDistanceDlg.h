@@ -40,7 +40,7 @@ public:
 	ccPrimitiveDistanceDlg(QWidget* parent = nullptr);
 
 	//! Default destructor
-	~ccPrimitiveDistanceDlg();
+	~ccPrimitiveDistanceDlg() = default;
 
 	bool signedDistances() { return signedDistCheckBox->isChecked(); }
 	bool flipNormals() { return flipNormalsCheckBox->isChecked(); }

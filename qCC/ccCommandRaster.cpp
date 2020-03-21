@@ -262,7 +262,8 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 		ccBBox gridBBox = cloudDesc.pc->getOwnBB();
 
 		//compute the grid size
-		unsigned gridWidth = 0, gridHeight = 0;
+		unsigned gridWidth = 0;
+		unsigned gridHeight = 0;
 		if (!ccRasterGrid::ComputeGridSize(vertDir, gridBBox, gridStep, gridWidth, gridHeight))
 		{
 			return cmd.error("Failed to compute the grid dimensions (check input cloud(s) bounding-box)");
@@ -560,7 +561,8 @@ bool CommandVolume25D::process(ccCommandLineInterface &cmd)
 	}
 
 	//we'll get the first two clouds
-	CLCloudDesc *ground = 0, *ceil = 0;
+	CLCloudDesc *ground = nullptr;
+	CLCloudDesc *ceil = nullptr;
 	{
 		CLCloudDesc* clouds[2] = { nullptr, nullptr };
 		int index = 0;
@@ -596,7 +598,8 @@ bool CommandVolume25D::process(ccCommandLineInterface &cmd)
 	}
 
 	//compute the grid size
-	unsigned gridWidth = 0, gridHeight = 0;
+	unsigned gridWidth = 0;
+	unsigned gridHeight = 0;
 	if (!ccRasterGrid::ComputeGridSize(vertDir, gridBBox, gridStep, gridWidth, gridHeight))
 	{
 		return cmd.error("Failed to compute the grid dimensions (check input cloud(s) bounding-box)");

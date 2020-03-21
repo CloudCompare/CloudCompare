@@ -106,7 +106,8 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
 
 	//we activate a temporary scalar field for registration distances computation
 	CCLib::ScalarField* dataDisplayedSF = nullptr;
-	int oldDataSfIdx = -1, dataSfIdx = -1;
+	int oldDataSfIdx = -1;
+	int dataSfIdx = -1;
 
 	//if the 'data' entity is a real ccPointCloud, we can even create a proper temporary SF for registration distances
 	if (data->isA(CC_TYPES::POINT_CLOUD))

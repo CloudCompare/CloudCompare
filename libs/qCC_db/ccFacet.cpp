@@ -200,7 +200,11 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 
 	//we project the input points on a plane
 	std::vector<CCLib::PointProjectionTools::IndexedCCVector2> points2D;
-	CCVector3 X, Y; //local base
+	
+	//local base
+	CCVector3 X;
+	CCVector3 Y;
+	
 	if (!Yk.projectPointsOn2DPlane<CCLib::PointProjectionTools::IndexedCCVector2>(points2D, nullptr, &m_center, &X, &Y))
 	{
 		ccLog::Error("[ccFacet::createInternalRepresentation] Not enough memory!");

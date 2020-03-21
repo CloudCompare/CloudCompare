@@ -772,7 +772,8 @@ bool ccVolumeCalcTool::updateGrid()
 		return false;
 	}
 
-	unsigned gridWidth = 0, gridHeight = 0;
+	unsigned gridWidth = 0;
+	unsigned gridHeight = 0;
 	if (!getGridSize(gridWidth, gridHeight))
 	{
 		return false;

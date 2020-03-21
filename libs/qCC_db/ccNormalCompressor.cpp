@@ -38,7 +38,9 @@ unsigned ccNormalCompressor::Compress(const PointCoordinateType n[3])
 
 	/// compute in which sector lie the elements
 	unsigned res = 0;
-	PointCoordinateType x, y, z;
+	PointCoordinateType x;
+	PointCoordinateType y;
+	PointCoordinateType z;
 	if (n[0] >= 0) { x = n[0]; } else { res |= 4; x = -n[0]; }
 	if (n[1] >= 0) { y = n[1]; } else { res |= 2; y = -n[1]; }
 	if (n[2] >= 0) { z = n[2]; } else { res |= 1; z = -n[2]; }

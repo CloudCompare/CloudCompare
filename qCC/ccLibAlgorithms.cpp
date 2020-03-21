@@ -649,7 +649,8 @@ namespace ccLibAlgorithms
 						{
 							const CCVector3* X = Yk.getLSPlaneX();
 							const CCVector3* O = Yk.getGravityCenter();
-							double minX = 0,maxX = 0;
+							double minX = 0;
+							double maxX = 0;
 							for (unsigned j=0; j<cloud->size(); ++j)
 							{
 								double x = (*cloud->getPoint(j) - *O).dot(*X);

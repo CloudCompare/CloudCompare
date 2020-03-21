@@ -391,7 +391,8 @@ bool ccComparisonDlg::computeApproxDistances()
 		ccLog::Print("[computeApproxDistances] Time: %3.2f s.", elapsedTime_ms / 1.0e3);
 
 		//display approx. dist. statistics
-		ScalarType mean,variance;
+		ScalarType mean;
+		ScalarType variance;
 		sf->computeMinAndMax();
 		sf->computeMeanAndVariance(mean,&variance);
 
@@ -872,7 +873,8 @@ bool ccComparisonDlg::computeDistances()
 		ccLog::Print("[ComputeDistances] Time: %3.2f s.",static_cast<double>(elapsedTime_ms)/1.0e3);
 
 		//display some statics about the computed distances
-		ScalarType mean,variance;
+		ScalarType mean;
+		ScalarType variance;
 		sf->computeMinAndMax();
 		sf->computeMeanAndVariance(mean, &variance);
 		ccLog::Print("[ComputeDistances] Mean distance = %f / std deviation = %f",mean,sqrt(variance));

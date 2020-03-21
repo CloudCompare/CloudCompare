@@ -135,7 +135,8 @@ bool cc2Point5DimEditor::getGridSize(unsigned& gridWidth, unsigned& gridHeight) 
 
 QString cc2Point5DimEditor::getGridSizeAsString() const
 {
-	unsigned gridWidth = 0, gridHeight = 0;
+	unsigned gridWidth = 0;
+	unsigned gridHeight = 0;
 	if (!getGridSize(gridWidth, gridHeight))
 	{
 		return QObject::tr("invalid grid box");

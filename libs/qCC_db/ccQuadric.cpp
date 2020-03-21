@@ -151,7 +151,10 @@ ccQuadric* ccQuadric::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/
 	}
 
 	//project the points on a 2D plane
-	CCVector3 G, X, Y, N;
+	CCVector3 G;
+	CCVector3 X;
+	CCVector3 Y;
+	CCVector3 N;
 	{
 		CCLib::Neighbourhood Yk(cloud);
 		

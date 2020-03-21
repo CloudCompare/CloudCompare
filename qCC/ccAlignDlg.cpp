@@ -403,7 +403,8 @@ void ccAlignDlg::changeSamplingMethod(int index)
 			{
 				modelSamplingRate->setDecimals(4);
 				int oldSliderPos = modelSample->sliderPosition();
-				CCVector3 bbMin, bbMax;
+				CCVector3 bbMin;
+				CCVector3 bbMax;
 				modelObject->getBoundingBox(bbMin, bbMax);
 				double dist = (bbMin-bbMax).norm();
 				modelSamplingRate->setMaximum(dist);
@@ -415,7 +416,8 @@ void ccAlignDlg::changeSamplingMethod(int index)
 			{
 				dataSamplingRate->setDecimals(4);
 				int oldSliderPos = dataSample->sliderPosition();
-				CCVector3 bbMin, bbMax;
+				CCVector3 bbMin;
+				CCVector3 bbMax;
 				dataObject->getBoundingBox(bbMin, bbMax);
 				double dist = (bbMin-bbMax).norm();
 				dataSamplingRate->setMaximum(dist);

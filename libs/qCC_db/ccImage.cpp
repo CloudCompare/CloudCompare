@@ -175,7 +175,8 @@ bool ccImage::toFile_MeOnly(QFile& out) const
 		return WriteError();
 
 	//for backward compatibility
-	float texU = 1.0f, texV = 1.0f;
+	float texU = 1.0f;
+	float texV = 1.0f;
 
 	QDataStream outStream(&out);
 	outStream << m_width;
@@ -205,7 +206,8 @@ bool ccImage::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDM
 	//[DIRTY] WARNING: temporarily, we set the vertices unique ID in the 'm_associatedCloud' pointer!!!
 	*(uint32_t*)(&m_associatedSensor) = sensorUniqueID;
 
-	float texU, texV;
+	float texU = 1.0f;
+	float texV = 1.0f;
 
 	QDataStream inStream(&in);
 	inStream >> m_width;

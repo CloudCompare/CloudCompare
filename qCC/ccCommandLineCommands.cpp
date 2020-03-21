@@ -2129,7 +2129,8 @@ bool CommandMatchBestFitPlane::process(ccCommandLineInterface &cmd)
 			
 			//we compute strike & dip by the way
 			{
-				PointCoordinateType dip = 0, dipDir = 0;
+				PointCoordinateType dip = 0;
+				PointCoordinateType dipDir = 0;
 				ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipDir);
 				txtStream << ccNormalVectors::ConvertDipAndDipDirToString(dip, dipDir) << endl;
 			}
@@ -2466,7 +2467,8 @@ bool CommandCrop::process(ccCommandLineInterface &cmd)
 		return cmd.error(QObject::tr("No point cloud or mesh available. Be sure to open or generate one first!"));
 	
 	//decode box extents
-	CCVector3 boxMin, boxMax;
+	CCVector3 boxMin;
+	CCVector3 boxMax;
 	{
 		QString boxBlock = cmd.arguments().takeFirst();
 		QStringList tokens = boxBlock.split(':');

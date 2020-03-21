@@ -142,7 +142,9 @@ void ccClippingBoxTool::editBox()
 
 	//construct the local box orientation matrix
 	{
-		CCVector3d X, Y, Z;
+		CCVector3d X;
+		CCVector3d Y;
+		CCVector3d Z;
 		bbeDlg.getBoxAxes(X, Y, Z);
 		//make sure the vectors define an orthogonal basis
 		Z = X.cross(Y);
@@ -624,7 +626,9 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 					}
 				}
 
-				int indexMins[3], indexMaxs[3], gridDim[3];
+				int indexMins[3]{ 0, 0, 0 };
+				int indexMaxs[3]{ 0, 0, 0 };
+				int gridDim[3]{ 0, 0, 0 };
 				unsigned cellCount = ComputeGridDimensions(localBox, repeatDimensions, indexMins, indexMaxs, gridDim, gridOrigin, cellSizePlusGap);
 
 				//we'll potentially create up to one (ref.) cloud per input loud and per cell
@@ -813,7 +817,9 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 					}
 				}
 
-				int indexMins[3], indexMaxs[3], gridDim[3];
+				int indexMins[3]{ 0, 0, 0 };
+				int indexMaxs[3]{ 0, 0, 0 };
+				int gridDim[3]{ 0, 0, 0 };
 				unsigned cellCount = ComputeGridDimensions(localBox, repeatDimensions, indexMins, indexMaxs, gridDim, gridOrigin, cellSizePlusGap);
 
 				const ccGLMatrix* _transformation = nullptr;

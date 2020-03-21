@@ -1365,7 +1365,8 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 		bool uniqueScale = true;
 		ccBBox localBB;
 		//sadly we don't have a double-typed bounding box class yet ;)
-		CCVector3d globalBBmin(0, 0, 0), globalBBmax(0, 0, 0);
+		CCVector3d globalBBmin(0, 0, 0);
+		CCVector3d globalBBmax(0, 0, 0);
 
 		for ( ccHObject *entity : getSelectedEntities() )
 		{
@@ -5541,7 +5542,8 @@ void MainWindow::doActionUnroll()
 	//let's rock unroll ;)
 	ccProgressDialog pDlg(true, this);
 
-	double startAngle_deg = 0.0, stopAngle_deg = 360.0;
+	double startAngle_deg = 0.0;
+	double stopAngle_deg = 360.0;
 	unrollDlg.getAngleRange(startAngle_deg, stopAngle_deg);
 	if (startAngle_deg >= stopAngle_deg)
 	{
@@ -6076,7 +6078,8 @@ void MainWindow::activateRegisterPointPairTool()
 		return;
 	}
 
-	ccHObject::Container alignedEntities, refEntities;
+	ccHObject::Container alignedEntities;
+	ccHObject::Container refEntities;
 	try
 	{
 		ccHObject::Container entities;
@@ -7903,7 +7906,8 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 		if (cloud)
 		{
 			double rms = 0.0;
-			CCVector3 C, N;
+			CCVector3 C;
+			CCVector3 N;
 
 			ccHObject* plane = nullptr;
 			if (fitFacet)
@@ -8629,7 +8633,8 @@ void MainWindow::doActionExportPlaneInfo()
 			
 		CCVector3 C = plane->getOwnBB().getCenter();
 		CCVector3 N = plane->getNormal();
-		PointCoordinateType dip_deg = 0, dipDir_deg = 0;
+		PointCoordinateType dip_deg = 0;
+		PointCoordinateType dipDir_deg = 0;
 		ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip_deg, dipDir_deg);
 
 		csvStream << plane->getName() << separator;		//Name
@@ -9059,7 +9064,8 @@ void MainWindow::doActionCloudPrimitiveDist()
 			ccScalarField* sf = static_cast<ccScalarField*>(compEnt->getScalarField(sfIdx));
 			if (sf)
 			{
-				ScalarType mean, variance;				
+				ScalarType mean;
+				ScalarType variance;				
 				sf->computeMinAndMax();
 				sf->computeMeanAndVariance(mean, &variance);
 				ccLog::Print("[Compute Primitive Distances] [Primitive: %s] [Cloud: %s] [%s] Mean distance = %f / std deviation = %f", qPrintable(refEntity->getName()), qPrintable(compEnt->getName()), qPrintable(sfName), mean, sqrt(variance));			
@@ -10950,8 +10956,10 @@ void MainWindow::doActionComparePlanes()
 	info << QString("Plane 2: %1").arg(p2->getName());
 	ccLog::Print(QString("[Compare] ") + info.last());
 
-	CCVector3 N1, N2;
-	PointCoordinateType d1, d2;
+	CCVector3 N1;
+	CCVector3 N2;
+	PointCoordinateType d1;
+	PointCoordinateType d2;
 	p1->getEquation(N1, d1);
 	p2->getEquation(N2, d2);
 

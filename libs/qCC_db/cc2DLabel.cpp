@@ -1349,7 +1349,8 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 	int arrowBaseSize = static_cast<int>(c_arrowBaseSize * context.renderZoom);
 
 	int titleHeight = 0;
-	QFont bodyFont, titleFont;
+	QFont bodyFont;
+	QFont titleFont;
 	if (!pushName)
 	{
 		/*** label border ***/

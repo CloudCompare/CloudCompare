@@ -247,7 +247,8 @@ void ccScalarField::updateSaturationBounds()
 	{
 		//DGM: same formulas as for the 'relative scale' case but we use the boundaries
 		//defined by the scale itself instead of the current SF boundaries...
-		double minVal = 0, maxVal = 0;
+		double minVal = 0;
+		double maxVal = 0;
 		m_colorScale->getAbsoluteBoundaries(minVal, maxVal);
 
 		m_saturationRange.setBounds(static_cast<ScalarType>(minVal), static_cast<ScalarType>(maxVal));

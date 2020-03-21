@@ -877,7 +877,9 @@ void ccGraphicalTransformationTool::apply()
 		//convert matrix back and forth so as to be sure to get a 'true' rotation matrix
 		//DGM: we use Euler angles, as the axis/angle method (formerly used) is not robust
 		//enough! Shifts could be perceived by the user.
-		double phi_rad,theta_rad,psi_rad;
+		double phi_rad = 0.0;
+		double theta_rad = 0.0;
+		double psi_rad = 0.0;
 		CCVector3d t3D;
 		finalTrans.getParameters(phi_rad,theta_rad,psi_rad,t3D);
 		finalTransCorrected.initFromParameters(phi_rad,theta_rad,psi_rad,t3D);
@@ -940,7 +942,9 @@ void ccGraphicalTransformationTool::apply()
 	ccLog::Print(correctedFinalTrans.toString(12,' ')); //full precision
 #ifdef QT_DEBUG
 	{
-		float phi_rad,theta_rad,psi_rad;
+		float phi_rad = 0.0f;
+		float theta_rad = 0.0f;
+		float psi_rad = 0.0f;
 		CCVector3f t3D;
 		correctedFinalTrans.getParameters(phi_rad,theta_rad,psi_rad,t3D);
 		ccLog::Print(QString("Angles(%1,%2,%3) T(%5,%6,%7)").arg(phi_rad).arg(theta_rad).arg(psi_rad).arg(t3D.x).arg(t3D.y).arg(t3D.z));

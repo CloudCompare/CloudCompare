@@ -240,7 +240,8 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 	//hack: compute the theoretical 'minimal' edge length
 	PointCoordinateType minSquareEdgeLength = 0;
 	{
-		CCVector2 minP, maxP;
+		CCVector2 minP;
+		CCVector2 maxP;
 		for (size_t i=0; i<pointCount; ++i)
 		{
 			const Vertex2D& P = points[i];
@@ -724,7 +725,12 @@ ccPolyline* ccContourExtractor::ExtractFlatContour(	CCLib::GenericIndexedCloudPe
 		return nullptr;
 
 	CCLib::Neighbourhood Yk(points);
-	CCVector3 O, X, Y; //local base
+	
+	//local base
+	CCVector3 O;
+	CCVector3 X;
+	CCVector3 Y;
+	
 	CCLib::Neighbourhood::InputVectorsUsage vectorsUsage = CCLib::Neighbourhood::None;
 
 	//we project the input points on a plane

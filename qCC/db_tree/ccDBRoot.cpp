@@ -1310,7 +1310,8 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 	while (!stream.atEnd())
 	{
 		//decode current item index data (row, col, data 'roles' map)
-		int srcRow, srcCol;
+		int srcRow = 0;
+		int srcCol = 0;
 		QMap<int, QVariant> roleDataMap;
 		stream >> srcRow >> srcCol >> roleDataMap;
 		if (!roleDataMap.contains(Qt::UserRole))
@@ -1553,7 +1554,9 @@ void ccDBRoot::alignCameraWithEntity(bool reverse)
 	{
 		cc2DLabel* label = static_cast<cc2DLabel*>(obj);
 		//work only with labels with 3 points or labels picked on a triangle!
-		CCVector3 A, B, C;
+		CCVector3 A;
+		CCVector3 B;
+		CCVector3 C;
 		if (label->size() == 3)
 		{
 			A = label->getPickedPoint(0).getPointPosition();

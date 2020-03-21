@@ -170,7 +170,8 @@ void ccPlaneEditDlg::onNormalChanged(double)
 	Nd.z = nzDoubleSpinBox->value();
 	Nd.normalize();
 
-	PointCoordinateType dip = 0, dipDir = 0;
+	PointCoordinateType dip = 0;
+	PointCoordinateType dipDir = 0;
 	ccNormalVectors::ConvertNormalToDipAndDipDir(Nd, dip, dipDir);
 
 	dipDoubleSpinBox->blockSignals(true);

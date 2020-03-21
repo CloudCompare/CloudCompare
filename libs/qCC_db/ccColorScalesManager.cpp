@@ -440,7 +440,8 @@ void ccColorScalesManager::toPersistentSettings() const
 			settings.setValue(c_csm_relative, (*it)->isRelative());
 			if (!(*it)->isRelative())
 			{
-				double minVal, maxVal;
+				double minVal = 0.0;
+				double maxVal = 0.0;
 				(*it)->getAbsoluteBoundaries(minVal, maxVal);
 				settings.setValue(c_csm_minVal, minVal);
 				settings.setValue(c_csm_maxVal, maxVal);

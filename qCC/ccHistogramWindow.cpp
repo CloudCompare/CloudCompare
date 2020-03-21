@@ -498,7 +498,8 @@ void ccHistogramWindow::refresh()
 	int curveSize = static_cast<int>(m_curveValues.size());
 	if (curveSize > 1)
 	{
-		QVector<double> x(curveSize), y(curveSize);
+		QVector<double> x(curveSize);
+		QVector<double> y(curveSize);
 
 		double step = (m_maxVal - m_minVal) / (curveSize - 1);
 		for (int i = 0; i < curveSize; ++i)

@@ -925,7 +925,8 @@ CCVector3 ccNormalVectors::ConvertDipAndDipDirToNormal(PointCoordinateType dip_d
 
 void ccNormalVectors::ConvertNormalToHSV(const CCVector3& N, float& H, float& S, float& V)
 {
-	PointCoordinateType dip = 0, dipDir = 0;
+	PointCoordinateType dip = 0;
+	PointCoordinateType dipDir = 0;
 	ConvertNormalToDipAndDipDir(N, dip, dipDir);
 
 	H = static_cast<float>(dipDir);

@@ -415,7 +415,9 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 					{
 						for (unsigned n = 0; n < chunkSize; n += decimStep)
 						{
-							CCVector3 Na, Nb, Nc;
+							CCVector3 Na;
+							CCVector3 Nb;
+							CCVector3 Nc;
 							getTriangleNormals(static_cast<unsigned>(chunkStart + n), Na, Nb, Nc);
 							*_normals++ = Na;
 							*_normals++ = Nb;
@@ -454,13 +456,21 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		else
 		{
 			//current vertex color (RGB)
-			const ccColor::Rgb *rgb1 = nullptr, *rgb2 = nullptr, *rgb3 = nullptr;
+			const ccColor::Rgb *rgb1 = nullptr;
+			const ccColor::Rgb *rgb2 = nullptr;
+			const ccColor::Rgb *rgb3 = nullptr;
 			//current vertex color (RGBA)
-			const ccColor::Rgba *rgba1 = nullptr, *rgba2 = nullptr, *rgba3 = nullptr;
+			const ccColor::Rgba *rgba1 = nullptr;
+			const ccColor::Rgba *rgba2 = nullptr;
+			const ccColor::Rgba *rgba3 = nullptr;
 			//current vertex normal
-			const PointCoordinateType *N1 = nullptr, *N2 = nullptr, *N3 = nullptr;
+			const PointCoordinateType *N1 = nullptr;
+			const PointCoordinateType *N2 = nullptr;
+			const PointCoordinateType *N3 = nullptr;
 			//current vertex texture coordinates
-			TexCoords2D *Tx1 = nullptr, *Tx2 = nullptr, *Tx3 = nullptr;
+			TexCoords2D *Tx1 = nullptr;
+			TexCoords2D *Tx2 = nullptr;
+			TexCoords2D *Tx3 = nullptr;
 
 			//loop on all triangles
 			int lasMtlIndex = -1;
@@ -524,7 +534,9 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 					if (showTriNormals)
 					{
 						assert(triNormals);
-						int n1, n2, n3;
+						int n1 = 0;
+						int n2 = 0;
+						int n3 = 0;
 						getTriangleNormalIndexes(n, n1, n2, n3);
 						N1 = (n1 >= 0 ?                 ccNormalVectors::GetNormal(triNormals->at(n1)).u : nullptr);
 						N2 = (n1 == n2 ? N1 : n1 >= 0 ? ccNormalVectors::GetNormal(triNormals->at(n2)).u : nullptr);
@@ -909,10 +921,14 @@ bool ccGenericMesh::trianglePicking(unsigned triIndex,
 {
 	assert(triIndex < size());
 
-	CCVector3 A3D, B3D, C3D;
+	CCVector3 A3D;
+	CCVector3 B3D;
+	CCVector3 C3D;
 	getTriangleVertices(triIndex, A3D, B3D, C3D);
 
-	CCVector3d A2D, B2D, C2D;
+	CCVector3d A2D;
+	CCVector3d B2D;
+	CCVector3d C2D;
 	if (noGLTrans)
 	{
 		// if none of its points fall into the frustrum the triangle is not visible...
@@ -1067,7 +1083,9 @@ bool ccGenericMesh::computePointPosition(unsigned triIndex, const CCVector2d& uv
 		return true;
 	}
 	
-	CCVector3 A, B, C;
+	CCVector3 A;
+	CCVector3 B;
+	CCVector3 C;
 	getTriangleVertices(triIndex, A, B, C);
 
 	double z = 1.0 - uv.x - uv.y;

@@ -1896,7 +1896,9 @@ ccImage* ccCameraSensor::orthoRectifyAsImage(	const ccImage* image,
 												double* maxCorner/*=0*/,
 												double* realCorners/*=0*/) const
 {
-	double a[3], b[3], c[3];
+	double a[3]{ 0.0, 0.0, 0.0 };
+	double b[3]{ 0.0, 0.0, 0.0 };
+	double c[3]{ 0.0, 0.0, 0.0 };
 
 	if (!computeOrthoRectificationParams(image, keypoints3D, keypointsImage, a, b, c))
 	{
@@ -1915,7 +1917,9 @@ ccImage* ccCameraSensor::orthoRectifyAsImage(	const ccImage* image,
 
 	//first, we compute the ortho-rectified image corners
 	double corners[8];
-	double xi, yi, qi;
+	double xi;
+	double yi;
+	double qi;
 
 	int width = static_cast<int>(image->getW());
 	int height = static_cast<int>(image->getH());
@@ -2091,7 +2095,9 @@ bool ccCameraSensor::OrthoRectifyAsImages(	std::vector<ccImage*> images,
 
 		//first, we compute the ortho-rectified image corners
 		double corners[8];
-		double xi,yi,qi;
+		double xi;
+		double yi;
+		double qi;
 
 		unsigned width = images[k]->getW();
 		unsigned height = images[k]->getH();
@@ -2297,7 +2303,9 @@ ccPointCloud* ccCameraSensor::orthoRectifyAsCloud(	const ccImage* image,
 													CCLib::GenericIndexedCloud* keypoints3D,
 													std::vector<KeyPoint>& keypointsImage) const
 {
-	double a[3],b[3],c[3];
+	double a[3]{ 0.0, 0.0, 0.0 };
+	double b[3]{ 0.0, 0.0, 0.0 };
+	double c[3]{ 0.0, 0.0, 0.0 };
 
 	if (!computeOrthoRectificationParams(image,keypoints3D,keypointsImage,a,b,c))
 		return nullptr;
@@ -2621,7 +2629,8 @@ void ccOctreeFrustumIntersector::computeFrustumIntersectionByLevel(unsigned char
 		if (got != m_cellsBuilt[level].end())
 		{
 			// get extrema of the current cell
-			CCVector3 bbMin, bbMax;
+			CCVector3 bbMin;
+			CCVector3 bbMax;
 			m_associatedOctree->computeCellLimits(truncatedCode, level, bbMin, bbMax, true);
 
 			// look if there is a separating plane

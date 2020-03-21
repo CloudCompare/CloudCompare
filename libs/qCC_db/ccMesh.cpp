@@ -486,10 +486,9 @@ void ccMesh::transformTriNormals(const ccGLMatrix& trans)
     //we must take care of the triangle normals!
 	if (m_triNormals && (!getParent() || !getParent()->isKindOf(CC_TYPES::MESH)))
     {
-		size_t numTriNormals = m_triNormals->size();
-
 #if 0 //no use to use memory for this!
-      bool recoded = false;
+		size_t numTriNormals = m_triNormals->size();
+		bool recoded = false;
 
         //if there are more triangle normals than the size of the compressed
 		//normals array, we recompress the array instead of recompressing each normal
@@ -915,7 +914,8 @@ ccMesh* ccMesh::TriangulateTwoPolylines(ccPolyline* p1, ccPolyline* p2, CCVector
 
 	//get plane coordinate system
 	CCVector3 O = *N.getGravityCenter();
-	CCVector3 X(1, 0, 0), Y(0, 1, 0);
+	CCVector3 X(1, 0, 0);
+	CCVector3 Y(0, 1, 0);
 	if (projectionDir)
 	{
 		//use the input projection dir.
@@ -1683,7 +1683,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 	if (MACRO_Draw3D(context))
 	{
 		//any triangle?
-		size_t n, triNum = m_triVertIndexes->size();
+		size_t triNum = m_triVertIndexes->size();
 		if (triNum == 0)
 		{
 			return;
@@ -1857,7 +1857,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				{
 					const CCLib::VerticesIndexes* _vertIndexes = _vertIndexesChunkOrigin;
 					CCVector3* _vertices = GetVertexBuffer();
-					for (n = 0; n < chunkSize; n += decimStep, _vertIndexes += decimStep)
+					for (size_t n = 0; n < chunkSize; n += decimStep, _vertIndexes += decimStep)
 					{
 						assert(_vertIndexes->i1 < m_associatedCloud->size());
 						assert(_vertIndexes->i2 < m_associatedCloud->size());
@@ -1875,7 +1875,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 					ccColor::Rgb* _rgbColors = reinterpret_cast<ccColor::Rgb*>(GetColorsBuffer());
 					assert(colorScale);
 
-					for (n = 0; n < chunkSize; n += decimStep, _vertIndexes += decimStep)
+					for (size_t n = 0; n < chunkSize; n += decimStep, _vertIndexes += decimStep)
 					{
 						assert(_vertIndexes->i1 < currentDisplayedScalarField->size());
 						assert(_vertIndexes->i2 < currentDisplayedScalarField->size());
@@ -1890,7 +1890,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				{
 					const CCLib::VerticesIndexes* _vertIndexes = _vertIndexesChunkOrigin;
 					ccColor::Rgba* _rgbaColors = reinterpret_cast<ccColor::Rgba*>(GetColorsBuffer());
-					for (n = 0; n < chunkSize; n += decimStep, _vertIndexes += decimStep)
+					for (size_t n = 0; n < chunkSize; n += decimStep, _vertIndexes += decimStep)
 					{
 						assert(_vertIndexes->i1 < rgbaColorsTable->size());
 						assert(_vertIndexes->i2 < rgbaColorsTable->size());
@@ -1909,7 +1909,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 					{
 						assert(m_triNormalIndexes);
 						const Tuple3i* _triNormalIndexes = ccChunk::Start(*m_triNormalIndexes, k);
-						for (n = 0; n < chunkSize; n += decimStep, _triNormalIndexes += decimStep)
+						for (size_t n = 0; n < chunkSize; n += decimStep, _triNormalIndexes += decimStep)
 						{
 							assert(_triNormalIndexes->u[0] < static_cast<int>(m_triNormals->size()));
 							assert(_triNormalIndexes->u[1] < static_cast<int>(m_triNormals->size()));
@@ -1923,7 +1923,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 					else
 					{
 						const CCLib::VerticesIndexes* _vertIndexes = _vertIndexesChunkOrigin;
-						for (n = 0; n < chunkSize; n += decimStep, _vertIndexes += decimStep)
+						for (size_t n = 0; n < chunkSize; n += decimStep, _vertIndexes += decimStep)
 						{
 							assert(_vertIndexes->i1 < normalsIndexesTable->size());
 							assert(_vertIndexes->i2 < normalsIndexesTable->size());
@@ -1983,7 +1983,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			int lasMtlIndex = -1;
 
 			//loop on all triangles
-			for (n = 0; n < triNum; ++n)
+			for (size_t n = 0; n < triNum; ++n)
 			{
 				//LOD: shall we display this triangle?
 				if (n % decimStep)
@@ -3368,13 +3368,15 @@ bool ccMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor
 	//if (x < 0 || x > 1.0 || y < 0 || y > 1.0)
 	if (x > 1.0)
 	{
-		double xFrac, xInt;
+		double xFrac = 0.0;
+		double xInt = 0.0;
 		xFrac = std::modf(x, &xInt);
 		x = xFrac;
 	}
 	else if (x < 0.0)
 	{
-		double xFrac, xInt;
+		double xFrac = 0.0;
+		double xInt = 0.0;
 		xFrac = std::modf(x, &xInt);
 		x = 1.0 + xFrac;
 	}
@@ -3382,13 +3384,15 @@ bool ccMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor
 	//same thing for y
 	if (y > 1.0)
 	{
-		double yFrac, yInt;
+		double yFrac = 0.0;
+		double yInt = 0.0;
 		yFrac = std::modf(y, &yInt);
 		y = yFrac;
 	}
 	else if (y < 0.0)
 	{
-		double yFrac, yInt;
+		double yFrac = 0.0;
+		double yInt = 0.0;
 		yFrac = std::modf(y, &yInt);
 		y = 1.0 + yFrac;
 	}

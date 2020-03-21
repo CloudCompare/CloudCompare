@@ -285,7 +285,8 @@ bool ccOctree::DrawCellAsABox(	const CCLib::DgmOctree::octreeCell& cell,
 	QOpenGLFunctions_2_1* glFunc     = static_cast<QOpenGLFunctions_2_1*>(additionalParameters[1]);
 	assert(glFunc != nullptr);
 
-	CCVector3 bbMin, bbMax;
+	CCVector3 bbMin;
+	CCVector3 bbMax;
 	cell.parentOctree->computeCellLimits(cell.truncatedCode, cell.level, bbMin, bbMax, true);
 
 	ccOctreeFrustumIntersector::OctreeCellVisibility vis = ccOctreeFrustumIntersector::CELL_OUTSIDE_FRUSTUM;
@@ -542,7 +543,8 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 	bool hasGLTrans = m_theAssociatedCloudAsGPC->getAbsoluteGLTransformation(trans);
 
 	//compute 3D picking 'ray'
-	CCVector3 rayAxis, rayOrigin;
+	CCVector3 rayAxis;
+	CCVector3 rayOrigin;
 	{
 		CCVector3d clickPosd2(clickPos.x, clickPos.y, 1.0);
 		CCVector3d Y(0, 0, 0);
@@ -661,7 +663,8 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 
 				if (camera.perspective)
 				{
-					double radialSqDist, sqDistToOrigin;
+					double radialSqDist = 0.0;
+					double sqDistToOrigin = 0.0;
 					rayLocal.squareDistances(cellCenter, radialSqDist, sqDistToOrigin);
 
 					double dx = sqrt(sqDistToOrigin);

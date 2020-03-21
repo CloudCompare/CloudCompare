@@ -44,7 +44,7 @@ struct Candidate
 	PointCoordinateType radius;
 	CCVector3 centroid;
 
-	Candidate() : leaf(0), dist(PC_NAN), radius(0) {}
+	Candidate() : leaf(nullptr), dist(PC_NAN), radius(0) {}
 	Candidate(ccKdTree::Leaf* l) : leaf(l), dist(PC_NAN), radius(0)
 	{
 		if (leaf && leaf->points)

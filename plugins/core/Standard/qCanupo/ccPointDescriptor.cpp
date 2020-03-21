@@ -453,7 +453,7 @@ ScaleParamsComputer* ScaleParamsComputer::GetByID(unsigned descID)
 	{
 		//couldn't find the corresponding descriptor!
 		assert(false);
-		return 0;
+		return nullptr;
 	}
 }
 
@@ -665,7 +665,7 @@ bool CorePointDescSet::loadFromMSC(QString filename, QString& error, ccPointClou
 		{
 			//not enough memory to load core points!
 			if (!corePoints->reserve(ncorepoints))
-				corePoints = 0;
+				corePoints = nullptr;
 		}
 	}
 
@@ -698,14 +698,14 @@ bool CorePointDescSet::loadFromMSC(QString filename, QString& error, ccPointClou
 	int ptnparams;
 	mscfile.read((char*)&ptnparams, sizeof(int));
 
-	std::vector<CCLib::ScalarField*> paramsSf(3,0);
+	std::vector<CCLib::ScalarField*> paramsSf(3,nullptr);
 	if (corePoints)
 	{
 		//above 3, ptnparams contains additional scalars
 		for (int i=3; i<ptnparams; ++i)
 		{
 			int sfIdx = corePoints->addScalarField(qPrintable(QString("scalar #%1").arg(i-2)));
-			paramsSf.push_back(sfIdx >= 0 ? corePoints->getScalarField(sfIdx) : 0);
+			paramsSf.push_back(sfIdx >= 0 ? corePoints->getScalarField(sfIdx) : nullptr);
 
 			if (sfIdx < 0)
 			{

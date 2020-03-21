@@ -39,7 +39,7 @@
 #include <limits>
 
 qCanupoTrainingDialog::qCanupoTrainingDialog(ccMainAppInterface* app)
-	: QDialog(app ? app->getMainWindow() : 0)
+	: QDialog(app ? app->getMainWindow() : nullptr)
 	, Ui::CanupoTrainingDialog()
 	, m_app(app)
 {
@@ -207,13 +207,13 @@ ccPointCloud* qCanupoTrainingDialog::getClass2Cloud()
 ccPointCloud* qCanupoTrainingDialog::getOriginPointCloud()
 {
 	//return the cloud currently selected in the combox box
-	return useOriginalCloudCheckBox->isChecked() ? qCanupoTools::GetCloudFromCombo(originCloudComboBox, m_app->dbRootObject()) : 0;
+	return useOriginalCloudCheckBox->isChecked() ? qCanupoTools::GetCloudFromCombo(originCloudComboBox, m_app->dbRootObject()) : nullptr;
 }
 
 ccPointCloud* qCanupoTrainingDialog::getEvaluationCloud()
 {
 	//return the cloud currently selected in the combox box
-	return evaluateParamsCheckBox->isChecked() ? qCanupoTools::GetCloudFromCombo(evaluationCloudComboBox, m_app->dbRootObject()) : 0;
+	return evaluateParamsCheckBox->isChecked() ? qCanupoTools::GetCloudFromCombo(evaluationCloudComboBox, m_app->dbRootObject()) : nullptr;
 }
 
 void qCanupoTrainingDialog::loadParamsFromPersistentSettings()

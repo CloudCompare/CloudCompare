@@ -454,7 +454,7 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 	double projectionScale = dlg.cylDiameterDoubleSpinBox->value();
 	qM3C2Normals::ComputationMode normMode = dlg.getNormalsComputationMode();
 	double samplingDist = dlg.cpSubsamplingDoubleSpinBox->value();
-	ccScalarField* normalScaleSF = 0; //normal scale (multi-scale mode only)
+	ccScalarField* normalScaleSF = nullptr; //normal scale (multi-scale mode only)
 
 	//other parameters are stored in 's_M3C2Params' for parallel call
 	s_M3C2Params = M3C2Params();
@@ -562,7 +562,7 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 
 			//don't need those references anymore
 			delete subsampled;
-			subsampled = 0;
+			subsampled = nullptr;
 		}
 
 		if (s_M3C2Params.corePoints)
@@ -654,7 +654,7 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 
 			bool invalidNormals = false;
 			ccPointCloud* baseCloud = (useCorePointsOnly ? s_M3C2Params.corePoints : cloud1);
-			ccOctree* baseOctree = (baseCloud == cloud1 ? s_M3C2Params.cloud1Octree.data() : 0);
+			ccOctree* baseOctree = (baseCloud == cloud1 ? s_M3C2Params.cloud1Octree.data() : nullptr);
 
 			//dedicated core points method
 			normalsAreOk = qM3C2Normals::ComputeCorePointsNormals(s_M3C2Params.corePoints,
@@ -824,7 +824,7 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 			if (app)
 				app->dispToConsole("Failed to allocate memory for change significance values!", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 			s_M3C2Params.sigChangeSF->release();
-			s_M3C2Params.sigChangeSF = 0;
+			s_M3C2Params.sigChangeSF = nullptr;
 			//no need to stop just for this SF!
 			//error = true;
 			//break;
@@ -850,7 +850,7 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 				if (app)
 					app->dispToConsole("Failed to allocate memory for cloud #1 std. dev. values!", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 				s_M3C2Params.stdDevCloud1SF->release();
-				s_M3C2Params.stdDevCloud1SF = 0;
+				s_M3C2Params.stdDevCloud1SF = nullptr;
 			}
 			//allocate cloud #2 std. dev. SF
 			QString stdDevSFName2 = QString(STD_DEV_CLOUD2_SF_NAME).arg(prefix);
@@ -861,7 +861,7 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 				if (app)
 					app->dispToConsole("Failed to allocate memory for cloud #2 std. dev. values!", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 				s_M3C2Params.stdDevCloud2SF->release();
-				s_M3C2Params.stdDevCloud2SF = 0;
+				s_M3C2Params.stdDevCloud2SF = nullptr;
 			}
 		}
 		if (dlg.exportDensityAtProjScaleCheckBox->isChecked())
@@ -874,7 +874,7 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 				if (app)
 					app->dispToConsole("Failed to allocate memory for cloud #1 density values!", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 				s_M3C2Params.densityCloud1SF->release();
-				s_M3C2Params.densityCloud1SF = 0;
+				s_M3C2Params.densityCloud1SF = nullptr;
 			}
 			//allocate cloud #2 density SF
 			s_M3C2Params.densityCloud2SF = new ccScalarField(DENSITY_CLOUD2_SF_NAME);
@@ -884,7 +884,7 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 				if (app)
 					app->dispToConsole("Failed to allocate memory for cloud #2 density values!", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 				s_M3C2Params.densityCloud2SF->release();
-				s_M3C2Params.densityCloud2SF = 0;
+				s_M3C2Params.densityCloud2SF = nullptr;
 			}
 		}
 
@@ -968,7 +968,7 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 				app->dispToConsole(QString("[M3C2] Distances computation: %1 s.").arg(static_cast<double>(distTime_ms) / 1000.0, 0, 'f', 3), ccMainAppInterface::STD_CONSOLE_MESSAGE);
 		}
 
-		s_M3C2Params.nProgress = 0;
+		s_M3C2Params.nProgress = nullptr;
 
 		break; //to break from fake loop
 	}
@@ -1080,7 +1080,7 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 		{
 			delete s_M3C2Params.outputCloud;
 		}
-		s_M3C2Params.outputCloud = 0;
+		s_M3C2Params.outputCloud = nullptr;
 	}
 
 	if (app)

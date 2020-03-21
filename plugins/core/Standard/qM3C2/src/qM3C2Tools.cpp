@@ -111,7 +111,7 @@ void ComputeCorePointNormal(unsigned index)
 
 			/*** we manually compute the least squares best fitting plane (so as to get the PCA eigen values) ***/
 
-			//we determine the plane normal by computing the smallest eigen value of M = 1/n * S[(p-µ)*(p-µ)']
+			//we determine the plane normal by computing the smallest eigen value of M = 1/n * S[(p-Âµ)*(p-Âµ)']
 			CCLib::SquareMatrixd eigVectors;
 			std::vector<double> eigValues;
 			if (Jacobi<double>::ComputeEigenValuesAndVectors(Z.computeCovarianceMatrix(), eigVectors, eigValues, true))
@@ -258,7 +258,7 @@ bool qM3C2Normals::ComputeCorePointsNormals(CCLib::GenericIndexedCloud* corePoin
 	s_corePointsNormalsParams.radii = sortedRadii;
 	s_corePointsNormalsParams.octree = theOctree;
 	s_corePointsNormalsParams.octreeLevel = octreeLevel;
-	s_corePointsNormalsParams.nProgress = progressCb ? &nProgress : 0;
+	s_corePointsNormalsParams.nProgress = progressCb ? &nProgress : nullptr;
 	s_corePointsNormalsParams.processCanceled = false;
 	s_corePointsNormalsParams.invalidNormals = false;
 	s_corePointsNormalsParams.normalScale = normalScale;
@@ -616,7 +616,7 @@ bool qM3C2Tools::GuessBestParams(	ccPointCloud* cloud1,
 		ccOctree::Shared octree1 = cloud1->getOctree();
 		if (!octree1)
 		{
-			ccProgressDialog pDlg(true, app ? app->getMainWindow() : 0);
+			ccProgressDialog pDlg(true, app ? app->getMainWindow() : nullptr);
 			octree1 = cloud1->computeOctree(&pDlg);
 			if (!octree1)
 			{

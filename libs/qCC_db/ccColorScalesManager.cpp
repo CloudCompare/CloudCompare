@@ -480,7 +480,7 @@ void ccColorScalesManager::toPersistentSettings() const
 
 ccColorScale::Shared ccColorScalesManager::getScale(QString UUID) const
 {
-	return m_scales.value(UUID, ccColorScale::Shared(0));
+	return m_scales.value(UUID, ccColorScale::Shared(nullptr));
 }
 
 void ccColorScalesManager::addScale(ccColorScale::Shared scale)
@@ -556,7 +556,7 @@ ccColorScale::Shared ccColorScalesManager::Create(DEFAULT_SCALES scaleType)
 	if ( name.isNull() )
 	{
 		ccLog::Error(QStringLiteral("Unhandled pre-defined scale (%1)").arg(scaleType));
-		return ccColorScale::Shared(0);
+		return ccColorScale::Shared(nullptr);
 	}
 
 	ccColorScale::Shared scale(new ccColorScale(name, QString::number(scaleType)));

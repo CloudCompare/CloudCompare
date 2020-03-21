@@ -42,11 +42,11 @@ public:
 
 	//! Default constructor
 	FacetDensityGrid()
-		: grid(0)
+		: grid(nullptr)
 		, rSteps(0)
 		, ddSteps(0)
-		, step_deg(0)
 		, step_R(0)
+		, step_deg(0)
 	{
 		minMaxDensity[0] = minMaxDensity[1] = 0;
 	}

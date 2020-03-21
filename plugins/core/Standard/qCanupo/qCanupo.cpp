@@ -49,8 +49,8 @@
 qCanupoPlugin::qCanupoPlugin(QObject* parent/*=0*/)
 	: QObject(parent)
 	, ccStdPluginInterface( ":/CC/plugin/qCanupoPlugin/info.json" )
-	, m_classifyAction(0)
-	, m_trainAction(0)
+	, m_classifyAction(nullptr)
+	, m_trainAction(nullptr)
 {
 }
 
@@ -144,8 +144,8 @@ void qCanupoPlugin::doClassifyAction()
 	PointCoordinateType samplingDist = static_cast<PointCoordinateType>(cDlg.cpSubsamplingDoubleSpinBox->value());
 
 	CorePointDescSet corePointsDescriptors; //core point descriptors
-	ccPointCloud* realCorePoints = 0; //the core point cloud (as a real point cloud, if available)
-	CCLib::GenericIndexedCloudPersist* corePoints = 0; //the core points, potentially as references!
+	ccPointCloud* realCorePoints = nullptr; //the core point cloud (as a real point cloud, if available)
+	CCLib::GenericIndexedCloudPersist* corePoints = nullptr; //the core points, potentially as references!
 
 	switch (coreSource)
 	{
@@ -173,7 +173,7 @@ void qCanupoPlugin::doClassifyAction()
 		CCLib::ReferenceCloud* refCloud = CCLib::CloudSamplingTools::resampleCloudSpatially(cloud,
 																							samplingDist,
 																							modParams,
-																							0,
+																							nullptr,
 																							&pDlg);
 		if (!refCloud)
 		{
@@ -198,7 +198,7 @@ void qCanupoPlugin::doClassifyAction()
 		}
 
 		delete refCloud;
-		refCloud = 0;
+		refCloud = nullptr;
 	}
 	break;
 
@@ -213,7 +213,7 @@ void qCanupoPlugin::doClassifyAction()
 			if (realCorePoints)
 			{
 				delete realCorePoints;
-				realCorePoints = 0;
+				realCorePoints = nullptr;
 			}
 			m_app->dispToConsole(error, ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 			return;
@@ -252,7 +252,7 @@ void qCanupoPlugin::doClassifyAction()
 	if (corePoints != realCorePoints)
 	{
 		delete corePoints;
-		corePoints = 0;
+		corePoints = nullptr;
 	}
 }
 
@@ -317,9 +317,9 @@ void qCanupoPlugin::doTrainAction()
 			return;
 		}
 		if (computer->needSF()
-			&& (cloud1->getCurrentDisplayedScalarField() == 0
-			|| cloud2->getCurrentDisplayedScalarField() == 0
-			|| (evaluationCloud && evaluationCloud->getCurrentDisplayedScalarField() == 0)
+			&& (cloud1->getCurrentDisplayedScalarField() == nullptr
+			|| cloud2->getCurrentDisplayedScalarField() == nullptr
+			|| (evaluationCloud && evaluationCloud->getCurrentDisplayedScalarField() == nullptr)
 			)
 			)
 		{
@@ -330,9 +330,9 @@ void qCanupoPlugin::doTrainAction()
 	}
 
 	//sub-sampled clouds
-	CCLib::GenericIndexedCloudPersist* corePoints1 = 0;
-	CCLib::GenericIndexedCloudPersist* corePoints2 = 0;
-	CCLib::GenericIndexedCloudPersist* evaluationPoints = 0;
+	CCLib::GenericIndexedCloudPersist* corePoints1 = nullptr;
+	CCLib::GenericIndexedCloudPersist* corePoints2 = nullptr;
+	CCLib::GenericIndexedCloudPersist* evaluationPoints = nullptr;
 
 	//progress dialog
 	ccProgressDialog pDlg(true, m_app->getMainWindow());
@@ -476,7 +476,7 @@ void qCanupoPlugin::doTrainAction()
 				cloud2->getName(),
 				ctDlg.cloud1ClassSpinBox->value(),
 				ctDlg.cloud2ClassSpinBox->value(),
-				evaluationPoints ? &evaluationDescriptors : 0,
+				evaluationPoints ? &evaluationDescriptors : nullptr,
 				m_app);
 
 			//we need the 3D view to be visible before updating the zoom!

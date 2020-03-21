@@ -57,7 +57,7 @@ static ccPointCloud* GetCloudFromCombo(QComboBox* comboBox, ccHObject* dbRoot)
 	if (!comboBox || !dbRoot)
 	{
 		assert(false);
-		return 0;
+		return nullptr;
 	}
 
 	//return the cloud currently selected in the combox box
@@ -65,7 +65,7 @@ static ccPointCloud* GetCloudFromCombo(QComboBox* comboBox, ccHObject* dbRoot)
 	if (index < 0)
 	{
 		assert(false);
-		return 0;
+		return nullptr;
 	}
 	assert(comboBox->itemData(index).isValid());
 	unsigned uniqueID = comboBox->itemData(index).toUInt();
@@ -73,7 +73,7 @@ static ccPointCloud* GetCloudFromCombo(QComboBox* comboBox, ccHObject* dbRoot)
 	if (!item || !item->isA(CC_TYPES::POINT_CLOUD))
 	{
 		assert(false);
-		return 0;
+		return nullptr;
 	}
 	return static_cast<ccPointCloud*>(item);
 }
@@ -81,7 +81,7 @@ static ccPointCloud* GetCloudFromCombo(QComboBox* comboBox, ccHObject* dbRoot)
 /*** HELPERS (END) ***/
 
 qM3C2Dialog::qM3C2Dialog(ccPointCloud* cloud1, ccPointCloud* cloud2, ccMainAppInterface* app)
-	: QDialog(app ? app->getMainWindow() : 0)
+	: QDialog(app ? app->getMainWindow() : nullptr)
 	, Ui::M3C2Dialog()
 	, m_app(app)
 	, m_cloud1(nullptr)

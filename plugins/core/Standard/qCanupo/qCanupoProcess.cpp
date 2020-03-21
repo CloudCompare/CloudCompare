@@ -80,7 +80,8 @@ float RefinePointClassif(	const Classifier& classifier,
 			octreeLevel);
 
 		// for each scene data point, find the corresponding core point and check if it is reliable
-		std::vector<ScalarType> class1SFValues, class2SFValues;
+		std::vector<ScalarType> class1SFValues;
+		std::vector<ScalarType> class2SFValues;
 		for (int j = 0; j < n; ++j)
 		{
 			unsigned currentPointIndex = neighbors[j].pointIndex;

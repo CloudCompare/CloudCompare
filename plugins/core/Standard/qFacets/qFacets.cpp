@@ -488,7 +488,8 @@ ccHObject* qFacets::createFacets(ccPointCloud* cloud,
 #endif
 
 					//shall we colorize it with a random color?
-					ccColor::Rgb col, darkCol;
+					ccColor::Rgb col;
+					ccColor::Rgb darkCol;
 					if (randomColors)
 					{
 						col = ccColor::Generator::Random();
@@ -501,7 +502,8 @@ ccHObject* qFacets::createFacets(ccPointCloud* cloud,
 					{
 						//use normal-based HSV coloring
 						CCVector3 N = facet->getNormal();
-						PointCoordinateType dip, dipDir;
+						PointCoordinateType dip = 0;
+						PointCoordinateType dipDir = 0;
 						ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipDir);
 						FacetsClassifier::GenerateSubfamilyColor(col, dip, dipDir, 0, 1, &darkCol);
 					}
@@ -619,7 +621,8 @@ void GetFacetMetaData(ccFacet* facet, FacetMetaData& data)
 
 	//compute dip direction & dip
 	{
-		PointCoordinateType dipDir = 0, dip = 0;
+		PointCoordinateType dipDir = 0;
+		PointCoordinateType dip = 0;
 		ccNormalVectors::ConvertNormalToDipAndDipDir(data.normal, dip, dipDir);
 		data.dipDir_deg = static_cast<int>(dipDir);
 		data.dip_deg = static_cast<int>(dip);
@@ -637,7 +640,8 @@ void ComputeFacetExtensions(CCVector3& N, ccPolyline* facetContour, double& hori
 	{
 		//oriRotMat.applyRotation(N); //DGM: oriRotMat is only for display!
 		//we assume that at this point the "up" direction is always (0,0,1)
-		CCVector3 Xf(1, 0, 0), Yf(0, 1, 0);
+		CCVector3 Xf(1, 0, 0);
+		CCVector3 Yf(0, 1, 0);
 		//we get the horizontal vector on the plane
 		CCVector3 D = CCVector3(0, 0, 1).cross(N);
 		if (D.norm2() > ZERO_TOLERANCE) //otherwise the facet is horizontal!
@@ -751,7 +755,9 @@ void qFacets::exportFacets()
 	bool useCustomOrientation = fDlg.customOriRadioButton->isChecked();
 
 	//Default base
-	CCVector3 X(1, 0, 0), Y(0, 1, 0), Z(0, 0, 1);
+	CCVector3 X(1, 0, 0);
+	CCVector3 Y(0, 1, 0);
+	CCVector3 Z(0, 0, 1);
 
 	//'vertical' orientation (potentially specified by the user)
 	if (!useNativeOrientation)
@@ -868,7 +874,8 @@ void qFacets::exportFacets()
 			GetFacetMetaData(facet, data);
 
 			//horizontal and vertical extensions
-			double horizExt = 0, vertExt = 0;
+			double horizExt = 0;
+			double vertExt = 0;
 			ComputeFacetExtensions(data.normal, poly, horizExt, vertExt);
 
 			facetIndex.values.push_back(data.facetIndex);
@@ -1103,7 +1110,8 @@ void qFacets::exportFacetsInfo()
 		FacetMetaData data;
 		GetFacetMetaData(facet, data);
 		//horizontal and vertical extensions
-		double horizExt = 0, vertExt = 0;
+		double horizExt = 0;
+		double vertExt = 0;
 		ComputeFacetExtensions(data.normal, facet->getContour(), horizExt, vertExt);
 
 		outStream << data.facetIndex << ";";

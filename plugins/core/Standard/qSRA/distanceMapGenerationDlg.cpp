@@ -179,7 +179,8 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 	if (m_cloud)
 	{
 		ccBBox bbox = m_cloud->getOwnBB();
-		PointCoordinateType hMin = 0, hMax = 0;
+		PointCoordinateType hMin = 0;
+		PointCoordinateType hMax = 0;
 		if (bbox.isValid())
 		{
 			hMin = bbox.minCorner().u[profileDesc.revolDim];
@@ -363,7 +364,8 @@ void DistanceMapGenerationDlg::updateMinAndMaxLimits()
 			//compute transformation from the cloud to the surface (of revolution)
 			ccGLMatrix cloudToSurfaceOrigin = profileDesc.computeCloudToSurfaceOriginTrans();
 
-			double minLat_rad = 0.0, maxLat_rad = 0.0;
+			double minLat_rad = 0.0;
+			double maxLat_rad = 0.0;
 			if (DistanceMapGenerationTool::ComputeMinAndMaxLatitude_rad(m_cloud,
 				minLat_rad,
 				maxLat_rad,
@@ -614,7 +616,9 @@ void DistanceMapGenerationDlg::update()
 		{
 			//we must check that the projection parameter have not changed!
 			//Otherwise the symbols will be misplaced...
-			double yMin, yMax, yStep;
+			double yMin = 0.0;
+			double yMax = 0.0;
+			double yStep = 0.0;
 			getGridYValues(yMin, yMax, yStep, ANG_RAD);
 			if (	!m_map->conical
 				||	m_map->yMin != yMin
@@ -1043,7 +1047,9 @@ void DistanceMapGenerationDlg::updateGridSteps()
 	//angular step
 	QString xStepsStr;
 	{
-		double minX, maxX, step;
+		double minX = 0.0;
+		double maxX = 0.0;
+		double step = 0.0;
 		getGridXValues(minX, maxX, step, m_angularUnits);
 		xStepsStr = (step > 0 ? QString::number(ceil(std::max(maxX-minX,0.0)/ step)) : "inf");
 	}
@@ -1051,7 +1057,9 @@ void DistanceMapGenerationDlg::updateGridSteps()
 	//Y step
 	QString yStepsStr;
 	{
-		double minY, maxY, step;
+		double minY = 0.0;
+		double maxY = 0.0;
+		double step = 0.0;
 		getGridYValues(minY, maxY, step, m_angularUnits);
 		yStepsStr = (step > 0 ? QString::number(ceil(std::max(maxY-minY,0.0)/ step)) : "inf");
 	}
@@ -1137,7 +1145,9 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationDlg::updateM
 	bool ccw = ccwCheckBox->isChecked();
 
 	//Y values
-	double yMin, yMax, yStep;
+	double yMin = 0.0;
+	double yMax = 0.0;
+	double yStep = 0.0;
 	getGridYValues(yMin, yMax, yStep, ANG_RAD);
 	
 	//generate map
@@ -1448,7 +1458,9 @@ void DistanceMapGenerationDlg::loadOverlaySymbols()
 			QStringList tokens = currentLine.simplified().split(QChar(' '), QString::SkipEmptyParts);
 			if (tokens.size() == 4)
 			{
-				bool okX, okY, okZ;
+				bool okX = false;
+				bool okY = false;
+				bool okZ = false;
 				CCVector3 P(static_cast<PointCoordinateType>(tokens[1].toDouble(&okX)),
 							static_cast<PointCoordinateType>(tokens[2].toDouble(&okY)),
 							static_cast<PointCoordinateType>(tokens[3].toDouble(&okZ)));
@@ -1723,11 +1735,15 @@ void DistanceMapGenerationDlg::toggleOverlayGrid(bool state)
 							static_cast<ColorCompType>(m_gridColor.blue()) );
 
 		//we reconstruct the grid and the corresponding labels
-		double xMin_rad, xMax_rad, xStep_rad;
+		double xMin_rad = 0.0;
+		double xMax_rad = 0.0;
+		double xStep_rad = 0.0;
 		getGridXValues(xMin_rad, xMax_rad, xStep_rad, ANG_RAD);
 		double scaleXStep_rad = getSpinboxAngularValue(scaleXStepDoubleSpinBox,ANG_RAD);
 
-		double yMin, yMax, yStep;
+		double yMin = 0.0;
+		double yMax = 0.0;
+		double yStep = 0.0;
 		getGridYValues(yMin, yMax, yStep, ANG_RAD);
 		double scaleYStep = getScaleYStep(ANG_RAD);
 

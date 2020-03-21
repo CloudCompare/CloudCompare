@@ -124,7 +124,8 @@ bool CCMiscTools::TriBoxOverlap(const CCVector3& boxcenter, const CCVector3& box
 	fey = std::abs(e0[1]);
 	fez = std::abs(e0[2]);
 
-	PointCoordinateType minV,maxV;
+	PointCoordinateType minV;
+	PointCoordinateType maxV;
 	AXISTEST_X01(e0[2], e0[1], fez, fey);
 	fex = std::abs(e0[0]); //DGM: not necessary before!
 	AXISTEST_Y02(e0[2], e0[0], fez, fex);

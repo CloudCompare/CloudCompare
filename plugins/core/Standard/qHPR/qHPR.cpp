@@ -177,7 +177,8 @@ CCLib::ReferenceCloud* qHPR::removeHiddenPoints(CCLib::GenericIndexedCloudPersis
 
 	qh_freeqhull(!qh_ALL);
 	//free long memory
-	int curlong, totlong;
+	int curlong = 0;
+	int totlong = 0;
 	qh_memfreeshort (&curlong, &totlong);
 	//free short memory and memory allocator
 

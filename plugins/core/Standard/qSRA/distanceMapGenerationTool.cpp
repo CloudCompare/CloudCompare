@@ -716,7 +716,10 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 						const CCLib::VerticesIndexes* tsi = dm->getNextTriangleVertIndexes();
 						//get the triangle bounding box (in grid coordinates)
 						int P[3][2];
-						int xMin = 0, yMin = 0, xMax = 0, yMax = 0;
+						int xMin = 0;
+						int yMin = 0;
+						int xMax = 0;
+						int yMax = 0;
 						{
 							for (unsigned j = 0; j < 3; ++j)
 							{

@@ -130,7 +130,8 @@ float Classifier::classify2D_checkcondnum(const Point2D& P, const Point2D& R, fl
 
 float Classifier::classify2D(const Point2D& P) const
 {
-	float condpos, condneg;
+	float condpos = 0.0f;
+	float condneg = 0.0f;
 	float predpos = classify2D_checkcondnum(P,refPointPos,condpos);
 	float predneg = classify2D_checkcondnum(P,refPointNeg,condneg);
 

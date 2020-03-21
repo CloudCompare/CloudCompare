@@ -206,7 +206,8 @@ void ComputeM3C2DistForPoint(unsigned index)
 
 	//compute M3C2 distance
 	{
-		double mean1 = 0, stdDev1 = 0;
+		double mean1 = 0;
+		double stdDev1 = 0;
 		bool validStats1 = false;
 
 		//extract cloud #1's neighbourhood
@@ -288,7 +289,8 @@ void ComputeM3C2DistForPoint(unsigned index)
 			||	s_M3C2Params.densityCloud2SF
 			)
 		{
-			double mean2 = 0, stdDev2 = 0;
+			double mean2 = 0;
+			double stdDev2 = 0;
 			bool validStats2 = false;
 			
 			//extract cloud #2's neighbourhood

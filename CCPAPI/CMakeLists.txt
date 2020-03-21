@@ -33,6 +33,7 @@ include_directories( ${QCC_IO_LIB_SOURCE_DIR} )
 include_directories( ${QCC_GL_LIB_SOURCE_DIR} )
 include_directories( ${CloudComparePlugins_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
+#include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../qCC )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../common )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/db_tree )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/ui_templates )
@@ -62,10 +63,9 @@ INCLUDE_DIRECTORIES(
   ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-SET(_link_LIBRARIES
-  ${PYTHON_LIBRARIES}
-  ${CC_PAPI_LIB}
-)
+#SET(_link_LIBRARIES
+#  ${PYTHON_LIBRARIES} " CC_PAPI_LIB CC_FBO_LIB CC_CORE_LIB QCC_DB_LIB QCC_GL_LIB qcustomplot ")
+#MESSAGE(STATUS "_link_LIBRARIES: " ${_link_LIBRARIES})
 
 SET(_add_SOURCES
     sipcloudCompareccPApi.cc
@@ -79,15 +79,13 @@ SIP_WRAP_SIP( _sip_SOURCES cloudCompare.sip OPTIONS -t WS_X11 -t Qt_5_9_5 -I /us
 MESSAGE(STATUS "_sip_SOURCES: " ${_sip_SOURCES})
 
 # sources / to compile
-ADD_LIBRARY( cloudCompare ${_sip_SOURCES} ${_add_SOURCES} )
+ADD_LIBRARY( cloudCompare SHARED ${_sip_SOURCES} ${_add_SOURCES} )
 
-TARGET_LINK_LIBRARIES(cloudCompare ${_link_LIBRARIES}  ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(cloudCompare ${PYTHON_LIBRARIES} CC_PAPI_LIB CC_FBO_LIB CC_CORE_LIB QCC_DB_LIB QCC_GL_LIB qcustomplot Qt5::Core Qt5::Widgets Qt5::Concurrent)
 
 SET(INSTALL_CLOUDCOMPARE_PYTHON ${CMAKE_INSTALL_LIBDIR}/cloudcompare)
 MESSAGE(STATUS "INSTALL_CLOUDCOMPARE_PYTHON: " ${INSTALL_CLOUDCOMPARE_PYTHON})
-INSTALL(TARGETS cloudCompare DESTINATION ${INSTALL_CLOUDCOMPARE_PYTHON})
-
-#INSTALL(TARGETS cloudCompare EXPORT ${PROJECT_NAME}TargetGroup DESTINATION ${SALOME_INSTALL_LIBS})
+INSTALL(TARGETS cloudCompare LIBRARY DESTINATION ${INSTALL_CLOUDCOMPARE_PYTHON})
 
 IF(WIN32)
   SET_TARGET_PROPERTIES(cloudCompare PROPERTIES SUFFIX ".pyd" DEBUG_OUTPUT_NAME cloudCompare_d RELEASE_OUTPUT_NAME cloudCompare)

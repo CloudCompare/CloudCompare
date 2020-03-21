@@ -7,6 +7,9 @@
 
 #include "ccPApi.h"
 
+//qCC
+//#include <ccConsole.h>
+
 //qCC_db
 #include <ccHObjectCaster.h>
 
@@ -20,6 +23,7 @@ ccPApi::ccPApi() :
         m_silentMode(false), m_autoSaveMode(true), m_addTimestamp(true), m_precision(
                 12), m_coordinatesShiftWasEnabled(false)
 {
+//    ccConsole::Init(nullptr, nullptr, nullptr, true);
 }
 
 ccPApi::~ccPApi()
@@ -35,7 +39,7 @@ ccPointCloud* ccPApi::loadPointCloud(const char *filename, CC_SHIFT_MODE mode,
     CC_FILE_ERROR result = CC_FERR_NO_ERROR;
     ccHObject *db = nullptr;
 
-    FileIOFilter::Shared filter = 0;
+    FileIOFilter::Shared filter = FileIOFilter::Shared(nullptr);
     QString fileName(filename);
     if (filter)
     {

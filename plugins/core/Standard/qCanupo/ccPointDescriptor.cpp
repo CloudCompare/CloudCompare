@@ -718,7 +718,9 @@ bool CorePointDescSet::loadFromMSC(QString filename, QString& error, ccPointClou
 	//vector<float> avg_ndist_max_scale(ncorepoints);
 	for (int pt=0; pt<ncorepoints; ++pt)
 	{
-		float x,y,z;
+		float x = 0.0f;
+		float y = 0.0f;
+		float z = 0.0f;
 		mscfile.read((char*)&x, sizeof(float));
 		mscfile.read((char*)&y, sizeof(float));
 		mscfile.read((char*)&z, sizeof(float));
@@ -741,7 +743,8 @@ bool CorePointDescSet::loadFromMSC(QString filename, QString& error, ccPointClou
 
 		for (int s=0; s<nscales_msc; ++s)
 		{
-			float a,b;
+			float a = 0.0f;
+			float b = 0.0f;
 			mscfile.read((char*)(&a), sizeof(float));
 			mscfile.read((char*)(&b), sizeof(float));
 			

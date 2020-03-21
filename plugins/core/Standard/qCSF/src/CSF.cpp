@@ -73,7 +73,9 @@ bool CSF::readPointsFromFile(std::string filename)
 		std::ifstream fin(filename.c_str(), std::ios::in);
 
 		char line[500];
-		std::string x, y, z;
+		std::string x;
+		std::string y;
+		std::string z;
 		while (fin.getline(line, sizeof(line)))
 		{
 			std::stringstream words(line);
@@ -120,7 +122,8 @@ bool CSF::do_filtering(	std::vector<int>& groundIndexes,
 		timer.start();
 
 		//compute the terrain (cloud) bounding-box
-		wl::Point bbMin, bbMax;
+		wl::Point bbMin;
+		wl::Point bbMax;
 		point_cloud.computeBoundingBox(bbMin, bbMax);
 
 		//computing the number of cloth node

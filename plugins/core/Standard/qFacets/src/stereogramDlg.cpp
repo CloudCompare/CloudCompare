@@ -203,7 +203,8 @@ bool StereogramWidget::init(double angularStep_deg,
 			Nmean.z += static_cast<double>(N.z) * weight;
 			surfaceSum += weight;
 
-			PointCoordinateType dipDir = 0, dip = 0;
+			PointCoordinateType dipDir = 0;
+			PointCoordinateType dip = 0;
 			ccNormalVectors::ConvertNormalToDipAndDipDir(N,dip,dipDir);
 
 			//unsigned iDip = static_cast<unsigned>(floor(static_cast<double>(dip)/densityGrid->step_deg));
@@ -238,7 +239,8 @@ bool StereogramWidget::init(double angularStep_deg,
 				static_cast<PointCoordinateType>(Nmean.y),
 				static_cast<PointCoordinateType>(Nmean.z));
 
-			PointCoordinateType dipDir = 0, dip = 0;
+			PointCoordinateType dipDir = 0;
+			PointCoordinateType dip = 0;
 			ccNormalVectors::ConvertNormalToDipAndDipDir(N,dip,dipDir);
 
 			m_meanDipDir_deg = static_cast<double>(dipDir);
@@ -635,7 +637,8 @@ bool StereogramDialog::init(double angularStep_deg,
 	if (!m_classifWidget->init(angularStep_deg, facetGroup, resolution_deg))
 		return false;
 
-	double meanDipDir_deg, meanDip_deg;
+	double meanDipDir_deg = 0.0;
+	double meanDip_deg = 0.0;
 	//set stereogram subtitle (i.e. mean direction)
 	m_classifWidget->getMeanDir(meanDip_deg, meanDipDir_deg);
 	meanDirLabel->setText(	QString("[Mean] ")
@@ -752,7 +755,8 @@ void StereogramDialog::updateFacetsFilter(bool enable)
 			if (enable)
 			{
 				CCVector3 N = facet->getNormal();
-				PointCoordinateType dip, dipDir;
+				PointCoordinateType dip = 0;
+				PointCoordinateType dipDir = 0;
 				ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipDir);
 
 				double dDip = fabs(dip - dipFilter);
@@ -799,7 +803,8 @@ void StereogramDialog::updateFacetsFilter(bool enable)
 			for (unsigned i = 0; i < static_cast<unsigned>(count); ++i)
 			{
 				CCVector3 N = cloud->getPointNormal(i);
-				PointCoordinateType dip, dipDir;
+				PointCoordinateType dip = 0;
+				PointCoordinateType dipDir = 0;
 				ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipDir);
 
 				double dDip = fabs(dip - dipFilter);
@@ -854,7 +859,8 @@ void StereogramDialog::exportCurrentSelection()
 			ccFacet* facet = static_cast<ccFacet*>(facets[i]);
 
 			CCVector3 N = facet->getNormal();
-			PointCoordinateType dip, dipDir;
+			PointCoordinateType dip = 0;
+			PointCoordinateType dipDir = 0;
 			ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipDir);
 
 			double dDip = fabs(dip - dipFilter);

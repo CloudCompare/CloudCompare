@@ -623,7 +623,8 @@ void qBroomDlg::updateAutomationAreaPolyline(int x, int y)
 	//project the currrent mouse position in 3D AND on the broom plane
 	CCVector3 P3D;
 	{
-		CCVector3d M03D, M13D;
+		CCVector3d M03D;
+		CCVector3d M13D;
 		QPointF pos2D = m_glWindow->toCornerGLCoordinates(x, y);
 		camera.unproject(CCVector3(pos2D.x(), pos2D.y(), 0), M03D);
 		camera.unproject(CCVector3(pos2D.x(), pos2D.y(), 1), M13D);
@@ -1272,7 +1273,8 @@ void qBroomDlg::onLeftButtonClicked(int x, int y)
 		CCVector3 P3D;
 		{
 			ccGLMatrix broomTrans = m_boxes->getGLTransformation();
-			CCVector3d M03D, M13D;
+			CCVector3d M03D;
+			CCVector3d M13D;
 			QPointF pos2D = m_glWindow->toCornerGLCoordinates(x, y);
 			camera.unproject(CCVector3(pos2D.x(), pos2D.y(), 0), M03D);
 			camera.unproject(CCVector3(pos2D.x(), pos2D.y(), 1), M13D);
@@ -1330,7 +1332,8 @@ void qBroomDlg::onLeftButtonClicked(int x, int y)
 				QPointF pos2D = m_glWindow->toCornerGLCoordinates(m_lastMousePos.x(), m_lastMousePos.y());
 				CCVector3d A2D(pos2D.x(), pos2D.y(), 0);
 				CCVector3d B2D(pos2D.x(), pos2D.y(), 1);
-				CCVector3d A3D, B3D;
+				CCVector3d A3D;
+				CCVector3d B3D;
 				if (	camera.unproject(A2D, A3D)
 					&&	camera.unproject(B2D, B3D) )
 				{
@@ -1418,7 +1421,8 @@ void qBroomDlg::onMouseMoved(int x, int y, Qt::MouseButtons button)
 				QPointF pos2D = m_glWindow->toCornerGLCoordinates(m_lastMousePos.x(), m_lastMousePos.y());
 				CCVector3d A2D(pos2D.x(), pos2D.y(), 0);
 				CCVector3d B2D(pos2D.x(), pos2D.y(), 1);
-				CCVector3d A3D, B3D;
+				CCVector3d A3D;
+				CCVector3d B3D;
 
 				bool hasMousePos3D = false;
 				CCVector3 mousePos3D;

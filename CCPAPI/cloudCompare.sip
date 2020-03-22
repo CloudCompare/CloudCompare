@@ -2,8 +2,7 @@
 
 %Module cloudCompare
 
-
-%Import QtWidgets/QtWidgetsmod.sip
+%Import QtGui/QtGuimod.sip
 
 %If (Qt_5_9_1 -)
 

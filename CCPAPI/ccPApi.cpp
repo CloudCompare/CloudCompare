@@ -5,11 +5,7 @@
  *      Author: paul
  */
 
-#include <QtWidgets>
 #include "ccPApi.h"
-
-//qCC
-//#include <ccConsole.h>
 
 //qCC_db
 #include <ccHObjectCaster.h>
@@ -24,8 +20,6 @@ ccPApi::ccPApi() :
         m_silentMode(false), m_autoSaveMode(true), m_addTimestamp(true), m_precision(
                 12), m_coordinatesShiftWasEnabled(false)
 {
-    QMainWindow();
-    //ccConsole::Init(nullptr, nullptr, nullptr, true);
 }
 
 ccPApi::ccPApi(const ccPApi &)

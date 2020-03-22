@@ -4,7 +4,7 @@
 #include <ccPApi.h>
 %End
 
-class ccPApi: public QMainWindow {
+class ccPApi {
 
 %TypeHeaderCode
 #include <ccPApi.h>

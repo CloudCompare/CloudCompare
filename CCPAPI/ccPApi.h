@@ -8,17 +8,10 @@
 #ifndef CCPAPI_CCPAPI_H_
 #define CCPAPI_CCPAPI_H_
 
-#include <QMainWindow>
 #include <ccCommandLineInterface.h>
-//#include <vector>
-//#include <ccHObject.h>
-//#include <FileIOFilter.h>
 
-class ccPApi: public QMainWindow
+class ccPApi
 {
-public:
-    Q_OBJECT
-
 public:
    enum CC_SHIFT_MODE
     {

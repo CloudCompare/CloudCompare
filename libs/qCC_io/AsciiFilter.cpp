@@ -42,6 +42,9 @@
 //Qt
 #include <QScopedPointer>
 
+#define _CCDEBUG_
+#include <ccTrace.h>
+
 Garbage<QDialog> s_dialogGarbage;
 AsciiSaveDlg* s_saveDialog(nullptr);
 AsciiOpenDlg* s_openDialog(nullptr);
@@ -130,7 +133,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 						++cloudCount;
 				}
 			}
-			
+
 			//we can now create the corresponding file(s)
 			if (cloudCount > 1)
 			{
@@ -154,7 +157,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 						subFilename += QString("_%1").arg(cloudCount-counter,6,10,QChar('0'));
 						if (!extension.isEmpty())
 							subFilename += QString(".") + extension;
-						
+
 						CC_FILE_ERROR result = saveToFile(entity->getChild(i),subFilename,parameters);
 						if (result != CC_FERR_NO_ERROR)
 						{
@@ -215,7 +218,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 
 	//output precision
 	const int s_coordPrecision = saveDialog->coordsPrecision();
-	const int s_sfPrecision = saveDialog->sfPrecision(); 
+	const int s_sfPrecision = saveDialog->sfPrecision();
 	const int s_nPrecision = 2 + sizeof(PointCoordinateType);
 
 	//other parameters
@@ -286,7 +289,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 			header.append(separator);
 			header.append(AsciiHeaderColumns::Nz());
 		}
-		
+
 		stream << header << "\n";
 	}
 
@@ -404,9 +407,11 @@ CC_FILE_ERROR AsciiFilter::loadFile(const QString& filename,
 	//column attribution dialog
 	//DGM: we ask for the semi-persistent dialog as it may have
 	//been already initialized (by the command-line for instance)
+	CCTRACE("---");
 	AsciiOpenDlg* openDialog = GetOpenDialog(parameters.parentWidget);
 	assert(openDialog);
 	openDialog->setFilename(filename);
+    CCTRACE("---");
 
 	bool forceDialogDisplay = parameters.alwaysDisplayLoadDialog;
 	//if we should try to avoid displaying the dialog
@@ -523,7 +528,7 @@ struct cloudAttributesDescriptor
 		hasNorms = false;
 		hasRGBColors = false;
 		hasFloatRGBColors[0] = hasFloatRGBColors[1] = hasFloatRGBColors[2] = hasFloatRGBColors[3] = false;
-		
+
 		scalarIndexes.clear();
 		scalarFields.clear();
 	}

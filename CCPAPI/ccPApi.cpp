@@ -9,17 +9,29 @@
 
 //qCC_db
 #include <ccHObjectCaster.h>
+//#include <ccColorScalesManager.h>
 
 //system
 #include <unordered_set>
 
+//plugins
+#include "ccPluginInterface.h"
+//#include "ccPluginManager.h"
+
 #define _CCDEBUG_
-#include "ccTrace.h"
+#include <ccTrace.h>
 
 ccPApi::ccPApi() :
         m_silentMode(false), m_autoSaveMode(true), m_addTimestamp(true), m_precision(
                 12), m_coordinatesShiftWasEnabled(false)
 {
+    //global structures initialization
+    FileIOFilter::InitInternalFilters(); //load all known I/O filters (plugins will come later!)
+    ccNormalVectors::GetUniqueInstance(); //force pre-computed normals array initialization
+    //ccColorScalesManager::GetUniqueInstance(); //force pre-computed color tables initialization
+
+    //load the plugins
+    //ccPluginManager::get().loadPlugins();
 }
 
 ccPApi::ccPApi(const ccPApi &)

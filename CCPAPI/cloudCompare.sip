@@ -2,9 +2,12 @@
 
 %Module cloudCompare
 
-//%Import QtCore/QtCoremod.sip
-%Import QtGui/QtGuimod.sip
+
+%Import QtWidgets/QtWidgetsmod.sip
+
+%If (Qt_5_9_1 -)
 
 %Include ccPApi.sip
 %Include ccPointCloud.sip
 
+%End

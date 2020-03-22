@@ -5,6 +5,7 @@
  *      Author: paul
  */
 
+#include <QtWidgets>
 #include "ccPApi.h"
 
 //qCC
@@ -23,7 +24,18 @@ ccPApi::ccPApi() :
         m_silentMode(false), m_autoSaveMode(true), m_addTimestamp(true), m_precision(
                 12), m_coordinatesShiftWasEnabled(false)
 {
-//    ccConsole::Init(nullptr, nullptr, nullptr, true);
+    QMainWindow();
+    //ccConsole::Init(nullptr, nullptr, nullptr, true);
+}
+
+ccPApi::ccPApi(const ccPApi &)
+{
+    // Private: Avoid automatic copy constructor. Prevent instances from being copied.
+}
+
+ccPApi &ccPApi::operator=(const ccPApi &)
+{
+    // Private: Avoid automatic copy constructor. Prevent instances from being copied.
 }
 
 ccPApi::~ccPApi()

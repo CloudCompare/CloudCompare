@@ -8,16 +8,19 @@
 #ifndef CCPAPI_CCPAPI_H_
 #define CCPAPI_CCPAPI_H_
 
+#include <QMainWindow>
 #include <ccCommandLineInterface.h>
 //#include <vector>
 //#include <ccHObject.h>
 //#include <FileIOFilter.h>
 
-class ccPApi
+class ccPApi: public QMainWindow
 {
 public:
+    Q_OBJECT
 
-    enum CC_SHIFT_MODE
+public:
+   enum CC_SHIFT_MODE
     {
         AUTO = 0, XYZ = 1
     };
@@ -80,6 +83,10 @@ protected: //members
 
     //! Orphan entities
     ccHObject m_orphans;
+private:
+    // Prevent instances from being copied.
+    ccPApi(const ccPApi &);
+    ccPApi &operator=(const ccPApi &);
 
 };
 

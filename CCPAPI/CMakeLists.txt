@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
-
+cmake_policy(SET CMP0071 NEW)
 MESSAGE(STATUS "CC PYthon API")
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cmake")
 

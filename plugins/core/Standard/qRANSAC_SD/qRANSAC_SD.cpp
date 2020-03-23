@@ -447,6 +447,11 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 
 	if (shapes.size() > 0)
 	{
+		unsigned planeCount = 1;
+		unsigned sphereCount = 1;
+		unsigned cylinderCount = 1;
+		unsigned coneCount = 1;
+		unsigned torusCount = 1;
 		ccHObject* group = 0;
 		for (MiscLib::Vector<DetectedShape>::const_iterator it = shapes.begin(); it != shapes.end(); ++it)
 		{
@@ -495,7 +500,7 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 						saveNormals = false;
 					}
 				}
-				pcShape->setName(desc.c_str());
+				
 #else
 				pcShape = new ccPointCloud(desc.c_str());
 				if (!pcShape->reserve(static_cast<unsigned>(shapePointsCount)))
@@ -589,6 +594,8 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 				ccNormalVectors::ConvertNormalToDipAndDipDir(CCVector3::fromArray(N.getValue()), dip, dipDir);
 				QString dipAndDipDirStr = ccNormalVectors::ConvertDipAndDipDirToString(dip, dipDir);
 				prim->setName(dipAndDipDirStr);
+				pcShape->setName(QString("Plane_%1").arg(planeCount, 4, 10, QChar('0')));
+				planeCount++;
 			}
 			break;
 
@@ -596,9 +603,7 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 			{
 				const SpherePrimitiveShape* sphere = static_cast<const SpherePrimitiveShape*>(shape);
 				float radius = sphere->Internal().Radius();
-				Vec3f CC = sphere->Internal().Center();
-
-				pcShape->setName(QString("Sphere (r=%1)").arg(radius, 0, 'f'));
+				Vec3f CC = sphere->Internal().Center();		
 
 				//we build matrix from these vecctors
 				ccGLMatrix glMat;
@@ -606,7 +611,9 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 				//sphere primitive
 				prim = new ccSphere(radius, &glMat);
 				prim->setEnabled(false);
-
+				prim->setName(QString("Sphere (r=%1)").arg(radius, 0, 'f'));
+				pcShape->setName(QString("Sphere_%1").arg(sphereCount, 4, 10, QChar('0')));
+				sphereCount++;
 			}
 			break;
 
@@ -621,9 +628,7 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 				float hMin = cyl->MinHeight();
 				float hMax = cyl->MaxHeight();
 				float h = hMax - hMin;
-				G += N * (hMin + h / 2);
-
-				pcShape->setName(QString("Cylinder (r=%1/h=%2)").arg(r, 0, 'f').arg(h, 0, 'f'));
+				G += N * (hMin + h / 2);		
 
 				//we build matrix from these vecctors
 				ccGLMatrix glMat(CCVector3::fromArray(X.getValue()),
@@ -634,7 +639,9 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 				//cylinder primitive
 				prim = new ccCylinder(r, h, &glMat);
 				prim->setEnabled(false);
-
+				prim->setName(QString("Cylinder (r=%1/h=%2)").arg(r, 0, 'f').arg(h, 0, 'f'));
+				pcShape->setName(QString("Cylinder_%1").arg(cylinderCount, 4, 10, QChar('0')));
+				cylinderCount++;
 			}
 			break;
 
@@ -666,7 +673,6 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 
 				}
 
-				pcShape->setName(QString("Cone (alpha=%1/h=%2)").arg(alpha, 0, 'f').arg(maxHeight - minHeight, 0, 'f'));
 
 				float minRadius = tan(alpha) * minHeight;
 				float maxRadius = tan(alpha) * maxHeight;
@@ -694,6 +700,9 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 					//eventually create the cone primitive
 					prim = new ccCone(maxRadius, minRadius, maxHeight - minHeight, 0, 0, &glMat);
 					prim->setEnabled(false);
+					prim->setName(QString("Cone (alpha=%1/h=%2)").arg(alpha, 0, 'f').arg(maxHeight - minHeight, 0, 'f'));
+					pcShape->setName(QString("Cone_%1").arg(coneCount, 4, 10, QChar('0')));
+					coneCount++;
 				}
 
 			}
@@ -713,8 +722,6 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 					float minRadius = torus->Internal().MinorRadius();
 					float maxRadius = torus->Internal().MajorRadius();
 
-					pcShape->setName(QString("Torus (r=%1/R=%2)").arg(minRadius, 0, 'f').arg(maxRadius, 0, 'f'));
-
 					CCVector3 Z = CCVector3::fromArray(CA.getValue());
 					CCVector3 C = CCVector3::fromArray(CC.getValue());
 					//construct remaining of base
@@ -727,6 +734,9 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 					//torus primitive
 					prim = new ccTorus(maxRadius - minRadius, maxRadius + minRadius, M_PI * 2.0, false, 0, &glMat);
 					prim->setEnabled(false);
+					prim->setName(QString("Torus (r=%1/R=%2)").arg(minRadius, 0, 'f').arg(maxRadius, 0, 'f'));
+					pcShape->setName(QString("Torus_%1").arg(torusCount, 4, 10, QChar('0')));
+					torusCount++;
 				}
 
 			}

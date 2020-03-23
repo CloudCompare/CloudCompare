@@ -165,6 +165,7 @@
       <string>Colors</string>
      </property>
      <addaction name="actionSetUniqueColor"/>
+     <addaction name="actionColorFromScalarField"/>
      <addaction name="actionColorize"/>
      <addaction name="actionChangeColorLevels"/>
      <addaction name="actionSetColorGradient"/>
@@ -2373,6 +2374,11 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionScalarFieldFromColor">
    <property name="text">
     <string>Convert to Scalar field</string>
+   </property>
+  </action>
+  <action name="actionColorFromScalarField">
+   <property name="text">
+    <string>From Scalar field(s)</string>
    </property>
   </action>
   <action name="actionComputeKdTree">

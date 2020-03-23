@@ -506,9 +506,11 @@ void MainWindow::connectActions()
 	connect(m_UI->actionRGBToGreyScale,				&QAction::triggered, this, &MainWindow::doActionRGBToGreyScale);
 	connect(m_UI->actionInterpolateColors,			&QAction::triggered, this, &MainWindow::doActionInterpolateColors);
 	connect(m_UI->actionEnhanceRGBWithIntensities,	&QAction::triggered, this, &MainWindow::doActionEnhanceRGBWithIntensities);
+	connect(m_UI->actionColorFromScalarField,       &QAction::triggered, this, &MainWindow::doActionColorFromScalars);
 	connect(m_UI->actionClearColor, &QAction::triggered, this, [=]() {
 		clearSelectedEntitiesProperty( ccEntityAction::CLEAR_PROPERTY::COLORS );
 	});
+
 
 	//"Edit > Normals" menu
 	connect(m_UI->actionComputeNormals,				&QAction::triggered, this, &MainWindow::doActionComputeNormals);
@@ -825,6 +827,10 @@ void MainWindow::doActionEnhanceRGBWithIntensities()
 	refreshAll();
 }
 
+void MainWindow::doActionColorFromScalars()
+{
+	MainWindow::dispToConsole("Don't do that again....");
+}
 
 void MainWindow::doActionInvertNormals()
 {
@@ -10419,7 +10425,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionClearColor->setEnabled(atLeastOneColor);
 	m_UI->actionRGBToGreyScale->setEnabled(atLeastOneColor);
 	m_UI->actionEnhanceRGBWithIntensities->setEnabled(atLeastOneColor);
-
+	m_UI->actionColorFromScalarField->setEnabled(atLeastOneSF);
 	// == 1
 	bool exactlyOneEntity = (selInfo.selCount == 1);
 	bool exactlyOneGroup = (selInfo.groupCount == 1);

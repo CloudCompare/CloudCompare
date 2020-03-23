@@ -76,8 +76,10 @@ public:
 	//! Camera center (for perspective mode)
 	CCVector3d cameraCenter;
 
-	//! Camera F.O.V. (field of view - for perspective mode only)
-	float fov;
+	//! Camera F.O.V. (field of view) in degrees
+	/** For perspective mode only.
+	**/
+	float fov_deg;
 	//! Camera aspect ratio (perspective mode only)
 	float perspectiveAspectRatio;
 
@@ -97,7 +99,7 @@ public:
 	static int ZNearCoefToIncrement(double coef, int iMax);
 
 	//! Computes the view matrix
-	ccGLMatrixd computeViewMatrix(const CCVector3d& cameraCenter) const;
+	ccGLMatrixd computeViewMatrix() const;
 
 	//! Computes the scale matrix
 	ccGLMatrixd computeScaleMatrix(const QRect& glViewport) const;
@@ -114,8 +116,6 @@ public:
 	**/
 	CCVector3d getUpDir() const;
 
-	//! Returns the real camera center
-	/** Maybe different from the 'cameraCenter' member in orthographic view
-	**/
-	CCVector3d getRealCameraCenter(const ccBBox& visibleObjectsBBox) const;
+	//! Computes the 'convergence' distance
+	double computeConvergenceDistance() const;
 };

@@ -892,14 +892,13 @@ protected: //other methods
 	void drawScale(const ccColor::Rgbub& color);
 
 	//! Computes the model view matrix
-	ccGLMatrixd computeModelViewMatrix(const CCVector3d& cameraCenter) const;
+	ccGLMatrixd computeModelViewMatrix() const;
 
 	//! Optional output metrics (from computeProjectionMatrix)
 	struct ProjectionMetrics;
 
 	//! Computes the projection matrix
-	ccGLMatrixd computeProjectionMatrix(	const CCVector3d& cameraCenter,
-											bool withGLfeatures, 
+	ccGLMatrixd computeProjectionMatrix(	bool withGLfeatures, 
 											ProjectionMetrics* metrics = nullptr, 
 											double* eyeOffset = nullptr) const;
 	void updateModelViewMatrix();
@@ -971,9 +970,6 @@ protected: //other methods
 
 	//! Returns the height of the 'GL filter' banner
 	int getGlFilterBannerHeight() const;
-
-	//! Returns real camera center (i.e. with z centered on the visible objects bounding-box in ortho mode)
-	CCVector3d getRealCameraCenter() const;
 
 	//! Draws the 'hot zone' (+/- icons for point size), 'leave bubble-view' button, etc.
 	void drawClickableItems(int xStart, int& yStart);

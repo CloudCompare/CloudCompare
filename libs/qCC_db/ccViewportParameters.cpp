@@ -32,7 +32,7 @@ ccViewportParameters::ccViewportParameters()
 	, zFar(0)
 	, pivotPoint(0, 0, 0)
 	, cameraCenter(0, 0, 0)
-	, fov(30.0f)
+	, fov_deg(30.0f)
 	, perspectiveAspectRatio(1.0f)
 	, orthoAspectRatio(1.0f)
 {
@@ -52,7 +52,7 @@ ccViewportParameters::ccViewportParameters(const ccViewportParameters& params)
 	, zFar(params.zFar)
 	, pivotPoint(params.pivotPoint)
 	, cameraCenter(params.cameraCenter)
-	, fov(params.fov)
+	, fov_deg(params.fov_deg)
 	, perspectiveAspectRatio(params.perspectiveAspectRatio)
 	, orthoAspectRatio(params.orthoAspectRatio)
 {
@@ -78,7 +78,7 @@ bool ccViewportParameters::toFile(QFile& out) const
 	outStream << cameraCenter.x;
 	outStream << cameraCenter.y;
 	outStream << cameraCenter.z;
-	outStream << fov;
+	outStream << fov_deg;
 	outStream << perspectiveAspectRatio;
 	//ortho mode aspect ratio (dataVersion>=30)
 	outStream << orthoAspectRatio;
@@ -140,7 +140,7 @@ bool ccViewportParameters::fromFile(QFile& in, short dataVersion, int flags, Loa
 			cameraCenter = pivotPoint;
 		}
 	}
-	inStream >> fov;
+	inStream >> fov_deg;
 	inStream >> perspectiveAspectRatio;
 	if (dataVersion < 25) //screenPan has been replaced by cameraCenter(x,y) in object centered mode!
 	{
@@ -182,7 +182,7 @@ int ccViewportParameters::ZNearCoefToIncrement(double coef, int iMax)
 	return iMax - i;
 }
 
-ccGLMatrixd ccViewportParameters::computeViewMatrix(const CCVector3d& cameraCenter) const
+ccGLMatrixd ccViewportParameters::computeViewMatrix() const
 {
 	ccGLMatrixd viewMatd;
 	viewMatd.toIdentity();
@@ -216,7 +216,7 @@ ccGLMatrixd ccViewportParameters::computeScaleMatrix(const QRect& glViewport) co
 {
 	ccGLMatrixd scaleMatd;
 	scaleMatd.toIdentity();
-	if (perspectiveView) //perspective mode
+	//if (perspectiveView) //perspective mode
 	{
 		//for proper aspect ratio handling
 		if (glViewport.height() != 0)
@@ -230,34 +230,17 @@ ccGLMatrixd ccViewportParameters::computeScaleMatrix(const QRect& glViewport) co
 			}
 		}
 	}
-	else //ortho. mode
-	{
-		//apply zoom
-		double totalZoom = zoom / pixelSize;
-		//glScalef(totalZoom,totalZoom,totalZoom);
-		scaleMatd.data()[0] = totalZoom;
-		scaleMatd.data()[5] = totalZoom;
-		scaleMatd.data()[10] = totalZoom;
-	}
+	//else //ortho. mode
+	//{
+	//	//apply zoom
+	//	double totalZoom = zoom / pixelSize;
+	//	//glScalef(totalZoom,totalZoom,totalZoom);
+	//	scaleMatd.data()[0] = totalZoom;
+	//	scaleMatd.data()[5] = totalZoom;
+	//	scaleMatd.data()[10] = totalZoom;
+	//}
 
 	return scaleMatd;
-}
-
-CCVector3d ccViewportParameters::getRealCameraCenter(const ccBBox& visibleObjectsBBox) const
-{
-	if (perspectiveView)
-	{
-		//the camera center is always defined in perspective mode
-		return cameraCenter;
-	}
-	else
-	{
-		//in orthographic mode, we put the camera at the center of the
-		//visible objects (along the viewing direction)
-		return CCVector3d(	cameraCenter.x,
-							cameraCenter.y,
-							visibleObjectsBBox.isValid() ? visibleObjectsBBox.getCenter().z : 0.0);
-	}
 }
 
 CCVector3d ccViewportParameters::getViewDir() const
@@ -278,4 +261,9 @@ CCVector3d ccViewportParameters::getUpDir() const
 	axis.normalize();
 
 	return axis;
+}
+
+double ccViewportParameters::computeConvergenceDistance() const
+{
+	return (cameraCenter - pivotPoint).z;
 }

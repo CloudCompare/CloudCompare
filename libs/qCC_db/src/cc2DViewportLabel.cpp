@@ -107,7 +107,7 @@ void cc2DViewportLabel::drawMeOnly(CC_DRAW_CONTEXT& context)
 	
 	if (m_params.perspectiveView)
 	{
-		if (params.fov != m_params.fov || params.perspectiveAspectRatio != m_params.perspectiveAspectRatio)
+		if (params.fov_deg != m_params.fov_deg || params.perspectiveAspectRatio != m_params.perspectiveAspectRatio)
 			return;
 
 		if ( CCCoreLib::GreaterThanEpsilon( (params.pivotPoint - m_params.pivotPoint).norm() )

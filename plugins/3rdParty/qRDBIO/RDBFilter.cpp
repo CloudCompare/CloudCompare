@@ -460,7 +460,7 @@ CC_FILE_ERROR RDBFilter::loadFile( const QString &filename, ccHObject &container
 					col.r = static_cast<unsigned char>(buffer_rgba[i][0]);
 					col.g = static_cast<unsigned char>(buffer_rgba[i][1]);
 					col.b = static_cast<unsigned char>(buffer_rgba[i][2]);
-					cloud->addRGBColor(col);
+					cloud->addColor(col);
 				}
 				//read normals
 				if (rdb_hasNormals || rdb_has_pca_axis_min)

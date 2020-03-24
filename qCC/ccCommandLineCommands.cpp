@@ -43,8 +43,9 @@ constexpr char COMMAND_EXPORT_EXTENSION[]				= "EXT";
 constexpr char COMMAND_ASCII_EXPORT_PRECISION[]			= "PREC";
 constexpr char COMMAND_ASCII_EXPORT_SEPARATOR[]			= "SEP";
 constexpr char COMMAND_ASCII_EXPORT_ADD_COL_HEADER[]	= "ADD_HEADER";
-constexpr char COMMAND_MESH_EXPORT_FORMAT[]				= "M_EXPORT_FMT";
 constexpr char COMMAND_ASCII_EXPORT_ADD_PTS_COUNT[]		= "ADD_PTS_COUNT";
+constexpr char COMMAND_MESH_EXPORT_FORMAT[]				= "M_EXPORT_FMT";
+constexpr char COMMAND_HIERARCHY_EXPORT_FORMAT[]		= "H_EXPORT_FMT";
 constexpr char COMMAND_OPEN[]							= "O";				//+file name
 constexpr char COMMAND_OPEN_SKIP_LINES[]				= "SKIP";			//+number of lines to skip
 constexpr char COMMAND_SUBSAMPLE[]						= "SS";				//+ method (RANDOM/SPATIAL/OCTREE) + parameter (resp. point count / spatial step / octree level)
@@ -348,6 +349,45 @@ bool CommandChangeMeshOutputFormat::process(ccCommandLineInterface &cmd)
 		}
 	}
 	
+	return true;
+}
+
+CommandChangeHierarchyOutputFormat::CommandChangeHierarchyOutputFormat()
+	: CommandChangeOutputFormat("Change hierarchy output format", COMMAND_HIERARCHY_EXPORT_FORMAT)
+{}
+
+bool CommandChangeHierarchyOutputFormat::process(ccCommandLineInterface& cmd)
+{
+	QString defaultExt;
+	QString fileFilter = getFileFormatFilter(cmd, defaultExt);
+	if (fileFilter.isEmpty())
+		return false;
+
+	cmd.setHierarchyExportFormat(fileFilter, defaultExt);
+	cmd.print(QObject::tr("Output export format (hierarchy) set to: %1").arg(defaultExt.toUpper()));
+
+	//look for additional parameters
+	while (!cmd.arguments().empty())
+	{
+		QString argument = cmd.arguments().front();
+
+		if (ccCommandLineInterface::IsCommand(argument, COMMAND_EXPORT_EXTENSION))
+		{
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
+
+			if (cmd.arguments().empty())
+				return cmd.error(QObject::tr("Missing parameter: extension after '%1'").arg(COMMAND_EXPORT_EXTENSION));
+
+			cmd.setHierarchyExportFormat(cmd.hierarchyExportFormat(), cmd.arguments().takeFirst());
+			cmd.print(QObject::tr("New output extension for hierarchies: %1").arg(cmd.hierarchyExportExt()));
+		}
+		else
+		{
+			break; //as soon as we encounter an unrecognized argument, we break the local loop to go back to the main one!
+		}
+	}
+
 	return true;
 }
 
@@ -1049,7 +1089,7 @@ bool CommandExtractCCs::process(ccCommandLineInterface &cmd)
 						CLCloudDesc cloudDesc(compCloud, inputClouds[i].basename + QObject::tr("_COMPONENT_%1").arg(++realIndex), inputClouds[i].path);
 						if (cmd.autoSaveMode())
 						{
-							QString errorStr = cmd.exportEntity(cloudDesc, QString(), nullptr, false, true);
+							QString errorStr = cmd.exportEntity(cloudDesc, QString(), nullptr, ccCommandLineInterface::ExportOption::ForceNoTimestamp);
 							if (!errorStr.isEmpty())
 							{
 								cmd.error(errorStr);

@@ -358,18 +358,13 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 			}
 
 			ccHObject* group = qRansacSD::executeRANSAC(clCloud.pc, params, cmd.silentMode());
-			if (cmd.autoSaveMode())
-			{
-				QString errorStr = cmd.exportEntity(clCloud); // The original cloud may have had normals added
-				if (!errorStr.isEmpty())
-					cmd.warning(errorStr);
-			}
+			
 			if (group)
 			{
 				if (outputGrouped)
 				{
 					CLGroupDesc clGroup(group, clCloud.basename + "_" + clCloud.pc->getName() + "_RANSAC_DETECTED_SHAPES", outputGroupDir != "" ? outputGroupDir : clCloud.path);
-					QString errorStr = cmd.exportEntity(clGroup);
+					QString errorStr = cmd.exportEntity(clGroup, QString(), nullptr, ccCommandLineInterface::ExportOption::ForceHierarchy);
 					if (!errorStr.isEmpty())
 					{
 						cmd.warning(errorStr);
@@ -419,8 +414,8 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 							auto cld = ccHObjectCaster::ToPointCloud(mesh->getParent());
 							if (outputIndividualPairs)
 							{
-								CLCloudDesc clCloudp(cld, clCloud.basename + "_" + clCloud.pc->getName() + suffix + QString("_pair"), outputPairDir != "" ? outputPairDir : clCloud.path);
-								QString errorStr = cmd.exportEntity(clCloudp);
+								CLGroupDesc clPair(cld, clCloud.basename + "_" + clCloud.pc->getName() + suffix + QString("_pair"), outputPairDir != "" ? outputPairDir : clCloud.path);
+								QString errorStr = cmd.exportEntity(clPair, QString(), nullptr, ccCommandLineInterface::ExportOption::ForceHierarchy);
 								if (!errorStr.isEmpty())
 								{
 									cmd.warning(errorStr);
@@ -453,6 +448,12 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 						}
 					}
 				}
+			}
+			if (cmd.autoSaveMode())
+			{
+				QString errorStr = cmd.exportEntity(clCloud); // The original cloud may have had normals added
+				if (!errorStr.isEmpty())
+					cmd.warning(errorStr);
 			}
 		}
 

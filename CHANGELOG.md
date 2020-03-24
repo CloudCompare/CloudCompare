@@ -22,6 +22,7 @@ v2.11 (Anoia) - (in development)
 	  - 'Edit > Normals > Export normals to SF(s)' (or equivalently 'Edit > Scalar fields > Export normals to SF(s)')
 	  - command line argument: '-NORMALS_TO_SFS' (all dimensions are exported by default, as 3 scalar fields)
   - Command line:
+     - -H_EXPORT_FMT added to select format for hierarchy objects exported.
      - qRansac_SD plugin support added, all parameters below are optional and can be added in any order, will work on all clouds opened already loaded when called.
        - -RANSAC (main command)
          - 'EPSILON_ABSOLUTE' (Max distance to primitive)

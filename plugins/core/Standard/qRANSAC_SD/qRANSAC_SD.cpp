@@ -452,7 +452,7 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 		unsigned cylinderCount = 1;
 		unsigned coneCount = 1;
 		unsigned torusCount = 1;
-		ccHObject* group = 0;
+		ccHObject* group = nullptr;
 		for (MiscLib::Vector<DetectedShape>::const_iterator it = shapes.begin(); it != shapes.end(); ++it)
 		{
 			const PrimitiveShape* shape = it->first;

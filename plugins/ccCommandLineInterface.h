@@ -20,6 +20,12 @@
 class ccProgressDialog;
 class QDialog;
 
+enum class CL_ENTITY_TYPE {
+	GROUP,
+	CLOUD,
+	MESH
+};
+
 //! Loaded entity description
 struct CLEntityDesc
 {
@@ -61,6 +67,7 @@ struct CLEntityDesc
 	
 	virtual ccHObject* getEntity() = 0;
 	virtual const ccHObject* getEntity() const = 0;
+	virtual CL_ENTITY_TYPE getCLEntityType() const = 0;
 };
 
 //! Loaded group description
@@ -79,6 +86,7 @@ struct CLGroupDesc : CLEntityDesc
 	
 	ccHObject* getEntity() override { return groupEntity; }
 	const ccHObject* getEntity() const override { return groupEntity; }
+	CL_ENTITY_TYPE getCLEntityType() const override{ return CL_ENTITY_TYPE::GROUP; };
 };
 
 //! Loaded cloud description
@@ -110,6 +118,7 @@ struct CLCloudDesc : CLEntityDesc
 
 	ccHObject* getEntity() override { return static_cast<ccHObject*>(pc); }
 	const ccHObject* getEntity() const override { return static_cast<ccHObject*>(pc); }
+	CL_ENTITY_TYPE getCLEntityType() const override { return CL_ENTITY_TYPE::CLOUD; };
 };
 
 //! Loaded mesh description
@@ -141,6 +150,7 @@ struct CLMeshDesc : CLEntityDesc
 	
 	ccHObject* getEntity() override { return static_cast<ccHObject*>(mesh); }
 	const ccHObject* getEntity() const override { return static_cast<ccHObject*>(mesh); }
+	CL_ENTITY_TYPE getCLEntityType() const override { return CL_ENTITY_TYPE::GROUP; };
 };
 
 //! Command line interface
@@ -158,6 +168,15 @@ public: //constructor
 	{}
 	
 	virtual ~ccCommandLineInterface() = default;
+
+	enum class ExportOption {
+		NoOptions = 0x0,
+		ForceCloud = 0x1,
+		ForceMesh = 0x2,
+		ForceHierarchy = 0x4,
+		ForceNoTimestamp = 0x8
+	};
+	Q_DECLARE_FLAGS(ExportOptions, ExportOption)
 
 public: //commands
 
@@ -207,11 +226,10 @@ public: //virtual methods
 	//! Exports a cloud or a mesh
 	/** \return error string (if any)
 	**/
-	virtual QString exportEntity(	CLEntityDesc& entityDesc,
-									QString suffix = QString(),
-									QString* outputFilename = nullptr,
-									bool forceIsCloud = false,
-									bool forceNoTimestamp = false) = 0;
+	virtual QString exportEntity(CLEntityDesc& entityDesc,
+		const QString &suffix = QString(),
+		QString* outputFilename = nullptr,
+		ccCommandLineInterface::ExportOptions options = ExportOption::NoOptions) = 0;
 
 	//! Saves all clouds
 	/** \param suffix optional suffix
@@ -280,11 +298,17 @@ public: //file I/O
 	virtual QString meshExportFormat() const = 0;
 	//! Returs the current mesh(es) export extension (warning: can be anything)
 	virtual QString meshExportExt() const = 0;
+	//! Returns the current hiearchy(ies) export format
+	virtual QString hierarchyExportFormat() const = 0;
+	//! Returs the current hiearchy(ies) export extension (warning: can be anything)
+	virtual QString hierarchyExportExt() const = 0;
 
 	//! Sets the current cloud(s) export format and extension
 	virtual void setCloudExportFormat(QString format, QString ext) = 0;
 	//! Sets the current mesh(es) export format and extension
 	virtual void setMeshExportFormat(QString format, QString ext) = 0;
+	//! Sets the current hiearchy(ies) export format and extension
+	virtual void setHierarchyExportFormat(QString format, QString ext) = 0;
 
 public: //logging
 

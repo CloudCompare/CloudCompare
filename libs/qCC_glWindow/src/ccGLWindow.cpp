@@ -5539,23 +5539,13 @@ void ccGLWindow::togglePerspective(bool objectCentered)
 
 double ccGLWindow::computeActualPixelSize() const
 {
-	if (!m_viewportParams.perspectiveView)
-	{
-		return m_viewportParams.pixelSize / m_viewportParams.zoom;
-	}
-
-	//int minScreenDim = std::min(m_glViewport.width(), m_glViewport.height());
-	//if (minScreenDim <= 0)
-	//	return 1.0;
-
 	if (m_glViewport.width() <= 0)
 		return 1.0;
 
 	//Camera center to pivot vector
-	double zoomEquivalentDist = (m_viewportParams.cameraCenter - m_viewportParams.pivotPoint).norm();
+	double zoomEquivalentDist = m_viewportParams.computeConvergenceDistance();
 
-	//return zoomEquivalentDist * (2.0 * std::tan(std::min(getFov(), 75.0f) / 2.0 *CCCoreLib::CCCoreLib::DEG_TO_RAD )) / minScreenDim; //tan(75) = 3.73 (then it quickly increases!)
-	return zoomEquivalentDist * (2.0 * std::tan( CCCoreLib::DegreesToRadians( std::min(getFov(), 75.0f) / 2.0 ) )) / m_glViewport.width(); //tan(75) = 3.73 (then it quickly increases!)
+	return zoomEquivalentDist * (2.0 * std::tan(CCCoreLib::DegreesToRadians( std::min(getFov(), 75.0f) / 2.0 )) / m_glViewport.width(); //tan(75) = 3.73 (then it quickly increases!)
 }
 
 float ccGLWindow::computePerspectiveZoom() const

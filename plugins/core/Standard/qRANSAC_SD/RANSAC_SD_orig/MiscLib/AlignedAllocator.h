@@ -13,7 +13,7 @@
 
 #ifdef _mm_malloc
 #ifndef a_malloc
-#define a_malloc(align,sz) _mm_malloc((align),(sz))
+#define a_malloc(sz, align) _mm_malloc((sz), (align))
 #endif // !a_malloc
 #endif // !_mm_malloc
 #ifdef _mm_free
@@ -26,7 +26,7 @@
 #define a_free(a)      free(a) 
 #endif // !_mm_free
 #ifndef a_malloc
-#define a_malloc(a, b) aligned_alloc(a, b)
+#define a_malloc(sz, align) aligned_alloc((align), (sz))
 #endif // !_mm_malloc
 
 

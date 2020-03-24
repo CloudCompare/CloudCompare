@@ -190,8 +190,7 @@ bool qAnimationDlg::init(const std::vector<cc2DViewportObject*>& viewports)
 		m_videoSteps[i].indexInOriginalTrajectory = static_cast<int>(i);
 
 		//compute the real camera center
-		CCVector3d cameraCenter = vp->getParameters().getRealCameraCenter(visibleObjectsBBox);
-		ccGLMatrixd viewMat = vp->getParameters().computeViewMatrix(cameraCenter);
+		ccGLMatrixd viewMat = vp->getParameters().computeViewMatrix();
 		m_videoSteps[i].cameraCenter = viewMat.inverse().getTranslationAsVec3D();
 	}
 

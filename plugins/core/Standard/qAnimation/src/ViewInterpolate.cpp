@@ -87,7 +87,7 @@ bool ViewInterpolate::interpolate(ccViewportParameters& interpView, double inter
 		interpView.zNearCoef              = InterpolateNumber ( m_view1.zNearCoef, m_view2.zNearCoef, interpolate_fraction );
 		interpView.zNear                  = InterpolateNumber ( m_view1.zNear, m_view2.zNear, interpolate_fraction );
 		interpView.zFar                   = InterpolateNumber ( m_view1.zFar, m_view2.zFar, interpolate_fraction );
-		interpView.fov                    = InterpolateNumber ( m_view1.fov, m_view2.fov, interpolate_fraction );
+		interpView.fov_deg                = InterpolateNumber ( m_view1.fov_deg, m_view2.fov_deg, interpolate_fraction );
 		interpView.perspectiveAspectRatio = InterpolateNumber ( m_view1.perspectiveAspectRatio, m_view2.perspectiveAspectRatio, interpolate_fraction );
 		interpView.orthoAspectRatio       = InterpolateNumber ( m_view1.orthoAspectRatio, m_view2.orthoAspectRatio, interpolate_fraction );
 		interpView.viewMat                = ccGLMatrixd::Interpolate(interpolate_fraction, m_view1.viewMat, m_view2.viewMat);

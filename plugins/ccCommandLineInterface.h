@@ -298,9 +298,9 @@ public: //file I/O
 	virtual QString meshExportFormat() const = 0;
 	//! Returns the current mesh(es) export extension (warning: can be anything)
 	virtual QString meshExportExt() const = 0;
-	//! Returns the current hiearchy(ies) export format
+	//! Returns the current hierarchy(ies) export format
 	virtual QString hierarchyExportFormat() const = 0;
-	//! Returs the current hiearchy(ies) export extension (warning: can be anything)
+	//! Returns the current hierarchy(ies) export extension (warning: can be anything)
 	virtual QString hierarchyExportExt() const = 0;
 
 	//! Sets the current cloud(s) export format and extension

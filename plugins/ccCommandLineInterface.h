@@ -150,7 +150,7 @@ struct CLMeshDesc : CLEntityDesc
 	
 	ccHObject* getEntity() override { return static_cast<ccHObject*>(mesh); }
 	const ccHObject* getEntity() const override { return static_cast<ccHObject*>(mesh); }
-	CL_ENTITY_TYPE getCLEntityType() const override { return CL_ENTITY_TYPE::GROUP; }
+	CL_ENTITY_TYPE getCLEntityType() const override { return CL_ENTITY_TYPE::MESH; }
 };
 
 //! Command line interface

@@ -53,7 +53,7 @@ constexpr char PRIM_TORUS[] = "TORUS";
 
 struct CommandRANSAC : public ccCommandLineInterface::Command
 {
-	CommandRANSAC() : ccCommandLineInterface::Command("RANSAC", COMMAND_RANSAC) {}
+	CommandRANSAC() : ccCommandLineInterface::Command(QObject::tr("RANSAC"), COMMAND_RANSAC) {}
 
 	virtual bool process(ccCommandLineInterface& cmd) override
 	{
@@ -87,7 +87,9 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 		params.bitmapEpsilon = -1.0f;
 
 		for (unsigned char k = 0; k < 5; ++k)
+		{
 			params.primEnabled[k] = false;
+		}
 
 		if (!cmd.arguments().empty())
 		{
@@ -453,7 +455,9 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 			{
 				QString errorStr = cmd.exportEntity(clCloud); // The original cloud may have had normals added
 				if (!errorStr.isEmpty())
+				{
 					cmd.warning(errorStr);
+				}
 			}
 		}
 

@@ -15,12 +15,6 @@ MESSAGE(STATUS "python version: " ${PYTHON_VERSION_STRING})
 FIND_PACKAGE(SIP REQUIRED)  # should come after Python (and before PyQt if needed)
 INCLUDE(UseSIP)
 
-# --- Swig detection
-
-# FIND_PACKAGE(SWIG REQUIRED)
-# MESSAGE(STATUS "SWIG_USE_FILE " ${SWIG_USE_FILE})
-# INCLUDE(${SWIG_USE_FILE})
-
 # --- C++ library cc Python Api (ccPApi)
 
 include_directories( ${CC_FBO_LIB_SOURCE_DIR}/include )
@@ -51,9 +45,6 @@ target_link_libraries( CC_PAPI_LIB QCC_IO_LIB )
 target_link_libraries( CC_PAPI_LIB QCC_GL_LIB )
 target_link_libraries( CC_PAPI_LIB qcustomplot )
 
-# Qt
-#target_link_libraries(CC_PAPI_LIB Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL Qt5::PrintSupport)
-
 # --- Python wrapping with sip
 
 INCLUDE_DIRECTORIES(
@@ -62,22 +53,22 @@ INCLUDE_DIRECTORIES(
   ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-#SET(_link_LIBRARIES
-#  ${PYTHON_LIBRARIES} " CC_PAPI_LIB CC_FBO_LIB CC_CORE_LIB QCC_DB_LIB QCC_GL_LIB qcustomplot ")
-#MESSAGE(STATUS "_link_LIBRARIES: " ${_link_LIBRARIES})
-
 SET(_add_SOURCES
     sipcloudCompareccPApi.cc
     sipcloudCompareccPointCloud.cc
 )
 
+MESSAGE(STATUS "_add_SOURCES: " "${_add_SOURCES}")
+
 set_source_files_properties( ${_add_SOURCES} PROPERTIES GENERATED TRUE )
 
-# sources / sip wrappings
-SIP_WRAP_SIP( _sip_SOURCES cloudCompare.sip OPTIONS -t WS_X11 -t Qt_5_9_5 -I /usr/share/sip/PyQt5)
-MESSAGE(STATUS "_sip_SOURCES: " ${_sip_SOURCES})
+# --- sources / sip wrappings
 
-# sources / to compile
+SIP_WRAP_SIP( _sip_SOURCES cloudCompare.sip OPTIONS -t WS_X11 -t Qt_5_9_5 -I /usr/share/sip/PyQt5)
+MESSAGE(STATUS "_sip_SOURCES: " "${_sip_SOURCES}")
+
+# --- sources / to compile
+
 ADD_LIBRARY( cloudCompare SHARED ${_sip_SOURCES} ${_add_SOURCES} )
 
 TARGET_LINK_LIBRARIES(cloudCompare ${PYTHON_LIBRARIES} CC_PAPI_LIB CC_FBO_LIB CC_CORE_LIB QCC_DB_LIB QCC_GL_LIB qcustomplot Qt5::Core Qt5::Widgets Qt5::Concurrent)
@@ -91,21 +82,3 @@ IF(WIN32)
 ELSE()
   SET_TARGET_PROPERTIES(cloudCompare PROPERTIES PREFIX "")
 ENDIF()
-
-# --- Python wrapping with swig
-
-#INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_DIRS})
-#INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
-# SET(CMAKE_SWIG_FLAGS "")
-# SET(_swig_SCRIPTS
-#   ${CMAKE_CURRENT_BINARY_DIR}/cloudCompare.py
-# )
-# SET_SOURCE_FILES_PROPERTIES(cloudCompare.i PROPERTIES CPLUSPLUS ON)
-# SWIG_ADD_LIBRARY(cloudCompare LANGUAGE python SOURCES cloudCompare.i)
-# SWIG_LINK_LIBRARIES(cloudCompare CC_PAPI_LIB)
-# SWIG_LINK_LIBRARIES(cloudCompare ${PYTHON_LIBRARIES})
-# SET(INSTALL_CLOUDCOMPARE_PYTHON ${CMAKE_INSTALL_LIBDIR}/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages/cloudCompare)
-# MESSAGE(STATUS "INSTALL_CLOUDCOMPARE_PYTHON: " ${INSTALL_CLOUDCOMPARE_PYTHON})
-# INSTALL(TARGETS ${SWIG_MODULE_cloudCompare_REAL_NAME} LIBRARY DESTINATION ${INSTALL_CLOUDCOMPARE_PYTHON})
-# SET(PERMS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
-# INSTALL(FILES ${_swig_SCRIPTS} DESTINATION ${INSTALL_CLOUDCOMPARE_PYTHON} PERMISSIONS ${PERMS})

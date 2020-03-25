@@ -9,6 +9,8 @@ capi = cc.ccPApi()
 cloud = capi.loadPointCloud("/home/paul/projets/CloudCompare/data/altiXYZ/RGEALTI_FXX_0845_6446_MNT_LAMB93_IGN69.xyz")
 namecloud = cloud.getName()
 print(namecloud)
+g = cloud.computeGravityCenter()
+print(g)
 
 # addressBook = AddressBook()
 # addressBook.show()

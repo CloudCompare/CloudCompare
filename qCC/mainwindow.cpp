@@ -5588,22 +5588,27 @@ void MainWindow::doActionUnroll()
 
 	if (output)
 	{
-		pc->setEnabled(false);
-		
-		ccConsole::Warning("[Unroll] Original cloud has been automatically hidden");
-
-		if (pc->getParent())
+		if (m_selectedEntities[0]->isA(CC_TYPES::MESH))
 		{
-			pc->getParent()->addChild(output);
-		}
-		
-		//if it's a mesh, unroll it by swapping vertices
-		if(m_selectedEntities[0]->isA(CC_TYPES::MESH)){
 			ccMesh* mesh = ccHObjectCaster::ToMesh(m_selectedEntities[0]);
-					mesh->setAssociatedCloud(output);
+			mesh->setEnabled(false);
+			ccConsole::Warning("[Unroll] Original mesh has been automatically hidden");
+			ccMesh* outputMesh = mesh->cloneMesh(output);
+			outputMesh->addChild(output);
+			addToDB(outputMesh, true, true, false, true);
+			outputMesh->setEnabled(true);
+			outputMesh->setVisible(true);
 		}
-		
-		addToDB(output, true, true, false, true);
+		else
+		{
+			pc->setEnabled(false);
+			ccConsole::Warning("[Unroll] Original cloud has been automatically hidden");
+			if (pc->getParent())
+			{
+				pc->getParent()->addChild(output);
+			}
+			addToDB(output, true, true, false, true);
+		}
 		updateUI();
 	}
 }

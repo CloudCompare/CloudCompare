@@ -147,6 +147,7 @@ v2.11 (Anoia) - (in development)
     - after loading an E57 file, the scan (sensor) origin and orientation is stored as meta-data and should be properly restored and saved when exporting the scan(s) back to E57
   - Unroll
 	- ability to set the start and stop angles for the cone unrolling options
+	- ability to unroll meshes
 	- new unrolling mode: 'Straightened cone' (the previous one has been renamed 'Straightened cone (fixed radius)'). This new mode unrolls the cone as a cylinder but with a varying radius.
 	- the 'Straightened cone' options are now using the real curvilinear abscissa (0 = cone apex)
   - Tools > Others > Compute geometric features

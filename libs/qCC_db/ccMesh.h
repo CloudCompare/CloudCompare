@@ -57,7 +57,7 @@ public:
 
 	//! Clones this entity
 	/** All the main features of the entity are cloned, except from the octree
-		\param vertices vertices set to use (will be automatically - AND OPTIMALLY - cloned if 0)
+		\param vertices vertices set to use (will be automatically - AND OPTIMALLY - cloned if nullptr)
 		\param clonedMaterials for internal use
 		\param clonedNormsTable for internal use
 		\param cloneTexCoords for internal use

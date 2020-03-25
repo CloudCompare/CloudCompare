@@ -124,6 +124,26 @@
       <widget class="QDoubleSpinBox" name="minInputSpinBoxR"/>
      </item>
      <item>
+      <spacer name="horizontalSpacer_5">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="reverseR">
+       <property name="text">
+        <string>Reverse</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer_6">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -227,6 +247,26 @@
       <widget class="QDoubleSpinBox" name="minInputSpinBoxG"/>
      </item>
      <item>
+      <spacer name="horizontalSpacer_10">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="reverseG">
+       <property name="text">
+        <string>Reverse</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer_8">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -328,6 +368,26 @@
      </item>
      <item>
       <widget class="QDoubleSpinBox" name="minInputSpinBoxB"/>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_7">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="reverseB">
+       <property name="text">
+        <string>Reverse</string>
+       </property>
+      </widget>
      </item>
      <item>
       <spacer name="horizontalSpacer_9">

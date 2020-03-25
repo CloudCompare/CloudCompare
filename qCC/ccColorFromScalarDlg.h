@@ -24,8 +24,8 @@
 #include <ui_colorFromScalarDlg.h>
 #include <ccColorScale.h>
 #include <ccScalarField.h>
+#include <ccHistogramWindow.h>
 
-class ccHistogramWindow;
 class ccPointCloud;
 
 //! Dialog to change the color levels
@@ -43,29 +43,28 @@ public:
 protected slots:
 	
 	//events to set scalar fields
-	void onChannelChangedR(int);
-	void onChannelChangedG(int);
-	void onChannelChangedB(int);
+	void onChannelChangedR(int) { updateChannel(0); }
+	void onChannelChangedG(int) { updateChannel(1); }
+	void onChannelChangedB(int) { updateChannel(2); }
 	void updateChannel(int);
+	void updateColormaps();
 
 	//mapping ranges changed
-	void minChanged(int n, double val)
-	{
-		m_minSat[n] = val;
-		m_boxes_min[n]->setValue(val);
-	}
-
-	void maxChanged(int n, double val)
-	{
-		m_maxSat[n] = val;
-		m_boxes_max[n]->setValue(val);
-	}
-	void minChangedR(double val) { minChanged(0,val); }
-	void maxChangedR(double val) { maxChanged(0,val); }
+	void minChangedR(double val) { minChanged(0, val); }
+	void maxChangedR(double val) { maxChanged(0, val); }
 	void minChangedG(double val) { minChanged(1, val); }
 	void maxChangedG(double val) { maxChanged(1, val); }
 	void minChangedB(double val) { minChanged(2, val); }
 	void maxChangedB(double val) { maxChanged(2, val); }
+	void minSpinChangedR(double val) { minChanged(0, val); }
+	void maxSpinChangedR(double val) { maxChanged(0, val); }
+	void minSpinChangedG(double val) { minChanged(1, val); }
+	void maxSpinChangedG(double val) { maxChanged(1, val); }
+	void minSpinChangedB(double val) { minChanged(2, val); }
+	void maxSpinChangedB(double val) { maxChanged(2, val); }
+	void toggleColors(int val);
+	void minChanged(int n, double val);
+	void maxChanged(int n, double val);
 
 	//done!
 	void onApply();
@@ -88,13 +87,7 @@ protected:
 	double m_maxSat[3];
 
 	//! Associated colour scales
-	ccColorScale::Shared m_colors[3];
-	ccColorScale::Shared m_red;
-	ccColorScale::Shared m_green;
-	ccColorScale::Shared m_blue;
-	ccColorScale::Shared m_hue;
-	ccColorScale::Shared m_sat;
-	ccColorScale::Shared m_val;
+	ccColorScale::Shared m_colors[4];
 
 	//! Associated point cloud (color source)
 	ccPointCloud* m_cloud;

@@ -47,24 +47,6 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
 {
 	setupUi(this);
 
-	//create colour scales
-	m_red = ccColorScale::Shared(new ccColorScale("Reds"));
-	m_red->insert(ccColorScaleElement(0.0, Qt::black));
-	m_red->insert(ccColorScaleElement(1.0, Qt::red));
-
-	m_green = ccColorScale::Shared(new ccColorScale("Green"));
-	m_green->insert(ccColorScaleElement(0.0, Qt::black));
-	m_green->insert(ccColorScaleElement(1.0, Qt::green));
-
-	m_blue = ccColorScale::Shared(new ccColorScale("Blues"));
-	m_blue->insert(ccColorScaleElement(0.0, Qt::black));
-	m_blue->insert(ccColorScaleElement(1.0, Qt::blue));
-
-	//default colors (RGB mode)
-	m_colors[0] = m_red;
-	m_colors[1] = m_green;
-	m_colors[2] = m_blue;
-
 	//create histograms
 	QFrame* histoFrame[3] = { histoFrameR, histoFrameG, histoFrameB };
 	for (unsigned i = 0; i < 3; i++)
@@ -103,23 +85,89 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
 	connect(channelComboG, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccColorFromScalarDlg::onChannelChangedG);
 	connect(channelComboB, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccColorFromScalarDlg::onChannelChangedB);
 	connect(buttonBox->button(QDialogButtonBox::Apply), &QPushButton::clicked, this, &ccColorFromScalarDlg::onApply);
+	connect(minInputSpinBoxR, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::minSpinChangedR);
+	connect(maxInputSpinBoxR, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::maxSpinChangedR);
+	connect(minInputSpinBoxG, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::minSpinChangedG);
+	connect(maxInputSpinBoxG, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::maxSpinChangedG);
+	connect(minInputSpinBoxB, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::minSpinChangedB);
+	connect(maxInputSpinBoxB, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::maxSpinChangedB);
+	connect(reverseR, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleColors);
+	connect(reverseG, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleColors);
+	connect(reverseB, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleColors);
+	
+	//connect histogram events
 	connect(m_histograms[0], &ccHistogramWindow::sfMinSatValChanged, this, &ccColorFromScalarDlg::minChangedR);
 	connect(m_histograms[0], &ccHistogramWindow::sfMaxSatValChanged, this, &ccColorFromScalarDlg::maxChangedR);
 	connect(m_histograms[1], &ccHistogramWindow::sfMinSatValChanged, this, &ccColorFromScalarDlg::minChangedG);
 	connect(m_histograms[1], &ccHistogramWindow::sfMaxSatValChanged, this, &ccColorFromScalarDlg::maxChangedG);
 	connect(m_histograms[2], &ccHistogramWindow::sfMinSatValChanged, this, &ccColorFromScalarDlg::minChangedB);
 	connect(m_histograms[2], &ccHistogramWindow::sfMaxSatValChanged, this, &ccColorFromScalarDlg::maxChangedB);
+	
+	//initialise colour scales
+	for (unsigned i = 0; i < 4; i++)
+	{
+		m_colors[i] = ccColorScale::Shared(new ccColorScale(QString::asprintf("%d", i)));
+	}
+	updateColormaps();
 
 	//update histograms
 	onChannelChangedR(0);
 	onChannelChangedG(1);
 	onChannelChangedB(2);
+	m_cloud->getCurrentDisplayedScalarField()->setColorScale(m_colors[3]); //set grey colour ramp to start with
 
 	toggleHSV->setEnabled(false); //disable HSV for now (until I implement it...)
 }
 
+void ccColorFromScalarDlg::updateColormaps()
+{
+	//create colourmaps for RGB
+	if (toggleRGB->isChecked())
+	{
+
+		//populate colour ramps
+		Qt::GlobalColor start_colors[4] = { Qt::black , Qt::black , Qt::black , Qt::black };
+		Qt::GlobalColor end_colors[4] = { Qt::red , Qt::green , Qt::blue , Qt::white };
+		bool reversed[4] = { reverseR->isChecked(), reverseG->isChecked(), reverseB->isChecked(), false };
+		for (unsigned i = 0; i < 4; i++)
+		{
+			m_colors[i]->clear();
+			if (reversed[i]) //flip
+			{
+				m_colors[i]->insert(ccColorScaleElement(0.0, end_colors[i]));
+				m_colors[i]->insert(ccColorScaleElement(1.0, start_colors[i]));
+			} else
+			{
+				m_colors[i]->insert(ccColorScaleElement(0.0, start_colors[i]));
+				m_colors[i]->insert(ccColorScaleElement(1.0, end_colors[i]));
+			}
+			
+			m_colors[i]->update();
+		}		
+	}
+	else //create colourmaps for HSV
+	{
+		//TODO
+	}
+
+}
+
+void ccColorFromScalarDlg::toggleColors(int state)
+{
+	//update colourmaps
+	updateColormaps();
+	
+	//update histograms
+	updateHistogram(0); 
+	updateHistogram(1); 
+	updateHistogram(2); 
+}
+
 void ccColorFromScalarDlg::updateHistogram(int n)
 {
+	//set scalar field
+	m_scalars[n]->setColorScale(m_colors[n]);
+
 	//clear and build histogram
 	m_histograms[n]->clear();
 	m_histograms[n]->fromSF(m_scalars[n], 255, false, true);
@@ -129,6 +177,8 @@ void ccColorFromScalarDlg::updateHistogram(int n)
 	//hide axis (not sure why this code HAS to be here, but it does...)
 	m_histograms[n]->setAxisLabels("", "");
 	m_histograms[n]->yAxis->setVisible(false); //disable y-axis
+
+	m_histograms[n]->repaint();
 }
 
 void ccColorFromScalarDlg::updateChannel(int n)
@@ -155,24 +205,32 @@ void ccColorFromScalarDlg::updateChannel(int n)
 		m_histograms[n]->setMinSatValue(m_minSat[n] + 0.1 * range);
 		m_histograms[n]->setMaxSatValue(m_maxSat[n] - 0.1 * range);
 
-		
 	}
 }
 
-void ccColorFromScalarDlg::onChannelChangedR(int index)
+//mapping ranges changed
+void ccColorFromScalarDlg::minChanged(int n, double val)
 {
-	updateChannel(0);
+	if (val < m_maxSat[n]) //valid value?
+	{
+		m_scalars[n]->setColorScale(m_colors[n]);
+		m_minSat[n] = val;
+		m_boxes_min[n]->setValue(val);
+		m_histograms[n]->setMinSatValue(val);
+	}
 }
 
-void ccColorFromScalarDlg::onChannelChangedG(int index)
+void ccColorFromScalarDlg::maxChanged(int n, double val)
 {
-	updateChannel(1);
+	if (val > m_minSat[n]) //valid value?
+	{
+		m_scalars[n]->setColorScale(m_colors[n]);
+		m_maxSat[n] = val;
+		m_boxes_max[n]->setValue(val);
+		m_histograms[n]->setMaxSatValue(val);
+	}
 }
 
-void ccColorFromScalarDlg::onChannelChangedB(int index)
-{
-	updateChannel(2);
-}
 
 void ccColorFromScalarDlg::onApply()
 {

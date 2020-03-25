@@ -234,5 +234,44 @@ void ccColorFromScalarDlg::maxChanged(int n, double val)
 
 void ccColorFromScalarDlg::onApply()
 {
+
+	//which maps to flip?
+	bool reversed[4] = { reverseR->isChecked(), reverseG->isChecked(), reverseB->isChecked() };
+
+	//map scalar values to RGB
+	if (toggleRGB->isChecked())
+	{
+		int col[3];
+		for (unsigned p = 0; p < m_cloud->size(); p++)
+		{
+			//get col
+			for (unsigned i = 0; i < 3; i++)
+			{
+				col[i] = int( 255.0 * (m_scalars[i]->getValue(p) - m_minSat[i]) / (m_maxSat[i]-m_minSat[i]) );
+				
+				//trim to range 0 - 255
+				col[i] = std::max(col[i], 0);
+				col[i] = std::min(col[i], 255);
+
+				//flip?
+				if (reversed[i])
+				{
+					col[i] = 255 - col[i];
+				}
+			}
+			m_cloud->setPointColor(p, ccColor::FromQColor(QColor(col[0], col[1], col[2], 255)));
+		}
+	}
+	else //map scalar values to HSV (and then to RGB)
+	{
+		//TODO
+	}
+	
+	m_cloud->colorsHaveChanged();
+	m_cloud->showSF(false);
+	m_cloud->showColors(true);
+	m_cloud->redrawDisplay();
+	m_cloud->prepareDisplayForRefresh();
+	m_cloud->refreshDisplay();
 	
 }

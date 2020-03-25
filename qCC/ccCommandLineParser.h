@@ -77,9 +77,9 @@ private: //members
 	QString m_meshExportFormat;
 	//! Current mesh(es) export extension (warning: can be anything)
 	QString m_meshExportExt;
-	//! Current hiearchy(ies) export format (can be modified with the 'COMMAND_HIEARCHY_EXPORT_FORMAT' option)
+	//! Current hierarchy(ies) export format (can be modified with the 'COMMAND_HIEARCHY_EXPORT_FORMAT' option)
 	QString m_hierarchyExportFormat;
-	//! Current hiearchy(ies) export extension (warning: can be anything)
+	//! Current hierarchy(ies) export extension (warning: can be anything)
 	QString m_hierarchyExportExt;
 
 	//! Mesh filename

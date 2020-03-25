@@ -86,7 +86,7 @@ struct CLGroupDesc : CLEntityDesc
 	
 	ccHObject* getEntity() override { return groupEntity; }
 	const ccHObject* getEntity() const override { return groupEntity; }
-	CL_ENTITY_TYPE getCLEntityType() const override{ return CL_ENTITY_TYPE::GROUP; };
+	CL_ENTITY_TYPE getCLEntityType() const override{ return CL_ENTITY_TYPE::GROUP; }
 };
 
 //! Loaded cloud description
@@ -118,7 +118,7 @@ struct CLCloudDesc : CLEntityDesc
 
 	ccHObject* getEntity() override { return static_cast<ccHObject*>(pc); }
 	const ccHObject* getEntity() const override { return static_cast<ccHObject*>(pc); }
-	CL_ENTITY_TYPE getCLEntityType() const override { return CL_ENTITY_TYPE::CLOUD; };
+	CL_ENTITY_TYPE getCLEntityType() const override { return CL_ENTITY_TYPE::CLOUD; }
 };
 
 //! Loaded mesh description
@@ -150,7 +150,7 @@ struct CLMeshDesc : CLEntityDesc
 	
 	ccHObject* getEntity() override { return static_cast<ccHObject*>(mesh); }
 	const ccHObject* getEntity() const override { return static_cast<ccHObject*>(mesh); }
-	CL_ENTITY_TYPE getCLEntityType() const override { return CL_ENTITY_TYPE::GROUP; };
+	CL_ENTITY_TYPE getCLEntityType() const override { return CL_ENTITY_TYPE::GROUP; }
 };
 
 //! Command line interface
@@ -296,7 +296,7 @@ public: //file I/O
 	virtual QString cloudExportExt() const = 0;
 	//! Returns the current mesh(es) export format
 	virtual QString meshExportFormat() const = 0;
-	//! Returs the current mesh(es) export extension (warning: can be anything)
+	//! Returns the current mesh(es) export extension (warning: can be anything)
 	virtual QString meshExportExt() const = 0;
 	//! Returns the current hiearchy(ies) export format
 	virtual QString hierarchyExportFormat() const = 0;

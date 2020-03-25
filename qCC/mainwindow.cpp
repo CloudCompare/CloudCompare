@@ -117,6 +117,7 @@
 #include "ccVolumeCalcTool.h"
 #include "ccWaveformDialog.h"
 #include "ccEntitySelectionDlg.h"
+#include "ccColorFromScalarDlg.h"
 
 //other
 #include "ccCropTool.h"
@@ -829,7 +830,18 @@ void MainWindow::doActionEnhanceRGBWithIntensities()
 
 void MainWindow::doActionColorFromScalars()
 {
-	MainWindow::dispToConsole("Don't do that again....");
+	for (ccHObject *entity : getSelectedEntities())
+	{
+		//for "real" point clouds only
+		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
+		if (cloud)
+		{
+			//create color from scalar dialogue
+			ccColorFromScalarDlg* cfsDlg = new ccColorFromScalarDlg(this, cloud);
+			cfsDlg->setAttribute(Qt::WA_DeleteOnClose, true);
+			cfsDlg->show();
+		}
+	}
 }
 
 void MainWindow::doActionInvertNormals()

@@ -27,7 +27,7 @@ public:
     
     bool hasScalarFields() const;
     
-    void scale(double fx, double fy, double fz, SIP_PYTUPLE center) [ void (PointCoordinateType, PointCoordinateType, PointCoordinateType, CCVector3) ];
+    void scale(double fx, double fy, double fz, SIP_PYTUPLE center = Py_BuildValue("(ddd)", 0., 0., 0.)) [ void (PointCoordinateType, PointCoordinateType, PointCoordinateType, CCVector3) ];
     %MethodCode
     double v[3];
     if (PyArg_ParseTuple(a3, "ddd", &v[0], &v[1], &v[2]))

@@ -5503,7 +5503,7 @@ void MainWindow::doActionFilterNoise()
 
 void MainWindow::doActionUnroll()
 {
-	//there should be only one point cloud with sensor in current selection!
+	//there should be only one point cloud or one mesh!
 	if (!haveOneSelection())
 	{
 		ccConsole::Error("Select one and only one entity!");
@@ -5588,15 +5588,27 @@ void MainWindow::doActionUnroll()
 
 	if (output)
 	{
-		pc->setEnabled(false);
-		ccConsole::Warning("[Unroll] Original cloud has been automatically hidden");
-
-		if (pc->getParent())
+		if (m_selectedEntities[0]->isA(CC_TYPES::MESH))
 		{
-			pc->getParent()->addChild(output);
+			ccMesh* mesh = ccHObjectCaster::ToMesh(m_selectedEntities[0]);
+			mesh->setEnabled(false);
+			ccConsole::Warning("[Unroll] Original mesh has been automatically hidden");
+			ccMesh* outputMesh = mesh->cloneMesh(output);
+			outputMesh->addChild(output);
+			addToDB(outputMesh, true, true, false, true);
+			outputMesh->setEnabled(true);
+			outputMesh->setVisible(true);
 		}
-		addToDB(output, true, true, false, true);
-
+		else
+		{
+			pc->setEnabled(false);
+			ccConsole::Warning("[Unroll] Original cloud has been automatically hidden");
+			if (pc->getParent())
+			{
+				pc->getParent()->addChild(output);
+			}
+			addToDB(output, true, true, false, true);
+		}
 		updateUI();
 	}
 }

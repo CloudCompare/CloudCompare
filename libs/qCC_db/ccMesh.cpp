@@ -645,10 +645,10 @@ bool ccMesh::laplacianSmooth(	unsigned nbIteration,
 	return true;
 }
 
-ccMesh* ccMesh::cloneMesh(	ccGenericPointCloud* vertices/*=0*/,
-							ccMaterialSet* clonedMaterials/*=0*/,
-							NormsIndexesTableType* clonedNormsTable/*=0*/,
-							TextureCoordsContainer* cloneTexCoords/*=0*/)
+ccMesh* ccMesh::cloneMesh(	ccGenericPointCloud* vertices/*=nullptr*/,
+							ccMaterialSet* clonedMaterials/*=nullptr*/,
+							NormsIndexesTableType* clonedNormsTable/*=nullptr*/,
+							TextureCoordsContainer* cloneTexCoords/*=nullptr*/)
 {
 	assert(m_associatedCloud);
 

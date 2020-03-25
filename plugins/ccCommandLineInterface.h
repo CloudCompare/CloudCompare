@@ -86,7 +86,7 @@ struct CLGroupDesc : CLEntityDesc
 	
 	ccHObject* getEntity() override { return groupEntity; }
 	const ccHObject* getEntity() const override { return groupEntity; }
-	CL_ENTITY_TYPE getCLEntityType() const override{ return CL_ENTITY_TYPE::GROUP; }
+	CL_ENTITY_TYPE getCLEntityType() const override { return CL_ENTITY_TYPE::GROUP; }
 };
 
 //! Loaded cloud description
@@ -307,7 +307,7 @@ public: //file I/O
 	virtual void setCloudExportFormat(QString format, QString ext) = 0;
 	//! Sets the current mesh(es) export format and extension
 	virtual void setMeshExportFormat(QString format, QString ext) = 0;
-	//! Sets the current hiearchy(ies) export format and extension
+	//! Sets the current hierarchy(ies) export format and extension
 	virtual void setHierarchyExportFormat(QString format, QString ext) = 0;
 
 public: //logging

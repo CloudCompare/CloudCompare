@@ -15,8 +15,8 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef M3C2_PLUGIN_COMMANDS_HEADER
-#define M3C2_PLUGIN_COMMANDS_HEADER
+#ifndef RANSAC_PLUGIN_COMMANDS_HEADER
+#define RANSAC_PLUGIN_COMMANDS_HEADER
 
 //CloudCompare
 #include "ccCommandLineInterface.h"

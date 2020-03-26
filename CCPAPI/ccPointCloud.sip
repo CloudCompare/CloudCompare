@@ -10,6 +10,17 @@ class ccPointCloud
 #include <ccPointCloud.h>
 %End
 
+%Docstring
+A 3D cloud and its associated features (color, normals, scalar fields, etc.)
+A point cloud can have multiple features:
+- colors (RGB)
+- normals (compressed)
+- scalar fields
+- an octree strucutre
+- per-point visibility information (to hide/display subsets of points)
+- other children objects (meshes, calibrated pictures, etc.)
+%End
+
 public:
     ccPointCloud(QString name = QString(), unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID) throw();
 

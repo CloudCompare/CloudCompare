@@ -10,6 +10,19 @@ class ccPApi {
 #include <ccPApi.h>
 %End
 
+%Docstring
+ccPApi is the actual context of the Python interface for CloudCompare:
+cloud compare Python Api.
+-_____-_______-______---.
+You should create an instance of ccPApi to get access to the cloudCompare features.
+For instance:
+from PyQt5.QtWidgets import QApplication
+app = QApplication(sys.argv)
+import cloudCompare as cc
+capi = cc.ccPApi()
+cloud = capi.loadPointCloud("/home/paul/projets/CloudCompare/data/altiXYZ/RGEALTI_FXX_0845_6446_MNT_LAMB93_IGN69.xyz")
+%End
+
 public:
 
     enum CC_SHIFT_MODE
@@ -25,6 +38,14 @@ public:
     							 double x=0,
     							 double y=0, 
     							 double z=0);
+    %Docstring
+    Load a 3D cloud from a file
+    params:
+    - filename
+    - optional parameters not used yet!
+    return a ccPointCloud object.
+    Usage: see ccPointCloud doc.
+    %End
     							 
 private:
     ccPApi(const ccPApi &);

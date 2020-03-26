@@ -166,7 +166,7 @@ bool ccCommandLineParser::registerCommand(Command::Shared command)
 	if (m_commands.contains(command->m_keyword))
 	{
 		assert(false);
-		warning(QString("Internal error: keyword '%' already registered (by command '%2')").arg(command->m_keyword, m_commands[command->m_keyword]->m_name));
+		warning(QString("Internal error: keyword '%1' already registered (by command '%2')").arg(command->m_keyword, m_commands[command->m_keyword]->m_name));
 		return false;
 	}
 

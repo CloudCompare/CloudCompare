@@ -53,5 +53,40 @@ public:
         sipIsErr = 1;
     }
     %End
+    
+    void translate(SIP_PYTUPLE t) [ void (const CCVector3&) ];
+    %MethodCode
+    double v[3];
+    if (PyArg_ParseTuple(a0, "ddd", &v[0], &v[1], &v[2]))
+    {
+        Py_BEGIN_ALLOW_THREADS
+        sipCpp->translate(CCVector3(v[0], v[1], v[2]));
+        Py_END_ALLOW_THREADS
+    }
+    else
+    {
+        // PyArg_ParseTuple() will have raised the exception.
+        sipIsErr = 1;
+    }
+    %End
+    
+    bool exportCoordToSF(SIP_PYTUPLE b) [ bool (bool*) ];
+    %MethodCode
+    int v[3];
+    if (PyArg_ParseTuple(a0, "ppp", &v[0], &v[1], &v[2]))
+    {
+        bool b[3];
+        b[0] = v[0]; b[1] = v[1]; b[2] = v[2];
+        Py_BEGIN_ALLOW_THREADS
+        sipRes = sipCpp->exportCoordToSF(b);
+        Py_END_ALLOW_THREADS
+    }
+    else
+    {
+        sipRes = false;
+        // PyArg_ParseTuple() will have raised the exception.
+        sipIsErr = 1;
+    }
+    %End
 };
     

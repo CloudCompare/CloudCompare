@@ -27,6 +27,13 @@ struct CommandChangeMeshOutputFormat : public CommandChangeOutputFormat
 	bool process(ccCommandLineInterface& cmd) override;
 };
 
+struct CommandChangeHierarchyOutputFormat : public CommandChangeOutputFormat
+{
+	CommandChangeHierarchyOutputFormat();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
 struct CommandLoad : public ccCommandLineInterface::Command
 {
 	CommandLoad();

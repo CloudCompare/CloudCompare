@@ -8,6 +8,7 @@ class ccPointCloud
 {
 %TypeHeaderCode
 #include <ccPointCloud.h>
+//#include <ScalarField.h>
 %End
 
 %Docstring
@@ -88,5 +89,11 @@ public:
         sipIsErr = 1;
     }
     %End
+    
+    unsigned getNumberOfScalarFields() const;
+    
+    CCLib::ScalarField* getScalarField(int index) const;
+    
+    const char* getScalarFieldName(int index) const;
 };
     

@@ -56,6 +56,8 @@ INCLUDE_DIRECTORIES(
 SET(_add_SOURCES
     sipcloudCompareccPApi.cc
     sipcloudCompareccPointCloud.cc
+    sipcloudCompareCCLib.cc
+    sipcloudCompareCCLibScalarField.cc
 )
 
 MESSAGE(STATUS "_add_SOURCES: " "${_add_SOURCES}")

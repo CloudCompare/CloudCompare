@@ -9,6 +9,8 @@
 %If (Qt_5_9_1 -)
 %Include ccPApi.sip
 %Include ccPointCloud.sip
+namespace CCLib;
+%Include ScalarField.sip
 %End
 
 

@@ -19,8 +19,8 @@ endif()
 # to compile CCLib only! (CMake implicitly imposes to declare a project before anything...)
 project( CC_CORE_LIB VERSION 1.0 )
 
-include ( ../cmake/CMakePolicies.cmake )
-include ( ../cmake/CMakeSetCompilerOptions.cmake )
+include ( CMakePolicies )
+include ( CMakeSetCompilerOptions )
 
 if (COMPILE_CC_CORE_LIB_WITH_CGAL)
 	include( cmake/CGALSupport.cmake )
@@ -36,7 +36,7 @@ endif()
 
 # Additional dependencies (only Qt in fact)
 if (COMPILE_CC_CORE_LIB_WITH_QT)
-	include( ../cmake/CMakeExternalLibs.cmake )
+	include( CMakeExternalLibs )
 endif()
 
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/include )
@@ -89,7 +89,7 @@ if ( COMPILE_CC_CORE_LIB_WITH_QT )
 endif()
 
 # Load advanced scripts
-include( ../cmake/CMakeInclude.cmake )
+include( CMakeInclude )
 
 if ( COMPILE_CC_CORE_LIB_SHARED )
 	# Install (shared) library to specified destinations

@@ -10,7 +10,7 @@ if (WIN32)
 		#CloudCompare LAS FWF (i.e. version >= 1.3) I/O plugin
 		project( QLAS_FWF_IO_PLUGIN )
 		
-		include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
+		include( CMakePolicies NO_POLICY_SCOPE )
 
 		include( LASLibSupport.cmake )
 

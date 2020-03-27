@@ -6,7 +6,7 @@ if (PLUGIN_STANDARD_QM3C2)
 
 	project( QM3C2_PLUGIN )
 
-	include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
+	include( CMakePolicies NO_POLICY_SCOPE )
 
 	include_directories( src )
 

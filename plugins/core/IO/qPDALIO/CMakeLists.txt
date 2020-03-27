@@ -5,7 +5,7 @@ option( PLUGIN_IO_QPDAL "Install qPDALIO plugin to read & write LAS files" OFF )
 if ( PLUGIN_IO_QPDAL )
 	project( QPDAL_IO_PLUGIN )
 
-	include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
+	include( CMakePolicies NO_POLICY_SCOPE )
 
 	set( CC_IS_IO_PLUGIN 1 )
 	

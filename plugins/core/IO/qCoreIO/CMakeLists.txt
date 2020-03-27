@@ -5,7 +5,7 @@ option( PLUGIN_IO_QCORE "Check to install the CoreIO plugin" ON )
 if ( PLUGIN_IO_QCORE )
 	project( QCORE_IO_PLUGIN )
 
-	include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
+	include( CMakePolicies NO_POLICY_SCOPE )
 
 	set( CC_IS_IO_PLUGIN 1 )
 	

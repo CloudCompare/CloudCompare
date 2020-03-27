@@ -441,7 +441,7 @@ void ccColorFromScalarDlg::onApply()
 			{
 				if (fixed[i]) //fixed value
 				{
-					col[i] = int(m_boxes_min[i]->value());
+					col[i] = m_boxes_min[i]->value() / m_boxes_min[i]->maximum();
 				}
 				else //map from scalar
 				{
@@ -464,6 +464,7 @@ void ccColorFromScalarDlg::onApply()
 			ccColor::Rgb rgb = ccColor::Convert::hsv2rgb(col[0] * 360.0f, col[1], col[2]);
 			m_cloud->setPointColor(p, ccColor::FromQColor(QColor(int(rgb.r), int(rgb.g), int(rgb.b), int(col[3] * 255))));
 		}
+
 	}
 		m_cloud->colorsHaveChanged();
 		m_cloud->showSF(false);

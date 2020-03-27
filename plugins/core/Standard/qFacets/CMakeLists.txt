@@ -10,7 +10,7 @@ if (PLUGIN_STANDARD_QFACETS)
 
 	project( QFACETS_PLUGIN )
 
-	include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
+	include( CMakePolicies NO_POLICY_SCOPE )
 
 	# we need includes from the main CC source dir
 	include_directories( ${CloudCompare_SOURCE_DIR} )

@@ -25,7 +25,7 @@ endif()
 
 project( QPCL_PLUGIN_UTILS_LIB )
 
-include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
+include ( CMakePolicies NO_POLICY_SCOPE )
 
 include_directories( ${PCL_INCLUDE_DIRS} )
 

@@ -8,7 +8,7 @@ if (PLUGIN_STANDARD_QRANSAC_SD)
 
 	add_definitions( -DPOINTSWITHINDEX ) #Causes the sub clouds to be generated as partial clones of original cloud
 
-	include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
+	include( CMakePolicies NO_POLICY_SCOPE )
 
 
 	add_subdirectory (RANSAC_SD_orig)

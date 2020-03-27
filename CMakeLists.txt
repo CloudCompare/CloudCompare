@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 3.0)
 
-set (CC_CMAKE_SCRIPTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-
 project( CloudCompareProjects )
 
 option(BUILD_TESTING "" OFF)
 include(CTest)
 
-include( cmake/CMakePolicies.cmake )
-include( cmake/CMakeSetCompilerOptions.cmake )
+list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/" )
+
+include( CMakePolicies )
+include( CMakeSetCompilerOptions )
 
 # Default debug suffix for libraries.
 set( CMAKE_DEBUG_POSTFIX "d" )
@@ -81,7 +81,7 @@ elseif( UNIX )
 endif()
 
 # Load advanced scripts
-include( cmake/CMakeInclude.cmake )
+include( CMakeInclude )
 
 add_subdirectory( CC )
 
@@ -93,7 +93,7 @@ else()
 endif()
 
 # Add external libraries
-include( cmake/CMakeExternalLibs.cmake )
+include( CMakeExternalLibs )
 
 # Contrib. libraries (mainly for I/O)
 include( contrib/AllSupport.cmake )

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>656</width>
-    <height>547</height>
+    <width>582</width>
+    <height>731</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -114,7 +114,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="MinLabel">
+      <widget class="QLabel" name="MinLabelR">
        <property name="text">
         <string>Minimum:</string>
        </property>
@@ -137,6 +137,13 @@
       </spacer>
      </item>
      <item>
+      <widget class="QCheckBox" name="fixR">
+       <property name="text">
+        <string>Fix</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QCheckBox" name="reverseR">
        <property name="text">
         <string>Reverse</string>
@@ -157,7 +164,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QLabel" name="MaxLabel">
+      <widget class="QLabel" name="MaxLabelR">
        <property name="text">
         <string>Maximum:</string>
        </property>
@@ -237,7 +244,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="MinLabel_3">
+      <widget class="QLabel" name="MinLabelG">
        <property name="text">
         <string>Minimum:</string>
        </property>
@@ -260,6 +267,13 @@
       </spacer>
      </item>
      <item>
+      <widget class="QCheckBox" name="fixG">
+       <property name="text">
+        <string>Fix</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QCheckBox" name="reverseG">
        <property name="text">
         <string>Reverse</string>
@@ -280,7 +294,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QLabel" name="MaxLabel_3">
+      <widget class="QLabel" name="MaxLabelG">
        <property name="text">
         <string>Maximum:</string>
        </property>
@@ -360,7 +374,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="MinLabel_4">
+      <widget class="QLabel" name="MinLabelB">
        <property name="text">
         <string>Minimum:</string>
        </property>
@@ -383,6 +397,13 @@
       </spacer>
      </item>
      <item>
+      <widget class="QCheckBox" name="fixB">
+       <property name="text">
+        <string>Fix</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QCheckBox" name="reverseB">
        <property name="text">
         <string>Reverse</string>
@@ -403,7 +424,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QLabel" name="MaxLabel_4">
+      <widget class="QLabel" name="MaxLabelB">
        <property name="text">
         <string>Maximum:</string>
        </property>
@@ -416,6 +437,139 @@
    </item>
    <item>
     <widget class="QFrame" name="histoFrameB">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_7">
+     <item>
+      <widget class="QLabel" name="labelA">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>  Alpha</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_14">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>30</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QComboBox" name="channelComboA">
+       <property name="currentText">
+        <string>RGB</string>
+       </property>
+       <item>
+        <property name="text">
+         <string>RGB</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Red</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Green</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Blue</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="MinLabelA">
+       <property name="text">
+        <string>Minimum:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDoubleSpinBox" name="minInputSpinBoxA"/>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_15">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="fixA">
+       <property name="text">
+        <string>Fix</string>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="reverseA">
+       <property name="text">
+        <string>Reverse</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_16">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="MaxLabelA">
+       <property name="text">
+        <string>Maximum:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDoubleSpinBox" name="maxInputSpinBoxA"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QFrame" name="histoFrameA">
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
      </property>

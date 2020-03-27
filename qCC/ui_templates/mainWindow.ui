@@ -2378,7 +2378,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionColorFromScalarField">
    <property name="text">
-    <string>From Scalar field(s)</string>
+    <string>From Scalar fields</string>
    </property>
   </action>
   <action name="actionComputeKdTree">

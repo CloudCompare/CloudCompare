@@ -11,7 +11,7 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#          COPYRIGHT: CloudCompare project                               #
 //#                                                                        #
 //##########################################################################
 
@@ -119,6 +119,8 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
 	connect(reverseG, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleColors);
 	connect(reverseB, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleColors);
 	connect(reverseA, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleColors);
+	connect(toggleHSV, &QRadioButton::toggled, this, &ccColorFromScalarDlg::toggleColorMode);
+	connect(toggleRGB, &QRadioButton::toggled, this, &ccColorFromScalarDlg::toggleColorMode);
 
 	connect(fixR, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleFixedR);
 	connect(fixG, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleFixedG);
@@ -149,20 +151,26 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
 	updateChannel(3);
 	m_cloud->getCurrentDisplayedScalarField()->setColorScale(m_colors[3]); //set grey colour ramp to start with
 
-	toggleHSV->setEnabled(false); //disable HSV for now (until I implement it...)
-	
 }
 
 void ccColorFromScalarDlg::updateColormaps()
 {
+	//check for reversed
+	bool reversed[4] = { reverseR->isChecked(), reverseG->isChecked(), reverseB->isChecked(), reverseA->isChecked() };
+
 	//create colourmaps for RGB
 	if (toggleRGB->isChecked())
 	{
+		//update labels
+		labelR->setText("Red");
+		labelG->setText("Green");
+		labelB->setText("Blue");
+		labelA->setText("Alpha");
 
 		//populate colour ramps
 		Qt::GlobalColor start_colors[4] = { Qt::black , Qt::black , Qt::black , Qt::black };
 		Qt::GlobalColor end_colors[4] = { Qt::red , Qt::green , Qt::blue , Qt::white };
-		bool reversed[4] = { reverseR->isChecked(), reverseG->isChecked(), reverseB->isChecked(), reverseA->isChecked() };
+		
 		for (unsigned i = 0; i < 4; i++)
 		{
 			m_colors[i]->clear();
@@ -181,9 +189,57 @@ void ccColorFromScalarDlg::updateColormaps()
 	}
 	else //create colourmaps for HSV
 	{
-		//TODO
-	}
+		//update labels
+		labelR->setText("Hue");
+		labelG->setText("Sat");
+		labelB->setText("Value");
+		labelA->setText("Alpha");
 
+		//populate colour ramps
+		Qt::GlobalColor start_colors[4] = { Qt::black , Qt::gray , Qt::black , Qt::black };
+		Qt::GlobalColor end_colors[4] = { Qt::red , Qt::green , Qt::white , Qt::white };
+
+		for (unsigned i = 0; i < 4; i++)
+		{
+			m_colors[i]->clear();
+			if (reversed[i]) //flip
+			{
+				m_colors[i]->insert(ccColorScaleElement(0.0, end_colors[i]));
+				m_colors[i]->insert(ccColorScaleElement(1.0, start_colors[i]));
+			}
+			else
+			{
+				m_colors[i]->insert(ccColorScaleElement(0.0, start_colors[i]));
+				m_colors[i]->insert(ccColorScaleElement(1.0, end_colors[i]));
+			}
+
+			m_colors[i]->update();
+		}
+
+		//overwrite first colourmap with hue rainbow
+		int hue;
+		m_colors[0]->clear();
+
+		ccColor::Rgb col = ccColor::Convert::hsv2rgb(360.0f, 1.0f, 1.0f);
+		m_colors[0]->insert(ccColorScaleElement(1.0, QColor(int(col.r), int(col.g), int(col.b), 255)));
+		for (unsigned i = 0; i < 360; i+=2)
+		{
+			//calculate hue value
+			if (reversed[0]) {
+				hue = 360 - i;
+			} else
+			{
+				hue = i;
+			}
+
+			//calculate colour
+			col = ccColor::Convert::hsv2rgb(hue, 1.0f, 1.0f);
+
+			//add stop
+			m_colors[0]->insert(ccColorScaleElement( double(i) / 360.0, QColor( int(col.r), int(col.g), int(col.b), 255)));
+		}
+		m_colors[0]->update();
+	}
 }
 
 void ccColorFromScalarDlg::toggleColors(int state)
@@ -196,6 +252,18 @@ void ccColorFromScalarDlg::toggleColors(int state)
 	updateHistogram(1); 
 	updateHistogram(2); 
 	updateHistogram(3);
+}
+
+void ccColorFromScalarDlg::toggleColorMode(bool state)
+{
+	//update colourmaps
+	updateColormaps();
+
+	//update histograms
+	updateChannel(0);
+	updateChannel(1);
+	updateChannel(2);
+	updateChannel(3);
 }
 
 void ccColorFromScalarDlg::updateHistogram(int n)
@@ -211,12 +279,19 @@ void ccColorFromScalarDlg::updateHistogram(int n)
 	if (fixed[n]) //this channel is/has been fixed
 	{
 		m_labels_min[n]->setText("  Value:");
-		m_boxes_min[n]->setMinimum(-0.1);
-		m_boxes_min[n]->setMaximum(255.1);
-		m_boxes_max[n]->setMinimum(-0.1);
-		m_boxes_max[n]->setMaximum(255.1);
+		m_boxes_min[n]->setMinimum(0.0);
+		m_boxes_min[n]->setMaximum(255.0);
+		m_boxes_max[n]->setMinimum(0.0);
+		m_boxes_max[n]->setMaximum(255.0);
 		m_boxes_min[n]->setValue(200.0);
 		m_boxes_max[n]->setValue(200.0);
+
+		//edge case for HSV values (0 - 360)
+		if (n == 0 && toggleHSV->isChecked())
+		{
+			m_boxes_min[n]->setMaximum(360);
+		}
+
 
 		//and make histogram grey
 		m_histograms[n]->clear();
@@ -267,7 +342,7 @@ void ccColorFromScalarDlg::updateChannel(int n)
 		m_boxes_min[n]->setMaximum(m_maxSat[n]);
 		m_boxes_max[n]->setMinimum(m_minSat[n]);
 		m_boxes_max[n]->setMaximum(m_maxSat[n]);
-
+		m_boxes_max[n]->setCorrectionMode(QAbstractSpinBox::CorrectionMode::CorrectToNearestValue);
 		updateHistogram(n);
 
 		//set default stretch (n.b. this is a cheap hack to avoid calculating percentiles [by assuming uniform data distribution])
@@ -279,25 +354,38 @@ void ccColorFromScalarDlg::updateChannel(int n)
 }
 
 //mapping ranges changed
-void ccColorFromScalarDlg::minChanged(int n, double val)
+void ccColorFromScalarDlg::minChanged(int n, double val, bool slider)
 {
-	if (val < m_maxSat[n]) //valid value?
+	if (val <= m_maxSat[n]) //valid value?
 	{
 		m_scalars[n]->setColorScale(m_colors[n]);
 		m_minSat[n] = val;
-		m_boxes_min[n]->setValue(val);
-		m_histograms[n]->setMinSatValue(val);
+		if (slider) //change was made with the slider
+		{
+			m_boxes_min[n]->setValue(val);
+		}
+		else //change was made with text box
+		{
+			m_histograms[n]->setMinSatValue(val);
+		}
 	}
 }
 
-void ccColorFromScalarDlg::maxChanged(int n, double val)
+void ccColorFromScalarDlg::maxChanged(int n, double val, bool slider)
 {
-	if (val > m_minSat[n]) //valid value?
+	if (val >= m_minSat[n]) //valid value?
 	{
 		m_scalars[n]->setColorScale(m_colors[n]);
 		m_maxSat[n] = val;
-		m_boxes_max[n]->setValue(val);
-		m_histograms[n]->setMaxSatValue(val);
+		//m_boxes_max[n]->setValue(val-0.1);
+		if (slider) //change was made with the slider
+		{
+			m_boxes_max[n]->setValue(val);
+		}
+		else //change was made with text box
+		{
+			m_histograms[n]->setMaxSatValue(val);
+		}
 	}
 }
 
@@ -328,8 +416,8 @@ void ccColorFromScalarDlg::onApply()
 				{
 					col[i] = int(255.0 * (m_scalars[i]->getValue(p) - m_minSat[i]) / (m_maxSat[i] - m_minSat[i]));
 				}
-				
-				
+
+
 				//trim to range 0 - 255
 				col[i] = std::max(col[i], 0);
 				col[i] = std::min(col[i], 255);
@@ -345,14 +433,43 @@ void ccColorFromScalarDlg::onApply()
 	}
 	else //map scalar values to HSV (and then to RGB)
 	{
-		//TODO
+		float col[4];
+		for (unsigned p = 0; p < m_cloud->size(); p++)
+		{
+			//get col
+			for (unsigned i = 0; i < 4; i++)
+			{
+				if (fixed[i]) //fixed value
+				{
+					col[i] = int(m_boxes_min[i]->value());
+				}
+				else //map from scalar
+				{
+					col[i] = (m_scalars[i]->getValue(p) - m_minSat[i]) / (m_maxSat[i] - m_minSat[i]);
+				}
+
+
+				//trim to range 0 - 1
+				col[i] = std::max(col[i], 0.0f);
+				col[i] = std::min(col[i], 1.0f);
+
+				//flip?
+				if (reversed[i] && !fixed[i])
+				{
+					col[i] = 1.0f - col[i];
+				}
+			}
+
+			//calculate and set colour
+			ccColor::Rgb rgb = ccColor::Convert::hsv2rgb(col[0] * 360.0f, col[1], col[2]);
+			m_cloud->setPointColor(p, ccColor::FromQColor(QColor(int(rgb.r), int(rgb.g), int(rgb.b), int(col[3] * 255))));
+		}
 	}
-	
-	m_cloud->colorsHaveChanged();
-	m_cloud->showSF(false);
-	m_cloud->showColors(true);
-	m_cloud->redrawDisplay();
-	m_cloud->prepareDisplayForRefresh();
-	m_cloud->refreshDisplay();
-	
+		m_cloud->colorsHaveChanged();
+		m_cloud->showSF(false);
+		m_cloud->showColors(true);
+		m_cloud->redrawDisplay();
+		m_cloud->prepareDisplayForRefresh();
+		m_cloud->refreshDisplay();
+
 }

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Colorise from Scalar Field(s)</string>
+   <string>Color from Scalar Fields</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>

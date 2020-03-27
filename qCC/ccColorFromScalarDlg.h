@@ -11,7 +11,7 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#          COPYRIGHT: CloudCompare project                               #
 //#                                                                        #
 //##########################################################################
 
@@ -51,29 +51,30 @@ protected slots:
 	void updateColormaps();
 
 	//mapping ranges changed
-	void minChangedR(double val) { minChanged(0, val); }
-	void maxChangedR(double val) { maxChanged(0, val); }
-	void minChangedG(double val) { minChanged(1, val); }
-	void maxChangedG(double val) { maxChanged(1, val); }
-	void minChangedB(double val) { minChanged(2, val); }
-	void maxChangedB(double val) { maxChanged(2, val); }
-	void minChangedA(double val) { minChanged(3, val); }
-	void maxChangedA(double val) { maxChanged(3, val); }
-	void minSpinChangedR(double val) { minChanged(0, val); }
-	void maxSpinChangedR(double val) { maxChanged(0, val); }
-	void minSpinChangedG(double val) { minChanged(1, val); }
-	void maxSpinChangedG(double val) { maxChanged(1, val); }
-	void minSpinChangedB(double val) { minChanged(2, val); }
-	void maxSpinChangedB(double val) { maxChanged(2, val); }
-	void minSpinChangedA(double val) { minChanged(3, val); }
-	void maxSpinChangedA(double val) { maxChanged(3, val); }
+	void minChangedR(double val) { minChanged(0, val, true); }
+	void maxChangedR(double val) { maxChanged(0, val, true); }
+	void minChangedG(double val) { minChanged(1, val, true); }
+	void maxChangedG(double val) { maxChanged(1, val, true); }
+	void minChangedB(double val) { minChanged(2, val, true); }
+	void maxChangedB(double val) { maxChanged(2, val, true); }
+	void minChangedA(double val) { minChanged(3, val, true); }
+	void maxChangedA(double val) { maxChanged(3, val, true); }
+	void minSpinChangedR(double val) { minChanged(0, val, false); }
+	void maxSpinChangedR(double val) { maxChanged(0, val, false); }
+	void minSpinChangedG(double val) { minChanged(1, val, false); }
+	void maxSpinChangedG(double val) { maxChanged(1, val, false); }
+	void minSpinChangedB(double val) { minChanged(2, val, false); }
+	void maxSpinChangedB(double val) { maxChanged(2, val, false); }
+	void minSpinChangedA(double val) { minChanged(3, val, false); }
+	void maxSpinChangedA(double val) { maxChanged(3, val, false); }
 	void toggleFixedR() { updateChannel(0);}
 	void toggleFixedG() { updateChannel(1);}
 	void toggleFixedB() { updateChannel(2);}
 	void toggleFixedA() { updateChannel(3);}
 	void toggleColors(int val);
-	void minChanged(int n, double val);
-	void maxChanged(int n, double val);
+	void toggleColorMode(bool state);
+	void minChanged(int n, double val, bool slider);
+	void maxChanged(int n, double val, bool slider);
 
 	//done!
 	void onApply();

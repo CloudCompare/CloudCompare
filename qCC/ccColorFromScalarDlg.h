@@ -21,27 +21,30 @@
 //Qt
 #include <QColor>
 
-#include <ui_colorFromScalarDlg.h>
+//CC
 #include <ccColorScale.h>
-#include <ccScalarField.h>
 #include <ccHistogramWindow.h>
+#include <ccScalarField.h>
 
 class ccPointCloud;
 
+namespace Ui {
+	class ColorFromScalarDialog;
+}
+
 //! Dialog to change the color levels
-class ccColorFromScalarDlg : public QDialog, public Ui::ColorFromScalarDialog
+class ccColorFromScalarDlg : public QDialog
 {
 	Q_OBJECT
 
 public:
-
 	//! Default constructor
 	ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointCloud);
 
 	//update and redraw histograms
 	void updateHistogram(int);
+
 protected slots:
-	
 	//events to set scalar fields
 	void onChannelChangedR(int) { updateChannel(0); }
 	void onChannelChangedG(int) { updateChannel(1); }
@@ -49,7 +52,6 @@ protected slots:
 	void onChannelChangedA(int) { updateChannel(3); }
 	void updateChannel(int);
 	void updateColormaps();
-
 	//mapping ranges changed
 	void minChangedR(double val) { minChanged(0, val, true); }
 	void maxChangedR(double val) { maxChanged(0, val, true); }
@@ -75,18 +77,14 @@ protected slots:
 	void toggleColorMode(bool state);
 	void minChanged(int n, double val, bool slider);
 	void maxChanged(int n, double val, bool slider);
-
 	//done!
 	void onApply();
 
 protected:
-
 	//! Associated histogram view
 	ccHistogramWindow *m_histograms[4];  //0 - red, 1 - green, 2 - blue
-
 	 //scalar fields
 	ccScalarField *m_scalars[4]; //0 - red, 1 - green, 2 - blue
-
 	//gui elements
 	QComboBox* m_combos[4];
 	QDoubleSpinBox* m_boxes_min[4];
@@ -94,18 +92,16 @@ protected:
 	QLabel* m_labels_min[4];
 	QLabel* m_labels_max[4];
 	QCheckBox* m_reverse[4];
-
 	//saturation values
 	double m_minSat[4];
 	double m_maxSat[4];
-
 	//! Associated colour scales
 	ccColorScale::Shared m_colors[4];
-
 	//! Associated point cloud (color source)
 	ccPointCloud* m_cloud;
 
-
+private:
+	Ui::ColorFromScalarDialog *ui;
 };
 
 #endif //CC_COLOR_LEVELS_DLG_HEADER

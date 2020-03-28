@@ -83,6 +83,7 @@
 #include "ccBoundingBoxEditorDlg.h"
 #include "ccCamSensorProjectionDlg.h"
 #include "ccClippingBoxTool.h"
+#include "ccColorFromScalarDlg.h"
 #include "ccColorScaleEditorDlg.h"
 #include "ccComparisonDlg.h"
 #include "ccPrimitiveDistanceDlg.h"
@@ -117,7 +118,6 @@
 #include "ccVolumeCalcTool.h"
 #include "ccWaveformDialog.h"
 #include "ccEntitySelectionDlg.h"
-#include "ccColorFromScalarDlg.h"
 
 //other
 #include "ccCropTool.h"
@@ -511,7 +511,6 @@ void MainWindow::connectActions()
 	connect(m_UI->actionClearColor, &QAction::triggered, this, [=]() {
 		clearSelectedEntitiesProperty( ccEntityAction::CLEAR_PROPERTY::COLORS );
 	});
-
 
 	//"Edit > Normals" menu
 	connect(m_UI->actionComputeNormals,				&QAction::triggered, this, &MainWindow::doActionComputeNormals);

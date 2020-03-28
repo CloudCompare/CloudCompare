@@ -18,37 +18,34 @@
 #include "ccColorFromScalarDlg.h"
 
 //local
-#include "ccHistogramWindow.h"
-//#include "ccGenericPointCloud.h"
 #include "ccConsole.h"
+#include "ccHistogramWindow.h"
 
 //qCC_db
-#include <ccGenericGLDisplay.h>
-#include <ccPointCloud.h>
-#include <ccHObjectCaster.h>
 #include <ccColorScale.h>
+#include <ccGenericGLDisplay.h>
+#include <ccHObjectCaster.h>
+#include <ccPointCloud.h>
 
 //Qt
 #include <QPushButton>
 
-//system
-#include <string.h>
-#include <assert.h>
+//ui
+#include <ui_colorFromScalarDlg.h>
 
-//persistent parameters
-static int s_inputLevels[2] = {0,255};
-static int s_outputLevels[2] = {0,255};
-static bool s_outputLevelsEnabled = false;
+//system
+#include <cassert>
+#include <cstring>
 
 ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointCloud)
 	: QDialog(parent, Qt::Tool)
-	, Ui::ColorFromScalarDialog()
 	, m_cloud(pointCloud)
+	, ui(new Ui::ColorFromScalarDialog)
 {
-	setupUi(this);
+	ui->setupUi(this);
 
 	//create histograms
-	QFrame* histoFrame[4] = { histoFrameR, histoFrameG, histoFrameB, histoFrameA };
+	QFrame* histoFrame[4] = { ui->histoFrameR, ui->histoFrameG, ui->histoFrameB, ui->histoFrameA };
 	for (unsigned i = 0; i < 4; i++)
 	{
 		m_histograms[i] = new ccHistogramWindow(this);
@@ -58,34 +55,34 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
 	}
 
 	//populate boxes
-	m_boxes_min[0] = minInputSpinBoxR;
-	m_boxes_max[0] = maxInputSpinBoxR;
-	m_boxes_min[1] = minInputSpinBoxG;
-	m_boxes_max[1] = maxInputSpinBoxG;
-	m_boxes_min[2] = minInputSpinBoxB;
-	m_boxes_max[2] = maxInputSpinBoxB;
-	m_boxes_min[3] = minInputSpinBoxA;
-	m_boxes_max[3] = maxInputSpinBoxA;
+	m_boxes_min[0] = ui->minInputSpinBoxR;
+	m_boxes_max[0] = ui->maxInputSpinBoxR;
+	m_boxes_min[1] = ui->minInputSpinBoxG;
+	m_boxes_max[1] = ui->maxInputSpinBoxG;
+	m_boxes_min[2] = ui->minInputSpinBoxB;
+	m_boxes_max[2] = ui->maxInputSpinBoxB;
+	m_boxes_min[3] = ui->minInputSpinBoxA;
+	m_boxes_max[3] = ui->maxInputSpinBoxA;
 
 	//populate combo boxes
-	m_combos[0] = channelComboR;
-	m_combos[1] = channelComboG;
-	m_combos[2] = channelComboB;
-	m_combos[3] = channelComboA;
+	m_combos[0] = ui->channelComboR;
+	m_combos[1] = ui->channelComboG;
+	m_combos[2] = ui->channelComboB;
+	m_combos[3] = ui->channelComboA;
 
 	//populate labels
-	m_labels_min[0] = MinLabelR;
-	m_labels_min[1] = MinLabelG;
-	m_labels_min[2] = MinLabelB;
-	m_labels_min[3] = MinLabelA;
-	m_labels_max[0] = MaxLabelR;
-	m_labels_max[1] = MaxLabelG;
-	m_labels_max[2] = MaxLabelB;
-	m_labels_max[3] = MaxLabelA;
-	m_reverse[0] = reverseR;
-	m_reverse[1] = reverseG;
-	m_reverse[2] = reverseB;
-	m_reverse[3] = reverseA;
+	m_labels_min[0] = ui->MinLabelR;
+	m_labels_min[1] = ui->MinLabelG;
+	m_labels_min[2] = ui->MinLabelB;
+	m_labels_min[3] = ui->MinLabelA;
+	m_labels_max[0] = ui->MaxLabelR;
+	m_labels_max[1] = ui->MaxLabelG;
+	m_labels_max[2] = ui->MaxLabelB;
+	m_labels_max[3] = ui->MaxLabelA;
+	m_reverse[0] = ui->reverseR;
+	m_reverse[1] = ui->reverseG;
+	m_reverse[2] = ui->reverseB;
+	m_reverse[3] = ui->reverseA;
 
 	for (unsigned i = 0; i < 4; i++)
 	{
@@ -97,35 +94,35 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
 		m_combos[i]->setCurrentIndex( m_cloud->getCurrentDisplayedScalarFieldIndex() );
 	}
 
-	fixA->setChecked(true); //set alpha to checked
+	ui->fixA->setChecked(true); //set alpha to checked
 
 	//connect GUI elements
-	connect(channelComboR, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccColorFromScalarDlg::onChannelChangedR);
-	connect(channelComboG, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccColorFromScalarDlg::onChannelChangedG);
-	connect(channelComboB, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccColorFromScalarDlg::onChannelChangedB);
-	connect(channelComboA, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccColorFromScalarDlg::onChannelChangedA);
+	connect(ui->channelComboR, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccColorFromScalarDlg::onChannelChangedR);
+	connect(ui->channelComboG, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccColorFromScalarDlg::onChannelChangedG);
+	connect(ui->channelComboB, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccColorFromScalarDlg::onChannelChangedB);
+	connect(ui->channelComboA, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccColorFromScalarDlg::onChannelChangedA);
 
-	connect(buttonBox->button(QDialogButtonBox::Apply), &QPushButton::clicked, this, &ccColorFromScalarDlg::onApply);
-	connect(minInputSpinBoxR, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::minSpinChangedR);
-	connect(maxInputSpinBoxR, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::maxSpinChangedR);
-	connect(minInputSpinBoxG, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::minSpinChangedG);
-	connect(maxInputSpinBoxG, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::maxSpinChangedG);
-	connect(minInputSpinBoxB, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::minSpinChangedB);
-	connect(maxInputSpinBoxB, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::maxSpinChangedB);
-	connect(minInputSpinBoxA, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::minSpinChangedA);
-	connect(maxInputSpinBoxA, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::maxSpinChangedA);
+	connect(ui->buttonBox->button(QDialogButtonBox::Apply), &QPushButton::clicked, this, &ccColorFromScalarDlg::onApply);
+	connect(ui->minInputSpinBoxR, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::minSpinChangedR);
+	connect(ui->maxInputSpinBoxR, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::maxSpinChangedR);
+	connect(ui->minInputSpinBoxG, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::minSpinChangedG);
+	connect(ui->maxInputSpinBoxG, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::maxSpinChangedG);
+	connect(ui->minInputSpinBoxB, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::minSpinChangedB);
+	connect(ui->maxInputSpinBoxB, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::maxSpinChangedB);
+	connect(ui->minInputSpinBoxA, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::minSpinChangedA);
+	connect(ui->maxInputSpinBoxA, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::maxSpinChangedA);
 	
-	connect(reverseR, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleColors);
-	connect(reverseG, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleColors);
-	connect(reverseB, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleColors);
-	connect(reverseA, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleColors);
-	connect(toggleHSV, &QRadioButton::toggled, this, &ccColorFromScalarDlg::toggleColorMode);
-	connect(toggleRGB, &QRadioButton::toggled, this, &ccColorFromScalarDlg::toggleColorMode);
+	connect(ui->reverseR, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleColors);
+	connect(ui->reverseG, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleColors);
+	connect(ui->reverseB, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleColors);
+	connect(ui->reverseA, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleColors);
+	connect(ui->toggleHSV, &QRadioButton::toggled, this, &ccColorFromScalarDlg::toggleColorMode);
+	connect(ui->toggleRGB, &QRadioButton::toggled, this, &ccColorFromScalarDlg::toggleColorMode);
 
-	connect(fixR, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleFixedR);
-	connect(fixG, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleFixedG);
-	connect(fixB, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleFixedB);
-	connect(fixA, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleFixedA);
+	connect(ui->fixR, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleFixedR);
+	connect(ui->fixG, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleFixedG);
+	connect(ui->fixB, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleFixedB);
+	connect(ui->fixA, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleFixedA);
 
 	//connect histogram events
 	connect(m_histograms[0], &ccHistogramWindow::sfMinSatValChanged, this, &ccColorFromScalarDlg::minChangedR);
@@ -150,22 +147,21 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
 	updateChannel(2);
 	updateChannel(3);
 	m_cloud->getCurrentDisplayedScalarField()->setColorScale(m_colors[3]); //set grey colour ramp to start with
-
 }
 
 void ccColorFromScalarDlg::updateColormaps()
 {
 	//check for reversed
-	bool reversed[4] = { reverseR->isChecked(), reverseG->isChecked(), reverseB->isChecked(), reverseA->isChecked() };
+	bool reversed[4] = { ui->reverseR->isChecked(), ui->reverseG->isChecked(), ui->reverseB->isChecked(), ui->reverseA->isChecked() };
 
 	//create colourmaps for RGB
-	if (toggleRGB->isChecked())
+	if (ui->toggleRGB->isChecked())
 	{
 		//update labels
-		labelR->setText("Red");
-		labelG->setText("Green");
-		labelB->setText("Blue");
-		labelA->setText("Alpha");
+		ui->labelR->setText("Red");
+		ui->labelG->setText("Green");
+		ui->labelB->setText("Blue");
+		ui->labelA->setText("Alpha");
 
 		//populate colour ramps
 		Qt::GlobalColor start_colors[4] = { Qt::black , Qt::black , Qt::black , Qt::black };
@@ -190,10 +186,10 @@ void ccColorFromScalarDlg::updateColormaps()
 	else //create colourmaps for HSV
 	{
 		//update labels
-		labelR->setText("Hue");
-		labelG->setText("Sat");
-		labelB->setText("Value");
-		labelA->setText("Alpha");
+		ui->labelR->setText("Hue");
+		ui->labelG->setText("Sat");
+		ui->labelB->setText("Value");
+		ui->labelA->setText("Alpha");
 
 		//populate colour ramps
 		Qt::GlobalColor start_colors[4] = { Qt::black , Qt::gray , Qt::black , Qt::black };
@@ -221,7 +217,10 @@ void ccColorFromScalarDlg::updateColormaps()
 		m_colors[0]->clear();
 
 		ccColor::Rgb col = ccColor::Convert::hsv2rgb(360.0f, 1.0f, 1.0f);
-		m_colors[0]->insert(ccColorScaleElement(1.0, QColor(int(col.r), int(col.g), int(col.b), 255)));
+		m_colors[0]->insert(ccColorScaleElement(1.0, QColor(
+														static_cast<int>(col.r), 
+														static_cast<int>(col.g), 
+														static_cast<int>(col.b), 255)));
 		for (unsigned i = 0; i < 360; i+=2)
 		{
 			//calculate hue value
@@ -236,7 +235,10 @@ void ccColorFromScalarDlg::updateColormaps()
 			col = ccColor::Convert::hsv2rgb(hue, 1.0f, 1.0f);
 
 			//add stop
-			m_colors[0]->insert(ccColorScaleElement( double(i) / 360.0, QColor( int(col.r), int(col.g), int(col.b), 255)));
+			m_colors[0]->insert(ccColorScaleElement( static_cast<double>(i) / 360.0, QColor( 
+																	static_cast<int>(col.r), 
+																	static_cast<int>(col.g), 
+																	static_cast<int>(col.b), 255)));
 		}
 		m_colors[0]->update();
 	}
@@ -268,9 +270,8 @@ void ccColorFromScalarDlg::toggleColorMode(bool state)
 
 void ccColorFromScalarDlg::updateHistogram(int n)
 {
-
 	//first check if fixed or not and enable disable gui features based on this
-	bool fixed[4] = { fixR->isChecked(), fixG->isChecked(), fixB->isChecked(), fixA->isChecked() };
+	bool fixed[4] = { ui->fixR->isChecked(), ui->fixG->isChecked(), ui->fixB->isChecked(), ui->fixA->isChecked() };
 	m_histograms[n]->setEnabled(!fixed[n]);
 	m_combos[n]->setEnabled(!fixed[n]);
 	m_boxes_max[n]->setEnabled(!fixed[n]);
@@ -287,11 +288,10 @@ void ccColorFromScalarDlg::updateHistogram(int n)
 		m_boxes_max[n]->setValue(200.0);
 
 		//edge case for HSV values (0 - 360)
-		if (n == 0 && toggleHSV->isChecked())
+		if (n == 0 && ui->toggleHSV->isChecked())
 		{
 			m_boxes_min[n]->setMaximum(360);
 		}
-
 
 		//and make histogram grey
 		m_histograms[n]->clear();
@@ -332,7 +332,6 @@ void ccColorFromScalarDlg::updateChannel(int n)
 	m_scalars[n] = sf;
 	if (sf)
 	{
-		
 		sf->computeMinAndMax();
 		sf->setColorScale(m_colors[n]);
 
@@ -349,7 +348,6 @@ void ccColorFromScalarDlg::updateChannel(int n)
 		float range = m_maxSat[n] - m_minSat[n];
 		m_histograms[n]->setMinSatValue(m_minSat[n] + 0.1 * range);
 		m_histograms[n]->setMaxSatValue(m_maxSat[n] - 0.1 * range);
-
 	}
 }
 
@@ -377,7 +375,6 @@ void ccColorFromScalarDlg::maxChanged(int n, double val, bool slider)
 	{
 		m_scalars[n]->setColorScale(m_colors[n]);
 		m_maxSat[n] = val;
-		//m_boxes_max[n]->setValue(val-0.1);
 		if (slider) //change was made with the slider
 		{
 			m_boxes_max[n]->setValue(val);
@@ -389,18 +386,16 @@ void ccColorFromScalarDlg::maxChanged(int n, double val, bool slider)
 	}
 }
 
-
 void ccColorFromScalarDlg::onApply()
 {
-
 	//which maps to flip?
-	bool reversed[4] = { reverseR->isChecked(), reverseG->isChecked(), reverseB->isChecked() };
+	bool reversed[4] = { ui->reverseR->isChecked(), ui->reverseG->isChecked(), ui->reverseB->isChecked(), ui->reverseA->isChecked() };
 
 	//and which are fixed?
-	bool fixed[4] = { fixR->isChecked(), fixG->isChecked(), fixB->isChecked(), fixA->isChecked() };
+	bool fixed[4] = { ui->fixR->isChecked(), ui->fixG->isChecked(), ui->fixB->isChecked(), ui->fixA->isChecked() };
 
 	//map scalar values to RGB
-	if (toggleRGB->isChecked())
+	if (ui->toggleRGB->isChecked())
 	{
 		int col[4];
 		for (unsigned p = 0; p < m_cloud->size(); p++)
@@ -410,13 +405,12 @@ void ccColorFromScalarDlg::onApply()
 			{
 				if (fixed[i]) //fixed value
 				{
-					col[i] = int(m_boxes_min[i]->value());
+					col[i] = static_cast<int>(m_boxes_min[i]->value());
 				}
 				else //map from scalar
 				{
-					col[i] = int(255.0 * (m_scalars[i]->getValue(p) - m_minSat[i]) / (m_maxSat[i] - m_minSat[i]));
+					col[i] = static_cast<int>(255.0 * (m_scalars[i]->getValue(p) - m_minSat[i]) / (m_maxSat[i] - m_minSat[i]));
 				}
-
 
 				//trim to range 0 - 255
 				col[i] = std::max(col[i], 0);
@@ -448,7 +442,6 @@ void ccColorFromScalarDlg::onApply()
 					col[i] = (m_scalars[i]->getValue(p) - m_minSat[i]) / (m_maxSat[i] - m_minSat[i]);
 				}
 
-
 				//trim to range 0 - 1
 				col[i] = std::max(col[i], 0.0f);
 				col[i] = std::min(col[i], 1.0f);
@@ -459,12 +452,15 @@ void ccColorFromScalarDlg::onApply()
 					col[i] = 1.0f - col[i];
 				}
 			}
-
+				
 			//calculate and set colour
 			ccColor::Rgb rgb = ccColor::Convert::hsv2rgb(col[0] * 360.0f, col[1], col[2]);
-			m_cloud->setPointColor(p, ccColor::FromQColor(QColor(int(rgb.r), int(rgb.g), int(rgb.b), int(col[3] * 255))));
+			m_cloud->setPointColor(p, ccColor::FromQColor(QColor(
+																static_cast<int>(rgb.r), 
+																static_cast<int>(rgb.g), 
+																static_cast<int>(rgb.b), 
+																static_cast<int>(col[3] * 255))));
 		}
-
 	}
 		m_cloud->colorsHaveChanged();
 		m_cloud->showSF(false);
@@ -472,5 +468,4 @@ void ccColorFromScalarDlg::onApply()
 		m_cloud->redrawDisplay();
 		m_cloud->prepareDisplayForRefresh();
 		m_cloud->refreshDisplay();
-
 }

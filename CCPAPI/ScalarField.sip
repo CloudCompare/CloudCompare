@@ -28,12 +28,16 @@ namespace CCLib
         explicit ScalarField(const char* name = nullptr);
         
         const char* getName() const;
+    
+        void initNumpyApi();
+        %MethodCode
+        CCTRACE("initialization numpy C++ API");
+        import_array();
+        CCTRACE("initialization numpy C++ API done");
+        %End
 
         PyObject* toNpArray();
         %MethodCode
-        CCTRACE("---");
-        import_array();
-        CCTRACE("---");
         if( !sipCpp->empty() )
         {
             int type_num = NPY_FLOAT32;
@@ -44,7 +48,7 @@ namespace CCLib
             CCTRACE("data address: " << p);
             CCTRACE("p[0] : " << p[0]);
             CCTRACE("p[1] : " << p[1]);
-            PyObject* npArray = PyArray_SimpleNewFromData(1, dims, type_num, p);
+            PyObject* npArray = PyArray_SimpleNewFromData(1, dims, type_num, p ); //  /TransferThis/ memory management ownership C++
             CCTRACE("---");
             sipRes = npArray;
         }

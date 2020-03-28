@@ -27,10 +27,12 @@ n = cloud.getNumberOfScalarFields()
 print("number of saclar fields: %s"%n)
 csfname0 = cloud.getScalarFieldName(0)
 print("cloud scalar field name: %s"%csfname0)
+
 sf = cloud.getScalarField(0)
 print("scalar field: %s"%sf)    
 sfname = sf.getName()
 print("scalar field name: %s"%sfname)
+sf.initNumpyApi()
 asf = sf.toNpArray()
 
 

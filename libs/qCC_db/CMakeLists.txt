@@ -12,8 +12,9 @@ set( CMAKE_CXX_VISIBILITY_PRESET hidden )
 
 add_library( ${PROJECT_NAME} SHARED ${header_list} ${source_list} )
 
-target_link_libraries( ${PROJECT_NAME} CC_CORE_LIB )
-target_link_libraries( ${PROJECT_NAME} CC_FBO_LIB )
+target_link_libraries( ${PROJECT_NAME}
+	CC_CORE_LIB
+	CC_FBO_LIB )
 
 # Qt
 target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL)

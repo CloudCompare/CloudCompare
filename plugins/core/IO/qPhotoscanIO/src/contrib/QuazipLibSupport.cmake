@@ -42,7 +42,7 @@ target_link_libraries(${PROJECT_NAME} ${ZLIB_LIBRARIES})
 # Qt
 target_link_libraries(${PROJECT_NAME} Qt5::Core)
 
-set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS QUAZIP_STATIC )
+target_compile_definitions( ${PROJECT_NAME} PRIVATE QUAZIP_STATIC )
 
 # Link project with quazip library
 function( target_link_QUAZIP ) # 1 argument: ARGV0 = project name
@@ -51,9 +51,8 @@ function( target_link_QUAZIP ) # 1 argument: ARGV0 = project name
 
 		include_directories( ${ZLIB_INCLUDE_DIRS} )
 
-		set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS QUAZIP_STATIC )
+		target_compile_definitions( ${ARGV0} PRIVATE QUAZIP_STATIC )
 		target_link_libraries( ${ARGV0} quazip_static )
-		#target_link_libraries( ${ARGV0} Qt5::Xml )
 
 	endif()
 

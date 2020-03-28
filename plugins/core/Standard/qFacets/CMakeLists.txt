@@ -35,5 +35,5 @@ if (PLUGIN_STANDARD_QFACETS)
 	#add shapelib support
 	target_link_libraries( ${PROJECT_NAME} SHAPELIB )
 	include_directories( ${SHAPELIB_SOURCE_DIR} )
-	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_SHP_SUPPORT )
+	target_compile_definitions( ${PROJECT_NAME} PRIVATE CC_SHP_SUPPORT )
 endif()

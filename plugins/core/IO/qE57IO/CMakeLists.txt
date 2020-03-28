@@ -23,6 +23,6 @@ if ( PLUGIN_IO_QE57 )
 	target_link_libraries( ${PROJECT_NAME} E57Format ${XercesC_LIBRARIES} )
 	
 	if ( USING_STATIC_XERCES )
-		set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS XERCES_STATIC_LIBRARY )
+		target_compile_definitions( ${PROJECT_NAME} PRIVATE XERCES_STATIC_LIBRARY )
     endif()	
 endif()

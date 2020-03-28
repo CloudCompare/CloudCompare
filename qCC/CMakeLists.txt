@@ -139,17 +139,8 @@ endif()
 # Translation
 add_subdirectory( translations )
 
-# in order to ensure that everything else is installed first, put the Mac bundling in its own subdirectory
-if( APPLE )
-    set_target_properties( ${PROJECT_NAME} PROPERTIES
-        INSTALL_RPATH "@executable_path/../Frameworks"
-        MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Mac/CloudCompare.plist )
-
-    set( MACOSX_BUNDLE_ICON_FILE cc_icon.icns ) 
-    set( MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}" )
-    set( MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION}" )
-    set( MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}" )
-    
+# Put together our Application bundle on macOS
+if( APPLE )    
     add_subdirectory( Mac )
 endif()
 

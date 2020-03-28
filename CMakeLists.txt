@@ -52,16 +52,6 @@ else()
 	set( CCVIEWER_DEST_FOLDER bin )
 endif()
 
-if (APPLE)
-	set( CLOUDCOMPARE_MAC_BASE_DIR ${CMAKE_INSTALL_PREFIX}/${CLOUDCOMPARE_DEST_FOLDER}/CloudCompare.app  CACHE INTERNAL "CloudCompare bundle dir")
-	set( CLOUDCOMPARE_MAC_FRAMEWORK_DIR ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Frameworks CACHE INTERNAL "CC framework dir" )
-	set( CLOUDCOMPARE_MAC_PLUGIN_DIR ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/PlugIns/ccPlugins CACHE INTERNAL "CC plugin dir" )
-	
-	set( CCVIEWER_MAC_BASE_DIR ${CMAKE_INSTALL_PREFIX}/${CCVIEWER_DEST_FOLDER}/ccViewer.app CACHE INTERNAL "ccViewer bundle dir")
-	set( CCVIEWER_MAC_FRAMEWORK_DIR ${CCVIEWER_MAC_BASE_DIR}/Contents/Frameworks CACHE INTERNAL "CCViewer framework dir" )
-	set( CCVIEWER_MAC_PLUGIN_DIR ${CCVIEWER_MAC_BASE_DIR}/Contents/PlugIns/ccPlugins CACHE INTERNAL "CCViewer plugin dir" )
-endif()
-
 # set default install folders
 if( WIN32 )
     # (on Windows - msvc generator - the '_debug' suffix is automatically added for debug configurations)

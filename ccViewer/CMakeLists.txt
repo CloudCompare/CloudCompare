@@ -123,23 +123,12 @@ if(APPLE OR WIN32) # For Linux it's already installed in by qCC
 	endforeach()
 endif()
 
-# Put together our App bundle on Mac OS X
+# Put together our Application bundle on macOS
 if( APPLE )
-	set_target_properties( ${PROJECT_NAME} PROPERTIES
-		INSTALL_RPATH "@executable_path/../Frameworks"
-		MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Mac/ccViewer.plist )
-
-	set( MACOSX_BUNDLE_ICON_FILE cc_viewer_icon.icns )
-	set( MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}" )
-	set( MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION}" )
-	set( MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}" )
-
 	add_subdirectory( Mac )
 endif( APPLE )
 
 # Export common shader files to all install destinations
-if( APPLE )
-	install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/../qCC/shaders/ColorRamp/color_ramp.frag DESTINATION ${CCVIEWER_MAC_BASE_DIR}/Contents/Shaders/ColorRamp )
-elseif( WIN32 ) # For Linux it's already installed in by qCC
+if( WIN32 ) # For Linux it's already installed in by qCC
 	install_ext( FILES ${CMAKE_CURRENT_SOURCE_DIR}/../qCC/shaders/ColorRamp/color_ramp.frag ${CCVIEWER_DEST_FOLDER} /shaders/ColorRamp )
 endif()

@@ -12,15 +12,15 @@ print(namecloud)
 g = cloud.computeGravityCenter()
 print(g)
 print("has scalar fields: %s"%cloud.hasScalarFields() )
-cloud.scale(1.0, 1.0, 2.0, (0., 0., 0.) )
-g = cloud.computeGravityCenter()
-print(g)
-cloud.scale(1, 1, 0.5 )
-g = cloud.computeGravityCenter()
-print(g)
-cloud.translate((-845499.5, -6445500.5, -192.53309631347656))
-g = cloud.computeGravityCenter()
-print(g)
+# cloud.scale(1.0, 1.0, 2.0, (0., 0., 0.) )
+# g = cloud.computeGravityCenter()
+# print(g)
+# cloud.scale(1, 1, 0.5 )
+# g = cloud.computeGravityCenter()
+# print(g)
+# cloud.translate((-845499.5, -6445500.5, -192.53309631347656))
+# g = cloud.computeGravityCenter()
+# print(g)
 res = cloud.exportCoordToSF((False, False, True))
 print("has scalar fields: %s"%cloud.hasScalarFields() )
 n = cloud.getNumberOfScalarFields()
@@ -31,3 +31,24 @@ sf = cloud.getScalarField(0)
 print("scalar field: %s"%sf)    
 sfname = sf.getName()
 print("scalar field name: %s"%sfname)
+asf = sf.toNpArray()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

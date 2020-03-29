@@ -82,9 +82,9 @@ protected slots:
 
 protected:
 	//! Associated histogram view
-	ccHistogramWindow *m_histograms[4];  //0 - red, 1 - green, 2 - blue
-	 //scalar fields
-	ccScalarField *m_scalars[4]; //0 - red, 1 - green, 2 - blue
+	ccHistogramWindow *m_histograms[4];  //0 - red, 1 - green, 2 - blue, 3 - alpha
+	//scalar fields
+	ccScalarField *m_scalars[4]; //0 - red, 1 - green, 2 - blue, 3 - alpha
 	//gui elements
 	QComboBox* m_combos[4];
 	QDoubleSpinBox* m_boxes_min[4];
@@ -101,7 +101,7 @@ protected:
 	ccPointCloud* m_cloud;
 
 private:
-	Ui::ColorFromScalarDialog *ui;
+	Ui::ColorFromScalarDialog *m_ui;
 };
 
 #endif //CC_COLOR_LEVELS_DLG_HEADER

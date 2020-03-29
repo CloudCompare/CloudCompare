@@ -243,6 +243,7 @@ FileIOFilter::Shared FileIOFilter::GetFilter(const QString& fileFilter, bool onI
 		for (FilterContainer::const_iterator it=s_ioFilters.begin(); it!=s_ioFilters.end(); ++it)
 		{
 			QStringList otherFilters = (*it)->getFileFilters(onImport);
+			CCTRACE("otherFilters: "<< otherFilters.join("|").toStdString());
 			if (otherFilters.contains(fileFilter))
 				return *it;
 		}

@@ -333,7 +333,9 @@ bool ccMaterialSet::saveAsMTL(const QString& path, const QString& baseFilename, 
 		stream << "Ka " << Ka.r << " " << Ka.g << " " << Ka.b << endl;
 		stream << "Kd " << Kd.r << " " << Kd.g << " " << Kd.b << endl;
 		stream << "Ks " << Ks.r << " " << Ks.g << " " << Ks.b << endl;
-		stream << "Tr " << Ka.a << endl; //we take the ambient's by default
+		// we take the ambient's alpha by default
+		// openGL "a = 1.0" is for "full opacity" / MTL "Tr = 1.0" is for "full transparency" 
+		stream << "Tr " << 1.0 - Ka.a << endl; 
 		stream << "illum 1" << endl;
 		stream << "Ns " << mtl->getShininessFront()	<< endl; //we take the front's by default
 

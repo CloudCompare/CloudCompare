@@ -185,10 +185,23 @@ CC_FILE_ERROR ccPApi::SavePointCloud(ccPointCloud* cloud,
     parameters.alwaysDisplaySaveDialog = false;
     QFileInfo fi(filename);
     QString ext = fi.suffix();
-    CC_FILE_ERROR result = FileIOFilter::SaveToFile(cloud,
+    QString fileFilter = "";
+    const std::vector<FileIOFilter::Shared>& filters = FileIOFilter::GetFilters();
+    for(auto filter :filters)
+    {
+        QStringList theFilters = filter->getFileFilters(false);
+        QStringList matches = theFilters.filter(ext);
+        if (matches.size())
+        {
+            fileFilter = matches.first();
+            break;
+        }
+    }
+    CCTRACE("fileFilter: " << fileFilter.toStdString());
+    CC_FILE_ERROR result  = FileIOFilter::SaveToFile(cloud,
                                                     filename,
                                                     parameters,
-                                                    AsciiFilter::GetFileFilter());
+                                                    fileFilter); //AsciiFilter::GetFileFilter());
     return result;
 }
 

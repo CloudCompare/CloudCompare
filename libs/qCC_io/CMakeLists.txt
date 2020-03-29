@@ -22,9 +22,10 @@ set( CMAKE_CXX_VISIBILITY_PRESET hidden )
 qt5_wrap_ui( generated_ui_list ${ui_list} )
 add_library( ${PROJECT_NAME} SHARED ${header_list} ${source_list} ${generated_ui_list} )
 
-target_link_libraries( ${PROJECT_NAME} CC_CORE_LIB )
-target_link_libraries( ${PROJECT_NAME} CC_FBO_LIB )
-target_link_libraries( ${PROJECT_NAME} QCC_DB_LIB )
+target_link_libraries( ${PROJECT_NAME}
+	CC_CORE_LIB
+	CC_FBO_LIB
+	QCC_DB_LIB )
 
 # Qt
 target_link_libraries(${PROJECT_NAME} Qt5::Core)	

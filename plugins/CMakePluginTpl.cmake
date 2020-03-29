@@ -47,19 +47,20 @@ add_library( ${PROJECT_NAME} SHARED ${header_list} ${source_list} ${moc_list} ${
 
 # Add custom default preprocessor definitions
 if (OPTION_GL_QUAD_BUFFER_SUPPORT)
-	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_GL_WINDOW_USE_QWINDOW )
+	target_compile_definitions( ${PROJECT_NAME} PRIVATE CC_GL_WINDOW_USE_QWINDOW )
 endif()
 
 # Plugins need the QT_NO_DEBUG preprocessor in release!
 if( WIN32 )
-	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS $<$<CONFIG:Release>:QT_NO_DEBUG>)
+	target_compile_definitions( ${PROJECT_NAME} PRIVATE $<$<CONFIG:Release>:QT_NO_DEBUG> )
 endif()
 
-target_link_libraries( ${PROJECT_NAME} CC_FBO_LIB )
-target_link_libraries( ${PROJECT_NAME} CC_CORE_LIB )
-target_link_libraries( ${PROJECT_NAME} QCC_DB_LIB )
-target_link_libraries( ${PROJECT_NAME} QCC_IO_LIB )
-target_link_libraries( ${PROJECT_NAME} QCC_GL_LIB )
+target_link_libraries( ${PROJECT_NAME}
+	CC_FBO_LIB
+	CC_CORE_LIB
+	QCC_DB_LIB
+	QCC_IO_LIB
+	QCC_GL_LIB )
 
 # Qt
 target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL Qt5::Concurrent)

@@ -73,19 +73,19 @@ generate_export_header( ${PROJECT_NAME}
 
 if (COMPILE_CC_CORE_LIB_WITH_CGAL)
 	target_link_libraries( ${PROJECT_NAME} ${CGAL_LIBRARIES} )
-	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS USE_CGAL_LIB )
+	target_compile_definitions( ${PROJECT_NAME} PRIVATE USE_CGAL_LIB )
 endif()
 
 if (COMPILE_CC_CORE_LIB_WITH_TBB)
 	include_directories( ${TBB_INCLUDE_DIRS} )
 	target_link_libraries( ${PROJECT_NAME} ${TBB_LIBRARIES} )
-	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS USE_TBB )
+	target_compile_definitions( ${PROJECT_NAME} PRIVATE USE_TBB )
 endif()
 
 if ( COMPILE_CC_CORE_LIB_WITH_QT )
 	include_directories( ${Qt5Widgets_INCLUDE_DIRS} ${Qt5Core_INCLUDE_DIRS} )
 	target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Widgets Qt5::Concurrent)
-	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS USE_QT )
+	target_compile_definitions( ${PROJECT_NAME} PRIVATE USE_QT )
 endif()
 
 # Load advanced scripts
@@ -103,7 +103,7 @@ if ( COMPILE_CC_CORE_LIB_SHARED )
 endif()
 
 if (WIN32)
-	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS _CRT_SECURE_NO_WARNINGS )
+	target_compile_definitions( ${PROJECT_NAME} PRIVATE _CRT_SECURE_NO_WARNINGS )
 endif()
 
 set( CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DCC_DEBUG" )

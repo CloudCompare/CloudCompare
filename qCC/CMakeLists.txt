@@ -57,12 +57,13 @@ else()
 	add_executable( ${PROJECT_NAME} ${header_list} ${source_list} ${generated_ui_list} ${generated_qrc_list} ${rc_list} ${txt_list} )
 endif()
 
-target_link_libraries( ${PROJECT_NAME} CC_FBO_LIB )
-target_link_libraries( ${PROJECT_NAME} CC_CORE_LIB )
-target_link_libraries( ${PROJECT_NAME} QCC_DB_LIB )
-target_link_libraries( ${PROJECT_NAME} QCC_IO_LIB )
-target_link_libraries( ${PROJECT_NAME} QCC_GL_LIB )
-target_link_libraries( ${PROJECT_NAME} qcustomplot )
+target_link_libraries( ${PROJECT_NAME}
+	CC_FBO_LIB
+	CC_CORE_LIB
+	QCC_DB_LIB
+	QCC_IO_LIB 
+	QCC_GL_LIB
+	qcustomplot )
 
 # Qt
 target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL Qt5::PrintSupport)
@@ -90,11 +91,11 @@ endif()
 
 # Add custom preprocessor definitions
 if (OPTION_GL_QUAD_BUFFER_SUPPORT)
-	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_GL_WINDOW_USE_QWINDOW )
+	target_compile_definitions( ${PROJECT_NAME} PUBLIC CC_GL_WINDOW_USE_QWINDOW )
 endif()
 if( WIN32 )
 	if (MSVC)
-		SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES LINK_FLAGS " /MANIFEST:NO")
+		set_target_properties( ${PROJECT_NAME} PROPERTIES LINK_FLAGS " /MANIFEST:NO" )
 	endif()
 endif()
 

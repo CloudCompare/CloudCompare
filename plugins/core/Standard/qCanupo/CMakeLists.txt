@@ -20,7 +20,7 @@ if (PLUGIN_STANDARD_QCANUPO)
 	
 	option( COMPILE_QCANUPO_WITH_PRIVATE_PARTS "Check to compile qCanupo plugin with private methods (CNRS/UEB only)" OFF )
 	if ( COMPILE_QCANUPO_WITH_PRIVATE_PARTS )
-		set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS COMPILE_PRIVATE_CANUPO )
+		target_compile_definitions( ${PROJECT_NAME} PRIVATE COMPILE_PRIVATE_CANUPO )
 	endif()
 
 endif()

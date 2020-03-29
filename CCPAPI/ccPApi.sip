@@ -4,13 +4,34 @@
 #include <ccPApi.h>
 %End
 
+//! Typical I/O filter errors
+enum CC_FILE_ERROR {CC_FERR_NO_ERROR,
+                    CC_FERR_BAD_ARGUMENT,
+                    CC_FERR_UNKNOWN_FILE,
+                    CC_FERR_WRONG_FILE_TYPE,
+                    CC_FERR_WRITING,
+                    CC_FERR_READING,
+                    CC_FERR_NO_SAVE,
+                    CC_FERR_NO_LOAD,
+                    CC_FERR_BAD_ENTITY_TYPE,
+                    CC_FERR_CANCELED_BY_USER,
+                    CC_FERR_NOT_ENOUGH_MEMORY,
+                    CC_FERR_MALFORMED_FILE,
+                    CC_FERR_CONSOLE_ERROR,
+                    CC_FERR_BROKEN_DEPENDENCY_ERROR,
+                    CC_FERR_FILE_WAS_WRITTEN_BY_UNKNOWN_PLUGIN,
+                    CC_FERR_THIRD_PARTY_LIB_FAILURE,
+                    CC_FERR_THIRD_PARTY_LIB_EXCEPTION,
+                    CC_FERR_NOT_IMPLEMENTED,
+};
+
 class ccPApi {
 
-%TypeHeaderCode
-#define _CCDEBUG_
-#include <ccTrace.h>
-#include <ccPApi.h>
-%End
+    %TypeHeaderCode
+    #define _CCDEBUG_
+    #include <ccTrace.h>
+    #include <ccPApi.h>
+    %End
 
 %Docstring
 ccPApi is the actual context of the Python interface for CloudCompare:
@@ -48,7 +69,17 @@ public:
     return a ccPointCloud object.
     Usage: see ccPointCloud doc.
     %End
-    							 
+
+    CC_FILE_ERROR SavePointCloud(ccPointCloud* cloud,
+                                 const QString& filename);
+    %Docstring
+    Save a 3D cloud in a file
+    params:
+    - cloud
+    - filename
+    return 0 or I/O error.
+    %End
+
 private:
     ccPApi(const ccPApi &);
 };

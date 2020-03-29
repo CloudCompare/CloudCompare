@@ -11,6 +11,8 @@
 #include <ccHObjectCaster.h>
 //#include <ccColorScalesManager.h>
 
+#include<AsciiFilter.h>
+
 //system
 #include <unordered_set>
 
@@ -170,5 +172,23 @@ ccPointCloud* ccPApi::loadPointCloud(const char *filename, CC_SHIFT_MODE mode,
         return m_clouds.back().pc;
     else
         return nullptr;
+}
+
+CC_FILE_ERROR ccPApi::SavePointCloud(ccPointCloud* cloud,
+                                     const QString& filename)
+{
+    CCTRACE("saving cloud");
+    if (cloud == nullptr or filename.isEmpty())
+        return CC_FERR_BAD_ARGUMENT;
+    CCTRACE("cloud: " << cloud->getName().toStdString() << " file: " << filename.toStdString());
+    FileIOFilter::SaveParameters parameters;
+    parameters.alwaysDisplaySaveDialog = false;
+    QFileInfo fi(filename);
+    QString ext = fi.suffix();
+    CC_FILE_ERROR result = FileIOFilter::SaveToFile(cloud,
+                                                    filename,
+                                                    parameters,
+                                                    AsciiFilter::GetFileFilter());
+    return result;
 }
 

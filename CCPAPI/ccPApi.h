@@ -25,6 +25,9 @@ public:
             CC_SHIFT_MODE mode = AUTO, int skip = 0, double x = 0, double y = 0,
             double z = 0);
 
+    CC_FILE_ERROR SavePointCloud(ccPointCloud* cloud,
+                                 const QString& filename);
+
 protected: //file I/O
 
     //Extended file loading parameters

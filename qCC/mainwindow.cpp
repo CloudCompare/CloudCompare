@@ -83,6 +83,7 @@
 #include "ccBoundingBoxEditorDlg.h"
 #include "ccCamSensorProjectionDlg.h"
 #include "ccClippingBoxTool.h"
+#include "ccColorFromScalarDlg.h"
 #include "ccColorScaleEditorDlg.h"
 #include "ccComparisonDlg.h"
 #include "ccPrimitiveDistanceDlg.h"
@@ -506,6 +507,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionRGBToGreyScale,				&QAction::triggered, this, &MainWindow::doActionRGBToGreyScale);
 	connect(m_UI->actionInterpolateColors,			&QAction::triggered, this, &MainWindow::doActionInterpolateColors);
 	connect(m_UI->actionEnhanceRGBWithIntensities,	&QAction::triggered, this, &MainWindow::doActionEnhanceRGBWithIntensities);
+	connect(m_UI->actionColorFromScalarField,       &QAction::triggered, this, &MainWindow::doActionColorFromScalars);
 	connect(m_UI->actionClearColor, &QAction::triggered, this, [=]() {
 		clearSelectedEntitiesProperty( ccEntityAction::CLEAR_PROPERTY::COLORS );
 	});
@@ -825,6 +827,21 @@ void MainWindow::doActionEnhanceRGBWithIntensities()
 	refreshAll();
 }
 
+void MainWindow::doActionColorFromScalars()
+{
+	for (ccHObject *entity : getSelectedEntities())
+	{
+		//for "real" point clouds only
+		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
+		if (cloud)
+		{
+			//create color from scalar dialogue
+			ccColorFromScalarDlg* cfsDlg = new ccColorFromScalarDlg(this, cloud);
+			cfsDlg->setAttribute(Qt::WA_DeleteOnClose, true);
+			cfsDlg->show();
+		}
+	}
+}
 
 void MainWindow::doActionInvertNormals()
 {
@@ -10431,7 +10448,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionClearColor->setEnabled(atLeastOneColor);
 	m_UI->actionRGBToGreyScale->setEnabled(atLeastOneColor);
 	m_UI->actionEnhanceRGBWithIntensities->setEnabled(atLeastOneColor);
-
+	m_UI->actionColorFromScalarField->setEnabled(atLeastOneSF);
 	// == 1
 	bool exactlyOneEntity = (selInfo.selCount == 1);
 	bool exactlyOneGroup = (selInfo.groupCount == 1);

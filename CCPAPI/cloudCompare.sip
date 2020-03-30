@@ -8,13 +8,11 @@
 {
 %Docstring
 cloudCompare is the Python module interfacing cloudCompare library
-actual access to cloudCompare objects is done via ccPApi.
-For instance:
+Python3 access to cloudCompare objects is done like this:
 from PyQt5.QtWidgets import QApplication
 app = QApplication(sys.argv)
 import cloudCompare as cc
-capi = cc.ccPApi()
-cloud = capi.loadPointCloud("/home/paul/projets/CloudCompare/data/altiXYZ/RGEALTI_FXX_0845_6446_MNT_LAMB93_IGN69.xyz")
+cloud = cc.loadPointCloud("/home/paul/projets/CloudCompare/data/altiXYZ/RGEALTI_FXX_0845_6446_MNT_LAMB93_IGN69.xyz")
 %End
 };
 

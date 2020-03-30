@@ -10,46 +10,42 @@
 
 #include <ccCommandLineInterface.h>
 
-class ccPApi
+// --- for Python3 interface
+
+enum CC_SHIFT_MODE
 {
-public:
-   enum CC_SHIFT_MODE
+    AUTO = 0, XYZ = 1
+};
+
+ccPointCloud* loadPointCloud(const char *filename,
+        CC_SHIFT_MODE mode = AUTO, int skip = 0, double x = 0, double y = 0,
+        double z = 0);
+
+CC_FILE_ERROR SavePointCloud(ccPointCloud* cloud,
+                             const QString& filename);
+
+// --- internal
+
+//Extended file loading parameters
+struct CLLoadParameters: public FileIOFilter::LoadParameters
+{
+    CLLoadParameters() :
+            FileIOFilter::LoadParameters(), m_coordinatesShiftEnabled(
+                    false), m_coordinatesShift(0, 0, 0)
     {
-        AUTO = 0, XYZ = 1
-    };
+        shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG;
+        alwaysDisplayLoadDialog = false;
+        autoComputeNormals = false;
+        coordinatesShiftEnabled = &m_coordinatesShiftEnabled;
+        coordinatesShift = &m_coordinatesShift;
+    }
 
-    ccPApi();
-    virtual ~ccPApi();
+    bool m_coordinatesShiftEnabled;
+    CCVector3d m_coordinatesShift;
+};
 
-    ccPointCloud* loadPointCloud(const char *filename,
-            CC_SHIFT_MODE mode = AUTO, int skip = 0, double x = 0, double y = 0,
-            double z = 0);
-
-    CC_FILE_ERROR SavePointCloud(ccPointCloud* cloud,
-                                 const QString& filename);
-
-protected: //file I/O
-
-    //Extended file loading parameters
-    struct CLLoadParameters: public FileIOFilter::LoadParameters
-    {
-        CLLoadParameters() :
-                FileIOFilter::LoadParameters(), m_coordinatesShiftEnabled(
-                        false), m_coordinatesShift(0, 0, 0)
-        {
-            shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG;
-            alwaysDisplayLoadDialog = false;
-            autoComputeNormals = false;
-            coordinatesShiftEnabled = &m_coordinatesShiftEnabled;
-            coordinatesShift = &m_coordinatesShift;
-        }
-
-        bool m_coordinatesShiftEnabled;
-        CCVector3d m_coordinatesShift;
-    };
-
-protected: //members
-
+struct ccPApi
+{
     //! Currently opened point clouds and their filename
     std::vector<CLCloudDesc> m_clouds;
 
@@ -79,11 +75,8 @@ protected: //members
 
     //! Orphan entities
     ccHObject m_orphans;
-private:
-    // Prevent instances from being copied.
-    ccPApi(const ccPApi &);
-    ccPApi &operator=(const ccPApi &);
-
 };
+
+ccPApi* initCloudCompare(); // should be done once
 
 #endif /* CCPAPI_CCPAPI_H_ */

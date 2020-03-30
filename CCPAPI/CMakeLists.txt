@@ -54,7 +54,6 @@ INCLUDE_DIRECTORIES(
 )
 
 SET(_add_SOURCES
-    sipcloudCompareccPApi.cc
     sipcloudCompareccPointCloud.cc
     sipcloudCompareCCLib.cc
     sipcloudCompareCCLibScalarField.cc

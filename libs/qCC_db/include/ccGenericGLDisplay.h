@@ -35,7 +35,6 @@ struct ccGLCameraParameters
 	ccGLCameraParameters()
 		: perspective(false)
 		, fov_deg(0.0f)
-		, pixelSize(0.0f)
 	{
 	   memset(viewport, 0, 4 * sizeof(int));
 	}
@@ -60,8 +59,6 @@ struct ccGLCameraParameters
 	bool perspective;
 	//! F.O.V. (in degrees) - perspective mode only
 	float fov_deg;
-	//! Pixel size (i.e. zoom) - non perspective mode only
-	float pixelSize;
 };
 
 //! Generic interface for GL displays

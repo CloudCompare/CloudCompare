@@ -91,9 +91,10 @@ void cc2DViewportLabel::drawMeOnly(CC_DRAW_CONTEXT& context)
 	//general parameters
 	if (	params.perspectiveView != m_params.perspectiveView
 		||	params.objectCenteredView != m_params.objectCenteredView
-		||	params.pixelSize != m_params.pixelSize)
+		||	params.fov_deg != m_params.fov_deg
+		||	params.cameraAspectRatio != m_params.cameraAspectRatio)
 	{
-			return;
+		return;
 	}
 
 	//test base view matrix
@@ -104,47 +105,38 @@ void cc2DViewportLabel::drawMeOnly(CC_DRAW_CONTEXT& context)
 			return;
 		}
 	}
-	
-	if (m_params.perspectiveView)
-	{
-		if (params.fov_deg != m_params.fov_deg || params.perspectiveAspectRatio != m_params.perspectiveAspectRatio)
-			return;
 
-		if ( CCCoreLib::GreaterThanEpsilon( (params.pivotPoint - m_params.pivotPoint).norm() )
-			 || CCCoreLib::GreaterThanEpsilon( (params.cameraCenter - m_params.cameraCenter).norm() ) )
-		{
-			return;
-		}
-	}
-	else
+
+	if ( CCCoreLib::GreaterThanEpsilon( (params.getPivotPoint() - m_params.getPivotPoint()).norm() )
+		 || CCCoreLib::GreaterThanEpsilon( (params.getCameraCenter() - m_params.getCameraCenter()).norm() ) )
+		)
 	{
-		if (params.orthoAspectRatio != m_params.orthoAspectRatio)
-			return;
+		return;
 	}
 
 	glFunc->glPushAttrib(GL_LINE_BIT);
 
 	float relativeZoom = 1.0f;
-	float dx = 0;
-	float dy = 0;
-	if (!m_params.perspectiveView) //ortho mode
-	{
-		//Screen pan & pivot compensation
-		float totalZoom = m_params.zoom / m_params.pixelSize;
-		float winTotalZoom = params.zoom / params.pixelSize;
-		relativeZoom = winTotalZoom / totalZoom;
+	float dx = 0, dy = 0;
+	//TODO FIXME
+	//if (!m_params.perspectiveView) //ortho mode
+	//{
+	//	//Screen pan & pivot compensation
+	//	float totalZoom = m_params.zoom / m_params.pixelSize;
+	//	float winTotalZoom = params.zoom / params.pixelSize;
+	//	relativeZoom = winTotalZoom / totalZoom;
 
-		CCVector3d dC = m_params.cameraCenter - params.cameraCenter;
+	//	CCVector3d dC = m_params.cameraCenter - params.cameraCenter;
 
-		CCVector3d P = m_params.pivotPoint - params.pivotPoint;
-		m_params.viewMat.apply(P);
+	//	CCVector3d P = m_params.pivotPoint - params.pivotPoint;
+	//	m_params.viewMat.apply(P);
 
-		dx = static_cast<float>(dC.x + P.x);
-		dy = static_cast<float>(dC.y + P.y);
+	//	dx = static_cast<float>(dC.x + P.x);
+	//	dy = static_cast<float>(dC.y + P.y);
 
-		dx *= winTotalZoom;
-		dy *= winTotalZoom;
-	}
+	//	dx *= winTotalZoom;
+	//	dy *= winTotalZoom;
+	//}
 
 	//thick dotted line
 	glFunc->glLineWidth(2);

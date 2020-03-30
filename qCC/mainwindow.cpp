@@ -5811,11 +5811,9 @@ ccGLWindow* MainWindow::new3DView( bool allowEntitySelection )
 
 	//'echo' mode
 	connect(view3D,	&ccGLWindow::mouseWheelRotated, this, &MainWindow::echoMouseWheelRotate);
-	connect(view3D,	&ccGLWindow::cameraDisplaced, this, &MainWindow::echoCameraDisplaced);
 	connect(view3D,	&ccGLWindow::viewMatRotated, this, &MainWindow::echoBaseViewMatRotation);
 	connect(view3D,	&ccGLWindow::cameraPosChanged, this, &MainWindow::echoCameraPosChanged);
 	connect(view3D,	&ccGLWindow::pivotPointChanged, this, &MainWindow::echoPivotPointChanged);
-	connect(view3D,	&ccGLWindow::pixelSizeChanged, this, &MainWindow::echoPixelSizeChanged);
 
 	connect(view3D,	&QObject::destroyed, this, &MainWindow::prepareWindowDeletion);
 	connect(view3D,	&ccGLWindow::filesDropped, this, &MainWindow::addToDBAuto, Qt::QueuedConnection); //DGM: we don't want to block the 'dropEvent' method of ccGLWindow instances!
@@ -7061,14 +7059,14 @@ void MainWindow::doActionAdjustZoom()
 		return;
 	}
 
-	ccAdjustZoomDlg azDlg(win,this);
+	ccAdjustZoomDlg azDlg(win, this);
 
 	if (!azDlg.exec())
 		return;
 
-	//apply zoom
-	double zoom = azDlg.getZoom();
-	win->setZoom(static_cast<float>(zoom));
+	//apply new focal
+	double focalDist = azDlg.getFocalDistance();
+	win->setFocalDistance(focalDist);
 	win->redraw();
 }
 
@@ -10617,28 +10615,6 @@ void MainWindow::echoMouseWheelRotate(float wheelDelta_deg)
 	}
 }
 
-void MainWindow::echoCameraDisplaced(float ddx, float ddy)
-{
-	if (!m_UI->actionEnableCameraLink->isChecked())
-		return;
-
-	ccGLWindow* sendingWindow = dynamic_cast<ccGLWindow*>(sender());
-	if (!sendingWindow)
-		return;
-
-	for ( QMdiSubWindow *window : m_mdiArea->subWindowList() )
-	{
-		ccGLWindow *child = GLWindowFromWidget(window->widget());
-		if (child != sendingWindow)
-		{
-			child->blockSignals(true);
-			child->moveCamera(ddx, ddy, 0.0f);
-			child->blockSignals(false);
-			child->redraw();
-		}
-	}
-}
-
 void MainWindow::echoBaseViewMatRotation(const ccGLMatrixd& rotMat)
 {
 	if (!m_UI->actionEnableCameraLink->isChecked())
@@ -10706,29 +10682,7 @@ void MainWindow::echoBaseViewMatRotation(const ccGLMatrixd& rotMat)
 	 }
  }
 
- void MainWindow::echoPixelSizeChanged(float pixelSize)
- {
-	 if (!m_UI->actionEnableCameraLink->isChecked())
-		 return;
-
-	 ccGLWindow* sendingWindow = dynamic_cast<ccGLWindow*>(sender());
-	 if (!sendingWindow)
-		 return;
-
-	 for ( QMdiSubWindow *window : m_mdiArea->subWindowList() )
-	 {
-		 ccGLWindow *child = GLWindowFromWidget(window->widget());
-		 if (child != sendingWindow)
-		 {
-			 child->blockSignals(true);
-			 child->setPixelSize(pixelSize);
-			 child->blockSignals(false);
-			 child->redraw();
-		 }
-	 }
- }
-
-void MainWindow::dispToConsole(QString message, ConsoleMessageLevel level/*=STD_CONSOLE_MESSAGE*/)
+ void MainWindow::dispToConsole(QString message, ConsoleMessageLevel level/*=STD_CONSOLE_MESSAGE*/)
 {
 	switch(level)
 	{

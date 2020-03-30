@@ -80,19 +80,17 @@ bool ViewInterpolate::interpolate(ccViewportParameters& interpView, double inter
 
     interpView = m_view1;
 	{
-		interpView.pixelSize              = InterpolateNumber ( m_view1.pixelSize, m_view2.pixelSize, interpolate_fraction );
-		interpView.zoom                   = InterpolateNumber ( m_view1.zoom, m_view2.zoom, interpolate_fraction );
 		interpView.defaultPointSize       = InterpolateNumber ( m_view1.defaultPointSize, m_view2.defaultPointSize, interpolate_fraction );
 		interpView.defaultLineWidth       = InterpolateNumber ( m_view1.defaultLineWidth, m_view2.defaultLineWidth, interpolate_fraction );
 		interpView.zNearCoef              = InterpolateNumber ( m_view1.zNearCoef, m_view2.zNearCoef, interpolate_fraction );
 		interpView.zNear                  = InterpolateNumber ( m_view1.zNear, m_view2.zNear, interpolate_fraction );
 		interpView.zFar                   = InterpolateNumber ( m_view1.zFar, m_view2.zFar, interpolate_fraction );
 		interpView.fov_deg                = InterpolateNumber ( m_view1.fov_deg, m_view2.fov_deg, interpolate_fraction );
-		interpView.perspectiveAspectRatio = InterpolateNumber ( m_view1.perspectiveAspectRatio, m_view2.perspectiveAspectRatio, interpolate_fraction );
-		interpView.orthoAspectRatio       = InterpolateNumber ( m_view1.orthoAspectRatio, m_view2.orthoAspectRatio, interpolate_fraction );
-		interpView.viewMat                = ccGLMatrixd::Interpolate(interpolate_fraction, m_view1.viewMat, m_view2.viewMat);
-		interpView.pivotPoint             = m_view1.pivotPoint + (m_view2.pivotPoint - m_view1.pivotPoint) * interpolate_fraction;
-		interpView.cameraCenter           = m_view1.cameraCenter + (m_view2.cameraCenter - m_view1.cameraCenter) * interpolate_fraction;
+		interpView.cameraAspectRatio      = InterpolateNumber ( m_view1.cameraAspectRatio, m_view2.cameraAspectRatio, interpolate_fraction );
+		interpView.viewMat                = ccGLMatrixd::Interpolate(interpolate_fraction, m_view1.viewMat, m_view2.viewMat );
+		interpView.setPivotPoint          ( m_view1.getPivotPoint() + (m_view2.getPivotPoint() - m_view1.getPivotPoint()) * interpolate_fraction );
+		interpView.setCameraCenter        ( m_view1.getCameraCenter() + (m_view2.getCameraCenter() - m_view1.getCameraCenter()) * interpolate_fraction );
+		interpView.setFocalDistance       ( InterpolateNumber(m_view1.getFocalDistance(), m_view2.getFocalDistance(), interpolate_fraction) );
 	}
 
     return true;

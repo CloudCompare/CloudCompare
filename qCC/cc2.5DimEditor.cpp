@@ -185,9 +185,13 @@ void cc2Point5DimEditor::update2DDisplayZoom(ccBBox& box)
 			}
 		}
 
-		params.pixelSize = static_cast<float>(std::max(realGridWidth / screenWidth, realGridHeight / screenHeight));
-		params.zoom = 1.0f;
+		double targetWidth = realGridWidth;
+		if (realGridHeight / screenHeight > realGridWidth / screenWidth)
+		{
+			targetWidth *= realGridHeight * screenWidth / screenHeight;
+		}
 
+		m_glWindow->setCameraFocalToFitWidth(static_cast<float>(targetWidth));
 		m_glWindow->setViewportParameters(params);
 		m_glWindow->setPointSize(pointSize);
 	}

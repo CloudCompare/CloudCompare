@@ -244,11 +244,9 @@ private:
 	void addToDBAuto(const QStringList& filenames);
 
 	void echoMouseWheelRotate(float);
-	void echoCameraDisplaced(float ddx, float ddy);
 	void echoBaseViewMatRotation(const ccGLMatrixd& rotMat);
 	void echoCameraPosChanged(const CCVector3d&);
 	void echoPivotPointChanged(const CCVector3d&);
-	void echoPixelSizeChanged(float);
 
 	void doActionRenderToFile();
 

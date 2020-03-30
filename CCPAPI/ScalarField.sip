@@ -22,6 +22,8 @@ namespace CCLib
     A simple scalar field (to be associated to a point cloud)
     A monodimensional array of scalar values.
     Invalid values can be represented by NAN_VALUE.
+    Dealing with numpy (method toNpArray) requires to initialize first numpy interface:
+    cloudCompare.CCLib.ScalarField.initNumpyApi()
     %End
     
     public:
@@ -29,7 +31,7 @@ namespace CCLib
         
         const char* getName() const;
     
-        void initNumpyApi();
+        static void initNumpyApi();
         %MethodCode
         CCTRACE("initialization numpy C++ API");
         import_array();

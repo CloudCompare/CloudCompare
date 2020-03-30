@@ -5,6 +5,7 @@ sys.path.append('/home/paul/projets/CloudCompare/install/lib/cloudcompare')
 from PyQt5.QtWidgets import QApplication
 app = QApplication(sys.argv)
 import cloudCompare as cc
+cc.CCLib.ScalarField.initNumpyApi() # to do once before dealing with numpy
 cloud = cc.loadPointCloud("/home/paul/projets/CloudCompare/data/altiXYZ/RGEALTI_FXX_0845_6446_MNT_LAMB93_IGN69.xyz")
 namecloud = cloud.getName()
 print(namecloud)
@@ -31,7 +32,7 @@ sf = cloud.getScalarField(0)
 print("scalar field: %s"%sf)    
 sfname = sf.getName()
 print("scalar field name: %s"%sfname)
-sf.initNumpyApi()
+#sf.initNumpyApi()
 asf = sf.toNpArray()
 
 sf2 = cloud.getScalarField(1)

@@ -87,9 +87,9 @@ void ccEnvelopeExtractorDlg::zoomOn(const ccBBox& box)
 	if (!m_glWindow)
 		return;
 
-	float pixSize = std::max(box.getDiagVec().x / std::max(20, m_glWindow->glWidth() - 20), box.getDiagVec().y / std::max(20, m_glWindow->glHeight() - 20));
-	m_glWindow->setPixelSize(pixSize);
-	m_glWindow->setCameraPos(CCVector3d::fromArray(box.getCenter().u));
+	double pixSize = std::max(box.getDiagVec().x / std::max(20, m_glWindow->glWidth() - 20), box.getDiagVec().y / std::max(20, m_glWindow->glHeight() - 20));
+	m_glWindow->setPivotPoint(CCVector3d::fromArray(box.getCenter().u));
+	m_glWindow->setCameraFocalToFitWidth(pixSize * m_glWindow->glWidth());
 }
 
 bool ccEnvelopeExtractorDlg::isSkipped() const

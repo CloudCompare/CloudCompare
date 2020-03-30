@@ -391,7 +391,7 @@ void ccColorFromScalarDlg::onApply()
 	//map scalar values to RGB
 	if (m_ui->toggleRGB->isChecked())
 	{
-		int col[3];
+		int col[4];
 		for (unsigned p = 0; p < m_cloud->size(); p++)
 		{
 			//get col

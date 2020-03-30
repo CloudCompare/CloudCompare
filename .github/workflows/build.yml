@@ -15,7 +15,7 @@ jobs:
           - {
               name: "Windows Latest MSVC",
               os: windows-latest,
-              generator: "NMake Makefiles",
+              generator: "Visual Studio 16 2019",
               conda_library_dir: "Library",
               compile_qpcl: "ON",
               compile_qransac: "ON",
@@ -110,4 +110,4 @@ jobs:
             .
 
       - name: Build
-        run: cmake --build build
+        run: cmake --build build --parallel --config Release

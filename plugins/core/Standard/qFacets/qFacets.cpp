@@ -66,8 +66,6 @@ static double	s_stereogramAngleStep = 30.0;
 static double	s_stereogramResolution_deg = 5.0;
 static ccPointCloud* s_lastCloud = nullptr;
 
-//persistent dialog
-static StereogramDialog* s_fcDlg = nullptr;
 
 qFacets::qFacets(QObject* parent)
 	: QObject(parent)
@@ -78,16 +76,8 @@ qFacets::qFacets(QObject* parent)
 	, m_doExportFacetsInfo(nullptr)
 	, m_doClassifyFacetsByAngle(nullptr)
 	, m_doShowStereogram(nullptr)
+	, m_stereogramDialog(nullptr)
 {
-}
-
-qFacets::~qFacets()
-{
-	if (s_fcDlg)
-	{
-		s_fcDlg->close();
-		s_fcDlg = nullptr;
-	}
 }
 
 QList<QAction *> qFacets::getActions()
@@ -954,12 +944,15 @@ void qFacets::showStereogram()
 	s_stereogramAngleStep = stereogramParamsDlg.angleStepDoubleSpinBox->value();
 	s_stereogramResolution_deg = stereogramParamsDlg.resolutionDoubleSpinBox->value();
 
-	if (!s_fcDlg)
-		s_fcDlg = new StereogramDialog(m_app);
-	if (s_fcDlg->init(s_stereogramAngleStep, selectedEntities.back(), s_stereogramResolution_deg))
+	if ( m_stereogramDialog == nullptr )
 	{
-		s_fcDlg->show();
-		s_fcDlg->raise();
+		m_stereogramDialog = new StereogramDialog( m_app );
+	}
+	
+	if (m_stereogramDialog->init(s_stereogramAngleStep, selectedEntities.back(), s_stereogramResolution_deg))
+	{
+		m_stereogramDialog->show();
+		m_stereogramDialog->raise();
 	}
 }
 

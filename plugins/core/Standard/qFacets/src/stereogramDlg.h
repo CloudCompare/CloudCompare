@@ -157,7 +157,7 @@ class StereogramDialog : public QDialog, public Ui::StereogramDialog
 public:
 
 	//! Default constructor
-	StereogramDialog(ccMainAppInterface* app = nullptr);
+	StereogramDialog(ccMainAppInterface* app);
 
 	//! Inits dialog
 	/** Warning: input 'facetGroup' should not be deleted before this dialog is closed!

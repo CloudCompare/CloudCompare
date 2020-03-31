@@ -40,6 +40,8 @@ class ccPointCloud;
 class ccPolyline;
 class ccFacet;
 
+class StereogramDialog;
+
 //! Facet detection plugin (BRGM)
 /** BRGM: BUREAU DE RECHERCHES GEOLOGIQUES ET MINIERES - http://www.brgm.fr/
 **/
@@ -55,7 +57,7 @@ public:
 	qFacets(QObject* parent = nullptr);
 	
 	//! Destructor
-	virtual ~qFacets();
+	virtual ~qFacets() = default;
 
 	//inherited from ccStdPluginInterface
 	virtual void onNewSelection(const ccHObject::Container& selectedEntities) override;
@@ -117,6 +119,8 @@ protected:
 	QAction* m_doClassifyFacetsByAngle;
 	//! Associated action
 	QAction* m_doShowStereogram;
+	
+	StereogramDialog* m_stereogramDialog;
 };
 
 #endif //QFACET_PLUGIN_HEADER

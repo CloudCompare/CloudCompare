@@ -568,8 +568,8 @@ void StereogramWidget::paintEvent(QPaintEvent* event)
 	}
 }
 
-StereogramDialog::StereogramDialog(ccMainAppInterface* app/*=0*/)
-	: QDialog(app ? app->getMainWindow() : nullptr)
+StereogramDialog::StereogramDialog(ccMainAppInterface* app)
+	: QDialog( app->getMainWindow() )
 	, Ui::StereogramDialog()
 	, m_classifWidget(nullptr)
 	, m_colorScaleSelector(nullptr)

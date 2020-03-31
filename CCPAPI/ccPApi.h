@@ -8,7 +8,10 @@
 #ifndef CCPAPI_CCPAPI_H_
 #define CCPAPI_CCPAPI_H_
 
+#include <QList>
+#include <QString>
 #include <ccCommandLineInterface.h>
+#include <GeometricalAnalysisTools.h>
 
 // --- for Python3 interface
 
@@ -24,7 +27,16 @@ ccPointCloud* loadPointCloud(const char *filename,
 CC_FILE_ERROR SavePointCloud(ccPointCloud* cloud,
                              const QString& filename);
 
-// --- internal
+enum CurvatureType
+{
+    GAUSSIAN_CURV = 1,
+    MEAN_CURV,
+    NORMAL_CHANGE_RATE
+};
+
+bool computeCurvature(CurvatureType option, double radius, QList<ccPointCloud*> clouds);
+
+// --- internal ---------------------------------------------------------------
 
 //Extended file loading parameters
 struct CLLoadParameters: public FileIOFilter::LoadParameters
@@ -78,5 +90,16 @@ struct ccPApi
 };
 
 ccPApi* initCloudCompare(); // should be done once
+
+//! copied from ccLibAlgorithms::ComputeGeomCharacteristic
+bool ccPApiComputeGeomCharacteristic( CCLib::GeometricalAnalysisTools::GeomCharacteristic c,
+                                      int subOption,
+                                      PointCoordinateType radius,
+                                      ccHObject::Container& entities);
+
+//! copied from ccLibAlgorithms::GetDensitySFName
+QString ccPApiGetDensitySFName(CCLib::GeometricalAnalysisTools::Density densityType,
+                               bool approx,
+                               double densityKernelSize = 0.0);
 
 #endif /* CCPAPI_CCPAPI_H_ */

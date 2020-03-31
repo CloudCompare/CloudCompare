@@ -38,6 +38,13 @@ enum CC_FILE_ERROR
     CC_FERR_NOT_IMPLEMENTED,
 };
 
+enum CurvatureType
+{
+    GAUSSIAN_CURV = 1,
+    MEAN_CURV,
+    NORMAL_CHANGE_RATE
+};
+
 ccPointCloud* loadPointCloud(const char* filename,
                              CC_SHIFT_MODE mode=AUTO,
                              int skip=0, 
@@ -63,6 +70,15 @@ params:
 return 0 or I/O error.
 %End
 
+bool computeCurvature(CurvatureType option, double radius, QList<ccPointCloud*>);
+%Docstring
+Compute the curvature on a list of point clouds (create a scalarField)
+params:
+- CurvatureType from cloudCompare.GAUSSIAN_CURV, cloudCompare.MEAN_CURV, cloudCompare.NORMAL_CHANGE_RATE
+- radius try 1.9
+- list of clouds
+%End
+
 %Exception std::exception(SIP_Exception) /PyName=StdException, default/
 {
 %TypeHeaderCode
@@ -76,3 +92,4 @@ return 0 or I/O error.
     SIP_UNBLOCK_THREADS
 %End
 };
+

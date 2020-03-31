@@ -18,9 +18,13 @@ print(g)
 cloud.scale(1, 1, 0.5 )
 g = cloud.computeGravityCenter()
 print(g)
-cloud.translate((-845499.5, -6445500.5, -192.53309631347656))
+cloud.translate((-850000, -6500000, -200))
 g = cloud.computeGravityCenter()
 print(g)
+cloud.translate((850000, 6500000, 200))
+g = cloud.computeGravityCenter()
+print(g)
+
 res = cloud.exportCoordToSF((False, True, True))
 print("has scalar fields: %s"%cloud.hasScalarFields() )
 n = cloud.getNumberOfScalarFields()
@@ -40,6 +44,8 @@ print("scalar field: %s"%sf2)
 sf2name = sf2.getName()
 print("scalar field name: %s"%sf2name)
 asf2 = sf2.toNpArray()
+
+cc.computeCurvature(cc.GAUSSIAN_CURV, 1.88, [cloud])
 
 res=cc.SavePointCloud(cloud, "/home/paul/projets/CloudCompare/data/res.xyz")
 

@@ -26,6 +26,7 @@ endif()
 include_directories( ${QCC_IO_LIB_SOURCE_DIR} )
 include_directories( ${QCC_GL_LIB_SOURCE_DIR} )
 include_directories( ${CloudComparePlugins_SOURCE_DIR} )
+include_directories( ${CloudCompare_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../common )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/db_tree )
@@ -55,6 +56,7 @@ INCLUDE_DIRECTORIES(
 
 SET(_add_SOURCES
     sipcloudCompareccPointCloud.cc
+    sipcloudCompareQList0101ccPointCloud.cc
     sipcloudCompareCCLib.cc
     sipcloudCompareCCLibScalarField.cc
 )

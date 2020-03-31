@@ -170,7 +170,6 @@ bool CSF::do_filtering(	std::vector<int>& groundIndexes,
 		cloth.addForce(Vec3(0, -gravity, 0) * time_step2);
 		for (int i = 0; i < params.iterations; i++)
 		{
-			//ÂË²¨Ö÷¹ý³Ì
 			//cloth.addForce(Vec3(0, -gravity, 0) * time_step2); //move this outside the main loop
 			double maxDiff = cloth.timeStep();
 			cloth.terrainCollision();
@@ -180,7 +179,7 @@ bool CSF::do_filtering(	std::vector<int>& groundIndexes,
 			//	app->dispToConsole(QString("[CSF] Iteration %1: max delta = %2").arg(i+1).arg(maxDiff));
 			//}
 
-			if (maxDiff != 0 && maxDiff < params.class_threshold / 100)
+			if (maxDiff != 0 && maxDiff < 0.005)
 			{
 				//early stop
 				break;

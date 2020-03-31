@@ -198,6 +198,7 @@ v2.11 (Anoia) - (in development)
 	- Data could be lost when merging two clouds with FWF data
 	- When VBOs were activated with an ATI card, CloudCompare could crash (because ATI only supports 32bit aligned VBOs :p)
 	- the LAS 1.3/1.4 filter was not compressing files with a minor case 'laz' extension :(
+	- Small glitch fix in the CSF plugin (the iteration stop criteria has been changed)
 
 v2.10.3 (Zephyrus) - 13/06/2019
 ----------------------

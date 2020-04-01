@@ -1,6 +1,8 @@
 name: Build
 
-on: push
+on: 
+  push:
+  pull_request:
 
 jobs:
   build:

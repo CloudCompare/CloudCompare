@@ -1,3 +1,43 @@
+2019-02-28  Even Rouault  <even.rouault at spatialys.com>
+	* Fix 'make distcheck' broken by nth-2 commit
+	* Shapelib 1.5.0 released
+
+2019-02-28  Even Rouault  <even.rouault at spatialys.com>
+
+	* shpopen.c: resync with GDAL internal shapelib to avoid being dependent
+	on correctness of file size field in .shp. Fixes
+	https://lists.osgeo.org/pipermail/gdal-dev/2018-October/049218.html
+
+2019-02-28  Even Rouault  <even.rouault at spatialys.com>
+
+	* contrib/shpgeo.h/.c: Remove PROJ.4 dependency and functionality,
+	 causing removal of SHPProject(), SHPSetProjection() and SHPFreeProjection()
+	* contrib/shpproj.c: removed
+
+2018-08-16  Even Rouault  <even.rouault at spatialys.com>
+
+	* shpopen.c, dbfopen.c, shptree.c, sbnsearch.c: resyc with GDAL
+	internal shapelib. Mostly to allow building those files as C++
+	without warning. Also add FTDate entry in DBFFieldType
+	(see https://github.com/OSGeo/gdal/pull/308). And some other
+	code cleanups
+
+2018-08-16  Even Rouault  <even.rouault at spatialys.com>
+
+	* dbfopen.c: fix a bug where the end of file character was
+	written on top of the first character of the first field name
+	when deleting a field on a .dbf without records.
+	Fixes https://github.com/OSGeo/gdal/issues/863
+
+2018-06-15  Even Rouault  <even.rouault at spatialys.com>
+
+	* safileio.c: remove duplicate test. Patch by Jaroslav Fojtik.
+	Fixes http://bugzilla.maptools.org/show_bug.cgi?id=2744
+
+2017-09-14  Even Rouault  <even.rouault at spatialys.com>
+
+	* Shapelib 1.4.1 released
+
 2017-09-10  Even Rouault  <even.rouault at spatialys.com>
 
 	* shpopen.c: resync with GDAL copy. Make sure to zero terminate all

@@ -2,7 +2,7 @@
 #define SHAPEFILE_H_INCLUDED
 
 /******************************************************************************
- * $Id: shapefil.h,v 1.55 2016-12-05 18:44:08 erouault Exp $
+ * $Id$
  *
  * Project:  Shapelib
  * Purpose:  Primary include file for Shapelib.
@@ -37,7 +37,14 @@
  * DEALINGS IN THE SOFTWARE.
  ******************************************************************************
  *
- * $Log: shapefil.h,v $
+ * $Log$
+ * Revision 1.56  2018-08-16 15:39:07  erouault
+ * * shpopen.c, dbfopen.c, shptree.c, sbnsearch.c: resyc with GDAL
+ * internal shapelib. Mostly to allow building those files as C++
+ * without warning. Also add FTDate entry in DBFFieldType
+ * (see https://github.com/OSGeo/gdal/pull/308). And some other
+ * code cleanups
+ *
  * Revision 1.55  2016-12-05 18:44:08  erouault
  * * dbfopen.c, shapefil.h: write DBF end-of-file character 0x1A by default.
  * This behaviour can be controlled with the DBFSetWriteEndOfFileChar()
@@ -631,6 +638,7 @@ typedef enum {
   FTInteger,
   FTDouble,
   FTLogical,
+  FTDate,
   FTInvalid
 } DBFFieldType;
 

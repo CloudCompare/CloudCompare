@@ -6,6 +6,7 @@ jobs:
   build:
     name: ${{ matrix.config.name }} SCALAR_DOUBLE=${{ matrix.scalar_double }}
     runs-on: ${{ matrix.config.os }}
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
 
     strategy:
       fail-fast: false

@@ -112,7 +112,7 @@ unsigned ccAlignDlg::getMaxNumberOfCandidates()
 
 CCLib::ReferenceCloud *ccAlignDlg::getSampledModel()
 {
-	CCLib::ReferenceCloud* sampledCloud = 0;
+	CCLib::ReferenceCloud* sampledCloud = nullptr;
 
 	switch (getSamplingMethod())
 	{
@@ -150,7 +150,7 @@ CCLib::ReferenceCloud *ccAlignDlg::getSampledModel()
 			if (!sampledCloud->addPointIndex(0, modelObject->size()))
 			{
 				delete sampledCloud;
-				sampledCloud = 0;
+				sampledCloud = nullptr;
 				ccLog::Error("[ccAlignDlg::getSampledModel] Not enough memory!");
 			}
 		}
@@ -162,7 +162,7 @@ CCLib::ReferenceCloud *ccAlignDlg::getSampledModel()
 
 CCLib::ReferenceCloud *ccAlignDlg::getSampledData()
 {
-	CCLib::ReferenceCloud* sampledCloud = 0;
+	CCLib::ReferenceCloud* sampledCloud = nullptr;
 
 	switch (getSamplingMethod())
 	{
@@ -197,7 +197,7 @@ CCLib::ReferenceCloud *ccAlignDlg::getSampledData()
 			if (!sampledCloud->addPointIndex(0,dataObject->size()))
 			{
 				delete sampledCloud;
-				sampledCloud = 0;
+				sampledCloud = nullptr;
 				ccLog::Error("[ccAlignDlg::getSampledData] Not enough memory!");
 			}
 		}
@@ -403,7 +403,8 @@ void ccAlignDlg::changeSamplingMethod(int index)
 			{
 				modelSamplingRate->setDecimals(4);
 				int oldSliderPos = modelSample->sliderPosition();
-				CCVector3 bbMin, bbMax;
+				CCVector3 bbMin;
+				CCVector3 bbMax;
 				modelObject->getBoundingBox(bbMin, bbMax);
 				double dist = (bbMin-bbMax).norm();
 				modelSamplingRate->setMaximum(dist);
@@ -415,7 +416,8 @@ void ccAlignDlg::changeSamplingMethod(int index)
 			{
 				dataSamplingRate->setDecimals(4);
 				int oldSliderPos = dataSample->sliderPosition();
-				CCVector3 bbMin, bbMax;
+				CCVector3 bbMin;
+				CCVector3 bbMax;
 				dataObject->getBoundingBox(bbMin, bbMax);
 				double dist = (bbMin-bbMax).norm();
 				dataSamplingRate->setMaximum(dist);

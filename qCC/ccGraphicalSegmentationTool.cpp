@@ -20,6 +20,7 @@
 //Local
 #include "mainwindow.h"
 #include "ccItemSelectionDlg.h"
+#include "ccReservedIDs.h"
 
 //CCLib
 #include <ManualSegmentationTools.h>
@@ -50,8 +51,8 @@ ccGraphicalSegmentationTool::ccGraphicalSegmentationTool(QWidget* parent)
 	, Ui::GraphicalSegmentationDlg()
 	, m_somethingHasChanged(false)
 	, m_state(0)
-	, m_segmentationPoly(0)
-	, m_polyVertices(0)
+	, m_segmentationPoly(nullptr)
+	, m_polyVertices(nullptr)
 	, m_rectangularSelection(false)
 	, m_deleteHiddenParts(false)
 {
@@ -96,8 +97,8 @@ ccGraphicalSegmentationTool::ccGraphicalSegmentationTool(QWidget* parent)
 	importExportMenu->addAction(actionExportSegmentationPolyline);
 	loadSaveToolButton->setMenu(importExportMenu);
 
-	m_polyVertices = new ccPointCloud("vertices");
-	m_segmentationPoly = new ccPolyline(m_polyVertices);
+	m_polyVertices = new ccPointCloud("vertices", static_cast<unsigned>(ReservedIDs::INTERACTIVE_SEGMENTATION_TOOL_POLYLINE_VERTICES));
+	m_segmentationPoly = new ccPolyline(m_polyVertices, static_cast<unsigned>(ReservedIDs::INTERACTIVE_SEGMENTATION_TOOL_POLYLINE));
 	m_segmentationPoly->setForeground(true);
 	m_segmentationPoly->setColor(ccColor::green);
 	m_segmentationPoly->showColors(true);
@@ -122,11 +123,11 @@ ccGraphicalSegmentationTool::~ccGraphicalSegmentationTool()
 {
 	if (m_segmentationPoly)
 		delete m_segmentationPoly;
-	m_segmentationPoly = 0;
+	m_segmentationPoly = nullptr;
 
 	if (m_polyVertices)
 		delete m_polyVertices;
-	m_polyVertices = 0;
+	m_polyVertices = nullptr;
 }
 
 void ccGraphicalSegmentationTool::onShortcutTriggered(int key)
@@ -184,7 +185,7 @@ bool ccGraphicalSegmentationTool::linkWith(ccGLWindow* win)
 		oldWin->disconnect(this);
 		if (m_segmentationPoly)
 		{
-			m_segmentationPoly->setDisplay(0);
+			m_segmentationPoly->setDisplay(nullptr);
 		}
 	}
 	

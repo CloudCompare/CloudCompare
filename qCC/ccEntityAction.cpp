@@ -98,7 +98,7 @@ namespace ccEntityAction
 	// Colours
 	bool setColor(ccHObject::Container selectedEntities, bool colorize, QWidget *parent)
 	{
-		QColor colour = QColorDialog::getColor(Qt::white, parent);
+		QColor colour = QColorDialog::getColor(Qt::white, parent, QString(), QColorDialog::ShowAlphaChannel);
 		
 		if (!colour.isValid())
 			return false;
@@ -139,11 +139,12 @@ namespace ccEntityAction
 				{
 					cloud->colorize(static_cast<float>(colour.redF()),
 									static_cast<float>(colour.greenF()),
-									static_cast<float>(colour.blueF()) );
+									static_cast<float>(colour.blueF()),
+									static_cast<float>(colour.alphaF()));
 				}
 				else
 				{
-					cloud->setRGBColor(	ccColor::FromQColor(colour) );
+					cloud->setColor(ccColor::FromQColora(colour));
 				}
 				cloud->showColors(true);
 				cloud->showSF(false); //just in case
@@ -240,7 +241,8 @@ namespace ccEntityAction
 		else if (ramp == ccColorGradientDlg::TwoColors)
 		{
 			colorScale = ccColorScale::Create("Temp scale");
-			QColor first,second;
+			QColor first;
+			QColor second;
 			dlg.getColors(first,second);
 			colorScale->insert(ccColorScaleElement(0.0, first), false);
 			colorScale->insert(ccColorScaleElement(1.0, second), true);
@@ -536,9 +538,6 @@ namespace ccEntityAction
 						continue;
 					}
 					
-					//ColorCompType C[3]={MAX_COLOR_COMP,MAX_COLOR_COMP,MAX_COLOR_COMP};
-					//mesh->getColorFromMaterial(triIndex,*P,C,withRGB);
-					//cloud->addRGBColor(C);
 					if (mesh->convertMaterialsToVertexColors())
 					{
 						mesh->showColors(true);
@@ -562,7 +561,8 @@ namespace ccEntityAction
 		QString defaultSFName("Intensity");
 
 		bool useCustomIntensityRange = false;
-		static double s_minI = 0.0, s_maxI = 1.0;
+		static double s_minI = 0.0;
+		static double s_maxI = 1.0;
 		if (QMessageBox::question(parent, "Intensity range", "Do you want to define the theoretical intensity range (yes)\nor use the actual one (no)?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
 		{
 			ccAskTwoDoubleValuesDlg atdvDlg("Min", "Max", -1000000.0, 1000000.0, s_minI, s_maxI, 3, "Theroetical intensity", parent);
@@ -908,7 +908,7 @@ namespace ccEntityAction
 				//if there is no displayed SF --> nothing to do!
 				if (pc->getCurrentDisplayedScalarField())
 				{
-					if (pc->setRGBColorWithCurrentScalarField(mixWithExistingColors))
+					if (pc->convertCurrentScalarFieldToColors(mixWithExistingColors))
 					{
 						ent->showColors(true);
 						ent->showSF(false); //just in case
@@ -939,7 +939,7 @@ namespace ccEntityAction
 			return false;
 		Q_ASSERT(s_randomColorsNumber > 1);
 		
-		ColorsTableType* randomColors = new ColorsTableType;
+		RGBAColorsTableType* randomColors = new RGBAColorsTableType;
 		if (!randomColors->reserveSafe(static_cast<unsigned>(s_randomColorsNumber)))
 		{
 			ccConsole::Error("Not enough memory!");
@@ -949,7 +949,7 @@ namespace ccEntityAction
 		//generate random colors
 		for (int i = 0; i < s_randomColorsNumber; ++i)
 		{
-			ccColor::Rgb col = ccColor::Generator::Random();
+			ccColor::Rgba col(ccColor::Generator::Random(), ccColor::MAX);
 			randomColors->addElement(col);
 		}
 		
@@ -1315,15 +1315,17 @@ namespace ccEntityAction
 		const bool exportR = dialog.getRStatus();
 		const bool exportG = dialog.getGStatus();
 		const bool exportB = dialog.getBStatus();
-		const bool exportC = dialog.getCompositeStatus();
+		const bool exportAlpha = dialog.getAlphaStatus();
+		const bool exportComposite = dialog.getCompositeStatus();
 		
 		for (const auto cloud : clouds)
 		{
-			std::vector<ccScalarField*> fields(4);
+			std::vector<ccScalarField*> fields(5, nullptr);
 			fields[0] = (exportR ? new ccScalarField(qPrintable(GetFirstAvailableSFName(cloud,"R"))) : nullptr);
 			fields[1] = (exportG ? new ccScalarField(qPrintable(GetFirstAvailableSFName(cloud,"G"))) : nullptr);
 			fields[2] = (exportB ? new ccScalarField(qPrintable(GetFirstAvailableSFName(cloud,"B"))) : nullptr);
-			fields[3] = (exportC ? new ccScalarField(qPrintable(GetFirstAvailableSFName(cloud,"Composite"))) : nullptr);
+			fields[3] = (exportAlpha ? new ccScalarField(qPrintable(GetFirstAvailableSFName(cloud, "Alpha"))) : nullptr);
+			fields[4] = (exportComposite ? new ccScalarField(qPrintable(GetFirstAvailableSFName(cloud,"Composite"))) : nullptr);
 			
 			//try to instantiate memory for each field
 			unsigned count = cloud->size();
@@ -1340,16 +1342,18 @@ namespace ccEntityAction
 			//export points
 			for (unsigned j = 0; j < cloud->size(); ++j)
 			{
-				const ccColor::Rgb& rgb = cloud->getPointColor(j);
+				const ccColor::Rgba& col = cloud->getPointColor(j);
 				
 				if (fields[0])
-					fields[0]->addElement(rgb.r);
+					fields[0]->addElement(col.r);
 				if (fields[1])
-					fields[1]->addElement(rgb.g);
+					fields[1]->addElement(col.g);
 				if (fields[2])
-					fields[2]->addElement(rgb.b);
+					fields[2]->addElement(col.b);
 				if (fields[3])
-					fields[3]->addElement(static_cast<ScalarType>(rgb.r + rgb.g + rgb.b) / 3);
+					fields[3]->addElement(col.a);
+				if (fields[4])
+					fields[4]->addElement(static_cast<ScalarType>(col.r + col.g + col.b) / 3);
 			}
 			
 			QString fieldsStr;
@@ -2475,7 +2479,8 @@ namespace ccEntityAction
 					case 1: //WEIBULL
 					{
 						CCLib::WeibullDistribution* weibull = static_cast<CCLib::WeibullDistribution*>(distrib);
-						ScalarType a, b;
+						ScalarType a;
+						ScalarType b;
 						weibull->getParameters(a, b);
 						description = QString("a = %1 / b = %2 / shift = %3").arg(a, 0, 'f', precision).arg(b, 0, 'f', precision).arg(weibull->getValueShift(), 0, 'f', precision);
 						ccLog::Print(QString("[Distribution fitting] Additional Weibull distrib. parameters: mode = %1 / skewness = %2").arg(weibull->computeMode()).arg(weibull->computeSkewness()));

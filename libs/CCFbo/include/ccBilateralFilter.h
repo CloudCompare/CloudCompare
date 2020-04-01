@@ -53,7 +53,7 @@ public:
 	**/
 	ccBilateralFilter();
 	//! Destructor
-	virtual ~ccBilateralFilter();
+	virtual ~ccBilateralFilter() = default;
 
 	//! Resets the filter
 	void reset();

@@ -36,8 +36,8 @@
 #include <QFileInfo>
 
 //LASLib
-#include <lasreader.hpp>
-#include <laswriter.hpp>
+#include <lasreader_las.hpp>
+#include <laswriter_las.hpp>
 #include <laspoint.hpp>
 
 //Qt gui
@@ -157,19 +157,6 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 
 	try
 	{
-		LASwriteOpener laswriteopener;
-		laswriteopener.set_file_name(qPrintable(filename));
-		assert(laswriteopener.active());
-
-		if (QFileInfo(filename).suffix().endsWith('Z'))
-		{
-			laswriteopener.set_format(LAS_TOOLS_FORMAT_LAZ);
-		}
-		else
-		{
-			laswriteopener.set_format(LAS_TOOLS_FORMAT_LAS);
-		}
-
 		bool hasFWF = cloud->hasFWF();
 		bool hasColors = cloud->hasColors();
 		bool hasIntensity = (cloud->getScalarFieldIndexByName(LAS_FIELD_NAMES[LAS_INTENSITY]) >= 0);
@@ -446,17 +433,12 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 		}
 
 		// open laswriter
-		LASwriter* laswriter = laswriteopener.open(&lasheader);
-		if (laswriter == 0)
+		LASwriterLAS  laswriter;
+		bool useLAZ = QFileInfo(filename).suffix().toUpper().endsWith('Z');
+		if (!laswriter.open(qUtf8Printable(filename), &lasheader, useLAZ ? LASZIP_COMPRESSOR_LAYERED_CHUNKED : LASZIP_COMPRESSOR_NONE))
 		{
 			return CC_FERR_WRITING;
 		}
-		
-		//LASwaveform13writer* fwfWriter = 0;
-		//if (hasFWF)
-		//{
-		//	fwfWriter = laswriteopener.open_waveform13(&lasheader);
-		//}
 		
 		//progress dialog
 		QScopedPointer<ccProgressDialog> progressDialog(0);
@@ -635,21 +617,13 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 			}
 
 			//write the point
-			laswriter->write_point(&laspoint);
+			laswriter.write_point(&laspoint);
 
 			//add it to the inventory
-			laswriter->update_inventory(&laspoint);
+			laswriter.update_inventory(&laspoint);
 		}
 
-		//if (fwfWriter)
-		//{
-		//	delete fwfWriter;
-		//	fwfWriter = 0;
-		//}
-
-		laswriter->close();
-		delete laswriter;
-		laswriter = 0;
+		laswriter.close();
 
 		//if (lasheader.vlr_wave_packet_descr)
 		//{
@@ -726,18 +700,14 @@ CC_FILE_ERROR LASFWFFilter::loadFile(const QString& filename, ccHObject& contain
 
 	try
 	{
-		LASreadOpener lasreadopener;
-		lasreadopener.set_file_name(qPrintable(filename), TRUE);
-		assert(lasreadopener.active());
-
-		LASreader* lasreader = lasreadopener.open();
-		if (lasreader == 0)
+		LASreaderLAS lasreader;
+		if (!lasreader.open(qUtf8Printable(filename)))
 		{
 			ccLog::Warning("LASLib", "Failed to open 'lasreader'");
 			return CC_FERR_THIRD_PARTY_LIB_FAILURE;
 		}
 
-		unsigned pointCount = static_cast<unsigned>(lasreader->npoints);
+		unsigned pointCount = static_cast<unsigned>(lasreader.npoints);
 		ccLog::Print(QString("[LASLib] " + QObject::tr("Reading %1 points").arg(pointCount)));
 
 		//progress dialog
@@ -762,8 +732,7 @@ CC_FILE_ERROR LASFWFFilter::loadFile(const QString& filename, ccHObject& contain
 		if (!cloud->reserve(pointCount))
 		{
 			//not enough memory
-			lasreader->close();
-			delete lasreader;
+			lasreader.close();
 			delete cloud;
 			return CC_FERR_NOT_ENOUGH_MEMORY;
 		}
@@ -794,19 +763,16 @@ CC_FILE_ERROR LASFWFFilter::loadFile(const QString& filename, ccHObject& contain
 		}
 
 		//now for the extra values
-		for (I32 i = 0; i < lasreader->header.number_attributes; ++i)
+		for (I32 i = 0; i < lasreader.header.number_attributes; ++i)
 		{
-			const LASattribute& attribute = lasreader->header.attributes[i];
+			const LASattribute& attribute = lasreader.header.attributes[i];
 			ExtraLasField* field = new ExtraLasField(attribute.name);
-			field->startIndex = i; // lasreader->header.attribute_starts[i];
+			field->startIndex = i; // lasreader.header.attribute_starts[i];
 			field->isShifted = (attribute.data_type == 10);
 			fieldsToLoad.push_back(LasField::Shared(field));
 		}
 
-		bool hasFWF = (lasreader->header.vlr_wave_packet_descr != 0);
-		//QFile fwfFile;
-		//bool hasFWFFile = false;
-		LASwaveform13reader* fwfReader = 0;
+		bool hasFWF = (lasreader.header.vlr_wave_packet_descr != 0);
 		for (int fakeIteration = 0; hasFWF && fakeIteration < 1; ++fakeIteration)
 		{
 			try
@@ -820,21 +786,13 @@ CC_FILE_ERROR LASFWFFilter::loadFile(const QString& filename, ccHObject& contain
 				break;
 			}
 
-			fwfReader = lasreadopener.open_waveform13(&(lasreader->header));
-			if (!fwfReader)
-			{
-				ccLog::Warning(QString("Failed to open/read the associated waveform data packets"));
-				hasFWF = false;
-				break;
-			}
-
 			//determine the total size of the FWF data
 			QFile fwfDataSource;
 			uint64_t fwfDataCount = 0;
-			if (lasreader->header.start_of_waveform_data_packet_record != 0)
+			if (lasreader.header.start_of_waveform_data_packet_record != 0)
 			{
 				//the FWF data is internal
-				assert(lasreader->header.global_encoding & 2);
+				assert(lasreader.header.global_encoding & 2);
 				//open the same file
 				fwfDataSource.setFileName(filename);
 				if (!fwfDataSource.open(QFile::ReadOnly))
@@ -844,7 +802,7 @@ CC_FILE_ERROR LASFWFFilter::loadFile(const QString& filename, ccHObject& contain
 					break;
 				}
 				//seek for the waveform EVLR
-				if (!fwfDataSource.seek(lasreader->header.start_of_waveform_data_packet_record))
+				if (!fwfDataSource.seek(lasreader.header.start_of_waveform_data_packet_record))
 				{
 					ccLog::Warning(QString("Failed to find the associated waveform data packets header"));
 					hasFWF = false;
@@ -931,8 +889,8 @@ CC_FILE_ERROR LASFWFFilter::loadFile(const QString& filename, ccHObject& contain
 			}
 		}
 
-		CCVector3d lasScale = CCVector3d(lasreader->header.x_scale_factor, lasreader->header.y_scale_factor, lasreader->header.z_scale_factor);
-		CCVector3d lasShift = -CCVector3d(lasreader->header.x_offset, lasreader->header.y_offset, lasreader->header.z_offset);
+		CCVector3d lasScale = CCVector3d(lasreader.header.x_scale_factor, lasreader.header.y_scale_factor, lasreader.header.z_scale_factor);
+		CCVector3d lasShift = -CCVector3d(lasreader.header.x_offset, lasreader.header.y_offset, lasreader.header.z_offset);
 
 		cloud->setMetaData(LAS_SCALE_X_META_DATA, QVariant(lasScale.x));
 		cloud->setMetaData(LAS_SCALE_Y_META_DATA, QVariant(lasScale.y));
@@ -941,9 +899,9 @@ CC_FILE_ERROR LASFWFFilter::loadFile(const QString& filename, ccHObject& contain
 		ccPointCloud::FWFDescriptorSet& descriptors = cloud->fwfDescriptors();
 
 		//read the points
-		for (size_t pointIndex = 0; lasreader->read_point(); ++pointIndex)
+		for (size_t pointIndex = 0; lasreader.read_point(); ++pointIndex)
 		{
-			const LASpoint& point = lasreader->point;
+			const LASpoint& point = lasreader.point;
 
 			CCVector3d P(	point.quantizer->get_x(point.X),
 							point.quantizer->get_y(point.Y),
@@ -952,12 +910,12 @@ CC_FILE_ERROR LASFWFFilter::loadFile(const QString& filename, ccHObject& contain
 			//Waveform
 			if (hasFWF && point.have_wavepacket)
 			{
-				if (fwfReader->read_waveform(&point))
+				//if (fwfReader->read_waveform(&point))
 				{
 					U8 packetIndex = point.wavepacket.getIndex();
 					if (!descriptors.contains(packetIndex))
 					{
-						LASvlr_wave_packet_descr* descriptor = lasreader->header.vlr_wave_packet_descr[packetIndex];
+						LASvlr_wave_packet_descr* descriptor = lasreader.header.vlr_wave_packet_descr[packetIndex];
 						WaveformDescriptor wfd;
 						if (descriptor)
 						{
@@ -978,8 +936,8 @@ CC_FILE_ERROR LASFWFFilter::loadFile(const QString& filename, ccHObject& contain
 					ccWaveform& w = cloud->waveforms()[pointIndex];
 					w.setDescriptorID(packetIndex);
 					w.setDataDescription(point.wavepacket.getOffset() - fwfDataOffset, point.wavepacket.getSize());
-					w.setBeamDir(CCVector3f::fromArray(fwfReader->XYZt));
-					w.setEchoTime_ps(fwfReader->location);
+					w.setBeamDir(CCVector3f(point.wavepacket.getXt(), point.wavepacket.getYt(), point.wavepacket.getZt()));
+					w.setEchoTime_ps(point.wavepacket.getLocation());
 					w.setReturnIndex(point.return_number);
 				}
 			}
@@ -1034,7 +992,7 @@ CC_FILE_ERROR LASFWFFilter::loadFile(const QString& filename, ccHObject& contain
 							for (unsigned i = 0; i < cloud->size(); ++i)
 							{
 								//set all previous colors!
-								cloud->addRGBColor(ccColor::black);
+								cloud->addColor(ccColor::black);
 							}
 						}
 					}
@@ -1064,7 +1022,7 @@ CC_FILE_ERROR LASFWFFilter::loadFile(const QString& filename, ccHObject& contain
 										static_cast<unsigned char>((point.rgb[1] >> colorBitDec) & 255),
 										static_cast<unsigned char>((point.rgb[2] >> colorBitDec) & 255));
 
-					cloud->addRGBColor(color);
+					cloud->addColor(color);
 				}
 			}
 
@@ -1179,15 +1137,13 @@ CC_FILE_ERROR LASFWFFilter::loadFile(const QString& filename, ccHObject& contain
 			}
 		}
 
-		if (fwfReader)
-		{
-			delete fwfReader;
-			fwfReader = 0;
-		}
+		//if (fwfReader)
+		//{
+		//	delete fwfReader;
+		//	fwfReader = 0;
+		//}
 
-		lasreader->close();
-		delete lasreader;
-		lasreader = 0;
+		lasreader.close();
 
 		if (cloud->size() == 0)
 		{

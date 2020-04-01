@@ -53,7 +53,7 @@ public:
 	}
 
 	//inherited from ccHObject/ccArray
-	QCC_DB_LIB_API bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	QCC_DB_LIB_API bool fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
 };
 
 //! Array of (uncompressed) 3D normals (Nx,Ny,Nz)
@@ -100,6 +100,32 @@ public:
 		if (!copy(*cloneArray))
 		{
 			ccLog::Warning("[ColorsTableType::clone] Failed to clone array (not enough memory)");
+			cloneArray->release();
+			return nullptr;
+		}
+		cloneArray->setName(getName());
+		return cloneArray;
+	}
+};
+
+//! Array of RGBA colors for each point
+class RGBAColorsTableType : public ccArray<ccColor::Rgba, 4, ColorCompType>
+{
+public:
+	//! Default constructor
+	RGBAColorsTableType() : ccArray<ccColor::Rgba, 4, ColorCompType>("RGBA colors") {}
+	virtual ~RGBAColorsTableType() = default;
+
+	//inherited from ccArray/ccHObject
+	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::RGBA_COLOR_ARRAY; }
+
+	//! Duplicates array (overloaded from ccArray::clone)
+	RGBAColorsTableType* clone() override
+	{
+		RGBAColorsTableType* cloneArray = new RGBAColorsTableType();
+		if (!copy(*cloneArray))
+		{
+			ccLog::Warning("[RGBAColorsTableType::clone] Failed to clone array (not enough memory)");
 			cloneArray->release();
 			return nullptr;
 		}

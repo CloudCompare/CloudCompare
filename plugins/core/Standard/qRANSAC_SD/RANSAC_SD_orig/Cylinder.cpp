@@ -221,10 +221,11 @@ bool Cylinder::Init(bool binary, std::istream *i)
 void Cylinder::Init(FILE *i)
 {
 	float rotate = 0;
-	fread(&m_axisDir, sizeof(m_axisDir), 1, i);
-	fread(&m_axisPos, sizeof(m_axisPos), 1, i);
-	fread(&m_radius, sizeof(m_radius), 1, i);
-	fread(&rotate, sizeof(rotate), 1, i);
+	size_t readrtn; //unused return warning suppresion
+	readrtn = fread(&m_axisDir, sizeof(m_axisDir), 1, i);
+	readrtn = fread(&m_axisPos, sizeof(m_axisPos), 1, i);
+	readrtn = fread(&m_radius, sizeof(m_radius), 1, i);
+	readrtn = fread(&rotate, sizeof(rotate), 1, i);
 	m_hcs.FromNormal(m_axisDir);
 	m_angularRotatedRadians = 0;
 	RotateAngularDirection(rotate);

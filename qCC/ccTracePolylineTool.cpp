@@ -19,6 +19,7 @@
 
 //Local
 #include "mainwindow.h"
+#include "ccReservedIDs.h"
 
 //common
 #include <ccPickingHub.h>
@@ -63,10 +64,10 @@ ccTracePolylineTool::SegmentGLParams::SegmentGLParams(ccGenericGLDisplay* displa
 ccTracePolylineTool::ccTracePolylineTool(ccPickingHub* pickingHub, QWidget* parent)
 	: ccOverlayDialog(parent)
 	, Ui::TracePolyLineDlg()
-	, m_polyTip(0)
-	, m_polyTipVertices(0)
-	, m_poly3D(0)
-	, m_poly3DVertices(0)
+	, m_polyTip(nullptr)
+	, m_polyTipVertices(nullptr)
+	, m_poly3D(nullptr)
+	, m_poly3DVertices(nullptr)
 	, m_done(false)
 	, m_pickingHub(pickingHub)
 {
@@ -87,13 +88,13 @@ ccTracePolylineTool::ccTracePolylineTool(ccPickingHub* pickingHub, QWidget* pare
 	addOverridenShortcut(Qt::Key_Return); //return key for the "apply" button
 	connect(this, &ccTracePolylineTool::shortcutTriggered, this, &ccTracePolylineTool::onShortcutTriggered);
 
-	m_polyTipVertices = new ccPointCloud("Tip vertices");
+	m_polyTipVertices = new ccPointCloud("Tip vertices", static_cast<unsigned>(ReservedIDs::TRACE_POLYLINE_TOOL_POLYLINE_TIP_VERTICES));
 	m_polyTipVertices->reserve(2);
 	m_polyTipVertices->addPoint(CCVector3(0, 0, 0));
 	m_polyTipVertices->addPoint(CCVector3(1, 1, 1));
 	m_polyTipVertices->setEnabled(false);
 
-	m_polyTip = new ccPolyline(m_polyTipVertices);
+	m_polyTip = new ccPolyline(m_polyTipVertices, static_cast<unsigned>(ReservedIDs::TRACE_POLYLINE_TOOL_POLYLINE_TIP));
 	m_polyTip->setForeground(true);
 	m_polyTip->setTempColor(ccColor::green);
 	m_polyTip->set2DMode(true);
@@ -143,13 +144,13 @@ ccPolyline* ccTracePolylineTool::polylineOverSampling(unsigned steps) const
 	if (!m_poly3D || !m_poly3DVertices || m_segmentParams.size() != m_poly3DVertices->size())
 	{
 		assert(false);
-		return 0;
+		return nullptr;
 	}
 
 	if (steps <= 1)
 	{
 		//nothing to do
-		return 0;
+		return nullptr;
 	}
 
 	ccHObject::Container clouds;
@@ -161,7 +162,7 @@ ccPolyline* ccTracePolylineTool::polylineOverSampling(unsigned steps) const
 	{
 		//no entity is currently displayed?!
 		assert(false);
-		return 0;
+		return nullptr;
 	}
 
 	unsigned n_verts = m_poly3DVertices->size();
@@ -177,7 +178,7 @@ ccPolyline* ccTracePolylineTool::polylineOverSampling(unsigned steps) const
 	{
 		ccLog::Warning("[ccTracePolylineTool::PolylineOverSampling] Not enough memory");
 		delete newPoly;
-		return 0;
+		return nullptr;
 	}
 	newVertices->importParametersFrom(m_poly3DVertices);
 	newVertices->setName(m_poly3DVertices->getName());
@@ -185,7 +186,7 @@ ccPolyline* ccTracePolylineTool::polylineOverSampling(unsigned steps) const
 	newPoly->importParametersFrom(*m_poly3D);
 	newPoly->setDisplay_recursive(m_poly3D->getDisplay());
 
-	QProgressDialog pDlg(QString("Oversampling"), "Cancel", 0, static_cast<int>(end_size), m_associatedWin ? m_associatedWin->asWidget() : 0);
+	QProgressDialog pDlg(QString("Oversampling"), "Cancel", 0, static_cast<int>(end_size), m_associatedWin ? m_associatedWin->asWidget() : nullptr);
 	pDlg.show();
 	QCoreApplication::processEvents();
 
@@ -312,7 +313,7 @@ bool ccTracePolylineTool::linkWith(ccGLWindow* win)
 		oldWin->disconnect(this);
 
 		if (m_polyTip)
-			m_polyTip->setDisplay(0);
+			m_polyTip->setDisplay(nullptr);
 	}
 
 	if (m_associatedWin)
@@ -477,11 +478,11 @@ void ccTracePolylineTool::onItemPicked(const PickedItem& pi)
 	//if the 3D polyline doesn't exist yet, we create it
 	if (!m_poly3D || !m_poly3DVertices)
 	{
-		m_poly3DVertices = new ccPointCloud("Vertices");
+		m_poly3DVertices = new ccPointCloud("Vertices", static_cast<unsigned>(ReservedIDs::TRACE_POLYLINE_TOOL_POLYLINE_VERTICES));
 		m_poly3DVertices->setEnabled(false);
 		m_poly3DVertices->setDisplay(m_associatedWin);
 
-		m_poly3D = new ccPolyline(m_poly3DVertices);
+		m_poly3D = new ccPolyline(m_poly3DVertices, static_cast<unsigned>(ReservedIDs::TRACE_POLYLINE_TOOL_POLYLINE));
 		m_poly3D->setTempColor(ccColor::green);
 		m_poly3D->set2DMode(false);
 		m_poly3D->addChild(m_poly3DVertices);
@@ -596,8 +597,8 @@ void ccTracePolylineTool::restart(bool reset)
 			delete m_poly3D;
 			m_segmentParams.resize(0);
 			//delete m_poly3DVertices;
-			m_poly3D = 0;
-			m_poly3DVertices = 0;
+			m_poly3D = nullptr;
+			m_poly3DVertices = nullptr;
 		}
 		else
 		{
@@ -647,7 +648,7 @@ void ccTracePolylineTool::exportLine()
 		{
 			delete m_poly3D;
 			m_segmentParams.resize(0);
-			m_poly3DVertices = 0;
+			m_poly3DVertices = nullptr;
 			m_poly3D = poly;
 		}
 	}
@@ -663,9 +664,9 @@ void ccTracePolylineTool::exportLine()
 		assert(false);
 	}
 
-	m_poly3D = 0;
+	m_poly3D = nullptr;
 	m_segmentParams.resize(0);
-	m_poly3DVertices = 0;
+	m_poly3DVertices = nullptr;
 
 	resetLine(); //to update the GUI
 }
@@ -697,6 +698,6 @@ void ccTracePolylineTool::onWidthSizeChanged(int width)
 	
 	if (m_associatedWin)
 	{
-		m_associatedWin->redraw(m_poly3D == 0, false);
+		m_associatedWin->redraw(m_poly3D == nullptr, false);
 	}
 }

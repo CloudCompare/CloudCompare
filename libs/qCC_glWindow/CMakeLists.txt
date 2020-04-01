@@ -16,9 +16,10 @@ file( GLOB source_list *.cpp)
 
 add_library( ${PROJECT_NAME} STATIC ${header_list} ${source_list} )
 
-target_link_libraries( ${PROJECT_NAME} CC_CORE_LIB )
-target_link_libraries( ${PROJECT_NAME} QCC_DB_LIB )
-target_link_libraries( ${PROJECT_NAME} CC_FBO_LIB )
+target_link_libraries( ${PROJECT_NAME}
+	CC_CORE_LIB
+	QCC_DB_LIB
+	CC_FBO_LIB )
 
 # OCULUS support
 target_link_OCULUS_SDK( ${PROJECT_NAME} )
@@ -27,7 +28,6 @@ target_link_OCULUS_SDK( ${PROJECT_NAME} )
 target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL Qt5::OpenGLExtensions)
 
 # Add custom preprocessor definitions
-# set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS )
 if (OPTION_GL_QUAD_BUFFER_SUPPORT)
-	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_GL_WINDOW_USE_QWINDOW )
+	target_compile_definitions( ${PROJECT_NAME} PRIVATE CC_GL_WINDOW_USE_QWINDOW )
 endif()

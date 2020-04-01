@@ -42,11 +42,11 @@ public:
 
 	//! Default constructor
 	FacetDensityGrid()
-		: grid(0)
+		: grid(nullptr)
 		, rSteps(0)
 		, ddSteps(0)
-		, step_deg(0)
 		, step_R(0)
+		, step_deg(0)
 	{
 		minMaxDensity[0] = minMaxDensity[1] = 0;
 	}
@@ -78,10 +78,10 @@ public:
 StereogramWidget::StereogramWidget(QWidget *parent)
 	: QLabel(QString(), parent)
 	, m_angularStep_deg(0)
-	, m_densityGrid(0)
+	, m_densityGrid(nullptr)
 	, m_meanDipDir_deg(-1.0)
 	, m_meanDip_deg(-1.0)
-	, m_densityColorScale(0)
+	, m_densityColorScale(nullptr)
 	, m_densityColorScaleSteps(ccColorScale::MAX_STEPS < 256 ? ccColorScale::MAX_STEPS : 256) //DGM: we can't pass a constant initializer (MAX_STEPS) by reference
 	, m_ticksFreq(3)
 	, m_showHSVRing(false)
@@ -114,7 +114,7 @@ bool StereogramWidget::init(double angularStep_deg,
 
 	if (m_densityGrid)
 		delete m_densityGrid;
-	m_densityGrid = 0;
+	m_densityGrid = nullptr;
 
 	if (!entity)
 		return false;
@@ -128,7 +128,7 @@ bool StereogramWidget::init(double angularStep_deg,
 	size_t count = 0;
 	ccHObject::Container facets;
 	ccHObject::Container planes;
-	ccPointCloud* cloud = 0;
+	ccPointCloud* cloud = nullptr;
 
 	//a set of facets or planes?
 	if (entity->isA(CC_TYPES::HIERARCHY_OBJECT))
@@ -203,7 +203,8 @@ bool StereogramWidget::init(double angularStep_deg,
 			Nmean.z += static_cast<double>(N.z) * weight;
 			surfaceSum += weight;
 
-			PointCoordinateType dipDir = 0, dip = 0;
+			PointCoordinateType dipDir = 0;
+			PointCoordinateType dip = 0;
 			ccNormalVectors::ConvertNormalToDipAndDipDir(N,dip,dipDir);
 
 			//unsigned iDip = static_cast<unsigned>(floor(static_cast<double>(dip)/densityGrid->step_deg));
@@ -238,7 +239,8 @@ bool StereogramWidget::init(double angularStep_deg,
 				static_cast<PointCoordinateType>(Nmean.y),
 				static_cast<PointCoordinateType>(Nmean.z));
 
-			PointCoordinateType dipDir = 0, dip = 0;
+			PointCoordinateType dipDir = 0;
+			PointCoordinateType dip = 0;
 			ccNormalVectors::ConvertNormalToDipAndDipDir(N,dip,dipDir);
 
 			m_meanDipDir_deg = static_cast<double>(dipDir);
@@ -275,7 +277,7 @@ bool StereogramWidget::init(double angularStep_deg,
 	{
 		//not enough memory!
 		delete densityGrid;
-		densityGrid = 0;
+		densityGrid = nullptr;
 	}
 
 	//replace old grid by new one! (even in case of failure! See below)
@@ -566,11 +568,11 @@ void StereogramWidget::paintEvent(QPaintEvent* event)
 	}
 }
 
-StereogramDialog::StereogramDialog(ccMainAppInterface* app/*=0*/)
-	: QDialog(app ? app->getMainWindow() : 0)
+StereogramDialog::StereogramDialog(ccMainAppInterface* app)
+	: QDialog( app->getMainWindow() )
 	, Ui::StereogramDialog()
-	, m_classifWidget(0)
-	, m_colorScaleSelector(0)
+	, m_classifWidget(nullptr)
+	, m_colorScaleSelector(nullptr)
 	, m_app(app)
 	, m_facetGroupUniqueID(0)
 {
@@ -635,7 +637,8 @@ bool StereogramDialog::init(double angularStep_deg,
 	if (!m_classifWidget->init(angularStep_deg, facetGroup, resolution_deg))
 		return false;
 
-	double meanDipDir_deg, meanDip_deg;
+	double meanDipDir_deg = 0.0;
+	double meanDip_deg = 0.0;
 	//set stereogram subtitle (i.e. mean direction)
 	m_classifWidget->getMeanDir(meanDip_deg, meanDipDir_deg);
 	meanDirLabel->setText(	QString("[Mean] ")
@@ -726,7 +729,7 @@ void StereogramDialog::updateFacetsFilter(bool enable)
 
 	//try to find the associated entity
 	ccHObject* root = m_app->dbRootObject();
-	ccHObject* entity = (root ? root->find(m_facetGroupUniqueID) : 0);
+	ccHObject* entity = (root ? root->find(m_facetGroupUniqueID) : nullptr);
 	if (!entity)
 		return;
 
@@ -752,7 +755,8 @@ void StereogramDialog::updateFacetsFilter(bool enable)
 			if (enable)
 			{
 				CCVector3 N = facet->getNormal();
-				PointCoordinateType dip, dipDir;
+				PointCoordinateType dip = 0;
+				PointCoordinateType dipDir = 0;
 				ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipDir);
 
 				double dDip = fabs(dip - dipFilter);
@@ -799,7 +803,8 @@ void StereogramDialog::updateFacetsFilter(bool enable)
 			for (unsigned i = 0; i < static_cast<unsigned>(count); ++i)
 			{
 				CCVector3 N = cloud->getPointNormal(i);
-				PointCoordinateType dip, dipDir;
+				PointCoordinateType dip = 0;
+				PointCoordinateType dipDir = 0;
 				ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipDir);
 
 				double dDip = fabs(dip - dipFilter);
@@ -828,7 +833,7 @@ void StereogramDialog::exportCurrentSelection()
 
 	//try to find the associated entity
 	ccHObject* root = m_app->dbRootObject();
-	ccHObject* entity = (root ? root->find(m_facetGroupUniqueID) : 0);
+	ccHObject* entity = (root ? root->find(m_facetGroupUniqueID) : nullptr);
 	if (!entity)
 		return;
 
@@ -854,7 +859,8 @@ void StereogramDialog::exportCurrentSelection()
 			ccFacet* facet = static_cast<ccFacet*>(facets[i]);
 
 			CCVector3 N = facet->getNormal();
-			PointCoordinateType dip, dipDir;
+			PointCoordinateType dip = 0;
+			PointCoordinateType dipDir = 0;
 			ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipDir);
 
 			double dDip = fabs(dip - dipFilter);
@@ -878,7 +884,7 @@ void StereogramDialog::exportCurrentSelection()
 		else
 		{
 			delete newGroup;
-			newGroup = 0;
+			newGroup = nullptr;
 		}
 	}
 	//or a cloud?

@@ -1,5 +1,5 @@
 sudo: required
-dist: xenial
+dist: bionic
 cache: ccache
 language: cpp
 compiler:
@@ -10,14 +10,14 @@ env:
 - SCALAR_DOUBLE=OFF
 install:
 - sudo apt-get update -qq
-- sudo apt-get install -qy cmake
-  libgdal-dev libfreenect-dev
-  libeigen3-dev libqt5svg5-dev libtbb-dev
-  libavcodec-dev libavformat-dev libavutil-dev libboost-thread-dev
-  libboost-program-options-dev libcgal-dev libcgal-qt5-dev
-  libdlib-dev libswscale-dev libtbb-dev
-  libqt5opengl5-dev qt5-default qttools5-dev qttools5-dev-tools
-  libproj-dev libdlib-dev libxerces-c-dev xvfb
+- sudo apt-get install -qy cmake 
+  libqt5svg5-dev libqt5opengl5-dev qt5-default qttools5-dev qttools5-dev-tools 
+  libtbb-dev 
+  libavcodec-dev libavformat-dev libavutil-dev 
+  libboost-program-options-dev libboost-thread-dev 
+  libeigen3-dev 
+  libcgal-dev libcgal-qt5-dev libgdal-dev libpcl-dev
+  libdlib-dev libswscale-dev libproj-dev libxerces-c-dev xvfb libpdal-dev libjsoncpp-dev 
 - git submodule init && git submodule update
 
 before_script:
@@ -25,6 +25,7 @@ before_script:
 - cd build
 - cmake -DCMAKE_BUILD_TYPE=Release
   -DEIGEN_ROOT_DIR=/usr/include/eigen3
+  -DJSON_ROOT_DIR=/usr/include/jsoncpp
   -DCOMPILE_CC_CORE_LIB_WITH_TBB=ON
   -DDLIB_ROOT=/usr/include
   -DOPTION_USE_DXF_LIB=ON
@@ -39,6 +40,7 @@ before_script:
   -DPLUGIN_IO_QCORE=ON
   -DPLUGIN_IO_QE57=ON
   -DPLUGIN_IO_QPHOTOSCAN=ON
+  -DPLUGIN_IO_QPDAL=ON
   -DPLUGIN_STANDARD_QANIMATION=ON
   -DPLUGIN_STANDARD_QBROOM=ON
   -DPLUGIN_STANDARD_QCANUPO=ON
@@ -51,11 +53,13 @@ before_script:
   -DPLUGIN_STANDARD_QPCV=ON
   -DPLUGIN_STANDARD_QPOISSON_RECON=ON
   -DPLUGIN_STANDARD_QSRA=ON
+  -DPLUGIN_STANDARD_QRANSAC_SD=ON
+  -DPLUGIN_STANDARD_QPCL=ON
   -DBUILD_TESTING=ON
   ..
 script:
 - if [[ $CXX == "clang++" ]]; then export LD_LIBRARY_PATH=/usr/local/clang/lib:$LD_LIBRARY_PATH; fi
-- if [[ $TRAVIS_BRANCH != "beta_builds" ]] && [[ $SCALAR_DOUBLE != "ON" ]]; then make -j2 && xvfb-run ctest -V; fi
+- if [[ $TRAVIS_BRANCH != "beta_builds" ]]; then make -j2 && if [[ $SCALAR_DOUBLE != "ON" ]]; then xvfb-run ctest -V; fi; fi
 - cd ..
 after_success:
 - openssl aes-256-cbc -K $encrypted_d04fcf964026_key -iv $encrypted_d04fcf964026_iv

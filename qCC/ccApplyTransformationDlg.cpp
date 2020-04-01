@@ -48,7 +48,7 @@ class DipDirTransformationDialog : public QDialog, public Ui::DipDirTransformati
 	
 public:
 
-	DipDirTransformationDialog(QWidget* parent = 0) : QDialog(parent) { setupUi(this); }
+	DipDirTransformationDialog(QWidget* parent = nullptr) : QDialog(parent) { setupUi(this); }
 };
 
 ccApplyTransformationDlg::ccApplyTransformationDlg(QWidget* parent/*=0*/)
@@ -111,7 +111,8 @@ void ccApplyTransformationDlg::onMatrixTextChange()
 void ccApplyTransformationDlg::onRotAngleValueChanged(double)
 {
 	PointCoordinateType alpha = 0;
-	CCVector3 axis,t;
+	CCVector3 axis;
+	CCVector3 t;
 
 	axis.x	= static_cast<PointCoordinateType>(rxAxisDoubleSpinBox->value());
 	axis.y	= static_cast<PointCoordinateType>(ryAxisDoubleSpinBox->value());
@@ -129,7 +130,9 @@ void ccApplyTransformationDlg::onRotAngleValueChanged(double)
 
 void ccApplyTransformationDlg::onEulerValueChanged(double)
 {
-	PointCoordinateType phi,theta,psi = 0;
+	PointCoordinateType phi = 0;
+	PointCoordinateType theta = 0;
+	PointCoordinateType psi = 0;
 	CCVector3 t;
 
 	phi		= static_cast<PointCoordinateType>(ePhiDoubleSpinBox->value() * CC_DEG_TO_RAD);
@@ -166,7 +169,8 @@ void ccApplyTransformationDlg::updateAll(const ccGLMatrix& mat, bool textForm/*=
 		tzAxisDoubleSpinBox->blockSignals(true);
 
 		PointCoordinateType alpha = 0;
-		CCVector3 axis,t;
+		CCVector3 axis;
+		CCVector3 t;
 		mat.getParameters(alpha,axis,t);
 
 		rxAxisDoubleSpinBox->setValue(axis.x);
@@ -195,7 +199,9 @@ void ccApplyTransformationDlg::updateAll(const ccGLMatrix& mat, bool textForm/*=
 		etyAxisDoubleSpinBox->blockSignals(true);
 		etzAxisDoubleSpinBox->blockSignals(true);
 
-		PointCoordinateType phi,theta,psi = 0;
+		PointCoordinateType phi = 0;
+		PointCoordinateType theta = 0;
+		PointCoordinateType psi = 0;
 		CCVector3 t;
 		mat.getParameters(phi,theta,psi,t);
 

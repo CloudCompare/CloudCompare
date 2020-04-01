@@ -22,11 +22,6 @@ ccNoteTool::ccNoteTool()
 {
 }
 
-ccNoteTool::~ccNoteTool()
-{
-}
-
-
 //called when a point in a point cloud gets picked while this tool is active
 void ccNoteTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPointCloud* cloud, const CCVector3& P)
 {

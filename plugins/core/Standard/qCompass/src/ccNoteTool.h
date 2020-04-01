@@ -27,12 +27,11 @@
 /*
 Tool used to create notes and associated them with points in a cloud.
 */
-class ccNoteTool :
-	public ccTool
+class ccNoteTool : public ccTool
 {
 public:
 	ccNoteTool();
-	virtual ~ccNoteTool();
+	virtual ~ccNoteTool() = default;
 
 	//called when the tool is set to active (for initialization)
 	virtual void toolActivated() override;

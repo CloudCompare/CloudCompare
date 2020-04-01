@@ -818,7 +818,8 @@ bool ccGLWindow::initialize()
 		if (context()->hasExtension(QByteArrayLiteral("GL_ARB_vertex_buffer_object")))
 		{
 			QStringList glVersion = QString((const char*)glFunc->glGetString(GL_VERSION)).split('.');
-			int majorVersion = 0, minorVersion = 0;
+			int majorVersion = 0;
+			int minorVersion = 0;
 			if (glVersion.size() >= 2)
 			{
 				majorVersion = glVersion[0].toInt();
@@ -2067,7 +2068,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 		//draw black background
 		{
 			int height = (diagStrings.size() + 1) * 14;
-			glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::black.rgb);
+			glColor4ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::black.rgba);
 			glFunc->glBegin(GL_QUADS);
 			glFunc->glVertex2i(x, m_glViewport.height() - y);
 			glFunc->glVertex2i(x, m_glViewport.height() - (y + height));
@@ -2076,7 +2077,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 			glFunc->glEnd();
 		}
 
-		glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::yellow.rgb);
+		glColor4ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::yellow.rgba);
 		for (const QString &str : diagStrings)
 		{
 			renderText(x + 10, y + 10, str);
@@ -2309,7 +2310,8 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingPara
 	}
 
 	//model and projection matrices
-	ccGLMatrixd modelViewMat, projectionMat;
+	ccGLMatrixd modelViewMat;
+	ccGLMatrixd projectionMat;
 
 	//setup camera projection (DGM: AFTER THE LIGHTS)
 	if (m_stereoModeEnabled)
@@ -2579,7 +2581,7 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 
 				glFunc->glPopAttrib(); //GL_COLOR_BUFFER_BIT
 
-				glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::black.rgb);
+				glColor4ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::black.rgba);
 				renderText(	10,
 							borderHeight - CC_GL_FILTER_BANNER_MARGIN - CC_GL_FILTER_BANNER_MARGIN / 2,
 							QString("[GL filter] ") + m_activeGLFilter->getDescription()
@@ -3054,7 +3056,7 @@ void ccGLWindow::drawCross()
 	glFunc->glLineWidth(1.0f);
 
 	//cross OpenGL drawing
-	glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::lightGrey.rgb);
+	glColor4ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::lightGrey.rgba);
 	glFunc->glBegin(GL_LINES);
 	glFunc->glVertex3f(0.0f, -CC_DISPLAYED_CENTER_CROSS_LENGTH, 0.0f);
 	glFunc->glVertex3f(0.0f, CC_DISPLAYED_CENTER_CROSS_LENGTH, 0.0f);
@@ -4231,7 +4233,8 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 					else //side view
 					{
 						//project the current pivot point on screen
-						CCVector3d A2D, B2D;
+						CCVector3d A2D;
+						CCVector3d B2D;
 						if (	camera.project(m_viewportParams.pivotPoint, A2D)
 							&&	camera.project(m_viewportParams.pivotPoint + m_viewportParams.zFar * m_lockedRotationAxis, B2D))
 						{
@@ -5169,7 +5172,8 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 
 					int nearestTriIndex = -1;
 					double nearestSquareDist = 0.0;
-					CCVector3d P, barycentricCoords;
+					CCVector3d P;
+					CCVector3d barycentricCoords;
 					if (mesh->trianglePicking(	clickedPos,
 												camera,
 												nearestTriIndex,
@@ -5465,7 +5469,7 @@ void ccGLWindow::drawCustomLight()
 	ccQOpenGLFunctions* glFunc = functions();
 	assert(glFunc);
 
-	glFunc->glColor3ubv(ccColor::yellow.rgb);
+	glFunc->glColor4ubv(ccColor::yellow.rgba);
 	//ensure that the star size is constant (in pixels)
 	GLfloat d = static_cast<GLfloat>(CC_DISPLAYED_CUSTOM_LIGHT_LENGTH * computeActualPixelSize());
 
@@ -6464,9 +6468,9 @@ int ccGLWindow::getGlFilterBannerHeight() const
 	return QFontMetrics(font()).height() + 2 * CC_GL_FILTER_BANNER_MARGIN;
 }
 
-void ccGLWindow::display3DLabel(const QString& str, const CCVector3& pos3D, const unsigned char* rgb/*=0*/, const QFont& font/*=QFont()*/)
+void ccGLWindow::display3DLabel(const QString& str, const CCVector3& pos3D, const ccColor::Rgba* color/*=nullptr*/, const QFont& font/*=QFont()*/)
 {
-	glColor3ubv_safe<ccQOpenGLFunctions>(functions(), rgb ? rgb : getDisplayParameters().textDefaultCol.rgb);
+	glColor4ubv_safe<ccQOpenGLFunctions>(functions(), color ? color->rgba : getDisplayParameters().textDefaultCol.rgba);
 	renderText(pos3D.x, pos3D.y, pos3D.z, str, font);
 }
 
@@ -6475,7 +6479,7 @@ void ccGLWindow::displayText(	QString text,
 								int y,
 								unsigned char align/*=ALIGN_HLEFT|ALIGN_VTOP*/,
 								float bkgAlpha/*=0*/,
-								const unsigned char* rgbColor/*=0*/,
+								const ccColor::Rgba* color/*=0*/,
 								const QFont* font/*=0*/)
 {
 	ccQOpenGLFunctions* glFunc = functions();
@@ -6485,7 +6489,7 @@ void ccGLWindow::displayText(	QString text,
 	int y2 = m_glViewport.height() - 1 - y;
 
 	//actual text color
-	const unsigned char* col = (rgbColor ? rgbColor : getDisplayParameters().textDefaultCol.rgb);
+	const unsigned char* rgba = (color ? color->rgba : getDisplayParameters().textDefaultCol.rgba);
 
 	QFont textFont = (font ? *font : m_font);
 
@@ -6513,9 +6517,9 @@ void ccGLWindow::displayText(	QString text,
 			glFunc->glEnable(GL_BLEND);
 
 			//inverted color with a bit of transparency
-			const float invertedCol[4] = {	(255 - col[0]) / 255.0f,
-											(255 - col[0]) / 255.0f,
-											(255 - col[0]) / 255.0f,
+			const float invertedCol[4] = {	(255 - rgba[0]) / 255.0f,
+											(255 - rgba[1]) / 255.0f,
+											(255 - rgba[2]) / 255.0f,
 											bkgAlpha };
 			glFunc->glColor4fv(invertedCol);
 
@@ -6551,7 +6555,7 @@ void ccGLWindow::displayText(	QString text,
 	else if (align & ALIGN_VMIDDLE)
 		y2 -= margin / 2; //empirical compensation
 
-	glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, col);
+	glColor4ubv_safe<ccQOpenGLFunctions>(glFunc, rgba);
 	renderText(x2, y2, text, textFont);
 }
 

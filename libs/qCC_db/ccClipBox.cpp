@@ -19,6 +19,7 @@
 #include "ccIncludeGL.h"
 
 #include "ccClipBox.h"
+//#include "ccReservedIDs.h"
 
 //Local
 #include "ccCone.h"
@@ -40,16 +41,16 @@ void DrawUnitArrow(int ID, const CCVector3& start, const CCVector3& direction, P
 {
 	//get the set of OpenGL functions (version 2.1)
 	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
-	assert( glFunc != nullptr );
-	
-	if ( glFunc == nullptr )
+	assert(glFunc != nullptr);
+
+	if (glFunc == nullptr)
 		return;
 
 	if (ID > 0)
 	{
 		glFunc->glLoadName(ID);
 	}
-	
+
 	glFunc->glMatrixMode(GL_MODELVIEW);
 	glFunc->glPushMatrix();
 
@@ -57,14 +58,14 @@ void DrawUnitArrow(int ID, const CCVector3& start, const CCVector3& direction, P
 	ccGL::Scale(glFunc, scale, scale, scale);
 
 	//we compute scalar prod between the two vectors
-	CCVector3 Z(0.0,0.0,1.0);
+	CCVector3 Z(0.0, 0.0, 1.0);
 	PointCoordinateType ps = Z.dot(direction);
-	
+
 	if (ps < 1)
 	{
-		CCVector3 axis(1,0,0);
+		CCVector3 axis(1, 0, 0);
 		PointCoordinateType angle_deg = static_cast<PointCoordinateType>(180.0);
-		
+
 		if (ps > -1)
 		{
 			//we deduce angle from scalar prod
@@ -73,19 +74,19 @@ void DrawUnitArrow(int ID, const CCVector3& start, const CCVector3& direction, P
 			//we compute rotation axis with scalar prod
 			axis = Z.cross(direction);
 		}
-		
-		ccGL::Rotate(glFunc,angle_deg, axis.x, axis.y, axis.z);
+
+		ccGL::Rotate(glFunc, angle_deg, axis.x, axis.y, axis.z);
 	}
 
 	if (!c_arrowShaft)
-		c_arrowShaft = QSharedPointer<ccCylinder>(new ccCylinder(0.15f,0.6f,nullptr,"ArrowShaft",12));
+		c_arrowShaft = QSharedPointer<ccCylinder>(new ccCylinder(0.15f, 0.6f, nullptr, "ArrowShaft", 12, 0)); //we don't want to increase the unique ID counter for this 'invisible' entities
 	if (!c_arrowHead)
-		c_arrowHead = QSharedPointer<ccCone>(new ccCone(0.3f,0,0.4f,0,0,nullptr,"ArrowHead",24));
+		c_arrowHead = QSharedPointer<ccCone>(new ccCone(0.3f, 0, 0.4f, 0, 0, nullptr, "ArrowHead", 24, 0)); //we don't want to increase the unique ID counter for this 'invisible' entities
 
-	glFunc->glTranslatef(0,0,0.3f);
+	glFunc->glTranslatef(0, 0, 0.3f);
 	c_arrowShaft->setTempColor(col);
 	c_arrowShaft->draw(context);
-	glFunc->glTranslatef(0,0,0.3f+0.2f);
+	glFunc->glTranslatef(0, 0, 0.3f + 0.2f);
 	c_arrowHead->setTempColor(col);
 	c_arrowHead->draw(context);
 
@@ -96,14 +97,14 @@ static void DrawUnitTorus(int ID, const CCVector3& center, const CCVector3& dire
 {
 	//get the set of OpenGL functions (version 2.1)
 	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
-	assert( glFunc != nullptr );
-	
-	if ( glFunc == nullptr )
+	assert(glFunc != nullptr);
+
+	if (glFunc == nullptr)
 		return;
 
 	if (ID > 0)
 		glFunc->glLoadName(ID);
-	
+
 	glFunc->glMatrixMode(GL_MODELVIEW);
 	glFunc->glPushMatrix();
 
@@ -111,14 +112,14 @@ static void DrawUnitTorus(int ID, const CCVector3& center, const CCVector3& dire
 	ccGL::Scale(glFunc, scale, scale, scale);
 
 	//we compute scalar prod between the two vectors
-	CCVector3 Z(0,0,1);
+	CCVector3 Z(0, 0, 1);
 	PointCoordinateType ps = Z.dot(direction);
-	
+
 	if (ps < 1)
 	{
-		CCVector3 axis(1,0,0);
+		CCVector3 axis(1, 0, 0);
 		PointCoordinateType angle_deg = 180;
-		
+
 		if (ps > -1)
 		{
 			//we deduce angle from scalar prod
@@ -127,14 +128,14 @@ static void DrawUnitTorus(int ID, const CCVector3& center, const CCVector3& dire
 			//we compute rotation axis with scalar prod
 			axis = Z.cross(direction);
 		}
-		
+
 		ccGL::Rotate(glFunc, angle_deg, axis.x, axis.y, axis.z);
 	}
 
 	if (!c_torus)
-		c_torus = QSharedPointer<ccTorus>(new ccTorus(0.2f, 0.4f, 2.0*M_PI, false, 0, nullptr, "Torus", 12));
+		c_torus = QSharedPointer<ccTorus>(new ccTorus(0.2f, 0.4f, 2.0*M_PI, false, 0, nullptr, "Torus", 12, 0)); //we don't want to increase the unique ID counter for this 'invisible' entities
 
-	glFunc->glTranslatef(0,0,0.3f);
+	glFunc->glTranslatef(0, 0, 0.3f);
 	c_torus->setTempColor(col);
 	c_torus->draw(context);
 
@@ -161,7 +162,7 @@ static void DrawUnitTorus(int ID, const CCVector3& center, const CCVector3& dire
 //	ccGL::Scale(glFunc, radius, radius, radius);
 //
 //	if (!c_centralSphere)
-//		c_centralSphere = QSharedPointer<ccSphere>(new ccSphere(1, 0, "CentralSphere", 24));
+//		c_centralSphere = QSharedPointer<ccSphere>(new ccSphere(1, 0, "CentralSphere", 24, 0)); //we don't want to increase the unique ID counter for this 'invisible' entities
 //
 //	c_centralSphere->setTempColor(col);
 //	c_centralSphere->draw(context);
@@ -180,7 +181,7 @@ static void DrawUnitCross(int ID, const CCVector3& center, PointCoordinateType s
 
 	if (ID > 0)
 		glFunc->glLoadName(ID);
-	
+
 	scale /= 2;
 	DrawUnitArrow(0, center, CCVector3(-1, 0, 0), scale, col, context);
 	DrawUnitArrow(0, center, CCVector3( 1, 0, 0), scale, col, context);
@@ -190,8 +191,14 @@ static void DrawUnitCross(int ID, const CCVector3& center, PointCoordinateType s
 	DrawUnitArrow(0, center, CCVector3( 0, 0, 1), scale, col, context);
 }
 
-ccClipBox::ccClipBox(QString name/*= QString("clipping box")*/)
-	: ccHObject(name)
+//default 'GetComponentIDFunction'
+unsigned GetComponentID(ccClipBox::Components)
+{
+	return ccUniqueIDGenerator::InvalidUniqueID;
+}
+
+ccClipBox::ccClipBox(QString name/*= QString("clipping box")*/, unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
+	: ccHObject(name, uniqueID)
 	, m_entityContainer("entities")
 	, m_showBox(true)
 	, m_activeComponent(NONE)
@@ -218,7 +225,7 @@ void ccClipBox::update()
 			m_entityContainer.getChild(ci)->removeAllClipPlanes();
 		}
 	}
-	
+
 	//now add the 6 box clipping planes
 	ccBBox extents;
 	ccGLMatrix transformation;
@@ -381,9 +388,9 @@ void ccClipBox::setActiveComponent(int id)
 static CCVector3d PointToVector(int x, int y, int screenWidth, int screenHeight)
 {
 	//convert mouse position to vector (screen-centered)
-	CCVector3d v(	static_cast<double>(2 * std::max(std::min(x,screenWidth-1),-screenWidth+1) - screenWidth) / static_cast<double>(screenWidth),
-					static_cast<double>(screenHeight - 2 * std::max(std::min(y,screenHeight-1),-screenHeight+1)) / static_cast<double>(screenHeight),
-					0 );
+	CCVector3d v(	static_cast<double>(2 * std::max(std::min(x, screenWidth - 1), -screenWidth + 1) - screenWidth) / static_cast<double>(screenWidth),
+					static_cast<double>(screenHeight - 2 * std::max(std::min(y, screenHeight - 1), -screenHeight + 1)) / static_cast<double>(screenHeight),
+					0);
 
 	//square 'radius'
 	double d2 = v.x*v.x + v.y*v.y;

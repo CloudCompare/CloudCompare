@@ -44,8 +44,8 @@ static CCVector3d s_center(0, 0, 0);
 ccPlaneEditDlg::ccPlaneEditDlg(ccPickingHub* pickingHub, QWidget* parent)
 	: QDialog(parent)
 	, Ui::PlaneEditDlg()
-	, m_pickingWin(0)
-	, m_associatedPlane(0)
+	, m_pickingWin(nullptr)
+	, m_associatedPlane(nullptr)
 	, m_pickingHub(pickingHub)
 {
 	assert(pickingHub);
@@ -170,7 +170,8 @@ void ccPlaneEditDlg::onNormalChanged(double)
 	Nd.z = nzDoubleSpinBox->value();
 	Nd.normalize();
 
-	PointCoordinateType dip = 0, dipDir = 0;
+	PointCoordinateType dip = 0;
+	PointCoordinateType dipDir = 0;
 	ccNormalVectors::ConvertNormalToDipAndDipDir(Nd, dip, dipDir);
 
 	dipDoubleSpinBox->blockSignals(true);

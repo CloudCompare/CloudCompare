@@ -523,7 +523,10 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 					const CCLib::VerticesIndexes* tsi = delaunayMesh.getNextTriangleVertIndexes();
 					//get the triangle bounding box (in grid coordinates)
 					int P[3][2];
-					int xMin = 0, yMin = 0, xMax = 0, yMax = 0;
+					int xMin = 0;
+					int yMin = 0;
+					int xMax = 0;
+					int yMax = 0;
 					{
 						for (unsigned j = 0; j < 3; ++j)
 						{
@@ -916,11 +919,11 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 
 					if (interpolateColors)
 					{
-						ccColor::Rgb col(	static_cast<ColorCompType>(std::min(255.0, aCell->color.x)),
-											static_cast<ColorCompType>(std::min(255.0, aCell->color.y)),
-											static_cast<ColorCompType>(std::min(255.0, aCell->color.z)) );
+						ccColor::Rgb col(	static_cast<ColorCompType>(std::min(static_cast<double>(ccColor::MAX), aCell->color.x)),
+											static_cast<ColorCompType>(std::min(static_cast<double>(ccColor::MAX), aCell->color.y)),
+											static_cast<ColorCompType>(std::min(static_cast<double>(ccColor::MAX), aCell->color.z)) );
 						
-						cloudGrid->addRGBColor(col);
+						cloudGrid->addColor(col);
 					}
 				}
 
@@ -1009,7 +1012,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 
 					if (interpolateColors)
 					{
-						cloudGrid->addRGBColor(ccColor::black);
+						cloudGrid->addColor(ccColor::black);
 					}
 				}
 

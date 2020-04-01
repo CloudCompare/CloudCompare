@@ -417,7 +417,7 @@ bool PlyOpenDlg::isValid(bool displayErrors/*=true*/) const
 	if (zeroCoord > 1)
 	{
 		if (displayErrors)
-			QMessageBox::warning(0, "Error", "At least two vertex coordinates (X,Y,Z) must be defined!");
+			QMessageBox::warning(nullptr, "Error", "At least two vertex coordinates (X,Y,Z) must be defined!");
 		return false;
 	}
 
@@ -443,7 +443,7 @@ bool PlyOpenDlg::isValid(bool displayErrors/*=true*/) const
 		if (assignedIndexCount[i] > 1)
 		{
 			if (displayErrors)
-				QMessageBox::warning(0, "Error", QString("Can't assign same property to multiple fields! (%1)").arg(xComboBox->itemText(i)));
+				QMessageBox::warning(nullptr, "Error", QString("Can't assign same property to multiple fields! (%1)").arg(xComboBox->itemText(i)));
 			return false;
 		}
 	}

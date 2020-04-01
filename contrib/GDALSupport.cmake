@@ -21,7 +21,7 @@ function( target_link_GDAL ) # 2 arguments: ARGV0 = project name / ARGV1 = base 
 	if( ${OPTION_USE_GDAL} )
 		if( GDAL_FOUND )
 			target_link_libraries( ${ARGV0} ${GDAL_LIBRARY} )
-			set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS CC_GDAL_SUPPORT )
+			target_compile_definitions( ${ARGV0} PUBLIC CC_GDAL_SUPPORT )
 			
 			if( WIN32 )
 				#install DLLs

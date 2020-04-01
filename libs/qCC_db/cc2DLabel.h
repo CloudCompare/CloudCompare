@@ -192,7 +192,7 @@ protected:
 		bool hasNormal;
 		CCVector3 normal;
 		bool hasRGB;
-		ccColor::Rgb rgb;
+		ccColor::Rgba color;
 		bool hasSF;
 		ScalarType sfValue;
 		double sfShiftedValue;
@@ -203,7 +203,7 @@ protected:
 			: hasNormal(false)
 			, normal(0, 0, 0)
 			, hasRGB(false)
-			, rgb(0, 0, 0)
+			, color(0, 0, 0, 0)
 			, hasSF(false)
 			, sfValue(0)
 			, sfShiftedValue(0)
@@ -253,7 +253,7 @@ protected:
 
 	//inherited from ccHObject
 	virtual bool toFile_MeOnly(QFile& out) const override;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
 	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 	virtual void onDeletionOf(const ccHObject* obj) override;
 

@@ -32,9 +32,15 @@ class QCC_DB_LIB_API ccShiftedObject : public ccHObject
 public:
 
 	//! Default constructor
-	ccShiftedObject(QString name = QString());
+	/** \param name cloud name (optional)
+		\param uniqueID unique ID (handle with care)
+	**/
+	ccShiftedObject(QString name = QString(), unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID);
+
 	//! Copy constructor
-	ccShiftedObject(const ccShiftedObject& s);
+	/** \param s shifted object to copy
+	**/
+	ccShiftedObject(const ccShiftedObject& s) = default;
 
 	//! Sets shift applied to original coordinates (information storage only)
 	/** Such a shift can typically be applied at loading time.

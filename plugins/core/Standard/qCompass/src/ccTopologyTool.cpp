@@ -25,10 +25,6 @@ ccTopologyTool::ccTopologyTool()
 {
 }
 
-ccTopologyTool::~ccTopologyTool()
-{
-}
-
 //called when the selection is changed while this tool is active
 void ccTopologyTool::onNewSelection(const ccHObject::Container& selectedEntities)
 {

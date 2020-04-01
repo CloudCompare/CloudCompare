@@ -35,7 +35,7 @@ public:
 	ccOctreeProxy(ccOctree::Shared octree = ccOctree::Shared(0), QString name = "Octree");
 
 	//! Destructor
-	virtual ~ccOctreeProxy();
+	virtual ~ccOctreeProxy() = default;
 
 	//! Sets the associated octree
 	inline void setOctree(ccOctree::Shared octree) { m_octree = octree; }

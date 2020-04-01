@@ -147,11 +147,14 @@ ccQuadric* ccQuadric::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/
 	if (count < CC_LOCAL_MODEL_MIN_SIZE[QUADRIC])
 	{
 		ccLog::Warning(QString("[ccQuadric::fitTo] Not enough points in input cloud to fit a quadric! (%1 at the very least are required)").arg(CC_LOCAL_MODEL_MIN_SIZE[QUADRIC]));
-		return 0;
+		return nullptr;
 	}
 
 	//project the points on a 2D plane
-	CCVector3 G, X, Y, N;
+	CCVector3 G;
+	CCVector3 X;
+	CCVector3 Y;
+	CCVector3 N;
 	{
 		CCLib::Neighbourhood Yk(cloud);
 		
@@ -160,7 +163,7 @@ ccQuadric* ccQuadric::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/
 		if (!theLSPlane)
 		{
 			ccLog::Warning("[ccQuadric::Fit] Not enough points to fit a quadric!");
-			return 0;
+			return nullptr;
 		}
 
 		assert(Yk.getGravityCenter());
@@ -178,7 +181,7 @@ ccQuadric* ccQuadric::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/
 	if (!tempCloud.reserve(count))
 	{
 		ccLog::Warning("[ccQuadric::Fit] Not enough memory!");
-		return 0;
+		return nullptr;
 	}
 
 	cloud->placeIteratorAtBeginning();
@@ -207,7 +210,7 @@ ccQuadric* ccQuadric::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/
 	if (!eq)
 	{
 		ccLog::Warning("[ccQuadric::Fit] Failed to fit a quadric!");
-		return 0;
+		return nullptr;
 	}
 
 	//we recenter the quadric object
@@ -299,20 +302,20 @@ bool ccQuadric::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccQuadric::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
+bool ccQuadric::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
-	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags))
+	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
 	//parameters (dataVersion>=35)
 	QDataStream inStream(&in);
-	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_minCorner.x,1);
-	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_minCorner.y,1);
-	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_maxCorner.x,1);
-	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_maxCorner.y,1);
+	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_minCorner.x, 1);
+	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_minCorner.y, 1);
+	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_maxCorner.x, 1);
+	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_maxCorner.y, 1);
 
-	for (unsigned i=0; i<6; ++i)
-		ccSerializationHelper::CoordsFromDataStream(inStream,flags,m_eq+i,1);
+	for (unsigned i = 0; i < 6; ++i)
+		ccSerializationHelper::CoordsFromDataStream(inStream, flags, m_eq + i, 1);
 
 	return true;
 }
@@ -320,5 +323,5 @@ bool ccQuadric::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 ccBBox ccQuadric::getOwnFitBB(ccGLMatrix& trans)
 {
 	trans = m_transformation;
-	return ccBBox( CCVector3(m_minCorner.x,m_minCorner.y,m_minZ), CCVector3(m_maxCorner.x,m_maxCorner.y,m_maxZ) );
+	return ccBBox(CCVector3(m_minCorner.x, m_minCorner.y, m_minZ), CCVector3(m_maxCorner.x, m_maxCorner.y, m_maxZ));
 }

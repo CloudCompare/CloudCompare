@@ -15,7 +15,7 @@ if (PLUGIN_STANDARD_QPCL)
     
     project( QPCL_PLUGIN )
     
-	include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
+    include( CMakePolicies NO_POLICY_SCOPE )
 
     #documentation
     add_subdirectory(doc)
@@ -24,7 +24,7 @@ if (PLUGIN_STANDARD_QPCL)
     include_directories( ${QPCL_PLUGIN_UTILS_LIB_BINARY_DIR} )
     include_directories( ${PCL_INCLUDE_DIRS} )
     
-	  include( ../../../CMakePluginTpl.cmake )
+    include( ../../../CMakePluginTpl.cmake )
     
     target_link_libraries(${PROJECT_NAME} QPCL_PLUGIN_UTILS_LIB)
     

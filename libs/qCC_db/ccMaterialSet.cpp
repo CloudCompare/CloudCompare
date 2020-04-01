@@ -220,10 +220,15 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 					currentMaterial->setShininess(tokens[1].toFloat());
 			}
 			//transparent
-			else if (tokens.front() == "d" || tokens.front() == "Tr")
+			else if (tokens.front() == "d")
 			{
 				if (tokens.size() > 1)
 					currentMaterial->setTransparency(tokens[1].toFloat());
+			}
+			else if (tokens.front() == "Tr")
+			{
+				if (tokens.size() > 1)
+					currentMaterial->setTransparency(1.0f - tokens[1].toFloat());
 			}
 			//reflection
 			else if (tokens.front() == "r")
@@ -328,7 +333,9 @@ bool ccMaterialSet::saveAsMTL(const QString& path, const QString& baseFilename, 
 		stream << "Ka " << Ka.r << " " << Ka.g << " " << Ka.b << endl;
 		stream << "Kd " << Kd.r << " " << Kd.g << " " << Kd.b << endl;
 		stream << "Ks " << Ks.r << " " << Ks.g << " " << Ks.b << endl;
-		stream << "Tr " << Ka.a << endl; //we take the ambient's by default
+		// we take the ambient's alpha by default
+		// openGL "a = 1.0" is for "full opacity" / MTL "Tr = 1.0" is for "full transparency" 
+		stream << "Tr " << 1.0 - Ka.a << endl; 
 		stream << "illum 1" << endl;
 		stream << "Ns " << mtl->getShininessFront()	<< endl; //we take the front's by default
 
@@ -454,9 +461,9 @@ bool ccMaterialSet::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccMaterialSet::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
+bool ccMaterialSet::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
-	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags))
+	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
 	//Materials count (dataVersion>=20)
@@ -471,7 +478,7 @@ bool ccMaterialSet::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 		for (uint32_t i = 0; i < count; ++i)
 		{
 			ccMaterial::Shared mtl(new ccMaterial);
-			if (!mtl->fromFile(in, dataVersion, flags))
+			if (!mtl->fromFile(in, dataVersion, flags, oldToNewIDMap))
 				return false;
 			addMaterial(mtl, true); //if we load a file, we can't allow that materials are not in the same order as before!
 		}

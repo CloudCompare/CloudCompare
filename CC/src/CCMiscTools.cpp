@@ -103,7 +103,9 @@ bool CCMiscTools::TriBoxOverlap(const CCVector3& boxcenter, const CCVector3& box
 	/*       this gives 3x3=9 more tests */
 
 	/* move everything so that the boxcenter is in (0,0,0) */
-	PointCoordinateType v0[3],v1[3],v2[3];
+	PointCoordinateType v0[3];
+	PointCoordinateType v1[3];
+	PointCoordinateType v2[3];
 	CCVector3::vsubstract(triverts[0]->u, boxcenter.u, v0);
 	CCVector3::vsubstract(triverts[1]->u, boxcenter.u, v1);
 	CCVector3::vsubstract(triverts[2]->u, boxcenter.u, v2);
@@ -114,12 +116,16 @@ bool CCMiscTools::TriBoxOverlap(const CCVector3& boxcenter, const CCVector3& box
 	/* Bullet 3: */
 
 	/*  test the 9 tests first (this was faster) */
-	PointCoordinateType rad,fex,fey,fez;		// -NJMP- "d" local variable removed
+	PointCoordinateType rad;
+	PointCoordinateType fex;
+	PointCoordinateType fey;
+	PointCoordinateType fez;
 	//fex = std::abs(e0[0]);
 	fey = std::abs(e0[1]);
 	fez = std::abs(e0[2]);
 
-	PointCoordinateType minV,maxV;
+	PointCoordinateType minV;
+	PointCoordinateType maxV;
 	AXISTEST_X01(e0[2], e0[1], fez, fey);
 	fex = std::abs(e0[0]); //DGM: not necessary before!
 	AXISTEST_Y02(e0[2], e0[0], fez, fex);
@@ -231,7 +237,9 @@ bool CCMiscTools::TriBoxOverlapd(const CCVector3d& boxcenter, const CCVector3d& 
 	/*       this gives 3x3=9 more tests */
 
 	/* move everything so that the boxcenter is in (0,0,0) */
-	double v0[3], v1[3], v2[3];
+	double v0[3];
+	double v1[3];
+	double v2[3];
 	CCVector3d::vsubstract(triverts[0].u, boxcenter.u, v0);
 	CCVector3d::vsubstract(triverts[1].u, boxcenter.u, v1);
 	CCVector3d::vsubstract(triverts[2].u, boxcenter.u, v2);
@@ -242,12 +250,13 @@ bool CCMiscTools::TriBoxOverlapd(const CCVector3d& boxcenter, const CCVector3d& 
 	/* Bullet 3: */
 
 	/*  test the 9 tests first (this was faster) */
-	double rad, fex, fey, fez;		// -NJMP- "d" local variable removed
-	//fex = std::abs(e0[0]);
-	fey = std::abs(e0[1]);
-	fez = std::abs(e0[2]);
+	double rad = 0.0;
+	double fex = 0.0;
+	double fey = std::abs(e0[1]);
+	double fez = std::abs(e0[2]);
 
-	double minV, maxV;
+	double minV = 0.0;
+	double maxV = 0.0;
 	AXISTEST_X01(e0[2], e0[1], fez, fey);
 	fex = std::abs(e0[0]); //DGM: not necessary before!
 	AXISTEST_Y02(e0[2], e0[0], fez, fex);

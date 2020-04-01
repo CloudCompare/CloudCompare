@@ -6,7 +6,7 @@ option( PLUGIN_STANDARD_QCORK "Check to install qCORK plugin" OFF )
 if (PLUGIN_STANDARD_QCORK)
     project( QCORK_PLUGIN )
     
-	include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
+	include( CMakePolicies NO_POLICY_SCOPE )
 
     # Cork lib and MPIR are needed to build this plugin
     include( CorkSupport.cmake NO_POLICY_SCOPE )

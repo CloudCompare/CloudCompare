@@ -67,11 +67,11 @@ ccPointPropertiesDlg::~ccPointPropertiesDlg()
 {
 	if (m_label)
 		delete m_label;
-	m_label = 0;
+	m_label = nullptr;
 
 	if (m_rect2DLabel)
 		delete m_rect2DLabel;
-	m_rect2DLabel = 0;
+	m_rect2DLabel = nullptr;
 }
 
 bool ccPointPropertiesDlg::linkWith(ccGLWindow* win)
@@ -215,11 +215,11 @@ void ccPointPropertiesDlg::initializeState()
 
 void ccPointPropertiesDlg::exportCurrentLabel()
 {
-	ccHObject* labelObject = 0;
+	ccHObject* labelObject = nullptr;
 	if (m_pickingMode == RECT_ZONE)
-		labelObject = (m_rect2DLabel->isSelected() && m_rect2DLabel->isVisible() ? m_rect2DLabel : 0);
+		labelObject = (m_rect2DLabel->isSelected() && m_rect2DLabel->isVisible() ? m_rect2DLabel : nullptr);
 	else
-		labelObject = (m_label && m_label->size() > 0 ? m_label : 0);
+		labelObject = (m_label && m_label->size() > 0 ? m_label : nullptr);
 	
 	if (!labelObject)
 	{
@@ -231,7 +231,7 @@ void ccPointPropertiesDlg::exportCurrentLabel()
 		m_associatedWin->removeFromOwnDB(labelObject);
 	labelObject->setSelected(false);
 
-	ccHObject* newLabelObject = 0;
+	ccHObject* newLabelObject = nullptr;
 	if (m_pickingMode == RECT_ZONE)
 	{
 		//if (m_associatedWin)

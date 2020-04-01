@@ -54,10 +54,6 @@ ccGlFilter* ccBilateralFilter::clone() const
 	return filter;
 }
 
-ccBilateralFilter::~ccBilateralFilter()
-{
-}
-
 void ccBilateralFilter::useExistingViewport(bool state)
 {
 	m_useCurrentViewport = state;

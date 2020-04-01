@@ -247,7 +247,8 @@ void ccScalarField::updateSaturationBounds()
 	{
 		//DGM: same formulas as for the 'relative scale' case but we use the boundaries
 		//defined by the scale itself instead of the current SF boundaries...
-		double minVal = 0, maxVal = 0;
+		double minVal = 0;
+		double maxVal = 0;
 		m_colorScale->getAbsoluteBoundaries(minVal, maxVal);
 
 		m_saturationRange.setBounds(static_cast<ScalarType>(minVal), static_cast<ScalarType>(maxVal));
@@ -387,7 +388,7 @@ bool ccScalarField::toFile(QFile& out) const
 	return true;
 }
 
-bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags)
+bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
 	assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
 
@@ -564,7 +565,7 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags)
 			if (hasColorScale)
 			{
 				ccColorScale::Shared colorScale = ccColorScale::Create("temp");
-				if (!colorScale->fromFile(in, dataVersion, flags))
+				if (!colorScale->fromFile(in, dataVersion, flags, oldToNewIDMap))
 					return ReadError();
 				m_colorScale = colorScale;
 

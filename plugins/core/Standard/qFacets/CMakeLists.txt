@@ -10,7 +10,7 @@ if (PLUGIN_STANDARD_QFACETS)
 
 	project( QFACETS_PLUGIN )
 
-	include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
+	include( CMakePolicies NO_POLICY_SCOPE )
 
 	# we need includes from the main CC source dir
 	include_directories( ${CloudCompare_SOURCE_DIR} )
@@ -35,5 +35,5 @@ if (PLUGIN_STANDARD_QFACETS)
 	#add shapelib support
 	target_link_libraries( ${PROJECT_NAME} SHAPELIB )
 	include_directories( ${SHAPELIB_SOURCE_DIR} )
-	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_SHP_SUPPORT )
+	target_compile_definitions( ${PROJECT_NAME} PRIVATE CC_SHP_SUPPORT )
 endif()

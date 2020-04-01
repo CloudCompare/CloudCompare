@@ -38,7 +38,7 @@
 #include <QThread>
 
 qCanupoClassifDialog::qCanupoClassifDialog(ccPointCloud* cloud, ccMainAppInterface* app)
-	: QDialog(app ? app->getMainWindow() : 0)
+	: QDialog(app ? app->getMainWindow() : nullptr)
 	, Ui::CanupoClassifDialog()
 	, m_app(app)
 	, m_cloud(cloud)
@@ -58,7 +58,7 @@ qCanupoClassifDialog::qCanupoClassifDialog(ccPointCloud* cloud, ccMainAppInterfa
 	if (cloud)
 	{
 		//check if a the cloud has an active SF!
-		useSFCheckBox->setEnabled(cloud->getCurrentDisplayedScalarField() != 0);
+		useSFCheckBox->setEnabled(cloud->getCurrentDisplayedScalarField() != nullptr);
 	}
 
 	if (m_app)
@@ -142,7 +142,7 @@ ccPointCloud* qCanupoClassifDialog::getCorePointsCloud()
 	}
 	else
 	{
-		return 0;
+		return nullptr;
 	}
 }
 

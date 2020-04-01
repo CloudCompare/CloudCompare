@@ -652,7 +652,9 @@ bool Orientation::execute(PdmsObjects::GenericItem* &item) const
 	}
 
 	//Get position point
-	CCVector3 x, y, z;
+	CCVector3 x;
+	CCVector3 y;
+	CCVector3 z;
 	if (!getAxes(x, y, z))
 		return false;
 
@@ -1717,7 +1719,8 @@ bool Cone::setValue(Token t, PointCoordinateType value)
 
 PointCoordinateType Cone::surface() const
 {
-	PointCoordinateType r1, r2;
+	PointCoordinateType r1;
+	PointCoordinateType r2;
 	if (dtop < dbottom)
 	{
 		r1 = dtop;

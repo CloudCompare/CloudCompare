@@ -706,7 +706,8 @@ bool ccRasterizeTool::updateGrid(bool interpolateSF/*=false*/)
 		m_UI->filledCellsPercentageLabel->setText("0 %");
 	}
 
-	unsigned gridWidth = 0, gridHeight = 0;
+	unsigned gridWidth = 0;
+	unsigned gridHeight = 0;
 	if (!getGridSize(gridWidth, gridHeight))
 	{
 		return false;
@@ -2186,7 +2187,7 @@ void ccRasterizeTool::generateImage() const
 			unsigned steps = (addTransparentColor ? 255 : 256);
 			for (unsigned i = 0; i < steps; i++)
 			{
-				const ccColor::Rgb* col = colorScale->getColorByRelativePos(i / static_cast<double>(steps - 1), steps, &ccColor::lightGrey);
+				const ccColor::Rgb* col = colorScale->getColorByRelativePos(i / static_cast<double>(steps - 1), steps, &ccColor::lightGreyRGB);
 				palette[i] = qRgba(col->r, col->g, col->b, 255);
 			}
 		}

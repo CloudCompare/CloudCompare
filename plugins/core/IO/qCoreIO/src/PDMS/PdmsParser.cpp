@@ -444,7 +444,8 @@ void PdmsFileSession::skipComment()
 
 void PdmsFileSession::skipHandleCommand()
 {
-	int opened = 0, state = 0;
+	int opened = 0;
+	int state = 0;
 
 	//Search for "HANDLE(...)" and remove this string from tokenBuffer
 	for (unsigned i = 0; i < strlen(tokenBuffer); i++)

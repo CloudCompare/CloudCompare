@@ -104,7 +104,7 @@ void ccMouseCircle::draw(CC_DRAW_CONTEXT& context)
 	glFunc->glLineStipple(1, 0xAAAA);
 	glFunc->glEnable(GL_LINE_STIPPLE);
 
-	glFunc->glColor3ubv(ccColor::red.rgb);
+	glFunc->glColor4ubv(ccColor::red.rgba);
 
 	//get height & width
 	int halfW = static_cast<int>(context.glW / 2.0f);

@@ -138,6 +138,8 @@ ccCommandLineParser::ccCommandLineParser()
 	, m_cloudExportExt(BinFilter::GetDefaultExtension())
 	, m_meshExportFormat(BinFilter::GetFileFilter())
 	, m_meshExportExt(BinFilter::GetDefaultExtension())
+	, m_hierarchyExportFormat(BinFilter::GetFileFilter())
+	, m_hierarchyExportExt(BinFilter::GetDefaultExtension())
 	, m_orphans("orphans")
 	, m_progressDialog(nullptr)
 	, m_parentWidget(nullptr)
@@ -164,7 +166,7 @@ bool ccCommandLineParser::registerCommand(Command::Shared command)
 	if (m_commands.contains(command->m_keyword))
 	{
 		assert(false);
-		warning(QString("Internal error: keyword '%' already registered (by command '%2')").arg(command->m_keyword, m_commands[command->m_keyword]->m_name));
+		warning(QString("Internal error: keyword '%1' already registered (by command '%2')").arg(command->m_keyword, m_commands[command->m_keyword]->m_name));
 		return false;
 	}
 
@@ -229,10 +231,9 @@ QString ccCommandLineParser::getExportFilename(	const CLEntityDesc& entityDesc,
 }
 
 QString ccCommandLineParser::exportEntity(	CLEntityDesc& entityDesc,
-											QString suffix/*=QString()*/,
-											QString* baseOutputFilename/*=0*/,
-											bool forceIsCloud/*=false*/,
-											bool forceNoTimestamp/*=false*/)
+											const QString& suffix/*=QString()*/,
+											QString* baseOutputFilename/*=nullptr*/,
+											ccCommandLineInterface::ExportOptions options/*ExportOptiopn::NoOption*/)
 {
 	print("[SAVING]");
 
@@ -244,12 +245,34 @@ QString ccCommandLineParser::exportEntity(	CLEntityDesc& entityDesc,
 		return "[ExportEntity] Internal error: invalid input entity!";
 	}
 
+	bool anyForced = options.testFlag(ExportOption::ForceCloud) | options.testFlag(ExportOption::ForceHierarchy) | options.testFlag(ExportOption::ForceMesh);
 	//specific case: clouds
-	bool isCloud = entity->isA(CC_TYPES::POINT_CLOUD);
-	isCloud |= forceIsCloud;
-	QString extension = isCloud ? m_cloudExportExt : m_meshExportExt;
+	bool isCloud = entity->isA(CC_TYPES::POINT_CLOUD) || entityDesc.getCLEntityType() == CL_ENTITY_TYPE::CLOUD;
 
-	QString outputFilename = getExportFilename(entityDesc, extension, suffix, baseOutputFilename, forceNoTimestamp);
+	//specific case: mesh
+	bool isMesh = entity->isKindOf(CC_TYPES::MESH) || entityDesc.getCLEntityType() == CL_ENTITY_TYPE::MESH;
+
+	QString extension = isCloud ? m_cloudExportExt : isMesh ? m_meshExportExt : m_hierarchyExportExt;
+	QString format = isCloud ? m_cloudExportFormat : isMesh ? m_meshExportFormat : m_hierarchyExportFormat;
+	if (anyForced)
+	{
+		if (options.testFlag(ExportOption::ForceCloud))
+		{
+			extension = m_cloudExportExt;
+			format = m_cloudExportFormat;
+		}
+		if (options.testFlag(ExportOption::ForceMesh))
+		{
+			extension = m_meshExportExt;
+			format = m_meshExportFormat;
+		}
+		if (options.testFlag(ExportOption::ForceHierarchy))
+		{
+			extension = m_hierarchyExportExt;
+			format = m_hierarchyExportFormat;
+		}
+	}
+	QString outputFilename = getExportFilename(entityDesc, extension, suffix, baseOutputFilename, options.testFlag(ExportOption::ForceNoTimestamp));
 	if (outputFilename.isEmpty())
 	{
 		return QString();
@@ -304,7 +327,7 @@ QString ccCommandLineParser::exportEntity(	CLEntityDesc& entityDesc,
 	CC_FILE_ERROR result = FileIOFilter::SaveToFile(entity,
 													outputFilename,
 													parameters,
-													isCloud ? m_cloudExportFormat : m_meshExportFormat);
+													format);
 
 	//restore input state!
 	if (tempDependencyCreated)
@@ -487,7 +510,7 @@ bool ccCommandLineParser::saveClouds(QString suffix/*=QString()*/, bool allAtOnc
 				CommandSave::SetFileDesc(desc, *allAtOnceFileName);
 			}
 
-			QString errorStr = exportEntity(desc, suffix, nullptr, true);
+			QString errorStr = exportEntity(desc, suffix, nullptr, ExportOption::ForceCloud);
 			if (!errorStr.isEmpty())
 				return error(errorStr);
 			else
@@ -544,7 +567,7 @@ bool ccCommandLineParser::saveMeshes(QString suffix/*=QString()*/, bool allAtOnc
 				CommandSave::SetFileDesc(desc, *allAtOnceFileName);
 			}
 
-			QString errorStr = exportEntity(desc, suffix, nullptr, false);
+			QString errorStr = exportEntity(desc, suffix, nullptr, ExportOption::ForceMesh);
 			if (!errorStr.isEmpty())
 				return error(errorStr);
 			else
@@ -607,6 +630,7 @@ void ccCommandLineParser::registerBuiltInCommands()
 	registerCommand(Command::Shared(new CommandICP));
 	registerCommand(Command::Shared(new CommandChangeCloudOutputFormat));
 	registerCommand(Command::Shared(new CommandChangeMeshOutputFormat));
+	registerCommand(Command::Shared(new CommandChangeHierarchyOutputFormat));
 	registerCommand(Command::Shared(new CommandChangePLYExportFormat));
 	registerCommand(Command::Shared(new CommandForceNormalsComputation));
 	registerCommand(Command::Shared(new CommandSaveClouds));

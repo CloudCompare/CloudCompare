@@ -57,7 +57,7 @@ public:
 	unsigned getNumberOfValidEntities() const;
 
 	//! Get a pointer to the polyline that has been segmented
-	ccPolyline *getPolyLine() {return m_segmentationPoly;}
+	const ccPolyline* getPolyLine() const { return m_segmentationPoly; }
 
 	//! Returns the active 'to be segmented' set
 	QSet<ccHObject*>& entities() { return m_toSegment; }

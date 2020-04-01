@@ -21,8 +21,9 @@ ccCylinder::ccCylinder(	PointCoordinateType radius,
 						PointCoordinateType height,
 						const ccGLMatrix* transMat/*=0*/,
 						QString name/*=QString("Cylinder")*/,
-						unsigned precision/*=DEFAULT_DRAWING_PRECISION*/)
-	: ccCone(radius, radius, height, 0, 0, transMat, name, precision)
+						unsigned precision/*=DEFAULT_DRAWING_PRECISION*/,
+						unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
+	: ccCone(radius, radius, height, 0, 0, transMat, name, precision, uniqueID)
 {
 }
 

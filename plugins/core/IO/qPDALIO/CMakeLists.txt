@@ -5,7 +5,7 @@ option( PLUGIN_IO_QPDAL "Install qPDALIO plugin to read & write LAS files" OFF )
 if ( PLUGIN_IO_QPDAL )
 	project( QPDAL_IO_PLUGIN )
 
-	include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
+	include( CMakePolicies NO_POLICY_SCOPE )
 
 	set( CC_IS_IO_PLUGIN 1 )
 	
@@ -19,14 +19,15 @@ if ( PLUGIN_IO_QPDAL )
 		link_directories( ${PDAL_LIBRARY_DIRS} )
 	endif()
 
-	set( JSON_ROOT_DIR "" CACHE PATH "Jsoncpp root dir (PDAL/vendor/jsoncpp/dist)" )
-	
-	if( NOT JSON_ROOT_DIR )
-		message( WARNING "Jsoncpp root dir is not specified (JSON_ROOT_DIR)" )
-	else()
-		include_directories( ${JSON_ROOT_DIR} )
+	if (PDAL_VERSION LESS 2.0.0)
+		set(JSON_ROOT_DIR "" CACHE PATH "Jsoncpp root dir (PDAL/vendor/jsoncpp/dist)")
+		if (NOT JSON_ROOT_DIR)
+			message(WARNING "Jsoncpp root dir is not specified (JSON_ROOT_DIR)")
+		else ()
+			include_directories(${JSON_ROOT_DIR})
+		endif ()
 	endif()
-	
+
 	# Plugin source
 	include_directories( src )
 

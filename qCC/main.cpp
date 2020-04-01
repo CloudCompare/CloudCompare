@@ -124,7 +124,7 @@ int main(int argc, char **argv)
 			}
 			else
 			{
-				QMessageBox::warning(0, QObject::tr("Translation"), QObject::tr("Failed to load language file '%1'").arg(langFilename));
+				QMessageBox::warning(nullptr, QObject::tr("Translation"), QObject::tr("Failed to load language file '%1'").arg(langFilename));
 			}
 			commandLine = false;
 			lastArgumentIndex += 2;
@@ -140,7 +140,7 @@ int main(int argc, char **argv)
 	{
 		if ((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_2_1) == 0)
 		{
-			QMessageBox::critical(0, "Error", "This application needs OpenGL 2.1 at least to run!");
+			QMessageBox::critical(nullptr, "Error", "This application needs OpenGL 2.1 at least to run!");
 			return EXIT_FAILURE;
 		}
 
@@ -173,7 +173,7 @@ int main(int argc, char **argv)
 		MainWindow* mainWindow = MainWindow::TheInstance();
 		if (!mainWindow)
 		{
-			QMessageBox::critical(0, "Error", "Failed to initialize the main application window?!");
+			QMessageBox::critical(nullptr, "Error", "Failed to initialize the main application window?!");
 			return EXIT_FAILURE;
 		}
 		mainWindow->initPlugins();
@@ -263,11 +263,11 @@ int main(int argc, char **argv)
 		}
 		catch (const std::exception& e)
 		{
-			QMessageBox::warning(0, "CC crashed!", QString("Hum, it seems that CC has crashed... Sorry about that :)\n") + e.what());
+			QMessageBox::warning(nullptr, "CC crashed!", QString("Hum, it seems that CC has crashed... Sorry about that :)\n") + e.what());
 		}
 		catch (...)
 		{
-			QMessageBox::warning(0, "CC crashed!", "Hum, it seems that CC has crashed... Sorry about that :)");
+			QMessageBox::warning(nullptr, "CC crashed!", "Hum, it seems that CC has crashed... Sorry about that :)");
 		}
 
 		//release the plugins

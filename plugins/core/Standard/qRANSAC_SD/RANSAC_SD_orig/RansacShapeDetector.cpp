@@ -637,9 +637,10 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 					oldSize = newSize;
 					std::pair< size_t, float > score;
 					PrimitiveShape *shape;
-					if(shape = Fit(allowDifferentShapes, *clone.Shape(),
+					shape = Fit(allowDifferentShapes, *clone.Shape(),
 						pc, clone.Indices()->begin(), clone.Indices()->end(),
-						&score))
+						&score);
+					if(shape)
 					{
 						clone.Shape(shape);
 						newScore = clone.GlobalWeightedScore( globalScoreVisitor, globalOctree,

@@ -43,12 +43,6 @@ ccIndexedTransformation::ccIndexedTransformation(const ccGLMatrix& matrix, doubl
 {
 }
 
-ccIndexedTransformation::ccIndexedTransformation(const ccIndexedTransformation& trans)
-	: ccGLMatrix(trans)
-	, m_index(trans.m_index)
-{
-}
-
 bool ccIndexedTransformation::toAsciiFile(QString filename, int precision/*=12*/) const
 {
 	QFile fp(filename);
@@ -182,9 +176,9 @@ bool ccIndexedTransformation::toFile(QFile& out) const
 	return true;
 }
 
-bool ccIndexedTransformation::fromFile(QFile& in, short dataVersion, int flags)
+bool ccIndexedTransformation::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
-	if (!ccGLMatrix::fromFile(in, dataVersion, flags))
+	if (!ccGLMatrix::fromFile(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
 	assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));

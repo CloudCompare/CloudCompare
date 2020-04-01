@@ -67,7 +67,7 @@ enum CC_OBJECT_FLAG {	//CC_UNUSED			= 1, //DGM: not used anymore (former CC_FATH
 #define CC_TEX_COORDS_BIT				0x00000080000000	//Texture coordinates (u,v)
 #define CC_CAMERA_BIT					0x00000100000000	//For camera sensors (projective sensors)
 #define CC_QUADRIC_BIT					0x00000200000000	//Quadric (primitive)
-//#define CC_FREE_BIT					0x00000400000000
+#define CC_RGBA_COLOR_BIT				0x00000400000000	//Color (R,G,B,A)
 //#define CC_FREE_BIT					0x00000800000000
 //#define CC_FREE_BIT					0x00000400000000
 //#define CC_FREE_BIT					0x00001000000000
@@ -115,6 +115,7 @@ namespace CC_TYPES
 		NORMALS_ARRAY		=	CC_ARRAY_BIT		| CC_NORMAL_BIT				| CC_LEAF_BIT,
 		NORMAL_INDEXES_ARRAY=	CC_ARRAY_BIT		| CC_COMPRESSED_NORMAL_BIT	| CC_LEAF_BIT,
 		RGB_COLOR_ARRAY		=	CC_ARRAY_BIT		| CC_RGB_COLOR_BIT			| CC_LEAF_BIT,
+		RGBA_COLOR_ARRAY	=	CC_ARRAY_BIT		| CC_RGBA_COLOR_BIT			| CC_LEAF_BIT,
 		TEX_COORDS_ARRAY	=	CC_ARRAY_BIT		| CC_TEX_COORDS_BIT			| CC_LEAF_BIT,
 		LABEL_2D			=	HIERARCHY_OBJECT	| CC_LABEL_BIT				| CC_LEAF_BIT,
 		VIEWPORT_2D_OBJECT	=	HIERARCHY_OBJECT	| CC_VIEWPORT_BIT			| CC_LEAF_BIT,
@@ -149,14 +150,17 @@ class QCC_DB_LIB_API ccUniqueIDGenerator
 {
 public:
 
+	static constexpr unsigned InvalidUniqueID = 0xFFFFFFFF;
+	static constexpr unsigned MinUniqueID = 0x00000100;
+
 	//! Shared type
 	using Shared = QSharedPointer<ccUniqueIDGenerator>;
 
 	//! Default constructor
-	ccUniqueIDGenerator() : m_lastUniqueID(0) {}
+	ccUniqueIDGenerator() : m_lastUniqueID(MinUniqueID) {}
 
 	//! Resets the unique ID
-	void reset() { m_lastUniqueID = 0; }
+	void reset() { m_lastUniqueID = MinUniqueID; }
 	//! Returns a (new) unique ID
 	unsigned fetchOne() { return ++m_lastUniqueID; }
 	//! Returns the value of the last generated unique ID
@@ -175,8 +179,9 @@ public:
 
 	//! Default constructor
 	/** \param name object name (optional)
+		\param uniqueID unique ID (handle with care! Will be auto generated if equal to ccUniqueIDGenerator::InvalidUniqueID)
 	**/
-	ccObject(const QString& name = QString());
+	ccObject(const QString& name = QString(), unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID);
 
 	//! Copy constructor
 	ccObject(const ccObject& object);
@@ -308,7 +313,7 @@ protected:
 		before calling this method, as the classID is voluntarily
 		skipped (in order to let the user instantiate the object first)
 	**/
-	bool fromFile(QFile& in, short dataVersion, int flags) override;
+	bool fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
 
 	//! Object name
 	QString m_name;

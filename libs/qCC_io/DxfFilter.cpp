@@ -141,12 +141,12 @@ public:
 			if (m_points->hasColors())
 			{
 				//simply add the new color
-				m_points->addRGBColor(col);
+				m_points->addColor(col);
 			}
 			else
 			{
 				//reserve memory (and fill the previous points with a default color if necessary)
-				if (!m_points->setRGBColor(ccColor::white))
+				if (!m_points->setColor(ccColor::white))
 				{
 					ccLog::Error("[DxfImporter] Not enough memory!");
 					return;
@@ -158,7 +158,7 @@ public:
 		else if (m_points->hasColors())
 		{
 			//add default color if none is defined!
-			m_points->addRGBColor(ccColor::white);
+			m_points->addColor(ccColor::white);
 		}
 	}
 
@@ -277,8 +277,8 @@ public:
 						//We must also check that the color is the same (if any)
 						if (faceCol || vertices->hasColors())
 						{
-							const ccColor::Rgb* _faceCol = faceCol ? faceCol : &ccColor::white;
-							const ccColor::Rgb* _vertCol = vertices->hasColors() ? &vertices->getPointColor(j) : &ccColor::white;
+							const ccColor::Rgb* _faceCol = faceCol ? faceCol : &ccColor::whiteRGB;
+							const ccColor::Rgba* _vertCol = vertices->hasColors() ? &vertices->getPointColor(j) : &ccColor::white;
 							useCurrentVertex = (_faceCol->r == _vertCol->r && _faceCol->g == _vertCol->g && _faceCol->b == _vertCol->b);
 						}
 
@@ -388,14 +388,14 @@ public:
 			if (vertices->hasColors())
 			{
 				for (unsigned i = 0; i < createdVertCount; ++i)
-					vertices->addRGBColor(*faceCol);
+					vertices->addColor(*faceCol);
 			}
 			//otherwise, reserve memory and set all previous points to white by default
-			else if (vertices->setRGBColor(ccColor::white))
+			else if (vertices->setColor(ccColor::white))
 			{
 				//then replace the last color(s) by the current one
 				for (unsigned i = 0; i < createdVertCount; ++i)
-					vertices->setPointColor(vertCount - 1 - i, *faceCol);
+					vertices->setPointColor(vertCount - 1 - i, ccColor::Rgba(*faceCol, ccColor::MAX));
 				m_faces->showColors(true);
 			}
 		}
@@ -403,7 +403,7 @@ public:
 		{
 			//add default color if none is defined!
 			for (unsigned i = 0; i < createdVertCount; ++i)
-				vertices->addRGBColor(ccColor::white);
+				vertices->addColor(ccColor::white);
 		}
 	}
 
@@ -581,7 +581,8 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const QString& filename, co
 		return CC_FERR_NO_SAVE;
 
 	//get global bounding box
-	CCVector3d bbMinCorner, bbMaxCorner;
+	CCVector3d bbMinCorner;
+	CCVector3d bbMaxCorner;
 	{
 		ccHObject::Container* containers[3] = { &polylines, &meshes, &clouds };
 
@@ -590,7 +591,8 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const QString& filename, co
 		{
 			for (size_t i = 0; i < containers[j]->size(); ++i)
 			{
-				CCVector3d minC, maxC;
+				CCVector3d minC;
+				CCVector3d maxC;
 				if (containers[j]->at(i)->getGlobalBB(minC, maxC))
 				{
 					//update global BB

@@ -54,10 +54,10 @@ qCanupo2DViewDialog::qCanupo2DViewDialog(	const CorePointDescSet* descriptors1,
 											int class2/*=2*/,
 											const CorePointDescSet* evaluationDescriptors/*=0*/,
 											ccMainAppInterface* app/*=0*/)
-	: QDialog(app ? app->getMainWindow() : 0)
+	: QDialog(app ? app->getMainWindow() : nullptr)
 	, Ui::Canupo2DViewDialog()
 	, m_app(app)
-	, m_glWindow(0)
+	, m_glWindow(nullptr)
 	, m_classifierSaved(false)
 	, m_descriptors1(descriptors1)
 	, m_descriptors2(descriptors2)
@@ -66,9 +66,9 @@ qCanupo2DViewDialog::qCanupo2DViewDialog(	const CorePointDescSet* descriptors1,
 	, m_cloud1Name(cloud1Name)
 	, m_cloud2Name(cloud2Name)
 	, m_class2(class2)
-	, m_cloud(0)
-	, m_poly(0)
-	, m_polyVertices(0)
+	, m_cloud(nullptr)
+	, m_poly(nullptr)
+	, m_polyVertices(nullptr)
 	, m_selectedPointIndex(-1)
 	, m_pickingRadius(5)
 {
@@ -82,7 +82,7 @@ qCanupo2DViewDialog::qCanupo2DViewDialog(	const CorePointDescSet* descriptors1,
 
 	//setup 2D view
 	{
-		QWidget* glWidget = 0;
+		QWidget* glWidget = nullptr;
 		m_app->createGLWindow(m_glWindow, glWidget);
 		assert(m_glWindow && glWidget);
 
@@ -161,12 +161,12 @@ void qCanupo2DViewDialog::reset()
 	
 	if (m_poly)
 		delete m_poly;
-	m_poly = 0;
-	m_polyVertices = 0; //m_polyVertices is a child of m_poly
+	m_poly = nullptr;
+	m_polyVertices = nullptr; //m_polyVertices is a child of m_poly
 	
 	if (m_cloud)
 		delete m_cloud;
-	m_cloud = 0;
+	m_cloud = nullptr;
 }
 
 void qCanupo2DViewDialog::getActiveScales(std::vector<float>& scales) const
@@ -228,7 +228,7 @@ bool qCanupo2DViewDialog::trainClassifier()
 										m_app))
 	{
 		delete m_cloud;
-		m_cloud = 0;
+		m_cloud = nullptr;
 		
 		s_training = false;
 		setEnabled(true);
@@ -510,7 +510,7 @@ void qCanupo2DViewDialog::addOrSelectPoint(int x, int y)
 	int closeIndex = getClosestVertex(x, y, P);
 
 	//B = closest vertex
-	const CCVector3* B = (closeIndex >= 0 ? m_poly->getPoint(closeIndex) : 0);
+	const CCVector3* B = (closeIndex >= 0 ? m_poly->getPoint(closeIndex) : nullptr);
 
 	//picking radius
 	double maxPickingDist = static_cast<double>(m_pickingRadius) * m_glWindow->computeActualPixelSize();
@@ -634,7 +634,7 @@ void qCanupo2DViewDialog::removePoint(int x, int y)
 	double maxPickingDist = static_cast<double>(m_pickingRadius) * m_glWindow->computeActualPixelSize();
 
 	//B = closest vertex
-	const CCVector3* B = (closeIndex >=0 ? m_poly->getPoint(closeIndex) : 0);
+	const CCVector3* B = (closeIndex >=0 ? m_poly->getPoint(closeIndex) : nullptr);
 	if ((P-*B).norm() > maxPickingDist)
 	{
 		//too far

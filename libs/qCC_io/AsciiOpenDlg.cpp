@@ -203,9 +203,11 @@ static bool CouldBeZ (const QString& colHeader) { return colHeader.startsWith(As
 static bool CouldBeRf(const QString& colHeader) { return colHeader == AsciiHeaderColumns::Rf().toUpper(); }
 static bool CouldBeGf(const QString& colHeader) { return colHeader == AsciiHeaderColumns::Gf().toUpper(); }
 static bool CouldBeBf(const QString& colHeader) { return colHeader == AsciiHeaderColumns::Bf().toUpper(); }
+static bool CouldBeAf(const QString& colHeader) { return colHeader == AsciiHeaderColumns::Af().toUpper(); }
 static bool CouldBeR (const QString& colHeader) { return colHeader == AsciiHeaderColumns::R().toUpper() || colHeader.contains("RED"); }
 static bool CouldBeG (const QString& colHeader) { return colHeader == AsciiHeaderColumns::G().toUpper() || colHeader.contains("GREEN"); }
 static bool CouldBeB (const QString& colHeader) { return colHeader == AsciiHeaderColumns::B().toUpper() || colHeader.contains("BLUE"); }
+static bool CouldBeA (const QString& colHeader) { return colHeader == AsciiHeaderColumns::A().toUpper() || colHeader.contains("ALPHA"); }
 static bool CouldBeNx(const QString& colHeader) { return colHeader.startsWith(AsciiHeaderColumns::Nx().toUpper()) || (colHeader.contains("NORM") && colHeader.contains("X")); }
 static bool CouldBeNy(const QString& colHeader) { return colHeader.startsWith(AsciiHeaderColumns::Ny().toUpper()) || (colHeader.contains("NORM") && colHeader.contains("Y")); }
 static bool CouldBeNz(const QString& colHeader) { return colHeader.startsWith(AsciiHeaderColumns::Nz().toUpper()) || (colHeader.contains("NORM") && colHeader.contains("Z")); }
@@ -223,16 +225,20 @@ static const unsigned DISPLAYED_LINES = 20;				//number of displayed lines
 static unsigned X_BIT		= 1;
 static unsigned Y_BIT		= 2;
 static unsigned Z_BIT		= 4;
+static unsigned W_BIT		= 8;
 static unsigned XYZ_BITS	= X_BIT | Y_BIT | Z_BIT;
+static unsigned XYZW_BITS	= XYZ_BITS | W_BIT;
 
-static int EnabledBits(unsigned bitField3)
+static int EnabledBits(unsigned bitField)
 {
 	int count = 0;
-	if (bitField3 & X_BIT)
+	if (bitField & X_BIT)
 		++count;
-	if (bitField3 & Y_BIT)
+	if (bitField & Y_BIT)
 		++count;
-	if (bitField3 & Z_BIT)
+	if (bitField & Z_BIT)
+		++count;
+	if (bitField & W_BIT)
 		++count;
 
 	return count;
@@ -556,9 +562,11 @@ void AsciiOpenDlg::updateTable()
 				columnHeaderWidget->setItemIcon(ASCII_OPEN_DLG_R, RGBIcon);
 				columnHeaderWidget->setItemIcon(ASCII_OPEN_DLG_G, RGBIcon);
 				columnHeaderWidget->setItemIcon(ASCII_OPEN_DLG_B, RGBIcon);
+				columnHeaderWidget->setItemIcon(ASCII_OPEN_DLG_A, RGBIcon);
 				columnHeaderWidget->setItemIcon(ASCII_OPEN_DLG_Rf, RGBIcon);
 				columnHeaderWidget->setItemIcon(ASCII_OPEN_DLG_Gf, RGBIcon);
 				columnHeaderWidget->setItemIcon(ASCII_OPEN_DLG_Bf, RGBIcon);
+				columnHeaderWidget->setItemIcon(ASCII_OPEN_DLG_Af, RGBIcon);
 				columnHeaderWidget->setItemIcon(ASCII_OPEN_DLG_Grey, GreyIcon);
 				columnHeaderWidget->setItemIcon(ASCII_OPEN_DLG_RGB32i, RGBIcon);
 				columnHeaderWidget->setItemIcon(ASCII_OPEN_DLG_RGB32f, RGBIcon);
@@ -709,6 +717,13 @@ void AsciiOpenDlg::updateTable()
 						assignedRGBFlags |= Z_BIT; //update bit field accordingly
 						m_columnType[i] = VALID;
 					}
+					else if ((assignedRGBFlags & W_BIT) == 0 && CouldBeA(colHeader))
+					{
+						//Blue
+						columnHeaderWidget->setCurrentIndex(ASCII_OPEN_DLG_A);
+						assignedRGBFlags |= W_BIT; //update bit field accordingly
+						m_columnType[i] = VALID;
+					}
 					else if ((assignedNormFlags & X_BIT) == 0 && CouldBeNx(colHeader))
 					{
 						//Nx
@@ -854,6 +869,11 @@ void AsciiOpenDlg::updateTable()
 								columnHeaderWidget->setCurrentIndex(ASCII_OPEN_DLG_B);
 								assignedRGBFlags |= Z_BIT; //update bit field accordingly
 							}
+							else if (!(assignedRGBFlags & W_BIT))
+							{
+								columnHeaderWidget->setCurrentIndex(ASCII_OPEN_DLG_A);
+								assignedRGBFlags |= W_BIT; //update bit field accordingly
+							}
 						}
 						//looks like a normal vector?
 						else if (valueIsBelowOne[i]
@@ -986,7 +1006,7 @@ bool AsciiOpenDlg::apply()
 	QString errorMessage;
 	if (!CheckOpenSequence(getOpenSequence(),errorMessage))
 	{
-		QMessageBox::warning(0, "Error", errorMessage);
+		QMessageBox::warning(nullptr, "Error", errorMessage);
 		return false;
 	}
 	else
@@ -1144,6 +1164,11 @@ bool AsciiOpenDlg::safeSequence() const
 		case ASCII_OPEN_DLG_B:
 		case ASCII_OPEN_DLG_Bf:
 			if (!CouldBeB(colHeader))
+				return false;
+			break;
+		case ASCII_OPEN_DLG_A:
+		case ASCII_OPEN_DLG_Af:
+			if (!CouldBeA(colHeader))
 				return false;
 			break;
 		case ASCII_OPEN_DLG_Grey:

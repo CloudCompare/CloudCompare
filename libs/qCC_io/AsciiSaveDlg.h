@@ -85,6 +85,11 @@ public:
 	//! Returns whether to save colors as float values (instead of unsigned bytes)
 	bool saveFloatColors() const;
 
+	//! Sets whether to save the alpha (transparency) channel
+	void setSaveAlphaChannel(bool state);
+	//! Returns whether to save the alpha (transparency) channel
+	bool saveAlphaChannel() const;
+
 protected slots:
 
 	//! Saves dialog state to persistent settings

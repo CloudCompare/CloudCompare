@@ -8,7 +8,7 @@ if (PLUGIN_STANDARD_QPCV)
 
     project( QPCV_PLUGIN )
     
-	include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
+	include( CMakePolicies NO_POLICY_SCOPE )
 
 	find_package( OpenGL REQUIRED )
 	if( NOT OPENGL_FOUND )

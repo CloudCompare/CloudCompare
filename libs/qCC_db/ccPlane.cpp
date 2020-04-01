@@ -115,7 +115,7 @@ ccPlane* ccPlane::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/*=0*
 	if (count < 3)
 	{
 		ccLog::Warning("[ccPlane::Fit] Not enough points in input cloud to fit a plane!");
-		return 0;
+		return nullptr;
 	}
 
 	CCLib::Neighbourhood Yk(cloud);
@@ -125,7 +125,7 @@ ccPlane* ccPlane::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/*=0*
 	if (!theLSPlane)
 	{
 		ccLog::Warning("[ccPlane::Fit] Not enough points to fit a plane!");
-		return 0;
+		return nullptr;
 	}
 
 	//get the centroid
@@ -139,7 +139,8 @@ ccPlane* ccPlane::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/*=0*
 	CCVector3 Y = N * (*X);
 
 	//compute bounding box in 2D plane
-	CCVector2 minXY(0, 0), maxXY(0, 0);
+	CCVector2 minXY(0, 0);
+	CCVector2 maxXY(0, 0);
 	cloud->placeIteratorAtBeginning();
 	for (unsigned k = 0; k < count; ++k)
 	{
@@ -196,9 +197,9 @@ bool ccPlane::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccPlane::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
+bool ccPlane::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
-	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags))
+	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
 	//parameters (dataVersion>=21)
@@ -267,7 +268,7 @@ ccMaterial::Shared ccPlane::SetQuadTexture(ccMesh* quadMesh, QImage image, QStri
 		{
 			//not enough memory
 			ccLog::Warning("[ccPlane::setAsTexture] Not enough memory!");
-			quadMesh->setTexCoordinatesTable(0);
+			quadMesh->setTexCoordinatesTable(nullptr);
 			quadMesh->removePerTriangleMtlIndexes();
 			return ccMaterial::Shared(nullptr);
 		}
@@ -283,7 +284,7 @@ ccMaterial::Shared ccPlane::SetQuadTexture(ccMesh* quadMesh, QImage image, QStri
 		{
 			//not enough memory
 			ccLog::Warning("[ccPlane::setAsTexture] Not enough memory!");
-			quadMesh->setTexCoordinatesTable(0);
+			quadMesh->setTexCoordinatesTable(nullptr);
 			quadMesh->removePerTriangleTexCoordIndexes();
 			return ccMaterial::Shared(nullptr);
 		}

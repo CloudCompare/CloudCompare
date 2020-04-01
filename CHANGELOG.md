@@ -22,13 +22,37 @@ v2.11 (Anoia) - (in development)
 	  - 'Edit > Normals > Export normals to SF(s)' (or equivalently 'Edit > Scalar fields > Export normals to SF(s)')
 	  - command line argument: '-NORMALS_TO_SFS' (all dimensions are exported by default, as 3 scalar fields)
   - Command line:
+     - -H_EXPORT_FMT added to select format for hierarchy objects exported.
+     - qRansac_SD plugin support added, all parameters below are optional and can be added in any order, will work on all clouds opened already loaded when called.
+       - -RANSAC (main command)
+         - 'EPSILON_ABSOLUTE' (Max distance to primitive)
+	     - 'EPSILON_PERCENTAGE_OF_SCALE' (Max distance to primitive as a percentage of cloud scale 0.0-1.0 exclusive)
+	     - 'BITMAP_EPSILON_PERCENTAGE_OF_SCALE' (Sampling resolution as a percentage of cloud scale 0.0-1.0 exclusive)
+	     - 'BITMAP_EPSILON_ABSOLUTE' (Sampling resolution)
+	     - 'SUPPORT_POINTS' (Min Support points per primitive)
+	     - 'MAX_NORMAL_DEV' (Max normal deviation from the ideal shape normal vector [in Degrees])
+	     - 'PROBABILITY' (Probability that no better candidate was overlooked during sampling, lower the better!)
+         - 'OUT_CLOUD_DIR' (path to save detected shapes clouds to, current dir if unspecified)
+         - 'OUT_MESH_DIR' (path to save detected shapes meshes to, current dir if unspecified)
+         - 'OUT_PAIR_DIR' (path to save detected shapes clouds & meshes to, current dir if unspecified)
+         - 'OUT_GROUP_DIR' (path to save all shapes and primitives to as a single file, current dir if unspecified)
+         - 'OUTPUT_INDIVIDUAL_SUBCLOUDS' (specify to output detected shapes clouds)
+         - 'OUTPUT_INDIVIDUAL_PRIMITIVES' (specify to output detected shapes meshes)
+         - 'OUTPUT_INDIVIDUAL_PAIRED_CLOUD_PRIMITIVE' (specify to output detected shapes clouds & meshes)
+         - 'OUTPUT_GROUPED' (specify to output all detected shapes clouds & meshes as single file)
+	     - 'ENABLE_PRIMITIVE' (each shape listed after this option will be searched for )
+	       - 'PLANE' 
+	       - 'SPHERE' 
+	       - 'CYLINDER' 
+	       - 'CONE' 
+	       - 'TORUS'
 	- The 1st Order Moment tool (Tools>Other>Compute geometric features) can now be accessed via 
 		the command line mode with option -MOMENT {kernel size}
 	    - Computes 1st order moment on all opened clouds and auto saved by default.
 	- The Feature tools (Tools>Other>Compute geometric features) can now be accessed via
 		the command line mode with option -FEATURE {type} {kernel size}
 		- type can be the following: SUM_OF_EIGENVALUES, OMNIVARIANCE, EIGENTROPY, ANISOTROPY, PLANARITY, 
-			LINEARITY, PCA1, PCA2, SURFACE_VARIATION, SPHERICITY, or VERTICALITY.
+			LINEARITY, PCA1, PCA2, SURFACE_VARIATION, SPHERICITY, VERTICALITY, EIGENVALUE1, EIGENVALUE2, EIGENVALUE3.
 		- Computes 1st order moment on all opened clouds and auto saved by default.
     - NORMALS_TO_DIP: converts the loaded cloud normals to dip and dip direction (scalar fields)
 	- NORMALS_TO_SFS: converts the loaded cloud normals to 3 scalar fields (Nx, Ny and Nz)
@@ -37,8 +61,17 @@ v2.11 (Anoia) - (in development)
 	- Yellow > Brown
 	- Topo Landserf
 	- High contrast
+  - Translate/Rotate Tool:
+	- Advanced translate mode to translate along a single segment polyline or plane normal vector.
+	- Advanced rotate mode to update the axis of rotation to a single segment polyline or plane normal vector.
+	  - Rotation center can be set to either the object center, or the polyline/plane normal.
 
 - Improvements
+  - CloudCompare now handles RGBA colors for points, mesh vertices, text and labels
+    - partial ability to display these elements with some transparency (warning: points and triangles are not depth-sorted yet - display of clouds and meshes might not be very nice ;)
+	- default materials and colors (Display > Display settings) now have an editable 'alpha' channel
+	- the 'Edit > Colors > Set unique' and 'Edit > Colors > Colorize' tools also have an editable 'alpha' channel
+	- this fixes a bug with ATI cards (when using VBOs - see below)
   - Better support for High DPI screens (4K) on Windows
   - Both the local and global bounding-box centers are now displyaed in the cloud properties (if the cloud has been shifted)
   - The PoissonRecon plugin now relies on the PoissonRecon V12 library
@@ -104,6 +137,7 @@ v2.11 (Anoia) - (in development)
 		- option to save any scalar field as extra bytes (and load extra bytes as scalar fields)
 		- proper minor version setting
 		- proper header size
+		- using the latest version of LASlib with proper management of UTF8/UTF16 ('foreign') characters
   - ASCII files:
 	- CloudCompare can now load ASCII files with mixed whitespaces (spaces / tabs)
 	- the ASCII load dialog option has now an option to load numerical values with a comma as digit separator
@@ -114,10 +148,12 @@ v2.11 (Anoia) - (in development)
     - after loading an E57 file, the scan (sensor) origin and orientation is stored as meta-data and should be properly restored and saved when exporting the scan(s) back to E57
   - Unroll
 	- ability to set the start and stop angles for the cone unrolling options
+	- ability to unroll meshes
 	- new unrolling mode: 'Straightened cone' (the previous one has been renamed 'Straightened cone (fixed radius)'). This new mode unrolls the cone as a cylinder but with a varying radius.
 	- the 'Straightened cone' options are now using the real curvilinear abscissa (0 = cone apex)
   - Tools > Others > Compute geometric features
 	- option to compute the 1st moment added
+	- option to compute the 1st, 2nd and 3rd eigenvalues added
   - Stereo mode updated:
 	- New stereo mode (Generic stereo display) to handle more stereo displays (PluraView, etc.)
 	- New stereo parameters (screen/display size, distance to screen, and eye separation)
@@ -160,6 +196,9 @@ v2.11 (Anoia) - (in development)
 	- SRS (Spatial Reference System) information could be lost when loading LAS files
 	- The cartesian bounding-box of exported E57 files was wrongly expressed in the file-level coordinate system (instead of the local one)
 	- Data could be lost when merging two clouds with FWF data
+	- When VBOs were activated with an ATI card, CloudCompare could crash (because ATI only supports 32bit aligned VBOs :p)
+	- the LAS 1.3/1.4 filter was not compressing files with a minor case 'laz' extension :(
+	- Small glitch fix in the CSF plugin (the iteration stop criteria has been changed)
 
 v2.10.3 (Zephyrus) - 13/06/2019
 ----------------------

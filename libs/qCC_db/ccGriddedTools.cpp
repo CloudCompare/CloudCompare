@@ -46,8 +46,10 @@ bool ccGriddedTools::DetectParameters(	const ccPointCloud* cloud,
 
 	//we must test if the angles are shifted (i.e the scan spans above theta = pi)
 	//we'll compute all parameters for both cases, and choose the best one at the end!
-	PointCoordinateType minPhiShifted = parameters.minPhi, maxPhiShifted = parameters.maxPhi;
-	PointCoordinateType minThetaShifted = parameters.minTheta, maxThetaShifted = parameters.maxTheta;
+	PointCoordinateType minPhiShifted = parameters.minPhi;
+	PointCoordinateType maxPhiShifted = parameters.maxPhi;
+	PointCoordinateType minThetaShifted = parameters.minTheta;
+	PointCoordinateType maxThetaShifted = parameters.maxTheta;
 
 	try
 	{
@@ -75,8 +77,10 @@ bool ccGriddedTools::DetectParameters(	const ccPointCloud* cloud,
 
 				if (maxIndex > minIndex)
 				{
-					PointCoordinateType minPhiCurrentLine = 0, maxPhiCurrentLine = 0;
-					PointCoordinateType minPhiCurrentLineShifted = 0, maxPhiCurrentLineShifted = 0;
+					PointCoordinateType minPhiCurrentLine = 0;
+					PointCoordinateType maxPhiCurrentLine = 0;
+					PointCoordinateType minPhiCurrentLineShifted = 0;
+					PointCoordinateType maxPhiCurrentLineShifted = 0;
 					for (unsigned k=minIndex; k<=maxIndex; ++k)
 					{
 						int index = _indexGrid[k];
@@ -195,8 +199,10 @@ bool ccGriddedTools::DetectParameters(	const ccPointCloud* cloud,
 
 				if (maxIndex > minIndex)
 				{
-					PointCoordinateType minThetaCurrentCol = 0, maxThetaCurrentCol = 0;
-					PointCoordinateType minThetaCurrentColShifted = 0, maxThetaCurrentColShifted = 0;
+					PointCoordinateType minThetaCurrentCol = 0;
+					PointCoordinateType maxThetaCurrentCol = 0;
+					PointCoordinateType minThetaCurrentColShifted = 0;
+					PointCoordinateType maxThetaCurrentColShifted = 0;
 					for (unsigned k=minIndex; k<=maxIndex; ++k)
 					{
 						int index = _indexGrid[k*grid->w];

@@ -534,7 +534,8 @@ void ScalarFieldTools::computeScalarFieldHistogram(const GenericCloud* theCloud,
 	}
 
 	//compute the min and max sf values
-	ScalarType minV,maxV;
+	ScalarType minV;
+	ScalarType maxV;
 	{
 		computeScalarFieldExtremas(theCloud, minV, maxV);
 
@@ -606,7 +607,8 @@ bool ScalarFieldTools::computeKmeans(	const GenericCloud* theCloud,
 	}
 
 	//compute min and max SF values
-	ScalarType minV,maxV;
+	ScalarType minV;
+	ScalarType maxV;
 	{
 		computeScalarFieldExtremas(theCloud, minV, maxV);
 		
@@ -714,7 +716,8 @@ bool ScalarFieldTools::computeKmeans(	const GenericCloud* theCloud,
 	} while (meansHaveMoved);
 
 	//update distances
-	std::vector<ScalarType> mins, maxs;
+	std::vector<ScalarType> mins;
+	std::vector<ScalarType> maxs;
 	try
 	{
 		mins.resize(K, maxV);

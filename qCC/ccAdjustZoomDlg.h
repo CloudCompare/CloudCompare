@@ -34,7 +34,7 @@ class ccAdjustZoomDlg: public QDialog, public Ui::AdjustZoomDialog
 public:
 
 	ccAdjustZoomDlg(ccGLWindow* win, QWidget* parent = 0);
-	virtual ~ccAdjustZoomDlg();
+	virtual ~ccAdjustZoomDlg() = default;
 
 	//! Returns requested zoom
 	double getZoom() const;

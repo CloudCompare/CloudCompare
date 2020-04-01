@@ -199,7 +199,8 @@ void qAnimationDlg::onAccept()
 double qAnimationDlg::computeTotalTime()
 {
 	double totalDuration_sec = 0;
-	size_t vp1 = 0, vp2 = 0;
+	size_t vp1 = 0;
+	size_t vp2 = 0;
 	while (getNextSegment(vp1, vp2))
 	{
 		assert(vp1 < stepSelectionList->count());
@@ -244,7 +245,8 @@ void qAnimationDlg::onTotalTimeChanged(double newTime_sec)
 		assert(previousTime_sec != 0);
 		double scale = newTime_sec / previousTime_sec;
 
-		size_t vp1 = 0, vp2 = 0;
+		size_t vp1 = 0;
+		size_t vp2 = 0;
 		while (getNextSegment(vp1, vp2))
 		{
 			assert(vp1 < stepSelectionList->count());
@@ -557,7 +559,8 @@ void qAnimationDlg::render(bool asSeparateFrames)
 
 	int frameIndex = 0;
 	bool success = true;
-	size_t vp1 = 0, vp2 = 0;
+	size_t vp1 = 0;
+	size_t vp2 = 0;
 	while (getNextSegment(vp1, vp2))
 	{
 		Step& step1 = m_videoSteps[vp1];

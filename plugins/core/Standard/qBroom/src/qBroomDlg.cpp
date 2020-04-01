@@ -79,9 +79,9 @@ static bool Intersection(const ccGLMatrix& broomTrans, const CCVector3& A, const
 }
 
 qBroomDlg::qBroomDlg(ccMainAppInterface* app/*=0*/)
-	: QDialog(app ? app->getMainWindow() : 0, Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint)
+	: QDialog(app ? app->getMainWindow() : nullptr, Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint)
 	, Ui::BroomDialog()
-	, m_glWindow(0)
+	, m_glWindow(nullptr)
 	, m_broomBox(new ccBox("Broom"))
 	, m_selectionBox(new ccBox("Selection"))
 	, m_boxes(new ccHObject("Boxes"))
@@ -91,7 +91,7 @@ qBroomDlg::qBroomDlg(ccMainAppInterface* app/*=0*/)
 	, m_broomSelected(false)
 	, m_selectionMode(ABOVE)
 	, m_app(app)
-	, m_initialCloud(0)
+	, m_initialCloud(nullptr)
 {
 	setupUi(this);
 
@@ -116,7 +116,7 @@ qBroomDlg::qBroomDlg(ccMainAppInterface* app/*=0*/)
 
 	//create 3D view
 	{
-		QWidget* glWidget = 0;
+		QWidget* glWidget = nullptr;
 		m_app->createGLWindow(m_glWindow, glWidget);
 		assert(m_glWindow && glWidget);
 
@@ -188,13 +188,13 @@ qBroomDlg::~qBroomDlg()
 		if (m_app)
 		{
 			m_app->destroyGLWindow(m_glWindow);
-			m_glWindow = 0;
+			m_glWindow = nullptr;
 		}
 	}
 	if (m_boxes)
 	{
 		delete m_boxes;
-		m_boxes = 0;
+		m_boxes = nullptr;
 	}
 }
 
@@ -214,7 +214,7 @@ cc2DLabel* qBroomDlg::Picking::addLabel(ccGenericPointCloud* cloud, unsigned poi
 	{
 		ccLog::Error("Not enough memory");
 		delete label;
-		label = 0;
+		label = nullptr;
 	}
 
 	return label;
@@ -232,7 +232,7 @@ void qBroomDlg::AutomationArea::clear()
 		}
 
 		delete polyline;
-		polyline = 0;
+		polyline = nullptr;
 	}
 
 	clickedPoints.resize(0);
@@ -277,7 +277,7 @@ void qBroomDlg::CloudBackup::backup(ccPointCloud* cloud)
 	originDisplay = cloud->getDisplay();
 	colorsWereDisplayed = cloud->colorsShown();
 	sfWasDisplayed = cloud->sfShown();
-	hadOctree = (cloud->getOctree() != 0);
+	hadOctree = (cloud->getOctree() != nullptr);
 	ref = cloud;
 }
 
@@ -292,12 +292,12 @@ bool qBroomDlg::CloudBackup::backupColors()
 	//we backup the colors (as we are going to change them)
 	if (ref->hasColors())
 	{
-		colors = new ColorsTableType;
+		colors = new RGBAColorsTableType;
 		if (!colors->resizeSafe(ref->size()))
 		{
 			//not enough memory
 			colors->release();
-			colors = 0;
+			colors = nullptr;
 			return false;
 		}
 
@@ -359,7 +359,7 @@ void qBroomDlg::CloudBackup::clear()
 	if (colors)
 	{
 		colors->release();
-		colors = 0;
+		colors = nullptr;
 	}
 
 	if (ref)
@@ -369,7 +369,7 @@ void qBroomDlg::CloudBackup::clear()
 			//the dialog takes care of its own clouds!
 			delete ref;
 		}
-		ref = 0;
+		ref = nullptr;
 	}
 }
 
@@ -456,12 +456,12 @@ bool qBroomDlg::setCloud(ccPointCloud* cloud, bool ownCloud/*=false*/, bool auto
 			bool success = false;
 			if (cloud->hasDisplayedScalarField())
 			{
-				success = cloud->setRGBColorWithCurrentScalarField();
+				success = cloud->convertCurrentScalarFieldToColors();
 			}
 			//or we simply set white colors
 			else
 			{
-				success = cloud->setRGBColor(ccColor::white);
+				success = cloud->setColor(ccColor::white);
 			}
 			if (!success)
 			{
@@ -564,7 +564,7 @@ void qBroomDlg::updateAutomationAreaPolyline(int x, int y)
 	ccGLCameraParameters camera;
 	m_glWindow->getGLCameraParameters(camera);
 
-	ccPointCloud* vertices = 0;
+	ccPointCloud* vertices = nullptr;
 	if (!m_autoArea.polyline)
 	{
 		vertices = new ccPointCloud();
@@ -575,7 +575,7 @@ void qBroomDlg::updateAutomationAreaPolyline(int x, int y)
 		{
 			//not enough memory
 			delete m_autoArea.polyline;
-			m_autoArea.polyline = 0;
+			m_autoArea.polyline = nullptr;
 			return;
 		}
 
@@ -623,7 +623,8 @@ void qBroomDlg::updateAutomationAreaPolyline(int x, int y)
 	//project the currrent mouse position in 3D AND on the broom plane
 	CCVector3 P3D;
 	{
-		CCVector3d M03D, M13D;
+		CCVector3d M03D;
+		CCVector3d M13D;
 		QPointF pos2D = m_glWindow->toCornerGLCoordinates(x, y);
 		camera.unproject(CCVector3(pos2D.x(), pos2D.y(), 0), M03D);
 		camera.unproject(CCVector3(pos2D.x(), pos2D.y(), 1), M13D);
@@ -767,7 +768,7 @@ bool qBroomDlg::startAutomation()
 	CCVector3 diagonal = BB1 - BB0;
 
 	//debug: show the automation area
-	ccPlane* plane = 0;
+	ccPlane* plane = nullptr;
 	if (false)
 	{
 		CCVector3 center = (BB1 + BB0) / 2;
@@ -1272,7 +1273,8 @@ void qBroomDlg::onLeftButtonClicked(int x, int y)
 		CCVector3 P3D;
 		{
 			ccGLMatrix broomTrans = m_boxes->getGLTransformation();
-			CCVector3d M03D, M13D;
+			CCVector3d M03D;
+			CCVector3d M13D;
 			QPointF pos2D = m_glWindow->toCornerGLCoordinates(x, y);
 			camera.unproject(CCVector3(pos2D.x(), pos2D.y(), 0), M03D);
 			camera.unproject(CCVector3(pos2D.x(), pos2D.y(), 1), M13D);
@@ -1330,7 +1332,8 @@ void qBroomDlg::onLeftButtonClicked(int x, int y)
 				QPointF pos2D = m_glWindow->toCornerGLCoordinates(m_lastMousePos.x(), m_lastMousePos.y());
 				CCVector3d A2D(pos2D.x(), pos2D.y(), 0);
 				CCVector3d B2D(pos2D.x(), pos2D.y(), 1);
-				CCVector3d A3D, B3D;
+				CCVector3d A3D;
+				CCVector3d B3D;
 				if (	camera.unproject(A2D, A3D)
 					&&	camera.unproject(B2D, B3D) )
 				{
@@ -1418,7 +1421,8 @@ void qBroomDlg::onMouseMoved(int x, int y, Qt::MouseButtons button)
 				QPointF pos2D = m_glWindow->toCornerGLCoordinates(m_lastMousePos.x(), m_lastMousePos.y());
 				CCVector3d A2D(pos2D.x(), pos2D.y(), 0);
 				CCVector3d B2D(pos2D.x(), pos2D.y(), 1);
-				CCVector3d A3D, B3D;
+				CCVector3d A3D;
+				CCVector3d B3D;
 
 				bool hasMousePos3D = false;
 				CCVector3 mousePos3D;
@@ -1476,7 +1480,7 @@ void qBroomDlg::onMouseMoved(int x, int y, Qt::MouseButtons button)
 bool qBroomDlg::moveBroom(ccGLMatrix& broomTrans, CCVector3d& broomDelta, bool stickToTheFloor) const
 {
 	//we will need the octree (intensively ;)
-	ccOctree::Shared octree = m_cloud.ref ? m_cloud.ref->getOctree() : ccOctree::Shared(0);
+	ccOctree::Shared octree = m_cloud.ref ? m_cloud.ref->getOctree() : ccOctree::Shared(nullptr);
 	if (!octree)
 	{
 		assert(false);
@@ -1530,7 +1534,7 @@ bool qBroomDlg::moveBroom(ccGLMatrix& broomTrans, CCVector3d& broomDelta, bool s
 		size_t count = octree->getPointsInBoxNeighbourhood(bn);
 
 		delete[] bn.axes;
-		bn.axes = 0;
+		bn.axes = nullptr;
 
 		//try to fit the box to the extracted points
 		if (count < 10)
@@ -1572,7 +1576,7 @@ bool qBroomDlg::moveBroom(ccGLMatrix& broomTrans, CCVector3d& broomDelta, bool s
 bool qBroomDlg::selectPoints(const ccGLMatrix& broomTrans, BroomDimensions* _broom/*=0*/)
 {
 	//we will need the octree (intensively ;)
-	ccOctree::Shared octree = m_cloud.ref ? m_cloud.ref->getOctree() : ccOctree::Shared(0);
+	ccOctree::Shared octree = m_cloud.ref ? m_cloud.ref->getOctree() : ccOctree::Shared(nullptr);
 	if (!octree)
 	{
 		assert(false);
@@ -1642,7 +1646,7 @@ bool qBroomDlg::selectPoints(const ccGLMatrix& broomTrans, BroomDimensions* _bro
 	size_t count = octree->getPointsInBoxNeighbourhood(bn);
 
 	delete[] bn.axes;
-	bn.axes = 0;
+	bn.axes = nullptr;
 
 	if (count)
 	{
@@ -1891,7 +1895,7 @@ void qBroomDlg::undo(uint32_t undoCount)
 
 void qBroomDlg::cancel()
 {
-	setCloud(0);
+	setCloud(nullptr);
 	
 	reject();
 }
@@ -1917,7 +1921,7 @@ ccPointCloud* qBroomDlg::createSegmentedCloud(ccPointCloud* cloud, bool removeSe
 		//we shouldn't be here ;)
 		assert(false);
 		//nothing to do
-		return 0;
+		return nullptr;
 	}
 
 	unsigned selectedCount = 0;
@@ -1936,7 +1940,7 @@ ccPointCloud* qBroomDlg::createSegmentedCloud(ccPointCloud* cloud, bool removeSe
 			assert(false);
 			//nothing to do
 			accept();
-			return 0;
+			return nullptr;
 		}
 	}
 
@@ -1946,7 +1950,7 @@ ccPointCloud* qBroomDlg::createSegmentedCloud(ccPointCloud* cloud, bool removeSe
 		{
 			displayError(tr("Not enough memory"));
 			error = true;
-			return 0;
+			return nullptr;
 		}
 
 		for (unsigned i=0; i<cloud->size(); ++i)
@@ -1965,7 +1969,7 @@ ccPointCloud* qBroomDlg::createSegmentedCloud(ccPointCloud* cloud, bool removeSe
 	{
 		displayError(tr("Not enough memory"));
 		error = true;
-		return 0;
+		return nullptr;
 	}
 
 	QString name = cloud->getName();
@@ -1998,7 +2002,7 @@ void qBroomDlg::apply()
 		bool ownCloud = m_cloud.ownCloud;
 		m_cloud.ownCloud = false; //to prevent if from being deleted!
 		
-		setCloud(0, false);
+		setCloud(nullptr, false);
 		setCloud(formerCloud, ownCloud, false);
 	}
 
@@ -2043,10 +2047,10 @@ void qBroomDlg::validate()
 	bool ownCloud = m_cloud.ownCloud;
 	m_cloud.ownCloud = false;
 
-	setCloud(0);
+	setCloud(nullptr);
 	//m_cloud.restore(); //already called by setCloud
 
-	ccPointCloud* newCloud = 0;
+	ccPointCloud* newCloud = nullptr;
 	if (!m_undoPositions.empty())
 	{
 		bool error;
@@ -2079,7 +2083,7 @@ void qBroomDlg::validate()
 		if (newCloud->getDisplay() == m_glWindow)
 		{
 			assert(false);
-			newCloud->setDisplay(0);
+			newCloud->setDisplay(nullptr);
 		}
 
 		if (m_initialCloud)

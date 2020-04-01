@@ -78,7 +78,8 @@ bool DxfProfilesExporter::SaveVerticalProfiles(	const QSharedPointer<DistanceMap
 	}
 
 	//Theoretical profile bounding box
-	CCVector3 profileBBMin, profileBBMax;
+	CCVector3 profileBBMin;
+	CCVector3 profileBBMax;
 	profile->getAssociatedCloud()->getBoundingBox(profileBBMin,profileBBMax);
 	//Mix with the map's boundaries along 'Y'
 	double yMin = std::max(map->yMin, static_cast<double>(profileBBMin.y)+heightShift);
@@ -525,7 +526,7 @@ bool DxfProfilesExporter::SaveVerticalProfiles(	const QSharedPointer<DistanceMap
 	dw->dxfEOF();
 	dw->close();
 	delete dw;
-	dw = 0;
+	dw = nullptr;
 
 	return true;
 
@@ -562,7 +563,8 @@ bool DxfProfilesExporter::SaveHorizontalProfiles(	const QSharedPointer<DistanceM
 	}
 
 	//Theoretical profile bounding box
-	CCVector3 profileBBMin, profileBBMax;
+	CCVector3 profileBBMin;
+	CCVector3 profileBBMax;
 	profile->getAssociatedCloud()->getBoundingBox(profileBBMin, profileBBMax);
 	//Mix with the map's boundaries along 'Y'
 	double yMin = std::max(	map->yMin + 0.5 * map->xStep, //central height of first row
@@ -1056,7 +1058,7 @@ bool DxfProfilesExporter::SaveHorizontalProfiles(	const QSharedPointer<DistanceM
 	dw->dxfEOF();
 	dw->close();
 	delete dw;
-	dw = 0;
+	dw = nullptr;
 
 	return true;
 

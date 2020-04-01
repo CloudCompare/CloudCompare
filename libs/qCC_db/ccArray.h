@@ -140,7 +140,7 @@ protected:
 
 	//inherited from ccHObject
 	inline virtual bool toFile_MeOnly(QFile& out) const override { return ccSerializationHelper::GenericArrayToFile<Type, N, ComponentType>(*this, out); }
-	inline virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override { return ccSerializationHelper::GenericArrayFromFile<Type, N, ComponentType>(*this, in, dataVersion); }
+	inline virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override { return ccSerializationHelper::GenericArrayFromFile<Type, N, ComponentType>(*this, in, dataVersion); }
 
 };
 

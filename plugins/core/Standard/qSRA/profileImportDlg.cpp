@@ -42,7 +42,7 @@ void ProfileImportDlg::browseFile()
 	QString filter("2D profile (*.txt)");
 
 	//open file loading dialog
-	QString filename = QFileDialog::getOpenFileName(0,"Select profile file",getFilename(),filter
+	QString filename = QFileDialog::getOpenFileName(nullptr,"Select profile file",getFilename(),filter
 #if defined( Q_OS_WIN ) && defined( _DEBUG )
 																,0,QFileDialog::DontUseNativeDialog
 #endif

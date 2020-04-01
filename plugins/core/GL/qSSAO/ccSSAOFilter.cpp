@@ -44,15 +44,15 @@ ccSSAOFilter::ccSSAOFilter()
 	: ccGlFilter("Screen Space Ambient Occlusion")
 	, m_w(0)
 	, m_h(0)
-	, m_fbo(0)
-	, m_shader(0)
+	, m_fbo(nullptr)
+	, m_shader(nullptr)
 	, m_texReflect(0)
 	, m_glFuncIsValid(0)
 {
 	setParameters(/*N=*/32,/*Kz=*/500.0f,/*R=*/0.05f,/*F=*/50.0f);
 
 	m_bilateralFilterEnabled = false;
-	m_bilateralFilter        = 0;
+	m_bilateralFilter        = nullptr;
 	m_bilateralGHalfSize     = 2;
 	m_bilateralGSigma        = 0.5f;
 	m_bilateralGSigmaZ       = 0.4f;
@@ -87,19 +87,19 @@ void ccSSAOFilter::reset()
 	if (m_fbo)
 	{
 		delete m_fbo;
-		m_fbo = 0;
+		m_fbo = nullptr;
 	}
 
 	if (m_shader)
 	{
 		delete m_shader;
-		m_shader = 0;
+		m_shader = nullptr;
 	}
 
 	if (m_bilateralFilter)
 	{
 		delete m_bilateralFilter;
-		m_bilateralFilter = 0;
+		m_bilateralFilter = nullptr;
 	}
 }
 
@@ -165,7 +165,7 @@ bool ccSSAOFilter::init(unsigned width,
 		if (!m_bilateralFilter->init(width, height, shadersPath, error))
 		{
 			delete m_bilateralFilter;
-			m_bilateralFilter = 0;
+			m_bilateralFilter = nullptr;
 			m_bilateralFilterEnabled = false;
 		}
 		else
@@ -176,7 +176,7 @@ bool ccSSAOFilter::init(unsigned width,
 	else if (m_bilateralFilter)
 	{
 		delete m_bilateralFilter;
-		m_bilateralFilter = 0;
+		m_bilateralFilter = nullptr;
 	}
 
 	m_w = width;
@@ -205,7 +205,7 @@ void ccSSAOFilter::sampleSphere()
 {
 	// Initialize the sobol QRNG
 	rk_sobol_state s;
-	if (rk_sobol_init(3, &s, nullptr, rk_sobol_Ldirections, NULL) != RK_SOBOL_OK)
+	if (rk_sobol_init(3, &s, nullptr, rk_sobol_Ldirections, nullptr) != RK_SOBOL_OK)
 	{
 		return;
 	}
@@ -363,7 +363,9 @@ void ccSSAOFilter::initReflectTexture()
 
 	for (int i=0; i<texSize; i++)
 	{
-		double x,y,z;
+		double x = 0.0;
+		double y = 0.0;
+		double z = 0.0;
 		randomPointInSphere(x, y, z);
 
 		double norm = x*x + y*y + z*z;

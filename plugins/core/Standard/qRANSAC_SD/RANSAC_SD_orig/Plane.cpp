@@ -93,9 +93,10 @@ void Plane::Init(float* array){
 
 void Plane::Init(FILE *i)
 {
-	fread(&m_normal, sizeof(m_normal), 1, i);
-	fread(&m_dist, sizeof(m_dist), 1, i);
-	fread(&m_pos, sizeof(m_pos), 1, i);
+	size_t readrtn; //unused return warning suppresion
+	readrtn = fread(&m_normal, sizeof(m_normal), 1, i);
+	readrtn = fread(&m_dist, sizeof(m_dist), 1, i);
+	readrtn = fread(&m_pos, sizeof(m_pos), 1, i);
 }
 
 bool Plane::equals (Plane other)

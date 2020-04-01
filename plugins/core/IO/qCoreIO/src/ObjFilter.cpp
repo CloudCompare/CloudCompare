@@ -313,7 +313,9 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		st->placeIteratorAtBeginning();
 
 		int lastMtlIndex = -1;
-		int t1 = -1, t2 = -1, t3 = -1;
+		int t1 = -1;
+		int t2 = -1;
+		int t3 = -1;
 
 		for (unsigned i=0; i<triNum; ++i)
 		{

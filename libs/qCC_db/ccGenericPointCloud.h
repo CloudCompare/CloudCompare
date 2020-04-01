@@ -59,7 +59,10 @@ class QCC_DB_LIB_API ccGenericPointCloud : public ccShiftedObject,  public CCLib
 public:
 
 	//! Default constructor
-	ccGenericPointCloud(QString name = QString());
+	/** \param name cloud name (optional)
+		\param uniqueID unique ID (handle with care)
+	**/
+	ccGenericPointCloud(QString name = QString(), unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID);
 
 	//! Copy constructor
 	ccGenericPointCloud(const ccGenericPointCloud& cloud);
@@ -145,7 +148,7 @@ public:
 	//! Returns color corresponding to a given point
 	/** WARNING: color array must be enabled! (see ccDrawableObject::hasColors)
 	**/
-	virtual const ccColor::Rgb& getPointColor(unsigned pointIndex) const = 0;
+	virtual const ccColor::Rgba& getPointColor(unsigned pointIndex) const = 0;
 
 	//! Returns compressed normal corresponding to a given point
 	/** WARNING: normals array must be enabled! (see ccDrawableObject::hasNormals)
@@ -267,7 +270,7 @@ public:
 protected:
 	//inherited from ccHObject
 	bool toFile_MeOnly(QFile& out) const override;
-	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
 	
 	//! Per-point visibility table
 	/** If this table is allocated, only values set to POINT_VISIBLE

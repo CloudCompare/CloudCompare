@@ -39,7 +39,7 @@ ccContourExtractorDlg::ccContourExtractorDlg(QWidget* parent/*=0*/)
 	: QDialog(parent, Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint)
 	, Ui::ContourExtractorDlg()
 	, m_skipped(false)
-	, m_glWindow(0)
+	, m_glWindow(nullptr)
 {
 	setupUi(this);
 }
@@ -59,7 +59,7 @@ void ccContourExtractorDlg::init()
 
 	//create 3D window
 	{
-		QWidget* glWidget = 0;
+		QWidget* glWidget = nullptr;
 		CreateGLWindow(m_glWindow, glWidget, false, true);
 		assert(m_glWindow && glWidget);
 

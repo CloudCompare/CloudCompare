@@ -180,7 +180,7 @@ void qCSF::doAction()
 	QProgressDialog pDlg;
 	pDlg.setWindowTitle("CSF");
 	pDlg.setLabelText("Computing....");
-	pDlg.setCancelButton(0);
+	pDlg.setCancelButton(nullptr);
 	pDlg.show();
 	QApplication::processEvents();
 
@@ -198,8 +198,9 @@ void qCSF::doAction()
 	csf.params.rigidness = csf_rigidness;
 	csf.params.iterations = MaxIteration;
 	//to do filtering
-	std::vector<int> groundIndexes, offGroundIndexes;
-	ccMesh* clothMesh = 0;
+	std::vector<int> groundIndexes;
+	std::vector<int> offGroundIndexes;
+	ccMesh* clothMesh = nullptr;
 	if (!csf.do_filtering(groundIndexes, offGroundIndexes, ExportClothMesh, clothMesh, m_app))
 	{
 		m_app->dispToConsole("Process failed", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
@@ -210,7 +211,7 @@ void qCSF::doAction()
 	m_app->dispToConsole(QString("[CSF] Timing: %1 s.").arg(timer.elapsed() / 1000.0, 0, 'f', 1), ccMainAppInterface::STD_CONSOLE_MESSAGE);
 
 	//extract ground subset
-	ccPointCloud* groundpoint = 0;
+	ccPointCloud* groundpoint = nullptr;
 	{
 		CCLib::ReferenceCloud groundpc(pc);
 		if (groundpc.reserve(static_cast<unsigned>(groundIndexes.size())))
@@ -228,7 +229,7 @@ void qCSF::doAction()
 	}
 
 	//extract off-ground subset
-	ccPointCloud* offgroundpoint = 0;
+	ccPointCloud* offgroundpoint = nullptr;
 	{
 		CCLib::ReferenceCloud offgroundpc(pc);
 		if (offgroundpc.reserve(static_cast<unsigned>(offGroundIndexes.size())))

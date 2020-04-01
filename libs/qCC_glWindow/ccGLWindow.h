@@ -174,8 +174,8 @@ public:
 	void refresh(bool only2D = false) override;
 	void invalidateViewport() override;
 	void deprecate3DLayer() override;
-	void display3DLabel(const QString& str, const CCVector3& pos3D, const unsigned char* rgbColor = nullptr, const QFont& font = QFont()) override;
-	void displayText(QString text, int x, int y, unsigned char align = ALIGN_DEFAULT, float bkgAlpha = 0.0f, const unsigned char* rgbColor = nullptr, const QFont* font = nullptr) override;
+	void display3DLabel(const QString& str, const CCVector3& pos3D, const ccColor::Rgba* color = nullptr, const QFont& font = QFont()) override;
+	void displayText(QString text, int x, int y, unsigned char align = ALIGN_DEFAULT, float bkgAlpha = 0.0f, const ccColor::Rgba* color = nullptr, const QFont* font = nullptr) override;
 	QFont getTextDisplayFont() const override; //takes rendering zoom into account!
 	QFont getLabelDisplayFont() const override; //takes rendering zoom into account!
 	const ccViewportParameters& getViewportParameters() const override { return m_viewportParams; }

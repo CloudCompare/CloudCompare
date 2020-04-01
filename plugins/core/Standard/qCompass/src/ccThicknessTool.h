@@ -33,7 +33,7 @@ class ccThicknessTool :
 {
 public:
 	ccThicknessTool();
-	virtual ~ccThicknessTool();
+	virtual ~ccThicknessTool() = default;
 
 	//called when the tool is set to active (for initialization)
 	virtual void toolActivated() override;
@@ -70,7 +70,6 @@ private:
 	//gets the interior part of the currently selected GeoObject (or returns the insertPoint if it's not a GeoObject)
 	ccHObject* getInsertInterior(ccHObject* insertPoint);
 public:
-	static ccColor::Rgb ACTIVE_COLOR;
 	static bool TWO_POINT_MODE; //if true, two points + planar orientation used to calculate thickness. If false, then point-to-plane distance
 	                            //is calculated for each point
 };

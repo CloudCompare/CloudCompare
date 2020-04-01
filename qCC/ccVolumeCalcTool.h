@@ -41,7 +41,7 @@ public:
 	ccVolumeCalcTool(ccGenericPointCloud* cloud1, ccGenericPointCloud* cloud2, QWidget* parent = 0);
 
 	//! Destructor
-	~ccVolumeCalcTool();
+	~ccVolumeCalcTool() = default;
 
 	//Inherited from cc2Point5DimEditor
 	virtual double getGridStep() const override;

@@ -844,26 +844,31 @@ bool qCanupoTools::TrainClassifier(	Classifier& classifier,
 			sample.set_size(fdim);
 
 			const CorePointDesc* desc = nullptr;
-			const ccColor::Rgb* col = &ccColor::lightGrey;
+			const ccColor::Rgb* col = &ccColor::lightGreyRGB;
 
 			if (i < nsamples1)
 			{
 				desc = &descriptors1[i];
-				col = &ccColor::blue;
+				col = &ccColor::blueRGB;
 			}
 			else if (i < nsamples)
 			{
 				desc = &descriptors2[i-nsamples1];
-				col = &ccColor::red;
+				col = &ccColor::redRGB;
 			}
 			else if (evaluationDescriptors)
 			{
 				desc = &evaluationDescriptors->at(i-nsamples);
-				//col = &ccColor::lightGrey;
+				//col = &ccColor::lightGreyRGB;
+			}
+			else
+			{
+				assert(false);
+				continue;
 			}
 
 			assert(desc && col);
-			size_t shift = (paramsCount - scaleCount)*dimPerScale; //if we use less scales than parameters
+			size_t shift = (paramsCount - scaleCount) * dimPerScale; //if we use less scales than parameters
 			for (size_t j = 0; j < fdim; ++j)
 			{
 				sample(j) = desc->params[shift + j];
@@ -876,7 +881,7 @@ bool qCanupoTools::TrainClassifier(	Classifier& classifier,
 											0) );
 			if (hasColors && col)
 			{
-				mscCloud->addRGBColor(*col);
+				mscCloud->addColor(*col);
 			}
 		}
 
@@ -976,8 +981,10 @@ bool qCanupoTools::TrainClassifier(	Classifier& classifier,
 #endif
 		{
 			//evaluate the boundary simply with the two input "class" clouds
-			Classifier::Point2D c1(0,0), c2(0,0);
-			unsigned n1=0, n2=0;
+			Classifier::Point2D c1(0,0);
+			Classifier::Point2D c2(0,0);
+			unsigned n1 = 0;
+			unsigned n2 = 0;
 			ComputeReferencePoints(c2,c1,proj1,proj2,labels,&n2,&n1);
 
 			Classifier::Point2D w_vect = c2 - c1;
@@ -1006,8 +1013,10 @@ bool qCanupoTools::TrainClassifier(	Classifier& classifier,
 				basis(1,0) = base_vec1.y; basis(1,1) = base_vec2.y;
 				basis = inv(basis);
 
-				double m1=0, m2=0;
-				std::vector<double> p1, p2;
+				double m1 = 0;
+				double m2 = 0;
+				std::vector<double> p1;
+				std::vector<double> p2;
 				p1.reserve(n1);
 				p2.reserve(n2);
 				for (size_t i=0; i<nsamples; ++i)

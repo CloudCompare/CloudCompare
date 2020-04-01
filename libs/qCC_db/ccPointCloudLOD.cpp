@@ -36,7 +36,7 @@ public:
 		: QThread()
 		, m_cloud(cloud)
 		, m_lod(lod)
-		, m_octree(0)
+		, m_octree(nullptr)
 		, m_maxCountPerCell(maxCountPerCell)
 		, m_maxLevel(0)
 	{
@@ -190,7 +190,7 @@ protected:
 		if (!m_octree)
 		{
 			m_octree = ccOctree::Shared(new ccOctree(&m_cloud));
-			if (m_octree->build(0/*progressCallback*/) <= 0)
+			if (m_octree->build(nullptr/*progressCallback*/) <= 0)
 			{
 				//not enough memory
 				ccLog::Warning(QString("[LoD] Failed to compute octree on cloud '%1' (not enough memory)").arg(m_cloud.getName()));
@@ -370,8 +370,8 @@ protected:
 ccPointCloudLOD::ccPointCloudLOD()
 	: m_indexMap(0)
 	, m_lastIndexMap(0)
-	, m_octree(0)
-	, m_thread(0)
+	, m_octree(nullptr)
+	, m_thread(nullptr)
 	, m_state(NOT_INITIALIZED)
 {
 	clearData(); //initializes the root node
@@ -527,7 +527,7 @@ void ccPointCloudLOD::clear()
 	if (m_thread)
 	{
 		delete m_thread;
-		m_thread = 0;
+		m_thread = nullptr;
 	}
 
 	m_levels.clear();

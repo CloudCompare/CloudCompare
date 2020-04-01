@@ -42,7 +42,7 @@ ccOctree::ccOctree(ccGenericPointCloud* aCloud)
 	, m_displayMode(WIRE)
 	, m_glListID(0)
 	, m_glListIsDeprecated(true)
-	, m_frustumIntersector(0)
+	, m_frustumIntersector(nullptr)
 {
 }
 
@@ -51,7 +51,7 @@ ccOctree::~ccOctree()
 	if (m_frustumIntersector)
 	{
 		delete m_frustumIntersector;
-		m_frustumIntersector = 0;
+		m_frustumIntersector = nullptr;
 	}
 }
 
@@ -151,7 +151,7 @@ void ccOctree::draw(CC_DRAW_CONTEXT& context)
 		//(therefore we always render it dynamically)
 		
 		glFunc->glDisable(GL_LIGHTING);
-		ccGL::Color3v(glFunc, ccColor::green.rgb);
+		ccGL::Color4v(glFunc, ccColor::green.rgba);
 
 		void* additionalParameters[] = {	reinterpret_cast<void*>(m_frustumIntersector),
 											reinterpret_cast<void*>(glFunc)
@@ -181,7 +181,7 @@ void ccOctree::draw(CC_DRAW_CONTEXT& context)
 
 		if (!glParams.showColors)
 		{
-			ccGL::Color3v(glFunc, ccColor::white.rgb);
+			ccGL::Color4v(glFunc, ccColor::white.rgba);
 		}
 
 		//shall we recompile the GL list?
@@ -242,7 +242,7 @@ void ccOctree::draw(CC_DRAW_CONTEXT& context)
 				//fake context
 				CC_DRAW_CONTEXT fakeContext = context;
 				fakeContext.drawingFlags = CC_DRAW_3D | CC_DRAW_FOREGROUND | CC_LIGHT_ENABLED;
-				fakeContext.display = 0;
+				fakeContext.display = nullptr;
 
 				void* additionalParameters[] = {	reinterpret_cast<void*>(&glParams),
 													reinterpret_cast<void*>(m_theAssociatedCloudAsGPC),
@@ -285,7 +285,8 @@ bool ccOctree::DrawCellAsABox(	const CCLib::DgmOctree::octreeCell& cell,
 	QOpenGLFunctions_2_1* glFunc     = static_cast<QOpenGLFunctions_2_1*>(additionalParameters[1]);
 	assert(glFunc != nullptr);
 
-	CCVector3 bbMin, bbMax;
+	CCVector3 bbMin;
+	CCVector3 bbMax;
 	cell.parentOctree->computeCellLimits(cell.truncatedCode, cell.level, bbMin, bbMax, true);
 
 	ccOctreeFrustumIntersector::OctreeCellVisibility vis = ccOctreeFrustumIntersector::CELL_OUTSIDE_FRUSTUM;
@@ -295,7 +296,7 @@ bool ccOctree::DrawCellAsABox(	const CCLib::DgmOctree::octreeCell& cell,
 	// outside
 	if (vis == ccOctreeFrustumIntersector::CELL_OUTSIDE_FRUSTUM)
 	{
-		ccGL::Color3v(glFunc, ccColor::green.rgb);
+		ccGL::Color4v(glFunc, ccColor::green.rgba);
 	}
 	else
 	{
@@ -303,10 +304,10 @@ bool ccOctree::DrawCellAsABox(	const CCLib::DgmOctree::octreeCell& cell,
 		glFunc->glLineWidth(2.0f);
 		// inside
 		if (vis == ccOctreeFrustumIntersector::CELL_INSIDE_FRUSTUM)
-			ccGL::Color3v(glFunc, ccColor::magenta.rgb);
+			ccGL::Color4v(glFunc, ccColor::magenta.rgba);
 		// intersecting
 		else
-			ccGL::Color3v(glFunc, ccColor::blue.rgb);
+			ccGL::Color4v(glFunc, ccColor::blue.rgba);
 	}
 
 	glFunc->glBegin(GL_LINE_LOOP);
@@ -357,7 +358,7 @@ bool ccOctree::DrawCellAsAPoint(const CCLib::DgmOctree::octreeCell& cell,
 	{
 		ScalarType dist = CCLib::ScalarFieldTools::computeMeanScalarValue(cell.points);
 		const ccColor::Rgb* col = cloud->geScalarValueColor(dist);
-		glFunc->glColor3ubv(col ? col->rgb : ccColor::lightGrey.rgb);
+		glFunc->glColor3ubv(col ? col->rgb : ccColor::lightGreyRGB.rgb);
 	}
 	else if (glParams->showColors)
 	{
@@ -516,7 +517,7 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 							PointDescriptor& output,
 							double pickWidth_pix/*=3.0*/) const
 {
-	output.point = 0;
+	output.point = nullptr;
 	output.squareDistd = -1.0;
 
 	if (!m_theAssociatedCloudAsGPC)
@@ -542,7 +543,8 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 	bool hasGLTrans = m_theAssociatedCloudAsGPC->getAbsoluteGLTransformation(trans);
 
 	//compute 3D picking 'ray'
-	CCVector3 rayAxis, rayOrigin;
+	CCVector3 rayAxis;
+	CCVector3 rayOrigin;
 	{
 		CCVector3d clickPosd2(clickPos.x, clickPos.y, 1.0);
 		CCVector3d Y(0, 0, 0);
@@ -605,10 +607,10 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 	Ray<PointCoordinateType> rayLocal(rayAxis, rayOrigin - m_dimMin);
 
 	//visibility table (if any)
-	const ccGenericPointCloud::VisibilityTableType* visTable = m_theAssociatedCloudAsGPC->isVisibilityTableInstantiated() ? &m_theAssociatedCloudAsGPC->getTheVisibilityArray() : 0;
+	const ccGenericPointCloud::VisibilityTableType* visTable = m_theAssociatedCloudAsGPC->isVisibilityTableInstantiated() ? &m_theAssociatedCloudAsGPC->getTheVisibilityArray() : nullptr;
 
 	//scalar field with hidden values (if any)
-	ccScalarField* activeSF = 0;
+	ccScalarField* activeSF = nullptr;
 	if (	m_theAssociatedCloudAsGPC->sfShown()
 		&&	m_theAssociatedCloudAsGPC->isA(CC_TYPES::POINT_CLOUD)
 		&&	!visTable //if the visibility table is instantiated, we always display ALL points
@@ -661,7 +663,8 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 
 				if (camera.perspective)
 				{
-					double radialSqDist, sqDistToOrigin;
+					double radialSqDist = 0.0;
+					double sqDistToOrigin = 0.0;
 					rayLocal.squareDistances(cellCenter, radialSqDist, sqDistToOrigin);
 
 					double dx = sqrt(sqDistToOrigin);

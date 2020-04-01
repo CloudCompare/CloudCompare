@@ -196,7 +196,8 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 		}
 	}
 
-	CCVector3d bbMin, bbMax;
+	CCVector3d bbMin;
+	CCVector3d bbMax;
 	if (hasPoseMat)
 	{
 		//we have to compute the rotated cloud bounding-box!
@@ -283,7 +284,8 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 				double minIndex = static_cast<double>(sf->getMin());
 				double maxIndex = static_cast<double>(sf->getMax());
 
-				double intMin, intMax;
+				double intMin = 0.0;
+				double intMax = 0.0;
 				double fracMin = modf(minIndex, &intMin);
 				double fracMax = modf(maxIndex, &intMax);
 
@@ -1867,7 +1869,7 @@ static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 				if (!arrays.blueData.empty())
 					C.b = static_cast<ColorCompType>(((arrays.blueData[i] - colorBlueOffset) * 255) / colorBlueRange);
 				
-				cloud->addRGBColor(C);
+				cloud->addColor(C);
 			}
 
 			if (!arrays.scanIndexData.empty())

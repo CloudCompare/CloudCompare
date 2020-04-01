@@ -60,10 +60,6 @@ CSF::CSF(wl::PointCloud& cloud)
 	params.iterations = 500;
 }
 
-CSF::~CSF()
-{
-}
-
 bool CSF::readPointsFromFile(std::string filename)
 {
 	point_cloud.clear();
@@ -73,7 +69,9 @@ bool CSF::readPointsFromFile(std::string filename)
 		std::ifstream fin(filename.c_str(), std::ios::in);
 
 		char line[500];
-		std::string x, y, z;
+		std::string x;
+		std::string y;
+		std::string z;
 		while (fin.getline(line, sizeof(line)))
 		{
 			std::stringstream words(line);
@@ -120,7 +118,8 @@ bool CSF::do_filtering(	std::vector<int>& groundIndexes,
 		timer.start();
 
 		//compute the terrain (cloud) bounding-box
-		wl::Point bbMin, bbMax;
+		wl::Point bbMin;
+		wl::Point bbMax;
 		point_cloud.computeBoundingBox(bbMin, bbMax);
 
 		//computing the number of cloth node
@@ -171,7 +170,6 @@ bool CSF::do_filtering(	std::vector<int>& groundIndexes,
 		cloth.addForce(Vec3(0, -gravity, 0) * time_step2);
 		for (int i = 0; i < params.iterations; i++)
 		{
-			//ÂË²¨Ö÷¹ý³Ì
 			//cloth.addForce(Vec3(0, -gravity, 0) * time_step2); //move this outside the main loop
 			double maxDiff = cloth.timeStep();
 			cloth.terrainCollision();
@@ -181,7 +179,7 @@ bool CSF::do_filtering(	std::vector<int>& groundIndexes,
 			//	app->dispToConsole(QString("[CSF] Iteration %1: max delta = %2").arg(i+1).arg(maxDiff));
 			//}
 
-			if (maxDiff != 0 && maxDiff < params.class_threshold / 100)
+			if (maxDiff != 0 && maxDiff < 0.005)
 			{
 				//early stop
 				break;

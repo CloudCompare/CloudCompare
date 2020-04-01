@@ -238,14 +238,14 @@ bool ccIndexedTransformationBuffer::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccIndexedTransformationBuffer::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
+bool ccIndexedTransformationBuffer::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
-	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags))
+	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
 	//vector size (dataVersion>=34)
 	uint32_t count = 0;
-	if (in.read((char*)&count,4) < 0)
+	if (in.read((char*)&count, 4) < 0)
 		return ReadError();
 
 	//try to resize the vector accordingly
@@ -260,20 +260,20 @@ bool ccIndexedTransformationBuffer::fromFile_MeOnly(QFile& in, short dataVersion
 	}
 
 	//transformations (dataVersion>=34)
-	for (ccIndexedTransformationBuffer::iterator it=begin(); it!=end(); ++it)
-		if (!it->fromFile(in, dataVersion, flags))
+	for (ccIndexedTransformationBuffer::iterator it = begin(); it != end(); ++it)
+		if (!it->fromFile(in, dataVersion, flags, oldToNewIDMap))
 			return false;
 
 	//display options
 	{
 		//Show polyline (dataVersion>=34)
-		if (in.read((char*)&m_showAsPolyline,sizeof(bool)) < 0)
+		if (in.read((char*)&m_showAsPolyline, sizeof(bool)) < 0)
 			return ReadError();
 		//Show trihedrons (dataVersion>=34)
-		if (in.read((char*)&m_showTrihedrons,sizeof(bool)) < 0)
+		if (in.read((char*)&m_showTrihedrons, sizeof(bool)) < 0)
 			return ReadError();
 		//Display scale (dataVersion>=34)
-		if (in.read((char*)&m_trihedronsScale,sizeof(float)) < 0)
+		if (in.read((char*)&m_trihedronsScale, sizeof(float)) < 0)
 			return ReadError();
 	}
 
@@ -300,7 +300,7 @@ void ccIndexedTransformationBuffer::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 	//show path
 	{
-		ccGL::Color3v(glFunc, ccColor::green.rgb);
+		ccGL::Color4v(glFunc, ccColor::green.rgba);
 		glFunc->glBegin(count > 1 && m_showAsPolyline ? GL_LINE_STRIP : GL_POINTS); //show path as a polyline or points?
 		for (ccIndexedTransformationBuffer::const_iterator it=begin(); it!=end(); ++it)
 			glFunc->glVertex3fv(it->getTranslation());

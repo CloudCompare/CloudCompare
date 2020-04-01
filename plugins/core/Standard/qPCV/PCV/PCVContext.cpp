@@ -132,7 +132,8 @@ void PCVContext::associateToEntity(GenericCloud* cloud, GenericMesh* mesh)
 	m_mesh = mesh;
 
 	//we get cloud bounding box
-	CCVector3 bbMin, bbMax;
+	CCVector3 bbMin;
+	CCVector3 bbMax;
 	m_vertices->getBoundingBox(bbMin, bbMax);
 
 	//we compute bbox diagonal
@@ -313,7 +314,9 @@ int PCVContext::GLAccumPixel(std::vector<int>& visibilityCount)
 	{
 		const CCVector3* P = m_vertices->getNextPoint();
 
-		double tx, ty, tz;
+		double tx = 0.0;
+		double ty = 0.0;
+		double tz = 0.0;
 		gluProject(P->x, P->y, P->z, MM, MP, VP, &tx, &ty, &tz);
 
 		int txi = static_cast<int>(floor(tx));

@@ -41,7 +41,7 @@ static bool s_outputLevelsEnabled = false;
 ccColorLevelsDlg::ccColorLevelsDlg(QWidget* parent, ccGenericPointCloud* pointCloud)
 	: QDialog(parent, Qt::Tool)
 	, Ui::ColorLevelsDialog()
-	, m_histogram(0)
+	, m_histogram(nullptr)
 	, m_cloud(pointCloud)
 {
 	setupUi(this);
@@ -101,9 +101,9 @@ void ccColorLevelsDlg::updateHistogram()
 			return;
 		}
 
-		std::vector<unsigned>* histoValuesR = (histoValues[0].empty() ? 0 : histoValues);
-		std::vector<unsigned>* histoValuesG = (histoValues[1].empty() ? 0 : histoValues+1);
-		std::vector<unsigned>* histoValuesB = (histoValues[2].empty() ? 0 : histoValues+2);
+		std::vector<unsigned>* histoValuesR = (histoValues[0].empty() ? nullptr : histoValues);
+		std::vector<unsigned>* histoValuesG = (histoValues[1].empty() ? nullptr : histoValues+1);
+		std::vector<unsigned>* histoValuesB = (histoValues[2].empty() ? nullptr : histoValues+2);
 
 		switch(channelComboBox->currentIndex())
 		{
@@ -130,15 +130,15 @@ void ccColorLevelsDlg::updateHistogram()
 
 		//project points
 		{
-			for (unsigned i=0; i<pointCount; ++i)
+			for (unsigned i = 0; i < pointCount; ++i)
 			{
-				const ccColor::Rgb& rgb = m_cloud->getPointColor(i);
+				const ccColor::Rgba& col = m_cloud->getPointColor(i);
 				if (histoValuesR)
-					histoValuesR->at(rgb.r)++;
+					histoValuesR->at(col.r)++;
 				if (histoValuesG)
-					histoValuesG->at(rgb.g)++;
+					histoValuesG->at(col.g)++;
 				if (histoValuesB)
-					histoValuesB->at(rgb.b)++;
+					histoValuesB->at(col.b)++;
 			}
 		}
 
@@ -186,10 +186,10 @@ void ccColorLevelsDlg::onApply()
 		unsigned pointCount = m_cloud->size();
 		int qIn = s_inputLevels[1] - s_inputLevels[0];
 		int pOut = s_outputLevels[1] - s_outputLevels[0];
-		for (unsigned i=0; i<pointCount; ++i)
+		for (unsigned i = 0; i < pointCount; ++i)
 		{
-			const ccColor::Rgb& rgb = m_cloud->getPointColor(i);
-			ccColor::Rgb newRgb;
+			const ccColor::Rgba& col = m_cloud->getPointColor(i);
+			ccColor::Rgba newRgb;
 			for (unsigned c = 0; c < 3; ++c)
 			{
 				if (applyRGB[c])
@@ -197,16 +197,17 @@ void ccColorLevelsDlg::onApply()
 					double newC = s_outputLevels[0];
 					if (qIn)
 					{
-						double u = (static_cast<double>(rgb.rgb[c]) - s_inputLevels[0]) / qIn;
+						double u = (static_cast<double>(col.rgba[c]) - s_inputLevels[0]) / qIn;
 						newC = s_outputLevels[0] + u * pOut; 
 					}
-					newRgb.rgb[c] = static_cast<ColorCompType>(std::max<double>(std::min<double>(newC, ccColor::MAX), 0.0));
+					newRgb.rgba[c] = static_cast<ColorCompType>(std::max<double>(std::min<double>(newC, ccColor::MAX), 0.0));
 				}
 				else
 				{
-					newRgb.rgb[c] = rgb.rgb[c];
+					newRgb.rgba[c] = col.rgba[c];
 				}
 			}
+			newRgb.a = col.a;
 
 			//set the new color
 			if (pc)
@@ -216,7 +217,7 @@ void ccColorLevelsDlg::onApply()
 			else
 			{
 				//DGM FIXME: dirty!
-				const_cast<ccColor::Rgb&>(rgb) = newRgb;
+				const_cast<ccColor::Rgba&>(col) = newRgb;
 			}
 		}
 

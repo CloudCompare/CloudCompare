@@ -25,7 +25,7 @@ struct DLL_LINKAGE Point {
 	Vec3f pos;
 	Vec3f normal;
 #ifdef POINTSWITHINDEX
-	size_t index;
+	unsigned index;
 #endif
 	//unsigned int meshFaceIndex;
 	Point() {}

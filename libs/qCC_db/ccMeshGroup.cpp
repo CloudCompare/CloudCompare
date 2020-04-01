@@ -32,14 +32,14 @@ bool ccMeshGroup::toFile_MeOnly(QFile& out) const
 	return false;
 }
 
-bool ccMeshGroup::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
+bool ccMeshGroup::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
 	//Mesh groups are deprecated since version 2.9
 	assert(dataVersion < 29);
 	if (dataVersion >= 29)
 		return false;
 
-	if (!ccGenericMesh::fromFile_MeOnly(in, dataVersion, flags))
+	if (!ccGenericMesh::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
 	/*** we simply read the data as it was before, so as to be able to read the other entities from the file! ***/

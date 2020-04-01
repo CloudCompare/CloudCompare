@@ -108,19 +108,18 @@ public:
 	**/
 	const PointCoordinateType* getEquation();
 
-
 	//! Flips the plane
 	void flip();
 
 protected:
 
 	//inherited from ccDrawable
-	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
+	void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
 	//inherited from ccGenericPrimitive
-	virtual bool toFile_MeOnly(QFile& out) const override;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
-	virtual bool buildUp() override;
+	bool toFile_MeOnly(QFile& out) const override;
+	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	bool buildUp() override;
 
 	//! Width along 'X' dimension
 	PointCoordinateType m_xWidth;

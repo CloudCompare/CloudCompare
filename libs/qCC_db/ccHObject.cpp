@@ -46,8 +46,8 @@
 //Qt
 #include <QIcon>
 
-ccHObject::ccHObject(const QString& name)
-	: ccObject(name)
+ccHObject::ccHObject(const QString& name, unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
+	: ccObject(name, uniqueID)
 	, ccDrawableObject()
 	, m_parent(nullptr)
 	, m_selectionBehavior(SELECTION_AA_BBOX)
@@ -152,6 +152,8 @@ ccHObject* ccHObject::New(CC_CLASS_ENUM objectType, const char* name/*=0*/)
 		return new NormsIndexesTableType();
 	case CC_TYPES::RGB_COLOR_ARRAY:
 		return new ColorsTableType();
+	case CC_TYPES::RGBA_COLOR_ARRAY:
+		return new RGBAColorsTableType();
 	case CC_TYPES::TEX_COORDS_ARRAY:
 		return new TextureCoordsContainer();
 	case CC_TYPES::IMAGE:
@@ -717,7 +719,7 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 			(  m_selected || !MACRO_SkipUnselected(context) ))
 		{
 			//apply default color (in case of)
-			ccGL::Color3v(glFunc, context.pointsDefaultCol.rgb);
+			ccGL::Color4v(glFunc, context.pointsDefaultCol.rgba);
 
 			//enable clipping planes (if any)
 			bool useClipPlanes = (draw3D && !m_clipPlanes.empty());
@@ -986,9 +988,9 @@ bool ccHObject::toFile(QFile& out) const
 	return true;
 }
 
-bool ccHObject::fromFile(QFile& in, short dataVersion, int flags)
+bool ccHObject::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
-	if (!fromFileNoChildren(in, dataVersion, flags))
+	if (!fromFileNoChildren(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
 	//(serializable) child count (dataVersion>=20)
@@ -1025,7 +1027,7 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags)
 			//store current position
 			size_t originalFilePos = in.pos();
 			//we need to load the custom object as plain ccCustomHobject
-			child->fromFileNoChildren(in, dataVersion, flags);
+			child->fromFileNoChildren(in, dataVersion, flags, oldToNewIDMap);
 			//go back to original position
 			in.seek(originalFilePos);
 			//get custom object name and plugin name
@@ -1052,7 +1054,7 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags)
 		assert(child && child->isSerializable());
 		if (child)
 		{
-			if (child->fromFile(in, dataVersion, flags))
+			if (child->fromFile(in, dataVersion, flags, oldToNewIDMap))
 			{
 				//FIXME
 				//addChild(child,child->getFlagState(CC_FATHER_DEPENDENT));
@@ -1086,7 +1088,7 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags)
 	//read transformation history (dataVersion >= 45)
 	if (dataVersion >= 45)
 	{
-		if (!m_glTransHistory.fromFile(in, dataVersion, flags))
+		if (!m_glTransHistory.fromFile(in, dataVersion, flags, oldToNewIDMap))
 		{
 			return false;
 		}
@@ -1095,16 +1097,16 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags)
 	return true;
 }
 
-bool ccHObject::fromFileNoChildren(QFile& in, short dataVersion, int flags)
+bool ccHObject::fromFileNoChildren(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
 	assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
 
 	//read 'ccObject' header
-	if (!ccObject::fromFile(in, dataVersion, flags))
+	if (!ccObject::fromFile(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
 	//read own data
-	return fromFile_MeOnly(in, dataVersion, flags);
+	return fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap);
 }
 
 bool ccHObject::toFile_MeOnly(QFile& out) const
@@ -1134,7 +1136,7 @@ bool ccHObject::toFile_MeOnly(QFile& out) const
 	if (m_colorIsOverriden)
 	{
 		//'tempColor' (dataVersion>=20)
-		if (out.write(reinterpret_cast<const char*>(m_tempColor.rgb), sizeof(ColorCompType)*3) < 0)
+		if (out.write(reinterpret_cast<const char*>(m_tempColor.rgba), sizeof(ColorCompType)*3) < 0) //TODO: save the alpha channel?
 		{
 			return WriteError();
 		}
@@ -1157,7 +1159,7 @@ bool ccHObject::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccHObject::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
+bool ccHObject::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
 	assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
 
@@ -1184,15 +1186,16 @@ bool ccHObject::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	if (m_colorIsOverriden)
 	{
 		//'tempColor' (dataVersion>=20)
-		if (in.read(reinterpret_cast<char*>(m_tempColor.rgb), sizeof(ColorCompType)*3) < 0)
+		if (in.read(reinterpret_cast<char*>(m_tempColor.rgba), sizeof(ColorCompType)*3) < 0)
 			return ReadError();
+		m_tempColor.a = ccColor::MAX;
 	}
 	//'glTransEnabled' state (dataVersion>=20)
 	if (in.read(reinterpret_cast<char*>(&m_glTransEnabled), sizeof(bool)) < 0)
 		return ReadError();
 	if (m_glTransEnabled)
 	{
-		if (!m_glTrans.fromFile(in, dataVersion, flags))
+		if (!m_glTrans.fromFile(in, dataVersion, flags, oldToNewIDMap))
 		{
 			return false;
 		}

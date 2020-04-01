@@ -41,9 +41,9 @@
 //system
 #include <cassert>
 
-ccGenericMesh::ccGenericMesh(QString name/*=QString()*/)
+ccGenericMesh::ccGenericMesh(QString name/*=QString()*/, unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
 	: GenericIndexedMesh()
-	, ccHObject(name)
+	, ccHObject(name, uniqueID)
 	, m_triNormsShown(false)
 	, m_materialsShown(false)
 	, m_showWired(false)
@@ -130,9 +130,9 @@ CCVector3* ccGenericMesh::GetNormalsBuffer()
 }
 
 //Colors buffer
-ccColor::Rgb* ccGenericMesh::GetColorsBuffer()
+ColorCompType* ccGenericMesh::GetColorsBuffer()
 {
-	static ccColor::Rgb s_rgbBuffer[ccChunk::SIZE * 3];
+	static ColorCompType s_rgbBuffer[ccChunk::SIZE * 3 * 4];
 	return s_rgbBuffer;
 }
 
@@ -295,18 +295,18 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 
 		//in the case we need to display vertex colors
-		ColorsTableType* rgbColorsTable = nullptr;
+		RGBAColorsTableType* rgbaColorsTable = nullptr;
 		if (glParams.showColors)
 		{
 			if (isColorOverriden())
 			{
-				ccGL::Color3v(glFunc, m_tempColor.rgb);
+				ccGL::Color4v(glFunc, m_tempColor.rgba);
 				glParams.showColors = false;
 			}
 			else
 			{
 				assert(vertices->isA(CC_TYPES::POINT_CLOUD));
-				rgbColorsTable = static_cast<ccPointCloud*>(vertices)->rgbColors();
+				rgbaColorsTable = static_cast<ccPointCloud*>(vertices)->rgbaColors();
 			}
 		}
 		else
@@ -350,10 +350,15 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				glFunc->glEnableClientState(GL_NORMAL_ARRAY);
 				glFunc->glNormalPointer(GL_COORD_TYPE, 0, GetNormalsBuffer());
 			}
-			if (glParams.showSF || glParams.showColors)
+			if (glParams.showSF)
 			{
 				glFunc->glEnableClientState(GL_COLOR_ARRAY);
 				glFunc->glColorPointer(3, GL_UNSIGNED_BYTE, 0, GetColorsBuffer());
+			}
+			else if (glParams.showColors)
+			{
+				glFunc->glEnableClientState(GL_COLOR_ARRAY);
+				glFunc->glColorPointer(4, GL_UNSIGNED_BYTE, 0, GetColorsBuffer());
 			}
 
 			//we can scan and process each chunk separately in an optimized way
@@ -378,7 +383,7 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				//scalar field
 				if (glParams.showSF)
 				{
-					ccColor::Rgb* _rgbColors = GetColorsBuffer();
+					ccColor::Rgb* _rgbColors = reinterpret_cast<ccColor::Rgb*>(GetColorsBuffer());
 					assert(colorScale);
 					for (unsigned n = 0; n < chunkSize; n += decimStep)
 					{
@@ -391,14 +396,14 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				//colors
 				else if (glParams.showColors)
 				{
-					ccColor::Rgb* _rgbColors = GetColorsBuffer();
+					ccColor::Rgba* _rgbaColors = reinterpret_cast<ccColor::Rgba*>(GetColorsBuffer());
 
 					for (unsigned n = 0; n < chunkSize; n += decimStep)
 					{
 						const CCLib::VerticesIndexes* ti = getTriangleVertIndexes(static_cast<unsigned>(chunkStart + n));
-						*_rgbColors++ = rgbColorsTable->at(ti->i1);
-						*_rgbColors++ = rgbColorsTable->at(ti->i2);
-						*_rgbColors++ = rgbColorsTable->at(ti->i3);
+						*_rgbaColors++ = rgbaColorsTable->at(ti->i1);
+						*_rgbaColors++ = rgbaColorsTable->at(ti->i2);
+						*_rgbaColors++ = rgbaColorsTable->at(ti->i3);
 					}
 				}
 
@@ -410,7 +415,9 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 					{
 						for (unsigned n = 0; n < chunkSize; n += decimStep)
 						{
-							CCVector3 Na, Nb, Nc;
+							CCVector3 Na;
+							CCVector3 Nb;
+							CCVector3 Nc;
 							getTriangleNormals(static_cast<unsigned>(chunkStart + n), Na, Nb, Nc);
 							*_normals++ = Na;
 							*_normals++ = Nb;
@@ -448,12 +455,22 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 		else
 		{
-			//current vertex color
-			const ccColor::Rgb *col1 = nullptr, *col2 = nullptr, *col3 = nullptr;
+			//current vertex color (RGB)
+			const ccColor::Rgb *rgb1 = nullptr;
+			const ccColor::Rgb *rgb2 = nullptr;
+			const ccColor::Rgb *rgb3 = nullptr;
+			//current vertex color (RGBA)
+			const ccColor::Rgba *rgba1 = nullptr;
+			const ccColor::Rgba *rgba2 = nullptr;
+			const ccColor::Rgba *rgba3 = nullptr;
 			//current vertex normal
-			const PointCoordinateType *N1 = nullptr, *N2 = nullptr, *N3 = nullptr;
+			const PointCoordinateType *N1 = nullptr;
+			const PointCoordinateType *N2 = nullptr;
+			const PointCoordinateType *N3 = nullptr;
 			//current vertex texture coordinates
-			TexCoords2D *Tx1 = nullptr, *Tx2 = nullptr, *Tx3 = nullptr;
+			TexCoords2D *Tx1 = nullptr;
+			TexCoords2D *Tx2 = nullptr;
+			TexCoords2D *Tx3 = nullptr;
 
 			//loop on all triangles
 			int lasMtlIndex = -1;
@@ -495,21 +512,21 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				if (glParams.showSF)
 				{
 					assert(colorScale);
-					col1 = currentDisplayedScalarField->getValueColor(tsi->i1);
-					if (!col1)
+					rgb1 = currentDisplayedScalarField->getValueColor(tsi->i1);
+					if (!rgb1)
 						continue;
-					col2 = currentDisplayedScalarField->getValueColor(tsi->i2);
-					if (!col2)
+					rgb2 = currentDisplayedScalarField->getValueColor(tsi->i2);
+					if (!rgb2)
 						continue;
-					col3 = currentDisplayedScalarField->getValueColor(tsi->i3);
-					if (!col3)
+					rgb3 = currentDisplayedScalarField->getValueColor(tsi->i3);
+					if (!rgb3)
 						continue;
 				}
 				else if (glParams.showColors)
 				{
-					col1 = &rgbColorsTable->at(tsi->i1);
-					col2 = &rgbColorsTable->at(tsi->i2);
-					col3 = &rgbColorsTable->at(tsi->i3);
+					rgba1 = &rgbaColorsTable->at(tsi->i1);
+					rgba2 = &rgbaColorsTable->at(tsi->i2);
+					rgba3 = &rgbaColorsTable->at(tsi->i3);
 				}
 
 				if (glParams.showNorms)
@@ -517,7 +534,9 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 					if (showTriNormals)
 					{
 						assert(triNormals);
-						int n1, n2, n3;
+						int n1 = 0;
+						int n2 = 0;
+						int n3 = 0;
 						getTriangleNormalIndexes(n, n1, n2, n3);
 						N1 = (n1 >= 0 ?                 ccNormalVectors::GetNormal(triNormals->at(n1)).u : nullptr);
 						N2 = (n1 == n2 ? N1 : n1 >= 0 ? ccNormalVectors::GetNormal(triNormals->at(n2)).u : nullptr);
@@ -584,8 +603,10 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				//vertex 1
 				if (N1)
 					ccGL::Normal3v(glFunc, N1);
-				if (col1)
-					glFunc->glColor3ubv(col1->rgb);
+				if (rgb1)
+					glFunc->glColor3ubv(rgb1->rgb);
+				else if (rgba1)
+					glFunc->glColor4ubv(rgba1->rgba);
 				if (Tx1)
 					glFunc->glTexCoord2fv(Tx1->t);
 				ccGL::Vertex3v(glFunc, vertices->getPoint(tsi->i1)->u);
@@ -593,8 +614,10 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				//vertex 2
 				if (N2)
 					ccGL::Normal3v(glFunc, N2);
-				if (col2)
-					glFunc->glColor3ubv(col2->rgb);
+				if (rgb2)
+					glFunc->glColor3ubv(rgb2->rgb);
+				else if (rgba2)
+					glFunc->glColor4ubv(rgba2->rgba);
 				if (Tx2)
 					glFunc->glTexCoord2fv(Tx2->t);
 				ccGL::Vertex3v(glFunc, vertices->getPoint(tsi->i2)->u);
@@ -602,8 +625,10 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				//vertex 3
 				if (N3)
 					ccGL::Normal3v(glFunc, N3);
-				if (col3)
-					glFunc->glColor3ubv(col3->rgb);
+				if (rgb3)
+					glFunc->glColor3ubv(rgb3->rgb);
+				else if (rgba3)
+					glFunc->glColor4ubv(rgba3->rgba);
 				if (Tx3)
 					glFunc->glTexCoord2fv(Tx3->t);
 				ccGL::Vertex3v(glFunc, vertices->getPoint(tsi->i3)->u);
@@ -669,9 +694,9 @@ bool ccGenericMesh::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccGenericMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
+bool ccGenericMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
-	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags))
+	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
 	//'show wired' state (dataVersion>=20)
@@ -793,9 +818,9 @@ ccPointCloud* ccGenericMesh::samplePoints(	bool densityBased,
 					unsigned triIndex = triIndices->at(i);
 					const CCVector3* P = cloud->getPoint(i);
 
-					ccColor::Rgb C;
-					getColorFromMaterial(triIndex, *P, C, withRGB);
-					cloud->addRGBColor(C);
+					ccColor::Rgba color;
+					getColorFromMaterial(triIndex, *P, color, withRGB);
+					cloud->addColor(color);
 				}
 
 				cloud->showColors(true);
@@ -816,7 +841,7 @@ ccPointCloud* ccGenericMesh::samplePoints(	bool densityBased,
 
 					ccColor::Rgb C;
 					interpolateColors(triIndex, *P, C);
-					cloud->addRGBColor(C);
+					cloud->addColor(C);
 				}
 
 				cloud->showColors(true);
@@ -896,10 +921,14 @@ bool ccGenericMesh::trianglePicking(unsigned triIndex,
 {
 	assert(triIndex < size());
 
-	CCVector3 A3D, B3D, C3D;
+	CCVector3 A3D;
+	CCVector3 B3D;
+	CCVector3 C3D;
 	getTriangleVertices(triIndex, A3D, B3D, C3D);
 
-	CCVector3d A2D, B2D, C2D;
+	CCVector3d A2D;
+	CCVector3d B2D;
+	CCVector3d C2D;
 	if (noGLTrans)
 	{
 		// if none of its points fall into the frustrum the triangle is not visible...
@@ -1054,7 +1083,9 @@ bool ccGenericMesh::computePointPosition(unsigned triIndex, const CCVector2d& uv
 		return true;
 	}
 	
-	CCVector3 A, B, C;
+	CCVector3 A;
+	CCVector3 B;
+	CCVector3 C;
 	getTriangleVertices(triIndex, A, B, C);
 
 	double z = 1.0 - uv.x - uv.y;

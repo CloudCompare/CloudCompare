@@ -166,7 +166,7 @@ void ccSymbolCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			if (MACRO_DrawFastNamesOnly(context))
 				return;
 
-			glFunc->glPushName(getUniqueID());
+			glFunc->glPushName(getUniqueIDForDisplay());
 			hasLabels = false; //no need to display labels in 'picking' mode
 		}
 
@@ -174,7 +174,7 @@ void ccSymbolCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		//glFunc->glOrtho(-halfW, halfW, -halfH, halfH, -maxS, maxS);
 
 		//default color
-		const ccColor::Rgb* color = &context.pointsDefaultCol;
+		const ccColor::Rgba* color = &context.pointsDefaultCol;
 		if (isColorOverriden())
 		{
 			color = &m_tempColor;
@@ -225,7 +225,7 @@ void ccSymbolCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					color = &getPointColor(i);
 				}
 				//we must reset the color each time as the call to displayText may change the active color!
-				glFunc->glColor3ubv(color->rgb);
+				glFunc->glColor4ubv(color->rgba);
 
 				//draw associated symbol
 				if (m_showSymbols && m_symbolSize > 0.0)
@@ -242,7 +242,7 @@ void ccSymbolCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 													static_cast<int>(Q2D.y + ypShift),
 													m_labelAlignFlags,
 													0,
-													color->rgb,
+													color,
 													&font);
 				}
 

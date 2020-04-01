@@ -69,7 +69,7 @@ namespace GfxTL
 	};
 
 	template< class T >
-	struct ScalarTypeDeferer< std::auto_ptr< T > >
+	struct ScalarTypeDeferer< std::unique_ptr< T > >
 	{
 		typedef T ScalarType;
 	};

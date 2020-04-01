@@ -707,7 +707,8 @@ bool ManualSegmentationTools::segmentMeshWithAAPlane(GenericIndexedMesh* mesh,
 
 			//test each vertex
 			//char relativePos[3] = { 1, 1, 1 };
-			std::vector<unsigned char> minusVertIndexes, plusVertIndexes;
+			std::vector<unsigned char> minusVertIndexes;
+			std::vector<unsigned char> plusVertIndexes;
 			for (unsigned char j = 0; j < 3; ++j)
 			{
 				const CCVector3d& v = V[j];
@@ -780,7 +781,8 @@ bool ManualSegmentationTools::segmentMeshWithAAPlane(GenericIndexedMesh* mesh,
 					unsigned char iMinus = minusVertIndexes.front();
 					unsigned char iPlus = plusVertIndexes.front();
 
-					unsigned iCoutside,iCinside;
+					unsigned iCoutside;
+					unsigned iCinside;
 					if (!ComputeEdgePoint(V[iMinus], origVertIndexes[iMinus],
 						V[iPlus], origVertIndexes[iPlus],
 						iCoutside, iCinside,
@@ -833,7 +835,9 @@ bool ManualSegmentationTools::segmentMeshWithAAPlane(GenericIndexedMesh* mesh,
 				else
 				{
 					//we have one vertex on one side and two on the other side
-					unsigned char iLeft, iRight1, iRight2;
+					unsigned char iLeft;
+					unsigned char iRight1;
+					unsigned char iRight2;
 					bool leftIsMinus = true;
 					if (minusVertIndexes.size() == 1)
 					{
@@ -853,8 +857,10 @@ bool ManualSegmentationTools::segmentMeshWithAAPlane(GenericIndexedMesh* mesh,
 					}
 
 					//the plane cuts through the two edges having the 'single' vertex in common
-					unsigned i1outside, i1inside;
-					unsigned i2outside, i2inside;
+					unsigned i1outside;
+					unsigned i1inside;
+					unsigned i2outside;
+					unsigned i2inside;
 					if (!ComputeEdgePoint(V[iRight1], origVertIndexes[iRight1], V[iLeft], origVertIndexes[iLeft], i1outside, i1inside, planeZ, Z, outsideVertices, insideVertices)
 					||	!ComputeEdgePoint(V[iRight2], origVertIndexes[iRight2], V[iLeft], origVertIndexes[iLeft], i2outside, i2inside, planeZ, Z, outsideVertices, insideVertices))
 					{
@@ -1081,7 +1087,8 @@ bool ManualSegmentationTools::segmentMeshWithAABox(GenericIndexedMesh* origMesh,
 				//test the position of each vertex relatively to the current plane
 				//char relativePos[3] = { 1, 1, 1 };
 				//bool insideXY[3] = { false, false, false };
-				std::vector<unsigned char> insideLocalVertIndexes, outsideLocalVertIndexes;
+				std::vector<unsigned char> insideLocalVertIndexes;
+				std::vector<unsigned char> outsideLocalVertIndexes;
 				for (unsigned char j = 0; j < 3; ++j)
 				{
 					const CCVector3d& v = V[j];
@@ -1155,7 +1162,8 @@ bool ManualSegmentationTools::segmentMeshWithAABox(GenericIndexedMesh* origMesh,
 						unsigned char iOuside = outsideLocalVertIndexes.front();
 
 						unsigned char iCenter = 3 - iInside - iOuside;
-						unsigned iCoutside, iCinside;
+						unsigned iCoutside;
+						unsigned iCinside;
 						//we can now create one vertex and two new triangles
 						if (!ComputeEdgePoint(
 							V[iInside], vertIndexes[iInside],
@@ -1213,7 +1221,9 @@ bool ManualSegmentationTools::segmentMeshWithAABox(GenericIndexedMesh* origMesh,
 					else
 					{
 						//we have one vertex on one side and two on the other side
-						unsigned char iLeft, iRight1, iRight2;
+						unsigned char iLeft;
+						unsigned char iRight1;
+						unsigned char iRight2;
 						bool leftIsInside = true;
 						if (insideLocalVertIndexes.size() == 1)
 						{
@@ -1234,8 +1244,10 @@ bool ManualSegmentationTools::segmentMeshWithAABox(GenericIndexedMesh* origMesh,
 
 						//the plane cuts through the two edges having the 'single' vertex in common
 						//we are going to create 3 triangles
-						unsigned i1outside, i1inside;
-						unsigned i2outside, i2inside;
+						unsigned i1outside;
+						unsigned i1inside;
+						unsigned i2outside;
+						unsigned i2inside;
 						if (  !ComputeEdgePoint(	V[iRight1], vertIndexes[iRight1],
 													V[iLeft], vertIndexes[iLeft],
 													i1outside, i1inside,
@@ -1397,12 +1409,12 @@ bool ManualSegmentationTools::segmentMeshWithAABox(GenericIndexedMesh* origMesh,
 		if (	!MergeOldTriangles(	origMesh, origVertices,
 									insideMesh, insideVertices,
 									*preservedTrianglesInside,
-									ioParams.trackOrigIndexes ? &ioParams.origTriIndexesMapInside : 0)
+									ioParams.trackOrigIndexes ? &ioParams.origTriIndexesMapInside : nullptr)
 			||	(	ioParams.generateOutsideMesh
 				&&	!MergeOldTriangles(	origMesh, origVertices,
 										outsideMesh, outsideVertices,
 										preservedTrianglesOutside,
-										ioParams.trackOrigIndexes ? &ioParams.origTriIndexesMapOutside : 0))
+										ioParams.trackOrigIndexes ? &ioParams.origTriIndexesMapOutside : nullptr))
 			)
 		{
 			error = true;

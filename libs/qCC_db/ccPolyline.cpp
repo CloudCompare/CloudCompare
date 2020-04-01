@@ -24,9 +24,9 @@
 #include "ccCone.h"
 #include "ccPointCloud.h"
 
-ccPolyline::ccPolyline(GenericIndexedCloudPersist* associatedCloud)
+ccPolyline::ccPolyline(GenericIndexedCloudPersist* associatedCloud, unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
 	: Polyline(associatedCloud)
-	, ccShiftedObject("Polyline")
+	, ccShiftedObject("Polyline", uniqueID)
 {
 	set2DMode(false);
 	setForeground(true);
@@ -196,7 +196,7 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 		glFunc->glPushName(getUniqueIDForDisplay());
 
 	if (isColorOverriden())
-		ccGL::Color3v(glFunc, getTempColor().rgb);
+		ccGL::Color4v(glFunc, getTempColor().rgba);
 	else if (colorsShown())
 		ccGL::Color3v(glFunc, m_rgbColor.rgb);
 
@@ -361,9 +361,9 @@ bool ccPolyline::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
+bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
-	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags))
+	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
 	if (dataVersion < 28)
@@ -672,12 +672,12 @@ ccPointCloud* ccPolyline::samplePoints(	bool densityBased,
 		if (isColorOverriden())
 		{
 			//we use the default 'temporary' color
-			cloud->setRGBColor(getTempColor());
+			cloud->setColor(getTempColor());
 		}
 		else if (colorsShown())
 		{
 			//we use the default color
-			cloud->setRGBColor(m_rgbColor);
+			cloud->setColor(m_rgbColor);
 		}
 	}
 

@@ -26,7 +26,7 @@
 ccComputeOctreeDlg::ccComputeOctreeDlg(const ccBBox& baseBBox, double minCellSize, QWidget* parent/*=0*/)
 	: QDialog(parent)
 	, Ui::ComputeOctreeDialog()
-	, m_bbEditorDlg(0)
+	, m_bbEditorDlg(nullptr)
 {
 	setupUi(this);
 

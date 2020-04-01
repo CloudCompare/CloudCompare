@@ -133,7 +133,7 @@ public:
 	inline const ccColor::Rgb* getColor(ScalarType value) const
 	{
 		assert(m_colorScale);
-		return m_colorScale->getColorByRelativePos(normalize(value), m_colorRampSteps, m_showNaNValuesInGrey ? &ccColor::lightGrey : nullptr);
+		return m_colorScale->getColorByRelativePos(normalize(value), m_colorRampSteps, m_showNaNValuesInGrey ? &ccColor::lightGreyRGB : nullptr);
 	}
 
 	//! Shortcut to getColor
@@ -209,7 +209,7 @@ public:
 	//inherited from ccSerializableObject
 	inline bool isSerializable() const override { return true; }
 	bool toFile(QFile& out) const override;
-	bool fromFile(QFile& in, short dataVersion, int flags) override;
+	bool fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
 
 	//! Returns the global shift (if any)
 	inline double getGlobalShift() const { return m_globalShift; }

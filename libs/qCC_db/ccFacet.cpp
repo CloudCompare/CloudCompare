@@ -200,7 +200,11 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 
 	//we project the input points on a plane
 	std::vector<CCLib::PointProjectionTools::IndexedCCVector2> points2D;
-	CCVector3 X, Y; //local base
+	
+	//local base
+	CCVector3 X;
+	CCVector3 Y;
+	
 	if (!Yk.projectPointsOn2DPlane<CCLib::PointProjectionTools::IndexedCCVector2>(points2D, nullptr, &m_center, &X, &Y))
 	{
 		ccLog::Error("[ccFacet::createInternalRepresentation] Not enough memory!");
@@ -360,7 +364,7 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 
 void ccFacet::setColor(const ccColor::Rgb& rgb)
 {
-	if (m_contourVertices && m_contourVertices->setRGBColor(rgb))
+	if (m_contourVertices && m_contourVertices->setColor(rgb))
 	{
 		m_contourVertices->showColors(true);
 		if (m_polygonMesh)
@@ -460,9 +464,9 @@ bool ccFacet::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccFacet::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
+bool ccFacet::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
-	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags))
+	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
 	if (dataVersion < 32)
@@ -473,7 +477,7 @@ bool ccFacet::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	//we only store its unique ID --> we hope we will find it at loading time
 	{
 		uint32_t origPointsUniqueID = 0;
-		if (in.read((char*)&origPointsUniqueID,4) < 0)
+		if (in.read((char*)&origPointsUniqueID, 4) < 0)
 			return ReadError();
 		//[DIRTY] WARNING: temporarily, we set the cloud unique ID in the 'm_originPoints' pointer!!!
 		*(uint32_t*)(&m_originPoints) = origPointsUniqueID;
@@ -484,7 +488,7 @@ bool ccFacet::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	//we only store its unique ID --> we hope we will find it at loading time
 	{
 		uint32_t contourPointsUniqueID = 0;
-		if (in.read((char*)&contourPointsUniqueID,4) < 0)
+		if (in.read((char*)&contourPointsUniqueID, 4) < 0)
 			return ReadError();
 		//[DIRTY] WARNING: temporarily, we set the cloud unique ID in the 'm_contourVertices' pointer!!!
 		*(uint32_t*)(&m_contourVertices) = contourPointsUniqueID;
@@ -495,7 +499,7 @@ bool ccFacet::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	//we only store its unique ID --> we hope we will find it at loading time
 	{
 		uint32_t contourPolyUniqueID = 0;
-		if (in.read((char*)&contourPolyUniqueID,4) < 0)
+		if (in.read((char*)&contourPolyUniqueID, 4) < 0)
 			return ReadError();
 		//[DIRTY] WARNING: temporarily, we set the polyline unique ID in the 'm_contourPolyline' pointer!!!
 		*(uint32_t*)(&m_contourPolyline) = contourPolyUniqueID;
@@ -506,30 +510,30 @@ bool ccFacet::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	//we only store its unique ID --> we hope we will find it at loading time
 	{
 		uint32_t polygonMeshUniqueID = 0;
-		if (in.read((char*)&polygonMeshUniqueID,4) < 0)
+		if (in.read((char*)&polygonMeshUniqueID, 4) < 0)
 			return ReadError();
 		//[DIRTY] WARNING: temporarily, we set the polyline unique ID in the 'm_contourPolyline' pointer!!!
 		*(uint32_t*)(&m_polygonMesh) = polygonMeshUniqueID;
 	}
 
 	//plane equation (dataVersion>=32)
-	if (in.read((char*)&m_planeEquation,sizeof(PointCoordinateType)*4) < 0)
+	if (in.read((char*)&m_planeEquation, sizeof(PointCoordinateType) * 4) < 0)
 		return ReadError();
 
 	//center (dataVersion>=32)
-	if (in.read((char*)m_center.u,sizeof(PointCoordinateType)*3) < 0)
+	if (in.read((char*)m_center.u, sizeof(PointCoordinateType) * 3) < 0)
 		return ReadError();
 
 	//RMS (dataVersion>=32)
-	if (in.read((char*)&m_rms,sizeof(double)) < 0)
+	if (in.read((char*)&m_rms, sizeof(double)) < 0)
 		return ReadError();
 
 	//surface (dataVersion>=32)
-	if (in.read((char*)&m_surface,sizeof(double)) < 0)
+	if (in.read((char*)&m_surface, sizeof(double)) < 0)
 		return ReadError();
 
 	//Max edge length (dataVersion>=31)
-	if (in.read((char*)&m_maxEdgeLength,sizeof(PointCoordinateType)) < 0)
+	if (in.read((char*)&m_maxEdgeLength, sizeof(PointCoordinateType)) < 0)
 		return WriteError();
 
 	return true;

@@ -91,7 +91,7 @@ CC_FILE_ERROR PNFilter::saveToFile(ccHObject* entity, const QString& filename, c
 						static_cast<float>(s_defaultNorm.z) };
 
 	//progress dialog
-	QScopedPointer<ccProgressDialog> pDlg(0);
+	QScopedPointer<ccProgressDialog> pDlg(nullptr);
 	if (pDlg)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); //cancel available
@@ -163,7 +163,7 @@ CC_FILE_ERROR PNFilter::loadFile(const QString& filename, ccHObject& container, 
 	unsigned numberOfPoints = static_cast<unsigned>(fileSize  / singlePointSize);
 
 	//progress dialog
-	QScopedPointer<ccProgressDialog> pDlg(0);
+	QScopedPointer<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); //cancel available
@@ -173,7 +173,7 @@ CC_FILE_ERROR PNFilter::loadFile(const QString& filename, ccHObject& container, 
 	}
 	CCLib::NormalizedProgress nprogress(pDlg.data(), numberOfPoints);
 
-	ccPointCloud* loadedCloud = 0;
+	ccPointCloud* loadedCloud = nullptr;
 	//if the file is too big, it will be chuncked in multiple parts
 	unsigned chunkIndex = 0;
 	unsigned fileChunkPos = 0;
@@ -197,7 +197,7 @@ CC_FILE_ERROR PNFilter::loadFile(const QString& filename, ccHObject& container, 
 				result = CC_FERR_NOT_ENOUGH_MEMORY;
 				if (loadedCloud)
 					delete loadedCloud;
-				loadedCloud = 0;
+				loadedCloud = nullptr;
 				break;
 			}
 			loadedCloud->showNormals(true);

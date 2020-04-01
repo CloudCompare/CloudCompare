@@ -58,7 +58,7 @@ bool ccColorRampShader::setup(QOpenGLFunctions_2_1* glFunc, float minSatRel, flo
 
 	//set 'grayed' points color as a float-packed value
 	{
-		int rgb = (ccColor::lightGrey.r << 16) | (ccColor::lightGrey.g << 8) | ccColor::lightGrey.b;
+		int rgb = (ccColor::lightGrey.a << 24) | (ccColor::lightGrey.r << 16) | (ccColor::lightGrey.g << 8) | ccColor::lightGrey.b;
 		float packedColorGray = static_cast<float>(rgb / resolution);
 		setUniformValue("uf_colorGray", packedColorGray);
 	}

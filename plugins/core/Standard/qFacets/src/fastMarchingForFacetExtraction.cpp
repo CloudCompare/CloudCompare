@@ -152,7 +152,8 @@ int FastMarchingForFacetExtraction::init(	ccGenericPointCloud* cloud,
 			Tuple3i cellPos;
 			theOctree->getCellPos(cellCodes.back(), level, cellPos, true);
 
-			CCVector3 N,C;
+			CCVector3 N;
+			CCVector3 C;
 			ScalarType error;
 			if (ComputeCellStats(&Yk, N, C, error, m_errorMeasure))
 			{
@@ -385,7 +386,7 @@ unsigned FastMarchingForFacetExtraction::updateFlagsTable(	ccGenericPointCloud* 
 			//++pointCount;
 		}
 
-		m_theGrid[m_activeCells[i]] = 0;
+		m_theGrid[m_activeCells[i]] = nullptr;
 		delete aCell;
 	}
 
@@ -438,7 +439,8 @@ ScalarType FastMarchingForFacetExtraction::addCellToCurrentFacet(unsigned index)
 	}
 
 	//update error
-	CCVector3 N, C;
+	CCVector3 N;
+	CCVector3 C;
 	ScalarType error;
 	ComputeCellStats(m_currentFacetPoints, N, C, error, m_errorMeasure);
 

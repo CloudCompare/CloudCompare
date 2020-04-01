@@ -48,10 +48,12 @@ public:
 	void refreshBB() override;
 	bool interpolateNormals(unsigned triIndex, const CCVector3& P, CCVector3& N) override;
 	bool interpolateNormalsBC(unsigned triIndex, const CCVector3d& w, CCVector3& N) override;
-	bool interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgb& rgb) override;
-	bool interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccColor::Rgb& rgb) override;
-	bool getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor::Rgb& rgb, bool interpolateColorIfNoTexture) override;
-	bool getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, ccColor::Rgb& rgb, bool returnColorIfNoTexture) override;
+	bool interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgb& color) override;
+	bool interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccColor::Rgb& color) override;
+	bool interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgba& color) override;
+	bool interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccColor::Rgba& color) override;
+	bool getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor::Rgba& color, bool interpolateColorIfNoTexture) override;
+	bool getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, ccColor::Rgba& color, bool returnColorIfNoTexture) override;
 	bool hasMaterials() const override;
 	const ccMaterialSet* getMaterialSet() const override;
 	int getTriangleMtlIndex(unsigned triangleIndex) const override;
@@ -159,7 +161,7 @@ protected:
 
 	//inherited from ccHObject
 	bool toFile_MeOnly(QFile& out) const override;
-	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
 	void onUpdateOf(ccHObject* obj) override;
 
 	//! Associated mesh

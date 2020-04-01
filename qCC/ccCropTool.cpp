@@ -35,7 +35,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 	assert(entity);
 	if (!entity)
 	{
-		return 0;
+		return nullptr;
 	}
 
 	if (entity->isA(CC_TYPES::POINT_CLOUD))
@@ -47,7 +47,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 		{
 			//process failed!
 			ccLog::Warning(QString("[Crop] Failed to crop cloud '%1'!").arg(cloud->getName()));
-			return 0;
+			return nullptr;
 		}
 
 		if (selection->size() == 0)
@@ -55,13 +55,13 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 			//no points fall inside selection!
 			ccLog::Warning(QString("[Crop] No point of the cloud '%1' falls %2side the input box!").arg(cloud->getName(), (inside ? "in" : "out")));
 			delete selection;
-			return 0;
+			return nullptr;
 		}
 
 		//crop
 		ccPointCloud* croppedEnt = cloud->partialClone(selection);
 		delete selection;
-		selection = 0;
+		selection = nullptr;
 
 		return croppedEnt;
 	}
@@ -83,7 +83,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 			if (!rotatedVertices)
 			{
 				ccLog::Warning(QString("[Crop] Failed to crop mesh '%1'! (not enough memory)").arg(mesh->getName()));
-				return 0;
+				return nullptr;
 			}
 			rotatedVertices->setGLTransformation(*meshRotation);
 			rotatedVertices->applyGLTransformation_recursive();
@@ -106,7 +106,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 		CCLib::SimpleMesh* tempMesh = inside ? params.insideMesh : params.outsideMesh;
 
 		//output
-		ccMesh* croppedMesh = 0;
+		ccMesh* croppedMesh = nullptr;
 
 		if (tempMesh)
 		{
@@ -127,7 +127,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 					//no points fall inside selection!
 					ccLog::Warning(QString("[Crop] No triangle of the mesh '%1' falls %2side the input box!").arg(mesh->getName(), (inside ? "in" : "out")));
 					delete croppedMesh;
-					croppedMesh = 0;
+					croppedMesh = nullptr;
 				}
 				else
 				{
@@ -177,10 +177,10 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 								
 								//scalar fields
 								std::vector<ccScalarField*> importedSFs;
-								ccPointCloud* origVertices_pc = 0;
+								ccPointCloud* origVertices_pc = nullptr;
 								if (origVertices->hasScalarFields())
 								{
-									origVertices_pc = origVertices->isA(CC_TYPES::POINT_CLOUD) ? static_cast<ccPointCloud*>(origVertices) : 0;
+									origVertices_pc = origVertices->isA(CC_TYPES::POINT_CLOUD) ? static_cast<ccPointCloud*>(origVertices) : nullptr;
 									unsigned sfCount = origVertices_pc ? origVertices_pc->getNumberOfScalarFields() : 1;
 									
 									//now try to import each SF
@@ -384,9 +384,9 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 										{
 											//get the origin triangle
 											unsigned origTriIndex = origTriIndexes[i];
-											TexCoords2D* tx1 = 0;
-											TexCoords2D* tx2 = 0;
-											TexCoords2D* tx3 = 0;
+											TexCoords2D* tx1 = nullptr;
+											TexCoords2D* tx2 = nullptr;
+											TexCoords2D* tx3 = nullptr;
 											mesh->getTriangleTexCoordinates(origTriIndex, tx1, tx2, tx3);
 
 											//get the new triangle
@@ -423,7 +423,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 									{
 										ccLog::Warning("[Crop] Failed to transfer texture coordinates on the output mesh (not enough memory)");
 										delete texCoords;
-										texCoords = 0;
+										texCoords = nullptr;
 									}
 								}
 							}
@@ -447,12 +447,12 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 		if (params.insideMesh)
 		{
 			delete params.insideMesh;
-			params.insideMesh = 0;
+			params.insideMesh = nullptr;
 		}
 		if (params.outsideMesh)
 		{
 			delete params.outsideMesh;
-			params.outsideMesh = 0;
+			params.outsideMesh = nullptr;
 		}
 
 		if (croppedMesh)
@@ -464,5 +464,5 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 
 	//unhandled entity
 	ccLog::Warning("[Crop] Unhandled entity type");
-	return 0;
+	return nullptr;
 }

@@ -240,7 +240,8 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 	//hack: compute the theoretical 'minimal' edge length
 	PointCoordinateType minSquareEdgeLength = 0;
 	{
-		CCVector2 minP, maxP;
+		CCVector2 minP;
+		CCVector2 maxP;
 		for (size_t i=0; i<pointCount; ++i)
 		{
 			const Vertex2D& P = points[i];
@@ -346,20 +347,20 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 	if (enableVisualDebugMode)
 	{
 		debugDialog.init();
-		debugDialog.setGeometry(50,50,800,600);
+		debugDialog.setGeometry(50, 50, 800, 600);
 		debugDialog.show();
 
 		//create point cloud with all (2D) input points
 		{
 			debugCloud = new ccPointCloud;
 			debugCloud->reserve(pointCount);
-			for (size_t i=0; i<pointCount; ++i)
+			for (size_t i = 0; i < pointCount; ++i)
 			{
 				const Vertex2D& P = points[i];
-				debugCloud->addPoint(CCVector3(P.x,P.y,0));
+				debugCloud->addPoint(CCVector3(P.x, P.y, 0));
 			}
 			debugCloud->setPointSize(3);
-			debugDialog.addToDisplay(debugCloud,false); //the window will take care of deleting this entity!
+			debugDialog.addToDisplay(debugCloud, false); //the window will take care of deleting this entity!
 		}
 
 		//create polyline
@@ -374,13 +375,13 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 			for (VertexIterator itA = hullPoints.begin(); itA != hullPoints.end(); ++itA, ++index)
 			{
 				const Vertex2D* P = *itA;
-				debugContourVertices->addPoint(CCVector3(P->x,P->y,0));
+				debugContourVertices->addPoint(CCVector3(P->x, P->y, 0));
 				debugContour->addPointIndex(index/*(*itA)->index*/);
 			}
 			debugContour->setColor(ccColor::red);
 			debugContourVertices->setEnabled(false);
 			debugContour->setClosed(contourType == FULL);
-			debugDialog.addToDisplay(debugContour,false); //the window will take care of deleting this entity!
+			debugDialog.addToDisplay(debugContour, false); //the window will take care of deleting this entity!
 		}
 
 		//set zoom
@@ -417,7 +418,7 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 				--initEdgeCount;
 
 			VertexIterator itB = hullPoints.begin();
-			for (size_t i=0; i<initEdgeCount; ++i)
+			for (size_t i = 0; i < initEdgeCount; ++i)
 			{
 				VertexIterator itA = itB; ++itB;
 				if (itB == hullPoints.end())
@@ -724,7 +725,12 @@ ccPolyline* ccContourExtractor::ExtractFlatContour(	CCLib::GenericIndexedCloudPe
 		return nullptr;
 
 	CCLib::Neighbourhood Yk(points);
-	CCVector3 O, X, Y; //local base
+	
+	//local base
+	CCVector3 O;
+	CCVector3 X;
+	CCVector3 Y;
+	
 	CCLib::Neighbourhood::InputVectorsUsage vectorsUsage = CCLib::Neighbourhood::None;
 
 	//we project the input points on a plane

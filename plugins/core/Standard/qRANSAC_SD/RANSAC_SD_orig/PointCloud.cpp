@@ -76,7 +76,8 @@ using namespace std;
  * * Cambridge University Press, 1992, Section 8.5, ISBN 0-521-43108-5
  * * This code by Nicolas Devillard - 1998. Public domain.
  * */
-#define ELEM_SWAP(a,b) { register float t=(a);(a)=(b);(b)=t; }
+//#define ELEM_SWAP(a,b) { register float t=(a);(a)=(b);(b)=t; }
+#define ELEM_SWAP(a,b) std::swap(a,b);
 float quick_select(float arr[], int n)
 {
 	int low, high ;

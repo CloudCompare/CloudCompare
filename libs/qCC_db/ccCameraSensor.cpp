@@ -489,9 +489,9 @@ bool ccCameraSensor::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccCameraSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
+bool ccCameraSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
-	if (!ccSensor::fromFile_MeOnly(in, dataVersion, flags))
+	if (!ccSensor::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
 	//serialization wasn't possible before v3.5!
@@ -503,7 +503,7 @@ bool ccCameraSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	{
 		//we don't need to save/load this matrix as it is dynamically computed!
 		ccGLMatrix dummyMatrix;
-		if (!dummyMatrix.fromFile(in, dataVersion, flags))
+		if (!dummyMatrix.fromFile(in, dataVersion, flags, oldToNewIDMap))
 			return ReadError();
 	}
 	m_projectionMatrixIsValid = false;
@@ -1342,7 +1342,7 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 		//not particularly fast
 		if (MACRO_DrawFastNamesOnly(context))
 			return;
-		glFunc->glPushName(getUniqueID());
+		glFunc->glPushName(getUniqueIDForDisplay());
 	}
 
 	glFunc->glMatrixMode(GL_MODELVIEW);
@@ -1506,21 +1506,21 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 		float l = static_cast<float>(fabs(upperLeftPoint.z)/2);
 
 		// right vector
-		ccGL::Color3v(glFunc, ccColor::red.rgb);
+		ccGL::Color4v(glFunc, ccColor::red.rgba);
 		glFunc->glBegin(GL_LINES);
 		glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
 		glFunc->glVertex3f(l, 0.0f, 0.0f);
 		glFunc->glEnd();
 
 		// up vector
-		ccGL::Color3v(glFunc, ccColor::green.rgb);
+		ccGL::Color4v(glFunc, ccColor::green.rgba);
 		glFunc->glBegin(GL_LINES);
 		glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
 		glFunc->glVertex3f(0.0f, l, 0.0f);
 		glFunc->glEnd();
 
 		// view vector
-		ccGL::Color3v(glFunc, ccColor::blue.rgb);
+		ccGL::Color4v(glFunc, ccColor::blue.rgba);
 		glFunc->glBegin(GL_LINES);
 		glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
 		glFunc->glVertex3f(0.0f, 0.0f, -l);
@@ -1896,7 +1896,9 @@ ccImage* ccCameraSensor::orthoRectifyAsImage(	const ccImage* image,
 												double* maxCorner/*=0*/,
 												double* realCorners/*=0*/) const
 {
-	double a[3], b[3], c[3];
+	double a[3]{ 0.0, 0.0, 0.0 };
+	double b[3]{ 0.0, 0.0, 0.0 };
+	double c[3]{ 0.0, 0.0, 0.0 };
 
 	if (!computeOrthoRectificationParams(image, keypoints3D, keypointsImage, a, b, c))
 	{
@@ -1915,7 +1917,9 @@ ccImage* ccCameraSensor::orthoRectifyAsImage(	const ccImage* image,
 
 	//first, we compute the ortho-rectified image corners
 	double corners[8];
-	double xi, yi, qi;
+	double xi;
+	double yi;
+	double qi;
 
 	int width = static_cast<int>(image->getW());
 	int height = static_cast<int>(image->getH());
@@ -2091,7 +2095,9 @@ bool ccCameraSensor::OrthoRectifyAsImages(	std::vector<ccImage*> images,
 
 		//first, we compute the ortho-rectified image corners
 		double corners[8];
-		double xi,yi,qi;
+		double xi;
+		double yi;
+		double qi;
 
 		unsigned width = images[k]->getW();
 		unsigned height = images[k]->getH();
@@ -2297,7 +2303,9 @@ ccPointCloud* ccCameraSensor::orthoRectifyAsCloud(	const ccImage* image,
 													CCLib::GenericIndexedCloud* keypoints3D,
 													std::vector<KeyPoint>& keypointsImage) const
 {
-	double a[3],b[3],c[3];
+	double a[3]{ 0.0, 0.0, 0.0 };
+	double b[3]{ 0.0, 0.0, 0.0 };
+	double c[3]{ 0.0, 0.0, 0.0 };
 
 	if (!computeOrthoRectificationParams(image,keypoints3D,keypointsImage,a,b,c))
 		return nullptr;
@@ -2330,15 +2338,15 @@ ccPointCloud* ccCameraSensor::orthoRectifyAsCloud(	const ccImage* image,
 
 	//ortho rectification
 	{
-		for (unsigned pi = 0; pi<width; ++pi)
+		for (unsigned pi = 0; pi < width; ++pi)
 		{
 			double xi = static_cast<double>(pi) - 0.5*width;
 			for (unsigned pj = 0; pj < height; ++pj)
 			{
-				double yi = static_cast<double>(pj)-0.5*height;
+				double yi = static_cast<double>(pj) - 0.5*height;
 				double qi = 1.0 + c1*xi + c2*yi;
-				CCVector3 P(static_cast<PointCoordinateType>((a0 + a1*xi + a2*yi) / qi),
-							static_cast<PointCoordinateType>((b0 + b1*xi + b2*yi) / qi),
+				CCVector3 P(static_cast<PointCoordinateType>((a0 + a1 * xi + a2 * yi) / qi),
+							static_cast<PointCoordinateType>((b0 + b1 * xi + b2 * yi) / qi),
 							defaultZ);
 
 				//and color?
@@ -2346,15 +2354,17 @@ ccPointCloud* ccCameraSensor::orthoRectifyAsCloud(	const ccImage* image,
 				int r = qRed(rgb);
 				int g = qGreen(rgb);
 				int b = qBlue(rgb);
-				if (r+g+b > 0)
+				if (r + g + b > 0)
 				{
 					//add point
 					proj->addPoint(P);
 					//and color
-					ccColor::Rgb C(	static_cast<ColorCompType>(r),
-									static_cast<ColorCompType>(g),
-									static_cast<ColorCompType>(b) );
-					proj->addRGBColor(C);
+					int a = qAlpha(rgb);
+					ccColor::Rgba color(static_cast<ColorCompType>(r),
+										static_cast<ColorCompType>(g),
+										static_cast<ColorCompType>(b),
+										static_cast<ColorCompType>(a));
+					proj->addColor(color);
 					++realCount;
 				}
 			}
@@ -2619,7 +2629,8 @@ void ccOctreeFrustumIntersector::computeFrustumIntersectionByLevel(unsigned char
 		if (got != m_cellsBuilt[level].end())
 		{
 			// get extrema of the current cell
-			CCVector3 bbMin, bbMax;
+			CCVector3 bbMin;
+			CCVector3 bbMax;
 			m_associatedOctree->computeCellLimits(truncatedCode, level, bbMin, bbMax, true);
 
 			// look if there is a separating plane

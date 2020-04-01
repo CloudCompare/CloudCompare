@@ -54,7 +54,7 @@ public:
 	DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalarField* sf, ccPolyline* polyline, ccMainAppInterface* app=0);
 
 	//! Default destructor
-	virtual ~DistanceMapGenerationDlg();
+	virtual ~DistanceMapGenerationDlg() = default;
 
 	//! Angular units
 	enum ANGULAR_UNIT { ANG_DEG, ANG_RAD, ANG_GRAD };

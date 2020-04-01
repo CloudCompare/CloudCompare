@@ -37,7 +37,7 @@ public:
 	ccShader(QObject* parent = 0);
 
 	//! Destructor
-	virtual ~ccShader();
+	virtual ~ccShader() = default;
 
 	//! Creates program from two shader files with same base filename
 	/** Path and extensions (.vert and .frag) are automatically

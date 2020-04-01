@@ -35,8 +35,9 @@ public:
 
 	//! Default ccMesh constructor
 	/** \param vertices the vertices cloud
+		\param uniqueID unique ID (handle with care)
 	**/
-	explicit ccMesh(ccGenericPointCloud* vertices);
+	explicit ccMesh(ccGenericPointCloud* vertices, unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID);
 
 	//! ccMesh constructor (from a CCLib::GenericIndexedMesh)
 	/** The GenericIndexedMesh should refer to a known ccGenericPointCloud.
@@ -56,7 +57,7 @@ public:
 
 	//! Clones this entity
 	/** All the main features of the entity are cloned, except from the octree
-		\param vertices vertices set to use (will be automatically - AND OPTIMALLY - cloned if 0)
+		\param vertices vertices set to use (will be automatically - AND OPTIMALLY - cloned if nullptr)
 		\param clonedMaterials for internal use
 		\param clonedNormsTable for internal use
 		\param cloneTexCoords for internal use
@@ -99,9 +100,11 @@ public:
 	bool interpolateNormalsBC(unsigned triIndex, const CCVector3d& w, CCVector3& N) override;
 	bool interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgb& C) override;
 	bool interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccColor::Rgb& C) override;
+	bool interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgba& C) override;
+	bool interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccColor::Rgba& C) override;
 	void computeInterpolationWeights(unsigned triIndex, const CCVector3& P, CCVector3d& weights) const override;
-	bool getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor::Rgb& C, bool interpolateColorIfNoTexture) override;
-	bool getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, ccColor::Rgb& C, bool returnColorIfNoTexture) override;
+	bool getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor::Rgba& C, bool interpolateColorIfNoTexture) override;
+	bool getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, ccColor::Rgba& color, bool returnColorIfNoTexture) override;
 	unsigned capacity() const override;
 
 	//inherited methods (GenericIndexedMesh)
@@ -390,7 +393,7 @@ protected: //methods
 	//inherited from ccHObject
 	void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 	bool toFile_MeOnly(QFile& out) const override;
-	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) override;
+	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
 	void applyGLTransformation(const ccGLMatrix& trans) override;
 	void onUpdateOf(ccHObject* obj) override;
 	void onDeletionOf(const ccHObject* obj) override;
@@ -401,6 +404,8 @@ protected: //methods
 	bool interpolateNormals(const CCLib::VerticesIndexes& vertIndexes, const CCVector3d& w, CCVector3& N, const Tuple3i* triNormIndexes = nullptr);
 	//! Same as other 'interpolateColors' method with a set of 3 vertices indexes
 	bool interpolateColors(const CCLib::VerticesIndexes& vertIndexes, const CCVector3d& w, ccColor::Rgb& C);
+	//! Same as other 'interpolateColors' method with a set of 3 vertices indexes
+	bool interpolateColors(const CCLib::VerticesIndexes& vertIndexes, const CCVector3d& w, ccColor::Rgba& C);
 
 	//! Used internally by 'subdivide'
 	bool pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, unsigned indexB, unsigned indexC);

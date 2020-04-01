@@ -34,7 +34,7 @@ ccProgressDialog::ccProgressDialog(	bool showCancelButton,
 	setRange(0, 100);
 	setMinimumWidth(400);
 
-	QPushButton* cancelButton = 0;
+	QPushButton* cancelButton = nullptr;
 	if (showCancelButton)
 	{
 		cancelButton = new QPushButton("Cancel");

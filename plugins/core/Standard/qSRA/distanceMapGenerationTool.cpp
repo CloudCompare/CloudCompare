@@ -285,7 +285,7 @@ bool DistanceMapGenerationTool::ComputeRadialDist(	ccPointCloud* cloud,
 	sf->resize(pointCount); //should always be ok
 	assert(sf);
 
-	ccScalarField* radiiSf = 0;
+	ccScalarField* radiiSf = nullptr;
 	if (storeRadiiAsSF)
 	{
 		int sfIdxRadii = cloud->getScalarFieldIndexByName(RADII_SF_NAME);
@@ -314,7 +314,7 @@ bool DistanceMapGenerationTool::ComputeRadialDist(	ccPointCloud* cloud,
 		const unsigned char dim1 = static_cast<unsigned char>(profileDesc.revolDim < 2 ? profileDesc.revolDim + 1 : 0);
 		const unsigned char dim2 = (dim1 < 2 ? dim1 + 1 : 0);
 
-		ccProgressDialog dlg(true, app ? app->getMainWindow() : 0);
+		ccProgressDialog dlg(true, app ? app->getMainWindow() : nullptr);
 		dlg.setMethodTitle(QObject::tr("Cloud to profile radial distance"));
 		dlg.setInfo(QObject::tr("Polyline: %1 vertices\nCloud: %2 points").arg(vertexCount).arg(pointCount));
 		dlg.start();
@@ -477,7 +477,7 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 	{
 		if (app)
 			app->dispToConsole(QString("[DistanceMapGenerationTool] Internal error: invalid input structures!"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		return QSharedPointer<Map>(0);
+		return QSharedPointer<Map>(nullptr);
 	}
 
 	//invalid parameters?
@@ -485,7 +485,7 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 	{
 		if (app)
 			app->dispToConsole(QString("[DistanceMapGenerationTool] Internal error: invalid grid parameters!"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		return QSharedPointer<Map>(0);
+		return QSharedPointer<Map>(nullptr);
 	}
 
 	unsigned count = cloud->size();
@@ -493,7 +493,7 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 	{
 		if (app)
 			app->dispToConsole(QString("[DistanceMapGenerationTool] Cloud is empty! Nothing to do!"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		return QSharedPointer<Map>(0);
+		return QSharedPointer<Map>(nullptr);
 	}
 
 	//revolution axis
@@ -511,7 +511,7 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 		{
 			if (app)
 				app->dispToConsole(QString("[DistanceMapGenerationTool] Invalid longitude step/boundaries! Can't generate a proper map!"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-			return QSharedPointer<Map>(0);
+			return QSharedPointer<Map>(nullptr);
 		}
 	}
 
@@ -523,7 +523,7 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 		{
 			if (app)
 				app->dispToConsole(QString("[DistanceMapGenerationTool] Invalid latitude step/boundaries! Can't generate a proper map!"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-			return QSharedPointer<Map>(0);
+			return QSharedPointer<Map>(nullptr);
 		}
 	}
 
@@ -541,7 +541,7 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 	{
 		if (app)
 			app->dispToConsole(QString("[DistanceMapGenerationTool] Not enough memory!"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		return QSharedPointer<Map>(0);
+		return QSharedPointer<Map>(nullptr);
 	}
 
 	//update grid info ("for the records")
@@ -716,7 +716,10 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 						const CCLib::VerticesIndexes* tsi = dm->getNextTriangleVertIndexes();
 						//get the triangle bounding box (in grid coordinates)
 						int P[3][2];
-						int xMin = 0, yMin = 0, xMax = 0, yMax = 0;
+						int xMin = 0;
+						int yMin = 0;
+						int xMax = 0;
+						int yMax = 0;
 						{
 							for (unsigned j = 0; j < 3; ++j)
 							{
@@ -780,7 +783,7 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 				}
 
 				delete dm;
-				dm = 0;
+				dm = nullptr;
 			}
 		}
 	}
@@ -824,7 +827,7 @@ ccMesh* DistanceMapGenerationTool::ConvertConicalMapToMesh(	const QSharedPointer
 															QImage mapTexture/*=QImage()*/)
 {
 	if (!map)
-		return 0;
+		return nullptr;
 
 	unsigned meshVertCount = map->xSteps * map->ySteps;
 	unsigned meshFaceCount = (map->xSteps-1) * (map->ySteps-1) * 2;
@@ -835,7 +838,7 @@ ccMesh* DistanceMapGenerationTool::ConvertConicalMapToMesh(	const QSharedPointer
 	{
 		//not enough memory
 		delete mesh;
-		return 0;
+		return nullptr;
 	}
 
 	//compute projection constant
@@ -1313,7 +1316,7 @@ ccMesh* DistanceMapGenerationTool::ConvertProfileToMesh(ccPolyline* profile,
 {
 	if (!profile || angularSteps < 3)
 	{
-		return 0;
+		return nullptr;
 	}
 
 	//profile vertices
@@ -1321,7 +1324,7 @@ ccMesh* DistanceMapGenerationTool::ConvertProfileToMesh(ccPolyline* profile,
 	unsigned profVertCount = profileVertices->size();
 	if (profVertCount < 2)
 	{
-		return 0;
+		return nullptr;
 	}
 
 	//profile meta-data
@@ -1329,7 +1332,7 @@ ccMesh* DistanceMapGenerationTool::ConvertProfileToMesh(ccPolyline* profile,
 	if (!GetPoylineMetaData(profile, profileDesc))
 	{
 		assert(false);
-		return 0;
+		return nullptr;
 	}
 
 	unsigned char Z = static_cast<unsigned char>(profileDesc.revolDim);
@@ -1346,7 +1349,7 @@ ccMesh* DistanceMapGenerationTool::ConvertProfileToMesh(ccPolyline* profile,
 		//not enough memory
 		delete cloud;
 		delete mesh;
-		return 0;
+		return nullptr;
 	}
 
 	ccGLMatrix profileToCloud = cloudToProfile.inverse();
@@ -1506,7 +1509,7 @@ ccPointCloud* DistanceMapGenerationTool::ConvertMapToCloud(	const QSharedPointer
 															bool keepNaNPoints/*=true*/)
 {
 	if (!map || !profile)
-		return 0;
+		return nullptr;
 
 	unsigned count = map->ySteps * map->xSteps;
 
@@ -1619,7 +1622,7 @@ QImage DistanceMapGenerationTool::ConvertMapToImage(const QSharedPointer<Map>& m
 			//for each column
 			for (unsigned i = 0; i < map->xSteps; ++i, ++cell)
 			{
-				const ccColor::Rgb* rgb = &ccColor::lightGrey;
+				const ccColor::Rgb* rgb = &ccColor::lightGreyRGB;
 
 				if (cell->count != 0)
 				{
@@ -1628,7 +1631,7 @@ QImage DistanceMapGenerationTool::ConvertMapToImage(const QSharedPointer<Map>& m
 						relativePos = 0.0;
 					else if (relativePos > 1.0)
 						relativePos = 1.0;
-					rgb = colorScale->getColorByRelativePos(relativePos, colorScaleSteps, &ccColor::lightGrey);
+					rgb = colorScale->getColorByRelativePos(relativePos, colorScaleSteps, &ccColor::lightGreyRGB);
 				}
 
 				//DGM FIXME: QImage::sePixel is quite slow!

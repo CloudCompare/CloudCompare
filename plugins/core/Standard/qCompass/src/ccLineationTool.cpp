@@ -23,11 +23,6 @@ ccLineationTool::ccLineationTool()
 {
 }
 
-ccLineationTool::~ccLineationTool()
-{
-
-}
-
 //called when the tool is set to disactive (for cleanup)
 void ccLineationTool::toolDisactivated()
 {

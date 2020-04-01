@@ -468,6 +468,7 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 			if (shapePointsCount < params.supportPoints)
 			{
 				ccLog::Warning("[qRansacSD] Skipping shape, did not meet minimum point requirement");
+				count -= shapePointsCount;
 				continue;
 			}
 

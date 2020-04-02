@@ -50,14 +50,50 @@ namespace CCLib
             CCTRACE("data address: " << p);
             CCTRACE("p[0] : " << p[0]);
             CCTRACE("p[1] : " << p[1]);
-            PyObject* npArray = PyArray_SimpleNewFromData(1, dims, type_num, p ); //  /TransferThis/ memory management ownership C++
+            sipRes = PyArray_SimpleNewFromData(1, dims, type_num, p ); //  /TransferThis/ memory management ownership C++
             CCTRACE("---");
-            sipRes = npArray;
+            //sipRes = npArray;
         }
         else
         {
             npy_intp dims[1] = {0};
             sipRes = PyArray_ZEROS(1, dims, NPY_FLOAT32, 0);
+        }
+        %End
+        
+        bool fromNpArray(SIP_PYOBJECT p);
+        %MethodCode
+        if (PyObject_TypeCheck(a0, &PyArray_Type))
+        {
+            CCTRACE("fromNpArray: ndarray");
+            PyArrayObject* pya = (PyArrayObject*)a0;
+            int nd = PyArray_NDIM(pya);
+            CCTRACE("nDim: " << nd);
+            npy_intp* dims = PyArray_DIMS(pya);
+            npy_intp nRows = dims[0];
+            CCTRACE("nRows: " << nRows);
+            int atype = PyArray_TYPE(pya);
+            CCTRACE("type: " << atype << " " << NPY_FLOAT32);
+            if ( nd==1 &&  nRows==sipCpp->size() && atype==NPY_FLOAT32)
+            {
+                CCTRACE("OK");
+                float* d = sipCpp->data();
+                CCTRACE("dest address: " << d);
+                float* s = (float*)PyArray_DATA(pya);
+                CCTRACE("orig address: " << s);
+                memcpy(d, s, nRows*sizeof(float));
+                sipRes = true;
+            }
+            else
+            {
+                CCTRACE("NOK");
+                sipRes = true;
+            }
+        }
+        else
+        {
+            CCTRACE("fromNpArray: not a ndarray");
+            sipRes = false;
         }
         %End
         

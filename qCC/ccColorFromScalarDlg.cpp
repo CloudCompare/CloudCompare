@@ -43,15 +43,19 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
 	, m_ui(new Ui::ColorFromScalarDialog)
 {
 	m_ui->setupUi(this);
-
+	
 	//create histograms
 	QFrame* histoFrame[4] = { m_ui->histoFrameR, m_ui->histoFrameG, m_ui->histoFrameB, m_ui->histoFrameA };
 	for (unsigned i = 0; i < 4; i++)
 	{
 		m_histograms[i] = new ccHistogramWindow(this);
-		histoFrame[i]->setLayout(new QHBoxLayout());
-		histoFrame[i]->setLayout(new QHBoxLayout());
-		histoFrame[i]->layout()->addWidget(m_histograms[i]);
+		
+		auto layout = new QHBoxLayout;
+		
+		layout->setContentsMargins( 0, 0, 0, 0 );
+		layout->addWidget( m_histograms[i] );
+		
+		histoFrame[i]->setLayout( layout );
 	}
 
 	//populate boxes
@@ -158,10 +162,10 @@ void ccColorFromScalarDlg::updateColormaps()
 	if (m_ui->toggleRGB->isChecked())
 	{
 		//update labels
-		m_ui->labelR->setText("Red");
-		m_ui->labelG->setText("Green");
-		m_ui->labelB->setText("Blue");
-		m_ui->labelA->setText("Alpha");
+		m_ui->mRedLabel->setText( QStringLiteral( "Red" ) );
+		m_ui->mGreenLabel->setText (QStringLiteral( "Green" ) );
+		m_ui->mBlueLabel->setText( QStringLiteral( "Blue" ) );
+		m_ui->mAlphaLabel->setText( QStringLiteral( "Alpha" ) );
 
 		//populate colour ramps
 		Qt::GlobalColor start_colors[4] = { Qt::black , Qt::black , Qt::black , Qt::black };
@@ -186,10 +190,10 @@ void ccColorFromScalarDlg::updateColormaps()
 	else //create colourmaps for HSV
 	{
 		//update labels
-		m_ui->labelR->setText("Hue");
-		m_ui->labelG->setText("Sat");
-		m_ui->labelB->setText("Value");
-		m_ui->labelA->setText("Alpha");
+		m_ui->mRedLabel->setText( QStringLiteral( "Hue") );
+		m_ui->mGreenLabel->setText( QStringLiteral( "Sat" ) );
+		m_ui->mBlueLabel->setText( QStringLiteral( "Value" ) );
+		m_ui->mAlphaLabel->setText( QStringLiteral( "Alpha" ) );
 
 		//populate colour ramps
 		Qt::GlobalColor start_colors[4] = { Qt::black , Qt::gray , Qt::black , Qt::black };

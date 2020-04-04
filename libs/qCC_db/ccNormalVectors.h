@@ -18,9 +18,6 @@
 #ifndef CC_NORMAL_VECTORS_HEADER
 #define CC_NORMAL_VECTORS_HEADER
 
-//CCLib
-#include <GeometricalAnalysisTools.h>
-
 //Local
 #include "ccGenericPointCloud.h"
 

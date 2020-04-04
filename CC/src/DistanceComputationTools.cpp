@@ -23,13 +23,13 @@
 #include <FastMarchingForPropagation.h>
 #include <LocalModel.h>
 #include <PointCloud.h>
+#include <Polyline.h>
 #include <ReferenceCloud.h>
 #include <SaitoSquaredDistanceTransform.h>
 #include <ScalarField.h>
 #include <ScalarFieldTools.h>
 #include <SimpleTriangle.h>
 #include <SquareMatrix.h>
-#include <Polyline.h>
 
 //system
 #include <algorithm>

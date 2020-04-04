@@ -22,29 +22,15 @@
 #include "qCanupoTrainingDialog.h"
 #include "qCanupo2DViewDialog.h"
 #include "qCanupoTools.h"
-#include "trainer.h"
 #include "qCanupoDisclaimerDialog.h"
 #include "qCanupoCommands.h"
 
 //CCLib
 #include <CloudSamplingTools.h>
-#include <ReferenceCloud.h>
 
 //qCC_db
-#include <ccPointCloud.h>
 #include <ccProgressDialog.h>
-#include <ccOctree.h>
-#include <ccOctreeProxy.h>
-#include <ccPolyline.h>
-#include <ccSphere.h>
-#include <ccScalarField.h>
 
-//Qt
-#include <QtGui>
-#include <QtCore>
-#include <QApplication>
-#include <QMessageBox>
-#include <QStringList>
 
 qCanupoPlugin::qCanupoPlugin(QObject* parent/*=0*/)
 	: QObject(parent)

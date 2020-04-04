@@ -17,6 +17,9 @@
 
 #include "fastMarchingForFacetExtraction.h"
 
+//CCLib
+#include <Neighbourhood.h>
+
 //qCC_db
 #include <ccGenericPointCloud.h>
 #include <ccPointCloud.h>

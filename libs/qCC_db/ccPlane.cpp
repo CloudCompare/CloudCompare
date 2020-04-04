@@ -26,6 +26,8 @@
 
 //CCLIB
 #include "DistanceComputationTools.h"
+#include "Neighbourhood.h"
+
 
 ccPlane::ccPlane(PointCoordinateType xWidth, PointCoordinateType yWidth, const ccGLMatrix* transMat/*=0*/, QString name/*=QString("Plane")*/)
 	: ccGenericPrimitive(name, transMat)

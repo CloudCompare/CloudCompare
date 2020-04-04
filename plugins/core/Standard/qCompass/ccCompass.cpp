@@ -19,18 +19,14 @@
 #include <random>
 
 //Qt
+#include <QBuffer>
 #include <QCheckBox>
 #include <QComboBox>
 #include <QFileDialog>
-#include <QFileInfo>
-#include <QIntValidator>
 #include <QXmlStreamWriter>
 
 //common
 #include <ccPickingHub.h>
-
-//qCC_db
-#include <ccProgressDialog.h>
 
 #include "ccBox.h"
 #include "ccFacet.h"

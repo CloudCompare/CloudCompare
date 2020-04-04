@@ -34,6 +34,9 @@
 #include <QFileInfo>
 #include <QMessageBox>
 
+//CCLib
+#include <Neighbourhood.h>
+
 //qCC_db
 #include <ccFileUtils.h>
 #include <ccHObjectCaster.h>

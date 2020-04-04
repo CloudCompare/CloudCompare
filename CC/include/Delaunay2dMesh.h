@@ -20,7 +20,6 @@
 #define DELAUNAY2D_MESH_HEADER
 
 //Local
-#include "GenericIndexedCloudPersist.h"
 #include "GenericIndexedMesh.h"
 #include "SimpleTriangle.h"
 
@@ -31,6 +30,7 @@ namespace CCLib
 {
 
 class GenericIndexedCloud;
+class GenericIndexedCloudPersist;
 class Polyline;
 
 //! A class to compute and handle a Delaunay 2D mesh on a subset of points

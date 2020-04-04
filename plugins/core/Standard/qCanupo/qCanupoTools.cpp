@@ -26,8 +26,6 @@
 #include <ParallelSort.h>
 
 //qCC_db
-#include <ccGenericPointCloud.h>
-#include <ccOctree.h>
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
@@ -39,7 +37,6 @@
 #include <QApplication>
 #include <QComboBox>
 #include <QMainWindow>
-#include <QProgressDialog>
 #include <QtConcurrentMap>
 
 //ComputeCorePointsDescriptors parameters

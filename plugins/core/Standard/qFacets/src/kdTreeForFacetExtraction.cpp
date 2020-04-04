@@ -19,6 +19,7 @@
 
 //CCLib
 #include <GenericProgressCallback.h>
+#include <Neighbourhood.h>
 #include <ParallelSort.h>
 
 //qCC_db

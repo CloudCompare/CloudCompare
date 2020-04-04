@@ -32,6 +32,9 @@ namespace CCLib
         const char* getName() const;
     
         static void initNumpyApi();
+        %Docstring
+        Should be done once before transforming ScalarField in numpyArray or inverse.
+        %End
         %MethodCode
         CCTRACE("initialization numpy C++ API");
         import_array();
@@ -39,6 +42,11 @@ namespace CCLib
         %End
 
         PyObject* toNpArray();
+        %Docstring
+        Wrap the ScalarField data into a numpy Array, no copy.
+        (Only float) Data ownership stays in CloudCompare C++ library.
+        TODO: detect double option, check ownership
+        %End
         %MethodCode
         if( !sipCpp->empty() )
         {
@@ -62,6 +70,11 @@ namespace CCLib
         %End
         
         bool fromNpArray(SIP_PYOBJECT p);
+        %Docstring
+        Copy data from numpy array into an existing ScalarField.
+        Check if the numpy array is of float, one dimension, same size as the ScalarField,
+        before overwriting ScalarField data.
+        %End
         %MethodCode
         if (PyObject_TypeCheck(a0, &PyArray_Type))
         {
@@ -86,7 +99,7 @@ namespace CCLib
             }
             else
             {
-                CCTRACE("NOK");
+                CCTRACE("NOK (dim, size or type");
                 sipRes = true;
             }
         }

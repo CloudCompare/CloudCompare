@@ -900,21 +900,21 @@ ccHistogramWindowDlg::ccHistogramWindowDlg(QWidget* parent/*=0*/)
 	, m_gui(new Ui_HistogramDialog)
 {
 	m_gui->setupUi(this);
-	QHBoxLayout* hboxLayout = new QHBoxLayout(m_gui->histoFrame);
-	hboxLayout->addWidget(m_win);
+	
+	auto hboxLayout = new QHBoxLayout;
+	
 	hboxLayout->setContentsMargins(0, 0, 0, 0);
+	hboxLayout->addWidget(m_win);
+
 	m_gui->histoFrame->setLayout(hboxLayout);
 
 	connect(m_gui->exportCSVToolButton, &QAbstractButton::clicked, this, &ccHistogramWindowDlg::onExportToCSV);
 	connect(m_gui->exportImageToolButton, &QAbstractButton::clicked, this, &ccHistogramWindowDlg::onExportToImage);
-
-	resize(400, 275);
 }
 
 ccHistogramWindowDlg::~ccHistogramWindowDlg()
 {
-	if (m_gui)
-		delete m_gui;
+	delete m_gui;
 }
 
 //CSV file default separator

@@ -30,7 +30,7 @@
 #include <Neighbourhood.h>
 
 //System
-#include <assert.h>
+#include <cassert>
 #include <random>
 
 //unique instance

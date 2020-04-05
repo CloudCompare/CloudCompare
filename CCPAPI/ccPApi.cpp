@@ -41,26 +41,26 @@
 #define _CCDEBUG_
 #include <ccTrace.h>
 
-static ccPApi* ccPApiInternals = nullptr;
+static ccPApi* s_ccPApiInternals = nullptr;
 
 ccPApi* initCloudCompare()
 {
-    if (!ccPApiInternals)
+    if (!s_ccPApiInternals)
     {
         CCTRACE("initCloudCompare");
-        ccPApiInternals = new ccPApi;
-        ccPApiInternals->m_silentMode = false;
-        ccPApiInternals->m_autoSaveMode = true;
-        ccPApiInternals->m_addTimestamp = true;
-        ccPApiInternals->m_precision = 12;
-        ccPApiInternals->m_coordinatesShiftWasEnabled = false;
+        s_ccPApiInternals = new ccPApi;
+        s_ccPApiInternals->m_silentMode = false;
+        s_ccPApiInternals->m_autoSaveMode = true;
+        s_ccPApiInternals->m_addTimestamp = true;
+        s_ccPApiInternals->m_precision = 12;
+        s_ccPApiInternals->m_coordinatesShiftWasEnabled = false;
         FileIOFilter::InitInternalFilters();  //load all known I/O filters (plugins will come later!)
         ccNormalVectors::GetUniqueInstance(); //force pre-computed normals array initialization
 
         //load the plugins
         //ccPluginManager::get().loadPlugins();
     }
-    return ccPApiInternals;
+    return s_ccPApiInternals;
 }
 
 ccPointCloud* loadPointCloud(const char* filename, CC_SHIFT_MODE mode, int skip, double x, double y, double z)

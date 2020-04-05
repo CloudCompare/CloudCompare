@@ -27,6 +27,7 @@
 
 //CCLIB
 #include "DistanceComputationTools.h"
+#include "Neighbourhood.h"
 
 //system
 #include <string.h>

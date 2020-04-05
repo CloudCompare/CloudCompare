@@ -17,6 +17,8 @@
 
 #include "ccFitPlaneTool.h"
 
+#include "Neighbourhood.h"
+
 ccFitPlaneTool::ccFitPlaneTool()
 	: ccTool()
 {

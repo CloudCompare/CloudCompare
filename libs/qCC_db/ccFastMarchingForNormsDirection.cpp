@@ -17,6 +17,9 @@
 
 #include "ccFastMarchingForNormsDirection.h"
 
+//CCLib
+#include "Neighbourhood.h"
+
 //Local
 #include "ccGenericPointCloud.h"
 #include "ccLog.h"

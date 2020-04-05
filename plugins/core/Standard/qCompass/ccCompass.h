@@ -18,9 +18,6 @@
 #ifndef CC_COMPASS_HEADER
 #define CC_COMPASS_HEADER
 
-#include <cmath>
-
-#include <QBuffer>
 #include <QObject>
 
 //qCC

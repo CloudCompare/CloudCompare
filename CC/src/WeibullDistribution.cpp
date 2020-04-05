@@ -28,6 +28,9 @@
 #include <ScalarField.h>
 #include <ScalarFieldTools.h>
 
+//System
+#include <cstring>
+
 using namespace CCLib;
 
 //GAMMA function

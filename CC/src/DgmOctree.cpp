@@ -28,7 +28,7 @@
 
 //system
 #include <cstdio>
-#include <set>
+#include <utility>
 
 //DGM: tests in progress
 //#define COMPUTE_NN_SEARCH_STATISTICS

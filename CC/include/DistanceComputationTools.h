@@ -24,7 +24,6 @@
 #include "CCToolbox.h"
 #include "DgmOctree.h"
 #include "SquareMatrix.h"
-#include "Polyline.h"
 
 namespace CCLib
 {
@@ -35,6 +34,7 @@ class GenericCloud;
 class GenericIndexedCloudPersist;
 class ReferenceCloud;
 class PointCloud;
+class Polyline;
 class GenericProgressCallback;
 struct OctreeAndMeshIntersection;
 class ScalarField;

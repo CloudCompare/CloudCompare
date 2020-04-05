@@ -24,6 +24,8 @@
 #include <Delaunay2dMesh.h>
 #include <DistanceComputationTools.h>
 #include <MeshSamplingTools.h>
+#include <Neighbourhood.h>
+
 
 constexpr const char* DEFAULT_POLYGON_MESH_NAME = "2D polygon";
 constexpr const char* DEFAULT_CONTOUR_NAME = "Contour";

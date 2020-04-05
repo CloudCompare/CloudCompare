@@ -28,8 +28,9 @@
 #include "ccBox.h"
 
 //CCLib
-#include <ScalarFieldTools.h>
+#include <Neighbourhood.h>
 #include <RayAndBox.h>
+#include <ScalarFieldTools.h>
 
 #ifdef QT_DEBUG
 //#define DEBUG_PICKING_MECHANISM

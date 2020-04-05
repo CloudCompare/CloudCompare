@@ -25,7 +25,7 @@
 
 //system
 #include <cassert>
-#include <cstring>
+#include <cstddef>
 #include <vector>
 
 #ifdef CC_ENV_64

@@ -26,10 +26,11 @@
 #include <DgmOctreeReferenceCloud.h>
 #include <GenericIndexedMesh.h>
 #include <GenericProgressCallback.h>
+#include <GeometricalAnalysisTools.h>
 #include <Neighbourhood.h>
 
 //System
-#include <assert.h>
+#include <cassert>
 #include <random>
 
 //unique instance

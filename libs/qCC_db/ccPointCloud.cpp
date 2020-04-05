@@ -50,7 +50,6 @@
 //Qt
 #include <QCoreApplication>
 #include <QElapsedTimer>
-#include <QSharedPointer>
 
 //system
 #include <cassert>

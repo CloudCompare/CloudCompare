@@ -15,6 +15,8 @@
 //#                                                                        #
 //##########################################################################
 
+#include "GeometricalAnalysisTools.h"
+
 #include "ccTrace.h"
 #include <queue>
 #include <bitset>

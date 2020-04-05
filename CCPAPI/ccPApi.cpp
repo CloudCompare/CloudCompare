@@ -41,7 +41,7 @@
 #define _CCDEBUG_
 #include <ccTrace.h>
 
-static ccPApi* ccPApiInternals=nullptr;
+static ccPApi* ccPApiInternals = nullptr;
 
 ccPApi* initCloudCompare()
 {
@@ -63,25 +63,22 @@ ccPApi* initCloudCompare()
     return ccPApiInternals;
 }
 
-ccPointCloud* loadPointCloud(const char *filename, CC_SHIFT_MODE mode,
-                             int skip, double x, double y, double z)
+ccPointCloud* loadPointCloud(const char* filename, CC_SHIFT_MODE mode, int skip, double x, double y, double z)
 {
     CCTRACE("Opening file: " << filename << " mode: " << mode << " skip: " << skip << " x: " << x << " y: " << y << " z: " << z);
     ccPApi* capi = initCloudCompare();
     CC_FILE_ERROR result = CC_FERR_NO_ERROR;
-    ccHObject *db = nullptr;
+    ccHObject* db = nullptr;
 
     FileIOFilter::Shared filter = FileIOFilter::Shared(nullptr);
     QString fileName(filename);
     if (filter)
     {
-        db = FileIOFilter::LoadFromFile(fileName, capi->m_loadingParameters, filter,
-                result);
+        db = FileIOFilter::LoadFromFile(fileName, capi->m_loadingParameters, filter, result);
     }
     else
     {
-        db = FileIOFilter::LoadFromFile(fileName, capi->m_loadingParameters, result,
-                QString());
+        db = FileIOFilter::LoadFromFile(fileName, capi->m_loadingParameters, result, QString());
     }
 
     if (!db)
@@ -92,7 +89,6 @@ ccPointCloud* loadPointCloud(const char *filename, CC_SHIFT_MODE mode,
 
     std::unordered_set<unsigned> verticesIDs;
 
-
     // look for the remaining clouds inside loaded DB
     ccHObject::Container clouds;
     db->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD);
@@ -100,7 +96,7 @@ ccPointCloud* loadPointCloud(const char *filename, CC_SHIFT_MODE mode,
     CCTRACE("number of clouds: " << count);
     for (size_t i = 0; i < count; ++i)
     {
-        ccPointCloud *pc = static_cast<ccPointCloud*>(clouds[i]);
+        ccPointCloud* pc = static_cast<ccPointCloud*>(clouds[i]);
         if (pc->getParent())
         {
             pc->getParent()->detachChild(pc);
@@ -113,8 +109,7 @@ ccPointCloud* loadPointCloud(const char *filename, CC_SHIFT_MODE mode,
             continue;
         }
         CCTRACE("Found one cloud with " << pc->size() << " points");
-        capi->m_clouds.emplace_back(pc, filename,
-                count == 1 ? -1 : static_cast<int>(i));
+        capi->m_clouds.emplace_back(pc, filename, count == 1 ? -1 : static_cast<int>(i));
     }
 
     delete db;
@@ -126,8 +121,7 @@ ccPointCloud* loadPointCloud(const char *filename, CC_SHIFT_MODE mode,
         return nullptr;
 }
 
-CC_FILE_ERROR SavePointCloud(ccPointCloud* cloud,
-                             const QString& filename)
+CC_FILE_ERROR SavePointCloud(ccPointCloud* cloud, const QString& filename)
 {
     CCTRACE("saving cloud");
     ccPApi* capi = initCloudCompare();
@@ -140,7 +134,7 @@ CC_FILE_ERROR SavePointCloud(ccPointCloud* cloud,
     QString ext = fi.suffix();
     QString fileFilter = "";
     const std::vector<FileIOFilter::Shared>& filters = FileIOFilter::GetFilters();
-    for(auto filter :filters)
+    for (auto filter : filters)
     {
         QStringList theFilters = filter->getFileFilters(false);
         QStringList matches = theFilters.filter(ext);
@@ -151,10 +145,7 @@ CC_FILE_ERROR SavePointCloud(ccPointCloud* cloud,
         }
     }
     CCTRACE("fileFilter: " << fileFilter.toStdString());
-    CC_FILE_ERROR result  = FileIOFilter::SaveToFile(cloud,
-                                                    filename,
-                                                    parameters,
-                                                    fileFilter); //AsciiFilter::GetFileFilter());
+    CC_FILE_ERROR result = FileIOFilter::SaveToFile(cloud, filename, parameters, fileFilter); //AsciiFilter::GetFileFilter());
     return result;
 }
 
@@ -171,10 +162,11 @@ bool computeCurvature(CurvatureType option, double radius, QList<ccPointCloud*> 
     ccPApiComputeGeomCharacteristic(CCLib::GeometricalAnalysisTools::Curvature, option, radius, entities);
 }
 
-bool ccPApiComputeGeomCharacteristic( CCLib::GeometricalAnalysisTools::GeomCharacteristic c,
-                                      int subOption,
-                                      PointCoordinateType radius,
-                                      ccHObject::Container& entities)
+bool ccPApiComputeGeomCharacteristic(
+    CCLib::GeometricalAnalysisTools::GeomCharacteristic c,
+    int subOption,
+    PointCoordinateType radius,
+    ccHObject::Container& entities)
 {
     // --- from ccLibAlgorithms::ComputeGeomCharacteristic
     CCTRACE("ccPApiComputeGeomCharacteristic "<< subOption << " radius: " << radius);
@@ -241,7 +233,7 @@ bool ccPApiComputeGeomCharacteristic( CCLib::GeometricalAnalysisTools::GeomChara
 
         sfName += QString(" (%1)").arg(radius);
     }
-    break;
+        break;
 
     case CCLib::GeometricalAnalysisTools::Curvature:
     {
@@ -263,10 +255,11 @@ bool ccPApiComputeGeomCharacteristic( CCLib::GeometricalAnalysisTools::GeomChara
         }
         sfName += QString(" (%1)").arg(radius);
     }
-    break;
+        break;
 
     case CCLib::GeometricalAnalysisTools::LocalDensity:
-        sfName = ccPApiGetDensitySFName(static_cast<CCLib::GeometricalAnalysisTools::Density>(subOption), false, radius);
+        sfName = ccPApiGetDensitySFName(static_cast<CCLib::GeometricalAnalysisTools::Density>(subOption), false,
+                                        radius);
         break;
 
     case CCLib::GeometricalAnalysisTools::ApproxLocalDensity:
@@ -320,7 +313,8 @@ bool ccPApiComputeGeomCharacteristic( CCLib::GeometricalAnalysisTools::GeomChara
                 }
             }
 
-            CCLib::GeometricalAnalysisTools::ErrorCode result = CCLib::GeometricalAnalysisTools::ComputeCharactersitic(c, subOption, cloud, radius, nullptr, octree.data());
+            CCLib::GeometricalAnalysisTools::ErrorCode result = CCLib::GeometricalAnalysisTools::ComputeCharactersitic(
+                    c, subOption, cloud, radius, nullptr, octree.data());
 
             if (result == CCLib::GeometricalAnalysisTools::NoError)
             {
@@ -378,7 +372,10 @@ bool ccPApiComputeGeomCharacteristic( CCLib::GeometricalAnalysisTools::GeomChara
     return true;
 }
 
-QString ccPApiGetDensitySFName(CCLib::GeometricalAnalysisTools::Density densityType, bool approx, double densityKernelSize)
+QString ccPApiGetDensitySFName(
+    CCLib::GeometricalAnalysisTools::Density densityType,
+    bool approx,
+    double densityKernelSize)
 {
     // --- from ccLibAlgorithms::GetDensitySFName
     CCTRACE("ccPApiGetDensitySFName");
@@ -387,18 +384,18 @@ QString ccPApiGetDensitySFName(CCLib::GeometricalAnalysisTools::Density densityT
     //update the name with the density type
     switch (densityType)
     {
-        case CCLib::GeometricalAnalysisTools::DENSITY_KNN:
-            sfName = CC_LOCAL_KNN_DENSITY_FIELD_NAME;
-            break;
-        case CCLib::GeometricalAnalysisTools::DENSITY_2D:
-            sfName = CC_LOCAL_SURF_DENSITY_FIELD_NAME;
-            break;
-        case CCLib::GeometricalAnalysisTools::DENSITY_3D:
-            sfName = CC_LOCAL_VOL_DENSITY_FIELD_NAME;
-            break;
-        default:
-            assert(false);
-            break;
+    case CCLib::GeometricalAnalysisTools::DENSITY_KNN:
+        sfName = CC_LOCAL_KNN_DENSITY_FIELD_NAME;
+        break;
+    case CCLib::GeometricalAnalysisTools::DENSITY_2D:
+        sfName = CC_LOCAL_SURF_DENSITY_FIELD_NAME;
+        break;
+    case CCLib::GeometricalAnalysisTools::DENSITY_3D:
+        sfName = CC_LOCAL_VOL_DENSITY_FIELD_NAME;
+        break;
+    default:
+        assert(false);
+        break;
     }
 
     sfName += QString(" (r=%2)").arg(densityKernelSize);
@@ -408,5 +405,4 @@ QString ccPApiGetDensitySFName(CCLib::GeometricalAnalysisTools::Density densityT
 
     return sfName;
 }
-
 

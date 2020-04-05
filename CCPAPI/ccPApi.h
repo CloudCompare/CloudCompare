@@ -31,30 +31,30 @@ enum CC_SHIFT_MODE
     AUTO = 0, XYZ = 1
 };
 
-ccPointCloud* loadPointCloud(const char *filename,
-        CC_SHIFT_MODE mode = AUTO, int skip = 0, double x = 0, double y = 0,
-        double z = 0);
+ccPointCloud* loadPointCloud(
+    const char* filename,
+    CC_SHIFT_MODE mode = AUTO,
+    int skip = 0,
+    double x = 0,
+    double y = 0,
+    double z = 0);
 
-CC_FILE_ERROR SavePointCloud(ccPointCloud* cloud,
-                             const QString& filename);
+CC_FILE_ERROR SavePointCloud(ccPointCloud* cloud, const QString& filename);
 
 enum CurvatureType
 {
-    GAUSSIAN_CURV = 1,
-    MEAN_CURV,
-    NORMAL_CHANGE_RATE
+    GAUSSIAN_CURV = 1, MEAN_CURV, NORMAL_CHANGE_RATE
 };
 
 bool computeCurvature(CurvatureType option, double radius, QList<ccPointCloud*> clouds);
 
 // --- internal ---------------------------------------------------------------
 
-//Extended file loading parameters
+//Extended file loading parameters, from plugins/ccCommandLineInterface.h
 struct CLLoadParameters: public FileIOFilter::LoadParameters
 {
     CLLoadParameters() :
-            FileIOFilter::LoadParameters(), m_coordinatesShiftEnabled(
-                    false), m_coordinatesShift(0, 0, 0)
+            FileIOFilter::LoadParameters(), m_coordinatesShiftEnabled(false), m_coordinatesShift(0, 0, 0)
     {
         shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG;
         alwaysDisplayLoadDialog = false;
@@ -103,14 +103,16 @@ struct ccPApi
 ccPApi* initCloudCompare(); // should be done once
 
 //! copied from ccLibAlgorithms::ComputeGeomCharacteristic
-bool ccPApiComputeGeomCharacteristic( CCLib::GeometricalAnalysisTools::GeomCharacteristic c,
-                                      int subOption,
-                                      PointCoordinateType radius,
-                                      ccHObject::Container& entities);
+bool ccPApiComputeGeomCharacteristic(
+    CCLib::GeometricalAnalysisTools::GeomCharacteristic c,
+    int subOption,
+    PointCoordinateType radius,
+    ccHObject::Container& entities);
 
 //! copied from ccLibAlgorithms::GetDensitySFName
-QString ccPApiGetDensitySFName(CCLib::GeometricalAnalysisTools::Density densityType,
-                               bool approx,
-                               double densityKernelSize = 0.0);
+QString ccPApiGetDensitySFName(
+    CCLib::GeometricalAnalysisTools::Density densityType,
+    bool approx,
+    double densityKernelSize = 0.0);
 
 #endif /* CCPAPI_CCPAPI_H_ */

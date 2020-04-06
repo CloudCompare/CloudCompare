@@ -24,10 +24,12 @@
 //qCC_db
 #include <ccGLMatrix.h>
 
-#include <ui_matrixDisplayDlg.h>
+namespace Ui {
+	class MatrixDisplayDlg;
+}
 
 //! Simple widget to display a 4x4 matrix in various formats
-class MatrixDisplayDlg : public QWidget, public Ui::MatrixDisplayDlg
+class MatrixDisplayDlg : public QWidget
 {
 	Q_OBJECT
 
@@ -36,6 +38,8 @@ public:
 	//! Default constructor
 	explicit MatrixDisplayDlg(QWidget* parent = 0);
 
+	~MatrixDisplayDlg();
+	
 	//! Clears widget
 	void clear();
 
@@ -61,6 +65,7 @@ protected:
 	//! Matrix
 	ccGLMatrixd m_mat;
 
+	Ui::MatrixDisplayDlg* m_ui;
 };
 
 #endif //CC_MATRIX_DISPLAY_DIALOG_HEADER

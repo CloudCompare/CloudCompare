@@ -21,13 +21,16 @@
 //Qt
 #include <QWidget>
 
-#include <ui_sfEditDlg.h>
 
 class ccScalarField;
 class ccHistogramWindow;
 
+namespace Ui {
+	class SFEditDlg;
+}
+
 //! GUI scalar field interactor for properties list dialog
-class sfEditDlg : public QWidget, public Ui::SFEditDlg
+class sfEditDlg : public QWidget
 {
 	Q_OBJECT
 
@@ -36,6 +39,8 @@ public:
 	//! Default constructor
 	explicit sfEditDlg(QWidget* parent = 0);
 
+	~sfEditDlg();
+	
 	//! Updates dialog with a given scalar field
 	void fillDialogWith(ccScalarField* sf);
 
@@ -73,6 +78,8 @@ protected:
 	ccScalarField* m_associatedSF;
 	//! Associated scalar field histogram
 	ccHistogramWindow* m_associatedSFHisto;
+	
+	Ui::SFEditDlg* m_ui;
 };
 
 #endif //CC_SF_EDIT_DIALOG_HEADER

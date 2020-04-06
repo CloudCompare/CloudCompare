@@ -60,6 +60,7 @@
 #include <QCheckBox>
 #include <QComboBox>
 #include <QHBoxLayout>
+#include <QLineEdit>
 #include <QLocale>
 #include <QPushButton>
 #include <QScrollBar>

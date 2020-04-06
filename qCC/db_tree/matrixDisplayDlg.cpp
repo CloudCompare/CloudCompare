@@ -16,6 +16,7 @@
 //##########################################################################
 
 #include "matrixDisplayDlg.h"
+#include "ui_matrixDisplayDlg.h"
 
 //local
 #include "../ccPersistentSettings.h"
@@ -27,20 +28,25 @@
 #include "ccFileUtils.h"
 
 //Qt
+#include <QClipboard>
 #include <QFileDialog>
 #include <QSettings>
-#include <QClipboard>
 
 MatrixDisplayDlg::MatrixDisplayDlg(QWidget* parent/*=0*/)
 	: QWidget(parent)
-	, Ui::MatrixDisplayDlg()
+	, m_ui( new Ui::MatrixDisplayDlg )
 {
-	setupUi(this);
+	m_ui->setupUi(this);
 
-	connect(exportToAsciiPushButton, &QAbstractButton::clicked, this, &MatrixDisplayDlg::exportToASCII);
-	connect(exportToClipboardPushButton, &QAbstractButton::clicked, this, &MatrixDisplayDlg::exportToClipboard);
+	connect(m_ui->exportToAsciiPushButton, &QAbstractButton::clicked, this, &MatrixDisplayDlg::exportToASCII);
+	connect(m_ui->exportToClipboardPushButton, &QAbstractButton::clicked, this, &MatrixDisplayDlg::exportToClipboard);
 
 	show();
+}
+
+MatrixDisplayDlg::~MatrixDisplayDlg()
+{
+	delete m_ui;
 }
 
 void MatrixDisplayDlg::fillDialogWith(const ccGLMatrix& mat)
@@ -50,7 +56,7 @@ void MatrixDisplayDlg::fillDialogWith(const ccGLMatrix& mat)
 	int precision = ccGui::Parameters().displayedNumPrecision;
 
 	//display as 4x4 matrix
-	maxTextEdit->setText(mat.toString(precision));
+	m_ui->maxTextEdit->setText(mat.toString(precision));
 
 	//display as rotation vector/angle
 	{
@@ -70,7 +76,7 @@ void MatrixDisplayDlg::fillDialogWith(const ccGLMatrixd& mat)
 	int precision = ccGui::Parameters().displayedNumPrecision;
 
 	//display as 4x4 matrix
-	maxTextEdit->setText(mat.toString(precision));
+	m_ui->maxTextEdit->setText(mat.toString(precision));
 
 	//display as rotation vector/angle
 	{
@@ -92,17 +98,17 @@ void MatrixDisplayDlg::fillDialogWith(const CCVector3d& axis, double angle_rad, 
 	//rotation angle
 	QString angleStr = QString("%1 deg.").arg(angle_rad*CC_RAD_TO_DEG,0,'f',precision);
 
-	axisLabel->setText(axisStr);
-	angleLabel->setText(angleStr);
-	centerLabel->setText(centerStr);
+	m_ui->axisLabel->setText(axisStr);
+	m_ui->angleLabel->setText(angleStr);
+	m_ui->centerLabel->setText(centerStr);
 }
 
 void MatrixDisplayDlg::clear()
 {
-	maxTextEdit->setText("Invalid transformation");
-	axisLabel->setText(QString());
-	angleLabel->setText(QString());
-	centerLabel->setText(QString());
+	m_ui->maxTextEdit->setText("Invalid transformation");
+	m_ui->axisLabel->setText(QString());
+	m_ui->angleLabel->setText(QString());
+	m_ui->centerLabel->setText(QString());
 	m_mat.toZero();
 }
 

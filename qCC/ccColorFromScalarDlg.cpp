@@ -420,6 +420,10 @@ void ccColorFromScalarDlg::onApply()
 					col[i] = 255 - col[i];
 				}
 			}
+			if (!m_cloud->hasColors())
+			{
+				m_cloud->resizeTheRGBTable(false);
+			}
 			m_cloud->setPointColor(p, ccColor::FromQColor(QColor(col[0], col[1], col[2], col[3])));
 		}
 	}

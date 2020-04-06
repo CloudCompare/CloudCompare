@@ -40,6 +40,8 @@ class ccColorFromScalarDlg : public QDialog
 public:
 	//! Default constructor
 	ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointCloud);
+	
+	~ccColorFromScalarDlg();
 
 	//update and redraw histograms
 	void updateHistogram(int);

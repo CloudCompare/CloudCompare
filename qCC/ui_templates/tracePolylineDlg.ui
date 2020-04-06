@@ -143,7 +143,7 @@
       <string>Export current polyline to the main DB</string>
      </property>
      <property name="icon">
-      <iconset resource="../icones.qrc">
+      <iconset resource="../icons.qrc">
        <normaloff>:/CC/images/dbContainerSymbol.png</normaloff>:/CC/images/dbContainerSymbol.png</iconset>
      </property>
     </widget>
@@ -157,7 +157,7 @@
       <string>Reset current polyline</string>
      </property>
      <property name="icon">
-      <iconset resource="../icones.qrc">
+      <iconset resource="../icons.qrc">
        <normaloff>:/CC/images/smallReset.png</normaloff>:/CC/images/smallReset.png</iconset>
      </property>
     </widget>
@@ -171,7 +171,7 @@
       <string>Continue the current polyline edition</string>
      </property>
      <property name="icon">
-      <iconset resource="../icones.qrc">
+      <iconset resource="../icons.qrc">
        <normaloff>:/CC/images/ccAddConstSF.png</normaloff>:/CC/images/ccAddConstSF.png</iconset>
      </property>
      <property name="shortcut">
@@ -197,7 +197,7 @@
       <string>OK</string>
      </property>
      <property name="icon">
-      <iconset resource="../icones.qrc">
+      <iconset resource="../icons.qrc">
        <normaloff>:/CC/images/smallValidate.png</normaloff>:/CC/images/smallValidate.png</iconset>
      </property>
     </widget>
@@ -217,7 +217,7 @@
       <string>Cancel</string>
      </property>
      <property name="icon">
-      <iconset resource="../icones.qrc">
+      <iconset resource="../icons.qrc">
        <normaloff>:/CC/images/smallCancel.png</normaloff>:/CC/images/smallCancel.png</iconset>
      </property>
     </widget>
@@ -225,7 +225,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../icones.qrc"/>
+  <include location="../icons.qrc"/>
  </resources>
  <connections/>
 </ui>

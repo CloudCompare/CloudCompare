@@ -33,7 +33,7 @@
          <string>Red-Blue</string>
         </property>
         <property name="icon">
-         <iconset resource="../../qCC/icones.qrc">
+         <iconset resource="../../qCC/icons.qrc">
           <normaloff>:/CC/images/ccStereo.png</normaloff>:/CC/images/ccStereo.png</iconset>
         </property>
        </item>
@@ -42,7 +42,7 @@
          <string>Blue-Red</string>
         </property>
         <property name="icon">
-         <iconset resource="../../qCC/icones.qrc">
+         <iconset resource="../../qCC/icons.qrc">
           <normaloff>:/CC/images/ccStereo.png</normaloff>:/CC/images/ccStereo.png</iconset>
         </property>
        </item>
@@ -51,7 +51,7 @@
          <string>Red-Cyan</string>
         </property>
         <property name="icon">
-         <iconset resource="../../qCC/icones.qrc">
+         <iconset resource="../../qCC/icons.qrc">
           <normaloff>:/CC/images/ccStereo.png</normaloff>:/CC/images/ccStereo.png</iconset>
         </property>
        </item>
@@ -60,7 +60,7 @@
          <string>Cyan-Red</string>
         </property>
         <property name="icon">
-         <iconset resource="../../qCC/icones.qrc">
+         <iconset resource="../../qCC/icons.qrc">
           <normaloff>:/CC/images/ccStereo.png</normaloff>:/CC/images/ccStereo.png</iconset>
         </property>
        </item>
@@ -69,7 +69,7 @@
          <string>NVidia Vision</string>
         </property>
         <property name="icon">
-         <iconset resource="../../qCC/icones.qrc">
+         <iconset resource="../../qCC/icons.qrc">
           <normaloff>:/CC/images/nvidia.png</normaloff>:/CC/images/nvidia.png</iconset>
         </property>
        </item>
@@ -78,7 +78,7 @@
          <string>Oculus</string>
         </property>
         <property name="icon">
-         <iconset resource="../../qCC/icones.qrc">
+         <iconset resource="../../qCC/icons.qrc">
           <normaloff>:/CC/images/oculus.png</normaloff>:/CC/images/oculus.png</iconset>
         </property>
        </item>
@@ -87,7 +87,7 @@
          <string extracomment="Generic stereo display (e.g. PluraView)">Generic stereo display</string>
         </property>
         <property name="icon">
-         <iconset resource="../../qCC/icones.qrc">
+         <iconset resource="../../qCC/icons.qrc">
           <normaloff>:/CC/images/ccStereo.png</normaloff>:/CC/images/ccStereo.png</iconset>
         </property>
        </item>
@@ -270,7 +270,7 @@ p, li { white-space: pre-wrap; }
   </layout>
  </widget>
  <resources>
-  <include location="../../qCC/icones.qrc"/>
+  <include location="../../qCC/icons.qrc"/>
  </resources>
  <connections>
   <connection>

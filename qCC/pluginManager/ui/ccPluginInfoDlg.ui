@@ -237,7 +237,7 @@ p, li { white-space: pre-wrap; }
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap resource="../../icones.qrc">:/CC/Icons/images/icon/cc_icon_64.png</pixmap>
+           <pixmap resource="../../icons.qrc">:/CC/Icons/images/icon/cc_icon_64.png</pixmap>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -344,8 +344,8 @@ p, li { white-space: pre-wrap; }
   </layout>
  </widget>
  <resources>
-  <include location="../../icones.qrc"/>
-  <include location="../../icones.qrc"/>
+  <include location="../../icons.qrc"/>
+  <include location="../../icons.qrc"/>
  </resources>
  <connections>
   <connection>

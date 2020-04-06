@@ -37,7 +37,7 @@ p, li { white-space: pre-wrap; }
   </layout>
  </widget>
  <resources>
-  <include location="../../qCC/icones.qrc"/>
+  <include location="../../qCC/icons.qrc"/>
  </resources>
  <connections/>
 </ui>

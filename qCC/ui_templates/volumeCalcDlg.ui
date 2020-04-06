@@ -171,7 +171,7 @@
             <string>swap</string>
            </property>
            <property name="icon">
-            <iconset resource="../icones.qrc">
+            <iconset resource="../icons.qrc">
              <normaloff>:/CC/images/ccSwapUpDown.png</normaloff>:/CC/images/ccSwapUpDown.png</iconset>
            </property>
            <property name="iconSize">
@@ -589,7 +589,7 @@ You should fill the empty cells...</string>
   </layout>
  </widget>
  <resources>
-  <include location="../icones.qrc"/>
+  <include location="../icons.qrc"/>
  </resources>
  <connections>
   <connection>

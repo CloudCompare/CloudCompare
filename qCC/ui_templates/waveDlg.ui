@@ -32,7 +32,7 @@
         <string>Pick a 3D point (click again to cancel)</string>
        </property>
        <property name="icon">
-        <iconset resource="../icones.qrc">
+        <iconset resource="../icons.qrc">
          <normaloff>:/CC/images/ccPointPicking.png</normaloff>:/CC/images/ccPointPicking.png</iconset>
        </property>
        <property name="checkable">
@@ -76,7 +76,7 @@
         <string>Export wave as CSV file</string>
        </property>
        <property name="icon">
-        <iconset resource="../icones.qrc">
+        <iconset resource="../icons.qrc">
          <normaloff>:/CC/images/smallCSVFile.png</normaloff>:/CC/images/smallCSVFile.png</iconset>
        </property>
       </widget>
@@ -106,7 +106,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../icones.qrc"/>
+  <include location="../icons.qrc"/>
  </resources>
  <connections>
   <connection>

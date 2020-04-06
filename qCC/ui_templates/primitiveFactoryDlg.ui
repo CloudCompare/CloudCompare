@@ -21,7 +21,7 @@
      </property>
      <widget class="QWidget" name="planeTab">
       <attribute name="icon">
-       <iconset resource="../icones.qrc">
+       <iconset resource="../icons.qrc">
         <normaloff>:/CC/images/primPlane.gif</normaloff>:/CC/images/primPlane.gif</iconset>
       </attribute>
       <attribute name="title">
@@ -108,7 +108,7 @@
      </widget>
      <widget class="QWidget" name="boxTab">
       <attribute name="icon">
-       <iconset resource="../icones.qrc">
+       <iconset resource="../icons.qrc">
         <normaloff>:/CC/images/primBox.gif</normaloff>:/CC/images/primBox.gif</iconset>
       </attribute>
       <attribute name="title">
@@ -218,7 +218,7 @@
      </widget>
      <widget class="QWidget" name="sphereTab">
       <attribute name="icon">
-       <iconset resource="../icones.qrc">
+       <iconset resource="../icons.qrc">
         <normaloff>:/CC/images/primSphere.gif</normaloff>:/CC/images/primSphere.gif</iconset>
       </attribute>
       <attribute name="title">
@@ -381,7 +381,7 @@
      </widget>
      <widget class="QWidget" name="cylTab">
       <attribute name="icon">
-       <iconset resource="../icones.qrc">
+       <iconset resource="../icons.qrc">
         <normaloff>:/CC/images/primCylinder.gif</normaloff>:/CC/images/primCylinder.gif</iconset>
       </attribute>
       <attribute name="title">
@@ -468,7 +468,7 @@
      </widget>
      <widget class="QWidget" name="coneTab">
       <attribute name="icon">
-       <iconset resource="../icones.qrc">
+       <iconset resource="../icons.qrc">
         <normaloff>:/CC/images/primCone.gif</normaloff>:/CC/images/primCone.gif</iconset>
       </attribute>
       <attribute name="title">
@@ -655,7 +655,7 @@
      </widget>
      <widget class="QWidget" name="torusTab">
       <attribute name="icon">
-       <iconset resource="../icones.qrc">
+       <iconset resource="../icons.qrc">
         <normaloff>:/CC/images/primTorus.gif</normaloff>:/CC/images/primTorus.gif</iconset>
       </attribute>
       <attribute name="title">
@@ -807,7 +807,7 @@
      </widget>
      <widget class="QWidget" name="dishTab">
       <attribute name="icon">
-       <iconset resource="../icones.qrc">
+       <iconset resource="../icons.qrc">
         <normaloff>:/CC/images/primDish.gif</normaloff>:/CC/images/primDish.gif</iconset>
       </attribute>
       <attribute name="title">
@@ -1006,7 +1006,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../icones.qrc"/>
+  <include location="../icons.qrc"/>
  </resources>
  <connections/>
 </ui>

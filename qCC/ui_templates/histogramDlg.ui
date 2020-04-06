@@ -60,7 +60,7 @@
          <string>Export histogram to a CSV file (can be imported into Excel ;)</string>
         </property>
         <property name="icon">
-         <iconset resource="../icones.qrc">
+         <iconset resource="../icons.qrc">
           <normaloff>:/CC/images/smallCSVFile.png</normaloff>:/CC/images/smallCSVFile.png</iconset>
         </property>
        </widget>
@@ -71,7 +71,7 @@
          <string>Export histogram to an image file</string>
         </property>
         <property name="icon">
-         <iconset resource="../icones.qrc">
+         <iconset resource="../icons.qrc">
           <normaloff>:/CC/images/dbImageSymbol.png</normaloff>:/CC/images/dbImageSymbol.png</iconset>
         </property>
        </widget>
@@ -95,7 +95,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../icones.qrc"/>
+  <include location="../icons.qrc"/>
  </resources>
  <connections/>
 </ui>

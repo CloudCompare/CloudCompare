@@ -153,6 +153,11 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
 	m_cloud->getCurrentDisplayedScalarField()->setColorScale(m_colors[3]); //set grey colour ramp to start with
 }
 
+ccColorFromScalarDlg::~ccColorFromScalarDlg()
+{
+	delete m_ui;
+}
+
 void ccColorFromScalarDlg::updateColormaps()
 {
 	//check for reversed

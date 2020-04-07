@@ -72,6 +72,7 @@ ccHistogramWindow::ccHistogramWindow(QWidget* parent/*=0*/)
 	setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 
 	setAutoAddPlottableToLegend(false);
+	setAntialiasedElements(QCP::AntialiasedElement::aeAll);
 
 	//default font for text rendering
 	m_renderingFont.setFamily(QString::fromUtf8("Arial"));
@@ -412,10 +413,13 @@ void ccHistogramWindow::refresh()
 	if (histoSize > 0)
 	{
 		m_histogram = new QCPColoredBars(xAxis, yAxis);
-		addPlottable(m_histogram);
-		// now we can modify properties of myBars:
+
 		m_histogram->setWidth((m_maxVal - m_minVal) / histoSize);
+		m_histogram->setAntialiased(false);
 		m_histogram->setAntialiasedFill(false);
+		
+		addPlottable(m_histogram);
+		
 		QVector<double> keyData(histoSize);
 		QVector<double> valueData(histoSize);
 

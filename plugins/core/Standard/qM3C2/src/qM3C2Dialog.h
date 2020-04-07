@@ -87,13 +87,13 @@ public:
 	//! Saves parameters to persistent settings
 	void saveParamsToPersistentSettings();
 
-protected slots:
+protected:
 
 	void swapClouds();
 	void setCloud1Visibility(bool);
 	void setCloud2Visibility(bool);
 	void saveParamsToFile();
-	void loadParamsFromFile();
+	void getParamsFromFile();
 	inline void guessParamsSlow() { guessParams(false); }
 	void projDestIndexChanged(int);
 	void onUpdateNormalComboBoxChanged(int);

@@ -88,7 +88,7 @@ public:
 	//! Returns the optional transformation matrix (if defined)
 	bool getOptionalTransfoMatrix(ccGLMatrix& mat);
 
-protected slots:
+protected:
 	void browseImageListFilename();
 	void browseAltKeypointsFilename();
 	void acceptAndSaveSettings();

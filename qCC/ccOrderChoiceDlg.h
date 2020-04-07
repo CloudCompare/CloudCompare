@@ -47,7 +47,7 @@ public:
 	//! Returns the second entity (new order)
 	ccHObject* getSecondEntity();
 
-protected slots:
+protected:
 
 	//! Swaps the entities
 	void swap();

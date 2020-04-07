@@ -45,12 +45,12 @@ public:
 	bool signedDistances() { return signedDistCheckBox->isChecked(); }
 	bool flipNormals() { return flipNormalsCheckBox->isChecked(); }
 	bool treatPlanesAsBounded() { return treatPlanesAsBoundedCheckBox->isChecked(); }
-public slots:
+public:
 	void applyAndExit();
 	void cancelAndExit();
 
 
-protected slots:
+protected:
 	void toggleSigned(bool);
 };
 

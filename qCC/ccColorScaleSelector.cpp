@@ -75,13 +75,13 @@ void ccColorScaleSelector::init()
 			m_comboBox->addItem(scale.key(), scale.value());
 		}
 
-		connect(m_comboBox, SIGNAL(activated(int)), this, SIGNAL(colorScaleSelected(int)));
+		connect(m_comboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::activated), this, &ccColorScaleSelector::colorScaleSelected);
 	}
 	//advanced tool button
 	if (m_button)
 	{
 		m_button->disconnect(this);
-		connect(m_button, SIGNAL(clicked()), this, SIGNAL(colorScaleEditorSummoned()));
+		connect(m_button, &QAbstractButton::clicked, this, &ccColorScaleSelector::colorScaleEditorSummoned);
 	}
 }
 

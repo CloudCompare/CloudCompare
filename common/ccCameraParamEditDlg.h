@@ -66,7 +66,7 @@ public:
 	//inherited from ccPickingListener
 	void onItemPicked(const PickedItem& pi) override;
 
-public slots:
+public:
 
 	//! Links this dialog with a given sub-window
 	void linkWith(QMdiSubWindow* qWin);
@@ -110,7 +110,7 @@ public slots:
 	void pickPointAsPivot(bool);
 	void processPickedItem(ccHObject*, unsigned, int, int, const CCVector3&, const CCVector3d&);
 
-protected slots:
+protected:
 
 	//! Reflects any dialog parameter change
 	void reflectParamChange();

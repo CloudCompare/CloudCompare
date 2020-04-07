@@ -68,7 +68,7 @@ public:
 	//! Saves parameters to persistent settings
 	void saveParamsToPersistentSettings();
 
-protected slots:
+protected:
 
 	void browseClassifierFile();
 	void browseMscFile();

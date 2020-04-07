@@ -87,7 +87,7 @@ public:
 	QAction *m_toSVG; //export to svg
 	
 
-protected slots:
+protected:
 	//! To capture overridden shortcuts (pause button, etc.)
 	void onShortcutTriggered(int);
 

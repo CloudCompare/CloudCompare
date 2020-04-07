@@ -52,7 +52,7 @@ signals:
 
 	void updated();
 
-protected slots:
+protected:
 
 	void updateInternalState();
 

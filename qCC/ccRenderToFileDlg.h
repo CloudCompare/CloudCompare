@@ -42,7 +42,7 @@ public:
 	bool renderOverlayItems() const;
 
 
-	protected slots:
+	protected:
 
 		void chooseFile();
 		void updateInfo();

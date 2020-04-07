@@ -56,14 +56,14 @@ public:
 	**/
 	bool checkForLoadedEntities();
 
-public slots:
+public:
 
 	//! Tries to load (and then adds to main db) a list of entity (files)
 	/** \param filenames filenames to load
 	**/
 	void addToDB(QStringList filenames);
 
-protected slots:
+protected:
 
 	//! Shows display parameters dialog
 	void showDisplayParameters();

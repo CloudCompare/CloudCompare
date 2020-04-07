@@ -599,8 +599,8 @@ StereogramDialog::StereogramDialog(ccMainAppInterface* app)
 			m_colorScaleSelector->setSelectedScale(scale->getUuid());
 			m_classifWidget->setDensityColorScale(scale);
 		}
-		connect(m_colorScaleSelector, SIGNAL(colorScaleSelected(int)), this, SLOT(colorScaleChanged(int)));
-		connect(m_colorScaleSelector, SIGNAL(colorScaleEditorSummoned()), this, SLOT(spawnColorScaleEditor()));
+		connect(m_colorScaleSelector, &ccColorScaleSelector::colorScaleSelected, this, &StereogramDialog::colorScaleChanged);
+		connect(m_colorScaleSelector, &ccColorScaleSelector::colorScaleEditorSummoned, this, &StereogramDialog::spawnColorScaleEditor);
 		//add selector to group's layout
 		if (!colorRampGroupBox->layout())
 			colorRampGroupBox->setLayout(new QHBoxLayout());
@@ -613,18 +613,18 @@ StereogramDialog::StereogramDialog(ccMainAppInterface* app)
 		m_classifWidget->setDensityColorScale(ccColorScalesManager::GetDefaultScale());
 	}
 
-	connect(colorScaleStepsSpinBox,		SIGNAL(valueChanged(int)),				this,	SLOT(onDensityColorStepsChanged(int)));
-	connect(ticksFreqSpinBox,			SIGNAL(valueChanged(int)),				this,	SLOT(onTicksFreqChanged(int)));
-	connect(showHSVColorsCheckBox,		SIGNAL(toggled(bool)),					this,	SLOT(onHSVColorsToggled(bool)));
+	connect(colorScaleStepsSpinBox,		static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &StereogramDialog::onDensityColorStepsChanged);
+	connect(ticksFreqSpinBox,			static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &StereogramDialog::onTicksFreqChanged);
+	connect(showHSVColorsCheckBox,		&QAbstractButton::toggled, this, &StereogramDialog::onHSVColorsToggled);
 
 	//interactive filtering mechanism
-	connect(filterFacetsGroupBox,		SIGNAL(toggled(bool)),					this,	SLOT(onFilterEnabled(bool)));
-	connect(dipSpanDoubleSpinBox,		SIGNAL(valueChanged(double)),			this,	SLOT(onFilterSizeChanged(double)));
-	connect(dipDirSpanDoubleSpinBox,	SIGNAL(valueChanged(double)),			this,	SLOT(onFilterSizeChanged(double)));
-	connect(dipDoubleSpinBox,			SIGNAL(valueChanged(double)),			this,	SLOT(onFilterCenterChanged(double)));
-	connect(dipDirDoubleSpinBox,		SIGNAL(valueChanged(double)),			this,	SLOT(onFilterCenterChanged(double)));
-	connect(m_classifWidget,			SIGNAL(pointClicked(double, double)),	this,	SLOT(onPointClicked(double, double)));
-	connect(exportPushButton,			SIGNAL(clicked()),						this,	SLOT(exportCurrentSelection()));
+	connect(filterFacetsGroupBox,		&QGroupBox::toggled, this, &StereogramDialog::onFilterEnabled);
+	connect(dipSpanDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &StereogramDialog::onFilterSizeChanged);
+	connect(dipDirSpanDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &StereogramDialog::onFilterSizeChanged);
+	connect(dipDoubleSpinBox,			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &StereogramDialog::onFilterCenterChanged);
+	connect(dipDirDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &StereogramDialog::onFilterCenterChanged);
+	connect(m_classifWidget,			&StereogramWidget::pointClicked, this, &StereogramDialog::onPointClicked);
+	connect(exportPushButton,			&QAbstractButton::clicked, this, &StereogramDialog::exportCurrentSelection);
 }
 
 bool StereogramDialog::init(double angularStep_deg,

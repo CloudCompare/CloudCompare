@@ -69,10 +69,10 @@ public:
 	**/
 	bool canBeSkipped() const;
 
-public slots:
+public:
 	void addSFComboBox(int selectedIndex = 0);
 
-protected slots:
+protected:
 	void apply();
 	void applyAll();
 

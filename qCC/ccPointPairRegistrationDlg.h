@@ -78,7 +78,7 @@ public:
 	//! Inherited from ccPickingListener
 	void onItemPicked(const PickedItem& pi) override;
 
-protected slots:
+protected:
 
 	//! Slot called to change aligned entities visibility
 	void showAlignedEntities(bool);

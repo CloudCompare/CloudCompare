@@ -91,7 +91,7 @@ public:
 	//! Sets the number of neighbors for Minimum Spanning Tree (MST)
 	void setMSTNeighborCount(int n);
 
-protected slots:
+protected:
 
 	//! On local model change
 	void localModelChanged(int index);

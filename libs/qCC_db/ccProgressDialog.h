@@ -70,7 +70,7 @@ public:
 	//! setInfo with a QString as argument
 	virtual void setInfo(QString infoStr);
 
-protected slots:
+protected:
 
 	//! Refreshes the progress
 	/** Should only be called in the main Qt thread!

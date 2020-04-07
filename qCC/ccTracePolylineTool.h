@@ -53,7 +53,7 @@ public:
 	virtual bool start() override;
 	virtual void stop(bool accepted) override;
 
-protected slots:
+protected:
 
 	void apply();
 	void cancel();

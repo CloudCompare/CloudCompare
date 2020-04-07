@@ -67,7 +67,7 @@ public:
 	//! Returns whether the dialog has been 'skipped' or not
 	bool isSkipped() const;
 
-protected slots:
+protected:
 
 	//! When the skip button is clicked
 	void onSkipButtonClicked();

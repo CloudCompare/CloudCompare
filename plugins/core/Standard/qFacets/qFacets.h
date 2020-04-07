@@ -63,7 +63,7 @@ public:
 	virtual void onNewSelection(const ccHObject::Container& selectedEntities) override;
 	virtual QList<QAction *> getActions() override;
 
-protected slots:
+protected:
 
 	//! Fuses the cells of a kd-tree to produces planar facets
 	void fuseKdTreeCells();

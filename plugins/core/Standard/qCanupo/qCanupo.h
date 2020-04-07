@@ -44,7 +44,7 @@ public:
 	virtual QList<QAction*> getActions() override;
 	virtual void registerCommands(ccCommandLineInterface* cmd) override;
 
-protected slots:
+protected:
 
 	void doClassifyAction();
 	void doTrainAction();

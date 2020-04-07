@@ -44,7 +44,7 @@ public:
 	//! Returns whether the profile heights are absolute or not (i.e. relative to the center)
 	bool absoluteHeightValues() const;
 
-protected slots:
+protected:
 
 	//! Called when the 'browse' tool button is pressed
 	void browseFile();

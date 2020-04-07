@@ -47,7 +47,7 @@ public:
 	void toPersistentSettings() const;
 	void fromPersistentSettings();
 
-protected slots:
+protected:
 	void shapeTypeChanged(int index);
 	void axisDimensionChanged(int index);
 	void axisAutoStateChanged(int checkState);

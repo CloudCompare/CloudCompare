@@ -47,7 +47,7 @@ public:
 	//! Adds a filter
 	int addFilter(BaseFilter* filter);
 
-public slots:
+public:
 	//! Handles new entity
 	void handleNewEntity(ccHObject*);
 

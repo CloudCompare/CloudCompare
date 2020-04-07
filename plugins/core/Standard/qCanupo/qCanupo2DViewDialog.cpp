@@ -101,21 +101,22 @@ qCanupo2DViewDialog::qCanupo2DViewDialog(	const CorePointDescSet* descriptors1,
 		viewFrame->setLayout(new QHBoxLayout());
 		viewFrame->layout()->addWidget(glWidget);
 
-		connect(m_glWindow, SIGNAL(leftButtonClicked(int, int)),			this, SLOT(addOrSelectPoint(int, int)));
-		connect(m_glWindow, SIGNAL(rightButtonClicked(int, int)),			this, SLOT(removePoint(int, int)));
-		connect(m_glWindow, SIGNAL(mouseMoved(int, int, Qt::MouseButtons)),	this, SLOT(moveSelectedPoint(int, int, Qt::MouseButtons)));
-		connect(m_glWindow, SIGNAL(buttonReleased()),						this, SLOT(deselectPoint()));
+		connect(m_glWindow, &ccGLWindow::leftButtonClicked,		this, &qCanupo2DViewDialog::addOrSelectPoint);
+		connect(m_glWindow, &ccGLWindow::rightButtonClicked,	this, &qCanupo2DViewDialog::removePoint);
+		connect(m_glWindow, &ccGLWindow::mouseMoved,			this, &qCanupo2DViewDialog::moveSelectedPoint);
+		connect(m_glWindow, &ccGLWindow::buttonReleased,		this, &qCanupo2DViewDialog::deselectPoint);
 	}
 
 	updateScalesList(true);
 
 	//loadParamsFromPersistentSettings();
-	connect(resetToolButton,		SIGNAL(clicked()),			this, SLOT(resetBoundary()));
-	connect(statisticsToolButton,	SIGNAL(clicked()),			this, SLOT(computeStatistics()));
-	connect(savePushButton,			SIGNAL(clicked()),			this, SLOT(saveClassifier()));
-	connect(donePushButton,			SIGNAL(clicked()),			this, SLOT(checkBeforeAccept()));
-	connect(pointSizeSpinBox,		SIGNAL(valueChanged(int)),	this, SLOT(setPointSize(int)));
-	connect(scalesCountSpinBox,		SIGNAL(valueChanged(int)),	this, SLOT(onScalesCountSpinBoxChanged(int)));
+	connect(resetToolButton,		&QAbstractButton::clicked, this, &qCanupo2DViewDialog::resetBoundary);
+	connect(statisticsToolButton,	&QAbstractButton::clicked, this, &qCanupo2DViewDialog::computeStatistics);
+	connect(savePushButton,			&QAbstractButton::clicked, this, &qCanupo2DViewDialog::saveClassifier);
+	connect(donePushButton,			&QAbstractButton::clicked, this, &qCanupo2DViewDialog::checkBeforeAccept);
+	
+	connect(pointSizeSpinBox,		static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &qCanupo2DViewDialog::setPointSize);
+	connect(scalesCountSpinBox,		static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &qCanupo2DViewDialog::onScalesCountSpinBoxChanged);
 }
 
 qCanupo2DViewDialog::~qCanupo2DViewDialog()

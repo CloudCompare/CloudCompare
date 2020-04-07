@@ -234,7 +234,7 @@ public:
 	//! Exports histogram to a CSV file
 	bool exportToCSV(QString filename) const;
 
-protected slots:
+protected:
 
 	//! When the export to CSV file button is pressed
 	void onExportToCSV();

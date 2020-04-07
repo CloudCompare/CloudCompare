@@ -114,7 +114,7 @@ public:
     //! Sets the last shift and scale information
     static void SetLastInfo(const CCVector3d& shift, double scale);
 
-protected slots:
+protected:
 
 	//! Slot called when the 'loadComboBox' index changes
 	void onLoadIndexChanged(int);

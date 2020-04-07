@@ -44,7 +44,7 @@ public:
 	//! Updates dialog with a given scalar field
 	void fillDialogWith(ccScalarField* sf);
 
-public slots:
+public:
 
 	void minValSBChanged(double);
 	void maxValSBChanged(double);

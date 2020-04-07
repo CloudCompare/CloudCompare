@@ -36,7 +36,7 @@ public:
 	//! Default constructor
 	ccColorLevelsDlg(QWidget* parent, ccGenericPointCloud* pointCloud);
 
-protected slots:
+protected:
 
 	void onChannelChanged(int);
 	void onApply();

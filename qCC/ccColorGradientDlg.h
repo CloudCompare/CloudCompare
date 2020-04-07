@@ -50,7 +50,7 @@ public:
 	//! Returns the ramp dimension
 	unsigned char getDimension() const;
 
-protected slots:
+protected:
 
 	void changeFirstColor();
 	void changeSecondColor();

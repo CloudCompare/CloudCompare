@@ -93,10 +93,11 @@ qCanupoTrainingDialog::qCanupoTrainingDialog(ccMainAppInterface* app)
 
 	loadParamsFromPersistentSettings();
 
-	connect(cloud1ClassSpinBox,		SIGNAL(valueChanged(int)),			this,	SLOT(onClassChanged(int)));
-	connect(cloud2ClassSpinBox,		SIGNAL(valueChanged(int)),			this,	SLOT(onClassChanged(int)));
-	connect(class1CloudComboBox,	SIGNAL(currentIndexChanged (int)),	this,	SLOT(onCloudChanged(int)));
-	connect(class2CloudComboBox,	SIGNAL(currentIndexChanged (int)),	this,	SLOT(onCloudChanged(int)));
+	connect(cloud1ClassSpinBox, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &qCanupoTrainingDialog::onClassChanged);
+	connect(cloud2ClassSpinBox, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &qCanupoTrainingDialog::onClassChanged);
+	
+	connect(class1CloudComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &qCanupoTrainingDialog::onCloudChanged);
+	connect(class2CloudComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &qCanupoTrainingDialog::onCloudChanged);
 
 	onClassChanged(0);
 	onCloudChanged(0);

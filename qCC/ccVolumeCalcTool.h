@@ -98,7 +98,7 @@ public:
 												bool exportToOriginalCS);
 
 	
-	protected slots:
+	protected:
 
 	//! Accepts the dialog and save settings
 	void saveSettingsAndAccept();

@@ -146,27 +146,26 @@ qBroomDlg::qBroomDlg(ccMainAppInterface* app/*=0*/)
 
 	//connect signals/slots
 	{
-		connect(m_glWindow, SIGNAL(itemPicked(ccHObject*, unsigned, int, int, const CCVector3&, const CCVector3d&)), this, SLOT(handlePickedItem(ccHObject*, unsigned, int, int, const CCVector3&, const CCVector3d&)));
+		connect(m_glWindow, &ccGLWindow::itemPicked, this, &qBroomDlg::handlePickedItem);
 
-		connect(m_glWindow, SIGNAL(leftButtonClicked(int,int)), this, SLOT(onLeftButtonClicked(int,int)));
-		//connect(m_glWindow, SIGNAL(rightButtonClicked(int,int)), this, SLOT(onRightButtonClicked(int,int)));
-		connect(m_glWindow, SIGNAL(mouseMoved(int,int,Qt::MouseButtons)), this, SLOT(onMouseMoved(int,int,Qt::MouseButtons)));
-		connect(m_glWindow, SIGNAL(buttonReleased()), this, SLOT(onButtonReleased()));
+		connect(m_glWindow, &ccGLWindow::leftButtonClicked, this, &qBroomDlg::onLeftButtonClicked);
+		connect(m_glWindow, &ccGLWindow::mouseMoved, this, &qBroomDlg::onMouseMoved);
+		connect(m_glWindow, &ccGLWindow::buttonReleased, this, &qBroomDlg::onButtonReleased);
 
-		connect(cleanHeightDoubleSpinBox,    SIGNAL(valueChanged(double)), this, SLOT(onCleanHeightChanged(double)));
-		connect(broomLengthDoubleSpinBox,    SIGNAL(valueChanged(double)), this, SLOT(onDimensionChanged(double)));
-		connect(broomWidthDoubleSpinBox,     SIGNAL(valueChanged(double)), this, SLOT(onDimensionChanged(double)));
-		connect(broomThicknessDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(onDimensionChanged(double)));
+		connect(cleanHeightDoubleSpinBox,    static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &qBroomDlg::onCleanHeightChanged);
+		connect(broomLengthDoubleSpinBox,    static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &qBroomDlg::onDimensionChanged);
+		connect(broomWidthDoubleSpinBox,     static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &qBroomDlg::onDimensionChanged);
+		connect(broomThicknessDoubleSpinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &qBroomDlg::onDimensionChanged);
 
-		connect(selectionModeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onSelectionModeChanged(int)));
-		connect(undoPushButton,        SIGNAL(clicked()), this, SLOT(doUndo()));
-		connect(undo10PushButton,      SIGNAL(clicked()), this, SLOT(doUndo10()));
-		connect(repositionPushButton,  SIGNAL(clicked()), this, SLOT(onReposition()));
-		connect(automatePushButton,    SIGNAL(clicked()), this, SLOT(onAutomate()));
+		connect(selectionModeComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &qBroomDlg::onSelectionModeChanged);
+		connect(undoPushButton,        &QAbstractButton::clicked, this, &qBroomDlg::doUndo);
+		connect(undo10PushButton,      &QAbstractButton::clicked, this, &qBroomDlg::doUndo10);
+		connect(repositionPushButton,  &QAbstractButton::clicked, this, &qBroomDlg::onReposition);
+		connect(automatePushButton,    &QAbstractButton::clicked, this, &qBroomDlg::onAutomate);
 
-		connect(cancelPushButton,   SIGNAL(clicked()), this, SLOT(cancel()));
-		connect(applyPushButton,    SIGNAL(clicked()), this, SLOT(apply()));
-		connect(validatePushButton, SIGNAL(clicked()), this, SLOT(validate()));
+		connect(cancelPushButton,   &QAbstractButton::clicked, this, &qBroomDlg::cancel);
+		connect(applyPushButton,    &QAbstractButton::clicked, this, &qBroomDlg::apply);
+		connect(validatePushButton, &QAbstractButton::clicked, this, &qBroomDlg::validate);
 
 		//view buttons
 		connect(topViewToolButton,    &QToolButton::clicked, [&]() { if (m_glWindow) m_glWindow->setView(CC_TOP_VIEW  ); });

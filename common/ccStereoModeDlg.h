@@ -49,7 +49,7 @@ public:
 	//! Returns whether the FOV should be updated or not
 	bool updateFOV() const;
 
-protected slots:
+protected:
 
 	//! Slot called when the glass type is modified
 	void glassTypeChanged(int);

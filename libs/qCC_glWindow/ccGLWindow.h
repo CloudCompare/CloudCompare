@@ -619,7 +619,7 @@ public: //stereo mode
 	bool isRotationAxisLocked() const { return m_rotationAxisLocked; }
 
 
-public slots:
+public:
 
 	//! Applies a 1:1 global zoom
 	void zoomGlobal();
@@ -643,7 +643,7 @@ public slots:
 	inline void update() { paintGL(); }
 #endif
 
-protected slots:
+protected:
 
 #ifdef CC_GL_WINDOW_USE_QWINDOW
 	//! Updates the display

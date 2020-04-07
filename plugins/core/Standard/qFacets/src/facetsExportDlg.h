@@ -35,7 +35,7 @@ public:
 	//! Default constructor
 	FacetsExportDlg(IOMode mode, QWidget* parent = 0);
 
-protected slots:
+protected:
 
 	//! Called when the 'browse' tool button is pressed
 	void browseDestination();

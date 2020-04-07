@@ -41,7 +41,7 @@ public:
 	//! Default constructor
 	explicit ccCSFDlg(QWidget* parent = 0);
 
-protected slots:
+protected:
 
 	//! Saves (temporarily) the dialog parameters on acceptation
 	void saveSettings();

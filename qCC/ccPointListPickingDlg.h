@@ -44,7 +44,7 @@ public:
 	//! Associates dialog with a cloud or a mesh
 	void linkWithEntity(ccHObject* entity);
 
-protected slots:
+protected:
 
 	//! Applies changes and exit
 	void applyAndExit();

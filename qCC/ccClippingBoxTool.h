@@ -107,7 +107,7 @@ public:
 		bool generateRandomColors = false,
 		ccProgressDialog* progressDialog = 0);
 
-protected slots:
+protected:
 
 	void toggleInteractors(bool);
 	void toggleBox(bool);

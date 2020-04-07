@@ -56,7 +56,7 @@ public:
 	//! Enables the SF modulation option (SPATIAL method)
 	void enableSFModulation(ScalarType sfMin, ScalarType sfMax);
 
-protected slots:
+protected:
 
 	void sliderMoved(int sliderPos);
 	void samplingRateChanged(double value);

@@ -125,8 +125,8 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 		m_colorScaleSelector = new ccColorScaleSelector(m_app->getColorScalesManager(),this,QString::fromUtf8(":/CC/plugin/qSRA/gearIcon.png"));
 		m_colorScaleSelector->init();
 		m_colorScaleSelector->setSelectedScale(ccColorScalesManager::GetDefaultScale()->getUuid());
-		connect(m_colorScaleSelector, SIGNAL(colorScaleSelected(int)), this, SLOT(colorScaleChanged(int)));
-		connect(m_colorScaleSelector, SIGNAL(colorScaleEditorSummoned()), this, SLOT(spawnColorScaleEditor()));
+		connect(m_colorScaleSelector, &ccColorScaleSelector::colorScaleSelected, this, &DistanceMapGenerationDlg::colorScaleChanged);
+		connect(m_colorScaleSelector, &ccColorScaleSelector::colorScaleEditorSummoned, this, &DistanceMapGenerationDlg::spawnColorScaleEditor);
 		//add selector to group's layout
 		if (!colorRampGroupBox->layout())
 			colorRampGroupBox->setLayout(new QHBoxLayout());
@@ -239,49 +239,52 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 		m_window->addToOwnDB(m_yLabels,false);
 	}
 
-	connect(projectionComboBox,				SIGNAL(currentIndexChanged(int)),	this,	SLOT(projectionModeChanged(int)));
-	connect(angularUnitComboBox,			SIGNAL(currentIndexChanged(int)),	this,	SLOT(angularUnitChanged(int)));
-	connect(xStepDoubleSpinBox,				SIGNAL(valueChanged(double)),		this,	SLOT(updateGridSteps()));
-	connect(hStepDoubleSpinBox,				SIGNAL(valueChanged(double)),		this,	SLOT(updateGridSteps()));
-	connect(latStepDoubleSpinBox,			SIGNAL(valueChanged(double)),		this,	SLOT(updateGridSteps()));
-	connect(xMinDoubleSpinBox,				SIGNAL(valueChanged(double)),		this,	SLOT(updateGridSteps()));
-	connect(xMaxDoubleSpinBox,				SIGNAL(valueChanged(double)),		this,	SLOT(updateGridSteps()));
-	connect(hMinDoubleSpinBox,				SIGNAL(valueChanged(double)),		this,	SLOT(updateGridSteps()));
-	connect(hMaxDoubleSpinBox,				SIGNAL(valueChanged(double)),		this,	SLOT(updateGridSteps()));
-	connect(latMinDoubleSpinBox,			SIGNAL(valueChanged(double)),		this,	SLOT(updateGridSteps()));
-	connect(latMaxDoubleSpinBox,			SIGNAL(valueChanged(double)),		this,	SLOT(updateGridSteps()));
-	connect(axisDimComboBox,				SIGNAL(currentIndexChanged(int)),	this,	SLOT(updateProfileRevolDim(int)));
-	connect(xOriginDoubleSpinBox,			SIGNAL(valueChanged(double)),		this,	SLOT(updateProfileOrigin()));
-	connect(yOriginDoubleSpinBox,			SIGNAL(valueChanged(double)),		this,	SLOT(updateProfileOrigin()));
-	connect(zOriginDoubleSpinBox,			SIGNAL(valueChanged(double)),		this,	SLOT(updateProfileOrigin()));
-	connect(baseRadiusDoubleSpinBox,		SIGNAL(valueChanged(double)),		this,	SLOT(baseRadiusChanged(double)));
-	connect(heightUnitLineEdit,				SIGNAL(editingFinished()),			this,	SLOT(updateHeightUnits()));
-	connect(exportCloudPushButton,			SIGNAL(clicked()),					this,	SLOT(exportMapAsCloud()));
-	connect(exportMeshPushButton,			SIGNAL(clicked()),					this,	SLOT(exportMapAsMesh()));
-	connect(exportMatrixPushButton,			SIGNAL(clicked()),					this,	SLOT(exportMapAsGrid()));
-	connect(exportImagePushButton,			SIGNAL(clicked()),					this,	SLOT(exportMapAsImage()));
-	connect(loadLabelsPushButton,			SIGNAL(clicked()),					this,	SLOT(loadOverlaySymbols()));
-	connect(clearLabelsPushButton,			SIGNAL(clicked()),					this,	SLOT(clearOverlaySymbols()));
-	connect(symbolSizeSpinBox,				SIGNAL(valueChanged(int)),			this,	SLOT(overlaySymbolsSizeChanged(int)));
-	connect(fontSizeSpinBox,				SIGNAL(valueChanged(int)),			this,	SLOT(labelFontSizeChanged(int)));
-	connect(precisionSpinBox,				SIGNAL(valueChanged(int)),			this,	SLOT(labelPrecisionChanged(int)));
+	connect(projectionComboBox,			static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),			this, &DistanceMapGenerationDlg::projectionModeChanged);
+	connect(angularUnitComboBox,		static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),			this, &DistanceMapGenerationDlg::angularUnitChanged);
+	connect(xStepDoubleSpinBox,			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::updateGridSteps);
+	connect(hStepDoubleSpinBox,			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::updateGridSteps);
+	connect(latStepDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::updateGridSteps);
+	connect(xMinDoubleSpinBox,			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::updateGridSteps);
+	connect(xMaxDoubleSpinBox,			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::updateGridSteps);
+	connect(hMinDoubleSpinBox,			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::updateGridSteps);
+	connect(hMaxDoubleSpinBox,			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::updateGridSteps);
+	connect(latMinDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::updateGridSteps);
+	connect(latMaxDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::updateGridSteps);
+	connect(axisDimComboBox,			static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),			this, &DistanceMapGenerationDlg::updateProfileRevolDim);
+	connect(xOriginDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::updateProfileOrigin);
+	connect(yOriginDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::updateProfileOrigin);
+	connect(zOriginDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::updateProfileOrigin);
+	connect(baseRadiusDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::baseRadiusChanged);
 	
-	connect(colorScaleStepsSpinBox,			SIGNAL(valueChanged(int)),			this,	SLOT(colorRampStepsChanged(int)));
-	connect(overlayGridGroupBox,			SIGNAL(toggled(bool)),				this,	SLOT(toggleOverlayGrid(bool)));
-	connect(scaleXStepDoubleSpinBox,		SIGNAL(editingFinished()),			this,	SLOT(updateOverlayGrid()));
-	connect(scaleHStepDoubleSpinBox,		SIGNAL(editingFinished()),			this,	SLOT(updateOverlayGrid()));
-	connect(scaleLatStepDoubleSpinBox,		SIGNAL(editingFinished()),			this,	SLOT(updateOverlayGrid()));
-	connect(xScaleCheckBox,					SIGNAL(clicked()),					this,	SLOT(updateOverlayGrid()));
-	connect(yScaleCheckBox,					SIGNAL(clicked()),					this,	SLOT(updateOverlayGrid()));
-	connect(gridColorButton,				SIGNAL(clicked()),					this,	SLOT(changeGridColor()));
-	connect(symbolColorButton,				SIGNAL(clicked()),					this,	SLOT(changeSymbolColor()));
-	connect(displayColorScaleCheckBox,		SIGNAL(toggled(bool)),				this,	SLOT(toggleColorScaleDisplay(bool)));
-	connect(updateVolumesPushButton,		SIGNAL(clicked()),					this,	SLOT(updateVolumes()));
+	connect(heightUnitLineEdit,			&QLineEdit::editingFinished, this, &DistanceMapGenerationDlg::updateHeightUnits);
+	
+	connect(exportCloudPushButton,		&QAbstractButton::clicked, this,	&DistanceMapGenerationDlg::exportMapAsCloud);
+	connect(exportMeshPushButton,		&QAbstractButton::clicked, this,	&DistanceMapGenerationDlg::exportMapAsMesh);
+	connect(exportMatrixPushButton,		&QAbstractButton::clicked, this,	&DistanceMapGenerationDlg::exportMapAsGrid);
+	connect(exportImagePushButton,		&QAbstractButton::clicked, this,	&DistanceMapGenerationDlg::exportMapAsImage);
+	connect(loadLabelsPushButton,		&QAbstractButton::clicked, this,	&DistanceMapGenerationDlg::loadOverlaySymbols);
+	connect(clearLabelsPushButton,		&QAbstractButton::clicked, this,	&DistanceMapGenerationDlg::clearOverlaySymbols);
+	
+	connect(symbolSizeSpinBox,			static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &DistanceMapGenerationDlg::overlaySymbolsSizeChanged);
+	connect(fontSizeSpinBox,			static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &DistanceMapGenerationDlg::labelFontSizeChanged);
+	connect(precisionSpinBox,			static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &DistanceMapGenerationDlg::labelPrecisionChanged);
+	connect(colorScaleStepsSpinBox,		static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &DistanceMapGenerationDlg::colorRampStepsChanged);
+	
+	connect(overlayGridGroupBox,		&QGroupBox::toggled,				this,	&DistanceMapGenerationDlg::toggleOverlayGrid);
+	connect(scaleXStepDoubleSpinBox,	&QAbstractSpinBox::editingFinished,	this,	&DistanceMapGenerationDlg::updateOverlayGrid);
+	connect(scaleHStepDoubleSpinBox,	&QAbstractSpinBox::editingFinished,	this,	&DistanceMapGenerationDlg::updateOverlayGrid);
+	connect(scaleLatStepDoubleSpinBox,	&QAbstractSpinBox::editingFinished,	this,	&DistanceMapGenerationDlg::updateOverlayGrid);
+	connect(xScaleCheckBox,				&QAbstractButton::clicked,			this,	&DistanceMapGenerationDlg::updateOverlayGrid);
+	connect(yScaleCheckBox,				&QAbstractButton::clicked,			this,	&DistanceMapGenerationDlg::updateOverlayGrid);
+	connect(gridColorButton,			&QAbstractButton::clicked,			this,	&DistanceMapGenerationDlg::changeGridColor);
+	connect(symbolColorButton,			&QAbstractButton::clicked,			this,	&DistanceMapGenerationDlg::changeSymbolColor);
+	connect(displayColorScaleCheckBox,	&QAbstractButton::toggled,			this,	&DistanceMapGenerationDlg::toggleColorScaleDisplay);
+	connect(updateVolumesPushButton,	&QAbstractButton::clicked,			this,	&DistanceMapGenerationDlg::updateVolumes);
 
 	//DXF profiles export button is only visible/connected if DXF support is enabled!
 	if (DxfProfilesExporter::IsEnabled())
 	{
-		connect(exportImageDXFButton,			SIGNAL(clicked()),					this,	SLOT(exportProfilesAsDXF()));
+		connect(exportImageDXFButton, &QAbstractButton::clicked, this, &DistanceMapGenerationDlg::exportProfilesAsDXF);
 	}
 	else
 	{
@@ -292,8 +295,8 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 	{
 		QPushButton* applyButton = buttonBox->button(QDialogButtonBox::Apply);
 		QPushButton* closeButton = buttonBox->button(QDialogButtonBox::Close);
-		connect(applyButton,				SIGNAL(clicked()),					this,	SLOT(update()));
-		connect(closeButton,				SIGNAL(clicked()),					this,	SLOT(accept()));
+		connect(applyButton, &QAbstractButton::clicked, this, &DistanceMapGenerationDlg::update);
+		connect(closeButton, &QAbstractButton::clicked, this, &QDialog::accept);
 	}
 
 	angularUnitChanged(m_angularUnits); //just to be sure

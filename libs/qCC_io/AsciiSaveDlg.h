@@ -90,7 +90,7 @@ public:
 	//! Returns whether to save the alpha (transparency) channel
 	bool saveAlphaChannel() const;
 
-protected slots:
+protected:
 
 	//! Saves dialog state to persistent settings
 	void acceptAndSaveSettings();

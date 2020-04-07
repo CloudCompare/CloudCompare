@@ -59,7 +59,7 @@ public:
 	//! if performing name-match (regex or not)
 	bool getNameMatchIsUsed() const;
 
-protected slots:
+protected:
 	//! Called when the dialog is accepted
 	void onAccept();
 	

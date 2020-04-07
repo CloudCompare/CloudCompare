@@ -43,7 +43,7 @@ public:
 	//! Returns the selected mode
 	Mode mode() const { return m_mode; }
 	
-protected slots:
+protected:
 
 	void onExport() { m_mode = EXPORT; accept(); }
 	void onSplit() { m_mode = SPLIT; accept(); }

@@ -391,6 +391,11 @@ void ccColorFromScalarDlg::maxChanged(int n, double val, bool slider)
 
 void ccColorFromScalarDlg::onApply()
 {
+	if (!m_cloud->hasColors())
+	{
+		m_cloud->resizeTheRGBTable(false);
+	}
+
 	//which maps to flip?
 	bool reversed[4] = { m_ui->reverseR->isChecked(), m_ui->reverseG->isChecked(), m_ui->reverseB->isChecked(), m_ui->reverseA->isChecked() };
 
@@ -424,10 +429,6 @@ void ccColorFromScalarDlg::onApply()
 				{
 					col[i] = 255 - col[i];
 				}
-			}
-			if (!m_cloud->hasColors())
-			{
-				m_cloud->resizeTheRGBTable(false);
 			}
 			m_cloud->setPointColor(p, ccColor::FromQColor(QColor(col[0], col[1], col[2], col[3])));
 		}

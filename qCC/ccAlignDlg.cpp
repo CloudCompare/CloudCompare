@@ -16,6 +16,8 @@
 //##########################################################################
 
 #include "ccAlignDlg.h"
+#include "ui_alignDlg.h"
+
 #include "mainwindow.h"
 
 //common
@@ -24,9 +26,6 @@
 //CCLib
 #include <CloudSamplingTools.h>
 #include <GeometricalAnalysisTools.h>
-#include <DgmOctree.h>
-#include <ReferenceCloud.h>
-#include <PointCloud.h>
 
 //qCC_db
 #include <ccGenericPointCloud.h>
@@ -34,55 +33,57 @@
 
 ccAlignDlg::ccAlignDlg(ccGenericPointCloud *data, ccGenericPointCloud *model, QWidget* parent)
 	: QDialog(parent, Qt::Tool)
-	, Ui::AlignDialog()
+	, m_ui( new Ui::AlignDialog )
 {
-	setupUi(this);
+	m_ui->setupUi(this);
 
-	samplingMethod->addItem("None");
-	samplingMethod->addItem("Random");
-	samplingMethod->addItem("Space");
-	samplingMethod->addItem("Octree");
-	samplingMethod->setCurrentIndex(NONE);
+	m_ui->samplingMethod->addItem( tr( "None" ) );
+	m_ui->samplingMethod->addItem( tr( "Random" ) );
+	m_ui->samplingMethod->addItem( tr( "Space" ) );
+	m_ui->samplingMethod->addItem( tr( "Octree" ) );
+	m_ui->samplingMethod->setCurrentIndex(NONE);
 
-	ccQtHelpers::SetButtonColor(dataColorButton, Qt::red);
-	ccQtHelpers::SetButtonColor(modelColorButton, Qt::yellow);
+	ccQtHelpers::SetButtonColor(m_ui->dataColorButton, Qt::red);
+	ccQtHelpers::SetButtonColor(m_ui->modelColorButton, Qt::yellow);
 
 	dataObject = data;
 	modelObject = model;
 	setColorsAndLabels();
 
-	changeSamplingMethod(samplingMethod->currentIndex());
-	toggleNbMaxCandidates(isNbCandLimited->isChecked());
+	changeSamplingMethod(m_ui->samplingMethod->currentIndex());
+	toggleNbMaxCandidates(m_ui->isNbCandLimited->isChecked());
 
-	connect(swapButton, &QPushButton::clicked, this, &ccAlignDlg::swapModelAndData);
-	connect(modelSample, &QSlider::sliderReleased, this, &ccAlignDlg::modelSliderReleased);
-	connect(dataSample,  &QSlider::sliderReleased, this, &ccAlignDlg::dataSliderReleased);
-	connect(modelSamplingRate, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccAlignDlg::modelSamplingRateChanged);
-	connect(dataSamplingRate,  static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccAlignDlg::dataSamplingRateChanged);
-	connect(deltaEstimation, &QPushButton::clicked, this, &ccAlignDlg::estimateDelta);
-	connect(samplingMethod, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccAlignDlg::changeSamplingMethod);
-	connect(isNbCandLimited, &QCheckBox::toggled, this, &ccAlignDlg::toggleNbMaxCandidates);
+	connect(m_ui->swapButton, &QPushButton::clicked, this, &ccAlignDlg::swapModelAndData);
+	connect(m_ui->modelSample, &QSlider::sliderReleased, this, &ccAlignDlg::modelSliderReleased);
+	connect(m_ui->dataSample,  &QSlider::sliderReleased, this, &ccAlignDlg::dataSliderReleased);
+	connect(m_ui->modelSamplingRate, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccAlignDlg::modelSamplingRateChanged);
+	connect(m_ui->dataSamplingRate,  static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccAlignDlg::dataSamplingRateChanged);
+	connect(m_ui->deltaEstimation, &QPushButton::clicked, this, &ccAlignDlg::estimateDelta);
+	connect(m_ui->samplingMethod, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccAlignDlg::changeSamplingMethod);
+	connect(m_ui->isNbCandLimited, &QCheckBox::toggled, this, &ccAlignDlg::toggleNbMaxCandidates);
 }
 
 ccAlignDlg::~ccAlignDlg()
 {
 	modelObject->enableTempColor(false);
 	dataObject->enableTempColor(false);
+	
+	delete m_ui;
 }
 
 unsigned ccAlignDlg::getNbTries()
 {
-	return nbTries->value();
+	return m_ui->nbTries->value();
 }
 
 double ccAlignDlg::getOverlap()
 {
-	return overlap->value();
+	return m_ui->overlap->value();
 }
 
 double ccAlignDlg::getDelta()
 {
-	return delta->value();
+	return m_ui->delta->value();
 }
 
 ccGenericPointCloud *ccAlignDlg::getModelObject()
@@ -97,17 +98,17 @@ ccGenericPointCloud *ccAlignDlg::getDataObject()
 
 ccAlignDlg::CC_SAMPLING_METHOD ccAlignDlg::getSamplingMethod()
 {
-	return (CC_SAMPLING_METHOD)samplingMethod->currentIndex();
+	return (CC_SAMPLING_METHOD)m_ui->samplingMethod->currentIndex();
 }
 
 bool ccAlignDlg::isNumberOfCandidatesLimited()
 {
-	return isNbCandLimited->isChecked();
+	return m_ui->isNbCandLimited->isChecked();
 }
 
 unsigned ccAlignDlg::getMaxNumberOfCandidates()
 {
-	return nbMaxCandidates->value();
+	return m_ui->nbMaxCandidates->value();
 }
 
 CCLib::ReferenceCloud *ccAlignDlg::getSampledModel()
@@ -120,7 +121,7 @@ CCLib::ReferenceCloud *ccAlignDlg::getSampledModel()
 		{
 			CCLib::CloudSamplingTools::SFModulationParams modParams(false);
 			sampledCloud = CCLib::CloudSamplingTools::resampleCloudSpatially(	modelObject,
-																				static_cast<PointCoordinateType>(modelSamplingRate->value()),
+																				static_cast<PointCoordinateType>(m_ui->modelSamplingRate->value()),
 																				modParams);
 		}
 		break;
@@ -128,7 +129,7 @@ CCLib::ReferenceCloud *ccAlignDlg::getSampledModel()
 		if (modelObject->getOctree())
 		{
 			sampledCloud = CCLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(	modelObject,
-																						static_cast<unsigned char>(modelSamplingRate->value()),
+																						static_cast<unsigned char>(m_ui->modelSamplingRate->value()),
 																						CCLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,
 																						nullptr,
 																						modelObject->getOctree().data());
@@ -141,7 +142,7 @@ CCLib::ReferenceCloud *ccAlignDlg::getSampledModel()
 	case RANDOM:
 		{
 			sampledCloud = CCLib::CloudSamplingTools::subsampleCloudRandomly(	modelObject,
-																				static_cast<unsigned>(modelSamplingRate->value()));
+																				static_cast<unsigned>(m_ui->modelSamplingRate->value()));
 		}
 		break;
 	default:
@@ -169,14 +170,15 @@ CCLib::ReferenceCloud *ccAlignDlg::getSampledData()
 	case SPACE:
 		{
 			CCLib::CloudSamplingTools::SFModulationParams modParams(false);
-			sampledCloud = CCLib::CloudSamplingTools::resampleCloudSpatially(dataObject, static_cast<PointCoordinateType>(dataSamplingRate->value()),modParams);
+			sampledCloud = CCLib::CloudSamplingTools::resampleCloudSpatially(dataObject,
+																			 static_cast<PointCoordinateType>(m_ui->dataSamplingRate->value()),modParams);
 		}
 		break;
 	case OCTREE:
 		if (dataObject->getOctree())
 		{
 			sampledCloud = CCLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(	dataObject,
-																						static_cast<unsigned char>(dataSamplingRate->value()),
+																						static_cast<unsigned char>(m_ui->dataSamplingRate->value()),
 																						CCLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,
 																						nullptr,
 																						dataObject->getOctree().data());
@@ -188,7 +190,7 @@ CCLib::ReferenceCloud *ccAlignDlg::getSampledData()
 		break;
 	case RANDOM:
 		{
-			sampledCloud = CCLib::CloudSamplingTools::subsampleCloudRandomly(dataObject, (unsigned)(dataSamplingRate->value()));
+			sampledCloud = CCLib::CloudSamplingTools::subsampleCloudRandomly(dataObject, (unsigned)(m_ui->dataSamplingRate->value()));
 		}
 		break;
 	default:
@@ -212,12 +214,12 @@ void ccAlignDlg::setColorsAndLabels()
 	if (!modelObject || !dataObject)
 		return;
 
-	modelCloud->setText(modelObject->getName());
+	m_ui->modelCloud->setText(modelObject->getName());
 	modelObject->setVisible(true);
 	modelObject->setTempColor(ccColor::red);
 	modelObject->prepareDisplayForRefresh_recursive();
 
-	dataCloud->setText(dataObject->getName());
+	m_ui->dataCloud->setText(dataObject->getName());
 	dataObject->setVisible(true);
 	dataObject->setTempColor(ccColor::yellow);
 	dataObject->prepareDisplayForRefresh_recursive();
@@ -230,26 +232,26 @@ void ccAlignDlg::swapModelAndData()
 {
 	std::swap(dataObject,modelObject);
 	setColorsAndLabels();
-	changeSamplingMethod(samplingMethod->currentIndex());
+	changeSamplingMethod(m_ui->samplingMethod->currentIndex());
 }
 
 void ccAlignDlg::modelSliderReleased()
 {
-	double rate = static_cast<double>(modelSample->sliderPosition())/modelSample->maximum();
+	double rate = static_cast<double>(m_ui->modelSample->sliderPosition())/m_ui->modelSample->maximum();
 	if ( getSamplingMethod() == SPACE)
 		rate = 1.0 - rate;
-	rate *= modelSamplingRate->maximum();
-	modelSamplingRate->setValue(rate);
+	rate *= m_ui->modelSamplingRate->maximum();
+	m_ui->modelSamplingRate->setValue(rate);
 	modelSamplingRateChanged(rate);
 }
 
 void ccAlignDlg::dataSliderReleased()
 {
-	double rate = static_cast<double>(dataSample->sliderPosition())/dataSample->maximum();
+	double rate = static_cast<double>(m_ui->dataSample->sliderPosition())/m_ui->dataSample->maximum();
 	if (getSamplingMethod() == SPACE)
 		rate = 1.0 - rate;
-	rate *= dataSamplingRate->maximum();
-	dataSamplingRate->setValue(rate);
+	rate *= m_ui->dataSamplingRate->maximum();
+	m_ui->dataSamplingRate->setValue(rate);
 	dataSamplingRateChanged(rate);
 }
 
@@ -258,10 +260,10 @@ void ccAlignDlg::modelSamplingRateChanged(double value)
 	QString message("An error occurred");
 
 	CC_SAMPLING_METHOD method = getSamplingMethod();
-	float rate = static_cast<float>(modelSamplingRate->value())/modelSamplingRate->maximum();
+	float rate = static_cast<float>(m_ui->modelSamplingRate->value())/m_ui->modelSamplingRate->maximum();
 	if (method == SPACE)
 		rate = 1.0f-rate;
-	modelSample->setSliderPosition(static_cast<int>(rate * modelSample->maximum()));
+	m_ui->modelSample->setSliderPosition(static_cast<int>(rate * m_ui->modelSample->maximum()));
 
 	switch(method)
 	{
@@ -297,7 +299,8 @@ void ccAlignDlg::modelSamplingRateChanged(double value)
 		}
 		break;
 	}
-	modelRemaining->setText(message);
+	
+	m_ui->modelRemaining->setText(message);
 }
 
 void ccAlignDlg::dataSamplingRateChanged(double value)
@@ -305,10 +308,10 @@ void ccAlignDlg::dataSamplingRateChanged(double value)
 	QString message("An error occurred");
 
 	CC_SAMPLING_METHOD method = getSamplingMethod();
-	double rate = static_cast<float>(dataSamplingRate->value()/dataSamplingRate->maximum());
+	double rate = static_cast<float>(m_ui->dataSamplingRate->value()/m_ui->dataSamplingRate->maximum());
 	if (method == SPACE)
 		rate = 1.0 - rate;
-	dataSample->setSliderPosition(static_cast<int>(rate * dataSample->maximum()));
+	m_ui->dataSample->setSliderPosition(static_cast<int>(rate * m_ui->dataSample->maximum()));
 
 	switch(method)
 	{
@@ -344,7 +347,8 @@ void ccAlignDlg::dataSamplingRateChanged(double value)
 		}
 		break;
 	}
-	dataRemaining->setText(message);
+	
+	m_ui->dataRemaining->setText(message);
 }
 
 void ccAlignDlg::estimateDelta()
@@ -388,7 +392,7 @@ void ccAlignDlg::estimateDelta()
 	}
 	double dev = meanSqrDensity - (meanDensity*meanDensity);
 
-	delta->setValue(meanDensity + dev);
+	m_ui->delta->setValue(meanDensity + dev);
 	delete sampledData;
 }
 
@@ -401,29 +405,29 @@ void ccAlignDlg::changeSamplingMethod(int index)
 		{
 			//model
 			{
-				modelSamplingRate->setDecimals(4);
-				int oldSliderPos = modelSample->sliderPosition();
+				m_ui->modelSamplingRate->setDecimals(4);
+				int oldSliderPos = m_ui->modelSample->sliderPosition();
 				CCVector3 bbMin;
 				CCVector3 bbMax;
 				modelObject->getBoundingBox(bbMin, bbMax);
 				double dist = (bbMin-bbMax).norm();
-				modelSamplingRate->setMaximum(dist);
-				modelSample->setSliderPosition(oldSliderPos);
-				modelSamplingRate->setSingleStep(0.01);
-				modelSamplingRate->setMinimum(0.);
+				m_ui->modelSamplingRate->setMaximum(dist);
+				m_ui->modelSample->setSliderPosition(oldSliderPos);
+				m_ui->modelSamplingRate->setSingleStep(0.01);
+				m_ui->modelSamplingRate->setMinimum(0.);
 			}
 			//data
 			{
-				dataSamplingRate->setDecimals(4);
-				int oldSliderPos = dataSample->sliderPosition();
+				m_ui->dataSamplingRate->setDecimals(4);
+				int oldSliderPos = m_ui->dataSample->sliderPosition();
 				CCVector3 bbMin;
 				CCVector3 bbMax;
 				dataObject->getBoundingBox(bbMin, bbMax);
 				double dist = (bbMin-bbMax).norm();
-				dataSamplingRate->setMaximum(dist);
-				dataSample->setSliderPosition(oldSliderPos);
-				dataSamplingRate->setSingleStep(0.01);
-				dataSamplingRate->setMinimum(0.);
+				m_ui->dataSamplingRate->setMaximum(dist);
+				m_ui->dataSample->setSliderPosition(oldSliderPos);
+				m_ui->dataSamplingRate->setSingleStep(0.01);
+				m_ui->dataSamplingRate->setMinimum(0.);
 			}
 		}
 		break;
@@ -431,17 +435,17 @@ void ccAlignDlg::changeSamplingMethod(int index)
 		{
 			//model
 			{
-				modelSamplingRate->setDecimals(0);
-				modelSamplingRate->setMaximum(static_cast<float>(modelObject->size()));
-				modelSamplingRate->setSingleStep(1.);
-				modelSamplingRate->setMinimum(0.);
+				m_ui->modelSamplingRate->setDecimals(0);
+				m_ui->modelSamplingRate->setMaximum(static_cast<float>(modelObject->size()));
+				m_ui->modelSamplingRate->setSingleStep(1.);
+				m_ui->modelSamplingRate->setMinimum(0.);
 			}
 			//data
 			{
-				dataSamplingRate->setDecimals(0);
-				dataSamplingRate->setMaximum(static_cast<float>(dataObject->size()));
-				dataSamplingRate->setSingleStep(1.);
-				dataSamplingRate->setMinimum(0.);
+				m_ui->dataSamplingRate->setDecimals(0);
+				m_ui->dataSamplingRate->setMaximum(static_cast<float>(dataObject->size()));
+				m_ui->dataSamplingRate->setSingleStep(1.);
+				m_ui->dataSamplingRate->setMinimum(0.);
 			}
 		}
 		break;
@@ -451,19 +455,19 @@ void ccAlignDlg::changeSamplingMethod(int index)
 			{
 				if (!modelObject->getOctree())
 					modelObject->computeOctree();
-				modelSamplingRate->setDecimals(0);
-				modelSamplingRate->setMaximum(static_cast<double>(CCLib::DgmOctree::MAX_OCTREE_LEVEL));
-				modelSamplingRate->setMinimum(1.);
-				modelSamplingRate->setSingleStep(1.);
+				m_ui->modelSamplingRate->setDecimals(0);
+				m_ui->modelSamplingRate->setMaximum(static_cast<double>(CCLib::DgmOctree::MAX_OCTREE_LEVEL));
+				m_ui->modelSamplingRate->setMinimum(1.);
+				m_ui->modelSamplingRate->setSingleStep(1.);
 			}
 			//data
 			{
 				if (!dataObject->getOctree())
 					dataObject->computeOctree();
-				dataSamplingRate->setDecimals(0);
-				dataSamplingRate->setMaximum(static_cast<double>(CCLib::DgmOctree::MAX_OCTREE_LEVEL));
-				dataSamplingRate->setMinimum(1.);
-				dataSamplingRate->setSingleStep(1.);
+				m_ui->dataSamplingRate->setDecimals(0);
+				m_ui->dataSamplingRate->setMaximum(static_cast<double>(CCLib::DgmOctree::MAX_OCTREE_LEVEL));
+				m_ui->dataSamplingRate->setMinimum(1.);
+				m_ui->dataSamplingRate->setSingleStep(1.);
 			}
 		}
 		break;
@@ -471,17 +475,17 @@ void ccAlignDlg::changeSamplingMethod(int index)
 		{
 			//model
 			{
-				modelSamplingRate->setDecimals(2);
-				modelSamplingRate->setMaximum(100.);
-				modelSamplingRate->setSingleStep(0.01);
-				modelSamplingRate->setMinimum(0.);
+				m_ui->modelSamplingRate->setDecimals(2);
+				m_ui->modelSamplingRate->setMaximum(100.);
+				m_ui->modelSamplingRate->setSingleStep(0.01);
+				m_ui->modelSamplingRate->setMinimum(0.);
 			}
 			//data
 			{
-				dataSamplingRate->setDecimals(2);
-				dataSamplingRate->setMaximum(100.);
-				dataSamplingRate->setSingleStep(0.01);
-				dataSamplingRate->setMinimum(0.);
+				m_ui->dataSamplingRate->setDecimals(2);
+				m_ui->dataSamplingRate->setMaximum(100.);
+				m_ui->dataSamplingRate->setSingleStep(0.01);
+				m_ui->dataSamplingRate->setMinimum(0.);
 			}
 		}
 		break;
@@ -490,22 +494,22 @@ void ccAlignDlg::changeSamplingMethod(int index)
 	if (index == NONE)
 	{
 		//model
-		modelSample->setSliderPosition(modelSample->maximum());
-		modelSample->setEnabled(false);
-		modelSamplingRate->setEnabled(false);
+		m_ui->modelSample->setSliderPosition(m_ui->modelSample->maximum());
+		m_ui->modelSample->setEnabled(false);
+		m_ui->modelSamplingRate->setEnabled(false);
 		//data
-		dataSample->setSliderPosition(dataSample->maximum());
-		dataSample->setEnabled(false);
-		dataSamplingRate->setEnabled(false);
+		m_ui->dataSample->setSliderPosition(m_ui->dataSample->maximum());
+		m_ui->dataSample->setEnabled(false);
+		m_ui->dataSamplingRate->setEnabled(false);
 	}
 	else
 	{
 		//model
-		modelSample->setEnabled(true);
-		modelSamplingRate->setEnabled(true);
+		m_ui->modelSample->setEnabled(true);
+		m_ui->modelSamplingRate->setEnabled(true);
 		//data
-		dataSample->setEnabled(true);
-		dataSamplingRate->setEnabled(true);
+		m_ui->dataSample->setEnabled(true);
+		m_ui->dataSamplingRate->setEnabled(true);
 	}
 
 	modelSliderReleased();
@@ -514,5 +518,5 @@ void ccAlignDlg::changeSamplingMethod(int index)
 
 void ccAlignDlg::toggleNbMaxCandidates(bool activ)
 {
-	nbMaxCandidates->setEnabled(activ);
+	m_ui->nbMaxCandidates->setEnabled(activ);
 }

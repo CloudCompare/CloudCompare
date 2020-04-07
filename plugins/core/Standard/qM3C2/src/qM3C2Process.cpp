@@ -20,10 +20,12 @@
 //local
 #include "qM3C2Tools.h"
 #include "qM3C2Dialog.h"
-#include "qM3C2DisclaimerDialog.h"
 
 //CCLib
 #include <CloudSamplingTools.h>
+
+//qCC_plugins
+#include <ccMainAppInterface.h>
 
 //qCC_db
 #include <ccGenericPointCloud.h>

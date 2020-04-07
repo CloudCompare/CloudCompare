@@ -17,6 +17,9 @@
 
 #include "qM3C2.h"
 
+//Qt
+#include <QMainWindow>
+
 //local
 #include "qM3C2Tools.h"
 #include "qM3C2Dialog.h"
@@ -63,7 +66,7 @@ QList<QAction *> qM3C2Plugin::getActions()
 void qM3C2Plugin::doAction()
 {
 	//disclaimer accepted?
-	if (!ShowDisclaimer(m_app))
+	if (!DisclaimerDialog::show(m_app))
 		return;
 
 	//m_app should have already been initialized by CC when plugin is loaded!

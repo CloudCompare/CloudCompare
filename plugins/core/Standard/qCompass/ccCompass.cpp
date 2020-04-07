@@ -226,60 +226,60 @@ void ccCompass::doAction()
 		m_dlg = new ccCompassDlg(m_app->getMainWindow());
 
 		//general
-		ccCompassDlg::connect(m_dlg->closeButton, SIGNAL(clicked()), this, SLOT(onClose()));
-		ccCompassDlg::connect(m_dlg->acceptButton, SIGNAL(clicked()), this, SLOT(onAccept()));
-		ccCompassDlg::connect(m_dlg->saveButton, SIGNAL(clicked()), this, SLOT(onSave()));
-		ccCompassDlg::connect(m_dlg->undoButton, SIGNAL(clicked()), this, SLOT(onUndo()));
-		ccCompassDlg::connect(m_dlg->infoButton, SIGNAL(clicked()), this, SLOT(showHelp()));
+		connect(m_dlg->closeButton, &QAbstractButton::clicked, this, &ccCompass::onClose);
+		connect(m_dlg->acceptButton, &QAbstractButton::clicked, this, &ccCompass::onAccept);
+		connect(m_dlg->saveButton, &QAbstractButton::clicked, this, &ccCompass::onSave);
+		connect(m_dlg->undoButton, &QAbstractButton::clicked, this, &ccCompass::onUndo);
+		connect(m_dlg->infoButton, &QAbstractButton::clicked, this, &ccCompass::showHelp);
 
 		//modes
-		ccCompassDlg::connect(m_dlg->mapMode, SIGNAL(clicked()), this, SLOT(enableMapMode()));
-		ccCompassDlg::connect(m_dlg->compassMode, SIGNAL(clicked()), this, SLOT(enableMeasureMode()));
+		connect(m_dlg->mapMode, &QAbstractButton::clicked, this, &ccCompass::enableMapMode);
+		connect(m_dlg->compassMode, &QAbstractButton::clicked, this, &ccCompass::enableMeasureMode);
 
 		//tools
-		ccCompassDlg::connect(m_dlg->pickModeButton, SIGNAL(clicked()), this, SLOT(setPick()));
-		ccCompassDlg::connect(m_dlg->pairModeButton, SIGNAL(clicked()), this, SLOT(setLineation()));
-		ccCompassDlg::connect(m_dlg->planeModeButton, SIGNAL(clicked()), this, SLOT(setPlane()));
-		ccCompassDlg::connect(m_dlg->traceModeButton, SIGNAL(clicked()), this, SLOT(setTrace()));
+		connect(m_dlg->pickModeButton, &QAbstractButton::clicked, this, &ccCompass::setPick);
+		connect(m_dlg->pairModeButton, &QAbstractButton::clicked, this, &ccCompass::setLineation);
+		connect(m_dlg->planeModeButton, &QAbstractButton::clicked, this, &ccCompass::setPlane);
+		connect(m_dlg->traceModeButton, &QAbstractButton::clicked, this, &ccCompass::setTrace);
 
 		//extra tools
-		ccCompassDlg::connect(m_dlg->m_pinchTool, SIGNAL(triggered()), this, SLOT(addPinchNode()));
-		ccCompassDlg::connect(m_dlg->m_measure_thickness, SIGNAL(triggered()), this, SLOT(setThickness()));
-		ccCompassDlg::connect(m_dlg->m_measure_thickness_twoPoint, SIGNAL(triggered()), this, SLOT(setThickness2()));
+		connect(m_dlg->m_pinchTool, &QAction::triggered, this, &ccCompass::addPinchNode);
+		connect(m_dlg->m_measure_thickness, &QAction::triggered, this, &ccCompass::setThickness);
+		connect(m_dlg->m_measure_thickness_twoPoint, &QAction::triggered, this, &ccCompass::setThickness2);
 
-		ccCompassDlg::connect(m_dlg->m_youngerThan, SIGNAL(triggered()), this, SLOT(setYoungerThan()));
-		ccCompassDlg::connect(m_dlg->m_follows, SIGNAL(triggered()), this, SLOT(setFollows()));
-		ccCompassDlg::connect(m_dlg->m_equivalent, SIGNAL(triggered()), this, SLOT(setEquivalent()));
+		connect(m_dlg->m_youngerThan, &QAction::triggered, this, &ccCompass::setYoungerThan);
+		connect(m_dlg->m_follows, &QAction::triggered, this, &ccCompass::setFollows);
+		connect(m_dlg->m_equivalent, &QAction::triggered, this, &ccCompass::setEquivalent);
 
-		ccCompassDlg::connect(m_dlg->m_mergeSelected, SIGNAL(triggered()), this, SLOT(mergeGeoObjects()));
-		ccCompassDlg::connect(m_dlg->m_fitPlaneToGeoObject, SIGNAL(triggered()), this, SLOT(fitPlaneToGeoObject()));
-		ccCompassDlg::connect(m_dlg->m_recalculateFitPlanes, SIGNAL(triggered()), this, SLOT(recalculateFitPlanes()));
-		ccCompassDlg::connect(m_dlg->m_toPointCloud, SIGNAL(triggered()), this, SLOT(convertToPointCloud()));
-		ccCompassDlg::connect(m_dlg->m_distributeSelection, SIGNAL(triggered()), this, SLOT(distributeSelection()));
-		ccCompassDlg::connect(m_dlg->m_estimateNormals, SIGNAL(triggered()), this, SLOT(estimateStructureNormals()));
-		ccCompassDlg::connect(m_dlg->m_estimateP21, SIGNAL(triggered()), this, SLOT(estimateP21()));
-		ccCompassDlg::connect(m_dlg->m_estimateStrain, SIGNAL(triggered()), this, SLOT(estimateStrain()));
-		ccCompassDlg::connect(m_dlg->m_noteTool, SIGNAL(triggered()), this, SLOT(setNote()));
-		ccCompassDlg::connect(m_dlg->m_loadFoliations, SIGNAL(triggered()), this, SLOT(importFoliations()));
-		ccCompassDlg::connect(m_dlg->m_loadLineations, SIGNAL(triggered()), this, SLOT(importLineations()));
-		ccCompassDlg::connect(m_dlg->m_toSVG, SIGNAL(triggered()), this, SLOT(exportToSVG()));
+		connect(m_dlg->m_mergeSelected, &QAction::triggered, this, &ccCompass::mergeGeoObjects);
+		connect(m_dlg->m_fitPlaneToGeoObject, &QAction::triggered, this, &ccCompass::fitPlaneToGeoObject);
+		connect(m_dlg->m_recalculateFitPlanes, &QAction::triggered, this, &ccCompass::recalculateFitPlanes);
+		connect(m_dlg->m_toPointCloud, &QAction::triggered, this, &ccCompass::convertToPointCloud);
+		connect(m_dlg->m_distributeSelection, &QAction::triggered, this, &ccCompass::distributeSelection);
+		connect(m_dlg->m_estimateNormals, &QAction::triggered, this, &ccCompass::estimateStructureNormals);
+		connect(m_dlg->m_estimateP21, &QAction::triggered, this, &ccCompass::estimateP21);
+		connect(m_dlg->m_estimateStrain, &QAction::triggered, this, &ccCompass::estimateStrain);
+		connect(m_dlg->m_noteTool, &QAction::triggered, this, &ccCompass::setNote);
+		connect(m_dlg->m_loadFoliations, &QAction::triggered, this, &ccCompass::importFoliations);
+		connect(m_dlg->m_loadLineations, &QAction::triggered, this, &ccCompass::importLineations);
+		connect(m_dlg->m_toSVG, &QAction::triggered, this, &ccCompass::exportToSVG);
 
 		//settings menu
-		ccCompassDlg::connect(m_dlg->m_showNames, SIGNAL(toggled(bool)), this, SLOT(toggleLabels(bool)));
-		ccCompassDlg::connect(m_dlg->m_showStippled, SIGNAL(toggled(bool)), this, SLOT(toggleStipple(bool)));
-		ccCompassDlg::connect(m_dlg->m_showNormals, SIGNAL(toggled(bool)), this, SLOT(toggleNormals(bool)));
-		ccCompassDlg::connect(m_dlg->m_recalculate, SIGNAL(triggered()), this, SLOT(recalculateSelectedTraces()));
+		connect(m_dlg->m_showNames, &QAction::toggled, this, &ccCompass::toggleLabels);
+		connect(m_dlg->m_showStippled, &QAction::toggled, this, &ccCompass::toggleStipple);
+		connect(m_dlg->m_showNormals, &QAction::toggled, this, &ccCompass::toggleNormals);
+		connect(m_dlg->m_recalculate, &QAction::triggered, this, &ccCompass::recalculateSelectedTraces);
 	}
 
 	if (!m_mapDlg)
 	{
 		m_mapDlg = new ccMapDlg(m_app->getMainWindow());
 
-		ccCompassDlg::connect(m_mapDlg->m_create_geoObject, SIGNAL(triggered()), this, SLOT(addGeoObject()));
-		ccCompassDlg::connect(m_mapDlg->m_create_geoObjectSS, SIGNAL(triggered()), this, SLOT(addGeoObjectSS()));
-		ccCompassDlg::connect(m_mapDlg->setInteriorButton, SIGNAL(clicked()), this, SLOT(writeToInterior()));
-		ccCompassDlg::connect(m_mapDlg->setUpperButton, SIGNAL(clicked()), this, SLOT(writeToUpper()));
-		ccCompassDlg::connect(m_mapDlg->setLowerButton, SIGNAL(clicked()), this, SLOT(writeToLower()));
+		connect(m_mapDlg->m_create_geoObject, &QAction::triggered, this, &ccCompass::addGeoObject);
+		connect(m_mapDlg->m_create_geoObjectSS, &QAction::triggered, this, &ccCompass::addGeoObjectSS);
+		connect(m_mapDlg->setInteriorButton, &QAbstractButton::clicked, this, &ccCompass::writeToInterior);
+		connect(m_mapDlg->setUpperButton, &QAbstractButton::clicked, this, &ccCompass::writeToUpper);
+		connect(m_mapDlg->setLowerButton, &QAbstractButton::clicked, this, &ccCompass::writeToLower);
 	}
 
 	m_dlg->linkWith(m_app->getActiveGLWindow());
@@ -1353,8 +1353,8 @@ void ccCompass::estimateStructureNormals()
 	strideText.setToolTip("Standard deviation of the normal distribution used to calculate monte-carlo jumps during sampling. Larger numbers sample more widely but are slower to run.");
 	
 	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-	QObject::connect(&buttonBox, SIGNAL(accepted()), &dlg, SLOT(accept()));
-	QObject::connect(&buttonBox, SIGNAL(rejected()), &dlg, SLOT(reject()));
+	connect(&buttonBox, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
+	connect(&buttonBox, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
 
 	vbox->addWidget(&minSizeLabel);
 	vbox->addWidget(&minSizeText);
@@ -2288,8 +2288,8 @@ void ccCompass::estimateStrain()
 	exagText.setToolTip("Exaggerate the shape of strain ellipses for easier visualisation.");
 
 	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-	QObject::connect(&buttonBox, SIGNAL(accepted()), &dlg, SLOT(accept()));
-	QObject::connect(&buttonBox, SIGNAL(rejected()), &dlg, SLOT(reject()));
+	connect(&buttonBox, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
+	connect(&buttonBox, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
 	vbox->addWidget(&boxSizeLabel);
 	vbox->addWidget(&boxSizeText);
 	vbox->addWidget(&buildBlocksChk);
@@ -2832,8 +2832,8 @@ void ccCompass::estimateP21()
 	subsampleText.setToolTip("Only sample P21 on the each n'th point in the original outcrop model (decreases calculation time).");
 
 	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-	QObject::connect(&buttonBox, SIGNAL(accepted()), &dlg, SLOT(accept()));
-	QObject::connect(&buttonBox, SIGNAL(rejected()), &dlg, SLOT(reject()));
+	connect(&buttonBox, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
+	connect(&buttonBox, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
 	vbox->addWidget(&boxSizeLabel);
 	vbox->addWidget(&boxSizeText);
 	vbox->addWidget(&subsampleLabel);
@@ -3458,8 +3458,8 @@ void ccCompass::importFoliations()
 	}
 
 	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-	QObject::connect(&buttonBox, SIGNAL(accepted()), &dlg, SLOT(accept()));
-	QObject::connect(&buttonBox, SIGNAL(rejected()), &dlg, SLOT(reject()));
+	connect(&buttonBox, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
+	connect(&buttonBox, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
 
 	vbox->addWidget(&dipLabel);
 	vbox->addWidget(&dipCombo);
@@ -3586,8 +3586,8 @@ void ccCompass::importLineations()
 	}
 
 	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-	QObject::connect(&buttonBox, SIGNAL(accepted()), &dlg, SLOT(accept()));
-	QObject::connect(&buttonBox, SIGNAL(rejected()), &dlg, SLOT(reject()));
+	connect(&buttonBox, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
+	connect(&buttonBox, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
 
 	vbox->addWidget(&dipLabel);
 	vbox->addWidget(&dipCombo);

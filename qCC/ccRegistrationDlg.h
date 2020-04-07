@@ -97,7 +97,7 @@ public:
 	//! Saves parameters for next call
 	void saveParameters() const;
 
-protected slots:
+protected:
 	void swapModelAndData();
 
 protected:

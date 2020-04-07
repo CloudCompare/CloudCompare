@@ -170,7 +170,7 @@ public:
 	//! Returns the associated parent plugin interface
 	ccPluginInterface * getParentPlugin() const { return m_parent_plugin; }
 
-protected slots:
+protected:
 
 	//! Returns is called when the dialog window is accepted.
 	/** it can be overridden but normally should not be necessary

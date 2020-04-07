@@ -105,7 +105,7 @@ public:
 	**/
 	static bool Apply(ccPointCloud* cloud, Operation op, int sf1Idx, bool inplace, SF2* sf2 = nullptr, QWidget* parent = nullptr);
 
-protected slots:
+protected:
 	
 	//! Called when the operation combo-box is modified
 	void onOperationIndexChanged(int index);

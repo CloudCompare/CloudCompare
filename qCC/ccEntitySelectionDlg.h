@@ -59,7 +59,7 @@ public:
 								QWidget* parent = 0,
 								QString label = QString());
 
-public slots:
+public:
 
 	//! Selects all entities
 	void selectAll();

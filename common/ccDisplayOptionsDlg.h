@@ -44,7 +44,7 @@ public:
 signals:
 	void aspectHasChanged();
 
-protected slots:
+protected:
 	void changeLightDiffuseColor();
 	void changeLightAmbientColor();
 	void changeLightSpecularColor();

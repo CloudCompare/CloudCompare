@@ -120,7 +120,7 @@ public:
 	//inherited from ccPickingListener
 	virtual void onItemPicked(const PickedItem& pi) override;
 
-protected slots:
+protected:
 
 	void onPointIndexChanged(int);
 	void updateCurrentWaveform();

@@ -48,7 +48,7 @@ public:
 	//! Saves state
 	void saveState();
 
-protected slots:
+protected:
 
 	void allDimsAtOnceToggled(bool);
 	void fxUpdated(double);

@@ -99,7 +99,7 @@ public:
 	**/
 	double getScaleYStep(ANGULAR_UNIT unit = ANG_RAD) const;
 
-protected slots:
+protected:
 
 	void projectionModeChanged(int);
 	void angularUnitChanged(int);

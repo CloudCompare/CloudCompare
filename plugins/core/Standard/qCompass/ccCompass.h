@@ -59,7 +59,7 @@ public:
 	void onNewSelection(const ccHObject::Container& selectedEntities) override;
 	QList<QAction *> getActions() override;
 
-protected slots:
+protected:
 
 	//initialise the plugin
 	void doAction();

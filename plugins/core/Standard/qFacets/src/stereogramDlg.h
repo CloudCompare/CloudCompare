@@ -169,7 +169,7 @@ public:
 	//! Returns associated widget
 	StereogramWidget* stereogram() { return m_classifWidget; }
 
-protected slots:
+protected:
 
 	void colorScaleChanged(int);
 	void spawnColorScaleEditor();

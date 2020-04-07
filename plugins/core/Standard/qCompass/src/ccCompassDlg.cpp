@@ -77,14 +77,14 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	m_cost_algorithm_menu->addAction(m_recalculate);
 
 	//add callbacks
-	ccCompassDlg::connect(m_dark, SIGNAL(triggered()), this, SLOT(setDarkCost()));
-	ccCompassDlg::connect(m_light, SIGNAL(triggered()), this, SLOT(setLightCost()));
-	ccCompassDlg::connect(m_rgb, SIGNAL(triggered()), this, SLOT(setRGBCost()));
-	ccCompassDlg::connect(m_grad, SIGNAL(triggered()), this, SLOT(setGradCost()));
-	ccCompassDlg::connect(m_curve, SIGNAL(triggered()), this, SLOT(setCurveCost()));
-	ccCompassDlg::connect(m_dist, SIGNAL(triggered()), this, SLOT(setDistCost()));
-	ccCompassDlg::connect(m_scalar, SIGNAL(triggered()), this, SLOT(setScalarCost()));
-	ccCompassDlg::connect(m_scalar_inv, SIGNAL(triggered()), this, SLOT(setInvScalarCost()));
+	connect(m_dark, &QAction::triggered, this, &ccCompassDlg::setDarkCost);
+	connect(m_light, &QAction::triggered, this, &ccCompassDlg::setLightCost);
+	connect(m_rgb, &QAction::triggered, this, &ccCompassDlg::setRGBCost);
+	connect(m_grad, &QAction::triggered, this, &ccCompassDlg::setGradCost);
+	connect(m_curve, &QAction::triggered, this, &ccCompassDlg::setCurveCost);
+	connect(m_dist, &QAction::triggered, this, &ccCompassDlg::setDistCost);
+	connect(m_scalar, &QAction::triggered, this, &ccCompassDlg::setScalarCost);
+	connect(m_scalar_inv, &QAction::triggered, this, &ccCompassDlg::setInvScalarCost);
 
 	//setup settings menu
 	m_settings_menu = new QMenu(this);
@@ -195,7 +195,8 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	addOverridenShortcut(Qt::Key_Escape); //escape key for the "cancel" button
 	addOverridenShortcut(Qt::Key_Return); //return key for the "apply" button
 	addOverridenShortcut(Qt::Key_Space); //space key also hits the "apply" button (easier for some)
-	connect(this, SIGNAL(shortcutTriggered(int)), this, SLOT(onShortcutTriggered(int)));
+	
+	connect(this, &ccOverlayDialog::shortcutTriggered, this, &ccCompassDlg::onShortcutTriggered);
 }
 
 int ccCompassDlg::getCostMode()

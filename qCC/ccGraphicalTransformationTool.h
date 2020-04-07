@@ -72,7 +72,7 @@ public:
 	ccGLMatrixd arbitraryVectorRotation(double angle, const CCVector3d&);
 
 
-protected slots:
+protected:
 
 	//! Applies transformation to selected entities
 	void apply();

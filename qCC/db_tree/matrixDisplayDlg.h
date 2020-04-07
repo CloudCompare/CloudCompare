@@ -48,7 +48,7 @@ public:
 	//! Updates dialog with a given (double) matrix
 	void fillDialogWith(const ccGLMatrixd& mat);
 
-public slots:
+public:
 
 	//! Exports current matrix to an ASCII file
 	/** Will display a file selection dialog!

@@ -94,21 +94,21 @@ qM3C2Dialog::qM3C2Dialog(ccPointCloud* cloud1, ccPointCloud* cloud2, ccMainAppIn
 	maxThreadCountSpinBox->setRange(1, maxThreadCount);
 	maxThreadCountSpinBox->setSuffix(QString(" / %1").arg(maxThreadCount));
 
-	connect(showCloud1CheckBox,			SIGNAL(toggled(bool)),	this, SLOT(setCloud1Visibility(bool)));
-	connect(showCloud2CheckBox,			SIGNAL(toggled(bool)),	this, SLOT(setCloud2Visibility(bool)));
+	connect(showCloud1CheckBox,		&QAbstractButton::toggled,	this, &qM3C2Dialog::setCloud1Visibility);
+	connect(showCloud2CheckBox,		&QAbstractButton::toggled,	this, &qM3C2Dialog::setCloud2Visibility);
 
-	connect(loadParamsToolButton,		SIGNAL(clicked()),		this, SLOT(loadParamsFromFile()));
-	connect(saveParamsToolButton,		SIGNAL(clicked()),		this, SLOT(saveParamsToFile()));
-	connect(swapCloudsToolButton,		SIGNAL(clicked()),		this, SLOT(swapClouds()));
-	connect(guessParamsPushButton,		SIGNAL(clicked()),		this, SLOT(guessParamsSlow()));
+	connect(loadParamsToolButton,	&QAbstractButton::clicked,	this, &qM3C2Dialog::getParamsFromFile);
+	connect(saveParamsToolButton,	&QAbstractButton::clicked,	this, &qM3C2Dialog::saveParamsToFile);
+	connect(swapCloudsToolButton,	&QAbstractButton::clicked,	this, &qM3C2Dialog::swapClouds);
+	connect(guessParamsPushButton,	&QAbstractButton::clicked,	this, &qM3C2Dialog::guessParamsSlow);
 
-	connect(projDestComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(projDestIndexChanged(int)));
+	connect(projDestComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &qM3C2Dialog::projDestIndexChanged);
 
-	connect(cpOtherCloudComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(updateNormalComboBox()));
-	connect(normalSourceComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onUpdateNormalComboBoxChanged(int)));
-	connect(cpUseCloud1RadioButton, SIGNAL(toggled(bool)), this, SLOT(updateNormalComboBox()));
-	connect(cpSubsampleRadioButton, SIGNAL(toggled(bool)), this, SLOT(updateNormalComboBox()));
-	connect(cpUseOtherCloudRadioButton, SIGNAL(toggled(bool)), this, SLOT(updateNormalComboBox()));
+	connect(cpOtherCloudComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &qM3C2Dialog::updateNormalComboBox);
+	connect(normalSourceComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &qM3C2Dialog::onUpdateNormalComboBoxChanged);
+	connect(cpUseCloud1RadioButton, &QAbstractButton::toggled, this, &qM3C2Dialog::updateNormalComboBox);
+	connect(cpSubsampleRadioButton, &QAbstractButton::toggled, this, &qM3C2Dialog::updateNormalComboBox);
+	connect(cpUseOtherCloudRadioButton, &QAbstractButton::toggled, this, &qM3C2Dialog::updateNormalComboBox);
 
 	loadParamsFromPersistentSettings();
 
@@ -612,7 +612,7 @@ void qM3C2Dialog::saveParamsTo(QSettings& settings)
 	settings.setValue("PM2Scale", pm2ScaleDoubleSpinBox->value());
 }
 
-void qM3C2Dialog::loadParamsFromFile()
+void qM3C2Dialog::getParamsFromFile()
 {
 	//select file to open
 	QString filename;

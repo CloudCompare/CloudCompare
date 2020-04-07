@@ -64,12 +64,12 @@ public:
 	//! Returns compared entity
 	ccHObject* getReferenceEntity() { return m_refEnt; }
 
-public slots:
+public:
 	bool computeDistances();
 	void applyAndExit();
 	void cancelAndExit();
 
-protected slots:
+protected:
 	void showHisto();
 	void locaModelChanged(int);
 	void maxDistUpdated();

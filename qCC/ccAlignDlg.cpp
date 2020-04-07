@@ -227,7 +227,6 @@ void ccAlignDlg::setColorsAndLabels()
 	MainWindow::RefreshAllGLWindow(false);
 }
 
-//SLOTS
 void ccAlignDlg::swapModelAndData()
 {
 	std::swap(dataObject,modelObject);

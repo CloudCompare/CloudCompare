@@ -41,7 +41,7 @@ public:
 	virtual void onNewSelection(const ccHObject::Container& selectedEntities) override;
 	virtual QList<QAction *> getActions() override;
 
-protected slots:
+protected:
 
 	//! Slot called when associated ation is triggered
 	void doAction();

@@ -58,12 +58,12 @@ public:
 	//! Returns classifier
 	const Classifier& getClassifier() { return m_classifier; }
 
-public slots:
+public:
 
 	//! Trains the classifier (with the current number of scales!)
 	bool trainClassifier();
 
-protected slots:
+protected:
 
 	//! Updates the boundary representation 
 	void resetBoundary();

@@ -75,8 +75,8 @@ qCanupoClassifDialog::qCanupoClassifDialog(ccPointCloud* cloud, ccMainAppInterfa
 		}
 	}
 
-	connect(browseToolButton,		SIGNAL(clicked()), this, SLOT(browseClassifierFile()));
-	connect(mscBrowseToolButton,	SIGNAL(clicked()), this, SLOT(browseMscFile()));
+	connect(browseToolButton, &QAbstractButton::clicked, this, &qCanupoClassifDialog::browseClassifierFile);
+	connect(mscBrowseToolButton, &QAbstractButton::clicked, this, &qCanupoClassifDialog::browseMscFile);
 
 	buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 }

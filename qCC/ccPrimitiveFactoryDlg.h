@@ -35,7 +35,7 @@ public:
 	//! Default constructor
 	explicit ccPrimitiveFactoryDlg(MainWindow* win);
 
-protected slots:
+protected:
 
 	//! Creates currently defined primitive
 	void createPrimitive();

@@ -39,7 +39,7 @@ public:
 	ccPointCloudInterpolator::Parameters::Algo getInterpolationAlgorithm() const;
 	void setInterpolationAlgorithm(ccPointCloudInterpolator::Parameters::Algo algo);
 
-protected slots:
+protected:
 
 	void onRadiusUpdated(double);
 };

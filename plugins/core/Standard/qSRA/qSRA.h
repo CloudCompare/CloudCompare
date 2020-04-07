@@ -41,7 +41,7 @@ public:
 	virtual void onNewSelection(const ccHObject::Container& selectedEntities) override;
 	virtual QList<QAction *> getActions() override;
 
-protected slots:
+protected:
 
 	//! Loads profile from a dedicated file
 	void loadProfile() const;

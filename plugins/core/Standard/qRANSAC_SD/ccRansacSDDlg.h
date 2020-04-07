@@ -30,7 +30,7 @@ public:
 	//! Default constructor
 	explicit ccRansacSDDlg(QWidget* parent = 0);
 
-protected slots:
+protected:
 
 	//! Saves (temporarily) the dialog parameters on acceptation
 	void saveSettings();

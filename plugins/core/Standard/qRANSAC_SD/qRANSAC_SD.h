@@ -79,7 +79,7 @@ public:
 	virtual void registerCommands(ccCommandLineInterface* cmd) override;
 
 	static ccHObject* executeRANSAC(ccPointCloud* ccPC, const RansacParams& params, bool silent = false);
-protected slots:
+protected:
 
 	//! Slot called when associated ation is triggered
 	void doAction();

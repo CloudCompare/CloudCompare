@@ -39,7 +39,7 @@ public:
 	//! Returns requested zoom
 	double getZoom() const;
 
-protected slots:
+protected:
 	void onZoomChanged(double);
 	void onPixelSizeChanged(double);
 	void onPixelCountChanged(int);

@@ -18,7 +18,7 @@
 class TestShpFilter : public QObject
 {
 Q_OBJECT
-private slots:
+private:
 	/* Reading tests */
 	void readPolylineFile(const QString &filePath = LINE_FILE) const;
 

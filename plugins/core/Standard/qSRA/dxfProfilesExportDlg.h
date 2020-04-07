@@ -35,7 +35,7 @@ public:
 	//! Returns horiz. profiles output filename (on completion)
 	QString getHorizFilename() const;
 
-protected slots:
+protected:
 
 	//! Called when the vert. 'browse' tool button is pressed
 	void browseVertFile();

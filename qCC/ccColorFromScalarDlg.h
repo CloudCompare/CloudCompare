@@ -46,7 +46,7 @@ public:
 	//update and redraw histograms
 	void updateHistogram(int);
 
-protected slots:
+protected:
 	//events to set scalar fields
 	void onChannelChangedR(int) { updateChannel(0); }
 	void onChannelChangedG(int) { updateChannel(1); }

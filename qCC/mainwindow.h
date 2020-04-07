@@ -168,7 +168,7 @@ public:
 	//! Updates the 'Properties' view
 	void updatePropertiesView();
 	
-private slots:
+private:
 	//! Creates a new 3D GL sub-window
 	ccGLWindow* new3DView( bool allowEntitySelection );
 

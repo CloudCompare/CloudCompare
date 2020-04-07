@@ -36,7 +36,7 @@ public:
 	//! Returns input matrix
 	ccGLMatrixd getTransformation() const;
 
-protected slots:
+protected:
 
 	//! Checks matrix validity and 'accept' dialog if ok
 	void checkMatrixValidityAndAccept();

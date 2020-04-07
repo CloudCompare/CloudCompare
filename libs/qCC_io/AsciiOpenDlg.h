@@ -189,7 +189,7 @@ public:
 	//! Resets the "apply all" flag (if set)
 	static void ResetApplyAll();
 
-public slots:
+public:
 	//! Slot called when separator changes
 	void onSeparatorChange(const QString& separator);
 	//! Forces the table to update itself
@@ -199,7 +199,7 @@ public slots:
 	//! Slot called when the 'comma as decimal' checkbox is toggled
 	void commaDecimalCheckBoxToggled(bool);
 
-protected slots:
+protected:
 	bool apply();
 	void applyAll();
 	void columnsTypeHasChanged(int index);

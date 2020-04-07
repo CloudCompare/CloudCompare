@@ -80,7 +80,7 @@ signals:
 	//! Signal emitted when a 'show' event is detected
 	void shown();
 
-protected slots:
+protected:
 
 	//! Slot called when the linked window is deleted (calls 'onClose')
 	virtual void onLinkedWindowDeletion(QObject* object = nullptr);

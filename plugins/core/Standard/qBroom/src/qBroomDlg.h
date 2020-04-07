@@ -63,7 +63,7 @@ public:
 	**/
 	bool setCloud(ccPointCloud* cloud, bool ownCloud = false, bool autoRedraw = true);
 
-protected slots:
+protected:
 
 	//! Slot called when the 'reposition' button is clicked
 	void onReposition();

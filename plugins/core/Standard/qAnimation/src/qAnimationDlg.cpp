@@ -103,16 +103,16 @@ qAnimationDlg::qAnimationDlg(ccGLWindow* view3d, QWidget* parent)
 		settings.endGroup();
 	}
 
-	connect ( fpsSpinBox,				SIGNAL( valueChanged(int) ),		this, SLOT( onFPSChanged(int) ) );
-	connect ( totalTimeDoubleSpinBox,	SIGNAL( valueChanged(double) ),		this, SLOT( onTotalTimeChanged(double) ) );
-	connect ( stepTimeDoubleSpinBox,	SIGNAL( valueChanged(double) ),		this, SLOT( onStepTimeChanged(double) ) );
-	connect ( loopCheckBox,				SIGNAL( toggled(bool) ),			this, SLOT( onLoopToggled(bool) ) );
+	connect( fpsSpinBox,				static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &qAnimationDlg::onFPSChanged );
+	connect( totalTimeDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &qAnimationDlg::onTotalTimeChanged );
+	connect( stepTimeDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &qAnimationDlg::onStepTimeChanged );
+	connect( loopCheckBox,				&QAbstractButton::toggled, this, &qAnimationDlg::onLoopToggled );
 
-	connect ( browseButton,				SIGNAL( clicked() ),				this, SLOT( onBrowseButtonClicked() ) );
-	connect ( previewButton,			SIGNAL( clicked() ),				this, SLOT( preview() ) );
-	connect ( renderButton,				SIGNAL( clicked() ),				this, SLOT( renderAnimation() ) );
-	connect ( exportFramesPushButton,	SIGNAL( clicked() ),				this, SLOT( renderFrames() ) );
-	connect ( buttonBox,				SIGNAL( accepted() ),				this, SLOT( onAccept() ) );
+	connect( browseButton,			&QAbstractButton::clicked,		this, &qAnimationDlg::onBrowseButtonClicked );
+	connect( previewButton,			&QAbstractButton::clicked,		this, &qAnimationDlg::preview );
+	connect( renderButton,			&QAbstractButton::clicked,		this, &qAnimationDlg::renderAnimation );
+	connect( exportFramesPushButton,&QAbstractButton::clicked,		this, &qAnimationDlg::renderFrames );
+	connect( buttonBox,				&QDialogButtonBox::accepted,	this, &qAnimationDlg::onAccept );
 }
 
 bool qAnimationDlg::init(const std::vector<cc2DViewportObject*>& viewports)
@@ -159,8 +159,8 @@ bool qAnimationDlg::init(const std::vector<cc2DViewportObject*>& viewports)
 		m_videoSteps[i].duration_sec = duration_sec;
 	}
 
-	connect ( stepSelectionList, SIGNAL( currentRowChanged(int) ),			this, SLOT( onCurrentStepChanged(int) ) );
-	connect ( stepSelectionList, SIGNAL( itemChanged(QListWidgetItem*) ),	this, SLOT( onItemChanged(QListWidgetItem*) ) );
+	connect( stepSelectionList, &QListWidget::currentRowChanged, this, &qAnimationDlg::onCurrentStepChanged );
+	connect( stepSelectionList, &QListWidget::itemChanged, this, &qAnimationDlg::onItemChanged );
 
 	stepSelectionList->setCurrentRow(0); //select the first one by default
 	onCurrentStepChanged(getCurrentStepIndex());

@@ -43,7 +43,7 @@ public:
 	//! Initialize the dialog with a set of viewports
 	bool init(const std::vector<cc2DViewportObject*>& viewports);
 
-protected slots:
+protected:
 
 	void onFPSChanged(int);
 

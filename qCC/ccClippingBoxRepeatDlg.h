@@ -38,7 +38,7 @@ public:
 	//! Sets repeat dimension (multiple contour mode only!)
 	void setRepeatDim(unsigned char dim);
 
-protected slots:
+protected:
 
 	//multi-contour mode
 	void onDimChecked(bool);

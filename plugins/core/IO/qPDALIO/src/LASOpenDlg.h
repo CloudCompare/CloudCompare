@@ -71,7 +71,7 @@ public:
 	//! Resets the "apply all" flag (if set)
 	void resetApplyAll();
 
-protected slots:
+protected:
 
 	void onApplyAll();
 	void onBrowse();

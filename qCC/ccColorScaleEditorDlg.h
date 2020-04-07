@@ -55,7 +55,7 @@ public:
 	//! Returns active scale
 	ccColorScale::Shared getActiveScale() { return m_colorScale; }
 
-protected slots:
+protected:
 
 	void colorScaleChanged(int);
 	void relativeModeChanged(int);

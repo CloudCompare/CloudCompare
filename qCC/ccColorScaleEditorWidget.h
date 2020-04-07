@@ -291,7 +291,7 @@ signals:
 	//! Signal emitted when a slider is modified
 	void stepModified(int index);
 
-protected slots:
+protected:
 
 	//! Slot called when a 'point' is clicked on the color bar 
 	void onPointClicked(double relativePos);

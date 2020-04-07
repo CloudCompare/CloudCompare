@@ -49,7 +49,7 @@ public:
 	**/
 	void setOctree(CCLib::DgmOctree* octree);
 
-protected slots:
+protected:
 
 	//! Called each time the spinbox value changes
 	void onValueChange(int);

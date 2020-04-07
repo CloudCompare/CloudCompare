@@ -51,7 +51,7 @@ public:
 	//! Returns the sections width
 	double getSectionsWidth() const;
 
-protected slots:
+protected:
 	void onStepChanged(double);
 
 protected:

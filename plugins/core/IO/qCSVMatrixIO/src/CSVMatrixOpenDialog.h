@@ -34,7 +34,7 @@ public:
 	//! Default constructor
 	explicit CSVMatrixOpenDialog(QWidget* parent = 0);
 
-protected slots:
+protected:
 
 	//! Bowse texture file
 	void browseTextureFile();

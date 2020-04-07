@@ -55,7 +55,7 @@ public:
 	//! Returns the selected descriptor ID
 	unsigned getDescriptorID() const;
 
-protected slots:
+protected:
 
 	void onClassChanged(int);
 	void onCloudChanged(int);

@@ -82,7 +82,7 @@ public:
 	//! Returns whether the picking mechanism is currently locked (i.e. an exclusive listener is registered)
 	bool isLocked() const { return m_exclusive && !m_listeners.empty(); }
 
-public slots:
+public:
 
 	void onActiveWindowChanged(QMdiSubWindow*);
 	void onActiveWindowDeleted(QObject*);

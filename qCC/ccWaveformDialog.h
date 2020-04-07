@@ -23,15 +23,16 @@
 
 //Qt
 #include <QDialog>
-#include <QFont>
 
 //QCustomPlot
 #include <qcustomplot.h>
 
-class QCPBarsWithText;
-class QCPHiddenArea;
-class QCPGraph;
 class QCPArrow;
+class QCPBarsWithText;
+class QCPColoredBars;
+class QCPHiddenArea;
+class QCPTextElement;
+
 class Ui_WaveDialog;
 class ccPointCloud;
 class ccPickingHub;
@@ -79,7 +80,7 @@ protected: //attributes
 
 	//Title
 	QString m_titleStr;
-	QCPPlotTitle* m_titlePlot;
+	QCPTextElement* m_titlePlot;
 
 	//! Wave curve
 	QCPGraph* m_curve;

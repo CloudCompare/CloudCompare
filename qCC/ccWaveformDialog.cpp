@@ -205,7 +205,7 @@ void ccWaveWidget::refresh()
 			plotLayout()->remove(m_titlePlot);
 			m_titlePlot = nullptr;
 		}
-		m_titlePlot = new QCPPlotTitle(this, m_titleStr);
+		m_titlePlot = new QCPTextElement(this, m_titleStr);
 		
 		//title font
 		m_renderingFont.setPointSize(ccGui::Parameters().defaultFontSize);
@@ -249,7 +249,6 @@ void ccWaveWidget::refresh()
 	if (m_drawVerticalIndicator) //vertical hint
 	{
 		m_vertBar = new QCPBarsWithText(xAxis, yAxis);
-		addPlottable(m_vertBar);
 		
 		// now we can modify properties of vertBar
 		m_vertBar->setName("VertLine");
@@ -278,7 +277,6 @@ void ccWaveWidget::refresh()
 	if (m_echoPos >= 0)
 	{
 		m_peakBar = new QCPBarsWithText(xAxis, yAxis);
-		addPlottable(m_peakBar);
 
 		// now we can modify properties of vertBar
 		m_peakBar->setName("PeakLine");

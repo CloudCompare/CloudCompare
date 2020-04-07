@@ -15,31 +15,37 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef M3C2_DISCLAIMER_DIALOG_HEADER
-#define M3C2_DISCLAIMER_DIALOG_HEADER
+#include "qM3C2DisclaimerDialog.h"
+#include "ui_disclaimerDlg.h"
 
-#include <QDialog>
+//qCC_plugins
+#include <ccMainAppInterface.h>
 
-class ccMainAppInterface;
- 
-namespace Ui {
-	class DisclaimerDialog;
+//Qt
+#include <QMainWindow>
+
+bool DisclaimerDialog::s_disclaimerAccepted = false;
+
+
+DisclaimerDialog::DisclaimerDialog(QWidget *parent)
+    : QDialog(parent)
+    , m_ui( new Ui::DisclaimerDialog )
+{
+    m_ui->setupUi( this );
 }
 
-//! Dialog for displaying the M3C2/UEB disclaimer
-class DisclaimerDialog : public QDialog
+DisclaimerDialog::~DisclaimerDialog()
 {
-public:
-	DisclaimerDialog(QWidget* parent = nullptr);
-	~DisclaimerDialog();
-	
-	static bool show(ccMainAppInterface* app);
-	
-private:
-	//whether disclaimer has already been displayed (and accepted) or not	
-	static bool s_disclaimerAccepted;
-	
-	Ui::DisclaimerDialog* m_ui;
-};
+    delete m_ui;
+}
 
-#endif //M3C2_DISCLAIMER_DIALOG_HEADER
+bool DisclaimerDialog::show(ccMainAppInterface *app)
+{
+	if ( !s_disclaimerAccepted )
+	{
+		//if the user "cancels" it, then he refuses the disclaimer
+		s_disclaimerAccepted = DisclaimerDialog(app ? app->getMainWindow() : 0).exec();
+	}
+
+	return s_disclaimerAccepted;
+}

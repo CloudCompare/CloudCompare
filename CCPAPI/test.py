@@ -61,9 +61,17 @@ sf2 = cloud.getScalarField(1)
 print("scalar field: %s"%sf2)    
 sf2name = sf2.getName()
 print("scalar field name: %s"%sf2name)
+
+meanvar = sf2.computeMeanAndVariance()
+print(meanvar)
+sf2.computeMinAndMax()
+print("min: %s"%sf2.getMin())
+print("max: %s"%sf2.getMax())
 asf2 = sf2.toNpArray()
 
 cc.computeCurvature(cc.GAUSSIAN_CURV, 1.88, [cloud])
+
+
 
 res=cc.SavePointCloud(cloud, "/home/paul/projets/CloudCompare/data/res.xyz")
 

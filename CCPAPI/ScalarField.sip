@@ -48,6 +48,28 @@ namespace CCLib
         explicit ScalarField(const char* name = nullptr);
         
         const char* getName() const;
+        
+        SIP_PYTUPLE computeMeanAndVariance() [ void (ScalarType&, ScalarType*) ];
+        %MethodCode
+        Py_BEGIN_ALLOW_THREADS
+        ScalarType mean;
+        ScalarType variance;
+        CCTRACE("computeMeanAndVariance");
+        sipCpp->computeMeanAndVariance(mean, &variance);
+        CCTRACE("mean: " << mean);
+        CCTRACE("variance: " << variance);
+        PyObject *t;
+        t = Py_BuildValue("(dd)", mean, variance);
+        sipRes = t;
+        Py_END_ALLOW_THREADS
+        %End
+        
+        void computeMinAndMax();
+        
+        float getMin() [ ScalarType ()];
+        
+        float getMax() [ ScalarType ()];
+        
     
         static void initNumpyApi();
         %Docstring

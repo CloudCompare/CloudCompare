@@ -23,7 +23,6 @@
 
 //Qt
 #include <QDialog>
-#include <QFont>
 
 //qCC_db
 #include <ccScalarField.h>

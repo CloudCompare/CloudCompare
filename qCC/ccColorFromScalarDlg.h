@@ -42,7 +42,7 @@ public:
 	ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointCloud);
 	
 	~ccColorFromScalarDlg();
-
+	void setupDisplay();
 	//update and redraw histograms
 	void updateHistogram(int);
 
@@ -53,6 +53,8 @@ protected slots:
 	void onChannelChangedB(int) { updateChannel(2); }
 	void onChannelChangedA(int) { updateChannel(3); }
 	void updateChannel(int);
+	void setDefaultSatValuePerChannel(int);
+	void jiggleSatValuePerChannel(int);
 	void updateColormaps();
 	//mapping ranges changed
 	void minChangedR(double val) { minChanged(0, val, true); }
@@ -83,6 +85,7 @@ protected slots:
 	void onApply();
 
 protected:
+	void resizeEvent(QResizeEvent* event);
 	//! Associated histogram view
 	ccHistogramWindow *m_histograms[4];  //0 - red, 1 - green, 2 - blue, 3 - alpha
 	//scalar fields
@@ -101,6 +104,10 @@ protected:
 	ccColorScale::Shared m_colors[4];
 	//! Associated point cloud (color source)
 	ccPointCloud* m_cloud;
+	//! Associated point cloud scalar field original scale (to restore on exit)
+	ccColorScale::Shared m_storedOrigColorScale;
+	ccScalarField::Range m_storedOrigSatRange;
+	ccScalarField::Range m_storedOrigDisplayRange;
 
 private:
 	Ui::ColorFromScalarDialog *m_ui;

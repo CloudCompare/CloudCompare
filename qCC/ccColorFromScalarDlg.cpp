@@ -44,12 +44,21 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
 {
 	m_ui->setupUi(this);
 	
+	
+	if (m_cloud->getCurrentDisplayedScalarFieldIndex() == -1)
+	{
+		m_cloud->setCurrentDisplayedScalarField(0);
+	}
+	m_storedOrigColorScale = m_cloud->getCurrentDisplayedScalarField()->getColorScale();
+	m_storedOrigSatRange = m_cloud->getCurrentDisplayedScalarField()->saturationRange();
+	m_storedOrigDisplayRange = m_cloud->getCurrentDisplayedScalarField()->displayRange();
+
 	//create histograms
 	QFrame* histoFrame[4] = { m_ui->histoFrameR, m_ui->histoFrameG, m_ui->histoFrameB, m_ui->histoFrameA };
 	for (unsigned i = 0; i < 4; i++)
 	{
 		m_histograms[i] = new ccHistogramWindow(this);
-		
+		m_histograms[i]->setSelectableItemControls(ccHistogramWindow::SHOW_SELECTABLE_ITEMS::ARROWS);
 		auto layout = new QHBoxLayout;
 		
 		layout->setContentsMargins( 0, 0, 0, 0 );
@@ -142,19 +151,21 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
 	for (unsigned i = 0; i < 4; i++)
 	{
 		m_colors[i] = ccColorScale::Shared(new ccColorScale(QString::asprintf("%d", i)));
+		updateChannel(i);
+		setDefaultSatValuePerChannel(i);
 	}
-	updateColormaps();
-
-	//update histograms
-	updateChannel(0);
-	updateChannel(1);
-	updateChannel(2);
-	updateChannel(3);
-	m_cloud->getCurrentDisplayedScalarField()->setColorScale(m_colors[3]); //set grey colour ramp to start with
 }
 
 ccColorFromScalarDlg::~ccColorFromScalarDlg()
 {
+	m_cloud->getCurrentDisplayedScalarField()->setColorScale(m_storedOrigColorScale);
+	m_cloud->getCurrentDisplayedScalarField()->setSaturationStart(m_storedOrigSatRange.min());
+	m_cloud->getCurrentDisplayedScalarField()->setSaturationStop(m_storedOrigSatRange.max());
+	m_cloud->getCurrentDisplayedScalarField()->setMinDisplayed(m_storedOrigDisplayRange.min());
+	m_cloud->getCurrentDisplayedScalarField()->setMaxDisplayed(m_storedOrigDisplayRange.max());
+	m_cloud->redrawDisplay();
+	m_cloud->prepareDisplayForRefresh();
+	m_cloud->refreshDisplay();
 	delete m_ui;
 }
 
@@ -249,17 +260,14 @@ void ccColorFromScalarDlg::updateColormaps()
 
 void ccColorFromScalarDlg::toggleColors(int state)
 {
-	//update colourmaps
-	updateColormaps();
-	
-	//update histograms
-	updateHistogram(0); 
-	updateHistogram(1); 
-	updateHistogram(2); 
-	updateHistogram(3);
+	setupDisplay();
 }
 
 void ccColorFromScalarDlg::toggleColorMode(bool state)
+{
+	setupDisplay();
+}
+void ccColorFromScalarDlg::setupDisplay()
 {
 	//update colourmaps
 	updateColormaps();
@@ -269,6 +277,10 @@ void ccColorFromScalarDlg::toggleColorMode(bool state)
 	updateChannel(1);
 	updateChannel(2);
 	updateChannel(3);
+	jiggleSatValuePerChannel(0);
+	jiggleSatValuePerChannel(1);
+	jiggleSatValuePerChannel(2);
+	jiggleSatValuePerChannel(3);
 }
 
 void ccColorFromScalarDlg::updateHistogram(int n)
@@ -316,11 +328,13 @@ void ccColorFromScalarDlg::updateHistogram(int n)
 
 		//clear and build histogram
 		m_histograms[n]->clear();
-		m_histograms[n]->fromSF(m_scalars[n], 255, false, true);
+		m_histograms[n]->fromSF(m_scalars[n], 255, false, true);		
 		m_histograms[n]->enableSFInteractionMode(true); //enable interactivity
 		m_histograms[n]->refresh();
 
 		//hide axis (not sure why this code HAS to be here, but it does...)
+		// We should add some more option variables in ccHistogramWindow so we
+		//  don't have to do this so often 
 		m_histograms[n]->setAxisLabels("", "");
 		m_histograms[n]->yAxis->setVisible(false); //disable y-axis
 		m_histograms[n]->xAxis->setVisible(true); //enable x-axis
@@ -332,29 +346,63 @@ void ccColorFromScalarDlg::updateHistogram(int n)
 void ccColorFromScalarDlg::updateChannel(int n)
 {
 	ccScalarField* sf = static_cast<ccScalarField*>(m_cloud->getScalarField(m_combos[n]->currentIndex()));
-	m_scalars[n] = sf;
 	if (sf)
 	{
-		sf->computeMinAndMax();
-		sf->setColorScale(m_colors[n]);
+		m_scalars[n] = sf;
+		m_scalars[n]->computeMinAndMax();
+		m_scalars[n]->setColorScale(m_colors[n]);
 
-		m_minSat[n] = sf->getMin();
-		m_maxSat[n] = sf->getMax();
+		m_minSat[n] = m_scalars[n]->getMin();
+		m_maxSat[n] = m_scalars[n]->getMax();
 		m_boxes_min[n]->setMinimum(m_minSat[n]);
 		m_boxes_min[n]->setMaximum(m_maxSat[n]);
 		m_boxes_max[n]->setMinimum(m_minSat[n]);
 		m_boxes_max[n]->setMaximum(m_maxSat[n]);
 		m_boxes_max[n]->setCorrectionMode(QAbstractSpinBox::CorrectionMode::CorrectToNearestValue);
+	}
+	if (m_scalars[n])
+	{
 		updateHistogram(n);
-
-		//set default stretch (n.b. this is a cheap hack to avoid calculating percentiles [by assuming uniform data distribution])
-		float range = m_maxSat[n] - m_minSat[n];
-		m_histograms[n]->setMinSatValue(m_minSat[n] + 0.1 * range);
-		m_histograms[n]->setMaxSatValue(m_maxSat[n] - 0.1 * range);
 	}
 }
 
-//mapping ranges changed
+void ccColorFromScalarDlg::setDefaultSatValuePerChannel(int n)
+{
+	//set default stretch (n.b. this is a cheap hack to avoid calculating percentiles [by assuming uniform data distribution])
+	m_scalars[n]->setColorScale(m_colors[n]);
+	m_minSat[n] = m_scalars[n]->getMin();
+	m_maxSat[n] = m_scalars[n]->getMax();
+	float range = m_maxSat[n] - m_minSat[n];
+	m_histograms[n]->setMinSatValue(m_minSat[n] + 0.1 * range);
+	m_histograms[n]->setMaxSatValue(m_maxSat[n] - 0.1 * range);
+}
+
+void ccColorFromScalarDlg::jiggleSatValuePerChannel(int n)
+{
+	//Ugly hack to force the plots saturation values to refresh
+	//properly after resize
+	m_scalars[n]->setColorScale(m_colors[n]);
+	double minSat = m_boxes_min[n]->value();
+	double maxSat = m_boxes_max[n]->value();
+	m_histograms[n]->setMinSatValue(minSat + 0.1);
+	m_histograms[n]->setMaxSatValue(maxSat - 0.1);
+	m_histograms[n]->setMinSatValue(minSat - 0.1);
+	m_histograms[n]->setMaxSatValue(maxSat + 0.1);
+	m_histograms[n]->replot();
+	m_histograms[n]->repaint();
+}
+
+void ccColorFromScalarDlg::resizeEvent(QResizeEvent* event)
+{
+	// This event is called after the histograms fire their resize event
+	// without this the histograms will not be setup correctly
+	m_histograms[0]->clear();
+	m_histograms[1]->clear();
+	m_histograms[2]->clear();
+	m_histograms[3]->clear();
+	setupDisplay();
+}	
+
 void ccColorFromScalarDlg::minChanged(int n, double val, bool slider)
 {
 	if (val <= m_maxSat[n]) //valid value?
@@ -469,7 +517,4 @@ void ccColorFromScalarDlg::onApply()
 		m_cloud->colorsHaveChanged();
 		m_cloud->showSF(false);
 		m_cloud->showColors(true);
-		m_cloud->redrawDisplay();
-		m_cloud->prepareDisplayForRefresh();
-		m_cloud->refreshDisplay();
 }

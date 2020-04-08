@@ -60,10 +60,15 @@ ccHistogramWindow::ccHistogramWindow(QWidget* parent/*=0*/)
 	, m_verticalIndicatorPositionPercent(0)
 	, m_sfInteractionMode(false)
 	, m_selectedItem(NONE)
+	, m_showItems(BOTH_AREAS_AND_ARROWS)
 	, m_areaLeft(nullptr)
+	, m_areaLeftlastValue(std::nan(""))
 	, m_areaRight(nullptr)
+	, m_areaRightlastValue(std::nan(""))
 	, m_arrowLeft(nullptr)
+	, m_arrowLeftlastValue(std::nan(""))
 	, m_arrowRight(nullptr)
+	, m_arrowRightlastValue(std::nan(""))
 	, m_lastMouseClick(0, 0)
 {
 	setWindowTitle("Histogram");
@@ -89,6 +94,11 @@ ccHistogramWindow::ccHistogramWindow(QWidget* parent/*=0*/)
 ccHistogramWindow::~ccHistogramWindow()
 {
 	clearInternal();
+}
+
+void ccHistogramWindow::setSelectableItemControls(SHOW_SELECTABLE_ITEMS showItems)
+{
+	m_showItems = showItems;
 }
 
 void ccHistogramWindow::clear()
@@ -524,42 +534,46 @@ void ccHistogramWindow::refresh()
 
 	//sf interaction mode
 	if (m_sfInteractionMode && m_associatedSF)
-	{
+	{		
 		const ccScalarField::Range& dispRange = m_associatedSF->displayRange();
-
-		m_areaLeft = new QCPHiddenArea(true, xAxis, yAxis);
-		m_areaLeft->setRange(dispRange.min(), dispRange.max());
-		m_areaLeft->setCurrentVal(dispRange.start());
-		addPlottable(m_areaLeft);
-
-		m_areaRight = new QCPHiddenArea(false, xAxis, yAxis);
-		m_areaRight->setRange(dispRange.min(), dispRange.max());
-		m_areaRight->setCurrentVal(dispRange.stop());
-		addPlottable(m_areaRight);
-
-		const ccScalarField::Range& satRange = m_associatedSF->saturationRange();
-
-		m_arrowLeft = new QCPArrow(xAxis, yAxis);
-		m_arrowLeft->setRange(satRange.min(), satRange.max());
-		m_arrowLeft->setCurrentVal(satRange.start());
-		if (colorScale)
+		if (m_showItems == AREAS || m_showItems == BOTH_AREAS_AND_ARROWS)
 		{
-			const ccColor::Rgb* col = colorScale->getColorByRelativePos(m_associatedSF->symmetricalScale() ? 0.5 : 0, m_associatedSF->getColorRampSteps());
-			if (col)
-				m_arrowLeft->setColor(col->r, col->g, col->b);
-		}
-		addPlottable(m_arrowLeft);
+			m_areaLeft = new QCPHiddenArea(true, xAxis, yAxis);
+			m_areaLeft->setRange(dispRange.min(), dispRange.max());
+			m_areaLeft->setCurrentVal(!isnan(m_areaLeftlastValue) ? m_areaLeftlastValue : dispRange.start());
+			addPlottable(m_areaLeft);
 
-		m_arrowRight = new QCPArrow(xAxis, yAxis);
-		m_arrowRight->setRange(satRange.min(), satRange.max());
-		m_arrowRight->setCurrentVal(satRange.stop());
-		if (colorScale)
-		{
-			const ccColor::Rgb* col = colorScale->getColorByRelativePos(1.0, m_associatedSF->getColorRampSteps());
-			if (col)
-				m_arrowRight->setColor(col->r, col->g, col->b);
+			m_areaRight = new QCPHiddenArea(false, xAxis, yAxis);
+			m_areaRight->setRange(dispRange.min(), dispRange.max());
+			m_areaRight->setCurrentVal(!isnan(m_areaRightlastValue) ? m_areaRightlastValue : dispRange.stop());
+			addPlottable(m_areaRight);
 		}
-		addPlottable(m_arrowRight);
+		if (m_showItems == ARROWS || m_showItems == BOTH_AREAS_AND_ARROWS)
+		{
+			const ccScalarField::Range& satRange = m_associatedSF->saturationRange();
+
+			m_arrowLeft = new QCPArrow(xAxis, yAxis);
+			m_arrowLeft->setRange(satRange.min(), satRange.max());
+			m_arrowLeft->setCurrentVal(!isnan(m_arrowLeftlastValue) ? m_arrowLeftlastValue : satRange.start());
+			if (colorScale)
+			{
+				const ccColor::Rgb* col = colorScale->getColorByRelativePos(m_associatedSF->symmetricalScale() ? 0.5 : 0, m_associatedSF->getColorRampSteps());
+				if (col)
+					m_arrowLeft->setColor(col->r, col->g, col->b);
+			}
+			addPlottable(m_arrowLeft);
+
+			m_arrowRight = new QCPArrow(xAxis, yAxis);
+			m_arrowRight->setRange(satRange.min(), satRange.max());
+			m_arrowRight->setCurrentVal(!isnan(m_arrowRightlastValue) ? m_arrowRightlastValue : satRange.stop());
+			if (colorScale)
+			{
+				const ccColor::Rgb* col = colorScale->getColorByRelativePos(1.0, m_associatedSF->getColorRampSteps());
+				if (col)
+					m_arrowRight->setColor(col->r, col->g, col->b);
+			}
+			addPlottable(m_arrowRight);
+		}
 	}
 	else if (m_drawVerticalIndicator) //vertical hint
 	{
@@ -601,6 +615,7 @@ void ccHistogramWindow::refresh()
 
 void ccHistogramWindow::setMinDispValue(double val)
 {
+	m_areaLeftlastValue = val;
 	if (m_areaLeft && m_areaLeft->currentVal() != val)
 	{
 		m_areaLeft->setCurrentVal(val);
@@ -622,6 +637,7 @@ void ccHistogramWindow::setMinDispValue(double val)
 
 void ccHistogramWindow::setMaxDispValue(double val)
 {
+	m_areaRightlastValue = val;
 	if (m_areaRight && m_areaRight->currentVal() != val)
 	{
 		m_areaRight->setCurrentVal(val);
@@ -643,6 +659,7 @@ void ccHistogramWindow::setMaxDispValue(double val)
 
 void ccHistogramWindow::setMinSatValue(double val)
 {
+	m_arrowLeftlastValue = val;
 	if (m_arrowLeft && m_arrowLeft->currentVal() != val)
 	{
 		m_arrowLeft->setCurrentVal(val);
@@ -664,6 +681,7 @@ void ccHistogramWindow::setMinSatValue(double val)
 
 void ccHistogramWindow::setMaxSatValue(double val)
 {
+	m_arrowRightlastValue = val;
 	if (m_arrowRight && m_arrowRight->currentVal() != val)
 	{
 		m_arrowRight->setCurrentVal(val);
@@ -674,7 +692,10 @@ void ccHistogramWindow::setMaxSatValue(double val)
 			m_associatedSF->setSaturationStop(static_cast<ScalarType>(val));
 			refreshBars();
 		}
-		replot();
+		else
+		{
+			replot();
+		}
 
 		emit sfMaxSatValChanged(val);
 	}

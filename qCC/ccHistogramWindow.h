@@ -43,7 +43,7 @@ class ccHistogramWindow : public QCustomPlot
 	Q_OBJECT
 
 public:
-
+	enum SHOW_SELECTABLE_ITEMS { NONE_SHOWN, AREAS, ARROWS, BOTH_AREAS_AND_ARROWS };
 	//! Default constructor
 	explicit ccHistogramWindow(QWidget *parent = 0);
 
@@ -54,6 +54,9 @@ public:
 	void setTitle(const QString& str);
 	//! Sets axis labels
 	void setAxisLabels(const QString& xLabel, const QString& yLabel);
+
+	//! Set which controls are shows in SFInteractionMode. Defaults to BOTH_AREAS_AND_ARROWS 
+	void setSelectableItemControls(SHOW_SELECTABLE_ITEMS showItems);
 
 	//! Computes histogram from a scalar field
 	/** Number of classes can be freely modified afterwards (if enabled).
@@ -202,16 +205,21 @@ protected: //SF interactor mode
 	enum SELECTABLE_ITEMS { NONE, LEFT_AREA, RIGHT_AREA, BOTH_AREAS, LEFT_ARROW, RIGHT_ARROW, BOTH_ARROWS };
 	//! Currently selected item
 	SELECTABLE_ITEMS m_selectedItem;
-
+	
+	SHOW_SELECTABLE_ITEMS m_showItems;
 	//! Left greyed area
 	QCPHiddenArea* m_areaLeft;
+	double m_areaLeftlastValue;
 	//! Right greyed area
 	QCPHiddenArea* m_areaRight;
+	double m_areaRightlastValue;
 
 	//! Left arrow
 	QCPArrow* m_arrowLeft;
+	double m_arrowLeftlastValue;
 	//! Right arrow
 	QCPArrow* m_arrowRight;
+	double m_arrowRightlastValue;
 
 	//! Last mouse click
 	QPoint m_lastMouseClick;

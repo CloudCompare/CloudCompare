@@ -521,4 +521,5 @@ void ccColorFromScalarDlg::onApply()
 		m_cloud->colorsHaveChanged();
 		m_cloud->showSF(false);
 		m_cloud->showColors(true);
+		m_cloud->redrawDisplay();
 }

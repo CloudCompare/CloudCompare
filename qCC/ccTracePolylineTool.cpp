@@ -16,6 +16,7 @@
 //##########################################################################
 
 #include "ccTracePolylineTool.h"
+#include "ui_tracePolylineDlg.h"
 
 //Local
 #include "mainwindow.h"
@@ -24,32 +25,16 @@
 //common
 #include <ccPickingHub.h>
 
-//CCLib
-#include <ManualSegmentationTools.h>
-#include <SquareMatrix.h>
-
 //qCC_db
-#include <ccLog.h>
 #include <ccPolyline.h>
-#include <ccGenericPointCloud.h>
 #include <ccPointCloud.h>
-#include <ccMesh.h>
-#include <ccHObjectCaster.h>
-#include <cc2DViewportObject.h>
-
-//qCC_gl
-#include <ccGLWindow.h>
 
 //Qt
-#include <QMenu>
-#include <QMessageBox>
-#include <QPushButton>
 #include <QProgressDialog>
 
 //System
-#include <assert.h>
+#include <cassert>
 
-#include <iostream>
 
 ccTracePolylineTool::SegmentGLParams::SegmentGLParams(ccGenericGLDisplay* display, int x , int y)
 {
@@ -63,25 +48,25 @@ ccTracePolylineTool::SegmentGLParams::SegmentGLParams(ccGenericGLDisplay* displa
 
 ccTracePolylineTool::ccTracePolylineTool(ccPickingHub* pickingHub, QWidget* parent)
 	: ccOverlayDialog(parent)
-	, Ui::TracePolyLineDlg()
 	, m_polyTip(nullptr)
 	, m_polyTipVertices(nullptr)
 	, m_poly3D(nullptr)
 	, m_poly3DVertices(nullptr)
 	, m_done(false)
 	, m_pickingHub(pickingHub)
+	, m_ui( new Ui::TracePolyLineDlg )
 {
 	assert(pickingHub);
 
-	setupUi(this);
+	m_ui->setupUi(this);
 	setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
 
-	connect(saveToolButton,		&QToolButton::clicked, this, &ccTracePolylineTool::exportLine);
-	connect(resetToolButton,	&QToolButton::clicked, this, &ccTracePolylineTool::resetLine);
-	connect(continueToolButton, &QToolButton::clicked, this, &ccTracePolylineTool::continueEdition);
-	connect(validButton,		&QToolButton::clicked, this, &ccTracePolylineTool::apply);
-	connect(cancelButton,		&QToolButton::clicked, this, &ccTracePolylineTool::cancel);
-	connect(widthSpinBox, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &ccTracePolylineTool::onWidthSizeChanged);
+	connect(m_ui->saveToolButton,		&QToolButton::clicked, this, &ccTracePolylineTool::exportLine);
+	connect(m_ui->resetToolButton,		&QToolButton::clicked, this, &ccTracePolylineTool::resetLine);
+	connect(m_ui->continueToolButton,	&QToolButton::clicked, this, &ccTracePolylineTool::continueEdition);
+	connect(m_ui->validButton,			&QToolButton::clicked, this, &ccTracePolylineTool::apply);
+	connect(m_ui->cancelButton,			&QToolButton::clicked, this, &ccTracePolylineTool::cancel);
+	connect(m_ui->widthSpinBox,			static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &ccTracePolylineTool::onWidthSizeChanged);
 
 	//add shortcuts
 	addOverridenShortcut(Qt::Key_Escape); //escape key for the "cancel" button
@@ -100,10 +85,10 @@ ccTracePolylineTool::ccTracePolylineTool(ccPickingHub* pickingHub, QWidget* pare
 	m_polyTip->set2DMode(true);
 	m_polyTip->reserve(2);
 	m_polyTip->addPointIndex(0, 2);
-	m_polyTip->setWidth(widthSpinBox->value() < 2 ? 0 : widthSpinBox->value()); //'1' is equivalent to the default line size
+	m_polyTip->setWidth(m_ui->widthSpinBox->value() < 2 ? 0 : m_ui->widthSpinBox->value()); //'1' is equivalent to the default line size
 	m_polyTip->addChild(m_polyTipVertices);
 
-	validButton->setEnabled(false);
+	m_ui->validButton->setEnabled(false);
 }
 
 ccTracePolylineTool::~ccTracePolylineTool()
@@ -119,6 +104,8 @@ ccTracePolylineTool::~ccTracePolylineTool()
 	//DGM: already a child of m_poly3D
 	//if (m_poly3DVertices)
 	//	delete m_poly3DVertices;
+	
+	delete m_ui;
 }
 
 void ccTracePolylineTool::onShortcutTriggered(int key)
@@ -230,8 +217,8 @@ ccPolyline* ccTracePolylineTool::polylineOverSampling(unsigned steps) const
 										m_segmentParams[i2].params,
 										nearestPointIndex,
 										nearestSquareDist,
-										snapSizeSpinBox->value(),
-										snapSizeSpinBox->value(),
+										m_ui->snapSizeSpinBox->value(),
+										m_ui->snapSizeSpinBox->value(),
 										true))
 				{
 					if (nearestElementSquareDist < 0 || nearestSquareDist < nearestElementSquareDist)
@@ -351,13 +338,13 @@ bool ccTracePolylineTool::start()
 										|	ccGLWindow::INTERACT_SIG_MOUSE_MOVED);
 	m_associatedWin->setCursor(Qt::CrossCursor);
 
-	snapSizeSpinBox->blockSignals(true);
-	snapSizeSpinBox->setValue(s_defaultPickingRadius);
-	snapSizeSpinBox->blockSignals(false);
+	m_ui->snapSizeSpinBox->blockSignals(true);
+	m_ui->snapSizeSpinBox->setValue(s_defaultPickingRadius);
+	m_ui->snapSizeSpinBox->blockSignals(false);
 
-	oversampleSpinBox->blockSignals(true);
-	oversampleSpinBox->setValue(s_overSamplingCount);
-	oversampleSpinBox->blockSignals(false);
+	m_ui->oversampleSpinBox->blockSignals(true);
+	m_ui->oversampleSpinBox->setValue(s_overSamplingCount);
+	m_ui->oversampleSpinBox->blockSignals(false);
 
 	resetLine(); //to reset the GUI
 
@@ -387,8 +374,8 @@ void ccTracePolylineTool::stop(bool accepted)
 		m_associatedWin->setCursor(Qt::ArrowCursor);
 	}
 
-	s_defaultPickingRadius = snapSizeSpinBox->value();
-	s_overSamplingCount = oversampleSpinBox->value();
+	s_defaultPickingRadius = m_ui->snapSizeSpinBox->value();
+	s_overSamplingCount = m_ui->oversampleSpinBox->value();
 
 	ccOverlayDialog::stop(accepted);
 }
@@ -486,7 +473,7 @@ void ccTracePolylineTool::onItemPicked(const PickedItem& pi)
 		m_poly3D->setTempColor(ccColor::green);
 		m_poly3D->set2DMode(false);
 		m_poly3D->addChild(m_poly3DVertices);
-		m_poly3D->setWidth(widthSpinBox->value() < 2 ? 0 : widthSpinBox->value()); //'1' is equivalent to the default line size
+		m_poly3D->setWidth(m_ui->widthSpinBox->value() < 2 ? 0 : m_ui->widthSpinBox->value()); //'1' is equivalent to the default line size
 
 		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(pi.entity);
 		if (cloud)
@@ -559,10 +546,10 @@ void ccTracePolylineTool::closePolyLine(int, int)
 			m_polyTip->setEnabled(false);
 		}
 		//update the GUI
-		validButton->setEnabled(true);
-		saveToolButton->setEnabled(true);
-		resetToolButton->setEnabled(true);
-		continueToolButton->setEnabled(true);
+		m_ui->validButton->setEnabled(true);
+		m_ui->saveToolButton->setEnabled(true);
+		m_ui->resetToolButton->setEnabled(true);
+		m_ui->continueToolButton->setEnabled(true);
 		if (m_pickingHub)
 		{
 			m_pickingHub->removeListener(this);
@@ -621,10 +608,10 @@ void ccTracePolylineTool::restart(bool reset)
 		m_associatedWin->redraw(false, false);
 	}
 	
-	validButton->setEnabled(false);
-	saveToolButton->setEnabled(false);
-	resetToolButton->setEnabled(false);
-	continueToolButton->setEnabled(false);
+	m_ui->validButton->setEnabled(false);
+	m_ui->saveToolButton->setEnabled(false);
+	m_ui->resetToolButton->setEnabled(false);
+	m_ui->continueToolButton->setEnabled(false);
 	m_done = false;
 }
 
@@ -640,7 +627,7 @@ void ccTracePolylineTool::exportLine()
 		m_associatedWin->removeFromOwnDB(m_poly3D);
 	}
 
-	unsigned overSampling = static_cast<unsigned>(oversampleSpinBox->value());
+	unsigned overSampling = static_cast<unsigned>(m_ui->oversampleSpinBox->value());
 	if (overSampling > 1)
 	{
 		ccPolyline* poly = polylineOverSampling(overSampling);

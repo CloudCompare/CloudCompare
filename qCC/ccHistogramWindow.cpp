@@ -38,6 +38,7 @@
 
 //System
 #include <assert.h>
+#include <cmath>
 
 //Gui
 #include "ui_histogramDlg.h"
@@ -540,7 +541,7 @@ void ccHistogramWindow::refresh()
 		{
 			m_areaLeft = new QCPHiddenArea(true, xAxis, yAxis);
 			m_areaLeft->setRange(dispRange.min(), dispRange.max());
-			m_areaLeft->setCurrentVal(!isnan(m_areaLeftlastValue) ? m_areaLeftlastValue : dispRange.start());
+			m_areaLeft->setCurrentVal(!std::isnan(m_areaLeftlastValue) ? m_areaLeftlastValue : dispRange.start());
 			addPlottable(m_areaLeft);
 
 			m_areaRight = new QCPHiddenArea(false, xAxis, yAxis);

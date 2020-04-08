@@ -58,7 +58,7 @@ ccHistogramWindow::ccHistogramWindow(QWidget* parent/*=0*/)
 	, m_vertBar(nullptr)
 	, m_drawVerticalIndicator(false)
 	, m_verticalIndicatorPositionPercent(0)
-	, m_sfInteractionMode(false)
+	, m_sfInteractionModes(SFInteractionMode::None)
 	, m_selectedItem(NONE)
 	, m_areaLeft(nullptr)
 	, m_areaRight(nullptr)
@@ -353,12 +353,17 @@ void ccHistogramWindow::refreshBars()
 	replot(QCustomPlot::rpImmediateRefresh);
 }
 
+void ccHistogramWindow::setSFInteractionMode(SFInteractionModes modes)
+{
+   m_sfInteractionModes = modes;
+}
+
 void ccHistogramWindow::refresh()
 {
 	// set ranges appropriate to show data
 	double minVal = m_minVal;
 	double maxVal = m_maxVal;
-	if (m_sfInteractionMode && m_associatedSF)
+	if (m_sfInteractionModes && m_associatedSF)
 	{
 		double minSat = m_associatedSF->saturationRange().min();
 		double maxSat = m_associatedSF->saturationRange().max();
@@ -525,38 +530,44 @@ void ccHistogramWindow::refresh()
 	}
 
 	//sf interaction mode
-	if (m_sfInteractionMode && m_associatedSF)
+	if (m_sfInteractionModes && m_associatedSF)
 	{
-		const ccScalarField::Range& dispRange = m_associatedSF->displayRange();
-
-		m_areaLeft = new QCPHiddenArea(true, xAxis, yAxis);
-		m_areaLeft->setRange(dispRange.min(), dispRange.max());
-		m_areaLeft->setCurrentVal(dispRange.start());
-
-		m_areaRight = new QCPHiddenArea(false, xAxis, yAxis);
-		m_areaRight->setRange(dispRange.min(), dispRange.max());
-		m_areaRight->setCurrentVal(dispRange.stop());
-
-		const ccScalarField::Range& satRange = m_associatedSF->saturationRange();
-
-		m_arrowLeft = new QCPArrow(xAxis, yAxis);
-		m_arrowLeft->setRange(satRange.min(), satRange.max());
-		m_arrowLeft->setCurrentVal(satRange.start());
-		if (colorScale)
+		if ( m_sfInteractionModes.testFlag(SFInteractionMode::DisplayRange) )
 		{
-			const ccColor::Rgb* col = colorScale->getColorByRelativePos(m_associatedSF->symmetricalScale() ? 0.5 : 0, m_associatedSF->getColorRampSteps());
-			if (col)
-				m_arrowLeft->setColor(col->r, col->g, col->b);
+			const ccScalarField::Range& dispRange = m_associatedSF->displayRange();
+	
+			m_areaLeft = new QCPHiddenArea(true, xAxis, yAxis);
+			m_areaLeft->setRange(dispRange.min(), dispRange.max());
+			m_areaLeft->setCurrentVal(dispRange.start());
+	
+			m_areaRight = new QCPHiddenArea(false, xAxis, yAxis);
+			m_areaRight->setRange(dispRange.min(), dispRange.max());
+			m_areaRight->setCurrentVal(dispRange.stop());
 		}
 
-		m_arrowRight = new QCPArrow(xAxis, yAxis);
-		m_arrowRight->setRange(satRange.min(), satRange.max());
-		m_arrowRight->setCurrentVal(satRange.stop());
-		if (colorScale)
+		if ( m_sfInteractionModes.testFlag(SFInteractionMode::SaturationRange) )
 		{
-			const ccColor::Rgb* col = colorScale->getColorByRelativePos(1.0, m_associatedSF->getColorRampSteps());
-			if (col)
-				m_arrowRight->setColor(col->r, col->g, col->b);
+			const ccScalarField::Range& satRange = m_associatedSF->saturationRange();
+			
+			m_arrowLeft = new QCPArrow(xAxis, yAxis);
+			m_arrowLeft->setRange(satRange.min(), satRange.max());
+			m_arrowLeft->setCurrentVal(satRange.start());
+			if (colorScale)
+			{
+				const ccColor::Rgb* col = colorScale->getColorByRelativePos(m_associatedSF->symmetricalScale() ? 0.5 : 0, m_associatedSF->getColorRampSteps());
+				if (col)
+					m_arrowLeft->setColor(col->r, col->g, col->b);
+			}
+			
+			m_arrowRight = new QCPArrow(xAxis, yAxis);
+			m_arrowRight->setRange(satRange.min(), satRange.max());
+			m_arrowRight->setCurrentVal(satRange.stop());
+			if (colorScale)
+			{
+				const ccColor::Rgb* col = colorScale->getColorByRelativePos(1.0, m_associatedSF->getColorRampSteps());
+				if (col)
+					m_arrowRight->setColor(col->r, col->g, col->b);
+			}
 		}
 	}
 	else if (m_drawVerticalIndicator) //vertical hint
@@ -704,10 +715,11 @@ void ccHistogramWindow::mousePressEvent(QMouseEvent *event)
 {
 	m_lastMouseClick = event->pos();
 
-	if (m_sfInteractionMode)
+	if (m_sfInteractionModes)
 	{
 		m_selectedItem = NONE;
 		//check greyed areas (circles)
+		if ( m_sfInteractionModes.testFlag(SFInteractionMode::DisplayRange) )
 		{
 			if (m_areaLeft && m_areaLeft->isSelectable(m_lastMouseClick))
 				m_selectedItem = LEFT_AREA;
@@ -721,7 +733,8 @@ void ccHistogramWindow::mousePressEvent(QMouseEvent *event)
 		}
 
 		//check yellow triangles
-		if (m_selectedItem == NONE)
+		if ( m_sfInteractionModes.testFlag(SFInteractionMode::SaturationRange)
+			 && (m_selectedItem == NONE) )
 		{
 			if (m_arrowLeft && m_arrowLeft->isSelectable(m_lastMouseClick))
 				m_selectedItem = LEFT_ARROW;
@@ -744,7 +757,7 @@ void ccHistogramWindow::mouseMoveEvent(QMouseEvent *event)
 {
 	if (event->buttons() & Qt::LeftButton)
 	{
-		if (m_sfInteractionMode)
+		if (m_sfInteractionModes)
 		{
 			QPoint mousePos = event->pos();
 			if (m_histogram)

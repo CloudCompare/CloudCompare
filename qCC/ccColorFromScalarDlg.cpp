@@ -298,7 +298,7 @@ void ccColorFromScalarDlg::updateHistogram(int n)
 
 		//and make histogram grey
 		m_histograms[n]->clear();
-		m_histograms[n]->enableSFInteractionMode(false); //disable interactivity
+		m_histograms[n]->setSFInteractionMode(ccHistogramWindow::SFInteractionMode::None); //disable interactivity
 		m_histograms[n]->refresh();
 		m_histograms[n]->setAxisLabels("", "");
 		m_histograms[n]->yAxis->setVisible(false); //disable y-axis
@@ -317,7 +317,7 @@ void ccColorFromScalarDlg::updateHistogram(int n)
 		//clear and build histogram
 		m_histograms[n]->clear();
 		m_histograms[n]->fromSF(m_scalars[n], 255, false, true);
-		m_histograms[n]->enableSFInteractionMode(true); //enable interactivity
+		m_histograms[n]->setSFInteractionMode(ccHistogramWindow::SFInteractionMode::SaturationRange); //disable interactivity
 		m_histograms[n]->refresh();
 
 		//hide axis (not sure why this code HAS to be here, but it does...)

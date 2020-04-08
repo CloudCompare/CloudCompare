@@ -48,7 +48,7 @@ sfEditDlg::sfEditDlg(QWidget* parent/*=0*/)
 		QHBoxLayout* hboxLayout = new QHBoxLayout(m_ui->histoFrame);
 		hboxLayout->addWidget(m_associatedSFHisto);
 		hboxLayout->setContentsMargins(0, 0, 0, 0);
-		m_associatedSFHisto->enableSFInteractionMode(true);
+		m_associatedSFHisto->setSFInteractionMode(ccHistogramWindow::SFInteractionMode::All);
 		m_associatedSFHisto->xAxis->setTickLabels(false);
 		m_associatedSFHisto->xAxis->ticker()->setTickCount(6);
 		m_associatedSFHisto->yAxis->setTickLabels(false);

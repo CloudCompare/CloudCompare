@@ -125,7 +125,6 @@ public:
 			if (colors.size() > i)
 				newData.color = colors[i];
 			m_coloredData.insertMulti(newData.key, newData);
-//			data()->insertMulti(newData.key, newData);
 			QCPBars::addData(newData.key,newData.value);
 		}
 	}

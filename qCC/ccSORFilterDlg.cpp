@@ -16,10 +16,37 @@
 //##########################################################################
 
 #include "ccSORFilterDlg.h"
+#include "ui_sorFilterDlg.h"
+
 
 ccSORFilterDlg::ccSORFilterDlg(QWidget* parent/*=0*/)
 	: QDialog(parent, Qt::Tool)
-	, Ui::SorFilterDialog()
+	, m_ui( new Ui::SorFilterDialog )
 {
-	setupUi(this);
+	m_ui->setupUi(this);
+}
+
+ccSORFilterDlg::~ccSORFilterDlg()
+{
+	delete m_ui;
+}
+
+int ccSORFilterDlg::KNN() const
+{
+	return m_ui->knnSpinBox->value();
+}
+
+void ccSORFilterDlg::setKNN(int knn)
+{
+	m_ui->knnSpinBox->setValue( knn );
+}
+
+double ccSORFilterDlg::nSigma() const
+{
+	return m_ui->nSigmaDoubleSpinBox->value();
+}
+
+void ccSORFilterDlg::setNSigma(double nSigma)
+{
+	m_ui->nSigmaDoubleSpinBox->setValue( nSigma );
 }

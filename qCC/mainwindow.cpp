@@ -5311,14 +5311,14 @@ void MainWindow::doActionSORFilter()
 	//set semi-persistent/dynamic parameters
 	static int s_sorFilterKnn = 6;
 	static double s_sorFilterNSigma = 1.0;
-	sorDlg.knnSpinBox->setValue(s_sorFilterKnn);
-	sorDlg.nSigmaDoubleSpinBox->setValue(s_sorFilterNSigma);
+	sorDlg.setKNN(s_sorFilterKnn);
+	sorDlg.setNSigma(s_sorFilterNSigma);
 	if (!sorDlg.exec())
 		return;
 
 	//update semi-persistent/dynamic parameters
-	s_sorFilterKnn = sorDlg.knnSpinBox->value();
-	s_sorFilterNSigma = sorDlg.nSigmaDoubleSpinBox->value();
+	s_sorFilterKnn = sorDlg.KNN();
+	s_sorFilterNSigma = sorDlg.nSigma();
 
 	ccProgressDialog pDlg(true, this);
 	pDlg.setAutoClose(false);

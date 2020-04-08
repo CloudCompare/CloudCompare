@@ -546,7 +546,7 @@ void ccHistogramWindow::refresh()
 
 			m_areaRight = new QCPHiddenArea(false, xAxis, yAxis);
 			m_areaRight->setRange(dispRange.min(), dispRange.max());
-			m_areaRight->setCurrentVal(!isnan(m_areaRightlastValue) ? m_areaRightlastValue : dispRange.stop());
+			m_areaRight->setCurrentVal(!std::isnan(m_areaRightlastValue) ? m_areaRightlastValue : dispRange.stop());
 			addPlottable(m_areaRight);
 		}
 		if (m_showItems == ARROWS || m_showItems == BOTH_AREAS_AND_ARROWS)
@@ -555,7 +555,7 @@ void ccHistogramWindow::refresh()
 
 			m_arrowLeft = new QCPArrow(xAxis, yAxis);
 			m_arrowLeft->setRange(satRange.min(), satRange.max());
-			m_arrowLeft->setCurrentVal(!isnan(m_arrowLeftlastValue) ? m_arrowLeftlastValue : satRange.start());
+			m_arrowLeft->setCurrentVal(!std::isnan(m_arrowLeftlastValue) ? m_arrowLeftlastValue : satRange.start());
 			if (colorScale)
 			{
 				const ccColor::Rgb* col = colorScale->getColorByRelativePos(m_associatedSF->symmetricalScale() ? 0.5 : 0, m_associatedSF->getColorRampSteps());
@@ -566,7 +566,7 @@ void ccHistogramWindow::refresh()
 
 			m_arrowRight = new QCPArrow(xAxis, yAxis);
 			m_arrowRight->setRange(satRange.min(), satRange.max());
-			m_arrowRight->setCurrentVal(!isnan(m_arrowRightlastValue) ? m_arrowRightlastValue : satRange.stop());
+			m_arrowRight->setCurrentVal(!std::isnan(m_arrowRightlastValue) ? m_arrowRightlastValue : satRange.stop());
 			if (colorScale)
 			{
 				const ccColor::Rgb* col = colorScale->getColorByRelativePos(1.0, m_associatedSF->getColorRampSteps());

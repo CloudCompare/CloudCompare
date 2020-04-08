@@ -45,6 +45,8 @@ public:
 
     QString getName() const;
     
+    unsigned size() const;
+    
     SIP_PYTUPLE computeGravityCenter() [CCVector3 () ];
     %MethodCode
     Py_BEGIN_ALLOW_THREADS

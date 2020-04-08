@@ -60,6 +60,7 @@ print("min: %s"%sfc.getMin())
 print("max: %s"%sfc.getMax())
 cloud.setCurrentOutScalarField(nsf-1)
 fcloud=cc.filterBySFValue(0.01, sfc.getMax(), cloud)
+print(fcloud.size())
 res=cc.SavePointCloud(fcloud, "/home/paul/projets/CloudCompare/data/res.xyz")
 
 

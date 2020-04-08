@@ -98,6 +98,10 @@ params:
 %End
 
 ccPointCloud* filterBySFValue(double minVal, double maxVal, ccPointCloud* cloud);
+%Docstring
+Create a new point cloud by filtering points using the current out ScalarField (see cloud.setCurrentOutScalarField).
+Keep the points whose ScalarField value is between the min and max parameters.
+%End
 
 %Exception std::exception(SIP_Exception) /PyName=StdException, default/
 {

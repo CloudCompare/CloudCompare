@@ -314,7 +314,7 @@ ccBBox ccCameraSensor::getOwnFitBB(ccGLMatrix& trans)
 	trans = sensorPos;
 
 	CCVector3 upperLeftPoint = computeUpperLeftPoint();
-	return ccBBox(-upperLeftPoint, CCVector3(upperLeftPoint.x, upperLeftPoint.x, 0));
+	return ccBBox(-upperLeftPoint, CCVector3(upperLeftPoint.x, upperLeftPoint.y, 0));
 }
 
 void ccCameraSensor::setVertFocal_pix(float vertFocal_pix)

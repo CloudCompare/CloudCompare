@@ -44,19 +44,15 @@ sfEditDlg::sfEditDlg(QWidget* parent/*=0*/)
 
 	//histogram window
 	{
-		m_associatedSFHisto = new ccHistogramWindow();
+		m_associatedSFHisto = new ccHistogramWindow;
 		QHBoxLayout* hboxLayout = new QHBoxLayout(m_ui->histoFrame);
 		hboxLayout->addWidget(m_associatedSFHisto);
 		hboxLayout->setContentsMargins(0, 0, 0, 0);
 		m_associatedSFHisto->enableSFInteractionMode(true);
 		m_associatedSFHisto->xAxis->setTickLabels(false);
-		//m_associatedSFHisto->xAxis->setAutoSubTicks(false);
-		//m_associatedSFHisto->xAxis->setSubTickCount(0);
-		m_associatedSFHisto->xAxis->setAutoTickCount(6);
+		m_associatedSFHisto->xAxis->ticker()->setTickCount(6);
 		m_associatedSFHisto->yAxis->setTickLabels(false);
-		//m_associatedSFHisto->yAxis->setAutoSubTicks(false);
-		//m_associatedSFHisto->yAxis->setSubTickCount(0);
-		m_associatedSFHisto->yAxis->setAutoTickCount(3);
+		m_associatedSFHisto->yAxis->ticker()->setTickCount(3);
 	}
 
 	connect(m_ui->minValSpinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,	&sfEditDlg::minValSBChanged);

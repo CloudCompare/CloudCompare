@@ -350,7 +350,7 @@ void ccHistogramWindow::refreshBars()
 		//rescaleAxes();
 	}
 
-	replot(QCustomPlot::rpImmediate);
+	replot(QCustomPlot::rpImmediateRefresh);
 }
 
 void ccHistogramWindow::refresh()
@@ -382,7 +382,7 @@ void ccHistogramWindow::refresh()
 			plotLayout()->remove(m_titlePlot);
 			m_titlePlot = nullptr;
 		}
-		m_titlePlot = new QCPPlotTitle(this, QString("%0 [%1 classes]").arg(m_titleStr).arg(m_histoValues.size()));
+		m_titlePlot = new QCPTextElement(this, QStringLiteral("%0 [%1 classes]").arg(m_titleStr, QString::number(m_histoValues.size())));
 		//title font
 		m_renderingFont.setPointSize(ccGui::Parameters().defaultFontSize);
 		m_titlePlot->setFont(m_renderingFont);
@@ -417,9 +417,7 @@ void ccHistogramWindow::refresh()
 		m_histogram->setWidth((m_maxVal - m_minVal) / histoSize);
 		m_histogram->setAntialiased(false);
 		m_histogram->setAntialiasedFill(false);
-		
-		addPlottable(m_histogram);
-		
+				
 		QVector<double> keyData(histoSize);
 		QVector<double> valueData(histoSize);
 
@@ -534,12 +532,10 @@ void ccHistogramWindow::refresh()
 		m_areaLeft = new QCPHiddenArea(true, xAxis, yAxis);
 		m_areaLeft->setRange(dispRange.min(), dispRange.max());
 		m_areaLeft->setCurrentVal(dispRange.start());
-		addPlottable(m_areaLeft);
 
 		m_areaRight = new QCPHiddenArea(false, xAxis, yAxis);
 		m_areaRight->setRange(dispRange.min(), dispRange.max());
 		m_areaRight->setCurrentVal(dispRange.stop());
-		addPlottable(m_areaRight);
 
 		const ccScalarField::Range& satRange = m_associatedSF->saturationRange();
 
@@ -552,7 +548,6 @@ void ccHistogramWindow::refresh()
 			if (col)
 				m_arrowLeft->setColor(col->r, col->g, col->b);
 		}
-		addPlottable(m_arrowLeft);
 
 		m_arrowRight = new QCPArrow(xAxis, yAxis);
 		m_arrowRight->setRange(satRange.min(), satRange.max());
@@ -563,12 +558,10 @@ void ccHistogramWindow::refresh()
 			if (col)
 				m_arrowRight->setColor(col->r, col->g, col->b);
 		}
-		addPlottable(m_arrowRight);
 	}
 	else if (m_drawVerticalIndicator) //vertical hint
 	{
 		m_vertBar = new QCPBarsWithText(xAxis, yAxis);
-		addPlottable(m_vertBar);
 
 		// now we can modify properties of vertBar
 		m_vertBar->setName("VertLine");

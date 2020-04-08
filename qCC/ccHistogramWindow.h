@@ -30,10 +30,12 @@
 //QCustomPlot
 #include <qcustomplot.h>
 
-class QCPColoredBars;
-class QCPBarsWithText;
-class QCPHiddenArea;
 class QCPArrow;
+class QCPBarsWithText;
+class QCPColoredBars;
+class QCPHiddenArea;
+class QCPTextElement;
+
 class Ui_HistogramDialog;
 
 //! Histogram widget
@@ -157,7 +159,7 @@ protected: //attributes
 
 	//Title
 	QString m_titleStr;
-	QCPPlotTitle* m_titlePlot;
+	QCPTextElement* m_titlePlot;
 
 	//! Color scheme
 	HISTOGRAM_COLOR_SCHEME m_colorScheme;

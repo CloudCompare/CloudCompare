@@ -50,6 +50,9 @@ namespace CCLib
         const char* getName() const;
         
         SIP_PYTUPLE computeMeanAndVariance() [ void (ScalarType&, ScalarType*) ];
+        %Docstring
+        Return a tuple (mean, variance)
+        %End
         %MethodCode
         Py_BEGIN_ALLOW_THREADS
         ScalarType mean;
@@ -65,11 +68,22 @@ namespace CCLib
         %End
         
         void computeMinAndMax();
+        %Docstring
+        Should be called before getMin or getMax.
+        No return!
+        %End
         
         float getMin() [ ScalarType ()];
+        %Docstring
+        Return minimal value of the ScalarField.
+        Call computeMinAndMax before!
+        %End
         
         float getMax() [ ScalarType ()];
-        
+        %Docstring
+        Return maximal value of the ScalarField.
+        Call computeMinAndMax before!
+        %End
     
         static void initNumpyApi();
         %Docstring

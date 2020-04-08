@@ -48,6 +48,9 @@ public:
     unsigned size() const;
     
     SIP_PYTUPLE computeGravityCenter() [CCVector3 () ];
+    %Docstring
+    Return a tuple of the 3 coordinates of the gravity center of the cloud
+    %End
     %MethodCode
     Py_BEGIN_ALLOW_THREADS
     CCVector3  g = sipCpp->computeGravityCenter();
@@ -58,8 +61,19 @@ public:
     %End
     
     bool hasScalarFields() const;
-    
+    %Docstring
+    Return True or False.
+    %End
+  
     void scale(double fx, double fy, double fz, SIP_PYTUPLE center = Py_BuildValue("(ddd)", 0., 0., 0.)) [ void (PointCoordinateType, PointCoordinateType, PointCoordinateType, CCVector3) ];
+    %Docstring
+    Scale the cloud with separate factors along the 3 directions x,y,z and an optional center (default: (0,0,0)).
+    parameters:
+    - x,
+    - y,
+    - z,
+    - center tuple: (xc, yc, zc), default (0,0,0)
+    %End
     %MethodCode
     double v[3];
     if (PyArg_ParseTuple(a3, "ddd", &v[0], &v[1], &v[2]))
@@ -76,6 +90,11 @@ public:
     %End
     
     void translate(SIP_PYTUPLE t) [ void (const CCVector3&) ];
+    %Docstring
+    translate the cloud of (x,y,z)
+    parameters:
+    translation tuple: (x,y,z)
+    %End
     %MethodCode
     double v[3];
     if (PyArg_ParseTuple(a0, "ddd", &v[0], &v[1], &v[2]))
@@ -92,6 +111,12 @@ public:
     %End
     
     bool exportCoordToSF(SIP_PYTUPLE b) [ bool (bool*) ];
+    %Docstring
+    export coordinates to ScalarFields
+    parameters:
+    tuple of booleans: (isXexported, isYexported, isZexported)
+    return status
+    %End
     %MethodCode
     int v[3];
     if (PyArg_ParseTuple(a0, "ppp", &v[0], &v[1], &v[2]))
@@ -124,22 +149,22 @@ public:
     
     void setCurrentOutScalarField(int index);
     %Docstring
-    Set the current out ScalarField index. No validity check. Use -1 to set None.
+    Set the current 'out' ScalarField index. No validity check. Use -1 to set None.
     %End
     
     CCLib::ScalarField* getCurrentOutScalarField() const;
     %Docstring
-    Return the current out ScalarField if there is one, otherwise None.
+    Return the current 'out' ScalarField if there is one, otherwise None.
     %End
     
     void setCurrentInScalarField(int index);
     %Docstring
-    Set the current in ScalarField index. No validity check. Use -1 to set None.
+    Set the current 'in' ScalarField index. No validity check. Use -1 to set None.
     %End
     
     CCLib::ScalarField* getCurrentInScalarField() const;
     %Docstring
-    Return the current in ScalarField if there is one, otherwise None.
+    Return the current 'in' ScalarField if there is one, otherwise None.
     %End
     
     bool renameScalarField(int index, const char* newName);
@@ -147,6 +172,10 @@ public:
     Rename the ScalarField if index is valid.
     Warning: Name should not be already used by other ScalarFields of the cloud!
     TODO: check the names in use.
+    parameters
+    - index of the ScalarField
+    - new name
+    return True in case of success
     %End
     
 };

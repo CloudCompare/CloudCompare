@@ -71,7 +71,7 @@ ccPointCloud* loadPointCloud(const char* filename,
                              double z=0);
 %Docstring
 Load a 3D cloud from a file
-params:
+parameters:
 - filename
 - optional parameters not used yet!
 return a ccPointCloud object.
@@ -82,8 +82,8 @@ CC_FILE_ERROR SavePointCloud(ccPointCloud* cloud,
                              const QString& filename);
 %Docstring
 Save a 3D cloud in a file
-params:
-- cloud
+parameters:
+- cloud: ccPointCloud
 - filename
 return 0 or I/O error.
 %End
@@ -91,16 +91,21 @@ return 0 or I/O error.
 bool computeCurvature(CurvatureType option, double radius, QList<ccPointCloud*>);
 %Docstring
 Compute the curvature on a list of point clouds (create a scalarField)
-params:
+parameters:
 - CurvatureType from cloudCompare.GAUSSIAN_CURV, cloudCompare.MEAN_CURV, cloudCompare.NORMAL_CHANGE_RATE
-- radius try 1.9
-- list of clouds
+- radius: try 1.9
+- list of clouds 
 %End
 
 ccPointCloud* filterBySFValue(double minVal, double maxVal, ccPointCloud* cloud);
 %Docstring
 Create a new point cloud by filtering points using the current out ScalarField (see cloud.setCurrentOutScalarField).
 Keep the points whose ScalarField value is between the min and max parameters.
+parameters:
+- minimum value
+- maximum value
+- cloud: ccPointCloud
+return a ccPointCloud object.
 %End
 
 %Exception std::exception(SIP_Exception) /PyName=StdException, default/

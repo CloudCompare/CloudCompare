@@ -49,9 +49,14 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
 	{
 		m_cloud->setCurrentDisplayedScalarField(0);
 	}
-	m_storedOrigColorScale = m_cloud->getCurrentDisplayedScalarField()->getColorScale();
-	m_storedOrigSatRange = m_cloud->getCurrentDisplayedScalarField()->saturationRange();
-	m_storedOrigDisplayRange = m_cloud->getCurrentDisplayedScalarField()->displayRange();
+	ccScalarField* sf = static_cast<ccScalarField*>(m_cloud->getCurrentDisplayedScalarField());
+	if (!sf)
+	{
+		ccLog::Error("[ccColorFromScalarDlg] Get current scalar field failed!");
+	}
+	m_storedOrigColorScale = sf->getColorScale();
+	m_storedOrigSatRange = sf->saturationRange();
+	m_storedOrigDisplayRange = sf->displayRange();
 
 	//create histograms
 	QFrame* histoFrame[4] = { m_ui->histoFrameR, m_ui->histoFrameG, m_ui->histoFrameB, m_ui->histoFrameA };
@@ -158,14 +163,13 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
 
 ccColorFromScalarDlg::~ccColorFromScalarDlg()
 {
-	m_cloud->getCurrentDisplayedScalarField()->setColorScale(m_storedOrigColorScale);
-	m_cloud->getCurrentDisplayedScalarField()->setSaturationStart(m_storedOrigSatRange.min());
-	m_cloud->getCurrentDisplayedScalarField()->setSaturationStop(m_storedOrigSatRange.max());
-	m_cloud->getCurrentDisplayedScalarField()->setMinDisplayed(m_storedOrigDisplayRange.min());
-	m_cloud->getCurrentDisplayedScalarField()->setMaxDisplayed(m_storedOrigDisplayRange.max());
+	ccScalarField* sf = static_cast<ccScalarField*>(m_cloud->getCurrentDisplayedScalarField());
+	sf->setColorScale(m_storedOrigColorScale);
+	sf->setSaturationStart(m_storedOrigSatRange.min());
+	sf->setSaturationStop(m_storedOrigSatRange.max());
+	sf->setMinDisplayed(m_storedOrigDisplayRange.min());
+	sf->setMaxDisplayed(m_storedOrigDisplayRange.max());
 	m_cloud->redrawDisplay();
-	m_cloud->prepareDisplayForRefresh();
-	m_cloud->refreshDisplay();
 	delete m_ui;
 }
 
@@ -372,7 +376,7 @@ void ccColorFromScalarDlg::setDefaultSatValuePerChannel(int n)
 	m_scalars[n]->setColorScale(m_colors[n]);
 	m_minSat[n] = m_scalars[n]->getMin();
 	m_maxSat[n] = m_scalars[n]->getMax();
-	float range = m_maxSat[n] - m_minSat[n];
+	ScalarType range = m_maxSat[n] - m_minSat[n];
 	m_histograms[n]->setMinSatValue(m_minSat[n] + 0.1 * range);
 	m_histograms[n]->setMaxSatValue(m_maxSat[n] - 0.1 * range);
 }

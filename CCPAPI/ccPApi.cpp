@@ -159,7 +159,20 @@ bool computeCurvature(CurvatureType option, double radius, QList<ccPointCloud*> 
         CCTRACE("entity: "<< i << " name: " << clouds.at(i)->getName().toStdString());
         entities[i] = clouds.at(i);
     }
-    ccPApiComputeGeomCharacteristic(CCLib::GeometricalAnalysisTools::Curvature, option, radius, entities);
+    return ccPApiComputeGeomCharacteristic(CCLib::GeometricalAnalysisTools::Curvature, option, radius, entities);
+}
+ccPointCloud* filterBySFValue(double minVal, double maxVal, ccPointCloud* cloud)
+{
+    CCTRACE("filterBySFValue min: " << minVal << " max: " << maxVal << " cloudName: " << cloud->getName().toStdString());
+    CCLib::ScalarField* sf = cloud->getCurrentOutScalarField();
+    ccPointCloud* fitleredCloud = nullptr;
+    if (sf)
+    {
+        ScalarType vmin = minVal;
+        ScalarType vmax = maxVal;
+        fitleredCloud = cloud->filterPointsByScalarValue(vmin, vmax, false);
+    }
+    return fitleredCloud;
 }
 
 bool ccPApiComputeGeomCharacteristic(

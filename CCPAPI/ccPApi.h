@@ -21,6 +21,9 @@
 
 #include <QList>
 #include <QString>
+
+//#define SCALAR_TYPE_FLOAT
+//#include <CCTypes.h>
 #include <ccCommandLineInterface.h>
 #include <GeometricalAnalysisTools.h>
 
@@ -47,6 +50,8 @@ enum CurvatureType
 };
 
 bool computeCurvature(CurvatureType option, double radius, QList<ccPointCloud*> clouds);
+
+ccPointCloud* filterBySFValue(double minVal, double maxVal, ccPointCloud* cloud);
 
 // --- internal ---------------------------------------------------------------
 

@@ -49,3 +49,30 @@ sfi=cloud.getCurrentInScalarField()
 print(sfi)
 sfo=cloud.getCurrentOutScalarField()
 print(sfo)
+res=cc.computeCurvature(cc.GAUSSIAN_CURV, 1.88, [cloud])
+nsf=cloud.getNumberOfScalarFields()
+sfc=cloud.getScalarField(nsf-1)
+print(sfc.getName())
+meanvar = sfc.computeMeanAndVariance()
+print(meanvar)
+sfc.computeMinAndMax()
+print("min: %s"%sfc.getMin())
+print("max: %s"%sfc.getMax())
+cloud.setCurrentOutScalarField(nsf-1)
+fcloud=cc.filterBySFValue(0.01, sfc.getMax(), cloud)
+res=cc.SavePointCloud(fcloud, "/home/paul/projets/CloudCompare/data/res.xyz")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

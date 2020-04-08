@@ -97,6 +97,8 @@ params:
 - list of clouds
 %End
 
+ccPointCloud* filterBySFValue(double minVal, double maxVal, ccPointCloud* cloud);
+
 %Exception std::exception(SIP_Exception) /PyName=StdException, default/
 {
 %TypeHeaderCode

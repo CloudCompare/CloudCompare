@@ -18,10 +18,14 @@
 #ifndef CC_STATISTICAL_TEST_DLG_HEADER
 #define CC_STATISTICAL_TEST_DLG_HEADER
 
-#include <ui_statisticalTestDlg.h>
+#include <QDialog>
+
+namespace Ui {
+	class StatisticalTestDialog;
+}
 
 //! Dialog for the Local Statistical Test tool
-class ccStatisticalTestDlg : public QDialog, public Ui::StatisticalTestDialog
+class ccStatisticalTestDlg : public QDialog
 {
 public:
 
@@ -30,8 +34,10 @@ public:
 							QString param2Label,
 							QString param3Label = QString(),
 							QString windowTitle = QString(),
-							QWidget* parent = 0);
-
+							QWidget* parent = nullptr);
+	
+	~ccStatisticalTestDlg();
+	
 	//! Returns 1st parameter value
 	double getParam1() const;
 	//! Returns 2nd parameter value
@@ -42,7 +48,10 @@ public:
 	//! Returns the number of neighbors
 	int getNeighborsNumber() const;
 	//! Returns the associated probability
-	double getProba() const;
+	double getProbability() const;
+	
+private:
+	Ui::StatisticalTestDialog* m_ui;
 };
 
 #endif //CC_STATISTICAL_TEST_DLG_HEADER

@@ -18,21 +18,29 @@
 #ifndef CC_SF_DISTANCES_DLG_HEADER
 #define CC_SF_DISTANCES_DLG_HEADER
 
-#include <ui_sensorComputeDistancesDlg.h>
+#include <QDialog>
+
+namespace Ui {
+	class sensorComputeDistancesDlg;
+}
 
 //! Dialog for sensor range computation
-class ccSensorComputeDistancesDlg : public QDialog, public Ui::sensorComputeDistancesDlg
+class ccSensorComputeDistancesDlg : public QDialog
 {
 	Q_OBJECT
 
 public:
 
 	//! Default constructor
-	explicit ccSensorComputeDistancesDlg(QWidget* parent = 0);
+	explicit ccSensorComputeDistancesDlg(QWidget* parent = nullptr);
+	
+	~ccSensorComputeDistancesDlg();
 
 	//! Returns whether computed distances should be squared or not
 	bool computeSquaredDistances() const;
 
+private:
+	Ui::sensorComputeDistancesDlg* m_ui;
 };
 
 #endif //CC_SF_DISTANCES_DLG_HEADER

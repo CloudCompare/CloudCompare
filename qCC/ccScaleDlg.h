@@ -24,17 +24,21 @@
 //Qt
 #include <QDialog>
 
-#include <ui_scaleDlg.h>
+namespace Ui {
+	class ScaleDialog;
+}
 
 //! Scale / multiply dialog
-class ccScaleDlg : public QDialog, public Ui::ScaleDialog
+class ccScaleDlg : public QDialog
 {
 	Q_OBJECT
 
 public:
 
 	//! Default constructor
-	explicit ccScaleDlg(QWidget* parent = 0);
+	explicit ccScaleDlg(QWidget* parent = nullptr);
+	
+	~ccScaleDlg();
 
 	//! Returns scales
 	CCVector3d getScales() const;
@@ -48,13 +52,12 @@ public:
 	//! Saves state
 	void saveState();
 
-protected:
+private:
 
 	void allDimsAtOnceToggled(bool);
 	void fxUpdated(double);
 
-protected:
-
+	Ui::ScaleDialog* m_ui;
 };
 
 #endif //CC_SCALE_DLG_HEADER

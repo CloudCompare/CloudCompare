@@ -2331,7 +2331,7 @@ namespace ccEntityAction
 			}
 		}
 		
-		const double pChi2 = sDlg->getProba();
+		const double pChi2 = sDlg->getProbability();
 		const int nn = sDlg->getNeighborsNumber();
 		
 		ccProgressDialog pDlg(true, parent);

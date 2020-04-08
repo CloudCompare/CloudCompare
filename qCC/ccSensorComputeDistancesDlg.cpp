@@ -17,15 +17,22 @@
 
 
 #include "ccSensorComputeDistancesDlg.h"
+#include "ui_sensorComputeDistancesDlg.h"
+
 
 ccSensorComputeDistancesDlg::ccSensorComputeDistancesDlg(QWidget* parent/*=0*/)
 	: QDialog(parent, Qt::Tool)
-	, Ui::sensorComputeDistancesDlg()
+	, m_ui( new Ui::sensorComputeDistancesDlg )
 {
-	setupUi(this);
+	m_ui->setupUi(this);
+}
+
+ccSensorComputeDistancesDlg::~ccSensorComputeDistancesDlg()
+{
+	delete m_ui;
 }
 
 bool ccSensorComputeDistancesDlg::computeSquaredDistances() const
 {
-	return checkSquaredDistance->checkState() == Qt::Checked;
+	return m_ui->checkSquaredDistance->checkState() == Qt::Checked;
 }

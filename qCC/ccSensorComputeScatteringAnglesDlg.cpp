@@ -16,15 +16,22 @@
 //##########################################################################
 
 #include "ccSensorComputeScatteringAnglesDlg.h"
+#include "ui_sensorComputeScatteringAnglesDlg.h"
+
 
 ccSensorComputeScatteringAnglesDlg::ccSensorComputeScatteringAnglesDlg(QWidget* parent/*=0*/)
 	: QDialog(parent, Qt::Tool)
-	, Ui::sensorComputeScatteringAnglesDlg()
+	, m_ui( new Ui::sensorComputeScatteringAnglesDlg )
 {
-	setupUi(this);
+	m_ui->setupUi(this);
+}
+
+ccSensorComputeScatteringAnglesDlg::~ccSensorComputeScatteringAnglesDlg()
+{
+	delete m_ui;
 }
 
 bool ccSensorComputeScatteringAnglesDlg::anglesInDegrees() const
 {
-	return anglesToDegCheckbox->checkState() == Qt::Checked;
+	return m_ui->anglesToDegCheckbox->checkState() == Qt::Checked;
 }

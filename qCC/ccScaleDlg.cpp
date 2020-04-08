@@ -16,6 +16,7 @@
 //##########################################################################
 
 #include "ccScaleDlg.h"
+#include "ui_scaleDlg.h"
 
 //semi persistent parameters
 static CCVector3d s_lastScales(1.0, 1.0, 1.0);
@@ -25,25 +26,30 @@ static bool s_rescaleGlobalShift = true;
 
 ccScaleDlg::ccScaleDlg(QWidget* parent/*=0*/)
 	: QDialog(parent)
-	, Ui::ScaleDialog()
+	, m_ui( new Ui::ScaleDialog )
 {
-	setupUi(this);
+	m_ui->setupUi(this);
 
-	connect(sameForAllCheckBox, &QCheckBox::toggled, this, &ccScaleDlg::allDimsAtOnceToggled);
-	connect(fxSpinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccScaleDlg::fxUpdated);
+	connect(m_ui->sameForAllCheckBox, &QCheckBox::toggled, this, &ccScaleDlg::allDimsAtOnceToggled);
+	connect(m_ui->fxSpinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccScaleDlg::fxUpdated);
 
 	//restore semi-persistent parameters
-	sameForAllCheckBox->setChecked(s_allAtOnce);
-	keepInPlaceCheckBox->setChecked(s_keepInPlace);
-	rescaleGlobalShiftCheckBox->setChecked(s_rescaleGlobalShift);
-	fzSpinBox->setValue(s_lastScales.z);
-	fySpinBox->setValue(s_lastScales.y);
-	fxSpinBox->setValue(s_lastScales.x); //always last in case 'same for all' is checked!
+	m_ui->sameForAllCheckBox->setChecked(s_allAtOnce);
+	m_ui->keepInPlaceCheckBox->setChecked(s_keepInPlace);
+	m_ui->rescaleGlobalShiftCheckBox->setChecked(s_rescaleGlobalShift);
+	m_ui->fzSpinBox->setValue(s_lastScales.z);
+	m_ui->fySpinBox->setValue(s_lastScales.y);
+	m_ui->fxSpinBox->setValue(s_lastScales.x); //always last in case 'same for all' is checked!
+}
+
+ccScaleDlg::~ccScaleDlg()
+{
+	delete m_ui;
 }
 
 void ccScaleDlg::saveState()
 {
-	s_allAtOnce = sameForAllCheckBox->isChecked();
+	s_allAtOnce = m_ui->sameForAllCheckBox->isChecked();
 	s_lastScales = getScales();
 	s_keepInPlace = keepInPlace();
 	s_rescaleGlobalShift = rescaleGlobalShift();
@@ -51,39 +57,39 @@ void ccScaleDlg::saveState()
 
 void ccScaleDlg::fxUpdated(double val)
 {
-	if (sameForAllCheckBox->isChecked())
+	if (m_ui->sameForAllCheckBox->isChecked())
 	{
-		fySpinBox->setValue(val);
-		fzSpinBox->setValue(val);
+		m_ui->fySpinBox->setValue(val);
+		m_ui->fzSpinBox->setValue(val);
 	}
 }
 
 CCVector3d ccScaleDlg::getScales() const
 {
 	return CCVector3d(
-		fxSpinBox->value(),
-		fySpinBox->value(),
-		fzSpinBox->value()
+		m_ui->fxSpinBox->value(),
+		m_ui->fySpinBox->value(),
+		m_ui->fzSpinBox->value()
 		);
 }
 
 bool ccScaleDlg::keepInPlace() const
 {
-	return keepInPlaceCheckBox->isChecked();
+	return m_ui->keepInPlaceCheckBox->isChecked();
 }
 
 bool ccScaleDlg::rescaleGlobalShift() const
 {
-	return rescaleGlobalShiftCheckBox->isChecked();
+	return m_ui->rescaleGlobalShiftCheckBox->isChecked();
 }
 
 void ccScaleDlg::allDimsAtOnceToggled(bool state)
 {
 	if (state)
 	{
-		fySpinBox->setValue(fxSpinBox->value());
-		fzSpinBox->setValue(fxSpinBox->value());
+		m_ui->fySpinBox->setValue(m_ui->fxSpinBox->value());
+		m_ui->fzSpinBox->setValue(m_ui->fxSpinBox->value());
 	}
-	fySpinBox->setEnabled(!state);
-	fzSpinBox->setEnabled(!state);
+	m_ui->fySpinBox->setEnabled(!state);
+	m_ui->fzSpinBox->setEnabled(!state);
 }

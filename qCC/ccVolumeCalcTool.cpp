@@ -16,66 +16,54 @@
 //##########################################################################
 
 #include "ccVolumeCalcTool.h"
+#include "ui_volumeCalcDlg.h"
 
 //Local
-#include "ccBoundingBoxEditorDlg.h"
 #include "ccPersistentSettings.h"
-#include "ccCommon.h"
 #include "mainwindow.h"
-#include "ccIsolines.h"
 
 //qCC_db
-#include <ccGenericPointCloud.h>
 #include <ccPointCloud.h>
-#include <ccScalarField.h>
 #include <ccProgressDialog.h>
-#include <ccMesh.h>
+#include <ccScalarField.h>
 
 //qCC_gl
 #include <ccGLWindow.h>
 
-//CCLib
-#include <Delaunay2dMesh.h>
-#include <PointProjectionTools.h>
-
 //Qt
-#include <QSettings>
-#include <QPushButton>
-#include <QMessageBox>
-#include <QComboBox>
 #include <QClipboard>
-#include <QApplication>
-#include <QLocale>
+#include <QMessageBox>
+#include <QSettings>
 
 //System
-#include <assert.h>
+#include <cassert>
 
 ccVolumeCalcTool::ccVolumeCalcTool(ccGenericPointCloud* cloud1, ccGenericPointCloud* cloud2, QWidget* parent/*=0*/)
 	: QDialog(parent, Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint)
 	, cc2Point5DimEditor()
-	, Ui::VolumeCalcDialog()
 	, m_cloud1(cloud1)
 	, m_cloud2(cloud2)
+	, m_ui( new Ui::VolumeCalcDialog )
 {
-	setupUi(this);
+	m_ui->setupUi(this);
 
-	connect(buttonBox,						&QDialogButtonBox::accepted,														this,	&ccVolumeCalcTool::saveSettingsAndAccept);
-	connect(buttonBox,						&QDialogButtonBox::rejected,														this,	&ccVolumeCalcTool::reject);
-	connect(gridStepDoubleSpinBox,			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),		this,	&ccVolumeCalcTool::updateGridInfo);
-	connect(gridStepDoubleSpinBox,			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),		this,	&ccVolumeCalcTool::gridOptionChanged);
-	connect(groundEmptyValueDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),		this,	&ccVolumeCalcTool::gridOptionChanged);
-	connect(ceilEmptyValueDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),		this,	&ccVolumeCalcTool::gridOptionChanged);
-	connect(projDimComboBox,				static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),				this,	&ccVolumeCalcTool::projectionDirChanged);
-	connect(updatePushButton,				&QPushButton::clicked,																this,	&ccVolumeCalcTool::updateGridAndDisplay);
-	connect(heightProjectionComboBox,		static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),				this,	&ccVolumeCalcTool::gridOptionChanged);
-	connect(fillGroundEmptyCellsComboBox,	static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),				this,	&ccVolumeCalcTool::groundFillEmptyCellStrategyChanged);
-	connect(fillCeilEmptyCellsComboBox,		static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),				this,	&ccVolumeCalcTool::ceilFillEmptyCellStrategyChanged);
-	connect(swapToolButton,					&QToolButton::clicked,																this,	&ccVolumeCalcTool::swapRoles);
-	connect(groundComboBox,					static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),				this,	&ccVolumeCalcTool::groundSourceChanged);
-	connect(ceilComboBox,					static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),				this,	&ccVolumeCalcTool::ceilSourceChanged);
-	connect(clipboardPushButton,			&QPushButton::clicked,																this,	&ccVolumeCalcTool::exportToClipboard);
-	connect(exportGridPushButton,			&QPushButton::clicked,																this,	&ccVolumeCalcTool::exportGridAsCloud);
-	connect(precisionSpinBox,				static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),						this,	&ccVolumeCalcTool::setDisplayedNumberPrecision);
+	connect(m_ui->buttonBox,					&QDialogButtonBox::accepted,													this,	&ccVolumeCalcTool::saveSettingsAndAccept);
+	connect(m_ui->buttonBox,					&QDialogButtonBox::rejected,													this,	&ccVolumeCalcTool::reject);
+	connect(m_ui->gridStepDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccVolumeCalcTool::updateGridInfo);
+	connect(m_ui->gridStepDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccVolumeCalcTool::gridOptionChanged);
+	connect(m_ui->groundEmptyValueDoubleSpinBox,static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccVolumeCalcTool::gridOptionChanged);
+	connect(m_ui->ceilEmptyValueDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccVolumeCalcTool::gridOptionChanged);
+	connect(m_ui->projDimComboBox,				static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),			this,	&ccVolumeCalcTool::projectionDirChanged);
+	connect(m_ui->updatePushButton,				&QPushButton::clicked,															this,	&ccVolumeCalcTool::updateGridAndDisplay);
+	connect(m_ui->heightProjectionComboBox,		static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),			this,	&ccVolumeCalcTool::gridOptionChanged);
+	connect(m_ui->fillGroundEmptyCellsComboBox,	static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),			this,	&ccVolumeCalcTool::groundFillEmptyCellStrategyChanged);
+	connect(m_ui->fillCeilEmptyCellsComboBox,	static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),			this,	&ccVolumeCalcTool::ceilFillEmptyCellStrategyChanged);
+	connect(m_ui->swapToolButton,				&QToolButton::clicked,															this,	&ccVolumeCalcTool::swapRoles);
+	connect(m_ui->groundComboBox,				static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),			this,	&ccVolumeCalcTool::groundSourceChanged);
+	connect(m_ui->ceilComboBox,					static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),			this,	&ccVolumeCalcTool::ceilSourceChanged);
+	connect(m_ui->clipboardPushButton,			&QPushButton::clicked,															this,	&ccVolumeCalcTool::exportToClipboard);
+	connect(m_ui->exportGridPushButton,			&QPushButton::clicked,															this,	&ccVolumeCalcTool::exportGridAsCloud);
+	connect(m_ui->precisionSpinBox,				static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),					this,	&ccVolumeCalcTool::setDisplayedNumberPrecision);
 
 	if (m_cloud1 && !m_cloud2)
 	{
@@ -93,36 +81,36 @@ ccVolumeCalcTool::ccVolumeCalcTool(ccGenericPointCloud* cloud1, ccGenericPointCl
 	if (gridBBox.isValid())
 	{
 		createBoundingBoxEditor(gridBBox, this);
-		connect(editGridToolButton, &QToolButton::clicked, this, &ccVolumeCalcTool::showGridBoxEditor);
+		connect(m_ui->editGridToolButton, &QToolButton::clicked, this, &ccVolumeCalcTool::showGridBoxEditor);
 	}
 	else
 	{
-		editGridToolButton->setEnabled(false);
+		m_ui->editGridToolButton->setEnabled(false);
 	}
 
-	groundComboBox->addItem("Constant");
-	ceilComboBox->addItem("Constant");
+	m_ui->groundComboBox->addItem("Constant");
+	m_ui->ceilComboBox->addItem("Constant");
 	if (m_cloud1)
 	{
-		groundComboBox->addItem(m_cloud1->getName());
-		ceilComboBox->addItem(m_cloud1->getName());
+		m_ui->groundComboBox->addItem(m_cloud1->getName());
+		m_ui->ceilComboBox->addItem(m_cloud1->getName());
 	}
 	if (m_cloud2)
 	{
-		groundComboBox->addItem(m_cloud2->getName());
-		ceilComboBox->addItem(m_cloud2->getName());
+		m_ui->groundComboBox->addItem(m_cloud2->getName());
+		m_ui->ceilComboBox->addItem(m_cloud2->getName());
 	}
-	assert(groundComboBox->count() >= 2);
-	groundComboBox->setCurrentIndex(groundComboBox->count()-2);
-	ceilComboBox->setCurrentIndex(ceilComboBox->count()-1);
+	assert(m_ui->groundComboBox->count() >= 2);
+	m_ui->groundComboBox->setCurrentIndex(m_ui->groundComboBox->count()-2);
+	m_ui->ceilComboBox->setCurrentIndex(m_ui->ceilComboBox->count()-1);
 
 	//add window
-	create2DView(mapFrame);
+	create2DView(m_ui->mapFrame);
 	if (m_glWindow)
 	{
 		ccGui::ParamStruct params = m_glWindow->getDisplayParameters();
 		params.colorScaleShowHistogram = false;
-		params.displayedNumPrecision = precisionSpinBox->value();
+		params.displayedNumPrecision = m_ui->precisionSpinBox->value();
 		m_glWindow->setDisplayParameters(params, true);
 	}
 
@@ -131,6 +119,11 @@ ccVolumeCalcTool::ccVolumeCalcTool(ccGenericPointCloud* cloud1, ccGenericPointCl
 	updateGridInfo();
 
 	gridIsUpToDate(false);
+}
+
+ccVolumeCalcTool::~ccVolumeCalcTool()
+{
+	delete m_ui;
 }
 
 void ccVolumeCalcTool::setDisplayedNumberPrecision(int precision)
@@ -145,7 +138,7 @@ void ccVolumeCalcTool::setDisplayedNumberPrecision(int precision)
 	}
 
 	//update report
-	if (clipboardPushButton->isEnabled())
+	if (m_ui->clipboardPushButton->isEnabled())
 	{
 		outputReport(m_lastReport);
 	}
@@ -153,29 +146,29 @@ void ccVolumeCalcTool::setDisplayedNumberPrecision(int precision)
 
 void ccVolumeCalcTool::groundSourceChanged(int)
 {
-	fillGroundEmptyCellsComboBox->setEnabled(groundComboBox->currentIndex() > 0);
+	m_ui->fillGroundEmptyCellsComboBox->setEnabled(m_ui->groundComboBox->currentIndex() > 0);
 	groundFillEmptyCellStrategyChanged(-1);
 }
 
 void ccVolumeCalcTool::ceilSourceChanged(int)
 {
-	fillCeilEmptyCellsComboBox->setEnabled(ceilComboBox->currentIndex() > 0);
+	m_ui->fillCeilEmptyCellsComboBox->setEnabled(m_ui->ceilComboBox->currentIndex() > 0);
 	ceilFillEmptyCellStrategyChanged(-1);
 }
 
 void ccVolumeCalcTool::swapRoles()
 {
-	int sourceIndex = ceilComboBox->currentIndex();
-	int emptyCellStrat = fillCeilEmptyCellsComboBox->currentIndex();
-	double emptyCellValue = ceilEmptyValueDoubleSpinBox->value();
+	int sourceIndex = m_ui->ceilComboBox->currentIndex();
+	int emptyCellStrat = m_ui->fillCeilEmptyCellsComboBox->currentIndex();
+	double emptyCellValue = m_ui->ceilEmptyValueDoubleSpinBox->value();
 
-	ceilComboBox->setCurrentIndex(groundComboBox->currentIndex());
-	fillCeilEmptyCellsComboBox->setCurrentIndex(fillGroundEmptyCellsComboBox->currentIndex());
-	ceilEmptyValueDoubleSpinBox->setValue(groundEmptyValueDoubleSpinBox->value());
+	m_ui->ceilComboBox->setCurrentIndex(m_ui->groundComboBox->currentIndex());
+	m_ui->fillCeilEmptyCellsComboBox->setCurrentIndex(m_ui->fillGroundEmptyCellsComboBox->currentIndex());
+	m_ui->ceilEmptyValueDoubleSpinBox->setValue(m_ui->groundEmptyValueDoubleSpinBox->value());
 	
-	groundComboBox->setCurrentIndex(sourceIndex);
-	fillGroundEmptyCellsComboBox->setCurrentIndex(emptyCellStrat);
-	groundEmptyValueDoubleSpinBox->setValue(emptyCellValue);
+	m_ui->groundComboBox->setCurrentIndex(sourceIndex);
+	m_ui->fillGroundEmptyCellsComboBox->setCurrentIndex(emptyCellStrat);
+	m_ui->groundEmptyValueDoubleSpinBox->setValue(emptyCellValue);
 	
 	gridIsUpToDate(false);
 }
@@ -193,17 +186,17 @@ bool ccVolumeCalcTool::showGridBoxEditor()
 
 void ccVolumeCalcTool::updateGridInfo()
 {
-	gridWidthLabel->setText(getGridSizeAsString());
+	m_ui->gridWidthLabel->setText(getGridSizeAsString());
 }
 
 double ccVolumeCalcTool::getGridStep() const
 {
-	return gridStepDoubleSpinBox->value();
+	return m_ui->gridStepDoubleSpinBox->value();
 }
 
 unsigned char ccVolumeCalcTool::getProjectionDimension() const
 {
-	int dim = projDimComboBox->currentIndex();
+	int dim = m_ui->projDimComboBox->currentIndex();
 	assert(dim >= 0 && dim < 3);
 
 	return static_cast<unsigned char>(dim);
@@ -211,30 +204,34 @@ unsigned char ccVolumeCalcTool::getProjectionDimension() const
 
 void ccVolumeCalcTool::sfProjectionTypeChanged(int index)
 {
+	Q_UNUSED( index )
+	
 	gridIsUpToDate(false);
 }
 
 void ccVolumeCalcTool::projectionDirChanged(int dir)
 {
+	Q_UNUSED( dir )
+	
 	updateGridInfo();
 	gridIsUpToDate(false);
 }
 
 void ccVolumeCalcTool::groundFillEmptyCellStrategyChanged(int)
 {
-	ccRasterGrid::EmptyCellFillOption fillEmptyCellsStrategy = getFillEmptyCellsStrategy(fillGroundEmptyCellsComboBox);
+	ccRasterGrid::EmptyCellFillOption fillEmptyCellsStrategy = getFillEmptyCellsStrategy(m_ui->fillGroundEmptyCellsComboBox);
 
-	groundEmptyValueDoubleSpinBox->setEnabled(	groundComboBox->currentIndex() == 0
-											||	fillEmptyCellsStrategy == ccRasterGrid::FILL_CUSTOM_HEIGHT);
+	m_ui->groundEmptyValueDoubleSpinBox->setEnabled( (m_ui->groundComboBox->currentIndex() == 0)
+													 || (fillEmptyCellsStrategy == ccRasterGrid::FILL_CUSTOM_HEIGHT) );
 	gridIsUpToDate(false);
 }
 
 void ccVolumeCalcTool::ceilFillEmptyCellStrategyChanged(int)
 {
-	ccRasterGrid::EmptyCellFillOption fillEmptyCellsStrategy = getFillEmptyCellsStrategy(fillCeilEmptyCellsComboBox);
+	ccRasterGrid::EmptyCellFillOption fillEmptyCellsStrategy = getFillEmptyCellsStrategy(m_ui->fillCeilEmptyCellsComboBox);
 
-	ceilEmptyValueDoubleSpinBox->setEnabled(	ceilComboBox->currentIndex() == 0
-											||	fillEmptyCellsStrategy == ccRasterGrid::FILL_CUSTOM_HEIGHT);
+	m_ui->ceilEmptyValueDoubleSpinBox->setEnabled( (m_ui->ceilComboBox->currentIndex() == 0)
+												   ||	(fillEmptyCellsStrategy == ccRasterGrid::FILL_CUSTOM_HEIGHT) );
 	gridIsUpToDate(false);
 }
 
@@ -245,7 +242,7 @@ void ccVolumeCalcTool::gridOptionChanged()
 
 ccRasterGrid::ProjectionType ccVolumeCalcTool::getTypeOfProjection() const
 {
-	switch (heightProjectionComboBox->currentIndex())
+	switch (m_ui->heightProjectionComboBox->currentIndex())
 	{
 	case 0:
 		return ccRasterGrid::PROJ_MINIMUM_VALUE;
@@ -265,24 +262,24 @@ void ccVolumeCalcTool::loadSettings()
 {
 	QSettings settings;
 	settings.beginGroup(ccPS::VolumeCalculation());
-	int projType				= settings.value("ProjectionType",heightProjectionComboBox->currentIndex()).toInt();
-	int projDim					= settings.value("ProjectionDim",projDimComboBox->currentIndex()).toInt();
-	int groundFillStrategy		= settings.value("gFillStrategy",fillGroundEmptyCellsComboBox->currentIndex()).toInt();
-	int ceilFillStrategy		= settings.value("cFillStrategy",fillCeilEmptyCellsComboBox->currentIndex()).toInt();
-	double step					= settings.value("GridStep",gridStepDoubleSpinBox->value()).toDouble();
-	double groundEmptyHeight	= settings.value("gEmptyCellsHeight",groundEmptyValueDoubleSpinBox->value()).toDouble();
-	double ceilEmptyHeight		= settings.value("cEmptyCellsHeight",ceilEmptyValueDoubleSpinBox->value()).toDouble();
-	int precision				= settings.value("NumPrecision",precisionSpinBox->value()).toInt();
+	int projType				= settings.value("ProjectionType", m_ui->heightProjectionComboBox->currentIndex()).toInt();
+	int projDim					= settings.value("ProjectionDim", m_ui->projDimComboBox->currentIndex()).toInt();
+	int groundFillStrategy		= settings.value("gFillStrategy", m_ui->fillGroundEmptyCellsComboBox->currentIndex()).toInt();
+	int ceilFillStrategy		= settings.value("cFillStrategy", m_ui->fillCeilEmptyCellsComboBox->currentIndex()).toInt();
+	double step					= settings.value("GridStep", m_ui->gridStepDoubleSpinBox->value()).toDouble();
+	double groundEmptyHeight	= settings.value("gEmptyCellsHeight", m_ui->groundEmptyValueDoubleSpinBox->value()).toDouble();
+	double ceilEmptyHeight		= settings.value("cEmptyCellsHeight", m_ui->ceilEmptyValueDoubleSpinBox->value()).toDouble();
+	int precision				= settings.value("NumPrecision", m_ui->precisionSpinBox->value()).toInt();
 	settings.endGroup();
 
-	gridStepDoubleSpinBox->setValue(step);
-	heightProjectionComboBox->setCurrentIndex(projType);
-	fillGroundEmptyCellsComboBox->setCurrentIndex(groundFillStrategy);
-	fillCeilEmptyCellsComboBox->setCurrentIndex(ceilFillStrategy);
-	groundEmptyValueDoubleSpinBox->setValue(groundEmptyHeight);
-	ceilEmptyValueDoubleSpinBox->setValue(ceilEmptyHeight);
-	projDimComboBox->setCurrentIndex(projDim);
-	precisionSpinBox->setValue(precision);
+	m_ui->gridStepDoubleSpinBox->setValue(step);
+	m_ui->heightProjectionComboBox->setCurrentIndex(projType);
+	m_ui->fillGroundEmptyCellsComboBox->setCurrentIndex(groundFillStrategy);
+	m_ui->fillCeilEmptyCellsComboBox->setCurrentIndex(ceilFillStrategy);
+	m_ui->groundEmptyValueDoubleSpinBox->setValue(groundEmptyHeight);
+	m_ui->ceilEmptyValueDoubleSpinBox->setValue(ceilEmptyHeight);
+	m_ui->projDimComboBox->setCurrentIndex(projDim);
+	m_ui->precisionSpinBox->setValue(precision);
 }
 
 void ccVolumeCalcTool::saveSettingsAndAccept()
@@ -295,14 +292,14 @@ void ccVolumeCalcTool::saveSettings()
 {
 	QSettings settings;
 	settings.beginGroup(ccPS::VolumeCalculation());
-	settings.setValue("ProjectionType", heightProjectionComboBox->currentIndex());
-	settings.setValue("ProjectionDim", projDimComboBox->currentIndex());
-	settings.setValue("gFillStrategy", fillGroundEmptyCellsComboBox->currentIndex());
-	settings.setValue("cFillStrategy", fillCeilEmptyCellsComboBox->currentIndex());
-	settings.setValue("GridStep", gridStepDoubleSpinBox->value());
-	settings.setValue("gEmptyCellsHeight", groundEmptyValueDoubleSpinBox->value());
-	settings.setValue("cEmptyCellsHeight", ceilEmptyValueDoubleSpinBox->value());
-	settings.setValue("NumPrecision", precisionSpinBox->value());
+	settings.setValue("ProjectionType", m_ui->heightProjectionComboBox->currentIndex());
+	settings.setValue("ProjectionDim", m_ui->projDimComboBox->currentIndex());
+	settings.setValue("gFillStrategy", m_ui->fillGroundEmptyCellsComboBox->currentIndex());
+	settings.setValue("cFillStrategy", m_ui->fillCeilEmptyCellsComboBox->currentIndex());
+	settings.setValue("GridStep", m_ui->gridStepDoubleSpinBox->value());
+	settings.setValue("gEmptyCellsHeight", m_ui->groundEmptyValueDoubleSpinBox->value());
+	settings.setValue("cEmptyCellsHeight", m_ui->ceilEmptyValueDoubleSpinBox->value());
+	settings.setValue("NumPrecision", m_ui->precisionSpinBox->value());
 	settings.endGroup();
 }
 
@@ -311,20 +308,20 @@ void ccVolumeCalcTool::gridIsUpToDate(bool state)
 	if (state)
 	{
 		//standard button
-		updatePushButton->setStyleSheet(QString());
+		m_ui->updatePushButton->setStyleSheet(QString());
 	}
 	else
 	{
 		//red button
-		updatePushButton->setStyleSheet("color: white; background-color:red;");
+		m_ui->updatePushButton->setStyleSheet("color: white; background-color:red;");
 	}
-	updatePushButton->setDisabled(state);
-	clipboardPushButton->setEnabled(state);
-	exportGridPushButton->setEnabled(state);
+	m_ui->updatePushButton->setDisabled(state);
+	m_ui->clipboardPushButton->setEnabled(state);
+	m_ui->exportGridPushButton->setEnabled(state);
 	if (!state)
 	{
-		spareseWarningLabel->hide();
-		reportPlainTextEdit->setPlainText("Update the grid first");
+		m_ui->spareseWarningLabel->hide();
+		m_ui->reportPlainTextEdit->setPlainText("Update the grid first");
 	}
 }
 
@@ -473,15 +470,15 @@ QString ccVolumeCalcTool::ReportInfo::toText(int precision) const
 
 void ccVolumeCalcTool::outputReport(const ReportInfo& info)
 {
-	int precision = precisionSpinBox->value();
+	int precision = m_ui->precisionSpinBox->value();
 
-	reportPlainTextEdit->setPlainText(info.toText(precision));
+	m_ui->reportPlainTextEdit->setPlainText(info.toText(precision));
 
 	//below 7 neighbors per cell, at least one of the cloud is very sparse!
-	spareseWarningLabel->setVisible(info.averageNeighborsPerCell < 7.0f);
+	m_ui->spareseWarningLabel->setVisible(info.averageNeighborsPerCell < 7.0f);
 
 	m_lastReport = info;
-	clipboardPushButton->setEnabled(true);
+	m_ui->clipboardPushButton->setEnabled(true);
 }
 
 bool SendError(const QString& message, QWidget* parentWidget)
@@ -782,10 +779,10 @@ bool ccVolumeCalcTool::updateGrid()
 	//ground
 	ccGenericPointCloud* groundCloud = nullptr;
 	double groundHeight = 0;
-	switch (groundComboBox->currentIndex())
+	switch (m_ui->groundComboBox->currentIndex())
 	{
 	case 0:
-		groundHeight = groundEmptyValueDoubleSpinBox->value();
+		groundHeight = m_ui->groundEmptyValueDoubleSpinBox->value();
 		break;
 	case 1:
 		groundCloud = m_cloud1 ? m_cloud1 : m_cloud2;
@@ -801,10 +798,10 @@ bool ccVolumeCalcTool::updateGrid()
 	//ceil
 	ccGenericPointCloud* ceilCloud = nullptr;
 	double ceilHeight = 0;
-	switch (ceilComboBox->currentIndex())
+	switch (m_ui->ceilComboBox->currentIndex())
 	{
 	case 0:
-		ceilHeight = ceilEmptyValueDoubleSpinBox->value();
+		ceilHeight = m_ui->ceilEmptyValueDoubleSpinBox->value();
 		break;
 	case 1:
 		ceilCloud = m_cloud1 ? m_cloud1 : m_cloud2;
@@ -828,8 +825,8 @@ bool ccVolumeCalcTool::updateGrid()
 						gridWidth,
 						gridHeight,
 						getTypeOfProjection(),
-						getFillEmptyCellsStrategy(fillGroundEmptyCellsComboBox),
-						getFillEmptyCellsStrategy(fillCeilEmptyCellsComboBox),
+						getFillEmptyCellsStrategy(m_ui->fillGroundEmptyCellsComboBox),
+						getFillEmptyCellsStrategy(m_ui->fillCeilEmptyCellsComboBox),
 						reportInfo,
 						groundHeight,
 						ceilHeight,
@@ -849,7 +846,7 @@ void ccVolumeCalcTool::exportToClipboard() const
 	QClipboard* clipboard = QApplication::clipboard();
 	if (clipboard)
 	{
-		clipboard->setText(reportPlainTextEdit->toPlainText());
+		clipboard->setText(m_ui->reportPlainTextEdit->toPlainText());
 	}
 }
 

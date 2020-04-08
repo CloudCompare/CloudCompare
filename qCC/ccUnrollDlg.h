@@ -18,23 +18,26 @@
 #ifndef CC_UNROLL_DLG_HEADER
 #define CC_UNROLL_DLG_HEADER
 
-#include <ui_unrollDlg.h>
+#include <QDialog>
 
-//CCLib
-#include <CCGeom.h>
 //qCC_db
 #include <ccPointCloud.h>
 
+namespace Ui {
+	class UnrollDialog;
+}
+
 //! Dialog: unroll clould on a cylinder or a cone
-class ccUnrollDlg : public QDialog, public Ui::UnrollDialog
+class ccUnrollDlg : public QDialog
 {
 	Q_OBJECT
 
 public:
 
 	//! Default constructor
-	explicit ccUnrollDlg(QWidget* parent = 0);
-
+	explicit ccUnrollDlg(QWidget* parent = nullptr);
+	~ccUnrollDlg();
+	
 	ccPointCloud::UnrollMode getType() const;
 	int getAxisDimension() const;
 	bool isAxisPositionAuto() const;
@@ -55,6 +58,7 @@ protected:
 protected:
 	bool coneMode;
 
+	Ui::UnrollDialog* m_ui;
 };
 
 #endif

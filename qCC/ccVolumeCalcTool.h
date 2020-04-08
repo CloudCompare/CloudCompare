@@ -18,8 +18,6 @@
 #ifndef CC_VOLUME_CALC_TOOL_HEADER
 #define CC_VOLUME_CALC_TOOL_HEADER
 
-#include <ui_volumeCalcDlg.h>
-
 //Local
 #include "cc2.5DimEditor.h"
 
@@ -29,19 +27,22 @@
 class ccGenericPointCloud;
 class ccPointCloud;
 class ccPolyline;
-class QComboBox;
+
+namespace Ui {
+	class VolumeCalcDialog;
+}
 
 //! Volume calculation tool (dialog)
-class ccVolumeCalcTool : public QDialog, public cc2Point5DimEditor, public Ui::VolumeCalcDialog
+class ccVolumeCalcTool : public QDialog, public cc2Point5DimEditor
 {
 	Q_OBJECT
 
 public:
 	//! Default constructor
-	ccVolumeCalcTool(ccGenericPointCloud* cloud1, ccGenericPointCloud* cloud2, QWidget* parent = 0);
+	ccVolumeCalcTool(ccGenericPointCloud* cloud1, ccGenericPointCloud* cloud2, QWidget* parent = nullptr);
 
 	//! Destructor
-	~ccVolumeCalcTool() = default;
+	~ccVolumeCalcTool();
 
 	//Inherited from cc2Point5DimEditor
 	virtual double getGridStep() const override;
@@ -98,7 +99,7 @@ public:
 												bool exportToOriginalCS);
 
 	
-	protected:
+protected:
 
 	//! Accepts the dialog and save settings
 	void saveSettingsAndAccept();
@@ -174,6 +175,8 @@ protected: //members
 	/** Only valid if clipboardPushButton is enabled
 	**/
 	ReportInfo m_lastReport;
+	
+	Ui::VolumeCalcDialog* m_ui;
 };
 
 #endif //CC_VOLUME_CALC_TOOL_HEADER

@@ -111,7 +111,41 @@ public:
     unsigned getNumberOfScalarFields() const;
     
     CCLib::ScalarField* getScalarField(int index) const;
+    %Docstring
+    Return a ScalarField if index is valid, otherwise None.
+    %End
     
     const char* getScalarFieldName(int index) const;
+    %Docstring
+    Return the ScalarField name if index is valid, otherwise None.
+    %End
+    
+    void setCurrentOutScalarField(int index);
+    %Docstring
+    Set the current out ScalarField index. No validity check. Use -1 to set None.
+    %End
+    
+    CCLib::ScalarField* getCurrentOutScalarField() const;
+    %Docstring
+    Return the current out ScalarField if there is one, otherwise None.
+    %End
+    
+    void setCurrentInScalarField(int index);
+    %Docstring
+    Set the current in ScalarField index. No validity check. Use -1 to set None.
+    %End
+    
+    CCLib::ScalarField* getCurrentInScalarField() const;
+    %Docstring
+    Return the current in ScalarField if there is one, otherwise None.
+    %End
+    
+    bool renameScalarField(int index, const char* newName);
+    %Docstring
+    Rename the ScalarField if index is valid.
+    Warning: Name should not be already used by other ScalarFields of the cloud!
+    TODO: check the names in use.
+    %End
+    
 };
     

@@ -1,7 +1,7 @@
 CloudCompare
 ============
 
-Homepage: http://www.cloudcompare.org/
+Homepage: https://cloudcompare.org
 
 [![GitHub release](https://img.shields.io/github/release/cloudcompare/trunk.svg)](https://github.com/cloudcompare/trunk/releases)
 
@@ -17,7 +17,7 @@ It was originally designed to perform comparison between two 3D points clouds
 (such as the ones obtained with a laser scanner) or between a point cloud and a
 triangular mesh. It relies on an octree structure that is highly optimized for
 this particular use-case. It was also meant to deal with huge point
-clouds (typically more than 10 millions points, and up to 120 millions with 2 Gb
+clouds (typically more than 10 million points, and up to 120 million with 2 GB
 of memory).
 
 More on CloudCompare [here](http://en.wikipedia.org/wiki/CloudCompare)
@@ -25,7 +25,7 @@ More on CloudCompare [here](http://en.wikipedia.org/wiki/CloudCompare)
 Compilation
 -----------
 
-Supported OS: Windows, Linux, and Mac OS X
+Supports: Windows, Linux, and macOS
 
 Refer to the [BUILD.md file](BUILD.md) for up-to-date information.
 

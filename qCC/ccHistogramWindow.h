@@ -213,13 +213,17 @@ protected: //SF interactor mode
 
 	//! Left greyed area
 	QCPHiddenArea* m_areaLeft;
+	double m_areaLeftlastValue;
 	//! Right greyed area
 	QCPHiddenArea* m_areaRight;
+	double m_areaRightlastValue;
 
 	//! Left arrow
 	QCPArrow* m_arrowLeft;
+	double m_arrowLeftlastValue;
 	//! Right arrow
 	QCPArrow* m_arrowRight;
+	double m_arrowRightlastValue;
 
 	//! Last mouse click
 	QPoint m_lastMouseClick;

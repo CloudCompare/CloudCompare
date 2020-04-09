@@ -38,6 +38,7 @@
 
 //System
 #include <assert.h>
+#include <cmath>
 
 //Gui
 #include "ui_histogramDlg.h"
@@ -61,9 +62,13 @@ ccHistogramWindow::ccHistogramWindow(QWidget* parent/*=0*/)
 	, m_sfInteractionModes(SFInteractionMode::None)
 	, m_selectedItem(NONE)
 	, m_areaLeft(nullptr)
+	, m_areaLeftlastValue(std::numeric_limits<double>::quiet_NaN())
 	, m_areaRight(nullptr)
+	, m_areaRightlastValue(std::numeric_limits<double>::quiet_NaN())
 	, m_arrowLeft(nullptr)
+	, m_arrowLeftlastValue(std::numeric_limits<double>::quiet_NaN())
 	, m_arrowRight(nullptr)
+	, m_arrowRightlastValue(std::numeric_limits<double>::quiet_NaN())
 	, m_lastMouseClick(0, 0)
 {
 	setWindowTitle("Histogram");
@@ -538,11 +543,11 @@ void ccHistogramWindow::refresh()
 	
 			m_areaLeft = new QCPHiddenArea(true, xAxis, yAxis);
 			m_areaLeft->setRange(dispRange.min(), dispRange.max());
-			m_areaLeft->setCurrentVal(dispRange.start());
+			m_areaLeft->setCurrentVal(!std::isnan(m_areaLeftlastValue) ? m_areaLeftlastValue : dispRange.start());
 	
 			m_areaRight = new QCPHiddenArea(false, xAxis, yAxis);
 			m_areaRight->setRange(dispRange.min(), dispRange.max());
-			m_areaRight->setCurrentVal(dispRange.stop());
+			m_areaRight->setCurrentVal(!std::isnan(m_areaRightlastValue) ? m_areaRightlastValue : dispRange.stop());
 		}
 
 		if ( m_sfInteractionModes.testFlag(SFInteractionMode::SaturationRange) )
@@ -551,7 +556,7 @@ void ccHistogramWindow::refresh()
 			
 			m_arrowLeft = new QCPArrow(xAxis, yAxis);
 			m_arrowLeft->setRange(satRange.min(), satRange.max());
-			m_arrowLeft->setCurrentVal(satRange.start());
+			m_arrowLeft->setCurrentVal(!std::isnan(m_arrowLeftlastValue) ? m_arrowLeftlastValue : satRange.start());
 			if (colorScale)
 			{
 				const ccColor::Rgb* col = colorScale->getColorByRelativePos(m_associatedSF->symmetricalScale() ? 0.5 : 0, m_associatedSF->getColorRampSteps());
@@ -561,7 +566,7 @@ void ccHistogramWindow::refresh()
 			
 			m_arrowRight = new QCPArrow(xAxis, yAxis);
 			m_arrowRight->setRange(satRange.min(), satRange.max());
-			m_arrowRight->setCurrentVal(satRange.stop());
+			m_arrowRight->setCurrentVal(!std::isnan(m_arrowRightlastValue) ? m_arrowRightlastValue : satRange.stop());
 			if (colorScale)
 			{
 				const ccColor::Rgb* col = colorScale->getColorByRelativePos(1.0, m_associatedSF->getColorRampSteps());
@@ -609,6 +614,7 @@ void ccHistogramWindow::refresh()
 
 void ccHistogramWindow::setMinDispValue(double val)
 {
+	m_areaLeftlastValue = val;
 	if (m_areaLeft && m_areaLeft->currentVal() != val)
 	{
 		m_areaLeft->setCurrentVal(val);
@@ -630,6 +636,7 @@ void ccHistogramWindow::setMinDispValue(double val)
 
 void ccHistogramWindow::setMaxDispValue(double val)
 {
+	m_areaRightlastValue = val;
 	if (m_areaRight && m_areaRight->currentVal() != val)
 	{
 		m_areaRight->setCurrentVal(val);
@@ -651,6 +658,7 @@ void ccHistogramWindow::setMaxDispValue(double val)
 
 void ccHistogramWindow::setMinSatValue(double val)
 {
+	m_arrowLeftlastValue = val;
 	if (m_arrowLeft && m_arrowLeft->currentVal() != val)
 	{
 		m_arrowLeft->setCurrentVal(val);
@@ -672,6 +680,7 @@ void ccHistogramWindow::setMinSatValue(double val)
 
 void ccHistogramWindow::setMaxSatValue(double val)
 {
+	m_arrowRightlastValue = val;
 	if (m_arrowRight && m_arrowRight->currentVal() != val)
 	{
 		m_arrowRight->setCurrentVal(val);
@@ -682,7 +691,10 @@ void ccHistogramWindow::setMaxSatValue(double val)
 			m_associatedSF->setSaturationStop(static_cast<ScalarType>(val));
 			refreshBars();
 		}
-		replot();
+		else
+		{
+			replot();
+		}
 
 		emit sfMaxSatValChanged(val);
 	}

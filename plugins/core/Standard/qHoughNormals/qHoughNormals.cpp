@@ -25,11 +25,12 @@
 #include <ccPointCloud.h>
 
 //Qt
+#include <QCoreApplication>
 #include <QMainWindow>
 #include <QProgressDialog>
 
 //system
-#include <assert.h>
+#include <cassert>
 
 qHoughNormals::qHoughNormals(QObject* parent)
 	: QObject(parent)

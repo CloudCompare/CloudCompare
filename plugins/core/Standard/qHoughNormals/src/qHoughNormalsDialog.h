@@ -1,6 +1,6 @@
 //##########################################################################
 //#                                                                        #
-//#                       CLOUDCOMPARE PLUGIN: qHPR                        #
+//#                       CLOUDCOMPARE PLUGIN: qHoughNormals               #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
@@ -18,25 +18,20 @@
 #ifndef QHOUGH_NORMALS_HEADER
 #define QHOUGH_NORMALS_HEADER
 
-#include "ui_qHoughNormalsDlg.h"
-
-//Qt
 #include <QDialog>
 
-//System
-#include <cmath>
+namespace Ui {
+	class HoughNormalsDialog;
+}
 
-//! Dialog for Hough Normals dialog
-class qHoughNormalsDialog : public QDialog, public Ui::HoughNormalsDialog
+class qHoughNormalsDialog : public QDialog
 {
 public:
 
 	//! Default constructor
-	explicit qHoughNormalsDialog(QWidget* parent = 0)
-		: QDialog(parent)
-	{
-		setupUi(this);
-	}
+	explicit qHoughNormalsDialog( QWidget* parent = nullptr );
+	
+	~qHoughNormalsDialog();
 
 	//Settings
 	struct Parameters
@@ -50,27 +45,11 @@ public:
 		int k_density = 5;
 	};
 	
-	void setParameters(const Parameters& params)
-	{
-		kSpinBox->setValue(params.K);
-		tSpinBox->setValue(params.T);
-		nPhiSpinBox->setValue(params.n_phi);
-		nRotSpinBox->setValue(params.n_rot);
-		tolAngleSpinBox->setValue(params.tol_angle_rad * 180.0 / M_PI);
-		kDensitySpinBox->setValue(params.k_density);
-		useDensityCheckBox->setChecked(params.use_density);
-	}
-
-	void getParameters(Parameters& params)
-	{
-		params.K = kSpinBox->value();
-		params.T = tSpinBox->value();
-		params.n_phi = nPhiSpinBox->value();
-		params.n_rot = nRotSpinBox->value();
-		params.tol_angle_rad = tolAngleSpinBox->value() * M_PI / 180.0;
-		params.k_density = kDensitySpinBox->value();
-		params.use_density = useDensityCheckBox->isChecked();
-	}
+	void setParameters( const Parameters& params );
+	void getParameters( Parameters& params );
+	
+private:
+	Ui::HoughNormalsDialog* m_ui;
 };
 
 #endif //QHOUGH_NORMALS_HEADER

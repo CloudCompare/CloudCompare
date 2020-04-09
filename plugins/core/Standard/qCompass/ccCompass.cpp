@@ -20,7 +20,7 @@
 
 //Qt
 #include <QCheckBox>
-#include <QComboBox>
+#include <QDoubleValidator>
 #include <QFileDialog>
 
 //common
@@ -30,6 +30,7 @@
 #include "ccCompass.h"
 #include "ccCompassDlg.h"
 #include "ccCompassExport.h"
+#include "ccCompassImport.h"
 #include "ccCompassInfo.h"
 #include "ccFitPlaneTool.h"
 #include "ccLineationTool.h"
@@ -257,8 +258,14 @@ void ccCompass::doAction()
 		connect(m_dlg->m_estimateP21, &QAction::triggered, this, &ccCompass::estimateP21);
 		connect(m_dlg->m_estimateStrain, &QAction::triggered, this, &ccCompass::estimateStrain);
 		connect(m_dlg->m_noteTool, &QAction::triggered, this, &ccCompass::setNote);
-		connect(m_dlg->m_loadFoliations, &QAction::triggered, this, &ccCompass::importFoliations);
-		connect(m_dlg->m_loadLineations, &QAction::triggered, this, &ccCompass::importLineations);
+		
+		connect(m_dlg->m_loadFoliations, &QAction::triggered, this, [=]() {
+			ccCompassImport::importFoliations( m_app );
+		});
+		connect(m_dlg->m_loadLineations, &QAction::triggered, this, [=]() {
+			ccCompassImport::importLineations( m_app );
+		});
+		
 		connect(m_dlg->m_toSVG, &QAction::triggered, this, &ccCompass::exportToSVG);
 
 		//settings menu
@@ -3411,235 +3418,6 @@ void ccCompass::writeToLower() //new digitiziation will be added to the GeoObjec
 	m_mapDlg->setInteriorButton->setChecked(false);
 	m_mapDlg->setUpperButton->setChecked(false);
 	m_mapDlg->setLowerButton->setChecked(true);
-}
-
-//convert a point cloud containing field points (x,y,z) and dip+dip-direction scalar fields to planes for visualisation.
-void ccCompass::importFoliations()
-{
-	//get selected point cloud
-	std::vector<ccHObject*> sel = m_app->getSelectedEntities();
-	if (sel.empty())
-	{
-		m_app->dispToConsole("Please select a point cloud containing your field data (this can be loaded from a text file)",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		return;
-	}
-
-	if (!sel[0]->isA(CC_TYPES::POINT_CLOUD))
-	{
-		m_app->dispToConsole("Please select a point cloud containing your field data (this can be loaded from a text file)", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		return;
-	}
-
-	//get point cloud object
-	ccPointCloud* cld = static_cast<ccPointCloud*>(sel[0]);
-
-	//get user to select scalar field for dip & dip-directon
-	QDialog dlg(m_app->getMainWindow());
-	QVBoxLayout* vbox = new QVBoxLayout();
-	QLabel dipLabel("Dip Field:");
-	QLabel dipDirLabel("Dip-Direction Field:");
-	QLabel sizeLabel("Plane Size");
-	QComboBox dipDirCombo(m_app->getMainWindow());
-	QComboBox dipCombo(m_app->getMainWindow());
-	QLineEdit planeSize("2.0"); planeSize.setValidator(new QDoubleValidator(0.01, std::numeric_limits<double>::max(), 6));
-
-	//fill combo boxes with field names
-	//std::vector<QString> fields;
-	//std::vector<int> idx;
-	for (unsigned i = 0; i < cld->getNumberOfScalarFields(); i++)
-	{
-		dipDirCombo.addItem(cld->getScalarFieldName(i));
-		dipCombo.addItem(cld->getScalarFieldName(i));
-		//fields.push_back(cld->getScalarFieldName(i));
-		//idx.push_back(i);
-	}
-
-	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-	connect(&buttonBox, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
-	connect(&buttonBox, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
-
-	vbox->addWidget(&dipLabel);
-	vbox->addWidget(&dipCombo);
-	vbox->addWidget(&dipDirLabel);
-	vbox->addWidget(&dipDirCombo);
-	vbox->addWidget(&buttonBox);
-	vbox->addWidget(&sizeLabel);
-	vbox->addWidget(&planeSize);
-	dlg.setLayout(vbox);
-
-	//execute dialog and get results
-	int result = dlg.exec();
-	if (result == QDialog::Rejected) {
-		return; //bail!
-	}
-
-
-	//get values
-	int dipSF = cld->getScalarFieldIndexByName(dipCombo.currentText().toStdString().c_str());
-	int dipDirSF = cld->getScalarFieldIndexByName(dipDirCombo.currentText().toStdString().c_str());
-	double size = planeSize.text().toDouble();
-	if (dipSF == dipDirSF)
-	{
-		m_app->dispToConsole("Error: Dip and Dip-Direction scalar fields must be different!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		return;
-	}
-
-	//loop through points
-	for (unsigned p = 0; p < cld->size(); p++)
-	{
-		float dip = cld->getScalarField(dipSF)->at(p);
-		float dipdir = cld->getScalarField(dipDirSF)->at(p);
-		CCVector3 Cd = *cld->getPoint(p);
-
-		//build plane and get its orientation 
-		ccPlane* plane = new ccPlane(QString("%1/%2").arg(static_cast<int>(dip), 2, 10, QChar('0')).arg(static_cast<int>(dipdir), 3, 10, QChar('0')));
-		plane->showNameIn3D(true);
-		cld->addChild(plane);
-		m_app->addToDB(plane, false, true, false, false);
-		CCVector3 N = plane->getNormal();
-		CCVector3 C = plane->getCenter();
-
-		//figure out transform (blatantly stolen from ccPlaneEditDlg::updatePlane())
-		CCVector3 Nd = ccNormalVectors::ConvertDipAndDipDirToNormal(dip, dipdir, true);
-		ccGLMatrix trans;
-		bool needToApplyTrans = false;
-		bool needToApplyRot = false;
-
-		needToApplyRot = (std::abs(N.dot(Nd) - PC_ONE) > std::numeric_limits<PointCoordinateType>::epsilon());
-		needToApplyTrans = needToApplyRot || ((C - Cd).norm2d() != 0);
-
-		if (needToApplyTrans)
-		{
-			trans.setTranslation(-C);
-			needToApplyTrans = true;
-		}
-		if (needToApplyRot)
-		{
-			ccGLMatrix rotation;
-			//special case: plane parallel to XY
-			if (std::abs(N.z) > PC_ONE - std::numeric_limits<PointCoordinateType>::epsilon())
-			{
-				ccGLMatrix rotX; rotX.initFromParameters(-dip * CC_DEG_TO_RAD, CCVector3(1, 0, 0), CCVector3(0, 0, 0)); //plunge
-				ccGLMatrix rotZ; rotZ.initFromParameters(dipdir * CC_DEG_TO_RAD, CCVector3(0, 0, -1), CCVector3(0, 0, 0));
-				rotation = rotZ * rotX;
-			}
-			else //general case
-			{
-				rotation = ccGLMatrix::FromToRotation(N, Nd);
-			}
-			trans = rotation * trans;
-		}
-		if (needToApplyTrans)
-		{
-			trans.setTranslation(trans.getTranslationAsVec3D() + Cd);
-		}
-		if (needToApplyRot || needToApplyTrans)
-		{
-			plane->applyGLTransformation_recursive(&trans);
-
-			//ccLog::Print("[Plane edit] Applied transformation matrix:");
-			//ccLog::Print(trans.toString(12, ' ')); //full precision
-		}
-		plane->setXWidth(size, false);
-		plane->setYWidth(size, true);
-	}
-}
-
-//convert a point cloud containing field points (x,y,z) and trend + plunge scalar fields to lineation vectors for visualisation.
-void ccCompass::importLineations()
-{
-	//get selected point cloud
-	std::vector<ccHObject*> sel = m_app->getSelectedEntities();
-	if (sel.empty())
-	{
-		m_app->dispToConsole("Please select a point cloud containing your field data (this can be loaded from a text file)", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		return;
-	}
-
-	if (!sel[0]->isA(CC_TYPES::POINT_CLOUD))
-	{
-		m_app->dispToConsole("Please select a point cloud containing your field data (this can be loaded from a text file)", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		return;
-	}
-
-	//get point cloud object
-	ccPointCloud* cld = static_cast<ccPointCloud*>(sel[0]);
-
-	//get user to select scalar field for dip & dip-directon
-	QDialog dlg(m_app->getMainWindow());
-	QVBoxLayout* vbox = new QVBoxLayout();
-	QLabel dipLabel("Trend Field:");
-	QLabel dipDirLabel("Plunge Field:");
-	QLabel sizeLabel("Display Length");
-	QComboBox dipDirCombo(m_app->getMainWindow());
-	QComboBox dipCombo(m_app->getMainWindow());
-	QLineEdit planeSize("2.0"); planeSize.setValidator(new QDoubleValidator(0.01, std::numeric_limits<double>::max(), 6));
-
-	//fill combo boxes with field names
-	for (unsigned i = 0; i < cld->getNumberOfScalarFields(); i++)
-	{
-		dipDirCombo.addItem(cld->getScalarFieldName(i));
-		dipCombo.addItem(cld->getScalarFieldName(i));
-	}
-
-	QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-	connect(&buttonBox, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
-	connect(&buttonBox, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
-
-	vbox->addWidget(&dipLabel);
-	vbox->addWidget(&dipCombo);
-	vbox->addWidget(&dipDirLabel);
-	vbox->addWidget(&dipDirCombo);
-	vbox->addWidget(&buttonBox);
-	vbox->addWidget(&sizeLabel);
-	vbox->addWidget(&planeSize);
-	dlg.setLayout(vbox);
-
-	//execute dialog and get results
-	int result = dlg.exec();
-	if (result == QDialog::Rejected) {
-		return; //bail!
-	}
-
-	//get values
-	int dipSF = cld->getScalarFieldIndexByName(dipCombo.currentText().toStdString().c_str());
-	int dipDirSF = cld->getScalarFieldIndexByName(dipDirCombo.currentText().toStdString().c_str());
-	double size = planeSize.text().toDouble();
-	if (dipSF == dipDirSF)
-	{
-		m_app->dispToConsole("Error: Trend and plunge scalar fields must be different!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		return;
-	}
-
-	//loop through points
-	for (unsigned p = 0; p < cld->size(); p++)
-	{
-		float trend = cld->getScalarField(dipSF)->at(p);
-		float plunge = cld->getScalarField(dipDirSF)->at(p);
-		CCVector3 Cd = *cld->getPoint(p);
-		
-		//build lineation vector
-		CCVector3 l(sin(trend * CC_DEG_TO_RAD) * cos(plunge * CC_DEG_TO_RAD), cos(trend * CC_DEG_TO_RAD)*cos(plunge * CC_DEG_TO_RAD), -sin(plunge * CC_DEG_TO_RAD));
-
-		//create new point cloud to associate with lineation graphic
-		ccPointCloud* points = new ccPointCloud();
-		points->setGlobalScale(cld->getGlobalScale()); //copy global shift & scale onto new point cloud
-		points->setGlobalShift(cld->getGlobalShift());
-		points->reserve(2);
-		points->addPoint(Cd);
-		points->addPoint(Cd + l*size);
-		points->setName("verts");
-
-		//create lineation graphic
-		ccLineation* lineation = new ccLineation(points);
-		lineation->addChild(points);
-		lineation->addPointIndex(0);
-		lineation->addPointIndex(1);
-		lineation->updateMetadata();
-		lineation->setName(QStringLiteral("%1->%2").arg( qRound( plunge ) ).arg( qRound( trend ) ));
-		cld->addChild(lineation);
-		m_app->addToDB(lineation, false, true, false, false);
-	}
 }
 
 //save the current view to an SVG file

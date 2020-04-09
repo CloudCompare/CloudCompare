@@ -18,9 +18,11 @@
 #include "qHoughNormalsDialog.h"
 #include "ui_qHoughNormalsDlg.h"
 
-#include <cmath>
-
 namespace {
+	#ifndef M_PI
+		constexpr double M_PI = 3.14159265358979323846264338327950288;
+	#endif	
+	
     constexpr double RadiansToDegrees = 180.0 / M_PI;
     constexpr double DegreesToRadians = M_PI / 180.0;
 }

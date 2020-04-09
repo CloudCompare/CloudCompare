@@ -23,20 +23,20 @@ namespace {
 		constexpr double M_PI = 3.14159265358979323846264338327950288;
 	#endif	
 	
-    constexpr double RadiansToDegrees = 180.0 / M_PI;
-    constexpr double DegreesToRadians = M_PI / 180.0;
+	constexpr double RadiansToDegrees = 180.0 / M_PI;
+	constexpr double DegreesToRadians = M_PI / 180.0;
 }
 
 qHoughNormalsDialog::qHoughNormalsDialog(QWidget *parent)
-    : QDialog(parent)
-    , m_ui( new Ui::HoughNormalsDialog )
+	: QDialog(parent)
+	, m_ui( new Ui::HoughNormalsDialog )
 {
-    m_ui->setupUi(this);
+	m_ui->setupUi(this);
 }
 
 qHoughNormalsDialog::~qHoughNormalsDialog()
 {
-    delete m_ui;
+	delete m_ui;
 }
 
 void qHoughNormalsDialog::setParameters( const Parameters &params )

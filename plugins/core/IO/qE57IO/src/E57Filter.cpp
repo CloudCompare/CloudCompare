@@ -24,15 +24,11 @@
 //libE57Format
 #include <E57Format.h>
 
-//CCLib
-#include <ScalarField.h>
-
 //qCC_db
 #include <ccCameraSensor.h>
 #include <ccColorScalesManager.h>
 #include <ccGBLSensor.h>
 #include <ccImage.h>
-#include <ccLog.h>
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
@@ -40,8 +36,6 @@
 //Qt
 #include <QApplication>
 #include <QBuffer>
-#include <QMap>
-#include <QString>
 #include <QUuid>
 
 //system
@@ -49,11 +43,55 @@
 #include <string>
 
 using colorFieldType = double;
-//typedef boost::uint16_t colorFieldType;
 
-static const char CC_E57_INTENSITY_FIELD_NAME[] = "Intensity";
-static const char CC_E57_RETURN_INDEX_FIELD_NAME[] = "Return index";
-static const char s_e57PoseKey[] = "E57_pose";
+namespace  {
+	constexpr char CC_E57_INTENSITY_FIELD_NAME[] = "Intensity";
+	constexpr char CC_E57_RETURN_INDEX_FIELD_NAME[] = "Return index";
+	constexpr char s_e57PoseKey[] = "E57_pose";
+	
+	unsigned s_absoluteScanIndex = 0;
+	bool s_cancelRequestedByUser = false;
+	
+	unsigned s_absoluteImageIndex = 0;
+	
+	ScalarType s_maxIntensity = 0;
+	ScalarType s_minIntensity = 0;
+	
+	//for coordinate shift handling
+	FileIOFilter::LoadParameters s_loadParameters;
+	
+	//Array chunks for reading/writing information out of E57 files
+	struct TempArrays
+	{
+		//points
+		std::vector<double> xData;
+		std::vector<double> yData;
+		std::vector<double> zData;
+		std::vector<int8_t> isInvalidData;
+	
+		//normals
+		std::vector<double> xNormData;
+		std::vector<double> yNormData;
+		std::vector<double> zNormData;
+	
+		//scalar field
+		std::vector<double>	intData;
+		std::vector<int8_t> isInvalidIntData;
+	
+		//scan index field
+		std::vector<int8_t> scanIndexData;
+	
+		//color
+		std::vector<colorFieldType> redData;
+		std::vector<colorFieldType> greenData;
+		std::vector<colorFieldType> blueData;
+	};
+	
+	inline QString GetNewGuid()
+	{
+		return QUuid::createUuid().toString();
+	}
+}
 
 
 E57Filter::E57Filter()
@@ -78,38 +116,6 @@ bool E57Filter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) con
 		return true;
 	}
 	return false;
-}
-
-//Array chunks for reading/writing information out of E57 files
-struct TempArrays
-{
-	//points
-	std::vector<double> xData;
-	std::vector<double> yData;
-	std::vector<double> zData;
-	std::vector<int8_t> isInvalidData;
-
-	//normals
-	std::vector<double> xNormData;
-	std::vector<double> yNormData;
-	std::vector<double> zNormData;
-
-	//scalar field
-	std::vector<double>	intData;
-	std::vector<int8_t> isInvalidIntData;
-
-	//scan index field
-	std::vector<int8_t> scanIndexData;
-
-	//color
-	std::vector<colorFieldType> redData;
-	std::vector<colorFieldType> greenData;
-	std::vector<colorFieldType> blueData;
-};
-
-static inline QString GetNewGuid()
-{
-	return QUuid::createUuid().toString();
 }
 
 //Helper: save pose information
@@ -139,9 +145,6 @@ static void SavePoseInformation(e57::StructureNode& parentNode, const e57::Image
 		pose.set("translation", translation);
 	}
 }
-
-static unsigned s_absoluteScanIndex = 0;
-static bool s_cancelRequestedByUser = false;
 
 static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile& imf, e57::VectorNode& data3D, QString& guidStr, ccProgressDialog* progressDlg = nullptr)
 {
@@ -595,7 +598,6 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 	return true;
 }
 
-static unsigned s_absoluteImageIndex = 0;
 void SaveImage(const ccImage* image, const QString& scanGUID, e57::ImageFile& imf, e57::VectorNode& images2D)
 {
 	assert(image);
@@ -1422,12 +1424,6 @@ static bool GetPoseInformation(const e57::StructureNode& node, ccGLMatrixd& pose
 
 	return validPoseMat;
 }
-
-static ScalarType s_maxIntensity = 0;
-static ScalarType s_minIntensity = 0;
-
-//for coordinate shift handling
-static FileIOFilter::LoadParameters s_loadParameters;
 
 static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDialog* progressDlg = nullptr)
 {

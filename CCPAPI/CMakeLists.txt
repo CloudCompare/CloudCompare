@@ -31,7 +31,6 @@ MESSAGE(STATUS "python version: " ${PYTHON_VERSION_STRING})
 # --- Sip detection
 
 FIND_PACKAGE(SIP REQUIRED)  # should come after Python (and before PyQt if needed)
-INCLUDE(UseSIP)
 
 # --- C++ library cc Python Api (ccPApi)
 
@@ -72,25 +71,44 @@ INCLUDE_DIRECTORIES(
   ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-SET(_add_SOURCES
-    sipcloudCompareccPointCloud.cc
-    sipcloudCompareQList0101ccPointCloud.cc
-    sipcloudCompareCCLib.cc
-    sipcloudCompareCCLibScalarField.cc
-)
-
-MESSAGE(STATUS "_add_SOURCES: " "${_add_SOURCES}")
-
-set_source_files_properties( ${_add_SOURCES} PROPERTIES GENERATED TRUE )
-
 # --- sources / sip wrappings
 
-SIP_WRAP_SIP( _sip_SOURCES cloudCompare.sip OPTIONS -t WS_X11 -t Qt_5_9_5 -I /usr/share/sip/PyQt5)
-MESSAGE(STATUS "_sip_SOURCES: " "${_sip_SOURCES}")
+SET(SIP_MAIN_SOURCE cloudCompare.sip)
+SET(SIP_ADD_SOURCES
+    ccPApi.sip
+    ccPointCloud.sip
+    ScalarField.sip
+    )
+SET(SIP_ALL_SOURCES ${SIP_MAIN_SOURCE} ${SIP_ADD_SOURCES})
+
+MESSAGE(STATUS "SIP_ALL_SOURCES: " "${SIP_ALL_SOURCES}")
+
+# TODO: names of generated sip files follow some rules based on module name, class name, namespace etc. Not obvious to compute...
+SET(SIP_MAIN_GENSRC ${CMAKE_CURRENT_BINARY_DIR}/sipcloudComparecmodule.cc)
+SET(SIP_ADD_GENSRC
+    ${CMAKE_CURRENT_BINARY_DIR}/sipcloudCompareccPointCloud.cc
+    ${CMAKE_CURRENT_BINARY_DIR}/sipcloudCompareQList0101ccPointCloud.cc
+    ${CMAKE_CURRENT_BINARY_DIR}/sipcloudCompareCCLib.cc
+    ${CMAKE_CURRENT_BINARY_DIR}/sipcloudCompareCCLibScalarField.cc
+   )
+SET(SIP_ALL_GENSRC ${SIP_MAIN_GENSRC} ${SIP_ADD_GENSRC})
+
+MESSAGE(STATUS "SIP_ALL_GENSRC: " "${SIP_ALL_GENSRC}")
+
+set_source_files_properties( ${SIP_ALL_GENSRC} PROPERTIES GENERATED TRUE )
+
+# TODO: generate the sip options (Qt version, sip path...)
+SET(SIP_OPTIONS -s .cc -c . -t WS_X11 -t Qt_5_9_5 -I /usr/share/sip/PyQt5)
+
+ADD_CUSTOM_COMMAND(
+    OUTPUT ${SIP_ALL_GENSRC}
+    COMMAND ${SIP_EXECUTABLE} ${SIP_OPTIONS} ${CMAKE_CURRENT_SOURCE_DIR}/${SIP_MAIN_SOURCE}
+    DEPENDS ${SIP_ALL_SOURCES}
+    )
 
 # --- sources / to compile
 
-ADD_LIBRARY( cloudCompare SHARED ${_sip_SOURCES} ${_add_SOURCES} )
+ADD_LIBRARY( cloudCompare SHARED ${SIP_ALL_GENSRC} )
 
 TARGET_LINK_LIBRARIES(cloudCompare ${PYTHON_LIBRARIES} CC_PAPI_LIB CC_FBO_LIB CC_CORE_LIB QCC_DB_LIB QCC_GL_LIB qcustomplot Qt5::Core Qt5::Widgets Qt5::Concurrent)
 

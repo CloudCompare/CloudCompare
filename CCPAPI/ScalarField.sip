@@ -87,7 +87,7 @@ namespace CCLib
     
         static void initNumpyApi();
         %Docstring
-        Should be done once before transforming ScalarField in numpyArray or inverse.
+        Should be done once before transforming ScalarField in numpyArray or the other way.
         %End
         %MethodCode
         CCTRACE("initialization numpy C++ API");
@@ -99,7 +99,7 @@ namespace CCLib
         %Docstring
         Wrap the ScalarField data into a numpy Array, no copy.
         (Only float) Data ownership stays in CloudCompare C++ library.
-        TODO: detect double option, check ownership
+        TODO: detect double option, check ownership...
         %End
         %MethodCode
         if( !sipCpp->empty() )

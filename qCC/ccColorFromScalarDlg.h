@@ -55,6 +55,7 @@ protected:
 	void onChannelChangedB(int) { updateChannel(2); }
 	void onChannelChangedA(int) { updateChannel(3); }
 	void updateChannel(int);
+	void updateSpinBoxLimits(int);
 	void setDefaultSatValuePerChannel(int);
 	void updateColormaps();
 	//mapping ranges changed

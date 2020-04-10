@@ -163,6 +163,7 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
 	{
 		if (sf)
 		{
+			m_scalars[i] = sf;
 			updateChannel(i);
 		}
 	}
@@ -316,6 +317,8 @@ void ccColorFromScalarDlg::updateHistogram(int n)
 			m_boxes_max[n]->setMaximum(255.0);
 			m_boxes_min[n]->setValue(200.0);
 			m_boxes_max[n]->setValue(200.0);
+			m_boxes_min[n]->setSingleStep(1.0);
+			m_boxes_max[n]->setSingleStep(1.0);
 
 			//edge case for HSV values (0 - 360)
 			if (n == 0 && m_ui->toggleHSV->isChecked())
@@ -357,22 +360,37 @@ void ccColorFromScalarDlg::updateHistogram(int n)
 	m_prevFixed[n] = fixed[n];
 }
 
+void ccColorFromScalarDlg::updateSpinBoxLimits(int n)
+{
+	ccScalarField* sf = static_cast<ccScalarField*>(m_cloud->getScalarField(m_combos[n]->currentIndex()));
+	if (sf)
+	{
+		m_minSat[n] = sf->getMin();
+		m_maxSat[n] = sf->getMax();
+		double singleStepSize = (m_maxSat[n] - m_minSat[n]) / 100.0;
+		if (singleStepSize < 0.01)
+		{
+			singleStepSize = 0.01;
+		}
+		m_boxes_min[n]->setMinimum(m_minSat[n]);
+		m_boxes_min[n]->setMaximum(m_maxSat[n]);
+		m_boxes_min[n]->setSingleStep(singleStepSize);
+		m_boxes_max[n]->setMinimum(m_minSat[n]);
+		m_boxes_max[n]->setMaximum(m_maxSat[n]);
+		m_boxes_max[n]->setSingleStep(singleStepSize);
+		m_boxes_max[n]->setCorrectionMode(QAbstractSpinBox::CorrectionMode::CorrectToNearestValue);
+	}
+}
+
 void ccColorFromScalarDlg::updateChannel(int n)
 {
 	ccScalarField* sf = static_cast<ccScalarField*>(m_cloud->getScalarField(m_combos[n]->currentIndex()));
 	if (sf)
 	{
 		m_scalars[n] = sf;
+		updateSpinBoxLimits(n);
 		sf->setColorScale(m_colors[n]);
 		sf->computeMinAndMax();
-
-		m_minSat[n] = sf->getMin();
-		m_maxSat[n] = sf->getMax();
-		m_boxes_min[n]->setMinimum(m_minSat[n]);
-		m_boxes_min[n]->setMaximum(m_maxSat[n]);
-		m_boxes_max[n]->setMinimum(m_minSat[n]);
-		m_boxes_max[n]->setMaximum(m_maxSat[n]);
-		m_boxes_max[n]->setCorrectionMode(QAbstractSpinBox::CorrectionMode::CorrectToNearestValue);
 		updateHistogram(n);
 	}
 }
@@ -383,6 +401,7 @@ void ccColorFromScalarDlg::setDefaultSatValuePerChannel(int n)
 	m_scalars[n]->setColorScale(m_colors[n]);
 	m_minSat[n] = m_scalars[n]->getMin();
 	m_maxSat[n] = m_scalars[n]->getMax();
+	updateSpinBoxLimits(n);
 	ScalarType range = m_maxSat[n] - m_minSat[n];
 	m_histograms[n]->setMinSatValue(m_minSat[n] + 0.1 * range);
 	m_boxes_min[n]->setValue(m_minSat[n] + 0.1 * range);

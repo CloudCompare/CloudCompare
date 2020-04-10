@@ -60,6 +60,7 @@ ccHistogramWindow::ccHistogramWindow(QWidget* parent/*=0*/)
 	, m_drawVerticalIndicator(false)
 	, m_verticalIndicatorPositionPercent(0)
 	, m_sfInteractionModes(SFInteractionMode::None)
+	, m_axisDisplayOptions(AxisDisplayOption::All)
 	, m_selectedItem(NONE)
 	, m_areaLeft(nullptr)
 	, m_areaLeftlastValue(std::numeric_limits<double>::quiet_NaN())
@@ -70,6 +71,7 @@ ccHistogramWindow::ccHistogramWindow(QWidget* parent/*=0*/)
 	, m_arrowRight(nullptr)
 	, m_arrowRightlastValue(std::numeric_limits<double>::quiet_NaN())
 	, m_lastMouseClick(0, 0)
+	, m_refreshAfterResize(true)
 {
 	setWindowTitle("Histogram");
 	setFocusPolicy(Qt::StrongFocus);
@@ -363,6 +365,16 @@ void ccHistogramWindow::setSFInteractionMode(SFInteractionModes modes)
    m_sfInteractionModes = modes;
 }
 
+void ccHistogramWindow::setAxisDisplayOption(AxisDisplayOptions axisOptions)
+{
+	m_axisDisplayOptions = axisOptions;
+}
+
+void ccHistogramWindow::setRefreshAfterResize(bool refreshAfterResize)
+{
+	m_refreshAfterResize = refreshAfterResize;
+}
+
 void ccHistogramWindow::refresh()
 {
 	// set ranges appropriate to show data
@@ -377,6 +389,10 @@ void ccHistogramWindow::refresh()
 	}
 	xAxis->setRange(minVal, std::max(minVal + std::numeric_limits<ScalarType>::epsilon(), maxVal));
 	yAxis->setRange(0, m_maxHistoVal);
+
+	xAxis->setVisible(m_axisDisplayOptions.testFlag(AxisDisplayOption::XAxis));
+	yAxis->setVisible(m_axisDisplayOptions.testFlag(AxisDisplayOption::YAxis));
+	
 
 	if (!m_titleStr.isEmpty())
 	{
@@ -473,7 +489,9 @@ void ccHistogramWindow::refresh()
 
 			totalSum += m_histoValues[i];
 			if (normVal < m_verticalIndicatorPositionPercent)
+			{
 				partialSum += m_histoValues[i];
+			}
 
 			keyData[i] = m_minVal + normVal * (m_maxVal - m_minVal);
 			valueData[i] = m_histoValues[i];
@@ -495,15 +513,21 @@ void ccHistogramWindow::refresh()
 					col = colorScale->getColorByRelativePos(normVal);
 				}
 				if (!col) //hidden values may have no associated color!
+				{
 					col = &ccColor::lightGreyRGB;
+				}
 				colors[i] = QColor(col->r, col->g, col->b);
 			}
 		}
 
 		if (!colors.isEmpty())
+		{
 			m_histogram->setData(keyData, valueData, colors);
+		}
 		else
+		{
 			m_histogram->setData(keyData, valueData);
+		}
 	}
 
 	//overlay curve?
@@ -561,7 +585,9 @@ void ccHistogramWindow::refresh()
 			{
 				const ccColor::Rgb* col = colorScale->getColorByRelativePos(m_associatedSF->symmetricalScale() ? 0.5 : 0, m_associatedSF->getColorRampSteps());
 				if (col)
+				{
 					m_arrowLeft->setColor(col->r, col->g, col->b);
+				}
 			}
 			
 			m_arrowRight = new QCPArrow(xAxis, yAxis);
@@ -571,7 +597,9 @@ void ccHistogramWindow::refresh()
 			{
 				const ccColor::Rgb* col = colorScale->getColorByRelativePos(1.0, m_associatedSF->getColorRampSteps());
 				if (col)
+				{
 					m_arrowRight->setColor(col->r, col->g, col->b);
+				}
 			}
 		}
 	}
@@ -717,10 +745,12 @@ void ccHistogramWindow::updateOverlayCurveWidth(int w, int h)
 void ccHistogramWindow::resizeEvent(QResizeEvent * event)
 {
 	QCustomPlot::resizeEvent(event);
-
+	
 	updateOverlayCurveWidth(event->size().width(), event->size().height());
-
-	refresh();
+	if (m_refreshAfterResize)
+	{
+		refresh();
+	}
 }
 
 void ccHistogramWindow::mousePressEvent(QMouseEvent *event)

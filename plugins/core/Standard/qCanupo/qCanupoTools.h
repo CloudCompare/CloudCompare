@@ -21,23 +21,21 @@
 //Local
 #include "classifier.h"
 
-//CCLib
-#include <GenericIndexedCloud.h>
-#include <GenericProgressCallback.h>
-#include <DgmOctree.h>
-
-//Qt
-#include <QString>
-
 //system
 #include <vector>
 
-class ccGenericPointCloud;
-class ccPointCloud;
-class ccMainAppInterface;
-class ccHObject;
 class QComboBox;
+class QString;
+
+class ccGenericPointCloud;
+class ccHObject;
+class ccMainAppInterface;
 class ccScalarField;
+
+namespace CCLib {
+	class GenericProgressCallback;
+	class DgmOctree;
+}
 
 //! Helper: pre-computed cos and sin values between 0 and Pi
 template<unsigned Count> struct CosSinTable
@@ -88,9 +86,9 @@ public:
 												QString& error, //if any
 												unsigned descriptorID = DESC_DIMENSIONALITY,
 												int maxThreadCount = 0,
-												CCLib::GenericProgressCallback* progressCb = 0,
-												CCLib::DgmOctree* inputOctree = 0,
-												std::vector<ccScalarField*>* roughnessSFs = 0 /*for tests*/); 
+												CCLib::GenericProgressCallback* progressCb = nullptr,
+												CCLib::DgmOctree* inputOctree = nullptr,
+												std::vector<ccScalarField*>* roughnessSFs = nullptr /*for tests*/); 
 
 	//! Returns a long description of a given entity (name + [ID])
 	static QString GetEntityName(ccHObject* obj);

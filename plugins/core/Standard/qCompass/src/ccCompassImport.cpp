@@ -91,8 +91,8 @@ namespace {
 namespace ccCompassImport {
 
 	//convert a point cloud containing field points (x,y,z) and dip+dip-direction scalar fields to planes for visualisation.	
-    void importFoliations( ccMainAppInterface *app )
-    {
+	void importFoliations( ccMainAppInterface *app )
+	{
 		//get selected point cloud
 		std::vector<ccHObject*> sel = app->getSelectedEntities();
 		if (sel.empty())
@@ -195,27 +195,27 @@ namespace ccCompassImport {
 			plane->setXWidth(size, false);
 			plane->setYWidth(size, true);
 		}
-    }
+	}
 
 	//convert a point cloud containing field points (x,y,z) and trend + plunge scalar fields to lineation vectors for visualisation.
-    void importLineations( ccMainAppInterface *app )
-    {
-        //get selected point cloud
-        std::vector<ccHObject*> sel = app->getSelectedEntities();
-        if (sel.empty())
-        {
-            app->dispToConsole("Please select a point cloud containing your field data (this can be loaded from a text file)", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-            return;
-        }
+	void importLineations( ccMainAppInterface *app )
+	{
+		//get selected point cloud
+		std::vector<ccHObject*> sel = app->getSelectedEntities();
+		if (sel.empty())
+		{
+			app->dispToConsole("Please select a point cloud containing your field data (this can be loaded from a text file)", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			return;
+		}
 
-        if (!sel[0]->isA(CC_TYPES::POINT_CLOUD))
-        {
-            app->dispToConsole("Please select a point cloud containing your field data (this can be loaded from a text file)", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-            return;
-        }
+		if (!sel[0]->isA(CC_TYPES::POINT_CLOUD))
+		{
+			app->dispToConsole("Please select a point cloud containing your field data (this can be loaded from a text file)", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			return;
+		}
 
-        //get point cloud object
-        ccPointCloud* cld = static_cast<ccPointCloud*>(sel[0]);
+		//get point cloud object
+		ccPointCloud* cld = static_cast<ccPointCloud*>(sel[0]);
 
 		
 		ImportDialog	lineationDialog( cld, app->getMainWindow() );
@@ -226,53 +226,53 @@ namespace ccCompassImport {
 									   QObject::tr( "Display Length", "ccCompassImport" )
 								   } );
 
-        int result = lineationDialog.exec();
+		int result = lineationDialog.exec();
 		
-        if (result == QDialog::Rejected)
+		if (result == QDialog::Rejected)
 		{
-            return; //bail!
-        }
+			return; //bail!
+		}
 
-        //get values
+		//get values
 		const int dipSF = lineationDialog.dipComboScalarFieldIndex();
 		const int dipDirSF = lineationDialog.dipDirComboScalarFieldIndex();
 		const double size = lineationDialog.planeSize();
 
 		if (dipSF == dipDirSF)
-        {
-            app->dispToConsole("Error: Trend and plunge scalar fields must be different!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-            return;
-        }
+		{
+			app->dispToConsole("Error: Trend and plunge scalar fields must be different!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			return;
+		}
 
-        //loop through points
-        for (unsigned p = 0; p < cld->size(); p++)
-        {
-            float trend = cld->getScalarField(dipSF)->at(p);
-            float plunge = cld->getScalarField(dipDirSF)->at(p);
-            CCVector3 Cd = *cld->getPoint(p);
+		//loop through points
+		for (unsigned p = 0; p < cld->size(); p++)
+		{
+			float trend = cld->getScalarField(dipSF)->at(p);
+			float plunge = cld->getScalarField(dipDirSF)->at(p);
+			CCVector3 Cd = *cld->getPoint(p);
 
-            //build lineation vector
-            CCVector3 l(sin(trend * CC_DEG_TO_RAD) * cos(plunge * CC_DEG_TO_RAD), cos(trend * CC_DEG_TO_RAD)*cos(plunge * CC_DEG_TO_RAD), -sin(plunge * CC_DEG_TO_RAD));
+			//build lineation vector
+			CCVector3 l(sin(trend * CC_DEG_TO_RAD) * cos(plunge * CC_DEG_TO_RAD), cos(trend * CC_DEG_TO_RAD)*cos(plunge * CC_DEG_TO_RAD), -sin(plunge * CC_DEG_TO_RAD));
 
-            //create new point cloud to associate with lineation graphic
-            ccPointCloud* points = new ccPointCloud();
-            points->setGlobalScale(cld->getGlobalScale()); //copy global shift & scale onto new point cloud
-            points->setGlobalShift(cld->getGlobalShift());
-            points->reserve(2);
-            points->addPoint(Cd);
-            points->addPoint(Cd + l*size);
-            points->setName("verts");
+			//create new point cloud to associate with lineation graphic
+			ccPointCloud* points = new ccPointCloud();
+			points->setGlobalScale(cld->getGlobalScale()); //copy global shift & scale onto new point cloud
+			points->setGlobalShift(cld->getGlobalShift());
+			points->reserve(2);
+			points->addPoint(Cd);
+			points->addPoint(Cd + l*size);
+			points->setName("verts");
 
-            //create lineation graphic
-            ccLineation* lineation = new ccLineation(points);
-            lineation->addChild(points);
-            lineation->addPointIndex(0);
-            lineation->addPointIndex(1);
-            lineation->updateMetadata();
-            lineation->setName(QStringLiteral("%1->%2").arg( qRound( plunge ) ).arg( qRound( trend ) ));
-            cld->addChild(lineation);
-            app->addToDB(lineation, false, true, false, false);
-        }
-    }
+			//create lineation graphic
+			ccLineation* lineation = new ccLineation(points);
+			lineation->addChild(points);
+			lineation->addPointIndex(0);
+			lineation->addPointIndex(1);
+			lineation->updateMetadata();
+			lineation->setName(QStringLiteral("%1->%2").arg( qRound( plunge ) ).arg( qRound( trend ) ));
+			cld->addChild(lineation);
+			app->addToDB(lineation, false, true, false, false);
+		}
+	}
 
 }

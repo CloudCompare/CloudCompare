@@ -43,9 +43,6 @@
 #include <cassert>
 #include <vector>
 
-#define _CCDEBUG_
-#include <ccTrace.h>
-
 //! Available filters
 /** Filters are uniquely recognized by their 'file filter' string.
 	We use a std::vector so as to keep the insertion ordering!
@@ -62,7 +59,7 @@ constexpr float FileIOFilter::DEFAULT_PRIORITY;
 FileIOFilter::FileIOFilter( const FileIOFilter::FilterInfo &info ) :
 	m_filterInfo( info )
 {
-#ifdef QT_DEBUG
+#ifdef QT_DEBUG	
 	if ( !(m_filterInfo.features & DynamicInfo) )
 	{
 		checkFilterInfo();
@@ -86,7 +83,7 @@ const QStringList& FileIOFilter::getFileFilters( bool onImport ) const
 	{
 		return m_filterInfo.importFileFilterStrings;
 	}
-
+	
 	return m_filterInfo.exportFileFilterStrings;
 }
 
@@ -120,7 +117,7 @@ void FileIOFilter::checkFilterInfo() const
 		{
 			ccLog::Warning( QStringLiteral( "I/O filter marked as import, but no filter strings set: %1" ).arg( m_filterInfo.id ) );
 		}
-
+		
 		if ( m_filterInfo.importExtensions.isEmpty() )
 		{
 			ccLog::Warning( QStringLiteral( "I/O filter marked as import, but no extensions set: %1" ).arg( m_filterInfo.id ) );
@@ -132,13 +129,13 @@ void FileIOFilter::checkFilterInfo() const
 		{
 			ccLog::Warning( QStringLiteral( "I/O filter not marked as import, but filter strings are set: %1" ).arg( m_filterInfo.id ) );
 		}
-
+		
 		if ( !m_filterInfo.importExtensions.isEmpty() )
 		{
 			ccLog::Warning( QStringLiteral( "I/O filter not marked as import, but extensions are set: %1" ).arg( m_filterInfo.id ) );
 		}
 	}
-
+	
 	if ( m_filterInfo.features & Export )
 	{
 		if ( m_filterInfo.exportFileFilterStrings.isEmpty() )
@@ -151,7 +148,7 @@ void FileIOFilter::checkFilterInfo() const
 		if ( !m_filterInfo.exportFileFilterStrings.isEmpty() )
 		{
 			ccLog::Warning( QStringLiteral( "I/O filter not marked as export, but filter strings are set: %1" ).arg( m_filterInfo.id ) );
-		}
+		}		
 	}
 #endif
 }
@@ -202,14 +199,14 @@ void FileIOFilter::Register(Shared filter)
 	{
 		return (filter == filter2) || (filter2->m_filterInfo.id == id);
 	};
-
-	if ( std::any_of( s_ioFilters.cbegin(), s_ioFilters.cend(), compareFilters ) )
+	
+	if ( std::any_of( s_ioFilters.cbegin(), s_ioFilters.cend(), compareFilters ) ) 
 	{
 		ccLog::Warning( QStringLiteral( "[FileIOFilter] I/O filter already registered with id '%1'" ).arg( id ) );
-
+		
 		return;
 	}
-
+	
 	// insert into the list, sorted by priority first, id second
 	auto comparePriorities = [] ( const Shared& filter1, const Shared& filter2 ) -> bool
 	{
@@ -217,12 +214,12 @@ void FileIOFilter::Register(Shared filter)
 		{
 			return filter1->m_filterInfo.id < filter2->m_filterInfo.id;
 		}
-
+		
 		return filter1->m_filterInfo.priority < filter2->m_filterInfo.priority;
 	};
-
+	
 	auto pos = std::upper_bound( s_ioFilters.begin(), s_ioFilters.end(), filter, comparePriorities );
-
+	
 	s_ioFilters.insert( pos, filter );
 }
 
@@ -232,7 +229,7 @@ void FileIOFilter::UnregisterAll()
 	{
 		filter->unregister();
 	}
-
+	
 	s_ioFilters.clear();
 }
 
@@ -259,7 +256,7 @@ const FileIOFilter::FilterContainer& FileIOFilter::GetFilters()
 FileIOFilter::Shared FileIOFilter::FindBestFilterForExtension(const QString& ext)
 {
 	const QString lowerExt = ext.toLower();
-    CCTRACE("lowerExt: " <<lowerExt.toStdString());
+	
 	for ( const auto &filter : s_ioFilters )
 	{
 		if ( filter->m_filterInfo.importExtensions.contains( lowerExt ) )
@@ -274,15 +271,15 @@ FileIOFilter::Shared FileIOFilter::FindBestFilterForExtension(const QString& ext
 QStringList FileIOFilter::ImportFilterList()
 {
 	QStringList	list{ QObject::tr( "All (*.*)" ) };
-
+	
 	for ( const auto &filter : s_ioFilters )
 	{
 		if ( filter->importSupported() )
 		{
 			list += filter->m_filterInfo.importFileFilterStrings;
 		}
-	}
-
+	}	
+	
 	return list;
 }
 
@@ -291,7 +288,6 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 										Shared filter,
 										CC_FILE_ERROR& result)
 {
-    CCTRACE("---");
 	if (!filter)
 	{
 		ccLog::Error(QString("[Load] Internal error (invalid input filter)").arg(filename));
@@ -305,31 +301,26 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 	if (!fi.exists())
 	{
 		ccLog::Error(QString("[Load] File '%1' doesn't exist!").arg(filename));
-		result = CC_FERR_CONSOLE_ERROR;
+		result = CC_FERR_CONSOLE_ERROR; 
 		return nullptr;
 	}
 
 	//load file
-    CCTRACE("---");
 	ccHObject* container = new ccHObject();
 	result = CC_FERR_NO_ERROR;
-    CCTRACE("---");
-
+	
 	//we start a new 'action' inside the current sessions
 	unsigned sessionCounter = IncreaseSesionCounter();
 	loadParameters.sessionStart = (sessionCounter == 1);
-    CCTRACE("---");
 
 	try
 	{
 		result = filter->loadFile(	filename,
 									*container,
 									loadParameters);
-	    CCTRACE("---");
 	}
 	catch (const std::exception& e)
 	{
-	    CCTRACE("---");
 		ccLog::Warning(QString("[I/O] CC has caught an exception while loading file '%1'").arg(filename));
 		ccLog::Warning(QString("[I/O] Exception: %1").arg(e.what()));
 		if (container)
@@ -340,7 +331,6 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 	}
 	catch (...)
 	{
-	    CCTRACE("---");
 		ccLog::Warning(QString("[I/O] CC has caught an unhandled exception while loading file '%1'").arg(filename));
 		if (container)
 		{
@@ -351,25 +341,20 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 
 	if (result == CC_FERR_NO_ERROR)
 	{
-	    CCTRACE("---");
 		ccLog::Print(QString("[I/O] File '%1' loaded successfully").arg(filename));
 	}
 	else
 	{
-	    CCTRACE("---");
 		DisplayErrorMessage(result, "loading", fi.baseName());
 	}
 
-    CCTRACE("---");
 	unsigned childCount = container->getChildrenNumber();
 	if (childCount != 0)
 	{
-	    CCTRACE("---");
 		//we set the main container name as the full filename (with path)
 		container->setName(QString("%1 (%2)").arg(fi.fileName(),fi.absolutePath()));
 		for (unsigned i = 0; i < childCount; ++i)
 		{
-		    CCTRACE("---");
 			ccHObject* child = container->getChild(i);
 			QString newName = child->getName();
 			if (newName.startsWith("unnamed"))
@@ -400,11 +385,10 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 										const QString& fileFilter )
 {
 	Shared filter(nullptr);
-
+	
 	//if the right filter is specified by the caller
 	if (!fileFilter.isEmpty())
 	{
-        CCTRACE("---");
 		filter = GetFilter(fileFilter, true);
 		if (!filter)
 		{
@@ -415,11 +399,8 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 	}
 	else //we need to guess the I/O filter based on the file format
 	{
-	    CCTRACE("---");
 		//look for file extension (we trust Qt on this task)
 		QString extension = QFileInfo(filename).suffix();
-		CCTRACE("filename: " << filename.toStdString());
-		CCTRACE("extension: " << extension.toStdString());
 		if (extension.isEmpty())
 		{
 			ccLog::Error("[Load] Can't guess file format: no file extension");
@@ -433,14 +414,12 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 		//unknown extension?
 		if (!filter)
 		{
-		    CCTRACE("---");
 			ccLog::Error(QString("[Load] Can't guess file format: unhandled file extension '%1'").arg(extension));
 			result = CC_FERR_CONSOLE_ERROR;
 			return nullptr;
 		}
 	}
 
-    CCTRACE("---");
 	return LoadFromFile(filename, loadParameters, filter, result);
 }
 
@@ -458,7 +437,7 @@ CC_FILE_ERROR FileIOFilter::SaveToFile(	ccHObject* entities,
 	{
 		completeFileName += QString(".%1").arg(filter->getDefaultExtension());
 	}
-
+	
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 	try
 	{
@@ -589,7 +568,7 @@ bool FileIOFilter::HandleGlobalShift(	const CCVector3d& P,
 		Pshift = *loadParameters.coordinatesShift;
 		preserveCoordinateShift = loadParameters.preserveShiftOnSave;
 	}
-
+	
 	bool applyAll = false;
 	if (	sizeof(PointCoordinateType) < 8
 		&&	ccGlobalShiftManager::Handle(	P,

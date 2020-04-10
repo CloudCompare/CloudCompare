@@ -837,6 +837,7 @@ void MainWindow::doActionColorFromScalars()
 		{
 			//create color from scalar dialogue
 			ccColorFromScalarDlg* cfsDlg = new ccColorFromScalarDlg(this, cloud);
+			cfsDlg->setAttribute(Qt::WA_DeleteOnClose, true);
 			cfsDlg->show();
 		}
 	}

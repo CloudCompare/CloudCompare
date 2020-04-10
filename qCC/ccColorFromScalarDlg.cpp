@@ -43,7 +43,7 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
 	, m_ui(new Ui::ColorFromScalarDialog)
 {
 	m_ui->setupUi(this);
-	this->setAttribute(Qt::WA_DeleteOnClose, true);
+	
 	if (m_cloud->getCurrentDisplayedScalarFieldIndex() == -1)
 	{
 		m_cloud->setCurrentDisplayedScalarField(0);
@@ -114,7 +114,7 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
 	}
 	
 	m_ui->fixA->setChecked(true); //set alpha fixed to checked
-	m_prevFixed[3] = false;
+	m_prevFixed[c_channelCount - 1] = false;
 	//connect GUI elements
 	connect(m_ui->channelComboR, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccColorFromScalarDlg::onChannelChangedR);
 	connect(m_ui->channelComboG, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccColorFromScalarDlg::onChannelChangedG);
@@ -167,7 +167,7 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
 			updateChannel(i);
 		}
 	}
-	sf->setColorScale(m_colors[3]); //set grey colour ramp to start with
+	sf->setColorScale(m_colors[c_channelCount - 1]); //set grey colour ramp to start with
 	m_cloud->redrawDisplay();
 }
 

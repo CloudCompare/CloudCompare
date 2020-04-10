@@ -43,7 +43,7 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
 	, m_ui(new Ui::ColorFromScalarDialog)
 {
 	m_ui->setupUi(this);
-	
+	this->setAttribute(Qt::WA_DeleteOnClose, true);
 	if (m_cloud->getCurrentDisplayedScalarFieldIndex() == -1)
 	{
 		m_cloud->setCurrentDisplayedScalarField(0);

@@ -839,6 +839,7 @@ void MainWindow::doActionColorFromScalars()
 			ccColorFromScalarDlg* cfsDlg = new ccColorFromScalarDlg(this, cloud);
 			cfsDlg->setAttribute(Qt::WA_DeleteOnClose, true);
 			cfsDlg->show();
+			cfsDlg->setupDisplay(); //required otherwise the initial histograms are grey
 		}
 	}
 }

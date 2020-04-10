@@ -44,12 +44,26 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
 {
 	m_ui->setupUi(this);
 	
+	if (m_cloud->getCurrentDisplayedScalarFieldIndex() == -1)
+	{
+		m_cloud->setCurrentDisplayedScalarField(0);
+	}
+	ccScalarField* sf = static_cast<ccScalarField*>(m_cloud->getCurrentDisplayedScalarField());
+	if (!sf) // I had this happen 1 time during testing but could never replicate
+	{
+		assert(false);
+		ccLog::Error("[ccColorFromScalarDlg] Get current scalar field failed!");
+		return; 
+	}
+	m_storedOrigColorScale = sf->getColorScale();
+	m_storedOrigSatRange = sf->saturationRange();
+	m_storedOrigDisplayRange = sf->displayRange();
 	//create histograms
-	QFrame* histoFrame[4] = { m_ui->histoFrameR, m_ui->histoFrameG, m_ui->histoFrameB, m_ui->histoFrameA };
-	for (unsigned i = 0; i < 4; i++)
+	QFrame* histoFrame[c_channelCount] = { m_ui->histoFrameR, m_ui->histoFrameG, m_ui->histoFrameB, m_ui->histoFrameA };
+	for (unsigned i = 0; i < c_channelCount; i++)
 	{
 		m_histograms[i] = new ccHistogramWindow(this);
-		
+		m_histograms[i]->setRefreshAfterResize(false);
 		auto layout = new QHBoxLayout;
 		
 		layout->setContentsMargins( 0, 0, 0, 0 );
@@ -88,8 +102,9 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
 	m_reverse[2] = m_ui->reverseB;
 	m_reverse[3] = m_ui->reverseA;
 
-	for (unsigned i = 0; i < 4; i++)
+	for (unsigned i = 0; i < c_channelCount; i++)
 	{
+		m_prevFixed[i] = true;
 		m_combos[i]->clear();
 		for (unsigned int s = 0; s < m_cloud->getNumberOfScalarFields(); s++)
 		{
@@ -97,9 +112,9 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
 		}
 		m_combos[i]->setCurrentIndex( m_cloud->getCurrentDisplayedScalarFieldIndex() );
 	}
-
-	m_ui->fixA->setChecked(true); //set alpha to checked
-
+	
+	m_ui->fixA->setChecked(true); //set alpha fixed to checked
+	m_prevFixed[3] = false;
 	//connect GUI elements
 	connect(m_ui->channelComboR, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccColorFromScalarDlg::onChannelChangedR);
 	connect(m_ui->channelComboG, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccColorFromScalarDlg::onChannelChangedG);
@@ -139,29 +154,38 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
 	connect(m_histograms[3], &ccHistogramWindow::sfMaxSatValChanged, this, &ccColorFromScalarDlg::maxChangedA);
 
 	//initialise colour scales
-	for (unsigned i = 0; i < 4; i++)
+	for (unsigned i = 0; i < c_channelCount; i++)
 	{
 		m_colors[i] = ccColorScale::Shared(new ccColorScale(QString::asprintf("%d", i)));
 	}
 	updateColormaps();
-
-	//update histograms
-	updateChannel(0);
-	updateChannel(1);
-	updateChannel(2);
-	updateChannel(3);
-	m_cloud->getCurrentDisplayedScalarField()->setColorScale(m_colors[3]); //set grey colour ramp to start with
+	for (unsigned i = 0; i < c_channelCount; i++)
+	{
+		if (sf)
+		{
+			updateChannel(i);
+		}
+	}
+	sf->setColorScale(m_colors[3]); //set grey colour ramp to start with
+	m_cloud->redrawDisplay();
 }
 
 ccColorFromScalarDlg::~ccColorFromScalarDlg()
 {
+	ccScalarField* sf = static_cast<ccScalarField*>(m_cloud->getCurrentDisplayedScalarField());
+	sf->setColorScale(m_storedOrigColorScale);
+	sf->setSaturationStart(m_storedOrigSatRange.min());
+	sf->setSaturationStop(m_storedOrigSatRange.max());
+	sf->setMinDisplayed(m_storedOrigDisplayRange.min());
+	sf->setMaxDisplayed(m_storedOrigDisplayRange.max());
+	m_cloud->redrawDisplay();
 	delete m_ui;
 }
 
 void ccColorFromScalarDlg::updateColormaps()
 {
 	//check for reversed
-	bool reversed[4] = { m_ui->reverseR->isChecked(), m_ui->reverseG->isChecked(), m_ui->reverseB->isChecked(), m_ui->reverseA->isChecked() };
+	bool reversed[c_channelCount] = { m_ui->reverseR->isChecked(), m_ui->reverseG->isChecked(), m_ui->reverseB->isChecked(), m_ui->reverseA->isChecked() };
 
 	//create colourmaps for RGB
 	if (m_ui->toggleRGB->isChecked())
@@ -173,17 +197,18 @@ void ccColorFromScalarDlg::updateColormaps()
 		m_ui->mAlphaLabel->setText( QStringLiteral( "Alpha" ) );
 
 		//populate colour ramps
-		Qt::GlobalColor start_colors[4] = { Qt::black , Qt::black , Qt::black , Qt::black };
-		Qt::GlobalColor end_colors[4] = { Qt::red , Qt::green , Qt::blue , Qt::white };
+		Qt::GlobalColor start_colors[c_channelCount] = { Qt::black , Qt::black , Qt::black , Qt::black };
+		Qt::GlobalColor end_colors[c_channelCount] = { Qt::red , Qt::green , Qt::blue , Qt::white };
 		
-		for (unsigned i = 0; i < 4; i++)
+		for (unsigned i = 0; i < c_channelCount; i++)
 		{
 			m_colors[i]->clear();
 			if (reversed[i]) //flip
 			{
 				m_colors[i]->insert(ccColorScaleElement(0.0, end_colors[i]));
 				m_colors[i]->insert(ccColorScaleElement(1.0, start_colors[i]));
-			} else
+			} 
+			else
 			{
 				m_colors[i]->insert(ccColorScaleElement(0.0, start_colors[i]));
 				m_colors[i]->insert(ccColorScaleElement(1.0, end_colors[i]));
@@ -201,10 +226,10 @@ void ccColorFromScalarDlg::updateColormaps()
 		m_ui->mAlphaLabel->setText( QStringLiteral( "Alpha" ) );
 
 		//populate colour ramps
-		Qt::GlobalColor start_colors[4] = { Qt::black , Qt::gray , Qt::black , Qt::black };
-		Qt::GlobalColor end_colors[4] = { Qt::red , Qt::green , Qt::white , Qt::white };
+		Qt::GlobalColor start_colors[c_channelCount] = { Qt::black , Qt::gray , Qt::black , Qt::black };
+		Qt::GlobalColor end_colors[c_channelCount] = { Qt::red , Qt::green , Qt::white , Qt::white };
 
-		for (unsigned i = 0; i < 4; i++)
+		for (unsigned i = 0; i < c_channelCount; i++)
 		{
 			m_colors[i]->clear();
 			if (reversed[i]) //flip
@@ -230,9 +255,11 @@ void ccColorFromScalarDlg::updateColormaps()
 		for (unsigned i = 0; i < 360; i+=2)
 		{
 			//calculate hue value
-			if (reversed[0]) {
+			if (reversed[0]) 
+			{
 				hue = 360 - i;
-			} else
+			} 
+			else
 			{
 				hue = i;
 			}
@@ -251,26 +278,24 @@ void ccColorFromScalarDlg::toggleColors(int state)
 {
 	//update colourmaps
 	updateColormaps();
-	
-	//update histograms
-	updateHistogram(0); 
-	updateHistogram(1); 
-	updateHistogram(2); 
-	updateHistogram(3);
+	setupDisplay();
 }
 
 void ccColorFromScalarDlg::toggleColorMode(bool state)
 {
 	//update colourmaps
 	updateColormaps();
-
-	//update histograms
-	updateChannel(0);
-	updateChannel(1);
-	updateChannel(2);
-	updateChannel(3);
+	setupDisplay();
 }
 
+void ccColorFromScalarDlg::setupDisplay()
+{
+	//update channels and histograms
+	for (int i = 0; i < c_channelCount; i++)
+	{
+		updateChannel(i);
+	}
+}
 void ccColorFromScalarDlg::updateHistogram(int n)
 {
 	//first check if fixed or not and enable disable ui features based on this
@@ -282,61 +307,64 @@ void ccColorFromScalarDlg::updateHistogram(int n)
 	m_reverse[n]->setEnabled(!fixed[n]);
 	if (fixed[n]) //this channel is/has been fixed
 	{
-		m_labels_min[n]->setText("  Value:");
-		m_boxes_min[n]->setMinimum(0.0);
-		m_boxes_min[n]->setMaximum(255.0);
-		m_boxes_max[n]->setMinimum(0.0);
-		m_boxes_max[n]->setMaximum(255.0);
-		m_boxes_min[n]->setValue(200.0);
-		m_boxes_max[n]->setValue(200.0);
-
-		//edge case for HSV values (0 - 360)
-		if (n == 0 && m_ui->toggleHSV->isChecked())
+		if (fixed[n] != m_prevFixed[n])
 		{
-			m_boxes_min[n]->setMaximum(360);
-		}
+			m_labels_min[n]->setText("  Value:");
+			m_boxes_min[n]->setMinimum(0.0);
+			m_boxes_min[n]->setMaximum(255.0);
+			m_boxes_max[n]->setMinimum(0.0);
+			m_boxes_max[n]->setMaximum(255.0);
+			m_boxes_min[n]->setValue(200.0);
+			m_boxes_max[n]->setValue(200.0);
 
-		//and make histogram grey
-		m_histograms[n]->clear();
-		m_histograms[n]->setSFInteractionMode(ccHistogramWindow::SFInteractionMode::None); //disable interactivity
-		m_histograms[n]->refresh();
-		m_histograms[n]->setAxisLabels("", "");
-		m_histograms[n]->yAxis->setVisible(false); //disable y-axis
-		m_histograms[n]->xAxis->setVisible(false); //disable y-axis
-		m_histograms[n]->replot();
-		m_histograms[n]->repaint();
+			//edge case for HSV values (0 - 360)
+			if (n == 0 && m_ui->toggleHSV->isChecked())
+			{
+				m_boxes_min[n]->setMaximum(360);
+			}
+
+			//and make histogram grey
+			m_histograms[n]->clear();
+			m_histograms[n]->setSFInteractionMode(ccHistogramWindow::SFInteractionMode::None); //disable interactivity
+			m_histograms[n]->setAxisLabels("", "");
+			m_histograms[n]->setAxisDisplayOption(ccHistogramWindow::AxisDisplayOption::None); //only display XAxis
+			m_histograms[n]->refresh();
+			m_histograms[n]->replot();
+			m_histograms[n]->repaint();
+		}
 	}
 	else
 	{
-		//ensure label text is correct
-		m_labels_min[n]->setText("Minimum:");
+		if (fixed[n] != m_prevFixed[n])
+		{
+			setDefaultSatValuePerChannel(n);
+			//ensure label text is correct
+			m_labels_min[n]->setText("Minimum:");
+		}
 
 		//set scalar field
 		m_scalars[n]->setColorScale(m_colors[n]);
+		
+		m_scalars[n]->setSaturationStart(m_boxes_min[n]->value());
+		m_scalars[n]->setSaturationStop(m_boxes_max[n]->value());
 
-		//clear and build histogram
-		m_histograms[n]->clear();
 		m_histograms[n]->fromSF(m_scalars[n], 255, false, true);
 		m_histograms[n]->setSFInteractionMode(ccHistogramWindow::SFInteractionMode::SaturationRange); //disable interactivity
-		m_histograms[n]->refresh();
-
-		//hide axis (not sure why this code HAS to be here, but it does...)
 		m_histograms[n]->setAxisLabels("", "");
-		m_histograms[n]->yAxis->setVisible(false); //disable y-axis
-		m_histograms[n]->xAxis->setVisible(true); //enable x-axis
-		m_histograms[n]->replot();
-		m_histograms[n]->repaint();
+		m_histograms[n]->setAxisDisplayOption(ccHistogramWindow::AxisDisplayOption::XAxis); //only display XAxis
+		m_histograms[n]->refresh();
 	}
+	m_prevFixed[n] = fixed[n];
 }
 
 void ccColorFromScalarDlg::updateChannel(int n)
 {
 	ccScalarField* sf = static_cast<ccScalarField*>(m_cloud->getScalarField(m_combos[n]->currentIndex()));
-	m_scalars[n] = sf;
 	if (sf)
 	{
-		sf->computeMinAndMax();
+		m_scalars[n] = sf;
 		sf->setColorScale(m_colors[n]);
+		sf->computeMinAndMax();
 
 		m_minSat[n] = sf->getMin();
 		m_maxSat[n] = sf->getMax();
@@ -346,12 +374,25 @@ void ccColorFromScalarDlg::updateChannel(int n)
 		m_boxes_max[n]->setMaximum(m_maxSat[n]);
 		m_boxes_max[n]->setCorrectionMode(QAbstractSpinBox::CorrectionMode::CorrectToNearestValue);
 		updateHistogram(n);
-
-		//set default stretch (n.b. this is a cheap hack to avoid calculating percentiles [by assuming uniform data distribution])
-		float range = m_maxSat[n] - m_minSat[n];
-		m_histograms[n]->setMinSatValue(m_minSat[n] + 0.1 * range);
-		m_histograms[n]->setMaxSatValue(m_maxSat[n] - 0.1 * range);
 	}
+}
+
+void ccColorFromScalarDlg::setDefaultSatValuePerChannel(int n)
+{
+	//set default stretch (n.b. this is a cheap hack to avoid calculating percentiles [by assuming uniform data distribution])
+	m_scalars[n]->setColorScale(m_colors[n]);
+	m_minSat[n] = m_scalars[n]->getMin();
+	m_maxSat[n] = m_scalars[n]->getMax();
+	ScalarType range = m_maxSat[n] - m_minSat[n];
+	m_histograms[n]->setMinSatValue(m_minSat[n] + 0.1 * range);
+	m_boxes_min[n]->setValue(m_minSat[n] + 0.1 * range);
+	m_histograms[n]->setMaxSatValue(m_maxSat[n] - 0.1 * range);
+	m_boxes_max[n]->setValue(m_maxSat[n] - 0.1 * range);
+}
+
+void ccColorFromScalarDlg::resizeEvent(QResizeEvent* event)
+{
+	setupDisplay();
 }
 
 //mapping ranges changed
@@ -397,19 +438,19 @@ void ccColorFromScalarDlg::onApply()
 	}
 
 	//which maps to flip?
-	bool reversed[4] = { m_ui->reverseR->isChecked(), m_ui->reverseG->isChecked(), m_ui->reverseB->isChecked(), m_ui->reverseA->isChecked() };
+	bool reversed[c_channelCount] = { m_ui->reverseR->isChecked(), m_ui->reverseG->isChecked(), m_ui->reverseB->isChecked(), m_ui->reverseA->isChecked() };
 
 	//and which are fixed?
-	bool fixed[4] = { m_ui->fixR->isChecked(), m_ui->fixG->isChecked(), m_ui->fixB->isChecked(), m_ui->fixA->isChecked() };
+	bool fixed[c_channelCount] = { m_ui->fixR->isChecked(), m_ui->fixG->isChecked(), m_ui->fixB->isChecked(), m_ui->fixA->isChecked() };
 
 	//map scalar values to RGB
 	if (m_ui->toggleRGB->isChecked())
 	{
-		int col[4];
+		int col[c_channelCount];
 		for (unsigned p = 0; p < m_cloud->size(); p++)
 		{
 			//get col
-			for (unsigned i = 0; i < 4; i++)
+			for (unsigned i = 0; i < c_channelCount; i++)
 			{
 				if (fixed[i]) //fixed value
 				{
@@ -435,11 +476,11 @@ void ccColorFromScalarDlg::onApply()
 	}
 	else //map scalar values to HSV (and then to RGB)
 	{
-		float col[4];
+		float col[c_channelCount];
 		for (unsigned p = 0; p < m_cloud->size(); p++)
 		{
 			//get col
-			for (unsigned i = 0; i < 4; i++)
+			for (unsigned i = 0; i < c_channelCount; i++)
 			{
 				if (fixed[i]) //fixed value
 				{
@@ -470,6 +511,4 @@ void ccColorFromScalarDlg::onApply()
 		m_cloud->showSF(false);
 		m_cloud->showColors(true);
 		m_cloud->redrawDisplay();
-		m_cloud->prepareDisplayForRefresh();
-		m_cloud->refreshDisplay();
 }

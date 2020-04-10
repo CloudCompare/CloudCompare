@@ -442,8 +442,10 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, int offset)
 		}
 	}
 
-	assert(false);
-	return std::deque<int>(); //shouldn't come here?
+	// If we're here, then it exhausted all the reachable points without finding the destination point.
+	// This can happen if, for example, the user is asking for a path between two "islands".
+	
+	return {};
 }
 
 int ccTrace::getSegmentCost(int p1, int p2)

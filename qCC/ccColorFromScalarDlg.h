@@ -85,6 +85,7 @@ protected:
 	void maxChanged(int n, double val, bool slider);
 	//done!
 	void onApply();
+	void disableAllButCancel();
 
 protected:
 	void resizeEvent(QResizeEvent* event);
@@ -111,6 +112,9 @@ protected:
 	ccColorScale::Shared m_storedOrigColorScale;
 	ccScalarField::Range m_storedOrigSatRange;
 	ccScalarField::Range m_storedOrigDisplayRange;
+	//set true when catastrophic failure has occured
+	bool m_systemInvalid;
+
 
 private:
 	Ui::ColorFromScalarDialog *m_ui;

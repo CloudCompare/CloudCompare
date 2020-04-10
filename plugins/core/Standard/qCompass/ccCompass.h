@@ -18,13 +18,9 @@
 #ifndef CC_COMPASS_HEADER
 #define CC_COMPASS_HEADER
 
-#include <QObject>
-
 //qCC
 #include "ccStdPluginInterface.h"
 #include <ccPickingListener.h>
-
-class QXmlStreamWriter;
 
 class ccCompassDlg;
 class ccFitPlaneTool;
@@ -187,16 +183,6 @@ protected:
 
 	//used to 'guess' the name of new GeoObjects
 	QString m_lastGeoObjectName = "GeoObject"; 
-
-	//used while exporting data
-	int writePlanes(ccHObject* object, QTextStream* out, const QString &parentName = QString());
-	int writeTraces(ccHObject* object, QTextStream* out, const QString &parentName = QString());
-	int writeLineations(ccHObject* object, QTextStream* out, const QString &parentName = QString(), bool thickness=false); //if thickness is true this will write "thickness lineations" rather than orientation lineations
-	
-	int writeTracesSVG(ccHObject* object, QTextStream* out, int height, float zoom);
-
-	int writeToXML(const QString &filename); //exports Compass interpretation tree to xml
-	int writeObjectXML(ccHObject* object, QXmlStreamWriter* out); //writes the provided object (recursive)
 
 	//checks if an object was made by this app (i.e. returns true if we are responsible for a given layer)
 	bool madeByMe(ccHObject* object);

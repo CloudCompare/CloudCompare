@@ -122,7 +122,7 @@ qBroomDlg::qBroomDlg(ccMainAppInterface* app/*=0*/)
 
 		m_glWindow->setPerspectiveState(false, true);
 		m_glWindow->displayOverlayEntities(true);
-		m_glWindow->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA());
+		m_glWindow->setInteractionMode(ccGLWindow::MODE_TRANSFORM_CAMERA);
 		m_glWindow->setPickingMode(ccGLWindow::NO_PICKING);
 		
 		//add window to the input frame (if any)
@@ -1104,7 +1104,7 @@ bool qBroomDlg::positionBroom(const CCVector3& P0, const CCVector3& P1)
 	//m_glWindow->redraw();
 
 	//now we wait for the user to click on the broom
-	m_glWindow->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA() | ccGLWindow::INTERACT_SIG_LB_CLICKED);
+	m_glWindow->setInteractionMode(ccGLWindow::MODE_TRANSFORM_CAMERA | ccGLWindow::INTERACT_SIG_LB_CLICKED);
 		
 	return true;
 }
@@ -1195,7 +1195,7 @@ void qBroomDlg::onReposition()
 	//enable picking
 	repositionPushButton->setText("Cancel");
 	automatePushButton->setEnabled(false);
-	m_glWindow->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA());
+	m_glWindow->setInteractionMode(ccGLWindow::MODE_TRANSFORM_CAMERA);
 	m_glWindow->setPickingMode(ccGLWindow::POINT_PICKING);
 	m_picking.mode = Picking::BROOM_PICKING;
 
@@ -1218,7 +1218,7 @@ void qBroomDlg::stopAutomation()
 	automatePushButton->setText("Automate");
 	m_glWindow->displayNewMessage(QString(), ccGLWindow::UPPER_CENTER_MESSAGE); //clear the area
 	//m_glWindow->setPickingMode(ccGLWindow::NO_PICKING);
-	m_glWindow->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA() | ccGLWindow::INTERACT_SIG_LB_CLICKED); //Standard interaction for manual broom displacement!
+	m_glWindow->setInteractionMode(ccGLWindow::MODE_TRANSFORM_CAMERA | ccGLWindow::INTERACT_SIG_LB_CLICKED); //Standard interaction for manual broom displacement!
 	m_picking.mode = Picking::NO_PICKING;
 	//m_picking.clear();
 	m_autoArea.clear();
@@ -1237,7 +1237,7 @@ void qBroomDlg::onAutomate()
 
 	//enable picking
 	automatePushButton->setText("Cancel");
-	m_glWindow->setInteractionMode(ccGLWindow::PAN_ONLY() | ccGLWindow::INTERACT_SIG_LB_CLICKED);
+	m_glWindow->setInteractionMode(ccGLWindow::MODE_PAN_ONLY | ccGLWindow::INTERACT_SIG_LB_CLICKED);
 	//m_glWindow->setPickingMode(ccGLWindow::POINT_PICKING); //We don't actually 'pick' an existing point!
 	m_picking.mode = Picking::AUTO_AREA_PICKING;
 	m_autoArea.clear(); //just in case
@@ -1680,7 +1680,7 @@ void qBroomDlg::onButtonReleased()
 		return;
 	}
 		
-	m_glWindow->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA() | ccGLWindow::INTERACT_SIG_LB_CLICKED);
+	m_glWindow->setInteractionMode(ccGLWindow::MODE_TRANSFORM_CAMERA | ccGLWindow::INTERACT_SIG_LB_CLICKED);
 
 	if (m_broomSelected)
 	{

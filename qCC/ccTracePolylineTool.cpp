@@ -332,7 +332,7 @@ bool ccTracePolylineTool::start()
 		m_pickingHub->removeListener(this);
 	}
 	m_associatedWin->setPickingMode(ccGLWindow::NO_PICKING);
-	m_associatedWin->setInteractionMode(	ccGLWindow::TRANSFORM_CAMERA()
+	m_associatedWin->setInteractionMode(	ccGLWindow::MODE_TRANSFORM_CAMERA
 										|	ccGLWindow::INTERACT_SIG_RB_CLICKED
 										|	ccGLWindow::INTERACT_CTRL_PAN
 										|	ccGLWindow::INTERACT_SIG_MOUSE_MOVED);
@@ -370,7 +370,7 @@ void ccTracePolylineTool::stop(bool accepted)
 
 		m_associatedWin->setUnclosable(false);
 		m_associatedWin->removeFromOwnDB(m_polyTip);
-		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA());
+		m_associatedWin->setInteractionMode(ccGLWindow::MODE_TRANSFORM_CAMERA);
 		m_associatedWin->setCursor(Qt::ArrowCursor);
 	}
 

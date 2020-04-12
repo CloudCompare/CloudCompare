@@ -94,7 +94,7 @@ qCanupo2DViewDialog::qCanupo2DViewDialog(	const CorePointDescSet* descriptors1,
 		params.displayCross = false;
 		m_glWindow->setDisplayParameters(params,true);
 		m_glWindow->setPerspectiveState(false,true);
-		m_glWindow->setInteractionMode(ccGLWindow::PAN_ONLY() | ccGLWindow::INTERACT_SEND_ALL_SIGNALS);
+        m_glWindow->setInteractionMode(ccGLWindow::MODE_PAN_ONLY | ccGLWindow::INTERACT_SEND_ALL_SIGNALS);
 		m_glWindow->setPickingMode(ccGLWindow::NO_PICKING);
 		m_glWindow->displayOverlayEntities(false);
 		//add window to the dedicated layout
@@ -674,7 +674,7 @@ void qCanupo2DViewDialog::moveSelectedPoint(int x, int y, Qt::MouseButtons butto
 void qCanupo2DViewDialog::deselectPoint()
 {
 	//to disable 'mouse move' event tracking
-	m_glWindow->setInteractionMode(ccGLWindow::PAN_ONLY() | ccGLWindow::INTERACT_SEND_ALL_SIGNALS);
+    m_glWindow->setInteractionMode(ccGLWindow::MODE_PAN_ONLY | ccGLWindow::INTERACT_SEND_ALL_SIGNALS);
 
 	m_selectedPointIndex = -1;
 }

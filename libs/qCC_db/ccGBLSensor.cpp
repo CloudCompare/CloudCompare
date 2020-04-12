@@ -270,15 +270,8 @@ ccGBLSensor::NormalGrid* ccGBLSensor::projectNormals(	CCLib::GenericCloud* cloud
 
 			if (distToSensor > ZERO_TOLERANCE)
 			{
-				//normal component along sensor viewing dir.
-				S.z = -N.dot(U) / distToSensor;
-
-				if (S.z > 1.0 - ZERO_TOLERANCE)
-				{
-					S.x = 0;
-					S.y = 0;
-				}
-				else
+				PointCoordinateType squareS2D = (S.x*S.x + S.y*S.y);
+				if (squareS2D > ZERO_TOLERANCE)
 				{
 					//and point+normal
 					CCVector3 P2 = *P + CCVector3(N);
@@ -286,10 +279,18 @@ ccGBLSensor::NormalGrid* ccGBLSensor::projectNormals(	CCLib::GenericCloud* cloud
 					PointCoordinateType depth2;
 					projectPoint(P2, S2, depth2, m_activeIndex);
 
+					//normal component along sensor viewing dir.
+					S.z = -N.dot(U) / distToSensor;
+
 					//deduce other normals components
-					PointCoordinateType coef = sqrt((1 - S.z*S.z) / (S.x*S.x + S.y*S.y));
+					PointCoordinateType coef = sqrt((PC_ONE - S.z*S.z) / squareS2D);
 					S.x = coef * (S2.x - Q.x);
 					S.y = coef * (S2.y - Q.y);
+				}
+				else
+				{
+					S.x = 0;
+					S.y = 0;
 				}
 			}
 			else

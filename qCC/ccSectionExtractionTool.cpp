@@ -513,7 +513,7 @@ void ccSectionExtractionTool::stop(bool accepted)
 
 	if (m_associatedWin)
 	{
-		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA());
+		m_associatedWin->setInteractionMode(ccGLWindow::MODE_TRANSFORM_CAMERA);
 		m_associatedWin->setPickingMode(ccGLWindow::DEFAULT_PICKING);
 		m_associatedWin->setUnclosable(false);
 	}
@@ -881,7 +881,7 @@ void ccSectionExtractionTool::enableSectionEditingMode(bool state)
 			m_editedPoly->clear();
 			m_editedPolyVertices->clear();
 		}
-		m_associatedWin->setInteractionMode(ccGLWindow::PAN_ONLY());
+		m_associatedWin->setInteractionMode(ccGLWindow::MODE_PAN_ONLY);
 		m_associatedWin->displayNewMessage(QString(), ccGLWindow::UPPER_CENTER_MESSAGE, false, 0, ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
 		m_associatedWin->setPickingMode(ccGLWindow::ENTITY_PICKING); //to be able to select polylines!
 	}

@@ -92,11 +92,6 @@ constexpr int CC_GL_FILTER_BANNER_MARGIN = 5;
 static const unsigned char MONO_OR_LEFT_RENDERING_PASS = 0;
 static const unsigned char RIGHT_RENDERING_PASS = 1;
 
-//default interaction flags
-ccGLWindow::INTERACTION_FLAGS ccGLWindow::PAN_ONLY()           { ccGLWindow::INTERACTION_FLAGS flags = INTERACT_PAN | INTERACT_ZOOM_CAMERA | INTERACT_2D_ITEMS | INTERACT_CLICKABLE_ITEMS; return flags; }
-ccGLWindow::INTERACTION_FLAGS ccGLWindow::TRANSFORM_CAMERA()   { ccGLWindow::INTERACTION_FLAGS flags = INTERACT_ROTATE | PAN_ONLY(); return flags; }
-ccGLWindow::INTERACTION_FLAGS ccGLWindow::TRANSFORM_ENTITIES() { ccGLWindow::INTERACTION_FLAGS flags = INTERACT_ROTATE | INTERACT_PAN | INTERACT_ZOOM_CAMERA | INTERACT_TRANSFORM_ENTITIES | INTERACT_CLICKABLE_ITEMS; return flags; }
-
 /*** Persistent settings ***/
 
 constexpr char c_ps_groupName[] = "ccGLWindow";
@@ -336,7 +331,7 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=0*/,
 	, m_mouseMoved(false)
 	, m_mouseButtonPressed(false)
 	, m_unclosable(false)
-	, m_interactionFlags(TRANSFORM_CAMERA())
+	, m_interactionFlags(MODE_TRANSFORM_CAMERA)
 	, m_pickingMode(NO_PICKING)
 	, m_pickingModeLocked(false)
 	, m_lastClickTime_ticks(0)
@@ -428,7 +423,7 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=0*/,
 
 	//default modes
 	setPickingMode(DEFAULT_PICKING);
-	setInteractionMode(TRANSFORM_CAMERA());
+	setInteractionMode(MODE_TRANSFORM_CAMERA);
 
 #ifndef CC_GL_WINDOW_USE_QWINDOW
 	//drag & drop handling

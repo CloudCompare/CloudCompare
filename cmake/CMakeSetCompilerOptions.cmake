@@ -1,25 +1,19 @@
-if( UNIX OR MINGW )
-    # You need a c++11 Compiler to build CC
-    # When we require cmake 3.1, we can use a cleaner method:
-    #   CXX_STANDARD & CXX_STANDARD_REQUIRED
-    #   https://cmake.org/cmake/help/v3.1/prop_tgt/CXX_STANDARD.html
-    include(CheckCXXCompilerFlag)
-    
-    CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-    
-    if (NOT COMPILER_SUPPORTS_CXX11)
-        message(ERROR "Your compiler does not support C++11")
-    endif()
-    
-    set( CXX11_FLAG "-std=c++11")
-    
-    # MinGW doesn't use fPIC
-    if( UNIX )
-        set( FPIC_FLAG  "-fPIC")
-    endif()
-    
-    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX11_FLAG} ${FPIC_FLAG}")
-    set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${FPIC_FLAG}")
+# Require C++14
+set( CMAKE_CXX_STANDARD 14 )
+set( CMAKE_CXX_STANDARD_REQUIRED ON )
+set( CMAKE_CXX_EXTENSIONS NO )
+
+# ccache
+# https://crascit.com/2016/04/09/using-ccache-with-cmake/
+find_program( CCACHE_PROGRAM ccache )
+
+if ( CCACHE_PROGRAM )
+    set( CMAKE_CXX_COMPILER_LAUNCHER ${CCACHE_PROGRAM} )
+    set( CMAKE_C_COMPILER_LAUNCHER ${CCACHE_PROGRAM} )
+endif()
+
+if ( UNIX )
+	set( CMAKE_POSITION_INDEPENDENT_CODE ON )	
 elseif( MSVC )
     add_definitions(-DNOMINMAX -D_CRT_SECURE_NO_WARNINGS -D__STDC_LIMIT_MACROS)
 

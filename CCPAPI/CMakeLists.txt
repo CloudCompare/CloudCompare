@@ -35,6 +35,7 @@ IF(NOT ${PYTHON_VERSION_STRING} MATCHES "${PYTHON_PREFERED_VERSION}\\..")
     MESSAGE(SEND_ERROR "no Python found matching ${PYTHON_PREFERED_VERSION}.x")
 ELSE()
     MESSAGE(STATUS "Python found ${PYTHON_VERSION_STRING} matches prefered version ${PYTHON_PREFERED_VERSION}.x")
+    MESSAGE(STATUS "PYTHON_LIBRARIES:" ${PYTHON_LIBRARIES})
 ENDIF()
 
 # --- Sip detection
@@ -65,12 +66,14 @@ file( GLOB source_list *.cpp )
 
 add_library( CC_PAPI_LIB STATIC ${header_list} ${source_list} )
 
-target_link_libraries( CC_PAPI_LIB CC_FBO_LIB )
-target_link_libraries( CC_PAPI_LIB CC_CORE_LIB )
-target_link_libraries( CC_PAPI_LIB QCC_DB_LIB )
-target_link_libraries( CC_PAPI_LIB QCC_IO_LIB )
-target_link_libraries( CC_PAPI_LIB QCC_GL_LIB )
-target_link_libraries( CC_PAPI_LIB qcustomplot )
+target_link_libraries( CC_PAPI_LIB
+    CC_FBO_LIB
+    CC_CORE_LIB
+    QCC_DB_LIB
+    QCC_IO_LIB
+    QCC_GL_LIB
+    qcustomplot
+    )
 
 # --- Python wrapping with sip
 
@@ -78,7 +81,7 @@ INCLUDE_DIRECTORIES(
   ${SIP_INCLUDE_DIR}
   ${PYTHON_INCLUDE_DIRS}
   ${CMAKE_CURRENT_SOURCE_DIR}
-)
+  )
 
 # --- sources / sip wrappings
 
@@ -93,6 +96,7 @@ SET(SIP_ALL_SOURCES ${SIP_MAIN_SOURCE} ${SIP_ADD_SOURCES})
 MESSAGE(STATUS "SIP_ALL_SOURCES: " "${SIP_ALL_SOURCES}")
 
 # TODO: names of generated sip files follow some rules based on module name, class name, namespace etc. Not obvious to compute...
+
 SET(SIP_MAIN_GENSRC ${CMAKE_CURRENT_BINARY_DIR}/sipcloudComparecmodule.cc)
 SET(SIP_ADD_GENSRC
     ${CMAKE_CURRENT_BINARY_DIR}/sipcloudCompareccPointCloud.cc
@@ -107,6 +111,7 @@ MESSAGE(STATUS "SIP_ALL_GENSRC: " "${SIP_ALL_GENSRC}")
 set_source_files_properties( ${SIP_ALL_GENSRC} PROPERTIES GENERATED TRUE )
 
 # TODO: generate the sip options (Qt version, sip path...)
+
 SET(SIP_OPTIONS -s .cc -c . -t WS_X11 -t Qt_5_9_5 -I /usr/share/sip/PyQt5)
 
 ADD_CUSTOM_COMMAND(
@@ -119,11 +124,40 @@ ADD_CUSTOM_COMMAND(
 
 ADD_LIBRARY( cloudCompare SHARED ${SIP_ALL_GENSRC} )
 
-TARGET_LINK_LIBRARIES(cloudCompare ${PYTHON_LIBRARIES} CC_PAPI_LIB CC_FBO_LIB CC_CORE_LIB QCC_DB_LIB QCC_GL_LIB qcustomplot Qt5::Core Qt5::Widgets Qt5::Concurrent)
+TARGET_LINK_LIBRARIES(cloudCompare
+    ${PYTHON_LIBRARIES}
+    CC_PAPI_LIB
+    CC_FBO_LIB
+    CC_CORE_LIB
+    QCC_DB_LIB
+    QCC_GL_LIB
+    qcustomplot
+    )
 
-SET(INSTALL_CLOUDCOMPARE_PYTHON ${CMAKE_INSTALL_LIBDIR}/cloudcompare)
-MESSAGE(STATUS "INSTALL_CLOUDCOMPARE_PYTHON: " ${INSTALL_CLOUDCOMPARE_PYTHON})
-INSTALL(TARGETS cloudCompare LIBRARY DESTINATION ${INSTALL_CLOUDCOMPARE_PYTHON})
+# Qt libraries
+
+TARGET_LINK_LIBRARIES(cloudCompare
+    Qt5::Core
+    Qt5::Gui
+    Qt5::Widgets
+    Qt5::OpenGL
+    Qt5::PrintSupport
+    )
+
+IF (WIN32)
+   TARGET_LINK_LIBRARIES(cloudCompare Qt5::WinMain)
+ENDIF()
+
+IF( WIN32 OR APPLE)
+   FOREACH( dest ${INSTALL_DESTINATIONS} )
+       MESSAGE(STATUS "INSTALL_DESTINATIONS: " ${dest})
+       INSTALL_SHARED( cloudCompare ${dest} 1 )
+   ENDFOREACH()
+ELSE()
+    SET(INSTALL_CLOUDCOMPARE_PYTHON ${CMAKE_INSTALL_LIBDIR}/cloudcompare)
+    MESSAGE(STATUS "INSTALL_CLOUDCOMPARE_PYTHON: " ${INSTALL_CLOUDCOMPARE_PYTHON})
+    INSTALL(TARGETS cloudCompare LIBRARY DESTINATION ${INSTALL_CLOUDCOMPARE_PYTHON})
+ENDIF()
 
 IF(WIN32)
   SET_TARGET_PROPERTIES(cloudCompare PROPERTIES SUFFIX ".pyd" DEBUG_OUTPUT_NAME cloudCompare_d RELEASE_OUTPUT_NAME cloudCompare)

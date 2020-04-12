@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.0)
 
+# to compile CCLib only! (CMake implicitly imposes to declare a project before anything...)
+project( CC_CORE_LIB VERSION 1.0 )
+
 # Options
 option( COMPILE_CC_CORE_LIB_WITH_QT "Check to compile CC_CORE_LIB with Qt (to enable parallel processing)" ON )
 option( COMPILE_CC_CORE_LIB_WITH_CGAL "Check to compile CC_CORE_LIB with CGAL lib. (to enable Delaunay 2.5D triangulation with a GPL compliant licence)" OFF )
@@ -15,9 +18,6 @@ if ( OPTION_SCALAR_DOUBLE )
 else()
 	add_definitions( -DSCALAR_TYPE_FLOAT )
 endif()
-
-# to compile CCLib only! (CMake implicitly imposes to declare a project before anything...)
-project( CC_CORE_LIB VERSION 1.0 )
 
 include ( CMakePolicies )
 include ( CMakeSetCompilerOptions )

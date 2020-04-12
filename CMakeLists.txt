@@ -2,17 +2,6 @@ cmake_minimum_required(VERSION 3.0)
 
 project( CloudCompareProjects )
 
-option(BUILD_TESTING "" OFF)
-include(CTest)
-
-list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/" )
-
-include( CMakePolicies )
-include( CMakeSetCompilerOptions )
-
-# Default debug suffix for libraries.
-set( CMAKE_DEBUG_POSTFIX "d" )
-
 # One shouldn't generate the BUILD project directly in the SOURCES folder!
 if ( ${CMAKE_CURRENT_BINARY_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR} )
 	if ( NOT SAME_BUILD_AND_SOURCE_FOLDER_WARNING_ALREADY_ISSUED )
@@ -20,6 +9,27 @@ if ( ${CMAKE_CURRENT_BINARY_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR} )
 		set( SAME_BUILD_AND_SOURCE_FOLDER_WARNING_ALREADY_ISSUED TRUE )
 	endif()
 endif()
+
+# Add our cmake module path so we don't need relative paths for these
+list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/" )
+
+include( CMakePolicies )
+include( CMakeSetCompilerOptions )
+
+# CCViewer
+option( OPTION_BUILD_CCVIEWER "Check to compile CCViewer project" ON )
+
+# Quad buffer stereo support
+option( OPTION_GL_QUAD_BUFFER_SUPPORT "Check to compile CloudCompare and ccViewer with Quad Buffer support" OFF )
+
+# Testing
+option( BUILD_TESTING "Build tests for CC" OFF )
+if ( BUILD_TESTING )
+	include( CTest )
+endif()
+
+# Default debug suffix for libraries.
+set( CMAKE_DEBUG_POSTFIX "d" )
 
 # Default install folders
 # (on Windows - msvc generator - the '_debug' suffix is automatically added for debug configurations)
@@ -31,12 +41,6 @@ if( UNIX AND NOT APPLE )
 	include( GNUInstallDirs )
 	set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_FULL_LIBDIR}/cloudcompare")
 endif()
-
-# CCViewer
-OPTION( OPTION_BUILD_CCVIEWER "Check to compile CCViewer project" ON )
-
-# Quad buffer stereo support
-OPTION( OPTION_GL_QUAD_BUFFER_SUPPORT "Check to compile CloudCompare and ccViewer with Quad Buffer support" OFF )
 
 # Define target folders
 # (now that ccViewer can have its own plugins, qCC and ccViewer must fall in separate folders!
@@ -75,7 +79,7 @@ include( CMakeInclude )
 
 add_subdirectory( CC )
 
-# Propagate the choice to use doubles for ScalarType
+# Propagate the choice from CCLib to use doubles for ScalarType
 if ( ${USE_SCALAR_TYPE_DOUBLE} )
 	add_definitions( -DSCALAR_TYPE_DOUBLE )
 else()
@@ -102,6 +106,6 @@ add_subdirectory( plugins )
 add_subdirectory( qCC )
 
 # CCViewer
-if( ${OPTION_BUILD_CCVIEWER} )
+if( OPTION_BUILD_CCVIEWER )
 	add_subdirectory( ccViewer )
 endif()

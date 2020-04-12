@@ -21,12 +21,21 @@ cmake_policy(SET CMP0071 NEW)
 MESSAGE(STATUS "CC PYthon API")
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cmake")
 
-# --- Python detection
+# --- Python detection: if several versions installed, select one with all the required packages installed
 
-SET(Python_ADDITIONAL_VERSIONS 3.6) # priority to this version 
+SET(PYTHON_PREFERED_VERSION "3.6" CACHE STRING "Select a Python version: it should be installed with all packages required for CloudCompare (pyqt, sip, numpy)")
+set_property(CACHE PYTHON_PREFERED_VERSION PROPERTY STRINGS "3.6" "3.7" "3.8")
+MESSAGE(STATUS "python prefered version: " ${PYTHON_PREFERED_VERSION})
+SET(Python_ADDITIONAL_VERSIONS ${PYTHON_PREFERED_VERSION}) # priority to this version 
 FIND_PACKAGE(PythonInterp)
 FIND_PACKAGE(PythonLibs)
 MESSAGE(STATUS "python version: " ${PYTHON_VERSION_STRING})
+MESSAGE(STATUS "check match for ${PYTHON_PREFERED_VERSION}.x")
+IF(NOT ${PYTHON_VERSION_STRING} MATCHES "${PYTHON_PREFERED_VERSION}\\..")
+    MESSAGE(SEND_ERROR "no Python found matching ${PYTHON_PREFERED_VERSION}.x")
+ELSE()
+    MESSAGE(STATUS "Python found ${PYTHON_VERSION_STRING} matches prefered version ${PYTHON_PREFERED_VERSION}.x")
+ENDIF()
 
 # --- Sip detection
 

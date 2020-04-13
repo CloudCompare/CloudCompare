@@ -169,11 +169,15 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
 
 				updateColormaps();
 				
+				//initialise histograms
 				m_prevFixed[c_channelCount - 1] = false;
-				for (unsigned i = 0; i < c_channelCount; i++)
+				updateChannel(0); //init first histogram
+				for (unsigned i = 1; i < c_channelCount; i++) //copy data from this histogram into the next ones
 				{
 					m_scalars[i] = sf;
-					updateChannel(i);
+					setDefaultSatValuePerChannel(i);
+					m_histograms[i]->fromBinArray(m_histograms[0]->histoValues(), m_histograms[0]->minVal(), m_histograms[0]->maxVal());
+					updateHistogram(i);
 				}	
 				
 				sf->setColorScale(m_colors[c_channelCount - 1]); //set grey colour ramp to start with
@@ -450,7 +454,6 @@ void ccColorFromScalarDlg::updateChannel(int n)
 		if (sf)
 		{
 			m_scalars[n] = sf;
-			sf->computeMinAndMax();
 			setDefaultSatValuePerChannel(n);
 			m_histograms[n]->clear(); //clear last histogram
 			m_histograms[n]->fromSF(m_scalars[n], 255, false, true); //generate new one

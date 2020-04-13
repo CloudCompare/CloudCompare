@@ -40,7 +40,7 @@ ENDIF()
 
 # --- Sip detection
 
-FIND_PACKAGE(SIP REQUIRED)  # should come after Python (and before PyQt if needed)
+FIND_PACKAGE(PYQTSIP REQUIRED)  # should come after Python
 
 # --- C++ library cc Python Api (ccPApi)
 
@@ -111,8 +111,8 @@ MESSAGE(STATUS "SIP_ALL_GENSRC: " "${SIP_ALL_GENSRC}")
 set_source_files_properties( ${SIP_ALL_GENSRC} PROPERTIES GENERATED TRUE )
 
 # TODO: generate the sip options (Qt version, sip path...)
-
-SET(SIP_OPTIONS -s .cc -c . -t WS_X11 -t Qt_5_9_5 -I /usr/share/sip/PyQt5)
+SET(SIP_OPTIONS -s .cc -c . ${PYQT_SIPFLAGS})
+MESSAGE(STATUS "SIP_OPTIONS: " "${SIP_OPTIONS}")
 
 ADD_CUSTOM_COMMAND(
     OUTPUT ${SIP_ALL_GENSRC}

@@ -44,7 +44,7 @@ public:
 	~ccColorFromScalarDlg();
 
 	static constexpr int c_channelCount = 4;
-	void setupDisplay();
+	void refreshDisplay();
 	//update and redraw histograms
 	void updateHistogram(int);
 

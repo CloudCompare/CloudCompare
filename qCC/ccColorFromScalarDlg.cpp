@@ -169,11 +169,15 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
 
 				updateColormaps();
 				
+				//initialise histograms
 				m_prevFixed[c_channelCount - 1] = false;
-				for (unsigned i = 0; i < c_channelCount; i++)
+				updateChannel(0); //init first histogram
+				for (unsigned i = 1; i < c_channelCount; i++) //copy data from this histogram into the next ones
 				{
 					m_scalars[i] = sf;
-					updateChannel(i);
+					setDefaultSatValuePerChannel(i);
+					m_histograms[i]->fromBinArray(m_histograms[0]->histoValues(), m_histograms[0]->minVal(), m_histograms[0]->maxVal());
+					updateHistogram(i);
 				}	
 				
 				sf->setColorScale(m_colors[c_channelCount - 1]); //set grey colour ramp to start with
@@ -305,7 +309,9 @@ void ccColorFromScalarDlg::toggleColors(int state)
 	{
 		//update colourmaps
 		updateColormaps();
-		setupDisplay();
+
+		//refresh histograms
+		refreshDisplay();
 	}
 }
 
@@ -315,21 +321,23 @@ void ccColorFromScalarDlg::toggleColorMode(bool state)
 	{
 		//update colourmaps
 		updateColormaps();
-		setupDisplay();
+		refreshDisplay();
 	}
 }
 
-void ccColorFromScalarDlg::setupDisplay()
+// update/redraw histograms but don't reset postion of UI elements/sliders etc. 
+void ccColorFromScalarDlg::refreshDisplay()
 {
 	if (!m_systemInvalid)
 	{
-		//update channels and histograms
+		// refresh histograms
 		for (int i = 0; i < c_channelCount; i++)
 		{
-			updateChannel(i);
+			updateHistogram(i);
 		}
 	}
 }
+
 
 void ccColorFromScalarDlg::updateHistogram(int n)
 {
@@ -375,27 +383,19 @@ void ccColorFromScalarDlg::updateHistogram(int n)
 				m_histograms[n]->setAxisDisplayOption(ccHistogramWindow::AxisDisplayOption::None); //only display XAxis
 				m_histograms[n]->refresh();
 				m_histograms[n]->replot();
-				m_histograms[n]->repaint();
-				m_histograms[n]->replot();
-				m_histograms[n]->repaint();				
 		}
 		else
 		{
 			if (fixed[n] != m_prevFixed[n])
 			{
-				
-				setDefaultSatValuePerChannel(n);
-				//ensure label text is correct
-				m_labels_min[n]->setText("Minimum:");
+				setDefaultSatValuePerChannel(n); //update slider positions
+				m_labels_min[n]->setText("Minimum:"); //ensure label text is correct
 			}
 
 			//set scalar field
 			m_scalars[n]->setColorScale(m_colors[n]);
-
 			m_scalars[n]->setSaturationStart(m_boxes_min[n]->value());
 			m_scalars[n]->setSaturationStop(m_boxes_max[n]->value());
-
-			m_histograms[n]->fromSF(m_scalars[n], 255, false, true);
 			m_histograms[n]->setSFInteractionMode(ccHistogramWindow::SFInteractionMode::SaturationRange); //disable interactivity
 			m_histograms[n]->setAxisLabels("", "");
 			m_histograms[n]->setAxisDisplayOption(ccHistogramWindow::AxisDisplayOption::XAxis); //only display XAxis
@@ -454,10 +454,10 @@ void ccColorFromScalarDlg::updateChannel(int n)
 		if (sf)
 		{
 			m_scalars[n] = sf;
-			updateSpinBoxLimits(n);
-			sf->setColorScale(m_colors[n]);
-			sf->computeMinAndMax();
-			updateHistogram(n);
+			setDefaultSatValuePerChannel(n);
+			m_histograms[n]->clear(); //clear last histogram
+			m_histograms[n]->fromSF(m_scalars[n], 255, false, true); //generate new one
+			updateHistogram(n); //update plotting etc.
 		}
 	}
 }
@@ -486,7 +486,7 @@ void ccColorFromScalarDlg::setDefaultSatValuePerChannel(int n)
 
 void ccColorFromScalarDlg::resizeEvent(QResizeEvent* event)
 {
-	setupDisplay();
+	refreshDisplay();
 }
 
 //mapping ranges changed
@@ -585,7 +585,7 @@ void ccColorFromScalarDlg::onApply()
 						col[i] = 255 - col[i];
 					}
 				}
-				m_cloud->setPointColor(p, ccColor::FromQColor(QColor(col[0], col[1], col[2], col[3])));
+				m_cloud->setPointColor(p, ccColor::FromQColora(QColor(col[0], col[1], col[2], col[3])));
 			}
 		}
 		else //map scalar values to HSV (and then to RGB)
@@ -598,7 +598,7 @@ void ccColorFromScalarDlg::onApply()
 				{
 					if (fixed[i]) //fixed value
 					{
-						col[i] = m_boxes_min[i]->value() / m_boxes_min[i]->maximum();
+						col[i] = m_boxes_min[i]->value() / m_boxes_min[i]->maximum(); //n.b. most 'fixed' boxes between 0 - 255, but hue between 0 and 360.
 					}
 					else //map from scalar
 					{

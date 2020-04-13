@@ -582,7 +582,7 @@ void ccColorFromScalarDlg::onApply()
 						col[i] = 255 - col[i];
 					}
 				}
-				m_cloud->setPointColor(p, ccColor::FromQColor(QColor(col[0], col[1], col[2], col[3])));
+				m_cloud->setPointColor(p, ccColor::FromQColora(QColor(col[0], col[1], col[2], col[3])));
 			}
 		}
 		else //map scalar values to HSV (and then to RGB)

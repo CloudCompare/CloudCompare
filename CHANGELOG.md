@@ -22,13 +22,13 @@ v2.11 (Anoia) - (in development)
 		- Edit > Normals > Export normals to SF(s) (or equivalently Edit > Scalar fields > Export normals to SF(s))
 		- Command line argument: -NORMALS_TO_SFS (all dimensions are exported by default as 3 scalar fields)
 	- Command line:
-		- -H_EXPORT_FMT added to select format for hierarchy objects exported
+		- '-H_EXPORT_FMT' added to select format for hierarchy objects exported
 		- The PCV tool can now be accessed via the command line:
-			- Option -PCV (see https://www.cloudcompare.org/doc/wiki/index.php?title=Command_line_mode for sub-options)
+			- Option '-PCV' (see https://www.cloudcompare.org/doc/wiki/index.php?title=Command_line_mode for sub-options)
 			- Can be called on any number of clouds or meshes
 			- (the tool was already accessible in V2.10, but in a very limited way)
 		- RANSAC plugin support added, all parameters below are optional and can be added in any order, and will work on all clouds opened and already loaded when called
-			- -RANSAC (main command)
+			- '-RANSAC' (main command)
 				- EPSILON_ABSOLUTE - max distance to primitive
 				- EPSILON_PERCENTAGE_OF_SCALE - max distance to primitive as a percentage of cloud scale 0.0-1.0 exclusive
 				- BITMAP_EPSILON_PERCENTAGE_OF_SCALE - sampling resolution as a percentage of cloud scale 0.0-1.0 exclusive
@@ -46,14 +46,16 @@ v2.11 (Anoia) - (in development)
 				- OUTPUT_GROUPED - output all detected shapes clouds & meshes as single file
 				- ENABLE_PRIMITIVE - each shape listed after this option will be searched for
 					- Shapes are: PLANE, SPHERE, CYLINDER, CONE, TORUS
-	- The 1st Order Moment tool (Tools > Other > Compute geometric features) can now be accessed via
-		the command line mode with option -MOMENT {kernel size}
-		- Computes 1st order moment on all opened clouds and auto saved by default.
-	- The Feature tools (Tools > Other > Compute geometric features) can now be accessed via
-		the command line mode with option -FEATURE {type} {kernel size}
-		- type is one of the following: SUM_OF_EIGENVALUES, OMNIVARIANCE, EIGENTROPY, ANISOTROPY, PLANARITY, LINEARITY, PCA1, PCA2, SURFACE_VARIATION, SPHERICITY, VERTICALITY, EIGENVALUE1, EIGENVALUE2, EIGENVALUE3.
-	- NORMALS_TO_DIP - converts the loaded cloud normals to dip and dip direction (scalar fields)
-	- NORMALS_TO_SFS - converts the loaded cloud normals to 3 scalar fields (Nx, Ny and Nz)
+	    - '-NORMALS_TO_DIP': converts the loaded cloud normals to dip and dip direction (scalar fields)
+	    - '-NORMALS_TO_SFS': converts the loaded cloud normals to 3 scalar fields (Nx, Ny and Nz)
+		- '-REMOVE_RGB': to remove RGB colors (from all loaded entities, i.e. clouds or meshes)
+		- '-REMOVE_Normals': to remove normals (from all loaded entities, i.e. clouds or meshes)
+	    - The 1st Order Moment tool (Tools > Other > Compute geometric features) can now be accessed via
+	    	the command line mode with option -MOMENT {kernel size}
+	    	- Computes 1st order moment on all opened clouds and auto saved by default.
+	    - The Feature tools (Tools > Other > Compute geometric features) can now be accessed via
+    		the command line mode with option -FEATURE {type} {kernel size}
+	    	- type is one of the following: SUM_OF_EIGENVALUES, OMNIVARIANCE, EIGENTROPY, ANISOTROPY, PLANARITY, LINEARITY, PCA1, PCA2, SURFACE_VARIATION, SPHERICITY, VERTICALITY, EIGENVALUE1, EIGENVALUE2, EIGENVALUE3.
 	- 4 new default color scales:
 		- Brown > Yellow
 		- Yellow > Brown

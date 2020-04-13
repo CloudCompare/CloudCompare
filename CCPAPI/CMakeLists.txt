@@ -38,7 +38,7 @@ ELSE()
     MESSAGE(STATUS "PYTHON_LIBRARIES:" ${PYTHON_LIBRARIES})
 ENDIF()
 
-# --- Sip detection
+# --- PyQt Sip detection
 
 FIND_PACKAGE(PYQTSIP REQUIRED)  # should come after Python
 
@@ -82,6 +82,14 @@ INCLUDE_DIRECTORIES(
   ${PYTHON_INCLUDE_DIRS}
   ${CMAKE_CURRENT_SOURCE_DIR}
   )
+
+# --- Numpy includes
+
+FIND_PATH(NUMPY_INCLUDE_DIR numpy/npy_common.h HINTS ${PYTHON_INCLUDE_DIRS} DOC "directory path of include: numpy/npy_common.h")
+MESSAGE(STATUS "NUMPY_INCLUDE_DIR: " ${NUMPY_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(
+  ${NUMPY_INCLUDE_DIR}
+)
 
 # --- sources / sip wrappings
 

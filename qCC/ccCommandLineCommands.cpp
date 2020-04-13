@@ -66,6 +66,8 @@ constexpr char COMMAND_MERGE_MESHES[]                   = "MERGE_MESHES";
 constexpr char COMMAND_SET_ACTIVE_SF[]					= "SET_ACTIVE_SF";
 constexpr char COMMAND_REMOVE_ALL_SFS[]					= "REMOVE_ALL_SFS";
 constexpr char COMMAND_REMOVE_SCAN_GRIDS[]				= "REMOVE_SCAN_GRIDS";
+constexpr char COMMAND_REMOVE_RGB[]						= "REMOVE_RGB";
+constexpr char COMMAND_REMOVE_NORMALS[]					= "REMOVE_NORMALS";
 constexpr char COMMAND_MATCH_BB_CENTERS[]				= "MATCH_CENTERS";
 constexpr char COMMAND_BEST_FIT_PLANE[]					= "BEST_FIT_PLANE";
 constexpr char COMMAND_BEST_FIT_PLANE_MAKE_HORIZ[]		= "MAKE_HORIZ";
@@ -2181,6 +2183,76 @@ bool CommandRemoveAllSF::process(ccCommandLineInterface &cmd)
 		}
 	}
 	
+	return true;
+}
+
+CommandRemoveRGB::CommandRemoveRGB()
+	: ccCommandLineInterface::Command(QObject::tr("Remove RGB"), COMMAND_REMOVE_RGB)
+{}
+
+bool CommandRemoveRGB::process(ccCommandLineInterface &cmd)
+{
+	//no argument required
+	for (auto &cloudDesc : cmd.clouds())
+	{
+		if (cloudDesc.pc)
+		{
+			cloudDesc.pc->unallocateColors();
+			cloudDesc.pc->showColors(false);
+		}
+	}
+
+	for (auto &meshDesc : cmd.meshes())
+	{
+		if (meshDesc.mesh)
+		{
+			ccGenericPointCloud* cloud = meshDesc.mesh->getAssociatedCloud();
+			if (cloud->isA(CC_TYPES::POINT_CLOUD))
+			{
+				static_cast<ccPointCloud*>(cloud)->unallocateColors();
+				cloud->showColors(false);
+			}
+			meshDesc.mesh->showColors(false);
+		}
+	}
+
+	return true;
+}
+
+CommandRemoveNormals::CommandRemoveNormals()
+	: ccCommandLineInterface::Command(QObject::tr("Remove normals"), COMMAND_REMOVE_NORMALS)
+{}
+
+bool CommandRemoveNormals::process(ccCommandLineInterface &cmd)
+{
+	//no argument required
+	for (auto &cloudDesc : cmd.clouds())
+	{
+		if (cloudDesc.pc)
+		{
+			cloudDesc.pc->unallocateNorms();
+			cloudDesc.pc->showNormals(false);
+		}
+	}
+
+	for (auto &meshDesc : cmd.meshes())
+	{
+		if (meshDesc.mesh)
+		{
+			ccGenericPointCloud* cloud = meshDesc.mesh->getAssociatedCloud();
+			if (cloud->isA(CC_TYPES::POINT_CLOUD))
+			{
+				static_cast<ccPointCloud*>(cloud)->unallocateNorms();
+				cloud->showNormals(false);
+			}
+			if (meshDesc.mesh->isA(CC_TYPES::MESH))
+			{
+				static_cast<ccMesh*>(meshDesc.mesh)->clearTriNormals();
+				meshDesc.mesh->showNormals(false);
+			}
+		}
+	}
+
 	return true;
 }
 

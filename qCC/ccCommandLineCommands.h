@@ -188,6 +188,20 @@ struct CommandRemoveAllSF : public ccCommandLineInterface::Command
 	bool process(ccCommandLineInterface& cmd) override;
 };
 
+struct CommandRemoveRGB : public ccCommandLineInterface::Command
+{
+	CommandRemoveRGB();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
+struct CommandRemoveNormals : public ccCommandLineInterface::Command
+{
+	CommandRemoveNormals();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
 struct CommandRemoveScanGrids : public ccCommandLineInterface::Command
 {
 	CommandRemoveScanGrids();

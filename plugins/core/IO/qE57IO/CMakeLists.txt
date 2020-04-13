@@ -9,18 +9,15 @@ if ( PLUGIN_IO_QE57 )
 
 	set( CC_IS_IO_PLUGIN 1 )
 
-	find_package( XercesC REQUIRED )
-	
-	include_directories( ${XercesC_INCLUDE_DIRS} )
 	include_directories( extern/libE57Format/include )
 	include_directories( src )
 
 	add_subdirectory( src )
-	add_subdirectory( extern/libE57Format EXCLUDE_FROM_ALL)
+	add_subdirectory( extern/libE57Format EXCLUDE_FROM_ALL )
 	
 	include( ../../../CMakePluginTpl.cmake )
 	
-	target_link_libraries( ${PROJECT_NAME} E57Format ${XercesC_LIBRARIES} )
+	target_link_libraries( ${PROJECT_NAME} E57Format )
 	
 	if ( USING_STATIC_XERCES )
 		target_compile_definitions( ${PROJECT_NAME} PRIVATE XERCES_STATIC_LIBRARY )

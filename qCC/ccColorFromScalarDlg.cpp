@@ -40,8 +40,8 @@
 ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointCloud)
 	: QDialog(parent, Qt::Tool)
 	, m_cloud(pointCloud)
-	, m_ui(new Ui::ColorFromScalarDialog)
 	, m_systemInvalid(false)
+	, m_ui(new Ui::ColorFromScalarDialog)
 {
 	m_ui->setupUi(this);
 	
@@ -77,120 +77,117 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
 
 	m_ui->fixA->setChecked(true); //set alpha fixed to checked
 
-		//create histograms
-		QFrame* histoFrame[c_channelCount] = { m_ui->histoFrameR, m_ui->histoFrameG, m_ui->histoFrameB, m_ui->histoFrameA };
-		for (unsigned i = 0; i < c_channelCount; i++)
+	//create histograms
+	QFrame* histoFrame[c_channelCount] = { m_ui->histoFrameR, m_ui->histoFrameG, m_ui->histoFrameB, m_ui->histoFrameA };
+	for (unsigned i = 0; i < c_channelCount; i++)
+	{
+		m_histograms[i] = new ccHistogramWindow(this);
+		m_histograms[i]->setRefreshAfterResize(false);
+		auto layout = new QHBoxLayout;
+
+		layout->setContentsMargins(0, 0, 0, 0);
+		layout->addWidget(m_histograms[i]);
+
+		histoFrame[i]->setLayout(layout);
+	}
+
+	//connect GUI elements
+	connect(m_ui->channelComboR, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccColorFromScalarDlg::onChannelChangedR);
+	connect(m_ui->channelComboG, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccColorFromScalarDlg::onChannelChangedG);
+	connect(m_ui->channelComboB, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccColorFromScalarDlg::onChannelChangedB);
+	connect(m_ui->channelComboA, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccColorFromScalarDlg::onChannelChangedA);
+
+	connect(m_ui->buttonBox->button(QDialogButtonBox::Apply), &QPushButton::clicked, this, &ccColorFromScalarDlg::onApply);
+	connect(m_ui->minInputSpinBoxR, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::minSpinChangedR);
+	connect(m_ui->maxInputSpinBoxR, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::maxSpinChangedR);
+	connect(m_ui->minInputSpinBoxG, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::minSpinChangedG);
+	connect(m_ui->maxInputSpinBoxG, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::maxSpinChangedG);
+	connect(m_ui->minInputSpinBoxB, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::minSpinChangedB);
+	connect(m_ui->maxInputSpinBoxB, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::maxSpinChangedB);
+	connect(m_ui->minInputSpinBoxA, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::minSpinChangedA);
+	connect(m_ui->maxInputSpinBoxA, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::maxSpinChangedA);
+
+	connect(m_ui->reverseR, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleColors);
+	connect(m_ui->reverseG, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleColors);
+	connect(m_ui->reverseB, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleColors);
+	connect(m_ui->reverseA, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleColors);
+	connect(m_ui->toggleHSV, &QRadioButton::toggled, this, &ccColorFromScalarDlg::toggleColorMode);
+	connect(m_ui->toggleRGB, &QRadioButton::toggled, this, &ccColorFromScalarDlg::toggleColorMode);
+
+	connect(m_ui->fixR, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleFixedR);
+	connect(m_ui->fixG, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleFixedG);
+	connect(m_ui->fixB, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleFixedB);
+	connect(m_ui->fixA, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleFixedA);
+
+	//connect histogram events
+	connect(m_histograms[0], &ccHistogramWindow::sfMinSatValChanged, this, &ccColorFromScalarDlg::minChangedR);
+	connect(m_histograms[0], &ccHistogramWindow::sfMaxSatValChanged, this, &ccColorFromScalarDlg::maxChangedR);
+	connect(m_histograms[1], &ccHistogramWindow::sfMinSatValChanged, this, &ccColorFromScalarDlg::minChangedG);
+	connect(m_histograms[1], &ccHistogramWindow::sfMaxSatValChanged, this, &ccColorFromScalarDlg::maxChangedG);
+	connect(m_histograms[2], &ccHistogramWindow::sfMinSatValChanged, this, &ccColorFromScalarDlg::minChangedB);
+	connect(m_histograms[2], &ccHistogramWindow::sfMaxSatValChanged, this, &ccColorFromScalarDlg::maxChangedB);
+	connect(m_histograms[3], &ccHistogramWindow::sfMinSatValChanged, this, &ccColorFromScalarDlg::minChangedA);
+	connect(m_histograms[3], &ccHistogramWindow::sfMaxSatValChanged, this, &ccColorFromScalarDlg::maxChangedA);
+
+	//initialise colour scales
+	for (unsigned i = 0; i < c_channelCount; i++)
+	{
+		m_colors[i] = ccColorScale::Shared(new ccColorScale(QString::asprintf("%d", i)));
+	}
+	if (m_cloud->getNumberOfScalarFields() > 0)
+	{
+		if (m_cloud->getCurrentDisplayedScalarFieldIndex() == -1)
 		{
-			m_histograms[i] = new ccHistogramWindow(this);
-			m_histograms[i]->setRefreshAfterResize(false);
-			auto layout = new QHBoxLayout;
-
-			layout->setContentsMargins(0, 0, 0, 0);
-			layout->addWidget(m_histograms[i]);
-
-			histoFrame[i]->setLayout(layout);
+			m_cloud->setCurrentDisplayedScalarField(0);
 		}
-
-		
-
-		//connect GUI elements
-		connect(m_ui->channelComboR, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccColorFromScalarDlg::onChannelChangedR);
-		connect(m_ui->channelComboG, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccColorFromScalarDlg::onChannelChangedG);
-		connect(m_ui->channelComboB, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccColorFromScalarDlg::onChannelChangedB);
-		connect(m_ui->channelComboA, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccColorFromScalarDlg::onChannelChangedA);
-
-		connect(m_ui->buttonBox->button(QDialogButtonBox::Apply), &QPushButton::clicked, this, &ccColorFromScalarDlg::onApply);
-		connect(m_ui->minInputSpinBoxR, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::minSpinChangedR);
-		connect(m_ui->maxInputSpinBoxR, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::maxSpinChangedR);
-		connect(m_ui->minInputSpinBoxG, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::minSpinChangedG);
-		connect(m_ui->maxInputSpinBoxG, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::maxSpinChangedG);
-		connect(m_ui->minInputSpinBoxB, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::minSpinChangedB);
-		connect(m_ui->maxInputSpinBoxB, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::maxSpinChangedB);
-		connect(m_ui->minInputSpinBoxA, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::minSpinChangedA);
-		connect(m_ui->maxInputSpinBoxA, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::maxSpinChangedA);
-
-		connect(m_ui->reverseR, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleColors);
-		connect(m_ui->reverseG, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleColors);
-		connect(m_ui->reverseB, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleColors);
-		connect(m_ui->reverseA, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleColors);
-		connect(m_ui->toggleHSV, &QRadioButton::toggled, this, &ccColorFromScalarDlg::toggleColorMode);
-		connect(m_ui->toggleRGB, &QRadioButton::toggled, this, &ccColorFromScalarDlg::toggleColorMode);
-
-		connect(m_ui->fixR, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleFixedR);
-		connect(m_ui->fixG, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleFixedG);
-		connect(m_ui->fixB, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleFixedB);
-		connect(m_ui->fixA, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleFixedA);
-
-		//connect histogram events
-		connect(m_histograms[0], &ccHistogramWindow::sfMinSatValChanged, this, &ccColorFromScalarDlg::minChangedR);
-		connect(m_histograms[0], &ccHistogramWindow::sfMaxSatValChanged, this, &ccColorFromScalarDlg::maxChangedR);
-		connect(m_histograms[1], &ccHistogramWindow::sfMinSatValChanged, this, &ccColorFromScalarDlg::minChangedG);
-		connect(m_histograms[1], &ccHistogramWindow::sfMaxSatValChanged, this, &ccColorFromScalarDlg::maxChangedG);
-		connect(m_histograms[2], &ccHistogramWindow::sfMinSatValChanged, this, &ccColorFromScalarDlg::minChangedB);
-		connect(m_histograms[2], &ccHistogramWindow::sfMaxSatValChanged, this, &ccColorFromScalarDlg::maxChangedB);
-		connect(m_histograms[3], &ccHistogramWindow::sfMinSatValChanged, this, &ccColorFromScalarDlg::minChangedA);
-		connect(m_histograms[3], &ccHistogramWindow::sfMaxSatValChanged, this, &ccColorFromScalarDlg::maxChangedA);
-
-		//initialise colour scales
-		for (unsigned i = 0; i < c_channelCount; i++)
+		ccScalarField* sf = static_cast<ccScalarField*>(m_cloud->getCurrentDisplayedScalarField());
+		if (!sf) // I had this happen 1 time during testing but could never replicate
 		{
-			m_colors[i] = ccColorScale::Shared(new ccColorScale(QString::asprintf("%d", i)));
-		}
-		if (m_cloud->getNumberOfScalarFields() > 0)
-		{
-			if (m_cloud->getCurrentDisplayedScalarFieldIndex() == -1)
-			{
-				m_cloud->setCurrentDisplayedScalarField(0);
-			}
-			ccScalarField* sf = static_cast<ccScalarField*>(m_cloud->getCurrentDisplayedScalarField());
-			if (!sf) // I had this happen 1 time during testing but could never replicate
-			{
-				assert(false);
-				ccLog::Error("[ccColorFromScalarDlg] Get current scalar field failed!");
-				m_systemInvalid = true;
-				disableAllButCancel();
-			}
-			else
-			{
-				m_storedOrigColorScale = sf->getColorScale();
-				m_storedOrigSatRange = sf->saturationRange();
-				m_storedOrigDisplayRange = sf->displayRange();
-
-				for (unsigned i = 0; i < c_channelCount; i++)
-				{
-					m_prevFixed[i] = true;
-					m_combos[i]->clear();
-					for (unsigned int s = 0; s < m_cloud->getNumberOfScalarFields(); s++)
-					{
-						m_combos[i]->addItem(m_cloud->getScalarFieldName(s));
-					}
-					m_combos[i]->setCurrentIndex(m_cloud->getCurrentDisplayedScalarFieldIndex());
-				}
-
-				updateColormaps();
-				
-				//initialise histograms
-				m_prevFixed[c_channelCount - 1] = false;
-				updateChannel(0); //init first histogram
-				for (unsigned i = 1; i < c_channelCount; i++) //copy data from this histogram into the next ones
-				{
-					m_scalars[i] = sf;
-					setDefaultSatValuePerChannel(i);
-					m_histograms[i]->fromBinArray(m_histograms[0]->histoValues(), m_histograms[0]->minVal(), m_histograms[0]->maxVal());
-					updateHistogram(i);
-				}	
-				
-				sf->setColorScale(m_colors[c_channelCount - 1]); //set grey colour ramp to start with
-				m_cloud->redrawDisplay();
-			}
-		}
-		else
-		{
-			ccLog::Error("[ccColorFromScalarDlg] Current cloud has no scalar fields!");
+			assert(false);
+			ccLog::Error("[ccColorFromScalarDlg] Get current scalar field failed!");
 			m_systemInvalid = true;
 			disableAllButCancel();
 		}
-	
+		else
+		{
+			m_storedOrigColorScale = sf->getColorScale();
+			m_storedOrigSatRange = sf->saturationRange();
+			m_storedOrigDisplayRange = sf->displayRange();
+
+			for (unsigned i = 0; i < c_channelCount; i++)
+			{
+				m_prevFixed[i] = true;
+				m_combos[i]->clear();
+				for (unsigned int s = 0; s < m_cloud->getNumberOfScalarFields(); s++)
+				{
+					m_combos[i]->addItem(m_cloud->getScalarFieldName(s));
+				}
+				m_combos[i]->setCurrentIndex(m_cloud->getCurrentDisplayedScalarFieldIndex());
+			}
+
+			updateColormaps();
+			
+			//initialise histograms
+			m_prevFixed[c_channelCount - 1] = false;
+			updateChannel(0); //init first histogram
+			for (unsigned i = 1; i < c_channelCount; i++) //copy data from this histogram into the next ones
+			{
+				m_scalars[i] = sf;
+				setDefaultSatValuePerChannel(i);
+				m_histograms[i]->fromBinArray(m_histograms[0]->histoValues(), m_histograms[0]->minVal(), m_histograms[0]->maxVal());
+				updateHistogram(i);
+			}	
+			
+			sf->setColorScale(m_colors[c_channelCount - 1]); //set grey colour ramp to start with
+			m_cloud->redrawDisplay();
+		}
+	}
+	else
+	{
+		ccLog::Error("[ccColorFromScalarDlg] Current cloud has no scalar fields!");
+		m_systemInvalid = true;
+		disableAllButCancel();
+	}
 }
 
 ccColorFromScalarDlg::~ccColorFromScalarDlg()

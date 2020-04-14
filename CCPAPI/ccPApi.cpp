@@ -125,7 +125,7 @@ CC_FILE_ERROR SavePointCloud(ccPointCloud* cloud, const QString& filename)
 {
     CCTRACE("saving cloud");
     ccPApi* capi = initCloudCompare();
-    if (cloud == nullptr or filename.isEmpty())
+    if ((cloud == nullptr) || filename.isEmpty())
         return CC_FERR_BAD_ARGUMENT;
     CCTRACE("cloud: " << cloud->getName().toStdString() << " file: " << filename.toStdString());
     FileIOFilter::SaveParameters parameters;

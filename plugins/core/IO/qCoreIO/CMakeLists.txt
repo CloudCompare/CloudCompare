@@ -1,5 +1,3 @@
-cmake_minimum_required( VERSION 3.0 )
-
 option( PLUGIN_IO_QCORE "Check to install the CoreIO plugin" ON )
 
 if ( PLUGIN_IO_QCORE )

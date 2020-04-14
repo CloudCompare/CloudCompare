@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.0)
-
 option( PLUGIN_STANDARD_QCORK "Check to install qCORK plugin" OFF )
 
 # CloudCompare Mesh CSG operations plugin (based on the Cork library)

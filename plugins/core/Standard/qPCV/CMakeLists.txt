@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.0)
-
 option( PLUGIN_STANDARD_QPCV "Check to install qPCV plugin" OFF )
 
 # CloudCompare 'PCV' plugin

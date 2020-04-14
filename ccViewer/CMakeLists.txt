@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.0)
-
 project( ccViewer VERSION 1.38.0 )
 
 include( CMakePolicies NO_POLICY_SCOPE )

@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.0)
-
 option( PLUGIN_STANDARD_QHOUGH_NORMALS "Check to install qHoughNormals plugin" OFF )
 
 # CloudCompare 'Hough Normals' plugin (see https://github.com/aboulch/normals_Hough)

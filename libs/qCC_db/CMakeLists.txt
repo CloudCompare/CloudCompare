@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.0)
-
 include_directories( ${CC_CORE_LIB_SOURCE_DIR}/include )
 include_directories( ${CC_FBO_LIB_SOURCE_DIR}/include )
 

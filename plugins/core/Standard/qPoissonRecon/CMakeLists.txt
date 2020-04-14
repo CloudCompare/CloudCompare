@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.0)
-
 option( PLUGIN_STANDARD_QPOISSON_RECON "Check to install qPoissonRecon plugin" OFF )
 
 # CloudCompare 'PoissonRecon' plugin

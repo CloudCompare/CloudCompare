@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.0)
-
 # CC custom (external) CMake script for Ribbonsoft's DXF Lib
 project( DXF_LIB )
 

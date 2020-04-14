@@ -1,4 +1,3 @@
-cmake_minimum_required( VERSION 3.1 )
 
 option( PLUGIN_IO_QE57 "Install qE57_IO plugin to read & write E57 files using libE57Format" OFF )
 

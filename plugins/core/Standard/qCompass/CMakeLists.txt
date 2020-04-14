@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.0)
-
 option( PLUGIN_STANDARD_QCOMPASS "Check to install compass plugin" OFF )
 
 if (PLUGIN_STANDARD_QCOMPASS)

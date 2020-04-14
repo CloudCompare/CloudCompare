@@ -2,8 +2,6 @@
 # Quazip Lib + CMake support for CloudCompare
 # ------------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.0)
-
 # Use system zlib on unix and Qt ZLIB on Windows
 IF(UNIX OR MINGW)
     find_package(ZLIB REQUIRED)

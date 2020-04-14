@@ -12,18 +12,17 @@ Cf. https://machinekoder.com/pyqt-vs-qt-for-python-pyside2-pyside/
 Si oui, migration à prévoir SIP -> Shiboken2. 
 Côté Python, grande compatibilité des scripts entre Pyside2 et PyQt ==> pas d'impact notable pour les futurs utilisateurs.
 
-CMakefile pour SIP
-------------------
-Récup sur SALOME, adaptation.
-Problèmes:
-- compilation parallèle cassée (make -jxx) sur la génération des sources C issus des .sip.
-- nom des sources générés par SIP à saisir en dur dans le makefile.
-Tester le CMake proposé par Qt_Python_Binding (https://github.com/ros-visualization/python_qt_binding.git)
+CMakefile pour PYQT-SIP
+-----------------------
+Pas de détection toute faite : FindPYQTSIP.cmake inspiré de travaux SALOME.
+Un CMake proposé par Qt_Python_Binding (https://github.com/ros-visualization/python_qt_binding.git) requiert trop d'autres prérequis...
+- testé sur Ubuntu 18.4 avec prerequis natifs et sur Windows 10, Visual Studio 2017, prérequis fournis par Anaconda.
+- tests à poursuivre sur différentes configurations
 
 Génération et tests sous Windows 10
 -----------------------------------
-Actuellement, build et tests uniquement sur Ubuntu 18.4 avec paquets natifs.
-J'ai une machine double boot Windows 10 avec Visual Studio 2017, donc faisable...
+Pour tester, j'ai lancé Visual Studio 2017 dans l'environnement Anaconda, pour faciliter la détection des prérequis.
+Il faut donner quelques chemins à la configuration pour Sip, PyQt5, Numpy...
 
 Extension du wrapping
 ---------------------
@@ -31,12 +30,14 @@ Interface très limitée, pour premiers tests :
 cloudCompare
 - lecture / ecriture de nuages de points
 - calcul de courbure
+- filtrage par champ scalaire
 ccPointCloud
 - computeGravityCenter
 - scale, translate
 - getName, hasScalarFields, getNumberOfScalarFields, getScalarFieldName
 - exportCoordToSF
 - getScalarField
+- ...
 ScalarField
 - getName
 - initNumpyApi (static a appeler une fois)
@@ -72,6 +73,13 @@ SIP permet de dire explictement qui a l'ownership des objets créés à l'interf
 Etablir des règles et des tests pour être sûr d'écrire du code fiable (Numpy Array <--> ScalarField est un cas particulier important).
 NB: pas de problème détecté à ce jour sur l'interface réduite, avec des tests simples...
 
+Tests Python portables
+----------------------
+Les scripts de test sont dépendants des path locaux, et d'un jeu de données local.
+TODO:
+- jeu de données généré ou accessible facilement.
+- Scripts configurés pour tourner dans l'environnement final de l'utilisateur.
+- Utiliser CTest en construction, au déploiement ?
 
 
 

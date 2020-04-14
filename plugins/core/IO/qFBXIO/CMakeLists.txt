@@ -1,5 +1,3 @@
-cmake_minimum_required( VERSION 3.0 )
-
 option( PLUGIN_IO_QFBX "Install qFBXIO plugin to read & write AutoDesk FBX files" OFF )
 
 if ( PLUGIN_IO_QFBX )

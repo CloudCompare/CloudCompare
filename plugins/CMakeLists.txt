@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.0)
-
 project( CloudComparePlugins )
 
 # reset buffers (for MacOS bundle)

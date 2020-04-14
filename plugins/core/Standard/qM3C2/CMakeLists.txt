@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.0)
-
 option( PLUGIN_STANDARD_QM3C2 "Check to install qM3C2 plugin" OFF )
 
 if (PLUGIN_STANDARD_QM3C2)

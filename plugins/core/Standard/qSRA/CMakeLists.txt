@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.0)
-
 option( PLUGIN_STANDARD_QSRA "Check to install qSRA (Surface of Revolution Analysis) plugin" OFF )
 
 # CloudCompare 'Surface of Revolution Analysis' plugin

@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.0)
-
 project( SHAPELIB )
 
 # no Qt stuff here

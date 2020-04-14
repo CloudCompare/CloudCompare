@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.0)
-
 option( PLUGIN_STANDARD_QFACETS "Check to install qFACETS plugin" OFF )
 
 # CloudCompare 'FACETS' plugin

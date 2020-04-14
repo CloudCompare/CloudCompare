@@ -1,5 +1,3 @@
-cmake_minimum_required( VERSION 3.0 )
-
 # CloudCompare example for standard plugins
 
 # REPLACE ALL 'ExamplePlugin' OCCURENCES BY YOUR PLUGIN NAME

@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.0)
-
 project( QSSAO_RANDOMKIT_LIB VERSION 1.15 )
 
 set( CMAKE_AUTOMOC OFF )

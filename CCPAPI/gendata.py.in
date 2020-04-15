@@ -1,0 +1,18 @@
+import numpy as np
+import math
+import os
+
+datadir = "@CC_PYTHONAPI_TEST_DIRECTORY@"
+
+def getSampleCloud():
+    sample = os.path.join(datadir, 'datasample.xyz')
+    if not os.path.exists(sample):
+        vx = np.arange(-5, 5, 0.01)
+        vy = np.arange(-5, 5, 0.01)
+        
+        with open('@CC_PYTHONAPI_TEST_DIRECTORY@/datasample.xyz','w') as f:
+            for x in vx:
+                for y in vy:
+                    z = math.sin(5*math.sqrt(x**2 + y**2)) / math.sqrt(x**2 + y**2)
+                    f.write("%f %f %f\n"%(x, y ,z))
+    return sample

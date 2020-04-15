@@ -16,6 +16,8 @@
 #                                                                        #
 ##########################################################################
 
+# TODO: split CCPAPI in several subdirectories (CMake, CCPAPI, cloudCompare, tests...)
+
 cmake_minimum_required(VERSION 3.0)
 cmake_policy(SET CMP0071 NEW)
 message(STATUS "CC PYthon API")
@@ -189,3 +191,13 @@ if(WIN32)
 else()
   set_target_properties(cloudCompare PROPERTIES PREFIX "")
 endif()
+
+# --- ------------
+# --- target tests
+
+set(CC_PYTHONAPI_TEST_DIRECTORY "/tmp")
+configure_file(gendata.py.in gendata.py)
+
+
+
+

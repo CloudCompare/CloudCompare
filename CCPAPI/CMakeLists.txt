@@ -18,29 +18,29 @@
 
 cmake_minimum_required(VERSION 3.0)
 cmake_policy(SET CMP0071 NEW)
-MESSAGE(STATUS "CC PYthon API")
-LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cmake" ${CMAKE_CURRENT_SOURCE_DIR})
+message(STATUS "CC PYthon API")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cmake" ${CMAKE_CURRENT_SOURCE_DIR})
 
 # --- Python detection: if several versions installed, select one with all the required packages installed
 
-SET(PYTHON_PREFERED_VERSION "3.6" CACHE STRING "Select a Python version: it should be installed with all packages required for CloudCompare (pyqt, sip, numpy)")
+set(PYTHON_PREFERED_VERSION "3.6" CACHE STRING "Select a Python version: it should be installed with all packages required for CloudCompare (pyqt, sip, numpy)")
 set_property(CACHE PYTHON_PREFERED_VERSION PROPERTY STRINGS "3.6" "3.7" "3.8")
-MESSAGE(STATUS "python prefered version: " ${PYTHON_PREFERED_VERSION})
-SET(Python_ADDITIONAL_VERSIONS ${PYTHON_PREFERED_VERSION}) # priority to this version 
-FIND_PACKAGE(PythonInterp)
-FIND_PACKAGE(PythonLibs)
-MESSAGE(STATUS "python version: " ${PYTHON_VERSION_STRING})
-MESSAGE(STATUS "check match for ${PYTHON_PREFERED_VERSION}.x")
-IF(NOT ${PYTHON_VERSION_STRING} MATCHES "${PYTHON_PREFERED_VERSION}\\..")
-    MESSAGE(SEND_ERROR "no Python found matching ${PYTHON_PREFERED_VERSION}.x")
-ELSE()
-    MESSAGE(STATUS "Python found ${PYTHON_VERSION_STRING} matches prefered version ${PYTHON_PREFERED_VERSION}.x")
-    MESSAGE(STATUS "PYTHON_LIBRARIES:" ${PYTHON_LIBRARIES})
-ENDIF()
+message(STATUS "python prefered version: " ${PYTHON_PREFERED_VERSION})
+set(Python_ADDITIONAL_VERSIONS ${PYTHON_PREFERED_VERSION}) # priority to this version 
+find_package(PythonInterp)
+find_package(PythonLibs)
+message(STATUS "python version: " ${PYTHON_VERSION_STRING})
+message(STATUS "check match for ${PYTHON_PREFERED_VERSION}.x")
+if(NOT ${PYTHON_VERSION_STRING} MATCHES "${PYTHON_PREFERED_VERSION}\\..")
+    message(SEND_ERROR "no Python found matching ${PYTHON_PREFERED_VERSION}.x")
+else()
+    message(STATUS "Python found ${PYTHON_VERSION_STRING} matches prefered version ${PYTHON_PREFERED_VERSION}.x")
+    message(STATUS "PYTHON_LIBRARIES:" ${PYTHON_LIBRARIES})
+endif()
 
 # --- PyQt Sip detection
 
-FIND_PACKAGE(PYQTSIP REQUIRED)  # should come after Python
+find_package(PYQTSIP REQUIRED)  # should come after Python
 
 # --- C++ library cc Python Api (ccPApi)
 
@@ -77,7 +77,7 @@ target_link_libraries( CC_PAPI_LIB
 
 # --- Python wrapping with sip
 
-INCLUDE_DIRECTORIES(
+include_directories(
   ${SIP_INCLUDE_DIR}
   ${PYTHON_INCLUDE_DIRS}
   ${CMAKE_CURRENT_SOURCE_DIR}
@@ -85,44 +85,44 @@ INCLUDE_DIRECTORIES(
 
 # --- Numpy includes
 
-FIND_PATH(NUMPY_INCLUDE_DIR numpy/npy_common.h HINTS ${PYTHON_INCLUDE_DIRS} DOC "directory path of include: numpy/npy_common.h")
-MESSAGE(STATUS "NUMPY_INCLUDE_DIR: " ${NUMPY_INCLUDE_DIR})
-INCLUDE_DIRECTORIES(
+find_path(NUMPY_INCLUDE_DIR numpy/npy_common.h HINTS ${PYTHON_INCLUDE_DIRS} DOC "directory path of include: numpy/npy_common.h")
+message(STATUS "NUMPY_INCLUDE_DIR: " ${NUMPY_INCLUDE_DIR})
+include_directories(
   ${NUMPY_INCLUDE_DIR}
 )
 
 # --- sources / sip wrappings
 
-SET(SIP_MAIN_SOURCE cloudCompare.sip)
-SET(SIP_ADD_SOURCES
+set(SIP_MAIN_SOURCE cloudCompare.sip)
+set(SIP_ADD_SOURCES
     ccPApi.sip
     ccPointCloud.sip
     ScalarField.sip
     )
-SET(SIP_ALL_SOURCES ${SIP_MAIN_SOURCE} ${SIP_ADD_SOURCES})
+set(SIP_ALL_SOURCES ${SIP_MAIN_SOURCE} ${SIP_ADD_SOURCES})
 
-MESSAGE(STATUS "SIP_ALL_SOURCES: " "${SIP_ALL_SOURCES}")
+message(STATUS "SIP_ALL_SOURCES: " "${SIP_ALL_SOURCES}")
 
 # TODO: names of generated sip files follow some rules based on module name, class name, namespace etc. Not obvious to compute...
 
-SET(SIP_MAIN_GENSRC ${CMAKE_CURRENT_BINARY_DIR}/sipcloudComparecmodule.cc)
-SET(SIP_ADD_GENSRC
+set(SIP_MAIN_GENSRC ${CMAKE_CURRENT_BINARY_DIR}/sipcloudComparecmodule.cc)
+set(SIP_ADD_GENSRC
     ${CMAKE_CURRENT_BINARY_DIR}/sipcloudCompareccPointCloud.cc
     ${CMAKE_CURRENT_BINARY_DIR}/sipcloudCompareQList0101ccPointCloud.cc
     ${CMAKE_CURRENT_BINARY_DIR}/sipcloudCompareCCLib.cc
     ${CMAKE_CURRENT_BINARY_DIR}/sipcloudCompareCCLibScalarField.cc
    )
-SET(SIP_ALL_GENSRC ${SIP_MAIN_GENSRC} ${SIP_ADD_GENSRC})
+set(SIP_ALL_GENSRC ${SIP_MAIN_GENSRC} ${SIP_ADD_GENSRC})
 
-MESSAGE(STATUS "SIP_ALL_GENSRC: " "${SIP_ALL_GENSRC}")
+message(STATUS "SIP_ALL_GENSRC: " "${SIP_ALL_GENSRC}")
 
 set_source_files_properties( ${SIP_ALL_GENSRC} PROPERTIES GENERATED TRUE )
 
 # TODO: generate the sip options (Qt version, sip path...)
-SET(SIP_OPTIONS -s .cc -c . ${PYQT_SIPFLAGS})
-MESSAGE(STATUS "SIP_OPTIONS: " "${SIP_OPTIONS}")
+set(SIP_OPTIONS -s .cc -c . ${PYQT_SIPFLAGS})
+message(STATUS "SIP_OPTIONS: " "${SIP_OPTIONS}")
 
-ADD_CUSTOM_COMMAND(
+add_custom_command(
     OUTPUT ${SIP_ALL_GENSRC}
     COMMAND ${SIP_EXECUTABLE} ${SIP_OPTIONS} ${CMAKE_CURRENT_SOURCE_DIR}/${SIP_MAIN_SOURCE}
     DEPENDS ${SIP_ALL_SOURCES}
@@ -130,9 +130,9 @@ ADD_CUSTOM_COMMAND(
 
 # --- sources / to compile
 
-ADD_LIBRARY( cloudCompare SHARED ${SIP_ALL_GENSRC} )
+add_library( cloudCompare SHARED ${SIP_ALL_GENSRC} )
 
-TARGET_LINK_LIBRARIES(cloudCompare
+target_link_libraries(cloudCompare
     ${PYTHON_LIBRARIES}
     CC_PAPI_LIB
     CC_FBO_LIB
@@ -144,7 +144,7 @@ TARGET_LINK_LIBRARIES(cloudCompare
 
 # Qt libraries
 
-TARGET_LINK_LIBRARIES(cloudCompare
+target_link_libraries(cloudCompare
     Qt5::Core
     Qt5::Gui
     Qt5::Widgets
@@ -152,23 +152,23 @@ TARGET_LINK_LIBRARIES(cloudCompare
     Qt5::PrintSupport
     )
 
-IF (WIN32)
-   TARGET_LINK_LIBRARIES(cloudCompare Qt5::WinMain)
-ENDIF()
+if (WIN32)
+   target_link_libraries(cloudCompare Qt5::WinMain)
+endif()
 
-IF( WIN32 OR APPLE)
-   FOREACH( dest ${INSTALL_DESTINATIONS} )
-       MESSAGE(STATUS "INSTALL_DESTINATIONS: " ${dest})
-       INSTALL_SHARED( cloudCompare ${dest} 1 )
-   ENDFOREACH()
-ELSE()
-    SET(INSTALL_CLOUDCOMPARE_PYTHON ${CMAKE_INSTALL_LIBDIR}/cloudcompare)
-    MESSAGE(STATUS "INSTALL_CLOUDCOMPARE_PYTHON: " ${INSTALL_CLOUDCOMPARE_PYTHON})
-    INSTALL(TARGETS cloudCompare LIBRARY DESTINATION ${INSTALL_CLOUDCOMPARE_PYTHON})
-ENDIF()
+if( WIN32 OR APPLE)
+   foreach( dest ${INSTALL_DESTINATIONS} )
+       list(STATUS "INSTALL_DESTINATIONS: " ${dest})
+       install_shared( cloudCompare ${dest} 1 )
+   endforeach()
+else()
+    set(INSTALL_CLOUDCOMPARE_PYTHON ${CMAKE_INSTALL_LIBDIR}/cloudcompare)
+    message(STATUS "INSTALL_CLOUDCOMPARE_PYTHON: " ${INSTALL_CLOUDCOMPARE_PYTHON})
+    install(TARGETS cloudCompare LIBRARY DESTINATION ${INSTALL_CLOUDCOMPARE_PYTHON})
+endif()
 
-IF(WIN32)
-  SET_TARGET_PROPERTIES(cloudCompare PROPERTIES SUFFIX ".pyd" DEBUG_OUTPUT_NAME cloudCompare_d RELEASE_OUTPUT_NAME cloudCompare)
-ELSE()
-  SET_TARGET_PROPERTIES(cloudCompare PROPERTIES PREFIX "")
-ENDIF()
+if(WIN32)
+  set_target_properties(cloudCompare PROPERTIES SUFFIX ".pyd" DEBUG_OUTPUT_NAME cloudCompare_d RELEASE_OUTPUT_NAME cloudCompare)
+else()
+  set_target_properties(cloudCompare PROPERTIES PREFIX "")
+endif()

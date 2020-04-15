@@ -42,29 +42,44 @@ endif()
 
 find_package(PYQTSIP REQUIRED)  # should come after Python
 
-# --- C++ library cc Python Api (ccPApi)
+# --- -----------------------------------------
+# --- target C++ library cc Python Api (ccPApi)
 
-include_directories( ${CC_FBO_LIB_SOURCE_DIR}/include )
-include_directories( ${CC_CORE_LIB_SOURCE_DIR}/include )
-include_directories( ${QCC_DB_LIB_SOURCE_DIR} )
+set( CC_PAPI_HEADER_LIST
+    ccPApi.h
+    ccTrace.h
+    )
+    
+set( CC_PAPI_SOURCE_LIST
+    ccPApi.cpp
+    )
+    
+add_library( CC_PAPI_LIB STATIC ${CC_PAPI_HEADER_LIST} ${CC_PAPI_SOURCE_LIST} )
+    
+target_include_directories( CC_PAPI_LIB PUBLIC
+    ${CC_FBO_LIB_SOURCE_DIR}/include
+    ${CC_CORE_LIB_SOURCE_DIR}/include
+    ${QCC_DB_LIB_SOURCE_DIR}
+    )
+    
 if( MSVC )
-   include_directories( ${QCC_DB_LIB_SOURCE_DIR}/msvc )
+   target_include_directories( CC_PAPI_LIB PUBLIC
+        ${QCC_DB_LIB_SOURCE_DIR}/msvc
+        )
 endif()
-include_directories( ${QCC_IO_LIB_SOURCE_DIR} )
-include_directories( ${QCC_GL_LIB_SOURCE_DIR} )
-include_directories( ${CloudComparePlugins_SOURCE_DIR} )
-include_directories( ${CloudCompare_SOURCE_DIR} )
-include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
-include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../common )
-include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/db_tree )
-include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/ui_templates )
-include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../libs/qcustomplot )
-include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
 
-file( GLOB header_list *.h )
-file( GLOB source_list *.cpp )
-
-add_library( CC_PAPI_LIB STATIC ${header_list} ${source_list} )
+target_include_directories( CC_PAPI_LIB PUBLIC
+    ${QCC_IO_LIB_SOURCE_DIR}
+    ${QCC_GL_LIB_SOURCE_DIR}
+    ${CloudComparePlugins_SOURCE_DIR} 
+    ${CloudCompare_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/../common
+    ${CMAKE_CURRENT_SOURCE_DIR}/db_tree
+    ${CMAKE_CURRENT_SOURCE_DIR}/ui_templates
+    ${CMAKE_CURRENT_SOURCE_DIR}/../libs/qcustomplot
+    ${CMAKE_CURRENT_BINARY_DIR}
+    )
 
 target_link_libraries( CC_PAPI_LIB
     CC_FBO_LIB
@@ -75,21 +90,8 @@ target_link_libraries( CC_PAPI_LIB
     qcustomplot
     )
 
-# --- Python wrapping with sip
-
-include_directories(
-  ${SIP_INCLUDE_DIR}
-  ${PYTHON_INCLUDE_DIRS}
-  ${CMAKE_CURRENT_SOURCE_DIR}
-  )
-
-# --- Numpy includes
-
-find_path(NUMPY_INCLUDE_DIR numpy/npy_common.h HINTS ${PYTHON_INCLUDE_DIRS} DOC "directory path of include: numpy/npy_common.h")
-message(STATUS "NUMPY_INCLUDE_DIR: " ${NUMPY_INCLUDE_DIR})
-include_directories(
-  ${NUMPY_INCLUDE_DIR}
-)
+# --- ----------------------------------------------------------
+# --- target PyQt sip Python library: Python module cloudCompare
 
 # --- sources / sip wrappings
 
@@ -100,7 +102,6 @@ set(SIP_ADD_SOURCES
     ScalarField.sip
     )
 set(SIP_ALL_SOURCES ${SIP_MAIN_SOURCE} ${SIP_ADD_SOURCES})
-
 message(STATUS "SIP_ALL_SOURCES: " "${SIP_ALL_SOURCES}")
 
 # TODO: names of generated sip files follow some rules based on module name, class name, namespace etc. Not obvious to compute...
@@ -118,7 +119,6 @@ message(STATUS "SIP_ALL_GENSRC: " "${SIP_ALL_GENSRC}")
 
 set_source_files_properties( ${SIP_ALL_GENSRC} PROPERTIES GENERATED TRUE )
 
-# TODO: generate the sip options (Qt version, sip path...)
 set(SIP_OPTIONS -s .cc -c . ${PYQT_SIPFLAGS})
 message(STATUS "SIP_OPTIONS: " "${SIP_OPTIONS}")
 
@@ -132,7 +132,24 @@ add_custom_command(
 
 add_library( cloudCompare SHARED ${SIP_ALL_GENSRC} )
 
-target_link_libraries(cloudCompare
+# --- Python wrapping with sip
+
+target_include_directories( cloudCompare PUBLIC
+    ${SIP_INCLUDE_DIR}
+    ${PYTHON_INCLUDE_DIRS}
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    )
+
+# --- Numpy includes
+
+find_path(NUMPY_INCLUDE_DIR numpy/npy_common.h HINTS ${PYTHON_INCLUDE_DIRS} DOC "directory path of include: numpy/npy_common.h")
+message(STATUS "NUMPY_INCLUDE_DIR: " ${NUMPY_INCLUDE_DIR})
+
+target_include_directories( cloudCompare PUBLIC
+    ${NUMPY_INCLUDE_DIR}
+    )
+
+target_link_libraries( cloudCompare
     ${PYTHON_LIBRARIES}
     CC_PAPI_LIB
     CC_FBO_LIB
@@ -144,7 +161,7 @@ target_link_libraries(cloudCompare
 
 # Qt libraries
 
-target_link_libraries(cloudCompare
+target_link_libraries( cloudCompare
     Qt5::Core
     Qt5::Gui
     Qt5::Widgets
@@ -153,7 +170,7 @@ target_link_libraries(cloudCompare
     )
 
 if (WIN32)
-   target_link_libraries(cloudCompare Qt5::WinMain)
+   target_link_libraries( cloudCompare Qt5::WinMain)
 endif()
 
 if( WIN32 OR APPLE)

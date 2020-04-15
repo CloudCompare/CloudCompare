@@ -16,8 +16,8 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CCPAPI_CCPAPI_H_
-#define CCPAPI_CCPAPI_H_
+#ifndef CCPAPI_PAPI_CCPAPI_H_
+#define CCPAPI_PAPI_CCPAPI_H_
 
 #include <QList>
 #include <QString>
@@ -120,4 +120,4 @@ QString ccPApiGetDensitySFName(
     bool approx,
     double densityKernelSize = 0.0);
 
-#endif /* CCPAPI_CCPAPI_H_ */
+#endif /* CCPAPI_PAPI_CCPAPI_H_ */

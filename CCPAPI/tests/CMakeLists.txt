@@ -16,8 +16,17 @@
 #                                                                        #
 ##########################################################################
 
+cmake_minimum_required(VERSION 3.0)
+cmake_policy(SET CMP0071 NEW)
+message(STATUS "CC PYthon API")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cmake" ${CMAKE_CURRENT_SOURCE_DIR})
 
-add_subdirectory( PAPI )
-add_subdirectory( sip )
-add_subdirectory( tests )
+# --- ------------
+# --- target tests
+
+set(CC_PYTHONAPI_TEST_DIRECTORY "/tmp")
+configure_file(gendata.py.in gendata.py)
+
+
+
 

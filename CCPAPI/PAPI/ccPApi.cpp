@@ -18,7 +18,6 @@
 
 #include "ccPApi.h"
 
-//CC
 #include <GeometricalAnalysisTools.h>
 
 //qCC_db
@@ -39,7 +38,7 @@
 #include "ccCommon.h"
 
 #define _CCDEBUG_
-#include <ccTrace.h>
+#include "ccTrace.h"
 
 static ccPApi* s_ccPApiInternals = nullptr;
 

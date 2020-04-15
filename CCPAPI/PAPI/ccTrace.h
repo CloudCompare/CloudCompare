@@ -16,8 +16,8 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CCPAPI_CCTRACE_H_
-#define CCPAPI_CCTRACE_H_
+#ifndef CCPAPI_PAPI_CCTRACE_H_
+#define CCPAPI_PAPI_CCTRACE_H_
 
 #include <iostream>
 #include <sstream>
@@ -28,4 +28,4 @@
 #define CCTRACE(msg)
 #endif
 
-#endif /* CCPAPI_CCTRACE_H_ */
+#endif /* CCPAPI_PAPI_CCTRACE_H_ */

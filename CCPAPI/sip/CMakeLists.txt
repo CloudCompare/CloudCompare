@@ -129,7 +129,7 @@ endif()
 
 if( WIN32 OR APPLE)
    foreach( dest ${INSTALL_DESTINATIONS} )
-       list(STATUS "INSTALL_DESTINATIONS: " ${dest})
+       message(STATUS "INSTALL_DESTINATIONS: " ${dest})
        install_shared( cloudCompare ${dest} 1 )
    endforeach()
 else()

@@ -76,8 +76,3 @@ if ( NOT APPLE )
 	endif()
 endif()
 
-# Intel's Threading Building Blocks (TBB)
-if (COMPILE_CC_CORE_LIB_WITH_TBB)
-	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_TBB")
-	include_directories( ${TBB_INCLUDE_DIRS} )
-endif()

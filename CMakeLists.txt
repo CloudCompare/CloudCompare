@@ -77,14 +77,7 @@ endif()
 # Load advanced scripts
 include( CMakeInclude )
 
-add_subdirectory( CC )
-
-# Propagate the choice from CCLib to use doubles for ScalarType
-if ( ${USE_SCALAR_TYPE_DOUBLE} )
-	add_definitions( -DSCALAR_TYPE_DOUBLE )
-else()
-	add_definitions( -DSCALAR_TYPE_FLOAT )
-endif()
+add_subdirectory( extern/CCCoreLib )
 
 # Add external libraries
 include( CMakeExternalLibs )

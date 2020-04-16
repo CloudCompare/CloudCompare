@@ -55,7 +55,7 @@ else()
 endif()
 
 target_link_libraries( ${PROJECT_NAME}
-    CCCoreLib
+	CCCoreLib
 	CC_FBO_LIB
 	QCC_DB_LIB
 	QCC_IO_LIB 

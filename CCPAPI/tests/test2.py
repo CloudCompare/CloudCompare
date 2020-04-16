@@ -18,14 +18,15 @@
 #                                                                        #
 ##########################################################################
 
-import sys
-sys.path.append('/home/paul/projets/CloudCompare/install/lib/cloudcompare')
+from gendata import getSampleCloud, dataDir
+import os, sys
+
 from PyQt5.QtWidgets import QApplication
 app = QApplication(sys.argv)
 import cloudCompare as cc
 cc.CCLib.ScalarField.initNumpyApi() # to do once before dealing with numpy
-cloud1 = cc.loadPointCloud("/home/paul/projets/CloudCompare/data/altiXYZ/RGEALTI_FXX_0845_6446_MNT_LAMB93_IGN69.xyz")
-cloud2 = cc.loadPointCloud("/home/paul/projets/CloudCompare/data/altiXYZ/RGEALTI_FXX_0845_6447_MNT_LAMB93_IGN69.xyz")
+cloud1 = cc.loadPointCloud(getSampleCloud(5.0))
+cloud2 = cc.loadPointCloud(getSampleCloud(4.9))
 res = cloud1.exportCoordToSF((False, False, True))
 res = cloud2.exportCoordToSF((False, False, True))
 sf1=cloud1.getScalarField(0)
@@ -33,4 +34,4 @@ sf2=cloud2.getScalarField(0)
 asf1=sf1.toNpArray()
 asf2=sf2.toNpArray()
 sf2.fromNpArray(asf1)
-res=cc.SavePointCloud(cloud2,"/home/paul/projets/CloudCompare/data/res.xyz")
+res=cc.SavePointCloud(cloud2,os.path.join(dataDir,"res2.xyz"))

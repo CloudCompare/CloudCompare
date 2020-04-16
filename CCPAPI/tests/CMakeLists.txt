@@ -1,6 +1,6 @@
 ##########################################################################
 #                                                                        #
-#                               CCPAPI                                   #
+#                               CCPAPI TEST                              #
 #                                                                        #
 #  This program is free software; you can redistribute it and/or modify  #
 #  it under the terms of the GNU Library General Public License as       #
@@ -18,13 +18,12 @@
 
 cmake_minimum_required(VERSION 3.0)
 cmake_policy(SET CMP0071 NEW)
-message(STATUS "CC PYthon API")
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cmake" ${CMAKE_CURRENT_SOURCE_DIR})
+message(STATUS "tests")
 
 # --- ------------
 # --- target tests
 
-set(CC_PYTHONAPI_TEST_DIRECTORY "/tmp")
+set(CC_PYTHONAPI_TEST_DIRECTORY "/tmp" CACHE STRING "Directory path for tests: to store samples and generated data")
 configure_file(gendata.py.in gendata.py)
 
 

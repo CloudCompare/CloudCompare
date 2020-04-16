@@ -1,16 +1,23 @@
 import numpy as np
 import math
 import os
+import sys
 
-datadir = "@CC_PYTHONAPI_TEST_DIRECTORY@"
+dataDir = "@CC_PYTHONAPI_TEST_DIRECTORY@"
+pythonScriptsSourceDir = "@CMAKE_CURRENT_SOURCE_DIR@"
+pythonModuleBuildDir = "@CMAKE_CURRENT_BINARY_DIR@/../sip"
 
-def getSampleCloud():
-    sample = os.path.join(datadir, 'datasample.xyz')
+sys.path.append(pythonScriptsSourceDir)
+sys.path.append(pythonModuleBuildDir)
+
+def getSampleCloud(h=5.0):
+    dataName = "dataSample_%s.xyz"%h
+    sample = os.path.join(dataDir, dataName)
     if not os.path.exists(sample):
         vx = np.arange(-5, 5, 0.01)
         vy = np.arange(-5, 5, 0.01)
         
-        with open('@CC_PYTHONAPI_TEST_DIRECTORY@/datasample.xyz','w') as f:
+        with open(sample,'w') as f:
             for x in vx:
                 for y in vy:
                     z = math.sin(5*math.sqrt(x**2 + y**2)) / math.sqrt(x**2 + y**2)

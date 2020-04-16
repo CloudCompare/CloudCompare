@@ -18,13 +18,14 @@
 #                                                                        #
 ##########################################################################
 
-import sys
-sys.path.append('/home/paul/projets/CloudCompare/install/lib/cloudcompare')
+from gendata import getSampleCloud, dataDir
+import os, sys
+
 from PyQt5.QtWidgets import QApplication
 app = QApplication(sys.argv)
 import cloudCompare as cc
 cc.CCLib.ScalarField.initNumpyApi() # to do once before dealing with numpy
-cloud = cc.loadPointCloud("/home/paul/projets/CloudCompare/data/altiXYZ/RGEALTI_FXX_0845_6446_MNT_LAMB93_IGN69.xyz")
+cloud = cc.loadPointCloud(getSampleCloud(5.0))
 namecloud = cloud.getName()
 print(namecloud)
 g = cloud.computeGravityCenter()
@@ -49,7 +50,7 @@ sfi=cloud.getCurrentInScalarField()
 print(sfi)
 sfo=cloud.getCurrentOutScalarField()
 print(sfo)
-res=cc.computeCurvature(cc.GAUSSIAN_CURV, 1.88, [cloud])
+res=cc.computeCurvature(cc.GAUSSIAN_CURV, 0.05, [cloud])
 nsf=cloud.getNumberOfScalarFields()
 sfc=cloud.getScalarField(nsf-1)
 print(sfc.getName())
@@ -61,7 +62,7 @@ print("max: %s"%sfc.getMax())
 cloud.setCurrentOutScalarField(nsf-1)
 fcloud=cc.filterBySFValue(0.01, sfc.getMax(), cloud)
 print(fcloud.size())
-res=cc.SavePointCloud(fcloud, "/home/paul/projets/CloudCompare/data/res.xyz")
+res=cc.SavePointCloud(fcloud, os.path.join(dataDir,"res3.xyz"))
 
 
 

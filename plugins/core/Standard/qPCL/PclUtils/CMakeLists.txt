@@ -54,7 +54,7 @@ endif()
 
 link_directories( ${PCL_LIBRARY_DIRS} )
 add_definitions( ${PCL_DEFINITIONS} )
-target_link_libraries( ${PROJECT_NAME} ${PCL_LIBRARIES})
+target_link_libraries( ${PROJECT_NAME} CCCoreLib ${PCL_LIBRARIES} )
 
 # Qt
 target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Gui Qt5::Widgets)

@@ -5,11 +5,11 @@ include( contrib/3DXSupport.cmake )
 # Gamepads support
 include( contrib/GamepadSupport.cmake )
 # DXF support
-include( contrib/DxfLibSupport.cmake )
+include( DxfLibSupport )
 # GDAL support
 include( contrib/GDALSupport.cmake )
 # SHP support
-include( contrib/ShapeLibSupport.cmake )
+include( ShapeLibSupport )
 # Oculus support
 include( contrib/OculusSupport.cmake )
 

@@ -85,8 +85,6 @@ jobs:
             -DPLUGIN_EXAMPLE_GL=ON `
             -DPLUGIN_EXAMPLE_IO=ON `
             -DPLUGIN_EXAMPLE_STANDARD=ON `
-            -DOPTION_USE_SHAPE_LIB=ON `
-            -DOPTION_USE_DXF_LIB=ON `
             -DPLUGIN_GL_QEDL=ON `
             -DPLUGIN_GL_QSSAO=ON `
             -DPLUGIN_IO_QADDITIONAL=ON `

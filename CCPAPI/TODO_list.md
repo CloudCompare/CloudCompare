@@ -1,36 +1,39 @@
-Cloud Compare Python API TODO list
-==================================
+Cloud Compare Python API TODO list & questions
+==============================================
 
-Wrapping: PyQt SIP, ou migration vers Qt for Python (Pyside2 Shiboken2) ?
--------------------------------------------------------------------------
+Wrapping: PyQt SIP, or migration to Qt for Python (Pyside2 Shiboken2)?
+----------------------------------------------------------------------
 
-CloudCompare s'appuie sur Qt : PyQt - SIP est plus adapté que SWIG, mais un peu laborieux...
-Avec les versions récentes de Qt (5.12 -), Qt propose Pyside2 et Shiboken2.
-Pour un premier test, sur Ubuntu 18.4, (Qt 5.9.5), je suis resté à PyQt -SIP, avec les paquets système natifs.
-Faut-il passer à Pyside2 / Shiboken2 ? 
-Cf. https://machinekoder.com/pyqt-vs-qt-for-python-pyside2-pyside/
-Si oui, migration à prévoir SIP -> Shiboken2. 
-Côté Python, grande compatibilité des scripts entre Pyside2 et PyQt ==> pas d'impact notable pour les futurs utilisateurs.
+CloudCompare relies on Qt: PyQt - SIP is more suitable than SWIG, but a bit laborious ...
+With recent versions of Qt (5.12 -), Qt offers Pyside2 and Shiboken2.
+For a first test, on Ubuntu 18.4, (Qt 5.9.5), I stayed at PyQt -SIP, with the native system packages.
+Should we switch to Pyside2 / Shiboken2?
+See https://machinekoder.com/pyqt-vs-qt-for-python-pyside2-pyside/
+If yes, migration to be planned SIP -> Shiboken2, later, when the required Qt version will be readily available on platforms (for Linux, native distribution package)
+On the Python side, great compatibility of scripts between Pyside2 and PyQt ==> no significant impact for future users.
 
-CMakefile pour PYQT-SIP
------------------------
-Pas de détection toute faite : FindPYQTSIP.cmake inspiré de travaux SALOME.
-Un CMake proposé par Qt_Python_Binding (https://github.com/ros-visualization/python_qt_binding.git) requiert trop d'autres prérequis...
-- testé sur Ubuntu 18.4 avec prerequis natifs et sur Windows 10, Visual Studio 2017, prérequis fournis par Anaconda.
-- tests à poursuivre sur différentes configurations
+CMakefile for PYQT-SIP
+----------------------
+No ready-made detection: FindPYQTSIP.cmake inspired by SALOME works, and probably incomplete.
+A CMake proposed by Qt_Python_Binding (https://github.com/ros-visualization/python_qt_binding.git) requires too many other prerequisites ...
+Tests with FindPYQTSIP.cmake:
+- Ubuntu 18.4 with native prerequisites
+- Windows 10, Visual Studio 2017, prerequisites provided by Anaconda.
+- tests to be continued on different configurations
 
-Génération et tests sous Windows 10
+Windows 10 generation and testing
 -----------------------------------
-Pour tester, j'ai lancé Visual Studio 2017 dans l'environnement Anaconda, pour faciliter la détection des prérequis.
-Il faut donner quelques chemins à la configuration pour Sip, PyQt5, Numpy...
+To test, I launched Visual Studio 2017 in the Anaconda environment, to facilitate the detection of prerequisites.
+Some paths must be given at the configuration step for Sip, PyQt5, Numpy ...
 
-Extension du wrapping
+Wrapping extension
 ---------------------
-Interface très limitée, pour premiers tests :
+Very limited interface, for first tests:
+
 cloudCompare
-- lecture / ecriture de nuages de points
-- calcul de courbure
-- filtrage par champ scalaire
+- read / write point clouds
+- curvature calculation
+- scalar field filtering
 ccPointCloud
 - computeGravityCenter
 - scale, translate
@@ -40,46 +43,48 @@ ccPointCloud
 - ...
 ScalarField
 - getName
-- initNumpyApi (static a appeler une fois)
+- initNumpyApi (static to call once)
 - toNpArray
 - fromNpArray
-L'idée est de compléter en s'inspirant des fonctions disponibles dans l'interface de commande.
 
-Eléments de code de qCC dupliqués
----------------------------------
-Le code de l'API Python de Cloud Compare est regroupé dans un répertoire CCPAPI (Cloud Compare Python API).
-Il s'appuie sur potentiellement toutes les libraries de CloudCompare, sauf l'application elle même (qCC).
-Il ne nécessite aucune modification des librairies appelées.
-Par contre, nécessité de dupliquer du code issu de qCC, sans les appels IHM graphique.
-Par exemple, pour le calcul de courbure, récup dans ccLibAlgorithms::ComputeGeomCharacteristic, ccLibAlgorithms::GetDensitySFName.
-Faut-il une couche intermédaire de traitements appelables depuis l'IHM graphique et l'interface Python ?
+The idea is to complete by taking inspiration from the functions available in the command interface.
+To do as a priority: export points (x, y, z) to a Numpy array.
 
-ScalarField <--> Numpy Array: type float en dur
------------------------------------------------
-Prévoir de gérer les double si CloudCompare compilé avec l'option ScalarType == double
+Duplicate qCC code elements
+---------------------------
+The Cloud Compare Python API code is gathered in a CCPAPI directory (Cloud Compare Python API).
+It is based on potentially all the CloudCompare libraries, except the application itself (qCC).
+It does not require any modification of the called libraries.
+By cons, need to duplicate code from qCC, without GUI graphics calls.
+For example, for the calculation of curvature, retrieved from ccLibAlgorithms :: ComputeGeomCharacteristic, ccLibAlgorithms :: GetDensitySFName.
+Do we need an intermediate layer of callable processing from the GUI and the Python interface?
 
-Numpy, ownership des ScalarFields
----------------------------------
-On peut transformer un ScalarField en Numpy Array sans copie.
-Normalement, l'ownership reste coté C++ : la destruction du ScalarField ne peut se faire que via une méthode de CloudCompare (méthode explicite à ajouter à l'interface Python).
-A l'inverse, on peut écraser les données d'un ScalarField existant par celles d'un Numpy Array de même type, même dimensions et taille (vecteur du même nombre d'éléments.
-Ici, l'opération de fait par copie (memcpy).
-Bâtir des tests pour s'assurer que l'on évite les destructions prématurées ou les fuites mémoire.
+ScalarField <--> Numpy Array: always floating type (double type not implemented)
+--------------------------------------------------------------------------------
+Implement the ScalarType == double option for ScalarField <--> Numpy Array conversions.
 
-Compteur de référence Python, Ownership
+Numpy, ownership of ScalarFields
+--------------------------------
+It is possible to transform a ScalarField into Numpy Array without copying.
+Normally, ownership remains on the C ++ side: the destruction of ScalarField can only be done via a CloudCompare method (explicit method to add to the Python interface).
+In the other direction, we can overwrite the data of an existing ScalarField with that of a Numpy Array of the same type, same dimensions and size (vector of the same number of elements).
+Here, the operation is done by copy (memcpy).
+- Build tests to ensure that premature destruction or memory leaks are avoided.
+
+Python references counter, Ownership
 ---------------------------------------
-Le garbage collector de Python s'appuie sur un compteur de référence sur lequel on peut agir dans l'interface C++ (Py_INCREF, PY_DECREF).
-SIP permet de dire explictement qui a l'ownership des objets créés à l'interface.
-Etablir des règles et des tests pour être sûr d'écrire du code fiable (Numpy Array <--> ScalarField est un cas particulier important).
-NB: pas de problème détecté à ce jour sur l'interface réduite, avec des tests simples...
+Python's garbage collector relies on a references counter on which we can act in the C ++ interface (Py_INCREF, PY_DECREF).
+SIP makes it possible to say explicitly who has the ownership of the objects created at the interface.
+Establish rules and tests to be sure of writing reliable code (Numpy Array <--> ScalarField is an important particular case).
+NB: no problem detected to date on the reduced interface, with simple tests ...
 
-Tests Python portables
+Portable Python tests
 ----------------------
-Les scripts de test sont dépendants des path locaux, et d'un jeu de données local.
+The test scripts are dependent on local paths, and on a local dataset.
 TODO:
-- jeu de données généré ou accessible facilement.
-- Scripts configurés pour tourner dans l'environnement final de l'utilisateur.
-- Utiliser CTest en construction, au déploiement ?
+- dataset generated or easily accessible.
+- Scripts configured to run in the end user environment.
+- Use CTest (or another test tool) during construction, deployment?
 
 
 

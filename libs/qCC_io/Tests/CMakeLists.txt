@@ -3,7 +3,7 @@ find_package(Qt5Test REQUIRED)
 
 QT5_ADD_RESOURCES(TestDataResources_SRCS TestData.qrc)
 
-set(TEST_LIBRARIES Qt5::Test Qt5::Core CC_CORE_LIB QCC_DB_LIB QCC_IO_LIB)
+set(TEST_LIBRARIES Qt5::Test Qt5::Core CCCoreLib QCC_DB_LIB QCC_IO_LIB)
 
 if (WIN_32)
     SET(CMAKE_WIN32_EXECUTABLE False)

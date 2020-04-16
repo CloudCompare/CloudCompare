@@ -35,7 +35,7 @@ public:
     ViewInterpolate( );
 
 	//! Constructor from two viewports and a number of steps
-    ViewInterpolate( cc2DViewportObject * view1,  cc2DViewportObject * view2, unsigned int stepCount = 0 );
+    ViewInterpolate(cc2DViewportObject * viewPort0, cc2DViewportObject * viewPort1,  cc2DViewportObject * viewPort2,  cc2DViewportObject * viewPort3, double dt0, double dt1, double dt2, double dt3, bool doCubic, unsigned int stepCount = 0);
 
     //! Sets the first viewport object
 	inline void setView1 ( cc2DViewportObject * view ) { m_view1 = view; }
@@ -65,9 +65,39 @@ public:
 
 private:
 
+    cc2DViewportObject* m_view0;
+
     cc2DViewportObject* m_view1;
 
     cc2DViewportObject* m_view2;
+
+    cc2DViewportObject* m_view3;
+
+    bool m_doCubic;
+    double m_ts[4];
+    double m_cam_cntr_x[4];
+    double m_cam_cntr_y[4];
+    double m_cam_cntr_z[4];
+    double m_pvt_pt_x[4];
+    double m_pvt_pt_y[4];
+    double m_pvt_pt_z[4];
+    double m_pixelSize[4];
+    double m_zoom[4];
+    double m_defaultPointSize[4];
+    double m_defaultLineWidth[4];
+    double m_zNearCoef[4];
+    double m_zNear[4];
+    double m_zFar[4];
+    double m_fov[4];
+    double m_perspectiveAspectRatio[4];
+    double m_orthoAspectRatio[4];
+    double m_vm_alpha[4];
+    double m_vm_axis_x[4];
+    double m_vm_axis_y[4];
+    double m_vm_axis_z[4];
+    double m_vm_translation_x[4];
+    double m_vm_translation_y[4];
+    double m_vm_translation_z[4];
 
     unsigned int m_totalSteps;
 

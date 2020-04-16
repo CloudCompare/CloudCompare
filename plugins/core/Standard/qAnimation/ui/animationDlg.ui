@@ -34,11 +34,22 @@
          </widget>
         </item>
         <item>
-         <widget class="QCheckBox" name="loopCheckBox">
-          <property name="text">
-           <string>Loop</string>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
+          <item>
+           <widget class="QCheckBox" name="loopCheckBox">
+            <property name="text">
+             <string>Loop</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="cubicCheckBox">
+            <property name="text">
+             <string>Cubic Interpolation</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </widget>

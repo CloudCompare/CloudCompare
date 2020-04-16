@@ -73,7 +73,9 @@ protected: //methods
 	void updateCurrentStepDuration();
 	void updateTotalDuration();
 
-	bool getNextSegment(size_t& vp1, size_t& vp2) const;
+	bool getNext(size_t& vp) const;
+	bool getPrevious(ssize_t& vp) const;
+	bool getNextSegment(size_t& vp0, size_t& vp1, size_t& vp2, size_t& vp3) const;
 
 	void render(bool asSeparateFrames);
 

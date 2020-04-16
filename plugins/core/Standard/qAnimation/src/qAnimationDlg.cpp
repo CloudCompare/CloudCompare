@@ -199,13 +199,15 @@ void qAnimationDlg::onAccept()
 double qAnimationDlg::computeTotalTime()
 {
 	double totalDuration_sec = 0;
+	size_t vp0 = 0;
 	size_t vp1 = 0;
 	size_t vp2 = 0;
-	while (getNextSegment(vp1, vp2))
+	size_t vp3 = 0;
+	while (getNextSegment(vp0, vp1, vp2, vp3))
 	{
 		assert(vp1 < stepSelectionList->count());
 		totalDuration_sec += m_videoSteps[static_cast<int>(vp1)].duration_sec;
-		if (vp2 == 0)
+		if (vp2 < vp1)
 		{
 			//loop case
 			break;
@@ -240,19 +242,22 @@ void qAnimationDlg::onFPSChanged(int fps)
 void qAnimationDlg::onTotalTimeChanged(double newTime_sec)
 {
 	double previousTime_sec = computeTotalTime();
+	if (previousTime_sec == 0) return; //prevents crash when no viewports are selected.
 	if (previousTime_sec != newTime_sec)
 	{
 		assert(previousTime_sec != 0);
 		double scale = newTime_sec / previousTime_sec;
 
+		size_t vp0 = 0;
 		size_t vp1 = 0;
 		size_t vp2 = 0;
-		while (getNextSegment(vp1, vp2))
+		size_t vp3 = 0;
+		while (getNextSegment(vp0, vp1, vp2, vp3))
 		{
 			assert(vp1 < stepSelectionList->count());
 			m_videoSteps[vp1].duration_sec *= scale;
 
-			if (vp2 == 0)
+			if (vp2 < vp1)
 			{
 				//loop case
 				break;
@@ -297,66 +302,46 @@ void qAnimationDlg::onBrowseButtonClicked()
 	outputFileLineEdit->setText(filename);
 }
 
-bool qAnimationDlg::getNextSegment(size_t& vp1, size_t& vp2) const
+bool qAnimationDlg::getNext(size_t& vp) const
 {
-	if( vp1 >= m_videoSteps.size())
-	{
-		assert(false);
-		return false;
-	}
+    size_t inputVP1 = vp;
+    if (vp >= m_videoSteps.size()) vp = 0; //loop around
+    while (stepSelectionList->item(static_cast<int>(vp))->checkState() == Qt::Unchecked) {
+        ++vp;
+        if (vp >= m_videoSteps.size()) vp = 0; //loop around
+        if (vp == inputVP1) return false; //catch loop, no or just 1 selected
+    }
+    return true;
+}
 
-	size_t inputVP1 = vp1;
-	while (stepSelectionList->item(static_cast<int>(vp1))->checkState() == Qt::Unchecked)
-	{
-		++vp1;
-		if (vp1 == m_videoSteps.size())
-		{
-			if (loopCheckBox->isChecked())
-			{
-				vp1 = 0;
-			}
-			else
-			{
-				//no more valid start (vp1)
-				return false;
-			}
-		}
-		if (vp1 == inputVP1)
-		{
-			return false;
-		}
-	}
+bool qAnimationDlg::getPrevious(ssize_t& vp) const
+{
+    if (vp <= 0) vp = m_videoSteps.size()-1; //loop around
+    ssize_t inputVP1 = vp;
+    while (stepSelectionList->item(static_cast<int>(vp))->checkState() == Qt::Unchecked) {
+        --vp;
+        if (vp <= 0) vp = m_videoSteps.size()-1; //loop around
+        if (vp == inputVP1) return false; //catch loop, no or just 1 selected
+    }
+    return true;
+}
 
-	//look for the next enabled viewport
-	for (vp2 = vp1+1; vp2 <= m_videoSteps.size(); ++vp2)
-	{
-		if (vp1 == vp2)
-		{
-			return false;
-		}
+bool qAnimationDlg::getNextSegment(size_t& vp0, size_t& vp1, size_t& vp2, size_t& vp3) const
+{
+    if( vp1 >= m_videoSteps.size()) return false;
 
-		if (vp2 == m_videoSteps.size())
-		{
-			if (loopCheckBox->isChecked())
-			{
-				vp2 = 0;
-			}
-			else
-			{
-				//stop
-				break;
-			}
-		}
-		
-		if (stepSelectionList->item(static_cast<int>(vp2))->checkState() == Qt::Checked)
-		{
-			//we have found a valid couple (vp1, vp2)
-			return true;
-		}
-	}
+    bool endless_loop = false;
+    endless_loop |= !getNext(vp1);
+    vp2 = vp1+1;
+    endless_loop |= !getNext(vp2);
+    vp3 = vp2+1;
+    endless_loop |= !getNext(vp3);
+    vp0 = vp1-1;
+    endless_loop |= !getPrevious((ssize_t&)vp0);
 
-	//no more valid stop (vp2)
-	return false;
+    if (endless_loop) return false;
+
+    return vp1 != vp2 && (vp2 > vp1 || loopCheckBox->isChecked());
 }
 
 int qAnimationDlg::countFrames(size_t startIndex/*=0*/)
@@ -366,17 +351,19 @@ int qAnimationDlg::countFrames(size_t startIndex/*=0*/)
 	{
 		double fps = fpsSpinBox->value();
 
+		size_t vp0 = 0;
 		size_t vp1 = startIndex;
-		size_t vp2 = vp1+1;
+		size_t vp2 = 0;
+		size_t vp3 = 0;
 
-		while (getNextSegment(vp1, vp2))
+		while (getNextSegment(vp0, vp1, vp2, vp3))
 		{
 			const Step& currentStep = m_videoSteps[vp1];
 			int frameCount = static_cast<int>( fps * currentStep.duration_sec );
 			totalFrameCount += frameCount;
 
 			//take care of the 'loop' case
-			if (vp2 == 0)
+			if (vp2 < vp1)
 			{
 				assert(loopCheckBox->isChecked());
 				break;
@@ -413,17 +400,21 @@ void qAnimationDlg::preview()
 	assert(stepSelectionList->count() >= m_videoSteps.size());
 
 	int frameIndex = 0;
+	size_t vp0 = 0;
 	size_t vp2 = 0;
-	while (getNextSegment(vp1, vp2))
+	size_t vp3 = 0;
+	while (getNextSegment(vp0, vp1, vp2, vp3))
 	{
+		Step& step0 = m_videoSteps[vp0];
 		Step& step1 = m_videoSteps[vp1];
 		Step& step2 = m_videoSteps[vp2];
+		Step& step3 = m_videoSteps[vp3];
 
 		//theoretical waiting time per frame
 		qint64 delay_ms = static_cast<int>(1000 * step1.duration_sec / fps);
 		int frameCount = static_cast<int>( fps * step1.duration_sec );
 
-		ViewInterpolate interpolator(step1.viewport, step2.viewport);
+		ViewInterpolate interpolator(step0.viewport, step1.viewport, step2.viewport, step3.viewport, step0.duration_sec, step1.duration_sec, step2.duration_sec, step3.duration_sec, cubicCheckBox->isChecked() );
 		interpolator.setMaxStep(frameCount);
 		cc2DViewportObject currentParams;
 		while ( interpolator.nextView( currentParams ) )
@@ -455,7 +446,7 @@ void qAnimationDlg::preview()
 			break;
 		}
 
-		if (vp2 == 0)
+		if (vp2 < vp1)
 		{
 			assert(loopCheckBox->isChecked());
 			frameIndex = 0;
@@ -559,14 +550,18 @@ void qAnimationDlg::render(bool asSeparateFrames)
 
 	int frameIndex = 0;
 	bool success = true;
+	size_t vp0 = 0;
 	size_t vp1 = 0;
 	size_t vp2 = 0;
-	while (getNextSegment(vp1, vp2))
+	size_t vp3 = 0;
+	while (getNextSegment(vp0, vp1, vp2, vp3))
 	{
+		Step& step0 = m_videoSteps[vp0];
 		Step& step1 = m_videoSteps[vp1];
 		Step& step2 = m_videoSteps[vp2];
+		Step& step3 = m_videoSteps[vp3];
 
-		ViewInterpolate interpolator(step1.viewport, step2.viewport);
+		ViewInterpolate interpolator(step0.viewport, step1.viewport, step2.viewport, step3.viewport, step0.duration_sec, step1.duration_sec, step2.duration_sec, step3.duration_sec, cubicCheckBox->isChecked() );
 		int frameCount = static_cast<int>( fps * step1.duration_sec );
 		interpolator.setMaxStep(frameCount);
 

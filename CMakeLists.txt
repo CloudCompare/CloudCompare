@@ -102,13 +102,5 @@ if( OPTION_BUILD_CCVIEWER )
 	add_subdirectory( ccViewer )
 endif()
 
-# Install CCCoreLib
-if ( CC-CORE-LIB_SHARED )
-	if ( WIN32 OR APPLE )
-		foreach( dest ${INSTALL_DESTINATIONS} )
-			install_shared( CCCoreLib ${dest} 1 )
-		endforeach()
-	else()
-		install_shared( CCCoreLib ${CMAKE_INSTALL_LIBDIR}/cloudcompare 0 ) #default destination: /usr/lib/cloudcompare
-	endif()
-endif()
+# Install
+include( InstallCCCoreLib )

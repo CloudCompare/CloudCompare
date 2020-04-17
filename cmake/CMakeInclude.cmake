@@ -139,6 +139,7 @@ endfunction()
 function( copy_files )	# 2 arguments:
 						# ARGV0 = files (if it's a list you have to provide the list alias quoted!)
 						# ARGV1 = target (directory)
+                        # ARGV2 = 1 for debug install (if available)
 
 	message(STATUS "Files " ${ARGV0} " will be installed to dest. " ${ARGV1})
 	if( NOT CMAKE_CONFIGURATION_TYPES )
@@ -147,6 +148,9 @@ function( copy_files )	# 2 arguments:
 		install( FILES ${ARGV0} CONFIGURATIONS Release DESTINATION ${ARGV1} )
 		install( FILES ${ARGV0} CONFIGURATIONS RelWithDebInfo DESTINATION ${ARGV1}_withDebInfo )
 		install( FILES ${ARGV0} CONFIGURATIONS Debug DESTINATION ${ARGV1}_debug )
+        if (${ARGV2} EQUAL 1)
+			install( FILES ${ARGV0} ${SHARED_LIB_TYPE} CONFIGURATIONS Debug DESTINATION ${ARGV1}_debug${ARGV3} )
+		endif()
 	endif()
 endfunction()
 

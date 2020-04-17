@@ -16,16 +16,26 @@
 #                                                                        #
 ##########################################################################
 
-cmake_minimum_required(VERSION 3.0)
-cmake_policy(SET CMP0071 NEW)
+cmake_minimum_required(VERSION 3.10)
 message(STATUS "tests")
+
+enable_testing()
 
 # --- ------------
 # --- target tests
 
 set(CC_PYTHONAPI_TEST_DIRECTORY "/tmp" CACHE STRING "Directory path for tests: to store samples and generated data")
 configure_file(gendata.py.in gendata.py)
+configure_file(execBuildTest.sh.in execBuildTest.sh)
 
+# --- define a function to simplify adding tests
 
+function(do_test arg)
+    add_test(NAME CCPAPI_${arg}
+    COMMAND execBuildTest.sh ${arg}.py
+    )
+endfunction(do_test)
 
-
+do_test(test001)
+do_test(test002)
+do_test(test003)

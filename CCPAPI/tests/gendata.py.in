@@ -1,14 +1,16 @@
+#!/usr/bin/env python3
+
 import numpy as np
 import math
 import os
-import sys
 
 dataDir = "@CC_PYTHONAPI_TEST_DIRECTORY@"
-pythonScriptsSourceDir = "@CMAKE_CURRENT_SOURCE_DIR@"
-pythonModuleBuildDir = "@CMAKE_CURRENT_BINARY_DIR@/../sip"
 
-sys.path.append(pythonScriptsSourceDir)
-sys.path.append(pythonModuleBuildDir)
+def isCoordEqual(vals, refs):
+    for val, ref in zip(vals, refs):
+        if not math.isclose(val, ref, rel_tol=1e-06):
+            return False
+    return True
 
 def getSampleCloud(h=5.0):
     dataName = "dataSample_%s.xyz"%h

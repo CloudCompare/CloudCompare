@@ -18,63 +18,40 @@
 #                                                                        #
 ##########################################################################
 
+import os
+import sys
+import math
 from gendata import getSampleCloud, dataDir
-import os, sys
 
 from PyQt5.QtWidgets import QApplication
 app = QApplication(sys.argv)
 import cloudCompare as cc
 cc.CCLib.ScalarField.initNumpyApi() # to do once before dealing with numpy
+
 cloud = cc.loadPointCloud(getSampleCloud(5.0))
-namecloud = cloud.getName()
-print(namecloud)
-g = cloud.computeGravityCenter()
-print(g)
-print("has scalar fields: %s"%cloud.hasScalarFields() )
-sf = cloud.getScalarField(0)
-print(sf is None)
-cloud.getScalarFieldName(0)
-a=cloud.getScalarFieldName(0)
-print(a is None)
-a=cloud.getScalarFieldName(-1)
-print(a is None)
-a=cloud.getScalarFieldName(25)
-print(a is None)
 res = cloud.exportCoordToSF((False, True, True))
-print("has scalar fields: %s"%cloud.hasScalarFields() )
 n = cloud.getNumberOfScalarFields()
-print("number of saclar fields: %s"%n)
 cloud.setCurrentInScalarField(0)
 cloud.setCurrentOutScalarField(1)
+
 sfi=cloud.getCurrentInScalarField()
-print(sfi)
+if sfi.getName() != cloud.getScalarFieldName(0):
+    raise RuntimeError
+
 sfo=cloud.getCurrentOutScalarField()
-print(sfo)
+if sfo.getName() != cloud.getScalarFieldName(1):
+    raise RuntimeError
+
 res=cc.computeCurvature(cc.GAUSSIAN_CURV, 0.05, [cloud])
 nsf=cloud.getNumberOfScalarFields()
 sfc=cloud.getScalarField(nsf-1)
-print(sfc.getName())
-meanvar = sfc.computeMeanAndVariance()
-print(meanvar)
-sfc.computeMinAndMax()
-print("min: %s"%sfc.getMin())
-print("max: %s"%sfc.getMax())
+if sfc.getName() != "Gaussian curvature (0.05)":
+    raise RuntimeError
+
 cloud.setCurrentOutScalarField(nsf-1)
 fcloud=cc.filterBySFValue(0.01, sfc.getMax(), cloud)
-print(fcloud.size())
+filteredSize = fcloud.size()
+if not math.isclose(filteredSize, 780611, rel_tol=1e-03):
+    raise RuntimeError
+
 res=cc.SavePointCloud(fcloud, os.path.join(dataDir,"res3.xyz"))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

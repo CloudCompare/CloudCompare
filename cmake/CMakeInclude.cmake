@@ -149,7 +149,7 @@ function( copy_files )	# 2 arguments:
 		install( FILES ${ARGV0} CONFIGURATIONS RelWithDebInfo DESTINATION ${ARGV1}_withDebInfo )
 		install( FILES ${ARGV0} CONFIGURATIONS Debug DESTINATION ${ARGV1}_debug )
         if (${ARGV2} EQUAL 1)
-			install( FILES ${ARGV0} ${SHARED_LIB_TYPE} CONFIGURATIONS Debug DESTINATION ${ARGV1}_debug${ARGV3} )
+			install( FILES ${ARGV0} CONFIGURATIONS Debug DESTINATION ${ARGV1}_debug )
 		endif()
 	endif()
 endfunction()

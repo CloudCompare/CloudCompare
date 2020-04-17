@@ -16,7 +16,7 @@ if (WIN32 AND PCL_DIR)
 	
 	#release DLLs
 	file( GLOB pcl_release_dlls ${PCL_DIR}/bin/*${PCL_RELEASE_SUFFIX}.dll  )
-	copy_files("${pcl_release_dlls}" ${ARGV0}) #mind the quotes!
+	copy_files("${pcl_release_dlls}" "${ARGV0}") #mind the quotes!
 
 	#debug DLLs
 	if( CMAKE_CONFIGURATION_TYPES )

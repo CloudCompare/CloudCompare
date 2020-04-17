@@ -27,6 +27,6 @@ if( ${OPTION_BUILD_CCVIEWER} )
 
 	#import PCL dlls (if any, WIN32 only)
 	include( ../ExportPCLDlls.cmake )
-	export_PCL_dlls( ${CCVIEWER_DEST_FOLDER} )
+	export_PCL_dlls( "${CCVIEWER_DEST_FOLDER}" )
 
 endif()

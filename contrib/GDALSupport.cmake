@@ -36,8 +36,8 @@ function( target_link_GDAL ) # 2 arguments: ARGV0 = project name / ARGV1 = base 
 					message( STATUS "Looked in: " ${GDAL_INCLUDE_DIR}/../bin )
 					message( STATUS ${GDAL_DLL_FILES2} )
 
-					copy_files("${GDAL_DLL_FILES}" ${ARGV1} ) #mind the quotes!
-					copy_files("${GDAL_DLL_FILES2}" ${ARGV1} ) #mind the quotes!
+					copy_files("${GDAL_DLL_FILES}" "${ARGV1}" ) #mind the quotes!
+					copy_files("${GDAL_DLL_FILES2}" "${ARGV1}" ) #mind the quotes!
 				endif()
 			endif()
 		else()

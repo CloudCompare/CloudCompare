@@ -141,7 +141,11 @@ function( copy_files )	# 2 (or 3) arguments:
 						# ARGV1 = target (directory)
                         # ARGV2 = 1 for debug install (if available)
 
-	message(STATUS "Files " ${ARGV0} " will be installed to dest. " ${ARGV1})
+	message(STATUS "Files: ${ARGV0} will be installed in ${ARGV1}" )
+    message( STATUS "  ARGC: ${ARGC}" )
+    foreach( arg IN LISTS ARGN )
+        message( STATUS "    ARGV: ${arg}" )
+    endforeach()
 	if( NOT CMAKE_CONFIGURATION_TYPES )
 		install( FILES ${ARGV0} DESTINATION ${ARGV1} )
 	else()

@@ -16,7 +16,6 @@
 #                                                                        #
 ##########################################################################
 
-cmake_minimum_required(VERSION 3.10)
 message(STATUS "tests")
 
 enable_testing()
@@ -24,7 +23,7 @@ enable_testing()
 # --- ------------
 # --- target tests
 
-set(CC_PYTHONAPI_TEST_DIRECTORY "/tmp" CACHE STRING "Directory path for tests: to store samples and generated data")
+set(PYTHONAPI_TEST_DIRECTORY "/tmp" CACHE STRING "Directory path for tests: to store samples and generated data")
 configure_file(gendata.py.in gendata.py)
 configure_file(execBuildTest.sh.in execBuildTest.sh)
 

@@ -22,8 +22,6 @@
 #include <QList>
 #include <QString>
 
-//#define SCALAR_TYPE_FLOAT
-//#include <CCTypes.h>
 #include <ccCommandLineInterface.h>
 #include <GeometricalAnalysisTools.h>
 
@@ -34,6 +32,16 @@ enum CC_SHIFT_MODE
     AUTO = 0, XYZ = 1
 };
 
+//! load a point cloud from file
+/*! TODO process optional parameters following ccCommandLineInterface::processGlobalShiftCommand
+ * \param filename
+ * \param mode optional default AUTO
+ * \param skip optional default 0
+ * \param x optional default 0
+ * \param y optional default 0
+ * \param z optional default 0
+ * \return cloud if success, or nullptr
+ */
 ccPointCloud* loadPointCloud(
     const char* filename,
     CC_SHIFT_MODE mode = AUTO,
@@ -42,6 +50,12 @@ ccPointCloud* loadPointCloud(
     double y = 0,
     double z = 0);
 
+//! save a point cloud to a file
+/*! the file type is given by the extension
+ * \param cloud
+ * \param filename
+ * \return IO status
+ */
 CC_FILE_ERROR SavePointCloud(ccPointCloud* cloud, const QString& filename);
 
 enum CurvatureType
@@ -49,63 +63,27 @@ enum CurvatureType
     GAUSSIAN_CURV = 1, MEAN_CURV, NORMAL_CHANGE_RATE
 };
 
+//! Computes a geometric characteristic (see GeometricalAnalysisTools::GeomCharacteristic) on a list of clouds
+/*! Computes a geometric characteristic (see GeometricalAnalysisTools::GeomCharacteristic) on a set of entities
+ * \param option from (GAUSSIAN_CURV, MEAN_CURV, NORMAL_CHANGE_RATE)
+ * \list of clouds
+ * \return status
+ */
 bool computeCurvature(CurvatureType option, double radius, QList<ccPointCloud*> clouds);
 
+//! Filters out points whose scalar values falls into an interval(see ccPointCloud::filterBySFValue)
+/** Threshold values should be expressed relatively to the current displayed scalar field.
+    \param minVal minimum value
+    \param maxVal maximum value
+    \return resulting cloud (remaining points)
+**/
 ccPointCloud* filterBySFValue(double minVal, double maxVal, ccPointCloud* cloud);
 
-// --- internal ---------------------------------------------------------------
+// --- internal functions (not wrapped in the Python API) ---------------------
 
-//Extended file loading parameters, from plugins/ccCommandLineInterface.h
-struct CLLoadParameters: public FileIOFilter::LoadParameters
-{
-    CLLoadParameters() :
-            FileIOFilter::LoadParameters(), m_coordinatesShiftEnabled(false), m_coordinatesShift(0, 0, 0)
-    {
-        shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG;
-        alwaysDisplayLoadDialog = false;
-        autoComputeNormals = false;
-        coordinatesShiftEnabled = &m_coordinatesShiftEnabled;
-        coordinatesShift = &m_coordinatesShift;
-    }
-
-    bool m_coordinatesShiftEnabled;
-    CCVector3d m_coordinatesShift;
-};
-
-struct ccPApi
-{
-    //! Currently opened point clouds and their filename
-    std::vector<CLCloudDesc> m_clouds;
-
-    //! Currently opened meshes and their filename
-    std::vector<CLMeshDesc> m_meshes;
-
-    //! Silent mode
-    bool m_silentMode;
-
-    //! Whether files should be automatically saved (after each process) or not
-    bool m_autoSaveMode;
-
-    //! Whether a timestamp should be automatically added to output files or not
-    bool m_addTimestamp;
-
-    //! Default numerical precision for ASCII output
-    int m_precision;
-
-    //! File loading parameters
-    CLLoadParameters m_loadingParameters;
-
-    //! Whether Global (coordinate) shift has already been defined
-    bool m_coordinatesShiftWasEnabled;
-
-    //! Global (coordinate) shift (if already defined)
-    CCVector3d m_formerCoordinatesShift;
-
-    //! Orphan entities
-    ccHObject m_orphans;
-};
-
-ccPApi* initCloudCompare(); // should be done once
+//! initialize internal structures: should be done once, multiples calls allowed (does nothing)
+struct ccPApi;
+ccPApi* initCloudCompare();
 
 //! copied from ccLibAlgorithms::ComputeGeomCharacteristic
 bool ccPApiComputeGeomCharacteristic(

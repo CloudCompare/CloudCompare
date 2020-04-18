@@ -34,6 +34,7 @@ cloud = cc.loadPointCloud("/home/paul/projets/CloudCompare/data/altiXYZ/RGEALTI_
 %End
 };
 
+// Not tested with a Qt version below 5.9: %If (Qt_5_9_1 -) means version 5.9.1 and up.
 %If (Qt_5_9_1 -)
 %Include ccPApi.sip
 %Include ccPointCloud.sip

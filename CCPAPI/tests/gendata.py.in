@@ -4,7 +4,7 @@ import numpy as np
 import math
 import os
 
-dataDir = "@CC_PYTHONAPI_TEST_DIRECTORY@"
+dataDir = "@PYTHONAPI_TEST_DIRECTORY@"
 
 def isCoordEqual(vals, refs):
     for val, ref in zip(vals, refs):

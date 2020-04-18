@@ -19,10 +19,9 @@
 #ifndef CCPAPI_PAPI_CCTRACE_H_
 #define CCPAPI_PAPI_CCTRACE_H_
 
+#ifdef _PYTHONAPI_DEBUG_
 #include <iostream>
 #include <sstream>
-
-#ifdef _CCDEBUG_
 #define CCTRACE(msg) {std::cerr<<std::flush<<__FILE__<<" ["<<__LINE__<<"] : "<<msg<<std::endl<<std::flush;}
 #else
 #define CCTRACE(msg)

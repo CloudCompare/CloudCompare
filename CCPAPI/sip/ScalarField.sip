@@ -27,7 +27,6 @@ namespace CCLib
     class ScalarField
     {
     %TypeHeaderCode
-    #define _CCDEBUG_
     #include <ccTrace.h>
     #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
     #include <ScalarField.h>
@@ -169,20 +168,3 @@ namespace CCLib
     };
     
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

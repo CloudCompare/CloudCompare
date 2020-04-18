@@ -59,6 +59,11 @@ By cons, need to duplicate code from qCC, without GUI graphics calls.
 For example, for the calculation of curvature, retrieved from ccLibAlgorithms :: ComputeGeomCharacteristic, ccLibAlgorithms :: GetDensitySFName.
 Do we need an intermediate layer of callable processing from the GUI and the Python interface?
 
+Plugins are not loaded
+----------------------
+The plugin manager seems to be only available from the GUI (Graphical User Interface), not in a non graphic library.
+Same problem as above. Not implemented.
+
 ScalarField <--> Numpy Array: always floating type (double type not implemented)
 --------------------------------------------------------------------------------
 Implement the ScalarType == double option for ScalarField <--> Numpy Array conversions.
@@ -85,6 +90,4 @@ TODO:
 - dataset generated or easily accessible.
 - Scripts configured to run in the end user environment.
 - Use CTest (or another test tool) during construction, deployment?
-
-
 

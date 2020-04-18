@@ -1,3 +1,4 @@
+
 ##########################################################################
 #                                                                        #
 #                               SIP                                      #
@@ -16,10 +17,7 @@
 #                                                                        #
 ##########################################################################
 
-cmake_minimum_required(VERSION 3.0)
-cmake_policy(SET CMP0071 NEW)
 message(STATUS "SIP processing")
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cmake" )
 
 # --- Python detection: if several versions installed, select one with all the required packages installed
 
@@ -143,7 +141,3 @@ if(WIN32)
 else()
   set_target_properties(cloudCompare PROPERTIES PREFIX "")
 endif()
-
-
-
-

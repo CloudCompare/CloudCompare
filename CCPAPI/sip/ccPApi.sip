@@ -23,7 +23,6 @@
 %End
 
 %ModuleHeaderCode
-#define _CCDEBUG_
 #include <ccTrace.h>
 #include <ccPApi.h>
 %End

@@ -16,8 +16,15 @@
 #                                                                        #
 ##########################################################################
 
+cmake_minimum_required(VERSION 3.10)
+
+option(PYTHONAPI_TRACES "Activate console trace in the Python API" OFF)
+if (PYTHONAPI_TRACES)
+    add_definitions(-D_PYTHONAPI_DEBUG_)
+endif()
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
 
 add_subdirectory( PAPI )
 add_subdirectory( sip )
 add_subdirectory( tests )
-

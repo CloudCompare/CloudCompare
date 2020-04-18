@@ -22,7 +22,6 @@
 
 //qCC_db
 #include <ccHObjectCaster.h>
-//#include <ccColorScalesManager.h>
 
 //libs/qCC_io
 #include<AsciiFilter.h>
@@ -32,15 +31,68 @@
 
 //plugins
 #include "ccPluginInterface.h"
-//#include "ccPluginManager.h"
+#include "ccPluginManager.h"
 
 //qCC
 #include "ccCommon.h"
 
-#define _CCDEBUG_
 #include "ccTrace.h"
 
+// --- internal struct
+
+//* Extended file loading parameters, from plugins/ccCommandLineInterface.h
+struct CLLoadParameters: public FileIOFilter::LoadParameters
+{
+    CLLoadParameters() :
+            FileIOFilter::LoadParameters(), m_coordinatesShiftEnabled(false), m_coordinatesShift(0, 0, 0)
+    {
+        shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG;
+        alwaysDisplayLoadDialog = false;
+        autoComputeNormals = false;
+        coordinatesShiftEnabled = &m_coordinatesShiftEnabled;
+        coordinatesShift = &m_coordinatesShift;
+    }
+
+    bool m_coordinatesShiftEnabled;
+    CCVector3d m_coordinatesShift;
+};
+
+//! internal attributes (cloned from plugins/ccCommandLineInterface.h)
+struct ccPApi
+{
+    //! Currently opened point clouds and their filename
+    std::vector<CLCloudDesc> m_clouds;
+
+    //! Currently opened meshes and their filename
+    std::vector<CLMeshDesc> m_meshes;
+
+    //! Silent mode
+    bool m_silentMode;
+
+    //! Whether files should be automatically saved (after each process) or not
+    bool m_autoSaveMode;
+
+    //! Whether a timestamp should be automatically added to output files or not
+    bool m_addTimestamp;
+
+    //! Default numerical precision for ASCII output
+    int m_precision;
+
+    //! File loading parameters
+    CLLoadParameters m_loadingParameters;
+
+    //! Whether Global (coordinate) shift has already been defined
+    bool m_coordinatesShiftWasEnabled;
+
+    //! Global (coordinate) shift (if already defined)
+    CCVector3d m_formerCoordinatesShift;
+
+    //! Orphan entities
+    ccHObject m_orphans;
+};
+
 static ccPApi* s_ccPApiInternals = nullptr;
+
 
 ccPApi* initCloudCompare()
 {
@@ -56,7 +108,7 @@ ccPApi* initCloudCompare()
         FileIOFilter::InitInternalFilters();  //load all known I/O filters (plugins will come later!)
         ccNormalVectors::GetUniqueInstance(); //force pre-computed normals array initialization
 
-        //load the plugins
+        // TODO: load the plugins: implemented in the GUI part today, not in a library
         //ccPluginManager::get().loadPlugins();
     }
     return s_ccPApiInternals;
@@ -65,11 +117,12 @@ ccPApi* initCloudCompare()
 ccPointCloud* loadPointCloud(const char* filename, CC_SHIFT_MODE mode, int skip, double x, double y, double z)
 {
     CCTRACE("Opening file: " << filename << " mode: " << mode << " skip: " << skip << " x: " << x << " y: " << y << " z: " << z);
+    // TODO process optional parameters following ccCommandLineInterface::processGlobalShiftCommand
     ccPApi* capi = initCloudCompare();
     CC_FILE_ERROR result = CC_FERR_NO_ERROR;
     ccHObject* db = nullptr;
 
-    FileIOFilter::Shared filter = FileIOFilter::Shared(nullptr);
+    FileIOFilter::Shared filter = nullptr;
     QString fileName(filename);
     if (filter)
     {
@@ -116,8 +169,7 @@ ccPointCloud* loadPointCloud(const char* filename, CC_SHIFT_MODE mode, int skip,
 
     if (count > 0)
         return capi->m_clouds.back().pc;
-    else
-        return nullptr;
+    return nullptr;
 }
 
 CC_FILE_ERROR SavePointCloud(ccPointCloud* cloud, const QString& filename)
@@ -133,7 +185,7 @@ CC_FILE_ERROR SavePointCloud(ccPointCloud* cloud, const QString& filename)
     QString ext = fi.suffix();
     QString fileFilter = "";
     const std::vector<FileIOFilter::Shared>& filters = FileIOFilter::GetFilters();
-    for (auto filter : filters)
+    for (const auto filter : filters)
     {
         QStringList theFilters = filter->getFileFilters(false);
         QStringList matches = theFilters.filter(ext);
@@ -160,6 +212,7 @@ bool computeCurvature(CurvatureType option, double radius, QList<ccPointCloud*> 
     }
     return ccPApiComputeGeomCharacteristic(CCLib::GeometricalAnalysisTools::Curvature, option, radius, entities);
 }
+
 ccPointCloud* filterBySFValue(double minVal, double maxVal, ccPointCloud* cloud)
 {
     CCTRACE("filterBySFValue min: " << minVal << " max: " << maxVal << " cloudName: " << cloud->getName().toStdString());

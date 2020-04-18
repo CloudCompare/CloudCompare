@@ -16,8 +16,6 @@
 #                                                                        #
 ##########################################################################
 
-cmake_minimum_required(VERSION 3.0)
-cmake_policy(SET CMP0071 NEW)
 message(STATUS "Python API")
 
 # --- -----------------------------------------
@@ -43,6 +41,7 @@ target_include_directories( CC_PAPI_LIB PUBLIC
     )
     
 if( MSVC )
+   # TODO is this order of include relevant ? I use the same order as in qCC (CloudCompare target) 
    target_include_directories( CC_PAPI_LIB PUBLIC
         ${QCC_DB_LIB_SOURCE_DIR}/msvc
         )
@@ -54,10 +53,10 @@ target_include_directories( CC_PAPI_LIB PUBLIC
     ${CloudComparePlugins_SOURCE_DIR} 
     ${CloudCompare_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/../common
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../common
     ${CMAKE_CURRENT_SOURCE_DIR}/db_tree
     ${CMAKE_CURRENT_SOURCE_DIR}/ui_templates
-    ${CMAKE_CURRENT_SOURCE_DIR}/../libs/qcustomplot
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../libs/qcustomplot
     ${CMAKE_CURRENT_BINARY_DIR}
     )
 

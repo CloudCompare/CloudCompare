@@ -2557,22 +2557,22 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="14"/>
         <source>Color From Scalar Fields</source>
-        <translation type="unfinished"></translation>
+        <translation>Цвет из скалярных полей</translation>
     </message>
     <message>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="40"/>
         <source>Mapping type:</source>
-        <translation type="unfinished"></translation>
+        <translation>Преобразовать в:</translation>
     </message>
     <message>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="47"/>
         <source>To RGB</source>
-        <translation type="unfinished"></translation>
+        <translation>RGB</translation>
     </message>
     <message>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="57"/>
         <source>To HSV</source>
-        <translation type="unfinished"></translation>
+        <translation>HSV</translation>
     </message>
     <message>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="118"/>
@@ -2581,7 +2581,7 @@ p, li { white-space: pre-wrap; }
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="460"/>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="618"/>
         <source>Red</source>
-        <translation type="unfinished">Красный</translation>
+        <translation>Красный</translation>
     </message>
     <message>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="138"/>
@@ -2593,7 +2593,7 @@ p, li { white-space: pre-wrap; }
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="609"/>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="613"/>
         <source>RGB</source>
-        <translation type="unfinished">RGB</translation>
+        <translation>RGB</translation>
     </message>
     <message>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="152"/>
@@ -2602,7 +2602,7 @@ p, li { white-space: pre-wrap; }
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="465"/>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="623"/>
         <source>Green</source>
-        <translation type="unfinished">Зеленый</translation>
+        <translation>Зеленый</translation>
     </message>
     <message>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="157"/>
@@ -2611,7 +2611,7 @@ p, li { white-space: pre-wrap; }
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="470"/>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="628"/>
         <source>Blue</source>
-        <translation type="unfinished">Синий</translation>
+        <translation>Синий</translation>
     </message>
     <message>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="165"/>
@@ -2619,7 +2619,7 @@ p, li { white-space: pre-wrap; }
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="478"/>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="636"/>
         <source>Minimum:</source>
-        <translation type="unfinished"></translation>
+        <translation>Минимум:</translation>
     </message>
     <message>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="188"/>
@@ -2627,7 +2627,7 @@ p, li { white-space: pre-wrap; }
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="501"/>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="659"/>
         <source>Fix</source>
-        <translation type="unfinished"></translation>
+        <translation>Фикс.</translation>
     </message>
     <message>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="195"/>
@@ -2635,7 +2635,7 @@ p, li { white-space: pre-wrap; }
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="508"/>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="669"/>
         <source>Reverse</source>
-        <translation type="unfinished"></translation>
+        <translation>Обратно</translation>
     </message>
     <message>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="215"/>
@@ -2643,12 +2643,12 @@ p, li { white-space: pre-wrap; }
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="528"/>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="689"/>
         <source>Maximum:</source>
-        <translation type="unfinished"></translation>
+        <translation>Максимум:</translation>
     </message>
     <message>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="589"/>
         <source>Alpha</source>
-        <translation type="unfinished">Альфа</translation>
+        <translation>Альфа</translation>
     </message>
 </context>
 <context>
@@ -6979,7 +6979,7 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2381"/>
         <source>From Scalar fields</source>
-        <translation type="unfinished"></translation>
+        <translation>Из скалярных полей</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2965"/>
@@ -10667,12 +10667,12 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2190"/>
         <source>Remove RGB</source>
-        <translation type="unfinished"></translation>
+        <translation>Удалить RGB</translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2223"/>
         <source>Remove normals</source>
-        <translation type="unfinished"></translation>
+        <translation>Удалить нормали</translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2260"/>

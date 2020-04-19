@@ -118,6 +118,7 @@ ccPointCloud* loadPointCloud(const char* filename, CC_SHIFT_MODE mode, int skip,
 {
     CCTRACE("Opening file: " << filename << " mode: " << mode << " skip: " << skip << " x: " << x << " y: " << y << " z: " << z);
     // TODO process optional parameters following ccCommandLineInterface::processGlobalShiftCommand
+    // TODO code from ccCommandLineParser::importFile
     ccPApi* capi = initCloudCompare();
     CC_FILE_ERROR result = CC_FERR_NO_ERROR;
     ccHObject* db = nullptr;
@@ -233,7 +234,7 @@ bool ccPApiComputeGeomCharacteristic(
     PointCoordinateType radius,
     ccHObject::Container& entities)
 {
-    // --- from ccLibAlgorithms::ComputeGeomCharacteristic
+    // TODO code from ccLibAlgorithms::ComputeGeomCharacteristic
     CCTRACE("ccPApiComputeGeomCharacteristic "<< subOption << " radius: " << radius);
     size_t selNum = entities.size();
     if (selNum < 1)

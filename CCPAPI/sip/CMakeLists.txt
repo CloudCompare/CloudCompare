@@ -107,13 +107,13 @@ target_include_directories( cloudCompare PUBLIC
     )
 
 target_link_libraries( cloudCompare
-    ${PYTHON_LIBRARIES}
     CC_PAPI_LIB
     CC_FBO_LIB
     CC_CORE_LIB
     QCC_DB_LIB
     QCC_GL_LIB
     qcustomplot
+    ${PYTHON_LIBRARIES}
     )
 
 # Qt libraries

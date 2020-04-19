@@ -38,6 +38,8 @@
 
 #include "ccTrace.h"
 
+using namespace PAPI;
+
 // --- internal struct
 
 //* Extended file loading parameters, from plugins/ccCommandLineInterface.h
@@ -58,7 +60,7 @@ struct CLLoadParameters: public FileIOFilter::LoadParameters
 };
 
 //! internal attributes (cloned from plugins/ccCommandLineInterface.h)
-struct ccPApi
+struct PAPI::ccPApi
 {
     //! Currently opened point clouds and their filename
     std::vector<CLCloudDesc> m_clouds;
@@ -91,10 +93,10 @@ struct ccPApi
     ccHObject m_orphans;
 };
 
-static ccPApi* s_ccPApiInternals = nullptr;
+static PAPI::ccPApi* s_ccPApiInternals = nullptr;
 
 
-ccPApi* initCloudCompare()
+PAPI::ccPApi* PAPI::initCloudCompare()
 {
     if (!s_ccPApiInternals)
     {
@@ -114,13 +116,13 @@ ccPApi* initCloudCompare()
     return s_ccPApiInternals;
 }
 
-ccPointCloud* loadPointCloud(const char* filename, CC_SHIFT_MODE mode, int skip, double x, double y, double z)
+ccPointCloud* PAPI::loadPointCloud(const char* filename, CC_SHIFT_MODE mode, int skip, double x, double y, double z)
 {
     CCTRACE("Opening file: " << filename << " mode: " << mode << " skip: " << skip << " x: " << x << " y: " << y << " z: " << z);
     // TODO process optional parameters following ccCommandLineInterface::processGlobalShiftCommand
     // TODO code from ccCommandLineParser::importFile
-    ccPApi* capi = initCloudCompare();
-    CC_FILE_ERROR result = CC_FERR_NO_ERROR;
+    PAPI::ccPApi* capi = PAPI::initCloudCompare();
+    ::CC_FILE_ERROR result = CC_FERR_NO_ERROR;
     ccHObject* db = nullptr;
 
     FileIOFilter::Shared filter = nullptr;
@@ -173,12 +175,12 @@ ccPointCloud* loadPointCloud(const char* filename, CC_SHIFT_MODE mode, int skip,
     return nullptr;
 }
 
-CC_FILE_ERROR SavePointCloud(ccPointCloud* cloud, const QString& filename)
+::CC_FILE_ERROR PAPI::SavePointCloud(ccPointCloud* cloud, const QString& filename)
 {
     CCTRACE("saving cloud");
-    ccPApi* capi = initCloudCompare();
+    ccPApi* capi = PAPI::initCloudCompare();
     if ((cloud == nullptr) || filename.isEmpty())
-        return CC_FERR_BAD_ARGUMENT;
+        return ::CC_FERR_BAD_ARGUMENT;
     CCTRACE("cloud: " << cloud->getName().toStdString() << " file: " << filename.toStdString());
     FileIOFilter::SaveParameters parameters;
     parameters.alwaysDisplaySaveDialog = false;
@@ -197,11 +199,11 @@ CC_FILE_ERROR SavePointCloud(ccPointCloud* cloud, const QString& filename)
         }
     }
     CCTRACE("fileFilter: " << fileFilter.toStdString());
-    CC_FILE_ERROR result = FileIOFilter::SaveToFile(cloud, filename, parameters, fileFilter); //AsciiFilter::GetFileFilter());
+    ::CC_FILE_ERROR result = FileIOFilter::SaveToFile(cloud, filename, parameters, fileFilter); //AsciiFilter::GetFileFilter());
     return result;
 }
 
-bool computeCurvature(CurvatureType option, double radius, QList<ccPointCloud*> clouds)
+bool PAPI::computeCurvature(PAPI::CurvatureType option, double radius, QList<ccPointCloud*> clouds)
 {
     CCTRACE("computeCurvature mode: " << option << " radius: " << radius << " nbClouds: " << clouds.size());
     ccHObject::Container entities;
@@ -214,7 +216,7 @@ bool computeCurvature(CurvatureType option, double radius, QList<ccPointCloud*> 
     return ccPApiComputeGeomCharacteristic(CCLib::GeometricalAnalysisTools::Curvature, option, radius, entities);
 }
 
-ccPointCloud* filterBySFValue(double minVal, double maxVal, ccPointCloud* cloud)
+ccPointCloud* PAPI::filterBySFValue(double minVal, double maxVal, ccPointCloud* cloud)
 {
     CCTRACE("filterBySFValue min: " << minVal << " max: " << maxVal << " cloudName: " << cloud->getName().toStdString());
     CCLib::ScalarField* sf = cloud->getCurrentOutScalarField();
@@ -228,7 +230,7 @@ ccPointCloud* filterBySFValue(double minVal, double maxVal, ccPointCloud* cloud)
     return fitleredCloud;
 }
 
-bool ccPApiComputeGeomCharacteristic(
+bool PAPI::ccPApiComputeGeomCharacteristic(
     CCLib::GeometricalAnalysisTools::GeomCharacteristic c,
     int subOption,
     PointCoordinateType radius,
@@ -438,7 +440,7 @@ bool ccPApiComputeGeomCharacteristic(
     return true;
 }
 
-QString ccPApiGetDensitySFName(
+QString PAPI::ccPApiGetDensitySFName(
     CCLib::GeometricalAnalysisTools::Density densityType,
     bool approx,
     double densityKernelSize)

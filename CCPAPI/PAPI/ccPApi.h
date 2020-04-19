@@ -27,6 +27,9 @@
 
 // --- for Python3 interface
 
+namespace PAPI
+{
+
 enum CC_SHIFT_MODE
 {
     AUTO = 0, XYZ = 1
@@ -97,5 +100,7 @@ QString ccPApiGetDensitySFName(
     CCLib::GeometricalAnalysisTools::Density densityType,
     bool approx,
     double densityKernelSize = 0.0);
+
+}
 
 #endif /* CCPAPI_PAPI_CCPAPI_H_ */

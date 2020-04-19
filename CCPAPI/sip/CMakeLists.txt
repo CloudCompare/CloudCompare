@@ -45,6 +45,8 @@ find_package(PYQTSIP REQUIRED)  # should come after Python
 
 project( cloudCompare VERSION 0.1 )
 
+add_library( cloudCompare SHARED "")
+
 # --- sources / sip wrappings
 
 set(SIP_MAIN_SOURCE cloudCompare.sip)
@@ -82,8 +84,11 @@ add_custom_command(
 
 # --- sources / to compile
 
-add_library( cloudCompare SHARED ${SIP_ALL_GENSRC} )
-
+target_sources( cloudCompare
+                PRIVATE
+                ${SIP_ALL_GENSRC}
+                )
+                
 # --- Python wrapping with sip
 
 target_include_directories( cloudCompare PUBLIC

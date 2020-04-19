@@ -23,17 +23,16 @@ message(STATUS "Python API")
 
 project( CC_PAPI_LIB VERSION 0.1 )
 
-set( CC_PAPI_HEADER_LIST
-    ccPApi.h
-    ccTrace.h
-    )
-    
-set( CC_PAPI_SOURCE_LIST
+add_library( CC_PAPI_LIB STATIC "")
+
+target_sources( CC_PAPI_LIB
+    PUBLIC
+    ${CMAKE_CURRENT_LIST_DIR}/ccPApi.h
+    ${CMAKE_CURRENT_LIST_DIR}/ccTrace.h
+    PRIVATE
     ccPApi.cpp
-    )
-    
-add_library( CC_PAPI_LIB STATIC ${CC_PAPI_HEADER_LIST} ${CC_PAPI_SOURCE_LIST} )
-    
+    )    
+       
 target_include_directories( CC_PAPI_LIB PUBLIC
     ${CC_FBO_LIB_SOURCE_DIR}/include
     ${CC_CORE_LIB_SOURCE_DIR}/include
@@ -54,8 +53,6 @@ target_include_directories( CC_PAPI_LIB PUBLIC
     ${CloudCompare_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/../../common
-    ${CMAKE_CURRENT_SOURCE_DIR}/db_tree
-    ${CMAKE_CURRENT_SOURCE_DIR}/ui_templates
     ${CMAKE_CURRENT_SOURCE_DIR}/../../libs/qcustomplot
     ${CMAKE_CURRENT_BINARY_DIR}
     )

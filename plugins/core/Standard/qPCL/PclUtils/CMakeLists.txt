@@ -16,7 +16,6 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 include_directories( ${CloudComparePlugins_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
 include_directories( ${EXTERNAL_LIBS_INCLUDE_DIR} )
-include_directories( ${QCC_GL_LIB_SOURCE_DIR} )
 
 project( QPCL_PLUGIN_UTILS_LIB )
 
@@ -51,8 +50,7 @@ endif()
 link_directories( ${PCL_LIBRARY_DIRS} )
 add_definitions( ${PCL_DEFINITIONS} )
 target_link_libraries( ${PROJECT_NAME}
-    CCCoreLib
-    QCC_DB_LIB
+    QCC_GL_LIB
     ${PCL_LIBRARIES}
 )
 

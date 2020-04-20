@@ -1,26 +1,16 @@
 include( CMakePolicies NO_POLICY_SCOPE )
 
-include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
-include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
-
 project( QCC_IO_LIB )
 
-file( GLOB header_list *.h)
-file( GLOB source_list *.cpp *.c)
-file( GLOB ui_list ui_templates/*.ui )
+add_library( ${PROJECT_NAME} SHARED )
 
-set( CMAKE_CXX_VISIBILITY_PRESET hidden )
-
-qt5_wrap_ui( generated_ui_list ${ui_list} )
-add_library( ${PROJECT_NAME} SHARED ${header_list} ${source_list} ${generated_ui_list} )
+add_subdirectory( include )
+add_subdirectory( src )
+add_subdirectory( ui )
 
 target_link_libraries( ${PROJECT_NAME}
-	CCCoreLib
-	CC_FBO_LIB
-	QCC_DB_LIB )
-
-# Qt
-target_link_libraries(${PROJECT_NAME} Qt5::Core)	
+	QCC_DB_LIB
+)
 
 # contrib. libraries support
 target_link_contrib( ${PROJECT_NAME} )
@@ -28,9 +18,13 @@ target_link_contrib( ${PROJECT_NAME} )
 # Add custom preprocessor definitions
 target_compile_definitions( ${PROJECT_NAME} PRIVATE QCC_IO_LIBRARY_BUILD )
 
-if( APPLE )
-	set_target_properties( ${PROJECT_NAME} PROPERTIES
-		INSTALL_RPATH "." )
+set_target_properties( ${PROJECT_NAME} PROPERTIES
+    AUTOUIC ON # FIXME Remove after everything has moved to targets and we can set it globally
+	CXX_VISIBILITY_PRESET hidden
+)
+
+if ( BUILD_TESTING )
+	add_subdirectory( test ) 
 endif()
 
 # install (shared) lib to specified destinations
@@ -40,8 +34,4 @@ if( WIN32 OR APPLE )
 	endforeach()
 else()
 	install_shared( ${PROJECT_NAME} ${CMAKE_INSTALL_LIBDIR}/cloudcompare 0 ) #default destination: /usr/lib
-endif()
-
-if(BUILD_TESTING)
-	add_subdirectory(Tests)
 endif()

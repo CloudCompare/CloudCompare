@@ -1,17 +1,17 @@
-# ALL 'contrib' supported libraries 
+# ALL 'contrib' supported libraries
 
 # 3DXWARE (3dConnexion devices) support
-include( contrib/3DXSupport.cmake )
+include( 3DXSupport )
 # Gamepads support
-include( contrib/GamepadSupport.cmake )
+include( GamepadSupport )
 # DXF support
 include( DxfLibSupport )
 # GDAL support
-include( contrib/GDALSupport.cmake )
+include( GDALSupport )
 # SHP support
 include( ShapeLibSupport )
 # Oculus support
-include( contrib/OculusSupport.cmake )
+include( OculusSupport )
 
 function( target_link_contrib ) # 2 arguments: ARGV0 = project name / ARGV1 = shared lib export base folder (optional - '_debug' will be appended for debug configuration)
 

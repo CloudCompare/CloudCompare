@@ -33,6 +33,7 @@ configure_file(gendata.py.in gendata.py)
 
 # shell scripts to execute a test, a build or install step
 if(WIN32)
+    configure_file(execTest.bat.in execTest.bat)
     configure_file(execInstallTest.bat.in execInstallTest.bat)
     set(EXEC_TEST execTest.bat)
 	set(EXEC_INSTALL_TEST execInstallTest.bat)

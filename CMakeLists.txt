@@ -82,7 +82,7 @@ add_subdirectory( extern/CCCoreLib )
 include( CMakeExternalLibs )
 
 # Contrib. libraries (mainly for I/O)
-include( contrib/AllSupport.cmake )
+include( AllSupport )
 
 # Libs requested by both qCC & ccViewer
 add_subdirectory( libs/CCFbo )

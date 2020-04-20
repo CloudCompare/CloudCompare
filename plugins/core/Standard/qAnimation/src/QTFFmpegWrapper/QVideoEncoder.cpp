@@ -116,9 +116,6 @@ bool QVideoEncoder::open(QString* errorString/*=0*/)
 		return false;
 	}
 
-	//Initialize libavcodec, and register all codecs and formats
-	av_register_all();
-
 	// find the output format
 	avformat_alloc_output_context2(&m_ff->formatContext, NULL, NULL, qPrintable(m_filename));
 	if (!m_ff->formatContext)

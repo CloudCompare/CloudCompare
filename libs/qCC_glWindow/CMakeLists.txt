@@ -1,10 +1,5 @@
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 
-include_directories( ${QCC_DB_LIB_SOURCE_DIR} )
-if( MSVC )
-   include_directories( ${QCC_DB_LIB_SOURCE_DIR}/msvc )
-endif()
-
 project( QCC_GL_LIB )
 
 file( GLOB header_list *.h)

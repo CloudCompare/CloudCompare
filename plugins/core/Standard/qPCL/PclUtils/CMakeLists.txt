@@ -16,11 +16,7 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 include_directories( ${CloudComparePlugins_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
 include_directories( ${EXTERNAL_LIBS_INCLUDE_DIR} )
-include_directories( ${QCC_DB_LIB_SOURCE_DIR} )
 include_directories( ${QCC_GL_LIB_SOURCE_DIR} )
-if( MSVC )
-  include_directories( ${QCC_DB_LIB_SOURCE_DIR}/msvc )
-endif()
 
 project( QPCL_PLUGIN_UTILS_LIB )
 

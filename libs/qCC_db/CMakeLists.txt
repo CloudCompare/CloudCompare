@@ -1,21 +1,24 @@
 project( QCC_DB_LIB )
 
-file( GLOB header_list *.h)
-file( GLOB source_list *.cpp)
+add_library( ${PROJECT_NAME} SHARED )
 
-set( CMAKE_CXX_VISIBILITY_PRESET hidden )
-
-add_library( ${PROJECT_NAME} SHARED ${header_list} ${source_list} )
+add_subdirectory( include )
+add_subdirectory( src )
 
 target_link_libraries( ${PROJECT_NAME}
 	CCCoreLib
-	CC_FBO_LIB )
+	CC_FBO_LIB
+    Qt5::Core
+    Qt5::Gui
+    Qt5::OpenGL
+    Qt5::Widgets
+)
 
-# Qt
-target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL)
-
-# Add custom preprocessor definitions
 target_compile_definitions( ${PROJECT_NAME} PRIVATE QCC_DB_LIBRARY_BUILD )
+
+set_target_properties( ${PROJECT_NAME} PROPERTIES
+	CXX_VISIBILITY_PRESET hidden
+)
 
 # install (shared) lib to specified destinations
 if( WIN32 OR APPLE )

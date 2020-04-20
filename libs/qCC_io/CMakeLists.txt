@@ -1,10 +1,6 @@
 include( CMakePolicies NO_POLICY_SCOPE )
 
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
-include_directories( ${QCC_DB_LIB_SOURCE_DIR} )
-if( MSVC )
-   include_directories( ${QCC_DB_LIB_SOURCE_DIR}/msvc )
-endif()
 include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
 
 project( QCC_IO_LIB )

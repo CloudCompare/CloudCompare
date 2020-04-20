@@ -1,5 +1,3 @@
-include_directories( ${CC_FBO_LIB_SOURCE_DIR}/include )
-
 project( QCC_DB_LIB )
 
 file( GLOB header_list *.h)

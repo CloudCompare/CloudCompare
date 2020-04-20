@@ -1,6 +1,5 @@
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 
-include_directories( ${CC_FBO_LIB_SOURCE_DIR}/include )
 include_directories( ${QCC_DB_LIB_SOURCE_DIR} )
 if( MSVC )
    include_directories( ${QCC_DB_LIB_SOURCE_DIR}/msvc )

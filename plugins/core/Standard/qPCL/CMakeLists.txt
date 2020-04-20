@@ -31,5 +31,5 @@ if (PLUGIN_STANDARD_QPCL)
     
     #import PCL dlls (if any, WIN32 only)
     include( ExportPCLDlls.cmake )
-    export_PCL_dlls( ${CLOUDCOMPARE_DEST_FOLDER} )
+    export_PCL_dlls( "${CLOUDCOMPARE_DEST_FOLDER}" )
 endif()

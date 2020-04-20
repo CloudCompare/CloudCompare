@@ -16,7 +16,6 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 include_directories( ${CloudComparePlugins_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
 include_directories( ${EXTERNAL_LIBS_INCLUDE_DIR} )
-include_directories( ${CC_CORE_LIB_SOURCE_DIR}/include )
 include_directories( ${QCC_DB_LIB_SOURCE_DIR} )
 include_directories( ${QCC_GL_LIB_SOURCE_DIR} )
 if( MSVC )
@@ -40,7 +39,7 @@ add_library( ${PROJECT_NAME} STATIC ${header_list} ${source_list} ${impl_list} $
 
 # Add custom preprocessor definitions
 if (WIN32)
-	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL QCC_DB_USE_AS_DLL )
+    set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL QCC_DB_USE_AS_DLL )
 endif()
 
 #define the PCL_VER_1_6_OR_OLDER preprocessor to compile qPCL with older versions of PCL
@@ -50,12 +49,12 @@ endif()
 
 # Luca's PCL patch support
 if( PCL_VERSION VERSION_GREATER  1.7 ) #from 1.7 the patch was merged
-	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS LP_PCL_PATCH_ENABLED )
+    set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS LP_PCL_PATCH_ENABLED )
 endif()
 
 link_directories( ${PCL_LIBRARY_DIRS} )
 add_definitions( ${PCL_DEFINITIONS} )
-target_link_libraries( ${PROJECT_NAME} ${PCL_LIBRARIES})
+target_link_libraries( ${PROJECT_NAME} CCCoreLib ${PCL_LIBRARIES} )
 
 # Qt
 target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Gui Qt5::Widgets)

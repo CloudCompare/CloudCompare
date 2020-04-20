@@ -1,4 +1,3 @@
-include_directories( ${CC_CORE_LIB_SOURCE_DIR}/include )
 include_directories( ${CC_FBO_LIB_SOURCE_DIR}/include )
 
 project( QCC_DB_LIB )
@@ -11,7 +10,7 @@ set( CMAKE_CXX_VISIBILITY_PRESET hidden )
 add_library( ${PROJECT_NAME} SHARED ${header_list} ${source_list} )
 
 target_link_libraries( ${PROJECT_NAME}
-	CC_CORE_LIB
+	CCCoreLib
 	CC_FBO_LIB )
 
 # Qt

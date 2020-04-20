@@ -77,16 +77,8 @@ endif()
 # Load advanced scripts
 include( CMakeInclude )
 
-add_subdirectory( CC )
-
-# Propagate the choice from CCLib to use doubles for ScalarType
-if ( ${USE_SCALAR_TYPE_DOUBLE} )
-	add_definitions( -DSCALAR_TYPE_DOUBLE )
-else()
-	add_definitions( -DSCALAR_TYPE_FLOAT )
-endif()
-
 # Add external libraries
+add_subdirectory( extern/CCCoreLib )
 include( CMakeExternalLibs )
 
 # Contrib. libraries (mainly for I/O)
@@ -109,3 +101,6 @@ add_subdirectory( qCC )
 if( OPTION_BUILD_CCVIEWER )
 	add_subdirectory( ccViewer )
 endif()
+
+# Install
+include( InstallCCCoreLib )

@@ -129,24 +129,33 @@ function( install_shared )	# 3 arguments:
 	else()
 		install( TARGETS ${ARGV0} ${SHARED_LIB_TYPE} CONFIGURATIONS Release DESTINATION ${ARGV1}${ARGV3} )
 		install( TARGETS ${ARGV0} ${SHARED_LIB_TYPE} CONFIGURATIONS RelWithDebInfo DESTINATION ${ARGV1}_withDebInfo${ARGV3} )
-		if (${ARGV2} EQUAL 1)
-			install( TARGETS ${ARGV0} ${SHARED_LIB_TYPE} CONFIGURATIONS Debug DESTINATION ${ARGV1}_debug${ARGV3} )
-		endif()
+        if ( ${ARGC} GREATER 2 )
+            if ( ${ARGV2} EQUAL 1 )
+                install( TARGETS ${ARGV0} ${SHARED_LIB_TYPE} CONFIGURATIONS Debug DESTINATION ${ARGV1}_debug${ARGV3} )
+            endif()
+        endif()
 	endif()
 endfunction()
 
 # Copy files to the specified directory and for the active configurations
-function( copy_files )	# 2 arguments:
+function( copy_files )	# 2 (or 3) arguments:
 						# ARGV0 = files (if it's a list you have to provide the list alias quoted!)
 						# ARGV1 = target (directory)
+                        # ARGV2 = 1 for debug install (if available)
 
-	message(STATUS "Files " ${ARGV0} " will be installed to dest. " ${ARGV1})
+	message(STATUS "Files: ${ARGV0} will be installed in ${ARGV1}" )
+
 	if( NOT CMAKE_CONFIGURATION_TYPES )
 		install( FILES ${ARGV0} DESTINATION ${ARGV1} )
 	else()
 		install( FILES ${ARGV0} CONFIGURATIONS Release DESTINATION ${ARGV1} )
 		install( FILES ${ARGV0} CONFIGURATIONS RelWithDebInfo DESTINATION ${ARGV1}_withDebInfo )
 		install( FILES ${ARGV0} CONFIGURATIONS Debug DESTINATION ${ARGV1}_debug )
+        if ( ${ARGC} GREATER 2 )
+            if ( ${ARGV2} EQUAL 1 )
+                install( FILES ${ARGV0} CONFIGURATIONS Debug DESTINATION ${ARGV1}_debug )
+            endif()
+        endif()
 	endif()
 endfunction()
 

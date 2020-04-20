@@ -85,7 +85,7 @@ if (WIN32)
 
 		message(STATUS "${FFMEG_DLL}")
 		
-		copy_files("${FFMEG_DLL}" ${ARGV0}) #mind the quotes
+		copy_files("${FFMEG_DLL}" "${ARGV0}") #mind the quotes
 	
 	else()
 

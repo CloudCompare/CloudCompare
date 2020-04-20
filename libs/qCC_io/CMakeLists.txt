@@ -1,7 +1,6 @@
 include( CMakePolicies NO_POLICY_SCOPE )
 
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
-include_directories( ${CC_CORE_LIB_SOURCE_DIR}/include )
 include_directories( ${CC_FBO_LIB_SOURCE_DIR}/include )
 include_directories( ${QCC_DB_LIB_SOURCE_DIR} )
 if( MSVC )
@@ -21,7 +20,7 @@ qt5_wrap_ui( generated_ui_list ${ui_list} )
 add_library( ${PROJECT_NAME} SHARED ${header_list} ${source_list} ${generated_ui_list} )
 
 target_link_libraries( ${PROJECT_NAME}
-	CC_CORE_LIB
+	CCCoreLib
 	CC_FBO_LIB
 	QCC_DB_LIB )
 

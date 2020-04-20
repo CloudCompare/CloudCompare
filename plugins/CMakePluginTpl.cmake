@@ -6,7 +6,6 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
 include_directories( ${CloudComparePlugins_SOURCE_DIR} )
 include_directories( ${CloudCompare_SOURCE_DIR}/../common )
-include_directories( ${CC_CORE_LIB_SOURCE_DIR}/include )
 include_directories( ${CC_FBO_LIB_SOURCE_DIR}/include )
 include_directories( ${QCC_IO_LIB_SOURCE_DIR} )
 include_directories( ${QCC_DB_LIB_SOURCE_DIR} )
@@ -56,8 +55,8 @@ if( WIN32 )
 endif()
 
 target_link_libraries( ${PROJECT_NAME}
+	CCCoreLib
 	CC_FBO_LIB
-	CC_CORE_LIB
 	QCC_DB_LIB
 	QCC_IO_LIB
 	QCC_GL_LIB )

@@ -1,9 +1,12 @@
 # ------------------------------------------------------------------------------
 # Qt
 # ------------------------------------------------------------------------------
-## we will use cmake automoc / autouic / autorcc feature
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+set( CMAKE_AUTOMOC ON )
+set( CMAKE_AUTORCC ON )
+
+# FIXME Eventually turn this on when we've completed the move to targets
+#set( CMAKE_AUTOUIC ON )
 
 set( QT5_ROOT_PATH CACHE PATH "Qt5 root directory (i.e. where the 'bin' folder lies)" )
 if ( QT5_ROOT_PATH )

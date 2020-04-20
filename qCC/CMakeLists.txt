@@ -2,7 +2,6 @@ project( CloudCompare VERSION 2.12.0 )
 
 include( CMakePolicies NO_POLICY_SCOPE )
 
-include_directories( ${QCC_IO_LIB_SOURCE_DIR} )
 include_directories( ${CloudComparePlugins_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../common )

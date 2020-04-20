@@ -26,10 +26,7 @@ if (PLUGIN_STANDARD_QFACETS)
 	
 	include( ../../../CMakePluginTpl.cmake )
 
-	#add IO support
-	include_directories( ${QCC_IO_LIB_SOURCE_DIR} )
-	target_link_libraries( ${PROJECT_NAME} QCC_IO_LIB )
-	
-	#add shapelib support
-	target_link_libraries( ${PROJECT_NAME} shapelib )
+	target_link_libraries( ${PROJECT_NAME}
+        shapelib
+    )
 endif()

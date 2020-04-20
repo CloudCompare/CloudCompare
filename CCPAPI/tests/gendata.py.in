@@ -1,0 +1,27 @@
+#!/usr/bin/env python3
+
+import numpy as np
+import math
+import os
+
+dataDir = "@PYTHONAPI_TEST_DIRECTORY@"
+
+def isCoordEqual(vals, refs):
+    for val, ref in zip(vals, refs):
+        if not math.isclose(val, ref, rel_tol=1e-06):
+            return False
+    return True
+
+def getSampleCloud(h=5.0):
+    dataName = "dataSample_%s.xyz"%h
+    sample = os.path.join(dataDir, dataName)
+    if not os.path.exists(sample):
+        vx = np.arange(-5, 5, 0.01)
+        vy = np.arange(-5, 5, 0.01)
+        
+        with open(sample,'w') as f:
+            for x in vx:
+                for y in vy:
+                    z = math.sin(5*math.sqrt(x**2 + y**2)) / math.sqrt(x**2 + y**2)
+                    f.write("%f %f %f\n"%(x, y ,z))
+    return sample

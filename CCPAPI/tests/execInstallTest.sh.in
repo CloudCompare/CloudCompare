@@ -1,0 +1,15 @@
+#!/bin/bash
+
+usage()
+{
+    echo "usage: $0 test<xxx>.py"
+}
+
+if [ "$1" == "" ]; then
+    usage
+    exit 1
+fi
+
+export PYTHONPATH=@CMAKE_INSTALL_PREFIX@/lib/cloudcompare:$PYTHONPATH
+export PYTHONPATH=@CMAKE_INSTALL_PREFIX@/@PYTHONAPI_TEST_SCRIPTS_DIRECTORY@:$PYTHONPATH
+python3 $1

@@ -97,6 +97,12 @@ add_subdirectory( plugins )
 # qCC
 add_subdirectory( qCC )
 
+# Python API
+option(BUILD_PYTHON_API "Generate a Python 3 interface. Need Python3, pyqt, sip, Numpy" OFF)
+if (BUILD_PYTHON_API)
+    add_subdirectory ( CCPAPI )
+endif()
+
 # CCViewer
 if( OPTION_BUILD_CCVIEWER )
 	add_subdirectory( ccViewer )

@@ -1,0 +1,17 @@
+#!/bin/bash
+
+usage()
+{
+    echo "usage: $0 test<xxx>.py"
+}
+
+if [ "$1" == "" ]; then
+    usage
+    exit 1
+fi
+
+export PYTHONPATH=@CMAKE_CURRENT_BINARY_DIR@/../PAPI:$PYTHONPATH
+export PYTHONPATH=@CMAKE_CURRENT_BINARY_DIR@/../sip:$PYTHONPATH
+export PYTHONPATH=@CMAKE_CURRENT_BINARY_DIR@:$PYTHONPATH
+cd @CMAKE_CURRENT_SOURCE_DIR@
+python3 $1

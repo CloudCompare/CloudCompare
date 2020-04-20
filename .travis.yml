@@ -5,19 +5,19 @@ language: cpp
 compiler:
 - clang
 - gcc
-env: 
+env:
 - SCALAR_DOUBLE=ON
 - SCALAR_DOUBLE=OFF
 install:
 - sudo apt-get update -qq
-- sudo apt-get install -qy cmake 
-  libqt5svg5-dev libqt5opengl5-dev qt5-default qttools5-dev qttools5-dev-tools 
-  libtbb-dev 
-  libavcodec-dev libavformat-dev libavutil-dev 
-  libboost-program-options-dev libboost-thread-dev 
-  libeigen3-dev 
+- sudo apt-get install -qy cmake
+  libqt5svg5-dev libqt5opengl5-dev qt5-default qttools5-dev qttools5-dev-tools
+  libtbb-dev
+  libavcodec-dev libavformat-dev libavutil-dev
+  libboost-program-options-dev libboost-thread-dev
+  libeigen3-dev
   libcgal-dev libcgal-qt5-dev libgdal-dev libpcl-dev
-  libdlib-dev libswscale-dev libproj-dev libxerces-c-dev xvfb libpdal-dev libjsoncpp-dev 
+  libdlib-dev libswscale-dev libproj-dev libxerces-c-dev xvfb libpdal-dev libjsoncpp-dev
 - git submodule init && git submodule update
 
 before_script:
@@ -28,8 +28,6 @@ before_script:
   -DJSON_ROOT_DIR=/usr/include/jsoncpp
   -DCOMPILE_CC_CORE_LIB_WITH_TBB=ON
   -DDLIB_ROOT=/usr/include
-  -DOPTION_USE_DXF_LIB=ON
-  -DOPTION_USE_SHAPE_LIB=ON
   -DOPTION_SCALAR_DOUBLE=$SCALAR_DOUBLE
   -DPLUGIN_EXAMPLE_GL=ON
   -DPLUGIN_EXAMPLE_IO=ON

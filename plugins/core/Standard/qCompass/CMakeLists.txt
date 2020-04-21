@@ -24,5 +24,5 @@ if (PLUGIN_STANDARD_QCOMPASS)
 	add_subdirectory( src )
 	add_subdirectory( ui )
 
-	include( ../../../CMakePluginTpl.cmake )
+    include( CMakePluginTemplate )
 endif()

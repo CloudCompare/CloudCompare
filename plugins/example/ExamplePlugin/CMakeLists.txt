@@ -13,7 +13,7 @@ if ( PLUGIN_EXAMPLE_STANDARD )
     # load any subdirectories (see qAdditionalIO for an example)
     # add_subdirectory( LIB1 )
     
-    include( ../../CMakePluginTpl.cmake )
+    include( CMakePluginTemplate )
     
     # set dependencies to necessary libraries (see qPCV for an example)
     # target_link_libraries( ${PROJECT_NAME} LIB1 )

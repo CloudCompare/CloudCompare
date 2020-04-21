@@ -32,7 +32,7 @@ if ( PLUGIN_IO_QPDAL )
 	add_subdirectory( src )
 	add_subdirectory( ui )
 
-	include( ../../../CMakePluginTpl.cmake )
+    include( CMakePluginTemplate )
 	
 	# Link PDAL
 	add_definitions( ${PDAL_DEFINITIONS} )

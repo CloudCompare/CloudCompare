@@ -20,7 +20,7 @@ if (WIN32)
 
 		set( CC_IS_IO_PLUGIN 1 )
 
-		include( ../../../CMakePluginTpl.cmake )
+        include( CMakePluginTemplate )
 		
 		target_link_LASLib( ${PROJECT_NAME} )
 

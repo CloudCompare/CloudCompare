@@ -12,7 +12,7 @@ if (PLUGIN_STANDARD_QBROOM)
 	add_subdirectory( src )
 	add_subdirectory( ui )
 	
-	include( ../../../CMakePluginTpl.cmake )
+    include( CMakePluginTemplate )
 	
 	include_directories( ${QBROOM_LIB_INCLUDE_DIR} )
 

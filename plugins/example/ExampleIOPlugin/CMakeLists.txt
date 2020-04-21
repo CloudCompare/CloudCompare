@@ -10,5 +10,5 @@ if (PLUGIN_EXAMPLE_IO)
 	
 	add_subdirectory( src )
 	
-	include( ../../CMakePluginTpl.cmake )    
+    include( CMakePluginTemplate )
 endif()

@@ -11,7 +11,7 @@ if (PLUGIN_STANDARD_QRANSAC_SD)
 
 	add_subdirectory (RANSAC_SD_orig)
 
-	include( ../../../CMakePluginTpl.cmake )
+    include( CMakePluginTemplate )
 
 	target_link_libraries( ${PROJECT_NAME} QRANSAC_SD_PRIM_SHAPES_LIB QRANSAC_SD_MISC_LIB )
 

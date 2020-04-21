@@ -24,7 +24,7 @@ if (PLUGIN_STANDARD_QFACETS)
 
 	add_subdirectory( ui )
 	
-	include( ../../../CMakePluginTpl.cmake )
+    include( CMakePluginTemplate )
 
 	target_link_libraries( ${PROJECT_NAME}
         shapelib

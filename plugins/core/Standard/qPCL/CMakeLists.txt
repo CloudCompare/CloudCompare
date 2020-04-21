@@ -22,7 +22,7 @@ if (PLUGIN_STANDARD_QPCL)
     include_directories( ${QPCL_PLUGIN_UTILS_LIB_BINARY_DIR} )
     include_directories( ${PCL_INCLUDE_DIRS} )
     
-    include( ../../../CMakePluginTpl.cmake )
+    include( CMakePluginTemplate )
     
     target_link_libraries(${PROJECT_NAME} QPCL_PLUGIN_UTILS_LIB)
     

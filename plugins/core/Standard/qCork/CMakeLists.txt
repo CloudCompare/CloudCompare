@@ -9,7 +9,7 @@ if (PLUGIN_STANDARD_QCORK)
     # Cork lib and MPIR are needed to build this plugin
     include( CorkSupport.cmake NO_POLICY_SCOPE )
     
-	include( ../../../CMakePluginTpl.cmake )
+    include( CMakePluginTemplate )
     
     target_link_cork( ${PROJECT_NAME} )
 endif()

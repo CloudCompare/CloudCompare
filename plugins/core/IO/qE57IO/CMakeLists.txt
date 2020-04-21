@@ -14,7 +14,7 @@ if ( PLUGIN_IO_QE57 )
 	add_subdirectory( src )
 	add_subdirectory( extern/libE57Format EXCLUDE_FROM_ALL )
 	
-	include( ../../../CMakePluginTpl.cmake )
+    include( CMakePluginTemplate )
 	
 	target_link_libraries( ${PROJECT_NAME} E57Format )
 	

@@ -12,6 +12,6 @@ if (PLUGIN_STANDARD_QCSF)
 	add_subdirectory( src )
 	add_subdirectory( ui )
 	
-	include( ../../../CMakePluginTpl.cmake )
+    include( CMakePluginTemplate )
 
 endif()

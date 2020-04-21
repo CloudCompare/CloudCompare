@@ -14,7 +14,7 @@ if (PLUGIN_STANDARD_QCANUPO)
 		include_directories( ${DLIB_ROOT} )
 	endif()
 	
-	include( ../../../CMakePluginTpl.cmake )
+    include( CMakePluginTemplate )
 	
 	option( COMPILE_QCANUPO_WITH_PRIVATE_PARTS "Check to compile qCanupo plugin with private methods (CNRS/UEB only)" OFF )
 	if ( COMPILE_QCANUPO_WITH_PRIVATE_PARTS )

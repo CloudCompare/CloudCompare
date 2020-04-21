@@ -9,7 +9,7 @@ if (PLUGIN_GL_QSSAO)
 	include( CMakePolicies NO_POLICY_SCOPE )
 
     set( CC_SHADER_FOLDER SSAO )
-    include( ../../../CMakePluginTpl.cmake )
+    include( CMakePluginTemplate )
     
     target_link_libraries( ${PROJECT_NAME} QSSAO_RANDOMKIT_LIB )
     include_directories( ${QSSAO_RANDOMKIT_LIB_SOURCE_DIR} )

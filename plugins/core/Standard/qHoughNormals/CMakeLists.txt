@@ -26,7 +26,7 @@ if (PLUGIN_STANDARD_QHOUGH_NORMALS)
 	add_subdirectory( src )
 	add_subdirectory( ui )
 	
-	include( ../../../CMakePluginTpl.cmake )
+    include( CMakePluginTemplate )
 
 	target_link_libraries( ${PROJECT_NAME} )
 	target_link_libraries( ${PROJECT_NAME} ${OPENGL_LIBRARIES} )

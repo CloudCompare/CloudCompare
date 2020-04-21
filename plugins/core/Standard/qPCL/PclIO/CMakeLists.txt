@@ -9,7 +9,7 @@ include_directories( ${PCL_INCLUDE_DIRS} )
 
 set( CC_IS_IO_PLUGIN 1 )
 
-include( ../../../../CMakePluginTpl.cmake )
+include( CMakePluginTemplate )
 
 target_link_libraries(${PROJECT_NAME} QPCL_PLUGIN_UTILS_LIB)
 link_directories( ${PCL_LIBRARY_DIRS} )

@@ -19,11 +19,6 @@ if ( OPTION_USE_SHAPE_LIB )
         set_target_properties( TestShpFilter PROPERTIES
             WIN32_EXECUTABLE False
         )
-
-        # FIXME This will go away soon - see policy CMP0020
-        target_link_libraries( TestShpFilter
-            Qt5::WinMain
-        )
     endif()
 
     add_test( NAME TestShpFilter COMMAND TestShpFilter )

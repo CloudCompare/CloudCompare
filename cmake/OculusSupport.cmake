@@ -2,7 +2,7 @@
 # Oculus LibOVR support for CloudCompare
 # ------------------------------------------------------------------------------
 
-OPTION( OPTION_USE_OCULUS_SDK "Build with Oculus SDK (LibOVR) support" OFF )
+option( OPTION_USE_OCULUS_SDK "Build with Oculus SDK (LibOVR) support" OFF )
 if(OPTION_USE_OCULUS_SDK)
 
 	# Oculus SDK (LibOVR)

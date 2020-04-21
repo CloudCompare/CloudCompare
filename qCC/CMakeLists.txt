@@ -58,6 +58,7 @@ target_link_libraries( ${PROJECT_NAME}
 
 # Qt
 target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL Qt5::PrintSupport)
+# FIXME This will go away soon - see policy CMP0020
 if (WIN32)
 	target_link_libraries( ${PROJECT_NAME} Qt5::WinMain )
 endif()

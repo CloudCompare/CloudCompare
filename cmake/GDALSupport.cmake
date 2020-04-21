@@ -2,7 +2,7 @@
 # GDAL support for CloudCompare
 # ------------------------------------------------------------------------------
 
-OPTION( OPTION_USE_GDAL "Build with GDAL support" OFF )
+option( OPTION_USE_GDAL "Build with GDAL support" OFF )
 if( ${OPTION_USE_GDAL} )
 	find_package(GDAL REQUIRED)
 	

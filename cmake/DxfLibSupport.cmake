@@ -2,7 +2,7 @@
 # Dxf Lib + CMake support for CloudCompare
 # ------------------------------------------------------------------------------
 
-OPTION( OPTION_USE_DXF_LIB "Build with Ribbonsoft's DXF Lib (AutoCAD DXF files support)" ON )
+option( OPTION_USE_DXF_LIB "Build with Ribbonsoft's DXF Lib (AutoCAD DXF files support)" ON )
 if( ${OPTION_USE_DXF_LIB} )
 	set( DXF_LIB_DIR "extern/dxflib" CACHE PATH "DXF lib path" )
 	add_subdirectory( "${DXF_LIB_DIR}" )

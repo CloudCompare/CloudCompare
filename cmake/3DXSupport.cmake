@@ -2,7 +2,7 @@
 # 3dConnexion+CMake support for CloudCompare
 # ------------------------------------------------------------------------------
 
-OPTION( OPTION_SUPPORT_3DCONNEXION_DEVICES "Build with 3dConnexion libraries (3D mouses support)" OFF )
+option( OPTION_SUPPORT_3DCONNEXION_DEVICES "Build with 3dConnexion libraries (3D mouses support)" OFF )
 if( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )
 
 	# 3DxWare

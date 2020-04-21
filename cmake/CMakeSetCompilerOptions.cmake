@@ -17,7 +17,7 @@ if ( UNIX )
 elseif( MSVC )
     add_definitions(-DNOMINMAX -D_CRT_SECURE_NO_WARNINGS -D__STDC_LIMIT_MACROS)
 
-    OPTION( OPTION_MP_BUILD "Check to activate multithreaded compilation with MSVC" OFF )
+    option( OPTION_MP_BUILD "Check to activate multithreaded compilation with MSVC" OFF )
     if( ${OPTION_MP_BUILD} )
        set( CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS}\ /MP)
     endif()
@@ -26,7 +26,7 @@ elseif( MSVC )
 	set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /D _SECURE_SCL=0" ) # disable checked iterators
 
     #use VLD for mem leak checking
-    OPTION( OPTION_USE_VISUAL_LEAK_DETECTOR "Check to activate compilation (in debug) with Visual Leak Detector" OFF )
+    option( OPTION_USE_VISUAL_LEAK_DETECTOR "Check to activate compilation (in debug) with Visual Leak Detector" OFF )
     if( ${OPTION_USE_VISUAL_LEAK_DETECTOR} )
 		set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /D USE_VLD" )
     endif()

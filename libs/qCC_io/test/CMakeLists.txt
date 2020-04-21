@@ -20,6 +20,7 @@ if ( OPTION_USE_SHAPE_LIB )
             WIN32_EXECUTABLE False
         )
 
+        # FIXME This will go away soon - see policy CMP0020
         target_link_libraries( TestShpFilter
             Qt5::WinMain
         )

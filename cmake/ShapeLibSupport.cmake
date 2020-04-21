@@ -2,7 +2,7 @@
 # ShapeLib + CMake support for CloudCompare
 # ------------------------------------------------------------------------------
 
-OPTION( OPTION_USE_SHAPE_LIB "Build with ShapeLib (SHP files support)" ON )
+option( OPTION_USE_SHAPE_LIB "Build with ShapeLib (SHP files support)" ON )
 if( ${OPTION_USE_SHAPE_LIB} )
     set( SHAPELIB_LIB_DIR "extern/shapelib" CACHE PATH "shapelib lib path" )
 	add_subdirectory( "${SHAPELIB_LIB_DIR}" )

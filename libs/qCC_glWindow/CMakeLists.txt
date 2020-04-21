@@ -12,10 +12,6 @@ target_link_libraries( ${PROJECT_NAME}
 	Qt5::Widgets
 )
 
-if ( OPTION_GL_QUAD_BUFFER_SUPPORT )
-	target_compile_definitions( ${PROJECT_NAME} PRIVATE CC_GL_WINDOW_USE_QWINDOW )
-endif()
-
 if ( OPTION_USE_OCULUS_SDK )
     target_link_OCULUS_SDK( ${PROJECT_NAME} )
 endif()

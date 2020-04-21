@@ -71,10 +71,6 @@ endif()
 # Add custom preprocessor definitions
 target_compile_definitions( ${PROJECT_NAME} PUBLIC CC_VIEWER )
 
-if (OPTION_GL_QUAD_BUFFER_SUPPORT)
-	target_compile_definitions( ${PROJECT_NAME} PUBLIC CC_GL_WINDOW_USE_QWINDOW )
-endif()
-
 if (WIN32)
 	if (MSVC)
 		set_target_properties( ${PROJECT_NAME} PROPERTIES LINK_FLAGS " /MANIFEST:NO" )

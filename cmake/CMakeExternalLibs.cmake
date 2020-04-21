@@ -13,45 +13,33 @@ if ( QT5_ROOT_PATH )
 	list( APPEND CMAKE_PREFIX_PATH ${QT5_ROOT_PATH} )
 endif()
 
-# find qt5 components
-# find_package(Qt5 COMPONENTS OpenGL Widgets Core Gui PrintSupport Concurrent REQUIRED)
-find_package(Qt5Widgets REQUIRED)
-find_package(Qt5Core REQUIRED)
-find_package(Qt5Gui REQUIRED)
-find_package(Qt5PrintSupport REQUIRED)
-find_package(Qt5Concurrent REQUIRED)
-find_package(Qt5OpenGL REQUIRED)
-find_package(Qt5OpenGLExtensions REQUIRED)
-find_package(Qt5Svg REQUIRED)
+find_package( Qt5
+    COMPONENTS
+        Concurrent
+        Core
+        Gui
+        OpenGL
+        OpenGLExtensions
+        PrintSupport
+        Svg
+        Widgets
+    REQUIRED
+)
 
 # in the case no Qt5Config.cmake file could be found, cmake will explicitly ask the user for the QT5_DIR containing it!
 # thus no need to keep additional variables and checks
 
 # Starting with the QtCore lib, find the bin and root directories
-get_target_property(QT5_LIB_LOCATION Qt5::Core LOCATION_${CMAKE_BUILD_TYPE})
-get_filename_component(QT_BINARY_DIR ${QT5_LIB_LOCATION} DIRECTORY)
+get_target_property( Qt5_LIB_LOCATION Qt5::Core LOCATION_${CMAKE_BUILD_TYPE} )
+get_filename_component( Qt5_LIB_LOCATION ${Qt5_LIB_LOCATION} DIRECTORY )
 
-# Apple uses frameworks - move up until we get to the base directory to set the bin directory properly
+# Apple uses frameworks - use qmake's location to find macdeployqt
 if ( APPLE )
-	get_filename_component(QT_BINARY_DIR ${QT_BINARY_DIR} DIRECTORY)
-	get_filename_component(QT_BINARY_DIR ${QT_BINARY_DIR} DIRECTORY)
-	set(QT_BINARY_DIR "${QT_BINARY_DIR}/bin")	
+    get_target_property( QMAKE_LOCATION Qt5::qmake IMPORTED_LOCATION )
+    get_filename_component( Qt5_BIN_DIR ${QMAKE_LOCATION} DIRECTORY )
 
-	set( MACDEPLOYQT "${QT_BINARY_DIR}/macdeployqt" )
+	set( MACDEPLOYQT "${Qt5_BIN_DIR}/macdeployqt" )
 endif()
-
-# set QT5_ROOT_PATH if it wasn't set by the user
-if ( NOT QT5_ROOT_PATH )
-	get_filename_component(QT5_ROOT_PATH ${QT_BINARY_DIR} DIRECTORY)
-endif()
-
-include_directories(${Qt5OpenGL_INCLUDE_DIRS}
-                    ${Qt5Widgets_INCLUDE_DIRS}
-                    ${Qt5Core_INCLUDE_DIRS}
-                    ${Qt5Gui_INCLUDE_DIRS}
-                    ${Qt5Concurrent_INCLUDE_DIRS}
-                    ${Qt5PrintSupport_INCLUDE_DIRS}
-					)
 
 # turn on QStringBuilder for more efficient string construction
 #	see https://doc.qt.io/qt-5/qstring.html#more-efficient-string-construction

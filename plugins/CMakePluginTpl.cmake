@@ -48,11 +48,12 @@ if( WIN32 )
 endif()
 
 target_link_libraries( ${PROJECT_NAME}
-	QCC_IO_LIB
-	QCC_GL_LIB )
-
-# Qt
-target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL Qt5::Concurrent)
+    QCC_IO_LIB
+    QCC_GL_LIB
+    Qt5::Concurrent
+    Qt5::OpenGL
+    Qt5::Widgets
+)
 
 if( APPLE )
     # put all the plugins we build into one directory

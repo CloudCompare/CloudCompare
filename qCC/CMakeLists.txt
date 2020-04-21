@@ -49,15 +49,14 @@ else()
 endif()
 
 target_link_libraries( ${PROJECT_NAME}
-	CCCoreLib
-	CC_FBO_LIB
-	QCC_DB_LIB
-	QCC_IO_LIB 
-	QCC_GL_LIB
-	QCustomPlot )
+    QCC_GL_LIB
+    QCC_IO_LIB
+    QCustomPlot
+    Qt5::OpenGL
+    Qt5::PrintSupport
+    Qt5::Widgets
+)
 
-# Qt
-target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL Qt5::PrintSupport)
 # FIXME This will go away soon - see policy CMP0020
 if (WIN32)
 	target_link_libraries( ${PROJECT_NAME} Qt5::WinMain )

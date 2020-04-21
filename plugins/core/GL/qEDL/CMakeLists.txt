@@ -11,5 +11,5 @@ if (PLUGIN_GL_QEDL)
 	add_subdirectory( src )
 	
     set( CC_SHADER_FOLDER EDL )
-    include( ../../../CMakePluginTpl.cmake )
+    include( CMakePluginTemplate )
 endif()

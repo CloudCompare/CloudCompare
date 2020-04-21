@@ -4,5 +4,5 @@ option( PLUGIN_EXAMPLE_GL "Check to install example GL plugin" OFF )
 if ( PLUGIN_EXAMPLE_GL )
     project( ExampleGLPlugin )
     
-    include( ../../CMakePluginTpl.cmake )
+    include( CMakePluginTemplate )
 endif()

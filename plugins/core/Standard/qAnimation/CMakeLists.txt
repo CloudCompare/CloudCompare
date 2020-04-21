@@ -18,7 +18,7 @@ if (PLUGIN_STANDARD_QANIMATION)
 	add_subdirectory( src )
 	add_subdirectory( ui )
 
-	include( ../../../CMakePluginTpl.cmake )
+    include( CMakePluginTemplate )
 
 	if (WITH_FFMPEG_SUPPORT)
 		target_link_libraries( ${PROJECT_NAME} QTFFMPEG_LIB )

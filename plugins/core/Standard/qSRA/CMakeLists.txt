@@ -25,7 +25,7 @@ if (PLUGIN_STANDARD_QSRA)
 	set( CC_PLUGIN_CUSTOM_UI_LIST	${CloudCompare_SOURCE_DIR}/ui_templates/colorScaleEditorDlg.ui
 									${CloudCompare_SOURCE_DIR}/ui_templates/renderToFileDialog.ui )
 
-	include( ../../../CMakePluginTpl.cmake )
+    include( CMakePluginTemplate )
 	
 	#DXF support
 	target_link_DXFLIB( ${PROJECT_NAME} )

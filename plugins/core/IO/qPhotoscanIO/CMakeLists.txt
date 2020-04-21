@@ -15,7 +15,7 @@ if (PLUGIN_IO_QPHOTOSCAN)
 	
 	add_subdirectory( src )
 
-	include( ../../../CMakePluginTpl.cmake )
+    include( CMakePluginTemplate )
 	
 	# Zlib
 	target_link_libraries(${PROJECT_NAME} ${ZLIB_LIBRARIES})

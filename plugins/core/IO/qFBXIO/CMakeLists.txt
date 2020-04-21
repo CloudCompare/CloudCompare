@@ -29,7 +29,7 @@ if ( PLUGIN_IO_QFBX )
 
 	add_subdirectory( src )
 	
-	include( ../../../CMakePluginTpl.cmake )
+    include( CMakePluginTemplate )
 	
 	# Link FBX
 	# Release

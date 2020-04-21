@@ -91,10 +91,9 @@ private:
     double m_fov[4];
     double m_perspectiveAspectRatio[4];
     double m_orthoAspectRatio[4];
-    double m_vm_alpha[4];
-    double m_vm_axis_x[4];
-    double m_vm_axis_y[4];
-    double m_vm_axis_z[4];
+    double m_vm_phi[4];
+    double m_vm_theta[4];
+    double m_vm_psi[4];
     double m_vm_translation_x[4];
     double m_vm_translation_y[4];
     double m_vm_translation_z[4];

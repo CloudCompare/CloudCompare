@@ -7,8 +7,6 @@ add_subdirectory( src )
 
 target_link_libraries( ${PROJECT_NAME}
 	QCC_DB_LIB
-	Qt5::Core
-	Qt5::Gui
 	Qt5::OpenGL
 	Qt5::OpenGLExtensions
 	Qt5::Widgets

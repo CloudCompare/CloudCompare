@@ -1,5 +1,3 @@
-cmake_minimum_required (VERSION 3.0)
-
 if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.12.0")
 	# https://cmake.org/cmake/help/git-stage/policy/CMP0074.html
 	cmake_policy(SET CMP0074 OLD)
@@ -52,8 +50,6 @@ add_definitions( ${PCL_DEFINITIONS} )
 target_link_libraries( ${PROJECT_NAME}
     QCC_GL_LIB
     ${PCL_LIBRARIES}
+    Qt5::Widgets
 )
-
-# Qt
-target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Gui Qt5::Widgets)
 

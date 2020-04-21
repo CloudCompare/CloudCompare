@@ -18,6 +18,8 @@ if (PLUGIN_STANDARD_QPCV)
 	include_directories( ${OpenGL_INCLUDE_DIR} )
     include_directories( ${PCV_LIB_SOURCE_DIR} )
     
-    target_link_libraries( ${PROJECT_NAME} PCV_LIB )
-	target_link_libraries( ${PROJECT_NAME} ${OPENGL_LIBRARIES} )
+    target_link_libraries( ${PROJECT_NAME}
+        PCV_LIB
+        ${OPENGL_LIBRARIES}
+     )
 endif()

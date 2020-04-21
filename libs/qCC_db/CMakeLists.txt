@@ -8,8 +8,6 @@ add_subdirectory( src )
 target_link_libraries( ${PROJECT_NAME}
 	CCCoreLib
 	CC_FBO_LIB
-    Qt5::Core
-    Qt5::Gui
     Qt5::OpenGL
     Qt5::Widgets
 )

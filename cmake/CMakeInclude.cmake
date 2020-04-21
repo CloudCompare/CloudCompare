@@ -25,18 +25,18 @@ if( WIN32 )
 				endif()
 			endif()
 			#ICU DLLs
-			file( GLOB QT_RELEASE_DLLS ${QT_BINARY_DIR}/icu*.dll ) #first init the list with the ICU Dlls
+			file( GLOB QT_RELEASE_DLLS ${Qt5_LIB_LOCATION}/icu*.dll ) #first init the list with the ICU Dlls
 	
 			#specific case for the MinGW version of Qts
 			if( MINGW )
-				file ( GLOB QT_RELEASE_DLLS ${QT_BINARY_DIR}/libgcc*.dll )
-				file ( GLOB QT_RELEASE_DLLS ${QT_BINARY_DIR}/libstdc++*.dll )
+				file ( GLOB QT_RELEASE_DLLS ${Qt5_LIB_LOCATION}/libgcc*.dll )
+				file ( GLOB QT_RELEASE_DLLS ${Qt5_LIB_LOCATION}/libstdc++*.dll )
 			endif()
 	
 			#generate full path of release Dlls
 			foreach( element ${QT_RELEASE_DLLS_BASE_NAME} )
 				#message(${element})
-				list( APPEND QT_RELEASE_DLLS ${QT_BINARY_DIR}/${element}.dll)
+				list( APPEND QT_RELEASE_DLLS ${Qt5_LIB_LOCATION}/${element}.dll)
 			endforeach()
 	
 			foreach( qtDLL ${QT_RELEASE_DLLS} )
@@ -66,7 +66,7 @@ if( WIN32 )
 					endif()
 				endif()
 				#ICU DLLs
-				file( GLOB QT_DEBUG_DLLS ${QT_BINARY_DIR}/icu*.dll ) #first init the list with the ICU Dlls
+				file( GLOB QT_DEBUG_DLLS ${Qt5_LIB_LOCATION}/icu*.dll ) #first init the list with the ICU Dlls
 	
 				#specific case for the MinGW version of Qts
 				if( MINGW )
@@ -76,7 +76,7 @@ if( WIN32 )
 			
 				#generate full path of release Dlls
 				foreach( element ${QT_DEBUG_DLLS_BASE_NAME} )
-					list( APPEND QT_DEBUG_DLLS ${QT_BINARY_DIR}/${element}.dll)
+					list( APPEND QT_DEBUG_DLLS ${Qt5_LIB_LOCATION}/${element}.dll)
 				endforeach()
 	
 				foreach( qtDLL ${QT_DEBUG_DLLS} )

@@ -49,11 +49,6 @@ target_link_libraries( ${PROJECT_NAME}
     Qt5::Widgets
 )
 
-# FIXME This will go away soon - see policy CMP0020
-if ( WIN32 )
-	target_link_libraries( ${PROJECT_NAME} Qt5::WinMain )
-endif()
-
 # contrib. libraries support
 if ( APPLE )
 	target_link_contrib( ${PROJECT_NAME} ${CLOUDCOMPARE_MAC_FRAMEWORK_DIR} )

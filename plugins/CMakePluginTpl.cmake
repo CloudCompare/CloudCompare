@@ -48,8 +48,8 @@ if( WIN32 )
 endif()
 
 target_link_libraries( ${PROJECT_NAME}
-	QCC_IO_LIB
-	QCC_GL_LIB
+    QCC_IO_LIB
+    QCC_GL_LIB
     Qt5::Concurrent
     Qt5::OpenGL
     Qt5::Widgets

@@ -49,9 +49,9 @@ else()
 endif()
 
 target_link_libraries( ${PROJECT_NAME}
-	QCC_GL_LIB
+    QCC_GL_LIB
     QCC_IO_LIB
-	QCustomPlot
+    QCustomPlot
     Qt5::OpenGL
     Qt5::PrintSupport
     Qt5::Widgets

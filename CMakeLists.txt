@@ -22,6 +22,11 @@ option( OPTION_BUILD_CCVIEWER "Check to compile CCViewer project" ON )
 # Quad buffer stereo support
 option( OPTION_GL_QUAD_BUFFER_SUPPORT "Check to compile CloudCompare and ccViewer with Quad Buffer support" OFF )
 
+if ( OPTION_GL_QUAD_BUFFER_SUPPORT )
+    # Add the define for all libs and applications
+	add_definitions( -DCC_GL_WINDOW_USE_QWINDOW )
+endif()
+
 # Testing
 option( BUILD_TESTING "Build tests for CC" OFF )
 if ( BUILD_TESTING )

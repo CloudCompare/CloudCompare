@@ -74,7 +74,7 @@ protected: //methods
 	void updateTotalDuration();
 
 	bool getNextSegment(size_t& vp0, size_t& vp1, size_t& vp2, size_t& vp3);
-	void resetSegment();
+	void resetSegment(size_t selected_index);
 
 	void render(bool asSeparateFrames);
 

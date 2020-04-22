@@ -200,7 +200,7 @@ double qAnimationDlg::computeTotalTime()
 {
 	double totalDuration_sec = 0;
 	size_t vp0, vp1, vp2, vp3;
-	resetSegment();
+	resetSegment(0);
 	while (getNextSegment(vp0, vp1, vp2, vp3))
 	{
 		assert(vp1 < stepSelectionList->count());
@@ -241,7 +241,7 @@ void qAnimationDlg::onTotalTimeChanged(double newTime_sec)
 		double scale = newTime_sec / previousTime_sec;
 
 		size_t vp0, vp1, vp2, vp3;
-		resetSegment();
+		resetSegment(0);
 		while (getNextSegment(vp0, vp1, vp2, vp3))
 		{
 			assert(vp1 < stepSelectionList->count());
@@ -285,9 +285,17 @@ void qAnimationDlg::onBrowseButtonClicked()
 	outputFileLineEdit->setText(filename);
 }
 
-void qAnimationDlg::resetSegment()
+void qAnimationDlg::resetSegment(size_t selected_index)
 {
 	m_current_step_index = 0;
+	if (stepSelectionList->item(selected_index)->checkState() == Qt::Unchecked)
+		return;
+	
+	/* Count number of checked items before selected */
+	for (int i = 0; i < selected_index; i++) {
+		if (stepSelectionList->item(i)->checkState() == Qt::Unchecked) continue;
+		m_current_step_index++;
+	}
 }
 
 bool qAnimationDlg::getNextSegment(size_t& vp0, size_t& vp1, size_t& vp2, size_t& vp3)
@@ -326,12 +334,8 @@ int qAnimationDlg::countFrames(size_t startIndex/*=0*/)
 	{
 		double fps = fpsSpinBox->value();
 
-		size_t vp0 = 0;
-		size_t vp1 = startIndex;
-		size_t vp2 = 0;
-		size_t vp3 = 0;
-
-		resetSegment();
+		size_t vp0, vp1, vp2, vp3;
+		resetSegment(startIndex);
 		while (getNextSegment(vp0, vp1, vp2, vp3))
 		{
 			const Step& currentStep = m_videoSteps[vp1];
@@ -348,11 +352,13 @@ void qAnimationDlg::preview()
 	//we'll take the rendering time into account!
 	QElapsedTimer timer;
 	timer.start();
-
-	size_t vp1 = previewFromSelectedCheckBox->isChecked() ? static_cast<size_t>(getCurrentStepIndex()) : 0;
+	size_t start_index = 0;
+	if (previewFromSelectedCheckBox->isChecked() && !loopCheckBox->isChecked()) {
+		start_index = static_cast<size_t>(getCurrentStepIndex());
+	}
 
 	//count the total number of frames
-	int frameCount = countFrames(loopCheckBox->isChecked() ? 0 : vp1);
+	int frameCount = countFrames(start_index);
 	if (not frameCount) return;
 	int fps = fpsSpinBox->value();
 
@@ -371,10 +377,8 @@ void qAnimationDlg::preview()
 	do
 	{
 		int frameIndex = 0;
-		size_t vp0 = 0;
-		size_t vp2 = 0;
-		size_t vp3 = 0;
-		resetSegment();
+		size_t vp0, vp1, vp2, vp3;
+		resetSegment(start_index);
 		while (getNextSegment(vp0, vp1, vp2, vp3))
 		{
 			Step& step0 = m_videoSteps[vp0];
@@ -520,11 +524,8 @@ void qAnimationDlg::render(bool asSeparateFrames)
 
 	int frameIndex = 0;
 	bool success = true;
-	size_t vp0 = 0;
-	size_t vp1 = 0;
-	size_t vp2 = 0;
-	size_t vp3 = 0;
-	resetSegment();
+	size_t vp0, vp1, vp2, vp3;
+	resetSegment(0);
 	while (getNextSegment(vp0, vp1, vp2, vp3))
 	{
 		Step& step0 = m_videoSteps[vp0];

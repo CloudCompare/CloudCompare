@@ -11,12 +11,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        scalar_double: ["ON", "OFF"]
+        scalar_double: ["OFF", "ON"]
         config:
           - {
               name: "Windows Latest MSVC",
               os: windows-latest,
-              generator: "Visual Studio 16 2019",
+              generator: "Ninja",
               conda_library_dir: "Library",
               compile_qpcl: "ON",
               compile_qransac: "ON",
@@ -54,15 +54,23 @@ jobs:
           xerces-c=3.2.* `
           zlib=1.2.* `
           eigen=3.3.* `
+          ninja `
           pcl=1.9.*
 
-      - name: Install additional dependencies on macos
+      - name: Install Dependencies (macOS)
         if: matrix.config.os == 'macos-latest'
-        run: brew install cmake ninja xerces-c
+        run: brew install xerces-c
 
-      - name: Configure msvc dev console
+      - name: Configure MSVC console (Windows)
         if:  matrix.config.os == 'windows-latest'
         uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Set environment for MSVC (Windows)
+        if:  matrix.config.os == 'windows-latest'
+        run: |
+          # Set these env vars so cmake picks the correct compiler
+          echo "::set-env name=CXX::cl.exe"
+          echo "::set-env name=CC::cl.exe"
 
       - name: Configure CMake
         shell: pwsh
@@ -74,6 +82,7 @@ jobs:
           $EIGEN_ROOT_DIR = Join-Path -Resolve $CONDA_LIB_DIR include eigen3
           $ZLIB_INCLUDE_DIRS = Join-Path -Resolve $CONDA_LIB_DIR include
           $ZLIB_LIBRARIES = Join-Path -Resolve $CONDA_LIB_DIR lib ${{ matrix.config.zlib_name }}
+
           cmake `
             -B build `
             -G "${{ matrix.config.generator }}" `
@@ -109,4 +118,5 @@ jobs:
             .
 
       - name: Build
-        run: cmake --build build --parallel --config Release
+        run: |
+          cmake --build build

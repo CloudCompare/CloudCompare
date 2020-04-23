@@ -247,7 +247,7 @@ namespace ccColor
 	//! Conversion from Rgb to Rgba
 	inline Rgba FromRgbToRgba(const Rgb& color)
 	{
-		return Rgba(color.r, color.g, color.b, MAX);
+		return Rgba(color, MAX);
 	}
 
 	//! Conversion from Rgbaf to Rgba

@@ -119,4 +119,4 @@ jobs:
 
       - name: Build
         run: |
-          cmake --build build --config Release
+          cmake --build build

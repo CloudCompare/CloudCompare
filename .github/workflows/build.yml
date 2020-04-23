@@ -87,7 +87,7 @@ jobs:
             -B build `
             -G "${{ matrix.config.generator }}" `
             -DCMAKE_BUILD_TYPE=Release `
-            -DOPTION_SCALAR_DOUBLE=${{ matrix.scalar_double }} `
+            -DCCCORELIB_SCALAR_DOUBLE=${{ matrix.scalar_double }} `
             -DEIGEN_ROOT_DIR="$EIGEN_ROOT_DIR" `
             -DZLIB_INCLUDE_DIRS="$ZLIB_INCLUDE_DIRS" `
             -DZLIB_LIBRARIES="$ZLIB_LIBRARIES" `

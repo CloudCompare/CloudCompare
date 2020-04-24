@@ -140,7 +140,7 @@ void PCVContext::associateToEntity(GenericCloud* cloud, GenericMesh* mesh)
 	PointCoordinateType maxD = (bbMax - bbMin).norm();
 
 	//we deduce default zoom
-	m_zoom = (maxD > ZERO_TOLERANCE ? static_cast<PointCoordinateType>(std::min(m_width, m_height)) / maxD : PC_ONE);
+	m_zoom = (maxD > CCLib::ZERO_TOLERANCE ? static_cast<PointCoordinateType>(std::min(m_width, m_height)) / maxD : CCLib::PC_ONE);
 
 	//as well as display center
 	m_viewCenter = (bbMax+bbMin)/2;

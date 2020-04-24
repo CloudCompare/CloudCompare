@@ -90,7 +90,7 @@ CCLib::ReferenceCloud* ccSubsamplingDlg::getSampledCloud(ccGenericPointCloud* cl
 				{
 					double deltaSF = static_cast<double>(m_sfMax) - m_sfMin;
 					assert(deltaSF >= 0);
-					if (deltaSF > ZERO_TOLERANCE)
+					if (deltaSF > CCLib::ZERO_TOLERANCE)
 					{
 						double sfMinSpacing = m_ui->minSFSpacingDoubleSpinBox->value();
 						double sfMaxSpacing = m_ui->maxSFSpacingDoubleSpinBox->value();

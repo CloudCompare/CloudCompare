@@ -61,7 +61,7 @@ bool ccTorus::buildUp()
 		return false;
 
 	//invalid parameters?
-	if ((m_rectSection && m_rectSectionHeight < ZERO_TOLERANCE) || m_insideRadius >= m_outsideRadius || m_angle_rad < ZERO_TOLERANCE)
+	if ((m_rectSection && m_rectSectionHeight < CCLib::ZERO_TOLERANCE) || m_insideRadius >= m_outsideRadius || m_angle_rad < CCLib::ZERO_TOLERANCE)
 		return false;
 
 	//topology

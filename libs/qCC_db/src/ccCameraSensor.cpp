@@ -370,7 +370,7 @@ bool ccCameraSensor::applyViewport(ccGenericGLDisplay* win/*=0*/)
 	//aspect ratio
 	float ar = static_cast<float>(m_intrinsicParams.arrayWidth) / m_intrinsicParams.arrayHeight;
 	//fov
-	float fov_deg = static_cast<float>(m_intrinsicParams.vFOV_rad * CC_RAD_TO_DEG);
+	float fov_deg = static_cast<float>(m_intrinsicParams.vFOV_rad * CCLib::RAD_TO_DEG);
 	//camera position/orientation
 	ccGLMatrixd transd(trans.data());
 	win->setupProjectiveViewport(transd, fov_deg, ar);
@@ -765,7 +765,7 @@ bool ccCameraSensor::fromImageCoordToGlobalCoord(const CCVector2& imageCoord, CC
 		return false;
 
 	CCVector3 localCoord;
-	if (!fromImageCoordToLocalCoord(imageCoord, localCoord, PC_ONE, withLensCorrection))
+	if (!fromImageCoordToLocalCoord(imageCoord, localCoord, CCLib::PC_ONE, withLensCorrection))
 		return false;
 
 	//update altitude: we must compute the intersection between the plane Z = Z0 (world) and the camera (input pixel) viewing direction
@@ -773,7 +773,7 @@ bool ccCameraSensor::fromImageCoordToGlobalCoord(const CCVector2& imageCoord, CC
 	trans.applyRotation(viewDir);
 	viewDir.normalize();
 
-	if (fabs(viewDir.z) < ZERO_TOLERANCE)
+	if (fabs(viewDir.z) < CCLib::ZERO_TOLERANCE)
 	{
 		//viewing dir is parallel to the plane Z = Z0!
 		return false;
@@ -964,7 +964,7 @@ bool ccCameraSensor::computeUncertainty(CCLib::ReferenceCloud* points, std::vect
 		}
 		else
 		{
-			accuracy[i].x = accuracy[i].y = accuracy[i].z = NAN_VALUE;
+			accuracy[i].x = accuracy[i].y = accuracy[i].z = CCLib::NAN_VALUE;
 		}
 	}
 
@@ -1170,14 +1170,14 @@ bool ccCameraSensor::computeFrustumCorners()
 	}
 
 	// DO NOT MODIFY THE ORDER OF THE CORNERS!! A LOT OF CODE DEPENDS OF THIS ORDER!!
-	m_frustumInfos.frustumCorners->addPoint(CCVector3( xIn, yIn, -PC_ONE) * zNear);
-	m_frustumInfos.frustumCorners->addPoint(CCVector3( xIn, yIn, -PC_ONE) * zFar);
-	m_frustumInfos.frustumCorners->addPoint(CCVector3( xIn,-yIn, -PC_ONE) * zNear);
-	m_frustumInfos.frustumCorners->addPoint(CCVector3( xIn,-yIn, -PC_ONE) * zFar);
-	m_frustumInfos.frustumCorners->addPoint(CCVector3(-xIn,-yIn, -PC_ONE) * zNear);
-	m_frustumInfos.frustumCorners->addPoint(CCVector3(-xIn,-yIn, -PC_ONE) * zFar);
-	m_frustumInfos.frustumCorners->addPoint(CCVector3(-xIn, yIn, -PC_ONE) * zNear);
-	m_frustumInfos.frustumCorners->addPoint(CCVector3(-xIn, yIn, -PC_ONE) * zFar);
+	m_frustumInfos.frustumCorners->addPoint(CCVector3( xIn, yIn, -CCLib::PC_ONE) * zNear);
+	m_frustumInfos.frustumCorners->addPoint(CCVector3( xIn, yIn, -CCLib::PC_ONE) * zFar);
+	m_frustumInfos.frustumCorners->addPoint(CCVector3( xIn,-yIn, -CCLib::PC_ONE) * zNear);
+	m_frustumInfos.frustumCorners->addPoint(CCVector3( xIn,-yIn, -CCLib::PC_ONE) * zFar);
+	m_frustumInfos.frustumCorners->addPoint(CCVector3(-xIn,-yIn, -CCLib::PC_ONE) * zNear);
+	m_frustumInfos.frustumCorners->addPoint(CCVector3(-xIn,-yIn, -CCLib::PC_ONE) * zFar);
+	m_frustumInfos.frustumCorners->addPoint(CCVector3(-xIn, yIn, -CCLib::PC_ONE) * zNear);
+	m_frustumInfos.frustumCorners->addPoint(CCVector3(-xIn, yIn, -CCLib::PC_ONE) * zFar);
 
 	// compute center of the circumscribed sphere
 	const CCVector3* P0 = m_frustumInfos.frustumCorners->getPoint(0);

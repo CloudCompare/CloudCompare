@@ -449,7 +449,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 					{
 						QString sfName = QString("band #%1 (%2)").arg(i).arg(GDALGetColorInterpretationName(colorInterp)); //SF names really need to be unique!
 						ccScalarField* sf = new ccScalarField(qPrintable(sfName));
-						if (!sf->resizeSafe(pc->size(), true, NAN_VALUE))
+						if (!sf->resizeSafe(pc->size(), true, CCLib::NAN_VALUE))
 						{
 							ccLog::Warning(QString("Failed to instantiate memory for storing '%1' as a scalar field!").arg(sf->getName()));
 							sf->release();

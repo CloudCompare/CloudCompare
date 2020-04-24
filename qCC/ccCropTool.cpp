@@ -190,7 +190,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 										if (sfIdx >= 0)
 										{
 											ccScalarField* sf = static_cast<ccScalarField*>(croppedVertices->getScalarField(i));
-											sf->fill(NAN_VALUE);
+											sf->fill(CCLib::NAN_VALUE);
 											if (origVertices_pc)
 											{
 												//import display parameters if possible
@@ -403,9 +403,9 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 												CCVector3d w;
 												mesh->computeInterpolationWeights(origTriIndex, *Vcj, w);
 
-												if (	(tx1 || w.u[0] < ZERO_TOLERANCE)
-													&&	(tx2 || w.u[1] < ZERO_TOLERANCE)
-													&&	(tx3 || w.u[2] < ZERO_TOLERANCE) )
+												if (	(tx1 || w.u[0] < CCLib::ZERO_TOLERANCE)
+													&&	(tx2 || w.u[1] < CCLib::ZERO_TOLERANCE)
+													&&	(tx3 || w.u[2] < CCLib::ZERO_TOLERANCE) )
 												{
 													TexCoords2D t(	static_cast<float>((tx1 ? tx1->tx*w.u[0] : 0.0) + (tx2 ? tx2->tx*w.u[1] : 0.0) + (tx3 ? tx3->tx*w.u[2] : 0.0)),
 																	static_cast<float>((tx1 ? tx1->ty*w.u[0] : 0.0) + (tx2 ? tx2->ty*w.u[1] : 0.0) + (tx3 ? tx3->ty*w.u[2] : 0.0)) );

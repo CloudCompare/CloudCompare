@@ -308,7 +308,7 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 
 	for (unsigned i = 0; i < valCount; ++i)
 	{
-		ScalarType val = NAN_VALUE;
+		ScalarType val = CCLib::NAN_VALUE;
 
 		//we must handle 'invalid' values
 		const ScalarType& val1 = sf1->getValue(i);
@@ -367,7 +367,7 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 					else
 					{
 						const ScalarType& val2 = sf2->getValue(i);
-						if (ccScalarField::ValidValue(val2) && std::abs(val2) > ZERO_TOLERANCE )
+						if (ccScalarField::ValidValue(val2) && std::abs(val2) > CCLib::ZERO_TOLERANCE )
 							val = val1 / val2;
 					}
 				}
@@ -417,7 +417,7 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 				val = static_cast<ScalarType>(static_cast<int>(val1)); //integer part ('round' doesn't seem to be available on MSVC?!)
 				break;
 			case INVERSE:
-				val = std::abs(val1) < ZERO_TOLERANCE ? NAN_VALUE : static_cast<ScalarType>(1.0/val1);
+				val = std::abs(val1) < CCLib::ZERO_TOLERANCE ? CCLib::NAN_VALUE : static_cast<ScalarType>(1.0/val1);
 				break;
 			default:
 				assert(false);

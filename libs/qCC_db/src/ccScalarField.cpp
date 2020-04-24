@@ -440,7 +440,7 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMa
 			//convert former 'HIDDEN_VALUE' and 'BIG_VALUE' to 'NAN_VALUE'
 			if ((onlyPositiveValues && val < 0) || (!onlyPositiveValues && val >= FORMER_BIG_VALUE))
 			{
-				val = NAN_VALUE;
+				val = CCLib::NAN_VALUE;
 			}
 		}
 	}

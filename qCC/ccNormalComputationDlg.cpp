@@ -69,18 +69,18 @@ ccNormalComputationDlg::ccNormalComputationDlg(bool withScanGrid, bool withSenso
 	}
 }
 
-void ccNormalComputationDlg::setLocalModel(CC_LOCAL_MODEL_TYPES  model)
+void ccNormalComputationDlg::setLocalModel(CCLib::LOCAL_MODEL_TYPES  model)
 {
 	int index = -1;
 	switch (model)
 	{
-	case LS:
+	case CCLib::LS:
 		index = 0;
 		break;
-	case QUADRIC:
+	case CCLib::QUADRIC:
 		index = 1;
 		break;
-	case TRI:
+	case CCLib::TRI:
 		index = 2;
 		break;
 	default:
@@ -90,20 +90,20 @@ void ccNormalComputationDlg::setLocalModel(CC_LOCAL_MODEL_TYPES  model)
 	localModelComboBox->setCurrentIndex(index);
 }
 
-CC_LOCAL_MODEL_TYPES ccNormalComputationDlg::getLocalModel() const
+CCLib::LOCAL_MODEL_TYPES ccNormalComputationDlg::getLocalModel() const
 {
 	switch (localModelComboBox->currentIndex())
 	{
 	case 0:
-		return LS;
+		return CCLib::LS;
 	case 1:
-		return QUADRIC;
+		return CCLib::QUADRIC;
 	case 2:
-		return TRI;
+		return CCLib::TRI;
 	}
 
 	assert(false);
-	return LS;
+	return CCLib::LS;
 }
 
 void ccNormalComputationDlg::localModelChanged(int index)

@@ -41,10 +41,10 @@ public:
 	explicit ccNormalComputationDlg(bool withScanGrid, bool withSensor, QWidget* parent = nullptr);
 
 	//! Returns the local model chosen for normal computation
-	CC_LOCAL_MODEL_TYPES getLocalModel() const;
+	CCLib::LOCAL_MODEL_TYPES getLocalModel() const;
 
 	//! Sets the local model chosen for normal computation
-	void setLocalModel(CC_LOCAL_MODEL_TYPES  model);
+	void setLocalModel(CCLib::LOCAL_MODEL_TYPES  model);
 
 	//! Sets default value for local neighbourhood radius
 	void setRadius(PointCoordinateType radius);

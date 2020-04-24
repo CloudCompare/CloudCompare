@@ -190,9 +190,9 @@ ccGLMatrixd ccGraphicalTransformationTool::arbitraryVectorTranslation(const CCVe
 {
 	double theta = 0;
 
-	if (std::abs(vec.z) < ZERO_TOLERANCE)
+	if (std::abs(vec.z) < CCLib::ZERO_TOLERANCE)
 	{
-		if (std::abs(vec.y) < ZERO_TOLERANCE)
+		if (std::abs(vec.y) < CCLib::ZERO_TOLERANCE)
 		{
 			theta = 0;
 		}
@@ -221,9 +221,9 @@ ccGLMatrixd ccGraphicalTransformationTool::arbitraryVectorTranslation(const CCVe
 	double phiDenominator = std::sqrt((vec.y * vec.y) + (vec.z * vec.z));
 	double phi = 0;
 
-	if (phiDenominator < ZERO_TOLERANCE)
+	if (phiDenominator < CCLib::ZERO_TOLERANCE)
 	{
-		if (std::abs(vec.x) < ZERO_TOLERANCE)
+		if (std::abs(vec.x) < CCLib::ZERO_TOLERANCE)
 		{
 			phi = 0;
 		}
@@ -251,7 +251,7 @@ ccGLMatrixd ccGraphicalTransformationTool::arbitraryVectorTranslation(const CCVe
 	ccGLMatrixd arbitraryVectorTranslationAdjust = xRotation * yRotation;
 
 	//special case 
-	if (std::abs(vec.x) < ZERO_TOLERANCE && std::abs(vec.y) < ZERO_TOLERANCE && vec.z < 0)
+	if (std::abs(vec.x) < CCLib::ZERO_TOLERANCE && std::abs(vec.y) < CCLib::ZERO_TOLERANCE && vec.z < 0)
 	{
 		arbitraryVectorTranslationAdjust.scaleRotation(-1);
 	}

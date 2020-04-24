@@ -1533,7 +1533,7 @@ namespace ccEntityAction
 		//compute normals for each selected cloud
 		if (!clouds.empty())
 		{
-			static CC_LOCAL_MODEL_TYPES s_lastModelType = LS;
+			static CCLib::LOCAL_MODEL_TYPES s_lastModelType = CCLib::LS;
 			static ccNormalVectors::Orientation s_lastNormalOrientation = ccNormalVectors::UNDEFINED;
 			static int s_lastMSTNeighborCount = 6;
 			static double s_lastMinGridAngle_deg = 1.0;
@@ -1553,7 +1553,7 @@ namespace ccEntityAction
 				return false;
 			
 			//normals computation
-			CC_LOCAL_MODEL_TYPES model = s_lastModelType = ncDlg.getLocalModel();
+			CCLib::LOCAL_MODEL_TYPES model = s_lastModelType = ncDlg.getLocalModel();
 			bool useGridStructure = withScanGrid && ncDlg.useScanGridsForComputation();
 			defaultRadius = ncDlg.getRadius();
 			double minGridAngle_deg = s_lastMinGridAngle_deg = ncDlg.getMinGridAngle_deg();

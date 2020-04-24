@@ -655,7 +655,7 @@ bool ccSectionExtractionTool::addCloud(ccGenericPointCloud* inputCloud, bool alr
 		if (!s_mixedShiftAndScaleInfo && it == m_clouds.begin())
 		{
 			if (cloud.entity->getGlobalScale() != inputCloud->getGlobalScale()
-				|| (cloud.entity->getGlobalShift() - inputCloud->getGlobalShift()).norm() < ZERO_TOLERANCE)
+				|| (cloud.entity->getGlobalShift() - inputCloud->getGlobalShift()).norm() < CCLib::ZERO_TOLERANCE)
 			{
 				ccLog::Warning("[ccSectionExtractionTool] Clouds have different shift & scale information! Only the first one will be used");
 				s_mixedShiftAndScaleInfo = true;
@@ -1541,7 +1541,7 @@ void ccSectionExtractionTool::unfoldPoints()
 				s.B = CCVector2(B->u[xDim], B->u[yDim]);
 				s.u = s.B - s.A;
 				s.d = s.u.norm();
-				if (s.d > ZERO_TOLERANCE)
+				if (s.d > CCLib::ZERO_TOLERANCE)
 				{
 					s.curvPos = curvPos;
 					s.u /= s.d;
@@ -1598,7 +1598,7 @@ void ccSectionExtractionTool::unfoldPoints()
 
 			//test each segment
 			int closestSegment = -1;
-			PointCoordinateType minSquareDist = -PC_ONE;
+			PointCoordinateType minSquareDist = -CCLib::PC_ONE;
 			for (unsigned j = 0; j < polySegmentCount; ++j)
 			{
 				const Segment& s = segments[j];
@@ -1845,7 +1845,7 @@ void ccSectionExtractionTool::extractPoints()
 						seg2D.s = s;
 						s += seg2D.lAB;
 
-						if (seg2D.lAB < ZERO_TOLERANCE)
+						if (seg2D.lAB < CCLib::ZERO_TOLERANCE)
 						{
 							//ignore too small segments
 							continue;
@@ -1905,7 +1905,7 @@ void ccSectionExtractionTool::extractPoints()
 							CCVector2 P2D(P->u[xDim], P->u[yDim]);
 
 							//for each vertex
-							PointCoordinateType minSquareDist = -PC_ONE;
+							PointCoordinateType minSquareDist = -CCLib::PC_ONE;
 							PointCoordinateType curvilinearPos = 0.0;
 							size_t minIndex = 0;
 							for (size_t j = 0; j < polySegments2D.size(); ++j)

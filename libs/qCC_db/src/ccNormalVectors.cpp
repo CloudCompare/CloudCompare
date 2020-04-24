@@ -150,7 +150,7 @@ bool ccNormalVectors::UpdateNormalOrientations(	ccGenericPointCloud* theCloud,
 			//0-5 = +/-X,Y,Z
 			assert(preferredOrientation >= 0 && preferredOrientation <= 5);
 
-			orientation.u[preferredOrientation >> 1] = ((preferredOrientation & 1) == 0 ? PC_ONE : -PC_ONE); //odd number --> inverse direction
+			orientation.u[preferredOrientation >> 1] = ((preferredOrientation & 1) == 0 ? CCLib::PC_ONE : -CCLib::PC_ONE); //odd number --> inverse direction
 		}
 		break;
 
@@ -409,7 +409,7 @@ PointCoordinateType ccNormalVectors::GuessBestRadius(	ccGenericPointCloud* cloud
 
 bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 											NormsIndexesTableType& theNormsCodes,
-											CC_LOCAL_MODEL_TYPES localModel,
+											CCLib::LOCAL_MODEL_TYPES localModel,
 											PointCoordinateType localRadius,
 											Orientation preferredOrientation/*=UNDEFINED*/,
 											CCLib::GenericProgressCallback* progressCb/*=0*/,
@@ -462,7 +462,7 @@ bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 	unsigned processedCells = 0;
 	switch (localModel)
 	{
-	case LS:
+	case CCLib::LS:
 		{
 			unsigned char level = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(localRadius);
 			processedCells = theOctree->executeFunctionForAllCellsAtLevel(	level,
@@ -473,7 +473,7 @@ bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 																			"Normals Computation[LS]");
 		}
 		break;
-	case TRI:
+	case CCLib::TRI:
 		{
 			unsigned char level = theOctree->findBestLevelForAGivenPopulationPerCell(NUMBER_OF_POINTS_FOR_NORM_WITH_TRI);
 			processedCells = theOctree->executeFunctionForAllCellsStartingAtLevel(	level,
@@ -486,7 +486,7 @@ bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 																					"Normals Computation[TRI]");
 		}
 		break;
-	case QUADRIC:
+	case CCLib::QUADRIC:
 		{
 			unsigned char level = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(localRadius);
 			processedCells = theOctree->executeFunctionForAllCellsAtLevel(	level,
@@ -842,9 +842,9 @@ void ccNormalVectors::ConvertNormalToStrikeAndDip(const CCVector3& N, PointCoord
 	// uses a right hand rule for the dip of the plane
 	if (N.norm2() > std::numeric_limits<PointCoordinateType>::epsilon())
 	{
-		strike_deg = 180.0 - atan2(N.y, N.x)*CC_RAD_TO_DEG;		//atan2 output is between -180 and 180! So strike is always positive here
+		strike_deg = 180.0 - atan2(N.y, N.x)*CCLib::RAD_TO_DEG;		//atan2 output is between -180 and 180! So strike is always positive here
 		PointCoordinateType x = sqrt(N.x*N.x + N.y*N.y);		//x is the horizontal magnitude
-		dip_deg = atan2(x, N.z)*CC_RAD_TO_DEG;
+		dip_deg = atan2(x, N.z)*CCLib::RAD_TO_DEG;
 	}
 	else
 	{
@@ -882,8 +882,8 @@ void ccNormalVectors::ConvertNormalToDipAndDipDir(const CCVector3& N, PointCoord
 		// We skip the division by r because the normal is a unit vector.
 		double dip_rad = acos(fabs(N.z));
 
-		dipDir_deg = static_cast<PointCoordinateType>(dipDir_rad * CC_RAD_TO_DEG);
-		dip_deg = static_cast<PointCoordinateType>(dip_rad * CC_RAD_TO_DEG);
+		dipDir_deg = static_cast<PointCoordinateType>(dipDir_rad * CCLib::RAD_TO_DEG);
+		dip_deg = static_cast<PointCoordinateType>(dip_rad * CCLib::RAD_TO_DEG);
 	}
 	else
 	{
@@ -899,9 +899,9 @@ CCVector3 ccNormalVectors::ConvertDipAndDipDirToNormal(PointCoordinateType dip_d
 		return CCVector3(0, 0, 0);
 	}
 	
-	double Nz = cos(dip_deg * CC_DEG_TO_RAD);
+	double Nz = cos(dip_deg * CCLib::DEG_TO_RAD);
 	double Nxy = sqrt(1.0 - Nz * Nz);
-	double dipDir_rad = dipDir_deg * CC_DEG_TO_RAD;
+	double dipDir_rad = dipDir_deg * CCLib::DEG_TO_RAD;
 	CCVector3 N(	static_cast<PointCoordinateType>(Nxy * sin(dipDir_rad)),
 					static_cast<PointCoordinateType>(Nxy * cos(dipDir_rad)),
 					static_cast<PointCoordinateType>(Nz) );

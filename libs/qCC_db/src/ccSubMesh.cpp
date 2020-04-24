@@ -228,9 +228,9 @@ ccSubMesh* ccSubMesh::createNewSubMeshFromSelection(bool removeSelectedFaces, In
 		{
 			const CCLib::VerticesIndexes* tsi = m_associatedMesh->getTriangleVertIndexes(globalIndex);
 			//triangle is visible?
-			if (   verticesVisibility[tsi->i1] == POINT_VISIBLE
-				&& verticesVisibility[tsi->i2] == POINT_VISIBLE
-				&& verticesVisibility[tsi->i3] == POINT_VISIBLE)
+			if (   verticesVisibility[tsi->i1] == CCLib::POINT_VISIBLE
+				&& verticesVisibility[tsi->i2] == CCLib::POINT_VISIBLE
+				&& verticesVisibility[tsi->i3] == CCLib::POINT_VISIBLE)
 			{
 				++visibleFaces;
 			}
@@ -269,9 +269,9 @@ ccSubMesh* ccSubMesh::createNewSubMeshFromSelection(bool removeSelectedFaces, In
 				globalIndex = indexMap->at(globalIndex);
 
 			//triangle is visible?
-			if (	verticesVisibility[tsi->i1] == POINT_VISIBLE
-				&&	verticesVisibility[tsi->i2] == POINT_VISIBLE
-				&&	verticesVisibility[tsi->i3] == POINT_VISIBLE)
+			if (	verticesVisibility[tsi->i1] == CCLib::POINT_VISIBLE
+				&&	verticesVisibility[tsi->i2] == CCLib::POINT_VISIBLE
+				&&	verticesVisibility[tsi->i3] == CCLib::POINT_VISIBLE)
 			{
 				newSubMesh->addTriangleIndex(globalIndex);
 			}

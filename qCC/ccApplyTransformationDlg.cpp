@@ -117,7 +117,7 @@ void ccApplyTransformationDlg::onRotAngleValueChanged(double)
 	axis.x	= static_cast<PointCoordinateType>(rxAxisDoubleSpinBox->value());
 	axis.y	= static_cast<PointCoordinateType>(ryAxisDoubleSpinBox->value());
 	axis.z	= static_cast<PointCoordinateType>(rzAxisDoubleSpinBox->value());
-	alpha	= static_cast<PointCoordinateType>(rAngleDoubleSpinBox->value() * CC_DEG_TO_RAD);
+	alpha	= static_cast<PointCoordinateType>(rAngleDoubleSpinBox->value() * CCLib::DEG_TO_RAD);
 	t.x		= static_cast<PointCoordinateType>(txAxisDoubleSpinBox->value());
 	t.y		= static_cast<PointCoordinateType>(tyAxisDoubleSpinBox->value());
 	t.z		= static_cast<PointCoordinateType>(tzAxisDoubleSpinBox->value());
@@ -135,9 +135,9 @@ void ccApplyTransformationDlg::onEulerValueChanged(double)
 	PointCoordinateType psi = 0;
 	CCVector3 t;
 
-	phi		= static_cast<PointCoordinateType>(ePhiDoubleSpinBox->value() * CC_DEG_TO_RAD);
-	theta	= static_cast<PointCoordinateType>(eThetaDoubleSpinBox->value() * CC_DEG_TO_RAD);
-	psi		= static_cast<PointCoordinateType>(ePsiDoubleSpinBox->value() * CC_DEG_TO_RAD);
+	phi		= static_cast<PointCoordinateType>(ePhiDoubleSpinBox->value() * CCLib::DEG_TO_RAD);
+	theta	= static_cast<PointCoordinateType>(eThetaDoubleSpinBox->value() * CCLib::DEG_TO_RAD);
+	psi		= static_cast<PointCoordinateType>(ePsiDoubleSpinBox->value() * CCLib::DEG_TO_RAD);
 	t.x		= static_cast<PointCoordinateType>(etxAxisDoubleSpinBox->value());
 	t.y		= static_cast<PointCoordinateType>(etyAxisDoubleSpinBox->value());
 	t.z		= static_cast<PointCoordinateType>(etzAxisDoubleSpinBox->value());
@@ -176,7 +176,7 @@ void ccApplyTransformationDlg::updateAll(const ccGLMatrix& mat, bool textForm/*=
 		rxAxisDoubleSpinBox->setValue(axis.x);
 		ryAxisDoubleSpinBox->setValue(axis.y);
 		rzAxisDoubleSpinBox->setValue(axis.z);
-		rAngleDoubleSpinBox->setValue(alpha * CC_RAD_TO_DEG);
+		rAngleDoubleSpinBox->setValue(alpha * CCLib::RAD_TO_DEG);
 		txAxisDoubleSpinBox->setValue(t.x);
 		tyAxisDoubleSpinBox->setValue(t.y);
 		tzAxisDoubleSpinBox->setValue(t.z);
@@ -205,9 +205,9 @@ void ccApplyTransformationDlg::updateAll(const ccGLMatrix& mat, bool textForm/*=
 		CCVector3 t;
 		mat.getParameters(phi,theta,psi,t);
 
-		ePhiDoubleSpinBox   ->setValue(phi * CC_RAD_TO_DEG);
-		eThetaDoubleSpinBox ->setValue(theta * CC_RAD_TO_DEG);
-		ePsiDoubleSpinBox   ->setValue(psi * CC_RAD_TO_DEG);
+		ePhiDoubleSpinBox   ->setValue(phi * CCLib::RAD_TO_DEG);
+		eThetaDoubleSpinBox ->setValue(theta * CCLib::RAD_TO_DEG);
+		ePsiDoubleSpinBox   ->setValue(psi * CCLib::RAD_TO_DEG);
 		etxAxisDoubleSpinBox->setValue(t.x);
 		etyAxisDoubleSpinBox->setValue(t.y);
 		etzAxisDoubleSpinBox->setValue(t.z);

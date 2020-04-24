@@ -589,7 +589,7 @@ bool CommandOctreeNormal::process(ccCommandLineInterface &cmd)
 	}
 	cmd.print(QObject::tr("\tRadius: %1").arg(radiusArg));
 
-	CC_LOCAL_MODEL_TYPES model = QUADRIC;
+	CCLib::LOCAL_MODEL_TYPES model = CCLib::QUADRIC;
 	ccNormalVectors::Orientation  orientation = ccNormalVectors::Orientation::UNDEFINED;
 	
 	while (!cmd.arguments().isEmpty())
@@ -663,15 +663,15 @@ bool CommandOctreeNormal::process(ccCommandLineInterface &cmd)
 				QString model_arg = cmd.arguments().takeFirst().toUpper();
 				if (model_arg == "LS")
 				{
-					model = CC_LOCAL_MODEL_TYPES::LS;
+					model = CCLib::LOCAL_MODEL_TYPES::LS;
 				}
 				else if (model_arg == "TRI")
 				{
-					model = CC_LOCAL_MODEL_TYPES::TRI;
+					model = CCLib::LOCAL_MODEL_TYPES::TRI;
 				}
 				else if (model_arg == "QUADRIC")
 				{
-					model = CC_LOCAL_MODEL_TYPES::QUADRIC;
+					model = CCLib::LOCAL_MODEL_TYPES::QUADRIC;
 				}
 				else
 				{
@@ -2440,7 +2440,7 @@ bool CommandMatchBestFitPlane::process(ccCommandLineInterface &cmd)
 			}
 			
 			//compute the transformation matrix that would make this normal points towards +Z
-			ccGLMatrix makeZPosMatrix = ccGLMatrix::FromToRotation(N, CCVector3(0, 0, PC_ONE));
+			ccGLMatrix makeZPosMatrix = ccGLMatrix::FromToRotation(N, CCVector3(0, 0, CCLib::PC_ONE));
 			CCVector3 Gt = C;
 			makeZPosMatrix.applyRotation(Gt);
 			makeZPosMatrix.setTranslation(C - Gt);

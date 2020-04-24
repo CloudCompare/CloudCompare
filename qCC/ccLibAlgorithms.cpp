@@ -93,12 +93,12 @@ namespace ccLibAlgorithms
 			return sqrt(surfacePerPoint * knn);
 		}
 		
-		return -PC_ONE;
+		return -CCLib::PC_ONE;
 	}
 	
 	PointCoordinateType GetDefaultCloudKernelSize(const ccHObject::Container& entities, unsigned knn/*=12*/)
 	{
-		PointCoordinateType sigma = -PC_ONE;
+		PointCoordinateType sigma = -CCLib::PC_ONE;
 		
 		size_t selNum = entities.size();
 		//computation of a first sigma guess
@@ -750,7 +750,7 @@ namespace ccLibAlgorithms
 					continue;
 				
 				ccLog::Print(QString("[Scale Matching] Entity '%1' scale: %2").arg(entities[i]->getName()).arg(scales[i]));
-				if (scales[i] <= ZERO_TOLERANCE)
+				if (scales[i] <= CCLib::ZERO_TOLERANCE)
 				{
 					ccLog::Warning("[Scale Matching] Entity scale is too small!");
 					continue;

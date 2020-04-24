@@ -669,7 +669,7 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 					rayLocal.squareDistances(cellCenter, radialSqDist, sqDistToOrigin);
 
 					double dx = sqrt(sqDistToOrigin);
-					double dy = std::max<double>(0, sqrt(radialSqDist) - SQRT_3 * halfCellSize);
+					double dy = std::max<double>(0, sqrt(radialSqDist) - CCLib::SQRT_3 * halfCellSize);
 					double fov_rad = atan2(dy, dx);
 
 					skipThisCell = (fov_rad > maxFOV_rad);
@@ -697,7 +697,7 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 		if (!skipThisCell)
 		{
 			//we shouldn't test points that are actually hidden!
-			if (	(!visTable || visTable->at(it->theIndex) == POINT_VISIBLE)
+			if (	(!visTable || visTable->at(it->theIndex) == CCLib::POINT_VISIBLE)
 				&&	(!activeSF || activeSF->getColor(activeSF->getValue(it->theIndex)))
 				)
 			{

@@ -45,8 +45,8 @@ struct Candidate
 	PointCoordinateType radius;
 	CCVector3 centroid;
 
-	Candidate() : leaf(nullptr), dist(PC_NAN), radius(0) {}
-	Candidate(ccKdTree::Leaf* l) : leaf(l), dist(PC_NAN), radius(0)
+	Candidate() : leaf(nullptr), dist(CCLib::PC_NAN), radius(0) {}
+	Candidate(ccKdTree::Leaf* l) : leaf(l), dist(CCLib::PC_NAN), radius(0)
 	{
 		if (leaf && leaf->points)
 		{
@@ -111,7 +111,7 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 	}
 
 	// cosine of the max angle between fused 'planes'
-	const double c_minCosNormAngle = cos(maxAngle_deg * CC_DEG_TO_RAD);
+	const double c_minCosNormAngle = cos(maxAngle_deg * CCLib::DEG_TO_RAD);
 
 	//fuse all cells, starting from the ones with the best error
 	const int unvisitedNeighborValue = -1;
@@ -370,7 +370,7 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 				ScalarType scalar = (ScalarType)leaves[i]->userData;
 				if (leaves[i]->userData <= 0) //for unfused cells, we create new individual groups
 					scalar = static_cast<ScalarType>(macroIndex++);
-					//scalar = NAN_VALUE; //FIXME TEST
+					//scalar = CCLib::NAN_VALUE; //FIXME TEST
 				for (unsigned j=0; j<subset->size(); ++j)
 					subset->setPointScalarValue(j,scalar);
 			}

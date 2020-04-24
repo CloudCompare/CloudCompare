@@ -109,7 +109,7 @@ ccGLMatrix DistanceMapGenerationTool::ProfileMetaData::computeCloudToSurfaceOrig
 	{
 		ccGLMatrix rotation;
 		CCVector3 Z(0, 0, 0);
-		Z.u[revolDim] = PC_ONE;
+		Z.u[revolDim] = CCLib::PC_ONE;
 		rotation = ccGLMatrix::FromToRotation(axis, Z);
 		cloudToSurfaceOrigin = rotation * cloudToSurfaceOrigin;
 	}
@@ -339,7 +339,7 @@ bool DistanceMapGenerationTool::ComputeRadialDist(	ccPointCloud* cloud,
 			}
 
 			//search nearest "segment" in polyline
-			ScalarType minDist = NAN_VALUE;
+			ScalarType minDist = CCLib::NAN_VALUE;
 			for (unsigned j = 1; j < vertexCount; ++j)
 			{
 				const CCVector3* A = vertices->getPoint(j - 1);
@@ -366,7 +366,7 @@ bool DistanceMapGenerationTool::ComputeRadialDist(	ccPointCloud* cloud,
 			{
 				//cancelled by user
 				for (unsigned j = i; j < pointCount; ++j)
-					sf->setValue(j, NAN_VALUE);
+					sf->setValue(j, CCLib::NAN_VALUE);
 
 				success = false;
 				break;
@@ -1157,7 +1157,7 @@ bool DistanceMapGenerationTool::ConvertCloudToCylindrical(	ccPointCloud* cloud,
 	const unsigned char Y = (X < 2 ? X + 1 : 0);
 
 	//motion direction
-	PointCoordinateType ccw = (counterclockwise ? -PC_ONE : PC_ONE);
+	PointCoordinateType ccw = (counterclockwise ? -CCLib::PC_ONE : CCLib::PC_ONE);
 
 	//get projection height
 	for (unsigned n = 0; n < cloud->size(); ++n)
@@ -1208,7 +1208,7 @@ bool DistanceMapGenerationTool::ConvertCloudToConical(	ccPointCloud* cloud,
 	const unsigned char Y = (X < 2 ? X + 1 : 0);
 
 	//motion direction
-	PointCoordinateType ccw = (counterclockwise ? -PC_ONE : PC_ONE);
+	PointCoordinateType ccw = (counterclockwise ? -CCLib::PC_ONE : CCLib::PC_ONE);
 	//projection factor
 	double nProj = ConicalProjectN(latMin_rad, latMax_rad) * conicalSpanRatio;
 
@@ -1582,7 +1582,7 @@ ccPointCloud* DistanceMapGenerationTool::ConvertMapToCloud(	const QSharedPointer
 
 				cloud->addPoint(profileDesc.origin + P);
 
-				ScalarType val = cell->count ? static_cast<ScalarType>(cell->value) : NAN_VALUE;
+				ScalarType val = cell->count ? static_cast<ScalarType>(cell->value) : CCLib::NAN_VALUE;
 				sf->addElement(val);
 			}
 		}

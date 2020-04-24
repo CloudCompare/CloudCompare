@@ -168,7 +168,7 @@ void ccPointPair::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glFunc->glMatrixMode(GL_MODELVIEW);
 			glFunc->glPushMatrix();
 			ccGL::Translate(glFunc, start.x, start.y, start.z); //start = 0,0,0
-			ccGLMatrix mat = ccGLMatrix::FromToRotation(CCVector3(0, 0, PC_ONE), dir); //end = 0,0,1
+			ccGLMatrix mat = ccGLMatrix::FromToRotation(CCVector3(0, 0, CCLib::PC_ONE), dir); //end = 0,0,1
 			glFunc->glMultMatrixf(mat.data());
 			ccGL::Scale(glFunc, width, width, length);
 

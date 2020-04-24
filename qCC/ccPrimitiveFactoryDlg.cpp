@@ -105,7 +105,7 @@ void ccPrimitiveFactoryDlg::createPrimitive()
 			{
 				primitive = new ccTorus(static_cast<PointCoordinateType>(torusInsideRadiusDoubleSpinBox->value()),
 										static_cast<PointCoordinateType>(torusOutsideRadiusDoubleSpinBox->value()),
-										static_cast<PointCoordinateType>(torusAngleDoubleSpinBox->value()*CC_DEG_TO_RAD),
+										static_cast<PointCoordinateType>(torusAngleDoubleSpinBox->value()*CCLib::DEG_TO_RAD),
 										torusRectGroupBox->isChecked(),
 										static_cast<PointCoordinateType>(torusRectGroupBox->isChecked() ? torusRectSectionHeightDoubleSpinBox->value() : 0));
 			}

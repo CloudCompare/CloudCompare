@@ -1997,9 +1997,9 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				if (visFiltering)
 				{
 					//we skip the triangle if at least one vertex is hidden
-					if ((verticesVisibility[tsi.i1] != POINT_VISIBLE) ||
-						(verticesVisibility[tsi.i2] != POINT_VISIBLE) ||
-						(verticesVisibility[tsi.i3] != POINT_VISIBLE))
+					if ((verticesVisibility[tsi.i1] != CCLib::POINT_VISIBLE) ||
+						(verticesVisibility[tsi.i2] != CCLib::POINT_VISIBLE) ||
+						(verticesVisibility[tsi.i3] != CCLib::POINT_VISIBLE))
 						continue;
 				}
 
@@ -2197,7 +2197,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 		rc.reset(new CCLib::ReferenceCloud(m_associatedCloud));
 
 		for (unsigned i = 0; i < m_associatedCloud->size(); ++i)
-			if (verticesVisibility[i] == POINT_VISIBLE)
+			if (verticesVisibility[i] == CCLib::POINT_VISIBLE)
 				if (!rc->addPointIndex(i))
 				{
 					ccLog::Error("Not enough memory!");
@@ -2321,9 +2321,9 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 					const CCLib::VerticesIndexes& tsi = m_triVertIndexes->at(i);
 
 					//all vertices must be visible
-					if (verticesVisibility[tsi.i1] == POINT_VISIBLE &&
-						verticesVisibility[tsi.i2] == POINT_VISIBLE &&
-						verticesVisibility[tsi.i3] == POINT_VISIBLE)
+					if (verticesVisibility[tsi.i1] == CCLib::POINT_VISIBLE &&
+						verticesVisibility[tsi.i2] == CCLib::POINT_VISIBLE &&
+						verticesVisibility[tsi.i3] == CCLib::POINT_VISIBLE)
 					{
 						//import per-triangle normals?
 						if (newTriNormals)
@@ -2498,9 +2498,9 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 					const CCLib::VerticesIndexes& tsi = m_triVertIndexes->at(i);
 
 					//at least one hidden vertex --> we keep it
-					if (verticesVisibility[tsi.i1] != POINT_VISIBLE ||
-						verticesVisibility[tsi.i2] != POINT_VISIBLE ||
-						verticesVisibility[tsi.i3] != POINT_VISIBLE)
+					if (verticesVisibility[tsi.i1] != CCLib::POINT_VISIBLE ||
+						verticesVisibility[tsi.i2] != CCLib::POINT_VISIBLE ||
+						verticesVisibility[tsi.i3] != CCLib::POINT_VISIBLE)
 					{
 						indexMap.emplace_back(removeSelectedFaces ? newInvisibleIndex++ : static_cast<unsigned>(i));
 					}
@@ -2556,9 +2556,9 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 			const CCLib::VerticesIndexes& tsi = m_triVertIndexes->at(i);
 
 			//at least one hidden vertex --> we keep it
-			if (verticesVisibility[tsi.i1] != POINT_VISIBLE ||
-				verticesVisibility[tsi.i2] != POINT_VISIBLE ||
-				verticesVisibility[tsi.i3] != POINT_VISIBLE)
+			if (verticesVisibility[tsi.i1] != CCLib::POINT_VISIBLE ||
+				verticesVisibility[tsi.i2] != CCLib::POINT_VISIBLE ||
+				verticesVisibility[tsi.i3] != CCLib::POINT_VISIBLE)
 			{
 				if (i != lastTri)
 				{
@@ -3351,9 +3351,9 @@ bool ccMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor
 	CCVector3d w;
 	computeInterpolationWeights(triIndex, P, w);
 
-	if (	(!T1 && w.u[0] > ZERO_TOLERANCE)
-		||	(!T2 && w.u[1] > ZERO_TOLERANCE)
-		||	(!T3 && w.u[2] > ZERO_TOLERANCE) )
+	if (	(!T1 && w.u[0] > CCLib::ZERO_TOLERANCE)
+		||	(!T2 && w.u[1] > CCLib::ZERO_TOLERANCE)
+		||	(!T3 && w.u[2] > CCLib::ZERO_TOLERANCE) )
 	{
 		//assert(false);
 		if (interpolateColorIfNoTexture)
@@ -3430,7 +3430,7 @@ static qint64 GenerateKey(unsigned edgeIndex1, unsigned edgeIndex2)
 
 bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, unsigned indexB, unsigned indexC)
 {
-	if (s_maxSubdivideArea/*maxArea*/ <= ZERO_TOLERANCE)
+	if (s_maxSubdivideArea/*maxArea*/ <= CCLib::ZERO_TOLERANCE)
 	{
 		ccLog::Error("[ccMesh::pushSubdivide] Invalid input argument!");
 		return false;
@@ -3604,7 +3604,7 @@ bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, uns
 
 ccMesh* ccMesh::subdivide(PointCoordinateType maxArea) const
 {
-	if (maxArea <= ZERO_TOLERANCE)
+	if (maxArea <= CCLib::ZERO_TOLERANCE)
 	{
 		ccLog::Error("[ccMesh::subdivide] Invalid input argument!");
 		return nullptr;

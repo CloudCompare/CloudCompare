@@ -145,9 +145,9 @@ ccQuadric* ccQuadric::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/
 {
 	//number of points
 	unsigned count = cloud->size();
-	if (count < CC_LOCAL_MODEL_MIN_SIZE[QUADRIC])
+	if (count < CCLib::CC_LOCAL_MODEL_MIN_SIZE[CCLib::QUADRIC])
 	{
-		ccLog::Warning(QString("[ccQuadric::fitTo] Not enough points in input cloud to fit a quadric! (%1 at the very least are required)").arg(CC_LOCAL_MODEL_MIN_SIZE[QUADRIC]));
+		ccLog::Warning(QString("[ccQuadric::fitTo] Not enough points in input cloud to fit a quadric! (%1 at the very least are required)").arg(CCLib::CC_LOCAL_MODEL_MIN_SIZE[CCLib::QUADRIC]));
 		return nullptr;
 	}
 

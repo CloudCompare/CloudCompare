@@ -91,7 +91,7 @@ public:
 	protected:
 
 		//! Updates actual range
-		inline void updateRange() { m_range = std::max(m_stop - m_start, static_cast<ScalarType>(ZERO_TOLERANCE)); }
+		inline void updateRange() { m_range = std::max(m_stop - m_start, static_cast<ScalarType>(CCLib::ZERO_TOLERANCE)); }
 
 		ScalarType m_min;		/**< Minimum value **/
 		ScalarType m_start;		/**< Current start value (in [min,max]) **/

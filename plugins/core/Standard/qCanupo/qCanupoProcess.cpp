@@ -753,7 +753,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 						if (classLabelSFIdx >= 0)
 						{
 							classLabelSF = cloud->getScalarField(classLabelSFIdx);
-							classLabelSF->fill(NAN_VALUE);
+							classLabelSF->fill(CCLib::NAN_VALUE);
 						}
 						else
 						{
@@ -772,7 +772,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 						if (confidenceSFIdx >= 0)
 						{
 							confidenceSF = cloud->getScalarField(confidenceSFIdx);
-							confidenceSF->fill(NAN_VALUE);
+							confidenceSF->fill(CCLib::NAN_VALUE);
 						}
 						else if (app)
 						{
@@ -818,7 +818,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 							assert(cloud->getScalarFieldIndexByName(qPrintable(sfName)) < 0);
 
 							scaleSFs[s] = new ccScalarField(qPrintable(sfName));
-							if (!scaleSFs[s]->resizeSafe(cloud->size(), true, NAN_VALUE))
+							if (!scaleSFs[s]->resizeSafe(cloud->size(), true, CCLib::NAN_VALUE))
 							{
 								if (app)
 									app->dispToConsole("Not enough memory to store per-level 'x-y' values!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
@@ -880,7 +880,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 								//SF with same name (if any) should have already been removed!
 								assert(cloud->getScalarFieldIndexByName(roughnessSFs[s]->getName()) < 0);
 
-								if (!roughnessSFs[s]->resize(cloud->size(), NAN_VALUE))
+								if (!roughnessSFs[s]->resize(cloud->size(), CCLib::NAN_VALUE))
 								{
 									if (app)
 										app->dispToConsole("Not enough memory to store per-level roughness!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);

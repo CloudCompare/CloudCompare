@@ -939,7 +939,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 						continue;
 					}
 
-					ScalarType sVal = NAN_VALUE;
+					ScalarType sVal = CCLib::NAN_VALUE;
 					switch (exportedFields[k])
 					{
 					case PER_CELL_HEIGHT:
@@ -1035,7 +1035,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 					else
 					{
 						assert(sf->size() < sf->capacity());
-						sf->addElement(NAN_VALUE);
+						sf->addElement(CCLib::NAN_VALUE);
 					}
 				}
 			}
@@ -1120,7 +1120,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 		for (int k = 0; k < static_cast<int>(cloudGrid->getNumberOfScalarFields()); ++k)
 		{
 			CCLib::ScalarField* sf = cloudGrid->getScalarField(k);
-			sf->resizeSafe(cloudGrid->size(), true, NAN_VALUE);
+			sf->resizeSafe(cloudGrid->size(), true, CCLib::NAN_VALUE);
 		}
 	}
 

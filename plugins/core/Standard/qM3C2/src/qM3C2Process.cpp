@@ -190,7 +190,7 @@ void ComputeM3C2DistForPoint(unsigned index)
 	if (s_M3C2Params.processCanceled)
 		return;
 
-	ScalarType dist = NAN_VALUE;
+	ScalarType dist = CCLib::NAN_VALUE;
 
 	//get core point #i
 	CCVector3 P;
@@ -362,7 +362,7 @@ void ComputeM3C2DistForPoint(unsigned index)
 					//confidence interval
 					if (s_M3C2Params.computeConfidence)
 					{
-						ScalarType LODStdDev = NAN_VALUE;
+						ScalarType LODStdDev = CCLib::NAN_VALUE;
 						if (s_M3C2Params.usePrecisionMaps)
 						{
 							LODStdDev = stdDev1*stdDev1 + stdDev2*stdDev2; //equation (2) in M3C2-PM article
@@ -395,7 +395,7 @@ void ComputeM3C2DistForPoint(unsigned index)
 						//else //DGM: scalar fields have already been initialized with the right 'default' values
 						//{
 						//	if (distUncertaintySF)
-						//		distUncertaintySF->setValue(index, NAN_VALUE);
+						//		distUncertaintySF->setValue(index, CCLib::NAN_VALUE);
 						//	if (sigChangeSF)
 						//		sigChangeSF->setValue(index, SCALAR_ZERO);
 						//}
@@ -803,7 +803,7 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 		//allocate distances SF
 		s_M3C2Params.m3c2DistSF = new ccScalarField(M3C2_DIST_SF_NAME);
 		s_M3C2Params.m3c2DistSF->link();
-		if (!s_M3C2Params.m3c2DistSF->resizeSafe(corePointCount, true, NAN_VALUE))
+		if (!s_M3C2Params.m3c2DistSF->resizeSafe(corePointCount, true, CCLib::NAN_VALUE))
 		{
 			errorMessage = "Failed to allocate memory for distance values!";
 			error = true;
@@ -812,7 +812,7 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 		//allocate dist. uncertainty SF
 		s_M3C2Params.distUncertaintySF = new ccScalarField(DIST_UNCERTAINTY_SF_NAME);
 		s_M3C2Params.distUncertaintySF->link();
-		if (!s_M3C2Params.distUncertaintySF->resizeSafe(corePointCount, true, NAN_VALUE))
+		if (!s_M3C2Params.distUncertaintySF->resizeSafe(corePointCount, true, CCLib::NAN_VALUE))
 		{
 			errorMessage = "Failed to allocate memory for dist. uncertainty values!";
 			error = true;
@@ -847,7 +847,7 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 			QString stdDevSFName1 = QString(STD_DEV_CLOUD1_SF_NAME).arg(prefix);
 			s_M3C2Params.stdDevCloud1SF = new ccScalarField(qPrintable(stdDevSFName1));
 			s_M3C2Params.stdDevCloud1SF->link();
-			if (!s_M3C2Params.stdDevCloud1SF->resizeSafe(corePointCount, true, NAN_VALUE))
+			if (!s_M3C2Params.stdDevCloud1SF->resizeSafe(corePointCount, true, CCLib::NAN_VALUE))
 			{
 				if (app)
 					app->dispToConsole("Failed to allocate memory for cloud #1 std. dev. values!", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
@@ -858,7 +858,7 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 			QString stdDevSFName2 = QString(STD_DEV_CLOUD2_SF_NAME).arg(prefix);
 			s_M3C2Params.stdDevCloud2SF = new ccScalarField(qPrintable(stdDevSFName2));
 			s_M3C2Params.stdDevCloud2SF->link();
-			if (!s_M3C2Params.stdDevCloud2SF->resizeSafe(corePointCount, true, NAN_VALUE))
+			if (!s_M3C2Params.stdDevCloud2SF->resizeSafe(corePointCount, true, CCLib::NAN_VALUE))
 			{
 				if (app)
 					app->dispToConsole("Failed to allocate memory for cloud #2 std. dev. values!", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
@@ -871,7 +871,7 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 			//allocate cloud #1 density SF
 			s_M3C2Params.densityCloud1SF = new ccScalarField(DENSITY_CLOUD1_SF_NAME);
 			s_M3C2Params.densityCloud1SF->link();
-			if (!s_M3C2Params.densityCloud1SF->resizeSafe(corePointCount, true, NAN_VALUE))
+			if (!s_M3C2Params.densityCloud1SF->resizeSafe(corePointCount, true, CCLib::NAN_VALUE))
 			{
 				if (app)
 					app->dispToConsole("Failed to allocate memory for cloud #1 density values!", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
@@ -881,7 +881,7 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 			//allocate cloud #2 density SF
 			s_M3C2Params.densityCloud2SF = new ccScalarField(DENSITY_CLOUD2_SF_NAME);
 			s_M3C2Params.densityCloud2SF->link();
-			if (!s_M3C2Params.densityCloud2SF->resizeSafe(corePointCount, true, NAN_VALUE))
+			if (!s_M3C2Params.densityCloud2SF->resizeSafe(corePointCount, true, CCLib::NAN_VALUE))
 			{
 				if (app)
 					app->dispToConsole("Failed to allocate memory for cloud #2 density values!", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
@@ -892,7 +892,7 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 
 		//get best levels for neighbourhood extraction on both octrees
 		assert(s_M3C2Params.cloud1Octree && s_M3C2Params.cloud2Octree);
-		PointCoordinateType equivalentRadius = pow(s_M3C2Params.projectionDepth * s_M3C2Params.projectionDepth * s_M3C2Params.projectionRadius, PC_ONE / 3);
+		PointCoordinateType equivalentRadius = pow(s_M3C2Params.projectionDepth * s_M3C2Params.projectionDepth * s_M3C2Params.projectionRadius, CCLib::PC_ONE / 3);
 		s_M3C2Params.level1 = s_M3C2Params.cloud1Octree->findBestLevelForAGivenNeighbourhoodSizeExtraction(equivalentRadius);
 		if (app)
 			app->dispToConsole(QString("[M3C2] Working subdivision level (cloud #1): %1").arg(s_M3C2Params.level1), ccMainAppInterface::STD_CONSOLE_MESSAGE);

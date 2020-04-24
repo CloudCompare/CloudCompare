@@ -1434,9 +1434,9 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 											std::max(globalBBmax.z,Bg.z) );
 
 				if (uniqueShift)
-					uniqueShift = ((shifted->getGlobalShift() - shift).norm() < ZERO_TOLERANCE);
+					uniqueShift = ((shifted->getGlobalShift() - shift).norm() < CCLib::ZERO_TOLERANCE);
 				if (uniqueScale)
-					uniqueScale = (std::abs(shifted->getGlobalScale() - scale) < ZERO_TOLERANCE);
+					uniqueScale = (std::abs(shifted->getGlobalScale() - scale) < CCLib::ZERO_TOLERANCE);
 			}
 
 			shiftedEntities.emplace_back(shifted, entity);
@@ -1503,7 +1503,7 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 				assert(shifted->getGlobalScale() > 0);
 				double scaleCoef = scale / shifted->getGlobalScale();
 
-				if (T.norm() > ZERO_TOLERANCE || std::abs(scaleCoef - 1.0) > ZERO_TOLERANCE)
+				if (T.norm() > CCLib::ZERO_TOLERANCE || std::abs(scaleCoef - 1.0) > CCLib::ZERO_TOLERANCE)
 				{
 					ccGLMatrix transMat;
 					transMat.toIdentity();
@@ -1879,7 +1879,7 @@ void MainWindow::doActionComputeScatteringAngles()
 		ScalarType theta = std::acos(std::min(std::abs(cosTheta), 1.0f));
 
 		if (toDegreeFlag)
-			theta *= static_cast<ScalarType>(CC_RAD_TO_DEG);
+			theta *= static_cast<ScalarType>(CCLib::RAD_TO_DEG);
 
 		angles->setValue(i,theta);
 	}
@@ -2553,10 +2553,10 @@ void MainWindow::doActionComputePointsVisibility()
 			pointCloud->showSF(true);
 
 			ccConsole::Print(QString("Visibility computed for cloud '%1'").arg(pointCloud->getName()));
-			ccConsole::Print(QString("\tVisible = %1").arg(POINT_VISIBLE));
-			ccConsole::Print(QString("\tHidden = %1").arg(POINT_HIDDEN));
-			ccConsole::Print(QString("\tOut of range = %1").arg(POINT_OUT_OF_RANGE));
-			ccConsole::Print(QString("\tOut of fov = %1").arg(POINT_OUT_OF_FOV));
+			ccConsole::Print(QString("\tVisible = %1").arg(CCLib::POINT_VISIBLE));
+			ccConsole::Print(QString("\tHidden = %1").arg(CCLib::POINT_HIDDEN));
+			ccConsole::Print(QString("\tOut of range = %1").arg(CCLib::POINT_OUT_OF_RANGE));
+			ccConsole::Print(QString("\tOut of fov = %1").arg(CCLib::POINT_OUT_OF_FOV));
 		}
 		pointCloud->redrawDisplay();
 	}
@@ -3766,8 +3766,8 @@ void MainWindow::doActionSubsample()
 	std::vector<ccPointCloud*> clouds;
 	unsigned maxPointCount = 0;
 	double maxCloudRadius = 0;
-	ScalarType sfMin = NAN_VALUE;
-	ScalarType sfMax = NAN_VALUE;
+	ScalarType sfMin = CCLib::NAN_VALUE;
+	ScalarType sfMax = CCLib::NAN_VALUE;
 	{
 		for ( ccHObject *entity : getSelectedEntities() )
 		{
@@ -4962,13 +4962,13 @@ void MainWindow::doActionComputeDistToBestFitQuadric3D()
 				for (int x = 0; x < steps; ++x)
 				{
 					CCVector3 P;
-					P.x = C.x + maxDim * (static_cast<PointCoordinateType>(x) / static_cast<PointCoordinateType>(steps - 1) - PC_ONE / 2);
+					P.x = C.x + maxDim * (static_cast<PointCoordinateType>(x) / static_cast<PointCoordinateType>(steps - 1) - CCLib::PC_ONE / 2);
 					for (int y = 0; y < steps; ++y)
 					{
-						P.y = C.y + maxDim * (static_cast<PointCoordinateType>(y) / static_cast<PointCoordinateType>(steps - 1) - PC_ONE / 2);
+						P.y = C.y + maxDim * (static_cast<PointCoordinateType>(y) / static_cast<PointCoordinateType>(steps - 1) - CCLib::PC_ONE / 2);
 						for (int z = 0; z < steps; ++z)
 						{
-							P.z = C.z + maxDim * (static_cast<PointCoordinateType>(z) / static_cast<PointCoordinateType>(steps - 1) - PC_ONE / 2);
+							P.z = C.z + maxDim * (static_cast<PointCoordinateType>(z) / static_cast<PointCoordinateType>(steps - 1) - CCLib::PC_ONE / 2);
 							newCloud->addPoint(P);
 
 							//compute distance to quadric
@@ -7994,7 +7994,7 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 				ccConsole::Print(QString("\t- %1").arg(dipAndDipDirStr));
 
 				//hack: output the transformation matrix that would make this normal points towards +Z
-				ccGLMatrix makeZPosMatrix = ccGLMatrix::FromToRotation(N, CCVector3(0, 0, PC_ONE));
+				ccGLMatrix makeZPosMatrix = ccGLMatrix::FromToRotation(N, CCVector3(0, 0, CCLib::PC_ONE));
 				CCVector3 Gt = C;
 				makeZPosMatrix.applyRotation(Gt);
 				makeZPosMatrix.setTranslation(C-Gt);
@@ -8129,7 +8129,7 @@ void MainWindow::doSphericalNeighbourhoodExtractionTest()
 		}
 
 		CCLib::ScalarField* sf = cloud->getScalarField(sfIdx);
-		sf->fill(NAN_VALUE);
+		sf->fill(CCLib::NAN_VALUE);
 		cloud->setCurrentScalarField(sfIdx);
 
 		QElapsedTimer eTimer;
@@ -8214,7 +8214,7 @@ void MainWindow::doCylindricalNeighbourhoodExtractionTest()
 	cloud->setCurrentScalarField(sfIdx);
 
 	//reset scalar field
-	cloud->getScalarField(sfIdx)->fill(NAN_VALUE);
+	cloud->getScalarField(sfIdx)->fill(CCLib::NAN_VALUE);
 
 	ccProgressDialog pDlg(true, this);
 	ccOctree::Shared octree = cloud->computeOctree(&pDlg);
@@ -8367,9 +8367,9 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 		//init all possible transformations
 		static const double angularStep_deg = 45.0;
 		unsigned phiSteps = static_cast<unsigned>(360.0 / angularStep_deg);
-		assert(std::abs(360.0 - phiSteps * angularStep_deg) < ZERO_TOLERANCE);
+		assert(std::abs(360.0 - phiSteps * angularStep_deg) < CCLib::ZERO_TOLERANCE);
 		unsigned thetaSteps = static_cast<unsigned>(180.0 / angularStep_deg);
-		assert(std::abs(180.0 - thetaSteps * angularStep_deg) < ZERO_TOLERANCE);
+		assert(std::abs(180.0 - thetaSteps * angularStep_deg) < CCLib::ZERO_TOLERANCE);
 		unsigned rotCount = phiSteps * (thetaSteps - 1) + 2;
 		matrices.reserve(rotCount);
 		matrixAngles.reserve(rotCount);
@@ -8382,8 +8382,8 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 			{
 				double phi_deg = i * angularStep_deg;
 				ccGLMatrix trans;
-				trans.initFromParameters(	static_cast<float>(phi_deg * CC_DEG_TO_RAD),
-											static_cast<float>(theta_deg * CC_DEG_TO_RAD),
+				trans.initFromParameters(	static_cast<float>(phi_deg * CCLib::DEG_TO_RAD),
+											static_cast<float>(theta_deg * CCLib::DEG_TO_RAD),
 											0,
 											CCVector3(0,0,0) );
 				matrices.push_back(trans);
@@ -9245,7 +9245,7 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 			if (smDlg.updateFOV())
 			{
 				//set the right FOV
-				double fov_deg = 2 * std::atan(params.screenWidth_mm / (2.0 * params.screenDistance_mm)) * CC_RAD_TO_DEG;
+				double fov_deg = 2 * std::atan(params.screenWidth_mm / (2.0 * params.screenDistance_mm)) * CCLib::RAD_TO_DEG;
 				ccLog::Print(QString("[Stereo] F.O.V. forced to %1 deg.").arg(fov_deg));
 				win->setFov(fov_deg);
 			}
@@ -10993,7 +10993,7 @@ void MainWindow::doActionComparePlanes()
 	p2->getEquation(N2, d2);
 
 	double angle_rad = N1.angle_rad(N2);
-	info << QString("Angle P1/P2: %1 deg.").arg(angle_rad * CC_RAD_TO_DEG);
+	info << QString("Angle P1/P2: %1 deg.").arg(angle_rad * CCLib::RAD_TO_DEG);
 	ccLog::Print(QString("[Compare] ") + info.last());
 
 	PointCoordinateType planeEq1[4] = { N1.x, N1.y, N1.z, d1 };

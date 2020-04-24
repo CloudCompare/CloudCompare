@@ -647,7 +647,7 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside)
 #endif
 		for (int i = 0; i < static_cast<int>(cloudSize); ++i)
 		{
-			if (visibilityArray[i] == POINT_VISIBLE)
+			if (visibilityArray[i] == CCLib::POINT_VISIBLE)
 			{
 				const CCVector3* P3D = cloud->getPoint(i);
 
@@ -659,7 +659,7 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside)
 				
 				bool pointInside = pointInFrustrum && CCLib::ManualSegmentationTools::isPointInsidePoly(P2D, m_segmentationPoly);
 
-				visibilityArray[i] = (keepPointsInside != pointInside ? POINT_HIDDEN : POINT_VISIBLE);
+				visibilityArray[i] = (keepPointsInside != pointInside ?CCLib:: POINT_HIDDEN : CCLib::POINT_VISIBLE);
 			}
 		}
 	}

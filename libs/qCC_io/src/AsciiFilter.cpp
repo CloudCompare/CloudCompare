@@ -1100,7 +1100,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 		{
 			for (size_t j = 0; j < cloudDesc.scalarFields.size(); ++j)
 			{
-				cloudDesc.scalarFields[j]->resizeSafe(cloudDesc.cloud->size(), true, NAN_VALUE);
+				cloudDesc.scalarFields[j]->resizeSafe(cloudDesc.cloud->size(), true, CCLib::NAN_VALUE);
 				cloudDesc.scalarFields[j]->computeMinAndMax();
 			}
 			cloudDesc.cloud->setCurrentDisplayedScalarField(0);

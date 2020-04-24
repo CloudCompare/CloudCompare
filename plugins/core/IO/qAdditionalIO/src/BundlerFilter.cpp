@@ -277,7 +277,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 					sum += fabs(mat[l]) + fabs(mat[4+l]) + fabs(mat[8+l]);
 				}
 			}
-			if (importImages && sum < ZERO_TOLERANCE)
+			if (importImages && sum < CCLib::ZERO_TOLERANCE)
 			{
 				ccLog::Warning("[Bundler] Camera #%i is invalid!",camIndex+1);
 				it->isValid = false;
@@ -756,7 +756,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 			ccGLMatrix transf(cameras[i].trans.inverse().data());
 			
 			//dist to cloud
-			PointCoordinateType dist = keypointsCloud ? (transf.getTranslationAsVec3D() - keypointsCloud->getOwnBB().getCenter()).norm() : PC_ONE;
+			PointCoordinateType dist = keypointsCloud ? (transf.getTranslationAsVec3D() - keypointsCloud->getOwnBB().getCenter()).norm() : CCLib::PC_ONE;
 			params.zFar_mm = dist;
 			params.zNear_mm = 0.001f;
 
@@ -764,7 +764,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 			sensor->setName(QString("Camera #%1").arg(i + 1));
 			sensor->setEnabled(true);
 			sensor->setVisible(true/*false*/);
-			sensor->setGraphicScale(keypointsCloud ? keypointsCloud->getOwnBB().getDiagNorm() / 10 : PC_ONE);
+			sensor->setGraphicScale(keypointsCloud ? keypointsCloud->getOwnBB().getDiagNorm() / 10 : CCLib::PC_ONE);
 			sensor->setRigidTransformation(transf);
 
 			//distortion parameters
@@ -838,7 +838,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 			{
 				ccLog::Warning(QString("[Bundler] Not enough keypoints descriptors for image '%1'!").arg(image->getName()));
 			}
-			else if (!keypointsImageBB.isValid() || keypointsImageBB.getDiagNorm() < PC_ONE)
+			else if (!keypointsImageBB.isValid() || keypointsImageBB.getDiagNorm() < CCLib::PC_ONE)
 			{
 				ccLog::Warning(QString("[Bundler] Keypoints descriptors for image '%1' are invalid (= all the same)").arg(image->getName()));
 			}
@@ -1062,7 +1062,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 
 				//apply bundler equation
 				sensorMatrix.apply(P);
-				if (fabs(P.z) > ZERO_TOLERANCE)
+				if (fabs(P.z) > CCLib::ZERO_TOLERANCE)
 				{
 					CCVector3 p(-P.x / P.z, -P.y / P.z, 0.0);
 					//float norm_p2 = p.norm2();

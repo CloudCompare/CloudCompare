@@ -244,6 +244,12 @@ namespace ccColor
 					static_cast<ColorCompType>(color.b * MAX) );
 	}
 	
+	//! Conversion from Rgb to Rgba
+	inline Rgba FromRgbToRgba(const Rgb& color)
+	{
+		return Rgba(color, MAX);
+	}
+
 	//! Conversion from Rgbaf to Rgba
 	inline Rgba FromRgbafToRgba(const Rgbaf& color)
 	{

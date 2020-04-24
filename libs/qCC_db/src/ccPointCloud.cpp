@@ -2736,7 +2736,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							const ccColor::Rgb* col = m_currentDisplayedScalarField->getValueColor(pointIndex);
 							//we force display of points hidden because of their scalar field value
 							//to be sure that the user doesn't miss them (during manual segmentation for instance)
-							glFunc->glColor4ubv(col ? col->rgb : ccColor::lightGreyRGB.rgb);
+							glFunc->glColor3ubv(col ? col->rgb : ccColor::lightGreyRGB.rgb); //Make sure all points are visible. No alpha used on purpose 
 						}
 						else if (glParams.showColors)
 						{

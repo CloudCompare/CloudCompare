@@ -16,6 +16,8 @@ if (PLUGIN_IO_QRDB)
 	# Set to include this I/O plugin in ccViewer
 	set( CC_IS_IO_PLUGIN 1 )
 
-	include( ../../CMakePluginTpl.cmake )
+    include( CMakePluginTemplate )
+	#include( ../../CMakePluginTpl.cmake )
+	
 	target_link_libraries(${PROJECT_NAME} rdbcpp)
 endif()

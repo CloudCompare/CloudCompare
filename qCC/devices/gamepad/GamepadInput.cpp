@@ -56,7 +56,7 @@ void GamepadInput::update(ccGLWindow* win)
 			float scale = static_cast<float>(std::min(win->glWidth(), win->glHeight()) * viewParams.pixelSize);
 			scale /= win->computePerspectiveZoom();
 
-			float tanFOV = tan(static_cast<float>(viewParams.fov * CC_DEG_TO_RAD)/*/2*/);
+			float tanFOV = tan(static_cast<float>(viewParams.fov * CCCoreLib::DEG_TO_RAD)/*/2*/);
 			m_panning.x *= tanFOV;
 			m_panning.y *= tanFOV;
 
@@ -71,7 +71,7 @@ void GamepadInput::update(ccGLWindow* win)
 			float scale = static_cast<float>(std::min(win->glWidth(), win->glHeight()) * viewParams.pixelSize);
 			scale /= win->computePerspectiveZoom();
 
-			float tanFOV = tan(static_cast<float>(viewParams.fov * CC_DEG_TO_RAD)/*/2*/);
+			float tanFOV = tan(static_cast<float>(viewParams.fov * CCCoreLib::DEG_TO_RAD)/*/2*/);
 			m_translation.x *= tanFOV;
 			m_translation.y *= tanFOV;
 			
@@ -140,7 +140,7 @@ void GamepadInput::updateInternalState()
 		{
 			double angle = buttonL2() ? 10 * s_gamepadRotSpeed : -10 * s_gamepadRotSpeed;
 			ccGLMatrixd rot;
-			rot.initFromParameters(angle * CC_DEG_TO_RAD, CCVector3d(0, 0, 1), CCVector3d(0, 0, 0));
+			rot.initFromParameters(angle * CCCoreLib::DEG_TO_RAD, CCVector3d(0, 0, 1), CCVector3d(0, 0, 0));
 			m_rotation = rot * m_rotation;
 			m_hasRotation = true;
 		}

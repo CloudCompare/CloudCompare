@@ -327,23 +327,23 @@ void Mouse3DInput::Apply(const std::vector<float>& motionData, ccGLWindow* win)
 		//ccLog::Print(QString("Mouse translation: (%1,%2,%3)").arg(X).arg(Y).arg(Z));
 
 		//Zoom: object moves closer/away (only for ortho. mode)
-		if (!perspectiveView && fabs(Z) > ZERO_TOLERANCE)
+		if (!perspectiveView && fabs(Z) > CCCoreLib::ZERO_TOLERANCE)
 		{
 			win->updateZoom(1.0f - Z / 1.5f);
 			Z = 0;
 		}
 
 		//Zoom & Panning: camera moves right/left + up/down + backward/forward (only for perspective mode)
-		if (	fabs(X) > ZERO_TOLERANCE
-		    ||	fabs(Y) > ZERO_TOLERANCE
-		    ||	fabs(Z) > ZERO_TOLERANCE )
+		if (	fabs(X) > CCCoreLib::ZERO_TOLERANCE
+		    ||	fabs(Y) > CCCoreLib::ZERO_TOLERANCE
+		    ||	fabs(Z) > CCCoreLib::ZERO_TOLERANCE )
 		{
 			const ccViewportParameters& viewParams = win->getViewportParameters();
 
 			float scale = static_cast<float>(std::min(win->glWidth(), win->glHeight()) * viewParams.pixelSize);
 			if (perspectiveView)
 			{
-				float tanFOV = tan(static_cast<float>(viewParams.fov * CC_DEG_TO_RAD)/*/2*/);
+				float tanFOV = tan(static_cast<float>(viewParams.fov * CCCoreLib::DEG_TO_RAD)/*/2*/);
 				X *= tanFOV;
 				Y *= tanFOV;
 				scale /= win->computePerspectiveZoom();
@@ -362,9 +362,9 @@ void Mouse3DInput::Apply(const std::vector<float>& motionData, ccGLWindow* win)
 	}
 
 	//rotation
-	if (	fabs(vec[3]) > ZERO_TOLERANCE
-	    ||	fabs(vec[4]) > ZERO_TOLERANCE
-	    ||	fabs(vec[5]) > ZERO_TOLERANCE)
+	if (	fabs(vec[3]) > CCCoreLib::ZERO_TOLERANCE
+	    ||	fabs(vec[4]) > CCCoreLib::ZERO_TOLERANCE
+	    ||	fabs(vec[5]) > CCCoreLib::ZERO_TOLERANCE)
 	{
 		//ccLog::Print(QString("Mouse rotation: (%1,%2,%3)").arg(vec[3]).arg(vec[4]).arg(vec[5]));
 

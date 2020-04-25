@@ -5654,7 +5654,7 @@ double ccGLWindow::computeActualPixelSize() const
 	//Camera center to pivot vector
 	double zoomEquivalentDist = (m_viewportParams.cameraCenter - m_viewportParams.pivotPoint).norm();
 
-	//return zoomEquivalentDist * (2.0 * std::tan(std::min(getFov(), 75.0f) / 2.0 *CCCoreLib::CC_DEG_TO_RAD )) / minScreenDim; //tan(75) = 3.73 (then it quickly increases!)
+	//return zoomEquivalentDist * (2.0 * std::tan(std::min(getFov(), 75.0f) / 2.0 *CCCoreLib::CCCoreLib::DEG_TO_RAD )) / minScreenDim; //tan(75) = 3.73 (then it quickly increases!)
 	return zoomEquivalentDist * (2.0 * std::tan(std::min(getFov(), 75.0f) / 2.0 * CCCoreLib::DEG_TO_RAD)) / m_glViewport.width(); //tan(75) = 3.73 (then it quickly increases!)
 }
 

@@ -139,7 +139,7 @@
 #include "devices/gamepad/ccGamepadManager.h"
 #endif
 
-#ifdef USE_TBB
+#ifdef CC_CORE_LIB_USES_TBB
 #include <tbb/tbb_stddef.h>
 #endif
 
@@ -297,7 +297,7 @@ MainWindow::MainWindow()
 
 	QMainWindow::statusBar()->showMessage(QString("Ready"));
 	
-#ifdef USE_TBB
+#ifdef CC_CORE_LIB_USES_TBB
 	ccConsole::Print( QStringLiteral( "[TBB] Using Intel's Threading Building Blocks %1.%2" )
 					  .arg( QString::number( TBB_VERSION_MAJOR ), QString::number( TBB_VERSION_MINOR ) ) );
 #endif

@@ -5,6 +5,12 @@ project( shapelib )
 
 add_library( ${PROJECT_NAME} STATIC )
 
+set_target_properties( ${PROJECT_NAME} PROPERTIES
+    AUTOMOC OFF
+    AUTORCC OFF
+    AUTOUIC OFF
+)
+
 target_sources( ${PROJECT_NAME}
     PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/shptree.c

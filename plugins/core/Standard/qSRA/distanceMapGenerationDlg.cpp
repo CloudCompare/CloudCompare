@@ -1806,7 +1806,7 @@ void DistanceMapGenerationDlg::toggleOverlayGrid(bool state)
 				Pup.z = 1.0;
 
 				//polyline
-				ccPointCloud* vertices = new ccPointCloud(/*QString("Angle %1").arg(static_cast<int>(angle_rad*CC_RAD_TO_DEG))*/);
+				ccPointCloud* vertices = new ccPointCloud(/*QString("Angle %1").arg(static_cast<int>(angle_rad*CCCoreLib::RAD_TO_DEG))*/);
 				vertices->reserve(2);
 				vertices->addPoint(Pbottom);
 				vertices->addPoint(Pup);

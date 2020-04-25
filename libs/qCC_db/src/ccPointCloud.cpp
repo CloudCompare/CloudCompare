@@ -3985,9 +3985,9 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 //		progressCb->start();
 //	}
 //
-//	PointCoordinateType tan_alpha = static_cast<PointCoordinateType>(tan(alpha_deg*CC_DEG_TO_RAD));
-//	PointCoordinateType cos_alpha = static_cast<PointCoordinateType>(cos(alpha_deg*CC_DEG_TO_RAD));
-//	PointCoordinateType sin_alpha = static_cast<PointCoordinateType>(sin(alpha_deg*CC_DEG_TO_RAD));
+//	PointCoordinateType tan_alpha = static_cast<PointCoordinateType>(tan(alpha_deg*CCCoreLib::DEG_TO_RAD));
+//	PointCoordinateType cos_alpha = static_cast<PointCoordinateType>(cos(alpha_deg*CCCoreLib::DEG_TO_RAD));
+//	PointCoordinateType sin_alpha = static_cast<PointCoordinateType>(sin(alpha_deg*CCCoreLib::DEG_TO_RAD));
 //
 //	for (unsigned i = 0; i < numberOfPoints; i++)
 //	{
@@ -5167,7 +5167,7 @@ bool ccPointCloud::computeNormalsWithGrids(	double minTriangleAngle_deg/*=1.0*/,
 	}
 
 	PointCoordinateType minAngleCos = static_cast<PointCoordinateType>(cos(minTriangleAngle_deg * CCCoreLib::DEG_TO_RAD));
-	//double minTriangleAngle_rad = minTriangleAngle_deg *CCCoreLib::CC_DEG_TO_RAD;
+	//double minTriangleAngle_rad = minTriangleAngle_deg *CCCoreLib::CCCoreLib::DEG_TO_RAD;
 
 	//for each grid cell
 	for (size_t gi = 0; gi < gridCount(); ++gi)
@@ -5749,7 +5749,7 @@ ccMesh* ccPointCloud::triangulateGrid(const Grid& grid, double minTriangleAngle_
 	}
 
 	PointCoordinateType minAngleCos = static_cast<PointCoordinateType>(cos(minTriangleAngle_deg * CCCoreLib::DEG_TO_RAD));
-	//double minTriangleAngle_rad = minTriangleAngle_deg *CCCoreLib::CC_DEG_TO_RAD;
+	//double minTriangleAngle_rad = minTriangleAngle_deg *CCCoreLib::CCCoreLib::DEG_TO_RAD;
 	
 	for (int j = 0; j < static_cast<int>(grid.h) - 1; ++j)
 	{

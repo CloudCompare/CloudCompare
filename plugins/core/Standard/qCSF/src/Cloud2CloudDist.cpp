@@ -176,7 +176,7 @@ bool Cloud2CloudDist::Compute(const Cloth& cloth,
 	return true;
 }
 
-//CCLib is always much faster
+//CCCoreLib is always much faster
 
 //CC_CORE_LIB
 #include <SimpleCloud.h>
@@ -185,17 +185,17 @@ bool Cloud2CloudDist::Compute(const Cloth& cloth,
 #include <DistanceComputationTools.h>
 #include <QThread>
 
-static bool ComputeMeanNeighborAltitude(const CCLib::DgmOctree::octreeCell& cell,
+static bool ComputeMeanNeighborAltitude(const CCCoreLib::DgmOctree::octreeCell& cell,
 										void** additionalParameters,
-										CCLib::NormalizedProgress* nProgress = 0)
+										CCCoreLib::NormalizedProgress* nProgress = 0)
 {
 	//additional parameters
 	const Cloth& cloth = *(const Cloth*)additionalParameters[0];
-	const CCLib::DgmOctree* particleOctree = (CCLib::DgmOctree*)additionalParameters[1];
+	const CCCoreLib::DgmOctree* particleOctree = (CCCoreLib::DgmOctree*)additionalParameters[1];
 	unsigned N = *(unsigned*)additionalParameters[2];
 
 	//structure for the nearest neighbor search
-	CCLib::DgmOctree::NearestNeighboursSearchStruct nNSS;
+	CCCoreLib::DgmOctree::NearestNeighboursSearchStruct nNSS;
 	nNSS.level = cell.level;
 	nNSS.minNumberOfNeighbors = N;
 	particleOctree->getCellPos(cell.truncatedCode, cell.level, nNSS.cellPos, true);
@@ -239,7 +239,7 @@ bool Cloud2CloudDist::Compute(	const Cloth& cloth,
 								std::vector<int>& offGroundIndexes,
 								unsigned N/*=3*/)
 {
-	CCLib::SimpleCloud particlePoints;
+	CCCoreLib::SimpleCloud particlePoints;
 	if (!particlePoints.reserve(static_cast<unsigned>(cloth.getSize())))
 	{
 		//not enough memory
@@ -251,7 +251,7 @@ bool Cloud2CloudDist::Compute(	const Cloth& cloth,
 		particlePoints.addPoint(CCVector3(static_cast<PointCoordinateType>(particle.pos.x), 0, static_cast<PointCoordinateType>(particle.pos.z)));
 	}
 
-	CCLib::SimpleCloud pcPoints;
+	CCCoreLib::SimpleCloud pcPoints;
 	if (	!pcPoints.reserve(static_cast<unsigned>(pc.size()))
 		||	!pcPoints.enableScalarField())
 	{
@@ -267,9 +267,9 @@ bool Cloud2CloudDist::Compute(	const Cloth& cloth,
 	try
 	{
 		//we spatially 'synchronize' the cloud and particles octrees
-		CCLib::DgmOctree *cloudOctree = 0, *particleOctree = 0;
-		CCLib::DistanceComputationTools::SOReturnCode soCode =
-			CCLib::DistanceComputationTools::synchronizeOctrees
+		CCCoreLib::DgmOctree *cloudOctree = 0, *particleOctree = 0;
+		CCCoreLib::DistanceComputationTools::SOReturnCode soCode =
+			CCCoreLib::DistanceComputationTools::synchronizeOctrees
 			(
 			&particlePoints,
 			&pcPoints,
@@ -279,7 +279,7 @@ bool Cloud2CloudDist::Compute(	const Cloth& cloth,
 			0
 			);
 
-		if (soCode != CCLib::DistanceComputationTools::SYNCHRONIZED && soCode != CCLib::DistanceComputationTools::DISJOINT)
+		if (soCode != CCCoreLib::DistanceComputationTools::SYNCHRONIZED && soCode != CCCoreLib::DistanceComputationTools::DISJOINT)
 		{
 			//not enough memory (or invalid input)
 			return false;

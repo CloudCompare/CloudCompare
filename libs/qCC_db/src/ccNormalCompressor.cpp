@@ -17,7 +17,7 @@
 
 #include "ccNormalCompressor.h"
 
-//CCLib
+//CCCoreLib
 #include <CCConst.h>
 
 //System

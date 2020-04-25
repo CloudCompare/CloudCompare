@@ -20,7 +20,7 @@
 #include "ccPointCloud.h"
 #include "ccPolyline.h"
 
-//CCLib
+//CCCoreLib
 #include <Delaunay2dMesh.h>
 #include <DistanceComputationTools.h>
 #include <MeshSamplingTools.h>
@@ -135,7 +135,7 @@ ccFacet* ccFacet::clone() const
 	return facet;
 }
 
-ccFacet* ccFacet::Create(	CCLib::GenericIndexedCloudPersist* cloud,
+ccFacet* ccFacet::Create(	CCCoreLib::GenericIndexedCloudPersist* cloud,
 							PointCoordinateType maxEdgeLength/*=0*/,
 							bool transferOwnership/*=false*/,
 							const PointCoordinateType* planeEquation/*=0*/)
@@ -176,7 +176,7 @@ ccFacet* ccFacet::Create(	CCLib::GenericIndexedCloudPersist* cloud,
 	return facet;
 }
 
-bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* points,
+bool ccFacet::createInternalRepresentation(	CCCoreLib::GenericIndexedCloudPersist* points,
 											const PointCoordinateType* planeEquation/*=0*/)
 {
 	assert(points);
@@ -186,7 +186,7 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 	if (ptsCount < 3)
 		return false;
 
-	CCLib::Neighbourhood Yk(points);
+	CCCoreLib::Neighbourhood Yk(points);
 
 	//get corresponding plane
 	if (!planeEquation)
@@ -201,20 +201,20 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 	memcpy(m_planeEquation, planeEquation, sizeof(PointCoordinateType) * 4);
 
 	//we project the input points on a plane
-	std::vector<CCLib::PointProjectionTools::IndexedCCVector2> points2D;
+	std::vector<CCCoreLib::PointProjectionTools::IndexedCCVector2> points2D;
 	
 	//local base
 	CCVector3 X;
 	CCVector3 Y;
 	
-	if (!Yk.projectPointsOn2DPlane<CCLib::PointProjectionTools::IndexedCCVector2>(points2D, nullptr, &m_center, &X, &Y))
+	if (!Yk.projectPointsOn2DPlane<CCCoreLib::PointProjectionTools::IndexedCCVector2>(points2D, nullptr, &m_center, &X, &Y))
 	{
 		ccLog::Error("[ccFacet::createInternalRepresentation] Not enough memory!");
 		return false;
 	}
 
 	//compute resulting RMS
-	m_rms = CCLib::DistanceComputationTools::computeCloud2PlaneDistanceRMS(points, m_planeEquation);
+	m_rms = CCCoreLib::DistanceComputationTools::computeCloud2PlaneDistanceRMS(points, m_planeEquation);
 	
 	//update the points indexes (not done by Neighbourhood::projectPointsOn2DPlane)
 	{
@@ -226,8 +226,8 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 
 	//try to get the points on the convex/concave hull to build the contour and the polygon
 	{
-		std::list<CCLib::PointProjectionTools::IndexedCCVector2*> hullPoints;
-		if (!CCLib::PointProjectionTools::extractConcaveHull2D(	points2D,
+		std::list<CCCoreLib::PointProjectionTools::IndexedCCVector2*> hullPoints;
+		if (!CCCoreLib::PointProjectionTools::extractConcaveHull2D(	points2D,
 																hullPoints,
 																m_maxEdgeLength*m_maxEdgeLength))
 		{
@@ -248,7 +248,7 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 			}
 			
 			//projection on the LS plane (in 3D)
-			for (std::list<CCLib::PointProjectionTools::IndexedCCVector2*>::const_iterator it = hullPoints.begin(); it != hullPoints.end(); ++it)
+			for (std::list<CCCoreLib::PointProjectionTools::IndexedCCVector2*>::const_iterator it = hullPoints.begin(); it != hullPoints.end(); ++it)
 			{
 				m_contourVertices->addPoint(m_center + X*(*it)->x + Y*(*it)->y);
 			}
@@ -285,7 +285,7 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 		try
 		{
 			hullPointsVector.reserve(hullPoints.size());
-			for (std::list<CCLib::PointProjectionTools::IndexedCCVector2*>::const_iterator it = hullPoints.begin(); it != hullPoints.end(); ++it)
+			for (std::list<CCCoreLib::PointProjectionTools::IndexedCCVector2*>::const_iterator it = hullPoints.begin(); it != hullPoints.end(); ++it)
 			{
 				hullPointsVector.push_back(**it);
 			}
@@ -298,10 +298,10 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 		//if we have computed a concave hull, we must remove triangles falling outside!
 		bool removePointsOutsideHull = (m_maxEdgeLength > 0);
 
-		if (!hullPointsVector.empty() && CCLib::Delaunay2dMesh::Available())
+		if (!hullPointsVector.empty() && CCCoreLib::Delaunay2dMesh::Available())
 		{
 			//compute the facet surface
-			CCLib::Delaunay2dMesh dm;
+			CCCoreLib::Delaunay2dMesh dm;
 			char errorStr[1024];
 			if (dm.buildMesh(hullPointsVector, 0, errorStr))
 			{
@@ -316,7 +316,7 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 					//import faces
 					for (unsigned i = 0; i < triCount; ++i)
 					{
-						const CCLib::VerticesIndexes* tsi = dm.getTriangleVertIndexes(i);
+						const CCCoreLib::VerticesIndexes* tsi = dm.getTriangleVertIndexes(i);
 						m_polygonMesh->addTriangle(tsi->i1, tsi->i2, tsi->i3);
 					}
 					m_polygonMesh->setVisible(true);
@@ -345,7 +345,7 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 					}
 
 					//update facet surface
-					m_surface = CCLib::MeshSamplingTools::computeMeshArea(m_polygonMesh);
+					m_surface = CCCoreLib::MeshSamplingTools::computeMeshArea(m_polygonMesh);
 				}
 				else
 				{

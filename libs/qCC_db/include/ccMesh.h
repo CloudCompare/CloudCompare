@@ -18,7 +18,7 @@
 #ifndef CC_MESH_HEADER
 #define CC_MESH_HEADER
 
-//CCLib
+//CCCoreLib
 #include <PointProjectionTools.h>
 #include <SimpleTriangle.h>
 
@@ -39,12 +39,12 @@ public:
 	**/
 	explicit ccMesh(ccGenericPointCloud* vertices, unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID);
 
-	//! ccMesh constructor (from a CCLib::GenericIndexedMesh)
+	//! ccMesh constructor (from a CCCoreLib::GenericIndexedMesh)
 	/** The GenericIndexedMesh should refer to a known ccGenericPointCloud.
 		\param giMesh the GenericIndexedMesh
 		\param giVertices giMesh vertices
 	**/
-	explicit ccMesh(CCLib::GenericIndexedMesh* giMesh, ccGenericPointCloud* giVertices);
+	explicit ccMesh(CCCoreLib::GenericIndexedMesh* giMesh, ccGenericPointCloud* giVertices);
 
 	//! Default destructor
 	~ccMesh() override;
@@ -69,7 +69,7 @@ public:
 						TextureCoordsContainer* cloneTexCoords = nullptr);
 
 	//! Creates a Delaunay 2.5D mesh from a point cloud
-	/** See CCLib::PointProjectionTools::computeTriangulation.
+	/** See CCCoreLib::PointProjectionTools::computeTriangulation.
 	**/
 	static ccMesh* Triangulate( ccGenericPointCloud* cloud,
 								CC_TRIANGULATION_TYPES type,
@@ -110,16 +110,16 @@ public:
 	//inherited methods (GenericIndexedMesh)
 	void forEach(genericTriangleAction action) override;
 	void placeIteratorAtBeginning() override;
-	CCLib::GenericTriangle* _getNextTriangle() override; //temporary
-	CCLib::GenericTriangle* _getTriangle(unsigned triangleIndex) override; //temporary
-	CCLib::VerticesIndexes* getNextTriangleVertIndexes() override;
-	CCLib::VerticesIndexes* getTriangleVertIndexes(unsigned triangleIndex) override;
+	CCCoreLib::GenericTriangle* _getNextTriangle() override; //temporary
+	CCCoreLib::GenericTriangle* _getTriangle(unsigned triangleIndex) override; //temporary
+	CCCoreLib::VerticesIndexes* getNextTriangleVertIndexes() override;
+	CCCoreLib::VerticesIndexes* getTriangleVertIndexes(unsigned triangleIndex) override;
 	void getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) const override;
 	unsigned size() const override;
 	void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) override;
 
 	//const version of getTriangleVertIndexes
-	const virtual CCLib::VerticesIndexes* getTriangleVertIndexes(unsigned triangleIndex) const;
+	const virtual CCCoreLib::VerticesIndexes* getTriangleVertIndexes(unsigned triangleIndex) const;
 
 	//inherited methods (ccDrawableObject)
 	bool hasColors() const override;
@@ -399,13 +399,13 @@ protected: //methods
 	void onDeletionOf(const ccHObject* obj) override;
 
 	//! Same as other 'computeInterpolationWeights' method with a set of 3 vertices indexes
-	void computeInterpolationWeights(const CCLib::VerticesIndexes& vertIndexes, const CCVector3& P, CCVector3d& weights) const;
+	void computeInterpolationWeights(const CCCoreLib::VerticesIndexes& vertIndexes, const CCVector3& P, CCVector3d& weights) const;
 	//! Same as other 'interpolateNormals' method with a set of 3 vertices indexes
-	bool interpolateNormals(const CCLib::VerticesIndexes& vertIndexes, const CCVector3d& w, CCVector3& N, const Tuple3i* triNormIndexes = nullptr);
+	bool interpolateNormals(const CCCoreLib::VerticesIndexes& vertIndexes, const CCVector3d& w, CCVector3& N, const Tuple3i* triNormIndexes = nullptr);
 	//! Same as other 'interpolateColors' method with a set of 3 vertices indexes
-	bool interpolateColors(const CCLib::VerticesIndexes& vertIndexes, const CCVector3d& w, ccColor::Rgb& C);
+	bool interpolateColors(const CCCoreLib::VerticesIndexes& vertIndexes, const CCVector3d& w, ccColor::Rgb& C);
 	//! Same as other 'interpolateColors' method with a set of 3 vertices indexes
-	bool interpolateColors(const CCLib::VerticesIndexes& vertIndexes, const CCVector3d& w, ccColor::Rgba& C);
+	bool interpolateColors(const CCCoreLib::VerticesIndexes& vertIndexes, const CCVector3d& w, ccColor::Rgba& C);
 
 	//! Used internally by 'subdivide'
 	bool pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, unsigned indexB, unsigned indexC);
@@ -450,14 +450,14 @@ protected: //members
 	ccMaterialSet* m_materials;
 
 	//! Container of per-triangle vertices indexes (3)
-	using triangleIndexesContainer = ccArray<CCLib::VerticesIndexes, 3, unsigned>;
+	using triangleIndexesContainer = ccArray<CCCoreLib::VerticesIndexes, 3, unsigned>;
 	//! Triangles' vertices indexes (3 per triangle)
 	triangleIndexesContainer* m_triVertIndexes;
 
 	//! Iterator on the list of triangles
 	unsigned m_globalIterator;
 	//! Dump triangle structure to transmit temporary data
-	CCLib::SimpleRefTriangle m_currentTriangle;
+	CCCoreLib::SimpleRefTriangle m_currentTriangle;
 
 	//! Bounding-box
 	ccBBox m_bBox;

@@ -40,11 +40,11 @@ public:
 	**/
 	static bool FuseCells(	ccKdTree* kdTree,
 							double maxError,
-							CCLib::DistanceComputationTools::ERROR_MEASURES errorMeasure,
+							CCCoreLib::DistanceComputationTools::ERROR_MEASURES errorMeasure,
 							double maxAngle_deg,
 							PointCoordinateType overlapCoef = 1,
 							bool closestFirst = true,
-							CCLib::GenericProgressCallback* progressCb = 0);
+							CCCoreLib::GenericProgressCallback* progressCb = 0);
 
 };
 

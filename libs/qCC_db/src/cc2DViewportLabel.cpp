@@ -20,7 +20,7 @@
 //Local
 #include "cc2DViewportLabel.h"
 
-//CCLib
+//CCCoreLib
 #include <CCConst.h>
 
 //Qt
@@ -98,7 +98,7 @@ void cc2DViewportLabel::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 	//test base view matrix
 	for (unsigned i = 0; i < 12; ++i)
-		if (fabs(params.viewMat.data()[i] - m_params.viewMat.data()[i]) > CCLib::ZERO_TOLERANCE)
+		if (fabs(params.viewMat.data()[i] - m_params.viewMat.data()[i]) > CCCoreLib::ZERO_TOLERANCE)
 			return;
 
 	if (m_params.perspectiveView)
@@ -106,8 +106,8 @@ void cc2DViewportLabel::drawMeOnly(CC_DRAW_CONTEXT& context)
 		if (params.fov != m_params.fov || params.perspectiveAspectRatio != m_params.perspectiveAspectRatio)
 			return;
 
-		if ((params.pivotPoint - m_params.pivotPoint).norm() > CCLib::ZERO_TOLERANCE
-			|| (params.cameraCenter - m_params.cameraCenter).norm() > CCLib::ZERO_TOLERANCE)
+		if ((params.pivotPoint - m_params.pivotPoint).norm() > CCCoreLib::ZERO_TOLERANCE
+			|| (params.cameraCenter - m_params.cameraCenter).norm() > CCCoreLib::ZERO_TOLERANCE)
 			return;
 	}
 	else

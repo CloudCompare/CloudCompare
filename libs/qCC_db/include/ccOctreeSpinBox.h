@@ -21,7 +21,7 @@
 //Local
 #include "qCC_db.h"
 
-//CCLib
+//CCCoreLib
 #include <DgmOctree.h>
 
 //Qt
@@ -47,7 +47,7 @@ public:
 	//! Inits the dialog with an octree
 	/** Alternative to ccOctreeSpinBox::setCloud
 	**/
-	void setOctree(CCLib::DgmOctree* octree);
+	void setOctree(CCCoreLib::DgmOctree* octree);
 
 protected:
 

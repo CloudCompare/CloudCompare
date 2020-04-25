@@ -25,5 +25,5 @@ ccHprDlg::ccHprDlg(QWidget* parent)
 {
 	setupUi(this);
 
-	octreeLevelSpinBox->setRange(2, CCLib::DgmOctree::MAX_OCTREE_LEVEL);
+	octreeLevelSpinBox->setRange(2, CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL);
 }

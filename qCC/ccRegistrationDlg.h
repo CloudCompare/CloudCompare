@@ -20,7 +20,7 @@
 
 #include <QDialog>
 
-//CCLib
+//CCCoreLib
 #include <RegistrationTools.h>
 
 #include <ui_registrationDlg.h>
@@ -42,7 +42,7 @@ public:
 	virtual ~ccRegistrationDlg();
 
 	//shortcuts
-	typedef CCLib::ICPRegistrationTools::CONVERGENCE_TYPE ConvergenceMethod;
+	typedef CCCoreLib::ICPRegistrationTools::CONVERGENCE_TYPE ConvergenceMethod;
 
 	//! Returns convergence method
 	ConvergenceMethod getConvergenceMethod() const;
@@ -87,7 +87,7 @@ public:
 	bool adjustScale() const;
 
 	//! Returns active transformation filters
-	/** See CCLib::RegistrationTools::TRANSFORMATION_FILTERS.
+	/** See CCCoreLib::RegistrationTools::TRANSFORMATION_FILTERS.
 	**/
 	int getTransformationFilters() const;
 

@@ -233,7 +233,7 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 		if (m_mode2D)
 		{
 			u *= -m_arrowLength;
-			static const PointCoordinateType s_defaultArrowAngle = static_cast<PointCoordinateType>(15.0 * CCLib::DEG_TO_RAD);
+			static const PointCoordinateType s_defaultArrowAngle = static_cast<PointCoordinateType>(15.0 * CCCoreLib::DEG_TO_RAD);
 			static const PointCoordinateType cost = cos(s_defaultArrowAngle);
 			static const PointCoordinateType sint = sin(s_defaultArrowAngle);
 			CCVector3 A(cost * u.x - sint * u.y, sint * u.x + cost * u.y, 0);
@@ -266,7 +266,7 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glFunc->glMatrixMode(GL_MODELVIEW);
 			glFunc->glPushMatrix();
 			ccGL::Translate(glFunc, P1->x, P1->y, P1->z);
-			ccGLMatrix rotMat = ccGLMatrix::FromToRotation(u, CCVector3(0, 0, CCLib::PC_ONE));
+			ccGLMatrix rotMat = ccGLMatrix::FromToRotation(u, CCVector3(0, 0, CCCoreLib::PC_ONE));
 			glFunc->glMultMatrixf(rotMat.inverse().data());
 			glFunc->glScalef(m_arrowLength, m_arrowLength, m_arrowLength);
 			ccGL::Translate(glFunc, 0.0, 0.0, -0.5);
@@ -495,7 +495,7 @@ bool ccPolyline::split(	PointCoordinateType maxEdgeLength,
 		if (partSize > 1) //otherwise we skip that point
 		{
 			//create the corresponding part
-			CCLib::ReferenceCloud ref(m_theAssociatedCloud);
+			CCCoreLib::ReferenceCloud ref(m_theAssociatedCloud);
 			if (!ref.reserve(partSize))
 			{
 				ccLog::Error("[ccPolyline::split] Not enough memory!");

@@ -17,7 +17,7 @@
 
 #include "PCVContext.h"
 
-//CCLib
+//CCCoreLib
 #include <CCMiscTools.h>
 #include <GenericTriangle.h>
 
@@ -46,7 +46,7 @@ static inline void glTranslate(double x, double y, double z) { glTranslated(x, y
 static inline void glScale(float x, float y, float z) { glScalef(x, y, z); }
 static inline void glScale(double x, double y, double z) { glScaled(x, y, z); }
 
-using namespace CCLib;
+using namespace CCCoreLib;
 
 #ifndef ZTWIST
 #define ZTWIST 1e-3f
@@ -75,8 +75,8 @@ PCVContext::~PCVContext()
 
 bool PCVContext::init(unsigned W,
 					  unsigned H,
-					  CCLib::GenericCloud* cloud,
-					  CCLib::GenericMesh* mesh/*=0*/,
+					  CCCoreLib::GenericCloud* cloud,
+					  CCCoreLib::GenericMesh* mesh/*=0*/,
 					  bool closedMesh/*=true*/)
 {
 	if (!QGLPixelBuffer::hasOpenGLPbuffers())
@@ -140,7 +140,7 @@ void PCVContext::associateToEntity(GenericCloud* cloud, GenericMesh* mesh)
 	PointCoordinateType maxD = (bbMax - bbMin).norm();
 
 	//we deduce default zoom
-	m_zoom = (maxD > CCLib::ZERO_TOLERANCE ? static_cast<PointCoordinateType>(std::min(m_width, m_height)) / maxD : CCLib::PC_ONE);
+	m_zoom = (maxD > CCCoreLib::ZERO_TOLERANCE ? static_cast<PointCoordinateType>(std::min(m_width, m_height)) / maxD : CCCoreLib::PC_ONE);
 
 	//as well as display center
 	m_viewCenter = (bbMax+bbMin)/2;

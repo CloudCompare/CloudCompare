@@ -81,11 +81,11 @@ public:
 	**/
 	static bool ComputeCloudNormals(ccGenericPointCloud* cloud,
 									NormsIndexesTableType& theNormsCodes,
-									CCLib::LOCAL_MODEL_TYPES localModel,
+									CCCoreLib::LOCAL_MODEL_TYPES localModel,
 									PointCoordinateType localRadius,
 									Orientation preferredOrientation = UNDEFINED,
-									CCLib::GenericProgressCallback* progressCb = 0,
-									CCLib::DgmOctree* inputOctree = 0);
+									CCCoreLib::GenericProgressCallback* progressCb = 0,
+									CCCoreLib::DgmOctree* inputOctree = 0);
 
 	//! Tries to guess a very naive 'local radius' for normals computation (see ComputeCloudNormals)
 	/** \param cloud point cloud on which to process the normals.
@@ -100,8 +100,8 @@ public:
 		\return the best radius (strictly positive value) or 0 if an error occurred
 	**/
 	static PointCoordinateType GuessBestRadius(	ccGenericPointCloud* cloud,
-												CCLib::DgmOctree* cloudOctree = 0,
-												CCLib::GenericProgressCallback* progressCb = 0);
+												CCCoreLib::DgmOctree* cloudOctree = 0,
+												CCCoreLib::GenericProgressCallback* progressCb = 0);
 
 	//! Updates normals orientation based on a preferred orientation
 	/** \param theCloud point cloud on which to process the normals.
@@ -185,17 +185,17 @@ public:
 	inline const std::vector<ccColor::Rgb>& getNormalHSVColorArray() const { return m_theNormalHSVColors; }
 
 	//! Helper: computes the normal (with best LS fit)
-	static bool ComputeNormalWithLS(CCLib::GenericIndexedCloudPersist* pointAndNeighbors, CCVector3& N);
+	static bool ComputeNormalWithLS(CCCoreLib::GenericIndexedCloudPersist* pointAndNeighbors, CCVector3& N);
 
 	//! Helper: computes the normal (with Delaunay 2.5D)
 	/** The normal is computed at the first point (assuming the others are its neighbors).
 	**/
-	static bool ComputeNormalWithTri(CCLib::GenericIndexedCloudPersist* pointAndNeighbors, CCVector3& N);
+	static bool ComputeNormalWithTri(CCCoreLib::GenericIndexedCloudPersist* pointAndNeighbors, CCVector3& N);
 
 	//! Helper: computes the normal (with Delaunay 2.5D)
 	/** The normal is computed at the first point (assuming the others are its neighbors).
 	**/
-	static bool ComputeNormalWithQuadric(CCLib::GenericIndexedCloudPersist* points, const CCVector3& P, CCVector3& N);
+	static bool ComputeNormalWithQuadric(CCCoreLib::GenericIndexedCloudPersist* points, const CCVector3& P, CCVector3& N);
 
 protected:
 
@@ -216,11 +216,11 @@ protected:
 	std::vector<ccColor::Rgb> m_theNormalHSVColors;
 
 	//! Cellular method for octree-based normal computation
-	static bool ComputeNormsAtLevelWithQuadric(const CCLib::DgmOctree::octreeCell& cell, void** additionalParameters, CCLib::NormalizedProgress* nProgress = 0);
+	static bool ComputeNormsAtLevelWithQuadric(const CCCoreLib::DgmOctree::octreeCell& cell, void** additionalParameters, CCCoreLib::NormalizedProgress* nProgress = 0);
 	//! Cellular method for octree-based normal computation
-	static bool ComputeNormsAtLevelWithLS(const CCLib::DgmOctree::octreeCell& cell, void** additionalParameters, CCLib::NormalizedProgress* nProgress = 0);
+	static bool ComputeNormsAtLevelWithLS(const CCCoreLib::DgmOctree::octreeCell& cell, void** additionalParameters, CCCoreLib::NormalizedProgress* nProgress = 0);
 	//! Cellular method for octree-based normal computation
-	static bool ComputeNormsAtLevelWithTri(const CCLib::DgmOctree::octreeCell& cell, void** additionalParameters, CCLib::NormalizedProgress* nProgress = 0);
+	static bool ComputeNormsAtLevelWithTri(const CCCoreLib::DgmOctree::octreeCell& cell, void** additionalParameters, CCCoreLib::NormalizedProgress* nProgress = 0);
 };
 
  #endif //CC_NORMAL_VECTORS_HEADER

@@ -32,7 +32,7 @@
 #include <cassert>
 #include <cstring>
 
-using namespace CCLib;
+using namespace CCCoreLib;
 
 static int gcd(int num1, int num2)
 {
@@ -211,7 +211,7 @@ int PCV::Launch(unsigned numberOfRays,
 				bool mode360/*=true*/,
 				unsigned width/*=1024*/,
 				unsigned height/*=1024*/,
-				CCLib::GenericProgressCallback* progressCb/*=0*/,
+				CCCoreLib::GenericProgressCallback* progressCb/*=0*/,
 				const QString& entityName/*=QString()*/)
 {
 	//generates light directions
@@ -230,12 +230,12 @@ int PCV::Launch(unsigned numberOfRays,
 }
 
 bool PCV::Launch(const std::vector<CCVector3>& rays,
-				 CCLib::GenericCloud* vertices,
-				 CCLib::GenericMesh* mesh/*=0*/,
+				 CCCoreLib::GenericCloud* vertices,
+				 CCCoreLib::GenericMesh* mesh/*=0*/,
 				 bool meshIsClosed/*=false*/,
 				 unsigned width/*=1024*/,
 				 unsigned height/*=1024*/,
-				 CCLib::GenericProgressCallback* progressCb/*=0*/,
+				 CCCoreLib::GenericProgressCallback* progressCb/*=0*/,
 				 const QString& entityName/*=QString()*/)
 {
 	if (rays.empty())
@@ -263,7 +263,7 @@ bool PCV::Launch(const std::vector<CCVector3>& rays,
 
 	/*** Main illumination loop ***/
 
-	CCLib::NormalizedProgress nProgress(progressCb, numberOfRays);
+	CCCoreLib::NormalizedProgress nProgress(progressCb, numberOfRays);
 	if (progressCb)
 	{
 		if (progressCb->textCanBeEdited())

@@ -69,7 +69,7 @@ void DrawUnitArrow(int ID, const CCVector3& start, const CCVector3& direction, P
 		if (ps > -1)
 		{
 			//we deduce angle from scalar prod
-			angle_deg = acos(ps) * static_cast<PointCoordinateType>(CCLib::RAD_TO_DEG);
+			angle_deg = acos(ps) * static_cast<PointCoordinateType>(CCCoreLib::RAD_TO_DEG);
 
 			//we compute rotation axis with scalar prod
 			axis = Z.cross(direction);
@@ -123,7 +123,7 @@ static void DrawUnitTorus(int ID, const CCVector3& center, const CCVector3& dire
 		if (ps > -1)
 		{
 			//we deduce angle from scalar prod
-			angle_deg = acos(ps) * static_cast<PointCoordinateType>(CCLib::RAD_TO_DEG);
+			angle_deg = acos(ps) * static_cast<PointCoordinateType>(CCCoreLib::RAD_TO_DEG);
 
 			//we compute rotation axis with scalar prod
 			axis = Z.cross(direction);
@@ -631,11 +631,11 @@ void ccClipBox::flagPointsInside(	ccGenericPointCloud* cloud,
 #endif
 		for (int i = 0; i < count; ++i)
 		{
-			if (!shrink || visTable->at(i) == CCLib::POINT_VISIBLE)
+			if (!shrink || visTable->at(i) == CCCoreLib::POINT_VISIBLE)
 			{
 				CCVector3 P = *cloud->getPoint(static_cast<unsigned>(i));
 				transMat.apply(P);
-				visTable->at(i) = (m_box.contains(P) ? CCLib::POINT_VISIBLE : CCLib::POINT_HIDDEN);
+				visTable->at(i) = (m_box.contains(P) ? CCCoreLib::POINT_VISIBLE : CCCoreLib::POINT_HIDDEN);
 			}
 		}
 	}
@@ -646,10 +646,10 @@ void ccClipBox::flagPointsInside(	ccGenericPointCloud* cloud,
 #endif
 		for (int i = 0; i < count; ++i)
 		{
-			if (!shrink || visTable->at(i) == CCLib::POINT_VISIBLE)
+			if (!shrink || visTable->at(i) == CCCoreLib::POINT_VISIBLE)
 			{
 				const CCVector3* P = cloud->getPoint(static_cast<unsigned>(i));
-				visTable->at(i) = (m_box.contains(*P) ? CCLib::POINT_VISIBLE : CCLib::POINT_HIDDEN);
+				visTable->at(i) = (m_box.contains(*P) ? CCCoreLib::POINT_VISIBLE : CCCoreLib::POINT_HIDDEN);
 			}
 		}
 	}

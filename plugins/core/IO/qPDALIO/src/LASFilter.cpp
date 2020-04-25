@@ -28,7 +28,7 @@
 #include <ccHObjectCaster.h>
 #include "ccColorScalesManager.h"
 
-//CCLib
+//CCCoreLib
 #include <CCPlatform.h>
 
 //Qt
@@ -304,7 +304,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		pDlg->setInfo(QObject::tr("Points: %L1").arg(numberOfPoints));
 		pDlg->start();
 	}
-	CCLib::NormalizedProgress nProgress(pDlg.data(), numberOfPoints);
+	CCCoreLib::NormalizedProgress nProgress(pDlg.data(), numberOfPoints);
 
 	CCVector3d bbMin, bbMax;
 	if (!theCloud->getGlobalBB(bbMin, bbMax))
@@ -362,9 +362,9 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 
 	//optimal scale (for accuracy) --> 1e-8 because the maximum integer is roughly +/-2e+9
 	CCVector3d diag = bbMax - lasOffset;
-	CCVector3d optimalScale(1.0e-9 * std::max<double>(diag.x, CCLib::ZERO_TOLERANCE),
-	                        1.0e-9 * std::max<double>(diag.y, CCLib::ZERO_TOLERANCE),
-	                        1.0e-9 * std::max<double>(diag.z, CCLib::ZERO_TOLERANCE));
+	CCVector3d optimalScale(1.0e-9 * std::max<double>(diag.x, CCCoreLib::ZERO_TOLERANCE),
+	                        1.0e-9 * std::max<double>(diag.y, CCCoreLib::ZERO_TOLERANCE),
+	                        1.0e-9 * std::max<double>(diag.z, CCCoreLib::ZERO_TOLERANCE));
 
 	bool canUseOriginalScale = false;
 	if (hasScaleMetaData)
@@ -1271,7 +1271,7 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 				pDlg->setInfo(QObject::tr("Points: %L1").arg(nbOfPoints));
 				pDlg->start();
 			}
-			CCLib::NormalizedProgress nProgress(pDlg.data(), nbOfPoints);
+			CCCoreLib::NormalizedProgress nProgress(pDlg.data(), nbOfPoints);
 
 			for (PointId idx = 0; idx < pointView->size(); ++idx)
 			{
@@ -1302,7 +1302,7 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 			return CC_FERR_NO_ERROR;
 		}
 
-		CCLib::NormalizedProgress nProgress(pDlg.data(), nbOfPoints);
+		CCCoreLib::NormalizedProgress nProgress(pDlg.data(), nbOfPoints);
 		ccPointCloud* loadedCloud = nullptr;
 		std::vector< LasField::Shared > fieldsToLoad;
 		CCVector3d Pshift(0, 0, 0);

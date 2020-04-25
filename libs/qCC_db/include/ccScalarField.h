@@ -18,16 +18,16 @@
 #ifndef CC_DB_SCALAR_FIELD_HEADER
 #define CC_DB_SCALAR_FIELD_HEADER
 
-//CCLib
+//CCCoreLib
 #include <ScalarField.h>
 
 //qCC_db
 #include "ccColorScale.h"
 
 //! A scalar field associated to display-related parameters
-/** Extends the CCLib::ScalarField object.
+/** Extends the CCCoreLib::ScalarField object.
 **/
-class QCC_DB_LIB_API ccScalarField : public CCLib::ScalarField, public ccSerializableObject
+class QCC_DB_LIB_API ccScalarField : public CCCoreLib::ScalarField, public ccSerializableObject
 {
 public:
 
@@ -91,7 +91,7 @@ public:
 	protected:
 
 		//! Updates actual range
-		inline void updateRange() { m_range = std::max(m_stop - m_start, static_cast<ScalarType>(CCLib::ZERO_TOLERANCE)); }
+		inline void updateRange() { m_range = std::max(m_stop - m_start, static_cast<ScalarType>(CCCoreLib::ZERO_TOLERANCE)); }
 
 		ScalarType m_min;		/**< Minimum value **/
 		ScalarType m_start;		/**< Current start value (in [min,max]) **/

@@ -157,7 +157,7 @@ namespace ccCompassImport {
 			bool needToApplyTrans = false;
 			bool needToApplyRot = false;
 	
-			needToApplyRot = (std::abs(N.dot(Nd) - CCLib::PC_ONE) > std::numeric_limits<PointCoordinateType>::epsilon());
+			needToApplyRot = (std::abs(N.dot(Nd) - CCCoreLib::PC_ONE) > std::numeric_limits<PointCoordinateType>::epsilon());
 			needToApplyTrans = needToApplyRot || ((C - Cd).norm2d() != 0);
 	
 			if (needToApplyTrans)
@@ -169,13 +169,13 @@ namespace ccCompassImport {
 			{
 				ccGLMatrix rotation;
 				//special case: plane parallel to XY
-				if (std::abs(N.z) > CCLib::PC_ONE - std::numeric_limits<PointCoordinateType>::epsilon())
+				if (std::abs(N.z) > CCCoreLib::PC_ONE - std::numeric_limits<PointCoordinateType>::epsilon())
 				{
 					ccGLMatrix rotX;
-					rotX.initFromParameters(-dip * CCLib::DEG_TO_RAD, CCVector3(1, 0, 0), CCVector3(0, 0, 0)); //plunge
+					rotX.initFromParameters(-dip * CCCoreLib::DEG_TO_RAD, CCVector3(1, 0, 0), CCVector3(0, 0, 0)); //plunge
 					
 					ccGLMatrix rotZ;
-					rotZ.initFromParameters(dipdir * CCLib::DEG_TO_RAD, CCVector3(0, 0, -1), CCVector3(0, 0, 0));
+					rotZ.initFromParameters(dipdir * CCCoreLib::DEG_TO_RAD, CCVector3(0, 0, -1), CCVector3(0, 0, 0));
 					rotation = rotZ * rotX;
 				}
 				else //general case
@@ -252,7 +252,7 @@ namespace ccCompassImport {
 			CCVector3 Cd = *cld->getPoint(p);
 
 			//build lineation vector
-			CCVector3 l(sin(trend * CCLib::DEG_TO_RAD) * cos(plunge * CCLib::DEG_TO_RAD), cos(trend * CCLib::DEG_TO_RAD)*cos(plunge * CCLib::DEG_TO_RAD), -sin(plunge * CCLib::DEG_TO_RAD));
+			CCVector3 l(sin(trend * CCCoreLib::DEG_TO_RAD) * cos(plunge * CCCoreLib::DEG_TO_RAD), cos(trend * CCCoreLib::DEG_TO_RAD)*cos(plunge * CCCoreLib::DEG_TO_RAD), -sin(plunge * CCCoreLib::DEG_TO_RAD));
 
 			//create new point cloud to associate with lineation graphic
 			ccPointCloud* points = new ccPointCloud();

@@ -28,7 +28,7 @@
 #include <ccScalarField.h>
 #include <ccProgressDialog.h>
 
-//CCLib
+//CCCoreLib
 #include <Delaunay2dMesh.h>
 
 //Qt
@@ -109,7 +109,7 @@ ccGLMatrix DistanceMapGenerationTool::ProfileMetaData::computeCloudToSurfaceOrig
 	{
 		ccGLMatrix rotation;
 		CCVector3 Z(0, 0, 0);
-		Z.u[revolDim] = CCLib::PC_ONE;
+		Z.u[revolDim] = CCCoreLib::PC_ONE;
 		rotation = ccGLMatrix::FromToRotation(axis, Z);
 		cloudToSurfaceOrigin = rotation * cloudToSurfaceOrigin;
 	}
@@ -252,7 +252,7 @@ bool DistanceMapGenerationTool::ComputeRadialDist(	ccPointCloud* cloud,
 	assert(cloud && profile);
 
 	//number of vertices for the profile
-	CCLib::GenericIndexedCloudPersist* vertices = profile->getAssociatedCloud();
+	CCCoreLib::GenericIndexedCloudPersist* vertices = profile->getAssociatedCloud();
 	unsigned vertexCount = vertices->size();
 	if (vertexCount < 2)
 	{
@@ -318,7 +318,7 @@ bool DistanceMapGenerationTool::ComputeRadialDist(	ccPointCloud* cloud,
 		dlg.setMethodTitle(QObject::tr("Cloud to profile radial distance"));
 		dlg.setInfo(QObject::tr("Polyline: %1 vertices\nCloud: %2 points").arg(vertexCount).arg(pointCount));
 		dlg.start();
-		CCLib::NormalizedProgress nProgress(static_cast<CCLib::GenericProgressCallback*>(&dlg), pointCount);
+		CCCoreLib::NormalizedProgress nProgress(static_cast<CCCoreLib::GenericProgressCallback*>(&dlg), pointCount);
 
 		for (unsigned i = 0; i < pointCount; ++i)
 		{
@@ -339,7 +339,7 @@ bool DistanceMapGenerationTool::ComputeRadialDist(	ccPointCloud* cloud,
 			}
 
 			//search nearest "segment" in polyline
-			ScalarType minDist = CCLib::NAN_VALUE;
+			ScalarType minDist = CCCoreLib::NAN_VALUE;
 			for (unsigned j = 1; j < vertexCount; ++j)
 			{
 				const CCVector3* A = vertices->getPoint(j - 1);
@@ -353,7 +353,7 @@ bool DistanceMapGenerationTool::ComputeRadialDist(	ccPointCloud* cloud,
 					double dist = radius - radius_th;
 
 					//we look at the closest segment (if the polyline is concave!)
-					if (!CCLib::ScalarField::ValidValue(minDist) || dist*dist < minDist*minDist)
+					if (!CCCoreLib::ScalarField::ValidValue(minDist) || dist*dist < minDist*minDist)
 					{
 						minDist = static_cast<ScalarType>(dist);
 					}
@@ -366,7 +366,7 @@ bool DistanceMapGenerationTool::ComputeRadialDist(	ccPointCloud* cloud,
 			{
 				//cancelled by user
 				for (unsigned j = i; j < pointCount; ++j)
-					sf->setValue(j, CCLib::NAN_VALUE);
+					sf->setValue(j, CCCoreLib::NAN_VALUE);
 
 				success = false;
 				break;
@@ -563,7 +563,7 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 	{
 		//we skip invalid values
 		const ScalarType& val = sf->getValue(n);
-		if (!CCLib::ScalarField::ValidValue(val))
+		if (!CCCoreLib::ScalarField::ValidValue(val))
 			continue;
 
 		const CCVector3* P = cloud->getPoint(n);
@@ -698,7 +698,7 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 				}
 
 				//mesh the '2D' points
-				CCLib::Delaunay2dMesh* dm = new CCLib::Delaunay2dMesh();
+				CCCoreLib::Delaunay2dMesh* dm = new CCCoreLib::Delaunay2dMesh();
 				char errorStr[1024];
 				if (!dm->buildMesh(the2DPoints, 0, errorStr))
 				{
@@ -713,7 +713,7 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 					dm->placeIteratorAtBeginning();
 					for (unsigned k = 0; k < triNum; ++k)
 					{
-						const CCLib::VerticesIndexes* tsi = dm->getNextTriangleVertIndexes();
+						const CCCoreLib::VerticesIndexes* tsi = dm->getNextTriangleVertIndexes();
 						//get the triangle bounding box (in grid coordinates)
 						int P[3][2];
 						int xMin = 0;
@@ -975,7 +975,7 @@ bool DistanceMapGenerationTool::ComputeSurfacesAndVolumes(	const QSharedPointer<
 		//invalid input!
 		return false;
 
-	CCLib::GenericIndexedCloudPersist* vertices = profile->getAssociatedCloud();
+	CCCoreLib::GenericIndexedCloudPersist* vertices = profile->getAssociatedCloud();
 	unsigned vertexCount = vertices ? vertices->size() : 0;
 	if (vertexCount < 2)
 	{
@@ -1157,7 +1157,7 @@ bool DistanceMapGenerationTool::ConvertCloudToCylindrical(	ccPointCloud* cloud,
 	const unsigned char Y = (X < 2 ? X + 1 : 0);
 
 	//motion direction
-	PointCoordinateType ccw = (counterclockwise ? -CCLib::PC_ONE : CCLib::PC_ONE);
+	PointCoordinateType ccw = (counterclockwise ? -CCCoreLib::PC_ONE : CCCoreLib::PC_ONE);
 
 	//get projection height
 	for (unsigned n = 0; n < cloud->size(); ++n)
@@ -1208,7 +1208,7 @@ bool DistanceMapGenerationTool::ConvertCloudToConical(	ccPointCloud* cloud,
 	const unsigned char Y = (X < 2 ? X + 1 : 0);
 
 	//motion direction
-	PointCoordinateType ccw = (counterclockwise ? -CCLib::PC_ONE : CCLib::PC_ONE);
+	PointCoordinateType ccw = (counterclockwise ? -CCCoreLib::PC_ONE : CCCoreLib::PC_ONE);
 	//projection factor
 	double nProj = ConicalProjectN(latMin_rad, latMax_rad) * conicalSpanRatio;
 
@@ -1320,7 +1320,7 @@ ccMesh* DistanceMapGenerationTool::ConvertProfileToMesh(ccPolyline* profile,
 	}
 
 	//profile vertices
-	CCLib::GenericIndexedCloudPersist* profileVertices = profile->getAssociatedCloud();
+	CCCoreLib::GenericIndexedCloudPersist* profileVertices = profile->getAssociatedCloud();
 	unsigned profVertCount = profileVertices->size();
 	if (profVertCount < 2)
 	{
@@ -1524,7 +1524,7 @@ ccPointCloud* DistanceMapGenerationTool::ConvertMapToCloud(	const QSharedPointer
 	}
 
 	//number of vertices
-	CCLib::GenericIndexedCloudPersist* polyVertices = profile->getAssociatedCloud();
+	CCCoreLib::GenericIndexedCloudPersist* polyVertices = profile->getAssociatedCloud();
 	unsigned polyVertCount = polyVertices->size();
 	if (polyVertCount < 2)
 	{
@@ -1582,7 +1582,7 @@ ccPointCloud* DistanceMapGenerationTool::ConvertMapToCloud(	const QSharedPointer
 
 				cloud->addPoint(profileDesc.origin + P);
 
-				ScalarType val = cell->count ? static_cast<ScalarType>(cell->value) : CCLib::NAN_VALUE;
+				ScalarType val = cell->count ? static_cast<ScalarType>(cell->value) : CCCoreLib::NAN_VALUE;
 				sf->addElement(val);
 			}
 		}

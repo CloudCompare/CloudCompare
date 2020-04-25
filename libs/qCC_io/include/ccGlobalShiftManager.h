@@ -18,7 +18,7 @@
 #ifndef CC_GLOBAL_SHIFT_MANAGER_HEADER
 #define CC_GLOBAL_SHIFT_MANAGER_HEADER
 
-//CCLib
+//CCCoreLib
 #include <CCGeom.h>
 
 //local

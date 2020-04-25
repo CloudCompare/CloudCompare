@@ -110,7 +110,7 @@ PointCoordinateType NumericalValue::getValue() const
 	case PDMS_Y_TOP_SHEAR:
 	case PDMS_X_BOTTOM_SHEAR:
 	case PDMS_Y_BOTTOM_SHEAR:
-		return static_cast<PointCoordinateType>(CCLib::DEG_TO_RAD) * value;
+		return static_cast<PointCoordinateType>(CCCoreLib::DEG_TO_RAD) * value;
 	default:
 		return value;
 	}
@@ -615,8 +615,8 @@ bool Orientation::axisFromCoords(const Coordinates &coords, CCVector3 &u)
 
 	if (coords.getNbComponents(true) == 2)
 	{
-		PointCoordinateType alpha = static_cast<PointCoordinateType>(CCLib::DEG_TO_RAD) * u[0];
-		PointCoordinateType beta = static_cast<PointCoordinateType>(CCLib::DEG_TO_RAD) * u[1];
+		PointCoordinateType alpha = static_cast<PointCoordinateType>(CCCoreLib::DEG_TO_RAD) * u[0];
+		PointCoordinateType beta = static_cast<PointCoordinateType>(CCCoreLib::DEG_TO_RAD) * u[1];
 		u[0] = cos(alpha)*cos(beta);
 		u[1] = sin(alpha)*cos(beta);
 		u[2] = sin(beta);
@@ -1080,7 +1080,7 @@ bool GenericItem::setOrientation(const CCVector3 &x, const CCVector3 &y, const C
 
 bool GenericItem::isOrientationValid(unsigned i) const
 {
-	return (orientation[i].norm2() > CCLib::ZERO_TOLERANCE);
+	return (orientation[i].norm2() > CCCoreLib::ZERO_TOLERANCE);
 }
 
 bool GenericItem::completeOrientation()
@@ -1487,16 +1487,16 @@ std::pair<int, int> SCylinder::write(std::ostream &output, int nbtabs) const
 	output << "HEIGHT " << height << std::endl;
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "XTSHEAR " << (CCLib::RAD_TO_DEG)*xtshear << std::endl;
+	output << "XTSHEAR " << (CCCoreLib::RAD_TO_DEG)*xtshear << std::endl;
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "XBSHEAR " << (CCLib::RAD_TO_DEG)*xbshear << std::endl;
+	output << "XBSHEAR " << (CCCoreLib::RAD_TO_DEG)*xbshear << std::endl;
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "YTSHEAR " << (CCLib::RAD_TO_DEG)*ytshear << std::endl;
+	output << "YTSHEAR " << (CCCoreLib::RAD_TO_DEG)*ytshear << std::endl;
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "YBSHEAR " << (CCLib::RAD_TO_DEG)*ybshear << std::endl;
+	output << "YBSHEAR " << (CCCoreLib::RAD_TO_DEG)*ybshear << std::endl;
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << std::endl;
@@ -1552,7 +1552,7 @@ std::pair<int, int> CTorus::write(std::ostream &output, int nbtabs) const
 	output << "ROUTSIDE " << outside_radius << std::endl;
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "ANGLE " << static_cast<PointCoordinateType>(CCLib::RAD_TO_DEG)*angle << std::endl;
+	output << "ANGLE " << static_cast<PointCoordinateType>(CCCoreLib::RAD_TO_DEG)*angle << std::endl;
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << std::endl;
@@ -1612,7 +1612,7 @@ std::pair<int, int> RTorus::write(std::ostream &output, int nbtabs) const
 	output << "HEIGHT " << height << std::endl;
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "ANGLE " << static_cast<PointCoordinateType>(CCLib::RAD_TO_DEG)*angle << std::endl;
+	output << "ANGLE " << static_cast<PointCoordinateType>(CCCoreLib::RAD_TO_DEG)*angle << std::endl;
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << std::endl;
@@ -1650,10 +1650,10 @@ bool Dish::setValue(Token t, PointCoordinateType value)
 
 PointCoordinateType Dish::surface() const
 {
-	if (radius > CCLib::ZERO_TOLERANCE)
+	if (radius > CCCoreLib::ZERO_TOLERANCE)
 	{
 		PointCoordinateType r = static_cast<PointCoordinateType>(0.5f*diameter);
-		if (fabs(2 * height - diameter) < CCLib::ZERO_TOLERANCE)
+		if (fabs(2 * height - diameter) < CCCoreLib::ZERO_TOLERANCE)
 			return static_cast<PointCoordinateType>(2.0*M_PI)*PDMS_SQR(r);
 		if (2 * height > diameter)
 		{

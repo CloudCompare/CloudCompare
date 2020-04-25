@@ -21,7 +21,7 @@
 //Local
 #include "ccGLDrawContext.h"
 
-//CCLib
+//CCCoreLib
 #include <CCGeom.h>
 
 
@@ -191,7 +191,7 @@ public: //Transformation matrix management (for display only)
 		If the associated GL transformation is enabled (see
 		ccDrawableObject::enableGLTransformation), it will
 		be applied before displaying this entity.
-		However it will not be taken into account by any CCLib algorithm
+		However it will not be taken into account by any CCCoreLib algorithm
 		(distance computation, etc.) for instance.
 		Note: GL transformation is automatically enabled.
 	**/

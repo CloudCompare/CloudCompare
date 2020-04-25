@@ -22,7 +22,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 
-//CCLib
+//CCCoreLib
 #include <NormalDistribution.h>
 #include <ScalarFieldTools.h>
 #include <StatisticalTestingTools.h>
@@ -612,7 +612,7 @@ namespace ccEntityAction
 					ccPickOneElementDlg poeDlg("Intensity scalar field", "Choose scalar field", parent);
 					for (unsigned i = 0; i < pc->getNumberOfScalarFields(); ++i)
 					{
-						CCLib::ScalarField* sf = pc->getScalarField(i);
+						CCCoreLib::ScalarField* sf = pc->getScalarField(i);
 						assert(sf);
 						QString sfName(sf->getName());
 						poeDlg.addElement(sfName);
@@ -694,7 +694,7 @@ namespace ccEntityAction
 			}
 			
 			//la methode est activee sur le champ scalaire affiche
-			CCLib::ScalarField* sf = pc->getCurrentDisplayedScalarField();
+			CCCoreLib::ScalarField* sf = pc->getCurrentDisplayedScalarField();
 			if (sf != nullptr)
 			{
 				//on met en lecture (OUT) le champ scalaire actuellement affiche
@@ -702,7 +702,7 @@ namespace ccEntityAction
 				Q_ASSERT(outSfIdx >= 0);
 				
 				pc->setCurrentOutScalarField(outSfIdx);
-				CCLib::ScalarField* outSF = pc->getCurrentOutScalarField();
+				CCCoreLib::ScalarField* outSF = pc->getCurrentOutScalarField();
 				Q_ASSERT(sf != nullptr);
 				
 				QString sfName = QString("%1.smooth(%2)").arg(outSF->getName()).arg(sigma);
@@ -732,7 +732,7 @@ namespace ccEntityAction
 				{
 					QElapsedTimer eTimer;
 					eTimer.start();
-					CCLib::ScalarFieldTools::applyScalarFieldGaussianFilter(static_cast<PointCoordinateType>(sigma),
+					CCCoreLib::ScalarFieldTools::applyScalarFieldGaussianFilter(static_cast<PointCoordinateType>(sigma),
 																			pc,
 																			-1,
 																			&pDlg,
@@ -775,7 +775,7 @@ namespace ccEntityAction
 		//estimate a good value for scalar field sigma, based on the first cloud
 		//and its displayed scalar field
 		ccPointCloud* pc_test = ccHObjectCaster::ToPointCloud(selectedEntities[0]);
-		CCLib::ScalarField* sf_test = pc_test->getCurrentDisplayedScalarField();
+		CCCoreLib::ScalarField* sf_test = pc_test->getCurrentDisplayedScalarField();
 		ScalarType range = sf_test->getMax() - sf_test->getMin();
 		double scalarFieldSigma = range / 4; // using 1/4 of total range
 		
@@ -813,7 +813,7 @@ namespace ccEntityAction
 			}
 			
 			//the algorithm will use the currently displayed SF
-			CCLib::ScalarField* sf = pc->getCurrentDisplayedScalarField();
+			CCCoreLib::ScalarField* sf = pc->getCurrentDisplayedScalarField();
 			if (sf != nullptr)
 			{
 				//we set the displayed SF as "OUT" SF
@@ -821,7 +821,7 @@ namespace ccEntityAction
 				Q_ASSERT(outSfIdx >= 0);
 				
 				pc->setCurrentOutScalarField(outSfIdx);
-				CCLib::ScalarField* outSF = pc->getCurrentOutScalarField();
+				CCCoreLib::ScalarField* outSF = pc->getCurrentOutScalarField();
 				Q_ASSERT(outSF != nullptr);
 				
 				QString sfName = QString("%1.bilsmooth(%2,%3)").arg(outSF->getName()).arg(sigma).arg(scalarFieldSigma);
@@ -852,7 +852,7 @@ namespace ccEntityAction
 					QElapsedTimer eTimer;
 					eTimer.start();
 					
-					CCLib::ScalarFieldTools::applyScalarFieldGaussianFilter(static_cast<PointCoordinateType>(sigma),
+					CCCoreLib::ScalarFieldTools::applyScalarFieldGaussianFilter(static_cast<PointCoordinateType>(sigma),
 																			pc,
 																			static_cast<PointCoordinateType>(scalarFieldSigma),
 																			&pDlg,
@@ -1059,7 +1059,7 @@ namespace ccEntityAction
 					return false;
 				}
 				
-				CCLib::ScalarField* sf = pc->getScalarField(sfIdx);
+				CCCoreLib::ScalarField* sf = pc->getScalarField(sfIdx);
 				Q_ASSERT(sf->currentSize() == pc->size());
 				
 				for (unsigned j=0 ; j<cloud->size(); j++)
@@ -1111,7 +1111,7 @@ namespace ccEntityAction
 						ScalarType s = sf->getValue(i);
 						
 						//handle NaN values
-						if (!CCLib::ScalarField::ValidValue(s))
+						if (!CCCoreLib::ScalarField::ValidValue(s))
 						{
 							if (!hasDefaultValueForNaN)
 							{
@@ -1533,7 +1533,7 @@ namespace ccEntityAction
 		//compute normals for each selected cloud
 		if (!clouds.empty())
 		{
-			static CCLib::LOCAL_MODEL_TYPES s_lastModelType = CCLib::LS;
+			static CCCoreLib::LOCAL_MODEL_TYPES s_lastModelType = CCCoreLib::LS;
 			static ccNormalVectors::Orientation s_lastNormalOrientation = ccNormalVectors::UNDEFINED;
 			static int s_lastMSTNeighborCount = 6;
 			static double s_lastMinGridAngle_deg = 1.0;
@@ -1553,7 +1553,7 @@ namespace ccEntityAction
 				return false;
 			
 			//normals computation
-			CCLib::LOCAL_MODEL_TYPES model = s_lastModelType = ncDlg.getLocalModel();
+			CCCoreLib::LOCAL_MODEL_TYPES model = s_lastModelType = ncDlg.getLocalModel();
 			bool useGridStructure = withScanGrid && ncDlg.useScanGridsForComputation();
 			defaultRadius = ncDlg.getRadius();
 			double minGridAngle_deg = s_lastMinGridAngle_deg = ncDlg.getMinGridAngle_deg();
@@ -1768,7 +1768,7 @@ namespace ccEntityAction
 		int value = QInputDialog::getInt(	parent,
 											"Orient normals (FM)", "Octree level",
 											s_defaultLevel,
-											1, CCLib::DgmOctree::MAX_OCTREE_LEVEL,
+											1, CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL,
 											1,
 											&ok);
 		if (!ok)
@@ -2308,7 +2308,7 @@ namespace ccEntityAction
 		}
 		
 		//build up corresponding distribution
-		CCLib::GenericDistribution* distrib = nullptr;
+		CCCoreLib::GenericDistribution* distrib = nullptr;
 		{
 			ScalarType a = static_cast<ScalarType>(sDlg->getParam1());
 			ScalarType b = static_cast<ScalarType>(sDlg->getParam2());
@@ -2318,15 +2318,15 @@ namespace ccEntityAction
 			{
 				case 0: //Gauss
 				{
-					CCLib::NormalDistribution* N = new CCLib::NormalDistribution();
+					CCCoreLib::NormalDistribution* N = new CCCoreLib::NormalDistribution();
 					N->setParameters(a,b*b); //warning: we input sigma2 here (not sigma)
-					distrib = static_cast<CCLib::GenericDistribution*>(N);
+					distrib = static_cast<CCCoreLib::GenericDistribution*>(N);
 					break;
 				}
 				case 1: //Weibull
-					CCLib::WeibullDistribution* W = new CCLib::WeibullDistribution();
+					CCCoreLib::WeibullDistribution* W = new CCCoreLib::WeibullDistribution();
 					W->setParameters(a,b,c);
-					distrib = static_cast<CCLib::GenericDistribution*>(W);
+					distrib = static_cast<CCCoreLib::GenericDistribution*>(W);
 					break;
 			}
 		}
@@ -2388,7 +2388,7 @@ namespace ccEntityAction
 			QElapsedTimer eTimer;
 			eTimer.start();
 			
-			double chi2dist = CCLib::StatisticalTestingTools::testCloudWithStatisticalModel(distrib, pc, nn, pChi2, &pDlg, theOctree.data());
+			double chi2dist = CCCoreLib::StatisticalTestingTools::testCloudWithStatisticalModel(distrib, pc, nn, pChi2, &pDlg, theOctree.data());
 			
 			ccConsole::Print("[Chi2 Test] Timing: %3.2f ms.", eTimer.elapsed() / 1000.0);
 			ccConsole::Print("[Chi2 Test] %s test result = %f", distrib->getName(), chi2dist);
@@ -2427,15 +2427,15 @@ namespace ccEntityAction
 		if (!pDlg.exec())
 			return false;
 		
-		CCLib::GenericDistribution* distrib = nullptr;
+		CCCoreLib::GenericDistribution* distrib = nullptr;
 		{
 			switch (pDlg.getSelectedIndex())
 			{
 				case 0: //GAUSS
-					distrib = new CCLib::NormalDistribution();
+					distrib = new CCCoreLib::NormalDistribution();
 					break;
 				case 1: //WEIBULL
-					distrib = new CCLib::WeibullDistribution();
+					distrib = new CCCoreLib::WeibullDistribution();
 					break;
 				default:
 					Q_ASSERT(false);
@@ -2471,14 +2471,14 @@ namespace ccEntityAction
 				{
 					case 0: //GAUSS
 					{
-						CCLib::NormalDistribution* normal = static_cast<CCLib::NormalDistribution*>(distrib);
+						CCCoreLib::NormalDistribution* normal = static_cast<CCCoreLib::NormalDistribution*>(distrib);
 						description = QString("mean = %1 / std.dev. = %2").arg(normal->getMu(), 0, 'f', precision).arg(sqrt(normal->getSigma2()), 0, 'f', precision);
 					}
 					break;
 					
 					case 1: //WEIBULL
 					{
-						CCLib::WeibullDistribution* weibull = static_cast<CCLib::WeibullDistribution*>(distrib);
+						CCCoreLib::WeibullDistribution* weibull = static_cast<CCCoreLib::WeibullDistribution*>(distrib);
 						ScalarType a;
 						ScalarType b;
 						weibull->getParameters(a, b);
@@ -2513,7 +2513,7 @@ namespace ccEntityAction
 				//compute the Chi2 distance
 				{
 					unsigned finalNumberOfClasses = 0;
-					const double chi2dist = CCLib::StatisticalTestingTools::computeAdaptativeChi2Dist(distrib, pc, 0, finalNumberOfClasses, false, nullptr, nullptr, histo.data(), npis.data());
+					const double chi2dist = CCCoreLib::StatisticalTestingTools::computeAdaptativeChi2Dist(distrib, pc, 0, finalNumberOfClasses, false, nullptr, nullptr, histo.data(), npis.data());
 
 					if (chi2dist >= 0.0)
 					{
@@ -2534,7 +2534,7 @@ namespace ccEntityAction
 					for (unsigned i = 0; i < n; ++i)
 					{
 						ScalarType v = pc->getPointScalarValue(i);
-						if (CCLib::ScalarField::ValidValue(v))
+						if (CCCoreLib::ScalarField::ValidValue(v))
 						{
 							squareSum += static_cast<double>(v) * v;
 							++counter;

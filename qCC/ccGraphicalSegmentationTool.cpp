@@ -22,7 +22,7 @@
 #include "ccItemSelectionDlg.h"
 #include "ccReservedIDs.h"
 
-//CCLib
+//CCCoreLib
 #include <ManualSegmentationTools.h>
 #include <SquareMatrix.h>
 
@@ -647,7 +647,7 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside)
 #endif
 		for (int i = 0; i < static_cast<int>(cloudSize); ++i)
 		{
-			if (visibilityArray[i] == CCLib::POINT_VISIBLE)
+			if (visibilityArray[i] == CCCoreLib::POINT_VISIBLE)
 			{
 				const CCVector3* P3D = cloud->getPoint(i);
 
@@ -657,9 +657,9 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside)
 				CCVector2 P2D(	static_cast<PointCoordinateType>(Q2D.x-half_w),
 								static_cast<PointCoordinateType>(Q2D.y-half_h) );
 				
-				bool pointInside = pointInFrustrum && CCLib::ManualSegmentationTools::isPointInsidePoly(P2D, m_segmentationPoly);
+				bool pointInside = pointInFrustrum && CCCoreLib::ManualSegmentationTools::isPointInsidePoly(P2D, m_segmentationPoly);
 
-				visibilityArray[i] = (keepPointsInside != pointInside ?CCLib:: POINT_HIDDEN : CCLib::POINT_VISIBLE);
+				visibilityArray[i] = (keepPointsInside != pointInside ?CCCoreLib:: POINT_HIDDEN : CCCoreLib::POINT_VISIBLE);
 			}
 		}
 	}
@@ -796,7 +796,7 @@ void ccGraphicalSegmentationTool::doActionUseExistingPolyline()
 				}
 			}
 
-			CCLib::GenericIndexedCloudPersist* vertices = poly->getAssociatedCloud();
+			CCCoreLib::GenericIndexedCloudPersist* vertices = poly->getAssociatedCloud();
 			bool mode3D = !poly->is2DMode();
 
 			//viewing parameters (for conversion from 3D to 2D)
@@ -905,7 +905,7 @@ void ccGraphicalSegmentationTool::doExportSegmentationPolyline()
 			const double half_h = camera.viewport[3] / 2.0;
 
 			//project the 2D polyline in 3D
-			CCLib::GenericIndexedCloudPersist* vertices = poly->getAssociatedCloud();
+			CCCoreLib::GenericIndexedCloudPersist* vertices = poly->getAssociatedCloud();
 			ccPointCloud* verticesPC = dynamic_cast<ccPointCloud*>(vertices);
 			if (verticesPC)
 			{

@@ -211,7 +211,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 		pDlg->setInfo(QObject::tr("Number of points: %1").arg(numberOfPoints));
 		pDlg->start();
 	}
-	CCLib::NormalizedProgress nprogress(pDlg.data(), numberOfPoints);
+	CCCoreLib::NormalizedProgress nprogress(pDlg.data(), numberOfPoints);
 
 	//output precision
 	const int s_coordPrecision = saveDialog->coordsPrecision();
@@ -503,7 +503,7 @@ struct cloudAttributesDescriptor
 		int indexes[c_attribCount];
 	};
 	std::vector<int> scalarIndexes;
-	std::vector<CCLib::ScalarField*> scalarFields;
+	std::vector<CCCoreLib::ScalarField*> scalarFields;
 	bool hasNorms;
 	bool hasRGBColors;
 	bool hasFloatRGBColors[4];
@@ -813,7 +813,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 		pDlg->setInfo(QObject::tr("Approximate number of points: %1").arg(approximateNumberOfLines));
 		pDlg->start();
 	}
-	CCLib::NormalizedProgress nprogress(pDlg.data(), approximateNumberOfLines);
+	CCCoreLib::NormalizedProgress nprogress(pDlg.data(), approximateNumberOfLines);
 
 	//buffers
 	ScalarType D = 0;
@@ -1100,7 +1100,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 		{
 			for (size_t j = 0; j < cloudDesc.scalarFields.size(); ++j)
 			{
-				cloudDesc.scalarFields[j]->resizeSafe(cloudDesc.cloud->size(), true, CCLib::NAN_VALUE);
+				cloudDesc.scalarFields[j]->resizeSafe(cloudDesc.cloud->size(), true, CCCoreLib::NAN_VALUE);
 				cloudDesc.scalarFields[j]->computeMinAndMax();
 			}
 			cloudDesc.cloud->setCurrentDisplayedScalarField(0);

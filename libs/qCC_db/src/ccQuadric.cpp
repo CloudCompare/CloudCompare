@@ -141,13 +141,13 @@ ccGenericPrimitive* ccQuadric::clone() const
 	return finishCloneJob(new ccQuadric(m_minCorner,m_maxCorner,m_eq,&m_dims,&m_transformation,getName(),m_drawPrecision));
 }
 
-ccQuadric* ccQuadric::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/*=0*/)
+ccQuadric* ccQuadric::Fit(CCCoreLib::GenericIndexedCloudPersist *cloud, double* rms/*=0*/)
 {
 	//number of points
 	unsigned count = cloud->size();
-	if (count < CCLib::CC_LOCAL_MODEL_MIN_SIZE[CCLib::QUADRIC])
+	if (count < CCCoreLib::CC_LOCAL_MODEL_MIN_SIZE[CCCoreLib::QUADRIC])
 	{
-		ccLog::Warning(QString("[ccQuadric::fitTo] Not enough points in input cloud to fit a quadric! (%1 at the very least are required)").arg(CCLib::CC_LOCAL_MODEL_MIN_SIZE[CCLib::QUADRIC]));
+		ccLog::Warning(QString("[ccQuadric::fitTo] Not enough points in input cloud to fit a quadric! (%1 at the very least are required)").arg(CCCoreLib::CC_LOCAL_MODEL_MIN_SIZE[CCCoreLib::QUADRIC]));
 		return nullptr;
 	}
 
@@ -157,7 +157,7 @@ ccQuadric* ccQuadric::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/
 	CCVector3 Y;
 	CCVector3 N;
 	{
-		CCLib::Neighbourhood Yk(cloud);
+		CCCoreLib::Neighbourhood Yk(cloud);
 		
 		//plane equation
 		const PointCoordinateType* theLSPlane = Yk.getLSPlane();
@@ -194,7 +194,7 @@ ccQuadric* ccQuadric::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/
 		tempCloud.addPoint(CCVector3(P.dot(X),P.dot(Y),P.dot(N)));
 	}
 
-	CCLib::Neighbourhood Zk(&tempCloud);
+	CCCoreLib::Neighbourhood Zk(&tempCloud);
 	{
 		//set exact values for gravity center and plane equation
 		//(just to be sure and to avoid re-computing them)

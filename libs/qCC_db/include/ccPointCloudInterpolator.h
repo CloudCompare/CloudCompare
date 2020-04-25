@@ -26,7 +26,7 @@ class ccPointCloud;
 //System
 #include <vector>
 
-namespace CCLib
+namespace CCCoreLib
 {
 	class GenericProgressCallback;
 }
@@ -53,7 +53,7 @@ public:
 											ccPointCloud* srccloud,
 											const std::vector<int>& sfIndexes,
 											const Parameters& params,
-											CCLib::GenericProgressCallback* progressCb = 0,
+											CCCoreLib::GenericProgressCallback* progressCb = 0,
 											unsigned char octreeLevel = 0);
 
 

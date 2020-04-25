@@ -26,7 +26,7 @@
 #include "ccMainAppInterface.h"
 #include "ccPickingListener.h"
 
-//CCLib
+//CCCoreLib
 #include <AutoSegmentationTools.h>
 
 class QAction;
@@ -468,7 +468,7 @@ private:
 
 	//! Creates point clouds from multiple 'components'
 	void createComponentsClouds(ccGenericPointCloud* cloud,
-								CCLib::ReferenceCloudContainer& components,
+								CCCoreLib::ReferenceCloudContainer& components,
 								unsigned minPointPerComponent,
 								bool randomColors,
 								bool selectComponents,

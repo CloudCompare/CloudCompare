@@ -17,7 +17,7 @@
 
 #include "ccGenericGLDisplay.h"
 
-//CCLib
+//CCCoreLib
 #include <CCConst.h>
 
 ccViewportParameters::ccViewportParameters()
@@ -108,7 +108,7 @@ bool ccViewportParameters::fromFile(QFile& in, short dataVersion, int flags, Loa
 	inStream >> pixelSize;
 	//before version 25, we were saving the inverse of 'pixelSize' ('globalZoom')
 	if (dataVersion < 25)
-		pixelSize = (pixelSize> CCLib::ZERO_TOLERANCE ? 1.0f/pixelSize : 1.0f);
+		pixelSize = (pixelSize> CCCoreLib::ZERO_TOLERANCE ? 1.0f/pixelSize : 1.0f);
 	inStream >> zoom;
 	inStream >> defaultPointSize;
 	inStream >> defaultLineWidth;

@@ -27,7 +27,7 @@
 #include "ccPointCloud.h"
 #include "ccBox.h"
 
-//CCLib
+//CCCoreLib
 #include <Neighbourhood.h>
 #include <RayAndBox.h>
 #include <ScalarFieldTools.h>
@@ -37,7 +37,7 @@
 #endif
 
 ccOctree::ccOctree(ccGenericPointCloud* aCloud)
-	: CCLib::DgmOctree(aCloud)
+	: CCCoreLib::DgmOctree(aCloud)
 	, m_theAssociatedCloudAsGPC(aCloud)
 	, m_displayedLevel(1)
 	, m_displayMode(WIRE)
@@ -278,9 +278,9 @@ void ccOctree::draw(CC_DRAW_CONTEXT& context)
 	glFunc->glPopAttrib();
 }
 
-bool ccOctree::DrawCellAsABox(	const CCLib::DgmOctree::octreeCell& cell,
+bool ccOctree::DrawCellAsABox(	const CCCoreLib::DgmOctree::octreeCell& cell,
 								void** additionalParameters,
-								CCLib::NormalizedProgress* nProgress/*=0*/)
+								CCCoreLib::NormalizedProgress* nProgress/*=0*/)
 {
 	ccOctreeFrustumIntersector* ofi = static_cast<ccOctreeFrustumIntersector*>(additionalParameters[0]);
 	QOpenGLFunctions_2_1* glFunc     = static_cast<QOpenGLFunctions_2_1*>(additionalParameters[1]);
@@ -345,9 +345,9 @@ bool ccOctree::DrawCellAsABox(	const CCLib::DgmOctree::octreeCell& cell,
 	return true;
 }
 
-bool ccOctree::DrawCellAsAPoint(const CCLib::DgmOctree::octreeCell& cell,
+bool ccOctree::DrawCellAsAPoint(const CCCoreLib::DgmOctree::octreeCell& cell,
 								void** additionalParameters,
-								CCLib::NormalizedProgress* nProgress/*=0*/)
+								CCCoreLib::NormalizedProgress* nProgress/*=0*/)
 {
 	//variables additionnelles
 	glDrawParams* glParams			= reinterpret_cast<glDrawParams*>(additionalParameters[0]);
@@ -357,7 +357,7 @@ bool ccOctree::DrawCellAsAPoint(const CCLib::DgmOctree::octreeCell& cell,
 
 	if (glParams->showSF)
 	{
-		ScalarType dist = CCLib::ScalarFieldTools::computeMeanScalarValue(cell.points);
+		ScalarType dist = CCCoreLib::ScalarFieldTools::computeMeanScalarValue(cell.points);
 		const ccColor::Rgb* col = cloud->geScalarValueColor(dist);
 		glFunc->glColor3ubv(col ? col->rgb : ccColor::lightGreyRGB.rgb);
 	}
@@ -374,15 +374,15 @@ bool ccOctree::DrawCellAsAPoint(const CCLib::DgmOctree::octreeCell& cell,
 		ccGL::Normal3v(glFunc, N.u);
 	}
 
-	const CCVector3* gravityCenter = CCLib::Neighbourhood(cell.points).getGravityCenter();
+	const CCVector3* gravityCenter = CCCoreLib::Neighbourhood(cell.points).getGravityCenter();
 	ccGL::Vertex3v(glFunc, gravityCenter->u);
 
 	return true;
 }
 
-bool ccOctree::DrawCellAsAPrimitive(const CCLib::DgmOctree::octreeCell& cell,
+bool ccOctree::DrawCellAsAPrimitive(const CCCoreLib::DgmOctree::octreeCell& cell,
 									void** additionalParameters,
-									CCLib::NormalizedProgress* nProgress/*=0*/)
+									CCCoreLib::NormalizedProgress* nProgress/*=0*/)
 {
 	//variables additionnelles
 	glDrawParams* glParams			= reinterpret_cast<glDrawParams*>(additionalParameters[0]);
@@ -402,7 +402,7 @@ bool ccOctree::DrawCellAsAPrimitive(const CCLib::DgmOctree::octreeCell& cell,
 
 	if (glParams->showSF)
 	{
-		ScalarType dist = CCLib::ScalarFieldTools::computeMeanScalarValue(cell.points);
+		ScalarType dist = CCCoreLib::ScalarFieldTools::computeMeanScalarValue(cell.points);
 		const ccColor::Rgb* rgb = cloud->geScalarValueColor(dist);
 		if (rgb)
 			primitive->setColor(*rgb);
@@ -432,13 +432,13 @@ bool ccOctree::DrawCellAsAPrimitive(const CCLib::DgmOctree::octreeCell& cell,
 	return true;
 }
 
-void ccOctree::ComputeAverageColor(CCLib::ReferenceCloud* subset, ccGenericPointCloud* sourceCloud, ColorCompType meanCol[])
+void ccOctree::ComputeAverageColor(CCCoreLib::ReferenceCloud* subset, ccGenericPointCloud* sourceCloud, ColorCompType meanCol[])
 {
 	if (!subset || subset->size() == 0 || !sourceCloud)
 		return;
 
 	assert(sourceCloud->hasColors());
-	assert(subset->getAssociatedCloud() == static_cast<CCLib::GenericIndexedCloud*>(sourceCloud));
+	assert(subset->getAssociatedCloud() == static_cast<CCCoreLib::GenericIndexedCloud*>(sourceCloud));
 
 	Tuple3Tpl<double> sum(0, 0, 0);
 
@@ -456,7 +456,7 @@ void ccOctree::ComputeAverageColor(CCLib::ReferenceCloud* subset, ccGenericPoint
 	meanCol[2] = static_cast<ColorCompType>(sum.z / n);
 }
 
-CCVector3 ccOctree::ComputeAverageNorm(CCLib::ReferenceCloud* subset, ccGenericPointCloud* sourceCloud)
+CCVector3 ccOctree::ComputeAverageNorm(CCCoreLib::ReferenceCloud* subset, ccGenericPointCloud* sourceCloud)
 {
 	CCVector3 N(0, 0, 0);
 
@@ -464,7 +464,7 @@ CCVector3 ccOctree::ComputeAverageNorm(CCLib::ReferenceCloud* subset, ccGenericP
 		return N;
 
 	assert(sourceCloud->hasNormals());
-	assert(subset->getAssociatedCloud() == static_cast<CCLib::GenericIndexedCloud*>(sourceCloud));
+	assert(subset->getAssociatedCloud() == static_cast<CCCoreLib::GenericIndexedCloud*>(sourceCloud));
 
 	unsigned n = subset->size();
 	for (unsigned i = 0; i < n; ++i)
@@ -669,7 +669,7 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 					rayLocal.squareDistances(cellCenter, radialSqDist, sqDistToOrigin);
 
 					double dx = sqrt(sqDistToOrigin);
-					double dy = std::max<double>(0, sqrt(radialSqDist) - CCLib::SQRT_3 * halfCellSize);
+					double dy = std::max<double>(0, sqrt(radialSqDist) - CCCoreLib::SQRT_3 * halfCellSize);
 					double fov_rad = atan2(dy, dx);
 
 					skipThisCell = (fov_rad > maxFOV_rad);
@@ -697,7 +697,7 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 		if (!skipThisCell)
 		{
 			//we shouldn't test points that are actually hidden!
-			if (	(!visTable || visTable->at(it->theIndex) == CCLib::POINT_VISIBLE)
+			if (	(!visTable || visTable->at(it->theIndex) == CCCoreLib::POINT_VISIBLE)
 				&&	(!activeSF || activeSF->getColor(activeSF->getValue(it->theIndex)))
 				)
 			{

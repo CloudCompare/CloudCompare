@@ -124,7 +124,7 @@ static void SavePoseInformation(e57::StructureNode& parentNode, const e57::Image
 	e57::StructureNode pose = e57::StructureNode(imf);
 	parentNode.set("pose", pose);
 
-	CCLib::SquareMatrixd transMat(poseMat.data(), true);
+	CCCoreLib::SquareMatrixd transMat(poseMat.data(), true);
 	double q[4];
 	if (transMat.toQuaternion(q))
 	{
@@ -512,7 +512,7 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 	e57::CompressedVectorWriter writer = points.writer(dbufs);
 
 	//progress bar
-	CCLib::NormalizedProgress nprogress(progressDlg, pointCount);
+	CCCoreLib::NormalizedProgress nprogress(progressDlg, pointCount);
 	if (progressDlg)
 	{
 		progressDlg->setMethodTitle(QObject::tr("Write E57 file"));
@@ -827,7 +827,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 				if (imageCount != 0)
 				{
 					//progress bar
-					CCLib::NormalizedProgress nprogress(progressDlg.data(), imageCount);
+					CCCoreLib::NormalizedProgress nprogress(progressDlg.data(), imageCount);
 					if (progressDlg)
 					{
 						progressDlg->setMethodTitle(QObject::tr("Write E57 file"));
@@ -1406,7 +1406,7 @@ static bool GetPoseInformation(const e57::StructureNode& node, ccGLMatrixd& pose
 			quaternion[2] = e57::FloatNode(rotNode.get("y")).value();
 			quaternion[3] = e57::FloatNode(rotNode.get("z")).value();
 
-			CCLib::SquareMatrixd rotMat(3);
+			CCCoreLib::SquareMatrixd rotMat(3);
 			rotMat.initFromQuaternion(quaternion);
 			rotMat.toGlMatrix(poseMat.data());
 			validPoseMat = true;
@@ -1737,7 +1737,7 @@ static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 	e57::CompressedVectorReader dataReader = points.reader(dbufs);
 
 	//local progress bar
-	CCLib::NormalizedProgress nprogress(progressDlg, static_cast<unsigned>(pointCount / chunkSize));
+	CCCoreLib::NormalizedProgress nprogress(progressDlg, static_cast<unsigned>(pointCount / chunkSize));
 	if (progressDlg)
 	{
 		progressDlg->setMethodTitle(QObject::tr("Read E57 file"));
@@ -2285,7 +2285,7 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 				progressDlg->start();
 				QApplication::processEvents();
 			}
-			CCLib::NormalizedProgress nprogress(progressDlg.data(), showGlobalProgress ? scanCount : 100);
+			CCCoreLib::NormalizedProgress nprogress(progressDlg.data(), showGlobalProgress ? scanCount : 100);
 
 			//static states
 			s_absoluteScanIndex = 0;
@@ -2377,7 +2377,7 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 					progressDlg->start();
 					QApplication::processEvents();
 				}
-				CCLib::NormalizedProgress nprogress(progressDlg.data(), imageCount);
+				CCCoreLib::NormalizedProgress nprogress(progressDlg.data(), imageCount);
 
 				for (unsigned i = 0; i < imageCount; ++i)
 				{

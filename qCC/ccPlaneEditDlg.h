@@ -22,7 +22,7 @@
 #include <ui_planeEditDlg.h>
 #include "ccPickingListener.h"
 
-//CCLib
+//CCCoreLib
 #include <CCGeom.h>
 
 //Qt

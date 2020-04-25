@@ -18,7 +18,7 @@
 #ifndef PDMS_TOOLS_HEADER
 #define PDMS_TOOLS_HEADER
 
-//CCLib
+//CCCoreLib
 #include <CCConst.h>
 #include <CCGeom.h>
 

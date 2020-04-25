@@ -21,23 +21,23 @@
 //Local
 #include "ccDrawableObject.h"
 
-//CCLib
+//CCCoreLib
 #include <BoundingBox.h>
 
 //! Bounding box structure
 /** Supports several operators such as addition (to a matrix or a vector) and
 	multiplication (by a matrix or a scalar).
 **/
-class QCC_DB_LIB_API ccBBox : public CCLib::BoundingBox
+class QCC_DB_LIB_API ccBBox : public CCCoreLib::BoundingBox
 {
 public:
 
 	//! Default constructor
-	ccBBox() : CCLib::BoundingBox() {}
+	ccBBox() : CCCoreLib::BoundingBox() {}
 	//! Constructor from two vectors (lower min. and upper max. corners)
-	ccBBox(const CCVector3& bbMinCorner, const CCVector3& bbMaxCorner) : CCLib::BoundingBox(bbMinCorner, bbMaxCorner) {}
+	ccBBox(const CCVector3& bbMinCorner, const CCVector3& bbMaxCorner) : CCCoreLib::BoundingBox(bbMinCorner, bbMaxCorner) {}
 	//! Constructor from two vectors (lower min. and upper max. corners)
-	ccBBox(const CCLib::BoundingBox& bbox) : CCLib::BoundingBox(bbox) {}
+	ccBBox(const CCCoreLib::BoundingBox& bbox) : CCCoreLib::BoundingBox(bbox) {}
 
 	//! Applies transformation to the bounding box
 	const ccBBox operator * (const ccGLMatrix& mat);

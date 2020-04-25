@@ -17,7 +17,7 @@
 
 #include "ccIndexedTransformationBuffer.h"
 
-//CCLib
+//CCCoreLib
 #include <ParallelSort.h>
 
 ccIndexedTransformationBuffer::ccIndexedTransformationBuffer(const QString& name)

@@ -75,10 +75,10 @@ public:
 	unsigned size() const override { return 0; }
 	void forEach(genericTriangleAction action) override {}
 	void placeIteratorAtBeginning() override {}
-	CCLib::GenericTriangle* _getNextTriangle() override { return 0; }
-	CCLib::GenericTriangle* _getTriangle(unsigned index) override { return 0; }
-	CCLib::VerticesIndexes* getNextTriangleVertIndexes() override { return 0; }
-	CCLib::VerticesIndexes* getTriangleVertIndexes(unsigned triangleIndex) override { return 0; }
+	CCCoreLib::GenericTriangle* _getNextTriangle() override { return 0; }
+	CCCoreLib::GenericTriangle* _getTriangle(unsigned index) override { return 0; }
+	CCCoreLib::VerticesIndexes* getNextTriangleVertIndexes() override { return 0; }
+	CCCoreLib::VerticesIndexes* getTriangleVertIndexes(unsigned triangleIndex) override { return 0; }
 	void getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) const override {}
 	void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) override {}
 

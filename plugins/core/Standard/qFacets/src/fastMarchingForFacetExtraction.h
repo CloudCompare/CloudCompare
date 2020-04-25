@@ -18,7 +18,7 @@
 #ifndef QFACET_FAST_MARCHING_FOR_FACET_EXTRACTION_HEADER
 #define QFACET_FAST_MARCHING_FOR_FACET_EXTRACTION_HEADER
 
-//CCLib
+//CCCoreLib
 #include <FastMarching.h>
 #include <GenericProgressCallback.h>
 #include <DistanceComputationTools.h>
@@ -32,7 +32,7 @@ class ccPointCloud;
 //! Fast Marching algorithm for planar facets extraction (qFacets plugin)
 /** Extends the FastMarching class.
 **/
-class FastMarchingForFacetExtraction : public CCLib::FastMarching
+class FastMarchingForFacetExtraction : public CCCoreLib::FastMarching
 {
 public:
 
@@ -40,10 +40,10 @@ public:
 	static int ExtractPlanarFacets(	ccPointCloud* theCloud,
 									unsigned char octreeLevel,
 									ScalarType maxError,
-									CCLib::DistanceComputationTools::ERROR_MEASURES errorMeasure,
+									CCCoreLib::DistanceComputationTools::ERROR_MEASURES errorMeasure,
 									bool useRetroProjectionError = true,
-									CCLib::GenericProgressCallback* progressCb = 0,
-									CCLib::DgmOctree* _theOctree = 0);
+									CCCoreLib::GenericProgressCallback* progressCb = 0,
+									CCCoreLib::DgmOctree* _theOctree = 0);
 
 	//! Default constructor
 	FastMarchingForFacetExtraction();
@@ -65,12 +65,12 @@ public:
 		\return a negative value if something went wrong
 	**/
 	int init(	ccGenericPointCloud* cloud,
-				CCLib::DgmOctree* theOctree,
+				CCCoreLib::DgmOctree* theOctree,
 				unsigned char gridLevel,
 				ScalarType maxError,
-				CCLib::DistanceComputationTools::ERROR_MEASURES errorMeasure,
+				CCCoreLib::DistanceComputationTools::ERROR_MEASURES errorMeasure,
 				bool useRetroProjectionError,
-				CCLib::GenericProgressCallback* progressCb = 0);
+				CCCoreLib::GenericProgressCallback* progressCb = 0);
 
 	//! Updates a list of point flags, indicating the points alreay processed
 	/** \return the number of newly flagged points
@@ -80,7 +80,7 @@ public:
 								unsigned facetIndex);
 
 	//! Sets the propagation progress callback
-	void setPropagateCallback(CCLib::GenericProgressCallback* propagateProgressCb) { m_propagateProgressCb = propagateProgressCb; m_propagateProgress = 0; }
+	void setPropagateCallback(CCCoreLib::GenericProgressCallback* propagateProgressCb) { m_propagateProgressCb = propagateProgressCb; m_propagateProgress = 0; }
 
 	//inherited methods (see FastMarchingAlgorithm)
 	virtual int propagate() override;
@@ -89,7 +89,7 @@ public:
 protected:
 
 	//! A Fast Marching grid cell for planar facets extraction
-	class PlanarCell : public CCLib::FastMarching::Cell
+	class PlanarCell : public CCCoreLib::FastMarching::Cell
 	{
 	public:
 		//! Default constructor
@@ -109,13 +109,13 @@ protected:
 		//! The local cell center
 		CCVector3 C;
 		//! the code of the equivalent cell in the octree
-		CCLib::DgmOctree::CellCode cellCode;
+		CCCoreLib::DgmOctree::CellCode cellCode;
 		//! Cell planarity error
 		ScalarType planarError;
 	};
 
 	//inherited methods (see FastMarchingAlgorithm)
-	virtual float computeTCoefApprox(CCLib::FastMarching::Cell* currentCell, CCLib::FastMarching::Cell* neighbourCell) const override;
+	virtual float computeTCoefApprox(CCCoreLib::FastMarching::Cell* currentCell, CCCoreLib::FastMarching::Cell* neighbourCell) const override;
 	virtual int step() override;
 	virtual void initTrialCells() override;
 	virtual bool instantiateGrid(unsigned size) override { return instantiateGridTpl<PlanarCell*>(size); }
@@ -124,7 +124,7 @@ protected:
 	ScalarType addCellToCurrentFacet(unsigned index);
 
 	//! Current facet points
-	CCLib::ReferenceCloud* m_currentFacetPoints;
+	CCCoreLib::ReferenceCloud* m_currentFacetPoints;
 
 	//! Current facet error
 	ScalarType m_currentFacetError;
@@ -133,13 +133,13 @@ protected:
 	ScalarType m_maxError;
 
 	//! Error measrue
-	CCLib::DistanceComputationTools::ERROR_MEASURES m_errorMeasure;
+	CCCoreLib::DistanceComputationTools::ERROR_MEASURES m_errorMeasure;
 
 	//! Whether to use retro-projection error in propagation
 	bool m_useRetroProjectionError;
 
 	//! Propagation progress callback
-	CCLib::GenericProgressCallback* m_propagateProgressCb;
+	CCCoreLib::GenericProgressCallback* m_propagateProgressCb;
 	//! Propagation progress
 	unsigned m_propagateProgress;
 };

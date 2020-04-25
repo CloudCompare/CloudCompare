@@ -24,7 +24,7 @@
 //qCC_db
 #include <ccScalarField.h>
 
-//CCLib
+//CCCoreLib
 #include <CCConst.h>
 
 //system

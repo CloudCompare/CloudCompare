@@ -39,7 +39,7 @@
 #include <QString>
 #include <QTextStream>
 
-//CCLib (for DTM generation)
+//CCCoreLib (for DTM generation)
 #include <ccMesh.h>
 #include <MeshSamplingTools.h>
 #include <PointProjectionTools.h>
@@ -232,7 +232,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 			pDlg->setInfo(QObject::tr("Cameras: %1\nPoints: %2").arg(camCount).arg(ptsCount));
 			pDlg->start();
 		}
-		CCLib::NormalizedProgress nprogress(pDlg.data(), camCount + (importKeypoints || orthoRectifyImages || generateColoredDTM ? ptsCount : 0));
+		CCCoreLib::NormalizedProgress nprogress(pDlg.data(), camCount + (importKeypoints || orthoRectifyImages || generateColoredDTM ? ptsCount : 0));
 
 		//read cameras info (whatever the case!)
 		cameras.resize(camCount);
@@ -277,7 +277,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 					sum += fabs(mat[l]) + fabs(mat[4+l]) + fabs(mat[8+l]);
 				}
 			}
-			if (importImages && sum < CCLib::ZERO_TOLERANCE)
+			if (importImages && sum < CCCoreLib::ZERO_TOLERANCE)
 			{
 				ccLog::Warning("[Bundler] Camera #%i is invalid!",camIndex+1);
 				it->isValid = false;
@@ -633,7 +633,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 		ipDlg->start();
 		QApplication::processEvents();
 	}
-	CCLib::NormalizedProgress inprogress(ipDlg.data(), camCount);
+	CCCoreLib::NormalizedProgress inprogress(ipDlg.data(), camCount);
 
 	assert(imageFilenames.size() >= static_cast<int>(camCount));
 
@@ -641,7 +641,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 
 	//for colored DTM generation
 	std::vector<int> mntColors;
-	QScopedPointer<CCLib::PointCloud> mntSamples;
+	QScopedPointer<CCCoreLib::PointCloud> mntSamples;
 	if (generateColoredDTM)
 	{
 		QScopedPointer<ccProgressDialog> toDlg(nullptr);
@@ -655,13 +655,13 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 
 		//1st step: triangulate keypoints (or use existing one)
 		ccGenericMesh* baseDTMMesh = (altEntity ? ccHObjectCaster::ToGenericMesh(altEntity) : nullptr);
-		CCLib::GenericIndexedMesh* dummyMesh = baseDTMMesh;
+		CCCoreLib::GenericIndexedMesh* dummyMesh = baseDTMMesh;
 		if (!baseDTMMesh)
 		{
 			//alternative keypoints?
 			ccGenericPointCloud* altKeypoints = (altEntity ? ccHObjectCaster::ToGenericPointCloud(altEntity) : nullptr);
 			char errorStr[1024];
-			dummyMesh = CCLib::PointProjectionTools::computeTriangulation(	altKeypoints ? altKeypoints : keypointsCloud,
+			dummyMesh = CCCoreLib::PointProjectionTools::computeTriangulation(	altKeypoints ? altKeypoints : keypointsCloud,
 																			DELAUNAY_2D_BEST_LS_PLANE,
 																			0,
 																			0,
@@ -675,7 +675,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 		if (dummyMesh)
 		{
 			//2nd step: samples points on resulting mesh
-			mntSamples.reset(CCLib::MeshSamplingTools::samplePointsOnMesh((CCLib::GenericMesh*)dummyMesh, coloredDTMVerticesCount));
+			mntSamples.reset(CCCoreLib::MeshSamplingTools::samplePointsOnMesh((CCCoreLib::GenericMesh*)dummyMesh, coloredDTMVerticesCount));
 			if (!baseDTMMesh)
 				delete dummyMesh;
 			dummyMesh = nullptr;
@@ -756,7 +756,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 			ccGLMatrix transf(cameras[i].trans.inverse().data());
 			
 			//dist to cloud
-			PointCoordinateType dist = keypointsCloud ? (transf.getTranslationAsVec3D() - keypointsCloud->getOwnBB().getCenter()).norm() : CCLib::PC_ONE;
+			PointCoordinateType dist = keypointsCloud ? (transf.getTranslationAsVec3D() - keypointsCloud->getOwnBB().getCenter()).norm() : CCCoreLib::PC_ONE;
 			params.zFar_mm = dist;
 			params.zNear_mm = 0.001f;
 
@@ -764,7 +764,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 			sensor->setName(QString("Camera #%1").arg(i + 1));
 			sensor->setEnabled(true);
 			sensor->setVisible(true/*false*/);
-			sensor->setGraphicScale(keypointsCloud ? keypointsCloud->getOwnBB().getDiagNorm() / 10 : CCLib::PC_ONE);
+			sensor->setGraphicScale(keypointsCloud ? keypointsCloud->getOwnBB().getDiagNorm() / 10 : CCCoreLib::PC_ONE);
 			sensor->setRigidTransformation(transf);
 
 			//distortion parameters
@@ -838,7 +838,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 			{
 				ccLog::Warning(QString("[Bundler] Not enough keypoints descriptors for image '%1'!").arg(image->getName()));
 			}
-			else if (!keypointsImageBB.isValid() || keypointsImageBB.getDiagNorm() < CCLib::PC_ONE)
+			else if (!keypointsImageBB.isValid() || keypointsImageBB.getDiagNorm() < CCCoreLib::PC_ONE)
 			{
 				ccLog::Warning(QString("[Bundler] Keypoints descriptors for image '%1' are invalid (= all the same)").arg(image->getName()));
 			}
@@ -1062,7 +1062,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 
 				//apply bundler equation
 				sensorMatrix.apply(P);
-				if (fabs(P.z) > CCLib::ZERO_TOLERANCE)
+				if (fabs(P.z) > CCCoreLib::ZERO_TOLERANCE)
 				{
 					CCVector3 p(-P.x / P.z, -P.y / P.z, 0.0);
 					//float norm_p2 = p.norm2();

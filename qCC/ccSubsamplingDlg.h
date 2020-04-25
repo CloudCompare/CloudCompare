@@ -21,12 +21,12 @@
 //Qt
 #include <QDialog>
 
-//CCLib
+//CCCoreLib
 #include <CCTypes.h>
 
 class ccGenericPointCloud;
 
-namespace CCLib {
+namespace CCCoreLib {
 	class GenericProgressCallback;
 	class ReferenceCloud;
 }
@@ -57,7 +57,7 @@ public:
 	//! Returns subsampled version of a cloud according to current parameters
 	/** Should be called only once the dialog has been validated.
 	**/
-	CCLib::ReferenceCloud* getSampledCloud(ccGenericPointCloud* cloud, CCLib::GenericProgressCallback* progressCb = nullptr);
+	CCCoreLib::ReferenceCloud* getSampledCloud(ccGenericPointCloud* cloud, CCCoreLib::GenericProgressCallback* progressCb = nullptr);
 
 	//! Enables the SF modulation option (SPATIAL method)
 	void enableSFModulation(ScalarType sfMin, ScalarType sfMax);

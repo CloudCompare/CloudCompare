@@ -18,7 +18,7 @@
 #ifndef PCV_CONTEXT_HEADER
 #define PCV_CONTEXT_HEADER
 
-//CCLib
+//CCCoreLib
 #include <GenericCloud.h>
 #include <GenericMesh.h>
 
@@ -49,8 +49,8 @@ class PCVContext
 		**/
 		bool init(	unsigned W,
 					unsigned H,
-					CCLib::GenericCloud* cloud,
-					CCLib::GenericMesh* mesh = nullptr,
+					CCCoreLib::GenericCloud* cloud,
+					CCCoreLib::GenericMesh* mesh = nullptr,
 					bool closedMesh = true);
 
 		//! Set the viewing directions
@@ -65,13 +65,13 @@ class PCVContext
 	protected:
 		void glInit();
 		void drawEntity();
-		void associateToEntity(CCLib::GenericCloud* cloud, CCLib::GenericMesh* mesh = nullptr);
+		void associateToEntity(CCCoreLib::GenericCloud* cloud, CCCoreLib::GenericMesh* mesh = nullptr);
 
 		//! Displayed entity (cloud or mesh vertices)
-		CCLib::GenericCloud* m_vertices;
+		CCCoreLib::GenericCloud* m_vertices;
 
 		//! Displayed entity (mesh - optional)
-		CCLib::GenericMesh* m_mesh;
+		CCCoreLib::GenericMesh* m_mesh;
 
 		//zoom courant
 		PointCoordinateType m_zoom;

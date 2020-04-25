@@ -31,7 +31,7 @@
 #include "ccPointCloud.h"
 #include "ccScalarField.h"
 
-//CCLib
+//CCCoreLib
 #include <GenericProgressCallback.h>
 #include <GenericTriangle.h>
 #include <MeshSamplingTools.h>
@@ -374,7 +374,7 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				CCVector3* _vertices = GetVertexBuffer();
 				for (size_t n = 0; n < chunkSize; n += decimStep)
 				{
-					const CCLib::VerticesIndexes* ti = getTriangleVertIndexes(static_cast<unsigned>(chunkStart + n));
+					const CCCoreLib::VerticesIndexes* ti = getTriangleVertIndexes(static_cast<unsigned>(chunkStart + n));
 					*_vertices++ = *vertices->getPoint(ti->i1);
 					*_vertices++ = *vertices->getPoint(ti->i2);
 					*_vertices++ = *vertices->getPoint(ti->i3);
@@ -387,7 +387,7 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 					assert(colorScale);
 					for (unsigned n = 0; n < chunkSize; n += decimStep)
 					{
-						const CCLib::VerticesIndexes* ti = getTriangleVertIndexes(static_cast<unsigned>(chunkStart + n));
+						const CCCoreLib::VerticesIndexes* ti = getTriangleVertIndexes(static_cast<unsigned>(chunkStart + n));
 						*_rgbColors++ = *currentDisplayedScalarField->getValueColor(ti->i1);
 						*_rgbColors++ = *currentDisplayedScalarField->getValueColor(ti->i2);
 						*_rgbColors++ = *currentDisplayedScalarField->getValueColor(ti->i3);
@@ -400,7 +400,7 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 					for (unsigned n = 0; n < chunkSize; n += decimStep)
 					{
-						const CCLib::VerticesIndexes* ti = getTriangleVertIndexes(static_cast<unsigned>(chunkStart + n));
+						const CCCoreLib::VerticesIndexes* ti = getTriangleVertIndexes(static_cast<unsigned>(chunkStart + n));
 						*_rgbaColors++ = rgbaColorsTable->at(ti->i1);
 						*_rgbaColors++ = rgbaColorsTable->at(ti->i2);
 						*_rgbaColors++ = rgbaColorsTable->at(ti->i3);
@@ -428,7 +428,7 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 					{
 						for (unsigned n = 0; n < chunkSize; n += decimStep)
 						{
-							const CCLib::VerticesIndexes* ti = getTriangleVertIndexes(static_cast<unsigned>(chunkStart + n));
+							const CCCoreLib::VerticesIndexes* ti = getTriangleVertIndexes(static_cast<unsigned>(chunkStart + n));
 							*_normals++ = vertices->getPointNormal(ti->i1);
 							*_normals++ = vertices->getPointNormal(ti->i2);
 							*_normals++ = vertices->getPointNormal(ti->i3);
@@ -494,7 +494,7 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			for (unsigned n = 0; n < triNum; ++n)
 			{
 				//current triangle vertices
-				const CCLib::VerticesIndexes* tsi = getTriangleVertIndexes(n);
+				const CCCoreLib::VerticesIndexes* tsi = getTriangleVertIndexes(n);
 
 				//LOD: shall we display this triangle?
 				if (n % decimStep)
@@ -503,9 +503,9 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				if (visFiltering)
 				{
 					//we skip the triangle if at least one vertex is hidden
-					if ((verticesVisibility[tsi->i1] != CCLib::POINT_VISIBLE) ||
-						(verticesVisibility[tsi->i2] != CCLib::POINT_VISIBLE) ||
-						(verticesVisibility[tsi->i3] != CCLib::POINT_VISIBLE))
+					if ((verticesVisibility[tsi->i1] != CCCoreLib::POINT_VISIBLE) ||
+						(verticesVisibility[tsi->i2] != CCCoreLib::POINT_VISIBLE) ||
+						(verticesVisibility[tsi->i3] != CCCoreLib::POINT_VISIBLE))
 						continue;
 				}
 
@@ -726,7 +726,7 @@ ccPointCloud* ccGenericMesh::samplePoints(	bool densityBased,
 											bool withNormals,
 											bool withRGB,
 											bool withTexture,
-											CCLib::GenericProgressCallback* pDlg/*=nullptr*/)
+											CCCoreLib::GenericProgressCallback* pDlg/*=nullptr*/)
 {
 	if (samplingParameter <= 0)
 	{
@@ -742,14 +742,14 @@ ccPointCloud* ccGenericMesh::samplePoints(	bool densityBased,
 		triIndices.reset(new std::vector<unsigned>);
 	}
 
-	CCLib::PointCloud* sampledCloud = nullptr;
+	CCCoreLib::PointCloud* sampledCloud = nullptr;
 	if (densityBased)
 	{
-		sampledCloud = CCLib::MeshSamplingTools::samplePointsOnMesh(this, samplingParameter, pDlg, triIndices.data());
+		sampledCloud = CCCoreLib::MeshSamplingTools::samplePointsOnMesh(this, samplingParameter, pDlg, triIndices.data());
 	}
 	else
 	{
-		sampledCloud = CCLib::MeshSamplingTools::samplePointsOnMesh(this, static_cast<unsigned>(samplingParameter), pDlg, triIndices.data());
+		sampledCloud = CCCoreLib::MeshSamplingTools::samplePointsOnMesh(this, static_cast<unsigned>(samplingParameter), pDlg, triIndices.data());
 	}
 
 	//convert to real point cloud
@@ -895,7 +895,7 @@ void ccGenericMesh::importParametersFrom(const ccGenericMesh* mesh)
 
 void ccGenericMesh::computeInterpolationWeights(unsigned triIndex, const CCVector3& P, CCVector3d& weights) const
 {
-	CCLib::GenericTriangle* tri = const_cast<ccGenericMesh*>(this)->_getTriangle(triIndex);
+	CCCoreLib::GenericTriangle* tri = const_cast<ccGenericMesh*>(this)->_getTriangle(triIndex);
 	const CCVector3 *A = tri->_getA();
 	const CCVector3 *B = tri->_getB();
 	const CCVector3 *C = tri->_getC();

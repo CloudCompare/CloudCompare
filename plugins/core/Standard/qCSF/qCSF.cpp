@@ -213,7 +213,7 @@ void qCSF::doAction()
 	//extract ground subset
 	ccPointCloud* groundpoint = nullptr;
 	{
-		CCLib::ReferenceCloud groundpc(pc);
+		CCCoreLib::ReferenceCloud groundpc(pc);
 		if (groundpc.reserve(static_cast<unsigned>(groundIndexes.size())))
 		{
 			for (unsigned j = 0; j < groundIndexes.size(); ++j)
@@ -231,7 +231,7 @@ void qCSF::doAction()
 	//extract off-ground subset
 	ccPointCloud* offgroundpoint = nullptr;
 	{
-		CCLib::ReferenceCloud offgroundpc(pc);
+		CCCoreLib::ReferenceCloud offgroundpc(pc);
 		if (offgroundpc.reserve(static_cast<unsigned>(offGroundIndexes.size())))
 		{
 			for (unsigned k = 0; k < offGroundIndexes.size(); ++k)

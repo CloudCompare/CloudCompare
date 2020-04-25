@@ -21,7 +21,7 @@
 #include <QHeaderView>
 #include <QMessageBox>
 
-//CCLib
+//CCCoreLib
 #include <DistanceComputationTools.h>
 #include <MeshSamplingTools.h>
 #include <ScalarField.h>
@@ -84,7 +84,7 @@ ccComparisonDlg::ccComparisonDlg(	ccHObject* compEntity,
 	{
 		//octree level
 		octreeLevelComboBox->addItem("AUTO");
-		for (int i=1; i<=CCLib::DgmOctree::MAX_OCTREE_LEVEL; ++i)
+		for (int i=1; i<=CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL; ++i)
 			octreeLevelComboBox->addItem(QString::number(i));
 
 		//local model
@@ -243,7 +243,7 @@ void ccComparisonDlg::locaModelChanged(int index)
 
 	if (index != 0)
 	{
-		unsigned minKNN = CCLib::CC_LOCAL_MODEL_MIN_SIZE[index];
+		unsigned minKNN = CCCoreLib::CC_LOCAL_MODEL_MIN_SIZE[index];
 		lmKNNSpinBox->setMinimum(minKNN);
 	}
 }
@@ -321,7 +321,7 @@ bool ccComparisonDlg::computeApproxDistances()
 	}
 
 	m_compCloud->setCurrentScalarField(sfIdx);
-	CCLib::ScalarField* sf = m_compCloud->getCurrentInScalarField();
+	CCCoreLib::ScalarField* sf = m_compCloud->getCurrentInScalarField();
 	assert(sf);
 
 	//prepare the octree structures
@@ -339,7 +339,7 @@ bool ccComparisonDlg::computeApproxDistances()
 	{
 	case CLOUDCLOUD_DIST: //cloud-cloud
 		{
-			approxResult = CCLib::DistanceComputationTools::computeApproxCloud2CloudDistance(	m_compCloud,
+			approxResult = CCCoreLib::DistanceComputationTools::computeApproxCloud2CloudDistance(	m_compCloud,
 																								m_refCloud,
 																								DEFAULT_OCTREE_LEVEL,
 																								0,
@@ -351,7 +351,7 @@ bool ccComparisonDlg::computeApproxDistances()
 	
 	case CLOUDMESH_DIST: //cloud-mesh
 		{
-			CCLib::DistanceComputationTools::Cloud2MeshDistanceComputationParams c2mParams;
+			CCCoreLib::DistanceComputationTools::Cloud2MeshDistanceComputationParams c2mParams;
 			{
 				c2mParams.octreeLevel = DEFAULT_OCTREE_LEVEL;
 				c2mParams.maxSearchDist = 0;
@@ -360,7 +360,7 @@ bool ccComparisonDlg::computeApproxDistances()
 				c2mParams.flipNormals = false;
 				c2mParams.multiThread = false;
 			}
-			approxResult = CCLib::DistanceComputationTools::computeCloud2MeshDistance(	m_compCloud,
+			approxResult = CCCoreLib::DistanceComputationTools::computeCloud2MeshDistance(	m_compCloud,
 																						m_refMesh,
 																						c2mParams,
 																						progressDlg.data(),
@@ -473,7 +473,7 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 		sfIdx = m_compCloud->getScalarFieldIndexByName(CC_TEMP_APPROX_DISTANCES_DEFAULT_SF_NAME);
 	}
 
-	const CCLib::ScalarField* approxDistances = m_compCloud->getScalarField(sfIdx);
+	const CCCoreLib::ScalarField* approxDistances = m_compCloud->getScalarField(sfIdx);
 	if (!approxDistances)
 	{
 		assert(sfIdx >= 0);
@@ -481,7 +481,7 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 	}
 
 	//evalutate the theoretical time for each octree level
-	const int MAX_OCTREE_LEVEL = m_refMesh ? 9 : CCLib::DgmOctree::MAX_OCTREE_LEVEL; //DGM: can't go higher than level 9 with a mesh as the grid is 'plain' and would take too much memory!
+	const int MAX_OCTREE_LEVEL = m_refMesh ? 9 : CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL; //DGM: can't go higher than level 9 with a mesh as the grid is 'plain' and would take too much memory!
 	std::vector<double> timings;
 	try
 	{
@@ -495,7 +495,7 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 
 	//if the reference is a mesh
 	double meanTriangleSurface = 1.0;
-	CCLib::GenericIndexedMesh* mesh = nullptr;
+	CCCoreLib::GenericIndexedMesh* mesh = nullptr;
 	if (!m_refOctree)
 	{
 		if (!m_refMesh)
@@ -503,14 +503,14 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 			ccLog::Error("Internal error: reference entity should be a mesh!");
 			return -1;
 		}
-		mesh = static_cast<CCLib::GenericIndexedMesh*>(m_refMesh);
+		mesh = static_cast<CCCoreLib::GenericIndexedMesh*>(m_refMesh);
 		if (!mesh || mesh->size() == 0)
 		{
 			ccLog::Warning("Can't determine best octree level: mesh is empty!");
 			return -1;
 		}
 		//total mesh surface
-		double meshSurface = CCLib::MeshSamplingTools::computeMeshArea(mesh);
+		double meshSurface = CCCoreLib::MeshSamplingTools::computeMeshArea(mesh);
 		//average triangle surface
 		if (meshSurface > 0)
 		{
@@ -531,7 +531,7 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 		progressDlg->setInfo(tr("Testing %1 levels...").arg(MAX_OCTREE_LEVEL)); //we lie here ;)
 		progressDlg->start();
 	}
-	CCLib::NormalizedProgress nProgress(progressDlg.data(), MAX_OCTREE_LEVEL - 2);
+	CCCoreLib::NormalizedProgress nProgress(progressDlg.data(), MAX_OCTREE_LEVEL - 2);
 	QApplication::processEvents();
 
 	bool maxDistanceDefined = maxDistCheckBox->isChecked();
@@ -540,7 +540,7 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 	//for each level
 	for (int level = s_minOctreeLevel; level < MAX_OCTREE_LEVEL; ++level)
 	{
-		const unsigned char bitDec = CCLib::DgmOctree::GET_BIT_SHIFT(level);
+		const unsigned char bitDec = CCCoreLib::DgmOctree::GET_BIT_SHIFT(level);
 		unsigned numberOfPointsInCell = 0;
 		unsigned index = 0;
 		double cellDist = -1;
@@ -557,13 +557,13 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 			refListDensity = m_refOctree->computeMeanOctreeDensity(static_cast<unsigned char>(level));
 		}
 
-		CCLib::DgmOctree::CellCode tempCode = 0xFFFFFFFF;
+		CCCoreLib::DgmOctree::CellCode tempCode = 0xFFFFFFFF;
 
 		//scan the octree structure
-		const CCLib::DgmOctree::cellsContainer& compCodes = m_compOctree->pointsAndTheirCellCodes();
-		for (CCLib::DgmOctree::cellsContainer::const_iterator c=compCodes.begin(); c!=compCodes.end(); ++c)
+		const CCCoreLib::DgmOctree::cellsContainer& compCodes = m_compOctree->pointsAndTheirCellCodes();
+		for (CCCoreLib::DgmOctree::cellsContainer::const_iterator c=compCodes.begin(); c!=compCodes.end(); ++c)
 		{
-			CCLib::DgmOctree::CellCode truncatedCode = (c->theCode >> bitDec);
+			CCCoreLib::DgmOctree::CellCode truncatedCode = (c->theCode >> bitDec);
 
 			//new cell?
 			if (truncatedCode != tempCode)
@@ -664,7 +664,7 @@ bool ccComparisonDlg::computeDistances()
 		return false;
 
 	int octreeLevel = octreeLevelComboBox->currentIndex();
-	assert(octreeLevel <= CCLib::DgmOctree::MAX_OCTREE_LEVEL);
+	assert(octreeLevel <= CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL);
 
 	if (octreeLevel == 0)
 	{
@@ -697,7 +697,7 @@ bool ccComparisonDlg::computeDistances()
 	}
 
 	m_compCloud->setCurrentScalarField(sfIdx);
-	CCLib::ScalarField* sf = m_compCloud->getCurrentInScalarField();
+	CCCoreLib::ScalarField* sf = m_compCloud->getCurrentInScalarField();
 	assert(sf);
 
 	//max search distance
@@ -705,8 +705,8 @@ bool ccComparisonDlg::computeDistances()
 	//multi-thread
 	bool multiThread = multiThreadedCheckBox->isChecked();
 
-	CCLib::DistanceComputationTools::Cloud2CloudDistanceComputationParams c2cParams;
-	CCLib::DistanceComputationTools::Cloud2MeshDistanceComputationParams  c2mParams;
+	CCCoreLib::DistanceComputationTools::Cloud2CloudDistanceComputationParams c2cParams;
+	CCCoreLib::DistanceComputationTools::Cloud2MeshDistanceComputationParams  c2mParams;
 	c2cParams.maxThreadCount = c2mParams.maxThreadCount = maxThreadCountSpinBox->value();
 
 	int result = -1;
@@ -815,8 +815,8 @@ bool ccComparisonDlg::computeDistances()
 			c2cParams.octreeLevel = static_cast<unsigned char>(octreeLevel);
 			if (localModelingTab->isEnabled())
 			{
-				c2cParams.localModel = (CCLib::LOCAL_MODEL_TYPES)localModelComboBox->currentIndex();
-				if (c2cParams.localModel != CCLib::NO_MODEL)
+				c2cParams.localModel = (CCCoreLib::LOCAL_MODEL_TYPES)localModelComboBox->currentIndex();
+				if (c2cParams.localModel != CCCoreLib::NO_MODEL)
 				{
 					c2cParams.useSphericalSearchForLocalModel = lmRadiusRadioButton->isChecked();
 					c2cParams.kNNForLocalModel = static_cast<unsigned>(std::max(0,lmKNNSpinBox->value()));
@@ -829,7 +829,7 @@ bool ccComparisonDlg::computeDistances()
 			c2cParams.CPSet = nullptr;
 		}
 		
-		result = CCLib::DistanceComputationTools::computeCloud2CloudDistance(	m_compCloud,
+		result = CCCoreLib::DistanceComputationTools::computeCloud2CloudDistance(	m_compCloud,
 																				m_refCloud,
 																				c2cParams,
 																				progressDlg.data(),
@@ -854,7 +854,7 @@ bool ccComparisonDlg::computeDistances()
 			c2mParams.multiThread = multiThread;
 		}
 		
-		result = CCLib::DistanceComputationTools::computeCloud2MeshDistance(	m_compCloud,
+		result = CCCoreLib::DistanceComputationTools::computeCloud2MeshDistance(	m_compCloud,
 																				m_refMesh,
 																				c2mParams,
 																				progressDlg.data(),
@@ -896,7 +896,7 @@ bool ccComparisonDlg::computeDistances()
 			break;
 		}
 
-		if (c2cParams.localModel != CCLib::NO_MODEL)
+		if (c2cParams.localModel != CCCoreLib::NO_MODEL)
 		{
 			m_sfName += QString("[%1]").arg(localModelComboBox->currentText());
 			if (c2cParams.useSphericalSearchForLocalModel)
@@ -923,7 +923,7 @@ bool ccComparisonDlg::computeDistances()
 			static const QChar charDim[3] = { 'X', 'Y', 'Z' };
 			for (unsigned j = 0; j < 3; ++j)
 			{
-				CCLib::ScalarField* sf = c2cParams.splitDistances[j];
+				CCCoreLib::ScalarField* sf = c2cParams.splitDistances[j];
 				if (sf)
 				{
 					sf->setName(qPrintable(m_sfName + QString(" (%1)").arg(charDim[j])));
@@ -950,7 +950,7 @@ bool ccComparisonDlg::computeDistances()
 
 	for (unsigned j = 0; j < 3; ++j)
 	{
-		CCLib::ScalarField* &sf = c2cParams.splitDistances[j];
+		CCCoreLib::ScalarField* &sf = c2cParams.splitDistances[j];
 		if (sf)
 		{
 			sf->release();

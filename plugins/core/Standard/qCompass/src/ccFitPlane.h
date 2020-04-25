@@ -38,7 +38,7 @@ public:
 	void updateAttributes(float rms, float search_r);
 
 	//create a FitPlane object from a point cloud
-	static ccFitPlane* Fit(CCLib::GenericIndexedCloudPersist* cloud, double *rms);
+	static ccFitPlane* Fit(CCCoreLib::GenericIndexedCloudPersist* cloud, double *rms);
 
 	//returns true if object is a plane created by ccCompass (has the associated data)
 	static bool isFitPlane(ccHObject* object);

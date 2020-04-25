@@ -21,7 +21,7 @@
 #include "ccSingleton.h"
 #include "ccNormalCompressor.h"
 
-//CCLib
+//CCCoreLib
 #include <CCGeom.h>
 #include <DgmOctreeReferenceCloud.h>
 #include <GenericIndexedMesh.h>
@@ -150,14 +150,14 @@ bool ccNormalVectors::UpdateNormalOrientations(	ccGenericPointCloud* theCloud,
 			//0-5 = +/-X,Y,Z
 			assert(preferredOrientation >= 0 && preferredOrientation <= 5);
 
-			orientation.u[preferredOrientation >> 1] = ((preferredOrientation & 1) == 0 ? CCLib::PC_ONE : -CCLib::PC_ONE); //odd number --> inverse direction
+			orientation.u[preferredOrientation >> 1] = ((preferredOrientation & 1) == 0 ? CCCoreLib::PC_ONE : -CCCoreLib::PC_ONE); //odd number --> inverse direction
 		}
 		break;
 
 	case PLUS_BARYCENTER:
 	case MINUS_BARYCENTER:
 		{
-			barycenter = CCLib::GeometricalAnalysisTools::ComputeGravityCenter(theCloud);
+			barycenter = CCCoreLib::GeometricalAnalysisTools::ComputeGravityCenter(theCloud);
 			ccLog::Print(QString("[UpdateNormalOrientations] Barycenter: (%1,%2,%3)").arg(barycenter.x).arg(barycenter.y).arg(barycenter.z));
 			useBarycenter = true;
 			positiveSign = (preferredOrientation == 6);
@@ -236,8 +236,8 @@ PointCoordinateType ccNormalVectors::GuessNaiveRadius(ccGenericPointCloud* cloud
 }
 
 PointCoordinateType ccNormalVectors::GuessBestRadius(	ccGenericPointCloud* cloud,
-														CCLib::DgmOctree* inputOctree/*=0*/,
-														CCLib::GenericProgressCallback* progressCb/*=0*/)
+														CCCoreLib::DgmOctree* inputOctree/*=0*/,
+														CCCoreLib::GenericProgressCallback* progressCb/*=0*/)
 {
 	if (!cloud)
 	{
@@ -245,10 +245,10 @@ PointCoordinateType ccNormalVectors::GuessBestRadius(	ccGenericPointCloud* cloud
 		return 0;
 	}
 
-	CCLib::DgmOctree* octree = inputOctree;
+	CCCoreLib::DgmOctree* octree = inputOctree;
 	if (!octree)
 	{
-		octree = new CCLib::DgmOctree(cloud);
+		octree = new CCCoreLib::DgmOctree(cloud);
 		if (octree->build() <= 0)
 		{
 			delete octree;
@@ -305,7 +305,7 @@ PointCoordinateType ccNormalVectors::GuessBestRadius(	ccGenericPointCloud* cloud
 				assert(randomIndex < cloud->size());
 
 				const CCVector3* P = cloud->getPoint(randomIndex);
-				CCLib::DgmOctree::NeighboursSet Yk;
+				CCCoreLib::DgmOctree::NeighboursSet Yk;
 				int n = octree->getPointsInSphericalNeighbourhood(*P, radius, Yk, octreeLevel);
 				assert(n >= 1);
 
@@ -409,11 +409,11 @@ PointCoordinateType ccNormalVectors::GuessBestRadius(	ccGenericPointCloud* cloud
 
 bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 											NormsIndexesTableType& theNormsCodes,
-											CCLib::LOCAL_MODEL_TYPES localModel,
+											CCCoreLib::LOCAL_MODEL_TYPES localModel,
 											PointCoordinateType localRadius,
 											Orientation preferredOrientation/*=UNDEFINED*/,
-											CCLib::GenericProgressCallback* progressCb/*=0*/,
-											CCLib::DgmOctree* inputOctree/*=0*/)
+											CCCoreLib::GenericProgressCallback* progressCb/*=0*/,
+											CCCoreLib::DgmOctree* inputOctree/*=0*/)
 {
 	assert(theCloud);
 
@@ -423,10 +423,10 @@ bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 		return false;
 	}
 
-	CCLib::DgmOctree* theOctree = inputOctree;
+	CCCoreLib::DgmOctree* theOctree = inputOctree;
 	if (!theOctree)
 	{
-		theOctree = new CCLib::DgmOctree(theCloud);
+		theOctree = new CCCoreLib::DgmOctree(theCloud);
 		if (theOctree->build() <= 0)
 		{
 			delete theOctree;
@@ -462,7 +462,7 @@ bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 	unsigned processedCells = 0;
 	switch (localModel)
 	{
-	case CCLib::LS:
+	case CCCoreLib::LS:
 		{
 			unsigned char level = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(localRadius);
 			processedCells = theOctree->executeFunctionForAllCellsAtLevel(	level,
@@ -473,7 +473,7 @@ bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 																			"Normals Computation[LS]");
 		}
 		break;
-	case CCLib::TRI:
+	case CCCoreLib::TRI:
 		{
 			unsigned char level = theOctree->findBestLevelForAGivenPopulationPerCell(NUMBER_OF_POINTS_FOR_NORM_WITH_TRI);
 			processedCells = theOctree->executeFunctionForAllCellsStartingAtLevel(	level,
@@ -486,7 +486,7 @@ bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 																					"Normals Computation[TRI]");
 		}
 		break;
-	case CCLib::QUADRIC:
+	case CCCoreLib::QUADRIC:
 		{
 			unsigned char level = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(localRadius);
 			processedCells = theOctree->executeFunctionForAllCellsAtLevel(	level,
@@ -536,9 +536,9 @@ bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 	return true;
 }
 
-bool ccNormalVectors::ComputeNormalWithQuadric(CCLib::GenericIndexedCloudPersist* points, const CCVector3& P, CCVector3& N)
+bool ccNormalVectors::ComputeNormalWithQuadric(CCCoreLib::GenericIndexedCloudPersist* points, const CCVector3& P, CCVector3& N)
 {
-	CCLib::Neighbourhood Z(points);
+	CCCoreLib::Neighbourhood Z(points);
 
 	Tuple3ub dims;
 	const PointCoordinateType* h = Z.getQuadric(&dims);
@@ -569,7 +569,7 @@ bool ccNormalVectors::ComputeNormalWithQuadric(CCLib::GenericIndexedCloudPersist
 	}
 }
 
-bool ccNormalVectors::ComputeNormalWithLS(CCLib::GenericIndexedCloudPersist* pointAndNeighbors, CCVector3& N)
+bool ccNormalVectors::ComputeNormalWithLS(CCCoreLib::GenericIndexedCloudPersist* pointAndNeighbors, CCVector3& N)
 {
 	N = CCVector3(0, 0, 0);
 
@@ -584,7 +584,7 @@ bool ccNormalVectors::ComputeNormalWithLS(CCLib::GenericIndexedCloudPersist* poi
 		return false;
 	}
 
-	CCLib::Neighbourhood Z(pointAndNeighbors);
+	CCCoreLib::Neighbourhood Z(pointAndNeighbors);
 	const CCVector3* _N = Z.getLSPlaneNormal();
 	if (_N)
 	{
@@ -598,7 +598,7 @@ bool ccNormalVectors::ComputeNormalWithLS(CCLib::GenericIndexedCloudPersist* poi
 }
 
 
-bool ccNormalVectors::ComputeNormalWithTri(CCLib::GenericIndexedCloudPersist* pointAndNeighbors, CCVector3& N)
+bool ccNormalVectors::ComputeNormalWithTri(CCCoreLib::GenericIndexedCloudPersist* pointAndNeighbors, CCVector3& N)
 {
 	N = CCVector3(0, 0, 0);
 
@@ -613,10 +613,10 @@ bool ccNormalVectors::ComputeNormalWithTri(CCLib::GenericIndexedCloudPersist* po
 		return false;
 	}
 
-	CCLib::Neighbourhood Z(pointAndNeighbors);
+	CCCoreLib::Neighbourhood Z(pointAndNeighbors);
 
 	//we mesh the neighbour points (2D1/2)
-	CCLib::GenericIndexedMesh* theMesh = Z.triangulateOnPlane();
+	CCCoreLib::GenericIndexedMesh* theMesh = Z.triangulateOnPlane();
 	if (!theMesh)
 	{
 		return false;
@@ -629,7 +629,7 @@ bool ccNormalVectors::ComputeNormalWithTri(CCLib::GenericIndexedCloudPersist* po
 	for (unsigned j = 0; j < triCount; ++j)
 	{
 		//we can't use getNextTriangleVertIndexes (which is faster on mesh groups but not multi-thread compatible) but anyway we'll never get mesh groups here!
-		const CCLib::VerticesIndexes* tsi = theMesh->getTriangleVertIndexes(j);
+		const CCCoreLib::VerticesIndexes* tsi = theMesh->getTriangleVertIndexes(j);
 
 		//we look if the central point is one of the triangle's vertices
 		if (tsi->i1 == 0 || tsi->i2 == 0 || tsi->i3 == 0)
@@ -653,15 +653,15 @@ bool ccNormalVectors::ComputeNormalWithTri(CCLib::GenericIndexedCloudPersist* po
 	return true;
 }
 
-bool ccNormalVectors::ComputeNormsAtLevelWithQuadric(	const CCLib::DgmOctree::octreeCell& cell,
+bool ccNormalVectors::ComputeNormsAtLevelWithQuadric(	const CCCoreLib::DgmOctree::octreeCell& cell,
 														void** additionalParameters,
-														CCLib::NormalizedProgress* nProgress/*=0*/)
+														CCCoreLib::NormalizedProgress* nProgress/*=0*/)
 {
 	//additional parameters
 	NormsTableType* theNorms = static_cast<NormsTableType*>(additionalParameters[0]);
 	PointCoordinateType radius = *static_cast<PointCoordinateType*>(additionalParameters[1]);
 
-	CCLib::DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
+	CCCoreLib::DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
 	nNSS.level = cell.level;
 	nNSS.prepare(radius, cell.parentOctree->getCellSize(nNSS.level));
 	cell.parentOctree->getCellPos(cell.truncatedCode, cell.level, nNSS.cellPos, true);
@@ -670,7 +670,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithQuadric(	const CCLib::DgmOctree::oc
 	//we already know which points are lying in the current cell
 	unsigned pointCount = cell.points->size();
 	nNSS.pointsInNeighbourhood.resize(pointCount);
-	CCLib::DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
+	CCCoreLib::DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
 	for (unsigned j = 0; j < pointCount; ++j, ++it)
 	{
 		it->point = cell.points->getPointPersistentPtr(j);
@@ -692,7 +692,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithQuadric(	const CCLib::DgmOctree::oc
 		}
 		if (k >= NUMBER_OF_POINTS_FOR_NORM_WITH_QUADRIC)
 		{
-			CCLib::DgmOctreeReferenceCloud neighbours(&nNSS.pointsInNeighbourhood, k);
+			CCCoreLib::DgmOctreeReferenceCloud neighbours(&nNSS.pointsInNeighbourhood, k);
 
 			CCVector3 N;
 			if (ComputeNormalWithQuadric(&neighbours, nNSS.queryPoint, N))
@@ -708,15 +708,15 @@ bool ccNormalVectors::ComputeNormsAtLevelWithQuadric(	const CCLib::DgmOctree::oc
 	return true;
 }
 
-bool ccNormalVectors::ComputeNormsAtLevelWithLS(const CCLib::DgmOctree::octreeCell& cell,
+bool ccNormalVectors::ComputeNormsAtLevelWithLS(const CCCoreLib::DgmOctree::octreeCell& cell,
 												void** additionalParameters,
-												CCLib::NormalizedProgress* nProgress/*=0*/)
+												CCCoreLib::NormalizedProgress* nProgress/*=0*/)
 {
 	//additional parameters
 	NormsTableType* theNorms = static_cast<NormsTableType*>(additionalParameters[0]);
 	PointCoordinateType radius = *static_cast<PointCoordinateType*>(additionalParameters[1]);
 
-	CCLib::DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
+	CCCoreLib::DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
 	nNSS.level = cell.level;
 	nNSS.prepare(radius, cell.parentOctree->getCellSize(nNSS.level));
 	cell.parentOctree->getCellPos(cell.truncatedCode, cell.level, nNSS.cellPos, true);
@@ -726,7 +726,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithLS(const CCLib::DgmOctree::octreeCe
 	unsigned pointCount = cell.points->size();
 	nNSS.pointsInNeighbourhood.resize(pointCount);
 	{
-		CCLib::DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
+		CCCoreLib::DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
 		for (unsigned j = 0; j < pointCount; ++j, ++it)
 		{
 			it->point = cell.points->getPointPersistentPtr(j);
@@ -749,7 +749,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithLS(const CCLib::DgmOctree::octreeCe
 		}
 		if (k >= NUMBER_OF_POINTS_FOR_NORM_WITH_LS)
 		{
-			CCLib::DgmOctreeReferenceCloud neighbours(&nNSS.pointsInNeighbourhood, k);
+			CCCoreLib::DgmOctreeReferenceCloud neighbours(&nNSS.pointsInNeighbourhood, k);
 
 			CCVector3 N;
 			if (ComputeNormalWithLS(&neighbours, N))
@@ -767,14 +767,14 @@ bool ccNormalVectors::ComputeNormsAtLevelWithLS(const CCLib::DgmOctree::octreeCe
 	return true;
 }
 
-bool ccNormalVectors::ComputeNormsAtLevelWithTri(	const CCLib::DgmOctree::octreeCell& cell,
+bool ccNormalVectors::ComputeNormsAtLevelWithTri(	const CCCoreLib::DgmOctree::octreeCell& cell,
 													void** additionalParameters,
-													CCLib::NormalizedProgress* nProgress/*=0*/)
+													CCCoreLib::NormalizedProgress* nProgress/*=0*/)
 {
 	//additional parameters
 	NormsTableType* theNorms = static_cast<NormsTableType*>(additionalParameters[0]);
 
-	CCLib::DgmOctree::NearestNeighboursSearchStruct nNSS;
+	CCCoreLib::DgmOctree::NearestNeighboursSearchStruct nNSS;
 	nNSS.level = cell.level;
 	nNSS.minNumberOfNeighbors = NUMBER_OF_POINTS_FOR_NORM_WITH_TRI;
 	cell.parentOctree->getCellPos(cell.truncatedCode, cell.level, nNSS.cellPos, true);
@@ -783,7 +783,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithTri(	const CCLib::DgmOctree::octree
 	//we already know which points are lying in the current cell
 	unsigned pointCount = cell.points->size();
 	nNSS.pointsInNeighbourhood.resize(pointCount);
-	CCLib::DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
+	CCCoreLib::DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
 	{
 		for (unsigned j = 0; j < pointCount; ++j, ++it)
 		{
@@ -802,7 +802,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithTri(	const CCLib::DgmOctree::octree
 		{
 			if (k > NUMBER_OF_POINTS_FOR_NORM_WITH_TRI * 3)
 				k = NUMBER_OF_POINTS_FOR_NORM_WITH_TRI * 3;
-			CCLib::DgmOctreeReferenceCloud neighbours(&nNSS.pointsInNeighbourhood, k);
+			CCCoreLib::DgmOctreeReferenceCloud neighbours(&nNSS.pointsInNeighbourhood, k);
 
 			CCVector3 N;
 			if (ComputeNormalWithTri(&neighbours, N))
@@ -842,9 +842,9 @@ void ccNormalVectors::ConvertNormalToStrikeAndDip(const CCVector3& N, PointCoord
 	// uses a right hand rule for the dip of the plane
 	if (N.norm2() > std::numeric_limits<PointCoordinateType>::epsilon())
 	{
-		strike_deg = 180.0 - atan2(N.y, N.x)*CCLib::RAD_TO_DEG;		//atan2 output is between -180 and 180! So strike is always positive here
+		strike_deg = 180.0 - atan2(N.y, N.x)*CCCoreLib::RAD_TO_DEG;		//atan2 output is between -180 and 180! So strike is always positive here
 		PointCoordinateType x = sqrt(N.x*N.x + N.y*N.y);		//x is the horizontal magnitude
-		dip_deg = atan2(x, N.z)*CCLib::RAD_TO_DEG;
+		dip_deg = atan2(x, N.z)*CCCoreLib::RAD_TO_DEG;
 	}
 	else
 	{
@@ -882,8 +882,8 @@ void ccNormalVectors::ConvertNormalToDipAndDipDir(const CCVector3& N, PointCoord
 		// We skip the division by r because the normal is a unit vector.
 		double dip_rad = acos(fabs(N.z));
 
-		dipDir_deg = static_cast<PointCoordinateType>(dipDir_rad * CCLib::RAD_TO_DEG);
-		dip_deg = static_cast<PointCoordinateType>(dip_rad * CCLib::RAD_TO_DEG);
+		dipDir_deg = static_cast<PointCoordinateType>(dipDir_rad * CCCoreLib::RAD_TO_DEG);
+		dip_deg = static_cast<PointCoordinateType>(dip_rad * CCCoreLib::RAD_TO_DEG);
 	}
 	else
 	{
@@ -899,9 +899,9 @@ CCVector3 ccNormalVectors::ConvertDipAndDipDirToNormal(PointCoordinateType dip_d
 		return CCVector3(0, 0, 0);
 	}
 	
-	double Nz = cos(dip_deg * CCLib::DEG_TO_RAD);
+	double Nz = cos(dip_deg * CCCoreLib::DEG_TO_RAD);
 	double Nxy = sqrt(1.0 - Nz * Nz);
-	double dipDir_rad = dipDir_deg * CCLib::DEG_TO_RAD;
+	double dipDir_rad = dipDir_deg * CCCoreLib::DEG_TO_RAD;
 	CCVector3 N(	static_cast<PointCoordinateType>(Nxy * sin(dipDir_rad)),
 					static_cast<PointCoordinateType>(Nxy * cos(dipDir_rad)),
 					static_cast<PointCoordinateType>(Nz) );

@@ -21,7 +21,7 @@
 
 #include "ccGenericPointCloud.h"
 
-//CCLib
+//CCCoreLib
 #include <DistanceComputationTools.h>
 #include <GenericProgressCallback.h>
 #include <Neighbourhood.h>
@@ -75,7 +75,7 @@ bool ccGenericPointCloud::resetVisibilityArray()
 		return false;
 	}
 
-	std::fill(m_pointsVisibility.begin(), m_pointsVisibility.end(), CCLib::POINT_VISIBLE); //by default, all points are visible
+	std::fill(m_pointsVisibility.begin(), m_pointsVisibility.end(), CCCoreLib::POINT_VISIBLE); //by default, all points are visible
 
 	return true;
 }
@@ -90,7 +90,7 @@ void ccGenericPointCloud::invertVisibilityArray()
 
 	for (unsigned char& vis : m_pointsVisibility)
 	{
-		vis = (vis == CCLib::POINT_HIDDEN ? CCLib::POINT_VISIBLE : CCLib::POINT_HIDDEN);
+		vis = (vis == CCCoreLib::POINT_HIDDEN ? CCCoreLib::POINT_VISIBLE : CCCoreLib::POINT_HIDDEN);
 	}
 }
 
@@ -159,7 +159,7 @@ void ccGenericPointCloud::setOctree(ccOctree::Shared octree, bool autoAddChild/*
 	}
 }
 
-ccOctree::Shared ccGenericPointCloud::computeOctree(CCLib::GenericProgressCallback* progressCb, bool autoAddChild/*=true*/)
+ccOctree::Shared ccGenericPointCloud::computeOctree(CCCoreLib::GenericProgressCallback* progressCb, bool autoAddChild/*=true*/)
 {
 	deleteOctree();
 	
@@ -311,7 +311,7 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 		{
 			//we can now use the octree to do faster point picking
 #ifdef QT_DEBUG
-			CCLib::ScalarField* sf = nullptr;
+			CCCoreLib::ScalarField* sf = nullptr;
 			if (getClassID() == CC_TYPES::POINT_CLOUD)
 			{
 				ccPointCloud* pc = static_cast<ccPointCloud*>(this);
@@ -401,7 +401,7 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 #endif
 		{
 			//we shouldn't test points that are actually hidden!
-			if (	(!visTable || visTable->at(i) == CCLib::POINT_VISIBLE)
+			if (	(!visTable || visTable->at(i) == CCCoreLib::POINT_VISIBLE)
 				&&	(!activeSF || activeSF->getColor(activeSF->getValue(i)))
 				)
 			{
@@ -455,7 +455,7 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 	return (nearestPointIndex >= 0);
 }
 
-CCLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints(const VisibilityTableType* visTable/*=nullptr*/, bool silent/*=false*/) const
+CCCoreLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints(const VisibilityTableType* visTable/*=nullptr*/, bool silent/*=false*/) const
 {
 	if (!visTable)
 	{
@@ -475,7 +475,7 @@ CCLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints(const Visibility
 	{
 		for (unsigned i = 0; i < count; ++i)
 		{
-			if (visTable->at(i) == CCLib::POINT_VISIBLE)
+			if (visTable->at(i) == CCCoreLib::POINT_VISIBLE)
 			{
 				++pointCount;
 			}
@@ -483,7 +483,7 @@ CCLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints(const Visibility
 	}
 
 	//we create an entity with the 'visible' vertices only
-	CCLib::ReferenceCloud* rc = new CCLib::ReferenceCloud(const_cast<ccGenericPointCloud*>(this));
+	CCCoreLib::ReferenceCloud* rc = new CCCoreLib::ReferenceCloud(const_cast<ccGenericPointCloud*>(this));
 
 	if (pointCount)
 	{
@@ -491,7 +491,7 @@ CCLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints(const Visibility
 		{
 			for (unsigned i = 0; i < count; ++i)
 			{
-				if (visTable->at(i) == CCLib::POINT_VISIBLE)
+				if (visTable->at(i) == CCCoreLib::POINT_VISIBLE)
 				{
 					rc->addPointIndex(i); //can't fail (see above)
 				}

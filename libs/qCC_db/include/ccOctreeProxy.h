@@ -21,7 +21,7 @@
 //Local
 #include "ccHObject.h"
 
-//CCLib
+//CCCoreLib
 #include <ccOctree.h>
 
 //! Octree structure proxy

@@ -219,7 +219,7 @@ bool ccGBLSensor::convertToDepthMapCoords(PointCoordinateType yaw, PointCoordina
 	return true;
 }
 
-ccGBLSensor::NormalGrid* ccGBLSensor::projectNormals(	CCLib::GenericCloud* cloud,
+ccGBLSensor::NormalGrid* ccGBLSensor::projectNormals(	CCCoreLib::GenericCloud* cloud,
 														const NormalGrid& theNorms,
 														double posIndex/*=0*/) const
 {
@@ -268,10 +268,10 @@ ccGBLSensor::NormalGrid* ccGBLSensor::projectNormals(	CCLib::GenericCloud* cloud
 			CCVector3 U = *P - sensorPos.getTranslationAsVec3D();
 			PointCoordinateType distToSensor = U.norm();
 
-			if (distToSensor > CCLib::ZERO_TOLERANCE)
+			if (distToSensor > CCCoreLib::ZERO_TOLERANCE)
 			{
 				PointCoordinateType squareS2D = (S.x*S.x + S.y*S.y);
-				if (squareS2D > CCLib::ZERO_TOLERANCE)
+				if (squareS2D > CCCoreLib::ZERO_TOLERANCE)
 				{
 					//and point+normal
 					CCVector3 P2 = *P + CCVector3(N);
@@ -283,7 +283,7 @@ ccGBLSensor::NormalGrid* ccGBLSensor::projectNormals(	CCLib::GenericCloud* cloud
 					S.z = -N.dot(U) / distToSensor;
 
 					//deduce other normals components
-					PointCoordinateType coef = sqrt((CCLib::PC_ONE - S.z*S.z) / squareS2D);
+					PointCoordinateType coef = sqrt((CCCoreLib::PC_ONE - S.z*S.z) / squareS2D);
 					S.x = coef * (S2.x - Q.x);
 					S.y = coef * (S2.y - Q.y);
 				}
@@ -326,7 +326,7 @@ ccGBLSensor::NormalGrid* ccGBLSensor::projectNormals(	CCLib::GenericCloud* cloud
 	return normalGrid;
 }
 
-ccGBLSensor::ColorGrid* ccGBLSensor::projectColors(	CCLib::GenericCloud* cloud,
+ccGBLSensor::ColorGrid* ccGBLSensor::projectColors(	CCCoreLib::GenericCloud* cloud,
 													const ColorGrid& theColors) const
 {
 	if (!cloud || theColors.capacity() == 0)
@@ -494,7 +494,7 @@ struct Interval
 	}
 };
 
-bool ccGBLSensor::computeAutoParameters(CCLib::GenericCloud* theCloud)
+bool ccGBLSensor::computeAutoParameters(CCCoreLib::GenericCloud* theCloud)
 {
 	assert(theCloud);
 	if (!theCloud)
@@ -538,7 +538,7 @@ bool ccGBLSensor::computeAutoParameters(CCLib::GenericCloud* theCloud)
 			projectPoint(*P, Q, depth, m_activeIndex);
 
 			//yaw
-			int angleYaw = static_cast<int>(Q.x * CCLib::RAD_TO_DEG);
+			int angleYaw = static_cast<int>(Q.x * CCCoreLib::RAD_TO_DEG);
 			assert(angleYaw >= -180 && angleYaw <= 180);
 			if (angleYaw == 180) //360 degrees warp
 				angleYaw = -180;
@@ -556,7 +556,7 @@ bool ccGBLSensor::computeAutoParameters(CCLib::GenericCloud* theCloud)
 			}
 
 			//pitch
-			int anglePitch = static_cast<int>(Q.y * CCLib::RAD_TO_DEG);
+			int anglePitch = static_cast<int>(Q.y * CCCoreLib::RAD_TO_DEG);
 			assert(anglePitch >= -180 && anglePitch <= 180);
 			if (anglePitch == 180)
 				anglePitch = -180;
@@ -622,7 +622,7 @@ bool ccGBLSensor::computeAutoParameters(CCLib::GenericCloud* theCloud)
 	return true;
 }
 
-bool ccGBLSensor::computeDepthBuffer(CCLib::GenericCloud* theCloud, int& errorCode, ccPointCloud* projectedCloud/*=0*/)
+bool ccGBLSensor::computeDepthBuffer(CCCoreLib::GenericCloud* theCloud, int& errorCode, ccPointCloud* projectedCloud/*=0*/)
 {
 	assert(theCloud);
 	if (!theCloud)
@@ -701,7 +701,7 @@ bool ccGBLSensor::computeDepthBuffer(CCLib::GenericCloud* theCloud, int& errorCo
 		{
 			//progress bar
 			ccProgressDialog pdlg(true);
-			CCLib::NormalizedProgress nprogress(&pdlg, pointCount);
+			CCCoreLib::NormalizedProgress nprogress(&pdlg, pointCount);
 			pdlg.setMethodTitle(QObject::tr("Depth buffer"));
 			pdlg.setInfo(QObject::tr("Points: %L1").arg(pointCount));
 			pdlg.start();
@@ -750,7 +750,7 @@ unsigned char ccGBLSensor::checkVisibility(const CCVector3& P) const
 {
 	if (m_depthBuffer.zBuff.empty()) //no z-buffer?
 	{
-		return CCLib::POINT_VISIBLE;
+		return CCCoreLib::POINT_VISIBLE;
 	}
 
 	//project point
@@ -761,7 +761,7 @@ unsigned char ccGBLSensor::checkVisibility(const CCVector3& P) const
 	//out of sight
 	if (depth > m_sensorRange)
 	{
-		return CCLib::POINT_OUT_OF_RANGE;
+		return CCCoreLib::POINT_OUT_OF_RANGE;
 	}
 
 	unsigned x = 0;
@@ -769,16 +769,16 @@ unsigned char ccGBLSensor::checkVisibility(const CCVector3& P) const
 	if (!convertToDepthMapCoords(Q.x, Q.y, x, y))
 	{
 		//out of field of view
-		return CCLib::POINT_OUT_OF_FOV;
+		return CCCoreLib::POINT_OUT_OF_FOV;
 	}
 
 	//hidden?
 	if (depth > m_depthBuffer.zBuff[y*m_depthBuffer.width + x] * (1.0f + m_uncertainty))
 	{
-		return CCLib::POINT_HIDDEN;
+		return CCCoreLib::POINT_HIDDEN;
 	}
 
-	return CCLib::POINT_VISIBLE;
+	return CCCoreLib::POINT_VISIBLE;
 }
 
 void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)

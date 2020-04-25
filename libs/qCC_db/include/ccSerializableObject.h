@@ -21,7 +21,7 @@
 //Local
 #include "ccLog.h"
 
-//CCLib
+//CCCoreLib
 #include <CCPlatform.h>
 #include <CCTypes.h>
 

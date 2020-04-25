@@ -572,7 +572,7 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(	const std::vector<ccRasterGri
 			int hillshadeSFIdx = m_rasterCloud->getScalarFieldIndexByName(HILLSHADE_FIELD_NAME);
 			if (hillshadeSFIdx >= 0)
 			{
-				CCLib::ScalarField* hillshadeField = m_rasterCloud->getScalarField(hillshadeSFIdx);
+				CCCoreLib::ScalarField* hillshadeField = m_rasterCloud->getScalarField(hillshadeSFIdx);
 				if (hillshadeField->currentSize() == cloudGrid->size())
 				{
 					try
@@ -871,7 +871,7 @@ void ccRasterizeTool::generateMesh() const
 	if (rasterCloud)
 	{
 		char errorStr[1024];
-		CCLib::GenericIndexedMesh* baseMesh = CCLib::PointProjectionTools::computeTriangulation(rasterCloud,
+		CCCoreLib::GenericIndexedMesh* baseMesh = CCCoreLib::PointProjectionTools::computeTriangulation(rasterCloud,
 																								DELAUNAY_2D_AXIS_ALIGNED,
 																								0,
 																								getProjectionDimension(),
@@ -1448,20 +1448,20 @@ void ccRasterizeTool::generateHillshade()
 		m_UI->activeLayerComboBox->setEnabled(true);
 	}
 	assert(hillshadeLayer && hillshadeLayer->currentSize() == m_rasterCloud->size());
-	hillshadeLayer->fill(CCLib::NAN_VALUE);
+	hillshadeLayer->fill(CCCoreLib::NAN_VALUE);
 
 	bool sparseSF = (hillshadeLayer->currentSize() != m_grid.height * m_grid.width);
 
 	//now we can compute the hillshade
 	int zenith_deg = m_UI->sunZenithSpinBox->value();
-	double zenith_rad = zenith_deg * CCLib::DEG_TO_RAD;
+	double zenith_rad = zenith_deg * CCCoreLib::DEG_TO_RAD;
 
 	double cos_zenith_rad = cos(zenith_rad);
 	double sin_zenith_rad = sin(zenith_rad);
 
 	int azimuth_deg = m_UI->sunAzimuthSpinBox->value();
 	int azimuth_math = 360 - azimuth_deg + 90;
-	double azimuth_rad = azimuth_math * CCLib::DEG_TO_RAD;
+	double azimuth_rad = azimuth_math * CCCoreLib::DEG_TO_RAD;
 
 	//for all cells
 	unsigned validCellIndex = 0;
@@ -1927,7 +1927,7 @@ void ccRasterizeTool::generateContours()
 		pDlg.start();
 		pDlg.show();
 		QApplication::processEvents();
-		CCLib::NormalizedProgress nProgress(&pDlg, levelCount);
+		CCCoreLib::NormalizedProgress nProgress(&pDlg, levelCount);
 
 		double v = startValue;
 		while (v <= activeLayer->getMax() && !memoryError)
@@ -2235,7 +2235,7 @@ void ccRasterizeTool::generateImage() const
 		}
 
 		double range = maxHeight - minHeight;
-		if (range < CCLib::ZERO_TOLERANCE)
+		if (range < CCCoreLib::ZERO_TOLERANCE)
 		{
 			range = 1.0;
 		}

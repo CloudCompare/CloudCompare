@@ -6,7 +6,7 @@
 #include "ccGLMatrix.h"
 #include "ccSerializableObject.h"
 
-//CCLib
+//CCCoreLib
 #include <CCGeom.h>
 
 //system

@@ -35,7 +35,7 @@
 //qCC_gl
 #include <ccGLWindow.h>
 
-//CCLib
+//CCCoreLib
 #include <ReferenceCloud.h>
 
 //Qt
@@ -655,7 +655,7 @@ bool ccSectionExtractionTool::addCloud(ccGenericPointCloud* inputCloud, bool alr
 		if (!s_mixedShiftAndScaleInfo && it == m_clouds.begin())
 		{
 			if (cloud.entity->getGlobalScale() != inputCloud->getGlobalScale()
-				|| (cloud.entity->getGlobalShift() - inputCloud->getGlobalShift()).norm() < CCLib::ZERO_TOLERANCE)
+				|| (cloud.entity->getGlobalShift() - inputCloud->getGlobalShift()).norm() < CCCoreLib::ZERO_TOLERANCE)
 			{
 				ccLog::Warning("[ccSectionExtractionTool] Clouds have different shift & scale information! Only the first one will be used");
 				s_mixedShiftAndScaleInfo = true;
@@ -1265,7 +1265,7 @@ bool ccSectionExtractionTool::extractSectionContour(const ccPolyline* originalSe
 	{
 		//update vertices (to replace 'unrolled' points by 'original' ones
 		{
-			CCLib::GenericIndexedCloud* vertices = contour->getAssociatedCloud();
+			CCCoreLib::GenericIndexedCloud* vertices = contour->getAssociatedCloud();
 			if (vertIndexes.size() == static_cast<size_t>(vertices->size()))
 			{
 				for (unsigned i = 0; i < vertices->size(); ++i)
@@ -1365,7 +1365,7 @@ bool ccSectionExtractionTool::extractSectionContour(const ccPolyline* originalSe
 	return true;
 }
 
-bool ccSectionExtractionTool::extractSectionCloud(const std::vector<CCLib::ReferenceCloud*>& refClouds,
+bool ccSectionExtractionTool::extractSectionCloud(const std::vector<CCCoreLib::ReferenceCloud*>& refClouds,
 	unsigned sectionIndex,
 	bool& cloudGenerated)
 {
@@ -1541,7 +1541,7 @@ void ccSectionExtractionTool::unfoldPoints()
 				s.B = CCVector2(B->u[xDim], B->u[yDim]);
 				s.u = s.B - s.A;
 				s.d = s.u.norm();
-				if (s.d > CCLib::ZERO_TOLERANCE)
+				if (s.d > CCCoreLib::ZERO_TOLERANCE)
 				{
 					s.curvPos = curvPos;
 					s.u /= s.d;
@@ -1555,7 +1555,7 @@ void ccSectionExtractionTool::unfoldPoints()
 	}
 
 	ccProgressDialog pdlg(true);
-	CCLib::NormalizedProgress nprogress(&pdlg, totalPointCount);
+	CCCoreLib::NormalizedProgress nprogress(&pdlg, totalPointCount);
 	pdlg.setMethodTitle(tr("Unfold cloud(s)"));
 	pdlg.setInfo(tr("Number of segments: %1\nNumber of points: %2").arg(polySegmentCount).arg(totalPointCount));
 	pdlg.start();
@@ -1573,7 +1573,7 @@ void ccSectionExtractionTool::unfoldPoints()
 			continue;
 		}
 
-		CCLib::ReferenceCloud unfoldedIndexes(cloud);
+		CCCoreLib::ReferenceCloud unfoldedIndexes(cloud);
 		if (!unfoldedIndexes.reserve(cloud->size()))
 		{
 			ccLog::Error("Not enough memory");
@@ -1598,7 +1598,7 @@ void ccSectionExtractionTool::unfoldPoints()
 
 			//test each segment
 			int closestSegment = -1;
-			PointCoordinateType minSquareDist = -CCLib::PC_ONE;
+			PointCoordinateType minSquareDist = -CCCoreLib::PC_ONE;
 			for (unsigned j = 0; j < polySegmentCount; ++j)
 			{
 				const Segment& s = segments[j];
@@ -1792,7 +1792,7 @@ void ccSectionExtractionTool::extractPoints()
 
 	//progress dialog
 	ccProgressDialog pdlg(true);
-	CCLib::NormalizedProgress nprogress(&pdlg, static_cast<unsigned>(sectionCount));
+	CCCoreLib::NormalizedProgress nprogress(&pdlg, static_cast<unsigned>(sectionCount));
 	if (!visualDebugMode)
 	{
 		pdlg.setMethodTitle(tr("Extract sections"));
@@ -1845,7 +1845,7 @@ void ccSectionExtractionTool::extractPoints()
 						seg2D.s = s;
 						s += seg2D.lAB;
 
-						if (seg2D.lAB < CCLib::ZERO_TOLERANCE)
+						if (seg2D.lAB < CCCoreLib::ZERO_TOLERANCE)
 						{
 							//ignore too small segments
 							continue;
@@ -1864,7 +1864,7 @@ void ccSectionExtractionTool::extractPoints()
 				}
 
 				int cloudCount = m_clouds.size();
-				std::vector<CCLib::ReferenceCloud*> refClouds;
+				std::vector<CCCoreLib::ReferenceCloud*> refClouds;
 				if (s_extractSectionsAsClouds)
 				{
 					refClouds.resize(cloudCount, nullptr);
@@ -1892,10 +1892,10 @@ void ccSectionExtractionTool::extractPoints()
 					if (cloud)
 					{
 						//for contour extraction as a cloud
-						CCLib::ReferenceCloud* refCloud = nullptr;
+						CCCoreLib::ReferenceCloud* refCloud = nullptr;
 						if (s_extractSectionsAsClouds)
 						{
-							refCloud = new CCLib::ReferenceCloud(cloud);
+							refCloud = new CCCoreLib::ReferenceCloud(cloud);
 						}
 
 						//compute the distance of each point to the current polyline segment
@@ -1905,7 +1905,7 @@ void ccSectionExtractionTool::extractPoints()
 							CCVector2 P2D(P->u[xDim], P->u[yDim]);
 
 							//for each vertex
-							PointCoordinateType minSquareDist = -CCLib::PC_ONE;
+							PointCoordinateType minSquareDist = -CCCoreLib::PC_ONE;
 							PointCoordinateType curvilinearPos = 0.0;
 							size_t minIndex = 0;
 							for (size_t j = 0; j < polySegments2D.size(); ++j)

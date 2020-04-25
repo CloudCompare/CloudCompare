@@ -29,7 +29,7 @@
 #include <cc2DViewportLabel.h>
 #include <cc2DLabel.h>
 
-//CCLib
+//CCCoreLib
 #include <ScalarField.h>
 
 //Qt

@@ -110,7 +110,7 @@ CC_FILE_ERROR OFFFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	{
 		for (unsigned i = 0; i < triCount; ++i)
 		{
-			const CCLib::VerticesIndexes* tsi = mesh->getTriangleVertIndexes(i);
+			const CCCoreLib::VerticesIndexes* tsi = mesh->getTriangleVertIndexes(i);
 			stream << "3 " << tsi->i1 << ' ' << tsi->i2 << ' ' << tsi->i3 << endl;
 		}
 	}

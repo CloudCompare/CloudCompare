@@ -22,7 +22,7 @@
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 
-//CCLib
+//CCCoreLib
 #include <CCGeom.h>
 
 //Local

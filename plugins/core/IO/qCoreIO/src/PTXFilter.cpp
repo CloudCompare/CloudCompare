@@ -275,7 +275,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	const QString& filename,
 
 		//read points
 		{
-			CCLib::NormalizedProgress nprogress(pDlg.data(), gridSize);
+			CCCoreLib::NormalizedProgress nprogress(pDlg.data(), gridSize);
 			if (pDlg)
 			{
 				pDlg->setInfo(qPrintable(QString("Number of cells: %1").arg(gridSize)));
@@ -529,7 +529,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	const QString& filename,
 		{
 			ccHObject* obj = container.getChild(i);
 			assert(obj && obj->isA(CC_TYPES::POINT_CLOUD));
-			CCLib::ScalarField* sf = static_cast<ccPointCloud*>(obj)->getScalarField(0);
+			CCCoreLib::ScalarField* sf = static_cast<ccPointCloud*>(obj)->getScalarField(0);
 			if (sf)
 			{
 				ccScalarField* ccSF = static_cast<ccScalarField*>(sf);

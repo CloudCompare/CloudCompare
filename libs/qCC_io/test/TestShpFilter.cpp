@@ -326,7 +326,7 @@ void TestShpFilter::readPolygonFile(const QString &filePath) const
 	QVERIFY(!poly->is2DMode());
 	QVERIFY(poly->isClosed());
 
-	CCLib::GenericIndexedCloudPersist *vertices = poly->getAssociatedCloud();
+	CCCoreLib::GenericIndexedCloudPersist *vertices = poly->getAssociatedCloud();
 	QVERIFY(vertices->size() == expectedNumPoints);
 
 	std::array<double, 14> expectedXs{-626146.0444521683, -187004.53123683017, -59884.61951660062, 169316.43343351,

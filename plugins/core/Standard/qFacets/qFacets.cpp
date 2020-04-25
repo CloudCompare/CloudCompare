@@ -34,7 +34,7 @@
 #include <QFileInfo>
 #include <QMessageBox>
 
-//CCLib
+//CCCoreLib
 #include <Neighbourhood.h>
 
 //qCC_db
@@ -239,23 +239,23 @@ void qFacets::extractFacets(CellsFusionDlg::Algorithm algo)
 	s_maxEdgeLength = fusionDlg.maxEdgeLengthDoubleSpinBox->value();
 
 	//convert 'errorMeasureComboBox' index to enum
-	CCLib::DistanceComputationTools::ERROR_MEASURES errorMeasure = CCLib::DistanceComputationTools::RMS;
+	CCCoreLib::DistanceComputationTools::ERROR_MEASURES errorMeasure = CCCoreLib::DistanceComputationTools::RMS;
 	switch (s_errorMeasureType)
 	{
 	case 0:
-		errorMeasure = CCLib::DistanceComputationTools::RMS;
+		errorMeasure = CCCoreLib::DistanceComputationTools::RMS;
 		break;
 	case 1:
-		errorMeasure = CCLib::DistanceComputationTools::MAX_DIST_68_PERCENT;
+		errorMeasure = CCCoreLib::DistanceComputationTools::MAX_DIST_68_PERCENT;
 		break;
 	case 2:
-		errorMeasure = CCLib::DistanceComputationTools::MAX_DIST_95_PERCENT;
+		errorMeasure = CCCoreLib::DistanceComputationTools::MAX_DIST_95_PERCENT;
 		break;
 	case 3:
-		errorMeasure = CCLib::DistanceComputationTools::MAX_DIST_99_PERCENT;
+		errorMeasure = CCCoreLib::DistanceComputationTools::MAX_DIST_99_PERCENT;
 		break;
 	case 4:
-		errorMeasure = CCLib::DistanceComputationTools::MAX_DIST;
+		errorMeasure = CCCoreLib::DistanceComputationTools::MAX_DIST;
 		break;
 	default:
 		assert(false);
@@ -325,8 +325,8 @@ void qFacets::extractFacets(CellsFusionDlg::Algorithm algo)
 	{
 		pc->setCurrentScalarField(sfIdx); //for AutoSegmentationTools::extractConnectedComponents
 
-		CCLib::ReferenceCloudContainer components;
-		if (!CCLib::AutoSegmentationTools::extractConnectedComponents(pc, components))
+		CCCoreLib::ReferenceCloudContainer components;
+		if (!CCCoreLib::AutoSegmentationTools::extractConnectedComponents(pc, components))
 		{
 			m_app->dispToConsole("Failed to extract fused components! (not enough memory?)", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		}
@@ -402,7 +402,7 @@ void qFacets::extractFacets(CellsFusionDlg::Algorithm algo)
 }
 
 ccHObject* qFacets::createFacets(ccPointCloud* cloud,
-	CCLib::ReferenceCloudContainer& components,
+	CCCoreLib::ReferenceCloudContainer& components,
 	unsigned minPointsPerComponent,
 	double maxEdgeLength,
 	bool randomColors,
@@ -435,7 +435,7 @@ ccHObject* qFacets::createFacets(ccPointCloud* cloud,
 	error = false;
 	while (!components.empty())
 	{
-		CCLib::ReferenceCloud* compIndexes = components.back();
+		CCCoreLib::ReferenceCloud* compIndexes = components.back();
 		components.pop_back();
 
 		//if it has enough points
@@ -628,7 +628,7 @@ void ComputeFacetExtensions(CCVector3& N, ccPolyline* facetContour, double& hori
 	//horizontal and vertical extensions
 	horizExt = vertExt = 0;
 
-	CCLib::GenericIndexedCloudPersist* vertCloud = facetContour->getAssociatedCloud();
+	CCCoreLib::GenericIndexedCloudPersist* vertCloud = facetContour->getAssociatedCloud();
 	if (vertCloud)
 	{
 		//oriRotMat.applyRotation(N); //DGM: oriRotMat is only for display!
@@ -637,14 +637,14 @@ void ComputeFacetExtensions(CCVector3& N, ccPolyline* facetContour, double& hori
 		CCVector3 Yf(0, 1, 0);
 		//we get the horizontal vector on the plane
 		CCVector3 D = CCVector3(0, 0, 1).cross(N);
-		if (D.norm2() > CCLib::ZERO_TOLERANCE) //otherwise the facet is horizontal!
+		if (D.norm2() > CCCoreLib::ZERO_TOLERANCE) //otherwise the facet is horizontal!
 		{
 			Yf = D;
 			Yf.normalize();
 			Xf = N.cross(Yf);
 		}
 
-		const CCVector3* G = CCLib::Neighbourhood(vertCloud).getGravityCenter();
+		const CCVector3* G = CCCoreLib::Neighbourhood(vertCloud).getGravityCenter();
 
 		ccBBox box;
 		for (unsigned i = 0; i < vertCloud->size(); ++i)
@@ -783,7 +783,7 @@ void qFacets::exportFacets()
 
 		//update X & Y
 		CCVector3 D = Z.cross(CCVector3(0, 0, 1));
-		if (D.norm2() > CCLib::ZERO_TOLERANCE) //otherwise the vertical dir hasn't changed!
+		if (D.norm2() > CCCoreLib::ZERO_TOLERANCE) //otherwise the vertical dir hasn't changed!
 		{
 			X = -D;
 			X.normalize();
@@ -837,7 +837,7 @@ void qFacets::exportFacets()
 		//if necessary, we create a (temporary) new facet
 		if (!useNativeOrientation)
 		{
-			CCLib::GenericIndexedCloudPersist* vertices = poly->getAssociatedCloud();
+			CCCoreLib::GenericIndexedCloudPersist* vertices = poly->getAssociatedCloud();
 			if (!vertices || vertices->size() < 3)
 				continue;
 

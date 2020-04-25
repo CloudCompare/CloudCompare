@@ -27,7 +27,7 @@
 //qCC
 #include "ccStdPluginInterface.h"
 
-//CCLib
+//CCCoreLib
 #include <AutoSegmentationTools.h>
 #include <ReferenceCloud.h>
 
@@ -90,7 +90,7 @@ protected:
 
 	//! Creates facets from components
 	ccHObject* createFacets(ccPointCloud* cloud,
-							CCLib::ReferenceCloudContainer& components,
+							CCCoreLib::ReferenceCloudContainer& components,
 							unsigned minPointsPerComponent,
 							double maxEdgeLength,
 							bool randomColors,

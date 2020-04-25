@@ -91,7 +91,7 @@ CC_FILE_ERROR SoiFilter::loadFile(const QString& filename, ccHObject& container,
 		pDlg->setInfo(QObject::tr("%1 scans / %2 points").arg(nbScansTotal).arg(nbPointsTotal));
 		pDlg->start();
 	}
-	CCLib::NormalizedProgress nprogress(pDlg.data(), nbPointsTotal);
+	CCCoreLib::NormalizedProgress nprogress(pDlg.data(), nbPointsTotal);
 
 	//Scan by scan
 	for (unsigned k = 0; k < nbScansTotal; k++)

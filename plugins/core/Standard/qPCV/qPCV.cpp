@@ -19,7 +19,7 @@
 #include "ccPcvDlg.h"
 #include "PCVCommand.h"
 
-//CCLib
+//CCCoreLib
 #include <PCV.h>
 #include <ScalarField.h>
 

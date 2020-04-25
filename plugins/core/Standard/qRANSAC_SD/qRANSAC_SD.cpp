@@ -52,7 +52,7 @@
 #include <ccCone.h>
 #include <ccTorus.h>
 
-//CCLib
+//CCCoreLib
 #include <ScalarField.h>
 #include <CCPlatform.h>
 
@@ -275,7 +275,7 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 	{
 		ransacOptions.m_epsilon = params.epsilon;
 		ransacOptions.m_bitmapEpsilon = params.bitmapEpsilon;
-		ransacOptions.m_normalThresh = static_cast<float>(cos(params.maxNormalDev_deg * CCLib::DEG_TO_RAD));
+		ransacOptions.m_normalThresh = static_cast<float>(cos(params.maxNormalDev_deg * CCCoreLib::DEG_TO_RAD));
 		assert(ransacOptions.m_normalThresh >= 0);
 		ransacOptions.m_probability = params.probability;
 		ransacOptions.m_minSupport = params.supportPoints;
@@ -480,7 +480,7 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 			bool saveNormals = true;
 			{
 #ifdef POINTSWITHINDEX
-				CCLib::ReferenceCloud refPcShape(ccPC);
+				CCCoreLib::ReferenceCloud refPcShape(ccPC);
 				//we fill cloud with sub-part points
 				if (!refPcShape.reserve(static_cast<unsigned>(shapePointsCount)))
 				{

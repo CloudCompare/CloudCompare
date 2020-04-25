@@ -23,7 +23,7 @@
 #include "ccOverlayDialog.h"
 #include "ccPickingListener.h"
 
-//CCLib
+//CCCoreLib
 #include <PointProjectionTools.h>
 
 //qCC_db
@@ -111,8 +111,8 @@ protected:
 	//! Enables (or not) buttons depending on the number of points in both lists
 	void onPointCountChanged();
 
-	//! Calls Horn registration (CCLib::HornRegistrationTools)
-	bool callHornRegistration(CCLib::PointProjectionTools::Transformation& trans, double& rms, bool autoUpdateTab);
+	//! Calls Horn registration (CCCoreLib::HornRegistrationTools)
+	bool callHornRegistration(CCCoreLib::PointProjectionTools::Transformation& trans, double& rms, bool autoUpdateTab);
 
 	//! Clears the RMS rows
 	void clearRMSColumns();

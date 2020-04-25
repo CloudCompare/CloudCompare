@@ -20,7 +20,7 @@
 
 #include "ui_broomDlg.h"
 
-//CCLib
+//CCCoreLib
 #include <CCGeom.h>
 
 //qCC_db

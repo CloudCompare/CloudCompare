@@ -32,7 +32,7 @@
 //qCC
 #include <ccGLWindow.h>
 
-//CCLib
+//CCCoreLib
 #include <CloudSamplingTools.h>
 
 //Qhull
@@ -72,7 +72,7 @@ void qHPR::onNewSelection(const ccHObject::Container& selectedEntities)
 	}
 }
 
-CCLib::ReferenceCloud* qHPR::removeHiddenPoints(CCLib::GenericIndexedCloudPersist* theCloud, const CCVector3d& viewPoint, double fParam)
+CCCoreLib::ReferenceCloud* qHPR::removeHiddenPoints(CCCoreLib::GenericIndexedCloudPersist* theCloud, const CCVector3d& viewPoint, double fParam)
 {
 	assert(theCloud);
 
@@ -83,7 +83,7 @@ CCLib::ReferenceCloud* qHPR::removeHiddenPoints(CCLib::GenericIndexedCloudPersis
 	//less than 4 points? no need for calculation, we return the whole cloud
 	if (nbPoints < 4)
 	{
-		CCLib::ReferenceCloud* visiblePoints = new CCLib::ReferenceCloud(theCloud);
+		CCCoreLib::ReferenceCloud* visiblePoints = new CCCoreLib::ReferenceCloud(theCloud);
 		if (!visiblePoints->addPointIndex(0,nbPoints)) //well even for less than 4 points we never know ;)
 		{
 			//not enough memory!
@@ -192,7 +192,7 @@ CCLib::ReferenceCloud* qHPR::removeHiddenPoints(CCLib::GenericIndexedCloudPersis
 					++cvxHullSize;
 		}
 
-		CCLib::ReferenceCloud* visiblePoints = new CCLib::ReferenceCloud(theCloud);
+		CCCoreLib::ReferenceCloud* visiblePoints = new CCCoreLib::ReferenceCloud(theCloud);
 		if (cvxHullSize!=0 && visiblePoints->reserve(cvxHullSize))
 		{
 			for (unsigned i=0; i<nbPoints; ++i)
@@ -252,7 +252,7 @@ void qHPR::doAction()
 
 	//unique parameter: the octree subdivision level
 	int octreeLevel = dlg.octreeLevelSpinBox->value();
-	assert(octreeLevel >= 0 && octreeLevel <= CCLib::DgmOctree::MAX_OCTREE_LEVEL);
+	assert(octreeLevel >= 0 && octreeLevel <= CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL);
 
 	//compute octree if cloud hasn't any
 	ccOctree::Shared theOctree = cloud->getOctree();
@@ -280,14 +280,14 @@ void qHPR::doAction()
 	}
 
 	//HPR
-	CCLib::ReferenceCloud* visibleCells = nullptr;
+	CCCoreLib::ReferenceCloud* visibleCells = nullptr;
 	{
 		QElapsedTimer eTimer;
 		eTimer.start();
 
-		CCLib::ReferenceCloud* theCellCenters = CCLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(	cloud,
+		CCCoreLib::ReferenceCloud* theCellCenters = CCCoreLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(	cloud,
 																											static_cast<unsigned char>(octreeLevel),
-																											CCLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,
+																											CCCoreLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,
 																											&progressCb,
 																											theOctree.data());
 		if (!theCellCenters)
@@ -321,12 +321,12 @@ void qHPR::doAction()
 		pointsVisibility->fill(POINT_HIDDEN);
 		*/
 
-		CCLib::ReferenceCloud visiblePoints(theOctree->associatedCloud());
+		CCCoreLib::ReferenceCloud visiblePoints(theOctree->associatedCloud());
 
 		unsigned visiblePointCount = 0;
 		unsigned visibleCellsCount = visibleCells->size();
 
-		CCLib::DgmOctree::cellIndexesContainer cellIndexes;
+		CCCoreLib::DgmOctree::cellIndexesContainer cellIndexes;
 		if (!theOctree->getCellIndexes(static_cast<unsigned char>(octreeLevel), cellIndexes))
 		{
 			m_app->dispToConsole("Couldn't fetch the list of octree cell indexes! (Not enough memory?)",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
@@ -340,7 +340,7 @@ void qHPR::doAction()
 			unsigned index = visibleCells->getPointGlobalIndex(i);
 
 			//points in this cell...
-			CCLib::ReferenceCloud Yk(theOctree->associatedCloud());
+			CCCoreLib::ReferenceCloud Yk(theOctree->associatedCloud());
 			theOctree->getPointsInCellByCellIndex(&Yk,cellIndexes[index],static_cast<unsigned char>(octreeLevel));
 			//...are all visible
 			/*unsigned count = Yk.size();

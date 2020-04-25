@@ -161,7 +161,7 @@ ccHObject* ccHObject::New(CC_CLASS_ENUM objectType, const char* name/*=0*/)
 	case CC_TYPES::CALIBRATED_IMAGE:
 		return nullptr; //deprecated
 	case CC_TYPES::GBL_SENSOR:
-		//warning: default sensor type set in constructor (see CCLib::GroundBasedLidarSensor::setRotationOrder)
+		//warning: default sensor type set in constructor (see CCCoreLib::GroundBasedLidarSensor::setRotationOrder)
 		return new ccGBLSensor();
 	case CC_TYPES::CAMERA_SENSOR:
 		return new ccCameraSensor();

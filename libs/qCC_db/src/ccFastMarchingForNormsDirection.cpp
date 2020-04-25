@@ -17,7 +17,7 @@
 
 #include "ccFastMarchingForNormsDirection.h"
 
-//CCLib
+//CCCoreLib
 #include "Neighbourhood.h"
 
 //Local
@@ -35,18 +35,18 @@
 #include <cassert>
 
 ccFastMarchingForNormsDirection::ccFastMarchingForNormsDirection()
-	: CCLib::FastMarching()
+	: CCCoreLib::FastMarching()
 {
 }
 
-static CCVector3 ComputeRobustAverageNorm(	CCLib::ReferenceCloud* subset,
+static CCVector3 ComputeRobustAverageNorm(	CCCoreLib::ReferenceCloud* subset,
 											ccGenericPointCloud* sourceCloud)
 {
 	if (!subset || subset->size() == 0 || !sourceCloud)
 		return CCVector3(0,0,1);
 
 	assert(sourceCloud->hasNormals());
-	assert(subset->getAssociatedCloud() == static_cast<CCLib::GenericIndexedCloud*>(sourceCloud));
+	assert(subset->getAssociatedCloud() == static_cast<CCCoreLib::GenericIndexedCloud*>(sourceCloud));
 
 	//we simply take the first normal as reference (DGM: seems to work better than the LS plane!)
 	const CCVector3& N = sourceCloud->getPointNormal(subset->getPointGlobalIndex(0));
@@ -80,10 +80,10 @@ int ccFastMarchingForNormsDirection::init(	ccGenericPointCloud* cloud,
 		return result;
 
 	//fill the grid with the octree
-	CCLib::DgmOctree::cellCodesContainer cellCodes;
+	CCCoreLib::DgmOctree::cellCodesContainer cellCodes;
 	theOctree->getCellCodes(level,cellCodes,true);
 
-	CCLib::ReferenceCloud Yk(theOctree->associatedCloud());
+	CCCoreLib::ReferenceCloud Yk(theOctree->associatedCloud());
 
 	while (!cellCodes.empty())
 	{
@@ -106,7 +106,7 @@ int ccFastMarchingForNormsDirection::init(	ccGenericPointCloud* cloud,
 			//aCell->signConfidence = 1;
 			aCell->cellCode = cellCodes.back();
 			aCell->N = ComputeRobustAverageNorm(&Yk,cloud);
-			aCell->C = *CCLib::Neighbourhood(&Yk).getGravityCenter();
+			aCell->C = *CCCoreLib::Neighbourhood(&Yk).getGravityCenter();
 		}
 
 		m_theGrid[gridPos] = aCell;
@@ -208,7 +208,7 @@ int ccFastMarchingForNormsDirection::step()
 	if (minTCellIndex == 0)
 		return 0;
 
-	CCLib::FastMarching::Cell* minTCell = m_theGrid[minTCellIndex];
+	CCCoreLib::FastMarching::Cell* minTCell = m_theGrid[minTCellIndex];
 	assert(minTCell && minTCell->state != DirectionCell::ACTIVE_CELL);
 
 	if (minTCell->T < Cell::T_INF())
@@ -234,7 +234,7 @@ int ccFastMarchingForNormsDirection::step()
 		{
 			//get neighbor cell
 			unsigned nIndex = minTCellIndex + m_neighboursIndexShift[i];
-			CCLib::FastMarching::Cell* nCell = m_theGrid[nIndex];
+			CCCoreLib::FastMarching::Cell* nCell = m_theGrid[nIndex];
 			if (nCell)
 			{
 				//if it' not yet a TRIAL cell
@@ -263,7 +263,7 @@ int ccFastMarchingForNormsDirection::step()
 	return 1;
 }
 
-float ccFastMarchingForNormsDirection::computeTCoefApprox(CCLib::FastMarching::Cell* originCell, CCLib::FastMarching::Cell* destCell) const
+float ccFastMarchingForNormsDirection::computeTCoefApprox(CCCoreLib::FastMarching::Cell* originCell, CCCoreLib::FastMarching::Cell* destCell) const
 {
 	DirectionCell* oCell = static_cast<DirectionCell*>(originCell);
 	DirectionCell* dCell = static_cast<DirectionCell*>(destCell);
@@ -290,10 +290,10 @@ unsigned ccFastMarchingForNormsDirection::updateResolvedTable(	ccGenericPointClo
 																std::vector<unsigned char>& resolved,
 																NormsIndexesTableType* theNorms)
 {
-	if (!m_initialized || !m_octree || m_gridLevel > CCLib::DgmOctree::MAX_OCTREE_LEVEL)
+	if (!m_initialized || !m_octree || m_gridLevel > CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL)
 		return 0;
 
-	CCLib::ReferenceCloud Yk(m_octree->associatedCloud());
+	CCCoreLib::ReferenceCloud Yk(m_octree->associatedCloud());
 
 	unsigned count = 0;
 	for (unsigned int cell : m_activeCells)

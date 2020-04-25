@@ -12,7 +12,6 @@ install:
 - sudo apt-get update -qq
 - sudo apt-get install -qy cmake
   libqt5svg5-dev libqt5opengl5-dev qt5-default qttools5-dev qttools5-dev-tools
-  libqt5gamepad5-dev
   libtbb-dev
   libavcodec-dev libavformat-dev libavutil-dev
   libboost-program-options-dev libboost-thread-dev
@@ -30,7 +29,6 @@ before_script:
   -DDLIB_ROOT=/usr/include
   -DCCCORELIB_SCALAR_DOUBLE=$SCALAR_DOUBLE
   -DCCCORELIB_USE_TBB=ON
-  -DOPTION_SUPPORT_GAMEPADS=ON
   -DPLUGIN_EXAMPLE_GL=ON
   -DPLUGIN_EXAMPLE_IO=ON
   -DPLUGIN_EXAMPLE_STANDARD=ON

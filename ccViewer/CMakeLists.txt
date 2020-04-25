@@ -44,7 +44,7 @@ endif()
 
 target_link_libraries( ${PROJECT_NAME}
     QCC_GL_LIB
-    QCC_IO_LIB
+    CCPluginAPI
     Qt5::OpenGL
     Qt5::Widgets
 )

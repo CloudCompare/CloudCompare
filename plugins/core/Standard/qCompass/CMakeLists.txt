@@ -7,9 +7,6 @@ if (PLUGIN_STANDARD_QCOMPASS)
 
 	include( CMakePolicies NO_POLICY_SCOPE )
 
-	# we need includes from the main CC source dir
-	include_directories( ${CloudCompare_SOURCE_DIR} )
-
 	#we need ccOverlay classes
 	file( GLOB CC_PLUGIN_CUSTOM_HEADER_LIST ${CloudCompare_SOURCE_DIR}/../common/ccOverlayDialog*.h )
 	file( GLOB CC_PLUGIN_CUSTOM_SOURCE_LIST ${CloudCompare_SOURCE_DIR}/../common/ccOverlayDialog*.cpp )
@@ -19,10 +16,19 @@ if (PLUGIN_STANDARD_QCOMPASS)
 	list( APPEND CC_PLUGIN_CUSTOM_HEADER_LIST ${CloudCompare_SOURCE_DIR}/../common/ccPickingHub.h )
 	list( APPEND CC_PLUGIN_CUSTOM_SOURCE_LIST ${CloudCompare_SOURCE_DIR}/../common/ccPickingHub.cpp )
 
-	include_directories( src )
-
 	add_subdirectory( src )
 	add_subdirectory( ui )
 
     include( CMakePluginTemplate )
+
+    # FIXME These are required becaue we have dependencies outside of the api
+    #   (at least ccOverlayDialog*, the picking stuff, and something in "common")
+    # We need to determine where those files should live to avoid this.
+    target_include_directories( ${PROJECT_NAME}
+        PRIVATE
+            ${CMAKE_CURRENT_LIST_DIR}
+            ${CMAKE_CURRENT_LIST_DIR}/src
+            ${CloudCompare_SOURCE_DIR}/../common
+    )
+    
 endif()

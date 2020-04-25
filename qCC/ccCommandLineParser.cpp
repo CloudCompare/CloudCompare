@@ -7,6 +7,7 @@
 #include "ccPluginInterface.h"
 
 //qCC_db
+#include <ccGenericMesh.h>
 #include <ccHObjectCaster.h>
 #include <ccProgressDialog.h>
 

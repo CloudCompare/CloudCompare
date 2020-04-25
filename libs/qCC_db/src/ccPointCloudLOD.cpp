@@ -54,8 +54,8 @@ protected:
 	uint8_t fillNode(ccPointCloudLOD::Node& node) const
 	{
 		const ccOctree::cellsContainer& cellCodes = m_octree->pointsAndTheirCellCodes();
-		const unsigned char bitDec = CCLib::DgmOctree::GET_BIT_SHIFT(node.level);
-		const CCLib::DgmOctree::CellCode currentTruncatedCellCode = (cellCodes[node.firstCodeIndex].theCode >> bitDec);
+		const unsigned char bitDec = CCCoreLib::DgmOctree::GET_BIT_SHIFT(node.level);
+		const CCCoreLib::DgmOctree::CellCode currentTruncatedCellCode = (cellCodes[node.firstCodeIndex].theCode >> bitDec);
 
 		//first count the number of points and compute their center
 		{
@@ -128,8 +128,8 @@ protected:
 	uint8_t fillNode_flat(ccPointCloudLOD::Node& node) const
 	{
 		const ccOctree::cellsContainer& cellCodes = m_octree->pointsAndTheirCellCodes();
-		const unsigned char bitDec = CCLib::DgmOctree::GET_BIT_SHIFT(node.level);
-		const CCLib::DgmOctree::CellCode currentTruncatedCellCode = (cellCodes[node.firstCodeIndex].theCode >> bitDec);
+		const unsigned char bitDec = CCCoreLib::DgmOctree::GET_BIT_SHIFT(node.level);
+		const CCCoreLib::DgmOctree::CellCode currentTruncatedCellCode = (cellCodes[node.firstCodeIndex].theCode >> bitDec);
 
 		//first count the number of points and compute their center
 		{
@@ -217,7 +217,7 @@ protected:
 		QObject::connect(m_octree.data(), &ccOctree::updated, this, [&](){ m_cloud.clearLOD(); });
 
 		m_maxLevel = static_cast<uint8_t>(std::max<size_t>(1, m_lod.m_levels.size())) - 1;
-		assert(m_maxLevel <= CCLib::DgmOctree::MAX_OCTREE_LEVEL);
+		assert(m_maxLevel <= CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL);
 
 #if 0 //recursive path
 		//recursive
@@ -447,8 +447,8 @@ bool ccPointCloudLOD::initInternal(ccOctree::Shared octree)
 
 	try
 	{
-		assert(CCLib::DgmOctree::MAX_OCTREE_LEVEL <= 255);
-		m_levels.resize(CCLib::DgmOctree::MAX_OCTREE_LEVEL + 1);
+		assert(CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL <= 255);
+		m_levels.resize(CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL + 1);
 	}
 	catch (const std::bad_alloc&)
 	{

@@ -22,7 +22,7 @@
 
 class ccGenericPointCloud;
 
-namespace CCLib {
+namespace CCCoreLib {
 	class ReferenceCloud;
 }
 
@@ -54,8 +54,8 @@ public:
 	CC_SAMPLING_METHOD getSamplingMethod();
 	bool isNumberOfCandidatesLimited();
 	unsigned getMaxNumberOfCandidates();
-	CCLib::ReferenceCloud *getSampledModel();
-	CCLib::ReferenceCloud *getSampledData();
+	CCCoreLib::ReferenceCloud *getSampledModel();
+	CCCoreLib::ReferenceCloud *getSampledData();
 
 protected:
 	void swapModelAndData();

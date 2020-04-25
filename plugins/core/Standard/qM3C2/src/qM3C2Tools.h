@@ -18,7 +18,7 @@
 #ifndef Q_M3C2_TOOLS_HEADER
 #define Q_M3C2_TOOLS_HEADER
 
-//CCLib
+//CCCoreLib
 #include <GenericIndexedCloud.h>
 #include <GenericProgressCallback.h>
 #include <DgmOctree.h>
@@ -51,22 +51,22 @@ public:
 	/** See qCC's ccNormalVectors::ComputeCloudNormals.
 		\warning normals orientation is not resolved!
 	**/
-	static bool ComputeCorePointsNormals(	CCLib::GenericIndexedCloud* corePoints,
+	static bool ComputeCorePointsNormals(	CCCoreLib::GenericIndexedCloud* corePoints,
 											NormsIndexesTableType* corePointsNormals,
 											ccGenericPointCloud* sourceCloud,
 											const std::vector<PointCoordinateType>& sortedRadii,
 											bool& invalidNormals,
 											int maxThreadCount = 0,
 											ccScalarField* normalScale = 0,
-											CCLib::GenericProgressCallback* progressCb = 0,
-											CCLib::DgmOctree* inputOctree = 0);
+											CCCoreLib::GenericProgressCallback* progressCb = 0,
+											CCCoreLib::DgmOctree* inputOctree = 0);
 	
 	//! Re-orients normal vectors so that they all 'look' towards the nearest point of another cloud
-	static bool UpdateNormalOrientationsWithCloud(	CCLib::GenericIndexedCloud* normCloud,
+	static bool UpdateNormalOrientationsWithCloud(	CCCoreLib::GenericIndexedCloud* normCloud,
 													NormsIndexesTableType& normsCodes,
-													CCLib::GenericIndexedCloud* orientationCloud,
+													CCCoreLib::GenericIndexedCloud* orientationCloud,
 													int maxThreadCount = 0,
-													CCLib::GenericProgressCallback* progressCb = 0);
+													CCCoreLib::GenericProgressCallback* progressCb = 0);
 
 	//! Makes all normals horizontal
 	static void MakeNormalsHorizontal(NormsIndexesTableType& normsCodes);
@@ -82,7 +82,7 @@ public:
 		or the median and interquartile range (if useMedian is true).
 		See http://en.wikipedia.org/wiki/Interquartile_range
 	**/
-	static void ComputeStatistics(	CCLib::DgmOctree::NeighboursSet& set,
+	static void ComputeStatistics(	CCCoreLib::DgmOctree::NeighboursSet& set,
 									bool useMedian,
 									double& meanOrMedian,
 									double& stdDevOrIQR);

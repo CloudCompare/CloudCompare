@@ -26,7 +26,7 @@
 //System
 #include <vector>
 
-namespace CCLib
+namespace CCCoreLib
 {
 	class GenericProgressCallback;
 	class ReferenceCloud;
@@ -52,7 +52,7 @@ class ccOctreeProxy;
 	- an octree strucutre
 	- visibility information per point (to hide/display subsets of points)
 **/
-class QCC_DB_LIB_API ccGenericPointCloud : public ccShiftedObject,  public CCLib::GenericIndexedCloudPersist
+class QCC_DB_LIB_API ccGenericPointCloud : public ccShiftedObject,  public CCCoreLib::GenericIndexedCloudPersist
 {
 	friend class ccMesh;
 
@@ -104,11 +104,11 @@ public:
 		3D cube that totally encloses the cloud.
 		WARNING: any previously attached octree will be deleted,
 				 even if the new octree computation failed.
-		\param progressCb the caller can get some notification of the process progress through this callback mechanism (see CCLib documentation)
+		\param progressCb the caller can get some notification of the process progress through this callback mechanism (see CCCoreLib documentation)
 		\param autoAddChild whether to automatically add the computed octree as child of this cloud or not
 		\return the computed octree
 	**/
-	virtual ccOctree::Shared computeOctree(CCLib::GenericProgressCallback* progressCb = nullptr, bool autoAddChild = true);
+	virtual ccOctree::Shared computeOctree(CCCoreLib::GenericProgressCallback* progressCb = nullptr, bool autoAddChild = true);
 	
 	//! Returns the associated octree (if any)
 	virtual ccOctree::Shared getOctree() const;
@@ -181,7 +181,7 @@ public:
 		\param silent don't issue warnings if no visible point is present
 		\return the visible points as a ReferenceCloud
 	**/
-	virtual CCLib::ReferenceCloud* getTheVisiblePoints(const VisibilityTableType* visTable = nullptr, bool silent = false) const;
+	virtual CCCoreLib::ReferenceCloud* getTheVisiblePoints(const VisibilityTableType* visTable = nullptr, bool silent = false) const;
 	
 	//! Returns whether the visiblity array is allocated or not
 	virtual bool isVisibilityTableInstantiated() const;
@@ -225,7 +225,7 @@ public:
 		\param inside whether selected points are inside or outside the box
 		\return points falling inside (or outside) as a selection
 	**/
-	virtual CCLib::ReferenceCloud* crop(const ccBBox& box, bool inside = true) = 0;
+	virtual CCCoreLib::ReferenceCloud* crop(const ccBBox& box, bool inside = true) = 0;
 
 	//! Multiplies all coordinates by constant factors (one per dimension)
 	/** WARNING: attached octree may be deleted.

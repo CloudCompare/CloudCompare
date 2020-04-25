@@ -25,7 +25,7 @@
 class ccMesh;
 
 //! A sub-mesh
-/** Equivalent to a CCLib::ReferenceCloud for a mesh
+/** Equivalent to a CCCoreLib::ReferenceCloud for a mesh
 **/
 class QCC_DB_LIB_API ccSubMesh : public ccGenericMesh
 {
@@ -79,10 +79,10 @@ public:
 	inline unsigned size() const override { return static_cast<unsigned>(m_triIndexes.size()); }
 	void forEach(genericTriangleAction action) override;
 	inline void placeIteratorAtBeginning() override { m_globalIterator = 0; }
-	CCLib::GenericTriangle* _getNextTriangle() override; //temporary object
-	CCLib::GenericTriangle* _getTriangle(unsigned index) override; //temporary object
-	CCLib::VerticesIndexes* getNextTriangleVertIndexes() override;
-	CCLib::VerticesIndexes* getTriangleVertIndexes(unsigned triangleIndex) override;
+	CCCoreLib::GenericTriangle* _getNextTriangle() override; //temporary object
+	CCCoreLib::GenericTriangle* _getTriangle(unsigned index) override; //temporary object
+	CCCoreLib::VerticesIndexes* getNextTriangleVertIndexes() override;
+	CCCoreLib::VerticesIndexes* getTriangleVertIndexes(unsigned triangleIndex) override;
 	void getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) const override;
 	void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) override;
 

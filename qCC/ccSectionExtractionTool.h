@@ -97,7 +97,7 @@ protected:
 	void addUndoStep();
 
 	//! Convert one or several ReferenceCloud instances to a single cloud and add it to the main DB
-	bool extractSectionCloud(	const std::vector<CCLib::ReferenceCloud*>& refClouds,
+	bool extractSectionCloud(	const std::vector<CCCoreLib::ReferenceCloud*>& refClouds,
 								unsigned sectionIndex,
 								bool& cloudGenerated);
 

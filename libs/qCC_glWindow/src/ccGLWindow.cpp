@@ -2822,7 +2822,7 @@ void ccGLWindow::updateConstellationCenterAndZoom(const ccBBox* aBox/*=0*/)
 	//we get the bounding-box diagonal length
 	double bbDiag = static_cast<double>(zoomedBox.getDiagNorm());
 
-	if (bbDiag < CCLib::ZERO_TOLERANCE)
+	if (bbDiag < CCCoreLib::ZERO_TOLERANCE)
 	{
 		ccLog::Warning("[ccGLWindow] Entity/DB has a null bounding-box! Can't zoom in...");
 		return;
@@ -2844,7 +2844,7 @@ void ccGLWindow::updateConstellationCenterAndZoom(const ccBBox* aBox/*=0*/)
 		//we must go backward so as to see the object!
 		float currentFov_deg = getFov();
 		assert(currentFov_deg > FLT_EPSILON);
-		double d = bbDiag / (2 * std::tan(currentFov_deg / 2.0 * CCLib::DEG_TO_RAD));
+		double d = bbDiag / (2 * std::tan(currentFov_deg / 2.0 * CCCoreLib::DEG_TO_RAD));
 
 		CCVector3d cameraDir(0, 0, -1);
 		if (!m_viewportParams.objectCenteredView)
@@ -3314,7 +3314,7 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(const CCVector3d& cameraCenter, 
 		//compute the aspect ratio
 		double ar = static_cast<double>(m_glViewport.height()) / m_glViewport.width();
 
-		double xMax = zNear * std::tan(currentFov_deg / 2.0 * CCLib::DEG_TO_RAD);
+		double xMax = zNear * std::tan(currentFov_deg / 2.0 * CCCoreLib::DEG_TO_RAD);
 		double yMax = xMax * ar;
 
 		//DGM: we now take 'frustumAsymmetry' into account (for stereo rendering)
@@ -4086,7 +4086,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 
 				if (m_rectPickingPoly)
 				{
-					CCLib::GenericIndexedCloudPersist* vertices = m_rectPickingPoly->getAssociatedCloud();
+					CCCoreLib::GenericIndexedCloudPersist* vertices = m_rectPickingPoly->getAssociatedCloud();
 					assert(vertices);
 					CCVector3* B = const_cast<CCVector3*>(vertices->getPointPersistentPtr(1));
 					CCVector3* C = const_cast<CCVector3*>(vertices->getPointPersistentPtr(2));
@@ -4121,7 +4121,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 						double delta_deg = (posDelta.x() * static_cast<double>(m_bubbleViewFov_deg)) / height();
 						//rotation about the sensor Z axis
 						CCVector3d axis = m_viewportParams.viewMat.getColumnAsVec3D(2);
-						rotMat.initFromParameters(delta_deg * CCLib::DEG_TO_RAD, axis, CCVector3d(0, 0, 0));
+						rotMat.initFromParameters(delta_deg * CCCoreLib::DEG_TO_RAD, axis, CCVector3d(0, 0, 0));
 					}
 
 					if (std::abs(posDelta.y()) != 0)
@@ -4129,7 +4129,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 						double delta_deg = (posDelta.y() * static_cast<double>(m_bubbleViewFov_deg)) / height();
 						//rotation about the local X axis
 						ccGLMatrixd rotX;
-						rotX.initFromParameters(delta_deg * CCLib::DEG_TO_RAD, CCVector3d(1, 0, 0), CCVector3d(0, 0, 0));
+						rotX.initFromParameters(delta_deg * CCCoreLib::DEG_TO_RAD, CCVector3d(1, 0, 0), CCVector3d(0, 0, 0));
 						rotMat = rotX * rotMat;
 					}
 				}
@@ -4444,7 +4444,7 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 			//if a rectangular picking area has been defined
 			if (m_rectPickingPoly)
 			{
-				CCLib::GenericIndexedCloudPersist* vertices = m_rectPickingPoly->getAssociatedCloud();
+				CCCoreLib::GenericIndexedCloudPersist* vertices = m_rectPickingPoly->getAssociatedCloud();
 				assert(vertices);
 				const CCVector3* A = vertices->getPointPersistentPtr(0);
 				const CCVector3* C = vertices->getPointPersistentPtr(2);
@@ -5654,8 +5654,8 @@ double ccGLWindow::computeActualPixelSize() const
 	//Camera center to pivot vector
 	double zoomEquivalentDist = (m_viewportParams.cameraCenter - m_viewportParams.pivotPoint).norm();
 
-	//return zoomEquivalentDist * (2.0 * std::tan(std::min(getFov(), 75.0f) / 2.0 *CCLib::CC_DEG_TO_RAD )) / minScreenDim; //tan(75) = 3.73 (then it quickly increases!)
-	return zoomEquivalentDist * (2.0 * std::tan(std::min(getFov(), 75.0f) / 2.0 * CCLib::DEG_TO_RAD)) / m_glViewport.width(); //tan(75) = 3.73 (then it quickly increases!)
+	//return zoomEquivalentDist * (2.0 * std::tan(std::min(getFov(), 75.0f) / 2.0 *CCCoreLib::CC_DEG_TO_RAD )) / minScreenDim; //tan(75) = 3.73 (then it quickly increases!)
+	return zoomEquivalentDist * (2.0 * std::tan(std::min(getFov(), 75.0f) / 2.0 * CCCoreLib::DEG_TO_RAD)) / m_glViewport.width(); //tan(75) = 3.73 (then it quickly increases!)
 }
 
 float ccGLWindow::computePerspectiveZoom() const
@@ -5671,12 +5671,12 @@ float ccGLWindow::computePerspectiveZoom() const
 
 	//Camera center to pivot vector
 	double zoomEquivalentDist = (m_viewportParams.cameraCenter - m_viewportParams.pivotPoint).norm();
-	if (zoomEquivalentDist < CCLib::ZERO_TOLERANCE)
+	if (zoomEquivalentDist < CCCoreLib::ZERO_TOLERANCE)
 		return 1.0f;
 
 	//float screenSize = std::min(m_glViewport.width(), m_glViewport.height()) * m_viewportParams.pixelSize; //see how pixelSize is computed!
 	float screenSize = m_glViewport.width() * m_viewportParams.pixelSize; //see how pixelSize is computed!
-	return screenSize / static_cast<float>(zoomEquivalentDist * 2.0 * std::tan(currentFov_deg / 2.0 * CCLib::DEG_TO_RAD));
+	return screenSize / static_cast<float>(zoomEquivalentDist * 2.0 * std::tan(currentFov_deg / 2.0 * CCCoreLib::DEG_TO_RAD));
 }
 
 void ccGLWindow::setBubbleViewMode(bool state)
@@ -5732,12 +5732,12 @@ void ccGLWindow::setPerspectiveState(bool state, bool objectCenteredView)
 			//(i.e. we replace the zoom by setting the camera at the right distance from
 			//the pivot point)
 			double currentFov_deg = getFov();
-			assert(currentFov_deg > CCLib::ZERO_TOLERANCE);
+			assert(currentFov_deg > CCCoreLib::ZERO_TOLERANCE);
 			//double screenSize = std::min(m_glViewport.width(), m_glViewport.height()) * m_viewportParams.pixelSize; //see how pixelSize is computed!
 			double screenSize = m_glViewport.width() * m_viewportParams.pixelSize; //see how pixelSize is computed!
 			if (screenSize > 0.0)
 			{
-				PC.z = screenSize / (m_viewportParams.zoom * 2.0 * std::tan(currentFov_deg / 2.0 * CCLib::DEG_TO_RAD));
+				PC.z = screenSize / (m_viewportParams.zoom * 2.0 * std::tan(currentFov_deg / 2.0 * CCCoreLib::DEG_TO_RAD));
 			}
 		}
 

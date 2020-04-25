@@ -102,7 +102,7 @@ CC_FILE_ERROR PVFilter::saveToFile(ccHObject* entity, const QString& filename, c
 		pDlg->setInfo(QObject::tr("Points: %L1").arg( numberOfPoints ));
 		pDlg->start();
 	}
-	CCLib::NormalizedProgress nprogress(pDlg.data(), numberOfPoints);
+	CCCoreLib::NormalizedProgress nprogress(pDlg.data(), numberOfPoints);
 
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 
@@ -168,7 +168,7 @@ CC_FILE_ERROR PVFilter::loadFile(const QString& filename, ccHObject& container, 
 		pDlg->setInfo(QObject::tr("Points: %L1").arg( numberOfPoints ));
 		pDlg->start();
 	}
-	CCLib::NormalizedProgress nprogress(pDlg.data(), numberOfPoints);
+	CCCoreLib::NormalizedProgress nprogress(pDlg.data(), numberOfPoints);
 
 	ccPointCloud* loadedCloud = nullptr;
 	//if the file is too big, it will be chuncked in multiple parts
@@ -189,7 +189,7 @@ CC_FILE_ERROR PVFilter::loadFile(const QString& filename, ccHObject& container, 
 				int sfIdx = loadedCloud->getCurrentInScalarFieldIndex();
 				if (sfIdx>=0)
 				{
-					CCLib::ScalarField* sf = loadedCloud->getScalarField(sfIdx);
+					CCCoreLib::ScalarField* sf = loadedCloud->getScalarField(sfIdx);
 					sf->computeMinAndMax();
 					loadedCloud->setCurrentDisplayedScalarField(sfIdx);
 					loadedCloud->showSF(true);
@@ -254,7 +254,7 @@ CC_FILE_ERROR PVFilter::loadFile(const QString& filename, ccHObject& container, 
 		int sfIdx = loadedCloud->getCurrentInScalarFieldIndex();
 		if (sfIdx >= 0)
 		{
-			CCLib::ScalarField* sf = loadedCloud->getScalarField(sfIdx);
+			CCCoreLib::ScalarField* sf = loadedCloud->getScalarField(sfIdx);
 			sf->computeMinAndMax();
 			loadedCloud->setCurrentDisplayedScalarField(sfIdx);
 			loadedCloud->showSF(true);

@@ -22,7 +22,7 @@
 #include "ccSensor.h"
 #include "ccDepthBuffer.h"
 
-//CCLib
+//CCCoreLib
 #include <GenericCloud.h>
 
 class ccPointCloud;
@@ -82,7 +82,7 @@ public:
 	//! Computes angular parameters automatically (all but the angular steps!)
 	/** WARNING: this method uses the cloud global iterator.
 	**/
-	bool computeAutoParameters(CCLib::GenericCloud* theCloud);
+	bool computeAutoParameters(CCCoreLib::GenericCloud* theCloud);
 
 	//! Returns the error string corresponding to an error code
 	/** Errors codes are returned by ccGBLSensor::computeDepthBuffer or ccDepthBuffer::fillHoles for instance.
@@ -185,7 +185,7 @@ public: //projection tools
 		\param posIndex (optional) sensor position index (see ccIndexedTransformationBuffer)
 		\return a bidimensional array of 3D vectors (same size as the depth buffer)
 	**/
-	NormalGrid* projectNormals(	CCLib::GenericCloud* cloud,
+	NormalGrid* projectNormals(	CCCoreLib::GenericCloud* cloud,
 								const NormalGrid& norms,
 								double posIndex = 0 ) const;
 
@@ -198,7 +198,7 @@ public: //projection tools
 		\param rgbColors the RGB colors (should have the same size and order as the point cloud)
 		\return a set of RGB colors organized as a bidimensional grid (same size as the depth buffer)
 	**/
-	ColorGrid* projectColors(	CCLib::GenericCloud* cloud,
+	ColorGrid* projectColors(	CCCoreLib::GenericCloud* cloud,
 								const ColorGrid& rgbColors ) const;
 
 public: //depth buffer management
@@ -210,7 +210,7 @@ public: //depth buffer management
 		\param projectedCloud optional (empty) cloud to store the projected points
 		\return whether the depth buffer was successfully created or not
 	**/
-	bool computeDepthBuffer(CCLib::GenericCloud* cloud, int& errorCode, ccPointCloud* projectedCloud = nullptr);
+	bool computeDepthBuffer(CCCoreLib::GenericCloud* cloud, int& errorCode, ccPointCloud* projectedCloud = nullptr);
 
 	//! Returns the associated depth buffer
 	/** Call ccGBLSensor::computeDepthBuffer first otherwise the returned buffer will be 0.

@@ -26,16 +26,16 @@
 #include <QAtomicInt>
 #include <QTimer>
 
-//CCLib
+//CCCoreLib
 #include <GenericProgressCallback.h>
 
 //! Graphical progress indicator (thread-safe)
 /** Implements the GenericProgressCallback interface, in order
-	to be passed to the CCLib algorithms (check the
-	CCLib documentation for more information about the
+	to be passed to the CCCoreLib algorithms (check the
+	CCCoreLib documentation for more information about the
 	inherited methods).
 **/
-class QCC_DB_LIB_API ccProgressDialog : public QProgressDialog, public CCLib::GenericProgressCallback
+class QCC_DB_LIB_API ccProgressDialog : public QProgressDialog, public CCCoreLib::GenericProgressCallback
 {
 
 	Q_OBJECT

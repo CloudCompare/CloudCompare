@@ -37,7 +37,7 @@
 //Qt
 #include <QFileInfo>
 
-//CCLib
+//CCCoreLib
 #include <MeshSamplingTools.h>
 
 //System
@@ -257,7 +257,7 @@ static int32_t SizeofMultipatch(unsigned numPoints, int32_t numParts = 1)
 	return static_cast<int32_t>(recordSize);
 }
 
-static bool AreVerticesCounterClockwise(const CCLib::GenericIndexedCloudPersist *vertices,
+static bool AreVerticesCounterClockwise(const CCCoreLib::GenericIndexedCloudPersist *vertices,
                                         int32_t numPoints,
                                         unsigned char dim1,
                                         unsigned char dim2)
@@ -279,7 +279,7 @@ static bool AreVerticesCounterClockwise(const CCLib::GenericIndexedCloudPersist 
 	return sum < 0.0;
 }
 
-static CCVector2d MinMaxOfEnabledScalarField(const CCLib::GenericIndexedCloudPersist *cloud)
+static CCVector2d MinMaxOfEnabledScalarField(const CCCoreLib::GenericIndexedCloudPersist *cloud)
 {
 	CCVector2d minMax(ESRI_NO_DATA, ESRI_NO_DATA);
 	if (cloud->isScalarFieldEnabled() && cloud->size() != 0)
@@ -336,7 +336,7 @@ CCVector2d mRangeOfContainer(ccHObject::Container &objects)
 {
 	CCVector2d range(std::numeric_limits<double>::max(), std::numeric_limits<double>::min());
 
-	auto updateRange = [&range](const CCLib::GenericIndexedCloudPersist *cloud)
+	auto updateRange = [&range](const CCCoreLib::GenericIndexedCloudPersist *cloud)
 	{
 		if (!cloud->isScalarFieldEnabled())
 			return;
@@ -344,7 +344,7 @@ CCVector2d mRangeOfContainer(ccHObject::Container &objects)
 		for (unsigned i = 0; i < numPoints; ++i)
 		{
 			ScalarType val = cloud->getPointScalarValue(i);
-			if (val != CCLib::NAN_VALUE)
+			if (val != CCCoreLib::NAN_VALUE)
 			{
 				auto m = static_cast<double>(val);
 				range.x = std::min(range.x, m);
@@ -367,7 +367,7 @@ CCVector2d mRangeOfContainer(ccHObject::Container &objects)
 			case CC_TYPES::POLY_LINE:
 			{
 				const ccPolyline *poly = ccHObjectCaster::ToPolyline(obj);
-				const CCLib::GenericIndexedCloudPersist *vertices = poly->getAssociatedCloud();
+				const CCCoreLib::GenericIndexedCloudPersist *vertices = poly->getAssociatedCloud();
 				updateRange(vertices);
 				break;
 			}
@@ -751,7 +751,7 @@ static std::vector<ScalarType> readMeasures(QDataStream& shpStream, int32_t numP
 		{
 			double m;
 			shpStream >> m;
-			scalarValues[i] = (isESRINoData(m)  ? CCLib::NAN_VALUE : static_cast<ScalarType>(m));
+			scalarValues[i] = (isESRINoData(m)  ? CCCoreLib::NAN_VALUE : static_cast<ScalarType>(m));
 		}
 	}
 	else
@@ -994,12 +994,12 @@ static void save3DCloud(QDataStream &stream, const ccGenericPointCloud *cloud, c
 	}
 }
 
-static inline bool isTriangleStrip(const CCLib::VerticesIndexes *idx)
+static inline bool isTriangleStrip(const CCCoreLib::VerticesIndexes *idx)
 {
 	return (idx->i3 - 1) == idx->i2 && (idx->i3 - 2) == idx->i1;
 }
 
-static inline bool isTriangleFan(const CCLib::VerticesIndexes *idx)
+static inline bool isTriangleFan(const CCCoreLib::VerticesIndexes *idx)
 {
 	return idx->i1 == 0 && idx->i2 == (idx->i3 - 1);
 }
@@ -1012,16 +1012,16 @@ static inline bool isTriangleFan(const CCLib::VerticesIndexes *idx)
  */
 CC_FILE_ERROR findTriangleOrganisation(ccMesh *mesh, ESRI_PART_TYPE &type)
 {
-	const CCLib::VerticesIndexes *firstVert = mesh->getNextTriangleVertIndexes();
+	const CCCoreLib::VerticesIndexes *firstVert = mesh->getNextTriangleVertIndexes();
 	if (!isTriangleFan(firstVert) && !isTriangleStrip(firstVert))
 		return CC_FERR_BAD_ENTITY_TYPE;
 
-	const CCLib::VerticesIndexes *secondVert = mesh->getNextTriangleVertIndexes();
+	const CCCoreLib::VerticesIndexes *secondVert = mesh->getNextTriangleVertIndexes();
 	if (isTriangleStrip(secondVert))
 	{
 		for (unsigned i = 2; i < mesh->size(); ++i)
 		{
-			CCLib::VerticesIndexes *idx = mesh->getNextTriangleVertIndexes();
+			CCCoreLib::VerticesIndexes *idx = mesh->getNextTriangleVertIndexes();
 			if (!isTriangleStrip(idx))
 				return CC_FERR_BAD_ENTITY_TYPE;
 		}
@@ -1033,7 +1033,7 @@ CC_FILE_ERROR findTriangleOrganisation(ccMesh *mesh, ESRI_PART_TYPE &type)
 	{
 		for (unsigned i = 2; i < mesh->size(); ++i)
 		{
-			CCLib::VerticesIndexes *idx = mesh->getNextTriangleVertIndexes();
+			CCCoreLib::VerticesIndexes *idx = mesh->getNextTriangleVertIndexes();
 			if (!isTriangleFan(idx))
 				return CC_FERR_BAD_ENTITY_TYPE;
 		}
@@ -1151,7 +1151,7 @@ static CC_FILE_ERROR LoadPolyline(QDataStream &shpStream,
 
 		//test if the polyline is closed
 		bool isClosed = false;
-		if (vertCount > 2 && (points[firstIndex] - points[lastIndex]).norm() < CCLib::ZERO_TOLERANCE)
+		if (vertCount > 2 && (points[firstIndex] - points[lastIndex]).norm() < CCCoreLib::ZERO_TOLERANCE)
 		{
 			vertCount--;
 			isClosed = true;
@@ -1247,7 +1247,7 @@ static CC_FILE_ERROR SavePolyline(ccPolyline* poly,
 	const unsigned char X = Z == 2 ? 0 : Z + 1;
 	const unsigned char Y = X == 2 ? 0 : X + 1;
 
-	CCLib::GenericIndexedCloudPersist* vertices = poly->getAssociatedCloud();
+	CCCoreLib::GenericIndexedCloudPersist* vertices = poly->getAssociatedCloud();
 	if (!vertices)
 	{
 		return CC_FERR_BAD_ENTITY_TYPE;
@@ -1392,7 +1392,7 @@ static CC_FILE_ERROR SavePolyline(ccPolyline* poly,
 			for (int32_t i = 0; i < numPoints; ++i)
 			{
 				ScalarType scalar = vertices->getPointScalarValue(i % iRealVertexCount);
-				out << (scalar == CCLib::NAN_VALUE ? ESRI_NO_DATA : static_cast<double>(scalar));
+				out << (scalar == CCCoreLib::NAN_VALUE ? ESRI_NO_DATA : static_cast<double>(scalar));
 			}
 		}
 		else
@@ -1489,7 +1489,7 @@ static CC_FILE_ERROR LoadCloud(QDataStream &shpStream,
 			{
 				double m;
 				shpStream >> m;
-				ScalarType s = isESRINoData(m) ? CCLib::NAN_VALUE : static_cast<ScalarType>(m);
+				ScalarType s = isESRINoData(m) ? CCCoreLib::NAN_VALUE : static_cast<ScalarType>(m);
 				sf->addElement(s);
 			}
 			bool allNans = std::all_of(sf->begin(), sf->end(), [](ScalarType s) { return std::isnan(s); });
@@ -1577,7 +1577,7 @@ static CC_FILE_ERROR LoadSinglePoint(QDataStream &shpStream,
 		P.z = static_cast<PointCoordinateType>(z + Pshift.z);
 	}
 
-	ScalarType s = CCLib::NAN_VALUE;
+	ScalarType s = CCCoreLib::NAN_VALUE;
 	if (hasMeasurements(shapeType))
 	{
 		double m;
@@ -1595,7 +1595,7 @@ static CC_FILE_ERROR LoadSinglePoint(QDataStream &shpStream,
 					singlePoints->setCurrentScalarField(sfIdx);
 					for (unsigned i = 0; i < singlePoints->size(); ++i)
 					{
-						singlePoints->setPointScalarValue(i, CCLib::NAN_VALUE);
+						singlePoints->setPointScalarValue(i, CCCoreLib::NAN_VALUE);
 					}
 				}
 			}
@@ -2219,7 +2219,7 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString &filename, ccHObject &container,
 		}
 		else
 		{
-			CCLib::ScalarField* sf = singlePoints->getScalarField(0);
+			CCCoreLib::ScalarField* sf = singlePoints->getScalarField(0);
 			if (sf)
 			{
 				sf->computeMinAndMax();

@@ -21,7 +21,7 @@
 #include <ccPointCloud.h>
 #include <ccHObjectCaster.h>
 
-//CCLib
+//CCCoreLib
 #include <CCPlatform.h>
 
 //qCC

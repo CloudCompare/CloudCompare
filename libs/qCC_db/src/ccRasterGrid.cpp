@@ -17,7 +17,7 @@
 
 #include "ccRasterGrid.h"
 
-//CCLib
+//CCCoreLib
 #include <Delaunay2dMesh.h>
 
 //qCC_db
@@ -220,7 +220,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 		progressDialog->show();
 		QCoreApplication::processEvents();
 	}
-	CCLib::NormalizedProgress nProgress(progressDialog, pointCount);
+	CCCoreLib::NormalizedProgress nProgress(progressDialog, pointCount);
 
 	//vertical dimension
 	assert(Z <= 2);
@@ -344,7 +344,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 			{
 				assert(!scalarFields[k].empty());
 
-				CCLib::ScalarField* sf = pc->getScalarField(static_cast<unsigned>(k));
+				CCCoreLib::ScalarField* sf = pc->getScalarField(static_cast<unsigned>(k));
 				assert(sf && pos < scalarFields[k].size());
 
 				ScalarType sfValue = sf->getValue(n);
@@ -511,7 +511,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 			assert(index == nonEmptyCellCount);
 
 			//mesh the '2D' points
-			CCLib::Delaunay2dMesh delaunayMesh;
+			CCCoreLib::Delaunay2dMesh delaunayMesh;
 			char errorStr[1024];
 			if (delaunayMesh.buildMesh(the2DPoints, 0, errorStr))
 			{
@@ -520,7 +520,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 				delaunayMesh.placeIteratorAtBeginning();
 				for (unsigned k = 0; k < triNum; ++k)
 				{
-					const CCLib::VerticesIndexes* tsi = delaunayMesh.getNextTriangleVertIndexes();
+					const CCCoreLib::VerticesIndexes* tsi = delaunayMesh.getNextTriangleVertIndexes();
 					//get the triangle bounding box (in grid coordinates)
 					int P[3][2];
 					int xMin = 0;
@@ -746,7 +746,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 			assert(false);
 			return nullptr;
 		}
-		CCLib::ReferenceCloud refCloud(inputCloud);
+		CCCoreLib::ReferenceCloud refCloud(inputCloud);
 		if (!refCloud.reserve(nonEmptyCellCount))
 		{
 			ccLog::Warning("[Rasterize] Not enough memory!");
@@ -806,7 +806,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 	assert(cloudGrid);
 	
 	//shall we generate additional scalar fields?
-	std::vector<CCLib::ScalarField*> exportedSFs;
+	std::vector<CCCoreLib::ScalarField*> exportedSFs;
 	if (!exportedFields.empty())
 	{
 		exportedSFs.resize(exportedFields.size(), nullptr);
@@ -933,13 +933,13 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 				assert(exportedSFs.size() == exportedFields.size());
 				for (size_t k = 0; k < exportedSFs.size(); ++k)
 				{
-					CCLib::ScalarField* sf = exportedSFs[k];
+					CCCoreLib::ScalarField* sf = exportedSFs[k];
 					if (!sf)
 					{
 						continue;
 					}
 
-					ScalarType sVal = CCLib::NAN_VALUE;
+					ScalarType sVal = CCCoreLib::NAN_VALUE;
 					switch (exportedFields[k])
 					{
 					case PER_CELL_HEIGHT:
@@ -1019,7 +1019,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 				assert(exportedSFs.size() == exportedFields.size());
 				for (size_t k = 0; k < exportedSFs.size(); ++k)
 				{
-					CCLib::ScalarField* sf = exportedSFs[k];
+					CCCoreLib::ScalarField* sf = exportedSFs[k];
 					if (!sf)
 					{
 						continue;
@@ -1035,7 +1035,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 					else
 					{
 						assert(sf->size() < sf->capacity());
-						sf->addElement(CCLib::NAN_VALUE);
+						sf->addElement(CCCoreLib::NAN_VALUE);
 					}
 				}
 			}
@@ -1089,7 +1089,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 					assert(sf);
 					//set sf values
 					unsigned n = 0;
-					const ScalarType emptyCellSFValue = CCLib::ScalarField::NaN();
+					const ScalarType emptyCellSFValue = CCCoreLib::ScalarField::NaN();
 					const double* _sfGrid = scalarFields[k].data();
 					for (unsigned j = 0; j < height; ++j)
 					{
@@ -1119,8 +1119,8 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 		//we simply add NAN values at the end of the SFs
 		for (int k = 0; k < static_cast<int>(cloudGrid->getNumberOfScalarFields()); ++k)
 		{
-			CCLib::ScalarField* sf = cloudGrid->getScalarField(k);
-			sf->resizeSafe(cloudGrid->size(), true, CCLib::NAN_VALUE);
+			CCCoreLib::ScalarField* sf = cloudGrid->getScalarField(k);
+			sf->resizeSafe(cloudGrid->size(), true, CCCoreLib::NAN_VALUE);
 		}
 	}
 

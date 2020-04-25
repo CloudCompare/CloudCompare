@@ -25,7 +25,7 @@
 #include <ccLog.h>
 //qCC_gl
 #include <ccGLWindow.h>
-//CCLib
+//CCCoreLib
 #include <CCPlatform.h>
 
 //Qt

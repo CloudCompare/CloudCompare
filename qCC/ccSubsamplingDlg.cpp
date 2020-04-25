@@ -18,7 +18,7 @@
 #include "ccSubsamplingDlg.h"
 #include "ui_subsamplingDlg.h"
 
-//CCLib
+//CCCoreLib
 #include <CloudSamplingTools.h>
 #include <ScalarField.h>
 
@@ -56,7 +56,7 @@ ccSubsamplingDlg::~ccSubsamplingDlg()
 	delete m_ui;
 }
 
-CCLib::ReferenceCloud* ccSubsamplingDlg::getSampledCloud(ccGenericPointCloud* cloud, CCLib::GenericProgressCallback* progressCb/*=0*/)
+CCCoreLib::ReferenceCloud* ccSubsamplingDlg::getSampledCloud(ccGenericPointCloud* cloud, CCCoreLib::GenericProgressCallback* progressCb/*=0*/)
 {
 	if (!cloud || cloud->size() == 0)
 	{
@@ -70,7 +70,7 @@ CCLib::ReferenceCloud* ccSubsamplingDlg::getSampledCloud(ccGenericPointCloud* cl
 		{
 			assert(m_ui->samplingValue->value() >= 0);
 			unsigned count = static_cast<unsigned>(m_ui->samplingValue->value());
-			return CCLib::CloudSamplingTools::subsampleCloudRandomly(	cloud,
+			return CCCoreLib::CloudSamplingTools::subsampleCloudRandomly(	cloud,
 																		count,
 																		progressCb);
 		}
@@ -84,13 +84,13 @@ CCLib::ReferenceCloud* ccSubsamplingDlg::getSampledCloud(ccGenericPointCloud* cl
 			if (octree)
 			{
 				PointCoordinateType minDist = static_cast<PointCoordinateType>(m_ui->samplingValue->value());
-				CCLib::CloudSamplingTools::SFModulationParams modParams;
+				CCCoreLib::CloudSamplingTools::SFModulationParams modParams;
 				modParams.enabled = m_ui->sfGroupBox->isEnabled() && m_ui->sfGroupBox->isChecked();
 				if (modParams.enabled)
 				{
 					double deltaSF = static_cast<double>(m_sfMax) - m_sfMin;
 					assert(deltaSF >= 0);
-					if (deltaSF > CCLib::ZERO_TOLERANCE)
+					if (deltaSF > CCCoreLib::ZERO_TOLERANCE)
 					{
 						double sfMinSpacing = m_ui->minSFSpacingDoubleSpinBox->value();
 						double sfMaxSpacing = m_ui->maxSFSpacingDoubleSpinBox->value();
@@ -103,7 +103,7 @@ CCLib::ReferenceCloud* ccSubsamplingDlg::getSampledCloud(ccGenericPointCloud* cl
 						modParams.b = m_sfMin;
 					}
 				}
-				return CCLib::CloudSamplingTools::resampleCloudSpatially(	cloud, 
+				return CCCoreLib::CloudSamplingTools::resampleCloudSpatially(	cloud, 
 																			minDist,
 																			modParams,
 																			octree.data(),
@@ -125,9 +125,9 @@ CCLib::ReferenceCloud* ccSubsamplingDlg::getSampledCloud(ccGenericPointCloud* cl
 			{
 				assert(m_ui->samplingValue->value() >= 0);
 				unsigned char level = static_cast<unsigned char>(m_ui->samplingValue->value());
-				return CCLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(	cloud,
+				return CCCoreLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(	cloud,
 																					level,
-																					CCLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,
+																					CCCoreLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,
 																					progressCb,
 																					octree.data());
 			}
@@ -242,7 +242,7 @@ void ccSubsamplingDlg::changeSamplingMethod(int index)
 		{
 			m_ui->samplingValue->setDecimals(0);
 			m_ui->samplingValue->setMinimum(1);
-			m_ui->samplingValue->setMaximum(static_cast<double>(CCLib::DgmOctree::MAX_OCTREE_LEVEL));
+			m_ui->samplingValue->setMaximum(static_cast<double>(CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL));
 			m_ui->samplingValue->setSingleStep(1);
 			m_ui->samplingValue->setEnabled(true);
 		}
@@ -259,7 +259,7 @@ void ccSubsamplingDlg::changeSamplingMethod(int index)
 
 void ccSubsamplingDlg::enableSFModulation(ScalarType sfMin, ScalarType sfMax)
 {
-	m_sfModEnabled = CCLib::ScalarField::ValidValue(sfMin) && CCLib::ScalarField::ValidValue(sfMax);
+	m_sfModEnabled = CCCoreLib::ScalarField::ValidValue(sfMin) && CCCoreLib::ScalarField::ValidValue(sfMax);
 	if (!m_sfModEnabled)
 	{
 		ccLog::Warning("[ccSubsamplingDlg::enableSFModulation] Invalid input SF values");

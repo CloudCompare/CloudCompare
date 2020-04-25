@@ -23,7 +23,7 @@
 #pragma warning( disable: 4250 )
 #endif
 
-//CCLib
+//CCCoreLib
 #include <PointCloudTpl.h>
 
 //Local
@@ -61,11 +61,11 @@ const unsigned CC_MAX_NUMBER_OF_POINTS_PER_CLOUD = 2000000000; //we must keep it
 	- per-point visibility information (to hide/display subsets of points)
 	- other children objects (meshes, calibrated pictures, etc.)
 **/
-class QCC_DB_LIB_API ccPointCloud : public CCLib::PointCloudTpl<ccGenericPointCloud, QString>
+class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPointCloud, QString>
 {
 public:
 	//! Base class (shortcut)
-	using BaseClass = CCLib::PointCloudTpl<ccGenericPointCloud, QString>;
+	using BaseClass = CCCoreLib::PointCloudTpl<ccGenericPointCloud, QString>;
 
 	//! Default constructor
 	/** Creates an empty cloud without any feature. Each of them shoud be
@@ -85,7 +85,7 @@ public:
 public: //clone, copy, etc.
 
 	//! Creates a new point cloud object from a GenericIndexedCloud
-	/** "GenericIndexedCloud" is an extension of GenericCloud (from CCLib)
+	/** "GenericIndexedCloud" is an extension of GenericCloud (from CCCoreLib)
 		which provides a const random accessor to points.
 		See CClib documentation for more information about GenericIndexedCloud.
 		As the GenericIndexedCloud interface is very simple, only points are imported.
@@ -93,10 +93,10 @@ public: //clone, copy, etc.
 		\param cloud a GenericIndexedCloud structure
 		\param sourceCloud cloud from which main parameters will be imported (optional)
 	**/
-	static ccPointCloud* From(const CCLib::GenericIndexedCloud* cloud, const ccGenericPointCloud* sourceCloud = nullptr);
+	static ccPointCloud* From(const CCCoreLib::GenericIndexedCloud* cloud, const ccGenericPointCloud* sourceCloud = nullptr);
 
 	//! Creates a new point cloud object from a GenericCloud
-	/** "GenericCloud" is a very simple and light interface from CCLib. It is
+	/** "GenericCloud" is a very simple and light interface from CCCoreLib. It is
 		meant to give access to points coordinates of any cloud (on the
 		condition it implements the GenericCloud interface of course).
 		See CClib documentation for more information about GenericClouds.
@@ -105,7 +105,7 @@ public: //clone, copy, etc.
 		\param cloud a GenericCloud structure
 		\param sourceCloud cloud from which main parameters will be imported (optional)
 	**/
-	static ccPointCloud* From(CCLib::GenericCloud* cloud, const ccGenericPointCloud* sourceCloud = nullptr);
+	static ccPointCloud* From(CCCoreLib::GenericCloud* cloud, const ccGenericPointCloud* sourceCloud = nullptr);
 
 	//! Warnings for the partialClone method (bit flags)
 	enum CLONE_WARNINGS {	WRN_OUT_OF_MEM_FOR_COLORS		= 1,
@@ -121,7 +121,7 @@ public: //clone, copy, etc.
 		\param selection a ReferenceCloud structure (pointing to source)
 		\param[out] warnings [optional] to determine if warnings (CTOR_ERRORS) occurred during the duplication process
 	**/
-	ccPointCloud* partialClone(const CCLib::ReferenceCloud* selection, int* warnings = nullptr) const;
+	ccPointCloud* partialClone(const CCCoreLib::ReferenceCloud* selection, int* warnings = nullptr) const;
 
 	//! Clones this entity
 	/** All the main features of the entity are cloned, except from the octree and
@@ -367,7 +367,7 @@ public: //normals computation/orientation
 	bool orientNormalsTowardViewPoint( CCVector3 & VP, ccProgressDialog* pDlg = nullptr);
 
 	//! Compute the normals by approximating the local surface around each point
-	bool computeNormalsWithOctree(	CCLib::LOCAL_MODEL_TYPES model,
+	bool computeNormalsWithOctree(	CCCoreLib::LOCAL_MODEL_TYPES model,
 									ccNormalVectors::Orientation preferredOrientation,
 									PointCoordinateType defaultRadius,
 									ccProgressDialog* pDlg = nullptr );
@@ -449,7 +449,7 @@ public: //other methods
 	void removeFromDisplay(const ccGenericGLDisplay* win) override; //for proper VBO release
 	void setDisplay(ccGenericGLDisplay* win) override;
 
-	//inherited from CCLib::GenericCloud
+	//inherited from CCCoreLib::GenericCloud
 	unsigned char testVisibility(const CCVector3& P) const override;
 
 	//inherited from ccGenericPointCloud
@@ -459,7 +459,7 @@ public: //other methods
 	const ccColor::Rgba& getPointColor(unsigned pointIndex) const override;
 	const CompressedNormType& getPointNormalIndex(unsigned pointIndex) const override;
 	const CCVector3& getPointNormal(unsigned pointIndex) const override;
-	CCLib::ReferenceCloud* crop(const ccBBox& box, bool inside = true) override;
+	CCCoreLib::ReferenceCloud* crop(const ccBBox& box, bool inside = true) override;
 	void scale(PointCoordinateType fx, PointCoordinateType fy, PointCoordinateType fz, CCVector3 center = CCVector3(0,0,0)) override;
 	/** \warning if removeSelectedPoints is true, any attached octree will be deleted. **/
 	ccGenericPointCloud* createNewCloudFromVisibilitySelection(bool removeSelectedPoints = false, VisibilityTableType* visTable = nullptr, bool silent = false) override;
@@ -479,13 +479,13 @@ public: //other methods
 	/** The output (reference) clouds will have as many points as this cloud
 		(with the indexes pointing on the closest point in the other cloud)
 	**/
-	QSharedPointer<CCLib::ReferenceCloud> computeCPSet(	ccGenericPointCloud& otherCloud,
-														CCLib::GenericProgressCallback* progressCb = nullptr,
+	QSharedPointer<CCCoreLib::ReferenceCloud> computeCPSet(	ccGenericPointCloud& otherCloud,
+														CCCoreLib::GenericProgressCallback* progressCb = nullptr,
 														unsigned char octreeLevel = 0);
 
 	//! Interpolate colors from another cloud (nearest neighbor only)
 	bool interpolateColorsFrom(	ccGenericPointCloud* cloud,
-								CCLib::GenericProgressCallback* progressCb = nullptr,
+								CCCoreLib::GenericProgressCallback* progressCb = nullptr,
 								unsigned char octreeLevel = 0);
 
 	//! Sets a particular point color
@@ -672,7 +672,7 @@ public: //other methods
 	};
 
 	//! Unrolls the cloud and its normals on a cylinder or a cone
-	/** This method is redundant with the "developCloudOnCylinder" method of CCLib,
+	/** This method is redundant with the "developCloudOnCylinder" method of CCCoreLib,
 		apart that it can also handle the cloud normals.
 		\param mode unrolling mode
 		\param params unrolling parameters (must match the unrolling mode)
@@ -687,7 +687,7 @@ public: //other methods
 							bool exportDeviationSF = false,
 							double startAngle_deg = 0.0,
 							double stopAngle_deg = 360.0,
-							CCLib::GenericProgressCallback* progressCb = nullptr) const;
+							CCCoreLib::GenericProgressCallback* progressCb = nullptr) const;
 
 	//! Adds associated SF color ramp info to current GL context
 	void addColorRampInfo(CC_DRAW_CONTEXT& context);
@@ -712,7 +712,7 @@ public: //other methods
 		\param inside whether selected points are inside or outside the polyline
 		\return points falling inside (or outside) as a selection
 	**/
-	CCLib::ReferenceCloud* crop2D(const ccPolyline* poly, unsigned char orthoDim, bool inside = true);
+	CCCoreLib::ReferenceCloud* crop2D(const ccPolyline* poly, unsigned char orthoDim, bool inside = true);
 
 	//! Appends a cloud to this one
 	/** Same as the += operator with pointCountBefore == size()

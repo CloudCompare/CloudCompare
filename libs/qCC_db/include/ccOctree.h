@@ -22,7 +22,7 @@
 #include "ccGenericGLDisplay.h"
 #include "ccHObject.h"
 
-//CCLib
+//CCCoreLib
 #include <DgmOctree.h>
 #include <ReferenceCloud.h>
 
@@ -34,9 +34,9 @@ class ccOctreeFrustumIntersector;
 class ccCameraSensor;
 
 //! Octree structure
-/** Extends the CCLib::DgmOctree class.
+/** Extends the CCCoreLib::DgmOctree class.
 **/
-class QCC_DB_LIB_API ccOctree : public QObject, public CCLib::DgmOctree
+class QCC_DB_LIB_API ccOctree : public QObject, public CCCoreLib::DgmOctree
 {
 	Q_OBJECT
 
@@ -110,12 +110,12 @@ public: //RENDERING
 public: //HELPERS
 	
 	//! Computes the average color of a set of points
-	static void ComputeAverageColor(CCLib::ReferenceCloud* subset,
+	static void ComputeAverageColor(CCCoreLib::ReferenceCloud* subset,
 									ccGenericPointCloud* sourceCloud,
 									ColorCompType meanCol[]);
 
 	//! Computes the average normal of a set of points
-	static CCVector3 ComputeAverageNorm(CCLib::ReferenceCloud* subset,
+	static CCVector3 ComputeAverageNorm(CCCoreLib::ReferenceCloud* subset,
 										ccGenericPointCloud* sourceCloud);
 
 signals:
@@ -125,17 +125,17 @@ signals:
 
 protected: ////RENDERING
 
-	static bool DrawCellAsABox(	const CCLib::DgmOctree::octreeCell& cell,
+	static bool DrawCellAsABox(	const CCCoreLib::DgmOctree::octreeCell& cell,
 								void** additionalParameters,
-								CCLib::NormalizedProgress* nProgress = 0);
+								CCCoreLib::NormalizedProgress* nProgress = 0);
 
-	static bool DrawCellAsAPoint(	const CCLib::DgmOctree::octreeCell& cell,
+	static bool DrawCellAsAPoint(	const CCCoreLib::DgmOctree::octreeCell& cell,
 									void** additionalParameters,
-									CCLib::NormalizedProgress* nProgress = 0);
+									CCCoreLib::NormalizedProgress* nProgress = 0);
 
-	static bool DrawCellAsAPrimitive(	const CCLib::DgmOctree::octreeCell& cell,
+	static bool DrawCellAsAPrimitive(	const CCCoreLib::DgmOctree::octreeCell& cell,
 										void** additionalParameters,
-										CCLib::NormalizedProgress* nProgress = 0);
+										CCCoreLib::NormalizedProgress* nProgress = 0);
 
 protected: //MEMBERS
 

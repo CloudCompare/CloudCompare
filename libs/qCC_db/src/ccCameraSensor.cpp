@@ -25,7 +25,7 @@
 #include "ccMesh.h"
 #include "ccPointCloud.h"
 
-//CCLib
+//CCCoreLib
 #include <ConjugateGradient.h>
 
 //Qt
@@ -370,7 +370,7 @@ bool ccCameraSensor::applyViewport(ccGenericGLDisplay* win/*=0*/)
 	//aspect ratio
 	float ar = static_cast<float>(m_intrinsicParams.arrayWidth) / m_intrinsicParams.arrayHeight;
 	//fov
-	float fov_deg = static_cast<float>(m_intrinsicParams.vFOV_rad * CCLib::RAD_TO_DEG);
+	float fov_deg = static_cast<float>(m_intrinsicParams.vFOV_rad * CCCoreLib::RAD_TO_DEG);
 	//camera position/orientation
 	ccGLMatrixd transd(trans.data());
 	win->setupProjectiveViewport(transd, fov_deg, ar);
@@ -765,7 +765,7 @@ bool ccCameraSensor::fromImageCoordToGlobalCoord(const CCVector2& imageCoord, CC
 		return false;
 
 	CCVector3 localCoord;
-	if (!fromImageCoordToLocalCoord(imageCoord, localCoord, CCLib::PC_ONE, withLensCorrection))
+	if (!fromImageCoordToLocalCoord(imageCoord, localCoord, CCCoreLib::PC_ONE, withLensCorrection))
 		return false;
 
 	//update altitude: we must compute the intersection between the plane Z = Z0 (world) and the camera (input pixel) viewing direction
@@ -773,7 +773,7 @@ bool ccCameraSensor::fromImageCoordToGlobalCoord(const CCVector2& imageCoord, CC
 	trans.applyRotation(viewDir);
 	viewDir.normalize();
 
-	if (fabs(viewDir.z) < CCLib::ZERO_TOLERANCE)
+	if (fabs(viewDir.z) < CCCoreLib::ZERO_TOLERANCE)
 	{
 		//viewing dir is parallel to the plane Z = Z0!
 		return false;
@@ -925,7 +925,7 @@ bool ccCameraSensor::computeUncertainty(const CCVector2& pixel, const float dept
 	return false;
 }
 
-bool ccCameraSensor::computeUncertainty(CCLib::ReferenceCloud* points, std::vector< Vector3Tpl<ScalarType> >& accuracy/*, bool lensCorrection*/)
+bool ccCameraSensor::computeUncertainty(CCCoreLib::ReferenceCloud* points, std::vector< Vector3Tpl<ScalarType> >& accuracy/*, bool lensCorrection*/)
 {
 	if (!points || points->size() == 0)
 	{
@@ -964,7 +964,7 @@ bool ccCameraSensor::computeUncertainty(CCLib::ReferenceCloud* points, std::vect
 		}
 		else
 		{
-			accuracy[i].x = accuracy[i].y = accuracy[i].z = CCLib::NAN_VALUE;
+			accuracy[i].x = accuracy[i].y = accuracy[i].z = CCCoreLib::NAN_VALUE;
 		}
 	}
 
@@ -1170,14 +1170,14 @@ bool ccCameraSensor::computeFrustumCorners()
 	}
 
 	// DO NOT MODIFY THE ORDER OF THE CORNERS!! A LOT OF CODE DEPENDS OF THIS ORDER!!
-	m_frustumInfos.frustumCorners->addPoint(CCVector3( xIn, yIn, -CCLib::PC_ONE) * zNear);
-	m_frustumInfos.frustumCorners->addPoint(CCVector3( xIn, yIn, -CCLib::PC_ONE) * zFar);
-	m_frustumInfos.frustumCorners->addPoint(CCVector3( xIn,-yIn, -CCLib::PC_ONE) * zNear);
-	m_frustumInfos.frustumCorners->addPoint(CCVector3( xIn,-yIn, -CCLib::PC_ONE) * zFar);
-	m_frustumInfos.frustumCorners->addPoint(CCVector3(-xIn,-yIn, -CCLib::PC_ONE) * zNear);
-	m_frustumInfos.frustumCorners->addPoint(CCVector3(-xIn,-yIn, -CCLib::PC_ONE) * zFar);
-	m_frustumInfos.frustumCorners->addPoint(CCVector3(-xIn, yIn, -CCLib::PC_ONE) * zNear);
-	m_frustumInfos.frustumCorners->addPoint(CCVector3(-xIn, yIn, -CCLib::PC_ONE) * zFar);
+	m_frustumInfos.frustumCorners->addPoint(CCVector3( xIn, yIn, -CCCoreLib::PC_ONE) * zNear);
+	m_frustumInfos.frustumCorners->addPoint(CCVector3( xIn, yIn, -CCCoreLib::PC_ONE) * zFar);
+	m_frustumInfos.frustumCorners->addPoint(CCVector3( xIn,-yIn, -CCCoreLib::PC_ONE) * zNear);
+	m_frustumInfos.frustumCorners->addPoint(CCVector3( xIn,-yIn, -CCCoreLib::PC_ONE) * zFar);
+	m_frustumInfos.frustumCorners->addPoint(CCVector3(-xIn,-yIn, -CCCoreLib::PC_ONE) * zNear);
+	m_frustumInfos.frustumCorners->addPoint(CCVector3(-xIn,-yIn, -CCCoreLib::PC_ONE) * zFar);
+	m_frustumInfos.frustumCorners->addPoint(CCVector3(-xIn, yIn, -CCCoreLib::PC_ONE) * zNear);
+	m_frustumInfos.frustumCorners->addPoint(CCVector3(-xIn, yIn, -CCCoreLib::PC_ONE) * zFar);
 
 	// compute center of the circumscribed sphere
 	const CCVector3* P0 = m_frustumInfos.frustumCorners->getPoint(0);
@@ -1580,7 +1580,7 @@ float ccCameraSensor::ComputeFovRadFromFocalMm(float focal_mm, float ccdSize_mm)
 }
 
 bool ccCameraSensor::computeOrthoRectificationParams(	const ccImage* image,
-														CCLib::GenericIndexedCloud* keypoints3D,
+														CCCoreLib::GenericIndexedCloud* keypoints3D,
 														std::vector<KeyPoint>& keypointsImage,
 														double a_out[3],
 														double b_out[3],
@@ -1651,8 +1651,8 @@ bool ccCameraSensor::computeOrthoRectificationParams(	const ccImage* image,
 
 	//conjugate gradient initialization
 	//we solve tA.A.X = tA.b
-	CCLib::ConjugateGradient<8, double> cg;
-	CCLib::SquareMatrixd& tAA = cg.A();
+	CCCoreLib::ConjugateGradient<8, double> cg;
+	CCCoreLib::SquareMatrixd& tAA = cg.A();
 	double* tAb = cg.b();
 
 	//compute tA.A and tA.b
@@ -1889,7 +1889,7 @@ ccImage* ccCameraSensor::orthoRectifyAsImageDirect(	const ccImage* image,
 }
 
 ccImage* ccCameraSensor::orthoRectifyAsImage(	const ccImage* image,
-												CCLib::GenericIndexedCloud* keypoints3D,
+												CCCoreLib::GenericIndexedCloud* keypoints3D,
 												std::vector<KeyPoint>& keypointsImage,
 												double& pixelSize,
 												double* minCorner/*=0*/,
@@ -2300,7 +2300,7 @@ bool ccCameraSensor::OrthoRectifyAsImages(	std::vector<ccImage*> images,
 }
 
 ccPointCloud* ccCameraSensor::orthoRectifyAsCloud(	const ccImage* image,
-													CCLib::GenericIndexedCloud* keypoints3D,
+													CCCoreLib::GenericIndexedCloud* keypoints3D,
 													std::vector<KeyPoint>& keypointsImage) const
 {
 	double a[3]{ 0.0, 0.0, 0.0 };
@@ -2391,7 +2391,7 @@ ccPointCloud* ccCameraSensor::orthoRectifyAsCloud(	const ccImage* image,
 /*******************                              *******************/
 /********************************************************************/
 
-bool ccOctreeFrustumIntersector::build(CCLib::DgmOctree* octree)
+bool ccOctreeFrustumIntersector::build(CCCoreLib::DgmOctree* octree)
 {
 	if (!octree)
 		return false;
@@ -2401,17 +2401,17 @@ bool ccOctreeFrustumIntersector::build(CCLib::DgmOctree* octree)
 		cell.clear();
 	}
 	
-	const CCLib::DgmOctree::cellsContainer& thePointsAndTheirCellCodes = octree->pointsAndTheirCellCodes();
-	CCLib::DgmOctree::cellsContainer::const_iterator it = thePointsAndTheirCellCodes.begin();
+	const CCCoreLib::DgmOctree::cellsContainer& thePointsAndTheirCellCodes = octree->pointsAndTheirCellCodes();
+	CCCoreLib::DgmOctree::cellsContainer::const_iterator it = thePointsAndTheirCellCodes.begin();
 
 	try
 	{
 		for (it=thePointsAndTheirCellCodes.begin(); it!=thePointsAndTheirCellCodes.end(); ++it)
 		{
-			CCLib::DgmOctree::CellCode completeCode = it->theCode;
-			for (unsigned char level=1; level<=CCLib::DgmOctree::MAX_OCTREE_LEVEL; level++)
+			CCCoreLib::DgmOctree::CellCode completeCode = it->theCode;
+			for (unsigned char level=1; level<=CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL; level++)
 			{
-				unsigned char bitDec = CCLib::DgmOctree::GET_BIT_SHIFT(level);
+				unsigned char bitDec = CCCoreLib::DgmOctree::GET_BIT_SHIFT(level);
 				m_cellsBuilt[level].insert(completeCode >> bitDec);
 			}
 		}
@@ -2419,7 +2419,7 @@ bool ccOctreeFrustumIntersector::build(CCLib::DgmOctree* octree)
 	catch (const std::bad_alloc&)
 	{
 		ccLog::Warning("[ccCameraSensor::prepareOctree] Not enough memory!");
-		for (int i = 0; i <= CCLib::DgmOctree::MAX_OCTREE_LEVEL; i++)
+		for (int i = 0; i <= CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL; i++)
 		{
 			m_cellsBuilt[i].clear();
 		}
@@ -2605,7 +2605,7 @@ ccOctreeFrustumIntersector::separatingAxisTest(const CCVector3& bbMin,
 }
 
 void ccOctreeFrustumIntersector::computeFrustumIntersectionByLevel(unsigned char level,
-																	CCLib::DgmOctree::CellCode parentTruncatedCode,
+																	CCCoreLib::DgmOctree::CellCode parentTruncatedCode,
 																	OctreeCellVisibility parentResult,
 																	const float planesCoefficients[6][4],
 																	const CCVector3 ptsFrustum[8],
@@ -2616,16 +2616,16 @@ void ccOctreeFrustumIntersector::computeFrustumIntersectionByLevel(unsigned char
 		return;
 
 	// move code to the left
-	CCLib::DgmOctree::CellCode baseTruncatedCode = (parentTruncatedCode << 3);
+	CCCoreLib::DgmOctree::CellCode baseTruncatedCode = (parentTruncatedCode << 3);
 
 	// test to do on the 8 child cells
 	for (unsigned i=0; i<8; i++)
 	{
 		// set truncated code of the current cell
-		CCLib::DgmOctree::CellCode truncatedCode = baseTruncatedCode + i;
+		CCCoreLib::DgmOctree::CellCode truncatedCode = baseTruncatedCode + i;
 
 		// if the current cell has not been built (contains no 3D points), we skip it
-		std::unordered_set<CCLib::DgmOctree::CellCode>::const_iterator got = m_cellsBuilt[level].find(truncatedCode);
+		std::unordered_set<CCCoreLib::DgmOctree::CellCode>::const_iterator got = m_cellsBuilt[level].find(truncatedCode);
 		if (got != m_cellsBuilt[level].end())
 		{
 			// get extrema of the current cell
@@ -2645,7 +2645,7 @@ void ccOctreeFrustumIntersector::computeFrustumIntersectionByLevel(unsigned char
 					m_cellsIntersectFrustum[level].insert(truncatedCode);
 
 				// we do the same for the children (if we have not already reached the end of the tree)
-				if (level < CCLib::DgmOctree::MAX_OCTREE_LEVEL)
+				if (level < CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL)
 					computeFrustumIntersectionByLevel(level+1, truncatedCode, result, planesCoefficients, ptsFrustum, edges, center);
 			}
 		}
@@ -2661,7 +2661,7 @@ void ccOctreeFrustumIntersector::computeFrustumIntersectionWithOctree(	std::vect
 {
 	// clear old result
 	{
-		for (int i=0; i<=CCLib::DgmOctree::MAX_OCTREE_LEVEL; i++)
+		for (int i=0; i<=CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL; i++)
 		{
 			m_cellsInFrustum[i].clear();
 			m_cellsIntersectFrustum[i].clear();
@@ -2672,11 +2672,11 @@ void ccOctreeFrustumIntersector::computeFrustumIntersectionWithOctree(	std::vect
 	computeFrustumIntersectionByLevel(1, 0, CELL_INTERSECT_FRUSTUM, planesCoefficients, ptsFrustum, edges, center);
 
 	// get points
-	unsigned char level = static_cast<unsigned char>(CCLib::DgmOctree::MAX_OCTREE_LEVEL);
+	unsigned char level = static_cast<unsigned char>(CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL);
 
 	// dealing with cells completely inside the frustum
-	std::unordered_set<CCLib::DgmOctree::CellCode>::const_iterator it;
-	CCLib::ReferenceCloud pointsInCell(m_associatedOctree->associatedCloud());
+	std::unordered_set<CCCoreLib::DgmOctree::CellCode>::const_iterator it;
+	CCCoreLib::ReferenceCloud pointsInCell(m_associatedOctree->associatedCloud());
 	for (it = m_cellsInFrustum[level].begin(); it != m_cellsInFrustum[level].end(); ++it)
 	{
 		// get all points in cell

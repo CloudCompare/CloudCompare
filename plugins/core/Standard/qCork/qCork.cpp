@@ -116,7 +116,7 @@ bool ToCorkMesh(const ccMesh* in, CorkMesh& out, ccMainAppInterface* app = 0)
 	{
 		for (unsigned i = 0; i < triCount; i++)
 		{
-			const CCLib::VerticesIndexes* tsi = in->getTriangleVertIndexes(i);
+			const CCCoreLib::VerticesIndexes* tsi = in->getTriangleVertIndexes(i);
 			CorkTriangle corkTri;
 			corkTri.a = tsi->i1;
 			corkTri.b = tsi->i2;

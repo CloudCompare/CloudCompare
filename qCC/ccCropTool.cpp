@@ -26,7 +26,7 @@
 #include <ccMaterial.h>
 #include <ccMaterialSet.h>
 
-//CCLib
+//CCCoreLib
 #include <ManualSegmentationTools.h>
 #include <SimpleMesh.h>
 
@@ -42,7 +42,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 	{
 		ccPointCloud* cloud = static_cast<ccPointCloud*>(entity);
 
-		CCLib::ReferenceCloud* selection = cloud->crop(box, inside);
+		CCCoreLib::ReferenceCloud* selection = cloud->crop(box, inside);
 		if (!selection)
 		{
 			//process failed!
@@ -68,7 +68,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 	else if (entity->isKindOf(CC_TYPES::MESH))
 	{
 		ccGenericMesh* mesh = static_cast<ccGenericMesh*>(entity);
-		CCLib::ManualSegmentationTools::MeshCutterParams params;
+		CCCoreLib::ManualSegmentationTools::MeshCutterParams params;
 		params.bbMin = CCVector3d::fromArray(box.minCorner().u);
 		params.bbMax = CCVector3d::fromArray(box.maxCorner().u);
 		params.generateOutsideMesh = !inside;
@@ -90,7 +90,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 			cropVertices = rotatedVertices;
 		}
 
-		if (!CCLib::ManualSegmentationTools::segmentMeshWithAABox(mesh, cropVertices, params))
+		if (!CCCoreLib::ManualSegmentationTools::segmentMeshWithAABox(mesh, cropVertices, params))
 		{
 			//process failed!
 			ccLog::Warning(QString("[Crop] Failed to crop mesh '%1'!").arg(mesh->getName()));
@@ -103,7 +103,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 			cropVertices = origVertices;
 		}
 
-		CCLib::SimpleMesh* tempMesh = inside ? params.insideMesh : params.outsideMesh;
+		CCCoreLib::SimpleMesh* tempMesh = inside ? params.insideMesh : params.outsideMesh;
 
 		//output
 		ccMesh* croppedMesh = nullptr;
@@ -190,7 +190,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 										if (sfIdx >= 0)
 										{
 											ccScalarField* sf = static_cast<ccScalarField*>(croppedVertices->getScalarField(i));
-											sf->fill(CCLib::NAN_VALUE);
+											sf->fill(CCCoreLib::NAN_VALUE);
 											if (origVertices_pc)
 											{
 												//import display parameters if possible
@@ -224,10 +224,10 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 									{
 										//get the origin triangle
 										unsigned origTriIndex = origTriIndexes[i];
-										const CCLib::VerticesIndexes* tsio = mesh->getTriangleVertIndexes(origTriIndex);
+										const CCCoreLib::VerticesIndexes* tsio = mesh->getTriangleVertIndexes(origTriIndex);
 
 										//get the new triangle
-										const CCLib::VerticesIndexes* tsic = croppedMesh->getTriangleVertIndexes(i);
+										const CCCoreLib::VerticesIndexes* tsic = croppedMesh->getTriangleVertIndexes(i);
 
 										//we now have to test the 3 vertices of the new triangle
 										for (unsigned j = 0; j < 3; ++j)
@@ -263,7 +263,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 													CCVector3d scalarValues(0, 0, 0);
 													if (origVertices_pc)
 													{
-														const CCLib::ScalarField* sf = origVertices_pc->getScalarField(s);
+														const CCCoreLib::ScalarField* sf = origVertices_pc->getScalarField(s);
 														scalarValues.x = sf->getValue(tsio->i1);
 														scalarValues.y = sf->getValue(tsio->i2);
 														scalarValues.z = sf->getValue(tsio->i3);
@@ -390,7 +390,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 											mesh->getTriangleTexCoordinates(origTriIndex, tx1, tx2, tx3);
 
 											//get the new triangle
-											const CCLib::VerticesIndexes* tsic = croppedMesh->getTriangleVertIndexes(i);
+											const CCCoreLib::VerticesIndexes* tsic = croppedMesh->getTriangleVertIndexes(i);
 
 											//for each vertex of the new triangle
 											int texIndexes[3] = { -1, -1, -1 };
@@ -403,9 +403,9 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 												CCVector3d w;
 												mesh->computeInterpolationWeights(origTriIndex, *Vcj, w);
 
-												if (	(tx1 || w.u[0] < CCLib::ZERO_TOLERANCE)
-													&&	(tx2 || w.u[1] < CCLib::ZERO_TOLERANCE)
-													&&	(tx3 || w.u[2] < CCLib::ZERO_TOLERANCE) )
+												if (	(tx1 || w.u[0] < CCCoreLib::ZERO_TOLERANCE)
+													&&	(tx2 || w.u[1] < CCCoreLib::ZERO_TOLERANCE)
+													&&	(tx3 || w.u[2] < CCCoreLib::ZERO_TOLERANCE) )
 												{
 													TexCoords2D t(	static_cast<float>((tx1 ? tx1->tx*w.u[0] : 0.0) + (tx2 ? tx2->tx*w.u[1] : 0.0) + (tx3 ? tx3->tx*w.u[2] : 0.0)),
 																	static_cast<float>((tx1 ? tx1->ty*w.u[0] : 0.0) + (tx2 ? tx2->ty*w.u[1] : 0.0) + (tx3 ? tx3->ty*w.u[2] : 0.0)) );

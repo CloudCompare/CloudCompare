@@ -28,7 +28,7 @@
 //qCC_gl
 #include <ccGLWindow.h>
 
-//CCLib
+//CCCoreLib
 #include <DistanceComputationTools.h>
 #include <Neighbourhood.h>
 #include <PointProjectionTools.h>
@@ -49,7 +49,7 @@ enum HullPointFlags {	POINT_NOT_USED	= 0,
 						POINT_FROZEN	= 3,
 };
 
-using Vertex2D = CCLib::PointProjectionTools::IndexedCCVector2;
+using Vertex2D = CCCoreLib::PointProjectionTools::IndexedCCVector2;
 using VertexIterator = std::list<Vertex2D *>::iterator;
 using ConstVertexIterator = std::list<Vertex2D *>::const_iterator;
 
@@ -215,7 +215,7 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 												double maxAngleDeg/*=0.0*/)
 {
 	//first compute the Convex hull
-	if (!CCLib::PointProjectionTools::extractConvexHull2D(points,hullPoints))
+	if (!CCCoreLib::PointProjectionTools::extractConvexHull2D(points,hullPoints))
 		return false;
 
 	//do we really need to compute the concave hull?
@@ -532,8 +532,8 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 								break;
 						}
 
-						if (	((*itI)->index != (*itA)->index && (*itJ)->index != (*itA)->index && CCLib::PointProjectionTools::segmentIntersect(**itI,**itJ,**itA,P))
-							||	((*itI)->index != (*itB)->index && (*itJ)->index != (*itB)->index && CCLib::PointProjectionTools::segmentIntersect(**itI,**itJ,P,**itB)) )
+						if (	((*itI)->index != (*itA)->index && (*itJ)->index != (*itA)->index && CCCoreLib::PointProjectionTools::segmentIntersect(**itI,**itJ,**itA,P))
+							||	((*itI)->index != (*itB)->index && (*itJ)->index != (*itB)->index && CCCoreLib::PointProjectionTools::segmentIntersect(**itI,**itJ,P,**itB)) )
 						{
 							intersect = true;
 							break;
@@ -704,7 +704,7 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 
 using Hull2D = std::list<Vertex2D *>;
 
-ccPolyline* ccContourExtractor::ExtractFlatContour(	CCLib::GenericIndexedCloudPersist* points,
+ccPolyline* ccContourExtractor::ExtractFlatContour(	CCCoreLib::GenericIndexedCloudPersist* points,
 													bool allowMultiPass,
 													PointCoordinateType maxEdgeLength/*=0*/,
 													const PointCoordinateType* preferredNormDim/*=0*/,
@@ -724,14 +724,14 @@ ccPolyline* ccContourExtractor::ExtractFlatContour(	CCLib::GenericIndexedCloudPe
 	if (ptsCount < 3)
 		return nullptr;
 
-	CCLib::Neighbourhood Yk(points);
+	CCCoreLib::Neighbourhood Yk(points);
 	
 	//local base
 	CCVector3 O;
 	CCVector3 X;
 	CCVector3 Y;
 	
-	CCLib::Neighbourhood::InputVectorsUsage vectorsUsage = CCLib::Neighbourhood::None;
+	CCCoreLib::Neighbourhood::InputVectorsUsage vectorsUsage = CCCoreLib::Neighbourhood::None;
 
 	//we project the input points on a plane
 	std::vector<Vertex2D> points2D;
@@ -740,7 +740,7 @@ ccPolyline* ccContourExtractor::ExtractFlatContour(	CCLib::GenericIndexedCloudPe
 	if (preferredUpDir != nullptr)
 	{
 		Y = CCVector3(preferredUpDir);
-		vectorsUsage = CCLib::Neighbourhood::UseYAsUpDir;
+		vectorsUsage = CCCoreLib::Neighbourhood::UseYAsUpDir;
 	}
 
 	//if the user has specified a default direction, we'll use it as 'projecting plane'
@@ -761,7 +761,7 @@ ccPolyline* ccContourExtractor::ExtractFlatContour(	CCLib::GenericIndexedCloudPe
 			O = *G;
 			//Y = CCVector3(preferredUpDir); //already done above
 			X = Y.cross(CCVector3(preferredNormDim));
-			vectorsUsage = CCLib::Neighbourhood::UseOXYasBase;
+			vectorsUsage = CCCoreLib::Neighbourhood::UseOXYasBase;
 		}
 	}
 
@@ -856,7 +856,7 @@ ccPolyline* ccContourExtractor::ExtractFlatContour(	CCLib::GenericIndexedCloudPe
 	return contourPolyline;
 }
 
-bool ccContourExtractor::ExtractFlatContour(CCLib::GenericIndexedCloudPersist* points,
+bool ccContourExtractor::ExtractFlatContour(CCCoreLib::GenericIndexedCloudPersist* points,
 											bool allowMultiPass,
 											PointCoordinateType maxEdgeLength,
 											std::vector<ccPolyline*>& parts,

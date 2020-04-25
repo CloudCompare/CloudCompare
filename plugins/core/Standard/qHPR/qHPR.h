@@ -20,7 +20,7 @@
 
 #include "ccStdPluginInterface.h"
 
-//CCLib
+//CCCoreLib
 #include <ReferenceCloud.h>
 
 //! Wrapper to the "Hidden Point Removal" algorithm for approximating points visibility in an N dimensional point cloud, as seen from a given viewpoint
@@ -53,7 +53,7 @@ protected:
 protected:
 
 	//! Katz et al. algorithm
-	CCLib::ReferenceCloud* removeHiddenPoints(CCLib::GenericIndexedCloudPersist* theCloud, const CCVector3d& viewPoint, double fParam);
+	CCCoreLib::ReferenceCloud* removeHiddenPoints(CCCoreLib::GenericIndexedCloudPersist* theCloud, const CCVector3d& viewPoint, double fParam);
 
 	//! Associated action
 	QAction* m_action;

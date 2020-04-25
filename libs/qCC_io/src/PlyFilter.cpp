@@ -47,7 +47,7 @@
 #include <unistd.h>
 #endif
 
-using namespace CCLib;
+using namespace CCCoreLib;
 
 
 PlyFilter::PlyFilter()
@@ -435,7 +435,7 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 		mesh->placeIteratorAtBeginning();
 		for (unsigned i = 0; i < triNum; ++i)
 		{
-			const CCLib::VerticesIndexes* tsi = mesh->getNextTriangleVertIndexes(); //DGM: getNextTriangleVertIndexes is faster for mesh groups!
+			const CCCoreLib::VerticesIndexes* tsi = mesh->getNextTriangleVertIndexes(); //DGM: getNextTriangleVertIndexes is faster for mesh groups!
 			ply_write(ply, double(3));
 			assert(tsi->i1 < vertCount);
 			assert(tsi->i2 < vertCount);
@@ -673,7 +673,7 @@ static int scalar_cb(p_ply_argument argument)
 		//skip the next pieces of data
 		return 1;
 	}
-	CCLib::ScalarField* sf = nullptr;
+	CCCoreLib::ScalarField* sf = nullptr;
 	ply_get_argument_user_data(argument, (void**)(&sf), nullptr);
 
 	p_ply_element element;
@@ -1573,7 +1573,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 				int sfIdx = cloud->addScalarField(qPrintable(qPropName));
 				if (sfIdx >= 0)
 				{
-					CCLib::ScalarField* sf = cloud->getScalarField(sfIdx);
+					CCCoreLib::ScalarField* sf = cloud->getScalarField(sfIdx);
 					assert(sf);
 					if (sf->resizeSafe(numberOfScalars))
 					{
@@ -1777,7 +1777,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 	{
 		for (unsigned i = 0; i < cloud->getNumberOfScalarFields(); ++i)
 		{
-			CCLib::ScalarField* sf = cloud->getScalarField(i);
+			CCCoreLib::ScalarField* sf = cloud->getScalarField(i);
 			assert(sf);
 			sf->computeMinAndMax();
 			if (i == 0)
@@ -1804,7 +1804,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 		unsigned maxVertIndex = 0;
 		for (unsigned i = 0; i < s_triCount; ++i)
 		{
-			const CCLib::VerticesIndexes* tri = mesh->getTriangleVertIndexes(i);
+			const CCCoreLib::VerticesIndexes* tri = mesh->getTriangleVertIndexes(i);
 			if (tri->i1 < minVertIndex)
 				minVertIndex = tri->i1;
 			else if (tri->i1 > maxVertIndex)
@@ -1826,7 +1826,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 				ccLog::Warning("[PLY] Vertex indexes seem to be shifted (+1)! We will try to 'unshift' indices (otherwise file is corrupted...)");
 				for (unsigned i = 0; i < s_triCount; ++i)
 				{
-					CCLib::VerticesIndexes* tri = mesh->getTriangleVertIndexes(i);
+					CCCoreLib::VerticesIndexes* tri = mesh->getTriangleVertIndexes(i);
 					--tri->i1;
 					--tri->i2;
 					--tri->i3;

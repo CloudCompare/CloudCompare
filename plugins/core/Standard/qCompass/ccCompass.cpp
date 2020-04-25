@@ -1255,7 +1255,7 @@ inline double prior(double phi, double theta, double nx, double ny, double nz)
 }
 
 //calculate log scale-factor for wishart dist. This only needs to be done once per X, so is pulled out of the wish function for performance
-inline double logWishSF(CCLib::SquareMatrixd X, int nobserved)
+inline double logWishSF(CCCoreLib::SquareMatrixd X, int nobserved)
 {
 	//calculate determinant of X
 	double detX = X.m_values[0][0] * ((X.m_values[1][1] * X.m_values[2][2]) - (X.m_values[2][1] * X.m_values[1][2])) -
@@ -1267,7 +1267,7 @@ inline double logWishSF(CCLib::SquareMatrixd X, int nobserved)
 }
 
 //calculate log wishart probability density
-inline double logWishart(CCLib::SquareMatrixd X, int nobserved, double phi, double theta, double alpha, double e1, double e2, double e3, double lsf)
+inline double logWishart(CCCoreLib::SquareMatrixd X, int nobserved, double phi, double theta, double alpha, double e1, double e2, double e3, double lsf)
 {
 	//--------------------------------------------------
 	//Derive scale matrix eigenvectors (basis matrix)
@@ -1414,7 +1414,7 @@ void ccCompass::estimateStructureNormals()
 	double cy = 0.0;
 	double cz = 0.0;
 	int iid = 0;
-	CCLib::SquareMatrixd eigVectors;
+	CCCoreLib::SquareMatrixd eigVectors;
 	std::vector<double> eigValues;
 	bool hasNormals = true;
 	bool broken = false; //assume normals exist until check later on
@@ -1570,7 +1570,7 @@ void ccCompass::estimateStructureNormals()
 			//*********************************************************
 			//SORT GATHERED POINTS INTO ORDER ALONG LONG-AXIS OF TRACE
 			//*********************************************************
-			CCLib::Neighbourhood Z(points[r]); //put points for this surface into a neighbourhood and get the sorting direction (principal eigenvector)
+			CCCoreLib::Neighbourhood Z(points[r]); //put points for this surface into a neighbourhood and get the sorting direction (principal eigenvector)
 			const CCVector3* longAxis = Z.getLSPlaneX(); //n.b. this is a normal vector
 			if (longAxis == nullptr) {
 				//fail friendly if eigens could not be computed
@@ -1631,12 +1631,12 @@ void ccCompass::estimateStructureNormals()
 			//CREATE BREAKS AT PINCH NODES (these prevent planes including points from two sides of a pinch node
 			//**************************************************************************************************
 			std::vector<bool> breaks(px.size(), false); //if point n is a break (closest point to a pinch node), breaks[n] == True.
-			CCLib::DgmOctree::NeighboursSet neighbours;
+			CCCoreLib::DgmOctree::NeighboursSet neighbours;
 
 			//build octree over points in combined trace
 			ccOctree::Shared oct = points[r]->computeOctree();
 			unsigned char level = oct->findBestLevelForAGivenPopulationPerCell(2); //init vars needed for nearest neighbour search
-			CCLib::ReferenceCloud* nCloud = new  CCLib::ReferenceCloud(points[r]);
+			CCCoreLib::ReferenceCloud* nCloud = new  CCCoreLib::ReferenceCloud(points[r]);
 			d = -1.0; //re-use the d variable rather than re-declaring another
 			for (unsigned p = 0; p < pinchNodes->size(); p++)
 			{
@@ -1668,7 +1668,7 @@ void ccCompass::estimateStructureNormals()
 			std::vector<double> bestE1(px.size(), 0);
 			std::vector<double> bestE2(px.size(), 0);
 			std::vector<double> bestE3(px.size(), 0);
-			std::vector<CCLib::SquareMatrixd> bestX(px.size()); //keep track of best COV matrix for each trace (for oversampling later)
+			std::vector<CCCoreLib::SquareMatrixd> bestX(px.size()); //keep track of best COV matrix for each trace (for oversampling later)
 			std::vector<CCVector3> sne(px.size()); //list of the best surface normal estimates found for each point (corresponds with the MAP above)
 			std::vector<int> start(px.size(),0); //index of start point for best planes
 			std::vector<int> end(px.size(),0); //index of end point for best planes
@@ -1738,7 +1738,7 @@ void ccCompass::estimateStructureNormals()
 					//-----------------------------------------------------------------------------
 					//compute the scatter and covariance matrices of this section of the trace
 					//-----------------------------------------------------------------------------
-					CCLib::SquareMatrixd X(3); //scale matrix
+					CCCoreLib::SquareMatrixd X(3); //scale matrix
 					for (unsigned p = _min; p <= _max; p++)
 					{
 						X.m_values[0][0] += (px[p] - cx) * (px[p] - cx); //mXX
@@ -1749,7 +1749,7 @@ void ccCompass::estimateStructureNormals()
 						X.m_values[1][2] += (py[p] - cy) * (pz[p] - cz); //mYZ
 					}
 					
-					CCLib::SquareMatrixd cov(3); //convert to covariance matrix
+					CCCoreLib::SquareMatrixd cov(3); //convert to covariance matrix
 					cov.m_values[0][0] = X.m_values[0][0] / n; cov.m_values[1][1] = X.m_values[1][1] / n; cov.m_values[2][2] = X.m_values[2][2] / n;
 					cov.m_values[0][1] = X.m_values[0][1] / n; cov.m_values[0][2] = X.m_values[0][2] / n; cov.m_values[1][2] = X.m_values[1][2] / n;
 
@@ -1852,13 +1852,13 @@ void ccCompass::estimateStructureNormals()
 			points[r]->setName("SNE");
 
 			//build scalar fields
-			CCLib::ScalarField* startSF = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("StartPoint")));
-			CCLib::ScalarField* endSF = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("EndPoint")));
-			CCLib::ScalarField* idSF = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("SegmentID")));
-			CCLib::ScalarField* weightSF = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("Weight")));
-			CCLib::ScalarField* trend = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("Trend")));
-			CCLib::ScalarField* plunge = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("Plunge")));
-			CCLib::ScalarField* pointID = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("PointID"))); //used for linking samples representing the same point
+			CCCoreLib::ScalarField* startSF = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("StartPoint")));
+			CCCoreLib::ScalarField* endSF = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("EndPoint")));
+			CCCoreLib::ScalarField* idSF = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("SegmentID")));
+			CCCoreLib::ScalarField* weightSF = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("Weight")));
+			CCCoreLib::ScalarField* trend = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("Trend")));
+			CCCoreLib::ScalarField* plunge = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("Plunge")));
+			CCCoreLib::ScalarField* pointID = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("PointID"))); //used for linking samples representing the same point
 
 			weightSF->reserve(px.size());
 			startSF->reserve(px.size());
@@ -1911,13 +1911,13 @@ void ccCompass::estimateStructureNormals()
 				samples[r]->setGlobalShift(points[r]->getGlobalShift());
 				samples[r]->reserve(static_cast<unsigned>(px.size())*oversample);
 				samples[r]->reserveTheNormsTable();
-				CCLib::ScalarField* startSF = samples[r]->getScalarField(samples[r]->addScalarField(new ccScalarField("StartPoint")));
-				CCLib::ScalarField* endSF = samples[r]->getScalarField(samples[r]->addScalarField(new ccScalarField("EndPoint")));
-				CCLib::ScalarField* idSF = samples[r]->getScalarField(samples[r]->addScalarField(new ccScalarField("SegmentID")));
-				CCLib::ScalarField* weightSF = samples[r]->getScalarField(samples[r]->addScalarField(new ccScalarField("Weight")));
-				CCLib::ScalarField* trend = samples[r]->getScalarField(samples[r]->addScalarField(new ccScalarField("Trend")));
-				CCLib::ScalarField* plunge = samples[r]->getScalarField(samples[r]->addScalarField(new ccScalarField("Plunge")));
-				CCLib::ScalarField* pointID = samples[r]->getScalarField(samples[r]->addScalarField(new ccScalarField("PointID")));
+				CCCoreLib::ScalarField* startSF = samples[r]->getScalarField(samples[r]->addScalarField(new ccScalarField("StartPoint")));
+				CCCoreLib::ScalarField* endSF = samples[r]->getScalarField(samples[r]->addScalarField(new ccScalarField("EndPoint")));
+				CCCoreLib::ScalarField* idSF = samples[r]->getScalarField(samples[r]->addScalarField(new ccScalarField("SegmentID")));
+				CCCoreLib::ScalarField* weightSF = samples[r]->getScalarField(samples[r]->addScalarField(new ccScalarField("Weight")));
+				CCCoreLib::ScalarField* trend = samples[r]->getScalarField(samples[r]->addScalarField(new ccScalarField("Trend")));
+				CCCoreLib::ScalarField* plunge = samples[r]->getScalarField(samples[r]->addScalarField(new ccScalarField("Plunge")));
+				CCCoreLib::ScalarField* pointID = samples[r]->getScalarField(samples[r]->addScalarField(new ccScalarField("PointID")));
 				weightSF->reserve(px.size()*oversample);
 				startSF->reserve(px.size()*oversample);
 				endSF->reserve(px.size()*oversample);
@@ -2073,7 +2073,7 @@ void ccCompass::estimateStructureNormals()
 				for (int r = 0; r < 2; r++)
 				{
 					//make scalar field
-					CCLib::ScalarField* thickSF = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("Thickness")));
+					CCCoreLib::ScalarField* thickSF = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("Thickness")));
 					thickSF->reserve(points[r]->size());
 					
 					//set thickness to visible scalar field
@@ -2081,8 +2081,8 @@ void ccCompass::estimateStructureNormals()
 					points[r]->showSF(true);
 
 					//create scalar field in samples point cloud
-					CCLib::ScalarField* thickSF_sample = nullptr;
-					CCLib::ScalarField* idSF_sample = nullptr;
+					CCCoreLib::ScalarField* thickSF_sample = nullptr;
+					CCCoreLib::ScalarField* idSF_sample = nullptr;
 					if (samples[r] != nullptr)
 					{
 						thickSF_sample = samples[r]->getScalarField(samples[r]->addScalarField(new ccScalarField("Thickness")));
@@ -2100,10 +2100,10 @@ void ccCompass::estimateStructureNormals()
 
 					//get octree for the picking and build picking data structures
 					ccOctree::Shared oct = points[compID]->getOctree();
-					CCLib::ReferenceCloud* nCloud = new  CCLib::ReferenceCloud(points[compID]);
+					CCCoreLib::ReferenceCloud* nCloud = new  CCCoreLib::ReferenceCloud(points[compID]);
 					unsigned char level = oct->findBestLevelForAGivenNeighbourhoodSizeExtraction(tcDistance/2);
 					
-					CCLib::DgmOctree::NeighboursSet neighbours;
+					CCCoreLib::DgmOctree::NeighboursSet neighbours;
 					d = -1.0;
 
 					//loop through points in this surface
@@ -2160,7 +2160,7 @@ void ccCompass::estimateStructureNormals()
 						pEq[3] = points[r]->getPoint(p)->dot(points[r]->getPointNormal(p));
 
 						//calculate point to plane distance
-						d = CCLib::DistanceComputationTools::computePoint2PlaneDistance(nCloud->getPoint(0), pEq);
+						d = CCCoreLib::DistanceComputationTools::computePoint2PlaneDistance(nCloud->getPoint(0), pEq);
 
 						//write thickness scalar field
 						thickSF->setValue(p, std::abs(d));
@@ -2181,7 +2181,7 @@ void ccCompass::estimateStructureNormals()
 									pEq[1] = samples[r]->getPointNormal(s).y;
 									pEq[2] = samples[r]->getPointNormal(s).z;
 									pEq[3] = samples[r]->getPoint(s)->dot(samples[r]->getPointNormal(s));
-									d = CCLib::DistanceComputationTools::computePoint2PlaneDistance(nCloud->getPoint(0), pEq);
+									d = CCCoreLib::DistanceComputationTools::computePoint2PlaneDistance(nCloud->getPoint(0), pEq);
 									thickSF_sample->setValue(s, std::abs(d));
 									samples[r]->setPointNormal(s, samples[r]->getPointNormal(s) * (d / std::abs(d)));
 								}
@@ -2400,8 +2400,8 @@ void ccCompass::estimateStrain()
 	}
 
 	//init strain tensors
-	CCLib::SquareMatrixd I(3); I.toIdentity();
-	std::vector<CCLib::SquareMatrixd> F(nx*ny*nz, CCLib::SquareMatrixd(I)); //deformation gradient tensors
+	CCCoreLib::SquareMatrixd I(3); I.toIdentity();
+	std::vector<CCCoreLib::SquareMatrixd> F(nx*ny*nz, CCCoreLib::SquareMatrixd(I)); //deformation gradient tensors
 
 	int validCells = 0;
 	prg.setInfo("Calculating strain tensors...");
@@ -2540,15 +2540,15 @@ void ccCompass::estimateStrain()
 					CCVector3 D = N.cross(S);
 
 					//define basis matrix
-					CCLib::SquareMatrixd B(3);
+					CCCoreLib::SquareMatrixd B(3);
 					B.setValue(0, 0, N.x); B.setValue(1, 0, N.y); B.setValue(2, 0, N.z);
 					B.setValue(0, 1, S.x); B.setValue(1, 1, S.y); B.setValue(2, 1, S.z);
 					B.setValue(0, 2, D.x); B.setValue(1, 2, D.y); B.setValue(2, 2, D.z);
 
 					//compute transform matrix that apply's a scaling/stretching equal to the dyke thickness and in the direction of its normal
-					CCLib::SquareMatrixd e(3); e.toIdentity();
+					CCCoreLib::SquareMatrixd e(3); e.toIdentity();
 					e.setValue(0, 0, (binSize + average_thickness) / binSize); //stretch matrix in local coordinates
-					CCLib::SquareMatrixd F_increment = B*(e*B.transposed());// transform to global coords
+					CCCoreLib::SquareMatrixd F_increment = B*(e*B.transposed());// transform to global coords
 					
 					//apply this (multiply with) the deformation gradient tensor
 					//N.B. The order here is important, but we don't know the timing!
@@ -2629,13 +2629,13 @@ void ccCompass::estimateStrain()
 
 
 					//decompose into the rotation and right-stretch 
-					CCLib::SquareMatrixd eigVectors; std::vector<double> eigValues;
-					CCLib::SquareMatrixd B = F[idx] * F[idx].transposed();
+					CCCoreLib::SquareMatrixd eigVectors; std::vector<double> eigValues;
+					CCCoreLib::SquareMatrixd B = F[idx] * F[idx].transposed();
 					Jacobi<double>::ComputeEigenValuesAndVectors(B, eigVectors, eigValues, true); //get eigens
 
-					CCLib::SquareMatrixd U_local(3); U_local.toIdentity();  //calculate stretch matrix in local (un-rotated coordinates)
+					CCCoreLib::SquareMatrixd U_local(3); U_local.toIdentity();  //calculate stretch matrix in local (un-rotated coordinates)
 					U_local.setValue(0, 0, sqrt(eigValues[0])); U_local.setValue(1, 1, sqrt(eigValues[1])); U_local.setValue(2, 2, sqrt(eigValues[2]));
-					CCLib::SquareMatrixd U = eigVectors.transposed() * (U_local * eigVectors); //transform back into global coordinates
+					CCCoreLib::SquareMatrixd U = eigVectors.transposed() * (U_local * eigVectors); //transform back into global coordinates
 
 					//compute jacobian (volumetric strain)
 					double J = eigValues[0] * eigValues[1] * eigValues[2]; //F[idx].computeDet();
@@ -2658,7 +2658,7 @@ void ccCompass::estimateStrain()
 						Jacobi<double>::SortEigenValuesAndVectors(eigVectors, eigValues);
 						
 						//apply exaggeration to eigenvalues (exaggerate shape of the strain ellipse)
-						CCLib::SquareMatrixd transMat(3);
+						CCCoreLib::SquareMatrixd transMat(3);
 						transMat.setValue(0, 0, pow(eigValues[0] / eigValues[1], exag));
 						transMat.setValue(1, 1, pow(eigValues[1] / eigValues[1], exag));
 						transMat.setValue(2, 2, pow(eigValues[2] / eigValues[1], exag));
@@ -2888,7 +2888,7 @@ void ccCompass::estimateP21()
 	unsigned char trace_level = trace_oct->findBestLevelForAGivenNeighbourhoodSizeExtraction(searchR);
 
 	//structure for nearest neighbors search
-	CCLib::DgmOctree::NeighboursSet region;
+	CCCoreLib::DgmOctree::NeighboursSet region;
 
 	//setup progress dialog
 	ccProgressDialog prg(true, m_app->getMainWindow());
@@ -3017,7 +3017,7 @@ void ccCompass::convertToPointCloud()
 		//make point cloud
 		ccPointCloud* points = new ccPointCloud("ConvertedLines"); //create point cloud for storing points
 		int sfid = points->addScalarField(new ccScalarField("Region")); //add scalar field containing region info
-		CCLib::ScalarField* sf = points->getScalarField(sfid);
+		CCCoreLib::ScalarField* sf = points->getScalarField(sfid);
 
 		//convert traces in each region
 		int nRegions = 3;
@@ -3071,7 +3071,7 @@ void ccCompass::convertToPointCloud()
 		//make point cloud
 		ccPointCloud* points = new ccPointCloud("ConvertedLines"); //create point cloud for storing points
 		int sfid = points->addScalarField(new ccScalarField("Region")); //add scalar field containing region info
-		CCLib::ScalarField* sf = points->getScalarField(sfid);
+		CCCoreLib::ScalarField* sf = points->getScalarField(sfid);
 		int number = 0;
 		for (ccPolyline* t : lines)
 		{

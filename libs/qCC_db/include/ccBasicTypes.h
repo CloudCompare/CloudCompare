@@ -18,7 +18,7 @@
 #ifndef CC_BASIC_TYPES_HEADER
 #define CC_BASIC_TYPES_HEADER
 
-//CCLib
+//CCCoreLib
 #include <CCTypes.h>
 
 //! Compressed normals type

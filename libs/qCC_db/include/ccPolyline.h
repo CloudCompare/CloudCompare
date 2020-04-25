@@ -18,7 +18,7 @@
 #ifndef CC_GL_POLYLINE_HEADER
 #define CC_GL_POLYLINE_HEADER
 
-//CCLib
+//CCCoreLib
 #include <Polyline.h>
 
 //Local
@@ -27,9 +27,9 @@
 class ccPointCloud;
 
 //! Colored polyline
-/** Extends the CCLib::Polyline class
+/** Extends the CCCoreLib::Polyline class
 **/
-class QCC_DB_LIB_API ccPolyline : public CCLib::Polyline, public ccShiftedObject
+class QCC_DB_LIB_API ccPolyline : public CCCoreLib::Polyline, public ccShiftedObject
 {
 public:
 

@@ -17,7 +17,7 @@
 
 #include "kdTreeForFacetExtraction.h"
 
-//CCLib
+//CCCoreLib
 #include <GenericProgressCallback.h>
 #include <Neighbourhood.h>
 #include <ParallelSort.h>
@@ -45,12 +45,12 @@ struct Candidate
 	PointCoordinateType radius;
 	CCVector3 centroid;
 
-	Candidate() : leaf(nullptr), dist(CCLib::PC_NAN), radius(0) {}
-	Candidate(ccKdTree::Leaf* l) : leaf(l), dist(CCLib::PC_NAN), radius(0)
+	Candidate() : leaf(nullptr), dist(CCCoreLib::PC_NAN), radius(0) {}
+	Candidate(ccKdTree::Leaf* l) : leaf(l), dist(CCCoreLib::PC_NAN), radius(0)
 	{
 		if (leaf && leaf->points)
 		{
-			CCLib::Neighbourhood N(leaf->points);
+			CCCoreLib::Neighbourhood N(leaf->points);
 			centroid = *N.getGravityCenter();
 			radius = N.computeLargestRadius();
 		}
@@ -64,11 +64,11 @@ static bool CandidateDistAscendingComparison(const Candidate& a, const Candidate
 
 bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 											double maxError,
-											CCLib::DistanceComputationTools::ERROR_MEASURES errorMeasure,
+											CCCoreLib::DistanceComputationTools::ERROR_MEASURES errorMeasure,
 											double maxAngle_deg,
 											PointCoordinateType overlapCoef/*=1*/,
 											bool closestFirst/*=true*/,
-											CCLib::GenericProgressCallback* progressCb/*=0*/)
+											CCCoreLib::GenericProgressCallback* progressCb/*=0*/)
 {
 	if (!kdTree)
 		return false;
@@ -83,7 +83,7 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 		return false;
 
 	//progress notification
-	CCLib::NormalizedProgress nProgress(progressCb, static_cast<unsigned>(leaves.size()));
+	CCCoreLib::NormalizedProgress nProgress(progressCb, static_cast<unsigned>(leaves.size()));
 	if (progressCb)
 	{
 		progressCb->update(0);
@@ -111,7 +111,7 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 	}
 
 	// cosine of the max angle between fused 'planes'
-	const double c_minCosNormAngle = cos(maxAngle_deg * CCLib::DEG_TO_RAD);
+	const double c_minCosNormAngle = cos(maxAngle_deg * CCCoreLib::DEG_TO_RAD);
 
 	//fuse all cells, starting from the ones with the best error
 	const int unvisitedNeighborValue = -1;
@@ -139,9 +139,9 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 			currentCell->userData = macroIndex++;
 
 			//we init the current set of 'fused' points with the cell's points
-			CCLib::ReferenceCloud* currentPointSet = currentCell->points;
+			CCCoreLib::ReferenceCloud* currentPointSet = currentCell->points;
 			//get current fused set centroid and normal
-			CCVector3 currentCentroid = *CCLib::Neighbourhood(currentPointSet).getGravityCenter();
+			CCVector3 currentCentroid = *CCCoreLib::Neighbourhood(currentPointSet).getGravityCenter();
 			CCVector3 currentNormal(currentCell->planeEq);
 
 			//visited neighbors
@@ -214,7 +214,7 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 					
 					//we will keep track of the best fused 'couple' at each pass
 					std::list<Candidate>::iterator bestIt = candidates.end();
-					CCLib::ReferenceCloud* bestFused = nullptr;
+					CCCoreLib::ReferenceCloud* bestFused = nullptr;
 					CCVector3 bestNormal(0,0,0);
 					double bestError = -1.0;
 
@@ -255,7 +255,7 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 						}
 
 						//fuse the main set with the current candidate
-						CCLib::ReferenceCloud* fused = new CCLib::ReferenceCloud(*currentPointSet);
+						CCCoreLib::ReferenceCloud* fused = new CCCoreLib::ReferenceCloud(*currentPointSet);
 						if (!fused->add(*(it->leaf->points)))
 						{
 							//not enough memory!
@@ -268,9 +268,9 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 
 						//fit a plane and estimate the resulting error
 						double error = -1.0;
-						const PointCoordinateType* planeEquation = CCLib::Neighbourhood(fused).getLSPlane();
+						const PointCoordinateType* planeEquation = CCCoreLib::Neighbourhood(fused).getLSPlane();
 						if (planeEquation)
-							error = CCLib::DistanceComputationTools::ComputeCloud2PlaneDistance(fused, planeEquation, errorMeasure);
+							error = CCCoreLib::DistanceComputationTools::ComputeCloud2PlaneDistance(fused, planeEquation, errorMeasure);
 
 						if (error < 0.0 || error > maxError)
 						{
@@ -312,7 +312,7 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 						currentPointSet = bestFused;
 						{
 							//update infos
-							CCLib::Neighbourhood N(currentPointSet);
+							CCCoreLib::Neighbourhood N(currentPointSet);
 							//currentCentroid = *N.getGravityCenter(); //if we update it, the search will naturally shift along one dimension!
 							//currentNormal = bestNormal; //same thing here for normals
 						}
@@ -364,13 +364,13 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 
 		for (size_t i=0; i<leaves.size(); ++i)
 		{
-			CCLib::ReferenceCloud* subset = leaves[i]->points;
+			CCCoreLib::ReferenceCloud* subset = leaves[i]->points;
 			if (subset)
 			{
 				ScalarType scalar = (ScalarType)leaves[i]->userData;
 				if (leaves[i]->userData <= 0) //for unfused cells, we create new individual groups
 					scalar = static_cast<ScalarType>(macroIndex++);
-					//scalar = CCLib::NAN_VALUE; //FIXME TEST
+					//scalar = CCCoreLib::NAN_VALUE; //FIXME TEST
 				for (unsigned j=0; j<subset->size(); ++j)
 					subset->setPointScalarValue(j,scalar);
 			}

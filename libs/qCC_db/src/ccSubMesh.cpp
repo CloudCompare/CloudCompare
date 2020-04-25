@@ -25,7 +25,7 @@
 //Qt
 #include <QString>
 
-//CCLib
+//CCCoreLib
 #include <ManualSegmentationTools.h>
 
 //system
@@ -71,7 +71,7 @@ void ccSubMesh::forEach(genericTriangleAction action)
 
 	for (unsigned int index : m_triIndexes)
 	{
-		CCLib::GenericTriangle* tri = m_associatedMesh->_getTriangle(index);
+		CCCoreLib::GenericTriangle* tri = m_associatedMesh->_getTriangle(index);
 		action(*tri);
 	}
 }
@@ -81,12 +81,12 @@ ccGenericPointCloud* ccSubMesh::getAssociatedCloud() const
 	return m_associatedMesh ? m_associatedMesh->getAssociatedCloud() : nullptr;
 }
 
-CCLib::GenericTriangle* ccSubMesh::_getNextTriangle() //temporary object
+CCCoreLib::GenericTriangle* ccSubMesh::_getNextTriangle() //temporary object
 {
 	return m_associatedMesh && m_globalIterator < size() ? m_associatedMesh->_getTriangle(m_triIndexes[m_globalIterator++]) : nullptr;
 }
 
-CCLib::VerticesIndexes* ccSubMesh::getNextTriangleVertIndexes()
+CCCoreLib::VerticesIndexes* ccSubMesh::getNextTriangleVertIndexes()
 {
 	return m_associatedMesh && m_globalIterator < size() ? m_associatedMesh->getTriangleVertIndexes(m_triIndexes[m_globalIterator++]) : nullptr;
 }
@@ -171,7 +171,7 @@ bool ccSubMesh::getVertexColorFromMaterial(unsigned triIndex, unsigned char vert
 	return false;
 }
 
-CCLib::GenericTriangle* ccSubMesh::_getTriangle(unsigned triIndex) //temporary object
+CCCoreLib::GenericTriangle* ccSubMesh::_getTriangle(unsigned triIndex) //temporary object
 {
 	if (m_associatedMesh && triIndex < size())
 		return m_associatedMesh->_getTriangle(getTriGlobalIndex(triIndex));
@@ -194,7 +194,7 @@ void ccSubMesh::getTriangleVertices(unsigned triIndex, CCVector3& A, CCVector3& 
 	}
 }
 
-CCLib::VerticesIndexes* ccSubMesh::getTriangleVertIndexes(unsigned triIndex)
+CCCoreLib::VerticesIndexes* ccSubMesh::getTriangleVertIndexes(unsigned triIndex)
 {
 	if (m_associatedMesh && triIndex < size())
 		return m_associatedMesh->getTriangleVertIndexes(getTriGlobalIndex(triIndex));
@@ -226,11 +226,11 @@ ccSubMesh* ccSubMesh::createNewSubMeshFromSelection(bool removeSelectedFaces, In
 	{
 		for (unsigned globalIndex : m_triIndexes)
 		{
-			const CCLib::VerticesIndexes* tsi = m_associatedMesh->getTriangleVertIndexes(globalIndex);
+			const CCCoreLib::VerticesIndexes* tsi = m_associatedMesh->getTriangleVertIndexes(globalIndex);
 			//triangle is visible?
-			if (   verticesVisibility[tsi->i1] == CCLib::POINT_VISIBLE
-				&& verticesVisibility[tsi->i2] == CCLib::POINT_VISIBLE
-				&& verticesVisibility[tsi->i3] == CCLib::POINT_VISIBLE)
+			if (   verticesVisibility[tsi->i1] == CCCoreLib::POINT_VISIBLE
+				&& verticesVisibility[tsi->i2] == CCCoreLib::POINT_VISIBLE
+				&& verticesVisibility[tsi->i3] == CCCoreLib::POINT_VISIBLE)
 			{
 				++visibleFaces;
 			}
@@ -263,15 +263,15 @@ ccSubMesh* ccSubMesh::createNewSubMeshFromSelection(bool removeSelectedFaces, In
 		for (size_t i = 0; i < triNum; ++i)
 		{
 			unsigned globalIndex = m_triIndexes[i];
-			const CCLib::VerticesIndexes* tsi = m_associatedMesh->getTriangleVertIndexes(globalIndex);
+			const CCCoreLib::VerticesIndexes* tsi = m_associatedMesh->getTriangleVertIndexes(globalIndex);
 
 			if (indexMap) //translate global index?
 				globalIndex = indexMap->at(globalIndex);
 
 			//triangle is visible?
-			if (	verticesVisibility[tsi->i1] == CCLib::POINT_VISIBLE
-				&&	verticesVisibility[tsi->i2] == CCLib::POINT_VISIBLE
-				&&	verticesVisibility[tsi->i3] == CCLib::POINT_VISIBLE)
+			if (	verticesVisibility[tsi->i1] == CCCoreLib::POINT_VISIBLE
+				&&	verticesVisibility[tsi->i2] == CCCoreLib::POINT_VISIBLE
+				&&	verticesVisibility[tsi->i3] == CCCoreLib::POINT_VISIBLE)
 			{
 				newSubMesh->addTriangleIndex(globalIndex);
 			}
@@ -501,7 +501,7 @@ void ccSubMesh::refreshBB()
 	{
 		for (unsigned globalIndex : m_triIndexes)
 		{
-			CCLib::GenericTriangle* tri = m_associatedMesh->_getTriangle(globalIndex);
+			CCCoreLib::GenericTriangle* tri = m_associatedMesh->_getTriangle(globalIndex);
 			m_bBox.add(*tri->_getA());
 			m_bBox.add(*tri->_getB());
 			m_bBox.add(*tri->_getC());

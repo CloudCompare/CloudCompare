@@ -22,7 +22,7 @@
 #include <QByteArray>
 #include <QString>
 
-//CCLib
+//CCCoreLib
 #include <ReferenceCloud.h>
 
 //system
@@ -86,7 +86,7 @@ public:
 		\param[out] invalidScale whether this scale is 'invalid' (i.e. parameters couldn't be computed, default one have been returned instead)
 		\return false if an error occurred (e.g. not enough memory)
 	**/
-	virtual bool computeScaleParams(CCLib::ReferenceCloud& neighbors, double radius, float params[], bool& invalidScale) = 0;
+	virtual bool computeScaleParams(CCCoreLib::ReferenceCloud& neighbors, double radius, float params[], bool& invalidScale) = 0;
 
 protected:
 };

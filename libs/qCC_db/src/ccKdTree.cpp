@@ -26,7 +26,7 @@
 #include "ccScalarField.h"
 
 ccKdTree::ccKdTree(ccGenericPointCloud* aCloud)
-	: CCLib::TrueKdTree(aCloud)
+	: CCCoreLib::TrueKdTree(aCloud)
 	, ccHObject("Kd-tree")
 	, m_associatedGenericCloud(aCloud)
 {
@@ -191,7 +191,7 @@ bool ccKdTree::convertCellIndexToSF()
 	//for each cell
 	for (size_t i=0; i<leaves.size(); ++i)
 	{
-		CCLib::ReferenceCloud* subset = leaves[i]->points;
+		CCCoreLib::ReferenceCloud* subset = leaves[i]->points;
 		if (subset)
 		{
 			for (unsigned j=0; j<subset->size(); ++j)
@@ -224,7 +224,7 @@ bool ccKdTree::convertCellIndexToRandomColor()
 	for (size_t i = 0; i < leaves.size(); ++i)
 	{
 		ccColor::Rgba col(ccColor::Generator::Random(), ccColor::MAX);
-		CCLib::ReferenceCloud* subset = leaves[i]->points;
+		CCCoreLib::ReferenceCloud* subset = leaves[i]->points;
 		if (subset)
 		{
 			for (unsigned j = 0; j < subset->size(); ++j)
@@ -247,8 +247,8 @@ public:
 	GetCellBBoxVisitor()
 	{
 		//invalidate the initial bounding box
-		m_UpdatedBox.maxCorner() = CCVector3(CCLib::PC_NAN,CCLib::PC_NAN,CCLib::PC_NAN);
-		m_UpdatedBox.minCorner() = CCVector3(CCLib::PC_NAN,CCLib::PC_NAN,CCLib::PC_NAN);
+		m_UpdatedBox.maxCorner() = CCVector3(CCCoreLib::PC_NAN,CCCoreLib::PC_NAN,CCCoreLib::PC_NAN);
+		m_UpdatedBox.minCorner() = CCVector3(CCCoreLib::PC_NAN,CCCoreLib::PC_NAN,CCCoreLib::PC_NAN);
 	}
 	
 	void visit(ccKdTree::BaseNode* node)

@@ -17,7 +17,7 @@
 
 #include "qM3C2Tools.h"
 
-//CCLib
+//CCCoreLib
 #include <Neighbourhood.h>
 #include <DistanceComputationTools.h>
 #include <Jacobi.h>
@@ -48,16 +48,16 @@
 // ComputeCorePointNormal parameters
 static struct
 {
-	CCLib::GenericIndexedCloud* corePoints;
+	CCCoreLib::GenericIndexedCloud* corePoints;
 	ccGenericPointCloud* sourceCloud;
-	CCLib::DgmOctree* octree;
+	CCCoreLib::DgmOctree* octree;
 	unsigned char octreeLevel;
 	std::vector<PointCoordinateType> radii;
 	NormsIndexesTableType* normCodes;
 	ccScalarField* normalScale;
 	bool invalidNormals;
 
-	CCLib::NormalizedProgress* nProgress;
+	CCCoreLib::NormalizedProgress* nProgress;
 	bool processCanceled;
 
 } s_corePointsNormalsParams;
@@ -68,11 +68,11 @@ void ComputeCorePointNormal(unsigned index)
 		return;
 
 	CCVector3 bestNormal(0, 0, 0);
-	ScalarType bestScale = CCLib::NAN_VALUE;
+	ScalarType bestScale = CCCoreLib::NAN_VALUE;
 
 	const CCVector3* P = s_corePointsNormalsParams.corePoints->getPoint(index);
-	CCLib::DgmOctree::NeighboursSet neighbours;
-	CCLib::ReferenceCloud subset(s_corePointsNormalsParams.sourceCloud);
+	CCCoreLib::DgmOctree::NeighboursSet neighbours;
+	CCCoreLib::ReferenceCloud subset(s_corePointsNormalsParams.sourceCloud);
 
 	int n = s_corePointsNormalsParams.octree->getPointsInSphericalNeighbourhood(*P,
 																				s_corePointsNormalsParams.radii.back(), //we use the biggest neighborhood
@@ -107,12 +107,12 @@ void ComputeCorePointNormal(unsigned index)
 			//if (subset.size() < 10) //DGM -> not implemented in Brodu's code?!
 			//	break;
 
-			CCLib::Neighbourhood Z(&subset);
+			CCCoreLib::Neighbourhood Z(&subset);
 
 			/*** we manually compute the least squares best fitting plane (so as to get the PCA eigen values) ***/
 
 			//we determine the plane normal by computing the smallest eigen value of M = 1/n * S[(p-µ)*(p-µ)']
-			CCLib::SquareMatrixd eigVectors;
+			CCCoreLib::SquareMatrixd eigVectors;
 			std::vector<double> eigValues;
 			if (Jacobi<double>::ComputeEigenValuesAndVectors(Z.computeCovarianceMatrix(), eigVectors, eigValues, true))
 			{
@@ -188,15 +188,15 @@ void ComputeCorePointNormal(unsigned index)
 	}
 }
 
-bool qM3C2Normals::ComputeCorePointsNormals(CCLib::GenericIndexedCloud* corePoints,
+bool qM3C2Normals::ComputeCorePointsNormals(CCCoreLib::GenericIndexedCloud* corePoints,
 											NormsIndexesTableType* corePointsNormals,
 											ccGenericPointCloud* sourceCloud,
 											const std::vector<PointCoordinateType>& sortedRadii,
 											bool& invalidNormals,
 											int maxThreadCount/*=0*/,
 											ccScalarField* normalScale/*=0*/,
-											CCLib::GenericProgressCallback* progressCb/*=0*/,
-											CCLib::DgmOctree* inputOctree/*=0*/)
+											CCCoreLib::GenericProgressCallback* progressCb/*=0*/,
+											CCCoreLib::DgmOctree* inputOctree/*=0*/)
 {
 	assert(corePoints && sourceCloud && corePointsNormals);
 	assert(!sortedRadii.empty());
@@ -214,13 +214,13 @@ bool qM3C2Normals::ComputeCorePointsNormals(CCLib::GenericIndexedCloud* corePoin
 			//not enough memory
 			return false;
 		}
-		normalScale->fill(CCLib::NAN_VALUE);
+		normalScale->fill(CCCoreLib::NAN_VALUE);
 	}
 
-	CCLib::DgmOctree* theOctree = inputOctree;
+	CCCoreLib::DgmOctree* theOctree = inputOctree;
 	if (!theOctree)
 	{
-		theOctree = new CCLib::DgmOctree(sourceCloud);
+		theOctree = new CCCoreLib::DgmOctree(sourceCloud);
 		if (theOctree->build() == 0)
 		{
 			delete theOctree;
@@ -228,7 +228,7 @@ bool qM3C2Normals::ComputeCorePointsNormals(CCLib::GenericIndexedCloud* corePoin
 		}
 	}
 
-	CCLib::NormalizedProgress nProgress(progressCb, corePtsCount);
+	CCCoreLib::NormalizedProgress nProgress(progressCb, corePtsCount);
 	if (progressCb)
 	{
 		if (progressCb->textCanBeEdited())
@@ -324,10 +324,10 @@ bool qM3C2Normals::ComputeCorePointsNormals(CCLib::GenericIndexedCloud* corePoin
 static struct
 {
 	NormsIndexesTableType* normsCodes;
-	CCLib::GenericIndexedCloud* normCloud;
-	CCLib::GenericIndexedCloud* orientationCloud;
+	CCCoreLib::GenericIndexedCloud* normCloud;
+	CCCoreLib::GenericIndexedCloud* orientationCloud;
 
-	CCLib::NormalizedProgress* nProgress;
+	CCCoreLib::NormalizedProgress* nProgress;
 	bool processCanceled;
 
 } s_normOriWithCloud;
@@ -373,11 +373,11 @@ static void OrientPointNormalWithCloud(unsigned index)
 	}
 }
 
-bool qM3C2Normals::UpdateNormalOrientationsWithCloud(	CCLib::GenericIndexedCloud* normCloud,
+bool qM3C2Normals::UpdateNormalOrientationsWithCloud(	CCCoreLib::GenericIndexedCloud* normCloud,
 														NormsIndexesTableType& normsCodes,
-														CCLib::GenericIndexedCloud* orientationCloud,
+														CCCoreLib::GenericIndexedCloud* orientationCloud,
 														int maxThreadCount/*=0*/,
-														CCLib::GenericProgressCallback* progressCb/*=0*/)
+														CCCoreLib::GenericProgressCallback* progressCb/*=0*/)
 {
 	//input normals
 	unsigned count = normsCodes.currentSize();
@@ -397,7 +397,7 @@ bool qM3C2Normals::UpdateNormalOrientationsWithCloud(	CCLib::GenericIndexedCloud
 		return true;
 	}
 
-	CCLib::NormalizedProgress nProgress(progressCb, count);
+	CCCoreLib::NormalizedProgress nProgress(progressCb, count);
 	if (progressCb)
 	{
 		if (progressCb->textCanBeEdited())
@@ -489,13 +489,13 @@ void qM3C2Normals::MakeNormalsHorizontal(NormsIndexesTableType& normsCodes)
 /** Uses the common definition using mid-point average in the even case
 	just as the original m3c2 code by N. Brodu.
 **/
-static double Median(const CCLib::DgmOctree::NeighboursSet& set, size_t begin = 0, size_t count = 0)
+static double Median(const CCCoreLib::DgmOctree::NeighboursSet& set, size_t begin = 0, size_t count = 0)
 {
 	if (count == 0)
 	{
 		count = set.size();
 		if (count == 0)
-			return CCLib::NAN_VALUE;
+			return CCCoreLib::NAN_VALUE;
 	}
 
 	size_t nd2 = count / 2;
@@ -513,10 +513,10 @@ static double Median(const CCLib::DgmOctree::NeighboursSet& set, size_t begin = 
 /** Uses Mathworld's definition (http://mathworld.wolfram.com/InterquartileRange.html)
 	as the original m3c2 code by N. Brodu.
 	**/
-double Interquartile(const CCLib::DgmOctree::NeighboursSet& set)
+double Interquartile(const CCCoreLib::DgmOctree::NeighboursSet& set)
 {
 	if (set.empty())
-		return CCLib::NAN_VALUE;
+		return CCCoreLib::NAN_VALUE;
 
 	size_t num = set.size();
 	size_t num_pts_each_half = (num + 1) / 2;
@@ -528,12 +528,12 @@ double Interquartile(const CCLib::DgmOctree::NeighboursSet& set)
 	return q3 - q1;
 }
 
-void qM3C2Tools::ComputeStatistics(CCLib::DgmOctree::NeighboursSet& set, bool useMedian, double& meanOrMedian, double& stdDevOrIQR)
+void qM3C2Tools::ComputeStatistics(CCCoreLib::DgmOctree::NeighboursSet& set, bool useMedian, double& meanOrMedian, double& stdDevOrIQR)
 {
 	size_t count = set.size();
 	if (count == 0)
 	{
-		meanOrMedian = CCLib::NAN_VALUE;
+		meanOrMedian = CCCoreLib::NAN_VALUE;
 		stdDevOrIQR = 0;
 		return;
 	}
@@ -547,7 +547,7 @@ void qM3C2Tools::ComputeStatistics(CCLib::DgmOctree::NeighboursSet& set, bool us
 	if (useMedian)
 	{
 		//sort neighbors by distance
-		std::sort(set.begin(), set.end(), CCLib::DgmOctree::PointDescriptor::distComp);
+		std::sort(set.begin(), set.end(), CCCoreLib::DgmOctree::PointDescriptor::distComp);
 
 		meanOrMedian = Median(set);
 		stdDevOrIQR = Interquartile(set);
@@ -676,7 +676,7 @@ bool qM3C2Tools::GuessBestParams(	ccPointCloud* cloud1,
 
 				if (!hasBestNormLevel && n >= 12)
 				{
-					CCLib::ReferenceCloud neighborCloud(cloud1);
+					CCCoreLib::ReferenceCloud neighborCloud(cloud1);
 					if (!neighborCloud.resize(static_cast<unsigned>(n)))
 					{
 						//not enough memory!
@@ -691,11 +691,11 @@ bool qM3C2Tools::GuessBestParams(	ccPointCloud* cloud1,
 						neighborCloud.setPointIndex(j, neighbors[j].pointIndex);
 					}
 
-					CCLib::Neighbourhood Yk(&neighborCloud);
+					CCCoreLib::Neighbourhood Yk(&neighborCloud);
 					const PointCoordinateType* lsPlane = Yk.getLSPlane();
 					if (lsPlane)
 					{
-						ScalarType d = CCLib::DistanceComputationTools::computePoint2PlaneDistance(P, lsPlane);
+						ScalarType d = CCCoreLib::DistanceComputationTools::computePoint2PlaneDistance(P, lsPlane);
 						//we compute relative roughness
 						d /= scale;
 						sumRoughness += d*d;//fabs(d);

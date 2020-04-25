@@ -43,7 +43,7 @@ namespace
 		edge* nextEdge;
 	};
 	
-	static void ReleaseEdgeList(edge**& theEdges, unsigned numberOfVertexes, CCLib::NormalizedProgress* nprogress = nullptr)
+	static void ReleaseEdgeList(edge**& theEdges, unsigned numberOfVertexes, CCCoreLib::NormalizedProgress* nprogress = nullptr)
 	{
 		for (unsigned i = 0; i < numberOfVertexes; ++i)
 		{
@@ -152,7 +152,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const QString& filename, c
 		pDlg->setInfo(QObject::tr("Triangles = %1").arg(numberOfTriangles));
 		pDlg->start();
 	}
-	CCLib::NormalizedProgress nprogress(pDlg.data(), ((2 + coloursAdjustment) * numberOfTriangles + (3 + coloursAdjustment) * numberOfVertexes));
+	CCCoreLib::NormalizedProgress nprogress(pDlg.data(), ((2 + coloursAdjustment) * numberOfTriangles + (3 + coloursAdjustment) * numberOfVertexes));
 
 	//we extract the (short) filename from the whole path
 	QString baseFilename = QFileInfo(filename).fileName();
@@ -280,7 +280,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const QString& filename, c
 		theMesh->placeIteratorAtBeginning();
 		for (unsigned i = 0; i < numberOfTriangles; ++i)
 		{
-			const CCLib::VerticesIndexes* tsi = theMesh->getNextTriangleVertIndexes(); //DGM: getNextTriangleVertIndexes is faster for mesh groups!
+			const CCCoreLib::VerticesIndexes* tsi = theMesh->getNextTriangleVertIndexes(); //DGM: getNextTriangleVertIndexes is faster for mesh groups!
 
 			ind[0] = tsi->i1;
 			ind[1] = tsi->i2;
@@ -399,7 +399,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const QString& filename, c
 				return CC_FERR_WRITING;
 			}
 
-			CCLib::VerticesIndexes* tsi = theMesh->getNextTriangleVertIndexes(); //DGM: getNextTriangleVertIndexes is faster for mesh groups!
+			CCCoreLib::VerticesIndexes* tsi = theMesh->getNextTriangleVertIndexes(); //DGM: getNextTriangleVertIndexes is faster for mesh groups!
 			ind[0] = tsi->i1;
 			ind[1] = tsi->i2;
 			ind[2] = tsi->i3;
@@ -472,7 +472,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const QString& filename, c
 		{
 			for (unsigned i=0; i<numberOfTriangles; ++i)
 			{
-				CCLib::VerticesIndexes* tsi = theMesh->getNextTriangleVertIndexes(); //DGM: getNextTriangleVertIndexes is faster for mesh groups!
+				CCCoreLib::VerticesIndexes* tsi = theMesh->getNextTriangleVertIndexes(); //DGM: getNextTriangleVertIndexes is faster for mesh groups!
 				ind[0] = tsi->i1;
 				ind[1] = tsi->i2;
 				ind[2] = tsi->i3;

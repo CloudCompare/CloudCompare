@@ -175,7 +175,7 @@ public:
 		else
 		{
 			//create relative distance matrix
-			CCLib::SquareMatrixf distMat(static_cast<unsigned>(count));
+			CCCoreLib::SquareMatrixf distMat(static_cast<unsigned>(count));
 			if (distMat.isValid())
 			{
 				for (unsigned it1 = 0; it1 + 1 != count; ++it1)

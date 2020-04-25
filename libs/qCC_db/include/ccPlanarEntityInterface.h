@@ -1,7 +1,7 @@
 #ifndef PLANAR_ENTITY_INTERFACE_HEADER
 #define PLANAR_ENTITY_INTERFACE_HEADER
 
-//CCLib
+//CCCoreLib
 #include <CCGeom.h>
 
 //qCC_gl

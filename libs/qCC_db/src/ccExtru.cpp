@@ -21,7 +21,7 @@
 #include "ccPointCloud.h"
 #include "ccNormalVectors.h"
 
-//CCLib
+//CCCoreLib
 #include <Delaunay2dMesh.h>
 
 //system
@@ -57,7 +57,7 @@ bool ccExtru::buildUp()
 	if (count < 3)
 		return false;
 
-	CCLib::Delaunay2dMesh mesh;
+	CCCoreLib::Delaunay2dMesh mesh;
 
 	//DGM: we check that last vertex is different from the first one!
 	//(yes it happens ;)

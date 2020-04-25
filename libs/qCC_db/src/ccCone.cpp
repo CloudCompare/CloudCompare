@@ -62,12 +62,12 @@ bool ccCone::buildUp()
 		return false;
 
 	//invalid dimensions?
-	if (m_height < CCLib::ZERO_TOLERANCE || m_bottomRadius + m_topRadius < CCLib::ZERO_TOLERANCE)
+	if (m_height < CCCoreLib::ZERO_TOLERANCE || m_bottomRadius + m_topRadius < CCCoreLib::ZERO_TOLERANCE)
 		return false;
 
 	//topology
-	bool singlePointBottom = (m_bottomRadius < CCLib::ZERO_TOLERANCE);
-	bool singlePointTop = (m_topRadius < CCLib::ZERO_TOLERANCE);
+	bool singlePointBottom = (m_bottomRadius < CCCoreLib::ZERO_TOLERANCE);
+	bool singlePointTop = (m_topRadius < CCCoreLib::ZERO_TOLERANCE);
 	assert(!singlePointBottom || !singlePointTop);
 
 	unsigned steps = m_drawPrecision;

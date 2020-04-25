@@ -559,7 +559,7 @@ void ccPropertiesTreeDelegate::fillSFWithPointCloud(ccGenericPointCloud* _obj)
 		appendRow(ITEM( tr( "Active" ) ), PERSISTENT_EDITOR(OBJECT_CURRENT_SCALAR_FIELD), true);
 
 		//no need to go any further if no SF is currently active
-		CCLib::ScalarField* sf = cloud->getCurrentDisplayedScalarField();
+		CCCoreLib::ScalarField* sf = cloud->getCurrentDisplayedScalarField();
 		if (sf)
 		{
 			addSeparator("Color Scale");
@@ -753,19 +753,19 @@ void ccPropertiesTreeDelegate::fillWithPointKdTree(const ccKdTree* _obj)
 		QString errorMeasure;
 		switch (_obj->getMaxErrorType())
 		{
-		case CCLib::DistanceComputationTools::RMS:
+		case CCCoreLib::DistanceComputationTools::RMS:
 			errorMeasure = tr( "RMS" );
 			break;
-		case CCLib::DistanceComputationTools::MAX_DIST_68_PERCENT:
+		case CCCoreLib::DistanceComputationTools::MAX_DIST_68_PERCENT:
 			errorMeasure = tr( "Max dist @ 68%" );
 			break;
-		case CCLib::DistanceComputationTools::MAX_DIST_95_PERCENT:
+		case CCCoreLib::DistanceComputationTools::MAX_DIST_95_PERCENT:
 			errorMeasure = tr( "Max dist @ 95%" );
 			break;
-		case CCLib::DistanceComputationTools::MAX_DIST_99_PERCENT:
+		case CCCoreLib::DistanceComputationTools::MAX_DIST_99_PERCENT:
 			errorMeasure = tr( "Max dist @ 99%" );
 			break;
-		case CCLib::DistanceComputationTools::MAX_DIST:
+		case CCCoreLib::DistanceComputationTools::MAX_DIST:
 			errorMeasure = tr( "Max distance" );
 			break;
 		default:
@@ -901,20 +901,20 @@ void ccPropertiesTreeDelegate::fillWithGBLSensor(const ccGBLSensor* _obj)
 		//Angular range (yaw)
 		PointCoordinateType yawMin = _obj->getMinYaw();
 		PointCoordinateType yawMax = _obj->getMaxYaw();
-		appendRow(ITEM( tr( "Yaw span" ) ), ITEM(QStringLiteral("[%1 ; %2]").arg(yawMin * CCLib::RAD_TO_DEG, 0, 'f', 2).arg(yawMax * CCLib::RAD_TO_DEG, 0, 'f', 2)));
+		appendRow(ITEM( tr( "Yaw span" ) ), ITEM(QStringLiteral("[%1 ; %2]").arg(yawMin * CCCoreLib::RAD_TO_DEG, 0, 'f', 2).arg(yawMax * CCCoreLib::RAD_TO_DEG, 0, 'f', 2)));
 
 		//Angular steps (yaw)
 		PointCoordinateType yawStep = _obj->getYawStep();
-		appendRow(ITEM( tr( "Yaw step" ) ), ITEM(QStringLiteral("%1").arg(yawStep * CCLib::RAD_TO_DEG, 0, 'f', 4)));
+		appendRow(ITEM( tr( "Yaw step" ) ), ITEM(QStringLiteral("%1").arg(yawStep * CCCoreLib::RAD_TO_DEG, 0, 'f', 4)));
 
 		//Angular range (pitch)
 		PointCoordinateType pitchMin = _obj->getMinPitch();
 		PointCoordinateType pitchMax = _obj->getMaxPitch();
-		appendRow(ITEM( tr( "Pitch span" ) ), ITEM(QStringLiteral("[%1 ; %2]").arg(pitchMin * CCLib::RAD_TO_DEG, 0, 'f', 2).arg(pitchMax * CCLib::RAD_TO_DEG, 0, 'f', 2)));
+		appendRow(ITEM( tr( "Pitch span" ) ), ITEM(QStringLiteral("[%1 ; %2]").arg(pitchMin * CCCoreLib::RAD_TO_DEG, 0, 'f', 2).arg(pitchMax * CCCoreLib::RAD_TO_DEG, 0, 'f', 2)));
 
 		//Angular steps (pitch)
 		PointCoordinateType pitchStep = _obj->getPitchStep();
-		appendRow(ITEM( tr( "Pitch step" ) ), ITEM(QStringLiteral("%1").arg(pitchStep * CCLib::RAD_TO_DEG, 0, 'f', 4)));
+		appendRow(ITEM( tr( "Pitch step" ) ), ITEM(QStringLiteral("%1").arg(pitchStep * CCCoreLib::RAD_TO_DEG, 0, 'f', 4)));
 	}
 
 	//Positions
@@ -945,7 +945,7 @@ void ccPropertiesTreeDelegate::fillWithCameraSensor(const ccCameraSensor* _obj)
 	}
 
 	//Field of view
-	appendRow(ITEM( tr( "Field of view" ) ), ITEM(QString::number(params.vFOV_rad * CCLib::RAD_TO_DEG) + " deg."));
+	appendRow(ITEM( tr( "Field of view" ) ), ITEM(QString::number(params.vFOV_rad * CCCoreLib::RAD_TO_DEG) + " deg."));
 
 	//Skewness
 	appendRow(ITEM( tr( "Skew" ) ), ITEM(QString::number(params.skew)));
@@ -1161,7 +1161,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 	case OBJECT_OCTREE_LEVEL:
 	{
 		QSpinBox* spinBox = new QSpinBox(parent);
-		spinBox->setRange(1, CCLib::DgmOctree::MAX_OCTREE_LEVEL);
+		spinBox->setRange(1, CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL);
 
 		connect(spinBox, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
 				this, &ccPropertiesTreeDelegate::octreeDisplayedLevelChanged);

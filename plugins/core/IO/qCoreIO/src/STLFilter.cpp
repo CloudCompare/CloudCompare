@@ -126,7 +126,7 @@ CC_FILE_ERROR STLFilter::saveToBINFile(ccGenericMesh* mesh, FILE *theFile, QWidg
 		pDlg->start();
 		QApplication::processEvents();
 	}
-	CCLib::NormalizedProgress nprogress(pDlg.data(), faceCount);
+	CCCoreLib::NormalizedProgress nprogress(pDlg.data(), faceCount);
 
 	//header
 	{
@@ -156,7 +156,7 @@ CC_FILE_ERROR STLFilter::saveToBINFile(ccGenericMesh* mesh, FILE *theFile, QWidg
 	mesh->placeIteratorAtBeginning();
 	for (unsigned i = 0; i < faceCount; ++i)
 	{
-		CCLib::VerticesIndexes*tsi = mesh->getNextTriangleVertIndexes();
+		CCCoreLib::VerticesIndexes*tsi = mesh->getNextTriangleVertIndexes();
 
 		const CCVector3* A = vertices->getPointPersistentPtr(tsi->i1);
 		const CCVector3* B = vertices->getPointPersistentPtr(tsi->i2);
@@ -218,7 +218,7 @@ CC_FILE_ERROR STLFilter::saveToASCIIFile(ccGenericMesh* mesh, FILE *theFile, QWi
 		pDlg->start();
 		QApplication::processEvents();
 	}
-	CCLib::NormalizedProgress nprogress(pDlg.data(), faceCount);
+	CCCoreLib::NormalizedProgress nprogress(pDlg.data(), faceCount);
 
 	if (fprintf(theFile, "solid %s\n", qPrintable(mesh->getName())) < 0) //empty names are acceptable!
 	{
@@ -231,7 +231,7 @@ CC_FILE_ERROR STLFilter::saveToASCIIFile(ccGenericMesh* mesh, FILE *theFile, QWi
 	mesh->placeIteratorAtBeginning();
 	for (unsigned i = 0; i < faceCount; ++i)
 	{
-		CCLib::VerticesIndexes*tsi = mesh->getNextTriangleVertIndexes();
+		CCCoreLib::VerticesIndexes*tsi = mesh->getNextTriangleVertIndexes();
 
 		const CCVector3* A = vertices->getPointPersistentPtr(tsi->i1);
 		const CCVector3* B = vertices->getPointPersistentPtr(tsi->i2);
@@ -278,17 +278,17 @@ CC_FILE_ERROR STLFilter::saveToASCIIFile(ccGenericMesh* mesh, FILE *theFile, QWi
 	return CC_FERR_NO_ERROR;
 }
 
-const PointCoordinateType c_defaultSearchRadius = static_cast<PointCoordinateType>(sqrt(CCLib::ZERO_TOLERANCE));
-static bool TagDuplicatedVertices(	const CCLib::DgmOctree::octreeCell& cell,
+const PointCoordinateType c_defaultSearchRadius = static_cast<PointCoordinateType>(sqrt(CCCoreLib::ZERO_TOLERANCE));
+static bool TagDuplicatedVertices(	const CCCoreLib::DgmOctree::octreeCell& cell,
 									void** additionalParameters,
-									CCLib::NormalizedProgress* nProgress/*=0*/)
+									CCCoreLib::NormalizedProgress* nProgress/*=0*/)
 {
 	std::vector<int>* equivalentIndexes = static_cast<std::vector<int>*>(additionalParameters[0]);
 
 	//we look for points very near to the others (only if not yet tagged!)
 
 	//structure for nearest neighbors search
-	CCLib::DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
+	CCCoreLib::DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
 	nNSS.level = cell.level;
 	nNSS.prepare(c_defaultSearchRadius, cell.parentOctree->getCellSize(nNSS.level));
 	cell.parentOctree->getCellPos(cell.truncatedCode, cell.level, nNSS.cellPos, true);
@@ -309,7 +309,7 @@ static bool TagDuplicatedVertices(	const CCLib::DgmOctree::octreeCell& cell,
 
 	//init structure with cell points
 	{
-		CCLib::DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
+		CCCoreLib::DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
 		for (unsigned i = 0; i < n; ++i, ++it)
 		{
 			it->point = cell.points->getPointPersistentPtr(i);
@@ -504,7 +504,7 @@ CC_FILE_ERROR STLFilter::loadFile(const QString& filename, ccHObject& container,
 							unsigned newFaceCount = 0;
 							for (unsigned i = 0; i < faceCount; ++i)
 							{
-								CCLib::VerticesIndexes* tri = mesh->getTriangleVertIndexes(i);
+								CCCoreLib::VerticesIndexes* tri = mesh->getTriangleVertIndexes(i);
 								tri->i1 = static_cast<unsigned>(equivalentIndexes[tri->i1]) - vertCount;
 								tri->i2 = static_cast<unsigned>(equivalentIndexes[tri->i2]) - vertCount;
 								tri->i3 = static_cast<unsigned>(equivalentIndexes[tri->i3]) - vertCount;
@@ -957,7 +957,7 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 		pDlg->start();
 		QApplication::processEvents();
 	}
-	CCLib::NormalizedProgress nProgress(pDlg.data(), faceCount);
+	CCCoreLib::NormalizedProgress nProgress(pDlg.data(), faceCount);
 
 	//current vertex shift
 	CCVector3d Pshift(0, 0, 0);

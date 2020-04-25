@@ -22,7 +22,7 @@
 #include <QSharedPointer>
 #include <QImage>
 
-//CCLib
+//CCCoreLib
 #include <CCGeom.h>
 
 //qCC_db

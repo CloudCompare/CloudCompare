@@ -386,7 +386,7 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 			else if (outputMesh)
 			{
 				char errorStr[1024];
-				CCLib::GenericIndexedMesh* baseMesh = CCLib::PointProjectionTools::computeTriangulation
+				CCCoreLib::GenericIndexedMesh* baseMesh = CCCoreLib::PointProjectionTools::computeTriangulation
 				                                      (
 				                                          rasterCloud,
 				                                          DELAUNAY_2D_AXIS_ALIGNED,
@@ -679,7 +679,7 @@ bool CommandVolume25D::process(ccCommandLineInterface &cmd)
 			if (outputMesh)
 			{
 				char errorStr[1024];
-				CCLib::GenericIndexedMesh* baseMesh = CCLib::PointProjectionTools::computeTriangulation(rasterCloud,
+				CCCoreLib::GenericIndexedMesh* baseMesh = CCCoreLib::PointProjectionTools::computeTriangulation(rasterCloud,
 				                                                                                        DELAUNAY_2D_AXIS_ALIGNED,
 				                                                                                        0,
 				                                                                                        vertDir,

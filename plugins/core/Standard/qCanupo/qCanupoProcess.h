@@ -21,7 +21,7 @@
 //Local
 #include "ccPointDescriptor.h"
 
-//CCLib
+//CCCoreLib
 #include <GenericIndexedCloudPersist.h>
 
 //Qt
@@ -51,7 +51,7 @@ public:
 	static bool Classify(	QString classifierFilename,
 							const ClassifyParams& params,
 							ccPointCloud* cloud,
-							CCLib::GenericIndexedCloudPersist* corePoints,
+							CCCoreLib::GenericIndexedCloudPersist* corePoints,
 							CorePointDescSet& corePointsDescriptors,
 							ccPointCloud* realCorePoints = nullptr,
 							ccMainAppInterface* app = nullptr,

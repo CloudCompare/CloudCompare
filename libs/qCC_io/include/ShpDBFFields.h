@@ -23,7 +23,7 @@
 //local
 #include "qCC_io.h"
 
-//CCLib
+//CCCoreLib
 #include <CCGeom.h>
 
 //Qt

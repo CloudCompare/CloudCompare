@@ -50,7 +50,7 @@ protected:
 
 	struct Option : ccLibAlgorithms::GeomCharacteristic
 	{
-		Option(QCheckBox* cb, CCLib::GeometricalAnalysisTools::GeomCharacteristic c, int option = 0)
+		Option(QCheckBox* cb, CCCoreLib::GeometricalAnalysisTools::GeomCharacteristic c, int option = 0)
 			: ccLibAlgorithms::GeomCharacteristic(c, option)
 			, checkBox(cb)
 		{}

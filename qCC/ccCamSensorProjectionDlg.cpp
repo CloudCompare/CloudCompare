@@ -82,7 +82,7 @@ void ccCamSensorProjectionDlg::initWithCamSensor(const ccCameraSensor* sensor)
 		const ccCameraSensor::IntrinsicParameters& iParams = sensor->getIntrinsicParameters();
 
 		focalDoubleSpinBox->setValue(iParams.vertFocal_pix);
-		fovDoubleSpinBox->setValue(iParams.vFOV_rad * CCLib::RAD_TO_DEG);
+		fovDoubleSpinBox->setValue(iParams.vFOV_rad * CCCoreLib::RAD_TO_DEG);
 		arrayWSpinBox->setValue(iParams.arrayWidth);
 		arrayHSpinBox->setValue(iParams.arrayHeight);
 		pixWDoubleSpinBox->setValue(iParams.pixelSize_mm[0]);
@@ -176,7 +176,7 @@ void ccCamSensorProjectionDlg::updateCamSensor(ccCameraSensor* sensor)
 		ccCameraSensor::IntrinsicParameters iParams;
 
 		iParams.vertFocal_pix = static_cast<float>(focalDoubleSpinBox->value());
-		iParams.vFOV_rad = static_cast<float>(fovDoubleSpinBox->value() * CCLib::DEG_TO_RAD);
+		iParams.vFOV_rad = static_cast<float>(fovDoubleSpinBox->value() * CCCoreLib::DEG_TO_RAD);
 		iParams.arrayWidth = arrayWSpinBox->value();
 		iParams.arrayHeight = arrayHSpinBox->value();
 		iParams.pixelSize_mm[0] = static_cast<float>(pixWDoubleSpinBox->value());

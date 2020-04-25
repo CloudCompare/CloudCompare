@@ -22,7 +22,7 @@
 #include "ccHObject.h"
 #include "ccPlanarEntityInterface.h"
 
-namespace CCLib
+namespace CCCoreLib
 {
 	class GenericIndexedCloudPersist;
 }
@@ -57,7 +57,7 @@ public:
 		\param planeEquation to input a custom plane equation
 		\return a facet (or 0 if an error occurred)
 	**/
-	static ccFacet* Create(	CCLib::GenericIndexedCloudPersist* cloud,
+	static ccFacet* Create(	CCCoreLib::GenericIndexedCloudPersist* cloud,
 							PointCoordinateType maxEdgeLength = 0,
 							bool transferOwnership = false,
 							const PointCoordinateType* planeEquation = nullptr);
@@ -123,7 +123,7 @@ protected:
 	void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
 	//! Creates internal representation (polygon, polyline, etc.)
-	bool createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* points,
+	bool createInternalRepresentation(	CCCoreLib::GenericIndexedCloudPersist* points,
 										const PointCoordinateType* planeEquation = nullptr);
 
 	//! Facet

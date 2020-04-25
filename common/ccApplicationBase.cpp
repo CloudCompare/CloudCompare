@@ -25,7 +25,7 @@
 #include <QTranslator>
 #include <QtGlobal>
 
-// CCLib
+// CCCoreLib
 #include "CCPlatform.h"
 
 // qCC_db

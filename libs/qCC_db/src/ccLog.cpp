@@ -17,7 +17,7 @@
 
 #include "ccLog.h"
 
-//CCLib
+//CCCoreLib
 #include <CCPlatform.h>
 
 //System

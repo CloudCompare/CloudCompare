@@ -120,7 +120,7 @@ bool ccFitPlane::isFitPlane(ccHObject* object)
 	&& object->hasMetaData("Radius");*/
 }
 
-ccFitPlane* ccFitPlane::Fit(CCLib::GenericIndexedCloudPersist* cloud, double *rms)
+ccFitPlane* ccFitPlane::Fit(CCCoreLib::GenericIndexedCloudPersist* cloud, double *rms)
 {
 	ccPlane* p = ccPlane::Fit(cloud, rms);
 	if (p) //valid plane

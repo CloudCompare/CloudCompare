@@ -1599,7 +1599,7 @@ void ccDBRoot::alignCameraWithEntity(bool reverse)
 		ccFacet* facet = static_cast<ccFacet*>(obj);
 		planeNormal = CCVector3d::fromArray(facet->getNormal().u);
 		CCVector3d planeHorizDir(0, 1, 0);
-		CCLib::CCMiscTools::ComputeBaseVectors(planeNormal,planeHorizDir,planeVertDir);
+		CCCoreLib::CCMiscTools::ComputeBaseVectors(planeNormal,planeHorizDir,planeVertDir);
 		center = facet->getBB_recursive(false,false).getCenter();
 	}
 	else

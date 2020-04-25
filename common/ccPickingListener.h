@@ -18,7 +18,7 @@
 #ifndef CC_PICKING_LISTENER_HEADER
 #define CC_PICKING_LISTENER_HEADER
 
-//CCLib
+//CCCoreLib
 #include <CCGeom.h>
 
 //Qt

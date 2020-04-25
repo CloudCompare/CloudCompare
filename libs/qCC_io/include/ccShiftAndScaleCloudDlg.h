@@ -8,7 +8,7 @@
 //Qt
 #include <QDialog>
 
-//CCLib
+//CCCoreLib
 #include <CCGeom.h>
 
 class Ui_GlobalShiftAndScaleDlg;

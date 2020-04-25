@@ -376,7 +376,7 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene, QString filenam
 	{
 		for (unsigned j = 0; j < faceCount; ++j)
 		{
-			const CCLib::VerticesIndexes* tsi = mesh->getTriangleVertIndexes(j);
+			const CCCoreLib::VerticesIndexes* tsi = mesh->getTriangleVertIndexes(j);
 
 			int matIndex = hasMaterial ? asCCMesh->getTriangleMtlIndex(j) : -1;
 			lMesh->BeginPolygon(matIndex);

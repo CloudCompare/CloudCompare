@@ -20,7 +20,7 @@
 //Local
 #include "trainer.h"
 
-//CCLib
+//CCCoreLib
 #include <DistanceComputationTools.h>
 #include <Neighbourhood.h>
 #include <ParallelSort.h>
@@ -42,14 +42,14 @@
 //ComputeCorePointsDescriptors parameters
 static struct
 {
-	CCLib::GenericIndexedCloud* corePoints;
+	CCCoreLib::GenericIndexedCloud* corePoints;
 	ccGenericPointCloud* sourceCloud;
-	CCLib::DgmOctree* octree;
+	CCCoreLib::DgmOctree* octree;
 	unsigned char octreeLevel;
 	CorePointDescSet* descriptors;
 	bool invalidDescriptors;
 
-	CCLib::NormalizedProgress* nProgress;
+	CCCoreLib::NormalizedProgress* nProgress;
 	bool processCanceled;
 	bool errorOccurred;
 
@@ -67,7 +67,7 @@ void ComputeCorePointDescriptor(unsigned index)
 		return;
 
 	const CCVector3* P = s_computeCorePointsDescParams.corePoints->getPoint(index);
-	CCLib::DgmOctree::NeighboursSet neighbours;
+	CCCoreLib::DgmOctree::NeighboursSet neighbours;
 
 	//extract the neighbors (maximum radius)
 	float maxRadius = s_computeCorePointsDescParams.descriptors->scales().front()/2;
@@ -88,7 +88,7 @@ void ComputeCorePointDescriptor(unsigned index)
 		assert(desc.params.size() == scaleCount*dimPerScale);
 
 		//init the whole neighborhood subset (we will prune it each time)
-		CCLib::ReferenceCloud subset(s_computeCorePointsDescParams.sourceCloud);
+		CCCoreLib::ReferenceCloud subset(s_computeCorePointsDescParams.sourceCloud);
 		{
 			if (!subset.reserve(n))
 			{
@@ -99,7 +99,7 @@ void ComputeCorePointDescriptor(unsigned index)
 			}
 
 			//sort the neighbors by increasing distance
-			ParallelSort(neighbours.begin(), neighbours.end(), CCLib::DgmOctree::PointDescriptor::distComp);
+			ParallelSort(neighbours.begin(), neighbours.end(), CCCoreLib::DgmOctree::PointDescriptor::distComp);
 
 			for (int j = 0; j < n; ++j)
 			{
@@ -117,8 +117,8 @@ void ComputeCorePointDescriptor(unsigned index)
 			{
 				//trim the points that don't fall in the current neighborhood
 				double squareRadius = radius*radius;
-				CCLib::DgmOctree::PointDescriptor fakeDesc(nullptr,0,squareRadius);
-				CCLib::DgmOctree::NeighboursSet::iterator up = std::upper_bound(neighbours.begin(),neighbours.end(),fakeDesc,CCLib::DgmOctree::PointDescriptor::distComp);
+				CCCoreLib::DgmOctree::PointDescriptor fakeDesc(nullptr,0,squareRadius);
+				CCCoreLib::DgmOctree::NeighboursSet::iterator up = std::upper_bound(neighbours.begin(),neighbours.end(),fakeDesc,CCCoreLib::DgmOctree::PointDescriptor::distComp);
 				if (up != neighbours.end())
 				{
 					size_t count = std::max<size_t>( 1, up - neighbours.begin() );
@@ -131,7 +131,7 @@ void ComputeCorePointDescriptor(unsigned index)
 			//optional: compute per-level roughness
 			if (s_computeCorePointsDescParams.roughnessSFs)
 			{
-				ScalarType roughness = CCLib::NAN_VALUE;
+				ScalarType roughness = CCCoreLib::NAN_VALUE;
 
 				if (subset.size() >= 3)
 				{
@@ -145,13 +145,13 @@ void ComputeCorePointDescriptor(unsigned index)
 					unsigned globalIndex = subset.getPointGlobalIndex(lastIndex);
 					subset.resize(lastIndex);
 					
-					CCLib::Neighbourhood Z(&subset);
+					CCCoreLib::Neighbourhood Z(&subset);
 					const PointCoordinateType* lsPlane = Z.getLSPlane();
 					if (lsPlane)
 					{
 						//distance to the LS plane fitted on the nearest neighbors
 						const CCVector3* centralPoint = s_computeCorePointsDescParams.sourceCloud->getPoint(globalIndex);
-						roughness = fabs(CCLib::DistanceComputationTools::computePoint2PlaneDistance(centralPoint,lsPlane));
+						roughness = fabs(CCCoreLib::DistanceComputationTools::computePoint2PlaneDistance(centralPoint,lsPlane));
 					}
 
 					//put back the point at its original place!
@@ -202,7 +202,7 @@ void ComputeCorePointDescriptor(unsigned index)
 	}
 }
 
-bool qCanupoTools::ComputeCorePointsDescriptors(CCLib::GenericIndexedCloud* corePoints,
+bool qCanupoTools::ComputeCorePointsDescriptors(CCCoreLib::GenericIndexedCloud* corePoints,
 												CorePointDescSet& corePointsDescriptors,
 												ccGenericPointCloud* sourceCloud,
 												const std::vector<float>& sortedScales,
@@ -210,8 +210,8 @@ bool qCanupoTools::ComputeCorePointsDescriptors(CCLib::GenericIndexedCloud* core
 												QString& error, //if any
 												unsigned descriptorID/*=DESC_DIMENSIONALITY*/,
 												int maxThreadCount/*=0*/,
-												CCLib::GenericProgressCallback* progressCb/*=0*/,
-												CCLib::DgmOctree* inputOctree/*=0*/,
+												CCCoreLib::GenericProgressCallback* progressCb/*=0*/,
+												CCCoreLib::DgmOctree* inputOctree/*=0*/,
 												std::vector<ccScalarField*>* roughnessSFs/*=0*/)
 {
 	assert(corePoints && sourceCloud);
@@ -249,10 +249,10 @@ bool qCanupoTools::ComputeCorePointsDescriptors(CCLib::GenericIndexedCloud* core
 	corePointsDescriptors.setDescriptorID(descriptorID);
 	corePointsDescriptors.setDimPerScale(s_computeCorePointsDescParams.computer->dimPerScale());
 
-	CCLib::DgmOctree* theOctree = inputOctree;
+	CCCoreLib::DgmOctree* theOctree = inputOctree;
 	if (!theOctree)
 	{
-		theOctree = new CCLib::DgmOctree(sourceCloud);
+		theOctree = new CCCoreLib::DgmOctree(sourceCloud);
 		if (theOctree->build(progressCb) == 0)
 		{
 			error = "Failed to build the octree (not enough memory?)";
@@ -261,7 +261,7 @@ bool qCanupoTools::ComputeCorePointsDescriptors(CCLib::GenericIndexedCloud* core
 		}
 	}
 
-	CCLib::NormalizedProgress nProgress(progressCb, corePtsCount);
+	CCCoreLib::NormalizedProgress nProgress(progressCb, corePtsCount);
 	if (progressCb)
 	{
 		if (progressCb->textCanBeEdited())
@@ -944,7 +944,7 @@ bool qCanupoTools::TrainClassifier(	Classifier& classifier,
 						Classifier::Point2D P2D = A + u * s;
 
 						CCVector3 P(P2D.x,P2D.y,0);
-						CCLib::DgmOctree::NeighboursSet Yk;
+						CCCoreLib::DgmOctree::NeighboursSet Yk;
 						int count = octree->getPointsInSphericalNeighbourhood(P,radius,Yk,octreeLevel);
 
 						// count the number of neighbors

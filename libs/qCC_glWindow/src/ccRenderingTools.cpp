@@ -85,7 +85,7 @@ void ccRenderingTools::ShowDepthBuffer(ccGBLSensor* sensor, QWidget* parent/*=0*
 	{
 		ccColorScale::Shared colorScale = ccColorScalesManager::GetDefaultScale();
 		assert(colorScale);
-		ScalarType coef = maxDist - minDist < CCLib::ZERO_TOLERANCE ? 0 : static_cast<ScalarType>(ccColorScale::MAX_STEPS - 1) / (maxDist - minDist);
+		ScalarType coef = maxDist - minDist < CCCoreLib::ZERO_TOLERANCE ? 0 : static_cast<ScalarType>(ccColorScale::MAX_STEPS - 1) / (maxDist - minDist);
 
 		const PointCoordinateType* _zBuff = depthBuffer.zBuff.data();
 		for (unsigned y = 0; y < depthBuffer.height; ++y)

@@ -509,7 +509,7 @@ static unsigned ComputeGridDimensions(	const ccBBox& localBox,
 	{
 		if (processDim[d])
 		{
-			if (cellSizePlusGap.u[d] < CCLib::ZERO_TOLERANCE)
+			if (cellSizePlusGap.u[d] < CCCoreLib::ZERO_TOLERANCE)
 			{
 				ccLog::Error("Box size (plus gap) is null! Can't apply repetitive process!");
 				return 0;
@@ -632,7 +632,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 				unsigned cellCount = ComputeGridDimensions(localBox, repeatDimensions, indexMins, indexMaxs, gridDim, gridOrigin, cellSizePlusGap);
 
 				//we'll potentially create up to one (ref.) cloud per input loud and per cell
-				std::vector<CCLib::ReferenceCloud*> refClouds;
+				std::vector<CCCoreLib::ReferenceCloud*> refClouds;
 				refClouds.resize(cellCount * clouds.size(), nullptr);
 
 				if (progressDialog)
@@ -659,7 +659,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 					}
 					QApplication::processEvents();
 
-					CCLib::NormalizedProgress nProgress(progressDialog, pointCount);
+					CCCoreLib::NormalizedProgress nProgress(progressDialog, pointCount);
 					for (unsigned i = 0; i < pointCount; ++i)
 					{
 						CCVector3 P = *cloud->getPoint(i);
@@ -686,10 +686,10 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 							int cloudIndex = ((zi - indexMins[2]) * static_cast<int>(gridDim[1]) + (yi - indexMins[1])) * static_cast<int>(gridDim[0]) + (xi - indexMins[0]);
 							assert(cloudIndex >= 0 && static_cast<size_t>(cloudIndex)* clouds.size() + ci < refClouds.size());
 
-							CCLib::ReferenceCloud*& destCloud = refClouds[cloudIndex * clouds.size() + ci];
+							CCCoreLib::ReferenceCloud*& destCloud = refClouds[cloudIndex * clouds.size() + ci];
 							if (!destCloud)
 							{
-								destCloud = new CCLib::ReferenceCloud(cloud);
+								destCloud = new CCCoreLib::ReferenceCloud(cloud);
 								++subCloudsCount;
 							}
 
@@ -730,7 +730,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 							for (size_t ci = 0; ci != clouds.size(); ++ci)
 							{
 								ccGenericPointCloud* cloud = clouds[ci];
-								CCLib::ReferenceCloud* destCloud = refClouds[cloudIndex * clouds.size() + ci];
+								CCCoreLib::ReferenceCloud* destCloud = refClouds[cloudIndex * clouds.size() + ci];
 								if (destCloud) //some slices can be empty!
 								{
 									//generate slice from previous selection

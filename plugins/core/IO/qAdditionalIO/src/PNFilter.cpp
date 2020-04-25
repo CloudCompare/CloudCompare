@@ -99,7 +99,7 @@ CC_FILE_ERROR PNFilter::saveToFile(ccHObject* entity, const QString& filename, c
 		pDlg->setInfo(QObject::tr("Points: %L1").arg( numberOfPoints ));
 		pDlg->start();
 	}
-	CCLib::NormalizedProgress nprogress(pDlg.data(), numberOfPoints);
+	CCCoreLib::NormalizedProgress nprogress(pDlg.data(), numberOfPoints);
 
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 
@@ -171,7 +171,7 @@ CC_FILE_ERROR PNFilter::loadFile(const QString& filename, ccHObject& container, 
 		pDlg->setInfo(QObject::tr("Points: %L1").arg( numberOfPoints ));
 		pDlg->start();
 	}
-	CCLib::NormalizedProgress nprogress(pDlg.data(), numberOfPoints);
+	CCCoreLib::NormalizedProgress nprogress(pDlg.data(), numberOfPoints);
 
 	ccPointCloud* loadedCloud = nullptr;
 	//if the file is too big, it will be chuncked in multiple parts

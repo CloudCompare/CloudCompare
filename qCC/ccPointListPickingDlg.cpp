@@ -25,7 +25,7 @@
 #include <QMessageBox>
 #include <QSettings>
 
-//CCLib
+//CCCoreLib
 #include <CCConst.h>
 
 //qCC_db

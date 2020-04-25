@@ -18,7 +18,7 @@
 #ifndef GAMEPAD_INPUT_HEADER
 #define GAMEPAD_INPUT_HEADER
 
-//CCLib
+//CCCoreLib
 #include <CCConst.h>
 
 //qCC_db

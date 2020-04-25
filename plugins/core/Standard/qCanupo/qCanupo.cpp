@@ -25,7 +25,7 @@
 #include "qCanupoDisclaimerDialog.h"
 #include "qCanupoCommands.h"
 
-//CCLib
+//CCCoreLib
 #include <CloudSamplingTools.h>
 
 //qCC_db
@@ -131,7 +131,7 @@ void qCanupoPlugin::doClassifyAction()
 
 	CorePointDescSet corePointsDescriptors; //core point descriptors
 	ccPointCloud* realCorePoints = nullptr; //the core point cloud (as a real point cloud, if available)
-	CCLib::GenericIndexedCloudPersist* corePoints = nullptr; //the core points, potentially as references!
+	CCCoreLib::GenericIndexedCloudPersist* corePoints = nullptr; //the core points, potentially as references!
 
 	switch (coreSource)
 	{
@@ -155,8 +155,8 @@ void qCanupoPlugin::doClassifyAction()
 		ccProgressDialog pDlg(true, m_app->getMainWindow());
 
 		assert(samplingDist > 0);
-		CCLib::CloudSamplingTools::SFModulationParams modParams(false);
-		CCLib::ReferenceCloud* refCloud = CCLib::CloudSamplingTools::resampleCloudSpatially(cloud,
+		CCCoreLib::CloudSamplingTools::SFModulationParams modParams(false);
+		CCCoreLib::ReferenceCloud* refCloud = CCCoreLib::CloudSamplingTools::resampleCloudSpatially(cloud,
 																							samplingDist,
 																							modParams,
 																							nullptr,
@@ -316,9 +316,9 @@ void qCanupoPlugin::doTrainAction()
 	}
 
 	//sub-sampled clouds
-	CCLib::GenericIndexedCloudPersist* corePoints1 = nullptr;
-	CCLib::GenericIndexedCloudPersist* corePoints2 = nullptr;
-	CCLib::GenericIndexedCloudPersist* evaluationPoints = nullptr;
+	CCCoreLib::GenericIndexedCloudPersist* corePoints1 = nullptr;
+	CCCoreLib::GenericIndexedCloudPersist* corePoints2 = nullptr;
+	CCCoreLib::GenericIndexedCloudPersist* evaluationPoints = nullptr;
 
 	//progress dialog
 	ccProgressDialog pDlg(true, m_app->getMainWindow());
@@ -334,7 +334,7 @@ void qCanupoPlugin::doTrainAction()
 			if (evaluationCloud)
 			{
 				if (evaluationCloud->size() > maxCorePoints)
-					evaluationPoints = CCLib::CloudSamplingTools::subsampleCloudRandomly(evaluationCloud, maxCorePoints, &pDlg);
+					evaluationPoints = CCCoreLib::CloudSamplingTools::subsampleCloudRandomly(evaluationCloud, maxCorePoints, &pDlg);
 				else
 					evaluationPoints = evaluationCloud;
 
@@ -352,7 +352,7 @@ void qCanupoPlugin::doTrainAction()
 				maxCorePoints = cloud2->size();
 
 			if (cloud1->size() > maxCorePoints)
-				corePoints1 = CCLib::CloudSamplingTools::subsampleCloudRandomly(cloud1, maxCorePoints, &pDlg);
+				corePoints1 = CCCoreLib::CloudSamplingTools::subsampleCloudRandomly(cloud1, maxCorePoints, &pDlg);
 			else
 				corePoints1 = cloud1;
 
@@ -363,7 +363,7 @@ void qCanupoPlugin::doTrainAction()
 			}
 
 			if (cloud2->size() > maxCorePoints)
-				corePoints2 = CCLib::CloudSamplingTools::subsampleCloudRandomly(cloud2, maxCorePoints, &pDlg);
+				corePoints2 = CCCoreLib::CloudSamplingTools::subsampleCloudRandomly(cloud2, maxCorePoints, &pDlg);
 			else
 				corePoints2 = cloud2;
 

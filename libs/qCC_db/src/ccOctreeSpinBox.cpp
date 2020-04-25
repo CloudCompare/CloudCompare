@@ -17,7 +17,7 @@
 
 #include "ccOctreeSpinBox.h"
 
-//CCLib
+//CCCoreLib
 #include <CCMiscTools.h>
 
 //qCC_db
@@ -29,7 +29,7 @@ ccOctreeSpinBox::ccOctreeSpinBox(QWidget* parent/*=0*/)
 	: QSpinBox(parent)
 	, m_octreeBoxWidth(0)
 {
-	setRange(0, CCLib::DgmOctree::MAX_OCTREE_LEVEL);
+	setRange(0, CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL);
 	
 	//we'll catch any modification of the spinbox value and update the suffix consequently
 	connect(this, static_cast<void (ccOctreeSpinBox::*)(int)>(&ccOctreeSpinBox::valueChanged), this, &ccOctreeSpinBox::onValueChange);
@@ -50,13 +50,13 @@ void ccOctreeSpinBox::setCloud(ccGenericPointCloud* cloud)
 	else
 	{
 		ccBBox box = cloud->getOwnBB(false);
-		CCLib::CCMiscTools::MakeMinAndMaxCubical(box.minCorner(), box.maxCorner());
+		CCCoreLib::CCMiscTools::MakeMinAndMaxCubical(box.minCorner(), box.maxCorner());
 		m_octreeBoxWidth = box.getMaxBoxDim();
 		onValueChange(value());
 	}
 }
 
-void ccOctreeSpinBox::setOctree(CCLib::DgmOctree* octree)
+void ccOctreeSpinBox::setOctree(CCCoreLib::DgmOctree* octree)
 {
 	if (octree)
 	{
@@ -74,7 +74,7 @@ void ccOctreeSpinBox::onValueChange(int level)
 {
 	if (m_octreeBoxWidth > 0)
 	{
-		if (level >= 0/* && level <= CCLib::DgmOctree::MAX_OCTREE_LEVEL*/)
+		if (level >= 0/* && level <= CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL*/)
 		{
 			double cs = m_octreeBoxWidth / pow(2.0, static_cast<double>(level));
 			setSuffix(QString(" (grid step = %1)").arg(cs));

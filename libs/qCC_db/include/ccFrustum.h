@@ -18,7 +18,7 @@
 #ifndef CC_FRUSTUM_HEADER
 #define CC_FRUSTUM_HEADER
 
-//CCLib
+//CCCoreLib
 #include <RayAndBox.h>
 
 //Local

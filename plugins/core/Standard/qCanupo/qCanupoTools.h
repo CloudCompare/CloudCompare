@@ -32,7 +32,7 @@ class ccHObject;
 class ccMainAppInterface;
 class ccScalarField;
 
-namespace CCLib {
+namespace CCCoreLib {
 	class GenericProgressCallback;
 	class DgmOctree;
 }
@@ -78,7 +78,7 @@ public:
 	static size_t TestVectorsOverlap(const std::vector<float>& first, const std::vector<float>& second);
 
 	//! Computes the 'descriptors' for various scales on core points only
-	static bool ComputeCorePointsDescriptors(	CCLib::GenericIndexedCloud* corePoints,
+	static bool ComputeCorePointsDescriptors(	CCCoreLib::GenericIndexedCloud* corePoints,
 												CorePointDescSet& corePointsDescriptors,
 												ccGenericPointCloud* sourceCloud,
 												const std::vector<float>& sortedScales,
@@ -86,8 +86,8 @@ public:
 												QString& error, //if any
 												unsigned descriptorID = DESC_DIMENSIONALITY,
 												int maxThreadCount = 0,
-												CCLib::GenericProgressCallback* progressCb = nullptr,
-												CCLib::DgmOctree* inputOctree = nullptr,
+												CCCoreLib::GenericProgressCallback* progressCb = nullptr,
+												CCCoreLib::DgmOctree* inputOctree = nullptr,
 												std::vector<ccScalarField*>* roughnessSFs = nullptr /*for tests*/); 
 
 	//! Returns a long description of a given entity (name + [ID])

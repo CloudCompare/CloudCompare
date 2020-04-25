@@ -40,7 +40,7 @@
 //CC_FBO
 #include <ccGlFilter.h>
 
-//CCLib
+//CCCoreLib
 #include <RegistrationTools.h>
 #include <GeometricalAnalysisTools.h>
 
@@ -457,7 +457,7 @@ void ccPointPairRegistrationDlg::pause(bool state)
 
 bool ccPointPairRegistrationDlg::convertToSphereCenter(CCVector3d& P, ccHObject* entity, PointCoordinateType& sphereRadius)
 {
-	sphereRadius = -CCLib::PC_ONE;
+	sphereRadius = -CCCoreLib::PC_ONE;
 	if (	!entity
 		||	!useSphereToolButton->isChecked()
 		||	!entity->isKindOf(CC_TYPES::POINT_CLOUD) ) //only works with cloud right now
@@ -476,7 +476,7 @@ bool ccPointPairRegistrationDlg::convertToSphereCenter(CCVector3d& P, ccHObject*
 	ccBBox box;
 	box.add(CCVector3::fromArray((P - CCVector3d(1,1,1)*searchRadius).u));
 	box.add(CCVector3::fromArray((P + CCVector3d(1,1,1)*searchRadius).u));
-	CCLib::ReferenceCloud* part = cloud->crop(box,true);
+	CCCoreLib::ReferenceCloud* part = cloud->crop(box,true);
 
 	bool success = false;
 	if (part && part->size() > 16)
@@ -486,7 +486,7 @@ bool ccPointPairRegistrationDlg::convertToSphereCenter(CCVector3d& P, ccHObject*
 		double rms;
 		ccProgressDialog pDlg(true, this);
 		//first roughly search for the sphere
-		if (CCLib::GeometricalAnalysisTools::DetectSphereRobust(part, 0.5, C, radius, rms, &pDlg, 0.9) == CCLib::GeometricalAnalysisTools::NoError)
+		if (CCCoreLib::GeometricalAnalysisTools::DetectSphereRobust(part, 0.5, C, radius, rms, &pDlg, 0.9) == CCCoreLib::GeometricalAnalysisTools::NoError)
 		{
 			if (radius / searchRadius < 0.5 || radius / searchRadius > 2.0)
 			{
@@ -502,7 +502,7 @@ bool ccPointPairRegistrationDlg::convertToSphereCenter(CCVector3d& P, ccHObject*
 					box.add(C + CCVector3(1, 1, 1)*radius*static_cast<PointCoordinateType>(1.05)); //add 5%
 					part = cloud->crop(box, true);
 					if (part && part->size() > 16)
-						CCLib::GeometricalAnalysisTools::DetectSphereRobust(part, 0.5, C, radius, rms, &pDlg, 0.99);
+						CCCoreLib::GeometricalAnalysisTools::DetectSphereRobust(part, 0.5, C, radius, rms, &pDlg, 0.99);
 				}
 				ccLog::Print(QString("[ccPointPairRegistrationDlg] Detected sphere radius = %1 (rms = %2)").arg(radius).arg(rms));
 				if (radius / searchRadius < 0.5 || radius / searchRadius > 2.0)
@@ -697,7 +697,7 @@ bool ccPointPairRegistrationDlg::addAlignedPoint(CCVector3d& Pin, ccHObject* ent
 		}
 	}
 
-	PointCoordinateType sphereRadius = -CCLib::PC_ONE;
+	PointCoordinateType sphereRadius = -CCCoreLib::PC_ONE;
 	if (!convertToSphereCenter(Pin, entity, sphereRadius))
 		return false;
 
@@ -709,7 +709,7 @@ bool ccPointPairRegistrationDlg::addAlignedPoint(CCVector3d& Pin, ccHObject* ent
 	for (unsigned i = 0; i < m_alignedPoints.size(); ++i)
 	{
 		CCVector3d Pi = m_alignedPoints.toGlobal3d<PointCoordinateType>(*m_alignedPoints.getPoint(i));
-		if ((Pi-Pin).norm() < CCLib::ZERO_TOLERANCE)
+		if ((Pi-Pin).norm() < CCCoreLib::ZERO_TOLERANCE)
 		{
 			ccLog::Error("Point already picked or too close to an already selected one!");
 			return false;
@@ -892,7 +892,7 @@ bool ccPointPairRegistrationDlg::addReferencePoint(CCVector3d& Pin, ccHObject* e
 		}
 	}
 
-	PointCoordinateType sphereRadius = -CCLib::PC_ONE;
+	PointCoordinateType sphereRadius = -CCCoreLib::PC_ONE;
 	if (!convertToSphereCenter(Pin, entity, sphereRadius))
 		return false;
 
@@ -907,7 +907,7 @@ bool ccPointPairRegistrationDlg::addReferencePoint(CCVector3d& Pin, ccHObject* e
 	{
 		//express the 'Pi' point in the current global coordinate system
 		CCVector3d Pi = m_refPoints.toGlobal3d<PointCoordinateType>(*m_refPoints.getPoint(i));
-		if ((Pi - Pin).norm() < CCLib::ZERO_TOLERANCE)
+		if ((Pi - Pin).norm() < CCCoreLib::ZERO_TOLERANCE)
 		{
 			ccLog::Error("Point already picked or too close to an already selected one!");
 			return false;
@@ -1089,7 +1089,7 @@ void ccPointPairRegistrationDlg::showReferenceEntities(bool state)
 	}
 }
 
-bool ccPointPairRegistrationDlg::callHornRegistration(CCLib::PointProjectionTools::Transformation& trans, double& rms, bool autoUpdateTab)
+bool ccPointPairRegistrationDlg::callHornRegistration(CCCoreLib::PointProjectionTools::Transformation& trans, double& rms, bool autoUpdateTab)
 {
 	if (m_alignedEntities.empty())
 	{
@@ -1108,7 +1108,7 @@ bool ccPointPairRegistrationDlg::callHornRegistration(CCLib::PointProjectionTool
 	bool adjustScale = adjustScaleCheckBox->isChecked();
 
 	//call Horn registration method
-	if (!CCLib::HornRegistrationTools::FindAbsoluteOrientation(&m_alignedPoints, &m_refPoints, trans, !adjustScale))
+	if (!CCCoreLib::HornRegistrationTools::FindAbsoluteOrientation(&m_alignedPoints, &m_refPoints, trans, !adjustScale))
 	{
 		ccLog::Error("Registration failed! (points are aligned?)");
 		return false;
@@ -1120,13 +1120,13 @@ bool ccPointPairRegistrationDlg::callHornRegistration(CCLib::PointProjectionTool
 		switch (rotComboBox->currentIndex())
 		{
 		case 1:
-			filters |= CCLib::RegistrationTools::SKIP_RYZ;
+			filters |= CCCoreLib::RegistrationTools::SKIP_RYZ;
 			break;
 		case 2:
-			filters |= CCLib::RegistrationTools::SKIP_RXZ;
+			filters |= CCCoreLib::RegistrationTools::SKIP_RXZ;
 			break;
 		case 3:
-			filters |= CCLib::RegistrationTools::SKIP_RXY;
+			filters |= CCCoreLib::RegistrationTools::SKIP_RXY;
 			break;
 		default:
 			//nothing to do
@@ -1134,20 +1134,20 @@ bool ccPointPairRegistrationDlg::callHornRegistration(CCLib::PointProjectionTool
 		}
 
 		if (!TxCheckBox->isChecked())
-			filters |= CCLib::RegistrationTools::SKIP_TX;
+			filters |= CCCoreLib::RegistrationTools::SKIP_TX;
 		if (!TyCheckBox->isChecked())
-			filters |= CCLib::RegistrationTools::SKIP_TY;
+			filters |= CCCoreLib::RegistrationTools::SKIP_TY;
 		if (!TzCheckBox->isChecked())
-			filters |= CCLib::RegistrationTools::SKIP_TZ;
+			filters |= CCCoreLib::RegistrationTools::SKIP_TZ;
 
 		if (filters != 0)
 		{
-			CCLib::RegistrationTools::FilterTransformation(trans, filters, trans);
+			CCCoreLib::RegistrationTools::FilterTransformation(trans, filters, trans);
 		}
 	}
 
 	//compute RMS
-	rms = CCLib::HornRegistrationTools::ComputeRMS(&m_alignedPoints, &m_refPoints, trans);
+	rms = CCCoreLib::HornRegistrationTools::ComputeRMS(&m_alignedPoints, &m_refPoints, trans);
 
 	if (autoUpdateTab)
 	{
@@ -1202,7 +1202,7 @@ void ccPointPairRegistrationDlg::updateAlignInfo()
 	//reset title
 	resetTitle();
 
-	CCLib::PointProjectionTools::Transformation trans;
+	CCCoreLib::PointProjectionTools::Transformation trans;
 	double rms;
 
 	if (	m_alignedPoints.size() == m_refPoints.size()
@@ -1225,7 +1225,7 @@ void ccPointPairRegistrationDlg::updateAlignInfo()
 
 void ccPointPairRegistrationDlg::align()
 {
-	CCLib::PointProjectionTools::Transformation trans;
+	CCCoreLib::PointProjectionTools::Transformation trans;
 	double rms;
 
 	//reset title
@@ -1330,7 +1330,7 @@ void ccPointPairRegistrationDlg::reset()
 
 void ccPointPairRegistrationDlg::apply()
 {
-	CCLib::PointProjectionTools::Transformation trans;
+	CCCoreLib::PointProjectionTools::Transformation trans;
 	double rms = -1.0;
 	
 	if (callHornRegistration(trans, rms, false))

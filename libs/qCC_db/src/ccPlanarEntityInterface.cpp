@@ -61,7 +61,7 @@ void ccPlanarEntityInterface::glDrawNormal(CC_DRAW_CONTEXT& context, const CCVec
 	glFunc->glMatrixMode(GL_MODELVIEW);
 	glFunc->glPushMatrix();
 	ccGL::Translate(glFunc, pos.x, pos.y, pos.z);
-	ccGLMatrix mat = ccGLMatrix::FromToRotation(CCVector3(0, 0, CCLib::PC_ONE), getNormal());
+	ccGLMatrix mat = ccGLMatrix::FromToRotation(CCVector3(0, 0, CCCoreLib::PC_ONE), getNormal());
 	glFunc->glMultMatrixf(mat.data());
 	ccGL::Scale(glFunc, scale, scale, scale);
 	glFunc->glTranslatef(0, 0, 0.45f);

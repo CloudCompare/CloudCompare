@@ -23,7 +23,7 @@
 //CloudCompare
 #include <ccMainAppInterface.h>
 
-//CCLib
+//CCCoreLib
 #include <CloudSamplingTools.h>
 #include <ReferenceCloud.h>
 
@@ -55,15 +55,15 @@ float RefinePointClassif(	const Classifier& classifier,
 							ccPointCloud* cloud,
 							ccOctree* octree,
 							unsigned char octreeLevel,
-							CCLib::GenericIndexedCloudPersist* corePoints,
-							CCLib::DgmOctree* corePointsOctree,
+							CCCoreLib::GenericIndexedCloudPersist* corePoints,
+							CCCoreLib::DgmOctree* corePointsOctree,
 							unsigned char coreOctreeLevel,
 							unsigned coreIndex,
 							PointCoordinateType largestRadius,
 							const std::vector<int>& corePointClasses
 	)
 {
-	CCLib::ScalarField* sf = cloud->getCurrentDisplayedScalarField();
+	CCCoreLib::ScalarField* sf = cloud->getCurrentDisplayedScalarField();
 	if (!sf)
 	{
 		assert(false);
@@ -73,7 +73,7 @@ float RefinePointClassif(	const Classifier& classifier,
 	try
 	{
 		// find all scene data around that core point
-		CCLib::DgmOctree::NeighboursSet neighbors;
+		CCCoreLib::DgmOctree::NeighboursSet neighbors;
 		int n = octree->getPointsInSphericalNeighbourhood(*corePoints->getPoint(coreIndex),
 			largestRadius, //we use the biggest neighborhood
 			neighbors,
@@ -95,7 +95,7 @@ float RefinePointClassif(	const Classifier& classifier,
 			else
 			{
 				double maxSquareDist = 0;
-				CCLib::ReferenceCloud Yk(corePoints);
+				CCCoreLib::ReferenceCloud Yk(corePoints);
 				if (corePointsOctree->findPointNeighbourhood(cloud->getPoint(currentPointIndex),
 					&Yk,
 					1,
@@ -245,7 +245,7 @@ float RefinePointClassif(	const Classifier& classifier,
 bool qCanupoProcess::Classify(	QString classifierFilename,
 								const ClassifyParams& params,
 								ccPointCloud* cloud,
-								CCLib::GenericIndexedCloudPersist* corePoints,
+								CCCoreLib::GenericIndexedCloudPersist* corePoints,
 								CorePointDescSet& corePointsDescriptors,
 								ccPointCloud* realCorePoints/*=nullptr*/,
 								ccMainAppInterface* app/*=nullptr*/,
@@ -478,14 +478,14 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 				assert(!params.useActiveSFForConfidence || cloud->getCurrentDisplayedScalarField() != nullptr);
 
 				// core points octree
-				CCLib::DgmOctree* corePointsOctree = nullptr;
+				CCCoreLib::DgmOctree* corePointsOctree = nullptr;
 				if (corePoints == cloud)
 				{
 					corePointsOctree = octree.data();
 				}
 				else
 				{
-					corePointsOctree = new CCLib::DgmOctree(corePoints);
+					corePointsOctree = new CCCoreLib::DgmOctree(corePoints);
 					if (!corePointsOctree->build(&pDlg))
 					{
 						if (app)
@@ -522,7 +522,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 				}
 				std::vector<unsigned> unreliablePointIndexes;
 
-				CCLib::ScalarField* sf = cloud->getCurrentDisplayedScalarField();
+				CCCoreLib::ScalarField* sf = cloud->getCurrentDisplayedScalarField();
 				assert(!params.useActiveSFForConfidence || sf);
 
 				//while unreliable points remain
@@ -532,7 +532,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 					pDlg.reset();
 					pDlg.setInfo(QObject::tr("Remaining points to classify: %1\nSource points: %2").arg(pendingPoints.size()).arg(cloud->size()));
 					pDlg.setMethodTitle(QObject::tr("Classification"));
-					CCLib::NormalizedProgress nProgress(&pDlg, corePoints->size());
+					CCCoreLib::NormalizedProgress nProgress(&pDlg, corePoints->size());
 					pDlg.start();
 
 					for (size_t i = 0; i < pendingPoints.size(); ++i)
@@ -744,7 +744,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 				// eventually label the points
 				{
 					// instantiate the scalar fields
-					CCLib::ScalarField* classLabelSF = nullptr;
+					CCCoreLib::ScalarField* classLabelSF = nullptr;
 					int classLabelSFIdx = -1;
 					{
 						classLabelSFIdx = cloud->getScalarFieldIndexByName("CANUPO.class");
@@ -753,7 +753,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 						if (classLabelSFIdx >= 0)
 						{
 							classLabelSF = cloud->getScalarField(classLabelSFIdx);
-							classLabelSF->fill(CCLib::NAN_VALUE);
+							classLabelSF->fill(CCCoreLib::NAN_VALUE);
 						}
 						else
 						{
@@ -763,7 +763,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 						}
 					}
 
-					CCLib::ScalarField* confidenceSF = nullptr;
+					CCCoreLib::ScalarField* confidenceSF = nullptr;
 					int confidenceSFIdx = -1;
 					{
 						confidenceSFIdx = cloud->getScalarFieldIndexByName("CANUPO.confidence");
@@ -772,7 +772,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 						if (confidenceSFIdx >= 0)
 						{
 							confidenceSF = cloud->getScalarField(confidenceSFIdx);
-							confidenceSF->fill(CCLib::NAN_VALUE);
+							confidenceSF->fill(CCCoreLib::NAN_VALUE);
 						}
 						else if (app)
 						{
@@ -818,7 +818,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 							assert(cloud->getScalarFieldIndexByName(qPrintable(sfName)) < 0);
 
 							scaleSFs[s] = new ccScalarField(qPrintable(sfName));
-							if (!scaleSFs[s]->resizeSafe(cloud->size(), true, CCLib::NAN_VALUE))
+							if (!scaleSFs[s]->resizeSafe(cloud->size(), true, CCCoreLib::NAN_VALUE))
 							{
 								if (app)
 									app->dispToConsole("Not enough memory to store per-level 'x-y' values!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
@@ -880,7 +880,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 								//SF with same name (if any) should have already been removed!
 								assert(cloud->getScalarFieldIndexByName(roughnessSFs[s]->getName()) < 0);
 
-								if (!roughnessSFs[s]->resize(cloud->size(), CCLib::NAN_VALUE))
+								if (!roughnessSFs[s]->resize(cloud->size(), CCCoreLib::NAN_VALUE))
 								{
 									if (app)
 										app->dispToConsole("Not enough memory to store per-level roughness!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
@@ -901,11 +901,11 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 					pDlg.reset();
 					pDlg.setInfo(QObject::tr("Core points: %1\nSource points: %2").arg(corePoints->size()).arg(cloud->size()));
 					pDlg.setMethodTitle(QObject::tr("Labelling"));
-					CCLib::NormalizedProgress nProgress(&pDlg, cloud->size());
+					CCCoreLib::NormalizedProgress nProgress(&pDlg, cloud->size());
 					pDlg.start();
 
 					bool error = false;
-					CCLib::ReferenceCloud Yk(corePoints);
+					CCCoreLib::ReferenceCloud Yk(corePoints);
 					for (unsigned i = 0; i < cloud->size(); ++i)
 					{
 						const CCVector3* P = cloud->getPoint(i);

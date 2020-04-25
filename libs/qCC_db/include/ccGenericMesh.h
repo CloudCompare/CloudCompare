@@ -18,14 +18,14 @@
 #ifndef CC_GENERIC_MESH_HEADER
 #define CC_GENERIC_MESH_HEADER
 
-//CCLib
+//CCCoreLib
 #include <GenericIndexedMesh.h>
 
 //Local
 #include "ccAdvancedTypes.h"
 #include "ccGenericGLDisplay.h"
 
-namespace CCLib
+namespace CCCoreLib
 {
 	class GenericProgressCallback;
 	class ReferenceCloud;
@@ -36,7 +36,7 @@ class ccPointCloud;
 class ccMaterialSet;
 
 //! Generic mesh interface
-class QCC_DB_LIB_API ccGenericMesh : public CCLib::GenericIndexedMesh, public ccHObject
+class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh, public ccHObject
 {
 
 public:
@@ -212,7 +212,7 @@ public:
 								bool withNormals,
 								bool withRGB,
 								bool withTexture,
-								CCLib::GenericProgressCallback* pDlg = nullptr);
+								CCCoreLib::GenericProgressCallback* pDlg = nullptr);
 
 	//! Imports the parameters from another mesh
 	/** Only the specific parameters are imported.

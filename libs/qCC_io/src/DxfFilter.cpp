@@ -18,7 +18,7 @@
 #include "DxfFilter.h"
 #include "FileIO.h"
 
-//CCLib
+//CCCoreLib
 #include <ScalarField.h>
 
 //qCC_db
@@ -840,7 +840,7 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const QString& filename, co
 				mesh->placeIteratorAtBeginning();
 				for (unsigned f = 0; f < triCount; ++f)
 				{
-					const CCLib::GenericTriangle* tri = mesh->_getNextTriangle();
+					const CCCoreLib::GenericTriangle* tri = mesh->_getNextTriangle();
 					CCVector3d A = vertices->toGlobal3d(*tri->_getA());
 					CCVector3d B = vertices->toGlobal3d(*tri->_getB());
 					CCVector3d C = vertices->toGlobal3d(*tri->_getC());

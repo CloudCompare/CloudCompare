@@ -23,7 +23,7 @@
 //Local
 #include "classifier.h"
 
-//CCLib
+//CCCoreLib
 #include <CCGeom.h>
 
 class ccMainAppInterface;

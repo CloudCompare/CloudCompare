@@ -35,7 +35,7 @@
 #include <ccGlFilter.h>
 #include <ccGLWidget.h>
 
-//CCLib
+//CCCoreLib
 #include <DgmOctreeReferenceCloud.h>
 #include <Neighbourhood.h>
 
@@ -1014,7 +1014,7 @@ bool qBroomDlg::positionBroom(const CCVector3& P0, const CCVector3& P1)
 #define USE_CYLINDRICAL_NEIGHBORHOOD
 #ifdef USE_CYLINDRICAL_NEIGHBORHOOD
 
-	CCLib::DgmOctree::CylindricalNeighbourhood nn;
+	CCCoreLib::DgmOctree::CylindricalNeighbourhood nn;
 	nn.center = (P0 + P1) / 2;
 	nn.dir = X;
 	nn.dir.normalize();
@@ -1027,7 +1027,7 @@ bool qBroomDlg::positionBroom(const CCVector3& P0, const CCVector3& P1)
 
 #else
 
-	CCLib::DgmOctree::BoxNeighbourhood nn;
+	CCCoreLib::DgmOctree::BoxNeighbourhood nn;
 	{
 		BroomDimensions broom;
 		getBroomDimensions(broom);
@@ -1067,9 +1067,9 @@ bool qBroomDlg::positionBroom(const CCVector3& P0, const CCVector3& P1)
 		return false;
 	}
 
-	CCLib::DgmOctreeReferenceCloud neighboursCloud(&nn.neighbours);
+	CCCoreLib::DgmOctreeReferenceCloud neighboursCloud(&nn.neighbours);
 
-	CCLib::Neighbourhood n(&neighboursCloud);
+	CCCoreLib::Neighbourhood n(&neighboursCloud);
 	const CCVector3* N = n.getLSPlaneNormal();
 	if (!N)
 	{
@@ -1516,7 +1516,7 @@ bool qBroomDlg::moveBroom(ccGLMatrix& broomTrans, CCVector3d& broomDelta, bool s
 	if (stickToTheFloor)
 	{
 		//extract the points inside the broom
-		CCLib::DgmOctree::BoxNeighbourhood bn;
+		CCCoreLib::DgmOctree::BoxNeighbourhood bn;
 		{
 			bn.dimensions = CCVector3(broom.length, broom.width, broom.thick);
 
@@ -1543,8 +1543,8 @@ bool qBroomDlg::moveBroom(ccGLMatrix& broomTrans, CCVector3d& broomDelta, bool s
 		}
 		else
 		{
-			CCLib::DgmOctreeReferenceCloud neighboursCloud(&bn.neighbours);
-			CCLib::Neighbourhood n(&neighboursCloud);
+			CCCoreLib::DgmOctreeReferenceCloud neighboursCloud(&bn.neighbours);
+			CCCoreLib::Neighbourhood n(&neighboursCloud);
 			const CCVector3* N = n.getLSPlaneNormal();
 			if (N)
 			{
@@ -1596,7 +1596,7 @@ bool qBroomDlg::selectPoints(const ccGLMatrix& broomTrans, BroomDimensions* _bro
 	}
 
 	//extract the points inside the selection area
-	CCLib::DgmOctree::BoxNeighbourhood bn;
+	CCCoreLib::DgmOctree::BoxNeighbourhood bn;
 	{
 		CCVector3 centerShift(0,0,0);
 
@@ -1943,7 +1943,7 @@ ccPointCloud* qBroomDlg::createSegmentedCloud(ccPointCloud* cloud, bool removeSe
 		}
 	}
 
-	CCLib::ReferenceCloud selection(cloud);
+	CCCoreLib::ReferenceCloud selection(cloud);
 	{
 		if (!selection.reserve(selectedCount))
 		{

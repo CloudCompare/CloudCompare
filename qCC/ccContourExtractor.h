@@ -21,7 +21,7 @@
 //qCC_db
 #include <ccPolyline.h>
 
-//CCLib
+//CCCoreLib
 #include <PointProjectionTools.h>
 
 
@@ -46,7 +46,7 @@ public:
 		\param maxAngleDeg max angle between segments (angle between 0 and 180, in degrees)
 		\return contour polyline (or 0 if an error occurred)
 	**/
-	static ccPolyline* ExtractFlatContour(	CCLib::GenericIndexedCloudPersist* points,
+	static ccPolyline* ExtractFlatContour(	CCCoreLib::GenericIndexedCloudPersist* points,
 											bool allowMultiPass,
 											PointCoordinateType maxEdgeLength = 0,
 											const PointCoordinateType* preferredNormDim = nullptr,
@@ -69,7 +69,7 @@ public:
 		\param enableVisualDebugMode whether to display a (debug) window to represent the algorithm process
 		\return success
 	**/
-	static bool ExtractFlatContour(	CCLib::GenericIndexedCloudPersist* points,
+	static bool ExtractFlatContour(	CCCoreLib::GenericIndexedCloudPersist* points,
 									bool allowMultiPass,
 									PointCoordinateType maxEdgeLength,
 									std::vector<ccPolyline*>& parts,
@@ -85,7 +85,7 @@ protected:
 	/** Inspired from JIN-SEO PARK AND SE-JONG OH, "A New Concave Hull Algorithm
 		and Concaveness Measure for n-dimensional Datasets", 2012
 		Calls extractConvexHull2D (see associated warnings).
-		\note Almost the same method as CCLib::PointProjectionTools::ExtractConcaveHull2D
+		\note Almost the same method as CCCoreLib::PointProjectionTools::ExtractConcaveHull2D
 		but with partial contour support and visual debug mode.
 		\param points input set of points
 		\param hullPoints output points (on the convex hull)
@@ -96,8 +96,8 @@ protected:
 		\param maxAngleDeg max angle between segments (angle between 0 and 180, in degrees)
 		\return success
 	**/
-	static bool ExtractConcaveHull2D(	std::vector<CCLib::PointProjectionTools::IndexedCCVector2>& points,
-										std::list<CCLib::PointProjectionTools::IndexedCCVector2*>& hullPoints,
+	static bool ExtractConcaveHull2D(	std::vector<CCCoreLib::PointProjectionTools::IndexedCCVector2>& points,
+										std::list<CCCoreLib::PointProjectionTools::IndexedCCVector2*>& hullPoints,
 										ContourType contourType,
 										bool allowMultiPass,
 										PointCoordinateType maxSquareLength = 0,

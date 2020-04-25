@@ -17,7 +17,7 @@
 
 #include "mainwindow.h"
 
-//CCLib Includes
+//CCCoreLib Includes
 #include <CloudSamplingTools.h>
 #include <Delaunay2dMesh.h>
 #include <Jacobi.h>
@@ -910,7 +910,7 @@ void MainWindow::doActionComputeKdTree()
 	eTimer.start();
 	ccKdTree* kdtree = new ccKdTree(cloud);
 
-	if (kdtree->build(s_kdTreeMaxErrorPerCell, CCLib::DistanceComputationTools::MAX_DIST_95_PERCENT, 4, 1000, &pDlg))
+	if (kdtree->build(s_kdTreeMaxErrorPerCell, CCCoreLib::DistanceComputationTools::MAX_DIST_95_PERCENT, 4, 1000, &pDlg))
 	{
 		qint64 elapsedTime_ms = eTimer.elapsed();
 
@@ -991,11 +991,11 @@ void MainWindow::doActionResampleWithOctree()
 			cloud->setEnabled(false);
 			QElapsedTimer eTimer;
 			eTimer.start();
-			CCLib::GenericIndexedCloud* result = CCLib::CloudSamplingTools::resampleCloudWithOctree
+			CCCoreLib::GenericIndexedCloud* result = CCCoreLib::CloudSamplingTools::resampleCloudWithOctree
 			(
 				cloud,
 				aimedPoints,
-				CCLib::CloudSamplingTools::CELL_GRAVITY_CENTER,
+				CCCoreLib::CloudSamplingTools::CELL_GRAVITY_CENTER,
 				&pDlg,
 				octree.data()
 			);
@@ -1434,9 +1434,9 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 											std::max(globalBBmax.z,Bg.z) );
 
 				if (uniqueShift)
-					uniqueShift = ((shifted->getGlobalShift() - shift).norm() < CCLib::ZERO_TOLERANCE);
+					uniqueShift = ((shifted->getGlobalShift() - shift).norm() < CCCoreLib::ZERO_TOLERANCE);
 				if (uniqueScale)
-					uniqueScale = (std::abs(shifted->getGlobalScale() - scale) < CCLib::ZERO_TOLERANCE);
+					uniqueScale = (std::abs(shifted->getGlobalScale() - scale) < CCCoreLib::ZERO_TOLERANCE);
 			}
 
 			shiftedEntities.emplace_back(shifted, entity);
@@ -1503,7 +1503,7 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 				assert(shifted->getGlobalScale() > 0);
 				double scaleCoef = scale / shifted->getGlobalScale();
 
-				if (T.norm() > CCLib::ZERO_TOLERANCE || std::abs(scaleCoef - 1.0) > CCLib::ZERO_TOLERANCE)
+				if (T.norm() > CCCoreLib::ZERO_TOLERANCE || std::abs(scaleCoef - 1.0) > CCCoreLib::ZERO_TOLERANCE)
 				{
 					ccGLMatrix transMat;
 					transMat.toIdentity();
@@ -1551,12 +1551,12 @@ void MainWindow::doComputeBestFitBB()
 
 		if (cloud && cloud->isA(CC_TYPES::POINT_CLOUD)) // TODO
 		{
-			CCLib::Neighbourhood Yk(cloud);
+			CCCoreLib::Neighbourhood Yk(cloud);
 
-			CCLib::SquareMatrixd covMat = Yk.computeCovarianceMatrix();
+			CCCoreLib::SquareMatrixd covMat = Yk.computeCovarianceMatrix();
 			if (covMat.isValid())
 			{
-				CCLib::SquareMatrixd eigVectors;
+				CCCoreLib::SquareMatrixd eigVectors;
 				std::vector<double> eigValues;
 				if (Jacobi<double>::ComputeEigenValuesAndVectors(covMat, eigVectors, eigValues, true))
 				{
@@ -1624,10 +1624,10 @@ void MainWindow::doActionFlagMeshVertices()
 						continue;
 					}
 				}
-				CCLib::ScalarField* flags = vertices->getScalarField(sfIdx);
+				CCCoreLib::ScalarField* flags = vertices->getScalarField(sfIdx);
 
-				CCLib::MeshSamplingTools::EdgeConnectivityStats stats;
-				if (CCLib::MeshSamplingTools::flagMeshVerticesByType(mesh,flags,&stats))
+				CCCoreLib::MeshSamplingTools::EdgeConnectivityStats stats;
+				if (CCCoreLib::MeshSamplingTools::flagMeshVerticesByType(mesh,flags,&stats))
 				{
 					vertices->setCurrentDisplayedScalarField(sfIdx);
 					ccScalarField* sf = vertices->getCurrentDisplayedScalarField();
@@ -1666,7 +1666,7 @@ void MainWindow::doActionFlagMeshVertices()
 	{
 		//display reminder
 		forceConsoleDisplay();
-		ccConsole::Print(QString("[Mesh Quality] SF flags: %1 (NORMAL) / %2 (BORDER) / (%3) NON-MANIFOLD").arg(CCLib::MeshSamplingTools::VERTEX_NORMAL).arg(CCLib::MeshSamplingTools::VERTEX_BORDER).arg(CCLib::MeshSamplingTools::VERTEX_NON_MANIFOLD));
+		ccConsole::Print(QString("[Mesh Quality] SF flags: %1 (NORMAL) / %2 (BORDER) / (%3) NON-MANIFOLD").arg(CCCoreLib::MeshSamplingTools::VERTEX_NORMAL).arg(CCCoreLib::MeshSamplingTools::VERTEX_BORDER).arg(CCCoreLib::MeshSamplingTools::VERTEX_NON_MANIFOLD));
 	}
 
 	if (errors)
@@ -1685,14 +1685,14 @@ void MainWindow::doActionMeasureMeshVolume()
 			if (mesh)
 			{
 				//we compute the mesh volume
-				double V = CCLib::MeshSamplingTools::computeMeshVolume(mesh);
+				double V = CCCoreLib::MeshSamplingTools::computeMeshVolume(mesh);
 				//we force the console to display itself
 				forceConsoleDisplay();
 				ccConsole::Print(QString("[Mesh Volume] Mesh '%1': V=%2 (cube units)").arg(entity->getName()).arg(V));
 
 				//check that the mesh is closed
-				CCLib::MeshSamplingTools::EdgeConnectivityStats stats;
-				if (CCLib::MeshSamplingTools::computeMeshEdgesConnectivity(mesh, stats))
+				CCCoreLib::MeshSamplingTools::EdgeConnectivityStats stats;
+				if (CCCoreLib::MeshSamplingTools::computeMeshEdgesConnectivity(mesh, stats))
 				{
 					if (stats.edgesNotShared != 0)
 					{
@@ -1725,7 +1725,7 @@ void MainWindow::doActionMeasureMeshSurface()
 			ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(entity);
 			if (mesh)
 			{
-				double S = CCLib::MeshSamplingTools::computeMeshArea(mesh);
+				double S = CCCoreLib::MeshSamplingTools::computeMeshArea(mesh);
 				//we force the console to display itself
 				forceConsoleDisplay();
 				ccConsole::Print(QString("[Mesh Surface] Mesh '%1': S=%2 (square units)").arg(entity->getName()).arg(S));
@@ -1791,7 +1791,7 @@ void MainWindow::doActionComputeDistancesFromSensor()
 				return;
 			}
 		}
-		CCLib::ScalarField* distances = cloud->getScalarField(sfIdx);
+		CCCoreLib::ScalarField* distances = cloud->getScalarField(sfIdx);
 
 		for (unsigned i = 0; i < cloud->size(); ++i)
 		{
@@ -1858,7 +1858,7 @@ void MainWindow::doActionComputeScatteringAngles()
 			return;
 		}
 	}
-	CCLib::ScalarField* angles = cloud->getScalarField(sfIdx);
+	CCCoreLib::ScalarField* angles = cloud->getScalarField(sfIdx);
 
 	//perform computations
 	for (unsigned i = 0; i < cloud->size(); ++i)
@@ -1879,7 +1879,7 @@ void MainWindow::doActionComputeScatteringAngles()
 		ScalarType theta = std::acos(std::min(std::abs(cosTheta), 1.0f));
 
 		if (toDegreeFlag)
-			theta *= static_cast<ScalarType>(CCLib::RAD_TO_DEG);
+			theta *= static_cast<ScalarType>(CCCoreLib::RAD_TO_DEG);
 
 		angles->setValue(i,theta);
 	}
@@ -2180,7 +2180,7 @@ void MainWindow::doActionProjectUncertainty()
 		return;
 	}
 
-	CCLib::ReferenceCloud points(pointCloud);
+	CCCoreLib::ReferenceCloud points(pointCloud);
 	if (!points.reserve(pointCloud->size()))
 	{
 		ccConsole::Error("Not enough memory!");
@@ -2214,7 +2214,7 @@ void MainWindow::doActionProjectUncertainty()
 		}
 
 		// fill scalar field
-		CCLib::ScalarField* sf = pointCloud->getScalarField(sfIdx);
+		CCCoreLib::ScalarField* sf = pointCloud->getScalarField(sfIdx);
 		assert(sf);
 		if (sf)
 		{
@@ -2243,7 +2243,7 @@ void MainWindow::doActionProjectUncertainty()
 		}
 
 		// fill scalar field
-		CCLib::ScalarField* sf = pointCloud->getScalarField(sfIdx);
+		CCCoreLib::ScalarField* sf = pointCloud->getScalarField(sfIdx);
 		assert(sf);
 		if (sf)
 		{
@@ -2324,7 +2324,7 @@ void MainWindow::doActionCheckPointsInsideFrustum()
 				return;
 			}
 
-			CCLib::ScalarField* sf = pointCloud->getScalarField(sfIdx);
+			CCCoreLib::ScalarField* sf = pointCloud->getScalarField(sfIdx);
 			assert(sf);
 			if (sf)
 			{
@@ -2515,7 +2515,7 @@ void MainWindow::doActionComputePointsVisibility()
 		return;
 	}
 
-	CCLib::ScalarField* sf = pointCloud->getScalarField(sfIdx);
+	CCCoreLib::ScalarField* sf = pointCloud->getScalarField(sfIdx);
 	assert(sf);
 	if (sf)
 	{
@@ -2523,7 +2523,7 @@ void MainWindow::doActionComputePointsVisibility()
 
 		//progress bar
 		ccProgressDialog pdlg(true);
-		CCLib::NormalizedProgress nprogress(&pdlg,pointCloud->size());
+		CCCoreLib::NormalizedProgress nprogress(&pdlg,pointCloud->size());
 		pdlg.setMethodTitle(tr("Compute visibility"));
 		pdlg.setInfo(tr("Points: %L1").arg( pointCloud->size() ));
 		pdlg.start();
@@ -2553,10 +2553,10 @@ void MainWindow::doActionComputePointsVisibility()
 			pointCloud->showSF(true);
 
 			ccConsole::Print(QString("Visibility computed for cloud '%1'").arg(pointCloud->getName()));
-			ccConsole::Print(QString("\tVisible = %1").arg(CCLib::POINT_VISIBLE));
-			ccConsole::Print(QString("\tHidden = %1").arg(CCLib::POINT_HIDDEN));
-			ccConsole::Print(QString("\tOut of range = %1").arg(CCLib::POINT_OUT_OF_RANGE));
-			ccConsole::Print(QString("\tOut of fov = %1").arg(CCLib::POINT_OUT_OF_FOV));
+			ccConsole::Print(QString("\tVisible = %1").arg(CCCoreLib::POINT_VISIBLE));
+			ccConsole::Print(QString("\tHidden = %1").arg(CCCoreLib::POINT_HIDDEN));
+			ccConsole::Print(QString("\tOut of range = %1").arg(CCCoreLib::POINT_OUT_OF_RANGE));
+			ccConsole::Print(QString("\tOut of fov = %1").arg(CCCoreLib::POINT_OUT_OF_FOV));
 		}
 		pointCloud->redrawDisplay();
 	}
@@ -2732,15 +2732,15 @@ void MainWindow::doRemoveDuplicatePoints()
 
 			ccOctree::Shared octree = cloud->getOctree();
 
-			CCLib::GeometricalAnalysisTools::ErrorCode result = CCLib::GeometricalAnalysisTools::FlagDuplicatePoints(	cloud,
+			CCCoreLib::GeometricalAnalysisTools::ErrorCode result = CCCoreLib::GeometricalAnalysisTools::FlagDuplicatePoints(	cloud,
 																														minDistanceBetweenPoints,
 																														&pDlg,
 																														octree.data());
 
-			if (result == CCLib::GeometricalAnalysisTools::NoError)
+			if (result == CCCoreLib::GeometricalAnalysisTools::NoError)
 			{
 				//count the number of duplicate points!
-				CCLib::ScalarField* flagSF = cloud->getScalarField(sfIdx);
+				CCCoreLib::ScalarField* flagSF = cloud->getScalarField(sfIdx);
 				unsigned duplicateCount = 0;
 				assert(flagSF);
 				if (flagSF)
@@ -2809,7 +2809,7 @@ void MainWindow::doActionFilterByValue()
 		{
 			ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
 			//la methode est activee sur le champ scalaire affiche
-			CCLib::ScalarField* sf = pc->getCurrentDisplayedScalarField();
+			CCCoreLib::ScalarField* sf = pc->getCurrentDisplayedScalarField();
 			if (sf)
 			{
 				toFilter.emplace_back(entity,pc);
@@ -2866,7 +2866,7 @@ void MainWindow::doActionFilterByValue()
 		{
 			ccHObject* ent = item.first;
 			ccPointCloud* pc = item.second;
-			//CCLib::ScalarField* sf = pc->getCurrentDisplayedScalarField();
+			//CCCoreLib::ScalarField* sf = pc->getCurrentDisplayedScalarField();
 			//assert(sf);
 
 			//we set as output (OUT) the currently displayed scalar field
@@ -3325,7 +3325,7 @@ void MainWindow::doActionMerge()
 		ccHObjectContext firstCloudContext;
 
 		//whether to generate the 'original cloud index' scalar field or not
-		CCLib::ScalarField* ocIndexSF = nullptr;
+		CCCoreLib::ScalarField* ocIndexSF = nullptr;
 		size_t cloudIndex = 0;
 
 		for (size_t i = 0; i < clouds.size(); ++i)
@@ -3501,7 +3501,7 @@ void MainWindow::doActionRegister()
 	bool adjustScale											= rDlg.adjustScale();
 	int transformationFilters									= rDlg.getTransformationFilters();
 	unsigned finalOverlap										= rDlg.getFinalOverlap();
-	CCLib::ICPRegistrationTools::CONVERGENCE_TYPE method		= rDlg.getConvergenceMethod();
+	CCCoreLib::ICPRegistrationTools::CONVERGENCE_TYPE method		= rDlg.getConvergenceMethod();
 	int maxThreadCount											= rDlg.getMaxThreadCount();
 
 	//semi-persistent storage (for next call)
@@ -3703,15 +3703,15 @@ void MainWindow::doAction4pcsRegister()
 	data = aDlg.getDataObject();
 
 	//Take the correct number of points among the clouds
-	CCLib::ReferenceCloud *subModel = aDlg.getSampledModel();
-	CCLib::ReferenceCloud *subData = aDlg.getSampledData();
+	CCCoreLib::ReferenceCloud *subModel = aDlg.getSampledModel();
+	CCCoreLib::ReferenceCloud *subData = aDlg.getSampledData();
 
 	unsigned nbMaxCandidates = aDlg.isNumberOfCandidatesLimited() ? aDlg.getMaxNumberOfCandidates() : 0;
 
 	ccProgressDialog pDlg(true, this);
 
-	CCLib::PointProjectionTools::Transformation transform;
-	if (CCLib::FPCSRegistrationTools::RegisterClouds(	subModel,
+	CCCoreLib::PointProjectionTools::Transformation transform;
+	if (CCCoreLib::FPCSRegistrationTools::RegisterClouds(	subModel,
 														subData,
 														transform,
 														static_cast<ScalarType>(aDlg.getDelta()),
@@ -3766,8 +3766,8 @@ void MainWindow::doActionSubsample()
 	std::vector<ccPointCloud*> clouds;
 	unsigned maxPointCount = 0;
 	double maxCloudRadius = 0;
-	ScalarType sfMin = CCLib::NAN_VALUE;
-	ScalarType sfMax = CCLib::NAN_VALUE;
+	ScalarType sfMin = CCCoreLib::NAN_VALUE;
+	ScalarType sfMax = CCCoreLib::NAN_VALUE;
 	{
 		for ( ccHObject *entity : getSelectedEntities() )
 		{
@@ -3822,7 +3822,7 @@ void MainWindow::doActionSubsample()
 		for (size_t i = 0; i < clouds.size(); ++i)
 		{
 			ccPointCloud* cloud = clouds[i];
-			CCLib::ReferenceCloud *sampledCloud = sDlg.getSampledCloud(cloud,&pDlg);
+			CCCoreLib::ReferenceCloud *sampledCloud = sDlg.getSampledCloud(cloud,&pDlg);
 			if (!sampledCloud)
 			{
 				ccConsole::Warning(QString("[Subsampling] Failed to subsample cloud '%1'!").arg(cloud->getName()));
@@ -3907,7 +3907,7 @@ struct ComponentIndexAndSize
 };
 
 void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
-										CCLib::ReferenceCloudContainer& components,
+										CCCoreLib::ReferenceCloudContainer& components,
 										unsigned minPointsPerComponent,
 										bool randomColors,
 										bool selectComponents,
@@ -3954,7 +3954,7 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 		//for each component
 		for (size_t i = 0; i < components.size(); ++i)
 		{
-			CCLib::ReferenceCloud* compIndexes = _sortedIndexes ? components[_sortedIndexes->at(i).index] : components[i];
+			CCCoreLib::ReferenceCloud* compIndexes = _sortedIndexes ? components[_sortedIndexes->at(i).index] : components[i];
 
 			//if it has enough points
 			if (compIndexes->size() >= minPointsPerComponent)
@@ -4092,8 +4092,8 @@ void MainWindow::doActionLabelConnectedComponents()
 			pc->setCurrentScalarField(sfIdx);
 
 			//we try to label all CCs
-			CCLib::ReferenceCloudContainer components;
-			int componentCount = CCLib::AutoSegmentationTools::labelConnectedComponents(cloud,
+			CCCoreLib::ReferenceCloudContainer components;
+			int componentCount = CCCoreLib::AutoSegmentationTools::labelConnectedComponents(cloud,
 																						static_cast<unsigned char>(octreeLevel),
 																						false,
 																						&pDlg,
@@ -4136,7 +4136,7 @@ void MainWindow::doActionLabelConnectedComponents()
 				}
 
 				pc->getCurrentInScalarField()->computeMinAndMax();
-				if (!CCLib::AutoSegmentationTools::extractConnectedComponents(cloud, components))
+				if (!CCCoreLib::AutoSegmentationTools::extractConnectedComponents(cloud, components))
 				{
 					ccConsole::Warning(QString("[doActionLabelConnectedComponents] Something went wrong while extracting CCs from cloud %1...").arg(cloud->getName()));
 				}
@@ -4367,7 +4367,7 @@ void MainWindow::doConvertPolylinesToMesh()
 		assert(segments2D.size() == segmentCount * 2);
 	}
 
-	CCLib::Delaunay2dMesh* delaunayMesh = new CCLib::Delaunay2dMesh;
+	CCCoreLib::Delaunay2dMesh* delaunayMesh = new CCCoreLib::Delaunay2dMesh;
 	char errorStr[1024];
 	if (!delaunayMesh->buildMesh(points2D, segments2D, errorStr))
 	{
@@ -4406,7 +4406,7 @@ void MainWindow::doConvertPolylinesToMesh()
 		unsigned vertCount = vertices->size();
 		for (unsigned i = 0; i < delaunayMesh->size(); ++i)
 		{
-			const CCLib::VerticesIndexes* tsi = delaunayMesh->getTriangleVertIndexes(i);
+			const CCCoreLib::VerticesIndexes* tsi = delaunayMesh->getTriangleVertIndexes(i);
 			assert(tsi->i1 < vertCount && tsi->i2 < vertCount && tsi->i3 < vertCount);
 		}
 	}
@@ -4801,8 +4801,8 @@ void MainWindow::doActionComputeDistanceMap()
 			continue;
 		}
 
-		//CCLib::ChamferDistanceTransform cdt;
-		CCLib::SaitoSquaredDistanceTransform cdt;
+		//CCCoreLib::ChamferDistanceTransform cdt;
+		CCCoreLib::SaitoSquaredDistanceTransform cdt;
 		if (!cdt.initGrid(Tuple3ui(steps, steps, steps)))
 		{
 			//not enough memory
@@ -4909,7 +4909,7 @@ void MainWindow::doActionComputeDistToBestFitQuadric3D()
 		if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
 		{
 			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(entity);
-			CCLib::Neighbourhood Yk(cloud);
+			CCCoreLib::Neighbourhood Yk(cloud);
 
 			double Q[10];
 			if (Yk.compute3DQuadric(Q))
@@ -4962,13 +4962,13 @@ void MainWindow::doActionComputeDistToBestFitQuadric3D()
 				for (int x = 0; x < steps; ++x)
 				{
 					CCVector3 P;
-					P.x = C.x + maxDim * (static_cast<PointCoordinateType>(x) / static_cast<PointCoordinateType>(steps - 1) - CCLib::PC_ONE / 2);
+					P.x = C.x + maxDim * (static_cast<PointCoordinateType>(x) / static_cast<PointCoordinateType>(steps - 1) - CCCoreLib::PC_ONE / 2);
 					for (int y = 0; y < steps; ++y)
 					{
-						P.y = C.y + maxDim * (static_cast<PointCoordinateType>(y) / static_cast<PointCoordinateType>(steps - 1) - CCLib::PC_ONE / 2);
+						P.y = C.y + maxDim * (static_cast<PointCoordinateType>(y) / static_cast<PointCoordinateType>(steps - 1) - CCCoreLib::PC_ONE / 2);
 						for (int z = 0; z < steps; ++z)
 						{
-							P.z = C.z + maxDim * (static_cast<PointCoordinateType>(z) / static_cast<PointCoordinateType>(steps - 1) - CCLib::PC_ONE / 2);
+							P.z = C.z + maxDim * (static_cast<PointCoordinateType>(z) / static_cast<PointCoordinateType>(steps - 1) - CCCoreLib::PC_ONE / 2);
 							newCloud->addPoint(P);
 
 							//compute distance to quadric
@@ -5048,13 +5048,13 @@ void MainWindow::doActionComputeCPS()
 	}
 	cmpPC->setCurrentScalarField(sfIdx);
 	cmpPC->enableScalarField();
-	//cmpPC->forEach(CCLib::ScalarFieldTools::SetScalarValueToNaN); //now done by default by computeCloud2CloudDistance
+	//cmpPC->forEach(CCCoreLib::ScalarFieldTools::SetScalarValueToNaN); //now done by default by computeCloud2CloudDistance
 
-	CCLib::ReferenceCloud CPSet(srcCloud);
+	CCCoreLib::ReferenceCloud CPSet(srcCloud);
 	ccProgressDialog pDlg(true, this);
-	CCLib::DistanceComputationTools::Cloud2CloudDistanceComputationParams params;
+	CCCoreLib::DistanceComputationTools::Cloud2CloudDistanceComputationParams params;
 	params.CPSet = &CPSet;
-	int result = CCLib::DistanceComputationTools::computeCloud2CloudDistance(compCloud,srcCloud,params,&pDlg);
+	int result = CCCoreLib::DistanceComputationTools::computeCloud2CloudDistance(compCloud,srcCloud,params,&pDlg);
 	cmpPC->deleteScalarField(sfIdx);
 
 	if (result >= 0)
@@ -5339,7 +5339,7 @@ void MainWindow::doActionSORFilter()
 		}
 
 		//computation
-		CCLib::ReferenceCloud* selection = CCLib::CloudSamplingTools::sorFilter(cloud,
+		CCCoreLib::ReferenceCloud* selection = CCCoreLib::CloudSamplingTools::sorFilter(cloud,
 																				s_sorFilterKnn,
 																				s_sorFilterNSigma,
 																				nullptr,
@@ -5455,7 +5455,7 @@ void MainWindow::doActionFilterNoise()
 		}
 
 		//computation
-		CCLib::ReferenceCloud* selection = CCLib::CloudSamplingTools::noiseFilter(	cloud,
+		CCCoreLib::ReferenceCloud* selection = CCCoreLib::CloudSamplingTools::noiseFilter(	cloud,
 																					kernelRadius,
 																					s_noiseFilterNSigma,
 																					s_noiseFilterRemoveIsolatedPoints,
@@ -7799,7 +7799,7 @@ void MainWindow::doActionAddConstantSF()
 		return;
 	}
 
-	CCLib::ScalarField* sf = cloud->getScalarField(sfIdx);
+	CCCoreLib::ScalarField* sf = cloud->getScalarField(sfIdx);
 	assert(sf);
 	if (sf)
 	{
@@ -7850,13 +7850,13 @@ void MainWindow::doActionFitSphere()
 		CCVector3 center;
 		PointCoordinateType radius;
 		double rms;
-		if (CCLib::GeometricalAnalysisTools::DetectSphereRobust(cloud,
+		if (CCCoreLib::GeometricalAnalysisTools::DetectSphereRobust(cloud,
 			outliersRatio,
 			center,
 			radius,
 			rms,
 			&pDlg,
-			confidence) != CCLib::GeometricalAnalysisTools::NoError)
+			confidence) != CCCoreLib::GeometricalAnalysisTools::NoError)
 		{
 			ccLog::Warning(QString("[Fit sphere] Failed to fit a sphere on cloud '%1'").arg(cloud->getName()));
 			continue;
@@ -7914,12 +7914,12 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 	for (ccHObject *entity : selectedEntities) 
 	{
 		ccShiftedObject* shifted = nullptr;
-		CCLib::GenericIndexedCloudPersist* cloud = nullptr;
+		CCCoreLib::GenericIndexedCloudPersist* cloud = nullptr;
 
 		if (entity->isKindOf(CC_TYPES::POLY_LINE))
 		{
 			ccPolyline* poly = ccHObjectCaster::ToPolyline(entity);
-			cloud = static_cast<CCLib::GenericIndexedCloudPersist*>(poly);
+			cloud = static_cast<CCCoreLib::GenericIndexedCloudPersist*>(poly);
 			shifted = poly;
 		}
 		else
@@ -7927,7 +7927,7 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 			ccGenericPointCloud* gencloud = ccHObjectCaster::ToGenericPointCloud(entity);
 			if (gencloud)
 			{
-				cloud = static_cast<CCLib::GenericIndexedCloudPersist*>(gencloud);
+				cloud = static_cast<CCCoreLib::GenericIndexedCloudPersist*>(gencloud);
 				shifted = gencloud;
 			}
 		}
@@ -7968,7 +7968,7 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 				{
 					plane = static_cast<ccHObject*>(pPlane);
 					N = pPlane->getNormal();
-					C = *CCLib::Neighbourhood(cloud).getGravityCenter();
+					C = *CCCoreLib::Neighbourhood(cloud).getGravityCenter();
 					pPlane->enableStippling(true);
 				}
 			}
@@ -7994,7 +7994,7 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 				ccConsole::Print(QString("\t- %1").arg(dipAndDipDirStr));
 
 				//hack: output the transformation matrix that would make this normal points towards +Z
-				ccGLMatrix makeZPosMatrix = ccGLMatrix::FromToRotation(N, CCVector3(0, 0, CCLib::PC_ONE));
+				ccGLMatrix makeZPosMatrix = ccGLMatrix::FromToRotation(N, CCVector3(0, 0, CCCoreLib::PC_ONE));
 				CCVector3 Gt = C;
 				makeZPosMatrix.applyRotation(Gt);
 				makeZPosMatrix.setTranslation(C-Gt);
@@ -8128,8 +8128,8 @@ void MainWindow::doSphericalNeighbourhoodExtractionTest()
 			}
 		}
 
-		CCLib::ScalarField* sf = cloud->getScalarField(sfIdx);
-		sf->fill(CCLib::NAN_VALUE);
+		CCCoreLib::ScalarField* sf = cloud->getScalarField(sfIdx);
+		sf->fill(CCCoreLib::NAN_VALUE);
 		cloud->setCurrentScalarField(sfIdx);
 
 		QElapsedTimer eTimer;
@@ -8145,7 +8145,7 @@ void MainWindow::doSphericalNeighbourhoodExtractionTest()
 		for (unsigned j = 0; j < samples; ++j)
 		{
 			unsigned randIndex = dist(gen);
-			CCLib::DgmOctree::NeighboursSet neighbours;
+			CCCoreLib::DgmOctree::NeighboursSet neighbours;
 			octree->getPointsInSphericalNeighbourhood(*cloud->getPoint(randIndex), sphereRadius, neighbours, level);
 			size_t neihgboursCount = neighbours.size();
 			extractedPoints += neihgboursCount;
@@ -8214,7 +8214,7 @@ void MainWindow::doCylindricalNeighbourhoodExtractionTest()
 	cloud->setCurrentScalarField(sfIdx);
 
 	//reset scalar field
-	cloud->getScalarField(sfIdx)->fill(CCLib::NAN_VALUE);
+	cloud->getScalarField(sfIdx)->fill(CCCoreLib::NAN_VALUE);
 
 	ccProgressDialog pDlg(true, this);
 	ccOctree::Shared octree = cloud->computeOctree(&pDlg);
@@ -8244,7 +8244,7 @@ void MainWindow::doCylindricalNeighbourhoodExtractionTest()
 			}
 			unsigned randIndex = distIndex(gen);
 
-			CCLib::DgmOctree::CylindricalNeighbourhood cn;
+			CCCoreLib::DgmOctree::CylindricalNeighbourhood cn;
 			cn.center = *cloud->getPoint(randIndex);
 			cn.dir = dir;
 			cn.level = level;
@@ -8367,9 +8367,9 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 		//init all possible transformations
 		static const double angularStep_deg = 45.0;
 		unsigned phiSteps = static_cast<unsigned>(360.0 / angularStep_deg);
-		assert(std::abs(360.0 - phiSteps * angularStep_deg) < CCLib::ZERO_TOLERANCE);
+		assert(std::abs(360.0 - phiSteps * angularStep_deg) < CCCoreLib::ZERO_TOLERANCE);
 		unsigned thetaSteps = static_cast<unsigned>(180.0 / angularStep_deg);
-		assert(std::abs(180.0 - thetaSteps * angularStep_deg) < CCLib::ZERO_TOLERANCE);
+		assert(std::abs(180.0 - thetaSteps * angularStep_deg) < CCCoreLib::ZERO_TOLERANCE);
 		unsigned rotCount = phiSteps * (thetaSteps - 1) + 2;
 		matrices.reserve(rotCount);
 		matrixAngles.reserve(rotCount);
@@ -8382,8 +8382,8 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 			{
 				double phi_deg = i * angularStep_deg;
 				ccGLMatrix trans;
-				trans.initFromParameters(	static_cast<float>(phi_deg * CCLib::DEG_TO_RAD),
-											static_cast<float>(theta_deg * CCLib::DEG_TO_RAD),
+				trans.initFromParameters(	static_cast<float>(phi_deg * CCCoreLib::DEG_TO_RAD),
+											static_cast<float>(theta_deg * CCCoreLib::DEG_TO_RAD),
 											0,
 											CCVector3(0,0,0) );
 				matrices.push_back(trans);
@@ -8406,7 +8406,7 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 		ccProgressDialog pDlg(true, this);
 		pDlg.setMethodTitle(tr("Testing all possible positions"));
 		pDlg.setInfo(tr("%1 clouds and %2 positions").arg(cloudCount).arg(matrices.size()));
-		CCLib::NormalizedProgress nProgress(&pDlg, static_cast<unsigned>(((cloudCount*(cloudCount - 1)) / 2)*matrices.size()));
+		CCCoreLib::NormalizedProgress nProgress(&pDlg, static_cast<unsigned>(((cloudCount*(cloudCount - 1)) / 2)*matrices.size()));
 		pDlg.start();
 		QApplication::processEvents();
 
@@ -8451,17 +8451,17 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 #ifndef TEST_GENERATION
 					double finalRMS = 0.0;
 					unsigned finalPointCount = 0;
-					CCLib::ICPRegistrationTools::RESULT_TYPE result;
-					CCLib::ICPRegistrationTools::ScaledTransformation registerTrans;
-					CCLib::ICPRegistrationTools::Parameters params;
+					CCCoreLib::ICPRegistrationTools::RESULT_TYPE result;
+					CCCoreLib::ICPRegistrationTools::ScaledTransformation registerTrans;
+					CCCoreLib::ICPRegistrationTools::Parameters params;
 					{
-						params.convType = CCLib::ICPRegistrationTools::MAX_ERROR_CONVERGENCE;
+						params.convType = CCCoreLib::ICPRegistrationTools::MAX_ERROR_CONVERGENCE;
 						params.minRMSDecrease = 1.0e-6;
 					}
 
-					result = CCLib::ICPRegistrationTools::Register(A, nullptr, B, params, registerTrans, finalRMS, finalPointCount);
+					result = CCCoreLib::ICPRegistrationTools::Register(A, nullptr, B, params, registerTrans, finalRMS, finalPointCount);
 
-					if (result >= CCLib::ICPRegistrationTools::ICP_ERROR)
+					if (result >= CCCoreLib::ICPRegistrationTools::ICP_ERROR)
 					{
 						delete B;
 						if (bestB)
@@ -8774,7 +8774,7 @@ void MainWindow::doActionExportCloudInfo()
 		{
 			ccPointCloud* cloud = static_cast<ccPointCloud*>(entity);
 
-			CCVector3 G = *CCLib::Neighbourhood(cloud).getGravityCenter();
+			CCVector3 G = *CCCoreLib::Neighbourhood(cloud).getGravityCenter();
 			csvStream << cloud->getName() << ";" /*"Name;"*/;
 			csvStream << cloud->size() << ";" /*"Points;"*/;
 			csvStream << G.x << ";" /*"meanX;"*/;
@@ -8782,7 +8782,7 @@ void MainWindow::doActionExportCloudInfo()
 			csvStream << G.z << ";" /*"meanZ;"*/;
 			for (unsigned j = 0; j < cloud->getNumberOfScalarFields(); ++j)
 			{
-				CCLib::ScalarField* sf = cloud->getScalarField(j);
+				CCCoreLib::ScalarField* sf = cloud->getScalarField(j);
 				csvStream << sf->getName() << ";" /*"SF name;"*/;
 
 				unsigned validCount = 0;
@@ -8791,7 +8791,7 @@ void MainWindow::doActionExportCloudInfo()
 				for (unsigned k = 0; k < sf->currentSize(); ++k)
 				{
 					const ScalarType& val = sf->getValue(k);
-					if (CCLib::ScalarField::ValidValue(val))
+					if (CCCoreLib::ScalarField::ValidValue(val))
 					{
 						++validCount;
 						sfSum += val;
@@ -9007,13 +9007,13 @@ void MainWindow::doActionCloudPrimitiveDist()
 			}
 			compEnt->setCurrentScalarField(sfIdx);
 			compEnt->enableScalarField();
-			compEnt->forEach(CCLib::ScalarFieldTools::SetScalarValueToNaN);
+			compEnt->forEach(CCCoreLib::ScalarFieldTools::SetScalarValueToNaN);
 			int returnCode;
 			switch (entityType)
 			{
 				case CC_TYPES::SPHERE:
 				{
-					if (!(returnCode = CCLib::DistanceComputationTools::computeCloud2SphereEquation(compEnt, refEntity->getOwnBB().getCenter(), static_cast<ccSphere*>(refEntity)->getRadius(), signedDist)))
+					if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2SphereEquation(compEnt, refEntity->getOwnBB().getCenter(), static_cast<ccSphere*>(refEntity)->getRadius(), signedDist)))
 						ccConsole::Error(errString, "Sphere", returnCode);
 					break;
 				}
@@ -9022,35 +9022,35 @@ void MainWindow::doActionCloudPrimitiveDist()
 					ccPlane* plane = static_cast<ccPlane*>(refEntity);
 					if (treatPlanesAsBounded)
 					{
-						CCLib::SquareMatrix rotationTransform(plane->getTransformation().data(), true);
-						if (!(returnCode = CCLib::DistanceComputationTools::computeCloud2RectangleEquation(compEnt, plane->getXWidth(), plane->getYWidth(), rotationTransform, plane->getCenter(), signedDist)))
+						CCCoreLib::SquareMatrix rotationTransform(plane->getTransformation().data(), true);
+						if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2RectangleEquation(compEnt, plane->getXWidth(), plane->getYWidth(), rotationTransform, plane->getCenter(), signedDist)))
 							ccConsole::Error(errString, "Bounded Plane", returnCode);
 					}
 					else
 					{
-						if (!(returnCode = CCLib::DistanceComputationTools::computeCloud2PlaneEquation(compEnt, static_cast<ccPlane*>(refEntity)->getEquation(), signedDist)))
+						if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2PlaneEquation(compEnt, static_cast<ccPlane*>(refEntity)->getEquation(), signedDist)))
 							ccConsole::Error(errString, "Infinite Plane", returnCode);
 					}
 					break;
 				}
 				case CC_TYPES::CYLINDER:
 				{
-					if (!(returnCode = CCLib::DistanceComputationTools::computeCloud2CylinderEquation(compEnt, static_cast<ccCylinder*>(refEntity)->getBottomCenter(), static_cast<ccCylinder*>(refEntity)->getTopCenter(), static_cast<ccCylinder*>(refEntity)->getBottomRadius(), signedDist)))
+					if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2CylinderEquation(compEnt, static_cast<ccCylinder*>(refEntity)->getBottomCenter(), static_cast<ccCylinder*>(refEntity)->getTopCenter(), static_cast<ccCylinder*>(refEntity)->getBottomRadius(), signedDist)))
 						ccConsole::Error(errString, "Cylinder", returnCode);
 					break;
 				}
 				case CC_TYPES::CONE:
 				{
-					if (!(returnCode = CCLib::DistanceComputationTools::computeCloud2ConeEquation(compEnt, static_cast<ccCone*>(refEntity)->getLargeCenter(), static_cast<ccCone*>(refEntity)->getSmallCenter(), static_cast<ccCone*>(refEntity)->getLargeRadius(), static_cast<ccCone*>(refEntity)->getSmallRadius(), signedDist)))
+					if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2ConeEquation(compEnt, static_cast<ccCone*>(refEntity)->getLargeCenter(), static_cast<ccCone*>(refEntity)->getSmallCenter(), static_cast<ccCone*>(refEntity)->getLargeRadius(), static_cast<ccCone*>(refEntity)->getSmallRadius(), signedDist)))
 						ccConsole::Error(errString, "Cone", returnCode);
 					break;
 				}
 				case CC_TYPES::BOX: 
 				{
 					const ccGLMatrix& glTransform = refEntity->getGLTransformationHistory();
-					CCLib::SquareMatrix rotationTransform(glTransform.data(), true);
+					CCCoreLib::SquareMatrix rotationTransform(glTransform.data(), true);
 					CCVector3 boxCenter = glTransform.getColumnAsVec3D(3);
-					if (!(returnCode = CCLib::DistanceComputationTools::computeCloud2BoxEquation(compEnt, static_cast<ccBox*>(refEntity)->getDimensions(), rotationTransform, boxCenter, signedDist)))
+					if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2BoxEquation(compEnt, static_cast<ccBox*>(refEntity)->getDimensions(), rotationTransform, boxCenter, signedDist)))
 						ccConsole::Error(errString, "Box", returnCode);
 					break; 
 				}
@@ -9059,7 +9059,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 					signedDist = false;
 					flippedNormals = false;
 					ccPolyline* line = static_cast<ccPolyline*>(refEntity);
-					returnCode = CCLib::DistanceComputationTools::computeCloud2PolylineEquation(compEnt, line);
+					returnCode = CCCoreLib::DistanceComputationTools::computeCloud2PolylineEquation(compEnt, line);
 					if (!returnCode)
 					{
 						ccConsole::Error(errString, "Polyline", returnCode);
@@ -9077,7 +9077,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 			sfName = QString(signedDist ? CC_CLOUD2PRIMITIVE_SIGNED_DISTANCES_DEFAULT_SF_NAME : CC_CLOUD2PRIMITIVE_DISTANCES_DEFAULT_SF_NAME);
 			if (flippedNormals)
 			{
-				compEnt->forEach(CCLib::ScalarFieldTools::SetScalarValueInverted);
+				compEnt->forEach(CCCoreLib::ScalarFieldTools::SetScalarValueInverted);
 				sfName += QString("[-]");
 			}
 			
@@ -9245,7 +9245,7 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 			if (smDlg.updateFOV())
 			{
 				//set the right FOV
-				double fov_deg = 2 * std::atan(params.screenWidth_mm / (2.0 * params.screenDistance_mm)) * CCLib::RAD_TO_DEG;
+				double fov_deg = 2 * std::atan(params.screenWidth_mm / (2.0 * params.screenDistance_mm)) * CCCoreLib::RAD_TO_DEG;
 				ccLog::Print(QString("[Stereo] F.O.V. forced to %1 deg.").arg(fov_deg));
 				win->setFov(fov_deg);
 			}
@@ -10993,18 +10993,18 @@ void MainWindow::doActionComparePlanes()
 	p2->getEquation(N2, d2);
 
 	double angle_rad = N1.angle_rad(N2);
-	info << QString("Angle P1/P2: %1 deg.").arg(angle_rad * CCLib::RAD_TO_DEG);
+	info << QString("Angle P1/P2: %1 deg.").arg(angle_rad * CCCoreLib::RAD_TO_DEG);
 	ccLog::Print(QString("[Compare] ") + info.last());
 
 	PointCoordinateType planeEq1[4] = { N1.x, N1.y, N1.z, d1 };
 	PointCoordinateType planeEq2[4] = { N2.x, N2.y, N2.z, d2 };
 	CCVector3 C1 = p1->getCenter();
-	ScalarType distCenter1ToPlane2 = CCLib::DistanceComputationTools::computePoint2PlaneDistance(&C1, planeEq2);
+	ScalarType distCenter1ToPlane2 = CCCoreLib::DistanceComputationTools::computePoint2PlaneDistance(&C1, planeEq2);
 	info << QString("Distance Center(P1)/P2: %1").arg(distCenter1ToPlane2);
 	ccLog::Print(QString("[Compare] ") + info.last());
 
 	CCVector3 C2 = p2->getCenter();
-	ScalarType distCenter2ToPlane1 = CCLib::DistanceComputationTools::computePoint2PlaneDistance(&C2, planeEq1);
+	ScalarType distCenter2ToPlane1 = CCCoreLib::DistanceComputationTools::computePoint2PlaneDistance(&C2, planeEq1);
 	info << QString("Distance Center(P2)/P1: %1").arg(distCenter2ToPlane1);
 	ccLog::Print(QString("[Compare] ") + info.last());
 

@@ -17,7 +17,7 @@
 
 #include "ccContourExtractorDlg.h"
 
-//CCLib
+//CCCoreLib
 #include <CCPlatform.h>
 
 //qCC_gl

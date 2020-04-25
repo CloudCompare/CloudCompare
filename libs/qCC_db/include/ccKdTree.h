@@ -18,7 +18,7 @@
 #ifndef CC_KD_TREE_HEADER
 #define CC_KD_TREE_HEADER
 
-//CCLib
+//CCCoreLib
 #include <TrueKdTree.h>
 
 //Local
@@ -30,9 +30,9 @@
 class ccGenericPointCloud;
 
 //! KD-tree structure
-/** Extends the CCLib::TrueKdTree class.
+/** Extends the CCCoreLib::TrueKdTree class.
 **/
-class QCC_DB_LIB_API ccKdTree : public CCLib::TrueKdTree, public ccHObject
+class QCC_DB_LIB_API ccKdTree : public CCCoreLib::TrueKdTree, public ccHObject
 {
 public:
 

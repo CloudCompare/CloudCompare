@@ -24,7 +24,7 @@ class ccMainAppInterface;
 //Qt
 #include <QString>
 
-//CCLib
+//CCCoreLib
 #include <CCGeom.h>
 
 //! Loads a 2D profile form a custom (ASCII) file

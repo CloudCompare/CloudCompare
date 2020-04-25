@@ -69,11 +69,11 @@ void ccFitPlaneTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPoi
 	//nearest neighbour search
 	float r = m_mouseCircle->getRadiusWorld();
 	unsigned char level = oct->findBestLevelForAGivenNeighbourhoodSizeExtraction(r);
-	CCLib::DgmOctree::NeighboursSet set;
+	CCCoreLib::DgmOctree::NeighboursSet set;
 	int n = oct->getPointsInSphericalNeighbourhood(P, PointCoordinateType(r), set, level);
 	//Put data in a point cloud class and encapsulate as a "neighbourhood"
-	CCLib::DgmOctreeReferenceCloud nCloud(&set, n);
-	CCLib::Neighbourhood Z(&nCloud);
+	CCCoreLib::DgmOctreeReferenceCloud nCloud(&set, n);
+	CCCoreLib::Neighbourhood Z(&nCloud);
 
 	//Fit plane!
 	double rms = 0.0; //output for rms

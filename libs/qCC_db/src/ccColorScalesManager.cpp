@@ -24,7 +24,7 @@
 //Qt
 #include <QSettings>
 
-//CCLib
+//CCCoreLib
 #include <MeshSamplingTools.h>
 
 //System
@@ -614,9 +614,9 @@ ccColorScale::Shared ccColorScalesManager::Create(DEFAULT_SCALES scaleType)
 		scale->insert(ccColorScaleElement(0.0, Qt::blue ), false);
 		scale->insert(ccColorScaleElement(0.5, Qt::green), false);
 		scale->insert(ccColorScaleElement(1.0, Qt::red  ), false);
-		assert(		CCLib::MeshSamplingTools::VERTEX_NORMAL < CCLib::MeshSamplingTools::VERTEX_BORDER
-				&&	CCLib::MeshSamplingTools::VERTEX_BORDER < CCLib::MeshSamplingTools::VERTEX_NON_MANIFOLD );
-		scale->setAbsolute(CCLib::MeshSamplingTools::VERTEX_NORMAL, CCLib::MeshSamplingTools::VERTEX_NON_MANIFOLD);
+		assert(		CCCoreLib::MeshSamplingTools::VERTEX_NORMAL < CCCoreLib::MeshSamplingTools::VERTEX_BORDER
+				&&	CCCoreLib::MeshSamplingTools::VERTEX_BORDER < CCCoreLib::MeshSamplingTools::VERTEX_NON_MANIFOLD );
+		scale->setAbsolute(CCCoreLib::MeshSamplingTools::VERTEX_NORMAL, CCCoreLib::MeshSamplingTools::VERTEX_NON_MANIFOLD);
 		scale->customLabels().insert(0);
 		scale->customLabels().insert(0.5);
 		scale->customLabels().insert(1.0);

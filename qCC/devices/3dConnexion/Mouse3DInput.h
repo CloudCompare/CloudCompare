@@ -18,7 +18,7 @@
 #ifndef MOUSE_3D_INPUT_HEADER
 #define MOUSE_3D_INPUT_HEADER
 
-//CCLib
+//CCCoreLib
 #include <CCConst.h>
 
 //qCC_db

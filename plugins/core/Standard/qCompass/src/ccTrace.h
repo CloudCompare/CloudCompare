@@ -267,8 +267,8 @@ private:
 	//random vars that we keep to optimise speed
 	int m_start_rgb[3];
 	int m_end_rgb[3]; //[r,g,b] values for start and end nodes
-	CCLib::DgmOctree::NeighboursSet m_neighbours;
-	CCLib::DgmOctree::PointDescriptor m_p;
+	CCCoreLib::DgmOctree::NeighboursSet m_neighbours;
+	CCCoreLib::DgmOctree::PointDescriptor m_p;
 	float m_search_r;
 	float m_maxIterations;
 

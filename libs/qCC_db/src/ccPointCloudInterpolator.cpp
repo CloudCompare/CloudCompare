@@ -146,13 +146,13 @@ bool cellSFInterpolator(const CCLib::DgmOctree::octreeCell& cell,
 				}
 				else
 				{
-					//we assume the scalar fields have all been initialized to NAN_VALUE
+					//we assume the scalar fields have all been initialized to CCLib::NAN_VALUE
 				}
 			}
 		}
 		else
 		{
-			//we assume the scalar fields have all been initialized to NAN_VALUE
+			//we assume the scalar fields have all been initialized to CCLib::NAN_VALUE
 		}
 
 		if (nProgress && !nProgress->oneStep())
@@ -234,7 +234,7 @@ bool ccPointCloudInterpolator::InterpolateScalarFieldsFrom(	ccPointCloud* destCl
 		CCLib::ScalarField* outSF = destCloud->getScalarField(outSFIndex);
 		scalarFields.push_back(SFPair(inSF, outSF));
 
-		outSF->fill(NAN_VALUE);
+		outSF->fill(CCLib::NAN_VALUE);
 	}
 
 	if (params.method == Parameters::NEAREST_NEIGHBOR)

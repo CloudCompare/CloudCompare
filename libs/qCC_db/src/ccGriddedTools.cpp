@@ -164,7 +164,7 @@ bool ccGriddedTools::DetectParameters(	const ccPointCloud* cloud,
 				parameters.deltaPhiRad = static_cast<PointCoordinateType>(angles[maxSpanIndex].first);
 				if (verbose)
 				{
-					ccLog::Print(QString("[Scan grid] Detected pitch step: %1 degrees (span [%2 - %3])").arg(parameters.deltaPhiRad * CC_RAD_TO_DEG).arg(parameters.minPhi * CC_RAD_TO_DEG).arg(parameters.maxPhi * CC_RAD_TO_DEG));
+					ccLog::Print(QString("[Scan grid] Detected pitch step: %1 degrees (span [%2 - %3])").arg(parameters.deltaPhiRad * CCLib::RAD_TO_DEG).arg(parameters.minPhi * CCLib::RAD_TO_DEG).arg(parameters.maxPhi * CCLib::RAD_TO_DEG));
 				}
 			}
 			else
@@ -280,7 +280,7 @@ bool ccGriddedTools::DetectParameters(	const ccPointCloud* cloud,
 				parameters.deltaThetaRad = static_cast<PointCoordinateType>(angles[maxSpanIndex].first);
 				if (verbose)
 				{
-					ccLog::Print(QString("[Scan grid] Detected yaw step: %1 degrees (span [%2 - %3])").arg(parameters.deltaThetaRad * CC_RAD_TO_DEG).arg(parameters.minTheta * CC_RAD_TO_DEG).arg(parameters.maxTheta * CC_RAD_TO_DEG));
+					ccLog::Print(QString("[Scan grid] Detected yaw step: %1 degrees (span [%2 - %3])").arg(parameters.deltaThetaRad * CCLib::RAD_TO_DEG).arg(parameters.minTheta * CCLib::RAD_TO_DEG).arg(parameters.maxTheta * CCLib::RAD_TO_DEG));
 				}
 			}
 			else
@@ -315,7 +315,7 @@ ccGBLSensor* ccGriddedTools::ComputeBestSensor(ccPointCloud* cloud, ccPointCloud
 		sensor->setYawStep(parameters.deltaThetaRad);
 		sensor->setYawRange(parameters.minTheta,parameters.maxTheta);
 		sensor->setSensorRange(parameters.maxRange);
-		sensor->setGraphicScale(PC_ONE/2);
+		sensor->setGraphicScale(CCLib::PC_ONE/2);
 		sensor->setVisible(true);
 		sensor->setEnabled(false);
 	}

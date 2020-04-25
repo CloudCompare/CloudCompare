@@ -275,7 +275,7 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 	{
 		ransacOptions.m_epsilon = params.epsilon;
 		ransacOptions.m_bitmapEpsilon = params.bitmapEpsilon;
-		ransacOptions.m_normalThresh = static_cast<float>(cos(params.maxNormalDev_deg * CC_DEG_TO_RAD));
+		ransacOptions.m_normalThresh = static_cast<float>(cos(params.maxNormalDev_deg * CCLib::DEG_TO_RAD));
 		assert(ransacOptions.m_normalThresh >= 0);
 		ransacOptions.m_probability = params.probability;
 		ransacOptions.m_minSupport = params.supportPoints;

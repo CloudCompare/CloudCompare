@@ -742,9 +742,9 @@ void cc2DLabel::getLabelInfo1(LabelInfo1& info) const
 					sf = static_cast<ccPointCloud*>(vertices)->getCurrentDisplayedScalarField();
 				}
 
-				ScalarType s1 = NAN_VALUE;
-				ScalarType s2 = NAN_VALUE;
-				ScalarType s3 = NAN_VALUE;
+				ScalarType s1 = CCLib::NAN_VALUE;
+				ScalarType s2 = CCLib::NAN_VALUE;
+				ScalarType s3 = CCLib::NAN_VALUE;
 
 				if (sf)
 				{
@@ -829,9 +829,9 @@ void cc2DLabel::getLabelInfo3(LabelInfo3& info) const
 	info.edges.u[2] = P1P3.normd();  //edge 3-1
 
 	//angle
-	info.angles.u[0] = P1P2.angle_rad( P1P3) * CC_RAD_TO_DEG; //angleAtP1
-	info.angles.u[1] = P2P3.angle_rad(-P1P2) * CC_RAD_TO_DEG; //angleAtP2
-	info.angles.u[2] = P1P3.angle_rad(-P2P3) * CC_RAD_TO_DEG; //angleAtP3 (should be equal to 180-a1-a2!)
+	info.angles.u[0] = P1P2.angle_rad( P1P3) * CCLib::RAD_TO_DEG; //angleAtP1
+	info.angles.u[1] = P2P3.angle_rad(-P1P2) * CCLib::RAD_TO_DEG; //angleAtP2
+	info.angles.u[2] = P1P3.angle_rad(-P2P3) * CCLib::RAD_TO_DEG; //angleAtP3 (should be equal to 180-a1-a2!)
 }
 
 QStringList cc2DLabel::getLabelContent(int precision) const

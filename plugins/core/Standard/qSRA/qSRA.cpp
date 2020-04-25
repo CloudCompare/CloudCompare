@@ -292,9 +292,9 @@ static ccPolyline* GetConeProfile(ccCone* cone)
 	{
 		CCVector3 y(0, 1, 0);
 		CCVector3 Z(0, 0, 0);
-		Z.u[revolDim] = PC_ONE;
+		Z.u[revolDim] = CCLib::PC_ONE;
 		ccGLMatrix axisTrans = ccGLMatrix::FromToRotation(y, Z);
-		assert(((axisTrans * y) - Z).norm() < ZERO_TOLERANCE);
+		assert(((axisTrans * y) - Z).norm() < CCLib::ZERO_TOLERANCE);
 		ccGLMatrix polyMat = coneTrans * axisTrans;
 		polyline->setGLTransformation(polyMat);
 	}

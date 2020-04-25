@@ -503,9 +503,9 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				if (visFiltering)
 				{
 					//we skip the triangle if at least one vertex is hidden
-					if ((verticesVisibility[tsi->i1] != POINT_VISIBLE) ||
-						(verticesVisibility[tsi->i2] != POINT_VISIBLE) ||
-						(verticesVisibility[tsi->i3] != POINT_VISIBLE))
+					if ((verticesVisibility[tsi->i1] != CCLib::POINT_VISIBLE) ||
+						(verticesVisibility[tsi->i2] != CCLib::POINT_VISIBLE) ||
+						(verticesVisibility[tsi->i3] != CCLib::POINT_VISIBLE))
 						continue;
 				}
 

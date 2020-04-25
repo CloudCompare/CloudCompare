@@ -131,7 +131,7 @@ void ComputeCorePointDescriptor(unsigned index)
 			//optional: compute per-level roughness
 			if (s_computeCorePointsDescParams.roughnessSFs)
 			{
-				ScalarType roughness = NAN_VALUE;
+				ScalarType roughness = CCLib::NAN_VALUE;
 
 				if (subset.size() >= 3)
 				{

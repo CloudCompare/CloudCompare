@@ -901,20 +901,20 @@ void ccPropertiesTreeDelegate::fillWithGBLSensor(const ccGBLSensor* _obj)
 		//Angular range (yaw)
 		PointCoordinateType yawMin = _obj->getMinYaw();
 		PointCoordinateType yawMax = _obj->getMaxYaw();
-		appendRow(ITEM( tr( "Yaw span" ) ), ITEM(QStringLiteral("[%1 ; %2]").arg(yawMin * CC_RAD_TO_DEG, 0, 'f', 2).arg(yawMax * CC_RAD_TO_DEG, 0, 'f', 2)));
+		appendRow(ITEM( tr( "Yaw span" ) ), ITEM(QStringLiteral("[%1 ; %2]").arg(yawMin * CCLib::RAD_TO_DEG, 0, 'f', 2).arg(yawMax * CCLib::RAD_TO_DEG, 0, 'f', 2)));
 
 		//Angular steps (yaw)
 		PointCoordinateType yawStep = _obj->getYawStep();
-		appendRow(ITEM( tr( "Yaw step" ) ), ITEM(QStringLiteral("%1").arg(yawStep * CC_RAD_TO_DEG, 0, 'f', 4)));
+		appendRow(ITEM( tr( "Yaw step" ) ), ITEM(QStringLiteral("%1").arg(yawStep * CCLib::RAD_TO_DEG, 0, 'f', 4)));
 
 		//Angular range (pitch)
 		PointCoordinateType pitchMin = _obj->getMinPitch();
 		PointCoordinateType pitchMax = _obj->getMaxPitch();
-		appendRow(ITEM( tr( "Pitch span" ) ), ITEM(QStringLiteral("[%1 ; %2]").arg(pitchMin * CC_RAD_TO_DEG, 0, 'f', 2).arg(pitchMax * CC_RAD_TO_DEG, 0, 'f', 2)));
+		appendRow(ITEM( tr( "Pitch span" ) ), ITEM(QStringLiteral("[%1 ; %2]").arg(pitchMin * CCLib::RAD_TO_DEG, 0, 'f', 2).arg(pitchMax * CCLib::RAD_TO_DEG, 0, 'f', 2)));
 
 		//Angular steps (pitch)
 		PointCoordinateType pitchStep = _obj->getPitchStep();
-		appendRow(ITEM( tr( "Pitch step" ) ), ITEM(QStringLiteral("%1").arg(pitchStep * CC_RAD_TO_DEG, 0, 'f', 4)));
+		appendRow(ITEM( tr( "Pitch step" ) ), ITEM(QStringLiteral("%1").arg(pitchStep * CCLib::RAD_TO_DEG, 0, 'f', 4)));
 	}
 
 	//Positions
@@ -945,7 +945,7 @@ void ccPropertiesTreeDelegate::fillWithCameraSensor(const ccCameraSensor* _obj)
 	}
 
 	//Field of view
-	appendRow(ITEM( tr( "Field of view" ) ), ITEM(QString::number(params.vFOV_rad * CC_RAD_TO_DEG) + " deg."));
+	appendRow(ITEM( tr( "Field of view" ) ), ITEM(QString::number(params.vFOV_rad * CCLib::RAD_TO_DEG) + " deg."));
 
 	//Skewness
 	appendRow(ITEM( tr( "Skew" ) ), ITEM(QString::number(params.skew)));

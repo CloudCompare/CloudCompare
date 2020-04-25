@@ -127,7 +127,7 @@ void ccSNECloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			//skip hidden points
 			if (isVisibilityTableInstantiated())
 			{
-				if (m_pointsVisibility[p] != POINT_VISIBLE && !m_pointsVisibility.empty())
+				if (m_pointsVisibility[p] != CCLib::POINT_VISIBLE && !m_pointsVisibility.empty())
 				{
 					continue; //skip this point
 				}

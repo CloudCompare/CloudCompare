@@ -243,7 +243,7 @@ void ccComparisonDlg::locaModelChanged(int index)
 
 	if (index != 0)
 	{
-		unsigned minKNN = CC_LOCAL_MODEL_MIN_SIZE[index];
+		unsigned minKNN = CCLib::CC_LOCAL_MODEL_MIN_SIZE[index];
 		lmKNNSpinBox->setMinimum(minKNN);
 	}
 }
@@ -815,8 +815,8 @@ bool ccComparisonDlg::computeDistances()
 			c2cParams.octreeLevel = static_cast<unsigned char>(octreeLevel);
 			if (localModelingTab->isEnabled())
 			{
-				c2cParams.localModel = (CC_LOCAL_MODEL_TYPES)localModelComboBox->currentIndex();
-				if (c2cParams.localModel != NO_MODEL)
+				c2cParams.localModel = (CCLib::LOCAL_MODEL_TYPES)localModelComboBox->currentIndex();
+				if (c2cParams.localModel != CCLib::NO_MODEL)
 				{
 					c2cParams.useSphericalSearchForLocalModel = lmRadiusRadioButton->isChecked();
 					c2cParams.kNNForLocalModel = static_cast<unsigned>(std::max(0,lmKNNSpinBox->value()));
@@ -896,7 +896,7 @@ bool ccComparisonDlg::computeDistances()
 			break;
 		}
 
-		if (c2cParams.localModel != NO_MODEL)
+		if (c2cParams.localModel != CCLib::NO_MODEL)
 		{
 			m_sfName += QString("[%1]").arg(localModelComboBox->currentText());
 			if (c2cParams.useSphericalSearchForLocalModel)

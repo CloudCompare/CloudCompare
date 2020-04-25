@@ -22,7 +22,7 @@ ccSensor::ccSensor(const QString& name)
 	, m_posBuffer(nullptr)
 	, m_activeIndex(0)
 	, m_color(ccColor::green)
-	, m_scale(PC_ONE)
+	, m_scale(CCLib::PC_ONE)
 {
 	m_rigidTransformation.toIdentity();
 }

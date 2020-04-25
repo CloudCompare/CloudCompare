@@ -81,7 +81,7 @@ public:
 	**/
 	static bool ComputeCloudNormals(ccGenericPointCloud* cloud,
 									NormsIndexesTableType& theNormsCodes,
-									CC_LOCAL_MODEL_TYPES localModel,
+									CCLib::LOCAL_MODEL_TYPES localModel,
 									PointCoordinateType localRadius,
 									Orientation preferredOrientation = UNDEFINED,
 									CCLib::GenericProgressCallback* progressCb = 0,

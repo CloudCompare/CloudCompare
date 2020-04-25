@@ -68,7 +68,7 @@ void ComputeCorePointNormal(unsigned index)
 		return;
 
 	CCVector3 bestNormal(0, 0, 0);
-	ScalarType bestScale = NAN_VALUE;
+	ScalarType bestScale = CCLib::NAN_VALUE;
 
 	const CCVector3* P = s_corePointsNormalsParams.corePoints->getPoint(index);
 	CCLib::DgmOctree::NeighboursSet neighbours;
@@ -214,7 +214,7 @@ bool qM3C2Normals::ComputeCorePointsNormals(CCLib::GenericIndexedCloud* corePoin
 			//not enough memory
 			return false;
 		}
-		normalScale->fill(NAN_VALUE);
+		normalScale->fill(CCLib::NAN_VALUE);
 	}
 
 	CCLib::DgmOctree* theOctree = inputOctree;
@@ -495,7 +495,7 @@ static double Median(const CCLib::DgmOctree::NeighboursSet& set, size_t begin = 
 	{
 		count = set.size();
 		if (count == 0)
-			return NAN_VALUE;
+			return CCLib::NAN_VALUE;
 	}
 
 	size_t nd2 = count / 2;
@@ -516,7 +516,7 @@ static double Median(const CCLib::DgmOctree::NeighboursSet& set, size_t begin = 
 double Interquartile(const CCLib::DgmOctree::NeighboursSet& set)
 {
 	if (set.empty())
-		return NAN_VALUE;
+		return CCLib::NAN_VALUE;
 
 	size_t num = set.size();
 	size_t num_pts_each_half = (num + 1) / 2;
@@ -533,7 +533,7 @@ void qM3C2Tools::ComputeStatistics(CCLib::DgmOctree::NeighboursSet& set, bool us
 	size_t count = set.size();
 	if (count == 0)
 	{
-		meanOrMedian = NAN_VALUE;
+		meanOrMedian = CCLib::NAN_VALUE;
 		stdDevOrIQR = 0;
 		return;
 	}

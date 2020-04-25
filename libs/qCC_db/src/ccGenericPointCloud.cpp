@@ -75,7 +75,7 @@ bool ccGenericPointCloud::resetVisibilityArray()
 		return false;
 	}
 
-	std::fill(m_pointsVisibility.begin(), m_pointsVisibility.end(), POINT_VISIBLE); //by default, all points are visible
+	std::fill(m_pointsVisibility.begin(), m_pointsVisibility.end(), CCLib::POINT_VISIBLE); //by default, all points are visible
 
 	return true;
 }
@@ -90,7 +90,7 @@ void ccGenericPointCloud::invertVisibilityArray()
 
 	for (unsigned char& vis : m_pointsVisibility)
 	{
-		vis = (vis == POINT_HIDDEN ? POINT_VISIBLE : POINT_HIDDEN);
+		vis = (vis == CCLib::POINT_HIDDEN ? CCLib::POINT_VISIBLE : CCLib::POINT_HIDDEN);
 	}
 }
 
@@ -401,7 +401,7 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 #endif
 		{
 			//we shouldn't test points that are actually hidden!
-			if (	(!visTable || visTable->at(i) == POINT_VISIBLE)
+			if (	(!visTable || visTable->at(i) == CCLib::POINT_VISIBLE)
 				&&	(!activeSF || activeSF->getColor(activeSF->getValue(i)))
 				)
 			{
@@ -475,7 +475,7 @@ CCLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints(const Visibility
 	{
 		for (unsigned i = 0; i < count; ++i)
 		{
-			if (visTable->at(i) == POINT_VISIBLE)
+			if (visTable->at(i) == CCLib::POINT_VISIBLE)
 			{
 				++pointCount;
 			}
@@ -491,7 +491,7 @@ CCLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints(const Visibility
 		{
 			for (unsigned i = 0; i < count; ++i)
 			{
-				if (visTable->at(i) == POINT_VISIBLE)
+				if (visTable->at(i) == CCLib::POINT_VISIBLE)
 				{
 					rc->addPointIndex(i); //can't fail (see above)
 				}

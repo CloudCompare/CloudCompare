@@ -120,7 +120,7 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 	}
 
 	//default scale
-	double scale = (coordinatesScale ? std::max(*coordinatesScale, ZERO_TOLERANCE) : 1.0);
+	double scale = (coordinatesScale ? std::max(*coordinatesScale, CCLib::ZERO_TOLERANCE) : 1.0);
 
 	bool needShift = NeedShift(P);
 	bool needRescale = NeedRescale(diagonal);

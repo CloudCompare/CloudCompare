@@ -456,17 +456,17 @@ void ccCameraParamEditDlg::initWithMatrix(const ccGLMatrixd& mat)
 	m_associatedWin = nullptr;
 
 	m_ui->phiSpinBox->blockSignals(true);
-	m_ui->phiSpinBox->setValue(CC_RAD_TO_DEG*phi);
+	m_ui->phiSpinBox->setValue(CCLib::RAD_TO_DEG*phi);
 	dPhiValueChanged(m_ui->phiSpinBox->value());
 	m_ui->phiSpinBox->blockSignals(false);
 	
 	m_ui->psiSpinBox->blockSignals(true);
-	m_ui->psiSpinBox->setValue(CC_RAD_TO_DEG*psi);
+	m_ui->psiSpinBox->setValue(CCLib::RAD_TO_DEG*psi);
 	dPsiValueChanged(m_ui->psiSpinBox->value());
 	m_ui->psiSpinBox->blockSignals(false);
 
 	m_ui->thetaSpinBox->blockSignals(true);
-	m_ui->thetaSpinBox->setValue(CC_RAD_TO_DEG*theta);
+	m_ui->thetaSpinBox->setValue(CCLib::RAD_TO_DEG*theta);
 	dThetaValueChanged(m_ui->thetaSpinBox->value());
 	m_ui->thetaSpinBox->blockSignals(false);
 
@@ -554,9 +554,9 @@ ccGLMatrixd ccCameraParamEditDlg::getMatrix()
 	double theta = 0;
 	double psi = 0;
 
-	phi		= CC_DEG_TO_RAD * m_ui->phiSpinBox->value();
-	psi		= CC_DEG_TO_RAD * m_ui->psiSpinBox->value();
-	theta	= CC_DEG_TO_RAD * m_ui->thetaSpinBox->value();
+	phi = CCLib::DEG_TO_RAD * m_ui->phiSpinBox->value();
+	psi = CCLib::DEG_TO_RAD * m_ui->psiSpinBox->value();
+	theta = CCLib::DEG_TO_RAD * m_ui->thetaSpinBox->value();
 
 	ccGLMatrixd mat;
 	CCVector3d T(0,0,0);

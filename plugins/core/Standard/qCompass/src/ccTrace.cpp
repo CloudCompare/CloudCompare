@@ -603,7 +603,7 @@ int ccTrace::getSegmentCostGrad(int p1, int p2, float search_r)
 				int c_value = (static_cast<int>(c.r) + c.g) + c.b;
 
 				//calculate gradient weighted by distance to the point (i.e. divide by distance^2)
-				if (norm2 > ZERO_TOLERANCE)
+				if (norm2 > CCLib::ZERO_TOLERANCE)
 				{
 					//color magnitude difference
 					int deltaValue = p_value - c_value;
@@ -844,7 +844,7 @@ ccFitPlane* ccTrace::fitPlane(int surface_effect_tolerance, float min_planarity)
 			CCVector3 n = ccNormalVectors::GetNormal(m_cloud->getPointNormalIndex(this->getPointGlobalIndex(i)));
 			n_avg += n;
 		}
-		n_avg *= (PC_ONE / size()); //turn sum into average
+		n_avg *= (CCLib::PC_ONE / size()); //turn sum into average
 
 
 		//compare to plane normal

@@ -1267,7 +1267,7 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 			for (unsigned i = 0; i < sf->currentSize(); ++i)
 			{
 				if (sf->getValue(i) == FORMER_HIDDEN_POINTS)
-					sf->setValue(i, NAN_VALUE);
+					sf->setValue(i, CCLib::NAN_VALUE);
 			}
 			sf->computeMinAndMax();
 

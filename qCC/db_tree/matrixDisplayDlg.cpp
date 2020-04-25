@@ -96,7 +96,7 @@ void MatrixDisplayDlg::fillDialogWith(const CCVector3d& axis, double angle_rad, 
 	//rotation axis
 	QString axisStr = QString("%0 ; %1 ; %2").arg(axis.x,0,'f',precision).arg(axis.y,0,'f',precision).arg(axis.z,0,'f',precision);
 	//rotation angle
-	QString angleStr = QString("%1 deg.").arg(angle_rad*CC_RAD_TO_DEG,0,'f',precision);
+	QString angleStr = QString("%1 deg.").arg(angle_rad*CCLib::RAD_TO_DEG,0,'f',precision);
 
 	m_ui->axisLabel->setText(axisStr);
 	m_ui->angleLabel->setText(angleStr);

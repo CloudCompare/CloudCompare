@@ -1448,20 +1448,20 @@ void ccRasterizeTool::generateHillshade()
 		m_UI->activeLayerComboBox->setEnabled(true);
 	}
 	assert(hillshadeLayer && hillshadeLayer->currentSize() == m_rasterCloud->size());
-	hillshadeLayer->fill(NAN_VALUE);
+	hillshadeLayer->fill(CCLib::NAN_VALUE);
 
 	bool sparseSF = (hillshadeLayer->currentSize() != m_grid.height * m_grid.width);
 
 	//now we can compute the hillshade
 	int zenith_deg = m_UI->sunZenithSpinBox->value();
-	double zenith_rad = zenith_deg * CC_DEG_TO_RAD;
+	double zenith_rad = zenith_deg * CCLib::DEG_TO_RAD;
 
 	double cos_zenith_rad = cos(zenith_rad);
 	double sin_zenith_rad = sin(zenith_rad);
 
 	int azimuth_deg = m_UI->sunAzimuthSpinBox->value();
 	int azimuth_math = 360 - azimuth_deg + 90;
-	double azimuth_rad = azimuth_math * CC_DEG_TO_RAD;
+	double azimuth_rad = azimuth_math * CCLib::DEG_TO_RAD;
 
 	//for all cells
 	unsigned validCellIndex = 0;
@@ -2235,7 +2235,7 @@ void ccRasterizeTool::generateImage() const
 		}
 
 		double range = maxHeight - minHeight;
-		if (range < ZERO_TOLERANCE)
+		if (range < CCLib::ZERO_TOLERANCE)
 		{
 			range = 1.0;
 		}

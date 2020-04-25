@@ -344,7 +344,7 @@ CCVector2d mRangeOfContainer(ccHObject::Container &objects)
 		for (unsigned i = 0; i < numPoints; ++i)
 		{
 			ScalarType val = cloud->getPointScalarValue(i);
-			if (val != NAN_VALUE)
+			if (val != CCLib::NAN_VALUE)
 			{
 				auto m = static_cast<double>(val);
 				range.x = std::min(range.x, m);
@@ -751,7 +751,7 @@ static std::vector<ScalarType> readMeasures(QDataStream& shpStream, int32_t numP
 		{
 			double m;
 			shpStream >> m;
-			scalarValues[i] = (isESRINoData(m)  ? NAN_VALUE : static_cast<ScalarType>(m));
+			scalarValues[i] = (isESRINoData(m)  ? CCLib::NAN_VALUE : static_cast<ScalarType>(m));
 		}
 	}
 	else
@@ -1151,7 +1151,7 @@ static CC_FILE_ERROR LoadPolyline(QDataStream &shpStream,
 
 		//test if the polyline is closed
 		bool isClosed = false;
-		if (vertCount > 2 && (points[firstIndex] - points[lastIndex]).norm() < ZERO_TOLERANCE)
+		if (vertCount > 2 && (points[firstIndex] - points[lastIndex]).norm() < CCLib::ZERO_TOLERANCE)
 		{
 			vertCount--;
 			isClosed = true;
@@ -1392,7 +1392,7 @@ static CC_FILE_ERROR SavePolyline(ccPolyline* poly,
 			for (int32_t i = 0; i < numPoints; ++i)
 			{
 				ScalarType scalar = vertices->getPointScalarValue(i % iRealVertexCount);
-				out << (scalar == NAN_VALUE ? ESRI_NO_DATA : static_cast<double>(scalar));
+				out << (scalar == CCLib::NAN_VALUE ? ESRI_NO_DATA : static_cast<double>(scalar));
 			}
 		}
 		else
@@ -1489,7 +1489,7 @@ static CC_FILE_ERROR LoadCloud(QDataStream &shpStream,
 			{
 				double m;
 				shpStream >> m;
-				ScalarType s = isESRINoData(m) ? NAN_VALUE : static_cast<ScalarType>(m);
+				ScalarType s = isESRINoData(m) ? CCLib::NAN_VALUE : static_cast<ScalarType>(m);
 				sf->addElement(s);
 			}
 			bool allNans = std::all_of(sf->begin(), sf->end(), [](ScalarType s) { return std::isnan(s); });
@@ -1577,7 +1577,7 @@ static CC_FILE_ERROR LoadSinglePoint(QDataStream &shpStream,
 		P.z = static_cast<PointCoordinateType>(z + Pshift.z);
 	}
 
-	ScalarType s = NAN_VALUE;
+	ScalarType s = CCLib::NAN_VALUE;
 	if (hasMeasurements(shapeType))
 	{
 		double m;
@@ -1595,7 +1595,7 @@ static CC_FILE_ERROR LoadSinglePoint(QDataStream &shpStream,
 					singlePoints->setCurrentScalarField(sfIdx);
 					for (unsigned i = 0; i < singlePoints->size(); ++i)
 					{
-						singlePoints->setPointScalarValue(i, NAN_VALUE);
+						singlePoints->setPointScalarValue(i, CCLib::NAN_VALUE);
 					}
 				}
 			}

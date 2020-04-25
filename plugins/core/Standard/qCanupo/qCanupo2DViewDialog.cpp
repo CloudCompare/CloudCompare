@@ -547,7 +547,7 @@ void qCanupo2DViewDialog::addOrSelectPoint(int x, int y)
 
 		//projection falls inside the segment?
 		dot /= AB.norm2();
-		if (dot > 0 && dot < PC_ONE)
+		if (dot > 0 && dot < CCLib::PC_ONE)
 		{
 			CCVector3 AH = AB*dot;
 			CCVector3 HP = AP - AH;

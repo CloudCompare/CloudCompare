@@ -62,7 +62,7 @@ public:
 		\param P a 3D point
 		\return the visibility of the point
 	**/
-	virtual inline unsigned char checkVisibility(const CCVector3& P) const { return POINT_VISIBLE; }
+	virtual inline unsigned char checkVisibility(const CCVector3& P) const { return CCLib::POINT_VISIBLE; }
 
 	//! Returns associated positions
 	ccIndexedTransformationBuffer* getPositions() { return m_posBuffer; }

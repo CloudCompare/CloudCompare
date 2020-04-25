@@ -367,7 +367,7 @@ public: //normals computation/orientation
 	bool orientNormalsTowardViewPoint( CCVector3 & VP, ccProgressDialog* pDlg = nullptr);
 
 	//! Compute the normals by approximating the local surface around each point
-	bool computeNormalsWithOctree(	CC_LOCAL_MODEL_TYPES model,
+	bool computeNormalsWithOctree(	CCLib::LOCAL_MODEL_TYPES model,
 									ccNormalVectors::Orientation preferredOrientation,
 									PointCoordinateType defaultRadius,
 									ccProgressDialog* pDlg = nullptr );

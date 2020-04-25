@@ -835,7 +835,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 					ccScalarField* newSF = new ccScalarField(sf->getName());
 					newSF->setGlobalShift(sf->getGlobalShift());
 					//we fill the beginning with NaN (as there is no equivalent in the current cloud)
-					if (newSF->resizeSafe(pointCountBefore + addedPoints, true, NAN_VALUE))
+					if (newSF->resizeSafe(pointCountBefore + addedPoints, true, CCLib::NAN_VALUE))
 					{
 						//we copy the new values
 						for (unsigned i = 0; i < addedPoints; i++)
@@ -1780,7 +1780,7 @@ bool ccPointCloud::setRGBColorByHeight(unsigned char heightDim, ccColorScale::Sh
 
 	double minHeight = getOwnBB().minCorner().u[heightDim];
 	double height = getOwnBB().getDiagVec().u[heightDim];
-	if (fabs(height) < ZERO_TOLERANCE) //flat cloud!
+	if (fabs(height) < CCLib::ZERO_TOLERANCE) //flat cloud!
 	{
 		const ccColor::Rgb& col = colorScale->getColorByIndex(0);
 		return setColor(col);
@@ -1930,7 +1930,7 @@ void ccPointCloud::applyRigidTransformation(const ccGLMatrix& trans)
 
 void ccPointCloud::translate(const CCVector3& T)
 {
-	if (fabs(T.x) + fabs(T.y) + fabs(T.z) < ZERO_TOLERANCE)
+	if (fabs(T.x) + fabs(T.y) + fabs(T.z) < CCLib::ZERO_TOLERANCE)
 		return;
 
 	unsigned count = size();
@@ -2728,7 +2728,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				{
 					//we must test each point visibility
 					unsigned pointIndex = toDisplay.indexMap ? toDisplay.indexMap->at(j) : j;
-					if (m_pointsVisibility.empty() || m_pointsVisibility[pointIndex] == POINT_VISIBLE)
+					if (m_pointsVisibility.empty() || m_pointsVisibility[pointIndex] == CCLib::POINT_VISIBLE)
 					{
 						if (glParams.showSF)
 						{
@@ -3224,7 +3224,7 @@ void ccPointCloud::hidePointsByScalarValue(ScalarType minVal, ScalarType maxVal)
 		const ScalarType& val = sf->getValue(i);
 		if (val < minVal || val > maxVal || val != val) //handle NaN values!
 		{
-			m_pointsVisibility[i] = POINT_HIDDEN;
+			m_pointsVisibility[i] = CCLib::POINT_HIDDEN;
 		}
 	}
 }
@@ -3294,7 +3294,7 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool re
 				unsigned newIndex = 0;
 				for (unsigned i = 0; i < count; ++i)
 				{
-					if (m_pointsVisibility[i] != POINT_VISIBLE)
+					if (m_pointsVisibility[i] != CCLib::POINT_VISIBLE)
 					{
 						newIndexMap[i] = newIndex++;
 					}
@@ -3319,7 +3319,7 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool re
 		unsigned lastPoint = 0;
 		for (unsigned i = 0; i < count; ++i)
 		{
-			if (m_pointsVisibility[i] != POINT_VISIBLE)
+			if (m_pointsVisibility[i] != CCLib::POINT_VISIBLE)
 			{
 				if (i != lastPoint)
 				{
@@ -3680,14 +3680,14 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 		}
 	}
 	
-	double startAngle_rad = startAngle_deg * CC_DEG_TO_RAD;
-	double stopAngle_rad = stopAngle_deg * CC_DEG_TO_RAD;
+	double startAngle_rad = startAngle_deg * CCLib::DEG_TO_RAD;
+	double stopAngle_rad = stopAngle_deg * CCLib::DEG_TO_RAD;
 
 	PointCoordinateType alpha_rad = 0;
 	PointCoordinateType sin_alpha = 0;
 	if (mode != CYLINDER)
 	{
-		alpha_rad = coneParams->coneAngle_deg * CC_DEG_TO_RAD;
+		alpha_rad = coneParams->coneAngle_deg * CCLib::DEG_TO_RAD;
 		sin_alpha = static_cast<PointCoordinateType>(sin(alpha_rad));
 	}
 
@@ -5166,8 +5166,8 @@ bool ccPointCloud::computeNormalsWithGrids(	double minTriangleAngle_deg/*=1.0*/,
 		QCoreApplication::processEvents();
 	}
 
-	PointCoordinateType minAngleCos = static_cast<PointCoordinateType>(cos(minTriangleAngle_deg * CC_DEG_TO_RAD));
-	//double minTriangleAngle_rad = minTriangleAngle_deg * CC_DEG_TO_RAD;
+	PointCoordinateType minAngleCos = static_cast<PointCoordinateType>(cos(minTriangleAngle_deg * CCLib::DEG_TO_RAD));
+	//double minTriangleAngle_rad = minTriangleAngle_deg *CCLib::CC_DEG_TO_RAD;
 
 	//for each grid cell
 	for (size_t gi = 0; gi < gridCount(); ++gi)
@@ -5485,7 +5485,7 @@ bool ccPointCloud::orientNormalsTowardViewPoint( CCVector3 & VP, ccProgressDialo
 	return true;
 }
 
-bool ccPointCloud::computeNormalsWithOctree(CC_LOCAL_MODEL_TYPES model,
+bool ccPointCloud::computeNormalsWithOctree(CCLib::LOCAL_MODEL_TYPES model,
 											ccNormalVectors::Orientation preferredOrientation,
 											PointCoordinateType defaultRadius,
 											ccProgressDialog* pDlg/*=0*/)
@@ -5589,8 +5589,8 @@ unsigned char ccPointCloud::testVisibility(const CCVector3& P) const
 				ccGBLSensor* sensor = static_cast<ccGBLSensor*>(child);
 				unsigned char visibility = sensor->checkVisibility(P);
 
-				if (visibility == POINT_VISIBLE)
-					return POINT_VISIBLE;
+				if (visibility == CCLib::POINT_VISIBLE)
+					return CCLib::POINT_VISIBLE;
 				else if (visibility < bestVisibility)
 					bestVisibility = visibility;
 			}
@@ -5599,7 +5599,7 @@ unsigned char ccPointCloud::testVisibility(const CCVector3& P) const
 			return bestVisibility;
 	}
 
-	return POINT_VISIBLE;
+	return CCLib::POINT_VISIBLE;
 }
 
 bool ccPointCloud::initLOD()
@@ -5748,8 +5748,8 @@ ccMesh* ccPointCloud::triangulateGrid(const Grid& grid, double minTriangleAngle_
 		return nullptr;
 	}
 
-	PointCoordinateType minAngleCos = static_cast<PointCoordinateType>(cos(minTriangleAngle_deg * CC_DEG_TO_RAD));
-	//double minTriangleAngle_rad = minTriangleAngle_deg * CC_DEG_TO_RAD;
+	PointCoordinateType minAngleCos = static_cast<PointCoordinateType>(cos(minTriangleAngle_deg * CCLib::DEG_TO_RAD));
+	//double minTriangleAngle_rad = minTriangleAngle_deg *CCLib::CC_DEG_TO_RAD;
 	
 	for (int j = 0; j < static_cast<int>(grid.h) - 1; ++j)
 	{

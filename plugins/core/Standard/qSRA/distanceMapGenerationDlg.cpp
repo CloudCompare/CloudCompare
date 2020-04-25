@@ -70,7 +70,7 @@ static double ConvertAngleFromRad(double angle_rad, DistanceMapGenerationDlg::AN
 	switch(destUnit)
 	{
 	case DistanceMapGenerationDlg::ANG_DEG: //degrees
-		return angle_rad * CC_RAD_TO_DEG;
+		return angle_rad * CCLib::RAD_TO_DEG;
 	case DistanceMapGenerationDlg::ANG_RAD: //radians
 		return angle_rad;
 	case DistanceMapGenerationDlg::ANG_GRAD: //grades
@@ -87,7 +87,7 @@ static double ConvertAngleToRad(double angle, DistanceMapGenerationDlg::ANGULAR_
 	switch(srcUnit)
 	{
 	case DistanceMapGenerationDlg::ANG_DEG: //degrees
-		return angle * CC_DEG_TO_RAD;
+		return angle * CCLib::DEG_TO_RAD;
 	case DistanceMapGenerationDlg::ANG_RAD: //radians
 		return angle;
 	case DistanceMapGenerationDlg::ANG_GRAD: //grades
@@ -508,7 +508,7 @@ void DistanceMapGenerationDlg::updateZoom(ccBBox& box)
 
 	//we get the bounding-box diagonal length
 	PointCoordinateType bbDiag = box.getDiagNorm();
-	if (bbDiag > ZERO_TOLERANCE)
+	if (bbDiag > CCLib::ZERO_TOLERANCE)
 	{
 		bool sfDisplayed = m_window->getAssociatedScalarField() && m_window->sfShown();
 		bool yLabelDisplayed = m_yLabels && m_yLabels->isVisible() && m_yLabels->size();
@@ -892,15 +892,15 @@ void DistanceMapGenerationDlg::angularUnitChanged(int index)
 		{
 		m_angularUnits = ANG_DEG;
 
-		SetSpinBoxValues(xStepDoubleSpinBox,		2, 0.01, 360.0, 0.1, xStep_rad			* CC_RAD_TO_DEG);
-		SetSpinBoxValues(scaleXStepDoubleSpinBox,	2, 0.01, 360.0, 5.0, scaleXStep_rad		* CC_RAD_TO_DEG);
-		SetSpinBoxValues(xMinDoubleSpinBox,			2,  0.0, 360.0, 5.0, xMin_rad			* CC_RAD_TO_DEG);
-		SetSpinBoxValues(xMaxDoubleSpinBox,			2,  0.0, 360.0, 5.0, xMax_rad			* CC_RAD_TO_DEG);
+		SetSpinBoxValues(xStepDoubleSpinBox,		2, 0.01, 360.0, 0.1, xStep_rad			* CCLib::RAD_TO_DEG);
+		SetSpinBoxValues(scaleXStepDoubleSpinBox,	2, 0.01, 360.0, 5.0, scaleXStep_rad		* CCLib::RAD_TO_DEG);
+		SetSpinBoxValues(xMinDoubleSpinBox,			2,  0.0, 360.0, 5.0, xMin_rad			* CCLib::RAD_TO_DEG);
+		SetSpinBoxValues(xMaxDoubleSpinBox,			2,  0.0, 360.0, 5.0, xMax_rad			* CCLib::RAD_TO_DEG);
 
-		SetSpinBoxValues(latStepDoubleSpinBox,		2,   0.01, 89.99, 1.0, latStep_rad		* CC_RAD_TO_DEG);
-		SetSpinBoxValues(scaleLatStepDoubleSpinBox,	2,   0.01, 89.99, 1.0, scaleLatStep_rad	* CC_RAD_TO_DEG);
-		SetSpinBoxValues(latMinDoubleSpinBox,		2, -89.99, 89.99, 1.0, latMin_rad			* CC_RAD_TO_DEG);
-		SetSpinBoxValues(latMaxDoubleSpinBox,		2, -89.99, 89.99, 1.0, latMax_rad			* CC_RAD_TO_DEG);
+		SetSpinBoxValues(latStepDoubleSpinBox,		2,   0.01, 89.99, 1.0, latStep_rad		* CCLib::RAD_TO_DEG);
+		SetSpinBoxValues(scaleLatStepDoubleSpinBox,	2,   0.01, 89.99, 1.0, scaleLatStep_rad	* CCLib::RAD_TO_DEG);
+		SetSpinBoxValues(latMinDoubleSpinBox,		2, -89.99, 89.99, 1.0, latMin_rad		* CCLib::RAD_TO_DEG);
+		SetSpinBoxValues(latMaxDoubleSpinBox,		2, -89.99, 89.99, 1.0, latMax_rad		* CCLib::RAD_TO_DEG);
 
 		xMaxDoubleSpinBox->setMaximum(360.0);
 		xMaxDoubleSpinBox->setValue(360.0);
@@ -1865,10 +1865,10 @@ void DistanceMapGenerationDlg::toggleOverlayGrid(bool state)
 				{
 					CCVector3 Pleft(	static_cast<PointCoordinateType>(xMin_rad),
 										static_cast<PointCoordinateType>(y),
-										PC_ONE);
+										CCLib::PC_ONE);
 					CCVector3 Pright(	static_cast<PointCoordinateType>(xMax_rad),
 										static_cast<PointCoordinateType>(y),
-										PC_ONE);
+										CCLib::PC_ONE);
 					vertices->reserve(2);
 					vertices->addPoint(Pleft);
 					vertices->addPoint(Pright);
@@ -1898,7 +1898,7 @@ void DistanceMapGenerationDlg::toggleOverlayGrid(bool state)
 					//cylindrical 'mode' labels
 					CCVector3 Pleft(static_cast<PointCoordinateType>(xMin_rad),
 									static_cast<PointCoordinateType>(y),
-									PC_ONE);
+									CCLib::PC_ONE);
 					m_yLabels->addPoint(Pleft);
 					m_yLabels->addLabel(QString("%1 %2").arg(y).arg(getHeightUnitString()));
 				}

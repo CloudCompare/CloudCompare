@@ -7,6 +7,12 @@ file( GLOB source_list *.cpp )
 
 add_library( ${PROJECT_NAME} STATIC ${header_list} ${source_list} )
 
+set_target_properties( ${PROJECT_NAME} PROPERTIES
+    AUTOMOC OFF
+    AUTORCC OFF
+    AUTOUIC OFF
+)
+
 target_link_libraries( ${PROJECT_NAME}
     CCCoreLib
     Qt5::Gui

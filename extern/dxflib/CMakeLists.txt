@@ -5,6 +5,12 @@ project( dxflib )
 
 add_library( ${PROJECT_NAME} STATIC )
 
+set_target_properties( ${PROJECT_NAME} PROPERTIES
+    AUTOMOC OFF
+    AUTORCC OFF
+    AUTOUIC OFF
+)
+
 add_subdirectory( src )
 
 if (WIN32)

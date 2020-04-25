@@ -33,7 +33,7 @@
 #include <Neighbourhood.h>
 #include <PointProjectionTools.h>
 
-#ifdef USE_TBB
+#ifdef CC_CORE_LIB_USES_TBB
 #include <tbb/parallel_for.h>
 #endif
 
@@ -92,7 +92,7 @@ static PointCoordinateType FindNearestCandidate(unsigned& minIndex,
 	const PointCoordinateType squareLengthAB = AB.norm2();
 	const unsigned pointCount = static_cast<unsigned>(points.size());
 
-#ifdef USE_TBB
+#ifdef CC_CORE_LIB_USES_TBB
 	tbb::parallel_for( static_cast<unsigned int>(0), pointCount, [&](unsigned int i) {
 		const Vertex2D& P = points[i];
 		if (pointFlags[P.index] != POINT_NOT_USED)

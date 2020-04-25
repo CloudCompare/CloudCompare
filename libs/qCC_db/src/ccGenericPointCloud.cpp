@@ -15,7 +15,7 @@
 //#                                                                        #
 //##########################################################################
 
-#ifdef USE_TBB
+#ifdef CC_CORE_LIB_USES_TBB
 #include <tbb/parallel_for.h>
 #endif
 
@@ -394,7 +394,7 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 			}
 		}
 
-#ifdef USE_TBB
+#ifdef CC_CORE_LIB_USES_TBB
 		tbb::parallel_for( 0, static_cast<int>(size()), [&](int i)
 #else
 		for (int i = 0; i < static_cast<int>(size()); ++i)
@@ -413,7 +413,7 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 					if(!camera.project(*P, Q2D, true))
 					{
 						// Point is not in frustrum
-						#ifdef USE_TBB
+						#ifdef CC_CORE_LIB_USES_TBB
 							return;
 						#else
 							continue; 
@@ -427,7 +427,7 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 					if(!camera.project(P3D, Q2D, true))
 					{
 						// Point is not in frustrum
-						#ifdef USE_TBB
+						#ifdef CC_CORE_LIB_USES_TBB
 							return;
 						#else
 							continue; 
@@ -447,7 +447,7 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 				}
 			}
 		}
-#ifdef USE_TBB
+#ifdef CC_CORE_LIB_USES_TBB
 		);
 #endif
 	}

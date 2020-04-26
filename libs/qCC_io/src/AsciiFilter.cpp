@@ -42,7 +42,7 @@
 //Qt
 #include <QScopedPointer>
 
-Garbage<QDialog> s_dialogGarbage;
+CCCoreLib::Garbage<QDialog> s_dialogGarbage;
 AsciiSaveDlg* s_saveDialog(nullptr);
 AsciiOpenDlg* s_openDialog(nullptr);
 

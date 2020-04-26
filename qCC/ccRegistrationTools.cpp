@@ -72,7 +72,7 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
 		progressDlg.reset(new ccProgressDialog(false, parent));
 	}
 
-	Garbage<CCCoreLib::GenericIndexedCloudPersist> cloudGarbage;
+	CCCoreLib::Garbage<CCCoreLib::GenericIndexedCloudPersist> cloudGarbage;
 
 	//if the 'model' entity is a mesh, we need to sample points on it
 	CCCoreLib::GenericIndexedCloudPersist* modelCloud = nullptr;

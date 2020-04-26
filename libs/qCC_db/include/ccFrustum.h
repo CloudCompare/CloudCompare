@@ -66,11 +66,11 @@ public: //members
 	float constCoef;
 };
 
-class AABox : public AABB<float>
+class AABox : public CCCoreLib::AABB<float>
 {
 public:
 
-	AABox(const CCVector3f& A, const CCVector3f& B) : AABB<float>(A, B)
+	AABox(const CCVector3f& A, const CCVector3f& B) : CCCoreLib::AABB<float>(A, B)
 	{
 	}
 

@@ -83,9 +83,9 @@ public:
 
 			CCCoreLib::SquareMatrixd eigVectors;
 			std::vector<double> eigValues;
-			if (Jacobi<double>::ComputeEigenValuesAndVectors(Z.computeCovarianceMatrix(), eigVectors, eigValues, true))
+			if (CCCoreLib::Jacobi<double>::ComputeEigenValuesAndVectors(Z.computeCovarianceMatrix(), eigVectors, eigValues, true))
 			{
-				Jacobi<double>::SortEigenValuesAndVectors(eigVectors, eigValues); //decreasing order of their associated eigenvalues
+				CCCoreLib::Jacobi<double>::SortEigenValuesAndVectors(eigVectors, eigValues); //decreasing order of their associated eigenvalues
 
 				double totalVariance = 0;
 				CCVector3d sValues(0, 0, 0);

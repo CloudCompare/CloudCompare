@@ -1763,8 +1763,8 @@ void ccCompass::estimateStructureNormals()
 					X.m_values[2][1] = X.m_values[1][2]; cov.m_values[2][1] = cov.m_values[1][2];
 
 					//compute and sort eigens
-					Jacobi<double>::ComputeEigenValuesAndVectors(cov, eigVectors, eigValues, true); //get eigens
-					Jacobi<double>::SortEigenValuesAndVectors(eigVectors, eigValues); //sort into decreasing order
+					CCCoreLib::Jacobi<double>::ComputeEigenValuesAndVectors(cov, eigVectors, eigValues, true); //get eigens
+					CCCoreLib::Jacobi<double>::SortEigenValuesAndVectors(eigVectors, eigValues); //sort into decreasing order
 
 					//----------------------------------------------------------------------------------------------------
 					//Compute the trend and plunge of the best-fit plane (based entirely on the eigensystem).
@@ -2631,7 +2631,7 @@ void ccCompass::estimateStrain()
 					//decompose into the rotation and right-stretch 
 					CCCoreLib::SquareMatrixd eigVectors; std::vector<double> eigValues;
 					CCCoreLib::SquareMatrixd B = F[idx] * F[idx].transposed();
-					Jacobi<double>::ComputeEigenValuesAndVectors(B, eigVectors, eigValues, true); //get eigens
+					CCCoreLib::Jacobi<double>::ComputeEigenValuesAndVectors(B, eigVectors, eigValues, true); //get eigens
 
 					CCCoreLib::SquareMatrixd U_local(3); U_local.toIdentity();  //calculate stretch matrix in local (un-rotated coordinates)
 					U_local.setValue(0, 0, sqrt(eigValues[0])); U_local.setValue(1, 1, sqrt(eigValues[1])); U_local.setValue(2, 2, sqrt(eigValues[2]));
@@ -2654,8 +2654,8 @@ void ccCompass::estimateStrain()
 					{
 						//compute eigens of F
 						eigVectors.clear(); eigValues.clear();
-						Jacobi<double>::ComputeEigenValuesAndVectors(F[idx], eigVectors, eigValues, true); //get eigens
-						Jacobi<double>::SortEigenValuesAndVectors(eigVectors, eigValues);
+						CCCoreLib::Jacobi<double>::ComputeEigenValuesAndVectors(F[idx], eigVectors, eigValues, true); //get eigens
+						CCCoreLib::Jacobi<double>::SortEigenValuesAndVectors(eigVectors, eigValues);
 						
 						//apply exaggeration to eigenvalues (exaggerate shape of the strain ellipse)
 						CCCoreLib::SquareMatrixd transMat(3);

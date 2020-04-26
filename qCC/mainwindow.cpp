@@ -1558,16 +1558,16 @@ void MainWindow::doComputeBestFitBB()
 			{
 				CCCoreLib::SquareMatrixd eigVectors;
 				std::vector<double> eigValues;
-				if (Jacobi<double>::ComputeEigenValuesAndVectors(covMat, eigVectors, eigValues, true))
+				if (CCCoreLib::Jacobi<double>::ComputeEigenValuesAndVectors(covMat, eigVectors, eigValues, true))
 				{
-					Jacobi<double>::SortEigenValuesAndVectors(eigVectors, eigValues);
+					CCCoreLib::Jacobi<double>::SortEigenValuesAndVectors(eigVectors, eigValues);
 
 					ccGLMatrix trans;
 					GLfloat* rotMat = trans.data();
 					for (unsigned j = 0; j < 3; ++j)
 					{
 						double u[3];
-						Jacobi<double>::GetEigenVector(eigVectors, j, u);
+						CCCoreLib::Jacobi<double>::GetEigenVector(eigVectors, j, u);
 						CCVector3 v(static_cast<PointCoordinateType>(u[0]),
 									static_cast<PointCoordinateType>(u[1]),
 									static_cast<PointCoordinateType>(u[2]));

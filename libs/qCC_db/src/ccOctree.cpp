@@ -580,8 +580,8 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 	}
 
 	//first test with the total bounding box
-	Ray<PointCoordinateType> ray(rayAxis, rayOrigin);
-	if (!AABB<PointCoordinateType>(m_dimMin - margin, m_dimMax + margin).intersects(ray))
+	CCCoreLib::Ray<PointCoordinateType> ray(rayAxis, rayOrigin);
+	if (!CCCoreLib::AABB<PointCoordinateType>(m_dimMin - margin, m_dimMax + margin).intersects(ray))
 	{
 		//no intersection
 		return true; //DGM: false would mean that an error occurred! (output.point == 0 means that nothing has been found)
@@ -605,7 +605,7 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 #endif
 
 	//ray with origin expressed in the local coordinate system!
-	Ray<PointCoordinateType> rayLocal(rayAxis, rayOrigin - m_dimMin);
+	CCCoreLib::Ray<PointCoordinateType> rayLocal(rayAxis, rayOrigin - m_dimMin);
 
 	//visibility table (if any)
 	const ccGenericPointCloud::VisibilityTableType* visTable = m_theAssociatedCloudAsGPC->isVisibilityTableInstantiated() ? &m_theAssociatedCloudAsGPC->getTheVisibilityArray() : nullptr;
@@ -676,7 +676,7 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 				}
 				else
 				{
-					skipThisCell = !AABB<PointCoordinateType>(	cellCenter - halfCell - margin,
+					skipThisCell = !CCCoreLib::AABB<PointCoordinateType>(	cellCenter - halfCell - margin,
 																cellCenter + halfCell + margin).intersects(rayLocal);
 				}
 

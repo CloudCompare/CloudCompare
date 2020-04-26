@@ -1,5 +1,5 @@
 
-if ( CC-CORE-LIB_SHARED )
+if ( CCCORELIB_SHARED )
     # Before CMake 3.13, install(TARGETS) would only accept targets created in the same directory scope
     # This makes it difficult to work with submodules.
     # This can be cleaned up when we move to a minimum CMake of 3.13 or higher

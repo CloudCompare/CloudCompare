@@ -699,11 +699,15 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 
 				//mesh the '2D' points
 				CCCoreLib::Delaunay2dMesh* dm = new CCCoreLib::Delaunay2dMesh();
-				char errorStr[1024];
-				if (!dm->buildMesh(the2DPoints, 0, errorStr))
+				std::string errorStr;
+				if (!dm->buildMesh(the2DPoints, CCCoreLib::Delaunay2dMesh::USE_ALL_POINTS, errorStr))
 				{
 					if (app)
-						app->dispToConsole(QString("[DistanceMapGenerationTool] Interpolation failed: Triangle lib. said '%1'").arg(errorStr),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+					{
+						app->dispToConsole( QStringLiteral("[DistanceMapGenerationTool] Interpolation failed: Triangle lib. said '%1'")
+											.arg( QString::fromStdString( errorStr ) ),
+											ccMainAppInterface::ERR_CONSOLE_MESSAGE );
+					}
 				}
 				else
 				{

@@ -660,15 +660,16 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 		{
 			//alternative keypoints?
 			ccGenericPointCloud* altKeypoints = (altEntity ? ccHObjectCaster::ToGenericPointCloud(altEntity) : nullptr);
-			char errorStr[1024];
-			dummyMesh = CCCoreLib::PointProjectionTools::computeTriangulation(	altKeypoints ? altKeypoints : keypointsCloud,
-																			DELAUNAY_2D_BEST_LS_PLANE,
-																			0,
-																			0,
-																			errorStr);
+			std::string errorStr;
+			dummyMesh = CCCoreLib::PointProjectionTools::computeTriangulation( altKeypoints ? altKeypoints : keypointsCloud,
+																			   CCCoreLib::DELAUNAY_2D_BEST_LS_PLANE,
+																			   CCCoreLib::PointProjectionTools::IGNORE_MAX_EDGE_LENGTH,
+																			   0,
+																			   errorStr );
 			if (!dummyMesh)
 			{
-				ccLog::Warning(QString("[Bundler] Failed to generate DTM! (%1)").arg(errorStr));
+				ccLog::Warning( QStringLiteral("[Bundler] Failed to generate DTM! (%1)")
+								.arg( QString::fromStdString( errorStr ) ) );
 			}
 		}
 

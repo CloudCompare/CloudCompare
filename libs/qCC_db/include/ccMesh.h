@@ -72,7 +72,7 @@ public:
 	/** See CCCoreLib::PointProjectionTools::computeTriangulation.
 	**/
 	static ccMesh* Triangulate( ccGenericPointCloud* cloud,
-								CC_TRIANGULATION_TYPES type,
+								CCCoreLib::TRIANGULATION_TYPES type,
 								bool updateNormals = false,
 								PointCoordinateType maxEdgeLength = 0,
 								unsigned char dim = 2);

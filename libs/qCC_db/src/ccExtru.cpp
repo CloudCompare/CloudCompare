@@ -64,10 +64,11 @@ bool ccExtru::buildUp()
 	if (m_profile.back().x == m_profile.front().x &&  m_profile.back().y == m_profile.front().y)
 		--count;
 
-	char errorStr[1024];
+	std::string errorStr;
 	if (!mesh.buildMesh(m_profile, count, errorStr))
 	{
-		ccLog::Warning(QString("[ccPlane::buildUp] Profile triangulation failed (CClib said: '%1'").arg(errorStr));
+		ccLog::Warning( QStringLiteral("[ccPlane::buildUp] Profile triangulation failed (CClib said: '%1'")
+					    .arg( QString::fromStdString( errorStr) ) );
 		return false;
 	}
 

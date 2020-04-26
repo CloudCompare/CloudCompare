@@ -512,8 +512,8 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 
 			//mesh the '2D' points
 			CCCoreLib::Delaunay2dMesh delaunayMesh;
-			char errorStr[1024];
-			if (delaunayMesh.buildMesh(the2DPoints, 0, errorStr))
+			std::string errorStr;
+			if (delaunayMesh.buildMesh(the2DPoints, CCCoreLib::Delaunay2dMesh::USE_ALL_POINTS, errorStr))
 			{
 				unsigned triNum = delaunayMesh.size();
 				//now we are going to 'project' all triangles on the grid
@@ -612,7 +612,8 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 			}
 			else
 			{
-				ccLog::Warning(QString("[Rasterize] Empty cells interpolation failed: Triangle lib. said '%1'").arg(errorStr));
+				ccLog::Warning( QStringLiteral("[Rasterize] Empty cells interpolation failed: Triangle lib. said '%1'")
+								.arg( QString::fromStdString( errorStr ) ) );
 			}
 		}
 	}

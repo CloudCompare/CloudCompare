@@ -616,7 +616,11 @@ bool ccNormalVectors::ComputeNormalWithTri(CCCoreLib::GenericIndexedCloudPersist
 	CCCoreLib::Neighbourhood Z(pointAndNeighbors);
 
 	//we mesh the neighbour points (2D1/2)
-	CCCoreLib::GenericIndexedMesh* theMesh = Z.triangulateOnPlane();
+	std::string errorStr;
+	
+	CCCoreLib::GenericIndexedMesh* theMesh = Z.triangulateOnPlane( CCCoreLib::Neighbourhood::DO_NOT_DUPLICATE_VERTICES,
+																   CCCoreLib::Neighbourhood::IGNORE_MAX_EDGE_LENGTH,
+																   errorStr );
 	if (!theMesh)
 	{
 		return false;

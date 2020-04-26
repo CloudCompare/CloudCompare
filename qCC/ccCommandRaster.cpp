@@ -385,12 +385,12 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 			}
 			else if (outputMesh)
 			{
-				char errorStr[1024];
+				std::string errorStr;
 				CCCoreLib::GenericIndexedMesh* baseMesh = CCCoreLib::PointProjectionTools::computeTriangulation
 				                                      (
 				                                          rasterCloud,
-				                                          DELAUNAY_2D_AXIS_ALIGNED,
-				                                          0,
+				                                          CCCoreLib::DELAUNAY_2D_AXIS_ALIGNED,
+				                                          CCCoreLib::PointProjectionTools::IGNORE_MAX_EDGE_LENGTH,
 				                                          vertDir,
 				                                          errorStr
 				                                          );
@@ -431,7 +431,8 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 				}
 				else
 				{
-					cmd.warning(QString("[Rasterize] Failed to create output mesh ('%1')").arg(errorStr));
+					cmd.warning( QStringLiteral("[Rasterize] Failed to create output mesh ('%1')")
+								 .arg( QString::fromStdString( errorStr ) ) );
 				}
 			}
 
@@ -678,10 +679,10 @@ bool CommandVolume25D::process(ccCommandLineInterface &cmd)
 			ccMesh* rasterMesh = nullptr;
 			if (outputMesh)
 			{
-				char errorStr[1024];
+				std::string errorStr;
 				CCCoreLib::GenericIndexedMesh* baseMesh = CCCoreLib::PointProjectionTools::computeTriangulation(rasterCloud,
-				                                                                                        DELAUNAY_2D_AXIS_ALIGNED,
-				                                                                                        0,
+				                                                                                        CCCoreLib::DELAUNAY_2D_AXIS_ALIGNED,
+				                                                                                        CCCoreLib::PointProjectionTools::IGNORE_MAX_EDGE_LENGTH,
 				                                                                                        vertDir,
 				                                                                                        errorStr);
 
@@ -707,7 +708,8 @@ bool CommandVolume25D::process(ccCommandLineInterface &cmd)
 				else
 				{
 					delete rasterCloud;
-					return cmd.error(QString("[Voume] Failed to create output mesh ('%1')").arg(errorStr));
+					return cmd.error( QStringLiteral("[Voume] Failed to create output mesh ('%1')")
+									  .arg( QString::fromStdString( errorStr ) ) );
 				}
 			}
 

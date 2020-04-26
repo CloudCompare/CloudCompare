@@ -502,7 +502,7 @@ private:
 	//! Mesh computation fork
 	/** \param type triangulation type
 	**/
-	void doActionComputeMesh(CC_TRIANGULATION_TYPES type);
+	void doActionComputeMesh(CCCoreLib::TRIANGULATION_TYPES type);
 
 	//! Computes the orientation of an entity
 	/** Either fit a plane or a 'facet' (2D polygon)

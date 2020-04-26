@@ -3857,7 +3857,7 @@ bool CommandDelaunayTri::process(ccCommandLineInterface &cmd)
 		cmd.print(QObject::tr("\tProcessing cloud #%1 (%2)").arg(i + 1).arg(!cloud->getName().isEmpty() ? cloud->getName() : "no name"));
 		
 		ccMesh* mesh = ccMesh::Triangulate(cloud,
-										   axisAligned ? DELAUNAY_2D_AXIS_ALIGNED : DELAUNAY_2D_BEST_LS_PLANE,
+										   axisAligned ? CCCoreLib::DELAUNAY_2D_AXIS_ALIGNED : CCCoreLib::DELAUNAY_2D_BEST_LS_PLANE,
 										   false,
 										   static_cast<PointCoordinateType>(maxEdgeLength),
 										   2 //XY plane by default

@@ -1,6 +1,3 @@
-#ifndef CC_FOO_FILTER_HEADER
-#define CC_FOO_FILTER_HEADER
-
 //##########################################################################
 //#                                                                        #
 //#                           ExampleIOPlugin                              #
@@ -18,6 +15,8 @@
 //#                                                                        #
 //##########################################################################
 
+#pragma once
+
 #include "FileIOFilter.h"
 
 
@@ -26,10 +25,8 @@ class FooFilter : public FileIOFilter
 public:
 	FooFilter();
 	
-	// inherited from FileIOFilter
+	// Inherited from FileIOFilter
 	CC_FILE_ERROR loadFile( const QString &fileName, ccHObject &container, LoadParameters &parameters ) override;
 	
 	bool canSave( CC_CLASS_ENUM type, bool &multiple, bool &exclusive ) const override;
 };
-
-#endif

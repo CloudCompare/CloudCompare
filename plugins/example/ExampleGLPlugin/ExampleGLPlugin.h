@@ -1,6 +1,3 @@
-#ifndef EXAMPLE_GL_PLUGIN_HEADER
-#define EXAMPLE_GL_PLUGIN_HEADER
-
 //##########################################################################
 //#                                                                        #
 //#             CLOUDCOMPARE PLUGIN: ExampleGLPlugin                       #
@@ -18,6 +15,8 @@
 //#                                                                        #
 //##########################################################################
 
+#pragma once
+
 #include "ccGLPluginInterface.h"
 
 /** Replace 'ExampleGLPlugin' by your own plugin class name throughout and then
@@ -34,15 +33,13 @@
 class ExampleGLPlugin : public QObject, public ccGLPluginInterface
 {
 	Q_OBJECT
-	Q_INTERFACES(ccGLPluginInterface)
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.ExampleGL" FILE "info.json")
+	Q_INTERFACES( ccGLPluginInterface )
+	Q_PLUGIN_METADATA( IID "cccorp.cloudcompare.plugin.ExampleGL" FILE "info.json" )
 	
 public:
 	explicit ExampleGLPlugin( QObject *parent = nullptr );
 	~ExampleGLPlugin() override = default;
 	
-	// inherited from ccGLFilterPluginInterface
+	// Inherited from ccGLFilterPluginInterface
 	ccGlFilter *getFilter() override;
 };
-
-#endif

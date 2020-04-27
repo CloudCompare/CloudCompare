@@ -4,9 +4,7 @@ option( PLUGIN_IO_QCSV_MATRIX "Check to install qCSVMatrix I/O plugin" OFF )
 if (PLUGIN_IO_QCSV_MATRIX)
     project( QCSV_MATRIX_IO_PLUGIN )
     
-	include( CMakePolicies NO_POLICY_SCOPE )
-
-    set( CC_IS_IO_PLUGIN 1 )
+    AddPlugin( NAME ${PROJECT_NAME} TYPE io )
 	
 	include_directories( src )
 	

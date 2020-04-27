@@ -1,6 +1,3 @@
-#ifndef EXAMPLE_IO_PLUGIN_HEADER
-#define EXAMPLE_IO_PLUGIN_HEADER
-
 //##########################################################################
 //#                                                                        #
 //#          CLOUDCOMPARE PLUGIN: ExampleIOPlugin                          #
@@ -17,6 +14,8 @@
 //#          COPYRIGHT: CloudCompare project                               #
 //#                                                                        #
 //##########################################################################
+
+#pragma once
 
 #include "ccIOPluginInterface.h"
 
@@ -44,8 +43,6 @@ public:
 	
 	void registerCommands( ccCommandLineInterface *cmd ) override;
 	
-	// inherited from ccIOPluginInterface
+	// Inherited from ccIOPluginInterface
 	ccIOPluginInterface::FilterList getFilters() override;
 };
-
-#endif

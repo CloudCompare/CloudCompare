@@ -8,7 +8,7 @@ if (WIN32)
 		#CloudCompare LAS FWF (i.e. version >= 1.3) I/O plugin
 		project( QLAS_FWF_IO_PLUGIN )
 		
-		include( CMakePolicies NO_POLICY_SCOPE )
+        AddPlugin( NAME ${PROJECT_NAME} TYPE io )
 
 		include( LASLibSupport.cmake )
 
@@ -17,8 +17,6 @@ if (WIN32)
 			
 		#we need the saveLASFileDlg.ui file
 		set( CC_PLUGIN_CUSTOM_UI_LIST ../qPDALIO/ui/saveLASFileDlg.ui )
-
-		set( CC_IS_IO_PLUGIN 1 )
 
         include( CMakePluginTemplate )
 		

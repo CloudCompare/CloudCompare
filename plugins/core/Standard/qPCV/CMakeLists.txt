@@ -6,7 +6,7 @@ if (PLUGIN_STANDARD_QPCV)
 
     project( QPCV_PLUGIN )
     
-	include( CMakePolicies NO_POLICY_SCOPE )
+    AddPlugin( NAME ${PROJECT_NAME} )
 
 	find_package( OpenGL REQUIRED )
 	if( NOT OPENGL_FOUND )

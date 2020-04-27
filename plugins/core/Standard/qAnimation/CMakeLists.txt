@@ -6,7 +6,7 @@ if (PLUGIN_STANDARD_QANIMATION)
 
 	project( QANIMATION_PLUGIN )
 
-	include( CMakePolicies NO_POLICY_SCOPE )
+    AddPlugin( NAME ${PROJECT_NAME} )
 
 	if (WITH_FFMPEG_SUPPORT)
 		add_subdirectory( src/QTFFmpegWrapper )

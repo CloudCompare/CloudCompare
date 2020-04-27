@@ -3,9 +3,7 @@ option( PLUGIN_IO_QPDAL "Install qPDALIO plugin to read & write LAS files" OFF )
 if ( PLUGIN_IO_QPDAL )
 	project( QPDAL_IO_PLUGIN )
 
-	include( CMakePolicies NO_POLICY_SCOPE )
-
-	set( CC_IS_IO_PLUGIN 1 )
+    AddPlugin( NAME ${PROJECT_NAME} TYPE io )
 	
 	# PDAL library
 	find_package( PDAL 1.0.0 REQUIRED CONFIG )

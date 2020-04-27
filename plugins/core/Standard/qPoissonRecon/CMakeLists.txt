@@ -4,7 +4,7 @@ option( PLUGIN_STANDARD_QPOISSON_RECON "Check to install qPoissonRecon plugin" O
 if (PLUGIN_STANDARD_QPOISSON_RECON)
 	project( QPOISSON_RECON_PLUGIN )
 		
-	include( CMakePolicies NO_POLICY_SCOPE )
+    AddPlugin( NAME ${PROJECT_NAME} )
 
 	add_subdirectory (PoissonReconLib)
 

@@ -22,24 +22,14 @@ if (CC_PLUGIN_CUSTOM_UI_LIST)
     list( APPEND ui_list ${CC_PLUGIN_CUSTOM_UI_LIST} )
 endif()
 
-add_library( ${PROJECT_NAME} SHARED ${header_list} ${source_list} ${moc_list} ${ui_list} ${qrc_list} ${json_list} )
-
-set_target_properties( ${PROJECT_NAME} PROPERTIES
-    AUTOUIC ON # FIXME Remove after everything has moved to targets and we can set it globally
-    AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui
-)
-
-# Plugins need the QT_NO_DEBUG preprocessor in release!
-if( WIN32 )
-	target_compile_definitions( ${PROJECT_NAME} PRIVATE $<$<CONFIG:Release>:QT_NO_DEBUG> )
-endif()
-
-target_link_libraries( ${PROJECT_NAME}
-    CCPluginAPI
-    QCC_GL_LIB
-    Qt5::Concurrent
-    Qt5::OpenGL
-    Qt5::Widgets
+target_sources( ${PROJECT_NAME}
+    PRIVATE
+        ${header_list}
+        ${source_list}
+        ${moc_list}
+        ${ui_list}
+        ${qrc_list}
+        ${json_list}
 )
 
 if( APPLE )
@@ -63,7 +53,8 @@ endif()
 
 #GL filters and IO plugins also go the the ccViewer 'plugins' sub-folder
 if( ${OPTION_BUILD_CCVIEWER} )
-    if( CC_SHADER_FOLDER OR CC_IS_IO_PLUGIN )
+    get_target_property( IS_IO_PLUGIN ${PROJECT_NAME} IO_PLUGIN )
+    if( CC_SHADER_FOLDER OR IS_IO_PLUGIN )
         if( APPLE )
             install( TARGETS ${PROJECT_NAME} LIBRARY DESTINATION ${CCVIEWER_MAC_PLUGIN_DIR} COMPONENT Runtime )
             set( CCVIEWER_PLUGINS ${CCVIEWER_PLUGINS} ${CCVIEWER_MAC_PLUGIN_DIR}/lib${PROJECT_NAME}${CMAKE_SHARED_LIBRARY_SUFFIX} CACHE INTERNAL "ccViewer plugin list")

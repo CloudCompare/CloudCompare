@@ -4,7 +4,7 @@ if (PLUGIN_STANDARD_QM3C2)
 
 	project( QM3C2_PLUGIN )
 
-	include( CMakePolicies NO_POLICY_SCOPE )
+    AddPlugin( NAME ${PROJECT_NAME} )
 
 	include_directories( src )
 

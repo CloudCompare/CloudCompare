@@ -1,14 +1,12 @@
-option( PLUGIN_EXAMPLE_IO "Check to install example I/O plugin" OFF )
+option( PLUGIN_EXAMPLE_IO "Install example I/O plugin" OFF )
 
 if (PLUGIN_EXAMPLE_IO)
 	project( ExampleIOPlugin )
-	
-	# Set to include this I/O plugin in ccViewer
-	set( CC_IS_IO_PLUGIN 1 )
 
-	include_directories( src )
-	
-	add_subdirectory( src )
-	
+    AddPlugin( NAME ${PROJECT_NAME} TYPE io )
+    
     include( CMakePluginTemplate )
+
+    add_subdirectory( include )
+    add_subdirectory( src )
 endif()

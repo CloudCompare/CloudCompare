@@ -1,6 +1,3 @@
-#ifndef EXAMPLE_PLUGIN_HEADER
-#define EXAMPLE_PLUGIN_HEADER
-
 //##########################################################################
 //#                                                                        #
 //#                CLOUDCOMPARE PLUGIN: ExamplePlugin                      #
@@ -17,6 +14,8 @@
 //#                             COPYRIGHT: XXX                             #
 //#                                                                        #
 //##########################################################################
+
+#pragma once
 
 #include "ccStdPluginInterface.h"
 
@@ -41,25 +40,22 @@
 class ExamplePlugin : public QObject, public ccStdPluginInterface
 {
 	Q_OBJECT
-	Q_INTERFACES(ccStdPluginInterface)
+	Q_INTERFACES( ccStdPluginInterface )
 	
 	// Replace "Example" by your plugin name (IID should be unique - let's hope your plugin name is unique ;)
 	// The info.json file provides information about the plugin to the loading system and
 	// it is displayed in the plugin information dialog.
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.Example" FILE "info.json")
+	Q_PLUGIN_METADATA( IID "cccorp.cloudcompare.plugin.Example" FILE "info.json" )
 	
 public:
 	explicit ExamplePlugin( QObject *parent = nullptr );
 	~ExamplePlugin() override = default;
 	
-	// inherited from ccStdPluginInterface
+	// Inherited from ccStdPluginInterface
 	void onNewSelection( const ccHObject::Container &selectedEntities ) override;
 	QList<QAction *> getActions() override;
 	
-private:
-	/*** ADD YOUR CUSTOM ACTIONS HERE ***/
-	void doAction();
-	
+private:	
 	//! Default action
 	/** You can add as many actions as you want in a plugin.
 		Each action will correspond to an icon in the dedicated
@@ -67,5 +63,3 @@ private:
 	**/
 	QAction* m_action;
 };
-
-#endif

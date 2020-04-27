@@ -302,8 +302,8 @@ bool ccFacet::createInternalRepresentation(	CCCoreLib::GenericIndexedCloudPersis
 		{
 			//compute the facet surface
 			CCCoreLib::Delaunay2dMesh dm;
-			char errorStr[1024];
-			if (dm.buildMesh(hullPointsVector, 0, errorStr))
+			std::string errorStr;
+			if (dm.buildMesh(hullPointsVector, CCCoreLib::Delaunay2dMesh::USE_ALL_POINTS, errorStr))
 			{
 				if (removePointsOutsideHull)
 					dm.removeOuterTriangles(hullPointsVector, hullPointsVector);
@@ -356,7 +356,8 @@ bool ccFacet::createInternalRepresentation(	CCCoreLib::GenericIndexedCloudPersis
 			}
 			else
 			{
-				ccLog::Warning(QString("[ccFacet::createInternalRepresentation] Failed to create the polygon mesh (third party lib. said '%1'").arg(errorStr));
+				ccLog::Warning( QStringLiteral("[ccFacet::createInternalRepresentation] Failed to create the polygon mesh (third party lib. said '%1'")
+							   .arg( QString::fromStdString( errorStr ) ) );
 			}
 		}
 	}

@@ -4368,10 +4368,10 @@ void MainWindow::doConvertPolylinesToMesh()
 	}
 
 	CCCoreLib::Delaunay2dMesh* delaunayMesh = new CCCoreLib::Delaunay2dMesh;
-	char errorStr[1024];
+	std::string errorStr;
 	if (!delaunayMesh->buildMesh(points2D, segments2D, errorStr))
 	{
-		ccLog::Error(QString("Third party library error: %1").arg(errorStr));
+		ccLog::Error( QStringLiteral("Third party library error: %1").arg( QString::fromStdString( errorStr ) ) );
 		delete delaunayMesh;
 		return;
 	}
@@ -4590,15 +4590,15 @@ void MainWindow::doActionMeshScanGrids()
 
 void MainWindow::doActionComputeMeshAA()
 {
-	doActionComputeMesh(DELAUNAY_2D_AXIS_ALIGNED);
+	doActionComputeMesh(CCCoreLib::DELAUNAY_2D_AXIS_ALIGNED);
 }
 
 void MainWindow::doActionComputeMeshLS()
 {
-	doActionComputeMesh(DELAUNAY_2D_BEST_LS_PLANE);
+	doActionComputeMesh(CCCoreLib::DELAUNAY_2D_BEST_LS_PLANE);
 }
 
-void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
+void MainWindow::doActionComputeMesh(CCCoreLib::TRIANGULATION_TYPES type)
 {
 	//ask the user for the max edge length
 	static double s_meshMaxEdgeLength = 0.0;

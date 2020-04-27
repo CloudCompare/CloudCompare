@@ -870,10 +870,10 @@ void ccRasterizeTool::generateMesh() const
 	ccPointCloud* rasterCloud = generateCloud(false);
 	if (rasterCloud)
 	{
-		char errorStr[1024];
+		std::string errorStr;
 		CCCoreLib::GenericIndexedMesh* baseMesh = CCCoreLib::PointProjectionTools::computeTriangulation(rasterCloud,
-																								DELAUNAY_2D_AXIS_ALIGNED,
-																								0,
+																								CCCoreLib::DELAUNAY_2D_AXIS_ALIGNED,
+																								CCCoreLib::PointProjectionTools::IGNORE_MAX_EDGE_LENGTH,
 																								getProjectionDimension(),
 																								errorStr);
 		ccMesh* rasterMesh = nullptr;
@@ -903,7 +903,8 @@ void ccRasterizeTool::generateMesh() const
 		}
 		else
 		{
-			ccLog::Error(QString("Failed to create mesh ('%1')").arg(errorStr));
+			ccLog::Error( QStringLiteral("Failed to create mesh ('%1')")
+						  .arg( QString::fromStdString( errorStr ) ) );
 		}
 	}
 }

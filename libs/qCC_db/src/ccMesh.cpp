@@ -986,10 +986,10 @@ ccMesh* ccMesh::TriangulateTwoPolylines(ccPolyline* p1, ccPolyline* p2, CCVector
 	}
 
 	CCCoreLib::Delaunay2dMesh* delaunayMesh = new CCCoreLib::Delaunay2dMesh;
-	char errorStr[1024];
+	std::string errorStr;
 	if (!delaunayMesh->buildMesh(points2D, segments2D, errorStr))
 	{
-		ccLog::Warning(QString("Third party library error: %1").arg(errorStr));
+		ccLog::Warning( QStringLiteral("Third party library error: %1").arg( QString::fromStdString( errorStr ) ) );
 		delete delaunayMesh;
 		delete vertices;
 		return nullptr;
@@ -1095,7 +1095,7 @@ ccMesh* ccMesh::TriangulateTwoPolylines(ccPolyline* p1, ccPolyline* p2, CCVector
 }
 
 ccMesh* ccMesh::Triangulate(ccGenericPointCloud* cloud,
-							CC_TRIANGULATION_TYPES type,
+							CCCoreLib::TRIANGULATION_TYPES type,
 							bool updateNormals/*=false*/,
 							PointCoordinateType maxEdgeLength/*=0*/,
 							unsigned char dim/*=2*/)
@@ -1112,7 +1112,7 @@ ccMesh* ccMesh::Triangulate(ccGenericPointCloud* cloud,
 	}
 	
 	//compute raw mesh
-	char errorStr[1024];
+	std::string errorStr;
 	CCCoreLib::GenericIndexedMesh* dummyMesh = CCCoreLib::PointProjectionTools::computeTriangulation(	cloud,
 																								type,
 																								maxEdgeLength,
@@ -1120,7 +1120,8 @@ ccMesh* ccMesh::Triangulate(ccGenericPointCloud* cloud,
 																								errorStr);
 	if (!dummyMesh)
 	{
-		ccLog::Warning(QString("[ccMesh::Triangulate] Failed to construct Delaunay mesh (Triangle lib error: %1)").arg(errorStr));
+		ccLog::Warning( QStringLiteral("[ccMesh::Triangulate] Failed to construct Delaunay mesh (Triangle lib error: %1)")
+						.arg( QString::fromStdString( errorStr ) ) );
 		return nullptr;
 	}
 

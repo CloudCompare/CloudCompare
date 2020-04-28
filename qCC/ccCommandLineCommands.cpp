@@ -36,6 +36,7 @@
 #include "ccEntityAction.h"
 
 #include <QDateTime>
+#include <QFileInfo>
 
 //commands
 constexpr char COMMAND_CLOUD_EXPORT_FORMAT[]			= "C_EXPORT_FMT";

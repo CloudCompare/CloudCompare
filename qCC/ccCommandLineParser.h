@@ -2,7 +2,7 @@
 #define CC_COMMAND_LINE_PARSER_HEADER
 
 //interface
-#include "../plugins/ccCommandLineInterface.h"
+#include "ccCommandLineInterface.h"
 
 //Local
 #include "ccPluginManager.h"

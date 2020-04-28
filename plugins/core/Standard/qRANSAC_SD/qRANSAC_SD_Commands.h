@@ -18,6 +18,8 @@
 #ifndef RANSAC_PLUGIN_COMMANDS_HEADER
 #define RANSAC_PLUGIN_COMMANDS_HEADER
 
+#include <QDir>
+
 //CloudCompare
 #include "ccCommandLineInterface.h"
 #include <ccMesh.h>

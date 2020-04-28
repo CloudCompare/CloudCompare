@@ -10,9 +10,6 @@ if (PLUGIN_STANDARD_QFACETS)
 
 	include( CMakePolicies NO_POLICY_SCOPE )
 
-	# we need includes from the main CC source dir
-	include_directories( ${CloudCompare_SOURCE_DIR} )
-
 	#we need Color Scale Manager and Editor importer
 	file( GLOB CC_PLUGIN_CUSTOM_HEADER_LIST ${CloudCompare_SOURCE_DIR}/ccColorScale*.h )
 	file( GLOB CC_PLUGIN_CUSTOM_SOURCE_LIST ${CloudCompare_SOURCE_DIR}/ccColorScale*.cpp )
@@ -25,6 +22,21 @@ if (PLUGIN_STANDARD_QFACETS)
 	add_subdirectory( ui )
 	
     include( CMakePluginTemplate )
+    
+    set_target_properties( ${PROJECT_NAME} PROPERTIES
+        # FIXME Remove after everything has moved to targets
+        # This is an exception to find ccColorScaleEditorDlg which means we have an odd dependency
+        AUTOUIC_SEARCH_PATHS "${CloudCompare_SOURCE_DIR}/ui_templates;${CMAKE_CURRENT_SOURCE_DIR}/ui"
+    )
+    
+    # FIXME These are required becaue we have dependencies outside of the api
+    #   (at least ccColorScale* and something in "common")
+    # We need to determine where those files should live to avoid this.
+    target_include_directories( ${PROJECT_NAME}
+        PRIVATE
+            ${CloudCompare_SOURCE_DIR}
+            ${CloudCompare_SOURCE_DIR}/../common
+    )
 
 	target_link_libraries( ${PROJECT_NAME}
         shapelib

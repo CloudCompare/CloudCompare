@@ -1,24 +1,41 @@
+//##########################################################################
+//#                                                                        #
+//#                            CLOUDCOMPARE                                #
+//#                                                                        #
+//#  This program is free software; you can redistribute it and/or modify  #
+//#  it under the terms of the GNU General Public License as published by  #
+//#  the Free Software Foundation; version 2 of the License.               #
+//#                                                                        #
+//#  This program is distributed in the hope that it will be useful,       #
+//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  GNU General Public License for more details.                          #
+//#                                                                        #
+//#          COPYRIGHT: CloudCompare project                               #
+//#                                                                        #
+//##########################################################################
+
 #ifndef CC_COMMAND_LINE_INTERFACE_HEADER
 #define CC_COMMAND_LINE_INTERFACE_HEADER
 
 //qCC_db
-#include <ccGenericMesh.h>
 #include <ccPointCloud.h>
 
 //qCC_io
 #include <FileIOFilter.h>
 
 //Qt
-#include <QDir>
 #include <QSharedPointer>
 #include <QString>
-#include <QStringList>
 
 //System
 #include <vector>
 
+class ccGenericMesh;
 class ccProgressDialog;
+
 class QDialog;
+class QStringList;
 
 enum class CL_ENTITY_TYPE {
 	GROUP,
@@ -33,35 +50,9 @@ struct CLEntityDesc
 	QString path;
 	int indexInFile;
 
-	CLEntityDesc( const QString &name )
-		: basename( name )
-		, path( QDir::currentPath() )
-		, indexInFile( -1 )
-	{	
-	}
-	
-	CLEntityDesc(const QString &filename, int _indexInFile)
-		: indexInFile(_indexInFile)
-	{
-		if (filename.isNull())
-		{
-			basename = "unknown";
-			path = QDir::currentPath();
-		}
-		else
-		{
-			QFileInfo fi(filename);
-			basename = fi.completeBaseName();
-			path = fi.path();
-		}
-	}
-	
-	CLEntityDesc(const QString &_basename, const QString &_path, int _indexInFile = -1)
-		: basename(_basename)
-		, path(_path)
-		, indexInFile(_indexInFile)
-	{
-	}
+	CLEntityDesc( const QString &name );
+	CLEntityDesc( const QString &filename, int _indexInFile );
+	CLEntityDesc( const QString &_basename, const QString &_path, int _indexInFile = -1 );
 	
 	virtual ~CLEntityDesc() = default;
 	
@@ -77,16 +68,13 @@ struct CLGroupDesc : CLEntityDesc
 
 	CLGroupDesc(ccHObject* group,
 				const QString& basename,
-				const QString& path = QString())
-		: CLEntityDesc(basename, path)
-		, groupEntity(group)
-	{}
+				const QString& path = QString());
 
 	~CLGroupDesc() override = default;
 	
-	ccHObject* getEntity() override { return groupEntity; }
-	const ccHObject* getEntity() const override { return groupEntity; }
-	CL_ENTITY_TYPE getCLEntityType() const override { return CL_ENTITY_TYPE::GROUP; }
+	ccHObject* getEntity() override;
+	const ccHObject* getEntity() const override;
+	CL_ENTITY_TYPE getCLEntityType() const override;
 };
 
 //! Loaded cloud description
@@ -94,31 +82,22 @@ struct CLCloudDesc : CLEntityDesc
 {
 	ccPointCloud* pc;
 
-	CLCloudDesc()
-		: CLEntityDesc("Unnamed cloud")
-		, pc( nullptr )
-	{}
+	CLCloudDesc();
 
 	CLCloudDesc(ccPointCloud* cloud,
 				const QString& filename = QString(),
-				int index = -1)
-		: CLEntityDesc(filename, index)
-		, pc(cloud)
-	{}
+				int index = -1);
 
 	CLCloudDesc(ccPointCloud* cloud,
 				const QString& basename,
 				const QString& path,
-				int index = -1)
-		: CLEntityDesc(basename, path, index)
-		, pc(cloud)
-	{}
+				int index = -1);
 
 	~CLCloudDesc() override = default;
 
-	ccHObject* getEntity() override { return static_cast<ccHObject*>(pc); }
-	const ccHObject* getEntity() const override { return static_cast<ccHObject*>(pc); }
-	CL_ENTITY_TYPE getCLEntityType() const override { return CL_ENTITY_TYPE::CLOUD; }
+	ccHObject* getEntity() override;
+	const ccHObject* getEntity() const override;
+	CL_ENTITY_TYPE getCLEntityType() const override;
 };
 
 //! Loaded mesh description
@@ -126,31 +105,22 @@ struct CLMeshDesc : CLEntityDesc
 {
 	ccGenericMesh* mesh;
 
-	CLMeshDesc()
-		: CLEntityDesc("Unnamed mesh")
-		, mesh( nullptr )
-	{}
+	CLMeshDesc();
 
 	CLMeshDesc(	ccGenericMesh* _mesh,
 				const QString& filename = QString(),
-				int index = -1)
-		: CLEntityDesc(filename, index)
-		, mesh(_mesh)
-	{}
+				int index = -1 );
 
 	CLMeshDesc(	ccGenericMesh* _mesh,
 				const QString& basename,
 				const QString& path,
-				int index = -1)
-		: CLEntityDesc(basename, path, index)
-		, mesh(_mesh)
-	{}
+				int index = -1 );
 
 	~CLMeshDesc() override = default;
 	
-	ccHObject* getEntity() override { return static_cast<ccHObject*>(mesh); }
-	const ccHObject* getEntity() const override { return static_cast<ccHObject*>(mesh); }
-	CL_ENTITY_TYPE getCLEntityType() const override { return CL_ENTITY_TYPE::MESH; }
+	ccHObject* getEntity() override;
+	const ccHObject* getEntity() const override;
+	CL_ENTITY_TYPE getCLEntityType() const override;
 };
 
 //! Command line interface
@@ -159,13 +129,7 @@ class ccCommandLineInterface
 public: //constructor
 
 	//! Default constructor
-	ccCommandLineInterface()
-		: m_silentMode(false)
-		, m_autoSaveMode(true)
-		, m_addTimestamp(true)
-		, m_precision(12)
-		, m_coordinatesShiftWasEnabled(false)
-	{}
+	ccCommandLineInterface();
 	
 	virtual ~ccCommandLineInterface() = default;
 
@@ -187,10 +151,7 @@ public: //commands
 		using Shared = QSharedPointer<Command>;
 
 		//! Default constructor
-		Command(const QString& name, const QString& keyword)
-			: m_name(name)
-			, m_keyword(keyword)
-		{}
+		Command(const QString& name, const QString& keyword);
 
 		virtual ~Command() = default;
 		
@@ -204,10 +165,7 @@ public: //commands
 	};
 
 	//! Test whether a command line token is a valid command keyword or not
-	static bool IsCommand(const QString& token, const char* command)
-	{
-		return token.startsWith("-") && token.mid(1).toUpper() == QString(command);
-	}
+	static bool IsCommand(const QString& token, const char* command);
 
 public: //virtual methods
 
@@ -257,33 +215,23 @@ public: //virtual methods
 	virtual const QStringList& arguments() const = 0;
 
 	//! Returns a (shared) progress dialog (if any is available)
-	virtual ccProgressDialog* progressDialog() { return nullptr; }
+	virtual ccProgressDialog* progressDialog();
 	//! Returns a (widget) parent (if any is available)
-	virtual QDialog* widgetParent() { return nullptr; }
+	virtual QDialog* widgetParent();
 
 public: //file I/O
 
 	//Extended file loading parameters
 	struct CLLoadParameters : public FileIOFilter::LoadParameters
 	{
-		CLLoadParameters()
-			: FileIOFilter::LoadParameters()
-			, m_coordinatesShiftEnabled(false)
-			, m_coordinatesShift(0, 0, 0)
-		{
-			shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG;
-			alwaysDisplayLoadDialog = false;
-			autoComputeNormals = false;
-			coordinatesShiftEnabled = &m_coordinatesShiftEnabled;
-			coordinatesShift = &m_coordinatesShift;
-		}
+		CLLoadParameters();
 
 		bool m_coordinatesShiftEnabled;
 		CCVector3d m_coordinatesShift;
 	};
 
 	//! File loading parameters
-	virtual CLLoadParameters& fileLoadingParams() { return m_loadingParameters; }
+	virtual CLLoadParameters& fileLoadingParams();
 
 	//! Loads a file with a specific filter
 	/** Automatically dispatches the entities between the clouds and meshes sets.
@@ -294,10 +242,12 @@ public: //file I/O
 	virtual QString cloudExportFormat() const = 0;
 	//! Returns the current cloud(s) export extension (warning: can be anything)
 	virtual QString cloudExportExt() const = 0;
+	
 	//! Returns the current mesh(es) export format
 	virtual QString meshExportFormat() const = 0;
 	//! Returns the current mesh(es) export extension (warning: can be anything)
 	virtual QString meshExportExt() const = 0;
+	
 	//! Returns the current hierarchy(ies) export format
 	virtual QString hierarchyExportFormat() const = 0;
 	//! Returns the current hierarchy(ies) export extension (warning: can be anything)
@@ -320,105 +270,51 @@ public: //logging
 public: //access to data
 
 	//! Currently opened point clouds and their filename
-	virtual std::vector< CLCloudDesc >& clouds() { return m_clouds; }
+	virtual std::vector< CLCloudDesc >& clouds();
 	//! Currently opened point clouds and their filename (const version)
-	virtual const std::vector< CLCloudDesc >& clouds() const { return m_clouds; }
+	virtual const std::vector< CLCloudDesc >& clouds() const;
 
 	//! Currently opened meshes and their filename
-	virtual std::vector< CLMeshDesc >& meshes() { return m_meshes; }
+	virtual std::vector< CLMeshDesc >& meshes();
 	//! Currently opened meshes and their filename (const version)
-	virtual const std::vector< CLMeshDesc >& meshes() const { return m_meshes; }
+	virtual const std::vector< CLMeshDesc >& meshes() const;
 
 	//! Toggles silent mode
-	/** Must be called BEFORE calling start.
-	**/
-	void toggleSilentMode(bool state) { m_silentMode = state; }
+	/** Must be called BEFORE calling start. **/
+	void toggleSilentMode(bool state);
 	//! Returns the silent mode
-	bool silentMode() const { return m_silentMode; }
+	bool silentMode() const;
 
 	//! Sets whether files should be automatically saved (after each process) or not
-	void toggleAutoSaveMode(bool state) { m_autoSaveMode = state; }
+	void toggleAutoSaveMode(bool state);
 	//! Returns whether files should be automatically saved (after each process) or not
-	bool autoSaveMode() const { return m_autoSaveMode; }
+	bool autoSaveMode() const;
 
 	//! Sets whether a timestamp should be automatically added to output files or not
-	void toggleAddTimestamp(bool state) { m_addTimestamp = state; }
+	void toggleAddTimestamp(bool state);
 	//! Returns whether a timestamp should be automatically added to output files or not
-	bool addTimestamp() const { return m_addTimestamp; }
+	bool addTimestamp() const;
 
 	//! Sets the numerical precision
-	void setNumericalPrecision(int p) { m_precision = p; }
+	void setNumericalPrecision(int p);
 	//! Returns the numerical precision
-	int numericalPrecision() const { return m_precision; }
+	int numericalPrecision() const;
 
 public: //Global shift management
 
 	//! Returns whether Global (coordinate) shift has already been defined
-	bool coordinatesShiftWasEnabled() const { return m_coordinatesShiftWasEnabled; }
+	bool coordinatesShiftWasEnabled() const;
 	//! Returns the Global (coordinate) shift (if already defined)
-	const CCVector3d& formerCoordinatesShift() const { return m_formerCoordinatesShift; }
+	const CCVector3d& formerCoordinatesShift() const;
 	//! Sets whether Global (coordinate) shift is defined or not
-	void storeCoordinatesShiftParams() { m_coordinatesShiftWasEnabled = m_loadingParameters.m_coordinatesShiftEnabled; m_formerCoordinatesShift = m_loadingParameters.m_coordinatesShift; }
+	void storeCoordinatesShiftParams();
 
-	static const char* COMMAND_OPEN_SHIFT_ON_LOAD()			{ return "GLOBAL_SHIFT"; }	//!< Global shift
-	static const char* COMMAND_OPEN_SHIFT_ON_LOAD_AUTO()	{ return "AUTO"; }			//!< "AUTO" keyword
-	static const char* COMMAND_OPEN_SHIFT_ON_LOAD_FIRST()	{ return "FIRST"; }			//!< "FIRST" keyword
-
-	bool nextCommandIsGlobalShift() const { return !arguments().empty() && IsCommand(arguments().front(), COMMAND_OPEN_SHIFT_ON_LOAD()); }
+	bool nextCommandIsGlobalShift() const;
 
 	//! Check the current command line argument stack against the 'COMMAND_OPEN_SHIFT_ON_LOAD' keyword and process the following commands if necessary
 	/** \warning This method assumes the 'COMMAND_OPEN_SHIFT_ON_LOAD' argument has already been removed from the argument stack
 	**/
-	bool processGlobalShiftCommand()
-	{
-		if (arguments().empty())
-		{
-			return error(QObject::tr("Missing parameter: global shift vector or %1 or %2 after '%3'").arg(COMMAND_OPEN_SHIFT_ON_LOAD_AUTO(), COMMAND_OPEN_SHIFT_ON_LOAD_FIRST(), COMMAND_OPEN_SHIFT_ON_LOAD()));
-		}
-
-		QString firstParam = arguments().takeFirst();
-
-		m_loadingParameters.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG;
-		m_loadingParameters.m_coordinatesShiftEnabled = false;
-		m_loadingParameters.m_coordinatesShift = CCVector3d(0, 0, 0);
-
-		if (firstParam.toUpper() == COMMAND_OPEN_SHIFT_ON_LOAD_AUTO())
-		{
-			//let CC handle the global shift automatically
-			m_loadingParameters.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT;
-		}
-		else if (firstParam.toUpper() == COMMAND_OPEN_SHIFT_ON_LOAD_FIRST())
-		{
-			//use the first encountered global shift value (if any)
-			m_loadingParameters.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT;
-			m_loadingParameters.m_coordinatesShiftEnabled = m_coordinatesShiftWasEnabled;
-			m_loadingParameters.m_coordinatesShift = m_formerCoordinatesShift;
-		}
-		else if (arguments().size() < 2)
-		{
-			return error(QObject::tr("Missing parameter: global shift vector after '%1' (3 values expected)").arg(COMMAND_OPEN_SHIFT_ON_LOAD()));
-		}
-		else
-		{
-			bool ok = true;
-			CCVector3d shiftOnLoadVec;
-			shiftOnLoadVec.x = firstParam.toDouble(&ok);
-			if (!ok)
-				return error(QObject::tr("Invalid parameter: X coordinate of the global shift vector after '%1'").arg(COMMAND_OPEN_SHIFT_ON_LOAD()));
-			shiftOnLoadVec.y = arguments().takeFirst().toDouble(&ok);
-			if (!ok)
-				return error(QObject::tr("Invalid parameter: Y coordinate of the global shift vector after '%1'").arg(COMMAND_OPEN_SHIFT_ON_LOAD()));
-			shiftOnLoadVec.z = arguments().takeFirst().toDouble(&ok);
-			if (!ok)
-				return error(QObject::tr("Invalid parameter: Z coordinate of the global shift vector after '%1'").arg(COMMAND_OPEN_SHIFT_ON_LOAD()));
-
-			//set the user defined shift vector as default shift information
-			m_loadingParameters.m_coordinatesShiftEnabled = true;
-			m_loadingParameters.m_coordinatesShift = shiftOnLoadVec;
-		}
-
-		return true;
-	}
+	bool processGlobalShiftCommand();
 
 protected: //members
 
@@ -447,7 +343,6 @@ protected: //members
 	bool m_coordinatesShiftWasEnabled;
 	//! Global (coordinate) shift (if already defined)
 	CCVector3d m_formerCoordinatesShift;
-
 };
 
 #endif //CC_COMMAND_LINE_INTERFACE_HEADER

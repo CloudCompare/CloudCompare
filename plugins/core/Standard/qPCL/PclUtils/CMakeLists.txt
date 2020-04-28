@@ -48,6 +48,7 @@ endif()
 link_directories( ${PCL_LIBRARY_DIRS} )
 add_definitions( ${PCL_DEFINITIONS} )
 target_link_libraries( ${PROJECT_NAME}
+    CCPluginAPI
     QCC_GL_LIB
     ${PCL_LIBRARIES}
     Qt5::Widgets

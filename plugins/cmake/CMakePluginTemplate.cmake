@@ -2,17 +2,8 @@
 
 include( CMakePolicies NO_POLICY_SCOPE )
 
-include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
-include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
-include_directories( ${CloudComparePlugins_SOURCE_DIR} )
-include_directories( ${CloudCompare_SOURCE_DIR}/../common )
-include_directories( ${EXTERNAL_LIBS_INCLUDE_DIR} )
-
 file( GLOB header_list *.h)
 file( GLOB source_list *.cpp)
-
-# force link with interface implementations
-list( APPEND source_list ${CloudComparePlugins_SOURCE_DIR}/ccDefaultPluginInterface.cpp )
 
 file( GLOB json_list *.json)
 file( GLOB ui_list *.ui )
@@ -31,16 +22,12 @@ if (CC_PLUGIN_CUSTOM_UI_LIST)
     list( APPEND ui_list ${CC_PLUGIN_CUSTOM_UI_LIST} )
 endif()
 
+add_library( ${PROJECT_NAME} SHARED ${header_list} ${source_list} ${moc_list} ${ui_list} ${qrc_list} ${json_list} )
 
-qt5_wrap_ui( generated_ui_list ${ui_list} )
-qt5_add_resources( generated_qrc_list ${qrc_list} )
-
-add_library( ${PROJECT_NAME} SHARED ${header_list} ${source_list} ${moc_list} ${generated_ui_list} ${generated_qrc_list} ${json_list} )
-
-# Add custom default preprocessor definitions
-if (OPTION_GL_QUAD_BUFFER_SUPPORT)
-	target_compile_definitions( ${PROJECT_NAME} PRIVATE CC_GL_WINDOW_USE_QWINDOW )
-endif()
+set_target_properties( ${PROJECT_NAME} PROPERTIES
+    AUTOUIC ON # FIXME Remove after everything has moved to targets and we can set it globally
+    AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui
+)
 
 # Plugins need the QT_NO_DEBUG preprocessor in release!
 if( WIN32 )
@@ -48,7 +35,7 @@ if( WIN32 )
 endif()
 
 target_link_libraries( ${PROJECT_NAME}
-    QCC_IO_LIB
+    CCPluginAPI
     QCC_GL_LIB
     Qt5::Concurrent
     Qt5::OpenGL

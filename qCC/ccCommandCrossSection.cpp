@@ -6,8 +6,8 @@
 
 #include "ccCropTool.h"
 
-//to read the 'Cross Section' tool XML parameters file
-#include <QXmlStreamReader>
+#include <QDir>
+#include <QXmlStreamReader>	// to read the 'Cross Section' tool XML parameters file
 
 
 constexpr char COMMAND_CROSS_SECTION[] = "CROSS_SECTION";

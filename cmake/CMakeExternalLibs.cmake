@@ -33,6 +33,12 @@ find_package( Qt5
 get_target_property( Qt5_LIB_LOCATION Qt5::Core LOCATION_${CMAKE_BUILD_TYPE} )
 get_filename_component( Qt5_LIB_LOCATION ${Qt5_LIB_LOCATION} DIRECTORY )
 
+if ( WIN32 )
+    get_target_property( QMAKE_LOCATION Qt5::qmake IMPORTED_LOCATION )
+    get_filename_component( Qt5_BIN_DIR ${QMAKE_LOCATION} DIRECTORY )
+    get_filename_component( QT5_ROOT_PATH "${Qt5_BIN_DIR}/.." ABSOLUTE )
+endif()
+
 # Apple uses frameworks - use qmake's location to find macdeployqt
 if ( APPLE )
     get_target_property( QMAKE_LOCATION Qt5::qmake IMPORTED_LOCATION )

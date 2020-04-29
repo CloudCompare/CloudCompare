@@ -88,9 +88,9 @@ void ccGBLSensorProjectionDlg::initWithGBLSensor(const ccGBLSensor* sensor)
 	/*** Angular steps ***/
 	{
 		//pitch step
-		pitchStepSpinBox->setValue(sensor->getPitchStep() * CCCoreLib::RAD_TO_DEG);
+		pitchStepSpinBox->setValue( CCCoreLib::radiansToDegrees( sensor->getPitchStep() ) );
 		//yaw step
-		yawStepSpinBox->setValue(sensor->getYawStep() * CCCoreLib::RAD_TO_DEG);
+		yawStepSpinBox->setValue( CCCoreLib::radiansToDegrees( sensor->getYawStep() ) );
 	}
 
 	/*** Other ***/

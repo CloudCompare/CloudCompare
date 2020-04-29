@@ -1,13 +1,11 @@
 #CloudCompare PCL I/O plugin (for PCD files)
 project( QPCL_IO_PLUGIN )
 
-include ( CMakePolicies NO_POLICY_SCOPE )
+AddPlugin( NAME ${PROJECT_NAME} TYPE io )
 
 include_directories( ${QPCL_PLUGIN_UTILS_LIB_SOURCE_DIR}/filters )
 include_directories( ${QPCL_PLUGIN_UTILS_LIB_SOURCE_DIR}/utils )
 include_directories( ${PCL_INCLUDE_DIRS} )
-
-set( CC_IS_IO_PLUGIN 1 )
 
 include( CMakePluginTemplate )
 

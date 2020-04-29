@@ -5,7 +5,7 @@ if (PLUGIN_STANDARD_QCOMPASS)
 	# CloudCompare 'compass' plugin
 	project( QCOMPASS_PLUGIN )
 
-	include( CMakePolicies NO_POLICY_SCOPE )
+    AddPlugin( NAME ${PROJECT_NAME} )
 
 	#we need ccOverlay classes
 	file( GLOB CC_PLUGIN_CUSTOM_HEADER_LIST ${CloudCompare_SOURCE_DIR}/../common/ccOverlayDialog*.h )

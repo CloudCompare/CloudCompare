@@ -15,7 +15,7 @@ if (PLUGIN_STANDARD_QHOUGH_NORMALS)
 
 	project( QHOUGH_NORMALS_PLUGIN )
 
-	include( CMakePolicies NO_POLICY_SCOPE )
+    AddPlugin( NAME ${PROJECT_NAME} )
 
 	include_directories( src )
 	include_directories( src/normals_Hough )
@@ -27,7 +27,4 @@ if (PLUGIN_STANDARD_QHOUGH_NORMALS)
 	add_subdirectory( ui )
 	
     include( CMakePluginTemplate )
-
-	target_link_libraries( ${PROJECT_NAME} )
-	target_link_libraries( ${PROJECT_NAME} ${OPENGL_LIBRARIES} )
 endif()

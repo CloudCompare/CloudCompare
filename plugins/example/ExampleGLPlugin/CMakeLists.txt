@@ -1,8 +1,12 @@
-option( PLUGIN_EXAMPLE_GL "Check to install example GL plugin" OFF )
+option( PLUGIN_EXAMPLE_GL "Install example GL plugin" OFF )
 
-# CloudCompare example GL plugin
 if ( PLUGIN_EXAMPLE_GL )
     project( ExampleGLPlugin )
     
+    AddPlugin( NAME ${PROJECT_NAME} TYPE gl )
+    
     include( CMakePluginTemplate )
+    
+    add_subdirectory( include )
+    add_subdirectory( src )
 endif()

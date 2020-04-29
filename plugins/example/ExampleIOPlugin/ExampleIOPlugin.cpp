@@ -44,6 +44,8 @@ ExampleIOPlugin::ExampleIOPlugin( QObject* parent )
 
 void ExampleIOPlugin::registerCommands( ccCommandLineInterface *cmd )
 {
+	Q_UNUSED( cmd );
+	
 	// If you want to register this plugin for the command line, create a
 	// ccCommandLineInterface::Command and add it here. e.g.:
 	//

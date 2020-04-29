@@ -8,7 +8,7 @@ if (PLUGIN_STANDARD_QFACETS)
 
 	project( QFACETS_PLUGIN )
 
-	include( CMakePolicies NO_POLICY_SCOPE )
+    AddPlugin( NAME ${PROJECT_NAME} )
 
 	#we need Color Scale Manager and Editor importer
 	file( GLOB CC_PLUGIN_CUSTOM_HEADER_LIST ${CloudCompare_SOURCE_DIR}/ccColorScale*.h )

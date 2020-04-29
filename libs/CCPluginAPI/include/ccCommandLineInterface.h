@@ -147,7 +147,7 @@ public: //constructor
 public: //commands
 
 	//! Generic command interface
-	struct Command
+	struct CCPLUGIN_LIB_API Command
 	{
 		//! Shared type
 		using Shared = QSharedPointer<Command>;
@@ -224,7 +224,7 @@ public: //virtual methods
 public: //file I/O
 
 	//Extended file loading parameters
-	struct CLLoadParameters : public FileIOFilter::LoadParameters
+	struct CCPLUGIN_LIB_API CLLoadParameters : public FileIOFilter::LoadParameters
 	{
 		CLLoadParameters();
 

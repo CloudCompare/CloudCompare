@@ -20,15 +20,13 @@
 
 #include <QString>
 
-#include "CCPluginAPI.h"
-
 #include "ccPluginInterface.h"
 
 
 class ccDefaultPluginData;
 
 
-class CCPLUGIN_LIB_API ccDefaultPluginInterface : public ccPluginInterface
+class ccDefaultPluginInterface : public ccPluginInterface
 {
 public:
 	~ccDefaultPluginInterface() override;

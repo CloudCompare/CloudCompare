@@ -15,8 +15,7 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_STD_PLUGIN_INTERFACE_HEADER
-#define CC_STD_PLUGIN_INTERFACE_HEADER
+#pragma once
 
 //Qt
 #include <QActionGroup>
@@ -103,6 +102,4 @@ protected:
 
 Q_DECLARE_METATYPE(const ccStdPluginInterface *);
 
-Q_DECLARE_INTERFACE(ccStdPluginInterface,"edf.rd.CloudCompare.ccStdPluginInterface/1.4")
-
-#endif //CC_STD_PLUGIN_INTERFACE_HEADER
+Q_DECLARE_INTERFACE(ccStdPluginInterface,"cccorp.cloudcompare.ccStdPluginInterface/1.5")

@@ -6,13 +6,13 @@ set_target_properties( ${PROJECT_NAME} PROPERTIES
     AUTOMOC OFF
     AUTORCC OFF
     AUTOUIC OFF
-    API_STUB_FILE ${CMAKE_CURRENT_LIST_DIR}/stub/ccDefaultPluginInterface.cpp
 )
 
 add_subdirectory( include )
 add_subdirectory( src )
 
 target_link_libraries( ${PROJECT_NAME}
+    CCPluginStub
     QCC_IO_LIB
 )
 
@@ -23,13 +23,3 @@ set_target_properties( ${PROJECT_NAME} PROPERTIES
 )
 
 InstallSharedLibrary( TARGET ${PROJECT_NAME} )
-
-# Document custom property
-define_property( TARGET
-    PROPERTY
-        API_STUB_FILE
-    BRIEF_DOCS
-        "Path to plugin stub file."
-    FULL_DOCS
-        "Path to plugin stub file. This file is compiled with each plugin so they can be recognized properly."
-)

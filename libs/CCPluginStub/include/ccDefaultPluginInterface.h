@@ -15,8 +15,7 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_DEFAULT_PLUGIN_INTERFACE_HEADER
-#define CC_DEFAULT_PLUGIN_INTERFACE_HEADER
+#pragma once
 
 #include <QString>
 
@@ -51,5 +50,3 @@ private:
 		
 	ccDefaultPluginData	*m_data;
 };
-
-#endif

@@ -15,8 +15,7 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_GL_PLUGIN_INTERFACE_HEADER
-#define CC_GL_PLUGIN_INTERFACE_HEADER
+#pragma once
 
 //CC_FBO_LIB
 #include <ccGlFilter.h>
@@ -24,7 +23,7 @@
 #include "ccDefaultPluginInterface.h"
 
 //! GL Filter plugin interface
-/** Version 1.3
+/** Version 1.4
 **/
 class ccGLPluginInterface : public ccDefaultPluginInterface
 {
@@ -46,6 +45,4 @@ public:
 Q_DECLARE_METATYPE(ccGLPluginInterface *);
 
 Q_DECLARE_INTERFACE(ccGLPluginInterface,
-                    "edf.rd.CloudCompare.ccGLFilterPluginInterface/1.3")
-
-#endif //CC_GL_FILTER_PLUGIN_INTERFACE_HEADER
+                    "cccorp.cloudcompare.ccGLFilterPluginInterface/1.4")

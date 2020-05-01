@@ -15,8 +15,7 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_IO_PLUGIN_INTERFACE_HEADER
-#define CC_IO_PLUGIN_INTERFACE_HEADER
+#pragma once
 
 #include <QVector>
 
@@ -26,7 +25,7 @@
 #include "ccDefaultPluginInterface.h"
 
 //! I/O filter plugin interface
-/** Version 1.2
+/** Version 1.3
 **/
 class ccIOPluginInterface : public ccDefaultPluginInterface
 {
@@ -49,6 +48,4 @@ public:
 };
 
 Q_DECLARE_INTERFACE(ccIOPluginInterface,
-                    "edf.rd.CloudCompare.ccIOPluginInterface/1.2")
-
-#endif //CC_IO_PLUGIN_INTERFACE_HEADER
+                    "cccorp.cloudcompare.ccIOPluginInterface/1.3")

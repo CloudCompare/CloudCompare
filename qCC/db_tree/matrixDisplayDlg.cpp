@@ -18,6 +18,8 @@
 #include "matrixDisplayDlg.h"
 #include "ui_matrixDisplayDlg.h"
 
+#include "CCMath.h"
+
 //local
 #include "../ccPersistentSettings.h"
 
@@ -92,11 +94,11 @@ void MatrixDisplayDlg::fillDialogWith(const ccGLMatrixd& mat)
 void MatrixDisplayDlg::fillDialogWith(const CCVector3d& axis, double angle_rad, const CCVector3d& T, int precision)
 {
 	//center position
-	QString centerStr = QString("%0 ; %1 ; %2").arg(T.x,0,'f',precision).arg(T.y,0,'f',precision).arg(T.z,0,'f',precision);
+	QString centerStr = QStringLiteral("%0 ; %1 ; %2").arg(T.x,0,'f',precision).arg(T.y,0,'f',precision).arg(T.z,0,'f',precision);
 	//rotation axis
-	QString axisStr = QString("%0 ; %1 ; %2").arg(axis.x,0,'f',precision).arg(axis.y,0,'f',precision).arg(axis.z,0,'f',precision);
+	QString axisStr = QStringLiteral("%0 ; %1 ; %2").arg(axis.x,0,'f',precision).arg(axis.y,0,'f',precision).arg(axis.z,0,'f',precision);
 	//rotation angle
-	QString angleStr = QString("%1 deg.").arg(angle_rad*CCCoreLib::RAD_TO_DEG,0,'f',precision);
+	QString angleStr = QStringLiteral("%1 deg.").arg( CCCoreLib::RadiansToDegrees( angle_rad ), 0, 'f', precision );
 
 	m_ui->axisLabel->setText(axisStr);
 	m_ui->angleLabel->setText(angleStr);

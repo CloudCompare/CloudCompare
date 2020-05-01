@@ -176,7 +176,7 @@ void ccApplyTransformationDlg::updateAll(const ccGLMatrix& mat, bool textForm/*=
 		rxAxisDoubleSpinBox->setValue(axis.x);
 		ryAxisDoubleSpinBox->setValue(axis.y);
 		rzAxisDoubleSpinBox->setValue(axis.z);
-		rAngleDoubleSpinBox->setValue(alpha * CCCoreLib::RAD_TO_DEG);
+		rAngleDoubleSpinBox->setValue( CCCoreLib::RadiansToDegrees( alpha ) );
 		txAxisDoubleSpinBox->setValue(t.x);
 		tyAxisDoubleSpinBox->setValue(t.y);
 		tzAxisDoubleSpinBox->setValue(t.z);
@@ -205,9 +205,9 @@ void ccApplyTransformationDlg::updateAll(const ccGLMatrix& mat, bool textForm/*=
 		CCVector3 t;
 		mat.getParameters(phi,theta,psi,t);
 
-		ePhiDoubleSpinBox   ->setValue(phi * CCCoreLib::RAD_TO_DEG);
-		eThetaDoubleSpinBox ->setValue(theta * CCCoreLib::RAD_TO_DEG);
-		ePsiDoubleSpinBox   ->setValue(psi * CCCoreLib::RAD_TO_DEG);
+		ePhiDoubleSpinBox   ->setValue( CCCoreLib::RadiansToDegrees( phi ) );
+		eThetaDoubleSpinBox ->setValue( CCCoreLib::RadiansToDegrees( theta ) );
+		ePsiDoubleSpinBox   ->setValue( CCCoreLib::RadiansToDegrees( psi ) );
 		etxAxisDoubleSpinBox->setValue(t.x);
 		etyAxisDoubleSpinBox->setValue(t.y);
 		etzAxisDoubleSpinBox->setValue(t.z);

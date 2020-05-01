@@ -20,6 +20,8 @@
 
 #include <cmath>
 
+#include "CCMath.h"
+
 //Local
 #include "ccGLMatrix.h"
 
@@ -113,7 +115,7 @@ public: //GLU equivalent methods
 		{
 			double* matrix = outMatrix.data();
 
-			double ymax = znear * std::tan(fovyInDegrees/2 * CCCoreLib::DEG_TO_RAD);
+			double ymax = znear * std::tan( CCCoreLib::DegreesToRadians( fovyInDegrees/2 ) );
 			double xmax = ymax * aspectRatio;
 
 			double dZ = zfar - znear;

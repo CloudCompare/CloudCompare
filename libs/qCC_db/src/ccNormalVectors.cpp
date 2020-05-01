@@ -846,9 +846,9 @@ void ccNormalVectors::ConvertNormalToStrikeAndDip(const CCVector3& N, PointCoord
 	// uses a right hand rule for the dip of the plane
 	if (N.norm2() > std::numeric_limits<PointCoordinateType>::epsilon())
 	{
-		strike_deg = 180.0 - atan2(N.y, N.x)*CCCoreLib::RAD_TO_DEG;		//atan2 output is between -180 and 180! So strike is always positive here
+		strike_deg = 180.0 - CCCoreLib::RadiansToDegrees( atan2(N.y, N.x) );		//atan2 output is between -180 and 180! So strike is always positive here
 		PointCoordinateType x = sqrt(N.x*N.x + N.y*N.y);		//x is the horizontal magnitude
-		dip_deg = atan2(x, N.z)*CCCoreLib::RAD_TO_DEG;
+		dip_deg = CCCoreLib::RadiansToDegrees( atan2(x, N.z) );
 	}
 	else
 	{
@@ -886,8 +886,8 @@ void ccNormalVectors::ConvertNormalToDipAndDipDir(const CCVector3& N, PointCoord
 		// We skip the division by r because the normal is a unit vector.
 		double dip_rad = acos(fabs(N.z));
 
-		dipDir_deg = static_cast<PointCoordinateType>(dipDir_rad * CCCoreLib::RAD_TO_DEG);
-		dip_deg = static_cast<PointCoordinateType>(dip_rad * CCCoreLib::RAD_TO_DEG);
+		dipDir_deg = static_cast<PointCoordinateType>(CCCoreLib::RadiansToDegrees( dipDir_rad ));
+		dip_deg = static_cast<PointCoordinateType>(CCCoreLib::RadiansToDegrees( dip_rad ));
 	}
 	else
 	{

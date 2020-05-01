@@ -31,7 +31,7 @@
 #include <ccGLWidget.h>
 
 //CCCoreLib
-#include <CCConst.h>
+#include <CCMath.h>
 #include <GenericTriangle.h>
 
 //Qt
@@ -456,17 +456,17 @@ void ccCameraParamEditDlg::initWithMatrix(const ccGLMatrixd& mat)
 	m_associatedWin = nullptr;
 
 	m_ui->phiSpinBox->blockSignals(true);
-	m_ui->phiSpinBox->setValue(CCCoreLib::RAD_TO_DEG*phi);
+	m_ui->phiSpinBox->setValue( CCCoreLib::RadiansToDegrees( phi ) );
 	dPhiValueChanged(m_ui->phiSpinBox->value());
 	m_ui->phiSpinBox->blockSignals(false);
 	
 	m_ui->psiSpinBox->blockSignals(true);
-	m_ui->psiSpinBox->setValue(CCCoreLib::RAD_TO_DEG*psi);
+	m_ui->psiSpinBox->setValue( CCCoreLib::RadiansToDegrees( psi ) );
 	dPsiValueChanged(m_ui->psiSpinBox->value());
 	m_ui->psiSpinBox->blockSignals(false);
 
 	m_ui->thetaSpinBox->blockSignals(true);
-	m_ui->thetaSpinBox->setValue(CCCoreLib::RAD_TO_DEG*theta);
+	m_ui->thetaSpinBox->setValue( CCCoreLib::RadiansToDegrees( theta ) );
 	dThetaValueChanged(m_ui->thetaSpinBox->value());
 	m_ui->thetaSpinBox->blockSignals(false);
 
@@ -550,13 +550,9 @@ void ccCameraParamEditDlg::updateZNearCoef(float zNearCoef)
 
 ccGLMatrixd ccCameraParamEditDlg::getMatrix()
 {
-	double phi = 0;
-	double theta = 0;
-	double psi = 0;
-
-	phi = CCCoreLib::DEG_TO_RAD * m_ui->phiSpinBox->value();
-	psi = CCCoreLib::DEG_TO_RAD * m_ui->psiSpinBox->value();
-	theta = CCCoreLib::DEG_TO_RAD * m_ui->thetaSpinBox->value();
+	const double phi = CCCoreLib::DegreesToRadians( m_ui->phiSpinBox->value() );
+	const double psi = CCCoreLib::DegreesToRadians( m_ui->psiSpinBox->value() );
+	const double theta = CCCoreLib::DegreesToRadians( m_ui->thetaSpinBox->value() );
 
 	ccGLMatrixd mat;
 	CCVector3d T(0,0,0);

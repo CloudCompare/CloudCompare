@@ -902,20 +902,30 @@ void ccPropertiesTreeDelegate::fillWithGBLSensor(const ccGBLSensor* _obj)
 		//Angular range (yaw)
 		PointCoordinateType yawMin = _obj->getMinYaw();
 		PointCoordinateType yawMax = _obj->getMaxYaw();
-		appendRow(ITEM( tr( "Yaw span" ) ), ITEM(QStringLiteral("[%1 ; %2]").arg(yawMin * CCCoreLib::RAD_TO_DEG, 0, 'f', 2).arg(yawMax * CCCoreLib::RAD_TO_DEG, 0, 'f', 2)));
-
+		appendRow(ITEM( tr( "Yaw span" ) ),
+				  ITEM( QStringLiteral("[%1 ; %2]")
+						.arg( CCCoreLib::RadiansToDegrees( yawMin ), 0, 'f', 2)
+						.arg( CCCoreLib::RadiansToDegrees( yawMax ), 0, 'f', 2)));
+		
 		//Angular steps (yaw)
 		PointCoordinateType yawStep = _obj->getYawStep();
-		appendRow(ITEM( tr( "Yaw step" ) ), ITEM(QStringLiteral("%1").arg(yawStep * CCCoreLib::RAD_TO_DEG, 0, 'f', 4)));
+		appendRow(ITEM( tr( "Yaw step" ) ),
+				  ITEM( QStringLiteral("%1")
+						.arg( CCCoreLib::RadiansToDegrees( yawStep ), 0, 'f', 4)));
 
 		//Angular range (pitch)
 		PointCoordinateType pitchMin = _obj->getMinPitch();
 		PointCoordinateType pitchMax = _obj->getMaxPitch();
-		appendRow(ITEM( tr( "Pitch span" ) ), ITEM(QStringLiteral("[%1 ; %2]").arg(pitchMin * CCCoreLib::RAD_TO_DEG, 0, 'f', 2).arg(pitchMax * CCCoreLib::RAD_TO_DEG, 0, 'f', 2)));
+		appendRow(ITEM( tr( "Pitch span" ) ),
+				  ITEM( QStringLiteral("[%1 ; %2]")
+						.arg( CCCoreLib::RadiansToDegrees( pitchMin ), 0, 'f', 2)
+						.arg( CCCoreLib::RadiansToDegrees( pitchMax ), 0, 'f', 2)));
 
 		//Angular steps (pitch)
 		PointCoordinateType pitchStep = _obj->getPitchStep();
-		appendRow(ITEM( tr( "Pitch step" ) ), ITEM(QStringLiteral("%1").arg(pitchStep * CCCoreLib::RAD_TO_DEG, 0, 'f', 4)));
+		appendRow(ITEM( tr( "Pitch step" ) ),
+				  ITEM( QStringLiteral("%1")
+						.arg( CCCoreLib::RadiansToDegrees( pitchStep ), 0, 'f', 4)));
 	}
 
 	//Positions
@@ -946,7 +956,7 @@ void ccPropertiesTreeDelegate::fillWithCameraSensor(const ccCameraSensor* _obj)
 	}
 
 	//Field of view
-	appendRow(ITEM( tr( "Field of view" ) ), ITEM(QString::number(params.vFOV_rad * CCCoreLib::RAD_TO_DEG) + " deg."));
+	appendRow(ITEM( tr( "Field of view" ) ), ITEM(QString::number( CCCoreLib::RadiansToDegrees( params.vFOV_rad ) ) + " deg."));
 
 	//Skewness
 	appendRow(ITEM( tr( "Skew" ) ), ITEM(QString::number(params.skew)));

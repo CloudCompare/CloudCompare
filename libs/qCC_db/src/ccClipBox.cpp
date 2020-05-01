@@ -69,7 +69,7 @@ void DrawUnitArrow(int ID, const CCVector3& start, const CCVector3& direction, P
 		if (ps > -1)
 		{
 			//we deduce angle from scalar prod
-			angle_deg = acos(ps) * static_cast<PointCoordinateType>(CCCoreLib::RAD_TO_DEG);
+			angle_deg = CCCoreLib::RadiansToDegrees( acos(ps) );
 
 			//we compute rotation axis with scalar prod
 			axis = Z.cross(direction);
@@ -123,7 +123,7 @@ static void DrawUnitTorus(int ID, const CCVector3& center, const CCVector3& dire
 		if (ps > -1)
 		{
 			//we deduce angle from scalar prod
-			angle_deg = acos(ps) * static_cast<PointCoordinateType>(CCCoreLib::RAD_TO_DEG);
+			angle_deg = CCCoreLib::RadiansToDegrees( acos(ps) );
 
 			//we compute rotation axis with scalar prod
 			axis = Z.cross(direction);

@@ -70,7 +70,7 @@ static double ConvertAngleFromRad(double angle_rad, DistanceMapGenerationDlg::AN
 	switch(destUnit)
 	{
 	case DistanceMapGenerationDlg::ANG_DEG: //degrees
-		return angle_rad * CCCoreLib::RAD_TO_DEG;
+		return CCCoreLib::RadiansToDegrees( angle_rad );
 	case DistanceMapGenerationDlg::ANG_RAD: //radians
 		return angle_rad;
 	case DistanceMapGenerationDlg::ANG_GRAD: //grades
@@ -892,15 +892,15 @@ void DistanceMapGenerationDlg::angularUnitChanged(int index)
 		{
 		m_angularUnits = ANG_DEG;
 
-		SetSpinBoxValues(xStepDoubleSpinBox,		2, 0.01, 360.0, 0.1, xStep_rad			* CCCoreLib::RAD_TO_DEG);
-		SetSpinBoxValues(scaleXStepDoubleSpinBox,	2, 0.01, 360.0, 5.0, scaleXStep_rad		* CCCoreLib::RAD_TO_DEG);
-		SetSpinBoxValues(xMinDoubleSpinBox,			2,  0.0, 360.0, 5.0, xMin_rad			* CCCoreLib::RAD_TO_DEG);
-		SetSpinBoxValues(xMaxDoubleSpinBox,			2,  0.0, 360.0, 5.0, xMax_rad			* CCCoreLib::RAD_TO_DEG);
+		SetSpinBoxValues(xStepDoubleSpinBox,		2, 0.01, 360.0, 0.1, CCCoreLib::RadiansToDegrees( xStep_rad ) );
+		SetSpinBoxValues(scaleXStepDoubleSpinBox,	2, 0.01, 360.0, 5.0, CCCoreLib::RadiansToDegrees( scaleXStep_rad ) );
+		SetSpinBoxValues(xMinDoubleSpinBox,			2,  0.0, 360.0, 5.0, CCCoreLib::RadiansToDegrees( xMin_rad ) );
+		SetSpinBoxValues(xMaxDoubleSpinBox,			2,  0.0, 360.0, 5.0, CCCoreLib::RadiansToDegrees( xMax_rad ) );
 
-		SetSpinBoxValues(latStepDoubleSpinBox,		2,   0.01, 89.99, 1.0, latStep_rad		* CCCoreLib::RAD_TO_DEG);
-		SetSpinBoxValues(scaleLatStepDoubleSpinBox,	2,   0.01, 89.99, 1.0, scaleLatStep_rad	* CCCoreLib::RAD_TO_DEG);
-		SetSpinBoxValues(latMinDoubleSpinBox,		2, -89.99, 89.99, 1.0, latMin_rad		* CCCoreLib::RAD_TO_DEG);
-		SetSpinBoxValues(latMaxDoubleSpinBox,		2, -89.99, 89.99, 1.0, latMax_rad		* CCCoreLib::RAD_TO_DEG);
+		SetSpinBoxValues(latStepDoubleSpinBox,		2,   0.01, 89.99, 1.0, CCCoreLib::RadiansToDegrees( latStep_rad ) );
+		SetSpinBoxValues(scaleLatStepDoubleSpinBox,	2,   0.01, 89.99, 1.0, CCCoreLib::RadiansToDegrees( scaleLatStep_rad ) );
+		SetSpinBoxValues(latMinDoubleSpinBox,		2, -89.99, 89.99, 1.0, CCCoreLib::RadiansToDegrees( latMin_rad ) );
+		SetSpinBoxValues(latMaxDoubleSpinBox,		2, -89.99, 89.99, 1.0, CCCoreLib::RadiansToDegrees( latMax_rad) );
 
 		xMaxDoubleSpinBox->setMaximum(360.0);
 		xMaxDoubleSpinBox->setValue(360.0);

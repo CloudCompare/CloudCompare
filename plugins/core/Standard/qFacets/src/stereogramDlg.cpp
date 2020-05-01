@@ -302,7 +302,7 @@ void StereogramWidget::mousePressEvent(QMouseEvent* e)
 			{
 				//compute equivalent positions
 				m_clickDip_deg = std::min(90.0, 90.0 * sqrt(static_cast<double>(squareDistToCenter)) / static_cast<double>(m_radius));
-				m_clickDipDir_deg = atan2(static_cast<double>(AB.y()),static_cast<double>(AB.x())) * CCCoreLib::RAD_TO_DEG;
+				m_clickDipDir_deg = CCCoreLib::RadiansToDegrees( atan2(static_cast<double>(AB.y()), static_cast<double>(AB.x())) );
 				if (m_clickDipDir_deg < 0)
 					m_clickDipDir_deg += 360.0;
 				m_clickDipDir_deg += 90.0; //stereogram starts at 12 o'clock (not 3)

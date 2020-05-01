@@ -164,7 +164,10 @@ bool ccGriddedTools::DetectParameters(	const ccPointCloud* cloud,
 				parameters.deltaPhiRad = static_cast<PointCoordinateType>(angles[maxSpanIndex].first);
 				if (verbose)
 				{
-					ccLog::Print(QString("[Scan grid] Detected pitch step: %1 degrees (span [%2 - %3])").arg(parameters.deltaPhiRad * CCCoreLib::RAD_TO_DEG).arg(parameters.minPhi * CCCoreLib::RAD_TO_DEG).arg(parameters.maxPhi * CCCoreLib::RAD_TO_DEG));
+					ccLog::Print( QStringLiteral("[Scan grid] Detected pitch step: %1 degrees (span [%2 - %3])")
+								  .arg( CCCoreLib::RadiansToDegrees( parameters.deltaPhiRad ) )
+								  .arg( CCCoreLib::RadiansToDegrees( parameters.minPhi ) )
+								  .arg( CCCoreLib::RadiansToDegrees( parameters.maxPhi ) ) );
 				}
 			}
 			else
@@ -280,7 +283,10 @@ bool ccGriddedTools::DetectParameters(	const ccPointCloud* cloud,
 				parameters.deltaThetaRad = static_cast<PointCoordinateType>(angles[maxSpanIndex].first);
 				if (verbose)
 				{
-					ccLog::Print(QString("[Scan grid] Detected yaw step: %1 degrees (span [%2 - %3])").arg(parameters.deltaThetaRad * CCCoreLib::RAD_TO_DEG).arg(parameters.minTheta * CCCoreLib::RAD_TO_DEG).arg(parameters.maxTheta * CCCoreLib::RAD_TO_DEG));
+					ccLog::Print( QStringLiteral("[Scan grid] Detected yaw step: %1 degrees (span [%2 - %3])")
+								  .arg( CCCoreLib::RadiansToDegrees( parameters.deltaThetaRad ) )
+								  .arg( CCCoreLib::RadiansToDegrees( parameters.minTheta ) )
+								  .arg( CCCoreLib::RadiansToDegrees( parameters.maxTheta ) ) );
 				}
 			}
 			else

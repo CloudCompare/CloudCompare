@@ -55,6 +55,11 @@ function( AddPlugin )
         target_compile_definitions( ${PLUGIN_TARGET} PRIVATE $<$<CONFIG:Release>:QT_NO_DEBUG> )
     endif()
     
+    # We need to compile this stub file in with each plugin so the plugins are recognized
+    get_target_property( API_STUB_FILE CCPluginAPI API_STUB_FILE )
+    
+    target_sources( ${PLUGIN_TARGET} PRIVATE "${API_STUB_FILE}" )
+    
     # Link to required libraries
     target_link_libraries( ${PLUGIN_TARGET}
         CCPluginAPI

@@ -5,11 +5,12 @@
 # Arguments:
 #   NAME The name of the plugin (this is the target)
 #   TYPE One of "gl", "io", or "standard". If TYPE is not specified, it will default to "standard".
+#   SHADER_FOLDER If it is a gl plugin, this is the folder containing the shaders. Ignored otherwise.
 function( AddPlugin )
     cmake_parse_arguments(
             ADD_PLUGIN
             ""
-            "NAME;TYPE"
+            "NAME;TYPE;SHADER_FOLDER"
             ""
             ${ARGN}
         )
@@ -38,16 +39,29 @@ function( AddPlugin )
     add_library( ${PLUGIN_TARGET} SHARED )
     
     # Set default properties
-    set_target_properties( ${PLUGIN_TARGET} PROPERTIES
-        AUTOUIC ON # FIXME Remove after everything has moved to targets and we can set it globally
-        AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui
+    set_target_properties( ${PLUGIN_TARGET}
+        PROPERTIES
+            AUTOUIC ON # FIXME Remove after everything has moved to targets and we can set it globally
+            AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui
+            PLUGIN_TYPE "${ADD_PLUGIN_TYPE}"
     )
     
-    if( "${ADD_PLUGIN_TYPE}" STREQUAL "io" )
+    # Keep track of our shader folder if it was given
+    if( ("${ADD_PLUGIN_TYPE}" STREQUAL "gl") AND ADD_PLUGIN_SHADER_FOLDER )
+        # Because they are added relative to the CMakeLists file, add the path
+        set( SHADER_FOLDER "${CMAKE_CURRENT_SOURCE_DIR}/shaders/${ADD_PLUGIN_SHADER_FOLDER}" )
+        
+        # Check that the folder exists
+        if( NOT EXISTS "${SHADER_FOLDER}" )
+            message( FATAL_ERROR "AddPlugin: SHADER_FOLDER does not exist: ${SHADER_FOLDER}" )
+        endif()
+        
+        # Add it as a property
         set_target_properties( ${PLUGIN_TARGET}
             PROPERTIES
-            IO_PLUGIN 1
-        )        
+                SHADER_FOLDER_NAME "${ADD_PLUGIN_SHADER_FOLDER}"
+                SHADER_FOLDER_PATH "${SHADER_FOLDER}"
+        )
     endif()
     
     if( WIN32 )
@@ -68,12 +82,30 @@ function( AddPlugin )
     message( STATUS "Added ${ADD_PLUGIN_TYPE} plugin: ${ADD_PLUGIN_NAME}")
 endfunction()
 
-# define_property is for documentation purposes
+# Documentation of custom properties
 define_property( TARGET
     PROPERTY
-        IS_IO_PLUGIN
+        PLUGIN_TYPE
     BRIEF_DOCS
-        "Indicates that a plugin is an IO plugin."
+        "Type of plugin: gl, io, or standard."
     FULL_DOCS
-        "Indicate that a plugin is an IO plugin. Used to decide where to install this plugin."
+        "Type of plugin: gl, io, or standard. Used to decide where to install this plugin."
+)
+
+define_property( TARGET
+    PROPERTY
+        SHADER_FOLDER_NAME
+    BRIEF_DOCS
+        "Name of the shader folder for a gl plugin."
+    FULL_DOCS
+        "Name of the shader folder for a gl plugin. Used as the name of the folder when installing the shader files."
+)
+
+define_property( TARGET
+    PROPERTY
+        SHADER_FOLDER_PATH
+    BRIEF_DOCS
+        "Path to the folder containing the shader files for a gl plugin."
+    FULL_DOCS
+        "Path to the folder containing the shader files for a gl plugin. Files are copied from here when installing."
 )

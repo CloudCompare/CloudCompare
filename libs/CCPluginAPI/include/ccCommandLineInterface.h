@@ -18,6 +18,8 @@
 #ifndef CC_COMMAND_LINE_INTERFACE_HEADER
 #define CC_COMMAND_LINE_INTERFACE_HEADER
 
+#include "CCPluginAPI.h"
+
 //qCC_db
 #include <ccPointCloud.h>
 
@@ -44,7 +46,7 @@ enum class CL_ENTITY_TYPE {
 };
 
 //! Loaded entity description
-struct CLEntityDesc
+struct CCPLUGIN_LIB_API CLEntityDesc
 {
 	QString basename;
 	QString path;
@@ -62,14 +64,14 @@ struct CLEntityDesc
 };
 
 //! Loaded group description
-struct CLGroupDesc : CLEntityDesc
+struct CCPLUGIN_LIB_API CLGroupDesc : CLEntityDesc
 {
 	ccHObject* groupEntity;
-
-	CLGroupDesc(ccHObject* group,
-				const QString& basename,
-				const QString& path = QString());
-
+	
+	CLGroupDesc( ccHObject* group,
+				 const QString& basename,
+				 const QString& path = QString() );
+	
 	~CLGroupDesc() override = default;
 	
 	ccHObject* getEntity() override;
@@ -78,21 +80,21 @@ struct CLGroupDesc : CLEntityDesc
 };
 
 //! Loaded cloud description
-struct CLCloudDesc : CLEntityDesc
+struct CCPLUGIN_LIB_API CLCloudDesc : CLEntityDesc
 {
 	ccPointCloud* pc;
 
 	CLCloudDesc();
-
-	CLCloudDesc(ccPointCloud* cloud,
-				const QString& filename = QString(),
-				int index = -1);
-
-	CLCloudDesc(ccPointCloud* cloud,
-				const QString& basename,
-				const QString& path,
-				int index = -1);
-
+	
+	CLCloudDesc( ccPointCloud* cloud,
+				 const QString& filename = QString(),
+				 int index = -1 );
+	
+	CLCloudDesc( ccPointCloud* cloud,
+				 const QString& basename,
+				 const QString& path,
+				 int index = -1 );
+	
 	~CLCloudDesc() override = default;
 
 	ccHObject* getEntity() override;
@@ -101,21 +103,21 @@ struct CLCloudDesc : CLEntityDesc
 };
 
 //! Loaded mesh description
-struct CLMeshDesc : CLEntityDesc
+struct CCPLUGIN_LIB_API CLMeshDesc : CLEntityDesc
 {
 	ccGenericMesh* mesh;
 
 	CLMeshDesc();
-
-	CLMeshDesc(	ccGenericMesh* _mesh,
+	
+	CLMeshDesc( ccGenericMesh* _mesh,
 				const QString& filename = QString(),
 				int index = -1 );
-
-	CLMeshDesc(	ccGenericMesh* _mesh,
+	
+	CLMeshDesc( ccGenericMesh* _mesh,
 				const QString& basename,
 				const QString& path,
 				int index = -1 );
-
+	
 	~CLMeshDesc() override = default;
 	
 	ccHObject* getEntity() override;
@@ -124,7 +126,7 @@ struct CLMeshDesc : CLEntityDesc
 };
 
 //! Command line interface
-class ccCommandLineInterface
+class CCPLUGIN_LIB_API ccCommandLineInterface
 {
 public: //constructor
 
@@ -145,7 +147,7 @@ public: //constructor
 public: //commands
 
 	//! Generic command interface
-	struct Command
+	struct CCPLUGIN_LIB_API Command
 	{
 		//! Shared type
 		using Shared = QSharedPointer<Command>;
@@ -222,7 +224,7 @@ public: //virtual methods
 public: //file I/O
 
 	//Extended file loading parameters
-	struct CLLoadParameters : public FileIOFilter::LoadParameters
+	struct CCPLUGIN_LIB_API CLLoadParameters : public FileIOFilter::LoadParameters
 	{
 		CLLoadParameters();
 

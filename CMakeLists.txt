@@ -81,6 +81,7 @@ endif()
 
 # Load advanced scripts
 include( CMakeInclude )
+include( Install )
 
 # Add external libraries
 add_subdirectory( extern/CCCoreLib )

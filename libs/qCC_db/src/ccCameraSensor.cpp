@@ -370,7 +370,7 @@ bool ccCameraSensor::applyViewport(ccGenericGLDisplay* win/*=0*/)
 	//aspect ratio
 	float ar = static_cast<float>(m_intrinsicParams.arrayWidth) / m_intrinsicParams.arrayHeight;
 	//fov
-	float fov_deg = CCCoreLib::radiansToDegrees( m_intrinsicParams.vFOV_rad );
+	float fov_deg = CCCoreLib::RadiansToDegrees( m_intrinsicParams.vFOV_rad );
 	//camera position/orientation
 	ccGLMatrixd transd(trans.data());
 	win->setupProjectiveViewport(transd, fov_deg, ar);

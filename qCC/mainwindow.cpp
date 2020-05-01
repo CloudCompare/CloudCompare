@@ -1880,7 +1880,7 @@ void MainWindow::doActionComputeScatteringAngles()
 
 		if (toDegreeFlag)
 		{
-			theta = CCCoreLib::radiansToDegrees( theta );
+			theta = CCCoreLib::RadiansToDegrees( theta );
 		}
 		
 		angles->setValue(i,theta);
@@ -9247,7 +9247,7 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 			if (smDlg.updateFOV())
 			{
 				//set the right FOV
-				double fov_deg = 2 * CCCoreLib::radiansToDegrees( std::atan(params.screenWidth_mm / (2.0 * params.screenDistance_mm)) );
+				double fov_deg = 2 * CCCoreLib::RadiansToDegrees( std::atan(params.screenWidth_mm / (2.0 * params.screenDistance_mm)) );
 				ccLog::Print(QString("[Stereo] F.O.V. forced to %1 deg.").arg(fov_deg));
 				win->setFov(fov_deg);
 			}
@@ -10995,7 +10995,7 @@ void MainWindow::doActionComparePlanes()
 	p2->getEquation(N2, d2);
 
 	double angle_rad = N1.angle_rad(N2);
-	info << QString("Angle P1/P2: %1 deg.").arg( CCCoreLib::radiansToDegrees( angle_rad ) );
+	info << QString("Angle P1/P2: %1 deg.").arg( CCCoreLib::RadiansToDegrees( angle_rad ) );
 	ccLog::Print(QString("[Compare] ") + info.last());
 
 	PointCoordinateType planeEq1[4] = { N1.x, N1.y, N1.z, d1 };

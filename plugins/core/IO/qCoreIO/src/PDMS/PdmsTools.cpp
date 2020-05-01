@@ -1486,16 +1486,16 @@ std::pair<int, int> SCylinder::write(std::ostream &output, int nbtabs) const
 	output << "HEIGHT " << height << std::endl;
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "XTSHEAR " << CCCoreLib::radiansToDegrees( xtshear ) << std::endl;
+	output << "XTSHEAR " << CCCoreLib::RadiansToDegrees( xtshear ) << std::endl;
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "XBSHEAR " << CCCoreLib::radiansToDegrees( xbshear ) << std::endl;
+	output << "XBSHEAR " << CCCoreLib::RadiansToDegrees( xbshear ) << std::endl;
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "YTSHEAR " << CCCoreLib::radiansToDegrees( ytshear ) << std::endl;
+	output << "YTSHEAR " << CCCoreLib::RadiansToDegrees( ytshear ) << std::endl;
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "YBSHEAR " << CCCoreLib::radiansToDegrees( ybshear ) << std::endl;
+	output << "YBSHEAR " << CCCoreLib::RadiansToDegrees( ybshear ) << std::endl;
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << std::endl;
@@ -1551,7 +1551,7 @@ std::pair<int, int> CTorus::write(std::ostream &output, int nbtabs) const
 	output << "ROUTSIDE " << outside_radius << std::endl;
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "ANGLE " << CCCoreLib::radiansToDegrees( angle ) << std::endl;
+	output << "ANGLE " << CCCoreLib::RadiansToDegrees( angle ) << std::endl;
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << std::endl;
@@ -1611,7 +1611,7 @@ std::pair<int, int> RTorus::write(std::ostream &output, int nbtabs) const
 	output << "HEIGHT " << height << std::endl;
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "ANGLE " << CCCoreLib::radiansToDegrees( angle ) << std::endl;
+	output << "ANGLE " << CCCoreLib::RadiansToDegrees( angle ) << std::endl;
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << std::endl;

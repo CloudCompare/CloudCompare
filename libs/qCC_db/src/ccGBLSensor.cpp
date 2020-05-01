@@ -538,7 +538,7 @@ bool ccGBLSensor::computeAutoParameters(CCCoreLib::GenericCloud* theCloud)
 			projectPoint(*P, Q, depth, m_activeIndex);
 
 			//yaw
-			int angleYaw = static_cast<int>(CCCoreLib::radiansToDegrees( Q.x ));
+			int angleYaw = static_cast<int>(CCCoreLib::RadiansToDegrees( Q.x ));
 			assert(angleYaw >= -180 && angleYaw <= 180);
 			if (angleYaw == 180) //360 degrees warp
 				angleYaw = -180;
@@ -556,7 +556,7 @@ bool ccGBLSensor::computeAutoParameters(CCCoreLib::GenericCloud* theCloud)
 			}
 
 			//pitch
-			int anglePitch = static_cast<int>(CCCoreLib::radiansToDegrees( Q.y ));
+			int anglePitch = static_cast<int>(CCCoreLib::RadiansToDegrees( Q.y ));
 			assert(anglePitch >= -180 && anglePitch <= 180);
 			if (anglePitch == 180)
 				anglePitch = -180;

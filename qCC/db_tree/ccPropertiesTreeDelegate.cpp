@@ -903,28 +903,28 @@ void ccPropertiesTreeDelegate::fillWithGBLSensor(const ccGBLSensor* _obj)
 		PointCoordinateType yawMax = _obj->getMaxYaw();
 		appendRow(ITEM( tr( "Yaw span" ) ),
 				  ITEM( QStringLiteral("[%1 ; %2]")
-						.arg( CCCoreLib::radiansToDegrees( yawMin ), 0, 'f', 2)
-						.arg( CCCoreLib::radiansToDegrees( yawMax ), 0, 'f', 2)));
+						.arg( CCCoreLib::RadiansToDegrees( yawMin ), 0, 'f', 2)
+						.arg( CCCoreLib::RadiansToDegrees( yawMax ), 0, 'f', 2)));
 		
 		//Angular steps (yaw)
 		PointCoordinateType yawStep = _obj->getYawStep();
 		appendRow(ITEM( tr( "Yaw step" ) ),
 				  ITEM( QStringLiteral("%1")
-						.arg( CCCoreLib::radiansToDegrees( yawStep ), 0, 'f', 4)));
+						.arg( CCCoreLib::RadiansToDegrees( yawStep ), 0, 'f', 4)));
 
 		//Angular range (pitch)
 		PointCoordinateType pitchMin = _obj->getMinPitch();
 		PointCoordinateType pitchMax = _obj->getMaxPitch();
 		appendRow(ITEM( tr( "Pitch span" ) ),
 				  ITEM( QStringLiteral("[%1 ; %2]")
-						.arg( CCCoreLib::radiansToDegrees( pitchMin ), 0, 'f', 2)
-						.arg( CCCoreLib::radiansToDegrees( pitchMax ), 0, 'f', 2)));
+						.arg( CCCoreLib::RadiansToDegrees( pitchMin ), 0, 'f', 2)
+						.arg( CCCoreLib::RadiansToDegrees( pitchMax ), 0, 'f', 2)));
 
 		//Angular steps (pitch)
 		PointCoordinateType pitchStep = _obj->getPitchStep();
 		appendRow(ITEM( tr( "Pitch step" ) ),
 				  ITEM( QStringLiteral("%1")
-						.arg( CCCoreLib::radiansToDegrees( pitchStep ), 0, 'f', 4)));
+						.arg( CCCoreLib::RadiansToDegrees( pitchStep ), 0, 'f', 4)));
 	}
 
 	//Positions
@@ -955,7 +955,7 @@ void ccPropertiesTreeDelegate::fillWithCameraSensor(const ccCameraSensor* _obj)
 	}
 
 	//Field of view
-	appendRow(ITEM( tr( "Field of view" ) ), ITEM(QString::number( CCCoreLib::radiansToDegrees( params.vFOV_rad ) ) + " deg."));
+	appendRow(ITEM( tr( "Field of view" ) ), ITEM(QString::number( CCCoreLib::RadiansToDegrees( params.vFOV_rad ) ) + " deg."));
 
 	//Skewness
 	appendRow(ITEM( tr( "Skew" ) ), ITEM(QString::number(params.skew)));

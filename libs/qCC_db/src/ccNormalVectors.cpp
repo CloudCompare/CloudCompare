@@ -903,9 +903,9 @@ CCVector3 ccNormalVectors::ConvertDipAndDipDirToNormal(PointCoordinateType dip_d
 		return CCVector3(0, 0, 0);
 	}
 	
-	double Nz = cos(dip_deg * CCCoreLib::DEG_TO_RAD);
+	double Nz = cos( CCCoreLib::DegreesToRadians( dip_deg ) );
 	double Nxy = sqrt(1.0 - Nz * Nz);
-	double dipDir_rad = dipDir_deg * CCCoreLib::DEG_TO_RAD;
+	double dipDir_rad = CCCoreLib::DegreesToRadians( dipDir_deg );
 	CCVector3 N(	static_cast<PointCoordinateType>(Nxy * sin(dipDir_rad)),
 					static_cast<PointCoordinateType>(Nxy * cos(dipDir_rad)),
 					static_cast<PointCoordinateType>(Nz) );

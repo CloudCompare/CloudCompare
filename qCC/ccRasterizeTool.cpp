@@ -1455,14 +1455,14 @@ void ccRasterizeTool::generateHillshade()
 
 	//now we can compute the hillshade
 	int zenith_deg = m_UI->sunZenithSpinBox->value();
-	double zenith_rad = zenith_deg * CCCoreLib::DEG_TO_RAD;
+	double zenith_rad = CCCoreLib::DegreesToRadians( static_cast<double>( zenith_deg ) );
 
 	double cos_zenith_rad = cos(zenith_rad);
 	double sin_zenith_rad = sin(zenith_rad);
 
 	int azimuth_deg = m_UI->sunAzimuthSpinBox->value();
 	int azimuth_math = 360 - azimuth_deg + 90;
-	double azimuth_rad = azimuth_math * CCCoreLib::DEG_TO_RAD;
+	double azimuth_rad = CCCoreLib::DegreesToRadians( static_cast<double>( azimuth_math ) );
 
 	//for all cells
 	unsigned validCellIndex = 0;

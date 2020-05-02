@@ -304,8 +304,8 @@ void ccPlaneEditDlg::updatePlane(ccPlane* plane)
 		//special case: plane parallel to XY
 		if (fabs(N.z) > CCCoreLib::PC_ONE - std::numeric_limits<PointCoordinateType>::epsilon())
 		{
-			ccGLMatrix rotX; rotX.initFromParameters(-dip * CCCoreLib::DEG_TO_RAD, CCVector3(1, 0, 0), CCVector3(0, 0, 0)); //plunge
-			ccGLMatrix rotZ; rotZ.initFromParameters(dipDir * CCCoreLib::DEG_TO_RAD, CCVector3(0, 0, -1), CCVector3(0, 0, 0));
+			ccGLMatrix rotX; rotX.initFromParameters( CCCoreLib::DegreesToRadians( -dip ), CCVector3(1, 0, 0), CCVector3(0, 0, 0) ); //plunge
+			ccGLMatrix rotZ; rotZ.initFromParameters( CCCoreLib::DegreesToRadians( dipDir ), CCVector3(0, 0, -1), CCVector3(0, 0, 0) );
 			rotation = rotZ * rotX;
 		}
 		else //general case

@@ -87,7 +87,7 @@ static double ConvertAngleToRad(double angle, DistanceMapGenerationDlg::ANGULAR_
 	switch(srcUnit)
 	{
 	case DistanceMapGenerationDlg::ANG_DEG: //degrees
-		return angle * CCCoreLib::DEG_TO_RAD;
+		return CCCoreLib::DegreesToRadians( angle );
 	case DistanceMapGenerationDlg::ANG_RAD: //radians
 		return angle;
 	case DistanceMapGenerationDlg::ANG_GRAD: //grades

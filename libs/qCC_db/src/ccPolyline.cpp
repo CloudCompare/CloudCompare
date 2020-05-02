@@ -233,7 +233,7 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 		if (m_mode2D)
 		{
 			u *= -m_arrowLength;
-			static const PointCoordinateType s_defaultArrowAngle = static_cast<PointCoordinateType>(15.0 * CCCoreLib::DEG_TO_RAD);
+			static const PointCoordinateType s_defaultArrowAngle = CCCoreLib::DegreesToRadians( static_cast<PointCoordinateType>(15.0) );
 			static const PointCoordinateType cost = cos(s_defaultArrowAngle);
 			static const PointCoordinateType sint = sin(s_defaultArrowAngle);
 			CCVector3 A(cost * u.x - sint * u.y, sint * u.x + cost * u.y, 0);

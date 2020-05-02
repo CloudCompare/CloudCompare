@@ -117,7 +117,7 @@ void ccApplyTransformationDlg::onRotAngleValueChanged(double)
 	axis.x	= static_cast<PointCoordinateType>(rxAxisDoubleSpinBox->value());
 	axis.y	= static_cast<PointCoordinateType>(ryAxisDoubleSpinBox->value());
 	axis.z	= static_cast<PointCoordinateType>(rzAxisDoubleSpinBox->value());
-	alpha	= static_cast<PointCoordinateType>(rAngleDoubleSpinBox->value() * CCCoreLib::DEG_TO_RAD);
+	alpha	= static_cast<PointCoordinateType>( CCCoreLib::DegreesToRadians( rAngleDoubleSpinBox->value() ) );
 	t.x		= static_cast<PointCoordinateType>(txAxisDoubleSpinBox->value());
 	t.y		= static_cast<PointCoordinateType>(tyAxisDoubleSpinBox->value());
 	t.z		= static_cast<PointCoordinateType>(tzAxisDoubleSpinBox->value());
@@ -135,9 +135,9 @@ void ccApplyTransformationDlg::onEulerValueChanged(double)
 	PointCoordinateType psi = 0;
 	CCVector3 t;
 
-	phi		= static_cast<PointCoordinateType>(ePhiDoubleSpinBox->value() * CCCoreLib::DEG_TO_RAD);
-	theta	= static_cast<PointCoordinateType>(eThetaDoubleSpinBox->value() * CCCoreLib::DEG_TO_RAD);
-	psi		= static_cast<PointCoordinateType>(ePsiDoubleSpinBox->value() * CCCoreLib::DEG_TO_RAD);
+	phi		= static_cast<PointCoordinateType>( CCCoreLib::DegreesToRadians( ePhiDoubleSpinBox->value() ) );
+	theta	= static_cast<PointCoordinateType>( CCCoreLib::DegreesToRadians( eThetaDoubleSpinBox->value() ) );
+	psi		= static_cast<PointCoordinateType>( CCCoreLib::DegreesToRadians( ePsiDoubleSpinBox->value() ) );
 	t.x		= static_cast<PointCoordinateType>(etxAxisDoubleSpinBox->value());
 	t.y		= static_cast<PointCoordinateType>(etyAxisDoubleSpinBox->value());
 	t.z		= static_cast<PointCoordinateType>(etzAxisDoubleSpinBox->value());

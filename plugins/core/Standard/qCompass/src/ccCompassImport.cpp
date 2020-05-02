@@ -172,10 +172,10 @@ namespace ccCompassImport {
 				if (std::abs(N.z) > CCCoreLib::PC_ONE - std::numeric_limits<PointCoordinateType>::epsilon())
 				{
 					ccGLMatrix rotX;
-					rotX.initFromParameters(-dip * CCCoreLib::DEG_TO_RAD, CCVector3(1, 0, 0), CCVector3(0, 0, 0)); //plunge
+					rotX.initFromParameters( CCCoreLib::DegreesToRadians( -dip ), CCVector3(1, 0, 0), CCVector3(0, 0, 0)); //plunge
 					
 					ccGLMatrix rotZ;
-					rotZ.initFromParameters(dipdir * CCCoreLib::DEG_TO_RAD, CCVector3(0, 0, -1), CCVector3(0, 0, 0));
+					rotZ.initFromParameters( CCCoreLib::DegreesToRadians( dipdir ), CCVector3(0, 0, -1), CCVector3(0, 0, 0));
 					rotation = rotZ * rotX;
 				}
 				else //general case
@@ -252,8 +252,10 @@ namespace ccCompassImport {
 			CCVector3 Cd = *cld->getPoint(p);
 
 			//build lineation vector
-			CCVector3 l(sin(trend * CCCoreLib::DEG_TO_RAD) * cos(plunge * CCCoreLib::DEG_TO_RAD), cos(trend * CCCoreLib::DEG_TO_RAD)*cos(plunge * CCCoreLib::DEG_TO_RAD), -sin(plunge * CCCoreLib::DEG_TO_RAD));
-
+			CCVector3 l( sin( CCCoreLib::DegreesToRadians( trend ) ) * cos( CCCoreLib::DegreesToRadians( plunge ) ),
+						 cos( CCCoreLib::DegreesToRadians( trend ) ) * cos( CCCoreLib::DegreesToRadians( plunge ) ),
+						 -sin( CCCoreLib::DegreesToRadians( plunge ) ) );
+			
 			//create new point cloud to associate with lineation graphic
 			ccPointCloud* points = new ccPointCloud();
 			points->setGlobalScale(cld->getGlobalScale()); //copy global shift & scale onto new point cloud

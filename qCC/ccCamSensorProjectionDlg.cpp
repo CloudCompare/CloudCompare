@@ -176,7 +176,7 @@ void ccCamSensorProjectionDlg::updateCamSensor(ccCameraSensor* sensor)
 		ccCameraSensor::IntrinsicParameters iParams;
 
 		iParams.vertFocal_pix = static_cast<float>(focalDoubleSpinBox->value());
-		iParams.vFOV_rad = static_cast<float>(fovDoubleSpinBox->value() * CCCoreLib::DEG_TO_RAD);
+		iParams.vFOV_rad = static_cast<float>( CCCoreLib::DegreesToRadians( fovDoubleSpinBox->value() ) );
 		iParams.arrayWidth = arrayWSpinBox->value();
 		iParams.arrayHeight = arrayHSpinBox->value();
 		iParams.pixelSize_mm[0] = static_cast<float>(pixWDoubleSpinBox->value());

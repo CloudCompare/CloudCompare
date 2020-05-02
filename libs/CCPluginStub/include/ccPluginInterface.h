@@ -15,8 +15,7 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_PLUGIN_INTERFACE_HEADER
-#define CC_PLUGIN_INTERFACE_HEADER
+#pragma once
 
 //Qt
 #include <QIcon>
@@ -40,7 +39,7 @@ enum  CC_PLUGIN_TYPE
 };
 
 //! Standard CC plugin interface
-/** Version 3.1
+/** Version 3.2
 **/
 class ccPluginInterface
 {
@@ -144,6 +143,4 @@ protected:
 
 Q_DECLARE_METATYPE(const ccPluginInterface *);
 
-Q_DECLARE_INTERFACE(ccPluginInterface, "edf.rd.CloudCompare.ccPluginInterface/3.1")
-
-#endif //CC_PLUGIN_INTERFACE_HEADER
+Q_DECLARE_INTERFACE(ccPluginInterface, "cccorp.cloudcompare.ccPluginInterface/3.2")

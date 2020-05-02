@@ -11,47 +11,38 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: CloudCompare project                               #
+//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_DEFAULT_PLUGIN_INTERFACE_HEADER
-#define CC_DEFAULT_PLUGIN_INTERFACE_HEADER
+#pragma once
 
-#include <QString>
+//CC_FBO_LIB
+#include <ccGlFilter.h>
 
-#include "CCPluginAPI.h"
+#include "ccDefaultPluginInterface.h"
 
-#include "ccPluginInterface.h"
-
-
-class ccDefaultPluginData;
-
-
-class CCPLUGIN_LIB_API ccDefaultPluginInterface : public ccPluginInterface
+//! GL Filter plugin interface
+/** Version 1.4
+**/
+class ccGLPluginInterface : public ccDefaultPluginInterface
 {
 public:
-	~ccDefaultPluginInterface() override;
-		
-	bool isCore() const override;
+	ccGLPluginInterface( const QString &resourcePath = QString() ) :
+		ccDefaultPluginInterface( resourcePath )
+	{
+	}
+	
+	~ccGLPluginInterface() override = default;
 
-	QString getName() const override;
-	QString getDescription() const override;
-	
-	QIcon getIcon() const override;
-	
-	ReferenceList getReferences() const override;
-	ContactList getAuthors() const override;
-	ContactList getMaintainers() const override;
+	//inherited from ccPluginInterface
+	CC_PLUGIN_TYPE getType() const override { return CC_GL_FILTER_PLUGIN; }
 
-protected:
-	ccDefaultPluginInterface( const QString &resourcePath = QString() );
-	
-private:
-	void setIID( const QString& iid ) override;
-	const QString& IID() const override;
-		
-	ccDefaultPluginData	*m_data;
+	//! Returns a GL filter object
+	virtual ccGlFilter* getFilter() = 0;
 };
 
-#endif
+Q_DECLARE_METATYPE(ccGLPluginInterface *);
+
+Q_DECLARE_INTERFACE(ccGLPluginInterface,
+                    "cccorp.cloudcompare.ccGLFilterPluginInterface/1.4")

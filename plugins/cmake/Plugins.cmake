@@ -54,10 +54,11 @@ function( AddPlugin )
         # Plugins need the QT_NO_DEBUG preprocessor in release!
         target_compile_definitions( ${PLUGIN_TARGET} PRIVATE $<$<CONFIG:Release>:QT_NO_DEBUG> )
     endif()
-    
+     
     # Link to required libraries
     target_link_libraries( ${PLUGIN_TARGET}
         CCPluginAPI
+        CCPluginStub
         QCC_GL_LIB
         Qt5::Concurrent
         Qt5::OpenGL

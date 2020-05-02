@@ -11,41 +11,42 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#          COPYRIGHT: CloudCompare project                               #
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_GL_PLUGIN_INTERFACE_HEADER
-#define CC_GL_PLUGIN_INTERFACE_HEADER
+#pragma once
 
-//CC_FBO_LIB
-#include <ccGlFilter.h>
+#include <QString>
 
-#include "ccDefaultPluginInterface.h"
+#include "ccPluginInterface.h"
 
-//! GL Filter plugin interface
-/** Version 1.3
-**/
-class ccGLPluginInterface : public ccDefaultPluginInterface
+
+class ccDefaultPluginData;
+
+
+class ccDefaultPluginInterface : public ccPluginInterface
 {
 public:
-	ccGLPluginInterface( const QString &resourcePath = QString() ) :
-		ccDefaultPluginInterface( resourcePath )
-	{
-	}
+	~ccDefaultPluginInterface() override;
+		
+	bool isCore() const override;
+
+	QString getName() const override;
+	QString getDescription() const override;
 	
-	~ccGLPluginInterface() override = default;
+	QIcon getIcon() const override;
+	
+	ReferenceList getReferences() const override;
+	ContactList getAuthors() const override;
+	ContactList getMaintainers() const override;
 
-	//inherited from ccPluginInterface
-	CC_PLUGIN_TYPE getType() const override { return CC_GL_FILTER_PLUGIN; }
-
-	//! Returns a GL filter object
-	virtual ccGlFilter* getFilter() = 0;
+protected:
+	ccDefaultPluginInterface( const QString &resourcePath = QString() );
+	
+private:
+	void setIID( const QString& iid ) override;
+	const QString& IID() const override;
+		
+	ccDefaultPluginData	*m_data;
 };
-
-Q_DECLARE_METATYPE(ccGLPluginInterface *);
-
-Q_DECLARE_INTERFACE(ccGLPluginInterface,
-                    "edf.rd.CloudCompare.ccGLFilterPluginInterface/1.3")
-
-#endif //CC_GL_FILTER_PLUGIN_INTERFACE_HEADER

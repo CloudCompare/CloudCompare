@@ -55,6 +55,10 @@ jobs:
           environment-file: .ci/conda.yml
           miniconda-version: 'latest'
 
+      - name: Install Dependencies (macOS)
+        if: matrix.config.os == 'macos-latest'
+        run: brew install xerces-c
+
       - name: Configure MSVC console (Windows)
         if:  matrix.config.os == 'windows-latest'
         uses: ilammy/msvc-dev-cmd@v1

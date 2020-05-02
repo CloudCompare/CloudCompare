@@ -44,7 +44,7 @@ jobs:
       - name: Conda Cache
         uses: actions/cache@v1
         with:
-          path: C:\Miniconda3\envs\CCCoreLib
+          path: C:\Miniconda3\envs\CloudCompareDev
           key: conda-cache-${{ runner.os }}-${{ hashFiles('.ci/conda.yml') }}
 
       - name: Install Dependencies

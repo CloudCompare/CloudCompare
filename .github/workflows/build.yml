@@ -41,7 +41,15 @@ jobs:
         with:
           submodules: true
 
-      - name: Conda Cache
+      - name: Conda Cache (macOS)
+        if:  matrix.config.os == 'macos-latest'
+        uses: actions/cache@v1
+        with:
+          path: /Users/runner/miniconda3/envs/CloudCompareDev
+          key: conda-cache-${{ runner.os }}-${{ hashFiles('.ci/conda.yml') }}
+
+      - name: Conda Cache (Windows)
+        if:  matrix.config.os == 'windows-latest'
         uses: actions/cache@v1
         with:
           path: C:\Miniconda3\envs\CloudCompareDev

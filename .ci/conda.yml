@@ -5,7 +5,7 @@ dependencies:
   - eigen=3.3.*
   - ninja
   - pcl=1.9.*
-  - pdal=2.0.*
+  - pdal=2.1.*
   - qt=5.12.*
   - xerces-c=3.2.*
   - zlib=1.2.*

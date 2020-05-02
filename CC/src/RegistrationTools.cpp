@@ -921,8 +921,9 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P, //data
 		{
 			double cos_t = Np.dot(Nx);
 			assert(cos_t > -1.0 && cos_t < 1.0); //see above
-			double s = sqrt((1 + cos_t) * 2);
-			double q[4] = { s / 2, a.x / s, a.y / s, a.z / s };
+			double cos_half_t = sqrt((1 + cos_t) / 2);
+			double sin_half_t = sqrt((1 - cos_t) / 2);
+			double q[4] = { cos_half_t, a.x * sin_half_t, a.y * sin_half_t, a.z * sin_half_t };
 			//don't forget to normalize the quaternion
 			double qnorm = q[0] * q[0] + q[1] * q[1] + q[2] * q[2] + q[3] * q[3];
 			assert(qnorm >= ZERO_TOLERANCE);
@@ -945,7 +946,7 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P, //data
 		}
 
 		//we deduce the first translation
-		trans.T = Gx - (trans.R*Gp) * (aPrioriScale*trans.s); //#26 in besl paper, modified with the scale as in jschmidt
+		trans.T = Gx - (trans.R*Gp) * (aPrioriScale*trans.s); //#26 in Besl paper, modified with the scale as in jschmidt
 
 		//we need to find the rotation in the (X) plane now
 		{

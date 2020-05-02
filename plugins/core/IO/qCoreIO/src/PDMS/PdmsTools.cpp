@@ -109,7 +109,7 @@ PointCoordinateType NumericalValue::getValue() const
 	case PDMS_Y_TOP_SHEAR:
 	case PDMS_X_BOTTOM_SHEAR:
 	case PDMS_Y_BOTTOM_SHEAR:
-		return static_cast<PointCoordinateType>(CCCoreLib::DEG_TO_RAD) * value;
+		return static_cast<PointCoordinateType>( CCCoreLib::DegreesToRadians( value ) );
 	default:
 		return value;
 	}
@@ -614,8 +614,8 @@ bool Orientation::axisFromCoords(const Coordinates &coords, CCVector3 &u)
 
 	if (coords.getNbComponents(true) == 2)
 	{
-		PointCoordinateType alpha = static_cast<PointCoordinateType>(CCCoreLib::DEG_TO_RAD) * u[0];
-		PointCoordinateType beta = static_cast<PointCoordinateType>(CCCoreLib::DEG_TO_RAD) * u[1];
+		PointCoordinateType alpha = static_cast<PointCoordinateType>( CCCoreLib::DegreesToRadians( u[0] ) );
+		PointCoordinateType beta = static_cast<PointCoordinateType>( CCCoreLib::DegreesToRadians( u[1] ) );
 		u[0] = cos(alpha)*cos(beta);
 		u[1] = sin(alpha)*cos(beta);
 		u[2] = sin(beta);

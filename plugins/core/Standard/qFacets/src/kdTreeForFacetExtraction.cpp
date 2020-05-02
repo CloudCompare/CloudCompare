@@ -111,7 +111,7 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 	}
 
 	// cosine of the max angle between fused 'planes'
-	const double c_minCosNormAngle = cos(maxAngle_deg * CCCoreLib::DEG_TO_RAD);
+	const double c_minCosNormAngle = cos( CCCoreLib::DegreesToRadians( maxAngle_deg ) );
 
 	//fuse all cells, starting from the ones with the best error
 	const int unvisitedNeighborValue = -1;

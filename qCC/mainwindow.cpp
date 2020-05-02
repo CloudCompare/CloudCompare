@@ -8384,8 +8384,8 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 			{
 				double phi_deg = i * angularStep_deg;
 				ccGLMatrix trans;
-				trans.initFromParameters(	static_cast<float>(phi_deg * CCCoreLib::DEG_TO_RAD),
-											static_cast<float>(theta_deg * CCCoreLib::DEG_TO_RAD),
+				trans.initFromParameters(	static_cast<float>( CCCoreLib::DegreesToRadians( phi_deg ) ),
+											static_cast<float>( CCCoreLib::DegreesToRadians( theta_deg ) ),
 											0,
 											CCVector3(0,0,0) );
 				matrices.push_back(trans);

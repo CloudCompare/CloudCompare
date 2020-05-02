@@ -439,10 +439,10 @@ void StereogramWidget::paintEvent(QPaintEvent* event)
 			double dipDir_deg = j * m_angularStep_deg / ticksFreq;
 			if (dipDir_deg < 360.0)
 			{
-				const double dipDirRadians = CCCoreLib::DegreesToRadians( dipDir_deg );
+				const double dipDir_rad = CCCoreLib::DegreesToRadians( dipDir_deg );
 				
-				QPoint X(	 static_cast<int>(sin( dipDirRadians ) * radius),
-							-static_cast<int>(cos( dipDirRadians ) * radius) );
+				QPoint X(	 static_cast<int>(sin( dipDir_rad ) * radius),
+							-static_cast<int>(cos( dipDir_rad ) * radius) );
 
 				if ((j % ticksFreq) == 0) //long ticks
 					painter.drawLine(center, center + X);
@@ -464,12 +464,12 @@ void StereogramWidget::paintEvent(QPaintEvent* event)
 		QPolygon poly(4);
 
 		const double* d = m_densityGrid->grid;
-		const double stepRadians = CCCoreLib::DegreesToRadians( m_densityGrid->step_deg );
+		const double step_rad = CCCoreLib::DegreesToRadians( m_densityGrid->step_deg );
 		
 		for (unsigned j = 0; j < m_densityGrid->ddSteps; ++j)
 		{
-			double dipDir0_rad = (j    ) * stepRadians;
-			double dipDir1_rad = (j + 1) * stepRadians;
+			double dipDir0_rad = (j    ) * step_rad;
+			double dipDir1_rad = (j + 1) * step_rad;
 			double cos_dipDir0 = cos(dipDir0_rad);
 			double sin_dipDir0 = sin(dipDir0_rad);
 			double cos_dipDir1 = cos(dipDir1_rad);
@@ -509,18 +509,18 @@ void StereogramWidget::paintEvent(QPaintEvent* event)
 		pen.setColor(Qt::red);
 		painter.setPen(pen);
 
-		const double meanDipDirRadians = CCCoreLib::DegreesToRadians( m_meanDipDir_deg );
+		const double meanDipDir_rad = CCCoreLib::DegreesToRadians( m_meanDipDir_deg );
 
 		//draw main direction
-		QPoint X(	 static_cast<int>(sin( meanDipDirRadians ) * radius),
-					-static_cast<int>(cos( meanDipDirRadians ) * radius) );
+		QPoint X(	 static_cast<int>(sin( meanDipDir_rad ) * radius),
+					-static_cast<int>(cos( meanDipDir_rad ) * radius) );
 		pen.setStyle(Qt::DashLine);
 		painter.setPen(pen);
 		painter.drawLine(center,center+X);
 
 		//draw orthogonal to main direction
-		QPoint Y(	static_cast<int>(cos( meanDipDirRadians ) * radius),
-					static_cast<int>(sin( meanDipDirRadians ) * radius) );
+		QPoint Y(	static_cast<int>(cos( meanDipDir_rad ) * radius),
+					static_cast<int>(sin( meanDipDir_rad ) * radius) );
 		pen.setStyle(Qt::SolidLine);
 		painter.setPen(pen);
 		painter.drawLine(center-Y,center+Y);
@@ -541,21 +541,21 @@ void StereogramWidget::paintEvent(QPaintEvent* event)
 		double R0 = radius * (std::max(0.0, m_clickDip_deg - m_clickDipSpan_deg / 2) / 90.0);
 		double R1 = radius * (std::min(90.0, m_clickDip_deg + m_clickDipSpan_deg / 2) / 90.0);
 
-		const double angleRadians = CCCoreLib::DegreesToRadians( m_clickDipDir_deg - m_clickDipDirSpan_deg / 2 );
+		const double angle_rad = CCCoreLib::DegreesToRadians( m_clickDipDir_deg - m_clickDipDirSpan_deg / 2 );
 
 		//draw radial limits
 		{
-			QPoint X0(	 static_cast<int>(sin( angleRadians ) * R0),
-						-static_cast<int>(cos( angleRadians ) * R0));
-			QPoint X1(	 static_cast<int>(sin( angleRadians ) * R1),
-						-static_cast<int>(cos( angleRadians ) * R1));
+			QPoint X0(	 static_cast<int>(sin( angle_rad ) * R0),
+						-static_cast<int>(cos( angle_rad ) * R0));
+			QPoint X1(	 static_cast<int>(sin( angle_rad ) * R1),
+						-static_cast<int>(cos( angle_rad ) * R1));
 			painter.drawLine(center + X0, center + X1);
 		}
 		{
-			QPoint X0(	 static_cast<int>(sin( angleRadians ) * R0),
-						-static_cast<int>(cos( angleRadians ) * R0));
-			QPoint X1(	 static_cast<int>(sin( angleRadians ) * R1),
-						-static_cast<int>(cos( angleRadians ) * R1));
+			QPoint X0(	 static_cast<int>(sin( angle_rad ) * R0),
+						-static_cast<int>(cos( angle_rad ) * R0));
+			QPoint X1(	 static_cast<int>(sin( angle_rad ) * R1),
+						-static_cast<int>(cos( angle_rad ) * R1));
 			painter.drawLine(center + X0, center + X1);
 		}
 

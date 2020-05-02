@@ -138,9 +138,9 @@ void GamepadInput::updateInternalState()
 
 		if (buttonL2() || buttonR2())
 		{
-			double angle = buttonL2() ? 10 * s_gamepadRotSpeed : -10 * s_gamepadRotSpeed;
+			double angle_deg = buttonL2() ? 10 * s_gamepadRotSpeed : -10 * s_gamepadRotSpeed;
 			ccGLMatrixd rot;
-			rot.initFromParameters( CCCoreLib::DegreesToRadians( angle ), CCVector3d(0, 0, 1), CCVector3d(0, 0, 0) );
+			rot.initFromParameters( CCCoreLib::DegreesToRadians( angle_deg ), CCVector3d(0, 0, 1), CCVector3d(0, 0, 0) );
 			m_rotation = rot * m_rotation;
 			m_hasRotation = true;
 		}

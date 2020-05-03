@@ -18,21 +18,22 @@
 //#                                                                        #
 //##########################################################################
 
-#include "ccIOPluginInterface.h"
+//Qt
+#include <QObject>
+
+#include <ccIOPluginInterface.h>
 
 //! RDB file (3D cloud)
 class qRDBIO : public QObject, public ccIOPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES( ccIOPluginInterface )
-	
 	Q_PLUGIN_METADATA( IID "cccorp.cloudcompare.plugin.qRDBIO" FILE "info.json" )
 
 public:
-    explicit qRDBIO( QObject *parent = nullptr );
-	~qRDBIO() override = default;
-	
-	void registerCommands( ccCommandLineInterface *cmd ) override;
+
+	//! Default constructor
+	explicit qRDBIO( QObject *parent = nullptr );
 	
 	// inherited from ccIOPluginInterface
 	ccIOPluginInterface::FilterList getFilters() override;

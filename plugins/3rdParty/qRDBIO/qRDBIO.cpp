@@ -26,14 +26,6 @@ qRDBIO::qRDBIO( QObject* parent )
 {
 }
 
-void qRDBIO::registerCommands( ccCommandLineInterface *cmd )
-{
-	// If you want to register this plugin for the command line, create a
-	// ccCommandLineInterface::Command and add it here. e.g.:
-	//
-	// cmd->registerCommand( ccCommandLineInterface::Command::Shared( new FooCommand ) );
-}
-
 ccIOPluginInterface::FilterList qRDBIO::getFilters()
 {
 	return {

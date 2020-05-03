@@ -5,9 +5,7 @@ include( CMakePolicies NO_POLICY_SCOPE )
 file( GLOB header_list *.h)
 file( GLOB source_list *.cpp)
 
-file( GLOB json_list *.json)
 file( GLOB ui_list *.ui )
-file( GLOB qrc_list *.qrc )
 file( GLOB rc_list *.rc )
 
 if ( CC_PLUGIN_CUSTOM_HEADER_LIST )
@@ -28,8 +26,6 @@ target_sources( ${PROJECT_NAME}
         ${source_list}
         ${moc_list}
         ${ui_list}
-        ${qrc_list}
-        ${json_list}
 )
 
 if( APPLE )

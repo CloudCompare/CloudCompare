@@ -68,7 +68,24 @@ function( AddPlugin )
         # Plugins need the QT_NO_DEBUG preprocessor in release!
         target_compile_definitions( ${PLUGIN_TARGET} PRIVATE $<$<CONFIG:Release>:QT_NO_DEBUG> )
     endif()
-     
+    
+    # Add .qrc file to sources
+    get_filename_component( FOLDER_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME )
+    set( QRC_FILE "${CMAKE_CURRENT_SOURCE_DIR}/${FOLDER_NAME}.qrc" )
+    if( EXISTS "${QRC_FILE}" )
+        target_sources( ${PLUGIN_TARGET} PRIVATE ${QRC_FILE} )
+    else()
+        message( FATAL_ERROR "Missing qrc file: ${QRC_FILE}" )
+    endif()
+
+    # Add info.json to sources
+    set( INFO_FILE "${CMAKE_CURRENT_SOURCE_DIR}/info.json" )
+    if( EXISTS "${INFO_FILE}" )
+        target_sources( ${PLUGIN_TARGET} PRIVATE ${INFO_FILE} )
+    else()
+        message( FATAL_ERROR "Missing info.json file: ${INFO_FILE}" )
+    endif()
+   
     # Link to required libraries
     target_link_libraries( ${PLUGIN_TARGET}
         CCPluginAPI

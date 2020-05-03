@@ -2,8 +2,8 @@ name: CloudCompareDev
 channels:
   - conda-forge
 dependencies:
-  - eigen=3.3.*
   - ninja
+  - eigen=3.3.*
   - pcl=1.9.*
   - pdal=2.1.*
   - qt=5.12.*

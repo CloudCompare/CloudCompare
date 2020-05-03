@@ -41,12 +41,13 @@ jobs:
         with:
           submodules: true
 
-      - name: Conda Cache (macOS)
-        if:  matrix.config.os == 'macos-latest'
-        uses: actions/cache@v1
-        with:
-          path: /Users/runner/miniconda3/envs/CloudCompareDev
-          key: conda-cache-${{ runner.os }}-${{ hashFiles('.ci/conda.yml') }}
+      # Turn off for now since GitHub Actions is broken (will eventually move to brew anyways) 
+      # - name: Conda Cache (macOS)
+      #   if:  matrix.config.os == 'macos-latest'
+      #   uses: actions/cache@v1
+      #   with:
+      #     path: /Users/runner/miniconda3/envs/CloudCompareDev
+      #     key: conda-cache-${{ runner.os }}-${{ hashFiles('.ci/conda.yml') }}
 
       - name: Conda Cache (Windows)
         if:  matrix.config.os == 'windows-latest'

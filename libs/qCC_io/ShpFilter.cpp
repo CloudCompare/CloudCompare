@@ -712,6 +712,12 @@ static CC_FILE_ERROR ReadMeasures(QDataStream& shpStream, int32_t numPoints, std
 	double mMax;
 	shpStream >> mMin >> mMax;
 
+	if (IsESRINoData(mMin) && IsESRINoData(mMax))
+	{
+		shpStream.skipRawData(8 * numPoints);
+		return CC_FERR_NO_ERROR;
+	}
+
 	try
 	{
 		scalarValues.resize(numPoints, NAN_VALUE);
@@ -721,19 +727,12 @@ static CC_FILE_ERROR ReadMeasures(QDataStream& shpStream, int32_t numPoints, std
 		return CC_FERR_NOT_ENOUGH_MEMORY;
 	}
 
-	if (IsESRINoData(mMin) || IsESRINoData(mMax))
-	{
-		ccLog::Warning("[SHP] Pontentially invalid measurements");
-		//return CC_FERR_MALFORMED_FILE; //apparently we shouldn't treat this as an error
-		return CC_FERR_NO_ERROR;
-	}
-
 	//M values (an array of length NumPoints)
 	for (int32_t i = 0; i < numPoints; ++i)
 	{
 		double m;
 		shpStream >> m;
-		if (!IsESRINoData(m))
+		if (!IsESRINoData(m) && std::isfinite(m))
 		{
 			scalarValues[i] = static_cast<ScalarType>(m);
 		}

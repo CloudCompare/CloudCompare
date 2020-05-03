@@ -27,5 +27,5 @@ qEDL::qEDL( QObject *parent )
 
 ccGlFilter* qEDL::getFilter()
 {
-	return new ccEDLFilter();
+	return new ccEDLFilter;
 }

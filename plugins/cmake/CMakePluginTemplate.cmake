@@ -51,10 +51,11 @@ if( APPLE )
     install_shared( ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} 1 /plugins )
 endif()
 
+get_target_property( PLUGIN_TYPE ${PROJECT_NAME} PLUGIN_TYPE )
+
 #GL filters and IO plugins also go the the ccViewer 'plugins' sub-folder
 if( ${OPTION_BUILD_CCVIEWER} )
-    get_target_property( IS_IO_PLUGIN ${PROJECT_NAME} IO_PLUGIN )
-    if( CC_SHADER_FOLDER OR IS_IO_PLUGIN )
+    if( ("${PLUGIN_TYPE}" STREQUAL "gl") OR ("${PLUGIN_TYPE}" STREQUAL "io") )
         if( APPLE )
             install( TARGETS ${PROJECT_NAME} LIBRARY DESTINATION ${CCVIEWER_MAC_PLUGIN_DIR} COMPONENT Runtime )
             set( CCVIEWER_PLUGINS ${CCVIEWER_PLUGINS} ${CCVIEWER_MAC_PLUGIN_DIR}/lib${PROJECT_NAME}${CMAKE_SHARED_LIBRARY_SUFFIX} CACHE INTERNAL "ccViewer plugin list")
@@ -67,27 +68,33 @@ if( ${OPTION_BUILD_CCVIEWER} )
 endif()
 
 #'GL filter' plugins specifics
-if( CC_SHADER_FOLDER )
-	# copy shader dirs into our shadow build directory
-	file( COPY shaders DESTINATION "${CMAKE_BINARY_DIR}" )
+if( "${PLUGIN_TYPE}" STREQUAL "gl" )
+    get_target_property( SHADER_FOLDER_NAME ${PROJECT_NAME} SHADER_FOLDER_NAME )
+    get_target_property( SHADER_FOLDER_PATH ${PROJECT_NAME} SHADER_FOLDER_PATH )
 
-	# install the shader files
-    file( GLOB shaderFiles shaders/${CC_SHADER_FOLDER}/*.frag shaders/${CC_SHADER_FOLDER}/*.vert )
-    foreach( filename ${shaderFiles} )
-        if( APPLE )
-            install( FILES ${filename} DESTINATION ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Shaders/${CC_SHADER_FOLDER} )
-            if( ${OPTION_BUILD_CCVIEWER} )
-                install( FILES ${filename} DESTINATION ${CCVIEWER_MAC_BASE_DIR}/Contents/Shaders/${CC_SHADER_FOLDER} )
+    if( EXISTS "${SHADER_FOLDER_PATH}" )
+        # copy shader dirs into our shadow build directory
+        file( COPY shaders DESTINATION "${CMAKE_BINARY_DIR}" )
+    
+        # install the shader files
+        file( GLOB shaderFiles shaders/${SHADER_FOLDER_PATH}/*.frag shaders/${SHADER_FOLDER_PATH}/*.vert )
+        foreach( filename ${shaderFiles} )
+            if( APPLE )
+                install( FILES ${filename} DESTINATION ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Shaders/${SHADER_FOLDER_NAME} )
+                if( ${OPTION_BUILD_CCVIEWER} )
+                    install( FILES ${filename} DESTINATION ${CCVIEWER_MAC_BASE_DIR}/Contents/Shaders/${SHADER_FOLDER_NAME} )
+                endif()
+            elseif ( UNIX )
+              install( FILES ${filename} DESTINATION share/cloudcompare/shaders/${SHADER_FOLDER_NAME} )
+            else()
+                install_ext( FILES ${filename} ${CLOUDCOMPARE_DEST_FOLDER} /shaders/${SHADER_FOLDER_NAME} )
+                if( ${OPTION_BUILD_CCVIEWER} )
+                    install_ext( FILES ${filename} ${CCVIEWER_DEST_FOLDER} /shaders/${SHADER_FOLDER_NAME} )
+                endif()
             endif()
-        elseif ( UNIX )
-          install( FILES ${filename} DESTINATION share/cloudcompare/shaders/${CC_SHADER_FOLDER} )
-        else()
-            install_ext( FILES ${filename} ${CLOUDCOMPARE_DEST_FOLDER} /shaders/${CC_SHADER_FOLDER} )
-            if( ${OPTION_BUILD_CCVIEWER} )
-                install_ext( FILES ${filename} ${CCVIEWER_DEST_FOLDER} /shaders/${CC_SHADER_FOLDER} )
-            endif()
-        endif()
-    endforeach()
+        endforeach()
+    endif()
 endif()
 
+unset( PLUGIN_TYPE )
 ### END OF DEFAULT CC PLUGIN CMAKE SCRIPT ###

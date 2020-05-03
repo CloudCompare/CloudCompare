@@ -25,7 +25,7 @@ class qEDL : public QObject, public ccGLPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ccGLPluginInterface)
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qEDL" FILE "info.json")
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qEDL" FILE "../info.json")
 
 public:
 	explicit qEDL( QObject *parent = nullptr );

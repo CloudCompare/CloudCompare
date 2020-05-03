@@ -1,16 +1,22 @@
-option( PLUGIN_GL_QSSAO "Check to install qSSAO plugin" OFF )
+option( PLUGIN_GL_QSSAO "Install qSSAO plugin" OFF )
 
-# CloudCompare 'SSAO' plugin
-if (PLUGIN_GL_QSSAO)
-    add_subdirectory (Randomkit)
+if( PLUGIN_GL_QSSAO )
     
     project( QSSAO_GL_PLUGIN )
+        
+    AddPlugin(
+        NAME ${PROJECT_NAME}
+        TYPE gl
+        SHADER_FOLDER SSAO
+    )
     
-    AddPlugin( NAME ${PROJECT_NAME} TYPE gl )
+    add_subdirectory( include )
+    add_subdirectory( src )
+    add_subdirectory( shaders )
 
-    set( CC_SHADER_FOLDER SSAO )
+    add_subdirectory( extern/Randomkit )
+   
+    target_link_libraries( ${PROJECT_NAME} RandomKitLib )
+
     include( CMakePluginTemplate )
-    
-    target_link_libraries( ${PROJECT_NAME} QSSAO_RANDOMKIT_LIB )
-    include_directories( ${QSSAO_RANDOMKIT_LIB_SOURCE_DIR} )
 endif()

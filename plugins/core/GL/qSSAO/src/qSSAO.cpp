@@ -1,6 +1,6 @@
 //##########################################################################
 //#                                                                        #
-//#             CLOUDCOMPARE PLUGIN: ExampleGLPlugin                       #
+//#                       CLOUDCOMPARE PLUGIN: qSSAO                       #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
@@ -15,31 +15,20 @@
 //#                                                                        #
 //##########################################################################
 
-#pragma once
+#include "ccSSAOFilter.h"
 
-#include "ccGLPluginInterface.h"
+//Qt
+#include <QtGui>
 
-/** Replace 'ExampleGLPlugin' by your own plugin class name throughout and then
-	check 'ExampleGLPlugin.cpp' for more directions.
-	
-	Each plugin requires an info.json file to provide information about itself -
-	the name, authors, maintainers, icon, etc..
-	
-	The one method you are required to implement is getFilter(). This method
-	registers your GL filter with CloudCompare.
-**/
+#include "qSSAO.h"
 
-//! Example GL Plugin
-class ExampleGLPlugin : public QObject, public ccGLPluginInterface
+qSSAO::qSSAO(QObject *parent)
+	: QObject(parent)
+	, ccGLPluginInterface(":/CC/plugin/qSSAO/info.json")
 {
-	Q_OBJECT
-	Q_INTERFACES( ccGLPluginInterface )
-	Q_PLUGIN_METADATA( IID "cccorp.cloudcompare.plugin.ExampleGL" FILE "info.json" )
-	
-public:
-	explicit ExampleGLPlugin( QObject *parent = nullptr );
-	~ExampleGLPlugin() override = default;
-	
-	// Inherited from ccGLFilterPluginInterface
-	ccGlFilter *getFilter() override;
-};
+}
+
+ccGlFilter* qSSAO::getFilter()
+{
+	return new ccSSAOFilter;
+}

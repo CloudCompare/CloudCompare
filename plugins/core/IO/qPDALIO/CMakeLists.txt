@@ -28,7 +28,6 @@ if ( PLUGIN_IO_QPDAL )
 	include_directories( src )
 
 	add_subdirectory( src )
-	add_subdirectory( ui )
 
     include( CMakePluginTemplate )
 	

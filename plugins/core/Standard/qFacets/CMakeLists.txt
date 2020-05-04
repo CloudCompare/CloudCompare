@@ -18,8 +18,6 @@ if (PLUGIN_STANDARD_QFACETS)
 	include_directories( src )
 	
 	add_subdirectory( src )
-
-	add_subdirectory( ui )
 	
     include( CMakePluginTemplate )
     

@@ -5,9 +5,6 @@ include( CMakePolicies NO_POLICY_SCOPE )
 file( GLOB header_list *.h)
 file( GLOB source_list *.cpp)
 
-file( GLOB ui_list *.ui )
-file( GLOB rc_list *.rc )
-
 if ( CC_PLUGIN_CUSTOM_HEADER_LIST )
     list( APPEND header_list ${CC_PLUGIN_CUSTOM_HEADER_LIST} )
 endif()
@@ -16,16 +13,10 @@ if ( CC_PLUGIN_CUSTOM_SOURCE_LIST )
     list( APPEND source_list ${CC_PLUGIN_CUSTOM_SOURCE_LIST} )
 endif()
 
-if (CC_PLUGIN_CUSTOM_UI_LIST)
-    list( APPEND ui_list ${CC_PLUGIN_CUSTOM_UI_LIST} )
-endif()
-
 target_sources( ${PROJECT_NAME}
     PRIVATE
         ${header_list}
         ${source_list}
-        ${moc_list}
-        ${ui_list}
 )
 
 if( APPLE )

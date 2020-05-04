@@ -16,7 +16,6 @@ if (PLUGIN_STANDARD_QANIMATION)
 	include_directories( src )
 
 	add_subdirectory( src )
-	add_subdirectory( ui )
 
     include( CMakePluginTemplate )
 

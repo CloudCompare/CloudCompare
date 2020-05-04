@@ -24,7 +24,6 @@ if (PLUGIN_STANDARD_QHOUGH_NORMALS)
 	include_directories( ${EIGEN_ROOT_DIR} )
 	
 	add_subdirectory( src )
-	add_subdirectory( ui )
 	
     include( CMakePluginTemplate )
 endif()

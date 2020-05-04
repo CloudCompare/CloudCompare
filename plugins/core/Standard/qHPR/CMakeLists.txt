@@ -10,7 +10,6 @@ if (PLUGIN_STANDARD_QHPR)
 	
 	add_subdirectory( src )
 	add_subdirectory( src/qhull/src2015.2 )
-	add_subdirectory( ui )
 	
     include( CMakePluginTemplate )
     

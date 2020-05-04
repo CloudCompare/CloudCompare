@@ -9,7 +9,6 @@ if (PLUGIN_IO_QCSV_MATRIX)
 	include_directories( src )
 	
 	add_subdirectory( src )
-	add_subdirectory( ui )
     
     include( CMakePluginTemplate )
 endif()

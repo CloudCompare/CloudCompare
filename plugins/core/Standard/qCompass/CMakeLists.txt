@@ -17,7 +17,6 @@ if (PLUGIN_STANDARD_QCOMPASS)
 	list( APPEND CC_PLUGIN_CUSTOM_SOURCE_LIST ${CloudCompare_SOURCE_DIR}/../common/ccPickingHub.cpp )
 
 	add_subdirectory( src )
-	add_subdirectory( ui )
 
     include( CMakePluginTemplate )
 

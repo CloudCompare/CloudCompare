@@ -10,7 +10,6 @@ if (PLUGIN_STANDARD_QBROOM)
 	include_directories( src )
 	
 	add_subdirectory( src )
-	add_subdirectory( ui )
 	
     include( CMakePluginTemplate )
 	

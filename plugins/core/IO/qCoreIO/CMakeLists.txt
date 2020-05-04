@@ -9,7 +9,6 @@ if ( PLUGIN_IO_QCORE )
 	include_directories( src/PDMS )
 
 	add_subdirectory( src )
-	add_subdirectory( ui )
 	
     include( CMakePluginTemplate )
 endif()

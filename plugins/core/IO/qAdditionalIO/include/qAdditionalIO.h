@@ -25,16 +25,16 @@ class qAdditionalIO : public QObject, public ccIOPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ccIOPluginInterface)
-	
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qAdditionalIO" FILE "info.json")
+
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qAdditionalIO" FILE "../info.json")
 
 public:
 	explicit qAdditionalIO( QObject* parent = nullptr );
-	
+
 	~qAdditionalIO() override = default;
 
 	void registerCommands(ccCommandLineInterface* cmd) override;
-	
+
 	// inherited from ccIOPluginInterface
 	FilterList getFilters() override;
 };

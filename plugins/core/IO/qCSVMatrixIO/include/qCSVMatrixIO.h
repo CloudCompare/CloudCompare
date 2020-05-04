@@ -1,9 +1,6 @@
-#ifndef QCORE_IO_HEADER
-#define QCORE_IO_HEADER
-
 //##########################################################################
 //#                                                                        #
-//#                              CLOUDCOMPARE                              #
+//#                  CLOUDCOMPARE PLUGIN: qCSVMatrixIO                     #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
@@ -14,26 +11,29 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: CloudCompare project                               #
+//#                  COPYRIGHT: Daniel Girardeau-Montaut                   #
 //#                                                                        #
 //##########################################################################
 
+#ifndef Q_CSV_MATRIX_IO_PLUGIN_HEADER
+#define Q_CSV_MATRIX_IO_PLUGIN_HEADER
+
 #include "ccIOPluginInterface.h"
 
-class qCoreIO : public QObject, public ccIOPluginInterface
+//! CSV Matrix file (2.5D cloud)
+class qCSVMatrixIO : public QObject, public ccIOPluginInterface
 {
 	Q_OBJECT
-	Q_INTERFACES( ccIOPluginInterface )
-	
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qCoreIO" FILE "info.json")
-	
+	Q_INTERFACES(ccIOPluginInterface)
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qCSVMatrixIO" FILE "../info.json")
+
 public:
-	explicit qCoreIO( QObject *parent = nullptr );
-	
-protected:
-	void registerCommands( ccCommandLineInterface *inCmdLine ) override;
-	
+	qCSVMatrixIO(QObject* parent = nullptr);
+
+	~qCSVMatrixIO() override = default;
+
+	//inherited from ccIOPluginInterface
 	FilterList getFilters() override;
 };
 
-#endif //QCORE_IO_HEADER
+#endif //Q_CSV_MATRIX_IO_PLUGIN_HEADER

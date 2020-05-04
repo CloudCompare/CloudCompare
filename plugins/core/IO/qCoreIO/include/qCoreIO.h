@@ -1,6 +1,9 @@
+#ifndef QCORE_IO_HEADER
+#define QCORE_IO_HEADER
+
 //##########################################################################
 //#                                                                        #
-//#                  CLOUDCOMPARE PLUGIN: qCSVMatrixIO                     #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
@@ -11,29 +14,26 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#                  COPYRIGHT: Daniel Girardeau-Montaut                   #
+//#          COPYRIGHT: CloudCompare project                               #
 //#                                                                        #
 //##########################################################################
 
-#ifndef Q_CSV_MATRIX_IO_PLUGIN_HEADER
-#define Q_CSV_MATRIX_IO_PLUGIN_HEADER
-
 #include "ccIOPluginInterface.h"
 
-//! CSV Matrix file (2.5D cloud)
-class qCSVMatrixIO : public QObject, public ccIOPluginInterface
+class qCoreIO : public QObject, public ccIOPluginInterface
 {
 	Q_OBJECT
-	Q_INTERFACES(ccIOPluginInterface)
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qCSVMatrixIO" FILE "info.json")
+	Q_INTERFACES( ccIOPluginInterface )
+
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qCoreIO" FILE "../info.json")
 
 public:
-	qCSVMatrixIO(QObject* parent = nullptr);
-	
-	~qCSVMatrixIO() override = default;
+	explicit qCoreIO( QObject *parent = nullptr );
 
-	//inherited from ccIOPluginInterface
+protected:
+	void registerCommands( ccCommandLineInterface *inCmdLine ) override;
+
 	FilterList getFilters() override;
 };
 
-#endif //Q_CSV_MATRIX_IO_PLUGIN_HEADER
+#endif //QCORE_IO_HEADER

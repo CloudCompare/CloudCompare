@@ -15,7 +15,7 @@ jobs:
         scalar_double: ["OFF"]
         config:
           - {
-              name: "Windows Latest MSVC",
+              name: "Windows MSVC",
               os: windows-latest,
               generator: "Ninja",
               conda_library_dir: "Library",
@@ -25,7 +25,7 @@ jobs:
               xercesclib_name: xerces-c_3.lib,
            }
           - {
-              name: "macOS Latest Clang",
+              name: "macOS Clang",
               os: macos-latest,
               generator: "Ninja",
               conda_library_dir: ".",
@@ -41,22 +41,28 @@ jobs:
         with:
           submodules: true
 
-      - uses: goanpeca/setup-miniconda@v1
-        with:
-          miniconda-version: 'latest'
-          activate-environment: ccenv
-          auto-update-conda: true
+      # Turn off for now since GitHub Actions is broken (will eventually move to brew anyways) 
+      # - name: Conda Cache (macOS)
+      #   if:  matrix.config.os == 'macos-latest'
+      #   uses: actions/cache@v1
+      #   with:
+      #     path: /Users/runner/miniconda3/envs/CloudCompareDev
+      #     key: conda-cache-${{ runner.os }}-${{ hashFiles('.ci/conda.yml') }}
 
-      - name: Install dependencies
-        shell: pwsh
-        run: conda install -y -c conda-forge `
-          qt=5.12.* `
-          pdal=2.0.* `
-          xerces-c=3.2.* `
-          zlib=1.2.* `
-          eigen=3.3.* `
-          ninja `
-          pcl=1.9.*
+      - name: Conda Cache (Windows)
+        if:  matrix.config.os == 'windows-latest'
+        uses: actions/cache@v1
+        with:
+          path: C:\Miniconda3\envs\CloudCompareDev
+          key: conda-cache-${{ runner.os }}-${{ hashFiles('.ci/conda.yml') }}
+
+      - name: Install Dependencies
+        uses: goanpeca/setup-miniconda@v1
+        with:
+          activate-environment: CloudCompareDev
+          auto-activate-base: false
+          environment-file: .ci/conda.yml
+          miniconda-version: 'latest'
 
       - name: Install Dependencies (macOS)
         if: matrix.config.os == 'macos-latest'

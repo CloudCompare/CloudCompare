@@ -86,7 +86,6 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release `
             -DCCCORELIB_SCALAR_DOUBLE=${{ matrix.scalar_double }} `
             -DEIGEN_ROOT_DIR="$EIGEN_ROOT_DIR" `
-            -DZLIB_ROOT="$CONDA_LIB_DIR" `
             -DOPTION_SUPPORT_GAMEPADS=ON `
             -DPLUGIN_EXAMPLE_GL=ON `
             -DPLUGIN_EXAMPLE_IO=ON `

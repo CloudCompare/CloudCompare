@@ -44,9 +44,8 @@ target_sources( ${PROJECT_NAME}
 target_include_directories( ${PROJECT_NAME}
 	PUBLIC
 	    ${CMAKE_CURRENT_SOURCE_DIR}/quazip/quazip
-        ${ZLIB_INCLUDE_DIRS}
 )
 
 target_compile_definitions( ${PROJECT_NAME} PUBLIC QUAZIP_STATIC )
 
-target_link_libraries( ${PROJECT_NAME} PRIVATE Qt5::Core ZLIB::ZLIB )
+target_link_libraries( ${PROJECT_NAME} Qt5::Core ZLIB::ZLIB )

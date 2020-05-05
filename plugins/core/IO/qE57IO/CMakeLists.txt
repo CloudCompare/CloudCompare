@@ -6,8 +6,8 @@ if ( PLUGIN_IO_QE57 )
 
     AddPlugin( NAME ${PROJECT_NAME} TYPE io )
 
-    add_subdirectory( include )
-    add_subdirectory( src )
+	add_subdirectory( include )
+	add_subdirectory( src )
 	add_subdirectory( extern/libE57Format )
     
     set_target_properties( E57Format PROPERTIES

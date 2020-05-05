@@ -21,6 +21,7 @@ target_sources( ${PROJECT_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/quazip/quazip/quazipfile.h
         ${CMAKE_CURRENT_LIST_DIR}/quazip/quazip/quazipfileinfo.h
         ${CMAKE_CURRENT_LIST_DIR}/quazip/quazip/quazipnewinfo.h
+        ${CMAKE_CURRENT_LIST_DIR}/quazip/quazip/unzip.h
         ${CMAKE_CURRENT_LIST_DIR}/quazip/quazip/zip.h
     PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/quazip/quazip/crypt.h
@@ -36,7 +37,6 @@ target_sources( ${PROJECT_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/quazip/quazip/quazipfile.cpp
         ${CMAKE_CURRENT_LIST_DIR}/quazip/quazip/quazipfileinfo.cpp
         ${CMAKE_CURRENT_LIST_DIR}/quazip/quazip/quazipnewinfo.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/quazip/quazip/unzip.h
         ${CMAKE_CURRENT_LIST_DIR}/quazip/quazip/unzip.c
         ${CMAKE_CURRENT_LIST_DIR}/quazip/quazip/zip.c
 )

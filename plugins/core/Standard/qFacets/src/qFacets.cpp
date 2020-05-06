@@ -637,7 +637,7 @@ void ComputeFacetExtensions(CCVector3& N, ccPolyline* facetContour, double& hori
 		CCVector3 Yf(0, 1, 0);
 		//we get the horizontal vector on the plane
 		CCVector3 D = CCVector3(0, 0, 1).cross(N);
-		if (D.norm2() > CCCoreLib::ZERO_TOLERANCE) //otherwise the facet is horizontal!
+		if ( CCCoreLib::GreaterThanEpsilon( D.norm2() ) ) //otherwise the facet is horizontal!
 		{
 			Yf = D;
 			Yf.normalize();
@@ -783,7 +783,7 @@ void qFacets::exportFacets()
 
 		//update X & Y
 		CCVector3 D = Z.cross(CCVector3(0, 0, 1));
-		if (D.norm2() > CCCoreLib::ZERO_TOLERANCE) //otherwise the vertical dir hasn't changed!
+		if ( CCCoreLib::GreaterThanEpsilon( D.norm2() ) ) //otherwise the vertical dir hasn't changed!
 		{
 			X = -D;
 			X.normalize();

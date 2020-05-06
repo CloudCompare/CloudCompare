@@ -519,7 +519,7 @@ static unsigned ComputeGridDimensions(	const ccBBox& localBox,
 	{
 		if (processDim[d])
 		{
-			if (cellSizePlusGap.u[d] < CCCoreLib::ZERO_TOLERANCE)
+			if ( CCCoreLib::LessThanEpsilon( cellSizePlusGap.u[d] ) )
 			{
 				ccLog::Error("Box size (plus gap) is null! Can't apply repetitive process!");
 				return 0;

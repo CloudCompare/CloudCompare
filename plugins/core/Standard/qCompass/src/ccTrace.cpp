@@ -603,7 +603,7 @@ int ccTrace::getSegmentCostGrad(int p1, int p2, float search_r)
 				int c_value = (static_cast<int>(c.r) + c.g) + c.b;
 
 				//calculate gradient weighted by distance to the point (i.e. divide by distance^2)
-				if (norm2 > CCCoreLib::ZERO_TOLERANCE)
+				if ( CCCoreLib::GreaterThanEpsilon( norm2 ) )
 				{
 					//color magnitude difference
 					int deltaValue = p_value - c_value;

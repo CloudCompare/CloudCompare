@@ -278,7 +278,7 @@ CC_FILE_ERROR STLFilter::saveToASCIIFile(ccGenericMesh* mesh, FILE *theFile, QWi
 	return CC_FERR_NO_ERROR;
 }
 
-const PointCoordinateType c_defaultSearchRadius = static_cast<PointCoordinateType>(sqrt(CCCoreLib::ZERO_TOLERANCE));
+const PointCoordinateType c_defaultSearchRadius = static_cast<PointCoordinateType>(sqrt( CCCoreLib::ZERO_TOLERANCE_F ));
 static bool TagDuplicatedVertices(	const CCCoreLib::DgmOctree::octreeCell& cell,
 									void** additionalParameters,
 									CCCoreLib::NormalizedProgress* nProgress/*=0*/)

@@ -1079,7 +1079,7 @@ bool GenericItem::setOrientation(const CCVector3 &x, const CCVector3 &y, const C
 
 bool GenericItem::isOrientationValid(unsigned i) const
 {
-	return (orientation[i].norm2() > CCCoreLib::ZERO_TOLERANCE);
+	return CCCoreLib::GreaterThanEpsilon( orientation[i].norm2() );
 }
 
 bool GenericItem::completeOrientation()
@@ -1649,11 +1649,13 @@ bool Dish::setValue(Token t, PointCoordinateType value)
 
 PointCoordinateType Dish::surface() const
 {
-	if (radius > CCCoreLib::ZERO_TOLERANCE)
+	if ( CCCoreLib::GreaterThanEpsilon( radius ) )
 	{
 		PointCoordinateType r = static_cast<PointCoordinateType>(0.5f*diameter);
-		if (fabs(2 * height - diameter) < CCCoreLib::ZERO_TOLERANCE)
+		if ( CCCoreLib::LessThanEpsilon( fabs(2 * height - diameter) ) )
+		{
 			return static_cast<PointCoordinateType>(2.0*M_PI)*PDMS_SQR(r);
+		}
 		if (2 * height > diameter)
 		{
 			PointCoordinateType a = acos(r / height);

@@ -750,7 +750,7 @@ namespace ccLibAlgorithms
 					continue;
 				
 				ccLog::Print(QString("[Scale Matching] Entity '%1' scale: %2").arg(entities[i]->getName()).arg(scales[i]));
-				if (scales[i] <= CCCoreLib::ZERO_TOLERANCE)
+				if (scales[i] <= CCCoreLib::ZERO_TOLERANCE_D)
 				{
 					ccLog::Warning("[Scale Matching] Entity scale is too small!");
 					continue;

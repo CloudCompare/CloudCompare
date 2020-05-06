@@ -367,8 +367,10 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 					else
 					{
 						const ScalarType& val2 = sf2->getValue(i);
-						if (ccScalarField::ValidValue(val2) && std::abs(val2) > CCCoreLib::ZERO_TOLERANCE )
+						if (ccScalarField::ValidValue(val2) && CCCoreLib::GreaterThanEpsilon(std::abs(val2) ) )
+						{
 							val = val1 / val2;
+						}
 					}
 				}
 				break;
@@ -417,7 +419,7 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 				val = static_cast<ScalarType>(static_cast<int>(val1)); //integer part ('round' doesn't seem to be available on MSVC?!)
 				break;
 			case INVERSE:
-				val = std::abs(val1) < CCCoreLib::ZERO_TOLERANCE ? CCCoreLib::NAN_VALUE : static_cast<ScalarType>(1.0/val1);
+				val = CCCoreLib::LessThanEpsilon( std::abs(val1) ) ? CCCoreLib::NAN_VALUE : static_cast<ScalarType>(1.0/val1);
 				break;
 			default:
 				assert(false);

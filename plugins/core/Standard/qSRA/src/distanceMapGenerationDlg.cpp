@@ -508,7 +508,7 @@ void DistanceMapGenerationDlg::updateZoom(ccBBox& box)
 
 	//we get the bounding-box diagonal length
 	PointCoordinateType bbDiag = box.getDiagNorm();
-	if (bbDiag > CCCoreLib::ZERO_TOLERANCE)
+	if ( CCCoreLib::GreaterThanEpsilon( bbDiag ) )
 	{
 		bool sfDisplayed = m_window->getAssociatedScalarField() && m_window->sfShown();
 		bool yLabelDisplayed = m_yLabels && m_yLabels->isVisible() && m_yLabels->size();

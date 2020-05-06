@@ -268,10 +268,10 @@ ccGBLSensor::NormalGrid* ccGBLSensor::projectNormals(	CCCoreLib::GenericCloud* c
 			CCVector3 U = *P - sensorPos.getTranslationAsVec3D();
 			PointCoordinateType distToSensor = U.norm();
 
-			if (distToSensor > CCCoreLib::ZERO_TOLERANCE)
+			if ( CCCoreLib::GreaterThanEpsilon( distToSensor ) )
 			{
 				PointCoordinateType squareS2D = (S.x*S.x + S.y*S.y);
-				if (squareS2D > CCCoreLib::ZERO_TOLERANCE)
+				if ( CCCoreLib::GreaterThanEpsilon( squareS2D ) )
 				{
 					//and point+normal
 					CCVector3 P2 = *P + CCVector3(N);

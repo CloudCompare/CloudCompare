@@ -403,9 +403,9 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 												CCVector3d w;
 												mesh->computeInterpolationWeights(origTriIndex, *Vcj, w);
 
-												if (	(tx1 || w.u[0] < CCCoreLib::ZERO_TOLERANCE)
-													&&	(tx2 || w.u[1] < CCCoreLib::ZERO_TOLERANCE)
-													&&	(tx3 || w.u[2] < CCCoreLib::ZERO_TOLERANCE) )
+												if (	(tx1 || CCCoreLib::LessThanEpsilon( w.u[0] ) )
+													&&	(tx2 || CCCoreLib::LessThanEpsilon( w.u[1] ) )
+													&&	(tx3 || CCCoreLib::LessThanEpsilon( w.u[2] ) ) )
 												{
 													TexCoords2D t(	static_cast<float>((tx1 ? tx1->tx*w.u[0] : 0.0) + (tx2 ? tx2->tx*w.u[1] : 0.0) + (tx3 ? tx3->tx*w.u[2] : 0.0)),
 																	static_cast<float>((tx1 ? tx1->ty*w.u[0] : 0.0) + (tx2 ? tx2->ty*w.u[1] : 0.0) + (tx3 ? tx3->ty*w.u[2] : 0.0)) );

@@ -25,7 +25,7 @@ class qPDALIO : public QObject, public ccIOPluginInterface
 	Q_OBJECT
 	Q_INTERFACES( ccIOPluginInterface )
 
-	Q_PLUGIN_METADATA( IID "cccorp.cloudcompare.plugin.qPDALIO" FILE "info.json" )
+	Q_PLUGIN_METADATA( IID "cccorp.cloudcompare.plugin.qPDALIO" FILE "../info.json" )
 
 public:
 	explicit qPDALIO( QObject *parent = nullptr );

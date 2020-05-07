@@ -4,10 +4,7 @@
 
 # Find FFmpeg includes
 if( NOT EXISTS "${FFMPEG_INCLUDE_DIR}" )
-    find_path( FFMPEG_AVCODEC_INCLUDE_DIR libavcodec/avcodec.h
-        HINTS
-            /usr/local/include
-    )
+    find_path( FFMPEG_AVCODEC_INCLUDE_DIR libavcodec/avcodec.h )
     set( FFMPEG_INCLUDE_DIR "${FFMPEG_AVCODEC_INCLUDE_DIR}" CACHE PATH "FFmpeg include directory" )
     
     message( STATUS "Setting FFmpeg include dir: ${FFMPEG_INCLUDE_DIR}" )
@@ -16,10 +13,7 @@ endif()
 
 # Find FFmpeg libraries
 if( NOT EXISTS "${FFMPEG_LIBRARY_DIR}" )
-    find_library( FFMPEG_AVCODEC_LIBRARY_DIR avcodec
-        HINTS
-            /usr/local/lib
-    )
+    find_library( FFMPEG_AVCODEC_LIBRARY_DIR avcodec DOC "FFmpeg library directory" )
     get_filename_component( FFMPEG_AVCODEC_LIBRARY_DIR ${FFMPEG_AVCODEC_LIBRARY_DIR} DIRECTORY )
     set( FFMPEG_LIBRARY_DIR "${FFMPEG_AVCODEC_LIBRARY_DIR}" CACHE PATH "FFmpeg library directory" )
     
@@ -45,11 +39,7 @@ if( WIN32 )
     endif()
 elseif( APPLE )
 	if( NOT EXISTS "${FFMPEG_X264_LIBRARY_DIR}" )
-        find_library( X264_LIBRARY_DIR x264
-            HINTS
-                /usr/local/lib
-        )
-
+        find_library( X264_LIBRARY_DIR x264 )
         get_filename_component( X264_LIBRARY_DIR ${X264_LIBRARY_DIR} DIRECTORY )
         set( FFMPEG_X264_LIBRARY_DIR "${X264_LIBRARY_DIR}" CACHE PATH "The directory containing the x264 library." )
         

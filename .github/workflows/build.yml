@@ -64,7 +64,7 @@ jobs:
 
       - name: Install Dependencies (macOS)
         if: matrix.config.os == 'macos-latest'
-        run: brew install x264 xerces-c
+        run: brew install ffmpeg x264 xerces-c
 
       - name: Configure MSVC console (Windows)
         if:  matrix.config.os == 'windows-latest'

@@ -2,9 +2,24 @@
 # FFmpeg+CMake support for CloudCompare
 # ------------------------------------------------------------------------------
 
-# Find FFmpeg
-set( FFMPEG_INCLUDE_DIR "" CACHE PATH "FFmpeg include directory" )
-set( FFMPEG_LIBRARY_DIR "" CACHE PATH "FFmpeg library directory" )
+# Find FFmpeg includes
+if( NOT EXISTS "${FFMPEG_INCLUDE_DIR}" )
+    find_path( FFMPEG_AVCODEC_INCLUDE_DIR libavcodec/avcodec.h )
+    set( FFMPEG_INCLUDE_DIR "${FFMPEG_AVCODEC_INCLUDE_DIR}" CACHE PATH "FFmpeg include directory" )
+    
+    message( STATUS "Setting FFmpeg include dir: ${FFMPEG_INCLUDE_DIR}" )
+    unset( FFMPEG_AVCODEC_INCLUDE_DIR CACHE )
+endif()
+
+# Find FFmpeg libraries
+if( NOT EXISTS "${FFMPEG_LIBRARY_DIR}" )
+    find_library( FFMPEG_AVCODEC_LIBRARY_DIR avcodec DOC "FFmpeg library directory" )
+    get_filename_component( FFMPEG_AVCODEC_LIBRARY_DIR ${FFMPEG_AVCODEC_LIBRARY_DIR} DIRECTORY )
+    set( FFMPEG_LIBRARY_DIR "${FFMPEG_AVCODEC_LIBRARY_DIR}" CACHE PATH "FFmpeg library directory" )
+    
+    message( STATUS "Setting FFmpeg library dir: ${FFMPEG_LIBRARY_DIR}" )
+    unset( FFMPEG_AVCODEC_LIBRARY_DIR CACHE )
+endif()
 
 if (WIN32)
 	set( FFMPEG_BINARY_DIR "" CACHE PATH "FFmpeg binary directory (where the DLLs are ;-)" )
@@ -17,11 +32,11 @@ elseif ( APPLE )
 endif()
 
 if( NOT EXISTS "${FFMPEG_INCLUDE_DIR}" )
-	message( FATAL_ERROR "FFmpeg include dir does not exist (FFMPEG_INCLUDE_DIR)" )
+	message( FATAL_ERROR "FFmpeg include dir does not exist (FFMPEG_INCLUDE_DIR): ${FFMPEG_INCLUDE_DIR}" )
 endif()
 
 if( NOT EXISTS "${FFMPEG_LIBRARY_DIR}" )
-    message( FATAL_ERROR "FFmpeg library dir does not exist (FFMPEG_LIBRARY_DIR)" )
+    message( FATAL_ERROR "FFmpeg library dir does not exist (FFMPEG_LIBRARY_DIR): ${FFMPEG_LIBRARY_DIR}" )
 endif()
 
 # link project with ffmpeg libraries

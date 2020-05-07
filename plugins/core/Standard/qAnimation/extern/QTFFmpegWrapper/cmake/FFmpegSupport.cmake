@@ -54,8 +54,6 @@ endif()
 
 # link project with ffmpeg libraries
 function( target_link_ffmpeg ) # 1 argument: ARGV0 = project name
-	target_include_directories( ${ARGV0} PRIVATE ${FFMPEG_INCLUDE_DIR} )
-
 	set( FFMPEG_LIBRARIES "" )
 	set( FFMPEG_LIBRARIES_ROOT_NAME avutil avcodec avformat swscale ) #unused: avdevice avfilter postproc swresample
 	

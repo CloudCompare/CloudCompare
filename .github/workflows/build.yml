@@ -19,18 +19,18 @@ jobs:
               os: windows-latest,
               generator: "Ninja",
               conda_library_dir: "Library",
+              compile_qanimation_with_ffmpeg: "ON",
               compile_qpcl: "ON",
               compile_qransac: "ON",
-              xercesclib_name: xerces-c_3.lib,
            }
           - {
               name: "macOS Clang",
               os: macos-latest,
               generator: "Ninja",
               conda_library_dir: ".",
+              compile_qanimation_with_ffmpeg: "OFF",
               compile_qpcl: "OFF",
               compile_qransac: "OFF",
-              xercesclib_name: libxerces-c-3.2.dylib
             }
 
     steps:
@@ -105,7 +105,7 @@ jobs:
             -DPLUGIN_IO_QPHOTOSCAN=ON `
             -DPLUGIN_IO_QPDAL=ON `
             -DPLUGIN_STANDARD_QANIMATION=ON `
-            -DQANIMATION_WITH_FFMPEG_SUPPORT=ON `
+            -DQANIMATION_WITH_FFMPEG_SUPPORT=${{ matrix.config.compile_qanimation_with_ffmpeg }} `
             -DPLUGIN_STANDARD_QBROOM=ON `
             -DPLUGIN_STANDARD_QCANUPO=OFF `
             -DPLUGIN_STANDARD_QCOMPASS=ON `

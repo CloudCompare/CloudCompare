@@ -25,7 +25,7 @@ class qPhotoscanIO : public QObject, public ccIOPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES( ccIOPluginInterface )
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qPhotoscanIO" FILE "info.json")
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qPhotoscanIO" FILE "../info.json")
 
 public:
 	explicit qPhotoscanIO( QObject *parent = nullptr );

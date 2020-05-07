@@ -24,14 +24,14 @@ class qE57IO : public QObject, public ccIOPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES( ccIOPluginInterface )
-	
-	Q_PLUGIN_METADATA( IID "cccorp.cloudcompare.plugin.qE57IO" FILE "info.json" )
-	
+
+	Q_PLUGIN_METADATA( IID "cccorp.cloudcompare.plugin.qE57IO" FILE "../info.json" )
+
 public:
 	explicit qE57IO( QObject *parent = nullptr );
-	
+
 	void registerCommands( ccCommandLineInterface *cmd ) override;
-	
+
 	FilterList getFilters() override;
 };
 

@@ -21,7 +21,6 @@ jobs:
               conda_library_dir: "Library",
               compile_qpcl: "ON",
               compile_qransac: "ON",
-              zlib_name: z.lib,
               xercesclib_name: xerces-c_3.lib,
            }
           - {
@@ -31,7 +30,6 @@ jobs:
               conda_library_dir: ".",
               compile_qpcl: "OFF",
               compile_qransac: "OFF",
-              zlib_name: libz.a,
               xercesclib_name: libxerces-c-3.2.dylib
             }
 
@@ -87,8 +85,6 @@ jobs:
           $CONDA_LIB_DIR = Join-Path -Resolve $env:CONDA_PREFIX ${{ matrix.config.conda_library_dir }}
 
           $EIGEN_ROOT_DIR = Join-Path -Resolve $CONDA_LIB_DIR include eigen3
-          $ZLIB_INCLUDE_DIRS = Join-Path -Resolve $CONDA_LIB_DIR include
-          $ZLIB_LIBRARIES = Join-Path -Resolve $CONDA_LIB_DIR lib ${{ matrix.config.zlib_name }}
 
           cmake `
             -B build `
@@ -96,8 +92,6 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release `
             -DCCCORELIB_SCALAR_DOUBLE=${{ matrix.scalar_double }} `
             -DEIGEN_ROOT_DIR="$EIGEN_ROOT_DIR" `
-            -DZLIB_INCLUDE_DIRS="$ZLIB_INCLUDE_DIRS" `
-            -DZLIB_LIBRARIES="$ZLIB_LIBRARIES" `
             -DOPTION_SUPPORT_GAMEPADS=ON `
             -DPLUGIN_EXAMPLE_GL=ON `
             -DPLUGIN_EXAMPLE_IO=ON `

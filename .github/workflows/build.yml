@@ -64,7 +64,7 @@ jobs:
 
       - name: Install Dependencies (macOS)
         if: matrix.config.os == 'macos-latest'
-        run: brew install ffmpeg x264 xerces-c
+        run: brew install x264 xerces-c
 
       - name: Configure MSVC console (Windows)
         if:  matrix.config.os == 'windows-latest'
@@ -90,6 +90,7 @@ jobs:
             -B build `
             -G "${{ matrix.config.generator }}" `
             -DCMAKE_BUILD_TYPE=Release `
+            -DCMAKE_PREFIX_PATH="$CONDA_LIB_DIR" `
             -DCCCORELIB_SCALAR_DOUBLE=${{ matrix.scalar_double }} `
             -DEIGEN_ROOT_DIR="$EIGEN_ROOT_DIR" `
             -DOPTION_SUPPORT_GAMEPADS=ON `

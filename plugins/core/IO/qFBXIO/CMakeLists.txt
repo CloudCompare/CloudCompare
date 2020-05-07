@@ -1,6 +1,6 @@
 option( PLUGIN_IO_QFBX "Install qFBXIO plugin to read & write AutoDesk FBX files" OFF )
 
-if ( PLUGIN_IO_QFBX )
+if( PLUGIN_IO_QFBX )
 	project( QFBX_IO_PLUGIN )
 
     AddPlugin( NAME ${PROJECT_NAME} TYPE io )
@@ -23,9 +23,8 @@ if ( PLUGIN_IO_QFBX )
 		include_directories( ${FBX_SDK_INCLUDE_DIR} )
 	endif()
 	
-	include_directories( src )
-
-	add_subdirectory( src )
+    add_subdirectory( include )
+    add_subdirectory( src )
 	
     include( CMakePluginTemplate )
 	

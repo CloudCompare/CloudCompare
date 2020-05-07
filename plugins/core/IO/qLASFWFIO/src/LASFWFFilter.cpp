@@ -27,7 +27,7 @@
 #include <ccHObjectCaster.h>
 
 //qPDALIO
-#include "../qPDALIO/src/LASFields.h"
+#include "LASFields.h"
 
 //Qt
 #include <QCoreApplication>

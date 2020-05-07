@@ -21,7 +21,7 @@
 #include "ccCommandLineInterface.h"
 
 //Local
-#include "Filter/LASFWFFilter.h"
+#include "LASFWFFilter.h"
 
 static const char COMMAND_LOAD_FWF[]		= "FWF_O";
 static const char COMMAND_SAVE_CLOUDS_FWF[]	= "FWF_SAVE_CLOUDS";

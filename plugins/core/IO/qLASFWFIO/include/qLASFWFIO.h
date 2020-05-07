@@ -15,34 +15,29 @@
 //#                                                                        #
 //##########################################################################
 
-#include "qLASFWFIO.h"
-
-//local
-#include "Filter/LASFWFFilter.h"
-#include "qLASFWFIOCommands.h"
+#ifndef Q_LAS_FWF_IO_PLUGIN_HEADER
+#define Q_LAS_FWF_IO_PLUGIN_HEADER
 
 //Qt
-#include <QtPlugin>
+#include <QObject>
 
-qLASFWFIO::qLASFWFIO(QObject *parent)
-    : QObject(parent)
-    , ccIOPluginInterface(":/CC/plugin/qLASFWFIO/info.json")
+#include "ccIOPluginInterface.h"
+
+class qLASFWFIO : public QObject, public ccIOPluginInterface
 {
-}
+	Q_OBJECT
+	Q_INTERFACES( ccIOPluginInterface )
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qLAS_FWF_IO" FILE "../info.json")
 
-ccIOPluginInterface::FilterList qLASFWFIO::getFilters()
-{
-	return { FileIOFilter::Shared(new LASFWFFilter) };
-}
+public:
+	//! Default constructor
+	qLASFWFIO(QObject* parent = nullptr);
 
-void qLASFWFIO::registerCommands(ccCommandLineInterface* cmd)
-{
-	if (!cmd)
-	{
-		assert(false);
-		return;
-	}
+	//inherited from ccPluginInterface
+	void registerCommands(ccCommandLineInterface* cmd) override;
 
-	cmd->registerCommand(ccCommandLineInterface::Command::Shared(new CommandLoadLASFWF));
-	cmd->registerCommand(ccCommandLineInterface::Command::Shared(new CommandSaveLASFWF));
-}
+	//inherited from ccIOPluginInterface
+	ccIOPluginInterface::FilterList getFilters() override;
+};
+
+#endif //Q_LAS_FWF_IO_PLUGIN_HEADER

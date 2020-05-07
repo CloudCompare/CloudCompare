@@ -39,7 +39,7 @@ jobs:
         with:
           submodules: true
 
-      # Turn off for now since GitHub Actions is broken (will eventually move to brew anyways) 
+      # Turn off for now since GitHub Actions is broken (will eventually move to brew anyways)
       # - name: Conda Cache (macOS)
       #   if:  matrix.config.os == 'macos-latest'
       #   uses: actions/cache@v1
@@ -104,6 +104,7 @@ jobs:
             -DPLUGIN_IO_QPHOTOSCAN=ON `
             -DPLUGIN_IO_QPDAL=ON `
             -DPLUGIN_STANDARD_QANIMATION=ON `
+            -DQANIMATION_WITH_FFMPEG_SUPPORT=ON `
             -DPLUGIN_STANDARD_QBROOM=ON `
             -DPLUGIN_STANDARD_QCANUPO=OFF `
             -DPLUGIN_STANDARD_QCOMPASS=ON `

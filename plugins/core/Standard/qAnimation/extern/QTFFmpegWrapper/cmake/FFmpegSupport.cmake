@@ -21,22 +21,35 @@ if( NOT EXISTS "${FFMPEG_LIBRARY_DIR}" )
     unset( FFMPEG_AVCODEC_LIBRARY_DIR CACHE )
 endif()
 
-if (WIN32)
-	set( FFMPEG_BINARY_DIR "" CACHE PATH "FFmpeg binary directory (where the DLLs are ;-)" )
-elseif ( APPLE )
-	set( FFMPEG_X264_LIBRARY_DIR "" CACHE PATH "The directory containing the x264 library." )
-
-	if( NOT EXISTS "${FFMPEG_X264_LIBRARY_DIR}" )
-		message( SEND_ERROR "x264 library dir does not exist (FFMPEG_X264_LIBRARY_DIR)" )
-	endif()
-endif()
-
 if( NOT EXISTS "${FFMPEG_INCLUDE_DIR}" )
 	message( FATAL_ERROR "FFmpeg include dir does not exist (FFMPEG_INCLUDE_DIR): ${FFMPEG_INCLUDE_DIR}" )
 endif()
 
 if( NOT EXISTS "${FFMPEG_LIBRARY_DIR}" )
     message( FATAL_ERROR "FFmpeg library dir does not exist (FFMPEG_LIBRARY_DIR): ${FFMPEG_LIBRARY_DIR}" )
+endif()
+
+if( WIN32 )
+    if( NOT EXISTS "${FFMPEG_BINARY_DIR}" )
+        get_filename_component( FFMPEG_ROOT_DIR "${FFMPEG_LIBRARY_DIR}/.." ABSOLUTE )
+        set( FFMPEG_BINARY_DIR "${FFMPEG_ROOT_DIR}/bin" CACHE PATH "FFmpeg binary directory (where the DLLs are ;-)" )
+        
+        message( STATUS "Setting FFmpeg binary dir: ${FFMPEG_BINARY_DIR}" )
+        unset( FFMPEG_ROOT_DIR CACHE )
+    endif()
+elseif( APPLE )
+	if( NOT EXISTS "${FFMPEG_X264_LIBRARY_DIR}" )
+        find_library( X264_LIBRARY_DIR x264 )
+        get_filename_component( X264_LIBRARY_DIR ${X264_LIBRARY_DIR} DIRECTORY )
+        set( FFMPEG_X264_LIBRARY_DIR "${X264_LIBRARY_DIR}" CACHE PATH "The directory containing the x264 library." )
+        
+        message( STATUS "Setting x264 library dir: ${FFMPEG_X264_LIBRARY_DIR}" )
+        unset( X264_LIBRARY_DIR CACHE )
+	endif()
+    
+    if( NOT EXISTS "${FFMPEG_X264_LIBRARY_DIR}" )
+        message( FATAL_ERROR "x264 library dir does not exist (FFMPEG_X264_LIBRARY_DIR): ${FFMPEG_X264_LIBRARY_DIR}" )
+    endif()
 endif()
 
 # link project with ffmpeg libraries

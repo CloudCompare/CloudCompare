@@ -24,7 +24,9 @@ function( target_link_LASLib ) # 1 argument: ARGV0 = project name
 
     if( LASLIB_RELEASE_LIBRARY )
         target_link_libraries( ${ARGV0} optimized ${LASLIB_RELEASE_LIBRARY} )
-    elseif( CMAKE_CONFIGURATION_TYPES AND LASLIB_DEBUG_LIBRARY )
+    endif()
+
+    if( CMAKE_CONFIGURATION_TYPES AND LASLIB_DEBUG_LIBRARY )
         target_link_libraries( ${ARGV0} debug ${LASLIB_DEBUG_LIBRARY} )
     endif()
 endfunction()

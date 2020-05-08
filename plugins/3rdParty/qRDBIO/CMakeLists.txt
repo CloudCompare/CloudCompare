@@ -7,7 +7,7 @@ if (PLUGIN_IO_QRDB)
 
 	project( QRDB_IO_PLUGIN )
 
-	AddPlugin( NAME ${PROJECT_NAME} )
+	AddPlugin( NAME ${PROJECT_NAME} TYPE io )
 
 	include( CMakePolicies NO_POLICY_SCOPE )
 

@@ -79,68 +79,66 @@ enum class ESRI_SHAPE_TYPE : int32_t
 **/
 static bool IsValidESRIShapeCode(int32_t code)
 {
-	if (code < static_cast<int32_t >(ESRI_SHAPE_TYPE::NULL_SHAPE))
+	if (code < static_cast<int32_t>(ESRI_SHAPE_TYPE::NULL_SHAPE))
 		return false;
-	if (code > static_cast<int32_t >(ESRI_SHAPE_TYPE::MULTI_PATCH))
+	if (code > static_cast<int32_t>(ESRI_SHAPE_TYPE::MULTI_PATCH))
 		return false;
 
-	switch (static_cast<ESRI_SHAPE_TYPE >(code))
+	switch (static_cast<ESRI_SHAPE_TYPE>(code))
 	{
-		case ESRI_SHAPE_TYPE::NULL_SHAPE:
-		case ESRI_SHAPE_TYPE::POINT:
-		case ESRI_SHAPE_TYPE::POLYLINE:
-		case ESRI_SHAPE_TYPE::POLYGON:
-		case ESRI_SHAPE_TYPE::MULTI_POINT:
-		case ESRI_SHAPE_TYPE::POINT_Z:
-		case ESRI_SHAPE_TYPE::POLYLINE_Z:
-		case ESRI_SHAPE_TYPE::POLYGON_Z:
-		case ESRI_SHAPE_TYPE::MULTI_POINT_Z:
-		case ESRI_SHAPE_TYPE::POINT_M:
-		case ESRI_SHAPE_TYPE::POLYLINE_M:
-		case ESRI_SHAPE_TYPE::POLYGON_M:
-		case ESRI_SHAPE_TYPE::MULTI_POINT_M:
-		case ESRI_SHAPE_TYPE::MULTI_PATCH:
-			return true;
-		default:
-			return false;
+	case ESRI_SHAPE_TYPE::NULL_SHAPE:
+	case ESRI_SHAPE_TYPE::POINT:
+	case ESRI_SHAPE_TYPE::POLYLINE:
+	case ESRI_SHAPE_TYPE::POLYGON:
+	case ESRI_SHAPE_TYPE::MULTI_POINT:
+	case ESRI_SHAPE_TYPE::POINT_Z:
+	case ESRI_SHAPE_TYPE::POLYLINE_Z:
+	case ESRI_SHAPE_TYPE::POLYGON_Z:
+	case ESRI_SHAPE_TYPE::MULTI_POINT_Z:
+	case ESRI_SHAPE_TYPE::POINT_M:
+	case ESRI_SHAPE_TYPE::POLYLINE_M:
+	case ESRI_SHAPE_TYPE::POLYGON_M:
+	case ESRI_SHAPE_TYPE::MULTI_POINT_M:
+	case ESRI_SHAPE_TYPE::MULTI_PATCH:
+		return true;
+	default:
+		return false;
 	}
 }
-
 
 //! Returns whether the shape type contains the 3rd dimensions Z
 static bool IsESRIShape3D(ESRI_SHAPE_TYPE shapeType)
 {
 	switch (shapeType)
 	{
-		case ESRI_SHAPE_TYPE::POINT_Z:
-		case ESRI_SHAPE_TYPE::POLYLINE_Z:
-		case ESRI_SHAPE_TYPE::POLYGON_Z:
-		case ESRI_SHAPE_TYPE::MULTI_POINT_Z:
-		case ESRI_SHAPE_TYPE::MULTI_PATCH:
-			return true;
-		default:
-			return false;
+	case ESRI_SHAPE_TYPE::POINT_Z:
+	case ESRI_SHAPE_TYPE::POLYLINE_Z:
+	case ESRI_SHAPE_TYPE::POLYGON_Z:
+	case ESRI_SHAPE_TYPE::MULTI_POINT_Z:
+	case ESRI_SHAPE_TYPE::MULTI_PATCH:
+		return true;
+	default:
+		return false;
 	}
 }
-
 
 //! Returns whether the shape type contains the additional measures dimension
 static bool HasMeasurements(ESRI_SHAPE_TYPE shapeType)
 {
 	switch (shapeType)
 	{
-		case ESRI_SHAPE_TYPE::POINT_Z:
-		case ESRI_SHAPE_TYPE::POLYLINE_Z:
-		case ESRI_SHAPE_TYPE::POLYGON_Z:
-		case ESRI_SHAPE_TYPE::MULTI_POINT_Z:
-		case ESRI_SHAPE_TYPE::POINT_M:
-		case ESRI_SHAPE_TYPE::POLYLINE_M:
-		case ESRI_SHAPE_TYPE::POLYGON_M:
-		case ESRI_SHAPE_TYPE::MULTI_POINT_M:
-		case ESRI_SHAPE_TYPE::MULTI_PATCH:
-			return true;
-		default:
-			return false;
+	case ESRI_SHAPE_TYPE::POINT_Z:
+	case ESRI_SHAPE_TYPE::POLYLINE_Z:
+	case ESRI_SHAPE_TYPE::POLYGON_Z:
+	case ESRI_SHAPE_TYPE::MULTI_POINT_Z:
+	case ESRI_SHAPE_TYPE::POINT_M:
+	case ESRI_SHAPE_TYPE::POLYLINE_M:
+	case ESRI_SHAPE_TYPE::POLYGON_M:
+	case ESRI_SHAPE_TYPE::MULTI_POINT_M:
+	case ESRI_SHAPE_TYPE::MULTI_PATCH:
+		return true;
+	default:
+		return false;
 	}
 }
 
@@ -156,22 +154,22 @@ enum class ESRI_PART_TYPE : int32_t
 
 static bool IsValidEsriPartType(int32_t code)
 {
-	if (code < static_cast<int32_t >(ESRI_PART_TYPE::TRIANGLE_STRIP))
+	if (code < static_cast<int32_t>(ESRI_PART_TYPE::TRIANGLE_STRIP))
 		return false;
-	if (code > static_cast<int32_t >(ESRI_PART_TYPE::RING))
+	if (code > static_cast<int32_t>(ESRI_PART_TYPE::RING))
 		return false;
 
-	switch (static_cast<ESRI_PART_TYPE >(code))
+	switch (static_cast<ESRI_PART_TYPE>(code))
 	{
-		case ESRI_PART_TYPE::TRIANGLE_STRIP:
-		case ESRI_PART_TYPE::TRIANGLE_FAN:
-		case ESRI_PART_TYPE::INNER_RING:
-		case ESRI_PART_TYPE::OUTER_RING:
-		case ESRI_PART_TYPE::FIRST_RING:
-		case ESRI_PART_TYPE::RING:
-			return true;
-		default:
-			return false;
+	case ESRI_PART_TYPE::TRIANGLE_STRIP:
+	case ESRI_PART_TYPE::TRIANGLE_FAN:
+	case ESRI_PART_TYPE::INNER_RING:
+	case ESRI_PART_TYPE::OUTER_RING:
+	case ESRI_PART_TYPE::FIRST_RING:
+	case ESRI_PART_TYPE::RING:
+		return true;
+	default:
+		return false;
 	}
 }
 
@@ -383,7 +381,7 @@ struct ShapeFileHeader
 {
 	int32_t fileLength = ESRI_HEADER_SIZE;
 	int32_t version = 1000;
-	int32_t shapeTypeInt = static_cast<int32_t >(ESRI_SHAPE_TYPE::NULL_SHAPE);
+	int32_t shapeTypeInt = static_cast<int32_t>(ESRI_SHAPE_TYPE::NULL_SHAPE);
 	CCVector3d pointMin;
 	CCVector3d pointMax;
 	CCVector2d mRange; // x is the min, y is the max
@@ -849,7 +847,7 @@ static CC_FILE_ERROR BuildPatches(
 		ESRI_PART_TYPE type = static_cast<ESRI_PART_TYPE>(partTypes[i]);
 
 		const int32_t &firstIndex = startIndexes[i];
-		const int32_t &lastIndex = static_cast<const int32_t &>((i + 1 < numParts ? startIndexes[i + 1] : numPoints) -1);
+		const int32_t &lastIndex = static_cast<const int32_t &>((i + 1 < numParts ? startIndexes[i + 1] : numPoints) - 1);
 		const int32_t vertCount = lastIndex - firstIndex + 1;
 
 		switch (type)
@@ -978,19 +976,19 @@ static void Save3DCloud(QDataStream &stream, const ccGenericPointCloud *cloud, c
 		mMax = std::numeric_limits<double>::min();
 		for (unsigned i = 0; i < numPoints; ++i)
 		{
-			auto scalar = static_cast<double >(cloud->getPointScalarValue(i));
+			double scalar = cloud->getPointScalarValue(i);
 			mMin = std::min(mMin, scalar);
 			mMax = std::max(mMax, scalar);
 		}
 	}
 	stream << mMin << mMax;
 
-	auto scalar = ESRI_NO_DATA;
+	double scalar = ESRI_NO_DATA;
 	for (unsigned i = 0; i < numPoints; ++i)
 	{
 		if (hasSF)
 		{
-			scalar = static_cast<double>(cloud->getPointScalarValue(i));
+			scalar = cloud->getPointScalarValue(i);
 		}
 		stream << scalar;
 	}
@@ -1079,7 +1077,7 @@ static CC_FILE_ERROR SaveMesh(ccMesh *mesh, QDataStream &stream, int32_t recordN
 
 	qint64 recordStart = stream.device()->pos();
 	stream.setByteOrder(QDataStream::LittleEndian);
-	stream << static_cast<int32_t >(ESRI_SHAPE_TYPE::MULTI_PATCH);
+	stream << static_cast<int32_t>(ESRI_SHAPE_TYPE::MULTI_PATCH);
 
 	CCVector3d bbMing;
 	CCVector3d bbMaxg;
@@ -1223,7 +1221,7 @@ static CC_FILE_ERROR LoadPolyline(QDataStream &shpStream,
 			);
 			if (!allNaNs)
 			{
-				auto* sf = new ccScalarField("Measures");
+				ccScalarField* sf = new ccScalarField("Measures");
 				if (!sf->reserveSafe(vertCount))
 				{
 					ccLog::Warning(QString("[SHP] Polyline #%1.%2: not enough memory to load scalar values!").arg(index).arg(i + 1));
@@ -1440,7 +1438,7 @@ static CC_FILE_ERROR LoadCloud(QDataStream &shpStream,
 	int32_t numPoints;
 	shpStream >> numPoints;
 
-	auto* cloud = new ccPointCloud(QString("Cloud #%1").arg(index));
+	ccPointCloud* cloud = new ccPointCloud(QString("Cloud #%1").arg(index));
 	if (!cloud->reserve(numPoints))
 	{
 		delete cloud;
@@ -1698,7 +1696,7 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 	// Promote to polygon
 	if (m_closedPolylinesAsPolygons && outputShapeType == ESRI_SHAPE_TYPE::POLYLINE_Z)
 	{
-		auto isClosed = [](const ccHObject *obj) {return static_cast<const ccPolyline*>(obj)->isClosed();};
+		auto isClosed = [](const ccHObject *obj) { return static_cast<const ccPolyline*>(obj)->isClosed(); };
 		bool allClosed = std::all_of(toSave.begin(), toSave.end(), isClosed);
 		if (allClosed)
 		{
@@ -1709,7 +1707,7 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 	// Demote to 2D polyline/polygon and remove "measure" dimension if not needed
 	if (save3DPolysAs2D)
 	{
-		auto hasSF = [](const ccHObject *obj){ return static_cast<const ccPolyline*>(obj)->isScalarFieldEnabled(); };
+		auto hasSF = [](const ccHObject *obj) { return static_cast<const ccPolyline*>(obj)->isScalarFieldEnabled(); };
 		bool anyHasSF = std::any_of(toSave.begin(), toSave.end(), hasSF);
 		if (anyHasSF)
 		{
@@ -2006,7 +2004,7 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString &filename, ccHObject &container,
 			ccLog::Warning("[SHP] Shape %d has an invalid shape code (%d)", recordNumber, shapeTypeInt);
 			return CC_FERR_READING;
 		}
-		auto shapeType = static_cast<ESRI_SHAPE_TYPE >(shapeTypeInt);
+		ESRI_SHAPE_TYPE shapeType = static_cast<ESRI_SHAPE_TYPE>(shapeTypeInt);
 
 		if (recordNumber < 64)
 			ccLog::Print(QString("[SHP] Record #%1 - type: %2 (%3 bytes)").arg(recordNumber).arg(ToString(shapeType)).arg(recordSize * 2)); //recordSize is measured in 16-bit words

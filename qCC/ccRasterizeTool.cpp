@@ -1651,10 +1651,7 @@ void ccRasterizeTool::generateContours()
 		assert(Z <= 2);
 		const unsigned char X = Z == 2 ? 0 : Z + 1;
 		const unsigned char Y = X == 2 ? 0 : X + 1;
-
-		ccBBox gridBBox = getCustomBBox();
-		assert(gridBBox.isValid());
-		gridMinCorner = CCVector2d(gridBBox.minCorner().u[X], gridBBox.minCorner().u[Y]);
+		gridMinCorner = CCVector2d(m_grid.minCorner.u[X], m_grid.minCorner.u[Y]);
 	}
 
 	//generate the contour lines

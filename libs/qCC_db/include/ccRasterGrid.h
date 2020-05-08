@@ -88,6 +88,9 @@ struct QCC_DB_LIB_API ccRasterGrid
 	//! Clears the grid
 	void clear();
 
+	//! Resets the grid
+	void reset();
+
 	//! Exportable fields
 	enum ExportableFields { PER_CELL_HEIGHT,
 							PER_CELL_COUNT,
@@ -146,6 +149,17 @@ struct QCC_DB_LIB_API ccRasterGrid
 	void fillEmptyCells(EmptyCellFillOption fillEmptyCellsStrategy,
 						double customCellHeight = 0);
 
+	//! Updates the number of non-empty cells
+	unsigned updateNonEmptyCellCount();
+
+	//! Updates the statistics about the cells
+	void updateCellStats();
+
+	//! Interpolates the empty cells
+	/** \warning The number of non empty cells must be up-to-date (see updateNonEmptyCellCount)
+	**/
+	bool interpolateEmptyCells();
+
 	//! Sets valid
 	inline void setValid(bool state) { valid = state; }
 	//! Returns whether the grid is 'valid' or not
@@ -157,14 +171,14 @@ struct QCC_DB_LIB_API ccRasterGrid
 		CCVector3d relativePos = CCVector3d::fromArray(P.u) - minCorner;
 
 		//DGM: we use the 'PixelIsArea' convention
-		int i = static_cast<int>((relativePos.u[X] / gridStep + 0.5));
-		int j = static_cast<int>((relativePos.u[Y] / gridStep + 0.5));
+		int i = static_cast<int>(relativePos.u[X] / gridStep + 0.5);
+		int j = static_cast<int>(relativePos.u[Y] / gridStep + 0.5);
 
 		return {i, j};
 	}
 
 	//! Computes the position of the center of a given cell
-	CCVector2d computeCellCenter(int i, int j, unsigned char X, unsigned char Y) const
+	inline CCVector2d computeCellCenter(int i, int j, unsigned char X, unsigned char Y) const
 	{
 		return {minCorner.u[X] + (i + 0.5) * gridStep, minCorner.u[Y] + (j + 0.5) * gridStep};
 	}

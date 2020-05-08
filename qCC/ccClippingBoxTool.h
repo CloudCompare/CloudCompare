@@ -79,6 +79,9 @@ public:
 		\param extractContours whether to extract contours or not
 		\param maxEdgeLength max contour edge length (the smaller, the tighter the contour will be)
 		\param outputContours output contours (if successful)
+		\param extractLevelSet whether to extract the level set or not
+		\param levelSetGridStep the step of the grid from which the level set will be extraced
+		\param levelSet level set contour lines (if any)
 		\param gap optional gap between each slice
 		\param multiPass multi-pass contour extraction
 		\param splitContours whether to split the contour when the segment can't be smaller than the specified 'maxEdgeLength'
@@ -95,10 +98,17 @@ public:
 		bool singleContourMode,
 		bool processDimensions[3],
 		std::vector<ccHObject*>& outputSlices,
+
 		bool extractContours,
 		PointCoordinateType maxEdgeLength,
-		std::vector<ccPolyline*>& outputContours,
 		ccContourExtractor::ContourType contourType,
+		std::vector<ccPolyline*>& outputContours,
+
+		bool extractLevelSet,
+		double levelSetGridStep,
+		int levelSetMinVertCount,
+		std::vector<ccPolyline*>& levelSet,
+
 		PointCoordinateType gap = 0,
 		bool multiPass = false,
 		bool splitContours = false,

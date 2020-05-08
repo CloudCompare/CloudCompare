@@ -20,6 +20,7 @@
 //Local
 #include "ccBoundingBoxEditorDlg.h"
 #include "ccClippingBoxRepeatDlg.h"
+#include "ccContourLinesGenerator.h"
 #include "ccCropTool.h"
 #include "ccGLWindow.h"
 #include "ccReservedIDs.h"
@@ -29,6 +30,7 @@
 
 //qCC_db
 #include <ccClipBox.h>
+#include <ccRasterGrid.h>
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 
@@ -497,7 +499,7 @@ static unsigned ComputeGridDimensions(	const ccBBox& localBox,
 										const CCVector3& cellSizePlusGap)
 {
 	//compute 'grid' extents in the local clipping box ref.
-	for (int i=0; i<3; ++i)
+	for (int i = 0; i < 3; ++i)
 	{
 		indexMins[i] = 0;
 		indexMaxs[i] = 0;
@@ -538,10 +540,17 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 	bool singleContourMode,
 	bool repeatDimensions[3],
 	std::vector<ccHObject*>& outputSlices,
+
 	bool extractContours,
 	PointCoordinateType maxEdgeLength,
-	std::vector<ccPolyline*>& outputContours,
 	ccContourExtractor::ContourType contourType,
+	std::vector<ccPolyline*>& outputContours,
+
+	bool extractLevelSet,
+	double levelSetGridStep,
+	int levelSetMinVertCount,
+	std::vector<ccPolyline*>& levelSet,
+
 	PointCoordinateType gap/*=0*/,
 	bool multiPass/*=false*/,
 	bool splitContours/*=false*/,
@@ -567,6 +576,13 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 		assert(false);
 		ccLog::Error("No dimension selected to repeat the segmentation process?!");
 		return false;
+	}
+
+	if (extractLevelSet && repeatDimensionsSum != 1)
+	{
+		assert(false);
+		ccLog::Error("Only one repeat/flat dimension should be defined for level set extraction");
+		extractLevelSet = false;
 	}
 
 	//compute the cloud bounding box in the local clipping box ref.
@@ -764,6 +780,10 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 										QString slicePosStr = QString("(%1 ; %2 ; %3)").arg(cellOrigin.x).arg(cellOrigin.y).arg(cellOrigin.z);
 										sliceCloud->setName(QString("slice @ ") + slicePosStr);
 
+										sliceCloud->setMetaData("cell.origin.dim(0)", cellOrigin.x);
+										sliceCloud->setMetaData("cell.origin.dim(1)", cellOrigin.y);
+										sliceCloud->setMetaData("cell.origin.dim(2)", cellOrigin.z);
+
 										//add slice to group
 										outputSlices.push_back(sliceCloud);
 										++subCloudsCount;
@@ -908,6 +928,160 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 			} //extract sections from meshes
 
 		} //repeat mode
+
+		//extract level set (optionaly)
+		if (!error && extractLevelSet && cloudSliceCount != 0)
+		{
+			for (int iteration = 0; iteration < 1; ++iteration) //fake loop for easy break
+			{
+				if (progressDialog)
+				{
+					progressDialog->setWindowTitle("Level set extraction");
+					progressDialog->setInfo(QObject::tr("Level(s): %L1").arg(cloudSliceCount));
+					progressDialog->setMaximum(static_cast<int>(cloudSliceCount));
+					progressDialog->show();
+					QApplication::processEvents();
+				}
+
+				int Z = 2;
+				assert(repeatDimensionsSum == 1);
+				{
+					for (int i = 0; i < 3; ++i)
+					{
+						if (repeatDimensions[i])
+						{
+							Z = i;
+							break;
+						}
+					}
+				}
+				int X = (Z == 2 ? 0 : Z + 1);
+				int Y = (X == 2 ? 0 : X + 1);
+
+				CCVector3 gridOrigin = clipBox.getOwnBB().minCorner();
+				CCVector3 gridSize = clipBox.getOwnBB().getDiagVec();
+				ccGLMatrix globalTrans = localTrans.inverse();
+
+				assert(!CCCoreLib::LessThanEpsilon(levelSetGridStep));
+				unsigned gridWidth = 1 + static_cast<unsigned>(gridSize.u[X] / levelSetGridStep + 0.5);
+				unsigned gridHeight = 1 + static_cast<unsigned>(gridSize.u[Y] / levelSetGridStep + 0.5);
+
+				//add a margin to avoid issues in the level set generation
+				gridWidth += 2;
+				gridHeight += 2;
+				gridOrigin.u[X] -= levelSetGridStep;
+				gridOrigin.u[Y] -= levelSetGridStep;
+
+				ccRasterGrid grid;
+				if (!grid.init(gridWidth, gridHeight, levelSetGridStep, CCVector3d(0, 0, 0)))
+				{
+					ccLog::Error("Not enough memory!");
+					error = true;
+					break;
+				}
+
+				//process all the slices originating from point clouds
+				assert(cloudSliceCount <= outputSlices.size());
+				for (size_t i = 0; i < cloudSliceCount; ++i)
+				{
+					ccPointCloud* sliceCloud = ccHObjectCaster::ToPointCloud(outputSlices[i]);
+					assert(sliceCloud);
+
+					double sliceZ = sliceCloud->getMetaData(QString("cell.origin.dim(%1)").arg(Z)).toDouble();
+					sliceZ += gridSize.u[Z] / 2;
+
+					//grid.reset();
+					for (ccRasterGrid::Row& row : grid.rows)
+					{
+						for (ccRasterCell& cell : row)
+						{
+							cell.h = 0.0;
+							cell.nbPoints = 0;
+						}
+					}
+
+					//project the slice in 2D
+					for (unsigned pi = 0; pi != sliceCloud->size(); ++pi)
+					{
+						CCVector3 relativePos = *sliceCloud->getPoint(pi);
+						localTrans.apply(relativePos);
+						relativePos -= gridOrigin;
+
+						int i = static_cast<int>(relativePos.u[X] / levelSetGridStep + 0.5);
+						int j = static_cast<int>(relativePos.u[Y] / levelSetGridStep + 0.5);
+
+						//we skip points that fall outside of the grid!
+						if (	i < 0 || i >= static_cast<int>(gridWidth)
+							||	j < 0 || j >= static_cast<int>(gridHeight))
+						{
+							//there shouldn't be any actually
+							assert(false);
+							continue;
+						}
+
+						ccRasterCell& cell = grid.rows[j][i];
+						cell.h = 1.0;
+						++cell.nbPoints;
+					}
+
+					grid.updateNonEmptyCellCount();	
+					grid.updateCellStats();
+					grid.setValid(true);
+
+					//now extract the contour lines
+					ccContourLinesGenerator::Parameters params;
+					params.emptyCellsValue = std::numeric_limits<double>::quiet_NaN();
+					params.minVertexCount = levelSetMinVertCount;
+					params.parentWidget = progressDialog->parentWidget();
+					params.startAltitude = 0.0;
+					params.maxAltitude = 1.0;
+					params.step = 1.0;
+
+					std::vector<ccPolyline*> contours;
+					if (ccContourLinesGenerator::GenerateContourLines(&grid, CCVector2d(gridOrigin.u[X], gridOrigin.u[Y]), params, contours))
+					{
+						for (size_t k = 0; k < contours.size(); ++k)
+						{
+							ccPolyline* poly = contours[k];
+							CCCoreLib::GenericIndexedCloudPersist* vertices = poly->getAssociatedCloud();
+							for (unsigned pi = 0; pi < vertices->size(); ++pi)
+							{
+								//convert the vertices from the local coordinate system to the global one
+								const CCVector3* Pconst = vertices->getPoint(pi);
+								CCVector3 P;
+								P.u[X] = Pconst->x;
+								P.u[Y] = Pconst->y;
+								P.u[Z] = sliceZ;
+								*const_cast<CCVector3*>(Pconst) = globalTrans * P;
+							}
+
+							static char s_dimNames[3] = { 'X', 'Y', 'Z' };
+							poly->setName(QString("Contour line %1=%2 (#%3)").arg(s_dimNames[Z]).arg(sliceZ).arg(k + 1));
+							poly->setGlobalScale(sliceCloud->getGlobalScale());
+							poly->setGlobalShift(sliceCloud->getGlobalShift());
+							poly->setMetaData(ccPolyline::MetaKeyConstAltitude(), QVariant(sliceZ)); //replace the 'altitude' meta-data by the right value
+
+							levelSet.push_back(poly);
+						}
+					}
+					else
+					{
+						ccLog::Warning(QString("Failed to generate contour lines for cloud #%1").arg(i + 1));
+					}
+
+					if (progressDialog)
+					{
+						if (progressDialog->wasCanceled())
+						{
+							error = true;
+							ccLog::Warning(QString("[ExtractSlicesAndContours] Process canceled by user"));
+							break;
+						}
+						progressDialog->setValue(static_cast<int>(i) + 1);
+					}
+				}
+			}
+		}
 
 		//extract contour polylines (optionaly)
 		if (!error && extractContours && cloudSliceCount != 0)
@@ -1080,7 +1254,8 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 
 	ccClippingBoxRepeatDlg repeatDlg(singleContourMode, MainWindow::TheInstance());
 	repeatDlg.extractContoursGroupBox->setEnabled(!clouds.empty());
-	
+	repeatDlg.extractLevelSetGroupBox->setEnabled(!clouds.empty());
+
 	//by default we set the 'flat/repeat' dimension to the smallest box dimension
 	{
 		CCVector3 diagVec = m_clipBox->getOwnBB().getDiagVec();
@@ -1106,10 +1281,16 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 	static bool s_projectOnBestFitPlane = false;
 	static bool s_visualDebugMode = false;
 	static bool s_generateRandomColors = false;
+	static bool s_extractLevelSet = false;
+	static double s_levelSetGridStep = 0.0;
+	static int s_levelSetMinVertCount = 3;
 
 	//set default max edge length
 	if (s_maxEdgeLength < 0)
 		s_maxEdgeLength = m_clipBox->getBox().getDiagNorm() / 100.0;
+	if (s_levelSetGridStep <= 0.0)
+		s_levelSetGridStep = m_clipBox->getBox().getDiagNorm() / 300.0;
+
 	repeatDlg.maxEdgeLengthDoubleSpinBox->setValue(s_maxEdgeLength);
 	repeatDlg.splitContourCheckBox->setChecked(s_splitContours);
 	repeatDlg.multiPassCheckBox->setChecked(s_multiPass);
@@ -1118,7 +1299,9 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 	repeatDlg.projectOnBestFitCheckBox->setChecked(s_projectOnBestFitPlane);
 	repeatDlg.debugModeCheckBox->setChecked(s_visualDebugMode);
 	repeatDlg.randomColorCheckBox->setChecked(s_generateRandomColors);
-
+	repeatDlg.extractLevelSetGroupBox->setChecked(s_extractLevelSet);
+	repeatDlg.lsGridStepDoubleSpinBox->setValue(s_levelSetGridStep);
+	repeatDlg.minLSVertexCountSpinBox->setValue(s_levelSetMinVertCount);
 	if (!repeatDlg.exec())
 	{
 		//cancelled by user
@@ -1139,6 +1322,9 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 	s_projectOnBestFitPlane = repeatDlg.projectOnBestFitCheckBox->isChecked();
 	s_visualDebugMode = repeatDlg.debugModeCheckBox->isChecked();
 	s_generateRandomColors = repeatDlg.randomColorCheckBox->isChecked();
+	s_extractLevelSet = repeatDlg.extractLevelSetGroupBox->isChecked();
+	s_levelSetGridStep = repeatDlg.lsGridStepDoubleSpinBox->value();
+	s_levelSetMinVertCount = repeatDlg.minLSVertexCountSpinBox->value();
 
 	ccContourExtractor::ContourType contourType = ccContourExtractor::ContourType::FULL;
 	switch (s_contourTypeIndex)
@@ -1167,6 +1353,7 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 	ccProgressDialog pDlg(false, this);
 	std::vector<ccHObject*> outputSlices;
 	std::vector<ccPolyline*> outputContours;
+	std::vector<ccPolyline*> outputLevelSet;
 
 	QElapsedTimer eTimer;
 	eTimer.start();
@@ -1177,10 +1364,17 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 									singleContourMode,
 									processDim,
 									outputSlices,
+
 									extractContours,
 									static_cast<PointCoordinateType>(s_maxEdgeLength),
-									outputContours,
 									contourType,
+									outputContours,
+
+									s_extractLevelSet,
+									s_levelSetGridStep,
+									s_levelSetMinVertCount,
+									outputLevelSet,
+
 									static_cast<PointCoordinateType>(s_defaultGap),
 									s_multiPass,
 									s_splitContours,
@@ -1253,6 +1447,23 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 		s_lastContourUniqueIDs.clear();
 		s_lastContourUniqueIDs.push_back(contourGroup->getUniqueID());
 		removeLastContourToolButton->setEnabled(true);
+	}
+
+	//level set
+	if (!outputLevelSet.empty())
+	{
+		ccHObject* levelSetGroup = new ccHObject(baseName.isEmpty() ? QString("Level set") : baseName + QString(".levelSet"));
+
+		for (ccPolyline* poly : outputLevelSet)
+		{
+			levelSetGroup->addChild(poly);
+		}
+
+		if (m_clipBox->getContainer().getFirstChild())
+		{
+			levelSetGroup->setDisplay_recursive(m_clipBox->getContainer().getFirstChild()->getDisplay());
+		}
+		MainWindow::TheInstance()->addToDB(levelSetGroup);
 	}
 
 	if (m_associatedWin)

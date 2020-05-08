@@ -42,6 +42,7 @@ ccClippingBoxRepeatDlg::ccClippingBoxRepeatDlg(bool singleContourMode/*=false*/,
 		connect(xRepeatCheckBox, &QAbstractButton::toggled, this, &ccClippingBoxRepeatDlg::onDimXChecked);
 		connect(yRepeatCheckBox, &QAbstractButton::toggled, this, &ccClippingBoxRepeatDlg::onDimYChecked);
 		connect(zRepeatCheckBox, &QAbstractButton::toggled, this, &ccClippingBoxRepeatDlg::onDimZChecked);
+		
 		setFlatDim(0);
 
 		extractContoursGroupBox->setChecked(true);
@@ -87,6 +88,8 @@ void ccClippingBoxRepeatDlg::setFlatDim(unsigned char dim)
 		boxes[d]->setEnabled(d != dim);
 		boxes[d]->blockSignals(false);
 	}
+	
+	extractLevelSetGroupBox->setEnabled(true);
 }
 
 void ccClippingBoxRepeatDlg::onDimChecked(bool)
@@ -103,6 +106,7 @@ void ccClippingBoxRepeatDlg::onDimChecked(bool)
 			projectOnBestFitCheckBox->setChecked(false);
 		projectOnBestFitCheckBox->setVisible(true);
 		contourTypeComboBox->setEnabled(true);
+		extractLevelSetGroupBox->setEnabled(true);
 	}
 	else
 	{
@@ -110,6 +114,8 @@ void ccClippingBoxRepeatDlg::onDimChecked(bool)
 		projectOnBestFitCheckBox->setChecked(true);
 		contourTypeComboBox->setCurrentIndex(2);
 		contourTypeComboBox->setEnabled(false);
+		extractLevelSetGroupBox->setEnabled(false);
+		extractLevelSetGroupBox->setChecked(false);
 	}
 
 	buttonBox->button(QDialogButtonBox::Ok)->setEnabled(sum != 0);

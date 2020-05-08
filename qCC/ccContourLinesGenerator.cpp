@@ -160,13 +160,7 @@ bool ccContourLinesGenerator::GenerateContourLines(	ccRasterGrid* rasterGrid,
 		assert(false);
 		return false;
 	}
-	if (!std::isfinite(params.emptyCellsValue))
-	{
-		ccLog::Error("Invalid empty cell value!");
-		assert(false);
-		return false;
-	}
-	if (CCCoreLib::LessThanEpsilon(params.step))
+	if (params.step < 0)
 	{
 		ccLog::Error("Invalid step value");
 		assert(false);
@@ -180,6 +174,12 @@ bool ccContourLinesGenerator::GenerateContourLines(	ccRasterGrid* rasterGrid,
 	}
 
 	bool sparseLayer = (params.altitudes && params.altitudes->currentSize() != rasterGrid->height * rasterGrid->width);
+	if (sparseLayer && !std::isfinite(params.emptyCellsValue))
+	{
+		ccLog::Error("Invalid empty cell value (sparse layer)");
+		assert(false);
+		return false;
+	}
 
 	unsigned levelCount = 1;
 	if (CCCoreLib::GreaterThanEpsilon(params.step))
@@ -197,7 +197,7 @@ bool ccContourLinesGenerator::GenerateContourLines(	ccRasterGrid* rasterGrid,
 		gdalParams.projectContourOnAltitudes = params.projectContourOnAltitudes;
 		GDALContourGeneratorH hCG = GDAL_CG_Create(	rasterGrid->width,
 													rasterGrid->height,
-													1,
+													std::isnan(params.emptyCellsValue) ? FALSE : TRUE,
 													params.emptyCellsValue,
 													params.step,
 													params.startAltitude,
@@ -217,7 +217,7 @@ bool ccContourLinesGenerator::GenerateContourLines(	ccRasterGrid* rasterGrid,
 				ccLog::Error("[GDAL] Not enough memory");
 				return false;
 			}
-
+											
 			unsigned layerIndex = 0;
 
 			for (unsigned j = 0; j < rasterGrid->height; ++j)
@@ -234,7 +234,7 @@ bool ccContourLinesGenerator::GenerateContourLines(	ccRasterGrid* rasterGrid,
 						}
 						else
 						{
-							scanline[i] = cellRow[i].h;
+							scanline[i] = std::isfinite(cellRow[i].h) ? cellRow[i].h : params.emptyCellsValue;
 						}
 					}
 					else
@@ -293,6 +293,8 @@ bool ccContourLinesGenerator::GenerateContourLines(	ccRasterGrid* rasterGrid,
 				gdalParams.contourLines.clear(); //just in case
 			}
 		}
+
+		GDAL_CG_Destroy(hCG);
 #else
 		unsigned xDim = rasterGrid->width;
 		unsigned yDim = rasterGrid->height;
@@ -324,7 +326,7 @@ bool ccContourLinesGenerator::GenerateContourLines(	ccRasterGrid* rasterGrid,
 						}
 						else
 						{
-							row[i] = cellRow[i].h;
+							row[i] = std::isfinite(cellRow[i].h) ? cellRow[i].h : params.emptyCellsValue;
 						}
 					}
 					else

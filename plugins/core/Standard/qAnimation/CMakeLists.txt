@@ -5,17 +5,17 @@ if( PLUGIN_STANDARD_QANIMATION )
 
 	project( QANIMATION_PLUGIN )
 
-    AddPlugin( NAME ${PROJECT_NAME} )
+	AddPlugin( NAME ${PROJECT_NAME} )
 
-    add_subdirectory( include )
-    add_subdirectory( src )
+	add_subdirectory( include )
+	add_subdirectory( src )
 
 	if( QANIMATION_WITH_FFMPEG_SUPPORT )
-        add_subdirectory( extern/QTFFmpegWrapper )
+		add_subdirectory( extern/QTFFmpegWrapper )
 
-        target_link_libraries( ${PROJECT_NAME} QTFFMPEG_LIB )
+		target_link_libraries( ${PROJECT_NAME} QTFFMPEG_LIB )
 		target_compile_definitions( ${PROJECT_NAME} PRIVATE QFFMPEG_SUPPORT )
 	endif()
 
-    include( CMakePluginTemplate )
+	include( CMakePluginTemplate )
 endif()

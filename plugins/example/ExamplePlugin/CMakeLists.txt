@@ -7,15 +7,15 @@
 option( PLUGIN_EXAMPLE_STANDARD "Install example plugin" OFF )
 
 if ( PLUGIN_EXAMPLE_STANDARD )
-    project( ExamplePlugin )
-     
-    AddPlugin( NAME ${PROJECT_NAME} )
-    
-    include( CMakePluginTemplate )
-    
-    add_subdirectory( include )
-    add_subdirectory( src )
-    
-    # set dependencies to necessary libraries
-    # target_link_libraries( ${PROJECT_NAME} LIB1 )
+	project( ExamplePlugin )
+	 
+	AddPlugin( NAME ${PROJECT_NAME} )
+	
+	include( CMakePluginTemplate )
+	
+	add_subdirectory( include )
+	add_subdirectory( src )
+	
+	# set dependencies to necessary libraries
+	# target_link_libraries( ${PROJECT_NAME} LIB1 )
 endif()

@@ -1,10 +1,11 @@
 
 target_sources( ${PROJECT_NAME}
-    PRIVATE
-        ${CMAKE_CURRENT_LIST_DIR}/ActionA.h
+	PRIVATE
+		${CMAKE_CURRENT_LIST_DIR}/ActionA.h
+		${CMAKE_CURRENT_LIST_DIR}/ExamplePlugin.h
 )
 
 target_include_directories( ${PROJECT_NAME}
 	PRIVATE
-	    ${CMAKE_CURRENT_SOURCE_DIR}
+		${CMAKE_CURRENT_SOURCE_DIR}
 )

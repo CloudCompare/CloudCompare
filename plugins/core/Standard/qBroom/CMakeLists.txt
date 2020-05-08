@@ -1,18 +1,13 @@
-option( PLUGIN_STANDARD_QBROOM "Check to install qBroom plugin" OFF )
+option( PLUGIN_STANDARD_QBROOM "Install qBroom plugin" OFF )
 
-if (PLUGIN_STANDARD_QBROOM)
-
-	#CloudCompare 'Virtual broom' plugin
+if( PLUGIN_STANDARD_QBROOM )
 	project( QBROOM_PLUGIN )
 	
     AddPlugin( NAME ${PROJECT_NAME} )
-
-	include_directories( src )
 	
-	add_subdirectory( src )
+    add_subdirectory( include )
+    add_subdirectory( src )
+    add_subdirectory( ui )
 	
     include( CMakePluginTemplate )
-	
-	include_directories( ${QBROOM_LIB_INCLUDE_DIR} )
-
 endif()

@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="qCanupo.qrc">
-    <normaloff>:/CC/plugin/qCanupoPlugin/iconClassify.png</normaloff>:/CC/plugin/qCanupoPlugin/iconClassify.png</iconset>
+    <normaloff>:/CC/plugin/qCanupoPlugin/images/iconClassify.png</normaloff>:/CC/plugin/qCanupoPlugin/images/iconClassify.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -32,7 +32,7 @@
         <string/>
        </property>
        <property name="pixmap">
-        <pixmap resource="qCanupo.qrc">:/CC/plugin/qCanupoPlugin/Logo_cnrs_eub_eec.png</pixmap>
+        <pixmap resource="qCanupo.qrc">:/CC/plugin/qCanupoPlugin/images/Logo_cnrs_eub_eec.png</pixmap>
        </property>
        <property name="scaledContents">
         <bool>true</bool>

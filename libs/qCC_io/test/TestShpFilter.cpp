@@ -83,7 +83,6 @@ void TestShpFilter::readPolylineMFile(const QString &filePath) const
 	QVERIFY(!firstPolyline->is2DMode());
 	auto *vertices = firstPolyline->getAssociatedCloud();
 	QVERIFY(vertices->size() == 5);
-	QVERIFY(vertices->isScalarFieldEnabled());
 
 	ScalarType expectedXs[5] = {1.0, 5.0, 5.0, 3.0, 1.0};
 	ScalarType expectedYs[5] = {5.0, 5.0, 1.0, 3.0, 1.0};
@@ -95,11 +94,14 @@ void TestShpFilter::readPolylineMFile(const QString &filePath) const
 		QCOMPARE(point->z, 0.0);
 	}
 
-	QCOMPARE(vertices->getPointScalarValue(0), 0.0);
-	QVERIFY(std::isnan(vertices->getPointScalarValue(1)));
-	QCOMPARE(vertices->getPointScalarValue(2), 3.0);
-	QVERIFY(std::isnan(vertices->getPointScalarValue(3)));
-	QCOMPARE(vertices->getPointScalarValue(4), 0.0);
+	if (vertices->isScalarFieldEnabled())
+	{
+		QCOMPARE(vertices->getPointScalarValue(0), 0.0);
+		QVERIFY(std::isnan(vertices->getPointScalarValue(1)));
+		QCOMPARE(vertices->getPointScalarValue(2), 3.0);
+		QVERIFY(std::isnan(vertices->getPointScalarValue(3)));
+		QCOMPARE(vertices->getPointScalarValue(4), 0.0);
+	}
 
 	auto *secondPolyline = static_cast<ccPolyline *>(container.getChild(1));
 	QVERIFY(!secondPolyline->isClosed());
@@ -158,12 +160,13 @@ void TestShpFilter::readPolylineZFile(const QString &filePath) const
 	QVERIFY(!thirdPolyline->is2DMode());
 	vertices = thirdPolyline->getAssociatedCloud();
 	QVERIFY(vertices->size() == 3);
-	QVERIFY(vertices->isScalarFieldEnabled());
 
-	QCOMPARE(vertices->getPointScalarValue(0), 0.0);
-	QCOMPARE(vertices->getPointScalarValue(1), 3.0);
-	QCOMPARE(vertices->getPointScalarValue(2), 2.0);
-
+	if (vertices->isScalarFieldEnabled())
+	{
+		QCOMPARE(vertices->getPointScalarValue(0), 0.0);
+		QCOMPARE(vertices->getPointScalarValue(1), 3.0);
+		QCOMPARE(vertices->getPointScalarValue(2), 2.0);
+	}
 }
 
 

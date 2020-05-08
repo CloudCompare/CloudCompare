@@ -90,8 +90,8 @@ void updateTable(RDBOpenDialog &openDlg, riegl::rdb::Pointcloud &rdb)
 		//Get list of point attributes
 		std::vector<std::string> attributes = rdb.pointAttribute().list();
 		openDlg.rdbTableWidget->setColumnCount(2);
-		openDlg.rdbTableWidget->setRowCount(attributes.size());
-		openDlg.rdbTableWidget->setColumnWidth(0,200);
+		openDlg.rdbTableWidget->setRowCount(static_cast<int>(attributes.size()));
+		openDlg.rdbTableWidget->setColumnWidth(0, 200);
 		openDlg.rdbTableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
 		QStringList headerLabels;
@@ -345,7 +345,7 @@ CC_FILE_ERROR RDBFilter::loadFile( const QString &filename, ccHObject &container
 
 		//progress dialog
 		ccProgressDialog pdlg(true, parameters.parentWidget);
-		CCLib::NormalizedProgress nprogress(&pdlg, root.pointCountTotal/BUFFER_SIZE);
+		CCCoreLib::NormalizedProgress nprogress(&pdlg, root.pointCountTotal / BUFFER_SIZE);
 		{
 			std::stringstream ss;
 			ss << "Loading RDB file [" << filename.toStdString().c_str()<< "]";
@@ -377,22 +377,24 @@ CC_FILE_ERROR RDBFilter::loadFile( const QString &filename, ccHObject &container
 		riegl::rdb::pointcloud::QuerySelect select = rdb.select();
 
 		//Bind target data buffers to query
-		select.bindBuffer("riegl.xyz",                buffer_xyz);
+		select.bind("riegl.xyz", riegl::rdb::pointcloud::DataType::SINGLE, buffer_xyz.data());
 		if (rdb_hasRGBA)
-			select.bindBuffer("riegl.rgba",           buffer_rgba);
+			select.bind("riegl.rgba", riegl::rdb::pointcloud::DataType::UINT8, buffer_rgba.data());
 		if (rdb_hasNormals)
-			select.bindBuffer("riegl.surface_normal", buffer_normals);
+			select.bind("riegl.surface_normal", riegl::rdb::pointcloud::DataType::SINGLE, buffer_normals.data());
 		if (rdb_has_pca_axis_min)
-			select.bindBuffer("riegl.pca_axis_min",   buffer_normals);
+			select.bind("riegl.pca_axis_min", riegl::rdb::pointcloud::DataType::SINGLE, buffer_normals.data());
 		if (rdb_has_plane_up)
-			select.bindBuffer("riegl.plane_up",       buffer_plane_up);
+			select.bind("riegl.plane_up", riegl::rdb::pointcloud::DataType::SINGLE, buffer_plane_up.data());
+
+		riegl::rdb::pointcloud::DataType ScalarTypeRiegl = (sizeof(ScalarType) == 4 ? riegl::rdb::pointcloud::DataType::SINGLE : riegl::rdb::pointcloud::DataType::DOUBLE);
 		if (rdb_has_plane_width)
-			select.bindBuffer("riegl.plane_width",    buffer_plane_width);
+			select.bind("riegl.plane_width", ScalarTypeRiegl, buffer_plane_width.data());
 		if (rdb_has_plane_height)
-			select.bindBuffer("riegl.plane_height",   buffer_plane_height);
+			select.bind("riegl.plane_height", ScalarTypeRiegl, buffer_plane_height.data());
 		for (Conversion &conv : conversions)
 		{
-			select.bindBuffer(conv.att,       conv.buffer);
+			select.bind(conv.att, ScalarTypeRiegl, conv.buffer.data());
 		}
 
 		{ //pre allocate memory for cloud to load

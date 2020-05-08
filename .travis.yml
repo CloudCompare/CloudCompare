@@ -13,11 +13,11 @@ install:
 - sudo apt-get install -qy cmake
   libqt5svg5-dev libqt5opengl5-dev qt5-default qttools5-dev qttools5-dev-tools
   libtbb-dev
-  libavcodec-dev libavformat-dev libavutil-dev
+  libavcodec-dev libavformat-dev libavutil-dev libswscale-dev
   libboost-program-options-dev libboost-thread-dev
   libeigen3-dev
   libcgal-dev libcgal-qt5-dev libgdal-dev libpcl-dev
-  libdlib-dev libswscale-dev libproj-dev libxerces-c-dev xvfb libpdal-dev libjsoncpp-dev
+  libdlib-dev libproj-dev libxerces-c-dev xvfb libpdal-dev libjsoncpp-dev
 - git submodule init && git submodule update
 
 before_script:
@@ -40,6 +40,7 @@ before_script:
   -DPLUGIN_IO_QPHOTOSCAN=ON
   -DPLUGIN_IO_QPDAL=ON
   -DPLUGIN_STANDARD_QANIMATION=ON
+  -DQANIMATION_WITH_FFMPEG_SUPPORT=ON
   -DPLUGIN_STANDARD_QBROOM=ON
   -DPLUGIN_STANDARD_QCANUPO=ON
   -DPLUGIN_STANDARD_QCOMPASS=ON

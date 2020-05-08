@@ -19,18 +19,18 @@ jobs:
               os: windows-latest,
               generator: "Ninja",
               conda_library_dir: "Library",
+              compile_qanimation_with_ffmpeg: "ON",
               compile_qpcl: "ON",
               compile_qransac: "ON",
-              xercesclib_name: xerces-c_3.lib,
            }
           - {
               name: "macOS Clang",
               os: macos-latest,
               generator: "Ninja",
               conda_library_dir: ".",
+              compile_qanimation_with_ffmpeg: "OFF",
               compile_qpcl: "OFF",
               compile_qransac: "OFF",
-              xercesclib_name: libxerces-c-3.2.dylib
             }
 
     steps:
@@ -39,7 +39,7 @@ jobs:
         with:
           submodules: true
 
-      # Turn off for now since GitHub Actions is broken (will eventually move to brew anyways) 
+      # Turn off for now since GitHub Actions is broken (will eventually move to brew anyways)
       # - name: Conda Cache (macOS)
       #   if:  matrix.config.os == 'macos-latest'
       #   uses: actions/cache@v1
@@ -90,6 +90,7 @@ jobs:
             -B build `
             -G "${{ matrix.config.generator }}" `
             -DCMAKE_BUILD_TYPE=Release `
+            -DCMAKE_PREFIX_PATH="$CONDA_LIB_DIR" `
             -DCCCORELIB_SCALAR_DOUBLE=${{ matrix.scalar_double }} `
             -DEIGEN_ROOT_DIR="$EIGEN_ROOT_DIR" `
             -DOPTION_SUPPORT_GAMEPADS=ON `
@@ -104,6 +105,7 @@ jobs:
             -DPLUGIN_IO_QPHOTOSCAN=ON `
             -DPLUGIN_IO_QPDAL=ON `
             -DPLUGIN_STANDARD_QANIMATION=ON `
+            -DQANIMATION_WITH_FFMPEG_SUPPORT=${{ matrix.config.compile_qanimation_with_ffmpeg }} `
             -DPLUGIN_STANDARD_QBROOM=ON `
             -DPLUGIN_STANDARD_QCANUPO=OFF `
             -DPLUGIN_STANDARD_QCOMPASS=ON `

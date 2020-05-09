@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,11 +17,8 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_SECTION_EXTRACTION_TOOL_HEADER
-#define CC_SECTION_EXTRACTION_TOOL_HEADER
-
 //Local
-#include "ccContourExtractor.h"
+#include "ccEnvelopeExtractor.h"
 #include "ccOverlayDialog.h"
 
 //qCC_db
@@ -101,16 +100,16 @@ protected:
 								unsigned sectionIndex,
 								bool& cloudGenerated);
 
-	//! Extract the contour from a set of 2D points and add it to the main DB
-	bool extractSectionContour(	const ccPolyline* originalSection,
+	//! Extract the envelope from a set of 2D points and add it to the main DB
+	bool extractSectionEnvelope(const ccPolyline* originalSection,
 								const ccPointCloud* originalSectionCloud,
 								ccPointCloud* unrolledSectionCloud, //'2D' cloud with Z = 0
 								unsigned sectionIndex,
-								ccContourExtractor::ContourType type,
+								ccEnvelopeExtractor::EnvelopeType type,
 								PointCoordinateType maxEdgeLength,
 								bool multiPass,
-								bool splitContour,
-								bool& contourGenerated,
+								bool splitEnvelope,
+								bool& envelopeGenerated,
 								bool visualDebugMode = false);
 
 	//! Creates (if necessary) and returns a group to store entities in the main DB
@@ -232,5 +231,3 @@ private: //members
 	//! Global clouds bounding-box
 	ccBBox m_cloudsBox;
 };
-
-#endif //CC_SECTION_EXTRACTION_TOOL_HEADER

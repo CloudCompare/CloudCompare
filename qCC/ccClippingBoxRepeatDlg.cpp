@@ -23,12 +23,12 @@
 //system
 #include <assert.h>
 
-ccClippingBoxRepeatDlg::ccClippingBoxRepeatDlg(bool singleContourMode/*=false*/, QWidget* parent/*=0*/)
+ccClippingBoxRepeatDlg::ccClippingBoxRepeatDlg(bool singleSliceMode/*=false*/, QWidget* parent/*=0*/)
 	: QDialog(parent)
 {
 	setupUi(this);
 
-	if (!singleContourMode)
+	if (!singleSliceMode)
 	{
 		connect(xRepeatCheckBox, &QAbstractButton::toggled, this, &ccClippingBoxRepeatDlg::onDimChecked);
 		connect(yRepeatCheckBox, &QAbstractButton::toggled, this, &ccClippingBoxRepeatDlg::onDimChecked);
@@ -36,7 +36,7 @@ ccClippingBoxRepeatDlg::ccClippingBoxRepeatDlg(bool singleContourMode/*=false*/,
 	}
 	else
 	{
-		//single contour extraction mode!
+		//single slice extraction mode!
 		repeatDimGroupBox->setTitle("Flat dimension");
 
 		connect(xRepeatCheckBox, &QAbstractButton::toggled, this, &ccClippingBoxRepeatDlg::onDimXChecked);
@@ -45,10 +45,10 @@ ccClippingBoxRepeatDlg::ccClippingBoxRepeatDlg(bool singleContourMode/*=false*/,
 		
 		setFlatDim(0);
 
-		extractContoursGroupBox->setChecked(true);
-		extractContoursGroupBox->setCheckable(false);
-		projectOnBestFitCheckBox->setVisible(true);
-		projectOnBestFitCheckBox->setChecked(false);
+		//extractEnvelopesGroupBox->setChecked(true); //DGM: we now have the choice between envelope and contours!
+		//extractEnvelopesGroupBox->setCheckable(false);
+		//envProjectPointsOnBestFitCheckBox->setVisible(true);
+		//envProjectPointsOnBestFitCheckBox->setChecked(false);
 
 		randomColorCheckBox->setChecked(false);
 		otherOptionsGroupBox->setVisible(false);
@@ -68,9 +68,23 @@ void ccClippingBoxRepeatDlg::setRepeatDim(unsigned char dim)
 	}
 }
 
-void ccClippingBoxRepeatDlg::onDimXChecked(bool state) { assert(state); setFlatDim(0); }
-void ccClippingBoxRepeatDlg::onDimYChecked(bool state) { assert(state); setFlatDim(1); }
-void ccClippingBoxRepeatDlg::onDimZChecked(bool state) { assert(state); setFlatDim(2); }
+void ccClippingBoxRepeatDlg::onDimXChecked(bool state)
+{
+	assert(state);
+	setFlatDim(0);
+}
+
+void ccClippingBoxRepeatDlg::onDimYChecked(bool state)
+{
+	assert(state);
+	setFlatDim(1);
+}
+
+void ccClippingBoxRepeatDlg::onDimZChecked(bool state)
+{
+	assert(state);
+	setFlatDim(2);
+}
 
 void ccClippingBoxRepeatDlg::setFlatDim(unsigned char dim)
 {
@@ -102,18 +116,18 @@ void ccClippingBoxRepeatDlg::onDimChecked(bool)
 
 	if (sum == 1)
 	{
-		if (!projectOnBestFitCheckBox->isVisible())
-			projectOnBestFitCheckBox->setChecked(false);
-		projectOnBestFitCheckBox->setVisible(true);
-		contourTypeComboBox->setEnabled(true);
+		if (!envProjectPointsOnBestFitCheckBox->isVisible())
+			envProjectPointsOnBestFitCheckBox->setChecked(false);
+		envProjectPointsOnBestFitCheckBox->setVisible(true);
+		envelopeTypeComboBox->setEnabled(true);
 		extractLevelSetGroupBox->setEnabled(true);
 	}
 	else
 	{
-		projectOnBestFitCheckBox->setVisible(false);
-		projectOnBestFitCheckBox->setChecked(true);
-		contourTypeComboBox->setCurrentIndex(2);
-		contourTypeComboBox->setEnabled(false);
+		envProjectPointsOnBestFitCheckBox->setVisible(false);
+		envProjectPointsOnBestFitCheckBox->setChecked(true);
+		envelopeTypeComboBox->setCurrentIndex(2);
+		envelopeTypeComboBox->setEnabled(false);
 		extractLevelSetGroupBox->setEnabled(false);
 		extractLevelSetGroupBox->setChecked(false);
 	}

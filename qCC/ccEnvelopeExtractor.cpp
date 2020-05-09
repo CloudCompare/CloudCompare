@@ -15,10 +15,10 @@
 //#                                                                        #
 //##########################################################################
 
-#include "ccContourExtractor.h"
+#include "ccEnvelopeExtractor.h"
 
 //local
-#include "ccContourExtractorDlg.h"
+#include "ccEnvelopeExtractorDlg.h"
 
 //qCC_db
 #include <cc2DLabel.h>
@@ -206,9 +206,9 @@ static PointCoordinateType FindNearestCandidate(unsigned& minIndex,
 	return (minDist2 < 0 ? minDist2 : minDist2/squareLengthAB);
 }
 
-bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
+bool ccEnvelopeExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 												std::list<Vertex2D*>& hullPoints,
-												ContourType contourType,
+												EnvelopeType envelopeType,
 												bool allowMultiPass,
 												PointCoordinateType maxSquareEdgeLength/*=0*/,
 												bool enableVisualDebugMode/*=false*/,
@@ -273,9 +273,9 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 			}
 		}
 
-		if (contourType != FULL)
+		if (envelopeType != FULL)
 		{
-			//we will now try to determine which part of the contour is the 'upper' one and which one is the 'lower' one
+			//we will now try to determine which part of the envelope is the 'upper' one and which one is the 'lower' one
 
 			//search for the min and max vertices
 			VertexIterator itLeft = hullPoints.begin();
@@ -303,7 +303,7 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 				if (itAfter == hullPoints.end())
 					itAfter = hullPoints.begin();
 
-				bool forward = ((**itBefore - **itLeft).cross(**itAfter - **itLeft) < 0 && contourType == LOWER);
+				bool forward = ((**itBefore - **itLeft).cross(**itAfter - **itLeft) < 0 && envelopeType == LOWER);
 				if (!forward)
 					std::swap(itLeft,itRight);
 			}
@@ -339,10 +339,10 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 
 
 	//DEBUG MECHANISM
-	ccContourExtractorDlg debugDialog;
+	ccEnvelopeExtractorDlg debugDialog;
 	ccPointCloud* debugCloud = nullptr;
-	ccPolyline* debugContour = nullptr;
-	ccPointCloud* debugContourVertices = nullptr;
+	ccPolyline* debugEnvelope = nullptr;
+	ccPointCloud* debugEnvelopeVertices = nullptr;
 	
 	if (enableVisualDebugMode)
 	{
@@ -365,23 +365,23 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 
 		//create polyline
 		{
-			debugContourVertices = new ccPointCloud;
-			debugContour = new ccPolyline(debugContourVertices);
-			debugContour->addChild(debugContourVertices);
+			debugEnvelopeVertices = new ccPointCloud;
+			debugEnvelope = new ccPolyline(debugEnvelopeVertices);
+			debugEnvelope->addChild(debugEnvelopeVertices);
 			unsigned hullSize = static_cast<unsigned>(hullPoints.size());
-			debugContour->reserve(hullSize);
-			debugContourVertices->reserve(hullSize);
+			debugEnvelope->reserve(hullSize);
+			debugEnvelopeVertices->reserve(hullSize);
 			unsigned index = 0;
 			for (VertexIterator itA = hullPoints.begin(); itA != hullPoints.end(); ++itA, ++index)
 			{
 				const Vertex2D* P = *itA;
-				debugContourVertices->addPoint(CCVector3(P->x, P->y, 0));
-				debugContour->addPointIndex(index/*(*itA)->index*/);
+				debugEnvelopeVertices->addPoint(CCVector3(P->x, P->y, 0));
+				debugEnvelope->addPointIndex(index/*(*itA)->index*/);
 			}
-			debugContour->setColor(ccColor::red);
-			debugContourVertices->setEnabled(false);
-			debugContour->setClosed(contourType == FULL);
-			debugDialog.addToDisplay(debugContour, false); //the window will take care of deleting this entity!
+			debugEnvelope->setColor(ccColor::red);
+			debugEnvelopeVertices->setEnabled(false);
+			debugEnvelope->setClosed(envelopeType == FULL);
+			debugDialog.addToDisplay(debugEnvelope, false); //the window will take care of deleting this entity!
 		}
 
 		//set zoom
@@ -414,7 +414,7 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 			//initial number of edges
 			assert(hullPoints.size() >= 2);
 			size_t initEdgeCount = hullPoints.size();
-			if (contourType != FULL)
+			if (envelopeType != FULL)
 				--initEdgeCount;
 
 			VertexIterator itB = hullPoints.begin();
@@ -448,8 +448,8 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 				pointFlags[(*itA)->index] = POINT_USED;
 			}
 
-			//flag the last vertex as well for non closed contours!
-			if (contourType != FULL)
+			//flag the last vertex as well for non closed envelopes!
+			if (envelopeType != FULL)
 				pointFlags[(*hullPoints.rbegin())->index] = POINT_USED;
 
 			while (!edges.empty())
@@ -463,7 +463,7 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 				VertexIterator itB = itA; ++itB;
 				if (itB == hullPoints.end())
 				{
-					assert(contourType == FULL);
+					assert(envelopeType == FULL);
 					itB = hullPoints.begin();
 				}
 
@@ -526,7 +526,7 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 					{
 						if (itJ == hullPoints.end())
 						{
-							if (contourType == FULL)
+							if (envelopeType == FULL)
 								itJ = hullPoints.begin();
 							else
 								break;
@@ -552,22 +552,22 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 
 					if (enableVisualDebugMode && !debugDialog.isSkipped())
 					{
-						if (debugContour)
+						if (debugEnvelope)
 						{
-							debugContourVertices->clear();
+							debugEnvelopeVertices->clear();
 							unsigned hullSize = static_cast<unsigned>(hullPoints.size());
-							debugContourVertices->reserve(hullSize);
+							debugEnvelopeVertices->reserve(hullSize);
 							unsigned index = 0;
 							for (VertexIterator it = hullPoints.begin(); it != hullPoints.end(); ++it, ++index)
 							{
 								const Vertex2D* P = *it;
-								debugContourVertices->addPoint(CCVector3(P->x,P->y,0));
+								debugEnvelopeVertices->addPoint(CCVector3(P->x,P->y,0));
 							}
-							debugContour->reserve(hullSize);
-							debugContour->addPointIndex(hullSize-1);
+							debugEnvelope->reserve(hullSize);
+							debugEnvelope->addPointIndex(hullSize-1);
 							debugDialog.refresh();
 						}
-						debugDialog.displayMessage("point has been added to contour",true);
+						debugDialog.displayMessage("point has been added to envelope",true);
 					}
 
 					//update all edges that were having 'P' as their nearest candidate as well
@@ -666,7 +666,7 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 				else
 				{
 					if (enableVisualDebugMode)
-						debugDialog.displayMessage("[rejected] new edge would intersect the current contour!",true);
+						debugDialog.displayMessage("[rejected] new edge would intersect the current envelope!",true);
 				}
 			
 				//remove labels
@@ -704,15 +704,15 @@ bool ccContourExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 
 using Hull2D = std::list<Vertex2D *>;
 
-ccPolyline* ccContourExtractor::ExtractFlatContour(	CCCoreLib::GenericIndexedCloudPersist* points,
-													bool allowMultiPass,
-													PointCoordinateType maxEdgeLength/*=0*/,
-													const PointCoordinateType* preferredNormDim/*=0*/,
-													const PointCoordinateType* preferredUpDir/*=0*/,
-													ContourType contourType/*=FULL*/,
-													std::vector<unsigned>* originalPointIndexes/*=0*/,
-													bool enableVisualDebugMode/*=false*/,
-													double maxAngleDeg/*=0.0*/)
+ccPolyline* ccEnvelopeExtractor::ExtractFlatEnvelope(	CCCoreLib::GenericIndexedCloudPersist* points,
+														bool allowMultiPass,
+														PointCoordinateType maxEdgeLength/*=0*/,
+														const PointCoordinateType* preferredNormDim/*=0*/,
+														const PointCoordinateType* preferredUpDir/*=0*/,
+														EnvelopeType envelopeType/*=FULL*/,
+														std::vector<unsigned>* originalPointIndexes/*=0*/,
+														bool enableVisualDebugMode/*=false*/,
+														double maxAngleDeg/*=0.0*/)
 {
 	assert(points);
 	
@@ -767,7 +767,7 @@ ccPolyline* ccContourExtractor::ExtractFlatContour(	CCCoreLib::GenericIndexedClo
 
 	if (!Yk.projectPointsOn2DPlane<Vertex2D>(points2D, planeEq, &O, &X, &Y, vectorsUsage))
 	{
-		ccLog::Warning("[ExtractFlatContour] Failed to project the points on the LS plane (not enough memory?)!");
+		ccLog::Warning("[ExtractFlatEnvelope] Failed to project the points on the LS plane (not enough memory?)!");
 		return nullptr;
 	}
 
@@ -779,17 +779,17 @@ ccPolyline* ccContourExtractor::ExtractFlatContour(	CCCoreLib::GenericIndexedClo
 		}
 	}
 
-	//try to get the points on the convex/concave hull to build the contour and the polygon
+	//try to get the points on the convex/concave hull to build the envelope and the polygon
 	Hull2D hullPoints;
 	if (!ExtractConcaveHull2D(	points2D,
 								hullPoints,
-								contourType,
+								envelopeType,
 								allowMultiPass,
 								maxEdgeLength*maxEdgeLength,
 								enableVisualDebugMode,
 								maxAngleDeg))
 	{
-		ccLog::Warning("[ExtractFlatContour] Failed to compute the convex hull of the input points!");
+		ccLog::Warning("[ExtractFlatEnvelope] Failed to compute the convex hull of the input points!");
 		return nullptr;
 	}
 
@@ -802,7 +802,7 @@ ccPolyline* ccContourExtractor::ExtractFlatContour(	CCCoreLib::GenericIndexedClo
 		catch (const std::bad_alloc&)
 		{
 			//not enough memory
-			ccLog::Error("[ExtractFlatContour] Not enough memory!");
+			ccLog::Error("[ExtractFlatEnvelope] Not enough memory!");
 			return nullptr;
 		}
 
@@ -816,60 +816,60 @@ ccPolyline* ccContourExtractor::ExtractFlatContour(	CCCoreLib::GenericIndexedClo
 	unsigned hullPtsCount = static_cast<unsigned>(hullPoints.size());
 
 	//create vertices
-	ccPointCloud* contourVertices = new ccPointCloud();
+	ccPointCloud* envelopeVertices = new ccPointCloud();
 	{
-		if (!contourVertices->reserve(hullPtsCount))
+		if (!envelopeVertices->reserve(hullPtsCount))
 		{
-			delete contourVertices;
-			contourVertices = nullptr;
-			ccLog::Error("[ExtractFlatContour] Not enough memory!");
+			delete envelopeVertices;
+			envelopeVertices = nullptr;
+			ccLog::Error("[ExtractFlatEnvelope] Not enough memory!");
 			return nullptr;
 		}
 
 		//projection on the LS plane (in 3D)
 		for (Hull2D::const_iterator it = hullPoints.begin(); it != hullPoints.end(); ++it)
 		{
-			contourVertices->addPoint(O + X*(*it)->x + Y*(*it)->y);
+			envelopeVertices->addPoint(O + X*(*it)->x + Y*(*it)->y);
 		}
 		
-		contourVertices->setName("vertices");
-		contourVertices->setEnabled(false);
+		envelopeVertices->setName("vertices");
+		envelopeVertices->setEnabled(false);
 	}
 
 	//we create the corresponding (3D) polyline
-	ccPolyline* contourPolyline = new ccPolyline(contourVertices);
-	if (contourPolyline->reserve(hullPtsCount))
+	ccPolyline* envelopePolyline = new ccPolyline(envelopeVertices);
+	if (envelopePolyline->reserve(hullPtsCount))
 	{
-		contourPolyline->addPointIndex(0, hullPtsCount);
-		contourPolyline->setClosed(contourType == FULL);
-		contourPolyline->setVisible(true);
-		contourPolyline->setName("contour");
-		contourPolyline->addChild(contourVertices);
+		envelopePolyline->addPointIndex(0, hullPtsCount);
+		envelopePolyline->setClosed(envelopeType == FULL);
+		envelopePolyline->setVisible(true);
+		envelopePolyline->setName("envelope");
+		envelopePolyline->addChild(envelopeVertices);
 	}
 	else
 	{
-		delete contourPolyline;
-		contourPolyline = nullptr;
-		ccLog::Warning("[ExtractFlatContour] Not enough memory to create the contour polyline!");
+		delete envelopePolyline;
+		envelopePolyline = nullptr;
+		ccLog::Warning("[ExtractFlatEnvelope] Not enough memory to create the envelope polyline!");
 	}
 
-	return contourPolyline;
+	return envelopePolyline;
 }
 
-bool ccContourExtractor::ExtractFlatContour(CCCoreLib::GenericIndexedCloudPersist* points,
-											bool allowMultiPass,
-											PointCoordinateType maxEdgeLength,
-											std::vector<ccPolyline*>& parts,
-											ContourType contourType/*=FULL*/,
-											bool allowSplitting/*=true*/,
-											const PointCoordinateType* preferredNormDir/*=nullptr*/,
-											const PointCoordinateType* preferredUpDir/*=nullptr*/,
-											bool enableVisualDebugMode/*=false*/)
+bool ccEnvelopeExtractor::ExtractFlatEnvelope(	CCCoreLib::GenericIndexedCloudPersist* points,
+												bool allowMultiPass,
+												PointCoordinateType maxEdgeLength,
+												std::vector<ccPolyline*>& parts,
+												EnvelopeType envelopeType/*=FULL*/,
+												bool allowSplitting/*=true*/,
+												const PointCoordinateType* preferredNormDir/*=nullptr*/,
+												const PointCoordinateType* preferredUpDir/*=nullptr*/,
+												bool enableVisualDebugMode/*=false*/)
 {
 	parts.clear();
 
-	//extract whole contour
-	ccPolyline* basePoly = ExtractFlatContour(points, allowMultiPass, maxEdgeLength, preferredNormDir, preferredUpDir, contourType, nullptr, enableVisualDebugMode);
+	//extract whole envelope
+	ccPolyline* basePoly = ExtractFlatEnvelope(points, allowMultiPass, maxEdgeLength, preferredNormDir, preferredUpDir, envelopeType, nullptr, enableVisualDebugMode);
 	if (!basePoly)
 	{
 		return false;

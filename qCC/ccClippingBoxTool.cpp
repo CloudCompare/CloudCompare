@@ -37,11 +37,11 @@
 //Qt
 #include <QMessageBox>
 
-//Last contour unique ID
+//Last envelope or contour unique ID
 static std::vector<unsigned> s_lastContourUniqueIDs;
 
-//Contour extraction parameters (global)
-static double s_maxEdgeLength = -1.0;
+//Envelope extraction parameters (global)
+static double s_maxEnvelopeEdgeLength = -1.0;
 
 // persistent map of the previous box used for each entity
 struct ccClipBoxParams
@@ -89,7 +89,7 @@ ccClippingBoxTool::ccClippingBoxTool(QWidget* parent)
 	connect(viewLeftToolButton,				&QToolButton::clicked,				this, &ccClippingBoxTool::setLeftView);
 	connect(viewRightToolButton,			&QToolButton::clicked,				this, &ccClippingBoxTool::setRightView);
 
-	s_maxEdgeLength = -1.0;
+	s_maxEnvelopeEdgeLength = -1.0;
 	//s_lastContourUniqueIDs.clear();
 	removeLastContourToolButton->setEnabled(false);
 }
@@ -270,7 +270,7 @@ bool ccClippingBoxTool::addAssociatedEntity(ccHObject* entity)
 		thickZDoubleSpinBox->setSingleStep(diag.z / 100.0);
 	}
 
-	s_maxEdgeLength = -1.0;
+	s_maxEnvelopeEdgeLength = -1.0;
 	s_lastContourUniqueIDs.resize(0);
 	removeLastContourToolButton->setEnabled(false);
 
@@ -482,12 +482,12 @@ void ccClippingBoxTool::exportSlice()
 
 void ccClippingBoxTool::extractContour()
 {
-	extractSlicesAndContours(false, true, /*singleContourMode=*/true);
+	extractSlicesAndContours(/*singleSliceMode=*/true);
 }
 
 void ccClippingBoxTool::exportMultSlices()
 {
-	extractSlicesAndContours(true, true, /*singleContourMode=*/false);
+	extractSlicesAndContours(/*singleSliceMode=*/false);
 }
 
 static unsigned ComputeGridDimensions(	const ccBBox& localBox,
@@ -537,14 +537,14 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 	const std::vector<ccGenericPointCloud*>& clouds,
 	const std::vector<ccGenericMesh*>& meshes,
 	ccClipBox& clipBox,
-	bool singleContourMode,
+	bool singleSliceMode,
 	bool repeatDimensions[3],
 	std::vector<ccHObject*>& outputSlices,
 
-	bool extractContours,
+	bool extractEnvelopes,
 	PointCoordinateType maxEdgeLength,
-	ccContourExtractor::ContourType contourType,
-	std::vector<ccPolyline*>& outputContours,
+	ccEnvelopeExtractor::EnvelopeType envelopeType,
+	std::vector<ccPolyline*>& outputEnvelopes,
 
 	bool extractLevelSet,
 	double levelSetGridStep,
@@ -553,7 +553,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 
 	PointCoordinateType gap/*=0*/,
 	bool multiPass/*=false*/,
-	bool splitContours/*=false*/,
+	bool splitEnvelopes/*=false*/,
 	bool projectOnBestFitPlane/*=false*/,
 	bool visualDebugMode/*=false*/,
 	bool generateRandomColors/*=false*/,
@@ -571,7 +571,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 							+ static_cast<int>(repeatDimensions[1])
 							+ static_cast<int>(repeatDimensions[2]);
 
-	if (!singleContourMode && repeatDimensionsSum == 0)
+	if (!singleSliceMode && repeatDimensionsSum == 0)
 	{
 		assert(false);
 		ccLog::Error("No dimension selected to repeat the segmentation process?!");
@@ -605,9 +605,9 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 		bool warningsIssued = false;
 		size_t cloudSliceCount = 0;
 
-		if (singleContourMode)
+		if (singleSliceMode)
 		{
-			//single contour: easy
+			//single slice: easy
 			outputSlices.reserve(clouds.size());
 			for (size_t ci = 0; ci != clouds.size(); ++ci)
 			{
@@ -778,7 +778,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 																gridOrigin.y + j * cellSizePlusGap.y,
 																gridOrigin.z + k * cellSizePlusGap.z);
 										QString slicePosStr = QString("(%1 ; %2 ; %3)").arg(cellOrigin.x).arg(cellOrigin.y).arg(cellOrigin.z);
-										sliceCloud->setName(QString("slice @ ") + slicePosStr);
+										sliceCloud->setName(cloud->getName() + QString(".slice @ ") + slicePosStr);
 
 										sliceCloud->setMetaData("cell.origin.dim(0)", cellOrigin.x);
 										sliceCloud->setMetaData("cell.origin.dim(1)", cellOrigin.y);
@@ -1083,13 +1083,13 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 			}
 		}
 
-		//extract contour polylines (optionaly)
-		if (!error && extractContours && cloudSliceCount != 0)
+		//extract envelopes as polylines (optionaly)
+		if (!error && extractEnvelopes && cloudSliceCount != 0)
 		{
 			if (progressDialog)
 			{
-				progressDialog->setWindowTitle("Contour extraction");
-				progressDialog->setInfo(QObject::tr("Contour(s): %L1").arg(cloudSliceCount));
+				progressDialog->setWindowTitle("Envelope extraction");
+				progressDialog->setInfo(QObject::tr("Envelope(s): %L1").arg(cloudSliceCount));
 				progressDialog->setMaximum(static_cast<int>(cloudSliceCount));
 				if (!visualDebugMode)
 				{
@@ -1125,12 +1125,12 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 				assert(sliceCloud);
 
 				std::vector<ccPolyline*> polys;
-				if (ccContourExtractor::ExtractFlatContour(sliceCloud,
+				if (ccEnvelopeExtractor::ExtractFlatEnvelope(sliceCloud,
 					multiPass,
 					maxEdgeLength,
 					polys,
-					contourType,
-					splitContours,
+					envelopeType,
+					splitEnvelopes,
 					preferredNormDir,
 					preferredUpDir,
 					visualDebugMode))
@@ -1144,14 +1144,14 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 							poly->showColors(true);
 							poly->setGlobalScale(sliceCloud->getGlobalScale());
 							poly->setGlobalShift(sliceCloud->getGlobalShift());
-							QString contourName = sliceCloud->getName();
-							contourName.replace("slice", "contour");
+							QString envelopeName = sliceCloud->getName();
+							envelopeName.replace("slice", "envelope");
 							if (polys.size() > 1)
 							{
-								contourName += QString(" (part %1)").arg(p + 1);
+								envelopeName += QString(" (part %1)").arg(p + 1);
 							}
-							poly->setName(contourName);
-							outputContours.push_back(poly);
+							poly->setName(envelopeName);
+							outputEnvelopes.push_back(poly);
 						}
 					}
 					else
@@ -1162,7 +1162,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 				}
 				else
 				{
-					ccLog::Warning(QString("%1: contour extraction failed!").arg(sliceCloud->getName()));
+					ccLog::Warning(QString("%1: envelope extraction failed!").arg(sliceCloud->getName()));
 					warningsIssued = true;
 				}
 
@@ -1179,10 +1179,10 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 				}
 			}
 
-		} //extract contour polylines
+		} //extract envelope polylines
 
 		//release memory
-		if (error || singleContourMode)
+		if (error || singleSliceMode)
 		{
 			for (ccHObject* slice : outputSlices)
 			{
@@ -1193,7 +1193,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 
 		if (error)
 		{
-			for (ccPolyline* poly : outputContours)
+			for (ccPolyline* poly : outputEnvelopes)
 			{
 				delete poly;
 			}
@@ -1213,7 +1213,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 	return true;
 }
 
-void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extractContours, bool singleContourMode)
+void ccClippingBoxTool::extractSlicesAndContours(bool singleSliceMode)
 {
 	if (!m_clipBox || m_clipBox->getContainer().getChildrenNumber() == 0)
 	{
@@ -1252,8 +1252,8 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 		return;
 	}
 
-	ccClippingBoxRepeatDlg repeatDlg(singleContourMode, MainWindow::TheInstance());
-	repeatDlg.extractContoursGroupBox->setEnabled(!clouds.empty());
+	ccClippingBoxRepeatDlg repeatDlg(singleSliceMode, MainWindow::TheInstance());
+	repeatDlg.extractEnvelopesGroupBox->setEnabled(!clouds.empty());
 	repeatDlg.extractLevelSetGroupBox->setEnabled(!clouds.empty());
 
 	//by default we set the 'flat/repeat' dimension to the smallest box dimension
@@ -1264,44 +1264,61 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 			flatDim = 1;
 		if (diagVec.z < diagVec.u[flatDim])
 			flatDim = 2;
-		if (singleContourMode)
+		if (singleSliceMode)
 			repeatDlg.setFlatDim(flatDim);
 		else
 			repeatDlg.setRepeatDim(flatDim);
 	}
 	
-	//random colors is only useful for mutliple slice/contour mode
-	repeatDlg.randomColorCheckBox->setEnabled(!singleContourMode);
-	
-	//Semi persistent contour extraction parameters
-	static bool s_splitContours = false;
-	static bool s_multiPass = false;
-	static double s_defaultGap = 0.0;
-	static int s_contourTypeIndex = 2; //full
-	static bool s_projectOnBestFitPlane = false;
-	static bool s_visualDebugMode = false;
+	//random colors is only useful for mutliple slices mode
+	repeatDlg.randomColorCheckBox->setEnabled(!singleSliceMode);
+
+	//Semi persistent parameters
+	static bool s_extractSliceCloudsOrMeshes = true;
 	static bool s_generateRandomColors = false;
+
+	static bool s_extractEnvelopes = false;
+	static int s_envelopeTypeIndex = 2; //full
+	static bool s_multiPassEnvelope = false;
+	static bool s_envProjectPointsOnBestFitPlane = false;
+	static bool s_splitEnvelopes = false;
+	static bool s_envelopeDebugMode = false;
+
 	static bool s_extractLevelSet = false;
 	static double s_levelSetGridStep = 0.0;
 	static int s_levelSetMinVertCount = 3;
 
+	static double s_defaultGap = 0.0;
+	static int s_groupByIndex = 0;
+
 	//set default max edge length
-	if (s_maxEdgeLength < 0)
-		s_maxEdgeLength = m_clipBox->getBox().getDiagNorm() / 100.0;
+	if (s_maxEnvelopeEdgeLength < 0)
+		s_maxEnvelopeEdgeLength = m_clipBox->getBox().getDiagNorm() / 100.0;
 	if (s_levelSetGridStep <= 0.0)
 		s_levelSetGridStep = m_clipBox->getBox().getDiagNorm() / 300.0;
 
-	repeatDlg.maxEdgeLengthDoubleSpinBox->setValue(s_maxEdgeLength);
-	repeatDlg.splitContourCheckBox->setChecked(s_splitContours);
-	repeatDlg.multiPassCheckBox->setChecked(s_multiPass);
-	repeatDlg.gapDoubleSpinBox->setValue(s_defaultGap);
-	repeatDlg.contourTypeComboBox->setCurrentIndex(s_contourTypeIndex);
-	repeatDlg.projectOnBestFitCheckBox->setChecked(s_projectOnBestFitPlane);
-	repeatDlg.debugModeCheckBox->setChecked(s_visualDebugMode);
+	//Extract slice cloud(s) or mesh(es)
+	repeatDlg.extractSliceEntitiesGroupBox->setChecked(s_extractSliceCloudsOrMeshes);
 	repeatDlg.randomColorCheckBox->setChecked(s_generateRandomColors);
+
+	//Extract envelope(s)
+	repeatDlg.extractEnvelopesGroupBox->setChecked(s_extractEnvelopes);
+	repeatDlg.envelopeTypeComboBox->setCurrentIndex(s_envelopeTypeIndex);
+	repeatDlg.maxEnvelopeEdgeLengthDoubleSpinBox->setValue(s_maxEnvelopeEdgeLength);
+	repeatDlg.multiPassEnvelopeCheckBox->setChecked(s_multiPassEnvelope);
+	repeatDlg.envProjectPointsOnBestFitCheckBox->setChecked(s_envProjectPointsOnBestFitPlane);
+	repeatDlg.splitEnvelopeCheckBox->setChecked(s_splitEnvelopes);
+	repeatDlg.envDebugModeCheckBox->setChecked(s_envelopeDebugMode);
+
+	//Extract contours
 	repeatDlg.extractLevelSetGroupBox->setChecked(s_extractLevelSet);
 	repeatDlg.lsGridStepDoubleSpinBox->setValue(s_levelSetGridStep);
 	repeatDlg.minLSVertexCountSpinBox->setValue(s_levelSetMinVertCount);
+
+	//Other options
+	repeatDlg.gapDoubleSpinBox->setValue(s_defaultGap);
+	repeatDlg.groupByTypeComboBox->setCurrentIndex(s_groupByIndex);
+	
 	if (!repeatDlg.exec())
 	{
 		//cancelled by user
@@ -1314,40 +1331,40 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 							repeatDlg.zRepeatCheckBox->isChecked() };
 
 	//whether to use random colors for (multiple) generated slices
-	s_defaultGap = repeatDlg.gapDoubleSpinBox->value();
-	s_maxEdgeLength = repeatDlg.maxEdgeLengthDoubleSpinBox->value();
-	s_splitContours = repeatDlg.splitContourCheckBox->isChecked();
-	s_multiPass = repeatDlg.multiPassCheckBox->isChecked();
-	s_contourTypeIndex = repeatDlg.contourTypeComboBox->currentIndex();
-	s_projectOnBestFitPlane = repeatDlg.projectOnBestFitCheckBox->isChecked();
-	s_visualDebugMode = repeatDlg.debugModeCheckBox->isChecked();
+	s_extractSliceCloudsOrMeshes = repeatDlg.extractSliceEntitiesGroupBox->isChecked();
 	s_generateRandomColors = repeatDlg.randomColorCheckBox->isChecked();
+
+	s_extractEnvelopes = repeatDlg.extractEnvelopesGroupBox->isChecked();
+	s_envelopeTypeIndex = repeatDlg.envelopeTypeComboBox->currentIndex();
+	s_maxEnvelopeEdgeLength = repeatDlg.maxEnvelopeEdgeLengthDoubleSpinBox->value();
+	s_multiPassEnvelope = repeatDlg.multiPassEnvelopeCheckBox->isChecked();
+	s_envProjectPointsOnBestFitPlane = repeatDlg.envProjectPointsOnBestFitCheckBox->isChecked();
+	s_splitEnvelopes = repeatDlg.splitEnvelopeCheckBox->isChecked();
+	s_envelopeDebugMode = repeatDlg.envDebugModeCheckBox->isChecked();
+
 	s_extractLevelSet = repeatDlg.extractLevelSetGroupBox->isChecked();
 	s_levelSetGridStep = repeatDlg.lsGridStepDoubleSpinBox->value();
 	s_levelSetMinVertCount = repeatDlg.minLSVertexCountSpinBox->value();
 
-	ccContourExtractor::ContourType contourType = ccContourExtractor::ContourType::FULL;
-	switch (s_contourTypeIndex)
+	s_defaultGap = repeatDlg.gapDoubleSpinBox->value();
+	s_groupByIndex = repeatDlg.groupByTypeComboBox->currentIndex();
+
+	ccEnvelopeExtractor::EnvelopeType envelopeType = ccEnvelopeExtractor::EnvelopeType::FULL;
+	switch (s_envelopeTypeIndex)
 	{
 	case 0:
-		contourType = ccContourExtractor::ContourType::LOWER;
+		envelopeType = ccEnvelopeExtractor::EnvelopeType::LOWER;
 		break;
 	case 1:
-		contourType = ccContourExtractor::ContourType::UPPER;
+		envelopeType = ccEnvelopeExtractor::EnvelopeType::UPPER;
 		break;
 	case 2:
-		contourType = ccContourExtractor::ContourType::FULL;
+		envelopeType = ccEnvelopeExtractor::EnvelopeType::FULL;
 		break;
 	default:
 		assert(false);
-		ccLog::Warning("Internal error: unhandled contour type");
+		ccLog::Warning("Internal error: unhandled envelope type");
 		break;
-	}
-
-	//whether to extract contours or not
-	if (!singleContourMode)
-	{
-		extractContours = repeatDlg.extractContoursGroupBox->isChecked();
 	}
 
 	ccProgressDialog pDlg(false, this);
@@ -1361,13 +1378,13 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 	if (!ExtractSlicesAndContours(clouds,
 									meshes,
 									*m_clipBox,
-									singleContourMode,
+									singleSliceMode,
 									processDim,
 									outputSlices,
 
-									extractContours,
-									static_cast<PointCoordinateType>(s_maxEdgeLength),
-									contourType,
+									s_extractEnvelopes,
+									static_cast<PointCoordinateType>(s_maxEnvelopeEdgeLength),
+									envelopeType,
 									outputContours,
 
 									s_extractLevelSet,
@@ -1376,10 +1393,10 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 									outputLevelSet,
 
 									static_cast<PointCoordinateType>(s_defaultGap),
-									s_multiPass,
-									s_splitContours,
-									s_projectOnBestFitPlane,
-									s_visualDebugMode,
+									s_multiPassEnvelope,
+									s_splitEnvelopes,
+									s_envProjectPointsOnBestFitPlane,
+									s_envelopeDebugMode,
 									s_generateRandomColors,
 									&pDlg
 									))
@@ -1397,36 +1414,49 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 		baseName = m_clipBox->getContainer().getFirstChild()->getName();
 	}
 
-	//slices
+	//slices (clouds or meshes)
 	if (!outputSlices.empty())
 	{
-		QString groupName;
-		if (!baseName.isEmpty())
+		if (s_extractSliceCloudsOrMeshes)
 		{
-			groupName = QString("%1.slices").arg(baseName);
+			QString groupName;
+			if (!baseName.isEmpty())
+			{
+				groupName = QString("%1.slices").arg(baseName);
+			}
+			else
+			{
+				groupName = "Slices";
+			}
+			ccHObject* sliceGroup = new ccHObject(groupName);
+
+			for (ccHObject* slice : outputSlices)
+			{
+				sliceGroup->addChild(slice);
+			}
+
+			QMessageBox::warning(nullptr, "Process finished", QString("%1 slices have been generated.\n(you may have to close the tool and hide the initial cloud to see them...)").arg(sliceGroup->getChildrenNumber()));
+			if (m_clipBox->getContainer().getFirstChild())
+			{
+				sliceGroup->setDisplay_recursive(m_clipBox->getContainer().getFirstChild()->getDisplay());
+			}
+			MainWindow::TheInstance()->addToDB(sliceGroup);
 		}
 		else
 		{
-			groupName = "Slices";
+			for (ccHObject* slice : outputSlices)
+			{
+				delete slice;
+			}
+			outputSlices.clear();
 		}
-		ccHObject* sliceGroup = new ccHObject(groupName);
-
-		for (ccHObject* slice : outputSlices)
-		{
-			sliceGroup->addChild(slice);
-		}
-
-		QMessageBox::warning(nullptr, "Process finished", QString("%1 slices have been generated.\n(you may have to close the tool and hide the initial cloud to see them...)").arg(sliceGroup->getChildrenNumber()));
-		if (m_clipBox->getContainer().getFirstChild())
-		{
-			sliceGroup->setDisplay_recursive(m_clipBox->getContainer().getFirstChild()->getDisplay());
-		}
-		MainWindow::TheInstance()->addToDB(sliceGroup);
 	}
-	else if (!singleContourMode)
+	else if (!singleSliceMode)
 	{
 		ccLog::Warning("[ccClippingBoxTool] Repeat process generated no output!");
 	}
+
+	s_lastContourUniqueIDs.clear();
 
 	//contour polylines
 	if (!outputContours.empty())
@@ -1444,9 +1474,7 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 		}
 		MainWindow::TheInstance()->addToDB(contourGroup);
 
-		s_lastContourUniqueIDs.clear();
 		s_lastContourUniqueIDs.push_back(contourGroup->getUniqueID());
-		removeLastContourToolButton->setEnabled(true);
 	}
 
 	//level set
@@ -1464,10 +1492,16 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 			levelSetGroup->setDisplay_recursive(m_clipBox->getContainer().getFirstChild()->getDisplay());
 		}
 		MainWindow::TheInstance()->addToDB(levelSetGroup);
+
+		s_lastContourUniqueIDs.push_back(levelSetGroup->getUniqueID());
 	}
 
+	removeLastContourToolButton->setEnabled(!s_lastContourUniqueIDs.empty());
+
 	if (m_associatedWin)
+	{
 		m_associatedWin->redraw();
+	}
 }
 
 void ccClippingBoxTool::onBoxModified(const ccBBox* box)

@@ -84,6 +84,8 @@ v2.11 (Anoia) - (in development)
 		- option to select the extracted contour type (LOWER, UPPER or FULL)
 		- 'up' direction is always Z for slices normal to X or Y (the local X, Y or Z directions of the active cross-section)
 		- 'up' direction is X for slices normal to Z
+		- ability to extract the real contours of the points inside each slice (single slice mode or 'repeat' mode)
+			(CC will rasterize the slice and apply the 'contour plot' extraction algorithm)
 	- All parameters should now be properly remembered from one call to the other (during the same session)
 	- The current box/slice position can now be exported (resp. imported) to (resp. from) the clipboard via the 'Advanced' menu
 	- Command line tool:
@@ -156,6 +158,7 @@ v2.11 (Anoia) - (in development)
 	- Others:
 		- CC now saves the radius (parameter) after computing normals (as meta-data associated to the cloud)
 		- stereogram tool of the Facets plugin now uses the new 'High contrast' color scale by default
+		- Contour (extraction) renamed Envelope (extraction) for the sake of clarity
 
 - Changes
 	- Command line tool:

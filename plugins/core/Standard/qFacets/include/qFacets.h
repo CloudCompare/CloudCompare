@@ -49,13 +49,13 @@ class qFacets : public QObject, public ccStdPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ccStdPluginInterface)
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qFacets" FILE "info.json")
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qFacets" FILE "../info.json")
 
 public:
 
 	//! Default constructor
 	qFacets(QObject* parent = nullptr);
-	
+
 	//! Destructor
 	virtual ~qFacets() = default;
 
@@ -90,11 +90,11 @@ protected:
 
 	//! Creates facets from components
 	ccHObject* createFacets(ccPointCloud* cloud,
-							CCCoreLib::ReferenceCloudContainer& components,
-							unsigned minPointsPerComponent,
-							double maxEdgeLength,
-							bool randomColors,
-							bool& error);
+	                        CCCoreLib::ReferenceCloudContainer& components,
+	                        unsigned minPointsPerComponent,
+	                        double maxEdgeLength,
+	                        bool randomColors,
+	                        bool& error);
 
 	//! Set of facets (pointers)
 	typedef std::unordered_set<ccFacet*> FacetSet;
@@ -104,8 +104,8 @@ protected:
 
 	//! Classifies facets by orientation
 	void classifyFacetsByAngle(	ccHObject* group,
-								double angleStep_deg,
-								double maxDist);
+	                            double angleStep_deg,
+	                            double maxDist);
 
 	//! Associated action
 	QAction* m_doFuseKdTreeCells;
@@ -119,7 +119,7 @@ protected:
 	QAction* m_doClassifyFacetsByAngle;
 	//! Associated action
 	QAction* m_doShowStereogram;
-	
+
 	StereogramDialog* m_stereogramDialog;
 };
 

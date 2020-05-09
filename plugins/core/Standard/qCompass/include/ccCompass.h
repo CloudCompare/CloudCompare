@@ -39,7 +39,7 @@ class ccCompass : public QObject, public ccStdPluginInterface, public ccPickingL
 {
 	Q_OBJECT
 		Q_INTERFACES(ccStdPluginInterface)
-		Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.ccCompass" FILE "info.json")
+		Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.ccCompass" FILE "../info.json")
 
 public:
 	//! Default constructor
@@ -65,7 +65,7 @@ protected:
 
 	//stop picking mode
 	bool stopMeasuring(bool finalStop = false);
-	
+
 	//inherited from ccPickingListener
 	void onItemPicked(const ccPickingListener::PickedItem& pi) override;
 
@@ -104,7 +104,7 @@ protected:
 	void fitPlaneToGeoObject(); //calculates best-fit plane for the upper and lower surfaces of the selected GeoObject
 	void recalculateFitPlanes(); //recalcs fit planes for traces and GeoObjects
 	void estimateStructureNormals(); //Estimate the normal vector to the structure this trace represents at each point in this trace.
-	void estimateP21(); //Calculate the intensity of selected structures 
+	void estimateP21(); //Calculate the intensity of selected structures
 	void estimateStrain(); //Estimate strain from Mode-I dykes and veins
 	void convertToPointCloud(); //converts selected traces or geoObjects to point clouds
 	void distributeSelection(); //distributes selected objects into GeoObjects with the same name
@@ -133,7 +133,7 @@ protected:
 
 	//event to get mouse-move updates & trigger repaint of overlay circle
 	bool eventFilter(QObject* obj, QEvent* event) override;
-	
+
 	//used to get the place/object that new measurements or interpretation should be stored
 	ccHObject* getInsertPoint();
 
@@ -180,7 +180,7 @@ protected:
 	std::vector<int> m_hiddenObjects; //used to hide objects (for picking)
 
 	//used to 'guess' the name of new GeoObjects
-	QString m_lastGeoObjectName = "GeoObject"; 
+	QString m_lastGeoObjectName = "GeoObject";
 
 	//checks if an object was made by this app (i.e. returns true if we are responsible for a given layer)
 	bool madeByMe(ccHObject* object);

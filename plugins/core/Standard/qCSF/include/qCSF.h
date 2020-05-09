@@ -34,18 +34,18 @@
 
 #include "ccStdPluginInterface.h"
 
-//! A point-clouds filtering algorithm utilize cloth simulation process. 
+//! A point-clouds filtering algorithm utilize cloth simulation process.
 class qCSF : public QObject, public ccStdPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ccStdPluginInterface)
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qCSF" FILE "info.json")
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qCSF" FILE "../info.json")
 
 public:
 
 	//! Default constructor
 	explicit qCSF(QObject* parent = nullptr);
-	
+
 	virtual ~qCSF() = default;
 
 	//inherited from ccStdPluginInterface

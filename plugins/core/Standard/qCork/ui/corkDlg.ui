@@ -27,7 +27,7 @@
        <widget class="QToolButton" name="swapToolButton">
         <property name="icon">
          <iconset resource="qCork.qrc">
-          <normaloff>:/CC/plugin/qCork/iconSwap.png</normaloff>:/CC/plugin/qCork/iconSwap.png</iconset>
+          <normaloff>:/CC/plugin/qCork/images/iconSwap.png</normaloff>:/CC/plugin/qCork/images/iconSwap.png</iconset>
         </property>
        </widget>
       </item>
@@ -161,7 +161,7 @@ A n B</string>
       <string>Image courtesy of Autodesk(r)</string>
      </property>
      <property name="pixmap">
-      <pixmap resource="qCork.qrc">:/CC/plugin/qCork/csg_types.png</pixmap>
+      <pixmap resource="qCork.qrc">:/CC/plugin/qCork/images/csg_types.png</pixmap>
      </property>
     </widget>
    </item>

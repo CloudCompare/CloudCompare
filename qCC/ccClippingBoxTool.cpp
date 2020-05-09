@@ -532,6 +532,9 @@ static unsigned ComputeGridDimensions(	const ccBBox& localBox,
 	return cellCount;
 }
 
+static constexpr char* s_originEntityUUID = "OriginEntityUUID";
+static constexpr char* s_sliceID = "SliceID";
+
 bool ccClippingBoxTool::ExtractSlicesAndContours
 (
 	const std::vector<ccGenericPointCloud*>& clouds,
@@ -615,6 +618,17 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 				if (slice)
 				{
 					slice->setName(clouds[ci]->getName() + QString(".slice"));
+					
+					//set meta-data
+					slice->setMetaData(s_originEntityUUID, clouds[ci]->getUniqueID());
+					slice->setMetaData(s_sliceID, "unique_slice");
+					if (slice->isKindOf(CC_TYPES::POINT_CLOUD))
+					{
+						slice->setMetaData("slice.origin.dim(0)", gridOrigin.x);
+						slice->setMetaData("slice.origin.dim(1)", gridOrigin.y);
+						slice->setMetaData("slice.origin.dim(2)", gridOrigin.z);
+					}
+
 					outputSlices.push_back(slice);
 				}
 			}
@@ -780,9 +794,12 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 										QString slicePosStr = QString("(%1 ; %2 ; %3)").arg(cellOrigin.x).arg(cellOrigin.y).arg(cellOrigin.z);
 										sliceCloud->setName(cloud->getName() + QString(".slice @ ") + slicePosStr);
 
-										sliceCloud->setMetaData("cell.origin.dim(0)", cellOrigin.x);
-										sliceCloud->setMetaData("cell.origin.dim(1)", cellOrigin.y);
-										sliceCloud->setMetaData("cell.origin.dim(2)", cellOrigin.z);
+										//set meta-data
+										sliceCloud->setMetaData(s_originEntityUUID, cloud->getUniqueID());
+										sliceCloud->setMetaData(s_sliceID, slicePosStr);
+										sliceCloud->setMetaData("slice.origin.dim(0)", cellOrigin.x);
+										sliceCloud->setMetaData("slice.origin.dim(1)", cellOrigin.y);
+										sliceCloud->setMetaData("slice.origin.dim(2)", cellOrigin.z);
 
 										//add slice to group
 										outputSlices.push_back(sliceCloud);
@@ -901,7 +918,14 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 									croppedEnt->setDisplay(mesh->getDisplay());
 
 									QString slicePosStr = QString("(%1 ; %2 ; %3)").arg(C.x).arg(C.y).arg(C.z);
-									croppedEnt->setName(QString("slice @ ") + slicePosStr);
+									croppedEnt->setName(mesh->getName() + QString(".slice @ ") + slicePosStr);
+
+									//set meta-data
+									croppedEnt->setMetaData(s_originEntityUUID, mesh->getUniqueID());
+									croppedEnt->setMetaData(s_sliceID, slicePosStr);
+									croppedEnt->setMetaData("slice.origin.dim(0)", C.x);
+									croppedEnt->setMetaData("slice.origin.dim(1)", C.y);
+									croppedEnt->setMetaData("slice.origin.dim(2)", C.z);
 
 									//add slice to group
 									outputSlices.push_back(croppedEnt);
@@ -987,7 +1011,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 					ccPointCloud* sliceCloud = ccHObjectCaster::ToPointCloud(outputSlices[i]);
 					assert(sliceCloud);
 
-					double sliceZ = sliceCloud->getMetaData(QString("cell.origin.dim(%1)").arg(Z)).toDouble();
+					double sliceZ = sliceCloud->getMetaData(QString("slice.origin.dim(%1)").arg(Z)).toDouble();
 					sliceZ += gridSize.u[Z] / 2;
 
 					//grid.reset();
@@ -1060,6 +1084,13 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 							poly->setGlobalScale(sliceCloud->getGlobalScale());
 							poly->setGlobalShift(sliceCloud->getGlobalShift());
 							poly->setMetaData(ccPolyline::MetaKeyConstAltitude(), QVariant(sliceZ)); //replace the 'altitude' meta-data by the right value
+
+							//set meta-data
+							poly->setMetaData(s_originEntityUUID, sliceCloud->getMetaData(s_originEntityUUID));
+							poly->setMetaData(s_sliceID, sliceCloud->getMetaData(s_sliceID));
+							poly->setMetaData("slice.origin.dim(0)", sliceCloud->getMetaData("slice.origin.dim(0)"));
+							poly->setMetaData("slice.origin.dim(1)", sliceCloud->getMetaData("slice.origin.dim(1)"));
+							poly->setMetaData("slice.origin.dim(2)", sliceCloud->getMetaData("slice.origin.dim(2)"));
 
 							levelSet.push_back(poly);
 						}
@@ -1151,6 +1182,14 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 								envelopeName += QString(" (part %1)").arg(p + 1);
 							}
 							poly->setName(envelopeName);
+
+							//set meta-data
+							poly->setMetaData(s_originEntityUUID, sliceCloud->getMetaData(s_originEntityUUID));
+							poly->setMetaData(s_sliceID, sliceCloud->getMetaData(s_sliceID));
+							poly->setMetaData("slice.origin.dim(0)", sliceCloud->getMetaData("slice.origin.dim(0)"));
+							poly->setMetaData("slice.origin.dim(1)", sliceCloud->getMetaData("slice.origin.dim(1)"));
+							poly->setMetaData("slice.origin.dim(2)", sliceCloud->getMetaData("slice.origin.dim(2)"));
+
 							outputEnvelopes.push_back(poly);
 						}
 					}
@@ -1212,6 +1251,25 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 
 	return true;
 }
+
+static ccHObject* FindOrCreateChildren(ccHObject* parent, QString name)
+{
+	assert(parent && !name.isEmpty());
+
+	for (unsigned i = 0; i < parent->getChildrenNumber(); ++i)
+	{
+		ccHObject* child = parent->getChild(i);
+		if (child->getName() == name)
+		{
+			return child;
+		}
+	}
+
+	ccHObject* child = new ccHObject(name);
+	parent->addChild(child);
+	return child;
+}
+
 
 void ccClippingBoxTool::extractSlicesAndContours(bool singleSliceMode)
 {
@@ -1369,7 +1427,7 @@ void ccClippingBoxTool::extractSlicesAndContours(bool singleSliceMode)
 
 	ccProgressDialog pDlg(false, this);
 	std::vector<ccHObject*> outputSlices;
-	std::vector<ccPolyline*> outputContours;
+	std::vector<ccPolyline*> outputEnvelopes;
 	std::vector<ccPolyline*> outputLevelSet;
 
 	QElapsedTimer eTimer;
@@ -1385,7 +1443,7 @@ void ccClippingBoxTool::extractSlicesAndContours(bool singleSliceMode)
 									s_extractEnvelopes,
 									static_cast<PointCoordinateType>(s_maxEnvelopeEdgeLength),
 									envelopeType,
-									outputContours,
+									outputEnvelopes,
 
 									s_extractLevelSet,
 									s_levelSetGridStep,
@@ -1407,6 +1465,148 @@ void ccClippingBoxTool::extractSlicesAndContours(bool singleSliceMode)
 
 	ccLog::Print("[ccClippingBoxTool] Processed finished in %.2f s.", eTimer.elapsed() / 1.0e3);
 
+	//possible outputs
+	ccHObject* sliceGroup = nullptr;
+	ccHObject* envelopeGroup = nullptr;
+	ccHObject* levelSetGroup = nullptr;
+	QMap<QString, ccHObject*> perSliceGroups;
+	QMap<unsigned, ccHObject*> perEntityGroups;
+	QMap<unsigned, QString> perEntityGroupNames;
+	ccHObject* garbageGroup = new ccHObject("Extracted entities");
+
+	enum OutputFormat { BY_TYPE = 0,
+						BY_ENTITY = 1,
+						BY_SLICE = 2,
+						BY_ENTITY_THEN_SLICE = 3,
+						BY_SLICE_THEN_ENTITY = 4,
+	};
+
+	if (	s_groupByIndex == OutputFormat::BY_ENTITY
+		||	s_groupByIndex == OutputFormat::BY_ENTITY_THEN_SLICE
+		||	s_groupByIndex == OutputFormat::BY_SLICE_THEN_ENTITY
+		)
+	{
+		for (const ccGenericPointCloud* cloud : clouds)
+		{
+			QString name = cloud->getName() + ".slices";
+			perEntityGroupNames[cloud->getUniqueID()] = name;
+			if (s_groupByIndex != OutputFormat::BY_SLICE_THEN_ENTITY)
+			{
+				perEntityGroups[cloud->getUniqueID()] = new ccHObject(name);
+			}
+		}
+		for (const ccGenericMesh* mesh : meshes)
+		{
+			QString name = mesh->getName() + ".slices";
+			perEntityGroupNames[mesh->getUniqueID()] = name;
+			if (s_groupByIndex != OutputFormat::BY_SLICE_THEN_ENTITY)
+			{
+				perEntityGroups[mesh->getUniqueID()] = new ccHObject(name);
+			}
+		}
+	}
+
+	if (s_groupByIndex == OutputFormat::BY_SLICE)
+	{
+		for (const ccHObject* slice : outputSlices)
+		{
+			QString sliceID = slice->getMetaData(s_sliceID).toString();
+			perSliceGroups[sliceID] = new ccHObject(sliceID);
+		}
+	}
+
+	auto dispatchEntity = [&](ccHObject* entity, ccHObject* sliceGroup)
+	{
+		if (entity == nullptr)
+		{
+			assert(false);
+			return;
+		}
+		ccHObject* destGroup = nullptr;
+
+		switch (s_groupByIndex)
+		{
+		case OutputFormat::BY_TYPE:
+		{
+			destGroup = sliceGroup;
+		}
+		break;
+
+		case OutputFormat::BY_ENTITY:
+		case OutputFormat::BY_ENTITY_THEN_SLICE:
+		{
+			//first level: entity
+			unsigned entityUUID = entity->getMetaData(s_originEntityUUID).toUInt();
+			if (perEntityGroups.contains(entityUUID))
+			{
+				destGroup = perEntityGroups[entityUUID];
+			}
+			else
+			{
+				assert(false);
+				destGroup = garbageGroup;
+			}
+
+			if (s_groupByIndex == OutputFormat::BY_ENTITY_THEN_SLICE)
+			{
+				//second level: slice
+				QString sliceID = entity->getMetaData(s_sliceID).toString();
+				destGroup = FindOrCreateChildren(destGroup, sliceID);
+			}
+			
+			destGroup->addChild(entity);
+		}
+		break;
+
+		case OutputFormat::BY_SLICE:
+		case OutputFormat::BY_SLICE_THEN_ENTITY:
+		{
+			//first level: slice
+			QString sliceID = entity->getMetaData(s_sliceID).toString();
+			if (perSliceGroups.contains(sliceID))
+			{
+				destGroup = perSliceGroups[sliceID];
+			}
+			else
+			{
+				assert(false);
+				destGroup = garbageGroup;
+			}
+			
+			if (s_groupByIndex == OutputFormat::BY_SLICE_THEN_ENTITY)
+			{
+				//second level: entity
+				unsigned entityUUID = entity->getMetaData(s_originEntityUUID).toUInt();
+				if (perEntityGroupNames.contains(entityUUID))
+				{
+					destGroup = FindOrCreateChildren(destGroup, perEntityGroupNames[entityUUID]);
+				}
+			}
+		}
+		break;
+
+		default:
+			assert(false);
+			return;
+		}
+
+		if (destGroup)
+		{
+			destGroup->addChild(entity);
+		}
+		else
+		{
+			assert(false);
+		}
+	};
+
+	//get the default output display
+	ccGenericGLDisplay* defaultDisplay = nullptr;
+	if (m_clipBox->getContainer().getFirstChild())
+	{
+		defaultDisplay = m_clipBox->getContainer().getFirstChild()->getDisplay();
+	}
+
 	//base name
 	QString baseName;
 	if (m_clipBox->getContainer().getChildrenNumber() == 1)
@@ -1415,32 +1615,21 @@ void ccClippingBoxTool::extractSlicesAndContours(bool singleSliceMode)
 	}
 
 	//slices (clouds or meshes)
-	if (!outputSlices.empty())
+	size_t sliceCount = outputSlices.size();
+	if (sliceCount)
 	{
 		if (s_extractSliceCloudsOrMeshes)
 		{
-			QString groupName;
-			if (!baseName.isEmpty())
+			if (s_groupByIndex == OutputFormat::BY_TYPE)
 			{
-				groupName = QString("%1.slices").arg(baseName);
+				//we have to create the destination group
+				sliceGroup = new ccHObject(baseName.isEmpty() ? QString("Slices") : baseName + QString(".slices"));
 			}
-			else
-			{
-				groupName = "Slices";
-			}
-			ccHObject* sliceGroup = new ccHObject(groupName);
 
 			for (ccHObject* slice : outputSlices)
 			{
-				sliceGroup->addChild(slice);
+				dispatchEntity(slice, sliceGroup);
 			}
-
-			QMessageBox::warning(nullptr, "Process finished", QString("%1 slices have been generated.\n(you may have to close the tool and hide the initial cloud to see them...)").arg(sliceGroup->getChildrenNumber()));
-			if (m_clipBox->getContainer().getFirstChild())
-			{
-				sliceGroup->setDisplay_recursive(m_clipBox->getContainer().getFirstChild()->getDisplay());
-			}
-			MainWindow::TheInstance()->addToDB(sliceGroup);
 		}
 		else
 		{
@@ -1451,56 +1640,116 @@ void ccClippingBoxTool::extractSlicesAndContours(bool singleSliceMode)
 			outputSlices.clear();
 		}
 	}
-	else if (!singleSliceMode)
+
+	if (!outputEnvelopes.empty() || !outputLevelSet.empty())
 	{
-		ccLog::Warning("[ccClippingBoxTool] Repeat process generated no output!");
+		s_lastContourUniqueIDs.clear();
 	}
 
-	s_lastContourUniqueIDs.clear();
-
-	//contour polylines
-	if (!outputContours.empty())
+	//envelopes
+	if (!outputEnvelopes.empty())
 	{
-		ccHObject* contourGroup = new ccHObject(baseName.isEmpty() ? QString("Contours") : baseName + QString(".contours"));
-
-		for (ccPolyline* poly : outputContours)
+		if (s_groupByIndex == OutputFormat::BY_TYPE)
 		{
-			contourGroup->addChild(poly);
+			//we have to create the destination group
+			envelopeGroup = new ccHObject(baseName.isEmpty() ? QString("Envelopes") : baseName + QString(".envelopes"));
 		}
 
-		if (m_clipBox->getContainer().getFirstChild())
+		for (ccPolyline* poly : outputEnvelopes)
 		{
-			contourGroup->setDisplay_recursive(m_clipBox->getContainer().getFirstChild()->getDisplay());
+			dispatchEntity(poly, envelopeGroup);
+			s_lastContourUniqueIDs.push_back(poly->getUniqueID());
 		}
-		MainWindow::TheInstance()->addToDB(contourGroup);
 
-		s_lastContourUniqueIDs.push_back(contourGroup->getUniqueID());
+		if (envelopeGroup)
+		{
+			s_lastContourUniqueIDs.push_back(envelopeGroup->getUniqueID());
+		}
 	}
 
 	//level set
 	if (!outputLevelSet.empty())
 	{
-		ccHObject* levelSetGroup = new ccHObject(baseName.isEmpty() ? QString("Level set") : baseName + QString(".levelSet"));
+		if (s_groupByIndex == OutputFormat::BY_TYPE)
+		{
+			//we have to create the destination group
+			levelSetGroup = new ccHObject(baseName.isEmpty() ? QString("Level set") : baseName + QString(".levelSet"));
+		}
 
 		for (ccPolyline* poly : outputLevelSet)
 		{
-			levelSetGroup->addChild(poly);
+			dispatchEntity(poly, levelSetGroup);
+			s_lastContourUniqueIDs.push_back(poly->getUniqueID());
 		}
 
-		if (m_clipBox->getContainer().getFirstChild())
+		if (levelSetGroup)
 		{
-			levelSetGroup->setDisplay_recursive(m_clipBox->getContainer().getFirstChild()->getDisplay());
+			s_lastContourUniqueIDs.push_back(levelSetGroup->getUniqueID());
 		}
-		MainWindow::TheInstance()->addToDB(levelSetGroup);
-
-		s_lastContourUniqueIDs.push_back(levelSetGroup->getUniqueID());
 	}
 
 	removeLastContourToolButton->setEnabled(!s_lastContourUniqueIDs.empty());
 
+	//now take care of the 'output' groups
+	{
+		if (sliceGroup)
+		{
+			sliceGroup->setDisplay_recursive(defaultDisplay);
+			MainWindow::TheInstance()->addToDB(sliceGroup);
+		}
+	
+		if (envelopeGroup)
+		{
+			envelopeGroup->setDisplay_recursive(defaultDisplay);
+			MainWindow::TheInstance()->addToDB(envelopeGroup);
+		}
+
+		if (levelSetGroup)
+		{
+			levelSetGroup->setDisplay_recursive(defaultDisplay);
+			MainWindow::TheInstance()->addToDB(levelSetGroup);
+		}
+
+		for (ccHObject* group : perSliceGroups)
+		{
+			group->setDisplay_recursive(defaultDisplay);
+			MainWindow::TheInstance()->addToDB(group);
+		}
+
+		for (ccHObject* group : perEntityGroups)
+		{
+			group->setDisplay_recursive(defaultDisplay);
+			MainWindow::TheInstance()->addToDB(group);
+		}
+
+		//don't forget the 'garbage' group (just in case)
+		if (garbageGroup)
+		{
+			if (garbageGroup->getChildrenNumber() != 0)
+			{
+				garbageGroup->setDisplay_recursive(defaultDisplay);
+				MainWindow::TheInstance()->addToDB(garbageGroup);
+			}
+			else
+			{
+				delete garbageGroup;
+				garbageGroup = nullptr;
+			}
+		}
+	}
+
 	if (m_associatedWin)
 	{
 		m_associatedWin->redraw();
+	}
+
+	if (sliceCount != 0)
+	{
+		QMessageBox::warning(nullptr, "Process finished", QString("%1 slices have been generated.\n(you may have to close the tool and hide the initial cloud to see them...)").arg(sliceCount));
+	}
+	else
+	{
+		QMessageBox::warning(nullptr, "Process finished", "The process has generated no output");
 	}
 }
 

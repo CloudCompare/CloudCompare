@@ -315,6 +315,16 @@ color: white;</string>
           <string>Slice</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>Origin entity, then slice</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Slice, then origin entity</string>
+         </property>
+        </item>
        </widget>
       </item>
      </layout>

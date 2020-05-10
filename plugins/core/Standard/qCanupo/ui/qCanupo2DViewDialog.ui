@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="qCanupo.qrc">
-    <normaloff>:/CC/plugin/qCanupoPlugin/iconCreate.png</normaloff>:/CC/plugin/qCanupoPlugin/iconCreate.png</iconset>
+    <normaloff>:/CC/plugin/qCanupoPlugin/images/iconCreate.png</normaloff>:/CC/plugin/qCanupoPlugin/images/iconCreate.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>

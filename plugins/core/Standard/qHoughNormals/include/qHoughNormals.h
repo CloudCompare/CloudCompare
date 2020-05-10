@@ -28,7 +28,7 @@ class qHoughNormals : public QObject, public ccStdPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ccStdPluginInterface)
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qHoughNormals" FILE "info.json")
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qHoughNormals" FILE "../info.json")
 
 public:
 
@@ -36,7 +36,7 @@ public:
 	explicit qHoughNormals(QObject* parent = nullptr);
 
 	virtual ~qHoughNormals() = default;
-	
+
 	//inherited from ccStdPluginInterface
 	virtual void onNewSelection(const ccHObject::Container& selectedEntities) override;
 	virtual QList<QAction *> getActions() override;

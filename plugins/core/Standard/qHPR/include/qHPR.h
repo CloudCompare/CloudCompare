@@ -24,7 +24,7 @@
 #include <ReferenceCloud.h>
 
 //! Wrapper to the "Hidden Point Removal" algorithm for approximating points visibility in an N dimensional point cloud, as seen from a given viewpoint
-/** "Direct Visibility of Point Sets", Sagi Katz, Ayellet Tal, and Ronen Basri. 
+/** "Direct Visibility of Point Sets", Sagi Katz, Ayellet Tal, and Ronen Basri.
 	SIGGRAPH 2007
 	http://www.mathworks.com/matlabcentral/fileexchange/16581-hidden-point-removal
 **/
@@ -32,13 +32,13 @@ class qHPR : public QObject, public ccStdPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ccStdPluginInterface)
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qHPR" FILE "info.json")
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qHPR" FILE "../info.json")
 
 public:
 
 	//! Default constructor
 	explicit qHPR(QObject* parent = nullptr);
-	
+
 	virtual ~qHPR() = default;
 
 	//inherited from ccStdPluginInterface

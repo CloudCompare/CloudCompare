@@ -1,18 +1,16 @@
-option( PLUGIN_STANDARD_QHPR "Check to install qHPR plugin" OFF )
+option( PLUGIN_STANDARD_QHPR "Install qHPR plugin" OFF )
 
-# CloudCompare 'HPR' plugin
-if (PLUGIN_STANDARD_QHPR)
-    project( QHPR_PLUGIN )
-    	
-    AddPlugin( NAME ${PROJECT_NAME} )
-
-	include_directories( src )
+if( PLUGIN_STANDARD_QHPR )
+	project( QHPR_PLUGIN )
+		
+	AddPlugin( NAME ${PROJECT_NAME} )
 	
+	add_subdirectory( extern/qhull )
+	add_subdirectory( include )
 	add_subdirectory( src )
-	add_subdirectory( src/qhull/src2015.2 )
+	add_subdirectory( ui )
+		
+	target_link_libraries( ${PROJECT_NAME} qhull )
 	
-    include( CMakePluginTemplate )
-    
-    target_link_libraries( ${PROJECT_NAME} qhull )
-    include_directories( ${QHULL_LIB_INCLUDE_DIR} )
+	include( CMakePluginTemplate )	
 endif()

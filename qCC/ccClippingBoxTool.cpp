@@ -1747,7 +1747,7 @@ void ccClippingBoxTool::extractSlicesAndContours(bool singleSliceMode)
 	{
 		QMessageBox::warning(nullptr, "Process finished", QString("%1 slices have been generated.\n(you may have to close the tool and hide the initial cloud to see them...)").arg(sliceCount));
 	}
-	else
+	else if (s_extractSliceCloudsOrMeshes)
 	{
 		QMessageBox::warning(nullptr, "Process finished", "The process has generated no output");
 	}

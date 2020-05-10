@@ -300,6 +300,9 @@ color: white;</string>
       </item>
       <item row="1" column="1">
        <widget class="QComboBox" name="groupByTypeComboBox">
+        <property name="currentIndex">
+         <number>3</number>
+        </property>
         <item>
          <property name="text">
           <string>Type</string>

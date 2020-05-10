@@ -30,18 +30,26 @@
 
 //qCC_db
 #include <ccClipBox.h>
-#include <ccRasterGrid.h>
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
+#include <ccRasterGrid.h>
 
 //Qt
 #include <QMessageBox>
 
-//Last envelope or contour unique ID
-static std::vector<unsigned> s_lastContourUniqueIDs;
+namespace
+{
+	//Last envelope or contour unique ID
+	std::vector<unsigned> s_lastContourUniqueIDs;
+	
+	//Envelope extraction parameters (global)
+	double s_maxEnvelopeEdgeLength = -1.0;
 
-//Envelope extraction parameters (global)
-static double s_maxEnvelopeEdgeLength = -1.0;
+	//Meta-data key: origin entity UUID
+	constexpr char* s_originEntityUUID = "OriginEntityUUID";
+	//Meta-data key: slice (unique) ID
+	constexpr char* s_sliceID = "SliceID";
+}
 
 // persistent map of the previous box used for each entity
 struct ccClipBoxParams
@@ -532,9 +540,6 @@ static unsigned ComputeGridDimensions(	const ccBBox& localBox,
 	return cellCount;
 }
 
-static constexpr char* s_originEntityUUID = "OriginEntityUUID";
-static constexpr char* s_sliceID = "SliceID";
-
 bool ccClippingBoxTool::ExtractSlicesAndContours
 (
 	const std::vector<ccGenericPointCloud*>& clouds,
@@ -621,7 +626,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 					
 					//set meta-data
 					slice->setMetaData(s_originEntityUUID, clouds[ci]->getUniqueID());
-					slice->setMetaData(s_sliceID, "unique_slice");
+					slice->setMetaData(s_sliceID, "slice");
 					if (slice->isKindOf(CC_TYPES::POINT_CLOUD))
 					{
 						slice->setMetaData("slice.origin.dim(0)", gridOrigin.x);
@@ -1097,7 +1102,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 					}
 					else
 					{
-						ccLog::Warning(QString("Failed to generate contour lines for cloud #%1").arg(i + 1));
+						ccLog::Warning(tr("Failed to generate contour lines for cloud #%1").arg(i + 1));
 					}
 
 					if (progressDialog)
@@ -1105,7 +1110,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 						if (progressDialog->wasCanceled())
 						{
 							error = true;
-							ccLog::Warning(QString("[ExtractSlicesAndContours] Process canceled by user"));
+							ccLog::Warning(tr("[ExtractSlicesAndContours] Process canceled by user"));
 							break;
 						}
 						progressDialog->setValue(static_cast<int>(i) + 1);
@@ -1119,8 +1124,8 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 		{
 			if (progressDialog)
 			{
-				progressDialog->setWindowTitle("Envelope extraction");
-				progressDialog->setInfo(QObject::tr("Envelope(s): %L1").arg(cloudSliceCount));
+				progressDialog->setWindowTitle(tr("Envelope extraction"));
+				progressDialog->setInfo(tr("Envelope(s): %L1").arg(cloudSliceCount));
 				progressDialog->setMaximum(static_cast<int>(cloudSliceCount));
 				if (!visualDebugMode)
 				{
@@ -1195,13 +1200,13 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 					}
 					else
 					{
-						ccLog::Warning(QString("%1: points are too far from each other! Increase the max edge length").arg(sliceCloud->getName()));
+						ccLog::Warning(tr("%1: points are too far from each other! Increase the max edge length").arg(sliceCloud->getName()));
 						warningsIssued = true;
 					}
 				}
 				else
 				{
-					ccLog::Warning(QString("%1: envelope extraction failed!").arg(sliceCloud->getName()));
+					ccLog::Warning(tr("%1: envelope extraction failed!").arg(sliceCloud->getName()));
 					warningsIssued = true;
 				}
 
@@ -1210,7 +1215,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 					if (progressDialog->wasCanceled())
 					{
 						error = true;
-						ccLog::Warning(QString("[ExtractSlicesAndContours] Process canceled by user"));
+						ccLog::Warning(tr("[ExtractSlicesAndContours] Process canceled by user"));
 						//early stop
 						break;
 					}
@@ -1240,12 +1245,12 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 		}
 		else if (warningsIssued)
 		{
-			ccLog::Warning("[ExtractSlicesAndContours] Warnings were issued during the process! (result may be incomplete)");
+			ccLog::Warning(tr("[ExtractSlicesAndContours] Warnings were issued during the process! (result may be incomplete)"));
 		}
 	}
 	catch (const std::bad_alloc&)
 	{
-		ccLog::Error("Not enough memory!");
+		ccLog::Error(tr("Not enough memory!"));
 		return false;
 	}
 
@@ -1745,11 +1750,11 @@ void ccClippingBoxTool::extractSlicesAndContours(bool singleSliceMode)
 
 	if (sliceCount != 0)
 	{
-		QMessageBox::warning(nullptr, "Process finished", QString("%1 slices have been generated.\n(you may have to close the tool and hide the initial cloud to see them...)").arg(sliceCount));
+		QMessageBox::warning(nullptr, tr("Process finished"), tr("%1 slices have been generated.\n(you may have to close the tool and hide the initial cloud to see them...)").arg(sliceCount));
 	}
 	else if (s_extractSliceCloudsOrMeshes)
 	{
-		QMessageBox::warning(nullptr, "Process finished", "The process has generated no output");
+		QMessageBox::warning(nullptr, tr("Process finished"), tr("The process has generated no output"));
 	}
 }
 

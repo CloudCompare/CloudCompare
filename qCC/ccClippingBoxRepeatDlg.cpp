@@ -45,11 +45,6 @@ ccClippingBoxRepeatDlg::ccClippingBoxRepeatDlg(bool singleSliceMode/*=false*/, Q
 		
 		setFlatDim(0);
 
-		//extractEnvelopesGroupBox->setChecked(true); //DGM: we now have the choice between envelope and contours!
-		//extractEnvelopesGroupBox->setCheckable(false);
-		//envProjectPointsOnBestFitCheckBox->setVisible(true);
-		//envProjectPointsOnBestFitCheckBox->setChecked(false);
-
 		randomColorCheckBox->setChecked(false);
 		otherOptionsGroupBox->setVisible(false);
 	}
@@ -117,7 +112,9 @@ void ccClippingBoxRepeatDlg::onDimChecked(bool)
 	if (sum == 1)
 	{
 		if (!envProjectPointsOnBestFitCheckBox->isVisible())
+		{
 			envProjectPointsOnBestFitCheckBox->setChecked(false);
+		}
 		envProjectPointsOnBestFitCheckBox->setVisible(true);
 		envelopeTypeComboBox->setEnabled(true);
 		extractLevelSetGroupBox->setEnabled(true);

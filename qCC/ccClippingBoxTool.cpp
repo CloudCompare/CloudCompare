@@ -46,9 +46,9 @@ namespace
 	double s_maxEnvelopeEdgeLength = -1.0;
 
 	//Meta-data key: origin entity UUID
-	constexpr char* s_originEntityUUID = "OriginEntityUUID";
+	constexpr char s_originEntityUUID[] = "OriginEntityUUID";
 	//Meta-data key: slice (unique) ID
-	constexpr char* s_sliceID = "SliceID";
+	constexpr char s_sliceID[] = "SliceID";
 }
 
 // persistent map of the previous box used for each entity

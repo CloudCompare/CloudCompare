@@ -21,10 +21,8 @@
 //Local
 #include "ccCommon.h"
 #include "ccPersistentSettings.h"
+#include "ccContourLinesGenerator.h"
 #include "mainwindow.h"
-#ifndef CC_GDAL_SUPPORT
-#include "ccIsolines.h" //old alternative code to generate contour lines (doesn't work very well :( )
-#endif
 
 //qCC_db
 #include <ccColorScalesManager.h>
@@ -53,7 +51,6 @@
 //GDAL
 #include <cpl_string.h>
 #include <gdal.h>
-#include <gdal_alg.h>
 #include <gdal_priv.h>
 #include <ogr_api.h>
 //local
@@ -1417,7 +1414,7 @@ void ccRasterizeTool::generateHillshade()
 {
 	if (!m_grid.isValid() || !m_rasterCloud)
 	{
-		ccLog::Error("Need a valid raster/cloud to compute contours!");
+		ccLog::Error("Need a valid raster/cloud to generate hillshade!");
 		return;
 	}
 	if (m_grid.height < 3 || m_grid.width < 3)
@@ -1558,110 +1555,6 @@ void ccRasterizeTool::generateHillshade()
 	}
 }
 
-#ifdef CC_GDAL_SUPPORT
-
-struct ContourGenerationParameters
-{
-	std::vector<ccPolyline*> contourLines;
-	const ccRasterGrid* grid = nullptr;
-	bool projectContourOnAltitudes = false;
-};
-
-static CPLErr ContourWriter(	double dfLevel,
-								int nPoints,
-								double *padfX,
-								double *padfY,
-								void * userData)
-{
-	if (nPoints < 2)
-	{
-		//nothing to do
-		assert(false);
-		return CE_None;
-	}
-
-	ContourGenerationParameters* params = reinterpret_cast<ContourGenerationParameters*>(userData);
-	if (!params || !params->grid)
-	{
-		assert(false);
-		return CE_Failure;
-	}
-
-	ccPointCloud* vertices = nullptr;
-	ccPolyline* poly = nullptr;
-
-	unsigned subIndex = 0;
-	for (int i = 0; i < nPoints; ++i)
-	{
-		CCVector3 P(padfX[i], padfY[i], dfLevel);
-
-		if (params->projectContourOnAltitudes)
-		{
-			int xi = std::min(std::max(static_cast<int>(padfX[i]), 0), static_cast<int>(params->grid->width) - 1);
-			int yi = std::min(std::max(static_cast<int>(padfY[i]), 0), static_cast<int>(params->grid->height) - 1);
-			double h = params->grid->rows[yi][xi].h;
-			if (std::isfinite(h))
-			{
-				P.z = static_cast<PointCoordinateType>(h);
-			}
-			else
-			{
-				//DGM: we stop the current polyline
-				if (poly)
-				{
-					if (poly->size() < 2)
-					{
-						delete poly;
-						params->contourLines.pop_back();
-					}
-					poly = nullptr;
-					vertices = nullptr;
-				}
-				continue;
-			}
-		}
-
-		if (!poly)
-		{
-			//we need to instantiate a new polyline
-			vertices = new ccPointCloud("vertices");
-			vertices->setEnabled(false);
-			poly = new ccPolyline(vertices);
-			poly->addChild(vertices);
-			poly->setMetaData("SubIndex", ++subIndex);
-			poly->setClosed(false);
-
-			//add the 'const altitude' meta-data as well
-			poly->setMetaData(ccPolyline::MetaKeyConstAltitude(), QVariant(dfLevel));
-
-			if (!vertices->reserve(nPoints - i) || !poly->reserve(nPoints - i))
-			{
-				//not enough memory
-				delete poly;
-				poly = nullptr;
-				return CE_Failure;
-			}
-
-			try
-			{
-				params->contourLines.push_back(poly);
-			}
-			catch (const std::bad_alloc&)
-			{
-				return CE_Failure;
-			}
-		}
-
-		assert(vertices);
-		poly->addPointIndex(vertices->size());
-		vertices->addPoint(P);
-	}
-
-	return CE_None;
-}
-
-#endif //CC_GDAL_SUPPORT
-
 void ccRasterizeTool::addNewContour(ccPolyline* poly, double height, unsigned subIndex)
 {
 	assert(poly);
@@ -1703,354 +1596,86 @@ void ccRasterizeTool::generateContours()
 		return;
 	}
 
-	//read options
-	bool projectContourOnAltitudes = false;
+	//initialize parameters
+	ccContourLinesGenerator::Parameters params;
 	{
-		switch (m_UI->activeLayerComboBox->currentData().toInt())
+		params.projectContourOnAltitudes = false;
 		{
-		case LAYER_HEIGHT:
-			//nothing to do
-			break;
-		case LAYER_RGB:
-			ccLog::Error("Can't generate contours from RGB colors");
-			return;
-		default:
-			projectContourOnAltitudes = m_UI->projectContoursOnAltCheckBox->isChecked();
-			break;
+			switch (m_UI->activeLayerComboBox->currentData().toInt())
+			{
+			case LAYER_HEIGHT:
+				//nothing to do
+				break;
+			case LAYER_RGB:
+				ccLog::Error("Can't generate contours from RGB colors");
+				return;
+			default:
+				params.projectContourOnAltitudes = m_UI->projectContoursOnAltCheckBox->isChecked();
+				break;
+			}
 		}
-	}
-	
-	//current layer
-	ccScalarField* activeLayer = m_rasterCloud->getCurrentDisplayedScalarField();
-	if (!activeLayer)
-	{
-		ccLog::Error("No valid/active layer!");
-		return;
-	}
-	const double emptyCellsValue = activeLayer->getMin() - 1.0;
 
-	//first contour level
-	double startValue = m_UI->contourStartDoubleSpinBox->value();
-	if (startValue > activeLayer->getMax())
-	{
-		ccLog::Error("Start value is above the layer maximum value!");
-		return;
+		//use current layer for 'altitudes'
+		params.altitudes = m_rasterCloud->getCurrentDisplayedScalarField();
+		if (!params.altitudes)
+		{
+			ccLog::Error("No valid/active layer!");
+			return;
+		}
+		params.emptyCellsValue = params.altitudes->getMin() - 1.0;
+
+		//min and max 'altitudes'
+		params.startAltitude = m_UI->contourStartDoubleSpinBox->value();
+		params.maxAltitude = params.altitudes->getMax();
+		assert(params.startAltitude <= params.maxAltitude);
+
+		//gap between levels
+		params.step = m_UI->contourStepDoubleSpinBox->value();
+		assert(params.step > 0);
+
+		//minimum number of vertices per contour line
+		params.minVertexCount = m_UI->minVertexCountSpinBox->value();
+		assert(params.minVertexCount >= 3);
+
+		//the parameters below are only required if GDAL is not supported (but we can set them anyway)
+		params.ignoreBorders = m_UI->ignoreContourBordersCheckBox->isChecked();
+		params.parentWidget = this;
 	}
-
-	//gap between levels
-	double step = m_UI->contourStepDoubleSpinBox->value();
-	assert(step > 0);
-	unsigned levelCount = 1 + static_cast<unsigned>(floor((activeLayer->getMax() - startValue) / step));
-
-	//minimum number of vertices per contour line
-	int minVertexCount = m_UI->minVertexCountSpinBox->value();
-	assert(minVertexCount >= 3);
 
 	removeContourLines();
 
-	bool memoryError = false;
-
-#ifdef CC_GDAL_SUPPORT //use GDAL (more robust) - otherwise we will use an old code found on the Internet (with a strange behavior)
-
-	//invoke the GDAL 'Contour Generator'
-	ContourGenerationParameters params;
-	params.grid = &m_grid;
-	params.projectContourOnAltitudes = projectContourOnAltitudes;
-	GDALContourGeneratorH hCG = GDAL_CG_Create(m_grid.width, m_grid.height, 1, emptyCellsValue, step, startValue, ContourWriter, &params);
-	if (!hCG)
+	//compute the grid min corner (2D)
+	CCVector2d gridMinCorner;
 	{
-		ccLog::Error("[GDAL] Failed to create contour generator");
-		return;
-	}
-
-	//feed the scan lines
-	{
-		double* scanline = static_cast<double*>(CPLMalloc(sizeof(double) * m_grid.width));
-		if (!scanline)
-		{
-			ccLog::Error("[GDAL] Not enough memory");
-			return;
-		}
-
-		bool sparseLayer = (activeLayer->currentSize() != m_grid.height * m_grid.width);
-		unsigned layerIndex = 0;
-
-		for (unsigned j = 0; j < m_grid.height; ++j)
-		{
-			const ccRasterGrid::Row& cellRow = m_grid.rows[j];
-			for (unsigned i = 0; i < m_grid.width; ++i)
-			{
-				if (cellRow[i].nbPoints || !sparseLayer)
-				{
-					ScalarType value = activeLayer->getValue(layerIndex++);
-					scanline[i] = ccScalarField::ValidValue(value) ? value : emptyCellsValue;
-
-				}
-				else
-				{
-					scanline[i] = emptyCellsValue;
-				}
-			}
-
-			CPLErr error = GDAL_CG_FeedLine(hCG, scanline);
-			if (error != CE_None)
-			{
-				ccLog::Error("[GDAL] An error occurred during countour lines generation");
-				break;
-			}
-		}
-
-		if (scanline)
-		{
-			CPLFree(scanline);
-		}
-		scanline = nullptr;
-
-		//have we generated any contour line?
-		if (!params.contourLines.empty())
-		{
-			//vertical dimension
-			const unsigned char Z = getProjectionDimension();
-			assert(Z <= 2);
-			const unsigned char X = Z == 2 ? 0 : Z + 1;
-			const unsigned char Y = X == 2 ? 0 : X + 1;
-
-			ccBBox gridBBox = getCustomBBox();
-			assert(gridBBox.isValid());
-
-			//reproject contour lines from raster C.S. to the cloud C.S.
-			for (ccPolyline*& poly : params.contourLines)
-			{
-				if (static_cast<int>(poly->size()) < minVertexCount)
-				{
-					delete poly;
-					poly = nullptr;
-					continue;
-				}
-
-				double height = std::numeric_limits<double>::quiet_NaN();
-				for (unsigned i = 0; i < poly->size(); ++i)
-				{
-					CCVector3* P2D = const_cast<CCVector3*>(poly->getAssociatedCloud()->getPoint(i));
-					if (i == 0)
-					{
-						height = P2D->z;
-					}
-
-					CCVector3 P;
-					//DGM: we will only do the dimension mapping at export time
-					//(otherwise the contour lines appear in the wrong orientation compared to the grid/raster which
-					// is in the XY plane by default!)
-					/*P.u[X] = */P.x = static_cast<PointCoordinateType>((P2D->x - 0.5) * m_grid.gridStep + gridBBox.minCorner().u[X]);
-					/*P.u[Y] = */P.y = static_cast<PointCoordinateType>((P2D->y - 0.5) * m_grid.gridStep + gridBBox.minCorner().u[Y]);
-					/*P.u[Z] = */P.z = P2D->z;
-
-					*P2D = P;
-				}
-				 
-				addNewContour(poly, height, poly->getMetaData("SubIndex").toUInt());
-			}
-
-			params.contourLines.resize(0); //just in case
-		}
-	}
-
-#else
-
-	bool ignoreBorders = m_UI->ignoreContourBordersCheckBox->isChecked();
-	unsigned xDim = m_grid.width;
-	unsigned yDim = m_grid.height;
-
-	int margin = 0;
-	if (!ignoreBorders)
-	{
-		margin = 1;
-		xDim += 2;
-		yDim += 2;
-	}
-	std::vector<double> grid;
-	try
-	{
-		grid.resize(xDim * yDim, 0);
-	}
-	catch (const std::bad_alloc&)
-	{
-		ccLog::Error("Not enough memory!");
-		if (m_glWindow)
-			m_glWindow->redraw();
-		return;
-	}
-
-	//fill grid
-	{
-		bool sparseLayer = (activeLayer->currentSize() != m_grid.height * m_grid.width);
-
-		unsigned layerIndex = 0;
-		for (unsigned j = 0; j < m_grid.height; ++j)
-		{
-			const ccRasterGrid::Row& cellRow = m_grid.rows[j];
-			double* row = &(grid[(j + margin)*xDim + margin]);
-			for (unsigned i = 0; i < m_grid.width; ++i)
-			{
-				if (cellRow[i].nbPoints || !sparseLayer)
-				{
-					ScalarType value = activeLayer->getValue(layerIndex++);
-					row[i] = ccScalarField::ValidValue(value) ? value : emptyCellsValue;
-				}
-				else
-				{
-					row[i] = emptyCellsValue;
-				}
-			}
-		}
-	}
-
-	try
-	{
-		Isolines<double> iso(static_cast<int>(xDim), static_cast<int>(yDim));
-		if (!ignoreBorders)
-		{
-			iso.createOnePixelBorder(grid.data(), activeLayer->getMin() - 1.0);
-		}
-		//bounding box
-		ccBBox box = getCustomBBox();
-		assert(box.isValid());
-
-		//vertical dimension
 		const unsigned char Z = getProjectionDimension();
 		assert(Z <= 2);
-		const unsigned char X = (Z == 2 ? 0 : Z + 1);
-		const unsigned char Y = (X == 2 ? 0 : X + 1);
-
-		ccProgressDialog pDlg(true,this);
-		pDlg.setMethodTitle(tr("Contour plot"));
-		pDlg.setInfo(tr("Levels: %1\nCells: %2 x %3").arg(levelCount).arg(m_grid.width).arg(m_grid.height));
-		pDlg.start();
-		pDlg.show();
-		QApplication::processEvents();
-		CCCoreLib::NormalizedProgress nProgress(&pDlg, levelCount);
-
-		double v = startValue;
-		while (v <= activeLayer->getMax() && !memoryError)
-		{
-			//extract contour lines for the current level
-			iso.setThreshold(v);
-			int lineCount = iso.find(grid.data());
-
-			ccLog::PrintDebug(QString("[Rasterize][Isolines] value=%1 : %2 lines").arg(v).arg(lineCount));
-
-			//convert them to poylines
-			int realCount = 0;
-			for (int i = 0; i < lineCount; ++i)
-			{
-				int vertCount = iso.getContourLength(i);
-				if (vertCount >= minVertexCount)
-				{
-					int startVi = 0; //we may have to split the polyline in multiple chunks
-					while (startVi < vertCount)
-					{
-						ccPointCloud* vertices = new ccPointCloud("vertices");
-						ccPolyline* poly = new ccPolyline(vertices);
-						poly->addChild(vertices);
-						bool isClosed = (startVi == 0 ? iso.isContourClosed(i) : false);
-						if (poly->reserve(vertCount - startVi) && vertices->reserve(vertCount - startVi))
-						{
-							unsigned localIndex = 0;
-							for (int vi = startVi; vi < vertCount; ++vi)
-							{
-								++startVi;
-								
-								double x = iso.getContourX(i, vi) - margin;
-								double y = iso.getContourY(i, vi) - margin;
-
-								CCVector3 P;
-								//DGM: we will only do the dimension mapping at export time
-								//(otherwise the contour lines appear in the wrong orientation compared to the grid/raster which
-								// is in the XY plane by default!)
-								/*P.u[X] = */P.x = static_cast<PointCoordinateType>((x + 0.5) * m_grid.gridStep + box.minCorner().u[X]);
-								/*P.u[Y] = */P.y = static_cast<PointCoordinateType>((y + 0.5) * m_grid.gridStep + box.minCorner().u[Y]);
-								if (projectContourOnAltitudes)
-								{
-									int xi = std::min(std::max(static_cast<int>(x), 0), static_cast<int>(m_grid.width) - 1);
-									int yi = std::min(std::max(static_cast<int>(y), 0), static_cast<int>(m_grid.height) - 1);
-									double h = m_grid.rows[yi][xi].h;
-									if (std::isfinite(h))
-									{
-										/*P.u[Z] = */P.z = static_cast<PointCoordinateType>(h);
-									}
-									else
-									{
-										//DGM: we stop the current polyline
-										isClosed = false;
-										break;
-									}
-								}
-								else
-								{
-									/*P.u[Z] = */P.z = static_cast<PointCoordinateType>(v);
-								}
-
-								vertices->addPoint(P);
-								assert(localIndex < vertices->size());
-								poly->addPointIndex(localIndex++);
-							}
-
-							assert(poly);
-							if (poly->size() > 1)
-							{
-								poly->setClosed(isClosed); //if we have less vertices, it means we have 'chopped' the original contour
-								vertices->setEnabled(false);
-
-								//add the 'const altitude' meta-data as well
-								poly->setMetaData(ccPolyline::MetaKeyConstAltitude(), QVariant(v));
-
-								addNewContour(poly, v, ++realCount);
-							}
-							else
-							{
-								delete poly;
-								poly = nullptr;
-							}
-						}
-						else
-						{
-							delete poly;
-							poly = nullptr;
-							ccLog::Error("Not enough memory!");
-							memoryError = true; //early stop
-							break;
-						}
-					}
-				}
-			}
-			v += step;
-
-			if (!nProgress.oneStep())
-			{
-				//process cancelled by user
-				break;
-			}
-		}
+		const unsigned char X = Z == 2 ? 0 : Z + 1;
+		const unsigned char Y = X == 2 ? 0 : X + 1;
+		gridMinCorner = CCVector2d(m_grid.minCorner.u[X], m_grid.minCorner.u[Y]);
 	}
-	catch (const std::bad_alloc&)
+
+	//generate the contour lines
+	std::vector<ccPolyline*> contourLines;
+	if (!ccContourLinesGenerator::GenerateContourLines(	&m_grid,
+														gridMinCorner,
+														params,
+														contourLines))
 	{
-		ccLog::Error("Not enough memory!");
+		ccLog::Error("Process failed (see console)");
+		return;
 	}
-#endif
 
-	ccLog::Print(QString("[Rasterize] %1 iso-lines generated (%2 levels)").arg(m_contourLines.size()).arg(levelCount));
+	for (ccPolyline* poly : contourLines)
+	{
+		addNewContour(	poly,
+						poly->getMetaData(ccPolyline::MetaKeyConstAltitude()).toUInt(),
+						poly->getMetaData(ccContourLinesGenerator::MetaKeySubIndex()).toUInt() );
+	}
 
 	if (!m_contourLines.empty())
 	{
-		if (memoryError)
-		{
-			removeContourLines();
-		}
-		else
-		{
-			m_UI->exportContoursPushButton->setEnabled(true);
-			m_UI->clearContoursPushButton->setEnabled(true);
-		}
+		m_UI->exportContoursPushButton->setEnabled(true);
+		m_UI->clearContoursPushButton->setEnabled(true);
 	}
 
 	if (m_glWindow)

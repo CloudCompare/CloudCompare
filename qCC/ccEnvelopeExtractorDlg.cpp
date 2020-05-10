@@ -15,7 +15,7 @@
 //#                                                                        #
 //##########################################################################
 
-#include "ccContourExtractorDlg.h"
+#include "ccEnvelopeExtractorDlg.h"
 
 //CCCoreLib
 #include <CCPlatform.h>
@@ -35,16 +35,16 @@
 #include <unistd.h>
 #endif
 
-ccContourExtractorDlg::ccContourExtractorDlg(QWidget* parent/*=0*/)
+ccEnvelopeExtractorDlg::ccEnvelopeExtractorDlg(QWidget* parent/*=0*/)
 	: QDialog(parent, Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint)
-	, Ui::ContourExtractorDlg()
+	, Ui::EnvelopeExtractorDlg()
 	, m_skipped(false)
 	, m_glWindow(nullptr)
 {
 	setupUi(this);
 }
 
-void ccContourExtractorDlg::init()
+void ccEnvelopeExtractorDlg::init()
 {
 	if (m_glWindow)
 	{
@@ -54,7 +54,7 @@ void ccContourExtractorDlg::init()
 	}
 
 	connect(nextPushButton, &QAbstractButton::clicked, &m_loop, &QEventLoop::quit);
-	connect(skipPushButton, &QAbstractButton::clicked, this, &ccContourExtractorDlg::onSkipButtonClicked);
+	connect(skipPushButton, &QAbstractButton::clicked, this, &ccEnvelopeExtractorDlg::onSkipButtonClicked);
 	nextPushButton->setFocus();
 
 	//create 3D window
@@ -82,7 +82,7 @@ void ccContourExtractorDlg::init()
 	}
 }
 
-void ccContourExtractorDlg::zoomOn(const ccBBox& box)
+void ccEnvelopeExtractorDlg::zoomOn(const ccBBox& box)
 {
 	if (!m_glWindow)
 		return;
@@ -92,12 +92,12 @@ void ccContourExtractorDlg::zoomOn(const ccBBox& box)
 	m_glWindow->setCameraPos(CCVector3d::fromArray(box.getCenter().u));
 }
 
-bool ccContourExtractorDlg::isSkipped() const
+bool ccEnvelopeExtractorDlg::isSkipped() const
 {
 	return skipPushButton->isChecked();
 }
 
-void ccContourExtractorDlg::addToDisplay(ccHObject* obj, bool noDependency/*=true*/)
+void ccEnvelopeExtractorDlg::addToDisplay(ccHObject* obj, bool noDependency/*=true*/)
 {
 	if (m_glWindow && obj)
 	{
@@ -105,7 +105,7 @@ void ccContourExtractorDlg::addToDisplay(ccHObject* obj, bool noDependency/*=tru
 	}
 }
 
-void ccContourExtractorDlg::removFromDisplay(ccHObject* obj)
+void ccEnvelopeExtractorDlg::removFromDisplay(ccHObject* obj)
 {
 	if (m_glWindow && obj)
 	{
@@ -113,7 +113,7 @@ void ccContourExtractorDlg::removFromDisplay(ccHObject* obj)
 	}
 }
 
-void ccContourExtractorDlg::refresh()
+void ccEnvelopeExtractorDlg::refresh()
 {
 	if (m_skipped)
 		return;
@@ -124,7 +124,7 @@ void ccContourExtractorDlg::refresh()
 	}
 }
 
-void ccContourExtractorDlg::displayMessage(QString message, bool waitForUserConfirmation/*=false*/)
+void ccEnvelopeExtractorDlg::displayMessage(QString message, bool waitForUserConfirmation/*=false*/)
 {
 	if (m_skipped)
 		return;
@@ -133,14 +133,14 @@ void ccContourExtractorDlg::displayMessage(QString message, bool waitForUserConf
 		waitForUser(20);
 }
 
-void ccContourExtractorDlg::onSkipButtonClicked()
+void ccEnvelopeExtractorDlg::onSkipButtonClicked()
 {
 	m_skipped = true;
 	hide();
 	QCoreApplication::processEvents();
 }
 
-void ccContourExtractorDlg::waitForUser(unsigned defaultDelay_ms/*=100*/)
+void ccEnvelopeExtractorDlg::waitForUser(unsigned defaultDelay_ms/*=100*/)
 {
 	if (m_skipped)
 		return;

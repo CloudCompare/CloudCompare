@@ -80,7 +80,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="extractContoursGroupBox">
+    <widget class="QGroupBox" name="extractEnvelopesGroupBox">
      <property name="toolTip">
       <string>To extract the contour of each section as a polyline</string>
      </property>
@@ -123,7 +123,7 @@
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QComboBox" name="contourTypeComboBox">
+          <widget class="QComboBox" name="envelopeTypeComboBox">
            <property name="toolTip">
             <string>Section type (lower or upper part, or both)</string>
            </property>
@@ -179,7 +179,7 @@ Warning: if 0, generates the convex hull.</string>
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="splitContourCheckBox">
+       <widget class="QCheckBox" name="splitEnvelopeCheckBox">
         <property name="toolTip">
          <string>split the generated profile(s) in smaller parts to avoid creating too long edges (10 times the specified max edge length).
 Warning: may not be compatible with Mascaret export.</string>

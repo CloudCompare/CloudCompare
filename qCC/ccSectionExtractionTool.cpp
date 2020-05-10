@@ -18,7 +18,7 @@
 #include "ccSectionExtractionTool.h"
 
 //Local
-#include "ccContourExtractor.h"
+#include "ccEnvelopeExtractor.h"
 #include "ccItemSelectionDlg.h"
 #include "ccOrthoSectionGenerationDlg.h"
 #include "ccSectionExtractionSubDlg.h"
@@ -53,7 +53,7 @@
 
 //default parameters
 static const ccColor::Rgb& s_defaultPolylineColor = ccColor::magenta;
-static const ccColor::Rgb& s_defaultContourColor = ccColor::green;
+static const ccColor::Rgb& s_defaultEnvelopeColor = ccColor::green;
 static const ccColor::Rgb& s_defaultEditedPolylineColor = ccColor::green;
 static const ccColor::Rgb& s_defaultSelectedPolylineColor = ccColor::red;
 
@@ -1222,29 +1222,29 @@ void ccSectionExtractionTool::exportSections()
 	ccLog::Print(QString("[ccSectionExtractionTool] %1 sections exported").arg(exportCount));
 }
 
-bool ccSectionExtractionTool::extractSectionContour(const ccPolyline* originalSection,
+bool ccSectionExtractionTool::extractSectionEnvelope(const ccPolyline* originalSection,
 	const ccPointCloud* originalSectionCloud,
 	ccPointCloud* unrolledSectionCloud,
 	unsigned sectionIndex,
-	ccContourExtractor::ContourType contourType,
+	ccEnvelopeExtractor::EnvelopeType envelopeType,
 	PointCoordinateType maxEdgeLength,
 	bool multiPass,
-	bool splitContour,
-	bool& contourGenerated,
+	bool splitEnvelope,
+	bool& envelopeGenerated,
 	bool visualDebugMode/*=false*/)
 {
-	contourGenerated = false;
+	envelopeGenerated = false;
 
 	if (!originalSectionCloud || !unrolledSectionCloud)
 	{
-		ccLog::Warning("[ccSectionExtractionTool][extract contour] Internal error: invalid input parameter(s)");
+		ccLog::Warning("[ccSectionExtractionTool][extract envelope] Internal error: invalid input parameter(s)");
 		return false;
 	}
 
 	if (originalSectionCloud->size() < 2)
 	{
 		//nothing to do
-		ccLog::Warning(QString("[ccSectionExtractionTool][extract contour] Section #%1 contains less than 2 points and will be ignored").arg(sectionIndex));
+		ccLog::Warning(QString("[ccSectionExtractionTool][extract envelope] Section #%1 contains less than 2 points and will be ignored").arg(sectionIndex));
 		return true;
 	}
 
@@ -1253,19 +1253,20 @@ bool ccSectionExtractionTool::extractSectionContour(const ccPolyline* originalSe
 	CCVector3 Y(0, 1, 0);
 
 	std::vector<unsigned> vertIndexes;
-	ccPolyline* contour = ccContourExtractor::ExtractFlatContour(unrolledSectionCloud,
+	ccPolyline* envelope = ccEnvelopeExtractor::ExtractFlatEnvelope(unrolledSectionCloud,
 		multiPass,
 		maxEdgeLength,
 		N.u,
 		Y.u,
-		contourType,
+		envelopeType,
 		&vertIndexes,
 		visualDebugMode);
-	if (contour)
+	
+	if (envelope)
 	{
 		//update vertices (to replace 'unrolled' points by 'original' ones
 		{
-			CCCoreLib::GenericIndexedCloud* vertices = contour->getAssociatedCloud();
+			CCCoreLib::GenericIndexedCloud* vertices = envelope->getAssociatedCloud();
 			if (vertIndexes.size() == static_cast<size_t>(vertices->size()))
 			{
 				for (unsigned i = 0; i < vertices->size(); ++i)
@@ -1281,28 +1282,28 @@ bool ccSectionExtractionTool::extractSectionContour(const ccPolyline* originalSe
 			}
 			else
 			{
-				ccLog::Warning("[ccSectionExtractionTool][extract contour] Internal error (couldn't fetch original points indexes?!)");
-				delete contour;
+				ccLog::Warning("[ccSectionExtractionTool][extract envelope] Internal error (couldn't fetch original points indexes?!)");
+				delete envelope;
 				return false;
 			}
 		}
 
 		std::vector<ccPolyline*> parts;
-		if (splitContour)
+		if (splitEnvelope)
 		{
 #ifdef QT_DEBUG
-			//compute some stats on the contour
+			//compute some stats on the envelope
 			{
 				double minLength = 0;
 				double maxLength = 0;
 				double sumLength = 0;
-				unsigned count = contour->size();
-				if (!contour->isClosed())
+				unsigned count = envelope->size();
+				if (!envelope->isClosed())
 					--count;
-				for (unsigned i=0; i<count; ++i)
+				for (unsigned i = 0; i < count; ++i)
 				{
-					const CCVector3* A = contour->getPoint(i);
-					const CCVector3* B = contour->getPoint((i+1) % contour->size());
+					const CCVector3* A = envelope->getPoint(i);
+					const CCVector3* B = envelope->getPoint((i+1) % envelope->size());
 					CCVector3 e = *B - *A;
 					double l = e.norm();
 					if (i != 0)
@@ -1316,17 +1317,17 @@ bool ccSectionExtractionTool::extractSectionContour(const ccPolyline* originalSe
 						minLength = maxLength = sumLength = l;
 					}
 				}
-				ccLog::PrintDebug(QString("Contour: min = %1 / avg = %2 / max = %3").arg(minLength).arg(sumLength/count).arg(maxLength));
+				ccLog::PrintDebug(QString("Envelope: min = %1 / avg = %2 / max = %3").arg(minLength).arg(sumLength/count).arg(maxLength));
 			}
 #endif
 
-			/*bool success = */contour->split(maxEdgeLength, parts);
-			delete contour;
-			contour = nullptr;
+			/*bool success = */envelope->split(maxEdgeLength, parts);
+			delete envelope;
+			envelope = nullptr;
 		}
 		else
 		{
-			parts.push_back(contour);
+			parts.push_back(envelope);
 		}
 
 		//create output group if necessary
@@ -1335,31 +1336,31 @@ bool ccSectionExtractionTool::extractSectionContour(const ccPolyline* originalSe
 
 		for (size_t p = 0; p < parts.size(); ++p)
 		{
-			ccPolyline* contourPart = parts[p];
-			QString name = QString("Section contour #%1").arg(sectionIndex);
+			ccPolyline* envelopePart = parts[p];
+			QString name = QString("Section envelope #%1").arg(sectionIndex);
 			if (parts.size() > 1)
 				name += QString("(part %1/%2)").arg(p + 1).arg(parts.size());
-			contourPart->setName(name);
-			contourPart->setGlobalScale(originalSectionCloud->getGlobalScale());
-			contourPart->setGlobalShift(originalSectionCloud->getGlobalShift());
-			contourPart->setColor(s_defaultContourColor);
-			contourPart->showColors(true);
+			envelopePart->setName(name);
+			envelopePart->setGlobalScale(originalSectionCloud->getGlobalScale());
+			envelopePart->setGlobalShift(originalSectionCloud->getGlobalShift());
+			envelopePart->setColor(s_defaultEnvelopeColor);
+			envelopePart->showColors(true);
 			//copy meta-data (import for Mascaret export!)
 			{
 				const QVariantMap& metaData = originalSection->metaData();
 				for (QVariantMap::const_iterator it = metaData.begin(); it != metaData.end(); ++it)
 				{
-					contourPart->setMetaData(it.key(), it.value());
+					envelopePart->setMetaData(it.key(), it.value());
 				}
 			}
 
 			//add to main DB
-			destEntity->addChild(contourPart);
-			contourPart->setDisplay_recursive(destEntity->getDisplay());
-			MainWindow::TheInstance()->addToDB(contourPart, false, false);
+			destEntity->addChild(envelopePart);
+			envelopePart->setDisplay_recursive(destEntity->getDisplay());
+			MainWindow::TheInstance()->addToDB(envelopePart, false, false);
 		}
 
-		contourGenerated = true;
+		envelopeGenerated = true;
 	}
 
 	return true;
@@ -1724,12 +1725,12 @@ struct Segment2D
 void ccSectionExtractionTool::extractPoints()
 {
 	static double s_defaultSectionThickness = -1.0;
-	static double s_contourMaxEdgeLength = 0;
+	static double s_envelopeMaxEdgeLength = 0;
 	static bool s_extractSectionsAsClouds = false;
-	static bool s_extractSectionsAsContours = true;
+	static bool s_extractSectionsAsEnvelopes = true;
 	static bool s_multiPass = false;
-	static bool s_splitContour = false;
-	static ccContourExtractor::ContourType s_extractSectionsType = ccContourExtractor::LOWER;
+	static bool s_splitEnvelope = false;
+	static ccEnvelopeExtractor::EnvelopeType s_extractSectionsType = ccEnvelopeExtractor::LOWER;
 
 	//number of eligible sections
 	unsigned sectionCount = 0;
@@ -1763,31 +1764,31 @@ void ccSectionExtractionTool::extractPoints()
 	{
 		s_defaultSectionThickness = box.getMaxBoxDim() / 500.0;
 	}
-	if (s_contourMaxEdgeLength <= 0)
+	if (s_envelopeMaxEdgeLength <= 0)
 	{
-		s_contourMaxEdgeLength = box.getMaxBoxDim() / 500.0;
+		s_envelopeMaxEdgeLength = box.getMaxBoxDim() / 500.0;
 	}
 
 	//show dialog
 	ccSectionExtractionSubDlg sesDlg(MainWindow::TheInstance());
 	sesDlg.setActiveSectionCount(sectionCount);
 	sesDlg.setSectionThickness(s_defaultSectionThickness);
-	sesDlg.setMaxEdgeLength(s_contourMaxEdgeLength);
+	sesDlg.setMaxEdgeLength(s_envelopeMaxEdgeLength);
 	sesDlg.doExtractClouds(s_extractSectionsAsClouds);
-	sesDlg.doExtractContours(s_extractSectionsAsContours, s_extractSectionsType);
+	sesDlg.doExtractEnvelopes(s_extractSectionsAsEnvelopes, s_extractSectionsType);
 	sesDlg.doUseMultiPass(s_multiPass);
-	sesDlg.doSplitContours(s_splitContour);
+	sesDlg.doSplitEnvelopes(s_splitEnvelope);
 
 	if (!sesDlg.exec())
 		return;
 
 	s_defaultSectionThickness = sesDlg.getSectionThickness();
-	s_contourMaxEdgeLength = sesDlg.getMaxEdgeLength();
+	s_envelopeMaxEdgeLength = sesDlg.getMaxEdgeLength();
 	s_extractSectionsAsClouds = sesDlg.extractClouds();
-	s_extractSectionsAsContours = sesDlg.extractContours();
-	s_extractSectionsType = sesDlg.getContourType();
+	s_extractSectionsAsEnvelopes = sesDlg.extractEnvelopes();
+	s_extractSectionsType = sesDlg.getEnvelopeType();
 	s_multiPass = sesDlg.useMultiPass();
-	s_splitContour = sesDlg.splitContours();
+	s_splitEnvelope = sesDlg.splitEnvelopes();
 	bool visualDebugMode = sesDlg.visualDebugMode();
 
 	//progress dialog
@@ -1809,7 +1810,7 @@ void ccSectionExtractionTool::extractPoints()
 	double sectionThicknessSq = std::pow(s_defaultSectionThickness / 2.0, 2.0);
 	bool error = false;
 
-	unsigned generatedContours = 0;
+	unsigned generatedEnvelopes = 0;
 	unsigned generatedClouds = 0;
 
 	try
@@ -1870,10 +1871,10 @@ void ccSectionExtractionTool::extractPoints()
 					refClouds.resize(cloudCount, nullptr);
 				}
 
-				//for contour extraction as a polyline
+				//for envelope extraction as a polyline
 				ccPointCloud* originalSlicePoints = nullptr;
 				ccPointCloud* unrolledSlicePoints = nullptr;
-				if (s_extractSectionsAsContours)
+				if (s_extractSectionsAsEnvelopes)
 				{
 					originalSlicePoints = new ccPointCloud("section.orig");
 					unrolledSlicePoints = new ccPointCloud("section.unroll");
@@ -1891,7 +1892,7 @@ void ccSectionExtractionTool::extractPoints()
 					ccGenericPointCloud* cloud = m_clouds[c].entity;
 					if (cloud)
 					{
-						//for contour extraction as a cloud
+						//for envelope extraction as a cloud
 						CCCoreLib::ReferenceCloud* refCloud = nullptr;
 						if (s_extractSectionsAsClouds)
 						{
@@ -1966,8 +1967,8 @@ void ccSectionExtractionTool::extractPoints()
 									refCloud->addPointIndex(i);
 								}
 
-								//if we extract the section as contour(s), we add it to the 2D points set
-								if (s_extractSectionsAsContours)
+								//if we extract the section as envelope(s), we add it to the 2D points set
+								if (s_extractSectionsAsEnvelopes)
 								{
 									assert(originalSlicePoints && unrolledSlicePoints);
 									assert(originalSlicePoints->size() == unrolledSlicePoints->size());
@@ -2032,24 +2033,26 @@ void ccSectionExtractionTool::extractPoints()
 
 				if (!error)
 				{
-					//Extract sections as (polyline) contours
-					if (/*!error && */s_extractSectionsAsContours)
+					//Extract sections as (polyline) envelopes
+					if (/*!error && */s_extractSectionsAsEnvelopes)
 					{
 						assert(originalSlicePoints && unrolledSlicePoints);
-						bool contourGenerated = false;
-						error = !extractSectionContour(	poly,
+						bool envelopeGenerated = false;
+						error = !extractSectionEnvelope(poly,
 														originalSlicePoints,
 														unrolledSlicePoints,
 														s + 1,
 														s_extractSectionsType,
-														s_contourMaxEdgeLength,
+														s_envelopeMaxEdgeLength,
 														s_multiPass,
-														s_splitContour,
-														contourGenerated,
+														s_splitEnvelope,
+														envelopeGenerated,
 														visualDebugMode);
 
-						if (contourGenerated)
-							++generatedContours;
+						if (envelopeGenerated)
+						{
+							++generatedEnvelopes;
+						}
 					}
 
 					//Extract sections as clouds
@@ -2098,6 +2101,6 @@ void ccSectionExtractionTool::extractPoints()
 	}
 	else
 	{
-		ccLog::Print(QString("[ccSectionExtractionTool] Job done (%1 contour(s) and %2 cloud(s) were generated)").arg(generatedContours).arg(generatedClouds));
+		ccLog::Print(QString("[ccSectionExtractionTool] Job done (%1 envelope(s) and %2 cloud(s) were generated)").arg(generatedEnvelopes).arg(generatedClouds));
 	}
 }

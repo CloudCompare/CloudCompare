@@ -62,25 +62,25 @@ void ccSectionExtractionSubDlg::doExtractClouds(bool state)
 	extractCloudsGroupBox->setChecked(state);
 }
 
-bool ccSectionExtractionSubDlg::extractContours() const
+bool ccSectionExtractionSubDlg::extractEnvelopes() const
 {
-	return extractContoursGroupBox->isChecked();
+	return extractEnvelopesGroupBox->isChecked();
 }
 
-void ccSectionExtractionSubDlg::doExtractContours(bool state, ccContourExtractor::ContourType type)
+void ccSectionExtractionSubDlg::doExtractEnvelopes(bool state, ccEnvelopeExtractor::EnvelopeType type)
 {
-	extractContoursGroupBox->setChecked(state);
+	extractEnvelopesGroupBox->setChecked(state);
 
 	switch(type)
 	{
-	case ccContourExtractor::LOWER:
-		contourTypeComboBox->setCurrentIndex(0);
+	case ccEnvelopeExtractor::LOWER:
+		envelopeTypeComboBox->setCurrentIndex(0);
 		break;
-	case ccContourExtractor::UPPER:
-		contourTypeComboBox->setCurrentIndex(1);
+	case ccEnvelopeExtractor::UPPER:
+		envelopeTypeComboBox->setCurrentIndex(1);
 		break;
-	case ccContourExtractor::FULL:
-		contourTypeComboBox->setCurrentIndex(2);
+	case ccEnvelopeExtractor::FULL:
+		envelopeTypeComboBox->setCurrentIndex(2);
 		break;
 	default:
 		assert(false);
@@ -88,14 +88,14 @@ void ccSectionExtractionSubDlg::doExtractContours(bool state, ccContourExtractor
 	}
 }
 
-bool ccSectionExtractionSubDlg::splitContours() const
+bool ccSectionExtractionSubDlg::splitEnvelopes() const
 {
-	return splitContourCheckBox->isChecked();
+	return splitEnvelopeCheckBox->isChecked();
 }
 
-void ccSectionExtractionSubDlg::doSplitContours(bool state)
+void ccSectionExtractionSubDlg::doSplitEnvelopes(bool state)
 {
-	splitContourCheckBox->setChecked(state);
+	splitEnvelopeCheckBox->setChecked(state);
 }
 
 bool ccSectionExtractionSubDlg::useMultiPass() const
@@ -108,22 +108,22 @@ void ccSectionExtractionSubDlg::doUseMultiPass(bool state)
 	multiPassCheckBox->setChecked(state);
 }
 
-ccContourExtractor::ContourType ccSectionExtractionSubDlg::getContourType() const
+ccEnvelopeExtractor::EnvelopeType ccSectionExtractionSubDlg::getEnvelopeType() const
 {
-	switch(contourTypeComboBox->currentIndex())
+	switch(envelopeTypeComboBox->currentIndex())
 	{
 	case 0:
-		return ccContourExtractor::LOWER;
+		return ccEnvelopeExtractor::LOWER;
 	case 1:
-		return ccContourExtractor::UPPER;
+		return ccEnvelopeExtractor::UPPER;
 	case 2:
-		return ccContourExtractor::FULL;
+		return ccEnvelopeExtractor::FULL;
 	default:
 		assert(false);
 		break;
 	}
 
-	return ccContourExtractor::FULL;
+	return ccEnvelopeExtractor::FULL;
 }
 
 bool ccSectionExtractionSubDlg::visualDebugMode() const

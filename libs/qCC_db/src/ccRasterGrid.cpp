@@ -110,11 +110,24 @@ bool ccRasterGrid::ComputeGridSize(	unsigned char Z,
 
 void ccRasterGrid::clear()
 {
-	//reset
+	//clear
 	width = height = 0;
-
 	rows.resize(0);
 	scalarFields.resize(0);
+
+	minHeight = maxHeight = meanHeight = 0;
+	nonEmptyCellCount = validCellCount = 0;
+	hasColors = false;
+
+	setValid(false);
+}
+
+void ccRasterGrid::reset()
+{
+	for (Row& row : rows)
+	{
+		std::fill(row.begin(), row.end(), ccRasterCell());
+	}
 
 	minHeight = maxHeight = meanHeight = 0;
 	nonEmptyCellCount = validCellCount = 0;
@@ -157,7 +170,7 @@ bool ccRasterGrid::init(unsigned w,
 bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 								unsigned char Z,
 								ProjectionType projectionType,
-								bool interpolateEmptyCells,
+								bool doInterpolateEmptyCells,
 								ProjectionType sfInterpolation/*=INVALID_PROJECTION_TYPE*/,
 								ccProgressDialog* progressDialog/*=0*/)
 {
@@ -230,15 +243,15 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 	//we always handle the colors (if any)
 	hasColors = cloud->hasColors();
 
-	for (unsigned n = 0; n<pointCount; ++n)
+	for (unsigned n = 0; n < pointCount; ++n)
 	{
 		//for each point
 		const CCVector3* P = cloud->getPoint(n);
 
 		//project it inside the grid
 		CCVector3d relativePos = CCVector3d::fromArray(P->u) - minCorner;
-		int i = static_cast<int>((relativePos.u[X] / gridStep + 0.5));
-		int j = static_cast<int>((relativePos.u[Y] / gridStep + 0.5));
+		int i = static_cast<int>(relativePos.u[X] / gridStep + 0.5);
+		int j = static_cast<int>(relativePos.u[Y] / gridStep + 0.5);
 
 		//we skip points that fall outside of the grid!
 		if (	i < 0 || i >= static_cast<int>(width)
@@ -251,7 +264,6 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 			}
 			continue;
 		}
-		assert(i >= 0 && j >= 0);
 
 		//update the cell statistics
 		ccRasterCell& aCell = rows[j][i];
@@ -463,6 +475,174 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 	}
 
 	//compute the number of non empty cells
+	updateNonEmptyCellCount();
+
+	//specific case: interpolate the empty cells
+	if (doInterpolateEmptyCells)
+	{
+		interpolateEmptyCells();
+	}
+
+	//computation of the average and extreme height values in the grid
+	updateCellStats();
+
+	setValid(true);
+
+	return true;
+}
+
+bool ccRasterGrid::interpolateEmptyCells()
+{
+	if (nonEmptyCellCount < 3)
+	{
+		ccLog::Warning("[Rasterize] Not enough non-empty cells for interpolation!");
+		return false;
+	}
+	
+	if (nonEmptyCellCount >= width * height)
+	{
+		//nothing to do
+		return true;
+	}
+
+	std::vector<CCVector2> the2DPoints;
+	try
+	{
+		the2DPoints.resize(nonEmptyCellCount);
+	}
+	catch (const std::bad_alloc&)
+	{
+		//out of memory
+		ccLog::Warning("[Rasterize] Not enough memory to interpolate empty cells!");
+		return false;
+	}
+
+	//fill 2D vector with non-empty cell indexes
+	unsigned index = 0;
+	for (unsigned j = 0; j < height; ++j)
+	{
+		const Row& row = rows[j];
+		for (unsigned i = 0; i < width; ++i)
+		{
+			if (row[i].nbPoints)
+			{
+				//we only use the non-empty cells for interpolation
+				the2DPoints[index++] = CCVector2(static_cast<PointCoordinateType>(i), static_cast<PointCoordinateType>(j));
+			}
+		}
+	}
+	assert(index == nonEmptyCellCount);
+
+	//mesh the '2D' points
+	CCCoreLib::Delaunay2dMesh delaunayMesh;
+	std::string errorStr;
+	if (!delaunayMesh.buildMesh(the2DPoints, CCCoreLib::Delaunay2dMesh::USE_ALL_POINTS, errorStr))
+	{
+		ccLog::Warning(QStringLiteral("[Rasterize] Empty cells interpolation failed. Could not compute the 2.5D mesh ('%1')")
+			.arg(QString::fromStdString(errorStr)));
+		return false;
+	}
+
+	//now we are going to 'project' all triangles on the grid
+	delaunayMesh.placeIteratorAtBeginning();
+	unsigned triNum = delaunayMesh.size();
+	for (unsigned k = 0; k < triNum; ++k)
+	{
+		const CCCoreLib::VerticesIndexes* tsi = delaunayMesh.getNextTriangleVertIndexes();
+		//get the triangle bounding box (in grid coordinates)
+		int P[3][2];
+		int xMin = 0;
+		int yMin = 0;
+		int xMax = 0;
+		int yMax = 0;
+		{
+			for (unsigned j = 0; j < 3; ++j)
+			{
+				const CCVector2& P2D = the2DPoints[tsi->i[j]];
+				P[j][0] = static_cast<int>(P2D.x);
+				P[j][1] = static_cast<int>(P2D.y);
+			}
+			xMin = std::min(std::min(P[0][0], P[1][0]), P[2][0]);
+			yMin = std::min(std::min(P[0][1], P[1][1]), P[2][1]);
+			xMax = std::max(std::max(P[0][0], P[1][0]), P[2][0]);
+			yMax = std::max(std::max(P[0][1], P[1][1]), P[2][1]);
+		}
+		//now scan the cells
+		{
+			//pre-computation for barycentric coordinates
+			const double& valA = rows[P[0][1]][P[0][0]].h;
+			const double& valB = rows[P[1][1]][P[1][0]].h;
+			const double& valC = rows[P[2][1]][P[2][0]].h;
+
+			double det = static_cast<double>((P[1][1] - P[2][1])*(P[0][0] - P[2][0]) + (P[2][0] - P[1][0])*(P[0][1] - P[2][1]));
+
+			for (int j = yMin; j <= yMax; ++j)
+			{
+				Row& row = rows[static_cast<unsigned>(j)];
+
+				for (int i = xMin; i <= xMax; ++i)
+				{
+					//if the cell is empty
+					if (!row[i].nbPoints)
+					{
+						//we test if it's included or not in the current triangle
+						//Point Inclusion in Polygon Test (inspired from W. Randolph Franklin - WRF)
+						bool inside = false;
+						for (int ti = 0; ti < 3; ++ti)
+						{
+							const int* P1 = P[ti];
+							const int* P2 = P[(ti + 1) % 3];
+							if ((P2[1] <= j && j < P1[1]) || (P1[1] <= j && j < P2[1]))
+							{
+								int t = (i - P2[0])*(P1[1] - P2[1]) - (P1[0] - P2[0])*(j - P2[1]);
+								if (P1[1] < P2[1])
+									t = -t;
+								if (t < 0)
+									inside = !inside;
+							}
+						}
+						//can we interpolate?
+						if (inside)
+						{
+							double l1 = ((P[1][1] - P[2][1])*(i - P[2][0]) + (P[2][0] - P[1][0])*(j - P[2][1])) / det;
+							double l2 = ((P[2][1] - P[0][1])*(i - P[2][0]) + (P[0][0] - P[2][0])*(j - P[2][1])) / det;
+							double l3 = 1.0 - l1 - l2;
+
+							row[i].h = l1 * valA + l2 * valB + l3 * valC;
+							assert(std::isfinite(row[i].h));
+
+							//interpolate color as well!
+							if (hasColors)
+							{
+								const CCVector3d& colA = rows[P[0][1]][P[0][0]].color;
+								const CCVector3d& colB = rows[P[1][1]][P[1][0]].color;
+								const CCVector3d& colC = rows[P[2][1]][P[2][0]].color;
+								row[i].color = l1 * colA + l2 * colB + l3 * colC;
+							}
+
+							//interpolate the SFs as well!
+							for (auto &gridSF : scalarFields)
+							{
+								assert(!gridSF.empty());
+
+								const double& sfValA = gridSF[P[0][0] + P[0][1] * width];
+								const double& sfValB = gridSF[P[1][0] + P[1][1] * width];
+								const double& sfValC = gridSF[P[2][0] + P[2][1] * width];
+								assert(i + j * width < gridSF.size());
+								gridSF[i + j * width] = l1 * sfValA + l2 * sfValB + l3 * sfValC;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return true;
+}
+
+unsigned ccRasterGrid::updateNonEmptyCellCount()
+{
 	nonEmptyCellCount = 0;
 	{
 		for (unsigned i = 0; i < height; ++i)
@@ -470,198 +650,49 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 				if (rows[i][j].nbPoints)
 					++nonEmptyCellCount;
 	}
-
-	//specific case: interpolate the empty cells
-	if (interpolateEmptyCells)
-	{
-		std::vector<CCVector2> the2DPoints;
-		if (nonEmptyCellCount < 3)
-		{
-			ccLog::Warning("[Rasterize] Not enough non-empty cells for interpolation!");
-		}
-		else if (nonEmptyCellCount < width * height) //otherwise it's useless!
-		{
-			try
-			{
-				the2DPoints.resize(nonEmptyCellCount);
-			}
-			catch (const std::bad_alloc&)
-			{
-				//out of memory
-				ccLog::Warning("[Rasterize] Not enough memory to interpolate empty cells!");
-			}
-		}
-
-		//fill 2D vector with non-empty cell indexes
-		if (!the2DPoints.empty())
-		{
-			unsigned index = 0;
-			for (unsigned j = 0; j < height; ++j)
-			{
-				const Row& row = rows[j];
-				for (unsigned i = 0; i < width; ++i)
-				{
-					if (row[i].nbPoints)
-					{
-						//we only use the non-empty cells for interpolation
-						the2DPoints[index++] = CCVector2(static_cast<PointCoordinateType>(i), static_cast<PointCoordinateType>(j));
-					}
-				}
-			}
-			assert(index == nonEmptyCellCount);
-
-			//mesh the '2D' points
-			CCCoreLib::Delaunay2dMesh delaunayMesh;
-			std::string errorStr;
-			if (delaunayMesh.buildMesh(the2DPoints, CCCoreLib::Delaunay2dMesh::USE_ALL_POINTS, errorStr))
-			{
-				unsigned triNum = delaunayMesh.size();
-				//now we are going to 'project' all triangles on the grid
-				delaunayMesh.placeIteratorAtBeginning();
-				for (unsigned k = 0; k < triNum; ++k)
-				{
-					const CCCoreLib::VerticesIndexes* tsi = delaunayMesh.getNextTriangleVertIndexes();
-					//get the triangle bounding box (in grid coordinates)
-					int P[3][2];
-					int xMin = 0;
-					int yMin = 0;
-					int xMax = 0;
-					int yMax = 0;
-					{
-						for (unsigned j = 0; j < 3; ++j)
-						{
-							const CCVector2& P2D = the2DPoints[tsi->i[j]];
-							P[j][0] = static_cast<int>(P2D.x);
-							P[j][1] = static_cast<int>(P2D.y);
-						}
-						xMin = std::min(std::min(P[0][0], P[1][0]), P[2][0]);
-						yMin = std::min(std::min(P[0][1], P[1][1]), P[2][1]);
-						xMax = std::max(std::max(P[0][0], P[1][0]), P[2][0]);
-						yMax = std::max(std::max(P[0][1], P[1][1]), P[2][1]);
-					}
-					//now scan the cells
-					{
-						//pre-computation for barycentric coordinates
-						const double& valA = rows[ P[0][1] ][ P[0][0] ].h;
-						const double& valB = rows[ P[1][1] ][ P[1][0] ].h;
-						const double& valC = rows[ P[2][1] ][ P[2][0] ].h;
-
-						double det = static_cast<double>((P[1][1] - P[2][1])*(P[0][0] - P[2][0]) + (P[2][0] - P[1][0])*(P[0][1] - P[2][1]));
-
-						for (int j = yMin; j <= yMax; ++j)
-						{
-							Row& row = rows[static_cast<unsigned>(j)];
-
-							for (int i = xMin; i <= xMax; ++i)
-							{
-								//if the cell is empty
-								if (!row[i].nbPoints)
-								{
-									//we test if it's included or not in the current triangle
-									//Point Inclusion in Polygon Test (inspired from W. Randolph Franklin - WRF)
-									bool inside = false;
-									for (int ti = 0; ti < 3; ++ti)
-									{
-										const int* P1 = P[ti];
-										const int* P2 = P[(ti + 1) % 3];
-										if ((P2[1] <= j &&j < P1[1]) || (P1[1] <= j && j < P2[1]))
-										{
-											int t = (i - P2[0])*(P1[1] - P2[1]) - (P1[0] - P2[0])*(j - P2[1]);
-											if (P1[1] < P2[1])
-												t = -t;
-											if (t < 0)
-												inside = !inside;
-										}
-									}
-									//can we interpolate?
-									if (inside)
-									{
-										double l1 = ((P[1][1] - P[2][1])*(i - P[2][0]) + (P[2][0] - P[1][0])*(j - P[2][1])) / det;
-										double l2 = ((P[2][1] - P[0][1])*(i - P[2][0]) + (P[0][0] - P[2][0])*(j - P[2][1])) / det;
-										double l3 = 1.0 - l1 - l2;
-
-										row[i].h = l1 * valA + l2 * valB + l3 * valC;
-										assert(std::isfinite(row[i].h));
-
-										//interpolate color as well!
-										if (hasColors)
-										{
-											const CCVector3d& colA = rows[P[0][1]][P[0][0]].color;
-											const CCVector3d& colB = rows[P[1][1]][P[1][0]].color;
-											const CCVector3d& colC = rows[P[2][1]][P[2][0]].color;
-											row[i].color = l1 * colA + l2 * colB + l3 * colC;
-										}
-
-										//interpolate the SFs as well!
-										for (auto &gridSF : scalarFields)
-										{
-											assert(!gridSF.empty());
-
-											const double& sfValA = gridSF[P[0][0] + P[0][1] * width];
-											const double& sfValB = gridSF[P[1][0] + P[1][1] * width];
-											const double& sfValC = gridSF[P[2][0] + P[2][1] * width];
-											assert(i + j * width < gridSF.size());
-											gridSF[i + j * width] = l1 * sfValA + l2 * sfValB + l3 * sfValC;
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-			else
-			{
-				ccLog::Warning( QStringLiteral("[Rasterize] Empty cells interpolation failed: Triangle lib. said '%1'")
-								.arg( QString::fromStdString( errorStr ) ) );
-			}
-		}
-	}
-
-	//computation of the average and extreme height values in the grid
-	{
-		minHeight = 0;
-		maxHeight = 0;
-		meanHeight = 0;
-		validCellCount = 0;
-
-		for (unsigned i=0; i<height; ++i)
-		{
-			for (unsigned j=0; j<width; ++j)
-			{
-				double h = rows[i][j].h;
-
-				if (std::isfinite(h)) //valid height
-				{
-					if (validCellCount)
-					{
-						if (h < minHeight)
-							minHeight = h;
-						else if (h > maxHeight)
-							maxHeight = h;
-
-						meanHeight += h;
-					}
-					else
-					{
-						//first valid cell
-						meanHeight = minHeight = maxHeight = h;
-					}
-					++validCellCount;
-				}
-			}
-		}
-		
-		if (validCellCount)
-		{
-			meanHeight /= validCellCount;
-		}
-	}
-
-	setValid(true);
-
-	return true;
+	return nonEmptyCellCount;
 }
+
+void ccRasterGrid::updateCellStats()
+{
+	minHeight = 0;
+	maxHeight = 0;
+	meanHeight = 0;
+	validCellCount = 0;
+
+	for (unsigned i = 0; i < height; ++i)
+	{
+		for (unsigned j = 0; j < width; ++j)
+		{
+			double h = rows[i][j].h;
+
+			if (std::isfinite(h)) //valid height
+			{
+				if (validCellCount)
+				{
+					if (h < minHeight)
+						minHeight = h;
+					else if (h > maxHeight)
+						maxHeight = h;
+
+					meanHeight += h;
+				}
+				else
+				{
+					//first valid cell
+					meanHeight = minHeight = maxHeight = h;
+				}
+				++validCellCount;
+			}
+		}
+	}
+
+	if (validCellCount)
+	{
+		meanHeight /= validCellCount;
+	}
+}
+
 
 void ccRasterGrid::fillEmptyCells(	EmptyCellFillOption fillEmptyCellsStrategy,
 									double customCellHeight/*=0*/)

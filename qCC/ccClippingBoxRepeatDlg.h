@@ -31,19 +31,19 @@ class ccClippingBoxRepeatDlg : public QDialog, public Ui::ClippingBoxRepeatDlg
 public:
 
 	//! Default constructor
-	ccClippingBoxRepeatDlg(bool singleContourMode = false, QWidget* parent = 0);
+	ccClippingBoxRepeatDlg(bool singleSliceMode = false, QWidget* parent = 0);
 
-	//! Sets flat dimension (single contour mode only!)
+	//! Sets flat dimension (single slice mode only!)
 	void setFlatDim(unsigned char dim);
-	//! Sets repeat dimension (multiple contour mode only!)
+	//! Sets repeat dimension (multiple slices mode only!)
 	void setRepeatDim(unsigned char dim);
 
 protected:
 
-	//multi-contour mode
+	//multi-slices mode
 	void onDimChecked(bool);
 
-	//single-contour mode
+	//single-slice mode
 	void onDimXChecked(bool);
 	void onDimYChecked(bool);
 	void onDimZChecked(bool);

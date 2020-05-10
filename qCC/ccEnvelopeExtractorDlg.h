@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,9 +17,6 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_CONTOUR_EXTRACTOR_DIALOG_HEADER
-#define CC_CONTOUR_EXTRACTOR_DIALOG_HEADER
-
 //Qt
 #include <QDialog>
 #include <QEventLoop>
@@ -26,20 +25,20 @@
 #include <ccBBox.h>
 
 //GUI
-#include <ui_contourExtractorDlg.h>
+#include <ui_envelopeExtractorDlg.h>
 
 class ccGLWindow;
 class ccHObject;
 
-//! Dialog for debugging contour extraction
-class ccContourExtractorDlg : public QDialog, public Ui::ContourExtractorDlg
+//! Dialog for debugging envelope extraction
+class ccEnvelopeExtractorDlg : public QDialog, public Ui::EnvelopeExtractorDlg
 {
 	Q_OBJECT
 
 public:
 
 	//! Default constructor
-	explicit ccContourExtractorDlg(QWidget* parent = 0);
+	explicit ccEnvelopeExtractorDlg(QWidget* parent = 0);
 
 	//! Initializes the display
 	void init();
@@ -81,8 +80,4 @@ protected:
 
 	//! Associated 3D window
 	ccGLWindow* m_glWindow;
-
-
 };
-
-#endif // CC_SECTION_EXTRACTION_SUB_DIALOG_HEADER

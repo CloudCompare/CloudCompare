@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,65 +17,61 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_CONTOUR_EXTRACTOR_HEADER
-#define CC_CONTOUR_EXTRACTOR_HEADER
-
 //qCC_db
 #include <ccPolyline.h>
 
 //CCCoreLib
 #include <PointProjectionTools.h>
 
-
-//! Controur extractor (with debug GUI)
-class ccContourExtractor
+//! Envelope extractor (with debug GUI)
+class ccEnvelopeExtractor
 {
 public:
 
-	//! Contour type
-	enum ContourType { LOWER, UPPER, FULL };
+	//! Envelope type
+	enum EnvelopeType { LOWER, UPPER, FULL };
 
-	//! Extracts a unique closed (2D) contour polyline of a point cloud
+	//! Extracts a unique closed (2D) envelope polyline of a point cloud
 	/** Projects the cloud on its best fitting LS plane first.
 		\param points point cloud
 		\param allowMultiPass whether to allow multi-pass process (with longer edges potentially generated so as 'disturb' the initial guess)
-		\param maxEdgeLength max edge length (ignored if 0, in which case the contour is the convex hull)
+		\param maxEdgeLength max edge length (ignored if 0, in which case the envelope is the convex hull)
 		\param preferredNormDim to specifiy a preferred (normal) direction for the polyline extraction
 		\param preferredUpDir to specifiy a preferred up direction for the polyline extraction (preferredNormDim must be defined as well and must be normal to this 'up' direction)
-		\param contourType to specify a type of contour (you should define a 'up' direction to get proper lower and upper contours)
+		\param envelopeType to specify a type of envelope (you should define a 'up' direction to get proper lower and upper envelope)
 		\param[out] originalPointIndexes to get the indexes (relatively to the input cloud) of the output polyline vertices
 		\param enableVisualDebugMode whether to display a (debug) window to represent the algorithm process
 		\param maxAngleDeg max angle between segments (angle between 0 and 180, in degrees)
-		\return contour polyline (or 0 if an error occurred)
+		\return envelope polyline (or 0 if an error occurred)
 	**/
-	static ccPolyline* ExtractFlatContour(	CCCoreLib::GenericIndexedCloudPersist* points,
+	static ccPolyline* ExtractFlatEnvelope(	CCCoreLib::GenericIndexedCloudPersist* points,
 											bool allowMultiPass,
 											PointCoordinateType maxEdgeLength = 0,
 											const PointCoordinateType* preferredNormDim = nullptr,
 											const PointCoordinateType* preferredUpDir = nullptr,
-											ContourType contourType = FULL,
+											EnvelopeType envelopeType = FULL,
 											std::vector<unsigned>* originalPointIndexes = nullptr,
 											bool enableVisualDebugMode = false,
 											double maxAngleDeg = 0.0);
 
-	//! Extracts one or several parts of the (2D) contour polyline of a point cloud
+	//! Extracts one or several parts of the (2D) envelope polyline of a point cloud
 	/** Projects the cloud on its best fitting LS plane first.
 		\warning output polylines set (parts) may be empty if all the vertices are too far from each other!
 		\param points point cloud
 		\param allowMultiPass whether to allow multi-pass process (with longer edges potentially generated so as 'disturb' the initial guess)
-		\param maxEdgeLength max edge length (ignored if 0, in which case the contour is the convex hull)
+		\param maxEdgeLength max edge length (ignored if 0, in which case the envelope is the convex hull)
 		\param[out] parts output polyline parts
-		\param contourType contour type (FULL by default)
+		\param envelopeType envelope type (FULL by default)
 		\param allowSplitting whether the polyline can be split or not
 		\param preferredNormDim to specifiy a preferred (normal) direction for the polyline extraction
 		\param enableVisualDebugMode whether to display a (debug) window to represent the algorithm process
 		\return success
 	**/
-	static bool ExtractFlatContour(	CCCoreLib::GenericIndexedCloudPersist* points,
+	static bool ExtractFlatEnvelope(CCCoreLib::GenericIndexedCloudPersist* points,
 									bool allowMultiPass,
 									PointCoordinateType maxEdgeLength,
 									std::vector<ccPolyline*>& parts,
-									ContourType contourType = FULL,
+									EnvelopeType envelopeType = FULL,
 									bool allowSplitting = true,
 									const PointCoordinateType* preferredNormDim = nullptr,
 									const PointCoordinateType* preferredUpDir = nullptr,
@@ -86,10 +84,10 @@ protected:
 		and Concaveness Measure for n-dimensional Datasets", 2012
 		Calls extractConvexHull2D (see associated warnings).
 		\note Almost the same method as CCCoreLib::PointProjectionTools::ExtractConcaveHull2D
-		but with partial contour support and visual debug mode.
+		but with partial envelope support and visual debug mode.
 		\param points input set of points
 		\param hullPoints output points (on the convex hull)
-		\param contourType type of contour (above / below / full)
+		\param envelopeType type of envelope (above / below / full)
 		\param allowMultiPass whether to allow multi-pass process (with longer edges potentially generated so as 'disturb' the initial guess)
 		\param maxSquareLength maximum square length (ignored if <= 0, in which case the method simply returns the convex hull!)
 		\param enableVisualDebugMode whether to display a (debug) window to represent the algorithm process
@@ -98,7 +96,7 @@ protected:
 	**/
 	static bool ExtractConcaveHull2D(	std::vector<CCCoreLib::PointProjectionTools::IndexedCCVector2>& points,
 										std::list<CCCoreLib::PointProjectionTools::IndexedCCVector2*>& hullPoints,
-										ContourType contourType,
+										EnvelopeType envelopeType,
 										bool allowMultiPass,
 										PointCoordinateType maxSquareLength = 0,
 										bool enableVisualDebugMode = false,
@@ -106,5 +104,3 @@ protected:
 
 
 };
-
-#endif //CC_CONTOUR_EXTRACTOR_HEADER

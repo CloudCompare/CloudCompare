@@ -1,6 +1,14 @@
 CloudCompare Version History
 ============================
 
+v2.12 (???) - (in development)
+----------------------
+- Improvements
+	- Clipping box tool:
+		- former 'contours' renamed 'envelopes' for the sake of clarity
+		- ability to extract the real contours of the points inside each slice (single slice mode or 'repeat' mode)
+			(CC will rasterize the slice and apply the 'contour plot' extraction algorithm)
+
 v2.11 (Anoia) - (in development)
 ----------------------
 
@@ -156,6 +164,7 @@ v2.11 (Anoia) - (in development)
 	- Others:
 		- CC now saves the radius (parameter) after computing normals (as meta-data associated to the cloud)
 		- stereogram tool of the Facets plugin now uses the new 'High contrast' color scale by default
+		- Contour (extraction) renamed Envelope (extraction) for the sake of clarity
 
 - Changes
 	- Command line tool:

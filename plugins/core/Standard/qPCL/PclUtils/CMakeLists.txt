@@ -34,6 +34,6 @@ if( NOT WIN32 )
 	find_package( OpenMP )
 
 	if( OpenMP_CXX_FOUND )
-		target_link_libraries( ${PROJECT_NAME} PUBLIC OpenMP::OpenMP_CXX )
+		target_link_libraries( ${PROJECT_NAME} OpenMP::OpenMP_CXX )
 	endif()
 endif()

@@ -14,10 +14,14 @@ target_include_directories( ${PROJECT_NAME}
         ${PCL_INCLUDE_DIRS}
 )
 
-target_link_directories( ${PROJECT_NAME}
-    PUBLIC
-        ${PCL_LIBRARY_DIRS}
-)
+if( CMAKE_VERSION VERSION_LESS 3.13 )
+    link_directories( ${PCL_LIBRARY_DIRS} )
+else()
+    target_link_directories( ${PROJECT_NAME}
+        PUBLIC
+            ${PCL_LIBRARY_DIRS}
+    )
+endif()
 
 target_link_libraries( ${PROJECT_NAME}
     CCPluginAPI

@@ -24,10 +24,11 @@ else()
 endif()
 
 target_link_libraries( ${PROJECT_NAME}
-    CCPluginAPI
-    QCC_GL_LIB
-    ${PCL_LIBRARIES}
-    Qt5::Widgets
+    PUBLIC
+        CCPluginAPI
+        QCC_GL_LIB
+        ${PCL_LIBRARIES}
+        Qt5::Widgets
 )
 
 if( NOT WIN32 )

@@ -19,7 +19,7 @@
 #include "qHoughNormalsDialog.h"
 
 //Hough Normals library
-#include "normals_Hough/Normals.h"
+#include "Normals.h"
 
 //qCC_db
 #include <ccPointCloud.h>

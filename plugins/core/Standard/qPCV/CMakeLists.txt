@@ -1,25 +1,22 @@
-option( PLUGIN_STANDARD_QPCV "Check to install qPCV plugin" OFF )
+option( PLUGIN_STANDARD_QPCV "Install qPCV plugin" OFF )
 
-# CloudCompare 'PCV' plugin
-if (PLUGIN_STANDARD_QPCV)
-    add_subdirectory (PCV)
-
-    project( QPCV_PLUGIN )
-    
-    AddPlugin( NAME ${PROJECT_NAME} )
-
+if( PLUGIN_STANDARD_QPCV )
+	project( QPCV_PLUGIN )
+	
 	find_package( OpenGL REQUIRED )
 	if( NOT OPENGL_FOUND )
-		message( SEND_ERROR "OpenGL required, but not found with 'find_package()'" )
+		message( FATAL_ERROR "OpenGL required by PCV plugin" )
 	endif()
+	
+	AddPlugin( NAME ${PROJECT_NAME} )
 
-    include( CMakePluginTemplate )
-    
-	include_directories( ${OpenGL_INCLUDE_DIR} )
-    include_directories( ${PCV_LIB_SOURCE_DIR} )
-    
-    target_link_libraries( ${PROJECT_NAME}
-        PCV_LIB
-        ${OPENGL_LIBRARIES}
-     )
+	add_subdirectory( include )
+	add_subdirectory( src )
+	add_subdirectory( ui )
+	
+	target_include_directories( ${PROJECT_NAME} PRIVATE ${OpenGL_INCLUDE_DIR} )
+	
+	target_link_libraries( ${PROJECT_NAME} ${OPENGL_LIBRARIES} )
+ 
+	include( CMakePluginTemplate )
 endif()

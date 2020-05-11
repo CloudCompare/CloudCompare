@@ -1,0 +1,14 @@
+
+target_sources( ${PROJECT_NAME}
+	PRIVATE
+		${CMAKE_CURRENT_LIST_DIR}/ccPcvDlg.h
+		${CMAKE_CURRENT_LIST_DIR}/PCV.h
+		${CMAKE_CURRENT_LIST_DIR}/PCVCommand.h
+		${CMAKE_CURRENT_LIST_DIR}/PCVContext.h
+		${CMAKE_CURRENT_LIST_DIR}/qPCV.h
+)
+
+target_include_directories( ${PROJECT_NAME}
+	PRIVATE
+		${CMAKE_CURRENT_SOURCE_DIR}
+)

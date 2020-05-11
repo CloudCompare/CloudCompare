@@ -1,9 +1,9 @@
-option( PLUGIN_STANDARD_QSRA "Check to install qSRA (Surface of Revolution Analysis) plugin" OFF )
+option( PLUGIN_STANDARD_QSRA "Install qSRA (Surface of Revolution Analysis) plugin" OFF )
 
 # CloudCompare 'Surface of Revolution Analysis' plugin
-if (PLUGIN_STANDARD_QSRA)
-	#DXF support should be enabled for this plugin! (not mandatory though)
-	if(NOT OPTION_USE_DXF_LIB )
+if( PLUGIN_STANDARD_QSRA )
+	# DXF support should be enabled for this plugin! (not mandatory though)
+	if( NOT OPTION_USE_DXF_LIB )
 		message( WARNING "qSRA plugin works best with dxflib support! (enable OPTION_USE_DXF_LIB)" )
 	endif()
 	
@@ -11,18 +11,9 @@ if (PLUGIN_STANDARD_QSRA)
 
     AddPlugin( NAME ${PROJECT_NAME} )
 
-	#we need Color Scale Manager and Editor importer
-	file( GLOB CC_PLUGIN_CUSTOM_HEADER_LIST ${CloudCompare_SOURCE_DIR}/ccColorScale*.h )
-	file( GLOB CC_PLUGIN_CUSTOM_SOURCE_LIST ${CloudCompare_SOURCE_DIR}/ccColorScale*.cpp )
-	#and the ccRenderToFileDlg class
-	list( APPEND CC_PLUGIN_CUSTOM_HEADER_LIST ${CloudCompare_SOURCE_DIR}/ccRenderToFileDlg.h )
-	list( APPEND CC_PLUGIN_CUSTOM_SOURCE_LIST ${CloudCompare_SOURCE_DIR}/ccRenderToFileDlg.cpp )
-
-	#don't forget associated widgets(.ui)
-	set( CC_PLUGIN_CUSTOM_UI_LIST	${CloudCompare_SOURCE_DIR}/ui_templates/colorScaleEditorDlg.ui
-									${CloudCompare_SOURCE_DIR}/ui_templates/renderToFileDialog.ui )
-
-    include( CMakePluginTemplate )
+	add_subdirectory( include )
+	add_subdirectory( src )
+	add_subdirectory( ui )
     
     set_target_properties( ${PROJECT_NAME} PROPERTIES
         # FIXME Remove after everything has moved to targets
@@ -31,14 +22,33 @@ if (PLUGIN_STANDARD_QSRA)
     )
 
     # FIXME These are required becaue we have dependencies outside of the api
-    #   (at least ccColorScale*, ccRenderToFileDlg, and something in "common")
+    #   (at least ccColorScale*, ccRenderToFileDlg, and ccQtHelpers in "common")
     # We need to determine where those files should live to avoid this.
+	target_sources( ${PROJECT_NAME}
+		PRIVATE
+			${CloudCompare_SOURCE_DIR}/../common/ccQtHelpers.h
+			# we need the Color Scale Manager and Editor importer
+			${CloudCompare_SOURCE_DIR}/ccColorScaleEditorDlg.cpp
+			${CloudCompare_SOURCE_DIR}/ccColorScaleEditorDlg.h
+			${CloudCompare_SOURCE_DIR}/ccColorScaleEditorWidget.cpp
+			${CloudCompare_SOURCE_DIR}/ccColorScaleEditorWidget.h
+			${CloudCompare_SOURCE_DIR}/ccColorScaleSelector.cpp
+			${CloudCompare_SOURCE_DIR}/ccColorScaleSelector.h
+			# we need the ccRenderToFileDlg class
+			${CloudCompare_SOURCE_DIR}/ccRenderToFileDlg.cpp
+			${CloudCompare_SOURCE_DIR}/ccRenderToFileDlg.h
+			${CloudCompare_SOURCE_DIR}/ui_templates/colorScaleEditorDlg.ui
+			${CloudCompare_SOURCE_DIR}/ui_templates/renderToFileDialog.ui
+	)
     target_include_directories( ${PROJECT_NAME}
         PRIVATE
             ${CloudCompare_SOURCE_DIR}
             ${CloudCompare_SOURCE_DIR}/../common
     )
 	
-	#DXF support
-	target_link_DXFLIB( ${PROJECT_NAME} )
+	if( OPTION_USE_DXF_LIB )
+		target_link_DXFLIB( ${PROJECT_NAME} )
+	endif()
+	
+	include( CMakePluginTemplate )
 endif()

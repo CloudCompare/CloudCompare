@@ -122,7 +122,7 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 	if (m_sf)
 	{
 		//create selector widget
-		m_colorScaleSelector = new ccColorScaleSelector(m_app->getColorScalesManager(),this,QString::fromUtf8(":/CC/plugin/qSRA/gearIcon.png"));
+		m_colorScaleSelector = new ccColorScaleSelector(m_app->getColorScalesManager(),this,QString::fromUtf8(":/CC/plugin/qSRA/images/gearIcon.png"));
 		m_colorScaleSelector->init();
 		m_colorScaleSelector->setSelectedScale(ccColorScalesManager::GetDefaultScale()->getUuid());
 		connect(m_colorScaleSelector, &ccColorScaleSelector::colorScaleSelected, this, &DistanceMapGenerationDlg::colorScaleChanged);

@@ -1,56 +1,35 @@
-if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.12.0")
-	# https://cmake.org/cmake/help/git-stage/policy/CMP0074.html
-	cmake_policy(SET CMP0074 OLD)
-endif()
-
-#requires PCL
-find_package(PCL REQUIRED)
-
-if( NOT MSVC )
-	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp -lpthread" )
-endif()
-
-include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
-include_directories( ${CloudComparePlugins_SOURCE_DIR} )
-include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
-include_directories( ${EXTERNAL_LIBS_INCLUDE_DIR} )
-
 project( QPCL_PLUGIN_UTILS_LIB )
 
-include ( CMakePolicies NO_POLICY_SCOPE )
+find_package( Qt5 COMPONENTS Widgets REQUIRED )
 
-include_directories( ${PCL_INCLUDE_DIRS} )
+find_package( PCL 1.7 REQUIRED )
 
-file( GLOB_RECURSE header_list *.h )
-file( GLOB_RECURSE source_list *.cpp )
-file( GLOB_RECURSE impl_list *.hpp)
-file( GLOB_RECURSE ui_list *.ui )
+if( NOT WIN32 )
+	find_package( OpenMP )
 
-qt5_wrap_ui(generated_ui_list ${ui_list})
-
-add_library( ${PROJECT_NAME} STATIC ${header_list} ${source_list} ${impl_list} ${generated_ui_list} )
-
-# Add custom preprocessor definitions
-if (WIN32)
-    set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL QCC_DB_USE_AS_DLL )
+	if( OpenMP_CXX_FOUND )
+		target_link_libraries( ${PROJECT_NAME} PUBLIC OpenMP::OpenMP_CXX )
+	endif()
 endif()
 
-#define the PCL_VER_1_6_OR_OLDER preprocessor to compile qPCL with older versions of PCL
-if ( PCL_VERSION VERSION_LESS  1.7 ) # VERSION_GREATER Works just like "greater or equal"
-        set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS PCL_VER_1_6_OR_OLDER )
-endif()
+add_library( ${PROJECT_NAME} STATIC )
 
-# Luca's PCL patch support
-if( PCL_VERSION VERSION_GREATER  1.7 ) #from 1.7 the patch was merged
-    set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS LP_PCL_PATCH_ENABLED )
-endif()
+add_subdirectory( filters )
+add_subdirectory( utils )
 
-link_directories( ${PCL_LIBRARY_DIRS} )
-add_definitions( ${PCL_DEFINITIONS} )
+target_include_directories( ${PROJECT_NAME}
+    PUBLIC
+        ${PCL_INCLUDE_DIRS}
+)
+
+target_link_directories( ${PROJECT_NAME}
+    PUBLIC
+        ${PCL_LIBRARY_DIRS}
+)
+
 target_link_libraries( ${PROJECT_NAME}
     CCPluginAPI
     QCC_GL_LIB
     ${PCL_LIBRARIES}
     Qt5::Widgets
 )
-

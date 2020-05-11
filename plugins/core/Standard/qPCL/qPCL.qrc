@@ -1,11 +1,11 @@
 <RCC>
-  <qresource prefix="/toolbar">
-    <file>pcl.png</file>
-    <file>PclUtils/icons/mls_smoothing.png</file>
-    <file>PclUtils/icons/normal_curvature.png</file>
-    <file>PclUtils/icons/pcl.png</file>
-    <file>PclUtils/icons/sift.png</file>
-    <file>PclUtils/icons/sor_outlier_remover.png</file>
-    <file>info.json</file>
-  </qresource>
+    <qresource prefix="/toolbar">
+        <file>PclUtils/icons/mls_smoothing.png</file>
+        <file>PclUtils/icons/normal_curvature.png</file>
+        <file>PclUtils/icons/pcl.png</file>
+        <file>PclUtils/icons/sift.png</file>
+        <file>PclUtils/icons/sor_outlier_remover.png</file>
+        <file>info.json</file>
+        <file>images/pcl.png</file>
+    </qresource>
 </RCC>

@@ -5,7 +5,7 @@ AddPlugin( NAME ${PROJECT_NAME} TYPE io )
 add_subdirectory( include )
 add_subdirectory( src )
 
-target_link_libraries( ${PROJECT_NAME} PRIVATE QPCL_PLUGIN_UTILS_LIB )
+target_link_libraries( ${PROJECT_NAME} QPCL_PLUGIN_UTILS_LIB )
 
 #for ccViewer, we also have to copy the PCL dlls! (for CloudCompare they are already copied by qPCL
 if( ${OPTION_BUILD_CCVIEWER} )

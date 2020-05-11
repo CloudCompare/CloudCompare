@@ -23,5 +23,5 @@ add_subdirectory( dialogs )
 
 set_target_properties( ${PROJECT_NAME}
 	PROPERTIES
-	    AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/dialogs
+	    AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_LIST_DIR}/dialogs
 )

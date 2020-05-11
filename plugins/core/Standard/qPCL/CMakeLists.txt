@@ -12,7 +12,7 @@ if( PLUGIN_STANDARD_QPCL )
     add_subdirectory( PclUtils ) # PCL bridge library
     add_subdirectory( PclIO ) # PCL I/O plugin (to load PCD files)
      
-    target_link_libraries( ${PROJECT_NAME} PRIVATE QPCL_PLUGIN_UTILS_LIB )
+    target_link_libraries( ${PROJECT_NAME} QPCL_PLUGIN_UTILS_LIB )
         
     # Import PCL dlls (if any, WIN32 only)
     include( cmake/ExportPCLDlls.cmake )

@@ -4,14 +4,6 @@ find_package( Qt5 COMPONENTS Widgets REQUIRED )
 
 find_package( PCL 1.7 REQUIRED )
 
-if( NOT WIN32 )
-	find_package( OpenMP )
-
-	if( OpenMP_CXX_FOUND )
-		target_link_libraries( ${PROJECT_NAME} PUBLIC OpenMP::OpenMP_CXX )
-	endif()
-endif()
-
 add_library( ${PROJECT_NAME} STATIC )
 
 add_subdirectory( filters )
@@ -33,3 +25,11 @@ target_link_libraries( ${PROJECT_NAME}
     ${PCL_LIBRARIES}
     Qt5::Widgets
 )
+
+if( NOT WIN32 )
+	find_package( OpenMP )
+
+	if( OpenMP_CXX_FOUND )
+		target_link_libraries( ${PROJECT_NAME} PUBLIC OpenMP::OpenMP_CXX )
+	endif()
+endif()

@@ -11,7 +11,7 @@ target_link_libraries( ${PROJECT_NAME} QPCL_PLUGIN_UTILS_LIB )
 if( ${OPTION_BUILD_CCVIEWER} )
 
 	#import PCL dlls (if any, WIN32 only)
-	include( ../ExportPCLDlls.cmake )
+	include( ../cmake/ExportPCLDlls.cmake )
 	export_PCL_dlls( "${CCVIEWER_DEST_FOLDER}" )
 
 endif()

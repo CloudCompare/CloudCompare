@@ -15,6 +15,16 @@ target_compile_definitions( ${PROJECT_NAME}
 		$<$<CONFIG:Release>:TIMINGLEVEL1>
 )
 
+# DGM: OpenMP doesn't work with MSVC (the process loops infinitely)
+if( NOT WIN32 )
+	find_package( OpenMP )
+
+	if( OpenMP_CXX_FOUND )
+		target_link_libraries( ${PROJECT_NAME} PUBLIC OpenMP::OpenMP_CXX )
+		target_compile_definitions( ${PROJECT_NAME} PRIVATE DOPARALLEL )
+	endif()
+endif()
+
 target_sources( ${PROJECT_NAME}
 	PUBLIC
 	    ${CMAKE_CURRENT_LIST_DIR}/BasePrimitiveShape.h

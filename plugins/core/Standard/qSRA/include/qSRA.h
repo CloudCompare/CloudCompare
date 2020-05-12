@@ -1,6 +1,6 @@
 //##########################################################################
 //#                                                                        #
-//#                       CLOUDCOMPARE PLUGIN: qM3C2                       #
+//#                      CLOUDCOMPARE PLUGIN: qSRA                         #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
@@ -11,52 +11,61 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#            COPYRIGHT: UNIVERSITE EUROPEENNE DE BRETAGNE                #
+//#                           COPYRIGHT: EDF                               #
 //#                                                                        #
 //##########################################################################
 
-#ifndef Q_M3C2_PLUGIN_HEADER
-#define Q_M3C2_PLUGIN_HEADER
+#ifndef Q_SRA_PLUGIN_HEADER
+#define Q_SRA_PLUGIN_HEADER
 
-//qCC
 #include "ccStdPluginInterface.h"
 
-//qCC_db
-#include <ccHObject.h>
+class ccPointCloud;
+class ccPolyline;
 
-
-//! M3C2 plugin
-/** See "Accurate 3D comparison of complex topography with terrestrial laser scanner:
-	application to the Rangitikei canyon (N-Z)", Lague, D., Brodu, N. and Leroux, J.,
-	2013, ISPRS journal of Photogrammmetry and Remote Sensing
-**/
-class qM3C2Plugin : public QObject, public ccStdPluginInterface
+//! Surface of Revolution Analysis plugin
+class qSRA : public QObject, public ccStdPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ccStdPluginInterface)
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qM3C2" FILE "info.json")
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qSRA" FILE "../info.json")
 
 public:
 
 	//! Default constructor
-	qM3C2Plugin(QObject* parent = nullptr);
-	
-	virtual ~qM3C2Plugin() = default;
+	explicit qSRA(QObject* parent = nullptr);
+
+	virtual ~qSRA() = default;
 
 	//inherited from ccStdPluginInterface
 	virtual void onNewSelection(const ccHObject::Container& selectedEntities) override;
 	virtual QList<QAction *> getActions() override;
-	virtual void registerCommands(ccCommandLineInterface* cmd) override;
 
-private:
+protected:
 
-	void doAction();
+	//! Loads profile from a dedicated file
+	void loadProfile() const;
 
-	//! Default action
-	QAction* m_action;
+	//! Computes cloud-to-profile radial distances
+	void computeCloud2ProfileRadialDist() const;
 
-	//! Currently selected entities
-	ccHObject::Container m_selectedEntities;
+	//! Projects the cloud distances into a 2D grid
+	void projectCloudDistsInGrid() const;
+
+protected:
+
+	//! Projects the cloud distances into a 2D grid (needs the revolution profile)
+	void doProjectCloudDistsInGrid(ccPointCloud* cloud, ccPolyline* polyline) const;
+
+	//! Computes cloud-to-profile radial distances
+	bool doComputeRadialDists(ccPointCloud* cloud, ccPolyline* polyline) const;
+
+	//! Associated action
+	QAction* m_doLoadProfile;
+	//! Associated action
+	QAction* m_doCompareCloudToProfile;
+	//! Associated action
+	QAction* m_doProjectCloudDists;
 };
 
-#endif //Q_M3C2_PLUGIN_HEADER
+#endif //Q_SRA_PLUGIN_HEADER

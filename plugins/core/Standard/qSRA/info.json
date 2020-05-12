@@ -2,7 +2,7 @@
   "type": "Standard",
   "core" : true,
   "name": "Surface of Revolution Analysis",
-  "icon": ":/CC/plugin/qSRA/qSRA.png",
+  "icon": ":/CC/plugin/qSRA/images/qSRA.png",
   "description": "Comparison between a point cloud and a surface of revolution.",
   "authors": [
     {

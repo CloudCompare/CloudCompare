@@ -6,16 +6,16 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>350</width>
-    <height>270</height>
+    <width>399</width>
+    <height>333</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>ShadeVis</string>
   </property>
   <property name="windowIcon">
-   <iconset>
-    <normaloff>:/CC/Old/images/old_cc/cc_ShadeVisIcon.gif</normaloff>:/CC/Old/images/old_cc/cc_ShadeVisIcon.gif</iconset>
+   <iconset resource="../qPCV.qrc">
+    <normaloff>:/CC/plugin/qPCV/images/PCVIcon.png</normaloff>:/CC/plugin/qPCV/images/PCVIcon.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
@@ -230,7 +230,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="qPCV.qrc"/>
+  <include location="../qPCV.qrc"/>
  </resources>
  <connections>
   <connection>

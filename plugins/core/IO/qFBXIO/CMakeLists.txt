@@ -25,9 +25,7 @@ if( PLUGIN_IO_QFBX )
 	
 	add_subdirectory( include )
 	add_subdirectory( src )
-	
-	include( CMakePluginTemplate )
-	
+		
 	# Link FBX
 	# Release
 	if( FBX_SDK_LIBRARY_FILE )

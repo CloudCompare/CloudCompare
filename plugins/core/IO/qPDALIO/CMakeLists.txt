@@ -21,8 +21,6 @@ if( PLUGIN_IO_QPDAL )
 		target_include_directories( ${PROJECT_NAME} PRIVATE ${JSON_ROOT_DIR} )
 	endif()
 	
-	include( CMakePluginTemplate )
-	
 	target_link_libraries( ${PROJECT_NAME} ${PDAL_LIBRARIES} )
 
 	if( WIN32 )

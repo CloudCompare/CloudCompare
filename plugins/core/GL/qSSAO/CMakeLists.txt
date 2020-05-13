@@ -17,6 +17,4 @@ if( PLUGIN_GL_QSSAO )
 	add_subdirectory( extern/Randomkit )
    
 	target_link_libraries( ${PROJECT_NAME} RandomKitLib )
-
-	include( CMakePluginTemplate )
 endif()

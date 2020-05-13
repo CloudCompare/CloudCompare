@@ -11,6 +11,4 @@ if( PLUGIN_IO_QPHOTOSCAN )
 	add_subdirectory( extern/quazip EXCLUDE_FROM_ALL )
 	
 	target_link_libraries( ${PROJECT_NAME} quazip )
-	
-	include( CMakePluginTemplate )
 endif()

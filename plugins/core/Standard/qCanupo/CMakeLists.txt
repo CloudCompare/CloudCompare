@@ -20,6 +20,4 @@ if( PLUGIN_STANDARD_QCANUPO )
 	add_subdirectory( include )
 	add_subdirectory( src )
 	add_subdirectory( ui )
-	
-	include( CMakePluginTemplate )
 endif()

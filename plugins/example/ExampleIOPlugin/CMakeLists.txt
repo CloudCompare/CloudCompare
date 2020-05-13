@@ -7,6 +7,4 @@ if( PLUGIN_EXAMPLE_IO )
     
     add_subdirectory( include )
     add_subdirectory( src )
-    
-    include( CMakePluginTemplate )    
 endif()

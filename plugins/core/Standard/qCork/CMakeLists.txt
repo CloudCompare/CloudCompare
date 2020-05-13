@@ -14,6 +14,4 @@ if( PLUGIN_STANDARD_QCORK )
 	add_subdirectory( ui )
 		
 	target_link_cork( ${PROJECT_NAME} )
-	
-	include( CMakePluginTemplate )	
 endif()

@@ -10,9 +10,7 @@ if ( PLUGIN_EXAMPLE_STANDARD )
 	project( ExamplePlugin )
 	 
 	AddPlugin( NAME ${PROJECT_NAME} )
-	
-	include( CMakePluginTemplate )
-	
+		
 	add_subdirectory( include )
 	add_subdirectory( src )
 	

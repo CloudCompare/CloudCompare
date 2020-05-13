@@ -1,3 +1,5 @@
+set( CC_PLUGIN_TARGET_LIST "" CACHE INTERNAL "Internal plugin list" )
+
 # AddPlugin should be called once for each plugin.
 # This function sets up a target for the plugin, sets up default properties, and sets the target
 # to link to the necessary libraries.
@@ -18,6 +20,8 @@ function( AddPlugin )
     # For readability
     set( PLUGIN_TARGET "${ADD_PLUGIN_NAME}" )
     
+	set( CC_PLUGIN_TARGET_LIST "${CC_PLUGIN_TARGET_LIST};${PLUGIN_TARGET}" CACHE INTERNAL "Internal plugin list" )
+	
     # First check our TYPE
     
     # If none given, make it "standard"
@@ -95,6 +99,23 @@ function( AddPlugin )
         Qt5::OpenGL
         Qt5::Widgets
     )
+
+	# On macOS, copy the plugin to the ccPlugins directory at the top level
+	# post build so we can find it without installing everything.
+	if( APPLE )
+		set( PLUGINS_OUTPUT_DIR "${CMAKE_BINARY_DIR}/ccPlugins" )
+		
+		if( NOT EXISTS PLUGINS_OUTPUT_DIR )
+			file( MAKE_DIRECTORY "${PLUGINS_OUTPUT_DIR}" )
+		endif()
+		
+		add_custom_command( TARGET ${PLUGIN_TARGET} POST_BUILD
+			COMMAND
+				${CMAKE_COMMAND} -E copy_if_different
+					$<TARGET_FILE:${PLUGIN_TARGET}>
+					${PLUGINS_OUTPUT_DIR}
+		)  
+	endif()
 
     message( STATUS "Added ${ADD_PLUGIN_TYPE} plugin: ${ADD_PLUGIN_NAME}")
 endfunction()

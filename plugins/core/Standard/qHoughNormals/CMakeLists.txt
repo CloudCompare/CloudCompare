@@ -18,6 +18,4 @@ if( PLUGIN_STANDARD_QHOUGH_NORMALS )
 	add_subdirectory( include )
 	add_subdirectory( src )
 	add_subdirectory( ui )
-		
-	include( CMakePluginTemplate )
 endif()

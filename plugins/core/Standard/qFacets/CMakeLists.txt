@@ -43,6 +43,4 @@ if( PLUGIN_STANDARD_QFACETS )
 	target_link_libraries( ${PROJECT_NAME}
 		shapelib
 	)
-
-	include( CMakePluginTemplate )
 endif()

@@ -17,6 +17,4 @@ if( PLUGIN_STANDARD_QPCV )
 	target_include_directories( ${PROJECT_NAME} PRIVATE ${OpenGL_INCLUDE_DIR} )
 	
 	target_link_libraries( ${PROJECT_NAME} ${OPENGL_LIBRARIES} )
- 
-	include( CMakePluginTemplate )
 endif()

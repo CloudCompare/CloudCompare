@@ -115,3 +115,24 @@ endif( APPLE )
 if( WIN32 ) # For Linux it's already installed in by qCC
 	install_ext( FILES ${CMAKE_CURRENT_SOURCE_DIR}/../qCC/shaders/ColorRamp/color_ramp.frag ${CCVIEWER_DEST_FOLDER} /shaders/ColorRamp )
 endif()
+
+# Install plugins & shaders in the correct folder for each platform
+if( APPLE )	
+	InstallPlugins(
+		TYPES "gl;io"
+		DEST_FOLDER "${CCVIEWER_MAC_PLUGIN_DIR}"
+		SHADER_DEST_FOLDER "${CCVIEWER_MAC_BASE_DIR}/Contents/Shaders"
+	)
+elseif( UNIX )
+	InstallPlugins(
+		TYPES "gl;io"
+		DEST_FOLDER "${CMAKE_INSTALL_LIBDIR}/cloudcompare/plugins"
+		SHADER_DEST_FOLDER share/cloudcompare/shaders
+	)
+else()
+	InstallPlugins(
+		TYPES "gl;io"
+		DEST_FOLDER "${CCVIEWER_DEST_FOLDER}/plugins"
+		SHADER_DEST_FOLDER "${CCVIEWER_DEST_FOLDER}/shaders"
+	)
+endif()

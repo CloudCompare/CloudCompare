@@ -84,7 +84,7 @@ include( CMakeInclude )
 include( Install )
 
 # Add external libraries
-add_subdirectory( extern/CCCoreLib )
+add_subdirectory( extern/CCCoreLib EXCLUDE_FROM_ALL )
 include( CMakeExternalLibs )
 
 # Contrib. libraries (mainly for I/O)

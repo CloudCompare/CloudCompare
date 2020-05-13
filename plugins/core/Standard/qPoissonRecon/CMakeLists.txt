@@ -5,7 +5,7 @@ if( PLUGIN_STANDARD_QPOISSON_RECON )
 		
 	AddPlugin( NAME ${PROJECT_NAME} )
 
-	add_subdirectory( extern/PoissonRecon )
+	add_subdirectory( extern/PoissonRecon EXCLUDE_FROM_ALL )
 	add_subdirectory( include )
 	add_subdirectory( src )
 	add_subdirectory( ui )

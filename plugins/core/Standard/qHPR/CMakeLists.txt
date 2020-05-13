@@ -5,7 +5,7 @@ if( PLUGIN_STANDARD_QHPR )
 		
 	AddPlugin( NAME ${PROJECT_NAME} )
 	
-	add_subdirectory( extern/qhull )
+	add_subdirectory( extern/qhull EXCLUDE_FROM_ALL )
 	add_subdirectory( include )
 	add_subdirectory( src )
 	add_subdirectory( ui )

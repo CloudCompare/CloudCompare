@@ -8,7 +8,7 @@ if ( PLUGIN_IO_QE57 )
 
 	add_subdirectory( include )
 	add_subdirectory( src )
-	add_subdirectory( extern/libE57Format )
+	add_subdirectory( extern/libE57Format EXCLUDE_FROM_ALL )
 	
 	set_target_properties( E57Format PROPERTIES
 		AUTOMOC OFF

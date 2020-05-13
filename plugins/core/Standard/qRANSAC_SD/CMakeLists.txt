@@ -1,25 +1,19 @@
-option( PLUGIN_STANDARD_QRANSAC_SD "Check to install qRansac_SD (Shape Detection) plugin" OFF )
+option( PLUGIN_STANDARD_QRANSAC_SD "Install qRansac_SD (Shape Detection) plugin" OFF )
 
-# CloudCompare 'Ransac Shape Detection' plugin
-if (PLUGIN_STANDARD_QRANSAC_SD)
+if( PLUGIN_STANDARD_QRANSAC_SD )
 	project( QRANSAC_SD_PLUGIN )
 
-	add_definitions( -DPOINTSWITHINDEX ) #Causes the sub clouds to be generated as partial clones of original cloud
+	AddPlugin( NAME ${PROJECT_NAME} )
 
-    AddPlugin( NAME ${PROJECT_NAME} )
+	add_subdirectory( extern/RANSAC_SD )
+	add_subdirectory( include )
+	add_subdirectory( src )
+	add_subdirectory( ui )
 
-	add_subdirectory (RANSAC_SD_orig)
+	# Causes the sub-clouds to be generated as partial clones of original cloud
+	target_compile_definitions( ${PROJECT_NAME} PRIVATE POINTSWITHINDEX )
+	
+	target_link_libraries( ${PROJECT_NAME} QRANSAC_SD_PRIM_SHAPES_LIB )
 
-    include( CMakePluginTemplate )
-
-	target_link_libraries( ${PROJECT_NAME} QRANSAC_SD_PRIM_SHAPES_LIB QRANSAC_SD_MISC_LIB )
-
-	include_directories( ${QRANSAC_SD_MISC_LIB_SOURCE_DIR} )
-	include_directories( ${QRANSAC_SD_PRIM_SHAPES_LIB_SOURCE_DIR} )
-	include_directories( ${QRANSAC_SD_PRIM_SHAPES_LIB_SOURCE_DIR}/GfxTL )
-
-if (OPENMP_FOUND AND NOT WIN32) #DGM: OpenMP doesn't work with Visual at least (the process loops infinitely)
-	target_compile_definitions( ${PROJECT_NAME} PRIVATE DOPARALLEL )
-endif()
-
+	include( CMakePluginTemplate )
 endif()

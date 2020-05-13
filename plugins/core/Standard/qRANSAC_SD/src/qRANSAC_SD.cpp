@@ -67,11 +67,11 @@
 static ccMainAppInterface* s_app = nullptr;
 
 qRansacSD::qRansacSD(QObject* parent/*=nullptr*/)
-	: QObject(parent)
-	, ccStdPluginInterface(":/CC/plugin/qRANSAC_SD/info.json")
-	, m_action(nullptr)
+    : QObject(parent)
+    , ccStdPluginInterface(":/CC/plugin/qRANSAC_SD/info.json")
+    , m_action(nullptr)
 {
-	s_app = m_app;
+    s_app = m_app;
 }
 
 void qRansacSD::onNewSelection(const ccHObject::Container& selectedEntities)
@@ -153,7 +153,7 @@ void qRansacSD::doAction()
 	CCVector3 diff = bbMax - bbMin;
 	float scale = std::max(std::max(diff[0], diff[1]), diff[2]);
 
-	
+
 	//init dialog with default values
 	ccRansacSDDlg rsdDlg(m_app->getMainWindow());
 	rsdDlg.epsilonDoubleSpinBox->setValue(.005f * scale);		// set distance threshold to 0.5% of bounding box width
@@ -186,7 +186,7 @@ void qRansacSD::doAction()
 	}
 
 	ccHObject* group = executeRANSAC(pc, params, false);
-	
+
 
 	if (group)
 	{
@@ -275,7 +275,7 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 	{
 		ransacOptions.m_epsilon = params.epsilon;
 		ransacOptions.m_bitmapEpsilon = params.bitmapEpsilon;
-		ransacOptions.m_normalThresh = static_cast<float>(cos(params.maxNormalDev_deg * CCCoreLib::DEG_TO_RAD));
+		ransacOptions.m_normalThresh = static_cast<float>(cos( CCCoreLib::DegreesToRadians( params.maxNormalDev_deg ) ));
 		assert(ransacOptions.m_normalThresh >= 0);
 		ransacOptions.m_probability = params.probability;
 		ransacOptions.m_minSupport = params.supportPoints;
@@ -501,7 +501,7 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 						saveNormals = false;
 					}
 				}
-				
+
 #else
 				pcShape = new ccPointCloud(desc.c_str());
 				if (!pcShape->reserve(static_cast<unsigned>(shapePointsCount)))
@@ -535,7 +535,7 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 			}
 			pcShape->showNormals(saveNormals);
 			pcShape->setVisible(true);
-			
+
 
 			//convert detected primitive into a CC primitive type
 			ccGenericPrimitive* prim = nullptr;
@@ -581,9 +581,9 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 
 				//we build matrix from these vectors
 				ccGLMatrix glMat(CCVector3::fromArray(X.getValue()),
-					CCVector3::fromArray(Y.getValue()),
-					CCVector3::fromArray(N.getValue()),
-					CCVector3::fromArray(G.getValue()));
+				    CCVector3::fromArray(Y.getValue()),
+				    CCVector3::fromArray(N.getValue()),
+				    CCVector3::fromArray(G.getValue()));
 
 				//plane primitive
 				//ccLog::Print(QString("dX: %1, dY: %2").arg(dX).arg(dY));
@@ -604,7 +604,7 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 			{
 				const SpherePrimitiveShape* sphere = static_cast<const SpherePrimitiveShape*>(shape);
 				float radius = sphere->Internal().Radius();
-				Vec3f CC = sphere->Internal().Center();		
+				Vec3f CC = sphere->Internal().Center();
 
 				//we build matrix from these vecctors
 				ccGLMatrix glMat;
@@ -629,13 +629,13 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 				float hMin = cyl->MinHeight();
 				float hMax = cyl->MaxHeight();
 				float h = hMax - hMin;
-				G += N * (hMin + h / 2);		
+				G += N * (hMin + h / 2);
 
 				//we build matrix from these vecctors
 				ccGLMatrix glMat(CCVector3::fromArray(X.getValue()),
-					CCVector3::fromArray(Y.getValue()),
-					CCVector3::fromArray(N.getValue()),
-					CCVector3::fromArray(G.getValue()));
+				    CCVector3::fromArray(Y.getValue()),
+				    CCVector3::fromArray(N.getValue()),
+				    CCVector3::fromArray(G.getValue()));
 
 				//cylinder primitive
 				prim = new ccCylinder(r, h, &glMat);
@@ -772,7 +772,7 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 			ccPC->setEnabled(false);
 			ccLog::Warning("[qRansacSD] Input cloud has been automtically hidden!");
 
-			
+
 			group->setVisible(true);
 			group->setDisplay_recursive(ccPC->getDisplay());
 			return group;

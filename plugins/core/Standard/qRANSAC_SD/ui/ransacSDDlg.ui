@@ -14,8 +14,8 @@
    <string>Ransac Shape Detection</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="qRANSAC_SD.qrc">
-    <normaloff>:/CC/plugin/qRANSAC_SD/qRANSAC_SD.png</normaloff>:/CC/plugin/qRANSAC_SD/qRANSAC_SD.png</iconset>
+   <iconset resource="../qRANSAC_SD.qrc">
+    <normaloff>:/CC/plugin/qRANSAC_SD/images/qRANSAC_SD.png</normaloff>:/CC/plugin/images/qRANSAC_SD/qRANSAC_SD.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="1" column="0">

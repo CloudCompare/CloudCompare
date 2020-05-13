@@ -1,0 +1,12 @@
+
+target_sources( ${PROJECT_NAME}
+	PRIVATE
+		${CMAKE_CURRENT_LIST_DIR}/ccRansacSDDlg.h
+		${CMAKE_CURRENT_LIST_DIR}/qRANSAC_SD_Commands.h
+		${CMAKE_CURRENT_LIST_DIR}/qRANSAC_SD.h
+)
+
+target_include_directories( ${PROJECT_NAME}
+	PRIVATE
+		${CMAKE_CURRENT_SOURCE_DIR}
+)

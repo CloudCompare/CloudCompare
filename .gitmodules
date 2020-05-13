@@ -1,9 +1,9 @@
-[submodule "plugins/core/Standard/qPoissonRecon/PoissonReconLib"]
-	path = plugins/core/Standard/qPoissonRecon/PoissonReconLib
-	url = https://github.com/cloudcompare/PoissonRecon
 [submodule "plugins/core/IO/qE57IO/extern/libE57Format"]
-path = plugins/core/IO/qE57IO/extern/libE57Format
-url = https://github.com/asmaloney/libE57Format
+	path = plugins/core/IO/qE57IO/extern/libE57Format
+	url = https://github.com/asmaloney/libE57Format
 [submodule "extern/CCCoreLib"]
 	path = extern/CCCoreLib
 	url = https://github.com/CloudCompare/CCCoreLib.git
+[submodule "plugins/core/Standard/qPoissonRecon/extern/PoissonRecon"]
+	path = plugins/core/Standard/qPoissonRecon/extern/PoissonRecon
+	url = https://github.com/cloudcompare/PoissonRecon

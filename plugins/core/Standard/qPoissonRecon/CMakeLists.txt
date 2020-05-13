@@ -1,16 +1,16 @@
-option( PLUGIN_STANDARD_QPOISSON_RECON "Check to install qPoissonRecon plugin" OFF )
+option( PLUGIN_STANDARD_QPOISSON_RECON "Install qPoissonRecon plugin" OFF )
 
-# CloudCompare 'PoissonRecon' plugin
-if (PLUGIN_STANDARD_QPOISSON_RECON)
+if( PLUGIN_STANDARD_QPOISSON_RECON )
 	project( QPOISSON_RECON_PLUGIN )
 		
-    AddPlugin( NAME ${PROJECT_NAME} )
+	AddPlugin( NAME ${PROJECT_NAME} )
 
-	add_subdirectory (PoissonReconLib)
+	add_subdirectory( extern/PoissonRecon )
+	add_subdirectory( include )
+	add_subdirectory( src )
+	add_subdirectory( ui )
 
-    include( CMakePluginTemplate )
+	include( CMakePluginTemplate )
 	
 	target_link_libraries( ${PROJECT_NAME} QPOISSON_RECON_LIB )
-	include_directories( ${QPOISSON_RECON_LIB_SOURCE_DIR}/Src_CC_wrap )
-
 endif()

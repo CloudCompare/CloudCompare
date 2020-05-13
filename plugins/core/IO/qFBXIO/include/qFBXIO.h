@@ -25,7 +25,7 @@ class qFBXIO : public QObject, public ccIOPluginInterface
 	Q_OBJECT
 	Q_INTERFACES( ccIOPluginInterface )
 
-	Q_PLUGIN_METADATA( IID "cccorp.cloudcompare.plugin.qFBXIO" FILE "info.json" )
+	Q_PLUGIN_METADATA( IID "cccorp.cloudcompare.plugin.qFBXIO" FILE "../info.json" )
 
 public:
 	explicit qFBXIO( QObject *parent = nullptr );

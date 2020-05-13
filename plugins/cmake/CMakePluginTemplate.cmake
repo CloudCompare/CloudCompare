@@ -1,24 +1,5 @@
 ### DEFAULT CC "STANDARD" PLUGIN CMAKE SCRIPT ###
 
-include( CMakePolicies NO_POLICY_SCOPE )
-
-file( GLOB header_list *.h)
-file( GLOB source_list *.cpp)
-
-if ( CC_PLUGIN_CUSTOM_HEADER_LIST )
-    list( APPEND header_list ${CC_PLUGIN_CUSTOM_HEADER_LIST} )
-endif()
-
-if ( CC_PLUGIN_CUSTOM_SOURCE_LIST )
-    list( APPEND source_list ${CC_PLUGIN_CUSTOM_SOURCE_LIST} )
-endif()
-
-target_sources( ${PROJECT_NAME}
-    PRIVATE
-        ${header_list}
-        ${source_list}
-)
-
 if( APPLE )
     # put all the plugins we build into one directory
     set( PLUGINS_OUTPUT_DIR "${CMAKE_BINARY_DIR}/ccPlugins" )
@@ -32,9 +13,9 @@ if( APPLE )
 
     install( TARGETS ${PROJECT_NAME} LIBRARY DESTINATION ${CLOUDCOMPARE_MAC_PLUGIN_DIR} COMPONENT Runtime )
     set( CLOUDCOMPARE_PLUGINS ${CLOUDCOMPARE_PLUGINS} ${CLOUDCOMPARE_MAC_PLUGIN_DIR}/lib${PROJECT_NAME}${CMAKE_SHARED_LIBRARY_SUFFIX} CACHE INTERNAL "CloudCompare plugin list")
-  elseif( UNIX )
+elseif( UNIX )
     install_shared( ${PROJECT_NAME} ${CMAKE_INSTALL_LIBDIR}/cloudcompare/plugins 0 )
-  else()
+else()
     install_shared( ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} 1 /plugins )
 endif()
 

@@ -18,15 +18,15 @@ function( target_link_LASLib ) # 1 argument: ARGV0 = project name
 
 	target_include_directories( ${ARGV0}
 		PRIVATE
-		    ${LASLIB_INCLUDE_DIR}
+			${LASLIB_INCLUDE_DIR}
 			${LASZIP_INCLUDE_DIR}
 	)
 
-    if( LASLIB_RELEASE_LIBRARY )
-        target_link_libraries( ${ARGV0} optimized ${LASLIB_RELEASE_LIBRARY} )
-    endif()
+	if( LASLIB_RELEASE_LIBRARY )
+		target_link_libraries( ${ARGV0} optimized ${LASLIB_RELEASE_LIBRARY} )
+	endif()
 
-    if( CMAKE_CONFIGURATION_TYPES AND LASLIB_DEBUG_LIBRARY )
-        target_link_libraries( ${ARGV0} debug ${LASLIB_DEBUG_LIBRARY} )
-    endif()
+	if( CMAKE_CONFIGURATION_TYPES AND LASLIB_DEBUG_LIBRARY )
+		target_link_libraries( ${ARGV0} debug ${LASLIB_DEBUG_LIBRARY} )
+	endif()
 endfunction()

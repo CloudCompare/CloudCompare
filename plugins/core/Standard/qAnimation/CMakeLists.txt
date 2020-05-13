@@ -9,6 +9,7 @@ if( PLUGIN_STANDARD_QANIMATION )
 
 	add_subdirectory( include )
 	add_subdirectory( src )
+	add_subdirectory( ui )
 
 	if( QANIMATION_WITH_FFMPEG_SUPPORT )
 		add_subdirectory( extern/QTFFmpegWrapper )

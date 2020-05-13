@@ -1,35 +1,22 @@
-option( PLUGIN_STANDARD_QPCL "Check to install qPCL plugin" OFF )
+option( PLUGIN_STANDARD_QPCL "Install qPCL plugin" OFF )
 
-# CloudCompare 'PCL' bridge plugin
-if (PLUGIN_STANDARD_QPCL)
-    #requires PCL
-    find_package(PCL REQUIRED)
-    
-    #PCL bridge library
-    add_subdirectory(PclUtils)
-    
-    #CloudCompare 'qPCLIO' I/O plugin (to load PCD files)
-    add_subdirectory(PclIO)
-    
-    project( QPCL_PLUGIN )
-    
-    AddPlugin( NAME ${PROJECT_NAME} )
+if( PLUGIN_STANDARD_QPCL )	  
+	project( QPCL_PLUGIN )
+	
+	AddPlugin( NAME ${PROJECT_NAME} )
 
-    #documentation
-    add_subdirectory(doc)
-    
-    include_directories( ${QPCL_PLUGIN_UTILS_LIB_SOURCE_DIR}/filters )
-    include_directories( ${QPCL_PLUGIN_UTILS_LIB_BINARY_DIR} )
-    include_directories( ${PCL_INCLUDE_DIRS} )
-    
-    include( CMakePluginTemplate )
-    
-    target_link_libraries(${PROJECT_NAME} QPCL_PLUGIN_UTILS_LIB)
-    
-    link_directories( ${PCL_LIBRARY_DIRS} )
-    add_definitions( ${PCL_DEFINITIONS} )
-    
-    #import PCL dlls (if any, WIN32 only)
-    include( ExportPCLDlls.cmake )
-    export_PCL_dlls( "${CLOUDCOMPARE_DEST_FOLDER}" )
+	add_subdirectory( doc )
+	add_subdirectory( include )
+	add_subdirectory( src )
+	
+	add_subdirectory( PclUtils ) # PCL bridge library
+	add_subdirectory( PclIO ) # PCL I/O plugin (to load PCD files)
+	 
+	target_link_libraries( ${PROJECT_NAME} QPCL_PLUGIN_UTILS_LIB )
+		
+	# Import PCL dlls (if any, WIN32 only)
+	include( cmake/ExportPCLDlls.cmake )
+	export_PCL_dlls( "${CLOUDCOMPARE_DEST_FOLDER}" )
+
+	include( CMakePluginTemplate )
 endif()

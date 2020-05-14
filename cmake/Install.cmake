@@ -13,7 +13,7 @@ function( InstallSharedLibrary )
 			"TARGET"
 			""
 			${ARGN}
-		)
+	)
 
 	message( STATUS "Install shared library: ${INSTALL_SHARED_LIB_TARGET}")
 
@@ -41,7 +41,7 @@ function( InstallPlugins )
 			"DEST_FOLDER;SHADER_DEST_FOLDER"
 			"TYPES"
 			${ARGN}
-		)
+	)
 	
 	# Check the types we need to install
 	set( VALID_TYPES "gl" "io" "standard" )
@@ -83,14 +83,10 @@ function( InstallPlugins )
 		if( "${plugin_type}" IN_LIST INSTALL_PLUGINS_TYPES )
 			message( STATUS " Install ${plugin_target} (${plugin_type})" )
 			
-			if( WIN32 )
-				install_shared( ${plugin_target} ${INSTALL_PLUGINS_DEST_FOLDER} 1 )
-			else()
-				install( TARGETS ${plugin_target}
-					LIBRARY DESTINATION ${INSTALL_PLUGINS_DEST_FOLDER}
-					COMPONENT Runtime
-				)
-			endif()			
+			_InstallPluginTarget(
+				TARGET ${plugin_target}
+				DEST_FOLDER ${INSTALL_PLUGINS_DEST_FOLDER}
+			)		
 			
 			if( "${plugin_type}" STREQUAL "gl" )
 				get_target_property( SHADER_FOLDER_NAME ${plugin_target} SHADER_FOLDER_NAME )
@@ -112,4 +108,59 @@ function( InstallPlugins )
 			endif()
 		endif()
 	endforeach()	
+endfunction()
+
+# _InstallPluginTarget should only be called by InstallPlugins above.
+# It was factored out to provide cmake < 3.13 a way to install plugins.
+#
+# Arguments:
+#	DEST_FOLDER Where to install the plugins.
+#	TARGET The name of the plugin target
+function( _InstallPluginTarget )
+	cmake_parse_arguments(
+			INSTALL_PLUGIN_TARGET
+			""
+			"DEST_FOLDER;TARGET"
+			""
+			${ARGN}
+	)
+	
+	# For readability
+    set( plugin_target "${INSTALL_PLUGIN_TARGET_TARGET}" )
+	
+	# Before CMake 3.13, install(TARGETS) would only accept targets created in the same directory scope
+    # This makes it difficult to work with submodules.
+    # This can be cleaned up when we move to a minimum CMake of 3.13 or higher
+    # https://gitlab.kitware.com/cmake/cmake/-/merge_requests/2152
+    if ( ${CMAKE_VERSION} VERSION_LESS "3.13.0" )
+        # Basic hack: construct the name of the plugin dynamic library ("target_plugin") and install using
+        # install(FILES) instead of install(TARGETS)
+        
+        if ( APPLE OR UNIX )
+            set( lib_prefix "lib" )
+        endif()
+        
+        if ( CMAKE_BUILD_TYPE STREQUAL "Debug" )
+            get_target_property( lib_postfix ${plugin_target} DEBUG_POSTFIX)
+        endif()
+        
+		get_target_property( target_bin_dir ${plugin_target} BINARY_DIR )
+		
+        set( target_plugin "${target_bin_dir}/${lib_prefix}${plugin_target}${lib_postfix}${CMAKE_SHARED_LIBRARY_SUFFIX}" )
+                
+        if ( WIN32 )
+            copy_files( "${target_plugin}" "${INSTALL_PLUGIN_TARGET_DEST_FOLDER}" 1 )
+        else()
+            copy_files( "${target_plugin}" "${INSTALL_PLUGIN_TARGET_DEST_FOLDER}" )
+        endif()
+	else()	
+		if( WIN32 )
+			install_shared( ${plugin_target} ${INSTALL_PLUGIN_TARGET_DEST_FOLDER} 1 )
+		else()
+			install( TARGETS ${plugin_target}
+				LIBRARY DESTINATION ${INSTALL_PLUGIN_TARGET_DEST_FOLDER}
+				COMPONENT Runtime
+			)
+		endif()
+	endif()
 endfunction()

@@ -14,7 +14,6 @@ if ( CCCORELIB_SHARED )
         
         if ( CMAKE_BUILD_TYPE STREQUAL "Debug" )
             get_target_property( POSTFIX CCCoreLib DEBUG_POSTFIX)
-            message( "${POSTFIX}" )
         endif()
         
         set( CCCoreLib_LIBRARY "${CCCoreLib_BINARY_DIR}/${PREFIX}CCCoreLib${POSTFIX}${CMAKE_SHARED_LIBRARY_SUFFIX}" )

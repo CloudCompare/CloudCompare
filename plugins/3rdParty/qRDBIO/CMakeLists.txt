@@ -16,8 +16,17 @@ if (PLUGIN_IO_QRDB)
 	# cmake variable rdb_DIR
 	find_package(rdb REQUIRED)
 
-	# Set to include this I/O plugin in ccViewer
-	set( CC_IS_IO_PLUGIN 1 )
+	file( GLOB PLUGIN_HDR_LIST ${CMAKE_CURRENT_SOURCE_DIR}/*.h )
+	file( GLOB PLUGIN_SRC_LIST ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp )
+	file( GLOB PLUGIN_UI_LIST ${CMAKE_CURRENT_SOURCE_DIR}/*.ui )
+	
+	# add source files
+	target_sources( ${PROJECT_NAME}
+		PRIVATE
+			${PLUGIN_HDR_LIST}
+			${PLUGIN_SRC_LIST}
+			${PLUGIN_UI_LIST}
+	)
 
     include( CMakePluginTemplate )
 	#include( ../../CMakePluginTpl.cmake )

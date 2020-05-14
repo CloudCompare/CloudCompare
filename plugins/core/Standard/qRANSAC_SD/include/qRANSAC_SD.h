@@ -83,7 +83,7 @@ public:
 protected:
 
 	//! Slot called when associated ation is triggered
-	void doAction();
+	Q_SLOT void doAction();
 
 protected:
 

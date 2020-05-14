@@ -184,7 +184,7 @@ protected:
 	//! Called when action is triggered
 	/** \note performAction calls start() in base class
 	**/
-	int performAction();
+	Q_SLOT int performAction();
 
 signals:
 

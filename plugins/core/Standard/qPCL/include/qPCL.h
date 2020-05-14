@@ -50,13 +50,13 @@ public:
 
 public:
 	//! Handles new entity
-	void handleNewEntity(ccHObject*);
+	Q_SLOT void handleNewEntity(ccHObject*);
 
 	//! Handles entity (visual) modification
-	void handleEntityChange(ccHObject*);
+	Q_SLOT void handleEntityChange(ccHObject*);
 
 	//! Handles new error message
-	void handleErrorMessage(QString);
+	Q_SLOT void handleErrorMessage(QString);
 
 protected:
 

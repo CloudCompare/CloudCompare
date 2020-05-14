@@ -1,3 +1,4 @@
+#pragma once
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,23 +16,23 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_QT_HELPERS_HEADER
-#define CC_QT_HELPERS_HEADER
-
-//Qt
 #include <QAbstractButton>
 
 class ccQtHelpers
 {
 public:
-
+	
 	//! Sets a button background color
-	inline static void SetButtonColor(QAbstractButton* button, const QColor &col)
+	static void SetButtonColor( QAbstractButton* button, const QColor &col )
 	{
-		if (button)
-			button->setStyleSheet(QString("* { background-color: rgb(%1,%2,%3) }").arg(col.red()).arg(col.green()).arg(col.blue()));
+		if ( button != nullptr )
+		{
+			button->setStyleSheet( QStringLiteral( "* { background-color: rgb(%1,%2,%3) }" )
+								   .arg( col.red() )
+								   .arg( col.green() )
+								   .arg( col.blue() )
+								   );
+		}
 	}
-
+	
 };
-
-#endif //CC_QT_HELPERS_HEADER

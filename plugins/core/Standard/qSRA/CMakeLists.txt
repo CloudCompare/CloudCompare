@@ -21,12 +21,9 @@ if( PLUGIN_STANDARD_QSRA )
         AUTOUIC_SEARCH_PATHS "${CloudCompare_SOURCE_DIR}/ui_templates;${CMAKE_CURRENT_SOURCE_DIR}/ui"
     )
 
-    # FIXME These are required becaue we have dependencies outside of the api
-    #   (at least ccColorScale*, ccRenderToFileDlg, and ccQtHelpers in "common")
-    # We need to determine where those files should live to avoid this.
+    # FIXME These are required because we have dependencies outside of the API
 	target_sources( ${PROJECT_NAME}
 		PRIVATE
-			${CloudCompare_SOURCE_DIR}/../common/ccQtHelpers.h
 			# we need the Color Scale Manager and Editor importer
 			${CloudCompare_SOURCE_DIR}/ccColorScaleEditorDlg.cpp
 			${CloudCompare_SOURCE_DIR}/ccColorScaleEditorDlg.h
@@ -34,16 +31,15 @@ if( PLUGIN_STANDARD_QSRA )
 			${CloudCompare_SOURCE_DIR}/ccColorScaleEditorWidget.h
 			${CloudCompare_SOURCE_DIR}/ccColorScaleSelector.cpp
 			${CloudCompare_SOURCE_DIR}/ccColorScaleSelector.h
+			${CloudCompare_SOURCE_DIR}/ui_templates/colorScaleEditorDlg.ui
 			# we need the ccRenderToFileDlg class
 			${CloudCompare_SOURCE_DIR}/ccRenderToFileDlg.cpp
 			${CloudCompare_SOURCE_DIR}/ccRenderToFileDlg.h
-			${CloudCompare_SOURCE_DIR}/ui_templates/colorScaleEditorDlg.ui
 			${CloudCompare_SOURCE_DIR}/ui_templates/renderToFileDialog.ui
 	)
     target_include_directories( ${PROJECT_NAME}
         PRIVATE
             ${CloudCompare_SOURCE_DIR}
-            ${CloudCompare_SOURCE_DIR}/../common
     )
 	
 	if( OPTION_USE_DXF_LIB )

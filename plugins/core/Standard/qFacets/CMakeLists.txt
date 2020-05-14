@@ -19,12 +19,9 @@ if( PLUGIN_STANDARD_QFACETS )
 		AUTOUIC_SEARCH_PATHS "${CloudCompare_SOURCE_DIR}/ui_templates;${CMAKE_CURRENT_SOURCE_DIR}/ui"
 	)
 	
-	# FIXME These are required becaue we have dependencies outside of the API
-	#	(at least ccColorScale* and ccQtHelpers in "common")
-	# We need to determine where those files should live to avoid this.
+	# FIXME These are required because we have dependencies outside of the API
 	target_sources( ${PROJECT_NAME}
 		PRIVATE
-			${CloudCompare_SOURCE_DIR}/../common/ccQtHelpers.h
 			# we need the Color Scale Manager and Editor importer
 			${CloudCompare_SOURCE_DIR}/ccColorScaleEditorDlg.cpp
 			${CloudCompare_SOURCE_DIR}/ccColorScaleEditorDlg.h
@@ -37,7 +34,6 @@ if( PLUGIN_STANDARD_QFACETS )
 	target_include_directories( ${PROJECT_NAME}
 		PRIVATE
 			${CloudCompare_SOURCE_DIR}
-			${CloudCompare_SOURCE_DIR}/../common
 	)
 
 	target_link_libraries( ${PROJECT_NAME}

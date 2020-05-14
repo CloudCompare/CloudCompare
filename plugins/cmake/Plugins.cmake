@@ -94,7 +94,6 @@ function( AddPlugin )
 	target_link_libraries( ${PLUGIN_TARGET}
 		CCPluginAPI
 		CCPluginStub
-		QCC_GL_LIB
 		Qt5::Concurrent
 		Qt5::OpenGL
 		Qt5::Widgets

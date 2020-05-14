@@ -1,3 +1,4 @@
+#pragma once
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,8 +16,7 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_PICKING_HUB_HEADER
-#define CC_PICKING_HUB_HEADER
+#include "CCPluginAPI.h"
 
 //Local
 #include "ccPickingListener.h"
@@ -35,7 +35,7 @@ class ccHObject;
 class ccMainAppInterface;
 
 //! Point/triangle picking hub
-class ccPickingHub : public QObject
+class CCPLUGIN_LIB_API ccPickingHub : public QObject
 {
 	Q_OBJECT
 
@@ -109,5 +109,3 @@ protected:
 	bool m_exclusive;
 
 };
-
-#endif //CC_PICKING_HUB_HEADER

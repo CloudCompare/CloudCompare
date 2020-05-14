@@ -30,7 +30,6 @@
 #include <ccColorScaleSelector.h>
 #include <ccColorScalesManager.h>
 #include <ccColorScaleEditorDlg.h>
-#include <ccCommon.h>
 #include <ccRenderToFileDlg.h>
 
 //common
@@ -1284,10 +1283,8 @@ void DistanceMapGenerationDlg::exportMapAsImage()
 		return;
 
 	ccRenderToFileDlg rtfDlg(m_window->glWidth(), m_window->glHeight(), m_app->getMainWindow());
-	rtfDlg.dontScaleFeaturesCheckBox->setChecked(false);
-	rtfDlg.dontScaleFeaturesCheckBox->setVisible(false);
-	rtfDlg.renderOverlayItemsCheckBox->setChecked(false);
-	rtfDlg.renderOverlayItemsCheckBox->setVisible(false);
+	
+	rtfDlg.hideOptions();
 
 	if (rtfDlg.exec())
 	{

@@ -90,7 +90,7 @@ function( InstallPlugins )
 			
 			if( "${plugin_type}" STREQUAL "gl" )
 				get_target_property( SHADER_FOLDER_NAME ${plugin_target} SHADER_FOLDER_NAME )
-			    get_target_property( SHADER_FOLDER_PATH ${plugin_target} SHADER_FOLDER_PATH )
+				get_target_property( SHADER_FOLDER_PATH ${plugin_target} SHADER_FOLDER_PATH )
 				
 				if( EXISTS "${SHADER_FOLDER_PATH}" )
 					message( STATUS "  + shader: ${SHADER_FOLDER_NAME} (${SHADER_FOLDER_PATH})" )
@@ -126,33 +126,33 @@ function( _InstallPluginTarget )
 	)
 	
 	# For readability
-    set( plugin_target "${INSTALL_PLUGIN_TARGET_TARGET}" )
+	set( plugin_target "${INSTALL_PLUGIN_TARGET_TARGET}" )
 	
 	# Before CMake 3.13, install(TARGETS) would only accept targets created in the same directory scope
-    # This makes it difficult to work with submodules.
-    # This can be cleaned up when we move to a minimum CMake of 3.13 or higher
-    # https://gitlab.kitware.com/cmake/cmake/-/merge_requests/2152
-    if ( ${CMAKE_VERSION} VERSION_LESS "3.13.0" )
-        # Basic hack: construct the name of the plugin dynamic library ("target_plugin") and install using
-        # install(FILES) instead of install(TARGETS)
-        
-        if ( APPLE OR UNIX )
-            set( lib_prefix "lib" )
-        endif()
-        
-        if ( CMAKE_BUILD_TYPE STREQUAL "Debug" )
-            get_target_property( lib_postfix ${plugin_target} DEBUG_POSTFIX)
-        endif()
-        
+	# This makes it difficult to work with submodules.
+	# This can be cleaned up when we move to a minimum CMake of 3.13 or higher
+	# https://gitlab.kitware.com/cmake/cmake/-/merge_requests/2152
+	if ( ${CMAKE_VERSION} VERSION_LESS "3.13.0" )
+		# Basic hack: construct the name of the plugin dynamic library ("target_plugin") and install using
+		# install(FILES) instead of install(TARGETS)
+		
+		if ( APPLE OR UNIX )
+			set( lib_prefix "lib" )
+		endif()
+		
+		if ( CMAKE_BUILD_TYPE STREQUAL "Debug" )
+			get_target_property( lib_postfix ${plugin_target} DEBUG_POSTFIX)
+		endif()
+		
 		get_target_property( target_bin_dir ${plugin_target} BINARY_DIR )
 		
-        set( target_plugin "${target_bin_dir}/${lib_prefix}${plugin_target}${lib_postfix}${CMAKE_SHARED_LIBRARY_SUFFIX}" )
-                
-        if ( WIN32 )
-            copy_files( "${target_plugin}" "${INSTALL_PLUGIN_TARGET_DEST_FOLDER}" 1 )
-        else()
-            copy_files( "${target_plugin}" "${INSTALL_PLUGIN_TARGET_DEST_FOLDER}" )
-        endif()
+		set( target_plugin "${target_bin_dir}/${lib_prefix}${plugin_target}${lib_postfix}${CMAKE_SHARED_LIBRARY_SUFFIX}" )
+				
+		if ( WIN32 )
+			copy_files( "${target_plugin}" "${INSTALL_PLUGIN_TARGET_DEST_FOLDER}" 1 )
+		else()
+			copy_files( "${target_plugin}" "${INSTALL_PLUGIN_TARGET_DEST_FOLDER}" )
+		endif()
 	else()	
 		if( WIN32 )
 			install_shared( ${plugin_target} ${INSTALL_PLUGIN_TARGET_DEST_FOLDER} 1 )

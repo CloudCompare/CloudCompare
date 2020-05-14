@@ -64,26 +64,16 @@ function( InstallPlugins )
 	message( STATUS "Install plugins" )
 	message( STATUS " Types: ${INSTALL_PLUGINS_TYPES}" )
 	
-	# Check our destination folder is valid and ensure it exists
+	# Check our destination folder is valid
 	if( NOT INSTALL_PLUGINS_DEST_FOLDER )
 		message( FATAL_ERROR "InstallPlugins: DEST_FOLDER not specified" )
 	endif()
 	
-	if( NOT EXISTS INSTALL_PLUGINS_DEST_FOLDER )
-		message( STATUS " Destination: ${INSTALL_PLUGINS_DEST_FOLDER}" )
-		file( MAKE_DIRECTORY "${INSTALL_PLUGINS_DEST_FOLDER}" )
-	endif()
-	
-	# If we have gl plugins, check that our shader destination folder is valid and ensure it exists
+	# If we have gl plugins, check that our shader destination folder is valid
 	if( "gl" IN_LIST VALID_TYPES )
 		if( NOT INSTALL_PLUGINS_SHADER_DEST_FOLDER )
 			message( FATAL_ERROR "InstallPlugins: SHADER_DEST_FOLDER not specified" )
 		endif()
-		
-		if( NOT EXISTS INSTALL_PLUGINS_SHADER_DEST_FOLDER )
-			message( STATUS " Shader destination: ${INSTALL_PLUGINS_SHADER_DEST_FOLDER}" )
-			file( MAKE_DIRECTORY "${INSTALL_PLUGINS_SHADER_DEST_FOLDER}" )
-		endif()		
 	endif()
 	
 	# Install the requested plugins in the DEST_FOLDER

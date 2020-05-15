@@ -1,3 +1,4 @@
+#pragma once
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,23 +16,26 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_COLOR_SCALE_EDITOR_DLG_HEADER
-#define CC_COLOR_SCALE_EDITOR_DLG_HEADER
+#include "CCPluginAPI.h"
 
-#include <ui_colorScaleEditorDlg.h>
-
-//local
-#include "ccColorScaleEditorWidget.h"
+//qCC_db
+#include <ccColorScale.h>
 
 //Qt
 #include <QDialog>
 
 class ccScalarField;
+class ccColorScaleEditorWidget;
 class ccColorScalesManager;
 class ccMainAppInterface;
 
+namespace Ui
+{
+	class ColorScaleEditorDlg;	
+}
+
 //! Dialog to edit/create color scales
-class ccColorScaleEditorDialog : public QDialog, public Ui::ColorScaleEditorDlg
+class CCPLUGIN_LIB_API ccColorScaleEditorDialog : public QDialog
 {
 	Q_OBJECT
 
@@ -44,7 +48,7 @@ public:
 								QWidget* parent = nullptr);
 
 	//! Destructor
-	~ccColorScaleEditorDialog() override = default;
+	~ccColorScaleEditorDialog() override;
 
 	//! Sets associated scalar field (optional)
 	void setAssociatedScalarField(ccScalarField* sf);
@@ -139,6 +143,6 @@ protected:
 
 	//! Associated application (interface)
 	ccMainAppInterface* m_mainApp;
+	
+	Ui::ColorScaleEditorDlg* m_ui;
 };
-
-#endif //CC_COLOR_SCALE_EDITOR_DLG_HEADER

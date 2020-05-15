@@ -1,3 +1,4 @@
+#pragma once
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,8 +16,7 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_COLOR_SCALE_SELECTOR_HEADER
-#define CC_COLOR_SCALE_SELECTOR_HEADER
+#include "CCPluginAPI.h"
 
 //Qt
 #include <QFrame>
@@ -31,7 +31,7 @@ class ccColorScalesManager;
 //! Advanced editor for color scales
 /** Combo-box + shortcut to color scale editor
 **/
-class ccColorScaleSelector : public QFrame
+class CCPLUGIN_LIB_API ccColorScaleSelector : public QFrame
 {
 	Q_OBJECT
 
@@ -71,5 +71,3 @@ protected:
 	//! Spawn color scale editor button
 	QToolButton* m_button;
 };
-
-#endif //CC_COLOR_SCALE_SELECTOR_HEADER

@@ -14,6 +14,4 @@ if( PLUGIN_STANDARD_QRANSAC_SD )
 	target_compile_definitions( ${PROJECT_NAME} PRIVATE POINTSWITHINDEX )
 	
 	target_link_libraries( ${PROJECT_NAME} QRANSAC_SD_PRIM_SHAPES_LIB )
-
-	include( CMakePluginTemplate )
 endif()

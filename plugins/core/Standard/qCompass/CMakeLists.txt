@@ -26,6 +26,4 @@ if( PLUGIN_STANDARD_QCOMPASS )
 		PRIVATE
 			${CloudCompare_SOURCE_DIR}/../common
 	)
-
-	include( CMakePluginTemplate )
 endif()

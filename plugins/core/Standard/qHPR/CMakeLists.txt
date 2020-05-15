@@ -11,6 +11,4 @@ if( PLUGIN_STANDARD_QHPR )
 	add_subdirectory( ui )
 		
 	target_link_libraries( ${PROJECT_NAME} qhull )
-	
-	include( CMakePluginTemplate )	
 endif()

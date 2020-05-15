@@ -17,6 +17,4 @@ if( PLUGIN_STANDARD_QANIMATION )
 		target_link_libraries( ${PROJECT_NAME} QTFFMPEG_LIB )
 		target_compile_definitions( ${PROJECT_NAME} PRIVATE QFFMPEG_SUPPORT )
 	endif()
-
-	include( CMakePluginTemplate )
 endif()

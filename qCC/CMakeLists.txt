@@ -147,3 +147,21 @@ else()
 	install_ext( FILES ${CC_FBO_LIB_SOURCE_DIR}/shaders/Bilateral/bilateral.vert ${CLOUDCOMPARE_DEST_FOLDER} /shaders/Bilateral )
 	install_ext( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/ColorRamp/color_ramp.frag ${CLOUDCOMPARE_DEST_FOLDER} /shaders/ColorRamp )
 endif()
+
+# Install plugins and shaders in the correct folder for each platform
+if( APPLE )	
+	InstallPlugins(
+		DEST_FOLDER "${CLOUDCOMPARE_MAC_PLUGIN_DIR}"
+		SHADER_DEST_FOLDER "${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Shaders"
+	)
+elseif( UNIX )
+	InstallPlugins(
+		DEST_FOLDER "${CMAKE_INSTALL_LIBDIR}/cloudcompare/plugins"
+		SHADER_DEST_FOLDER share/cloudcompare/shaders
+	)
+else()
+	InstallPlugins(
+		DEST_FOLDER "${CLOUDCOMPARE_DEST_FOLDER}/plugins"
+		SHADER_DEST_FOLDER "${CLOUDCOMPARE_DEST_FOLDER}/shaders"
+	)
+endif()

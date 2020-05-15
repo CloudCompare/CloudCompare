@@ -15,9 +15,7 @@ if ( PLUGIN_IO_QE57 )
 		AUTORCC OFF
 		AUTOUIC OFF
 	)
-	
-	include( CMakePluginTemplate )
-		
+			
 	target_link_libraries( ${PROJECT_NAME} E57Format )
 	
 	if ( USING_STATIC_XERCES )

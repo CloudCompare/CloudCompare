@@ -49,6 +49,4 @@ if( PLUGIN_STANDARD_QSRA )
 	if( OPTION_USE_DXF_LIB )
 		target_link_DXFLIB( ${PROJECT_NAME} )
 	endif()
-	
-	include( CMakePluginTemplate )
 endif()

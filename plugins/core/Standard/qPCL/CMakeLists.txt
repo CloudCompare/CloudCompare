@@ -17,6 +17,4 @@ if( PLUGIN_STANDARD_QPCL )
 	# Import PCL dlls (if any, WIN32 only)
 	include( cmake/ExportPCLDlls.cmake )
 	export_PCL_dlls( "${CLOUDCOMPARE_DEST_FOLDER}" )
-
-	include( CMakePluginTemplate )
 endif()

@@ -21,7 +21,5 @@ if( WIN32 )
 		include( cmake/LASLibSupport.cmake )
 		
 		target_link_LASLib( ${PROJECT_NAME} )
-
-		include( CMakePluginTemplate )
 	endif()
 endif()

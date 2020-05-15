@@ -15,5 +15,3 @@ if( ${OPTION_BUILD_CCVIEWER} )
 	export_PCL_dlls( "${CCVIEWER_DEST_FOLDER}" )
 
 endif()
-
-include( CMakePluginTemplate )

@@ -9,8 +9,6 @@ if( PLUGIN_STANDARD_QPOISSON_RECON )
 	add_subdirectory( include )
 	add_subdirectory( src )
 	add_subdirectory( ui )
-
-	include( CMakePluginTemplate )
 	
 	target_link_libraries( ${PROJECT_NAME} QPOISSON_RECON_LIB )
 endif()

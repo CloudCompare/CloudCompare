@@ -1,3 +1,4 @@
+#pragma once
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,8 +16,7 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_OVERLAY_DIALOG_HEADER
-#define CC_OVERLAY_DIALOG_HEADER
+#include "CCPluginAPI.h"
 
 //Qt
 #include <QDialog>
@@ -25,7 +25,7 @@
 class ccGLWindow;
 
 //! Generic overlay dialog interface
-class ccOverlayDialog : public QDialog
+class CCPLUGIN_LIB_API ccOverlayDialog : public QDialog
 {
 	Q_OBJECT
 
@@ -99,5 +99,3 @@ protected:
 	//! Overridden keys
 	QList<int> m_overriddenKeys;
 };
-
-#endif //CC_OVERLAY_DIALOG_HEADER

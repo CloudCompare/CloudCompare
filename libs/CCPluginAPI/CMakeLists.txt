@@ -2,10 +2,10 @@ project( CCPluginAPI )
 
 add_library( ${PROJECT_NAME} SHARED )
 
-set_target_properties( ${PROJECT_NAME} PROPERTIES
-    AUTOMOC OFF
-    AUTORCC OFF
-    AUTOUIC OFF
+find_package( Qt5
+	COMPONENTS
+		Gui
+	REQUIRED
 )
 
 add_subdirectory( include )
@@ -17,7 +17,9 @@ get_target_property( STUB_INCLUDES CCPluginStub INCLUDE_DIRECTORIES )
 target_include_directories( ${PROJECT_NAME} PUBLIC "${STUB_INCLUDES}" )
 
 target_link_libraries( ${PROJECT_NAME}
-    QCC_IO_LIB
+    QCC_GL_LIB
+	QCC_IO_LIB
+	Qt5::Gui
 )
 
 target_compile_definitions( ${PROJECT_NAME} PRIVATE CCPLUGIN_API_LIBRARY_BUILD )

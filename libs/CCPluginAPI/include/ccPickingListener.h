@@ -1,3 +1,4 @@
+#pragma once
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,8 +16,7 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_PICKING_LISTENER_HEADER
-#define CC_PICKING_LISTENER_HEADER
+#include "CCPluginAPI.h"
 
 //CCCoreLib
 #include <CCGeom.h>
@@ -27,7 +27,7 @@
 class ccHObject;
 
 //! Point/triangle picking listener interface
-class ccPickingListener
+class CCPLUGIN_LIB_API ccPickingListener
 {
 public:
 	virtual ~ccPickingListener() = default;
@@ -52,5 +52,3 @@ public:
 	//! Method called whenever an item is picked
 	virtual void onItemPicked(const PickedItem& pi) = 0;
 };
-
-#endif //CC_PICKING_LISTENER_HEADER

@@ -1,6 +1,6 @@
 
 target_sources( ${PROJECT_NAME}
-	PUBLIC
+	PRIVATE
 		${CMAKE_CURRENT_LIST_DIR}/ccDefaultPluginInterface.h
 		${CMAKE_CURRENT_LIST_DIR}/ccGLPluginInterface.h
 		${CMAKE_CURRENT_LIST_DIR}/ccIOPluginInterface.h

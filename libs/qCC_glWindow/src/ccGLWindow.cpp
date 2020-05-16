@@ -2822,7 +2822,7 @@ void ccGLWindow::updateConstellationCenterAndZoom(const ccBBox* aBox/*=0*/)
 	//we get the bounding-box diagonal length
 	double bbDiag = static_cast<double>(zoomedBox.getDiagNorm());
 
-	if (bbDiag < CCCoreLib::ZERO_TOLERANCE)
+	if ( CCCoreLib::LessThanEpsilon( bbDiag ) )
 	{
 		ccLog::Warning("[ccGLWindow] Entity/DB has a null bounding-box! Can't zoom in...");
 		return;
@@ -2843,7 +2843,7 @@ void ccGLWindow::updateConstellationCenterAndZoom(const ccBBox* aBox/*=0*/)
 	{
 		//we must go backward so as to see the object!
 		float currentFov_deg = getFov();
-		assert(currentFov_deg > FLT_EPSILON);
+		assert( CCCoreLib::GreaterThanEpsilon( currentFov_deg ) );
 		double d = bbDiag / (2 * std::tan( CCCoreLib::DegreesToRadians( currentFov_deg / 2.0 ) ));
 
 		CCVector3d cameraDir(0, 0, -1);
@@ -5666,14 +5666,18 @@ float ccGLWindow::computePerspectiveZoom() const
 
 	//we compute the zoom equivalent to the corresponding camera position (inverse of above calculus)
 	float currentFov_deg = getFov();
-	if (currentFov_deg < FLT_EPSILON)
+	if ( CCCoreLib::LessThanEpsilon( currentFov_deg ) )
+	{
 		return 1.0f;
-
+	}
+	
 	//Camera center to pivot vector
 	double zoomEquivalentDist = (m_viewportParams.cameraCenter - m_viewportParams.pivotPoint).norm();
-	if (zoomEquivalentDist < CCCoreLib::ZERO_TOLERANCE)
+	if ( CCCoreLib::LessThanEpsilon( zoomEquivalentDist ) )
+	{
 		return 1.0f;
-
+	}
+	
 	//float screenSize = std::min(m_glViewport.width(), m_glViewport.height()) * m_viewportParams.pixelSize; //see how pixelSize is computed!
 	float screenSize = m_glViewport.width() * m_viewportParams.pixelSize; //see how pixelSize is computed!
 	return screenSize / static_cast<float>(zoomEquivalentDist * 2.0 * std::tan( CCCoreLib::DegreesToRadians( currentFov_deg / 2.0 ) ));
@@ -5732,7 +5736,7 @@ void ccGLWindow::setPerspectiveState(bool state, bool objectCenteredView)
 			//(i.e. we replace the zoom by setting the camera at the right distance from
 			//the pivot point)
 			double currentFov_deg = getFov();
-			assert(currentFov_deg > CCCoreLib::ZERO_TOLERANCE);
+			assert( CCCoreLib::GreaterThanEpsilon( currentFov_deg ) );
 			//double screenSize = std::min(m_glViewport.width(), m_glViewport.height()) * m_viewportParams.pixelSize; //see how pixelSize is computed!
 			double screenSize = m_glViewport.width() * m_viewportParams.pixelSize; //see how pixelSize is computed!
 			if (screenSize > 0.0)
@@ -5822,7 +5826,7 @@ void ccGLWindow::setAspectRatio(float ar)
 
 void ccGLWindow::setFov(float fov_deg)
 {
-	if (fov_deg < FLT_EPSILON || fov_deg > 180.0f)
+	if ( CCCoreLib::LessThanEpsilon( fov_deg ) || (fov_deg > 180.0f))
 	{
 		ccLog::Warning("[ccGLWindow::setFov] Invalid FOV value!");
 		return;
@@ -5862,9 +5866,11 @@ float ccGLWindow::getFov() const
 
 void ccGLWindow::setBubbleViewFov(float fov_deg)
 {
-	if (fov_deg < FLT_EPSILON || fov_deg > 180.0f)
+	if ( CCCoreLib::LessThanEpsilon( fov_deg ) || (fov_deg > 180.0f))
+	{
 		return;
-
+	}
+	
 	if (fov_deg != m_bubbleViewFov_deg)
 	{
 		m_bubbleViewFov_deg = fov_deg;

@@ -773,7 +773,7 @@ bool ccCameraSensor::fromImageCoordToGlobalCoord(const CCVector2& imageCoord, CC
 	trans.applyRotation(viewDir);
 	viewDir.normalize();
 
-	if (fabs(viewDir.z) < CCCoreLib::ZERO_TOLERANCE)
+	if ( CCCoreLib::LessThanEpsilon( fabs(viewDir.z) ) )
 	{
 		//viewing dir is parallel to the plane Z = Z0!
 		return false;

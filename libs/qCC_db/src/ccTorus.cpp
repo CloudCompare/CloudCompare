@@ -61,9 +61,13 @@ bool ccTorus::buildUp()
 		return false;
 
 	//invalid parameters?
-	if ((m_rectSection && m_rectSectionHeight < CCCoreLib::ZERO_TOLERANCE) || m_insideRadius >= m_outsideRadius || m_angle_rad < CCCoreLib::ZERO_TOLERANCE)
+	if ((m_rectSection && CCCoreLib::LessThanEpsilon( m_rectSectionHeight ))
+			|| m_insideRadius >= m_outsideRadius
+			|| CCCoreLib::LessThanEpsilon( m_angle_rad ) )
+	{
 		return false;
-
+	}
+	
 	//topology
 	bool closed = (m_angle_rad >= 2.0*M_PI);
 

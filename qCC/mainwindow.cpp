@@ -1434,9 +1434,13 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 											std::max(globalBBmax.z,Bg.z) );
 
 				if (uniqueShift)
-					uniqueShift = ((shifted->getGlobalShift() - shift).norm() < CCCoreLib::ZERO_TOLERANCE);
+				{
+					uniqueShift = CCCoreLib::LessThanEpsilon( (shifted->getGlobalShift() - shift).norm() );
+				}
 				if (uniqueScale)
-					uniqueScale = (std::abs(shifted->getGlobalScale() - scale) < CCCoreLib::ZERO_TOLERANCE);
+				{
+					uniqueScale = CCCoreLib::LessThanEpsilon( std::abs(shifted->getGlobalScale() - scale) );
+				}
 			}
 
 			shiftedEntities.emplace_back(shifted, entity);
@@ -1503,7 +1507,8 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 				assert(shifted->getGlobalScale() > 0);
 				double scaleCoef = scale / shifted->getGlobalScale();
 
-				if (T.norm() > CCCoreLib::ZERO_TOLERANCE || std::abs(scaleCoef - 1.0) > CCCoreLib::ZERO_TOLERANCE)
+				if ( CCCoreLib::GreaterThanEpsilon( T.norm() )
+					 || CCCoreLib::GreaterThanEpsilon( std::abs(scaleCoef - 1.0) ) )
 				{
 					ccGLMatrix transMat;
 					transMat.toIdentity();
@@ -8369,9 +8374,9 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 		//init all possible transformations
 		static const double angularStep_deg = 45.0;
 		unsigned phiSteps = static_cast<unsigned>(360.0 / angularStep_deg);
-		assert(std::abs(360.0 - phiSteps * angularStep_deg) < CCCoreLib::ZERO_TOLERANCE);
+		assert( CCCoreLib::LessThanEpsilon( std::abs(360.0 - phiSteps * angularStep_deg) ) );
 		unsigned thetaSteps = static_cast<unsigned>(180.0 / angularStep_deg);
-		assert(std::abs(180.0 - thetaSteps * angularStep_deg) < CCCoreLib::ZERO_TOLERANCE);
+		assert( CCCoreLib::LessThanEpsilon( std::abs(180.0 - thetaSteps * angularStep_deg) ) );
 		unsigned rotCount = phiSteps * (thetaSteps - 1) + 2;
 		matrices.reserve(rotCount);
 		matrixAngles.reserve(rotCount);

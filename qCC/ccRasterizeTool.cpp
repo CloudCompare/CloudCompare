@@ -1861,7 +1861,7 @@ void ccRasterizeTool::generateImage() const
 		}
 
 		double range = maxHeight - minHeight;
-		if (range < CCCoreLib::ZERO_TOLERANCE)
+		if ( CCCoreLib::LessThanEpsilon( range ) )
 		{
 			range = 1.0;
 		}

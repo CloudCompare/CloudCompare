@@ -1780,7 +1780,7 @@ bool ccPointCloud::setRGBColorByHeight(unsigned char heightDim, ccColorScale::Sh
 
 	double minHeight = getOwnBB().minCorner().u[heightDim];
 	double height = getOwnBB().getDiagVec().u[heightDim];
-	if (fabs(height) < CCCoreLib::ZERO_TOLERANCE) //flat cloud!
+	if ( CCCoreLib::LessThanEpsilon( fabs(height) ) ) //flat cloud!
 	{
 		const ccColor::Rgb& col = colorScale->getColorByIndex(0);
 		return setColor(col);
@@ -1930,7 +1930,7 @@ void ccPointCloud::applyRigidTransformation(const ccGLMatrix& trans)
 
 void ccPointCloud::translate(const CCVector3& T)
 {
-	if (fabs(T.x) + fabs(T.y) + fabs(T.z) < CCCoreLib::ZERO_TOLERANCE)
+	if ( CCCoreLib::LessThanEpsilon( fabs(T.x) + fabs(T.y) + fabs(T.z) ) )
 		return;
 
 	unsigned count = size();

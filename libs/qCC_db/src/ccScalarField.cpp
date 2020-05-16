@@ -103,7 +103,7 @@ ScalarType ccScalarField::normalize(ScalarType d) const
 	}
 	else //log scale
 	{
-		ScalarType dLog = log10(std::max(static_cast<ScalarType>(fabs(d)), static_cast<ScalarType>(ZERO_TOLERANCE)));
+		ScalarType dLog = log10(std::max(static_cast<ScalarType>(fabs(d)), CCCoreLib::ZERO_TOLERANCE_SCALAR));
 		if (dLog <= m_logSaturationRange.start())
 			return 0;
 		else if (dLog >= m_logSaturationRange.stop())
@@ -238,8 +238,8 @@ void ccScalarField::updateSaturationBounds()
 		//log scale (we always update it even if m_logScale is not enabled!)
 		//if (m_logScale)
 		{
-			ScalarType minSatLog = log10(std::max(minAbsVal, static_cast<ScalarType>(ZERO_TOLERANCE)));
-			ScalarType maxSatLog = log10(std::max(maxAbsVal, static_cast<ScalarType>(ZERO_TOLERANCE)));
+			ScalarType minSatLog = log10(std::max(minAbsVal, CCCoreLib::ZERO_TOLERANCE_SCALAR));
+			ScalarType maxSatLog = log10(std::max(maxAbsVal, CCCoreLib::ZERO_TOLERANCE_SCALAR));
 			m_logSaturationRange.setBounds(minSatLog, maxSatLog);
 		}
 	}
@@ -258,8 +258,8 @@ void ccScalarField::updateSaturationBounds()
 		{
 			ScalarType minAbsVal = static_cast<ScalarType>(maxVal < 0 ? std::min(-maxVal, -minVal) : std::max(minVal, 0.0));
 			ScalarType maxAbsVal = static_cast<ScalarType>(std::max(fabs(minVal), fabs(maxVal)));
-			ScalarType minSatLog = log10(std::max(minAbsVal, static_cast<ScalarType>(ZERO_TOLERANCE)));
-			ScalarType maxSatLog = log10(std::max(maxAbsVal, static_cast<ScalarType>(ZERO_TOLERANCE)));
+			ScalarType minSatLog = log10(std::max(minAbsVal, CCCoreLib::ZERO_TOLERANCE_SCALAR));
+			ScalarType maxSatLog = log10(std::max(maxAbsVal, CCCoreLib::ZERO_TOLERANCE_SCALAR));
 			m_logSaturationRange.setBounds(minSatLog, maxSatLog);
 		}
 	}

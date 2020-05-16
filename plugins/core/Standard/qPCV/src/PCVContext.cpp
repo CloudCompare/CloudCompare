@@ -18,6 +18,7 @@
 #include "PCVContext.h"
 
 //CCCoreLib
+#include <CCMath.h>
 #include <CCMiscTools.h>
 #include <GenericTriangle.h>
 
@@ -140,7 +141,7 @@ void PCVContext::associateToEntity(GenericCloud* cloud, GenericMesh* mesh)
 	PointCoordinateType maxD = (bbMax - bbMin).norm();
 
 	//we deduce default zoom
-	m_zoom = (maxD > CCCoreLib::ZERO_TOLERANCE ? static_cast<PointCoordinateType>(std::min(m_width, m_height)) / maxD : CCCoreLib::PC_ONE);
+	m_zoom = (CCCoreLib::GreaterThanEpsilon( maxD ) ? static_cast<PointCoordinateType>(std::min(m_width, m_height)) / maxD : CCCoreLib::PC_ONE);
 
 	//as well as display center
 	m_viewCenter = (bbMax+bbMin)/2;

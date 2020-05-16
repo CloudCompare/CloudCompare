@@ -3352,9 +3352,9 @@ bool ccMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor
 	CCVector3d w;
 	computeInterpolationWeights(triIndex, P, w);
 
-	if (	(!T1 && w.u[0] > CCCoreLib::ZERO_TOLERANCE)
-		||	(!T2 && w.u[1] > CCCoreLib::ZERO_TOLERANCE)
-		||	(!T3 && w.u[2] > CCCoreLib::ZERO_TOLERANCE) )
+	if (	(!T1 && CCCoreLib::GreaterThanEpsilon( w.u[0] ) )
+		||	(!T2 && CCCoreLib::GreaterThanEpsilon( w.u[1] ) )
+		||	(!T3 && CCCoreLib::GreaterThanEpsilon( w.u[2] ) ) )
 	{
 		//assert(false);
 		if (interpolateColorIfNoTexture)
@@ -3431,7 +3431,7 @@ static qint64 GenerateKey(unsigned edgeIndex1, unsigned edgeIndex2)
 
 bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, unsigned indexB, unsigned indexC)
 {
-	if (s_maxSubdivideArea/*maxArea*/ <= CCCoreLib::ZERO_TOLERANCE)
+	if ( s_maxSubdivideArea <= CCCoreLib::ZERO_TOLERANCE_POINT_COORDINATE )
 	{
 		ccLog::Error("[ccMesh::pushSubdivide] Invalid input argument!");
 		return false;
@@ -3605,7 +3605,7 @@ bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, uns
 
 ccMesh* ccMesh::subdivide(PointCoordinateType maxArea) const
 {
-	if (maxArea <= CCCoreLib::ZERO_TOLERANCE)
+	if ( maxArea <= CCCoreLib::ZERO_TOLERANCE_POINT_COORDINATE )
 	{
 		ccLog::Error("[ccMesh::subdivide] Invalid input argument!");
 		return nullptr;

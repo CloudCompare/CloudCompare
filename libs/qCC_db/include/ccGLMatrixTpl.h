@@ -22,8 +22,8 @@
 #include "ccSerializableObject.h"
 
 //CCCoreLib
-#include <CCConst.h>
 #include <CCGeom.h>
+#include <CCMath.h>
 
 //Qt
 #include <QTextStream>
@@ -133,7 +133,7 @@ public:
 		T f = (c < 0 ? -c : c);
 		ccGLMatrixTpl<T> result;
 
-		if (1.0 - f < CCCoreLib::ZERO_TOLERANCE) //"from" and "to"-vector almost parallel
+		if ( CCCoreLib::LessThanEpsilon( 1.0 - f ) ) //"from" and "to"-vector almost parallel
 		{
 			// "to" vector most nearly orthogonal to "from"
 			Vector3Tpl<T> x(0, 0, 0);
@@ -581,7 +581,7 @@ public:
 
 		//normalize axis
 		T n2 = axis3D.norm2();
-		if (n2 > CCCoreLib::ZERO_TOLERANCE)
+		if ( CCCoreLib::GreaterThanEpsilon( n2 ) )
 		{
 			axis3D /= sqrt(n2);
 		}

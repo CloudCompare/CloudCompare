@@ -16,6 +16,7 @@
 //##########################################################################
 
 #include "ccColorScaleEditorDlg.h"
+#include "ui_colorScaleEditorDlg.h"
 
 //local
 #include "ccColorScaleEditorWidget.h"
@@ -51,7 +52,6 @@ ccColorScaleEditorDialog::ccColorScaleEditorDialog(	ccColorScalesManager* manage
 													ccColorScale::Shared currentScale/*=0*/,
 													QWidget* parent/*=0*/)
 	: QDialog(parent)
-	, Ui::ColorScaleEditorDlg()
 	, m_manager(manager)
 	, m_colorScale(currentScale)
 	, m_scaleWidget(new ccColorScaleEditorWidget(this,Qt::Horizontal))
@@ -60,47 +60,48 @@ ccColorScaleEditorDialog::ccColorScaleEditorDialog(	ccColorScalesManager* manage
 	, m_minAbsoluteVal(0.0)
 	, m_maxAbsoluteVal(1.0)
 	, m_mainApp(mainApp)
+	, m_ui( new Ui::ColorScaleEditorDlg )
 {
 	assert(m_manager);
 
-	setupUi(this);
+	m_ui->setupUi(this);
 
-	colorScaleEditorFrame->setLayout(new QHBoxLayout());
-	colorScaleEditorFrame->layout()->setContentsMargins(0,0,0,0);
-	colorScaleEditorFrame->layout()->addWidget(m_scaleWidget);
+	m_ui->colorScaleEditorFrame->setLayout(new QHBoxLayout());
+	m_ui->colorScaleEditorFrame->layout()->setContentsMargins(0,0,0,0);
+	m_ui->colorScaleEditorFrame->layout()->addWidget(m_scaleWidget);
 
 	//main combo box
-	connect(rampComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::activated), this, &ccColorScaleEditorDialog::colorScaleChanged);
+	connect(m_ui->rampComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::activated), this, &ccColorScaleEditorDialog::colorScaleChanged);
 
 	//import/export buttons
-	connect(exportToolButton,		&QToolButton::clicked,				this,	&ccColorScaleEditorDialog::exportCurrentScale);
-	connect(importToolButton,		&QToolButton::clicked,				this,	&ccColorScaleEditorDialog::importScale);
+	connect(m_ui->exportToolButton,		&QToolButton::clicked,				this,	&ccColorScaleEditorDialog::exportCurrentScale);
+	connect(m_ui->importToolButton,		&QToolButton::clicked,				this,	&ccColorScaleEditorDialog::importScale);
 
 	//upper buttons
-	connect(renameToolButton,		&QToolButton::clicked,				this,	&ccColorScaleEditorDialog::renameCurrentScale);
-	connect(saveToolButton,			&QToolButton::clicked,				this,	&ccColorScaleEditorDialog::saveCurrentScale);
-	connect(deleteToolButton,		&QToolButton::clicked,				this,	&ccColorScaleEditorDialog::deleteCurrentScale);
-	connect(copyToolButton,			&QToolButton::clicked,				this,	&ccColorScaleEditorDialog::copyCurrentScale);
-	connect(newToolButton,			&QToolButton::clicked,				this,	&ccColorScaleEditorDialog::createNewScale);
-	connect(scaleModeComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::activated),			this,	&ccColorScaleEditorDialog::relativeModeChanged);
+	connect(m_ui->renameToolButton,		&QToolButton::clicked,				this,	&ccColorScaleEditorDialog::renameCurrentScale);
+	connect(m_ui->saveToolButton,			&QToolButton::clicked,				this,	&ccColorScaleEditorDialog::saveCurrentScale);
+	connect(m_ui->deleteToolButton,		&QToolButton::clicked,				this,	&ccColorScaleEditorDialog::deleteCurrentScale);
+	connect(m_ui->copyToolButton,			&QToolButton::clicked,				this,	&ccColorScaleEditorDialog::copyCurrentScale);
+	connect(m_ui->newToolButton,			&QToolButton::clicked,				this,	&ccColorScaleEditorDialog::createNewScale);
+	connect(m_ui->scaleModeComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::activated),			this,	&ccColorScaleEditorDialog::relativeModeChanged);
 
 	//scale widget
 	connect(m_scaleWidget,		&ccColorScaleEditorWidget::stepSelected,this,	&ccColorScaleEditorDialog::onStepSelected);
 	connect(m_scaleWidget,		&ccColorScaleEditorWidget::stepModified,this,	&ccColorScaleEditorDialog::onStepModified);
 
 	//slider editor
-	connect(deleteSliderToolButton,	&QToolButton::clicked,				this,	&ccColorScaleEditorDialog::deletecSelectedStep);
-	connect(colorToolButton,		&QToolButton::clicked,				this,	&ccColorScaleEditorDialog::changeSelectedStepColor);
-	connect(valueDoubleSpinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &ccColorScaleEditorDialog::changeSelectedStepValue);
+	connect(m_ui->deleteSliderToolButton,	&QToolButton::clicked,				this,	&ccColorScaleEditorDialog::deletecSelectedStep);
+	connect(m_ui->colorToolButton,		&QToolButton::clicked,				this,	&ccColorScaleEditorDialog::changeSelectedStepColor);
+	connect(m_ui->valueDoubleSpinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &ccColorScaleEditorDialog::changeSelectedStepValue);
 
 	//labels list widget
-	connect(customLabelsGroupBox, &QGroupBox::toggled,					this, &ccColorScaleEditorDialog::toggleCustomLabelsList);
-	connect(customLabelsPlainTextEdit, &QPlainTextEdit::textChanged,	this, &ccColorScaleEditorDialog::onCustomLabelsListChanged);
+	connect(m_ui->customLabelsGroupBox, &QGroupBox::toggled,					this, &ccColorScaleEditorDialog::toggleCustomLabelsList);
+	connect(m_ui->customLabelsPlainTextEdit, &QPlainTextEdit::textChanged,	this, &ccColorScaleEditorDialog::onCustomLabelsListChanged);
 
 	//apply button
-	connect(applyPushButton, &QPushButton::clicked,				this, &ccColorScaleEditorDialog::onApply);
+	connect(m_ui->applyPushButton, &QPushButton::clicked,				this, &ccColorScaleEditorDialog::onApply);
 	//close button
-	connect(closePushButton, &QPushButton::clicked,				this, &ccColorScaleEditorDialog::onClose);
+	connect(m_ui->closePushButton, &QPushButton::clicked,				this, &ccColorScaleEditorDialog::onClose);
 
 	//populate main combox box with all known scales
 	updateMainComboBox();
@@ -109,6 +110,11 @@ ccColorScaleEditorDialog::ccColorScaleEditorDialog(	ccColorScalesManager* manage
 		m_colorScale = m_manager->getDefaultScale(ccColorScalesManager::BGYR);
 
 	setActiveScale(m_colorScale);
+}
+
+ccColorScaleEditorDialog::~ccColorScaleEditorDialog()
+{
+	delete m_ui;
 }
 
 void ccColorScaleEditorDialog::setAssociatedScalarField(ccScalarField* sf)
@@ -129,30 +135,30 @@ void ccColorScaleEditorDialog::updateMainComboBox()
 		return;
 	}
 
-	rampComboBox->blockSignals(true);
-	rampComboBox->clear();
+	m_ui->rampComboBox->blockSignals(true);
+	m_ui->rampComboBox->clear();
 
 	//populate combo box with scale names (and UUID)
 	assert(m_manager);
 	for (ccColorScalesManager::ScalesMap::const_iterator it = m_manager->map().constBegin(); it != m_manager->map().constEnd(); ++it)
-		rampComboBox->addItem((*it)->getName(),(*it)->getUuid());
+		m_ui->rampComboBox->addItem((*it)->getName(),(*it)->getUuid());
 
 	//find the currently selected scale in the new 'list'
 	int pos = -1;
 	if (m_colorScale)
 	{
-		pos = rampComboBox->findData(m_colorScale->getUuid());
+		pos = m_ui->rampComboBox->findData(m_colorScale->getUuid());
 		if (pos < 0) //the current color scale has disappeared?!
 			m_colorScale = ccColorScale::Shared(nullptr);
 	}
-	rampComboBox->setCurrentIndex(pos);
+	m_ui->rampComboBox->setCurrentIndex(pos);
 
-	rampComboBox->blockSignals(false);
+	m_ui->rampComboBox->blockSignals(false);
 }
 
 void ccColorScaleEditorDialog::colorScaleChanged(int pos)
 {
-	QString UUID = rampComboBox->itemData(pos).toString();
+	QString UUID = m_ui->rampComboBox->itemData(pos).toString();
 	ccColorScale::Shared colorScale = ccColorScalesManager::GetUniqueInstance()->getScale(UUID);
 
 	setActiveScale(colorScale);
@@ -168,7 +174,7 @@ void ccColorScaleEditorDialog::relativeModeChanged(int value)
 void ccColorScaleEditorDialog::setModified(bool state)
 {
 	m_modified = state;
-	saveToolButton->setEnabled(m_modified);
+	m_ui->saveToolButton->setEnabled(m_modified);
 }
 
 bool ccColorScaleEditorDialog::canChangeCurrentScale()
@@ -204,7 +210,7 @@ bool ccColorScaleEditorDialog::canChangeCurrentScale()
 
 bool ccColorScaleEditorDialog::isRelativeMode() const
 {
-	return (scaleModeComboBox->currentIndex() == 0 ? true : false);
+	return (m_ui->scaleModeComboBox->currentIndex() == 0 ? true : false);
 }
 
 void ccColorScaleEditorDialog::setActiveScale(ccColorScale::Shared currentScale)
@@ -215,12 +221,12 @@ void ccColorScaleEditorDialog::setActiveScale(ccColorScale::Shared currentScale)
 		if (!canChangeCurrentScale())
 		{
 			//restore old combo-box state
-			int pos = rampComboBox->findData(m_colorScale->getUuid());
+			int pos = m_ui->rampComboBox->findData(m_colorScale->getUuid());
 			if (pos >= 0)
 			{
-				rampComboBox->blockSignals(true);
-				rampComboBox->setCurrentIndex(pos);
-				rampComboBox->blockSignals(false);
+				m_ui->rampComboBox->blockSignals(true);
+				m_ui->rampComboBox->setCurrentIndex(pos);
+				m_ui->rampComboBox->blockSignals(false);
 			}
 			else
 			{
@@ -236,12 +242,12 @@ void ccColorScaleEditorDialog::setActiveScale(ccColorScale::Shared currentScale)
 
 	//make sure combo-box is up to date
 	{
-		int pos = rampComboBox->findData(m_colorScale->getUuid());
+		int pos = m_ui->rampComboBox->findData(m_colorScale->getUuid());
 		if (pos >= 0)
 		{
-			rampComboBox->blockSignals(true);
-			rampComboBox->setCurrentIndex(pos);
-			rampComboBox->blockSignals(false);
+			m_ui->rampComboBox->blockSignals(true);
+			m_ui->rampComboBox->setCurrentIndex(pos);
+			m_ui->rampComboBox->blockSignals(false);
 		}
 	}
 
@@ -249,14 +255,14 @@ void ccColorScaleEditorDialog::setActiveScale(ccColorScale::Shared currentScale)
 	{
 		//locked state
 		bool isLocked = !m_colorScale || m_colorScale->isLocked();
-		colorScaleParametersFrame->setEnabled(!isLocked);
-		exportToolButton->setEnabled(!isLocked);
-		lockWarningLabel->setVisible(isLocked);
-		selectedSliderGroupBox->setEnabled(!isLocked);
+		m_ui->colorScaleParametersFrame->setEnabled(!isLocked);
+		m_ui->exportToolButton->setEnabled(!isLocked);
+		m_ui->lockWarningLabel->setVisible(isLocked);
+		m_ui->selectedSliderGroupBox->setEnabled(!isLocked);
 		m_scaleWidget->setEnabled(!isLocked);
-		customLabelsGroupBox->blockSignals(true);
-		customLabelsGroupBox->setEnabled(!isLocked);
-		customLabelsGroupBox->blockSignals(false);
+		m_ui->customLabelsGroupBox->blockSignals(true);
+		m_ui->customLabelsGroupBox->setEnabled(!isLocked);
+		m_ui->customLabelsGroupBox->blockSignals(false);
 
 		//absolute or relative mode
 		if (m_colorScale)
@@ -282,9 +288,9 @@ void ccColorScaleEditorDialog::setActiveScale(ccColorScale::Shared currentScale)
 		ccColorScale::LabelSet& customLabels = m_colorScale->customLabels();
 		if (customLabels.empty())
 		{
-			customLabelsPlainTextEdit->blockSignals(true);
-			customLabelsPlainTextEdit->setPlainText(s_defaultEmptyCustomListText);
-			customLabelsPlainTextEdit->blockSignals(false);
+			m_ui->customLabelsPlainTextEdit->blockSignals(true);
+			m_ui->customLabelsPlainTextEdit->setPlainText(s_defaultEmptyCustomListText);
+			m_ui->customLabelsPlainTextEdit->blockSignals(false);
 		}
 		else
 		{
@@ -296,14 +302,14 @@ void ccColorScaleEditorDialog::setActiveScale(ccColorScale::Shared currentScale)
 					text += QString("\n");
 				text += QString::number(*it,'f',6);
 			}
-			customLabelsPlainTextEdit->blockSignals(true);
-			customLabelsPlainTextEdit->setPlainText(text);
-			customLabelsPlainTextEdit->blockSignals(false);
+			m_ui->customLabelsPlainTextEdit->blockSignals(true);
+			m_ui->customLabelsPlainTextEdit->setPlainText(text);
+			m_ui->customLabelsPlainTextEdit->blockSignals(false);
 
 		}
-		customLabelsGroupBox->blockSignals(true);
-		customLabelsGroupBox->setChecked(!customLabels.empty());
-		customLabelsGroupBox->blockSignals(false);
+		m_ui->customLabelsGroupBox->blockSignals(true);
+		m_ui->customLabelsGroupBox->setChecked(!customLabels.empty());
+		m_ui->customLabelsGroupBox->blockSignals(false);
 	}
 
 	m_scaleWidget->importColorScale(m_colorScale);
@@ -313,14 +319,18 @@ void ccColorScaleEditorDialog::setActiveScale(ccColorScale::Shared currentScale)
 
 void ccColorScaleEditorDialog::setScaleModeToRelative(bool isRelative)
 {
-	scaleModeComboBox->setCurrentIndex(isRelative ? 0 : 1);
-	valueDoubleSpinBox->setSuffix(isRelative ? QString(" %") : QString());
-	valueDoubleSpinBox->blockSignals(true);
+	m_ui->scaleModeComboBox->setCurrentIndex(isRelative ? 0 : 1);
+	m_ui->valueDoubleSpinBox->setSuffix(isRelative ? QString(" %") : QString());
+	m_ui->valueDoubleSpinBox->blockSignals(true);
 	if (isRelative)
-		valueDoubleSpinBox->setRange(0.0, 100.0); //between 0 and 100%
+	{
+		m_ui->valueDoubleSpinBox->setRange(0.0, 100.0); //between 0 and 100%
+	}
 	else
-		valueDoubleSpinBox->setRange(-1.0e9, 1.0e9);
-	valueDoubleSpinBox->blockSignals(false);
+	{
+		m_ui->valueDoubleSpinBox->setRange(-1.0e9, 1.0e9);
+	}
+	m_ui->valueDoubleSpinBox->blockSignals(false);
 
 	//update selected slider frame
 	int selectedIndex = (m_scaleWidget ? m_scaleWidget->getSelectedStepIndex() : -1);
@@ -329,17 +339,17 @@ void ccColorScaleEditorDialog::setScaleModeToRelative(bool isRelative)
 
 void ccColorScaleEditorDialog::onStepSelected(int index)
 {
-	selectedSliderGroupBox->setEnabled(/*m_colorScale && !m_colorScale->isLocked() && */index >= 0);
+	m_ui->selectedSliderGroupBox->setEnabled(/*m_colorScale && !m_colorScale->isLocked() && */index >= 0);
 
-	deleteSliderToolButton->setEnabled(index >= 1 && index+1 < m_scaleWidget->getStepCount()); //don't delete the first and last steps!
+	m_ui->deleteSliderToolButton->setEnabled(index >= 1 && index+1 < m_scaleWidget->getStepCount()); //don't delete the first and last steps!
 
 	if (index < 0)
 	{
-		valueDoubleSpinBox->blockSignals(true);
-		valueDoubleSpinBox->setValue(0.0);
-		valueDoubleSpinBox->blockSignals(false);
-		ccQtHelpers::SetButtonColor(colorToolButton,Qt::gray);
-		valueLabel->setVisible(false);
+		m_ui->valueDoubleSpinBox->blockSignals(true);
+		m_ui->valueDoubleSpinBox->setValue(0.0);
+		m_ui->valueDoubleSpinBox->blockSignals(false);
+		ccQtHelpers::SetButtonColor(m_ui->colorToolButton,Qt::gray);
+		m_ui->valueLabel->setVisible(false);
 	}
 	else
 	{
@@ -357,43 +367,43 @@ void ccColorScaleEditorDialog::onStepModified(int index)
 	const ColorScaleElementSlider* slider = m_scaleWidget->getStep(index);
 	assert(slider);
 
-	ccQtHelpers::SetButtonColor(colorToolButton,slider->getColor());
+	ccQtHelpers::SetButtonColor(m_ui->colorToolButton,slider->getColor());
 	if (m_colorScale)
 	{
 		const double relativePos = slider->getRelativePos();
 		if (isRelativeMode())
 		{
-			valueDoubleSpinBox->blockSignals(true);
-			valueDoubleSpinBox->setValue(relativePos*100.0);
-			valueDoubleSpinBox->blockSignals(false);
+			m_ui->valueDoubleSpinBox->blockSignals(true);
+			m_ui->valueDoubleSpinBox->setValue(relativePos*100.0);
+			m_ui->valueDoubleSpinBox->blockSignals(false);
 			if (m_associatedSF)
 			{
 				//compute corresponding scalar value for associated SF
 				double actualValue = m_associatedSF->getMin() + relativePos * (m_associatedSF->getMax() - m_associatedSF->getMin());
-				valueLabel->setText(QString("(%1)").arg(actualValue));
-				valueLabel->setVisible(true);
+				m_ui->valueLabel->setText(QString("(%1)").arg(actualValue));
+				m_ui->valueLabel->setVisible(true);
 			}
 			else
 			{
-				valueLabel->setVisible(false);
+				m_ui->valueLabel->setVisible(false);
 			}
 
 			//can't change min and max boundaries in 'relative' mode!
-			valueDoubleSpinBox->setEnabled(index > 0 && index < m_scaleWidget->getStepCount()-1);
+			m_ui->valueDoubleSpinBox->setEnabled(index > 0 && index < m_scaleWidget->getStepCount()-1);
 		}
 		else
 		{
 			//compute corresponding 'absolute' value from current dialog boundaries
 			double absoluteValue = m_minAbsoluteVal + relativePos * (m_maxAbsoluteVal - m_minAbsoluteVal);
 			
-			valueDoubleSpinBox->blockSignals(true);
-			valueDoubleSpinBox->setValue(absoluteValue);
-			valueDoubleSpinBox->blockSignals(false);
-			valueDoubleSpinBox->setEnabled(true);
+			m_ui->valueDoubleSpinBox->blockSignals(true);
+			m_ui->valueDoubleSpinBox->setValue(absoluteValue);
+			m_ui->valueDoubleSpinBox->blockSignals(false);
+			m_ui->valueDoubleSpinBox->setEnabled(true);
 
 			//display corresponding relative position as well
-			valueLabel->setText(QString("(%1 %)").arg(relativePos*100.0));
-			valueLabel->setVisible(true);
+			m_ui->valueLabel->setText(QString("(%1 %)").arg(relativePos*100.0));
+			m_ui->valueLabel->setVisible(true);
 		}
 
 		setModified(true);
@@ -496,10 +506,10 @@ void ccColorScaleEditorDialog::changeSelectedStepValue(double value)
 
 bool ccColorScaleEditorDialog::exportCustomLabelsList(ccColorScale::LabelSet& labels)
 {
-	assert(customLabelsGroupBox->isChecked());
+	assert(m_ui->customLabelsGroupBox->isChecked());
 	labels.clear();
 
-	QString text = customLabelsPlainTextEdit->toPlainText();
+	QString text = m_ui->customLabelsPlainTextEdit->toPlainText();
 	QStringList items = text.simplified().split(QChar(' '), QString::SkipEmptyParts);
 	if (items.size() < 2)
 	{
@@ -532,7 +542,7 @@ bool ccColorScaleEditorDialog::exportCustomLabelsList(ccColorScale::LabelSet& la
 
 bool ccColorScaleEditorDialog::checkCustomLabelsList(bool showWarnings)
 {
-	QString text = customLabelsPlainTextEdit->toPlainText();
+	QString text = m_ui->customLabelsPlainTextEdit->toPlainText();
 	QStringList items = text.simplified().split(QChar(' '), QString::SkipEmptyParts);
 	if (items.size() < 2)
 	{
@@ -566,13 +576,13 @@ void ccColorScaleEditorDialog::toggleCustomLabelsList(bool state)
 	//custom list enable
 	if (state)
 	{
-		QString previousText = customLabelsPlainTextEdit->toPlainText();
+		QString previousText = m_ui->customLabelsPlainTextEdit->toPlainText();
 		//if the previous list was 'empty', we clear its (fake) content
 		if (previousText == s_defaultEmptyCustomListText)
 		{
-			customLabelsPlainTextEdit->blockSignals(true);
-			customLabelsPlainTextEdit->clear();
-			customLabelsPlainTextEdit->blockSignals(false);
+			m_ui->customLabelsPlainTextEdit->blockSignals(true);
+			m_ui->customLabelsPlainTextEdit->clear();
+			m_ui->customLabelsPlainTextEdit->blockSignals(false);
 		}
 	}
 	else
@@ -580,7 +590,7 @@ void ccColorScaleEditorDialog::toggleCustomLabelsList(bool state)
 		if (!checkCustomLabelsList(false))
 		{
 			//if the text is invalid
-			customLabelsPlainTextEdit->setPlainText(s_defaultEmptyCustomListText);
+			m_ui->customLabelsPlainTextEdit->setPlainText(s_defaultEmptyCustomListText);
 		}
 	}
 	setModified(true);
@@ -622,7 +632,7 @@ bool ccColorScaleEditorDialog::saveCurrentScale()
 	}
 
 	//check the custom labels
-	if (customLabelsGroupBox->isChecked() && !checkCustomLabelsList(true))
+	if (m_ui->customLabelsGroupBox->isChecked() && !checkCustomLabelsList(true))
 	{
 		//error message already issued
 		return false;
@@ -671,7 +681,7 @@ bool ccColorScaleEditorDialog::saveCurrentScale()
 	}
 
 	//save the custom labels
-	if (customLabelsGroupBox->isChecked())
+	if (m_ui->customLabelsGroupBox->isChecked())
 	{
 		exportCustomLabelsList(m_colorScale->customLabels());
 	}
@@ -698,10 +708,10 @@ void ccColorScaleEditorDialog::renameCurrentScale()
 	{
 		m_colorScale->setName(newName);
 		//position in combo box
-		int pos = rampComboBox->findData(m_colorScale->getUuid());
+		int pos = m_ui->rampComboBox->findData(m_colorScale->getUuid());
 		if (pos >= 0)
 			//update combo box entry name
-			rampComboBox->setItemText(pos,newName);
+			m_ui->rampComboBox->setItemText(pos,newName);
 	}
 }
 
@@ -727,7 +737,7 @@ void ccColorScaleEditorDialog::deleteCurrentScale()
 	ccColorScale::Shared colorScaleToDelete = m_colorScale;
 	setModified(false); //cancel any modification
 
-	int currentIndex = rampComboBox->currentIndex();
+	int currentIndex = m_ui->rampComboBox->currentIndex();
 	if (currentIndex == 0)
 		currentIndex = 1;
 	else if (currentIndex > 0)
@@ -737,7 +747,7 @@ void ccColorScaleEditorDialog::deleteCurrentScale()
 	if (m_manager)
 	{
 		//activate the neighbor scale in the list
-		ccColorScale::Shared nextScale = m_manager->getScale(rampComboBox->itemData(currentIndex).toString());
+		ccColorScale::Shared nextScale = m_manager->getScale(m_ui->rampComboBox->itemData(currentIndex).toString());
 		setActiveScale(nextScale);
 
 		m_manager->removeScale(colorScaleToDelete->getUuid());

@@ -1,3 +1,4 @@
+#pragma once
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -17,8 +18,7 @@
 
 //Inspired from ccColorScaleEditorWidget by Richard Steffen (LGPL 2.1)
 
-#ifndef CC_COLOR_SCALE_EDITOR_WIDGET_HEADER
-#define CC_COLOR_SCALE_EDITOR_WIDGET_HEADER
+#include "CCPluginAPI.h"
 
 //Qt
 #include <QWidget>
@@ -27,7 +27,7 @@
 #include <ccColorScale.h>
 
 //! Color scale element as a widget
-class ColorScaleElementSlider : public QWidget, public ccColorScaleElement
+class CCPLUGIN_LIB_API ColorScaleElementSlider : public QWidget, public ccColorScaleElement
 {
 	Q_OBJECT
 
@@ -61,7 +61,7 @@ protected:
 };
 
 //! Set of color scale elements (widgets)
-class ColorScaleElementSliders : public QList<ColorScaleElementSlider*>
+class CCPLUGIN_LIB_API ColorScaleElementSliders : public QList<ColorScaleElementSlider*>
 {
 public:
 
@@ -92,7 +92,7 @@ using SharedColorScaleElementSliders = QSharedPointer<ColorScaleElementSliders>;
 //! Base color scale editor (sub)Widget
 /** A widget with a margin (along a preferred orientation)
 **/
-class ColorScaleEditorBaseWidget : public QWidget
+class CCPLUGIN_LIB_API ColorScaleEditorBaseWidget : public QWidget
 {
 	Q_OBJECT
 
@@ -133,7 +133,7 @@ protected:
 };
 
 //! Color bar widget
-class ColorBarWidget : public ColorScaleEditorBaseWidget
+class CCPLUGIN_LIB_API ColorBarWidget : public ColorScaleEditorBaseWidget
 {
 	Q_OBJECT
 
@@ -157,7 +157,7 @@ protected:
 };
 
 //! All sliders widget
-class SlidersWidget : public ColorScaleEditorBaseWidget
+class CCPLUGIN_LIB_API SlidersWidget : public ColorScaleEditorBaseWidget
 {
 	Q_OBJECT
 
@@ -202,7 +202,7 @@ protected:
 };
 
 //! All sliders labels widget
-class SliderLabelWidget : public ColorScaleEditorBaseWidget
+class CCPLUGIN_LIB_API SliderLabelWidget : public ColorScaleEditorBaseWidget
 {
 	Q_OBJECT
 
@@ -230,7 +230,7 @@ protected:
 };
 
 //! Color scale editor dialog
-class ccColorScaleEditorWidget : public ColorScaleEditorBaseWidget
+class CCPLUGIN_LIB_API ccColorScaleEditorWidget : public ColorScaleEditorBaseWidget
 {
 	Q_OBJECT
 
@@ -314,5 +314,3 @@ protected:
 	SliderLabelWidget* m_labelsWidget;
 
 };
-
-#endif //CC_COLOR_SCALE_EDITOR_DIALOG_HEADER

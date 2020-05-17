@@ -21,7 +21,7 @@
 #include "CCMath.h"
 
 //local
-#include "../ccPersistentSettings.h"
+#include "ccPersistentSettings.h"
 
 //qCC_gl
 #include <ccGuiParameters.h>

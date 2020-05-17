@@ -37,7 +37,7 @@ class CCGLWINDOW_LIB_API ccGui
 public:
 
 	//! GUI parameters
-	struct ParamStruct
+	struct CCGLWINDOW_LIB_API ParamStruct
 	{
 		//! Light diffuse color (RGBA)
 		ccColor::Rgbaf lightDiffuseColor;

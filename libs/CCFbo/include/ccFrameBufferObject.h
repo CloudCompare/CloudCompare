@@ -1,3 +1,4 @@
+#pragma once
 //##########################################################################
 //#                                                                        #
 //#                               CCFBO                                    #
@@ -15,8 +16,7 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_FRAME_BUFFER_OBJECT
-#define CC_FRAME_BUFFER_OBJECT
+#include "CCFbo.h"
 
 //Qt
 #include <QOpenGLExtensions>
@@ -27,7 +27,7 @@
 	- get the attached depth texture ID
 	- attach a custom COLOR texture
 **/
-class ccFrameBufferObject
+class CCFBO_LIB_API ccFrameBufferObject
 {
 public:
 	ccFrameBufferObject();
@@ -105,5 +105,3 @@ protected: //members
 	QOpenGLFunctions_2_1 m_glFunc;
 	QOpenGLExtension_ARB_framebuffer_object	m_glExtFunc;
 };
-
-#endif

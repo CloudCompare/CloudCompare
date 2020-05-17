@@ -1,3 +1,4 @@
+#pragma once
 //##########################################################################
 //#                                                                        #
 //#                               CCFBO                                    #
@@ -15,8 +16,7 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_SHADER_HEADER
-#define CC_SHADER_HEADER
+#include "CCFbo.h"
 
 //Qt
 #include <QString>
@@ -27,7 +27,7 @@ class QObject;
 //! Shader program
 /** Now a simple encapsulation of QOpenGLShaderProgram providing two helper functions.
 **/
-class ccShader : public QOpenGLShaderProgram
+class CCFBO_LIB_API ccShader : public QOpenGLShaderProgram
 {
 	Q_OBJECT
 	
@@ -57,5 +57,3 @@ public:
 	**/
 	virtual bool loadProgram(QString vertShaderFile, QString fragShaderFile, QString& error);
 };
-
-#endif

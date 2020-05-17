@@ -1,3 +1,4 @@
+#pragma once
 //##########################################################################
 //#                                                                        #
 //#                               CCFBO                                    #
@@ -15,8 +16,7 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_GL_FILTER_HEADER
-#define CC_GL_FILTER_HEADER
+#include "CCFbo.h"
 
 //Qt
 #include <QString>
@@ -26,7 +26,7 @@
 	textures (typically the rendered scene), typically
 	through intensive use of Frame Buffer Objects.
 **/
-class ccGlFilter
+class CCFBO_LIB_API ccGlFilter
 {
 public:
 
@@ -59,7 +59,7 @@ public:
 						QString& error) = 0;
 
 	//! Minimal set of 3D viewport parameters that can be used by shaders
-	struct ViewportParameters
+	struct CCFBO_LIB_API ViewportParameters
 	{
 		//! Default constructor
 		ViewportParameters()
@@ -103,5 +103,3 @@ protected:
 	//! Filter description
 	QString m_description;
 };
-
-#endif

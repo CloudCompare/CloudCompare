@@ -14,8 +14,4 @@ if( PLUGIN_STANDARD_QSRA )
 	add_subdirectory( include )
 	add_subdirectory( src )
 	add_subdirectory( ui )
-	
-	if( OPTION_USE_DXF_LIB )
-		target_link_DXFLIB( ${PROJECT_NAME} )
-	endif()
 endif()

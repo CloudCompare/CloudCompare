@@ -1,3 +1,4 @@
+#pragma once
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,8 +16,7 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_GL_WINDOW_HEADER
-#define CC_GL_WINDOW_HEADER
+#include "qCC_glWindow.h"
 
 //qCC_db
 #include <ccDrawableObject.h>
@@ -64,7 +64,7 @@ using ccGLWindowParent = QOpenGLWidget;
 
 
 //! OpenGL 3D view
-class ccGLWindow : public ccGLWindowParent, public ccGenericGLDisplay
+class CCGLWINDOW_LIB_API ccGLWindow : public ccGLWindowParent, public ccGenericGLDisplay
 {
 	Q_OBJECT
 
@@ -566,7 +566,7 @@ public: //debug traces on screen
 public: //stereo mode
 
 	//! Seterovision parameters
-	struct StereoParams
+	struct CCGLWINDOW_LIB_API StereoParams
 	{
 		StereoParams();
 
@@ -808,7 +808,7 @@ protected: //rendering
 	bool bindFBO(ccFrameBufferObject* fbo);
 
 	//! LOD state
-	struct LODState
+	struct CCGLWINDOW_LIB_API LODState
 	{
 		LODState()
 			: inProgress(false)
@@ -1111,7 +1111,7 @@ protected: //members
 	bool m_pickingModeLocked;
 
 	//! Display capturing mode options
-	struct CaptureModeOptions
+	struct CCGLWINDOW_LIB_API CaptureModeOptions
 	{
 		//! Default constructor
 		CaptureModeOptions()
@@ -1129,7 +1129,7 @@ protected: //members
 	CaptureModeOptions m_captureMode;
 
 	//! Temporary Message to display in the lower-left corner
-	struct MessageToDisplay
+	struct CCGLWINDOW_LIB_API MessageToDisplay
 	{
 		MessageToDisplay()
 			: messageValidity_sec(0)
@@ -1168,7 +1168,7 @@ protected: //members
 	bool m_customLightEnabled;
 
 	//! Clickable item
-	struct ClickableItem
+	struct CCGLWINDOW_LIB_API ClickableItem
 	{
 		enum Role {	NO_ROLE,
 					INCREASE_POINT_SIZE,
@@ -1333,5 +1333,3 @@ protected: //members
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(ccGLWindow::INTERACTION_FLAGS);
-
-#endif //CC_GL_WINDOW_HEADER

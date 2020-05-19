@@ -1,3 +1,4 @@
+#pragma once
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,8 +16,7 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_GL_UTILS_HEADER
-#define CC_GL_UTILS_HEADER
+#include "qCC_glWindow.h"
 
 //qCC_db
 #include <ccIncludeGL.h> //Always first!
@@ -35,7 +35,7 @@ enum CC_VIEW_ORIENTATION {	CC_TOP_VIEW,	/**< Top view (eye: +Z) **/
 							CC_ISO_VIEW_2,	/**< Isometric view 2: back, left and top **/
 };
 
-class ccGLUtils
+class CCGLWINDOW_LIB_API ccGLUtils
 {
 public:
 
@@ -60,5 +60,3 @@ public:
 	static ccGLMatrixd GenerateViewMat(CC_VIEW_ORIENTATION orientation);
 
 };
-
-#endif //CC_GL_UTILS_HEADER

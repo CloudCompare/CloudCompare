@@ -1,3 +1,4 @@
+#pragma once
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,8 +16,7 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_GL_WIDGET_HEADER
-#define CC_GL_WIDGET_HEADER
+#include "qCC_glWindow.h"
 
 //Local
 #include <ccGLWindow.h>
@@ -33,7 +33,7 @@
 #include <assert.h>
 
 //! Container widget for ccGLWindow
-class ccGLWidget : public QWidget
+class CCGLWINDOW_LIB_API ccGLWidget : public QWidget
 {
 	Q_OBJECT
 
@@ -136,5 +136,3 @@ inline ccGLWindow* GLWindowFromWidget(QWidget* widget)
 		return nullptr;
 	}
 }
-
-#endif //CC_GL_WIDGET_HEADER

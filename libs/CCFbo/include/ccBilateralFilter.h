@@ -1,3 +1,4 @@
+#pragma once
 //##########################################################################
 //#                                                                        #
 //#                               CCFBO                                    #
@@ -27,8 +28,7 @@
 //
 /*****************************************************************/
 
-#ifndef	CC_BILATERAL_FILTER_HEADER
-#define	CC_BILATERAL_FILTER_HEADER
+#include "CCFbo.h"
 
 //Local
 #include "ccGlFilter.h"
@@ -41,7 +41,7 @@
 //! Bilateral filer (shader)
 /** See http://en.wikipedia.org/wiki/Bilateral_filter
 **/
-class ccBilateralFilter : public ccGlFilter
+class CCFBO_LIB_API ccBilateralFilter : public ccGlFilter
 {
 public:
 
@@ -106,5 +106,3 @@ protected: //members
 	//! Associated OpenGL functions set validity
 	bool m_glFuncIsValid;
 };
-
-#endif

@@ -10,7 +10,7 @@ target_link_libraries( ${PROJECT_NAME}
 	CCPluginAPI
 )
 
-target_compile_definitions( ${PROJECT_NAME} PRIVATE CCAPPCOMMON_LIB_BUILD )
+target_compile_definitions( ${PROJECT_NAME} PRIVATE CCAPPCOMMON_LIBRARY_BUILD )
 
 set_target_properties( ${PROJECT_NAME} PROPERTIES
 	AUTOUIC ON # FIXME Remove after everything has moved to targets and we can set it globally

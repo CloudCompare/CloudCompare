@@ -19,7 +19,7 @@
 
 #include <QtCore/QtGlobal>
 
-#if defined( CCAPPCOMMON_API_LIBRARY_BUILD )
+#if defined( CCAPPCOMMON_LIBRARY_BUILD )
 #  define CCAPPCOMMON_LIB_API Q_DECL_EXPORT
 #else
 #  define CCAPPCOMMON_LIB_API Q_DECL_IMPORT

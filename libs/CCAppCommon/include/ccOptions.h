@@ -1,6 +1,4 @@
-#ifndef CCPLUGINMANAGER_H
-#define CCPLUGINMANAGER_H
-
+#pragma once
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -14,48 +12,53 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: CloudCompare project                               #
+//#                 COPYRIGHT: Daniel Girardeau-Montaut                    #
 //#                                                                        #
 //##########################################################################
 
-#include <QObject>
-#include <QVector>
+#include "CCAppCommon.h"
 
-class ccPluginInterface;
+//Qt
+#include <QString>
 
-//! Simply a list of \see ccPluginInterface
-using ccPluginInterfaceList = QVector<ccPluginInterface *>;
-
-
-class ccPluginManager : public QObject
+//! Main application options
+class CCAPPCOMMON_LIB_API ccOptions
 {
-	Q_OBJECT
-	
-public:
-	~ccPluginManager() override = default;
-	
-	static ccPluginManager& get();
-	
-	void setPaths( const QStringList& paths );
-	QStringList pluginPaths();
-	
-	void loadPlugins();
-	
-	ccPluginInterfaceList& pluginList();
-	
-	void setPluginEnabled( const ccPluginInterface* plugin, bool enabled );
-	bool isEnabled( const ccPluginInterface* plugin ) const;
-	
-protected:
-	explicit ccPluginManager( QObject* parent = nullptr );
+public: //parameters
 
-private:
-	void loadFromPathsAndAddToList();
+	//! Whether to display the normals by default or not
+	bool normalsDisplayedByDefault;
+
+	//! Use native load/save dialogs
+	bool useNativeDialogs;
+
+public: //methods
+
+	//! Default constructor
+	ccOptions();
+
+	//! Resets parameters to default values
+	void reset();
+
+	//! Loads from persistent DB
+	void fromPersistentSettings();
+
+	//! Saves to persistent DB
+	void toPersistentSettings() const;
+
+public: //static methods
+
+	//! Returns the stored values of each parameter.
+	static const ccOptions& Instance() { return InstanceNonConst(); }
+
+	//! Release unique instance (if any)
+	static void ReleaseInstance();
+
+	//! Sets parameters
+	static void Set(const ccOptions& options);
+
+protected: //methods
 	
-	QStringList disabledPluginIIDs() const;
-	
-	QStringList m_pluginPaths;
-	ccPluginInterfaceList m_pluginList;
+	//! Returns the stored values of each parameter.
+	static ccOptions& InstanceNonConst();
 };
-
-#endif

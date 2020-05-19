@@ -1,9 +1,6 @@
-#ifndef CCAPPLICATIONBASE_H
-#define CCAPPLICATIONBASE_H
-
 //##########################################################################
 //#                                                                        #
-//#                              CLOUDCOMPARE                              #
+//#                            CLOUDCOMPARE                                #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
@@ -18,38 +15,12 @@
 //#                                                                        #
 //##########################################################################
 
-//Qt
-#include <QApplication>
+#pragma once
 
-//! Mimic Qt's qApp for easy access to the application instance
-#define ccApp (static_cast<ccApplicationBase *>( QCoreApplication::instance() ))
+#include <QtCore/QtGlobal>
 
-class ccApplicationBase : public QApplication
-{
-public:
-	//! This must be called before instantiating the application class so it
-	//! can setup OpenGL first.
-	static void	initOpenGL();
-	
-	ccApplicationBase( int &argc, char **argv, bool isCommandLine, const QString &version );
-	
-	bool isCommandLine() const { return c_CommandLine; }
-	
-	QString versionStr() const;
-	QString versionLongStr( bool includeOS ) const;
-	
-	const QString &translationPath() const;
-	
-private:
-	void setupPaths();
-		
-	const QString c_VersionStr;
-	
-	QString	m_ShaderPath;
-	QString	m_TranslationPath;
-	QStringList m_PluginPaths;
-	
-	const bool c_CommandLine;
-};
-
+#if defined( CCAPPCOMMON_API_LIBRARY_BUILD )
+#  define CCAPPCOMMON_LIB_API Q_DECL_EXPORT
+#else
+#  define CCAPPCOMMON_LIB_API Q_DECL_IMPORT
 #endif

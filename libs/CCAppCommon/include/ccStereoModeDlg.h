@@ -1,3 +1,4 @@
+#pragma once
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,40 +16,44 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_PICK_ONE_ELEMENT_DLG_HEADER
-#define CC_PICK_ONE_ELEMENT_DLG_HEADER
+#include "CCAppCommon.h"
+
+//qCC_gl
+#include <ccGLWindow.h>
 
 //Qt
 #include <QDialog>
 
-class Ui_PickOneElementDialog;
+namespace Ui
+{
+	class StereoModeDialog;
+}
 
-//! Minimal dialog to pick one element in a list (combox box)
-class ccPickOneElementDlg : public QDialog
+//! Dialog to define the parameters of the stereo mode (for 3D views)
+class CCAPPCOMMON_LIB_API ccStereoModeDlg : public QDialog
 {
 	Q_OBJECT
 
 public:
 
 	//! Default constructor
-	ccPickOneElementDlg(const QString &label,
-						const QString &windowTitle = QString(),
-						QWidget* parent = nullptr);
+	explicit ccStereoModeDlg(QWidget* parent);
+	~ccStereoModeDlg() override;
 
-	//! Destructor
-	~ccPickOneElementDlg() override;
+	//! Returns the current parameters
+	ccGLWindow::StereoParams getParameters() const;
 
-	//! Add an element to the combo box
-	void addElement(const QString &elementName);
-	//! Sets the combo box default index
-	void setDefaultIndex(int index);
-	//! Returns the combo box current index (after completion)
-	int getSelectedIndex();
+	//! Sets the current parameters
+	void setParameters(const ccGLWindow::StereoParams& params);
+
+	//! Returns whether the FOV should be updated or not
+	bool updateFOV() const;
 
 protected:
 
-	//! Associated UI
-	Ui_PickOneElementDialog* m_ui;
+	//! Slot called when the glass type is modified
+	void glassTypeChanged(int);
+	
+private:
+	Ui::StereoModeDialog* m_ui;
 };
-
-#endif //CC_PICK_ONE_ELEMENT_DLG_HEADER

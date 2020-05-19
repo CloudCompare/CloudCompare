@@ -4,7 +4,6 @@ include( CMakePolicies NO_POLICY_SCOPE )
 
 include_directories( ${CloudComparePlugins_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
-include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../common )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../qCC )
 include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
 
@@ -14,8 +13,6 @@ file( GLOB source_list *.cpp )
 file( GLOB ui_list ui_templates/*.ui )
 file( GLOB qrc_list ../qCC/*.qrc )
 file( GLOB rc_list ../qCC/*.rc )
-
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../common ${CMAKE_CURRENT_BINARY_DIR}/common)
 
 # 3DX support (3dConnexion devices)
 if ( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )
@@ -43,8 +40,7 @@ else()
 endif()
 
 target_link_libraries( ${PROJECT_NAME}
-    QCC_GL_LIB
-    CCPluginAPI
+	CCAppCommon
     Qt5::OpenGL
     Qt5::Widgets
 )

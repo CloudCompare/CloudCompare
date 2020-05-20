@@ -47,24 +47,24 @@ jobs:
           activate-environment: ccenv
           auto-update-conda: true
 
-#      - name: Install dependencies
-#        shell: pwsh
-#        run: conda install -y -c conda-forge `
-#          qt=5.12.* `
-#          pdal=2.0.* `
-#          xerces-c=3.2.* `
-#          zlib=1.2.* `
-#          eigen=3.3.* `
-#          ninja `
-#          pcl=1.9.*
-#
-#      - name: Install Dependencies (macOS)
-#        if: matrix.config.os == 'macos-latest'
-#        run: brew install xerces-c
-#
-#      - name: Configure MSVC console (Windows)
-#        if:  matrix.config.os == 'windows-latest'
-#        uses: ilammy/msvc-dev-cmd@v1
+      - name: Install dependencies
+        shell: pwsh
+        run: conda install -y -c conda-forge `
+          qt=5.12.* `
+          pdal=2.0.* `
+          xerces-c=3.2.* `
+          zlib=1.2.* `
+          eigen=3.3.* `
+          ninja `
+          pcl=1.9.*
+
+      - name: Install Dependencies (macOS)
+        if: matrix.config.os == 'macos-latest'
+        run: brew install xerces-c
+
+      - name: Configure MSVC console (Windows)
+        if:  matrix.config.os == 'windows-latest'
+        uses: ilammy/msvc-dev-cmd@v1
 
       - name: Set environment for MSVC (Windows)
         if:  matrix.config.os == 'windows-latest'
@@ -84,10 +84,10 @@ jobs:
           #- $ZLIB_INCLUDE_DIRS = Join-Path -Resolve $CONDA_LIB_DIR include
           #- $ZLIB_LIBRARIES = Join-Path -Resolve $CONDA_LIB_DIR lib ${{ matrix.config.zlib_name }}
 
-          #  -G "${{ matrix.config.generator }}" `
           try {
           cmake `
             -B build `
+            -G "${{ matrix.config.generator }}" `
             -DCMAKE_BUILD_TYPE=Release `
             -DCCCORELIB_SCALAR_DOUBLE=${{ matrix.scalar_double }} `
             -DEIGEN_ROOT_DIR="$EIGEN_ROOT_DIR" `
@@ -119,6 +119,7 @@ jobs:
             -DPLUGIN_STANDARD_QRANSAC_SD=${{ matrix.config.compile_qransac }} `
             -DPLUGIN_STANDARD_QPCL=${{ matrix.config.compile_qpcl }} `
             . 2>&1 | set-variable Output
+            Write-Host "Output:"
             $i = 0
             $Output | % {
               Write-Host ("--- " + $i + ": "  + $_.GetType() +  " ------------------------")

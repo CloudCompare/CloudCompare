@@ -47,24 +47,24 @@ jobs:
           activate-environment: ccenv
           auto-update-conda: true
 
-      - name: Install dependencies
-        shell: pwsh
-        run: conda install -y -c conda-forge `
-          qt=5.12.* `
-          pdal=2.0.* `
-          xerces-c=3.2.* `
-          zlib=1.2.* `
-          eigen=3.3.* `
-          ninja `
-          pcl=1.9.*
-
-      - name: Install Dependencies (macOS)
-        if: matrix.config.os == 'macos-latest'
-        run: brew install xerces-c
-
-      - name: Configure MSVC console (Windows)
-        if:  matrix.config.os == 'windows-latest'
-        uses: ilammy/msvc-dev-cmd@v1
+#      - name: Install dependencies
+#        shell: pwsh
+#        run: conda install -y -c conda-forge `
+#          qt=5.12.* `
+#          pdal=2.0.* `
+#          xerces-c=3.2.* `
+#          zlib=1.2.* `
+#          eigen=3.3.* `
+#          ninja `
+#          pcl=1.9.*
+#
+#      - name: Install Dependencies (macOS)
+#        if: matrix.config.os == 'macos-latest'
+#        run: brew install xerces-c
+#
+#      - name: Configure MSVC console (Windows)
+#        if:  matrix.config.os == 'windows-latest'
+#        uses: ilammy/msvc-dev-cmd@v1
 
       - name: Set environment for MSVC (Windows)
         if:  matrix.config.os == 'windows-latest'

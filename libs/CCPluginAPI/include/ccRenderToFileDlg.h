@@ -1,3 +1,4 @@
+#pragma once
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,15 +16,17 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_RENDER_TO_FILE_DLG_HEADER
-#define CC_RENDER_TO_FILE_DLG_HEADER
+#include "CCPluginAPI.h"
 
 #include <QDialog>
 
-#include <ui_renderToFileDialog.h>
+namespace Ui
+{
+	class RenderToFileDialog;	
+}
 
 //! Dialog for screen to file rendering
-class ccRenderToFileDlg : public QDialog, public Ui::RenderToFileDialog
+class CCPLUGIN_LIB_API ccRenderToFileDlg : public QDialog
 {
 	Q_OBJECT
 
@@ -32,6 +35,11 @@ public:
 	//! Default constructor
 	ccRenderToFileDlg(unsigned baseWidth, unsigned baseHeight, QWidget* parent = 0);
 
+	~ccRenderToFileDlg() override;
+	
+	//! Disable and hide the scale and overlay checkboxes
+	void hideOptions();
+	
 	//! On dialog acceptance, returns requested zoom
 	float getZoom() const;
 	//! On dialog acceptance, returns requested output filename
@@ -41,14 +49,11 @@ public:
 	//! Whether overlay items should be rendered
 	bool renderOverlayItems() const;
 
+private:
 
-	protected:
-
-		void chooseFile();
-		void updateInfo();
-		void saveSettings();
-
-protected:
+	void chooseFile();
+	void updateInfo();
+	void saveSettings();
 
 	unsigned w;
 	unsigned h;
@@ -56,6 +61,6 @@ protected:
 	QString selectedFilter;
 	QString currentPath;
 	QString filters;
-};
 
-#endif //CC_RENDER_TO_FILE_DLG_HEADER
+	Ui::RenderToFileDialog* m_ui;
+};

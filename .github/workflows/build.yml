@@ -132,9 +132,11 @@ jobs:
             echo "---"
             $_
             echo "^^^^" 
-            Write-Host "An error occurred:"
+            Write-Host " => An error occurred:"
             Write-Host $_
+            Write-Host " => Stack:"
             Write-Host $_.ScriptStackTrace
+            Write-Host " => Details:"
             Write-Host $_.ErrorDetails
             Exit 99
           }

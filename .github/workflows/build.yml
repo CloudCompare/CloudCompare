@@ -84,10 +84,10 @@ jobs:
           #- $ZLIB_INCLUDE_DIRS = Join-Path -Resolve $CONDA_LIB_DIR include
           #- $ZLIB_LIBRARIES = Join-Path -Resolve $CONDA_LIB_DIR lib ${{ matrix.config.zlib_name }}
 
+          #  -G "${{ matrix.config.generator }}" `
           try {
           cmake `
             -B build `
-            -G "${{ matrix.config.generator }}" `
             -DCMAKE_BUILD_TYPE=Release `
             -DCCCORELIB_SCALAR_DOUBLE=${{ matrix.scalar_double }} `
             -DEIGEN_ROOT_DIR="$EIGEN_ROOT_DIR" `

@@ -76,7 +76,7 @@ jobs:
       - name: Configure CMake
         shell: pwsh
         run: |
-          $ErrorActionPreference = Continue
+          $ErrorActionPreference = Stop
           mkdir build
           # Base dir where libs are installed (cmake, dlls, include files, etc)
           $CONDA_LIB_DIR = Join-Path -Resolve $env:CONDA_PREFIX ${{ matrix.config.conda_library_dir }}
@@ -154,6 +154,6 @@ jobs:
             Exit 99
           }
 
-      - name: Build
-        run: |
-          cmake --build build
+#      - name: Build
+#        run: |
+#          cmake --build build

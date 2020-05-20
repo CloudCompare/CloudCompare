@@ -138,6 +138,18 @@ jobs:
             Write-Host $_.ScriptStackTrace
             Write-Host " => Details:"
             Write-Host $_.ErrorDetails
+            cd build
+            cd CMakeFiles
+            Write-Host " => CMakeFilse:"
+            dir
+            Write-Host " => CMakeOutput.log:"
+            Get-Content CMakeOutput.log
+            Write-Host " => CMakeError.log:"
+            try {
+              Get-Content CMakeError.log
+            } catch {
+              Write-Host "Not exists"
+            }
             Exit 99
           }
 

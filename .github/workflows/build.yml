@@ -123,7 +123,11 @@ jobs:
             Write-Host "CMake Output:"
             $i = 0
             $Output | % {
-              Write-Host "${i}: ${_.Exception}"
+              if ($_.GetType().Name -eq 'ErrorRecord') {
+                Write-Host "${i}: $_.Exception.Message"
+              } else {
+                Write-Host "${i}: $_"
+              }
               $i++
             }
           }catch {

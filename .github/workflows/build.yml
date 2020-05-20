@@ -120,27 +120,18 @@ jobs:
             -DPLUGIN_STANDARD_QRANSAC_SD=${{ matrix.config.compile_qransac }} `
             -DPLUGIN_STANDARD_QPCL=${{ matrix.config.compile_qpcl }} `
             . 2>&1 | set-variable Output
-            Write-Host "Output:"
+            Write-Host "CMake Output:"
             $i = 0
             $Output | % {
-              Write-Host ( $i + ": "  + $_.Exception)
+              Write-Host "${i}: ${_.Exception}"
               $i++
             }
           }catch {
-            echo "CMake fails"
+            Write-Host "CMake fails"
             $Error
-            echo "---"
-            $_
-            echo "^^^^" 
-            Write-Host " => An error occurred:"
-            Write-Host $_
-            Write-Host " => Stack:"
-            Write-Host $_.ScriptStackTrace
-            Write-Host " => Details:"
-            Write-Host $_.ErrorDetails
             cd build
             cd CMakeFiles
-            Write-Host " => CMakeFilse:"
+            Write-Host " => CMakeFiles:"
             dir
             Write-Host " => CMakeOutput.log:"
             Get-Content CMakeOutput.log

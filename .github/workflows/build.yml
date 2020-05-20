@@ -78,11 +78,11 @@ jobs:
         run: |
           mkdir build
           # Base dir where libs are installed (cmake, dlls, include files, etc)
-          $CONDA_LIB_DIR = Join-Path -Resolve $env:CONDA_PREFIX ${{ matrix.config.conda_library_dir }}
+          #- $CONDA_LIB_DIR = Join-Path -Resolve $env:CONDA_PREFIX ${{ matrix.config.conda_library_dir }}
 
-          $EIGEN_ROOT_DIR = Join-Path -Resolve $CONDA_LIB_DIR include eigen3
-          $ZLIB_INCLUDE_DIRS = Join-Path -Resolve $CONDA_LIB_DIR include
-          $ZLIB_LIBRARIES = Join-Path -Resolve $CONDA_LIB_DIR lib ${{ matrix.config.zlib_name }}
+          #- $EIGEN_ROOT_DIR = Join-Path -Resolve $CONDA_LIB_DIR include eigen3
+          #- $ZLIB_INCLUDE_DIRS = Join-Path -Resolve $CONDA_LIB_DIR include
+          #- $ZLIB_LIBRARIES = Join-Path -Resolve $CONDA_LIB_DIR lib ${{ matrix.config.zlib_name }}
 
           try {
           cmake `
@@ -131,6 +131,10 @@ jobs:
             echo "---"
             $_
             echo "^^^^" 
+            Write-Host "An error occurred:"
+            Write-Host $_
+            Write-Host $_.ScriptStackTrace
+            Write-Host $_.ErrorDetails
             Exit 99
           }
 

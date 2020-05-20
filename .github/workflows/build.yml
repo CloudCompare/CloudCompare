@@ -124,9 +124,9 @@ jobs:
             $i = 0
             $Output | % {
               if ($_.GetType().Name -eq 'ErrorRecord') {
-                Write-Host "${i}: $_.Exception.Message"
+                Write-Host "${i}: ERR $_.Exception.Message"
               } else {
-                Write-Host "${i}: $_"
+                Write-Host "${i}: OUT $_"
               }
               $i++
             }

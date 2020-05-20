@@ -84,6 +84,7 @@ jobs:
           $ZLIB_INCLUDE_DIRS = Join-Path -Resolve $CONDA_LIB_DIR include
           $ZLIB_LIBRARIES = Join-Path -Resolve $CONDA_LIB_DIR lib ${{ matrix.config.zlib_name }}
 
+          try {
           cmake `
             -B build `
             -G "${{ matrix.config.generator }}" `
@@ -118,6 +119,11 @@ jobs:
             -DPLUGIN_STANDARD_QRANSAC_SD=${{ matrix.config.compile_qransac }} `
             -DPLUGIN_STANDARD_QPCL=${{ matrix.config.compile_qpcl }} `
             .
+          }catch {
+            echo "CMake fails"
+            $Error
+            Exit 1
+          }
 
       - name: Build
         run: |

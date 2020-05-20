@@ -24,16 +24,16 @@ jobs:
               zlib_name: z.lib,
               xercesclib_name: xerces-c_3.lib,
            }
-          - {
-              name: "macOS Latest Clang",
-              os: macos-latest,
-              generator: "Ninja",
-              conda_library_dir: ".",
-              compile_qpcl: "OFF",
-              compile_qransac: "OFF",
-              zlib_name: libz.a,
-              xercesclib_name: libxerces-c-3.2.dylib
-            }
+#          - {
+#              name: "macOS Latest Clang",
+#              os: macos-latest,
+#              generator: "Ninja",
+#              conda_library_dir: ".",
+#              compile_qpcl: "OFF",
+#              compile_qransac: "OFF",
+#              zlib_name: libz.a,
+#              xercesclib_name: libxerces-c-3.2.dylib
+#            }
 
     steps:
       - name: Checkout
@@ -128,6 +128,9 @@ jobs:
           }catch {
             echo "CMake fails"
             $Error
+            echo "---"
+            $_
+            echo "^^^^" 
             Exit 99
           }
 

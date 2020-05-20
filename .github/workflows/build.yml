@@ -118,11 +118,17 @@ jobs:
             -DPLUGIN_STANDARD_QSRA=ON `
             -DPLUGIN_STANDARD_QRANSAC_SD=${{ matrix.config.compile_qransac }} `
             -DPLUGIN_STANDARD_QPCL=${{ matrix.config.compile_qpcl }} `
-            .
+            . 2>&1 | set-variable Output
+            $i = 0
+            $Output | % {
+              Write-Host ("--- " + $i + ": "  + $_.GetType() +  " ------------------------")
+              Write-Host ($_ | Format-List -Force | Out-String)
+              $i++
+            }
           }catch {
             echo "CMake fails"
             $Error
-            Exit 1
+            Exit 99
           }
 
       - name: Build

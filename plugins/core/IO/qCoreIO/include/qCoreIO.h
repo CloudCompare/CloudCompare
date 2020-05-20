@@ -23,9 +23,9 @@
 class qCoreIO : public QObject, public ccIOPluginInterface
 {
 	Q_OBJECT
-	Q_INTERFACES( ccIOPluginInterface )
+	Q_INTERFACES( ccPluginInterface ccIOPluginInterface )
 
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qCoreIO" FILE "../info.json")
+	Q_PLUGIN_METADATA( IID "cccorp.cloudcompare.plugin.qCoreIO" FILE "../info.json" )
 
 public:
 	explicit qCoreIO( QObject *parent = nullptr );

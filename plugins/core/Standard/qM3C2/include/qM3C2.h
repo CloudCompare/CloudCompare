@@ -33,8 +33,9 @@
 class qM3C2Plugin : public QObject, public ccStdPluginInterface
 {
 	Q_OBJECT
-	Q_INTERFACES(ccStdPluginInterface)
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qM3C2" FILE "../info.json")
+	Q_INTERFACES( ccPluginInterface ccStdPluginInterface )
+
+	Q_PLUGIN_METADATA( IID "cccorp.cloudcompare.plugin.qM3C2" FILE "../info.json" )
 
 public:
 

@@ -24,8 +24,9 @@
 class qCSVMatrixIO : public QObject, public ccIOPluginInterface
 {
 	Q_OBJECT
-	Q_INTERFACES(ccIOPluginInterface)
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qCSVMatrixIO" FILE "../info.json")
+	Q_INTERFACES( ccPluginInterface ccIOPluginInterface )
+
+	Q_PLUGIN_METADATA( IID "cccorp.cloudcompare.plugin.qCSVMatrixIO" FILE "../info.json" )
 
 public:
 	qCSVMatrixIO(QObject* parent = nullptr);

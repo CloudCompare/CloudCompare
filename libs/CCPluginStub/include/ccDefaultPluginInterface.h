@@ -40,7 +40,14 @@ public:
 	ReferenceList getReferences() const override;
 	ContactList getAuthors() const override;
 	ContactList getMaintainers() const override;
-
+	
+	bool start() override { return true; }
+	void stop() override {}
+	
+	ccExternalFactory *getCustomObjectsFactory() const override { return nullptr; }
+	
+	void registerCommands(ccCommandLineInterface *cmd) override { Q_UNUSED( cmd ); }
+	
 protected:
 	ccDefaultPluginInterface( const QString &resourcePath = QString() );
 	

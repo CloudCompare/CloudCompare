@@ -46,7 +46,7 @@ class ccPluginInterface
 public:	
 	// Contact represents a person and is used for authors and maintainer lists
 	struct Contact
-   {
+	{
 		QString name;
 		QString email;
 	};
@@ -56,7 +56,7 @@ public:
 	// Reference represents a journal article or online post about the plugin where
 	// the user can find more information.
 	struct Reference
-   {
+	{
 		QString article;
 		QString	url;
 	};
@@ -82,38 +82,38 @@ public:
 	//! Returns icon
 	/** Should be reimplemented if necessary
 	**/
-	virtual QIcon getIcon() const { return QIcon(); }
+	virtual QIcon getIcon() const = 0;
 	
 	//! Returns a list of references (articles and websites) for the plugin
 	//! This is optional.
 	//! See qDummyPlugin for a real example.
 	//! Added in v3.1 of the plugin interface.
-	virtual ReferenceList getReferences() const { return ReferenceList{}; }
+	virtual ReferenceList getReferences() const = 0;
 	
 	//! Returns a list of the authors' names and email addresses
 	//! This is optional.
 	//! See qDummyPlugin for a real example.
 	//! Added in v3.1 of the plugin interface.
-	virtual ContactList getAuthors() const { return ContactList{}; }
+	virtual ContactList getAuthors() const = 0;
 	
 	//! Returns a list of the maintainers' names and email addresses
 	//! This is optional.
 	//! See qDummyPlugin for a real example.
 	//! Added in v3.1 of the plugin interface.
-	virtual ContactList getMaintainers() const { return ContactList{}; }
+	virtual ContactList getMaintainers() const = 0;
 	
 	//! Starts the plugin
 	/** Should be reimplemented if necessary.
 		Used when 'starting' a plugin from the command line
 		(to start a background service, a thread, etc.)
 	**/
-	virtual bool start() { return true; }
+	virtual bool start() = 0;
 
 	//! Stops the plugin
 	/** Should be reimplemented if necessary.
 		Used to stop a plugin previously started (see ccPluginInterface::start).
 	**/
-	virtual void stop() { }
+	virtual void stop() = 0;
 
 	//! Returns the plugin's custom object factory (if any)
 	/** Plugins may provide a factory to build custom objects.
@@ -121,14 +121,14 @@ public:
 		objects stream in BIN files. Custom objects must inherit the
 		ccCustomHObject or ccCustomLeafObject interfaces.
 	**/
-	virtual ccExternalFactory* getCustomObjectsFactory() const { return nullptr; }
+	virtual ccExternalFactory* getCustomObjectsFactory() const = 0;
 
 	//! Optional: registers commands (for the command line mode)
 	/** Does nothing by default.
 		\warning: don't use keywords that are already used by the main application or other plugins!
 			(use a unique prefix for all commands if possible)
 	**/
-	virtual void registerCommands(ccCommandLineInterface* cmd) { Q_UNUSED( cmd ); }
+	virtual void registerCommands(ccCommandLineInterface* cmd) = 0;
 	
 protected:	
 	friend class ccPluginManager;

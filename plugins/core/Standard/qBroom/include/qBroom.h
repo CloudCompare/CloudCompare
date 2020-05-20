@@ -24,8 +24,9 @@
 class qBroom : public QObject, public ccStdPluginInterface
 {
 	Q_OBJECT
-	Q_INTERFACES(ccStdPluginInterface)
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qBroom" FILE "../info.json")
+	Q_INTERFACES( ccPluginInterface ccStdPluginInterface )
+	
+	Q_PLUGIN_METADATA( IID "cccorp.cloudcompare.plugin.qBroom" FILE "../info.json" )
 
 public:
 

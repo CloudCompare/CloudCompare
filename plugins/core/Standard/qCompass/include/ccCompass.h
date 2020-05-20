@@ -38,8 +38,9 @@ class ccSNECloud;
 class ccCompass : public QObject, public ccStdPluginInterface, public ccPickingListener
 {
 	Q_OBJECT
-		Q_INTERFACES(ccStdPluginInterface)
-		Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.ccCompass" FILE "../info.json")
+	Q_INTERFACES( ccPluginInterface ccStdPluginInterface )
+	
+	Q_PLUGIN_METADATA( IID "cccorp.cloudcompare.plugin.ccCompass" FILE "../info.json" )
 
 public:
 	//! Default constructor

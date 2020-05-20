@@ -123,8 +123,7 @@ jobs:
             Write-Host "Output:"
             $i = 0
             $Output | % {
-              Write-Host ("--- " + $i + ": "  + $_.GetType() +  " ------------------------")
-              Write-Host ($_ | Format-List -Force | Out-String)
+              Write-Host ( $i + ": "  + $_.Exception)
               $i++
             }
           }catch {

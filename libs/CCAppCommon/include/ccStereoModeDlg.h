@@ -1,6 +1,4 @@
-#ifndef CCPLUGINMANAGER_H
-#define CCPLUGINMANAGER_H
-
+#pragma once
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -14,48 +12,48 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: CloudCompare project                               #
+//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
 
-#include <QObject>
-#include <QVector>
+#include "CCAppCommon.h"
 
-class ccPluginInterface;
+//qCC_gl
+#include <ccGLWindow.h>
 
-//! Simply a list of \see ccPluginInterface
-using ccPluginInterfaceList = QVector<ccPluginInterface *>;
+//Qt
+#include <QDialog>
 
+namespace Ui
+{
+	class StereoModeDialog;
+}
 
-class ccPluginManager : public QObject
+//! Dialog to define the parameters of the stereo mode (for 3D views)
+class CCAPPCOMMON_LIB_API ccStereoModeDlg : public QDialog
 {
 	Q_OBJECT
-	
+
 public:
-	~ccPluginManager() override = default;
-	
-	static ccPluginManager& get();
-	
-	void setPaths( const QStringList& paths );
-	QStringList pluginPaths();
-	
-	void loadPlugins();
-	
-	ccPluginInterfaceList& pluginList();
-	
-	void setPluginEnabled( const ccPluginInterface* plugin, bool enabled );
-	bool isEnabled( const ccPluginInterface* plugin ) const;
-	
+
+	//! Default constructor
+	explicit ccStereoModeDlg(QWidget* parent);
+	~ccStereoModeDlg() override;
+
+	//! Returns the current parameters
+	ccGLWindow::StereoParams getParameters() const;
+
+	//! Sets the current parameters
+	void setParameters(const ccGLWindow::StereoParams& params);
+
+	//! Returns whether the FOV should be updated or not
+	bool updateFOV() const;
+
 protected:
-	explicit ccPluginManager( QObject* parent = nullptr );
 
+	//! Slot called when the glass type is modified
+	void glassTypeChanged(int);
+	
 private:
-	void loadFromPathsAndAddToList();
-	
-	QStringList disabledPluginIIDs() const;
-	
-	QStringList m_pluginPaths;
-	ccPluginInterfaceList m_pluginList;
+	Ui::StereoModeDialog* m_ui;
 };
-
-#endif

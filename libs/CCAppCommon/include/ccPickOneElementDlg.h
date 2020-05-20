@@ -1,3 +1,4 @@
+#pragma once
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -11,56 +12,41 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#                 COPYRIGHT: Daniel Girardeau-Montaut                    #
+//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_OPTIONS_HEADER
-#define CC_OPTIONS_HEADER
+#include "CCAppCommon.h"
 
 //Qt
-#include <QString>
+#include <QDialog>
 
-//! Main application options
-class ccOptions
+class Ui_PickOneElementDialog;
+
+//! Minimal dialog to pick one element in a list (combox box)
+class CCAPPCOMMON_LIB_API ccPickOneElementDlg : public QDialog
 {
-public: //parameters
+	Q_OBJECT
 
-	//! Whether to display the normals by default or not
-	bool normalsDisplayedByDefault;
-
-	//! Use native load/save dialogs
-	bool useNativeDialogs;
-
-public: //methods
+public:
 
 	//! Default constructor
-	ccOptions();
+	ccPickOneElementDlg(const QString &label,
+						const QString &windowTitle = QString(),
+						QWidget* parent = nullptr);
 
-	//! Resets parameters to default values
-	void reset();
+	//! Destructor
+	~ccPickOneElementDlg() override;
 
-	//! Loads from persistent DB
-	void fromPersistentSettings();
+	//! Add an element to the combo box
+	void addElement(const QString &elementName);
+	//! Sets the combo box default index
+	void setDefaultIndex(int index);
+	//! Returns the combo box current index (after completion)
+	int getSelectedIndex();
 
-	//! Saves to persistent DB
-	void toPersistentSettings() const;
+private:
 
-public: //static methods
-
-	//! Returns the stored values of each parameter.
-	static const ccOptions& Instance() { return InstanceNonConst(); }
-
-	//! Release unique instance (if any)
-	static void ReleaseInstance();
-
-	//! Sets parameters
-	static void Set(const ccOptions& options);
-
-protected: //methods
-	
-   //! Returns the stored values of each parameter.
-	static ccOptions& InstanceNonConst();
+	//! Associated UI
+	Ui_PickOneElementDialog* m_ui;
 };
-
-#endif //CC_OPTIONS_HEADER

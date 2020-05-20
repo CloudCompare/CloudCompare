@@ -1,6 +1,4 @@
-#ifndef CCTRANSLATIONMANAGER_H
-#define CCTRANSLATIONMANAGER_H
-
+#pragma once
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -18,12 +16,14 @@
 //#                                                                        #
 //##########################################################################
 
+#include "CCAppCommon.h"
+
 #include <QMenu>
 #include <QPair>
 #include <QVector>
 
 
-class ccTranslationManager : public QObject
+class CCAPPCOMMON_LIB_API ccTranslationManager : public QObject
 {
 	Q_OBJECT
 	
@@ -51,7 +51,7 @@ protected:
 	explicit ccTranslationManager() = default;
 
 private:
-	struct TranslatorFile {
+	struct CCAPPCOMMON_LIB_API TranslatorFile {
 		QString	prefix;
 		QString path;
 	};
@@ -69,5 +69,3 @@ private:
 	
 	TranslatorFileList	mTranslatorFileInfo;
 };
-
-#endif //CCTRANSLATIONMANAGER_H

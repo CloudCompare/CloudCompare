@@ -1,6 +1,6 @@
 //##########################################################################
 //#                                                                        #
-//#                              CLOUDCOMPARE                              #
+//#                            CLOUDCOMPARE                                #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
@@ -11,44 +11,16 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#          COPYRIGHT: CloudCompare project                               #
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_PICK_ONE_ELEMENT_DLG_HEADER
-#define CC_PICK_ONE_ELEMENT_DLG_HEADER
+#pragma once
 
-//Qt
-#include <QDialog>
+#include <QtCore/QtGlobal>
 
-class Ui_PickOneElementDialog;
-
-//! Minimal dialog to pick one element in a list (combox box)
-class ccPickOneElementDlg : public QDialog
-{
-	Q_OBJECT
-
-public:
-
-	//! Default constructor
-	ccPickOneElementDlg(const QString &label,
-						const QString &windowTitle = QString(),
-						QWidget* parent = nullptr);
-
-	//! Destructor
-	~ccPickOneElementDlg() override;
-
-	//! Add an element to the combo box
-	void addElement(const QString &elementName);
-	//! Sets the combo box default index
-	void setDefaultIndex(int index);
-	//! Returns the combo box current index (after completion)
-	int getSelectedIndex();
-
-protected:
-
-	//! Associated UI
-	Ui_PickOneElementDialog* m_ui;
-};
-
-#endif //CC_PICK_ONE_ELEMENT_DLG_HEADER
+#if defined( CCAPPCOMMON_LIBRARY_BUILD )
+#  define CCAPPCOMMON_LIB_API Q_DECL_EXPORT
+#else
+#  define CCAPPCOMMON_LIB_API Q_DECL_IMPORT
+#endif

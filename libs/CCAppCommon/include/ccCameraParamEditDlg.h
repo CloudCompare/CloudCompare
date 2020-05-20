@@ -1,3 +1,4 @@
+#pragma once
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,8 +16,7 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_CAMERA_PARAM_EDIT_DLG_HEADER
-#define CC_CAMERA_PARAM_EDIT_DLG_HEADER
+#include "CCAppCommon.h"
 
 //Local
 #include "ccOverlayDialog.h"
@@ -41,7 +41,7 @@ namespace Ui
 }
 
 //! Dialog to interactively edit the camera pose parameters
-class ccCameraParamEditDlg : public ccOverlayDialog, public ccPickingListener
+class CCAPPCOMMON_LIB_API ccCameraParamEditDlg : public ccOverlayDialog, public ccPickingListener
 {
 	Q_OBJECT
 
@@ -143,5 +143,3 @@ protected:
 private:
 	Ui::CameraParamDlg* m_ui;
 };
-
-#endif //CC_CAMERA_PARAM_EDIT_DLG_HEADER

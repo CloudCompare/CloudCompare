@@ -1,6 +1,4 @@
-#ifndef CCAPPLICATIONBASE_H
-#define CCAPPLICATIONBASE_H
-
+#pragma once
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -14,42 +12,53 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: CloudCompare project                               #
+//#                 COPYRIGHT: Daniel Girardeau-Montaut                    #
 //#                                                                        #
 //##########################################################################
 
+#include "CCAppCommon.h"
+
 //Qt
-#include <QApplication>
+#include <QString>
 
-//! Mimic Qt's qApp for easy access to the application instance
-#define ccApp (static_cast<ccApplicationBase *>( QCoreApplication::instance() ))
-
-class ccApplicationBase : public QApplication
+//! Main application options
+class CCAPPCOMMON_LIB_API ccOptions
 {
-public:
-	//! This must be called before instantiating the application class so it
-	//! can setup OpenGL first.
-	static void	initOpenGL();
-	
-	ccApplicationBase( int &argc, char **argv, bool isCommandLine, const QString &version );
-	
-	bool isCommandLine() const { return c_CommandLine; }
-	
-	QString versionStr() const;
-	QString versionLongStr( bool includeOS ) const;
-	
-	const QString &translationPath() const;
-	
-private:
-	void setupPaths();
-		
-	const QString c_VersionStr;
-	
-	QString	m_ShaderPath;
-	QString	m_TranslationPath;
-	QStringList m_PluginPaths;
-	
-	const bool c_CommandLine;
-};
+public: //parameters
 
-#endif
+	//! Whether to display the normals by default or not
+	bool normalsDisplayedByDefault;
+
+	//! Use native load/save dialogs
+	bool useNativeDialogs;
+
+public: //methods
+
+	//! Default constructor
+	ccOptions();
+
+	//! Resets parameters to default values
+	void reset();
+
+	//! Loads from persistent DB
+	void fromPersistentSettings();
+
+	//! Saves to persistent DB
+	void toPersistentSettings() const;
+
+public: //static methods
+
+	//! Returns the stored values of each parameter.
+	static const ccOptions& Instance() { return InstanceNonConst(); }
+
+	//! Release unique instance (if any)
+	static void ReleaseInstance();
+
+	//! Sets parameters
+	static void Set(const ccOptions& options);
+
+protected: //methods
+	
+	//! Returns the stored values of each parameter.
+	static ccOptions& InstanceNonConst();
+};

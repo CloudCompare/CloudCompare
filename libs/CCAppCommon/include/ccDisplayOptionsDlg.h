@@ -1,3 +1,4 @@
+#pragma once
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,8 +16,7 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_DISPLAY_OPTIONS_DIALOG_HEADER
-#define CC_DISPLAY_OPTIONS_DIALOG_HEADER
+#include "CCAppCommon.h"
 
 //Local
 #include "ccOptions.h"
@@ -33,7 +33,7 @@ namespace Ui
 }
 
 //! Dialog to setup display settings
-class ccDisplayOptionsDlg : public QDialog
+class CCAPPCOMMON_LIB_API ccDisplayOptionsDlg : public QDialog
 {
 	Q_OBJECT
 
@@ -108,5 +108,3 @@ protected:
 private:
 	Ui::DisplayOptionsDlg* m_ui;
 };
-
-#endif

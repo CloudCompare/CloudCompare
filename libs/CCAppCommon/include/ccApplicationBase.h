@@ -1,3 +1,4 @@
+#pragma once
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -11,51 +12,42 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#          COPYRIGHT: CloudCompare project                               #
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_STEREO_MODE_DLG_HEADER
-#define CC_STEREO_MODE_DLG_HEADER
-
-//qCC_gl
-#include <ccGLWindow.h>
+#include "CCAppCommon.h"
 
 //Qt
-#include <QDialog>
+#include <QApplication>
 
-namespace Ui
+//! Mimic Qt's qApp for easy access to the application instance
+#define ccApp (static_cast<ccApplicationBase *>( QCoreApplication::instance() ))
+
+class CCAPPCOMMON_LIB_API ccApplicationBase : public QApplication
 {
-	class StereoModeDialog;
-}
-
-//! Dialog to define the parameters of the stereo mode (for 3D views)
-class ccStereoModeDlg : public QDialog
-{
-	Q_OBJECT
-
 public:
-
-	//! Default constructor
-	explicit ccStereoModeDlg(QWidget* parent);
-	~ccStereoModeDlg() override;
-
-	//! Returns the current parameters
-	ccGLWindow::StereoParams getParameters() const;
-
-	//! Sets the current parameters
-	void setParameters(const ccGLWindow::StereoParams& params);
-
-	//! Returns whether the FOV should be updated or not
-	bool updateFOV() const;
-
-protected:
-
-	//! Slot called when the glass type is modified
-	void glassTypeChanged(int);
+	//! This must be called before instantiating the application class so it
+	//! can setup OpenGL first.
+	static void	initOpenGL();
+	
+	ccApplicationBase( int &argc, char **argv, bool isCommandLine, const QString &version );
+	
+	bool isCommandLine() const { return c_CommandLine; }
+	
+	QString versionStr() const;
+	QString versionLongStr( bool includeOS ) const;
+	
+	const QString &translationPath() const;
 	
 private:
-	Ui::StereoModeDialog* m_ui;
+	void setupPaths();
+		
+	const QString c_VersionStr;
+	
+	QString	m_ShaderPath;
+	QString	m_TranslationPath;
+	QStringList m_PluginPaths;
+	
+	const bool c_CommandLine;
 };
-
-#endif //CC_STEREO_MODE_DLG_HEADER

@@ -77,7 +77,7 @@ jobs:
           echo "::set-env name=CC::cl.exe"
 
       - name: Configure CMake
-        shell: bash
+        shell: bash -l {0}
         run: |
           mkdir build
 

@@ -2,6 +2,8 @@ project( QCC_IO_LIB )
 
 add_library( ${PROJECT_NAME} SHARED )
 
+include( cmake/GDALSupport.cmake )
+
 add_subdirectory( include )
 add_subdirectory( src )
 add_subdirectory( ui )
@@ -23,6 +25,10 @@ endif()
 target_link_libraries( ${PROJECT_NAME}
 	QCC_DB_LIB
 )
+
+if( OPTION_USE_GDAL )
+	target_link_GDAL( ${PROJECT_NAME} )
+endif()
 
 # contrib. libraries support
 target_link_contrib( ${PROJECT_NAME} )

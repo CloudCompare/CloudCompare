@@ -11,8 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # scalar_double: ["OFF", "ON"]
-        scalar_double: ["OFF"]
+        scalar_double: ["OFF", "ON"]
         config:
           - {
               name: "Windows MSVC",
@@ -22,7 +21,7 @@ jobs:
               compile_qanimation_with_ffmpeg: "ON",
               compile_qpcl: "ON",
               compile_qransac: "ON",
-           }
+            }
           - {
               name: "macOS Clang",
               os: macos-latest,
@@ -78,47 +77,46 @@ jobs:
           echo "::set-env name=CC::cl.exe"
 
       - name: Configure CMake
-        shell: pwsh
+        shell: bash -l {0}
         run: |
           mkdir build
-          # Base dir where libs are installed (cmake, dlls, include files, etc)
-          $CONDA_LIB_DIR = Join-Path -Resolve $env:CONDA_PREFIX ${{ matrix.config.conda_library_dir }}
 
-          $EIGEN_ROOT_DIR = Join-Path -Resolve $CONDA_LIB_DIR include eigen3
+          export CONDA_LIB_DIR="$CONDA_PREFIX/${{ matrix.config.conda_library_dir }}"
+          export EIGEN_ROOT_DIR="$CONDA_LIB_DIR/include/eigen3"
 
-          cmake `
-            -B build `
-            -G "${{ matrix.config.generator }}" `
-            -DCMAKE_BUILD_TYPE=Release `
-            -DCMAKE_PREFIX_PATH="$CONDA_LIB_DIR" `
-            -DCCCORELIB_SCALAR_DOUBLE=${{ matrix.scalar_double }} `
-            -DEIGEN_ROOT_DIR="$EIGEN_ROOT_DIR" `
-            -DOPTION_SUPPORT_GAMEPADS=ON `
-            -DPLUGIN_EXAMPLE_GL=ON `
-            -DPLUGIN_EXAMPLE_IO=ON `
-            -DPLUGIN_EXAMPLE_STANDARD=ON `
-            -DPLUGIN_GL_QEDL=ON `
-            -DPLUGIN_GL_QSSAO=ON `
-            -DPLUGIN_IO_QADDITIONAL=ON `
-            -DPLUGIN_IO_QCORE=ON `
-            -DPLUGIN_IO_QE57=ON `
-            -DPLUGIN_IO_QPHOTOSCAN=ON `
-            -DPLUGIN_IO_QPDAL=ON `
-            -DPLUGIN_STANDARD_QANIMATION=ON `
-            -DQANIMATION_WITH_FFMPEG_SUPPORT=${{ matrix.config.compile_qanimation_with_ffmpeg }} `
-            -DPLUGIN_STANDARD_QBROOM=ON `
-            -DPLUGIN_STANDARD_QCANUPO=OFF `
-            -DPLUGIN_STANDARD_QCOMPASS=ON `
-            -DPLUGIN_STANDARD_QCSF=ON `
-            -DPLUGIN_STANDARD_QFACETS=ON `
-            -DPLUGIN_STANDARD_QHOUGH_NORMALS=ON `
-            -DPLUGIN_STANDARD_QHPR=ON `
-            -DPLUGIN_STANDARD_QM3C2=ON `
-            -DPLUGIN_STANDARD_QPCV=ON `
-            -DPLUGIN_STANDARD_QPOISSON_RECON=ON `
-            -DPLUGIN_STANDARD_QSRA=ON `
-            -DPLUGIN_STANDARD_QRANSAC_SD=${{ matrix.config.compile_qransac }} `
-            -DPLUGIN_STANDARD_QPCL=${{ matrix.config.compile_qpcl }} `
+          cmake \
+            -B build \
+            -G "${{ matrix.config.generator }}" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH="$CONDA_LIB_DIR" \
+            -DCCCORELIB_SCALAR_DOUBLE=${{ matrix.scalar_double }} \
+            -DEIGEN_ROOT_DIR="$EIGEN_ROOT_DIR" \
+            -DOPTION_SUPPORT_GAMEPADS=ON \
+            -DPLUGIN_EXAMPLE_GL=ON \
+            -DPLUGIN_EXAMPLE_IO=ON \
+            -DPLUGIN_EXAMPLE_STANDARD=ON \
+            -DPLUGIN_GL_QEDL=ON \
+            -DPLUGIN_GL_QSSAO=ON \
+            -DPLUGIN_IO_QADDITIONAL=ON \
+            -DPLUGIN_IO_QCORE=ON \
+            -DPLUGIN_IO_QE57=ON \
+            -DPLUGIN_IO_QPHOTOSCAN=ON \
+            -DPLUGIN_IO_QPDAL=ON \
+            -DPLUGIN_STANDARD_QANIMATION=ON \
+            -DQANIMATION_WITH_FFMPEG_SUPPORT=${{ matrix.config.compile_qanimation_with_ffmpeg }} \
+            -DPLUGIN_STANDARD_QBROOM=ON \
+            -DPLUGIN_STANDARD_QCANUPO=OFF \
+            -DPLUGIN_STANDARD_QCOMPASS=ON \
+            -DPLUGIN_STANDARD_QCSF=ON \
+            -DPLUGIN_STANDARD_QFACETS=ON \
+            -DPLUGIN_STANDARD_QHOUGH_NORMALS=ON \
+            -DPLUGIN_STANDARD_QHPR=ON \
+            -DPLUGIN_STANDARD_QM3C2=ON \
+            -DPLUGIN_STANDARD_QPCV=ON \
+            -DPLUGIN_STANDARD_QPOISSON_RECON=ON \
+            -DPLUGIN_STANDARD_QSRA=ON \
+            -DPLUGIN_STANDARD_QRANSAC_SD=${{ matrix.config.compile_qransac }} \
+            -DPLUGIN_STANDARD_QPCL=${{ matrix.config.compile_qpcl }} \
             .
 
       - name: Build

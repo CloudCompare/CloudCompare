@@ -20,7 +20,6 @@ target_include_directories( ${PROJECT_NAME} PUBLIC "${STUB_INCLUDES}" )
 target_link_libraries( ${PROJECT_NAME}
 	QCC_GL_LIB
 	QCC_IO_LIB
-	Qt5::Gui
 )
 
 target_compile_definitions( ${PROJECT_NAME} PRIVATE CCPLUGIN_API_LIBRARY_BUILD )

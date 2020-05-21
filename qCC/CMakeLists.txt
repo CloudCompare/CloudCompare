@@ -49,9 +49,7 @@ endif()
 target_link_libraries( ${PROJECT_NAME}
     CCAppCommon
     QCustomPlot
-    Qt5::OpenGL
     Qt5::PrintSupport
-    Qt5::Widgets
 )
 
 # contrib. libraries support

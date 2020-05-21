@@ -11,7 +11,7 @@ add_subdirectory( utils )
 
 target_include_directories( ${PROJECT_NAME}
 	PUBLIC
-		${PCL_INCLUDE_DIRS}
+	    ${PCL_INCLUDE_DIRS}
 )
 
 if( CMAKE_VERSION VERSION_LESS 3.13 )
@@ -19,7 +19,7 @@ if( CMAKE_VERSION VERSION_LESS 3.13 )
 else()
 	target_link_directories( ${PROJECT_NAME}
 		PUBLIC
-			${PCL_LIBRARY_DIRS}
+		    ${PCL_LIBRARY_DIRS}
 	)
 endif()
 
@@ -27,7 +27,6 @@ target_link_libraries( ${PROJECT_NAME}
 	CCPluginAPI
 	QCC_GL_LIB
 	${PCL_LIBRARIES}
-	Qt5::Widgets
 )
 
 if( NOT WIN32 )

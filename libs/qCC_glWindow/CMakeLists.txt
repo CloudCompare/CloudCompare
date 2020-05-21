@@ -9,9 +9,6 @@ target_compile_definitions( ${PROJECT_NAME} PRIVATE CCGLWINDOW_LIB_BUILD )
 
 target_link_libraries( ${PROJECT_NAME}
 	QCC_DB_LIB
-	Qt5::OpenGL
-	Qt5::OpenGLExtensions
-	Qt5::Widgets
 )
 
 if ( OPTION_USE_OCULUS_SDK )

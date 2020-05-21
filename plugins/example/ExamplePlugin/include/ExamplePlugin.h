@@ -40,7 +40,7 @@
 class ExamplePlugin : public QObject, public ccStdPluginInterface
 {
 	Q_OBJECT
-	Q_INTERFACES( ccStdPluginInterface )
+	Q_INTERFACES( ccPluginInterface ccStdPluginInterface )
 
 	// Replace "Example" by your plugin name (IID should be unique - let's hope your plugin name is unique ;)
 	// The info.json file provides information about the plugin to the loading system and

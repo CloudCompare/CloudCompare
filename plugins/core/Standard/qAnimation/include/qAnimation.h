@@ -30,9 +30,9 @@ class ccGLWindow;
 class qAnimation : public QObject, public ccStdPluginInterface
 {
 	Q_OBJECT
+	Q_INTERFACES( ccPluginInterface ccStdPluginInterface )
 
-	Q_INTERFACES(ccStdPluginInterface)
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qAnimation" FILE "../info.json")
+	Q_PLUGIN_METADATA( IID "cccorp.cloudcompare.plugin.qAnimation" FILE "../info.json" )
 
 public:
 

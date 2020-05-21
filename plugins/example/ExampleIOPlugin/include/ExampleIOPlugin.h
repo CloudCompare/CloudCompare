@@ -33,7 +33,7 @@
 class ExampleIOPlugin : public QObject, public ccIOPluginInterface
 {
 	Q_OBJECT
-	Q_INTERFACES( ccIOPluginInterface )
+	Q_INTERFACES( ccPluginInterface ccIOPluginInterface )
 
 	Q_PLUGIN_METADATA( IID "cccorp.cloudcompare.plugin.ExampleIO" FILE "../info.json" )
 

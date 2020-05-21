@@ -23,7 +23,7 @@
 class qE57IO : public QObject, public ccIOPluginInterface
 {
 	Q_OBJECT
-	Q_INTERFACES( ccIOPluginInterface )
+	Q_INTERFACES( ccPluginInterface ccIOPluginInterface )
 
 	Q_PLUGIN_METADATA( IID "cccorp.cloudcompare.plugin.qE57IO" FILE "../info.json" )
 

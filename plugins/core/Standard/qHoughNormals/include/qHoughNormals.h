@@ -27,8 +27,9 @@
 class qHoughNormals : public QObject, public ccStdPluginInterface
 {
 	Q_OBJECT
-	Q_INTERFACES(ccStdPluginInterface)
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qHoughNormals" FILE "../info.json")
+	Q_INTERFACES( ccPluginInterface ccStdPluginInterface )
+	
+	Q_PLUGIN_METADATA( IID "cccorp.cloudcompare.plugin.qHoughNormals" FILE "../info.json" )
 
 public:
 

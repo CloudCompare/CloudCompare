@@ -133,7 +133,7 @@ void ccPluginManager::loadPlugins()
 	
 	for ( QObject* plugin : pluginInstances )
 	{
-		ccPluginInterface* ccPlugin = dynamic_cast<ccPluginInterface*>(plugin);
+		ccPluginInterface* ccPlugin = qobject_cast<ccPluginInterface*>(plugin);
 		
 		if (ccPlugin == nullptr)
 		{
@@ -316,7 +316,7 @@ void ccPluginManager::loadFromPathsAndAddToList()
 			}
 			
 			QObject* plugin = loader->instance();
-			ccPluginInterface* ccPlugin = dynamic_cast<ccPluginInterface*>(plugin);
+			ccPluginInterface* ccPlugin = qobject_cast<ccPluginInterface*>(plugin);
 			
 			if ( (plugin == nullptr) || (ccPlugin == nullptr) )
 			{				
@@ -354,7 +354,7 @@ void ccPluginManager::loadFromPathsAndAddToList()
 			// If we have already loaded a plugin with this IID, unload it and replace the interface in the plugin list
 			if ( previousLoader != nullptr )
 			{
-				ccPluginInterface* pluginInterface = dynamic_cast<ccPluginInterface *>( previousLoader->instance() );
+				ccPluginInterface* pluginInterface = qobject_cast<ccPluginInterface *>( previousLoader->instance() );
 				
 				// maintain the order of the plugin list
 				const int index = m_pluginList.indexOf( pluginInterface );

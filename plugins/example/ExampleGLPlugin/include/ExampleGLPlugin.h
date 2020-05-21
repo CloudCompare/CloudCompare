@@ -33,7 +33,8 @@
 class ExampleGLPlugin : public QObject, public ccGLPluginInterface
 {
 	Q_OBJECT
-	Q_INTERFACES( ccGLPluginInterface )
+	Q_INTERFACES( ccPluginInterface ccGLPluginInterface )
+	
 	Q_PLUGIN_METADATA( IID "cccorp.cloudcompare.plugin.ExampleGL" FILE "../info.json" )
 
 public:

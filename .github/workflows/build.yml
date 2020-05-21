@@ -124,11 +124,26 @@ jobs:
             $i = 0
             $Output | % {
               if ($_.GetType().Name -eq 'ErrorRecord') {
-                Write-Host "${i}: ERR $_.Exception.Message"
+                Write-Host "E ${i}: $_.Exception.Message"
               } else {
-                Write-Host "${i}: OUT $_"
+                Write-Host "  ${i}: $_"
               }
               $i++
+            }
+            Write-Host
+            Write-Host "CMake Errors:"
+            $i = 0
+            $Output | % {
+              if ($_.GetType().Name -eq 'ErrorRecord') {
+                Write-Host "${i}: $_.Exception.Message"
+                $i++
+              }
+            }
+            if ($i -gt 0) {
+              Write-Host "Abort because of stderr output"
+              Exit 88
+            } else {
+              Write-Host "No CMake errors."
             }
           }catch {
             Write-Host "CMake fails"

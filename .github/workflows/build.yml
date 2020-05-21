@@ -74,94 +74,50 @@ jobs:
           echo "::set-env name=CC::cl.exe"
 
       - name: Configure CMake
-        shell: pwsh
+        shell: bash
         run: |
-          $ErrorActionPreference = "Continue"
           mkdir build
           # Base dir where libs are installed (cmake, dlls, include files, etc)
-          $CONDA_LIB_DIR = Join-Path -Resolve $env:CONDA_PREFIX ${{ matrix.config.conda_library_dir }}
+          export CONDA_LIB_DIR="$CONDA_PREFIX/${{ matrix.config.conda_library_dir }}"
 
-          $EIGEN_ROOT_DIR = Join-Path -Resolve $CONDA_LIB_DIR include eigen3
-          $ZLIB_INCLUDE_DIRS = Join-Path -Resolve $CONDA_LIB_DIR include
-          $ZLIB_LIBRARIES = Join-Path -Resolve $CONDA_LIB_DIR lib ${{ matrix.config.zlib_name }}
+          export EIGEN_ROOT_DIR="$CONDA_LIB_DIR/include/eigen3"
+          export ZLIB_INCLUDE_DIRS="$CONDA_LIB_DIR/include"
+          export ZLIB_LIBRARIES="$CONDA_LIB_DIR/lib/${{ matrix.config.zlib_name }}"
 
-          try {
-          cmake `
-            -B build `
-            -G "${{ matrix.config.generator }}" `
-            -DCMAKE_BUILD_TYPE=Release `
-            -DCCCORELIB_SCALAR_DOUBLE=${{ matrix.scalar_double }} `
-            -DEIGEN_ROOT_DIR="$EIGEN_ROOT_DIR" `
-            -DZLIB_INCLUDE_DIRS="$ZLIB_INCLUDE_DIRS" `
-            -DZLIB_LIBRARIES="$ZLIB_LIBRARIES" `
-            -DOPTION_SUPPORT_GAMEPADS=ON `
-            -DPLUGIN_EXAMPLE_GL=ON `
-            -DPLUGIN_EXAMPLE_IO=ON `
-            -DPLUGIN_EXAMPLE_STANDARD=ON `
-            -DPLUGIN_GL_QEDL=ON `
-            -DPLUGIN_GL_QSSAO=ON `
-            -DPLUGIN_IO_QADDITIONAL=ON `
-            -DPLUGIN_IO_QCORE=ON `
-            -DPLUGIN_IO_QE57=ON `
-            -DPLUGIN_IO_QPHOTOSCAN=ON `
-            -DPLUGIN_IO_QPDAL=ON `
-            -DPLUGIN_STANDARD_QANIMATION=ON `
-            -DPLUGIN_STANDARD_QBROOM=ON `
-            -DPLUGIN_STANDARD_QCANUPO=OFF `
-            -DPLUGIN_STANDARD_QCOMPASS=ON `
-            -DPLUGIN_STANDARD_QCSF=ON `
-            -DPLUGIN_STANDARD_QFACETS=ON `
-            -DPLUGIN_STANDARD_QHOUGH_NORMALS=ON `
-            -DPLUGIN_STANDARD_QHPR=ON `
-            -DPLUGIN_STANDARD_QM3C2=ON `
-            -DPLUGIN_STANDARD_QPCV=ON `
-            -DPLUGIN_STANDARD_QPOISSON_RECON=ON `
-            -DPLUGIN_STANDARD_QSRA=ON `
-            -DPLUGIN_STANDARD_QRANSAC_SD=${{ matrix.config.compile_qransac }} `
-            -DPLUGIN_STANDARD_QPCL=${{ matrix.config.compile_qpcl }} `
-            . 2>&1 | set-variable Output
-            Write-Host "CMake Output:"
-            $i = 0
-            $Output | % {
-              if ($_.GetType().Name -eq 'ErrorRecord') {
-                Write-Host "E ${i}: $_.Exception.Message"
-              } else {
-                Write-Host "  ${i}: $_"
-              }
-              $i++
-            }
-            Write-Host
-            Write-Host "CMake Errors:"
-            $i = 0
-            $Output | % {
-              if ($_.GetType().Name -eq 'ErrorRecord') {
-                Write-Host "${i}: $_.Exception.Message"
-                $i++
-              }
-            }
-            if ($i -gt 0) {
-              Write-Host "Abort because of stderr output"
-              Exit 88
-            } else {
-              Write-Host "No CMake errors."
-            }
-          }catch {
-            Write-Host "CMake fails"
-            $Error
-            cd build
-            cd CMakeFiles
-            Write-Host " => CMakeFiles:"
-            dir
-            Write-Host " => CMakeOutput.log:"
-            Get-Content CMakeOutput.log
-            Write-Host " => CMakeError.log:"
-            try {
-              Get-Content CMakeError.log
-            } catch {
-              Write-Host "Not exists"
-            }
-            Exit 99
-          }
+          cmake \
+            -B build \
+            -G "${{ matrix.config.generator }}" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCCCORELIB_SCALAR_DOUBLE=${{ matrix.scalar_double }} \
+            -DEIGEN_ROOT_DIR="$EIGEN_ROOT_DIR" \
+            -DZLIB_INCLUDE_DIRS="$ZLIB_INCLUDE_DIRS" \
+            -DZLIB_LIBRARIES="$ZLIB_LIBRARIES" \
+            -DOPTION_SUPPORT_GAMEPADS=ON \
+            -DPLUGIN_EXAMPLE_GL=ON \
+            -DPLUGIN_EXAMPLE_IO=ON \
+            -DPLUGIN_EXAMPLE_STANDARD=ON \
+            -DPLUGIN_GL_QEDL=ON \
+            -DPLUGIN_GL_QSSAO=ON \
+            -DPLUGIN_IO_QADDITIONAL=ON \
+            -DPLUGIN_IO_QCORE=ON \
+            -DPLUGIN_IO_QE57=ON \
+            -DPLUGIN_IO_QPHOTOSCAN=ON \
+            -DPLUGIN_IO_QPDAL=ON \
+            -DPLUGIN_STANDARD_QANIMATION=ON \
+            -DPLUGIN_STANDARD_QBROOM=ON \
+            -DPLUGIN_STANDARD_QCANUPO=OFF \
+            -DPLUGIN_STANDARD_QCOMPASS=ON \
+            -DPLUGIN_STANDARD_QCSF=ON \
+            -DPLUGIN_STANDARD_QFACETS=ON \
+            -DPLUGIN_STANDARD_QHOUGH_NORMALS=ON \
+            -DPLUGIN_STANDARD_QHPR=ON \
+            -DPLUGIN_STANDARD_QM3C2=ON \
+            -DPLUGIN_STANDARD_QPCV=ON \
+            -DPLUGIN_STANDARD_QPOISSON_RECON=ON \
+            -DPLUGIN_STANDARD_QSRA=ON \
+            -DPLUGIN_STANDARD_QRANSAC_SD=${{ matrix.config.compile_qransac }} \
+            -DPLUGIN_STANDARD_QPCL=${{ matrix.config.compile_qpcl }} \
+            . 
 
       - name: Build
         run: |

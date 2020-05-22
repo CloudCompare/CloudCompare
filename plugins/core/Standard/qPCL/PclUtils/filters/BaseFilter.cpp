@@ -59,7 +59,7 @@ void BaseFilter::initAction()
 	m_action = new QAction(getIcon(), getEntryName(), this);
 	m_action->setStatusTip(getStatusTip());
 	//connect this action
-	connect(m_action, SIGNAL(triggered()), this, SLOT(performAction()));
+	connect(m_action, &QAction::triggered, this, &BaseFilter::performAction);
 }
 
 void BaseFilter::throwError(int errCode)

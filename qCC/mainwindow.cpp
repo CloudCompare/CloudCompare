@@ -135,8 +135,8 @@
 #endif
 
 //Gamepads
-#ifdef CC_GAMEPADS_SUPPORT
-#include "devices/gamepad/ccGamepadManager.h"
+#ifdef CC_GAMEPAD_SUPPORT
+#include "ccGamepadManager.h"
 #endif
 
 #ifdef CC_CORE_LIB_USES_TBB
@@ -418,19 +418,19 @@ void MainWindow::setupInputDevices()
 	m_UI->menuFile->insertMenu(m_UI->actionCloseAll, m_3DMouseManager->menu());
 #endif
 
-#ifdef CC_GAMEPADS_SUPPORT
+#ifdef CC_GAMEPAD_SUPPORT
 	m_gamepadManager = new ccGamepadManager( this, this );
 	m_UI->menuFile->insertMenu(m_UI->actionCloseAll, m_gamepadManager->menu());
 #endif
 
-#if defined(CC_3DXWARE_SUPPORT) || defined(CC_GAMEPADS_SUPPORT)
+#if defined(CC_3DXWARE_SUPPORT) || defined(CC_GAMEPAD_SUPPORT)
 	m_UI->menuFile->insertSeparator(m_UI->actionCloseAll);
 #endif
 }
 
 void MainWindow::destroyInputDevices()
 {
-#ifdef CC_GAMEPADS_SUPPORT
+#ifdef CC_GAMEPAD_SUPPORT
 	delete m_gamepadManager;
 	m_gamepadManager = nullptr;
 #endif

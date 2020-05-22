@@ -26,7 +26,7 @@
 #include <QTime>
 #include <QTimer>
 #include <QTranslator>
-#ifdef CC_GAMEPADS_SUPPORT
+#ifdef CC_GAMEPAD_SUPPORT
 #include <QGamepadManager>
 #endif
 
@@ -83,7 +83,7 @@ int main(int argc, char **argv)
 	{
 		ccApplication::initOpenGL();
 
-#ifdef CC_GAMEPADS_SUPPORT
+#ifdef CC_GAMEPAD_SUPPORT
 		QGamepadManager::instance(); //potential workaround to bug https://bugreports.qt.io/browse/QTBUG-61553
 #endif
 	}

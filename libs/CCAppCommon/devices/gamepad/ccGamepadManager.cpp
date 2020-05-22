@@ -19,7 +19,7 @@
 #include "ccGamepadManager.h"
 #include "ccGLWindow.h"
 #include "ccMainAppInterface.h"
-#include "devices/gamepad/GamepadInput.h"
+#include "GamepadInput.h"
 #include "ccPickOneElementDlg.h"
 
 //Qt

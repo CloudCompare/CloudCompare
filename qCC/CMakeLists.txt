@@ -26,11 +26,6 @@ if ( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )
 	add_subdirectory( devices/3dConnexion )
 endif()	
 
-# Gamepad support (requires Qt 5.7+)
-if ( ${OPTION_SUPPORT_GAMEPADS} )
-	add_subdirectory( devices/gamepad )
-endif()	
-
 qt5_wrap_ui( generated_ui_list ${ui_list} )
 qt5_add_resources( generated_qrc_list ${qrc_list} )
 
@@ -65,11 +60,6 @@ endif()
 if ( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )
 	target_link_3DXWARE( ${PROJECT_NAME} )
 endif()
-# Gamepad support (requires Qt 5.7+)
-if ( ${OPTION_SUPPORT_GAMEPADS} )
-	target_link_GAMEPADS( ${PROJECT_NAME} )
-endif()
-
 # Add custom preprocessor definitions
 if( WIN32 )
 	if (MSVC)

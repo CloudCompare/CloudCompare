@@ -1,3 +1,4 @@
+#pragma once
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,8 +16,7 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef GAMEPAD_INPUT_HEADER
-#define GAMEPAD_INPUT_HEADER
+#include "CCAppCommon.h"
 
 //CCCoreLib
 #include <CCConst.h>
@@ -31,7 +31,7 @@
 class ccGLWindow;
 
 //! Gaempad handler
-class GamepadInput : public QGamepad
+class CCAPPCOMMON_LIB_API GamepadInput : public QGamepad
 {
 	Q_OBJECT
 
@@ -56,7 +56,7 @@ protected:
 
 	void updateInternalState();
 
-protected:
+private:
 
 	//! Timer to poll the gamepad state
 	QTimer m_timer;
@@ -70,5 +70,3 @@ protected:
 	bool m_hasRotation;
 	float m_zoom;
 };
-
-#endif //MOUSE_3D_INPUT_HEADER

@@ -1,6 +1,4 @@
-#ifndef CCGAMEPADMANAGER_H
-#define CCGAMEPADMANAGER_H
-
+#pragma once
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -18,6 +16,8 @@
 //#                                                                        #
 //##########################################################################
 
+#include "CCAppCommon.h"
+
 //Qt
 #include <QObject>
 
@@ -29,7 +29,7 @@ class ccMainAppInterface;
 class GamepadInput;
 
 //! Gamepad manager
-class ccGamepadManager : public QObject
+class CCAPPCOMMON_LIB_API ccGamepadManager : public QObject
 {
 	Q_OBJECT
 	
@@ -40,7 +40,7 @@ public:
 	//! Returns the menu associated with gamepads
 	QMenu* menu() { return m_menu; }
 	
-protected: //methods
+protected:
 	void enableDevice(bool state, bool silent, int deviceID = -1);
 	void releaseDevice();
 
@@ -50,12 +50,9 @@ protected: //methods
 	
 	void onGamepadInput();
 	
-protected: //members
-
+private:
 	ccMainAppInterface* m_appInterface;
 	GamepadInput* m_gamepadInput;
 	QMenu* m_menu;
 	QAction* m_actionEnable;
 };
-
-#endif //CCGAMEPADMANAGER_H

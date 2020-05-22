@@ -2,8 +2,6 @@
 
 # 3DXWARE (3dConnexion devices) support
 include( 3DXSupport )
-# Gamepads support
-include( GamepadSupport )
 # Oculus support
 include( OculusSupport )
 

@@ -13,5 +13,5 @@ add_subdirectory( src )
 
 target_link_libraries( ${PROJECT_NAME}
 	PRIVATE
-		QCC_IO_LIB
+		QCC_DB_LIB
 )

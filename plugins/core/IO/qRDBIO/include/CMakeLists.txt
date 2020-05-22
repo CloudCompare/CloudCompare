@@ -1,0 +1,12 @@
+
+target_sources( ${PROJECT_NAME}
+	PRIVATE
+		${CMAKE_CURRENT_LIST_DIR}/qRDBIO.h
+		${CMAKE_CURRENT_LIST_DIR}/RDBFilter.h
+		${CMAKE_CURRENT_LIST_DIR}/RDBOpenDialog.h
+)
+
+target_include_directories( ${PROJECT_NAME}
+	PRIVATE
+		${CMAKE_CURRENT_SOURCE_DIR}
+)

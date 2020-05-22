@@ -123,7 +123,7 @@ function( InstallPlugins )
 	endforeach()	
 endfunction()
 
-# _InstallSharedTarget should only be called by oone of the functions above.
+# _InstallSharedTarget should only be called by one of the functions above.
 # It was factored out to provide cmake < 3.13 a way to install shared libs.
 #
 # Arguments:

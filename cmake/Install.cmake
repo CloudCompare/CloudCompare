@@ -15,14 +15,27 @@ function( InstallSharedLibrary )
 			${ARGN}
 	)
 
-	message( STATUS "Install shared library: ${INSTALL_SHARED_LIB_TARGET}")
+	# For readability
+	set( shared_lib_target "${INSTALL_SHARED_LIB_TARGET}" )
 
-	if( WIN32 OR APPLE )
-		foreach( DEST ${INSTALL_DESTINATIONS} )
-			install_shared( ${INSTALL_SHARED_LIB_TARGET} ${DEST} 1 )
+	message( STATUS "Install shared library: ${shared_lib_target}")
+
+	if( WIN32 )
+		foreach( destination ${INSTALL_DESTINATIONS} )
+			install_shared( ${shared_lib_target} ${destination} 1 )
+		endforeach()
+	elseif( APPLE )
+		foreach( destination ${INSTALL_DESTINATIONS} )
+			install( TARGETS ${shared_lib_target}
+				LIBRARY DESTINATION ${destination}
+				COMPONENT Runtime
+			)
 		endforeach()
 	else()
-		install_shared( ${INSTALL_SHARED_LIB_TARGET} ${CMAKE_INSTALL_LIBDIR}/cloudcompare )
+		install( TARGETS ${shared_lib_target}
+			LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/cloudcompare
+			COMPONENT Runtime
+		)
 	endif()
 endfunction()
 

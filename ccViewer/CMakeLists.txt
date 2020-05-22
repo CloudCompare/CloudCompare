@@ -40,9 +40,7 @@ else()
 endif()
 
 target_link_libraries( ${PROJECT_NAME}
-	CCAppCommon
-    Qt5::OpenGL
-    Qt5::Widgets
+    CCAppCommon
 )
 
 # contrib. libraries support

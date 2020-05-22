@@ -8,7 +8,6 @@ add_subdirectory( src )
 target_link_libraries( ${PROJECT_NAME}
     CCCoreLib
     CC_FBO_LIB
-    Qt5::Widgets
 )
 
 target_compile_definitions( ${PROJECT_NAME} PRIVATE QCC_DB_LIBRARY_BUILD )

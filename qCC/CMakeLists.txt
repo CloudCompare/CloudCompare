@@ -90,7 +90,7 @@ if( WIN32 )
 endif()
 
 # install program
-install_ext( TARGETS ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} )
+install_ext( TARGETS ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} "" )
 
 # Auxiliary files
 set( auxFiles  ${CloudCompareProjects_SOURCE_DIR}/CHANGELOG.md bin_other/license.txt bin_other/global_shift_list_template.txt )
@@ -109,11 +109,11 @@ endif()
 # Install auxiliary files
 if( WIN32 OR APPLE )
 	foreach( filename ${auxFiles} )
-		install_ext( FILES ${filename} ${CLOUDCOMPARE_DEST_FOLDER} )
+		install_ext( FILES ${filename} ${CLOUDCOMPARE_DEST_FOLDER} "" )
 	endforeach()
 else( UNIX )
 	foreach( filename ${auxFiles} )
-		install_ext( FILES ${filename} share/cloudcompare )
+		install_ext( FILES ${filename} share/cloudcompare "" )
 	endforeach()
 endif()
 

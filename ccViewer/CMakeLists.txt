@@ -81,7 +81,7 @@ if( WIN32 )
 endif()
 
 # install program
-install_ext( TARGETS ccViewer ${CCVIEWER_DEST_FOLDER} )
+install_ext( TARGETS ccViewer ${CCVIEWER_DEST_FOLDER} "" )
 
 # Auxiliary files
 set( auxFiles bin_other/license.txt )
@@ -98,7 +98,7 @@ endif()
 # Install auxiliary files
 if(APPLE OR WIN32) # For Linux it's already installed in by qCC
 	foreach( filename ${auxFiles} )
-		install_ext( FILES ${filename} ${CCVIEWER_DEST_FOLDER} )
+		install_ext( FILES ${filename} ${CCVIEWER_DEST_FOLDER} "" )
 	endforeach()
 endif()
 

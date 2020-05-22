@@ -69,10 +69,6 @@ double ccAdjustZoomDlg::getFocalDistance() const
 	return focalDoubleSpinBox->value();
 }
 
-ccAdjustZoomDlg::~ccAdjustZoomDlg()
-{
-}
-
 void ccAdjustZoomDlg::onFocalChanged(double focalDist)
 {
 	assert(pixelCountSpinBox->value() > 0);

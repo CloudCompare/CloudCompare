@@ -111,8 +111,8 @@ qAnimationDlg::qAnimationDlg(ccGLWindow* view3d, QWidget* parent)
 		settings.endGroup();
 	}
 
-	connect ( autoStepDurationCheckBox,	&QAbstractButton::toggled,			this, &qAnimationDlg::onAutoStepsDurationToggled );
-	connect ( smoothTrajectoryCheckBox,	&QAbstractButton::toggled,			this, &qAnimationDlg::onSmoothTrajectoryToggled );
+	connect ( autoStepDurationCheckBox,	&QAbstractButton::toggled,		this, &qAnimationDlg::onAutoStepsDurationToggled );
+	connect ( smoothTrajectoryGroupBox,	&QGroupBox::toggled,			this, &qAnimationDlg::onSmoothTrajectoryToggled );
 	connect ( smoothRatioDoubleSpinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),		this, &qAnimationDlg::onSmoothRatioChanged );
 	
 	connect( fpsSpinBox,				static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &qAnimationDlg::onFPSChanged );
@@ -359,7 +359,7 @@ bool qAnimationDlg::smoothTrajectory(double ratio, unsigned iterationCount)
 				if (!openPoly || i != 0)
 				{
 					Step interpolatedStep;
-					interpolatedStep.cameraCenter = (PC_ONE - ratio) * sP.cameraCenter + ratio * sQ.cameraCenter;
+					interpolatedStep.cameraCenter = (CCCoreLib::PC_ONE - ratio) * sP.cameraCenter + ratio * sQ.cameraCenter;
 					interpolator.interpolate(interpolatedStep.viewportParams, ratio);
 					interpolatedStep.indexInOriginalTrajectory = (it == 0 ? -1 : sP.indexInOriginalTrajectory);
 					newTrajectory.push_back(interpolatedStep);
@@ -368,8 +368,8 @@ bool qAnimationDlg::smoothTrajectory(double ratio, unsigned iterationCount)
 				if (!openPoly || i + 1 != segmentCount)
 				{
 					Step interpolatedStep;
-					interpolatedStep.cameraCenter = ratio * sP.cameraCenter + (PC_ONE - ratio) * sQ.cameraCenter;
-					interpolator.interpolate(interpolatedStep.viewportParams, PC_ONE - ratio);
+					interpolatedStep.cameraCenter = ratio * sP.cameraCenter + (CCCoreLib::PC_ONE - ratio) * sQ.cameraCenter;
+					interpolator.interpolate(interpolatedStep.viewportParams, CCCoreLib::PC_ONE - ratio);
 					interpolatedStep.indexInOriginalTrajectory = (it == 0 ? sQ.indexInOriginalTrajectory : -1);
 					newTrajectory.push_back(interpolatedStep);
 				}
@@ -524,7 +524,11 @@ void qAnimationDlg::onAutoStepsDurationToggled(bool state)
 			length = step1.length;
 		}
 
-		if (length >= ZERO_TOLERANCE)
+		if (CCCoreLib::LessThanEpsilon(length))
+		{
+			step1.duration_sec = 0.0;
+		}
+		else
 		{
 			step1.duration_sec = totalTimeDoubleSpinBox->value() * (length / referenceLength);
 
@@ -538,10 +542,6 @@ void qAnimationDlg::onAutoStepsDurationToggled(bool state)
 					totalTimeSmooth += s.duration_sec;
 				}
 			}
-		}
-		else
-		{
-			step1.duration_sec = 0.0;
 		}
 
 		totalTime += step1.duration_sec;
@@ -672,17 +672,7 @@ void qAnimationDlg::onTotalTimeChanged(double newTime_sec)
 					length += s.length;
 				}
 
-				if (length > ZERO_TOLERANCE)
-				{
-					//divide over all the segments based on their respective length
-					for (int i = i1Smooth; i < i2Smooth; ++i)
-					{
-						Step& s = m_smoothVideoSteps[static_cast<size_t>(i) % m_smoothVideoSteps.size()];
-						s.duration_sec = step1.duration_sec * s.length / length;
-						totalTimeSmooth += s.duration_sec;
-					}
-				}
-				else
+				if (CCCoreLib::LessThanEpsilon(length))
 				{
 					//divide equally over all the segments
 					size_t count = static_cast<size_t>(i2Smooth - i1Smooth);
@@ -690,6 +680,16 @@ void qAnimationDlg::onTotalTimeChanged(double newTime_sec)
 					{
 						Step& s = m_smoothVideoSteps[static_cast<size_t>(i) % m_smoothVideoSteps.size()];
 						s.duration_sec = step1.duration_sec / count;
+						totalTimeSmooth += s.duration_sec;
+					}
+				}
+				else
+				{
+					//divide over all the segments based on their respective length
+					for (int i = i1Smooth; i < i2Smooth; ++i)
+					{
+						Step& s = m_smoothVideoSteps[static_cast<size_t>(i) % m_smoothVideoSteps.size()];
+						s.duration_sec = step1.duration_sec * s.length / length;
 						totalTimeSmooth += s.duration_sec;
 					}
 				}

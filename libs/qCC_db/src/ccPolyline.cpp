@@ -710,7 +710,7 @@ ccPolyline* ccPolyline::smoothChaikin(PointCoordinateType ratio, unsigned iterat
 		return nullptr;
 	}
 
-	const CCLib::GenericIndexedCloudPersist* currentIterationVertices = this; //a polyline is actually a ReferenceCloud!
+	const CCCoreLib::GenericIndexedCloudPersist* currentIterationVertices = this; //a polyline is actually a ReferenceCloud!
 	ccPolyline* smoothPoly = nullptr;
 
 	bool openPoly = !isClosed();
@@ -748,13 +748,13 @@ ccPolyline* ccPolyline::smoothChaikin(PointCoordinateType ratio, unsigned iterat
 
 			if (!openPoly || i != 0)
 			{
-				CCVector3 P0 = (PC_ONE - ratio) * P + ratio * Q;
+				CCVector3 P0 = (CCCoreLib::PC_ONE - ratio) * P + ratio * Q;
 				newStateVertices->addPoint(P0);
 			}
 
 			if (!openPoly || i + 1 != segmentCount)
 			{
-				CCVector3 P1 = ratio * P + (PC_ONE - ratio) * Q;
+				CCVector3 P1 = ratio * P + (CCCoreLib::PC_ONE - ratio) * Q;
 				newStateVertices->addPoint(P1);
 			}
 		}

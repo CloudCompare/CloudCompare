@@ -3280,7 +3280,7 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(bool withGLfeatures, ProjectionM
 		//for entities with large coordinates)
 		//double zNear = zFar * m_viewportParams.zNearCoef;
 		zNear = bbHalfDiag * m_viewportParams.zNearCoef; //we want a stable value!
-		zFar = std::max(zNear + ZERO_TOLERANCE, zFar);
+		zFar = std::max(zNear + CCCoreLib::ZERO_TOLERANCE, zFar);
 
 		double xMax = zNear * m_viewportParams.computeDistanceToHalfWidthRatio();
 		double yMax = xMax * ar;
@@ -3310,7 +3310,7 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(bool withGLfeatures, ProjectionM
 	else
 	{
 		//zNear = std::max(zNear, 0.0);
-		zFar = std::max(zNear + ZERO_TOLERANCE, zFar);
+		zFar = std::max(zNear + CCCoreLib::ZERO_TOLERANCE, zFar);
 
 		//ccLog::Print(QString("cameraCenterToPivotDist = %0 / zNear = %1 / zFar = %2").arg(cameraCenterToPivotDist).arg(zNear).arg(zFar));
 

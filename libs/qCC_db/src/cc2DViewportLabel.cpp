@@ -108,7 +108,7 @@ void cc2DViewportLabel::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 
 	if ( CCCoreLib::GreaterThanEpsilon( (params.getPivotPoint() - m_params.getPivotPoint()).norm() )
-		 || CCCoreLib::GreaterThanEpsilon( (params.getCameraCenter() - m_params.getCameraCenter()).norm() ) )
+		 || CCCoreLib::GreaterThanEpsilon( (params.getCameraCenter() - m_params.getCameraCenter()).norm() )
 		)
 	{
 		return;

@@ -29,7 +29,7 @@ ccRansacSDDlg::ccRansacSDDlg(QWidget* parent)
 {
 	setupUi(this);
 
-	connect(buttonBox, SIGNAL(accepted()), this, SLOT(saveSettings()));
+	connect(buttonBox, &QDialogButtonBox::accepted, this, &ccRansacSDDlg::saveSettings);
 
 	supportPointsSpinBox->setValue(s_minSupport);
 	maxNormDevAngleSpinBox->setValue(s_maxNormalDev_deg);

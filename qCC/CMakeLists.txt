@@ -136,17 +136,19 @@ endif()
 # Install plugins and shaders in the correct folder for each platform
 if( APPLE )	
 	InstallPlugins(
-		DEST_FOLDER "${CLOUDCOMPARE_MAC_PLUGIN_DIR}"
-		SHADER_DEST_FOLDER "${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Shaders"
+		DEST_PATH "${CLOUDCOMPARE_MAC_PLUGIN_DIR}"
+		SHADER_DEST_PATH "${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Shaders"
 	)
 elseif( UNIX )
 	InstallPlugins(
-		DEST_FOLDER "${CMAKE_INSTALL_LIBDIR}/cloudcompare/plugins"
-		SHADER_DEST_FOLDER share/cloudcompare/shaders
+		DEST_PATH "${CMAKE_INSTALL_LIBDIR}/cloudcompare/plugins"
+		SHADER_DEST_PATH share/cloudcompare/shaders
 	)
 else()
 	InstallPlugins(
-		DEST_FOLDER "${CLOUDCOMPARE_DEST_FOLDER}/plugins"
-		SHADER_DEST_FOLDER "${CLOUDCOMPARE_DEST_FOLDER}/shaders"
+		DEST_PATH "${CLOUDCOMPARE_DEST_FOLDER}"
+		DEST_FOLDER "plugins"
+		SHADER_DEST_PATH "${CLOUDCOMPARE_DEST_FOLDER}"
+		SHADER_DEST_FOLDER "shaders"
 	)
 endif()

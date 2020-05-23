@@ -40,14 +40,16 @@ endfunction()
 # If it is a gl plugin with shaders, install the shaders to SHADER_DEST_FOLDER.
 #
 # Arguments:
-#	DEST_FOLDER Where to install the plugins.
-#	SHADER_DEST_FOLDER Where to install the shaders for the plugins.
+#	DEST_FOLDER The name of the directory to install the plugins in.
+#	DEST_PATH Path to DEST_FOLDER - note that on Windows we will modify this depending on CONFIGURATIONS
+#	SHADER_DEST_FOLDER The name of the directory to install the shaders for the plugins.
+#	SHADER_DEST_PATH Path to SHADER_DEST_FOLDER - note that on Windows we will modify this depending on CONFIGURATIONS
 #	TYPES Semicolon-separated list of plugin types to install (valid: gl, io, standard). If not specified, install all.
 function( InstallPlugins )
 	cmake_parse_arguments(
 			INSTALL_PLUGINS
 			""
-			"DEST_FOLDER;SHADER_DEST_FOLDER"
+			"DEST_FOLDER;DEST_PATH;SHADER_DEST_FOLDER;SHADER_DEST_PATH"
 			"TYPES"
 			${ARGN}
 	)
@@ -73,20 +75,20 @@ function( InstallPlugins )
 	message( STATUS "Install plugins" )
 	message( STATUS " Types: ${INSTALL_PLUGINS_TYPES}" )
 	
-	# Check our destination folder is valid
-	if( NOT INSTALL_PLUGINS_DEST_FOLDER )
-		message( FATAL_ERROR "InstallPlugins: DEST_FOLDER not specified" )
+	# Check our destination path is valid
+	if( NOT INSTALL_PLUGINS_DEST_PATH )
+		message( FATAL_ERROR "InstallPlugins: DEST_PATH not specified" )
 	endif()
 	
-	message( STATUS " Destination: ${INSTALL_PLUGINS_DEST_FOLDER}" )
+	message( STATUS " Destination: ${INSTALL_PLUGINS_DEST_PATH}/${INSTALL_PLUGINS_DEST_FOLDER}" )
 	
 	# If we have gl plugins, check that our shader destination folder is valid
 	if( "gl" IN_LIST VALID_TYPES )
-		if( NOT INSTALL_PLUGINS_SHADER_DEST_FOLDER )
-			message( FATAL_ERROR "InstallPlugins: SHADER_DEST_FOLDER not specified" )
+		if( NOT INSTALL_PLUGINS_SHADER_DEST_PATH )
+			message( FATAL_ERROR "InstallPlugins: SHADER_DEST_PATH not specified" )
 		endif()
 		
-		message( STATUS " Shader Destination: ${INSTALL_PLUGINS_SHADER_DEST_FOLDER}" )
+		message( STATUS " Shader Destination: ${INSTALL_PLUGINS_SHADER_DEST_PATH}/${INSTALL_PLUGINS_SHADER_DEST_FOLDER}" )
 	endif()
 	
 	# Install the requested plugins in the DEST_FOLDER
@@ -98,6 +100,7 @@ function( InstallPlugins )
 			
 			_InstallSharedTarget(
 				TARGET ${plugin_target}
+				DEST_PATH ${INSTALL_PLUGINS_DEST_PATH}
 				DEST_FOLDER ${INSTALL_PLUGINS_DEST_FOLDER}
 			)		
 			
@@ -111,35 +114,36 @@ function( InstallPlugins )
 					get_target_property( shader_files ${plugin_target} SOURCES )
 					list( FILTER shader_files INCLUDE REGEX ".*\.vert|frag" )					
 					
-					foreach( filename ${shader_files} )
-						install(
-							FILES ${filename}
-							DESTINATION "${INSTALL_PLUGINS_SHADER_DEST_FOLDER}/${SHADER_FOLDER_NAME}"
-						)
-					endforeach()
+					_InstallFiles(
+						FILES ${shader_files}
+						DEST_PATH ${INSTALL_PLUGINS_SHADER_DEST_PATH}
+						DEST_FOLDER ${INSTALL_PLUGINS_SHADER_DEST_FOLDER}/${SHADER_FOLDER_NAME}
+					)
 				endif()
 			endif()
 		endif()
-	endforeach()	
+	endforeach()
 endfunction()
 
 # _InstallSharedTarget should only be called by one of the functions above.
 # It was factored out to provide cmake < 3.13 a way to install shared libs.
 #
 # Arguments:
-#	DEST_FOLDER Where to install the shared lib.
+#	DEST_FOLDER The name of the directory to install the shared lib in.
+#	DEST_PATH Path to DEST_FOLDER - note that on Windows we will modify this depending on CONFIGURATIONS
 #	TARGET The name of the shared lib target
 function( _InstallSharedTarget )
 	cmake_parse_arguments(
 			INSTALL_SHARED_TARGET
 			""
-			"DEST_FOLDER;TARGET"
+			"DEST_FOLDER;DEST_PATH;TARGET"
 			""
 			${ARGN}
 	)
 	
 	# For readability
 	set( shared_target "${INSTALL_SHARED_TARGET_TARGET}" )
+	set( full_path "${INSTALL_SHARED_TARGET_DEST_PATH}/${INSTALL_SHARED_TARGET_DEST_FOLDER}" )
 	
 	# Before CMake 3.13, install(TARGETS) would only accept targets created in the same directory scope
 	# This makes it difficult to work with submodules.
@@ -162,18 +166,93 @@ function( _InstallSharedTarget )
 		set( target_shared_lib "${target_bin_dir}/${lib_prefix}${shared_target}${lib_postfix}${CMAKE_SHARED_LIBRARY_SUFFIX}" )
 				
 		if ( WIN32 )
-			copy_files( "${target_shared_lib}" "${INSTALL_SHARED_TARGET_DEST_FOLDER}" 1 )
+			copy_files( "${target_shared_lib}" "${full_path}" 1 )
 		else()
-			copy_files( "${target_shared_lib}" "${INSTALL_SHARED_TARGET_DEST_FOLDER}" )
+			copy_files( "${target_shared_lib}" "${full_path}" )
 		endif()
 	else()	
 		if( WIN32 )
-			install_shared( ${shared_target} ${INSTALL_SHARED_TARGET_DEST_FOLDER} 1 )
+			if( NOT CMAKE_CONFIGURATION_TYPES )
+				install(
+					TARGETS ${shared_target}
+					RUNTIME DESTINATION ${full_path}
+				)
+			else()
+				install(
+					TARGETS ${shared_target}
+					CONFIGURATIONS Debug
+					RUNTIME DESTINATION ${INSTALL_SHARED_TARGET_DEST_PATH}_debug/${INSTALL_SHARED_TARGET_DEST_FOLDER}
+				)
+			
+				install(
+					TARGETS ${shared_target}
+					CONFIGURATIONS Release
+					RUNTIME DESTINATION ${full_path}
+				)
+			
+				install(
+					TARGETS ${shared_target}
+					CONFIGURATIONS RelWithDebInfo
+					RUNTIME DESTINATION ${INSTALL_SHARED_TARGET_DEST_PATH}_withDebInfo/${INSTALL_SHARED_TARGET_DEST_FOLDER}
+				)
+			endif()			
 		else()
 			install( TARGETS ${shared_target}
-				LIBRARY DESTINATION ${INSTALL_SHARED_TARGET_DEST_FOLDER}
+				LIBRARY DESTINATION ${full_path}
 				COMPONENT Runtime
 			)
 		endif()
+	endif()
+endfunction()
+
+# _InstallFiles should only be called by one of the functions above.
+#
+# Arguments:
+#	DEST_FOLDER The name of the directory to install the files in.
+#	DEST_PATH Path to DEST_FOLDER - note that on Windows we will modify this depending on CONFIGURATIONS
+#	FILES The name of the files to install
+function( _InstallFiles )
+	cmake_parse_arguments(
+			INSTALL_FILES
+			""
+			"DEST_FOLDER;DEST_PATH"
+			"FILES"
+			${ARGN}
+	)
+
+	# For readability
+	set( files "${INSTALL_FILES_FILES}" )
+	set( full_path "${INSTALL_FILES_DEST_PATH}/${INSTALL_FILES_DEST_FOLDER}" )
+	
+	if( WIN32 )
+		if( NOT CMAKE_CONFIGURATION_TYPES )
+			install(
+				FILES ${files}
+				DESTINATION "${full_path}"
+			)
+		else()
+			install(
+				FILES ${files}
+				CONFIGURATIONS Debug
+				DESTINATION "${INSTALL_FILES_DEST_PATH}_debug/${INSTALL_FILES_DEST_FOLDER}"
+			)
+		
+			install(
+				FILES ${files}
+				CONFIGURATIONS Release
+				RUNTIME DESTINATION ${full_path}
+			)
+		
+			install(
+				FILES ${files}
+				CONFIGURATIONS RelWithDebInfo
+				RUNTIME DESTINATION "${INSTALL_FILES_DEST_PATH}_withDebInfo/${INSTALL_FILES_DEST_FOLDER}"
+			)
+		endif()			
+	else()
+		install(
+			FILES ${files}
+			DESTINATION "${full_path}"
+		)
 	endif()
 endfunction()

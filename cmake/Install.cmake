@@ -43,12 +43,13 @@ endfunction()
 #	DEST_FOLDER The name of the directory to install the plugins in.
 #	DEST_PATH Path to DEST_FOLDER - note that on Windows we will modify this depending on CONFIGURATIONS
 #	SHADER_DEST_FOLDER The name of the directory to install the shaders for the plugins.
+#	SHADER_DEST_PATH Path to SHADER_DEST_FOLDER - note that on Windows we will modify this depending on CONFIGURATIONS
 #	TYPES Semicolon-separated list of plugin types to install (valid: gl, io, standard). If not specified, install all.
 function( InstallPlugins )
 	cmake_parse_arguments(
 			INSTALL_PLUGINS
 			""
-			"DEST_FOLDER;DEST_PATH;SHADER_DEST_FOLDER"
+			"DEST_FOLDER;DEST_PATH;SHADER_DEST_FOLDER;SHADER_DEST_PATH"
 			"TYPES"
 			${ARGN}
 	)
@@ -83,11 +84,11 @@ function( InstallPlugins )
 	
 	# If we have gl plugins, check that our shader destination folder is valid
 	if( "gl" IN_LIST VALID_TYPES )
-		if( NOT INSTALL_PLUGINS_SHADER_DEST_FOLDER )
-			message( FATAL_ERROR "InstallPlugins: SHADER_DEST_FOLDER not specified" )
+		if( NOT INSTALL_PLUGINS_SHADER_DEST_PATH )
+			message( FATAL_ERROR "InstallPlugins: SHADER_DEST_PATH not specified" )
 		endif()
 		
-		message( STATUS " Shader Destination: ${INSTALL_PLUGINS_SHADER_DEST_FOLDER}" )
+		message( STATUS " Shader Destination: ${INSTALL_PLUGINS_SHADER_DEST_PATH}/${INSTALL_PLUGINS_SHADER_DEST_FOLDER}" )
 	endif()
 	
 	# Install the requested plugins in the DEST_FOLDER
@@ -113,12 +114,11 @@ function( InstallPlugins )
 					get_target_property( shader_files ${plugin_target} SOURCES )
 					list( FILTER shader_files INCLUDE REGEX ".*\.vert|frag" )					
 					
-					foreach( filename ${shader_files} )
-						install(
-							FILES ${filename}
-							DESTINATION "${INSTALL_PLUGINS_SHADER_DEST_FOLDER}/${SHADER_FOLDER_NAME}"
-						)
-					endforeach()
+					_InstallFiles(
+						FILES ${shader_files}
+						DEST_PATH ${INSTALL_PLUGINS_SHADER_DEST_PATH}
+						DEST_FOLDER ${INSTALL_PLUGINS_SHADER_DEST_FOLDER}/${SHADER_FOLDER_NAME}
+					)
 				endif()
 			endif()
 		endif()
@@ -143,7 +143,6 @@ function( _InstallSharedTarget )
 	
 	# For readability
 	set( shared_target "${INSTALL_SHARED_TARGET_TARGET}" )
-	
 	set( full_path "${INSTALL_SHARED_TARGET_DEST_PATH}/${INSTALL_SHARED_TARGET_DEST_FOLDER}" )
 	
 	# Before CMake 3.13, install(TARGETS) would only accept targets created in the same directory scope
@@ -174,21 +173,25 @@ function( _InstallSharedTarget )
 	else()	
 		if( WIN32 )
 			if( NOT CMAKE_CONFIGURATION_TYPES )
-				install( TARGETS ${shared_target}
+				install(
+					TARGETS ${shared_target}
 					RUNTIME DESTINATION ${full_path}
 				)
 			else()
-				install( TARGETS ${shared_target}
+				install(
+					TARGETS ${shared_target}
 					CONFIGURATIONS Debug
 					RUNTIME DESTINATION ${INSTALL_SHARED_TARGET_DEST_PATH}_debug/${INSTALL_SHARED_TARGET_DEST_FOLDER}
 				)
 			
-				install( TARGETS ${shared_target}
+				install(
+					TARGETS ${shared_target}
 					CONFIGURATIONS Release
 					RUNTIME DESTINATION ${full_path}
 				)
 			
-				install( TARGETS ${shared_target}
+				install(
+					TARGETS ${shared_target}
 					CONFIGURATIONS RelWithDebInfo
 					RUNTIME DESTINATION ${INSTALL_SHARED_TARGET_DEST_PATH}_withDebInfo/${INSTALL_SHARED_TARGET_DEST_FOLDER}
 				)
@@ -199,5 +202,57 @@ function( _InstallSharedTarget )
 				COMPONENT Runtime
 			)
 		endif()
+	endif()
+endfunction()
+
+# _InstallFiles should only be called by one of the functions above.
+#
+# Arguments:
+#	DEST_FOLDER The name of the directory to install the files in.
+#	DEST_PATH Path to DEST_FOLDER - note that on Windows we will modify this depending on CONFIGURATIONS
+#	FILES The name of the files to install
+function( _InstallFiles )
+	cmake_parse_arguments(
+			INSTALL_FILES
+			""
+			"DEST_FOLDER;DEST_PATH"
+			"FILES"
+			${ARGN}
+	)
+
+	# For readability
+	set( files "${INSTALL_FILES_FILES}" )
+	set( full_path "${INSTALL_FILES_DEST_PATH}/${INSTALL_FILES_DEST_FOLDER}" )
+	
+	if( WIN32 )
+		if( NOT CMAKE_CONFIGURATION_TYPES )
+			install(
+				FILES ${files}
+				DESTINATION "${full_path}"
+			)
+		else()
+			install(
+				FILES ${files}
+				CONFIGURATIONS Debug
+				DESTINATION "${INSTALL_FILES_DEST_FOLDER}_debug/${INSTALL_FILES_DEST_PATH}"
+			)
+		
+			install(
+				FILES ${files}
+				CONFIGURATIONS Release
+				RUNTIME DESTINATION ${full_path}
+			)
+		
+			install(
+				FILES ${files}
+				CONFIGURATIONS RelWithDebInfo
+				RUNTIME DESTINATION "${INSTALL_FILES_DEST_FOLDER}_withDebInfo/${INSTALL_FILES_DEST_PATH}"
+			)
+		endif()			
+	else()
+		install(
+			FILES ${files}
+			DESTINATION "${full_path}"
+		)
 	endif()
 endfunction()

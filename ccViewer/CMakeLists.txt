@@ -105,19 +105,20 @@ if( APPLE )
 	InstallPlugins(
 		TYPES "gl;io"
 		DEST_PATH "${CCVIEWER_MAC_PLUGIN_DIR}"
-		SHADER_DEST_FOLDER "${CCVIEWER_MAC_BASE_DIR}/Contents/Shaders"
+		SHADER_DEST_PATH "${CCVIEWER_MAC_BASE_DIR}/Contents/Shaders"
 	)
 elseif( UNIX )
 	InstallPlugins(
 		TYPES "gl;io"
 		DEST_PATH "${CMAKE_INSTALL_LIBDIR}/cloudcompare/plugins"
-		SHADER_DEST_FOLDER share/cloudcompare/shaders
+		SHADER_DEST_PATH share/cloudcompare/shaders
 	)
 else()
 	InstallPlugins(
 		TYPES "gl;io"
 		DEST_PATH "${CCVIEWER_DEST_FOLDER}"
 		DEST_FOLDER "plugins"
-		SHADER_DEST_FOLDER "${CCVIEWER_DEST_FOLDER}/shaders"
-	)
+		SHADER_DEST_PATH "${CCVIEWER_DEST_FOLDER}"
+		SHADER_DEST_FOLDER "shaders"
+)
 endif()

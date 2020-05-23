@@ -6,8 +6,11 @@ add_subdirectory( GfxTL )
 add_subdirectory( MiscLib )
 
 target_compile_definitions( ${PROJECT_NAME}
+	PUBLIC
+		# Causes sub-clouds to be generated as partial clones of original cloud
+		POINTSWITHINDEX
 	PRIVATE
-	    _CRT_SECURE_NO_DEPRECATE
+		_CRT_SECURE_NO_DEPRECATE
 		_CRT_SECURE_NO_WARNINGS
 		_SCL_SECURE_NO_WARNINGS
 		_LIB
@@ -28,7 +31,7 @@ target_compile_definitions( ${PROJECT_NAME}
 
 target_sources( ${PROJECT_NAME}
 	PUBLIC
-	    ${CMAKE_CURRENT_LIST_DIR}/BasePrimitiveShape.h
+		${CMAKE_CURRENT_LIST_DIR}/BasePrimitiveShape.h
 		${CMAKE_CURRENT_LIST_DIR}/basic.h
 		${CMAKE_CURRENT_LIST_DIR}/Bitmap.h
 		${CMAKE_CURRENT_LIST_DIR}/BitmapPrimitiveShape.h
@@ -68,7 +71,7 @@ target_sources( ${PROJECT_NAME}
 		${CMAKE_CURRENT_LIST_DIR}/TorusPrimitiveShape.h
 		${CMAKE_CURRENT_LIST_DIR}/TorusPrimitiveShapeConstructor.h
 	PRIVATE
-	    ${CMAKE_CURRENT_LIST_DIR}/Bitmap.cpp
+		${CMAKE_CURRENT_LIST_DIR}/Bitmap.cpp
 		${CMAKE_CURRENT_LIST_DIR}/BitmapPrimitiveShape.cpp
 		${CMAKE_CURRENT_LIST_DIR}/Candidate.cpp
 		${CMAKE_CURRENT_LIST_DIR}/Cone.cpp
@@ -96,5 +99,5 @@ target_sources( ${PROJECT_NAME}
 
 target_include_directories( ${PROJECT_NAME}
 	PUBLIC
-	    ${CMAKE_CURRENT_SOURCE_DIR}
+		${CMAKE_CURRENT_SOURCE_DIR}
 )

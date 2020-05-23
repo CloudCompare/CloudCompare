@@ -20,21 +20,17 @@ function( InstallSharedLibrary )
 
 	message( STATUS "Install shared library: ${shared_lib_target}")
 
-	if( WIN32 )
-		foreach( destination ${INSTALL_DESTINATIONS} )
-			install_shared( ${shared_lib_target} ${destination} 1 )
-		endforeach()
-	elseif( APPLE )
-		foreach( destination ${INSTALL_DESTINATIONS} )
-			install( TARGETS ${shared_lib_target}
-				LIBRARY DESTINATION ${destination}
-				COMPONENT Runtime
-			)
+	if( APPLE OR WIN32 )
+		foreach( destination ${INSTALL_DESTINATIONS} )			
+			_InstallSharedTarget(
+				TARGET ${shared_lib_target}
+				DEST_FOLDER ${destination}
+			)		
 		endforeach()
 	else()
-		install( TARGETS ${shared_lib_target}
-			LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/cloudcompare
-			COMPONENT Runtime
+		_InstallSharedTarget(
+			TARGET ${shared_lib_target}
+			DEST_FOLDER ${CMAKE_INSTALL_LIBDIR}/cloudcompare
 		)
 	endif()
 endfunction()
@@ -100,7 +96,7 @@ function( InstallPlugins )
 		if( "${plugin_type}" IN_LIST INSTALL_PLUGINS_TYPES )
 			message( STATUS " Install ${plugin_target} (${plugin_type})" )
 			
-			_InstallPluginTarget(
+			_InstallSharedTarget(
 				TARGET ${plugin_target}
 				DEST_FOLDER ${INSTALL_PLUGINS_DEST_FOLDER}
 			)		
@@ -127,15 +123,15 @@ function( InstallPlugins )
 	endforeach()	
 endfunction()
 
-# _InstallPluginTarget should only be called by InstallPlugins above.
-# It was factored out to provide cmake < 3.13 a way to install plugins.
+# _InstallSharedTarget should only be called by one of the functions above.
+# It was factored out to provide cmake < 3.13 a way to install shared libs.
 #
 # Arguments:
-#	DEST_FOLDER Where to install the plugins.
-#	TARGET The name of the plugin target
-function( _InstallPluginTarget )
+#	DEST_FOLDER Where to install the shared lib.
+#	TARGET The name of the shared lib target
+function( _InstallSharedTarget )
 	cmake_parse_arguments(
-			INSTALL_PLUGIN_TARGET
+			INSTALL_SHARED_TARGET
 			""
 			"DEST_FOLDER;TARGET"
 			""
@@ -143,14 +139,14 @@ function( _InstallPluginTarget )
 	)
 	
 	# For readability
-	set( plugin_target "${INSTALL_PLUGIN_TARGET_TARGET}" )
+	set( shared_target "${INSTALL_SHARED_TARGET_TARGET}" )
 	
 	# Before CMake 3.13, install(TARGETS) would only accept targets created in the same directory scope
 	# This makes it difficult to work with submodules.
 	# This can be cleaned up when we move to a minimum CMake of 3.13 or higher
 	# https://gitlab.kitware.com/cmake/cmake/-/merge_requests/2152
 	if ( ${CMAKE_VERSION} VERSION_LESS "3.13.0" )
-		# Basic hack: construct the name of the plugin dynamic library ("target_plugin") and install using
+		# Basic hack: construct the name of the dynamic library ("target_shared_lib") and install using
 		# install(FILES) instead of install(TARGETS)
 		
 		if ( APPLE OR UNIX )
@@ -158,24 +154,24 @@ function( _InstallPluginTarget )
 		endif()
 		
 		if ( CMAKE_BUILD_TYPE STREQUAL "Debug" )
-			get_target_property( lib_postfix ${plugin_target} DEBUG_POSTFIX)
+			get_target_property( lib_postfix ${shared_target} DEBUG_POSTFIX)
 		endif()
 		
-		get_target_property( target_bin_dir ${plugin_target} BINARY_DIR )
+		get_target_property( target_bin_dir ${shared_target} BINARY_DIR )
 		
-		set( target_plugin "${target_bin_dir}/${lib_prefix}${plugin_target}${lib_postfix}${CMAKE_SHARED_LIBRARY_SUFFIX}" )
+		set( target_shared_lib "${target_bin_dir}/${lib_prefix}${shared_target}${lib_postfix}${CMAKE_SHARED_LIBRARY_SUFFIX}" )
 				
 		if ( WIN32 )
-			copy_files( "${target_plugin}" "${INSTALL_PLUGIN_TARGET_DEST_FOLDER}" 1 )
+			copy_files( "${target_shared_lib}" "${INSTALL_SHARED_TARGET_DEST_FOLDER}" 1 )
 		else()
-			copy_files( "${target_plugin}" "${INSTALL_PLUGIN_TARGET_DEST_FOLDER}" )
+			copy_files( "${target_shared_lib}" "${INSTALL_SHARED_TARGET_DEST_FOLDER}" )
 		endif()
 	else()	
 		if( WIN32 )
-			install_shared( ${plugin_target} ${INSTALL_PLUGIN_TARGET_DEST_FOLDER} 1 )
+			install_shared( ${shared_target} ${INSTALL_SHARED_TARGET_DEST_FOLDER} 1 )
 		else()
-			install( TARGETS ${plugin_target}
-				LIBRARY DESTINATION ${INSTALL_PLUGIN_TARGET_DEST_FOLDER}
+			install( TARGETS ${shared_target}
+				LIBRARY DESTINATION ${INSTALL_SHARED_TARGET_DEST_FOLDER}
 				COMPONENT Runtime
 			)
 		endif()

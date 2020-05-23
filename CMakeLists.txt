@@ -84,7 +84,6 @@ include( CMakeInclude )
 include( Install )
 
 # Add external libraries
-add_subdirectory( extern/CCCoreLib EXCLUDE_FROM_ALL )
 include( CMakeExternalLibs )
 
 # Contrib. libraries (mainly for I/O)
@@ -103,6 +102,3 @@ add_subdirectory( qCC )
 if( OPTION_BUILD_CCVIEWER )
 	add_subdirectory( ccViewer )
 endif()
-
-# Install
-include( InstallCCCoreLib )

@@ -5,6 +5,8 @@ add_library( ${PROJECT_NAME} SHARED )
 add_subdirectory( include )
 add_subdirectory( src )
 
+add_subdirectory( extern/CCCoreLib EXCLUDE_FROM_ALL )
+
 target_link_libraries( ${PROJECT_NAME}
     CCCoreLib
     CC_FBO_LIB
@@ -16,4 +18,5 @@ set_target_properties( ${PROJECT_NAME} PROPERTIES
 	CXX_VISIBILITY_PRESET hidden
 )
 
+InstallSharedLibrary( TARGET CCCoreLib )
 InstallSharedLibrary( TARGET ${PROJECT_NAME} )

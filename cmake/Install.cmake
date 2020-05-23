@@ -234,7 +234,7 @@ function( _InstallFiles )
 			install(
 				FILES ${files}
 				CONFIGURATIONS Debug
-				DESTINATION "${INSTALL_FILES_DEST_FOLDER}_debug/${INSTALL_FILES_DEST_PATH}"
+				DESTINATION "${INSTALL_FILES_DEST_PATH}_debug/${INSTALL_FILES_DEST_FOLDER}"
 			)
 		
 			install(
@@ -246,7 +246,7 @@ function( _InstallFiles )
 			install(
 				FILES ${files}
 				CONFIGURATIONS RelWithDebInfo
-				RUNTIME DESTINATION "${INSTALL_FILES_DEST_FOLDER}_withDebInfo/${INSTALL_FILES_DEST_PATH}"
+				RUNTIME DESTINATION "${INSTALL_FILES_DEST_PATH}_withDebInfo/${INSTALL_FILES_DEST_FOLDER}"
 			)
 		endif()			
 	else()

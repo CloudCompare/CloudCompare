@@ -9,9 +9,6 @@ if( PLUGIN_STANDARD_QRANSAC_SD )
 	add_subdirectory( include )
 	add_subdirectory( src )
 	add_subdirectory( ui )
-
-	# Causes the sub-clouds to be generated as partial clones of original cloud
-	target_compile_definitions( ${PROJECT_NAME} PRIVATE POINTSWITHINDEX )
 	
 	target_link_libraries( ${PROJECT_NAME} QRANSAC_SD_PRIM_SHAPES_LIB )
 endif()

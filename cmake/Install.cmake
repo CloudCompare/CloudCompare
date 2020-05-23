@@ -40,14 +40,15 @@ endfunction()
 # If it is a gl plugin with shaders, install the shaders to SHADER_DEST_FOLDER.
 #
 # Arguments:
-#	DEST_FOLDER Where to install the plugins.
-#	SHADER_DEST_FOLDER Where to install the shaders for the plugins.
+#	DEST_FOLDER The name of the directory to install the plugins in.
+#	DEST_PATH Path to DEST_FOLDER - note that on Windows we will modify this depending on CONFIGURATIONS
+#	SHADER_DEST_FOLDER The name of the directory to install the shaders for the plugins.
 #	TYPES Semicolon-separated list of plugin types to install (valid: gl, io, standard). If not specified, install all.
 function( InstallPlugins )
 	cmake_parse_arguments(
 			INSTALL_PLUGINS
 			""
-			"DEST_FOLDER;SHADER_DEST_FOLDER"
+			"DEST_FOLDER;DEST_PATH;SHADER_DEST_FOLDER"
 			"TYPES"
 			${ARGN}
 	)
@@ -73,12 +74,12 @@ function( InstallPlugins )
 	message( STATUS "Install plugins" )
 	message( STATUS " Types: ${INSTALL_PLUGINS_TYPES}" )
 	
-	# Check our destination folder is valid
-	if( NOT INSTALL_PLUGINS_DEST_FOLDER )
-		message( FATAL_ERROR "InstallPlugins: DEST_FOLDER not specified" )
+	# Check our destination path is valid
+	if( NOT INSTALL_PLUGINS_DEST_PATH )
+		message( FATAL_ERROR "InstallPlugins: DEST_PATH not specified" )
 	endif()
 	
-	message( STATUS " Destination: ${INSTALL_PLUGINS_DEST_FOLDER}" )
+	message( STATUS " Destination: ${INSTALL_PLUGINS_DEST_PATH}/${INSTALL_PLUGINS_DEST_FOLDER}" )
 	
 	# If we have gl plugins, check that our shader destination folder is valid
 	if( "gl" IN_LIST VALID_TYPES )
@@ -98,6 +99,7 @@ function( InstallPlugins )
 			
 			_InstallSharedTarget(
 				TARGET ${plugin_target}
+				DEST_PATH ${INSTALL_PLUGINS_DEST_PATH}
 				DEST_FOLDER ${INSTALL_PLUGINS_DEST_FOLDER}
 			)		
 			
@@ -120,26 +122,29 @@ function( InstallPlugins )
 				endif()
 			endif()
 		endif()
-	endforeach()	
+	endforeach()
 endfunction()
 
 # _InstallSharedTarget should only be called by one of the functions above.
 # It was factored out to provide cmake < 3.13 a way to install shared libs.
 #
 # Arguments:
-#	DEST_FOLDER Where to install the shared lib.
+#	DEST_FOLDER The name of the directory to install the shared lib in.
+#	DEST_PATH Path to DEST_FOLDER - note that on Windows we will modify this depending on CONFIGURATIONS
 #	TARGET The name of the shared lib target
 function( _InstallSharedTarget )
 	cmake_parse_arguments(
 			INSTALL_SHARED_TARGET
 			""
-			"DEST_FOLDER;TARGET"
+			"DEST_FOLDER;DEST_PATH;TARGET"
 			""
 			${ARGN}
 	)
 	
 	# For readability
 	set( shared_target "${INSTALL_SHARED_TARGET_TARGET}" )
+	
+	set( full_path "${INSTALL_SHARED_TARGET_DEST_PATH}/${INSTALL_SHARED_TARGET_DEST_FOLDER}" )
 	
 	# Before CMake 3.13, install(TARGETS) would only accept targets created in the same directory scope
 	# This makes it difficult to work with submodules.
@@ -162,16 +167,35 @@ function( _InstallSharedTarget )
 		set( target_shared_lib "${target_bin_dir}/${lib_prefix}${shared_target}${lib_postfix}${CMAKE_SHARED_LIBRARY_SUFFIX}" )
 				
 		if ( WIN32 )
-			copy_files( "${target_shared_lib}" "${INSTALL_SHARED_TARGET_DEST_FOLDER}" 1 )
+			copy_files( "${target_shared_lib}" "${full_path}" 1 )
 		else()
-			copy_files( "${target_shared_lib}" "${INSTALL_SHARED_TARGET_DEST_FOLDER}" )
+			copy_files( "${target_shared_lib}" "${full_path}" )
 		endif()
 	else()	
 		if( WIN32 )
-			install_shared( ${shared_target} ${INSTALL_SHARED_TARGET_DEST_FOLDER} 1 )
+			if( NOT CMAKE_CONFIGURATION_TYPES )
+				install( TARGETS ${shared_target}
+					RUNTIME DESTINATION ${full_path}
+				)
+			else()
+				install( TARGETS ${shared_target}
+					CONFIGURATIONS Debug
+					RUNTIME DESTINATION ${INSTALL_SHARED_TARGET_DEST_PATH}_debug/${INSTALL_SHARED_TARGET_DEST_FOLDER}
+				)
+			
+				install( TARGETS ${shared_target}
+					CONFIGURATIONS Release
+					RUNTIME DESTINATION ${full_path}
+				)
+			
+				install( TARGETS ${shared_target}
+					CONFIGURATIONS RelWithDebInfo
+					RUNTIME DESTINATION ${INSTALL_SHARED_TARGET_DEST_PATH}_withDebInfo/${INSTALL_SHARED_TARGET_DEST_FOLDER}
+				)
+			endif()			
 		else()
 			install( TARGETS ${shared_target}
-				LIBRARY DESTINATION ${INSTALL_SHARED_TARGET_DEST_FOLDER}
+				LIBRARY DESTINATION ${full_path}
 				COMPONENT Runtime
 			)
 		endif()

@@ -29,9 +29,24 @@ else()
 	add_executable( ${PROJECT_NAME} ${header_list} ${source_list} ${generated_ui_list} ${generated_qrc_list} ${rc_list})
 endif()
 
+DeployQt(
+	TARGET
+		${PROJECT_NAME}
+	DEPLOY_PATH
+		${PROJECT_NAME}
+)
+
 target_link_libraries( ${PROJECT_NAME}
     CCAppCommon
 )
+
+if( CCCORELIB_USE_QT_CONCURRENT )
+	# We want *deployqt to handle this dependency, so instead of just copying the file
+	# link to the target.
+	target_link_libraries( ${PROJECT_NAME}
+		Qt5::Concurrent
+	)
+endif()
 
 # contrib. libraries support
 if ( APPLE )
@@ -65,10 +80,6 @@ install_ext( TARGETS ccViewer ${CCVIEWER_DEST_FOLDER} "" )
 set( auxFiles bin_other/license.txt )
 
 if( WIN32 )
-	# Export Qt dlls
-	install_Qt_Dlls( ${CCVIEWER_DEST_FOLDER} ${OPTION_SUPPORT_GAMEPADS} )
-	install_Qt5_plugins( ${CCVIEWER_DEST_FOLDER} )
-
 	# Additional auxiliary file(s)
 	list( APPEND auxFiles bin_other/start.bat )
 endif()

@@ -20,3 +20,5 @@ set_target_properties( ${PROJECT_NAME} PROPERTIES
 
 InstallSharedLibrary( TARGET CCCoreLib )
 InstallSharedLibrary( TARGET ${PROJECT_NAME} )
+
+include( cmake/InstallCGALDependencies.cmake )

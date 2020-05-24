@@ -24,13 +24,13 @@ function( InstallSharedLibrary )
 		foreach( destination ${INSTALL_DESTINATIONS} )			
 			_InstallSharedTarget(
 				TARGET ${shared_lib_target}
-				DEST_FOLDER ${destination}
+				DEST_PATH ${destination}
 			)		
 		endforeach()
 	else()
 		_InstallSharedTarget(
 			TARGET ${shared_lib_target}
-			DEST_FOLDER ${CMAKE_INSTALL_LIBDIR}/cloudcompare
+			DEST_PATH ${CMAKE_INSTALL_LIBDIR}/cloudcompare
 		)
 	endif()
 endfunction()

@@ -2831,21 +2831,17 @@ void ccGLWindow::updateConstellationCenterAndZoom(const ccBBox* boundingBox/*=nu
 	CCVector3d P = CCVector3d::fromArray(zoomedBox.getCenter().u);
 	setPivotPoint(P, false, false);
 
-	//set the right distance for the camera to see the whole bounding-box
+	//compute the right distance for the camera to see the whole bounding-box
 	double targetWidth = bbDiag;
 	if (glHeight() < glWidth())
 	{
 		targetWidth *= static_cast<double>(glWidth()) / glHeight();
 	}
-	setCameraFocalToFitWidth(targetWidth);
+	double focalDistance = targetWidth / m_viewportParams.computeDistanceToWidthRatio();
 
-	if (!m_viewportParams.objectCenteredView)
-	{
-		//reposition the camera center
-		CCVector3d cameraDir = m_viewportParams.getViewDir();
-		CCVector3d cameraPos = m_viewportParams.getPivotPoint() - cameraDir * m_viewportParams.getFocalDistance();
-		setCameraPos(cameraPos);
-	}
+	//set the camera position
+	setCameraPos(P);
+	moveCamera(CCVector3d(0, 0, focalDistance));
 
 	//just in case
 	invalidateViewport();

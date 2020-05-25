@@ -63,19 +63,16 @@ public:
 	{
 		//! Default constructor
 		ViewportParameters()
-			: zoom(1.0)
-			, perspectiveMode(false)
+			: perspectiveMode(false)
 			, zNear(0.0)
 			, zFar(1.0)
 		{}
 
-		//! Zoom
-		double zoom;
 		//! Whether perspective mode is enabled or not
 		bool perspectiveMode;
-		//! Near clipping plane position (perspective mode only)
+		//! Near clipping plane position
 		double zNear;
-		//! Far clipping plane position (perspective mode only)
+		//! Far clipping plane position
 		double zFar;
 	};
 

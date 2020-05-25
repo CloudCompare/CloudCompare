@@ -2119,7 +2119,6 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 					parameters.perspectiveMode = m_viewportParams.perspectiveView;
 					parameters.zFar = m_viewportParams.zFar;
 					parameters.zNear = m_viewportParams.zNear;
-					//parameters.zoom = m_viewportParams.perspectiveView ? computePerspectiveZoom() : m_viewportParams.zoom; //TODO: doesn't work well with EDL in perspective mode!
 				}
 				//apply shader
 				m_activeGLFilter->shade(depthTex, colorTex, parameters);
@@ -2938,6 +2937,8 @@ void ccGLWindow::setCameraPos(const CCVector3d& P)
 	{
 		m_viewportParams.setCameraCenter(P);
 
+		ccLog::Print(QString("[ccGLWindow] Focal distance = %1").arg(m_viewportParams.getFocalDistance()));
+
 		emit cameraPosChanged(P);
 
 		invalidateViewport();
@@ -3274,8 +3275,9 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(bool withGLfeatures, ProjectionM
 		//DGM: the 'zNearCoef' must not be too small, otherwise the loss in accuracy
 		//for the detph buffer is too high and the display is jeopardized, especially
 		//for entities with large coordinates)
-		//double zNear = zFar * m_viewportParams.zNearCoef;
+		//zNear = zFar * m_viewportParams.zNearCoef;
 		zNear = bbHalfDiag * m_viewportParams.zNearCoef; //we want a stable value!
+		//zNear = std::max(bbHalfDiag * m_viewportParams.zNearCoef, zNear); //we want a stable value!
 		zFar = std::max(zNear + CCCoreLib::ZERO_TOLERANCE, zFar);
 
 		double xMax = zNear * m_viewportParams.computeDistanceToHalfWidthRatio();
@@ -6033,9 +6035,8 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0f*/,
 	bool stereoModeWasEnabled = m_stereoModeEnabled;
 	m_stereoModeEnabled = false;
 
-	//TODO FIXME
-	//float originalZoom = m_viewportParams.zoom;
-	//setZoom(m_viewportParams.zoom * zoomFactor);
+	float originalFocalDistance = m_viewportParams.getFocalDistance();
+	m_viewportParams.setFocalDistance(originalFocalDistance / zoomFactor);
 
 	//disable LOD!
 	bool wasLODEnabled = isLODEnabled();
@@ -6047,8 +6048,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0f*/,
 
 	fullRenderingPass(CONTEXT, renderingParams);
 
-	//TODO FIXME
-	//setZoom(originalZoom);
+	m_viewportParams.setFocalDistance(originalFocalDistance);
 
 	//disable the FBO
 	logGLError("ccGLWindow::renderToFile/FBO stop");
@@ -6078,7 +6078,6 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0f*/,
 			parameters.perspectiveMode = m_viewportParams.perspectiveView;
 			parameters.zFar = m_viewportParams.zFar;
 			parameters.zNear = m_viewportParams.zNear;
-			//parameters.zoom = m_viewportParams.perspectiveView ? computePerspectiveZoom() : m_viewportParams.zoom * zoomFactor; //TODO: doesn't work well with EDL in perspective mode!
 		}
 		//apply shader
 		glFilter->shade(depthTex, colorTex, parameters);

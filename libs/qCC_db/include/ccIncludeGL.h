@@ -82,61 +82,26 @@ public: //GLU equivalent methods
 
 			double dX = right - left;
 			double dY = top - bottom;
-			double dZ = znear - zfar;
-
-			matrix[0]  =  2*znear / dX;
-			matrix[1]  =  0.0;
-			matrix[2]  =  0.0;
-			matrix[3]  =  0.0;
-
-			matrix[4]  =  0.0;
-			matrix[5]  =  2*znear / dY;
-			matrix[6]  =  0.0;
-			matrix[7]  =  0.0;
-
-			matrix[8]  =  (right + left)/dX;
-			matrix[9]  =  (top + bottom)/dY;
-			matrix[10] =  (zfar + znear)/dZ;
-			matrix[11] = -1.0;
-
-			matrix[12] =  0.0;
-			matrix[13] =  0.0;
-			matrix[14] =  2*znear*zfar / dZ;
-			matrix[15] =  0.0;
-		}
-
-		return outMatrix;
-	}
-
-	//inspired from https://www.opengl.org/wiki/GluPerspective_code and http://www.songho.ca/opengl/gl_projectionmatrix.html
-	static ccGLMatrixd Perspective(double fovyInDegrees, double aspectRatio, double znear, double zfar)
-	{
-		ccGLMatrixd outMatrix;
-		{
-			double* matrix = outMatrix.data();
-
-			double ymax = znear * std::tan( CCCoreLib::DegreesToRadians( fovyInDegrees/2 ) );
-			double xmax = ymax * aspectRatio;
-
 			double dZ = zfar - znear;
-			matrix[0]  =  znear / xmax;
+
+			matrix[0]  =  (2 * znear) / dX;
 			matrix[1]  =  0.0;
 			matrix[2]  =  0.0;
 			matrix[3]  =  0.0;
 
 			matrix[4]  =  0.0;
-			matrix[5]  =  znear / ymax;
+			matrix[5]  =  (2 * znear) / dY;
 			matrix[6]  =  0.0;
 			matrix[7]  =  0.0;
 
-			matrix[8]  =  0.0;
-			matrix[9]  =  0.0;
+			matrix[8]  =  (right + left) / dX;
+			matrix[9]  =  (top + bottom) / dY;
 			matrix[10] = -(zfar + znear) / dZ;
 			matrix[11] = -1.0;
 
 			matrix[12] =  0.0;
 			matrix[13] =  0.0;
-			matrix[14] =  -(2.0 * znear * zfar) / dZ;
+			matrix[14] =  (-2 * zfar*znear) / dZ;
 			matrix[15] =  0.0;
 		}
 

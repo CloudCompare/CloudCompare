@@ -447,7 +447,7 @@ public:
 	virtual bool areGLFiltersEnabled() const;
 
 	//! Returns the actual pixel size on screen (taking zoom or perspective parameters into account)
-	/** In perspective mode, this value is approximate.
+	/** In perspective mode, this value is approximate (especially if we are in 'viewer-based' viewing mode).
 	**/
 	virtual double computeActualPixelSize() const;
 

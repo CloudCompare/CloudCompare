@@ -569,16 +569,15 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 
 	CCVector3 margin(0, 0, 0);
 	double maxFOV_rad = 0;
-	//TODO FIXME
-	//if (camera.perspective)
+	if (camera.perspective)
 	{
 		maxFOV_rad = 0.002 * pickWidth_pix; //empirical conversion from pixels to FOV angle (in radians)
 	}
-	//else
-	//{
-	//	double maxRadius = pickWidth_pix * camera.pixelSize / 2;
-	//	margin = CCVector3(1, 1, 1) * static_cast<PointCoordinateType>(maxRadius);
-	//}
+	else
+	{
+		double maxRadius = pickWidth_pix * camera.fov_deg / 2;
+		margin = CCVector3(1, 1, 1) * static_cast<PointCoordinateType>(maxRadius);
+	}
 
 	//first test with the total bounding box
 	CCCoreLib::Ray<PointCoordinateType> ray(rayAxis, rayOrigin);

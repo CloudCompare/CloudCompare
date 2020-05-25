@@ -3389,20 +3389,21 @@ void ccGLWindow::setBaseViewMat(ccGLMatrixd& mat)
 void ccGLWindow::getGLCameraParameters(ccGLCameraParameters& params)
 {
 	//get/compute the modelview matrix
-	{
-		params.modelViewMat = getModelViewMatrix();
-	}
+	params.modelViewMat = getModelViewMatrix();
 
 	//get/compute the projection matrix
-	{
-		params.projectionMat = getProjectionMatrix();
-	}
+	params.projectionMat = getProjectionMatrix();
 
+	//viewport
 	params.viewport[0] = m_glViewport.x();
 	params.viewport[1] = m_glViewport.y();
 	params.viewport[2] = m_glViewport.width();
 	params.viewport[3] = m_glViewport.height();
 
+	//compute the pixel size
+	params.pixelSize = computeActualPixelSize();
+
+	//other parameters
 	params.perspective = m_viewportParams.perspectiveView;
 	params.fov_deg = m_viewportParams.fov_deg;
 }
@@ -3410,7 +3411,9 @@ void ccGLWindow::getGLCameraParameters(ccGLCameraParameters& params)
 const ccGLMatrixd& ccGLWindow::getModelViewMatrix()
 {
 	if (!m_validModelviewMatrix)
+	{
 		updateModelViewMatrix();
+	}
 
 	return m_viewMatd;
 }
@@ -3418,7 +3421,9 @@ const ccGLMatrixd& ccGLWindow::getModelViewMatrix()
 const ccGLMatrixd& ccGLWindow::getProjectionMatrix()
 {
 	if (!m_validProjectionMatrix)
+	{
 		updateProjectionMatrix();
+	}
 
 	return m_projMatd;
 }
@@ -5502,14 +5507,10 @@ void ccGLWindow::togglePerspective(bool objectCentered)
 
 double ccGLWindow::computeActualPixelSize() const
 {
-	if (!m_viewportParams.objectCenteredView)
+	if (m_glViewport.width() <= 0)
 	{
-		//TODO not supported
 		return 1.0;
 	}
-
-	if (m_glViewport.width() <= 0)
-		return 1.0;
 
 	return m_viewportParams.computeWidthAtFocalDist() / m_glViewport.width();
 }

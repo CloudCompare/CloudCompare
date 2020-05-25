@@ -33,10 +33,11 @@ class QWidget;
 struct ccGLCameraParameters
 {
 	ccGLCameraParameters()
-		: perspective(false)
+		: viewport{0, 0, 0, 0}
+		, perspective(false)
 		, fov_deg(0.0f)
+		, pixelSize(0.0)
 	{
-	   memset(viewport, 0, 4 * sizeof(int));
 	}
 
 	//! Projects a 3D point in 2D (+ normalized 'z' coordinate)
@@ -57,8 +58,10 @@ struct ccGLCameraParameters
 	int viewport[4];
 	//! Perspective mode
 	bool perspective;
-	//! F.O.V. (in degrees) - perspective mode only
+	//! F.O.V. (in degrees)
 	float fov_deg;
+	//! Pixel size (approximate if in perspective mode)
+	double pixelSize;
 };
 
 //! Generic interface for GL displays

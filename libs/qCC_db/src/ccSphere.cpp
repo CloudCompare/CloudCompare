@@ -213,9 +213,7 @@ void ccSphere::drawNameIn3D(CC_DRAW_CONTEXT& context)
 
 	//we want to display this name next to the sphere, and not above it!
 	const ccViewportParameters& params = context.display->getViewportParameters();
-	//TODO FIXME
-	//int dPix = static_cast<int>(ceil(params.zoom * m_radius / params.pixelSize));
-	int dPix = 0;
+	int dPix = static_cast<int>(ceil(m_radius / camera.pixelSize));
 
 	int bkgBorder = QFontMetrics(context.display->getTextDisplayFont()).height() / 4 + 4;
 	QFont font = context.display->getTextDisplayFont(); //takes rendering zoom into account!

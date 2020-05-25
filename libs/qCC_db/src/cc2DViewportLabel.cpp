@@ -108,7 +108,7 @@ void cc2DViewportLabel::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 
 	if ( CCCoreLib::GreaterThanEpsilon( (params.getPivotPoint() - m_params.getPivotPoint()).norm() )
-		 || CCCoreLib::GreaterThanEpsilon( (params.getCameraCenter() - m_params.getCameraCenter()).norm() )
+		//|| CCCoreLib::GreaterThanEpsilon( (params.getCameraCenter() - m_params.getCameraCenter()).norm() )
 		)
 	{
 		return;
@@ -116,27 +116,11 @@ void cc2DViewportLabel::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 	glFunc->glPushAttrib(GL_LINE_BIT);
 
-	float relativeZoom = 1.0f;
-	float dx = 0, dy = 0;
-	//TODO FIXME
-	//if (!m_params.perspectiveView) //ortho mode
-	//{
-	//	//Screen pan & pivot compensation
-	//	float totalZoom = m_params.zoom / m_params.pixelSize;
-	//	float winTotalZoom = params.zoom / params.pixelSize;
-	//	relativeZoom = winTotalZoom / totalZoom;
-
-	//	CCVector3d dC = m_params.cameraCenter - params.cameraCenter;
-
-	//	CCVector3d P = m_params.pivotPoint - params.pivotPoint;
-	//	m_params.viewMat.apply(P);
-
-	//	dx = static_cast<float>(dC.x + P.x);
-	//	dy = static_cast<float>(dC.y + P.y);
-
-	//	dx *= winTotalZoom;
-	//	dy *= winTotalZoom;
-	//}
+	//focal distance change compensation
+	double relativeZoom = m_params.getFocalDistance() / params.getFocalDistance();
+	
+	//camera center shift compensation
+	CCVector3d dC = relativeZoom * context.glW * (m_params.getCameraCenter() - params.getCameraCenter()) / m_params.computeWidthAtFocalDist();
 
 	//thick dotted line
 	glFunc->glLineWidth(2);
@@ -147,10 +131,10 @@ void cc2DViewportLabel::drawMeOnly(CC_DRAW_CONTEXT& context)
 	glFunc->glColor4ubv(defaultColor->rgba);
 
 	glFunc->glBegin(GL_LINE_LOOP);
-	glFunc->glVertex2f(dx + m_roi[0] * relativeZoom, dy + m_roi[1] * relativeZoom);
-	glFunc->glVertex2f(dx + m_roi[2] * relativeZoom, dy + m_roi[1] * relativeZoom);
-	glFunc->glVertex2f(dx + m_roi[2] * relativeZoom, dy + m_roi[3] * relativeZoom);
-	glFunc->glVertex2f(dx + m_roi[0] * relativeZoom, dy + m_roi[3] * relativeZoom);
+	glFunc->glVertex2d(dC.x + m_roi[0] * relativeZoom, dC.y + m_roi[1] * relativeZoom);
+	glFunc->glVertex2d(dC.x + m_roi[2] * relativeZoom, dC.y + m_roi[1] * relativeZoom);
+	glFunc->glVertex2d(dC.x + m_roi[2] * relativeZoom, dC.y + m_roi[3] * relativeZoom);
+	glFunc->glVertex2d(dC.x + m_roi[0] * relativeZoom, dC.y + m_roi[3] * relativeZoom);
 	glFunc->glEnd();
 
 	glFunc->glPopAttrib();
@@ -164,8 +148,8 @@ void cc2DViewportLabel::drawMeOnly(CC_DRAW_CONTEXT& context)
 		QFontMetrics titleFontMetrics(titleFont);
 		int titleHeight = titleFontMetrics.height();
 
-		int xStart = static_cast<int>(dx + 0.5f * context.glW + std::min<float>(m_roi[0], m_roi[2]) * relativeZoom);
-		int yStart = static_cast<int>(dy + 0.5f * context.glH + std::min<float>(m_roi[1], m_roi[3]) * relativeZoom);
+		int xStart = static_cast<int>(dC.x + 0.5 * context.glW + std::min<float>(m_roi[0], m_roi[2]) * relativeZoom);
+		int yStart = static_cast<int>(dC.y + 0.5 * context.glH + std::min<float>(m_roi[1], m_roi[3]) * relativeZoom);
 
 		context.display->displayText(title, xStart, yStart - 5 - titleHeight, ccGenericGLDisplay::ALIGN_DEFAULT, 0, defaultColor, &titleFont);
 	}

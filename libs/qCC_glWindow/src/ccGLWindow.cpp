@@ -2937,7 +2937,7 @@ void ccGLWindow::setCameraPos(const CCVector3d& P)
 	{
 		m_viewportParams.setCameraCenter(P);
 
-		ccLog::Print(QString("[ccGLWindow] Focal distance = %1").arg(m_viewportParams.getFocalDistance()));
+		//ccLog::Print(QString("[ccGLWindow] Focal distance = %1").arg(m_viewportParams.getFocalDistance()));
 
 		emit cameraPosChanged(P);
 
@@ -6035,9 +6035,6 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0f*/,
 	bool stereoModeWasEnabled = m_stereoModeEnabled;
 	m_stereoModeEnabled = false;
 
-	float originalFocalDistance = m_viewportParams.getFocalDistance();
-	m_viewportParams.setFocalDistance(originalFocalDistance / zoomFactor);
-
 	//disable LOD!
 	bool wasLODEnabled = isLODEnabled();
 	setLODEnabled(false);
@@ -6047,8 +6044,6 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0f*/,
 	logGLError("ccGLWindow::renderToFile/FBO start");
 
 	fullRenderingPass(CONTEXT, renderingParams);
-
-	m_viewportParams.setFocalDistance(originalFocalDistance);
 
 	//disable the FBO
 	logGLError("ccGLWindow::renderToFile/FBO stop");
@@ -6078,6 +6073,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0f*/,
 			parameters.perspectiveMode = m_viewportParams.perspectiveView;
 			parameters.zFar = m_viewportParams.zFar;
 			parameters.zNear = m_viewportParams.zNear;
+			parameters.zoomFactor = zoomFactor;
 		}
 		//apply shader
 		glFilter->shade(depthTex, colorTex, parameters);

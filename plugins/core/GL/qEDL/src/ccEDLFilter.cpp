@@ -261,6 +261,7 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& pa
 	assert(m_glFunc.glGetError() == GL_NO_ERROR);
 
 	float lightMod = parameters.perspectiveMode ? 3.0f : 1.2f; //FIXME: we would need to be smarter and depend on the actual 'zoom' (= the focal distance now)
+	lightMod *= parameters.zoomFactor;
 	//ccLog::Print(QString("Zm = %1 / ZM = %2 (%3)").arg(parameters.zNear).arg(parameters.zFar).arg(parameters.zFar - parameters.zNear));
 
 	for (unsigned i = 0; i < FBO_COUNT; ++i)

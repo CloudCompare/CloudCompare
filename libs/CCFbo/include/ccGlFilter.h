@@ -66,6 +66,7 @@ public:
 			: perspectiveMode(false)
 			, zNear(0.0)
 			, zFar(1.0)
+			, zoomFactor(1.0)
 		{}
 
 		//! Whether perspective mode is enabled or not
@@ -74,6 +75,8 @@ public:
 		double zNear;
 		//! Far clipping plane position
 		double zFar;
+		//! Rendering zoom factor
+		float zoomFactor;
 	};
 
 	//! Applies filter to texture (depth + color)

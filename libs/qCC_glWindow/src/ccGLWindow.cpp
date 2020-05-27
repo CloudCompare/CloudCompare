@@ -2937,7 +2937,7 @@ void ccGLWindow::setCameraPos(const CCVector3d& P)
 	{
 		m_viewportParams.setCameraCenter(P);
 
-		//ccLog::Print(QString("[ccGLWindow] Focal distance = %1").arg(m_viewportParams.getFocalDistance()));
+		ccLog::Print(QString("[ccGLWindow] Focal distance = %1").arg(m_viewportParams.getFocalDistance()));
 
 		emit cameraPosChanged(P);
 
@@ -3291,7 +3291,11 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(bool withGLfeatures, ProjectionM
 			double convergence = std::abs(m_viewportParams.getFocalDistance());
 
 			//we assume zNear = screen distance
-			double scale = zNear * m_stereoParams.stereoStrength / m_stereoParams.screenDistance_mm;
+			//double scale = zNear * m_stereoParams.stereoStrength / m_stereoParams.screenDistance_mm;	//DGM: we don't want to depend on the cloud size anymore
+																										//as it can produce very strange visual effects on very large clouds
+																										//we now keep something related to the focal distance (multiplied by
+																										//the 'zNearCoef' that can be tweaked by the user if necessary)
+			double scale = convergence * m_viewportParams.zNearCoef * m_stereoParams.stereoStrength / m_stereoParams.screenDistance_mm;
 			double eyeSeperation = m_stereoParams.eyeSeparation_mm * scale;
 
 			//on input 'eyeOffset' should be -1 (left) or +1 (right)

@@ -19,19 +19,32 @@
 
 #include <cmath>
 
+//! Unit circle
+struct Circle
+{
+	Circle()
+	{
+		//setup unit circle
+		for (int n = 0; n < Resolution; n++)
+		{
+			double heading = n * (2 * M_PI / Resolution); //heading in radians
+			vertices[n][0] = std::cos(heading);
+			vertices[n][1] = std::sin(heading);
+		}
+	}
+	
+	static const int Resolution = 100;
+	double vertices[Resolution][2];
+};
+static Circle s_unitCircle;
+
 ccMouseCircle::ccMouseCircle(ccGLWindow* owner, QString name) 
 	: cc2DViewportObject(name.isEmpty() ? "label" : name)
+	, m_radius(50)
+	, m_radiusStep(4)
 {
 	setVisible(true);
 	setEnabled(false);
-
-	//setup unit circle
-	for (int n = 0; n < ccMouseCircle::RESOLUTION; n++)
-	{
-		float heading = n * (2 * M_PI / (float) ccMouseCircle::RESOLUTION); //heading in radians
-		ccMouseCircle::UNIT_CIRCLE[n][0] = std::cos(heading);
-		ccMouseCircle::UNIT_CIRCLE[n][1] = std::sin(heading);
-	}
 
 	//attach to owner
 	assert(owner); //check valid pointer
@@ -50,83 +63,76 @@ ccMouseCircle::~ccMouseCircle()
 	}
 }
 
-//get the circle radius in px
-int ccMouseCircle::getRadiusPx()
-{
-	return ccMouseCircle::RADIUS;
-}
-
 //get the circle radius in world coordinates
 float ccMouseCircle::getRadiusWorld()
 {
-	return getRadiusPx() / m_winTotalZoom;
+	float r = getRadiusPx() * m_pixelSize;
+	ccLog::Print(QString("Radius_w = %1 (= %2 x %3)").arg(r).arg(getRadiusPx()).arg(m_pixelSize));
+	return r;
 }
 
 //override draw function
 void ccMouseCircle::draw(CC_DRAW_CONTEXT& context)
 {
+	if (!m_owner)
+	{
+		assert(false);
+		return;
+	}
+
 	//only draw when visible
 	if (!ccMouseCircle::isVisible())
+	{
 		return;
+	}
 
 	//only draw in 2D foreground mode
 	if (!MACRO_Foreground(context) || !MACRO_Draw2D(context))
+	{
 		return;
+	}
 
 	//get the set of OpenGL functions (version 2.1)
 	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
 	assert(glFunc != nullptr);
-
 	if (glFunc == nullptr)
+	{
 		return;
+	}
 
 	//test viewport parameters
 	const ccViewportParameters& params = context.display->getViewportParameters();
-	glFunc->glPushAttrib(GL_LINE_BIT);
 
-	float dx = 0.0f;
-	float dy = 0.0f;
-	if (!m_params.perspectiveView) //ortho mode
-	{
-		//Screen pan & pivot compensation
-		m_winTotalZoom = params.zoom / params.pixelSize;
+	ccLog::Print(QString("WidthAtFocalDist = %1 (= %2 x %3)").arg(params.computeWidthAtFocalDist()).arg(params.computeDistanceToWidthRatio()).arg(params.getFocalDistance()));
+	m_pixelSize = (context.glW != 0 ? params.computeWidthAtFocalDist() / context.glW : 0);
 
-		//CCVector3d dC = m_params.cameraCenter - params.cameraCenter;
-		CCVector3d P = m_params.pivotPoint - params.pivotPoint;
-		m_params.viewMat.apply(P);
-
-		dx *= m_winTotalZoom;
-		dy *= m_winTotalZoom;
-	}
-
-	//thick dotted line
-	glFunc->glLineWidth(2);
-	glFunc->glLineStipple(1, 0xAAAA);
-	glFunc->glEnable(GL_LINE_STIPPLE);
-
-	glFunc->glColor4ubv(ccColor::red.rgba);
-
-	//get height & width
-	int halfW = static_cast<int>(context.glW / 2.0f);
-	int halfH = static_cast<int>(context.glH / 2.0f);
-	
 	//get mouse position
 	QPoint p = m_owner->asWidget()->mapFromGlobal(QCursor::pos());
 	int mx = p.x(); //mouse x-coord
-	int my = 2*halfH - p.y(); //mouse y-coord in OpenGL coordinates (origin at bottom left, not top left)
+	int my = context.glH - 1 - p.y(); //mouse y-coord in OpenGL coordinates (origin at bottom left, not top left)
 	
 	//calculate circle location
-	int cx = dx+mx-halfW;
-	int cy = dy+my-halfH;
+	int cx = mx - context.glW / 2;
+	int cy = my - context.glH / 2;
 
 	//draw circle
-	glFunc->glBegin(GL_LINE_LOOP);
-	for (int n = 0; n < ccMouseCircle::RESOLUTION; n++)
 	{
-		glFunc->glVertex2f(ccMouseCircle::UNIT_CIRCLE[n][0] * ccMouseCircle::RADIUS + cx, ccMouseCircle::UNIT_CIRCLE[n][1] * ccMouseCircle::RADIUS + cy);
+		//thick dotted line
+		{
+			glFunc->glPushAttrib(GL_LINE_BIT);
+			glFunc->glLineWidth(2);
+			glFunc->glLineStipple(1, 0xAAAA);
+			glFunc->glEnable(GL_LINE_STIPPLE);
+		}
+		glFunc->glColor4ubv(ccColor::red.rgba);
+		glFunc->glBegin(GL_LINE_LOOP);
+		for (int n = 0; n < Circle::Resolution; n++)
+		{
+			glFunc->glVertex2d(s_unitCircle.vertices[n][0] * m_radius + cx, s_unitCircle.vertices[n][1] * m_radius + cy);
+		}
+		glFunc->glEnd();
+		glFunc->glPopAttrib();
 	}
-	glFunc->glEnd();
-	glFunc->glPopAttrib();
 }
 
 //get mouse move events
@@ -142,7 +148,6 @@ bool ccMouseCircle::eventFilter(QObject* obj, QEvent* event)
 		{
 			m_owner->redraw(true, false); //redraw 2D graphics
 		}
-		
 	}
 
 	if (event->type() == QEvent::Wheel)
@@ -152,14 +157,8 @@ bool ccMouseCircle::eventFilter(QObject* obj, QEvent* event)
 		//is control down
 		if (wheelEvent->modifiers().testFlag(Qt::ControlModifier))
 		{
-			//adjust radius
-			ccMouseCircle::RADIUS -= ccMouseCircle::RADIUS_STEP*(wheelEvent->delta() / 100.0);
-
-			//avoid really small radius
-			if (ccMouseCircle::RADIUS < ccMouseCircle::RADIUS_STEP)
-			{
-				ccMouseCircle::RADIUS = ccMouseCircle::RADIUS_STEP;
-			}
+			//adjust radius (+ avoid really small radius)
+			m_radius = std::max(m_radiusStep, m_radius - static_cast<int>(m_radiusStep * (wheelEvent->delta() / 100.0)));
 			//repaint
 			m_owner->redraw(true, false);
 		}

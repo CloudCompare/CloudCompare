@@ -112,6 +112,7 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 	, m_yLabels(nullptr)
 	, m_gridColor(Qt::gray)
 	, m_symbolColor(Qt::black)
+	, m_firstGeneration(true)
 {
 	setupUi(this);
 
@@ -507,17 +508,16 @@ void DistanceMapGenerationDlg::updateZoom(ccBBox& box)
 
 	//we get the bounding-box diagonal length
 	PointCoordinateType bbDiag = box.getDiagNorm();
-	if ( CCCoreLib::GreaterThanEpsilon( bbDiag ) )
+	if (CCCoreLib::GreaterThanEpsilon(bbDiag))
 	{
 		bool sfDisplayed = m_window->getAssociatedScalarField() && m_window->sfShown();
 		bool yLabelDisplayed = m_yLabels && m_yLabels->isVisible() && m_yLabels->size();
 		float centerPos = 0.5f;
 
-		//we compute the pixel size (in world coordinates)
-		{
-			ccViewportParameters params = m_window->getViewportParameters();
-			params.zoom = 1.0f;
+		ccViewportParameters params = m_window->getViewportParameters();
 
+		//we compute the focal distance so that the map appears at the right 'scale'
+		{
 			int screenWidth = m_window->glWidth();
 			int scaleWidth = 0;
 			int labelsWidth = 0;
@@ -532,13 +532,13 @@ void DistanceMapGenerationDlg::updateZoom(ccBBox& box)
 				labelFont.setPointSize(m_yLabels->getFontSize());
 				QFontMetrics fm(labelFont);
 				int maxWidth = 0;
-				for (unsigned i=0; i<m_yLabels->size(); ++i)
+				for (unsigned i = 0; i < m_yLabels->size(); ++i)
 				{
 					QString label = m_yLabels->getLabel(i);
 					if (!label.isNull())
 					{
 						int width = fm.width(label);
-						maxWidth = std::max(maxWidth,width);
+						maxWidth = std::max(maxWidth, width);
 					}
 				}
 				labelsWidth = maxWidth;
@@ -549,7 +549,7 @@ void DistanceMapGenerationDlg::updateZoom(ccBBox& box)
 
 			//we zoom so that the map takes all the room left
 			float mapPart = static_cast<float>(mapWidth) / static_cast<float>(screenWidth);
-			params.zoom *= mapPart;
+			//zoom *= mapPart;
 
 			//we must also center the camera on the right position so that the map
 			//appears in between the scale and the color ramp
@@ -557,17 +557,25 @@ void DistanceMapGenerationDlg::updateZoom(ccBBox& box)
 			centerPos = (0.5f - mapStart) / mapPart;
 
 			//update pixel size accordingly
-			float screenHeight = m_window->glHeight() * params.orthoAspectRatio;
-			params.pixelSize = static_cast<float>(std::max(box.getDiagVec().x / mapWidth, box.getDiagVec().y / screenHeight));
-			m_window->setViewportParameters(params);
+			float screenHeight = m_window->glHeight() * params.cameraAspectRatio;
+			double pixelSize = std::max(box.getDiagVec().x / mapWidth, box.getDiagVec().y / screenHeight);
+			double distanceToWidthRatio = params.computeDistanceToWidthRatio();
+			double focalDistance = (pixelSize * screenWidth) / distanceToWidthRatio;
+			params.setFocalDistance(focalDistance);
 		}
 
 		//we set the pivot point on the box center
 		CCVector3 P = box.getCenter();
 		if (centerPos != 0.5f) //if we don't look exactly at the center of the map
 			P.x = box.minCorner().x * (1.0f - centerPos) + box.maxCorner().x * centerPos;
-		m_window->setPivotPoint(CCVector3d::fromArray(P.u));
-		m_window->setCameraPos(CCVector3d::fromArray(P.u));
+
+		CCVector3d pivotPoint = CCVector3d::fromArray(P.u);
+		CCVector3d cameraCenter = pivotPoint;
+		cameraCenter.z += params.getFocalDistance();
+		m_window->setPivotPoint(pivotPoint);
+		m_window->setCameraPos(cameraCenter);
+
+		m_window->setViewportParameters(params);
 
 		m_window->invalidateViewport();
 		m_window->invalidateVisualization();
@@ -646,6 +654,21 @@ void DistanceMapGenerationDlg::update()
 
 	//auto update volumes
 	updateVolumes();
+
+	if (m_firstGeneration)
+	{
+		//double dX = m_map->xMax - m_map->xMin;
+		//if (dX < scaleXStepDoubleSpinBox->value())
+		//{
+		//	scaleXStepDoubleSpinBox->setValue(dX);
+		//}
+		double dY = m_map->yMax - m_map->yMin;
+		if (dY < scaleHStepDoubleSpinBox->value())
+		{
+			scaleHStepDoubleSpinBox->setValue(dY);
+		}
+		m_firstGeneration = false;
+	}
 
 	if (m_map && m_window)
 	{
@@ -1076,7 +1099,7 @@ void DistanceMapGenerationDlg::baseRadiusChanged(double)
 		return;
 
 	ccViewportParameters params = m_window->getViewportParameters();
-	params.orthoAspectRatio = static_cast<float>( getBaseRadius() );
+	params.cameraAspectRatio = static_cast<float>( getBaseRadius() );
 	m_window->setViewportParameters(params);
 	m_window->redraw();
 }
@@ -1751,8 +1774,8 @@ void DistanceMapGenerationDlg::toggleOverlayGrid(bool state)
 			return;
 		}
 
-		unsigned xStepCount = static_cast<unsigned>( ceil( std::max(xMax_rad-xMin_rad,0.0) / scaleXStep_rad) );
-		unsigned yStepCount = static_cast<unsigned>( ceil( std::max(yMax-yMin,0.0) / scaleYStep) );
+		unsigned xStepCount = static_cast<unsigned>(ceil(std::max(xMax_rad - xMin_rad, 0.0) / scaleXStep_rad));
+		unsigned yStepCount = static_cast<unsigned>(ceil(std::max(yMax - yMin, 0.0) / scaleYStep));
 
 		//correct 'xMax' and 'yMax'
 		xMax_rad = xMin_rad + static_cast<double>(xStepCount) * scaleXStep_rad;

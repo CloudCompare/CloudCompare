@@ -201,6 +201,9 @@ protected:
 	//! Symbols color
 	QColor m_symbolColor;
 
+	//! First time the map is generated
+	bool m_firstGeneration;
+
 };
 
 #endif //QSRA_DISTANCE_MAP_GENERATION_DIALOG

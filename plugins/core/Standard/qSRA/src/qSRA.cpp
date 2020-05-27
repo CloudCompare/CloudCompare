@@ -350,7 +350,7 @@ void qSRA::computeCloud2ProfileRadialDist() const
 				}
 				tempPolyline = true;
 
-#ifdef _DEBUG
+//#ifdef _DEBUG
 				//test: apply a visual transformation to see the polyline in the right place
 				{
 					polyline->set2DMode(false);
@@ -362,7 +362,7 @@ void qSRA::computeCloud2ProfileRadialDist() const
 					m_app->addToDB(polyline);
 					tempPolyline = false;
 				}
-#endif
+//#endif
 			}
 		}
 	}
@@ -506,7 +506,7 @@ void qSRA::doProjectCloudDistsInGrid(ccPointCloud* cloud, ccPolyline* polyline) 
 			}
 			else
 			{
-				QString message = QString("Cloud has no no '%1' field and no active scalar field!").arg(RADIAL_DIST_SF_NAME);
+				QString message = QString("Cloud has no '%1' field and no active scalar field!").arg(RADIAL_DIST_SF_NAME);
 				ccLog::Error(message);
 				
 				//additional indications

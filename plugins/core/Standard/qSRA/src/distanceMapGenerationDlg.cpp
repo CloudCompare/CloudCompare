@@ -44,17 +44,18 @@
 #include <ccMaterialSet.h>
 
 //Qt
-#include <QMainWindow>
-#include <QHBoxLayout>
-#include <QSettings>
+#include <QColorDialog>
+#include <QCloseEvent>
+#include <QFile>
 #include <QFileDialog>
 #include <QFileInfo>
-#include <QFile>
-#include <QTextStream>
-#include <QProgressDialog>
-#include <QColorDialog>
 #include <QFontMetrics>
+#include <QHBoxLayout>
 #include <QLocale>
+#include <QMainWindow>
+#include <QProgressDialog>
+#include <QSettings>
+#include <QTextStream>
 
 //system
 #include <assert.h>
@@ -112,7 +113,6 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 	, m_yLabels(nullptr)
 	, m_gridColor(Qt::gray)
 	, m_symbolColor(Qt::black)
-	, m_firstGeneration(true)
 {
 	setupUi(this);
 
@@ -166,6 +166,18 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 			}
 
 			updateMinAndMaxLimits();
+
+			//check that the vertical step (for the grid) is not bigger than the map
+			double yMin = 0.0;
+			double yMax = 0.0;
+			double yStep = 0.0;
+			getGridYValues(yMin, yMax, yStep, ANG_RAD);
+			double dY = yMax - yMin;
+			if (dY < scaleHStepDoubleSpinBox->value())
+			{
+				scaleHStepDoubleSpinBox->setValue(dY);
+				ccLog::Warning("[qSRA] The vertical step of the grid has been automatically reduced to match the map height (you can change it if required)");
+			}
 		}
 		else
 		{
@@ -305,6 +317,17 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 	overlayGridColorChanged();
 	labelFontSizeChanged(-1);
 	projectionModeChanged(-1);
+}
+
+void DistanceMapGenerationDlg::closeEvent(QCloseEvent* e)
+{
+	if (m_window && m_window->getOwnDB())
+	{
+		//remove the mesh otherwise it may not be removed before CC quits
+		//and the OpenGL context won't be valid anymore to unload the map texture
+		m_window->getOwnDB()->removeAllChildren();
+	}
+	e->accept();
 }
 
 void DistanceMapGenerationDlg::updateMinAndMaxLimits()
@@ -549,7 +572,6 @@ void DistanceMapGenerationDlg::updateZoom(ccBBox& box)
 
 			//we zoom so that the map takes all the room left
 			float mapPart = static_cast<float>(mapWidth) / static_cast<float>(screenWidth);
-			//zoom *= mapPart;
 
 			//we must also center the camera on the right position so that the map
 			//appears in between the scale and the color ramp
@@ -567,13 +589,15 @@ void DistanceMapGenerationDlg::updateZoom(ccBBox& box)
 		//we set the pivot point on the box center
 		CCVector3 P = box.getCenter();
 		if (centerPos != 0.5f) //if we don't look exactly at the center of the map
+		{
 			P.x = box.minCorner().x * (1.0f - centerPos) + box.maxCorner().x * centerPos;
+		}
 
 		CCVector3d pivotPoint = CCVector3d::fromArray(P.u);
 		CCVector3d cameraCenter = pivotPoint;
 		cameraCenter.z += params.getFocalDistance();
-		m_window->setPivotPoint(pivotPoint);
-		m_window->setCameraPos(cameraCenter);
+		params.setPivotPoint(pivotPoint, false);
+		params.setCameraCenter(cameraCenter, false);
 
 		m_window->setViewportParameters(params);
 
@@ -655,21 +679,6 @@ void DistanceMapGenerationDlg::update()
 	//auto update volumes
 	updateVolumes();
 
-	if (m_firstGeneration)
-	{
-		//double dX = m_map->xMax - m_map->xMin;
-		//if (dX < scaleXStepDoubleSpinBox->value())
-		//{
-		//	scaleXStepDoubleSpinBox->setValue(dX);
-		//}
-		double dY = m_map->yMax - m_map->yMin;
-		if (dY < scaleHStepDoubleSpinBox->value())
-		{
-			scaleHStepDoubleSpinBox->setValue(dY);
-		}
-		m_firstGeneration = false;
-	}
-
 	if (m_map && m_window)
 	{
 		ccMesh* mapMesh = nullptr;
@@ -702,7 +711,7 @@ void DistanceMapGenerationDlg::update()
 		{
 			mapMesh->setVisible(true);
 			mapMesh->showNormals(false);
-			m_window->addToOwnDB(mapMesh,false);
+			m_window->addToOwnDB(mapMesh, false);
 
 			updateMapTexture();
 
@@ -1594,12 +1603,12 @@ void DistanceMapGenerationDlg::clearOverlaySymbols()
 		return;
 
 	ccHObject::Container clouds;
-	m_window->getOwnDB()->filterChildren(clouds,false,CC_TYPES::POINT_CLOUD);
-	
-	for (size_t i=0; i<clouds.size(); ++i)
+	m_window->getOwnDB()->filterChildren(clouds, false, CC_TYPES::POINT_CLOUD);
+
+	for (size_t i = 0; i < clouds.size(); ++i)
 		if (clouds[i] != m_xLabels && clouds[i] != m_yLabels)
 			m_window->removeFromOwnDB(clouds[i]);
-	
+
 	clearLabelsPushButton->setEnabled(false);
 	clearLabelsPushButton->setText("Clear");
 	m_window->redraw();
@@ -1613,7 +1622,7 @@ void DistanceMapGenerationDlg::overlaySymbolsSizeChanged(int size)
 	double symbolSize = (double)symbolSizeSpinBox->value();
 
 	ccHObject* db = m_window->getOwnDB();
-	for (unsigned i=0; i<db->getChildrenNumber(); ++i)
+	for (unsigned i = 0; i < db->getChildrenNumber(); ++i)
 	{
 		ccHObject* child = db->getChild(i);
 		if (child->isA(CC_TYPES::POINT_CLOUD)
@@ -1637,13 +1646,13 @@ void DistanceMapGenerationDlg::overlaySymbolsColorChanged()
 						static_cast<ColorCompType>(m_symbolColor.blue()) );
 
 	ccHObject* db = m_window->getOwnDB();
-	for (unsigned i=0; i<db->getChildrenNumber(); ++i)
+	for (unsigned i = 0; i < db->getChildrenNumber(); ++i)
 	{
 		ccHObject* child = db->getChild(i);
 		if (child->isA(CC_TYPES::POINT_CLOUD)
 			&& child != m_xLabels && child != m_yLabels) //don't modify the X an Y label clouds!
 		{
-			child->setTempColor(rgb,true);
+			child->setTempColor(rgb, true);
 		}
 	}
 

@@ -40,13 +40,14 @@ public: //functions
 	bool fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
 
 	//! Sets the pivot point (for object-centered view mode)
-	void setPivotPoint(const CCVector3d& P);
+	void setPivotPoint(const CCVector3d& P, bool autoUpdateFocal);
 
 	//! Returns the pivot point (for object-centered view mode)
 	const CCVector3d& getPivotPoint() const { return pivotPoint; }
 
 	//! Sets the camera center
-	void setCameraCenter(const CCVector3d& C);
+	//* _
+	void setCameraCenter(const CCVector3d& C, bool autoUpdateFocal);
 
 	//! Returns the camera center
 	const CCVector3d& getCameraCenter() const { return cameraCenter; }

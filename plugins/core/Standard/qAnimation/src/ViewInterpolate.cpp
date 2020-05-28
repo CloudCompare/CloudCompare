@@ -88,8 +88,8 @@ bool ViewInterpolate::interpolate(ccViewportParameters& interpView, double inter
 		interpView.fov_deg                = InterpolateNumber ( m_view1.fov_deg, m_view2.fov_deg, interpolate_fraction );
 		interpView.cameraAspectRatio      = InterpolateNumber ( m_view1.cameraAspectRatio, m_view2.cameraAspectRatio, interpolate_fraction );
 		interpView.viewMat                = ccGLMatrixd::Interpolate(interpolate_fraction, m_view1.viewMat, m_view2.viewMat );
-		interpView.setPivotPoint          ( m_view1.getPivotPoint() + (m_view2.getPivotPoint() - m_view1.getPivotPoint()) * interpolate_fraction );
-		interpView.setCameraCenter        ( m_view1.getCameraCenter() + (m_view2.getCameraCenter() - m_view1.getCameraCenter()) * interpolate_fraction );
+		interpView.setPivotPoint          ( m_view1.getPivotPoint() + (m_view2.getPivotPoint() - m_view1.getPivotPoint()) * interpolate_fraction, false );
+		interpView.setCameraCenter        ( m_view1.getCameraCenter() + (m_view2.getCameraCenter() - m_view1.getCameraCenter()) * interpolate_fraction, true );
 		interpView.setFocalDistance       ( InterpolateNumber(m_view1.getFocalDistance(), m_view2.getFocalDistance(), interpolate_fraction) );
 	}
 

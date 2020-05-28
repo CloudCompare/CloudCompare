@@ -266,20 +266,20 @@ CCVector3d ccViewportParameters::getUpDir() const
 	return axis;
 }
 
-void ccViewportParameters::setPivotPoint(const CCVector3d& P)
+void ccViewportParameters::setPivotPoint(const CCVector3d& P, bool autoUpdateFocal)
 {
 	pivotPoint = P;
-	if (objectCenteredView)
+	if (autoUpdateFocal && objectCenteredView)
 	{
 		//update focal distance accordingly
 		focalDistance = cameraCenter.z - pivotPoint.z;
 	}
 }
 
-void ccViewportParameters::setCameraCenter(const CCVector3d& C)
+void ccViewportParameters::setCameraCenter(const CCVector3d& C, bool autoUpdateFocal)
 {
 	cameraCenter = C;
-	if (objectCenteredView)
+	if (autoUpdateFocal && objectCenteredView)
 	{
 		//update focal distance accordingly
 		focalDistance = cameraCenter.z - pivotPoint.z;

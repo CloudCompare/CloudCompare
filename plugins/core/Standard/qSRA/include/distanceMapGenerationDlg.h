@@ -135,6 +135,8 @@ protected:
 	//! Updates map (and display)
 	void update();
 
+	void closeEvent(QCloseEvent* e) override;
+
 protected:
 
 	//! Updates internal map
@@ -200,10 +202,6 @@ protected:
 
 	//! Symbols color
 	QColor m_symbolColor;
-
-	//! First time the map is generated
-	bool m_firstGeneration;
-
 };
 
 #endif //QSRA_DISTANCE_MAP_GENERATION_DIALOG

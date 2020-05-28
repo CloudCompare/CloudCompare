@@ -2935,7 +2935,7 @@ void ccGLWindow::setCameraPos(const CCVector3d& P)
 {
 	if ((m_viewportParams.getCameraCenter() - P).norm2d() != 0.0)
 	{
-		m_viewportParams.setCameraCenter(P);
+		m_viewportParams.setCameraCenter(P, true);
 
 		ccLog::Print(QString("[ccGLWindow] Focal distance = %1").arg(m_viewportParams.getFocalDistance()));
 
@@ -2979,7 +2979,7 @@ void ccGLWindow::setPivotPoint(	const CCVector3d& P,
 		setCameraPos(newCameraPos); //will also update the pixel size
 	}
 
-	m_viewportParams.setPivotPoint(P);
+	m_viewportParams.setPivotPoint(P, true);
 	emit pivotPointChanged(P);
 
 	if (verbose)
@@ -5766,11 +5766,11 @@ void ccGLWindow::rotateBaseViewMat(const ccGLMatrixd& rotMat)
 	deprecate3DLayer();
 }
 
-void ccGLWindow::setupProjectiveViewport(const ccGLMatrixd& cameraMatrix,
-	float fov_deg/*=0.0f*/,
-	float ar/*=1.0f*/,
-	bool viewerBasedPerspective/*=true*/,
-	bool bubbleViewMode/*=false*/)
+void ccGLWindow::setupProjectiveViewport(	const ccGLMatrixd& cameraMatrix,
+											float fov_deg/*=0.0f*/,
+											float ar/*=1.0f*/,
+											bool viewerBasedPerspective/*=true*/,
+											bool bubbleViewMode/*=false*/)
 {
 	//perspective (viewer-based by default)
 	if (bubbleViewMode)

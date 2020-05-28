@@ -2937,7 +2937,7 @@ void ccGLWindow::setCameraPos(const CCVector3d& P)
 	{
 		m_viewportParams.setCameraCenter(P, true);
 
-		ccLog::Print(QString("[ccGLWindow] Focal distance = %1").arg(m_viewportParams.getFocalDistance()));
+		//ccLog::Print(QString("[ccGLWindow] Focal distance = %1").arg(m_viewportParams.getFocalDistance()));
 
 		emit cameraPosChanged(P);
 

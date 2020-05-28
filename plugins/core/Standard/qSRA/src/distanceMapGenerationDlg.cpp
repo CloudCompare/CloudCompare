@@ -309,6 +309,7 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 		QPushButton* closeButton = buttonBox->button(QDialogButtonBox::Close);
 		connect(applyButton, &QAbstractButton::clicked, this, &DistanceMapGenerationDlg::update);
 		connect(closeButton, &QAbstractButton::clicked, this, &QDialog::accept);
+		connect(closeButton, &QAbstractButton::clicked, [&] { closeEvent(nullptr); });
 	}
 
 	angularUnitChanged(m_angularUnits); //just to be sure
@@ -327,7 +328,10 @@ void DistanceMapGenerationDlg::closeEvent(QCloseEvent* e)
 		//and the OpenGL context won't be valid anymore to unload the map texture
 		m_window->getOwnDB()->removeAllChildren();
 	}
-	e->accept();
+	if (e)
+	{
+		e->accept();
+	}
 }
 
 void DistanceMapGenerationDlg::updateMinAndMaxLimits()

@@ -329,7 +329,9 @@ void Mouse3DInput::Apply(const std::vector<float>& motionData, ccGLWindow* win)
 		//Zoom: object moves closer/away (only for ortho. mode)
 		if (!perspectiveView && fabs(Z) > CCCoreLib::ZERO_TOLERANCE)
 		{
-			win->updateZoom(1.0f - Z / 1.5f);
+			ccViewportParameters viewParams = win->getViewportParameters();
+			viewParams.setFocalDistance(viewParams.getFocalDistance() / (1.0f - Z / 1.5f));
+			win->setViewportParameters(viewParams);
 			Z = 0;
 		}
 
@@ -340,24 +342,25 @@ void Mouse3DInput::Apply(const std::vector<float>& motionData, ccGLWindow* win)
 		{
 			const ccViewportParameters& viewParams = win->getViewportParameters();
 
-			float scale = static_cast<float>(std::min(win->glWidth(), win->glHeight()) * viewParams.pixelSize);
+			float scale = static_cast<float>(std::min(win->glWidth(), win->glHeight()) * win->computeActualPixelSize());
 			if (perspectiveView)
 			{
 				float tanFOV = tan(static_cast<float>(viewParams.fov_deg * CCCoreLib::DEG_TO_RAD)/*/2*/);
 				X *= tanFOV;
 				Y *= tanFOV;
-				scale /= win->computePerspectiveZoom();
+				//scale /= win->computePerspectiveZoom();
 			}
 			else
 			{
-				scale /= win->getViewportParameters().zoom;
+				//scale /= win->getViewportParameters().zoom;
 			}
 
 			if (objectMode)
 			{
 				scale = -scale;
 			}
-			win->moveCamera(-X*scale, Y*scale, -Z*scale);
+			CCVector3d v(-X * scale, Y*scale, -Z * scale);
+			win->moveCamera(v);
 		}
 	}
 

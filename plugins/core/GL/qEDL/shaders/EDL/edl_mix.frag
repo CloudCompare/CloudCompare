@@ -31,13 +31,12 @@ uniform float		A2;
 void main (void)
 {
 	float d = texture2D(s2_D,gl_TexCoord[0].st).r;
-	/*if( d > 0.999)
+	if( d > 0.999)
 	{
 		gl_FragData[0].rgb = texture2D(s2_I1,gl_TexCoord[0].st).rgb;
 		gl_FragData[0].a = 1.;
 		return;
 	}
-	*/
 
     //color version
 	vec3 C1 = texture2D(s2_I1,gl_TexCoord[0].st).rgb;

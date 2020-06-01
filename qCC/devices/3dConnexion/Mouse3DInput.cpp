@@ -357,9 +357,9 @@ void Mouse3DInput::Apply(const std::vector<float>& motionData, ccGLWindow* win)
 	}
 
 	//rotation
-	if (	fabs(vec[3]) > CCCoreLib::ZERO_TOLERANCE
-	    ||	fabs(vec[4]) > CCCoreLib::ZERO_TOLERANCE
-	    ||	fabs(vec[5]) > CCCoreLib::ZERO_TOLERANCE)
+	if (	CCCoreLib::GreaterThanEpsilon(fabs(vec[3]))
+	    ||	CCCoreLib::GreaterThanEpsilon(fabs(vec[4]))
+	    ||	CCCoreLib::GreaterThanEpsilon(fabs(vec[5])) )
 	{
 		//ccLog::Print(QString("Mouse rotation: (%1,%2,%3)").arg(vec[3]).arg(vec[4]).arg(vec[5]));
 

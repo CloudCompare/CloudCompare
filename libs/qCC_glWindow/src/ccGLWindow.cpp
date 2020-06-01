@@ -2840,7 +2840,8 @@ void ccGLWindow::updateConstellationCenterAndZoom(const ccBBox* boundingBox/*=nu
 
 	//set the camera position
 	setCameraPos(P);
-	moveCamera(CCVector3d(0, 0, focalDistance));
+	CCVector3d v(0, 0, focalDistance);
+	moveCamera(v);
 
 	//just in case
 	invalidateViewport();
@@ -3278,7 +3279,7 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(bool withGLfeatures, ProjectionM
 		//zNear = zFar * m_viewportParams.zNearCoef;
 		zNear = bbHalfDiag * m_viewportParams.zNearCoef; //we want a stable value!
 		//zNear = std::max(bbHalfDiag * m_viewportParams.zNearCoef, zNear); //we want a stable value!
-		zFar = std::max(zNear + CCCoreLib::ZERO_TOLERANCE, zFar);
+		zFar = std::max(zNear + CCCoreLib::ZERO_TOLERANCE_D, zFar);
 
 		double xMax = zNear * m_viewportParams.computeDistanceToHalfWidthRatio();
 		double yMax = xMax * ar;
@@ -3312,7 +3313,7 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(bool withGLfeatures, ProjectionM
 	else
 	{
 		//zNear = std::max(zNear, 0.0);
-		zFar = std::max(zNear + CCCoreLib::ZERO_TOLERANCE, zFar);
+		zFar = std::max(zNear + CCCoreLib::ZERO_TOLERANCE_D, zFar);
 
 		//ccLog::Print(QString("cameraCenterToPivotDist = %0 / zNear = %1 / zFar = %2").arg(cameraCenterToPivotDist).arg(zNear).arg(zFar));
 

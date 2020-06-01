@@ -4539,7 +4539,8 @@ void ccGLWindow::onWheelEvent(float wheelDelta_deg)
 			}
 		}
 
-		moveCamera(CCVector3d(0.0, 0.0, -delta));
+		CCVector3d v(0.0, 0.0, -delta);
+		moveCamera(v);
 	}
 
 	setLODEnabled(true, true);

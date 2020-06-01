@@ -10,6 +10,8 @@ v2.12 (???) - (in development)
 			(CC will rasterize the slice and apply the 'contour plot' extraction algorithm)
 	- qCompass:
 		- planes fitted with the 'Plane tool' should now always have the normal pointing towards the user instead of a random orientation
+	- qAnimation:
+		- option to smooth the trajectory
 
 v2.11 (Anoia) - (in development)
 ----------------------

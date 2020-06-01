@@ -20,21 +20,6 @@
 //qCC_db
 #include <ccPolyline.h>
 
-//ViewInterpolate::ViewInterpolate()
-//	: m_view1(nullptr)
-//	, m_view2(nullptr)
-//	, m_totalSteps(0)
-//	, m_currentStep(0)
-//	, smoothTrajectory(nullptr)
-//	, smoothTrajectoryReversed(nullptr)
-//	, smoothTrajStartIndex(0)
-//	, smoothTrajStopIndex(0)
-//	, smoothTrajCurrentIndex(0)
-//	, smoothSegmentLength(0)
-//	, smoothCurrentLength(0)
-//{
-//}
-
 ViewInterpolate::ViewInterpolate(const ccViewportParameters& viewParams1, const ccViewportParameters& m_view2, unsigned int stepCount)
 	: m_view1(viewParams1)
 	, m_view2(m_view2)

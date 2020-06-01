@@ -18,10 +18,13 @@
 //##########################################################################
 
 //Local
-#include "ccBBox.h"
+#include "ccSerializableObject.h"
+#include "ccGLMatrix.h"
 
-//Qt
-#include <QRect>
+//CCCoreLib
+#include <CCGeom.h>
+
+class QRect;
 
 //! Standard parameters for GL displays/viewports
 class QCC_DB_LIB_API ccViewportParameters : public ccSerializableObject

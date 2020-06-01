@@ -150,7 +150,7 @@ public:
 	//! Smoothes the polyline (Chaikin algorithm)
 	/** \param ratio between 0 and 0.5 (excluded)
 		\param iterationCount of iteration
-		\return smmoothed polyline
+		\return smoothed polyline
 	**/
 	ccPolyline* smoothChaikin(	PointCoordinateType ratio,
 								unsigned iterationCount) const;

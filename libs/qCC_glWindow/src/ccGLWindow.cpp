@@ -3064,11 +3064,6 @@ void ccGLWindow::drawScale(const ccColor::Rgbub& color)
 		//DGM: we have to fall back to the case 'render zoom = 1' (otherwise we might not get the exact same aspect)
 		scaleMaxW /= m_captureMode.zoomFactor;
 	}
-	//if (m_viewportParams.zoom < CC_GL_MIN_ZOOM_RATIO)
-	//{
-	//	assert(false);
-	//	return;
-	//}
 
 	double pixelSize = computeActualPixelSize();
 

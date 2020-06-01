@@ -239,8 +239,7 @@ void qHPR::doAction()
 	const ccViewportParameters& params = win->getViewportParameters();
 	if (!params.perspectiveView)
 	{
-		m_app->dispToConsole("Perspective mode only!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		return;
+		m_app->dispToConsole("[Hidden Point Removal] for improved results use Perspective mode", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 	}
 
 	ccHprDlg dlg(m_app->getMainWindow());

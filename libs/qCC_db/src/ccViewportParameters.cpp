@@ -17,8 +17,11 @@
 
 #include "ccViewportParameters.h"
 
-//CCLib
+//CCCoreLib
 #include <CCConst.h>
+
+//Qt
+#include <QRect>
 
 ccViewportParameters::ccViewportParameters()
 	: defaultPointSize(1)
@@ -159,7 +162,7 @@ bool ccViewportParameters::fromFile(QFile& in, short dataVersion, int flags, Loa
 
 	if (dataVersion >= 30 && dataVersion < 51)
 	{
-		//ortho mode aspect ratio (30 <= dataVersion < 51)
+		//ortho mode aspect ratio (30 >= dataVersion < 51)
 		float orthoAspectRatio = 0.0f;
 		inStream >> orthoAspectRatio;
 	}

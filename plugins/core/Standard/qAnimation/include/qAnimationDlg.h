@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                   CLOUDCOMPARE PLUGIN: qAnimation                      #
@@ -14,9 +16,6 @@
 //#             COPYRIGHT: Ryan Wicks, 2G Robotics Inc., 2015              #
 //#                                                                        #
 //##########################################################################
-
-#ifndef CC_ANIMATION_DLG_HEADER
-#define CC_ANIMATION_DLG_HEADER
 
 //qCC_db
 #include <ccViewportParameters.h>
@@ -124,16 +123,4 @@ protected: //members
 
 	//! Associated 3D view
 	ccGLWindow* m_view3d;
-
-	////! Trajectory polyline
-	//ccPolyline* m_trajectory;
-	////! Trajectory polyline vertices
-	//ccPointCloud* m_trajectoryVertices;
-	////! Smooth trajectory polyline
-	//ccPolyline* m_smoothTrajectory;
-	////! Smooth trajectory polyline (reversed)
-	//ccPolyline* m_smoothTrajectoryReversed;
-
 };
-
-#endif

@@ -883,6 +883,10 @@ protected: //other methods
 	struct ProjectionMetrics;
 
 	//! Computes the projection matrix
+	/** \param[in]  withGLfeatures whether to take additional elements (pivot symbol, custom light, etc.) into account or not
+		\param[out] metrics [optional] output other metrics (Znear and Zfar, etc.)
+		\param[out] eyeOffset [optional] eye offset (for stereo display)
+	**/
 	ccGLMatrixd computeProjectionMatrix(	bool withGLfeatures, 
 											ProjectionMetrics* metrics = nullptr, 
 											double* eyeOffset = nullptr) const;

@@ -32,9 +32,6 @@ class ViewInterpolate
 {
 public:
 
-	//! Default constructor
-    //ViewInterpolate( );
-
 	//! Constructor from two viewports and a number of steps
     ViewInterpolate( const ccViewportParameters& view1,  const ccViewportParameters& view2, unsigned int stepCount = 0 );
 

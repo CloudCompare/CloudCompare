@@ -43,7 +43,7 @@ void main (void)
 	vec3 C1 = texture2D(s2_I1,gl_TexCoord[0].st).rgb;
 	vec3 C2 = texture2D(s2_I2,gl_TexCoord[0].st).rgb;
 	vec3 C4 = texture2D(s2_I4,gl_TexCoord[0].st).rgb;
-	vec3 C = (A0*C1 + A1*C2 + A2*C4) /(A0+A1+A2);
+	vec3 C = (A0*C1 + A1*C2 + A2*C4) / (A0+A1+A2);
 
 	gl_FragData[0] = vec4(C.x,C.y,C.z,1.);
 }

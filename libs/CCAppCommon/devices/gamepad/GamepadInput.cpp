@@ -51,12 +51,12 @@ void GamepadInput::update(ccGLWindow* win)
 	//panning
 	if (m_hasPanning)
 	{
-		double pixSize = win->computeActualPixelSize() * std::min(win->glWidth(), win->glHeight());
+		double screenWidth3D = viewParams.computeWidthAtFocalDist();
 		if (!viewParams.objectCenteredView)
 		{
-			pixSize = -pixSize;
+			screenWidth3D = -screenWidth3D;
 		}
-		CCVector3d v(-m_panning.x*pixSize, -m_panning.y*pixSize, 0);
+		CCVector3d v(-m_panning.x*screenWidth3D, -m_panning.y*screenWidth3D, 0);
 		win->moveCamera(v);
 	}
 
@@ -70,16 +70,16 @@ void GamepadInput::update(ccGLWindow* win)
 		if (	CCCoreLib::GreaterThanEpsilon(fabs(X))
 			||	CCCoreLib::GreaterThanEpsilon(fabs(Z)))
 		{
-			double scale = std::min(win->glWidth(), win->glHeight()) * win->computeActualPixelSize();
 			if (viewParams.perspectiveView)
 			{
 				X *= win->getViewportParameters().computeDistanceToHalfWidthRatio();
 			}
+			double screenWidth3D = viewParams.computeWidthAtFocalDist();
 			if (!viewParams.objectCenteredView)
 			{
-				scale = -scale;
+				screenWidth3D = -screenWidth3D;
 			}
-			CCVector3d v(-X * scale, 0, -Z * scale);
+			CCVector3d v(-X * screenWidth3D, 0, -Z * screenWidth3D);
 			win->moveCamera(v);
 		}
 	}

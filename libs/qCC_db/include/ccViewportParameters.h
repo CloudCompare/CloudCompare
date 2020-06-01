@@ -101,8 +101,11 @@ public: //functions
 	**/
 	double computeDistanceToWidthRatio() const;
 
-	//! Computes the screen 'width' at the 'focal' distance
+	//! Computes the object 'width' at the 'focal' distance
 	double computeWidthAtFocalDist() const;
+
+	//! Computes the pixel size at the 'focal' distance
+	double computePixelSize(int glWidth) const;
 
 public: //variables
 

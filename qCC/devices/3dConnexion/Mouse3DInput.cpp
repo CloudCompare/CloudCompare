@@ -339,7 +339,6 @@ void Mouse3DInput::Apply(const std::vector<float>& motionData, ccGLWindow* win)
 		    ||	CCCoreLib::GreaterThanEpsilon(fabs(Y))
 		    ||	CCCoreLib::GreaterThanEpsilon(fabs(Z)) )
 		{
-			double scale = std::min(win->glWidth(), win->glHeight()) * win->computeActualPixelSize();
 			if (viewParams.perspectiveView)
 			{
 				double distanceToWidthRatio = win->getViewportParameters().computeDistanceToWidthRatio();
@@ -347,11 +346,12 @@ void Mouse3DInput::Apply(const std::vector<float>& motionData, ccGLWindow* win)
 				Y *= distanceToWidthRatio;
 			}
 
+			double screenWidth3D = viewParams.computeWidthAtFocalDist();
 			if (viewParams.objectCenteredView)
 			{
-				scale = -scale;
+				screenWidth3D = -screenWidth3D;
 			}
-			CCVector3d v(-X * scale, Y * scale, -Z * scale);
+			CCVector3d v(-X * screenWidth3D, Y * screenWidth3D, -Z * screenWidth3D);
 			win->moveCamera(v);
 		}
 	}

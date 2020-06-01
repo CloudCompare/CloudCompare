@@ -310,3 +310,8 @@ double ccViewportParameters::computeWidthAtFocalDist() const
 {
 	return getFocalDistance() * computeDistanceToWidthRatio();
 }
+
+double ccViewportParameters::computePixelSize(int glWidth) const
+{
+	return (glWidth > 0 ? computeWidthAtFocalDist() / glWidth : 1.0);
+}

@@ -3905,7 +3905,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 		{
 			//displacement vector (in "3D")
 			double pixSize = computeActualPixelSize();
-			CCVector3d u(dx*pixSize, -dy*pixSize, 0.0);
+			CCVector3d u(dx * pixSize, -dy * pixSize, 0.0);
 			m_viewportParams.viewMat.transposed().applyRotation(u);
 
 			const int retinaScale = devicePixelRatio();
@@ -5515,12 +5515,7 @@ void ccGLWindow::togglePerspective(bool objectCentered)
 
 double ccGLWindow::computeActualPixelSize() const
 {
-	if (m_glViewport.width() <= 0)
-	{
-		return 1.0;
-	}
-
-	return m_viewportParams.computeWidthAtFocalDist() / m_glViewport.width();
+	return m_viewportParams.computePixelSize(m_glViewport.width());
 }
 
 void ccGLWindow::setBubbleViewMode(bool state)

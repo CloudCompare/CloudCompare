@@ -296,6 +296,59 @@ bool qAnimationDlg::updateCameraTrajectory()
 	return result;
 }
 
+void qAnimationDlg::updateSmoothTrajectoryDurations()
+{
+	bool smoothMode = smoothModeEnabled();
+	if (!smoothMode)
+	{
+		return;
+	}
+
+	size_t vp1Index = 0, vp2Index = 0;
+	while (getNextSegment(vp1Index, vp2Index))
+	{
+		assert(vp1Index < stepSelectionList->count());
+		Step& step1 = m_videoSteps[vp1Index];
+		const Step& step2 = m_videoSteps[vp2Index];
+
+		int i1Smooth = step1.indexInSmoothTrajectory;
+		int i2Smooth = step2.indexInSmoothTrajectory;
+		if (i1Smooth < 0 || i2Smooth < 0)
+		{
+			assert(false);
+			continue;
+		}
+		if (i2Smooth < i1Smooth)
+		{
+			//loop mode
+			i2Smooth += static_cast<int>(m_smoothVideoSteps.size());
+		}
+
+		double length = 0;
+		for (int i = i1Smooth; i < i2Smooth; ++i)
+		{
+			const Step& s = m_smoothVideoSteps[static_cast<size_t>(i) % m_smoothVideoSteps.size()];
+			length += s.length;
+		}
+
+		if (CCCoreLib::GreaterThanEpsilon(length))
+		{
+			for (int i = i1Smooth; i < i2Smooth; ++i)
+			{
+				Step& s = m_smoothVideoSteps[static_cast<size_t>(i) % m_smoothVideoSteps.size()];
+				s.duration_sec = step1.duration_sec  * (s.length / length);
+			}
+		}
+
+		if (vp2Index < vp1Index)
+		{
+			//loop case
+			break;
+		}
+		vp1Index = vp2Index;
+	}
+}
+
 bool qAnimationDlg::smoothTrajectory(double ratio, unsigned iterationCount)
 {
 	if (iterationCount == 0)
@@ -360,6 +413,7 @@ bool qAnimationDlg::smoothTrajectory(double ratio, unsigned iterationCount)
 				{
 					Step interpolatedStep;
 					interpolatedStep.cameraCenter = (CCCoreLib::PC_ONE - ratio) * sP.cameraCenter + ratio * sQ.cameraCenter;
+					interpolatedStep.duration_sec = sP.duration_sec * ratio;
 					interpolator.interpolate(interpolatedStep.viewportParams, ratio);
 					interpolatedStep.indexInOriginalTrajectory = (it == 0 ? -1 : sP.indexInOriginalTrajectory);
 					newTrajectory.push_back(interpolatedStep);
@@ -369,6 +423,7 @@ bool qAnimationDlg::smoothTrajectory(double ratio, unsigned iterationCount)
 				{
 					Step interpolatedStep;
 					interpolatedStep.cameraCenter = ratio * sP.cameraCenter + (CCCoreLib::PC_ONE - ratio) * sQ.cameraCenter;
+					interpolatedStep.duration_sec = sP.duration_sec * (CCCoreLib::PC_ONE - ratio);
 					interpolator.interpolate(interpolatedStep.viewportParams, CCCoreLib::PC_ONE - ratio);
 					interpolatedStep.indexInOriginalTrajectory = (it == 0 ? sQ.indexInOriginalTrajectory : -1);
 					newTrajectory.push_back(interpolatedStep);
@@ -415,6 +470,9 @@ bool qAnimationDlg::smoothTrajectory(double ratio, unsigned iterationCount)
 				m_videoSteps[s.indexInOriginalTrajectory].indexInSmoothTrajectory = static_cast<int>(i);
 			}
 		}
+
+		//update the durations
+		updateSmoothTrajectoryDurations();
 	}
 	catch (const std::bad_alloc&)
 	{
@@ -507,6 +565,11 @@ void qAnimationDlg::onAutoStepsDurationToggled(bool state)
 		{
 			i1Smooth = step1.indexInSmoothTrajectory;
 			i2Smooth = step2.indexInSmoothTrajectory;
+			if (i1Smooth < 0 || i2Smooth < 0)
+			{
+				assert(false);
+				continue;
+			}
 			if (i2Smooth < i1Smooth)
 			{
 				//loop mode
@@ -659,6 +722,11 @@ void qAnimationDlg::onTotalTimeChanged(double newTime_sec)
 			{
 				int i1Smooth = step1.indexInSmoothTrajectory;
 				int i2Smooth = step2.indexInSmoothTrajectory;
+				if (i1Smooth < 0 || i2Smooth < 0)
+				{
+					assert(false);
+					continue;
+				}
 				if (i2Smooth < i1Smooth)
 				{
 					//loop mode
@@ -722,6 +790,8 @@ void qAnimationDlg::onStepTimeChanged(double time_sec)
 	updateTotalDuration();
 	//update current step
 	updateCurrentStepDuration();
+	//we have to update the whole smooth trajectory duration as well
+	updateSmoothTrajectoryDurations();
 }
 
 void qAnimationDlg::onBrowseButtonClicked()

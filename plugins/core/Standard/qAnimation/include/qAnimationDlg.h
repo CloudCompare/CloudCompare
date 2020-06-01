@@ -104,7 +104,6 @@ protected: //methods
 		int indexInOriginalTrajectory = -1;
 		CCVector3d cameraCenter;
 
-
 		double duration_sec = 0.0;
 		double length = 0.0;
 		int indexInSmoothTrajectory = -1;
@@ -113,6 +112,8 @@ protected: //methods
 	typedef std::vector<Step> Trajectory;
 
 	bool getCompressedTrajectory(Trajectory& compressedTrajectory) const;
+
+	void updateSmoothTrajectoryDurations();
 
 protected: //members
 

@@ -157,6 +157,11 @@ void cc2Point5DimEditor::update2DDisplayZoom(ccBBox& box)
 
 	//equivalent to 'ccGLWindow::updateConstellationCenterAndZoom' but we take aspect ratio into account
 
+	//we set the pivot point on the box center
+	CCVector3 P = box.getCenter();
+	m_glWindow->setPivotPoint(CCVector3d::fromArray(P.u));
+	m_glWindow->setCameraPos(CCVector3d::fromArray(P.u));
+
 	//we compute the pixel size (in world coordinates)
 	{
 		ccViewportParameters params = m_glWindow->getViewportParameters();
@@ -188,19 +193,14 @@ void cc2Point5DimEditor::update2DDisplayZoom(ccBBox& box)
 		double targetWidth = realGridWidth;
 		if (realGridHeight / screenHeight > realGridWidth / screenWidth)
 		{
-			targetWidth *= realGridHeight * screenWidth / screenHeight;
+			targetWidth = (realGridHeight * screenWidth) / screenHeight;
 		}
 
 		m_glWindow->setCameraFocalToFitWidth(static_cast<float>(targetWidth));
-		m_glWindow->setViewportParameters(params);
+		//m_glWindow->setViewportParameters(params);
 		m_glWindow->setPointSize(pointSize);
 	}
 	
-	//we set the pivot point on the box center
-	CCVector3 P = box.getCenter();
-	m_glWindow->setPivotPoint(CCVector3d::fromArray(P.u));
-	m_glWindow->setCameraPos(CCVector3d::fromArray(P.u));
-
 	m_glWindow->invalidateViewport();
 	m_glWindow->invalidateVisualization();
 	m_glWindow->deprecate3DLayer();

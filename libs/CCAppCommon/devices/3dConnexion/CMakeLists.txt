@@ -24,6 +24,7 @@ if( WIN32 )
 		target_include_directories( ${PROJECT_NAME}
 			PUBLIC
 				${CMAKE_CURRENT_LIST_DIR}
+				${3DXWARE_INCLUDE_DIR}
 		)
 	
 		target_compile_definitions( ${PROJECT_NAME} PUBLIC CC_3DXWARE_SUPPORT )

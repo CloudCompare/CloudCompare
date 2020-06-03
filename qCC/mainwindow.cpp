@@ -118,6 +118,7 @@
 #include "ccVolumeCalcTool.h"
 #include "ccWaveformDialog.h"
 #include "ccEntitySelectionDlg.h"
+#include "ccSmoothPolylineDlg.h"
 
 //other
 #include "ccCropTool.h"
@@ -549,6 +550,8 @@ void MainWindow::connectActions()
 	connect(m_UI->actionEnhanceMeshSF,				&QAction::triggered, this, &MainWindow::doActionEnhanceMeshSF);
 	//"Edit > Polyline" menu
 	connect(m_UI->actionSamplePointsOnPolyline,		&QAction::triggered, this, &MainWindow::doActionSamplePointsOnPolyline);
+	connect(m_UI->actionSmoothPolyline,				&QAction::triggered, this, &MainWindow::doActionSmoohPolyline);
+	
 	//"Edit > Plane" menu
 	connect(m_UI->actionCreatePlane,				&QAction::triggered, this, &MainWindow::doActionCreatePlane);
 	connect(m_UI->actionEditPlane,					&QAction::triggered, this, &MainWindow::doActionEditPlane);
@@ -2693,6 +2696,60 @@ void MainWindow::doActionSamplePointsOnPolyline()
 	refreshAll();
 }
 
+void MainWindow::doActionSmoohPolyline()
+{
+	static int s_iterationCount = 5;
+	static double s_ratio = 0.25;
+
+	ccSmoothPolylineDialog dlg(this);
+	//restore last parameters
+	dlg.setIerationCount(s_iterationCount);
+	dlg.setRatio(s_ratio);
+	if (!dlg.exec())
+		return;
+
+	s_iterationCount = dlg.getIerationCount();
+	s_ratio = dlg.getRatio();
+
+	bool errors = false;
+
+	ccHObject::Container selectedEntities = getSelectedEntities();
+	m_ccRoot->unselectAllEntities();
+
+	for (ccHObject *entity : selectedEntities)
+	{
+		if (!entity->isKindOf(CC_TYPES::POLY_LINE))
+			continue;
+
+		ccPolyline* poly = ccHObjectCaster::ToPolyline(entity);
+		assert(poly);
+
+		ccPolyline* smoothPoly = poly->smoothChaikin(s_ratio, static_cast<unsigned>(s_iterationCount));
+		if (smoothPoly)
+		{
+			if (poly->getParent())
+			{
+				poly->getParent()->addChild(smoothPoly);
+			}
+			poly->setEnabled(false);
+			addToDB(smoothPoly);
+
+			m_ccRoot->selectEntity(smoothPoly, true);
+		}
+		else
+		{
+			errors = true;
+		}
+	}
+
+	if (errors)
+	{
+		ccLog::Error("[doActionSmoohPolyline] Errors occurred during the process! Result may be incomplete!");
+	}
+
+	refreshAll();
+}
+
 void MainWindow::doRemoveDuplicatePoints()
 {
 	if (!haveSelection())
@@ -4221,7 +4278,7 @@ void MainWindow::doMeshTwoPolylines()
 		useViewingDir = (QMessageBox::question(this, "Projection method", "Use best fit plane (yes) or the current viewing direction (no)", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No);
 		if (useViewingDir)
 		{
-			viewingDir = -CCVector3::fromArray(static_cast<ccGLWindow*>(p1->getDisplay())->getCurrentViewDir().u);
+			viewingDir = -CCVector3::fromArray(p1->getDisplay()->getViewportParameters().getViewDir().u);
 		}
 	}
 
@@ -5754,11 +5811,9 @@ ccGLWindow* MainWindow::new3DView( bool allowEntitySelection )
 
 	//'echo' mode
 	connect(view3D,	&ccGLWindow::mouseWheelRotated, this, &MainWindow::echoMouseWheelRotate);
-	connect(view3D,	&ccGLWindow::cameraDisplaced, this, &MainWindow::echoCameraDisplaced);
 	connect(view3D,	&ccGLWindow::viewMatRotated, this, &MainWindow::echoBaseViewMatRotation);
 	connect(view3D,	&ccGLWindow::cameraPosChanged, this, &MainWindow::echoCameraPosChanged);
 	connect(view3D,	&ccGLWindow::pivotPointChanged, this, &MainWindow::echoPivotPointChanged);
-	connect(view3D,	&ccGLWindow::pixelSizeChanged, this, &MainWindow::echoPixelSizeChanged);
 
 	connect(view3D,	&QObject::destroyed, this, &MainWindow::prepareWindowDeletion);
 	connect(view3D,	&ccGLWindow::filesDropped, this, &MainWindow::addToDBAuto, Qt::QueuedConnection); //DGM: we don't want to block the 'dropEvent' method of ccGLWindow instances!
@@ -7004,14 +7059,14 @@ void MainWindow::doActionAdjustZoom()
 		return;
 	}
 
-	ccAdjustZoomDlg azDlg(win,this);
+	ccAdjustZoomDlg azDlg(win, this);
 
 	if (!azDlg.exec())
 		return;
 
-	//apply zoom
-	double zoom = azDlg.getZoom();
-	win->setZoom(static_cast<float>(zoom));
+	//apply new focal
+	double focalDist = azDlg.getFocalDistance();
+	win->setFocalDistance(focalDist);
 	win->redraw();
 }
 
@@ -7313,7 +7368,7 @@ void MainWindow::onItemPicked(const PickedItem& pi)
 				CCVector3 Y = *C - *A;
 				CCVector3 Z = X.cross(Y);
 				//we choose 'Z' so that it points 'upward' relatively to the camera (assuming the user will be looking from the top)
-				CCVector3d viewDir = s_pickingWindow->getCurrentViewDir();
+				CCVector3d viewDir = s_pickingWindow->getViewportParameters().getViewDir();
 				if (CCVector3d::fromArray(Z.u).dot(viewDir) > 0)
 				{
 					Z = -Z;
@@ -10467,6 +10522,8 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 
 	m_UI->actionConvertPolylinesToMesh->setEnabled(atLeastOnePolyline || exactlyOneGroup);
 	m_UI->actionSamplePointsOnPolyline->setEnabled(atLeastOnePolyline);
+	m_UI->actionSmoothPolyline->setEnabled(atLeastOnePolyline);
+
 	m_UI->actionMeshTwoPolylines->setEnabled(selInfo.selCount == 2 && selInfo.polylineCount == 2);
 	m_UI->actionCreateSurfaceBetweenTwoPolylines->setEnabled(m_UI->actionMeshTwoPolylines->isEnabled()); //clone of actionMeshTwoPolylines
 	m_UI->actionModifySensor->setEnabled(exactlyOneSensor);
@@ -10558,28 +10615,6 @@ void MainWindow::echoMouseWheelRotate(float wheelDelta_deg)
 	}
 }
 
-void MainWindow::echoCameraDisplaced(float ddx, float ddy)
-{
-	if (!m_UI->actionEnableCameraLink->isChecked())
-		return;
-
-	ccGLWindow* sendingWindow = dynamic_cast<ccGLWindow*>(sender());
-	if (!sendingWindow)
-		return;
-
-	for ( QMdiSubWindow *window : m_mdiArea->subWindowList() )
-	{
-		ccGLWindow *child = GLWindowFromWidget(window->widget());
-		if (child != sendingWindow)
-		{
-			child->blockSignals(true);
-			child->moveCamera(ddx, ddy, 0.0f);
-			child->blockSignals(false);
-			child->redraw();
-		}
-	}
-}
-
 void MainWindow::echoBaseViewMatRotation(const ccGLMatrixd& rotMat)
 {
 	if (!m_UI->actionEnableCameraLink->isChecked())
@@ -10647,29 +10682,7 @@ void MainWindow::echoBaseViewMatRotation(const ccGLMatrixd& rotMat)
 	 }
  }
 
- void MainWindow::echoPixelSizeChanged(float pixelSize)
- {
-	 if (!m_UI->actionEnableCameraLink->isChecked())
-		 return;
-
-	 ccGLWindow* sendingWindow = dynamic_cast<ccGLWindow*>(sender());
-	 if (!sendingWindow)
-		 return;
-
-	 for ( QMdiSubWindow *window : m_mdiArea->subWindowList() )
-	 {
-		 ccGLWindow *child = GLWindowFromWidget(window->widget());
-		 if (child != sendingWindow)
-		 {
-			 child->blockSignals(true);
-			 child->setPixelSize(pixelSize);
-			 child->blockSignals(false);
-			 child->redraw();
-		 }
-	 }
- }
-
-void MainWindow::dispToConsole(QString message, ConsoleMessageLevel level/*=STD_CONSOLE_MESSAGE*/)
+ void MainWindow::dispToConsole(QString message, ConsoleMessageLevel level/*=STD_CONSOLE_MESSAGE*/)
 {
 	switch(level)
 	{

@@ -44,17 +44,18 @@
 #include <ccMaterialSet.h>
 
 //Qt
-#include <QMainWindow>
-#include <QHBoxLayout>
-#include <QSettings>
+#include <QColorDialog>
+#include <QCloseEvent>
+#include <QFile>
 #include <QFileDialog>
 #include <QFileInfo>
-#include <QFile>
-#include <QTextStream>
-#include <QProgressDialog>
-#include <QColorDialog>
 #include <QFontMetrics>
+#include <QHBoxLayout>
 #include <QLocale>
+#include <QMainWindow>
+#include <QProgressDialog>
+#include <QSettings>
+#include <QTextStream>
 
 //system
 #include <assert.h>
@@ -165,6 +166,18 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 			}
 
 			updateMinAndMaxLimits();
+
+			//check that the vertical step (for the grid) is not bigger than the map
+			double yMin = 0.0;
+			double yMax = 0.0;
+			double yStep = 0.0;
+			getGridYValues(yMin, yMax, yStep, ANG_RAD);
+			double dY = yMax - yMin;
+			if (dY < scaleHStepDoubleSpinBox->value())
+			{
+				scaleHStepDoubleSpinBox->setValue(dY);
+				ccLog::Warning("[qSRA] The vertical step of the grid has been automatically reduced to match the map height (you can change it if required)");
+			}
 		}
 		else
 		{
@@ -296,6 +309,7 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 		QPushButton* closeButton = buttonBox->button(QDialogButtonBox::Close);
 		connect(applyButton, &QAbstractButton::clicked, this, &DistanceMapGenerationDlg::update);
 		connect(closeButton, &QAbstractButton::clicked, this, &QDialog::accept);
+		connect(closeButton, &QAbstractButton::clicked, [&] { closeEvent(nullptr); });
 	}
 
 	angularUnitChanged(m_angularUnits); //just to be sure
@@ -304,6 +318,20 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 	overlayGridColorChanged();
 	labelFontSizeChanged(-1);
 	projectionModeChanged(-1);
+}
+
+void DistanceMapGenerationDlg::closeEvent(QCloseEvent* e)
+{
+	if (m_window && m_window->getOwnDB())
+	{
+		//remove the mesh otherwise it may not be removed before CC quits
+		//and the OpenGL context won't be valid anymore to unload the map texture
+		m_window->getOwnDB()->removeAllChildren();
+	}
+	if (e)
+	{
+		e->accept();
+	}
 }
 
 void DistanceMapGenerationDlg::updateMinAndMaxLimits()
@@ -507,17 +535,16 @@ void DistanceMapGenerationDlg::updateZoom(ccBBox& box)
 
 	//we get the bounding-box diagonal length
 	PointCoordinateType bbDiag = box.getDiagNorm();
-	if ( CCCoreLib::GreaterThanEpsilon( bbDiag ) )
+	if (CCCoreLib::GreaterThanEpsilon(bbDiag))
 	{
 		bool sfDisplayed = m_window->getAssociatedScalarField() && m_window->sfShown();
 		bool yLabelDisplayed = m_yLabels && m_yLabels->isVisible() && m_yLabels->size();
 		float centerPos = 0.5f;
 
-		//we compute the pixel size (in world coordinates)
-		{
-			ccViewportParameters params = m_window->getViewportParameters();
-			params.zoom = 1.0f;
+		ccViewportParameters params = m_window->getViewportParameters();
 
+		//we compute the focal distance so that the map appears at the right 'scale'
+		{
 			int screenWidth = m_window->glWidth();
 			int scaleWidth = 0;
 			int labelsWidth = 0;
@@ -532,13 +559,13 @@ void DistanceMapGenerationDlg::updateZoom(ccBBox& box)
 				labelFont.setPointSize(m_yLabels->getFontSize());
 				QFontMetrics fm(labelFont);
 				int maxWidth = 0;
-				for (unsigned i=0; i<m_yLabels->size(); ++i)
+				for (unsigned i = 0; i < m_yLabels->size(); ++i)
 				{
 					QString label = m_yLabels->getLabel(i);
 					if (!label.isNull())
 					{
 						int width = fm.width(label);
-						maxWidth = std::max(maxWidth,width);
+						maxWidth = std::max(maxWidth, width);
 					}
 				}
 				labelsWidth = maxWidth;
@@ -549,7 +576,6 @@ void DistanceMapGenerationDlg::updateZoom(ccBBox& box)
 
 			//we zoom so that the map takes all the room left
 			float mapPart = static_cast<float>(mapWidth) / static_cast<float>(screenWidth);
-			params.zoom *= mapPart;
 
 			//we must also center the camera on the right position so that the map
 			//appears in between the scale and the color ramp
@@ -557,17 +583,27 @@ void DistanceMapGenerationDlg::updateZoom(ccBBox& box)
 			centerPos = (0.5f - mapStart) / mapPart;
 
 			//update pixel size accordingly
-			float screenHeight = m_window->glHeight() * params.orthoAspectRatio;
-			params.pixelSize = static_cast<float>(std::max(box.getDiagVec().x / mapWidth, box.getDiagVec().y / screenHeight));
-			m_window->setViewportParameters(params);
+			float screenHeight = m_window->glHeight() * params.cameraAspectRatio;
+			double pixelSize = std::max(box.getDiagVec().x / mapWidth, box.getDiagVec().y / screenHeight);
+			double distanceToWidthRatio = params.computeDistanceToWidthRatio();
+			double focalDistance = (pixelSize * screenWidth) / distanceToWidthRatio;
+			params.setFocalDistance(focalDistance);
 		}
 
 		//we set the pivot point on the box center
 		CCVector3 P = box.getCenter();
 		if (centerPos != 0.5f) //if we don't look exactly at the center of the map
+		{
 			P.x = box.minCorner().x * (1.0f - centerPos) + box.maxCorner().x * centerPos;
-		m_window->setPivotPoint(CCVector3d::fromArray(P.u));
-		m_window->setCameraPos(CCVector3d::fromArray(P.u));
+		}
+
+		CCVector3d pivotPoint = CCVector3d::fromArray(P.u);
+		CCVector3d cameraCenter = pivotPoint;
+		cameraCenter.z += params.getFocalDistance();
+		params.setPivotPoint(pivotPoint, false);
+		params.setCameraCenter(cameraCenter, false);
+
+		m_window->setViewportParameters(params);
 
 		m_window->invalidateViewport();
 		m_window->invalidateVisualization();
@@ -679,7 +715,7 @@ void DistanceMapGenerationDlg::update()
 		{
 			mapMesh->setVisible(true);
 			mapMesh->showNormals(false);
-			m_window->addToOwnDB(mapMesh,false);
+			m_window->addToOwnDB(mapMesh, false);
 
 			updateMapTexture();
 
@@ -1076,7 +1112,7 @@ void DistanceMapGenerationDlg::baseRadiusChanged(double)
 		return;
 
 	ccViewportParameters params = m_window->getViewportParameters();
-	params.orthoAspectRatio = static_cast<float>( getBaseRadius() );
+	params.cameraAspectRatio = static_cast<float>( getBaseRadius() );
 	m_window->setViewportParameters(params);
 	m_window->redraw();
 }
@@ -1571,12 +1607,12 @@ void DistanceMapGenerationDlg::clearOverlaySymbols()
 		return;
 
 	ccHObject::Container clouds;
-	m_window->getOwnDB()->filterChildren(clouds,false,CC_TYPES::POINT_CLOUD);
-	
-	for (size_t i=0; i<clouds.size(); ++i)
+	m_window->getOwnDB()->filterChildren(clouds, false, CC_TYPES::POINT_CLOUD);
+
+	for (size_t i = 0; i < clouds.size(); ++i)
 		if (clouds[i] != m_xLabels && clouds[i] != m_yLabels)
 			m_window->removeFromOwnDB(clouds[i]);
-	
+
 	clearLabelsPushButton->setEnabled(false);
 	clearLabelsPushButton->setText("Clear");
 	m_window->redraw();
@@ -1590,7 +1626,7 @@ void DistanceMapGenerationDlg::overlaySymbolsSizeChanged(int size)
 	double symbolSize = (double)symbolSizeSpinBox->value();
 
 	ccHObject* db = m_window->getOwnDB();
-	for (unsigned i=0; i<db->getChildrenNumber(); ++i)
+	for (unsigned i = 0; i < db->getChildrenNumber(); ++i)
 	{
 		ccHObject* child = db->getChild(i);
 		if (child->isA(CC_TYPES::POINT_CLOUD)
@@ -1614,13 +1650,13 @@ void DistanceMapGenerationDlg::overlaySymbolsColorChanged()
 						static_cast<ColorCompType>(m_symbolColor.blue()) );
 
 	ccHObject* db = m_window->getOwnDB();
-	for (unsigned i=0; i<db->getChildrenNumber(); ++i)
+	for (unsigned i = 0; i < db->getChildrenNumber(); ++i)
 	{
 		ccHObject* child = db->getChild(i);
 		if (child->isA(CC_TYPES::POINT_CLOUD)
 			&& child != m_xLabels && child != m_yLabels) //don't modify the X an Y label clouds!
 		{
-			child->setTempColor(rgb,true);
+			child->setTempColor(rgb, true);
 		}
 	}
 
@@ -1751,8 +1787,8 @@ void DistanceMapGenerationDlg::toggleOverlayGrid(bool state)
 			return;
 		}
 
-		unsigned xStepCount = static_cast<unsigned>( ceil( std::max(xMax_rad-xMin_rad,0.0) / scaleXStep_rad) );
-		unsigned yStepCount = static_cast<unsigned>( ceil( std::max(yMax-yMin,0.0) / scaleYStep) );
+		unsigned xStepCount = static_cast<unsigned>(ceil(std::max(xMax_rad - xMin_rad, 0.0) / scaleXStep_rad));
+		unsigned yStepCount = static_cast<unsigned>(ceil(std::max(yMax - yMin, 0.0) / scaleYStep));
 
 		//correct 'xMax' and 'yMax'
 		xMax_rad = xMin_rad + static_cast<double>(xStepCount) * scaleXStep_rad;

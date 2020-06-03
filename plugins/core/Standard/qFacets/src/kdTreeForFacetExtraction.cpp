@@ -318,7 +318,6 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 						}
 
 						bestIt->leaf->userData = currentCell->userData;
-						//bestIt->leaf->userData = macroIndex++; //FIXME TEST
 
 						//we will test this cell's neighbors as well
 						cellsToTest.push_back(bestIt->leaf);
@@ -367,12 +366,11 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 			CCCoreLib::ReferenceCloud* subset = leaves[i]->points;
 			if (subset)
 			{
-				ScalarType scalar = (ScalarType)leaves[i]->userData;
+				ScalarType scalar = static_cast<ScalarType>(leaves[i]->userData);
 				if (leaves[i]->userData <= 0) //for unfused cells, we create new individual groups
 					scalar = static_cast<ScalarType>(macroIndex++);
-					//scalar = CCCoreLib::NAN_VALUE; //FIXME TEST
-				for (unsigned j=0; j<subset->size(); ++j)
-					subset->setPointScalarValue(j,scalar);
+				for (unsigned j = 0; j < subset->size(); ++j)
+					subset->setPointScalarValue(j, scalar);
 			}
 		}
 

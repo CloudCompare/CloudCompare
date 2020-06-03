@@ -64,16 +64,20 @@ void ccFitPlaneTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPoi
 	if (!oct)
 	{
 		oct = cloud->computeOctree(); //if the user clicked "no" when asked to compute the octree then tough....
+		if (!oct)
+		{
+			ccLog::Warning("[ccFitPlaneTool] Failed to compute the cloud octree");
+			return;
+		}
 	}
 
 	//nearest neighbour search
-	float r = m_mouseCircle->getRadiusWorld();
+	PointCoordinateType r = static_cast<PointCoordinateType>(m_mouseCircle->getRadiusWorld());
 	unsigned char level = oct->findBestLevelForAGivenNeighbourhoodSizeExtraction(r);
 	CCCoreLib::DgmOctree::NeighboursSet set;
-	int n = oct->getPointsInSphericalNeighbourhood(P, PointCoordinateType(r), set, level);
+	int n = oct->getPointsInSphericalNeighbourhood(P, r, set, level);
 	//Put data in a point cloud class and encapsulate as a "neighbourhood"
 	CCCoreLib::DgmOctreeReferenceCloud nCloud(&set, n);
-	CCCoreLib::Neighbourhood Z(&nCloud);
 
 	//Fit plane!
 	double rms = 0.0; //output for rms
@@ -81,7 +85,17 @@ void ccFitPlaneTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPoi
 
 	if (pPlane) //valid fit
 	{
-		pPlane->updateAttributes(rms, m_mouseCircle->getRadiusWorld());
+		//we can orient the plane normal to face the viewer
+		if (m_app->getActiveGLWindow())
+		{
+			CCVector3d viewDir = m_app->getActiveGLWindow()->getViewportParameters().getViewDir();
+			if (CCVector3d::fromArray(pPlane->getNormal().u).dot(viewDir) > 0)
+			{
+				pPlane->flip();
+			}
+		}
+
+		pPlane->updateAttributes(rms, r);
 
 		//make plane to add to display
 		pPlane->setVisible(true);

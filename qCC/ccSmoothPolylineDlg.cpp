@@ -11,43 +11,50 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#                    COPYRIGHT: CloudCompare project                     #
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_ADJUST_ZOOM_DIALOG_HEADER
-#define CC_ADJUST_ZOOM_DIALOG_HEADER
+#include "ccSmoothPolylineDlg.h"
 
+//ui
+#include <ui_smoothPolylineDlg.h>
+
+//Qt
 #include <QDialog>
 
-#include <ui_adjustZoomDlg.h>
-
-class ccGLWindow;
-
-//! Dialog to set the current focal of a 3D view (or equivalently the pixel size)
-/** Orthographic mode only.
-**/
-class ccAdjustZoomDlg: public QDialog, public Ui::AdjustZoomDialog
+ccSmoothPolylineDialog::ccSmoothPolylineDialog(QWidget* parent/*=nullptr*/)
+	: QDialog(parent, Qt::Tool)
+	, m_ui(new Ui_SmoothPolylineDialog)
 {
-	Q_OBJECT
+	m_ui->setupUi(this);
+}
 
-public:
+ccSmoothPolylineDialog::~ccSmoothPolylineDialog()
+{
+	if (m_ui)
+	{
+		delete m_ui;
+		m_ui = nullptr;
+	}
+}
 
-	ccAdjustZoomDlg(ccGLWindow* win, QWidget* parent = 0);
-	virtual ~ccAdjustZoomDlg() = default;
+void ccSmoothPolylineDialog::setIerationCount(int count)
+{
+	m_ui->iterationSpinBox->setValue(count);
+}
 
-	//! Returns requested focal distance
-	double getFocalDistance() const;
+void ccSmoothPolylineDialog::setRatio(double ratio)
+{
+	m_ui->ratioDoubleSpinBox->setValue(ratio);
+}
 
-protected slots:
-	void onFocalChanged(double);
-	void onPixelSizeChanged(double);
-	void onPixelCountChanged(int);
+int ccSmoothPolylineDialog::getIerationCount() const
+{
+	return m_ui->iterationSpinBox->value();
+}
 
-protected:
-
-	int m_windowWidth_pix;
-	double m_distanceToWidthRatio;
-};
-
-#endif // CC_ADJUST_ZOOM_DIALOG_HEADER
+double ccSmoothPolylineDialog::getRatio() const
+{
+	return m_ui->ratioDoubleSpinBox->value();
+}

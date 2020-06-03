@@ -159,7 +159,7 @@ void ccStereoModeDlg::setParameters(const ccGLWindow::StereoParams& params)
 		m_ui->glassTypeComboBox->setCurrentIndex(COMBO_INDEX_CYAN_RED);
 		break;
 	case ccGLWindow::StereoParams::NVIDIA_VISION:
-		m_ui->glassTypeComboBox->setCurrentIndex(COMBO_INDEX_NV_VISION); //TODO FIXME
+		m_ui->glassTypeComboBox->setCurrentIndex(COMBO_INDEX_NV_VISION);
 		break;
 	case ccGLWindow::StereoParams::OCULUS:
 		m_ui->glassTypeComboBox->setCurrentIndex(COMBO_INDEX_OCULUS);

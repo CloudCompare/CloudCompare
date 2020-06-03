@@ -37,6 +37,7 @@ ccGamepadManager::ccGamepadManager( ccMainAppInterface *appInterface, QObject *p
 {
 	setupMenu();
 	setupGamepadInput(); //DGM:at this point we can only init the gamepadInput structure (Qt will send a signal when the gamepad is connected - at least from its point of view)
+	enableDevice(true, true); //DGM: but if it's already connected, we'll have to 'enable' it ourselves
 }
 
 ccGamepadManager::~ccGamepadManager()

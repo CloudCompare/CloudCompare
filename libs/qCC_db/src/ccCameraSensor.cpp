@@ -2169,7 +2169,7 @@ bool ccCameraSensor::OrthoRectifyAsImages(	std::vector<ccImage*> images,
 	}
 
 	//deduce pixel size
-	double pixelSize = maxDimAllImages/maxSize;
+	double pixelSize = maxDimAllImages / maxSize;
 
 	if (outputDir)
 	{
@@ -2182,9 +2182,9 @@ bool ccCameraSensor::OrthoRectifyAsImages(	std::vector<ccImage*> images,
 			stream.setRealNumberPrecision(6);
 			stream << "PixelSize" << ' ' << pixelSize << endl;
 			stream << "Global3DBBox" << ' ' << globalCorners[0] << ' ' << globalCorners[1] << ' ' << globalCorners[2] << ' ' << globalCorners[3] << endl;
-			int globalWidth = static_cast<int>(ceil((globalCorners[2]-globalCorners[0])/pixelSize));
-			int globalHeight = static_cast<int>(ceil((globalCorners[3]-globalCorners[1])/pixelSize));
-			stream << "Global2DBBox" << ' ' << 0 << ' ' << 0 << ' ' << globalWidth-1 << ' ' << globalHeight-1 << endl;
+			int globalWidth = static_cast<int>(ceil((globalCorners[2] - globalCorners[0]) / pixelSize));
+			int globalHeight = static_cast<int>(ceil((globalCorners[3] - globalCorners[1]) / pixelSize));
+			stream << "Global2DBBox" << ' ' << 0 << ' ' << 0 << ' ' << globalWidth - 1 << ' ' << globalHeight - 1 << endl;
 		}
 	}
 
@@ -2199,8 +2199,8 @@ bool ccCameraSensor::OrthoRectifyAsImages(	std::vector<ccImage*> images,
 		ccImage* image = images[k];
 		unsigned width = images[k]->getW();
 		unsigned height = images[k]->getH();
-		unsigned w = static_cast<unsigned>(ceil(dx/pixelSize));
-		unsigned h = static_cast<unsigned>(ceil(dy/pixelSize));
+		unsigned w = static_cast<unsigned>(ceil(dx / pixelSize));
+		unsigned h = static_cast<unsigned>(ceil(dy / pixelSize));
 
 		QImage orthoImage(w,h,QImage::Format_ARGB32);
 		if (orthoImage.isNull()) //not enough memory!
@@ -2232,16 +2232,16 @@ bool ccCameraSensor::OrthoRectifyAsImages(	std::vector<ccImage*> images,
 		for (unsigned i=0; i<w; ++i)
 		{
 			double xip = minC[0] + static_cast<double>(i)*pixelSize;
-			for (unsigned j=0;j<h;++j)
+			for (unsigned j = 0; j < h; ++j)
 			{
 				double yip = minC[1] + static_cast<double>(j)*pixelSize;
-				double q = (c2*xip-a2)*(c1*yip-b1)-(c2*yip-b2)*(c1*xip-a1);
-				double p = (a0-xip)*(c1*yip-b1)-(b0-yip)*(c1*xip-a1);
-				double yi = p/q;
+				double q = (c2*xip - a2)*(c1*yip - b1) - (c2*yip - b2)*(c1*xip - a1);
+				double p = (a0 - xip)*(c1*yip - b1) - (b0 - yip)*(c1*xip - a1);
+				double yi = p / q;
 
-				q = (c1*xip-a1)*(c2*yip-b2)-(c1*yip-b1)*(c2*xip-a2);
-				p = (a0-xip)*(c2*yip-b2)-(b0-yip)*(c2*xip-a2);
-				double  xi = p/q;
+				q = (c1*xip - a1)*(c2*yip - b2) - (c1*yip - b1)*(c2*xip - a2);
+				p = (a0 - xip)*(c2*yip - b2) - (b0 - yip)*(c2*xip - a2);
+				double  xi = p / q;
 
 				xi += 0.5 * width;
 				yi += 0.5 * height;
@@ -2250,7 +2250,7 @@ bool ccCameraSensor::OrthoRectifyAsImages(	std::vector<ccImage*> images,
 				int y = static_cast<int>(yi);
 				if (x >= 0 && x < static_cast<int>(width) && y >= 0 && y < static_cast<int>(height))
 				{
-					QRgb rgb = image->data().pixel(x,y);
+					QRgb rgb = image->data().pixel(x, y);
 					//pure black pixels are treated as transparent ones!
 					if (qRed(rgb) + qGreen(rgb) + qBlue(rgb) > 0)
 						orthoImage.setPixel(i, h - 1 - j, rgb);
@@ -2265,8 +2265,8 @@ bool ccCameraSensor::OrthoRectifyAsImages(	std::vector<ccImage*> images,
 		//eventually compute relative pos
 		if (relativePos)
 		{
-			double xShift = (minC[0]-minCorners[0])/pixelSize;
-			double yShift = (minC[1]-minCorners[1])/pixelSize;
+			double xShift = (minC[0] - minCorners[0]) / pixelSize;
+			double yShift = (minC[1] - minCorners[1]) / pixelSize;
 			relativePos->emplace_back(xShift, yShift);
 		}
 
@@ -2280,20 +2280,20 @@ bool ccCameraSensor::OrthoRectifyAsImages(	std::vector<ccImage*> images,
 			QFile f(outputDir->absoluteFilePath("ortho_rectification_log.txt"));
 			if (f.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) //always append
 			{
-				double xShiftGlobal = (minC[0]-globalCorners[0])/pixelSize;
-				double yShiftGlobal = (minC[1]-globalCorners[1])/pixelSize;
+				double xShiftGlobal = (minC[0] - globalCorners[0]) / pixelSize;
+				double yShiftGlobal = (minC[1] - globalCorners[1]) / pixelSize;
 				QTextStream stream(&f);
 				stream.setRealNumberNotation(QTextStream::FixedNotation);
 				stream.setRealNumberPrecision(6);
-				stream << "Image" << ' ' << exportFilename  << ' ';
+				stream << "Image" << ' ' << exportFilename << ' ';
 				stream << "Local3DBBox" << ' ' << minC[0] << ' ' << minC[1] << ' ' << maxC[0] << ' ' << maxC[1] << ' ';
-				stream << "Local2DBBox" << ' ' << xShiftGlobal << ' ' << yShiftGlobal <<  ' ' << xShiftGlobal+static_cast<double>(w-1) << ' ' << yShiftGlobal+static_cast<double>(h-1) << endl;
+				stream << "Local2DBBox" << ' ' << xShiftGlobal << ' ' << yShiftGlobal << ' ' << xShiftGlobal + static_cast<double>(w - 1) << ' ' << yShiftGlobal + static_cast<double>(h - 1) << endl;
 				f.close();
 			}
 		}
 
 		if (result)
-			result->push_back(new ccImage(orthoImage,image->getName()));
+			result->push_back(new ccImage(orthoImage, image->getName()));
 	}
 
 	return true;
@@ -2307,7 +2307,7 @@ ccPointCloud* ccCameraSensor::orthoRectifyAsCloud(	const ccImage* image,
 	double b[3]{ 0.0, 0.0, 0.0 };
 	double c[3]{ 0.0, 0.0, 0.0 };
 
-	if (!computeOrthoRectificationParams(image,keypoints3D,keypointsImage,a,b,c))
+	if (!computeOrthoRectificationParams(image, keypoints3D, keypointsImage, a, b, c))
 		return nullptr;
 
 	const double& a0 = a[0];
@@ -2325,7 +2325,7 @@ ccPointCloud* ccCameraSensor::orthoRectifyAsCloud(	const ccImage* image,
 	unsigned width = image->getW();
 	unsigned height = image->getH();
 
-	ccPointCloud* proj = new ccPointCloud(getName()+QString(".ortho-rectified"));
+	ccPointCloud* proj = new ccPointCloud(getName() + QString(".ortho-rectified"));
 	if (!proj->reserve(width*height) || !proj->reserveTheRGBTable())
 	{
 		ccLog::Warning("[orthoRectifyAsCloud] Not enough memory!");
@@ -2344,7 +2344,7 @@ ccPointCloud* ccCameraSensor::orthoRectifyAsCloud(	const ccImage* image,
 			for (unsigned pj = 0; pj < height; ++pj)
 			{
 				double yi = static_cast<double>(pj) - 0.5*height;
-				double qi = 1.0 + c1*xi + c2*yi;
+				double qi = 1.0 + c1 * xi + c2 * yi;
 				CCVector3 P(static_cast<PointCoordinateType>((a0 + a1 * xi + a2 * yi) / qi),
 							static_cast<PointCoordinateType>((b0 + b1 * xi + b2 * yi) / qi),
 							defaultZ);

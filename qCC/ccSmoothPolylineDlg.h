@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -11,43 +13,42 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#                    COPYRIGHT: CloudCompare project                     #
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_ADJUST_ZOOM_DIALOG_HEADER
-#define CC_ADJUST_ZOOM_DIALOG_HEADER
+//qCC_db
+#include <ccHObject.h>
 
+//Qt
 #include <QDialog>
 
-#include <ui_adjustZoomDlg.h>
+class Ui_SmoothPolylineDialog;
 
-class ccGLWindow;
-
-//! Dialog to set the current focal of a 3D view (or equivalently the pixel size)
-/** Orthographic mode only.
-**/
-class ccAdjustZoomDlg: public QDialog, public Ui::AdjustZoomDialog
+//! Dialog to smooth a polyline (Chaikin algorithm)
+class ccSmoothPolylineDialog : public QDialog
 {
-	Q_OBJECT
-
 public:
+	//! Default constructor
+	ccSmoothPolylineDialog(QWidget* parent = nullptr);
 
-	ccAdjustZoomDlg(ccGLWindow* win, QWidget* parent = 0);
-	virtual ~ccAdjustZoomDlg() = default;
+	//! Destructor
+	virtual ~ccSmoothPolylineDialog();
 
-	//! Returns requested focal distance
-	double getFocalDistance() const;
+	//! Sets the number of iterations
+	void setIerationCount(int count);
 
-protected slots:
-	void onFocalChanged(double);
-	void onPixelSizeChanged(double);
-	void onPixelCountChanged(int);
+	//! Sets the smoothing ratio
+	void setRatio(double ratio);
+
+	//! Returns the number of iterations
+	int getIerationCount() const;
+
+	//! Returns the smoothing ratio
+	double getRatio() const;
 
 protected:
 
-	int m_windowWidth_pix;
-	double m_distanceToWidthRatio;
+	//! Associated ui
+	Ui_SmoothPolylineDialog* m_ui;
 };
-
-#endif // CC_ADJUST_ZOOM_DIALOG_HEADER

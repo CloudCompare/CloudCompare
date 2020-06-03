@@ -23,7 +23,8 @@
 ccAdjustZoomDlg::ccAdjustZoomDlg(ccGLWindow* win, QWidget* parent/*=0*/)
 	: QDialog(parent, Qt::Tool)
 	, Ui::AdjustZoomDialog()
-	, m_basePixelSize(1.0)
+	, m_windowWidth_pix(0)
+	, m_distanceToWidthRatio(0.0)
 {
 	setupUi(this);
 
@@ -34,43 +35,66 @@ ccAdjustZoomDlg::ccAdjustZoomDlg(ccGLWindow* win, QWidget* parent/*=0*/)
 		const ccViewportParameters& params = win->getViewportParameters();
 		assert(!params.perspectiveView);
 
-		m_basePixelSize = params.pixelSize;
-		zoomDoubleSpinBox->setValue(params.zoom);
+		m_windowWidth_pix = win->glWidth();
+		m_distanceToWidthRatio = params.computeDistanceToWidthRatio();
+		double focalDist = params.getFocalDistance();
+
+		if (m_windowWidth_pix < 1)
+		{
+			assert(false);
+			m_windowWidth_pix = 1;
+		}
+		if (m_distanceToWidthRatio <= 0.0)
+		{
+			assert(false);
+			m_distanceToWidthRatio = 1.0;
+		}
+
+		focalDoubleSpinBox->setValue(focalDist);
 		pixelCountSpinBox->setValue(1);
-		pixelSizeDoubleSpinBox->setValue(params.pixelSize / params.zoom);
+		pixelSizeDoubleSpinBox->setValue(focalDist * m_distanceToWidthRatio / m_windowWidth_pix);
 	}
 	else
 	{
 		windowLabel->setText("Error");
 	}
 
-	connect(zoomDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &ccAdjustZoomDlg::onZoomChanged);
+	connect(focalDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &ccAdjustZoomDlg::onFocalChanged);
 	connect(pixelSizeDoubleSpinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &ccAdjustZoomDlg::onPixelSizeChanged);
 	connect(pixelCountSpinBox,		static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),					this, &ccAdjustZoomDlg::onPixelCountChanged);
 }
 
-double ccAdjustZoomDlg::getZoom() const
+double ccAdjustZoomDlg::getFocalDistance() const
 {
-	return zoomDoubleSpinBox->value();
+	return focalDoubleSpinBox->value();
 }
 
-void ccAdjustZoomDlg::onZoomChanged(double zoom)
+void ccAdjustZoomDlg::onFocalChanged(double focalDist)
 {
+	assert(pixelCountSpinBox->value() > 0);
+
 	pixelSizeDoubleSpinBox->blockSignals(true);
-	pixelSizeDoubleSpinBox->setValue( m_basePixelSize * static_cast<double>(pixelCountSpinBox->value()) / zoom );
+	double pixelSizeNPixels = (focalDist * m_distanceToWidthRatio * pixelCountSpinBox->value()) / m_windowWidth_pix;
+	pixelSizeDoubleSpinBox->setValue(pixelSizeNPixels);
 	pixelSizeDoubleSpinBox->blockSignals(false);
 }
 
-void ccAdjustZoomDlg::onPixelSizeChanged(double ps)
+void ccAdjustZoomDlg::onPixelSizeChanged(double pixelSizeNPixels)
 {
-	zoomDoubleSpinBox->blockSignals(true);
-	zoomDoubleSpinBox->setValue( m_basePixelSize * static_cast<double>(pixelCountSpinBox->value()) / ps );
-	zoomDoubleSpinBox->blockSignals(false);
+	assert(pixelCountSpinBox->value() > 0);
+
+	focalDoubleSpinBox->blockSignals(true);
+	double focalDist = (pixelSizeNPixels * m_windowWidth_pix) / (pixelCountSpinBox->value() * m_distanceToWidthRatio);
+	focalDoubleSpinBox->setValue(focalDist);
+	focalDoubleSpinBox->blockSignals(false);
 }
 
-void ccAdjustZoomDlg::onPixelCountChanged(int count)
+void ccAdjustZoomDlg::onPixelCountChanged(int pixelCount)
 {
+	assert(pixelCount > 0);
+
 	pixelSizeDoubleSpinBox->blockSignals(true);
-	pixelSizeDoubleSpinBox->setValue( m_basePixelSize * static_cast<double>(count) / zoomDoubleSpinBox->value() );
+	double pixelSizeNPixels = (focalDoubleSpinBox->value() * m_distanceToWidthRatio * pixelCount) / m_windowWidth_pix;
+	pixelSizeDoubleSpinBox->setValue( pixelSizeNPixels );
 	pixelSizeDoubleSpinBox->blockSignals(false);
 }

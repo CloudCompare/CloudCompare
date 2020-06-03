@@ -39,13 +39,13 @@ public:
 	~ccMouseCircle();
 
 	//get the circle radius in px
-	int getRadiusPx();
+	inline int getRadiusPx() const { return m_radius; }
 
 	//get the circle radius in world coordinates
 	float getRadiusWorld();
 
 	//removes the link with the owner (no cleanup)
-	void ownerIsDead() { m_owner = 0; }
+	inline void ownerIsDead() { m_owner = nullptr; }
 
 protected:
 	//draws a circle of radius r around the mouse
@@ -54,16 +54,13 @@ protected:
 private:
 	//ccGLWindow this overlay is attached to -> used to get mouse position & events
 	ccGLWindow* m_owner;
-	float m_winTotalZoom;
+	float m_pixelSize;
 
 	//event to get mouse-move updates & trigger repaint
-	bool eventFilter(QObject* obj, QEvent* event);
+	bool eventFilter(QObject* obj, QEvent* event) override;
 
-public:
-	static const int RESOLUTION = 100;
-	int RADIUS = 50;
-	int RADIUS_STEP = 4;
-	float UNIT_CIRCLE[ RESOLUTION ][2];
+	int m_radius;
+	int m_radiusStep;
 };
 
 #endif

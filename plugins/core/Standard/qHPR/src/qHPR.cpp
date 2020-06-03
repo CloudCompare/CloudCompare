@@ -43,7 +43,7 @@ extern "C"
 
 qHPR::qHPR(QObject* parent)
 	: QObject(parent)
-	, ccStdPluginInterface( ":/CC/plugin/qHPR/info.json" )
+	, ccStdPluginInterface(":/CC/plugin/qHPR/info.json")
 	, m_action(nullptr)
 {
 }
@@ -53,7 +53,7 @@ QList<QAction *> qHPR::getActions()
 	//default action
 	if (!m_action)
 	{
-		m_action = new QAction(getName(),this);
+		m_action = new QAction(getName(), this);
 		m_action->setToolTip(getDescription());
 		m_action->setIcon(getIcon());
 		//connect signal
@@ -84,7 +84,7 @@ CCCoreLib::ReferenceCloud* qHPR::removeHiddenPoints(CCCoreLib::GenericIndexedClo
 	if (nbPoints < 4)
 	{
 		CCCoreLib::ReferenceCloud* visiblePoints = new CCCoreLib::ReferenceCloud(theCloud);
-		if (!visiblePoints->addPointIndex(0,nbPoints)) //well even for less than 4 points we never know ;)
+		if (!visiblePoints->addPointIndex(0, nbPoints)) //well even for less than 4 points we never know ;)
 		{
 			//not enough memory!
 			delete visiblePoints;
@@ -96,11 +96,11 @@ CCCoreLib::ReferenceCloud* qHPR::removeHiddenPoints(CCCoreLib::GenericIndexedClo
 	double maxRadius = 0;
 
 	//convert point cloud to an array of double triplets (for qHull)
-	coordT* pt_array = new coordT[(nbPoints+1)*3];
+	coordT* pt_array = new coordT[(nbPoints + 1) * 3];
 	{
 		coordT* _pt_array = pt_array;
 
-		for (unsigned i=0; i<nbPoints; ++i)
+		for (unsigned i = 0; i < nbPoints; ++i)
 		{
 			CCVector3d P = CCVector3d::fromArray(theCloud->getPoint(i)->u) - viewPoint;
 			*_pt_array++ = static_cast<coordT>(P.x);
@@ -112,7 +112,7 @@ CCCoreLib::ReferenceCloud* qHPR::removeHiddenPoints(CCCoreLib::GenericIndexedClo
 			if (maxRadius < r2)
 				maxRadius = r2;
 		}
-		
+
 		//we add the view point (Cf. HPR)
 		*_pt_array++ = 0;
 		*_pt_array++ = 0;
@@ -123,14 +123,14 @@ CCCoreLib::ReferenceCloud* qHPR::removeHiddenPoints(CCCoreLib::GenericIndexedClo
 
 	//apply spherical flipping
 	{
-		maxRadius *= pow(10.0,fParam) * 2;
-	
+		maxRadius *= pow(10.0, fParam) * 2;
+
 		coordT* _pt_array = pt_array;
-		for (unsigned i=0; i<nbPoints; ++i)
+		for (unsigned i = 0; i < nbPoints; ++i)
 		{
 			CCVector3d P = CCVector3d::fromArray(theCloud->getPoint(i)->u) - viewPoint;
 
-			double r = (maxRadius/P.norm()) - 1.0;
+			double r = (maxRadius / P.norm()) - 1.0;
 			*_pt_array++ *= r;
 			*_pt_array++ *= r;
 			*_pt_array++ *= r;
@@ -141,11 +141,11 @@ CCCoreLib::ReferenceCloud* qHPR::removeHiddenPoints(CCCoreLib::GenericIndexedClo
 	std::vector<bool> pointBelongsToCvxHull;
 
 	static char qHullCommand[] = "qhull QJ Qci";
-	if (!qh_new_qhull(3,nbPoints+1,pt_array,False,qHullCommand,nullptr,stderr))
+	if (!qh_new_qhull(3, nbPoints + 1, pt_array, False, qHullCommand, nullptr, stderr))
 	{
 		try
 		{
-			pointBelongsToCvxHull.resize(nbPoints+1,false);
+			pointBelongsToCvxHull.resize(nbPoints + 1, false);
 		}
 		catch (const std::bad_alloc&)
 		{
@@ -179,7 +179,7 @@ CCCoreLib::ReferenceCloud* qHPR::removeHiddenPoints(CCCoreLib::GenericIndexedClo
 	//free long memory
 	int curlong = 0;
 	int totlong = 0;
-	qh_memfreeshort (&curlong, &totlong);
+	qh_memfreeshort(&curlong, &totlong);
 	//free short memory and memory allocator
 
 	if (!pointBelongsToCvxHull.empty())
@@ -187,15 +187,15 @@ CCCoreLib::ReferenceCloud* qHPR::removeHiddenPoints(CCCoreLib::GenericIndexedClo
 		//compute the number of points belonging to the convex hull
 		unsigned cvxHullSize = 0;
 		{
-			for (unsigned i=0; i<nbPoints; ++i)
+			for (unsigned i = 0; i < nbPoints; ++i)
 				if (pointBelongsToCvxHull[i])
 					++cvxHullSize;
 		}
 
 		CCCoreLib::ReferenceCloud* visiblePoints = new CCCoreLib::ReferenceCloud(theCloud);
-		if (cvxHullSize!=0 && visiblePoints->reserve(cvxHullSize))
+		if (cvxHullSize != 0 && visiblePoints->reserve(cvxHullSize))
 		{
-			for (unsigned i=0; i<nbPoints; ++i)
+			for (unsigned i = 0; i < nbPoints; ++i)
 				if (pointBelongsToCvxHull[i])
 					visiblePoints->addPointIndex(i); //can't fail, see above
 
@@ -220,7 +220,7 @@ void qHPR::doAction()
 
 	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
 
-	if ( !m_app->haveOneSelection() || !selectedEntities.front()->isA(CC_TYPES::POINT_CLOUD))
+	if (!m_app->haveOneSelection() || !selectedEntities.front()->isA(CC_TYPES::POINT_CLOUD))
 	{
 		m_app->dispToConsole("Select only one cloud!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
@@ -231,16 +231,15 @@ void qHPR::doAction()
 	ccGLWindow* win = m_app->getActiveGLWindow();
 	if (!win)
 	{
-		m_app->dispToConsole("No active window!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		m_app->dispToConsole("No active window!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
 	}
 
 	//display parameters
-	const ccViewportParameters& params =  win->getViewportParameters();
+	const ccViewportParameters& params = win->getViewportParameters();
 	if (!params.perspectiveView)
 	{
-		m_app->dispToConsole("Perspective mode only!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		return;
+		m_app->dispToConsole("[Hidden Point Removal] for improved results use Perspective mode", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 	}
 
 	ccHprDlg dlg(m_app->getMainWindow());
@@ -248,7 +247,7 @@ void qHPR::doAction()
 		return;
 
 	//progress dialog
-	ccProgressDialog progressCb(false,m_app->getMainWindow());
+	ccProgressDialog progressCb(false, m_app->getMainWindow());
 
 	//unique parameter: the octree subdivision level
 	int octreeLevel = dlg.octreeLevelSpinBox->value();
@@ -267,44 +266,42 @@ void qHPR::doAction()
 
 	if (!theOctree)
 	{
-		m_app->dispToConsole("Couldn't compute octree!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		m_app->dispToConsole("Couldn't compute octree!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
 	}
 
-	CCVector3d viewPoint = params.cameraCenter;
+	CCVector3d viewPoint = params.getCameraCenter();
 	if (params.objectCenteredView)
 	{
-		CCVector3d PC = params.cameraCenter - params.pivotPoint;
+		CCVector3d PC = params.getCameraCenter() - params.getPivotPoint();
 		params.viewMat.inverse().apply(PC);
-		viewPoint = params.pivotPoint + PC;
+		viewPoint = params.getPivotPoint() + PC;
 	}
 
 	//HPR
-	CCCoreLib::ReferenceCloud* visibleCells = nullptr;
+	QScopedPointer<CCCoreLib::ReferenceCloud> visibleCells;
 	{
 		QElapsedTimer eTimer;
 		eTimer.start();
 
-		CCCoreLib::ReferenceCloud* theCellCenters = CCCoreLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(	cloud,
+		QScopedPointer<CCCoreLib::ReferenceCloud> theCellCenters( CCCoreLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(	cloud,
 																											static_cast<unsigned char>(octreeLevel),
 																											CCCoreLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,
 																											&progressCb,
-																											theOctree.data());
+																											theOctree.data()) );
 		if (!theCellCenters)
 		{
-			m_app->dispToConsole("Error while simplifying point cloud with octree!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			m_app->dispToConsole("Error while simplifying point cloud with octree!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 			return;
 		}
 
-		visibleCells = removeHiddenPoints(theCellCenters,viewPoint,3.5);
-	
-		m_app->dispToConsole(QString("[HPR] Cells: %1 - Time: %2 s").arg(theCellCenters->size()).arg(eTimer.elapsed()/1.0e3));
+		visibleCells.reset(removeHiddenPoints(theCellCenters.data(), viewPoint, 3.5));
 
-		//warning: after this, visibleCells can't be used anymore as a
+		m_app->dispToConsole(QString("[HPR] Cells: %1 - Time: %2 s").arg(theCellCenters->size()).arg(eTimer.elapsed() / 1.0e3));
+
+		//warning: after this point, visibleCells can't be used anymore as a
 		//normal cloud (as it's 'associated cloud' has been deleted).
 		//Only its indexes are valid! (they are corresponding to octree cells)
-		delete theCellCenters;
-		theCellCenters = nullptr;
 	}
 
 	if (visibleCells)
@@ -329,19 +326,18 @@ void qHPR::doAction()
 		CCCoreLib::DgmOctree::cellIndexesContainer cellIndexes;
 		if (!theOctree->getCellIndexes(static_cast<unsigned char>(octreeLevel), cellIndexes))
 		{
-			m_app->dispToConsole("Couldn't fetch the list of octree cell indexes! (Not enough memory?)",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-			delete visibleCells;
+			m_app->dispToConsole("Couldn't fetch the list of octree cell indexes! (Not enough memory?)", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 			return;
 		}
 
-		for (unsigned i=0; i<visibleCellsCount; ++i)
+		for (unsigned i = 0; i < visibleCellsCount; ++i)
 		{
 			//cell index
 			unsigned index = visibleCells->getPointGlobalIndex(i);
 
 			//points in this cell...
 			CCCoreLib::ReferenceCloud Yk(theOctree->associatedCloud());
-			theOctree->getPointsInCellByCellIndex(&Yk,cellIndexes[index],static_cast<unsigned char>(octreeLevel));
+			theOctree->getPointsInCellByCellIndex(&Yk, cellIndexes[index], static_cast<unsigned char>(octreeLevel));
 			//...are all visible
 			/*unsigned count = Yk.size();
 			for (unsigned j=0;j<count;++j)
@@ -350,30 +346,28 @@ void qHPR::doAction()
 			*/
 			if (!visiblePoints.add(Yk))
 			{
-				m_app->dispToConsole("Not enough memory!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-				delete visibleCells;
+				m_app->dispToConsole("Not enough memory!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 				return;
 			}
 		}
 
-		delete visibleCells;
-		visibleCells = nullptr;
+		visibleCells.reset(nullptr);
 
 		m_app->dispToConsole(QString("[HPR] Visible points: %1").arg(visiblePointCount));
 
 		if (visiblePoints.size() == cloud->size())
 		{
-			m_app->dispToConsole("No points were removed!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			m_app->dispToConsole("No points were removed!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		}
 		else
 		{
 			//create cloud from visibility selection
 			ccPointCloud* newCloud = cloud->partialClone(&visiblePoints);
 			if (newCloud)
-			{			
+			{
 				newCloud->setDisplay(newCloud->getDisplay());
 				newCloud->setVisible(true);
-				newCloud->setName(cloud->getName()+QString(".visible_points"));
+				newCloud->setName(cloud->getName() + QString(".visible_points"));
 				cloud->setEnabled(false);
 
 				//add associated viewport object
@@ -386,7 +380,7 @@ void qHPR::doAction()
 			}
 			else
 			{
-				m_app->dispToConsole("Not enough memory!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+				m_app->dispToConsole("Not enough memory!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 			}
 		}
 	}

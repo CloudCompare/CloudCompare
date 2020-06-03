@@ -506,7 +506,7 @@ void qSRA::doProjectCloudDistsInGrid(ccPointCloud* cloud, ccPolyline* polyline) 
 			}
 			else
 			{
-				QString message = QString("Cloud has no no '%1' field and no active scalar field!").arg(RADIAL_DIST_SF_NAME);
+				QString message = QString("Cloud has no '%1' field and no active scalar field!").arg(RADIAL_DIST_SF_NAME);
 				ccLog::Error(message);
 				
 				//additional indications

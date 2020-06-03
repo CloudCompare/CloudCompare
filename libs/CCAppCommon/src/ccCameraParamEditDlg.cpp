@@ -488,9 +488,9 @@ void ccCameraParamEditDlg::initWith(ccGLWindow* win)
 	updateViewMode();
 
 	//update pivot point
-	updatePivotPoint(params.pivotPoint);
+	updatePivotPoint(params.getPivotPoint());
 	//update camera center
-	updateCameraCenter(params.cameraCenter);
+	updateCameraCenter(params.getCameraCenter());
 
 	//update FOV
 	updateWinFov(win->getFov());

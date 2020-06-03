@@ -147,6 +147,15 @@ public:
 								double samplingParameter,
 								bool withRGB);
 
+	//! Smoothes the polyline (Chaikin algorithm)
+	/** \param ratio between 0 and 0.5 (excluded)
+		\param iterationCount of iteration
+		\return smoothed polyline
+	**/
+	ccPolyline* smoothChaikin(	PointCoordinateType ratio,
+								unsigned iterationCount) const;
+
+
 public: //meta-data keys
 	
 	//! Meta data key: vertical direction (for 2D polylines, contour plots, etc.)

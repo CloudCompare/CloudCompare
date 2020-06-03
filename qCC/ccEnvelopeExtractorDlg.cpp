@@ -72,8 +72,8 @@ void ccEnvelopeExtractorDlg::init()
 		params.decimateMeshOnMove = false;
 		params.displayCross = false;
 		params.colorScaleUseShader = false;
-		m_glWindow->setDisplayParameters(params,true);
-		m_glWindow->setPerspectiveState(false,true);
+		m_glWindow->setDisplayParameters(params, true);
+		m_glWindow->setPerspectiveState(false, true);
 		m_glWindow->setInteractionMode(ccGLWindow::INTERACT_PAN | ccGLWindow::INTERACT_ZOOM_CAMERA | ccGLWindow::INTERACT_CLICKABLE_ITEMS);
 		m_glWindow->setPickingMode(ccGLWindow::NO_PICKING);
 		m_glWindow->displayOverlayEntities(true);
@@ -87,9 +87,11 @@ void ccEnvelopeExtractorDlg::zoomOn(const ccBBox& box)
 	if (!m_glWindow)
 		return;
 
-	float pixSize = std::max(box.getDiagVec().x / std::max(20, m_glWindow->glWidth() - 20), box.getDiagVec().y / std::max(20, m_glWindow->glHeight() - 20));
-	m_glWindow->setPixelSize(pixSize);
-	m_glWindow->setCameraPos(CCVector3d::fromArray(box.getCenter().u));
+	double pixSize = std::max(box.getDiagVec().x / std::max(20, m_glWindow->glWidth() - 20), box.getDiagVec().y / std::max(20, m_glWindow->glHeight() - 20));
+	CCVector3d C = CCVector3d::fromArray(box.getCenter().u);
+	m_glWindow->setPivotPoint(C);
+	m_glWindow->setCameraPos(C);
+	m_glWindow->setCameraFocalToFitWidth(pixSize * m_glWindow->glWidth());
 }
 
 bool ccEnvelopeExtractorDlg::isSkipped() const

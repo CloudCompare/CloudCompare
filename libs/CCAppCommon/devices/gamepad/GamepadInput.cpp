@@ -48,63 +48,39 @@ void GamepadInput::update(ccGLWindow* win)
 
 	const ccViewportParameters& viewParams = win->getViewportParameters();
 
-	if (viewParams.perspectiveView)
+	//panning
+	if (m_hasPanning)
 	{
-		//translation
-		if (m_hasPanning)
+		double screenWidth3D = viewParams.computeWidthAtFocalDist();
+		if (!viewParams.objectCenteredView)
 		{
-			float scale = static_cast<float>(std::min(win->glWidth(), win->glHeight()) * viewParams.pixelSize);
-			scale /= win->computePerspectiveZoom();
-
-			const float tanFOV = tan( CCCoreLib::DegreesToRadians( viewParams.fov ) );
-			m_panning.x *= tanFOV;
-			m_panning.y *= tanFOV;
-
-			if (!viewParams.objectCenteredView)
-			{
-				scale = -scale;
-			}
-			win->moveCamera(-m_panning.x*scale, -m_panning.y*scale, 0);
+			screenWidth3D = -screenWidth3D;
 		}
-		else if (m_hasTranslation)
-		{
-			float scale = static_cast<float>(std::min(win->glWidth(), win->glHeight()) * viewParams.pixelSize);
-			scale /= win->computePerspectiveZoom();
-
-			const float tanFOV = tan( CCCoreLib::DegreesToRadians( viewParams.fov ) );
-			m_translation.x *= tanFOV;
-			m_translation.y *= tanFOV;
-			
-			if (!viewParams.objectCenteredView)
-			{
-				scale = -scale;
-			}
-			win->moveCamera(-m_translation.x*scale, m_translation.y*scale, -m_translation.z*scale);
-		}
+		CCVector3d v(-m_panning.x*screenWidth3D, -m_panning.y*screenWidth3D, 0);
+		win->moveCamera(v);
 	}
-	else
-	{
-		//panning
-		if (m_hasPanning)
-		{
-			float scale = static_cast<float>(std::min(win->glWidth(), win->glHeight()) * viewParams.pixelSize);
-			scale /= win->getViewportParameters().zoom;
-			win->moveCamera(-m_panning.x*scale, -m_panning.y*scale, 0);
-		}
 
-		//zoom
-		if (m_hasTranslation)
+	//zoom
+	if (m_hasTranslation)
+	{
+		double X = m_translation.x;
+		//double Y = m_translation.y; //always 0
+		double Z = m_translation.z;
+
+		if (	CCCoreLib::GreaterThanEpsilon(fabs(X))
+			||	CCCoreLib::GreaterThanEpsilon(fabs(Z)))
 		{
-			if (m_translation.x != 0 && !m_hasPanning)
+			if (viewParams.perspectiveView)
 			{
-				float scale = static_cast<float>(std::min(win->glWidth(), win->glHeight()) * viewParams.pixelSize);
-				scale /= win->getViewportParameters().zoom;
-				win->moveCamera(-m_translation.x*scale, 0, 0);
+				X *= win->getViewportParameters().computeDistanceToHalfWidthRatio();
 			}
-			if (m_translation.z != 0)
+			double screenWidth3D = viewParams.computeWidthAtFocalDist();
+			if (!viewParams.objectCenteredView)
 			{
-				win->updateZoom(1.0f + m_translation.z);
+				screenWidth3D = -screenWidth3D;
 			}
+			CCVector3d v(-X * screenWidth3D, 0, -Z * screenWidth3D);
+			win->moveCamera(v);
 		}
 	}
 
@@ -112,7 +88,7 @@ void GamepadInput::update(ccGLWindow* win)
 }
 
 static double s_gamepadSpeed = 0.005;
-static double s_gamepadRotSpeed = 0.01;
+static double s_gamepadRotSpeed = 0.02;
 
 void GamepadInput::updateInternalState()
 {
@@ -138,7 +114,7 @@ void GamepadInput::updateInternalState()
 
 		if (buttonL2() || buttonR2())
 		{
-			double angle_deg = buttonL2() ? 10 * s_gamepadRotSpeed : -10 * s_gamepadRotSpeed;
+			double angle_deg = buttonL2() ? 20 * s_gamepadRotSpeed : -20 * s_gamepadRotSpeed;
 			ccGLMatrixd rot;
 			rot.initFromParameters( CCCoreLib::DegreesToRadians( angle_deg ), CCVector3d(0, 0, 1), CCVector3d(0, 0, 0) );
 			m_rotation = rot * m_rotation;

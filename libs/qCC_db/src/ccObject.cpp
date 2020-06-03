@@ -61,8 +61,9 @@
 	v4.8 - 10/19/2018 - The CC_CAMERA_BIT and CC_QUADRIC_BIT were wrongly defined
 	v4.9 - 03/31/2019 - Point labels can now be picked on meshes
 	v5.0 - 10/06/2019 - Point labels can now target the entity center
+	v5.1 - 03/29/2019 - New camera management (viewports have changed)
 **/
-const unsigned c_currentDBVersion = 50; //5.0
+const unsigned c_currentDBVersion = 51; //5.1
 
 //! Default unique ID generator (using the system persistent settings as we did previously proved to be not reliable)
 static ccUniqueIDGenerator::Shared s_uniqueIDGenerator(new ccUniqueIDGenerator);

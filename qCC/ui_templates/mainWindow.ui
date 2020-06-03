@@ -322,6 +322,7 @@
       <string>Polyline</string>
      </property>
      <addaction name="actionSamplePointsOnPolyline"/>
+     <addaction name="actionSmoothPolyline"/>
     </widget>
     <addaction name="menuColors"/>
     <addaction name="menuNormals"/>
@@ -3061,6 +3062,11 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="toolTip">
     <string>Export normals to one or several scalar fields</string>
+   </property>
+  </action>
+  <action name="actionSmoothPolyline">
+   <property name="text">
+    <string>Smooth</string>
    </property>
   </action>
  </widget>

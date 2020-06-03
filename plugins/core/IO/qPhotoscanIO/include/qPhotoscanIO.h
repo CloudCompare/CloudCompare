@@ -1,3 +1,6 @@
+#ifndef Q_PHOTOSCAN_IO_PLUGIN_HEADER
+#define Q_PHOTOSCAN_IO_PLUGIN_HEADER
+
 //##########################################################################
 //#                                                                        #
 //#                   CLOUDCOMPARE PLUGIN: qPhotoScanIO                    #
@@ -15,10 +18,7 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef Q_PHOTOSCAN_IO_PLUGIN_HEADER
-#define Q_PHOTOSCAN_IO_PLUGIN_HEADER
-
-#include "ccIOPluginInterface.h"
+#include <ccIOPluginInterface.h>
 
 //! PhotoScan
 class qPhotoscanIO : public QObject, public ccIOPluginInterface

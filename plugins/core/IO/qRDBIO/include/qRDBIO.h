@@ -18,9 +18,6 @@
 //#                                                                        #
 //##########################################################################
 
-//Qt
-#include <QObject>
-
 #include <ccIOPluginInterface.h>
 
 //! RDB file (3D cloud)
@@ -36,7 +33,7 @@ public:
 	explicit qRDBIO( QObject *parent = nullptr );
 
 	// inherited from ccIOPluginInterface
-	ccIOPluginInterface::FilterList getFilters() override;
+	FilterList getFilters() override;
 };
 
 #endif //Q_RDB_IO_PLUGIN_HEADER

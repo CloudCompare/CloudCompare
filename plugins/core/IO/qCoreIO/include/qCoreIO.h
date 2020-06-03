@@ -18,7 +18,7 @@
 //#                                                                        #
 //##########################################################################
 
-#include "ccIOPluginInterface.h"
+#include <ccIOPluginInterface.h>
 
 class qCoreIO : public QObject, public ccIOPluginInterface
 {
@@ -30,7 +30,6 @@ class qCoreIO : public QObject, public ccIOPluginInterface
 public:
 	explicit qCoreIO( QObject *parent = nullptr );
 
-protected:
 	void registerCommands( ccCommandLineInterface *inCmdLine ) override;
 
 	FilterList getFilters() override;

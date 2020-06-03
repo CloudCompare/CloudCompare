@@ -1,3 +1,6 @@
+#ifndef Q_LAS_FWF_IO_PLUGIN_HEADER
+#define Q_LAS_FWF_IO_PLUGIN_HEADER
+
 //##########################################################################
 //#                                                                        #
 //#                    CLOUDCOMPARE PLUGIN: qLasFWFIO                      #
@@ -15,13 +18,7 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef Q_LAS_FWF_IO_PLUGIN_HEADER
-#define Q_LAS_FWF_IO_PLUGIN_HEADER
-
-//Qt
-#include <QObject>
-
-#include "ccIOPluginInterface.h"
+#include <ccIOPluginInterface.h>
 
 class qLASFWFIO : public QObject, public ccIOPluginInterface
 {
@@ -32,13 +29,13 @@ class qLASFWFIO : public QObject, public ccIOPluginInterface
 
 public:
 	//! Default constructor
-	qLASFWFIO(QObject* parent = nullptr);
+	explicit qLASFWFIO(QObject* parent = nullptr);
 
 	//inherited from ccPluginInterface
 	void registerCommands(ccCommandLineInterface* cmd) override;
 
 	//inherited from ccIOPluginInterface
-	ccIOPluginInterface::FilterList getFilters() override;
+	FilterList getFilters() override;
 };
 
 #endif //Q_LAS_FWF_IO_PLUGIN_HEADER

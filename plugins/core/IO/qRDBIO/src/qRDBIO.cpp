@@ -19,7 +19,6 @@
 
 #include "RDBFilter.h"
 
-
 qRDBIO::qRDBIO( QObject* parent )
 	: QObject( parent )
 	, ccIOPluginInterface( ":/CC/plugin/qRDBIO/info.json" )

@@ -619,7 +619,7 @@ void qBroomDlg::updateAutomationAreaPolyline(int x, int y)
 	//broom position/orientation
 	const ccGLMatrix& broomTrans = m_boxes->getGLTransformation();
 
-	//project the currrent mouse position in 3D AND on the broom plane
+	//project the current mouse position in 3D AND on the broom plane
 	CCVector3 P3D;
 	{
 		CCVector3d M03D;
@@ -1583,6 +1583,7 @@ bool qBroomDlg::selectPoints(const ccGLMatrix& broomTrans, BroomDimensions* _bro
 	}
 
 	CCVector3 broomCenter = broomTrans.getTranslationAsVec3D();
+	CCVector3 broomNormal = broomTrans.getColumnAsVec3D(2);
 
 	//broom dimensions
 	BroomDimensions broom;
@@ -1598,7 +1599,7 @@ bool qBroomDlg::selectPoints(const ccGLMatrix& broomTrans, BroomDimensions* _bro
 	//extract the points inside the selection area
 	CCCoreLib::DgmOctree::BoxNeighbourhood bn;
 	{
-		CCVector3 centerShift(0,0,0);
+		CCVector3 centerShift(0, 0, 0);
 
 		switch (m_selectionMode)
 		{
@@ -1609,12 +1610,12 @@ bool qBroomDlg::selectPoints(const ccGLMatrix& broomTrans, BroomDimensions* _bro
 		case ABOVE:
 		case ABOVE_AND_BELOW: //we start by ABOVE and we'll treat BELOW later
 			bn.dimensions = CCVector3(broom.length, broom.width, broom.height);
-			centerShift.z = (broom.thick + broom.height)/2;
+			centerShift = ((broom.thick + broom.height) / 2) * broomNormal;
 			break;
 
 		case BELOW:
 			bn.dimensions = CCVector3(broom.length, broom.width, broom.height);
-			centerShift.z = -(broom.thick + broom.height)/2;
+			centerShift = (-(broom.thick + broom.height) / 2) * broomNormal;
 			break;
 
 		default:
@@ -1627,7 +1628,7 @@ bool qBroomDlg::selectPoints(const ccGLMatrix& broomTrans, BroomDimensions* _bro
 		{
 			bn.axes[0] = broomTrans.getColumnAsVec3D(0);
 			bn.axes[1] = broomTrans.getColumnAsVec3D(1);
-			bn.axes[2] = broomTrans.getColumnAsVec3D(2);
+			bn.axes[2] = broomNormal;
 		}
 
 		PointCoordinateType radius = std::max(bn.dimensions.x, std::max(bn.dimensions.y, bn.dimensions.z)) / 5; //emprirical ;)
@@ -1639,7 +1640,7 @@ bool qBroomDlg::selectPoints(const ccGLMatrix& broomTrans, BroomDimensions* _bro
 		//extract the first half
 		octree->getPointsInBoxNeighbourhood(bn);
 		//and prepare the next one
-		bn.center = broomCenter + CCVector3(0, 0, -(broom.thick + broom.height)/2);
+		bn.center = broomCenter - ((broom.thick + broom.height) / 2) * broomNormal;
 	}
 
 	size_t count = octree->getPointsInBoxNeighbourhood(bn);

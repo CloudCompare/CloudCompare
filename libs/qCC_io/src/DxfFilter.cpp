@@ -90,9 +90,10 @@ public:
 		CCVector3d P(x, y, z);
 		if (m_firstPoint)
 		{
-			if (FileIOFilter::HandleGlobalShift(P, m_globalShift, m_preserveCoordinateShift, m_loadParameters))
+			if (	(!m_preserveCoordinateShift || ccGlobalShiftManager::NeedShift(P + m_globalShift))
+				&&	FileIOFilter::HandleGlobalShift(P, m_globalShift, m_preserveCoordinateShift, m_loadParameters) )
 			{
-				ccLog::Warning("[DXF] All points/vertices will been recentered! Translation: (%.2f ; %.2f ; %.2f)", m_globalShift.x, m_globalShift.y, m_globalShift.z);
+				ccLog::Warning("[DxfImporter] All points/vertices will be recentered! Translation: (%.2f ; %.2f ; %.2f)", m_globalShift.x, m_globalShift.y, m_globalShift.z);
 			}
 			m_firstPoint = false;
 		}
@@ -112,13 +113,13 @@ public:
 		}
 	}
 
-	virtual void addLayer(const DL_LayerData& data)
+	void addLayer(const DL_LayerData& data) override
 	{
 		// store our layer colours
 		m_layerColourMap[data.name.c_str()] = getAttributes().getColor();
 	}
 
-	virtual void addPoint(const DL_PointData& P)
+	void addPoint(const DL_PointData& P) override
 	{
 		//create the 'points' point cloud if necessary
 		if (!m_points)
@@ -162,11 +163,13 @@ public:
 		}
 	}
 
-	virtual void addPolyline(const DL_PolylineData& poly)
+	void addPolyline(const DL_PolylineData& poly) override
 	{
 		//create a new polyline if necessary
-		if (m_poly && !m_poly->size())
+		if (m_poly && m_poly->size() == 0)
+		{
 			delete m_poly;
+		}
 		m_polyVertices = new ccPointCloud("vertices");
 		m_poly = new ccPolyline(m_polyVertices);
 		m_poly->addChild(m_polyVertices);
@@ -193,9 +196,13 @@ public:
 			m_poly->setColor(col);
 			m_poly->showColors(true);
 		}
+
+		//some entities can have small coordinates (drawings, origin, etc.)
+		//hiding the fact that other polylines have large coordinates!
+		m_firstPoint = true;
 	}
 
-	virtual void addVertex(const DL_VertexData& vertex)
+	void addVertex(const DL_VertexData& vertex) override
 	{
 		//we assume it's a polyline vertex!
 		if (m_poly
@@ -204,17 +211,26 @@ public:
 			)
 		{
 			if (m_polyVertices->size() == m_polyVertices->capacity())
+			{
 				m_polyVertices->reserve(m_polyVertices->size() + 1);
+			}
 
 			m_poly->addPointIndex(m_polyVertices->size());
 			m_polyVertices->addPoint(convertPoint(vertex.x, vertex.y, vertex.z));
 
 			if (m_poly->size() == 1)
+			{
 				m_root->addChild(m_poly);
+
+				if (m_preserveCoordinateShift)
+				{
+					m_polyVertices->setGlobalShift(m_globalShift);
+				}
+			}
 		}
 	}
 
-	virtual void add3dFace(const DL_3dFaceData& face)
+	void add3dFace(const DL_3dFaceData& face) override
 	{
 		//TODO: understand what this really is?!
 		CCVector3 P[4];
@@ -407,7 +423,124 @@ public:
 		}
 	}
 
-	virtual void addLine(const DL_LineData& line)
+	void addRay(const DL_RayData&) override
+	{
+		ccLog::Warning("[DxfImporter] Ray not supported");
+	}
+
+	void addArc(const DL_ArcData& data) override
+	{
+		//we load arc as simple polylines!
+		ccPointCloud* polyVertices = new ccPointCloud("vertices");
+		ccPolyline* poly = new ccPolyline(polyVertices);
+		poly->addChild(polyVertices);
+
+		double arcLength_deg = data.angle2 - data.angle1;
+		unsigned vertexCount = 1 + static_cast<unsigned>(std::max(1.0, arcLength_deg)); //we use a 1 degree resolution by default for now
+		double step_deg = 1.0;
+		if (arcLength_deg < 360.0)
+		{
+			assert(vertexCount >= 2);
+			step_deg = arcLength_deg / (vertexCount - 1);
+		}
+		else
+		{
+			vertexCount = 360;
+			step_deg = 1.0;
+		}
+
+		if (!polyVertices->reserve(vertexCount) || !poly->reserve(vertexCount))
+		{
+			ccLog::Error("[DxfImporter] Not enough memory!");
+			delete poly;
+			return;
+		}
+		polyVertices->setEnabled(false);
+		poly->setVisible(true);
+		poly->setName("Arc");
+		poly->addPointIndex(0, vertexCount);
+		poly->setClosed(arcLength_deg >= 360.0);
+
+		//some entities can have small coordinates (drawings, origin, etc.)
+		//hiding the fact that other polylines have large coordinates!
+		m_firstPoint = true;
+
+		CCVector3 Clocal = convertPoint(data.cx, data.cy, data.cz);
+
+		if (m_preserveCoordinateShift)
+		{
+			polyVertices->setGlobalShift(m_globalShift);
+			poly->setGlobalShift(m_globalShift);
+		}
+
+		for (unsigned i = 0; i < vertexCount; ++i)
+		{
+			double angle_deg = data.angle1 + i * step_deg;
+			double angle_rad = CCCoreLib::DegreesToRadians(angle_deg);
+			CCVector3 P = Clocal + CCVector3(static_cast<PointCoordinateType>(data.radius * cos(angle_rad)), static_cast<PointCoordinateType>(data.radius * sin(angle_rad)), 0);
+			polyVertices->addPoint(P);
+		}
+
+		//flags
+		poly->setClosed(false);
+
+		//color
+		ccColor::Rgb col;
+		if (getCurrentColour(col))
+		{
+			poly->setColor(col);
+			poly->showColors(true);
+		}
+
+		m_root->addChild(poly);
+	}
+	
+	void addCircle(const DL_CircleData&) override
+	{
+		ccLog::Warning("[DxfImporter] Circle not supported");
+	}
+
+	void addEllipse(const DL_EllipseData&) override
+	{
+		ccLog::Warning("[DxfImporter] Ellipse not supported");
+	}
+
+	void addSpline(const DL_SplineData&) override
+	{
+		ccLog::Warning("[DxfImporter] Spline not supported");
+	}
+
+	void addControlPoint(const DL_ControlPointData&) override
+	{
+		ccLog::Warning("[DxfImporter] Control point not supported");
+	}
+
+	void addFitPoint(const DL_FitPointData&) override
+	{
+		ccLog::Warning("[DxfImporter] Fit point not supported");
+	}
+
+	void addKnot(const DL_KnotData&) override
+	{
+		ccLog::Warning("[DxfImporter] Knot not supported");
+	}
+
+	void addInsert(const DL_InsertData&) override
+	{
+		ccLog::Warning("[DxfImporter] Insert not supported");
+	}
+
+	void addSolid(const DL_SolidData&) override
+	{
+		ccLog::Warning("[DxfImporter] Solid not supported");
+	}
+
+	void addXLine(const DL_XLineData&) override
+	{
+		ccLog::Warning("[DxfImporter] XLine not supported");
+	}
+
+	void addLine(const DL_LineData& line) override
 	{
 		//we open lines as simple polylines!
 		ccPointCloud* polyVertices = new ccPointCloud("vertices");
@@ -423,6 +556,11 @@ public:
 		poly->setVisible(true);
 		poly->setName("Line");
 		poly->addPointIndex(0, 2);
+
+		//some entities can have small coordinates (drawings, origin, etc.)
+		//hiding the fact that other polylines have large coordinates!
+		m_firstPoint = true;
+
 		//add first point
 		polyVertices->addPoint(convertPoint(line.x1, line.y1, line.z1));
 		//add second point

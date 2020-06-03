@@ -164,8 +164,6 @@ void cc2Point5DimEditor::update2DDisplayZoom(ccBBox& box)
 
 	//we compute the pixel size (in world coordinates)
 	{
-		ccViewportParameters params = m_glWindow->getViewportParameters();
-
 		double realGridWidth  = m_grid.width  * m_grid.gridStep;
 		double realGridHeight = m_grid.height * m_grid.gridStep;
 
@@ -197,7 +195,6 @@ void cc2Point5DimEditor::update2DDisplayZoom(ccBBox& box)
 		}
 
 		m_glWindow->setCameraFocalToFitWidth(static_cast<float>(targetWidth));
-		//m_glWindow->setViewportParameters(params);
 		m_glWindow->setPointSize(pointSize);
 	}
 	

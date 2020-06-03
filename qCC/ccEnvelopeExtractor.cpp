@@ -349,6 +349,7 @@ bool ccEnvelopeExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 		debugDialog.init();
 		debugDialog.setGeometry(50, 50, 800, 600);
 		debugDialog.show();
+		QCoreApplication::processEvents(); //make sure the dialog is visible or the call to zoomOn below won't be effective!
 
 		//create point cloud with all (2D) input points
 		{

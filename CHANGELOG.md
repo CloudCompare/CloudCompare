@@ -13,6 +13,9 @@ v2.12 (???) - (in development)
 	- qAnimation:
 		- option to smooth the trajectory
 
+- Bug fixes
+	- qBroom: the broom was not working properly on a non horizontal surface!
+
 v2.11 (Anoia) - (in development)
 ----------------------
 

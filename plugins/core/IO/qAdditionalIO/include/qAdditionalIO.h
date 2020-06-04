@@ -18,7 +18,7 @@
 //#                                                                        #
 //##########################################################################
 
-#include "ccIOPluginInterface.h"
+#include <ccIOPluginInterface.h>
 
 //! Additional I/O Formats
 class qAdditionalIO : public QObject, public ccIOPluginInterface

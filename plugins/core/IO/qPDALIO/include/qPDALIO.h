@@ -18,7 +18,7 @@
 //#                                                                        #
 //##########################################################################
 
-#include "ccIOPluginInterface.h"
+#include <ccIOPluginInterface.h>
 
 class qPDALIO : public QObject, public ccIOPluginInterface
 {

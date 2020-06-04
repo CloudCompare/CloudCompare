@@ -1,3 +1,6 @@
+#ifndef Q_CSV_MATRIX_IO_PLUGIN_HEADER
+#define Q_CSV_MATRIX_IO_PLUGIN_HEADER
+
 //##########################################################################
 //#                                                                        #
 //#                  CLOUDCOMPARE PLUGIN: qCSVMatrixIO                     #
@@ -15,10 +18,7 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef Q_CSV_MATRIX_IO_PLUGIN_HEADER
-#define Q_CSV_MATRIX_IO_PLUGIN_HEADER
-
-#include "ccIOPluginInterface.h"
+#include <ccIOPluginInterface.h>
 
 //! CSV Matrix file (2.5D cloud)
 class qCSVMatrixIO : public QObject, public ccIOPluginInterface
@@ -29,7 +29,7 @@ class qCSVMatrixIO : public QObject, public ccIOPluginInterface
 	Q_PLUGIN_METADATA( IID "cccorp.cloudcompare.plugin.qCSVMatrixIO" FILE "../info.json" )
 
 public:
-	qCSVMatrixIO(QObject* parent = nullptr);
+	explicit qCSVMatrixIO(QObject* parent = nullptr);
 
 	~qCSVMatrixIO() override = default;
 

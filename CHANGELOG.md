@@ -193,6 +193,8 @@ v2.11 (Anoia) - (in development)
 	- When VBOs were activated with an ATI card, CloudCompare could crash (because ATI only supports 32bit aligned VBOs :p)
 	- The LAS 1.3/1.4 filter was not compressing files with a minor case 'laz' extension :(
 	- The iteration stop criteria has been changed in the CSF plugin to fix a small bug
+	- qBroom: the broom was not working properly on a non horizontal surface!
+
 
 v2.10.3 (Zephyrus) - 13/06/2019
 ----------------------

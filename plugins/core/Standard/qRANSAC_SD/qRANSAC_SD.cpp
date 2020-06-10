@@ -475,6 +475,9 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 			std::string desc;
 			shape->Description(&desc);
 
+			// points to current shapes last point in cloud
+			const auto shapeCloudIndex = count - 1;
+
 			//new cloud for sub-part
 			ccPointCloud* pcShape = nullptr;
 			bool saveNormals = true;
@@ -490,7 +493,7 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 
 				for (unsigned j = 0; j < shapePointsCount; ++j)
 				{
-					refPcShape.addPointIndex(cloud[count - 1 - j].index);
+					refPcShape.addPointIndex(cloud[shapeCloudIndex - j].index);
 				}
 				int warnings = 0;
 				pcShape = ccPC->partialClone(&refPcShape, &warnings);
@@ -514,10 +517,10 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 
 				for (unsigned j = 0; j < shapePointsCount; ++j)
 				{
-					pcShape->addPoint(CCVector3::fromArray(cloud[count - 1 - j].pos));
+					pcShape->addPoint(CCVector3::fromArray(cloud[shapeCloudIndex - j].pos));
 					if (saveNormals)
 					{
-						pcShape->addNorm(CCVector3::fromArray(cloud[count - 1 - j].normal));
+						pcShape->addNorm(CCVector3::fromArray(cloud[shapeCloudIndex - j].normal));
 					}
 
 				}
@@ -554,7 +557,7 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 				for (unsigned j = 0; j < shapePointsCount; ++j)
 				{
 					std::pair<float, float> param;
-					plane->Parameters(cloud[count - 1 - j].pos, &param);
+					plane->Parameters(cloud[shapeCloudIndex - j].pos, &param);
 					if (j != 0)
 					{
 						if (minX < param.first)
@@ -656,20 +659,20 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 				//compute max height
 				Vec3f minP, maxP;
 				float minHeight, maxHeight;
-				minP = maxP = cloud[0].pos;
-				minHeight = maxHeight = cone->Internal().Height(cloud[0].pos);
+				minP = maxP = cloud[shapeCloudIndex].pos;
+				minHeight = maxHeight = cone->Internal().Height(cloud[shapeCloudIndex].pos);
 				for (size_t j = 1; j < shapePointsCount; ++j)
 				{
-					float h = cone->Internal().Height(cloud[j].pos);
+					float h = cone->Internal().Height(cloud[shapeCloudIndex - j].pos);
 					if (h < minHeight)
 					{
 						minHeight = h;
-						minP = cloud[j].pos;
+						minP = cloud[shapeCloudIndex - j].pos;
 					}
 					else if (h > maxHeight)
 					{
 						maxHeight = h;
-						maxP = cloud[j].pos;
+						maxP = cloud[shapeCloudIndex - j].pos;
 					}
 
 				}

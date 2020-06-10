@@ -47,9 +47,9 @@ void LowStretchSphereParametrization::WrapComponents(const GfxTL::AABox< GfxTL::
 		if(u < uextent - 1)
 		{
 			float uangleNext = ((u + 1.5f) * epsilon + bbox.Min()[0]) / m_sphere->Radius();
-			float radiusNext = std::sin(uangle) * m_sphere->Radius();
-			vstartNext = float(-M_PI) * radius;
-			vendNext = float(M_PI) * radius;
+			float radiusNext = std::sin(uangleNext) * m_sphere->Radius();
+			vstartNext = float(-M_PI) * radiusNext;
+			vendNext = float(M_PI) * radiusNext;
 			vsNext =  std::min(vextent - 1, (size_t)std::max((intptr_t)0,
 				(intptr_t)((vstartNext - bbox.Min()[1]) / epsilon)));
 			veNext = (size_t)std::max((intptr_t)0, std::min((intptr_t)vextent - 1,

@@ -656,20 +656,20 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 				//compute max height
 				Vec3f minP, maxP;
 				float minHeight, maxHeight;
-				minP = maxP = cloud[0].pos;
-				minHeight = maxHeight = cone->Internal().Height(cloud[0].pos);
+				minP = maxP = cloud[count - 1].pos;
+				minHeight = maxHeight = cone->Internal().Height(cloud[count - 1].pos);
 				for (size_t j = 1; j < shapePointsCount; ++j)
 				{
-					float h = cone->Internal().Height(cloud[j].pos);
+					float h = cone->Internal().Height(cloud[count - 1 - j].pos);
 					if (h < minHeight)
 					{
 						minHeight = h;
-						minP = cloud[j].pos;
+						minP = cloud[count - 1 - j].pos;
 					}
 					else if (h > maxHeight)
 					{
 						maxHeight = h;
-						maxP = cloud[j].pos;
+						maxP = cloud[count - 1 - j].pos;
 					}
 
 				}

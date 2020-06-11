@@ -29,7 +29,7 @@ jobs:
               conda_library_dir: ".",
               compile_qanimation_with_ffmpeg: "OFF",
               compile_qpcl: "OFF",
-              compile_qransac: "OFF",
+              compile_qransac: "ON",
             }
 
     steps:

@@ -15,12 +15,12 @@
 
 #ifdef _mm_malloc
 #ifndef a_malloc
-#define a_malloc(sz, align) _mm_malloc((sz), (align))
+#define a_malloc(sz, align) malloc(sz)//_mm_malloc((sz), (align))
 #endif // !a_malloc
 #endif // !_mm_malloc
 #ifdef _mm_free
 #ifndef a_free
-#define a_free(ptr)  _mm_free((ptr))
+#define a_free(ptr)  free(ptr)//_mm_free((ptr))
 #endif // !a_free
 #endif // !_mm_free
 
@@ -28,7 +28,11 @@
 #define a_free(a)      free(a) 
 #endif // !_mm_free
 #ifndef a_malloc
+#ifndef __APPLE__
 #define a_malloc(sz, align) aligned_alloc((align), (sz))
+#else
+#define a_malloc(sz, align) malloc(sz) // OSX aligns all allocations to 16 byte boundaries (except valloc which aligns to page boundaries) - so specific alignment requests are ignored.
+#endif
 #endif // !_mm_malloc
 
 namespace GfxTL

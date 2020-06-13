@@ -21,11 +21,6 @@ add_subdirectory( pluginManager )
 
 add_subdirectory( extern/QCustomPlot EXCLUDE_FROM_ALL )
 
-# 3DX support (3dConnexion devices)
-if ( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )
-	add_subdirectory( devices/3dConnexion )
-endif()	
-
 qt5_wrap_ui( generated_ui_list ${ui_list} )
 qt5_add_resources( generated_qrc_list ${qrc_list} )
 
@@ -56,10 +51,6 @@ else()
 	target_link_contrib( ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} )
 endif()
 
-# 3dConnexion devices support
-if ( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )
-	target_link_3DXWARE( ${PROJECT_NAME} )
-endif()
 # Add custom preprocessor definitions
 if( WIN32 )
 	if (MSVC)

@@ -1,5 +1,4 @@
-#ifndef CC3DMOUSEMANAGER_H
-#define CC3DMOUSEMANAGER_H
+#pragma once
 
 //##########################################################################
 //#                                                                        #
@@ -18,6 +17,8 @@
 //#                                                                        #
 //##########################################################################
 
+#include "CCAppCommon.h"
+
 #include <QObject>
 
 class QAction;
@@ -27,7 +28,7 @@ class ccMainAppInterface;
 class Mouse3DInput;
 
 
-class cc3DMouseManager : public QObject
+class CCAPPCOMMON_LIB_API cc3DMouseManager : public QObject
 {
 	Q_OBJECT
 
@@ -60,4 +61,3 @@ private:
 	QAction *m_actionEnable;
 };
 
-#endif

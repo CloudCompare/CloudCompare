@@ -14,11 +14,6 @@ file( GLOB ui_list ui_templates/*.ui )
 file( GLOB qrc_list ../qCC/*.qrc )
 file( GLOB rc_list ../qCC/*.rc )
 
-# 3DX support (3dConnexion devices)
-if ( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )
-	add_subdirectory( ../qCC/devices/3dConnexion devices/3dConnexion )
-endif()
-
 qt5_wrap_ui( generated_ui_list ${ui_list} )
 qt5_add_resources( generated_qrc_list ${qrc_list} )
 
@@ -45,11 +40,6 @@ elseif( UNIX )
 	target_link_contrib( ${PROJECT_NAME} ${CMAKE_INSTALL_LIBDIR}/cloudcompare )
 else()
 	target_link_contrib( ${PROJECT_NAME} ${CCVIEWER_DEST_FOLDER} )
-endif()
-
-# 3dConnexion devices support
-if ( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )
-	target_link_3DXWARE( ${PROJECT_NAME} )
 endif()
 
 # Add custom preprocessor definitions

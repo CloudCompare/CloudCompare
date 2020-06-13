@@ -43,7 +43,7 @@
 
 //3D mouse handler
 #ifdef CC_3DXWARE_SUPPORT
-#include <devices/3dConnexion/Mouse3DInput.h>
+#include "Mouse3DInput.h"
 #endif
 
 //Camera parameters dialog

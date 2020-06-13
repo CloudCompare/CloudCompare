@@ -24,7 +24,7 @@
 
 #include "ccMainAppInterface.h"
 
-#include "devices/3dConnexion/Mouse3DInput.h"
+#include "Mouse3DInput.h"
 
 
 cc3DMouseManager::cc3DMouseManager( ccMainAppInterface *appInterface, QObject *parent ) :

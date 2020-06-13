@@ -183,22 +183,39 @@ void TorusPrimitiveShape::SuggestSimplifications(const PointCloud &pc,
 		}
 	}
 	size_t c = samples.size() / 2;
+	float d = 0;
+	float bestSum = 0;
+
+	for (size_t i = 0; i < c; ++i)
+	{
+		d = m_torus.Distance(samples[i]);
+		bestSum += d;
+	}
 	// now check all the shape types
 	Cone cone;
 	if(cone.InitAverage(samples))
 	{
 		cone.LeastSquaresFit(samples.begin(), samples.begin() + c);
 		bool failed = false;
+		float sum = 0;
 		for(size_t i = 0; i < c; ++i)
-			if(cone.Distance(samples[i]) > distThresh)
+		{
+			d = cone.Distance(samples[i]);
+			sum += d;
+			if (d > distThresh)
 			{
 				failed = true;
 				break;
 			}
-		if(!failed)
+		}
+		if (!failed)
 		{
-			suggestions->push_back(new ConePrimitiveShape(cone));
-			suggestions->back()->Release();
+			if (sum < bestSum)
+			{
+				bestSum = sum;
+				suggestions->push_back(new ConePrimitiveShape(cone));
+				suggestions->back()->Release();
+			}
 		}
 	}
 	Cylinder cylinder;
@@ -206,16 +223,25 @@ void TorusPrimitiveShape::SuggestSimplifications(const PointCloud &pc,
 	{
 		cylinder.LeastSquaresFit(samples.begin(), samples.begin() + c);
 		bool failed = false;
+		float sum = 0;
 		for(size_t i = 0; i < c; ++i)
-			if(cylinder.Distance(samples[i]) > distThresh)
+		{
+			d = cylinder.Distance(samples[i]);
+			sum += d;
+			if (d > distThresh)
 			{
 				failed = true;
 				break;
 			}
-		if(!failed)
+		}
+		if (!failed)
 		{
-			suggestions->push_back(new CylinderPrimitiveShape(cylinder));
-			suggestions->back()->Release();
+			if (sum < bestSum)
+			{
+				bestSum = sum;
+				suggestions->push_back(new CylinderPrimitiveShape(cylinder));
+				suggestions->back()->Release();
+			}
 		}
 	}
 	Sphere sphere;
@@ -223,32 +249,50 @@ void TorusPrimitiveShape::SuggestSimplifications(const PointCloud &pc,
 	{
 		sphere.LeastSquaresFit(samples.begin(), samples.begin() + c);
 		bool failed = false;
+		float sum = 0;
 		for(size_t i = 0; i < c; ++i)
-			if(sphere.Distance(samples[i]) > distThresh)
+		{
+			d = sphere.Distance(samples[i]);
+			sum += d;
+			if (d > distThresh)
 			{
 				failed = true;
 				break;
 			}
+		}
 		if(!failed)
 		{
-			suggestions->push_back(new SpherePrimitiveShape(sphere));
-			suggestions->back()->Release();
+			if (sum < bestSum)
+			{
+				bestSum = sum;
+				suggestions->push_back(new SpherePrimitiveShape(sphere));
+				suggestions->back()->Release();
+			}
 		}
 	}
 	Plane plane;
 	if(plane.LeastSquaresFit(samples.begin(), samples.begin() + c))
 	{
 		bool failed = false;
+		float sum = 0;
 		for(size_t i = 0; i < c; ++i)
-			if(plane.Distance(samples[i]) > distThresh)
+		{
+			d = plane.Distance(samples[i]);
+			sum += d;
+			if (d > distThresh)
 			{
 				failed = true;
 				break;
 			}
+		}
 		if(!failed)
 		{
-			suggestions->push_back(new PlanePrimitiveShape(plane));
-			suggestions->back()->Release();
+			if (sum < bestSum)
+			{
+				bestSum = sum;
+				suggestions->push_back(new PlanePrimitiveShape(plane));
+				suggestions->back()->Release();
+			}
 		}
 	}
 	/*// although theoretically possible, we never suggest a cone since a misclassification

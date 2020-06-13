@@ -14,8 +14,8 @@ class DLL_LINKAGE ConePrimitiveShape
 public:
 	size_t Identifier() const;
 	unsigned int RequiredSamples() const { return Cone::RequiredSamples; }
-	ConePrimitiveShape(const Cone &cone);
-	PrimitiveShape *Clone() const;
+	ConePrimitiveShape(const Cone &cone, float maxRadius = std::numeric_limits<float>::infinity(), float maxAngle = std::numeric_limits<float>::infinity(), float maxLength = std::numeric_limits<float>::infinity());
+	PrimitiveShape* Clone() const;						  
 	float Distance(const Vec3f &p) const;
 	float SignedDistance(const Vec3f &p) const;
 	float NormalDeviation(const Vec3f &p, const Vec3f &n) const;
@@ -87,6 +87,14 @@ public:
 	bool InSpace(size_t u, size_t v, float epsilon,
 		const GfxTL::AABox< GfxTL::Vector2Df > &bbox, size_t uextent,
 		size_t vextent, Vec3f *p, Vec3f *n) const;
+	bool CheckGeneratedShapeWithinLimits() override
+	{
+		if (m_cone.RadiusAtLength(std::max(fabs(m_extBbox.Min()[0]), fabs(m_extBbox.Max()[0]))) <= m_maxRadius && m_cone.Angle() <= m_maxAngle)
+		{
+			return true;
+		}
+		return false;
+	}
 
 private:
 	template< class IteratorT >
@@ -95,6 +103,9 @@ private:
 
 private:
 	Cone m_cone;
+	float m_maxRadius;
+	float m_maxLength;
+	float m_maxAngle;
 };
 
 template< class IteratorT >

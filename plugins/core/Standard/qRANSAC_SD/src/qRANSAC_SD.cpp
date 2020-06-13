@@ -122,6 +122,21 @@ static unsigned s_supportPoints = 500;	// this is the minimal numer of points re
 static double   s_maxNormalDev_deg = 25.0;	// maximal normal deviation from ideal shape (in degrees)
 static double   s_proba = 0.01;	// probability that no better candidate was overlooked during sampling
 static bool s_primEnabled[5] = { true,true,true,false,false };
+static bool s_allowSimplification = true;
+static bool s_createCloudFromLeftOverPoints = true;
+static bool s_maxSphereRadiusEnabled = false;
+static bool s_maxCylinderRadiusEnabled = false;
+static bool s_maxConeRadiusEnabled = false;
+static bool s_maxConeLengthEnabled = false;
+static bool s_maxConeAngleEnabled = false;
+static bool s_maxCylinderLengthEnabled = false;
+static double s_maxSphereRadius = 1;
+static double s_maxCylinderRadius = 1;
+static double s_maxConeRadius = 1;
+static double s_maxCylinderLength = 1;
+static double s_maxConeLength = 1;
+static double s_maxConeAngle_deg = 90;
+
 
 void qRansacSD::doAction()
 {
@@ -166,10 +181,28 @@ void qRansacSD::doAction()
 	rsdDlg.cylinderCheckBox->setChecked(s_primEnabled[2]);
 	rsdDlg.coneCheckBox->setChecked(s_primEnabled[3]);
 	rsdDlg.torusCheckBox->setChecked(s_primEnabled[4]);
+	rsdDlg.simplifyShapescheckBox->setChecked(s_allowSimplification);
+	rsdDlg.saveLeftOverscheckBox->setChecked(s_createCloudFromLeftOverPoints);
+	rsdDlg.maxSphereRadiuscheckBox->setChecked(s_maxSphereRadiusEnabled);
+	rsdDlg.maxCylinderRadiuscheckBox->setChecked(s_maxCylinderRadiusEnabled);
+	rsdDlg.maxConeAnglecheckBox->setChecked(s_maxConeAngleEnabled);
+	rsdDlg.maxConeRadiuscheckBox->setChecked(s_maxConeRadiusEnabled);
+	rsdDlg.maxSphereRadiusdoubleSpinBox->setValue(s_maxSphereRadius);
+	rsdDlg.maxCylinderRadiusdoubleSpinBox->setValue(s_maxCylinderRadius);
+	rsdDlg.maxConeRadiusdoubleSpinBox->setValue(s_maxConeRadius);
+	rsdDlg.maxConeLengthdoubleSpinBox->setValue(s_maxConeLength);
+	rsdDlg.maxCylinderLengthdoubleSpinBox->setValue(s_maxCylinderLength);
+	rsdDlg.maxConeAngledoubleSpinBox->setValue(s_maxConeAngle_deg);
 
 	if (!rsdDlg.exec())
 		return;
 
+	s_maxSphereRadiusEnabled = rsdDlg.maxSphereRadiuscheckBox->isChecked();
+	s_maxCylinderRadiusEnabled = rsdDlg.maxCylinderRadiuscheckBox->isChecked();
+	s_maxConeRadiusEnabled = rsdDlg.maxConeRadiuscheckBox->isChecked();
+	s_maxConeLengthEnabled = rsdDlg.maxConeLengthcheckBox->isChecked();
+	s_maxCylinderLengthEnabled = rsdDlg.maxCylinderLengthcheckBox->isChecked();
+	s_maxConeAngleEnabled = rsdDlg.maxConeAnglecheckBox->isChecked();
 	RansacParams params;
 	{
 		params.epsilon = static_cast<float>(rsdDlg.epsilonDoubleSpinBox->value());
@@ -183,8 +216,41 @@ void qRansacSD::doAction()
 		params.primEnabled[RPT_CYLINDER] = rsdDlg.cylinderCheckBox->isChecked();
 		params.primEnabled[RPT_CONE] = rsdDlg.coneCheckBox->isChecked();
 		params.primEnabled[RPT_TORUS] = rsdDlg.torusCheckBox->isChecked();
-	}
+		params.createCloudFromLeftOverPoints = rsdDlg.saveLeftOverscheckBox->isChecked();
+		params.allowSimplification = rsdDlg.simplifyShapescheckBox->isChecked();
+		if (s_maxSphereRadiusEnabled)
+		{
+			params.maxSphereRadius = static_cast<float>(rsdDlg.maxSphereRadiusdoubleSpinBox->value());
+			s_maxSphereRadius = params.maxSphereRadius;
+		}
+		if (s_maxCylinderRadiusEnabled)
+		{
+			params.maxCylinderRadius = static_cast<float>(rsdDlg.maxCylinderRadiusdoubleSpinBox->value());
+			s_maxCylinderRadius = params.maxCylinderRadius;
+		}
+		if (s_maxConeRadiusEnabled)
+		{
+			params.maxConeRadius = static_cast<float>(rsdDlg.maxConeRadiusdoubleSpinBox->value());
+			s_maxConeRadius = params.maxConeRadius;
+		}
 
+		if (s_maxCylinderLengthEnabled)
+		{
+			params.maxCylinderLength = static_cast<float>(rsdDlg.maxCylinderLengthdoubleSpinBox->value());
+			s_maxCylinderLength = params.maxCylinderLength;
+		}
+		if (s_maxConeLengthEnabled)
+		{
+			params.maxConeLength = static_cast<float>(rsdDlg.maxConeLengthdoubleSpinBox->value());
+			s_maxConeLength = params.maxConeLength;
+		}
+		if (s_maxConeAngleEnabled)
+		{
+			params.maxConeAngle_deg = static_cast<float>(rsdDlg.maxConeAngledoubleSpinBox->value());
+			s_maxConeAngle_deg = params.maxConeAngle_deg;
+		}
+	}
+	
 	ccHObject* group = executeRANSAC(pc, params, false);
 
 
@@ -218,6 +284,8 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 	s_supportPoints = params.supportPoints;
 	s_maxNormalDev_deg = params.maxNormalDev_deg;
 	s_proba = params.probability;
+	s_createCloudFromLeftOverPoints = params.createCloudFromLeftOverPoints;
+	s_allowSimplification = params.allowSimplification;
 	unsigned count = ccPC->size();
 	bool hasNorms = ccPC->hasNormals();
 	CCVector3 bbMin, bbMax;
@@ -279,6 +347,7 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 		assert(ransacOptions.m_normalThresh >= 0);
 		ransacOptions.m_probability = params.probability;
 		ransacOptions.m_minSupport = params.supportPoints;
+		ransacOptions.m_allowSimplification = params.allowSimplification;
 	}
 	const float scale = cloud.getScale();
 
@@ -339,13 +408,13 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 	if (params.primEnabled[RPT_PLANE])
 		detector.Add(new PlanePrimitiveShapeConstructor());
 	if (params.primEnabled[RPT_SPHERE])
-		detector.Add(new SpherePrimitiveShapeConstructor());
+		detector.Add(new SpherePrimitiveShapeConstructor(params.maxSphereRadius));
 	if (params.primEnabled[RPT_CYLINDER])
-		detector.Add(new CylinderPrimitiveShapeConstructor());
+		detector.Add(new CylinderPrimitiveShapeConstructor(params.maxCylinderRadius, params.maxCylinderLength));
 	if (params.primEnabled[RPT_CONE])
-		detector.Add(new ConePrimitiveShapeConstructor());
+		detector.Add(new ConePrimitiveShapeConstructor(params.maxConeRadius, CCCoreLib::DegreesToRadians(params.maxConeAngle_deg), params.maxConeLength));
 	if (params.primEnabled[RPT_TORUS])
-		detector.Add(new TorusPrimitiveShapeConstructor());
+		detector.Add(new TorusPrimitiveShapeConstructor(false)); // Do not allow apple shaped torus
 
 
 	unsigned remaining = count;
@@ -382,6 +451,8 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 		s_detector = &detector;
 		s_shapes = &shapes;
 		s_cloud = &cloud;
+		QElapsedTimer eTimer;
+		eTimer.start();
 		QFuture<void> future = QtConcurrent::run(doDetection);
 
 		while (!future.isFinished())
@@ -405,6 +476,9 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 			pDlg->hide();
 			delete pDlg;
 		}
+		qint64 elapsedTime_ms = eTimer.elapsed();
+
+		ccLog::Print("[qRANSAC] Search Timing: %2.3f s", static_cast<double>(elapsedTime_ms) / 1.0e3);
 	}
 
 #if 0 //def _DEBUG
@@ -756,11 +830,13 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 				prim->setColor(col);
 				prim->showColors(true);
 				prim->setVisible(true);
+				if (!group)
+				{
+					group = new ccHObject(QString("Ransac Detected Shapes (%1)").arg(ccPC->getName()));
+				}
+				group->addChild(pcShape);
 			}
 
-			if (!group)
-				group = new ccHObject(QString("Ransac Detected Shapes (%1)").arg(ccPC->getName()));
-			group->addChild(pcShape);
 
 			count -= shapePointsCount;
 
@@ -778,6 +854,40 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 
 			group->setVisible(true);
 			group->setDisplay_recursive(ccPC->getDisplay());
+#ifdef POINTSWITHINDEX
+			if (params.createCloudFromLeftOverPoints)
+			{
+				//new cloud for left overs
+				ccPointCloud* pcLeftOvers = nullptr;
+				CCCoreLib::ReferenceCloud refPcLO(ccPC);
+				//we fill cloud with left over points
+				if (!refPcLO.reserve(remaining))
+				{
+					ccLog::Error("[qRansacSD] Not enough memory!");
+				}
+
+				for (unsigned j = 0; j < remaining; ++j)
+				{
+					refPcLO.addPointIndex(cloud[j].index);
+				}
+				int warnings = 0;
+				pcLeftOvers = ccPC->partialClone(&refPcLO, &warnings);
+				bool saveNormals = true;
+				if (warnings != 0)
+				{
+					if ((warnings & ccPointCloud::WRN_OUT_OF_MEM_FOR_NORMALS) == ccPointCloud::WRN_OUT_OF_MEM_FOR_NORMALS)
+					{
+						saveNormals = false;
+					}
+				}
+				if (pcLeftOvers)
+				{
+					pcLeftOvers->setName("Leftovers");
+					group->addChild(pcLeftOvers);
+				}
+			}
+#endif
+
 			return group;
 		}
 	}

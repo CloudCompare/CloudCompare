@@ -10,6 +10,7 @@ target_compile_definitions( ${PROJECT_NAME}
 		# Causes sub-clouds to be generated as partial clones of original cloud
 		POINTSWITHINDEX
 	PRIVATE
+		PRECISIONLEVMAR
 		_CRT_SECURE_NO_DEPRECATE
 		_CRT_SECURE_NO_WARNINGS
 		_SCL_SECURE_NO_WARNINGS

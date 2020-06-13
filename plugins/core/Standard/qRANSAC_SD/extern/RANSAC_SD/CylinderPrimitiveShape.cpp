@@ -19,8 +19,10 @@ extern MiscLib::performance_t totalTime_cylinderConnected;
 CylinderPrimitiveShape::CylinderPrimitiveShape()
 {}
 
-CylinderPrimitiveShape::CylinderPrimitiveShape(const Cylinder &cylinder)
+CylinderPrimitiveShape::CylinderPrimitiveShape(const Cylinder &cylinder, float maxRadius, float maxLength)
 : m_cylinder(cylinder)
+, m_maxRadius(maxRadius)
+, m_maxLength(maxLength)
 {}
 
 size_t CylinderPrimitiveShape::Identifier() const
@@ -112,7 +114,7 @@ PrimitiveShape *CylinderPrimitiveShape::LSFit(const PointCloud &pc,
 	if(fit.LeastSquaresFit(pc, begin, end))
 	{
 		score->first = -1;
-		return new CylinderPrimitiveShape(fit);
+		return new CylinderPrimitiveShape(fit, m_maxRadius, m_maxLength);
 	}
 	score->first = 0;
 	return NULL;
@@ -178,38 +180,65 @@ void CylinderPrimitiveShape::SuggestSimplifications(const PointCloud &pc,
 				&samples[i * 5 + j + 25]);
 	}
 	size_t c = samples.size() / 2;
+	float d = 0;
+	float bestSum = 0;
+
+	for (size_t i = 0; i < c; ++i)
+	{
+		d = m_cylinder.Distance(samples[i]);
+		bestSum += d;
+	}
+	
 	// now check all the shape types
 	Sphere sphere;
 	if(sphere.Init(samples))
 	{
 		sphere.LeastSquaresFit(samples.begin(), samples.begin() + c);
 		bool failed = false;
-		for(size_t i = 0; i < c; ++i)
-			if(sphere.Distance(samples[i]) > distThresh)
+		float sum = 0;
+		for (size_t i = 0; i < c; ++i)
+		{
+			d = sphere.Distance(samples[i]);
+			sum += d;
+			if (d > distThresh)
 			{
 				failed = true;
 				break;
 			}
-		if(!failed)
+		}
+		if (!failed)
 		{
-			suggestions->push_back(new SpherePrimitiveShape(sphere));
-			suggestions->back()->Release();
+			if (sum < bestSum)
+			{
+				bestSum = sum;
+				suggestions->push_back(new SpherePrimitiveShape(sphere));
+				suggestions->back()->Release();
+			}
 		}
 	}
 	Plane plane;
 	if(plane.LeastSquaresFit(samples.begin(), samples.begin() + c))
 	{
 		bool failed = false;
+		float sum = 0;
 		for(size_t i = 0; i < c; ++i)
-			if(plane.Distance(samples[i]) > distThresh)
+		{
+			d = plane.Distance(samples[i]);
+			sum += d;
+			if (d > distThresh)
 			{
 				failed = true;
 				break;
 			}
-		if(!failed)
+		}
+		if (!failed)
 		{
-			suggestions->push_back(new PlanePrimitiveShape(plane));
-			suggestions->back()->Release();
+			if (sum < bestSum)
+			{
+				bestSum = sum;
+				suggestions->push_back(new PlanePrimitiveShape(plane));
+				suggestions->back()->Release();
+			}
 		}
 	}
 	/*// We suggest a sphere if a curvature of radius along the height

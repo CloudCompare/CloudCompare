@@ -21,8 +21,8 @@ class DLL_LINKAGE SpherePrimitiveShape
 {
 public:
 	typedef LowStretchSphereParametrization ParametrizationType;
-	SpherePrimitiveShape() : m_parametrization(m_sphere) {}
-	SpherePrimitiveShape(const Sphere &s);
+	SpherePrimitiveShape() : m_parametrization(m_sphere), m_maxRadius(std::numeric_limits<float>::infinity()) {}
+	SpherePrimitiveShape(const Sphere &s, float maxRadius = std::numeric_limits<float>::infinity());
 	SpherePrimitiveShape(const SpherePrimitiveShape &sps);
 	size_t Identifier() const;
 	unsigned int RequiredSamples() const { return Sphere::RequiredSamples; }
@@ -99,7 +99,14 @@ public:
 	bool InSpace(size_t u, size_t v, float epsilon,
 		const GfxTL::AABox< GfxTL::Vector2Df > &bbox, size_t uextent,
 		size_t vextent, Vec3f *p, Vec3f *n) const;
-
+	bool CheckGeneratedShapeWithinLimits() override
+	{
+		if (m_sphere.Radius() <= m_maxRadius)
+		{
+			return true;
+		}
+		return false;
+	}
 private:
 	template< class IteratorT >
 	void ParametersImpl(IteratorT begin, IteratorT end,
@@ -107,6 +114,7 @@ private:
 
 private:
 	Sphere m_sphere;
+	float m_maxRadius;
 	ParametrizationType m_parametrization;
 };
 

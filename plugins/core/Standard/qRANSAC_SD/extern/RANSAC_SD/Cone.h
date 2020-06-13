@@ -25,6 +25,19 @@
 class DLL_LINKAGE Cone
 {
 public:
+	struct ConeInfo
+	{
+		Vec3f center;
+		Vec3f axisDirection;
+		float angle;
+		Vec3f minPoint;
+		Vec3f maxPoint;
+		float height;
+		float minHeight;
+		float maxHeight;
+		float minRadius;
+		float maxRadius;
+	};
 	struct ParallelPlanesError
 	: public std::runtime_error
 	{
@@ -84,7 +97,8 @@ public:
 		const GfxTL::Vector3Df &trans);
 	inline unsigned int Intersect(const Vec3f &p, const Vec3f &r,
 		float lambda[2], Vec3f interPts[2]) const;
-
+	ConeInfo GetInfo(const PointCloud& pc, size_t startingIndx, size_t endingIndx) const;
+	ConeInfo GetInfo(const MiscLib::Vector< Vec3f >& samples) const;
 private:
 	template< class WeightT >
 	class LevMarCone

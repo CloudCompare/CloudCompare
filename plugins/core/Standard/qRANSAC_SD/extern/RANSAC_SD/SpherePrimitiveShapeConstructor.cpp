@@ -28,7 +28,7 @@ PrimitiveShape *SpherePrimitiveShapeConstructor::Construct(
 		return NULL;
 	if(sphere.Radius() > m_maxSphereRadius)
 		return NULL;
-	return new SpherePrimitiveShape(sphere);
+	return new SpherePrimitiveShape(sphere, m_maxSphereRadius);
 }
 
 PrimitiveShape *SpherePrimitiveShapeConstructor::Construct(
@@ -37,7 +37,9 @@ PrimitiveShape *SpherePrimitiveShapeConstructor::Construct(
 	Sphere sphere;
 	if(!sphere.Init(samples))
 		return NULL;
-	return new SpherePrimitiveShape(sphere);
+	if (sphere.Radius() > m_maxSphereRadius)
+		return NULL;
+	return new SpherePrimitiveShape(sphere, m_maxSphereRadius);
 }
 
 PrimitiveShape *SpherePrimitiveShapeConstructor::Deserialize(std::istream *i,

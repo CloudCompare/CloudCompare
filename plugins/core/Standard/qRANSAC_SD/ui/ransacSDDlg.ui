@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>489</width>
-    <height>274</height>
+    <width>656</width>
+    <height>481</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,10 +15,10 @@
   </property>
   <property name="windowIcon">
    <iconset resource="../qRANSAC_SD.qrc">
-    <normaloff>:/CC/plugin/qRANSAC_SD/images/qRANSAC_SD.png</normaloff>:/CC/plugin/images/qRANSAC_SD/qRANSAC_SD.png</iconset>
+    <normaloff>:/CC/plugin/qRANSAC_SD/images/qRANSAC_SD.png</normaloff>:/CC/plugin/qRANSAC_SD/images/qRANSAC_SD.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="1" column="0">
+   <item row="3" column="0">
     <widget class="QGroupBox" name="groupBox_2">
      <property name="title">
       <string>Primitives</string>
@@ -77,10 +77,298 @@
      </layout>
     </widget>
    </item>
-   <item row="1" column="1">
+   <item row="0" column="0" colspan="3">
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Min support points per primitive</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="supportPointsSpinBox">
+       <property name="toolTip">
+        <string>This is the minimal number of points required for a primitive</string>
+       </property>
+       <property name="statusTip">
+        <string>This is the minimal number of points required for a primitive</string>
+       </property>
+       <property name="whatsThis">
+        <string>This is the minimal number of points required for a primitive</string>
+       </property>
+       <property name="minimum">
+        <number>10</number>
+       </property>
+       <property name="maximum">
+        <number>1000000000</number>
+       </property>
+       <property name="singleStep">
+        <number>100</number>
+       </property>
+       <property name="value">
+        <number>500</number>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="2" column="0" colspan="3">
+    <widget class="QCheckBox" name="simplifyShapescheckBox">
+     <property name="toolTip">
+      <string>Will attempt to convert Spheres, Cones, Cylinders and Torus into a simpler shape (for example Cones may be simplified into a Cylinder, Plane, or Sphere)</string>
+     </property>
+     <property name="text">
+      <string>Attempt to simplify shapes</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="3">
+    <widget class="QCheckBox" name="saveLeftOverscheckBox">
+     <property name="text">
+      <string>Save leftover points into new cloud</string>
+     </property>
+    </widget>
+   </item>
+   <item row="14" column="2">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="0" colspan="3">
+    <layout class="QVBoxLayout" name="verticalLayout_3"/>
+   </item>
+   <item row="12" column="2">
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="9" column="0">
+    <widget class="QGroupBox" name="groupBox_3">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>48</height>
+      </size>
+     </property>
+     <property name="title">
+      <string>Sphere Advanced Parameters</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_6">
+      <item>
+       <widget class="QCheckBox" name="maxSphereRadiuscheckBox">
+        <property name="text">
+         <string>Max Radius</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDoubleSpinBox" name="maxSphereRadiusdoubleSpinBox">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="decimals">
+         <number>3</number>
+        </property>
+        <property name="minimum">
+         <double>0.001000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>10000.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>1.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="9" column="2">
+    <widget class="QGroupBox" name="groupBox_5">
+     <property name="title">
+      <string>Cone Advanced Parameters</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_5">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_8">
+        <item>
+         <widget class="QCheckBox" name="maxConeRadiuscheckBox">
+          <property name="text">
+           <string>Max Radius</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="maxConeRadiusdoubleSpinBox">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="decimals">
+           <number>3</number>
+          </property>
+          <property name="minimum">
+           <double>0.001000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>10000.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>1.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_10">
+        <item>
+         <widget class="QCheckBox" name="maxConeLengthcheckBox">
+          <property name="text">
+           <string>Max Length</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="maxConeLengthdoubleSpinBox">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="decimals">
+           <number>3</number>
+          </property>
+          <property name="minimum">
+           <double>0.001000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>10000.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>1.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_11">
+        <item>
+         <widget class="QCheckBox" name="maxConeAnglecheckBox">
+          <property name="text">
+           <string>Max Angle</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="maxConeAngledoubleSpinBox">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="decimals">
+           <number>3</number>
+          </property>
+          <property name="minimum">
+           <double>0.001000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>90.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="9" column="1">
+    <widget class="QGroupBox" name="groupBox_4">
+     <property name="title">
+      <string>Cylinder Advanced Parameters</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_4">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_7">
+        <item>
+         <widget class="QCheckBox" name="maxCylinderRadiuscheckBox">
+          <property name="text">
+           <string>Max Radius</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="maxCylinderRadiusdoubleSpinBox">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="decimals">
+           <number>3</number>
+          </property>
+          <property name="minimum">
+           <double>0.001000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>10000.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>1.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_9">
+        <item>
+         <widget class="QCheckBox" name="maxCylinderLengthcheckBox">
+          <property name="text">
+           <string>Max Length</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="maxCylinderLengthdoubleSpinBox">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="decimals">
+           <number>3</number>
+          </property>
+          <property name="minimum">
+           <double>0.001000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>10000.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>1.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="3" column="1" colspan="2">
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
-      <string>Advanced parameters</string>
+      <string>Parameters</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
@@ -215,69 +503,10 @@
      </layout>
     </widget>
    </item>
-   <item row="0" column="0" colspan="2">
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
-     <item>
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Min support points per primitive</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QSpinBox" name="supportPointsSpinBox">
-       <property name="toolTip">
-        <string>This is the minimal number of points required for a primitive</string>
-       </property>
-       <property name="statusTip">
-        <string>This is the minimal number of points required for a primitive</string>
-       </property>
-       <property name="whatsThis">
-        <string>This is the minimal number of points required for a primitive</string>
-       </property>
-       <property name="minimum">
-        <number>10</number>
-       </property>
-       <property name="maximum">
-        <number>1000000000</number>
-       </property>
-       <property name="singleStep">
-        <number>100</number>
-       </property>
-       <property name="value">
-        <number>500</number>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item row="3" column="1">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="1">
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
   </layout>
  </widget>
  <resources>
-  <include location="qRANSAC_SD.qrc"/>
+  <include location="../qRANSAC_SD.qrc"/>
  </resources>
  <connections>
   <connection>
@@ -309,6 +538,150 @@
     <hint type="destinationlabel">
      <x>286</x>
      <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sphereCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>groupBox_3</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>49</x>
+     <y>137</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>371</x>
+     <y>254</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>maxSphereRadiuscheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>maxSphereRadiusdoubleSpinBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>244</x>
+     <y>258</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>508</x>
+     <y>258</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>maxCylinderLengthcheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>maxCylinderLengthdoubleSpinBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>59</x>
+     <y>359</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>143</x>
+     <y>359</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cylinderCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>groupBox_4</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>100</x>
+     <y>160</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>100</x>
+     <y>339</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>maxCylinderRadiuscheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>maxCylinderRadiusdoubleSpinBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>58</x>
+     <y>331</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>142</x>
+     <y>331</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>coneCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>groupBox_5</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>100</x>
+     <y>182</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>425</x>
+     <y>292</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>maxConeRadiuscheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>maxConeRadiusdoubleSpinBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>319</x>
+     <y>270</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>532</x>
+     <y>270</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>maxConeLengthcheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>maxConeLengthdoubleSpinBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>319</x>
+     <y>298</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>532</x>
+     <y>298</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>maxConeAnglecheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>maxConeAngledoubleSpinBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>319</x>
+     <y>326</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>532</x>
+     <y>326</y>
     </hint>
    </hints>
   </connection>

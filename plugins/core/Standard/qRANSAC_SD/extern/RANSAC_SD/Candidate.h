@@ -118,7 +118,7 @@ void Candidate::Clone(Candidate *c) const
 	c->m_upperBound = m_upperBound;
 	c->m_indices = new MiscLib::RefCounted< MiscLib::Vector< size_t > >(*m_indices);
 	c->m_indices->Release();
-	c->m_level = m_level;;
+	c->m_level = m_level;
 	c->m_hasConnectedComponent = m_hasConnectedComponent;
 	c->m_score = m_score;
 }

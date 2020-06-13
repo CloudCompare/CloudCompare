@@ -139,12 +139,11 @@ void RansacShapeDetector::GenerateCandidates(
 			if((*i)->RequiredSamples() > samples.size() 
 					|| !(shape = (*i)->Construct(samplePoints)))
 				continue;
-			// verify shape
 			std::pair< float, float > dn;
 			bool verified = true;
-			for(size_t i = 0; i < c; ++i)
+			for(size_t ij = 0; ij < c; ++ij)
 			{
-				shape->DistanceAndNormalDeviation(samplePoints[i], samplePoints[i + c], &dn);
+				shape->DistanceAndNormalDeviation(samplePoints[ij], samplePoints[ij + c], &dn);
 				if(!scoreVisitorCopy.PointCompFunc()(dn.first, dn.second))
 				{
 					verified = false;
@@ -628,7 +627,7 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 						pc, 3 * m_options.m_epsilon, m_options.m_normalThresh,
 						m_options.m_bitmapEpsilon );
 				newSize = std::max(clone.Size(), candidates.back().Size());
-				bool allowDifferentShapes = false;
+				bool allowDifferentShapes = m_options.m_allowSimplification;
 				size_t fittingIter = 0;
 				do
 				{
@@ -640,7 +639,7 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 					shape = Fit(allowDifferentShapes, *clone.Shape(),
 						pc, clone.Indices()->begin(), clone.Indices()->end(),
 						&score);
-					if(shape)
+					if(shape && shape->CheckGeneratedShapeWithinLimits())
 					{
 						clone.Shape(shape);
 						newScore = clone.GlobalWeightedScore( globalScoreVisitor, globalOctree,
@@ -651,7 +650,7 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 						if(newScore > oldScore && newSize > m_options.m_minSupport)
 							clone.Clone(&candidates.back());
 					}
-					allowDifferentShapes = false;
+					//allowDifferentShapes = false;
 				}
 				while(newScore > oldScore && fittingIter < 3);
 			}
@@ -960,11 +959,57 @@ PrimitiveShape *RansacShapeDetector::Fit(bool allowDifferentShapes,
 	MiscLib::Vector< size_t >::const_iterator end,
 	std::pair< size_t, float > *score) const
 {
-	if(!m_constructors.size())
+	if (!m_constructors.size() || m_options.m_fitting != Options::LS_FITTING)
+	{
 		return NULL;
+	}
+
 	PrimitiveShape *bestShape = NULL;
-	if(m_options.m_fitting == Options::LS_FITTING)
 		bestShape = initialShape.LSFit(pc, m_options.m_epsilon,
 			m_options.m_normalThresh, begin, end, score);
+		if (bestShape && m_options.m_allowSimplification)
+		{
+			MiscLib::Vector< MiscLib::RefCountPtr< PrimitiveShape > > suggestions;
+			PointCloud tmpPC;
+			bestShape->SuggestSimplifications(tmpPC, nullptr, nullptr, m_options.m_epsilon, &suggestions);
+			if (suggestions.size() > 0)
+			{
+				bool foundBestShape = false;
+				for (int si = suggestions.size() - 1; si >= 0; si--)
+				{
+					if (!foundBestShape)
+					{
+						for (ConstructorsType::const_iterator lcli = m_constructors.begin(),
+							lcliend = m_constructors.end(); lcli != lcliend; ++lcli)
+						{
+							if (suggestions[si]->Identifier() == (*lcli)->Identifier())
+							{
+								bool verified = true;
+
+								//std::pair< float, float > dn;
+								//for (size_t ij = *begin; ij < *end; ++ij)
+								//{
+								//	suggestions[si]->DistanceAndNormalDeviation(pc[ij].pos, pc[ij].normal, &dn);
+								//	/*if (dn.first > m_options.m_epsilon || fabs(dn.second) <= m_options.m_normalThresh)
+								//	{
+								//		verified = false;
+								//		break;
+								//	}*/
+								//}
+								if (verified)
+								{
+									bestShape->Release();
+									bestShape = suggestions[si]->Clone();
+									bestShape->AddRef();
+								}
+								break;
+							}
+						}
+					}
+					suggestions[si]->Release();
+				}
+			}
+		}
+
 	return bestShape;
 }

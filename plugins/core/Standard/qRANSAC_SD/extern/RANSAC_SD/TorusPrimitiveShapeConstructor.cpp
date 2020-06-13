@@ -3,6 +3,11 @@
 #include "ScoreComputer.h"
 #include <GfxTL/NullClass.h>
 
+TorusPrimitiveShapeConstructor::TorusPrimitiveShapeConstructor(bool allowAppleShaped) :
+	m_allowAppleShaped(allowAppleShaped)
+{
+}
+
 size_t TorusPrimitiveShapeConstructor::Identifier() const
 {
 	return 4;
@@ -29,8 +34,15 @@ PrimitiveShape *TorusPrimitiveShapeConstructor::Construct(
 	const MiscLib::Vector< Vec3f > &samples) const
 {
 	Torus torus;
-	if(!torus.Init(samples))
+	if (!torus.Init(samples))
+	{
 		return NULL;
+	}
+	
+	if (!m_allowAppleShaped && torus.IsAppleShaped())
+	{
+		return NULL;
+	}
 	return new TorusPrimitiveShape(torus);
 }
 

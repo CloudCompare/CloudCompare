@@ -10,6 +10,7 @@ class DLL_LINKAGE TorusPrimitiveShapeConstructor
 : public PrimitiveShapeConstructor
 {
 public:
+	TorusPrimitiveShapeConstructor(bool allowAppleShaped = false);
 	size_t Identifier() const;
 	unsigned int RequiredSamples() const;
 	PrimitiveShape *Construct(const MiscLib::Vector< Vec3f > &points,
@@ -17,6 +18,8 @@ public:
 	PrimitiveShape *Construct(const MiscLib::Vector< Vec3f > &samples) const;
 	PrimitiveShape *Deserialize(std::istream *i, bool binary = true) const;
 	size_t SerializedSize() const;
+private:
+	bool m_allowAppleShaped;
 };
 
 #endif

@@ -1,7 +1,7 @@
 CloudCompare Version History
 ============================
 
-v2.11 (Anoia) - (in development)
+v2.11.0 (Anoia) - 14/06/2020
 ----------------------
 
 - New features
@@ -73,7 +73,7 @@ v2.11 (Anoia) - (in development)
 		- the 'Edit > Colors > Set unique' and 'Edit > Colors > Colorize' tools also have an editable 'alpha' channel
 		- this fixes a bug with ATI cards (when using VBOs - see below)
 	- Better support for High DPI screens (4K) on Windows
-	- Both the local and global bounding-box centers are now displyaed in the cloud properties (if the cloud has been shifted)
+	- Both the local and global bounding-box centers are now displayed in the cloud properties (if the cloud has been shifted)
 	- The PoissonRecon plugin now relies on the PoissonRecon V12 library
 		- new algorithm
 		- option to set the final 'resolution' instead of the octree depth
@@ -91,7 +91,7 @@ v2.11 (Anoia) - (in development)
 		- New suboption for the -O -GLOBAL_SHIFT option: 'FIRST'
 			To use the first encountered (non null) global shift for all loaded entities (must be defined for all entities nevertheless ;)
 		- The CROP command will now remove the input cloud if it's totally 'cropped out' (instead of leaving the full original cloud loaded)
-		- The 'FWF_O' command (to load LAS files with associated waveform data) nows properly supports the '-GLOBAL_SHIFT' option
+		- The 'FWF_O' command (to load LAS files with associated waveform data) now properly supports the '-GLOBAL_SHIFT' option
 		- No more popup will appear when loading a raster file via the command line mode in SILENT mode (raster is never loaded as a textured quad, and invalid points are always ignored and not loaded)
 		- One can now use the 'auto' value for the radius value input after -OCTREE_NORMALS to automatically guess the normal computation radius
 	- Raster import:
@@ -102,17 +102,17 @@ v2.11 (Anoia) - (in development)
 		- when using 'Shift+left click' or the Point picking tool on a mesh, CC won't spawn a 3-point label anymore, but a single point label at the right position
 		- labels picked on a mesh can be used to re-orient the camera (right-click on the label entry in the DB)
 		- for now, labels associated to meshes are not preserved when cloning or merging the meshes
-		- points are now exclusively picked inside the current fustrum (no more points behind the camera)
+		- points are now exclusively picked inside the current fustum (no more points behind the camera)
 	- The center of sphere (entities) can now be picked (a popup will let the user select the sphere center or a point on the surface)
 	- Graphical segmentation:
-		- points are now exclusively segmented inside/outside the frustrum
+		- points are now exclusively segmented inside/outside the frustum
 	- Plugins:
 		- plugins may now be enabled/disabled in the plugin info window
 		- to take effect, CloudCompare must be restarted
 		- all plugins are still available on the command line
 	- PCD now supports loading more field types (16 bit signed and unsigned, 32 bit unsigned, 64 bit floating point)
 	- OBJ files:
-		- we now correctly handle faces with more than 4 vertices! (they should be properly tesselated)
+		- we now correctly handle faces with more than 4 vertices! (they should be properly tessellated)
 		- support of escaped lines ('\' at the end of the line)
 		- now accepts MTL files with the 'Tf' keyword (well, CC just ignores it and doesn't complain about a wrong MTL file anymore ;)
 		- enhanced progress report (thanks to https://gitlab.com/Epic_Wink)
@@ -133,7 +133,7 @@ v2.11 (Anoia) - (in development)
 			- proper header size
 			- using the latest version of LASlib with proper management of UTF8/UTF16 ('foreign') characters
 	- ASCII files:
-		- now allows mixed whitespace (spaces / tabs)
+		- now allows mixed white space (spaces / tabs)
 		- the ASCII load dialog option has now an option to load numerical values with a comma as digit separator ('use comma as decimal character' checkbox)
 	- E57 files:
 		- sensors are now automatically created below each scan (if a sensor position is defined in the file)
@@ -151,8 +151,8 @@ v2.11 (Anoia) - (in development)
 		- new stereo mode (Generic stereo display) to handle more stereo displays (PluraView, etc.)
 		- new stereo parameters (screen/display size, distance to screen, and eye separation)
 	- SBF files
-		- format slightly updated to accomodate with scalar fields 'shift' (backward compatibiltiy maintained)
-		- format descritpion is here: https://www.cloudcompare.org/doc/wiki/index.php?title=SBF
+		- format slightly updated to accommodate with scalar fields 'shift' (backward compatibility maintained)
+		- format description is here: https://www.cloudcompare.org/doc/wiki/index.php?title=SBF
 	- Others:
 		- CC now saves the radius (parameter) after computing normals (as meta-data associated to the cloud)
 		- stereogram tool of the Facets plugin now uses the new 'High contrast' color scale by default
@@ -181,7 +181,7 @@ v2.11 (Anoia) - (in development)
 	- LAS classification flags were not always properly extracted/saved by the standard LAS filter (depending on the point format)
 	- Trace Polyline tool: when changing the OpenGL camera position while tracing a polyline AND using oversampling, strange spikes could appear
 	- The Unroll dialog was not enabling all the apex coordinate fields after switching from Cylinder to Cone mode
-	- The Clipping-box tool 'edit' dialog would sometimes move the box in an unepected way when opening and closing it without making any change
+	- The Clipping-box tool 'edit' dialog would sometimes move the box in an unexpected way when opening and closing it without making any change
 	- M3C2: the 'subsampling' option was not properly restored when loading the parameters from a file (if 'SubsampleEnabled = false')
 	- Orienting normals with a sensor position could lead to a crash
 	- Shapefile: at export time, the SHX file (created next to the SHP file) was malformed

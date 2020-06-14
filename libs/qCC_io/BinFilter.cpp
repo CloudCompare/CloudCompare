@@ -485,6 +485,12 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 	QString scalarFormat = ((flags & ccSerializableObject::DF_SCALAR_VAL_32_BITS) ? "float" : "double");
 	ccLog::Print(QString("[BIN] Version %1.%2 (coords: %3 / scalar: %4)").arg(binVersion / 10).arg(binVersion % 10).arg(coordsFormat).arg(scalarFormat));
 
+	if (ccObject::GetCurrentDBVersion() < binVersion)
+	{
+		ccLog::Error("This version of CloudCompare is too old and can't load this file, sorry");
+		return CC_FERR_CONSOLE_ERROR;
+	}
+
 	//we keep track of the last unique ID before load
 	unsigned lastUniqueIDBeforeLoad = ccObject::GetLastUniqueID();
 

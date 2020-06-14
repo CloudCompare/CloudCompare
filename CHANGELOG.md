@@ -256,6 +256,7 @@ v2.11.0 (Anoia) - 14/06/2020
 	- When VBOs were activated with an ATI card, CloudCompare could crash (because ATI only supports 32bit aligned VBOs :p)
 	- The LAS 1.3/1.4 filter was not compressing files with a minor case 'laz' extension :(
 	- The iteration stop criteria has been changed in the CSF plugin to fix a small bug
+	- Point picking on meshes: picking points on triangles that were partially outside of the frustum would lead to the wrong point being picked (or no point picked)
 
 v2.10.3 (Zephyrus) - 13/06/2019
 ----------------------

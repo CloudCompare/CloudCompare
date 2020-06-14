@@ -630,6 +630,28 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside)
 	const double half_w = camera.viewport[2] / 2.0;
 	const double half_h = camera.viewport[3] / 2.0;
 
+	//check if the polyline is totally inside the frustum or not
+	bool polyInsideFrustum = true;
+	{
+		int vertexCount = static_cast<int>(m_segmentationPoly->size());
+#if defined(_OPENMP)
+#pragma omp parallel for
+#endif
+		for (int i = 0; i < vertexCount; ++i)
+		{
+			const CCVector3* P = m_segmentationPoly->getPoint(i);
+
+			CCVector3d Q2D;
+			bool pointInFrustum = false;
+			camera.project(*P, Q2D, &pointInFrustum);
+
+			if (!pointInFrustum)
+			{
+				polyInsideFrustum = true;
+			}
+		}
+	}
+
 	//for each selected entity
 	for (QSet<ccHObject*>::const_iterator p = m_toSegment.constBegin(); p != m_toSegment.constEnd(); ++p)
 	{
@@ -639,25 +661,30 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside)
 		ccGenericPointCloud::VisibilityTableType& visibilityArray = cloud->getTheVisibilityArray();
 		assert(!visibilityArray.empty());
 
-		unsigned cloudSize = cloud->size();
+		int cloudSize = static_cast<int>(cloud->size());
 
 		//we project each point and we check if it falls inside the segmentation polyline
 #if defined(_OPENMP)
 #pragma omp parallel for
 #endif
-		for (int i = 0; i < static_cast<int>(cloudSize); ++i)
+		for (int i = 0; i < cloudSize; ++i)
 		{
 			if (visibilityArray[i] == CCCoreLib::POINT_VISIBLE)
 			{
 				const CCVector3* P3D = cloud->getPoint(i);
 
 				CCVector3d Q2D;
-				bool pointInFrustrum = camera.project(*P3D, Q2D, true);
+				bool pointInFrustum = false;
+				camera.project(*P3D, Q2D, &pointInFrustum);
 
-				CCVector2 P2D(	static_cast<PointCoordinateType>(Q2D.x-half_w),
-								static_cast<PointCoordinateType>(Q2D.y-half_h) );
-				
-				bool pointInside = pointInFrustrum && CCCoreLib::ManualSegmentationTools::isPointInsidePoly(P2D, m_segmentationPoly);
+				bool pointInside = false;
+				if (pointInFrustum || !polyInsideFrustum) //we can only skip the test if the polyline is fully inside the frustum
+				{
+					CCVector2 P2D(	static_cast<PointCoordinateType>(Q2D.x - half_w),
+									static_cast<PointCoordinateType>(Q2D.y - half_h));
+
+					pointInside = CCCoreLib::ManualSegmentationTools::isPointInsidePoly(P2D, m_segmentationPoly);
+				}
 
 				visibilityArray[i] = (keepPointsInside != pointInside ?CCCoreLib:: POINT_HIDDEN : CCCoreLib::POINT_VISIBLE);
 			}

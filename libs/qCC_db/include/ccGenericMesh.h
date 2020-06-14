@@ -256,7 +256,8 @@ protected:
 									const ccGenericPointCloud& vertices,
 									const ccGLCameraParameters& camera,
 									CCVector3d& point,
-									CCVector3d* barycentricCoords = nullptr) const;
+									CCVector3d* barycentricCoords = nullptr,
+									QPainter* painter = nullptr) const;
 
 	//! Returns a pre-initialized array of vertex indexes for wired display
 	/** Array size is MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*6 by default

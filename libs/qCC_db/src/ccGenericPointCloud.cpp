@@ -394,10 +394,14 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 			}
 		}
 
-#ifdef CC_CORE_LIB_USES_TBB
-		tbb::parallel_for( 0, static_cast<int>(size()), [&](int i)
+		int pointCount = static_cast<int>(size());
+#ifdef USE_TBB
+		tbb::parallel_for( 0, pointCount, [&](int i)
 #else
-		for (int i = 0; i < static_cast<int>(size()); ++i)
+#if defined(_OPENMP)
+#pragma omp parallel for
+#endif
+		for (int i = 0; i < pointCount; ++i)
 #endif
 		{
 			//we shouldn't test points that are actually hidden!
@@ -408,31 +412,26 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 				const CCVector3* P = getPoint(i);
 
 				CCVector3d Q2D;
+				bool insideFrustum = false;
 				if (noGLTrans)
 				{
-					if(!camera.project(*P, Q2D, true))
-					{
-						// Point is not in frustrum
-						#ifdef CC_CORE_LIB_USES_TBB
-							return;
-						#else
-							continue; 
-						#endif
-					}
+					camera.project(*P, Q2D, &insideFrustum);
 				}
 				else
 				{
 					CCVector3 P3D = *P;
 					trans.apply(P3D);
-					if(!camera.project(P3D, Q2D, true))
-					{
-						// Point is not in frustrum
-						#ifdef CC_CORE_LIB_USES_TBB
-							return;
-						#else
-							continue; 
-						#endif
-					}
+					camera.project(P3D, Q2D, &insideFrustum);
+				}
+
+				if (!insideFrustum)
+				{
+					// Point is not inside the frustum
+#ifdef USE_TBB
+					return;
+#else
+					continue;
+#endif
 				}
 
 				if (	fabs(Q2D.x - clickPos.x) <= pickWidth

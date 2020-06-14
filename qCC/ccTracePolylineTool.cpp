@@ -188,7 +188,7 @@ ccPolyline* ccTracePolylineTool::polylineOverSampling(unsigned steps) const
 		{
 			//we actually retro-project the 3D point in the second vertex camera frame so as to get a proper behavior
 			CCVector3d P2D;
-			m_segmentParams[i2].params.project(*p1, P2D, false);
+			m_segmentParams[i2].params.project(*p1, P2D);
 			clickPos1 = CCVector2d(P2D.x, P2D.y);
 		}
 

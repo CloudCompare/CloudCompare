@@ -917,7 +917,8 @@ bool ccGenericMesh::trianglePicking(unsigned triIndex,
 									const ccGenericPointCloud& vertices,
 									const ccGLCameraParameters& camera,
 									CCVector3d& point,
-									CCVector3d* barycentricCoords/*=nullptr*/) const
+									CCVector3d* barycentricCoords/*=nullptr*/,
+									QPainter* painter/*=nullptr*/) const
 {
 	assert(triIndex < size());
 
@@ -929,38 +930,49 @@ bool ccGenericMesh::trianglePicking(unsigned triIndex,
 	CCVector3d A2D;
 	CCVector3d B2D;
 	CCVector3d C2D;
+	bool insideA = false;
+	bool insideB = false;
+	bool insideC = false;
+
 	if (noGLTrans)
 	{
-		// if none of its points fall into the frustrum the triangle is not visible...
-		//DGM: we need to project ALL the points in case at least one is visible
-		bool insideA = camera.project(A3D, A2D, true);
-		bool insideB = camera.project(B3D, B2D, true);
-		bool insideC = camera.project(C3D, C2D, true);
-		if (!insideA && !insideB && !insideC)
-		{
-			return false;
-		}
+		camera.project(A3D, A2D, &insideA);
+		camera.project(B3D, B2D, &insideB);
+		camera.project(C3D, C2D, &insideC);
 	}
 	else
 	{
 		CCVector3 A3Dp = trans * A3D;
 		CCVector3 B3Dp = trans * B3D;
 		CCVector3 C3Dp = trans * C3D;
-		// if none of its points fall into the frustrum the triangle is not visible...
-		//DGM: we need to project ALL the points in case at least one is visible
-		bool insideA = camera.project(A3Dp, A2D, true);
-		bool insideB = camera.project(B3Dp, B2D, true);
-		bool insideC = camera.project(C3Dp, C2D, true);
-		if (!insideA && !insideB && !insideC)
-		{
-			return false;
-		}
+		camera.project(A3Dp, A2D, &insideA);
+		camera.project(B3Dp, B2D, &insideB);
+		camera.project(C3Dp, C2D, &insideC);
+	}
+
+	// if none of the vertices fall inside the frustum, the triangle is (probably) not visible...
+	// FIXME: if there's one huge triangle or the user zoom in a lot, if's not true!
+	if (!insideA && !insideB && !insideC)
+	{
+		return false;
+	}
+
+	if (painter)
+	{
+		//for debug purpose
+		painter->drawLine(QPointF(A2D.x, A2D.y), QPointF(B2D.x, B2D.y));
+		painter->drawLine(QPointF(B2D.x, B2D.y), QPointF(C2D.x, C2D.y));
+		painter->drawLine(QPointF(C2D.x, C2D.y), QPointF(A2D.x, A2D.y));
 	}
 
 	//barycentric coordinates
-	GLdouble detT =  (B2D.y - C2D.y) *      (A2D.x - C2D.x) + (C2D.x - B2D.x) *      (A2D.y - C2D.y);
-	GLdouble l1   = ((B2D.y - C2D.y) * (clickPos.x - C2D.x) + (C2D.x - B2D.x) * (clickPos.y - C2D.y)) / detT;
-	GLdouble l2   = ((C2D.y - A2D.y) * (clickPos.x - C2D.x) + (A2D.x - C2D.x) * (clickPos.y - C2D.y)) / detT;
+	GLdouble detT = (B2D.y - C2D.y) * (A2D.x - C2D.x) + (C2D.x - B2D.x) * (A2D.y - C2D.y);
+	if (std::abs(detT) < CCCoreLib::ZERO_TOLERANCE)
+	{
+		return false;
+	}
+	GLdouble l1 = ((B2D.y - C2D.y) * (clickPos.x - C2D.x) + (C2D.x - B2D.x) * (clickPos.y - C2D.y)) / detT;
+	GLdouble l2 = ((C2D.y - A2D.y) * (clickPos.x - C2D.x) + (A2D.x - C2D.x) * (clickPos.y - C2D.y)) / detT;
 
 	//does the point falls inside the triangle?
 	if (l1 >= 0 && l1 <= 1.0 && l2 >= 0.0 && l2 <= 1.0)
@@ -1025,14 +1037,40 @@ bool ccGenericMesh::trianglePicking(const CCVector2d& clickPos,
 		return false;
 	}
 
-#if defined(_OPENMP) && !defined(_DEBUG)
+//#define TEST_PICKING
+#ifdef TEST_PICKING
+	QImage testImage(camera.viewport[2], camera.viewport[3], QImage::Format::Format_ARGB32);
+	testImage.fill(Qt::white);
+	QPainter painter;
+	painter.begin(&testImage);
+	painter.setBrush(Qt::red);
+	painter.setPen(Qt::NoPen);
+	static const double brushRadius_pix = 2.5;
+	painter.drawEllipse(QPointF(clickPosd.x - brushRadius_pix, clickPosd.y - brushRadius_pix), 2 * brushRadius_pix, 2 * brushRadius_pix);
+	QPen pen(Qt::black);
+	pen.setWidth(3);
+	painter.setPen(pen);
+#endif
+
+#if defined(_OPENMP) && !defined(_DEBUG) && !defined(TEST_PICKING)
 	#pragma omp parallel for
 #endif
 	for (int i = 0; i < static_cast<int>(size()); ++i)
 	{
 		CCVector3d P;
 		CCVector3d BC;
-		if (!trianglePicking(i, clickPos, trans, noGLTrans, *vertices, camera, P, barycentricCoords ? &BC : nullptr))
+		if (!trianglePicking(	i,	
+								clickPos,
+								trans,
+								noGLTrans,
+								*vertices,
+								camera,
+								P,
+								barycentricCoords ? &BC : nullptr
+#ifdef TEST_PICKING
+			, &painter
+#endif
+		))
 			continue;
 
 		double squareDist = (X - P).norm2d();
@@ -1045,6 +1083,10 @@ bool ccGenericMesh::trianglePicking(const CCVector2d& clickPos,
 				*barycentricCoords = BC;
 		}
 	}
+
+#ifdef TEST_PICKING
+	testImage.save("lastPickingSession.png");
+#endif
 
 	return (nearestTriIndex >= 0);
 }

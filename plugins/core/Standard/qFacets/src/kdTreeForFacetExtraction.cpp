@@ -44,7 +44,7 @@ struct Candidate
 	PointCoordinateType radius;
 	CCVector3 centroid;
 
-	Candidate() : leaf(0), dist(PC_NAN), radius(0) {}
+	Candidate() : leaf(nullptr), dist(PC_NAN), radius(0) {}
 	Candidate(ccKdTree::Leaf* l) : leaf(l), dist(PC_NAN), radius(0)
 	{
 		if (leaf && leaf->points)
@@ -213,7 +213,7 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 					
 					//we will keep track of the best fused 'couple' at each pass
 					std::list<Candidate>::iterator bestIt = candidates.end();
-					CCLib::ReferenceCloud* bestFused = 0;
+					CCLib::ReferenceCloud* bestFused = nullptr;
 					CCVector3 bestNormal(0,0,0);
 					double bestError = -1.0;
 
@@ -287,7 +287,7 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 									delete bestFused;
 								bestFused = fused;
 								bestNormal = CCVector3(planeEquation);
-								fused = 0;
+								fused = nullptr;
 								
 								if (closestFirst)
 									break; //if we have found a good candidate, we stop here (closest first ;)
@@ -298,7 +298,7 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 						if (fused)
 						{
 							delete fused;
-							fused = 0;
+							fused = nullptr;
 						}
 					}
 
@@ -349,7 +349,7 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 			//end of the fusion process for the current leaf
 			if (currentPointSet != currentCell->points)
 				delete currentPointSet;
-			currentPointSet = 0;
+			currentPointSet = nullptr;
 
 			if (cancelled)
 				break;

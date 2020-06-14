@@ -373,7 +373,8 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::Register(	GenericIndexed
 		fprintf(fTraceFile,"Iteration; RMS; Point count;\n");
 #endif
 
-	double lastStepRMS = -1.0, initialDeltaRMS = -1.0;
+	double lastStepRMS = -1.0;
+	double initialDeltaRMS = -1.0;
 	ScaledTransformation currentTrans;
 	RESULT_TYPE result = ICP_ERROR;
 
@@ -393,7 +394,8 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::Register(	GenericIndexed
 			N.computeParameters(data.cloud);
 			if (N.isValid())
 			{
-				ScalarType mu,sigma2;
+				ScalarType mu;
+				ScalarType sigma2;
 				N.getParameters(mu,sigma2);
 				ScalarType maxDistance = static_cast<ScalarType>(mu + 2.5*sqrt(sigma2));
 
@@ -919,8 +921,9 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P, //data
 		{
 			double cos_t = Np.dot(Nx);
 			assert(cos_t > -1.0 && cos_t < 1.0); //see above
-			double s = sqrt((1 + cos_t) * 2);
-			double q[4] = { s / 2, a.x / s, a.y / s, a.z / s };
+			double cos_half_t = sqrt((1 + cos_t) / 2);
+			double sin_half_t = sqrt((1 - cos_t) / 2);
+			double q[4] = { cos_half_t, a.x * sin_half_t, a.y * sin_half_t, a.z * sin_half_t };
 			//don't forget to normalize the quaternion
 			double qnorm = q[0] * q[0] + q[1] * q[1] + q[2] * q[2] + q[3] * q[3];
 			assert(qnorm >= ZERO_TOLERANCE);
@@ -943,7 +946,7 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P, //data
 		}
 
 		//we deduce the first translation
-		trans.T = Gx - (trans.R*Gp) * (aPrioriScale*trans.s); //#26 in besl paper, modified with the scale as in jschmidt
+		trans.T = Gx - (trans.R*Gp) * (aPrioriScale*trans.s); //#26 in Besl paper, modified with the scale as in jschmidt
 
 		//we need to find the rotation in the (X) plane now
 		{
@@ -954,7 +957,8 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P, //data
 			double C = 0;
 			double S = 0;
 			CCVector3 Ssum(0, 0, 0);
-			CCVector3 rx, rp;
+			CCVector3 rx;
+			CCVector3 rp;
 
 			rx = *Ax - Gx;
 			rp = App - Gx;
@@ -1009,7 +1013,8 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P, //data
 	}
 	else
 	{
-		CCVector3 bbMin, bbMax;
+		CCVector3 bbMin;
+		CCVector3 bbMax;
 		X->getBoundingBox(bbMin, bbMax);
 
 		//if the data cloud is equivalent to a single point (for instance
@@ -1141,13 +1146,15 @@ bool FPCSRegistrationTools::RegisterClouds(	GenericIndexedCloud* modelCloud,
 	//Initialize random seed with current time
 	srand(static_cast<unsigned>(time(nullptr)));
 
-	unsigned bestScore = 0, score = 0;
+	unsigned bestScore = 0;
+	unsigned score = 0;
 	transform.R.invalidate();
 	transform.T = CCVector3(0,0,0);
 
 	//Adapt overlap to the model cloud size
 	{
-		CCVector3 bbMin, bbMax;
+		CCVector3 bbMin;
+		CCVector3 bbMax;
 		modelCloud->getBoundingBox(bbMin, bbMax);
 		CCVector3 diff = bbMax - bbMin;
 		overlap *= diff.norm() / 2;
@@ -1296,11 +1303,28 @@ bool FPCSRegistrationTools::FindBase(	GenericIndexedCloud* cloud,
 										unsigned nbTries,
 										Base &base)
 {
-	unsigned a, b, c, d;
-	unsigned i, size;
-	PointCoordinateType f, best, d0, d1, d2, x, y, z, w;
-	const CCVector3 *p0, *p1, *p2, *p3;
-	CCVector3 normal, u, v;
+	unsigned a;
+	unsigned b;
+	unsigned c;
+	unsigned d;
+	unsigned i;
+	unsigned size;
+	PointCoordinateType f;
+	PointCoordinateType best;
+	PointCoordinateType d0;
+	PointCoordinateType d1;
+	PointCoordinateType d2;
+	PointCoordinateType x;
+	PointCoordinateType y;
+	PointCoordinateType z;
+	PointCoordinateType w;
+	const CCVector3 *p0 = nullptr;
+	const CCVector3 *p1 = nullptr;
+	const CCVector3 *p2 = nullptr;
+	const CCVector3 *p3 = nullptr;
+	CCVector3 normal;
+	CCVector3 u;
+	CCVector3 v;
 
 	overlap *= overlap;
 	size = cloud->size();
@@ -1425,7 +1449,10 @@ int FPCSRegistrationTools::FindCongruentBases(KDTree* tree,
 												std::vector<Base>& results)
 {
 	//Compute reference base invariants (r1, r2)
-	PointCoordinateType r1, r2, d1, d2;
+	PointCoordinateType r1;
+	PointCoordinateType r2;
+	PointCoordinateType d1;
+	PointCoordinateType d2;
 	{
 		const CCVector3* p0 = base[0];
 		const CCVector3* p1 = base[1];
@@ -1443,7 +1470,8 @@ int FPCSRegistrationTools::FindCongruentBases(KDTree* tree,
 	GenericIndexedCloud* cloud = tree->getAssociatedCloud();
 
 	//Find all pairs which are d1-appart and d2-appart
-	std::vector<IndexPair> pairs1, pairs2;
+	std::vector<IndexPair> pairs1;
+	std::vector<IndexPair> pairs2;
 	{
 		unsigned count = static_cast<unsigned>(cloud->size());
 		std::vector<unsigned> pointsIndexes;
@@ -1495,7 +1523,8 @@ int FPCSRegistrationTools::FindCongruentBases(KDTree* tree,
 	//Select among the pairs the ones that can be congruent to the base "base"
 	std::vector<IndexPair> match;
 	{
-		PointCloud tmpCloud1, tmpCloud2;
+		PointCloud tmpCloud1;
+		PointCloud tmpCloud2;
 		{
 			unsigned count = static_cast<unsigned>(pairs1.size());
 			if (!tmpCloud1.reserve(count * 2)) //not enough memory
@@ -1613,8 +1642,13 @@ bool FPCSRegistrationTools::LinesIntersections(	const CCVector3 &p0,
 												PointCoordinateType& lambda,
 												PointCoordinateType& mu)
 {
-	CCVector3 p02, p32, p10, A, B;
-	PointCoordinateType num, denom;
+	CCVector3 p02;
+	CCVector3 p32;
+	CCVector3 p10;
+	CCVector3 A;
+	CCVector3 B;
+	PointCoordinateType num;
+	PointCoordinateType denom;
 
 	//Find lambda and mu such that :
 	//A = p0+lambda(p1-p0)
@@ -1654,11 +1688,13 @@ bool FPCSRegistrationTools::FilterCandidates(	GenericIndexedCloud *modelCloud,
 												std::vector<ScaledTransformation>& transforms)
 {
 	std::vector<Base> table;
-	std::vector<float> scores, sortedscores;
+	std::vector<float> scores;
+	std::vector<float> sortedscores;
 	const CCVector3* p[4];
 	ScaledTransformation t;
 	std::vector<ScaledTransformation> tarray;
-	PointCloud referenceBaseCloud, dataBaseCloud;
+	PointCloud referenceBaseCloud;
+	PointCloud dataBaseCloud;
 
 	unsigned candidatesCount = static_cast<unsigned>(candidates.size());
 	if (candidatesCount == 0)

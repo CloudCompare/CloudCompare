@@ -28,10 +28,9 @@ public:
 								QString* baseOutputFilename = nullptr,
 								bool forceNoTimestamp = false) const override;
 	QString exportEntity(	CLEntityDesc& entityDesc,
-							QString suffix = QString(),
+							const QString& suffix = QString(),
 							QString* baseOutputFilename = nullptr,
-							bool forceIsCloud = false,
-							bool forceNoTimestamp = false) override;
+							ccCommandLineInterface::ExportOptions options = ExportOption::NoOptions) override;
 	void removeClouds(bool onlyLast = false) override;
 	void removeMeshes(bool onlyLast = false) override;
 	QStringList& arguments() override { return m_arguments; }
@@ -48,8 +47,11 @@ public:
 	QString cloudExportExt() const override { return m_cloudExportExt; }
 	QString meshExportFormat() const override { return m_meshExportFormat; }
 	QString meshExportExt() const override { return m_meshExportExt; }
+	QString hierarchyExportFormat() const override { return m_hierarchyExportFormat; }
+	QString hierarchyExportExt() const override { return m_hierarchyExportExt; }
 	void setCloudExportFormat(QString format, QString ext) override { m_cloudExportFormat = format; m_cloudExportExt = ext; }
 	void setMeshExportFormat(QString format, QString ext) override { m_meshExportFormat = format; m_meshExportExt = ext; }
+	void setHierarchyExportFormat(QString format, QString ext) override { m_hierarchyExportFormat = format; m_hierarchyExportExt = ext; }
 
 protected: //other methods
 
@@ -75,6 +77,10 @@ private: //members
 	QString m_meshExportFormat;
 	//! Current mesh(es) export extension (warning: can be anything)
 	QString m_meshExportExt;
+	//! Current hierarchy(ies) export format (can be modified with the 'COMMAND_HIERARCHY_EXPORT_FORMAT' option)
+	QString m_hierarchyExportFormat;
+	//! Current hierarchy(ies) export extension (warning: can be anything)
+	QString m_hierarchyExportExt;
 
 	//! Mesh filename
 	QString m_meshFilename;

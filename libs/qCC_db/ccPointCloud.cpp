@@ -1652,7 +1652,8 @@ bool ccPointCloud::convertNormalToDipDirSFs(ccScalarField* dipSF, ccScalarField*
 	for (unsigned i = 0; i < count; ++i)
 	{
 		CCVector3 N(this->getPointNormal(i));
-		PointCoordinateType dip, dipDir;
+		PointCoordinateType dip;
+		PointCoordinateType dipDir;
 		ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipDir);
 		if (dipSF)
 			dipSF->setValue(i, static_cast<ScalarType>(dip));
@@ -2736,7 +2737,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							const ccColor::Rgb* col = m_currentDisplayedScalarField->getValueColor(pointIndex);
 							//we force display of points hidden because of their scalar field value
 							//to be sure that the user doesn't miss them (during manual segmentation for instance)
-							glFunc->glColor4ubv(col ? col->rgb : ccColor::lightGreyRGB.rgb);
+							glFunc->glColor3ubv(col ? col->rgb : ccColor::lightGreyRGB.rgb);
 						}
 						else if (glParams.showColors)
 						{
@@ -2845,7 +2846,9 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							{
 								if (glFunc->glIsEnabled(GL_LIGHT0 + i))
 								{
-									float diffuse[4], ambiant[4], specular[4];
+									float diffuse[4];
+									float ambiant[4];
+									float specular[4];
 
 									glFunc->glGetLightfv(GL_LIGHT0 + i, GL_AMBIENT, ambiant);
 									glFunc->glGetLightfv(GL_LIGHT0 + i, GL_DIFFUSE, diffuse);
@@ -3681,7 +3684,8 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 	double startAngle_rad = startAngle_deg * CC_DEG_TO_RAD;
 	double stopAngle_rad = stopAngle_deg * CC_DEG_TO_RAD;
 
-	PointCoordinateType alpha_rad = 0, sin_alpha = 0;
+	PointCoordinateType alpha_rad = 0;
+	PointCoordinateType sin_alpha = 0;
 	if (mode != CYLINDER)
 	{
 		alpha_rad = coneParams->coneAngle_deg * CC_DEG_TO_RAD;
@@ -3693,7 +3697,8 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 		const CCVector3* Pin = getPoint(i);
 
 		//we project the point
-		CCVector3 AP, Pout;
+		CCVector3 AP;
+		CCVector3 Pout;
 		PointCoordinateType longitude_rad = 0; //longitude (rad)
 		PointCoordinateType delta = 0; //distance to the cone/cylinder surface
 		PointCoordinateType coneAbscissa = 0;
@@ -3764,7 +3769,8 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 			{
 			case CYLINDER:
 			{
-				PointCoordinateType delta2, longitude2_rad;
+				PointCoordinateType delta2;
+				PointCoordinateType longitude2_rad;
 				ProjectOnCylinder(AP2, dim, params->radius, delta2, longitude2_rad);
 
 				N2.u[dim.x] = static_cast<PointCoordinateType>((longitude2_rad - longitude_rad) * params->radius);
@@ -3775,7 +3781,9 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 
 			case STRAIGHTENED_CONE:
 			{
-				PointCoordinateType coneAbscissa2, delta2, longitude2_rad;
+				PointCoordinateType coneAbscissa2;
+				PointCoordinateType delta2;
+				PointCoordinateType longitude2_rad;
 				ProjectOnCone(AP2, alpha_rad, dim, coneAbscissa2, delta2, longitude2_rad);
 				//we simply develop the cone as a cylinder
 				N2.u[dim.x] = static_cast<PointCoordinateType>((longitude2_rad - longitude_rad) * params->radius);
@@ -3786,7 +3794,9 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 
 			case STRAIGHTENED_CONE2:
 			{
-				PointCoordinateType coneAbscissa2, delta2, longitude2_rad;
+				PointCoordinateType coneAbscissa2;
+				PointCoordinateType delta2;
+				PointCoordinateType longitude2_rad;
 				ProjectOnCone(AP2, alpha_rad, dim, coneAbscissa2, delta2, longitude2_rad);
 				//we simply develop the cone as a cylinder
 				N2.u[dim.x] = static_cast<PointCoordinateType>((longitude2_rad * coneAbscissa - longitude_rad * coneAbscissa2) * sin_alpha);
@@ -3797,7 +3807,9 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 
 			case CONE:
 			{
-				PointCoordinateType coneAbscissa2, delta2, longitude2_rad;
+				PointCoordinateType coneAbscissa2;
+				PointCoordinateType delta2;
+				PointCoordinateType longitude2_rad;
 				ProjectOnCone(AP2, alpha_rad, dim, coneAbscissa2, delta2, longitude2_rad);
 				//unrolling
 				PointCoordinateType theta2_rad = longitude2_rad * sin_alpha; //sin_alpha is a bit arbitrary here. The aim is mostly to reduce the angular range
@@ -5648,7 +5660,8 @@ bool ccPointCloud::computeFWFAmplitude(double& minVal, double& maxVal, ccProgres
 			continue;
 		}
 
-		double wMinVal, wMaxVal;
+		double wMinVal = 0.0;
+		double wMaxVal = 0.0;
 		proxy.getRange(wMinVal, wMaxVal);
 
 		if (firstTest)

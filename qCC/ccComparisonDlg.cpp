@@ -59,14 +59,14 @@ ccComparisonDlg::ccComparisonDlg(	ccHObject* compEntity,
 	: QDialog(parent, Qt::Tool)
 	, Ui::ComparisonDialog()
 	, m_compEnt(compEntity)
-	, m_compCloud(0)
-	, m_compOctree(0)
+	, m_compCloud(nullptr)
+	, m_compOctree(nullptr)
 	, m_compOctreeIsPartial(false)
 	, m_compSFVisibility(false)
 	, m_refEnt(refEntity)
-	, m_refCloud(0)
-	, m_refMesh(0)
-	, m_refOctree(0)
+	, m_refCloud(nullptr)
+	, m_refMesh(nullptr)
+	, m_refOctree(nullptr)
 	, m_refOctreeIsPartial(false)
 	, m_refVisibility(false)
 	, m_compType(cpType)
@@ -391,7 +391,8 @@ bool ccComparisonDlg::computeApproxDistances()
 		ccLog::Print("[computeApproxDistances] Time: %3.2f s.", elapsedTime_ms / 1.0e3);
 
 		//display approx. dist. statistics
-		ScalarType mean,variance;
+		ScalarType mean;
+		ScalarType variance;
 		sf->computeMinAndMax();
 		sf->computeMeanAndVariance(mean,&variance);
 
@@ -494,7 +495,7 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 
 	//if the reference is a mesh
 	double meanTriangleSurface = 1.0;
-	CCLib::GenericIndexedMesh* mesh = 0;
+	CCLib::GenericIndexedMesh* mesh = nullptr;
 	if (!m_refOctree)
 	{
 		if (!m_refMesh)
@@ -825,7 +826,7 @@ bool ccComparisonDlg::computeDistances()
 			}
 			c2cParams.maxSearchDist = maxSearchDist;
 			c2cParams.multiThread = multiThread;
-			c2cParams.CPSet = 0;
+			c2cParams.CPSet = nullptr;
 		}
 		
 		result = CCLib::DistanceComputationTools::computeCloud2CloudDistance(	m_compCloud,
@@ -872,7 +873,8 @@ bool ccComparisonDlg::computeDistances()
 		ccLog::Print("[ComputeDistances] Time: %3.2f s.",static_cast<double>(elapsedTime_ms)/1.0e3);
 
 		//display some statics about the computed distances
-		ScalarType mean,variance;
+		ScalarType mean;
+		ScalarType variance;
 		sf->computeMinAndMax();
 		sf->computeMeanAndVariance(mean, &variance);
 		ccLog::Print("[ComputeDistances] Mean distance = %f / std deviation = %f",mean,sqrt(variance));

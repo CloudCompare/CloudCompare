@@ -221,7 +221,7 @@ protected:
 class PoissonReconParamDlg : public QDialog, public Ui::PoissonReconParamDialog
 {
 public:
-	explicit PoissonReconParamDlg(QWidget* parent = 0)
+	explicit PoissonReconParamDlg(QWidget* parent = nullptr)
 		: QDialog(parent, Qt::Tool)
 		, Ui::PoissonReconParamDialog()
 	{
@@ -232,7 +232,7 @@ public:
 qPoissonRecon::qPoissonRecon(QObject* parent/*=0*/)
 	: QObject(parent)
 	, ccStdPluginInterface(":/CC/plugin/qPoissonRecon/info.json")
-	, m_action(0)
+	, m_action(nullptr)
 {
 }
 

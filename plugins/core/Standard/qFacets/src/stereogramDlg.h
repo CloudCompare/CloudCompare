@@ -106,8 +106,8 @@ signals:
 protected:
 
 	//inherited from QWidget
-	virtual void paintEvent(QPaintEvent* e);
-	virtual void mousePressEvent(QMouseEvent* e);
+	void paintEvent(QPaintEvent* e) override;
+	void mousePressEvent(QMouseEvent* e) override;
 
 	//! Angular step (in degrees)
 	double m_angularStep_deg;
@@ -157,7 +157,7 @@ class StereogramDialog : public QDialog, public Ui::StereogramDialog
 public:
 
 	//! Default constructor
-	StereogramDialog(ccMainAppInterface* app = nullptr);
+	StereogramDialog(ccMainAppInterface* app);
 
 	//! Inits dialog
 	/** Warning: input 'facetGroup' should not be deleted before this dialog is closed!

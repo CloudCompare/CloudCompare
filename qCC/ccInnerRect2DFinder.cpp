@@ -25,7 +25,7 @@
 
 ccInnerRect2DFinder::ccInnerRect2DFinder()
 	: m_maxArea(0)
-	, m_cloud(0)
+	, m_cloud(nullptr)
 	, m_X(0)
 	, m_Y(1)
 {}
@@ -33,14 +33,14 @@ ccInnerRect2DFinder::ccInnerRect2DFinder()
 ccBox* ccInnerRect2DFinder::process( ccGenericPointCloud* cloud, unsigned char zDim/*=2*/ )
 {
 	if (!init(cloud,zDim))
-		return 0;
+		return nullptr;
 
 	//Find the 'biggest' rectangle
 	m_maxRect = Rect();
 	m_maxArea = 0;
 	findBiggestRect(m_boundingRect,0);
 
-	ccBox* resultBox = 0;
+	ccBox* resultBox = nullptr;
 	if (m_maxArea > 0)
 	{
 		ccBBox bbox = cloud->getOwnBB();
@@ -121,7 +121,7 @@ void ccInnerRect2DFinder::findBiggestRect(const Rect& rect, unsigned startIndex)
 	assert(m_cloud);
 
 	//test if at least one point falls inside the input rectangle
-	const CCVector3* Pinside = 0;
+	const CCVector3* Pinside = nullptr;
 	{
 		unsigned pointCount = m_cloud->size();
 		double minSquareDistToCenter = -1.0;

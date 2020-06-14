@@ -101,7 +101,8 @@ bool NormalDistribution::computeParameters(const GenericCloud* cloud)
 {
 	setValid(false);
 
-	double mean = 0.0, stddev2 = 0.0;
+	double mean = 0.0;
+	double stddev2 = 0.0;
 	unsigned counter = 0;
 
 	unsigned n = cloud->size();
@@ -132,7 +133,8 @@ bool NormalDistribution::computeParameters(const ScalarContainer& values)
 	setValid(false);
 
 	//compute mean and std. dev.
-	double mean = 0.0, stddev2 = 0.0;
+	double mean = 0.0;
+	double stddev2 = 0.0;
 	unsigned counter = 0;
 
 	for (ScalarType v : values)
@@ -165,7 +167,8 @@ bool NormalDistribution::computeRobustParameters(const ScalarContainer& values, 
 	const double maxStddev = sqrt(static_cast<double>(m_sigma2))*nSigma;
 
 	unsigned counter = 0;
-	double mean = 0.0, stddev2 = 0.0;
+	double mean = 0.0;
+	double stddev2 = 0.0;
 
 	for (ScalarType v : values)
 	{

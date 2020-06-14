@@ -74,7 +74,9 @@ bool ccSphere::buildUp()
 
 	//then, angular sweep
 	PointCoordinateType angle_rad_step = static_cast<PointCoordinateType>(M_PI) / static_cast<PointCoordinateType>(steps);
-	CCVector3 N0, N, P;
+	CCVector3 N0;
+	CCVector3 N;
+	CCVector3 P;
 	{
 		for (unsigned j = 1; j < steps; ++j)
 		{

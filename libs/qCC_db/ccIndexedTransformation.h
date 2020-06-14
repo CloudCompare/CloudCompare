@@ -45,7 +45,7 @@ public:
 	ccIndexedTransformation(const ccGLMatrix& matrix, double index);
 
 	//! Copy constructor
-	ccIndexedTransformation(const ccIndexedTransformation& trans);
+	ccIndexedTransformation(const ccIndexedTransformation& trans) = default;
 
 	//! Returns associated index (e.g. timestamp)
 	inline double getIndex() const { return m_index; }

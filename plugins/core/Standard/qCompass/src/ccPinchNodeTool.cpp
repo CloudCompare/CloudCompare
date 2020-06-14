@@ -22,11 +22,6 @@ ccPinchNodeTool::ccPinchNodeTool()
 {
 }
 
-ccPinchNodeTool::~ccPinchNodeTool()
-{
-}
-
-
 //called when a point in a point cloud gets picked while this tool is active
 void ccPinchNodeTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPointCloud* cloud, const CCVector3& P)
 {

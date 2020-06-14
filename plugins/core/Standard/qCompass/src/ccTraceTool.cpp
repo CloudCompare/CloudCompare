@@ -27,11 +27,6 @@ ccTraceTool::ccTraceTool()
 {
 }
 
-
-ccTraceTool::~ccTraceTool()
-{
-}
-
 //called when the tool is set to active (for initialization)
 void ccTraceTool::toolActivated()
 {

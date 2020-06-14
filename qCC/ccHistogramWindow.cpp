@@ -44,26 +44,26 @@
 
 ccHistogramWindow::ccHistogramWindow(QWidget* parent/*=0*/)
 	: QCustomPlot(parent)
-	, m_titlePlot(0)
+	, m_titlePlot(nullptr)
 	, m_colorScheme(USE_SOLID_COLOR)
 	, m_solidColor(Qt::blue)
 	, m_colorScale(ccColorScalesManager::GetDefaultScale())
-	, m_associatedSF(0)
+	, m_associatedSF(nullptr)
 	, m_numberOfClassesCanBeChanged(false)
-	, m_histogram(0)
+	, m_histogram(nullptr)
 	, m_minVal(0)
 	, m_maxVal(0)
 	, m_maxHistoVal(0)
-	, m_overlayCurve(0)
-	, m_vertBar(0)
+	, m_overlayCurve(nullptr)
+	, m_vertBar(nullptr)
 	, m_drawVerticalIndicator(false)
 	, m_verticalIndicatorPositionPercent(0)
-	, m_sfInteractionMode(false)
+	, m_sfInteractionModes(SFInteractionMode::None)
 	, m_selectedItem(NONE)
-	, m_areaLeft(0)
-	, m_areaRight(0)
-	, m_arrowLeft(0)
-	, m_arrowRight(0)
+	, m_areaLeft(nullptr)
+	, m_areaRight(nullptr)
+	, m_arrowLeft(nullptr)
+	, m_arrowRight(nullptr)
 	, m_lastMouseClick(0, 0)
 {
 	setWindowTitle("Histogram");
@@ -72,6 +72,7 @@ ccHistogramWindow::ccHistogramWindow(QWidget* parent/*=0*/)
 	setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 
 	setAutoAddPlottableToLegend(false);
+	setAntialiasedElements(QCP::AntialiasedElement::aeAll);
 
 	//default font for text rendering
 	m_renderingFont.setFamily(QString::fromUtf8("Arial"));
@@ -102,7 +103,7 @@ void ccHistogramWindow::clearInternal()
 	if (m_associatedSF)
 	{
 		m_associatedSF->release();
-		m_associatedSF = 0;
+		m_associatedSF = nullptr;
 	}
 
 	m_histoValues.resize(0);
@@ -352,12 +353,17 @@ void ccHistogramWindow::refreshBars()
 	replot(QCustomPlot::rpImmediate);
 }
 
+void ccHistogramWindow::setSFInteractionMode(SFInteractionModes modes)
+{
+   m_sfInteractionModes = modes;
+}
+
 void ccHistogramWindow::refresh()
 {
 	// set ranges appropriate to show data
 	double minVal = m_minVal;
 	double maxVal = m_maxVal;
-	if (m_sfInteractionMode && m_associatedSF)
+	if (m_sfInteractionModes && m_associatedSF)
 	{
 		double minSat = m_associatedSF->saturationRange().min();
 		double maxSat = m_associatedSF->saturationRange().max();
@@ -379,7 +385,7 @@ void ccHistogramWindow::refresh()
 		{
 			//remove previous title
 			plotLayout()->remove(m_titlePlot);
-			m_titlePlot = 0;
+			m_titlePlot = nullptr;
 		}
 		m_titlePlot = new QCPPlotTitle(this, QString("%0 [%1 classes]").arg(m_titleStr).arg(m_histoValues.size()));
 		//title font
@@ -389,13 +395,13 @@ void ccHistogramWindow::refresh()
 	}
 
 	//clear previous display
-	m_histogram = 0;
-	m_vertBar = 0;
-	m_overlayCurve = 0;
-	m_areaLeft = 0;
-	m_areaRight = 0;
-	m_arrowLeft = 0;
-	m_arrowRight = 0;
+	m_histogram = nullptr;
+	m_vertBar = nullptr;
+	m_overlayCurve = nullptr;
+	m_areaLeft = nullptr;
+	m_areaRight = nullptr;
+	m_arrowLeft = nullptr;
+	m_arrowRight = nullptr;
 	this->clearGraphs();
 	this->clearPlottables();
 
@@ -412,10 +418,13 @@ void ccHistogramWindow::refresh()
 	if (histoSize > 0)
 	{
 		m_histogram = new QCPColoredBars(xAxis, yAxis);
-		addPlottable(m_histogram);
-		// now we can modify properties of myBars:
+
 		m_histogram->setWidth((m_maxVal - m_minVal) / histoSize);
+		m_histogram->setAntialiased(false);
 		m_histogram->setAntialiasedFill(false);
+		
+		addPlottable(m_histogram);
+		
 		QVector<double> keyData(histoSize);
 		QVector<double> valueData(histoSize);
 
@@ -469,7 +478,7 @@ void ccHistogramWindow::refresh()
 			//import color for the current bin
 			if (colorScheme != USE_SOLID_COLOR)
 			{
-				const ccColor::Rgb* col = 0;
+				const ccColor::Rgb* col = nullptr;
 				if (colorScheme == USE_SF_SCALE)
 				{
 					//equivalent SF value
@@ -498,7 +507,8 @@ void ccHistogramWindow::refresh()
 	int curveSize = static_cast<int>(m_curveValues.size());
 	if (curveSize > 1)
 	{
-		QVector<double> x(curveSize), y(curveSize);
+		QVector<double> x(curveSize);
+		QVector<double> y(curveSize);
 
 		double step = (m_maxVal - m_minVal) / (curveSize - 1);
 		for (int i = 0; i < curveSize; ++i)
@@ -522,43 +532,49 @@ void ccHistogramWindow::refresh()
 	}
 
 	//sf interaction mode
-	if (m_sfInteractionMode && m_associatedSF)
+	if (m_sfInteractionModes && m_associatedSF)
 	{
-		const ccScalarField::Range& dispRange = m_associatedSF->displayRange();
-
-		m_areaLeft = new QCPHiddenArea(true, xAxis, yAxis);
-		m_areaLeft->setRange(dispRange.min(), dispRange.max());
-		m_areaLeft->setCurrentVal(dispRange.start());
-		addPlottable(m_areaLeft);
-
-		m_areaRight = new QCPHiddenArea(false, xAxis, yAxis);
-		m_areaRight->setRange(dispRange.min(), dispRange.max());
-		m_areaRight->setCurrentVal(dispRange.stop());
-		addPlottable(m_areaRight);
-
-		const ccScalarField::Range& satRange = m_associatedSF->saturationRange();
-
-		m_arrowLeft = new QCPArrow(xAxis, yAxis);
-		m_arrowLeft->setRange(satRange.min(), satRange.max());
-		m_arrowLeft->setCurrentVal(satRange.start());
-		if (colorScale)
+		if ( m_sfInteractionModes.testFlag(SFInteractionMode::DisplayRange) )
 		{
-			const ccColor::Rgb* col = colorScale->getColorByRelativePos(m_associatedSF->symmetricalScale() ? 0.5 : 0, m_associatedSF->getColorRampSteps());
-			if (col)
-				m_arrowLeft->setColor(col->r, col->g, col->b);
+			const ccScalarField::Range& dispRange = m_associatedSF->displayRange();
+	
+			m_areaLeft = new QCPHiddenArea(true, xAxis, yAxis);
+			m_areaLeft->setRange(dispRange.min(), dispRange.max());
+			m_areaLeft->setCurrentVal(dispRange.start());
+			addPlottable(m_areaLeft);
+	
+			m_areaRight = new QCPHiddenArea(false, xAxis, yAxis);
+			m_areaRight->setRange(dispRange.min(), dispRange.max());
+			m_areaRight->setCurrentVal(dispRange.stop());
+			addPlottable(m_areaRight);
 		}
-		addPlottable(m_arrowLeft);
 
-		m_arrowRight = new QCPArrow(xAxis, yAxis);
-		m_arrowRight->setRange(satRange.min(), satRange.max());
-		m_arrowRight->setCurrentVal(satRange.stop());
-		if (colorScale)
+		if ( m_sfInteractionModes.testFlag(SFInteractionMode::SaturationRange) )
 		{
-			const ccColor::Rgb* col = colorScale->getColorByRelativePos(1.0, m_associatedSF->getColorRampSteps());
-			if (col)
-				m_arrowRight->setColor(col->r, col->g, col->b);
+			const ccScalarField::Range& satRange = m_associatedSF->saturationRange();
+			
+			m_arrowLeft = new QCPArrow(xAxis, yAxis);
+			m_arrowLeft->setRange(satRange.min(), satRange.max());
+			m_arrowLeft->setCurrentVal(satRange.start());
+			if (colorScale)
+			{
+				const ccColor::Rgb* col = colorScale->getColorByRelativePos(m_associatedSF->symmetricalScale() ? 0.5 : 0, m_associatedSF->getColorRampSteps());
+				if (col)
+					m_arrowLeft->setColor(col->r, col->g, col->b);
+			}
+			addPlottable(m_arrowLeft);
+			
+			m_arrowRight = new QCPArrow(xAxis, yAxis);
+			m_arrowRight->setRange(satRange.min(), satRange.max());
+			m_arrowRight->setCurrentVal(satRange.stop());
+			if (colorScale)
+			{
+				const ccColor::Rgb* col = colorScale->getColorByRelativePos(1.0, m_associatedSF->getColorRampSteps());
+				if (col)
+					m_arrowRight->setColor(col->r, col->g, col->b);
+			}
+			addPlottable(m_arrowRight);
 		}
-		addPlottable(m_arrowRight);
 	}
 	else if (m_drawVerticalIndicator) //vertical hint
 	{
@@ -706,10 +722,11 @@ void ccHistogramWindow::mousePressEvent(QMouseEvent *event)
 {
 	m_lastMouseClick = event->pos();
 
-	if (m_sfInteractionMode)
+	if (m_sfInteractionModes)
 	{
 		m_selectedItem = NONE;
 		//check greyed areas (circles)
+		if ( m_sfInteractionModes.testFlag(SFInteractionMode::DisplayRange) )
 		{
 			if (m_areaLeft && m_areaLeft->isSelectable(m_lastMouseClick))
 				m_selectedItem = LEFT_AREA;
@@ -723,7 +740,8 @@ void ccHistogramWindow::mousePressEvent(QMouseEvent *event)
 		}
 
 		//check yellow triangles
-		if (m_selectedItem == NONE)
+		if ( m_sfInteractionModes.testFlag(SFInteractionMode::SaturationRange)
+			 && (m_selectedItem == NONE) )
 		{
 			if (m_arrowLeft && m_arrowLeft->isSelectable(m_lastMouseClick))
 				m_selectedItem = LEFT_ARROW;
@@ -746,7 +764,7 @@ void ccHistogramWindow::mouseMoveEvent(QMouseEvent *event)
 {
 	if (event->buttons() & Qt::LeftButton)
 	{
-		if (m_sfInteractionMode)
+		if (m_sfInteractionModes)
 		{
 			QPoint mousePos = event->pos();
 			if (m_histogram)
@@ -899,21 +917,21 @@ ccHistogramWindowDlg::ccHistogramWindowDlg(QWidget* parent/*=0*/)
 	, m_gui(new Ui_HistogramDialog)
 {
 	m_gui->setupUi(this);
-	QHBoxLayout* hboxLayout = new QHBoxLayout(m_gui->histoFrame);
-	hboxLayout->addWidget(m_win);
+	
+	auto hboxLayout = new QHBoxLayout;
+	
 	hboxLayout->setContentsMargins(0, 0, 0, 0);
+	hboxLayout->addWidget(m_win);
+
 	m_gui->histoFrame->setLayout(hboxLayout);
 
 	connect(m_gui->exportCSVToolButton, &QAbstractButton::clicked, this, &ccHistogramWindowDlg::onExportToCSV);
 	connect(m_gui->exportImageToolButton, &QAbstractButton::clicked, this, &ccHistogramWindowDlg::onExportToImage);
-
-	resize(400, 275);
 }
 
 ccHistogramWindowDlg::~ccHistogramWindowDlg()
 {
-	if (m_gui)
-		delete m_gui;
+	delete m_gui;
 }
 
 //CSV file default separator

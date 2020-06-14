@@ -6,7 +6,7 @@ option( PLUGIN_GL_QEDL "Check to install qEDL plugin" OFF )
 if (PLUGIN_GL_QEDL)
     project( QEDL_GL_PLUGIN )
     
-	include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
+	include( CMakePolicies NO_POLICY_SCOPE )
 
 	include_directories( src )
 	

@@ -1,3 +1,22 @@
+nanoflann 1.3.1: Released Oct 11, 2019
+  * Fixed bug in KDTreeSingleIndexDynamicAdaptor. See: https://github.com/jlblancoc/nanoflann/commit/a066148517d16c173954dcde13c1527481b9fad3
+  * Fix build in XCode.
+  * Simplify CMakeLists for Eigen example (requires Eigen3Config.cmake now)
+  * Avoid setting cmake global executable build path
+
+nanoflann 1.3.0: Released Aug 28, 2018
+  * Instructions for `make install` for Linux and Windows (Closes #87).
+  * Fix all (?) MSVC conversion warnings (Closes: #95).
+  * Avoid need for _USE_MATH_DEFINES in MSVC (Closes: #96)
+  * Eigen::Matrix datasets: now uses std::cref() to store a reference to matrix.
+  * GSOC2017 contributions by Pranjal Kumar Rai:
+    * Support for dynamic datasets.
+    * Support for non-Euclidean spaces: SO(2), SO(3)
+
+nanoflann 1.2.3: Released Dec 20, 2016
+  * Fixed: split plane now correctly chooses the dimensions with the largest span.
+    Should lead to more optimal trees.
+
 nanoflann 1.2.2: Released Nov 10, 2016
   * knnSearch() now also returns the number of valid points found.
 

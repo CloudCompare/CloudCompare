@@ -15,8 +15,8 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef M3C2_PLUGIN_COMMANDS_HEADER
-#define M3C2_PLUGIN_COMMANDS_HEADER
+#ifndef RANSAC_PLUGIN_COMMANDS_HEADER
+#define RANSAC_PLUGIN_COMMANDS_HEADER
 
 //CloudCompare
 #include "ccCommandLineInterface.h"
@@ -53,7 +53,7 @@ constexpr char PRIM_TORUS[] = "TORUS";
 
 struct CommandRANSAC : public ccCommandLineInterface::Command
 {
-	CommandRANSAC() : ccCommandLineInterface::Command("RANSAC", COMMAND_RANSAC) {}
+	CommandRANSAC() : ccCommandLineInterface::Command(QObject::tr("RANSAC"), COMMAND_RANSAC) {}
 
 	virtual bool process(ccCommandLineInterface& cmd) override
 	{
@@ -87,7 +87,9 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 		params.bitmapEpsilon = -1.0f;
 
 		for (unsigned char k = 0; k < 5; ++k)
+		{
 			params.primEnabled[k] = false;
+		}
 
 		if (!cmd.arguments().empty())
 		{
@@ -203,71 +205,31 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 				}
 				else if (param == OUT_CLOUD_DIR)
 				{
-					if (cmd.arguments().empty())
+					if (!makePathIfPossible(cmd, param, &outputCloudsDir, &outputIndividualClouds))
 					{
-						return cmd.error(QObject::tr("\nMissing parameter: Directory after \"-%1 %2\"").arg(COMMAND_RANSAC, OUT_CLOUD_DIR));
+						return false;
 					}
-					QString arg = cmd.arguments().takeFirst();
-					QDir dir(arg);
-					if (!dir.exists())
-					{
-						cmd.print(QObject::tr("\n%1 Does not exist\tcreating path").arg(arg));
-						dir.mkpath(arg);
-					}
-					outputCloudsDir = dir.cleanPath(arg);
-					cmd.print(QObject::tr("\t%1 : %2").arg(OUT_CLOUD_DIR, outputCloudsDir));
-					outputIndividualClouds = true;
 				}
 				else if (param == OUT_MESH_DIR)
 				{
-					if (cmd.arguments().empty())
+					if (!makePathIfPossible(cmd, param, &outputMeshesDir, &outputIndividualPrimitives))
 					{
-						return cmd.error(QObject::tr("\nMissing parameter: Directory after \"-%1 %2\"").arg(COMMAND_RANSAC, OUT_MESH_DIR));
+						return false;
 					}
-					QString arg = cmd.arguments().takeFirst();
-					QDir dir(arg);
-					if (!dir.exists())
-					{
-						cmd.print(QObject::tr("\n%1 Does not exist\tcreating path").arg(arg));
-						dir.mkpath(arg);
-					}
-					outputMeshesDir = dir.cleanPath(arg);
-					cmd.print(QObject::tr("\t%1 : %2").arg(OUT_MESH_DIR, outputMeshesDir));
-					outputIndividualPrimitives = true;
 				}
 				else if (param == OUT_GROUP_DIR)
 				{
-					if (cmd.arguments().empty())
+					if (!makePathIfPossible(cmd, param, &outputGroupDir, &outputGrouped))
 					{
-						return cmd.error(QObject::tr("\nMissing parameter: Directory after \"-%1 %2\"").arg(COMMAND_RANSAC, OUT_GROUP_DIR));
+						return false;
 					}
-					QString arg = cmd.arguments().takeFirst();
-					QDir dir(arg);
-					if (!dir.exists())
-					{
-						cmd.print(QObject::tr("\n%1 Does not exist\tcreating path").arg(arg));
-						dir.mkpath(arg);
-					}
-					outputGroupDir = dir.cleanPath(arg);
-					cmd.print(QObject::tr("\t%1 : %2").arg(OUT_GROUP_DIR, outputGroupDir));
-					outputGrouped = true;
 				}
 				else if (param == OUT_PAIR_DIR)
 				{
-				if (cmd.arguments().empty())
-				{
-					return cmd.error(QObject::tr("\nMissing parameter: Directory after \"-%1 %2\"").arg(COMMAND_RANSAC, OUT_PAIR_DIR));
-				}
-				QString arg = cmd.arguments().takeFirst();
-				QDir dir(arg);
-				if (!dir.exists())
-				{
-					cmd.print(QObject::tr("\n%1 Does not exist\tcreating path").arg(arg));
-					dir.mkpath(arg);
-				}
-				outputPairDir  = dir.cleanPath(arg);
-				cmd.print(QObject::tr("\t%1 : %2").arg(OUT_PAIR_DIR, outputPairDir));
-				outputIndividualPairs = true;
+					if (!makePathIfPossible(cmd, param, &outputPairDir, &outputIndividualPairs))
+					{
+						return false;
+					}				
 				}
 				else if (param == OUTPUT_INDIVIDUAL_SUBCLOUDS)
 				{
@@ -398,22 +360,16 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 			}
 
 			ccHObject* group = qRansacSD::executeRANSAC(clCloud.pc, params, cmd.silentMode());
-			if (cmd.autoSaveMode())
-			{
-				QString errorStr = cmd.exportEntity(clCloud); // The original cloud may have had normals added
-				if (!errorStr.isEmpty())
-					cmd.warning(errorStr);
-			}
+			
 			if (group)
 			{
 				if (outputGrouped)
 				{
 					CLGroupDesc clGroup(group, clCloud.basename + "_" + clCloud.pc->getName() + "_RANSAC_DETECTED_SHAPES", outputGroupDir != "" ? outputGroupDir : clCloud.path);
-					if (cmd.autoSaveMode())
+					QString errorStr = cmd.exportEntity(clGroup, QString(), nullptr, ccCommandLineInterface::ExportOption::ForceHierarchy);
+					if (!errorStr.isEmpty())
 					{
-						QString errorStr = cmd.exportEntity(clGroup);
-						if (!errorStr.isEmpty())
-							cmd.warning(errorStr);
+						cmd.warning(errorStr);
 					}
 				}
 				if (outputIndividualPrimitives || outputIndividualClouds || outputIndividualPairs)
@@ -434,74 +390,73 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 							QString suffix;
 							if (meshObj->isA(CC_TYPES::PLANE))
 							{
-								suffix = QString("_%1").arg(planeCount);
+								suffix = QString("_PLANE_%1").arg(planeCount, 4, 10, QChar('0'));
 								planeCount++;
 							}
 							else if (meshObj->isA(CC_TYPES::SPHERE))
 							{
-								suffix = QString("_%1").arg(sphereCount);
+								suffix = QString("_SPHERE_%1").arg(sphereCount, 4, 10, QChar('0'));
 								sphereCount++;
 							}
 							else if (meshObj->isA(CC_TYPES::CYLINDER))
 							{
-								suffix = QString("_%1").arg(cylinderCount);
+								suffix = QString("_CYLINDER_%1").arg(cylinderCount, 4, 10, QChar('0'));
 								cylinderCount++;
 							}
 							else if (meshObj->isA(CC_TYPES::CONE))
 							{
-								suffix = QString("_%1").arg(coneCount);
+								suffix = QString("_CONE_%1").arg(coneCount, 4, 10, QChar('0'));
 								coneCount++;
 							}
 							else if (meshObj->isA(CC_TYPES::TORUS))
 							{
-								suffix = QString("_%1").arg(torusCount);
+								suffix = QString("_TORUS_%1").arg(torusCount, 4, 10, QChar('0'));
 								torusCount++;
 							}
 							auto cld = ccHObjectCaster::ToPointCloud(mesh->getParent());
 							if (outputIndividualPairs)
 							{
-								CLCloudDesc clCloudp(cld, clCloud.basename + "_" + clCloud.pc->getName() + "_" + mesh->getName() + suffix + QString("_pair"), outputPairDir != "" ? outputPairDir : clCloud.path);
-								if (cmd.autoSaveMode())
+								CLGroupDesc clPair(cld, clCloud.basename + "_" + clCloud.pc->getName() + suffix + QString("_pair"), outputPairDir != "" ? outputPairDir : clCloud.path);
+								QString errorStr = cmd.exportEntity(clPair, QString(), nullptr, ccCommandLineInterface::ExportOption::ForceHierarchy);
+								if (!errorStr.isEmpty())
 								{
-									QString errorStr = cmd.exportEntity(clCloudp);
-									if (!errorStr.isEmpty())
-									{
-										cmd.warning(errorStr);
-									}
-								}
+									cmd.warning(errorStr);
+								}							
 							}
 							if (cld)
 							{
 								cld->detachChild(mesh);
 							}
-							CLCloudDesc clCloudp(cld, clCloud.basename + "_" + clCloud.pc->getName() + "_" + mesh->getName() + suffix + QString("_cloud"), outputCloudsDir != "" ? outputCloudsDir : clCloud.path);
+							CLCloudDesc clCloudp(cld, clCloud.basename + "_" + clCloud.pc->getName() + suffix + QString("_cloud"), outputCloudsDir != "" ? outputCloudsDir : clCloud.path);
 							cmd.clouds().push_back(clCloudp);
-							CLMeshDesc clMesh(mesh, clCloud.basename + "_" + clCloud.pc->getName() + "_" + mesh->getName() + suffix, outputMeshesDir != "" ? outputMeshesDir : clCloud.path);
+							CLMeshDesc clMesh(mesh, clCloud.basename + "_" + clCloud.pc->getName() + suffix, outputMeshesDir != "" ? outputMeshesDir : clCloud.path);
 							cmd.meshes().push_back(clMesh);
 							if (outputIndividualClouds)
 							{
-								if (cmd.autoSaveMode())
+								QString errorStr = cmd.exportEntity(clCloudp);
+								if (!errorStr.isEmpty())
 								{
-									QString errorStr = cmd.exportEntity(clCloud);
-									if (!errorStr.isEmpty())
-									{
-										cmd.warning(errorStr);
-									}
+									cmd.warning(errorStr);
 								}
 							}
 							if (outputIndividualPrimitives)
 							{
-								if (cmd.autoSaveMode())
+								QString errorStr = cmd.exportEntity(clMesh);
+								if (!errorStr.isEmpty())
 								{
-									QString errorStr = cmd.exportEntity(clMesh);
-									if (!errorStr.isEmpty())
-									{
-										cmd.warning(errorStr);
-									}
+									cmd.warning(errorStr);
 								}
 							}
 						}
 					}
+				}
+			}
+			if (cmd.autoSaveMode())
+			{
+				QString errorStr = cmd.exportEntity(clCloud); // The original cloud may have had normals added
+				if (!errorStr.isEmpty())
+				{
+					cmd.warning(errorStr);
 				}
 			}
 		}
@@ -509,6 +464,34 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 
 		return true;
 	}
+
+	bool makePathIfPossible(ccCommandLineInterface& cmd, const QString &param, QString *outputPath, bool *performOutput)
+	{
+		if (cmd.arguments().empty())
+		{
+			return cmd.error(QObject::tr("\nMissing parameter: Directory after \"-%1 %2\"").arg(COMMAND_RANSAC, param));
+		}
+		QString arg = cmd.arguments().takeFirst();
+		QDir dir(arg);
+		bool pathExists = dir.exists();
+		if (!pathExists)
+		{
+			cmd.print(QObject::tr("\n%1 Does not exist\tcreating path").arg(arg));
+			pathExists = dir.mkpath(arg);
+		}
+		if (pathExists)
+		{
+			*outputPath = dir.cleanPath(arg);
+			cmd.print(QObject::tr("\t%1 : %2").arg(param, *outputPath));
+			*performOutput = true;
+		}
+		else
+		{
+			cmd.print(QObject::tr("\n%1 path could not be created, skipping %2").arg(arg, param));
+		}
+		return true;
+	}
+
 };
 
 #endif //RANSAC_PLUGIN_COMMANDS_HEADER

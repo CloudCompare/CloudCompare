@@ -282,7 +282,8 @@ ccBBox ccKdTree::getCellBBox(BaseNode* node) const
 	//finish the job
 	ccBBox& box = helper.m_UpdatedBox;
 	{
-		CCVector3 bbMin,bbMax;
+		CCVector3 bbMin;
+		CCVector3 bbMax;
 		m_associatedCloud->getBoundingBox(bbMin,bbMax);
 		for (int i=0; i<3; ++i)
 		{

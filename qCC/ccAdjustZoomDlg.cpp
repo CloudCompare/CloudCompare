@@ -54,10 +54,6 @@ double ccAdjustZoomDlg::getZoom() const
 	return zoomDoubleSpinBox->value();
 }
 
-ccAdjustZoomDlg::~ccAdjustZoomDlg()
-{
-}
-
 void ccAdjustZoomDlg::onZoomChanged(double zoom)
 {
 	pixelSizeDoubleSpinBox->blockSignals(true);

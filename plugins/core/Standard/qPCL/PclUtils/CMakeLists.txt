@@ -1,7 +1,9 @@
 cmake_minimum_required (VERSION 3.0)
 
-# https://cmake.org/cmake/help/git-stage/policy/CMP0074.html
-cmake_policy(SET CMP0074 OLD)
+if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.12.0")
+	# https://cmake.org/cmake/help/git-stage/policy/CMP0074.html
+	cmake_policy(SET CMP0074 OLD)
+endif()
 
 #requires PCL
 find_package(PCL REQUIRED)
@@ -23,7 +25,7 @@ endif()
 
 project( QPCL_PLUGIN_UTILS_LIB )
 
-include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
+include ( CMakePolicies NO_POLICY_SCOPE )
 
 include_directories( ${PCL_INCLUDE_DIRS} )
 

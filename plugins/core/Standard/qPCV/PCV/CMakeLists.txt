@@ -18,7 +18,8 @@ add_library( ${PROJECT_NAME} STATIC ${header_list} ${source_list} )
 target_link_libraries( ${PROJECT_NAME} CC_CORE_LIB )
 
 # Add preprocessor definitions
-set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS NOMINMAX _CRT_SECURE_NO_WARNINGS )
+target_compile_definitions( ${PROJECT_NAME} PRIVATE NOMINMAX _CRT_SECURE_NO_WARNINGS )
+
 if (WIN32)
-	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL )
+	target_compile_definitions( ${PROJECT_NAME} PRIVATE CC_USE_AS_DLL )
 endif()

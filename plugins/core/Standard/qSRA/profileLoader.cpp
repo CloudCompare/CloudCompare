@@ -38,12 +38,12 @@ ccPolyline* ProfileLoader::Load(QString filename, CCVector3& origin, ccMainAppIn
 	{
 		if (app)
 			app->dispToConsole(QString("Failed to open file for reading! Check access rights"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		return 0;
+		return nullptr;
 	}
 
 	QTextStream stream(&file);
 
-	ccPolyline* polyline  = 0;
+	ccPolyline* polyline  = nullptr;
 
 	bool error = false;
 	for (unsigned n=0; n<1; ++n) //fake loop for easy break ;)
@@ -182,7 +182,7 @@ ccPolyline* ProfileLoader::Load(QString filename, CCVector3& origin, ccMainAppIn
 	if (error)
 	{
 		delete polyline;
-		polyline = 0;
+		polyline = nullptr;
 	}
 
 	return polyline;

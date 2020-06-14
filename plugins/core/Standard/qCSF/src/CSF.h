@@ -44,7 +44,7 @@ class CSF
 {
 public:
 	CSF(wl::PointCloud& cloud);
-	virtual ~CSF();
+	virtual ~CSF() = default;
 
 	//input PC from files
 	bool readPointsFromFile(std::string filename);

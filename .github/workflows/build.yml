@@ -1,0 +1,114 @@
+name: Build
+
+on: push
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }} SCALAR_DOUBLE=${{ matrix.scalar_double }}
+    runs-on: ${{ matrix.config.os }}
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+
+    strategy:
+      fail-fast: false
+      matrix:
+        scalar_double: ["ON", "OFF"]
+        config:
+          - {
+              name: "Windows Latest MSVC",
+              os: windows-latest,
+              generator: "NMake Makefiles",
+              conda_library_dir: "Library",
+              compile_qpcl: "ON",
+              compile_qransac: "ON",
+              zlib_name: z.lib,
+              xercesclib_name: xerces-c_3.lib,
+           }
+          - {
+              name: "macOS Latest Clang",
+              os: macos-latest,
+              generator: "Ninja",
+              conda_library_dir: ".",
+              compile_qpcl: "OFF",
+              compile_qransac: "OFF",
+              zlib_name: libz.a,
+              xercesclib_name: libxerces-c-3.2.dylib
+            }
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+        with:
+          submodules: true
+
+      - uses: goanpeca/setup-miniconda@v1
+        with:
+          miniconda-version: 'latest'
+          activate-environment: ccenv
+          auto-update-conda: true
+
+      - name: Install dependencies
+        shell: pwsh
+        run: conda install -y -c conda-forge `
+          qt=5.12.* `
+          pdal=2.0.* `
+          xerces-c=3.2.* `
+          zlib=1.2.* `
+          eigen=3.3.* `
+          pcl=1.9.*
+
+      - name: Install additional dependencies on macos
+        if: matrix.config.os == 'macos-latest'
+        run: brew install cmake ninja xerces-c
+
+      - name: Configure msvc dev console
+        if:  matrix.config.os == 'windows-latest'
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Configure CMake
+        shell: pwsh
+        run: |
+          mkdir build
+          # Base dir where libs are installed (cmake, dlls, include files, etc)
+          $CONDA_LIB_DIR = Join-Path -Resolve $env:CONDA_PREFIX ${{ matrix.config.conda_library_dir }}
+
+          $EIGEN_ROOT_DIR = Join-Path -Resolve $CONDA_LIB_DIR include eigen3
+          $ZLIB_INCLUDE_DIRS = Join-Path -Resolve $CONDA_LIB_DIR include
+          $ZLIB_LIBRARIES = Join-Path -Resolve $CONDA_LIB_DIR lib ${{ matrix.config.zlib_name }}
+          cmake `
+            -B build `
+            -G "${{ matrix.config.generator }}" `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DOPTION_SCALAR_DOUBLE=${{ matrix.scalar_double }} `
+            -DEIGEN_ROOT_DIR="$EIGEN_ROOT_DIR" `
+            -DZLIB_INCLUDE_DIRS="$ZLIB_INCLUDE_DIRS" `
+            -DZLIB_LIBRARIES="$ZLIB_LIBRARIES" `
+            -DPLUGIN_EXAMPLE_GL=ON `
+            -DPLUGIN_EXAMPLE_IO=ON `
+            -DPLUGIN_EXAMPLE_STANDARD=ON `
+            -DOPTION_USE_SHAPE_LIB=ON `
+            -DOPTION_USE_DXF_LIB=ON `
+            -DPLUGIN_GL_QEDL=ON `
+            -DPLUGIN_GL_QSSAO=ON `
+            -DPLUGIN_IO_QADDITIONAL=ON `
+            -DPLUGIN_IO_QCORE=ON `
+            -DPLUGIN_IO_QE57=ON `
+            -DPLUGIN_IO_QPHOTOSCAN=ON `
+            -DPLUGIN_IO_QPDAL=ON `
+            -DPLUGIN_STANDARD_QANIMATION=ON `
+            -DPLUGIN_STANDARD_QBROOM=ON `
+            -DPLUGIN_STANDARD_QCANUPO=OFF `
+            -DPLUGIN_STANDARD_QCOMPASS=ON `
+            -DPLUGIN_STANDARD_QCSF=ON `
+            -DPLUGIN_STANDARD_QFACETS=ON `
+            -DPLUGIN_STANDARD_QHOUGH_NORMALS=ON `
+            -DPLUGIN_STANDARD_QHPR=ON `
+            -DPLUGIN_STANDARD_QM3C2=ON `
+            -DPLUGIN_STANDARD_QPCV=ON `
+            -DPLUGIN_STANDARD_QPOISSON_RECON=ON `
+            -DPLUGIN_STANDARD_QSRA=ON `
+            -DPLUGIN_STANDARD_QRANSAC_SD=${{ matrix.config.compile_qransac }} `
+            -DPLUGIN_STANDARD_QPCL=${{ matrix.config.compile_qpcl }} `
+            .
+
+      - name: Build
+        run: cmake --build build

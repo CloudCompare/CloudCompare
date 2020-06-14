@@ -131,7 +131,8 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 	//cell limits (dimensions)
 	CCVector3 dims;
 	{
-		CCVector3 bbMin,bbMax;
+		CCVector3 bbMin;
+		CCVector3 bbMax;
 		subset->getBoundingBox(bbMin,bbMax);
 		dims = bbMax - bbMin;
 	}

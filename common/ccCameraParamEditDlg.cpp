@@ -445,7 +445,9 @@ void ccCameraParamEditDlg::updateViewMode()
 
 void ccCameraParamEditDlg::initWithMatrix(const ccGLMatrixd& mat)
 {
-	double phi=0, theta=0, psi=0;
+	double phi = 0;
+	double theta = 0;
+	double psi = 0;
 	CCVector3d trans;
 	mat.getParameters(phi,theta,psi,trans);
 
@@ -548,7 +550,9 @@ void ccCameraParamEditDlg::updateZNearCoef(float zNearCoef)
 
 ccGLMatrixd ccCameraParamEditDlg::getMatrix()
 {
-	double phi = 0, theta = 0, psi = 0;
+	double phi = 0;
+	double theta = 0;
+	double psi = 0;
 
 	phi		= CC_DEG_TO_RAD * m_ui->phiSpinBox->value();
 	psi		= CC_DEG_TO_RAD * m_ui->psiSpinBox->value();

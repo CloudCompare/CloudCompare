@@ -93,12 +93,12 @@ ccColorScale::Shared ccColorScaleSelector::getSelectedScale() const
 ccColorScale::Shared ccColorScaleSelector::getScale(int index) const
 {
 	if (!m_comboBox || index < 0 || index >= m_comboBox->count())
-		return ccColorScale::Shared(0);
+		return ccColorScale::Shared(nullptr);
 
 	//get UUID associated to the combo-box item
 	QString UUID = m_comboBox->itemData(index).toString();
 
-	return m_manager ? m_manager->getScale(UUID) : ccColorScale::Shared(0);
+	return m_manager ? m_manager->getScale(UUID) : ccColorScale::Shared(nullptr);
 }
 
 void ccColorScaleSelector::setSelectedScale(QString uuid)

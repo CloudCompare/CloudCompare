@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: safileio.c,v 1.5 2016-12-05 12:44:05 erouault Exp $
+ * $Id$
  *
  * Project:  Shapelib
  * Purpose:  Default implementation of file io based on stdio.
@@ -33,7 +33,11 @@
  * DEALINGS IN THE SOFTWARE.
  ******************************************************************************
  *
- * $Log: safileio.c,v $
+ * $Log$
+ * Revision 1.6  2018-06-15 19:56:32  erouault
+ * * safileio.c: remove duplicate test. Patch by Jaroslav Fojtik.
+ * Fixes http://bugzilla.maptools.org/show_bug.cgi?id=2744
+ *
  * Revision 1.5  2016-12-05 12:44:05  erouault
  * * Major overhaul of Makefile build system to use autoconf/automake.
  *
@@ -70,7 +74,7 @@
 #include <string.h>
 #include <stdio.h>
 
-SHP_CVSID("$Id: safileio.c,v 1.5 2016-12-05 12:44:05 erouault Exp $");
+SHP_CVSID("$Id$");
 
 #ifdef SHPAPI_UTF8_HOOKS
 #   ifdef SHPAPI_WINDOWS
@@ -207,7 +211,7 @@ const wchar_t* Utf8ToWideChar( const char *pszFilename )
     int nMulti, nWide;
     wchar_t *pwszFileName;
     
-    nMulti = (int)strlen(pszFilename) + 1;
+    nMulti = strlen(pszFilename) + 1;
     nWide = MultiByteToWideChar( CP_UTF8, 0, pszFilename, nMulti, 0, 0);
     if( nWide == 0 )
     {
@@ -236,7 +240,7 @@ SAFile SAUtf8WFOpen( const char *pszFilename, const char *pszAccess )
     const wchar_t *pwszFileName, *pwszAccess;
     pwszFileName = Utf8ToWideChar( pszFilename );
     pwszAccess = Utf8ToWideChar( pszAccess );
-    if( pwszFileName != NULL && pwszFileName != NULL)
+    if( pwszFileName != NULL && pwszAccess != NULL)
     {
         file = (SAFile) _wfopen( pwszFileName, pwszAccess );
     }

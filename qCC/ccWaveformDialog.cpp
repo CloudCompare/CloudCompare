@@ -224,7 +224,8 @@ void ccWaveWidget::refresh()
 	int curveSize = static_cast<int>(m_curveValues.size());
 	if (curveSize != 0)
 	{
-		QVector<double> x(curveSize), y(curveSize);
+		QVector<double> x(curveSize);
+		QVector<double> y(curveSize);
 		
 		for (int i = 0; i < curveSize; ++i)
 		{

@@ -261,6 +261,7 @@ private slots:
 	void doActionInterpolateColors();
 	void doActionChangeColorLevels();
 	void doActionEnhanceRGBWithIntensities();
+	void doActionColorFromScalars();
 
 	void doActionSFGaussianFilter();
 	void doActionSFBilateralFilter();

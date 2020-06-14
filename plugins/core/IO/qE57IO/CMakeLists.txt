@@ -5,7 +5,7 @@ option( PLUGIN_IO_QE57 "Install qE57_IO plugin to read & write E57 files using l
 if ( PLUGIN_IO_QE57 )
 	project( QE57_IO_PLUGIN )
 
-	include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
+	include( CMakePolicies NO_POLICY_SCOPE )
 
 	set( CC_IS_IO_PLUGIN 1 )
 
@@ -23,6 +23,6 @@ if ( PLUGIN_IO_QE57 )
 	target_link_libraries( ${PROJECT_NAME} E57Format ${XercesC_LIBRARIES} )
 	
 	if ( USING_STATIC_XERCES )
-		set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS XERCES_STATIC_LIBRARY )
+		target_compile_definitions( ${PROJECT_NAME} PRIVATE XERCES_STATIC_LIBRARY )
     endif()	
 endif()

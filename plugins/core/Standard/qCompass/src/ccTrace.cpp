@@ -112,7 +112,8 @@ int ccTrace::insertWaypoint(int pointId)
 		//get location of point to add
 		//const CCVector3* Q = m_cloud->getPoint(pointId);
 		CCVector3 Q = *m_cloud->getPoint(pointId);
-		CCVector3 start, end;
+		CCVector3 start;
+		CCVector3 end;
 		//check if point is "inside" any segments
 		for (int i = 1; i < m_waypoints.size(); i++)
 		{
@@ -185,7 +186,9 @@ bool ccTrace::optimizePath(int maxIterations)
 	m_maxIterations = maxIterations;
 
 	//loop through segments and build/rebuild trace
-	int start, end, tID; //declare vars
+	int start = 0;
+	int end = 0;
+	int tID = 0;
 	for (unsigned i = 1; i < m_waypoints.size(); i++)
 	{
 		//calculate indices
@@ -305,7 +308,8 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, int offset)
 	int cost = 0;
 	int smallest_cost = 999999;
 	int iter_count = 0;
-	float cur_d2, next_d2;
+	float cur_d2 = 0.0f;
+	float next_d2 = 0.0f;
 
 	//setup buffer for storing nodes
 	int bufferSize = 500000; //500k node buffer (~1.5-2Mb). This should be enough for most small-medium size traces. More buffers will be created for bigger ones.
@@ -790,7 +794,7 @@ ccFitPlane* ccTrace::fitPlane(int surface_effect_tolerance, float min_planarity)
 	finalizePath();
 	
 	if (size() < 3)
-		return 0; //need three points to fit a plane
+		return nullptr; //need three points to fit a plane
 
 	//check we are not trying to fit a plane to a line
 	CCLib::Neighbourhood Z(this);
@@ -844,7 +848,7 @@ ccFitPlane* ccTrace::fitPlane(int surface_effect_tolerance, float min_planarity)
 		if (acos(n_avg.dot(n)) < 0.01745329251*surface_effect_tolerance) //0.01745329251 converts deg to rad
 		{
 			//this is a false (surface) plane - reject
-			return 0; //don't return plane
+			return nullptr; //don't return plane
 		}
 	}
 
@@ -910,7 +914,7 @@ float ccTrace::calculateOptimumSearchRadius()
 	return d * 1.5;
 }
 
-static QSharedPointer<ccSphere> c_unitPointMarker(0);
+static QSharedPointer<ccSphere> c_unitPointMarker(nullptr);
 void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
 	if (!MACRO_Foreground(context)) //2D foreground only
@@ -931,7 +935,7 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 		//check sphere exists
 		if (!c_unitPointMarker)
 		{
-			c_unitPointMarker = QSharedPointer<ccSphere>(new ccSphere(1.0f, 0, "PointMarker", 6));
+			c_unitPointMarker = QSharedPointer<ccSphere>(new ccSphere(1.0f, nullptr, "PointMarker", 6));
 
 			c_unitPointMarker->showColors(true);
 			c_unitPointMarker->setVisible(true);
@@ -944,7 +948,7 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		//not sure what this does, but it looks like fun
 		CC_DRAW_CONTEXT markerContext = context; //build-up point maker own 'context'
-		markerContext.display = 0;
+		markerContext.display = nullptr;
 		markerContext.drawingFlags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the sphere doesn't push its own!
 
 		//get camera info

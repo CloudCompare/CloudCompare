@@ -147,11 +147,14 @@ ccQuadric* ccQuadric::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/
 	if (count < CC_LOCAL_MODEL_MIN_SIZE[QUADRIC])
 	{
 		ccLog::Warning(QString("[ccQuadric::fitTo] Not enough points in input cloud to fit a quadric! (%1 at the very least are required)").arg(CC_LOCAL_MODEL_MIN_SIZE[QUADRIC]));
-		return 0;
+		return nullptr;
 	}
 
 	//project the points on a 2D plane
-	CCVector3 G, X, Y, N;
+	CCVector3 G;
+	CCVector3 X;
+	CCVector3 Y;
+	CCVector3 N;
 	{
 		CCLib::Neighbourhood Yk(cloud);
 		
@@ -160,7 +163,7 @@ ccQuadric* ccQuadric::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/
 		if (!theLSPlane)
 		{
 			ccLog::Warning("[ccQuadric::Fit] Not enough points to fit a quadric!");
-			return 0;
+			return nullptr;
 		}
 
 		assert(Yk.getGravityCenter());
@@ -178,7 +181,7 @@ ccQuadric* ccQuadric::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/
 	if (!tempCloud.reserve(count))
 	{
 		ccLog::Warning("[ccQuadric::Fit] Not enough memory!");
-		return 0;
+		return nullptr;
 	}
 
 	cloud->placeIteratorAtBeginning();
@@ -207,7 +210,7 @@ ccQuadric* ccQuadric::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/
 	if (!eq)
 	{
 		ccLog::Warning("[ccQuadric::Fit] Failed to fit a quadric!");
-		return 0;
+		return nullptr;
 	}
 
 	//we recenter the quadric object

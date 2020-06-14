@@ -47,10 +47,6 @@ BundlerImportDlg::BundlerImportDlg(QWidget* parent)
 	connect(browseAltKeypointsFileToolButton, &QAbstractButton::clicked, this, &BundlerImportDlg::browseAltKeypointsFilename);
 }
 
-BundlerImportDlg::~BundlerImportDlg()
-{
-}
-
 void BundlerImportDlg::initFromPersistentSettings()
 {
 	QSettings settings;

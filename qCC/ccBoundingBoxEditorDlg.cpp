@@ -218,7 +218,9 @@ void ccBoundingBoxEditorDlg::saveBoxAndAccept()
 {
 	if (oriGroupBox->isVisible())
 	{
-		CCVector3d X, Y, Z;
+		CCVector3d X;
+		CCVector3d Y;
+		CCVector3d Z;
 		getBoxAxes(X, Y, Z);
 		X.normalize();
 		Y.normalize();
@@ -442,10 +444,12 @@ void ccBoundingBoxEditorDlg::getBoxAxes(CCVector3d& X, CCVector3d& Y, CCVector3d
 
 void ccBoundingBoxEditorDlg::onAxisValueChanged(double)
 {
-	CCVector3d X, Y, Z;
+	CCVector3d X;
+	CCVector3d Y;
+	CCVector3d Z;
 	getBoxAxes(X, Y, Z);
 
-	QDoubleSpinBox* vecSpinBoxes[3] = { 0, 0, 0 };
+	QDoubleSpinBox* vecSpinBoxes[3] = { nullptr, nullptr, nullptr };
 	CCVector3d N(0, 0, 0);
 	if (oriXCheckBox->isChecked())
 	{
@@ -523,7 +527,9 @@ void ccBoundingBoxEditorDlg::toClipboardClicked()
 	{
 		CCVector3 C = m_currentBBox.getCenter();
 
-		CCVector3d X, Y, Z;
+		CCVector3d X;
+		CCVector3d Y;
+		CCVector3d Z;
 		getBoxAxes(X, Y, Z);
 
 		ccGLMatrix matrix;

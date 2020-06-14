@@ -25,7 +25,7 @@ function( target_link_OCULUS_SDK ) # 1 argument: ARGV0 = project name
 	if( ${OPTION_USE_OCULUS_SDK} )
 		#release/general
 		if( OCULUS_SDK_LIBRARY_FILE )
-			set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS CC_OCULUS_SUPPORT )
+			target_compile_definitions( ${ARGV0} PUBLIC CC_OCULUS_SUPPORT )
 			target_link_libraries( ${ARGV0} ${OCULUS_SDK_LIBRARY_FILE} )
 		else()
 			message( SEND_ERROR "FBX SDK library not found: can't link" )

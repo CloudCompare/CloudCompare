@@ -241,7 +241,8 @@ namespace ccEntityAction
 		else if (ramp == ccColorGradientDlg::TwoColors)
 		{
 			colorScale = ccColorScale::Create("Temp scale");
-			QColor first,second;
+			QColor first;
+			QColor second;
 			dlg.getColors(first,second);
 			colorScale->insert(ccColorScaleElement(0.0, first), false);
 			colorScale->insert(ccColorScaleElement(1.0, second), true);
@@ -560,7 +561,8 @@ namespace ccEntityAction
 		QString defaultSFName("Intensity");
 
 		bool useCustomIntensityRange = false;
-		static double s_minI = 0.0, s_maxI = 1.0;
+		static double s_minI = 0.0;
+		static double s_maxI = 1.0;
 		if (QMessageBox::question(parent, "Intensity range", "Do you want to define the theoretical intensity range (yes)\nor use the actual one (no)?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
 		{
 			ccAskTwoDoubleValuesDlg atdvDlg("Min", "Max", -1000000.0, 1000000.0, s_minI, s_maxI, 3, "Theroetical intensity", parent);
@@ -2477,7 +2479,8 @@ namespace ccEntityAction
 					case 1: //WEIBULL
 					{
 						CCLib::WeibullDistribution* weibull = static_cast<CCLib::WeibullDistribution*>(distrib);
-						ScalarType a, b;
+						ScalarType a;
+						ScalarType b;
 						weibull->getParameters(a, b);
 						description = QString("a = %1 / b = %2 / shift = %3").arg(a, 0, 'f', precision).arg(b, 0, 'f', precision).arg(weibull->getValueShift(), 0, 'f', precision);
 						ccLog::Print(QString("[Distribution fitting] Additional Weibull distrib. parameters: mode = %1 / skewness = %2").arg(weibull->computeMode()).arg(weibull->computeSkewness()));

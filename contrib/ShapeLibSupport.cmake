@@ -12,6 +12,6 @@ endif()
 function( target_link_SHAPE_LIB ) # 2 arguments: ARGV0 = project name
 	if( ${OPTION_USE_SHAPE_LIB} )
 		target_link_libraries( ${PROJECT_NAME} SHAPELIB )	
-		set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_SHP_SUPPORT )
+		target_compile_definitions( ${PROJECT_NAME} PUBLIC CC_SHP_SUPPORT )
 	endif()
 endfunction()

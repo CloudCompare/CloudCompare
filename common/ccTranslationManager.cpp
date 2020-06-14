@@ -129,32 +129,47 @@ ccTranslationManager::LanguageList ccTranslationManager::availableLanguages( con
 	const QString     cFilter = QStringLiteral( "%1_*.qm" ).arg( appName );
 	const QStringList cFileNames = dir.entryList( { cFilter } );
 
-	QRegularExpression   regExp( QStringLiteral( "%1_(?<langCode>.{2}).*.qm" ).arg( appName ) );
+	// e.g. File name is "CloudCompare_es_AR.qm"
+	//	Regexp grabs "es_AR" in the var "localeStr" (used to set our locale using QLocale)
+	//	and if there is a country code (e.g. "AR"), capture that in "countryCode" (used for menu item)
+	QRegularExpression   regExp( QStringLiteral( "%1_(?<localeStr>.{2}(_(?<countryCode>.{2}))?).*.qm" ).arg( appName ) );
 
 	regExp.optimize();
 
 	for ( const auto &cFileName : cFileNames )
 	{
-	   QRegularExpressionMatch match = regExp.match( cFileName );
+		QRegularExpressionMatch match = regExp.match( cFileName );
+		
+		if ( !match.hasMatch() )
+		{
+			continue;
+		}
+		
+		// Determine our locale
+		const QString cLocaleStr( match.captured( QStringLiteral( "localeStr" ) ) );
+		const QLocale cLocale( cLocaleStr );
+		
+		// Grab our Langauge
+		const QString cLanguage( cLocale.nativeLanguageName() );
+		
+		if ( cLanguage.isEmpty() )
+		{
+			qWarning() << "Language not found for translation file" << cFileName;
+			continue;
+		}
 
-	   if ( !match.hasMatch() )
-	   {
-		  continue;
-	   }
-
-	   const QString  cLangCode( match.captured( QStringLiteral( "langCode" ) ) );
-
-	   QString  language( QLocale( cLangCode ).nativeLanguageName() );
-
-	   if ( language.isEmpty() )
-	   {
-		  qWarning() << "Language not found for translation file" << cFileName;
-		  continue;
-	   }
-
-	   language = language.at( 0 ).toUpper() + language.mid( 1 );
-
-	   theList += { cLangCode, language };
+		// Uppercase first letter of language
+		QString menuItem = QStringLiteral( "%1%2" ).arg( cLanguage.at( 0 ).toUpper(), cLanguage.mid( 1 ) );
+		
+		// Add country if it was part of our locale (e.g. "es_AR" -> "Argentina")
+		const QString cCountryCode( match.captured( QStringLiteral( "countryCode" ) ) );
+		
+		if ( !cCountryCode.isEmpty() )
+		{
+			menuItem += QStringLiteral( " (%1)" ).arg( cLocale.nativeCountryName() );
+		}
+		
+		theList += { cLocaleStr, menuItem };
 	}
 
 	return theList;

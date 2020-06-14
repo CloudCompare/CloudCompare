@@ -1,19 +1,19 @@
 //##########################################################################
-//#                                                                        #
-//#                               CCLIB                                    #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU Library General Public License as       #
-//#  published by the Free Software Foundation; version 2 or later of the  #
-//#  License.                                                              #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
+//#																		   #
+//#								  CCLIB									   #
+//#																		   #
+//#	 This program is free software; you can redistribute it and/or modify  #
+//#	 it under the terms of the GNU Library General Public License as	   #
+//#	 published by the Free Software Foundation; version 2 or later of the  #
+//#	 License.															   #
+//#																		   #
+//#	 This program is distributed in the hope that it will be useful,	   #
+//#	 but WITHOUT ANY WARRANTY; without even the implied warranty of		   #
+//#	 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the		   #
+//#	 GNU General Public License for more details.						   #
+//#																		   #
+//#			 COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)			   #
+//#																		   #
 //##########################################################################
 
 #include <DgmOctree.h>
@@ -116,7 +116,7 @@ struct MonoDimensionalCellCodes
 static MonoDimensionalCellCodes PRE_COMPUTED_POS_CODES;
 
 /**********************************/
-/*        STATIC ACCESSORS        */
+/*		  STATIC ACCESSORS		  */
 /**********************************/
 
 unsigned char DgmOctree::GET_BIT_SHIFT(unsigned char level)
@@ -132,7 +132,7 @@ int DgmOctree::OCTREE_LENGTH(int level)
 
 DgmOctree::CellCode DgmOctree::GenerateTruncatedCellCode(const Tuple3i& cellPos, unsigned char level)
 {
-	assert(	cellPos.x >= 0 && cellPos.x < MonoDimensionalCellCodes::VALUE_COUNT
+	assert( cellPos.x >= 0 && cellPos.x < MonoDimensionalCellCodes::VALUE_COUNT
 		&&	cellPos.y >= 0 && cellPos.y < MonoDimensionalCellCodes::VALUE_COUNT
 		&&	cellPos.z >= 0 && cellPos.z < MonoDimensionalCellCodes::VALUE_COUNT);
 
@@ -150,7 +150,7 @@ DgmOctree::CellCode DgmOctree::GenerateTruncatedCellCode(const Tuple3i& cellPos,
 #ifndef OCTREE_CODES_64_BITS
 DgmOctree::CellCode DgmOctree::GenerateTruncatedCellCode(const Tuple3s& cellPos, unsigned char level)
 {
-	assert(	cellPos.x >= 0 && cellPos.x < MonoDimensionalCellCodes::VALUE_COUNT
+	assert( cellPos.x >= 0 && cellPos.x < MonoDimensionalCellCodes::VALUE_COUNT
 		&&	cellPos.y >= 0 && cellPos.y < MonoDimensionalCellCodes::VALUE_COUNT
 		&&	cellPos.z >= 0 && cellPos.z < MonoDimensionalCellCodes::VALUE_COUNT);
 
@@ -180,7 +180,7 @@ bool DgmOctree::MultiThreadSupport()
 }
 
 /**********************************/
-/*        EVERYTHING ELSE!        */
+/*		  EVERYTHING ELSE!		  */
 /**********************************/
 
 DgmOctree::DgmOctree(GenericIndexedCloudPersist* cloud)
@@ -480,7 +480,8 @@ void DgmOctree::computeCellsStatistics(unsigned char level)
 	unsigned counter = 0;
 	unsigned cellCounter = 0;
 	unsigned maxCellPop = 0;
-	double sum = 0.0, sum2 = 0.0;
+	double sum = 0.0;
+	double sum2 = 0.0;
 
 	for (; p != m_thePointsAndTheirCellCodes.end(); ++p)
 	{
@@ -742,7 +743,7 @@ unsigned DgmOctree::getCellIndex(CellCode truncatedCellCode, unsigned char bitDe
 }
 #endif
 
-unsigned DgmOctree::findPointNeighbourhood(	const CCVector3* queryPoint,
+unsigned DgmOctree::findPointNeighbourhood( const CCVector3* queryPoint,
 											ReferenceCloud* Yk,
 											unsigned maxNumberOfNeighbors,
 											unsigned char level,
@@ -809,7 +810,7 @@ unsigned DgmOctree::findPointNeighbourhood(	const CCVector3* queryPoint,
 	return nnFound;
 }
 
-void DgmOctree::getCellDistanceFromBorders(	const Tuple3i& cellPos,
+void DgmOctree::getCellDistanceFromBorders( const Tuple3i& cellPos,
 											unsigned char level,
 											int* cellDists) const
 {
@@ -824,7 +825,7 @@ void DgmOctree::getCellDistanceFromBorders(	const Tuple3i& cellPos,
 	*_cellDists++ = fillIndexes[5] - cellPos.z;
 }
 
-void DgmOctree::getCellDistanceFromBorders(	const Tuple3i& cellPos,
+void DgmOctree::getCellDistanceFromBorders( const Tuple3i& cellPos,
 											unsigned char level,
 											int neighbourhoodLength,
 											int* limits) const
@@ -856,7 +857,7 @@ void DgmOctree::getCellDistanceFromBorders(	const Tuple3i& cellPos,
 	}
 }
 
-void DgmOctree::getNeighborCellsAround(	const Tuple3i& cellPos,
+void DgmOctree::getNeighborCellsAround( const Tuple3i& cellPos,
 										cellIndexesContainer &neighborCellsIndexes,
 										int neighbourhoodLength,
 										unsigned char level) const
@@ -1085,22 +1086,22 @@ void DgmOctree::getPointsInNeighbourCellsAround(NearestNeighboursSphericalSearch
 	}
 
 	//get distance form cell to octree neighbourhood borders
-    int limits[6];
-    if (!getCellDistanceFromBorders(nNSS.cellPos,
+	int limits[6];
+	if (!getCellDistanceFromBorders(nNSS.cellPos,
 									nNSS.level,
 									maxNeighbourhoodLength,
 									limits))
 		return;
 
-    int &iMinAbs = limits[0];
-    int &iMaxAbs = limits[1];
-    int &jMinAbs = limits[2];
-    int &jMaxAbs = limits[3];
-    int &kMinAbs = limits[4];
-    int &kMaxAbs = limits[5];
+	int &iMinAbs = limits[0];
+	int &iMaxAbs = limits[1];
+	int &jMinAbs = limits[2];
+	int &jMaxAbs = limits[3];
+	int &kMinAbs = limits[4];
+	int &kMaxAbs = limits[5];
 
-    unsigned old_index = 0;
-    CellCode old_c2 = 0;
+	unsigned old_index = 0;
+	CellCode old_c2 = 0;
 	Tuple3i currentCellPos;
 
 	//first part: i in [-maxNL,-minNL] and (j,k) in [-maxNL,maxNL]
@@ -1116,12 +1117,12 @@ void DgmOctree::getPointsInNeighbourCellsAround(NearestNeighboursSphericalSearch
 				currentCellPos.y = v1;
 				for (int v2=nNSS.cellPos.z-kMinAbs; v2<=nNSS.cellPos.z+kMaxAbs; ++v2)
 				{
-                    CellCode c2 = c1 | (GenerateCellCodeForDim(v2)<<2);
+					CellCode c2 = c1 | (GenerateCellCodeForDim(v2)<<2);
 
 					//look for corresponding cell
-                    unsigned index = (old_c2 < c2 ? getCellIndex(c2,bitDec,old_index,m_numberOfProjectedPoints-1) : getCellIndex(c2,bitDec,0,old_index));
-                    if (index < m_numberOfProjectedPoints)
-                    {
+					unsigned index = (old_c2 < c2 ? getCellIndex(c2,bitDec,old_index,m_numberOfProjectedPoints-1) : getCellIndex(c2,bitDec,0,old_index));
+					if (index < m_numberOfProjectedPoints)
+					{
 						//add cell descriptor to cells list
 						currentCellPos.z = v2;
 						computeCellCenter(currentCellPos,nNSS.level,cellDesc.center);
@@ -1129,14 +1130,14 @@ void DgmOctree::getPointsInNeighbourCellsAround(NearestNeighboursSphericalSearch
 						nNSS.cellsInNeighbourhood.push_back(cellDesc);
 
 						for (cellsContainer::const_iterator p = m_thePointsAndTheirCellCodes.begin()+index; (p != m_thePointsAndTheirCellCodes.end()) && ((p->theCode >> bitDec) == c2); ++p)
-                        {
+						{
 							PointDescriptor newPoint(m_theAssociatedCloud->getPointPersistentPtr(p->theIndex),p->theIndex);
-                            nNSS.pointsInSphericalNeighbourhood.push_back(newPoint);
-                        }
+							nNSS.pointsInSphericalNeighbourhood.push_back(newPoint);
+						}
 
-                        old_index = index;
-                        old_c2 = c2;
-                    }
+						old_index = index;
+						old_c2 = c2;
+					}
 				}
 			}
 		}
@@ -1156,12 +1157,12 @@ void DgmOctree::getPointsInNeighbourCellsAround(NearestNeighboursSphericalSearch
 				currentCellPos.y = v1;
 				for (int v2=nNSS.cellPos.z-kMinAbs; v2<=nNSS.cellPos.z+kMaxAbs; ++v2)
 				{
-                    CellCode c2 = c1 | (GenerateCellCodeForDim(v2)<<2);
+					CellCode c2 = c1 | (GenerateCellCodeForDim(v2)<<2);
 
 					//look for corresponding cell
-                    unsigned index = (old_c2 < c2 ? getCellIndex(c2,bitDec,old_index,m_numberOfProjectedPoints-1) : getCellIndex(c2,bitDec,0,old_index));
-                    if (index < m_numberOfProjectedPoints)
-                    {
+					unsigned index = (old_c2 < c2 ? getCellIndex(c2,bitDec,old_index,m_numberOfProjectedPoints-1) : getCellIndex(c2,bitDec,0,old_index));
+					if (index < m_numberOfProjectedPoints)
+					{
 						//add cell descriptor to cells list
 						currentCellPos.z = v2;
 						computeCellCenter(currentCellPos,nNSS.level,cellDesc.center);
@@ -1169,14 +1170,14 @@ void DgmOctree::getPointsInNeighbourCellsAround(NearestNeighboursSphericalSearch
 						nNSS.cellsInNeighbourhood.push_back(cellDesc);
 
 						for (cellsContainer::const_iterator p = m_thePointsAndTheirCellCodes.begin()+index; (p != m_thePointsAndTheirCellCodes.end()) && ((p->theCode >> bitDec) == c2); ++p)
-                        {
+						{
 							PointDescriptor newPoint(m_theAssociatedCloud->getPointPersistentPtr(p->theIndex),p->theIndex);
-                            nNSS.pointsInSphericalNeighbourhood.push_back(newPoint);
-                        }
+							nNSS.pointsInSphericalNeighbourhood.push_back(newPoint);
+						}
 
-                        old_index = index;
-                        old_c2 = c2;
-                    }
+						old_index = index;
+						old_c2 = c2;
+					}
 				}
 			}
 		}
@@ -1196,12 +1197,12 @@ void DgmOctree::getPointsInNeighbourCellsAround(NearestNeighboursSphericalSearch
 				currentCellPos.x = v0;
 				for (int v2=nNSS.cellPos.z-kMinAbs; v2<=nNSS.cellPos.z+kMaxAbs; ++v2)
 				{
-                    CellCode c2 = c0 | (GenerateCellCodeForDim(v2)<<2);
+					CellCode c2 = c0 | (GenerateCellCodeForDim(v2)<<2);
 
 					//look for corresponding cell
-                    unsigned index = (old_c2 < c2 ? getCellIndex(c2,bitDec,old_index,m_numberOfProjectedPoints-1) : getCellIndex(c2,bitDec,0,old_index));
-                    if (index < m_numberOfProjectedPoints)
-                    {
+					unsigned index = (old_c2 < c2 ? getCellIndex(c2,bitDec,old_index,m_numberOfProjectedPoints-1) : getCellIndex(c2,bitDec,0,old_index));
+					if (index < m_numberOfProjectedPoints)
+					{
 						//add cell descriptor to cells list
 						currentCellPos.z = v2;
 						computeCellCenter(currentCellPos,nNSS.level,cellDesc.center);
@@ -1209,14 +1210,14 @@ void DgmOctree::getPointsInNeighbourCellsAround(NearestNeighboursSphericalSearch
 						nNSS.cellsInNeighbourhood.push_back(cellDesc);
 
 						for (cellsContainer::const_iterator p = m_thePointsAndTheirCellCodes.begin()+index; (p != m_thePointsAndTheirCellCodes.end()) && ((p->theCode >> bitDec) == c2); ++p)
-                        {
+						{
 							PointDescriptor newPoint(m_theAssociatedCloud->getPointPersistentPtr(p->theIndex),p->theIndex);
-                            nNSS.pointsInSphericalNeighbourhood.push_back(newPoint);
-                        }
+							nNSS.pointsInSphericalNeighbourhood.push_back(newPoint);
+						}
 
-                        old_index = index;
-                        old_c2 = c2;
-                    }
+						old_index = index;
+						old_c2 = c2;
+					}
 				}
 			}
 		}
@@ -1236,12 +1237,12 @@ void DgmOctree::getPointsInNeighbourCellsAround(NearestNeighboursSphericalSearch
 				currentCellPos.x = v0;
 				for (int v2=nNSS.cellPos.z-kMinAbs; v2<=nNSS.cellPos.z+kMaxAbs; ++v2)
 				{
-                    CellCode c2 = c0 | (GenerateCellCodeForDim(v2)<<2);
+					CellCode c2 = c0 | (GenerateCellCodeForDim(v2)<<2);
 
 					//look for corresponding cell
-                    unsigned index = (old_c2 < c2 ? getCellIndex(c2,bitDec,old_index,m_numberOfProjectedPoints-1) : getCellIndex(c2,bitDec,0,old_index));
-                    if (index < m_numberOfProjectedPoints)
-                    {
+					unsigned index = (old_c2 < c2 ? getCellIndex(c2,bitDec,old_index,m_numberOfProjectedPoints-1) : getCellIndex(c2,bitDec,0,old_index));
+					if (index < m_numberOfProjectedPoints)
+					{
 						//add cell descriptor to cells list
 						currentCellPos.z = v2;
 						computeCellCenter(currentCellPos,nNSS.level,cellDesc.center);
@@ -1249,14 +1250,14 @@ void DgmOctree::getPointsInNeighbourCellsAround(NearestNeighboursSphericalSearch
 						nNSS.cellsInNeighbourhood.push_back(cellDesc);
 
 						for (cellsContainer::const_iterator p = m_thePointsAndTheirCellCodes.begin()+index; (p != m_thePointsAndTheirCellCodes.end()) && ((p->theCode >> bitDec) == c2); ++p)
-                        {
+						{
 							PointDescriptor newPoint(m_theAssociatedCloud->getPointPersistentPtr(p->theIndex),p->theIndex);
-                            nNSS.pointsInSphericalNeighbourhood.push_back(newPoint);
-                        }
+							nNSS.pointsInSphericalNeighbourhood.push_back(newPoint);
+						}
 
-                        old_index = index;
-                        old_c2 = c2;
-                    }
+						old_index = index;
+						old_c2 = c2;
+					}
 				}
 			}
 		}
@@ -1784,7 +1785,8 @@ std::size_t DgmOctree::getPointsInBoxNeighbourhood(BoxNeighbourhood& params) con
 
 	//we are going to test all the cells that may intersect this box
 	//first we extract the box... bounding box ;)
-	CCVector3 minCorner, maxCorner;
+	CCVector3 minCorner;
+	CCVector3 maxCorner;
 	if (params.axes)
 	{
 		//normalize axes (just in case)
@@ -1799,12 +1801,12 @@ std::size_t DgmOctree::getPointsInBoxNeighbourhood(BoxNeighbourhood& params) con
 		CCVector3 corners[8] =
 		{
 			CCVector3(-dx/2, -dy/2, -dz/2),
-			CCVector3(-dx/2, -dy/2,  dz/2),
-			CCVector3(-dx/2,  dy/2,  dz/2),
+			CCVector3(-dx/2, -dy/2,	 dz/2),
+			CCVector3(-dx/2,  dy/2,	 dz/2),
 			CCVector3(-dx/2,  dy/2, -dz/2),
 			CCVector3( dx/2, -dy/2, -dz/2),
-			CCVector3( dx/2, -dy/2,  dz/2),
-			CCVector3( dx/2,  dy/2,  dz/2),
+			CCVector3( dx/2, -dy/2,	 dz/2),
+			CCVector3( dx/2,  dy/2,	 dz/2),
 			CCVector3( dx/2,  dy/2, -dz/2)
 		};
 
@@ -2315,9 +2317,9 @@ int DgmOctree::findNeighborsInASphereStartingFromCell(NearestNeighboursSpherical
 	for (NeighbourCellsSet::iterator c = nNSS.cellsInNeighbourhood.begin(); c!=nNSS.cellsInNeighbourhood.end(); ++c)
 	{
 		//we check the cell bounding box
-		/*if (limitMax.x < c->center.x || limitMin.x >  c->center.x
-		|| limitMax.y < c->center.y || limitMin.y >  c->center.y
-		|| limitMax.z < c->center.z || limitMin.z >  c->center.z)
+		/*if (limitMax.x < c->center.x || limitMin.x > c->center.x
+		|| limitMax.y < c->center.y || limitMin.y > c->center.y
+		|| limitMax.z < c->center.z || limitMin.z > c->center.z)
 		continue; //sphere totally outside the cell
 		//*/
 
@@ -2615,7 +2617,7 @@ bool DgmOctree::getCellIndexes(unsigned char level, cellIndexesContainer& vec) c
 	return true;
 }
 
-bool DgmOctree::getPointsInCellByCellIndex(	ReferenceCloud* cloud,
+bool DgmOctree::getPointsInCellByCellIndex( ReferenceCloud* cloud,
 											unsigned cellIndex,
 											unsigned char level,
 											bool clearOutputCloud/* = true*/) const
@@ -2645,46 +2647,47 @@ bool DgmOctree::getPointsInCellByCellIndex(	ReferenceCloud* cloud,
 	return true;
 }
 
-ReferenceCloud* DgmOctree::getPointsInCellsWithSortedCellCodes(	cellCodesContainer& cellCodes,
+ReferenceCloud* DgmOctree::getPointsInCellsWithSortedCellCodes( cellCodesContainer& cellCodes,
 																unsigned char level,
 																ReferenceCloud* subset,
 																bool areCodesTruncated/*=false*/) const
 {
 	assert(subset);
 
-    //binary shift for cell code truncation
-    unsigned char bitDec1 = GET_BIT_SHIFT(level); //shift for this octree codes
-    unsigned char bitDec2 = (areCodesTruncated ? 0 : bitDec1); //shift for the input codes
+	//binary shift for cell code truncation
+	unsigned char bitDec1 = GET_BIT_SHIFT(level); //shift for this octree codes
+	unsigned char bitDec2 = (areCodesTruncated ? 0 : bitDec1); //shift for the input codes
 
-    cellsContainer::const_iterator p = m_thePointsAndTheirCellCodes.begin();
-    CellCode toExtractCode,currentCode = (p->theCode >> bitDec1); //pred value must be different than the first element's
+	cellsContainer::const_iterator p = m_thePointsAndTheirCellCodes.begin();
+	CellCode toExtractCode;
+	CellCode currentCode = (p->theCode >> bitDec1); //pred value must be different than the first element's
 
-    subset->clear();
+	subset->clear();
 
-    cellCodesContainer::const_iterator q=cellCodes.begin();
-    unsigned ind_p = 0;
-    while (ind_p<m_numberOfProjectedPoints)
-    {
-        //we skip codes while the searched code is below the current one
-        while (((toExtractCode = (*q >> bitDec2)) < currentCode) && (q != cellCodes.end()))
-            ++q;
+	cellCodesContainer::const_iterator q=cellCodes.begin();
+	unsigned ind_p = 0;
+	while (ind_p<m_numberOfProjectedPoints)
+	{
+		//we skip codes while the searched code is below the current one
+		while (((toExtractCode = (*q >> bitDec2)) < currentCode) && (q != cellCodes.end()))
+			++q;
 
-        if (q == cellCodes.end())
-            break;
+		if (q == cellCodes.end())
+			break;
 
-        //now we skip current codes to catch the search one!
-        while ((ind_p < m_numberOfProjectedPoints) && (currentCode <= toExtractCode))
-        {
-            if (currentCode == toExtractCode)
-                subset->addPointIndex(p->theIndex);
+		//now we skip current codes to catch the search one!
+		while ((ind_p < m_numberOfProjectedPoints) && (currentCode <= toExtractCode))
+		{
+			if (currentCode == toExtractCode)
+				subset->addPointIndex(p->theIndex);
 
-            ++p;
-            if (++ind_p < m_numberOfProjectedPoints)
-                currentCode = p->theCode >> bitDec1;
-        }
-    }
+			++p;
+			if (++ind_p < m_numberOfProjectedPoints)
+				currentCode = p->theCode >> bitDec1;
+		}
+	}
 
-    return subset;
+	return subset;
 }
 
 
@@ -2844,7 +2847,8 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
 	}
 
 	//we compute the position of each cell (grid coordinates)
-	Tuple3i indexMin, indexMax;
+	Tuple3i indexMin;
+	Tuple3i indexMax;
 	{
 		//binary shift for cell code truncation
 		unsigned char bitDec = GET_BIT_SHIFT(level);
@@ -2893,8 +2897,10 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
 	const int& step = gridSize.z;
 
 	//relative neighbos positions (either 6 or 26 total - but we only use half of it)
-	unsigned char neighborsInCurrentSlice = 0, neighborsInPrecedingSlice = 0;
-	int currentSliceNeighborsShifts[4], precedingSliceNeighborsShifts[9]; //maximum size to simplify code...
+	unsigned char neighborsInCurrentSlice = 0;
+	unsigned char neighborsInPrecedingSlice = 0;
+	int currentSliceNeighborsShifts[4];
+	int precedingSliceNeighborsShifts[9]; //maximum size to simplify code...
 
 	if (sixConnexity) //6-connexity
 	{
@@ -2926,7 +2932,8 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, unsigned char lev
 	}
 
 	//shared structures (to avoid repeated allocations)
-	std::vector<int> neighboursVal, neighboursMin;
+	std::vector<int> neighboursVal;
+	std::vector<int> neighboursMin;
 	try
 	{
 		neighboursVal.reserve(neighborsInCurrentSlice + neighborsInPrecedingSlice);
@@ -3447,7 +3454,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel(	unsigned char level,
 		if (fp)
 		{
 			fprintf(fp,"Function: %s\n",functionTitle ? functionTitle : "unknown");
-			fprintf(fp,"Tested:  %f (%3.1f %%)\n",s_testedPoints,100.0*s_testedPoints/std::max(1.0,s_testedPoints+s_skippedPoints));
+			fprintf(fp,"Tested:   %f (%3.1f %%)\n",s_testedPoints,100.0*s_testedPoints/std::max(1.0,s_testedPoints+s_skippedPoints));
 			fprintf(fp,"skipped: %f (%3.1f %%)\n",s_skippedPoints,100.0*s_skippedPoints/std::max(1.0,s_testedPoints+s_skippedPoints));
 			fprintf(fp,"Binary search count: %.0f\n",s_binarySearchCount);
 			if (s_binarySearchCount > 0.0)
@@ -4095,7 +4102,7 @@ unsigned DgmOctree::executeFunctionForAllCellsStartingAtLevel(unsigned char star
 		if (fp)
 		{
 			fprintf(fp,"Function: %s\n",functionTitle ? functionTitle : "unknown");
-			fprintf(fp,"Tested:  %f (%3.1f %%)\n",s_testedPoints,100.0*s_testedPoints/std::max(1.0,s_testedPoints+s_skippedPoints));
+			fprintf(fp,"Tested:   %f (%3.1f %%)\n",s_testedPoints,100.0*s_testedPoints/std::max(1.0,s_testedPoints+s_skippedPoints));
 			fprintf(fp,"skipped: %f (%3.1f %%)\n",s_skippedPoints,100.0*s_skippedPoints/std::max(1.0,s_testedPoints+s_skippedPoints));
 			fprintf(fp,"Binary search count: %.0f\n",s_binarySearchCount);
 			if (s_binarySearchCount > 0.0)
@@ -4216,7 +4223,8 @@ bool DgmOctree::rayCast(const CCVector3& rayAxis,
 
 				if (isFOV)
 				{
-					double radialSqDist, sqDistToOrigin;
+					double radialSqDist;
+					double sqDistToOrigin;
 					rayLocal.squareDistances(cellCenter, radialSqDist, sqDistToOrigin);
 
 					double dx = sqrt(sqDistToOrigin);

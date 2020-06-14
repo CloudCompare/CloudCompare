@@ -30,7 +30,7 @@ function( target_link_3DXWARE ) # 1 argument: ARGV0 = project name
 					target_link_libraries( ${ARGV0} debug ${3DXWARE_LIB_DIR}/siapp.lib ${3DXWARE_LIB_DIR}/spwmathD.lib )
 				endif()
 				
-				set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS CC_3DXWARE_SUPPORT )
+				target_compile_definitions( ${ARGV0} PUBLIC CC_3DXWARE_SUPPORT )
 			else()
 				message( SEND_ERROR "3DXWARE libraries folder is not specified (3DXWARE_LIB_DIR)" )
 			endif()

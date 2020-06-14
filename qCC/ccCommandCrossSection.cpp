@@ -34,7 +34,8 @@ bool CommandCrossSection::process(ccCommandLineInterface &cmd)
 	QString xmlFilename = cmd.arguments().takeFirst();
 
 	//read the XML file
-	CCVector3 boxCenter(0, 0, 0), boxThickness(0, 0, 0);
+	CCVector3 boxCenter(0, 0, 0);
+	CCVector3 boxThickness(0, 0, 0);
 	bool repeatDim[3] = { false, false, false };
 	double repeatGap = 0.0;
 	bool inside = true;
@@ -345,7 +346,7 @@ bool CommandCrossSection::process(ccCommandLineInterface &cmd)
 								}
 
 								delete croppedEnt;
-								croppedEnt = 0;
+								croppedEnt = nullptr;
 
 								if (!errorStr.isEmpty())
 									return cmd.error(errorStr);

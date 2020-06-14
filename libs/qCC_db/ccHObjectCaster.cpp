@@ -127,27 +127,27 @@ ccShiftedObject* ccHObjectCaster::ToShifted(ccHObject* obj, bool* lockedVertices
 
 ccGenericMesh* ccHObjectCaster::ToGenericMesh(ccHObject* obj)
 {
-	return (obj && obj->isKindOf(CC_TYPES::MESH) ? static_cast<ccGenericMesh*>(obj) : 0);
+	return (obj && obj->isKindOf(CC_TYPES::MESH) ? static_cast<ccGenericMesh*>(obj) : nullptr);
 }
 
 ccMesh* ccHObjectCaster::ToMesh(ccHObject* obj)
 {
-	return (obj && (obj->isA(CC_TYPES::MESH) || obj->isKindOf(CC_TYPES::PRIMITIVE)) ? static_cast<ccMesh*>(obj) : 0);
+	return (obj && (obj->isA(CC_TYPES::MESH) || obj->isKindOf(CC_TYPES::PRIMITIVE)) ? static_cast<ccMesh*>(obj) : nullptr);
 }
 
 ccSubMesh* ccHObjectCaster::ToSubMesh(ccHObject* obj)
 {
-	return (obj && obj->isA(CC_TYPES::SUB_MESH) ? static_cast<ccSubMesh*>(obj) : 0);
+	return (obj && obj->isA(CC_TYPES::SUB_MESH) ? static_cast<ccSubMesh*>(obj) : nullptr);
 }
 
 ccPolyline* ccHObjectCaster::ToPolyline(ccHObject* obj)
 {
-	return (obj && obj->isA(CC_TYPES::POLY_LINE) ? static_cast<ccPolyline*>(obj) : 0);
+	return (obj && obj->isA(CC_TYPES::POLY_LINE) ? static_cast<ccPolyline*>(obj) : nullptr);
 }
 
 ccFacet* ccHObjectCaster::ToFacet(ccHObject* obj)
 {
-	return obj && obj->isA(CC_TYPES::FACET) ? static_cast<ccFacet*>(obj) : 0;
+	return obj && obj->isA(CC_TYPES::FACET) ? static_cast<ccFacet*>(obj) : nullptr;
 }
 
 ccPlanarEntityInterface* ccHObjectCaster::ToPlanarEntity(ccHObject* obj)

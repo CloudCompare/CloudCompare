@@ -6,7 +6,7 @@ option( PLUGIN_IO_QCSV_MATRIX "Check to install qCSVMatrix I/O plugin" OFF )
 if (PLUGIN_IO_QCSV_MATRIX)
     project( QCSV_MATRIX_IO_PLUGIN )
     
-	include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
+	include( CMakePolicies NO_POLICY_SCOPE )
 
     set( CC_IS_IO_PLUGIN 1 )
 	

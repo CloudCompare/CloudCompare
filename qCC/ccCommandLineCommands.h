@@ -27,6 +27,13 @@ struct CommandChangeMeshOutputFormat : public CommandChangeOutputFormat
 	bool process(ccCommandLineInterface& cmd) override;
 };
 
+struct CommandChangeHierarchyOutputFormat : public CommandChangeOutputFormat
+{
+	CommandChangeHierarchyOutputFormat();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
 struct CommandLoad : public ccCommandLineInterface::Command
 {
 	CommandLoad();
@@ -177,6 +184,20 @@ struct CommandSetActiveSF : public ccCommandLineInterface::Command
 struct CommandRemoveAllSF : public ccCommandLineInterface::Command
 {
 	CommandRemoveAllSF();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
+struct CommandRemoveRGB : public ccCommandLineInterface::Command
+{
+	CommandRemoveRGB();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
+struct CommandRemoveNormals : public ccCommandLineInterface::Command
+{
+	CommandRemoveNormals();
 
 	bool process(ccCommandLineInterface& cmd) override;
 };

@@ -141,8 +141,8 @@ ccMesh* Cloth::toMesh() const
 	{
 		//not enough memory to generate the cloth mesh
 		delete mesh;
-		mesh = 0;
-		return 0;
+		mesh = nullptr;
+		return nullptr;
 	}
 
 	//copy the vertices (particles)

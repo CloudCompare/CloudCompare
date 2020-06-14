@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 
 project( CloudCompare VERSION 2.11.0 )
 
-include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
+include( CMakePolicies NO_POLICY_SCOPE )
 
 include_directories( ${CC_FBO_LIB_SOURCE_DIR}/include )
 include_directories( ${CC_CORE_LIB_SOURCE_DIR}/include )
@@ -57,12 +57,13 @@ else()
 	add_executable( ${PROJECT_NAME} ${header_list} ${source_list} ${generated_ui_list} ${generated_qrc_list} ${rc_list} ${txt_list} )
 endif()
 
-target_link_libraries( ${PROJECT_NAME} CC_FBO_LIB )
-target_link_libraries( ${PROJECT_NAME} CC_CORE_LIB )
-target_link_libraries( ${PROJECT_NAME} QCC_DB_LIB )
-target_link_libraries( ${PROJECT_NAME} QCC_IO_LIB )
-target_link_libraries( ${PROJECT_NAME} QCC_GL_LIB )
-target_link_libraries( ${PROJECT_NAME} qcustomplot )
+target_link_libraries( ${PROJECT_NAME}
+	CC_FBO_LIB
+	CC_CORE_LIB
+	QCC_DB_LIB
+	QCC_IO_LIB 
+	QCC_GL_LIB
+	qcustomplot )
 
 # Qt
 target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Gui Qt5::Widgets Qt5::OpenGL Qt5::PrintSupport)
@@ -90,11 +91,11 @@ endif()
 
 # Add custom preprocessor definitions
 if (OPTION_GL_QUAD_BUFFER_SUPPORT)
-	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_GL_WINDOW_USE_QWINDOW )
+	target_compile_definitions( ${PROJECT_NAME} PUBLIC CC_GL_WINDOW_USE_QWINDOW )
 endif()
 if( WIN32 )
 	if (MSVC)
-		SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES LINK_FLAGS " /MANIFEST:NO")
+		set_target_properties( ${PROJECT_NAME} PROPERTIES LINK_FLAGS " /MANIFEST:NO" )
 	endif()
 endif()
 
@@ -139,17 +140,8 @@ endif()
 # Translation
 add_subdirectory( translations )
 
-# in order to ensure that everything else is installed first, put the Mac bundling in its own subdirectory
-if( APPLE )
-    set_target_properties( ${PROJECT_NAME} PROPERTIES
-        INSTALL_RPATH "@executable_path/../Frameworks"
-        MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Mac/CloudCompare.plist )
-
-    set( MACOSX_BUNDLE_ICON_FILE cc_icon.icns ) 
-    set( MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}" )
-    set( MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION}" )
-    set( MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}" )
-    
+# Put together our Application bundle on macOS
+if( APPLE )    
     add_subdirectory( Mac )
 endif()
 

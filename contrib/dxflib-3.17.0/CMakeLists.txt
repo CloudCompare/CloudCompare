@@ -14,5 +14,5 @@ file( GLOB source_list src/*.cpp)
 add_library( ${PROJECT_NAME} STATIC ${header_list} ${source_list} )
 
 if (WIN32)
-	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS _CRT_SECURE_NO_DEPRECATE )
+	target_compile_definitions( ${PROJECT_NAME} PRIVATE _CRT_SECURE_NO_DEPRECATE )
 endif()

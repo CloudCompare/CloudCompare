@@ -83,7 +83,7 @@ void ccPointPair::drawMeOnly(CC_DRAW_CONTEXT& context)
 		//check sphere exists
 		if (!c_unitPointMarker)
 		{
-			c_unitPointMarker = QSharedPointer<ccSphere>(new ccSphere(1.0f, 0, "PointMarker", 6));
+			c_unitPointMarker = QSharedPointer<ccSphere>(new ccSphere(1.0f, nullptr, "PointMarker", 6));
 
 			c_unitPointMarker->showColors(true);
 			c_unitPointMarker->setVisible(true);
@@ -93,7 +93,7 @@ void ccPointPair::drawMeOnly(CC_DRAW_CONTEXT& context)
 		//check arrow parts exist
 		if (!c_bodyMarker)
 		{
-			c_bodyMarker = QSharedPointer<ccCylinder>(new ccCylinder(1.0f, 0.9f, 0, "UnitNormal", 12));
+			c_bodyMarker = QSharedPointer<ccCylinder>(new ccCylinder(1.0f, 0.9f, nullptr, "UnitNormal", 12));
 			c_bodyMarker->showColors(true);
 			c_bodyMarker->setVisible(true);
 			c_bodyMarker->setEnabled(true);
@@ -102,7 +102,7 @@ void ccPointPair::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 		if (!c_headMarker)
 		{
-			c_headMarker = QSharedPointer<ccCone>(new ccCone(2.5f, 0.0f, 0.1f, 0, 0, 0, "UnitNormalHead", 12));
+			c_headMarker = QSharedPointer<ccCone>(new ccCone(2.5f, 0.0f, 0.1f, 0, 0, nullptr, "UnitNormalHead", 12));
 			c_headMarker->showColors(true);
 			c_headMarker->setVisible(true);
 			c_headMarker->setEnabled(true);
@@ -113,7 +113,7 @@ void ccPointPair::drawMeOnly(CC_DRAW_CONTEXT& context)
 		//not sure what this does, but it looks like fun
 		CC_DRAW_CONTEXT markerContext = context; //build-up point maker own 'context'
 		markerContext.drawingFlags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the sphere doesn't push its own!
-		markerContext.display = 0;
+		markerContext.display = nullptr;
 
 		//get camera info
 		ccGLCameraParameters camera;

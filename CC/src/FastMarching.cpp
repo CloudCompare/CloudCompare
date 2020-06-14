@@ -291,7 +291,9 @@ float FastMarching::computeT(unsigned index)
 		}
 	}
 
-	double A = 0, B = 0, C = 0;
+	double A = 0;
+	double B = 0;
+	double C = 0;
 	double Tij = static_cast<double>(theCell->T/*Cell::T_INF()*/);
 
 	//Quadratic eq. along X

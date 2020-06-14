@@ -597,7 +597,8 @@ void ccColorScaleEditorDialog::copyCurrentScale()
 	ccColorScale::Shared scale = ccColorScale::Create(m_colorScale->getName()+QString("_copy"));
 	if (!m_colorScale->isRelative())
 	{
-		double minVal,maxVal;
+		double minVal = 0.0;
+		double maxVal = 0.0;
 		m_colorScale->getAbsoluteBoundaries(minVal,maxVal);
 		scale->setAbsolute(minVal,maxVal);
 	}

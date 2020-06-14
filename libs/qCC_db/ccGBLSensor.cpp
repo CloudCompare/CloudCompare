@@ -298,7 +298,8 @@ ccGBLSensor::NormalGrid* ccGBLSensor::projectNormals(	CCLib::GenericCloud* cloud
 			}
 
 			//project in Z-buffer
-			unsigned x, y;
+			unsigned x = 0;
+			unsigned y = 0;
 			if (convertToDepthMapCoords(Q.x, Q.y, x, y))
 			{
 				//add the transformed normal
@@ -385,7 +386,8 @@ ccGBLSensor::ColorGrid* ccGBLSensor::projectColors(	CCLib::GenericCloud* cloud,
 				PointCoordinateType depth;
 				projectPoint(*P, Q, depth, m_activeIndex);
 
-				unsigned x, y;
+				unsigned x = 0;
+				unsigned y = 0;
 				if (convertToDepthMapCoords(Q.x, Q.y, x, y))
 				{
 					unsigned index = y*m_depthBuffer.width + x;
@@ -440,7 +442,9 @@ struct Interval
 	template<class T> static Interval FindBiggest(const std::vector<T>& values, T intValue, bool allowLoop = true)
 	{
 		//look for the largest 'empty' part
-		Interval firstEmptyPart, bestEmptyPart, currentEmptyPart;
+		Interval firstEmptyPart;
+		Interval bestEmptyPart;
+		Interval currentEmptyPart;
 
 		for (size_t i = 0; i < values.size(); ++i)
 		{
@@ -498,7 +502,8 @@ bool ccGBLSensor::computeAutoParameters(CCLib::GenericCloud* theCloud)
 		return false;
 	}
 
-	std::vector<bool> nonEmptyAnglesYaw, nonEmptyAnglesPitch;
+	std::vector<bool> nonEmptyAnglesYaw;
+	std::vector<bool> nonEmptyAnglesPitch;
 	try
 	{
 		nonEmptyAnglesYaw.resize(360, false);
@@ -515,7 +520,10 @@ bool ccGBLSensor::computeAutoParameters(CCLib::GenericCloud* theCloud)
 
 	unsigned pointCount = theCloud->size();
 
-	PointCoordinateType minPitch = 0, maxPitch = 0, minYaw = 0, maxYaw = 0;
+	PointCoordinateType minPitch = 0;
+	PointCoordinateType maxPitch = 0;
+	PointCoordinateType minYaw = 0;
+	PointCoordinateType maxYaw = 0;
 	PointCoordinateType maxDepth = 0;
 	{
 		//first project all points to compute the (yaw,ptich) ranges
@@ -705,7 +713,8 @@ bool ccGBLSensor::computeDepthBuffer(CCLib::GenericCloud* theCloud, int& errorCo
 				PointCoordinateType depth;
 				projectPoint(*P, Q, depth, m_activeIndex);
 
-				unsigned x, y;
+				unsigned x = 0;
+				unsigned y = 0;
 				if (convertToDepthMapCoords(Q.x, Q.y, x, y))
 				{
 					PointCoordinateType& zBuf = m_depthBuffer.zBuff[y*m_depthBuffer.width + x];
@@ -754,7 +763,8 @@ unsigned char ccGBLSensor::checkVisibility(const CCVector3& P) const
 		return POINT_OUT_OF_RANGE;
 	}
 
-	unsigned x, y;
+	unsigned x = 0;
+	unsigned y = 0;
 	if (!convertToDepthMapCoords(Q.x, Q.y, x, y))
 	{
 		//out of field of view
@@ -1051,7 +1061,8 @@ bool ccGBLSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Loade
 	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_deltaTheta, 1);
 	if (dataVersion < 38)
 	{
-		ScalarType sensorRange{}, uncertainty{};
+		ScalarType sensorRange{};
+		ScalarType uncertainty{};
 		ccSerializationHelper::ScalarsFromDataStream(inStream, flags, &sensorRange, 1);
 		ccSerializationHelper::ScalarsFromDataStream(inStream, flags, &uncertainty, 1);
 		m_sensorRange = static_cast<PointCoordinateType>(sensorRange);

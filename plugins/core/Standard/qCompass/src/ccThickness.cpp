@@ -41,7 +41,8 @@ void ccThickness::updateMetadata()
 	if (size() == 2) //can't calculate orientation of something smaller than this...
 	{
 		CCVector3f dir = getDirection(); dir.normalize();
-		float trend, plunge;
+		float trend = 0.0f;
+		float plunge = 0.0f;
 
 		if (dir.x + dir.y + dir.z == 0) //special case: null direction
 		{

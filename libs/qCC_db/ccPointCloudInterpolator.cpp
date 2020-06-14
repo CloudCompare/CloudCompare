@@ -28,7 +28,7 @@
 
 struct SFPair
 {
-	SFPair(const CCLib::ScalarField* sfIn = 0, CCLib::ScalarField* sfOut = 0) : in(sfIn), out(sfOut) {}
+	SFPair(const CCLib::ScalarField* sfIn = nullptr, CCLib::ScalarField* sfOut = nullptr) : in(sfIn), out(sfOut) {}
 	const CCLib::ScalarField* in;
 	CCLib::ScalarField* out;
 };
@@ -274,7 +274,8 @@ bool ccPointCloudInterpolator::InterpolateScalarFieldsFrom(	ccPointCloud* destCl
 		assert(srcCloud && destCloud);
 
 		//we spatially 'synchronize' the octrees
-		CCLib::DgmOctree *_srcOctree = 0, *_destOctree = 0;
+		CCLib::DgmOctree *_srcOctree = nullptr;
+		CCLib::DgmOctree *_destOctree = nullptr;
 		CCLib::DistanceComputationTools::SOReturnCode soCode = CCLib::DistanceComputationTools::synchronizeOctrees(
 			srcCloud,
 			destCloud,
@@ -283,7 +284,8 @@ bool ccPointCloudInterpolator::InterpolateScalarFieldsFrom(	ccPointCloud* destCl
 			/*maxSearchDist*/0,
 			progressCb);
 		
-		QScopedPointer<CCLib::DgmOctree> srcOctree(_srcOctree), destOctree(_destOctree);
+		QScopedPointer<CCLib::DgmOctree> srcOctree(_srcOctree);
+		QScopedPointer<CCLib::DgmOctree> destOctree(_destOctree);
 
 		if (soCode != CCLib::DistanceComputationTools::SYNCHRONIZED)
 		{

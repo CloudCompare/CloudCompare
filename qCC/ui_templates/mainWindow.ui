@@ -165,6 +165,7 @@
       <string>Colors</string>
      </property>
      <addaction name="actionSetUniqueColor"/>
+     <addaction name="actionColorFromScalarField"/>
      <addaction name="actionColorize"/>
      <addaction name="actionChangeColorLevels"/>
      <addaction name="actionSetColorGradient"/>
@@ -1144,6 +1145,9 @@ QTreeView::branch:open:has-children:has-siblings  {
    <property name="text">
     <string>Segment</string>
    </property>
+   <property name="shortcut">
+    <string>T</string>
+   </property>  
   </action>
   <action name="actionTranslateRotate">
    <property name="checkable">
@@ -2364,6 +2368,9 @@ QTreeView::branch:open:has-children:has-siblings  {
    <property name="statusTip">
     <string>Cross Section</string>
    </property>
+   <property name="shortcut">
+    <string>X</string>
+   </property>   
   </action>
   <action name="actionEditGlobalShiftAndScale">
    <property name="text">
@@ -2373,6 +2380,11 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionScalarFieldFromColor">
    <property name="text">
     <string>Convert to Scalar field</string>
+   </property>
+  </action>
+  <action name="actionColorFromScalarField">
+   <property name="text">
+    <string>From Scalar fields</string>
    </property>
   </action>
   <action name="actionComputeKdTree">
@@ -2517,6 +2529,9 @@ QTreeView::branch:open:has-children:has-siblings  {
    <property name="toolTip">
     <string>Export cloud info to a CSV file (name, size, barycenter, scalar fields info, etc.)</string>
    </property>
+   <property name="shortcut">
+    <string>E</string>
+   </property>   
   </action>
   <action name="actionInterpolateColors">
    <property name="text">

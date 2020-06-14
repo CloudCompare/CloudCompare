@@ -653,7 +653,8 @@ void ccPropertiesTreeDelegate::fillWithPlanarEntity(const ccPlanarEntityInterfac
 	appendRow(ITEM( tr( "Normal" ) ), ITEM(QStringLiteral("(%1 ; %2 ; %3)").arg(N.x).arg(N.y).arg(N.z)));
 
 	//Dip & Dip direction (in degrees)
-	PointCoordinateType dip_deg, dipDir_deg;
+	PointCoordinateType dip_deg;
+	PointCoordinateType dipDir_deg;
 	ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip_deg, dipDir_deg);
 	appendRow(ITEM( tr( "Dip / Dip dir." ) ), ITEM(QStringLiteral("(%1 ; %2) deg.").arg(static_cast<int>(dip_deg)).arg(static_cast<int>(dipDir_deg))));
 
@@ -871,7 +872,8 @@ void ccPropertiesTreeDelegate::fillWithSensor(const ccSensor* _obj)
 	//number of positions
 	appendRow(ITEM( tr( "Count" ) ), ITEM(QString::number(_obj->getPositions() ? _obj->getPositions()->size() : 0)));
 
-	double minIndex, maxIndex;
+	double minIndex = 0.0;
+	double maxIndex = 0.0;
 	_obj->getIndexBounds(minIndex, maxIndex);
 	if (minIndex != maxIndex)
 	{
@@ -1247,7 +1249,8 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		ccSensor* sensor = ccHObjectCaster::ToSensor(m_currentObject);
 		assert(sensor);
 
-		double minIndex, maxIndex;
+		double minIndex = 0.0;
+		double maxIndex = 0.0;
 		sensor->getIndexBounds(minIndex, maxIndex);
 
 		QDoubleSpinBox* spinBox = new QDoubleSpinBox(parent);

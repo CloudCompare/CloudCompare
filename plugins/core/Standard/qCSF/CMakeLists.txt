@@ -7,7 +7,7 @@ if (PLUGIN_STANDARD_QCSF)
 	#CloudCompare 'CSF' plugin
 	project( QCSF_PLUGIN )
 
-	include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
+	include( CMakePolicies NO_POLICY_SCOPE )
 
 	include_directories( src )
 	

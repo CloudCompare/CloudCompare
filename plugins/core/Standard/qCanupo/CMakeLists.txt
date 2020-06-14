@@ -7,7 +7,7 @@ if (PLUGIN_STANDARD_QCANUPO)
 	#CloudCompare 'Canupo' plugin
 	project( QCANUPO_PLUGIN )
 	
-	include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
+	include( CMakePolicies NO_POLICY_SCOPE )
 
 	set( DLIB_ROOT "" CACHE PATH "DLib library root directory" )
 	if ( NOT DLIB_ROOT )
@@ -20,7 +20,7 @@ if (PLUGIN_STANDARD_QCANUPO)
 	
 	option( COMPILE_QCANUPO_WITH_PRIVATE_PARTS "Check to compile qCanupo plugin with private methods (CNRS/UEB only)" OFF )
 	if ( COMPILE_QCANUPO_WITH_PRIVATE_PARTS )
-		set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS COMPILE_PRIVATE_CANUPO )
+		target_compile_definitions( ${PROJECT_NAME} PRIVATE COMPILE_PRIVATE_CANUPO )
 	endif()
 
 endif()

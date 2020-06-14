@@ -71,7 +71,8 @@ double MeshSamplingTools::computeMeshVolume(GenericMesh* mesh)
 	//total volume
 	double Vtotal = 0.0;
 
-	CCVector3 origin,upperCorner;
+	CCVector3 origin;
+	CCVector3 upperCorner;
 	mesh->getBoundingBox(origin,upperCorner);
 
 	mesh->placeIteratorAtBeginning();
@@ -197,7 +198,8 @@ bool MeshSamplingTools::flagMeshVerticesByType(GenericIndexedMesh* mesh, ScalarF
 		//for all edges
 		for (std::map<unsigned long long, unsigned>::const_iterator edgeIt = edgeCounters.begin(); edgeIt != edgeCounters.end(); ++edgeIt)
 		{
-			unsigned i1, i2;
+			unsigned i1;
+			unsigned i2;
 			DecodeEdgeKey(edgeIt->first, i1, i2);
 
 			ScalarType flag = NAN_VALUE;

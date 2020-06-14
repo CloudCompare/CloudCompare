@@ -43,12 +43,6 @@ ccIndexedTransformation::ccIndexedTransformation(const ccGLMatrix& matrix, doubl
 {
 }
 
-ccIndexedTransformation::ccIndexedTransformation(const ccIndexedTransformation& trans)
-	: ccGLMatrix(trans)
-	, m_index(trans.m_index)
-{
-}
-
 bool ccIndexedTransformation::toAsciiFile(QString filename, int precision/*=12*/) const
 {
 	QFile fp(filename);

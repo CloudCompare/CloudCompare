@@ -56,7 +56,7 @@ void ccPrimitiveFactoryDlg::createPrimitive()
 	if (!m_win)
 		return;
 
-	ccGenericPrimitive* primitive = 0;
+	ccGenericPrimitive* primitive = nullptr;
 	switch(tabWidget->currentIndex())
 	{
 		//Plane

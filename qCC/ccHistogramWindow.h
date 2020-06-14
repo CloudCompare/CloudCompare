@@ -23,7 +23,6 @@
 
 //Qt
 #include <QDialog>
-#include <QFont>
 
 //qCC_db
 #include <ccScalarField.h>
@@ -113,9 +112,16 @@ public:
 	inline double maxVal() const { return m_maxVal; }
 
 public: //SF interactor mode
-
+	enum SFInteractionMode {
+		None = 0x0,
+		DisplayRange = 0x01,
+		SaturationRange = 0x02,
+		All = DisplayRange | SaturationRange
+	};
+	Q_DECLARE_FLAGS(SFInteractionModes, SFInteractionMode)
+	
 	//! Enables SF interaction mode
-	void enableSFInteractionMode(bool state) { m_sfInteractionMode = state; }
+	void setSFInteractionMode( SFInteractionModes modes );
 
 	void setMinDispValue(double);
 	void setMaxDispValue(double);
@@ -195,8 +201,8 @@ protected: //attributes
 
 protected: //SF interactor mode
 
-	//! Whether SF interaction mode is enabled or not
-	bool m_sfInteractionMode;
+	//! Which SF interaction modes are enabled
+	SFInteractionModes m_sfInteractionModes;
 
 	//! Selectable items in "SF interaction" mode
 	enum SELECTABLE_ITEMS { NONE, LEFT_AREA, RIGHT_AREA, BOTH_AREAS, LEFT_ARROW, RIGHT_ARROW, BOTH_ARROWS };

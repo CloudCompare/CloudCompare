@@ -59,10 +59,6 @@ ccNormalVectors::ccNormalVectors()
 	init();
 }
 
-ccNormalVectors::~ccNormalVectors()
-{
-}
-
 CompressedNormType ccNormalVectors::GetNormIndex(const PointCoordinateType N[])
 {
 	unsigned index = ccNormalCompressor::Compress(N);
@@ -404,7 +400,7 @@ PointCoordinateType ccNormalVectors::GuessBestRadius(	ccGenericPointCloud* cloud
 	if (octree && !inputOctree)
 	{
 		delete octree;
-		octree = 0;
+		octree = nullptr;
 	}
 
 	return bestRadius;
@@ -522,7 +518,7 @@ bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 	}
 
 	theNorms->release();
-	theNorms = 0;
+	theNorms = nullptr;
 
 	//preferred orientation
 	if (preferredOrientation != UNDEFINED)
@@ -533,7 +529,7 @@ bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 	if (theOctree && !inputOctree)
 	{
 		delete theOctree;
-		theOctree = 0;
+		theOctree = nullptr;
 	}
 
 	return true;
@@ -648,7 +644,7 @@ bool ccNormalVectors::ComputeNormalWithTri(CCLib::GenericIndexedCloudPersist* po
 	}
 
 	delete theMesh;
-	theMesh = 0;
+	theMesh = nullptr;
 
 	//normalize the 'mean' vector
 	N.normalize();
@@ -925,7 +921,8 @@ CCVector3 ccNormalVectors::ConvertDipAndDipDirToNormal(PointCoordinateType dip_d
 
 void ccNormalVectors::ConvertNormalToHSV(const CCVector3& N, float& H, float& S, float& V)
 {
-	PointCoordinateType dip = 0, dipDir = 0;
+	PointCoordinateType dip = 0;
+	PointCoordinateType dipDir = 0;
 	ConvertNormalToDipAndDipDir(N, dip, dipDir);
 
 	H = static_cast<float>(dipDir);

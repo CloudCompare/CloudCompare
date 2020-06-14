@@ -262,7 +262,8 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 		ccBBox gridBBox = cloudDesc.pc->getOwnBB();
 
 		//compute the grid size
-		unsigned gridWidth = 0, gridHeight = 0;
+		unsigned gridWidth = 0;
+		unsigned gridHeight = 0;
 		if (!ccRasterGrid::ComputeGridSize(vertDir, gridBBox, gridStep, gridWidth, gridHeight))
 		{
 			return cmd.error("Failed to compute the grid dimensions (check input cloud(s) bounding-box)");
@@ -298,7 +299,7 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 			}
 
 			//progress dialog
-			QScopedPointer<ccProgressDialog> pDlg(0);
+			QScopedPointer<ccProgressDialog> pDlg(nullptr);
 			if (!cmd.silentMode())
 			{
 				pDlg.reset(new ccProgressDialog(true, cmd.widgetParent()));
@@ -398,7 +399,7 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 				{
 					ccMesh* rasterMesh = new ccMesh(baseMesh, rasterCloud);
 					delete baseMesh;
-					baseMesh = 0;
+					baseMesh = nullptr;
 
 					rasterCloud->setEnabled(false);
 					rasterCloud->setVisible(true);
@@ -407,7 +408,7 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 					//rasterCloud->setName("vertices");
 					rasterMesh->showSF(rasterCloud->sfShown());
 					rasterMesh->showColors(rasterCloud->colorsShown());
-					rasterCloud = 0; //to avoid deleting it later
+					rasterCloud = nullptr; //to avoid deleting it later
 
 					cmd.print(QString("[Rasterize] Mesh '%1' successfully generated").arg(rasterMesh->getName()));
 
@@ -449,7 +450,7 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 				bands.rgb = false; //not a good idea to mix RGB and height values!
 				bands.allSFs = true;
 			}
-			QString exportFilename = cmd.getExportFilename(cloudDesc, "tif", "RASTER_Z", 0, !cmd.addTimestamp());
+			QString exportFilename = cmd.getExportFilename(cloudDesc, "tif", "RASTER_Z", nullptr, !cmd.addTimestamp());
 			if (exportFilename.isEmpty())
 			{
 				exportFilename = "rasterZ.tif";
@@ -466,7 +467,7 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 				bands.height = false; //not a good idea to mix RGB and height values!
 				bands.allSFs = false;
 			}
-			QString exportFilename = cmd.getExportFilename(cloudDesc, "tif", "RASTER_RGB", 0, !cmd.addTimestamp());
+			QString exportFilename = cmd.getExportFilename(cloudDesc, "tif", "RASTER_RGB", nullptr, !cmd.addTimestamp());
 			if (exportFilename.isEmpty())
 			{
 				exportFilename = "rasterRGB.tif";
@@ -560,9 +561,10 @@ bool CommandVolume25D::process(ccCommandLineInterface &cmd)
 	}
 
 	//we'll get the first two clouds
-	CLCloudDesc *ground = 0, *ceil = 0;
+	CLCloudDesc *ground = nullptr;
+	CLCloudDesc *ceil = nullptr;
 	{
-		CLCloudDesc* clouds[2] = { 0, 0 };
+		CLCloudDesc* clouds[2] = { nullptr, nullptr };
 		int index = 0;
 		if (!cmd.clouds().empty())
 		{
@@ -596,7 +598,8 @@ bool CommandVolume25D::process(ccCommandLineInterface &cmd)
 	}
 
 	//compute the grid size
-	unsigned gridWidth = 0, gridHeight = 0;
+	unsigned gridWidth = 0;
+	unsigned gridHeight = 0;
 	if (!ccRasterGrid::ComputeGridSize(vertDir, gridBBox, gridStep, gridWidth, gridHeight))
 	{
 		return cmd.error("Failed to compute the grid dimensions (check input cloud(s) bounding-box)");
@@ -625,8 +628,8 @@ bool CommandVolume25D::process(ccCommandLineInterface &cmd)
 	ccVolumeCalcTool::ReportInfo reportInfo;
 	if (ccVolumeCalcTool::ComputeVolume(
 	            grid,
-	            ground ? ground->pc : 0,
-	            ceil ? ceil->pc : 0,
+	            ground ? ground->pc : nullptr,
+	            ceil ? ceil->pc : nullptr,
 	            gridBBox,
 	            vertDir,
 	            gridStep,
@@ -638,7 +641,7 @@ bool CommandVolume25D::process(ccCommandLineInterface &cmd)
 	            reportInfo,
 	            constHeight,
 	            constHeight,
-	            cmd.silentMode() ? 0 : cmd.widgetParent()))
+	            cmd.silentMode() ? nullptr : cmd.widgetParent()))
 	{
 		CLCloudDesc* desc = ceil ? ceil : ground;
 		assert(desc);
@@ -672,7 +675,7 @@ bool CommandVolume25D::process(ccCommandLineInterface &cmd)
 				rasterCloud->showColors(true);
 			}
 
-			ccMesh* rasterMesh = 0;
+			ccMesh* rasterMesh = nullptr;
 			if (outputMesh)
 			{
 				char errorStr[1024];
@@ -686,7 +689,7 @@ bool CommandVolume25D::process(ccCommandLineInterface &cmd)
 				{
 					rasterMesh = new ccMesh(baseMesh, rasterCloud);
 					delete baseMesh;
-					baseMesh = 0;
+					baseMesh = nullptr;
 				}
 
 				if (rasterMesh)
@@ -708,7 +711,7 @@ bool CommandVolume25D::process(ccCommandLineInterface &cmd)
 				}
 			}
 
-			CLEntityDesc* outputDesc = 0;
+			CLEntityDesc* outputDesc = nullptr;
 			if (rasterMesh)
 			{
 				CLMeshDesc meshDesc;

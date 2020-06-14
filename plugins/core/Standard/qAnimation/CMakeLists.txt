@@ -8,7 +8,7 @@ if (PLUGIN_STANDARD_QANIMATION)
 
 	project( QANIMATION_PLUGIN )
 
-	include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
+	include( CMakePolicies NO_POLICY_SCOPE )
 
 	if (WITH_FFMPEG_SUPPORT)
 		add_subdirectory( src/QTFFmpegWrapper )
@@ -24,6 +24,6 @@ if (PLUGIN_STANDARD_QANIMATION)
 
 	if (WITH_FFMPEG_SUPPORT)
 		target_link_libraries( ${PROJECT_NAME} QTFFMPEG_LIB )
-		set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS QFFMPEG_SUPPORT )
+		target_compile_definitions( ${PROJECT_NAME} PRIVATE QFFMPEG_SUPPORT )
 	endif()
 endif()

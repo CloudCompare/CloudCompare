@@ -1,6 +1,6 @@
 name: cloudcompare 
 base: core18
-version: '2.11-beta' 
+version: '2.11' 
 summary: 3D point cloud and mesh processing software
 description: |
   CloudCompare is a 3D point cloud (and triangular mesh) processing software.
@@ -42,12 +42,14 @@ apps:
     environment:
       QT_QPA_PLATFORMTHEME: "gtk3"
       LD_LIBRARY_PATH: "$SNAP/lib/cloudcompare:$SNAP/usr/lib/x86_64-linux-gnu/blas:$SNAP/usr/lib/x86_64-linux-gnu/lapack:$LD_LIBRARY_PATH"
+      DISABLE_WAYLAND: "1"
     plugs: [desktop, desktop-legacy, home, x11, wayland, unity7, opengl, removable-media]
   CloudCompare:
     command: bin/desktop-launch CloudCompare
     environment:
       QT_QPA_PLATFORMTHEME: "gtk3"
       LD_LIBRARY_PATH: "$SNAP/lib/cloudcompare:$SNAP/usr/lib/x86_64-linux-gnu/blas:$SNAP/usr/lib/x86_64-linux-gnu/lapack:$LD_LIBRARY_PATH"
+      DISABLE_WAYLAND: "1"
     plugs: [desktop, desktop-legacy, home, x11, wayland, unity7, opengl, removable-media]
 
 parts:
@@ -58,7 +60,7 @@ parts:
     source: https://github.com/CloudCompare/CloudCompare.git
     source-type: git
     source-depth: 10
-    source-branch: master
+    source-branch: v2.11.x
     build-packages:
       - build-essential
       - libavcodec-dev

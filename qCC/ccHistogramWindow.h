@@ -111,7 +111,16 @@ public:
 	//! Returns the current histogram max value
 	inline double maxVal() const { return m_maxVal; }
 
-public: //SF interactor mode
+public: //Axis label display Options
+	enum class AxisDisplayOption {
+		None = 0x0,
+		XAxis = 0x01,
+		YAxis = 0x02,
+		All = XAxis | YAxis
+	};
+	Q_DECLARE_FLAGS(AxisDisplayOptions, AxisDisplayOption)
+	
+	//SF interactor mode
 	enum SFInteractionMode {
 		None = 0x0,
 		DisplayRange = 0x01,
@@ -122,6 +131,10 @@ public: //SF interactor mode
 	
 	//! Enables SF interaction mode
 	void setSFInteractionMode( SFInteractionModes modes );
+	void setAxisDisplayOption(AxisDisplayOptions axisOptions);
+	// Used to disable automatic refresh after resize event
+	// Must refresh manually from client code if this is set to false
+	void setRefreshAfterResize(bool refreshAfterResize);
 
 	void setMinDispValue(double);
 	void setMaxDispValue(double);
@@ -180,6 +193,8 @@ protected: //attributes
 	**/
 	bool m_numberOfClassesCanBeChanged;
 
+	bool m_refreshAfterResize;
+
 	//histogram data
 	QCPColoredBars* m_histogram;
 	std::vector<unsigned> m_histoValues;
@@ -199,6 +214,8 @@ protected: //attributes
 	//! Rendering font
 	QFont m_renderingFont;
 
+	AxisDisplayOptions m_axisDisplayOptions;
+
 protected: //SF interactor mode
 
 	//! Which SF interaction modes are enabled
@@ -211,13 +228,17 @@ protected: //SF interactor mode
 
 	//! Left greyed area
 	QCPHiddenArea* m_areaLeft;
+	double m_areaLeftlastValue;
 	//! Right greyed area
 	QCPHiddenArea* m_areaRight;
+	double m_areaRightlastValue;
 
 	//! Left arrow
 	QCPArrow* m_arrowLeft;
+	double m_arrowLeftlastValue;
 	//! Right arrow
 	QCPArrow* m_arrowRight;
+	double m_arrowRightlastValue;
 
 	//! Last mouse click
 	QPoint m_lastMouseClick;

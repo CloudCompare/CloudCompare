@@ -43,6 +43,8 @@ public:
 	
 	~ccColorFromScalarDlg();
 
+	static constexpr int c_channelCount = 4;
+	void refreshDisplay();
 	//update and redraw histograms
 	void updateHistogram(int);
 
@@ -53,6 +55,8 @@ protected slots:
 	void onChannelChangedB(int) { updateChannel(2); }
 	void onChannelChangedA(int) { updateChannel(3); }
 	void updateChannel(int);
+	void updateSpinBoxLimits(int);
+	void setDefaultSatValuePerChannel(int);
 	void updateColormaps();
 	//mapping ranges changed
 	void minChangedR(double val) { minChanged(0, val, true); }
@@ -81,26 +85,35 @@ protected slots:
 	void maxChanged(int n, double val, bool slider);
 	//done!
 	void onApply();
+	void disableAllButCancel();
 
 protected:
+	void resizeEvent(QResizeEvent* event);
+	bool m_prevFixed[c_channelCount];
 	//! Associated histogram view
-	ccHistogramWindow *m_histograms[4];  //0 - red, 1 - green, 2 - blue, 3 - alpha
+	ccHistogramWindow *m_histograms[c_channelCount];  //0 - red, 1 - green, 2 - blue, 3 - alpha
 	//scalar fields
-	ccScalarField *m_scalars[4]; //0 - red, 1 - green, 2 - blue, 3 - alpha
+	ccScalarField *m_scalars[c_channelCount]; //0 - red, 1 - green, 2 - blue, 3 - alpha
 	//gui elements
-	QComboBox* m_combos[4];
-	QDoubleSpinBox* m_boxes_min[4];
-	QDoubleSpinBox* m_boxes_max[4];
-	QLabel* m_labels_min[4];
-	QLabel* m_labels_max[4];
-	QCheckBox* m_reverse[4];
+	QComboBox* m_combos[c_channelCount];
+	QDoubleSpinBox* m_boxes_min[c_channelCount];
+	QDoubleSpinBox* m_boxes_max[c_channelCount];
+	QLabel* m_labels_min[c_channelCount];
+	QLabel* m_labels_max[c_channelCount];
+	QCheckBox* m_reverse[c_channelCount];
 	//saturation values
-	double m_minSat[4];
-	double m_maxSat[4];
+	double m_minSat[c_channelCount];
+	double m_maxSat[c_channelCount];
 	//! Associated colour scales
-	ccColorScale::Shared m_colors[4];
+	ccColorScale::Shared m_colors[c_channelCount];
 	//! Associated point cloud (color source)
 	ccPointCloud* m_cloud;
+	//! Associated point cloud scalar field original scale (to restore on exit)
+	ccColorScale::Shared m_storedOrigColorScale;
+	ccScalarField::Range m_storedOrigSatRange;
+	ccScalarField::Range m_storedOrigDisplayRange;
+	//set true when catastrophic failure has occured
+	bool m_systemInvalid;
 
 private:
 	Ui::ColorFromScalarDialog *m_ui;

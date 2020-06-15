@@ -60,6 +60,8 @@ public:
 		float maxConeRadius;
 		float maxConeAngle_deg;
 		float maxConeLength;
+		float maxTorusMinorRadius;
+		float maxTorusMajorRadius;
 
 		RansacParams() : epsilon(0.005f)
 			, bitmapEpsilon(0.001f)
@@ -75,6 +77,8 @@ public:
 			, maxConeRadius(std::numeric_limits<float>::infinity())
 			, maxConeAngle_deg(std::numeric_limits<float>::infinity())
 			, maxConeLength(std::numeric_limits<float>::infinity())
+			, maxTorusMinorRadius(std::numeric_limits<float>::infinity())
+			, maxTorusMajorRadius(std::numeric_limits<float>::infinity())
 		{
 			primEnabled[RPT_PLANE] = true;
 			primEnabled[RPT_SPHERE] = true;
@@ -97,6 +101,8 @@ public:
 			, maxConeRadius(std::numeric_limits<float>::infinity())
 			, maxConeAngle_deg(std::numeric_limits<float>::infinity())
 			, maxConeLength(std::numeric_limits<float>::infinity())
+			, maxTorusMinorRadius(std::numeric_limits<float>::infinity())
+			, maxTorusMajorRadius(std::numeric_limits<float>::infinity())
 		{
 			primEnabled[RPT_PLANE] = true;
 			primEnabled[RPT_SPHERE] = true;

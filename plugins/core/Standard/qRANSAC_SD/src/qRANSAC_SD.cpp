@@ -124,19 +124,23 @@ static double   s_proba = 0.01;	// probability that no better candidate was over
 static bool s_primEnabled[5] = { true,true,true,false,false };
 static bool s_allowSimplification = true;
 static bool s_createCloudFromLeftOverPoints = true;
+static bool s_randomColor = true;
 static bool s_maxSphereRadiusEnabled = false;
 static bool s_maxCylinderRadiusEnabled = false;
 static bool s_maxConeRadiusEnabled = false;
 static bool s_maxConeLengthEnabled = false;
 static bool s_maxConeAngleEnabled = false;
 static bool s_maxCylinderLengthEnabled = false;
+static bool s_maxTorusMinorRadiusEnabled = false;
+static bool s_maxTorusMajorRadiusEnabled = false;
 static double s_maxSphereRadius = 1;
 static double s_maxCylinderRadius = 1;
 static double s_maxConeRadius = 1;
 static double s_maxCylinderLength = 1;
 static double s_maxConeLength = 1;
 static double s_maxConeAngle_deg = 90;
-
+static double s_maxTorusMinorRadius = 1;
+static double s_maxTorusMajorRadius = 1;
 
 void qRansacSD::doAction()
 {
@@ -193,8 +197,12 @@ void qRansacSD::doAction()
 	rsdDlg.maxConeLengthdoubleSpinBox->setValue(s_maxConeLength);
 	rsdDlg.maxCylinderLengthdoubleSpinBox->setValue(s_maxCylinderLength);
 	rsdDlg.maxConeAngledoubleSpinBox->setValue(s_maxConeAngle_deg);
-
-	if (!rsdDlg.exec())
+	rsdDlg.maxTorusMinorRadiuscheckBox->setChecked(s_maxTorusMinorRadiusEnabled);
+	rsdDlg.maxTorusMajorRadiuscheckBox->setChecked(s_maxTorusMajorRadiusEnabled);
+	rsdDlg.maxTorusMinorRadiusdoubleSpinBox->setValue(s_maxTorusMinorRadius);
+	rsdDlg.maxTorusMajorRadiusdoubleSpinBox->setValue(s_maxTorusMajorRadius);
+	rsdDlg.randomColorcheckBox->setChecked(s_randomColor);
+		if (!rsdDlg.exec())							 
 		return;
 
 	s_maxSphereRadiusEnabled = rsdDlg.maxSphereRadiuscheckBox->isChecked();
@@ -203,13 +211,16 @@ void qRansacSD::doAction()
 	s_maxConeLengthEnabled = rsdDlg.maxConeLengthcheckBox->isChecked();
 	s_maxCylinderLengthEnabled = rsdDlg.maxCylinderLengthcheckBox->isChecked();
 	s_maxConeAngleEnabled = rsdDlg.maxConeAnglecheckBox->isChecked();
+	s_maxTorusMinorRadiusEnabled = rsdDlg.maxTorusMinorRadiuscheckBox->isChecked();
+	s_maxTorusMajorRadiusEnabled = rsdDlg.maxTorusMajorRadiuscheckBox->isChecked();
+	s_randomColor = rsdDlg.randomColorcheckBox->isChecked();
 	RansacParams params;
 	{
 		params.epsilon = static_cast<float>(rsdDlg.epsilonDoubleSpinBox->value());
 		params.bitmapEpsilon = static_cast<float>(rsdDlg.bitmapEpsilonDoubleSpinBox->value());
 		params.maxNormalDev_deg = static_cast<float>(rsdDlg.maxNormDevAngleSpinBox->value());
 		params.probability = static_cast<float>(rsdDlg.probaDoubleSpinBox->value());
-		params.randomColor = true;
+		params.randomColor = s_randomColor;
 		params.supportPoints = static_cast<unsigned>(rsdDlg.supportPointsSpinBox->value());
 		params.primEnabled[RPT_PLANE] = rsdDlg.planeCheckBox->isChecked();
 		params.primEnabled[RPT_SPHERE] = rsdDlg.sphereCheckBox->isChecked();
@@ -248,6 +259,16 @@ void qRansacSD::doAction()
 		{
 			params.maxConeAngle_deg = static_cast<float>(rsdDlg.maxConeAngledoubleSpinBox->value());
 			s_maxConeAngle_deg = params.maxConeAngle_deg;
+		}
+		if (s_maxTorusMinorRadiusEnabled)
+		{
+			params.maxTorusMinorRadius = static_cast<float>(rsdDlg.maxTorusMinorRadiusdoubleSpinBox->value());
+			s_maxTorusMinorRadius = params.maxTorusMinorRadius;
+		}
+		if (s_maxTorusMajorRadiusEnabled)
+		{
+			params.maxTorusMajorRadius = static_cast<float>(rsdDlg.maxTorusMajorRadiusdoubleSpinBox->value());
+			s_maxTorusMajorRadius = params.maxTorusMajorRadius;
 		}
 	}
 	
@@ -348,6 +369,7 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 		ransacOptions.m_probability = params.probability;
 		ransacOptions.m_minSupport = params.supportPoints;
 		ransacOptions.m_allowSimplification = params.allowSimplification;
+		ransacOptions.m_fitting = RansacShapeDetector::Options::LS_FITTING;
 	}
 	const float scale = cloud.getScale();
 
@@ -414,7 +436,7 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 	if (params.primEnabled[RPT_CONE])
 		detector.Add(new ConePrimitiveShapeConstructor(params.maxConeRadius, CCCoreLib::DegreesToRadians(params.maxConeAngle_deg), params.maxConeLength));
 	if (params.primEnabled[RPT_TORUS])
-		detector.Add(new TorusPrimitiveShapeConstructor(false)); // Do not allow apple shaped torus
+		detector.Add(new TorusPrimitiveShapeConstructor(false, params.maxTorusMinorRadius, params.maxTorusMajorRadius)); // Do not allow apple shaped torus
 
 
 	unsigned remaining = count;
@@ -827,7 +849,10 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 				prim->applyGLTransformation_recursive();
 				pcShape->addChild(prim);
 				prim->setDisplay(pcShape->getDisplay());
-				prim->setColor(col);
+				if (params.randomColor)
+				{
+					prim->setColor(col);
+				}
 				prim->showColors(true);
 				prim->setVisible(true);
 				if (!group)

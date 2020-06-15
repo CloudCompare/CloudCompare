@@ -3,8 +3,10 @@
 #include "ScoreComputer.h"
 #include <GfxTL/NullClass.h>
 
-TorusPrimitiveShapeConstructor::TorusPrimitiveShapeConstructor(bool allowAppleShaped) :
-	m_allowAppleShaped(allowAppleShaped)
+TorusPrimitiveShapeConstructor::TorusPrimitiveShapeConstructor(bool allowAppleShaped, float maxMinorRadius, float maxMajorRadius)
+	: m_allowAppleShaped(allowAppleShaped)
+	, m_maxMinorRadius(maxMinorRadius)
+	, m_maxMajorRadius(maxMajorRadius)
 {
 }
 
@@ -39,11 +41,13 @@ PrimitiveShape *TorusPrimitiveShapeConstructor::Construct(
 		return NULL;
 	}
 	
-	if (!m_allowAppleShaped && torus.IsAppleShaped())
+	if ((!m_allowAppleShaped && torus.IsAppleShaped()) ||
+		torus.MinorRadius() > m_maxMinorRadius ||
+		torus.MajorRadius() > m_maxMajorRadius)
 	{
 		return NULL;
 	}
-	return new TorusPrimitiveShape(torus);
+	return new TorusPrimitiveShape(torus, m_allowAppleShaped, m_maxMinorRadius, m_maxMajorRadius);
 }
 
 PrimitiveShape *TorusPrimitiveShapeConstructor::Deserialize(std::istream *i,

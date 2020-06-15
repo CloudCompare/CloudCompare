@@ -8,14 +8,20 @@
 #include "PlanePrimitiveShape.h"
 extern MiscLib::performance_t totalTime_torusConnected;
 
-TorusPrimitiveShape::TorusPrimitiveShape(const Torus &torus)
+TorusPrimitiveShape::TorusPrimitiveShape(const Torus &torus, bool allowAppleShaped, float maxMinorRadius, float maxMajorRadius)
 : m_torus(torus)
+, m_allowAppleShaped(allowAppleShaped)
+, m_maxMinorRadius(maxMinorRadius)
+, m_maxMajorRadius(maxMajorRadius)
 , m_parametrization(m_torus)
 {}
 
 TorusPrimitiveShape::TorusPrimitiveShape(const TorusPrimitiveShape &tps)
 : BitmapPrimitiveShape(tps)
 , m_torus(tps.m_torus)
+, m_allowAppleShaped(tps.m_allowAppleShaped)
+, m_maxMinorRadius(tps.m_maxMinorRadius)
+, m_maxMajorRadius(tps.m_maxMajorRadius)
 , m_parametrization(tps.m_parametrization)
 {
 	m_parametrization.Shape(m_torus);

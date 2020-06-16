@@ -379,7 +379,7 @@ void ccPropertiesTreeDelegate::addSeparator(const QString& title)
 void ccPropertiesTreeDelegate::fillWithMetaData(const ccObject* _obj)
 {
 	assert(_obj && m_model);
-	if (!_obj && !m_model)
+	if (!_obj || !m_model)
 	{
 		return;
 	}
@@ -413,7 +413,7 @@ void ccPropertiesTreeDelegate::fillWithMetaData(const ccObject* _obj)
 void ccPropertiesTreeDelegate::fillWithHObject(ccHObject* _obj)
 {
 	assert(_obj && m_model);
-	if (!_obj && !m_model)
+	if (!_obj || !m_model)
 	{
 		return;
 	}
@@ -500,7 +500,7 @@ void ccPropertiesTreeDelegate::fillWithHObject(ccHObject* _obj)
 void ccPropertiesTreeDelegate::fillWithShifted(const ccShiftedObject* _obj)
 {
 	assert(_obj && m_model);
-	if (!_obj && !m_model)
+	if (!_obj || !m_model)
 	{
 		return;
 	}
@@ -516,7 +516,7 @@ void ccPropertiesTreeDelegate::fillWithShifted(const ccShiftedObject* _obj)
 void ccPropertiesTreeDelegate::fillWithPointCloud(ccGenericPointCloud* _obj)
 {
 	assert(_obj && m_model);
-	if (!_obj && !m_model)
+	if (!_obj || !m_model)
 	{
 		return;
 	}
@@ -576,7 +576,7 @@ void ccPropertiesTreeDelegate::fillWithPointCloud(ccGenericPointCloud* _obj)
 void ccPropertiesTreeDelegate::fillSFWithPointCloud(ccGenericPointCloud* _obj)
 {
 	assert(m_model);
-	if (!_obj && !m_model)
+	if (!_obj || !m_model)
 	{
 		return;
 	}
@@ -625,7 +625,7 @@ void ccPropertiesTreeDelegate::fillSFWithPointCloud(ccGenericPointCloud* _obj)
 void ccPropertiesTreeDelegate::fillWithPrimitive(const ccGenericPrimitive* _obj)
 {
 	assert(_obj && m_model);
-	if (!_obj && !m_model)
+	if (!_obj || !m_model)
 	{
 		return;
 	}
@@ -668,7 +668,7 @@ void ccPropertiesTreeDelegate::fillWithPrimitive(const ccGenericPrimitive* _obj)
 void ccPropertiesTreeDelegate::fillWithFacet(const ccFacet* _obj)
 {
 	assert(_obj && m_model);
-	if (!_obj && !m_model)
+	if (!_obj || !m_model)
 	{
 		return;
 	}
@@ -698,7 +698,7 @@ void ccPropertiesTreeDelegate::fillWithFacet(const ccFacet* _obj)
 
 void ccPropertiesTreeDelegate::fillWithPlanarEntity(const ccPlanarEntityInterface* _obj)
 {
-	if (!_obj && !m_model)
+	if (!_obj || !m_model)
 	{
 		return;
 	}
@@ -720,7 +720,7 @@ void ccPropertiesTreeDelegate::fillWithPlanarEntity(const ccPlanarEntityInterfac
 void ccPropertiesTreeDelegate::fillWithMesh(const ccGenericMesh* _obj)
 {
 	assert(_obj && m_model);
-	if (!_obj && !m_model)
+	if (!_obj || !m_model)
 	{
 		return;
 	}
@@ -752,7 +752,7 @@ void ccPropertiesTreeDelegate::fillWithMesh(const ccGenericMesh* _obj)
 void ccPropertiesTreeDelegate::fillWithPolyline(const ccPolyline* _obj)
 {
 	assert(_obj && m_model);
-	if (!_obj && !m_model)
+	if (!_obj || !m_model)
 	{
 		return;
 	}
@@ -775,7 +775,7 @@ void ccPropertiesTreeDelegate::fillWithPolyline(const ccPolyline* _obj)
 void ccPropertiesTreeDelegate::fillWithPointOctree(const ccOctree* _obj)
 {
 	assert(_obj && m_model);
-	if (!_obj && !m_model)
+	if (!_obj || !m_model)
 	{
 		return;
 	}
@@ -809,7 +809,7 @@ void ccPropertiesTreeDelegate::fillWithPointOctree(const ccOctree* _obj)
 void ccPropertiesTreeDelegate::fillWithPointKdTree(const ccKdTree* _obj)
 {
 	assert(_obj && m_model);
-	if (!_obj && !m_model)
+	if (!_obj || !m_model)
 	{
 		return;
 	}
@@ -850,7 +850,7 @@ void ccPropertiesTreeDelegate::fillWithPointKdTree(const ccKdTree* _obj)
 void ccPropertiesTreeDelegate::fillWithImage(const ccImage* _obj)
 {
 	assert(_obj && m_model);
-	if (!_obj && !m_model)
+	if (!_obj || !m_model)
 	{
 		return;
 	}
@@ -877,7 +877,7 @@ void ccPropertiesTreeDelegate::fillWithImage(const ccImage* _obj)
 void ccPropertiesTreeDelegate::fillWithLabel(const cc2DLabel* _obj)
 {
 	assert(_obj && m_model);
-	if (!_obj && !m_model)
+	if (!_obj || !m_model)
 	{
 		return;
 	}
@@ -898,7 +898,7 @@ void ccPropertiesTreeDelegate::fillWithLabel(const cc2DLabel* _obj)
 void ccPropertiesTreeDelegate::fillWithViewportObject(const cc2DViewportObject* _obj)
 {
 	assert(_obj && m_model);
-	if (!_obj && !m_model)
+	if (!_obj || !m_model)
 	{
 		return;
 	}
@@ -919,7 +919,7 @@ void ccPropertiesTreeDelegate::fillWithViewportObject(const cc2DViewportObject* 
 void ccPropertiesTreeDelegate::fillWithTransBuffer(const ccIndexedTransformationBuffer* _obj)
 {
 	assert(_obj && m_model);
-	if (!_obj && !m_model)
+	if (!_obj || !m_model)
 	{
 		return;
 	}
@@ -942,7 +942,7 @@ void ccPropertiesTreeDelegate::fillWithTransBuffer(const ccIndexedTransformation
 void ccPropertiesTreeDelegate::fillWithSensor(const ccSensor* _obj)
 {
 	assert(_obj && m_model);
-	if (!_obj && !m_model)
+	if (!_obj || !m_model)
 	{
 		return;
 	}
@@ -979,7 +979,7 @@ void ccPropertiesTreeDelegate::fillWithSensor(const ccSensor* _obj)
 void ccPropertiesTreeDelegate::fillWithGBLSensor(const ccGBLSensor* _obj)
 {
 	assert(_obj && m_model);
-	if (!_obj && !m_model)
+	if (!_obj || !m_model)
 	{
 		return;
 	}
@@ -1028,7 +1028,7 @@ void ccPropertiesTreeDelegate::fillWithGBLSensor(const ccGBLSensor* _obj)
 void ccPropertiesTreeDelegate::fillWithCameraSensor(const ccCameraSensor* _obj)
 {
 	assert(_obj && m_model);
-	if (!_obj && !m_model)
+	if (!_obj || !m_model)
 	{
 		return;
 	}
@@ -1071,7 +1071,7 @@ void ccPropertiesTreeDelegate::fillWithCameraSensor(const ccCameraSensor* _obj)
 void ccPropertiesTreeDelegate::fillWithMaterialSet(const ccMaterialSet* _obj)
 {
 	assert(_obj && m_model);
-	if (!_obj && !m_model)
+	if (!_obj || !m_model)
 	{
 		return;
 	}
@@ -1087,7 +1087,7 @@ void ccPropertiesTreeDelegate::fillWithMaterialSet(const ccMaterialSet* _obj)
 void ccPropertiesTreeDelegate::fillWithShareable(const CCShareable* _obj)
 {
 	assert(_obj && m_model);
-	if (!_obj && !m_model)
+	if (!_obj || !m_model)
 	{
 		return;
 	}
@@ -1103,7 +1103,7 @@ template<class Type, int N, class ComponentType>
 void ccPropertiesTreeDelegate::fillWithCCArray(const ccArray<Type, N, ComponentType>* _obj)
 {
 	assert(_obj && m_model);
-	if (!_obj && !m_model)
+	if (!_obj || !m_model)
 	{
 		return;
 	}

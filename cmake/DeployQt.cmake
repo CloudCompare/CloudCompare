@@ -88,7 +88,8 @@ function( DeployQt )
 				${temp_app_path}
 				--no-angle
 				--no-opengl-sw
-				--no-quick-import				
+				--no-quick-import
+				--concurrent				
 				--verbose=1
 			VERBATIM
 		)

@@ -89,6 +89,7 @@ function( DeployQt )
 				--no-angle
 				--no-opengl-sw
 				--no-quick-import
+				--no-system-d3d-compiler
 				--concurrent				
 				--verbose=1
 			VERBATIM

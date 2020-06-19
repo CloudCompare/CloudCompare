@@ -17,7 +17,7 @@ if( ${OPTION_USE_GDAL} )
 endif()
 
 # Link project with GDAL library
-function( target_link_GDAL ) # 2 arguments: ARGV0 = project name / ARGV1 = base lib export folder (optional)
+function( target_link_GDAL ) # ARGV0 = project name
 	if( NOT GDAL_FOUND )
 		message( FATAL_ERROR "GDAL package not found" )
 	endif()
@@ -27,19 +27,17 @@ function( target_link_GDAL ) # 2 arguments: ARGV0 = project name / ARGV1 = base 
 	
 	if( WIN32 )
 		#install DLLs
-		if ( ARGV1 )
-			message( STATUS "Looking for GDAL DLLs" )
+		message( STATUS "Looking for GDAL DLLs" )
 
-			file( GLOB GDAL_DLL_FILES ${GDAL_BIN_DIR}/*.dll )
-			message( STATUS "Looked in: " ${GDAL_BIN_DIR} )
-			message( STATUS ${GDAL_DLL_FILES} )
+		file( GLOB GDAL_DLL_FILES ${GDAL_BIN_DIR}/*.dll )
+		message( STATUS "Looked in: " ${GDAL_BIN_DIR} )
+		message( STATUS ${GDAL_DLL_FILES} )
 
-			file( GLOB GDAL_DLL_FILES2 ${GDAL_INCLUDE_DIR}/../bin/*.dll )
-			message( STATUS "Looked in: " ${GDAL_INCLUDE_DIR}/../bin )
-			message( STATUS ${GDAL_DLL_FILES2} )
+		file( GLOB GDAL_DLL_FILES2 ${GDAL_INCLUDE_DIR}/../bin/*.dll )
+		message( STATUS "Looked in: " ${GDAL_INCLUDE_DIR}/../bin )
+		message( STATUS ${GDAL_DLL_FILES2} )
 
-			copy_files("${GDAL_DLL_FILES}" "${ARGV1}" ) #mind the quotes!
-			copy_files("${GDAL_DLL_FILES2}" "${ARGV1}" ) #mind the quotes!
-		endif()
+		copy_files("${GDAL_DLL_FILES}" "${CLOUDCOMPARE_DEST_FOLDER}" ) #mind the quotes!
+		copy_files("${GDAL_DLL_FILES2}" "${CLOUDCOMPARE_DEST_FOLDER}" ) #mind the quotes!
 	endif()
 endfunction()

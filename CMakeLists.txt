@@ -15,6 +15,7 @@ list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/" )
 
 include( CMakePolicies )
 include( CMakeSetCompilerOptions )
+include( DeployQt )
 
 # CCViewer
 option( OPTION_BUILD_CCVIEWER "Check to compile CCViewer project" ON )
@@ -35,10 +36,6 @@ endif()
 
 # Default debug suffix for libraries.
 set( CMAKE_DEBUG_POSTFIX "d" )
-
-# Default install folders
-# (on Windows - msvc generator - the '_debug' suffix is automatically added for debug configurations)
-set( INSTALL_DESTINATIONS CloudCompare )
 
 # RPATH Linux/Unix: (dynamic) libs are put in a subdir of prefix/lib,
 # since they are only used by qCC/ccViewer
@@ -61,21 +58,13 @@ else()
 	set( CCVIEWER_DEST_FOLDER bin )
 endif()
 
-# set default install folders
 if( WIN32 )
-    # (on Windows - msvc generator - the '_debug' suffix is automatically added for debug configurations)
     set( INSTALL_DESTINATIONS ${CLOUDCOMPARE_DEST_FOLDER} )
     
     if( ${OPTION_BUILD_CCVIEWER} )
         list( APPEND INSTALL_DESTINATIONS ${CCVIEWER_DEST_FOLDER} )
-    endif()
-elseif( APPLE )
-	set( INSTALL_DESTINATIONS "${CLOUDCOMPARE_MAC_FRAMEWORK_DIR}" )
-    
-    if( ${OPTION_BUILD_CCVIEWER} )
-        list( APPEND INSTALL_DESTINATIONS "${CCVIEWER_MAC_FRAMEWORK_DIR}" )
-    endif()
-elseif( UNIX )
+	endif()
+elseif( UNIX AND NOT APPLE )
 	set( INSTALL_DESTINATIONS ${CMAKE_INSTALL_PREFIX}/bin )
 endif()
 

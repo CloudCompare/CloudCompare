@@ -1,12 +1,16 @@
 # InstallSharedLibrary should be called once for each shared library in the libs directory.
 # This function installs the shared library in the correct places for each platform.
-# For macOS and Windows, it puts them with each application (CloudCompare and ccViewer).
-# For Linux, it puts it in the proper place for shared libraries so both applcations can
-# access them.
+#
+# If INSTALL_DESTINATIONS is not empty, it will install to each of the destinations in the list.
+# If INSTALL_DESTINATIONS is empty, this function does nothing.
 #
 # Arguments:
 #	TARGET The name of the library target
 function( InstallSharedLibrary )
+	if( NOT INSTALL_DESTINATIONS )
+		return()
+	endif()
+	
 	cmake_parse_arguments(
 			INSTALL_SHARED_LIB
 			""
@@ -20,19 +24,51 @@ function( InstallSharedLibrary )
 
 	message( STATUS "Install shared library: ${shared_lib_target}")
 
-	if( APPLE OR WIN32 )
-		foreach( destination ${INSTALL_DESTINATIONS} )			
-			_InstallSharedTarget(
-				TARGET ${shared_lib_target}
-				DEST_PATH ${destination}
-			)		
-		endforeach()
-	else()
+	foreach( destination ${INSTALL_DESTINATIONS} )			
 		_InstallSharedTarget(
 			TARGET ${shared_lib_target}
-			DEST_PATH ${CMAKE_INSTALL_LIBDIR}/cloudcompare
-		)
+			DEST_PATH ${destination}
+		)		
+	endforeach()
+endfunction()
+
+# InstallFiles should be called to install files that are not targets.
+# This function installs the files in the correct places for each platform.
+#
+# If INSTALL_DESTINATIONS is not empty, it will install to each of the destinations in the list.
+# If INSTALL_DESTINATIONS is empty, this function does nothing.
+#
+# Arguments:
+#	FILES The name of the files to install
+function( InstallFiles )
+	if( NOT INSTALL_DESTINATIONS )
+		return()
 	endif()
+	
+	cmake_parse_arguments(
+			INSTALL_FILES
+			""
+			""
+			"FILES"
+			${ARGN}
+	)
+
+	# For readability
+	set( files "${INSTALL_FILES_FILES}" )
+
+	if( NOT files )
+		message( WARNING "InstallFiles: no files specified" )
+		return()
+	endif()
+	
+	message( STATUS "Install files: ${files} to ${INSTALL_DESTINATIONS}")
+	
+	foreach( destination ${INSTALL_DESTINATIONS} )			
+		_InstallFiles(
+			FILES ${files}
+			DEST_PATH ${destination}
+		)		
+	endforeach()
 endfunction()
 
 # InstallPlugins should be called once for each application.

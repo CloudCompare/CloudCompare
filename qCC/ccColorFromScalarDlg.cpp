@@ -42,6 +42,7 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
 	, m_cloud(pointCloud)
 	, m_systemInvalid(false)
 	, m_ui(new Ui::ColorFromScalarDialog)
+	, m_systemInvalid(false)
 {
 	m_ui->setupUi(this);
 	
@@ -118,6 +119,7 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
 
 			for (unsigned i = 0; i < c_channelCount; i++)
 			{
+				m_scalars[i] = nullptr;
 				m_prevFixed[i] = true;
 				m_combos[i]->clear();
 				for (unsigned int s = 0; s < m_cloud->getNumberOfScalarFields(); s++)

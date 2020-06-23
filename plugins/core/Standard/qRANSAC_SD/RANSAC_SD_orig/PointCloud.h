@@ -28,9 +28,9 @@ struct DLL_LINKAGE Point {
 	unsigned index;
 #endif
 	//unsigned int meshFaceIndex;
-	Point() {}
-	Point(const Vec3f &Pos) {/*index = -1;*/ pos = Pos; normal = Vec3f(0,0,0); }
-	Point(const Vec3f &Pos, const Vec3f &Normal) { pos = Pos; normal = Normal; }
+	Point() : index() {}
+	Point(const Vec3f &Pos) : index() {/*index = -1;*/ pos = Pos; normal = Vec3f(0,0,0); }
+	Point(const Vec3f &Pos, const Vec3f &Normal) : index() { pos = Pos; normal = Normal; }
 	const float operator[](unsigned int i) const
 	{
 		return pos[i];

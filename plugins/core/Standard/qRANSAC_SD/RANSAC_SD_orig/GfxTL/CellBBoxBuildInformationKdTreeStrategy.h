@@ -44,6 +44,7 @@ namespace GfxTL
 			: public BaseType::BuildInformation
 			{
 				public:
+					BuildInformation() : m_oldBound(), m_cellBbox(nullptr) {}
 					ScalarType &OldBound() { return m_oldBound; }
 					const ScalarType OldBound() const
 					{ return m_oldBound; }

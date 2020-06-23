@@ -32,6 +32,7 @@ namespace GfxTL
 			: public BaseType::BuildInformation
 			{
 			public:
+				BuildInformation() : m_level() {}
 				size_t Level() const { return m_level; }
 				void Level(size_t l) { m_level = l; }
 			private:

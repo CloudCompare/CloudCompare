@@ -12,6 +12,7 @@ namespace GfxTL
 		: public InheritedStrategyT::CellData
 		{
 			public:
+				CellData() : m_bdim() {}
 				typedef typename InheritedStrategyT::CellData BaseType;
 				typedef typename BaseType::value_type value_type;
 				typedef typename ScalarTypeDeferer< value_type >::ScalarType

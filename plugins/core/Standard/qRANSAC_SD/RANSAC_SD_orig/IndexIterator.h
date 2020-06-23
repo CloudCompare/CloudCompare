@@ -15,7 +15,7 @@ public:
 	typedef std::forward_iterator_tag iterator_category;
 	typedef size_t size_type;
 	typedef size_t difference_type;
-	IndexIterator() {}
+	IndexIterator() : m_index() {}
 	IndexIterator(size_t index) : m_index(index) {}
 	const size_t operator*() const { return m_index; }
 	const size_t *operator->() const { return &m_index; }

@@ -19,7 +19,7 @@ public:
    typedef float ScalarType;
    enum { Dim = 3 };
 
-   Vec3f () {}
+   Vec3f() : vec() { }
    Vec3f (float x, float y, float z) { setValue(x, y, z); }
 
    Vec3f(const GfxTL::Vector3Df &v)

@@ -189,6 +189,7 @@ namespace GfxTL
 			: public BaseType::BuildInformation
 			{
 				public:
+					BuildInformation() : m_createChild() {}
 					unsigned int &CreateChild()
 					{ return m_createChild; }
 					const unsigned int CreateChild() const

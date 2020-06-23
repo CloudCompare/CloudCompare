@@ -2,7 +2,7 @@
 namespace GfxTL
 {
 	template< class PointT >
-	Plane< PointT >::Plane()
+	Plane< PointT >::Plane() : _d()
 	{}
 
 	template< class PointT >

@@ -123,7 +123,7 @@ bool Torus::Init(const MiscLib::Vector< Vec3f > &samples)
 		std::back_inserter(spin1));
 	SpinImage(pos2, normal2, samples.begin(), samples.begin() + k,
 		std::back_inserter(spin2));
-	float minorRadius1, majorRadius1, minorRadius2, majorRadius2,
+	float minorRadius1 = 0, majorRadius1 = 0, minorRadius2 = 0, majorRadius2 = 0,
 		distSum1 = std::numeric_limits< float >::infinity(),
 		distSum2 = std::numeric_limits< float >::infinity(),
 		tmp;
@@ -256,7 +256,7 @@ foundAxis:
 		std::back_inserter(spin1));
 	SpinImage(pos2, normal2, samples.begin(), samples.begin() + k,
 		std::back_inserter(spin2));
-	float minorRadius1, majorRadius1, minorRadius2, majorRadius2,
+	float minorRadius1 = 0, majorRadius1 = 0, minorRadius2 = 0, majorRadius2 = 0,
 		distSum1 = std::numeric_limits< float >::infinity(),
 		distSum2 = std::numeric_limits< float >::infinity(),
 		tmp;

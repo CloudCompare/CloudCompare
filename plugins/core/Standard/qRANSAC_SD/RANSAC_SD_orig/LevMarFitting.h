@@ -206,7 +206,7 @@ bool LevMar(IteratorT begin, IteratorT end, FuncT &func,
 #ifdef DOPARALLEL
 				#pragma omp parallel for
 #endif
-				for(int i = 0; i < paramDim; ++i)
+				for(size_t i = 0; i < paramDim; ++i)
 				{
 					for(size_t j = i; j < paramDim; ++j) // j = i since only upper triangle is needed
 					{

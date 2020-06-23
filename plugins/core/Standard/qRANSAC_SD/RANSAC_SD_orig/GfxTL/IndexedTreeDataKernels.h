@@ -267,6 +267,7 @@ protected:
 		typedef IteratorT dereferenced_iterator;
 		typedef IteratorT const_dereferenced_iterator;
 		typedef DereferencedType InvariantIdType;
+		IndexedIteratorTreeDataKernel() : m_begin(), m_end(){}
 
 		void IndexedData(IteratorT begin, IteratorT end, bool initIndices = true)
 		{

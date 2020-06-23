@@ -17,7 +17,7 @@ class DLL_LINKAGE Plane
 {
 public:
 	enum { RequiredSamples = 1 };
-	Plane() {}
+	Plane() : m_dist() {}
 	Plane(Vec3f p1, Vec3f p2, Vec3f p3);
 	Plane(Vec3f p1, Vec3f normal);
 	virtual ~Plane();

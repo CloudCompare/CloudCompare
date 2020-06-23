@@ -18,6 +18,16 @@
 class DLL_LINKAGE Torus
 {
 public:
+	Torus() : 
+		m_normal(),
+		m_center(),
+		m_rminor(),
+		m_rmajor(),
+		m_appleShaped(),
+		m_cutOffAngle(),
+		m_appleHeight()
+	{
+	};
 	enum { RequiredSamples = 4 };
 	bool Init(const MiscLib::Vector< Vec3f > &samples);
 	bool InitAverage(const MiscLib::Vector< Vec3f > &samples);

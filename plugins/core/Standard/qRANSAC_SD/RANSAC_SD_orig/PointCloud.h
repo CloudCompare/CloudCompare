@@ -33,10 +33,12 @@ struct DLL_LINKAGE Point {
 	Point(const Vec3f &Pos, const Vec3f &Normal) : index() { pos = Pos; normal = Normal; }
 	const float operator[](unsigned int i) const
 	{
+		i = i >= Dim ? Dim - 1 : i;
 		return pos[i];
 	}
 	float &operator[](unsigned int i)
 	{
+		i = i >= Dim ? Dim - 1 : i;
 		return pos[i];
 	}
 	operator const Vec3f &() const

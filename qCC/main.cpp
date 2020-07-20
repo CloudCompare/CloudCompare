@@ -51,13 +51,9 @@
 #include "ccPluginManager.h"
 
 #ifdef USE_VLD
-//VLD
 #include <vld.h>
 #endif
 
-#ifdef Q_OS_MAC
-#include <unistd.h>
-#endif
 
 int main(int argc, char **argv)
 {
@@ -74,7 +70,21 @@ int main(int argc, char **argv)
 #endif
 
 #ifdef Q_OS_MAC
-	bool commandLine = isatty( fileno( stdin ) );
+	// On macOS, when double-clicking the application, the Finder (sometimes!) adds a command-line parameter
+	// like "-psn_0_582385" which is a "process serial number".
+	// We need to recognize this and discount it when determining if we are running on the command line or not.
+
+	int numRealArgs = argc;
+	
+	for ( int i = 1; i < argc; ++i )
+	{
+		if ( strncmp( argv[i], "-psn_", 5 ) == 0 )
+		{
+			--numRealArgs;
+		}
+	}
+	
+	bool commandLine = (numRealArgs > 1) && (argv[1][0] == '-');
 #else
 	bool commandLine = (argc > 1) && (argv[1][0] == '-');
 #endif

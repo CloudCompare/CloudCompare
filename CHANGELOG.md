@@ -1,7 +1,7 @@
 CloudCompare Version History
 ============================
 
-v2.11.1 (Anoia) - (In development)
+v2.11.1 (Anoia) - 27/07/2020
 ----------------------
 - Bug fixes:
   - [macOS] Fix determination of command line use so opening a file in the GUI using the command line works (#1296).

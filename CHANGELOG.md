@@ -22,6 +22,8 @@ v2.11.1 (Anoia) - (In development)
 - Bug fixes:
   - [macOS] Fix determination of command line use so opening a file in the GUI using the command line works (#1296).
   - E57, Bundler: when trying to apply a Global Shift translation on load without 'preserving' the shift information, the Global Shift was simply not applied!
+  - Global Shift: when unchecking the 'preserve shift on save' option of the Global Shift dialog, and then hitting the "Apply all" button,
+                  the selection was not maintained and propagated to the other loaded clouds
   - command line: the 'LAST' keyword was not properly managed after -SF_ARITHMETIC
 
 v2.11.0 (Anoia) - 14/06/2020

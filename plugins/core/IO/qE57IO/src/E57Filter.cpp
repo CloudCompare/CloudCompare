@@ -2350,6 +2350,7 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 			}
 		}
 
+		//we save parameters
 		parameters = s_loadParameters;
 
 		//Image data?

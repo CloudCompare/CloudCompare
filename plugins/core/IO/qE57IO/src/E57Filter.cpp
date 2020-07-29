@@ -1527,10 +1527,10 @@ static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 		bool preserveCoordinateShift = true;
 		if (FileIOFilter::HandleGlobalShift(T, Tshift, preserveCoordinateShift, s_loadParameters))
 		{
+			poseMat.setTranslation((T + Tshift).u);
 			if (preserveCoordinateShift)
 			{
 				cloud->setGlobalShift(Tshift);
-				poseMat.setTranslation((T + Tshift).u);
 			}
 			poseMatWasShifted = true;
 			ccLog::Warning("[E57Filter::loadFile] Cloud %s has been recentered! Translation: (%.2f ; %.2f ; %.2f)", qPrintable(guidStr), Tshift.x, Tshift.y, Tshift.z);

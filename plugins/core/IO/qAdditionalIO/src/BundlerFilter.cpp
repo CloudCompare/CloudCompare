@@ -384,14 +384,14 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 						if (preserveCoordinateShift)
 						{
 							keypointsCloud->setGlobalShift(Pshift);
-							//we must apply the shift to the cameras as well!!!
-							for (size_t j = 0; j < cameras.size(); ++j)
-							{
-								ccGLMatrixd& trans = cameras[j].trans;
-								trans.invert();
-								trans.setTranslation(trans.getTranslationAsVec3D() + Pshift);
-								trans.invert();
-							}
+						}
+						//we must apply the shift to the cameras as well!!!
+						for (size_t j = 0; j < cameras.size(); ++j)
+						{
+							ccGLMatrixd& trans = cameras[j].trans;
+							trans.invert();
+							trans.setTranslation(trans.getTranslationAsVec3D() + Pshift);
+							trans.invert();
 						}
 						ccLog::Warning("[Bundler] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 					}

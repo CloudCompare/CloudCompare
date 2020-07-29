@@ -3926,7 +3926,7 @@ bool CommandSFArithmetic::process(ccCommandLineInterface &cmd)
 	{
 		sfIndex = sfIndexStr.toInt(&ok);
 	}
-	if (!ok || sfIndex < 0)
+	if (!ok || sfIndex == -1)
 	{
 		return cmd.error(QObject::tr("Invalid SF index! (after %1)").arg(COMMAND_SF_ARITHMETIC));
 	}

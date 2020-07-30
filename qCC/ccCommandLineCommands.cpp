@@ -4019,7 +4019,7 @@ bool CommandSFOperation::process(ccCommandLineInterface &cmd)
 		sfIndex = sfIndexStr.toInt(&ok);
 	}
 	
-	if (!ok || sfIndex < 0)
+	if (!ok || sfIndex == -1)
 	{
 		return cmd.error(QObject::tr("Invalid SF index! (after %1)").arg(COMMAND_SF_OP));
 	}
@@ -4230,7 +4230,7 @@ bool CommandICP::process(ccCommandLineInterface &cmd)
 			{
 				bool ok;
 				modelSFAsWeights = sfIndex.toInt(&ok);
-				if (!ok || modelSFAsWeights < 0)
+				if (!ok || modelSFAsWeights == -1)
 				{
 					return cmd.error(QObject::tr("Invalid SF index! (after %1)").arg(COMMAND_ICP_USE_MODEL_SF_AS_WEIGHT));
 				}
@@ -4254,7 +4254,7 @@ bool CommandICP::process(ccCommandLineInterface &cmd)
 			{
 				bool ok;
 				dataSFAsWeights = sfIndex.toInt(&ok);
-				if (!ok || dataSFAsWeights < 0)
+				if (!ok || dataSFAsWeights == -1)
 				{
 					return cmd.error(QObject::tr("Invalid SF index! (after %1)").arg(COMMAND_ICP_USE_DATA_SF_AS_WEIGHT));
 				}

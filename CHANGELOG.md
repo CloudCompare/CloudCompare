@@ -1,6 +1,11 @@
 CloudCompare Version History
 ============================
 
+v2.11.2 (Anoia) - ??/??/2020
+----------------------
+- Bug fixes:
+ -  command line: the LAST keyword was consistently badly managed (for -SF_OP and -ICP)
+
 v2.11.1 (Anoia) - 29/07/2020
 ----------------------
 - Bug fixes:

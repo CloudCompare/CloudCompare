@@ -70,22 +70,22 @@ if (WIN32)
 
 	if (FFMPEG_BINARY_DIR)
 
-		set( FFMEG_DLL "")
+		set( FFMPEG_DLL "")
 		file (GLOB CODEC_DLL ${FFMPEG_BINARY_DIR}/avcodec*.dll)
-		LIST( APPEND FFMEG_DLL ${CODEC_DLL} )
+		LIST( APPEND FFMPEG_DLL ${CODEC_DLL} )
 
 		file (GLOB FORMAT_DLL ${FFMPEG_BINARY_DIR}/avformat*.dll)
-		LIST( APPEND FFMEG_DLL ${FORMAT_DLL} )
+		LIST( APPEND FFMPEG_DLL ${FORMAT_DLL} )
 
 		file (GLOB UTIL_DLL ${FFMPEG_BINARY_DIR}/avutil*.dll)
-		LIST( APPEND FFMEG_DLL ${UTIL_DLL} )
+		LIST( APPEND FFMPEG_DLL ${UTIL_DLL} )
 		
 		file (GLOB SW_DLLS ${FFMPEG_BINARY_DIR}/sw*.dll)
-		LIST( APPEND FFMEG_DLL ${SW_DLLS} )
+		LIST( APPEND FFMPEG_DLL ${SW_DLLS} )
 
-		message(STATUS "${FFMEG_DLL}")
+		message(STATUS "${FFMPEG_DLL}")
 		
-		copy_files("${FFMEG_DLL}" ${ARGV0}) #mind the quotes
+		copy_files("${FFMPEG_DLL}" ${ARGV0}) #mind the quotes
 	
 	else()
 

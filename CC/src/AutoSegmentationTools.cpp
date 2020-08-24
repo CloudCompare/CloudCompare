@@ -54,7 +54,11 @@ int AutoSegmentationTools::labelConnectedComponents(GenericIndexedCloudPersist* 
 	}
 
 	//we use the default scalar field to store components labels
-	theCloud->enableScalarField();
+	if (!theCloud->enableScalarField())
+	{
+		//failed to enable a scalar field
+		return -1;
+	}
 
 	int result = theOctree->extractCCs(level, sixConnexity, progressCb);
 

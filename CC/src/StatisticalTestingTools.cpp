@@ -317,17 +317,27 @@ double StatisticalTestingTools::testCloudWithStatisticalModel(const GenericDistr
 		}
 	}
 
-	//on active le champ scalaire (IN) pour recevoir les distances du Chi2
-	theCloud->enableScalarField();
+	//we activate the 'IN' scalar field to store the Chi2 distances
+	if (!theCloud->enableScalarField())
+	{
+		if (!inputOctree)
+			delete theOctree;
+		return -3.0;
+	}
 
 	unsigned char level = theOctree->findBestLevelForAGivenPopulationPerCell(numberOfNeighbours);
 
 	unsigned numberOfChi2Classes = static_cast<unsigned>(ceil(sqrt(static_cast<double>(numberOfNeighbours))));
 
 	//Chi2 hisogram values
-	unsigned* histoValues = new unsigned[numberOfChi2Classes];
-	if (!histoValues)
+	std::vector<unsigned> histoValues;
+	try
 	{
+		histoValues.resize(numberOfChi2Classes);
+	}
+	catch (const std::bad_alloc&)
+	{
+		//not enough memory
 		if (!inputOctree)
 			delete theOctree;
 		return -3.0;
@@ -337,7 +347,7 @@ double StatisticalTestingTools::testCloudWithStatisticalModel(const GenericDistr
 	ScalarType customHistoMin = 0;
 	ScalarType* histoMax = nullptr;
 	ScalarType customHistoMax = 0;
-	if (strcmp(distrib->getName(),"Gauss")==0)
+	if (strcmp(distrib->getName(), "Gauss") == 0)
 	{
 		const NormalDistribution* nDist = static_cast<const NormalDistribution*>(distrib);
 		ScalarType mu = 0;
@@ -348,7 +358,7 @@ double StatisticalTestingTools::testCloudWithStatisticalModel(const GenericDistr
 		customHistoMax = mu + static_cast<ScalarType>(3.0) * sqrt(sigma2);
 		histoMax = &customHistoMax;
 	}
-	else if (strcmp(distrib->getName(),"Weibull")==0)
+	else if (strcmp(distrib->getName(), "Weibull") == 0)
 	{
 		customHistoMin = 0;
 		histoMin = &customHistoMin;
@@ -358,7 +368,7 @@ double StatisticalTestingTools::testCloudWithStatisticalModel(const GenericDistr
 	void* additionalParameters[] = {	reinterpret_cast<void*>(const_cast<GenericDistribution*>(distrib)),
 										reinterpret_cast<void*>(&numberOfNeighbours),
 										reinterpret_cast<void*>(&numberOfChi2Classes),
-										reinterpret_cast<void*>(histoValues),
+										reinterpret_cast<void*>(histoValues.data()),
 										reinterpret_cast<void*>(histoMin),
 										reinterpret_cast<void*>(histoMax) };
 
@@ -381,9 +391,6 @@ double StatisticalTestingTools::testCloudWithStatisticalModel(const GenericDistr
 			maxChi2 = sqrt(maxChi2); //on travaille avec les racines carrees des distances du Chi2
 		}
 	}
-
-	delete[] histoValues;
-	histoValues = nullptr;
 
 	if (!inputOctree)
         delete theOctree;

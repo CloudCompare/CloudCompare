@@ -5111,8 +5111,12 @@ void MainWindow::doActionComputeCPS()
 		return;
 	}
 	cmpPC->setCurrentScalarField(sfIdx);
-	cmpPC->enableScalarField();
-	//cmpPC->forEach(CCCoreLib::ScalarFieldTools::SetScalarValueToNaN); //now done by default by computeCloud2CloudDistance
+	if (!cmpPC->enableScalarField())
+	{
+		ccConsole::Error("Not enough memory");
+		return;
+	}
+	//cmpPC->forEach(CCLib::ScalarFieldTools::SetScalarValueToNaN); //now done by default by computeCloud2CloudDistance
 
 	CCCoreLib::ReferenceCloud CPSet(srcCloud);
 	ccProgressDialog pDlg(true, this);
@@ -9053,6 +9057,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 		bool signedDist = pDD.signedDistances();
 		bool flippedNormals = signedDist && pDD.flipNormals();
 		bool treatPlanesAsBounded = pDD.treatPlanesAsBounded();
+		size_t errorCount = 0;
 		for (auto &cloud : clouds)
 		{
 			ccPointCloud* compEnt = ccHObjectCaster::ToPointCloud(cloud);
@@ -9063,13 +9068,19 @@ void MainWindow::doActionCloudPrimitiveDist()
 				sfIdx = compEnt->addScalarField(CC_TEMP_DISTANCES_DEFAULT_SF_NAME);
 				if (sfIdx < 0)
 				{
-					ccLog::Error(QString("[Compute Primitive Distances] [Cloud: %1] Couldn't allocate a new scalar field for computing distances! Try to free some memory ...").arg(compEnt->getName()));
+					ccLog::Warning(QString("[Compute Primitive Distances] [Cloud: %1] Couldn't allocate a new scalar field for computing distances! Try to free some memory ...").arg(compEnt->getName()));
+					++errorCount;
 					continue;
 				}
 			}
 			compEnt->setCurrentScalarField(sfIdx);
-			compEnt->enableScalarField();
-			compEnt->forEach(CCCoreLib::ScalarFieldTools::SetScalarValueToNaN);
+			if (!compEnt->enableScalarField())
+			{
+				ccLog::Warning(QString("[Compute Primitive Distances] [Cloud: %1] Not enough memory").arg(compEnt->getName()));
+				++errorCount;
+				continue;
+			}
+			compEnt->forEach(CCLib::ScalarFieldTools::SetScalarValueToNaN);
 			int returnCode;
 			switch (entityType)
 			{
@@ -9084,27 +9095,39 @@ void MainWindow::doActionCloudPrimitiveDist()
 					ccPlane* plane = static_cast<ccPlane*>(refEntity);
 					if (treatPlanesAsBounded)
 					{
-						CCCoreLib::SquareMatrix rotationTransform(plane->getTransformation().data(), true);
-						if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2RectangleEquation(compEnt, plane->getXWidth(), plane->getYWidth(), rotationTransform, plane->getCenter(), signedDist)))
-							ccConsole::Error(errString, "Bounded Plane", returnCode);
+						CCLib::SquareMatrix rotationTransform(plane->getTransformation().data(), true);
+						if (!(returnCode = CCLib::DistanceComputationTools::computeCloud2RectangleEquation(compEnt, plane->getXWidth(), plane->getYWidth(), rotationTransform, plane->getCenter(), signedDist)))
+						{
+							ccConsole::Warning(errString, "Bounded Plane", returnCode);
+							++errorCount;
+						}
 					}
 					else
 					{
-						if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2PlaneEquation(compEnt, static_cast<ccPlane*>(refEntity)->getEquation(), signedDist)))
-							ccConsole::Error(errString, "Infinite Plane", returnCode);
+						if (!(returnCode = CCLib::DistanceComputationTools::computeCloud2PlaneEquation(compEnt, static_cast<ccPlane*>(refEntity)->getEquation(), signedDist)))
+						{
+							ccConsole::Warning(errString, "Infinite Plane", returnCode);
+							++errorCount;
+						}
 					}
 					break;
 				}
 				case CC_TYPES::CYLINDER:
 				{
-					if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2CylinderEquation(compEnt, static_cast<ccCylinder*>(refEntity)->getBottomCenter(), static_cast<ccCylinder*>(refEntity)->getTopCenter(), static_cast<ccCylinder*>(refEntity)->getBottomRadius(), signedDist)))
-						ccConsole::Error(errString, "Cylinder", returnCode);
+					if (!(returnCode = CCLib::DistanceComputationTools::computeCloud2CylinderEquation(compEnt, static_cast<ccCylinder*>(refEntity)->getBottomCenter(), static_cast<ccCylinder*>(refEntity)->getTopCenter(), static_cast<ccCylinder*>(refEntity)->getBottomRadius(), signedDist)))
+					{
+						ccConsole::Warning(errString, "Cylinder", returnCode);
+						++errorCount;
+					}
 					break;
 				}
 				case CC_TYPES::CONE:
 				{
-					if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2ConeEquation(compEnt, static_cast<ccCone*>(refEntity)->getLargeCenter(), static_cast<ccCone*>(refEntity)->getSmallCenter(), static_cast<ccCone*>(refEntity)->getLargeRadius(), static_cast<ccCone*>(refEntity)->getSmallRadius(), signedDist)))
-						ccConsole::Error(errString, "Cone", returnCode);
+					if (!(returnCode = CCLib::DistanceComputationTools::computeCloud2ConeEquation(compEnt, static_cast<ccCone*>(refEntity)->getLargeCenter(), static_cast<ccCone*>(refEntity)->getSmallCenter(), static_cast<ccCone*>(refEntity)->getLargeRadius(), static_cast<ccCone*>(refEntity)->getSmallRadius(), signedDist)))
+					{
+						ccConsole::Warning(errString, "Cone", returnCode);
+						++errorCount;
+					}
 					break;
 				}
 				case CC_TYPES::BOX: 
@@ -9112,8 +9135,11 @@ void MainWindow::doActionCloudPrimitiveDist()
 					const ccGLMatrix& glTransform = refEntity->getGLTransformationHistory();
 					CCCoreLib::SquareMatrix rotationTransform(glTransform.data(), true);
 					CCVector3 boxCenter = glTransform.getColumnAsVec3D(3);
-					if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2BoxEquation(compEnt, static_cast<ccBox*>(refEntity)->getDimensions(), rotationTransform, boxCenter, signedDist)))
-						ccConsole::Error(errString, "Box", returnCode);
+					if (!(returnCode = CCLib::DistanceComputationTools::computeCloud2BoxEquation(compEnt, static_cast<ccBox*>(refEntity)->getDimensions(), rotationTransform, boxCenter, signedDist)))
+					{
+						ccConsole::Warning(errString, "Box", returnCode);
+						++errorCount;
+					}
 					break; 
 				}
 				case CC_TYPES::POLY_LINE:
@@ -9124,7 +9150,8 @@ void MainWindow::doActionCloudPrimitiveDist()
 					returnCode = CCCoreLib::DistanceComputationTools::computeCloud2PolylineEquation(compEnt, line);
 					if (!returnCode)
 					{
-						ccConsole::Error(errString, "Polyline", returnCode);
+						ccConsole::Warning(errString, "Polyline", returnCode);
+						++errorCount;
 					}
 					break;
 				}
@@ -9165,8 +9192,15 @@ void MainWindow::doActionCloudPrimitiveDist()
 			compEnt->showSF(sfIdx >= 0);
 			compEnt->prepareDisplayForRefresh_recursive();
 		}
-	MainWindow::UpdateUI();
-	MainWindow::RefreshAllGLWindow(false);
+
+		if (errorCount != 0)
+		{
+			ccLog::Error(QString("%1 error(s) occurred: refer to the Console (F8).").arg(errorCount));
+		}
+
+		MainWindow::UpdateUI();
+	
+		MainWindow::RefreshAllGLWindow(false);
 	}
 }
 

@@ -171,6 +171,7 @@ CC_FILE_ERROR PVFilter::loadFile(const QString& filename, ccHObject& container, 
 	CCLib::NormalizedProgress nprogress(pDlg.data(), numberOfPoints);
 
 	ccPointCloud* loadedCloud = nullptr;
+	CCLib::ScalarField* sf = nullptr;
 	//if the file is too big, it will be chuncked in multiple parts
 	unsigned chunkIndex = 0;
 	unsigned fileChunkPos = 0;
@@ -181,17 +182,15 @@ CC_FILE_ERROR PVFilter::loadFile(const QString& filename, ccHObject& container, 
 
 	for (unsigned i = 0; i < numberOfPoints; i++)
 	{
-		//if we reach the max. cloud size limit, we cerate a new chunk
 		if (pointsRead == fileChunkPos+fileChunkSize)
 		{
+			//if we reach the max. cloud size limit, we create a new chunk
 			if (loadedCloud)
 			{
-				int sfIdx = loadedCloud->getCurrentInScalarFieldIndex();
-				if (sfIdx>=0)
+				if (sf)
 				{
-					CCLib::ScalarField* sf = loadedCloud->getScalarField(sfIdx);
 					sf->computeMinAndMax();
-					loadedCloud->setCurrentDisplayedScalarField(sfIdx);
+					loadedCloud->setCurrentDisplayedScalarField(loadedCloud->getCurrentInScalarFieldIndex());
 					loadedCloud->showSF(true);
 				}
 				container.addChild(loadedCloud);
@@ -199,6 +198,7 @@ CC_FILE_ERROR PVFilter::loadFile(const QString& filename, ccHObject& container, 
 			fileChunkPos = pointsRead;
 			fileChunkSize = std::min<unsigned>(numberOfPoints - pointsRead, CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
 			loadedCloud = new ccPointCloud(QString("unnamed - Cloud #%1").arg(++chunkIndex));
+			sf = nullptr;
 			if (!loadedCloud || !loadedCloud->reserveThePointsTable(fileChunkSize) || !loadedCloud->enableScalarField())
 			{
 				result = CC_FERR_NOT_ENOUGH_MEMORY;
@@ -206,6 +206,8 @@ CC_FILE_ERROR PVFilter::loadFile(const QString& filename, ccHObject& container, 
 				loadedCloud = nullptr;
 				break;
 			}
+			sf = loadedCloud->getCurrentInScalarField();
+			assert(sf);
 		}
 
 		//we read the 3 coordinates of the point
@@ -213,9 +215,7 @@ CC_FILE_ERROR PVFilter::loadFile(const QString& filename, ccHObject& container, 
 		if (in.read((char*)rBuff, 3 * sizeof(float)) >= 0)
 		{
 			//conversion to CCVector3
-			CCVector3 P((PointCoordinateType)rBuff[0],
-						(PointCoordinateType)rBuff[1],
-						(PointCoordinateType)rBuff[2]);
+			CCVector3 P = CCVector3::fromArray(rBuff);
 			loadedCloud->addPoint(P);
 		}
 		else
@@ -225,14 +225,14 @@ CC_FILE_ERROR PVFilter::loadFile(const QString& filename, ccHObject& container, 
 		}
 
 		//then the scalar value
-		if (in.read((char*)rBuff, sizeof(float)) >= 0)
+		if (in.read(reinterpret_cast<char*>(rBuff), sizeof(float)) >= 0)
 		{
-			loadedCloud->setPointScalarValue(pointsRead, (ScalarType)rBuff[0]);
+			sf->addElement(static_cast<ScalarType>(rBuff[0]));
 		}
 		else
 		{
 			//add fake scalar value for consistency then break
-			loadedCloud->setPointScalarValue(pointsRead, 0);
+			sf->addElement(NAN_VALUE);
 			result = CC_FERR_READING;
 			break;
 		}
@@ -251,12 +251,10 @@ CC_FILE_ERROR PVFilter::loadFile(const QString& filename, ccHObject& container, 
 	if (loadedCloud)
 	{
 		loadedCloud->shrinkToFit();
-		int sfIdx = loadedCloud->getCurrentInScalarFieldIndex();
-		if (sfIdx >= 0)
+		if (sf)
 		{
-			CCLib::ScalarField* sf = loadedCloud->getScalarField(sfIdx);
 			sf->computeMinAndMax();
-			loadedCloud->setCurrentDisplayedScalarField(sfIdx);
+			loadedCloud->setCurrentDisplayedScalarField(loadedCloud->getCurrentInScalarFieldIndex());
 			loadedCloud->showSF(true);
 		}
 		container.addChild(loadedCloud);

@@ -42,7 +42,6 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
 	, m_cloud(pointCloud)
 	, m_systemInvalid(false)
 	, m_ui(new Ui::ColorFromScalarDialog)
-	, m_systemInvalid(false)
 {
 	m_ui->setupUi(this);
 	

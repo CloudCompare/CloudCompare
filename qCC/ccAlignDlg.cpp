@@ -358,8 +358,14 @@ void ccAlignDlg::estimateDelta()
 	{
 		cloud.reserve(sampledData->size());
 		for (unsigned i = 0; i < sampledData->size(); i++)
+		{
 			cloud.addPoint(*sampledData->getPoint(i));
-		cloud.enableScalarField();
+		}
+		if (!cloud.enableScalarField())
+		{
+			ccLog::Error("Not enough memory");
+			return;
+		}
 	}
 
 	if (CCLib::GeometricalAnalysisTools::ComputeLocalDensityApprox(&cloud, CCLib::GeometricalAnalysisTools::DENSITY_KNN, &pDlg) != CCLib::GeometricalAnalysisTools::NoError)

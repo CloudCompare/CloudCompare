@@ -1141,7 +1141,7 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 		
 		//Creation
 		ccPointCloud* loadedCloud = new ccPointCloud(cloudName);
-		CCLib::ScalarField* loadedCloudSF = nullptr;
+		CCCoreLib::ScalarField* loadedCloudSF = nullptr;
 		if (!loadedCloud)
 			return CC_FERR_NOT_ENOUGH_MEMORY;
 

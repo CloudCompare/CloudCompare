@@ -5116,7 +5116,7 @@ void MainWindow::doActionComputeCPS()
 		ccConsole::Error("Not enough memory");
 		return;
 	}
-	//cmpPC->forEach(CCLib::ScalarFieldTools::SetScalarValueToNaN); //now done by default by computeCloud2CloudDistance
+	//cmpPC->forEach(CCCoreLib::ScalarFieldTools::SetScalarValueToNaN); //now done by default by computeCloud2CloudDistance
 
 	CCCoreLib::ReferenceCloud CPSet(srcCloud);
 	ccProgressDialog pDlg(true, this);
@@ -9080,7 +9080,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 				++errorCount;
 				continue;
 			}
-			compEnt->forEach(CCLib::ScalarFieldTools::SetScalarValueToNaN);
+			compEnt->forEach(CCCoreLib::ScalarFieldTools::SetScalarValueToNaN);
 			int returnCode;
 			switch (entityType)
 			{
@@ -9095,8 +9095,8 @@ void MainWindow::doActionCloudPrimitiveDist()
 					ccPlane* plane = static_cast<ccPlane*>(refEntity);
 					if (treatPlanesAsBounded)
 					{
-						CCLib::SquareMatrix rotationTransform(plane->getTransformation().data(), true);
-						if (!(returnCode = CCLib::DistanceComputationTools::computeCloud2RectangleEquation(compEnt, plane->getXWidth(), plane->getYWidth(), rotationTransform, plane->getCenter(), signedDist)))
+						CCCoreLib::SquareMatrix rotationTransform(plane->getTransformation().data(), true);
+						if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2RectangleEquation(compEnt, plane->getXWidth(), plane->getYWidth(), rotationTransform, plane->getCenter(), signedDist)))
 						{
 							ccConsole::Warning(errString, "Bounded Plane", returnCode);
 							++errorCount;
@@ -9104,7 +9104,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 					}
 					else
 					{
-						if (!(returnCode = CCLib::DistanceComputationTools::computeCloud2PlaneEquation(compEnt, static_cast<ccPlane*>(refEntity)->getEquation(), signedDist)))
+						if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2PlaneEquation(compEnt, static_cast<ccPlane*>(refEntity)->getEquation(), signedDist)))
 						{
 							ccConsole::Warning(errString, "Infinite Plane", returnCode);
 							++errorCount;
@@ -9114,7 +9114,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 				}
 				case CC_TYPES::CYLINDER:
 				{
-					if (!(returnCode = CCLib::DistanceComputationTools::computeCloud2CylinderEquation(compEnt, static_cast<ccCylinder*>(refEntity)->getBottomCenter(), static_cast<ccCylinder*>(refEntity)->getTopCenter(), static_cast<ccCylinder*>(refEntity)->getBottomRadius(), signedDist)))
+					if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2CylinderEquation(compEnt, static_cast<ccCylinder*>(refEntity)->getBottomCenter(), static_cast<ccCylinder*>(refEntity)->getTopCenter(), static_cast<ccCylinder*>(refEntity)->getBottomRadius(), signedDist)))
 					{
 						ccConsole::Warning(errString, "Cylinder", returnCode);
 						++errorCount;
@@ -9123,7 +9123,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 				}
 				case CC_TYPES::CONE:
 				{
-					if (!(returnCode = CCLib::DistanceComputationTools::computeCloud2ConeEquation(compEnt, static_cast<ccCone*>(refEntity)->getLargeCenter(), static_cast<ccCone*>(refEntity)->getSmallCenter(), static_cast<ccCone*>(refEntity)->getLargeRadius(), static_cast<ccCone*>(refEntity)->getSmallRadius(), signedDist)))
+					if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2ConeEquation(compEnt, static_cast<ccCone*>(refEntity)->getLargeCenter(), static_cast<ccCone*>(refEntity)->getSmallCenter(), static_cast<ccCone*>(refEntity)->getLargeRadius(), static_cast<ccCone*>(refEntity)->getSmallRadius(), signedDist)))
 					{
 						ccConsole::Warning(errString, "Cone", returnCode);
 						++errorCount;
@@ -9135,7 +9135,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 					const ccGLMatrix& glTransform = refEntity->getGLTransformationHistory();
 					CCCoreLib::SquareMatrix rotationTransform(glTransform.data(), true);
 					CCVector3 boxCenter = glTransform.getColumnAsVec3D(3);
-					if (!(returnCode = CCLib::DistanceComputationTools::computeCloud2BoxEquation(compEnt, static_cast<ccBox*>(refEntity)->getDimensions(), rotationTransform, boxCenter, signedDist)))
+					if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2BoxEquation(compEnt, static_cast<ccBox*>(refEntity)->getDimensions(), rotationTransform, boxCenter, signedDist)))
 					{
 						ccConsole::Warning(errString, "Box", returnCode);
 						++errorCount;

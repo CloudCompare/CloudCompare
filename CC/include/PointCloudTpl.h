@@ -101,6 +101,12 @@ namespace CCLib
 		
 		bool enableScalarField() override
 		{
+			if (m_points.empty() && m_points.capacity() == 0)
+			{
+				//on must call resize or reserve on the cloud first
+				return false;
+			}
+
 			ScalarField* currentInScalarField = getCurrentInScalarField();
 
 			if (!currentInScalarField)
@@ -131,7 +137,16 @@ namespace CCLib
 				m_currentOutScalarFieldIndex = m_currentInScalarFieldIndex;
 			}
 
-			return currentInScalarField->resizeSafe(m_points.size());
+			if (m_points.empty())
+			{
+				//if the cloud is empty, with a reserved capacity, we do the same on the SF
+				return currentInScalarField->reserveSafe(m_points.capacity());
+			}
+			else
+			{
+				//otherwise we resize the SF with the current number of points so that they match
+				return currentInScalarField->resizeSafe(m_points.size());
+			}
 		}
 		
 		bool isScalarFieldEnabled() const override

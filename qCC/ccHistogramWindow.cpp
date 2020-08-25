@@ -156,7 +156,7 @@ void ccHistogramWindow::fromSF(	ccScalarField* sf,
 								bool numberOfClassesCanBeChanged/*=true*/,
 								bool showNaNValuesInGrey/*=true*/)
 {
-	if (m_associatedSF != sf)
+	if (sf && m_associatedSF != sf)
 	{
 		if (m_associatedSF)
 			m_associatedSF->release();

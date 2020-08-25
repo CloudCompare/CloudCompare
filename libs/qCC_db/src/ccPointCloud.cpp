@@ -4922,7 +4922,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 							for (int j = 0; j < chunkSize; j++, _sf++)
 							{
 								//we need to convert scalar value to color into a temporary structure
-								const ccColor::Rgb* col = m_vboManager.sourceSF->getColor(*_sf);
+								const ccColor::Rgb* col = _sf ? m_vboManager.sourceSF->getColor(*_sf) : nullptr;
 								if (!col)
 									col = &ccColor::lightGreyRGB;
 								*_sfColors++ = col->r;

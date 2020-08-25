@@ -171,7 +171,7 @@ CC_FILE_ERROR PVFilter::loadFile(const QString& filename, ccHObject& container, 
 	CCCoreLib::NormalizedProgress nprogress(pDlg.data(), numberOfPoints);
 
 	ccPointCloud* loadedCloud = nullptr;
-	CCLib::ScalarField* sf = nullptr;
+	CCCoreLib::ScalarField* sf = nullptr;
 	//if the file is too big, it will be chuncked in multiple parts
 	unsigned chunkIndex = 0;
 	unsigned fileChunkPos = 0;
@@ -210,29 +210,17 @@ CC_FILE_ERROR PVFilter::loadFile(const QString& filename, ccHObject& container, 
 			assert(sf);
 		}
 
-		//we read the 3 coordinates of the point
-		float rBuff[3];
-		if (in.read((char*)rBuff, 3 * sizeof(float)) >= 0)
+		//we read the 3 coordinates of the point and the scalar at once
+		float rBuff[4];
+		if (in.read(reinterpret_cast<char*>(rBuff), 4 * sizeof(float)) >= 0)
 		{
 			//conversion to CCVector3
 			CCVector3 P = CCVector3::fromArray(rBuff);
 			loadedCloud->addPoint(P);
+			sf->addElement(static_cast<ScalarType>(rBuff[3]));
 		}
 		else
 		{
-			result = CC_FERR_READING;
-			break;
-		}
-
-		//then the scalar value
-		if (in.read(reinterpret_cast<char*>(rBuff), sizeof(float)) >= 0)
-		{
-			sf->addElement(static_cast<ScalarType>(rBuff[0]));
-		}
-		else
-		{
-			//add fake scalar value for consistency then break
-			sf->addElement(NAN_VALUE);
 			result = CC_FERR_READING;
 			break;
 		}

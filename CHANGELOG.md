@@ -17,7 +17,14 @@ v2.12 (???) - (in development)
 	- qBroom: the broom was not working properly on a non horizontal surface!
 
 
-v2.11.1 (Anoia) - (In development)
+v2.11.2 (Anoia) - ??/??/2020
+----------------------
+- Bug fixes:
+ - command line: the LAST keyword was consistently badly managed (for -SF_OP and -ICP)
+ - the new 'Edit > Colors > From Scalar Fields' tool could crash due to a non initialized variable
+ - PV files could not be loaded anymore
+
+v2.11.1 (Anoia) - 29/07/2020
 ----------------------
 - Bug fixes:
   - [macOS] Fix determination of command line use so opening a file in the GUI using the command line works (#1296).

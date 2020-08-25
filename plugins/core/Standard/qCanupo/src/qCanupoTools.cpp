@@ -242,7 +242,7 @@ bool qCanupoTools::ComputeCorePointsDescriptors(CCCoreLib::GenericIndexedCloud* 
 	}
 	if (s_computeCorePointsDescParams.computer->needSF() && !corePoints->enableScalarField())
 	{
-		error = "Couldn't find a scalar field for core points!";
+		error = "Couldn't allocate a scalar field for core points!";
 		return false;
 	}
 

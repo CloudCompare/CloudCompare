@@ -252,8 +252,7 @@ bool Cloud2CloudDist::Compute(	const Cloth& cloth,
 	}
 
 	CCCoreLib::SimpleCloud pcPoints;
-	if (	!pcPoints.reserve(static_cast<unsigned>(pc.size()))
-		||	!pcPoints.enableScalarField())
+	if (!pcPoints.reserve(static_cast<unsigned>(pc.size())))
 	{
 		//not enough memory
 		return false;

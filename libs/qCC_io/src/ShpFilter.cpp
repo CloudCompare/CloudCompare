@@ -2132,89 +2132,103 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString &filename, ccHObject &container,
 
 				if (!candidateFields.empty())
 				{
-					//create a list of available fields
-					ImportDBFFieldDialog lsfDlg(nullptr);
-					for (QList<FieldIndexAndName>::const_iterator it = candidateFields.begin(); it != candidateFields.end(); ++it)
+					if (parameters.parentWidget)
 					{
-						lsfDlg.listWidget->addItem(it->second);
-					}
-					static double s_dbfFieldImportScale = 1.0;
-					lsfDlg.scaleDoubleSpinBox->setValue(s_dbfFieldImportScale);
-					lsfDlg.okPushButton->setVisible(false);
-
-
-					if (lsfDlg.exec())
-					{
-						s_dbfFieldImportScale = lsfDlg.scaleDoubleSpinBox->value();
-
-						//look for the selected index
-						int index = -1;
-						for (int i = 0; i < candidateFields.size(); ++i)
+						//create a list of available fields
+						ImportDBFFieldDialog lsfDlg(nullptr);
+						for (QList<FieldIndexAndName>::const_iterator it = candidateFields.begin(); it != candidateFields.end(); ++it)
 						{
-							if (lsfDlg.listWidget->isItemSelected(lsfDlg.listWidget->item(i)))
-							{
-								index = candidateFields[i].first;
-								break;
-							}
+							lsfDlg.listWidget->addItem(it->second);
 						}
+						static double s_dbfFieldImportScale = 1.0;
+						lsfDlg.scaleDoubleSpinBox->setValue(s_dbfFieldImportScale);
+						lsfDlg.okPushButton->setVisible(false);
 
-						if (index >= 0)
+						if (lsfDlg.exec())
 						{
-							double scale = s_dbfFieldImportScale;
-							//read values
-							DBFFieldType fieldType = DBFGetFieldInfo(dbfHandle, index, nullptr, nullptr, nullptr);
+							s_dbfFieldImportScale = lsfDlg.scaleDoubleSpinBox->value();
 
-							if (hasPolylines)
+							//look for the selected index
+							int index = -1;
+							for (int i = 0; i < candidateFields.size(); ++i)
 							{
-								//for each poyline
-								for (QMap<ccPolyline*, int32_t>::iterator it = polyIDs.begin(); it != polyIDs.end(); ++it)
+								if (lsfDlg.listWidget->isItemSelected(lsfDlg.listWidget->item(i)))
 								{
-									//get the height
-									double z = 0.0;
-									if (fieldType == FTDouble)
-										z = DBFReadDoubleAttribute(dbfHandle, it.value() - 1, index);
-									else //if (fieldType == FTInteger)
-										z = static_cast<double>(DBFReadIntegerAttribute(dbfHandle, it.value() - 1, index));
-									z *= scale;
+									index = candidateFields[i].first;
+									break;
+								}
+							}
 
-									//translate the polyline
-									CCVector3 T(0, 0, static_cast<PointCoordinateType>(z));
-									ccGLMatrix trans;
-									trans.setTranslation(T);
-									ccPolyline* poly = it.key();
-									if (poly)
+							if (index >= 0)
+							{
+								double scale = s_dbfFieldImportScale;
+								//read values
+								DBFFieldType fieldType = DBFGetFieldInfo(dbfHandle, index, nullptr, nullptr, nullptr);
+
+								if (hasPolylines)
+								{
+									//for each poyline
+									for (QMap<ccPolyline*, int32_t>::iterator it = polyIDs.begin(); it != polyIDs.end(); ++it)
 									{
-										poly->applyGLTransformation_recursive(&trans);
-										//this transformation is of no interest for the user
-										poly->resetGLTransformationHistory_recursive();
-										//add the 'const altitude' meta-data as well
-										poly->setMetaData(ccPolyline::MetaKeyConstAltitude(), QVariant(z));
+										//get the height
+										double z = 0.0;
+										if (fieldType == FTDouble)
+											z = DBFReadDoubleAttribute(dbfHandle, it.value() - 1, index);
+										else //if (fieldType == FTInteger)
+											z = static_cast<double>(DBFReadIntegerAttribute(dbfHandle, it.value() - 1, index));
+										z *= scale;
+
+										//translate the polyline
+										CCVector3 T(0, 0, static_cast<PointCoordinateType>(z));
+										ccGLMatrix trans;
+										trans.setTranslation(T);
+										ccPolyline* poly = it.key();
+										if (poly)
+										{
+											poly->applyGLTransformation_recursive(&trans);
+											//this transformation is of no interest for the user
+											poly->resetGLTransformationHistory_recursive();
+											//add the 'const altitude' meta-data as well
+											poly->setMetaData(ccPolyline::MetaKeyConstAltitude(), QVariant(z));
+										}
 									}
 								}
-							}
-							else if (hasPoints)
-							{
-								//for each point
-								for (unsigned i = 0; i < singlePoints->size(); ++i)
+								else if (hasPoints)
 								{
-									//get the height
-									double z = 0.0;
-									if (fieldType == FTDouble)
-										z = DBFReadDoubleAttribute(dbfHandle, static_cast<int>(i), index);
-									else //if (fieldType == FTInteger)
-										z = static_cast<double>(DBFReadIntegerAttribute(dbfHandle, static_cast<int>(i), index));
-									z *= scale;
+									//for each point
+									for (unsigned i = 0; i < singlePoints->size(); ++i)
+									{
+										//get the height
+										double z = 0.0;
+										if (fieldType == FTDouble)
+											z = DBFReadDoubleAttribute(dbfHandle, static_cast<int>(i), index);
+										else //if (fieldType == FTInteger)
+											z = static_cast<double>(DBFReadIntegerAttribute(dbfHandle, static_cast<int>(i), index));
+										z *= scale;
 
-									//set the point height
-									const_cast<CCVector3*>(singlePoints->getPoint(i))->z = z;
+										//set the point height
+										const_cast<CCVector3*>(singlePoints->getPoint(i))->z = z;
+									}
+									singlePoints->invalidateBoundingBox();
 								}
-								singlePoints->invalidateBoundingBox();
+								else
+								{
+									assert(false);
+								}
 							}
 							else
 							{
-								assert(false);
+								//the user didn't select any field?
 							}
 						}
+						else
+						{
+							//ignored/cancelled by the uer
+						}
+					}
+					else
+					{
+						ccLog::Warning("[SHP] Silent mode: no field will be used as Z coordinate!");
 					}
 				}
 				else

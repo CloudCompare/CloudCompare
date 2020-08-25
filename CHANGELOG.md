@@ -23,6 +23,8 @@ v2.11.2 (Anoia) - ??/??/2020
  - command line: the LAST keyword was consistently badly managed (for -SF_OP and -ICP)
  - the new 'Edit > Colors > From Scalar Fields' tool could crash due to a non initialized variable
  - PV files could not be loaded anymore
+ - even in the command line 'SILENT' mode, loading a SHP file with additional fields in the associated DBF file would spawn a blocking dialog
+	(these fields will now be ignored in SILENT mode)
 
 v2.11.1 (Anoia) - 29/07/2020
 ----------------------

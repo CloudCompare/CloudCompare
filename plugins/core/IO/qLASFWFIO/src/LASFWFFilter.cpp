@@ -453,18 +453,15 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 		CCCoreLib::NormalizedProgress nProgress(progressDialog.data(), cloud->size());
 
 		bool hasReturnNumberField = false;
-		bool hasPlainClassificationField = false;
 		for (const LasField& f : fieldsToSave)
 		{
 			if (f.type == LAS_RETURN_NUMBER)
 			{
 				hasReturnNumberField = true;
 			}
-			else if (f.type == LAS_CLASSIFICATION)
-			{
-				hasPlainClassificationField = true;
-			}
 		}
+
+		const bool pointFormatSixOrAbove = (lasheader.point_data_format >= 6);
 
 		for (unsigned i = 0; i < cloud->size(); ++i)
 		{
@@ -488,8 +485,6 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 			}
 
 			//additional fields
-			U8 classification = 0;
-			bool compositeClassif = false;
 			for (std::vector<LasField>::const_iterator it = fieldsToSave.begin(); it != fieldsToSave.end(); ++it)
 			{
 				assert(it->sf);
@@ -516,7 +511,19 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 					laspoint.set_edge_of_flight_line(static_cast<U8>(it->sf->getValue(i)));
 					break;
 				case LAS_CLASSIFICATION:
-					laspoint.set_classification(static_cast<U8>(it->sf->getValue(i)));
+					if (pointFormatSixOrAbove)
+					{
+						laspoint.set_extended_classification(static_cast<U8>(it->sf->getValue(i)));
+					}
+					else
+					{
+						//we have to decompose the field so that LASlib handles it properly
+						U8 classif = static_cast<U8>(it->sf->getValue(i));
+						laspoint.set_classification(classif & 31);
+						laspoint.set_synthetic_flag(classif & 32);
+						laspoint.set_keypoint_flag(classif & 64);
+						laspoint.set_withheld_flag(classif & 128);
+					}
 					break;
 				case LAS_SCAN_ANGLE_RANK:
 					laspoint.set_scan_angle_rank(static_cast<U8>(it->sf->getValue(i)));
@@ -536,31 +543,36 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 					laspoint.set_gps_time(static_cast<F64>(it->sf->getValue(i)) + it->sf->getGlobalShift());
 					break;
 				case LAS_CLASSIF_VALUE:
-					classification |= (static_cast<U8>(it->sf->getValue(i)) & 31); //5 first bits
-					compositeClassif = true;
+					if (pointFormatSixOrAbove)
+					{
+						laspoint.set_extended_classification(static_cast<U8>(it->sf->getValue(i))); //8 bits
+					}
+					else
+					{
+						laspoint.set_classification(static_cast<U8>(it->sf->getValue(i)) & 31); //5 first bits
+					}
 					break;
 				case LAS_CLASSIF_SYNTHETIC:
-					classification |= (static_cast<U8>(it->sf->getValue(i)) & 32); //6th bit
-					compositeClassif = true;
+					if (it->sf->getValue(i) != 0)
+						laspoint.set_synthetic_flag(1);
 					break;
 				case LAS_CLASSIF_KEYPOINT:
-					classification |= (static_cast<U8>(it->sf->getValue(i)) & 64); //7th bit
-					compositeClassif = true;
+					if (it->sf->getValue(i) != 0)
+						laspoint.set_keypoint_flag(1);
 					break;
 				case LAS_CLASSIF_WITHHELD:
-					classification |= (static_cast<U8>(it->sf->getValue(i)) & 128); //8th bit
-					compositeClassif = true;
+					if (it->sf->getValue(i) != 0)
+						laspoint.set_withheld_flag(1);
+					break;
+				case LAS_CLASSIF_OVERLAP:
+					if (it->sf->getValue(i) != 0)
+						laspoint.set_extended_overlap_flag(1);
 					break;
 				case LAS_INVALID:
 				default:
 					assert(false);
 					break;
 				}
-			}
-
-			if (compositeClassif && !hasPlainClassificationField)
-			{
-				laspoint.set_classification(classification);
 			}
 
 			if (hasColors)
@@ -707,6 +719,10 @@ CC_FILE_ERROR LASFWFFilter::loadFile(const QString& filename, ccHObject& contain
 			return CC_FERR_THIRD_PARTY_LIB_FAILURE;
 		}
 
+		ccLog::Print(QString("[LASLib] File version: %1.%2").arg(lasreader.header.version_major).arg(lasreader.header.version_minor));
+		ccLog::Print(QString("[LASLib] Point format: %1").arg(lasreader.header.point_data_format));
+		const bool pointFormatSixOrAbove = (lasreader.header.point_data_format >= 6);
+
 		unsigned pointCount = static_cast<unsigned>(lasreader.npoints);
 		ccLog::Print(QString("[LASLib] " + QObject::tr("Reading %1 points").arg(pointCount)));
 
@@ -746,11 +762,18 @@ CC_FILE_ERROR LASFWFFilter::loadFile(const QString& filename, ccHObject& contain
 		//DGM: from now on, we only enable scalar fields when we detect a valid value!
 		std::vector< LasField::Shared > fieldsToLoad;
 		{
-			fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIFICATION, 0, 0, 255))); //unsigned char: between 0 and 255
-			//fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIF_VALUE, 0, 0, 31))); //5 bits: between 0 and 31
-			//fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIF_SYNTHETIC, 0, 0, 1))); //1 bit: 0 or 1
-			//fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIF_KEYPOINT, 0, 0, 1))); //1 bit: 0 or 1
-			//fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIF_WITHHELD, 0, 0, 1))); //1 bit: 0 or 1
+			if (pointFormatSixOrAbove)
+			{
+				fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIFICATION, 0, 0, 255))); //unsigned char: between 0 and 255
+				fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIF_OVERLAP, 0, 0, 1))); //1 bit: 0 or 1
+			}
+			else
+			{
+				fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIF_VALUE, 0, 0, 31))); //5 bits: between 0 and 31
+			}
+			fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIF_SYNTHETIC, 0, 0, 1))); //1 bit: 0 or 1
+			fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIF_KEYPOINT, 0, 0, 1))); //1 bit: 0 or 1
+			fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_CLASSIF_WITHHELD, 0, 0, 1))); //1 bit: 0 or 1
 			fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_INTENSITY, 0, 0, 65535))); //16 bits: between 0 and 65536
 			fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_TIME, 0, 0, -1.0))); //8 bytes (double) --> we use global shift!
 			fieldsToLoad.push_back(LasField::Shared(new LasField(LAS_RETURN_NUMBER, 1, 1, 7))); //3 bits: between 1 and 7
@@ -1048,7 +1071,19 @@ CC_FILE_ERROR LASFWFFilter::loadFile(const QString& filename, ccHObject& contain
 					value = static_cast<double>(point.get_edge_of_flight_line());
 					break;
 				case LAS_CLASSIFICATION:
-					value = static_cast<double>(point.get_classification());
+					if (pointFormatSixOrAbove)
+					{
+						value = static_cast<double>(point.get_extended_classification());
+					}
+					else
+					{
+						//warning: compared to the other LAS filters, the 'LAS_CLASSIFICATION'
+						//field corresponds to the full 8 bits (for point format < 6)
+						value = static_cast<double>(point.get_classification()
+							+ point.get_synthetic_flag() * 32
+							+ point.get_keypoint_flag() * 64
+							+ point.get_withheld_flag() * 128);
+					}
 					break;
 				case LAS_SCAN_ANGLE_RANK:
 					value = static_cast<double>(point.get_scan_angle_rank());
@@ -1068,16 +1103,34 @@ CC_FILE_ERROR LASFWFFilter::loadFile(const QString& filename, ccHObject& contain
 					}
 					break;
 				case LAS_CLASSIF_VALUE:
-					value = static_cast<double>(point.get_classification() & 31); //5 bits
+					if (pointFormatSixOrAbove)
+						value = static_cast<double>(point.get_extended_classification()); //8 bits
+					else
+						value = static_cast<double>(point.get_classification() & 31); //5 bits
 					break;
 				case LAS_CLASSIF_SYNTHETIC:
-					value = static_cast<double>(point.get_classification() & 32); //bit #6
+					if (pointFormatSixOrAbove)
+						value = static_cast<double>(point.get_synthetic_flag() << 5); //shift the value so as to give the same result as with older versions
+					else
+						value = static_cast<double>(point.get_classification() & 32); //bit #6
 					break;
 				case LAS_CLASSIF_KEYPOINT:
-					value = static_cast<double>(point.get_classification() & 64); //bit #7
+					if (pointFormatSixOrAbove)
+						value = static_cast<double>(point.get_keypoint_flag() << 6); //shift the value so as to give the same result as with older versions
+					else
+						value = static_cast<double>(point.get_classification() & 64); //bit #7
 					break;
 				case LAS_CLASSIF_WITHHELD:
-					value = static_cast<double>(point.get_classification() & 128); //bit #8
+					if (pointFormatSixOrAbove)
+						value = static_cast<double>(point.get_withheld_flag() << 7); //shift the value so as to give the same result as with older versions
+					else
+						value = static_cast<double>(point.get_classification() & 128); //bit #8
+					break;
+				case LAS_CLASSIF_OVERLAP:
+					if (pointFormatSixOrAbove)
+						value = static_cast<double>(point.get_extended_overlap_flag());
+					else
+						value = 0; //not present in point format < 6
 					break;
 				case LAS_EXTRA:
 					value = point.get_attribute_as_float(static_cast<ExtraLasField*>(field.data())->startIndex);
@@ -1176,6 +1229,7 @@ CC_FILE_ERROR LASFWFFilter::loadFile(const QString& filename, ccHObject& contain
 						||	field->type == LAS_CLASSIF_SYNTHETIC
 						||	field->type == LAS_CLASSIF_KEYPOINT
 						||	field->type == LAS_CLASSIF_WITHHELD
+						||	field->type == LAS_CLASSIF_OVERLAP
 						||	field->type == LAS_RETURN_NUMBER
 						||	field->type == LAS_NUMBER_OF_RETURNS)
 					{

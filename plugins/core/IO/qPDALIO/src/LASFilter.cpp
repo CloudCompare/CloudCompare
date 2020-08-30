@@ -1127,7 +1127,11 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 		s_lasOpenDlg->setDimensions(file_info.m_dimNames);
 		s_lasOpenDlg->clearEVLRs();
 		s_lasOpenDlg->setInfos(filename, nbOfPoints, bbMin, bbMax);
-		s_lasOpenDlg->classifOverlapCheckBox->setEnabled(pointFormat >= 6);
+		if (pointFormat <= 5)
+		{
+			s_lasOpenDlg->classifOverlapCheckBox->setEnabled(false);
+			s_lasOpenDlg->classifOverlapCheckBox->setVisible(false);
+		}
 
 		for (const ExtraDim& dim : extraDims)
 		{

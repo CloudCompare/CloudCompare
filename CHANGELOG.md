@@ -25,6 +25,7 @@ v2.11.2 (Anoia) - ??/??/2020
  - PV files could not be loaded anymore
  - even in the command line 'SILENT' mode, loading a SHP file with additional fields in the associated DBF file would spawn a blocking dialog
 	(these fields will now be ignored in SILENT mode)
+- LAS 1.3 or 1.4 (LASlib): Classification values and flags were not always loaded or saved properly
 
 v2.11.1 (Anoia) - 29/07/2020
 ----------------------

@@ -17,7 +17,7 @@ v2.12 (???) - (in development)
 	- qBroom: the broom was not working properly on a non horizontal surface!
 
 
-v2.11.2 (Anoia) - ??/??/2020
+v2.11.2 (Anoia) - 30/08/2020
 ----------------------
 - Bug fixes:
  - command line: the LAST keyword was consistently badly managed (for -SF_OP and -ICP)
@@ -25,7 +25,8 @@ v2.11.2 (Anoia) - ??/??/2020
  - PV files could not be loaded anymore
  - even in the command line 'SILENT' mode, loading a SHP file with additional fields in the associated DBF file would spawn a blocking dialog
 	(these fields will now be ignored in SILENT mode)
-- LAS 1.3 or 1.4 (LASlib): Classification values and flags were not always loaded or saved properly
+ - LAS 1.3 or 1.4 (LASlib): Classification values and flags were not always loaded or saved properly
+ - [Windows] The contour lines generated with the Rasterize tool could be incomplete (due to GDAL 3.0 --> reverting to GDAL 2.2)
 
 v2.11.1 (Anoia) - 29/07/2020
 ----------------------

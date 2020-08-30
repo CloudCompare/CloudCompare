@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-project( CloudCompare VERSION 2.11.1 )
+project( CloudCompare VERSION 2.11.2 )
 
 include( CMakePolicies NO_POLICY_SCOPE )
 

@@ -382,9 +382,9 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 	if (vertices->hasMetaData("ply.comments")) 
 	{
 		QStringList comments = vertices->getMetaData("ply.comments").toStringList();
-		for(int i = 0; i<comments.size(); i++)
+		for (QString comment : comments)
 		{
-			ply_add_comment(ply, comments[i].toStdString().c_str());
+			ply_add_comment(ply,  qPrintable(comment));
 		}
 	}
 	else
@@ -930,7 +930,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 	/******************/
 	/***  Comments  ***/
 	/******************/
-	QStringList comments = QStringList();
+	QStringList comments;
 
 	{
 		//display comments

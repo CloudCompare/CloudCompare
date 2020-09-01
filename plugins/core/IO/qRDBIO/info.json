@@ -1,0 +1,17 @@
+{
+	"type" : "I/O",
+	"name" : "RDB2 (I/O Plugin)",
+	"description": "This plugin adds capabilities to read Riegl RDBX point cloud data.",
+	"authors" : [
+		{
+			"name" : "Reinhold Gschweicher",
+			"email" : "support@riegl.com"
+		}
+	],
+	"references" : [
+		{
+			"text" : "Riegl LMS",
+			"url" : "https://riegl.com/"
+		}
+	]
+}

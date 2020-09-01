@@ -118,6 +118,7 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
 
 			for (unsigned i = 0; i < c_channelCount; i++)
 			{
+				m_scalars[i] = nullptr;
 				m_prevFixed[i] = true;
 				m_combos[i]->clear();
 				for (unsigned int s = 0; s < m_cloud->getNumberOfScalarFields(); s++)

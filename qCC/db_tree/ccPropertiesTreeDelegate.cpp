@@ -97,7 +97,9 @@ static QStandardItem* ITEM(const QString& name,
 	item->setFlags(Qt::ItemIsEnabled | additionalFlags);
 	//role (if any)
 	if (role != ccPropertiesTreeDelegate::OBJECT_NO_PROPERTY)
+	{
 		item->setData(role);
+	}
 
 	return item;
 }
@@ -169,7 +171,9 @@ QSize ccPropertiesTreeDelegate::sizeHint(const QStyleOptionViewItem& option, con
 void ccPropertiesTreeDelegate::unbind()
 {
 	if (m_model)
+	{
 		m_model->disconnect(this);
+	}
 }
 
 ccHObject* ccPropertiesTreeDelegate::getCurrentObject()
@@ -180,7 +184,9 @@ ccHObject* ccPropertiesTreeDelegate::getCurrentObject()
 void ccPropertiesTreeDelegate::fillModel(ccHObject* hObject)
 {
 	if (!hObject)
+	{
 		return;
+	}
 
 	unbind();
 
@@ -305,7 +311,9 @@ void ccPropertiesTreeDelegate::fillModel(ccHObject* hObject)
 
 	//go back to original position
 	if (scrollPos > 0)
+	{
 		m_view->verticalScrollBar()->setSliderPosition(scrollPos);
+	}
 
 	if (m_model)
 	{
@@ -338,7 +346,7 @@ void ccPropertiesTreeDelegate::appendWideRow(QStandardItem* item, bool openPersi
 	assert(item);
 	assert(m_model);
 
-	if (m_model)
+	if (m_model && item)
 	{
 		m_model->appendRow(item);
 		
@@ -371,10 +379,15 @@ void ccPropertiesTreeDelegate::addSeparator(const QString& title)
 void ccPropertiesTreeDelegate::fillWithMetaData(const ccObject* _obj)
 {
 	assert(_obj && m_model);
-
+	if (!_obj || !m_model)
+	{
+		return;
+	}
 	const QVariantMap& metaData = _obj->metaData();
 	if (metaData.empty())
+	{
 		return;
+	}
 
 	addSeparator( tr( "Meta data" ) );
 
@@ -400,7 +413,10 @@ void ccPropertiesTreeDelegate::fillWithMetaData(const ccObject* _obj)
 void ccPropertiesTreeDelegate::fillWithHObject(ccHObject* _obj)
 {
 	assert(_obj && m_model);
-
+	if (!_obj || !m_model)
+	{
+		return;
+	}
 	addSeparator( tr( "CC Object" ) );
 
 	//name
@@ -408,18 +424,24 @@ void ccPropertiesTreeDelegate::fillWithHObject(ccHObject* _obj)
 
 	//visibility
 	if (!_obj->isVisiblityLocked())
-		appendRow(ITEM( tr( "Visible" ) ), CHECKABLE_ITEM(_obj->isVisible(), OBJECT_VISIBILITY));
+	{
+		appendRow(ITEM(tr("Visible")), CHECKABLE_ITEM(_obj->isVisible(), OBJECT_VISIBILITY));
+	}
 
 	//normals
 	if (_obj->hasNormals())
-		appendRow(ITEM( tr( "Normals" ) ), CHECKABLE_ITEM(_obj->normalsShown(), OBJECT_NORMALS_SHOWN));
+	{
+		appendRow(ITEM(tr("Normals")), CHECKABLE_ITEM(_obj->normalsShown(), OBJECT_NORMALS_SHOWN));
+	}
 
 	//name in 3D
 	appendRow(ITEM( tr( "Show name (in 3D)" ) ), CHECKABLE_ITEM(_obj->nameShownIn3D(), OBJECT_NAME_IN_3D));
 
 	//color source
 	if (_obj->hasColors() || _obj->hasScalarFields())
-		appendRow(ITEM( tr( "Colors" ) ), PERSISTENT_EDITOR(OBJECT_COLOR_SOURCE), true);
+	{
+		appendRow(ITEM(tr("Colors")), PERSISTENT_EDITOR(OBJECT_COLOR_SOURCE), true);
+	}
 
 	//Bounding-box
 	{
@@ -470,12 +492,18 @@ void ccPropertiesTreeDelegate::fillWithHObject(ccHObject* _obj)
 
 	//display window
 	if (!_obj->isLocked())
-		appendRow(ITEM( tr( "Current Display" )), PERSISTENT_EDITOR(OBJECT_CURRENT_DISPLAY), true);
+	{
+		appendRow(ITEM(tr("Current Display")), PERSISTENT_EDITOR(OBJECT_CURRENT_DISPLAY), true);
+	}
 }
 
 void ccPropertiesTreeDelegate::fillWithShifted(const ccShiftedObject* _obj)
 {
 	assert(_obj && m_model);
+	if (!_obj || !m_model)
+	{
+		return;
+	}
 
 	//global shift & scale
 	const CCVector3d& shift = _obj->getGlobalShift();
@@ -488,7 +516,10 @@ void ccPropertiesTreeDelegate::fillWithShifted(const ccShiftedObject* _obj)
 void ccPropertiesTreeDelegate::fillWithPointCloud(ccGenericPointCloud* _obj)
 {
 	assert(_obj && m_model);
-
+	if (!_obj || !m_model)
+	{
+		return;
+	}
 	addSeparator( tr( "Cloud" ) );
 
 	//number of points
@@ -513,9 +544,13 @@ void ccPropertiesTreeDelegate::fillWithPointCloud(ccGenericPointCloud* _obj)
 		if (gridCount != 0)
 		{
 			if (gridCount != 1)
-				addSeparator( tr( "Scan grids" ) );
+			{
+				addSeparator(tr("Scan grids"));
+			}
 			else
-				addSeparator( tr( "Scan grid" ) );
+			{
+				addSeparator(tr("Scan grid"));
+			}
 
 			for (size_t i = 0; i < gridCount; ++i)
 			{
@@ -541,11 +576,16 @@ void ccPropertiesTreeDelegate::fillWithPointCloud(ccGenericPointCloud* _obj)
 void ccPropertiesTreeDelegate::fillSFWithPointCloud(ccGenericPointCloud* _obj)
 {
 	assert(m_model);
-
+	if (!_obj || !m_model)
+	{
+		return;
+	}
 	//for "real" point clouds only
 	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(_obj);
 	if (!cloud)
+	{
 		return;
+	}
 
 	//Scalar fields
 	unsigned sfCount = cloud->getNumberOfScalarFields();
@@ -585,6 +625,10 @@ void ccPropertiesTreeDelegate::fillSFWithPointCloud(ccGenericPointCloud* _obj)
 void ccPropertiesTreeDelegate::fillWithPrimitive(const ccGenericPrimitive* _obj)
 {
 	assert(_obj && m_model);
+	if (!_obj || !m_model)
+	{
+		return;
+	}
 
 	addSeparator( tr( "Primitive" ) );
 
@@ -624,6 +668,10 @@ void ccPropertiesTreeDelegate::fillWithPrimitive(const ccGenericPrimitive* _obj)
 void ccPropertiesTreeDelegate::fillWithFacet(const ccFacet* _obj)
 {
 	assert(_obj && m_model);
+	if (!_obj || !m_model)
+	{
+		return;
+	}
 
 	addSeparator( tr( "Facet" ) );
 
@@ -650,6 +698,10 @@ void ccPropertiesTreeDelegate::fillWithFacet(const ccFacet* _obj)
 
 void ccPropertiesTreeDelegate::fillWithPlanarEntity(const ccPlanarEntityInterface* _obj)
 {
+	if (!_obj || !m_model)
+	{
+		return;
+	}
 	//normal
 	CCVector3 N = _obj->getNormal();
 	appendRow(ITEM( tr( "Normal" ) ), ITEM(QStringLiteral("(%1 ; %2 ; %3)").arg(N.x).arg(N.y).arg(N.z)));
@@ -668,6 +720,10 @@ void ccPropertiesTreeDelegate::fillWithPlanarEntity(const ccPlanarEntityInterfac
 void ccPropertiesTreeDelegate::fillWithMesh(const ccGenericMesh* _obj)
 {
 	assert(_obj && m_model);
+	if (!_obj || !m_model)
+	{
+		return;
+	}
 
 	bool isSubMesh = _obj->isA(CC_TYPES::SUB_MESH);
 
@@ -696,6 +752,10 @@ void ccPropertiesTreeDelegate::fillWithMesh(const ccGenericMesh* _obj)
 void ccPropertiesTreeDelegate::fillWithPolyline(const ccPolyline* _obj)
 {
 	assert(_obj && m_model);
+	if (!_obj || !m_model)
+	{
+		return;
+	}
 
 	addSeparator( tr( "Polyline" ) );
 
@@ -715,6 +775,10 @@ void ccPropertiesTreeDelegate::fillWithPolyline(const ccPolyline* _obj)
 void ccPropertiesTreeDelegate::fillWithPointOctree(const ccOctree* _obj)
 {
 	assert(_obj && m_model);
+	if (!_obj || !m_model)
+	{
+		return;
+	}
 
 	addSeparator( tr( "Octree" ) );
 
@@ -745,6 +809,10 @@ void ccPropertiesTreeDelegate::fillWithPointOctree(const ccOctree* _obj)
 void ccPropertiesTreeDelegate::fillWithPointKdTree(const ccKdTree* _obj)
 {
 	assert(_obj && m_model);
+	if (!_obj || !m_model)
+	{
+		return;
+	}
 
 	addSeparator( tr( "Kd-tree" ) );
 
@@ -782,6 +850,10 @@ void ccPropertiesTreeDelegate::fillWithPointKdTree(const ccKdTree* _obj)
 void ccPropertiesTreeDelegate::fillWithImage(const ccImage* _obj)
 {
 	assert(_obj && m_model);
+	if (!_obj || !m_model)
+	{
+		return;
+	}
 
 	addSeparator( tr( "Image" ));
 
@@ -805,6 +877,10 @@ void ccPropertiesTreeDelegate::fillWithImage(const ccImage* _obj)
 void ccPropertiesTreeDelegate::fillWithLabel(const cc2DLabel* _obj)
 {
 	assert(_obj && m_model);
+	if (!_obj || !m_model)
+	{
+		return;
+	}
 
 	addSeparator( tr( "Label" ) );
 
@@ -822,6 +898,10 @@ void ccPropertiesTreeDelegate::fillWithLabel(const cc2DLabel* _obj)
 void ccPropertiesTreeDelegate::fillWithViewportObject(const cc2DViewportObject* _obj)
 {
 	assert(_obj && m_model);
+	if (!_obj || !m_model)
+	{
+		return;
+	}
 
 	addSeparator( tr( "Viewport" ) );
 
@@ -839,6 +919,10 @@ void ccPropertiesTreeDelegate::fillWithViewportObject(const cc2DViewportObject* 
 void ccPropertiesTreeDelegate::fillWithTransBuffer(const ccIndexedTransformationBuffer* _obj)
 {
 	assert(_obj && m_model);
+	if (!_obj || !m_model)
+	{
+		return;
+	}
 
 	addSeparator( tr( "Trans. buffer" ) );
 
@@ -858,6 +942,10 @@ void ccPropertiesTreeDelegate::fillWithTransBuffer(const ccIndexedTransformation
 void ccPropertiesTreeDelegate::fillWithSensor(const ccSensor* _obj)
 {
 	assert(_obj && m_model);
+	if (!_obj || !m_model)
+	{
+		return;
+	}
 
 	//Sensor drawing scale
 	appendRow(ITEM( tr( "Drawing scale" ) ), PERSISTENT_EDITOR(OBJECT_SENSOR_DISPLAY_SCALE), true);
@@ -891,6 +979,10 @@ void ccPropertiesTreeDelegate::fillWithSensor(const ccSensor* _obj)
 void ccPropertiesTreeDelegate::fillWithGBLSensor(const ccGBLSensor* _obj)
 {
 	assert(_obj && m_model);
+	if (!_obj || !m_model)
+	{
+		return;
+	}
 
 	addSeparator( tr( "TLS/GBL Sensor" ) );
 
@@ -936,6 +1028,10 @@ void ccPropertiesTreeDelegate::fillWithGBLSensor(const ccGBLSensor* _obj)
 void ccPropertiesTreeDelegate::fillWithCameraSensor(const ccCameraSensor* _obj)
 {
 	assert(_obj && m_model);
+	if (!_obj || !m_model)
+	{
+		return;
+	}
 
 	addSeparator( tr( "Camera Sensor" ) );
 
@@ -975,7 +1071,10 @@ void ccPropertiesTreeDelegate::fillWithCameraSensor(const ccCameraSensor* _obj)
 void ccPropertiesTreeDelegate::fillWithMaterialSet(const ccMaterialSet* _obj)
 {
 	assert(_obj && m_model);
-
+	if (!_obj || !m_model)
+	{
+		return;
+	}
 	addSeparator( tr( "Material set" ) );
 
 	//Count
@@ -988,6 +1087,10 @@ void ccPropertiesTreeDelegate::fillWithMaterialSet(const ccMaterialSet* _obj)
 void ccPropertiesTreeDelegate::fillWithShareable(const CCShareable* _obj)
 {
 	assert(_obj && m_model);
+	if (!_obj || !m_model)
+	{
+		return;
+	}
 
 	addSeparator( tr( "Array" ) );
 
@@ -1000,6 +1103,10 @@ template<class Type, int N, class ComponentType>
 void ccPropertiesTreeDelegate::fillWithCCArray(const ccArray<Type, N, ComponentType>* _obj)
 {
 	assert(_obj && m_model);
+	if (!_obj || !m_model)
+	{
+		return;
+	}
 
 	addSeparator( tr( "Array" ) );
 
@@ -1082,14 +1189,16 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 	case OBJECT_CURRENT_SCALAR_FIELD:
 	{
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
-		assert(cloud);
+		assert(cloud);		
 
 		QComboBox *comboBox = new QComboBox(parent);
 
 		comboBox->addItem( tr( s_noneString ) );
-		int nsf = cloud->getNumberOfScalarFields();
+		int nsf = cloud ? cloud->getNumberOfScalarFields() : 0;
 		for (int i = 0; i < nsf; ++i)
+		{
 			comboBox->addItem(QString(cloud->getScalarFieldName(i)));
+		}
 
 		connect(comboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::activated),
 				this, &ccPropertiesTreeDelegate::scalarFieldChanged);
@@ -1261,10 +1370,13 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 	{
 		ccSensor* sensor = ccHObjectCaster::ToSensor(m_currentObject);
 		assert(sensor);
-
+		
 		double minIndex = 0.0;
 		double maxIndex = 0.0;
-		sensor->getIndexBounds(minIndex, maxIndex);
+		if (sensor)
+		{
+			sensor->getIndexBounds(minIndex, maxIndex);
+		}
 
 		QDoubleSpinBox* spinBox = new QDoubleSpinBox(parent);
 		spinBox->setRange(minIndex, maxIndex);
@@ -1356,7 +1468,9 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		comboBox->addItem( tr( s_defaultPointSizeString ) ); //size = 0
 		
 		for (int i = static_cast<int>(ccGLWindow::MIN_POINT_SIZE_F); i <= static_cast<int>(ccGLWindow::MAX_POINT_SIZE_F); ++i)
+		{
 			comboBox->addItem(QString::number(i));
+		}
 
 		connect(comboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
 				this, &ccPropertiesTreeDelegate::cloudPointSizeChanged);
@@ -1371,7 +1485,9 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		comboBox->addItem( tr( s_defaultPolyWidthSizeString ) ); //size = 0
 				
 		for (int i = static_cast<int>(ccGLWindow::MIN_LINE_WIDTH_F); i <= static_cast<int>(ccGLWindow::MAX_LINE_WIDTH_F); ++i)
+		{
 			comboBox->addItem(QString::number(i));
+		}
 
 		connect(comboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
 				this, &ccPropertiesTreeDelegate::polyineWidthChanged);
@@ -1426,7 +1542,9 @@ void ccPropertiesTreeDelegate::updateEditorGeometry(QWidget* editor, const QStyl
 	QStyledItemDelegate::updateEditorGeometry(editor, option, index);
 
 	if (!m_model || !editor)
+	{
 		return;
+	}
 
 	QStandardItem* item = m_model->itemFromIndex(index);
 
@@ -1436,7 +1554,9 @@ void ccPropertiesTreeDelegate::updateEditorGeometry(QWidget* editor, const QStyl
 		{
 			QWidget* widget = qobject_cast<QWidget*>(editor);
 			if (!widget)
+			{
 				return;
+			}
 			//we must resize the SF edit widget so that it spans on both columns!
 			QRect rect = m_view->visualRect(m_model->index(item->row(), 1)); //second column width
 			widget->resize(option.rect.width() + rect.width(), widget->height());
@@ -1511,7 +1631,10 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 	{
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
 		assert(cloud);
-
+		if (!cloud)
+		{
+			return;
+		}
 		int pos = cloud->getCurrentDisplayedScalarFieldIndex();
 		SetComboBoxIndex(editor, pos + 1);
 		break;
@@ -1520,19 +1643,28 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 	{
 		QFrame *selectorFrame = qobject_cast<QFrame*>(editor);
 		if (!selectorFrame)
+		{
 			return;
+		}
 		ccColorScaleSelector* selector = static_cast<ccColorScaleSelector*>(selectorFrame);
 
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
 		assert(cloud);
-
+		if (!cloud)
+		{
+			return;
+		}
 		ccScalarField* sf = cloud->getCurrentDisplayedScalarField();
 		if (sf)
 		{
 			if (sf->getColorScale())
+			{
 				selector->setSelectedScale(sf->getColorScale()->getUuid());
+			}
 			else
+			{
 				selector->setSelectedScale(QString());
+			}
 		}
 		break;
 	}
@@ -1549,21 +1681,27 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 	{
 		sfEditDlg *sfd = qobject_cast<sfEditDlg*>(editor);
 		if (!sfd)
+		{
 			return;
+		}
 
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
 		assert(cloud);
 
 		ccScalarField* sf = cloud->getCurrentDisplayedScalarField();
 		if (sf)
+		{
 			sfd->fillDialogWith(sf);
+		}
 		break;
 	}
 	case OBJECT_HISTORY_MATRIX_EDITOR:
 	{
 		MatrixDisplayDlg *mdd = qobject_cast<MatrixDisplayDlg*>(editor);
 		if (!mdd)
+		{
 			return;
+		}
 
 		mdd->fillDialogWith(m_currentObject->getGLTransformationHistory());
 		break;
@@ -1572,7 +1710,9 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 	{
 		MatrixDisplayDlg *mdd = qobject_cast<MatrixDisplayDlg*>(editor);
 		if (!mdd)
+		{
 			return;
+		}
 
 		mdd->fillDialogWith(m_currentObject->getGLTransformation());
 		break;
@@ -1581,11 +1721,16 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 	{
 		MatrixDisplayDlg* mdd = qobject_cast<MatrixDisplayDlg*>(editor);
 		if (!mdd)
+		{
 			return;
+		}
 
 		ccSensor* sensor = ccHObjectCaster::ToSensor(m_currentObject);
 		assert(sensor);
-
+		if (!sensor)
+		{
+			return;
+		}
 		ccIndexedTransformation trans;
 		if (sensor->getActiveAbsoluteTransformation(trans))
 		{
@@ -1602,7 +1747,9 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 	{
 		QLabel* label = qobject_cast<QLabel*>(editor);
 		if (label)
+		{
 			label->setText(item->accessibleDescription());
+		}
 		break;
 	}
 	case OBJECT_OCTREE_TYPE:
@@ -1658,10 +1805,16 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 	{
 		QSlider *slider = qobject_cast<QSlider*>(editor);
 		if (!slider)
+		{
 			return;
+		}
 
 		ccImage* image = ccHObjectCaster::ToImage(m_currentObject);
 		assert(image);
+		if (!image)
+		{
+			return;
+		}
 		slider->setValue(static_cast<int>(image->getAlpha()*255.0f));
 		//slider->setTickPosition(QSlider::NoTicks);
 		break;
@@ -1677,7 +1830,9 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 	{
 		QLineEdit *lineEdit = qobject_cast<QLineEdit*>(editor);
 		if (!lineEdit)
+		{
 			return;
+		}
 
 		ccGBLSensor* sensor = ccHObjectCaster::ToGBLSensor(m_currentObject);
 		assert(sensor);
@@ -1702,6 +1857,10 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 	{
 		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(m_currentObject);
 		assert(cloud);
+		if (!cloud)
+		{
+			return;
+		}
 		SetComboBoxIndex(editor, static_cast<int>(cloud->getPointSize()));
 		break;
 	}
@@ -1709,6 +1868,10 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 	{
 		ccPolyline* poly = ccHObjectCaster::ToPolyline(m_currentObject);
 		assert(poly);
+		if (!poly)
+		{
+			return;
+		}
 		SetComboBoxIndex(editor, static_cast<int>(poly->getWidth()));
 		break;
 	}
@@ -1720,13 +1883,17 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 		{
 			++lastIndex;
 			if (m_currentObject->colorsShown())
+			{
 				currentIndex = lastIndex;
+			}
 		}
 		if (m_currentObject->hasScalarFields())
 		{
 			++lastIndex;
 			if (m_currentObject->sfShown())
+			{
 				currentIndex = lastIndex;
+			}
 		}
 		SetComboBoxIndex(editor, currentIndex);
 		break;
@@ -1888,7 +2055,9 @@ void ccPropertiesTreeDelegate::updateDisplay()
 {
 	ccHObject* object = m_currentObject;
 	if (!object)
+	{
 		return;
+	}
 
 	bool objectIsDisplayed = object->isDisplayed();
 	if (!objectIsDisplayed)
@@ -1913,9 +2082,13 @@ void ccPropertiesTreeDelegate::updateDisplay()
 	if (objectIsDisplayed)
 	{
 		if (object->isGroup())
+		{
 			emit ccObjectAndChildrenAppearanceChanged(m_currentObject);
+		}
 		else
+		{
 			emit ccObjectAppearanceChanged(m_currentObject);
+		}
 	}
 }
 
@@ -1928,7 +2101,9 @@ void ccPropertiesTreeDelegate::updateModel()
 void ccPropertiesTreeDelegate::scalarFieldChanged(int pos)
 {
 	if (!m_currentObject)
+	{
 		return;
+	}
 
 	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
 	if (cloud && cloud->getCurrentDisplayedScalarFieldIndex() + 1 != pos)
@@ -1945,7 +2120,9 @@ void ccPropertiesTreeDelegate::scalarFieldChanged(int pos)
 void ccPropertiesTreeDelegate::spawnColorRampEditor()
 {
 	if (!m_currentObject)
+	{
 		return;
+	}
 
 	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
 	assert(cloud);
@@ -1977,7 +2154,9 @@ void ccPropertiesTreeDelegate::spawnColorRampEditor()
 void ccPropertiesTreeDelegate::colorScaleChanged(int pos)
 {
 	if (!m_currentObject)
+	{
 		return;
+	}
 
 	if (pos < 0)
 	{
@@ -1987,7 +2166,9 @@ void ccPropertiesTreeDelegate::colorScaleChanged(int pos)
 
 	ccColorScaleSelector* selector = dynamic_cast<ccColorScaleSelector*>(QObject::sender());
 	if (!selector)
+	{
 		return;
+	}
 
 	ccColorScale::Shared colorScale = selector->getScale(pos);
 	if (!colorScale)
@@ -2011,10 +2192,16 @@ void ccPropertiesTreeDelegate::colorScaleChanged(int pos)
 void ccPropertiesTreeDelegate::colorRampStepsChanged(int pos)
 {
 	if (!m_currentObject)
+	{
 		return;
+	}
 
 	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
 	assert(cloud);
+	if (!cloud)
+	{
+		return;
+	}
 	ccScalarField* sf = static_cast<ccScalarField*>(cloud->getCurrentDisplayedScalarField());
 	if (sf && sf->getColorRampSteps() != pos)
 	{
@@ -2026,16 +2213,20 @@ void ccPropertiesTreeDelegate::colorRampStepsChanged(int pos)
 void ccPropertiesTreeDelegate::octreeDisplayModeChanged(int pos)
 {
 	if (!m_currentObject)
+	{
 		return;
+	}
 	QComboBox* comboBox = dynamic_cast<QComboBox*>(QObject::sender());
 	if (!comboBox)
+	{
 		return;
+	}
 
 	ccOctree* octree = ccHObjectCaster::ToOctree(m_currentObject);
 	assert(octree);
 
 	int mode = comboBox->itemData(pos, Qt::UserRole).toInt();
-	if (octree->getDisplayMode() != mode)
+	if (octree && octree->getDisplayMode() != mode)
 	{
 		octree->setDisplayMode(static_cast<ccOctree::DisplayMode>(mode));
 		updateDisplay();
@@ -2045,12 +2236,14 @@ void ccPropertiesTreeDelegate::octreeDisplayModeChanged(int pos)
 void ccPropertiesTreeDelegate::octreeDisplayedLevelChanged(int val)
 {
 	if (!m_currentObject)
+	{
 		return;
+	}
 
 	ccOctree* octree = ccHObjectCaster::ToOctree(m_currentObject);
 	assert(octree);
 
-	if (octree->getDisplayedLevel() != val) //to avoid infinite loops!
+	if (octree && octree->getDisplayedLevel() != val) //to avoid infinite loops!
 	{
 		octree->setDisplayedLevel(val);
 		updateDisplay();
@@ -2062,7 +2255,9 @@ void ccPropertiesTreeDelegate::octreeDisplayedLevelChanged(int val)
 void ccPropertiesTreeDelegate::primitivePrecisionChanged(int val)
 {
 	if (!m_currentObject)
+	{
 		return;
+	}
 
 	ccGenericPrimitive* primitive = ccHObjectCaster::ToPrimitive(m_currentObject);
 	assert(primitive);
@@ -2086,6 +2281,8 @@ void ccPropertiesTreeDelegate::sphereRadiusChanged(double val)
 
 	ccSphere* sphere = ccHObjectCaster::ToSphere(m_currentObject);
 	assert(sphere);
+	if (!sphere)
+		return;
 
 	PointCoordinateType radius = static_cast<PointCoordinateType>(val);
 	if (sphere->getRadius() != radius)
@@ -2107,6 +2304,8 @@ void ccPropertiesTreeDelegate::coneHeightChanged(double val)
 
 	ccCone* cone = ccHObjectCaster::ToCone(m_currentObject);
 	assert(cone);
+	if (!cone)
+		return;
 
 	PointCoordinateType height = static_cast<PointCoordinateType>(val);
 	if (cone->getHeight() != height)
@@ -2128,6 +2327,8 @@ void ccPropertiesTreeDelegate::coneBottomRadiusChanged(double val)
 
 	ccCone* cone = ccHObjectCaster::ToCone(m_currentObject);
 	assert(cone);
+	if (!cone)
+		return;
 
 	PointCoordinateType radius = static_cast<PointCoordinateType>(val);
 	if (cone->getBottomRadius() != radius)
@@ -2149,6 +2350,8 @@ void ccPropertiesTreeDelegate::coneTopRadiusChanged(double val)
 
 	ccCone* cone = ccHObjectCaster::ToCone(m_currentObject);
 	assert(cone);
+	if (!cone)
+		return;
 
 	PointCoordinateType radius = static_cast<PointCoordinateType>(val);
 	if (cone->getTopRadius() != radius)
@@ -2166,6 +2369,9 @@ void ccPropertiesTreeDelegate::coneTopRadiusChanged(double val)
 void ccPropertiesTreeDelegate::imageAlphaChanged(int val)
 {
 	ccImage* image = ccHObjectCaster::ToImage(m_currentObject);
+	assert(image);
+	if (!image)
+		return;
 
 	float alpha = val / 255.0f;
 	if (image && image->getAlpha() != alpha)
@@ -2182,6 +2388,8 @@ void ccPropertiesTreeDelegate::applyImageViewport()
 
 	ccImage* image = ccHObjectCaster::ToImage(m_currentObject);
 	assert(image);
+	if (!image)
+		return;
 
 	if (image->getAssociatedSensor() && image->getAssociatedSensor()->applyViewport())
 	{
@@ -2196,6 +2404,8 @@ void ccPropertiesTreeDelegate::applySensorViewport()
 
 	ccSensor* sensor = ccHObjectCaster::ToSensor(m_currentObject);
 	assert(sensor);
+	if (!sensor)
+		return;
 
 	if (sensor->applyViewport())
 	{
@@ -2210,6 +2420,10 @@ void ccPropertiesTreeDelegate::applyLabelViewport()
 
 	cc2DViewportObject* viewport = ccHObjectCaster::To2DViewportObject(m_currentObject);
 	assert(viewport);
+	if (!viewport)
+	{
+		return;
+	}
 
 	ccGLWindow* win = MainWindow::GetActiveGLWindow();
 	if (!win)
@@ -2222,14 +2436,22 @@ void ccPropertiesTreeDelegate::applyLabelViewport()
 void ccPropertiesTreeDelegate::updateLabelViewport()
 {
 	if (!m_currentObject)
+	{
 		return;
+	}
 
 	cc2DViewportObject* viewport = ccHObjectCaster::To2DViewportObject(m_currentObject);
 	assert(viewport);
+	if (!viewport)
+	{
+		return;
+	}
 
 	ccGLWindow* win = MainWindow::GetActiveGLWindow();
 	if (!win)
+	{
 		return;
+	}
 
 	viewport->setParameters(win->getViewportParameters());
 	ccLog::Print(QString("Viewport '%1' has been updated").arg(viewport->getName()));
@@ -2238,7 +2460,9 @@ void ccPropertiesTreeDelegate::updateLabelViewport()
 void ccPropertiesTreeDelegate::sensorUncertaintyChanged()
 {
 	if (!m_currentObject)
+	{
 		return;
+	}
 
 	QLineEdit* lineEdit = qobject_cast<QLineEdit*>(QObject::sender());
 	if (!lineEdit)
@@ -2260,7 +2484,9 @@ void ccPropertiesTreeDelegate::sensorUncertaintyChanged()
 void ccPropertiesTreeDelegate::sensorScaleChanged(double val)
 {
 	if (!m_currentObject)
+	{
 		return;
+	}
 
 	ccSensor* sensor = ccHObjectCaster::ToSensor(m_currentObject);
 	assert(sensor);
@@ -2275,7 +2501,9 @@ void ccPropertiesTreeDelegate::sensorScaleChanged(double val)
 void ccPropertiesTreeDelegate::sensorIndexChanged(double val)
 {
 	if (!m_currentObject)
+	{
 		return;
+	}
 
 	ccSensor* sensor = ccHObjectCaster::ToSensor(m_currentObject);
 	assert(sensor);
@@ -2290,7 +2518,9 @@ void ccPropertiesTreeDelegate::sensorIndexChanged(double val)
 void ccPropertiesTreeDelegate::trihedronsScaleChanged(double val)
 {
 	if (!m_currentObject)
+	{
 		return;
+	}
 
 	ccIndexedTransformationBuffer* buffer = ccHObjectCaster::ToTransBuffer(m_currentObject);
 	assert(buffer);
@@ -2299,14 +2529,18 @@ void ccPropertiesTreeDelegate::trihedronsScaleChanged(double val)
 	{
 		buffer->setTriherdonsDisplayScale(static_cast<float>(val));
 		if (buffer->triherdonsShown())
+		{
 			updateDisplay();
+		}
 	}
 }
 
 void ccPropertiesTreeDelegate::cloudPointSizeChanged(int size)
 {
 	if (!m_currentObject)
+	{
 		return;
+	}
 
 	ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(m_currentObject);
 	assert(cloud);
@@ -2321,7 +2555,9 @@ void ccPropertiesTreeDelegate::cloudPointSizeChanged(int size)
 void ccPropertiesTreeDelegate::polyineWidthChanged(int size)
 {
 	if (!m_currentObject)
+	{
 		return;
+	}
 
 	ccPolyline* polyline = ccHObjectCaster::ToPolyline(m_currentObject);
 	assert(polyline);
@@ -2336,15 +2572,21 @@ void ccPropertiesTreeDelegate::polyineWidthChanged(int size)
 void ccPropertiesTreeDelegate::objectDisplayChanged(const QString& newDisplayTitle)
 {
 	if (!m_currentObject)
+	{
 		return;
+	}
 
 	QString actualDisplayTitle;
 
 	ccGLWindow* win = static_cast<ccGLWindow*>(m_currentObject->getDisplay());
 	if (win)
+	{
 		actualDisplayTitle = win->windowTitle();
+	}
 	else
-		actualDisplayTitle = tr( s_noneString );
+	{
+		actualDisplayTitle = tr(s_noneString);
+	}
 
 	if (actualDisplayTitle != newDisplayTitle)
 	{
@@ -2367,7 +2609,9 @@ void ccPropertiesTreeDelegate::objectDisplayChanged(const QString& newDisplayTit
 void ccPropertiesTreeDelegate::colorSourceChanged(const QString & source)
 {
 	if (!m_currentObject)
+	{
 		return;
+	}
 
 	bool appearanceChanged = false;
 

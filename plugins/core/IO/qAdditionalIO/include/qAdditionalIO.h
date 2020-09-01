@@ -18,15 +18,15 @@
 //#                                                                        #
 //##########################################################################
 
-#include "ccIOPluginInterface.h"
+#include <ccIOPluginInterface.h>
 
 //! Additional I/O Formats
 class qAdditionalIO : public QObject, public ccIOPluginInterface
 {
 	Q_OBJECT
-	Q_INTERFACES(ccIOPluginInterface)
+	Q_INTERFACES( ccPluginInterface ccIOPluginInterface )
 
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qAdditionalIO" FILE "../info.json")
+	Q_PLUGIN_METADATA( IID "cccorp.cloudcompare.plugin.qAdditionalIO" FILE "../info.json" )
 
 public:
 	explicit qAdditionalIO( QObject* parent = nullptr );

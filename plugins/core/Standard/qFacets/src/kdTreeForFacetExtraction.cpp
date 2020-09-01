@@ -236,16 +236,16 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 						//compute the minimum distance between the candidate centroid and the 'currentPointSet'
 						PointCoordinateType minDistToMainSet = 0.0;
 						{
-							for (unsigned j=0; j<currentPointSet->size(); ++j)
+							for (unsigned j = 0; j < currentPointSet->size(); ++j)
 							{
 								const CCVector3* P = currentPointSet->getPoint(j);
-								PointCoordinateType d2 = (*P-it->centroid).norm2();
+								PointCoordinateType d2 = (*P - it->centroid).norm2();
 								if (d2 < minDistToMainSet || j == 0)
 									minDistToMainSet = d2;
 							}
 							minDistToMainSet = sqrt(minDistToMainSet);
 						}
-						
+
 						//if the leaf is too far
 						if (it->radius < minDistToMainSet / overlapCoef)
 						{
@@ -289,7 +289,7 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 								bestFused = fused;
 								bestNormal = CCVector3(planeEquation);
 								fused = nullptr;
-								
+
 								if (closestFirst)
 									break; //if we have found a good candidate, we stop here (closest first ;)
 							}
@@ -318,7 +318,6 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 						}
 
 						bestIt->leaf->userData = currentCell->userData;
-						//bestIt->leaf->userData = macroIndex++; //FIXME TEST
 
 						//we will test this cell's neighbors as well
 						cellsToTest.push_back(bestIt->leaf);
@@ -344,7 +343,7 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 					}
 
 				}
-			
+
 			} //no more candidates or cells to test
 
 			//end of the fusion process for the current leaf
@@ -360,19 +359,27 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 	//convert fused indexes to SF
 	if (!cancelled)
 	{
-		pc->enableScalarField();
+		if (!pc->enableScalarField())
+		{
+			ccLog::Error("Not enough memory");
+			return false;
+		}
 
-		for (size_t i=0; i<leaves.size(); ++i)
+		for (size_t i = 0; i < leaves.size(); ++i)
 		{
 			CCCoreLib::ReferenceCloud* subset = leaves[i]->points;
 			if (subset)
 			{
-				ScalarType scalar = (ScalarType)leaves[i]->userData;
+				ScalarType scalar = static_cast<ScalarType>(leaves[i]->userData);
 				if (leaves[i]->userData <= 0) //for unfused cells, we create new individual groups
+				{
 					scalar = static_cast<ScalarType>(macroIndex++);
-					//scalar = CCCoreLib::NAN_VALUE; //FIXME TEST
-				for (unsigned j=0; j<subset->size(); ++j)
-					subset->setPointScalarValue(j,scalar);
+					//scalar = NAN_VALUE; //FIXME TEST
+				}
+				for (unsigned j = 0; j < subset->size(); ++j)
+				{
+					subset->setPointScalarValue(j, scalar);
+				}
 			}
 		}
 

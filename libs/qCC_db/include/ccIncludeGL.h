@@ -82,65 +82,70 @@ public: //GLU equivalent methods
 
 			double dX = right - left;
 			double dY = top - bottom;
-			double dZ = znear - zfar;
+			double dZ = zfar - znear;
 
-			matrix[0]  =  2*znear / dX;
+			matrix[0]  =  (2 * znear) / dX;
 			matrix[1]  =  0.0;
 			matrix[2]  =  0.0;
 			matrix[3]  =  0.0;
 
 			matrix[4]  =  0.0;
-			matrix[5]  =  2*znear / dY;
+			matrix[5]  =  (2 * znear) / dY;
 			matrix[6]  =  0.0;
 			matrix[7]  =  0.0;
 
-			matrix[8]  =  (right + left)/dX;
-			matrix[9]  =  (top + bottom)/dY;
-			matrix[10] =  (zfar + znear)/dZ;
+			matrix[8]  =  (right + left) / dX;
+			matrix[9]  =  (top + bottom) / dY;
+			matrix[10] = -(zfar + znear) / dZ;
 			matrix[11] = -1.0;
 
 			matrix[12] =  0.0;
 			matrix[13] =  0.0;
-			matrix[14] =  2*znear*zfar / dZ;
+			matrix[14] =  (-2 * zfar*znear) / dZ;
 			matrix[15] =  0.0;
 		}
 
 		return outMatrix;
 	}
 
-	//inspired from https://www.opengl.org/wiki/GluPerspective_code and http://www.songho.ca/opengl/gl_projectionmatrix.html
-	static ccGLMatrixd Perspective(double fovyInDegrees, double aspectRatio, double znear, double zfar)
+	static ccGLMatrixd Ortho(	double left,    double right,
+								double bottom,  double top,
+								double nearVal, double farVal )
 	{
-		ccGLMatrixd outMatrix;
+		ccGLMatrixd matrix;
+		double dx = (right - left);
+		double dy = (top - bottom);
+		double dz = (farVal - nearVal);
+		if (dx != 0 && dy != 0 && dz != 0)
 		{
-			double* matrix = outMatrix.data();
+			double* mat = matrix.data();
+			// set OpenGL perspective projection matrix
+			mat[0] = 2.0 / dx;
+			mat[1] = 0;
+			mat[2] = 0;
+			mat[3] = 0;
 
-			double ymax = znear * std::tan( CCCoreLib::DegreesToRadians( fovyInDegrees/2 ) );
-			double xmax = ymax * aspectRatio;
+			mat[4] = 0;
+			mat[5] = 2.0 / dy;
+			mat[6] = 0;
+			mat[7] = 0;
 
-			double dZ = zfar - znear;
-			matrix[0]  =  znear / xmax;
-			matrix[1]  =  0.0;
-			matrix[2]  =  0.0;
-			matrix[3]  =  0.0;
+			mat[8] = 0;
+			mat[9] = 0;
+			mat[10] = -2.0 / dz;
+			mat[11] = 0;
 
-			matrix[4]  =  0.0;
-			matrix[5]  =  znear / ymax;
-			matrix[6]  =  0.0;
-			matrix[7]  =  0.0;
-
-			matrix[8]  =  0.0;
-			matrix[9]  =  0.0;
-			matrix[10] = -(zfar + znear) / dZ;
-			matrix[11] = -1.0;
-
-			matrix[12] =  0.0;
-			matrix[13] =  0.0;
-			matrix[14] =  -(2.0 * znear * zfar) / dZ;
-			matrix[15] =  0.0;
+			mat[12] = -(right + left) / dx;
+			mat[13] = -(top + bottom) / dy;
+			mat[14] = -(farVal + nearVal) / dz;
+			mat[15] = 1.0;
+		}
+		else
+		{
+			matrix.toIdentity();
 		}
 
-		return outMatrix;
+		return matrix;
 	}
 
 	//inspired from http://www.songho.ca/opengl/gl_projectionmatrix.html

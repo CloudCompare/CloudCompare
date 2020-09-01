@@ -249,21 +249,20 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& pa
 		return;
 	}
 
-	//perspective mode
-	int perspectiveMode = parameters.perspectiveMode ? 1 : 0;
-	//light-balancing based on the current zoom (for ortho. mode only)
-	float lightMod = perspectiveMode ? 3.0f : static_cast<float>(std::sqrt(2.0 * std::max(parameters.zoom, 0.7))); //1.41 ~ sqrt(2)
-
 	//we must use corner-based screen coordinates
 	m_glFunc.glMatrixMode(GL_PROJECTION);
 	m_glFunc.glPushMatrix();
 	m_glFunc.glLoadIdentity();
-	m_glFunc.glOrtho(0.0, (GLdouble)m_screenWidth, 0.0, (GLdouble)m_screenHeight, 0.0, 1.0/*parameters.zNear,parameters.zFar*/);
+	m_glFunc.glOrtho(0.0, static_cast<GLdouble>(m_screenWidth), 0.0, static_cast<GLdouble>(m_screenHeight), 0.0, 1.0);
 	m_glFunc.glMatrixMode(GL_MODELVIEW);
 	m_glFunc.glPushMatrix();
 	m_glFunc.glLoadIdentity();
 
 	assert(m_glFunc.glGetError() == GL_NO_ERROR);
+
+	float lightMod = parameters.perspectiveMode ? 3.0f : 1.2f; //FIXME: we would need to be smarter and depend on the actual 'zoom' (= the focal distance now)
+	lightMod *= parameters.zoomFactor;
+	//ccLog::Print(QString("Zm = %1 / ZM = %2 (%3)").arg(parameters.zNear).arg(parameters.zFar).arg(parameters.zFar - parameters.zNear));
 
 	for (unsigned i = 0; i < FBO_COUNT; ++i)
 	{
@@ -278,8 +277,8 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& pa
 		m_EDLShader->setUniformValue("s2_depth", 0);
 		m_EDLShader->setUniformValue("Sx", static_cast<float>(m_screenWidth));
 		m_EDLShader->setUniformValue("Sy", static_cast<float>(m_screenHeight));
-		m_EDLShader->setUniformValue("Zoom", lightMod);
-		m_EDLShader->setUniformValue("PerspectiveMode", perspectiveMode);
+		m_EDLShader->setUniformValue("Dist_to_neighbor_pix", lightMod);
+		m_EDLShader->setUniformValue("PerspectiveMode", parameters.perspectiveMode ? 1 : 0);
 		m_EDLShader->setUniformValue("Pix_scale", static_cast<float>(scale));
 		m_EDLShader->setUniformValue("Exp_scale", m_expScale);
 		m_EDLShader->setUniformValue("Zm", static_cast<float>(parameters.zNear));
@@ -324,7 +323,6 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& pa
 		m_mixShader->setUniformValue("A0", 1.0f);
 		m_mixShader->setUniformValue("A1", 0.5f);
 		m_mixShader->setUniformValue("A2", 0.25f);
-		m_mixShader->setUniformValue("absorb", 1);
 
 		GLuint texCol0 = m_bilateralFilters[0].filter ? m_bilateralFilters[0].filter->getTexture() : m_fbos[0]->getColorTexture();
 		GLuint texCol1 = m_bilateralFilters[1].filter ? m_bilateralFilters[1].filter->getTexture() : m_fbos[1]->getColorTexture();

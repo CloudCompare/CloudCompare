@@ -4,7 +4,6 @@ include( CMakePolicies NO_POLICY_SCOPE )
 
 include_directories( ${CloudComparePlugins_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
-include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../common )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../qCC )
 include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
 
@@ -14,18 +13,6 @@ file( GLOB source_list *.cpp )
 file( GLOB ui_list ui_templates/*.ui )
 file( GLOB qrc_list ../qCC/*.qrc )
 file( GLOB rc_list ../qCC/*.rc )
-
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../common ${CMAKE_CURRENT_BINARY_DIR}/common)
-
-# 3DX support (3dConnexion devices)
-if ( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )
-	add_subdirectory( ../qCC/devices/3dConnexion devices/3dConnexion )
-endif()
-
-# Gamepad support (requires Qt 5.7+)
-if ( ${OPTION_SUPPORT_GAMEPADS} )
-	add_subdirectory( ../qCC/devices/gamepad devices/gamepad )
-endif()
 
 qt5_wrap_ui( generated_ui_list ${ui_list} )
 qt5_add_resources( generated_qrc_list ${qrc_list} )
@@ -42,12 +29,24 @@ else()
 	add_executable( ${PROJECT_NAME} ${header_list} ${source_list} ${generated_ui_list} ${generated_qrc_list} ${rc_list})
 endif()
 
-target_link_libraries( ${PROJECT_NAME}
-    QCC_GL_LIB
-    CCPluginAPI
-    Qt5::OpenGL
-    Qt5::Widgets
+DeployQt(
+	TARGET
+		${PROJECT_NAME}
+	DEPLOY_PATH
+		${PROJECT_NAME}
 )
+
+target_link_libraries( ${PROJECT_NAME}
+    CCAppCommon
+)
+
+if( CCCORELIB_USE_QT_CONCURRENT )
+	# We want *deployqt to handle this dependency, so instead of just copying the file
+	# link to the target.
+	target_link_libraries( ${PROJECT_NAME}
+		Qt5::Concurrent
+	)
+endif()
 
 # contrib. libraries support
 if ( APPLE )
@@ -56,16 +55,6 @@ elseif( UNIX )
 	target_link_contrib( ${PROJECT_NAME} ${CMAKE_INSTALL_LIBDIR}/cloudcompare )
 else()
 	target_link_contrib( ${PROJECT_NAME} ${CCVIEWER_DEST_FOLDER} )
-endif()
-
-# 3dConnexion devices support
-if ( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )
-	target_link_3DXWARE( ${PROJECT_NAME} )
-endif()
-
-# Gamepad support (requires Qt 5.7+)
-if ( ${OPTION_SUPPORT_GAMEPADS} )
-	target_link_GAMEPADS( ${PROJECT_NAME} )
 endif()
 
 # Add custom preprocessor definitions
@@ -85,16 +74,12 @@ if( WIN32 )
 endif()
 
 # install program
-install_ext( TARGETS ccViewer ${CCVIEWER_DEST_FOLDER} )
+install_ext( TARGETS ccViewer ${CCVIEWER_DEST_FOLDER} "" )
 
 # Auxiliary files
 set( auxFiles bin_other/license.txt )
 
 if( WIN32 )
-	# Export Qt dlls
-	install_Qt_Dlls( ${CCVIEWER_DEST_FOLDER} ${OPTION_SUPPORT_GAMEPADS} )
-	install_Qt5_plugins( ${CCVIEWER_DEST_FOLDER} )
-
 	# Additional auxiliary file(s)
 	list( APPEND auxFiles bin_other/start.bat )
 endif()
@@ -102,7 +87,7 @@ endif()
 # Install auxiliary files
 if(APPLE OR WIN32) # For Linux it's already installed in by qCC
 	foreach( filename ${auxFiles} )
-		install_ext( FILES ${filename} ${CCVIEWER_DEST_FOLDER} )
+		install_ext( FILES ${filename} ${CCVIEWER_DEST_FOLDER} "" )
 	endforeach()
 endif()
 
@@ -120,19 +105,21 @@ endif()
 if( APPLE )	
 	InstallPlugins(
 		TYPES "gl;io"
-		DEST_FOLDER "${CCVIEWER_MAC_PLUGIN_DIR}"
-		SHADER_DEST_FOLDER "${CCVIEWER_MAC_BASE_DIR}/Contents/Shaders"
+		DEST_PATH "${CCVIEWER_MAC_PLUGIN_DIR}"
+		SHADER_DEST_PATH "${CCVIEWER_MAC_BASE_DIR}/Contents/Shaders"
 	)
 elseif( UNIX )
 	InstallPlugins(
 		TYPES "gl;io"
-		DEST_FOLDER "${CMAKE_INSTALL_LIBDIR}/cloudcompare/plugins"
-		SHADER_DEST_FOLDER share/cloudcompare/shaders
+		DEST_PATH "${CMAKE_INSTALL_LIBDIR}/cloudcompare/plugins"
+		SHADER_DEST_PATH share/cloudcompare/shaders
 	)
 else()
 	InstallPlugins(
 		TYPES "gl;io"
-		DEST_FOLDER "${CCVIEWER_DEST_FOLDER}/plugins"
-		SHADER_DEST_FOLDER "${CCVIEWER_DEST_FOLDER}/shaders"
-	)
+		DEST_PATH "${CCVIEWER_DEST_FOLDER}"
+		DEST_FOLDER "plugins"
+		SHADER_DEST_PATH "${CCVIEWER_DEST_FOLDER}"
+		SHADER_DEST_FOLDER "shaders"
+)
 endif()

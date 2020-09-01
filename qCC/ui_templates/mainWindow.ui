@@ -322,6 +322,7 @@
       <string>Polyline</string>
      </property>
      <addaction name="actionSamplePointsOnPolyline"/>
+     <addaction name="actionSmoothPolyline"/>
     </widget>
     <addaction name="menuColors"/>
     <addaction name="menuNormals"/>
@@ -1145,6 +1146,9 @@ QTreeView::branch:open:has-children:has-siblings  {
    <property name="text">
     <string>Segment</string>
    </property>
+   <property name="shortcut">
+    <string>T</string>
+   </property>  
   </action>
   <action name="actionTranslateRotate">
    <property name="checkable">
@@ -2365,6 +2369,9 @@ QTreeView::branch:open:has-children:has-siblings  {
    <property name="statusTip">
     <string>Cross Section</string>
    </property>
+   <property name="shortcut">
+    <string>X</string>
+   </property>   
   </action>
   <action name="actionEditGlobalShiftAndScale">
    <property name="text">
@@ -2523,6 +2530,9 @@ QTreeView::branch:open:has-children:has-siblings  {
    <property name="toolTip">
     <string>Export cloud info to a CSV file (name, size, barycenter, scalar fields info, etc.)</string>
    </property>
+   <property name="shortcut">
+    <string>E</string>
+   </property>   
   </action>
   <action name="actionInterpolateColors">
    <property name="text">
@@ -3052,6 +3062,11 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="toolTip">
     <string>Export normals to one or several scalar fields</string>
+   </property>
+  </action>
+  <action name="actionSmoothPolyline">
+   <property name="text">
+    <string>Smooth</string>
    </property>
   </action>
  </widget>

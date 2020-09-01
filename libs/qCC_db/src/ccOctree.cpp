@@ -575,7 +575,7 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 	}
 	else
 	{
-		double maxRadius = pickWidth_pix * camera.pixelSize / 2;
+		double maxRadius = pickWidth_pix * camera.fov_deg / 2;
 		margin = CCVector3(1, 1, 1) * static_cast<PointCoordinateType>(maxRadius);
 	}
 

@@ -118,6 +118,7 @@
 #include "ccVolumeCalcTool.h"
 #include "ccWaveformDialog.h"
 #include "ccEntitySelectionDlg.h"
+#include "ccSmoothPolylineDlg.h"
 
 //other
 #include "ccCropTool.h"
@@ -131,12 +132,12 @@
 
 //3D mouse handler
 #ifdef CC_3DXWARE_SUPPORT
-#include "devices/3dConnexion/cc3DMouseManager.h"
+#include "cc3DMouseManager.h"
 #endif
 
 //Gamepads
-#ifdef CC_GAMEPADS_SUPPORT
-#include "devices/gamepad/ccGamepadManager.h"
+#ifdef CC_GAMEPAD_SUPPORT
+#include "ccGamepadManager.h"
 #endif
 
 #ifdef CC_CORE_LIB_USES_TBB
@@ -418,19 +419,19 @@ void MainWindow::setupInputDevices()
 	m_UI->menuFile->insertMenu(m_UI->actionCloseAll, m_3DMouseManager->menu());
 #endif
 
-#ifdef CC_GAMEPADS_SUPPORT
+#ifdef CC_GAMEPAD_SUPPORT
 	m_gamepadManager = new ccGamepadManager( this, this );
 	m_UI->menuFile->insertMenu(m_UI->actionCloseAll, m_gamepadManager->menu());
 #endif
 
-#if defined(CC_3DXWARE_SUPPORT) || defined(CC_GAMEPADS_SUPPORT)
+#if defined(CC_3DXWARE_SUPPORT) || defined(CC_GAMEPAD_SUPPORT)
 	m_UI->menuFile->insertSeparator(m_UI->actionCloseAll);
 #endif
 }
 
 void MainWindow::destroyInputDevices()
 {
-#ifdef CC_GAMEPADS_SUPPORT
+#ifdef CC_GAMEPAD_SUPPORT
 	delete m_gamepadManager;
 	m_gamepadManager = nullptr;
 #endif
@@ -549,6 +550,8 @@ void MainWindow::connectActions()
 	connect(m_UI->actionEnhanceMeshSF,				&QAction::triggered, this, &MainWindow::doActionEnhanceMeshSF);
 	//"Edit > Polyline" menu
 	connect(m_UI->actionSamplePointsOnPolyline,		&QAction::triggered, this, &MainWindow::doActionSamplePointsOnPolyline);
+	connect(m_UI->actionSmoothPolyline,				&QAction::triggered, this, &MainWindow::doActionSmoohPolyline);
+	
 	//"Edit > Plane" menu
 	connect(m_UI->actionCreatePlane,				&QAction::triggered, this, &MainWindow::doActionCreatePlane);
 	connect(m_UI->actionEditPlane,					&QAction::triggered, this, &MainWindow::doActionEditPlane);
@@ -2693,6 +2696,60 @@ void MainWindow::doActionSamplePointsOnPolyline()
 	refreshAll();
 }
 
+void MainWindow::doActionSmoohPolyline()
+{
+	static int s_iterationCount = 5;
+	static double s_ratio = 0.25;
+
+	ccSmoothPolylineDialog dlg(this);
+	//restore last parameters
+	dlg.setIerationCount(s_iterationCount);
+	dlg.setRatio(s_ratio);
+	if (!dlg.exec())
+		return;
+
+	s_iterationCount = dlg.getIerationCount();
+	s_ratio = dlg.getRatio();
+
+	bool errors = false;
+
+	ccHObject::Container selectedEntities = getSelectedEntities();
+	m_ccRoot->unselectAllEntities();
+
+	for (ccHObject *entity : selectedEntities)
+	{
+		if (!entity->isKindOf(CC_TYPES::POLY_LINE))
+			continue;
+
+		ccPolyline* poly = ccHObjectCaster::ToPolyline(entity);
+		assert(poly);
+
+		ccPolyline* smoothPoly = poly->smoothChaikin(s_ratio, static_cast<unsigned>(s_iterationCount));
+		if (smoothPoly)
+		{
+			if (poly->getParent())
+			{
+				poly->getParent()->addChild(smoothPoly);
+			}
+			poly->setEnabled(false);
+			addToDB(smoothPoly);
+
+			m_ccRoot->selectEntity(smoothPoly, true);
+		}
+		else
+		{
+			errors = true;
+		}
+	}
+
+	if (errors)
+	{
+		ccLog::Error("[doActionSmoohPolyline] Errors occurred during the process! Result may be incomplete!");
+	}
+
+	refreshAll();
+}
+
 void MainWindow::doRemoveDuplicatePoints()
 {
 	if (!haveSelection())
@@ -4221,7 +4278,7 @@ void MainWindow::doMeshTwoPolylines()
 		useViewingDir = (QMessageBox::question(this, "Projection method", "Use best fit plane (yes) or the current viewing direction (no)", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No);
 		if (useViewingDir)
 		{
-			viewingDir = -CCVector3::fromArray(static_cast<ccGLWindow*>(p1->getDisplay())->getCurrentViewDir().u);
+			viewingDir = -CCVector3::fromArray(p1->getDisplay()->getViewportParameters().getViewDir().u);
 		}
 	}
 
@@ -5054,7 +5111,11 @@ void MainWindow::doActionComputeCPS()
 		return;
 	}
 	cmpPC->setCurrentScalarField(sfIdx);
-	cmpPC->enableScalarField();
+	if (!cmpPC->enableScalarField())
+	{
+		ccConsole::Error("Not enough memory");
+		return;
+	}
 	//cmpPC->forEach(CCCoreLib::ScalarFieldTools::SetScalarValueToNaN); //now done by default by computeCloud2CloudDistance
 
 	CCCoreLib::ReferenceCloud CPSet(srcCloud);
@@ -5754,11 +5815,9 @@ ccGLWindow* MainWindow::new3DView( bool allowEntitySelection )
 
 	//'echo' mode
 	connect(view3D,	&ccGLWindow::mouseWheelRotated, this, &MainWindow::echoMouseWheelRotate);
-	connect(view3D,	&ccGLWindow::cameraDisplaced, this, &MainWindow::echoCameraDisplaced);
 	connect(view3D,	&ccGLWindow::viewMatRotated, this, &MainWindow::echoBaseViewMatRotation);
 	connect(view3D,	&ccGLWindow::cameraPosChanged, this, &MainWindow::echoCameraPosChanged);
 	connect(view3D,	&ccGLWindow::pivotPointChanged, this, &MainWindow::echoPivotPointChanged);
-	connect(view3D,	&ccGLWindow::pixelSizeChanged, this, &MainWindow::echoPixelSizeChanged);
 
 	connect(view3D,	&QObject::destroyed, this, &MainWindow::prepareWindowDeletion);
 	connect(view3D,	&ccGLWindow::filesDropped, this, &MainWindow::addToDBAuto, Qt::QueuedConnection); //DGM: we don't want to block the 'dropEvent' method of ccGLWindow instances!
@@ -7004,14 +7063,14 @@ void MainWindow::doActionAdjustZoom()
 		return;
 	}
 
-	ccAdjustZoomDlg azDlg(win,this);
+	ccAdjustZoomDlg azDlg(win, this);
 
 	if (!azDlg.exec())
 		return;
 
-	//apply zoom
-	double zoom = azDlg.getZoom();
-	win->setZoom(static_cast<float>(zoom));
+	//apply new focal
+	double focalDist = azDlg.getFocalDistance();
+	win->setFocalDistance(focalDist);
 	win->redraw();
 }
 
@@ -7313,7 +7372,7 @@ void MainWindow::onItemPicked(const PickedItem& pi)
 				CCVector3 Y = *C - *A;
 				CCVector3 Z = X.cross(Y);
 				//we choose 'Z' so that it points 'upward' relatively to the camera (assuming the user will be looking from the top)
-				CCVector3d viewDir = s_pickingWindow->getCurrentViewDir();
+				CCVector3d viewDir = s_pickingWindow->getViewportParameters().getViewDir();
 				if (CCVector3d::fromArray(Z.u).dot(viewDir) > 0)
 				{
 					Z = -Z;
@@ -8998,6 +9057,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 		bool signedDist = pDD.signedDistances();
 		bool flippedNormals = signedDist && pDD.flipNormals();
 		bool treatPlanesAsBounded = pDD.treatPlanesAsBounded();
+		size_t errorCount = 0;
 		for (auto &cloud : clouds)
 		{
 			ccPointCloud* compEnt = ccHObjectCaster::ToPointCloud(cloud);
@@ -9008,12 +9068,18 @@ void MainWindow::doActionCloudPrimitiveDist()
 				sfIdx = compEnt->addScalarField(CC_TEMP_DISTANCES_DEFAULT_SF_NAME);
 				if (sfIdx < 0)
 				{
-					ccLog::Error(QString("[Compute Primitive Distances] [Cloud: %1] Couldn't allocate a new scalar field for computing distances! Try to free some memory ...").arg(compEnt->getName()));
+					ccLog::Warning(QString("[Compute Primitive Distances] [Cloud: %1] Couldn't allocate a new scalar field for computing distances! Try to free some memory ...").arg(compEnt->getName()));
+					++errorCount;
 					continue;
 				}
 			}
 			compEnt->setCurrentScalarField(sfIdx);
-			compEnt->enableScalarField();
+			if (!compEnt->enableScalarField())
+			{
+				ccLog::Warning(QString("[Compute Primitive Distances] [Cloud: %1] Not enough memory").arg(compEnt->getName()));
+				++errorCount;
+				continue;
+			}
 			compEnt->forEach(CCCoreLib::ScalarFieldTools::SetScalarValueToNaN);
 			int returnCode;
 			switch (entityType)
@@ -9031,25 +9097,37 @@ void MainWindow::doActionCloudPrimitiveDist()
 					{
 						CCCoreLib::SquareMatrix rotationTransform(plane->getTransformation().data(), true);
 						if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2RectangleEquation(compEnt, plane->getXWidth(), plane->getYWidth(), rotationTransform, plane->getCenter(), signedDist)))
-							ccConsole::Error(errString, "Bounded Plane", returnCode);
+						{
+							ccConsole::Warning(errString, "Bounded Plane", returnCode);
+							++errorCount;
+						}
 					}
 					else
 					{
 						if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2PlaneEquation(compEnt, static_cast<ccPlane*>(refEntity)->getEquation(), signedDist)))
-							ccConsole::Error(errString, "Infinite Plane", returnCode);
+						{
+							ccConsole::Warning(errString, "Infinite Plane", returnCode);
+							++errorCount;
+						}
 					}
 					break;
 				}
 				case CC_TYPES::CYLINDER:
 				{
 					if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2CylinderEquation(compEnt, static_cast<ccCylinder*>(refEntity)->getBottomCenter(), static_cast<ccCylinder*>(refEntity)->getTopCenter(), static_cast<ccCylinder*>(refEntity)->getBottomRadius(), signedDist)))
-						ccConsole::Error(errString, "Cylinder", returnCode);
+					{
+						ccConsole::Warning(errString, "Cylinder", returnCode);
+						++errorCount;
+					}
 					break;
 				}
 				case CC_TYPES::CONE:
 				{
 					if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2ConeEquation(compEnt, static_cast<ccCone*>(refEntity)->getLargeCenter(), static_cast<ccCone*>(refEntity)->getSmallCenter(), static_cast<ccCone*>(refEntity)->getLargeRadius(), static_cast<ccCone*>(refEntity)->getSmallRadius(), signedDist)))
-						ccConsole::Error(errString, "Cone", returnCode);
+					{
+						ccConsole::Warning(errString, "Cone", returnCode);
+						++errorCount;
+					}
 					break;
 				}
 				case CC_TYPES::BOX: 
@@ -9058,7 +9136,10 @@ void MainWindow::doActionCloudPrimitiveDist()
 					CCCoreLib::SquareMatrix rotationTransform(glTransform.data(), true);
 					CCVector3 boxCenter = glTransform.getColumnAsVec3D(3);
 					if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2BoxEquation(compEnt, static_cast<ccBox*>(refEntity)->getDimensions(), rotationTransform, boxCenter, signedDist)))
-						ccConsole::Error(errString, "Box", returnCode);
+					{
+						ccConsole::Warning(errString, "Box", returnCode);
+						++errorCount;
+					}
 					break; 
 				}
 				case CC_TYPES::POLY_LINE:
@@ -9069,7 +9150,8 @@ void MainWindow::doActionCloudPrimitiveDist()
 					returnCode = CCCoreLib::DistanceComputationTools::computeCloud2PolylineEquation(compEnt, line);
 					if (!returnCode)
 					{
-						ccConsole::Error(errString, "Polyline", returnCode);
+						ccConsole::Warning(errString, "Polyline", returnCode);
+						++errorCount;
 					}
 					break;
 				}
@@ -9110,8 +9192,15 @@ void MainWindow::doActionCloudPrimitiveDist()
 			compEnt->showSF(sfIdx >= 0);
 			compEnt->prepareDisplayForRefresh_recursive();
 		}
-	MainWindow::UpdateUI();
-	MainWindow::RefreshAllGLWindow(false);
+
+		if (errorCount != 0)
+		{
+			ccLog::Error(QString("%1 error(s) occurred: refer to the Console (F8).").arg(errorCount));
+		}
+
+		MainWindow::UpdateUI();
+	
+		MainWindow::RefreshAllGLWindow(false);
 	}
 }
 
@@ -10467,6 +10556,8 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 
 	m_UI->actionConvertPolylinesToMesh->setEnabled(atLeastOnePolyline || exactlyOneGroup);
 	m_UI->actionSamplePointsOnPolyline->setEnabled(atLeastOnePolyline);
+	m_UI->actionSmoothPolyline->setEnabled(atLeastOnePolyline);
+
 	m_UI->actionMeshTwoPolylines->setEnabled(selInfo.selCount == 2 && selInfo.polylineCount == 2);
 	m_UI->actionCreateSurfaceBetweenTwoPolylines->setEnabled(m_UI->actionMeshTwoPolylines->isEnabled()); //clone of actionMeshTwoPolylines
 	m_UI->actionModifySensor->setEnabled(exactlyOneSensor);
@@ -10558,28 +10649,6 @@ void MainWindow::echoMouseWheelRotate(float wheelDelta_deg)
 	}
 }
 
-void MainWindow::echoCameraDisplaced(float ddx, float ddy)
-{
-	if (!m_UI->actionEnableCameraLink->isChecked())
-		return;
-
-	ccGLWindow* sendingWindow = dynamic_cast<ccGLWindow*>(sender());
-	if (!sendingWindow)
-		return;
-
-	for ( QMdiSubWindow *window : m_mdiArea->subWindowList() )
-	{
-		ccGLWindow *child = GLWindowFromWidget(window->widget());
-		if (child != sendingWindow)
-		{
-			child->blockSignals(true);
-			child->moveCamera(ddx, ddy, 0.0f);
-			child->blockSignals(false);
-			child->redraw();
-		}
-	}
-}
-
 void MainWindow::echoBaseViewMatRotation(const ccGLMatrixd& rotMat)
 {
 	if (!m_UI->actionEnableCameraLink->isChecked())
@@ -10647,29 +10716,7 @@ void MainWindow::echoBaseViewMatRotation(const ccGLMatrixd& rotMat)
 	 }
  }
 
- void MainWindow::echoPixelSizeChanged(float pixelSize)
- {
-	 if (!m_UI->actionEnableCameraLink->isChecked())
-		 return;
-
-	 ccGLWindow* sendingWindow = dynamic_cast<ccGLWindow*>(sender());
-	 if (!sendingWindow)
-		 return;
-
-	 for ( QMdiSubWindow *window : m_mdiArea->subWindowList() )
-	 {
-		 ccGLWindow *child = GLWindowFromWidget(window->widget());
-		 if (child != sendingWindow)
-		 {
-			 child->blockSignals(true);
-			 child->setPixelSize(pixelSize);
-			 child->blockSignals(false);
-			 child->redraw();
-		 }
-	 }
- }
-
-void MainWindow::dispToConsole(QString message, ConsoleMessageLevel level/*=STD_CONSOLE_MESSAGE*/)
+ void MainWindow::dispToConsole(QString message, ConsoleMessageLevel level/*=STD_CONSOLE_MESSAGE*/)
 {
 	switch(level)
 	{

@@ -217,16 +217,6 @@ public:
 	//! Returns whether custom light is enabled or not
 	virtual bool customLightEnabled() const {return m_customLightEnabled;}
 
-	//! Sets current zoom
-	/** Warning: has no effect in viewer-centered perspective mode
-	**/
-	virtual void setZoom(float value);
-
-	//! Updates current zoom
-	/** Warning: has no effect in viewer-centered perspective mode
-	**/
-	virtual void updateZoom(float zoomFactor);
-
 	//! Sets pivot visibility
 	virtual void setPivotVisibility(PivotVisibility vis);
 
@@ -239,11 +229,6 @@ public:
 		- only taken into account if pivot visibility is set to PIVOT_SHOW_ON_MOVE
 	**/
 	virtual void showPivotSymbol(bool state);
-
-	//! Sets pixel size (i.e. zoom base)
-	/** Emits the 'pixelSizeChanged' signal.
-	**/
-	virtual void setPixelSize(float pixelSize);
 
 	//! Sets pivot point
 	/** Emits the 'pivotPointChanged' signal.
@@ -263,8 +248,17 @@ public:
 		* X: horizontal axis (right)
 		* Y: vertical axis (up)
 		* Z: depth axis (pointing out of the screen)
+		\param v displacement vector
 	**/
-	virtual void moveCamera(float dx, float dy, float dz);
+	virtual void moveCamera(CCVector3d& v);
+
+	//! Sets the OpenGL camera 'focal' distance to achieve a given width (in 'metric' units)
+	/** The camera will be positionned relatively to the current pivot point
+	**/
+	void setCameraFocalToFitWidth(double width);
+
+	//! Sets the focal distance
+	void setFocalDistance(double focalDistance);
 
 	//! Set perspective state/mode
 	/** Persepctive mode can be:
@@ -309,9 +303,10 @@ public:
 
 	//! Center and zoom on a given bounding box
 	/** If no bounding box is defined, the current displayed 'scene graph'
-		bounding box is taken.
+		bounding box is used.
+		\param boundingBox bounding box to zoom on
 	**/
-	virtual void updateConstellationCenterAndZoom(const ccBBox* aBox = nullptr);
+	virtual void updateConstellationCenterAndZoom(const ccBBox* boundingBox = nullptr);
 
 	//! Returns the visible objects bounding-box
 	void getVisibleObjectsBB(ccBBox& box) const;
@@ -417,10 +412,8 @@ public:
 	//! Returns the current f.o.v. (field of view) in degrees
 	virtual float getFov() const;
 
-	//! Sets current camera aspect ratio (width/height)
-	/** AR is only used in perspective mode.
-	**/
-	virtual void setAspectRatio(float ar);
+	//! Sets current OpenGL camera aspect ratio (width/height)
+	virtual void setGLCameraAspectRatio(float ar);
 
 	//! Sets current camera 'zNear' coefficient
 	/** zNear coef. is only used in perspective mode.
@@ -454,12 +447,9 @@ public:
 	virtual bool areGLFiltersEnabled() const;
 
 	//! Returns the actual pixel size on screen (taking zoom or perspective parameters into account)
-	/** In perspective mode, this value is approximate.
+	/** In perspective mode, this value is approximate (especially if we are in 'viewer-based' viewing mode).
 	**/
 	virtual double computeActualPixelSize() const;
-
-	//! Returns the zoom value equivalent to the current camera position (perspective only)
-	float computePerspectiveZoom() const;
 
 	//! Returns whether the ColorRamp shader is supported or not
 	bool hasColorRampShader() const { return m_colorRampShader != nullptr; }
@@ -469,18 +459,6 @@ public:
 
 	//! Sets whether rectangular picking is allowed or not
 	void setRectangularPickingAllowed(bool state) { m_allowRectangularEntityPicking = state; }
-
-	//! Returns current viewing direction
-	/** This is the direction normal to the screen
-		(pointing 'inside') in world base.
-	**/
-	CCVector3d getCurrentViewDir() const;
-
-	//! Returns current up direction
-	/** This is the vertical direction of the screen
-		(pointing 'upward') in world base.
-	**/
-	CCVector3d getCurrentUpDir() const;
 
 	//! Returns current parameters for this display (const version)
 	/** Warning: may return overridden parameters!
@@ -700,8 +678,6 @@ signals:
 
 	//! Signal emitted when the window 'model view' matrix is interactively changed
 	void viewMatRotated(const ccGLMatrixd& rotMat);
-	//! Signal emitted when the camera is interactively displaced
-	void cameraDisplaced(float ddx, float ddy);
 	//! Signal emitted when the mouse wheel is rotated
 	void mouseWheelRotated(float wheelDelta_deg);
 
@@ -710,9 +686,6 @@ signals:
 
 	//! Signal emitted when the window 'base view' matrix is changed
 	void baseViewMatChanged(const ccGLMatrixd& newViewMat);
-
-	//! Signal emitted when the pixel size is changed
-	void pixelSizeChanged(float pixelSize);
 
 	//! Signal emitted when the f.o.v. changes
 	void fovChanged(float fov);
@@ -904,14 +877,17 @@ protected: //other methods
 	void drawScale(const ccColor::Rgbub& color);
 
 	//! Computes the model view matrix
-	ccGLMatrixd computeModelViewMatrix(const CCVector3d& cameraCenter) const;
+	ccGLMatrixd computeModelViewMatrix() const;
 
 	//! Optional output metrics (from computeProjectionMatrix)
 	struct ProjectionMetrics;
 
 	//! Computes the projection matrix
-	ccGLMatrixd computeProjectionMatrix(	const CCVector3d& cameraCenter,
-											bool withGLfeatures, 
+	/** \param[in]  withGLfeatures whether to take additional elements (pivot symbol, custom light, etc.) into account or not
+		\param[out] metrics [optional] output other metrics (Znear and Zfar, etc.)
+		\param[out] eyeOffset [optional] eye offset (for stereo display)
+	**/
+	ccGLMatrixd computeProjectionMatrix(	bool withGLfeatures, 
 											ProjectionMetrics* metrics = nullptr, 
 											double* eyeOffset = nullptr) const;
 	void updateModelViewMatrix();
@@ -983,9 +959,6 @@ protected: //other methods
 
 	//! Returns the height of the 'GL filter' banner
 	int getGlFilterBannerHeight() const;
-
-	//! Returns real camera center (i.e. with z centered on the visible objects bounding-box in ortho mode)
-	CCVector3d getRealCameraCenter() const;
 
 	//! Draws the 'hot zone' (+/- icons for point size), 'leave bubble-view' button, etc.
 	void drawClickableItems(int xStart, int& yStart);

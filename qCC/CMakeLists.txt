@@ -4,7 +4,6 @@ include( CMakePolicies NO_POLICY_SCOPE )
 
 include_directories( ${CloudComparePlugins_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
-include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../common )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/db_tree )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/ui_templates )
 include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
@@ -17,21 +16,10 @@ file( GLOB qrc_list *.qrc )
 
 file( GLOB txt_list TODO.txt ${CloudCompareProjects_SOURCE_DIR}/CHANGELOG.md )
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../common ${CMAKE_CURRENT_BINARY_DIR}/common)
 add_subdirectory( db_tree )
 add_subdirectory( pluginManager )
 
 add_subdirectory( extern/QCustomPlot EXCLUDE_FROM_ALL )
-
-# 3DX support (3dConnexion devices)
-if ( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )
-	add_subdirectory( devices/3dConnexion )
-endif()	
-
-# Gamepad support (requires Qt 5.7+)
-if ( ${OPTION_SUPPORT_GAMEPADS} )
-	add_subdirectory( devices/gamepad )
-endif()	
 
 qt5_wrap_ui( generated_ui_list ${ui_list} )
 qt5_add_resources( generated_qrc_list ${qrc_list} )
@@ -48,14 +36,26 @@ else()
 	add_executable( ${PROJECT_NAME} ${header_list} ${source_list} ${generated_ui_list} ${generated_qrc_list} ${rc_list} ${txt_list} )
 endif()
 
-target_link_libraries( ${PROJECT_NAME}
-    QCC_GL_LIB
-    CCPluginAPI
-    QCustomPlot
-    Qt5::OpenGL
-    Qt5::PrintSupport
-    Qt5::Widgets
+DeployQt(
+	TARGET
+		${PROJECT_NAME}
+	DEPLOY_PATH
+		${PROJECT_NAME}
 )
+
+target_link_libraries( ${PROJECT_NAME}
+    CCAppCommon
+    QCustomPlot
+    Qt5::PrintSupport
+)
+
+if( CCCORELIB_USE_QT_CONCURRENT )
+	# We want *deployqt to handle this dependency, so instead of just copying the file
+	# link to the target.
+	target_link_libraries( ${PROJECT_NAME}
+		Qt5::Concurrent
+	)
+endif()
 
 # contrib. libraries support
 if( APPLE )
@@ -64,15 +64,6 @@ elseif( UNIX )
 	target_link_contrib( ${PROJECT_NAME} lib/cloudcompare )
 else()
 	target_link_contrib( ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} )
-endif()
-
-# 3dConnexion devices support
-if ( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )
-	target_link_3DXWARE( ${PROJECT_NAME} )
-endif()
-# Gamepad support (requires Qt 5.7+)
-if ( ${OPTION_SUPPORT_GAMEPADS} )
-	target_link_GAMEPADS( ${PROJECT_NAME} )
 endif()
 
 # Add custom preprocessor definitions
@@ -93,17 +84,12 @@ if( WIN32 )
 endif()
 
 # install program
-install_ext( TARGETS ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} )
+install_ext( TARGETS ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} "" )
 
 # Auxiliary files
 set( auxFiles  ${CloudCompareProjects_SOURCE_DIR}/CHANGELOG.md bin_other/license.txt bin_other/global_shift_list_template.txt )
 
 if( WIN32 )
-	# Export Qt dlls
-	install_Qt_Dlls( ${CLOUDCOMPARE_DEST_FOLDER} ${OPTION_SUPPORT_GAMEPADS} )
-	install_Qt_ImageFormats( ${CLOUDCOMPARE_DEST_FOLDER} )
-	install_Qt5_plugins( ${CLOUDCOMPARE_DEST_FOLDER} )
-
 	# Additional auxiliary file(s)
 	file( GLOB batch_list bin_other/*.bat )
 	list( APPEND auxFiles ${batch_list} )
@@ -112,11 +98,11 @@ endif()
 # Install auxiliary files
 if( WIN32 OR APPLE )
 	foreach( filename ${auxFiles} )
-		install_ext( FILES ${filename} ${CLOUDCOMPARE_DEST_FOLDER} )
+		install_ext( FILES ${filename} ${CLOUDCOMPARE_DEST_FOLDER} "" )
 	endforeach()
 else( UNIX )
 	foreach( filename ${auxFiles} )
-		install_ext( FILES ${filename} share/cloudcompare )
+		install_ext( FILES ${filename} share/cloudcompare "" )
 	endforeach()
 endif()
 
@@ -151,17 +137,19 @@ endif()
 # Install plugins and shaders in the correct folder for each platform
 if( APPLE )	
 	InstallPlugins(
-		DEST_FOLDER "${CLOUDCOMPARE_MAC_PLUGIN_DIR}"
-		SHADER_DEST_FOLDER "${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Shaders"
+		DEST_PATH "${CLOUDCOMPARE_MAC_PLUGIN_DIR}"
+		SHADER_DEST_PATH "${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Shaders"
 	)
 elseif( UNIX )
 	InstallPlugins(
-		DEST_FOLDER "${CMAKE_INSTALL_LIBDIR}/cloudcompare/plugins"
-		SHADER_DEST_FOLDER share/cloudcompare/shaders
+		DEST_PATH "${CMAKE_INSTALL_LIBDIR}/cloudcompare/plugins"
+		SHADER_DEST_PATH share/cloudcompare/shaders
 	)
 else()
 	InstallPlugins(
-		DEST_FOLDER "${CLOUDCOMPARE_DEST_FOLDER}/plugins"
-		SHADER_DEST_FOLDER "${CLOUDCOMPARE_DEST_FOLDER}/shaders"
+		DEST_PATH "${CLOUDCOMPARE_DEST_FOLDER}"
+		DEST_FOLDER "plugins"
+		SHADER_DEST_PATH "${CLOUDCOMPARE_DEST_FOLDER}"
+		SHADER_DEST_FOLDER "shaders"
 	)
 endif()

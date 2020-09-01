@@ -51,7 +51,7 @@ public:
 						GLenum target = GL_TEXTURE_2D);
 
 	bool initDepth(	GLint wrapParam = GL_CLAMP_TO_BORDER,
-					GLenum internalFormat = GL_DEPTH_COMPONENT32,
+					GLenum internalFormat = GL_DEPTH_COMPONENT32F,
 					GLint minMagFilter = GL_NEAREST,
 					GLenum textureTarget = GL_TEXTURE_2D);
 

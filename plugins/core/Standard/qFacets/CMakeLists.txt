@@ -12,8 +12,4 @@ if( PLUGIN_STANDARD_QFACETS )
 	add_subdirectory( include )
 	add_subdirectory( src )
 	add_subdirectory( ui )
-
-	target_link_libraries( ${PROJECT_NAME}
-		shapelib
-	)
 endif()

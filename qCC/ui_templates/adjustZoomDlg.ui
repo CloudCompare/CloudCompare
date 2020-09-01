@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>442</width>
-    <height>150</height>
+    <width>350</width>
+    <height>130</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -46,12 +46,12 @@
      <item>
       <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>zoom</string>
+        <string>focal</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QDoubleSpinBox" name="zoomDoubleSpinBox">
+      <widget class="QDoubleSpinBox" name="focalDoubleSpinBox">
        <property name="decimals">
         <number>6</number>
        </property>

@@ -1,7 +1,5 @@
 project( QTFFMPEG_LIB )
 
-find_package( Qt5 COMPONENTS Gui REQUIRED )
-
 include( cmake/FFmpegSupport.cmake )
 
 add_library( ${PROJECT_NAME} STATIC )

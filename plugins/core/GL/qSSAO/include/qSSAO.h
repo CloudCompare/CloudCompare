@@ -24,8 +24,9 @@
 class qSSAO : public QObject, public ccGLPluginInterface
 {
 	Q_OBJECT
-	Q_INTERFACES(ccGLPluginInterface)
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qSSAO" FILE "../info.json")
+	Q_INTERFACES( ccPluginInterface ccGLPluginInterface )
+	
+	Q_PLUGIN_METADATA( IID "cccorp.cloudcompare.plugin.qSSAO" FILE "../info.json" )
 
 public:
 	explicit qSSAO(QObject* parent = nullptr);

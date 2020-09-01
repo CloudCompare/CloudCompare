@@ -1583,7 +1583,7 @@ void ccDBRoot::alignCameraWithEntity(bool reverse)
 		}
 		CCVector3 N = (B - A).cross(C - A);
 		planeNormal = CCVector3d::fromArray(N.u);
-		planeVertDir = win->getCurrentUpDir();
+		planeVertDir = win->getViewportParameters().getUpDir();
 		center = (A + B + C) / 3;
 	}
 	else if (obj->isA(CC_TYPES::PLANE)) //plane

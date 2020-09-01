@@ -1141,11 +1141,12 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 		
 		//Creation
 		ccPointCloud* loadedCloud = new ccPointCloud(cloudName);
+		CCCoreLib::ScalarField* loadedCloudSF = nullptr;
 		if (!loadedCloud)
 			return CC_FERR_NOT_ENOUGH_MEMORY;
 
 		unsigned fileChunkPos = 0;
-		unsigned fileChunkSize = std::min(nbOfPoints,CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
+		unsigned fileChunkSize = std::min(nbOfPoints, CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
 
 		loadedCloud->reserveThePointsTable(fileChunkSize);
 		if (header.colors)
@@ -1159,7 +1160,16 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 			loadedCloud->showNormals(true);
 		}
 		if (header.scalarField)
-			loadedCloud->enableScalarField();
+		{
+			if (loadedCloud->enableScalarField())
+			{
+				loadedCloudSF = loadedCloud->getCurrentInScalarField();
+			}
+			else
+			{
+				ccLog::Warning(QString("Failed to allocate scalar field on cloud '%1'").arg(loadedCloud->getName()));
+			}
+		}
 
 		unsigned lineRead = 0;
 		unsigned parts = 0;
@@ -1171,11 +1181,13 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 		{
 			if (lineRead == fileChunkPos + fileChunkSize)
 			{
-				if (header.scalarField)
+				if (loadedCloudSF)
 				{
-					loadedCloud->getCurrentInScalarField()->computeMinAndMax();
+					loadedCloudSF->computeMinAndMax();
+					loadedCloudSF = nullptr;
 				}
 
+				//create a new cloud
 				container.addChild(loadedCloud);
 				fileChunkPos = lineRead;
 				fileChunkSize = std::min(nbOfPoints - lineRead, CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
@@ -1183,7 +1195,11 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 				++parts;
 				sprintf(partName, "%s.part_%u", cloudName, parts);
 				loadedCloud = new ccPointCloud(partName);
-				loadedCloud->reserveThePointsTable(fileChunkSize);
+				if (!loadedCloud->reserveThePointsTable(fileChunkSize))
+				{
+					delete loadedCloud;
+					return CC_FERR_NOT_ENOUGH_MEMORY;
+				}
 
 				if (header.colors)
 				{
@@ -1196,7 +1212,16 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 					loadedCloud->showNormals(true);
 				}
 				if (header.scalarField)
-					loadedCloud->enableScalarField();
+				{
+					if (loadedCloud->enableScalarField())
+					{
+						loadedCloudSF = loadedCloud->getCurrentInScalarField();
+					}
+					else
+					{
+						ccLog::Warning(QString("Failed to allocate scalar field on cloud '%1'").arg(loadedCloud->getName()));
+					}
+				}
 			}
 
 			float Pf[3];
@@ -1237,8 +1262,11 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 					//Console::print("[BinFilter::loadModelFromBinaryFile] Error reading the %ith entity distance!\n",k);
 					return CC_FERR_READING;
 				}
-				ScalarType d = static_cast<ScalarType>(D);
-				loadedCloud->setPointScalarValue(i, d);
+				if (loadedCloudSF)
+				{
+					ScalarType d = static_cast<ScalarType>(D);
+					loadedCloudSF->addElement(d);
+				}
 			}
 
 			lineRead++;
@@ -1257,19 +1285,17 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 			QApplication::processEvents();
 		}
 
-		if (header.scalarField)
+		if (loadedCloudSF)
 		{
-			CCCoreLib::ScalarField* sf = loadedCloud->getCurrentInScalarField();
-			assert(sf);
-			sf->setName(sfName);
+			loadedCloudSF->setName(sfName);
 
 			//replace HIDDEN_VALUES by NAN_VALUES
-			for (unsigned i = 0; i < sf->currentSize(); ++i)
+			for (unsigned i = 0; i < loadedCloudSF->currentSize(); ++i)
 			{
-				if (sf->getValue(i) == FORMER_HIDDEN_POINTS)
-					sf->setValue(i, CCCoreLib::NAN_VALUE);
+				if (loadedCloudSF->getValue(i) == FORMER_HIDDEN_POINTS)
+					loadedCloudSF->setValue(i, CCCoreLib::NAN_VALUE);
 			}
-			sf->computeMinAndMax();
+			loadedCloudSF->computeMinAndMax();
 
 			loadedCloud->setCurrentDisplayedScalarField(loadedCloud->getCurrentInScalarFieldIndex());
 			loadedCloud->showSF(true);

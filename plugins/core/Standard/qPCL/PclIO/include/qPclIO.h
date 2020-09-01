@@ -1,3 +1,6 @@
+#ifndef Q_PCL_IO_PLUGIN_HEADER
+#define Q_PCL_IO_PLUGIN_HEADER
+
 //##########################################################################
 //#                                                                        #
 //#                      CLOUDCOMPARE PLUGIN: qPclIO                       #
@@ -15,27 +18,22 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef Q_PCL_IO_PLUGIN_HEADER
-#define Q_PCL_IO_PLUGIN_HEADER
-
-#include "ccIOPluginInterface.h"
-
-//Qt
-#include <QObject>
+#include <ccIOPluginInterface.h>
 
 //! PCL IO plugin (PCD format)
 class qPclIO : public QObject, public ccIOPluginInterface
 {
 	Q_OBJECT
-	Q_INTERFACES( ccIOPluginInterface )
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qPclIO" FILE "../info.json")
+	Q_INTERFACES( ccPluginInterface ccIOPluginInterface )
+	
+	Q_PLUGIN_METADATA( IID "cccorp.cloudcompare.plugin.qPclIO" FILE "../info.json" )
 
 public:
 
 	explicit qPclIO(QObject* parent = nullptr);
 
 	//inherited from ccIOPluginInterface
-	ccIOPluginInterface::FilterList getFilters() override;
+	FilterList getFilters() override;
 };
 
 #endif //Q_PCL_IO_PLUGIN_HEADER

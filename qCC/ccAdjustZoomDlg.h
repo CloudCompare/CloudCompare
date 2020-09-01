@@ -24,7 +24,7 @@
 
 class ccGLWindow;
 
-//! Dialog to set the current zoom of a 3D view (or equivalently the pixel size)
+//! Dialog to set the current focal of a 3D view (or equivalently the pixel size)
 /** Orthographic mode only.
 **/
 class ccAdjustZoomDlg: public QDialog, public Ui::AdjustZoomDialog
@@ -36,17 +36,18 @@ public:
 	ccAdjustZoomDlg(ccGLWindow* win, QWidget* parent = 0);
 	virtual ~ccAdjustZoomDlg() = default;
 
-	//! Returns requested zoom
-	double getZoom() const;
+	//! Returns requested focal distance
+	double getFocalDistance() const;
 
-protected:
-	void onZoomChanged(double);
+protected slots:
+	void onFocalChanged(double);
 	void onPixelSizeChanged(double);
 	void onPixelCountChanged(int);
 
 protected:
 
-	double m_basePixelSize;
+	int m_windowWidth_pix;
+	double m_distanceToWidthRatio;
 };
 
 #endif // CC_ADJUST_ZOOM_DIALOG_HEADER

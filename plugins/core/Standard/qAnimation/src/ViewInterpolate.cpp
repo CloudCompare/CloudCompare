@@ -17,21 +17,36 @@
 
 #include "ViewInterpolate.h"
 
+//qCC_db
+#include <ccPolyline.h>
 
-ViewInterpolate::ViewInterpolate()
-    : m_view1 (nullptr)
-    , m_view2 (nullptr)
-    , m_totalSteps ( 0 )
-    , m_currentStep ( 0 )
+ViewInterpolate::ViewInterpolate(const ccViewportParameters& viewParams1, const ccViewportParameters& m_view2, unsigned int stepCount)
+	: m_view1(viewParams1)
+	, m_view2(m_view2)
+	, m_totalSteps(stepCount)
+	, m_currentStep(0)
+	, smoothTrajectory(nullptr)
+	, smoothTrajectoryReversed(nullptr)
+	, smoothTrajStartIndex(0)
+	, smoothTrajStopIndex(0)
+	, smoothTrajCurrentIndex(0)
+	, smoothSegmentLength(0)
+	, smoothCurrentLength(0)
 {
 }
 
-ViewInterpolate::ViewInterpolate(cc2DViewportObject * viewParams1,  cc2DViewportObject * viewParams2, unsigned int stepCount )
-	: m_view1 ( viewParams1 )
-    , m_view2 ( viewParams2 )
-    , m_totalSteps ( stepCount )
-    , m_currentStep ( 0 )
+void ViewInterpolate::setSmoothTrajectory(	ccPolyline* _smoothTrajectory,
+											ccPolyline* _smoothTrajectoryReversed,
+											unsigned i1,
+											unsigned i2,
+											PointCoordinateType length )
 {
+	smoothTrajectory = _smoothTrajectory;
+	smoothTrajectoryReversed = _smoothTrajectoryReversed;
+	smoothTrajCurrentIndex = smoothTrajStartIndex = i1;
+	smoothTrajStopIndex = i2;
+	smoothSegmentLength = length;
+	smoothCurrentLength = 0;
 }
 
 //helper function for interpolating between simple numerical types
@@ -40,40 +55,41 @@ template <class T> T InterpolateNumber( T start, T end, double interpolationFrac
     return static_cast < T > ( static_cast<double>(start) + (static_cast<double>(end) - static_cast<double>(start)) * interpolationFraction );
 }
 
-bool ViewInterpolate::nextView ( cc2DViewportObject& outViewport )
+bool ViewInterpolate::interpolate(ccViewportParameters& interpView, double interpolate_fraction) const
 {
-    if (	m_currentStep >= m_totalSteps
-		||	m_view1 == nullptr
-		||	m_view2 == nullptr)
-    {
-        return false;
-    }
+	if (	interpolate_fraction < 0.0
+		||	interpolate_fraction > 1.0)
+	{
+		return false;
+	}
 
-    //initial and final views
-    const ccViewportParameters& viewParams1 = m_view1->getParameters();
-    const ccViewportParameters& viewParams2 = m_view2->getParameters();
-    ccViewportParameters interpView = m_view1->getParameters();
-
-    //interpolation fraction
-    double interpolate_fraction = static_cast <double>(m_currentStep) / m_totalSteps;
-
-    interpView.pixelSize              = InterpolateNumber ( viewParams1.pixelSize, viewParams2.pixelSize, interpolate_fraction );
-    interpView.zoom                   = InterpolateNumber ( viewParams1.zoom, viewParams2.zoom, interpolate_fraction );
-    interpView.defaultPointSize       = InterpolateNumber ( viewParams1.defaultPointSize, viewParams2.defaultPointSize, interpolate_fraction );
-    interpView.defaultLineWidth       = InterpolateNumber ( viewParams1.defaultLineWidth, viewParams2.defaultLineWidth, interpolate_fraction );
-    interpView.zNearCoef              = InterpolateNumber ( viewParams1.zNearCoef, viewParams2.zNearCoef, interpolate_fraction );
-    interpView.zNear                  = InterpolateNumber ( viewParams1.zNear, viewParams2.zNear, interpolate_fraction );
-    interpView.zFar                   = InterpolateNumber ( viewParams1.zFar, viewParams2.zFar, interpolate_fraction );
-    interpView.fov                    = InterpolateNumber ( viewParams1.fov, viewParams2.fov, interpolate_fraction );
-    interpView.perspectiveAspectRatio = InterpolateNumber ( viewParams1.perspectiveAspectRatio, viewParams2.perspectiveAspectRatio, interpolate_fraction );
-    interpView.orthoAspectRatio       = InterpolateNumber ( viewParams1.orthoAspectRatio, viewParams2.orthoAspectRatio, interpolate_fraction );
-	interpView.viewMat                = ccGLMatrixd::Interpolate(interpolate_fraction, viewParams1.viewMat, viewParams2.viewMat);
-	interpView.pivotPoint             = viewParams1.pivotPoint + (viewParams2.pivotPoint - viewParams1.pivotPoint) * interpolate_fraction;
-	interpView.cameraCenter           = viewParams1.cameraCenter + (viewParams2.cameraCenter - viewParams1.cameraCenter) * interpolate_fraction;
-
-    outViewport.setParameters( interpView );
-
-    ++m_currentStep;
+    interpView = m_view1;
+	{
+		interpView.defaultPointSize       = InterpolateNumber ( m_view1.defaultPointSize, m_view2.defaultPointSize, interpolate_fraction );
+		interpView.defaultLineWidth       = InterpolateNumber ( m_view1.defaultLineWidth, m_view2.defaultLineWidth, interpolate_fraction );
+		interpView.zNearCoef              = InterpolateNumber ( m_view1.zNearCoef, m_view2.zNearCoef, interpolate_fraction );
+		interpView.zNear                  = InterpolateNumber ( m_view1.zNear, m_view2.zNear, interpolate_fraction );
+		interpView.zFar                   = InterpolateNumber ( m_view1.zFar, m_view2.zFar, interpolate_fraction );
+		interpView.fov_deg                = InterpolateNumber ( m_view1.fov_deg, m_view2.fov_deg, interpolate_fraction );
+		interpView.cameraAspectRatio      = InterpolateNumber ( m_view1.cameraAspectRatio, m_view2.cameraAspectRatio, interpolate_fraction );
+		interpView.viewMat                = ccGLMatrixd::Interpolate(interpolate_fraction, m_view1.viewMat, m_view2.viewMat );
+		interpView.setPivotPoint          ( m_view1.getPivotPoint() + (m_view2.getPivotPoint() - m_view1.getPivotPoint()) * interpolate_fraction, false );
+		interpView.setCameraCenter        ( m_view1.getCameraCenter() + (m_view2.getCameraCenter() - m_view1.getCameraCenter()) * interpolate_fraction, true );
+		interpView.setFocalDistance       ( InterpolateNumber(m_view1.getFocalDistance(), m_view2.getFocalDistance(), interpolate_fraction) );
+	}
 
     return true;
+}
+
+bool ViewInterpolate::nextView(ccViewportParameters& outViewport)
+{
+	if (m_currentStep >= m_totalSteps)
+	{
+		return false;
+	}
+
+	//interpolation fraction
+	double interpolate_fraction = static_cast <double>(m_currentStep) / m_totalSteps;
+
+	return interpolate(outViewport, interpolate_fraction);
 }

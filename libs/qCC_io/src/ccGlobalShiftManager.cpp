@@ -110,7 +110,7 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 									bool* applyAll/*=0*/)
 {
 	assert(diagonal >= 0);
-	if (preserveCoordinateShift)
+	if (preserveCoordinateShift && !useInputCoordinatesShiftIfPossible)
 	{
 		*preserveCoordinateShift = true;
 	}

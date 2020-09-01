@@ -1,3 +1,6 @@
+#ifndef Q_PHOTOSCAN_IO_PLUGIN_HEADER
+#define Q_PHOTOSCAN_IO_PLUGIN_HEADER
+
 //##########################################################################
 //#                                                                        #
 //#                   CLOUDCOMPARE PLUGIN: qPhotoScanIO                    #
@@ -15,17 +18,15 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef Q_PHOTOSCAN_IO_PLUGIN_HEADER
-#define Q_PHOTOSCAN_IO_PLUGIN_HEADER
-
-#include "ccIOPluginInterface.h"
+#include <ccIOPluginInterface.h>
 
 //! PhotoScan
 class qPhotoscanIO : public QObject, public ccIOPluginInterface
 {
 	Q_OBJECT
-	Q_INTERFACES( ccIOPluginInterface )
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qPhotoscanIO" FILE "../info.json")
+	Q_INTERFACES( ccPluginInterface ccIOPluginInterface )
+
+	Q_PLUGIN_METADATA( IID "cccorp.cloudcompare.plugin.qPhotoscanIO" FILE "../info.json" )
 
 public:
 	explicit qPhotoscanIO( QObject *parent = nullptr );

@@ -101,9 +101,9 @@ int qPCL::addFilter(BaseFilter* filter)
 	m_filters.push_back(filter);
 
 	//connect signals
-	connect(filter, SIGNAL(newEntity(ccHObject*)),			this,	SLOT(handleNewEntity(ccHObject*)));
-	connect(filter, SIGNAL(entityHasChanged(ccHObject*)),	this,	SLOT(handleEntityChange(ccHObject*)));
-	connect(filter, SIGNAL(newErrorMessage(QString)),		this,	SLOT(handleErrorMessage(QString)));
+	connect(filter, &BaseFilter::newEntity,			this,	&qPCL::handleNewEntity);
+	connect(filter, &BaseFilter::entityHasChanged,	this,	&qPCL::handleEntityChange);
+	connect(filter, &BaseFilter::newErrorMessage,	this,	&qPCL::handleErrorMessage);
 
 	return 1;
 }

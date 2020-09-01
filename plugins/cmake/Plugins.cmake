@@ -94,9 +94,6 @@ function( AddPlugin )
 	target_link_libraries( ${PLUGIN_TARGET}
 		CCPluginAPI
 		CCPluginStub
-		Qt5::Concurrent
-		Qt5::OpenGL
-		Qt5::Widgets
 	)
 
 	# On macOS, copy the plugin to the ccPlugins directory at the top level

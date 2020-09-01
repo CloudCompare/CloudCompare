@@ -815,7 +815,6 @@ static ccMesh* CreateMesh(
 				int sfIdx = vertices->addScalarField(sf);
 				vertices->setCurrentDisplayedScalarField(sfIdx);
 				vertices->showSF(true);
-				vertices->enableScalarField();
 			}
 		}
 	}
@@ -1236,7 +1235,6 @@ static CC_FILE_ERROR LoadPolyline(QDataStream &shpStream,
 				int sfIdx = vertices->addScalarField(sf);
 				vertices->setCurrentDisplayedScalarField(sfIdx);
 				vertices->showSF(true);
-				vertices->enableScalarField();
 			}
 		}
 		container.addChild(poly);

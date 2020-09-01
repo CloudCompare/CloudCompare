@@ -8,8 +8,32 @@ v2.12 (???) - (in development)
 		- former 'contours' renamed 'envelopes' for the sake of clarity
 		- ability to extract the real contours of the points inside each slice (single slice mode or 'repeat' mode)
 			(CC will rasterize the slice and apply the 'contour plot' extraction algorithm)
+	- qCompass:
+		- planes fitted with the 'Plane tool' should now always have the normal pointing towards the user instead of a random orientation
+	- qAnimation:
+		- option to smooth the trajectory
 
-v2.11 (Anoia) - (in development)
+- Bug fixes
+	- qBroom: the broom was not working properly on a non horizontal surface!
+
+
+v2.11.2 (Anoia) - ??/??/2020
+----------------------
+- Bug fixes:
+ - command line: the LAST keyword was consistently badly managed (for -SF_OP and -ICP)
+ - the new 'Edit > Colors > From Scalar Fields' tool could crash due to a non initialized variable
+ - PV files could not be loaded anymore
+
+v2.11.1 (Anoia) - 29/07/2020
+----------------------
+- Bug fixes:
+  - [macOS] Fix determination of command line use so opening a file in the GUI using the command line works (#1296).
+  - E57, Bundler: when trying to apply a Global Shift translation on load without 'preserving' the shift information, the Global Shift was simply not applied!
+  - Global Shift: when unchecking the 'preserve shift on save' option of the Global Shift dialog, and then hitting the "Apply all" button,
+                  the selection was not maintained and propagated to the other loaded clouds
+  - command line: the 'LAST' keyword was not properly managed after -SF_ARITHMETIC
+
+v2.11.0 (Anoia) - 14/06/2020
 ----------------------
 
 - New features

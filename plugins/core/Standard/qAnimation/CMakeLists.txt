@@ -12,7 +12,7 @@ if( PLUGIN_STANDARD_QANIMATION )
 	add_subdirectory( ui )
 
 	if( QANIMATION_WITH_FFMPEG_SUPPORT )
-		add_subdirectory( extern/QTFFmpegWrapper EXCLUDE_FROM_ALL )
+		add_subdirectory( extern/QTFFmpegWrapper ) # Can't use EXCLUDE_FROM_ALL because this lib installs some DLLs
 
 		target_link_libraries( ${PROJECT_NAME} QTFFMPEG_LIB )
 		target_compile_definitions( ${PROJECT_NAME} PRIVATE QFFMPEG_SUPPORT )

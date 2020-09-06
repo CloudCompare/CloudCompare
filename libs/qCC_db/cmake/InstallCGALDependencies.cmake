@@ -9,7 +9,16 @@ if( WIN32 )
 	endif()
 	
 	if( CCCORELIB_USE_CGAL )
-		InstallFiles( FILES ${GMP_LIBRARIES} )
-		InstallFiles( FILES ${MPFR_LIBRARIES} )
+	
+		list(GET GMP_LIBRARIES 0 FIRST_GMP_LIB_FILE)
+		get_filename_component(GMP_LIB_FOLDER ${FIRST_GMP_LIB_FILE} DIRECTORY)
+
+		file( GLOB GMP_DLL_FILES ${GMP_LIB_FOLDER}/*.dll )
+		foreach( dest ${INSTALL_DESTINATIONS} )
+			copy_files( "${GMP_DLL_FILES}" ${dest} ) # Mind the quotes!
+		endforeach()
+	
+		InstallFiles( FILES ${GMP_DLL_FILES} )
+		#InstallFiles( FILES ${MPFR_LIBRARIES} )
 	endif()
 endif()

@@ -7,3 +7,6 @@
 [submodule "plugins/core/Standard/qPoissonRecon/extern/PoissonRecon"]
 	path = plugins/core/Standard/qPoissonRecon/extern/PoissonRecon
 	url = https://github.com/cloudcompare/PoissonRecon
+[submodule "plugins/core/Standard/qMPlane"]
+	path = plugins/core/Standard/qMPlane
+	url = ../../hvs-ait/mplane-plugin.git

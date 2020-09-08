@@ -13,6 +13,9 @@ v2.12 (???) - (in development)
 	- qAnimation:
 		- option to smooth the trajectory
 
+- New plugins
+	- MPlane: perform normal distance measurements against a defined plane (see https://www.cloudcompare.org/doc/wiki/index.php?title=MPlane_(plugin))
+
 - Bug fixes
 	- qBroom: the broom was not working properly on a non horizontal surface!
 

@@ -19,6 +19,10 @@ v2.12 (???) - (in development)
 - Bug fixes
 	- qBroom: the broom was not working properly on a non horizontal surface!
 
+v2.11.3 (Anoia) - 08/09/2020
+----------------------
+- Bug fix:
+  - when used with only 3 points (pairs), the Align tool could produce a wrong registration matrix
 
 v2.11.2 (Anoia) - 30/08/2020
 ----------------------

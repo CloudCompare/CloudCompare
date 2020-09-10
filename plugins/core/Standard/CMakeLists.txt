@@ -16,6 +16,7 @@ add_subdirectory( qSRA )
 
 #plugins integrated as submodules
 set( submod_plugins
+		${CMAKE_CURRENT_SOURCE_DIR}/qColorimetricSegmenter
 		${CMAKE_CURRENT_SOURCE_DIR}/qMPlane
 )
 

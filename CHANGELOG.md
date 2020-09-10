@@ -15,6 +15,7 @@ v2.12 (???) - (in development)
 
 - New plugins
 	- MPlane: perform normal distance measurements against a defined plane (see https://www.cloudcompare.org/doc/wiki/index.php?title=MPlane_(plugin))
+	- Colorimetric Segmenter: color-based segmentation of point clouds (see https://gitlab.univ-nantes.fr/E164955Z/ptrans)
 
 - Bug fixes
 	- qBroom: the broom was not working properly on a non horizontal surface!

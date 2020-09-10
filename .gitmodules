@@ -10,3 +10,6 @@
 [submodule "plugins/core/Standard/qMPlane"]
 	path = plugins/core/Standard/qMPlane
 	url = ../../hvs-ait/mplane-plugin.git
+[submodule "plugins/core/Standard/qColorimetricSegmenter"]
+	path = plugins/core/Standard/qColorimetricSegmenter
+	url = https://gitlab.univ-nantes.fr/E164955Z/ptrans

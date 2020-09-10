@@ -3,13 +3,16 @@
 	url = https://github.com/asmaloney/libE57Format
 [submodule "extern/CCCoreLib"]
 	path = libs/qCC_db/extern/CCCoreLib
-	url = https://github.com/CloudCompare/CCCoreLib.git
+	url = https://github.com/CloudCompare/CCCoreLib
 [submodule "plugins/core/Standard/qPoissonRecon/extern/PoissonRecon"]
 	path = plugins/core/Standard/qPoissonRecon/extern/PoissonRecon
 	url = https://github.com/cloudcompare/PoissonRecon
 [submodule "plugins/core/Standard/qMPlane"]
 	path = plugins/core/Standard/qMPlane
-	url = ../../hvs-ait/mplane-plugin.git
+	url = https://github.com/hvs-ait/mplane-plugin
 [submodule "plugins/core/Standard/qColorimetricSegmenter"]
 	path = plugins/core/Standard/qColorimetricSegmenter
 	url = https://gitlab.univ-nantes.fr/E164955Z/ptrans
+[submodule "plugins/core/Standard/qMasonry"]
+	path = plugins/core/Standard/qMasonry
+	url = https://github.com/CyberbuildLab/masonry-cc

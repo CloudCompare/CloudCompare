@@ -14,8 +14,9 @@ v2.12 (???) - (in development)
 		- option to smooth the trajectory
 
 - New plugins
-	- MPlane: perform normal distance measurements against a defined plane (see https://www.cloudcompare.org/doc/wiki/index.php?title=MPlane_(plugin))
+	- MPlane: perform normal distance measurements against a defined plane (see https://www.cloudcompare.org/doc/wiki/index.php?title=MPlane_(plugin) )
 	- Colorimetric Segmenter: color-based segmentation of point clouds (see https://gitlab.univ-nantes.fr/E164955Z/ptrans)
+	- Masonry Segmentation: segmentation of dense point clouds of masonry structures into their individual stones (see: https://github.com/CyberbuildLab/masonry-cc)
 
 - Bug fixes
 	- qBroom: the broom was not working properly on a non horizontal surface!

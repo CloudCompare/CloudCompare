@@ -29,6 +29,7 @@
 //Qt
 #include <QElapsedTimer>
 #include <QOpenGLExtensions>
+#include <QOpenGLTexture>
 #include <QTimer>
 
 #ifdef CC_GL_WINDOW_USE_QWINDOW
@@ -121,7 +122,7 @@ public:
 	};
 
 	//! Message type
-	enum MessageType {  CUSTOM_MESSAGE,
+	enum MessageType {  CUSTOM_MESSAGE = 0,
 						SCREEN_SIZE_MESSAGE,
 						PERSPECTIVE_STATE_MESSAGE,
 						SUN_LIGHT_STATE_MESSAGE,
@@ -166,7 +167,7 @@ public:
 	ccHObject* getSceneDB();
 
 	//replacement for the missing methods of QGLWidget
-	void renderText(int x, int y, const QString & str, const QFont & font = QFont());
+	void renderText(int x, int y, const QString & str, uint16_t uniqueID = 0, const QFont & font = QFont());
 	void renderText(double x, double y, double z, const QString & str, const QFont & font = QFont());
 
 	//inherited from ccGenericGLDisplay
@@ -1303,6 +1304,17 @@ protected: //members
 	bool m_rotationAxisLocked;
 	//! Locked rotation axis
 	CCVector3d m_lockedRotationAxis;
+
+	using SharedTexture = QSharedPointer< QOpenGLTexture>;
+
+	//! Reserved textures (for renderText)
+	QMap<uint16_t, SharedTexture> m_uniqueTextures;
+
+	//! Texture pool (for renderText)
+	std::vector<SharedTexture> m_texturePool;
+
+	//! Last texture pool index
+	size_t m_texturePoolLastIndex;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(ccGLWindow::INTERACTION_FLAGS);

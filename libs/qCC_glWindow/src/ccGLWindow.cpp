@@ -39,7 +39,6 @@
 #include <QMessageBox>
 #include <QMimeData>
 #include <QOpenGLDebugLogger>
-#include <QOpenGLTexture>
 #include <QPushButton>
 #include <QSettings>
 #include <QTouchEvent>
@@ -107,6 +106,18 @@ static int s_GlWindowNumber = 0;
 
 // Shader path
 Q_GLOBAL_STATIC( QString, s_shaderPath );
+
+// Reserved texture indexes
+enum class RenderTextReservedIDs {
+	NotReserved = 0,
+	FullScreenLabel,
+	BubbleViewLabel,
+	PointSizeLabel,
+	LineSizeLabel,
+	GLFilterLabel,
+	ScaleLabel,
+	StandardMessagePrefix = 1024
+};
 
 //On some versions of Qt, QGLWidget::renderText seems to need glColorf instead of glColorub!
 // See https://bugreports.qt-project.org/browse/QTBUG-6217
@@ -382,6 +393,7 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=0*/,
 	, m_ignoreMouseReleaseEvent(false)
 	, m_rotationAxisLocked(false)
 	, m_lockedRotationAxis(0, 0, 1)
+	, m_texturePoolLastIndex(0)
 {
 	//start internal timer
 	m_timer.start();
@@ -1350,7 +1362,7 @@ void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
 
 		//label
 		glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, m_hotZone->color);
-		renderText(xStart, yStart + m_hotZone->yTextBottomLineShift, m_hotZone->fs_label, m_hotZone->font);
+		renderText(xStart, yStart + m_hotZone->yTextBottomLineShift, m_hotZone->fs_label, static_cast<uint16_t>(RenderTextReservedIDs::FullScreenLabel), m_hotZone->font);
 
 		//icon
 		xStart += m_hotZone->fs_labelRect.width() + m_hotZone->margin;
@@ -1372,7 +1384,7 @@ void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
 
 		//label
 		glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, m_hotZone->color);
-		renderText(xStart, yStart + m_hotZone->yTextBottomLineShift, m_hotZone->bbv_label, m_hotZone->font);
+		renderText(xStart, yStart + m_hotZone->yTextBottomLineShift, m_hotZone->bbv_label, static_cast<uint16_t>(RenderTextReservedIDs::BubbleViewLabel), m_hotZone->font);
 
 		//icon
 		xStart += m_hotZone->bbv_labelRect.width() + m_hotZone->margin;
@@ -1398,7 +1410,7 @@ void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
 			int xStart = m_hotZone->topCorner.x();
 
 			glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, m_hotZone->color);
-			renderText(xStart, yStart + m_hotZone->yTextBottomLineShift, m_hotZone->psi_label, m_hotZone->font);
+			renderText(xStart, yStart + m_hotZone->yTextBottomLineShift, m_hotZone->psi_label, static_cast<uint16_t>(RenderTextReservedIDs::PointSizeLabel), m_hotZone->font);
 
 			//icons
 			xStart += m_hotZone->psi_labelRect.width() + m_hotZone->margin;
@@ -1439,7 +1451,7 @@ void ccGLWindow::drawClickableItems(int xStart0, int& yStart)
 			int xStart = m_hotZone->topCorner.x();
 
 			glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, m_hotZone->color);
-			renderText(xStart, yStart + m_hotZone->yTextBottomLineShift, m_hotZone->lsi_label, m_hotZone->font);
+			renderText(xStart, yStart + m_hotZone->yTextBottomLineShift, m_hotZone->lsi_label, static_cast<uint16_t>(RenderTextReservedIDs::LineSizeLabel), m_hotZone->font);
 
 			//icons
 			xStart += m_hotZone->lsi_labelRect.width() + m_hotZone->margin;
@@ -1563,6 +1575,9 @@ void ccGLWindow::paintGL()
 #endif
 
 	qint64 startTime_ms = m_currentLODState.inProgress ? m_timer.elapsed() : 0;
+
+	//reset the texture pool index
+	m_texturePoolLastIndex = 0;
 
 	if (m_scheduledFullRedrawTime != 0)
 	{
@@ -2577,8 +2592,9 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 				glColor4ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::black.rgba);
 				renderText(	10,
 							borderHeight - CC_GL_FILTER_BANNER_MARGIN - CC_GL_FILTER_BANNER_MARGIN / 2,
-							QString("[GL filter] ") + m_activeGLFilter->getDescription()
-							/*,m_font*/); //we ignore the custom font size
+							QString("[GL filter] ") + m_activeGLFilter->getDescription(),
+							static_cast<uint16_t>(RenderTextReservedIDs::GLFilterLabel)
+							/*, m_font*/); //we ignore the custom font size
 
 				yStart += borderHeight;
 			}
@@ -2591,13 +2607,19 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 				int ll_currentHeight = m_glViewport.height() - 10; //lower left
 				int uc_currentHeight = 10; //upper center
 
-				for (const auto &message : m_messagesToDisplay)
+				for (const auto& message : m_messagesToDisplay)
 				{
+					uint16_t textureID = 0;
+					if (message.type != CUSTOM_MESSAGE)
+					{
+						textureID = static_cast<uint16_t>(RenderTextReservedIDs::StandardMessagePrefix) + static_cast<uint16_t>(message.type);
+					}
+						
 					switch (message.position)
 					{
 					case LOWER_LEFT_MESSAGE:
 					{
-						renderText(10, ll_currentHeight, message.message, m_font);
+						renderText(10, ll_currentHeight, message.message, textureID, m_font);
 						int messageHeight = QFontMetrics(m_font).height();
 						ll_currentHeight -= (messageHeight * 5) / 4; //add a 25% margin
 					}
@@ -2612,7 +2634,7 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 						{
 							y += getGlFilterBannerHeight();
 						}
-						renderText(x, y, message.message, m_font);
+						renderText(x, y, message.message, textureID, m_font);
 						uc_currentHeight += (rect.height() * 5) / 4; //add a 25% margin
 					}
 					break;
@@ -2622,7 +2644,7 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 						newFont.setPointSize(12 * devicePixelRatio());
 						QRect rect = QFontMetrics(newFont).boundingRect(message.message);
 						//only one message supported in the screen center (for the moment ;)
-						renderText((m_glViewport.width() - rect.width()) / 2, (m_glViewport.height() - rect.height()) / 2, message.message, newFont);
+						renderText((m_glViewport.width() - rect.width()) / 2, (m_glViewport.height() - rect.height()) / 2, message.message, textureID, newFont);
 					}
 					break;
 					}
@@ -3111,7 +3133,11 @@ void ccGLWindow::drawScale(const ccColor::Rgbub& color)
 
 	QString text = QString::number(equivalentWidth);
 	glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, color.rgb);
-	renderText(m_glViewport.width() - static_cast<int>(scaleW_pix / 2 + dW) - fm.width(text) / 2, m_glViewport.height() - static_cast<int>(dH / 2) + fm.height() / 3, text, font);
+	renderText(	m_glViewport.width() - static_cast<int>(scaleW_pix / 2 + dW) - fm.width(text) / 2,
+				m_glViewport.height() - static_cast<int>(dH / 2) + fm.height() / 3,
+				text,
+				static_cast<uint16_t>(RenderTextReservedIDs::ScaleLabel),
+				font );
 }
 
 void ccGLWindow::drawTrihedron()
@@ -6347,7 +6373,7 @@ void ccGLWindow::displayText(	QString text,
 		y2 -= margin / 2; //empirical compensation
 
 	glColor4ubv_safe<ccQOpenGLFunctions>(glFunc, rgba);
-	renderText(x2, y2, text, textFont);
+	renderText(x2, y2, text, 0, textFont);
 }
 
 CCVector3 ccGLWindow::backprojectPointOnTriangle(	const CCVector2i& P2D,
@@ -6682,7 +6708,7 @@ void ccGLWindow::toggleExclusiveFullScreen(bool state)
 	emit exclusiveFullScreenToggled(state);
 }
 
-void ccGLWindow::renderText(int x, int y, const QString & str, const QFont & font/*=QFont()*/)
+void ccGLWindow::renderText(int x, int y, const QString & str, uint16_t uniqueID/*=0*/, const QFont & font/*=QFont()*/)
 {   
 	if (m_activeFbo)
 	{
@@ -6692,20 +6718,80 @@ void ccGLWindow::renderText(int x, int y, const QString & str, const QFont & fon
 	ccQOpenGLFunctions* glFunc = functions();
 	assert(glFunc);
 
+	//retrieve the texture
+	SharedTexture texture;
+	if (uniqueID != 0)
+	{
+		if (m_uniqueTextures.contains(uniqueID))
+		{
+			//retrieve the texture
+			texture = m_uniqueTextures[uniqueID];
+		}
+		else
+		{
+			//register it for later
+			texture.reset(new QOpenGLTexture(QOpenGLTexture::Target2D));
+			m_uniqueTextures.insert(uniqueID, texture);
+		}
+	}
+	else
+	{
+		if (m_texturePoolLastIndex < m_texturePool.size())
+		{
+			//retrieve the texture
+			texture = m_texturePool[m_texturePoolLastIndex++];
+		}
+		else
+		{
+			texture.reset(new QOpenGLTexture(QOpenGLTexture::Target2D));
+			try
+			{
+				m_texturePool.push_back(texture);
+				++m_texturePoolLastIndex;
+			}
+			catch (const std::bad_alloc&)
+			{
+				//not enough memory to keep the texture?!
+			}
+		}
+	}
+	assert(texture);
+
 	//compute the text bounding rect
 	// This adjustment and the change to x & y are to work around a crash with Qt 5.9.
 	// At the time I (Andy) could not determine if it is a bug in CC or Qt.
 	//		https://bugreports.qt.io/browse/QTBUG-61863
 	//		https://github.com/CloudCompare/CloudCompare/issues/543
-	QRect rect = QFontMetrics(font).boundingRect(str).adjusted( -1, -2, 1, 2 );
-	
+	QRect textRect = QFontMetrics(font).boundingRect(str).adjusted(-1, -2, 1, 2);
+	//ccLog::Print(QString("Texture rect = (%1 ; %2) --> (%3 x %4)").arg(textRect.x()).arg(textRect.y()).arg(textRect.width()).arg(textRect.height()));
+
 	x -= 1;	// magic number!
 	y += 3;	// magic number!
 
-	//first we create a QImage from the text
-	QImage textImage(rect.width(), rect.height(), QImage::Format::Format_RGBA8888);
-	rect = textImage.rect();
-	
+	QSize imageSize;
+	if (texture->isStorageAllocated())
+	{
+		if (textRect.width() > texture->width() || textRect.height() > texture->height())
+		{
+			//we have to enlarge it
+			texture->destroy();
+			imageSize = textRect.size();
+		}
+		else
+		{
+			imageSize = QSize(texture->width(), texture->height());
+		}
+	}
+	else
+	{
+		imageSize = textRect.size();
+	}
+
+	// We create a QImage from the text
+	QImage textImage(imageSize.width(), imageSize.height(), QImage::Format::Format_RGBA8888);
+	QRect imageRect = textImage.rect();
+	//ccLog::Print(QString("Image rect = (%1 ; %2) --> (%3 x %4)").arg(imageRect.x()).arg(imageRect.y()).arg(imageRect.width()).arg(imageRect.height()));
+
 	textImage.fill(Qt::transparent);
 	{
 		QPainter painter(&textImage);
@@ -6717,7 +6803,7 @@ void ccGLWindow::renderText(int x, int y, const QString & str, const QFont & fon
 		
 		painter.setPen( color );
 		painter.setFont( font );
-		painter.drawText( rect, Qt::AlignCenter, str );
+		painter.drawText(imageRect, Qt::AlignLeft, str );
 	}
 	
 	//and then we convert this QImage to a texture!
@@ -6738,21 +6824,41 @@ void ccGLWindow::renderText(int x, int y, const QString & str, const QFont & fon
 			//move to the right position on the screen
 			glFunc->glTranslatef(x, m_glViewport.height() - 1 - y, 0);
 
-			glFunc->glEnable(GL_TEXTURE_2D);         
-			QOpenGLTexture textTex( textImage, QOpenGLTexture::DontGenerateMipMaps );
-			textTex.setMinificationFilter( QOpenGLTexture::Linear );
-			textTex.setMagnificationFilter( QOpenGLTexture::Linear );
-			textTex.bind();
+			glFunc->glEnable(GL_TEXTURE_2D);
+
+			if (texture->height() < textRect.height())
+			{
+				//we have to re-create it!
+				texture->destroy();
+			}
+
+			//In order to reduce the time ATI cards take to manage the texture ID generation
+			//and switching, we re-use the textures as much as possible.
+			//texture->setData(textImage, QOpenGLTexture::DontGenerateMipMaps);
+			if (!texture->isStorageAllocated())
+			{
+				//ccLog::Print(QString("New texture allocated: %1 x %2").arg(imageRect.width()).arg(imageRect.height()));
+				texture->setMinificationFilter(QOpenGLTexture::Linear);
+				texture->setMagnificationFilter(QOpenGLTexture::Linear);
+				texture->setFormat(QOpenGLTexture::RGBA8_UNorm);
+				texture->setSize(imageRect.width(), imageRect.height());
+				texture->setMipLevels(0);
+				texture->allocateStorage();
+			}
+			texture->setData(QOpenGLTexture::RGBA, QOpenGLTexture::UInt32_RGBA8_Rev, textImage.bits());
+			texture->bind();
 
 			glFunc->glColor4f(1.0f, 1.0f, 1.0f, 1.0f); //DGM: warning must be float colors to work properly?!
 			glFunc->glBegin(GL_QUADS);
-			glFunc->glTexCoord2f(0, 1); glFunc->glVertex3i(0, 0, 0);
-			glFunc->glTexCoord2f(1, 1); glFunc->glVertex3i(rect.width(), 0, 0);
-			glFunc->glTexCoord2f(1, 0); glFunc->glVertex3i(rect.width(), rect.height(), 0);
-			glFunc->glTexCoord2f(0, 0); glFunc->glVertex3i(0, rect.height(), 0);
+			float ratioW = textRect.width() / static_cast<float>(imageRect.width());
+			float ratioH = textRect.height() / static_cast<float>(imageRect.height());
+			glFunc->glTexCoord2f(0, ratioH); glFunc->glVertex3i(0, 0, 0);
+			glFunc->glTexCoord2f(ratioW, ratioH); glFunc->glVertex3i(textRect.width(), 0, 0);
+			glFunc->glTexCoord2f(ratioW, 0); glFunc->glVertex3i(textRect.width(), textRect.height(), 0);
+			glFunc->glTexCoord2f(0, 0); glFunc->glVertex3i(0, textRect.height(), 0);
 			glFunc->glEnd();
 
-			textTex.release();
+			texture->release();
 		}
 
 		glFunc->glMatrixMode(GL_PROJECTION);
@@ -6781,7 +6887,7 @@ void ccGLWindow::renderText(double x, double y, double z, const QString & str, c
 	if (camera.project(CCVector3d(x, y, z), Q2D))
 	{
 		Q2D.y = m_glViewport.height() - 1 - Q2D.y;
-		renderText(Q2D.x, Q2D.y, str, font);
+		renderText(Q2D.x, Q2D.y, str, 0, font);
 	}
 }
 

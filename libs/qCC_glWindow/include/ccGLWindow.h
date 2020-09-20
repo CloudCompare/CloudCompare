@@ -1009,10 +1009,10 @@ protected: //other methods
 	//! Returns the (relative) depth value at a given pixel position
 	/** \return the (relative) depth or 1.0 if none is defined
 	**/
-	GLfloat getGLDepth(int x, int y, bool extendToNeighbors = false);
+	GLfloat getGLDepth(int x, int y, bool extendToNeighbors = false, bool usePBO = false);
 
 	//! Returns the approximate 3D position of the clicked pixel
-	bool getClick3DPos(int x, int y, CCVector3d& P3D);
+	bool getClick3DPos(int x, int y, CCVector3d& P3D, bool usePBO);
 
 protected: //members
 
@@ -1325,6 +1325,12 @@ protected: //members
 
 		//! PBO object
 		QOpenGLBuffer* glBuffer = nullptr;
+
+		//! Last read operation timestamp
+		qint64 lastReadTime_ms = 0;
+
+		//! Elapsed timer
+		QElapsedTimer timer;
 
 		bool init();
 		void release();

@@ -43,6 +43,7 @@
 #include <QSettings>
 #include <QTouchEvent>
 #include <QWheelEvent>
+#include <QOpenGLBuffer>
 
 #if defined( Q_OS_MAC ) || defined( Q_OS_LINUX )
 #include <QDir>
@@ -274,7 +275,7 @@ struct ccGLWindow::RenderingParams
 	bool drawForeground = true;
 
 	//! Candidate pivot point(s) (will be used when the mouse is released)
-	/** Up to 2 candidates, ifstereo mode is enabled **/
+	/** Up to 2 candidates, if stereo mode is enabled **/
 	CCVector3d autoPivotCandidates[2];
 	bool hasAutoPivotCandidates[2] = { false, false };
 };
@@ -449,7 +450,7 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=0*/,
 		bool perspectiveView = settings.value(c_ps_perspectiveView, false).toBool();
 		//DGM: we force object-centered view by default now, as the viewer-based perspective is too dependent
 		//on what is displayed (so restoring this parameter at next startup is rarely a good idea)
-		bool objectCenteredView = /*settings.value(c_ps_objectMode,		true								).toBool()*/true;
+		bool objectCenteredView = /*settings.value(c_ps_objectMode, true).toBool()*/true;
 		m_sunLightEnabled = settings.value(c_ps_sunLight, true).toBool();
 		m_customLightEnabled = settings.value(c_ps_customLight, false).toBool();
 		int pivotVisibility = settings.value(c_ps_pivotVisibility, PIVOT_SHOW_ON_MOVE).toInt();
@@ -555,6 +556,8 @@ ccGLWindow::~ccGLWindow()
 	delete m_device;
 	m_device = nullptr;
 #endif
+
+	m_pickingPBO.release();
 
 	delete m_hotZone;
 	m_hotZone = nullptr;
@@ -4040,7 +4043,6 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 				break;
 
 				case StandardMode:
-				//case LockedAxisMode:
 				{
 					static CCVector3d s_lastMouseOrientation;
 					CCVector3d currentMouseOrientation = convertMousePositionToOrientation(x, y);
@@ -4061,19 +4063,6 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 						// unconstrained rotation following mouse position
 						rotMat = ccGLMatrixd::FromToRotation(s_lastMouseOrientation, currentMouseOrientation);
 					}
-
-					//if (rotationMode == LockedAxisMode)
-					//{
-					//	CCVector3d upAxis = m_lockedRotationAxis;
-					//	getBaseViewMat().applyRotation(upAxis);
-					//	upAxis.normalize();
-
-					//	ccGLMatrixd upAxisToZ = ccGLMatrixd::FromToRotation(upAxis, CCVector3d(0, 0, 1));
-					//	ccGLMatrixd rotMatInTempCS = upAxisToZ * rotMat;
-					//	ccGLMatrixd rotMatInTempCSFiltered = rotMatInTempCS/*.zRotation()*/;
-					//	ccGLMatrixd rotMatFiltered = upAxisToZ.inverse() * rotMatInTempCSFiltered;
-					//	rotMat = rotMatFiltered;
-					//}
 
 					s_lastMouseOrientation = currentMouseOrientation;
 				}
@@ -7007,6 +6996,41 @@ bool ccGLWindow::initFBOSafe(ccFrameBufferObject* &fbo, int w, int h)
 	return true;
 }
 
+static const size_t c_depthPickingBufferSize = 9 * sizeof(GLfloat);
+
+bool ccGLWindow::PBOPicking::init()
+{
+	if (supported && !glBuffer)
+	{
+		glBuffer = new QOpenGLBuffer(QOpenGLBuffer::PixelPackBuffer);
+		if (!glBuffer->create())
+		{
+			ccLog::Warning("Failed to create picking PBO");
+			release();
+			supported = false;
+			return false;
+		}
+
+		glBuffer->setUsagePattern(QOpenGLBuffer::DynamicRead);
+
+		//we need to allocate it the first time
+		glBuffer->bind();
+		glBuffer->allocate(c_depthPickingBufferSize);
+		glBuffer->release();
+	}
+
+	return true;
+}
+
+void ccGLWindow::PBOPicking::release()
+{
+	if (glBuffer)
+	{
+		delete glBuffer;
+		glBuffer = nullptr;
+	}
+}
+
 GLfloat ccGLWindow::getGLDepth(int x, int y, bool extendToNeighbors/*=false*/)
 {
 	makeCurrent();
@@ -7014,8 +7038,8 @@ GLfloat ccGLWindow::getGLDepth(int x, int y, bool extendToNeighbors/*=false*/)
 	ccQOpenGLFunctions* glFunc = functions();
 	assert(glFunc);
 
-	GLfloat z[9];
 	int kernel[2] = { 1, 1 };
+	GLfloat depthPickingBuffer[9] = { 0 };
 
 	if (extendToNeighbors)
 	{
@@ -7031,12 +7055,43 @@ GLfloat ccGLWindow::getGLDepth(int x, int y, bool extendToNeighbors/*=false*/)
 		}
 	}
 
+	if (m_pickingPBO.supported && !m_pickingPBO.glBuffer)
+	{
+		if (m_pickingPBO.init())
+		{
+			ccLog::Print("[ccGLWindow] Succesfully initialized PBO for faster depth picking");
+			logGLError("m_pickingPBO.init");
+		}
+	}
+
 	ccFrameBufferObject* formerFBO = m_activeFbo;
 	if (m_fbo && m_activeFbo != m_fbo)
 	{
 		bindFBO(m_fbo);
 	}
-	glFunc->glReadPixels(x, y, kernel[0], kernel[1], GL_DEPTH_COMPONENT, GL_FLOAT, z);
+	if (m_pickingPBO.glBuffer)
+	{
+		m_pickingPBO.glBuffer->bind();
+	}
+	glFunc->glReadPixels(x, y, kernel[0], kernel[1], GL_DEPTH_COMPONENT, GL_FLOAT, m_pickingPBO.glBuffer ? nullptr : depthPickingBuffer);
+
+	int kernelSize = kernel[0] * kernel[1];
+	if (m_pickingPBO.glBuffer)
+	{
+		void* _mappedBuffer = m_pickingPBO.glBuffer->map(QOpenGLBuffer::QOpenGLBuffer::ReadOnly);
+		if (_mappedBuffer)
+		{
+			memcpy_s(depthPickingBuffer, c_depthPickingBufferSize, _mappedBuffer, kernelSize * sizeof(GLfloat));
+			m_pickingPBO.glBuffer->unmap();
+			m_pickingPBO.glBuffer->release();
+		}
+		else
+		{
+			ccLog::Warning("Failed to map the picking PBO contents. We won't use it anymore");
+			m_pickingPBO.release();
+			m_pickingPBO.supported = false;
+		}
+	}
 	if (m_activeFbo != formerFBO)
 	{
 		bindFBO(formerFBO);
@@ -7045,8 +7100,7 @@ GLfloat ccGLWindow::getGLDepth(int x, int y, bool extendToNeighbors/*=false*/)
 	logGLError("getGLDepth");
 
 	//by default, we take the center value (= pixel(x,y))
-	int kernelSize = kernel[0] * kernel[1];
-	GLfloat minZ = z[(kernelSize + 1) / 2 - 1];
+	GLfloat minZ = depthPickingBuffer[(kernelSize + 1) / 2 - 1];
 
 	//if the depth is not defined...
 	if (minZ == 1.0f && extendToNeighbors)
@@ -7054,7 +7108,7 @@ GLfloat ccGLWindow::getGLDepth(int x, int y, bool extendToNeighbors/*=false*/)
 		//...extend the search to the neighbors
 		for (int i = 0; i < kernelSize; ++i)
 		{
-			minZ = std::min(minZ, z[i]);
+			minZ = std::min(minZ, depthPickingBuffer[i]);
 		}
 	}
 

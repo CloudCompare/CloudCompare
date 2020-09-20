@@ -44,6 +44,7 @@
 #include <unordered_set>
 
 class QOpenGLDebugMessage;
+class QOpenGLBuffer;
 
 class ccBBox;
 class ccColorRampShader;
@@ -1315,6 +1316,22 @@ protected: //members
 
 	//! Last texture pool index
 	size_t m_texturePoolLastIndex;
+
+	//! Fast pixel reading mechanism with PBO
+	struct PBOPicking
+	{
+		//! Whether the picking PBO seems supported or not
+		bool supported = true;
+
+		//! PBO object
+		QOpenGLBuffer* glBuffer = nullptr;
+
+		bool init();
+		void release();
+	};
+
+	//! Fast pixel reading mechanism with PBO
+	PBOPicking m_pickingPBO;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(ccGLWindow::INTERACTION_FLAGS);

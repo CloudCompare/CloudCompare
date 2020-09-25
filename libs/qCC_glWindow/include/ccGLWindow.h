@@ -44,6 +44,7 @@
 #include <unordered_set>
 
 class QOpenGLDebugMessage;
+class QOpenGLBuffer;
 
 class ccBBox;
 class ccColorRampShader;
@@ -1008,10 +1009,10 @@ protected: //other methods
 	//! Returns the (relative) depth value at a given pixel position
 	/** \return the (relative) depth or 1.0 if none is defined
 	**/
-	GLfloat getGLDepth(int x, int y, bool extendToNeighbors = false);
+	GLfloat getGLDepth(int x, int y, bool extendToNeighbors = false, bool usePBO = false);
 
 	//! Returns the approximate 3D position of the clicked pixel
-	bool getClick3DPos(int x, int y, CCVector3d& P3D);
+	bool getClick3DPos(int x, int y, CCVector3d& P3D, bool usePBO);
 
 protected: //members
 
@@ -1315,6 +1316,28 @@ protected: //members
 
 	//! Last texture pool index
 	size_t m_texturePoolLastIndex;
+
+	//! Fast pixel reading mechanism with PBO
+	struct PBOPicking
+	{
+		//! Whether the picking PBO seems supported or not
+		bool supported = true;
+
+		//! PBO object
+		QOpenGLBuffer* glBuffer = nullptr;
+
+		//! Last read operation timestamp
+		qint64 lastReadTime_ms = 0;
+
+		//! Elapsed timer
+		QElapsedTimer timer;
+
+		bool init();
+		void release();
+	};
+
+	//! Fast pixel reading mechanism with PBO
+	PBOPicking m_pickingPBO;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(ccGLWindow::INTERACTION_FLAGS);

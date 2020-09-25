@@ -7106,7 +7106,7 @@ GLfloat ccGLWindow::getGLDepth(int x, int y, bool extendToNeighbors/*=false*/, b
 		m_pickingPBO.lastReadTime_ms = readTime_ms;
 	}
 
-	glFunc->glReadPixels(x, y, kernel[0], kernel[1], GL_DEPTH_COMPONENT, GL_FLOAT, m_pickingPBO.glBuffer ? nullptr : depthPickingBuffer);
+	glFunc->glReadPixels(x, y, kernel[0], kernel[1], GL_DEPTH_COMPONENT, GL_FLOAT, usePBO && m_pickingPBO.glBuffer ? nullptr : depthPickingBuffer);
 
 	if (usePBO && m_pickingPBO.glBuffer)
 	{
@@ -7157,10 +7157,10 @@ GLfloat ccGLWindow::getGLDepth(int x, int y, bool extendToNeighbors/*=false*/, b
 	return minZ;
 }
 
-bool ccGLWindow::getClick3DPos(int x, int y, CCVector3d& P3D, bool useFBO)
+bool ccGLWindow::getClick3DPos(int x, int y, CCVector3d& P3D, bool usePBO)
 {
 	y = m_glViewport.height() - 1 - y;
-	GLfloat glDepth = getGLDepth(x, y, false, useFBO);
+	GLfloat glDepth = getGLDepth(x, y, false, usePBO);
 	if (glDepth == INVALID_DEPTH)
 	{
 		return false;

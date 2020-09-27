@@ -7116,7 +7116,7 @@ GLfloat ccGLWindow::getGLDepth(int x, int y, bool extendToNeighbors/*=false*/, b
 			void* _mappedBuffer = m_pickingPBO.glBuffer->map(QOpenGLBuffer::QOpenGLBuffer::ReadOnly);
 			if (_mappedBuffer)
 			{
-				memcpy_s(depthPickingBuffer, c_depthPickingBufferSize, _mappedBuffer, kernelSize * sizeof(GLfloat));
+				memcpy(depthPickingBuffer, _mappedBuffer, kernelSize * sizeof(GLfloat));
 				m_pickingPBO.glBuffer->unmap();
 			}
 			else

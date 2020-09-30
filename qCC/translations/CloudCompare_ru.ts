@@ -34,7 +34,7 @@
     <message>
         <location filename="../ui_templates/adjustZoomDlg.ui" line="49"/>
         <source>focal</source>
-        <translation type="unfinished"></translation>
+        <translation>масштаб</translation>
     </message>
     <message>
         <location filename="../ui_templates/adjustZoomDlg.ui" line="77"/>
@@ -239,7 +239,7 @@
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="115"/>
         <source>Automatic steps duration</source>
-        <translation type="unfinished"></translation>
+        <translation>Подогнать время шагов</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="128"/>
@@ -264,12 +264,12 @@
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="180"/>
         <source>Smooth trajectory</source>
-        <translation type="unfinished"></translation>
+        <translation>Сглаживание траектории</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="189"/>
         <source>smooth ratio</source>
-        <translation type="unfinished"></translation>
+        <translation>коэффициент</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="240"/>
@@ -380,7 +380,7 @@ larger). You may have to increase the points size beforehand.</source>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="474"/>
         <source>Export trajectory on exit</source>
-        <translation type="unfinished"></translation>
+        <translation>Экспорт траектории</translation>
     </message>
 </context>
 <context>
@@ -1271,7 +1271,22 @@ p, li { white-space: pre-wrap; }
 &lt;p align=&quot;center&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; background-color:#cce8cf;&quot;&gt;(&lt;/span&gt;&lt;a href=&quot;http://ramm.bnu.edu.cn/&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; text-decoration: underline; color:#0000ff;&quot;&gt;http://ramm.bnu.edu.cn/&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; background-color:#cce8cf;&quot;&gt;)&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt;&quot;&gt;Wuming Zhang; Jianbo Qi; Peng Wan; Hongtao Wang&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt;&quot;&gt;contact us: &lt;/span&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; background-color:#cce8cf;&quot;&gt;2009zwm@gmail.com; wpqjbzwm@126.com&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;.SF NS Text&apos;; font-size:13pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt;&quot;&gt;	&lt;/span&gt;&lt;span style=&quot; font-family:&apos;SimSun&apos;; font-size:11pt; font-weight:600;&quot;&gt;Описание модуля CSF&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;justify&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8pt; font-weight:600;&quot;&gt;Cloth Simulation Filter (CSF)&lt;/span&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8pt;&quot;&gt; инструмент для выделения рельефных точек в отдельное облако. Описание методики и алгоритмы можно найти в следующей статье:&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;justify&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a name=&quot;OLE_LINK22&quot;&gt;&lt;/a&gt;&lt;span style=&quot; font-family:&apos;Arial,sans-serif&apos;; font-size:8pt; color:#000000;&quot;&gt;Z&lt;/span&gt;&lt;span style=&quot; font-family:&apos;Arial,sans-serif&apos;; font-size:8pt; color:#000000;&quot;&gt;hang W, Qi J, Wan P, Wang H, Xie D, Wang X, Yan G. An Easy-to-Use Airborne LiDAR Data Filtering Method Based on Cloth Simulation. &lt;/span&gt;&lt;span style=&quot; font-family:&apos;Arial,sans-serif&apos;; font-size:8pt; font-style:italic; color:#000000;&quot;&gt;Remote Sensing&lt;/span&gt;&lt;span style=&quot; font-family:&apos;Arial,sans-serif&apos;; font-size:8pt; color:#000000;&quot;&gt;. 2016; 8(6):501.&lt;/span&gt;&lt;span style=&quot; font-family:&apos;SimSun&apos;; font-size:8pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;justify&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Microsoft YaHei UI,Tahoma&apos;; font-size:8pt; color:#000000; background-color:#cce8cf;&quot;&gt;Убедительная просьба цитировать статью при использовании фильтра Cloth Simulation Filter (CSF) в вашей работе.&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;justify&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Microsoft YaHei UI,Tahoma&apos;; font-size:8pt; color:#000000; background-color:#cce8cf;&quot;&gt;Статью можно скачать по ссылке &lt;/span&gt;&lt;a href=&quot;https://www.researchgate.net/profile/Wuming_Zhang2)&quot;&gt;&lt;span style=&quot; font-family:&apos;Microsoft YaHei UI,Tahoma&apos;; font-size:8pt; text-decoration: underline; color:#0000ff; background-color:#cce8cf;&quot;&gt;https://www.researchgate.net/profile/Wuming_Zhang2 .&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p align=&quot;justify&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Microsoft YaHei UI,Tahoma&apos;; font-size:8pt; color:#000000; background-color:#cce8cf;&quot;&gt;Дополнительную информацию можно найти на странице : &lt;/span&gt;&lt;a href=&quot;http://ramm.bnu.edu.cn/researchers/wumingzhang/english/default_contributions.htm&quot;&gt;&lt;span style=&quot; font-family:&apos;Microsoft YaHei UI,Tahoma&apos;; font-size:8pt; text-decoration: underline; color:#0000ff; background-color:#cce8cf;&quot;&gt;http://ramm.bnu.edu.cn/researchers/wumingzhang/english/default_contributions.htm&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:&apos;Microsoft YaHei UI,Tahoma&apos;; font-size:8pt; color:#000000; background-color:#cce8cf;&quot;&gt;.&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;justify&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Microsoft YaHei UI,Tahoma&apos;; font-size:8pt; color:#000000; background-color:#cce8cf;&quot;&gt;Версия для программирования в Matlab находится на сайте :  &lt;/span&gt;&lt;a href=&quot;http://www.mathworks.com/matlabcentral/fileexchange/58139-csf--ground-filtering-of-point-cloud-based-on-cloth-simulation&quot;&gt;&lt;span style=&quot; font-family:&apos;SimSun&apos;; font-size:9pt; text-decoration: underline; color:#0000ff;&quot;&gt;http://www.mathworks.com/matlabcentral/fileexchange/58139-csf--ground-filtering-of-point-cloud-based-on-cloth-simulation&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Microsoft YaHei UI,Tahoma&apos;; font-size:8pt; color:#000000; background-color:#cce8cf;&quot;&gt; Copyright &lt;/span&gt;&lt;span style=&quot; font-family:&apos;Arial,Helvetica,sans-serif&apos;; font-size:8.25pt; color:#333333; background-color:#e5eaee;&quot;&gt;©&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; background-color:#cce8cf;&quot;&gt;RAMM laboratory, School of Geography, Beijing Normal University&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; background-color:#cce8cf;&quot;&gt;(&lt;/span&gt;&lt;a href=&quot;http://ramm.bnu.edu.cn/&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; text-decoration: underline; color:#0000ff;&quot;&gt;http://ramm.bnu.edu.cn/&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; background-color:#cce8cf;&quot;&gt;)&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt;&quot;&gt;Wuming Zhang; Jianbo Qi; Peng Wan; Hongtao Wang&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt;&quot;&gt;пишите нам: &lt;/span&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; background-color:#cce8cf;&quot;&gt;2009zwm@gmail.com; wpqjbzwm@126.com&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCSF/ui/CSFDlg.ui" line="58"/>
@@ -2287,7 +2302,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="14"/>
         <source>Repeat</source>
-        <translation>Повторение</translation>
+        <translation>Сечения</translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="20"/>
@@ -2297,32 +2312,32 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="23"/>
         <source>Repeat dimensions</source>
-        <translation>Повторять вдоль</translation>
+        <translation>Сечения по оси</translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="74"/>
         <source>Extract slice cloud(s) or mesh(es)</source>
-        <translation type="unfinished"></translation>
+        <translation>Создавать слои из облаков или цифровых моделей</translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="86"/>
         <source>random colors per slice (will overwrite existing colors!)</source>
-        <translation type="unfinished"></translation>
+        <translation>случайный цвет на слой (исходный цвет будет утерян)</translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="96"/>
         <source>Check that option if you wish to extract the envelope of each slice</source>
-        <translation type="unfinished"></translation>
+        <translation>Эта функция включает построение контуров для каждого слоя</translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="99"/>
         <source>Extract envelope(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>Построить контур(ы)</translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="113"/>
         <source>Envelope type</source>
-        <translation type="unfinished"></translation>
+        <translation>Тип контура</translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="120"/>
@@ -2332,17 +2347,17 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="127"/>
         <source>Lower</source>
-        <translation>по нижнему краю слоя</translation>
+        <translation>Нижняя граница</translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="132"/>
         <source>Upper</source>
-        <translation>по верхнему краю слоя</translation>
+        <translation>Верхняя граница</translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="137"/>
         <source>Full</source>
-        <translatorcomment>по верху и низу слоя</translatorcomment>
+        <translatorcomment>Обе границы</translatorcomment>
         <translation></translation>
     </message>
     <message>
@@ -2368,7 +2383,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="177"/>
         <source>Before extracting the contour, points can be projected along the repeat dimension (if only one is defined) or on the best fit plane</source>
-        <translation>До построения сечения, точки каждого слоя проецируются вдоль выбранной оси (если она задана одна) или на вписанную в общий массив плоскость</translation>
+        <translation>При построении контура, точки каждого слоя проецируются вдоль выбранной оси (если она задана одна) или на вписанную в общий массив плоскость</translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="180"/>
@@ -2383,37 +2398,37 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="190"/>
         <source>split envelope(s) on longer edges</source>
-        <translation type="unfinished"></translation>
+        <translation>разрывать контур на длинных краях</translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="297"/>
         <source>Group generated entities by</source>
-        <translation type="unfinished"></translation>
+        <translation>Группировать результат по</translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="308"/>
         <source>Type</source>
-        <translation type="unfinished">Тип</translation>
+        <translation>Тип</translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="313"/>
         <source>Origin entity</source>
-        <translation type="unfinished"></translation>
+        <translation>Исходный объект</translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="318"/>
         <source>Slice</source>
-        <translation type="unfinished"></translation>
+        <translation>Слой</translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="323"/>
         <source>Origin entity, then slice</source>
-        <translation type="unfinished"></translation>
+        <translation>Исх. объект, затем слой</translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="328"/>
         <source>Slice, then origin entity</source>
-        <translation type="unfinished"></translation>
+        <translation>Слой, затем исх. объект</translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="197"/>
@@ -2428,27 +2443,27 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="210"/>
         <source>Extract the point contours (via a rasterization process)</source>
-        <translation type="unfinished"></translation>
+        <translation>Построение изолиний по растеризованному облаку</translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="213"/>
         <source>Extract contours</source>
-        <translation type="unfinished"></translation>
+        <translation>Построение изолиний</translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="225"/>
         <source>Grid step</source>
-        <translation type="unfinished"></translation>
+        <translation>Шаг сетки</translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="248"/>
         <source>Min. vertex count</source>
-        <translation type="unfinished">Минимум вершин</translation>
+        <translation>Минимум вершин</translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="255"/>
         <source>Min vertex count per iso-line (to ignore the smallest ones)</source>
-        <translation type="unfinished">Минимально допустимое количество вершин-узлов изолинии (для игнорирования небольших изолиний)</translation>
+        <translation>Минимально допустимое количество вершин-узлов изолинии (для игнорирования небольших изолиний)</translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="271"/>
@@ -3022,7 +3037,7 @@ Collision Engineering Associates, Inc.
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p align=&quot;center&quot;&gt;
-Этот плагин любезно предоставлен Wesley Grimes,
+Этот модуль любезно предоставлен Wesley Grimes,
 &lt;br/&gt;
 Collision Engineering Associates, Inc.
 &lt;br/&gt;
@@ -3062,7 +3077,7 @@ p, li { white-space: pre-wrap; }
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Разработку этого плагина начал Thomas Dewez – BRGM&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Разработку этого модуля начал Thomas Dewez – BRGM&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Это свободное программное обеспечение; вы можете распространять его и/или изменять его в соответствии с правилами публичной лицензии GNU General Public License as published bythe Free Software Foundation; версии 2 или следующей.&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Эта программа распространяется в надежде быть полезной, но БЕЗ КАКИХ-ЛИБО ГАРАНТИЙ; и даже без подразумеваемой гарантии MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. Для деталей см. публичную лицензию GNU General Public License.&lt;/span&gt;&lt;/p&gt;
@@ -3694,32 +3709,32 @@ The bigger the more accurate the map will be
     <message>
         <location filename="../ui_templates/envelopeExtractorDlg.ui" line="14"/>
         <source>Envelope Extractor Visual Debug</source>
-        <translation type="unfinished"></translation>
+        <translation>Визуальный отладчик построения сечений</translation>
     </message>
     <message>
         <location filename="../ui_templates/envelopeExtractorDlg.ui" line="44"/>
         <source>Message</source>
-        <translation type="unfinished">Сообщение</translation>
+        <translation>Сообщение</translation>
     </message>
     <message>
         <location filename="../ui_templates/envelopeExtractorDlg.ui" line="57"/>
         <source>no message</source>
-        <translation type="unfinished">нет сообщений</translation>
+        <translation>нет сообщений</translation>
     </message>
     <message>
         <location filename="../ui_templates/envelopeExtractorDlg.ui" line="64"/>
         <source>auto</source>
-        <translation type="unfinished">авто</translation>
+        <translation>авто</translation>
     </message>
     <message>
         <location filename="../ui_templates/envelopeExtractorDlg.ui" line="71"/>
         <source>Next</source>
-        <translation type="unfinished">Следующий</translation>
+        <translation>Следующий</translation>
     </message>
     <message>
         <location filename="../ui_templates/envelopeExtractorDlg.ui" line="78"/>
         <source>Skip</source>
-        <translation type="unfinished">Пропустить</translation>
+        <translation>Пропустить</translation>
     </message>
 </context>
 <context>
@@ -4543,7 +4558,7 @@ CloudCompare как и большинство графических адапт�
     <message>
         <location filename="../ui_templates/graphicalTransformationDlg.ui" line="84"/>
         <source>Pause segmentation</source>
-        <translation>Пауза трансформации</translation>
+        <translation>Пауза сегментирования</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalTransformationDlg.ui" line="87"/>
@@ -4625,37 +4640,37 @@ CloudCompare как и большинство графических адапт�
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/HSVDialog.ui" line="20"/>
         <source>HSV color setting</source>
-        <translation type="unfinished"></translation>
+        <translation>Выборка по цвету HSV</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/HSVDialog.ui" line="31"/>
         <source>Select the reference point </source>
-        <translation type="unfinished"></translation>
+        <translation>Укажите основную точку</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/HSVDialog.ui" line="233"/>
         <source>Pick the plane center (click again to cancel)</source>
-        <translation type="unfinished">Щелчком выберите центр плоскости (щелкните повторно для отмены)</translation>
+        <translation>Щелкните по основной точке (щелкните повторно для отмены)</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/HSVDialog.ui" line="268"/>
         <source>Choose which points to keep </source>
-        <translation type="unfinished"></translation>
+        <translation>Укажите какие точки выбрать </translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/HSVDialog.ui" line="280"/>
         <source>Retain</source>
-        <translation type="unfinished"></translation>
+        <translation>В диапазоне</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/HSVDialog.ui" line="290"/>
         <source>Exclude</source>
-        <translation type="unfinished"></translation>
+        <translation>Вне диапазона</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/HSVDialog.ui" line="297"/>
         <source>Both</source>
-        <translation type="unfinished">По обеим границам</translation>
+        <translation>Оба варианта</translation>
     </message>
 </context>
 <context>
@@ -5074,17 +5089,17 @@ CloudCompare как и большинство графических адапт�
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/KmeansDlg.ui" line="14"/>
         <source>Kmeans clustering setting</source>
-        <translation type="unfinished"></translation>
+        <translation>Выборка по K-средним</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/KmeansDlg.ui" line="22"/>
         <source>Number of colors</source>
-        <translation type="unfinished"></translation>
+        <translation>Кол-во цветов</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/KmeansDlg.ui" line="72"/>
         <source>Max number of iterations</source>
-        <translation type="unfinished"></translation>
+        <translation>Макс. число итераций</translation>
     </message>
 </context>
 <context>
@@ -5569,7 +5584,7 @@ Parameter</source>
     <message>
         <location filename="../../plugins/core/Standard/qMPlane/ui/mplaneDlg.ui" line="20"/>
         <source>Dialog</source>
-        <translation type="unfinished">Диалог</translation>
+        <translation>Диалог</translation>
     </message>
 </context>
 <context>
@@ -6098,7 +6113,7 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1150"/>
         <source>T</source>
-        <translation type="unfinished"></translation>
+        <translation>T</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1171"/>
@@ -6563,12 +6578,12 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1775"/>
         <source>About Plugins...</source>
-        <translation>О плагинах...</translation>
+        <translation>О модулях...</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2373"/>
         <source>X</source>
-        <translation type="unfinished"></translation>
+        <translation>X</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2388"/>
@@ -6578,7 +6593,7 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2534"/>
         <source>E</source>
-        <translation type="unfinished"></translation>
+        <translation>E</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2975"/>
@@ -9207,47 +9222,47 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../../plugins/core/Standard/qMasonry/qAutoSeg/profileImportDlg.ui" line="44"/>
         <source>Operations</source>
-        <translation type="unfinished"></translation>
+        <translation>Действия</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qMasonry/qAutoSeg/profileImportDlg.ui" line="53"/>
         <source>Align wall to XZ (vertical)</source>
-        <translation type="unfinished"></translation>
+        <translation>Выставить стену в XZ (вертикально)</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qMasonry/qAutoSeg/profileImportDlg.ui" line="60"/>
         <source>Automatic segmentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Автоматическое сегментирование</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qMasonry/qAutoSeg/profileImportDlg.ui" line="67"/>
         <source>Mortar maps</source>
-        <translation type="unfinished"></translation>
+        <translation>Карта строительных швов</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qMasonry/qAutoSeg/profileImportDlg.ui" line="89"/>
         <source>Segmentation settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Настройки сегментирования</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qMasonry/qAutoSeg/profileImportDlg.ui" line="97"/>
         <source>Estimated width of mortar joints (cm): </source>
-        <translation type="unfinished"></translation>
+        <translation>Примерная ширина строит. швов (cm): </translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qMasonry/qAutoSeg/profileImportDlg.ui" line="132"/>
         <source>Window (only advanced users)</source>
-        <translation type="unfinished"></translation>
+        <translation>Окно (для опытных пользователей)</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qMasonry/qAutoSeg/profileImportDlg.ui" line="144"/>
         <source>Vertical (m):</source>
-        <translation type="unfinished"></translation>
+        <translation>Высота (м):</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qMasonry/qAutoSeg/profileImportDlg.ui" line="177"/>
         <source>Horizontal (m):</source>
-        <translation type="unfinished"></translation>
+        <translation>Ширина (м):</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qMasonry/qManualSeg/profileImportDlg.ui" line="20"/>
@@ -9341,7 +9356,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="969"/>
         <source>Level(s): %L1</source>
-        <translation type="unfinished"></translation>
+        <translation>Уровней: %L1</translation>
     </message>
     <message>
         <location filename="../ccLibAlgorithms.cpp" line="613"/>
@@ -12053,13 +12068,13 @@ Missing parameter: Directory after &quot;-%1 %2&quot;</source>
     <message>
         <location filename="../ccContourLinesGenerator.cpp" line="349"/>
         <source>Contour plot</source>
-        <translation type="unfinished">Контурное изображение</translation>
+        <translation>Контурное изображение</translation>
     </message>
     <message>
         <location filename="../ccContourLinesGenerator.cpp" line="350"/>
         <source>Levels: %1
 Cells: %2 x %3</source>
-        <translation type="unfinished">Уровней: %1
+        <translation>Уровней: %1
 Ячеек: %2 x %3</translation>
     </message>
 </context>
@@ -12112,22 +12127,22 @@ Cells: %2 x %3</source>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/QuantiDialog.ui" line="14"/>
         <source>Histogram Clustering setting</source>
-        <translation type="unfinished"></translation>
+        <translation>Кластеризация гистограммы</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/QuantiDialog.ui" line="22"/>
         <source>Quantification index</source>
-        <translation type="unfinished"></translation>
+        <translation>Индекс квантификации</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/QuantiDialog.ui" line="78"/>
         <source>Colors available :</source>
-        <translation type="unfinished"></translation>
+        <translation>Доступно цветов :</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/QuantiDialog.ui" line="104"/>
         <source>1</source>
-        <translation type="unfinished"></translation>
+        <translation>1</translation>
     </message>
 </context>
 <context>
@@ -12135,17 +12150,17 @@ Cells: %2 x %3</source>
     <message>
         <location filename="../../plugins/core/IO/qRDBIO/ui/openRDBDlg.ui" line="14"/>
         <source>Open Riegl RDB 2 file</source>
-        <translation type="unfinished"></translation>
+        <translation>Открыть файл RIEGL RDB 2</translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qRDBIO/ui/openRDBDlg.ui" line="20"/>
         <source>RDB Info</source>
-        <translation type="unfinished"></translation>
+        <translation>Сводка</translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qRDBIO/ui/openRDBDlg.ui" line="26"/>
         <source>Points</source>
-        <translation type="unfinished"></translation>
+        <translation>Точек</translation>
     </message>
 </context>
 <context>
@@ -12898,48 +12913,48 @@ replaced by the cell&apos;s average height!</source>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/RgbDialog.ui" line="20"/>
         <source>RGB color setting</source>
-        <translation type="unfinished"></translation>
+        <translation>Выборка по цвету RGB</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/RgbDialog.ui" line="30"/>
         <source>Choose the first point </source>
-        <translation type="unfinished"></translation>
+        <translation>Точка начала диапазона </translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/RgbDialog.ui" line="55"/>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/RgbDialog.ui" line="216"/>
         <source>Pick the plane center (click again to cancel)</source>
-        <translation type="unfinished">Щелчком выберите центр плоскости (щелкните повторно для отмены)</translation>
+        <translation>Укажите место (щелкните повторно для отмены)</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/RgbDialog.ui" line="191"/>
         <source>Choose the second point </source>
-        <translation type="unfinished"></translation>
+        <translation>Точка конца диапазона </translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/RgbDialog.ui" line="341"/>
         <source>Choose which points to keep </source>
-        <translation type="unfinished"></translation>
+        <translation>Укажите какие точки выбрать </translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/RgbDialog.ui" line="356"/>
         <source>Retain</source>
-        <translation type="unfinished"></translation>
+        <translation>В диапазоне</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/RgbDialog.ui" line="366"/>
         <source>Exclude</source>
-        <translation type="unfinished"></translation>
+        <translation>Вне диапазона</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/RgbDialog.ui" line="373"/>
         <source>Both</source>
-        <translation type="unfinished">По обеим границам</translation>
+        <translation>Оба варианта</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/RgbDialog.ui" line="385"/>
         <source>Deviation from RGB limits  (%) :</source>
-        <translation type="unfinished"></translation>
+        <translation>Допустимое отклонение (%) :</translation>
     </message>
 </context>
 <context>
@@ -13282,48 +13297,48 @@ replaced by the cell&apos;s average height!</source>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/ScalarDialog.ui" line="20"/>
         <source>Scalar color setting</source>
-        <translation type="unfinished"></translation>
+        <translation>Выборка по цвету скал. поля</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/ScalarDialog.ui" line="30"/>
         <source>Choose the lowest point</source>
-        <translation type="unfinished"></translation>
+        <translation>Укажите точку нижней границы</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/ScalarDialog.ui" line="39"/>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/ScalarDialog.ui" line="171"/>
         <source>Pick the plane center (click again to cancel)</source>
-        <translation type="unfinished">Щелчком выберите центр плоскости (щелкните повторно для отмены)</translation>
+        <translation>Укажите место (щелкните повторно для отмены)</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/ScalarDialog.ui" line="146"/>
         <source>Choose the highest point </source>
-        <translation type="unfinished"></translation>
+        <translation>Укажите точку верхней границы</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/ScalarDialog.ui" line="251"/>
         <source>Choose which points to keep </source>
-        <translation type="unfinished"></translation>
+        <translation>Укажите какие точки выбрать </translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/ScalarDialog.ui" line="266"/>
         <source>Retain</source>
-        <translation type="unfinished"></translation>
+        <translation>В диапазоне</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/ScalarDialog.ui" line="276"/>
         <source>Exclude</source>
-        <translation type="unfinished"></translation>
+        <translation>Вне диапазона</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/ScalarDialog.ui" line="283"/>
         <source>Both</source>
-        <translation type="unfinished">По обеим границам</translation>
+        <translation>Оба варианта</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/ScalarDialog.ui" line="295"/>
         <source>Deviation from limits (%) :</source>
-        <translation type="unfinished"></translation>
+        <translation>Допустимое отклонение (%) :</translation>
     </message>
 </context>
 <context>
@@ -13590,17 +13605,17 @@ Warning: may not be compatible with Mascaret export.</source>
     <message>
         <location filename="../ui_templates/smoothPolylineDlg.ui" line="14"/>
         <source>Smooth polyline (Chaikin)</source>
-        <translation type="unfinished"></translation>
+        <translation>Сглаживание полилинии (Чайкин)</translation>
     </message>
     <message>
         <location filename="../ui_templates/smoothPolylineDlg.ui" line="20"/>
         <source>Ratio (strength)</source>
-        <translation type="unfinished"></translation>
+        <translation>Отношение</translation>
     </message>
     <message>
         <location filename="../ui_templates/smoothPolylineDlg.ui" line="43"/>
         <source>iterations</source>
-        <translation type="unfinished"></translation>
+        <translation>итераций</translation>
     </message>
 </context>
 <context>
@@ -14375,7 +14390,7 @@ You should fill the empty cells...</source>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="675"/>
         <source>Preparing extraction</source>
-        <translation>Подготовка извлечения</translation>
+        <translation>Подготовка к построению</translation>
     </message>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="689"/>
@@ -14390,60 +14405,61 @@ You should fill the empty cells...</source>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="1105"/>
         <source>Failed to generate contour lines for cloud #%1</source>
-        <translation type="unfinished"></translation>
+        <translation>Нельзя создать контур. линии для облака #%1</translation>
     </message>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="1113"/>
         <location filename="../ccClippingBoxTool.cpp" line="1218"/>
         <source>[ExtractSlicesAndContours] Process canceled by user</source>
-        <translation type="unfinished"></translation>
+        <translation>[ExtractSlicesAndContours] Обработка отменена пользователем</translation>
     </message>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="1127"/>
         <source>Envelope extraction</source>
-        <translation type="unfinished"></translation>
+        <translation>Построение контура</translation>
     </message>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="1128"/>
         <source>Envelope(s): %L1</source>
-        <translation type="unfinished"></translation>
+        <translation>Контур(ов): %L1</translation>
     </message>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="1203"/>
         <source>%1: points are too far from each other! Increase the max edge length</source>
-        <translation type="unfinished"></translation>
+        <translation>%1: точек далеки друг от друга! Увеличьте макс. длину краев</translation>
     </message>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="1209"/>
         <source>%1: envelope extraction failed!</source>
-        <translation type="unfinished"></translation>
+        <translation>%1: сбой(я) построения контура!</translation>
     </message>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="1248"/>
         <source>[ExtractSlicesAndContours] Warnings were issued during the process! (result may be incomplete)</source>
-        <translation type="unfinished"></translation>
+        <translation>[ExtractSlicesAndContours] При обработке появлялись предупреждения! (результат может быть неполным)</translation>
     </message>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="1253"/>
         <source>Not enough memory!</source>
-        <translation type="unfinished">Недостаточно памяти!</translation>
+        <translation>Недостаточно памяти!</translation>
     </message>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="1753"/>
         <location filename="../ccClippingBoxTool.cpp" line="1757"/>
         <source>Process finished</source>
-        <translation type="unfinished"></translation>
+        <translation>Обработка завершена</translation>
     </message>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="1753"/>
         <source>%1 slices have been generated.
 (you may have to close the tool and hide the initial cloud to see them...)</source>
-        <translation type="unfinished"></translation>
+        <translation>Создано слоев: %1.
+(чтобы увидеть их, закройте инструмент и отключите исходное облако...)</translation>
     </message>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="1757"/>
         <source>The process has generated no output</source>
-        <translation type="unfinished"></translation>
+        <translation>Обработка завершена без результата</translation>
     </message>
 </context>
 <context>
@@ -14520,12 +14536,12 @@ You should fill the empty cells...</source>
     <message>
         <location filename="../../plugins/core/Standard/qMPlane/src/ccMPlaneDlgController.cpp" line="115"/>
         <source>Save Measurements</source>
-        <translation type="unfinished"></translation>
+        <translation>Сохранить измерения</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qMPlane/src/ccMPlaneDlgController.cpp" line="116"/>
         <source>Comma-separated values (*.csv);;All Files (*)</source>
-        <translation type="unfinished"></translation>
+        <translation>Значения через запятую (*.csv);;Все файлы (*)</translation>
     </message>
 </context>
 <context>
@@ -14556,7 +14572,7 @@ You should fill the empty cells...</source>
     <message>
         <location filename="../pluginManager/ui/ccPluginInfoDlg.ui" line="33"/>
         <source>Filter list by plugin name</source>
-        <translation>Фильтр по имени плагина</translation>
+        <translation>Фильтр по имени модуля</translation>
     </message>
     <message>
         <location filename="../pluginManager/ui/ccPluginInfoDlg.ui" line="36"/>
@@ -14592,7 +14608,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../pluginManager/ui/ccPluginInfoDlg.ui" line="162"/>
         <source>Plugins</source>
-        <translation>Плагины</translation>
+        <translation>Модули</translation>
     </message>
     <message>
         <location filename="../pluginManager/ui/ccPluginInfoDlg.ui" line="175"/>
@@ -14617,22 +14633,22 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../pluginManager/ui/ccPluginInfoDlg.ui" line="320"/>
         <source>CloudCompare looks for plugins in the following directories:</source>
-        <translation>CloudCompare ищет плагины в следующих каталогах:</translation>
+        <translation>CloudCompare ищет модули в следующих каталогах:</translation>
     </message>
     <message>
         <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="115"/>
         <source>About Plugins</source>
-        <translation>О плагинах</translation>
+        <translation>О модулях</translation>
     </message>
     <message>
         <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="117"/>
         <source>Enabling/disabling plugins will take effect next time you run %1</source>
-        <translation>Включение/выключение плагинов будет доступно при следующем запуске %1</translation>
+        <translation>Включение/выключение модулей будет доступно при следующем запуске %1</translation>
     </message>
     <message>
         <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="165"/>
         <source>%1 Plugin</source>
-        <translation>%1 плагин</translation>
+        <translation>%1 модуль</translation>
     </message>
     <message>
         <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="169"/>
@@ -14647,7 +14663,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="254"/>
         <source>(No plugin selected)</source>
-        <translation>(Плагин не выбран)</translation>
+        <translation>(Модуль не выбран)</translation>
     </message>
     <message>
         <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="291"/>
@@ -14672,7 +14688,7 @@ p, li { white-space: pre-wrap; }
         <location filename="../pluginManager/ccPluginUIManager.cpp" line="319"/>
         <location filename="../pluginManager/ccPluginUIManager.cpp" line="355"/>
         <source>Plugins</source>
-        <translation>Плагины</translation>
+        <translation>Модули</translation>
     </message>
     <message>
         <location filename="../pluginManager/ccPluginUIManager.cpp" line="312"/>
@@ -15018,7 +15034,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="713"/>
         <source>Dip / Dip dir. (integer)</source>
-        <translation type="unfinished"></translation>
+        <translation>Падение/Азим.(целое)</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="714"/>
@@ -15605,7 +15621,7 @@ Number of points: %2</source>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/ui/compassDlg.ui" line="288"/>
         <source>Exit ccCompass plugin. Thanks for visiting :)</source>
-        <translation>Покинуть плагин ccCompass. Благодарим за визит :)</translation>
+        <translation>Покинуть модуль ccCompass. Благодарим за визит :)</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/ui/compassDlg.ui" line="295"/>

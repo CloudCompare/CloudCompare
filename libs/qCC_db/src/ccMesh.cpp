@@ -1795,7 +1795,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 		else
 		{
-			glFunc->glColor4fv(context.defaultMat->getDiffuseFront().rgba);
+			ccGL::Color4v(glFunc, context.defaultMat->getDiffuseFront().rgba);
 		}
 
 		if (glParams.showNorms)

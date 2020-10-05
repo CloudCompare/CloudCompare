@@ -223,12 +223,26 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 			else if (tokens.front() == "d")
 			{
 				if (tokens.size() > 1)
-					currentMaterial->setTransparency(tokens[1].toFloat());
+				{
+					float d = tokens[1].toFloat();
+					if (d == 0)
+					{
+						ccLog::Warning(QString("Material %1 'alpha' (=d) value is 0 (= fully transparent)").arg(currentMaterial->getName()));
+					}
+					currentMaterial->setTransparency(d);
+				}
 			}
 			else if (tokens.front() == "Tr")
 			{
 				if (tokens.size() > 1)
+				{
+					float tr = tokens[1].toFloat();
+					if (tr == 1.0f)
+					{
+						ccLog::Warning(QString("Material %1 'transparency' (=Tr) value is 1 (= fully transparent)").arg(currentMaterial->getName()));
+					}
 					currentMaterial->setTransparency(1.0f - tokens[1].toFloat());
+				}
 			}
 			//reflection
 			else if (tokens.front() == "r")

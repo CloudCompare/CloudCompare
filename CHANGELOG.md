@@ -23,6 +23,8 @@ v2.12 (???) - (in development)
 - Bug fixes
 	- qBroom: the broom was not working properly on a non horizontal surface!
 	- qM3C2: M3C2 dialog parameters were not properly restored in command line mode
+	- Command line:
+		- using the "-FBX" option would lead to an infinite loop
 
 v2.11.3 (Anoia) - 08/09/2020
 ----------------------

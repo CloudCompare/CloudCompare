@@ -101,7 +101,48 @@ void QVideoEncoder::freeFrame()
 	}
 }
 
-bool QVideoEncoder::open(QString* errorString/*=0*/)
+bool QVideoEncoder::GetSupportedOutputFormats(std::vector<OutputFormat>& formats, bool ignoreIfNoFileExtension/*=true*/)
+{
+	try
+	{
+		// list of all output formats
+		AVOutputFormat* prev = nullptr;
+		while (true)
+		{
+			AVOutputFormat* format = av_oformat_next(prev);
+			if (format)
+			{
+				//potentially skip the output formats without any extension (= test formats mostly)
+				if (	format->video_codec != AV_CODEC_ID_NONE
+					&&	(!ignoreIfNoFileExtension || (format->extensions && format->extensions[0] != 0))
+					)
+				{
+					OutputFormat f;
+					{
+						f.shortName = format->name;
+						f.longName = format->long_name;
+						f.extensions = format->extensions;
+					}
+					formats.push_back(f);
+				}
+				prev = format;
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
+	catch (const std::bad_alloc&)
+	{
+		//not enough memory
+		return false;
+	}
+
+	return true;
+}
+
+bool QVideoEncoder::open(QString formatShortName, QStringList& errors)
 {
 	if (m_isOpen)
 	{
@@ -111,23 +152,38 @@ bool QVideoEncoder::open(QString* errorString/*=0*/)
 
 	if (!isSizeValid())
 	{
-		if (errorString)
-			*errorString = "Invalid video size";
+		errors << "Invalid video size";
 		return false;
 	}
 
+	AVOutputFormat* outputFormat = NULL;
+	if (!formatShortName.isEmpty())
+	{
+		outputFormat = av_guess_format(qPrintable(formatShortName), NULL, NULL);
+		if (!outputFormat)
+		{
+			errors << "Could not find output format from short name: " + formatShortName;
+		}
+	}
+
 	// find the output format
-	avformat_alloc_output_context2(&m_ff->formatContext, NULL, NULL, qPrintable(m_filename));
+	avformat_alloc_output_context2(&m_ff->formatContext, outputFormat, NULL, outputFormat ? qPrintable(m_filename) : NULL);
 	if (!m_ff->formatContext)
 	{
-		if (errorString)
-			*errorString = "Could not deduce output format from file extension: using MPEG";
-		
-		avformat_alloc_output_context2(&m_ff->formatContext, NULL, "mpeg", qPrintable(m_filename));
-		if (!m_ff->formatContext)
+		if (!outputFormat)
 		{
-			if (errorString)
-				*errorString = "Codec not found";
+			errors << "Could not deduce output format from file extension: using MPEG";
+
+			avformat_alloc_output_context2(&m_ff->formatContext, NULL, "mpeg", qPrintable(m_filename));
+			if (!m_ff->formatContext)
+			{
+				errors << "Codec not found";
+				return false;
+			}
+		}
+		else
+		{
+			errors << "Failed to initialize the output context with the specified output format: " + formatShortName;
 			return false;
 		}
 	}
@@ -139,8 +195,7 @@ bool QVideoEncoder::open(QString* errorString/*=0*/)
 	AVCodec *pCodec = avcodec_find_encoder(codec_id);
 	if (!pCodec)
 	{
-		if (errorString)
-			*errorString = "Could not load the codec";
+		errors << "Could not load the codec";
 		return false;
 	}
 	m_ff->codecContext = avcodec_alloc_context3(pCodec);
@@ -183,8 +238,7 @@ bool QVideoEncoder::open(QString* errorString/*=0*/)
 	m_ff->videoStream = avformat_new_stream(m_ff->formatContext, pCodec);
 	if (!m_ff->videoStream )
 	{
-		if (errorString)
-			*errorString = "Failed to allocate the output stream";
+		errors << "Failed to allocate the output stream";
 		return false;
 	}
 	m_ff->videoStream->id = m_ff->formatContext->nb_streams-1;
@@ -197,23 +251,20 @@ bool QVideoEncoder::open(QString* errorString/*=0*/)
 	// open the codec
 	if (avcodec_open2(m_ff->codecContext, pCodec, 0) < 0)
 	{
-		if (errorString)
-			*errorString = "Could not open the codec";
+		errors << "Could not open the codec";
 		return false;
 	}
 
 	// Allocate the YUV frame
 	if (!initFrame())
 	{
-		if (errorString)
-			*errorString = "Could not init the internal frame";
+		errors << "Could not init the internal frame";
 		return false;
 	}
 
 	if (avio_open(&m_ff->formatContext->pb, qPrintable(m_filename), AVIO_FLAG_WRITE) < 0)
 	{
-		if (errorString)
-			*errorString = QString("Could not open '%1'").arg(m_filename);
+		errors << QString("Could not open '%1'").arg(m_filename);
 		return false;
 	}
 
@@ -221,8 +272,7 @@ bool QVideoEncoder::open(QString* errorString/*=0*/)
 	
 	if ( err != 0 )
 	{
-		if (errorString)
-			*errorString = QString("Could not write header for '%1'").arg(m_filename);
+		errors << QString("Could not write header for '%1'").arg(m_filename);
 		return false;
 	}
 

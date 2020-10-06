@@ -5195,6 +5195,13 @@ void ccGLWindow::setPointSize(float size, bool silent/*=false*/)
 
 void ccGLWindow::setLineWidth(float width, bool silent/*=false*/)
 {
+	if (!silent)
+	{
+		if (width < MIN_LINE_WIDTH_F)
+			ccLog::Warning(QString("Line width is too small: %1/%2").arg(width).arg(MIN_LINE_WIDTH_F));
+		else if (width > MAX_LINE_WIDTH_F)
+			ccLog::Warning(QString("Line width is too big: %1/%2").arg(width).arg(MAX_LINE_WIDTH_F));
+	}
 	float newWidth = std::max(std::min(width, MAX_LINE_WIDTH_F), MIN_LINE_WIDTH_F);
 	
 	if (m_viewportParams.defaultLineWidth != newWidth)
@@ -5208,16 +5215,6 @@ void ccGLWindow::setLineWidth(float width, bool silent/*=false*/)
 				false,
 				2,
 				SCREEN_SIZE_MESSAGE); //DGM HACK: we cheat and use the same 'slot' as the window size
-		}
-	}
-	else
-	{
-		if (!silent)
-		{
-			if (width < MIN_LINE_WIDTH_F)
-				ccLog::Print(QString("Defaut line width is already at minimum : %1").arg(MIN_LINE_WIDTH_F));
-			else
-				ccLog::Print(QString("Defaut line width is already at maximum : %1").arg(MAX_LINE_WIDTH_F));
 		}
 	}
 }

@@ -12,6 +12,7 @@ v2.12 (???) - (in development)
 		- planes fitted with the 'Plane tool' should now always have the normal pointing towards the user instead of a random orientation
 	- qAnimation:
 		- option to smooth the trajectory
+		- option to choose the video output codec/format
 	- ATI cards:
 		- the display should now be faster with ATI cards thanks to a smarter way to manage (2D text) textures
 

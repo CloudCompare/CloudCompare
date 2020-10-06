@@ -65,6 +65,7 @@ qAnimationDlg::qAnimationDlg(ccGLWindow* view3d, QWidget* parent)
 	setupUi(this);
 
 	//restore previous settings
+	QString defaultOutputFormat;
 	{
 		QSettings settings;
 		settings.beginGroup("qAnimation");
@@ -96,6 +97,7 @@ qAnimationDlg::qAnimationDlg(ccGLWindow* view3d, QWidget* parent)
 			bool autoStepDuration = settings.value("autoStepDuration", autoStepDurationCheckBox->isChecked()).toBool();
 			bool smoothTrajectory = settings.value("smoothTrajectory", smoothTrajectoryGroupBox->isChecked()).toBool();
 			double smoothRatio = settings.value("smoothRatio", smoothRatioDoubleSpinBox->value()).toDouble();
+			defaultOutputFormat = settings.value("outputFormat").toString();
 
 			previewFromSelectedCheckBox->setChecked(startPreviewFromSelectedStep);
 			loopCheckBox->setChecked(loop);
@@ -109,6 +111,35 @@ qAnimationDlg::qAnimationDlg(ccGLWindow* view3d, QWidget* parent)
 		}
 		
 		settings.endGroup();
+	}
+
+	//populate the output format combo-box
+	{
+		outputFormatComboBox->addItem("Auto", QVariant(QString()));
+#ifdef QFFMPEG_SUPPORT
+		std::vector<QVideoEncoder::OutputFormat> formats;
+		if (QVideoEncoder::GetSupportedOutputFormats(formats, true))
+		{
+			int defaultIndex = 0;
+			for (const QVideoEncoder::OutputFormat& f : formats)
+			{
+				QString title = f.longName;
+				if (!f.extensions.isEmpty())
+				{
+					title += "[" + f.extensions + "]";
+					static const int s_maxTitleLength = 48;
+					if (title.size() > s_maxTitleLength)
+						title = title.left(s_maxTitleLength - 3) + "...";
+				}
+				outputFormatComboBox->addItem(title, QVariant(f.shortName));
+				if (defaultIndex == 0 && !defaultOutputFormat.isEmpty() && defaultOutputFormat == f.shortName)
+				{
+					defaultIndex = outputFormatComboBox->count() - 1;
+				}
+			}
+			outputFormatComboBox->setCurrentIndex(defaultIndex);
+		}
+#endif
 	}
 
 	connect ( autoStepDurationCheckBox,	&QAbstractButton::toggled,		this, &qAnimationDlg::onAutoStepsDurationToggled );
@@ -240,6 +271,7 @@ void qAnimationDlg::onAccept()
 		settings.setValue("autoStepDuration", autoStepDurationCheckBox->isChecked());
 		settings.setValue("smoothTrajectory", smoothTrajectoryGroupBox->isChecked());
 		settings.setValue("smoothRatio", smoothRatioDoubleSpinBox->value());
+		settings.setValue("outputFormat", outputFormatComboBox->currentData().toString());
 
 		settings.endGroup();
 	}
@@ -1198,11 +1230,19 @@ void qAnimationDlg::render(bool asSeparateFrames)
 		{
 			animScale = superRes;
 		}
+
 		encoder.reset(new QVideoEncoder(outputFilename, m_view3d->glWidth() * animScale, m_view3d->glHeight() * animScale, bitrate, gop, static_cast<unsigned>(fpsSpinBox->value())));
-		QString errorString;
-		if (!encoder->open(&errorString))
+		QStringList errors;
+		QString outputFormat = outputFormatComboBox->currentData().toString();
+		bool success = encoder->open(outputFormat, errors);
+		for (QString e : errors)
 		{
-			QMessageBox::critical(this, "Error", QString("Failed to open file for output: %1").arg(errorString));
+			ccLog::Warning(e);
+		}
+
+		if (!success)
+		{
+			QMessageBox::critical(this, "Error", QString("Failed to open file for output: %1").arg(errors.back())); //display the last error message
 			setEnabled(true);
 			return;
 		}

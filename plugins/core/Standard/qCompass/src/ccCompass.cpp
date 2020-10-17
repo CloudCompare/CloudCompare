@@ -15,18 +15,22 @@
 //#                                                                        #
 //##########################################################################
 
-#include <array>
-#include <random>
-
 //Qt
 #include <QCheckBox>
 #include <QDoubleValidator>
 #include <QFileDialog>
 
+//CCCoreLib
+#include <Neighbourhood.h>
+
+//system
+#include <array>
+#include <random>
+
 //common
 #include <ccPickingHub.h>
+#include <ccBox.h>
 
-#include "ccBox.h"
 #include "ccCompass.h"
 #include "ccCompassDlg.h"
 #include "ccCompassExport.h"

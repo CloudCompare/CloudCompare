@@ -88,6 +88,11 @@ function( target_link_GDAL ) # ARGV0 = project name
 		#message( STATUS ${GDAL_DEP_DLL_FILES} )
 		copy_files("${GDAL_DLL_FILES}" "${CLOUDCOMPARE_DEST_FOLDER}" ) #mind the quotes!
 		copy_files("${GDAL_DEP_DLL_FILES}" "${CLOUDCOMPARE_DEST_FOLDER}" ) #mind the quotes!
+		
+		if (${OPTION_BUILD_CCVIEWER})
+			copy_files("${GDAL_DLL_FILES}" "${CCVIEWER_DEST_FOLDER}" ) #mind the quotes!
+			copy_files("${GDAL_DEP_DLL_FILES}" "${CCVIEWER_DEST_FOLDER}" ) #mind the quotes!
+		endif()
 
 	endif()
 endfunction()

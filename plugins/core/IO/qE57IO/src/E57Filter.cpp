@@ -728,7 +728,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 		/// We are using the E57 v1.0 data format standard fieldnames.
 		/// The standard fieldnames are used without an extension prefix (in the default namespace).
 		/// We explicitly register it for completeness (the reference implementaion would do it for us, if we didn't).
-		imf.extensionsAdd("", E57_V1_0_URI);
+		imf.extensionsAdd("", e57::E57_V1_0_URI);
 
 		// Set per-file properties.
 		/// Path names: "/formatName", "/majorVersion", "/minorVersion", "/coordinateMetadata"

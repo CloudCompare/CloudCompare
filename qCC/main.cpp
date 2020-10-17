@@ -125,7 +125,7 @@ int main(int argc, char **argv)
 		//translation file selection
 		if (QString(argv[lastArgumentIndex]).toUpper() == "-LANG")
 		{
-			QString langFilename = QString(argv[2]);
+			QString langFilename = QString::fromLocal8Bit(argv[2]);
 
 			//Load translation file
 			if (translator.load(langFilename, QCoreApplication::applicationDirPath()))
@@ -208,7 +208,7 @@ int main(int argc, char **argv)
 			QStringList filenames;
 			for (int i = lastArgumentIndex; i < argc; ++i)
 			{
-				QString arg(argv[i]);
+				QString arg = QString::fromLocal8Bit(argv[i]);
 				//special command: auto start a plugin
 				if (arg.startsWith(":start-plugin:"))
 				{

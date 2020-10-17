@@ -57,7 +57,7 @@ bool ccCommandLineParser::error(const QString& message) const
 
 int ccCommandLineParser::Parse(int nargs, char** args, ccPluginInterfaceList& plugins)
 {
-	if (!args || nargs < 2)
+	if (args == nullptr || nargs < 2)
 	{
 		assert(false);
 		return EXIT_SUCCESS;
@@ -70,7 +70,7 @@ int ccCommandLineParser::Parse(int nargs, char** args, ccPluginInterfaceList& pl
 	
 	for (int i = 1; i < nargs; ++i) //'i=1' because first argument is always program executable file!
 	{
-		parser->arguments().push_back(QString(args[i]));
+		parser->arguments().push_back(QString::fromLocal8Bit(args[i]));
 	}
 	
 	assert(!parser->arguments().empty());

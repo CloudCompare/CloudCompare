@@ -99,5 +99,5 @@ G. Minecraft Terra++
 qCSF plugin
 -----------
 
-The provided plugin is a modified version of the qCSF plugin made to work in the command mode. If you wish to learn more go [here](https://github.com/DavixDevelop/TerraLidar/tree/master/plugins).
+The provided plugin is a modified version of the qCSF plugin made to work in the command mode. If you wish to learn more go [here](https://github.com/DavixDevelop/TerraLidar/tree/master/qCSF).
 

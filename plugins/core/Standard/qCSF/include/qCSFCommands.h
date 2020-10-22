@@ -60,7 +60,8 @@ struct CommandCSF : public ccCommandLineInterface::Command
 	{
 		cmd.print("[CSF]");
 
-		if (cmd.clouds().size() < 1) {
+		if (cmd.clouds().size() < 1) 
+		{
 			cmd.error("No cloud loaded (1 is expected)");
 			return false;
 		}
@@ -70,19 +71,19 @@ struct CommandCSF : public ccCommandLineInterface::Command
 		//Convert CC point cloud to CSF type
 		unsigned count = pc->size();
 		wl::PointCloud csfPC;
-		try {
+		try 
+		{
 			csfPC.reserve(count);
 		}
-		catch (const std::bad_alloc&) {
+		catch (const std::bad_alloc&) 
+		{
 			return cmd.error("Not enough memory!");
 		}
 
-		for (unsigned i = 0; i < count; i++) {
+		for (unsigned i = 0; i < count; i++) 
+		{
 			const CCVector3* P = pc->getPoint(i);
 			wl::Point tmpPoint;
-			//tmpPoint.x = P->x;
-			//tmpPoint.y = P->y;
-			//tmpPoint.z = P->z;
 			tmpPoint.x = P->x;
 			tmpPoint.y = -P->z;
 			tmpPoint.z = P->y;
@@ -90,82 +91,92 @@ struct CommandCSF : public ccCommandLineInterface::Command
 		}
 
 		//initial parameters
-		static bool csf_postprocessing = false;
-		static double cloth_resolution = 2;
-		static double class_threshold = 0.5;
-		static int csf_rigidness = 2;
-		static int MaxIteration = 500;
-		static bool ExportClothMesh = false;
-		static bool ExportGround = false;
-		static bool ExportOffground = false;
+		bool csfPostprocessing = false;
+		double clothResolution = 2;
+		double classThreshold = 0.5;
+		int csfRigidness = 2;
+		int maxIteration = 500;
+		bool exportGround = false;
+		bool exportOffground = false;
 
 		while (!cmd.arguments().empty())
 		{
-			const QString& arg = cmd.arguments().front();
-			if (ccCommandLineInterface::IsCommand(arg, COMMAND_CSF_SCENE)) {
+			const QString& ARGUMENT = cmd.arguments().front();
+			if (ccCommandLineInterface::IsCommand(ARGUMENT, COMMAND_CSF_SCENE))
+			{
 				cmd.arguments().pop_front();
 				bool conv = false;
 				QString scene = cmd.arguments().takeFirst();
-				if (scene == COMMAND_CSF_SCENE_SLOPE) {
+				if (scene == COMMAND_CSF_SCENE_SLOPE)
+				{
 					cmd.print("Set scene to steep slope");
-					csf_rigidness = 1;
+					csfRigidness = 1;
 				}
-				else if (scene == COMMAND_CSF_SCENE_RELIEF) {
+				else if (scene == COMMAND_CSF_SCENE_RELIEF)
+				{
 					cmd.print("Set scene to relief");
-					csf_rigidness = 2;
+					csfRigidness = 2;
 				}
-				else if (scene == COMMAND_CSF_SCENE_FLAT) {
+				else if (scene == COMMAND_CSF_SCENE_FLAT)
+				{
 					cmd.print("Set scene to flat");
-					csf_rigidness = 3;
+					csfRigidness = 3;
 				}
-				else {
+				else
+				{
 					cmd.error("Unknown scene parameter. Defaulting to relief");
-					csf_rigidness = 2;
+					csfRigidness = 2;
 				}
-			}else if (ccCommandLineInterface::IsCommand(arg, COMMAND_CSF_PROC_SLOPE)) 
+			}else if (ccCommandLineInterface::IsCommand(ARGUMENT, COMMAND_CSF_PROC_SLOPE)) 
 			{
 				cmd.arguments().pop_front();
 				cmd.print("Slope processing turned on");
-				csf_postprocessing = true;
+				csfPostprocessing = true;
 			}
-			else if (ccCommandLineInterface::IsCommand(arg, COMMAND_CSF_CLOTH_RESOLUTION)) {
+			else if (ccCommandLineInterface::IsCommand(ARGUMENT, COMMAND_CSF_CLOTH_RESOLUTION))
+			{
 				cmd.arguments().pop_front();
 				bool conv = false;
-				cloth_resolution = cmd.arguments().takeFirst().toDouble(&conv);
-				if (!conv) {
+				clothResolution = cmd.arguments().takeFirst().toDouble(&conv);
+				if (!conv)
+				{
 					return cmd.error(QObject::tr("Invalid parameter: value after \"-%1\"").arg(COMMAND_CSF_CLOTH_RESOLUTION));
 				}
-				cmd.print(QString("Custom cloth resulution set: %1").arg(cloth_resolution));
+				cmd.print(QString("Custom cloth resulution set: %1").arg(clothResolution));
 			}
-			else if (ccCommandLineInterface::IsCommand(arg, COMMAND_CSF_MAX_ITERATION)) {
+			else if (ccCommandLineInterface::IsCommand(ARGUMENT, COMMAND_CSF_MAX_ITERATION))
+			{
 				cmd.arguments().pop_front();
 				bool conv = false;
-				MaxIteration = cmd.arguments().takeFirst().toInt(&conv);
-				if (!conv) {
+				maxIteration = cmd.arguments().takeFirst().toInt(&conv);
+				if (!conv)
+				{
 					return cmd.error(QObject::tr("Invalid parameter: value after \"-%1\"").arg(COMMAND_CSF_MAX_ITERATION));
 				}
-				cmd.print(QString("Custom max iteration set: %").arg(MaxIteration));
+				cmd.print(QString("Custom max iteration set: %").arg(maxIteration));
 			}
-			else if (ccCommandLineInterface::IsCommand(arg, COMMAND_CSF_CLASS_THRESHOLD)) {
+			else if (ccCommandLineInterface::IsCommand(ARGUMENT, COMMAND_CSF_CLASS_THRESHOLD))
+			{
 				cmd.arguments().pop_front();
 				bool conv = false;
-				class_threshold = cmd.arguments().takeFirst().toDouble(&conv);
-				if (!conv) {
+				classThreshold = cmd.arguments().takeFirst().toDouble(&conv);
+				if (!conv)
+				{
 					return cmd.error(QObject::tr("Invalid parameter: value after \"-%1\"").arg(COMMAND_CSF_CLASS_THRESHOLD));
 				}
-				cmd.print(QString("Custom class threshold set: %1").arg(class_threshold));
+				cmd.print(QString("Custom class threshold set: %1").arg(classThreshold));
 			}
-			else if (ccCommandLineInterface::IsCommand(arg, COMMAND_CSF_EXPORT_GROUND))
+			else if (ccCommandLineInterface::IsCommand(ARGUMENT, COMMAND_CSF_EXPORT_GROUND))
 			{
 				cmd.arguments().pop_front();
 				cmd.print("Ground will be exported");
-				ExportGround = true;
+				exportGround = true;
 			}
-			else if (ccCommandLineInterface::IsCommand(arg, COMMAND_CSF_EXPORT_OFFGROUND))
+			else if (ccCommandLineInterface::IsCommand(ARGUMENT, COMMAND_CSF_EXPORT_OFFGROUND))
 			{
 				cmd.arguments().pop_front();
 				cmd.print("Off-ground will be exported");
-				ExportOffground = true;
+				exportOffground = true;
 			}
 			else
 			{
@@ -179,17 +190,18 @@ struct CommandCSF : public ccCommandLineInterface::Command
 
 		//setup paramter
 		csf.params.k_nearest_points = 1;
-		csf.params.bSloopSmooth = csf_postprocessing;
+		csf.params.bSloopSmooth = csfPostprocessing;
 		csf.params.time_step = 0.65;
-		csf.params.class_threshold = class_threshold;
-		csf.params.cloth_resolution = cloth_resolution;
-		csf.params.rigidness = csf_rigidness;
-		csf.params.iterations = MaxIteration;
+		csf.params.class_threshold = classThreshold;
+		csf.params.cloth_resolution = clothResolution;
+		csf.params.rigidness = csfRigidness;
+		csf.params.iterations = maxIteration;
 
 		std::vector<int> groundIndexes;
 		std::vector<int> offGroundIndexes;
 		ccMesh* clothMesh = nullptr;
-		if (!csf.do_filtering(groundIndexes, offGroundIndexes, ExportClothMesh, clothMesh, nullptr, cmd.widgetParent())) {
+		if (!csf.do_filtering(groundIndexes, offGroundIndexes, false, clothMesh, nullptr, cmd.widgetParent()))
+		{
 			return cmd.error("Process failed");
 		}
 
@@ -225,9 +237,10 @@ struct CommandCSF : public ccCommandLineInterface::Command
 				offgroundpoint = pc->partialClone(&offgroundpc);
 			}
 		}
-		if (!offgroundpoint) {
+		if (!offgroundpoint)
+		{
 			cmd.print("Failed to extract the off-ground subset (not enough memory)");
-			if (!groundpoint) 
+			if (!groundpoint)
 			{
 				return false;
 			}
@@ -241,7 +254,8 @@ struct CommandCSF : public ccCommandLineInterface::Command
 		{
 			CLCloudDesc groundDesc(groundpoint, baseName + QObject::tr("_ground_points"), -1);//add cloud to the current pool
 			cmd.clouds().push_back(groundDesc);
-			if (ExportGround) {
+			if (exportGround)
+			{
 				QString errorStr = cmd.exportEntity(groundDesc, QString(), nullptr, ccCommandLineInterface::ExportOption::ForceNoTimestamp);
 				if (!errorStr.isEmpty())
 				{
@@ -250,11 +264,12 @@ struct CommandCSF : public ccCommandLineInterface::Command
 			}
 		}
 
-		if (offgroundpoint) 
+		if (offgroundpoint)
 		{
 			CLCloudDesc offgroundDesc(offgroundpoint, baseName + QObject::tr("_offground_points"), -1);
 			cmd.clouds().push_back(offgroundDesc);
-			if (ExportOffground) {
+			if (exportOffground)
+			{
 				QString errorStr = cmd.exportEntity(offgroundDesc, QString(), nullptr, ccCommandLineInterface::ExportOption::ForceNoTimestamp);
 				if (!errorStr.isEmpty())
 				{

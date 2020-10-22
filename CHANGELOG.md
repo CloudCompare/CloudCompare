@@ -15,6 +15,30 @@ v2.12 (???) - (in development)
 		- option to choose the video output codec/format
 	- ATI cards:
 		- the display should now be faster with ATI cards thanks to a smarter way to manage (2D text) textures
+	- qCSF:
+		- added support for command line mode with all available options, except cloth export:
+		<table>
+			<tr>
+				<th>Command</th>
+				<th>Description</th>
+			</tr>
+			<tr>
+				<td><code>-CSF</code></td>
+				<td>
+					<i>Runs the CSF plugin</i>
+					<p>Optional settings are:</p>
+					<ul>
+						<li> -SCENES [scene]: name of the scene (SLOPE|RELIEF|FLAT)</li>
+						<li> -PROC_SLOPE: turn on slope post processing for disconnected terrain</li>
+						<li> -CLOTH_RESOLUTION [value]: double value of cloth resolution (ex 0.5)</li>
+						<li> -MAX_ITERATION [value]: integer value of max iterations (ex. 500)</li>
+						<li> CLASS_THRESHOLD [value]: double value of classification threshold (ex. 0.5)</li>
+						<li> -EXPORT_GROUND: exports the ground as a .bin file</li>
+						<li> -EXPORT_OFFGROUND: exports the off-ground as a .bin file</li>
+					</ul>
+				</td>
+			</tr>
+		</table>
 
 - New plugins
 	- MPlane: perform normal distance measurements against a defined plane (see https://www.cloudcompare.org/doc/wiki/index.php?title=MPlane_(plugin) )

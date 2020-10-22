@@ -204,7 +204,7 @@
     <string>Rectangular selection</string>
    </property>
    <property name="toolTip">
-    <string>Activates rectangular selection</string>
+    <string>Activate rectangular selection</string>
    </property>
   </action>
   <action name="actionSetPolylineSelection">
@@ -216,7 +216,7 @@
     <string>Polygonal selection</string>
    </property>
    <property name="toolTip">
-    <string>Activaites polyline selection</string>
+    <string>Activate polyline selection</string>
    </property>
   </action>
   <action name="actionUseExistingPolyline">

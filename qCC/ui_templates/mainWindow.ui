@@ -39,7 +39,7 @@
      <x>0</x>
      <y>0</y>
      <width>1024</width>
-     <height>31</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -323,6 +323,7 @@
      </property>
      <addaction name="actionSamplePointsOnPolyline"/>
      <addaction name="actionSmoothPolyline"/>
+     <addaction name="actionPolylineToSpline"/>
     </widget>
     <addaction name="menuColors"/>
     <addaction name="menuNormals"/>
@@ -1148,7 +1149,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="shortcut">
     <string>T</string>
-   </property>  
+   </property>
   </action>
   <action name="actionTranslateRotate">
    <property name="checkable">
@@ -2371,7 +2372,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="shortcut">
     <string>X</string>
-   </property>   
+   </property>
   </action>
   <action name="actionEditGlobalShiftAndScale">
    <property name="text">
@@ -2532,7 +2533,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="shortcut">
     <string>E</string>
-   </property>   
+   </property>
   </action>
   <action name="actionInterpolateColors">
    <property name="text">
@@ -3067,6 +3068,11 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionSmoothPolyline">
    <property name="text">
     <string>Smooth</string>
+   </property>
+  </action>
+  <action name="actionPolylineToSpline">
+   <property name="text">
+    <string>To spline</string>
    </property>
   </action>
  </widget>

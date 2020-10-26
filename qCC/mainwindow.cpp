@@ -47,6 +47,7 @@
 #include <ccProgressDialog.h>
 #include <ccQuadric.h>
 #include <ccSphere.h>
+#include <ccSpline.h>
 #include <ccCylinder.h>
 #include <ccSubMesh.h>
 
@@ -551,6 +552,7 @@ void MainWindow::connectActions()
 	//"Edit > Polyline" menu
 	connect(m_UI->actionSamplePointsOnPolyline,		&QAction::triggered, this, &MainWindow::doActionSamplePointsOnPolyline);
 	connect(m_UI->actionSmoothPolyline,				&QAction::triggered, this, &MainWindow::doActionSmoohPolyline);
+	connect(m_UI->actionPolylineToSpline,			&QAction::triggered, this, &MainWindow::doActionPolylineToSpline);
 	
 	//"Edit > Plane" menu
 	connect(m_UI->actionCreatePlane,				&QAction::triggered, this, &MainWindow::doActionCreatePlane);
@@ -2694,6 +2696,39 @@ void MainWindow::doActionSamplePointsOnPolyline()
 	}
 
 	refreshAll();
+}
+
+void MainWindow::doActionPolylineToSpline()
+{
+	for (ccHObject *entity : m_selectedEntities)
+	{
+		if (!entity->isKindOf(CC_TYPES::POLY_LINE))
+			continue;
+
+		ccPolyline* poly = ccHObjectCaster::ToPolyline(entity);
+		assert(poly);
+
+		ccPointCloud* vertices = ccPointCloud::From(poly->getAssociatedCloud());
+		ccSpline* spline = new ccSpline(vertices, 3);
+		spline->addChild(vertices);
+		spline->reserve(poly->size());
+		for (unsigned i = 0; i < poly->size(); ++i)
+		{
+			spline->addPointIndex(poly->getPointGlobalIndex(i));
+		}
+		spline->updateInternalState();
+
+		if (poly->getParent())
+		{
+			poly->getParent()->addChild(spline);
+		}
+		spline->setDisplay_recursive(poly->getDisplay());
+		vertices->setEnabled(false);
+		poly->setEnabled(false);
+		addToDB(spline);
+
+		//m_ccRoot->selectEntity(spline, true);
+	}
 }
 
 void MainWindow::doActionSmoohPolyline()
@@ -10557,6 +10592,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionConvertPolylinesToMesh->setEnabled(atLeastOnePolyline || exactlyOneGroup);
 	m_UI->actionSamplePointsOnPolyline->setEnabled(atLeastOnePolyline);
 	m_UI->actionSmoothPolyline->setEnabled(atLeastOnePolyline);
+	m_UI->actionPolylineToSpline->setEnabled(atLeastOnePolyline);
 
 	m_UI->actionMeshTwoPolylines->setEnabled(selInfo.selCount == 2 && selInfo.polylineCount == 2);
 	m_UI->actionCreateSurfaceBetweenTwoPolylines->setEnabled(m_UI->actionMeshTwoPolylines->isEnabled()); //clone of actionMeshTwoPolylines

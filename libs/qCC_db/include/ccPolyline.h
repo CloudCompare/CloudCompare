@@ -99,7 +99,9 @@ public:
 	{
 		//DGM: only for 3D polylines!
 		if (!is2DMode())
+		{
 			ccShiftedObject::drawBB(context, col);
+		}
 	}
 
 
@@ -179,7 +181,7 @@ public: //meta-data keys
 	**/
 	static QString MetaKeyPrefixDirection()	{ return "profile.direction"; }
 
-protected:
+protected: //methods
 
 	//inherited from ccHObject
 	bool toFile_MeOnly(QFile& out) const override;
@@ -187,6 +189,8 @@ protected:
 
 	//inherited methods (ccHObject)
 	void drawMeOnly(CC_DRAW_CONTEXT& context) override;
+
+protected: //members
 
 	//! Unique RGB color
 	ccColor::Rgb m_rgbColor;

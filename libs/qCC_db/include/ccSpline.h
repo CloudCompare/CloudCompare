@@ -1,5 +1,8 @@
 #pragma once
 
+//Local
+#include "ccPolyline.h"
+
 //CCCoreLib
 #include <CCGeom.h>
 
@@ -7,9 +10,9 @@
 #include <vector>
 
 //! 3D spline curve
-/** Inspired from https://raw.githubusercontent.com/brainexcerpts/Spline
+/** Inspired from https://github.com/brainexcerpts/Spline
 **/
-class ccSpline
+class QCC_DB_LIB_API ccSpline : public ccPolyline
 {
 public:
 
@@ -23,23 +26,25 @@ public:
 		OpenUniform // Connected to the first and last control points
 	};
 
-	//! Constructor
-	/** \param k order of the spline (minimum is two)
+	//! Default constructor
+	/** \param associatedCloud the associated point cloud (i.e. the vertices)
+		\param k order of the spline (minimum is 2)
 		\param nodeType nodal vector type
+		\param uniqueID unique ID (handle with care)
 	**/
-	ccSpline(size_t k = 2, NodeType node_type = OpenUniform);
+	explicit ccSpline(	GenericIndexedCloudPersist* associatedCloud,
+						size_t k = 2,
+						NodeType nodeType = OpenUniform,
+						unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID);
+
+	//! Returns class ID
+	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::SPLINE_LINE; }
 
 	//! Returns the spline order
 	inline size_t getOrder() const { return m_k; }
 
-	//! Returns the set of control points
-	const std::vector<CCVector3>&  getControlPoints() const { return m_points; }
-
-	//! Sets the control points
-	void setControlPoints(const std::vector<CCVector3>& points);
-
 	//! Sets the control weights
-	void setControlWeights(const std::vector<double>& weights);
+	//void setControlWeights(const std::vector<double>& weights);
 
 	//! Sets the nodal vector type
 	bool setNodeType(NodeType type);
@@ -56,7 +61,19 @@ public:
 	**/
 	CCVector3 computeSpeed(double s) const;
 
+	//! Updates the spline based on the current state of the associated cloud / vertices
+	/** Should be called whenever the vertices are changed
+	**/
+	bool updateInternalState();
+
 protected: //methods
+
+	//inherited from ccHObject
+	bool toFile_MeOnly(QFile& out) const override;
+	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+
+	//inherited methods (ccHObject)
+	void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
 	//! Returns whether the spline is valid or not
 	bool isValid() const;
@@ -72,15 +89,15 @@ protected: //methods
 
 	//! Evaluates the equation of a splines using the blossom algorithm
 	/** \param s curvilinear position (between nodes[k-1] and nodes[point.size()])
-		\param points the control points (point.size() >= k)
 		\param k the spline order (degree == k-1)
 		\param nodes the nodal vector which defines the speed of the spline (size must be equal to k + point.size())
+		\param points if not null, the control points (point.size() >= k) - otherwise the polyline vertices are used by default
 		\param off offset to apply to the nodal vector 'nodes' before reading from it. this is useful to compute derivatives.
 	**/
 	CCVector3 eval(	double s,
-					const std::vector<CCVector3>& points,
 					size_t k,
 					const std::vector<double>& nodes,
+					const std::vector<CCVector3>* points = nullptr,
 					size_t off = 0) const;
 
 	CCVector3 eval_rec(	double u,
@@ -91,7 +108,6 @@ protected: //methods
 protected: //attributes
 	NodeType m_nodeType;				//! Nodal vector type
 	size_t m_k;							//! Spline order
-	std::vector<CCVector3> m_points;	//! Control points
 	std::vector<CCVector3> m_deltas;	//! Control points deltas
 	std::vector<double>	m_nodes;		//! Nodal vector
 };

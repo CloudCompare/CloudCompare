@@ -40,6 +40,7 @@
 #include "ccPolyline.h"
 #include "ccQuadric.h"
 #include "ccSphere.h"
+#include "ccSpline.h"
 #include "ccSubMesh.h"
 #include "ccTorus.h"
 
@@ -142,6 +143,9 @@ ccHObject* ccHObject::New(CC_CLASS_ENUM objectType, const char* name/*=0*/)
 	case CC_TYPES::POLY_LINE:
 		//warning: no associated vertices --> retrieved later
 		return new ccPolyline(nullptr);
+	case CC_TYPES::SPLINE_LINE:
+		//warning: no associated vertices --> retrieved later
+		return new ccSpline(nullptr);
 	case CC_TYPES::FACET:
 		return new ccFacet();
 	case CC_TYPES::MATERIAL_SET:

@@ -38,6 +38,7 @@
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
 #include <ccSensor.h>
+#include <ccSpline.h>
 #include <ccSubMesh.h>
 
 //system
@@ -276,6 +277,11 @@ CC_FILE_ERROR BinFilter::SaveFileV2(QFile& out, ccHObject* object)
 				dependencies.insert(pc);
 			else
 				ccLog::Warning(QString("[BIN] Poyline '%1' is associated to an unhandled vertices structure?!").arg(currentObject->getName()));
+
+			if (currentObject->isA(CC_TYPES::SPLINE_LINE))
+			{
+				static_cast<ccSpline*>(currentObject)->updateInternalState();
+			}
 		}
 		else if (currentObject->isKindOf(CC_TYPES::SENSOR))
 		{
@@ -780,6 +786,11 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 			if (cloud)
 			{
 				poly->setAssociatedCloud(ccHObjectCaster::ToGenericPointCloud(cloud));
+
+				if (currentObject->isA(CC_TYPES::SPLINE_LINE))
+				{
+					static_cast<ccSpline*>(currentObject)->updateInternalState();
+				}
 			}
 			else
 			{

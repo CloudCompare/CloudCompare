@@ -18,6 +18,29 @@ ccSpline::ccSpline(	GenericIndexedCloudPersist* associatedCloud,
 	}
 }
 
+ccSpline::ccSpline(	const ccPolyline& poly,
+					size_t k/*=2*/,
+					NodeType nodeType/*=OpenUniform*/)
+	: ccPolyline(poly)
+	, m_nodeType(nodeType)
+	, m_k(k)
+{
+	if (size() >= 2)
+	{
+		updateInternalState();
+	}
+}
+
+ccSpline::ccSpline(const ccSpline& spline)
+	: ccPolyline(spline)
+	, m_nodeType(spline.m_nodeType)
+	, m_k(spline.m_k)
+	, m_deltas(spline.m_deltas)
+	, m_nodes(spline.m_nodes)
+{
+}
+
+
 bool ccSpline::updateInternalState()
 {
 	m_deltas.clear();

@@ -37,14 +37,23 @@ public:
 						NodeType nodeType = OpenUniform,
 						unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID);
 
+	//! Constructor from a polyline
+	/** \param poly polyline to 'clone'
+	**/
+	ccSpline(	const ccPolyline& poly,
+				size_t k = 2,
+				NodeType nodeType = OpenUniform	);
+
+	//! Copy constructor
+	/** \param spline spline to clone
+	**/
+	ccSpline(const ccSpline& spline);
+
 	//! Returns class ID
 	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::SPLINE_LINE; }
 
 	//! Returns the spline order
 	inline size_t getOrder() const { return m_k; }
-
-	//! Sets the control weights
-	//void setControlWeights(const std::vector<double>& weights);
 
 	//! Sets the nodal vector type
 	bool setNodeType(NodeType type);
@@ -65,6 +74,12 @@ public:
 	/** Should be called whenever the vertices are changed
 	**/
 	bool updateInternalState();
+
+	//! The splines nodes
+	std::vector<double>& nodes() { return m_nodes; }
+
+	//! The splines nodes (const version)
+	const std::vector<double>& nodes() const { return m_nodes; }
 
 protected: //methods
 

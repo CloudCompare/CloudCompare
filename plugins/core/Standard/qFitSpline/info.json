@@ -1,0 +1,19 @@
+{
+    "type" : "Standard",
+	"core" : true,
+    "name" : "Fit Spline",
+    "icon" : ":/CC/plugin/qFitSpline/images/fitSpline.png",
+    "description": "Fits a spline (already created) to a point cloud.",
+    "authors" : [
+        {
+            "name" : "Daniel Girardeau-Montaut",
+            "email" : "daniel.girardeau@gmail.com"
+        }
+    ],
+    "maintainers" : [
+        {
+            "name" : "Daniel Girardeau-Montaut",
+            "email" : "daniel.girardeau@gmail.com"
+        }
+    ]
+}

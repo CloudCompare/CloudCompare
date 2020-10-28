@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/CC/plugin/qFitSpline" >
+        <file>images/fitSpline.png</file>
+        <file>info.json</file>
+    </qresource>
+</RCC>

@@ -292,7 +292,14 @@ template<int NX = Eigen::Dynamic, int NY = Eigen::Dynamic> struct LMFunctor
 		return m_values;
 	}
 
-	virtual void initX(Eigen::VectorXd& x) = 0;
+	virtual void initX(Eigen::VectorXd& x)
+	{
+		for (int i = 0; i < x.size(); ++i)
+		{
+			x(i) = 0.0;
+		}
+	}
+
 	virtual void updateSpline(ccSpline& spline, const Eigen::VectorXd& x) const = 0;
 
 	int m_inputs; //!< Number of inputs
@@ -322,38 +329,7 @@ struct FitSplineLMFunctor : LMFunctor<>
 
 	int operator()(const Eigen::VectorXd& p_x, Eigen::VectorXd& p_fvec) const
 	{
-		size_t nodeCount = m_localSpline.nodes().size();
-		size_t vertexCount = m_localSpline.size();
-		assert(nodeCount + 3 * vertexCount == p_x.size());
-
-		//load the new nodal parameters
-		for (size_t i = 0; i < nodeCount; ++i)
-		{
-			double nodeVal = p_x(i);
-			//consistency check
-			if (nodeVal < 0.0)
-			{
-				nodeVal = 0.0;
-			}
-			else if (nodeVal > 1.0)
-			{
-				nodeVal = 1.0;;
-			}
-			if (i != 0 && nodeVal < m_localSpline.nodes()[i - 1])
-			{
-				nodeVal = m_localSpline.nodes()[i - 1];
-			}
-			m_localSpline.nodes()[i] = nodeVal;
-		}
-		//load the vertices positions
-		size_t j = nodeCount;
-		for (size_t i = 0; i < vertexCount; ++i)
-		{
-			CCVector3* P = const_cast<CCVector3*>(m_localSpline.getPoint(static_cast<unsigned>(i)));
-			P->x = p_x(j++);
-			P->y = p_x(j++);
-			P->z = p_x(j++);
-		}
+		updateSpline(m_localSpline, p_x);
 
 		size_t pointCount = m_cloud.size();
 		assert(pointCount == p_fvec.size());
@@ -386,46 +362,40 @@ struct FitSplineLMFunctor : LMFunctor<>
 		return 0;
 	}
 
-	void initX(Eigen::VectorXd& x) override
-	{
-		size_t nodeCount = m_spline.nodes().size();
-		//load the new nodal parameters
-		for (size_t i = 0; i < nodeCount; ++i)
-		{
-			x(i) = m_spline.nodes()[i];
-		}
-		//load the vertices positions
-		size_t j = nodeCount;
-		size_t vertexCount = m_spline.size();
-		for (size_t i = 0; i < vertexCount; ++i)
-		{
-			const CCVector3* P = m_spline.getPoint(static_cast<unsigned>(i));
-			x(j++) = P->x;
-			x(j++) = P->y;
-			x(j++) = P->z;
-		}
-	}
-
 	void updateSpline(ccSpline& spline, const Eigen::VectorXd& x) const override
 	{
 		size_t nodeCount = m_spline.nodes().size();
 		size_t vertexCount = spline.size();
-
 		assert(nodeCount + 3 * vertexCount == x.size());
 
 		//load the new nodal parameters
 		for (size_t i = 0; i < nodeCount; ++i)
 		{
-			spline.nodes()[i] = x(i);
+			double nodeVal = m_spline.nodes()[i] + x(i) / 1.0;
+			//consistency check
+			//if (nodeVal < 0.0)
+			//{
+			//	nodeVal = 0.0;
+			//}
+			//else if (nodeVal > 1.0)
+			//{
+			//	nodeVal = 1.0;
+			//}
+			if (i != 0 && nodeVal < spline.nodes()[i - 1])
+			{
+				nodeVal = spline.nodes()[i - 1];
+			}
+			spline.nodes()[i] = nodeVal;
 		}
 		//load the vertices positions
 		size_t j = nodeCount;
 		for (size_t i = 0; i < vertexCount; ++i)
 		{
+			const CCVector3* Po = m_spline.getPoint(static_cast<unsigned>(i));
 			CCVector3* P = const_cast<CCVector3*>(spline.getPoint(static_cast<unsigned>(i)));
-			P->x = x(j++);
-			P->y = x(j++);
-			P->z = x(j++);
+			P->x = Po->x + x(j++);
+			P->y = Po->y + x(j++);
+			P->z = Po->z + x(j++);
 		}
 	}
 
@@ -460,20 +430,7 @@ struct FitSplineLMFunctorPos3D : LMFunctor<>
 
 	int operator()(const Eigen::VectorXd& p_x, Eigen::VectorXd& p_fvec) const
 	{
-		size_t vertexCount = m_localSpline.size();
-		assert(3 * vertexCount == p_x.size());
-		size_t pointCount = m_cloud.size();
-		assert(pointCount == p_fvec.size());
-
-		//load the vertices positions
-		size_t j = 0;
-		for (size_t i = 0; i < vertexCount; ++i)
-		{
-			CCVector3* P = const_cast<CCVector3*>(m_localSpline.getPoint(static_cast<unsigned>(i)));
-			P->x = p_x(j++);
-			P->y = p_x(j++);
-			P->z = p_x(j++);
-		}
+		updateSpline(m_localSpline, p_x);
 
 		double rms;
 		if (false == ComputeDistances(m_cloud,
@@ -485,6 +442,9 @@ struct FitSplineLMFunctorPos3D : LMFunctor<>
 		{
 			return -1;
 		}
+
+		size_t pointCount = m_cloud.size();
+		assert(pointCount == p_fvec.size());
 
 		for (size_t i = 0; i < pointCount; ++i)
 		{
@@ -503,34 +463,20 @@ struct FitSplineLMFunctorPos3D : LMFunctor<>
 		return 0;
 	}
 
-	void initX(Eigen::VectorXd& x) override
-	{
-		//load the vertices positions
-		size_t j = 0;
-		size_t vertexCount = m_spline.size();
-		for (size_t i = 0; i < vertexCount; ++i)
-		{
-			const CCVector3* P = m_spline.getPoint(static_cast<unsigned>(i));
-			x(j++) = P->x;
-			x(j++) = P->y;
-			x(j++) = P->z;
-		}
-	}
-
 	void updateSpline(ccSpline& spline, const Eigen::VectorXd& x) const override
 	{
 		size_t vertexCount = spline.size();
-
 		assert(3 * vertexCount == x.size());
 
 		//load the vertices positions
 		size_t j = 0;
 		for (size_t i = 0; i < vertexCount; ++i)
 		{
+			const CCVector3* Po = m_spline.getPoint(static_cast<unsigned>(i));
 			CCVector3* P = const_cast<CCVector3*>(spline.getPoint(static_cast<unsigned>(i)));
-			P->x = x(j++);
-			P->y = x(j++);
-			P->z = x(j++);
+			P->x = Po->x + x(j++);
+			P->y = Po->y + x(j++);
+			P->z = Po->z + x(j++);
 		}
 	}
 
@@ -661,7 +607,9 @@ void qFitSpline::doAction()
 		}
 	}
 
-	using CurrentLMFunctor = FitSplineLMFunctorPos3D;
+	//using CurrentLMFunctor = FitSplineLMFunctorPos3D;
+	using CurrentLMFunctor = FitSplineLMFunctor;
+
 	//LM routine functor
 	CurrentLMFunctor functor(*spline, *cloud, precision);
 	int inputCount = functor.inputs();

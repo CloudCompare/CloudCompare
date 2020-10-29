@@ -218,7 +218,7 @@ CCVector3 ccSpline::eval(	double s,
 	
 	// TODO: better search with binary search?
 	size_t dec = 0;
-	while (dec + k + off < nodes.size() && s > nodes[dec + k + off])
+	while ((dec + k + off < nodes.size()) && (dec + k < (points ? points->size() : size()) && (s > nodes[dec + k + off])))
 	{
 		++dec;
 	}

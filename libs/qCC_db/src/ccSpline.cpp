@@ -73,21 +73,20 @@ bool ccSpline::updateInternalState()
 	}
 	assert(isValid());
 
-	for (size_t i = 0; i < m_nodes.size(); ++i)
-	{
-		ccLog::Print(QString("Node %1 = %2").arg(i+1).arg(m_nodes[i]));
-	}
-
+	//for (size_t i = 0; i < m_nodes.size(); ++i)
+	//{
+	//	ccLog::Print(QString("Node %1 = %2").arg(i+1).arg(m_nodes[i]));
+	//}
 
 	for (size_t i = 0; i < m_deltas.size(); ++i)
 	{
 		m_deltas[i] = m_deltas[i] / static_cast<PointCoordinateType>(m_nodes[m_k + i] - m_nodes[i + 1]);
 	}
 
-	for (size_t i = 0; i < m_deltas.size(); ++i)
-	{
-		ccLog::Print(QString("Delta %1 = %2").arg(i + 1).arg(m_deltas[i].norm()));
-	}
+	//for (size_t i = 0; i < m_deltas.size(); ++i)
+	//{
+	//	ccLog::Print(QString("Delta %1 = %2").arg(i + 1).arg(m_deltas[i].norm()));
+	//}
 
 	return true;
 }

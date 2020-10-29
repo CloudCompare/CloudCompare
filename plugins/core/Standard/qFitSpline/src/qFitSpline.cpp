@@ -138,8 +138,15 @@ struct RecursiveSearch
 	unsigned depth = 0;
 };
 
-static bool ComputeDistances(const ccPointCloud& cloud, const ccSpline& spline, std::vector<double>& distances, double precision)
+static bool ComputeDistances(	const ccPointCloud& cloud,
+								const ccSpline& spline,
+								std::vector<double>& distances,
+								double& rms,
+								double precision,
+								bool silent = true)
 {
+	rms = std::numeric_limits<double>::quiet_NaN();
+	
 	try
 	{
 		size_t pointCount = cloud.size();
@@ -179,7 +186,7 @@ static bool ComputeDistances(const ccPointCloud& cloud, const ccSpline& spline, 
 		double depthSum = 0.0;
 		unsigned minDepth = 0;
 		unsigned maxDepth = 0;
-		double rms = 0.0;
+		rms = 0.0;
 		for (unsigned iPt = 0; iPt < pointCount; ++iPt)
 		{
 			const CCVector3* P = cloud.getPoint(iPt);
@@ -205,29 +212,35 @@ static bool ComputeDistances(const ccPointCloud& cloud, const ccSpline& spline, 
 
 			distances[iPt] = rs.minDistance;
 
-			if (iPt != 0)
-			{
-				if (rs.depth < minDepth)
-				{
-					minDepth = rs.depth;
-				}
-				else if (rs.depth > maxDepth)
-				{
-					maxDepth = rs.depth;
-				}
-			}
-			else
-			{
-				minDepth = maxDepth = rs.depth;
-			}
-			depthSum += static_cast<double>(rs.depth);
 			rms += rs.minDistance * rs.minDistance;
+			if (!silent)
+			{
+				if (iPt != 0)
+				{
+					if (rs.depth < minDepth)
+					{
+						minDepth = rs.depth;
+					}
+					else if (rs.depth > maxDepth)
+					{
+						maxDepth = rs.depth;
+					}
+				}
+				else
+				{
+					minDepth = maxDepth = rs.depth;
+				}
+				depthSum += static_cast<double>(rs.depth);
+			}
 		}
 
 		rms = sqrt(rms / pointCount);
-		ccLog::Print(QString("[qFitSpline::ComputeDistances] RMS = %1").arg(rms));
-		double avgDepth = depthSum / pointCount;
-		ccLog::Print(QString("[qFitSpline::ComputeDistances] Search depth in [%1 ; %2] (avg = %3)").arg(minDepth).arg(maxDepth).arg(avgDepth));
+		if (!silent)
+		{
+			ccLog::Print(QString("[qFitSpline::ComputeDistances] RMS = %1").arg(rms));
+			double avgDepth = depthSum / pointCount;
+			ccLog::Print(QString("[qFitSpline::ComputeDistances] Search depth in [%1 ; %2] (avg = %3)").arg(minDepth).arg(maxDepth).arg(avgDepth));
+		}
 	}
 	catch (const std::bad_alloc&)
 	{
@@ -279,6 +292,9 @@ template<int NX = Eigen::Dynamic, int NY = Eigen::Dynamic> struct LMFunctor
 		return m_values;
 	}
 
+	virtual void initX(Eigen::VectorXd& x) = 0;
+	virtual void updateSpline(ccSpline& spline, const Eigen::VectorXd& x) const = 0;
+
 	int m_inputs; //!< Number of inputs
 	int m_values; //!< Number of values
 };
@@ -289,11 +305,14 @@ struct FitSplineLMFunctor : LMFunctor<>
 	//static const int InputCount = ; //spline nodal values + 3D positions
 
 	FitSplineLMFunctor(	const ccSpline& spline,
-						const ccPointCloud& cloud)
-		: LMFunctor<>(static_cast<int>(spline.nodes().size() + 3 * spline.size()), static_cast<int>(cloud.size() * 3))
+						const ccPointCloud& cloud,
+						double precision)
+		: LMFunctor<>(static_cast<int>(spline.nodes().size() + 3 * spline.size()), static_cast<int>(cloud.size()))
 		, m_spline(spline)
 		, m_cloud(cloud)
 		, m_localSpline(spline)
+		, m_distanceBuffer(cloud.size())
+		, m_precision(precision)
 	{
 	}
 
@@ -310,7 +329,21 @@ struct FitSplineLMFunctor : LMFunctor<>
 		//load the new nodal parameters
 		for (size_t i = 0; i < nodeCount; ++i)
 		{
-			m_localSpline.nodes()[i] = p_x(i);
+			double nodeVal = p_x(i);
+			//consistency check
+			if (nodeVal < 0.0)
+			{
+				nodeVal = 0.0;
+			}
+			else if (nodeVal > 1.0)
+			{
+				nodeVal = 1.0;;
+			}
+			if (i != 0 && nodeVal < m_localSpline.nodes()[i - 1])
+			{
+				nodeVal = m_localSpline.nodes()[i - 1];
+			}
+			m_localSpline.nodes()[i] = nodeVal;
 		}
 		//load the vertices positions
 		size_t j = nodeCount;
@@ -325,25 +358,194 @@ struct FitSplineLMFunctor : LMFunctor<>
 		size_t pointCount = m_cloud.size();
 		assert(pointCount == p_fvec.size());
 
+		double rms;
+		if (false == ComputeDistances(	m_cloud,
+										m_localSpline,
+										m_distanceBuffer,
+										rms,
+										m_precision,
+										true))
+		{
+			return -1;
+		}
+
 		for (size_t i = 0; i < pointCount; ++i)
 		{
-			double distToSpline = 0.0;
+			double distToSpline = m_distanceBuffer[i];
 
-			p_fvec(i) = distToSpline;
+			if (std::isfinite(distToSpline))
+			{
+				p_fvec(i) = distToSpline;
+			}
+			else
+			{
+				p_fvec(i) = 0.0; //FIXME
+			}
 		}
 
 		return 0;
 	}
 
+	void initX(Eigen::VectorXd& x) override
+	{
+		size_t nodeCount = m_spline.nodes().size();
+		//load the new nodal parameters
+		for (size_t i = 0; i < nodeCount; ++i)
+		{
+			x(i) = m_spline.nodes()[i];
+		}
+		//load the vertices positions
+		size_t j = nodeCount;
+		size_t vertexCount = m_spline.size();
+		for (size_t i = 0; i < vertexCount; ++i)
+		{
+			const CCVector3* P = m_spline.getPoint(static_cast<unsigned>(i));
+			x(j++) = P->x;
+			x(j++) = P->y;
+			x(j++) = P->z;
+		}
+	}
+
+	void updateSpline(ccSpline& spline, const Eigen::VectorXd& x) const override
+	{
+		size_t nodeCount = m_spline.nodes().size();
+		size_t vertexCount = spline.size();
+
+		assert(nodeCount + 3 * vertexCount == x.size());
+
+		//load the new nodal parameters
+		for (size_t i = 0; i < nodeCount; ++i)
+		{
+			spline.nodes()[i] = x(i);
+		}
+		//load the vertices positions
+		size_t j = nodeCount;
+		for (size_t i = 0; i < vertexCount; ++i)
+		{
+			CCVector3* P = const_cast<CCVector3*>(spline.getPoint(static_cast<unsigned>(i)));
+			P->x = x(j++);
+			P->y = x(j++);
+			P->z = x(j++);
+		}
+	}
+
 	const ccSpline& m_spline;
 	const ccPointCloud& m_cloud;
 	mutable ccSpline m_localSpline;
+	mutable std::vector<double> m_distanceBuffer;
+	double m_precision;
+};
+
+
+struct FitSplineLMFunctorPos3D : LMFunctor<>
+{
+	//static const int ValueCount = ; //3D points (cloud)
+	//static const int InputCount = ; //spline nodal values + 3D positions
+
+	FitSplineLMFunctorPos3D(const ccSpline& spline,
+		const ccPointCloud& cloud,
+		double precision)
+		: LMFunctor<>(static_cast<int>(3 * spline.size()), static_cast<int>(cloud.size()))
+		, m_spline(spline)
+		, m_cloud(cloud)
+		, m_localSpline(spline)
+		, m_distanceBuffer(cloud.size())
+		, m_precision(precision)
+	{
+	}
+
+	virtual ~FitSplineLMFunctorPos3D()
+	{
+	}
+
+	int operator()(const Eigen::VectorXd& p_x, Eigen::VectorXd& p_fvec) const
+	{
+		size_t vertexCount = m_localSpline.size();
+		assert(3 * vertexCount == p_x.size());
+		size_t pointCount = m_cloud.size();
+		assert(pointCount == p_fvec.size());
+
+		//load the vertices positions
+		size_t j = 0;
+		for (size_t i = 0; i < vertexCount; ++i)
+		{
+			CCVector3* P = const_cast<CCVector3*>(m_localSpline.getPoint(static_cast<unsigned>(i)));
+			P->x = p_x(j++);
+			P->y = p_x(j++);
+			P->z = p_x(j++);
+		}
+
+		double rms;
+		if (false == ComputeDistances(m_cloud,
+			m_localSpline,
+			m_distanceBuffer,
+			rms,
+			m_precision,
+			true))
+		{
+			return -1;
+		}
+
+		for (size_t i = 0; i < pointCount; ++i)
+		{
+			double distToSpline = m_distanceBuffer[i];
+
+			if (std::isfinite(distToSpline))
+			{
+				p_fvec(i) = distToSpline;
+			}
+			else
+			{
+				p_fvec(i) = 0.0; //FIXME
+			}
+		}
+
+		return 0;
+	}
+
+	void initX(Eigen::VectorXd& x) override
+	{
+		//load the vertices positions
+		size_t j = 0;
+		size_t vertexCount = m_spline.size();
+		for (size_t i = 0; i < vertexCount; ++i)
+		{
+			const CCVector3* P = m_spline.getPoint(static_cast<unsigned>(i));
+			x(j++) = P->x;
+			x(j++) = P->y;
+			x(j++) = P->z;
+		}
+	}
+
+	void updateSpline(ccSpline& spline, const Eigen::VectorXd& x) const override
+	{
+		size_t vertexCount = spline.size();
+
+		assert(3 * vertexCount == x.size());
+
+		//load the vertices positions
+		size_t j = 0;
+		for (size_t i = 0; i < vertexCount; ++i)
+		{
+			CCVector3* P = const_cast<CCVector3*>(spline.getPoint(static_cast<unsigned>(i)));
+			P->x = x(j++);
+			P->y = x(j++);
+			P->z = x(j++);
+		}
+	}
+
+	const ccSpline& m_spline;
+	const ccPointCloud& m_cloud;
+	mutable ccSpline m_localSpline;
+	mutable std::vector<double> m_distanceBuffer;
+	double m_precision;
 };
 
 qFitSpline::qFitSpline(QObject* parent)
 	: QObject(parent)
 	, ccStdPluginInterface( ":/CC/plugin/qFitSpline/info.json" )
-	, m_action( nullptr ){
+	, m_action( nullptr )
+{
 }
 
 void qFitSpline::onNewSelection(const ccHObject::Container& selectedEntities)
@@ -447,42 +649,30 @@ void qFitSpline::doAction()
 		}
 	}
 
-	//test
+	//compute the distances before optimization
 	{
 		std::vector<double> distances;
-		bool success = ComputeDistances(*cloud, *spline, distances, precision);
-		return;
+		double rms;
+		ccLog::Print("Computing spline/cloud distances... (before optimization)");
+		if (!ComputeDistances(*cloud, *spline, distances, rms, precision, false))
+		{
+			m_app->dispToConsole("Failed to compute distances (before optimization)");
+			return;
+		}
 	}
 
-	size_t nodeCount = spline->nodes().size();
-	size_t vertexCount = spline->size();
-	size_t inputCount = nodeCount + 3 * vertexCount;
+	using CurrentLMFunctor = FitSplineLMFunctorPos3D;
+	//LM routine functor
+	CurrentLMFunctor functor(*spline, *cloud, precision);
+	int inputCount = functor.inputs();
 
 	//initial parameters for LM routine
 	Eigen::VectorXd x(inputCount);
-	{
-		//load the new nodal parameters
-		for (size_t i = 0; i < nodeCount; ++i)
-		{
-			x(i) = spline->nodes()[i];
-		}
-		//load the vertices positions
-		size_t j = nodeCount;
-		for (size_t i = 0; i < vertexCount; ++i)
-		{
-			const CCVector3* P = spline->getPoint(static_cast<unsigned>(i));
-			x(j++) = P->x;
-			x(j++) = P->y;
-			x(j++) = P->z;
-		}
-	}
-
-	//LM routine functor
-	FitSplineLMFunctor functor(*spline, *cloud);
+	functor.initX(x);
 
 	//run LM routine
-	Eigen::NumericalDiff<FitSplineLMFunctor>                                    numDiff(functor);
-	Eigen::LevenbergMarquardt<Eigen::NumericalDiff<FitSplineLMFunctor>, double> lm(numDiff);
+	Eigen::NumericalDiff<CurrentLMFunctor> numDiff(functor, precision);
+	Eigen::LevenbergMarquardt<Eigen::NumericalDiff<CurrentLMFunctor>, double> lm(numDiff);
 
 	//set LM algorithm convergence parameters
 	lm.parameters.maxfev = 1000;
@@ -511,20 +701,17 @@ void qFitSpline::doAction()
 	}
 
 	//update the output spline
+	functor.updateSpline(*spline, x);
+
+	//compute the distances after optimization
 	{
-		//load the new nodal parameters
-		for (size_t i = 0; i < nodeCount; ++i)
+		std::vector<double> distances;
+		double rms;
+		ccLog::Print("Computing spline/cloud distances... (after optimization)");
+		if (!ComputeDistances(*cloud, *spline, distances, rms, precision, false))
 		{
-			spline->nodes()[i] = x(i);
-		}
-		//load the vertices positions
-		size_t j = nodeCount;
-		for (size_t i = 0; i < vertexCount; ++i)
-		{
-			CCVector3* P = const_cast<CCVector3*>(spline->getPoint(static_cast<unsigned>(i)));
-			P->x = x(j++);
-			P->y = x(j++);
-			P->z = x(j++);
+			m_app->dispToConsole("Failed to compute distances (after optimization)");
+			//return; //too late
 		}
 	}
 

@@ -332,7 +332,7 @@ struct FitSplineLMFunctor : LMFunctor<>
 	FitSplineLMFunctor(const ccSpline& spline,
 		const ccPointCloud& cloud,
 		double precision)
-		: LMFunctor<>(static_cast<int>(spline.nodes().size() - 2 * (spline.getOrder() - 1) + 3 * spline.size()), static_cast<int>(cloud.size()))
+		: LMFunctor<>(static_cast<int>(spline.nodes().size() - 2 * spline.getOrder() + 3 * spline.size()), static_cast<int>(cloud.size()))
 		, m_spline(spline)
 		, m_cloud(cloud)
 		, m_localSpline(spline)
@@ -357,7 +357,7 @@ struct FitSplineLMFunctor : LMFunctor<>
 										true))
 		{
 			for (size_t i = 0; i < pointCount; ++i)
-				p_fvec(i) = std::numeric_limits<double>::max();
+				p_fvec(i) = std::numeric_limits<float>::max();
 			return -1;
 		}
 
@@ -371,7 +371,7 @@ struct FitSplineLMFunctor : LMFunctor<>
 			}
 			else
 			{
-				p_fvec(i) = 0.0; //FIXME
+				p_fvec(i) = std::numeric_limits<float>::max();
 			}
 		}
 
@@ -381,15 +381,14 @@ struct FitSplineLMFunctor : LMFunctor<>
 	void updateSpline(ccSpline& spline, const Eigen::VectorXd& x) const override
 	{
 		size_t order = m_spline.getOrder();
-		size_t nodeCount = m_spline.nodes().size();
-		size_t changedNodeCount = nodeCount - 2 * (order - 1);
+		size_t nodeCount = m_spline.nodes().size() - 2 * order;
 		size_t vertexCount = spline.size();
-		assert(changedNodeCount + 3 * vertexCount == x.size());
+		assert(nodeCount + 3 * vertexCount == x.size());
 
 		//load the new nodal parameters
-		for (size_t i = 0; i < changedNodeCount; ++i)
+		for (size_t i = 0; i < nodeCount; ++i)
 		{
-			double nodeVal = m_spline.nodes()[order + i] + x(i) / 1.0;
+			double nodeVal = m_spline.nodes()[order + i] + x(i) / 100.0;
 			//consistency check
 			if (nodeVal < 0.0)
 			{
@@ -399,14 +398,14 @@ struct FitSplineLMFunctor : LMFunctor<>
 			{
 				nodeVal = 1.0;
 			}
-			//if (i != 0 && nodeVal < spline.nodes()[order + i - 1])
-			//{
-			//	nodeVal = spline.nodes()[order + i - 1];
-			//}
+			if (i != 0 && nodeVal < spline.nodes()[order + i - 1])
+			{
+				nodeVal = spline.nodes()[order + i - 1];
+			}
 			spline.nodes()[order + i] = nodeVal;
 		}
 		//load the vertices positions
-		size_t j = changedNodeCount;
+		size_t j = nodeCount;
 		for (size_t i = 0; i < vertexCount; ++i)
 		{
 			const CCVector3* Po = m_spline.getPoint(static_cast<unsigned>(i));
@@ -457,7 +456,7 @@ struct FitSplineLMFunctorNodes : LMFunctor<>
 			true))
 		{
 			for (size_t i = 0; i < pointCount; ++i)
-				p_fvec(i) = std::numeric_limits<double>::max();
+				p_fvec(i) = std::numeric_limits<float>::max();
 			return -1;
 		}
 
@@ -471,7 +470,7 @@ struct FitSplineLMFunctorNodes : LMFunctor<>
 			}
 			else
 			{
-				p_fvec(i) = 0.0; //FIXME
+				p_fvec(i) = std::numeric_limits<float>::max();
 			}
 		}
 
@@ -487,7 +486,7 @@ struct FitSplineLMFunctorNodes : LMFunctor<>
 		//load the new nodal parameters
 		for (size_t i = 0; i < nodeCount; ++i)
 		{
-			double nodeVal = m_spline.nodes()[order + i] + x(i) / 1.0;
+			double nodeVal = m_spline.nodes()[order + i] + x(i);
 			//consistency check
 			if (nodeVal < 0.0)
 			{
@@ -497,9 +496,9 @@ struct FitSplineLMFunctorNodes : LMFunctor<>
 			{
 				nodeVal = 1.0;
 			}
-			if (i != 0 && nodeVal < spline.nodes()[order + i])
+			if (i != 0 && nodeVal < spline.nodes()[order + i - 1])
 			{
-				nodeVal = spline.nodes()[order + i];
+				nodeVal = spline.nodes()[order + i - 1];
 			}
 			spline.nodes()[order + i] = nodeVal;
 		}
@@ -545,7 +544,7 @@ struct FitSplineLMFunctorPos3D : LMFunctor<>
 			true))
 		{
 			for (size_t i = 0; i < pointCount; ++i)
-				p_fvec(i) = std::numeric_limits<double>::max();
+				p_fvec(i) = std::numeric_limits<float>::max();
 			return -1;
 		}
 
@@ -559,7 +558,7 @@ struct FitSplineLMFunctorPos3D : LMFunctor<>
 			}
 			else
 			{
-				p_fvec(i) = 0.0; //FIXME
+				p_fvec(i) = std::numeric_limits<float>::max();
 			}
 		}
 
@@ -710,8 +709,68 @@ void qFitSpline::doAction()
 		}
 	}
 
+	bool changePositionAndNodes = true;
 	bool changePosition = false;
-	bool changeNodes = true;
+	bool changeNodes = false;
+
+	//Lucky pass: change both the vertex positions and nodes
+	if (changePositionAndNodes)
+	{
+		using CurrentLMFunctor = FitSplineLMFunctor;
+
+		//LM routine functor
+		CurrentLMFunctor functor(*spline, *cloud, precision);
+		int inputCount = functor.inputs();
+
+		//initial parameters for LM routine
+		Eigen::VectorXd x(inputCount);
+		functor.initX(x);
+
+		//run LM routine
+		Eigen::NumericalDiff<CurrentLMFunctor> numDiff(functor, precision);
+		Eigen::LevenbergMarquardt<Eigen::NumericalDiff<CurrentLMFunctor>, double> lm(numDiff);
+
+		//set LM algorithm convergence parameters
+		lm.parameters.maxfev = 1000;
+		//lm.parameters.ftol = 1.0e-8; //absolute convergence criteria
+		//lm.parameters.xtol = 1.0e-6; //relative convergence criteria
+
+		Eigen::LevenbergMarquardtSpace::Status status = lm.minimize(x);
+		if (status <= 0)
+		{
+			m_app->dispToConsole(QString("Levenberg Marquardt optimization failed to converge (status: %1)").arg(status), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+			if (!inputSpline && spline)
+				delete spline;
+			return;
+		}
+		else
+		{
+			m_app->dispToConsole(QString("Levenberg Marquardt optimization: iterations: %1 / func. evaluations: %2").arg(lm.iter).arg(lm.nfev), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+		}
+
+		//create the resulting spline (if not already)
+		if (inputSpline)
+		{
+			//That's bold 8-o
+			spline = new ccSpline(*spline);
+			inputSpline = false;
+		}
+
+		//update the output spline
+		functor.updateSpline(*spline, x);
+
+		//compute the distances after optimization
+		{
+			std::vector<double> distances;
+			double rms;
+			ccLog::Print("Computing spline/cloud distances... (after optimization)");
+			if (!ComputeDistances(*cloud, *spline, distances, rms, precision, false))
+			{
+				m_app->dispToConsole("Failed to compute distances (after optimization)");
+				//return; //too late
+			}
+		}
+	}
 
 	//1st pass: change the vertex positions
 	if (changePosition)
@@ -778,8 +837,7 @@ void qFitSpline::doAction()
 		using CurrentLMFunctor = FitSplineLMFunctorNodes;
 
 		//LM routine functor
-		//precision = 1.0e-5;
-		CurrentLMFunctor functor(*spline, *cloud, precision);
+		CurrentLMFunctor functor(*spline, *cloud, 1.0e-5);
 		int inputCount = functor.inputs();
 
 		//initial parameters for LM routine
@@ -830,12 +888,15 @@ void qFitSpline::doAction()
 				//return; //too late
 			}
 		}
-
-		for (size_t i = 0; i < spline->nodes().size(); ++i)
-		{
-			ccLog::Print(QString("Node %1 = %2").arg(i + 1).arg(spline->nodes()[i]));
-		}
 	}
+
+#ifdef _DEBUG
+	//show the final spline nodes
+	for (size_t i = 0; i < spline->nodes().size(); ++i)
+	{
+		ccLog::Print(QString("Node %1 = %2").arg(i + 1).arg(spline->nodes()[i]));
+	}
+#endif
 
 	if (splineParent)
 	{

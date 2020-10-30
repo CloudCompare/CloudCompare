@@ -28,12 +28,12 @@ public:
 
 	//! Default constructor
 	/** \param associatedCloud the associated point cloud (i.e. the vertices)
-		\param k order of the spline (minimum is 2)
+		\param k order of the spline (minimum is 2). Order is equal to 'degree + 1'
 		\param nodeType nodal vector type
 		\param uniqueID unique ID (handle with care)
 	**/
 	explicit ccSpline(	GenericIndexedCloudPersist* associatedCloud,
-						size_t k = 2,
+						size_t order = 3,
 						NodeType nodeType = OpenUniform,
 						unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID);
 
@@ -41,7 +41,7 @@ public:
 	/** \param poly polyline to 'clone'
 	**/
 	ccSpline(	const ccPolyline& poly,
-				size_t k = 2,
+				size_t order = 3,
 				NodeType nodeType = OpenUniform	);
 
 	//! Copy constructor
@@ -53,22 +53,20 @@ public:
 	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::SPLINE_LINE; }
 
 	//! Returns the spline order
-	inline size_t getOrder() const { return m_k; }
+	inline size_t getOrder() const { return m_degree + 1; }
+
+	//! Returns the spline degree
+	inline size_t getDegree() const { return m_degree; }
 
 	//! Sets the nodal vector type
 	bool setNodeType(NodeType type);
 
 	//! Evaluates the position of the spline at a given curvilinear position
 	/** \param s curvilinear position (between 0 and 1)
-		\return 3D point
+		\param[out] P the position (if valid)
+		\return position validity (otherwise 's' is out of range)
 	**/
-	CCVector3 computePosition(double s) const;
-
-	//! Evaluates the speed of the spline at a given curvilinear position
-	/** \param s curvilinear position (between 0 and 1)
-		\return 3D speed
-	**/
-	CCVector3 computeSpeed(double s) const;
+	bool computePosition(double s, CCVector3& P) const;
 
 	//! Updates the spline based on the current state of the associated cloud / vertices
 	/** Should be called whenever the vertices are changed
@@ -82,6 +80,9 @@ public:
 	const std::vector<double>& nodes() const { return m_nodes; }
 
 protected: //methods
+
+	//! Returns the theoretical number of knots
+	size_t expectedKnotCount() const;
 
 	//inherited from ccHObject
 	bool toFile_MeOnly(QFile& out) const override;
@@ -102,27 +103,20 @@ protected: //methods
 	//! Sets values of the nodal vector to be open uniform
 	bool setNodeToOpenUniform();
 
-	//! Evaluates the equation of a splines using the blossom algorithm
-	/** \param s curvilinear position (between nodes[k-1] and nodes[point.size()])
-		\param k the spline order (degree == k-1)
-		\param nodes the nodal vector which defines the speed of the spline (size must be equal to k + point.size())
-		\param points if not null, the control points (point.size() >= k) - otherwise the polyline vertices are used by default
-		\param off offset to apply to the nodal vector 'nodes' before reading from it. this is useful to compute derivatives.
+	//! Evaluates the equation of a spline using the blossom algorithm
+	/** \param s curvilinear position
+		\param k current order
+		\param points control points
+		\param nodes the nodal vector
 	**/
-	CCVector3 eval(	double s,
-					size_t k,
-					const std::vector<double>& nodes,
-					const std::vector<CCVector3>* points = nullptr,
-					size_t off = 0) const;
-
-	CCVector3 eval_rec(	double u,
-						const std::vector<CCVector3>& points,
-						size_t k,
-						const std::vector<double>& nodes) const;
+	CCVector3 recursiveEval(double s,
+							size_t k,
+							const std::vector<CCVector3>& points,
+							const std::vector<double>& nodes) const;
 
 protected: //attributes
 	NodeType m_nodeType;				//! Nodal vector type
-	size_t m_k;							//! Spline order
+	size_t m_degree;					//! Spline degree
 	std::vector<CCVector3> m_deltas;	//! Control points deltas
 	std::vector<double>	m_nodes;		//! Nodal vector
 };

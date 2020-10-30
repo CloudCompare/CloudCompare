@@ -5,27 +5,37 @@
 #include <algorithm>
 
 ccSpline::ccSpline(	GenericIndexedCloudPersist* associatedCloud,
-					size_t k/*=2*/,
+					size_t order/*=3*/,
 					NodeType nodeType/*=OpenUniform*/,
 					unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
 	: ccPolyline(associatedCloud, uniqueID)
 	, m_nodeType(nodeType)
-	, m_k(k)
+	, m_degree(std::max<size_t>(order, 2) - 1)
 {
-	if (size() >= 2)
+	if (order < 2)
+	{
+		assert(false);
+		ccLog::Warning("Invalid input spline order (can't be below 2)");
+	}
+	if (size() > m_degree)
 	{
 		updateInternalState();
 	}
 }
 
 ccSpline::ccSpline(	const ccPolyline& poly,
-					size_t k/*=2*/,
+					size_t order/*=3*/,
 					NodeType nodeType/*=OpenUniform*/)
 	: ccPolyline(poly)
 	, m_nodeType(nodeType)
-	, m_k(k)
+	, m_degree(std::max<size_t>(order, 2) - 1)
 {
-	if (size() >= 2)
+	if (order < 2)
+	{
+		assert(false);
+		ccLog::Warning("Invalid input spline order (can't be below 2)");
+	}
+	if (size() > m_degree)
 	{
 		updateInternalState();
 	}
@@ -34,61 +44,39 @@ ccSpline::ccSpline(	const ccPolyline& poly,
 ccSpline::ccSpline(const ccSpline& spline)
 	: ccPolyline(spline)
 	, m_nodeType(spline.m_nodeType)
-	, m_k(spline.m_k)
-	, m_deltas(spline.m_deltas)
+	, m_degree(spline.m_degree)
 	, m_nodes(spline.m_nodes)
 {
 }
 
-
 bool ccSpline::updateInternalState()
 {
-	m_deltas.clear();
 	m_nodes.clear();
 
 	unsigned vertexCount = size();
-	if (vertexCount < 2)
+	if (vertexCount <= m_degree)
 	{
 		ccLog::Warning("[Spline] Not enough vertices");
 		return false;
 	}
 
-	try
-	{
-		m_deltas.resize(vertexCount - 1);
-		for (unsigned i = 0; i < vertexCount - 1; ++i)
-		{
-			m_deltas[i] = *getPoint(i + 1) - *getPoint(i);
-		}
-	}
-	catch (const std::bad_alloc&)
-	{
-		//not enough memory
-		return false;
-	}
-	
 	if (!setNodalVector())
 	{
 		return false;
 	}
 	assert(isValid());
 
-	//for (size_t i = 0; i < m_nodes.size(); ++i)
-	//{
-	//	ccLog::Print(QString("Node %1 = %2").arg(i+1).arg(m_nodes[i]));
-	//}
-
-	for (size_t i = 0; i < m_deltas.size(); ++i)
+	for (size_t i = 0; i < m_nodes.size(); ++i)
 	{
-		m_deltas[i] = m_deltas[i] / static_cast<PointCoordinateType>(m_nodes[m_k + i] - m_nodes[i + 1]);
+		ccLog::Print(QString("Node %1 = %2").arg(i+1).arg(m_nodes[i]));
 	}
 
-	//for (size_t i = 0; i < m_deltas.size(); ++i)
-	//{
-	//	ccLog::Print(QString("Delta %1 = %2").arg(i + 1).arg(m_deltas[i].norm()));
-	//}
-
 	return true;
+}
+
+size_t ccSpline::expectedKnotCount() const
+{
+	return size() + m_degree + 1;
 }
 
 bool ccSpline::setNodeType(NodeType type)
@@ -105,24 +93,76 @@ bool ccSpline::setNodeType(NodeType type)
 	}
 }
 
-CCVector3 ccSpline::computePosition(double s) const
+bool ccSpline::computePosition(double s, CCVector3& P) const
 {
-	s = std::max(std::min(s, 1.0), 0.0); // clamp between [0 1]
-	return eval(s, m_k, m_nodes);
-}
+	if (!isValid())
+	{
+		//invalid spline
+		assert(false);
+		return false;
+	}
 
-CCVector3 ccSpline::computeSpeed(double s) const
-{
-	s = std::max(std::min(s, 1.0), 0.0); // clamp between [0 1]
-	return static_cast<PointCoordinateType>(m_k - 1) * eval(s, m_k - 1, m_nodes, &m_deltas, 1);
+	if (s < 0.0 || s > 1.0)
+	{
+		return false;
+	}
+
+	size_t vertexCount = size();
+
+	//domain of interest spans from knot 'm_degree' to knot 'size()' 
+	size_t index = m_degree;
+	for (; index < vertexCount; ++index)
+	{
+		if (s >= m_nodes[index] && s <= m_nodes[index + 1])
+		{
+			break;
+		}
+		if (index + 1 == vertexCount)
+		{
+			//cope with rounding issues
+			if (std::abs(s - m_nodes[index + 1]) < 1.0e-6)
+			{
+				s = m_nodes[index + 1];
+				break;
+			}
+			else
+			{
+				return false;
+			}
+		}
+	}
+
+	//we use the 'index' point and the 'm_degree' previous one
+	size_t i0 = index - m_degree;
+	std::vector<CCVector3> v(m_degree + 1);
+	for (size_t i = i0; i <= index; ++i)
+	{
+		v[i - i0] = *getPoint(static_cast<unsigned>(i));
+	}
+
+	for (size_t l = 0; l < m_degree; ++l)
+	{
+		// build level l of the pyramid
+		size_t offset = m_degree - l;
+		for (size_t i = index; i > index - offset; --i)
+		{
+			double alpha = (s - m_nodes[i]) / (m_nodes[i + offset] - m_nodes[i]);
+
+			// interpolate each component
+			v[i - i0] = (1.0 - alpha) * v[i - i0 - 1] + alpha * v[i - i0];
+		}
+	}
+	
+	P = v[m_degree];
+
+	return true;
 }
 
 bool ccSpline::isValid() const
 {
-	return (m_k > 1)
-		&& (size() >= m_k)
-		&& (m_nodes.size() == m_k + size())
-		&& (size() == m_deltas.size() + 1);
+	return (m_degree != 0)
+		&& (size() > m_degree)
+		&& (m_nodes.size() == expectedKnotCount());
 }
 
 bool ccSpline::setNodalVector()
@@ -141,7 +181,7 @@ bool ccSpline::setNodalVector()
 
 bool ccSpline::setNodeToUniform()
 {
-	if (size() < m_k || m_k < 2)
+	if (m_degree == 0 || size() <= m_degree)
 	{
 		assert(false);
 		return false;
@@ -149,7 +189,7 @@ bool ccSpline::setNodeToUniform()
 	
 	try
 	{
-		m_nodes.resize(m_k + size());
+		m_nodes.resize(expectedKnotCount());
 	}
 	catch (const std::bad_alloc&)
 	{
@@ -157,11 +197,11 @@ bool ccSpline::setNodeToUniform()
 		return false;
 	}
 
-	double step = 1.0 / (size() + 1 - m_k);
-	
+	double step = static_cast<double>(size() - m_degree);
+
 	for (size_t i = 0; i < m_nodes.size(); ++i)
 	{
-		m_nodes[i] = step * i - step * (m_k - 1);
+		m_nodes[i] = (static_cast<int>(i) - static_cast<int>(m_degree)) / step;
 	}
 
 	return true;
@@ -169,7 +209,7 @@ bool ccSpline::setNodeToUniform()
 
 bool ccSpline::setNodeToOpenUniform()
 {
-	if (size() < m_k || m_k < 2)
+	if (m_degree == 0 || size() <= m_degree)
 	{
 		assert(false);
 		return false;
@@ -177,7 +217,7 @@ bool ccSpline::setNodeToOpenUniform()
 
 	try
 	{
-		m_nodes.resize(m_k + size());
+		m_nodes.resize(expectedKnotCount());
 	}
 	catch (const std::bad_alloc&)
 	{
@@ -185,90 +225,24 @@ bool ccSpline::setNodeToOpenUniform()
 		return false;
 	}
 
-	double acc = 1.0;
+	size_t internalNodeIndex = 0;
 	for (size_t i = 0; i < m_nodes.size(); ++i)
 	{
-		if (i < m_k)
+		if (i <= m_degree)
 		{
 			m_nodes[i] = 0.0;
 		}
-		else if (i >= size() + 1)
+		else if (i > size())
 		{
 			m_nodes[i] = 1.0;
 		}
 		else
 		{
-			m_nodes[i] = acc / (size() + 1 - m_k);
-			acc += 1.0;
+			m_nodes[i] = static_cast<double>(++internalNodeIndex) / (size() - m_degree);
 		}
 	}
 
 	return true;
-}
-
-CCVector3 ccSpline::eval(	double s,
-							size_t k,
-							const std::vector<double>& nodes,
-							const std::vector<CCVector3>* points/*=nullptr*/,
-							size_t off/*=0*/) const
-{
-	assert(k > 1);
-	assert(points ? points->size() >= k : size() >= static_cast<unsigned>(k));
-	assert(isValid());
-	
-	// TODO: better search with binary search?
-	size_t dec = 0;
-	while ((dec + k + off < nodes.size()) && (dec + k < (points ? points->size() : size()) && (s > nodes[dec + k + off])))
-	{
-		++dec;
-	}
-
-	std::vector<CCVector3> points_rec(k);
-	for (size_t i = 0; i < k; ++i)
-	{
-		points_rec[i] = points ? (*points)[i + dec] : *getPoint(static_cast<unsigned>(i + dec));
-	}
-
-	size_t nodesCount = 2 * k - 2;
-	size_t nodesOff = dec + 1 + off;
-	std::vector<double> nodes_rec(nodesCount, 0.0);
-	for (size_t i = 0; i < nodesCount; ++i)
-	{
-		nodes_rec[i] = nodes[i + nodesOff];
-	}
-
-	return eval_rec(s, points_rec, k, nodes_rec);
-}
-
-CCVector3 ccSpline::eval_rec(	double s,
-								const std::vector<CCVector3>& points,
-								size_t k,
-								const std::vector<double>& nodes) const
-{
-	if (points.size() == 1)
-	{
-		return points[0];
-	}
-
-	assert(k >= 2);
-	std::vector<CCVector3> p_out(k - 1);
-	for (size_t i = 0; i < k - 1; ++i)
-	{
-		const double n0 = nodes[i + k - 1];
-		const double n1 = nodes[i];
-		const PointCoordinateType f0 = static_cast<PointCoordinateType>((n0 - s) / (n0 - n1));
-		const PointCoordinateType f1 = static_cast<PointCoordinateType>((s - n1) / (n0 - n1));
-
-		p_out[i] = points[i] * f0 + points[i + 1] * f1;
-	}
-
-	std::vector<double> nodes_out(nodes.size() - 2);
-	for (size_t i = 1, j = 0; i < nodes.size() - 1; ++i, ++j)
-	{
-		nodes_out[j] = nodes[i];
-	}
-
-	return eval_rec(s, p_out, k - 1, nodes_out);
 }
 
 bool ccSpline::toFile_MeOnly(QFile& out) const
@@ -276,9 +250,9 @@ bool ccSpline::toFile_MeOnly(QFile& out) const
 	if (!ccPolyline::toFile_MeOnly(out))
 		return false;
 
-	// spline order
-	uint32_t k = static_cast<uint32_t>(m_k);
-	if (out.write((const char*)&m_k, 4) < 0)
+	// spline degree
+	uint32_t k = static_cast<uint32_t>(m_degree);
+	if (out.write((const char*)&m_degree, 4) < 0)
 		return WriteError();
 						
 	// node type
@@ -294,12 +268,17 @@ bool ccSpline::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedID
 	if (!ccPolyline::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
-	// spline order (dataVersion >= 51)
+	// spline degree (dataVersion >= 51)
 	{
-		uint32_t k = 0;
-		if (in.read((char*)&k, 4) < 0)
+		uint32_t d = 0;
+		if (in.read((char*)&d, 4) < 0)
 			return ReadError();
-		m_k = k;
+		if (d == 0)
+		{
+			ccLog::Warning("[ccSpline::fromFile] Invalid spline degree value (can't be zero)");
+			return false;
+		}
+		m_degree = d;
 	}
 
 	// node type (dataVersion >= 51)
@@ -323,7 +302,7 @@ bool ccSpline::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedID
 	}
 
 	// DGM: we can't update the polyline right now as the vertices are not attached yet!
-	//if (size() >= 2 && !updateInternalState())
+	//if (size() > m_degree && !updateInternalState())
 	//{
 	//	return false;
 	//}
@@ -390,7 +369,11 @@ void ccSpline::drawMeOnly(CC_DRAW_CONTEXT& context)
 	CCVector3 firstPoint;
 	for (unsigned i = 0; i <= displayVertCount; ++i)
 	{
-		CCVector3 P = computePosition(s);
+		CCVector3 P;
+		if (!computePosition(s, P))
+		{
+			continue;
+		}
 		s += step;
 		ccGL::Vertex3v(glFunc, P.u);
 
@@ -420,7 +403,11 @@ void ccSpline::drawMeOnly(CC_DRAW_CONTEXT& context)
 		//CCVector3 firstPoint;
 		//for (unsigned i = 0; i <= displayVertCount; ++i)
 		//{
-		//	CCVector3 P = computePosition(s);
+		//	CCVector3 P;
+		//	if (!computePosition(s, P))
+		//	{
+		//		continue;
+		//	}
 		//	s += step;
 		//	ccGL::Vertex3v(glFunc, P.u);
 		//}

@@ -21,6 +21,7 @@ constexpr char COMMAND_GRID_STEP[]						= "GRID_STEP";
 constexpr char COMMAND_GRID_OUTPUT_CLOUD[]				= "OUTPUT_CLOUD";
 constexpr char COMMAND_GRID_OUTPUT_MESH[]				= "OUTPUT_MESH";
 constexpr char COMMAND_GRID_OUTPUT_RASTER_Z[]			= "OUTPUT_RASTER_Z";
+constexpr char COMMAND_GRID_OUTPUT_RASTER_Z_AND_SF[]	= "OUTPUT_RASTER_Z_AND_SF";
 constexpr char COMMAND_GRID_OUTPUT_RASTER_RGB[]			= "OUTPUT_RASTER_RGB";
 
 //Rasterize specific commands
@@ -104,6 +105,7 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 	double gridStep = 0;
 	bool outputCloud = false;
 	bool outputRasterZ = false;
+	bool outputRasterSFs = false;
 	bool outputRasterRGB = false;
 	bool outputMesh = false;
 	bool resample = false;
@@ -150,6 +152,15 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 			cmd.arguments().pop_front();
 
 			outputRasterZ = true;
+			outputRasterSFs = false;
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_GRID_OUTPUT_RASTER_Z_AND_SF))
+		{
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
+
+			outputRasterZ = true;
+			outputRasterSFs = true;
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_GRID_OUTPUT_RASTER_RGB))
 		{
@@ -449,9 +460,9 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 			{
 				bands.height = true;
 				bands.rgb = false; //not a good idea to mix RGB and height values!
-				bands.allSFs = true;
+				bands.allSFs = outputRasterSFs;
 			}
-			QString exportFilename = cmd.getExportFilename(cloudDesc, "tif", "RASTER_Z", nullptr, !cmd.addTimestamp());
+			QString exportFilename = cmd.getExportFilename(cloudDesc, "tif", outputRasterSFs ? "RASTER_Z_AND_SF" : "RASTER_Z", nullptr, !cmd.addTimestamp());
 			if (exportFilename.isEmpty())
 			{
 				exportFilename = "rasterZ.tif";
@@ -466,7 +477,7 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 			{
 				bands.rgb = true;
 				bands.height = false; //not a good idea to mix RGB and height values!
-				bands.allSFs = false;
+				bands.allSFs = outputRasterSFs;
 			}
 			QString exportFilename = cmd.getExportFilename(cloudDesc, "tif", "RASTER_RGB", nullptr, !cmd.addTimestamp());
 			if (exportFilename.isEmpty())

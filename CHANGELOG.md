@@ -25,6 +25,10 @@ v2.12 (???) - (in development)
 			- -CLASS_THRESHOLD [value]: double value of classification threshold (ex. 0.5)
 			- -EXPORT_GROUND: exports the ground as a .bin file
 			- -EXPORT_OFFGROUND: exports the off-ground as a .bin file
+	- Command line:
+		- Command 'Rasterize':
+			- New output option '-OUTPUT_RASTER_Z_AND_SF' to explicitly export altitudes AND scalar fields.
+				The former '-OUTPUT_RASTER_Z' option will only export the altitudes as its name implies.
 
 - New plugins
 	- MPlane: perform normal distance measurements against a defined plane (see https://www.cloudcompare.org/doc/wiki/index.php?title=MPlane_(plugin) )

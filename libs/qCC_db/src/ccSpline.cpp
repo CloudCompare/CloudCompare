@@ -109,6 +109,11 @@ bool ccSpline::computePosition(double s, CCVector3& P) const
 
 	size_t vertexCount = size();
 
+	//remap the input (s) to the actual range
+	//double low = m_nodes[m_degree];
+	//double high = m_nodes[vertexCount];
+	//s = s * (high - low) + low;
+
 	//domain of interest spans from knot 'm_degree' to knot 'size()' 
 	size_t index = m_degree;
 	for (; index < vertexCount; ++index)
@@ -358,27 +363,37 @@ void ccSpline::drawMeOnly(CC_DRAW_CONTEXT& context)
 		glFunc->glLineWidth(static_cast<GLfloat>(m_width));
 	}
 
-	unsigned displayVertCount = vertCount * 10; //FIXME
+	unsigned resolution = 10;
+	//unsigned displayVertCount = vertCount * 10; //FIXME
 
 	//DGM: we do the 'GL_LINE_LOOP' manually as I have a strange bug
 	//on one on my graphic card with this mode!
 	//glBegin(m_isClosed ? GL_LINE_LOOP : GL_LINE_STRIP);
 	glFunc->glBegin(GL_LINE_STRIP);
-	double s = 0.0;
-	double step = 1.0 / displayVertCount;
+	//double s = 0.0;
+	//double step = 1.0 / displayVertCount;
 	CCVector3 firstPoint;
-	for (unsigned i = 0; i <= displayVertCount; ++i)
+	for (size_t i = m_degree; i <vertCount; ++i)
 	{
-		CCVector3 P;
-		if (!computePosition(s, P))
-		{
+		double start = m_nodes[i];
+		double stop = m_nodes[i + 1];
+		double delta = stop - start;
+		if (delta < 1.0e-6)
 			continue;
-		}
-		s += step;
-		ccGL::Vertex3v(glFunc, P.u);
+		for (size_t j = 0; j < resolution; ++j)
+		{
+			CCVector3 P;
+			if (!computePosition(start + (j * delta) / (resolution - 1), P))
+			{
+				continue;
+			}
+			ccGL::Vertex3v(glFunc, P.u);
 
-		if (i == 0)
-			firstPoint = P;
+			if (i == m_degree && j == 0)
+			{
+				firstPoint = P;
+			}
+		}
 	}
 	if (m_isClosed)
 	{

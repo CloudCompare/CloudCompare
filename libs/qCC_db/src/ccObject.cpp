@@ -267,6 +267,10 @@ bool ccObject::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& ol
 	if (in.read((char*)&uniqueID, 4) < 0)
 		return ReadError();
 	//DGM: this ID will be useful to recreate dynamic links between entities later!
+	if (oldToNewIDMap.contains(uniqueID))
+	{
+		ccLog::Warning(QString("Malformed file: uniqueID #%1 is used several times! (not that unique ;)").arg(uniqueID));
+	}
 	oldToNewIDMap.insert(uniqueID, m_uniqueID);
 
 	//name

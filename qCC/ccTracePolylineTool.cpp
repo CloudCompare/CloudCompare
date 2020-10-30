@@ -638,6 +638,18 @@ void ccTracePolylineTool::exportLine()
 			m_poly3DVertices = nullptr;
 			m_poly3D = poly;
 		}
+		else
+		{
+			ccLog::Error("Oversampling failed");
+			m_associatedWin->addToOwnDB(m_poly3D);
+			return;
+		}
+	}
+	else
+	{
+		//update the IDs as we don't want to export an object with a reserved ID!
+		m_poly3D->setUniqueID(ccObject::GetNextUniqueID());
+		m_poly3DVertices->setUniqueID(ccObject::GetNextUniqueID());
 	}
 
 	m_poly3D->enableTempColor(false);

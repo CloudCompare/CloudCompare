@@ -41,6 +41,8 @@ v2.12 (???) - (in development)
 	- Command line:
 		- using the "-FBX" option would lead to an infinite loop
 		- filenames local ('foreign') characters were not preserved
+	- Trace polyline: the exported polylines has a wrong unique ID. Saving multiple polylines created this way in the
+		same BIN file could lead to a corrupted file.
 
 v2.11.3 (Anoia) - 08/09/2020
 ----------------------

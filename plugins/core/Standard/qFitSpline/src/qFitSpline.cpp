@@ -95,7 +95,12 @@ struct RecursiveSearch
 			seg.AC->posA = seg.posA;
 			seg.AC->A = seg.A;
 			seg.AC->posB = (seg.posA + seg.posB) / 2;
-			seg.AC->B = spline.computePosition(seg.AC->posB);
+			if (!spline.computePosition(seg.AC->posB, seg.AC->B))
+			{
+				assert(false);
+				minDistance = std::numeric_limits<double>::quiet_NaN();
+				return;
+			}
 		}
 		double distToAC = DistanceToSegment(P, *seg.AC);
 
@@ -175,10 +180,23 @@ static bool ComputeDistances(	const ccPointCloud& cloud,
 		{
 			Segment& seg = initialSegments[i];
 			seg.posA = s;
-			seg.A = (i == 0 ? spline.computePosition(seg.posA) : initialSegments[i - 1].B);
+			if (i == 0)
+			{
+				if (!spline.computePosition(seg.posA, seg.A))
+				{
+					return false;
+				}
+			}
+			else
+			{
+				seg.A = initialSegments[i - 1].B;
+			}
 			s += step;
 			seg.posB = s;
-			seg.B = spline.computePosition(seg.posB);
+			if (!spline.computePosition(seg.posB, seg.B))
+			{
+				return false;
+			}
 		}
 
 		distances.resize(pointCount, std::numeric_limits<double>::quiet_NaN());
@@ -311,19 +329,15 @@ struct FitSplineLMFunctor : LMFunctor<>
 	//static const int ValueCount = ; //3D points (cloud)
 	//static const int InputCount = ; //spline nodal values + 3D positions
 
-	FitSplineLMFunctor(	const ccSpline& spline,
-						const ccPointCloud& cloud,
-						double precision)
-		: LMFunctor<>(static_cast<int>(spline.nodes().size() + 3 * spline.size()), static_cast<int>(cloud.size()))
+	FitSplineLMFunctor(const ccSpline& spline,
+		const ccPointCloud& cloud,
+		double precision)
+		: LMFunctor<>(static_cast<int>(spline.nodes().size() - 2 * (spline.getOrder() - 1) + 3 * spline.size()), static_cast<int>(cloud.size()))
 		, m_spline(spline)
 		, m_cloud(cloud)
 		, m_localSpline(spline)
 		, m_distanceBuffer(cloud.size())
 		, m_precision(precision)
-	{
-	}
-
-	virtual ~FitSplineLMFunctor()
 	{
 	}
 
@@ -342,6 +356,8 @@ struct FitSplineLMFunctor : LMFunctor<>
 										m_precision,
 										true))
 		{
+			for (size_t i = 0; i < pointCount; ++i)
+				p_fvec(i) = std::numeric_limits<double>::max();
 			return -1;
 		}
 
@@ -364,31 +380,33 @@ struct FitSplineLMFunctor : LMFunctor<>
 
 	void updateSpline(ccSpline& spline, const Eigen::VectorXd& x) const override
 	{
+		size_t order = m_spline.getOrder();
 		size_t nodeCount = m_spline.nodes().size();
+		size_t changedNodeCount = nodeCount - 2 * (order - 1);
 		size_t vertexCount = spline.size();
-		assert(nodeCount + 3 * vertexCount == x.size());
+		assert(changedNodeCount + 3 * vertexCount == x.size());
 
 		//load the new nodal parameters
-		for (size_t i = 0; i < nodeCount; ++i)
+		for (size_t i = 0; i < changedNodeCount; ++i)
 		{
-			double nodeVal = m_spline.nodes()[i] + x(i) / 1.0;
+			double nodeVal = m_spline.nodes()[order + i] + x(i) / 1.0;
 			//consistency check
-			//if (nodeVal < 0.0)
-			//{
-			//	nodeVal = 0.0;
-			//}
-			//else if (nodeVal > 1.0)
-			//{
-			//	nodeVal = 1.0;
-			//}
-			if (i != 0 && nodeVal < spline.nodes()[i - 1])
+			if (nodeVal < 0.0)
 			{
-				nodeVal = spline.nodes()[i - 1];
+				nodeVal = 0.0;
 			}
-			spline.nodes()[i] = nodeVal;
+			else if (nodeVal > 1.0)
+			{
+				nodeVal = 1.0;
+			}
+			//if (i != 0 && nodeVal < spline.nodes()[order + i - 1])
+			//{
+			//	nodeVal = spline.nodes()[order + i - 1];
+			//}
+			spline.nodes()[order + i] = nodeVal;
 		}
 		//load the vertices positions
-		size_t j = nodeCount;
+		size_t j = changedNodeCount;
 		for (size_t i = 0; i < vertexCount; ++i)
 		{
 			const CCVector3* Po = m_spline.getPoint(static_cast<unsigned>(i));
@@ -406,11 +424,98 @@ struct FitSplineLMFunctor : LMFunctor<>
 	double m_precision;
 };
 
+struct FitSplineLMFunctorNodes : LMFunctor<>
+{
+	//static const int ValueCount = ; //3D points (cloud)
+	//static const int InputCount = ; //spline nodal values
+
+	FitSplineLMFunctorNodes(const ccSpline& spline,
+		const ccPointCloud& cloud,
+		double precision)
+		: LMFunctor<>(static_cast<int>(spline.nodes().size() - 2 * spline.getOrder()), static_cast<int>(cloud.size()))
+		, m_spline(spline)
+		, m_cloud(cloud)
+		, m_localSpline(spline)
+		, m_distanceBuffer(cloud.size())
+		, m_precision(precision)
+	{
+	}
+
+	int operator()(const Eigen::VectorXd& p_x, Eigen::VectorXd& p_fvec) const
+	{
+		updateSpline(m_localSpline, p_x);
+
+		size_t pointCount = m_cloud.size();
+		assert(pointCount == p_fvec.size());
+
+		double rms;
+		if (false == ComputeDistances(m_cloud,
+			m_localSpline,
+			m_distanceBuffer,
+			rms,
+			m_precision,
+			true))
+		{
+			for (size_t i = 0; i < pointCount; ++i)
+				p_fvec(i) = std::numeric_limits<double>::max();
+			return -1;
+		}
+
+		for (size_t i = 0; i < pointCount; ++i)
+		{
+			double distToSpline = m_distanceBuffer[i];
+
+			if (std::isfinite(distToSpline))
+			{
+				p_fvec(i) = distToSpline;
+			}
+			else
+			{
+				p_fvec(i) = 0.0; //FIXME
+			}
+		}
+
+		return 0;
+	}
+
+	void updateSpline(ccSpline& spline, const Eigen::VectorXd& x) const override
+	{
+		size_t order = m_spline.getOrder();
+		size_t nodeCount = m_spline.nodes().size() - 2 * order;
+		assert(nodeCount == x.size());
+
+		//load the new nodal parameters
+		for (size_t i = 0; i < nodeCount; ++i)
+		{
+			double nodeVal = m_spline.nodes()[order + i] + x(i) / 1.0;
+			//consistency check
+			if (nodeVal < 0.0)
+			{
+				nodeVal = 0.0;
+			}
+			else if (nodeVal > 1.0)
+			{
+				nodeVal = 1.0;
+			}
+			if (i != 0 && nodeVal < spline.nodes()[order + i])
+			{
+				nodeVal = spline.nodes()[order + i];
+			}
+			spline.nodes()[order + i] = nodeVal;
+		}
+	}
+
+	const ccSpline& m_spline;
+	const ccPointCloud& m_cloud;
+	mutable ccSpline m_localSpline;
+	mutable std::vector<double> m_distanceBuffer;
+	double m_precision;
+};
 
 struct FitSplineLMFunctorPos3D : LMFunctor<>
 {
 	//static const int ValueCount = ; //3D points (cloud)
-	//static const int InputCount = ; //spline nodal values + 3D positions
+	//static const int InputCount = ; //3D positions
 
 	FitSplineLMFunctorPos3D(const ccSpline& spline,
 		const ccPointCloud& cloud,
@@ -424,13 +529,12 @@ struct FitSplineLMFunctorPos3D : LMFunctor<>
 	{
 	}
 
-	virtual ~FitSplineLMFunctorPos3D()
-	{
-	}
-
 	int operator()(const Eigen::VectorXd& p_x, Eigen::VectorXd& p_fvec) const
 	{
 		updateSpline(m_localSpline, p_x);
+
+		size_t pointCount = m_cloud.size();
+		assert(pointCount == p_fvec.size());
 
 		double rms;
 		if (false == ComputeDistances(m_cloud,
@@ -440,11 +544,10 @@ struct FitSplineLMFunctorPos3D : LMFunctor<>
 			m_precision,
 			true))
 		{
+			for (size_t i = 0; i < pointCount; ++i)
+				p_fvec(i) = std::numeric_limits<double>::max();
 			return -1;
 		}
-
-		size_t pointCount = m_cloud.size();
-		assert(pointCount == p_fvec.size());
 
 		for (size_t i = 0; i < pointCount; ++i)
 		{
@@ -556,7 +659,7 @@ void qFitSpline::doAction()
 	ccSpline* spline = nullptr;
 	bool inputSpline = false;
 	ccHObject* splineParent = nullptr;
-	double precision = 1.0e-3;
+	double precision = 1.0e-4;
 
 	for (ccHObject* entity : m_app->getSelectedEntities())
 	{
@@ -607,59 +710,130 @@ void qFitSpline::doAction()
 		}
 	}
 
-	//using CurrentLMFunctor = FitSplineLMFunctorPos3D;
-	using CurrentLMFunctor = FitSplineLMFunctor;
+	bool changePosition = false;
+	bool changeNodes = true;
 
-	//LM routine functor
-	CurrentLMFunctor functor(*spline, *cloud, precision);
-	int inputCount = functor.inputs();
-
-	//initial parameters for LM routine
-	Eigen::VectorXd x(inputCount);
-	functor.initX(x);
-
-	//run LM routine
-	Eigen::NumericalDiff<CurrentLMFunctor> numDiff(functor, precision);
-	Eigen::LevenbergMarquardt<Eigen::NumericalDiff<CurrentLMFunctor>, double> lm(numDiff);
-
-	//set LM algorithm convergence parameters
-	lm.parameters.maxfev = 1000;
-	//lm.parameters.ftol = 1.0e-8; //absolute convergence criteria
-	//lm.parameters.xtol = 1.0e-6; //relative convergence criteria
-
-	Eigen::LevenbergMarquardtSpace::Status status = lm.minimize(x);
-	if (status <= 0)
+	//1st pass: change the vertex positions
+	if (changePosition)
 	{
-		m_app->dispToConsole(QString("Levenberg Marquardt optimization failed to converge (status: %1)").arg(status), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
-		if (!inputSpline && spline)
-			delete spline;
-		return;
-	}
-	else
-	{
-		m_app->dispToConsole(QString("Levenberg Marquardt optimization: iterations: %1 / func. evaluations: %2").arg(lm.iter).arg(lm.nfev), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
-	}
+		using CurrentLMFunctor = FitSplineLMFunctorPos3D;
 
-	//create the resulting spline (if not already)
-	if (inputSpline)
-	{
-		//That's bold 8-o
-		spline = new ccSpline(*spline);
-		inputSpline = false;
-	}
+		//LM routine functor
+		CurrentLMFunctor functor(*spline, *cloud, precision);
+		int inputCount = functor.inputs();
 
-	//update the output spline
-	functor.updateSpline(*spline, x);
+		//initial parameters for LM routine
+		Eigen::VectorXd x(inputCount);
+		functor.initX(x);
 
-	//compute the distances after optimization
-	{
-		std::vector<double> distances;
-		double rms;
-		ccLog::Print("Computing spline/cloud distances... (after optimization)");
-		if (!ComputeDistances(*cloud, *spline, distances, rms, precision, false))
+		//run LM routine
+		Eigen::NumericalDiff<CurrentLMFunctor> numDiff(functor, precision);
+		Eigen::LevenbergMarquardt<Eigen::NumericalDiff<CurrentLMFunctor>, double> lm(numDiff);
+
+		//set LM algorithm convergence parameters
+		lm.parameters.maxfev = 1000;
+		//lm.parameters.ftol = 1.0e-8; //absolute convergence criteria
+		//lm.parameters.xtol = 1.0e-6; //relative convergence criteria
+
+		Eigen::LevenbergMarquardtSpace::Status status = lm.minimize(x);
+		if (status <= 0)
 		{
-			m_app->dispToConsole("Failed to compute distances (after optimization)");
-			//return; //too late
+			m_app->dispToConsole(QString("Levenberg Marquardt optimization failed to converge (status: %1)").arg(status), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+			if (!inputSpline && spline)
+				delete spline;
+			return;
+		}
+		else
+		{
+			m_app->dispToConsole(QString("Levenberg Marquardt optimization: iterations: %1 / func. evaluations: %2").arg(lm.iter).arg(lm.nfev), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+		}
+
+		//create the resulting spline (if not already)
+		if (inputSpline)
+		{
+			//That's bold 8-o
+			spline = new ccSpline(*spline);
+			inputSpline = false;
+		}
+
+		//update the output spline
+		functor.updateSpline(*spline, x);
+
+		//compute the distances after optimization
+		{
+			std::vector<double> distances;
+			double rms;
+			ccLog::Print("Computing spline/cloud distances... (after optimization)");
+			if (!ComputeDistances(*cloud, *spline, distances, rms, precision, false))
+			{
+				m_app->dispToConsole("Failed to compute distances (after optimization)");
+				//return; //too late
+			}
+		}
+	}
+
+	//2nd pass: change the spline node values
+	if (changeNodes)
+	{
+		using CurrentLMFunctor = FitSplineLMFunctorNodes;
+
+		//LM routine functor
+		//precision = 1.0e-5;
+		CurrentLMFunctor functor(*spline, *cloud, precision);
+		int inputCount = functor.inputs();
+
+		//initial parameters for LM routine
+		Eigen::VectorXd x(inputCount);
+		functor.initX(x);
+
+		//run LM routine
+		Eigen::NumericalDiff<CurrentLMFunctor> numDiff(functor, precision);
+		Eigen::LevenbergMarquardt<Eigen::NumericalDiff<CurrentLMFunctor>, double> lm(numDiff);
+
+		//set LM algorithm convergence parameters
+		lm.parameters.maxfev = 1000;
+		//lm.parameters.ftol = 1.0e-8; //absolute convergence criteria
+		//lm.parameters.xtol = 1.0e-6; //relative convergence criteria
+
+		Eigen::LevenbergMarquardtSpace::Status status = lm.minimize(x);
+		if (status <= 0)
+		{
+			m_app->dispToConsole(QString("Levenberg Marquardt optimization failed to converge (status: %1)").arg(status), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+			if (!inputSpline && spline)
+				delete spline;
+			return;
+		}
+		else
+		{
+			m_app->dispToConsole(QString("Levenberg Marquardt optimization: iterations: %1 / func. evaluations: %2").arg(lm.iter).arg(lm.nfev), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+		}
+
+		//create the resulting spline (if not already)
+		if (inputSpline)
+		{
+			//That's bold 8-o
+			spline = new ccSpline(*spline);
+			inputSpline = false;
+		}
+
+		//update the output spline
+		functor.updateSpline(*spline, x);
+
+		//compute the distances after optimization
+		{
+			std::vector<double> distances;
+			double rms;
+			ccLog::Print("Computing spline/cloud distances... (after optimization)");
+			if (!ComputeDistances(*cloud, *spline, distances, rms, precision, false))
+			{
+				m_app->dispToConsole("Failed to compute distances (after optimization)");
+				//return; //too late
+			}
+		}
+
+		for (size_t i = 0; i < spline->nodes().size(); ++i)
+		{
+			ccLog::Print(QString("Node %1 = %2").arg(i + 1).arg(spline->nodes()[i]));
 		}
 	}
 

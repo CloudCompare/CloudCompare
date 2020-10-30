@@ -19,6 +19,7 @@ set( submod_plugins
 		${CMAKE_CURRENT_SOURCE_DIR}/qColorimetricSegmenter
 		${CMAKE_CURRENT_SOURCE_DIR}/qMasonry
 		${CMAKE_CURRENT_SOURCE_DIR}/qMPlane
+		${CMAKE_CURRENT_SOURCE_DIR}/qJSonRPCPlugin
 )
 
 foreach( dir ${submod_plugins} )

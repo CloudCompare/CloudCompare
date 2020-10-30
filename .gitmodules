@@ -16,3 +16,6 @@
 [submodule "plugins/core/Standard/qMasonry"]
 	path = plugins/core/Standard/qMasonry
 	url = https://github.com/CyberbuildLab/masonry-cc
+[submodule "plugins/core/Standard/qJSonRPCPlugin"]
+	path = plugins/core/Standard/qJSonRPCPlugin
+	url = https://gitlab.com/theadib/JSonRPCPlugin.git

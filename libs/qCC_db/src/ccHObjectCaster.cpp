@@ -42,6 +42,7 @@
 #include "ccPolyline.h"
 #include "ccShiftedObject.h"
 #include "ccSphere.h"
+#include "ccSpline.h"
 #include "ccSubMesh.h"
 #include "ccTorus.h"
 
@@ -143,6 +144,11 @@ ccSubMesh* ccHObjectCaster::ToSubMesh(ccHObject* obj)
 ccPolyline* ccHObjectCaster::ToPolyline(ccHObject* obj)
 {
 	return (obj && obj->isKindOf(CC_TYPES::POLY_LINE) ? static_cast<ccPolyline*>(obj) : nullptr);
+}
+
+ccSpline* ccHObjectCaster::ToSpline(ccHObject* obj)
+{
+	return obj && obj->isKindOf(CC_TYPES::SPLINE_LINE) ? static_cast<ccSpline*>(obj) : nullptr;
 }
 
 ccFacet* ccHObjectCaster::ToFacet(ccHObject* obj)

@@ -43,6 +43,7 @@ class ccPolyline;
 class ccSensor;
 class CCShareable;
 class ccShiftedObject;
+class ccSpline;
 
 class QAbstractItemView;
 class QStandardItem;
@@ -101,6 +102,7 @@ public:
 							OBJECT_TRANS_BUFFER_TRIHDERONS_SCALE	,
 							OBJECT_HISTORY_MATRIX_EDITOR			,
 							OBJECT_GLTRANS_MATRIX_EDITOR			,
+							OBJECT_SPLINE_PRECISION					,
 							TREE_VIEW_HEADER						,
 	};
 
@@ -162,6 +164,7 @@ private:
 	void cloudPointSizeChanged(int);
 	void polyineWidthChanged(int);
 	void trihedronsScaleChanged(double);
+	void splinePrecisionChanged(int);
 
 	void addSeparator(const QString& title);
 	void appendRow(QStandardItem* leftItem, QStandardItem* rightItem, bool openPersistentEditor = false);
@@ -176,6 +179,7 @@ private:
 	void fillWithSensor(const ccSensor*);
 	void fillWithTransBuffer(const ccIndexedTransformationBuffer*);
 	void fillWithPolyline(const ccPolyline*);
+	void fillWithSpline(const ccSpline*);
 	void fillWithPrimitive(const ccGenericPrimitive*);
 	void fillWithPointOctree(const ccOctree*);
 	void fillWithPointKdTree(const ccKdTree*);

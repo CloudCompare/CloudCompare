@@ -553,6 +553,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionSamplePointsOnPolyline,		&QAction::triggered, this, &MainWindow::doActionSamplePointsOnPolyline);
 	connect(m_UI->actionSmoothPolyline,				&QAction::triggered, this, &MainWindow::doActionSmoohPolyline);
 	connect(m_UI->actionPolylineToSpline,			&QAction::triggered, this, &MainWindow::doActionPolylineToSpline);
+	connect(m_UI->actionPolylineFromSpline,			&QAction::triggered, this, &MainWindow::doActionPolylineFromSpline);
 	
 	//"Edit > Plane" menu
 	connect(m_UI->actionCreatePlane,				&QAction::triggered, this, &MainWindow::doActionCreatePlane);
@@ -1241,7 +1242,7 @@ void MainWindow::doActionApplyScale()
 			//try to get the underlying cloud (or the vertices set for a mesh)
 			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(entity, &lockedVertices);
 			//otherwise we can look if the selected entity is a polyline
-			if (!cloud && entity->isA(CC_TYPES::POLY_LINE))
+			if (!cloud && entity->isKindOf(CC_TYPES::POLY_LINE))
 			{
 				cloud = dynamic_cast<ccGenericPointCloud*>(static_cast<ccPolyline*>(entity)->getAssociatedCloud());
 				if (!cloud || cloud->isAncestorOf(entity))
@@ -2702,32 +2703,53 @@ void MainWindow::doActionPolylineToSpline()
 {
 	for (ccHObject *entity : m_selectedEntities)
 	{
-		if (!entity->isKindOf(CC_TYPES::POLY_LINE))
+		ccPolyline* poly = ccHObjectCaster::ToPolyline(entity);
+		if (!poly)
 			continue;
 
-		ccPolyline* poly = ccHObjectCaster::ToPolyline(entity);
-		assert(poly);
-
-		ccPointCloud* vertices = ccPointCloud::From(poly->getAssociatedCloud());
-		ccSpline* spline = new ccSpline(vertices, 3);
-		spline->addChild(vertices);
-		spline->reserve(poly->size());
-		for (unsigned i = 0; i < poly->size(); ++i)
+		ccSpline* spline = nullptr;
+		try
 		{
-			spline->addPointIndex(poly->getPointGlobalIndex(i));
+			spline = new ccSpline(*poly, 3);
 		}
-		spline->updateInternalState();
+		catch (const std::bad_alloc&)
+		{
+			ccLog::Error("Not enough memory");
+			return;
+		}
 
 		if (poly->getParent())
 		{
 			poly->getParent()->addChild(spline);
 		}
 		spline->setDisplay_recursive(poly->getDisplay());
-		vertices->setEnabled(false);
 		poly->setEnabled(false);
 		addToDB(spline);
 
-		//m_ccRoot->selectEntity(spline, true);
+		m_ccRoot->selectEntity(spline, true);
+	}
+}
+
+void MainWindow::doActionPolylineFromSpline()
+{
+	for (ccHObject *entity : m_selectedEntities)
+	{
+		ccSpline* spline = ccHObjectCaster::ToSpline(entity);
+
+		if (!spline)
+			continue;
+
+		ccPolyline* poly = spline->toPoly();
+
+		if (spline->getParent())
+		{
+			spline->getParent()->addChild(poly);
+		}
+		poly->setDisplay_recursive(spline->getDisplay());
+		spline->setEnabled(false);
+		addToDB(poly);
+
+		m_ccRoot->selectEntity(poly, true);
 	}
 }
 
@@ -10490,6 +10512,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	bool atLeastOneGBLSensor = (selInfo.gblSensorCount > 0);
 	bool atLeastOneCameraSensor = (selInfo.cameraSensorCount > 0);
 	bool atLeastOnePolyline = (selInfo.polylineCount > 0);
+	bool atLeastOneSpline = (selInfo.splineCount > 0);
 	bool activeWindow = (getActiveGLWindow() != nullptr);
 
 	//menuEdit->setEnabled(atLeastOneEntity);
@@ -10508,12 +10531,12 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionExportDepthBuffer->setEnabled(atLeastOneGBLSensor);
 	m_UI->actionComputePointsVisibility->setEnabled(atLeastOneGBLSensor);
 	m_UI->actionResampleWithOctree->setEnabled(atLeastOneCloud);
-	m_UI->actionApplyScale->setEnabled(atLeastOneCloud || atLeastOneMesh || atLeastOnePolyline);
+	m_UI->actionApplyScale->setEnabled(atLeastOneCloud || atLeastOneMesh || atLeastOnePolyline || atLeastOneSpline);
 	m_UI->actionApplyTransformation->setEnabled(atLeastOneEntity);
 	m_UI->actionComputeOctree->setEnabled(atLeastOneCloud || atLeastOneMesh);
 	m_UI->actionComputeNormals->setEnabled(atLeastOneCloud || atLeastOneMesh);
 	m_UI->actionChangeColorLevels->setEnabled(atLeastOneCloud || atLeastOneMesh);
-	m_UI->actionEditGlobalShiftAndScale->setEnabled(atLeastOneCloud || atLeastOneMesh || atLeastOnePolyline);
+	m_UI->actionEditGlobalShiftAndScale->setEnabled(atLeastOneCloud || atLeastOneMesh || atLeastOnePolyline || atLeastOneSpline);
 	m_UI->actionCrop->setEnabled(atLeastOneCloud || atLeastOneMesh);
 	m_UI->actionSetUniqueColor->setEnabled(atLeastOneEntity/*atLeastOneCloud || atLeastOneMesh*/); //DGM: we can set color to a group now!
 	m_UI->actionColorize->setEnabled(atLeastOneEntity/*atLeastOneCloud || atLeastOneMesh*/); //DGM: we can set color to a group now!
@@ -10593,6 +10616,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionSamplePointsOnPolyline->setEnabled(atLeastOnePolyline);
 	m_UI->actionSmoothPolyline->setEnabled(atLeastOnePolyline);
 	m_UI->actionPolylineToSpline->setEnabled(atLeastOnePolyline);
+	m_UI->actionPolylineFromSpline->setEnabled(atLeastOneSpline);
 
 	m_UI->actionMeshTwoPolylines->setEnabled(selInfo.selCount == 2 && selInfo.polylineCount == 2);
 	m_UI->actionCreateSurfaceBetweenTwoPolylines->setEnabled(m_UI->actionMeshTwoPolylines->isEnabled()); //clone of actionMeshTwoPolylines

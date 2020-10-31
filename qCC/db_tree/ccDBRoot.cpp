@@ -188,7 +188,11 @@ private:
 		const int	viewportLabelIndex = mIconList.count();
 		mIconList.append( { QIcon(QStringLiteral(":/CC/images/dbAreaLabelSymbol.png")),
 							{} } );
-		
+
+		const int	splineIndex = mIconList.count();
+		mIconList.append({ QIcon(QStringLiteral(":/CC/images/dbSpline.png")),
+							{} });
+
 		mIconMap = {
 			{ CC_TYPES::HIERARCHY_OBJECT, hObjectIndex },
 			{ CC_TYPES::POINT_CLOUD, cloudIndex },
@@ -206,6 +210,7 @@ private:
 			{ CC_TYPES::MESH_GROUP, subMeshIndex },
 			{ CC_TYPES::SUB_MESH, subMeshIndex },
 			{ CC_TYPES::POLY_LINE, polyLineIndex },
+			{ CC_TYPES::SPLINE_LINE, splineIndex },
 			{ CC_TYPES::POINT_OCTREE, octreeIndex },
 			{ CC_TYPES::CALIBRATED_IMAGE, calibratedImageIndex },
 			{ CC_TYPES::IMAGE, imageIndex },
@@ -1195,9 +1200,13 @@ size_t ccDBRoot::getSelectedEntities(	ccHObject::Container& selectedEntities,
 				if (obj->isKindOf(CC_TYPES::PLANE))
 					info->planeCount++;
 			}
-			else if (obj->isKindOf(CC_TYPES::POLY_LINE))
+			else if (obj->isA(CC_TYPES::POLY_LINE))
 			{
 				info->polylineCount++;
+			}
+			else if (obj->isA(CC_TYPES::SPLINE_LINE))
+			{
+				info->splineCount++;
 			}
 			else if(obj->isKindOf(CC_TYPES::SENSOR))
 			{

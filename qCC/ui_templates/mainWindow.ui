@@ -323,7 +323,9 @@
      </property>
      <addaction name="actionSamplePointsOnPolyline"/>
      <addaction name="actionSmoothPolyline"/>
+     <addaction name="separator"/>
      <addaction name="actionPolylineToSpline"/>
+     <addaction name="actionPolylineFromSpline"/>
     </widget>
     <addaction name="menuColors"/>
     <addaction name="menuNormals"/>
@@ -3073,6 +3075,11 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionPolylineToSpline">
    <property name="text">
     <string>To spline</string>
+   </property>
+  </action>
+  <action name="actionPolylineFromSpline">
+   <property name="text">
+    <string>From spline</string>
    </property>
   </action>
  </widget>

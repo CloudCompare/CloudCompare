@@ -53,6 +53,7 @@
 #include <ccScalarField.h>
 #include <ccSensor.h>
 #include <ccSphere.h>
+#include <ccSpline.h>
 #include <ccSubMesh.h>
 
 //Qt
@@ -231,6 +232,10 @@ void ccPropertiesTreeDelegate::fillModel(ccHObject* hObject)
 	else if (m_currentObject->isA(CC_TYPES::POLY_LINE))
 	{
 		fillWithPolyline(ccHObjectCaster::ToPolyline(m_currentObject));
+	}
+	else if (m_currentObject->isA(CC_TYPES::SPLINE_LINE))
+	{
+		fillWithSpline(ccHObjectCaster::ToSpline(m_currentObject));
 	}
 	else if (m_currentObject->isA(CC_TYPES::POINT_OCTREE))
 	{
@@ -763,7 +768,7 @@ void ccPropertiesTreeDelegate::fillWithPolyline(const ccPolyline* _obj)
 	appendRow(ITEM( tr( "Vertices" ) ), ITEM(QLocale(QLocale::English).toString(_obj->size())));
 
 	//polyline length
-	appendRow(ITEM( tr( "Length" ) ), ITEM(QLocale(QLocale::English).toString(_obj->computeLength())));
+	appendRow(ITEM(tr("Length")), ITEM(QLocale(QLocale::English).toString(_obj->computeLength())));
 
 	//custom line width
 	appendRow(ITEM( tr( "Line width" ) ), PERSISTENT_EDITOR(OBJECT_POLYLINE_WIDTH), true);
@@ -771,6 +776,33 @@ void ccPropertiesTreeDelegate::fillWithPolyline(const ccPolyline* _obj)
 	//global shift & scale
 	fillWithShifted(_obj);
 }
+
+void ccPropertiesTreeDelegate::fillWithSpline(const ccSpline* _obj)
+{
+	assert(_obj && m_model);
+	if (!_obj || !m_model)
+	{
+		return;
+	}
+
+	addSeparator(tr("Spline"));
+
+	//number of vertices
+	appendRow(ITEM(tr("Control points")), ITEM(QLocale(QLocale::English).toString(_obj->size())));
+
+	//degree
+	appendRow(ITEM(tr("Degree")), ITEM(QLocale(QLocale::English).toString(_obj->getDegree())));
+
+	//drawing precision
+	appendRow(ITEM(tr("Drawing precision")), PERSISTENT_EDITOR(OBJECT_SPLINE_PRECISION), true);
+
+	//custom line width
+	appendRow(ITEM(tr("Line width")), PERSISTENT_EDITOR(OBJECT_POLYLINE_WIDTH), true);
+
+	//global shift & scale
+	fillWithShifted(_obj);
+}
+
 
 void ccPropertiesTreeDelegate::fillWithPointOctree(const ccOctree* _obj)
 {
@@ -1290,10 +1322,22 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		outputWidget = spinBox;
 	}
 	break;
+	case OBJECT_SPLINE_PRECISION:
+	{
+		QSpinBox* spinBox = new QSpinBox(parent);
+		spinBox->setRange(ccSpline::MIN_DRAWING_PRECISION, 100);
+		spinBox->setSingleStep(2);
+
+		connect(spinBox, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+			this, &ccPropertiesTreeDelegate::splinePrecisionChanged);
+
+		outputWidget = spinBox;
+	}
+	break;
 	case OBJECT_PRIMITIVE_PRECISION:
 	{
 		QSpinBox* spinBox = new QSpinBox(parent);
-		spinBox->setRange(4, 360);
+		spinBox->setRange(ccGenericPrimitive::MIN_DRAWING_PRECISION, 360);
 		spinBox->setSingleStep(4);
 
 		connect(spinBox, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
@@ -1764,6 +1808,13 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 		ccOctree* octree = ccHObjectCaster::ToOctree(m_currentObject);
 		assert(octree);
 		SetSpinBoxValue(editor, octree ? octree->getDisplayedLevel() : 0);
+		break;
+	}
+	case OBJECT_SPLINE_PRECISION:
+	{
+		ccSpline* spline = ccHObjectCaster::ToSpline(m_currentObject);
+		assert(spline);
+		SetSpinBoxValue(editor, spline ? spline->getDrawingPrecision() : 0);
 		break;
 	}
 	case OBJECT_PRIMITIVE_PRECISION:
@@ -2246,6 +2297,26 @@ void ccPropertiesTreeDelegate::octreeDisplayedLevelChanged(int val)
 	if (octree && octree->getDisplayedLevel() != val) //to avoid infinite loops!
 	{
 		octree->setDisplayedLevel(val);
+		updateDisplay();
+		//we must also reset the properties display!
+		updateModel();
+	}
+}
+
+void ccPropertiesTreeDelegate::splinePrecisionChanged(int val)
+{
+	if (!m_currentObject)
+	{
+		return;
+	}
+
+	ccSpline* spline = ccHObjectCaster::ToSpline(m_currentObject);
+	assert(spline);
+
+	if (spline->getDrawingPrecision() != static_cast<unsigned int>(val))
+	{
+		spline->setDrawingPrecision(val);
+
 		updateDisplay();
 		//we must also reset the properties display!
 		updateModel();

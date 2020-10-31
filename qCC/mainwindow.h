@@ -298,6 +298,7 @@ private:
 	void doActionSamplePointsOnPolyline();
 	void doActionSmoohPolyline();
 	void doActionPolylineToSpline();
+	void doActionPolylineFromSpline();
 	void doActionConvertTextureToColor();
 	void doActionLabelConnectedComponents();
 	void doActionComputeStatParams();

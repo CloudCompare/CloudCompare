@@ -47,6 +47,7 @@ struct dbTreeSelectionInfo
 	size_t gridCound;
 	size_t groupCount;
 	size_t polylineCount;
+	size_t splineCount;
 	size_t planeCount;
 	size_t meshCount;
 	size_t imageCount;

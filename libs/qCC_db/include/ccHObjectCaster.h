@@ -48,6 +48,7 @@ class ccPolyline;
 class ccSensor;
 class ccShiftedObject;
 class ccSphere;
+class ccSpline;
 class ccSubMesh;
 class ccTorus;
 
@@ -84,6 +85,9 @@ public:
 
 	//! Converts current object to ccPolyline (if possible)
 	static ccPolyline* ToPolyline(ccHObject* obj);
+
+	//! Converts current object to ccSpline (if possible)
+	static ccSpline* ToSpline(ccHObject* obj);
 
 	//! Converts current object to ccFacet (if possible)
 	static ccFacet* ToFacet(ccHObject* obj);

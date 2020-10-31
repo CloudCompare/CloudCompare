@@ -22,26 +22,26 @@ public:
 	**/
 	enum NodeType
 	{
-		Uniform,
-		OpenUniform // Connected to the first and last control points
+		Uniform,		// Uniform (with mirrored node values on the sides)
+		OpenUniform,	// Connected to the first and last control points
+		Custom			// Custom values (must be set manually)
 	};
 
-	//! Default constructor
-	/** \param associatedCloud the associated point cloud (i.e. the vertices)
+	//! Default constructor (empty spline)
+	/** After the control points are set, one should call 'initNodes' to initialize the knots.
+		\param associatedCloud the associated point cloud (i.e. the vertices)
 		\param k order of the spline (minimum is 2). Order is equal to 'degree + 1'
-		\param nodeType nodal vector type
 		\param uniqueID unique ID (handle with care)
 	**/
 	explicit ccSpline(	GenericIndexedCloudPersist* associatedCloud,
-						size_t order = 3,
-						NodeType nodeType = OpenUniform,
+						unsigned order = 3,
 						unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID);
 
 	//! Constructor from a polyline
 	/** \param poly polyline to 'clone'
 	**/
 	ccSpline(	const ccPolyline& poly,
-				size_t order = 3,
+				unsigned order = 3,
 				NodeType nodeType = OpenUniform	);
 
 	//! Copy constructor
@@ -52,14 +52,16 @@ public:
 	//! Returns class ID
 	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::SPLINE_LINE; }
 
-	//! Returns the spline order
-	inline size_t getOrder() const { return m_degree + 1; }
+	//! Returns the spline order (= degree + 1)
+	inline unsigned getOrder() const { return m_degree + 1; }
 
-	//! Returns the spline degree
-	inline size_t getDegree() const { return m_degree; }
+	//! Returns the spline degree (= order - 1)
+	inline unsigned getDegree() const { return m_degree; }
 
-	//! Sets the nodal vector type
-	bool setNodeType(NodeType type);
+	//! Inits the knots
+	/** \warning Will reset the node values
+	**/
+	bool initNodes(NodeType type);
 
 	//! Evaluates the position of the spline at a given curvilinear position
 	/** \param s curvilinear position (between 0 and 1)
@@ -68,21 +70,35 @@ public:
 	**/
 	bool computePosition(double s, CCVector3& P) const;
 
-	//! Updates the spline based on the current state of the associated cloud / vertices
-	/** Should be called whenever the vertices are changed
-	**/
-	bool updateInternalState();
-
-	//! The splines nodes
+	//! Returns the node values
 	std::vector<double>& nodes() { return m_nodes; }
 
-	//! The splines nodes (const version)
+	//! Returns the node values (const version)
 	const std::vector<double>& nodes() const { return m_nodes; }
+
+	//! Minimum drawing precision
+	/** \warning Never pass a 'constant initializer' by reference
+	**/
+	static const unsigned MIN_DRAWING_PRECISION = 4;
+
+	//! Sets drawing precision
+	/** \param precision drawing precision (should be >= MIN_DRAWING_PRECISION)
+	**/
+	inline void setDrawingPrecision(unsigned precision)
+	{
+		m_drawPrecision = std::max(MIN_DRAWING_PRECISION, precision);
+	}
+
+	//! Returns drawing precision (or 0 if feature is not supported)
+	inline unsigned getDrawingPrecision() const { return m_drawPrecision; }
+
+	//! Converts this spline to a polyline (using the current drawing precision)
+	ccPolyline* toPoly() const;
 
 protected: //methods
 
 	//! Returns the theoretical number of knots
-	size_t expectedKnotCount() const;
+	unsigned expectedKnotCount() const;
 
 	//inherited from ccHObject
 	bool toFile_MeOnly(QFile& out) const override;
@@ -94,14 +110,11 @@ protected: //methods
 	//! Returns whether the spline is valid or not
 	bool isValid() const;
 
-	//! Sets value and size of the nodal vector depending on the current number of control points
-	bool setNodalVector();
-
 	//! Sets values of the nodal vector to be uniform
-	bool setNodeToUniform();
+	void setNodeToUniform();
 
 	//! Sets values of the nodal vector to be open uniform
-	bool setNodeToOpenUniform();
+	void setNodeToOpenUniform();
 
 	//! Evaluates the equation of a spline using the blossom algorithm
 	/** \param s curvilinear position
@@ -115,8 +128,7 @@ protected: //methods
 							const std::vector<double>& nodes) const;
 
 protected: //attributes
-	NodeType m_nodeType;				//! Nodal vector type
-	size_t m_degree;					//! Spline degree
-	std::vector<CCVector3> m_deltas;	//! Control points deltas
-	std::vector<double>	m_nodes;		//! Nodal vector
+	unsigned m_degree;					//!< Spline degree
+	std::vector<double>	m_nodes;		//!< Nodal vector
+	unsigned m_drawPrecision;			//!< Drawing precision
 };

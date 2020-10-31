@@ -257,7 +257,7 @@ static bool ComputeDistances(	const ccPointCloud& cloud,
 		{
 			ccLog::Print(QString("[qFitSpline::ComputeDistances] RMS = %1").arg(rms));
 			double avgDepth = depthSum / pointCount;
-			ccLog::Print(QString("[qFitSpline::ComputeDistances] Search depth in [%1 ; %2] (avg = %3)").arg(minDepth).arg(maxDepth).arg(avgDepth));
+			ccLog::Print(QString("[qFitSpline::ComputeDistances] Search depths in [%1 ; %2] (avg = %3)").arg(minDepth).arg(maxDepth).arg(avgDepth));
 		}
 	}
 	catch (const std::bad_alloc&)
@@ -669,7 +669,7 @@ void qFitSpline::doAction()
 		{
 			if (cloud)
 			{
-				m_app->dispToConsole("Only one cloud expected", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+				ccLog::Error("Only one cloud expected");
 				return;
 			}
 			cloud = static_cast<ccPointCloud*>(entity);
@@ -678,7 +678,7 @@ void qFitSpline::doAction()
 		{
 			if (spline)
 			{
-				m_app->dispToConsole("Only one spline or polyline expected", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+				ccLog::Error("Only one spline or polyline expected");
 				return;
 			}
 
@@ -704,7 +704,7 @@ void qFitSpline::doAction()
 		ccLog::Print("Computing spline/cloud distances... (before optimization)");
 		if (!ComputeDistances(*cloud, *spline, distances, rms, precision, false))
 		{
-			m_app->dispToConsole("Failed to compute distances (before optimization)");
+			ccLog::Error("Failed to compute distances (before optimization)");
 			return;
 		}
 	}
@@ -738,14 +738,14 @@ void qFitSpline::doAction()
 		Eigen::LevenbergMarquardtSpace::Status status = lm.minimize(x);
 		if (status <= 0)
 		{
-			m_app->dispToConsole(QString("Levenberg Marquardt optimization failed to converge (status: %1)").arg(status), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+			ccLog::Error(QString("Levenberg Marquardt optimization failed to converge (status: %1)").arg(status));
 			if (!inputSpline && spline)
 				delete spline;
 			return;
 		}
 		else
 		{
-			m_app->dispToConsole(QString("Levenberg Marquardt optimization: iterations: %1 / func. evaluations: %2").arg(lm.iter).arg(lm.nfev), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+			ccLog::Print(QString("Levenberg Marquardt optimization: iterations: %1 / func. evaluations: %2").arg(lm.iter).arg(lm.nfev));
 		}
 
 		//create the resulting spline (if not already)
@@ -766,7 +766,7 @@ void qFitSpline::doAction()
 			ccLog::Print("Computing spline/cloud distances... (after optimization)");
 			if (!ComputeDistances(*cloud, *spline, distances, rms, precision, false))
 			{
-				m_app->dispToConsole("Failed to compute distances (after optimization)");
+				ccLog::Warning("Failed to compute distances (after optimization)");
 				//return; //too late
 			}
 		}
@@ -797,14 +797,14 @@ void qFitSpline::doAction()
 		Eigen::LevenbergMarquardtSpace::Status status = lm.minimize(x);
 		if (status <= 0)
 		{
-			m_app->dispToConsole(QString("Levenberg Marquardt optimization failed to converge (status: %1)").arg(status), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+			ccLog::Error(QString("Levenberg Marquardt optimization failed to converge (status: %1)").arg(status));
 			if (!inputSpline && spline)
 				delete spline;
 			return;
 		}
 		else
 		{
-			m_app->dispToConsole(QString("Levenberg Marquardt optimization: iterations: %1 / func. evaluations: %2").arg(lm.iter).arg(lm.nfev), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+			ccLog::Print(QString("Levenberg Marquardt optimization: iterations: %1 / func. evaluations: %2").arg(lm.iter).arg(lm.nfev));
 		}
 
 		//create the resulting spline (if not already)
@@ -825,7 +825,7 @@ void qFitSpline::doAction()
 			ccLog::Print("Computing spline/cloud distances... (after optimization)");
 			if (!ComputeDistances(*cloud, *spline, distances, rms, precision, false))
 			{
-				m_app->dispToConsole("Failed to compute distances (after optimization)");
+				ccLog::Warning("Failed to compute distances (after optimization)");
 				//return; //too late
 			}
 		}
@@ -856,14 +856,14 @@ void qFitSpline::doAction()
 		Eigen::LevenbergMarquardtSpace::Status status = lm.minimize(x);
 		if (status <= 0)
 		{
-			m_app->dispToConsole(QString("Levenberg Marquardt optimization failed to converge (status: %1)").arg(status), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+			ccLog::Error(QString("Levenberg Marquardt optimization failed to converge (status: %1)").arg(status));
 			if (!inputSpline && spline)
 				delete spline;
 			return;
 		}
 		else
 		{
-			m_app->dispToConsole(QString("Levenberg Marquardt optimization: iterations: %1 / func. evaluations: %2").arg(lm.iter).arg(lm.nfev), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+			ccLog::Print(QString("Levenberg Marquardt optimization: iterations: %1 / func. evaluations: %2").arg(lm.iter).arg(lm.nfev));
 		}
 
 		//create the resulting spline (if not already)
@@ -881,10 +881,10 @@ void qFitSpline::doAction()
 		{
 			std::vector<double> distances;
 			double rms;
-			ccLog::Print("Computing spline/cloud distances... (after optimization)");
+			ccLog::Error("Computing spline/cloud distances... (after optimization)");
 			if (!ComputeDistances(*cloud, *spline, distances, rms, precision, false))
 			{
-				m_app->dispToConsole("Failed to compute distances (after optimization)");
+				ccLog::Warning("Failed to compute distances (after optimization)", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 				//return; //too late
 			}
 		}

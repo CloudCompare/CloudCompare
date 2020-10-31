@@ -11,7 +11,7 @@ env:
 install:
 - sudo apt-get update -qq
 - sudo apt-get install -qy cmake
-  libqt5svg5-dev libqt5opengl5-dev qt5-default qttools5-dev qttools5-dev-tools
+  libqt5svg5-dev libqt5opengl5-dev qt5-default qttools5-dev qttools5-dev-tools libqt5websockets5-dev
   libtbb-dev
   libavcodec-dev libavformat-dev libavutil-dev libswscale-dev
   libboost-program-options-dev libboost-thread-dev

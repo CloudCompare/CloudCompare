@@ -343,42 +343,47 @@ larger). You may have to increase the points size beforehand.</source>
         <translation>Вых. файл</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="429"/>
+        <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="448"/>
+        <source>Format</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="462"/>
         <source>Preview the animation</source>
         <translation>Предпросмотр анимации</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="432"/>
+        <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="465"/>
         <source>Preview</source>
         <translation>Предпросмотр</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="439"/>
+        <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="472"/>
         <source>Creates the animation file</source>
         <translation>Записать файл анимации</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="442"/>
+        <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="475"/>
         <source>Render</source>
         <translation>Запись</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="449"/>
+        <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="482"/>
         <source>Export frames as individual images</source>
         <translation>Экспорт кадров как отдельных изображений</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="452"/>
+        <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="485"/>
         <source>Export frames</source>
         <translation>Экспорт кадров</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="461"/>
+        <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="494"/>
         <source>Start preview from selected step</source>
         <translation>Начать предпросмотр с выбранного кадра</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="474"/>
+        <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="507"/>
         <source>Export trajectory on exit</source>
         <translation>Экспорт траектории</translation>
     </message>
@@ -4468,6 +4473,16 @@ CloudCompare как и большинство графических адапт�
         <translation>Отмена</translation>
     </message>
     <message>
+        <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="207"/>
+        <source>Activate rectangular selection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="219"/>
+        <source>Activate polyline selection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="186"/>
         <source>Cancel segentation</source>
         <translation>Отменить сегментирование</translation>
@@ -4513,19 +4528,9 @@ CloudCompare как и большинство графических адапт�
         <translation>Прямоугольное выделение</translation>
     </message>
     <message>
-        <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="207"/>
-        <source>Activates rectangular selection</source>
-        <translation>Включает выделение прямоугольной рамкой</translation>
-    </message>
-    <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="216"/>
         <source>Polygonal selection</source>
         <translation>Выделение полигоном</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="219"/>
-        <source>Activaites polyline selection</source>
-        <translation>Включает выделение полилинией</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="228"/>
@@ -10761,6 +10766,9 @@ p, li { white-space: pre-wrap; }
         <location filename="../ccCommandLineCommands.cpp" line="3377"/>
         <location filename="../ccCommandLineCommands.cpp" line="3393"/>
         <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerCommand.cpp" line="72"/>
+        <location filename="../../plugins/core/Standard/qCSF/include/qCSFCommands.h" line="143"/>
+        <location filename="../../plugins/core/Standard/qCSF/include/qCSFCommands.h" line="154"/>
+        <location filename="../../plugins/core/Standard/qCSF/include/qCSFCommands.h" line="165"/>
         <location filename="../../plugins/core/Standard/qPCV/src/PCVCommand.cpp" line="180"/>
         <location filename="../../plugins/core/Standard/qPCV/src/PCVCommand.cpp" line="190"/>
         <source>Invalid parameter: value after &quot;-%1&quot;</source>
@@ -11287,12 +11295,12 @@ p, li { white-space: pre-wrap; }
         <translation>%1_Ядро_характеристики_%2</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qFBXIO/src/FBXCommand.cpp" line="46"/>
+        <location filename="../../plugins/core/IO/qFBXIO/src/FBXCommand.cpp" line="44"/>
         <source>Missing parameter: FBX format (string) after &apos;%1&apos;</source>
         <translation>Отсутствует параметр: формат FBX (строки) после &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qFBXIO/src/FBXCommand.cpp" line="49"/>
+        <location filename="../../plugins/core/IO/qFBXIO/src/FBXCommand.cpp" line="47"/>
         <source>FBX format: %1</source>
         <translation>Формат FBX: %1</translation>
     </message>
@@ -11682,12 +11690,12 @@ Cells: %L2 x %L3</source>
         <translation>Загрузка: %1</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/BinFilter.cpp" line="1065"/>
+        <location filename="../../libs/qCC_io/src/BinFilter.cpp" line="1071"/>
         <source>Open Bin file (old style)</source>
         <translation>Открыть файл BIN (старый стиль)</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/BinFilter.cpp" line="1091"/>
+        <location filename="../../libs/qCC_io/src/BinFilter.cpp" line="1097"/>
         <source>cloud %1/%2 (%3 points)</source>
         <translation>облако %1/%2 (%3 точек)</translation>
     </message>
@@ -12076,6 +12084,16 @@ Missing parameter: Directory after &quot;-%1 %2&quot;</source>
 Cells: %2 x %3</source>
         <translation>Уровней: %1
 Ячеек: %2 x %3</translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qCSF/include/qCSFCommands.h" line="255"/>
+        <source>_ground_points</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qCSF/include/qCSFCommands.h" line="269"/>
+        <source>_offground_points</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -14478,22 +14496,22 @@ You should fill the empty cells...</source>
 <context>
     <name>ccCompass</name>
     <message>
-        <location filename="../../plugins/core/Standard/qCompass/src/ccCompass.cpp" line="3429"/>
+        <location filename="../../plugins/core/Standard/qCompass/src/ccCompass.cpp" line="3433"/>
         <source>SVG Output file</source>
         <translation>Вых. файл SVG</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qCompass/src/ccCompass.cpp" line="3429"/>
+        <location filename="../../plugins/core/Standard/qCompass/src/ccCompass.cpp" line="3433"/>
         <source>SVG files (*.svg)</source>
         <translation>файлы SVG (*.svg)</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qCompass/src/ccCompass.cpp" line="3448"/>
+        <location filename="../../plugins/core/Standard/qCompass/src/ccCompass.cpp" line="3452"/>
         <source>Output file</source>
         <translation>Вывод в файл</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qCompass/src/ccCompass.cpp" line="3448"/>
+        <location filename="../../plugins/core/Standard/qCompass/src/ccCompass.cpp" line="3452"/>
         <source>CSV files (*.csv *.txt);;XML (*.xml)</source>
         <translation>файлы CSV (*.csv *.txt);;XML (*.xml)</translation>
     </message>
@@ -15837,12 +15855,12 @@ At least 2 viewports must be selected.</source>
 <context>
     <name>qAnimationDlg</name>
     <message>
-        <location filename="../../plugins/core/Standard/qAnimation/src/qAnimationDlg.cpp" line="801"/>
+        <location filename="../../plugins/core/Standard/qAnimation/src/qAnimationDlg.cpp" line="833"/>
         <source>Output animation file</source>
         <translation>Выходной файл анимации</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qAnimation/src/qAnimationDlg.cpp" line="805"/>
+        <location filename="../../plugins/core/Standard/qAnimation/src/qAnimationDlg.cpp" line="837"/>
         <source>Open Directory</source>
         <translation>Открыть Директорий</translation>
     </message>

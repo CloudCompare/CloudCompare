@@ -343,42 +343,47 @@ larger). You may have to increase the points size beforehand.</source>
         <translation>Archivo de salida</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="429"/>
+        <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="448"/>
+        <source>Format</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="462"/>
         <source>Preview the animation</source>
         <translation>Previsualiza la animación</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="432"/>
+        <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="465"/>
         <source>Preview</source>
         <translation>Vista previa</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="439"/>
+        <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="472"/>
         <source>Creates the animation file</source>
         <translation>Crea el archivo de animación</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="442"/>
+        <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="475"/>
         <source>Render</source>
         <translation>Generar animación</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="449"/>
+        <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="482"/>
         <source>Export frames as individual images</source>
         <translation>Exporta los fotogramas como imágenes individuales</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="452"/>
+        <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="485"/>
         <source>Export frames</source>
         <translation>Exportar fotogramas</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="461"/>
+        <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="494"/>
         <source>Start preview from selected step</source>
         <translation>Iniciar vista previa a partir del paso seleccionado</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="474"/>
+        <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="507"/>
         <source>Export trajectory on exit</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4446,6 +4451,16 @@ Nota: la diagonal no es probada durante el proceso de carga.</translation>
         <translation>Cancelar</translation>
     </message>
     <message>
+        <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="207"/>
+        <source>Activate rectangular selection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="219"/>
+        <source>Activate polyline selection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="186"/>
         <source>Cancel segentation</source>
         <translation>Cancelar segmentación</translation>
@@ -4491,19 +4506,9 @@ Nota: la diagonal no es probada durante el proceso de carga.</translation>
         <translation>Selección rectangular</translation>
     </message>
     <message>
-        <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="207"/>
-        <source>Activates rectangular selection</source>
-        <translation>Activa la selección rectangular</translation>
-    </message>
-    <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="216"/>
         <source>Polygonal selection</source>
         <translation>Selección poligonal</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="219"/>
-        <source>Activaites polyline selection</source>
-        <translation>Activa la selección mediante polilínea</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="228"/>
@@ -10722,6 +10727,9 @@ p, li { white-space: pre-wrap; }
         <location filename="../ccCommandLineCommands.cpp" line="3377"/>
         <location filename="../ccCommandLineCommands.cpp" line="3393"/>
         <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerCommand.cpp" line="72"/>
+        <location filename="../../plugins/core/Standard/qCSF/include/qCSFCommands.h" line="143"/>
+        <location filename="../../plugins/core/Standard/qCSF/include/qCSFCommands.h" line="154"/>
+        <location filename="../../plugins/core/Standard/qCSF/include/qCSFCommands.h" line="165"/>
         <location filename="../../plugins/core/Standard/qPCV/src/PCVCommand.cpp" line="180"/>
         <location filename="../../plugins/core/Standard/qPCV/src/PCVCommand.cpp" line="190"/>
         <source>Invalid parameter: value after &quot;-%1&quot;</source>
@@ -11233,12 +11241,12 @@ p, li { white-space: pre-wrap; }
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qFBXIO/src/FBXCommand.cpp" line="46"/>
+        <location filename="../../plugins/core/IO/qFBXIO/src/FBXCommand.cpp" line="44"/>
         <source>Missing parameter: FBX format (string) after &apos;%1&apos;</source>
         <translation>Parámetro faltante: formato FBX (cadena de caracteres) luego de &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qFBXIO/src/FBXCommand.cpp" line="49"/>
+        <location filename="../../plugins/core/IO/qFBXIO/src/FBXCommand.cpp" line="47"/>
         <source>FBX format: %1</source>
         <translation>Formato FBX: %1</translation>
     </message>
@@ -11628,12 +11636,12 @@ Celdas: %L2 x %L3</translation>
         <translation>Cargando: %1</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/BinFilter.cpp" line="1065"/>
+        <location filename="../../libs/qCC_io/src/BinFilter.cpp" line="1071"/>
         <source>Open Bin file (old style)</source>
         <translation>Abrir archivo BIN (estilo viejo)</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/BinFilter.cpp" line="1091"/>
+        <location filename="../../libs/qCC_io/src/BinFilter.cpp" line="1097"/>
         <source>cloud %1/%2 (%3 points)</source>
         <translation>nube %1/%2 (%3 puntos)</translation>
     </message>
@@ -12022,6 +12030,16 @@ Missing parameter: Directory after &quot;-%1 %2&quot;</source>
 Cells: %2 x %3</source>
         <translation type="unfinished">Niveles: %1
 Celdas: %2 x %3</translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qCSF/include/qCSFCommands.h" line="255"/>
+        <source>_ground_points</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qCSF/include/qCSFCommands.h" line="269"/>
+        <source>_offground_points</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -14419,22 +14437,22 @@ Deberías rellenar las celdas vacías...</translation>
 <context>
     <name>ccCompass</name>
     <message>
-        <location filename="../../plugins/core/Standard/qCompass/src/ccCompass.cpp" line="3429"/>
+        <location filename="../../plugins/core/Standard/qCompass/src/ccCompass.cpp" line="3433"/>
         <source>SVG Output file</source>
         <translation>Archivo de salida SVG</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qCompass/src/ccCompass.cpp" line="3429"/>
+        <location filename="../../plugins/core/Standard/qCompass/src/ccCompass.cpp" line="3433"/>
         <source>SVG files (*.svg)</source>
         <translation>Archivos SVG (*.svg)</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qCompass/src/ccCompass.cpp" line="3448"/>
+        <location filename="../../plugins/core/Standard/qCompass/src/ccCompass.cpp" line="3452"/>
         <source>Output file</source>
         <translation>Archivo resultante</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qCompass/src/ccCompass.cpp" line="3448"/>
+        <location filename="../../plugins/core/Standard/qCompass/src/ccCompass.cpp" line="3452"/>
         <source>CSV files (*.csv *.txt);;XML (*.xml)</source>
         <translation>Archivos CSV (*.csv, *txt);;XML (*.xml)</translation>
     </message>
@@ -15778,12 +15796,12 @@ Al menos dos vistas deben ser seleccionadas.</translation>
 <context>
     <name>qAnimationDlg</name>
     <message>
-        <location filename="../../plugins/core/Standard/qAnimation/src/qAnimationDlg.cpp" line="801"/>
+        <location filename="../../plugins/core/Standard/qAnimation/src/qAnimationDlg.cpp" line="833"/>
         <source>Output animation file</source>
         <translation>Archivo resultante de la animación</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qAnimation/src/qAnimationDlg.cpp" line="805"/>
+        <location filename="../../plugins/core/Standard/qAnimation/src/qAnimationDlg.cpp" line="837"/>
         <source>Open Directory</source>
         <translation>Abrir Carpeta</translation>
     </message>

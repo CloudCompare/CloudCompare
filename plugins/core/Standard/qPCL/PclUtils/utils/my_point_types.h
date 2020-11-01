@@ -22,6 +22,7 @@
 #include <pcl/register_point_struct.h>
 #include <pcl/point_types.h>
 #include <boost/cstdint.hpp>
+#include <pcl/io/boost.h> // for boost::uint8_t
 
 //! PCL custom point type used for reading RGB data
 struct OnlyRGB

@@ -32,7 +32,7 @@ ccSpline::ccSpline(	const ccPolyline& poly,
 		assert(false);
 		ccLog::Warning("Invalid input spline order (can't be below 2)");
 	}
-	if (size() > m_degree)
+	if (getCPCount() > m_degree)
 	{
 		initNodes(nodeType);
 	}
@@ -48,7 +48,7 @@ ccSpline::ccSpline(const ccSpline& spline)
 
 unsigned ccSpline::expectedKnotCount() const
 {
-	return size() + m_degree + 1;
+	return getCPCount() + m_degree + 1;
 }
 
 bool ccSpline::computePosition(double s, CCVector3& P) const
@@ -65,22 +65,22 @@ bool ccSpline::computePosition(double s, CCVector3& P) const
 		return false;
 	}
 
-	unsigned vertexCount = size();
+	unsigned cpCount = getCPCount();
 
 	//remap the input (s) to the actual range
 	//double low = m_nodes[m_degree];
-	//double high = m_nodes[vertexCount];
+	//double high = m_nodes[cpCount];
 	//s = s * (high - low) + low;
 
-	//domain of interest spans from knot 'm_degree' to knot 'size()' 
+	//domain of interest spans from knot 'm_degree' to knot 'cpCount' 
 	unsigned index = m_degree;
-	for (; index < vertexCount; ++index)
+	for (; index < cpCount; ++index)
 	{
 		if (s >= m_nodes[index] && s <= m_nodes[index + 1])
 		{
 			break;
 		}
-		if (index + 1 == vertexCount)
+		if (index + 1 == cpCount)
 		{
 			//cope with rounding issues
 			if (std::abs(s - m_nodes[index + 1]) < 1.0e-6)
@@ -98,9 +98,10 @@ bool ccSpline::computePosition(double s, CCVector3& P) const
 	//we use the 'index' point and the 'm_degree' previous one
 	unsigned i0 = index - m_degree;
 	std::vector<CCVector3> v(m_degree + 1);
+	unsigned vertexCount = size();
 	for (unsigned i = i0; i <= index; ++i)
 	{
-		v[i - i0] = *getPoint(static_cast<unsigned>(i));
+		v[i - i0] = *getPoint(static_cast<unsigned>(i % vertexCount));
 	}
 
 	for (unsigned l = 0; l < m_degree; ++l)
@@ -124,24 +125,24 @@ bool ccSpline::computePosition(double s, CCVector3& P) const
 bool ccSpline::isValid() const
 {
 	return (m_degree != 0)
-		&& (size() > m_degree)
+		&& (getCPCount() > m_degree)
 		&& (m_nodes.size() == expectedKnotCount());
 }
 
 bool ccSpline::initNodes(NodeType nodeType)
 {
-	unsigned vertexCount = size();
-	if (vertexCount <= m_degree)
+	if (getCPCount() <= m_degree)
 	{
 		ccLog::Warning("[Spline::setupNodes] Not enough vertices");
 		m_nodes.clear();
 		return false;
 	}
 
-	if (m_degree == 0 || size() <= m_degree)
+	if (m_degree == 0)
 	{
-		ccLog::Warning("[Spline::setupNodes] Invalid degree or vertex count");
+		ccLog::Warning("[Spline::setupNodes] Invalid spline degree");
 		assert(false);
+		m_nodes.clear();
 		return false;
 	}
 
@@ -186,7 +187,7 @@ void ccSpline::setNodeToUniform()
 {
 	assert(m_nodes.size() == expectedKnotCount());
 	
-	double step = static_cast<double>(size() - m_degree);
+	double step = static_cast<double>(getCPCount() - m_degree);
 
 	for (size_t i = 0; i < m_nodes.size(); ++i)
 	{
@@ -198,6 +199,8 @@ void ccSpline::setNodeToOpenUniform()
 {
 	assert(m_nodes.size() == expectedKnotCount());
 
+	unsigned cpCount = getCPCount();
+
 	size_t internalNodeIndex = 0;
 	for (size_t i = 0; i < m_nodes.size(); ++i)
 	{
@@ -205,13 +208,13 @@ void ccSpline::setNodeToOpenUniform()
 		{
 			m_nodes[i] = 0.0;
 		}
-		else if (i > size())
+		else if (i > cpCount)
 		{
 			m_nodes[i] = 1.0;
 		}
 		else
 		{
-			m_nodes[i] = static_cast<double>(++internalNodeIndex) / (size() - m_degree);
+			m_nodes[i] = static_cast<double>(++internalNodeIndex) / (cpCount - m_degree);
 		}
 	}
 }
@@ -332,7 +335,8 @@ void ccSpline::drawMeOnly(CC_DRAW_CONTEXT& context)
 	glFunc->glBegin(GL_LINE_STRIP);
 	CCVector3 firstPoint;
 	bool firstPointRecorded = false;
-	for (unsigned i = m_degree; i <vertCount; ++i)
+	unsigned cpCount = getCPCount();
+	for (unsigned i = m_degree; i < cpCount; ++i)
 	{
 		double start = m_nodes[i];
 		double stop = m_nodes[i + 1];
@@ -395,8 +399,8 @@ ccPolyline* ccSpline::toPoly() const
 
 	ccPointCloud* vertices = new ccPointCloud("vertices");
 	{
-		unsigned controlPointCount = size();
-		unsigned vertCount = (controlPointCount - m_degree) * m_drawPrecision;
+		unsigned cpCount = getCPCount();
+		unsigned vertCount = (cpCount - m_degree) * m_drawPrecision;
 
 		if (!vertices->reserve(vertCount))
 		{
@@ -407,7 +411,7 @@ ccPolyline* ccSpline::toPoly() const
 		
 		CCVector3 firstPoint;
 		bool firstPointRecorded = false;
-		for (unsigned i = m_degree; i < controlPointCount; ++i)
+		for (unsigned i = m_degree; i < cpCount; ++i)
 		{
 			double start = m_nodes[i];
 			double stop = m_nodes[i + 1];
@@ -452,4 +456,14 @@ ccPolyline* ccSpline::toPoly() const
 	poly->importParametersFrom(*this);
 
 	return poly;
+}
+
+void ccSpline::setClosed(bool state)
+{
+	if (state != isClosed() && !m_nodes.empty())
+	{
+		ccLog::Warning("[ccSpline::setClosed] Calling setClosed on an already set polyline invalidates it!");
+		m_nodes.clear();
+	}
+	ccPolyline::setClosed(state);
 }

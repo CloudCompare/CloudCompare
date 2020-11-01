@@ -155,8 +155,8 @@ static bool ComputeDistances(	const ccPointCloud& cloud,
 	try
 	{
 		size_t pointCount = cloud.size();
-		unsigned vertexCount = spline.size();
-		if (pointCount == 0 || vertexCount < 2)
+		unsigned cpCount = spline.getCPCount();
+		if (pointCount == 0 || cpCount < 2)
 		{
 			//not enough points or vertices
 			ccLog::Warning("[qFitSpline::ComputeDistances] Not enough point or vertex");
@@ -164,7 +164,7 @@ static bool ComputeDistances(	const ccPointCloud& cloud,
 		}
 
 		//check spline consistency
-		if (vertexCount + spline.getOrder() != spline.nodes().size())
+		if (cpCount + spline.getOrder() != spline.nodes().size())
 		{
 			//malformed spline
 			ccLog::Warning("[qFitSpline::ComputeDistances] Malformed spline");
@@ -172,7 +172,7 @@ static bool ComputeDistances(	const ccPointCloud& cloud,
 		}
 
 		static const unsigned InitialSubdivision = 4;
-		unsigned sampleSegCount = vertexCount * InitialSubdivision - 1;
+		unsigned sampleSegCount = cpCount * InitialSubdivision - 1;
 		std::vector<Segment> initialSegments(sampleSegCount);
 		for (unsigned i = 0; i < sampleSegCount; ++i)
 		{

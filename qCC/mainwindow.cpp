@@ -2710,7 +2710,7 @@ void MainWindow::doActionPolylineToSpline()
 		ccSpline* spline = nullptr;
 		try
 		{
-			spline = new ccSpline(*poly, 3);
+			spline = new ccSpline(*poly, 3, poly->isClosed() ? ccSpline::Uniform : ccSpline::OpenUniform);
 		}
 		catch (const std::bad_alloc&)
 		{

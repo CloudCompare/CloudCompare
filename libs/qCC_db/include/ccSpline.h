@@ -58,6 +58,9 @@ public:
 	//! Returns the spline degree (= order - 1)
 	inline unsigned getDegree() const { return m_degree; }
 
+	//! Returns the number of (virtual) control points (= size() or size() + m_degree if the polyline is closed)
+	inline unsigned getCPCount() const { return isClosed() ? size() + m_degree : size(); }
+
 	//! Inits the knots
 	/** \warning Will reset the node values
 	**/
@@ -94,6 +97,11 @@ public:
 
 	//! Converts this spline to a polyline (using the current drawing precision)
 	ccPolyline* toPoly() const;
+
+	//! Sets whether the polyline/spline is closed or not
+	/** \warning Calling this method after the node values have been set will invalidate the spline!
+	**/
+	void setClosed(bool state) override;
 
 protected: //methods
 

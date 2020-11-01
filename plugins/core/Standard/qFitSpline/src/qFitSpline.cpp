@@ -174,12 +174,10 @@ static bool ComputeDistances(	const ccPointCloud& cloud,
 		static const unsigned InitialSubdivision = 4;
 		unsigned sampleSegCount = vertexCount * InitialSubdivision - 1;
 		std::vector<Segment> initialSegments(sampleSegCount);
-		double step = 1.0 / sampleSegCount;
-		double s = 0.0;
 		for (unsigned i = 0; i < sampleSegCount; ++i)
 		{
 			Segment& seg = initialSegments[i];
-			seg.posA = s;
+			seg.posA = static_cast<double>(i) / sampleSegCount;;
 			if (i == 0)
 			{
 				if (!spline.computePosition(seg.posA, seg.A))
@@ -191,8 +189,7 @@ static bool ComputeDistances(	const ccPointCloud& cloud,
 			{
 				seg.A = initialSegments[i - 1].B;
 			}
-			s += step;
-			seg.posB = s;
+			seg.posB = static_cast<double>(i + 1) / sampleSegCount;
 			if (!spline.computePosition(seg.posB, seg.B))
 			{
 				return false;

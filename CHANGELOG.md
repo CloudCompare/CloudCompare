@@ -15,6 +15,9 @@ v2.12 (???) - (in development)
 		- option to choose the video output codec/format
 	- ATI cards:
 		- the display should now be faster with ATI cards thanks to a smarter way to manage (2D text) textures
+	- Localization:
+		- Korean is now supported (thanks to Yun-Ho Chung)
+		- Russian translation has been updated (thanks to Gene Kalabin)
 	- qCSF:
 		- added support for command line mode with all available options, except cloth export
 		- use -CSF to run the plugin with the next optional settings:

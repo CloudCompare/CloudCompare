@@ -520,7 +520,7 @@ P를 3D 점으로 설정하면 변환된 P&apos;는 P&apos; = R.P + T입니다.<
     <message>
         <location filename="../../libs/qCC_io/ui/openAsciiFileDlg.ui" line="50"/>
         <source>Here are the first lines of this file. Choose an attribute for each column (one cloud at a time):</source>
-        <translation>여기가 파일의 1번라인입니다. 각행의 속성 (한번에 1 클라우드)을 선택하십시오.</translation>
+        <translation type="unfinished">파일의 1번라인입니다. 각행별 속성값을 선택하십시오: (클라우드당 1회)</translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openAsciiFileDlg.ui" line="60"/>
@@ -560,7 +560,7 @@ P를 3D 점으로 설정하면 변환된 P&apos;는 P&apos; = R.P + T입니다.<
     <message>
         <location filename="../../libs/qCC_io/ui/openAsciiFileDlg.ui" line="200"/>
         <source>use comma as decimal character</source>
-        <translation>자릿수문자로 콤마 사용</translation>
+        <translation type="unfinished">콤마 분리자 사용</translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openAsciiFileDlg.ui" line="207"/>
@@ -577,12 +577,12 @@ Otherwise labels are shown in 3D.</source>
     <message>
         <location filename="../../libs/qCC_io/ui/openAsciiFileDlg.ui" line="224"/>
         <source>Skip lines</source>
-        <translation>라인스킵</translation>
+        <translation type="unfinished">스킵할 라인</translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openAsciiFileDlg.ui" line="238"/>
         <source>+ comment/header lines skipped: 0</source>
-        <translation>+ 커맨트/헤더라인 스킵: 0</translation>
+        <translation type="unfinished">+ 주석/헤더 라인 스킵: 0</translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openAsciiFileDlg.ui" line="264"/>
@@ -6043,7 +6043,7 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1057"/>
         <source>Fine registration (ICP)</source>
-        <translation>정밀병합 (ICP)</translation>
+        <translation type="unfinished">정밀정합 (ICP)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1060"/>
@@ -6109,7 +6109,7 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1147"/>
         <source>Segment</source>
-        <translation>조각</translation>
+        <translation type="unfinished">분</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1150"/>
@@ -6898,7 +6898,7 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2137"/>
         <source>Align (point pairs picking)</source>
-        <translation>선형 (점쌍 선택)</translation>
+        <translation type="unfinished">맞춤 (점쌍 선택)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2140"/>
@@ -8822,13 +8822,13 @@ It will be saved as multiple tiles on the disk.</source>
         <location filename="../ui_templates/pointPropertiesDlg.ui" line="52"/>
         <source>Select 2 points and display segment information (length, etc.)</source>
         <comment>Compute point to point distance</comment>
-        <translation>2점 선택후 분할정보표시 (길이등)</translation>
+        <translation type="unfinished">2점 선택후 부분정보표시 (길이등)</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPropertiesDlg.ui" line="69"/>
         <location filename="../ui_templates/pointPropertiesDlg.ui" line="72"/>
         <source>Select 3 points and display corresponding triangle information</source>
-        <translation>3점선택후 관현 TIN 정보 표시</translation>
+        <translation type="unfinished">3점선택후 관련된 삼각정보 표시</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPropertiesDlg.ui" line="86"/>
@@ -9869,7 +9869,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1304"/>
         <source>Invalid parameter: density type is expected after &quot;-%1&quot; (KNN/SURFACE/VOLUME)</source>
-        <translation>잘못된 파라미터: &quot;-%1&quot; (KNN/지면/체적) 이후 밀도종류가 예상됩니다</translation>
+        <translation type="unfinished">잘못된 파라미터: &quot;-%1&quot; (KNN/지면/체적) 이후 밀도종류가 추청됩니다</translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1311"/>
@@ -13073,7 +13073,7 @@ replaced by the cell&apos;s average height!</source>
     <message>
         <location filename="../ui_templates/sfEditDlg.ui" line="42"/>
         <source>Display ranges</source>
-        <translation>표시거리</translation>
+        <translation type="unfinished">표시범위</translation>
     </message>
     <message>
         <location filename="../ui_templates/sfEditDlg.ui" line="102"/>
@@ -13103,7 +13103,7 @@ replaced by the cell&apos;s average height!</source>
     <message>
         <location filename="../ui_templates/sfEditDlg.ui" line="203"/>
         <source>always show 0 in color scale</source>
-        <translation>컬러스케일로 항상 0 보기</translation>
+        <translation type="unfinished">컬러스케일에 항상 0 보기</translation>
     </message>
     <message>
         <location filename="../ui_templates/sfEditDlg.ui" line="210"/>
@@ -14959,7 +14959,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="617"/>
         <source>SF display params</source>
-        <translation>Sf 표시 파라미터</translation>
+        <translation type="unfinished">스칼라필드 표시 파라미터</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="633"/>
@@ -15695,7 +15695,7 @@ Number of points: %2</source>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="25"/>
         <source>show &apos;to align&apos; entities</source>
-        <translation>&apos;선형종점&apos; 엔티티 보기</translation>
+        <translation type="unfinished">&apos;맞춤&apos; 엔티티 보기</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="64"/>

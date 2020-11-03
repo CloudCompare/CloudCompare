@@ -395,7 +395,7 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 		}
 
 		int pointCount = static_cast<int>(size());
-#ifdef USE_TBB
+#ifdef CC_CORE_LIB_USES_TBB
 		tbb::parallel_for( 0, pointCount, [&](int i)
 #else
 #if defined(_OPENMP)
@@ -427,7 +427,7 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 				if (!insideFrustum)
 				{
 					// Point is not inside the frustum
-#ifdef USE_TBB
+#ifdef CC_CORE_LIB_USES_TBB
 					return;
 #else
 					continue;

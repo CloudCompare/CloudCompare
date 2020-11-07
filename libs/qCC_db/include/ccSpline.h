@@ -124,17 +124,6 @@ protected: //methods
 	//! Sets values of the nodal vector to be open uniform
 	void setNodeToOpenUniform();
 
-	//! Evaluates the equation of a spline using the blossom algorithm
-	/** \param s curvilinear position
-		\param k current order
-		\param points control points
-		\param nodes the nodal vector
-	**/
-	CCVector3 recursiveEval(double s,
-							size_t k,
-							const std::vector<CCVector3>& points,
-							const std::vector<double>& nodes) const;
-
 protected: //attributes
 	unsigned m_degree;					//!< Spline degree
 	std::vector<double>	m_nodes;		//!< Nodal vector

@@ -46,6 +46,7 @@ v2.12 (???) - (in development)
 		- filenames local ('foreign') characters were not preserved
 	- Trace polyline: the exported polylines has a wrong unique ID. Saving multiple polylines created this way in the
 		same BIN file could lead to a corrupted file.
+	- Scissors tool: points were segmented only inside the frustum (screen) even if some segmentation polygon vertices were outside
 
 v2.11.3 (Anoia) - 08/09/2020
 ----------------------

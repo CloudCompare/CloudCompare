@@ -647,10 +647,11 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside)
 
 			if (!pointInFrustum)
 			{
-				polyInsideFrustum = true;
+				polyInsideFrustum = false;
 			}
 		}
 	}
+	ccLog::PrintDebug("Polyline is fully inside frustrum: " + QString(polyInsideFrustum ? "Yes" : "No"));
 
 	//for each selected entity
 	for (QSet<ccHObject*>::const_iterator p = m_toSegment.constBegin(); p != m_toSegment.constEnd(); ++p)

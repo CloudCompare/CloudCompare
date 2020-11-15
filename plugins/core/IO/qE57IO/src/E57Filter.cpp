@@ -1434,8 +1434,10 @@ static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 	}
 	e57::StructureNode scanNode(node);
 
+	QString scanName = QString::fromStdString(e57::StringNode(scanNode.get("name")).value());
+
 	//log
-	ccLog::Print(QString("[E57] Reading new scan node (%1)").arg(scanNode.elementName().c_str()));
+	ccLog::Print(QString("[E57] Reading new scan node (%1) - %2").arg(scanNode.elementName().c_str()).arg(scanName));
 
 	if (!scanNode.isDefined("points"))
 	{
@@ -1486,7 +1488,7 @@ static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 
 	if (scanNode.isDefined("name"))
 	{		
-		cloud->setName( QString::fromStdString( e57::StringNode(scanNode.get("name")).value() ) );
+		cloud->setName(scanName);
 	}
 	
 	if (scanNode.isDefined("description"))

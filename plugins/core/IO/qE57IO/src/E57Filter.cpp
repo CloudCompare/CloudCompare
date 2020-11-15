@@ -716,7 +716,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 
 	try
 	{
-		e57::ImageFile imf(qPrintable(filename), "w"); //DGM: warning, toStdString doesn't preserve "local" characters
+		e57::ImageFile imf(filename.toStdString(), "w");
 		if (!imf.isOpen())
 			return CC_FERR_WRITING;
 
@@ -1434,7 +1434,9 @@ static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 	}
 	e57::StructureNode scanNode(node);
 
-	QString scanName = QString::fromStdString(e57::StringNode(scanNode.get("name")).value());
+	QString scanName("none");
+	if (scanNode.isDefined("name"))
+		scanName = QString::fromStdString( e57::StringNode(scanNode.get("name")).value() );
 
 	//log
 	ccLog::Print(QString("[E57] Reading new scan node (%1) - %2").arg(scanNode.elementName().c_str()).arg(scanName));
@@ -1962,12 +1964,13 @@ static ccHObject* LoadImage(const e57::Node& node, QString& associatedData3DGuid
 	}
 	e57::StructureNode imageNode(node);
 
-	//log
-	ccLog::Print(QString("[E57] Reading new image node (%1)").arg(imageNode.elementName().c_str()));
-
-	e57::ustring name = "none";
+	QString imageName("none");
 	if (imageNode.isDefined("name"))
-		name = e57::StringNode(imageNode.get("name")).value();
+		imageName = QString::fromStdString(e57::StringNode(imageNode.get("name")).value());
+
+	//log
+	ccLog::Print(QString("[E57] Reading new image node (%1) - %2").arg(imageNode.elementName().c_str()).arg(imageName));
+
 	if (imageNode.isDefined("description"))
 		ccLog::Print(QString("[E57] Description: %1").arg(e57::StringNode(imageNode.get("description")).value().c_str()));
 
@@ -2006,7 +2009,7 @@ static ccHObject* LoadImage(const e57::Node& node, QString& associatedData3DGuid
 
 	if (!cameraRepresentation)
 	{
-		ccLog::Warning(QString("[E57] Image %1 has no associated camera representation!").arg(name.c_str()));
+		ccLog::Warning(QString("[E57] Image %1 has no associated camera representation!").arg(imageName));
 		return nullptr;
 	}
 	Image2DProjection cameraType = cameraRepresentation->getType();
@@ -2191,7 +2194,7 @@ static ccHObject* LoadImage(const e57::Node& node, QString& associatedData3DGuid
 
 	assert(imageObj);
 	imageObj->setData(qImage);
-	imageObj->setName(name.c_str());
+	imageObj->setName(imageName);
 
 	//don't forget image aspect ratio
 	if (cameraType == E57_CYLINDRICAL ||
@@ -2214,7 +2217,7 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 	try
 	{
-		e57::ImageFile imf( qPrintable(filename), "r", e57::CHECKSUM_POLICY_SPARSE ); //DGM: warning, toStdString doesn't preserve "local" characters
+		e57::ImageFile imf(filename.toStdString(), "r", e57::CHECKSUM_POLICY_SPARSE);
 		
 		if (!imf.isOpen())
 		{

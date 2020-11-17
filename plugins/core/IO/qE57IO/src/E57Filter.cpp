@@ -48,7 +48,10 @@ namespace  {
 	constexpr char CC_E57_INTENSITY_FIELD_NAME[] = "Intensity";
 	constexpr char CC_E57_RETURN_INDEX_FIELD_NAME[] = "Return index";
 	constexpr char s_e57PoseKey[] = "E57_pose";
-	
+
+	constexpr uint8_t VALID_DATA = 0;
+	constexpr uint8_t INVALID_DATA = 1;
+
 	unsigned s_absoluteScanIndex = 0;
 	bool s_cancelRequestedByUser = false;
 	
@@ -553,7 +556,7 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 				ScalarType sfVal = intensitySF->getValue(index);
 				arrays.intData[i] = static_cast<double>(sfVal);
 				if (!arrays.isInvalidIntData.empty())
-					arrays.isInvalidIntData[i] = ccScalarField::ValidValue(sfVal) ? 0 : 1;
+					arrays.isInvalidIntData[i] = ccScalarField::ValidValue(sfVal) ? VALID_DATA : INVALID_DATA;
 			}
 
 			if (hasNormals)
@@ -1833,7 +1836,7 @@ static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 			if (!arrays.intData.empty())
 			{
 				assert(intensitySF);
-				if (!header.pointFields.isIntensityInvalidField || arrays.isInvalidIntData[i] != 0)
+				if (!header.pointFields.isIntensityInvalidField || arrays.isInvalidIntData[i] != INVALID_DATA)
 				{
 					//ScalarType intensity = (ScalarType)((arrays.intData[i] - intOffset)/intRange); //Normalize intensity to 0 - 1.
 					const ScalarType intensity = static_cast<ScalarType>(arrays.intData[i]);

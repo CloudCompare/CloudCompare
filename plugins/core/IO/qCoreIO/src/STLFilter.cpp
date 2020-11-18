@@ -637,6 +637,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 
 	unsigned pointCount = 0;
 	unsigned faceCount = 0;
+	static const unsigned s_defaultMemAllocCount = 65536;
 	bool normalWarningAlreadyDisplayed = false;
 	NormsIndexesTableType* normals = mesh->getTriNormsTable();
 
@@ -779,41 +780,13 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 
 			CCVector3 P = CCVector3::fromArray((Pd + Pshift).u);
 
-			//look for existing vertices at the same place! (STL format is so dumb...)
-			{
-				//int equivalentIndex = -1;
-				//if (pointCount>2)
-				//{
-				//	//brute force!
-				//	for (int j=(int)pointCountBefore-1; j>=0; j--)
-				//	{
-				//		const CCVector3* Pj = vertices->getPoint(j);
-				//		if (Pj->x == P.x &&
-				//			Pj->y == P.y &&
-				//			Pj->z == P.z)
-				//		{
-				//			equivalentIndex = j;
-				//			break;
-				//		}
-				//	}
-				//}
+			//cloud is already full?
+			if (vertices->capacity() == pointCount && !vertices->reserve(pointCount + s_defaultMemAllocCount))
+				return CC_FERR_NOT_ENOUGH_MEMORY;
 
-				////new point ?
-				//if (equivalentIndex < 0)
-				{
-					//cloud is already full?
-					if (vertices->capacity() == pointCount && !vertices->reserve(pointCount + 1000))
-						return CC_FERR_NOT_ENOUGH_MEMORY;
-
-					//insert new point
-					vertIndexes[i] = pointCount++;
-					vertices->addPoint(P);
-				}
-				//else
-				//{
-				//	vertIndexes[i] = (unsigned)equivalentIndex;
-				//}
-			}
+			//insert new point
+			vertIndexes[i] = pointCount++;
+			vertices->addPoint(P);
 		}
 
 		//we have successfully read the 3 vertices
@@ -822,7 +795,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 			//mesh is full?
 			if (mesh->capacity() == faceCount)
 			{
-				if (!mesh->reserve(faceCount + 1000))
+				if (!mesh->reserve(faceCount + s_defaultMemAllocCount))
 				{
 					result = CC_FERR_NOT_ENOUGH_MEMORY;
 					break;
@@ -939,6 +912,8 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 
 	if (!mesh->reserve(faceCount))
 		return CC_FERR_NOT_ENOUGH_MEMORY;
+	if (!vertices->reserve(3 * faceCount))
+		return CC_FERR_NOT_ENOUGH_MEMORY;
 	NormsIndexesTableType* normals = mesh->getTriNormsTable();
 	if (normals && (!normals->reserveSafe(faceCount) || !mesh->reservePerTriangleNormalIndexes()))
 	{
@@ -972,7 +947,6 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 
 		//3 vertices
 		unsigned vertIndexes[3];
-		//		unsigned pointCountBefore=pointCount;
 		for (unsigned i = 0; i < 3; ++i)
 		{
 			//REAL32[3] Vertex 1,2 & 3
@@ -997,41 +971,9 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 
 			CCVector3 P = CCVector3::fromArray((Pd + Pshift).u);
 
-			//look for existing vertices at the same place! (STL format is so dumb...)
-			{
-				//int equivalentIndex = -1;
-				//if (pointCount>2)
-				//{
-				//	//brute force!
-				//	for (int j=static_cast<int>(pointCountBefore)-1; j>=0; j--)
-				//	{
-				//		const CCVector3* Pj = vertices->getPoint(j);
-				//		if (Pj->x == P.x &&
-				//			Pj->y == P.y &&
-				//			Pj->z == P.z)
-				//		{
-				//			equivalentIndex = j;
-				//			break;
-				//		}
-				//	}
-				//}
-
-				////new point ?
-				//if (equivalentIndex < 0)
-				{
-					//cloud is already full?
-					if (vertices->capacity() == pointCount && !vertices->reserve(pointCount + 1000))
-						return CC_FERR_NOT_ENOUGH_MEMORY;
-
-					//insert new point
-					vertIndexes[i] = pointCount++;
-					vertices->addPoint(P);
-				}
-				//else
-				//{
-				//	vertIndexes[i] = static_cast<unsigned>(equivalentIndex);
-				//}
-			}
+			//insert new point
+			vertIndexes[i] = pointCount++;
+			vertices->addPoint(P);
 		}
 
 		//UINT16 Attribute byte count (not used)

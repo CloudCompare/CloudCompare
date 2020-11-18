@@ -32,6 +32,8 @@ v2.12 (???) - (in development)
 		- Command 'Rasterize':
 			- New output option '-OUTPUT_RASTER_Z_AND_SF' to explicitly export altitudes AND scalar fields.
 				The former '-OUTPUT_RASTER_Z' option will only export the altitudes as its name implies.
+	- STL:
+		- loading speed should be greatly improved (compared to v2.10 and v2.11)
 
 - New plugins
 	- MPlane: perform normal distance measurements against a defined plane (see https://www.cloudcompare.org/doc/wiki/index.php?title=MPlane_(plugin) )

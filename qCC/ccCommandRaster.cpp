@@ -62,7 +62,7 @@ static ccRasterGrid::ProjectionType GetProjectionType(QString option, ccCommandL
 	else
 	{
 		assert(false);
-		cmd.warning(QString("Unknwon projection type: %1 (defaulting to 'average')").arg(option));
+		cmd.warning(QString("Unknown projection type: %1 (defaulting to 'average')").arg(option));
 		return ccRasterGrid::PROJ_AVERAGE_VALUE;
 	}
 }
@@ -88,7 +88,7 @@ static ccRasterGrid::EmptyCellFillOption GetEmptyCellFillingStrategy(QString opt
 	else
 	{
 		assert(false);
-		cmd.warning(QString("Unknwon empty cell filling strategy: %1 (defaulting to 'leave empty')").arg(option));
+		cmd.warning(QString("Unknown empty cell filling strategy: %1 (defaulting to 'leave empty')").arg(option));
 		return ccRasterGrid::LEAVE_EMPTY;
 	}
 }

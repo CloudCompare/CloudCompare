@@ -5186,9 +5186,9 @@ void ccGLWindow::setPointSize(float size, bool silent/*=false*/)
 		if (!silent)
 		{
 			if (size < MIN_POINT_SIZE_F)
-				ccLog::Print(QString("Defaut point size is already at minimum : %1").arg(MIN_POINT_SIZE_F));
+				ccLog::Print(QString("Default point size is already at minimum : %1").arg(MIN_POINT_SIZE_F));
 			else
-				ccLog::Print(QString("Defaut point size is already at maximum : %1").arg(MAX_POINT_SIZE_F));
+				ccLog::Print(QString("Default point size is already at maximum : %1").arg(MAX_POINT_SIZE_F));
 		}
 	}
 }

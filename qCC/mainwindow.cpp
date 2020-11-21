@@ -6940,7 +6940,7 @@ void MainWindow::activateTranslateRotateMode()
 	}
 	else if (rejectedEntities)
 	{
-		ccConsole::Error("Some entities were ingored! (see console)");
+		ccConsole::Error("Some entities were ignored! (see console)");
 	}
 
 	//try to activate "moving mode" in current GL window

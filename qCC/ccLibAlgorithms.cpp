@@ -554,7 +554,7 @@ namespace ccLibAlgorithms
 						pc->getCurrentInScalarField()->computeMinAndMax();
 					}
 					cloud->prepareDisplayForRefresh();
-					ccConsole::Print("[Algortihm] Timing: %3.2f s.", static_cast<double>(elapsedTime_ms) / 1000.0);
+					ccConsole::Print("[Algorithm] Timing: %3.2f s.", static_cast<double>(elapsedTime_ms) / 1000.0);
 				}
 				else
 				{

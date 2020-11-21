@@ -246,7 +246,7 @@ bool ccContourLinesGenerator::GenerateContourLines(	ccRasterGrid* rasterGrid,
 				CPLErr error = GDAL_CG_FeedLine(hCG, scanline);
 				if (error != CE_None)
 				{
-					ccLog::Error("[GDAL] An error occurred during countour lines generation");
+					ccLog::Error("[GDAL] An error occurred during contour lines generation");
 					break;
 				}
 			}

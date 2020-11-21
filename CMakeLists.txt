@@ -65,7 +65,7 @@ if( WIN32 )
         list( APPEND INSTALL_DESTINATIONS ${CCVIEWER_DEST_FOLDER} )
 	endif()
 elseif( UNIX AND NOT APPLE )
-	set( INSTALL_DESTINATIONS ${CMAKE_INSTALL_PREFIX}/bin )
+        set( INSTALL_DESTINATIONS ${CMAKE_INSTALL_PREFIX})
 endif()
 
 # Load advanced scripts

@@ -55,12 +55,6 @@ public:
 	//! Sets the associated vertices cloud (warning)
 	void setAssociatedCloud(ccGenericPointCloud* cloud);
 
-	//inherited methods (ccShiftedObject)
-	void setGlobalShift(const CCVector3d& shift) override;
-	void setGlobalScale(double scale) override;
-	const CCVector3d& getGlobalShift() const override;
-	double getGlobalScale() const override;
-
 	//! Clones this entity
 	/** All the main features of the entity are cloned, except from the octree
 		\param vertices vertices set to use (will be automatically - AND OPTIMALLY - cloned if nullptr)

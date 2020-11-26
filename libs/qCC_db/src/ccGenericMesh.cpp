@@ -1136,3 +1136,45 @@ bool ccGenericMesh::computePointPosition(unsigned triIndex, const CCVector2d& uv
 
 	return true;
 }
+
+void ccGenericMesh::setGlobalShift(const CCVector3d& shift)
+{
+	if (getAssociatedCloud())
+	{
+		//auto transfer the global shift info to the vertices
+		getAssociatedCloud()->setGlobalShift(shift);
+	}
+	else
+	{
+		//we normally don't want to store this information at
+		//the mesh level as it won't be saved.
+		assert(false);
+		ccGenericMesh::setGlobalShift(shift);
+	}
+}
+
+void ccGenericMesh::setGlobalScale(double scale)
+{
+	if (getAssociatedCloud())
+	{
+		//auto transfer the global scale info to the vertices
+		getAssociatedCloud()->setGlobalScale(scale);
+	}
+	else
+	{
+		//we normally don't want to store this information at
+		//the mesh level as it won't be saved.
+		assert(false);
+		ccGenericMesh::setGlobalScale(scale);
+	}
+}
+
+const CCVector3d& ccGenericMesh::getGlobalShift() const
+{
+	return (getAssociatedCloud() ? getAssociatedCloud()->getGlobalShift() : ccGenericMesh::getGlobalShift());
+}
+
+double ccGenericMesh::getGlobalScale() const
+{
+	return (getAssociatedCloud() ? getAssociatedCloud()->getGlobalScale() : ccGenericMesh::getGlobalScale());
+}

@@ -258,8 +258,7 @@ namespace ccCompassImport {
 			
 			//create new point cloud to associate with lineation graphic
 			ccPointCloud* points = new ccPointCloud();
-			points->setGlobalScale(cld->getGlobalScale()); //copy global shift & scale onto new point cloud
-			points->setGlobalShift(cld->getGlobalShift());
+			points->copyGlobalShiftAndScale(*cld); //copy global shift & scale onto new point cloud
 			points->reserve(2);
 			points->addPoint(Cd);
 			points->addPoint(Cd + l*size);

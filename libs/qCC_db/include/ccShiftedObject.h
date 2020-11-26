@@ -42,6 +42,11 @@ public:
 	**/
 	ccShiftedObject(const ccShiftedObject& s) = default;
 
+	//! Copies the Global Shift and Scale from another entity
+	/** \param s shifted entity to copy information from
+	**/
+	void copyGlobalShiftAndScale(const ccShiftedObject& s);
+
 	//! Sets shift applied to original coordinates (information storage only)
 	/** Such a shift can typically be applied at loading time.
 	**/

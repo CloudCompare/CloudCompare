@@ -3903,8 +3903,7 @@ void MainWindow::doActionSubsample()
 			if (newPointCloud)
 			{
 				newPointCloud->setName(cloud->getName() + QString(".subsampled"));
-				newPointCloud->setGlobalShift(cloud->getGlobalShift());
-				newPointCloud->setGlobalScale(cloud->getGlobalScale());
+				newPointCloud->copyGlobalShiftAndScale(*cloud);
 				newPointCloud->setDisplay(cloud->getDisplay());
 				newPointCloud->prepareDisplayForRefresh();
 				if (cloud->getParent())
@@ -4039,8 +4038,7 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 					//'shift on load' information
 					if (pc)
 					{
-						compCloud->setGlobalShift(pc->getGlobalShift());
-						compCloud->setGlobalScale(pc->getGlobalScale());
+						compCloud->copyGlobalShiftAndScale(*pc);
 					}
 					compCloud->setVisible(true);
 					compCloud->setName(QString("CC#%1").arg(ccGroup->getChildrenNumber()));
@@ -4509,8 +4507,7 @@ void MainWindow::doConvertPolylinesToMesh()
 		}
 
 		//global shift & scale (we copy it from the first polyline by default)
-		vertices->setGlobalShift(polylines.front()->getGlobalShift());
-		vertices->setGlobalScale(polylines.front()->getGlobalScale());
+		vertices->copyGlobalShiftAndScale(*polylines.front());
 	}
 	else
 	{
@@ -8021,8 +8018,7 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 						ccPolyline* contour = facet->getContour();
 						if (contour)
 						{
-							contour->setGlobalScale(shifted->getGlobalScale());
-							contour->setGlobalShift(shifted->getGlobalShift());
+							contour->copyGlobalShiftAndScale(*shifted);
 						}
 					}
 				}

@@ -372,8 +372,7 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 				rasterCloud->setCurrentDisplayedScalarField(0);
 			}
 			//don't forget the original shift
-			rasterCloud->setGlobalShift(cloudDesc.pc->getGlobalShift());
-			rasterCloud->setGlobalScale(cloudDesc.pc->getGlobalScale());
+			rasterCloud->copyGlobalShiftAndScale(*cloudDesc.pc);
 
 			if (outputCloud)
 			{

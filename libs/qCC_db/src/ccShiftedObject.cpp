@@ -28,6 +28,12 @@ ccShiftedObject::ccShiftedObject(QString name, unsigned uniqueID/*=ccUniqueIDGen
 {
 }
 
+void ccShiftedObject::copyGlobalShiftAndScale(const ccShiftedObject& s)
+{
+	setGlobalShift(s.getGlobalShift());
+	setGlobalScale(s.getGlobalScale());
+}
+
 void ccShiftedObject::setGlobalShift(const CCVector3d& shift)
 {
 	m_globalShift = shift;

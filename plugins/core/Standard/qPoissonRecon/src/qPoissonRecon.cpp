@@ -493,8 +493,7 @@ void qPoissonRecon::doAction()
 	}
 
 	//copy Global Shift & Scale information
-	newPC->setGlobalShift(pc->getGlobalShift());
-	newPC->setGlobalScale(pc->getGlobalScale());
+	newPC->copyGlobalShiftAndScale(*pc);
 
 	//output mesh
 	m_app->addToDB(newMesh);

@@ -692,8 +692,7 @@ bool ccPointPairRegistrationDlg::addAlignedPoint(CCVector3d& Pin, ccHObject* ent
 		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(entity);
 		if (cloud)
 		{
-			m_alignedPoints.setGlobalScale(cloud->getGlobalScale());
-			m_alignedPoints.setGlobalShift(cloud->getGlobalShift());
+			m_alignedPoints.copyGlobalShiftAndScale(*cloud);
 		}
 	}
 
@@ -860,8 +859,7 @@ bool ccPointPairRegistrationDlg::addReferencePoint(CCVector3d& Pin, ccHObject* e
 			//simply copy the cloud global shift/scale
 			if (cloud)
 			{
-				m_refPoints.setGlobalScale(cloud->getGlobalScale());
-				m_refPoints.setGlobalShift(cloud->getGlobalShift());
+				m_refPoints.copyGlobalShiftAndScale(*cloud);
 			}
 		}
 		else //virtual point

@@ -598,8 +598,7 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(	const std::vector<ccRasterGri
 		cloudGrid->showColors(interpolateColors);
 
 		//don't forget the original shift
-		cloudGrid->setGlobalShift(m_cloud->getGlobalShift());
-		cloudGrid->setGlobalScale(m_cloud->getGlobalScale());
+		cloudGrid->copyGlobalShiftAndScale(*m_cloud);
 	}
 
 	return cloudGrid;

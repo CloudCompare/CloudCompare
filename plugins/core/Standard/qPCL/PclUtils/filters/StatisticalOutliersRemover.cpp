@@ -88,8 +88,7 @@ int StatisticalOutliersRemover::compute()
 	final_cloud->setName(QString("%1_k%2_std%3").arg(cloud->getName()).arg(m_k).arg(m_std));
 	final_cloud->setDisplay(cloud->getDisplay());
 	//copy global shift & scale
-	final_cloud->setGlobalScale(cloud->getGlobalScale());
-	final_cloud->setGlobalShift(cloud->getGlobalShift());
+	final_cloud->copyGlobalShiftAndScale(*cloud);
 
 	//disable original cloud
 	cloud->setEnabled(false);

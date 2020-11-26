@@ -48,17 +48,17 @@ public:
 	virtual ~ccPolyline() override = default;
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const override {return CC_TYPES::POLY_LINE;}
+	CC_CLASS_ENUM getClassID() const override {return CC_TYPES::POLY_LINE;}
 
 	//inherited methods (ccHObject)
-	virtual bool isSerializable() const override { return true; }
-	virtual bool hasColors() const override;
-	virtual void applyGLTransformation(const ccGLMatrix& trans) override;
-	virtual unsigned getUniqueIDForDisplay() const override;
+	bool isSerializable() const override { return true; }
+	bool hasColors() const override;
+	void applyGLTransformation(const ccGLMatrix& trans) override;
+	unsigned getUniqueIDForDisplay() const override;
 
 	//inherited methods (ccShiftedObject)
-	virtual void setGlobalShift(const CCVector3d& shift) override;
-	virtual void setGlobalScale(double scale) override;
+	void setGlobalShift(const CCVector3d& shift) override;
+	void setGlobalScale(double scale) override;
 
 	//! Defines if the polyline is considered as 2D or 3D
 	/** \param state if true, the polyline is 2D

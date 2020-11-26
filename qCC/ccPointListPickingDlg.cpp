@@ -234,8 +234,7 @@ void ccPointListPickingDlg::exportToNewCloud()
 			ccGenericPointCloud* asCloud = ccHObjectCaster::ToGenericPointCloud(m_associatedEntity);
 			if (asCloud)
 			{
-				cloud->setGlobalShift(asCloud->getGlobalShift());
-				cloud->setGlobalScale(asCloud->getGlobalScale());
+				cloud->copyGlobalShiftAndScale(*asCloud);
 			}
 			else
 			{

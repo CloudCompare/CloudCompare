@@ -1079,8 +1079,7 @@ ccMesh* ccMesh::TriangulateTwoPolylines(ccPolyline* p1, ccPolyline* p2, CCVector
 		vertices->setEnabled(false);
 
 		//global shift & scale (we copy it from the first polyline by default)
-		vertices->setGlobalShift(p1->getGlobalShift());
-		vertices->setGlobalScale(p1->getGlobalScale());
+		vertices->copyGlobalShiftAndScale(*p1);
 		//same thing for the display
 		mesh->setDisplay(p1->getDisplay());
 	}
@@ -1149,8 +1148,7 @@ ccMesh* ccMesh::Triangulate(ccGenericPointCloud* cloud,
 	mesh->showNormals(cloudHadNormals || !cloud->hasColors());
 	if (mesh->getAssociatedCloud() && mesh->getAssociatedCloud() != cloud)
 	{
-		mesh->getAssociatedCloud()->setGlobalShift(cloud->getGlobalShift());
-		mesh->getAssociatedCloud()->setGlobalScale(cloud->getGlobalScale());
+		mesh->getAssociatedCloud()->copyGlobalShiftAndScale(*cloud);
 	}
 
 	return mesh;

@@ -41,8 +41,7 @@ ccPolyline::ccPolyline(GenericIndexedCloudPersist* associatedCloud, unsigned uni
 	ccGenericPointCloud* cloud = dynamic_cast<ccGenericPointCloud*>(associatedCloud);
 	if (cloud)
 	{
-		setGlobalScale(cloud->getGlobalScale());
-		setGlobalShift(cloud->getGlobalShift());
+		copyGlobalShiftAndScale(*cloud);
 	}
 }
 
@@ -112,8 +111,7 @@ void ccPolyline::importParametersFrom(const ccPolyline& poly)
 	showVertices(poly.verticesShown());
 	setVertexMarkerWidth(poly.getVertexMarkerWidth());
 	showArrow(m_showArrow,m_arrowIndex,m_arrowLength);
-	setGlobalScale(poly.getGlobalScale());
-	setGlobalShift(poly.getGlobalShift());
+	copyGlobalShiftAndScale(poly);
 	setGLTransformationHistory(poly.getGLTransformationHistory());
 	setMetaData(poly.metaData());
 }
@@ -681,8 +679,7 @@ ccPointCloud* ccPolyline::samplePoints(	bool densityBased,
 	}
 
 	//import parameters from the source
-	cloud->setGlobalShift(getGlobalShift());
-	cloud->setGlobalScale(getGlobalScale());
+	cloud->copyGlobalShiftAndScale(*this);
 	cloud->setGLTransformationHistory(getGLTransformationHistory());
 
 	return cloud;

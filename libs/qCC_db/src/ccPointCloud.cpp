@@ -3168,24 +3168,6 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		{
 			glFunc->glPopName();
 		}
-
-		//patch: display normals
-		if (hasNormals() && normalsShown())
-		{
-			glFunc->glColor3ub(0, 255, 0);
-			glFunc->glBegin(GL_LINES);
-			static const double nScale = 5.0;
-			for (unsigned i = 0; i < size(); ++i)
-			{
-				const CCVector3* P = point(i);
-				const CCVector3& N = getPointNormal(i);
-				const CCVector3 P2 = (*P) + nScale * N;
-				ccGL::Vertex3v(glFunc, P->u);
-				ccGL::Vertex3v(glFunc, P2.u);
-			}
-			glFunc->glEnd();
-		}
-
 	}
 	else if (MACRO_Draw2D(context))
 	{

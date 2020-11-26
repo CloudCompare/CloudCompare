@@ -1761,9 +1761,11 @@ enum USE_SPECIAL_SF_VALUE
 	USE_MIN,
 	USE_DISP_MIN,
 	USE_SAT_MIN,
+	USE_N_SIGMA_MIN,
 	USE_MAX,
 	USE_DISP_MAX,
-	USE_SAT_MAX
+	USE_SAT_MAX,
+	USE_N_SIGMA_MAX
 };
 
 bool CommandFilterBySFValue::process(ccCommandLineInterface &cmd)
@@ -1792,6 +1794,20 @@ bool CommandFilterBySFValue::process(ccCommandLineInterface &cmd)
 		else if (minValStr.toUpper() == "SAT_MIN")
 		{
 			useValForMin = USE_SAT_MIN;
+		}
+		else if (minValStr.toUpper() == "N_SIGMA_MIN")
+		{
+			useValForMin = USE_N_SIGMA_MIN;
+			if (cmd.arguments().empty())
+			{
+				return cmd.error(QObject::tr("Missing parameter: N value (after \"-%1 N_SIGMA_MIN\").").arg(COMMAND_FILTER_SF_BY_VALUE));
+			}
+			minValStr = cmd.arguments().takeFirst();
+			minVal = static_cast<ScalarType>(minValStr.toDouble(&paramOk));
+			if (!paramOk)
+			{
+				return cmd.error(QObject::tr("Failed to read a numerical parameter: N value (after \"N_SIGMA_MIN\"). Got '%2' instead.").arg(minValStr));
+			}
 		}
 		else
 		{
@@ -1825,6 +1841,20 @@ bool CommandFilterBySFValue::process(ccCommandLineInterface &cmd)
 		else if (maxValStr.toUpper() == "SAT_MAX")
 		{
 			useValForMax = USE_SAT_MAX;
+		}
+		else if (maxValStr.toUpper() == "N_SIGMA_MAX")
+		{
+			useValForMax = USE_N_SIGMA_MAX;
+			if (cmd.arguments().empty())
+			{
+				return cmd.error(QObject::tr("Missing parameter: N value (after \"-%1 N_SIGMA_MAX\").").arg(COMMAND_FILTER_SF_BY_VALUE));
+			}
+			maxValStr = cmd.arguments().takeFirst();
+			maxVal = static_cast<ScalarType>(maxValStr.toDouble(&paramOk));
+			if (!paramOk)
+			{
+				return cmd.error(QObject::tr("Failed to read a numerical parameter: N value (after \"N_SIGMA_MAX\"). Got '%2' instead.").arg(maxValStr));
+			}
 		}
 		else
 		{
@@ -1861,6 +1891,12 @@ bool CommandFilterBySFValue::process(ccCommandLineInterface &cmd)
 					case USE_SAT_MIN:
 						thisMinVal = static_cast<ccScalarField*>(sf)->saturationRange().start();
 						break;
+					case USE_N_SIGMA_MIN:
+						ScalarType mean;
+						ScalarType variance;
+						sf->computeMeanAndVariance(mean, &variance);
+						thisMinVal = mean - (sqrt(variance) * minVal);
+						break;
 					default:
 						//nothing to do
 						break;
@@ -1879,6 +1915,12 @@ bool CommandFilterBySFValue::process(ccCommandLineInterface &cmd)
 						break;
 					case USE_SAT_MAX:
 						thisMaxVal = static_cast<ccScalarField*>(sf)->saturationRange().stop();
+						break;
+					case USE_N_SIGMA_MIN:
+						ScalarType mean;
+						ScalarType variance;
+						sf->computeMeanAndVariance(mean, &variance);
+						thisMaxVal = mean - (sqrt(variance) * maxVal);
 						break;
 					default:
 						//nothing to do

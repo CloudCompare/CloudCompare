@@ -4,6 +4,8 @@ CloudCompare Version History
 v2.12 (???) - (in development)
 ----------------------
 - Improvements
+    - CommandLine mode new features
+      - Added N_SIGMA_MIN and N_SIGMA_MAX options to the FILTER_SF command. Specify the option followed by a numeric value to filter by N * standardDeviation around the mean.
 	- Clipping box tool:
 		- former 'contours' renamed 'envelopes' for the sake of clarity
 		- ability to extract the real contours of the points inside each slice (single slice mode or 'repeat' mode)

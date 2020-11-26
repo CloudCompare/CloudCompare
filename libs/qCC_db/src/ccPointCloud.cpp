@@ -138,7 +138,9 @@ ccPointCloud* ccPointCloud::From(const CCCoreLib::GenericIndexedCloud* cloud, co
 	}
 
 	if (pc && sourceCloud)
+	{
 		pc->importParametersFrom(sourceCloud);
+	}
 
 	return pc;
 }

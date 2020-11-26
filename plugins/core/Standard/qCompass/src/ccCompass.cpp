@@ -2872,7 +2872,7 @@ void ccCompass::estimateP21()
 		outputCloud->addPoint(*outcrop->getPoint(p));
 	}
 	//copy global shift
-	outputCloud->copyGlobalShiftAndScale(*outcrop); //copy global scale
+	outputCloud->copyGlobalShiftAndScale(*outcrop); //copy global shift & scale
 	
 	//setup scalar fields etc
 	ccScalarField* P21 = new ccScalarField("P21");
@@ -3036,7 +3036,7 @@ void ccCompass::convertToPointCloud()
 			for (ccHObject::Container::const_iterator it = poly.begin(); it != poly.end(); it++)
 			{
 				ccPolyline* t = static_cast<ccPolyline*>(*it);
-				points->copyGlobalShiftAndScale(*t); //copy global scale
+				points->copyGlobalShiftAndScale(*t); //copy global shift & scale
 				points->reserve(points->size() + t->size()); //make space
 				sf->reserve(points->size() + t->size());
 				for (unsigned int p = 0; p < t->size(); p++)

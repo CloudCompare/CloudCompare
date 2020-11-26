@@ -4507,7 +4507,7 @@ void MainWindow::doConvertPolylinesToMesh()
 		}
 
 		//global shift & scale (we copy it from the first polyline by default)
-		vertices->copyGlobalShiftAndScale(*polylines.front());
+		mesh->copyGlobalShiftAndScale(*polylines.front());
 	}
 	else
 	{

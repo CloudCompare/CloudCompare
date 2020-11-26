@@ -858,12 +858,8 @@ ccPointCloud* ccGenericMesh::samplePoints(	bool densityBased,
 	cloud->setDisplay(getDisplay());
 	cloud->prepareDisplayForRefresh();
 
-	//import parameters from both the source vertices and the source mesh
-	ccGenericPointCloud* vertices = getAssociatedCloud();
-	if (vertices)
-	{
-		cloud->copyGlobalShiftAndScale(*vertices);
-	}
+	//import parameters from the source mesh
+	cloud->copyGlobalShiftAndScale(*this);
 	cloud->setGLTransformationHistory(getGLTransformationHistory());
 
 	return cloud;
@@ -878,7 +874,7 @@ void ccGenericMesh::importParametersFrom(const ccGenericMesh* mesh)
 	}
 
 	//original shift & scale
-	//copyGlobalShiftAndScale(*mesh);
+	copyGlobalShiftAndScale(*mesh);
 
 	//stippling
 	enableStippling(mesh->stipplingEnabled());

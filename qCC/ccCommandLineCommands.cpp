@@ -1916,11 +1916,11 @@ bool CommandFilterBySFValue::process(ccCommandLineInterface &cmd)
 					case USE_SAT_MAX:
 						thisMaxVal = static_cast<ccScalarField*>(sf)->saturationRange().stop();
 						break;
-					case USE_N_SIGMA_MIN:
+					case USE_N_SIGMA_MAX:
 						ScalarType mean;
 						ScalarType variance;
 						sf->computeMeanAndVariance(mean, &variance);
-						thisMaxVal = mean - (sqrt(variance) * maxVal);
+						thisMaxVal = mean + (sqrt(variance) * maxVal);
 						break;
 					default:
 						//nothing to do

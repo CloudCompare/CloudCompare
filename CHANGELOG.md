@@ -36,6 +36,8 @@ v2.12 (???) - (in development)
 				The former '-OUTPUT_RASTER_Z' option will only export the altitudes as its name implies.
 	- STL:
 		- loading speed should be greatly improved (compared to v2.10 and v2.11)
+	- qRansacSD:
+		- the plugin can now transfer the Global Shift & Scale info to the created primitives
 
 - New plugins
 	- MPlane: perform normal distance measurements against a defined plane (see https://www.cloudcompare.org/doc/wiki/index.php?title=MPlane_(plugin) )

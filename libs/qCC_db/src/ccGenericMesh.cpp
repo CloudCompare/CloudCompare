@@ -43,7 +43,7 @@
 
 ccGenericMesh::ccGenericMesh(QString name/*=QString()*/, unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
 	: GenericIndexedMesh()
-	, ccHObject(name, uniqueID)
+	, ccShiftedObject(name, uniqueID)
 	, m_triNormsShown(false)
 	, m_materialsShown(false)
 	, m_showWired(false)

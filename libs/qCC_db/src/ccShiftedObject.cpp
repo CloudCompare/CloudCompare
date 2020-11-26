@@ -39,13 +39,6 @@ void ccShiftedObject::setGlobalShift(const CCVector3d& shift)
 	m_globalShift = shift;
 }
 
-void ccShiftedObject::setGlobalShift(double x, double y, double z)
-{
-	m_globalShift.x = x;
-	m_globalShift.y = y;
-	m_globalShift.z = z;
-}
-
 void ccShiftedObject::setGlobalScale(double scale)
 {
 	if (scale == 0)

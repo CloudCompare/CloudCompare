@@ -24,6 +24,7 @@
 //Local
 #include "ccAdvancedTypes.h"
 #include "ccGenericGLDisplay.h"
+#include "ccShiftedObject.h"
 
 namespace CCCoreLib
 {
@@ -36,7 +37,7 @@ class ccPointCloud;
 class ccMaterialSet;
 
 //! Generic mesh interface
-class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh, public ccHObject
+class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh, public ccShiftedObject
 {
 
 public:

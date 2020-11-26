@@ -3860,3 +3860,46 @@ bool ccMesh::convertMaterialsToVertexColors()
 
 	return true;
 }
+
+
+void ccMesh::setGlobalShift(const CCVector3d& shift)
+{
+	if (m_associatedCloud)
+	{
+		//auto transfer the global shift info to the vertices
+		m_associatedCloud->setGlobalShift(shift);
+	}
+	else
+	{
+		//we normally don't want to store this information at
+		//the mesh level as it won't be saved.
+		assert(false);
+		ccGenericMesh::setGlobalShift(shift);
+	}
+}
+
+void ccMesh::setGlobalScale(double scale)
+{
+	if (m_associatedCloud)
+	{
+		//auto transfer the global scale info to the vertices
+		m_associatedCloud->setGlobalScale(scale);
+	}
+	else
+	{
+		//we normally don't want to store this information at
+		//the mesh level as it won't be saved.
+		assert(false);
+		ccGenericMesh::setGlobalScale(scale);
+	}
+}
+
+const CCVector3d& ccMesh::getGlobalShift() const
+{
+	return (m_associatedCloud ? m_associatedCloud->getGlobalShift() : ccGenericMesh::getGlobalShift());
+}
+
+double ccMesh::getGlobalScale() const
+{
+	return (m_associatedCloud ? m_associatedCloud->getGlobalScale() : ccGenericMesh::getGlobalScale());
+}

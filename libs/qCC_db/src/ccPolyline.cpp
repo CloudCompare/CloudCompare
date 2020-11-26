@@ -583,6 +583,34 @@ void ccPolyline::setGlobalScale(double scale)
 	}
 }
 
+const CCVector3d& ccPolyline::getGlobalShift() const
+{
+	const ccPointCloud* pc = dynamic_cast<const ccPointCloud*>(m_theAssociatedCloud);
+	if (pc && pc->getParent() == this)
+	{
+		//auto transfer the global scale info to the vertices
+		return pc->getGlobalShift();
+	}
+	else
+	{
+		return ccShiftedObject::getGlobalShift();
+	}
+}
+
+double ccPolyline::getGlobalScale() const
+{
+	const ccPointCloud* pc = dynamic_cast<const ccPointCloud*>(m_theAssociatedCloud);
+	if (pc && pc->getParent() == this)
+	{
+		//auto transfer the global scale info to the vertices
+		return pc->getGlobalScale();
+	}
+	else
+	{
+		return ccShiftedObject::getGlobalScale();
+	}
+}
+
 ccPointCloud* ccPolyline::samplePoints(	bool densityBased,
 										double samplingParameter,
 										bool withRGB)

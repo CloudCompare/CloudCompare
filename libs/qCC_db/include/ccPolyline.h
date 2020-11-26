@@ -59,6 +59,8 @@ public:
 	//inherited methods (ccShiftedObject)
 	void setGlobalShift(const CCVector3d& shift) override;
 	void setGlobalScale(double scale) override;
+	const CCVector3d& getGlobalShift() const override;
+	double getGlobalScale() const override;
 
 	//! Defines if the polyline is considered as 2D or 3D
 	/** \param state if true, the polyline is 2D

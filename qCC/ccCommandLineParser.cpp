@@ -519,7 +519,7 @@ bool ccCommandLineParser::saveClouds(QString suffix/*=QString()*/, bool allAtOnc
 		}
 		else
 		{
-			error(QString("The currently selected ouput format for clouds (%1) doesn't handle multiple entities at once!").arg(m_cloudExportFormat));
+			error(QString("The currently selected output format for clouds (%1) doesn't handle multiple entities at once!").arg(m_cloudExportFormat));
 			//will proceed with the standard way
 		}
 	}
@@ -576,7 +576,7 @@ bool ccCommandLineParser::saveMeshes(QString suffix/*=QString()*/, bool allAtOnc
 		}
 		else
 		{
-			error(QString("The currently selected ouput format for meshes (%1) doesn't handle multiple entities at once!").arg(m_meshExportFormat));
+			error(QString("The currently selected output format for meshes (%1) doesn't handle multiple entities at once!").arg(m_meshExportFormat));
 			//will proceed with the standard way
 		}
 	}

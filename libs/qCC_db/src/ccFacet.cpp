@@ -67,7 +67,7 @@ ccFacet* ccFacet::clone() const
 		if (!facet->m_contourPolyline || !facet->m_contourVertices)
 		{
 			//not enough memory?!
-			ccLog::Warning(QString("[ccFacet::clone][%1] Failed to clone countour!").arg(getName()));
+			ccLog::Warning(QString("[ccFacet::clone][%1] Failed to clone contour!").arg(getName()));
 			delete facet;
 			return nullptr;
 		}

@@ -4767,6 +4767,7 @@ void MainWindow::doActionFitQuadric()
 				quadric->setName(QString("Quadric (%1)").arg(cloud->getName()));
 				quadric->setDisplay(cloud->getDisplay());
 				quadric->prepareDisplayForRefresh();
+				quadric->copyGlobalShiftAndScale(*cloud);
 				addToDB(quadric);
 
 				ccConsole::Print(QString("[doActionFitQuadric] Quadric local coordinate system:"));
@@ -7939,6 +7940,7 @@ void MainWindow::doActionFitSphere()
 		cloud->addChild(sphere);
 		//sphere->setDisplay(cloud->getDisplay());
 		sphere->prepareDisplayForRefresh();
+		sphere->copyGlobalShiftAndScale(*cloud);
 		addToDB(sphere, false, false, false);
 	}
 
@@ -8020,6 +8022,18 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 						{
 							contour->copyGlobalShiftAndScale(*shifted);
 						}
+
+						ccMesh* polygon = facet->getPolygon();
+						if (polygon)
+						{
+							polygon->copyGlobalShiftAndScale(*shifted);
+						}
+
+						ccPointCloud* points = facet->getOriginPoints();
+						if (points)
+						{
+							points->copyGlobalShiftAndScale(*shifted);
+						}
 					}
 				}
 			}
@@ -8032,6 +8046,11 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 					N = pPlane->getNormal();
 					C = *CCCoreLib::Neighbourhood(cloud).getGravityCenter();
 					pPlane->enableStippling(true);
+
+					if (shifted)
+					{
+						pPlane->copyGlobalShiftAndScale(*shifted);
+					}
 				}
 			}
 

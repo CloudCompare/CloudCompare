@@ -24,6 +24,7 @@
 //Local
 #include "ccAdvancedTypes.h"
 #include "ccGenericGLDisplay.h"
+#include "ccShiftedObject.h"
 
 namespace CCCoreLib
 {
@@ -36,7 +37,7 @@ class ccPointCloud;
 class ccMaterialSet;
 
 //! Generic mesh interface
-class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh, public ccHObject
+class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh, public ccShiftedObject
 {
 
 public:
@@ -236,6 +237,12 @@ public:
 
 	//! Computes the point that corresponds to the given uv (barycentric) coordinates
 	bool computePointPosition(unsigned triIndex, const CCVector2d& uv, CCVector3& P, bool warningIfOutside = true) const;
+
+	//inherited methods (ccShiftedObject)
+	void setGlobalShift(const CCVector3d& shift) override;
+	void setGlobalScale(double scale) override;
+	const CCVector3d& getGlobalShift() const override;
+	double getGlobalScale() const override;
 
 protected:
 

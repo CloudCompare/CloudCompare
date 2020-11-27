@@ -43,7 +43,7 @@
 
 ccGenericMesh::ccGenericMesh(QString name/*=QString()*/, unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
 	: GenericIndexedMesh()
-	, ccHObject(name, uniqueID)
+	, ccShiftedObject(name, uniqueID)
 	, m_triNormsShown(false)
 	, m_materialsShown(false)
 	, m_showWired(false)
@@ -858,13 +858,8 @@ ccPointCloud* ccGenericMesh::samplePoints(	bool densityBased,
 	cloud->setDisplay(getDisplay());
 	cloud->prepareDisplayForRefresh();
 
-	//import parameters from both the source vertices and the source mesh
-	ccGenericPointCloud* vertices = getAssociatedCloud();
-	if (vertices)
-	{
-		cloud->setGlobalShift(vertices->getGlobalShift());
-		cloud->setGlobalScale(vertices->getGlobalScale());
-	}
+	//import parameters from the source mesh
+	cloud->copyGlobalShiftAndScale(*this);
 	cloud->setGLTransformationHistory(getGLTransformationHistory());
 
 	return cloud;
@@ -879,8 +874,7 @@ void ccGenericMesh::importParametersFrom(const ccGenericMesh* mesh)
 	}
 
 	//original shift & scale
-	//setGlobalShift(mesh->getGlobalShift());
-	//setGlobalScale(mesh->getGlobalScale());
+	copyGlobalShiftAndScale(*mesh);
 
 	//stippling
 	enableStippling(mesh->stipplingEnabled());
@@ -1141,4 +1135,46 @@ bool ccGenericMesh::computePointPosition(unsigned triIndex, const CCVector2d& uv
 					static_cast<PointCoordinateType>(uv.x * A.z + uv.y * B.z + z * C.z));
 
 	return true;
+}
+
+void ccGenericMesh::setGlobalShift(const CCVector3d& shift)
+{
+	if (getAssociatedCloud())
+	{
+		//auto transfer the global shift info to the vertices
+		getAssociatedCloud()->setGlobalShift(shift);
+	}
+	else
+	{
+		//we normally don't want to store this information at
+		//the mesh level as it won't be saved.
+		assert(false);
+		ccShiftedObject::setGlobalShift(shift);
+	}
+}
+
+void ccGenericMesh::setGlobalScale(double scale)
+{
+	if (getAssociatedCloud())
+	{
+		//auto transfer the global scale info to the vertices
+		getAssociatedCloud()->setGlobalScale(scale);
+	}
+	else
+	{
+		//we normally don't want to store this information at
+		//the mesh level as it won't be saved.
+		assert(false);
+		ccShiftedObject::setGlobalScale(scale);
+	}
+}
+
+const CCVector3d& ccGenericMesh::getGlobalShift() const
+{
+	return (getAssociatedCloud() ? getAssociatedCloud()->getGlobalShift() : ccShiftedObject::getGlobalShift());
+}
+
+double ccGenericMesh::getGlobalScale() const
+{
+	return (getAssociatedCloud() ? getAssociatedCloud()->getGlobalScale() : ccShiftedObject::getGlobalScale());
 }

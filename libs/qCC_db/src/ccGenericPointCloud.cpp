@@ -273,8 +273,7 @@ void ccGenericPointCloud::importParametersFrom(const ccGenericPointCloud* cloud)
 	}
 
 	//original center
-	setGlobalShift(cloud->getGlobalShift());
-	setGlobalScale(cloud->getGlobalScale());
+	copyGlobalShiftAndScale(*cloud);
 	//keep the transformation history!
 	setGLTransformationHistory(cloud->getGLTransformationHistory());
 	//custom point size

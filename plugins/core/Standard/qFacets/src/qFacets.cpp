@@ -463,8 +463,7 @@ ccHObject* qFacets::createFacets(ccPointCloud* cloud,
 					}
 					if (facet->getContour())
 					{
-						facet->getContour()->setGlobalScale(facetCloud->getGlobalScale());
-						facet->getContour()->setGlobalShift(facetCloud->getGlobalShift());
+						facet->getContour()->copyGlobalShiftAndScale(*facetCloud);
 					}
 
 					//check the facet normal sign

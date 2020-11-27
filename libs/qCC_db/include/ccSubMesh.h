@@ -67,6 +67,8 @@ public:
 	bool getTriangleNormals(unsigned triangleIndex, CCVector3& Na, CCVector3& Nb, CCVector3& Nc) const override;
 	NormsIndexesTableType* getTriNormsTable() const override;
 	unsigned capacity() const override;
+	void setGlobalShift(const CCVector3d& shift) override { /* this method shouldn't be called on ccSubMesh instances */ assert(false); }
+	void setGlobalScale(double scale) override { /* this method shouldn't be called on ccSubMesh instances */ assert(false); }
 
 	//inherited methods (ccDrawableObject)
 	bool hasColors() const override;

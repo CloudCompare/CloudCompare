@@ -41,8 +41,9 @@ ccPolyline::ccPolyline(GenericIndexedCloudPersist* associatedCloud, unsigned uni
 	ccGenericPointCloud* cloud = dynamic_cast<ccGenericPointCloud*>(associatedCloud);
 	if (cloud)
 	{
-		setGlobalScale(cloud->getGlobalScale());
-		setGlobalShift(cloud->getGlobalShift());
+		//no need to call ccPolyline::the copyGlobalShiftAndScalemethod
+		//as it will try to set the Global Shift & Scale info on the associated cloud!
+		ccShiftedObject::copyGlobalShiftAndScale(*cloud);
 	}
 }
 
@@ -111,9 +112,8 @@ void ccPolyline::importParametersFrom(const ccPolyline& poly)
 	showColors(poly.colorsShown());
 	showVertices(poly.verticesShown());
 	setVertexMarkerWidth(poly.getVertexMarkerWidth());
-	showArrow(m_showArrow,m_arrowIndex,m_arrowLength);
-	setGlobalScale(poly.getGlobalScale());
-	setGlobalShift(poly.getGlobalShift());
+	showArrow(m_showArrow, m_arrowIndex, m_arrowLength);
+	copyGlobalShiftAndScale(poly);
 	setGLTransformationHistory(poly.getGLTransformationHistory());
 	setMetaData(poly.metaData());
 }
@@ -585,6 +585,34 @@ void ccPolyline::setGlobalScale(double scale)
 	}
 }
 
+const CCVector3d& ccPolyline::getGlobalShift() const
+{
+	const ccPointCloud* pc = dynamic_cast<const ccPointCloud*>(m_theAssociatedCloud);
+	if (pc && pc->getParent() == this)
+	{
+		//auto transfer the global scale info to the vertices
+		return pc->getGlobalShift();
+	}
+	else
+	{
+		return ccShiftedObject::getGlobalShift();
+	}
+}
+
+double ccPolyline::getGlobalScale() const
+{
+	const ccPointCloud* pc = dynamic_cast<const ccPointCloud*>(m_theAssociatedCloud);
+	if (pc && pc->getParent() == this)
+	{
+		//auto transfer the global scale info to the vertices
+		return pc->getGlobalScale();
+	}
+	else
+	{
+		return ccShiftedObject::getGlobalScale();
+	}
+}
+
 ccPointCloud* ccPolyline::samplePoints(	bool densityBased,
 										double samplingParameter,
 										bool withRGB)
@@ -681,8 +709,7 @@ ccPointCloud* ccPolyline::samplePoints(	bool densityBased,
 	}
 
 	//import parameters from the source
-	cloud->setGlobalShift(getGlobalShift());
-	cloud->setGlobalScale(getGlobalScale());
+	cloud->copyGlobalShiftAndScale(*this);
 	cloud->setGLTransformationHistory(getGLTransformationHistory());
 
 	return cloud;

@@ -3903,8 +3903,7 @@ void MainWindow::doActionSubsample()
 			if (newPointCloud)
 			{
 				newPointCloud->setName(cloud->getName() + QString(".subsampled"));
-				newPointCloud->setGlobalShift(cloud->getGlobalShift());
-				newPointCloud->setGlobalScale(cloud->getGlobalScale());
+				newPointCloud->copyGlobalShiftAndScale(*cloud);
 				newPointCloud->setDisplay(cloud->getDisplay());
 				newPointCloud->prepareDisplayForRefresh();
 				if (cloud->getParent())
@@ -4039,8 +4038,7 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 					//'shift on load' information
 					if (pc)
 					{
-						compCloud->setGlobalShift(pc->getGlobalShift());
-						compCloud->setGlobalScale(pc->getGlobalScale());
+						compCloud->copyGlobalShiftAndScale(*pc);
 					}
 					compCloud->setVisible(true);
 					compCloud->setName(QString("CC#%1").arg(ccGroup->getChildrenNumber()));
@@ -4509,8 +4507,7 @@ void MainWindow::doConvertPolylinesToMesh()
 		}
 
 		//global shift & scale (we copy it from the first polyline by default)
-		vertices->setGlobalShift(polylines.front()->getGlobalShift());
-		vertices->setGlobalScale(polylines.front()->getGlobalScale());
+		mesh->copyGlobalShiftAndScale(*polylines.front());
 	}
 	else
 	{
@@ -4770,6 +4767,7 @@ void MainWindow::doActionFitQuadric()
 				quadric->setName(QString("Quadric (%1)").arg(cloud->getName()));
 				quadric->setDisplay(cloud->getDisplay());
 				quadric->prepareDisplayForRefresh();
+				quadric->copyGlobalShiftAndScale(*cloud);
 				addToDB(quadric);
 
 				ccConsole::Print(QString("[doActionFitQuadric] Quadric local coordinate system:"));
@@ -7942,6 +7940,7 @@ void MainWindow::doActionFitSphere()
 		cloud->addChild(sphere);
 		//sphere->setDisplay(cloud->getDisplay());
 		sphere->prepareDisplayForRefresh();
+		sphere->copyGlobalShiftAndScale(*cloud);
 		addToDB(sphere, false, false, false);
 	}
 
@@ -8021,8 +8020,19 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 						ccPolyline* contour = facet->getContour();
 						if (contour)
 						{
-							contour->setGlobalScale(shifted->getGlobalScale());
-							contour->setGlobalShift(shifted->getGlobalShift());
+							contour->copyGlobalShiftAndScale(*shifted);
+						}
+
+						ccMesh* polygon = facet->getPolygon();
+						if (polygon)
+						{
+							polygon->copyGlobalShiftAndScale(*shifted);
+						}
+
+						ccPointCloud* points = facet->getOriginPoints();
+						if (points)
+						{
+							points->copyGlobalShiftAndScale(*shifted);
 						}
 					}
 				}
@@ -8036,6 +8046,11 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 					N = pPlane->getNormal();
 					C = *CCCoreLib::Neighbourhood(cloud).getGravityCenter();
 					pPlane->enableStippling(true);
+
+					if (shifted)
+					{
+						pPlane->copyGlobalShiftAndScale(*shifted);
+					}
 				}
 			}
 

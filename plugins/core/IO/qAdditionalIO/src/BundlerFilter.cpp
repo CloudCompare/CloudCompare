@@ -1030,8 +1030,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 					ccPointCloud* orthoCloud = sensor->orthoRectifyAsCloud(image,_keypointsCloud,keypointsImage);
 					if (orthoCloud)
 					{
-						orthoCloud->setGlobalScale(_keypointsCloud->getGlobalScale());
-						orthoCloud->setGlobalShift(_keypointsCloud->getGlobalShift());
+						orthoCloud->copyGlobalShiftAndScale(*_keypointsCloud);
 						container.addChild(orthoCloud);
 					}
 					else

@@ -673,27 +673,31 @@ void ccPropertiesTreeDelegate::fillWithFacet(const ccFacet* _obj)
 		return;
 	}
 
-	addSeparator( tr( "Facet" ) );
+	addSeparator(tr("Facet"));
 
 	//planar entity commons
 	fillWithPlanarEntity(_obj);
 
 	//surface
-	appendRow(ITEM( tr( "Surface" ) ), ITEM(QLocale(QLocale::English).toString(_obj->getSurface())));
+	appendRow(ITEM(tr("Surface")), ITEM(QLocale(QLocale::English).toString(_obj->getSurface())));
 
 	//RMS
-	appendRow(ITEM( tr( "RMS" ) ), ITEM(QLocale(QLocale::English).toString(_obj->getRMS())));
+	appendRow(ITEM(tr("RMS")), ITEM(QLocale(QLocale::English).toString(_obj->getRMS())));
 
 	//center
-	appendRow(ITEM( tr( "Center" ) ), ITEM(QStringLiteral("(%1 ; %2 ; %3)").arg(_obj->getCenter().x).arg(_obj->getCenter().y).arg(_obj->getCenter().z)));
+	appendRow(ITEM(tr("Center")), ITEM(QStringLiteral("(%1 ; %2 ; %3)").arg(_obj->getCenter().x).arg(_obj->getCenter().y).arg(_obj->getCenter().z)));
 
 	//contour visibility
 	if (_obj->getContour())
-		appendRow(ITEM( tr( "Show contour" ) ), CHECKABLE_ITEM(_obj->getContour()->isVisible(), OBJECT_FACET_CONTOUR));
+	{
+		appendRow(ITEM(tr("Show contour")), CHECKABLE_ITEM(_obj->getContour()->isVisible(), OBJECT_FACET_CONTOUR));
+	}
 
 	//polygon visibility
 	if (_obj->getPolygon())
-		appendRow(ITEM( tr( "Show polygon" ) ), CHECKABLE_ITEM(_obj->getPolygon()->isVisible(), OBJECT_FACET_MESH));
+	{
+		appendRow(ITEM(tr("Show polygon")), CHECKABLE_ITEM(_obj->getPolygon()->isVisible(), OBJECT_FACET_MESH));
+	}
 }
 
 void ccPropertiesTreeDelegate::fillWithPlanarEntity(const ccPlanarEntityInterface* _obj)
@@ -746,7 +750,12 @@ void ccPropertiesTreeDelegate::fillWithMesh(const ccGenericMesh* _obj)
 	//we also integrate vertices SF into mesh properties
 	ccGenericPointCloud* vertices = _obj->getAssociatedCloud();
 	if (vertices && (!vertices->isLocked() || _obj->isAncestorOf(vertices)))
+	{
 		fillSFWithPointCloud(vertices);
+	}
+
+	//global shift & scale
+	fillWithShifted(_obj);
 }
 
 void ccPropertiesTreeDelegate::fillWithPolyline(const ccPolyline* _obj)

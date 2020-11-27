@@ -1155,8 +1155,7 @@ bool CommandExtractCCs::process(ccCommandLineInterface &cmd)
 					if (compCloud)
 					{
 						//'shift on load' information
-						compCloud->setGlobalShift(cloud->getGlobalShift());
-						compCloud->setGlobalScale(cloud->getGlobalScale());
+						compCloud->copyGlobalShiftAndScale(*cloud);
 						compCloud->setName(QString(cloud->getName() + "_CC#%1").arg(j + 1));
 						
 						CLCloudDesc cloudDesc(compCloud, inputClouds[i].basename + QObject::tr("_COMPONENT_%1").arg(++realIndex), inputClouds[i].path);

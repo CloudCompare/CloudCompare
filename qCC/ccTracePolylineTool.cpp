@@ -479,8 +479,7 @@ void ccTracePolylineTool::onItemPicked(const PickedItem& pi)
 		if (cloud)
 		{
 			//copy the first clicked entity's global shift & scale
-			m_poly3D->setGlobalShift(cloud->getGlobalShift());
-			m_poly3D->setGlobalScale(cloud->getGlobalScale());
+			m_poly3D->copyGlobalShiftAndScale(*cloud);
 		}
 
 		m_segmentParams.resize(0); //just in case

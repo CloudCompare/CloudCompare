@@ -828,12 +828,12 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const QString& filename, co
 			dxf.writeLayer(*dw,
 				DL_LayerData("0", 0),
 				DL_Attributes(
-				std::string(""),		// leave empty
-				DL_Codes::black,		// default color
-				100,					// default width (in 1/100 mm)
-				"CONTINUOUS",			// default line style
-				1.0						// linetypeScale
-				));			
+					std::string(""),		// leave empty
+					DL_Codes::black,		// default color
+					100,					// default width (in 1/100 mm)
+					"CONTINUOUS",			// default line style
+					1.0						// linetypeScale
+				));
 
 			//polylines layers
 			for (unsigned i = 0; i < polyCount; ++i)
@@ -847,11 +847,11 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const QString& filename, co
 				dxf.writeLayer(*dw,
 					DL_LayerData(qPrintable(layerName), 0), //DGM: warning, toStdString doesn't preserve "local" characters
 					DL_Attributes(
-					std::string(""),
-					DL_Codes::green,
-					static_cast<int>(lineWidth),
-					"CONTINUOUS",
-					1.0));
+						std::string(""),
+						DL_Codes::green,
+						static_cast<int>(lineWidth),
+						"CONTINUOUS",
+						1.0));
 			}
 
 			//mesh layers
@@ -866,11 +866,11 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const QString& filename, co
 				dxf.writeLayer(*dw,
 					DL_LayerData(qPrintable(layerName), 0), //DGM: warning, toStdString doesn't preserve "local" characters
 					DL_Attributes(
-					std::string(""),
-					DL_Codes::magenta,
-					static_cast<int>(lineWidth),
-					"CONTINUOUS",
-					1.0));
+						std::string(""),
+						DL_Codes::magenta,
+						static_cast<int>(lineWidth),
+						"CONTINUOUS",
+						1.0));
 			}
 
 			//clouds
@@ -885,11 +885,11 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const QString& filename, co
 				dxf.writeLayer(*dw,
 					DL_LayerData(qPrintable(layerName), 0), //DGM: warning, toStdString doesn't preserve "local" characters
 					DL_Attributes(
-					std::string(""),
-					DL_Codes::magenta,
-					static_cast<int>(lineWidth),
-					"CONTINUOUS",
-					1.0));
+						std::string(""),
+						DL_Codes::magenta,
+						static_cast<int>(lineWidth),
+						"CONTINUOUS",
+						1.0));
 			}
 		}
 		dw->tableEnd();
@@ -984,10 +984,10 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const QString& filename, co
 					CCVector3d C = vertices->toGlobal3d(*tri->_getC());
 					dxf.write3dFace(*dw,
 						DL_3dFaceData(A.x, A.y, A.z,
-						B.x, B.y, B.z,
-						C.x, C.y, C.z,
-						C.x, C.y, C.z,
-						lineWidth),
+							B.x, B.y, B.z,
+							C.x, C.y, C.z,
+							C.x, C.y, C.z,
+							lineWidth),
 						DL_Attributes(qPrintable(meshLayerNames[j]), DL_Codes::bylayer, -1, "BYLAYER", 1.0)); //DGM: warning, toStdString doesn't preserve "local" characters
 				}
 			}

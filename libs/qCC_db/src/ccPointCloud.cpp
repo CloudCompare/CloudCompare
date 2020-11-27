@@ -138,7 +138,9 @@ ccPointCloud* ccPointCloud::From(const CCCoreLib::GenericIndexedCloud* cloud, co
 	}
 
 	if (pc && sourceCloud)
+	{
 		pc->importParametersFrom(sourceCloud);
+	}
 
 	return pc;
 }
@@ -966,8 +968,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 			if (!isShifted())
 			{
 				//we can keep the global shift information of the merged cloud
-				setGlobalShift(addedCloud->getGlobalShift());
-				setGlobalScale(addedCloud->getGlobalScale());
+				copyGlobalShiftAndScale(*addedCloud);
 			}
 			else if (	getGlobalScale() != addedCloud->getGlobalScale()
 					||	(getGlobalShift() - addedCloud->getGlobalShift()).norm2d() > 1.0e-6)

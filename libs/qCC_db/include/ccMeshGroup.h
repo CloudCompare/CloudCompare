@@ -65,7 +65,6 @@ public:
 									double& nearestSquareDist,
 									CCVector3d& nearestPoint,
 									CCVector3d* barycentricCoords = nullptr) const override { return false; }
-	void setGlobalShift(double x, double y, double z) override { /* this method shouldn't be called on ccMeshGroup instances */ assert(false); }
 	void setGlobalShift(const CCVector3d& shift) override { /* this method shouldn't be called on ccMeshGroup instances */ assert(false); }
 	void setGlobalScale(double scale) override { /* this method shouldn't be called on ccMeshGroup instances */ assert(false); }
 

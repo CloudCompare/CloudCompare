@@ -67,7 +67,6 @@ public:
 	bool getTriangleNormals(unsigned triangleIndex, CCVector3& Na, CCVector3& Nb, CCVector3& Nc) const override;
 	NormsIndexesTableType* getTriNormsTable() const override;
 	unsigned capacity() const override;
-	void setGlobalShift(double x, double y, double z) override { /* this method shouldn't be called on ccSubMesh instances */ assert(false); }
 	void setGlobalShift(const CCVector3d& shift) override { /* this method shouldn't be called on ccSubMesh instances */ assert(false); }
 	void setGlobalScale(double scale) override { /* this method shouldn't be called on ccSubMesh instances */ assert(false); }
 

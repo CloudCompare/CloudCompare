@@ -68,13 +68,12 @@ enum CC_OBJECT_FLAG {	//CC_UNUSED			= 1, //DGM: not used anymore (former CC_FATH
 #define CC_CAMERA_BIT					0x00000100000000	//For camera sensors (projective sensors)
 #define CC_QUADRIC_BIT					0x00000200000000	//Quadric (primitive)
 #define CC_RGBA_COLOR_BIT				0x00000400000000	//Color (R,G,B,A)
-//#define CC_FREE_BIT					0x00000800000000
-//#define CC_FREE_BIT					0x00000400000000
+#define CC_COORDINATESYSTEM_BIT			0x00000800000000	//CoordinateSystem (primitive)
 //#define CC_FREE_BIT					0x00001000000000
 //#define CC_FREE_BIT					0x00002000000000
 //#define CC_FREE_BIT					0x00004000000000
 //#define CC_FREE_BIT					0x00008000000000
-//#define CC_FREE_BIT					0x00004000000000
+//#define CC_FREE_BIT					0x00010000000000
 //#define CC_FREE_BIT					...
 
 //! Type of object type flags (64 bits)
@@ -122,7 +121,7 @@ namespace CC_TYPES
 		VIEWPORT_2D_LABEL	=	VIEWPORT_2D_OBJECT	| CC_LABEL_BIT,
 		CLIPPING_BOX		=	CC_CLIP_BOX_BIT		| CC_LEAF_BIT,
 		TRANS_BUFFER		=	HIERARCHY_OBJECT	| CC_TRANS_BUFFER_BIT		| CC_LEAF_BIT,
-		
+		COORDINATESYSTEM	=	PRIMITIVE			| CC_COORDINATESYSTEM_BIT,
 		//  Custom types
 		/** Custom objects are typically defined by plugins. They can be inserted in an object
 			hierarchy or displayed in an OpenGL context like any other ccHObject.

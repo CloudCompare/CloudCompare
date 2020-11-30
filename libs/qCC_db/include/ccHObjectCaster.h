@@ -50,6 +50,7 @@ class ccShiftedObject;
 class ccSphere;
 class ccSubMesh;
 class ccTorus;
+class ccCoordinateSystem;
 
 //! Useful class to (try to) statically cast a basic ccHObject to a given type
 class QCC_DB_LIB_API ccHObjectCaster
@@ -140,6 +141,9 @@ public:
 
 	//! Converts current object to ccIndexedTransformationBuffer (if possible)
 	static ccIndexedTransformationBuffer* ToTransBuffer(ccHObject* obj);
+
+	//! Converts current object to ccCoordinateSystem (if possible)
+	static ccCoordinateSystem* ccHObjectCaster::ToCoordinateSystem(ccHObject* obj);
 
 };
 

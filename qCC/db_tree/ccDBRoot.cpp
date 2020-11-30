@@ -222,6 +222,7 @@ private:
 			{ CC_TYPES::LABEL_2D, labelIndex },
 			{ CC_TYPES::VIEWPORT_2D_OBJECT, viewportObjIndex },
 			{ CC_TYPES::VIEWPORT_2D_LABEL, viewportLabelIndex },
+			{ CC_TYPES::COORDINATESYSTEM, geomIndex }
 		};
 	}
 	

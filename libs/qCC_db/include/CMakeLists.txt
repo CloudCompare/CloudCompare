@@ -18,6 +18,7 @@ target_sources( ${PROJECT_NAME}
 		${CMAKE_CURRENT_LIST_DIR}/ccColorScalesManager.h
 		${CMAKE_CURRENT_LIST_DIR}/ccColorTypes.h
 		${CMAKE_CURRENT_LIST_DIR}/ccCone.h
+		${CMAKE_CURRENT_LIST_DIR}/ccCoordinateSystem.h
 		${CMAKE_CURRENT_LIST_DIR}/ccCustomObject.h
 		${CMAKE_CURRENT_LIST_DIR}/ccCylinder.h
 		${CMAKE_CURRENT_LIST_DIR}/ccDepthBuffer.h

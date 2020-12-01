@@ -54,6 +54,7 @@
 #include <ccSensor.h>
 #include <ccSphere.h>
 #include <ccSubMesh.h>
+#include <ccCoordinateSystem.h>
 
 //Qt
 #include <QAbstractItemView>
@@ -210,8 +211,12 @@ void ccPropertiesTreeDelegate::fillModel(ccHObject* hObject)
 			fillWithHObject(m_currentObject);
 		}
 	}
-	
-	if (m_currentObject->isKindOf(CC_TYPES::POINT_CLOUD))
+
+	if (m_currentObject->isA(CC_TYPES::COORDINATESYSTEM))
+	{
+		fillWithCoordinateSystem(ccHObjectCaster::ToCoordinateSystem(m_currentObject));
+	}
+	else if (m_currentObject->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
 		fillWithPointCloud(ccHObjectCaster::ToGenericPointCloud(m_currentObject));
 	}
@@ -511,6 +516,26 @@ void ccPropertiesTreeDelegate::fillWithShifted(const ccShiftedObject* _obj)
 
 	double scale = _obj->getGlobalScale();
 	appendRow(ITEM( tr( "Global scale" ) ), ITEM(QStringLiteral("%1").arg(scale, 0, 'f', 6)));
+}
+
+void ccPropertiesTreeDelegate::fillWithCoordinateSystem(const ccCoordinateSystem* _obj)
+{
+	assert(_obj && m_model);
+	if (!_obj || !m_model)
+	{
+		return;
+	}
+
+	CCVector3 origin = _obj->getOrigin();
+	addSeparator(tr("Coordinate System"));
+	appendRow(ITEM(tr("Origin")),
+		ITEM(QStringLiteral("X: %0\nY: %1\nZ: %2").arg(origin.x).arg(origin.y).arg(origin.z)));
+	appendRow(ITEM(tr("Planes Visible")), CHECKABLE_ITEM(_obj->axisPlanesAreShown(), OBJECT_COORDINATE_SYSTEM_DISP_PLANES));
+	appendRow(ITEM(tr("Planes Stippled")), CHECKABLE_ITEM(static_cast<const ccMesh*>(_obj)->stipplingEnabled(), OBJECT_MESH_STIPPLING));
+	appendRow(ITEM(tr("Axis Lines Visible")), CHECKABLE_ITEM(_obj->axisLinesAreShown(), OBJECT_COORDINATE_SYSTEM_DISP_AXES));
+	appendRow(ITEM(tr("Axis width")), PERSISTENT_EDITOR(OBJECT_COORDINATE_SYSTEM_AXES_WIDTH), true);
+	appendRow(ITEM(tr("Display scale")), PERSISTENT_EDITOR(OBJECT_COORDINATE_SYSTEM_DISP_SCALE), true);
+
 }
 
 void ccPropertiesTreeDelegate::fillWithPointCloud(ccGenericPointCloud* _obj)
@@ -1529,6 +1554,50 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		outputWidget = comboBox;
 	}
 	break;
+	case OBJECT_COORDINATE_SYSTEM_AXES_WIDTH:
+	{
+		QComboBox* comboBox = new QComboBox(parent);
+
+		comboBox->addItem(tr(s_defaultPolyWidthSizeString)); //size = 0
+
+		for (int i = static_cast<int>(ccCoordinateSystem::MIN_AXIS_WIDTH_F); i <= static_cast<int>(ccCoordinateSystem::MAX_AXIS_WIDTH_F); ++i)
+		{
+			comboBox->addItem(QString::number(i));
+		}
+		if (m_currentObject && m_currentObject->isA(CC_TYPES::COORDINATESYSTEM))
+		{
+			ccCoordinateSystem* cs = ccHObjectCaster::ToCoordinateSystem(m_currentObject);
+			if (cs)
+			{
+				comboBox->setCurrentIndex(static_cast<int>(cs->getAxisWidth()));
+			}
+		}
+		connect(comboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+			this, &ccPropertiesTreeDelegate::coordinateSystemAxisWidthChanged);
+
+		outputWidget = comboBox;
+	}
+	break;
+	case OBJECT_COORDINATE_SYSTEM_DISP_SCALE:
+	{
+		QDoubleSpinBox* spinBox = new QDoubleSpinBox(parent);
+		spinBox->setRange(1.0e-3, 1.0e6);
+		spinBox->setDecimals(3);
+		spinBox->setSingleStep(1.0e-1);
+		if (m_currentObject && m_currentObject->isA(CC_TYPES::COORDINATESYSTEM))
+		{
+			ccCoordinateSystem* cs = ccHObjectCaster::ToCoordinateSystem(m_currentObject);
+			if (cs)
+			{
+				spinBox->setValue(cs->getDisplayScale());
+			}
+		}
+		connect(spinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+			this, &ccPropertiesTreeDelegate::coordinateSystemDisplayScaleChanged);
+
+		outputWidget = spinBox;
+	}
+	break;
 	default:
 		return QStyledItemDelegate::createEditor(parent, option, index);
 	}
@@ -1956,6 +2025,26 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
 		assert(cloud);
 		cloud->showSFColorsScale(item->checkState() == Qt::Checked);
+	}
+	redraw = true;
+	break;	
+	case OBJECT_COORDINATE_SYSTEM_DISP_AXES:
+	{
+		ccCoordinateSystem* cs = ccHObjectCaster::ToCoordinateSystem(m_currentObject);
+		if (cs)
+		{
+			cs->ShowAxisLines(item->checkState() == Qt::Checked);
+		}
+	}
+	redraw = true;
+	break;
+	case OBJECT_COORDINATE_SYSTEM_DISP_PLANES:
+	{
+		ccCoordinateSystem* cs = ccHObjectCaster::ToCoordinateSystem(m_currentObject);
+		if (cs)
+		{
+			cs->ShowAxisPlanes(item->checkState() == Qt::Checked);
+		}
 	}
 	redraw = true;
 	break;
@@ -2507,6 +2596,24 @@ void ccPropertiesTreeDelegate::sensorScaleChanged(double val)
 	}
 }
 
+void ccPropertiesTreeDelegate::coordinateSystemDisplayScaleChanged(double val)
+{
+	if (!m_currentObject)
+	{
+		return;
+	}
+
+	ccCoordinateSystem* cs = ccHObjectCaster::ToCoordinateSystem(m_currentObject);
+	assert(cs);
+
+	if (cs && cs->getDisplayScale() != static_cast<PointCoordinateType>(val))
+	{
+		cs->setDisplayScale(static_cast<PointCoordinateType>(val));
+		updateDisplay();
+	}
+}
+
+
 void ccPropertiesTreeDelegate::sensorIndexChanged(double val)
 {
 	if (!m_currentObject)
@@ -2574,6 +2681,23 @@ void ccPropertiesTreeDelegate::polyineWidthChanged(int size)
 	if (polyline && polyline->getWidth() != static_cast<PointCoordinateType>(size))
 	{
 		polyline->setWidth(static_cast<PointCoordinateType>(size));
+		updateDisplay();
+	}
+}
+
+void ccPropertiesTreeDelegate::coordinateSystemAxisWidthChanged(int size)
+{
+	if (!m_currentObject)
+	{
+		return;
+	}
+
+	ccCoordinateSystem* cs = ccHObjectCaster::ToCoordinateSystem(m_currentObject);
+	assert(cs);
+
+	if (cs && cs->getAxisWidth() != static_cast<PointCoordinateType>(size))
+	{
+		cs->setAxisWidth(static_cast<PointCoordinateType>(size));
 		updateDisplay();
 	}
 }

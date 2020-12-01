@@ -21,17 +21,125 @@
 #include "ccPlane.h"
 #include "ccPointCloud.h"
 
+
 ccCoordinateSystem::ccCoordinateSystem(PointCoordinateType displayScale, PointCoordinateType axisWidth, const ccGLMatrix* transMat/*= 0*/,
 	QString name/*=QString("CoordinateSystem")*/)
-	: ccGenericPrimitive(name, transMat), m_DisplayScale(displayScale), m_width(axisWidth)
+	: ccGenericPrimitive(name, transMat), m_DisplayScale(displayScale), m_width(axisWidth), m_showAxisPlanes(true), m_showAxisLines(true)
 {
 	updateRepresentation();
+	showColors(true);
 }
 
-ccCoordinateSystem::ccCoordinateSystem(QString name/*=QString("CoordinateSystem")*/)
-	: ccGenericPrimitive(name), m_DisplayScale(1.0), m_width(4.0)
+ccCoordinateSystem::ccCoordinateSystem(const ccGLMatrix* transMat/*= 0*/,
+	QString name/*=QString("CoordinateSystem")*/)
+	: ccGenericPrimitive(name, transMat), m_DisplayScale(DEFAULT_DISPLAY_SCALE), m_width(AXIS_DEFAULT_WIDTH), m_showAxisPlanes(true), m_showAxisLines(true)
 {
 	updateRepresentation();
+	showColors(true);
+}
+
+
+ccCoordinateSystem::ccCoordinateSystem(QString name/*=QString("CoordinateSystem")*/)
+	: ccGenericPrimitive(name), m_DisplayScale(DEFAULT_DISPLAY_SCALE), m_width(AXIS_DEFAULT_WIDTH), m_showAxisPlanes(true), m_showAxisLines(true)
+{
+	updateRepresentation();
+	showColors(true);
+}
+
+void ccCoordinateSystem::ShowAxisPlanes(bool show)
+{
+	m_showAxisPlanes = show;
+}
+
+void ccCoordinateSystem::ShowAxisLines(bool show)
+{
+	m_showAxisLines = show;
+}
+
+
+void ccCoordinateSystem::setAxisWidth(PointCoordinateType size)
+{
+	if (size >= MIN_AXIS_WIDTH_F && size <= MAX_AXIS_WIDTH_F)
+	{
+		m_width = size;
+	}
+	if (size == 0.0f)
+	{
+		m_width = AXIS_DEFAULT_WIDTH;
+	}
+}
+
+
+
+void ccCoordinateSystem::setDisplayScale(PointCoordinateType size)
+{
+	if (size >= MIN_DISPLAY_SCALE_F)
+	{
+		m_DisplayScale = size;
+		updateRepresentation();
+	}
+}
+
+ccPlane ccCoordinateSystem::getXYplane() const
+{
+	ccPlane xyPlane = createXYplane(&m_transformation);
+	return xyPlane;
+}
+ccPlane ccCoordinateSystem::getYZplane() const
+{
+	ccPlane yzPlane = createYZplane(&m_transformation);
+	return yzPlane;
+}
+ccPlane ccCoordinateSystem::getZXplane() const
+{
+	ccPlane zxPlane = createZXplane(&m_transformation);
+	return zxPlane;
+}
+
+ccPlane ccCoordinateSystem::createXYplane(const ccGLMatrix* transMat) const
+{
+	ccGLMatrix xyPlane_mtrx;
+	xyPlane_mtrx.toIdentity();
+	xyPlane_mtrx.setTranslation(CCVector3(m_DisplayScale / 2, m_DisplayScale / 2, 0.0));
+	if (transMat)
+	{
+		xyPlane_mtrx = *transMat * xyPlane_mtrx;
+	}
+	ccPlane xyPlane(m_DisplayScale, m_DisplayScale, &xyPlane_mtrx);
+	xyPlane.setColor(ccColor::red);
+	return xyPlane;
+}
+
+ccPlane ccCoordinateSystem::createYZplane(const ccGLMatrix* transMat) const
+{
+	ccGLMatrix yzPlane_mtrx;
+	yzPlane_mtrx.initFromParameters(static_cast<PointCoordinateType>(1.57079633),
+		static_cast<PointCoordinateType>(0),
+		static_cast<PointCoordinateType>(1.57079633),
+		CCVector3(0.0, m_DisplayScale / 2, m_DisplayScale / 2));
+	if (transMat)
+	{
+		yzPlane_mtrx = *transMat * yzPlane_mtrx;
+	}
+	ccPlane yzPlane(m_DisplayScale, m_DisplayScale, &yzPlane_mtrx);
+	yzPlane.setColor(ccColor::green);
+	return yzPlane;
+}
+
+ccPlane ccCoordinateSystem::createZXplane(const ccGLMatrix* transMat) const
+{
+	ccGLMatrix zxPlane_mtrx;
+	zxPlane_mtrx.initFromParameters(static_cast<PointCoordinateType>(0),
+		static_cast<PointCoordinateType>(-1.57079633),
+		static_cast<PointCoordinateType>(-1.57079633),
+		CCVector3(m_DisplayScale / 2, 0.0, m_DisplayScale / 2));
+	if (transMat)
+	{
+		zxPlane_mtrx = *transMat * zxPlane_mtrx;
+	}
+	ccPlane zxPlane(m_DisplayScale, m_DisplayScale, &zxPlane_mtrx);
+	zxPlane.setColor(ccColor::FromRgbfToRgb(ccColor::Rgbf(0, 0.7, 1.0)));
+	return zxPlane;
 }
 
 bool ccCoordinateSystem::buildUp()
@@ -54,42 +162,30 @@ bool ccCoordinateSystem::buildUp()
 		verts->clear();
 	}
 
-	//XYplane_Centered
-	ccGLMatrix xyPlane_Centered;
-	xyPlane_Centered.toIdentity();
-	*this += ccPlane(m_DisplayScale, m_DisplayScale, &xyPlane_Centered);
-	//xzPlane_Centered
-	ccGLMatrix xzPlane_Centered;
-	xzPlane_Centered.initFromParameters(static_cast<PointCoordinateType>(0),
-										static_cast<PointCoordinateType>(-1.57079633),
-										static_cast<PointCoordinateType>(-1.57079633),
-										CCVector3());
-	*this += ccPlane(m_DisplayScale, m_DisplayScale, &xzPlane_Centered);
-	//YZplane_Centered
-	ccGLMatrix yzPlane_Centered;
-	yzPlane_Centered.initFromParameters(static_cast<PointCoordinateType>(1.57079633),
-										static_cast<PointCoordinateType>(0), 
-										static_cast<PointCoordinateType>(1.57079633),
-										CCVector3());
-	*this += ccPlane(m_DisplayScale, m_DisplayScale, &yzPlane_Centered);
+	*this += createXYplane();
+	*this += createYZplane();
+	*this += createZXplane();
 	
 
 	return (vertices() && vertices()->size() == 12 && this->size() == 6);
 }
+
 
 ccGenericPrimitive* ccCoordinateSystem::clone() const
 {
 	return finishCloneJob(new ccCoordinateSystem(m_DisplayScale, m_width, &m_transformation, getName()));
 }
 
+
 bool ccCoordinateSystem::toFile_MeOnly(QFile& out) const
 {
 	if (!ccGenericPrimitive::toFile_MeOnly(out))
 		return false;
 
-	//parameters (dataVersion>=22)
+	//parameters (dataVersion>=52)
 	QDataStream outStream(&out);
 	outStream << m_DisplayScale;
+	outStream << m_width;
 
 	return true;
 }
@@ -99,20 +195,23 @@ bool ccCoordinateSystem::fromFile_MeOnly(QFile& in, short dataVersion, int flags
 	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
-	//parameters (dataVersion>=22)
+	//parameters (dataVersion>=52)
 	QDataStream inStream(&in);
 	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_DisplayScale, 1);
-
+	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_width, 1);
 	return true;
 }
 
 void ccCoordinateSystem::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
-	//call parent method to draw the Planes
-	ccGenericPrimitive::drawMeOnly(context);
+	if (m_showAxisPlanes)
+	{
+		//call parent method to draw the Planes
+		ccGenericPrimitive::drawMeOnly(context);
+	}
 
 	//show axis
-	if (MACRO_Draw3D(context))
+	if (m_showAxisLines && MACRO_Draw3D(context))
 	{
 		QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
 		assert(glFunc != nullptr);
@@ -140,13 +239,13 @@ void ccCoordinateSystem::drawMeOnly(CC_DRAW_CONTEXT& context)
 		glFunc->glBegin(GL_LINES);
 		glFunc->glColor3f(1.0f, 0.0f, 0.0f);
 		glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
-		glFunc->glVertex3f(m_DisplayScale, 0.0f, 0.0f);
+		glFunc->glVertex3f(m_DisplayScale*2, 0.0f, 0.0f);
 		glFunc->glColor3f(0.0f, 1.0f, 0.0f);
 		glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
-		glFunc->glVertex3f(0.0f, m_DisplayScale, 0.0f);
+		glFunc->glVertex3f(0.0f, m_DisplayScale*2, 0.0f);
 		glFunc->glColor3f(0.0f, 0.7f, 1.0f);
 		glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
-		glFunc->glVertex3f(0.0f, 0.0f, m_DisplayScale);
+		glFunc->glVertex3f(0.0f, 0.0f, m_DisplayScale*2);
 		glFunc->glEnd();
 		
 		if (pushName)

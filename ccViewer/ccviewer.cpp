@@ -150,7 +150,7 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 
 	//"Help" menu
 	connect(ui.actionAbout,							&QAction::triggered,					this,	&ccViewer::doActionAbout);
-	connect(ui.actionHelpShortctus,					&QAction::triggered,					this,	&ccViewer::doActionDisplayShortcuts);
+	connect(ui.actionHelpShortcuts,					&QAction::triggered,					this,	&ccViewer::doActionDisplayShortcuts);
 
 	loadPlugins();
 }

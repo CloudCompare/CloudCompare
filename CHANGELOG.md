@@ -34,6 +34,9 @@ v2.12 (???) - (in development)
 		- Command 'Rasterize':
 			- New output option '-OUTPUT_RASTER_Z_AND_SF' to explicitly export altitudes AND scalar fields.
 				The former '-OUTPUT_RASTER_Z' option will only export the altitudes as its name implies.
+		- New sub-option for the RANSAC plugin command line option (-RANSAC)
+			- OUT_RANDOM_COLOR = generate random colors for the output clouds (false by default now)
+
 	- STL:
 		- loading speed should be greatly improved (compared to v2.10 and v2.11)
 	- Global Shift & Scale:

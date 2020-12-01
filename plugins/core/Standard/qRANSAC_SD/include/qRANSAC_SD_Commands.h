@@ -41,6 +41,7 @@ constexpr char OUT_CLOUD_DIR[] = "OUT_CLOUD_DIR";
 constexpr char OUT_MESH_DIR[] = "OUT_MESH_DIR";
 constexpr char OUT_PAIR_DIR[] = "OUT_PAIR_DIR";
 constexpr char OUT_GROUP_DIR[] = "OUT_GROUP_DIR";
+constexpr char OUT_RANDOM_COLOR[] = "OUT_RANDOM_COLOR";
 constexpr char OUTPUT_INDIVIDUAL_PRIMITIVES[] = "OUTPUT_INDIVIDUAL_PRIMITIVES";
 constexpr char OUTPUT_INDIVIDUAL_SUBCLOUDS[] = "OUTPUT_INDIVIDUAL_SUBCLOUDS";
 constexpr char OUTPUT_INDIVIDUAL_PAIRED_CLOUD_PRIMITIVE[] = "OUTPUT_INDIVIDUAL_PAIRED_CLOUD_PRIMITIVE";
@@ -67,7 +68,7 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 		QStringList paramNames = QStringList() << EPSILON_ABSOLUTE << EPSILON_PERCENTAGE_OF_SCALE <<
 			BITMAP_EPSILON_PERCENTAGE_OF_SCALE << BITMAP_EPSILON_ABSOLUTE <<
 			SUPPORT_POINTS << MAX_NORMAL_DEV << PROBABILITY << ENABLE_PRIMITIVE <<
-			OUT_CLOUD_DIR << OUT_MESH_DIR << OUT_GROUP_DIR << OUT_PAIR_DIR << OUTPUT_INDIVIDUAL_PRIMITIVES <<
+			OUT_CLOUD_DIR << OUT_MESH_DIR << OUT_GROUP_DIR << OUT_PAIR_DIR << OUT_RANDOM_COLOR << OUTPUT_INDIVIDUAL_PRIMITIVES <<
 			OUTPUT_INDIVIDUAL_SUBCLOUDS << OUTPUT_GROUPED << OUTPUT_INDIVIDUAL_PAIRED_CLOUD_PRIMITIVE;
 		QStringList primitiveNames = QStringList() << PRIM_PLANE << PRIM_SPHERE << PRIM_CYLINDER << PRIM_CONE << PRIM_TORUS;
 		QString outputCloudsDir;
@@ -79,14 +80,13 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 		bool outputIndividualPairs = false;
 		bool outputGrouped = false;
 
-
-
 		float epsilonABS = -1.0f;
 		float epsilonPercentage = -1.0f;
 		float bitmapEpsilonABS = -1.0f;
 		float bitmapEpsilonPercentage = -1.0f;
 		params.epsilon = -1.0f;
 		params.bitmapEpsilon = -1.0f;
+		params.randomColor = false;
 
 		for (unsigned char k = 0; k < 5; ++k)
 		{
@@ -204,6 +204,10 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 					}
 					cmd.print(QObject::tr("\tProbability : %1").arg(val));
 					params.probability = val;
+				}
+				else if (param == OUT_RANDOM_COLOR)
+				{
+					params.randomColor = true;
 				}
 				else if (param == OUT_CLOUD_DIR)
 				{

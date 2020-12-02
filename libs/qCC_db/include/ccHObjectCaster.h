@@ -143,7 +143,7 @@ public:
 	static ccIndexedTransformationBuffer* ToTransBuffer(ccHObject* obj);
 
 	//! Converts current object to ccCoordinateSystem (if possible)
-	static ccCoordinateSystem* ccHObjectCaster::ToCoordinateSystem(ccHObject* obj);
+	static ccCoordinateSystem* ToCoordinateSystem(ccHObject* obj);
 
 };
 

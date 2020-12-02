@@ -126,7 +126,7 @@ void ccPrimitiveFactoryDlg::createPrimitive()
 		case 7:
 			{			
 				bool valid = false;
-				ccGLMatrix mat = isCSMatrixValid(valid);
+				ccGLMatrix mat = getCSMatrix(valid);
 				if (!valid)
 				{
 					mat.toIdentity();
@@ -189,7 +189,7 @@ void ccPrimitiveFactoryDlg::setCoordinateSystemBasedOnSelectedObject()
 void ccPrimitiveFactoryDlg::onMatrixTextChange()
 {	
 	bool valid = false;
-	isCSMatrixValid(valid);
+	getCSMatrix(valid);
 	if (valid)
 	{
 		ccLog::Print("Valid ccGLMatrix");
@@ -203,7 +203,7 @@ void ccPrimitiveFactoryDlg::setCSMatrixToIdentity()
 	csMatrixTextEdit->blockSignals(false);
 }
 
-ccGLMatrix ccPrimitiveFactoryDlg::isCSMatrixValid(bool& valid)
+ccGLMatrix ccPrimitiveFactoryDlg::getCSMatrix(bool& valid)
 {
 	QString text = csMatrixTextEdit->toPlainText();
 	if (text.contains("["))

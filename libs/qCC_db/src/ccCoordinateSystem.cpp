@@ -22,17 +22,27 @@
 #include "ccPointCloud.h"
 
 
-ccCoordinateSystem::ccCoordinateSystem(PointCoordinateType displayScale, PointCoordinateType axisWidth, const ccGLMatrix* transMat/*= 0*/,
-	QString name/*=QString("CoordinateSystem")*/)
-	: ccGenericPrimitive(name, transMat), m_DisplayScale(displayScale), m_width(axisWidth), m_showAxisPlanes(true), m_showAxisLines(true)
+ccCoordinateSystem::ccCoordinateSystem(PointCoordinateType displayScale, 
+									   PointCoordinateType axisWidth, 
+									   const ccGLMatrix* transMat/*= 0*/,
+									   QString name/*=QString("CoordinateSystem")*/)
+	: ccGenericPrimitive(name, transMat), 
+	  m_DisplayScale(displayScale), 
+	  m_width(axisWidth), 
+	  m_showAxisPlanes(true), 
+	  m_showAxisLines(true)
 {
 	updateRepresentation();
 	showColors(true);
 }
 
 ccCoordinateSystem::ccCoordinateSystem(const ccGLMatrix* transMat/*= 0*/,
-	QString name/*=QString("CoordinateSystem")*/)
-	: ccGenericPrimitive(name, transMat), m_DisplayScale(DEFAULT_DISPLAY_SCALE), m_width(AXIS_DEFAULT_WIDTH), m_showAxisPlanes(true), m_showAxisLines(true)
+									   QString name/*=QString("CoordinateSystem")*/)
+	: ccGenericPrimitive(name, transMat), 
+	  m_DisplayScale(DEFAULT_DISPLAY_SCALE), 
+	  m_width(AXIS_DEFAULT_WIDTH), 
+	  m_showAxisPlanes(true), 
+	  m_showAxisLines(true)
 {
 	updateRepresentation();
 	showColors(true);
@@ -40,7 +50,11 @@ ccCoordinateSystem::ccCoordinateSystem(const ccGLMatrix* transMat/*= 0*/,
 
 
 ccCoordinateSystem::ccCoordinateSystem(QString name/*=QString("CoordinateSystem")*/)
-	: ccGenericPrimitive(name), m_DisplayScale(DEFAULT_DISPLAY_SCALE), m_width(AXIS_DEFAULT_WIDTH), m_showAxisPlanes(true), m_showAxisLines(true)
+	: ccGenericPrimitive(name), 
+	  m_DisplayScale(DEFAULT_DISPLAY_SCALE), 
+	  m_width(AXIS_DEFAULT_WIDTH), 
+	  m_showAxisPlanes(true), 
+	  m_showAxisLines(true)
 {
 	updateRepresentation();
 	showColors(true);
@@ -59,13 +73,14 @@ void ccCoordinateSystem::ShowAxisLines(bool show)
 
 void ccCoordinateSystem::setAxisWidth(PointCoordinateType size)
 {
-	if (size >= MIN_AXIS_WIDTH_F && size <= MAX_AXIS_WIDTH_F)
-	{
-		m_width = size;
-	}
 	if (size == 0.0f)
 	{
 		m_width = AXIS_DEFAULT_WIDTH;
+		return;
+	}
+	if (size >= MIN_AXIS_WIDTH_F && size <= MAX_AXIS_WIDTH_F)
+	{
+		m_width = size;
 	}
 }
 

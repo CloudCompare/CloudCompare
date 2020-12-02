@@ -1564,13 +1564,10 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		{
 			comboBox->addItem(QString::number(i));
 		}
-		if (m_currentObject && m_currentObject->isA(CC_TYPES::COORDINATESYSTEM))
+		ccCoordinateSystem* cs = ccHObjectCaster::ToCoordinateSystem(m_currentObject);
+		if (cs)
 		{
-			ccCoordinateSystem* cs = ccHObjectCaster::ToCoordinateSystem(m_currentObject);
-			if (cs)
-			{
-				comboBox->setCurrentIndex(static_cast<int>(cs->getAxisWidth()));
-			}
+			comboBox->setCurrentIndex(static_cast<int>(cs->getAxisWidth()));
 		}
 		connect(comboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
 			this, &ccPropertiesTreeDelegate::coordinateSystemAxisWidthChanged);
@@ -1584,14 +1581,12 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		spinBox->setRange(1.0e-3, 1.0e6);
 		spinBox->setDecimals(3);
 		spinBox->setSingleStep(1.0e-1);
-		if (m_currentObject && m_currentObject->isA(CC_TYPES::COORDINATESYSTEM))
+		ccCoordinateSystem* cs = ccHObjectCaster::ToCoordinateSystem(m_currentObject);
+		if (cs)
 		{
-			ccCoordinateSystem* cs = ccHObjectCaster::ToCoordinateSystem(m_currentObject);
-			if (cs)
-			{
-				spinBox->setValue(cs->getDisplayScale());
-			}
+			spinBox->setValue(cs->getDisplayScale());
 		}
+		
 		connect(spinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
 			this, &ccPropertiesTreeDelegate::coordinateSystemDisplayScaleChanged);
 

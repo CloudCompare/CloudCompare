@@ -54,7 +54,7 @@ protected:
 
 	void setCSMatrixToIdentity();
 
-	ccGLMatrix isCSMatrixValid(bool &valid);
+	ccGLMatrix getCSMatrix(bool &valid);
 
 protected:
 

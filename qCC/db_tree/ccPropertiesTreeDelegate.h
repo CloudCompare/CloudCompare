@@ -43,6 +43,7 @@ class ccPolyline;
 class ccSensor;
 class CCShareable;
 class ccShiftedObject;
+class ccCoordinateSystem;
 
 class QAbstractItemView;
 class QStandardItem;
@@ -101,6 +102,10 @@ public:
 							OBJECT_TRANS_BUFFER_TRIHDERONS_SCALE	,
 							OBJECT_HISTORY_MATRIX_EDITOR			,
 							OBJECT_GLTRANS_MATRIX_EDITOR			,
+							OBJECT_COORDINATE_SYSTEM_DISP_PLANES	,
+							OBJECT_COORDINATE_SYSTEM_DISP_AXES		,
+							OBJECT_COORDINATE_SYSTEM_AXES_WIDTH		,
+							OBJECT_COORDINATE_SYSTEM_DISP_SCALE		,
 							TREE_VIEW_HEADER						,
 	};
 
@@ -157,10 +162,12 @@ private:
 	void objectDisplayChanged(const QString &);
 	void colorSourceChanged(const QString &);
 	void sensorScaleChanged(double);
+	void coordinateSystemDisplayScaleChanged(double);
 	void sensorUncertaintyChanged();
 	void sensorIndexChanged(double);
 	void cloudPointSizeChanged(int);
 	void polyineWidthChanged(int);
+	void coordinateSystemAxisWidthChanged(int);
 	void trihedronsScaleChanged(double);
 
 	void addSeparator(const QString& title);
@@ -188,6 +195,7 @@ private:
 	void fillWithShareable(const CCShareable*);
 	void fillWithMetaData(const ccObject*);
 	void fillWithShifted(const ccShiftedObject*);
+	void fillWithCoordinateSystem(const ccCoordinateSystem*);
 	
 	template<class Type, int N, class ComponentType>
 	void fillWithCCArray(const ccArray<Type, N, ComponentType>*);

@@ -44,6 +44,7 @@
 #include "ccSphere.h"
 #include "ccSubMesh.h"
 #include "ccTorus.h"
+#include "ccCoordinateSystem.h"
 
 /*** helpers ***/
 
@@ -260,4 +261,9 @@ cc2DViewportObject* ccHObjectCaster::To2DViewportObject(ccHObject* obj)
 ccIndexedTransformationBuffer* ccHObjectCaster::ToTransBuffer(ccHObject* obj)
 {
 	return obj && obj->isKindOf(CC_TYPES::TRANS_BUFFER) ? static_cast<ccIndexedTransformationBuffer*>(obj) : nullptr;
+}
+
+ccCoordinateSystem* ccHObjectCaster::ToCoordinateSystem(ccHObject* obj)
+{
+	return (obj && obj->isKindOf(CC_TYPES::COORDINATESYSTEM) ? static_cast<ccCoordinateSystem*>(obj) : nullptr);
 }

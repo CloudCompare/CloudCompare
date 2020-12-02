@@ -32,6 +32,7 @@
 #include <ccCone.h>
 #include <ccTorus.h>
 #include <ccDish.h>
+#include <ccCoordinateSystem.h>
 
 //system
 #include <assert.h>
@@ -49,6 +50,10 @@ ccPrimitiveFactoryDlg::ccPrimitiveFactoryDlg(MainWindow* win)
 	connect(closePushButton, &QAbstractButton::clicked, this, &QDialog::accept);
 	connect(spherePosFromClipboardButton, &QPushButton::clicked, this, &ccPrimitiveFactoryDlg::setSpherePositionFromClipboard);
 	connect(spherePosToOriginButton, &QPushButton::clicked, this, &ccPrimitiveFactoryDlg::setSpherePositionToOrigin);
+	connect(csSetMatrixBasedOnSelectedObjectButton, &QPushButton::clicked, this, &ccPrimitiveFactoryDlg::setCoordinateSystemBasedOnSelectedObject);
+	connect(csMatrixTextEdit, &QPlainTextEdit::textChanged, this, &ccPrimitiveFactoryDlg::onMatrixTextChange);
+	connect(csClearMatrixButton, &QPushButton::clicked, this, &ccPrimitiveFactoryDlg::setCSMatrixToIdentity);
+	setCSMatrixToIdentity();
 }
 
 void ccPrimitiveFactoryDlg::createPrimitive()
@@ -118,6 +123,18 @@ void ccPrimitiveFactoryDlg::createPrimitive()
 										static_cast<PointCoordinateType>(dishEllipsoidGroupBox->isChecked() ? dishRadius2DoubleSpinBox->value() : 0));
 			}
 			break;
+		case 7:
+			{			
+				bool valid = false;
+				ccGLMatrix mat = getCSMatrix(valid);
+				if (!valid)
+				{
+					mat.toIdentity();
+				}
+				primitive = new ccCoordinateSystem(&mat);
+				
+			}
+			break;
 	}
 
 	if (primitive)
@@ -157,4 +174,47 @@ void ccPrimitiveFactoryDlg::setSpherePositionToOrigin()
 	spherePosXDoubleSpinBox->setValue(0);
 	spherePosYDoubleSpinBox->setValue(0);
 	spherePosZDoubleSpinBox->setValue(0);
+}
+
+
+void ccPrimitiveFactoryDlg::setCoordinateSystemBasedOnSelectedObject()
+{
+	ccHObject::Container selectedEnt = m_win->getSelectedEntities();
+	for (auto entity : selectedEnt)
+	{
+		csMatrixTextEdit->setPlainText(entity->getGLTransformationHistory().toString());
+	}
+}
+
+void ccPrimitiveFactoryDlg::onMatrixTextChange()
+{	
+	bool valid = false;
+	getCSMatrix(valid);
+	if (valid)
+	{
+		ccLog::Print("Valid ccGLMatrix");
+	}
+}
+
+void ccPrimitiveFactoryDlg::setCSMatrixToIdentity()
+{
+	csMatrixTextEdit->blockSignals(true);
+	csMatrixTextEdit->setPlainText("1.00000000 0.00000000 0.00000000 0.00000000\n0.00000000 1.00000000 0.00000000 0.00000000\n0.00000000 0.00000000 1.00000000 0.00000000\n0.00000000 0.00000000 0.00000000 1.00000000");
+	csMatrixTextEdit->blockSignals(false);
+}
+
+ccGLMatrix ccPrimitiveFactoryDlg::getCSMatrix(bool& valid)
+{
+	QString text = csMatrixTextEdit->toPlainText();
+	if (text.contains("["))
+	{
+		//automatically remove anything between square brackets
+		static const QRegExp squareBracketsFilter("\\[([^]]+)\\]");
+		text.replace(squareBracketsFilter, "");
+		csMatrixTextEdit->blockSignals(true);
+		csMatrixTextEdit->setPlainText(text);
+		csMatrixTextEdit->blockSignals(false);
+	}
+	ccGLMatrix mat = ccGLMatrix::FromString(text, valid);
+	return mat;
 }

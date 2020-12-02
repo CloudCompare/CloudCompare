@@ -62,8 +62,9 @@
 	v4.9 - 03/31/2019 - Point labels can now be picked on meshes
 	v5.0 - 10/06/2019 - Point labels can now target the entity center
 	v5.1 - 03/29/2019 - New camera management (viewports have changed)
+	v5.2 - 11/30/2020 - New ccCoordinateSystem added
 **/
-const unsigned c_currentDBVersion = 51; //5.1
+const unsigned c_currentDBVersion = 52; //5.2
 
 //! Default unique ID generator (using the system persistent settings as we did previously proved to be not reliable)
 static ccUniqueIDGenerator::Shared s_uniqueIDGenerator(new ccUniqueIDGenerator);

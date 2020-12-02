@@ -27,6 +27,7 @@
 #include "ccCameraSensor.h"
 #include "ccCustomObject.h"
 #include "ccCylinder.h"
+#include "ccCoordinateSystem.h"
 #include "ccDish.h"
 #include "ccExternalFactory.h"
 #include "ccExtru.h"
@@ -196,6 +197,8 @@ ccHObject* ccHObject::New(CC_CLASS_ENUM objectType, const char* name/*=0*/)
 		return new ccCustomHObject(name);
 	case CC_TYPES::CUSTOM_LEAF_OBJECT:
 		return new ccCustomLeafObject(name);
+	case CC_TYPES::COORDINATESYSTEM:
+		return new ccCoordinateSystem(name);
 	case CC_TYPES::POINT_OCTREE:
 	case CC_TYPES::POINT_KDTREE:
 		//construction this way is not supported (yet)

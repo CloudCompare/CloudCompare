@@ -58,6 +58,8 @@ v2.12 (???) - (in development)
 		same BIN file could lead to a corrupted file.
 	- Scissors tool: points were segmented only inside the frustum (screen) even if some segmentation polygon vertices were outside
 	- E57:  "invalid data" flags were wrongly interpreted
+	- The 'Clean > Noise' tool was mixing the number of neighbors (knn) and the 'kernel radius' parameters
+
 
 v2.11.3 (Anoia) - 08/09/2020
 ----------------------

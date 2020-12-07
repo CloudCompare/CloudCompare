@@ -147,13 +147,13 @@ ccPlane ccCoordinateSystem::createZXplane(const ccGLMatrix* transMat) const
 	zxPlane_mtrx.initFromParameters(static_cast<PointCoordinateType>(0),
 		static_cast<PointCoordinateType>(-1.57079633),
 		static_cast<PointCoordinateType>(-1.57079633),
-		CCVector3(m_DisplayScale / 2, 0.0, m_DisplayScale / 2));
+		CCVector3(m_DisplayScale / 2, 0, m_DisplayScale / 2));
 	if (transMat)
 	{
 		zxPlane_mtrx = *transMat * zxPlane_mtrx;
 	}
 	ccPlane zxPlane(m_DisplayScale, m_DisplayScale, &zxPlane_mtrx);
-	zxPlane.setColor(ccColor::FromRgbfToRgb(ccColor::Rgbf(0, 0.7, 1.0)));
+	zxPlane.setColor(ccColor::FromRgbfToRgb(ccColor::Rgbf(0.0f, 0.7f, 1.0f)));
 	return zxPlane;
 }
 

@@ -103,6 +103,9 @@ jobs:
             -DPLUGIN_IO_QE57=ON \
             -DPLUGIN_IO_QPHOTOSCAN=ON \
             -DPLUGIN_IO_QPDAL=ON \
+            -DPLUGIN_IO_QRDB=ON \
+            -DPLUGIN_IO_QRDB_FETCH_DEPENDENCY=ON \
+            -DPLUGIN_IO_QRDB_INSTALL_DEPENDENCY=ON \
             -DPLUGIN_STANDARD_QANIMATION=ON \
             -DQANIMATION_WITH_FFMPEG_SUPPORT=${{ matrix.config.compile_qanimation_with_ffmpeg }} \
             -DPLUGIN_STANDARD_QBROOM=ON \

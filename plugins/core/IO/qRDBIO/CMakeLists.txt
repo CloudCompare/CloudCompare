@@ -57,4 +57,41 @@ if( PLUGIN_IO_QRDB )
 	add_subdirectory( ui )
 
 	target_link_libraries( ${PROJECT_NAME} rdbcpp )
+
+	option( PLUGIN_IO_QRDB_INSTALL_DEPENDENCY "Install RDB shared library to library folder" OFF)
+	if( PLUGIN_IO_QRDB_INSTALL_DEPENDENCY )
+		get_target_property(RDB_LIBRARY_FILE rdbc IMPORTED_LOCATION)
+		# resolve possible symlink and install the real library
+		get_filename_component(lib_REAL ${RDB_LIBRARY_FILE} REALPATH)
+		install(FILES ${lib_REAL} DESTINATION lib)
+		if( NOT WIN32 )
+			# find all the symlinks linking to lib_REAL
+			string(REGEX MATCH "\\.so" is_shared_lib_linux "${RDB_LIBRARY_FILE}")
+			string(REGEX MATCH "\\.dylib$" is_shared_lib_darwin "${RDB_LIBRARY_FILE}")
+			if(is_shared_lib_linux OR is_shared_lib_darwin)
+				if(is_shared_lib_linux)
+					string(REGEX REPLACE "\\.so.*" ".so" lib_base "${RDB_LIBRARY_FILE}")
+					file(GLOB lib_symlinks "${lib_base}*")
+				else()
+					string(REGEX REPLACE "\\.dylib$" "" lib_base "${RDB_LIBRARY_FILE}")
+					file(GLOB lib_symlinks "${lib_base}*.dylib")
+				endif()
+				foreach(lib_sym ${lib_symlinks})
+					STRING(COMPARE NOTEQUAL "${lib_sym}" "${lib_REAL}" real_lib_different)
+					if(NOT real_lib_different)
+						continue() # we found the real lib, not a symlink, skip it
+					endif()
+					# actually install the found symlink
+					install(FILES ${lib_sym} DESTINATION lib)
+				endforeach()
+			else() # neither linux nor darwin,
+				# no special symlink handling implemented, just install if different paths to prevent doulbe installation
+				STRING(COMPARE NOTEQUAL "${RDB_LIBRARY_FILE}" "${lib_REAL}" real_lib_different)
+				if(real_lib_different)
+					# only install if different
+					install(FILES ${RDB_LIBRARY_FILE}  DESTINATION lib)
+				endif()
+			endif()
+		endif() # NOT WIN32
+	endif() # install dependency
 endif()

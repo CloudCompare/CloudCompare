@@ -59,6 +59,7 @@ v2.12 (???) - (in development)
 	- Scissors tool: points were segmented only inside the frustum (screen) even if some segmentation polygon vertices were outside
 	- E57:  "invalid data" flags were wrongly interpreted
 	- The 'Clean > Noise' tool was mixing the number of neighbors (knn) and the 'kernel radius' parameters
+	- PLY filter was exporting large coordinates with a limited accuracy when creating ASCII files
 
 
 v2.11.3 (Anoia) - 08/09/2020

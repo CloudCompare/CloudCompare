@@ -118,7 +118,10 @@ protected:
 	void clearRMSColumns();
 
 	//! Adds a point to one of the table (ref./aligned)
-	void addPointToTable(QTableWidget* tableWidget, int rowIndex, const CCVector3d& P, QString pointLabel);
+	void addPointToTable(	QTableWidget* tableWidget,
+							int rowIndex,
+							const CCVector3d& P,
+							QString pointLabel );
 
 	//! Converts a picked point to a sphere center (if necessary)
 	/** \param P input point (may be converted to a sphere center)
@@ -161,6 +164,13 @@ protected:
 		bool isShifted;
 		CCVector3d shift;
 	};
+
+	//! Removes a label (and restore its associated label if any)
+	void removeLabel(	ccPointCloud& points,
+						unsigned childIndex,
+						const EntityContexts& entities);
+
+protected: //members
 
 	//! Aligned entity
 	EntityContexts m_alignedEntities;

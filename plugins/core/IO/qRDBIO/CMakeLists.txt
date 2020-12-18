@@ -58,12 +58,29 @@ if( PLUGIN_IO_QRDB )
 
 	target_link_libraries( ${PROJECT_NAME} rdbcpp )
 
+
 	option( PLUGIN_IO_QRDB_INSTALL_DEPENDENCY "Install RDB shared library to library folder" OFF)
 	if( PLUGIN_IO_QRDB_INSTALL_DEPENDENCY )
+		if(MSVC)
+			# on Windows put the dll to the binaries for them to find them
+			set(_rdb_libdir "${CLOUDCOMPARE_DEST_FOLDER}")
+		else()
+			# some distros prefer "lib" others like more specific folders like "lib64" (handled by GNUInstallDirs)
+			if( CMAKE_INSTALL_LIBDIR STREQUAL "" )
+				# see: https://cmake.org/cmake/help/latest/module/GNUInstallDirs.html
+				include(GNUInstallDirs)
+			endif()
+			if( CMAKE_INSTALL_LIBDIR STREQUAL "" )
+				# still no library destination? just use "lib" to be extra save
+				set(_rdb_libdir "lib")
+			else()
+				set(_rdb_libdir "${CMAKE_INSTALL_LIBDIR}")
+			endif()
+		endif()
 		get_target_property(RDB_LIBRARY_FILE rdbc IMPORTED_LOCATION)
 		# resolve possible symlink and install the real library
 		get_filename_component(lib_REAL ${RDB_LIBRARY_FILE} REALPATH)
-		install(FILES ${lib_REAL} DESTINATION lib)
+		install(FILES ${lib_REAL} DESTINATION ${_rdb_libdir})
 		if( NOT WIN32 )
 			# find all the symlinks linking to lib_REAL
 			string(REGEX MATCH "\\.so" is_shared_lib_linux "${RDB_LIBRARY_FILE}")
@@ -82,14 +99,14 @@ if( PLUGIN_IO_QRDB )
 						continue() # we found the real lib, not a symlink, skip it
 					endif()
 					# actually install the found symlink
-					install(FILES ${lib_sym} DESTINATION lib)
+					install(FILES ${lib_sym} DESTINATION ${_rdb_libdir})
 				endforeach()
 			else() # neither linux nor darwin,
 				# no special symlink handling implemented, just install if different paths to prevent doulbe installation
 				STRING(COMPARE NOTEQUAL "${RDB_LIBRARY_FILE}" "${lib_REAL}" real_lib_different)
 				if(real_lib_different)
 					# only install if different
-					install(FILES ${RDB_LIBRARY_FILE}  DESTINATION lib)
+					install(FILES ${RDB_LIBRARY_FILE}  DESTINATION ${_rdb_libdir})
 				endif()
 			endif()
 		endif() # NOT WIN32

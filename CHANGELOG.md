@@ -36,12 +36,14 @@ v2.12 (???) - (in development)
 				The former '-OUTPUT_RASTER_Z' option will only export the altitudes as its name implies.
 		- New sub-option for the RANSAC plugin command line option (-RANSAC)
 			- OUT_RANDOM_COLOR = generate random colors for the output clouds (false by default now)
-
 	- STL:
 		- loading speed should be greatly improved (compared to v2.10 and v2.11)
 	- Global Shift & Scale:
 		- the qRansacSD plugin can now transfer the Global Shift & Scale info to the created primitives
 		- The fit functions (Fit shpere, Fit plane, Fit facet and Fit quadric) as well
+	- Align tool (Point-pair based registration):
+		- labels associated to a point cloud will now remain visible and the user can pick them
+		- the tool will display the corresponding label title in the registration summary tables
 
 - New plugins
 	- MPlane: perform normal distance measurements against a defined plane (see https://www.cloudcompare.org/doc/wiki/index.php?title=MPlane_(plugin) )

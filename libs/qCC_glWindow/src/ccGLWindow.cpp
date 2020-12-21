@@ -5038,8 +5038,8 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 						}
 					}
 				}
-				else if (	ent->isKindOf(CC_TYPES::MESH)
-						&&	!ent->isA(CC_TYPES::MESH_GROUP)) //we don't need to process mesh groups as their children will be processed later
+				else if (ent->isKindOf(CC_TYPES::MESH)
+					&& !ent->isA(CC_TYPES::MESH_GROUP)) //we don't need to process mesh groups as their children will be processed later
 				{
 					ignoreSubmeshes = true;
 
@@ -5054,12 +5054,12 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 					double nearestSquareDist = 0.0;
 					CCVector3d P;
 					CCVector3d barycentricCoords;
-					if (mesh->trianglePicking(	clickedPos,
-												camera,
-												nearestTriIndex,
-												nearestSquareDist,
-												P,
-												&barycentricCoords))
+					if (mesh->trianglePicking(clickedPos,
+						camera,
+						nearestTriIndex,
+						nearestSquareDist,
+						P,
+						&barycentricCoords))
 					{
 						if (nearestElementIndex < 0 || (nearestTriIndex >= 0 && nearestSquareDist < nearestElementSquareDist))
 						{
@@ -5068,6 +5068,28 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 							nearestPoint = CCVector3::fromArray(P.u);
 							nearestEntity = mesh;
 							nearestPointBC = barycentricCoords;
+						}
+					}
+				}
+				else if (ent->isA(CC_TYPES::LABEL_2D))
+				{
+					cc2DLabel* label = static_cast<cc2DLabel*>(ent);
+
+					int nearestPointIndex = -1;
+					double nearestSquareDist = 0.0;
+
+					if (label->pointPicking(clickedPos,
+											camera,
+											nearestPointIndex,
+											nearestSquareDist))
+					{
+						if (nearestElementIndex < 0 || (nearestPointIndex >= 0 && nearestSquareDist < nearestElementSquareDist))
+						{
+							nearestElementSquareDist = nearestSquareDist;
+							assert(nearestPointIndex < static_cast<int>(label->size()));
+							nearestElementIndex = nearestPointIndex;
+							nearestPoint = label->getPickedPoint(nearestPointIndex).getPointPosition();
+							nearestEntity = label;
 						}
 					}
 				}

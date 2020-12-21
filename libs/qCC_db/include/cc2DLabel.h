@@ -21,6 +21,7 @@
 //Local
 #include "ccHObject.h"
 #include "ccInteractor.h"
+#include "ccGenericGLDisplay.h"
 
 //Qt
 #include <QRect>
@@ -124,6 +125,8 @@ public:
 		/** This position is updated on each call to drawMeOnly3D
 		**/
 		CCVector3d pos2D;
+		//! Last known marker scale
+		float markerScale;
 		//! Barycentric coordinates (for triangles)
 		CCVector2d uv;
 		//! Entity center mode (index will be invalid)
@@ -148,6 +151,7 @@ public:
 			, _mesh(nullptr)
 			, index(0)
 			, pos2D(0, 0, 0)
+			, markerScale(0)
 			, uv(0, 0)
 			, entityCenterPoint(false)
 		{}
@@ -158,6 +162,7 @@ public:
 			, _mesh(nullptr)
 			, index(pointIndex)
 			, pos2D(0, 0, 0)
+			, markerScale(0)
 			, uv(0, 0)
 			, entityCenterPoint(centerPoint)
 		{}
@@ -168,6 +173,7 @@ public:
 			, _mesh(_mesh)
 			, index(triIindex)
 			, pos2D(0, 0, 0)
+			, markerScale(0)
 			, uv(_uv)
 			, entityCenterPoint(centerPoint)
 		{}
@@ -183,6 +189,12 @@ public:
 	/** Default value: 1.0
 	**/
 	inline void setRelativeMarkerScale(float scale) { m_relMarkerScale = scale; }
+
+	//! Point (marker) picking
+	bool pointPicking(	const CCVector2d& clickPos,
+						const ccGLCameraParameters& camera,
+						int& nearestPointIndex,
+						double& nearestSquareDist) const;
 
 protected:
 

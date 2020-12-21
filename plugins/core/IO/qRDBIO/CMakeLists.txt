@@ -80,7 +80,7 @@ if( PLUGIN_IO_QRDB )
 		get_target_property(RDB_LIBRARY_FILE rdbc IMPORTED_LOCATION)
 		# resolve possible symlink and install the real library
 		get_filename_component(lib_REAL ${RDB_LIBRARY_FILE} REALPATH)
-		install(FILES ${lib_REAL} DESTINATION ${_rdb_libdir})
+		_InstallFiles(FILES ${lib_REAL} DEST_PATH ${_rdb_libdir})
 		if( NOT WIN32 )
 			# find all the symlinks linking to lib_REAL
 			string(REGEX MATCH "\\.so" is_shared_lib_linux "${RDB_LIBRARY_FILE}")
@@ -99,14 +99,14 @@ if( PLUGIN_IO_QRDB )
 						continue() # we found the real lib, not a symlink, skip it
 					endif()
 					# actually install the found symlink
-					install(FILES ${lib_sym} DESTINATION ${_rdb_libdir})
+					_InstallFiles(FILES ${lib_sym} DEST_PATH ${_rdb_libdir})
 				endforeach()
 			else() # neither linux nor darwin,
 				# no special symlink handling implemented, just install if different paths to prevent doulbe installation
 				STRING(COMPARE NOTEQUAL "${RDB_LIBRARY_FILE}" "${lib_REAL}" real_lib_different)
 				if(real_lib_different)
 					# only install if different
-					install(FILES ${RDB_LIBRARY_FILE}  DESTINATION ${_rdb_libdir})
+					_InstallFiles(FILES ${RDB_LIBRARY_FILE}  DEST_PATH ${_rdb_libdir})
 				endif()
 			endif()
 		endif() # NOT WIN32

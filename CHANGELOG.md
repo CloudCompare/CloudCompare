@@ -62,6 +62,7 @@ v2.12 (???) - (in development)
 	- E57:  "invalid data" flags were wrongly interpreted
 	- The 'Clean > Noise' tool was mixing the number of neighbors (knn) and the 'kernel radius' parameters
 	- PLY filter was exporting large coordinates with a limited accuracy when creating ASCII files
+	- the 'flip normals' checkbox of the C2M comparison dialog was not accessible anymore
 
 
 v2.11.3 (Anoia) - 08/09/2020

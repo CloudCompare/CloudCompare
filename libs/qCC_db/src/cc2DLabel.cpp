@@ -831,7 +831,7 @@ void cc2DLabel::getLabelInfo3(LabelInfo3& info) const
 	//angle
 	info.angles.u[0] = CCCoreLib::RadiansToDegrees( P1P2.angle_rad( P1P3) ); //angleAtP1
 	info.angles.u[1] = CCCoreLib::RadiansToDegrees( P2P3.angle_rad(-P1P2) ); //angleAtP2
-	info.angles.u[2] = CCCoreLib::RadiansToDegrees( P1P3.angle_rad(-P2P3) ); //angleAtP3 (should be equal to 180-a1-a2!)
+	info.angles.u[2] = CCCoreLib::RadiansToDegrees( P1P3.angle_rad( P2P3) ); //angleAtP3 (should be equal to 180-a1-a2!)
 }
 
 QStringList cc2DLabel::getLabelContent(int precision) const

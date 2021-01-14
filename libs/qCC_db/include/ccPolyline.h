@@ -25,7 +25,7 @@
 #include "ccShiftedObject.h"
 
 class ccPointCloud;
-
+class ccGLCameraParameters;
 //! Colored polyline
 /** Extends the CCCoreLib::Polyline class
 **/
@@ -124,8 +124,23 @@ public:
 
 	//! Sets the width of vertex markers
 	void setVertexMarkerWidth(int width) { m_vertMarkWidth = width; }
+
 	//! Returns the width of vertex markers
 	int getVertexMarkerWidth() const { return m_vertMarkWidth; }
+
+	//! Return Poly Group Index
+	unsigned getGroupIndex() const { return m_groupIndex; };
+
+	//! Set Poly Group Index
+	void setGroupIndex(unsigned groupIndex) { m_groupIndex = groupIndex; }
+	
+	//! Return if point inside/Outside
+	bool getPointInside() const { return m_pointInside; }
+
+	//! Set if inside/outside segmentation
+	void setPointInside(bool pointInside) { m_pointInside = pointInside; }
+
+
 
 	//! Initializes the polyline with a given set of vertices and the parameters of another polyline
 	/** \warning Even the 'closed' state is copied as is!
@@ -156,7 +171,7 @@ public:
 	**/
 	ccPolyline* smoothChaikin(	PointCoordinateType ratio,
 								unsigned iterationCount) const;
-
+	
 
 public: //meta-data keys
 	
@@ -214,6 +229,13 @@ protected:
 	PointCoordinateType m_arrowLength;
 	//! Arrow index
 	unsigned m_arrowIndex;
+
+	//! Group index
+	unsigned m_groupIndex;
+
+	//! Point Inside
+	bool m_pointInside;
+
 };
 
 #endif //CC_GL_POLYLINE_HEADER

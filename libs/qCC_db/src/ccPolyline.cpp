@@ -35,6 +35,7 @@ ccPolyline::ccPolyline(GenericIndexedCloudPersist* associatedCloud, unsigned uni
 	setColor(ccColor::white);
 	showVertices(false);
 	setVertexMarkerWidth(3);
+	setGroupIndex(0);
 	setWidth(0);
 	showArrow(false, 0, 0);
 
@@ -100,6 +101,7 @@ bool ccPolyline::initWith(ccPointCloud*& vertices, const ccPolyline& poly)
 	return success;
 }
 
+
 void ccPolyline::importParametersFrom(const ccPolyline& poly)
 {
 	setClosed(poly.m_isClosed);
@@ -112,6 +114,7 @@ void ccPolyline::importParametersFrom(const ccPolyline& poly)
 	showColors(poly.colorsShown());
 	showVertices(poly.verticesShown());
 	setVertexMarkerWidth(poly.getVertexMarkerWidth());
+	setGroupIndex(poly.getGroupIndex());
 	showArrow(m_showArrow, m_arrowIndex, m_arrowLength);
 	copyGlobalShiftAndScale(poly);
 	setGLTransformationHistory(poly.getGLTransformationHistory());
@@ -821,3 +824,6 @@ ccPolyline* ccPolyline::smoothChaikin(PointCoordinateType ratio, unsigned iterat
 
 	return smoothPoly;
 }
+
+
+

@@ -343,6 +343,7 @@
     <addaction name="separator"/>
     <addaction name="actionTranslateRotate"/>
     <addaction name="actionSegment"/>
+    <addaction name="actionSegmentMultiple"/>
     <addaction name="actionCrop"/>
     <addaction name="separator"/>
     <addaction name="actionEditGlobalShiftAndScale"/>
@@ -704,6 +705,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    <addaction name="actionSORFilter"/>
    <addaction name="separator"/>
    <addaction name="actionSegment"/>
+   <addaction name="actionSegmentMultiple"/>
    <addaction name="actionTranslateRotate"/>
    <addaction name="actionCrossSection"/>
    <addaction name="actionExtractSections"/>
@@ -1149,6 +1151,19 @@ QTreeView::branch:open:has-children:has-siblings  {
    <property name="shortcut">
     <string>T</string>
    </property>  
+  </action>
+  <action name="actionSegmentMultiple">
+    <property name="icon">
+      <iconset resource="../icons.qrc">
+        <normaloff>:/CC/images/ccCropTool.png</normaloff>:/CC/images/ccCropTool.png
+      </iconset>
+    </property>
+    <property name="text">
+      <string>Segment Multiple</string>
+    </property>
+    <property name="shortcut">
+      <string>T</string>
+    </property>
   </action>
   <action name="actionTranslateRotate">
    <property name="checkable">

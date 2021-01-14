@@ -47,6 +47,8 @@
 #include "ccProgressDialog.h"
 #include "ccScalarField.h"
 
+
+
 //Qt
 #include <QCoreApplication>
 #include <QElapsedTimer>
@@ -1808,6 +1810,7 @@ bool ccPointCloud::setRGBColorByHeight(unsigned char heightDim, ccColorScale::Sh
 
 bool ccPointCloud::setColor(const ccColor::Rgba& col)
 {
+	
 	enableTempColor(false);
 
 	//allocate colors if necessary
@@ -1816,8 +1819,9 @@ bool ccPointCloud::setColor(const ccColor::Rgba& col)
 			return false;
 
 	assert(m_rgbaColors);
+	
 	m_rgbaColors->fill(col);
-
+	
 	//update the grid colors as well!
 	for (size_t i = 0; i < m_grids.size(); ++i)
 	{
@@ -2729,9 +2733,9 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				{
 					//we must test each point visibility
 					unsigned pointIndex = toDisplay.indexMap ? toDisplay.indexMap->at(j) : j;
-					if (m_pointsVisibility.empty() || m_pointsVisibility[pointIndex] == CCCoreLib::POINT_VISIBLE)
+					if (m_pointsVisibility.empty() || m_pointsVisibility[pointIndex] == CCCoreLib::POINT_VISIBLE || m_pointsVisibility[pointIndex] == CCCoreLib::POINT_HIGHLIGHTED)
 					{
-						if (glParams.showSF)
+						if (glParams.showSF && m_pointsVisibility[pointIndex] == CCCoreLib::POINT_VISIBLE)
 						{
 							assert(pointIndex < m_currentDisplayedScalarField->currentSize());
 							const ccColor::Rgb* col = m_currentDisplayedScalarField->getValueColor(pointIndex);
@@ -2739,9 +2743,21 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							//to be sure that the user doesn't miss them (during manual segmentation for instance)
 							glFunc->glColor3ubv(col ? col->rgb : ccColor::lightGreyRGB.rgb); //Make sure all points are visible. No alpha used on purpose 
 						}
-						else if (glParams.showColors)
+						else if (glParams.showSF && m_pointsVisibility[pointIndex] == CCCoreLib::POINT_HIGHLIGHTED)
+						{
+							assert(pointIndex < m_currentDisplayedScalarField->currentSize());
+							const ccColor::Rgb* col = m_currentDisplayedScalarField->getValueColor(pointIndex);
+							//we force display of points hidden because of their scalar field value
+							//to be sure that the user doesn't miss them (during manual segmentation for instance)
+							glFunc->glColor3ubv(col ? ccColor::highlightedRGB.rgb : ccColor::lightGreyRGB.rgb); //Make sure all points are visible. No alpha used on purpose 
+						}
+						else if (glParams.showColors && m_pointsVisibility[pointIndex] == CCCoreLib::POINT_VISIBLE)
 						{
 							glFunc->glColor4ubv(m_rgbaColors->getValue(pointIndex).rgba);
+						}
+						else if (glParams.showColors && m_pointsVisibility[pointIndex] == CCCoreLib::POINT_HIGHLIGHTED)
+						{
+							glFunc->glColor4ubv(ccColor::highlighted.rgba);
 						}
 						if (glParams.showNorms)
 						{
@@ -3275,9 +3291,14 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool re
 		ccLog::Warning("[ccPointCloud] Failed to generate a subset cloud");
 		return nullptr;
 	}
+	if (getCurrentSliceIndex() >= 0) {
 
-	result->setName(getName() + QString(".segmented"));
+		result->setName(getName() + QString(".segmented")+QString::number(m_currentSliceIndex));
+	}
+	else {
 
+		result->setName(getName() + QString(".segmented"));
+	}
 	//shall the visible points be erased from this cloud?
 	if (removeSelectedPoints && !isLocked())
 	{
@@ -3341,6 +3362,8 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool re
 
 	return result;
 }
+
+
 
 ccScalarField* ccPointCloud::getCurrentDisplayedScalarField() const
 {

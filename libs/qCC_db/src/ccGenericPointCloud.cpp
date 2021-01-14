@@ -80,6 +80,24 @@ bool ccGenericPointCloud::resetVisibilityArray()
 	return true;
 }
 
+bool ccGenericPointCloud::resetHighlightedArray()
+{
+	try
+	{
+		m_pointsHighlighted.resize(size());
+	}
+	catch (const std::bad_alloc&)
+	{
+		unallocateHighlightedArray();
+		return false;
+	}
+
+	std::fill(m_pointsHighlighted.begin(), m_pointsHighlighted.end(), CCCoreLib::POINT_HIDDEN); //delete here by default, all points are visible
+
+	return true;
+}
+
+
 void ccGenericPointCloud::invertVisibilityArray()
 {
 	if (m_pointsVisibility.empty())
@@ -94,14 +112,51 @@ void ccGenericPointCloud::invertVisibilityArray()
 	}
 }
 
+void ccGenericPointCloud::invertHighlightedArray()
+{
+	if (m_pointsVisibility.empty())
+	{
+		assert(false);
+		return;
+	}
+
+	for (unsigned char& high : m_pointsVisibility)
+	{
+		high = (high == CCCoreLib::POINT_HIGHLIGHTED || high == CCCoreLib::POINT_HIDDEN ? CCCoreLib::POINT_HIDDEN : CCCoreLib::POINT_VISIBLE);
+	}
+}
+void ccGenericPointCloud::cancelHighlightedArray()
+{
+	if (m_pointsVisibility.empty())
+	{
+		assert(false);
+		return;
+	}
+
+	for (unsigned char& high : m_pointsVisibility)
+	{
+		high = (high == CCCoreLib::POINT_HIGHLIGHTED || high == CCCoreLib::POINT_VISIBLE ? CCCoreLib::POINT_VISIBLE : CCCoreLib::POINT_HIDDEN);
+	}
+}
+
 void ccGenericPointCloud::unallocateVisibilityArray()
 {
 	m_pointsVisibility.resize(0);
 }
 
+void ccGenericPointCloud::unallocateHighlightedArray()
+{
+	m_pointsHighlighted.resize(0);
+}
+
 bool ccGenericPointCloud::isVisibilityTableInstantiated() const
 {
 	return !m_pointsVisibility.empty();
+}
+
+bool ccGenericPointCloud::isHighlightedTableInstantiated() const
+{
+	return !m_pointsHighlighted.empty();
 }
 
 void ccGenericPointCloud::deleteOctree()
@@ -296,6 +351,7 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 										double pickHeight/*=2.0*/,
 										bool autoComputeOctree/*=false*/)
 {
+	
 	//can we use the octree to accelerate the point picking process?
 	if (pickWidth == pickHeight)
 	{
@@ -455,6 +511,7 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 
 CCCoreLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints(const VisibilityTableType* visTable/*=nullptr*/, bool silent/*=false*/) const
 {
+	
 	if (!visTable)
 	{
 		visTable = &m_pointsVisibility;
@@ -482,7 +539,7 @@ CCCoreLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints(const Visibi
 
 	//we create an entity with the 'visible' vertices only
 	CCCoreLib::ReferenceCloud* rc = new CCCoreLib::ReferenceCloud(const_cast<ccGenericPointCloud*>(this));
-
+	
 	if (pointCount)
 	{
 		if (rc->reserve(pointCount))
@@ -509,3 +566,4 @@ CCCoreLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints(const Visibi
 
 	return rc;
 }
+

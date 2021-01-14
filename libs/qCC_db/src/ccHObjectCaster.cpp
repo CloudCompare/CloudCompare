@@ -59,6 +59,7 @@ ccPointCloud* ccHObjectCaster::ToPointCloud(ccHObject* obj, bool* lockedVertices
 	{
 		if (obj->isA(CC_TYPES::POINT_CLOUD))
 		{
+			
 			return static_cast<ccPointCloud*>(obj);
 		}
 		else if (obj->isKindOf(CC_TYPES::MESH))
@@ -79,7 +80,8 @@ ccPointCloud* ccHObjectCaster::ToPointCloud(ccHObject* obj, bool* lockedVertices
 }
 
 ccGenericPointCloud* ccHObjectCaster::ToGenericPointCloud(ccHObject* obj, bool* lockedVertices /*= 0*/)
-{
+{	
+	
 	if (lockedVertices)
 	{
 		*lockedVertices = false;

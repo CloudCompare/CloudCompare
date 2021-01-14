@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+  <class>GraphicalMultipleSegmentationDlg</class>
+  <widget class="QDialog" name="GraphicalMultipleSegmentationDlg">
+    <property name="geometry">
+      <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>251</width>
+        <height>26</height>
+      </rect>
+    </property>
+    <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+      </sizepolicy>
+    </property>
+    <property name="windowTitle">
+      <string>Segmentation</string>
+    </property>
+    <layout class="QHBoxLayout">
+      <property name="spacing">
+        <number>2</number>
+      </property>
+      <property name="leftMargin">
+        <number>2</number>
+      </property>
+      <property name="topMargin">
+        <number>2</number>
+      </property>
+      <property name="rightMargin">
+        <number>2</number>
+      </property>
+      <property name="bottomMargin">
+        <number>2</number>
+      </property>
+      <item>
+        <widget class="QToolButton" name="pauseButton">
+          <property name="toolTip">
+            <string>Pause segmentation (Space)</string>
+          </property>
+          <property name="statusTip">
+            <string>Pause segmentation  (allow rotation/panning of 3D view)</string>
+          </property>
+          <property name="text">
+            <string>pause</string>
+          </property>
+          <property name="icon">
+            <iconset resource="../icons.qrc">
+              <normaloff>:/CC/images/smallPause.png</normaloff>:/CC/images/smallPause.png
+            </iconset>
+          </property>
+          <property name="checkable">
+            <bool>true</bool>
+          </property>
+          <property name="checked">
+            <bool>false</bool>
+          </property>
+        </widget>
+      </item>
+      <item>
+        <widget class="QToolButton" name="selectionModelButton">
+          <property name="toolTip">
+            <string>Polyline selection mode (Tab)</string>
+          </property>
+          <property name="text">
+            <string>polyline selection</string>
+          </property>
+          <property name="icon">
+            <iconset resource="../icons.qrc">
+              <normaloff>:/CC/images/smallPolygonSelect.png</normaloff>:/CC/images/smallPolygonSelect.png
+            </iconset>
+          </property>
+          <property name="popupMode">
+            <enum>QToolButton::MenuButtonPopup</enum>
+          </property>
+        </widget>
+      </item>
+      <item>
+        <widget class="QToolButton" name="inButton">
+          <property name="toolTip">
+            <string>Segment In (I)</string>
+          </property>
+          <property name="statusTip">
+            <string>Segment (keep points inside)</string>
+          </property>
+          <property name="text">
+            <string>in</string>
+          </property>
+          <property name="icon">
+            <iconset resource="../icons.qrc">
+              <normaloff>:/CC/images/smallSegmentIn.png</normaloff>:/CC/images/smallSegmentIn.png
+            </iconset>
+          </property>
+        </widget>
+      </item>
+      <item>
+        <widget class="QToolButton" name="outButton">
+          <property name="toolTip">
+            <string>Segment Out (O)</string>
+          </property>
+          <property name="statusTip">
+            <string>Segment (keep points outside)</string>
+          </property>
+          <property name="text">
+            <string>out</string>
+          </property>
+          <property name="icon">
+            <iconset resource="../icons.qrc">
+              <normaloff>:/CC/images/smallSegmentOut.png</normaloff>:/CC/images/smallSegmentOut.png
+            </iconset>
+          </property>
+        </widget>
+      </item>
+      <item>
+        <widget class="QToolButton" name="cancelCurrentSelectionButton">
+          <property name="enabled">
+            <bool>false</bool>
+          </property>
+          <property name="toolTip">
+            <string>Clear Current Selection</string>
+          </property>
+          <property name="statusTip">
+            <string>Clear Current Selection</string>
+          </property>
+          <property name="text">
+            <string>Clear Current Selection</string>
+          </property>
+          <property name="icon">
+            <iconset resource="../icons.qrc">
+              <normaloff>:/CC/images/smallReset.png</normaloff>:/CC/images/smallReset.png
+            </iconset>
+          </property>
+        </widget>
+      </item>
+      <item>
+        <widget class="QToolButton" name="addSliceButton">
+          <property name="enabled">
+            <bool>false</bool>
+          </property>
+          <property name="toolTip">
+            <string>Add Slice</string>
+          </property>
+          <property name="statusTip">
+            <string>Add Slice</string>
+          </property>
+          <property name="text">
+            <string>raz</string>
+          </property>
+          <property name="icon">
+            <iconset resource="../icons.qrc">
+              <normaloff>:/CC/images/ccPlus.png</normaloff>:/CC/images/ccPlus.png
+            </iconset>
+          </property>
+        </widget>
+      </item>
+      <item>
+        <widget class="QToolButton" name="cancelPreviousCropButton">
+          <property name="enabled">
+            <bool>false</bool>
+          </property>
+          <property name="toolTip">
+            <string>Remove Last Slice</string>
+          </property>
+          <property name="statusTip">
+            <string>Remove Last Slice</string>
+          </property>
+          <property name="text">
+            <string>Remove Slice</string>
+          </property>
+          <property name="icon">
+            <iconset resource="../icons.qrc">
+              <normaloff>:/CC/images/ccMinus.png</normaloff>:/CC/images/ccMinus.png
+            </iconset>
+          </property>
+        </widget>
+      </item>
+      <item>
+        <widget class="QToolButton" name="validButton">
+          <property name="toolTip">
+            <string>Confirm segmentation (Enter)</string>
+          </property>
+          <property name="statusTip">
+            <string>Confirm segmentation</string>
+          </property>
+          <property name="text">
+            <string>OK</string>
+          </property>
+          <property name="icon">
+            <iconset resource="../icons.qrc">
+              <normaloff>:/CC/images/smallValidate.png</normaloff>:/CC/images/smallValidate.png
+            </iconset>
+          </property>
+        </widget>
+      </item>
+      <item>
+        <widget class="QToolButton" name="cancelButton">
+          <property name="toolTip">
+            <string>Cancel (Esc)</string>
+          </property>
+          <property name="statusTip">
+            <string>Cancel segentation</string>
+          </property>
+          <property name="text">
+            <string>Cancel</string>
+          </property>
+          <property name="icon">
+            <iconset resource="../icons.qrc">
+              <normaloff>:/CC/images/smallCancel.png</normaloff>:/CC/images/smallCancel.png
+            </iconset>
+          </property>
+        </widget>
+      </item>
+    </layout>
+    <action name="actionSetRectangularSelection">
+      <property name="icon">
+        <iconset resource="../icons.qrc">
+          <normaloff>:/CC/images/smallRectangleSelect.png</normaloff>:/CC/images/smallRectangleSelect.png
+        </iconset>
+      </property>
+      <property name="text">
+        <string>Rectangular selection</string>
+      </property>
+      <property name="toolTip">
+        <string>Activate rectangular selection</string>
+      </property>
+    </action>
+    <action name="actionSetPolylineSelection">
+      <property name="icon">
+        <iconset resource="../icons.qrc">
+          <normaloff>:/CC/images/smallPolygonSelect.png</normaloff>:/CC/images/smallPolygonSelect.png
+        </iconset>
+      </property>
+      <property name="text">
+        <string>Polygonal selection</string>
+      </property>
+      <property name="toolTip">
+        <string>Activate polyline selection</string>
+      </property>
+    </action>
+    <action name="actionUseExistingPolyline">
+      <property name="icon">
+        <iconset resource="../icons.qrc">
+          <normaloff>:/CC/images/dbPolylineSymbol.png</normaloff>:/CC/images/dbPolylineSymbol.png
+        </iconset>
+      </property>
+      <property name="text">
+        <string>Use existing polyline</string>
+      </property>
+      <property name="toolTip">
+        <string>Import polyline from DB for segmentation</string>
+      </property>
+    </action>
+    <action name="actionExportSegmentationPolyline">
+      <property name="icon">
+        <iconset resource="../icons.qrc">
+          <normaloff>:/CC/images/ccSave.png</normaloff>:/CC/images/ccSave.png
+        </iconset>
+      </property>
+      <property name="text">
+        <string>Export segmentation polyline</string>
+      </property>
+      <property name="toolTip">
+        <string>Export segmentation polyline as new entity</string>
+      </property>
+    </action>
+  </widget>
+  <resources>
+    <include location="../icons.qrc"/>
+  </resources>
+  <connections/>
+</ui>

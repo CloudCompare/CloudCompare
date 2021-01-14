@@ -54,6 +54,12 @@ public:
 	**/
 	virtual void stop(bool accepted);
 
+	//! Stops process/dialog
+	/** Wihtout the 'processFinished' signal (with input state as argument).
+		\param accepted process/dialog result
+	**/
+	virtual void stopWithoutEmit();
+
 	//reimplemented from QDialog
 	void reject() override;
 

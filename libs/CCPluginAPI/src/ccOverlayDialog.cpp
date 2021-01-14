@@ -114,8 +114,20 @@ void ccOverlayDialog::stop(bool accepted)
 	hide();
 
 	linkWith(nullptr);
-
+	
 	emit processFinished(accepted);
+	
+}
+
+void ccOverlayDialog::stopWithoutEmit()
+{
+	m_processing = false;
+
+	//auto-hide
+	hide();
+
+	linkWith(nullptr);
+
 }
 
 void ccOverlayDialog::reject()

@@ -15,8 +15,8 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_GRAPHICAL_SEGMENTATION_TOOLS_HEADER
-#define CC_GRAPHICAL_SEGMENTATION_TOOLS_HEADER
+#ifndef CC_GRAPHICAL_MULTIPLE_SEGMENTATION_TOOLS_HEADER
+#define CC_GRAPHICAL_MULTIPLE_SEGMENTATION_TOOLS_HEADER
 
 //Local
 #include <ccOverlayDialog.h>
@@ -28,23 +28,25 @@
 #include <QSet>
 
 //GUI
-#include <ui_graphicalSegmentationDlg.h>
+#include <ui_graphicalMultipleSegmentationDlg.h>
 
 class ccPolyline;
 class ccPointCloud;
-class ccGLWindow;
+class cc2DViewportObject;
+class ccGenericPointCloud;
+
 
 //! Graphical segmentation mechanism (with polyline)
-class ccGraphicalSegmentationTool : public ccOverlayDialog, public Ui::GraphicalSegmentationDlg
+class ccGraphicalMultipleSegmentationTool : public ccOverlayDialog, public Ui::GraphicalMultipleSegmentationDlg
 {
 	Q_OBJECT
 
 public:
 
 	//! Default constructor
-	explicit ccGraphicalSegmentationTool(QWidget* parent);
+	explicit ccGraphicalMultipleSegmentationTool(QWidget* parent);
 	//! Destructor
-	virtual ~ccGraphicalSegmentationTool();
+	virtual ~ccGraphicalMultipleSegmentationTool();
 
 	//! Adds an entity (and/or its children) to the 'to be segmented' pool
 	/** Warning: some entities may be rejected if they are
@@ -64,6 +66,9 @@ public:
 	//! Returns the active 'to be segmented' set (const version)
 	const QSet<ccHObject*>& entities() const { return m_toSegment; }
 
+	//! Returns the current group index (substract one) 
+	unsigned getLastGroupIndex() { return m_currentGroupIndex; }
+
 	//inherited from ccOverlayDialog
 	virtual bool linkWith(ccGLWindow* win) override;
 	virtual bool start() override;
@@ -77,14 +82,18 @@ public:
 		prior to be removed from the pool.
 	**/
 	void removeAllEntities(bool unallocateVisibilityArrays);
+	
+	//! Recreate the segmentation based on the Index Group 
+	void segmentFromIndex(unsigned index, ccGenericPointCloud* cloud);
+	
 
 protected:
 
 	void segmentIn();
 	void segmentOut();
 	void segment(bool);
-	void highlight(bool);
 	void reset();
+	void addToBeSliced();
 	void apply();
 	void applyAndDelete();
 	void cancel();
@@ -97,9 +106,21 @@ protected:
 	void doSetRectangularSelection();
 	void doActionUseExistingPolyline();
 	void doExportSegmentationPolyline();
+	void useExistingPolyline(ccPolyline*, cc2DViewportObject* );
+	void redoSegmentation(bool);
+	void cancelPreviousCrop();
+	void cancelCurrentSelection();
+	void segmentByEntity(bool, ccGenericPointCloud*);
 
 	//! To capture overridden shortcuts (pause button, etc.)
 	void onShortcutTriggered(int);
+	
+	
+
+	//! Set of Polyline Group
+	std::vector<ccPolyline*> m_polyGroup;
+	//! Set of viewport Group
+	std::vector<cc2DViewportObject*> m_viewportGroup;
 
 protected:
 
@@ -108,6 +129,7 @@ protected:
 
 	//! Set of entities to be segmented
 	QSet<ccHObject*> m_toSegment;
+	
 
 	//! Whether something has changed or not (for proper 'cancel')
 	bool m_somethingHasChanged;
@@ -128,16 +150,23 @@ protected:
 	//! Current process state
 	unsigned m_state;
 
+
 	//! Segmentation polyline
 	ccPolyline* m_segmentationPoly;
 	//! Segmentation polyline vertices
 	ccPointCloud* m_polyVertices;
+	
+	//! The current group index 
+	unsigned m_currentGroupIndex;
 
 	//! Selection mode
 	bool m_rectangularSelection;
 
 	//! Whether to delete hidden parts after segmentation
 	bool m_deleteHiddenParts;
+	//! Bool Highlighted
+	bool m_highlighted;
+	
 };
 
 #endif //CC_GRAPHICAL_SEGMENTATION_TOOLS_HEADER

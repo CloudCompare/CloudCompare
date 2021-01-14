@@ -331,7 +331,7 @@ bool ccHObject::addChild(ccHObject* child, int dependencyFlags/*=DP_PARENT_OF_OT
 	}
 	if (std::find(m_children.begin(), m_children.end(), child) != m_children.end())
 	{
-		ccLog::ErrorDebug("[ccHObject::addChild] Object is already a child!");
+		//ccLog::ErrorDebug("[ccHObject::addChild] Object is already a child!");
 		return false;
 	}
 
@@ -880,6 +880,7 @@ void ccHObject::detatchAllChildren()
 void ccHObject::removeChild(ccHObject* child)
 {
 	int pos = getChildIndex(child);
+	// recursive to remove all child
 	if (pos >= 0)
 	{
 		removeChild(pos);

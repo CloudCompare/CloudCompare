@@ -8,9 +8,9 @@
 #define MyAppExeName "CloudCompare.exe"
 #define MyVCRedistPath "E:\These\C++\CloudCompare\vc_redist"
 #define MyFaroRedistPath "E:\These\C++\Faro\redist"
-#define MyFaroRedistExe "E1800_FARO_LS_SDK_7.1.1.81_x64_Setup.exe"
-#define MyCCPath "E:\These\C++\CloudCompare\bin_x64_msvc_2017\CloudCompare"
-#define MyOutputDir "E:\These\C++\CloudCompare\bin_x64_msvc_2017"
+#define MyFaroRedistExe "FARO LS 2020.0.4.5330 Setup.exe"
+#define MyCCPath "E:\These\C++\CloudCompare\new_bin_x64_msvc_2017\CloudCompare"
+#define MyOutputDir "E:\These\C++\CloudCompare\new_bin_x64_msvc_2017"
 #define MyCreationDate GetDateTimeString('mm_dd_yyyy', '', '')
 
 [Setup]

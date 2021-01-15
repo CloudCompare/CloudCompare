@@ -3,6 +3,13 @@ CloudCompare
 
 Homepage: https://cloudcompare.org
 
+A distribution made for mining utilizing new tools and integrating Libpointmatcher ICP
+Convergence Analysis Tools
+
+Agnico Eagle & Point Laz Solution
+---------------------------------
+
+
 [![GitHub release](https://img.shields.io/github/release/cloudcompare/trunk.svg)](https://github.com/cloudcompare/trunk/releases)
 
 - [![Build Status](https://travis-ci.org/CloudCompare/CloudCompare.svg?branch=master)](https://travis-ci.org/CloudCompare/CloudCompare) Linux

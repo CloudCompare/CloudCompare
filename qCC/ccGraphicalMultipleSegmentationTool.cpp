@@ -55,28 +55,30 @@ ccGraphicalMultipleSegmentationTool::ccGraphicalMultipleSegmentationTool(QWidget
 	, m_polyVertices(nullptr)
 	, m_rectangularSelection(false)
 	, m_deleteHiddenParts(false)
+	, m_currentGroupIndex(0)
 	
+
 {
 	// Set QDialog background as transparent (DGM: doesn't work over an OpenGL context)
 	//setAttribute(Qt::WA_NoSystemBackground);
 
 	setupUi(this);
 
-	connect(inButton,							&QToolButton::clicked,		this,	&ccGraphicalMultipleSegmentationTool::segmentIn);
-	connect(outButton,							&QToolButton::clicked,		this,	&ccGraphicalMultipleSegmentationTool::segmentOut);
-	connect(validButton,						&QToolButton::clicked,		this,	&ccGraphicalMultipleSegmentationTool::apply);
-	connect(cancelButton,						&QToolButton::clicked,		this,	&ccGraphicalMultipleSegmentationTool::cancel);
-	connect(pauseButton,						&QToolButton::toggled,		this,	&ccGraphicalMultipleSegmentationTool::pauseSegmentationMode);
-	connect(addSliceButton,						&QToolButton::clicked,		this,	&ccGraphicalMultipleSegmentationTool::addToBeSliced);
-	connect(cancelPreviousCropButton,			&QToolButton::clicked,		this,	&ccGraphicalMultipleSegmentationTool::cancelPreviousCrop);
-	connect(cancelCurrentSelectionButton,		&QToolButton::clicked,		this,	&ccGraphicalMultipleSegmentationTool::cancelCurrentSelection);
+	connect(inButton, &QToolButton::clicked, this, &ccGraphicalMultipleSegmentationTool::segmentIn);
+	connect(outButton, &QToolButton::clicked, this, &ccGraphicalMultipleSegmentationTool::segmentOut);
+	connect(validButton, &QToolButton::clicked, this, &ccGraphicalMultipleSegmentationTool::apply);
+	connect(cancelButton, &QToolButton::clicked, this, &ccGraphicalMultipleSegmentationTool::cancel);
+	connect(pauseButton, &QToolButton::toggled, this, &ccGraphicalMultipleSegmentationTool::pauseSegmentationMode);
+	connect(addSliceButton, &QToolButton::clicked, this, &ccGraphicalMultipleSegmentationTool::addToBeSliced);
+	connect(cancelPreviousCropButton, &QToolButton::clicked, this, &ccGraphicalMultipleSegmentationTool::cancelPreviousCrop);
+	connect(cancelCurrentSelectionButton, &QToolButton::clicked, this, &ccGraphicalMultipleSegmentationTool::cancelCurrentSelection);
 
 	//selection modes
-	connect(actionSetPolylineSelection,			&QAction::triggered,	this,	&ccGraphicalMultipleSegmentationTool::doSetPolylineSelection);
-	connect(actionSetRectangularSelection,		&QAction::triggered,	this,	&ccGraphicalMultipleSegmentationTool::doSetRectangularSelection);
+	connect(actionSetPolylineSelection, &QAction::triggered, this, &ccGraphicalMultipleSegmentationTool::doSetPolylineSelection);
+	connect(actionSetRectangularSelection, &QAction::triggered, this, &ccGraphicalMultipleSegmentationTool::doSetRectangularSelection);
 	//import/export options
-	connect(actionUseExistingPolyline,			&QAction::triggered,	this,	&ccGraphicalMultipleSegmentationTool::doActionUseExistingPolyline);
-	connect(actionExportSegmentationPolyline,	&QAction::triggered,	this,	&ccGraphicalMultipleSegmentationTool::doExportSegmentationPolyline);
+	connect(actionUseExistingPolyline, &QAction::triggered, this, &ccGraphicalMultipleSegmentationTool::doActionUseExistingPolyline);
+	connect(actionExportSegmentationPolyline, &QAction::triggered, this, &ccGraphicalMultipleSegmentationTool::doExportSegmentationPolyline);
 
 	//add shortcuts
 	addOverridenShortcut(Qt::Key_Space);  //space bar for the "pause" button
@@ -84,7 +86,7 @@ ccGraphicalMultipleSegmentationTool::ccGraphicalMultipleSegmentationTool(QWidget
 	addOverridenShortcut(Qt::Key_Return); //return key for the "apply" button	addOverridenShortcut(Qt::Key_Tab);    //tab key to switch between rectangular and polygonal selection modes
 	addOverridenShortcut(Qt::Key_I);      //'I' key for the "segment in" button
 	addOverridenShortcut(Qt::Key_O);      //'O' key for the "segment out" button
-	addOverridenShortcut(Qt::Key_A);      //'A' key for the "Add To Be Sliced" button
+	addOverridenShortcut(Qt::Key_U);      //'U' key for the "Add To Be Sliced" button
 	addOverridenShortcut(Qt::Key_S);      //'S' key for the "Cancel Previous Crop" button
 	addOverridenShortcut(Qt::Key_D);      //'D' key for the "Cancel Current Selection" button
 	connect(this, &ccOverlayDialog::shortcutTriggered, this, &ccGraphicalMultipleSegmentationTool::onShortcutTriggered);
@@ -129,11 +131,17 @@ ccGraphicalMultipleSegmentationTool::~ccGraphicalMultipleSegmentationTool()
 	if (m_polyVertices)
 		delete m_polyVertices;
 	m_polyVertices = nullptr;
+
+	if (m_polyGroup.size()>0)
+			m_polyGroup.clear();
+
+	if (m_viewportGroup.size() > 0)
+		m_viewportGroup.clear();
 }
 
 void ccGraphicalMultipleSegmentationTool::onShortcutTriggered(int key)
 {
- 	switch(key)
+	switch (key)
 	{
 	case Qt::Key_Space:
 		pauseButton->toggle();
@@ -146,7 +154,7 @@ void ccGraphicalMultipleSegmentationTool::onShortcutTriggered(int key)
 	case Qt::Key_O:
 		outButton->click();
 		return;
-	case Qt::Key_A:
+	case Qt::Key_U:
 		addSliceButton->click();
 		return;
 	case Qt::Key_Return:
@@ -191,13 +199,13 @@ bool ccGraphicalMultipleSegmentationTool::linkWith(ccGLWindow* win)
 			m_segmentationPoly->setDisplay(nullptr);
 		}
 	}
-	
+
 	if (m_associatedWin)
 	{
-		connect(m_associatedWin, &ccGLWindow::leftButtonClicked,	this, &ccGraphicalMultipleSegmentationTool::addPointToPolyline);
-		connect(m_associatedWin, &ccGLWindow::rightButtonClicked,	this, &ccGraphicalMultipleSegmentationTool::closePolyLine);
-		connect(m_associatedWin, &ccGLWindow::mouseMoved,			this, &ccGraphicalMultipleSegmentationTool::updatePolyLine);
-		connect(m_associatedWin, &ccGLWindow::buttonReleased,		this, &ccGraphicalMultipleSegmentationTool::closeRectangle);
+		connect(m_associatedWin, &ccGLWindow::leftButtonClicked, this, &ccGraphicalMultipleSegmentationTool::addPointToPolyline);
+		connect(m_associatedWin, &ccGLWindow::rightButtonClicked, this, &ccGraphicalMultipleSegmentationTool::closePolyLine);
+		connect(m_associatedWin, &ccGLWindow::mouseMoved, this, &ccGraphicalMultipleSegmentationTool::updatePolyLine);
+		connect(m_associatedWin, &ccGLWindow::buttonReleased, this, &ccGraphicalMultipleSegmentationTool::closeRectangle);
 
 		if (m_segmentationPoly)
 		{
@@ -229,11 +237,12 @@ bool ccGraphicalMultipleSegmentationTool::start()
 	m_associatedWin->addToOwnDB(m_segmentationPoly);
 	m_associatedWin->setPickingMode(ccGLWindow::NO_PICKING);
 	pauseSegmentationMode(false);
+	validButton->setEnabled(false);
 	m_somethingHasChanged = false;
 
 	reset();
 
-	
+
 	return ccOverlayDialog::start();
 }
 
@@ -254,31 +263,31 @@ void ccGraphicalMultipleSegmentationTool::removeAllEntities(bool unallocateVisib
 void ccGraphicalMultipleSegmentationTool::stop(bool accepted)
 {
 	assert(m_segmentationPoly);
-	
-	
-		
-		
-		m_associatedWin->displayNewMessage("Segmentation [OFF]",
-											ccGLWindow::UPPER_CENTER_MESSAGE,
-											false,
-											2,
-											ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
-		
-		m_associatedWin->setInteractionMode(ccGLWindow::MODE_TRANSFORM_CAMERA);
-		m_associatedWin->setPickingMode(ccGLWindow::DEFAULT_PICKING);
-		m_associatedWin->setUnclosable(false);
-		m_associatedWin->removeFromOwnDB(m_segmentationPoly);
-		
-	
+
+
+
+
+	m_associatedWin->displayNewMessage("Segmentation [OFF]",
+		ccGLWindow::UPPER_CENTER_MESSAGE,
+		false,
+		2,
+		ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
+
+	m_associatedWin->setInteractionMode(ccGLWindow::MODE_TRANSFORM_CAMERA);
+	m_associatedWin->setPickingMode(ccGLWindow::DEFAULT_PICKING);
+	m_associatedWin->setUnclosable(false);
+	m_associatedWin->removeFromOwnDB(m_segmentationPoly);
+
+
 	ccOverlayDialog::stop(accepted);
-	
+
 }
 
 void ccGraphicalMultipleSegmentationTool::reset()
 {
 	if (m_somethingHasChanged)
 	{
-		
+
 		for (QSet<ccHObject*>::const_iterator p = m_toSegment.constBegin(); p != m_toSegment.constEnd(); ++p)
 		{
 			ccHObjectCaster::ToGenericPointCloud(*p)->resetVisibilityArray();
@@ -300,7 +309,7 @@ void ccGraphicalMultipleSegmentationTool::reset()
 
 bool ccGraphicalMultipleSegmentationTool::addEntity(ccHObject* entity)
 {
-	
+
 	//FIXME
 	/*if (entity->isLocked())
 		ccLog::Warning(QString("Can't use entity [%1] cause it's locked!").arg(entity->getName()));
@@ -311,10 +320,10 @@ bool ccGraphicalMultipleSegmentationTool::addEntity(ccHObject* entity)
 	}
 
 	bool result = false;
-	
+
 	if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
-		
+
 		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(entity);
 		//detect if this cloud is in fact a vertex set for at least one mesh
 		{
@@ -326,9 +335,9 @@ bool ccGraphicalMultipleSegmentationTool::addEntity(ccHObject* entity)
 			}
 			//or the parent of its child mesh!
 			ccHObject::Container meshes;
-			if (cloud->filterChildren(meshes,false,CC_TYPES::MESH) != 0)
+			if (cloud->filterChildren(meshes, false, CC_TYPES::MESH) != 0)
 			{
-				for (unsigned i=0; i<meshes.size(); ++i)
+				for (unsigned i = 0; i < meshes.size(); ++i)
 					if (ccHObjectCaster::ToGenericMesh(meshes[i])->getAssociatedCloud() == cloud)
 					{
 						ccLog::Warning(QString("[Graphical Segmentation Tool] Can't segment mesh vertices '%1' directly! Select its child mesh instead!").arg(entity->getName()));
@@ -336,12 +345,12 @@ bool ccGraphicalMultipleSegmentationTool::addEntity(ccHObject* entity)
 					}
 			}
 		}
-		
+
 		cloud->resetVisibilityArray();
 		m_toSegment.insert(cloud);
 
 		//automatically add cloud's children
-		for (unsigned i=0; i<entity->getChildrenNumber(); ++i)
+		for (unsigned i = 0; i < entity->getChildrenNumber(); ++i)
 			result |= addEntity(entity->getChild(i));
 	}
 	else if (entity->isKindOf(CC_TYPES::MESH))
@@ -386,7 +395,7 @@ bool ccGraphicalMultipleSegmentationTool::addEntity(ccHObject* entity)
 	else if (entity->isA(CC_TYPES::HIERARCHY_OBJECT))
 	{
 		//automatically add entity's children
-		for (unsigned i=0;i<entity->getChildrenNumber();++i)
+		for (unsigned i = 0; i < entity->getChildrenNumber(); ++i)
 			result |= addEntity(entity->getChild(i));
 	}
 
@@ -419,8 +428,8 @@ void ccGraphicalMultipleSegmentationTool::updatePolyLine(int x, int y, Qt::Mouse
 	//new point (expressed relatively to the screen center)
 	QPointF pos2D = m_associatedWin->toCenteredGLCoordinates(x, y);
 	CCVector3 P(static_cast<PointCoordinateType>(pos2D.x()),
-				static_cast<PointCoordinateType>(pos2D.y()),
-				0);
+		static_cast<PointCoordinateType>(pos2D.y()),
+		0);
 
 	if (m_state & RECTANGLE)
 	{
@@ -432,14 +441,14 @@ void ccGraphicalMultipleSegmentationTool::updatePolyLine(int x, int y, Qt::Mouse
 		CCVector3* B = const_cast<CCVector3*>(m_polyVertices->getPointPersistentPtr(1));
 		CCVector3* C = const_cast<CCVector3*>(m_polyVertices->getPointPersistentPtr(2));
 		CCVector3* D = const_cast<CCVector3*>(m_polyVertices->getPointPersistentPtr(3));
-		*B = CCVector3(A->x,P.y,0);
+		*B = CCVector3(A->x, P.y, 0);
 		*C = P;
-		*D = CCVector3(P.x,A->y,0);
+		*D = CCVector3(P.x, A->y, 0);
 
 		if (vertCount != 4)
 		{
 			m_segmentationPoly->clear();
-			if (!m_segmentationPoly->addPointIndex(0,4))
+			if (!m_segmentationPoly->addPointIndex(0, 4))
 			{
 				ccLog::Error("Out of memory!");
 				allowPolylineExport(false);
@@ -453,7 +462,7 @@ void ccGraphicalMultipleSegmentationTool::updatePolyLine(int x, int y, Qt::Mouse
 		if (vertCount < 2)
 			return;
 		//we replace last point by the current one
-		CCVector3* lastP = const_cast<CCVector3*>(m_polyVertices->getPointPersistentPtr(vertCount-1));
+		CCVector3* lastP = const_cast<CCVector3*>(m_polyVertices->getPointPersistentPtr(vertCount - 1));
 		*lastP = P;
 	}
 
@@ -483,8 +492,8 @@ void ccGraphicalMultipleSegmentationTool::addPointToPolyline(int x, int y)
 	//new point
 	QPointF pos2D = m_associatedWin->toCenteredGLCoordinates(x, y);
 	CCVector3 P(static_cast<PointCoordinateType>(pos2D.x()),
-				static_cast<PointCoordinateType>(pos2D.y()),
-				0);
+		static_cast<PointCoordinateType>(pos2D.y()),
+		0);
 
 	//CTRL key pressed at the same time?
 	bool ctrlKeyPressed = m_rectangularSelection || ((QApplication::keyboardModifiers() & Qt::ControlModifier) == Qt::ControlModifier);
@@ -519,7 +528,7 @@ void ccGraphicalMultipleSegmentationTool::addPointToPolyline(int x, int y)
 		//we were already in 'polyline' mode?
 		if (m_state & POLYLINE)
 		{
-			if (!m_polyVertices->reserve(vertCount+1))
+			if (!m_polyVertices->reserve(vertCount + 1))
 			{
 				ccLog::Error("Out of memory!");
 				allowPolylineExport(false);
@@ -527,7 +536,7 @@ void ccGraphicalMultipleSegmentationTool::addPointToPolyline(int x, int y)
 			}
 
 			//we replace last point by the current one
-			CCVector3* lastP = const_cast<CCVector3*>(m_polyVertices->getPointPersistentPtr(vertCount-1));
+			CCVector3* lastP = const_cast<CCVector3*>(m_polyVertices->getPointPersistentPtr(vertCount - 1));
 			*lastP = P;
 			//and add a new (equivalent) one
 			m_polyVertices->addPoint(P);
@@ -542,7 +551,7 @@ void ccGraphicalMultipleSegmentationTool::addPointToPolyline(int x, int y)
 		{
 			assert(false); //we shouldn't fall here?!
 			m_state &= (~RUNNING);
-			addPointToPolyline(x,y);
+			addPointToPolyline(x, y);
 			return;
 		}
 	}
@@ -595,7 +604,7 @@ void ccGraphicalMultipleSegmentationTool::closePolyLine(int, int)
 	else
 	{
 		//remove last point!
-		m_segmentationPoly->resize(vertCount-1); //can't fail --> smaller
+		m_segmentationPoly->resize(vertCount - 1); //can't fail --> smaller
 		m_segmentationPoly->setClosed(true);
 	}
 
@@ -613,19 +622,24 @@ void ccGraphicalMultipleSegmentationTool::closePolyLine(int, int)
 
 void ccGraphicalMultipleSegmentationTool::segmentIn()
 {
+	m_segmentationPoly->setPointInside(true);
 	segment(true);
 	addSliceButton->setEnabled(true);
+	
+
 }
 
 void ccGraphicalMultipleSegmentationTool::segmentOut()
 {
+	m_segmentationPoly->setPointInside(false);
 	segment(false);
 	addSliceButton->setEnabled(true);
+	
 }
 
 void ccGraphicalMultipleSegmentationTool::segment(bool keepPointsInside)
 {
-	
+
 	if (!m_associatedWin)
 		return;
 
@@ -709,22 +723,23 @@ void ccGraphicalMultipleSegmentationTool::segment(bool keepPointsInside)
 		}
 	}
 	// Save viewport
-	
+
 	cc2DViewportObject* viewportObject = new cc2DViewportObject();
 	viewportObject->setParameters(m_associatedWin->getViewportParameters());
 	viewportObject->setDisplay(m_associatedWin);
 	m_viewportGroup.push_back(viewportObject);
 	// Save Polyline 
-	
+
 	m_segmentationPoly->setGroupIndex(m_currentGroupIndex);
 
-	m_segmentationPoly->setPointInside(keepPointsInside);	
+	
 	ccPolyline* poly = new ccPolyline(*m_segmentationPoly);
 	m_polyGroup.push_back(poly);
 
 	m_somethingHasChanged = true;
 	validButton->setEnabled(true);
 	cancelCurrentSelectionButton->setEnabled(true);
+	pauseSegmentationMode(true);
 	pauseSegmentationMode(false);
 	m_segmentationPoly->clear();
 	m_polyVertices->clear();
@@ -732,6 +747,7 @@ void ccGraphicalMultipleSegmentationTool::segment(bool keepPointsInside)
 
 void ccGraphicalMultipleSegmentationTool::segmentByEntity(bool keepPointsInside, ccGenericPointCloud* cloud)
 {
+
 
 	if (!m_associatedWin)
 		return;
@@ -779,7 +795,7 @@ void ccGraphicalMultipleSegmentationTool::segmentByEntity(bool keepPointsInside,
 	ccLog::PrintDebug("Polyline is fully inside frustrum: " + QString(polyInsideFrustum ? "Yes" : "No"));
 
 	//entity passed by the algo 
-	
+
 	ccGenericPointCloud::VisibilityTableType& visibilityArray = cloud->getTheVisibilityArray();
 	assert(!visibilityArray.empty());
 
@@ -807,15 +823,16 @@ void ccGraphicalMultipleSegmentationTool::segmentByEntity(bool keepPointsInside,
 
 				pointInside = CCCoreLib::ManualSegmentationTools::isPointInsidePoly(P2D, m_segmentationPoly);
 			}
-			visibilityArray[i] = (keepPointsInside != pointInside ? CCCoreLib::POINT_VISIBLE : CCCoreLib::POINT_HIDDEN);
+			visibilityArray[i] = (keepPointsInside!= pointInside ? CCCoreLib::POINT_VISIBLE : CCCoreLib::POINT_HIDDEN);
 		}
 	}
 
 
-	
+
 }
 void ccGraphicalMultipleSegmentationTool::redoSegmentation(bool keepPointsInside)
 {
+	bool keepIn = keepPointsInside ? true : false;
 
 	if (!m_associatedWin)
 		return;
@@ -895,7 +912,7 @@ void ccGraphicalMultipleSegmentationTool::redoSegmentation(bool keepPointsInside
 					pointInside = CCCoreLib::ManualSegmentationTools::isPointInsidePoly(P2D, m_segmentationPoly);
 				}
 
-				visibilityArray[i] = (keepPointsInside != pointInside ? CCCoreLib::POINT_VISIBLE : CCCoreLib::POINT_HIDDEN);
+				visibilityArray[i] = (keepPointsInside == pointInside ? CCCoreLib::POINT_HIDDEN : CCCoreLib::POINT_VISIBLE);
 			}
 		}
 	}
@@ -903,7 +920,7 @@ void ccGraphicalMultipleSegmentationTool::redoSegmentation(bool keepPointsInside
 	m_somethingHasChanged = true;
 	validButton->setEnabled(true);
 	cancelCurrentSelectionButton->setEnabled(false);
-	pauseSegmentationMode(false);
+	pauseSegmentationMode(true);
 }
 
 void ccGraphicalMultipleSegmentationTool::pauseSegmentationMode(bool state)
@@ -915,7 +932,7 @@ void ccGraphicalMultipleSegmentationTool::pauseSegmentationMode(bool state)
 
 	if (state/*=activate pause mode*/)
 	{
-		
+
 		m_state = PAUSED;
 		if (m_polyVertices->size() != 0)
 		{
@@ -926,7 +943,7 @@ void ccGraphicalMultipleSegmentationTool::pauseSegmentationMode(bool state)
 		m_associatedWin->setInteractionMode(ccGLWindow::MODE_TRANSFORM_CAMERA);
 		m_associatedWin->displayNewMessage("Segmentation [PAUSED HERE]", ccGLWindow::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
 		m_associatedWin->displayNewMessage("Unpause to segment again", ccGLWindow::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
-		
+
 	}
 	else
 	{
@@ -965,9 +982,9 @@ void ccGraphicalMultipleSegmentationTool::doSetPolylineSelection()
 		pauseSegmentationMode(false);
 	}
 
-	m_associatedWin->displayNewMessage(QString(),ccGLWindow::UPPER_CENTER_MESSAGE); //clear the area
-	m_associatedWin->displayNewMessage("Segmentation [ON] (rectangular selection)",ccGLWindow::UPPER_CENTER_MESSAGE,false,3600,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
-	m_associatedWin->displayNewMessage("Right click: set opposite corners",ccGLWindow::UPPER_CENTER_MESSAGE,true,3600,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
+	m_associatedWin->displayNewMessage(QString(), ccGLWindow::UPPER_CENTER_MESSAGE); //clear the area
+	m_associatedWin->displayNewMessage("Segmentation [ON] (rectangular selection)", ccGLWindow::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
+	m_associatedWin->displayNewMessage("Right click: set opposite corners", ccGLWindow::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
 }
 
 void ccGraphicalMultipleSegmentationTool::doSetRectangularSelection()
@@ -977,16 +994,16 @@ void ccGraphicalMultipleSegmentationTool::doSetRectangularSelection()
 
 	selectionModelButton->setDefaultAction(actionSetRectangularSelection);
 
-	m_rectangularSelection=true;
+	m_rectangularSelection = true;
 	if (m_state != PAUSED)
 	{
 		pauseSegmentationMode(true);
 		pauseSegmentationMode(false);
 	}
 
-	m_associatedWin->displayNewMessage(QString(),ccGLWindow::UPPER_CENTER_MESSAGE); //clear the area
-	m_associatedWin->displayNewMessage("Segmentation [ON] (rectangular selection)",ccGLWindow::UPPER_CENTER_MESSAGE,false,3600,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
-	m_associatedWin->displayNewMessage("Right click: set opposite corners",ccGLWindow::UPPER_CENTER_MESSAGE,true,3600,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
+	m_associatedWin->displayNewMessage(QString(), ccGLWindow::UPPER_CENTER_MESSAGE); //clear the area
+	m_associatedWin->displayNewMessage("Segmentation [ON] (rectangular selection)", ccGLWindow::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
+	m_associatedWin->displayNewMessage("Right click: set opposite corners", ccGLWindow::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
 }
 
 void ccGraphicalMultipleSegmentationTool::doActionUseExistingPolyline()
@@ -1021,11 +1038,11 @@ void ccGraphicalMultipleSegmentationTool::doActionUseExistingPolyline()
 			if (poly->filterChildren(viewports, false, CC_TYPES::VIEWPORT_2D_OBJECT, true) == 1)
 			{
 				//shall we apply this viewport?
-				if (QMessageBox::question(	m_associatedWin->asWidget(),
-											"Associated viewport",
-											"The selected polyline has an associated viewport: do you want to apply it?",
-											QMessageBox::Yes,
-											QMessageBox::No) == QMessageBox::Yes)
+				if (QMessageBox::question(m_associatedWin->asWidget(),
+					"Associated viewport",
+					"The selected polyline has an associated viewport: do you want to apply it?",
+					QMessageBox::Yes,
+					QMessageBox::No) == QMessageBox::Yes)
 				{
 					m_associatedWin->setViewportParameters(static_cast<cc2DViewportObject*>(viewports.front())->getParameters());
 					m_associatedWin->redraw(false);
@@ -1048,8 +1065,8 @@ void ccGraphicalMultipleSegmentationTool::doActionUseExistingPolyline()
 			allowPolylineExport(false);
 
 			//duplicate polyline 'a minima' (only points and indexes + closed state)
-			if (	m_polyVertices->reserve(vertices->size() + (poly->isClosed() ? 0 : 1))
-				&&	m_segmentationPoly->reserve(poly->size() + (poly->isClosed() ? 0 : 1)))
+			if (m_polyVertices->reserve(vertices->size() + (poly->isClosed() ? 0 : 1))
+				&& m_segmentationPoly->reserve(poly->size() + (poly->isClosed() ? 0 : 1)))
 			{
 				for (unsigned i = 0; i < vertices->size(); ++i)
 				{
@@ -1087,7 +1104,7 @@ void ccGraphicalMultipleSegmentationTool::doActionUseExistingPolyline()
 					m_segmentationPoly->setClosed(true);
 					m_state |= (POLYLINE | RUNNING);
 				}
-				
+
 				m_rectangularSelection = false;
 				m_associatedWin->redraw(true, false);
 			}
@@ -1109,14 +1126,14 @@ void ccGraphicalMultipleSegmentationTool::useExistingPolyline(ccPolyline* poly, 
 		assert(false);
 		return;
 	}
-	
+
 	MainWindow* mainWindow = MainWindow::TheInstance();
 	if (mainWindow)
 	{
 
 		m_associatedWin->setViewportParameters(viewport->getParameters());
 		m_associatedWin->redraw(false);
-			
+
 		CCCoreLib::GenericIndexedCloudPersist* vertices = poly->getAssociatedCloud();
 		bool mode3D = !poly->is2DMode();
 
@@ -1196,8 +1213,8 @@ void ccGraphicalMultipleSegmentationTool::doExportSegmentationPolyline()
 		messageBox.setText("Export polyline in:\n - 2D (with coordinates relative to the screen)\n - 3D (with coordinates relative to the segmented entities)");
 		QPushButton* button2D = new QPushButton("2D");
 		QPushButton* button3D = new QPushButton("3D");
-		messageBox.addButton(button2D,QMessageBox::AcceptRole);
-		messageBox.addButton(button3D,QMessageBox::AcceptRole);
+		messageBox.addButton(button2D, QMessageBox::AcceptRole);
+		messageBox.addButton(button3D, QMessageBox::AcceptRole);
 		messageBox.addButton(QMessageBox::Cancel);
 		messageBox.setDefaultButton(button3D);
 		messageBox.exec();
@@ -1272,7 +1289,7 @@ void ccGraphicalMultipleSegmentationTool::doExportSegmentationPolyline()
 				poly->setGlobalScale(globalScale);
 			}
 		}
-		
+
 		QString polyName = QString("Segmentation polyline #%1").arg(++s_polylineExportCount);
 		poly->setName(polyName);
 		poly->setEnabled(false); //we don't want it to appear while the segmentation mode is enabled! (anyway it's 2D only...)
@@ -1291,7 +1308,7 @@ void ccGraphicalMultipleSegmentationTool::doExportSegmentationPolyline()
 }
 
 void ccGraphicalMultipleSegmentationTool::addToBeSliced()
-{	
+{
 	if (m_polyGroup.size() <= 0)
 	{
 		return;
@@ -1305,7 +1322,7 @@ void ccGraphicalMultipleSegmentationTool::addToBeSliced()
 			newSegments = true;
 		}
 	}
-	if (!newSegments) 
+	if (!newSegments)
 	{
 		return;
 	}
@@ -1347,6 +1364,8 @@ void ccGraphicalMultipleSegmentationTool::cancelCurrentSelection() {
 			j++;
 		}
 	}
+	
+	
 	// Remove polylines and from saved vector
 	m_polyGroup.erase(m_polyGroup.end() - j, m_polyGroup.end());
 	m_viewportGroup.erase(m_viewportGroup.end() - j, m_viewportGroup.end());
@@ -1356,12 +1375,14 @@ void ccGraphicalMultipleSegmentationTool::cancelCurrentSelection() {
 	addSliceButton->setEnabled(false);
 	m_segmentationPoly->clear();
 	m_polyVertices->clear();
+	
 }
 
 void ccGraphicalMultipleSegmentationTool::cancelPreviousCrop()
 {
 	if (m_polyGroup.empty())
 	{
+		validButton->setEnabled(false);
 		return;
 	}
 	if (m_currentGroupIndex > 0)
@@ -1387,7 +1408,15 @@ void ccGraphicalMultipleSegmentationTool::cancelPreviousCrop()
 		{
 			viewport = m_viewportGroup[i];
 			useExistingPolyline(poly, viewport);
-			redoSegmentation(true); //has to be checked 
+			if (poly->getPointInside()) {
+				redoSegmentation(true);
+			}
+			else
+			{
+				redoSegmentation(false);
+				ccLog::Print("out");
+			}
+
 			j++;
 		}
 	}
@@ -1395,7 +1424,7 @@ void ccGraphicalMultipleSegmentationTool::cancelPreviousCrop()
 	m_polyGroup.erase(m_polyGroup.begin() + j, m_polyGroup.end());
 	m_viewportGroup.erase(m_viewportGroup.begin() + j, m_viewportGroup.end());
 
-	ccLog::PrintDebug(QString::number(m_polyGroup.size()));
+
 	m_somethingHasChanged = true;
 	m_associatedWin->redraw();
 	cancelCurrentSelectionButton->setEnabled(false);
@@ -1410,25 +1439,32 @@ void ccGraphicalMultipleSegmentationTool::cancelPreviousCrop()
 	addSliceButton->setEnabled(false);
 	m_segmentationPoly->clear();
 	m_polyVertices->clear();
+	
 }
 
 void ccGraphicalMultipleSegmentationTool::segmentFromIndex(unsigned index, ccGenericPointCloud* cloud)
-{	
+{
 
 	ccPolyline* poly;
 	cc2DViewportObject* viewport;
 	cloud->resetVisibilityArray();
-	for (int i = 0; i < m_polyGroup.size(); i++) 
+	for (int i = 0; i < m_polyGroup.size(); i++)
 	{
 		poly = m_polyGroup[i];
+		
 		if (poly->getGroupIndex() == index)
 		{
+
 			viewport = m_viewportGroup[i];
 			useExistingPolyline(poly, viewport);
-			ccLog::PrintDebug("Pushing Point " + QString(poly->getPointInside() ? "Inside" : "Outside"));
-			segmentByEntity(true,cloud); //has to be checked 
-			
-		}		
+			if (poly->getPointInside()) {
+				segmentByEntity(true,cloud);
+			}
+			else
+			{
+				segmentByEntity(false, cloud);
+			}
+		}
 
 	}
 	cloud->invertVisibilityArray();
@@ -1436,15 +1472,27 @@ void ccGraphicalMultipleSegmentationTool::segmentFromIndex(unsigned index, ccGen
 
 void ccGraphicalMultipleSegmentationTool::apply()
 {
-	if (m_polyGroup.size() > 0) {
-		m_deleteHiddenParts = false;
-		emit ccOverlayDialog::processFinished(true);
-		stop(false);
-	}
-	else 
+	if (QMessageBox::question(m_associatedWin->asWidget(),
+		"Segmenting",
+		"Are you sure you want to segment in?",
+		QMessageBox::Yes,
+		QMessageBox::No) == QMessageBox::Yes)
 	{
-		cancel();
+		if (m_polyGroup.size() > 0) {
+			m_deleteHiddenParts = false;
+			emit ccOverlayDialog::processFinished(true);
+			stop(false);
+		}
+		else
+		{
+			cancel(false);
+		}
 	}
+	else
+	{
+		return;
+	}
+	
 }
 
 void ccGraphicalMultipleSegmentationTool::applyAndDelete()
@@ -1453,9 +1501,30 @@ void ccGraphicalMultipleSegmentationTool::applyAndDelete()
 	stop(true);
 }
 
-void ccGraphicalMultipleSegmentationTool::cancel()
+void ccGraphicalMultipleSegmentationTool::cancel(bool ask=true)
 {
-	reset();
-	m_deleteHiddenParts = false;
-	stop(false);
+	if (ask)
+	{
+		if (QMessageBox::question(m_associatedWin->asWidget(),
+			"Cancel",
+			"Are you sure you want to cancel all progress will be lost?",
+			QMessageBox::Yes,
+			QMessageBox::No) == QMessageBox::Yes)
+		{
+
+			reset();
+			m_deleteHiddenParts = false;
+			stop(false);
+		}
+		else
+		{
+			return;
+		}
+	}
+	else
+	{
+		reset();
+		m_deleteHiddenParts = false;
+		stop(false);
+	}
 }

@@ -138,7 +138,7 @@ public:
 	bool getPointInside() const { return m_pointInside; }
 
 	//! Set if inside/outside segmentation
-	void setPointInside(bool pointInside) { m_pointInside = pointInside; }
+	void setPointInside(bool pointInside) { m_pointInside = pointInside?true:false; }
 
 
 

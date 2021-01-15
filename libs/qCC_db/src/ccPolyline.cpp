@@ -27,6 +27,8 @@
 ccPolyline::ccPolyline(GenericIndexedCloudPersist* associatedCloud, unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
 	: Polyline(associatedCloud)
 	, ccShiftedObject("Polyline", uniqueID)
+	, m_pointInside(true)
+	, m_groupIndex(0)
 {
 	set2DMode(false);
 	setForeground(true);
@@ -38,6 +40,9 @@ ccPolyline::ccPolyline(GenericIndexedCloudPersist* associatedCloud, unsigned uni
 	setGroupIndex(0);
 	setWidth(0);
 	showArrow(false, 0, 0);
+	setPointInside(true);
+	setGroupIndex(0);
+
 
 	ccGenericPointCloud* cloud = dynamic_cast<ccGenericPointCloud*>(associatedCloud);
 	if (cloud)
@@ -115,6 +120,7 @@ void ccPolyline::importParametersFrom(const ccPolyline& poly)
 	showVertices(poly.verticesShown());
 	setVertexMarkerWidth(poly.getVertexMarkerWidth());
 	setGroupIndex(poly.getGroupIndex());
+	setPointInside(poly.getPointInside());
 	showArrow(m_showArrow, m_arrowIndex, m_arrowLength);
 	copyGlobalShiftAndScale(poly);
 	setGLTransformationHistory(poly.getGLTransformationHistory());

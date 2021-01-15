@@ -91,6 +91,7 @@
 #include "ccGBLSensorProjectionDlg.h"
 #include "ccGeomFeaturesDlg.h"
 #include "ccGraphicalSegmentationTool.h"
+#include "ccGraphicalMultipleSegmentationTool.h"
 #include "ccGraphicalTransformationTool.h"
 #include "ccItemSelectionDlg.h"
 #include "ccLabelingDlg.h"
@@ -193,6 +194,7 @@ MainWindow::MainWindow()
 	, m_pickingHub(nullptr)
 	, m_cpeDlg(nullptr)
 	, m_gsTool(nullptr)
+	, m_gmsTool(nullptr)
 	, m_tplTool(nullptr)
 	, m_seTool(nullptr)
 	, m_transTool(nullptr)
@@ -329,6 +331,7 @@ MainWindow::~MainWindow()
 	}
 	m_cpeDlg = nullptr;
 	m_gsTool = nullptr;
+	m_gmsTool = nullptr;
 	m_seTool = nullptr;
 	m_transTool = nullptr;
 	m_clipTool = nullptr;
@@ -604,6 +607,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionApplyScale,					&QAction::triggered, this, &MainWindow::doActionApplyScale);
 	connect(m_UI->actionTranslateRotate,			&QAction::triggered, this, &MainWindow::activateTranslateRotateMode);
 	connect(m_UI->actionSegment,					&QAction::triggered, this, &MainWindow::activateSegmentationMode);
+	connect(m_UI->actionSegmentMultiple,			&QAction::triggered, this, &MainWindow::activateMultipleSegmentationMode);
     connect(m_UI->actionTracePolyline,				&QAction::triggered, this, &MainWindow::activateTracePolylineMode);
 
 	connect(m_UI->actionCrop,						&QAction::triggered, this, &MainWindow::doActionCrop);
@@ -2462,6 +2466,7 @@ void MainWindow::doActionExportDepthBuffer()
 
 void MainWindow::doActionComputePointsVisibility()
 {
+	
 	//there should be only one camera sensor in the current selection!
 	if (!haveOneSelection() || !m_selectedEntities[0]->isKindOf(CC_TYPES::GBL_SENSOR))
 	{
@@ -6690,7 +6695,337 @@ void MainWindow::deactivateSegmentationMode(bool state)
 		win->redraw();
 	}
 }
+void MainWindow::activateMultipleSegmentationMode()
+{
+	ccGLWindow* win = getActiveGLWindow();
+	if (!win)
+		return;
 
+	if (!haveSelection())
+		return;
+
+	if (!m_gmsTool)
+	{
+		m_gmsTool = new ccGraphicalMultipleSegmentationTool(this);
+		connect(m_gmsTool, &ccOverlayDialog::processFinished, this, &MainWindow::deactivateMultipleSegmentationMode);
+
+		registerOverlayDialog(m_gmsTool, Qt::TopRightCorner);
+	}
+
+	m_gmsTool->linkWith(win);
+
+	for (ccHObject *entity : getSelectedEntities())
+	{
+		m_gmsTool->addEntity(entity);
+	}
+
+	if (m_gmsTool->getNumberOfValidEntities() == 0)
+	{
+		ccConsole::Error("No segmentable entity in active window!");
+		return;
+	}
+
+	freezeUI(true);
+	m_UI->toolBarView->setDisabled(false);
+
+	//we disable all other windows
+	disableAllBut(win);
+
+	if (!m_gmsTool->start())
+		deactivateMultipleSegmentationMode(false);
+	else
+		updateOverlayDialogsPlacement();
+}
+
+void MainWindow::deactivateMultipleSegmentationMode(bool state)
+{
+	bool deleteHiddenParts = false;
+	//shall we apply segmentation?
+	if (state)
+	{
+		ccHObject* firstResult = nullptr;
+
+		deleteHiddenParts = m_gmsTool->deleteHiddenParts();
+
+		//aditional vertices of which visibility array should be manually reset
+		std::unordered_set<ccGenericPointCloud*> verticesToReset;
+
+		QSet<ccHObject*>& segmentedEntities = m_gmsTool->entities();
+		for (QSet<ccHObject*>::iterator p = segmentedEntities.begin(); p != segmentedEntities.end(); )
+		{
+			ccHObject* entity = (*p);
+			
+
+			if (entity->isKindOf(CC_TYPES::POINT_CLOUD) || entity->isKindOf(CC_TYPES::MESH))
+			{
+				//first, do the things that must absolutely be done BEFORE removing the entity from DB (even temporarily)
+				//bool lockedVertices;
+				ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity/*,&lockedVertices*/);
+				cloud-> resetVisibilityArray();
+				
+				assert(cloud);
+				if (cloud)
+				{
+					//assert(!lockedVertices); //in some cases we accept to segment meshes with locked vertices!
+
+					//specific case: labels (do this before temporarily removing 'entity' from DB!)
+					ccHObject::Container labels;
+					if (m_ccRoot)
+					{
+						m_ccRoot->getRootEntity()->filterChildren(labels, true, CC_TYPES::LABEL_2D);
+					}
+					for (ccHObject::Container::iterator it = labels.begin(); it != labels.end(); ++it)
+					{
+						if ((*it)->isA(CC_TYPES::LABEL_2D)) //Warning: cc2DViewportLabel is also a kind of 'CC_TYPES::LABEL_2D'!
+						{
+							//we must search for all dependent labels and remove them!!!
+							//TODO: couldn't we be more clever and update the label instead?
+							cc2DLabel* label = static_cast<cc2DLabel*>(*it);
+							bool removeLabel = false;
+							for (unsigned i = 0; i < label->size(); ++i)
+							{
+								if (label->getPickedPoint(i).entity() == entity)
+								{
+									removeLabel = true;
+									break;
+								}
+							}
+
+							if (removeLabel && label->getParent())
+							{
+								ccLog::Warning(QString("[Segmentation] Label %1 depends on cloud %2 and will be removed").arg(label->getName(), cloud->getName()));
+								ccHObject* labelParent = label->getParent();
+								ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(labelParent);
+								labelParent->removeChild(label);
+								label = nullptr;
+								putObjectBackIntoDBTree(labelParent, objContext);
+							}
+						}
+					} //for each label
+				} // if (cloud)
+
+				//we temporarily detach the entity, as it may undergo
+				//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::createNewCloudFromVisibilitySelection
+				ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(entity);
+
+				//apply segmentation
+				ccHObject* segmentationResult = nullptr;
+				bool deleteOriginalEntity = deleteHiddenParts;
+				
+
+				//Iterate throught the different slices
+				
+				for (unsigned i = 0; i < m_gmsTool->getLastGroupIndex(); i++)
+				{
+
+					if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
+					{
+
+						ccGenericPointCloud* genCloud = ccHObjectCaster::ToGenericPointCloud(entity);
+						genCloud->setCurrentSliceIndex(i);
+						m_gmsTool->segmentFromIndex(i, genCloud);
+						ccGenericPointCloud* segmentedCloud = genCloud->createNewCloudFromVisibilitySelection(!deleteHiddenParts);
+
+						if (segmentedCloud && segmentedCloud->size() == 0)
+						{
+							delete segmentationResult;
+							segmentationResult = nullptr;
+						}
+						else
+						{
+							segmentationResult = segmentedCloud;
+						}
+
+						deleteOriginalEntity |= (genCloud->size() == 0);
+					}
+					else if (entity->isKindOf(CC_TYPES::MESH)/*|| entity->isA(CC_TYPES::PRIMITIVE)*/) //TODO
+					{
+						if (entity->isA(CC_TYPES::MESH))
+						{
+							segmentationResult = ccHObjectCaster::ToMesh(entity)->createNewMeshFromSelection(!deleteHiddenParts);
+						}
+						else if (entity->isA(CC_TYPES::SUB_MESH))
+						{
+							segmentationResult = ccHObjectCaster::ToSubMesh(entity)->createNewSubMeshFromSelection(!deleteHiddenParts);
+						}
+
+						deleteOriginalEntity |= (ccHObjectCaster::ToGenericMesh(entity)->size() == 0);
+					}
+
+					if (segmentationResult)
+					{
+						assert(cloud);
+						if (cloud)
+						{
+							//another specific case: sensors (on clouds)
+							for (unsigned i = 0; i < entity->getChildrenNumber(); ++i)
+							{
+								ccHObject* child = entity->getChild(i);
+								assert(child);
+								if (child && child->isKindOf(CC_TYPES::SENSOR))
+								{
+									if (child->isA(CC_TYPES::GBL_SENSOR))
+									{
+										ccGBLSensor* sensor = ccHObjectCaster::ToGBLSensor(entity->getChild(i));
+										//remove the associated depth buffer of the original sensor (derpecated)
+										sensor->clearDepthBuffer();
+										if (deleteOriginalEntity)
+										{
+											//either transfer
+											entity->transferChild(sensor, *segmentationResult);
+										}
+										else
+										{
+											//or copy
+											segmentationResult->addChild(new ccGBLSensor(*sensor));
+										}
+									}
+									else if (child->isA(CC_TYPES::CAMERA_SENSOR))
+									{
+										ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(entity->getChild(i));
+										if (deleteOriginalEntity)
+										{
+											//either transfer
+											entity->transferChild(sensor, *segmentationResult);
+										}
+										else
+										{
+											//or copy
+											segmentationResult->addChild(new ccCameraSensor(*sensor));
+										}
+									}
+									else
+									{
+										//unhandled sensor?!
+										assert(false);
+									}
+								}
+							} //for each child
+						}
+					}
+
+					//we must take care of the remaining part
+					if (!deleteHiddenParts)
+					{
+						//no need to put back the entity in DB if we delete it afterwards!
+						if (!deleteOriginalEntity)
+						{
+							if (i + 1 == m_gmsTool->getLastGroupIndex()) 
+							{
+								entity->setName(entity->getName() + QString(".remaining"));
+								putObjectBackIntoDBTree(entity, objContext);
+							}
+							else 
+							{
+								entity->setName(entity->getName());
+								putObjectBackIntoDBTree(entity, objContext);
+							}
+						}
+					}
+
+					else
+					{
+						//keep original name(s)
+						segmentationResult->setName(entity->getName());
+						if (entity->isKindOf(CC_TYPES::MESH) && segmentationResult->isKindOf(CC_TYPES::MESH))
+						{
+							ccGenericMesh* meshEntity = ccHObjectCaster::ToGenericMesh(entity);
+							ccHObjectCaster::ToGenericMesh(segmentationResult)->getAssociatedCloud()->setName(meshEntity->getAssociatedCloud()->getName());
+
+							//specific case: if the sub mesh is deleted afterwards (see below)
+							//then its associated vertices won't be 'reset' by the segmentation tool!
+							if (deleteHiddenParts && meshEntity->isA(CC_TYPES::SUB_MESH))
+							{
+								verticesToReset.insert(meshEntity->getAssociatedCloud());
+							}
+						}
+						assert(deleteOriginalEntity);
+						//deleteOriginalEntity = true;
+					}
+				
+					if (segmentationResult->isA(CC_TYPES::SUB_MESH))
+					{
+						//for sub-meshes, we have no choice but to use its parent mesh!
+						objContext.parent = static_cast<ccSubMesh*>(segmentationResult)->getAssociatedMesh();
+					}
+					else
+					{
+						//otherwise we look for first non-mesh or non-cloud parent
+						while (objContext.parent && (objContext.parent->isKindOf(CC_TYPES::MESH) || objContext.parent->isKindOf(CC_TYPES::POINT_CLOUD)))
+						{
+							objContext.parent = objContext.parent->getParent();
+						}
+					}
+
+					if (objContext.parent)
+					{
+						objContext.parent->addChild(segmentationResult); //FiXME: objContext.parentFlags?
+					}
+
+					segmentationResult->setDisplay_recursive(entity->getDisplay());
+					segmentationResult->prepareDisplayForRefresh_recursive();
+
+					addToDB(segmentationResult);
+
+					if (!firstResult)
+					{
+						firstResult = segmentationResult;
+					}
+				
+					else if (!deleteOriginalEntity)
+					{
+						//ccConsole::Error("An error occurred! (not enough memory?)");
+						putObjectBackIntoDBTree(entity, objContext);
+					}
+				}
+
+				if (deleteOriginalEntity)
+				{
+					p = segmentedEntities.erase(p);
+
+					delete entity;
+					entity = nullptr;
+				}
+			
+				else
+				{
+					++p;
+				}
+			}
+		}
+
+		//specific actions
+		{
+			for (ccGenericPointCloud *cloud : verticesToReset)
+			{
+				cloud->resetVisibilityArray();
+			}
+		}
+
+		if (firstResult && m_ccRoot)
+		{
+			m_ccRoot->selectEntity(firstResult);
+		}
+	}
+
+	if (m_gmsTool)
+	{
+		m_gmsTool->removeAllEntities(!deleteHiddenParts);
+	}
+
+	//we enable all GL windows
+	enableAll();
+
+	freezeUI(false);
+
+	updateUI();
+
+	ccGLWindow* win = getActiveGLWindow();
+	if (win)
+	{
+		win->redraw();
+	}
+}
 void MainWindow::activateTracePolylineMode()
 {
 	ccGLWindow* win = getActiveGLWindow();
@@ -10315,8 +10650,9 @@ void MainWindow::updateMenus()
 	//View Menu
 	m_UI->toolBarView->setEnabled(hasMdiChild);
 
-	//oher actions
+	//other actions
 	m_UI->actionSegment->setEnabled(hasMdiChild && hasSelectedEntities);
+	m_UI->actionSegmentMultiple->setEnabled(hasMdiChild && hasSelectedEntities);
 	m_UI->actionTranslateRotate->setEnabled(hasMdiChild && hasSelectedEntities);
 	m_UI->actionPointPicking->setEnabled(hasMdiChild && hasLoadedEntities);
 	m_UI->actionTestFrameRate->setEnabled(hasMdiChild);
@@ -10483,6 +10819,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionExportCoordToSF->setEnabled(atLeastOneEntity);
 	m_UI->actionExportNormalToSF->setEnabled(atLeastOneNormal);
 	m_UI->actionSegment->setEnabled(atLeastOneEntity && activeWindow);
+	m_UI->actionSegmentMultiple->setEnabled(atLeastOneEntity && activeWindow);
 	m_UI->actionTranslateRotate->setEnabled(atLeastOneEntity && activeWindow);
 	m_UI->actionShowDepthBuffer->setEnabled(atLeastOneGBLSensor);
 	m_UI->actionExportDepthBuffer->setEnabled(atLeastOneGBLSensor);

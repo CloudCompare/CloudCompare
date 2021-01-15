@@ -732,6 +732,8 @@ public: //other methods
 	//! Exports the specified normal dimension(s) to scalar field(s)
 	bool exportNormalToSF(bool exportDims[3]);
 
+	
+
 protected:
 
 	//inherited from ccHObject
@@ -864,6 +866,8 @@ protected: //waveform (e.g. from airborne scanners)
 
 	//! Waveforms raw data storage
 	SharedFWFDataContainer m_fwfData;
+
+	
 
 };
 

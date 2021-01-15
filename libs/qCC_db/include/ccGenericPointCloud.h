@@ -170,6 +170,7 @@ public:
 	**/
 	using VisibilityTableType = std::vector<unsigned char>;
 	
+
 	//! Returns associated visiblity array
 	virtual inline VisibilityTableType& getTheVisibilityArray() { return m_pointsVisibility; }
 
@@ -197,10 +198,54 @@ public:
 	//! Erases the points visibility information
 	virtual void unallocateVisibilityArray();
 
+	//! Visibilities Arrays
+
+
+	/***************************************************
+					Highlighted array
+	***************************************************/
+
+	//! Array of "Highlighted" information for each point
+	/** See <CCConst.h>
+	**/
+	using HighlightedTableType = std::vector<unsigned char>;
+
+	//! Returns associated Highlighted array
+	virtual inline HighlightedTableType& getTheHighlightedArray() { return m_pointsHighlighted; }
+
+	//! Returns associated Highlighted array (const version)
+	virtual inline const HighlightedTableType& getTheHighlightedArray() const { return m_pointsHighlighted; }
+
+
+
+	//! Returns whether the Highlighted array is allocated or not
+	virtual bool isHighlightedTableInstantiated() const;
+
+	//! Resets the associated Highlighted array
+	/** Warning: allocates the array if it was not done yet!
+	**/
+	virtual bool resetHighlightedArray();
+
+	//! Inverts the Highlighted array
+	virtual void invertHighlightedArray();
+
+	//! Cancel Highlighted array et retransform to visible
+	virtual void cancelHighlightedArray();
+
+	//! Erases the points Highlighted information
+	virtual void unallocateHighlightedArray();
 
 	/***************************************************
 					Other methods
 	***************************************************/
+	//! Return Current Slice Index
+	unsigned getCurrentSliceIndex() { return m_currentSliceIndex; }
+
+	//! Set Current Slice Index
+	void setCurrentSliceIndex(unsigned index) { m_currentSliceIndex = index; }
+
+	//! Index of which is actually being Sliced
+	unsigned m_currentSliceIndex;
 
 	//Inherited from ccHObject
 	ccBBox getOwnBB(bool withGLFeatures = false) override;
@@ -215,7 +260,6 @@ public:
 		\return new point cloud with selected points
 	**/
 	virtual ccGenericPointCloud* createNewCloudFromVisibilitySelection(bool removeSelectedPoints = false, VisibilityTableType* visTable = nullptr, bool silent = false) = 0;
-	
 	//! Applies a rigid transformation (rotation + translation)
 	virtual void applyRigidTransformation(const ccGLMatrix& trans) = 0;
 
@@ -277,6 +321,12 @@ protected:
 		will be considered as visible/selected.
 	**/
 	VisibilityTableType m_pointsVisibility;
+	
+	//! Per-point Highlighted table
+	/** If this table is allocated, only values set to POINT_INVISIBLE
+		will be considered as visible/selected.
+	**/
+	HighlightedTableType m_pointsHighlighted;
 
 	//! Point size (won't be applied if 0)
 	unsigned char m_pointSize;

@@ -97,7 +97,9 @@ namespace ccEntityAction
 	//////////
 	// Colours
 	bool setColor(ccHObject::Container selectedEntities, bool colorize, QWidget *parent)
-	{
+	{	
+		
+
 		QColor colour = QColorDialog::getColor(Qt::white, parent, QString(), QColorDialog::ShowAlphaChannel);
 		
 		if (!colour.isValid())

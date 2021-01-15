@@ -130,6 +130,7 @@ namespace ccColor
 	constexpr Rgb orangeRGB					(MAX, MAX / 2, 0);
 	constexpr Rgb blackRGB					(0, 0, 0);
 	constexpr Rgb yellowRGB					(MAX, MAX, 0);
+	constexpr Rgb highlightedRGB			(MAX, MAX, 0);
 
 	// Predefined colors (default type)
 	constexpr Rgba white					(MAX, MAX, MAX, MAX);
@@ -144,6 +145,7 @@ namespace ccColor
 	constexpr Rgba orange					(MAX, MAX / 2, 0, MAX);
 	constexpr Rgba black					(0, 0, 0, MAX);
 	constexpr Rgba yellow					(MAX, MAX, 0, MAX);
+	constexpr Rgba highlighted				(MAX, MAX, 0, MAX);
 
 	// Predefined materials (float)
 	constexpr Rgbaf bright					(1.00f, 1.00f, 1.00f, 1.00f);

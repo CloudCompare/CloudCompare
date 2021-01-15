@@ -44,6 +44,7 @@ class ccDrawableObject;
 class ccGamepadManager;
 class ccGLWindow;
 class ccGraphicalSegmentationTool;
+class ccGraphicalMultipleSegmentationTool;
 class ccGraphicalTransformationTool;
 class ccHObject;
 class ccOverlayDialog;
@@ -168,6 +169,7 @@ public:
 	//! Updates the 'Properties' view
 	void updatePropertiesView();
 	
+
 private:
 	//! Creates a new 3D GL sub-window
 	ccGLWindow* new3DView( bool allowEntitySelection );
@@ -391,6 +393,10 @@ private:
 	void activateSegmentationMode();
 	void deactivateSegmentationMode(bool);
 
+	//Graphical Multiple segmentation
+	void activateMultipleSegmentationMode();
+	void deactivateMultipleSegmentationMode(bool);
+
 	//Polyline tracing
 	void activateTracePolylineMode();
 	void deactivateTracePolylineMode(bool);
@@ -557,6 +563,7 @@ private:
 	//! Flag: first time the window is made visible
 	bool m_FirstShow;
 
+
 	//! Point picking hub
 	ccPickingHub* m_pickingHub;
 
@@ -590,6 +597,8 @@ private:
 	ccCameraParamEditDlg* m_cpeDlg;
 	//! Graphical segmentation dialog
 	ccGraphicalSegmentationTool* m_gsTool;
+	//! Graphical Multiple segmentation dialog
+	ccGraphicalMultipleSegmentationTool* m_gmsTool;
 	//! Polyline tracing tool
 	ccTracePolylineTool * m_tplTool;
 	//! Section extraction dialog

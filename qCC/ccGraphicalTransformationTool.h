@@ -95,6 +95,8 @@ protected:
 	//! Updates the transform for advanced mode rotation when rotate ref changed
 	void advRotateRefUpdate(int index);
 
+	void advRotateComboBoxUpdate(int index);
+
 	//! Updates the axis center of rotation to the ref object in adv rotate/translate mode
 	void advRefAxisRadioToggled(bool state);
 
@@ -115,6 +117,9 @@ protected:
 
 protected:
 
+	//! rotComboBox enum
+	enum rotComboBoxItems { XYZ, X, Y, Z, NONE };
+
 	//! Clear all variables and 'unlink' dialog
 	void clear();
 
@@ -128,7 +133,7 @@ protected:
 	bool setAdvTranslationTransform(ccHObject* translateRef);
 
 	//! Sets the rotation transform used in advaced translate/rotate mode
-	bool setAdvRotationAxis(ccHObject* rotateRef);
+	bool setAdvRotationAxis(ccHObject* rotateRef, rotComboBoxItems selectedAxis);
 
 	//! Check if the entitry is in m_toTransform
 	bool entityInTransformList(ccHObject* entity);
@@ -174,11 +179,9 @@ protected:
 	**/
 	CCVector3d m_rotationCenter;
 
-	//! Planes and line segments found in the dbtree for adv transate/rotate
-	ccHObject::Container m_planesAndLineSegments;
+	//! Objects found in the dbtree for adv transate/rotate
+	ccHObject::Container m_advancedModeObjectList;
 
-	//! rotComboBox enum
-	enum rotComboBoxItems {XYZ, X, Y, Z, NONE};
 };
 
 #endif //CC_GRAPHICAL_TRANSFORMATION_TOOL_HEADER

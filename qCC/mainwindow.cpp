@@ -7778,6 +7778,32 @@ void MainWindow::doActionClone()
 				ccConsole::Error(QString("An error occurred while cloning facet %1").arg(entity->getName()));
 			}
 		}
+		else if (entity->isA(CC_TYPES::CAMERA_SENSOR))
+		{
+			ccCameraSensor* camera = ccHObjectCaster::ToCameraSensor(entity);
+			if (camera)
+			{
+				ccCameraSensor* cloned = new ccCameraSensor(*camera);
+				clone = (cloned ? cloned : nullptr);
+			}
+			if (!clone)
+			{
+				ccConsole::Error(QString("An error occurred while cloning camera sensor %1").arg(entity->getName()));
+			}
+		}
+		else if (entity->isA(CC_TYPES::GBL_SENSOR))
+		{
+			ccGBLSensor* sensor = ccHObjectCaster::ToGBLSensor(entity);
+			if (sensor)
+			{
+				ccGBLSensor* cloned = new ccGBLSensor(*sensor);
+				clone = (cloned ? cloned : nullptr);
+			}
+			if (!clone)
+			{
+				ccConsole::Error(QString("An error occurred while cloning GBL sensor %1").arg(entity->getName()));
+			}
+		}
 		else
 		{
 			ccLog::Warning(QString("Entity '%1' can't be cloned (type not supported yet!)").arg(entity->getName()));

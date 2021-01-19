@@ -64,6 +64,29 @@ void ccTranslationManager::loadTranslations()
 	}
 }
 
+void ccTranslationManager::loadTranslation(QString language)
+{
+	const QLocale	locale(language);
+
+	const auto& info = mTranslatorFileInfo;
+
+	for (const auto& fileInfo : info)
+	{
+		auto translator = new QTranslator(ccApp);
+
+		bool loaded = translator->load(locale, fileInfo.prefix, QStringLiteral("_"), fileInfo.path);
+
+		if (loaded)
+		{
+			ccApp->installTranslator(translator);
+		}
+		else
+		{
+			delete translator;
+		}
+	}
+}
+
 void ccTranslationManager::populateMenu( QMenu *menu, const QString &pathToTranslationFiles )
 {
 	const LanguageList	cList = availableLanguages( QStringLiteral( "CloudCompare" ), pathToTranslationFiles );

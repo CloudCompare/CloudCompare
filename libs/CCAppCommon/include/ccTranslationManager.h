@@ -44,6 +44,11 @@ public:
 	//! Using the translation file prefixes that were registered, load the actual translations
 	void loadTranslations();
 	
+	/** Using the translation file prefixes that were registered, load the actual
+	 * translation by the 2-letter ISO 639 language code in lowercase.
+	*/
+	void loadTranslation(QString language);
+	
 	//! Populate the menu with a list of languages found using files in 'pathToTranslationFiles'
 	void populateMenu( QMenu *menu, const QString &pathToTranslationFiles );
 	

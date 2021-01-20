@@ -45,6 +45,7 @@
 #include "ccGuiParameters.h"
 #include "ccPersistentSettings.h"
 #include "mainwindow.h"
+#include "ccTranslationManager.h"
 
 //plugins
 #include "ccPluginInterface.h"
@@ -89,14 +90,11 @@ int main(int argc, char **argv)
 	bool commandLine = (argc > 1) && (argv[1][0] == '-');
 #endif
    
-	if ( !commandLine )
-	{
-		ccApplication::initOpenGL();
+	ccApplication::initOpenGL();
 
 #ifdef CC_GAMEPAD_SUPPORT
-		QGamepadManager::instance(); //potential workaround to bug https://bugreports.qt.io/browse/QTBUG-61553
+	QGamepadManager::instance(); //potential workaround to bug https://bugreports.qt.io/browse/QTBUG-61553
 #endif
-	}
 	
 	ccApplication app(argc, argv, commandLine);
 
@@ -119,7 +117,6 @@ int main(int argc, char **argv)
 
 	//specific commands
 	int lastArgumentIndex = 1;
-	QTranslator translator;
 	if (commandLine)
 	{
 		//translation file selection
@@ -127,15 +124,7 @@ int main(int argc, char **argv)
 		{
 			QString langFilename = QString::fromLocal8Bit(argv[2]);
 
-			//Load translation file
-			if (translator.load(langFilename, QCoreApplication::applicationDirPath()))
-			{
-				qApp->installTranslator(&translator);
-			}
-			else
-			{
-				QMessageBox::warning(nullptr, QObject::tr("Translation"), QObject::tr("Failed to load language file '%1'").arg(langFilename));
-			}
+			ccTranslationManager::get().loadTranslation(langFilename);
 			commandLine = false;
 			lastArgumentIndex += 2;
 		}

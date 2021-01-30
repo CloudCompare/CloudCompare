@@ -4853,7 +4853,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 
 	//init VBOs
 	unsigned pointsInVBOs = 0;
-	int totalSizeBytesBefore = m_vboManager.totalMemSizeBytes;
+	size_t totalSizeBytesBefore = m_vboManager.totalMemSizeBytes;
 	m_vboManager.totalMemSizeBytes = 0;
 	{
 		//DGM: the context should be already active as this method should only be called from 'drawMeOnly'
@@ -4970,7 +4970,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 				}
 				else
 				{
-					m_vboManager.totalMemSizeBytes += vboSizeBytes;
+					m_vboManager.totalMemSizeBytes += static_cast<size_t>(vboSizeBytes);
 					pointsInVBOs += chunkSize;
 				}
 			}
@@ -5077,6 +5077,11 @@ int ccPointCloud::VBO::init(int count, bool withColors, bool withNormals, bool* 
 	release();
 	
 	return totalSizeBytes;
+}
+
+size_t ccPointCloud::vboSize() const
+{
+	return m_vboManager.totalMemSizeBytes;
 }
 
 void ccPointCloud::releaseVBOs()

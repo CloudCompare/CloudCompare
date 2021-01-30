@@ -148,10 +148,10 @@ protected:
 	void setDisplayedNumberPrecision(int);
 
 	//! Returns the ground cloud (or constant height)
-	std::pair<ccGenericPointCloud*, double> ccVolumeCalcTool::getGroundCloud() const;
+	std::pair<ccGenericPointCloud*, double> getGroundCloud() const;
 
 	//! Returns the ceil cloud (or constant height)
-	std::pair<ccGenericPointCloud*, double> ccVolumeCalcTool::getCeilCloud() const;
+	std::pair<ccGenericPointCloud*, double> getCeilCloud() const;
 
 protected: //standard methods
 

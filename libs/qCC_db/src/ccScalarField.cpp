@@ -283,7 +283,7 @@ void ccScalarField::setSaturationStart(ScalarType val)
 {
 	if (m_logScale)
 	{
-		m_logSaturationRange.setStart(val/*log10(std::max(val,(ScalarType)ZERO_TOLERANCE))*/);
+		m_logSaturationRange.setStart(val/*log10(std::max(val, static_cast<ScalarType>(ZERO_TOLERANCE_F)))*/);
 	}
 	else
 	{
@@ -296,7 +296,7 @@ void ccScalarField::setSaturationStop(ScalarType val)
 {
 	if (m_logScale)
 	{
-		m_logSaturationRange.setStop(val/*log10(std::max(val,(ScalarType)ZERO_TOLERANCE))*/);
+		m_logSaturationRange.setStop(val/*log10(std::max(val, static_cast<ScalarType>(ZERO_TOLERANCE_F)))*/);
 	}
 	else
 	{

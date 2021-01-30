@@ -292,6 +292,10 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 			else
 				assert(false);
 			break;
+
+		default:
+			//nothing to do
+			break;
 		}
 	}
 
@@ -724,7 +728,7 @@ public:
 	    const QString &absoluteBaseFilename,
 	    const CCVector3d& bbMin,
 	    const CCVector3d& bbMax,
-	    const PointTableRef table,
+	    PointTableRef table,
 	    const LasHeader& header)
 	{
 		//init tiling dimensions

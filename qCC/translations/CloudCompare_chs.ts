@@ -388,7 +388,7 @@ larger). You may have to increase the points size beforehand.</source>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="14"/>
         <source>Apply transformation</source>
-        <translation>应用转换</translation>
+        <translation type="unfinished">应用变换矩阵</translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="24"/>
@@ -2604,7 +2604,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="14"/>
         <source>Distance computation</source>
-        <translation>距離演算</translation>
+        <translation type="unfinished">距离计算</translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="22"/>
@@ -2640,7 +2640,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="80"/>
         <source>max. distance</source>
-        <translation>最大距離</translation>
+        <translation type="unfinished">最大距离</translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="106"/>
@@ -3328,7 +3328,7 @@ The bigger the more accurate the map will be
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="940"/>
         <source>Clear</source>
-        <translation>消去</translation>
+        <translation type="unfinished">清除</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="951"/>
@@ -5447,7 +5447,7 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="84"/>
         <source>Active scalar field</source>
-        <translation>主动标量场</translation>
+        <translation type="unfinished">活动的标量场</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="92"/>
@@ -5483,7 +5483,7 @@ Parameter</source>
         <location filename="../ui_templates/mainWindow.ui" line="181"/>
         <location filename="../ui_templates/mainWindow.ui" line="1964"/>
         <source>Normals</source>
-        <translation>规范</translation>
+        <translation type="unfinished">法向量</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="185"/>
@@ -5599,7 +5599,7 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="435"/>
         <source>Sand box (research)</source>
-        <translation>沙箱（研究）</translation>
+        <translation type="unfinished">沙盒（研究测试用）</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="458"/>
@@ -5664,7 +5664,7 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="796"/>
         <source>Open</source>
-        <translation>开放式</translation>
+        <translation type="unfinished">打开</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="799"/>
@@ -5747,7 +5747,7 @@ Parameter</source>
         <location filename="../ui_templates/mainWindow.ui" line="889"/>
         <location filename="../ui_templates/mainWindow.ui" line="892"/>
         <source>Set a unique color</source>
-        <translation>设置一个独特的颜色</translation>
+        <translation type="unfinished">设置一个单独的颜色</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="895"/>
@@ -6056,7 +6056,7 @@ Parameter</source>
         <location filename="../ui_templates/mainWindow.ui" line="1294"/>
         <location filename="../ui_templates/mainWindow.ui" line="1309"/>
         <source>Clear</source>
-        <translation>清楚</translation>
+        <translation type="unfinished">清除</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1297"/>
@@ -6095,7 +6095,7 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1342"/>
         <source>Delaunay 2.5D (best fitting plane)</source>
-        <translation>德劳内2.5D(最佳拟合平面)</translation>
+        <translation type="unfinished">德劳内2.5D三角网格(最佳拟合平面)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1345"/>
@@ -6194,7 +6194,7 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1447"/>
         <source>Unroll</source>
-        <translation>开卷</translation>
+        <translation type="unfinished">展开</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1450"/>
@@ -6210,7 +6210,7 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1471"/>
         <source>Zoom &amp; Center</source>
-        <translation>缩放；中心</translation>
+        <translation type="unfinished">缩放并居中</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1474"/>
@@ -6508,7 +6508,7 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1900"/>
         <source>Point list picking</source>
-        <translation>选点清单</translation>
+        <translation type="unfinished">选择点（列表）</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1903"/>
@@ -7014,7 +7014,7 @@ Parameter</source>
         <location filename="../ui_templates/mainWindow.ui" line="2367"/>
         <location filename="../ui_templates/mainWindow.ui" line="2370"/>
         <source>Cross Section</source>
-        <translation>横断面</translation>
+        <translation>横截面</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2378"/>
@@ -7107,7 +7107,7 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2469"/>
         <source>Compute points visibility (with octree)</source>
-        <translation>计算点的可见性（用八叉树</translation>
+        <translation type="unfinished">计算点的可见性（octree)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2474"/>
@@ -7122,7 +7122,7 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2484"/>
         <source>With Fast Marching</source>
-        <translation>伴随着快步走</translation>
+        <translation type="unfinished">使用快速匹配</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2489"/>
@@ -7158,12 +7158,12 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2518"/>
         <source>Crop</source>
-        <translation>农作物</translation>
+        <translation type="unfinished">裁剪</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2523"/>
         <source>Dip/Dip direction SFs</source>
-        <translation>浸渍/浸渍方向的SFs</translation>
+        <translation type="unfinished">倾角/倾斜方向 SF</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2528"/>
@@ -7214,7 +7214,7 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2570"/>
         <source>Noise filter</source>
-        <translation>噪声滤波器</translation>
+        <translation type="unfinished">噪声滤除</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2573"/>
@@ -7384,7 +7384,7 @@ Parameter</source>
         <location filename="../ui_templates/mainWindow.ui" line="2734"/>
         <source>SOR filter</source>
         <translatorcomment>外れ値フィルター（SOR）</translatorcomment>
-        <translation>SOR过滤器</translation>
+        <translation type="unfinished">SOR滤波器</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2737"/>
@@ -7923,7 +7923,7 @@ Should be used after one of the previous methods!</source>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="53"/>
         <source>Triangulation</source>
-        <translation>三角網化</translation>
+        <translation type="unfinished">三角网格化</translation>
     </message>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="70"/>
@@ -8863,7 +8863,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="14"/>
         <source>Primitive factory</source>
-        <translation type="unfinished">生成基础模型</translation>
+        <translation type="unfinished">创建基础模型</translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="28"/>
@@ -9015,7 +9015,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="980"/>
         <source>Create</source>
-        <translation type="unfinished">生成</translation>
+        <translation type="unfinished">创建</translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="987"/>
@@ -10933,7 +10933,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="4746"/>
         <source>Clear</source>
-        <translation>消去</translation>
+        <translation type="unfinished">清除</translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="4757"/>
@@ -12440,7 +12440,7 @@ replaced by the cell&apos;s average height!</source>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="787"/>
         <source>Clear</source>
-        <translation>消去</translation>
+        <translation type="unfinished">清除</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="797"/>
@@ -15432,7 +15432,7 @@ Number of points: %2</source>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="14"/>
         <source>Point list picking</source>
-        <translation type="unfinished">选点清单</translation>
+        <translation type="unfinished">选择点（列表）</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="64"/>
@@ -15495,7 +15495,7 @@ Number of points: %2</source>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="490"/>
         <source>align</source>
-        <translation>位置合わせ</translation>
+        <translation>对齐</translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="500"/>

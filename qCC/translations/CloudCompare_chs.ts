@@ -11,12 +11,12 @@
     <message>
         <location filename="../ui_templates/aboutDlg.ui" line="38"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;img src=&quot;:/CC/Icons/images/icon/cc_icon_64.png&quot;/&gt;&lt;br/&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;CloudCompare &lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600; font-style:italic;&quot;&gt;&lt;/span&gt;&lt;br/&gt;Version: %1&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;a href=&quot;http://www.cloudcompare.org/donate&quot;&gt;&lt;img src=&quot;:/CC/images/donate.png&quot; width=&quot;200&quot;/&gt;&lt;/a&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;a href=&quot;http://www.cloudcompare.org&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;www.cloudcompare.org&lt;br/&gt;&lt;/span&gt;&lt;/a&gt;License: GNU GPL (General Public Licence)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;img src=&quot;:/CC/Icons/images/icon/cc_icon_64.png&quot;/&gt;&lt;br/&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;CloudCompare &lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600; font-style:italic;&quot;&gt;&lt;/span&gt;&lt;br/&gt;Version: %1&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;a href=&quot;http://www.cloudcompare.org/donate&quot;&gt;&lt;img src=&quot;:/CC/images/donate.png&quot; width=&quot;200&quot;/&gt;&lt;/a&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;a href=&quot;http://www.cloudcompare.org&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;www.cloudcompare.org&lt;br/&gt;&lt;/span&gt;&lt;/a&gt;License: GNU GPL (General Public Licence)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;img src=&quot;:/CC/Icons/images/icon/cc_icon_64.png&quot;/&gt;&lt;br/&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;CloudCompare &lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600; font-style:italic;&quot;&gt;&lt;/span&gt;&lt;br/&gt;版本: %1&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;a href=&quot;http://www.cloudcompare.org/donate&quot;&gt;&lt;img src=&quot;:/CC/images/donate.png&quot; width=&quot;200&quot;/&gt;&lt;/a&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;a href=&quot;http://www.cloudcompare.org&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;www.cloudcompare.org&lt;br/&gt;&lt;/span&gt;&lt;/a&gt;许可: GNU GPL (General Public Licence)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../ui_templates/aboutDlg.ui" line="78"/>
         <source>OK</source>
-        <translation>OK</translation>
+        <translation>确定</translation>
     </message>
 </context>
 <context>
@@ -77,7 +77,7 @@
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="77"/>
         <source>Model:</source>
-        <translation>モデル:</translation>
+        <translation>模型:</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="84"/>
@@ -93,7 +93,7 @@
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="117"/>
         <source>swap</source>
-        <translation>交換</translation>
+        <translation type="unfinished">交换</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="144"/>
@@ -175,7 +175,7 @@
         <location filename="../ui_templates/alignDlg.ui" line="346"/>
         <location filename="../ui_templates/alignDlg.ui" line="466"/>
         <source>None</source>
-        <translation>なし</translation>
+        <translation type="unfinished">空值</translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="369"/>
@@ -597,7 +597,7 @@ Otherwise labels are shown in 3D.</source>
     <message>
         <location filename="../../libs/qCC_io/ui/openAsciiFileDlg.ui" line="354"/>
         <source>Cancel</source>
-        <translation>キャンセル</translation>
+        <translation>取消</translation>
     </message>
 </context>
 <context>
@@ -699,7 +699,7 @@ Otherwise labels are shown in 3D.</source>
     <message>
         <location filename="../ui_templates/askOneDoubleValueDlg.ui" line="12"/>
         <source>Set Value</source>
-        <translation>値のセット</translation>
+        <translation type="unfinished">设置值</translation>
     </message>
     <message>
         <location filename="../ui_templates/askOneDoubleValueDlg.ui" line="20"/>
@@ -712,7 +712,7 @@ Otherwise labels are shown in 3D.</source>
     <message>
         <location filename="../ui_templates/askOneIntValueDlg.ui" line="12"/>
         <source>Set Value</source>
-        <translation>値のセット</translation>
+        <translation type="unfinished">设置值</translation>
     </message>
     <message>
         <location filename="../ui_templates/askOneIntValueDlg.ui" line="20"/>
@@ -779,7 +779,7 @@ Otherwise labels are shown in 3D.</source>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="14"/>
         <source>Bounding Box Editor</source>
-        <translation type="unfinished">边界框编辑器</translation>
+        <translation type="unfinished">界限盒编辑器</translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="32"/>
@@ -854,7 +854,7 @@ Otherwise labels are shown in 3D.</source>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="596"/>
         <source>OK</source>
-        <translation type="unfinished">确认</translation>
+        <translation type="unfinished">确定</translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="603"/>
@@ -982,17 +982,17 @@ Otherwise labels are shown in 3D.</source>
     <message>
         <location filename="../../plugins/core/Standard/qBroom/ui/broomDlg.ui" line="481"/>
         <source>Apply</source>
-        <translation></translation>
+        <translation>应用</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qBroom/ui/broomDlg.ui" line="491"/>
         <source>Validate</source>
-        <translation></translation>
+        <translation>验证</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qBroom/ui/broomDlg.ui" line="498"/>
         <source>Cancel</source>
-        <translation>キャンセル</translation>
+        <translation>取消</translation>
     </message>
 </context>
 <context>
@@ -1329,7 +1329,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../../plugins/core/IO/qCSVMatrixIO/ui/openCSVMatrixDlg.ui" line="20"/>
         <source>Grid</source>
-        <translation>グリッド</translation>
+        <translation type="unfinished">网格</translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qCSVMatrixIO/ui/openCSVMatrixDlg.ui" line="29"/>
@@ -1367,7 +1367,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="14"/>
         <source>Sensor parameters</source>
-        <translation>センサーの値</translation>
+        <translation type="unfinished">传感器参数</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="24"/>
@@ -1417,7 +1417,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="180"/>
         <source>Intrinsic params</source>
-        <translation>組み込みパラメーター</translation>
+        <translation type="unfinished">内部参数</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="186"/>
@@ -1452,7 +1452,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="235"/>
         <source>array size</source>
-        <translation>アレイサイズ</translation>
+        <translation type="unfinished">数组大小</translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="244"/>
@@ -1974,7 +1974,7 @@ The bigger the farther the merged cells can be.</source>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/cellsFusionDlg.ui" line="123"/>
         <source>Octree level</source>
-        <translation>Octreeレベル</translation>
+        <translation type="unfinished">Octree层次</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/cellsFusionDlg.ui" line="130"/>
@@ -2094,7 +2094,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="28"/>
         <source>Show/hide bounding box</source>
-        <translation>バウンディングボックスを表示/隠す</translation>
+        <translation type="unfinished">显示/隐藏界限盒</translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="48"/>
@@ -2148,7 +2148,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="303"/>
         <source>Slices</source>
-        <translation>スライス</translation>
+        <translation type="unfinished">切片</translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="327"/>
@@ -2200,25 +2200,25 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="513"/>
         <source>Shift box</source>
-        <translation type="unfinished">移动Box</translation>
+        <translation type="unfinished">移动裁剪盒</translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="556"/>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="578"/>
         <source>Shift box along its X dimension</source>
-        <translation type="unfinished">沿X轴方向移动Box</translation>
+        <translation type="unfinished">沿X轴方向移动裁剪盒</translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="600"/>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="622"/>
         <source>Shift box along its Y dimension</source>
-        <translation type="unfinished">沿Y轴方向移动Box</translation>
+        <translation type="unfinished">沿Y轴方向移动裁剪盒</translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="644"/>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="666"/>
         <source>Shift box along its Z dimension</source>
-        <translation type="unfinished">沿Z轴方向移动Box</translation>
+        <translation type="unfinished">沿Z轴方向移动裁剪盒</translation>
     </message>
 </context>
 <context>
@@ -2609,7 +2609,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="22"/>
         <source>Compared</source>
-        <translation>比較</translation>
+        <translation type="unfinished">比较</translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="36"/>
@@ -2745,12 +2745,12 @@ to help advanced users setting the general parameters</source>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="488"/>
         <source>Ok</source>
-        <translation>Ok</translation>
+        <translation type="unfinished">确定</translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="495"/>
         <source>Cancel</source>
-        <translation>キャンセル</translation>
+        <translation type="unfinished">取消</translation>
     </message>
 </context>
 <context>
@@ -2791,7 +2791,7 @@ to help advanced users setting the general parameters</source>
     <message>
         <location filename="../ui_templates/computeOctreeDlg.ui" line="14"/>
         <source>Compute Octree</source>
-        <translation>Octree演算</translation>
+        <translation type="unfinished">计算Octree</translation>
     </message>
     <message>
         <location filename="../ui_templates/computeOctreeDlg.ui" line="20"/>
@@ -2801,7 +2801,7 @@ to help advanced users setting the general parameters</source>
     <message>
         <location filename="../ui_templates/computeOctreeDlg.ui" line="27"/>
         <source>Octree box</source>
-        <translation>Octreeボックス</translation>
+        <translation type="unfinished">Octree裁剪盒</translation>
     </message>
     <message>
         <location filename="../ui_templates/computeOctreeDlg.ui" line="33"/>
@@ -2816,12 +2816,12 @@ to help advanced users setting the general parameters</source>
     <message>
         <location filename="../ui_templates/computeOctreeDlg.ui" line="63"/>
         <source>Custom bounding box</source>
-        <translation></translation>
+        <translation type="unfinished">自定义界限盒</translation>
     </message>
     <message>
         <location filename="../ui_templates/computeOctreeDlg.ui" line="73"/>
         <source>Edit</source>
-        <translation>編集</translation>
+        <translation type="unfinished">编辑</translation>
     </message>
 </context>
 <context>
@@ -3594,7 +3594,7 @@ The bigger the more accurate the map will be
     <message>
         <location filename="../ui_templates/envelopeExtractorDlg.ui" line="57"/>
         <source>no message</source>
-        <translation>メッセージなし</translation>
+        <translation type="unfinished">无信息</translation>
     </message>
     <message>
         <location filename="../ui_templates/envelopeExtractorDlg.ui" line="64"/>
@@ -3709,7 +3709,7 @@ the other with the points falling outside.</source>
     <message>
         <location filename="../ui_templates/filterByValueDlg.ui" line="102"/>
         <source>Cancel</source>
-        <translation>キャンセル</translation>
+        <translation type="unfinished">取消</translation>
     </message>
 </context>
 <context>
@@ -3717,7 +3717,7 @@ the other with the points falling outside.</source>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="14"/>
         <source>Sensor parameters</source>
-        <translation>センサーの値</translation>
+        <translation type="unfinished">传感器参数</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="35"/>
@@ -3793,7 +3793,7 @@ the other with the points falling outside.</source>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="314"/>
         <source>Other</source>
-        <translation>その他</translation>
+        <translation type="unfinished">其它</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="322"/>
@@ -4295,7 +4295,7 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="158"/>
         <source>OK</source>
-        <translation>OK</translation>
+        <translation type="unfinished">确定</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="172"/>
@@ -4305,7 +4305,7 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="189"/>
         <source>Cancel</source>
-        <translation>キャンセル</translation>
+        <translation type="unfinished">取消</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="207"/>
@@ -4418,7 +4418,7 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../ui_templates/graphicalTransformationDlg.ui" line="209"/>
         <source>None</source>
-        <translation>なし</translation>
+        <translation type="unfinished">空值</translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalTransformationDlg.ui" line="289"/>
@@ -4801,12 +4801,12 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../../libs/qCC_io/ui/importDBFFieldDlg.ui" line="72"/>
         <source>OK</source>
-        <translation>OK</translation>
+        <translation type="unfinished">确定</translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/importDBFFieldDlg.ui" line="79"/>
         <source>Ignore</source>
-        <translation></translation>
+        <translation type="unfinished">忽略</translation>
     </message>
 </context>
 <context>
@@ -7580,7 +7580,6 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2954"/>
         <source>Compress the associated FWF data (maybe interesting after interactive segmentation for instance)</source>
-        <translatorcomment>カッコ内は開発者のコメントと思われるため訳さず。「例えばインタラクティブな分割の後だと面白いだろう」</translatorcomment>
         <translation type="unfinished">压缩相关的FWF数据（例如在交互式分割后可能会有兴趣）</translation>
     </message>
     <message>
@@ -8257,7 +8256,7 @@ It will be saved as multiple tiles on the disk.</source>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="590"/>
         <source>Cancel</source>
-        <translation>キャンセル</translation>
+        <translation type="unfinished">取消</translation>
     </message>
 </context>
 <context>
@@ -8549,17 +8548,17 @@ It will be saved as multiple tiles on the disk.</source>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="327"/>
         <source>Apply</source>
-        <translation></translation>
+        <translation type="unfinished">应用</translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="334"/>
         <source>Apply all</source>
-        <translation></translation>
+        <translation type="unfinished">应用全部</translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="341"/>
         <source>Cancel</source>
-        <translation>キャンセル</translation>
+        <translation type="unfinished">取消</translation>
     </message>
 </context>
 <context>
@@ -11155,7 +11154,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../main.cpp" line="137"/>
         <source>Translation</source>
-        <translation>変換</translation>
+        <translation type="unfinished">平移</translation>
     </message>
     <message>
         <location filename="../main.cpp" line="137"/>
@@ -12099,7 +12098,7 @@ Cells: %2 x %3</source>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="46"/>
         <source>Grid</source>
-        <translation>グリッド</translation>
+        <translation type="unfinished">网格</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="55"/>
@@ -12563,7 +12562,7 @@ replaced by the cell&apos;s average height!</source>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="98"/>
         <source>swap</source>
-        <translation>交換</translation>
+        <translation type="unfinished">交换</translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="115"/>
@@ -12656,7 +12655,7 @@ replaced by the cell&apos;s average height!</source>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="408"/>
         <source>Translation</source>
-        <translation>変換</translation>
+        <translation type="unfinished">平移</translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="485"/>
@@ -12745,7 +12744,7 @@ replaced by the cell&apos;s average height!</source>
     <message>
         <location filename="../ui_templates/roleChoiceDlg.ui" line="29"/>
         <source>Compared</source>
-        <translation>比較</translation>
+        <translation type="unfinished">比较</translation>
     </message>
     <message>
         <location filename="../ui_templates/roleChoiceDlg.ui" line="50"/>
@@ -13218,7 +13217,7 @@ replaced by the cell&apos;s average height!</source>
     <message>
         <location filename="../ui_templates/sectionExtractionDlg.ui" line="156"/>
         <source>OK</source>
-        <translation>OK</translation>
+        <translation type="unfinished">确定</translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionDlg.ui" line="167"/>
@@ -13535,7 +13534,7 @@ mean distance estimation</source>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/stereogramDlg.ui" line="318"/>
         <source>Other</source>
-        <translation>その他</translation>
+        <translation type="unfinished">其它</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/stereogramDlg.ui" line="335"/>
@@ -13739,13 +13738,13 @@ mean distance estimation</source>
     <message>
         <location filename="../ui_templates/tracePolylineDlg.ui" line="197"/>
         <source>OK</source>
-        <translation>OK</translation>
+        <translation>确定</translation>
     </message>
     <message>
         <location filename="../ui_templates/tracePolylineDlg.ui" line="214"/>
         <location filename="../ui_templates/tracePolylineDlg.ui" line="217"/>
         <source>Cancel</source>
-        <translation>キャンセル</translation>
+        <translation type="unfinished">取消</translation>
     </message>
 </context>
 <context>
@@ -13775,7 +13774,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/unrollDlg.ui" line="14"/>
         <source>Unroll</source>
-        <translation>展開</translation>
+        <translation type="unfinished">展开</translation>
     </message>
     <message>
         <location filename="../ui_templates/unrollDlg.ui" line="22"/>
@@ -13975,7 +13974,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="171"/>
         <source>swap</source>
-        <translation>交換</translation>
+        <translation type="unfinished">交换</translation>
     </message>
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="191"/>
@@ -13985,7 +13984,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="282"/>
         <source>Grid</source>
-        <translation>グリッド</translation>
+        <translation type="unfinished">网格</translation>
     </message>
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="303"/>
@@ -14121,7 +14120,7 @@ You should fill the empty cells...</source>
     <message>
         <location filename="../ccAlignDlg.cpp" line="40"/>
         <source>None</source>
-        <translation>なし</translation>
+        <translation type="unfinished">空值</translation>
     </message>
     <message>
         <location filename="../ccAlignDlg.cpp" line="41"/>
@@ -14488,7 +14487,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="77"/>
         <source>None</source>
-        <translation>なし</translation>
+        <translation type="unfinished">空值</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="81"/>
@@ -15557,12 +15556,12 @@ Number of points: %2</source>
     <message>
         <location filename="../ui_templates/primitiveDistanceDlg.ui" line="105"/>
         <source>Ok</source>
-        <translation>Ok</translation>
+        <translation>确定</translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveDistanceDlg.ui" line="118"/>
         <source>Cancel</source>
-        <translation>キャンセル</translation>
+        <translation>取消</translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveDistanceDlg.ui" line="143"/>

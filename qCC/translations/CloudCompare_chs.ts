@@ -6,7 +6,7 @@
     <message>
         <location filename="../ui_templates/aboutDlg.ui" line="17"/>
         <source>About CloudCompare</source>
-        <translation>关于CloudCompare</translation>
+        <translation type="unfinished">关于CloudCompare</translation>
     </message>
     <message>
         <location filename="../ui_templates/aboutDlg.ui" line="38"/>
@@ -3668,22 +3668,22 @@ The bigger the more accurate the map will be
     <message>
         <location filename="../ui_templates/filterByValueDlg.ui" line="14"/>
         <source>Filter by value</source>
-        <translation>属性値による抽出・分割</translation>
+        <translation type="unfinished">按值筛选</translation>
     </message>
     <message>
         <location filename="../ui_templates/filterByValueDlg.ui" line="22"/>
         <source>Range</source>
-        <translation></translation>
+        <translation type="unfinished">范围</translation>
     </message>
     <message>
         <location filename="../ui_templates/filterByValueDlg.ui" line="29"/>
         <source>Min range value</source>
-        <translation></translation>
+        <translation type="unfinished">最小范围值</translation>
     </message>
     <message>
         <location filename="../ui_templates/filterByValueDlg.ui" line="61"/>
         <source>Max range value</source>
-        <translation></translation>
+        <translation type="unfinished">最大范围值</translation>
     </message>
     <message>
         <location filename="../ui_templates/filterByValueDlg.ui" line="81"/>
@@ -3693,7 +3693,7 @@ The bigger the more accurate the map will be
     <message>
         <location filename="../ui_templates/filterByValueDlg.ui" line="84"/>
         <source>Export</source>
-        <translation></translation>
+        <translation type="unfinished">导出</translation>
     </message>
     <message>
         <location filename="../ui_templates/filterByValueDlg.ui" line="91"/>
@@ -3704,7 +3704,7 @@ the other with the points falling outside.</source>
     <message>
         <location filename="../ui_templates/filterByValueDlg.ui" line="95"/>
         <source>Split</source>
-        <translation></translation>
+        <translation type="unfinished">拆分</translation>
     </message>
     <message>
         <location filename="../ui_templates/filterByValueDlg.ui" line="102"/>
@@ -5895,7 +5895,7 @@ Parameter</source>
         <location filename="../ui_templates/mainWindow.ui" line="1075"/>
         <location filename="../ui_templates/mainWindow.ui" line="1078"/>
         <source>Compute cloud/cloud distance</source>
-        <translation>计算云端/云端距离</translation>
+        <translation type="unfinished">计算点云/点云距离</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1087"/>
@@ -5906,7 +5906,7 @@ Parameter</source>
         <location filename="../ui_templates/mainWindow.ui" line="1090"/>
         <location filename="../ui_templates/mainWindow.ui" line="1093"/>
         <source>Compute cloud/mesh distance</source>
-        <translation>计算云/网格距离</translation>
+        <translation type="unfinished">计算点云/网格距离</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1102"/>
@@ -6460,13 +6460,13 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1834"/>
         <source>Subsample</source>
-        <translation>子样本</translation>
+        <translation type="unfinished">二次采样</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1837"/>
         <location filename="../ui_templates/mainWindow.ui" line="1840"/>
         <source>Subsample a point cloud</source>
-        <translation>子样点云</translation>
+        <translation type="unfinished">对点云进行二次采样</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1848"/>
@@ -6660,7 +6660,7 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2069"/>
         <source>Bilateral filter</source>
-        <translation>双侧过滤器</translation>
+        <translation type="unfinished">双侧滤波器</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2072"/>
@@ -6675,7 +6675,7 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2080"/>
         <source>Compute laser beam scattering angle for a cloud with normals</source>
-        <translation>计算云的激光束散射角与法线的关系</translation>
+        <translation type="unfinished">计算点云的激光束散射角与法线的关系</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2085"/>
@@ -6774,7 +6774,7 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2188"/>
         <source>Primitive factory</source>
-        <translation type="unfinished">生成基础模型（&amp;F）</translation>
+        <translation type="unfinished">创建基础模型（&amp;F）</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2193"/>
@@ -6972,13 +6972,13 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="3050"/>
         <source>Cloud/Primitive Dist</source>
-        <translation>云端/基站距离</translation>
+        <translation type="unfinished">点云/基体距离</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="3053"/>
         <location filename="../ui_templates/mainWindow.ui" line="3056"/>
         <source>Compute cloud/Primitive distance</source>
-        <translation>计算云/基线距离</translation>
+        <translation type="unfinished">计算点云/基体距离</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="3061"/>
@@ -7383,7 +7383,6 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2734"/>
         <source>SOR filter</source>
-        <translatorcomment>外れ値フィルター（SOR）</translatorcomment>
         <translation type="unfinished">SOR滤波器</translation>
     </message>
     <message>
@@ -7850,7 +7849,7 @@ Should be used after one of the previous methods!</source>
     <message>
         <location filename="../ui_templates/noiseFilterDlg.ui" line="14"/>
         <source>Filter noise</source>
-        <translation></translation>
+        <translation type="unfinished">滤除噪声</translation>
     </message>
     <message>
         <location filename="../ui_templates/noiseFilterDlg.ui" line="20"/>
@@ -14385,7 +14384,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="115"/>
         <source>About Plugins</source>
-        <translation></translation>
+        <translation type="unfinished">关于插件</translation>
     </message>
     <message>
         <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="117"/>
@@ -14428,7 +14427,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../pluginManager/ccPluginUIManager.cpp" line="303"/>
         <source>Remove Filter</source>
-        <translation type="unfinished">移除Filter</translation>
+        <translation type="unfinished">移除滤波器</translation>
     </message>
     <message>
         <location filename="../pluginManager/ccPluginUIManager.cpp" line="308"/>
@@ -14441,12 +14440,12 @@ p, li { white-space: pre-wrap; }
         <location filename="../pluginManager/ccPluginUIManager.cpp" line="312"/>
         <location filename="../pluginManager/ccPluginUIManager.cpp" line="361"/>
         <source>GL Filters</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">GL滤波器</translation>
     </message>
     <message>
         <location filename="../pluginManager/ccPluginUIManager.cpp" line="321"/>
         <source>Shaders &amp;&amp; Filters</source>
-        <translation></translation>
+        <translation type="unfinished">着色器和滤波器</translation>
     </message>
 </context>
 <context>

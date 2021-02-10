@@ -46,6 +46,10 @@ v2.12 (???) - (in development)
 		- the tool will display the corresponding label title in the registration summary tables
 	- 2.5D Volume calculation tool
 		- the tool now preserves the Global Shift when exporting the difference map/cloud
+	- LAS files:
+	    - the Global Shift, if defined, will now be used as LAS offset if no offset was previously set
+		- the PDAL LAS I/O filter and the libLAS I/O filter should now both handle LAS offset
+		  and scale the same way at export time.
 
 - New plugins
 	- MPlane: perform normal distance measurements against a defined plane (see https://www.cloudcompare.org/doc/wiki/index.php?title=MPlane_(plugin) )
@@ -65,6 +69,7 @@ v2.12 (???) - (in development)
 	- The 'Clean > Noise' tool was mixing the number of neighbors (knn) and the 'kernel radius' parameters
 	- PLY filter was exporting large coordinates with a limited accuracy when creating ASCII files
 	- the 'flip normals' checkbox of the C2M comparison dialog was not accessible anymore
+	- minimal LAS scale suggested by CC was sometimes too small, potentially triggering a PDAL exception.
 
 
 v2.11.3 (Anoia) - 08/09/2020

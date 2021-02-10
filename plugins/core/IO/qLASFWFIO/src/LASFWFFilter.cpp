@@ -249,19 +249,6 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 				return CC_FERR_NO_SAVE;
 			}
 
-			if (isShifted)
-			{
-				lasheader.x_offset = -cloud->getGlobalShift().x;
-				lasheader.y_offset = -cloud->getGlobalShift().y;
-				lasheader.z_offset = -cloud->getGlobalShift().z;
-			}
-			else
-			{
-				lasheader.x_offset = bbMin.x;
-				lasheader.y_offset = bbMin.y;
-				lasheader.z_offset = bbMin.z;
-			}
-
 			//let the user choose between the original scale and the 'optimal' one (for accuracy, not for compression ;)
 			bool hasScaleMetaData = false;
 			CCVector3d lasScale(0, 0, 0);
@@ -275,11 +262,63 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 				}
 			}
 
+			bool hasOffsetMetaData = false;
+			CCVector3d lasOffset(0, 0, 0);
+			lasOffset.x = cloud->getMetaData(LAS_OFFSET_X_META_DATA).toDouble(&hasOffsetMetaData);
+			if (hasOffsetMetaData)
+			{
+				lasOffset.y = cloud->getMetaData(LAS_OFFSET_Y_META_DATA).toDouble(&hasOffsetMetaData);
+				if (hasOffsetMetaData)
+				{
+					lasOffset.z = cloud->getMetaData(LAS_OFFSET_Z_META_DATA).toDouble(&hasOffsetMetaData);
+				}
+			}
+
+			//Try to use the global shift if no LAS offset is defined
+			if (!hasOffsetMetaData && isShifted)
+			{
+				lasOffset = -cloud->getGlobalShift(); //'global shift' is the opposite of LAS offset ;)
+				hasOffsetMetaData = true;
+			}
+
+			//If we don't have any offset, let's use the min bounding-box corner
+			if (!hasOffsetMetaData && ccGlobalShiftManager::NeedShift(bbMax))
+			{
+				//we have no choice, we'll use the min bounding box
+				lasOffset = bbMin;
+			}
+
+			lasheader.x_offset = lasOffset.x;
+			lasheader.y_offset = lasOffset.y;
+			lasheader.z_offset = lasOffset.z;
+
+			//maximum cloud 'extents' relatively to the 'offset' point
+			CCVector3d diagPos = bbMax - lasOffset;
+			CCVector3d diagNeg = lasOffset - bbMin;
+			CCVector3d diag(std::max(diagPos.x, diagNeg.x),
+							std::max(diagPos.y, diagNeg.y),
+							std::max(diagPos.z, diagNeg.z));
 			//optimal scale (for accuracy) --> 1e-9 because the maximum integer is roughly +/-2e+9
-			CCVector3d diag = bbMax - bbMin;
-			CCVector3d optimalScale(1.0e-9 * std::max<double>(diag.x, CCCoreLib::ZERO_TOLERANCE_D),
-									1.0e-9 * std::max<double>(diag.y, CCCoreLib::ZERO_TOLERANCE_D),
-									1.0e-9 * std::max<double>(diag.z, CCCoreLib::ZERO_TOLERANCE_D));
+			CCVector3d optimalScale(1.0e-9 * std::max<double>(diag.x, 1.0),
+									1.0e-9 * std::max<double>(diag.y, 1.0),
+									1.0e-9 * std::max<double>(diag.z, 1.0));
+
+			bool canUseOriginalScale = false;
+			if (hasScaleMetaData)
+			{
+				//we may not be able to use the previous LAS scale
+				canUseOriginalScale = (		lasScale.x >= optimalScale.x
+										&&	lasScale.y >= optimalScale.y
+										&&	lasScale.z >= optimalScale.z );
+			}
+
+			//uniformize the value to make it less disturbing to some lastools users ;)
+			{
+				double maxScale = std::max(optimalScale.x, std::max(optimalScale.y, optimalScale.z));
+				double n = ceil(log10(maxScale)); //ceil because n should be negative
+				maxScale = pow(10.0, n);
+				optimalScale.x = optimalScale.y = optimalScale.z = maxScale;
+			}
 
 			if (parameters.alwaysDisplaySaveDialog)
 			{
@@ -292,11 +331,20 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 
 				if (hasScaleMetaData)
 				{
-					s_saveDlg->origAccuracyLabel->setText(QString("(%1, %2, %3)").arg(lasScale.x).arg(lasScale.y).arg(lasScale.z));
+					QString text = QString("(%1, %2, %3)").arg(lasScale.x).arg(lasScale.y).arg(lasScale.z);
+					if (!canUseOriginalScale)
+					{
+						text += "[too small]";
+					}
+					s_saveDlg->origAccuracyLabel->setText(text);
 				}
 				else
 				{
 					s_saveDlg->origAccuracyLabel->setText("none");
+				}
+				
+				if (!canUseOriginalScale)
+				{
 					if (s_saveDlg->origRadioButton->isChecked())
 						s_saveDlg->bestRadioButton->setChecked(true);
 					s_saveDlg->origRadioButton->setEnabled(false);

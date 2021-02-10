@@ -350,25 +350,30 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		}
 	}
 
-	//Set offset & scale, as points will be stored as boost::int32_t values (between -2147483648 and 2147483647)
-	//int_value = (double_value-offset)/scale
-	if (hasOffsetMetaData & ccGlobalShiftManager::NeedShift(bbMax - lasOffset))
+	//Try to use the global shift if no LAS offset is defined
+	if (!hasOffsetMetaData && theCloud->isShifted())
 	{
-		//the previous offset can't be used
-		hasOffsetMetaData = false;
-		lasOffset = CCVector3d(0, 0, 0);
+		lasOffset = -theCloud->getGlobalShift(); //'global shift' is the opposite of LAS offset ;)
+		hasOffsetMetaData = true;
 	}
+
+	//If we don't have any offset, let's use the min bounding-box corner
 	if (!hasOffsetMetaData && ccGlobalShiftManager::NeedShift(bbMax))
 	{
 		//we have no choice, we'll use the min bounding box
 		lasOffset = bbMin;
 	}
 
-	//optimal scale (for accuracy) --> 1e-8 because the maximum integer is roughly +/-2e+9
-	CCVector3d diag = bbMax - lasOffset;
-	CCVector3d optimalScale(1.0e-9 * std::max<double>(diag.x, CCCoreLib::ZERO_TOLERANCE_D),
-	                        1.0e-9 * std::max<double>(diag.y, CCCoreLib::ZERO_TOLERANCE_D),
-	                        1.0e-9 * std::max<double>(diag.z, CCCoreLib::ZERO_TOLERANCE_D));
+	// maximum cloud 'extents' relatively to the 'offset' point
+	CCVector3d diagPos = bbMax - lasOffset;
+	CCVector3d diagNeg = lasOffset - bbMin;
+	CCVector3d diag(std::max(diagPos.x, diagNeg.x),
+					std::max(diagPos.y, diagNeg.y),
+					std::max(diagPos.z, diagNeg.z));
+	//optimal scale (for accuracy) --> 1e-9 because the maximum integer is roughly +/-2e+9
+	CCVector3d optimalScale(1.0e-9 * std::max<double>(diag.x, 1.0),
+	                        1.0e-9 * std::max<double>(diag.y, 1.0),
+	                        1.0e-9 * std::max<double>(diag.z, 1.0));
 
 	bool canUseOriginalScale = false;
 	if (hasScaleMetaData)

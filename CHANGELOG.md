@@ -70,6 +70,8 @@ v2.12 (???) - (in development)
 	- PLY filter was exporting large coordinates with a limited accuracy when creating ASCII files
 	- the 'flip normals' checkbox of the C2M comparison dialog was not accessible anymore
 	- minimal LAS scale suggested by CC was sometimes too small, potentially triggering a PDAL exception.
+	- When loading raster files, GDAL can sometimes report wrong min and max altitudes. This would then let CC think that invalid pixels are
+		present. And when telling CC to keep these invalid points, the altitude was actually already replaced by a strange one...
 
 
 v2.11.3 (Anoia) - 08/09/2020

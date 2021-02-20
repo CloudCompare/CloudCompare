@@ -55,6 +55,13 @@ struct CommandOctreeNormal : public ccCommandLineInterface::Command
 	bool process(ccCommandLineInterface& cmd) override;
 };
 
+struct CommandInvertNormal : public ccCommandLineInterface::Command
+{
+	CommandInvertNormal();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
 struct CommandConvertNormalsToDipAndDipDir : public ccCommandLineInterface::Command
 {
 	CommandConvertNormalsToDipAndDipDir();

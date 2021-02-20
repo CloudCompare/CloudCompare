@@ -1732,23 +1732,30 @@ namespace ccEntityAction
 	{
 		for (ccHObject* ent : selectedEntities)
 		{
-			bool lockedVertices;
-			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent, &lockedVertices);
-			if (lockedVertices)
+			// is it a mesh?
+			ccMesh* mesh = ccHObjectCaster::ToMesh(ent);
+			if (mesh && mesh->hasNormals())
 			{
-				ccUtils::DisplayLockedVerticesWarning(ent->getName(), selectedEntities.size() == 1);
+				mesh->invertNormals();
+				mesh->showNormals(true);
+				mesh->prepareDisplayForRefresh_recursive();
 				continue;
 			}
-			
-			if (cloud && cloud->isA(CC_TYPES::POINT_CLOUD)) // TODO
+
+			// is it a cloud?
+			bool lockedVertices;
+			ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(ent, &lockedVertices);
+			if (cloud && cloud->hasNormals())
 			{
-				ccPointCloud* ccCloud = static_cast<ccPointCloud*>(cloud);
-				if (ccCloud->hasNormals())
+				if (lockedVertices)
 				{
-					ccCloud->invertNormals();
-					ccCloud->showNormals(true);
-					ccCloud->prepareDisplayForRefresh_recursive();
+					ccUtils::DisplayLockedVerticesWarning(ent->getName(), selectedEntities.size() == 1);
+					continue;
 				}
+			
+				cloud->invertNormals();
+				cloud->showNormals(true);
+				cloud->prepareDisplayForRefresh_recursive();
 			}
 		}
 		

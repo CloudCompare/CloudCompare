@@ -4,8 +4,6 @@ CloudCompare Version History
 v2.12 (???) - (in development)
 ----------------------
 - Improvements
-    - CommandLine mode new features
-      - Added N_SIGMA_MIN and N_SIGMA_MAX options to the FILTER_SF command. Specify the option followed by a numeric value to filter by N * standardDeviation around the mean.
 	- Clipping box tool:
 		- former 'contours' renamed 'envelopes' for the sake of clarity
 		- ability to extract the real contours of the points inside each slice (single slice mode or 'repeat' mode)
@@ -20,6 +18,8 @@ v2.12 (???) - (in development)
 	- Localization:
 		- Korean is now supported (thanks to Yun-Ho Chung)
 		- Russian translation has been updated (thanks to Gene Kalabin)
+		- Chinese is now supported (thanks to https://github.com/jindili)
+	- The option 'Edit > Normals > Invert' can now be used on meshes
 	- qCSF:
 		- added support for command line mode with all available options, except cloth export
 		- use -CSF to run the plugin with the next optional settings:
@@ -36,6 +36,10 @@ v2.12 (???) - (in development)
 				The former '-OUTPUT_RASTER_Z' option will only export the altitudes as its name implies.
 		- New sub-option for the RANSAC plugin command line option (-RANSAC)
 			- OUT_RANDOM_COLOR = generate random colors for the output clouds (false by default now)
+        - New sub-option for the FILTER_SF command:
+			- N_SIGMA_MIN and N_SIGMA_MAX: specify the option followed by a numeric value to filter by N * standardDeviation around the mean.
+		- new option '-INVERT_NORMALS':
+			- Inverts the normals of the loaded entities (cloud or mesh, and per-triangle or per-vertex for meshes)
 	- STL:
 		- loading speed should be greatly improved (compared to v2.10 and v2.11)
 	- Global Shift & Scale:

@@ -2626,6 +2626,33 @@ bool ccMesh::reservePerTriangleNormalIndexes()
 	return m_triNormalIndexes->reserveSafe(m_triVertIndexes->capacity());
 }
 
+void ccMesh::invertNormals()
+{
+	//per-triangle normals
+	if (m_triNormals)
+	{
+		invertPerTriangleNormals();
+	}
+
+	//per-vertex normals
+	ccPointCloud* pc = dynamic_cast<ccPointCloud*>(m_associatedCloud);
+	if (pc && pc->hasNormals())
+	{
+		pc->invertNormals();
+	}
+}
+
+void ccMesh::invertPerTriangleNormals()
+{
+	if (m_triNormals)
+	{
+		for (CompressedNormType& n : *m_triNormals)
+		{
+			ccNormalCompressor::InvertNormal(n);
+		}
+	}
+}
+
 void ccMesh::addTriangleNormalIndexes(int i1, int i2, int i3)
 {
 	assert(m_triNormalIndexes && m_triNormalIndexes->isAllocated());

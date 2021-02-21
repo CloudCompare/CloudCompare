@@ -60,18 +60,18 @@
 
 using namespace std;
 
-// See https://www.opencascade.com/doc/occt-7.0.0/refman/html/_top_abs___shape_enum_8hxx.html#a67b8aa38656811eaee45f9df08499667
-std::map<int, std::string> shapesTypes = 
-	{
-           {0, "TopAbs_COMPOUND"},
-           {1, "TopAbs_COMPSOLID"},
-           {2, "TopAbs_SOLID"},
-           {3, "TopAbs_SHELL"},
-           {4, "TopAbs_FACE"},
-           {5, "TopAbs_EDGE"},
-           {6, "TopAbs_VERTEX"},
-           {7, "TopAbs_SHAPE"}
-    };
+static std::map<TopAbs_ShapeEnum, QString> ShapeTypes
+{
+	{TopAbs_COMPOUND,  "TopAbs_COMPOUND"},
+	{TopAbs_COMPSOLID, "TopAbs_COMPSOLID"},
+	{TopAbs_SOLID,     "TopAbs_SOLID"},
+	{TopAbs_SHELL,     "TopAbs_SHELL"},
+	{TopAbs_FACE,      "TopAbs_FACE"},
+	{TopAbs_WIRE,      "TopAbs_WIRE"},
+	{TopAbs_EDGE,      "TopAbs_EDGE"},
+	{TopAbs_VERTEX,    "TopAbs_VERTEX"},
+	{TopAbs_SHAPE,     "TopAbs_SHAPE"}
+};
 
 STEPFilter::STEPFilter()
 	: FileIOFilter( {
@@ -125,7 +125,17 @@ CC_FILE_ERROR STEPFilter::loadFile( const QString& fullFilename,
 		}
 	}
 	
-	return importStepFile(container, fullFilename, linearDeflection, parameters);
+	CC_FILE_ERROR error;
+	try
+	{
+		error = importStepFile(container, fullFilename, linearDeflection, parameters);
+	}
+	catch (...)
+	{
+		return CC_FERR_THIRD_PARTY_LIB_EXCEPTION;
+	}
+
+	return error;
 }
 
 CC_FILE_ERROR STEPFilter::importStepFile(	ccHObject& container,
@@ -133,80 +143,90 @@ CC_FILE_ERROR STEPFilter::importStepFile(	ccHObject& container,
 											double linearDeflection,
 											LoadParameters& parameters )
 {
+	Interface_Static::SetCVal("xstep.cascade.unit", "M");
+
 	STEPControl_Reader aReader;
 	IFSelect_ReturnStatus aStatus = aReader.ReadFile(qUtf8Printable(fullFileName));
-
-	Interface_Static::SetCVal("xstep.cascade.unit", "M");
-	
 	if (aStatus != IFSelect_ReturnStatus::IFSelect_RetDone)
 	{
 		return CC_FERR_THIRD_PARTY_LIB_FAILURE;
 	}
 
-	bool isFailsonly = false;
-	aReader.PrintCheckLoad(isFailsonly, IFSelect_PrintCount::IFSelect_ItemsByEntity);
-	aReader.PrintCheckTransfer(isFailsonly, IFSelect_PrintCount::IFSelect_ItemsByEntity);
+	//bool isFailsonly = false;
+	//aReader.PrintCheckLoad(isFailsonly, IFSelect_PrintCount::IFSelect_ItemsByEntity);
+	//aReader.PrintCheckTransfer(isFailsonly, IFSelect_PrintCount::IFSelect_ItemsByEntity);
 
-	// Collecting resulting entities of the STEP file :
-	for (Standard_Integer n = 1; n <= aReader.NbRootsForTransfer(); n++)
+	// Collecting entities inside the STEP file
+	int rootCount = aReader.NbRootsForTransfer();
+	if (rootCount < 1)
 	{
-		ccLog::Print(QString("STEP: Transferring Root #%1").arg(n));
-		aReader.TransferRoot(n);
+		ccLog::Print("No root found in the STEP file.");
+		return CC_FERR_NO_LOAD;
 	}
-	// Root transfers :
-	aReader.TransferRoots();
+	ccLog::Print(QString("[STEP] Number of root(s): %1").arg(rootCount));
+
+	for (Standard_Integer n = 1; n <= rootCount; n++)
+	{
+		if (!aReader.TransferRoot(n))
+		{
+			ccLog::Warning(QString("[STEP] Failed to transfer root #%1").arg(n));
+		}
+	}
+	// Root transfers
+	int transferredRootCount = aReader.TransferRoots();
+	if (transferredRootCount < 1)
+	{
+		ccLog::Print("No root could be transferred from the STEP file.");
+		return CC_FERR_NO_LOAD;
+	}
 
 	Standard_Integer shapeCount = aReader.NbShapes();
-	ccLog::Print("Number of shapes = " + QString::number(shapeCount));
-
 	if (shapeCount == 0)
 	{
 		ccLog::Print("No shape found in the STEP file.");
 		return CC_FERR_NO_LOAD;
 	}
+	ccLog::Print(QString("[STEP] Number of shapes: %1").arg(shapeCount));
 
 	TopoDS_Shape aShape = aReader.OneShape();
-	string st = shapesTypes[aShape.ShapeType()];
-	ccLog::Print(QString("Shape type :%1").arg(st.c_str()));
-	BRepMesh_IncrementalMesh aMesh(aShape, linearDeflection, Standard_True);
+	ccLog::Print("[STEP] Shape type: " + ShapeTypes[aShape.ShapeType()]);
+	
+	BRepMesh_IncrementalMesh incrementalMesh(aShape, linearDeflection, Standard_True); //not explicitly used, but still needs to be instantiated
 
-	// 1st loop where we just count the number of vertices and of triangles
-	// in order to reserve the memory for CC structures.
+	// Creation of the CC vertices and mesh
+	ccPointCloud* vertices = new ccPointCloud("vertices");
+	vertices->setEnabled(false);
+	ccMesh* mesh = new ccMesh(vertices);
+	mesh->addChild(vertices);
+	mesh->setName("unnamed - tesselated");
+
 	// Notice that the nodes are duplicated during CAD tesslation : if a node is
 	// belonging to N triangles, it's duplicated N times.
-	int i = 0;
-	int triCount = 0; // Number of triangles of the tesselated CAD shape imported
-	int vertCount = 0;
+	unsigned faceCount = 0;
+	unsigned triCount = 0; // Number of triangles of the tesselated CAD shape imported
+	unsigned vertCount = 0;
 	TopExp_Explorer expFaces;
-	for (i = 0, expFaces.Init(aShape, TopAbs_FACE); expFaces.More(); i++, expFaces.Next())
+	for (expFaces.Init(aShape, TopAbs_FACE); expFaces.More(); expFaces.Next())
 	{
 		const TopoDS_Face& face = TopoDS::Face(expFaces.Current());
+		++faceCount;
+
 		TopLoc_Location location;
 		Poly_Triangulation facing = BRep_Tool::Triangulation(face, location);
-		gp_Trsf nodeTransformation = location;
-		vertCount += facing.NbNodes();
-		triCount += facing.NbTriangles();
-	}
-	ccLog::Print("Number of CAD faces  = " + QString::number(i));
-	ccLog::Print("Number of triangles (after tesselation) = " + QString::number(triCount));
-	ccLog::Print("Number of vertices (after tesselation)  = " + QString::number(vertCount));
 
-	// Creation of the point cloud (vertices) and of the mesh in CC :
-	QString name("mesh from STEP file");
-	ccPointCloud* vertices = new ccPointCloud("vertices");
-	ccMesh* mesh = new ccMesh(vertices);
-	mesh->setName(name);
-	vertices->reserve(vertCount + 100);
-	mesh->reserve(triCount + 100);
+		vertCount += static_cast<unsigned>(facing.NbNodes());
+		triCount += static_cast<unsigned>(facing.NbTriangles());
 
-	// 2nd loop where we create the vertices and triangles in the CC structures :
-	unsigned pointCount = 0;
-	expFaces.ReInit();
-	for (i = 0, expFaces.Init(aShape, TopAbs_FACE); expFaces.More(); i++, expFaces.Next())
-	{
-		const TopoDS_Face& face = TopoDS::Face(expFaces.Current());
-		TopLoc_Location location;
-		Poly_Triangulation facing = BRep_Tool::Triangulation(face, location);
+		if (triCount > mesh->capacity() && !mesh->reserve(triCount + 65536))
+		{
+			delete mesh;
+			return CC_FERR_NOT_ENOUGH_MEMORY;
+		}
+		if (vertCount > vertices->capacity() && !vertices->reserve(vertCount + 65536))
+		{
+			delete mesh;
+			return CC_FERR_NOT_ENOUGH_MEMORY;
+		}
 
 		gp_Trsf nodeTransformation = location;
 		TColgp_Array1OfPnt nodes = facing.Nodes();
@@ -214,29 +234,34 @@ CC_FILE_ERROR STEPFilter::importStepFile(	ccHObject& container,
 
 		for (int j = 1; j <= facing.NbTriangles(); j++)
 		{
-			Poly_Triangle trian = tri.Value(j);
 			Standard_Integer index1, index2, index3;
-			trian.Get(index1, index2, index3);
-			const gp_Pnt& p1 = nodes.Value(index1).Transformed(nodeTransformation);
-			const gp_Pnt& p2 = nodes.Value(index2).Transformed(nodeTransformation);
-			const gp_Pnt& p3 = nodes.Value(index3).Transformed(nodeTransformation);
-			// Récupération des coordonnées des sommets du triangle courant :
+			tri.Value(j).Get(index1, index2, index3);
+			gp_Pnt p1 = nodes.Value(index1).Transformed(nodeTransformation);
+			gp_Pnt p2 = nodes.Value(index2).Transformed(nodeTransformation);
+			gp_Pnt p3 = nodes.Value(index3).Transformed(nodeTransformation);
+
+			//===============================================================================
+			// Note for Daniel : the vertices that are duplicated should be fused.
+			//===============================================================================
 			unsigned vertIndexes[3];
-			vertIndexes[0] = pointCount++;
-			CCVector3 P(p1.X(), p1.Y(), p1.Z()); vertices->addPoint(P);
-			vertIndexes[1] = pointCount++;
-			P.x = p2.X(); P.y = p2.Y(); P.z = p2.Z(); vertices->addPoint(P);
-			vertIndexes[2] = pointCount++;
-			P.x = p3.X(); P.y = p3.Y(); P.z = p3.Z(); vertices->addPoint(P);
+			vertIndexes[0] = vertices->size();
+			vertices->addPoint(CCVector3(p1.X(), p1.Y(), p1.Z()));
+			vertIndexes[1] = vertices->size();
+			vertices->addPoint(CCVector3(p2.X(), p2.Y(), p2.Z()));
+			vertIndexes[2] = vertices->size();
+			vertices->addPoint(CCVector3(p3.X(), p3.Y(), p3.Z()));
+
 			mesh->addTriangle(vertIndexes[0], vertIndexes[1], vertIndexes[2]);
 		}
 	}
-	//===============================================================================
-	// Note for Daniel : the vertices that are duplicated should be fused.
-	//===============================================================================
-	vertices->setEnabled(true);
-	vertices->setLocked(false);
-	mesh->addChild(vertices);
+
+	mesh->shrinkToFit();
+	vertices->shrinkToFit();
+
+	ccLog::Print("[STEP] Number of CAD faces  = " + QString::number(faceCount));
+	ccLog::Print("[STEP] Number of triangles (after tesselation) = " + QString::number(triCount));
+	ccLog::Print("[STEP] Number of vertices (after tesselation)  = " + QString::number(vertCount));
+
 	container.addChild(mesh);
 
 	return CC_FERR_NO_ERROR;

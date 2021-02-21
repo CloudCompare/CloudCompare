@@ -1,0 +1,11 @@
+{
+  "type": "I/O",
+  "name": "Step file loader (I/O plugin)",
+  "description": "Allows reading STEP files (CAD format).",
+  "authors": [
+    {
+      "name": "Raphael Marc",
+      "email": "N/A"
+    }
+  ]
+}

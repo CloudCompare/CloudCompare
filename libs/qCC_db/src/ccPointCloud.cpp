@@ -72,7 +72,7 @@ ccPointCloud::ccPointCloud(QString name/*=QString()*/, unsigned uniqueID/*=ccUni
 	showSF(false);
 }
 
-ccPointCloud* ccPointCloud::From(CCCoreLib::GenericCloud* cloud, const ccGenericPointCloud* sourceCloud/*=0*/)
+ccPointCloud* ccPointCloud::From(CCCoreLib::GenericCloud* cloud, const ccGenericPointCloud* sourceCloud/*=nullptr*/)
 {
 	ccPointCloud* pc = new ccPointCloud("Cloud");
 

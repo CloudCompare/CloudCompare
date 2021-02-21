@@ -278,83 +278,6 @@ CC_FILE_ERROR STLFilter::saveToASCIIFile(ccGenericMesh* mesh, FILE *theFile, QWi
 	return CC_FERR_NO_ERROR;
 }
 
-const PointCoordinateType c_defaultSearchRadius = static_cast<PointCoordinateType>(sqrt( CCCoreLib::ZERO_TOLERANCE_F ));
-static bool TagDuplicatedVertices(	const CCCoreLib::DgmOctree::octreeCell& cell,
-									void** additionalParameters,
-									CCCoreLib::NormalizedProgress* nProgress/*=0*/)
-{
-	std::vector<int>* equivalentIndexes = static_cast<std::vector<int>*>(additionalParameters[0]);
-
-	//we look for points very near to the others (only if not yet tagged!)
-
-	//structure for nearest neighbors search
-	CCCoreLib::DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
-	nNSS.level = cell.level;
-	nNSS.prepare(c_defaultSearchRadius, cell.parentOctree->getCellSize(nNSS.level));
-	cell.parentOctree->getCellPos(cell.truncatedCode, cell.level, nNSS.cellPos, true);
-	cell.parentOctree->computeCellCenter(nNSS.cellPos, cell.level, nNSS.cellCenter);
-	//*/
-
-	unsigned n = cell.points->size(); //number of points in the current cell
-
-	//we already know some of the neighbours: the points in the current cell!
-	try
-	{
-		nNSS.pointsInNeighbourhood.resize(n);
-	}
-	catch (.../*const std::bad_alloc&*/) //out of memory
-	{
-		return false;
-	}
-
-	//init structure with cell points
-	{
-		CCCoreLib::DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
-		for (unsigned i = 0; i < n; ++i, ++it)
-		{
-			it->point = cell.points->getPointPersistentPtr(i);
-			it->pointIndex = cell.points->getPointGlobalIndex(i);
-		}
-		nNSS.alreadyVisitedNeighbourhoodSize = 1;
-	}
-
-	//for each point in the cell
-	for (unsigned i = 0; i < n; ++i)
-	{
-		int thisIndex = static_cast<int>(cell.points->getPointGlobalIndex(i));
-		if (equivalentIndexes->at(thisIndex) < 0) //has no equivalent yet 
-		{
-			cell.points->getPoint(i, nNSS.queryPoint);
-
-			//look for neighbors in a (very small) sphere
-			//warning: there may be more points at the end of nNSS.pointsInNeighbourhood than the actual nearest neighbors (k)!
-			unsigned k = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS, c_defaultSearchRadius, false);
-
-			//if there are some very close points
-			if (k > 1)
-			{
-				for (unsigned j = 0; j < k; ++j)
-				{
-					//all the other points are equivalent to the query point
-					const unsigned& otherIndex = nNSS.pointsInNeighbourhood[j].pointIndex;
-					if (static_cast<int>(otherIndex) != thisIndex)
-						equivalentIndexes->at(otherIndex) = thisIndex;
-				}
-			}
-
-			//and the query point is always root
-			equivalentIndexes->at(thisIndex) = thisIndex;
-		}
-
-		if (nProgress && !nProgress->oneStep())
-		{
-			return false;
-		}
-	}
-
-	return true;
-}
-
 CC_FILE_ERROR STLFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
 {
 	ccLog::Print(QString("[STL] Loading '%1'").arg(filename));
@@ -439,127 +362,8 @@ CC_FILE_ERROR STLFilter::loadFile(const QString& filename, ccHObject& container,
 	}
 
 	//remove duplicated vertices
-	//if (false)
-	{
-		try
-		{
-			std::vector<int> equivalentIndexes;
-			const int razValue = -1;
-			equivalentIndexes.resize(vertCount, razValue);
-			
-			QScopedPointer<ccProgressDialog> pDlg(nullptr);
-			if (parameters.parentWidget)
-			{
-				pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
-			}
-			ccOctree::Shared octree = ccOctree::Shared(new ccOctree(vertices));
-			if (!octree->build(pDlg.data()))
-			{
-				octree.clear();
-			}
-			if (octree)
-			{
-				void* additionalParameters[] = { static_cast<void*>(&equivalentIndexes) };
-				unsigned result = octree->executeFunctionForAllCellsAtLevel(10,
-																			TagDuplicatedVertices,
-																			additionalParameters,
-																			false,
-																			pDlg.data(),
-																			"Tag duplicated vertices");
-
-				octree.clear();
-
-				if (result != 0)
-				{
-					unsigned remainingCount = 0;
-					for (unsigned i = 0; i < vertCount; ++i)
-					{
-						int eqIndex = equivalentIndexes[i];
-						assert(eqIndex >= 0);
-						if (eqIndex == static_cast<int>(i)) //root point
-						{
-							int newIndex = static_cast<int>(vertCount + remainingCount); //We replace the root index by its 'new' index (+ vertCount, to differentiate it later)
-							equivalentIndexes[i] = newIndex;
-							++remainingCount;
-						}
-					}
-
-					ccPointCloud* newVertices = new ccPointCloud("vertices");
-					if (newVertices->reserve(remainingCount))
-					{
-						//copy root points in a new cloud
-						{
-							for (unsigned i = 0; i < vertCount; ++i)
-							{
-								int eqIndex = equivalentIndexes[i];
-								if (eqIndex >= static_cast<int>(vertCount)) //root point
-									newVertices->addPoint(*vertices->getPoint(i));
-								else
-									equivalentIndexes[i] = equivalentIndexes[eqIndex]; //and update the other indexes
-							}
-						}
-
-						//update face indexes
-						{
-							unsigned newFaceCount = 0;
-							for (unsigned i = 0; i < faceCount; ++i)
-							{
-								CCCoreLib::VerticesIndexes* tri = mesh->getTriangleVertIndexes(i);
-								tri->i1 = static_cast<unsigned>(equivalentIndexes[tri->i1]) - vertCount;
-								tri->i2 = static_cast<unsigned>(equivalentIndexes[tri->i2]) - vertCount;
-								tri->i3 = static_cast<unsigned>(equivalentIndexes[tri->i3]) - vertCount;
-
-								//very small triangles (or flat ones) may be implicitly removed by vertex fusion!
-								if (tri->i1 != tri->i2 && tri->i1 != tri->i3 && tri->i2 != tri->i3)
-								{
-									if (newFaceCount != i)
-										mesh->swapTriangles(i, newFaceCount);
-									++newFaceCount;
-								}
-							}
-
-							if (newFaceCount == 0)
-							{
-								ccLog::Warning("[STL] After vertex fusion, all triangles would collapse! We'll keep the non-fused version...");
-								delete newVertices;
-								newVertices = nullptr;
-							}
-							else
-							{
-								mesh->resize(newFaceCount);
-							}
-						}
-
-						if (newVertices)
-						{
-							mesh->setAssociatedCloud(newVertices);
-							delete vertices;
-							vertices = newVertices;
-							vertCount = vertices->size();
-							ccLog::Print("[STL] Remaining vertices after auto-removal of duplicate ones: %i", vertCount);
-							ccLog::Print("[STL] Remaining faces after auto-removal of duplicate ones: %i", mesh->size());
-						}
-					}
-					else
-					{
-						ccLog::Warning("[STL] Not enough memory: couldn't removed duplicated vertices!");
-					}
-				}
-				else
-				{
-					ccLog::Warning("[STL] Duplicated vertices removal algorithm failed?!");
-				}
-			}
-			else
-			{
-				ccLog::Warning("[STL] Not enough memory: couldn't removed duplicated vertices!");
-			}
-		}
-		catch (const std::bad_alloc&)
-		{
-			ccLog::Warning("[STL] Not enough memory: couldn't removed duplicated vertices!");
-		}
-	}
+	mesh->mergeDuplicatedVertices(ccMesh::DefaultMergeDulicateVerticesLevel, parameters.parentWidget);
+	vertices = nullptr; //warning, after this point, 'vertices' is not valid anymore
 
 	NormsIndexesTableType* normals = mesh->getTriNormsTable();
 	if (normals)
@@ -578,9 +382,10 @@ CC_FILE_ERROR STLFilter::loadFile(const QString& filename, ccHObject& container,
 		//	ccLog::Warning("[STL] Failed to compute per-vertex normals...");
 		ccLog::Warning("[STL] Mesh has no normal! You can manually compute them (select it then call \"Edit > Normals > Compute\")");
 	}
-	vertices->setEnabled(false);
-	vertices->setLocked(false); //DGM: no need to lock it as it is only used by one mesh!
-	mesh->addChild(vertices);
+	ccGenericPointCloud* meshVertices = mesh->getAssociatedCloud();
+	meshVertices->setEnabled(false);
+	meshVertices->setLocked(false); //DGM: no need to lock it as it is only used by one mesh!
+	mesh->addChild(meshVertices);
 
 	container.addChild(mesh);
 

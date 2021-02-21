@@ -160,7 +160,7 @@ CC_FILE_ERROR STEPFilter::importStepFile(	ccHObject& container,
 	int rootCount = aReader.NbRootsForTransfer();
 	if (rootCount < 1)
 	{
-		ccLog::Print("No root found in the STEP file.");
+		ccLog::Warning("No root found in the STEP file.");
 		return CC_FERR_NO_LOAD;
 	}
 	ccLog::Print(QString("[STEP] Number of root(s): %1").arg(rootCount));
@@ -176,14 +176,14 @@ CC_FILE_ERROR STEPFilter::importStepFile(	ccHObject& container,
 	int transferredRootCount = aReader.TransferRoots();
 	if (transferredRootCount < 1)
 	{
-		ccLog::Print("No root could be transferred from the STEP file.");
+		ccLog::Warning("No root could be transferred from the STEP file.");
 		return CC_FERR_NO_LOAD;
 	}
 
 	Standard_Integer shapeCount = aReader.NbShapes();
 	if (shapeCount == 0)
 	{
-		ccLog::Print("No shape found in the STEP file.");
+		ccLog::Warning("No shape found in the STEP file.");
 		return CC_FERR_NO_LOAD;
 	}
 	ccLog::Print(QString("[STEP] Number of shapes: %1").arg(shapeCount));
@@ -240,9 +240,6 @@ CC_FILE_ERROR STEPFilter::importStepFile(	ccHObject& container,
 			gp_Pnt p2 = nodes.Value(index2).Transformed(nodeTransformation);
 			gp_Pnt p3 = nodes.Value(index3).Transformed(nodeTransformation);
 
-			//===============================================================================
-			// Note for Daniel : the vertices that are duplicated should be fused.
-			//===============================================================================
 			unsigned vertIndexes[3];
 			vertIndexes[0] = vertices->size();
 			vertices->addPoint(CCVector3(p1.X(), p1.Y(), p1.Z()));
@@ -261,6 +258,14 @@ CC_FILE_ERROR STEPFilter::importStepFile(	ccHObject& container,
 	ccLog::Print("[STEP] Number of CAD faces  = " + QString::number(faceCount));
 	ccLog::Print("[STEP] Number of triangles (after tesselation) = " + QString::number(triCount));
 	ccLog::Print("[STEP] Number of vertices (after tesselation)  = " + QString::number(vertCount));
+
+	mesh->mergeDuplicatedVertices(ccMesh::DefaultMergeDulicateVerticesLevel, parameters.parentWidget);
+	vertices = nullptr; //warning, after this point, 'vertices' is not valid anymore
+
+	if (mesh->computePerTriangleNormals())
+	{
+		mesh->showNormals(true);
+	}
 
 	container.addChild(mesh);
 

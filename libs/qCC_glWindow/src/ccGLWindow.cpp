@@ -4370,7 +4370,11 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 				if (!processClickableItems(x, y))
 				{
 					m_lastMousePos = event->pos(); //just in case (it should be already at this position)
-					m_deferredPickingTimer.start();
+					const ccGui::ParamStruct& displayParams = getDisplayParameters();
+					if (displayParams.singleClickPicking)
+					{
+						m_deferredPickingTimer.start();
+					}
 					//doPicking();
 				}
 			}

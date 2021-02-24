@@ -87,9 +87,15 @@ public:
 	bool InSpace(size_t u, size_t v, float epsilon,
 		const GfxTL::AABox< GfxTL::Vector2Df > &bbox, size_t uextent,
 		size_t vextent, Vec3f *p, Vec3f *n) const;
-	bool CheckGeneratedShapeWithinLimits() override
+	bool CheckGeneratedShapeWithinLimits(const PointCloud& pc,
+		MiscLib::Vector< size_t >::const_iterator begin,
+		MiscLib::Vector< size_t >::const_iterator end) override
 	{
-		if (m_cone.RadiusAtLength(std::max(fabs(m_extBbox.Min()[0]), fabs(m_extBbox.Max()[0]))) <= m_maxRadius && m_cone.Angle() <= m_maxAngle)
+		if (m_cone.RadiusAtLength(m_extBbox.Min()[0]) <= m_maxRadius &&
+			m_cone.RadiusAtLength(m_extBbox.Max()[0]) <= m_maxRadius &&
+			m_cone.RadiusAtLength(m_extBbox.Min()[1]) <= m_maxRadius &&
+			m_cone.RadiusAtLength(m_extBbox.Max()[1]) <= m_maxRadius &&
+			m_cone.Angle() <= m_maxAngle)
 		{
 			return true;
 		}

@@ -96,7 +96,9 @@ public:
 		const GfxTL::AABox< GfxTL::Vector2Df > &bbox, size_t uextent,
 		size_t vextent, Vec3f *p, Vec3f *n) const;
 	const Torus &Internal() const { return m_torus; }
-	bool CheckGeneratedShapeWithinLimits() override
+	bool CheckGeneratedShapeWithinLimits(const PointCloud& pc,
+		MiscLib::Vector< size_t >::const_iterator begin,
+		MiscLib::Vector< size_t >::const_iterator end) override
 	{
 		if ((!m_allowAppleShaped && m_torus.IsAppleShaped()) || 
 			m_torus.MinorRadius() > m_maxMinorRadius || 

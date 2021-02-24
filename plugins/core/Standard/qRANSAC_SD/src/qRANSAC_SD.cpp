@@ -175,8 +175,8 @@ void qRansacSD::doAction()
 
 	//init dialog with default values
 	ccRansacSDDlg rsdDlg(m_app->getMainWindow());
-	rsdDlg.epsilonDoubleSpinBox->setValue(.005f * scale);		// set distance threshold to 0.5% of bounding box width
-	rsdDlg.bitmapEpsilonDoubleSpinBox->setValue(.01f * scale);	// set bitmap resolution (= sampling resolution) to 1% of bounding box width
+	rsdDlg.epsilonDoubleSpinBox->setValue(.005 * scale);		// set distance threshold to 0.5% of bounding box width
+	rsdDlg.bitmapEpsilonDoubleSpinBox->setValue(.01 * scale);	// set bitmap resolution (= sampling resolution) to 1% of bounding box width
 	rsdDlg.supportPointsSpinBox->setValue(s_supportPoints);
 	rsdDlg.maxNormDevAngleSpinBox->setValue(s_maxNormalDev_deg);
 	rsdDlg.probaDoubleSpinBox->setValue(s_proba);
@@ -189,8 +189,10 @@ void qRansacSD::doAction()
 	rsdDlg.saveLeftOverscheckBox->setChecked(s_createCloudFromLeftOverPoints);
 	rsdDlg.maxSphereRadiuscheckBox->setChecked(s_maxSphereRadiusEnabled);
 	rsdDlg.maxCylinderRadiuscheckBox->setChecked(s_maxCylinderRadiusEnabled);
+	rsdDlg.maxCylinderLengthcheckBox->setChecked(s_maxCylinderLengthEnabled);
 	rsdDlg.maxConeAnglecheckBox->setChecked(s_maxConeAngleEnabled);
 	rsdDlg.maxConeRadiuscheckBox->setChecked(s_maxConeRadiusEnabled);
+	rsdDlg.maxConeLengthcheckBox->setChecked(s_maxConeLengthEnabled);
 	rsdDlg.maxSphereRadiusdoubleSpinBox->setValue(s_maxSphereRadius);
 	rsdDlg.maxCylinderRadiusdoubleSpinBox->setValue(s_maxCylinderRadius);
 	rsdDlg.maxConeRadiusdoubleSpinBox->setValue(s_maxConeRadius);

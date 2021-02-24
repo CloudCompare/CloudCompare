@@ -287,7 +287,7 @@ bool CylinderPrimitiveShape::Similar(float tolerance,
 
 float CylinderPrimitiveShape::Height() const
 {
-	return m_extBbox.Max()[0] - m_extBbox.Min()[0];
+	return std::abs(m_extBbox.Max()[0] - m_extBbox.Min()[0]);
 }
 
 float CylinderPrimitiveShape::MinHeight() const

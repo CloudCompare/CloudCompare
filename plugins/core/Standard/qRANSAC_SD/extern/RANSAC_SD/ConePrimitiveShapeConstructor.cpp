@@ -39,7 +39,7 @@ PrimitiveShape *ConePrimitiveShapeConstructor::Construct(
 		|| m_maxConeLength < std::numeric_limits< float >::infinity())
 	{
 		Cone::ConeInfo ci = cone.GetInfo(points);
-		if (ci.height > m_maxConeLength || ci.maxRadius > m_maxConeRadius)
+		if (ci.height > m_maxConeLength || ci.maxRadius > m_maxConeRadius || ci.minRadius > m_maxConeRadius)
 		{
 			return NULL;
 		}
@@ -55,6 +55,21 @@ PrimitiveShape *ConePrimitiveShapeConstructor::Construct(
 	Cone cone;
 	if(!cone.Init(samples))
 		return NULL;
+	if (cone.Angle() > 1.4835298641951801403851371532153 || // do not allow cones with an opening angle of more than 85 degrees
+		cone.Angle() > m_maxAngle)
+	{
+		return NULL;
+	}
+	if (m_maxConeRadius < std::numeric_limits< float >::infinity()
+		|| m_maxConeLength < std::numeric_limits< float >::infinity())
+	{
+		Cone::ConeInfo ci = cone.GetInfo(samples);
+		if (ci.height > m_maxConeLength || ci.maxRadius > m_maxConeRadius || ci.minRadius > m_maxConeRadius)
+		{
+			return NULL;
+		}
+	}
+
 	return new ConePrimitiveShape(cone, m_maxConeRadius, m_maxAngle, m_maxConeLength);
 }
 

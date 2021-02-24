@@ -90,7 +90,9 @@ public:
 	bool InSpace(size_t u, size_t v, float epsilon,
 		const GfxTL::AABox< GfxTL::Vector2Df > &bbox, size_t uextent,
 		size_t vextent, Vec3f *p, Vec3f *n) const;
-	bool CheckGeneratedShapeWithinLimits() override
+	bool CheckGeneratedShapeWithinLimits(const PointCloud& pc,
+		MiscLib::Vector< size_t >::const_iterator begin,
+		MiscLib::Vector< size_t >::const_iterator end) override
 	{
 		if (m_cylinder.Radius() <= m_maxRadius && Height() <= m_maxLength)
 		{

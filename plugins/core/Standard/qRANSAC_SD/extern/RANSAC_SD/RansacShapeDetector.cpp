@@ -585,7 +585,7 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 		size_t firstCandidateSize = 0;
 		while(FindBestCandidate(candidates, octrees, pc, subsetScoreVisitor,
 			currentSize, drawnCandidates, numInvalid,
-			std::max(static_cast<size_t>(m_options.m_minSupport), static_cast<size_t>(0.8f * firstCandidateSize)),
+			std::max(static_cast<size_t>(m_options.m_minSupport), static_cast<size_t>(0.8 * firstCandidateSize)),
 			globalOctTreeMaxNodeDepth, &maxForgottenCandidate,
 			&bestCandidateFailureProbability))
 		{
@@ -635,20 +635,27 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 					oldScore = newScore;
 					oldSize = newSize;
 					std::pair< size_t, float > score;
-					PrimitiveShape *shape;
+					PrimitiveShape* shape;
 					shape = Fit(allowDifferentShapes, *clone.Shape(),
 						pc, clone.Indices()->begin(), clone.Indices()->end(),
 						&score);
-					if(shape && shape->CheckGeneratedShapeWithinLimits())
-					{
-						clone.Shape(shape);
-						newScore = clone.GlobalWeightedScore( globalScoreVisitor, globalOctree,
-							pc, 3 * m_options.m_epsilon, m_options.m_normalThresh,
-							m_options.m_bitmapEpsilon );
-						newSize = clone.Size();
-						shape->Release();
-						if(newScore > oldScore && newSize > m_options.m_minSupport)
-							clone.Clone(&candidates.back());
+					if (shape)
+					{		
+						if (shape->CheckGeneratedShapeWithinLimits(pc, clone.Indices()->begin(), clone.Indices()->end()))
+						{
+							clone.Shape(shape);
+							newScore = clone.GlobalWeightedScore(globalScoreVisitor, globalOctree,
+								pc, 3 * m_options.m_epsilon, m_options.m_normalThresh,
+								m_options.m_bitmapEpsilon);
+							newSize = clone.Size();
+							shape->Release();
+							if (newScore > oldScore && newSize > m_options.m_minSupport)
+								clone.Clone(&candidates.back());
+						}
+						else
+						{
+							shape->Release();
+						}
 					}
 					//allowDifferentShapes = false;
 				}

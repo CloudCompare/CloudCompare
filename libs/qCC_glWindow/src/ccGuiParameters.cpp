@@ -108,6 +108,8 @@ void ccGui::ParamStruct::reset()
 	zoomSpeed					= 1.0;
 
 	autoComputeOctree			= ASK_USER;
+
+	singleClickPicking			= true;
 }
 
 static int c_fColorArraySize  = sizeof(float) * 4;
@@ -151,7 +153,7 @@ void ccGui::ParamStruct::fromPersistentSettings()
 	labelOpacity				= static_cast<unsigned>(std::max(0,    settings.value("labelOpacity",             75  ).toInt()));
 	zoomSpeed					=                                      settings.value("zoomSpeed",                1.0 ).toDouble();
 	autoComputeOctree			= static_cast<ComputeOctreeForPicking>(settings.value("autoComputeOctree",   ASK_USER ).toInt());
-
+	singleClickPicking			=									   settings.value("singleClickPicking",		 true ).toBool();
 	settings.endGroup();
 }
 
@@ -191,7 +193,7 @@ void ccGui::ParamStruct::toPersistentSettings() const
 	settings.setValue("labelOpacity",             labelOpacity);
 	settings.setValue("zoomSpeed",                zoomSpeed);
 	settings.setValue("autoComputeOctree",        static_cast<int>(autoComputeOctree));
-
+	settings.setValue("singleClickPicking",		  singleClickPicking);
 	settings.endGroup();
 }
 

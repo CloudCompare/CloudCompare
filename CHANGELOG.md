@@ -22,6 +22,8 @@ v2.12 (???) - (in development)
 	- Localization:
 		- Korean is now supported (thanks to Yun-Ho Chung)
 		- Russian translation has been updated (thanks to Gene Kalabin)
+		- Chinese is now supported (thanks to https://github.com/jindili)
+	- The option 'Edit > Normals > Invert' can now be used on meshes
 	- qCSF:
 		- added support for command line mode with all available options, except cloth export
 		- use -CSF to run the plugin with the next optional settings:
@@ -38,6 +40,10 @@ v2.12 (???) - (in development)
 				The former '-OUTPUT_RASTER_Z' option will only export the altitudes as its name implies.
 		- New sub-option for the RANSAC plugin command line option (-RANSAC)
 			- OUT_RANDOM_COLOR = generate random colors for the output clouds (false by default now)
+        - New sub-option for the FILTER_SF command:
+			- N_SIGMA_MIN and N_SIGMA_MAX: specify the option followed by a numeric value to filter by N * standardDeviation around the mean.
+		- new option '-INVERT_NORMALS':
+			- Inverts the normals of the loaded entities (cloud or mesh, and per-triangle or per-vertex for meshes)
 	- STL:
 		- loading speed should be greatly improved (compared to v2.10 and v2.11)
 	- Global Shift & Scale:
@@ -46,6 +52,12 @@ v2.12 (???) - (in development)
 	- Align tool (Point-pair based registration):
 		- labels associated to a point cloud will now remain visible and the user can pick them
 		- the tool will display the corresponding label title in the registration summary tables
+	- 2.5D Volume calculation tool
+		- the tool now preserves the Global Shift when exporting the difference map/cloud
+	- LAS files:
+	    - the Global Shift, if defined, will now be used as LAS offset if no offset was previously set
+		- the PDAL LAS I/O filter and the libLAS I/O filter should now both handle LAS offset
+		  and scale the same way at export time.
 
 - New plugins
 	- MPlane: perform normal distance measurements against a defined plane (see https://www.cloudcompare.org/doc/wiki/index.php?title=MPlane_(plugin) )
@@ -65,6 +77,9 @@ v2.12 (???) - (in development)
 	- The 'Clean > Noise' tool was mixing the number of neighbors (knn) and the 'kernel radius' parameters
 	- PLY filter was exporting large coordinates with a limited accuracy when creating ASCII files
 	- the 'flip normals' checkbox of the C2M comparison dialog was not accessible anymore
+	- minimal LAS scale suggested by CC was sometimes too small, potentially triggering a PDAL exception.
+	- When loading raster files, GDAL can sometimes report wrong min and max altitudes. This would then let CC think that invalid pixels are
+		present. And when telling CC to keep these invalid points, the altitude was actually already replaced by a strange one...
 
 
 v2.11.3 (Anoia) - 08/09/2020

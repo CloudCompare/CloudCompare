@@ -109,6 +109,7 @@ constexpr char COMMAND_ICP_USE_DATA_SF_AS_WEIGHT[]		= "DATA_SF_AS_WEIGHTS";
 constexpr char COMMAND_ICP_ROT[]						= "ROT";
 constexpr char COMMAND_PLY_EXPORT_FORMAT[]				= "PLY_EXPORT_FMT";
 constexpr char COMMAND_COMPUTE_GRIDDED_NORMALS[]		= "COMPUTE_NORMALS";
+constexpr char COMMAND_INVERT_NORMALS[]					= "INVERT_NORMALS";
 constexpr char COMMAND_COMPUTE_OCTREE_NORMALS[]			= "OCTREE_NORMALS";
 constexpr char COMMAND_CONVERT_NORMALS_TO_DIP[]			= "NORMALS_TO_DIP";
 constexpr char COMMAND_CONVERT_NORMALS_TO_SFS[]			= "NORMALS_TO_SFS";
@@ -560,6 +561,70 @@ bool CommandClearNormals::process(ccCommandLineInterface &cmd)
 	return true;
 }
 
+CommandInvertNormal::CommandInvertNormal()
+	: ccCommandLineInterface::Command(QObject::tr("Invert normals"), COMMAND_INVERT_NORMALS)
+{}
+
+bool CommandInvertNormal::process(ccCommandLineInterface &cmd)
+{
+	cmd.print(QObject::tr("[INVERT NORMALS]"));
+
+	if (cmd.clouds().empty() && cmd.meshes().empty())
+	{
+		return cmd.error(QObject::tr("No input point cloud or mesh (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_INVERT_NORMALS));
+	}
+
+	for (CLCloudDesc& thisCloudDesc : cmd.clouds())
+	{
+		ccPointCloud* cloud = thisCloudDesc.pc;
+
+		if (!cloud->hasNormals())
+		{
+			cmd.warning(QObject::tr("Cloud %1 has no normals").arg(cloud->getName()));
+			continue;
+		}
+
+		cloud->invertNormals();
+
+		if (cmd.autoSaveMode())
+		{
+			QString errorStr = cmd.exportEntity(thisCloudDesc, "_INVERTED_NORMALS");
+			if (!errorStr.isEmpty())
+			{
+				return cmd.error(errorStr);
+			}
+		}
+	}
+
+	for (CLMeshDesc& thisMeshDesc : cmd.meshes())
+	{
+		ccMesh* mesh = ccHObjectCaster::ToMesh(thisMeshDesc.mesh);
+		if (!mesh)
+		{
+			assert(false);
+			continue;
+		}
+
+		if (!mesh->hasNormals())
+		{
+			cmd.warning(QObject::tr("Mesh %1 has no normals").arg(mesh->getName()));
+			continue;
+		}
+
+		mesh->invertNormals();
+
+		if (cmd.autoSaveMode())
+		{
+			QString errorStr = cmd.exportEntity(thisMeshDesc, "_INVERTED_NORMALS");
+			if (!errorStr.isEmpty())
+			{
+				return cmd.error(errorStr);
+			}
+		}
+	}
+
+	return true;
+}
 CommandOctreeNormal::CommandOctreeNormal()
 	: ccCommandLineInterface::Command(QObject::tr("Compute normals with octree"), COMMAND_COMPUTE_OCTREE_NORMALS)
 {}

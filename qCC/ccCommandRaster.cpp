@@ -255,7 +255,6 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 		//if no export target is specified, we chose the cloud by default
 		outputCloud = true;
 	}
-	assert(outputCloud || outputMesh);
 
 	if (resample && !outputCloud && !outputMesh)
 	{

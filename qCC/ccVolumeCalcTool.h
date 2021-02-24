@@ -147,6 +147,12 @@ protected:
 	//! Sets the displayed number precision
 	void setDisplayedNumberPrecision(int);
 
+	//! Returns the ground cloud (or constant height)
+	std::pair<ccGenericPointCloud*, double> getGroundCloud() const;
+
+	//! Returns the ceil cloud (or constant height)
+	std::pair<ccGenericPointCloud*, double> getCeilCloud() const;
+
 protected: //standard methods
 
 	//Inherited from cc2Point5DimEditor

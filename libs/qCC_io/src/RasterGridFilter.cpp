@@ -206,7 +206,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 
 			//fetch raster bands
 			bool zRasterProcessed = false;
-			unsigned zInvalid = 0;
+			CCCoreLib::ReferenceCloud validPoints(pc);
 			double zMinMax[2] = { 0, 0 };
 
 			for (int i = 1; i <= rasterCount; ++i)
@@ -258,6 +258,15 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 					//double* scanline = new double[nXSize];
 					memset(scanline, 0, sizeof(double)*nXSize);
 
+					if (!validPoints.reserve(pc->capacity()))
+					{
+						assert(!quad);
+						delete pc;
+						CPLFree(scanline);
+						GDALClose(poDataset);
+						return CC_FERR_READING;
+					}
+
 					for (int j = 0; j < nYSize; ++j)
 					{
 						if (poBand->RasterIO(	GF_Read,
@@ -285,12 +294,11 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 							unsigned pointIndex = static_cast<unsigned>(k + j * rasterX);
 							if (pointIndex <= pc->size())
 							{
-								if (z < zMinMax[0] || z > zMinMax[1])
-								{
-									z = zMinMax[0] - 1.0;
-									++zInvalid;
-								}
 								const_cast<CCVector3*>(pc->getPoint(pointIndex))->z = static_cast<PointCoordinateType>(z);
+								if (z >= zMinMax[0] && z <= zMinMax[1])
+								{
+									validPoints.addPointIndex(pointIndex);
+								}
 							}
 						}
 					}
@@ -501,49 +509,27 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 				{
 					ccLog::Warning("Raster has no height (Z) information: you can convert one of its scalar fields to Z with 'Edit > Scalar Fields > Set SF as coordinate(s)'");
 				}
-				else if (zInvalid != 0 && zInvalid < pc->size())
+				else if (validPoints.size() != 0 && validPoints.size() < pc->size())
 				{
 					//shall we remove the points with invalid heights?
 					static bool s_alwaysRemoveInvalidHeights = false;
 					int result = QMessageBox::Yes;
 					if (parameters.parentWidget) //otherwise it means we are in command line mode --> no popup
 					{
-						result = (s_alwaysRemoveInvalidHeights ? QMessageBox::Yes : QMessageBox::question(0, "Remove NaN points?", "This raster has pixels with invalid heights. Shall we remove them?", QMessageBox::Yes, QMessageBox::YesToAll, QMessageBox::No));
+						result = (s_alwaysRemoveInvalidHeights ? QMessageBox::Yes : QMessageBox::question(0, "Remove invalid points?", "This raster has pixels with invalid heights. Shall we remove them?", QMessageBox::Yes, QMessageBox::YesToAll, QMessageBox::No));
 					}
-					if (result != QMessageBox::No)
+					if (result != QMessageBox::No) //Yes = let's remove them
 					{
 						if (result == QMessageBox::YesToAll)
 							s_alwaysRemoveInvalidHeights = true;
 
-						CCCoreLib::ReferenceCloud validPoints(pc);
-						unsigned count = pc->size();
-						bool error = true;
-						if (validPoints.reserve(count - zInvalid))
+						ccPointCloud* newPC = pc->partialClone(&validPoints);
+						if (newPC)
 						{
-							for (unsigned i = 0; i < count; ++i)
-							{
-								if (pc->getPoint(i)->z >= zMinMax[0])
-									validPoints.addPointIndex(i);
-							}
-
-							if (validPoints.size() > 0)
-							{
-								validPoints.resize(validPoints.size());
-								ccPointCloud* newPC = pc->partialClone(&validPoints);
-								if (newPC)
-								{
-									delete pc;
-									pc = newPC;
-									error = false;
-								}
-							}
-							else
-							{
-								assert(false);
-							}
+							delete pc;
+							pc = newPC;
 						}
-
-						if (error)
+						else
 						{
 							ccLog::Error("Not enough memory to remove the points with invalid heights!");
 						}

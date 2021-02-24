@@ -3986,9 +3986,9 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 //		progressCb->start();
 //	}
 //
-//	PointCoordinateType tan_alpha = static_cast<PointCoordinateType>(tan(alpha_deg*CCCoreLib::DEG_TO_RAD));
-//	PointCoordinateType cos_alpha = static_cast<PointCoordinateType>(cos(alpha_deg*CCCoreLib::DEG_TO_RAD));
-//	PointCoordinateType sin_alpha = static_cast<PointCoordinateType>(sin(alpha_deg*CCCoreLib::DEG_TO_RAD));
+//	PointCoordinateType tan_alpha = static_cast<PointCoordinateType>(tan(CCCoreLib::DegreesToRadians(alpha_deg)));
+//	PointCoordinateType cos_alpha = static_cast<PointCoordinateType>(cos(CCCoreLib::DegreesToRadians(alpha_deg)));
+//	PointCoordinateType sin_alpha = static_cast<PointCoordinateType>(sin(CCCoreLib::DegreesToRadians(alpha_deg)));
 //
 //	for (unsigned i = 0; i < numberOfPoints; i++)
 //	{
@@ -4853,7 +4853,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 
 	//init VBOs
 	unsigned pointsInVBOs = 0;
-	int totalSizeBytesBefore = m_vboManager.totalMemSizeBytes;
+	size_t totalSizeBytesBefore = m_vboManager.totalMemSizeBytes;
 	m_vboManager.totalMemSizeBytes = 0;
 	{
 		//DGM: the context should be already active as this method should only be called from 'drawMeOnly'
@@ -4970,7 +4970,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 				}
 				else
 				{
-					m_vboManager.totalMemSizeBytes += vboSizeBytes;
+					m_vboManager.totalMemSizeBytes += static_cast<size_t>(vboSizeBytes);
 					pointsInVBOs += chunkSize;
 				}
 			}
@@ -5079,6 +5079,11 @@ int ccPointCloud::VBO::init(int count, bool withColors, bool withNormals, bool* 
 	return totalSizeBytes;
 }
 
+size_t ccPointCloud::vboSize() const
+{
+	return m_vboManager.totalMemSizeBytes;
+}
+
 void ccPointCloud::releaseVBOs()
 {
 	if (m_vboManager.state == vboSet::NEW)
@@ -5168,7 +5173,7 @@ bool ccPointCloud::computeNormalsWithGrids(	double minTriangleAngle_deg/*=1.0*/,
 	}
 
 	PointCoordinateType minAngleCos = static_cast<PointCoordinateType>(cos( CCCoreLib::DegreesToRadians( minTriangleAngle_deg ) ));
-	//double minTriangleAngle_rad = minTriangleAngle_deg *CCCoreLib::CCCoreLib::DEG_TO_RAD;
+	//double minTriangleAngle_rad = CCCoreLib::DegreesToRadians(minTriangleAngle_deg);
 
 	//for each grid cell
 	for (size_t gi = 0; gi < gridCount(); ++gi)
@@ -5750,7 +5755,7 @@ ccMesh* ccPointCloud::triangulateGrid(const Grid& grid, double minTriangleAngle_
 	}
 
 	PointCoordinateType minAngleCos = static_cast<PointCoordinateType>(cos( CCCoreLib::DegreesToRadians( minTriangleAngle_deg ) ));
-	//double minTriangleAngle_rad = minTriangleAngle_deg *CCCoreLib::CCCoreLib::DEG_TO_RAD;
+	//double minTriangleAngle_rad = CCCoreLib::DegreesToRadians(minTriangleAngle_deg);
 	
 	for (int j = 0; j < static_cast<int>(grid.h) - 1; ++j)
 	{

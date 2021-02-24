@@ -704,6 +704,7 @@ void MainWindow::connectActions()
 
 	//"Display" menu
 	connect(m_UI->actionResetGUIElementsPos,		&QAction::triggered, this, &MainWindow::doActionResetGUIElementsPos);
+	connect(m_UI->actionResetAllVBOs,				&QAction::triggered, this, &MainWindow::doActionResetAllVBOs);
 
 	//"3D Views" menu
 	connect(m_UI->menu3DViews,						&QMenu::aboutToShow, this, &MainWindow::update3DViewsMenu);
@@ -5735,7 +5736,7 @@ QMdiSubWindow* MainWindow::getMDISubWindow(ccGLWindow* win)
 
 ccGLWindow* MainWindow::getGLWindow(int index) const
 {
-	QList<QMdiSubWindow*> subWindowList = m_mdiArea->subWindowList();
+	QList<QMdiSubWindow*> subWindowList = m_mdiArea->subWindowList();	
 	if (index >= 0 && index < subWindowList.size())
 	{
 		ccGLWindow* win = GLWindowFromWidget(subWindowList[index]->widget());
@@ -5856,7 +5857,7 @@ void MainWindow::prepareWindowDeletion(QObject* glWindow)
 static bool s_autoSaveGuiElementPos = true;
 void MainWindow::doActionResetGUIElementsPos()
 {
-	// show the user it will be maximized
+	//show the user it will be maximized
 	showMaximized();
 
 	QSettings settings;
@@ -5869,6 +5870,36 @@ void MainWindow::doActionResetGUIElementsPos()
 	
 	//to avoid saving them right away!
 	s_autoSaveGuiElementPos = false;
+}
+
+void MainWindow::doActionResetAllVBOs()
+{
+	ccHObject::Container clouds;
+	m_ccRoot->getRootEntity()->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD, true);
+
+	size_t releasedSize = 0;
+	for (ccHObject* entity : clouds)
+	{
+		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
+		if (cloud)
+		{
+			releasedSize += cloud->vboSize();
+			cloud->releaseVBOs();
+		}
+	}
+
+	if (releasedSize != 0)
+	{
+		ccLog::Print(tr("All VBOs have been released (%1 Mb)").arg(releasedSize / static_cast<double>(1 << 20), 0, 'f', 2));
+		if (ccGui::Parameters().useVBOs)
+		{
+			ccLog::Warning(tr("You might want to disable the 'use VBOs' option in the Display Settings to keep the GPU memory empty"));
+		}
+	}
+	else
+	{
+		ccLog::Print(tr("No VBO allocated"));
+	}
 }
 
 void MainWindow::showEvent(QShowEvent* event)

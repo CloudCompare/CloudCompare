@@ -961,7 +961,7 @@ bool ccGenericMesh::trianglePicking(unsigned triIndex,
 
 	//barycentric coordinates
 	GLdouble detT = (B2D.y - C2D.y) * (A2D.x - C2D.x) + (C2D.x - B2D.x) * (A2D.y - C2D.y);
-	if (std::abs(detT) < CCCoreLib::ZERO_TOLERANCE)
+	if (CCCoreLib::LessThanEpsilon(std::abs(detT)))
 	{
 		return false;
 	}

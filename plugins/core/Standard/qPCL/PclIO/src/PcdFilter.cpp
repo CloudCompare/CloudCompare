@@ -80,9 +80,9 @@ CC_FILE_ERROR PcdFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	}
 
 	//search for a sensor as child (we take the first if there are several of them)
-	ccSensor* sensor(0);
+	ccSensor* sensor(nullptr);
 	{
-		for (unsigned i=0; i<ccCloud->getChildrenNumber(); ++i)
+		for (unsigned i = 0; i < ccCloud->getChildrenNumber(); ++i)
 		{
 			ccHObject* child = ccCloud->getChild(i);
 
@@ -103,26 +103,26 @@ CC_FILE_ERROR PcdFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	Eigen::Quaternionf ori;
 	if (!sensor)
 	{
-		//we append to the cloud null sensor informations
+		//no sensor data
 		pos = Eigen::Vector4f::Zero();
 		ori = Eigen::Quaternionf::Identity();
 	}
 	else
 	{
-		//we get out valid sensor informations
+		//get sensor data
 		ccGLMatrix mat = sensor->getRigidTransformation();
 		CCVector3 trans = mat.getTranslationAsVec3D();
 		pos(0) = trans.x;
 		pos(1) = trans.y;
 		pos(2) = trans.z;
 
-		//also the rotation
+		//rotation
 		Eigen::Matrix3f eigrot;
 		for (int i = 0; i < 3; ++i)
 			for (int j = 0; j < 3; ++j)
 				eigrot(i,j) = mat.getColumn(j)[i];
 
-		//now translate to a quaternion notation
+		//now translate to a quaternion
 		ori = Eigen::Quaternionf(eigrot);
 	}
 	if (ccCloud->size() == 0)

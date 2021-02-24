@@ -70,7 +70,7 @@ ccPointCloud* sm2ccConverter::getCloud()
 	if (!m_sm_cloud)
 	{
 		assert(false);
-		return 0;
+		return nullptr;
 	}
 	
 	//get the fields list
@@ -83,8 +83,10 @@ ccPointCloud* sm2ccConverter::getCloud()
 
 	//begin with checks and conversions
 	//be sure we have x, y, and z fields
-	if (!ExistField(m_sm_cloud,"x") || !ExistField(m_sm_cloud,"y") || !ExistField(m_sm_cloud,"z"))
-		return 0;
+	if (!ExistField(m_sm_cloud, "x") || !ExistField(m_sm_cloud, "y") || !ExistField(m_sm_cloud, "z"))
+	{
+		return nullptr;
+	}
 
 	//create cloud
 	ccPointCloud* cloud = new ccPointCloud();
@@ -95,7 +97,7 @@ ccPointCloud* sm2ccConverter::getCloud()
 		if (!addXYZ(cloud))
 		{
 			delete cloud;
-			return 0;
+			return nullptr;
 		}
 	}
 

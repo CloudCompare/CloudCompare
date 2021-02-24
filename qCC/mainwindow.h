@@ -372,6 +372,7 @@ private:
 	void doActionAdjustZoom();
 	void doActionSaveViewportAsCamera();
 	void doActionResetGUIElementsPos();
+	void doActionResetAllVBOs();
 
 	//Shaders & plugins
 	void doActionLoadShader();

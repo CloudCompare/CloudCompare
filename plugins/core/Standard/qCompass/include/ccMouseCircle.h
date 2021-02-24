@@ -49,7 +49,7 @@ public:
 
 protected:
 	//draws a circle of radius r around the mouse
-	void draw(CC_DRAW_CONTEXT& context);
+	void draw(CC_DRAW_CONTEXT& context) override;
 
 private:
 	//ccGLWindow this overlay is attached to -> used to get mouse position & events

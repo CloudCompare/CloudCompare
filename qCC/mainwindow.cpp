@@ -3549,7 +3549,7 @@ void MainWindow::doActionRegister()
 	ccHObject* data = static_cast<ccHObject*>(m_selectedEntities[1]);
 	ccHObject* model = static_cast<ccHObject*>(m_selectedEntities[0]);
 
-	ccRegistrationDlg rDlg(data,model,this);
+	ccRegistrationDlg rDlg(data, model, this);
 	if (!rDlg.exec())
 		return;
 
@@ -3557,7 +3557,19 @@ void MainWindow::doActionRegister()
 	model = rDlg.getModelEntity();
 	data = rDlg.getDataEntity();
 
-	double minRMSDecrease										= rDlg.getMinRMSDecrease();
+	double minRMSDecrease = rDlg.getMinRMSDecrease();
+	if (std::isnan(minRMSDecrease))
+	{
+		ccLog::Error(tr("Invalid minimum RMS decrease value"));
+		return;
+	}
+	if (minRMSDecrease < ccRegistrationDlg::GetAbsoluteMinRMSDecrease())
+	{
+		minRMSDecrease = ccRegistrationDlg::GetAbsoluteMinRMSDecrease();
+		ccLog::Error(tr("Minimum RMS decrease value is too small.\n%1 will be used instead (numerical accuracy limit).").arg(minRMSDecrease, 0, 'E', 1));
+		rDlg.setMinRMSDecrease(minRMSDecrease);
+	}
+
 	unsigned maxIterationCount									= rDlg.getMaxIterationCount();
 	unsigned randomSamplingLimit								= rDlg.randomSamplingLimit();
 	bool removeFarthestPoints									= rDlg.removeFarthestPoints();
@@ -3566,7 +3578,7 @@ void MainWindow::doActionRegister()
 	bool adjustScale											= rDlg.adjustScale();
 	int transformationFilters									= rDlg.getTransformationFilters();
 	unsigned finalOverlap										= rDlg.getFinalOverlap();
-	CCCoreLib::ICPRegistrationTools::CONVERGENCE_TYPE method		= rDlg.getConvergenceMethod();
+	CCCoreLib::ICPRegistrationTools::CONVERGENCE_TYPE method	= rDlg.getConvergenceMethod();
 	int maxThreadCount											= rDlg.getMaxThreadCount();
 
 	//semi-persistent storage (for next call)

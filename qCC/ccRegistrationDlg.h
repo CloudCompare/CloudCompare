@@ -60,6 +60,14 @@ public:
 	**/
 	double getMinRMSDecrease() const;
 
+	//! Returns the theoretical mininmum RMS decrease between two consecutive iterations
+	static double GetAbsoluteMinRMSDecrease();
+
+	//! Sets the minimum RMS decrease between two consecutive iterations
+	/** Only valid if registration method is 'MAX_ERROR_REG'.
+	**/
+	void setMinRMSDecrease(double value);
+
 	//! Returns whether farthest points should be ignored at each iteration
 	/** This is a trick to improve registration for slightly different clouds.
 	**/

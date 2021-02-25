@@ -652,6 +652,7 @@ void ccCommandLineParser::registerBuiltInCommands()
 	registerCommand(Command::Shared(new CommandConvertNormalsToDipAndDipDir));
 	registerCommand(Command::Shared(new CommandConvertNormalsToSFs));
 	registerCommand(Command::Shared(new CommandClearNormals));
+	registerCommand(Command::Shared(new CommandInvertNormal));
 	registerCommand(Command::Shared(new CommandComputeMeshVolume));
 	registerCommand(Command::Shared(new CommandSFColorScale));
 	registerCommand(Command::Shared(new CommandSFConvertToRGB));

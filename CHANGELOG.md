@@ -44,6 +44,8 @@ v2.12 (???) - (in development)
 			- N_SIGMA_MIN and N_SIGMA_MAX: specify the option followed by a numeric value to filter by N * standardDeviation around the mean.
 		- new option '-INVERT_NORMALS':
 			- Inverts the normals of the loaded entities (cloud or mesh, and per-triangle or per-vertex for meshes)
+		- new option '-RENAME_SF' ({scalar field index} {name}):
+			- To rename a scalar field
 	- STL:
 		- loading speed should be greatly improved (compared to v2.10 and v2.11)
 	- Global Shift & Scale:

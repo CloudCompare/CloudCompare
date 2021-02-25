@@ -630,6 +630,7 @@ void ccCommandLineParser::registerBuiltInCommands()
 	registerCommand(Command::Shared(new CommandDelaunayTri));
 	registerCommand(Command::Shared(new CommandSFArithmetic));
 	registerCommand(Command::Shared(new CommandSFOperation));
+	registerCommand(Command::Shared(new CommandSFRename));
 	registerCommand(Command::Shared(new CommandICP));
 	registerCommand(Command::Shared(new CommandChangeCloudOutputFormat));
 	registerCommand(Command::Shared(new CommandChangeMeshOutputFormat));

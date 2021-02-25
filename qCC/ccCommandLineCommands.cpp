@@ -94,6 +94,7 @@ constexpr char COMMAND_DELAUNAY_BF[]					= "BEST_FIT";
 constexpr char COMMAND_DELAUNAY_MAX_EDGE_LENGTH[]		= "MAX_EDGE_LENGTH";
 constexpr char COMMAND_SF_ARITHMETIC[]					= "SF_ARITHMETIC";
 constexpr char COMMAND_SF_OP[]							= "SF_OP";
+constexpr char COMMAND_RENAME_SF[]						= "RENAME_SF";
 constexpr char COMMAND_COORD_TO_SF[]					= "COORD_TO_SF";
 constexpr char COMMAND_EXTRACT_VERTICES[]				= "EXTRACT_VERTICES";
 constexpr char COMMAND_ICP[]							= "ICP";
@@ -4206,6 +4207,108 @@ bool CommandSFOperation::process(ccCommandLineInterface &cmd)
 		}
 	}
 	
+	return true;
+}
+
+
+CommandSFRename::CommandSFRename()
+	: ccCommandLineInterface::Command(QObject::tr("Rename SF"), COMMAND_RENAME_SF)
+{}
+
+bool CommandSFRename::process(ccCommandLineInterface &cmd)
+{
+	cmd.print(QObject::tr("[RENAME SF]"));
+
+	if (cmd.arguments().size() < 2)
+	{
+		return cmd.error(QObject::tr("Missing parameter(s): SF index and/or scalar field name after '%1' (2 values expected)").arg(COMMAND_RENAME_SF));
+	}
+
+	//read sf index
+	int sfIndex = -1;
+	bool ok = true;
+	QString sfIndexStr = cmd.arguments().takeFirst();
+	if (sfIndexStr.toUpper() == OPTION_LAST)
+	{
+		sfIndex = -2;
+	}
+	else
+	{
+		sfIndex = sfIndexStr.toInt(&ok);
+	}
+
+	if (!ok || sfIndex == -1)
+	{
+		return cmd.error(QObject::tr("Invalid SF index! (after %1)").arg(COMMAND_SF_OP));
+	}
+
+	//read the SF name
+	QString sfName = cmd.arguments().takeFirst();
+
+	//apply operation on clouds
+	for (CLCloudDesc& cloudDesc : cmd.clouds())
+	{
+		ccPointCloud* cloud = cloudDesc.pc;
+		if (cloud && cloud->getNumberOfScalarFields() != 0 && sfIndex < static_cast<int>(cloud->getNumberOfScalarFields()))
+		{
+			int thisSFIndex = (sfIndex < 0 ? static_cast<int>(cloud->getNumberOfScalarFields()) - 1 : sfIndex);
+			int indexOfSFWithSameName = cloud->getScalarFieldIndexByName(qPrintable(sfName));
+			if (indexOfSFWithSameName >= 0 && thisSFIndex != indexOfSFWithSameName)
+			{
+				return cmd.error("A SF with the same name is already defined on cloud " + cloud->getName());
+			}
+			CCCoreLib::ScalarField* sf = cloud->getScalarField(thisSFIndex);
+			if (!sf)
+			{
+				assert(false);
+				return cmd.error("Internal error: invalid SF index");
+			}
+			sf->setName(qPrintable(sfName));
+
+			if (cmd.autoSaveMode())
+			{
+				QString errorStr = cmd.exportEntity(cloudDesc, "SF_RENAMED");
+				if (!errorStr.isEmpty())
+				{
+					return cmd.error(errorStr);
+				}
+			}
+		}
+	}
+
+	//and meshes!
+	for (CLMeshDesc& meshDesc : cmd.meshes())
+	{
+		bool isLocked = false;
+		ccGenericMesh* mesh = meshDesc.mesh;
+		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(mesh, &isLocked);
+		if (cloud && !isLocked && cloud->getNumberOfScalarFields() != 0 && sfIndex < static_cast<int>(cloud->getNumberOfScalarFields()))
+		{
+			int thisSFIndex = (sfIndex < 0 ? static_cast<int>(cloud->getNumberOfScalarFields()) - 1 : sfIndex);
+			int indexOfSFWithSameName = cloud->getScalarFieldIndexByName(qPrintable(sfName));
+			if (indexOfSFWithSameName >= 0 && thisSFIndex != indexOfSFWithSameName)
+			{
+				return cmd.error("A SF with the same name is already defined on cloud " + cloud->getName());
+			}
+			CCCoreLib::ScalarField* sf = cloud->getScalarField(thisSFIndex);
+			if (!sf)
+			{
+				assert(false);
+				return cmd.error("Internal error: invalid SF index");
+			}
+			sf->setName(qPrintable(sfName));
+
+			if (cmd.autoSaveMode())
+			{
+				QString errorStr = cmd.exportEntity(meshDesc, "SF_RENAMED");
+				if (!errorStr.isEmpty())
+				{
+					return cmd.error(errorStr);
+				}
+			}
+		}
+	}
+
 	return true;
 }
 

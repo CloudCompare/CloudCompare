@@ -158,6 +158,7 @@ void ccPointPairRegistrationDlg::EntityContexts::fill(const ccHObject::Container
 			{
 				isShifted = true;
 				shift = shiftedEntity->getGlobalShift(); //we can only consider the first shift!
+				scale = shiftedEntity->getGlobalScale();
 			}
 		}
 
@@ -1516,13 +1517,16 @@ void ccPointPairRegistrationDlg::apply()
 			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(it.key());
 			if (cloud)
 			{
-				if (m_refPoints.isShifted())
+				if (m_referenceEntities.isShifted)
 				{
-					const CCVector3d& Pshift = m_refPoints.getGlobalShift();
-					const double& scale = m_refPoints.getGlobalScale();
-					cloud->setGlobalShift(Pshift);
-					cloud->setGlobalScale(scale);
-					ccLog::Warning(tr("[PointPairRegistration] Cloud %1: global shift has been updated to match the reference: (%1,%2,%3) [x%4]").arg(cloud->getName()).arg(Pshift.x).arg(Pshift.y).arg(Pshift.z).arg(scale));
+					cloud->setGlobalShift(m_referenceEntities.shift);
+					cloud->setGlobalScale(m_referenceEntities.scale);
+					ccLog::Warning(tr("[PointPairRegistration] Cloud %1: global shift has been updated to match the reference: (%1,%2,%3) [x%4]")
+						.arg(cloud->getName())
+						.arg(m_referenceEntities.shift.x)
+						.arg(m_referenceEntities.shift.y)
+						.arg(m_referenceEntities.shift.z)
+						.arg(m_referenceEntities.scale));
 				}
 				else if (cloud->isShifted()) //we'll ask the user first before dropping the shift information on the aligned cloud
 				{

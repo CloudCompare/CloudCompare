@@ -163,6 +163,7 @@ protected:
 
 		bool isShifted;
 		CCVector3d shift;
+		double scale = 1.0;
 	};
 
 	//! Removes a label (and restore its associated label if any)

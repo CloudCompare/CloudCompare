@@ -15,18 +15,22 @@
 //#                                                                        #
 //##########################################################################
 
-#include <array>
-#include <random>
-
 //Qt
 #include <QCheckBox>
 #include <QDoubleValidator>
 #include <QFileDialog>
 
+//CCCoreLib
+#include <Neighbourhood.h>
+
+//system
+#include <array>
+#include <random>
+
 //common
 #include <ccPickingHub.h>
+#include <ccBox.h>
 
-#include "ccBox.h"
 #include "ccCompass.h"
 #include "ccCompassDlg.h"
 #include "ccCompassExport.h"
@@ -1547,8 +1551,7 @@ void ccCompass::estimateStructureNormals()
 						//copy points from this trace across into the relevant point cloud for future access
 						points[r]->reserve(points[r]->size() + t->size()); //make space
 						points[r]->reserveTheNormsTable(); //make space for normals
-						points[r]->setGlobalScale(t->getGlobalScale()); //copy global shift & scale onto new point cloud
-						points[r]->setGlobalShift(t->getGlobalShift());
+						points[r]->copyGlobalShiftAndScale(*t); //copy global shift & scale onto new point cloud
 						for (unsigned p = 0; p < t->size(); p++)
 						{
 							points[r]->addPoint(*t->getPoint(p)); //add point to relevant surface
@@ -1907,8 +1910,7 @@ void ccCompass::estimateStructureNormals()
 				//build point cloud to store MCMC samples in and associated scalar fields
 				samples[r] = new ccSNECloud();
 				samples[r]->setName("SNE_Samples");
-				samples[r]->setGlobalScale(points[r]->getGlobalScale()); //copy global shift & scale onto new point cloud
-				samples[r]->setGlobalShift(points[r]->getGlobalShift());
+				samples[r]->copyGlobalShiftAndScale(*points[r]); //copy global shift & scale onto new point cloud
 				samples[r]->reserve(static_cast<unsigned>(px.size())*oversample);
 				samples[r]->reserveTheNormsTable();
 				CCCoreLib::ScalarField* startSF = samples[r]->getScalarField(samples[r]->addScalarField(new ccScalarField("StartPoint")));
@@ -2576,8 +2578,7 @@ void ccCompass::estimateStrain()
 	//store strain tensors on point cloud and build graphics
 	//**************************************************************
 	ccPointCloud* points = new ccPointCloud("Strain");
-	points->setGlobalScale(lines[0]->getGlobalScale()); //copy global shift & scale from one of the polylines (N.B. we assume here that all features have the same shift/scale)
-	points->setGlobalShift(lines[0]->getGlobalShift());
+	points->copyGlobalShiftAndScale(*lines[0]); //copy global shift & scale from one of the polylines (N.B. we assume here that all features have the same shift/scale)
 
 	points->reserve(validCells);
 	ccScalarField* nValidSF = new ccScalarField("nValid");
@@ -2871,8 +2872,7 @@ void ccCompass::estimateP21()
 		outputCloud->addPoint(*outcrop->getPoint(p));
 	}
 	//copy global shift
-	outputCloud->setGlobalScale(outcrop->getGlobalScale()); //copy global scale
-	outputCloud->setGlobalShift(outcrop->getGlobalShift()); //copy global shift
+	outputCloud->copyGlobalShiftAndScale(*outcrop); //copy global shift & scale
 	
 	//setup scalar fields etc
 	ccScalarField* P21 = new ccScalarField("P21");
@@ -3036,8 +3036,7 @@ void ccCompass::convertToPointCloud()
 			for (ccHObject::Container::const_iterator it = poly.begin(); it != poly.end(); it++)
 			{
 				ccPolyline* t = static_cast<ccPolyline*>(*it);
-				points->setGlobalScale(t->getGlobalScale()); //copy global scale
-				points->setGlobalShift(t->getGlobalShift()); //copy global shift
+				points->copyGlobalShiftAndScale(*t); //copy global shift & scale
 				points->reserve(points->size() + t->size()); //make space
 				sf->reserve(points->size() + t->size());
 				for (unsigned int p = 0; p < t->size(); p++)

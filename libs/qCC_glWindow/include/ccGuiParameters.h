@@ -116,6 +116,10 @@ public:
 		//! Whether to draw rounded points (slower) or not
 		bool drawRoundedPoints;
 
+		//! Whether to pick objects by single clicking in the GUI 
+		//! can be slow with large point clouds/large number of objects
+		bool singleClickPicking;
+
 		//! Default constructor
 		ParamStruct();
 

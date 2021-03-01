@@ -62,8 +62,9 @@
 	v4.9 - 03/31/2019 - Point labels can now be picked on meshes
 	v5.0 - 10/06/2019 - Point labels can now target the entity center
 	v5.1 - 03/29/2019 - New camera management (viewports have changed)
+	v5.2 - 11/30/2020 - New ccCoordinateSystem added
 **/
-const unsigned c_currentDBVersion = 51; //5.1
+const unsigned c_currentDBVersion = 52; //5.2
 
 //! Default unique ID generator (using the system persistent settings as we did previously proved to be not reliable)
 static ccUniqueIDGenerator::Shared s_uniqueIDGenerator(new ccUniqueIDGenerator);
@@ -267,6 +268,10 @@ bool ccObject::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& ol
 	if (in.read((char*)&uniqueID, 4) < 0)
 		return ReadError();
 	//DGM: this ID will be useful to recreate dynamic links between entities later!
+	if (oldToNewIDMap.contains(uniqueID))
+	{
+		ccLog::Warning(QString("Malformed file: uniqueID #%1 is used several times! (not that unique ;)").arg(uniqueID));
+	}
 	oldToNewIDMap.insert(uniqueID, m_uniqueID);
 
 	//name

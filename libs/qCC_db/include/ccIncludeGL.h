@@ -184,7 +184,7 @@ public: //GLU equivalent methods
 	}
 
 	template <typename iType, typename oType>
-	static bool Project(const Vector3Tpl<iType>& input3D, const oType* modelview, const oType* projection, const int* viewport, Vector3Tpl<oType>& output2D, bool checkInFrustrum = false)
+	static bool Project(const Vector3Tpl<iType>& input3D, const oType* modelview, const oType* projection, const int* viewport, Vector3Tpl<oType>& output2D, bool* inFrustum = nullptr)
 	{
 		//Modelview transform
 		Tuple4Tpl<oType> Pm;
@@ -210,13 +210,10 @@ public: //GLU equivalent methods
 			return false;
 		}
 
-		//Check if the point is in frustrum
-		if(checkInFrustrum)
+		if (inFrustum)
 		{
-			if (std::abs(Pp.x) > Pp.w || std::abs(Pp.y) > Pp.w || std::abs(Pp.z) > Pp.w)
-			{
-				return false;
-			}
+			//Check if the point is inside the frustum
+			*inFrustum = (std::abs(Pp.x) <= Pp.w && std::abs(Pp.y) <= Pp.w && std::abs(Pp.z) <= Pp.w);
 		}
 
 		//Perspective division

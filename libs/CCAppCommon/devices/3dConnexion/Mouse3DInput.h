@@ -1,3 +1,4 @@
+#pragma once
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,8 +16,9 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef MOUSE_3D_INPUT_HEADER
-#define MOUSE_3D_INPUT_HEADER
+
+#include "CCAppCommon.h"
+
 
 //CCCoreLib
 #include <CCConst.h>
@@ -33,7 +35,7 @@
 class ccGLWindow;
 
 //! 3DxWare driver wrapper for 3D mouse handling
-class Mouse3DInput : public QObject
+class CCAPPCOMMON_LIB_API Mouse3DInput : public QObject
 {
 	Q_OBJECT
 
@@ -285,5 +287,3 @@ protected:
 	//! 3DxWare handle
 	void* m_siHandle;
 };
-
-#endif //MOUSE_3D_INPUT_HEADER

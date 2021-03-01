@@ -44,10 +44,11 @@
 #include "ccSphere.h"
 #include "ccSubMesh.h"
 #include "ccTorus.h"
+#include "ccCoordinateSystem.h"
 
 /*** helpers ***/
 
-ccPointCloud* ccHObjectCaster::ToPointCloud(ccHObject* obj, bool* lockedVertices /*= 0*/)
+ccPointCloud* ccHObjectCaster::ToPointCloud(ccHObject* obj, bool* lockedVertices /*= nullptr*/)
 {
 	if (lockedVertices)
 	{
@@ -77,7 +78,7 @@ ccPointCloud* ccHObjectCaster::ToPointCloud(ccHObject* obj, bool* lockedVertices
 	return nullptr;
 }
 
-ccGenericPointCloud* ccHObjectCaster::ToGenericPointCloud(ccHObject* obj, bool* lockedVertices /*= 0*/)
+ccGenericPointCloud* ccHObjectCaster::ToGenericPointCloud(ccHObject* obj, bool* lockedVertices/*=nullptr*/)
 {
 	if (lockedVertices)
 	{
@@ -107,7 +108,7 @@ ccGenericPointCloud* ccHObjectCaster::ToGenericPointCloud(ccHObject* obj, bool* 
 	return nullptr;
 }
 
-ccShiftedObject* ccHObjectCaster::ToShifted(ccHObject* obj, bool* lockedVertices /*= 0*/)
+ccShiftedObject* ccHObjectCaster::ToShifted(ccHObject* obj, bool* lockedVertices/*=nullptr*/)
 {
 	ccGenericPointCloud* cloud = ToGenericPointCloud(obj, lockedVertices);
 	if (cloud)
@@ -260,4 +261,9 @@ cc2DViewportObject* ccHObjectCaster::To2DViewportObject(ccHObject* obj)
 ccIndexedTransformationBuffer* ccHObjectCaster::ToTransBuffer(ccHObject* obj)
 {
 	return obj && obj->isKindOf(CC_TYPES::TRANS_BUFFER) ? static_cast<ccIndexedTransformationBuffer*>(obj) : nullptr;
+}
+
+ccCoordinateSystem* ccHObjectCaster::ToCoordinateSystem(ccHObject* obj)
+{
+	return (obj && obj->isKindOf(CC_TYPES::COORDINATESYSTEM) ? static_cast<ccCoordinateSystem*>(obj) : nullptr);
 }

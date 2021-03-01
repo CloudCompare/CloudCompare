@@ -60,8 +60,10 @@ ccRegistrationDlg::ccRegistrationDlg(ccHObject *data, ccHObject *model, QWidget*
 	modelEntity = model;
 
 	setupUi(this);
+
 	QDoubleValidator* rmsValidator = new QDoubleValidator(rmsDifferenceLineEdit);
-	rmsValidator->setRange(1.0e-7, 1.0);
+	rmsValidator->setNotation(QDoubleValidator::ScientificNotation);
+	rmsValidator->setRange(GetAbsoluteMinRMSDecrease(), 1.0, 1);
 	rmsDifferenceLineEdit->setValidator(rmsValidator);
 
 	setColorsAndLabels();
@@ -83,7 +85,7 @@ ccRegistrationDlg::ccRegistrationDlg(ccHObject *data, ccHObject *model, QWidget*
 		maxThreadCountSpinBox->setValue(s_maxThreadCount);
 		adjustScaleCheckBox->setChecked(s_adjustScale);
 		randomSamplingLimitSpinBox->setValue(s_randomSamplingLimit);
-		rmsDifferenceLineEdit->setText(QString::number(s_rmsDifference, 'e', 1));
+		setMinRMSDecrease(s_rmsDifference);
 		maxIterationCount->setValue(s_maxIterationCount);
 		if (s_useErrorDifferenceCriterion)
 			errorCriterion->setChecked(true);
@@ -186,13 +188,33 @@ int ccRegistrationDlg::getMaxThreadCount() const
 	return maxThreadCountSpinBox->value();
 }
 
+double ccRegistrationDlg::GetAbsoluteMinRMSDecrease()
+{
+	return 1.0e-7;
+}
+
 double ccRegistrationDlg::getMinRMSDecrease() const
 {
 	bool ok = true;
 	double val = rmsDifferenceLineEdit->text().toDouble(&ok);
-	assert(ok);
+
+	if (!ok)
+	{
+		assert(false);
+		val = std::numeric_limits<double>::quiet_NaN();
+	}
 
 	return val;
+}
+
+void ccRegistrationDlg::setMinRMSDecrease(double value)
+{
+	if (std::isnan(value))
+	{
+		//last input value was invalid, restoring default
+		value = 1.0e-5;
+	}
+	rmsDifferenceLineEdit->setText(QString::number(value, 'E', 1));
 }
 
 ccRegistrationDlg::ConvergenceMethod ccRegistrationDlg::getConvergenceMethod() const

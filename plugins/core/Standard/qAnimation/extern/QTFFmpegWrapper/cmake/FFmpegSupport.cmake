@@ -88,21 +88,21 @@ endfunction()
 function( export_ffmpeg_dlls ) # 1 argument: ARGV0 = destination directory
 	if( WIN32 )
 		if( EXISTS "${FFMPEG_BINARY_DIR}" )
-			set( FFMEG_DLL "")
+			set( FFMPEG_DLL "")
 			
 			file( GLOB CODEC_DLL ${FFMPEG_BINARY_DIR}/avcodec*.dll )
-			list( APPEND FFMEG_DLL ${CODEC_DLL} )
+			list( APPEND FFMPEG_DLL ${CODEC_DLL} )
 
 			file( GLOB FORMAT_DLL ${FFMPEG_BINARY_DIR}/avformat*.dll )
-			list( APPEND FFMEG_DLL ${FORMAT_DLL} )
+			list( APPEND FFMPEG_DLL ${FORMAT_DLL} )
 
 			file( GLOB UTIL_DLL ${FFMPEG_BINARY_DIR}/avutil*.dll )
-			list( APPEND FFMEG_DLL ${UTIL_DLL} )
+			list( APPEND FFMPEG_DLL ${UTIL_DLL} )
 
 			file( GLOB SW_DLLS ${FFMPEG_BINARY_DIR}/sw*.dll )
-			list( APPEND FFMEG_DLL ${SW_DLLS} )
+			list( APPEND FFMPEG_DLL ${SW_DLLS} )
 
-			copy_files( "${FFMEG_DLL}" "${ARGV0}" ) #mind the quotes
+			copy_files( "${FFMPEG_DLL}" "${ARGV0}" ) #mind the quotes
 		else()
 			message( FATAL_ERROR "FFmpeg binary dir does not exist (FFMPEG_BINARY_DIR)" )
 		endif()

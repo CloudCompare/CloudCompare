@@ -134,11 +134,11 @@ void ccPickingHub::processPickedItem(ccHObject* entity, unsigned itemIndex, int 
 
 	//copy the list of listeners, in case the user call 'removeListener' in 'onItemPicked'
 	std::set< ccPickingListener* > listeners = m_listeners;
-	for (ccPickingListener* l : listeners)
+	for (ccPickingListener* listener : listeners)
 	{
-		if (l)
+		if (listener)
 		{
-			l->onItemPicked(item);
+			listener->onItemPicked(item);
 		}
 	}
 }

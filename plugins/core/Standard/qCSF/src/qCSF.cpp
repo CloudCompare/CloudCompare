@@ -41,6 +41,9 @@
 //Dialog
 #include "ccCSFDlg.h"
 
+//Local
+#include "qCSFCommands.h"
+
 //System
 #include <iostream>
 #include <vector>
@@ -282,4 +285,12 @@ void qCSF::doAction()
 
 	m_app->addToDB(cloudContainer);
 	m_app->refreshAll();
+}
+
+void qCSF::registerCommands(ccCommandLineInterface* cmd) {
+	if (!cmd) {
+		assert(false);
+		return;
+	}
+	cmd->registerCommand(ccCommandLineInterface::Command::Shared(new CommandCSF));
 }

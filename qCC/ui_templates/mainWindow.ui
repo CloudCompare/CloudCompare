@@ -39,7 +39,7 @@
      <x>0</x>
      <y>0</y>
      <width>1024</width>
-     <height>31</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -116,6 +116,7 @@
     <addaction name="menuToolbars"/>
     <addaction name="menuLanguage"/>
     <addaction name="actionResetGUIElementsPos"/>
+    <addaction name="actionResetAllVBOs"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -1148,7 +1149,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="shortcut">
     <string>T</string>
-   </property>  
+   </property>
   </action>
   <action name="actionTranslateRotate">
    <property name="checkable">
@@ -2371,7 +2372,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="shortcut">
     <string>X</string>
-   </property>   
+   </property>
   </action>
   <action name="actionEditGlobalShiftAndScale">
    <property name="text">
@@ -2532,7 +2533,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="shortcut">
     <string>E</string>
-   </property>   
+   </property>
   </action>
   <action name="actionInterpolateColors">
    <property name="text">
@@ -3067,6 +3068,14 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionSmoothPolyline">
    <property name="text">
     <string>Smooth</string>
+   </property>
+  </action>
+  <action name="actionResetAllVBOs">
+   <property name="text">
+    <string>Reset all VBOs</string>
+   </property>
+   <property name="toolTip">
+    <string>Reset all VBOs (unload GPU memory)</string>
    </property>
   </action>
  </widget>

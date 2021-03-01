@@ -231,11 +231,10 @@ void ccPointListPickingDlg::exportToNewCloud()
 			cloud->setDisplay(m_associatedEntity->getDisplay());
 
 			//retrieve Shift & Scale values
-			ccGenericPointCloud* asCloud = ccHObjectCaster::ToGenericPointCloud(m_associatedEntity);
-			if (asCloud)
+			ccShiftedObject* shifted = ccHObjectCaster::ToShifted(m_associatedEntity);
+			if (shifted)
 			{
-				cloud->setGlobalShift(asCloud->getGlobalShift());
-				cloud->setGlobalScale(asCloud->getGlobalScale());
+				cloud->copyGlobalShiftAndScale(*shifted);
 			}
 			else
 			{

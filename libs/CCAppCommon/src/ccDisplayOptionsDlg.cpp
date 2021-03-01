@@ -56,6 +56,7 @@ ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent)
 	connect(m_ui->decimateMeshBox,                 &QCheckBox::toggled, this, [&](bool state) { parameters.decimateMeshOnMove = state; });
 	connect(m_ui->decimateCloudBox,                &QCheckBox::toggled, this, [&](bool state) { parameters.decimateCloudOnMove = state; });
 	connect(m_ui->drawRoundedPointsCheckBox,       &QCheckBox::toggled, this, [&](bool state) { parameters.drawRoundedPoints = state; });
+	connect(m_ui->singleClickPickingCheckBox,	   &QCheckBox::toggled, this, [&](bool state) { parameters.singleClickPicking = state; });
 	connect(m_ui->autoDisplayNormalsCheckBox,      &QCheckBox::toggled, this, [&](bool state) { options.normalsDisplayedByDefault = state; });
 	connect(m_ui->useNativeDialogsCheckBox,        &QCheckBox::toggled, this, [&](bool state) { options.useNativeDialogs = state; });
 
@@ -153,6 +154,7 @@ void ccDisplayOptionsDlg::refresh()
 	m_ui->maxCloudSizeDoubleSpinBox->setValue(parameters.minLoDCloudSize / 1000000.0);
 	m_ui->useVBOCheckBox->setChecked(parameters.useVBOs);
 	m_ui->showCrossCheckBox->setChecked(parameters.displayCross);
+	m_ui->singleClickPickingCheckBox->setChecked(parameters.singleClickPicking);
 
 	m_ui->colorScaleShowHistogramCheckBox->setChecked(parameters.colorScaleShowHistogram);
 	m_ui->useColorScaleShaderCheckBox->setChecked(parameters.colorScaleUseShader);

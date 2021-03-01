@@ -80,9 +80,9 @@ CC_FILE_ERROR PcdFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	}
 
 	//search for a sensor as child (we take the first if there are several of them)
-	ccSensor* sensor(0);
+	ccSensor* sensor(nullptr);
 	{
-		for (unsigned i=0; i<ccCloud->getChildrenNumber(); ++i)
+		for (unsigned i = 0; i < ccCloud->getChildrenNumber(); ++i)
 		{
 			ccHObject* child = ccCloud->getChild(i);
 
@@ -103,26 +103,26 @@ CC_FILE_ERROR PcdFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	Eigen::Quaternionf ori;
 	if (!sensor)
 	{
-		//we append to the cloud null sensor informations
+		//no sensor data
 		pos = Eigen::Vector4f::Zero();
 		ori = Eigen::Quaternionf::Identity();
 	}
 	else
 	{
-		//we get out valid sensor informations
+		//get sensor data
 		ccGLMatrix mat = sensor->getRigidTransformation();
 		CCVector3 trans = mat.getTranslationAsVec3D();
 		pos(0) = trans.x;
 		pos(1) = trans.y;
 		pos(2) = trans.z;
 
-		//also the rotation
+		//rotation
 		Eigen::Matrix3f eigrot;
 		for (int i = 0; i < 3; ++i)
 			for (int j = 0; j < 3; ++j)
 				eigrot(i,j) = mat.getColumn(j)[i];
 
-		//now translate to a quaternion notation
+		//now translate to a quaternion
 		ori = Eigen::Quaternionf(eigrot);
 	}
 	if (ccCloud->size() == 0)
@@ -206,10 +206,10 @@ CC_FILE_ERROR PcdFilter::loadFile(const QString& filename, ccHObject& container,
 			float* X = ccRot.getColumn(0);
 			float* Y = ccRot.getColumn(1);
 			float* Z = ccRot.getColumn(2);
-			//Warning: Y and Z are inverted
-			X[0] =  eigrot(0,0); X[1] =  eigrot(1,0); X[2] =  eigrot(2,0);
-			Y[0] = -eigrot(0,2); Y[1] = -eigrot(1,2); Y[2] = -eigrot(2,2);
-			Z[0] =  eigrot(0,1); Z[1] =  eigrot(1,1); Z[2] =  eigrot(2,1);
+			
+			X[0] = eigrot(0,0); X[1] = eigrot(1,0); X[2] = eigrot(2,0);
+			Y[0] = eigrot(0,1); Y[1] = eigrot(1,1); Y[2] = eigrot(2,1);
+			Z[0] = eigrot(0,2); Z[1] = eigrot(1,2); Z[2] = eigrot(2,2);
 
 			ccRot.getColumn(3)[3] = 1.0f;
 			ccRot.setTranslation(origin.data());

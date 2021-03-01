@@ -31,7 +31,6 @@
 #include <GenericIndexedCloudPersist.h>
 #include <ccPointCloud.h>
 #include <ccColorTypes.h>
-#include <Neighbourhood.h>
 #include <ccPlane.h>
 #include <Jacobi.h>
 #include <ccScalarField.h>
@@ -42,9 +41,7 @@
 
 #include <vector>
 #include <algorithm>
-#include <unordered_map>
 #include <deque>
-#include <qmessagebox.h>
 
 /*
 A ccTrace object is essentially a ccPolyline that is controlled/created by "waypoints" and a least-cost path algorithm

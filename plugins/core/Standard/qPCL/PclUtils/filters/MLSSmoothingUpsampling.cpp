@@ -25,6 +25,8 @@
 
 //PCL
 #include <pcl/surface/mls.h>
+#include <pcl/common/io.h> // for getFieldIndex
+#include <pcl/search/kdtree.h> // for KdTree
 
 //qCC_plugins
 #include <ccMainAppInterface.h>
@@ -204,8 +206,7 @@ int MLSSmoothingUpsampling::compute()
 #endif
 
 	//copy global shift & scale
-	new_cloud->setGlobalScale(cloud->getGlobalScale());
-	new_cloud->setGlobalShift(cloud->getGlobalShift());
+	new_cloud->copyGlobalShiftAndScale(*cloud);
 
 	//disable original cloud
 	cloud->setEnabled(false);

@@ -8,6 +8,7 @@ target_sources( ${PROJECT_NAME}
 		${CMAKE_CURRENT_LIST_DIR}/Particle.h
 		${CMAKE_CURRENT_LIST_DIR}/wlPointCloud.h
 		${CMAKE_CURRENT_LIST_DIR}/qCSF.h
+		${CMAKE_CURRENT_LIST_DIR}/qCSFCommands.h
 		${CMAKE_CURRENT_LIST_DIR}/Rasterization.h
 		${CMAKE_CURRENT_LIST_DIR}/Vec3.h
 )

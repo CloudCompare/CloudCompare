@@ -1086,8 +1086,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 
 							static char s_dimNames[3] = { 'X', 'Y', 'Z' };
 							poly->setName(QString("Contour line %1=%2 (#%3)").arg(s_dimNames[Z]).arg(sliceZ).arg(k + 1));
-							poly->setGlobalScale(sliceCloud->getGlobalScale());
-							poly->setGlobalShift(sliceCloud->getGlobalShift());
+							poly->copyGlobalShiftAndScale(*sliceCloud);
 							poly->setMetaData(ccPolyline::MetaKeyConstAltitude(), QVariant(sliceZ)); //replace the 'altitude' meta-data by the right value
 
 							//set meta-data

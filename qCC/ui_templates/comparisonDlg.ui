@@ -553,5 +553,21 @@ to help advanced users setting the general parameters</string>
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>signedDistCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>flipNormalsCheckBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>71</x>
+     <y>155</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>273</x>
+     <y>155</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
 </ui>

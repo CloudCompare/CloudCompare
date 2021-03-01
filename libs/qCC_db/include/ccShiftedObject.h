@@ -1,3 +1,4 @@
+#pragma once
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -14,9 +15,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-
-#ifndef CC_SHIFTED_INTERFACE_HEADER
-#define CC_SHIFTED_INTERFACE_HEADER
 
 //Local
 #include "ccHObject.h"
@@ -42,10 +40,15 @@ public:
 	**/
 	ccShiftedObject(const ccShiftedObject& s) = default;
 
+	//! Copies the Global Shift and Scale from another entity
+	/** \param s shifted entity to copy information from
+	**/
+	void copyGlobalShiftAndScale(const ccShiftedObject& s);
+
 	//! Sets shift applied to original coordinates (information storage only)
 	/** Such a shift can typically be applied at loading time.
 	**/
-	virtual void setGlobalShift(double x, double y, double z);
+	virtual inline void setGlobalShift(double x, double y, double z) { return setGlobalShift(CCVector3d(x, y, z)); }
 
 	//! Sets shift applied to original coordinates (information storage only)
 	/** Such a shift can typically be applied at loading time.
@@ -56,42 +59,41 @@ public:
 	//! Returns the shift applied to original coordinates
 	/** See ccGenericPointCloud::setOriginalShift
 	**/
-	const CCVector3d& getGlobalShift() const { return m_globalShift; }
+	virtual const CCVector3d& getGlobalShift() const { return m_globalShift; }
 
 	//! Sets the scale applied to original coordinates (information storage only)
 	virtual void setGlobalScale(double scale);
 
+	//! Returns the scale applied to original coordinates
+	virtual double getGlobalScale() const { return m_globalScale; }
+
 	//! Returns whether the cloud is shifted or not
 	inline bool isShifted() const
 	{
-		return (	m_globalShift.x != 0
-				||	m_globalShift.y != 0
-				||	m_globalShift.z != 0
-				||	m_globalScale != 1.0 );
+		const CCVector3d& globalShift = getGlobalShift();
+		return (	globalShift.x != 0
+				||	globalShift.y != 0
+				||	globalShift.z != 0
+				||	getGlobalScale() != 1.0 );
 	}
-
-	//! Returns the scale applied to original coordinates
-	/** See ccGenericPointCloud::setOriginalScale
-	**/
-	inline double getGlobalScale() const { return m_globalScale; }
 
 	//! Returns the point back-projected into the original coordinates system
 	template<typename T> inline CCVector3d toGlobal3d(const Vector3Tpl<T>& Plocal) const
 	{
 		// Pglobal = Plocal/scale - shift
-		return CCVector3d::fromArray(Plocal.u) / m_globalScale - m_globalShift;
+		return CCVector3d::fromArray(Plocal.u) / getGlobalScale() - getGlobalShift();
 	}
 
 	//! Returns the point projected into the local (shifted) coordinates system
 	template<typename T> inline CCVector3d toLocal3d(const Vector3Tpl<T>& Pglobal) const
 	{
 		// Plocal = (Pglobal + shift) * scale
-		return (CCVector3d::fromArray(Pglobal.u) + m_globalShift) * m_globalScale;
+		return (CCVector3d::fromArray(Pglobal.u) + getGlobalShift()) * getGlobalScale();
 	}
 	//! Returns the point projected into the local (shifted) coordinates system
 	template<typename T> inline CCVector3 toLocal3pc(const Vector3Tpl<T>& Pglobal) const
 	{
-		CCVector3d Plocal = CCVector3d::fromArray(Pglobal.u) * m_globalScale + m_globalShift;
+		CCVector3d Plocal = CCVector3d::fromArray(Pglobal.u) * getGlobalScale() + getGlobalShift();
 		return CCVector3::fromArray(Plocal.u);
 	}
 
@@ -112,5 +114,3 @@ protected:
 	double m_globalScale;
 
 };
-
-#endif //CC_SHIFTED_INTERFACE_HEADER

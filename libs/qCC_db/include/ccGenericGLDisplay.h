@@ -41,9 +41,9 @@ struct ccGLCameraParameters
 	}
 
 	//! Projects a 3D point in 2D (+ normalized 'z' coordinate)
-	inline bool project(const CCVector3d& input3D, CCVector3d& output2D, bool checkInFrustrum = false) const { return ccGL::Project<double, double>(input3D, modelViewMat.data(), projectionMat.data(), viewport, output2D, checkInFrustrum); }
+	inline bool project(const CCVector3d& input3D, CCVector3d& output2D, bool* inFrustum = nullptr) const { return ccGL::Project<double, double>(input3D, modelViewMat.data(), projectionMat.data(), viewport, output2D, inFrustum); }
 	//! Projects a 3D point in 2D (+ normalized 'z' coordinate)
-	inline bool project(const CCVector3& input3D, CCVector3d& output2D, bool checkInFrustrum = false) const { return ccGL::Project<PointCoordinateType, double>(input3D, modelViewMat.data(), projectionMat.data(), viewport, output2D, checkInFrustrum); }
+	inline bool project(const CCVector3& input3D, CCVector3d& output2D, bool* inFrustum = nullptr) const { return ccGL::Project<PointCoordinateType, double>(input3D, modelViewMat.data(), projectionMat.data(), viewport, output2D, inFrustum); }
 
 	//! Unprojects a 2D point (+ normalized 'z' coordinate) in 3D
 	inline bool unproject(const CCVector3d& input2D, CCVector3d& output3D) const { return ccGL::Unproject<double, double>(input2D, modelViewMat.data(), projectionMat.data(), viewport, output3D); }

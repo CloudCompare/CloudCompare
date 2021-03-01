@@ -45,19 +45,16 @@
 #include "ccGuiParameters.h"
 #include "ccPersistentSettings.h"
 #include "mainwindow.h"
+#include "ccTranslationManager.h"
 
 //plugins
 #include "ccPluginInterface.h"
 #include "ccPluginManager.h"
 
 #ifdef USE_VLD
-//VLD
 #include <vld.h>
 #endif
 
-#ifdef Q_OS_MAC
-#include <unistd.h>
-#endif
 
 int main(int argc, char **argv)
 {
@@ -74,19 +71,30 @@ int main(int argc, char **argv)
 #endif
 
 #ifdef Q_OS_MAC
-	bool commandLine = isatty( fileno( stdin ) );
+	// On macOS, when double-clicking the application, the Finder (sometimes!) adds a command-line parameter
+	// like "-psn_0_582385" which is a "process serial number".
+	// We need to recognize this and discount it when determining if we are running on the command line or not.
+
+	int numRealArgs = argc;
+	
+	for ( int i = 1; i < argc; ++i )
+	{
+		if ( strncmp( argv[i], "-psn_", 5 ) == 0 )
+		{
+			--numRealArgs;
+		}
+	}
+	
+	bool commandLine = (numRealArgs > 1) && (argv[1][0] == '-');
 #else
 	bool commandLine = (argc > 1) && (argv[1][0] == '-');
 #endif
    
-	if ( !commandLine )
-	{
-		ccApplication::initOpenGL();
+	ccApplication::initOpenGL();
 
 #ifdef CC_GAMEPAD_SUPPORT
-		QGamepadManager::instance(); //potential workaround to bug https://bugreports.qt.io/browse/QTBUG-61553
+	QGamepadManager::instance(); //potential workaround to bug https://bugreports.qt.io/browse/QTBUG-61553
 #endif
-	}
 	
 	ccApplication app(argc, argv, commandLine);
 
@@ -109,23 +117,14 @@ int main(int argc, char **argv)
 
 	//specific commands
 	int lastArgumentIndex = 1;
-	QTranslator translator;
 	if (commandLine)
 	{
 		//translation file selection
 		if (QString(argv[lastArgumentIndex]).toUpper() == "-LANG")
 		{
-			QString langFilename = QString(argv[2]);
+			QString langFilename = QString::fromLocal8Bit(argv[2]);
 
-			//Load translation file
-			if (translator.load(langFilename, QCoreApplication::applicationDirPath()))
-			{
-				qApp->installTranslator(&translator);
-			}
-			else
-			{
-				QMessageBox::warning(nullptr, QObject::tr("Translation"), QObject::tr("Failed to load language file '%1'").arg(langFilename));
-			}
+			ccTranslationManager::get().loadTranslation(langFilename);
 			commandLine = false;
 			lastArgumentIndex += 2;
 		}
@@ -198,7 +197,7 @@ int main(int argc, char **argv)
 			QStringList filenames;
 			for (int i = lastArgumentIndex; i < argc; ++i)
 			{
-				QString arg(argv[i]);
+				QString arg = QString::fromLocal8Bit(argv[i]);
 				//special command: auto start a plugin
 				if (arg.startsWith(":start-plugin:"))
 				{

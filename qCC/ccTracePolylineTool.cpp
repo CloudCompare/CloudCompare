@@ -188,7 +188,7 @@ ccPolyline* ccTracePolylineTool::polylineOverSampling(unsigned steps) const
 		{
 			//we actually retro-project the 3D point in the second vertex camera frame so as to get a proper behavior
 			CCVector3d P2D;
-			m_segmentParams[i2].params.project(*p1, P2D, false);
+			m_segmentParams[i2].params.project(*p1, P2D);
 			clickPos1 = CCVector2d(P2D.x, P2D.y);
 		}
 
@@ -479,8 +479,7 @@ void ccTracePolylineTool::onItemPicked(const PickedItem& pi)
 		if (cloud)
 		{
 			//copy the first clicked entity's global shift & scale
-			m_poly3D->setGlobalShift(cloud->getGlobalShift());
-			m_poly3D->setGlobalScale(cloud->getGlobalScale());
+			m_poly3D->copyGlobalShiftAndScale(*cloud);
 		}
 
 		m_segmentParams.resize(0); //just in case
@@ -638,6 +637,18 @@ void ccTracePolylineTool::exportLine()
 			m_poly3DVertices = nullptr;
 			m_poly3D = poly;
 		}
+		else
+		{
+			ccLog::Error("Oversampling failed");
+			m_associatedWin->addToOwnDB(m_poly3D);
+			return;
+		}
+	}
+	else
+	{
+		//update the IDs as we don't want to export an object with a reserved ID!
+		m_poly3D->setUniqueID(ccObject::GetNextUniqueID());
+		m_poly3DVertices->setUniqueID(ccObject::GetNextUniqueID());
 	}
 
 	m_poly3D->enableTempColor(false);

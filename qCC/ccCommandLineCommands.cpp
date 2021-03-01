@@ -94,6 +94,7 @@ constexpr char COMMAND_DELAUNAY_BF[]					= "BEST_FIT";
 constexpr char COMMAND_DELAUNAY_MAX_EDGE_LENGTH[]		= "MAX_EDGE_LENGTH";
 constexpr char COMMAND_SF_ARITHMETIC[]					= "SF_ARITHMETIC";
 constexpr char COMMAND_SF_OP[]							= "SF_OP";
+constexpr char COMMAND_RENAME_SF[]						= "RENAME_SF";
 constexpr char COMMAND_COORD_TO_SF[]					= "COORD_TO_SF";
 constexpr char COMMAND_EXTRACT_VERTICES[]				= "EXTRACT_VERTICES";
 constexpr char COMMAND_ICP[]							= "ICP";
@@ -109,6 +110,7 @@ constexpr char COMMAND_ICP_USE_DATA_SF_AS_WEIGHT[]		= "DATA_SF_AS_WEIGHTS";
 constexpr char COMMAND_ICP_ROT[]						= "ROT";
 constexpr char COMMAND_PLY_EXPORT_FORMAT[]				= "PLY_EXPORT_FMT";
 constexpr char COMMAND_COMPUTE_GRIDDED_NORMALS[]		= "COMPUTE_NORMALS";
+constexpr char COMMAND_INVERT_NORMALS[]					= "INVERT_NORMALS";
 constexpr char COMMAND_COMPUTE_OCTREE_NORMALS[]			= "OCTREE_NORMALS";
 constexpr char COMMAND_CONVERT_NORMALS_TO_DIP[]			= "NORMALS_TO_DIP";
 constexpr char COMMAND_CONVERT_NORMALS_TO_SFS[]			= "NORMALS_TO_SFS";
@@ -560,6 +562,70 @@ bool CommandClearNormals::process(ccCommandLineInterface &cmd)
 	return true;
 }
 
+CommandInvertNormal::CommandInvertNormal()
+	: ccCommandLineInterface::Command(QObject::tr("Invert normals"), COMMAND_INVERT_NORMALS)
+{}
+
+bool CommandInvertNormal::process(ccCommandLineInterface &cmd)
+{
+	cmd.print(QObject::tr("[INVERT NORMALS]"));
+
+	if (cmd.clouds().empty() && cmd.meshes().empty())
+	{
+		return cmd.error(QObject::tr("No input point cloud or mesh (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_INVERT_NORMALS));
+	}
+
+	for (CLCloudDesc& thisCloudDesc : cmd.clouds())
+	{
+		ccPointCloud* cloud = thisCloudDesc.pc;
+
+		if (!cloud->hasNormals())
+		{
+			cmd.warning(QObject::tr("Cloud %1 has no normals").arg(cloud->getName()));
+			continue;
+		}
+
+		cloud->invertNormals();
+
+		if (cmd.autoSaveMode())
+		{
+			QString errorStr = cmd.exportEntity(thisCloudDesc, "_INVERTED_NORMALS");
+			if (!errorStr.isEmpty())
+			{
+				return cmd.error(errorStr);
+			}
+		}
+	}
+
+	for (CLMeshDesc& thisMeshDesc : cmd.meshes())
+	{
+		ccMesh* mesh = ccHObjectCaster::ToMesh(thisMeshDesc.mesh);
+		if (!mesh)
+		{
+			assert(false);
+			continue;
+		}
+
+		if (!mesh->hasNormals())
+		{
+			cmd.warning(QObject::tr("Mesh %1 has no normals").arg(mesh->getName()));
+			continue;
+		}
+
+		mesh->invertNormals();
+
+		if (cmd.autoSaveMode())
+		{
+			QString errorStr = cmd.exportEntity(thisMeshDesc, "_INVERTED_NORMALS");
+			if (!errorStr.isEmpty())
+			{
+				return cmd.error(errorStr);
+			}
+		}
+	}
+
+	return true;
+}
 CommandOctreeNormal::CommandOctreeNormal()
 	: ccCommandLineInterface::Command(QObject::tr("Compute normals with octree"), COMMAND_COMPUTE_OCTREE_NORMALS)
 {}
@@ -1155,8 +1221,7 @@ bool CommandExtractCCs::process(ccCommandLineInterface &cmd)
 					if (compCloud)
 					{
 						//'shift on load' information
-						compCloud->setGlobalShift(cloud->getGlobalShift());
-						compCloud->setGlobalScale(cloud->getGlobalScale());
+						compCloud->copyGlobalShiftAndScale(*cloud);
 						compCloud->setName(QString(cloud->getName() + "_CC#%1").arg(j + 1));
 						
 						CLCloudDesc cloudDesc(compCloud, inputClouds[i].basename + QObject::tr("_COMPONENT_%1").arg(++realIndex), inputClouds[i].path);
@@ -1761,9 +1826,11 @@ enum USE_SPECIAL_SF_VALUE
 	USE_MIN,
 	USE_DISP_MIN,
 	USE_SAT_MIN,
+	USE_N_SIGMA_MIN,
 	USE_MAX,
 	USE_DISP_MAX,
-	USE_SAT_MAX
+	USE_SAT_MAX,
+	USE_N_SIGMA_MAX
 };
 
 bool CommandFilterBySFValue::process(ccCommandLineInterface &cmd)
@@ -1792,6 +1859,20 @@ bool CommandFilterBySFValue::process(ccCommandLineInterface &cmd)
 		else if (minValStr.toUpper() == "SAT_MIN")
 		{
 			useValForMin = USE_SAT_MIN;
+		}
+		else if (minValStr.toUpper() == "N_SIGMA_MIN")
+		{
+			useValForMin = USE_N_SIGMA_MIN;
+			if (cmd.arguments().empty())
+			{
+				return cmd.error(QObject::tr("Missing parameter: N value (after \"-%1 N_SIGMA_MIN\").").arg(COMMAND_FILTER_SF_BY_VALUE));
+			}
+			minValStr = cmd.arguments().takeFirst();
+			minVal = static_cast<ScalarType>(minValStr.toDouble(&paramOk));
+			if (!paramOk)
+			{
+				return cmd.error(QObject::tr("Failed to read a numerical parameter: N value (after \"N_SIGMA_MIN\"). Got '%2' instead.").arg(minValStr));
+			}
 		}
 		else
 		{
@@ -1825,6 +1906,20 @@ bool CommandFilterBySFValue::process(ccCommandLineInterface &cmd)
 		else if (maxValStr.toUpper() == "SAT_MAX")
 		{
 			useValForMax = USE_SAT_MAX;
+		}
+		else if (maxValStr.toUpper() == "N_SIGMA_MAX")
+		{
+			useValForMax = USE_N_SIGMA_MAX;
+			if (cmd.arguments().empty())
+			{
+				return cmd.error(QObject::tr("Missing parameter: N value (after \"-%1 N_SIGMA_MAX\").").arg(COMMAND_FILTER_SF_BY_VALUE));
+			}
+			maxValStr = cmd.arguments().takeFirst();
+			maxVal = static_cast<ScalarType>(maxValStr.toDouble(&paramOk));
+			if (!paramOk)
+			{
+				return cmd.error(QObject::tr("Failed to read a numerical parameter: N value (after \"N_SIGMA_MAX\"). Got '%2' instead.").arg(maxValStr));
+			}
 		}
 		else
 		{
@@ -1861,6 +1956,12 @@ bool CommandFilterBySFValue::process(ccCommandLineInterface &cmd)
 					case USE_SAT_MIN:
 						thisMinVal = static_cast<ccScalarField*>(sf)->saturationRange().start();
 						break;
+					case USE_N_SIGMA_MIN:
+						ScalarType mean;
+						ScalarType variance;
+						sf->computeMeanAndVariance(mean, &variance);
+						thisMinVal = mean - (sqrt(variance) * minVal);
+						break;
 					default:
 						//nothing to do
 						break;
@@ -1879,6 +1980,12 @@ bool CommandFilterBySFValue::process(ccCommandLineInterface &cmd)
 						break;
 					case USE_SAT_MAX:
 						thisMaxVal = static_cast<ccScalarField*>(sf)->saturationRange().stop();
+						break;
+					case USE_N_SIGMA_MAX:
+						ScalarType mean;
+						ScalarType variance;
+						sf->computeMeanAndVariance(mean, &variance);
+						thisMaxVal = mean + (sqrt(variance) * maxVal);
 						break;
 					default:
 						//nothing to do
@@ -3926,7 +4033,7 @@ bool CommandSFArithmetic::process(ccCommandLineInterface &cmd)
 	{
 		sfIndex = sfIndexStr.toInt(&ok);
 	}
-	if (!ok || sfIndex < 0)
+	if (!ok || sfIndex == -1)
 	{
 		return cmd.error(QObject::tr("Invalid SF index! (after %1)").arg(COMMAND_SF_ARITHMETIC));
 	}
@@ -4019,7 +4126,7 @@ bool CommandSFOperation::process(ccCommandLineInterface &cmd)
 		sfIndex = sfIndexStr.toInt(&ok);
 	}
 	
-	if (!ok || sfIndex < 0)
+	if (!ok || sfIndex == -1)
 	{
 		return cmd.error(QObject::tr("Invalid SF index! (after %1)").arg(COMMAND_SF_OP));
 	}
@@ -4100,6 +4207,108 @@ bool CommandSFOperation::process(ccCommandLineInterface &cmd)
 		}
 	}
 	
+	return true;
+}
+
+
+CommandSFRename::CommandSFRename()
+	: ccCommandLineInterface::Command(QObject::tr("Rename SF"), COMMAND_RENAME_SF)
+{}
+
+bool CommandSFRename::process(ccCommandLineInterface &cmd)
+{
+	cmd.print(QObject::tr("[RENAME SF]"));
+
+	if (cmd.arguments().size() < 2)
+	{
+		return cmd.error(QObject::tr("Missing parameter(s): SF index and/or scalar field name after '%1' (2 values expected)").arg(COMMAND_RENAME_SF));
+	}
+
+	//read sf index
+	int sfIndex = -1;
+	bool ok = true;
+	QString sfIndexStr = cmd.arguments().takeFirst();
+	if (sfIndexStr.toUpper() == OPTION_LAST)
+	{
+		sfIndex = -2;
+	}
+	else
+	{
+		sfIndex = sfIndexStr.toInt(&ok);
+	}
+
+	if (!ok || sfIndex == -1)
+	{
+		return cmd.error(QObject::tr("Invalid SF index! (after %1)").arg(COMMAND_SF_OP));
+	}
+
+	//read the SF name
+	QString sfName = cmd.arguments().takeFirst();
+
+	//apply operation on clouds
+	for (CLCloudDesc& cloudDesc : cmd.clouds())
+	{
+		ccPointCloud* cloud = cloudDesc.pc;
+		if (cloud && cloud->getNumberOfScalarFields() != 0 && sfIndex < static_cast<int>(cloud->getNumberOfScalarFields()))
+		{
+			int thisSFIndex = (sfIndex < 0 ? static_cast<int>(cloud->getNumberOfScalarFields()) - 1 : sfIndex);
+			int indexOfSFWithSameName = cloud->getScalarFieldIndexByName(qPrintable(sfName));
+			if (indexOfSFWithSameName >= 0 && thisSFIndex != indexOfSFWithSameName)
+			{
+				return cmd.error("A SF with the same name is already defined on cloud " + cloud->getName());
+			}
+			CCCoreLib::ScalarField* sf = cloud->getScalarField(thisSFIndex);
+			if (!sf)
+			{
+				assert(false);
+				return cmd.error("Internal error: invalid SF index");
+			}
+			sf->setName(qPrintable(sfName));
+
+			if (cmd.autoSaveMode())
+			{
+				QString errorStr = cmd.exportEntity(cloudDesc, "SF_RENAMED");
+				if (!errorStr.isEmpty())
+				{
+					return cmd.error(errorStr);
+				}
+			}
+		}
+	}
+
+	//and meshes!
+	for (CLMeshDesc& meshDesc : cmd.meshes())
+	{
+		bool isLocked = false;
+		ccGenericMesh* mesh = meshDesc.mesh;
+		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(mesh, &isLocked);
+		if (cloud && !isLocked && cloud->getNumberOfScalarFields() != 0 && sfIndex < static_cast<int>(cloud->getNumberOfScalarFields()))
+		{
+			int thisSFIndex = (sfIndex < 0 ? static_cast<int>(cloud->getNumberOfScalarFields()) - 1 : sfIndex);
+			int indexOfSFWithSameName = cloud->getScalarFieldIndexByName(qPrintable(sfName));
+			if (indexOfSFWithSameName >= 0 && thisSFIndex != indexOfSFWithSameName)
+			{
+				return cmd.error("A SF with the same name is already defined on cloud " + cloud->getName());
+			}
+			CCCoreLib::ScalarField* sf = cloud->getScalarField(thisSFIndex);
+			if (!sf)
+			{
+				assert(false);
+				return cmd.error("Internal error: invalid SF index");
+			}
+			sf->setName(qPrintable(sfName));
+
+			if (cmd.autoSaveMode())
+			{
+				QString errorStr = cmd.exportEntity(meshDesc, "SF_RENAMED");
+				if (!errorStr.isEmpty())
+				{
+					return cmd.error(errorStr);
+				}
+			}
+		}
+	}
+
 	return true;
 }
 
@@ -4230,7 +4439,7 @@ bool CommandICP::process(ccCommandLineInterface &cmd)
 			{
 				bool ok;
 				modelSFAsWeights = sfIndex.toInt(&ok);
-				if (!ok || modelSFAsWeights < 0)
+				if (!ok || modelSFAsWeights == -1)
 				{
 					return cmd.error(QObject::tr("Invalid SF index! (after %1)").arg(COMMAND_ICP_USE_MODEL_SF_AS_WEIGHT));
 				}
@@ -4254,7 +4463,7 @@ bool CommandICP::process(ccCommandLineInterface &cmd)
 			{
 				bool ok;
 				dataSFAsWeights = sfIndex.toInt(&ok);
-				if (!ok || dataSFAsWeights < 0)
+				if (!ok || dataSFAsWeights == -1)
 				{
 					return cmd.error(QObject::tr("Invalid SF index! (after %1)").arg(COMMAND_ICP_USE_DATA_SF_AS_WEIGHT));
 				}

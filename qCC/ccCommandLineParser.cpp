@@ -57,7 +57,7 @@ bool ccCommandLineParser::error(const QString& message) const
 
 int ccCommandLineParser::Parse(int nargs, char** args, ccPluginInterfaceList& plugins)
 {
-	if (!args || nargs < 2)
+	if (args == nullptr || nargs < 2)
 	{
 		assert(false);
 		return EXIT_SUCCESS;
@@ -70,7 +70,7 @@ int ccCommandLineParser::Parse(int nargs, char** args, ccPluginInterfaceList& pl
 	
 	for (int i = 1; i < nargs; ++i) //'i=1' because first argument is always program executable file!
 	{
-		parser->arguments().push_back(QString(args[i]));
+		parser->arguments().push_back(QString::fromLocal8Bit(args[i]));
 	}
 	
 	assert(!parser->arguments().empty());
@@ -519,7 +519,7 @@ bool ccCommandLineParser::saveClouds(QString suffix/*=QString()*/, bool allAtOnc
 		}
 		else
 		{
-			error(QString("The currently selected ouput format for clouds (%1) doesn't handle multiple entities at once!").arg(m_cloudExportFormat));
+			error(QString("The currently selected output format for clouds (%1) doesn't handle multiple entities at once!").arg(m_cloudExportFormat));
 			//will proceed with the standard way
 		}
 	}
@@ -576,7 +576,7 @@ bool ccCommandLineParser::saveMeshes(QString suffix/*=QString()*/, bool allAtOnc
 		}
 		else
 		{
-			error(QString("The currently selected ouput format for meshes (%1) doesn't handle multiple entities at once!").arg(m_meshExportFormat));
+			error(QString("The currently selected output format for meshes (%1) doesn't handle multiple entities at once!").arg(m_meshExportFormat));
 			//will proceed with the standard way
 		}
 	}
@@ -630,6 +630,7 @@ void ccCommandLineParser::registerBuiltInCommands()
 	registerCommand(Command::Shared(new CommandDelaunayTri));
 	registerCommand(Command::Shared(new CommandSFArithmetic));
 	registerCommand(Command::Shared(new CommandSFOperation));
+	registerCommand(Command::Shared(new CommandSFRename));
 	registerCommand(Command::Shared(new CommandICP));
 	registerCommand(Command::Shared(new CommandChangeCloudOutputFormat));
 	registerCommand(Command::Shared(new CommandChangeMeshOutputFormat));
@@ -652,6 +653,7 @@ void ccCommandLineParser::registerBuiltInCommands()
 	registerCommand(Command::Shared(new CommandConvertNormalsToDipAndDipDir));
 	registerCommand(Command::Shared(new CommandConvertNormalsToSFs));
 	registerCommand(Command::Shared(new CommandClearNormals));
+	registerCommand(Command::Shared(new CommandInvertNormal));
 	registerCommand(Command::Shared(new CommandComputeMeshVolume));
 	registerCommand(Command::Shared(new CommandSFColorScale));
 	registerCommand(Command::Shared(new CommandSFConvertToRGB));

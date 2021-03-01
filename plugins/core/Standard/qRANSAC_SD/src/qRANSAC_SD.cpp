@@ -883,6 +883,7 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 			//is there a primitive to add to part cloud?
 			if (prim)
 			{
+				prim->copyGlobalShiftAndScale(*ccPC);
 				prim->applyGLTransformation_recursive();
 				pcShape->addChild(prim);
 				prim->setDisplay(pcShape->getDisplay());

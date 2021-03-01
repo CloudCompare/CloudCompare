@@ -66,6 +66,16 @@ const ccGenericPrimitive& ccGenericPrimitive::operator += (const ccGenericPrimit
 	unsigned newFacesCount = facesCount + prim.size();
 	bool primHasVertNorms = prim.getAssociatedCloud()->hasNormals();
 	bool primHasFaceNorms = prim.hasTriNormals();
+	bool primHasColors = prim.getAssociatedCloud()->hasColors();
+	
+	if (primHasColors && !verts->hasColors())
+		{
+		if (verts->size() > 0 && !verts->setColor(ccColor::white))
+			{
+				ccLog::Error("[ccGenericPrimitive::operator +] Not enough memory!");
+				return *this;
+			}
+		}
 
 	//reserve memory
 	if (	verts->reserve(newVertCount)
@@ -73,7 +83,16 @@ const ccGenericPrimitive& ccGenericPrimitive::operator += (const ccGenericPrimit
 		&&	reserve(newFacesCount)
 		&&	(!primHasFaceNorms || m_triNormalIndexes || reservePerTriangleNormalIndexes()))
 	{
-		//copy vertices & normals
+		if (primHasColors && !verts->hasColors())
+		{
+			if (!verts->reserveTheRGBTable())
+			{
+				ccLog::Error("[ccGenericPrimitive::operator +] Not enough memory!");
+				return *this;
+			}
+		}
+
+		//copy vertices & normals & colors
 		ccGenericPointCloud* cloud = prim.getAssociatedCloud();
 		for (unsigned i = 0; i < cloud->size(); ++i)
 		{
@@ -81,6 +100,14 @@ const ccGenericPrimitive& ccGenericPrimitive::operator += (const ccGenericPrimit
 			if (primHasVertNorms)
 			{
 				verts->addNormIndex(cloud->getPointNormalIndex(i));
+			}
+			if (primHasColors)
+			{
+				verts->addColor(cloud->getPointColor(i));
+			}
+			else if(verts->hasColors())
+			{
+				verts->addColor(ccColor::white);
 			}
 		}
 

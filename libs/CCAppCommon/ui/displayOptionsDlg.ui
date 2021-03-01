@@ -34,8 +34,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>493</width>
-        <height>349</height>
+        <width>496</width>
+        <height>411</height>
        </rect>
       </property>
       <attribute name="label">
@@ -374,8 +374,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>490</width>
-        <height>364</height>
+        <width>496</width>
+        <height>411</height>
        </rect>
       </property>
       <attribute name="label">
@@ -459,8 +459,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>490</width>
-        <height>364</height>
+        <width>496</width>
+        <height>411</height>
        </rect>
       </property>
       <attribute name="label">
@@ -602,8 +602,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>490</width>
-        <height>364</height>
+        <width>496</width>
+        <height>411</height>
        </rect>
       </property>
       <attribute name="label">
@@ -891,6 +891,16 @@
         <widget class="QCheckBox" name="autoDisplayNormalsCheckBox">
          <property name="text">
           <string>Automatically display normals at loading time (when available)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="singleClickPickingCheckBox">
+         <property name="text">
+          <string>Single Click Object Picking (Can be slow on large point clouds)</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
          </property>
         </widget>
        </item>

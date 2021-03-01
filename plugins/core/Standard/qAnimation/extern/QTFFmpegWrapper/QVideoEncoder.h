@@ -31,20 +31,33 @@ public:
 	virtual ~QVideoEncoder();
 
 	//! Creates an (empty) video/anmiation file
-	/** The codec is automatically guessed from the filename.
-		If it can't be guessed this way then MPEG is used by default.
+	/** \param formatShortName output format (short name)
+			- If empty, the format will be automatically guessed from the filename.
+			- If it can't be guessed this way then MPEG is used by default.
+		\param errors (if any)
 		\return success
 	**/
-	bool open(QString* errorString = 0);
+	bool open(QString formatShortName, QStringList& errors);
 
 	//! Returns whether the file is opened or not
 	inline bool isOpen() const { return m_isOpen; }
 
 	//! Adds an image to the stream
-	virtual bool encodeImage(const QImage& image, int frameIndex, QString* errorString = 0);
+	virtual bool encodeImage(const QImage& image, int frameIndex, QString* errorString = nullptr);
 
 	//! Closes the file
 	virtual bool close();
+
+	//! Output format
+	struct OutputFormat
+	{
+		QString shortName;
+		QString longName;
+		QString extensions;
+	};
+
+	//! Returns the list of supported output formats
+	static bool GetSupportedOutputFormats(std::vector<OutputFormat>& formats, bool ignoreIfNoFileExtension = true);
 
 protected:
 
@@ -72,7 +85,7 @@ protected:
 		It *should* be okay as we make sure the image size is a multiple of 8 bytes however it is not
 		guaranteed that sws_scale won't at some point require more bytes per line.
 	**/
-	bool convertImage_sws(const QImage &image, QString* errorString = 0);
+	bool convertImage_sws(const QImage &image, QString* errorString = nullptr);
 };
 
 #endif //Q_VIDEO_ENCODE_HEADER

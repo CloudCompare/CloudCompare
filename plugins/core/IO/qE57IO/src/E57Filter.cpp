@@ -48,7 +48,10 @@ namespace  {
 	constexpr char CC_E57_INTENSITY_FIELD_NAME[] = "Intensity";
 	constexpr char CC_E57_RETURN_INDEX_FIELD_NAME[] = "Return index";
 	constexpr char s_e57PoseKey[] = "E57_pose";
-	
+
+	constexpr uint8_t VALID_DATA = 0;
+	constexpr uint8_t INVALID_DATA = 1;
+
 	unsigned s_absoluteScanIndex = 0;
 	bool s_cancelRequestedByUser = false;
 	
@@ -553,7 +556,7 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 				ScalarType sfVal = intensitySF->getValue(index);
 				arrays.intData[i] = static_cast<double>(sfVal);
 				if (!arrays.isInvalidIntData.empty())
-					arrays.isInvalidIntData[i] = ccScalarField::ValidValue(sfVal) ? 0 : 1;
+					arrays.isInvalidIntData[i] = ccScalarField::ValidValue(sfVal) ? VALID_DATA : INVALID_DATA;
 			}
 
 			if (hasNormals)
@@ -716,7 +719,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 
 	try
 	{
-		e57::ImageFile imf(qPrintable(filename), "w"); //DGM: warning, toStdString doesn't preserve "local" characters
+		e57::ImageFile imf(filename.toStdString(), "w");
 		if (!imf.isOpen())
 			return CC_FERR_WRITING;
 
@@ -728,7 +731,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 		/// We are using the E57 v1.0 data format standard fieldnames.
 		/// The standard fieldnames are used without an extension prefix (in the default namespace).
 		/// We explicitly register it for completeness (the reference implementaion would do it for us, if we didn't).
-		imf.extensionsAdd("", E57_V1_0_URI);
+		imf.extensionsAdd("", e57::E57_V1_0_URI);
 
 		// Set per-file properties.
 		/// Path names: "/formatName", "/majorVersion", "/minorVersion", "/coordinateMetadata"
@@ -1434,8 +1437,12 @@ static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 	}
 	e57::StructureNode scanNode(node);
 
+	QString scanName("none");
+	if (scanNode.isDefined("name"))
+		scanName = QString::fromStdString( e57::StringNode(scanNode.get("name")).value() );
+
 	//log
-	ccLog::Print(QString("[E57] Reading new scan node (%1)").arg(scanNode.elementName().c_str()));
+	ccLog::Print(QString("[E57] Reading new scan node (%1) - %2").arg(scanNode.elementName().c_str()).arg(scanName));
 
 	if (!scanNode.isDefined("points"))
 	{
@@ -1486,7 +1493,7 @@ static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 
 	if (scanNode.isDefined("name"))
 	{		
-		cloud->setName( QString::fromStdString( e57::StringNode(scanNode.get("name")).value() ) );
+		cloud->setName(scanName);
 	}
 	
 	if (scanNode.isDefined("description"))
@@ -1527,10 +1534,10 @@ static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 		bool preserveCoordinateShift = true;
 		if (FileIOFilter::HandleGlobalShift(T, Tshift, preserveCoordinateShift, s_loadParameters))
 		{
+			poseMat.setTranslation((T + Tshift).u);
 			if (preserveCoordinateShift)
 			{
 				cloud->setGlobalShift(Tshift);
-				poseMat.setTranslation((T + Tshift).u);
 			}
 			poseMatWasShifted = true;
 			ccLog::Warning("[E57Filter::loadFile] Cloud %s has been recentered! Translation: (%.2f ; %.2f ; %.2f)", qPrintable(guidStr), Tshift.x, Tshift.y, Tshift.z);
@@ -1829,7 +1836,7 @@ static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 			if (!arrays.intData.empty())
 			{
 				assert(intensitySF);
-				if (!header.pointFields.isIntensityInvalidField || arrays.isInvalidIntData[i] != 0)
+				if (!header.pointFields.isIntensityInvalidField || arrays.isInvalidIntData[i] != INVALID_DATA)
 				{
 					//ScalarType intensity = (ScalarType)((arrays.intData[i] - intOffset)/intRange); //Normalize intensity to 0 - 1.
 					const ScalarType intensity = static_cast<ScalarType>(arrays.intData[i]);
@@ -1960,12 +1967,13 @@ static ccHObject* LoadImage(const e57::Node& node, QString& associatedData3DGuid
 	}
 	e57::StructureNode imageNode(node);
 
-	//log
-	ccLog::Print(QString("[E57] Reading new image node (%1)").arg(imageNode.elementName().c_str()));
-
-	e57::ustring name = "none";
+	QString imageName("none");
 	if (imageNode.isDefined("name"))
-		name = e57::StringNode(imageNode.get("name")).value();
+		imageName = QString::fromStdString(e57::StringNode(imageNode.get("name")).value());
+
+	//log
+	ccLog::Print(QString("[E57] Reading new image node (%1) - %2").arg(imageNode.elementName().c_str()).arg(imageName));
+
 	if (imageNode.isDefined("description"))
 		ccLog::Print(QString("[E57] Description: %1").arg(e57::StringNode(imageNode.get("description")).value().c_str()));
 
@@ -2004,7 +2012,7 @@ static ccHObject* LoadImage(const e57::Node& node, QString& associatedData3DGuid
 
 	if (!cameraRepresentation)
 	{
-		ccLog::Warning(QString("[E57] Image %1 has no associated camera representation!").arg(name.c_str()));
+		ccLog::Warning(QString("[E57] Image %1 has no associated camera representation!").arg(imageName));
 		return nullptr;
 	}
 	Image2DProjection cameraType = cameraRepresentation->getType();
@@ -2189,7 +2197,7 @@ static ccHObject* LoadImage(const e57::Node& node, QString& associatedData3DGuid
 
 	assert(imageObj);
 	imageObj->setData(qImage);
-	imageObj->setName(name.c_str());
+	imageObj->setName(imageName);
 
 	//don't forget image aspect ratio
 	if (cameraType == E57_CYLINDRICAL ||
@@ -2212,7 +2220,7 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 	try
 	{
-		e57::ImageFile imf( qPrintable(filename), "r", e57::CHECKSUM_POLICY_SPARSE ); //DGM: warning, toStdString doesn't preserve "local" characters
+		e57::ImageFile imf(filename.toStdString(), "r", e57::CHECKSUM_POLICY_SPARSE);
 		
 		if (!imf.isOpen())
 		{
@@ -2350,6 +2358,7 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 			}
 		}
 
+		//we save parameters
 		parameters = s_loadParameters;
 
 		//Image data?

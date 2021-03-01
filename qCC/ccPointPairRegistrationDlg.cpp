@@ -158,6 +158,7 @@ void ccPointPairRegistrationDlg::EntityContexts::fill(const ccHObject::Container
 			{
 				isShifted = true;
 				shift = shiftedEntity->getGlobalShift(); //we can only consider the first shift!
+				scale = shiftedEntity->getGlobalScale();
 			}
 		}
 
@@ -341,6 +342,19 @@ bool ccPointPairRegistrationDlg::init(	ccGLWindow* win,
 		aligned->setVisible(true);
 		SetEnabled_recursive(aligned);
 		//SetVisible_recursive(aligned);
+
+		//add the 1-point child labels as well (if any)
+		for (unsigned i = 0; i < aligned->getChildrenNumber(); ++i)
+		{
+			cc2DLabel* label = ccHObjectCaster::To2DLabel(aligned->getChild(i));
+			if (label && label->size() == 1)
+			{
+				m_alignedEntities.insert(label, EntityContext(label));
+				m_associatedWin->addToOwnDB(label);
+				label->setDisplay(m_associatedWin);
+				label->setVisible(true);
+			}
+		}
 	}
 
 	//add reference entity (if any) to display
@@ -358,6 +372,19 @@ bool ccPointPairRegistrationDlg::init(	ccGLWindow* win,
 		reference->setVisible(true);
 		SetEnabled_recursive(reference);
 		//SetVisible_recursive(reference);
+
+		//add the 1-point child labels as well (if any)
+		for (unsigned i = 0; i < reference->getChildrenNumber(); ++i)
+		{
+			cc2DLabel* label = ccHObjectCaster::To2DLabel(reference->getChild(i));
+			if (label && label->size() == 1)
+			{
+				m_referenceEntities.insert(label, EntityContext(label));
+				m_associatedWin->addToOwnDB(label);
+				label->setDisplay(m_associatedWin);
+				label->setVisible(true);
+			}
+		}
 	}
 
 	showReferenceCheckBox->setChecked(!m_referenceEntities.empty());
@@ -457,7 +484,7 @@ void ccPointPairRegistrationDlg::pause(bool state)
 
 bool ccPointPairRegistrationDlg::convertToSphereCenter(CCVector3d& P, ccHObject* entity, PointCoordinateType& sphereRadius)
 {
-	sphereRadius = -CCCoreLib::PC_ONE;
+	sphereRadius = 0;
 	if (	!entity
 		||	!useSphereToolButton->isChecked()
 		||	!entity->isKindOf(CC_TYPES::POINT_CLOUD) ) //only works with cloud right now
@@ -474,8 +501,8 @@ bool ccPointPairRegistrationDlg::convertToSphereCenter(CCVector3d& P, ccHObject*
 
 	//crop points inside a box centered on the current point
 	ccBBox box;
-	box.add(CCVector3::fromArray((P - CCVector3d(1,1,1)*searchRadius).u));
-	box.add(CCVector3::fromArray((P + CCVector3d(1,1,1)*searchRadius).u));
+	box.add(CCVector3::fromArray((P - CCVector3d(1, 1, 1)*searchRadius).u));
+	box.add(CCVector3::fromArray((P + CCVector3d(1, 1, 1)*searchRadius).u));
 	CCCoreLib::ReferenceCloud* part = cloud->crop(box,true);
 
 	bool success = false;
@@ -562,7 +589,14 @@ void ccPointPairRegistrationDlg::onItemPicked(const PickedItem& pi)
 	}
 	else
 	{
-		assert(false);
+		if (pi.entity && pi.entity->isA(CC_TYPES::LABEL_2D))
+		{
+			ccLog::Error(tr("Point/label already picked"));
+		}
+		else
+		{
+			assert(false);
+		}
 		return;
 	}
 	m_associatedWin->redraw();
@@ -650,7 +684,10 @@ void ccPointPairRegistrationDlg::onDelButtonPushed()
 		removeRefPoint(pointIndex);
 }
 
-void ccPointPairRegistrationDlg::addPointToTable(QTableWidget* tableWidget, int rowIndex, const CCVector3d& P, QString pointName)
+void ccPointPairRegistrationDlg::addPointToTable(	QTableWidget* tableWidget,
+													int rowIndex,
+													const CCVector3d& P,
+													QString pointName )
 {
 	assert(tableWidget);
 	if (!tableWidget)
@@ -680,7 +717,7 @@ void ccPointPairRegistrationDlg::addPointToTable(QTableWidget* tableWidget, int 
 	}
 }
 
-bool ccPointPairRegistrationDlg::addAlignedPoint(CCVector3d& Pin, ccHObject* entity/*=0*/, bool shifted/*=0*/)
+bool ccPointPairRegistrationDlg::addAlignedPoint(CCVector3d& Pin, ccHObject* entity/*=nullptr*/, bool shifted/*=false*/)
 {
 	//if the input point is not shifted, we shift it to the aligned coordinate system
 	assert(entity == nullptr || m_alignedEntities.contains(entity));
@@ -692,12 +729,11 @@ bool ccPointPairRegistrationDlg::addAlignedPoint(CCVector3d& Pin, ccHObject* ent
 		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(entity);
 		if (cloud)
 		{
-			m_alignedPoints.setGlobalScale(cloud->getGlobalScale());
-			m_alignedPoints.setGlobalShift(cloud->getGlobalShift());
+			m_alignedPoints.copyGlobalShiftAndScale(*cloud);
 		}
 	}
 
-	PointCoordinateType sphereRadius = -CCCoreLib::PC_ONE;
+	PointCoordinateType sphereRadius = 0;
 	if (!convertToSphereCenter(Pin, entity, sphereRadius))
 		return false;
 
@@ -717,7 +753,7 @@ bool ccPointPairRegistrationDlg::addAlignedPoint(CCVector3d& Pin, ccHObject* ent
 	}
 
 	unsigned newPointIndex = m_alignedPoints.size();
-	if (newPointIndex == m_alignedPoints.capacity() && !m_alignedPoints.reserve(newPointIndex+1))
+	if (newPointIndex == m_alignedPoints.capacity() && !m_alignedPoints.reserve(newPointIndex + 1))
 	{
 		ccLog::Error("Not enough memory?!");
 		return false;
@@ -728,14 +764,35 @@ bool ccPointPairRegistrationDlg::addAlignedPoint(CCVector3d& Pin, ccHObject* ent
 	m_alignedPoints.addPoint(P);
 	
 	QString pointName = QString("A%1").arg(newPointIndex);
-	
-	//add corresponding row in table
-	addPointToTable(alignedPointsTableWidget, newPointIndex, Pin, pointName);
 
 	//eventually add a label (or a sphere)
 	if (sphereRadius <= 0)
 	{
+		//if the picked point is associated to a label
+		cc2DLabel* originLabel = nullptr;
+		if (entity && entity->isA(CC_TYPES::LABEL_2D))
+		{
+			for (const EntityContext& ec : m_alignedEntities)
+			{
+				if (ec.entity == entity)
+				{
+					originLabel = ccHObjectCaster::To2DLabel(ec.entity);
+
+					//we've found a label corresponding to the chosen point
+					pointName += QString(" (%1)").arg(originLabel->getName());
+					originLabel->setEnabled(false);
+
+					//TODO add the label name to a new column?
+				}
+			}
+		}
+
 		cc2DLabel* label = CreateLabel(&m_alignedPoints, newPointIndex, pointName, m_associatedWin);
+		if (originLabel)
+		{
+			//remember the associated label
+			label->setMetaData("AssociatedLabelID", originLabel->getUniqueID());
+		}
 		m_alignedPoints.addChild(label);
 	}
 	else
@@ -748,12 +805,51 @@ bool ccPointPairRegistrationDlg::addAlignedPoint(CCVector3d& Pin, ccHObject* ent
 		m_alignedPoints.addChild(sphere);
 	}
 
+	//add corresponding row in table
+	addPointToTable(alignedPointsTableWidget, newPointIndex, Pin, pointName);
+
 	if (m_associatedWin)
 		m_associatedWin->redraw();
 
 	onPointCountChanged();
 
 	return true;
+}
+
+void ccPointPairRegistrationDlg::removeLabel(	ccPointCloud& points,
+												unsigned childIndex,
+												const EntityContexts& entities )
+{
+	if (childIndex >= points.getChildrenNumber())
+	{
+		assert(false);
+		return;
+	}
+	
+	cc2DLabel* label = ccHObjectCaster::To2DLabel(points.getChild(childIndex));
+	if (label)
+	{
+		//if the label had an associated label
+		if (label->hasMetaData("AssociatedLabelID"))
+		{
+			unsigned uuid = label->metaData()["AssociatedLabelID"].toUInt();
+			for (const EntityContext& ec : entities)
+			{
+				if (ec.entity && ec.entity->getUniqueID() == uuid)
+				{
+					//restore the original entity status (normally it was enabled!)
+					ec.entity->setEnabled(ec.wasEnabled);
+					break;
+				}
+			}
+		}
+	}
+	else
+	{
+		//should be a label!
+		assert(false);
+	}
+	points.removeChild(childIndex);
 }
 
 void ccPointPairRegistrationDlg::unstackAligned()
@@ -763,13 +859,14 @@ void ccPointPairRegistrationDlg::unstackAligned()
 		return;
 
 	assert(alignedPointsTableWidget->rowCount() > 0);
-	alignedPointsTableWidget->removeRow(alignedPointsTableWidget->rowCount()-1);
+	alignedPointsTableWidget->removeRow(alignedPointsTableWidget->rowCount() - 1);
 
 	//remove label
 	assert(m_alignedPoints.getChildrenNumber() == pointCount);
-	m_alignedPoints.removeChild(pointCount - 1);
+	--pointCount;
+	removeLabel(m_alignedPoints, pointCount, m_alignedEntities);
 	//remove point
-	m_alignedPoints.resize(pointCount - 1);
+	m_alignedPoints.resize(pointCount);
 
 	if (m_associatedWin)
 		m_associatedWin->redraw();
@@ -788,7 +885,7 @@ void ccPointPairRegistrationDlg::removeAlignedPoint(int index, bool autoRemoveDu
 
 	int pointCount = static_cast<int>(m_alignedPoints.size());
 	//remove the label (or sphere)
-	m_alignedPoints.removeChild(index);
+	removeLabel(m_alignedPoints, index, m_alignedEntities);
 	//remove array row
 	alignedPointsTableWidget->removeRow(index);
 
@@ -860,8 +957,7 @@ bool ccPointPairRegistrationDlg::addReferencePoint(CCVector3d& Pin, ccHObject* e
 			//simply copy the cloud global shift/scale
 			if (cloud)
 			{
-				m_refPoints.setGlobalScale(cloud->getGlobalScale());
-				m_refPoints.setGlobalShift(cloud->getGlobalShift());
+				m_refPoints.copyGlobalShiftAndScale(*cloud);
 			}
 		}
 		else //virtual point
@@ -892,7 +988,7 @@ bool ccPointPairRegistrationDlg::addReferencePoint(CCVector3d& Pin, ccHObject* e
 		}
 	}
 
-	PointCoordinateType sphereRadius = -CCCoreLib::PC_ONE;
+	PointCoordinateType sphereRadius = 0;
 	if (!convertToSphereCenter(Pin, entity, sphereRadius))
 		return false;
 
@@ -928,13 +1024,34 @@ bool ccPointPairRegistrationDlg::addReferencePoint(CCVector3d& Pin, ccHObject* e
 
 	QString pointName = QString("R%1").arg(newPointIndex);
 
-	//add corresponding row in table
-	addPointToTable(refPointsTableWidget, newPointIndex, Pin, pointName);
-
 	//eventually add a label (or a sphere)
 	if (sphereRadius <= 0)
 	{
+		//if the picked point is associated to a label
+		cc2DLabel* originLabel = nullptr;
+		if (entity && entity->isA(CC_TYPES::LABEL_2D))
+		{
+			for (const EntityContext& ec : m_referenceEntities)
+			{
+				if (ec.entity == entity)
+				{
+					originLabel = ccHObjectCaster::To2DLabel(ec.entity);
+
+					//we've found a label corresponding to the chosen point
+					pointName += QString(" (%1)").arg(originLabel->getName());
+					originLabel->setEnabled(false);
+
+					//TODO add the label name to a new column?
+				}
+			}
+		}
+
 		cc2DLabel* label = CreateLabel(&m_refPoints, newPointIndex, pointName, m_associatedWin);
+		if (originLabel)
+		{
+			//remember the associated label
+			label->setMetaData("AssociatedLabelID", originLabel->getUniqueID());
+		}
 		m_refPoints.addChild(label);
 	}
 	else
@@ -946,6 +1063,9 @@ bool ccPointPairRegistrationDlg::addReferencePoint(CCVector3d& Pin, ccHObject* e
 		sphere->setTempColor(ccColor::yellow, true);
 		m_refPoints.addChild(sphere);
 	}
+
+	//add corresponding row in table
+	addPointToTable(refPointsTableWidget, newPointIndex, Pin, pointName);
 
 	if (m_associatedWin)
 	{
@@ -969,7 +1089,7 @@ void ccPointPairRegistrationDlg::unstackRef()
 	//remove label
 	assert(m_refPoints.getChildrenNumber() == pointCount);
 	pointCount--;
-	m_refPoints.removeChild(pointCount);
+	removeLabel(m_refPoints, pointCount, m_referenceEntities);
 	//remove point
 	m_refPoints.resize(pointCount);
 
@@ -997,7 +1117,7 @@ void ccPointPairRegistrationDlg::removeRefPoint(int index, bool autoRemoveDualPo
 
 	int pointCount = static_cast<int>(m_refPoints.size());
 	//remove the label (or sphere)
-	m_refPoints.removeChild(index);
+	removeLabel(m_refPoints, index, m_referenceEntities);
 	//remove array row
 	refPointsTableWidget->removeRow(index);
 
@@ -1397,13 +1517,16 @@ void ccPointPairRegistrationDlg::apply()
 			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(it.key());
 			if (cloud)
 			{
-				if (m_refPoints.isShifted())
+				if (m_referenceEntities.isShifted)
 				{
-					const CCVector3d& Pshift = m_refPoints.getGlobalShift();
-					const double& scale = m_refPoints.getGlobalScale();
-					cloud->setGlobalShift(Pshift);
-					cloud->setGlobalScale(scale);
-					ccLog::Warning(tr("[PointPairRegistration] Cloud %1: global shift has been updated to match the reference: (%1,%2,%3) [x%4]").arg(cloud->getName()).arg(Pshift.x).arg(Pshift.y).arg(Pshift.z).arg(scale));
+					cloud->setGlobalShift(m_referenceEntities.shift);
+					cloud->setGlobalScale(m_referenceEntities.scale);
+					ccLog::Warning(tr("[PointPairRegistration] Cloud %1: global shift has been updated to match the reference: (%1,%2,%3) [x%4]")
+						.arg(cloud->getName())
+						.arg(m_referenceEntities.shift.x)
+						.arg(m_referenceEntities.shift.y)
+						.arg(m_referenceEntities.shift.z)
+						.arg(m_referenceEntities.scale));
 				}
 				else if (cloud->isShifted()) //we'll ask the user first before dropping the shift information on the aligned cloud
 				{

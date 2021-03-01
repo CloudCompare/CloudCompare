@@ -24,6 +24,7 @@
 #include <QDialog>
 
 class MainWindow;
+class ccGLMatrix;
 
 //! Primitive factory
 class ccPrimitiveFactoryDlg : public QDialog, public Ui::PrimitiveFactoryDlg
@@ -46,6 +47,14 @@ protected:
 
 	//! Set sphere position to origin
 	void setSpherePositionToOrigin();
+
+	void setCoordinateSystemBasedOnSelectedObject();
+
+	void onMatrixTextChange();
+
+	void setCSMatrixToIdentity();
+
+	ccGLMatrix getCSMatrix(bool &valid);
 
 protected:
 

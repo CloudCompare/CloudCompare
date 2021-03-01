@@ -38,7 +38,7 @@
 //System
 #include <cassert>
 
-ccVolumeCalcTool::ccVolumeCalcTool(ccGenericPointCloud* cloud1, ccGenericPointCloud* cloud2, QWidget* parent/*=0*/)
+ccVolumeCalcTool::ccVolumeCalcTool(ccGenericPointCloud* cloud1, ccGenericPointCloud* cloud2, QWidget* parent/*=nullptr*/)
 	: QDialog(parent, Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint)
 	, cc2Point5DimEditor()
 	, m_cloud1(cloud1)
@@ -394,15 +394,31 @@ ccPointCloud* ccVolumeCalcTool::convertGridToCloud(bool exportToOriginalCS) cons
 																std::numeric_limits<double>::quiet_NaN(),
 																exportToOriginalCS);
 
-		if (rasterCloud && rasterCloud->hasScalarFields())
+		if (rasterCloud)
 		{
-			rasterCloud->showSF(true);
-			rasterCloud->setCurrentDisplayedScalarField(0);
-			ccScalarField* sf = static_cast<ccScalarField*>(rasterCloud->getScalarField(0));
-			assert(sf);
-			sf->setName("Relative height");
-			sf->setSymmetricalScale(sf->getMin() < 0 && sf->getMax() > 0);
-			rasterCloud->showSFColorsScale(true);
+			if (rasterCloud->hasScalarFields())
+			{
+				rasterCloud->showSF(true);
+				rasterCloud->setCurrentDisplayedScalarField(0);
+				ccScalarField* sf = static_cast<ccScalarField*>(rasterCloud->getScalarField(0));
+				assert(sf);
+				sf->setName("Relative height");
+				sf->setSymmetricalScale(sf->getMin() < 0 && sf->getMax() > 0);
+				rasterCloud->showSFColorsScale(true);
+			}
+
+			//keep Global Shift & Scale
+			auto ground = getGroundCloud();
+			auto ceil = getCeilCloud();
+
+			if (ground.first && ground.first->isShifted())
+			{
+				rasterCloud->copyGlobalShiftAndScale(*ground.first);
+			}
+			else if (ceil.first && ceil.first->isShifted())
+			{
+				rasterCloud->copyGlobalShiftAndScale(*ceil.first);
+			}
 		}
 	}
 	catch (const std::bad_alloc&)
@@ -750,6 +766,52 @@ bool ccVolumeCalcTool::ComputeVolume(	ccRasterGrid& grid,
 	return true;
 }
 
+std::pair<ccGenericPointCloud*, double> ccVolumeCalcTool::getGroundCloud() const
+{
+	ccGenericPointCloud* groundCloud = nullptr;
+	double groundHeight = std::numeric_limits<double>::quiet_NaN();
+	switch (m_ui->groundComboBox->currentIndex())
+	{
+	case 0:
+		groundHeight = m_ui->groundEmptyValueDoubleSpinBox->value();
+		break;
+	case 1:
+		groundCloud = m_cloud1 ? m_cloud1 : m_cloud2;
+		break;
+	case 2:
+		groundCloud = m_cloud2;
+		break;
+	default:
+		assert(false);
+		break;
+	}
+
+	return { groundCloud, groundHeight };
+}
+
+std::pair<ccGenericPointCloud*, double> ccVolumeCalcTool::getCeilCloud() const
+{
+	ccGenericPointCloud* ceilCloud = nullptr;
+	double ceilHeight = std::numeric_limits<double>::quiet_NaN();
+	switch (m_ui->ceilComboBox->currentIndex())
+	{
+	case 0:
+		ceilHeight = m_ui->ceilEmptyValueDoubleSpinBox->value();
+		break;
+	case 1:
+		ceilCloud = m_cloud1 ? m_cloud1 : m_cloud2;
+		break;
+	case 2:
+		ceilCloud = m_cloud2;
+		break;
+	default:
+		assert(false);
+		break;
+	}
+
+	return { ceilCloud, ceilHeight };
+}
+
 bool ccVolumeCalcTool::updateGrid()
 {
 	if (!m_cloud2)
@@ -777,39 +839,17 @@ bool ccVolumeCalcTool::updateGrid()
 	assert(gridStep != 0);
 
 	//ground
-	ccGenericPointCloud* groundCloud = nullptr;
-	double groundHeight = 0;
-	switch (m_ui->groundComboBox->currentIndex())
+	auto ground = getGroundCloud();
+	if (nullptr == ground.first && std::isnan(ground.second))
 	{
-	case 0:
-		groundHeight = m_ui->groundEmptyValueDoubleSpinBox->value();
-		break;
-	case 1:
-		groundCloud = m_cloud1 ? m_cloud1 : m_cloud2;
-		break;
-	case 2:
-		groundCloud = m_cloud2;
-		break;
-	default:
 		assert(false);
 		return false;
 	}
 
 	//ceil
-	ccGenericPointCloud* ceilCloud = nullptr;
-	double ceilHeight = 0;
-	switch (m_ui->ceilComboBox->currentIndex())
+	auto ceil = getCeilCloud();
+	if (nullptr == ceil.first && std::isnan(ceil.second))
 	{
-	case 0:
-		ceilHeight = m_ui->ceilEmptyValueDoubleSpinBox->value();
-		break;
-	case 1:
-		ceilCloud = m_cloud1 ? m_cloud1 : m_cloud2;
-		break;
-	case 2:
-		ceilCloud = m_cloud2;
-		break;
-	default:
 		assert(false);
 		return false;
 	}
@@ -817,8 +857,8 @@ bool ccVolumeCalcTool::updateGrid()
 	ccVolumeCalcTool::ReportInfo reportInfo;
 
 	if (ComputeVolume(	m_grid,
-						groundCloud,
-						ceilCloud,
+						ground.first,
+						ceil.first,
 						box,
 						getProjectionDimension(),
 						gridStep,
@@ -828,8 +868,8 @@ bool ccVolumeCalcTool::updateGrid()
 						getFillEmptyCellsStrategy(m_ui->fillGroundEmptyCellsComboBox),
 						getFillEmptyCellsStrategy(m_ui->fillCeilEmptyCellsComboBox),
 						reportInfo,
-						groundHeight,
-						ceilHeight,
+						ground.second,
+						ceil.second,
 						this))
 	{	
 		outputReport(reportInfo);

@@ -1,7 +1,5 @@
 # ALL 'contrib' supported libraries
 
-# 3DXWARE (3dConnexion devices) support
-include( 3DXSupport )
 # Oculus support
 include( OculusSupport )
 

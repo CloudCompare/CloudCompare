@@ -14,11 +14,6 @@ file( GLOB ui_list ui_templates/*.ui )
 file( GLOB qrc_list ../qCC/*.qrc )
 file( GLOB rc_list ../qCC/*.rc )
 
-# 3DX support (3dConnexion devices)
-if ( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )
-	add_subdirectory( ../qCC/devices/3dConnexion devices/3dConnexion )
-endif()
-
 qt5_wrap_ui( generated_ui_list ${ui_list} )
 qt5_add_resources( generated_qrc_list ${qrc_list} )
 
@@ -27,16 +22,31 @@ if( MSVC )
 	set( rc_list images/icon/cc_viewer_icon.rc )
 
 	#to get rid of the (system) console
-	add_executable( ${PROJECT_NAME} WIN32 ${header_list} ${source_list} ${generated_ui_list} ${generated_qrc_list} ${rc_list})
+	add_executable( ${PROJECT_NAME} WIN32 ${header_list} ${source_list} ${generated_ui_list} ${generated_qrc_list} ${rc_list}  ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/windows/qt5.natvis )
 elseif( APPLE )
-	add_executable( ${PROJECT_NAME} MACOSX_BUNDLE ${header_list} ${source_list} ${generated_ui_list} ${generated_qrc_list} ${rc_list})
+	add_executable( ${PROJECT_NAME} MACOSX_BUNDLE ${header_list} ${source_list} ${generated_ui_list} ${generated_qrc_list} ${rc_list} )
 else()
-	add_executable( ${PROJECT_NAME} ${header_list} ${source_list} ${generated_ui_list} ${generated_qrc_list} ${rc_list})
+	add_executable( ${PROJECT_NAME} ${header_list} ${source_list} ${generated_ui_list} ${generated_qrc_list} ${rc_list} )
 endif()
+
+DeployQt(
+	TARGET
+		${PROJECT_NAME}
+	DEPLOY_PATH
+		${PROJECT_NAME}
+)
 
 target_link_libraries( ${PROJECT_NAME}
     CCAppCommon
 )
+
+if( CCCORELIB_USE_QT_CONCURRENT )
+	# We want *deployqt to handle this dependency, so instead of just copying the file
+	# link to the target.
+	target_link_libraries( ${PROJECT_NAME}
+		Qt5::Concurrent
+	)
+endif()
 
 # contrib. libraries support
 if ( APPLE )
@@ -45,11 +55,6 @@ elseif( UNIX )
 	target_link_contrib( ${PROJECT_NAME} ${CMAKE_INSTALL_LIBDIR}/cloudcompare )
 else()
 	target_link_contrib( ${PROJECT_NAME} ${CCVIEWER_DEST_FOLDER} )
-endif()
-
-# 3dConnexion devices support
-if ( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )
-	target_link_3DXWARE( ${PROJECT_NAME} )
 endif()
 
 # Add custom preprocessor definitions
@@ -75,10 +80,6 @@ install_ext( TARGETS ccViewer ${CCVIEWER_DEST_FOLDER} "" )
 set( auxFiles bin_other/license.txt )
 
 if( WIN32 )
-	# Export Qt dlls
-	install_Qt_Dlls( ${CCVIEWER_DEST_FOLDER} ${OPTION_SUPPORT_GAMEPADS} )
-	install_Qt5_plugins( ${CCVIEWER_DEST_FOLDER} )
-
 	# Additional auxiliary file(s)
 	list( APPEND auxFiles bin_other/start.bat )
 endif()

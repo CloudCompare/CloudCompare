@@ -10,6 +10,11 @@ v2.12 (???) - (in development)
         - Can select whether to attemt to simplify shapes (torus->cone/cylinder/sphere/planes cone->cylinder/sphere/plane  cylinder->sphere/plane, sphere->plane)
         - Can choose whether or not to have a random color assigned to each shape found.
         - Ability to select min and max radii for various shapes (helps prevent giant spheres and cylinders from beating out the more likely plane feature)
+    - Single Click Picking option added to display options menu
+      - Single click picking can be disabled (can be very slow for very large point clouds) 
+    - CommandLine mode new features
+      - Added N_SIGMA_MIN and N_SIGMA_MAX options to the FILTER_SF command. Specify the option followed by a numeric value to filter by N * standardDeviation around the mean.
+
 	- Clipping box tool:
 		- former 'contours' renamed 'envelopes' for the sake of clarity
 		- ability to extract the real contours of the points inside each slice (single slice mode or 'repeat' mode)
@@ -18,11 +23,100 @@ v2.12 (???) - (in development)
 		- planes fitted with the 'Plane tool' should now always have the normal pointing towards the user instead of a random orientation
 	- qAnimation:
 		- option to smooth the trajectory
+		- option to choose the video output codec/format
+	- ATI cards:
+		- the display should now be faster with ATI cards thanks to a smarter way to manage (2D text) textures
+	- Localization:
+		- Korean is now supported (thanks to Yun-Ho Chung)
+		- Russian translation has been updated (thanks to Gene Kalabin)
+		- Chinese is now supported (thanks to https://github.com/jindili)
+	- The option 'Edit > Normals > Invert' can now be used on meshes
+	- qCSF:
+		- added support for command line mode with all available options, except cloth export
+		- use -CSF to run the plugin with the next optional settings:
+			- -SCENES [scene]: name of the scene (SLOPE|RELIEF|FLAT)
+			- -PROC_SLOPE: turn on slope post processing for disconnected terrain
+			- -CLOTH_RESOLUTION [value]: double value of cloth resolution (ex 0.5)
+			- -MAX_ITERATION [value]: integer value of max iterations (ex. 500)
+			- -CLASS_THRESHOLD [value]: double value of classification threshold (ex. 0.5)
+			- -EXPORT_GROUND: exports the ground as a .bin file
+			- -EXPORT_OFFGROUND: exports the off-ground as a .bin file
+	- Command line:
+		- Command 'Rasterize':
+			- New output option '-OUTPUT_RASTER_Z_AND_SF' to explicitly export altitudes AND scalar fields.
+				The former '-OUTPUT_RASTER_Z' option will only export the altitudes as its name implies.
+		- New sub-option for the RANSAC plugin command line option (-RANSAC)
+			- OUT_RANDOM_COLOR = generate random colors for the output clouds (false by default now)
+        - New sub-option for the FILTER_SF command:
+			- N_SIGMA_MIN and N_SIGMA_MAX: specify the option followed by a numeric value to filter by N * standardDeviation around the mean.
+		- new option '-INVERT_NORMALS':
+			- Inverts the normals of the loaded entities (cloud or mesh, and per-triangle or per-vertex for meshes)
+		- new option '-RENAME_SF' ({scalar field index} {name}):
+			- To rename a scalar field
+	- STL:
+		- loading speed should be greatly improved (compared to v2.10 and v2.11)
+	- Global Shift & Scale:
+		- the qRansacSD plugin can now transfer the Global Shift & Scale info to the created primitives
+		- The fit functions (Fit shpere, Fit plane, Fit facet and Fit quadric) as well
+	- Align tool (Point-pair based registration):
+		- labels associated to a point cloud will now remain visible and the user can pick them
+		- the tool will display the corresponding label title in the registration summary tables
+	- 2.5D Volume calculation tool
+		- the tool now preserves the Global Shift when exporting the difference map/cloud
+	- LAS files:
+	    - the Global Shift, if defined, will now be used as LAS offset if no offset was previously set
+		- the PDAL LAS I/O filter and the libLAS I/O filter should now both handle LAS offset
+		  and scale the same way at export time.
+
+- New plugins
+	- MPlane: perform normal distance measurements against a defined plane (see https://www.cloudcompare.org/doc/wiki/index.php?title=MPlane_(plugin) )
+	- Colorimetric Segmenter: color-based segmentation of point clouds (see https://gitlab.univ-nantes.fr/E164955Z/ptrans)
+	- Masonry Segmentation: segmentation of dense point clouds of masonry structures into their individual stones (see: https://github.com/CyberbuildLab/masonry-cc)
 
 - Bug fixes
 	- qBroom: the broom was not working properly on a non horizontal surface!
+	- qM3C2: M3C2 dialog parameters were not properly restored in command line mode
+	- Command line:
+		- using the "-FBX" option would lead to an infinite loop
+		- filenames local ('foreign') characters were not preserved
+	- Trace polyline: the exported polylines has a wrong unique ID. Saving multiple polylines created this way in the
+		same BIN file could lead to a corrupted file.
+	- Scissors tool: points were segmented only inside the frustum (screen) even if some segmentation polygon vertices were outside
+	- E57:  "invalid data" flags were wrongly interpreted
+	- The 'Clean > Noise' tool was mixing the number of neighbors (knn) and the 'kernel radius' parameters
+	- PLY filter was exporting large coordinates with a limited accuracy when creating ASCII files
+	- the 'flip normals' checkbox of the C2M comparison dialog was not accessible anymore
+	- minimal LAS scale suggested by CC was sometimes too small, potentially triggering a PDAL exception.
+	- When loading raster files, GDAL can sometimes report wrong min and max altitudes. This would then let CC think that invalid pixels are
+		present. And when telling CC to keep these invalid points, the altitude was actually already replaced by a strange one...
 
-v2.11 (Anoia) - (in development)
+
+v2.11.3 (Anoia) - 08/09/2020
+----------------------
+- Bug fix:
+  - when used with only 3 points (pairs), the Align tool could produce a wrong registration matrix
+
+v2.11.2 (Anoia) - 30/08/2020
+----------------------
+- Bug fixes:
+ - command line: the LAST keyword was consistently badly managed (for -SF_OP and -ICP)
+ - the new 'Edit > Colors > From Scalar Fields' tool could crash due to a non initialized variable
+ - PV files could not be loaded anymore
+ - even in the command line 'SILENT' mode, loading a SHP file with additional fields in the associated DBF file would spawn a blocking dialog
+	(these fields will now be ignored in SILENT mode)
+ - LAS 1.3 or 1.4 (LASlib): Classification values and flags were not always loaded or saved properly
+ - [Windows] The contour lines generated with the Rasterize tool could be incomplete (due to GDAL 3.0 --> reverting to GDAL 2.2)
+
+v2.11.1 (Anoia) - 29/07/2020
+----------------------
+- Bug fixes:
+  - [macOS] Fix determination of command line use so opening a file in the GUI using the command line works (#1296).
+  - E57, Bundler: when trying to apply a Global Shift translation on load without 'preserving' the shift information, the Global Shift was simply not applied!
+  - Global Shift: when unchecking the 'preserve shift on save' option of the Global Shift dialog, and then hitting the "Apply all" button,
+                  the selection was not maintained and propagated to the other loaded clouds
+  - command line: the 'LAST' keyword was not properly managed after -SF_ARITHMETIC
+
+v2.11.0 (Anoia) - 14/06/2020
 ----------------------
 
 - New features
@@ -215,6 +309,7 @@ v2.11 (Anoia) - (in development)
 	- When VBOs were activated with an ATI card, CloudCompare could crash (because ATI only supports 32bit aligned VBOs :p)
 	- The LAS 1.3/1.4 filter was not compressing files with a minor case 'laz' extension :(
 	- The iteration stop criteria has been changed in the CSF plugin to fix a small bug
+	- Point picking on meshes: picking points on triangles that were partially outside of the frustum would lead to the wrong point being picked (or no point picked)
 
 v2.10.3 (Zephyrus) - 13/06/2019
 ----------------------

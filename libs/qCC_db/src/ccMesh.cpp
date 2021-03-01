@@ -1079,8 +1079,7 @@ ccMesh* ccMesh::TriangulateTwoPolylines(ccPolyline* p1, ccPolyline* p2, CCVector
 		vertices->setEnabled(false);
 
 		//global shift & scale (we copy it from the first polyline by default)
-		vertices->setGlobalShift(p1->getGlobalShift());
-		vertices->setGlobalScale(p1->getGlobalScale());
+		mesh->copyGlobalShiftAndScale(*p1);
 		//same thing for the display
 		mesh->setDisplay(p1->getDisplay());
 	}
@@ -1147,11 +1146,7 @@ ccMesh* ccMesh::Triangulate(ccGenericPointCloud* cloud,
 		mesh->computeNormals(true);
 	}
 	mesh->showNormals(cloudHadNormals || !cloud->hasColors());
-	if (mesh->getAssociatedCloud() && mesh->getAssociatedCloud() != cloud)
-	{
-		mesh->getAssociatedCloud()->setGlobalShift(cloud->getGlobalShift());
-		mesh->getAssociatedCloud()->setGlobalScale(cloud->getGlobalScale());
-	}
+	mesh->copyGlobalShiftAndScale(*cloud);
 
 	return mesh;
 }
@@ -1795,7 +1790,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 		else
 		{
-			glFunc->glColor4fv(context.defaultMat->getDiffuseFront().rgba);
+			ccGL::Color4v(glFunc, context.defaultMat->getDiffuseFront().rgba);
 		}
 
 		if (glParams.showNorms)
@@ -2629,6 +2624,33 @@ bool ccMesh::reservePerTriangleNormalIndexes()
 	assert(m_triVertIndexes && m_triVertIndexes->isAllocated());
 
 	return m_triNormalIndexes->reserveSafe(m_triVertIndexes->capacity());
+}
+
+void ccMesh::invertNormals()
+{
+	//per-triangle normals
+	if (m_triNormals)
+	{
+		invertPerTriangleNormals();
+	}
+
+	//per-vertex normals
+	ccPointCloud* pc = dynamic_cast<ccPointCloud*>(m_associatedCloud);
+	if (pc && pc->hasNormals())
+	{
+		pc->invertNormals();
+	}
+}
+
+void ccMesh::invertPerTriangleNormals()
+{
+	if (m_triNormals)
+	{
+		for (CompressedNormType& n : *m_triNormals)
+		{
+			ccNormalCompressor::InvertNormal(n);
+		}
+	}
 }
 
 void ccMesh::addTriangleNormalIndexes(int i1, int i2, int i3)

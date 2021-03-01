@@ -14,6 +14,7 @@ target_sources( ${PROJECT_NAME}
 	    ${CMAKE_CURRENT_LIST_DIR}/ccColorScalesManager.cpp
 	    ${CMAKE_CURRENT_LIST_DIR}/ccColorTypes.cpp
 	    ${CMAKE_CURRENT_LIST_DIR}/ccCone.cpp
+		${CMAKE_CURRENT_LIST_DIR}/ccCoordinateSystem.cpp
 	    ${CMAKE_CURRENT_LIST_DIR}/ccCylinder.cpp
 	    ${CMAKE_CURRENT_LIST_DIR}/ccDepthBuffer.cpp
 	    ${CMAKE_CURRENT_LIST_DIR}/ccDish.cpp

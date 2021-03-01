@@ -197,7 +197,7 @@ QStatusBar
     </property>
     <addaction name="actionAbout"/>
     <addaction name="separator"/>
-    <addaction name="actionHelpShortctus"/>
+    <addaction name="actionHelpShortcuts"/>
    </widget>
    <widget class="QMenu" name="menuPlugins">
     <property name="title">
@@ -251,7 +251,7 @@ QStatusBar
   </action>
   <action name="actionEditCamera">
    <property name="icon">
-    <iconset resource="../../qCC/icons.qrc">
+    <iconset>
      <normaloff>:/CC/images/ccCamera.png</normaloff>:/CC/images/ccCamera.png</iconset>
    </property>
    <property name="text">
@@ -294,9 +294,9 @@ QStatusBar
     <string>About</string>
    </property>
   </action>
-  <action name="actionHelpShortctus">
+  <action name="actionHelpShortcuts">
    <property name="text">
-    <string>Shortctus</string>
+    <string>Shortcuts</string>
    </property>
    <property name="shortcut">
     <string>F1</string>

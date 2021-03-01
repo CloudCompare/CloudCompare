@@ -132,7 +132,7 @@
 
 //3D mouse handler
 #ifdef CC_3DXWARE_SUPPORT
-#include "devices/3dConnexion/cc3DMouseManager.h"
+#include "cc3DMouseManager.h"
 #endif
 
 //Gamepads
@@ -704,6 +704,7 @@ void MainWindow::connectActions()
 
 	//"Display" menu
 	connect(m_UI->actionResetGUIElementsPos,		&QAction::triggered, this, &MainWindow::doActionResetGUIElementsPos);
+	connect(m_UI->actionResetAllVBOs,				&QAction::triggered, this, &MainWindow::doActionResetAllVBOs);
 
 	//"3D Views" menu
 	connect(m_UI->menu3DViews,						&QMenu::aboutToShow, this, &MainWindow::update3DViewsMenu);
@@ -3548,7 +3549,7 @@ void MainWindow::doActionRegister()
 	ccHObject* data = static_cast<ccHObject*>(m_selectedEntities[1]);
 	ccHObject* model = static_cast<ccHObject*>(m_selectedEntities[0]);
 
-	ccRegistrationDlg rDlg(data,model,this);
+	ccRegistrationDlg rDlg(data, model, this);
 	if (!rDlg.exec())
 		return;
 
@@ -3556,7 +3557,19 @@ void MainWindow::doActionRegister()
 	model = rDlg.getModelEntity();
 	data = rDlg.getDataEntity();
 
-	double minRMSDecrease										= rDlg.getMinRMSDecrease();
+	double minRMSDecrease = rDlg.getMinRMSDecrease();
+	if (std::isnan(minRMSDecrease))
+	{
+		ccLog::Error(tr("Invalid minimum RMS decrease value"));
+		return;
+	}
+	if (minRMSDecrease < ccRegistrationDlg::GetAbsoluteMinRMSDecrease())
+	{
+		minRMSDecrease = ccRegistrationDlg::GetAbsoluteMinRMSDecrease();
+		ccLog::Error(tr("Minimum RMS decrease value is too small.\n%1 will be used instead (numerical accuracy limit).").arg(minRMSDecrease, 0, 'E', 1));
+		rDlg.setMinRMSDecrease(minRMSDecrease);
+	}
+
 	unsigned maxIterationCount									= rDlg.getMaxIterationCount();
 	unsigned randomSamplingLimit								= rDlg.randomSamplingLimit();
 	bool removeFarthestPoints									= rDlg.removeFarthestPoints();
@@ -3565,7 +3578,7 @@ void MainWindow::doActionRegister()
 	bool adjustScale											= rDlg.adjustScale();
 	int transformationFilters									= rDlg.getTransformationFilters();
 	unsigned finalOverlap										= rDlg.getFinalOverlap();
-	CCCoreLib::ICPRegistrationTools::CONVERGENCE_TYPE method		= rDlg.getConvergenceMethod();
+	CCCoreLib::ICPRegistrationTools::CONVERGENCE_TYPE method	= rDlg.getConvergenceMethod();
 	int maxThreadCount											= rDlg.getMaxThreadCount();
 
 	//semi-persistent storage (for next call)
@@ -3903,8 +3916,7 @@ void MainWindow::doActionSubsample()
 			if (newPointCloud)
 			{
 				newPointCloud->setName(cloud->getName() + QString(".subsampled"));
-				newPointCloud->setGlobalShift(cloud->getGlobalShift());
-				newPointCloud->setGlobalScale(cloud->getGlobalScale());
+				newPointCloud->copyGlobalShiftAndScale(*cloud);
 				newPointCloud->setDisplay(cloud->getDisplay());
 				newPointCloud->prepareDisplayForRefresh();
 				if (cloud->getParent())
@@ -4039,8 +4051,7 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 					//'shift on load' information
 					if (pc)
 					{
-						compCloud->setGlobalShift(pc->getGlobalShift());
-						compCloud->setGlobalScale(pc->getGlobalScale());
+						compCloud->copyGlobalShiftAndScale(*pc);
 					}
 					compCloud->setVisible(true);
 					compCloud->setName(QString("CC#%1").arg(ccGroup->getChildrenNumber()));
@@ -4509,8 +4520,7 @@ void MainWindow::doConvertPolylinesToMesh()
 		}
 
 		//global shift & scale (we copy it from the first polyline by default)
-		vertices->setGlobalShift(polylines.front()->getGlobalShift());
-		vertices->setGlobalScale(polylines.front()->getGlobalScale());
+		mesh->copyGlobalShiftAndScale(*polylines.front());
 	}
 	else
 	{
@@ -4770,6 +4780,7 @@ void MainWindow::doActionFitQuadric()
 				quadric->setName(QString("Quadric (%1)").arg(cloud->getName()));
 				quadric->setDisplay(cloud->getDisplay());
 				quadric->prepareDisplayForRefresh();
+				quadric->copyGlobalShiftAndScale(*cloud);
 				addToDB(quadric);
 
 				ccConsole::Print(QString("[doActionFitQuadric] Quadric local coordinate system:"));
@@ -5111,7 +5122,11 @@ void MainWindow::doActionComputeCPS()
 		return;
 	}
 	cmpPC->setCurrentScalarField(sfIdx);
-	cmpPC->enableScalarField();
+	if (!cmpPC->enableScalarField())
+	{
+		ccConsole::Error("Not enough memory");
+		return;
+	}
 	//cmpPC->forEach(CCCoreLib::ScalarFieldTools::SetScalarValueToNaN); //now done by default by computeCloud2CloudDistance
 
 	CCCoreLib::ReferenceCloud CPSet(srcCloud);
@@ -5733,7 +5748,7 @@ QMdiSubWindow* MainWindow::getMDISubWindow(ccGLWindow* win)
 
 ccGLWindow* MainWindow::getGLWindow(int index) const
 {
-	QList<QMdiSubWindow*> subWindowList = m_mdiArea->subWindowList();
+	QList<QMdiSubWindow*> subWindowList = m_mdiArea->subWindowList();	
 	if (index >= 0 && index < subWindowList.size())
 	{
 		ccGLWindow* win = GLWindowFromWidget(subWindowList[index]->widget());
@@ -5854,7 +5869,7 @@ void MainWindow::prepareWindowDeletion(QObject* glWindow)
 static bool s_autoSaveGuiElementPos = true;
 void MainWindow::doActionResetGUIElementsPos()
 {
-	// show the user it will be maximized
+	//show the user it will be maximized
 	showMaximized();
 
 	QSettings settings;
@@ -5867,6 +5882,36 @@ void MainWindow::doActionResetGUIElementsPos()
 	
 	//to avoid saving them right away!
 	s_autoSaveGuiElementPos = false;
+}
+
+void MainWindow::doActionResetAllVBOs()
+{
+	ccHObject::Container clouds;
+	m_ccRoot->getRootEntity()->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD, true);
+
+	size_t releasedSize = 0;
+	for (ccHObject* entity : clouds)
+	{
+		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
+		if (cloud)
+		{
+			releasedSize += cloud->vboSize();
+			cloud->releaseVBOs();
+		}
+	}
+
+	if (releasedSize != 0)
+	{
+		ccLog::Print(tr("All VBOs have been released (%1 Mb)").arg(releasedSize / static_cast<double>(1 << 20), 0, 'f', 2));
+		if (ccGui::Parameters().useVBOs)
+		{
+			ccLog::Warning(tr("You might want to disable the 'use VBOs' option in the Display Settings to keep the GPU memory empty"));
+		}
+	}
+	else
+	{
+		ccLog::Print(tr("No VBO allocated"));
+	}
 }
 
 void MainWindow::showEvent(QShowEvent* event)
@@ -6936,7 +6981,7 @@ void MainWindow::activateTranslateRotateMode()
 	}
 	else if (rejectedEntities)
 	{
-		ccConsole::Error("Some entities were ingored! (see console)");
+		ccConsole::Error("Some entities were ignored! (see console)");
 	}
 
 	//try to activate "moving mode" in current GL window
@@ -7776,6 +7821,32 @@ void MainWindow::doActionClone()
 				ccConsole::Error(QString("An error occurred while cloning facet %1").arg(entity->getName()));
 			}
 		}
+		else if (entity->isA(CC_TYPES::CAMERA_SENSOR))
+		{
+			ccCameraSensor* camera = ccHObjectCaster::ToCameraSensor(entity);
+			if (camera)
+			{
+				ccCameraSensor* cloned = new ccCameraSensor(*camera);
+				clone = (cloned ? cloned : nullptr);
+			}
+			if (!clone)
+			{
+				ccConsole::Error(QString("An error occurred while cloning camera sensor %1").arg(entity->getName()));
+			}
+		}
+		else if (entity->isA(CC_TYPES::GBL_SENSOR))
+		{
+			ccGBLSensor* sensor = ccHObjectCaster::ToGBLSensor(entity);
+			if (sensor)
+			{
+				ccGBLSensor* cloned = new ccGBLSensor(*sensor);
+				clone = (cloned ? cloned : nullptr);
+			}
+			if (!clone)
+			{
+				ccConsole::Error(QString("An error occurred while cloning GBL sensor %1").arg(entity->getName()));
+			}
+		}
 		else
 		{
 			ccLog::Warning(QString("Entity '%1' can't be cloned (type not supported yet!)").arg(entity->getName()));
@@ -7938,6 +8009,7 @@ void MainWindow::doActionFitSphere()
 		cloud->addChild(sphere);
 		//sphere->setDisplay(cloud->getDisplay());
 		sphere->prepareDisplayForRefresh();
+		sphere->copyGlobalShiftAndScale(*cloud);
 		addToDB(sphere, false, false, false);
 	}
 
@@ -8017,8 +8089,19 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 						ccPolyline* contour = facet->getContour();
 						if (contour)
 						{
-							contour->setGlobalScale(shifted->getGlobalScale());
-							contour->setGlobalShift(shifted->getGlobalShift());
+							contour->copyGlobalShiftAndScale(*shifted);
+						}
+
+						ccMesh* polygon = facet->getPolygon();
+						if (polygon)
+						{
+							polygon->copyGlobalShiftAndScale(*shifted);
+						}
+
+						ccPointCloud* points = facet->getOriginPoints();
+						if (points)
+						{
+							points->copyGlobalShiftAndScale(*shifted);
 						}
 					}
 				}
@@ -8032,6 +8115,11 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 					N = pPlane->getNormal();
 					C = *CCCoreLib::Neighbourhood(cloud).getGravityCenter();
 					pPlane->enableStippling(true);
+
+					if (shifted)
+					{
+						pPlane->copyGlobalShiftAndScale(*shifted);
+					}
 				}
 			}
 
@@ -9053,6 +9141,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 		bool signedDist = pDD.signedDistances();
 		bool flippedNormals = signedDist && pDD.flipNormals();
 		bool treatPlanesAsBounded = pDD.treatPlanesAsBounded();
+		size_t errorCount = 0;
 		for (auto &cloud : clouds)
 		{
 			ccPointCloud* compEnt = ccHObjectCaster::ToPointCloud(cloud);
@@ -9063,12 +9152,18 @@ void MainWindow::doActionCloudPrimitiveDist()
 				sfIdx = compEnt->addScalarField(CC_TEMP_DISTANCES_DEFAULT_SF_NAME);
 				if (sfIdx < 0)
 				{
-					ccLog::Error(QString("[Compute Primitive Distances] [Cloud: %1] Couldn't allocate a new scalar field for computing distances! Try to free some memory ...").arg(compEnt->getName()));
+					ccLog::Warning(QString("[Compute Primitive Distances] [Cloud: %1] Couldn't allocate a new scalar field for computing distances! Try to free some memory ...").arg(compEnt->getName()));
+					++errorCount;
 					continue;
 				}
 			}
 			compEnt->setCurrentScalarField(sfIdx);
-			compEnt->enableScalarField();
+			if (!compEnt->enableScalarField())
+			{
+				ccLog::Warning(QString("[Compute Primitive Distances] [Cloud: %1] Not enough memory").arg(compEnt->getName()));
+				++errorCount;
+				continue;
+			}
 			compEnt->forEach(CCCoreLib::ScalarFieldTools::SetScalarValueToNaN);
 			int returnCode;
 			switch (entityType)
@@ -9086,25 +9181,37 @@ void MainWindow::doActionCloudPrimitiveDist()
 					{
 						CCCoreLib::SquareMatrix rotationTransform(plane->getTransformation().data(), true);
 						if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2RectangleEquation(compEnt, plane->getXWidth(), plane->getYWidth(), rotationTransform, plane->getCenter(), signedDist)))
-							ccConsole::Error(errString, "Bounded Plane", returnCode);
+						{
+							ccConsole::Warning(errString, "Bounded Plane", returnCode);
+							++errorCount;
+						}
 					}
 					else
 					{
 						if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2PlaneEquation(compEnt, static_cast<ccPlane*>(refEntity)->getEquation(), signedDist)))
-							ccConsole::Error(errString, "Infinite Plane", returnCode);
+						{
+							ccConsole::Warning(errString, "Infinite Plane", returnCode);
+							++errorCount;
+						}
 					}
 					break;
 				}
 				case CC_TYPES::CYLINDER:
 				{
 					if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2CylinderEquation(compEnt, static_cast<ccCylinder*>(refEntity)->getBottomCenter(), static_cast<ccCylinder*>(refEntity)->getTopCenter(), static_cast<ccCylinder*>(refEntity)->getBottomRadius(), signedDist)))
-						ccConsole::Error(errString, "Cylinder", returnCode);
+					{
+						ccConsole::Warning(errString, "Cylinder", returnCode);
+						++errorCount;
+					}
 					break;
 				}
 				case CC_TYPES::CONE:
 				{
 					if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2ConeEquation(compEnt, static_cast<ccCone*>(refEntity)->getLargeCenter(), static_cast<ccCone*>(refEntity)->getSmallCenter(), static_cast<ccCone*>(refEntity)->getLargeRadius(), static_cast<ccCone*>(refEntity)->getSmallRadius(), signedDist)))
-						ccConsole::Error(errString, "Cone", returnCode);
+					{
+						ccConsole::Warning(errString, "Cone", returnCode);
+						++errorCount;
+					}
 					break;
 				}
 				case CC_TYPES::BOX: 
@@ -9113,7 +9220,10 @@ void MainWindow::doActionCloudPrimitiveDist()
 					CCCoreLib::SquareMatrix rotationTransform(glTransform.data(), true);
 					CCVector3 boxCenter = glTransform.getColumnAsVec3D(3);
 					if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2BoxEquation(compEnt, static_cast<ccBox*>(refEntity)->getDimensions(), rotationTransform, boxCenter, signedDist)))
-						ccConsole::Error(errString, "Box", returnCode);
+					{
+						ccConsole::Warning(errString, "Box", returnCode);
+						++errorCount;
+					}
 					break; 
 				}
 				case CC_TYPES::POLY_LINE:
@@ -9124,7 +9234,8 @@ void MainWindow::doActionCloudPrimitiveDist()
 					returnCode = CCCoreLib::DistanceComputationTools::computeCloud2PolylineEquation(compEnt, line);
 					if (!returnCode)
 					{
-						ccConsole::Error(errString, "Polyline", returnCode);
+						ccConsole::Warning(errString, "Polyline", returnCode);
+						++errorCount;
 					}
 					break;
 				}
@@ -9165,8 +9276,15 @@ void MainWindow::doActionCloudPrimitiveDist()
 			compEnt->showSF(sfIdx >= 0);
 			compEnt->prepareDisplayForRefresh_recursive();
 		}
-	MainWindow::UpdateUI();
-	MainWindow::RefreshAllGLWindow(false);
+
+		if (errorCount != 0)
+		{
+			ccLog::Error(QString("%1 error(s) occurred: refer to the Console (F8).").arg(errorCount));
+		}
+
+		MainWindow::UpdateUI();
+	
+		MainWindow::RefreshAllGLWindow(false);
 	}
 }
 

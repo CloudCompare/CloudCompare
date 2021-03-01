@@ -831,7 +831,7 @@ void cc2DLabel::getLabelInfo3(LabelInfo3& info) const
 	//angle
 	info.angles.u[0] = CCCoreLib::RadiansToDegrees( P1P2.angle_rad( P1P3) ); //angleAtP1
 	info.angles.u[1] = CCCoreLib::RadiansToDegrees( P2P3.angle_rad(-P1P2) ); //angleAtP2
-	info.angles.u[2] = CCCoreLib::RadiansToDegrees( P1P3.angle_rad(-P2P3) ); //angleAtP3 (should be equal to 180-a1-a2!)
+	info.angles.u[2] = CCCoreLib::RadiansToDegrees( P1P3.angle_rad( P2P3) ); //angleAtP3 (should be equal to 180-a1-a2!)
 }
 
 QStringList cc2DLabel::getLabelContent(int precision) const
@@ -1119,6 +1119,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 					scale = static_cast<float>(scale * sqrt(d / unitD)); //sqrt = empirical (probably because the marker size is already partly compensated by ccGLWindow::computeActualPixelSize())
 				}
 				glFunc->glScalef(scale, scale, scale);
+				m_pickedPoints[i].markerScale = scale;
 				c_unitPointMarker->draw(markerContext);
 				glFunc->glPopMatrix();
 			}
@@ -1799,4 +1800,81 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 	{
 		glFunc->glPopName();
 	}
+}
+
+bool cc2DLabel::pointPicking(	const CCVector2d& clickPos,
+								const ccGLCameraParameters& camera,
+								int& nearestPointIndex,
+								double& nearestSquareDist) const
+{
+	nearestPointIndex = -1;
+	nearestSquareDist = -1.0;
+	{
+		//back project the clicked point in 3D
+		CCVector3d clickPosd(clickPos.x, clickPos.y, 0.0);
+		CCVector3d X(0, 0, 0);
+		if (!camera.unproject(clickPosd, X))
+		{
+			return false;
+		}
+
+		clickPosd.z = 1.0;
+		CCVector3d Y(0, 0, 0);
+		if (!camera.unproject(clickPosd, Y))
+		{
+			return false;
+		}
+
+		CCVector3d xy = (Y - X);
+		xy .normalize();
+
+		for (unsigned i = 0; i < size(); ++i)
+		{
+			const PickedPoint& pp = getPickedPoint(i);
+			if (pp.markerScale == 0)
+			{
+				//never displayed
+				continue;
+			}
+
+			const CCVector3 P = pp.getPointPosition();
+
+			//warning: we have to handle the relative GL transformation!
+			ccGLMatrix trans;
+			bool noGLTrans = pp.entity() ? !pp.entity()->getAbsoluteGLTransformation(trans) : true;
+
+			CCVector3d Q2D;
+			bool insideFrustum = false;
+			if (noGLTrans)
+			{
+				camera.project(P, Q2D, &insideFrustum);
+			}
+			else
+			{
+				CCVector3 P3D = P;
+				trans.apply(P3D);
+				camera.project(P3D, Q2D, &insideFrustum);
+			}
+
+			if (!insideFrustum)
+			{
+				continue;
+			}
+
+			// closest distance to XY
+			CCVector3d XP = (CCVector3d::fromArray(P.u) - X);
+			double squareDist = (XP - XP.dot(xy) * xy).norm2();
+
+			if (squareDist <= pp.markerScale * pp.markerScale)
+			{
+				if (nearestPointIndex < 0 || squareDist < nearestSquareDist)
+				{
+					nearestSquareDist = squareDist;
+					nearestPointIndex = i;
+				}
+			}
+		}
+	}
+
+	return (nearestPointIndex >= 0);
 }

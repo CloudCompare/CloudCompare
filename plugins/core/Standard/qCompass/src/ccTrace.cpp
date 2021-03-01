@@ -15,11 +15,13 @@
 //#                                                                        #
 //##########################################################################
 
-#include "GeometricalAnalysisTools.h"
-
 #include "ccTrace.h"
+
+#include <GeometricalAnalysisTools.h>
+
+#include <QMessageBox>
+
 #include <queue>
-#include <bitset>
 
 ccTrace::ccTrace(ccPointCloud* associatedCloud) : ccPolyline(associatedCloud)
 {

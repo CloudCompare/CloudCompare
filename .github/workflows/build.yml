@@ -54,7 +54,7 @@ jobs:
           key: conda-cache-${{ runner.os }}-${{ hashFiles('.ci/conda.yml') }}
 
       - name: Install Dependencies
-        uses: goanpeca/setup-miniconda@v1
+        uses: conda-incubator/setup-miniconda@v2
         with:
           activate-environment: CloudCompareDev
           auto-activate-base: false
@@ -73,8 +73,9 @@ jobs:
         if:  matrix.config.os == 'windows-latest'
         run: |
           # Set these env vars so cmake picks the correct compiler
-          echo "::set-env name=CXX::cl.exe"
-          echo "::set-env name=CC::cl.exe"
+          # https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-commands-for-github-actions#environment-files
+          echo "CXX=cl.exe" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          echo "CC=cl.exe" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Configure CMake
         shell: bash -l {0}
@@ -102,6 +103,9 @@ jobs:
             -DPLUGIN_IO_QE57=ON \
             -DPLUGIN_IO_QPHOTOSCAN=ON \
             -DPLUGIN_IO_QPDAL=ON \
+            -DPLUGIN_IO_QRDB=ON \
+            -DPLUGIN_IO_QRDB_FETCH_DEPENDENCY=ON \
+            -DPLUGIN_IO_QRDB_INSTALL_DEPENDENCY=ON \
             -DPLUGIN_STANDARD_QANIMATION=ON \
             -DQANIMATION_WITH_FFMPEG_SUPPORT=${{ matrix.config.compile_qanimation_with_ffmpeg }} \
             -DPLUGIN_STANDARD_QBROOM=ON \

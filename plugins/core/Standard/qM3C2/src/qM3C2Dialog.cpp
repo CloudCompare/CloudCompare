@@ -132,6 +132,11 @@ qM3C2Dialog::qM3C2Dialog(ccPointCloud* cloud1, ccPointCloud* cloud2, ccMainAppIn
 			}
 		}
 	}
+	else
+	{
+		//command line mode: we need to update the combo-box
+		updateNormalComboBox();
+	}
 }
 
 bool PopulateSFCombo(QComboBox* combo, const ccPointCloud& cloud, int defaultFieldIndex = -1, QString defaultField = QString())

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>656</width>
-    <height>504</height>
+    <height>579</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -78,9 +78,18 @@
     </widget>
    </item>
    <item row="11" column="2">
-    <widget class="QGroupBox" name="groupBox_5">
+    <widget class="QGroupBox" name="advancedConeGroupBox">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
      <property name="title">
       <string>Cone Advanced Parameters</string>
+     </property>
+     <property name="flat">
+      <bool>false</bool>
+     </property>
+     <property name="checkable">
+      <bool>false</bool>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_5">
       <item>
@@ -193,32 +202,66 @@
      <property name="title">
       <string>Sphere Advanced Parameters</string>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_6">
+     <layout class="QVBoxLayout">
       <item>
-       <widget class="QCheckBox" name="maxSphereRadiuscheckBox">
-        <property name="text">
-         <string>Max Radius</string>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout">
+        <item>
+         <widget class="QCheckBox" name="minSphereRadiuscheckBox">
+          <property name="text">
+           <string>Min Radius</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="minSphereRadiusdoubleSpinBox">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="decimals">
+           <number>3</number>
+          </property>
+          <property name="minimum">
+           <double>0.001000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>10000.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>1.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
-       <widget class="QDoubleSpinBox" name="maxSphereRadiusdoubleSpinBox">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="decimals">
-         <number>3</number>
-        </property>
-        <property name="minimum">
-         <double>0.001000000000000</double>
-        </property>
-        <property name="maximum">
-         <double>10000.000000000000000</double>
-        </property>
-        <property name="value">
-         <double>1.000000000000000</double>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <item>
+         <widget class="QCheckBox" name="maxSphereRadiuscheckBox">
+          <property name="text">
+           <string>Max Radius</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="maxSphereRadiusdoubleSpinBox">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="decimals">
+           <number>3</number>
+          </property>
+          <property name="minimum">
+           <double>0.001000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>10000.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>1.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>
@@ -229,6 +272,36 @@
       <string>Cylinder Advanced Parameters</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_4">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_9">
+        <item>
+         <widget class="QCheckBox" name="minCylinderRadiuscheckBox">
+          <property name="text">
+           <string>Min Radius</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="minCylinderRadiusdoubleSpinBox">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="decimals">
+           <number>3</number>
+          </property>
+          <property name="minimum">
+           <double>0.001000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>10000.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>1.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_7">
         <item>
@@ -259,36 +332,6 @@
         </item>
        </layout>
       </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_9">
-        <item>
-         <widget class="QCheckBox" name="maxCylinderLengthcheckBox">
-          <property name="text">
-           <string>Max Length</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QDoubleSpinBox" name="maxCylinderLengthdoubleSpinBox">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="decimals">
-           <number>3</number>
-          </property>
-          <property name="minimum">
-           <double>0.001000000000000</double>
-          </property>
-          <property name="maximum">
-           <double>10000.000000000000000</double>
-          </property>
-          <property name="value">
-           <double>1.000000000000000</double>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
      </layout>
     </widget>
    </item>
@@ -299,8 +342,18 @@
      </property>
     </widget>
    </item>
+   <item row="2" column="0">
+    <widget class="QCheckBox" name="allowFittingcheckBox">
+     <property name="text">
+      <string>Use Least Squares fitting on found shapes</string>
+     </property>
+    </widget>
+   </item>
    <item row="3" column="0" colspan="3">
     <widget class="QCheckBox" name="simplifyShapescheckBox">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="toolTip">
       <string>Will attempt to convert Spheres, Cones, Cylinders and Torus into a simpler shape (for example Cones may be simplified into a Cylinder, Plane, or Sphere)</string>
      </property>
@@ -516,6 +569,36 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_6">
       <item>
+       <layout class="QHBoxLayout">
+        <item>
+         <widget class="QCheckBox" name="minTorusMinorRadiuscheckBox">
+          <property name="text">
+           <string>Min Minor Radius</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="minTorusMinorRadiusdoubleSpinBox">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="decimals">
+           <number>3</number>
+          </property>
+          <property name="minimum">
+           <double>0.001000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>10000.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>1.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
        <layout class="QHBoxLayout" name="horizontalLayout_12">
         <item>
          <widget class="QCheckBox" name="maxTorusMinorRadiuscheckBox">
@@ -526,6 +609,36 @@
         </item>
         <item>
          <widget class="QDoubleSpinBox" name="maxTorusMinorRadiusdoubleSpinBox">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="decimals">
+           <number>3</number>
+          </property>
+          <property name="minimum">
+           <double>0.001000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>10000.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>1.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout">
+        <item>
+         <widget class="QCheckBox" name="minTorusMajorRadiuscheckBox">
+          <property name="text">
+           <string>Min Major Radius</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="minTorusMajorRadiusdoubleSpinBox">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -569,7 +682,7 @@
            <double>10000.000000000000000</double>
           </property>
           <property name="value">
-           <double>2.000000000000000</double>
+           <double>1.000000000000000</double>
           </property>
          </widget>
         </item>
@@ -656,9 +769,9 @@
    </hints>
   </connection>
   <connection>
-   <sender>maxCylinderLengthcheckBox</sender>
+   <sender>minCylinderRadiuscheckBox</sender>
    <signal>toggled(bool)</signal>
-   <receiver>maxCylinderLengthdoubleSpinBox</receiver>
+   <receiver>minCylinderRadiusdoubleSpinBox</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -706,7 +819,7 @@
   <connection>
    <sender>coneCheckBox</sender>
    <signal>toggled(bool)</signal>
-   <receiver>groupBox_5</receiver>
+   <receiver>advancedConeGroupBox</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -812,6 +925,70 @@
     <hint type="destinationlabel">
      <x>283</x>
      <y>390</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>minSphereRadiuscheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>minSphereRadiusdoubleSpinBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>66</x>
+     <y>302</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>164</x>
+     <y>302</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>minTorusMajorRadiuscheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>minTorusMajorRadiusdoubleSpinBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>113</x>
+     <y>468</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>306</x>
+     <y>468</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>minTorusMinorRadiuscheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>minTorusMinorRadiusdoubleSpinBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>113</x>
+     <y>412</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>306</x>
+     <y>412</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>allowFittingcheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>simplifyShapescheckBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>121</x>
+     <y>68</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>327</x>
+     <y>91</y>
     </hint>
    </hints>
   </connection>

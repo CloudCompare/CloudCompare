@@ -54,6 +54,7 @@ public:
 		bool createCloudFromLeftOverPoints; // should the points that were not associated with a shape be saved
 		bool primEnabled[5]; //RANSAC_PRIMITIVE_TYPES
 		bool allowSimplification;
+		bool allowFitting;
 		float minSphereRadius;
 		float maxSphereRadius;
 		float minCylinderRadius;
@@ -75,6 +76,7 @@ public:
 			, randomColor(true)
 			, createCloudFromLeftOverPoints(true)
 			, allowSimplification(true)
+			, allowFitting(true)
 			, minSphereRadius(-std::numeric_limits<float>::infinity())
 			, maxSphereRadius(std::numeric_limits<float>::infinity())
 			, minCylinderRadius(-std::numeric_limits<float>::infinity())
@@ -103,6 +105,7 @@ public:
 			, randomColor(true)
 			, createCloudFromLeftOverPoints(true)
 			, allowSimplification(true)
+			, allowFitting(true)
 			, minSphereRadius(-std::numeric_limits<float>::infinity())
 			, maxSphereRadius(std::numeric_limits<float>::infinity())
 			, minCylinderRadius(-std::numeric_limits<float>::infinity())

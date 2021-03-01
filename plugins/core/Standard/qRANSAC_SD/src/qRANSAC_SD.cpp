@@ -123,22 +123,31 @@ static double   s_maxNormalDev_deg = 25.0;	// maximal normal deviation from idea
 static double   s_proba = 0.01;	// probability that no better candidate was overlooked during sampling
 static bool s_primEnabled[5] = { true,true,true,false,false };
 static bool s_allowSimplification = true;
+static bool s_allowFitting = true;
 static bool s_createCloudFromLeftOverPoints = true;
 static bool s_randomColor = true;
+static bool s_minSphereRadiusEnabled = false;
 static bool s_maxSphereRadiusEnabled = false;
+static bool s_minCylinderRadiusEnabled = false;
 static bool s_maxCylinderRadiusEnabled = false;
 static bool s_maxConeRadiusEnabled = false;
 static bool s_maxConeLengthEnabled = false;
 static bool s_maxConeAngleEnabled = false;
 static bool s_maxCylinderLengthEnabled = false;
+static bool s_minTorusMinorRadiusEnabled = false;
+static bool s_minTorusMajorRadiusEnabled = false;
 static bool s_maxTorusMinorRadiusEnabled = false;
 static bool s_maxTorusMajorRadiusEnabled = false;
+static double s_minSphereRadius = 1;
 static double s_maxSphereRadius = 1;
+static double s_minCylinderRadius = 1;
 static double s_maxCylinderRadius = 1;
 static double s_maxConeRadius = 1;
 static double s_maxCylinderLength = 1;
 static double s_maxConeLength = 1;
 static double s_maxConeAngle_deg = 90;
+static double s_minTorusMinorRadius = 1;
+static double s_minTorusMajorRadius = 1;
 static double s_maxTorusMinorRadius = 1;
 static double s_maxTorusMajorRadius = 1;
 
@@ -175,6 +184,7 @@ void qRansacSD::doAction()
 
 	//init dialog with default values
 	ccRansacSDDlg rsdDlg(m_app->getMainWindow());
+	rsdDlg.advancedConeGroupBox->setVisible(false);
 	rsdDlg.epsilonDoubleSpinBox->setValue(.005 * scale);		// set distance threshold to 0.5% of bounding box width
 	rsdDlg.bitmapEpsilonDoubleSpinBox->setValue(.01 * scale);	// set bitmap resolution (= sampling resolution) to 1% of bounding box width
 	rsdDlg.supportPointsSpinBox->setValue(s_supportPoints);
@@ -185,34 +195,43 @@ void qRansacSD::doAction()
 	rsdDlg.cylinderCheckBox->setChecked(s_primEnabled[2]);
 	rsdDlg.coneCheckBox->setChecked(s_primEnabled[3]);
 	rsdDlg.torusCheckBox->setChecked(s_primEnabled[4]);
+	rsdDlg.allowFittingcheckBox->setChecked(s_allowFitting);
 	rsdDlg.simplifyShapescheckBox->setChecked(s_allowSimplification);
 	rsdDlg.saveLeftOverscheckBox->setChecked(s_createCloudFromLeftOverPoints);
+	rsdDlg.minSphereRadiuscheckBox->setChecked(s_minSphereRadiusEnabled);
 	rsdDlg.maxSphereRadiuscheckBox->setChecked(s_maxSphereRadiusEnabled);
+	rsdDlg.minCylinderRadiuscheckBox->setChecked(s_minCylinderRadiusEnabled);
 	rsdDlg.maxCylinderRadiuscheckBox->setChecked(s_maxCylinderRadiusEnabled);
-	rsdDlg.maxCylinderLengthcheckBox->setChecked(s_maxCylinderLengthEnabled);
 	rsdDlg.maxConeAnglecheckBox->setChecked(s_maxConeAngleEnabled);
 	rsdDlg.maxConeRadiuscheckBox->setChecked(s_maxConeRadiusEnabled);
 	rsdDlg.maxConeLengthcheckBox->setChecked(s_maxConeLengthEnabled);
+	rsdDlg.minSphereRadiusdoubleSpinBox->setValue(s_minSphereRadius);
 	rsdDlg.maxSphereRadiusdoubleSpinBox->setValue(s_maxSphereRadius);
+	rsdDlg.minCylinderRadiusdoubleSpinBox->setValue(s_minCylinderRadius);
 	rsdDlg.maxCylinderRadiusdoubleSpinBox->setValue(s_maxCylinderRadius);
 	rsdDlg.maxConeRadiusdoubleSpinBox->setValue(s_maxConeRadius);
 	rsdDlg.maxConeLengthdoubleSpinBox->setValue(s_maxConeLength);
-	rsdDlg.maxCylinderLengthdoubleSpinBox->setValue(s_maxCylinderLength);
 	rsdDlg.maxConeAngledoubleSpinBox->setValue(s_maxConeAngle_deg);
+	rsdDlg.minTorusMinorRadiuscheckBox->setChecked(s_minTorusMinorRadiusEnabled);
+	rsdDlg.minTorusMajorRadiuscheckBox->setChecked(s_minTorusMajorRadiusEnabled);
 	rsdDlg.maxTorusMinorRadiuscheckBox->setChecked(s_maxTorusMinorRadiusEnabled);
 	rsdDlg.maxTorusMajorRadiuscheckBox->setChecked(s_maxTorusMajorRadiusEnabled);
 	rsdDlg.maxTorusMinorRadiusdoubleSpinBox->setValue(s_maxTorusMinorRadius);
 	rsdDlg.maxTorusMajorRadiusdoubleSpinBox->setValue(s_maxTorusMajorRadius);
 	rsdDlg.randomColorcheckBox->setChecked(s_randomColor);
-		if (!rsdDlg.exec())							 
+	if (!rsdDlg.exec())
+	{
 		return;
-
+	}
+	s_minSphereRadiusEnabled = rsdDlg.minSphereRadiuscheckBox->isChecked();
 	s_maxSphereRadiusEnabled = rsdDlg.maxSphereRadiuscheckBox->isChecked();
+	s_minCylinderRadiusEnabled = rsdDlg.minCylinderRadiuscheckBox->isChecked();
 	s_maxCylinderRadiusEnabled = rsdDlg.maxCylinderRadiuscheckBox->isChecked();
 	s_maxConeRadiusEnabled = rsdDlg.maxConeRadiuscheckBox->isChecked();
 	s_maxConeLengthEnabled = rsdDlg.maxConeLengthcheckBox->isChecked();
-	s_maxCylinderLengthEnabled = rsdDlg.maxCylinderLengthcheckBox->isChecked();
 	s_maxConeAngleEnabled = rsdDlg.maxConeAnglecheckBox->isChecked();
+	s_minTorusMinorRadiusEnabled = rsdDlg.minTorusMinorRadiuscheckBox->isChecked();
+	s_minTorusMajorRadiusEnabled = rsdDlg.minTorusMajorRadiuscheckBox->isChecked();
 	s_maxTorusMinorRadiusEnabled = rsdDlg.maxTorusMinorRadiuscheckBox->isChecked();
 	s_maxTorusMajorRadiusEnabled = rsdDlg.maxTorusMajorRadiuscheckBox->isChecked();
 	s_randomColor = rsdDlg.randomColorcheckBox->isChecked();
@@ -230,11 +249,22 @@ void qRansacSD::doAction()
 		params.primEnabled[RPT_CONE] = rsdDlg.coneCheckBox->isChecked();
 		params.primEnabled[RPT_TORUS] = rsdDlg.torusCheckBox->isChecked();
 		params.createCloudFromLeftOverPoints = rsdDlg.saveLeftOverscheckBox->isChecked();
+		params.allowFitting = rsdDlg.allowFittingcheckBox->isChecked();
 		params.allowSimplification = rsdDlg.simplifyShapescheckBox->isChecked();
+		if (s_minSphereRadiusEnabled)
+		{
+			params.minSphereRadius = static_cast<float>(rsdDlg.minSphereRadiusdoubleSpinBox->value());
+			s_minSphereRadius = params.minSphereRadius;
+		}
 		if (s_maxSphereRadiusEnabled)
 		{
 			params.maxSphereRadius = static_cast<float>(rsdDlg.maxSphereRadiusdoubleSpinBox->value());
 			s_maxSphereRadius = params.maxSphereRadius;
+		}
+		if (s_minCylinderRadiusEnabled)
+		{
+			params.minCylinderRadius = static_cast<float>(rsdDlg.minCylinderRadiusdoubleSpinBox->value());
+			s_minCylinderRadius = params.minCylinderRadius;
 		}
 		if (s_maxCylinderRadiusEnabled)
 		{
@@ -247,11 +277,6 @@ void qRansacSD::doAction()
 			s_maxConeRadius = params.maxConeRadius;
 		}
 
-		if (s_maxCylinderLengthEnabled)
-		{
-			params.maxCylinderLength = static_cast<float>(rsdDlg.maxCylinderLengthdoubleSpinBox->value());
-			s_maxCylinderLength = params.maxCylinderLength;
-		}
 		if (s_maxConeLengthEnabled)
 		{
 			params.maxConeLength = static_cast<float>(rsdDlg.maxConeLengthdoubleSpinBox->value());
@@ -261,6 +286,16 @@ void qRansacSD::doAction()
 		{
 			params.maxConeAngle_deg = static_cast<float>(rsdDlg.maxConeAngledoubleSpinBox->value());
 			s_maxConeAngle_deg = params.maxConeAngle_deg;
+		}
+		if (s_minTorusMinorRadiusEnabled)
+		{
+			params.minTorusMinorRadius = static_cast<float>(rsdDlg.minTorusMinorRadiusdoubleSpinBox->value());
+			s_minTorusMinorRadius = params.minTorusMinorRadius;
+		}
+		if (s_minTorusMajorRadiusEnabled)
+		{
+			params.minTorusMajorRadius = static_cast<float>(rsdDlg.minTorusMajorRadiusdoubleSpinBox->value());
+			s_minTorusMajorRadius = params.minTorusMajorRadius;
 		}
 		if (s_maxTorusMinorRadiusEnabled)
 		{
@@ -371,7 +406,7 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 		ransacOptions.m_probability = params.probability;
 		ransacOptions.m_minSupport = params.supportPoints;
 		ransacOptions.m_allowSimplification = params.allowSimplification;
-		ransacOptions.m_fitting = RansacShapeDetector::Options::LS_FITTING;
+		ransacOptions.m_fitting = params.allowFitting ? RansacShapeDetector::Options::LS_FITTING : RansacShapeDetector::Options::NO_FITTING;
 	}
 	const float scale = cloud.getScale();
 

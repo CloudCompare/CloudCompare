@@ -17,10 +17,16 @@ public:
 	TorusPrimitiveShape() 
 		: m_parametrization(m_torus)
 		, m_allowAppleShaped(false)
+		, m_minMinorRadius(-std::numeric_limits<float>::infinity())
+		, m_minMajorRadius(-std::numeric_limits<float>::infinity())
 		, m_maxMinorRadius(std::numeric_limits<float>::infinity())
 		, m_maxMajorRadius(std::numeric_limits<float>::infinity())
 	{}
-	TorusPrimitiveShape(const Torus &torus, bool allowAppleShaped = false, float maxMinorRadius = std::numeric_limits<float>::infinity(), float maxMajorRadius = std::numeric_limits<float>::infinity());
+	TorusPrimitiveShape(const Torus &torus, bool allowAppleShaped = false
+		, float minMinorRadius = -std::numeric_limits<float>::infinity()
+		, float minMajorRadius = -std::numeric_limits<float>::infinity()
+		, float maxMinorRadius = std::numeric_limits<float>::infinity()
+		, float maxMajorRadius = std::numeric_limits<float>::infinity());
 	TorusPrimitiveShape(const TorusPrimitiveShape &tps);
 	size_t Identifier() const;
 	unsigned int RequiredSamples() const { return Torus::RequiredSamples; }
@@ -101,6 +107,8 @@ public:
 		MiscLib::Vector< size_t >::const_iterator end) override
 	{
 		if ((!m_allowAppleShaped && m_torus.IsAppleShaped()) || 
+			m_torus.MinorRadius() < m_minMinorRadius ||
+			m_torus.MajorRadius() < m_minMajorRadius ||
 			m_torus.MinorRadius() > m_maxMinorRadius || 
 			m_torus.MajorRadius() > m_maxMajorRadius)
 		{
@@ -118,6 +126,8 @@ private:
 	Torus m_torus;
 	ParametrizationType m_parametrization;
 	bool m_allowAppleShaped;
+	float m_minMinorRadius;
+	float m_minMajorRadius;
 	float m_maxMinorRadius;
 	float m_maxMajorRadius;
 };

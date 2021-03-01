@@ -432,13 +432,13 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 	if (params.primEnabled[RPT_PLANE])
 		detector.Add(new PlanePrimitiveShapeConstructor());
 	if (params.primEnabled[RPT_SPHERE])
-		detector.Add(new SpherePrimitiveShapeConstructor(params.maxSphereRadius));
+		detector.Add(new SpherePrimitiveShapeConstructor(params.minSphereRadius, params.maxSphereRadius));
 	if (params.primEnabled[RPT_CYLINDER])
-		detector.Add(new CylinderPrimitiveShapeConstructor(params.maxCylinderRadius, params.maxCylinderLength));
+		detector.Add(new CylinderPrimitiveShapeConstructor(params.minCylinderRadius, params.maxCylinderRadius, params.maxCylinderLength));
 	if (params.primEnabled[RPT_CONE])
 		detector.Add(new ConePrimitiveShapeConstructor(params.maxConeRadius, CCCoreLib::DegreesToRadians(params.maxConeAngle_deg), params.maxConeLength));
 	if (params.primEnabled[RPT_TORUS])
-		detector.Add(new TorusPrimitiveShapeConstructor(false, params.maxTorusMinorRadius, params.maxTorusMajorRadius)); // Do not allow apple shaped torus
+		detector.Add(new TorusPrimitiveShapeConstructor(false, params.minTorusMinorRadius, params.minTorusMajorRadius, params.maxTorusMinorRadius, params.maxTorusMajorRadius)); // Do not allow apple shaped torus
 
 
 	unsigned remaining = count;
@@ -802,7 +802,7 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 					//eventually create the cone primitive
 					prim = new ccCone(maxRadius, minRadius, maxHeight - minHeight, 0, 0, &glMat);
 					prim->setEnabled(false);
-					prim->setName(QString("Cone (alpha=%1/h=%2)").arg(alpha, 0, 'f').arg(maxHeight - minHeight, 0, 'f'));
+					prim->setName(QString("Cone (alpha=%1/h=%2)").arg(alpha, 0, 'f').arg(static_cast<double>(maxHeight) - minHeight, 0, 'f'));
 					pcShape->setName(QString("Cone_%1").arg(coneCount, 4, 10, QChar('0')));
 					coneCount++;
 				}

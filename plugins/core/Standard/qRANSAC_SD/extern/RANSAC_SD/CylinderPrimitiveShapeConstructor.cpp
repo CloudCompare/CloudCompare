@@ -3,8 +3,9 @@
 #include <GfxTL/NullClass.h>
 
 CylinderPrimitiveShapeConstructor::CylinderPrimitiveShapeConstructor(
-	float maxCylinderRadius, float maxCylinderLength)
-	: m_maxCylinderRadius(maxCylinderRadius)
+	float minCylinderRadius, float maxCylinderRadius, float maxCylinderLength)
+	: m_minCylinderRadius(minCylinderRadius)
+	, m_maxCylinderRadius(maxCylinderRadius)
 	, m_maxCylinderLength(maxCylinderLength)
 
 {}
@@ -32,9 +33,9 @@ PrimitiveShape *CylinderPrimitiveShapeConstructor::Construct(
 	{
 		return NULL;
 	}
-	if (cy.Radius() < m_maxCylinderRadius && CylinderPrimitiveShape(cy, m_maxCylinderRadius, m_maxCylinderLength).Height() < m_maxCylinderLength)
+	if (cy.Radius() > m_minCylinderRadius && cy.Radius() < m_maxCylinderRadius)
 	{
-		return new CylinderPrimitiveShape(cy, m_maxCylinderRadius, m_maxCylinderLength);
+		return new CylinderPrimitiveShape(cy, m_minCylinderRadius, m_maxCylinderRadius, m_maxCylinderLength);
 	}
 	return NULL;
 }
@@ -47,9 +48,9 @@ PrimitiveShape *CylinderPrimitiveShapeConstructor::Construct(
 	{
 		return NULL;
 	}
-	if (cy.Radius() < m_maxCylinderRadius && CylinderPrimitiveShape(cy, m_maxCylinderRadius, m_maxCylinderLength).Height() < m_maxCylinderLength)
+	if (cy.Radius() > m_minCylinderRadius && cy.Radius() < m_maxCylinderRadius)
 	{
-		return new CylinderPrimitiveShape(cy, m_maxCylinderRadius, m_maxCylinderLength);
+		return new CylinderPrimitiveShape(cy, m_minCylinderRadius, m_maxCylinderRadius, m_maxCylinderLength);
 	}
 	return NULL;
 }

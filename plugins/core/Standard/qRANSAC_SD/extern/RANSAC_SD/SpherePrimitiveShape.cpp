@@ -28,15 +28,17 @@
 #include "PlanePrimitiveShape.h"
 extern MiscLib::performance_t totalTime_sphereConnected;
 
-SpherePrimitiveShape::SpherePrimitiveShape(const Sphere &s, float maxRadius)
-: m_sphere(s),
-m_maxRadius(maxRadius)
+SpherePrimitiveShape::SpherePrimitiveShape(const Sphere &s, float minRadius, float maxRadius)
+: m_sphere(s)
+, m_minRadius(minRadius)
+, m_maxRadius(maxRadius)
 , m_parametrization(m_sphere)
 {}
 
 SpherePrimitiveShape::SpherePrimitiveShape(const SpherePrimitiveShape &sps)
 : BitmapPrimitiveShape(sps)
 , m_sphere(sps.m_sphere)
+, m_minRadius(sps.m_minRadius)
 , m_maxRadius(sps.m_maxRadius)
 , m_parametrization(sps.m_parametrization)
 {

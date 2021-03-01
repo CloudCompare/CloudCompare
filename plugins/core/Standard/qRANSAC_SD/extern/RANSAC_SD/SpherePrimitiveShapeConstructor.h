@@ -11,7 +11,9 @@ class DLL_LINKAGE SpherePrimitiveShapeConstructor
 : public PrimitiveShapeConstructor
 {
 	public:
-		SpherePrimitiveShapeConstructor(float maxSphereRadius =
+		SpherePrimitiveShapeConstructor(float minSphereRadius =
+			-std::numeric_limits< float >::infinity(), 
+			float maxSphereRadius =
 			std::numeric_limits< float >::infinity());
 		size_t Identifier() const;
 		unsigned int RequiredSamples() const;
@@ -22,6 +24,7 @@ class DLL_LINKAGE SpherePrimitiveShapeConstructor
 		size_t SerializedSize() const;
 
 	private:
+		float m_minSphereRadius;
 		float m_maxSphereRadius;
 };
 

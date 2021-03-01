@@ -21,8 +21,8 @@ class DLL_LINKAGE SpherePrimitiveShape
 {
 public:
 	typedef LowStretchSphereParametrization ParametrizationType;
-	SpherePrimitiveShape() : m_parametrization(m_sphere), m_maxRadius(std::numeric_limits<float>::infinity()) {}
-	SpherePrimitiveShape(const Sphere &s, float maxRadius = std::numeric_limits<float>::infinity());
+	SpherePrimitiveShape() : m_parametrization(m_sphere), m_minRadius(-std::numeric_limits<float>::infinity()), m_maxRadius(std::numeric_limits<float>::infinity()) {}
+	SpherePrimitiveShape(const Sphere &s, float minRadius = -std::numeric_limits<float>::infinity(), float maxRadius = std::numeric_limits<float>::infinity());
 	SpherePrimitiveShape(const SpherePrimitiveShape &sps);
 	size_t Identifier() const;
 	unsigned int RequiredSamples() const { return Sphere::RequiredSamples; }
@@ -103,7 +103,7 @@ public:
 		MiscLib::Vector< size_t >::const_iterator begin,
 		MiscLib::Vector< size_t >::const_iterator end) override
 	{
-		if (m_sphere.Radius() <= m_maxRadius)
+		if ((m_sphere.Radius() >= m_minRadius) && (m_sphere.Radius() <= m_maxRadius))
 		{
 			return true;
 		}
@@ -116,6 +116,7 @@ private:
 
 private:
 	Sphere m_sphere;
+	float m_minRadius;
 	float m_maxRadius;
 	ParametrizationType m_parametrization;
 };

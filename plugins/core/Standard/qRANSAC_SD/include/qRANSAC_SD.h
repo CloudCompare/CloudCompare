@@ -54,12 +54,16 @@ public:
 		bool createCloudFromLeftOverPoints; // should the points that were not associated with a shape be saved
 		bool primEnabled[5]; //RANSAC_PRIMITIVE_TYPES
 		bool allowSimplification;
+		float minSphereRadius;
 		float maxSphereRadius;
+		float minCylinderRadius;
 		float maxCylinderRadius;
 		float maxCylinderLength;
 		float maxConeRadius;
 		float maxConeAngle_deg;
 		float maxConeLength;
+		float minTorusMinorRadius;
+		float minTorusMajorRadius;
 		float maxTorusMinorRadius;
 		float maxTorusMajorRadius;
 
@@ -71,12 +75,16 @@ public:
 			, randomColor(true)
 			, createCloudFromLeftOverPoints(true)
 			, allowSimplification(true)
+			, minSphereRadius(-std::numeric_limits<float>::infinity())
 			, maxSphereRadius(std::numeric_limits<float>::infinity())
+			, minCylinderRadius(-std::numeric_limits<float>::infinity())
 			, maxCylinderRadius(std::numeric_limits<float>::infinity())
 			, maxCylinderLength(std::numeric_limits<float>::infinity())
 			, maxConeRadius(std::numeric_limits<float>::infinity())
 			, maxConeAngle_deg(std::numeric_limits<float>::infinity())
 			, maxConeLength(std::numeric_limits<float>::infinity())
+			, minTorusMinorRadius(std::numeric_limits<float>::infinity())
+			, minTorusMajorRadius(std::numeric_limits<float>::infinity())
 			, maxTorusMinorRadius(std::numeric_limits<float>::infinity())
 			, maxTorusMajorRadius(std::numeric_limits<float>::infinity())
 		{
@@ -95,12 +103,16 @@ public:
 			, randomColor(true)
 			, createCloudFromLeftOverPoints(true)
 			, allowSimplification(true)
+			, minSphereRadius(-std::numeric_limits<float>::infinity())
 			, maxSphereRadius(std::numeric_limits<float>::infinity())
+			, minCylinderRadius(-std::numeric_limits<float>::infinity())
 			, maxCylinderRadius(std::numeric_limits<float>::infinity())
 			, maxCylinderLength(std::numeric_limits<float>::infinity())
 			, maxConeRadius(std::numeric_limits<float>::infinity())
 			, maxConeAngle_deg(std::numeric_limits<float>::infinity())
 			, maxConeLength(std::numeric_limits<float>::infinity())
+			, minTorusMinorRadius(std::numeric_limits<float>::infinity())
+			, minTorusMajorRadius(std::numeric_limits<float>::infinity())
 			, maxTorusMinorRadius(std::numeric_limits<float>::infinity())
 			, maxTorusMajorRadius(std::numeric_limits<float>::infinity())
 		{

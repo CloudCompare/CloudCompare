@@ -15,7 +15,7 @@ public:
 	CylinderPrimitiveShape();
 	size_t Identifier() const;
 	unsigned int RequiredSamples() const { return Cylinder::RequiredSamples; }
-	CylinderPrimitiveShape(const Cylinder &cylinder, float maxRadius = std::numeric_limits<float>::infinity(), float maxLength = std::numeric_limits<float>::infinity());
+	CylinderPrimitiveShape(const Cylinder &cylinder, float minRadius = -std::numeric_limits<float>::infinity(), float maxRadius = std::numeric_limits<float>::infinity(), float maxLength = std::numeric_limits<float>::infinity());
 	PrimitiveShape *Clone() const;
 	bool Init(const Vec3f &pointA, const Vec3f &pointB,
 		const Vec3f &normalA, const Vec3f &normalB);
@@ -110,6 +110,7 @@ private:
 	bool m_clip;
 	float m_minPhi;
 	float m_maxPhi;
+	float m_minRadius;
 	float m_maxRadius;
 	float m_maxLength;
 };

@@ -11,6 +11,9 @@ class DLL_LINKAGE CylinderPrimitiveShapeConstructor
 : public PrimitiveShapeConstructor
 {
 	public:
+		CylinderPrimitiveShapeConstructor(float minCylinderRadius = -std::numeric_limits<float>::infinity()
+			, float maxCylinderRadius = std::numeric_limits< float >::infinity()
+			, float maxCylinderLength = std::numeric_limits< float >::infinity());
 		size_t Identifier() const;
 		unsigned int RequiredSamples() const;
 		PrimitiveShape *Construct(const MiscLib::Vector< Vec3f > &points,
@@ -18,6 +21,10 @@ class DLL_LINKAGE CylinderPrimitiveShapeConstructor
 		PrimitiveShape *Construct(const MiscLib::Vector< Vec3f > &samples) const;
 		PrimitiveShape *Deserialize(std::istream *i, bool binary = true) const;
 		size_t SerializedSize() const;
+	private:
+		float m_maxCylinderRadius;
+		float m_minCylinderRadius;
+		float m_maxCylinderLength;
 };
 
 #endif

@@ -17,8 +17,11 @@ extern MiscLib::performance_t totalTime_coneConnected;
 #undef max
 #undef min
 
-ConePrimitiveShape::ConePrimitiveShape(const Cone &cone)
+ConePrimitiveShape::ConePrimitiveShape(const Cone &cone, float maxRadius, float maxAngle, float maxLength)
 : m_cone(cone)
+, m_maxRadius(maxRadius)
+, m_maxAngle(maxAngle)
+, m_maxLength(maxLength)
 {}
 
 size_t ConePrimitiveShape::Identifier() const
@@ -187,6 +190,21 @@ void ConePrimitiveShape::Visit(PrimitiveShapeVisitor *visitor) const
 	visitor->Visit(*this);
 }
 
+//float ConePrimitiveShape::Height() const
+//{
+//	return m_extBbox.Max()[0] - m_extBbox.Min()[0];
+//}
+//
+//float ConePrimitiveShape::MinHeight() const
+//{
+//	return m_extBbox.Min()[0];
+//}
+//
+//float ConePrimitiveShape::MaxHeight() const
+//{
+//	return m_extBbox.Max()[0];
+//}
+
 void ConePrimitiveShape::SuggestSimplifications(const PointCloud &pc,
 	MiscLib::Vector< size_t >::const_iterator begin,
 	MiscLib::Vector< size_t >::const_iterator end, float distThresh,
@@ -221,22 +239,41 @@ void ConePrimitiveShape::SuggestSimplifications(const PointCloud &pc,
 		}
 	}
 	size_t c = samples.size() / 2;
+
+	float d = 0;
+	float bestSum = 0;
+
+	for (size_t i = 0; i < c; ++i)
+	{
+		d = m_cone.Distance(samples[i]);
+		bestSum += d;
+	}
+
 	// now check all the shape types
 	Cylinder cylinder;
 	if(cylinder.InitAverage(samples))
 	{
 		cylinder.LeastSquaresFit(samples.begin(), samples.begin() + c);
 		bool failed = false;
-		for(size_t i = 0; i < c; ++i)
-			if(cylinder.Distance(samples[i]) > distThresh)
+		float sum = 0;
+		for (size_t i = 0; i < c; ++i)
+		{
+			d = cylinder.Distance(samples[i]);
+			sum += d;			
+			if (d > distThresh)
 			{
 				failed = true;
 				break;
 			}
+		}
 		if(!failed)
 		{
-			suggestions->push_back(new CylinderPrimitiveShape(cylinder));
-			suggestions->back()->Release();
+			if (sum < bestSum)
+			{
+				bestSum = sum;
+				suggestions->push_back(new CylinderPrimitiveShape(cylinder));
+				suggestions->back()->Release();
+			}
 		}
 	}
 	Sphere sphere;
@@ -244,32 +281,50 @@ void ConePrimitiveShape::SuggestSimplifications(const PointCloud &pc,
 	{
 		sphere.LeastSquaresFit(samples.begin(), samples.begin() + c);
 		bool failed = false;
+		float sum = 0;
 		for(size_t i = 0; i < c; ++i)
-			if(sphere.Distance(samples[i]) > distThresh)
+		{
+			d = sphere.Distance(samples[i]);
+			sum += d;
+			if (d > distThresh)
 			{
 				failed = true;
 				break;
 			}
+		}
 		if(!failed)
 		{
-			suggestions->push_back(new SpherePrimitiveShape(sphere));
-			suggestions->back()->Release();
+			if (sum < bestSum)
+			{
+				bestSum = sum;
+				suggestions->push_back(new SpherePrimitiveShape(sphere));
+				suggestions->back()->Release();
+			}
 		}
 	}
 	Plane plane;
 	if(plane.LeastSquaresFit(samples.begin(), samples.begin() + c))
 	{
 		bool failed = false;
+		float sum = 0;
 		for(size_t i = 0; i < c; ++i)
-			if(plane.Distance(samples[i]) > distThresh)
+		{
+			d = plane.Distance(samples[i]);
+			sum += d;
+			if (d > distThresh)
 			{
 				failed = true;
 				break;
 			}
+		}
 		if(!failed)
 		{
-			suggestions->push_back(new PlanePrimitiveShape(plane));
-			suggestions->back()->Release();
+			if (sum < bestSum)
+			{
+				bestSum = sum;
+				suggestions->push_back(new PlanePrimitiveShape(plane));
+				suggestions->back()->Release();
+			}
 		}
 	}
 

@@ -81,7 +81,7 @@ void RansacShapeDetector::UpdateLevelWeights(float factor,
 	}
 	for(size_t i = 0; i < sampleLevelProbability->size(); ++i)
 	{
-		(*sampleLevelProbability)[i] = (1.f - factor) * (*sampleLevelProbability)[i] +
+		(*sampleLevelProbability)[i] = (1.0 - factor) * (*sampleLevelProbability)[i] +
 			factor * (newSampleLevelProbability[i] / newSum);
 	}
 }
@@ -139,12 +139,11 @@ void RansacShapeDetector::GenerateCandidates(
 			if((*i)->RequiredSamples() > samples.size() 
 					|| !(shape = (*i)->Construct(samplePoints)))
 				continue;
-			// verify shape
 			std::pair< float, float > dn;
 			bool verified = true;
-			for(size_t i = 0; i < c; ++i)
+			for(size_t ij = 0; ij < c; ++ij)
 			{
-				shape->DistanceAndNormalDeviation(samplePoints[i], samplePoints[i + c], &dn);
+				shape->DistanceAndNormalDeviation(samplePoints[ij], samplePoints[ij + c], &dn);
 				if(!scoreVisitorCopy.PointCompFunc()(dn.first, dn.second))
 				{
 					verified = false;
@@ -586,7 +585,7 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 		size_t firstCandidateSize = 0;
 		while(FindBestCandidate(candidates, octrees, pc, subsetScoreVisitor,
 			currentSize, drawnCandidates, numInvalid,
-			std::max(static_cast<size_t>(m_options.m_minSupport), static_cast<size_t>(0.8f * firstCandidateSize)),
+			std::max(static_cast<size_t>(m_options.m_minSupport), static_cast<size_t>(0.8 * firstCandidateSize)),
 			globalOctTreeMaxNodeDepth, &maxForgottenCandidate,
 			&bestCandidateFailureProbability))
 		{
@@ -612,8 +611,7 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 			foundCandidate = true;
 			if(bestCandidateFailureProbability < failureProbability)
 				failureProbability = bestCandidateFailureProbability;
-			std::string candidateDescription;
-			candidates.back().Shape()->Description(&candidateDescription);
+
 			// do fitting
 			if(m_options.m_fitting != Options::NO_FITTING)
 			{
@@ -621,14 +619,14 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 				candidates.back().ConnectedComponent(pc, m_options.m_bitmapEpsilon);
 				Candidate clone;
 				candidates.back().Clone(&clone);
-				float oldScore, newScore;
-				size_t oldSize, newSize;
+				float oldScore = 0.0f, newScore = 0.0f;
+				size_t oldSize = 0, newSize = 0;
 				// get the weight once
 				newScore = clone.GlobalWeightedScore( globalScoreVisitor, globalOctree,
 						pc, 3 * m_options.m_epsilon, m_options.m_normalThresh,
 						m_options.m_bitmapEpsilon );
 				newSize = std::max(clone.Size(), candidates.back().Size());
-				bool allowDifferentShapes = false;
+				bool allowDifferentShapes = m_options.m_allowSimplification;
 				size_t fittingIter = 0;
 				do
 				{
@@ -636,22 +634,35 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 					oldScore = newScore;
 					oldSize = newSize;
 					std::pair< size_t, float > score;
-					PrimitiveShape *shape;
+					PrimitiveShape* shape;
 					shape = Fit(allowDifferentShapes, *clone.Shape(),
 						pc, clone.Indices()->begin(), clone.Indices()->end(),
 						&score);
-					if(shape)
-					{
-						clone.Shape(shape);
-						newScore = clone.GlobalWeightedScore( globalScoreVisitor, globalOctree,
-							pc, 3 * m_options.m_epsilon, m_options.m_normalThresh,
-							m_options.m_bitmapEpsilon );
-						newSize = clone.Size();
-						shape->Release();
-						if(newScore > oldScore && newSize > m_options.m_minSupport)
-							clone.Clone(&candidates.back());
+					if (shape)
+					{	
+						Candidate clone2;
+						clone.Clone(&clone2);
+						clone2.Shape(shape);
+						clone2.ConnectedComponent(pc, m_options.m_bitmapEpsilon);
+						if (clone2.Shape()->CheckGeneratedShapeWithinLimits(pc, clone.Indices()->begin(), clone.Indices()->end()))
+						{
+							clone.Shape(shape);
+							newScore = clone.GlobalWeightedScore(globalScoreVisitor, globalOctree,
+								pc, 3 * m_options.m_epsilon, m_options.m_normalThresh,
+								m_options.m_bitmapEpsilon);
+							newSize = clone.Size();
+							shape->Release();
+							shape->Release();
+							if (newScore > oldScore && newSize > m_options.m_minSupport)
+								clone.Clone(&candidates.back());
+						}
+						else
+						{
+							shape->Release();
+							shape->Release();
+						}
 					}
-					allowDifferentShapes = false;
+					//allowDifferentShapes = false;
 				}
 				while(newScore > oldScore && fittingIter < 3);
 			}
@@ -672,7 +683,7 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 			// update drawn candidates to reflect removal of points
 			// get the percentage of candidates that are invalid
 			drawnCandidates = static_cast<size_t>(std::pow(1.f - (candidates.back().Indices()->size() /
-				static_cast<float>(currentSize - numInvalid)), 3.f) * drawnCandidates);
+				static_cast<double>(currentSize - numInvalid)), 3.f) * drawnCandidates);
 			numInvalid += candidates.back().Indices()->size();
 			candidates.pop_back();
 			if(numInvalid > currentSize / 4) // more than half of the points assigned?
@@ -917,7 +928,7 @@ bool RansacShapeDetector::DrawSamplesStratified(const IndexedOctreeType &oct,
 	{
 		samples->clear();
 		//get first point, which also determines octree cell
-		size_t first;
+		size_t first = 0;
 		do
 		{
 			first = oct.Dereference(rn_rand() % oct.size());
@@ -934,7 +945,7 @@ bool RansacShapeDetector::DrawSamplesStratified(const IndexedOctreeType &oct,
 
 		while(samples->size() < numSamples)
 		{
-			size_t i, iter = 0;
+			size_t i = 0, iter = 0;
 			do
 			{
 				i = oct.Dereference(rn_rand() % (*node)->Size()
@@ -960,11 +971,57 @@ PrimitiveShape *RansacShapeDetector::Fit(bool allowDifferentShapes,
 	MiscLib::Vector< size_t >::const_iterator end,
 	std::pair< size_t, float > *score) const
 {
-	if(!m_constructors.size())
+	if (!m_constructors.size() || m_options.m_fitting != Options::LS_FITTING)
+	{
 		return NULL;
+	}
+
 	PrimitiveShape *bestShape = NULL;
-	if(m_options.m_fitting == Options::LS_FITTING)
 		bestShape = initialShape.LSFit(pc, m_options.m_epsilon,
 			m_options.m_normalThresh, begin, end, score);
+		if (bestShape && m_options.m_allowSimplification)
+		{
+			MiscLib::Vector< MiscLib::RefCountPtr< PrimitiveShape > > suggestions;
+			PointCloud tmpPC;
+			bestShape->SuggestSimplifications(tmpPC, nullptr, nullptr, m_options.m_epsilon, &suggestions);
+			if (suggestions.size() > 0)
+			{
+				bool foundBestShape = false;
+				for (int si = suggestions.size() - 1; si >= 0; si--)
+				{
+					if (!foundBestShape)
+					{
+						for (ConstructorsType::const_iterator lcli = m_constructors.begin(),
+							lcliend = m_constructors.end(); lcli != lcliend; ++lcli)
+						{
+							if (suggestions[si]->Identifier() == (*lcli)->Identifier())
+							{
+								bool verified = true;
+
+								//std::pair< float, float > dn;
+								//for (size_t ij = *begin; ij < *end; ++ij)
+								//{
+								//	suggestions[si]->DistanceAndNormalDeviation(pc[ij].pos, pc[ij].normal, &dn);
+								//	/*if (dn.first > m_options.m_epsilon || fabs(dn.second) <= m_options.m_normalThresh)
+								//	{
+								//		verified = false;
+								//		break;
+								//	}*/
+								//}
+								if (verified)
+								{
+									bestShape->Release();
+									bestShape = suggestions[si]->Clone();
+									bestShape->AddRef();
+								}
+								break;
+							}
+						}
+					}
+					suggestions[si]->Release();
+				}
+			}
+		}
+
 	return bestShape;
 }

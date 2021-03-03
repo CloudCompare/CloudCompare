@@ -10,6 +10,7 @@ class DLL_LINKAGE ConePrimitiveShapeConstructor
 : public PrimitiveShapeConstructor
 {
 	public:
+		ConePrimitiveShapeConstructor(float maxConeRadius = std::numeric_limits< float >::infinity(), float maxAngleRadians = std::numeric_limits< float >::infinity(), float maxConeLength = std::numeric_limits< float >::infinity());
 		size_t Identifier() const;
 		unsigned int RequiredSamples() const;
 		PrimitiveShape *Construct(const MiscLib::Vector< Vec3f > &points,
@@ -17,6 +18,10 @@ class DLL_LINKAGE ConePrimitiveShapeConstructor
 		PrimitiveShape *Construct(const MiscLib::Vector< Vec3f > &samples) const;
 		PrimitiveShape *Deserialize(std::istream *i, bool binary = true) const;
 		size_t SerializedSize() const;
+private:
+	float m_maxConeLength;
+	float m_maxAngle;
+	float m_maxConeRadius;
 };
 
 #endif

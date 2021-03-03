@@ -15,7 +15,7 @@ public:
 	CylinderPrimitiveShape();
 	size_t Identifier() const;
 	unsigned int RequiredSamples() const { return Cylinder::RequiredSamples; }
-	CylinderPrimitiveShape(const Cylinder &cylinder);
+	CylinderPrimitiveShape(const Cylinder &cylinder, float minRadius = -std::numeric_limits<float>::infinity(), float maxRadius = std::numeric_limits<float>::infinity(), float maxLength = std::numeric_limits<float>::infinity());
 	PrimitiveShape *Clone() const;
 	bool Init(const Vec3f &pointA, const Vec3f &pointB,
 		const Vec3f &normalA, const Vec3f &normalB);
@@ -90,7 +90,16 @@ public:
 	bool InSpace(size_t u, size_t v, float epsilon,
 		const GfxTL::AABox< GfxTL::Vector2Df > &bbox, size_t uextent,
 		size_t vextent, Vec3f *p, Vec3f *n) const;
-
+	bool CheckGeneratedShapeWithinLimits(const PointCloud& pc,
+		MiscLib::Vector< size_t >::const_iterator begin,
+		MiscLib::Vector< size_t >::const_iterator end) override
+	{
+		if (m_cylinder.Radius() <= m_maxRadius && Height() <= m_maxLength)
+		{
+			return true;
+		}
+		return false;
+	}
 private:
 	template< class IteratorT >
 	void ParametersImpl(IteratorT begin, IteratorT end,
@@ -101,6 +110,9 @@ private:
 	bool m_clip;
 	float m_minPhi;
 	float m_maxPhi;
+	float m_minRadius;
+	float m_maxRadius;
+	float m_maxLength;
 };
 
 template< class IteratorT >

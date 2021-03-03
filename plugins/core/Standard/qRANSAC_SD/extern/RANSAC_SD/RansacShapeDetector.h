@@ -27,6 +27,7 @@ class DLL_LINKAGE RansacShapeDetector
 			, m_bitmapEpsilon(0.01f)
 			, m_fitting(LS_FITTING)
 			, m_probability(0.001f)
+			, m_allowSimplification(true)
 			{}
 			float m_epsilon;
 			float m_normalThresh;
@@ -34,6 +35,7 @@ class DLL_LINKAGE RansacShapeDetector
 			float m_bitmapEpsilon;
 			enum { NO_FITTING, LS_FITTING } m_fitting;
 			float m_probability;
+			bool m_allowSimplification;
 		};
 		RansacShapeDetector();
 		RansacShapeDetector(const Options &options);

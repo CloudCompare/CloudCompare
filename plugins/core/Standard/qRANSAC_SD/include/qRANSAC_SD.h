@@ -51,8 +51,44 @@ public:
 		float   maxNormalDev_deg;	// maximal normal deviation from ideal shape (in degrees)
 		float   probability;	// probability that no better candidate was overlooked during sampling
 		bool randomColor; // should the resulting detected shapes sub point cloud be colored randomly
+		bool createCloudFromLeftOverPoints; // should the points that were not associated with a shape be saved
 		bool primEnabled[5]; //RANSAC_PRIMITIVE_TYPES
-		RansacParams() : epsilon(0.005f), bitmapEpsilon(0.001f), supportPoints(500), maxNormalDev_deg(25.0f), probability(0.01f), randomColor(true)
+		bool allowSimplification;
+		bool allowFitting;
+		float minSphereRadius;
+		float maxSphereRadius;
+		float minCylinderRadius;
+		float maxCylinderRadius;
+		float maxCylinderLength;
+		float maxConeRadius;
+		float maxConeAngle_deg;
+		float maxConeLength;
+		float minTorusMinorRadius;
+		float minTorusMajorRadius;
+		float maxTorusMinorRadius;
+		float maxTorusMajorRadius;
+
+		RansacParams() : epsilon(0.005f)
+			, bitmapEpsilon(0.001f)
+			, supportPoints(500)
+			, maxNormalDev_deg(25.0f)
+			, probability(0.01f)
+			, randomColor(true)
+			, createCloudFromLeftOverPoints(true)
+			, allowSimplification(true)
+			, allowFitting(true)
+			, minSphereRadius(-std::numeric_limits<float>::infinity())
+			, maxSphereRadius(std::numeric_limits<float>::infinity())
+			, minCylinderRadius(-std::numeric_limits<float>::infinity())
+			, maxCylinderRadius(std::numeric_limits<float>::infinity())
+			, maxCylinderLength(std::numeric_limits<float>::infinity())
+			, maxConeRadius(std::numeric_limits<float>::infinity())
+			, maxConeAngle_deg(std::numeric_limits<float>::infinity())
+			, maxConeLength(std::numeric_limits<float>::infinity())
+			, minTorusMinorRadius(std::numeric_limits<float>::infinity())
+			, minTorusMajorRadius(std::numeric_limits<float>::infinity())
+			, maxTorusMinorRadius(std::numeric_limits<float>::infinity())
+			, maxTorusMajorRadius(std::numeric_limits<float>::infinity())
 		{
 			primEnabled[RPT_PLANE] = true;
 			primEnabled[RPT_SPHERE] = true;
@@ -61,7 +97,27 @@ public:
 			primEnabled[RPT_TORUS] = false;
 		};
 
-		RansacParams(float scale) : epsilon(0.005f * scale), bitmapEpsilon(0.001f * scale), supportPoints(500), maxNormalDev_deg(25.0f), probability(0.01f), randomColor(true)
+		RansacParams(float scale) : epsilon(0.005f * scale)
+			, bitmapEpsilon(0.001f)
+			, supportPoints(500)
+			, maxNormalDev_deg(25.0f)
+			, probability(0.01f)
+			, randomColor(true)
+			, createCloudFromLeftOverPoints(true)
+			, allowSimplification(true)
+			, allowFitting(true)
+			, minSphereRadius(-std::numeric_limits<float>::infinity())
+			, maxSphereRadius(std::numeric_limits<float>::infinity())
+			, minCylinderRadius(-std::numeric_limits<float>::infinity())
+			, maxCylinderRadius(std::numeric_limits<float>::infinity())
+			, maxCylinderLength(std::numeric_limits<float>::infinity())
+			, maxConeRadius(std::numeric_limits<float>::infinity())
+			, maxConeAngle_deg(std::numeric_limits<float>::infinity())
+			, maxConeLength(std::numeric_limits<float>::infinity())
+			, minTorusMinorRadius(std::numeric_limits<float>::infinity())
+			, minTorusMajorRadius(std::numeric_limits<float>::infinity())
+			, maxTorusMinorRadius(std::numeric_limits<float>::infinity())
+			, maxTorusMajorRadius(std::numeric_limits<float>::infinity())
 		{
 			primEnabled[RPT_PLANE] = true;
 			primEnabled[RPT_SPHERE] = true;

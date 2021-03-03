@@ -101,6 +101,9 @@ public:
 		std::pair< float, float > *param) const = 0;
 	// computes the point and normal in 3-space from coordinates in the parametrization
 	virtual bool InSpace(float u, float v, Vec3f *p, Vec3f *n) const = 0;
+	virtual bool CheckGeneratedShapeWithinLimits(const PointCloud& pc,
+		MiscLib::Vector< size_t >::const_iterator begin,
+		MiscLib::Vector< size_t >::const_iterator end) { return true; }
 };
 
 #endif

@@ -14,8 +14,19 @@ class DLL_LINKAGE TorusPrimitiveShape
 {
 public:
 	typedef LowStretchTorusParametrization ParametrizationType;
-	TorusPrimitiveShape() : m_parametrization(m_torus) {}
-	TorusPrimitiveShape(const Torus &torus);
+	TorusPrimitiveShape() 
+		: m_parametrization(m_torus)
+		, m_allowAppleShaped(false)
+		, m_minMinorRadius(-std::numeric_limits<float>::infinity())
+		, m_minMajorRadius(-std::numeric_limits<float>::infinity())
+		, m_maxMinorRadius(std::numeric_limits<float>::infinity())
+		, m_maxMajorRadius(std::numeric_limits<float>::infinity())
+	{}
+	TorusPrimitiveShape(const Torus &torus, bool allowAppleShaped = false
+		, float minMinorRadius = -std::numeric_limits<float>::infinity()
+		, float minMajorRadius = -std::numeric_limits<float>::infinity()
+		, float maxMinorRadius = std::numeric_limits<float>::infinity()
+		, float maxMajorRadius = std::numeric_limits<float>::infinity());
 	TorusPrimitiveShape(const TorusPrimitiveShape &tps);
 	size_t Identifier() const;
 	unsigned int RequiredSamples() const { return Torus::RequiredSamples; }
@@ -91,6 +102,20 @@ public:
 		const GfxTL::AABox< GfxTL::Vector2Df > &bbox, size_t uextent,
 		size_t vextent, Vec3f *p, Vec3f *n) const;
 	const Torus &Internal() const { return m_torus; }
+	bool CheckGeneratedShapeWithinLimits(const PointCloud& pc,
+		MiscLib::Vector< size_t >::const_iterator begin,
+		MiscLib::Vector< size_t >::const_iterator end) override
+	{
+		if ((!m_allowAppleShaped && m_torus.IsAppleShaped()) || 
+			m_torus.MinorRadius() < m_minMinorRadius ||
+			m_torus.MajorRadius() < m_minMajorRadius ||
+			m_torus.MinorRadius() > m_maxMinorRadius || 
+			m_torus.MajorRadius() > m_maxMajorRadius)
+		{
+			return false;
+		}
+		return true;
+	}
 
 private:
 	template< class IteratorT >
@@ -100,6 +125,11 @@ private:
 private:
 	Torus m_torus;
 	ParametrizationType m_parametrization;
+	bool m_allowAppleShaped;
+	float m_minMinorRadius;
+	float m_minMajorRadius;
+	float m_maxMinorRadius;
+	float m_maxMajorRadius;
 };
 
 template< class IteratorT >

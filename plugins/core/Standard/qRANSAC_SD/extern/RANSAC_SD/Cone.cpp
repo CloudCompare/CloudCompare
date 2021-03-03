@@ -12,7 +12,9 @@
 extern int dmat_solve ( int n, int rhs_num, double a[] );
 
 Cone::Cone()
-: m_angularRotatedRadians(0)
+: m_angularRotatedRadians(0),
+m_angle(0),
+m_n2d()
 {}
 
 Cone::Cone(const Vec3f &center, const Vec3f &axisDir, float angle)
@@ -664,4 +666,77 @@ void Cone::Transform(const GfxTL::MatrixXX< 3, 3, float > &rot,
 	m_hcs[0] = rot * m_hcs[0];
 	m_hcs[1] = rot * m_hcs[1];
 	m_normalY = m_normal[1] * m_axisDir;
+}
+
+Cone::ConeInfo Cone::GetInfo(const PointCloud& pc, size_t startingIndx, size_t endingIndx) const
+{
+	if (startingIndx > endingIndx)
+	{
+		std::swap(startingIndx, endingIndx);
+	}
+	size_t sampleSize = endingIndx - startingIndx;
+	if (endingIndx >= pc.size() || sampleSize >= pc.size())
+	{
+		return ConeInfo();
+	}
+
+	ConeInfo rtrn;
+
+	rtrn.center = Center();
+	rtrn.angle = Angle();
+	rtrn.axisDirection = AxisDirection();
+	
+	rtrn.minPoint = rtrn.maxPoint = pc[startingIndx];
+	rtrn.minHeight = rtrn.maxHeight = Height(pc[startingIndx]);
+	for (size_t i = startingIndx; i <= endingIndx; i++)
+	{
+		float h = Height(pc[i].pos);
+		if (h < rtrn.minHeight)
+		{
+			rtrn.minHeight = h;
+			rtrn.minPoint = pc[i].pos;
+		}
+		else if (h > rtrn.maxHeight)
+		{
+			rtrn.maxHeight = h;
+			rtrn.maxPoint = pc[i].pos;
+		}
+	}
+	rtrn.height = rtrn.maxHeight - rtrn.minHeight;
+	rtrn.minRadius = std::tan(rtrn.angle) * rtrn.minHeight;
+	rtrn.maxRadius = std::tan(rtrn.angle) * rtrn.maxHeight;
+
+	return rtrn;
+}
+
+Cone::ConeInfo Cone::GetInfo(const MiscLib::Vector< Vec3f >& samples) const
+{
+	ConeInfo rtrn;
+	
+	rtrn.center = Center();
+	rtrn.angle = Angle();
+	rtrn.axisDirection = AxisDirection();
+
+
+	rtrn.minPoint = rtrn.maxPoint = samples[0];
+	rtrn.minHeight = rtrn.maxHeight = Height(samples[0]);
+	for (size_t i = 0; i < samples.size(); i++)
+	{
+		float h = Height(samples[i]);
+		if (h < rtrn.minHeight)
+		{
+			rtrn.minHeight = h;
+			rtrn.minPoint = samples[i];
+		}
+		else if (h > rtrn.maxHeight)
+		{
+			rtrn.maxHeight = h;
+			rtrn.maxPoint = samples[i];
+		}
+	}
+	rtrn.height = rtrn.maxHeight - rtrn.minHeight;
+	rtrn.minRadius = std::tan(rtrn.angle) * rtrn.minHeight;
+	rtrn.maxRadius = std::tan(rtrn.angle) * rtrn.maxHeight; 
+	
+	return rtrn;
 }

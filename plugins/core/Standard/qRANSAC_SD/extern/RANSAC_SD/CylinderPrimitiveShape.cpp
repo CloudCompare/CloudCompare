@@ -17,10 +17,22 @@
 extern MiscLib::performance_t totalTime_cylinderConnected;
 
 CylinderPrimitiveShape::CylinderPrimitiveShape()
+: m_clip(false)
+, m_minPhi(0)
+, m_maxPhi(0)
+, m_minRadius(-std::numeric_limits<float>::infinity())
+, m_maxRadius(std::numeric_limits<float>::infinity())
+, m_maxLength(std::numeric_limits<float>::infinity())
 {}
 
-CylinderPrimitiveShape::CylinderPrimitiveShape(const Cylinder &cylinder)
+CylinderPrimitiveShape::CylinderPrimitiveShape(const Cylinder &cylinder, float minRadius, float maxRadius, float maxLength)
 : m_cylinder(cylinder)
+, m_clip(false)
+, m_minPhi(0)
+, m_maxPhi(0)
+, m_minRadius(minRadius)
+, m_maxRadius(maxRadius)
+, m_maxLength(maxLength)
 {}
 
 size_t CylinderPrimitiveShape::Identifier() const
@@ -112,7 +124,7 @@ PrimitiveShape *CylinderPrimitiveShape::LSFit(const PointCloud &pc,
 	if(fit.LeastSquaresFit(pc, begin, end))
 	{
 		score->first = -1;
-		return new CylinderPrimitiveShape(fit);
+		return new CylinderPrimitiveShape(fit, m_maxRadius, m_maxLength);
 	}
 	score->first = 0;
 	return NULL;
@@ -178,38 +190,65 @@ void CylinderPrimitiveShape::SuggestSimplifications(const PointCloud &pc,
 				&samples[i * 5 + j + 25]);
 	}
 	size_t c = samples.size() / 2;
+	float d = 0;
+	float bestSum = 0;
+
+	for (size_t i = 0; i < c; ++i)
+	{
+		d = m_cylinder.Distance(samples[i]);
+		bestSum += d;
+	}
+	
 	// now check all the shape types
 	Sphere sphere;
 	if(sphere.Init(samples))
 	{
 		sphere.LeastSquaresFit(samples.begin(), samples.begin() + c);
 		bool failed = false;
-		for(size_t i = 0; i < c; ++i)
-			if(sphere.Distance(samples[i]) > distThresh)
+		float sum = 0;
+		for (size_t i = 0; i < c; ++i)
+		{
+			d = sphere.Distance(samples[i]);
+			sum += d;
+			if (d > distThresh)
 			{
 				failed = true;
 				break;
 			}
-		if(!failed)
+		}
+		if (!failed)
 		{
-			suggestions->push_back(new SpherePrimitiveShape(sphere));
-			suggestions->back()->Release();
+			if (sum < bestSum)
+			{
+				bestSum = sum;
+				suggestions->push_back(new SpherePrimitiveShape(sphere));
+				suggestions->back()->Release();
+			}
 		}
 	}
 	Plane plane;
 	if(plane.LeastSquaresFit(samples.begin(), samples.begin() + c))
 	{
 		bool failed = false;
+		float sum = 0;
 		for(size_t i = 0; i < c; ++i)
-			if(plane.Distance(samples[i]) > distThresh)
+		{
+			d = plane.Distance(samples[i]);
+			sum += d;
+			if (d > distThresh)
 			{
 				failed = true;
 				break;
 			}
-		if(!failed)
+		}
+		if (!failed)
 		{
-			suggestions->push_back(new PlanePrimitiveShape(plane));
-			suggestions->back()->Release();
+			if (sum < bestSum)
+			{
+				bestSum = sum;
+				suggestions->push_back(new PlanePrimitiveShape(plane));
+				suggestions->back()->Release();
+			}
 		}
 	}
 	/*// We suggest a sphere if a curvature of radius along the height
@@ -258,7 +297,7 @@ bool CylinderPrimitiveShape::Similar(float tolerance,
 
 float CylinderPrimitiveShape::Height() const
 {
-	return m_extBbox.Max()[0] - m_extBbox.Min()[0];
+	return std::abs(m_extBbox.Max()[0] - m_extBbox.Min()[0]);
 }
 
 float CylinderPrimitiveShape::MinHeight() const
@@ -318,7 +357,7 @@ void CylinderPrimitiveShape::BitmapExtent(float epsilon,
 		std::sort(angularParams.begin(), angularParams.end());
 		// try to find a large gap
 		float maxGap = 0;
-		float lower, upper;
+		float lower = 0.0f, upper = 0.0f;
 		for(size_t i = 1; i < angularParams.size(); ++i)
 		{
 			float gap = angularParams[i] - angularParams[i - 1];
@@ -364,8 +403,8 @@ void CylinderPrimitiveShape::WrapBitmap(
 	bool *vwrap) const
 {
 	*uwrap = false;
-	if(bbox.Max()[1] - bbox.Min()[1]
-		>= 2 * M_PI * m_cylinder.Radius() - 2 * epsilon)
+	if(static_cast<size_t>(bbox.Max()[1]) - bbox.Min()[1]
+		>= 2 * M_PI * m_cylinder.Radius() - static_cast<double>(epsilon) * 2)
 		*vwrap = true; // wrap around angular component
 	else
 		*vwrap = false;
@@ -390,7 +429,7 @@ void CylinderPrimitiveShape::SetExtent(
 	size_t vextent, float epsilon, int label)
 {
 	if(extBbox.Min()[1] * m_cylinder.Radius() <= epsilon
-		&& extBbox.Max()[1] * m_cylinder.Radius()
+		&& static_cast<size_t>(extBbox.Max()[1]) * m_cylinder.Radius()
 			>= 2 * M_PI * m_cylinder.Radius() - epsilon)
 	{
 		// component has been cut along angular direction

@@ -16,6 +16,7 @@ Cylinder::ParallelNormalsError::ParallelNormalsError()
 
 Cylinder::Cylinder()
 : m_angularRotatedRadians(0)
+, m_radius(0.0f)
 {}
 
 Cylinder::Cylinder(const Vec3f &axisDir, const Vec3f &axisPos, float radius)

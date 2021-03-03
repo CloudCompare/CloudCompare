@@ -4,8 +4,10 @@
 #include <GfxTL/NullClass.h>
 
 SpherePrimitiveShapeConstructor::SpherePrimitiveShapeConstructor(
+	float minSphereRadius,
 	float maxSphereRadius)
-: m_maxSphereRadius(maxSphereRadius)
+: m_minSphereRadius(minSphereRadius)
+, m_maxSphereRadius(maxSphereRadius)
 {}
 
 size_t SpherePrimitiveShapeConstructor::Identifier() const
@@ -26,9 +28,9 @@ PrimitiveShape *SpherePrimitiveShapeConstructor::Construct(
 	Sphere sphere;
 	if(!sphere.Init2(points[0], points[1], normals[0], normals[1]))//points[2], points[3]))
 		return NULL;
-	if(sphere.Radius() > m_maxSphereRadius)
+	if(sphere.Radius() < m_minSphereRadius || sphere.Radius() > m_maxSphereRadius)
 		return NULL;
-	return new SpherePrimitiveShape(sphere);
+	return new SpherePrimitiveShape(sphere, m_minSphereRadius, m_maxSphereRadius);
 }
 
 PrimitiveShape *SpherePrimitiveShapeConstructor::Construct(
@@ -37,7 +39,9 @@ PrimitiveShape *SpherePrimitiveShapeConstructor::Construct(
 	Sphere sphere;
 	if(!sphere.Init(samples))
 		return NULL;
-	return new SpherePrimitiveShape(sphere);
+	if (sphere.Radius() < m_minSphereRadius || sphere.Radius() > m_maxSphereRadius)
+		return NULL;
+	return new SpherePrimitiveShape(sphere, m_minSphereRadius, m_maxSphereRadius);
 }
 
 PrimitiveShape *SpherePrimitiveShapeConstructor::Deserialize(std::istream *i,

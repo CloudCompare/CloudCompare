@@ -825,15 +825,15 @@ bool ccNormalVectors::ComputeNormsAtLevelWithTri(	const CCCoreLib::DgmOctree::oc
 QString ccNormalVectors::ConvertStrikeAndDipToString(double& strike_deg, double& dip_deg)
 {
 	int iStrike = static_cast<int>(strike_deg);
-	int iDip = static_cast<int>(dip_deg);
+	int iDip = static_cast<int>(std::round(dip_deg));
 
 	return QString("N%1°E - %2°").arg(iStrike, 3, 10, QChar('0')).arg(iDip, 3, 10, QChar('0'));
 }
 
 QString ccNormalVectors::ConvertDipAndDipDirToString(PointCoordinateType dip_deg, PointCoordinateType dipDir_deg)
 {
-	int iDipDir = static_cast<int>(dipDir_deg);
-	int iDip = static_cast<int>(dip_deg);
+	int iDipDir = static_cast<int>(std::round(dipDir_deg));
+	int iDip = static_cast<int>(std::round(dip_deg));
 
 	return QString("Dip: %1 deg. - Dip direction: %2 deg.").arg(iDip, 3, 10, QChar('0')).arg(iDipDir, 3, 10, QChar('0'));
 }

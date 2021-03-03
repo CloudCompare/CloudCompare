@@ -739,7 +739,7 @@ void ccPropertiesTreeDelegate::fillWithPlanarEntity(const ccPlanarEntityInterfac
 	PointCoordinateType dip_deg;
 	PointCoordinateType dipDir_deg;
 	ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip_deg, dipDir_deg);
-	appendRow(ITEM( tr( "Dip / Dip dir. (integer)" ) ), ITEM(QStringLiteral("(%1 ; %2) deg.").arg(static_cast<int>(dip_deg)).arg(static_cast<int>(dipDir_deg))));
+	appendRow(ITEM( tr( "Dip / Dip dir. (integer)" ) ), ITEM(QStringLiteral("(%1 ; %2) deg.").arg(static_cast<int>(std::round(dip_deg))).arg(static_cast<int>(std::round(dipDir_deg)))));
 	appendRow(ITEM( tr( "Dip / Dip dir." ) ), ITEM(QStringLiteral("(%1; %2) deg.").arg(dip_deg, 0, 'f', 2).arg(dipDir_deg, 0, 'f', 2)));
 
 	//normal vector visibility

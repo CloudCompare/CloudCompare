@@ -10,14 +10,15 @@
     <x>0</x>
     <y>0</y>
     <width>600</width>
-    <height>320</height>
+    <height>360</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>About CloudCompare</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-color:white;</string>
+   <string notr="true">background-color:white;
+color:black;</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>

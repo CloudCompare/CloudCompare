@@ -567,12 +567,12 @@ ccGLWindow::~ccGLWindow()
 
 void ccGLWindow::grabMouse()
 {
-	m_parentWidget->grabMouse();
+	setMouseGrabEnabled(true);
 }
 
 void ccGLWindow::releaseMouse()
 {
-	m_parentWidget->releaseMouse();
+	setMouseGrabEnabled(false);
 }
 
 void ccGLWindow::setParentWidget(QWidget* widget)

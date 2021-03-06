@@ -565,6 +565,16 @@ ccGLWindow::~ccGLWindow()
 
 #ifdef CC_GL_WINDOW_USE_QWINDOW
 
+void ccGLWindow::grabMouse()
+{
+	m_parentWidget->grabMouse();
+}
+
+void ccGLWindow::releaseMouse()
+{
+	m_parentWidget->releaseMouse();
+}
+
 void ccGLWindow::setParentWidget(QWidget* widget)
 {
 	m_parentWidget = widget;

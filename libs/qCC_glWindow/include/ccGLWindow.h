@@ -621,6 +621,9 @@ public:
 #ifdef CC_GL_WINDOW_USE_QWINDOW
 	//! For compatibility with the QOpenGLWidget version
 	inline void update() { paintGL(); }
+
+	void grabMouse();
+	void releaseMouse();
 #endif
 
 protected:

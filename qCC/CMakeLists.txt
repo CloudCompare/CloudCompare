@@ -36,12 +36,21 @@ else()
 	add_executable( ${PROJECT_NAME} ${header_list} ${source_list} ${generated_ui_list} ${generated_qrc_list} ${rc_list} ${txt_list} )
 endif()
 
-DeployQt(
-	TARGET
-		${PROJECT_NAME}
-	DEPLOY_PATH
-		${PROJECT_NAME}
-)
+if( WIN32 )
+	DeployQt(
+		TARGET
+			${PROJECT_NAME}
+		DEPLOY_PATH
+			${CLOUDCOMPARE_DEST_FOLDER}
+	)
+else()
+	DeployQt(
+		TARGET
+			${PROJECT_NAME}
+		DEPLOY_PATH
+			${PROJECT_NAME}
+	)
+endif()
 
 target_link_libraries( ${PROJECT_NAME}
     CCAppCommon

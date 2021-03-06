@@ -73,7 +73,7 @@
        <item row="2" column="0">
         <widget class="QCheckBox" name="upwardCheckBox">
          <property name="toolTip">
-          <string>Whether the plane normal should point upward (Z+) or backward (Z-)</string>
+          <string>Whether the plane normal should point upward (Z+) or downward (Z-)</string>
          </property>
          <property name="text">
           <string>upward</string>

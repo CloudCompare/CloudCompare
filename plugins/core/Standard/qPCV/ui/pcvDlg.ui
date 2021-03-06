@@ -85,7 +85,7 @@
          <item>
           <widget class="QCheckBox" name="mode180CheckBox">
            <property name="toolTip">
-            <string>rays are cast from the whole sphere (instrad of the Z+ hemisphere)</string>
+            <string>rays are cast from the whole sphere (instead of the Z+ hemisphere)</string>
            </property>
            <property name="text">
             <string>Only northern hemisphere (+Z)</string>

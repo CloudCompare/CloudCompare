@@ -3884,3 +3884,240 @@ bool ccMesh::convertMaterialsToVertexColors()
 
 	return true;
 }
+
+static bool TagDuplicatedVertices(	const CCCoreLib::DgmOctree::octreeCell& cell,
+									void** additionalParameters,
+									CCCoreLib::NormalizedProgress* nProgress/*=0*/)
+{
+	std::vector<int>* equivalentIndexes = static_cast<std::vector<int>*>(additionalParameters[0]);
+
+	//we look for points very close to the others (only if not yet tagged!)
+
+	//structure for nearest neighbors search
+	CCCoreLib::DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
+	nNSS.level = cell.level;
+	static const PointCoordinateType c_defaultSearchRadius = static_cast<PointCoordinateType>(sqrt(CCCoreLib::ZERO_TOLERANCE_F));
+	nNSS.prepare(c_defaultSearchRadius, cell.parentOctree->getCellSize(nNSS.level));
+	cell.parentOctree->getCellPos(cell.truncatedCode, cell.level, nNSS.cellPos, true);
+	cell.parentOctree->computeCellCenter(nNSS.cellPos, cell.level, nNSS.cellCenter);
+
+	unsigned n = cell.points->size(); //number of points in the current cell
+
+	//we already know some of the neighbours: the points in the current cell!
+	try
+	{
+		nNSS.pointsInNeighbourhood.resize(n);
+	}
+	catch (.../*const std::bad_alloc&*/) //out of memory
+	{
+		return false;
+	}
+
+	//init structure with cell points
+	{
+		CCCoreLib::DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
+		for (unsigned i = 0; i < n; ++i, ++it)
+		{
+			it->point = cell.points->getPointPersistentPtr(i);
+			it->pointIndex = cell.points->getPointGlobalIndex(i);
+		}
+		nNSS.alreadyVisitedNeighbourhoodSize = 1;
+	}
+
+	//for each point in the cell
+	for (unsigned i = 0; i < n; ++i)
+	{
+		int thisIndex = static_cast<int>(cell.points->getPointGlobalIndex(i));
+		if (equivalentIndexes->at(thisIndex) < 0) //has no equivalent yet 
+		{
+			cell.points->getPoint(i, nNSS.queryPoint);
+
+			//look for neighbors in a (very small) sphere
+			//warning: there may be more points at the end of nNSS.pointsInNeighbourhood than the actual nearest neighbors (k)!
+			unsigned k = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS, c_defaultSearchRadius, false);
+
+			//if there are some very close points
+			if (k > 1)
+			{
+				for (unsigned j = 0; j < k; ++j)
+				{
+					//all the other points are equivalent to the query point
+					const unsigned& otherIndex = nNSS.pointsInNeighbourhood[j].pointIndex;
+					if (static_cast<int>(otherIndex) != thisIndex)
+						equivalentIndexes->at(otherIndex) = thisIndex;
+				}
+			}
+
+			//and the query point is always root
+			equivalentIndexes->at(thisIndex) = thisIndex;
+		}
+
+		if (nProgress && !nProgress->oneStep())
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool ccMesh::mergeDuplicatedVertices(unsigned char octreeLevel/*=10*/, QWidget* parentWidget/*=nullptr*/)
+{
+	if (!m_associatedCloud)
+	{
+		assert(false);
+		return false;
+	}
+
+	unsigned vertCount = m_associatedCloud->size();
+	unsigned faceCount = size();
+	if (vertCount == 0 || faceCount == 0)
+	{
+		ccLog::Warning("[ccMesh::mergeDuplicatedVertices] No triangle or no vertex");
+		return false;
+	}
+
+	try
+	{
+		std::vector<int> equivalentIndexes;
+		const int razValue = -1;
+		equivalentIndexes.resize(vertCount, razValue);
+
+		// tag the duplicated vertices
+		{
+			QScopedPointer<ccProgressDialog> pDlg(nullptr);
+			if (parentWidget)
+			{
+				pDlg.reset(new ccProgressDialog(true, parentWidget));
+			}
+
+			// try to build the octree
+			ccOctree::Shared octree = ccOctree::Shared(new ccOctree(m_associatedCloud));
+			if (!octree->build(pDlg.data()))
+			{
+				ccLog::Warning("[MergeDuplicatedVertices] Not enough memory");
+				return false;
+			}
+
+			void* additionalParameters[] = { static_cast<void*>(&equivalentIndexes) };
+			unsigned result = octree->executeFunctionForAllCellsAtLevel(10,
+				TagDuplicatedVertices,
+				additionalParameters,
+				false,
+				pDlg.data(),
+				"Tag duplicated vertices");
+
+			if (result == 0)
+			{
+				ccLog::Warning("[MergeDuplicatedVertices] Duplicated vertices removal algorithm failed?!");
+				return false;
+			}
+		}
+
+		unsigned remainingCount = 0;
+		for (unsigned i = 0; i < vertCount; ++i)
+		{
+			int eqIndex = equivalentIndexes[i];
+			assert(eqIndex >= 0);
+			if (eqIndex == static_cast<int>(i)) //root point
+			{
+				// we replace the root index by its 'new' index (+ vertCount, to differentiate it later)
+				int newIndex = static_cast<int>(vertCount + remainingCount);
+				equivalentIndexes[i] = newIndex;
+				++remainingCount;
+			}
+		}
+
+		CCCoreLib::ReferenceCloud newVerticesRef(m_associatedCloud);
+		if (!newVerticesRef.reserve(remainingCount))
+		{
+			ccLog::Warning("[MergeDuplicatedVertices] Not enough memory");
+			return false;
+		}
+
+		//copy root points in a new cloud
+		{
+			for (unsigned i = 0; i < vertCount; ++i)
+			{
+				int eqIndex = equivalentIndexes[i];
+				if (eqIndex >= static_cast<int>(vertCount)) //root point
+					newVerticesRef.addPointIndex(i);
+				else
+					equivalentIndexes[i] = equivalentIndexes[eqIndex]; //and update the other indexes
+			}
+		}
+
+		ccPointCloud* newVertices = nullptr;
+		if (m_associatedCloud->isKindOf(CC_TYPES::POINT_CLOUD))
+		{
+			newVertices = static_cast<ccPointCloud*>(m_associatedCloud)->partialClone(&newVerticesRef);
+		}
+		else
+		{
+			newVertices = ccPointCloud::From(&newVerticesRef, m_associatedCloud);
+		}
+		if (!newVertices)
+		{
+			ccLog::Warning("[MergeDuplicatedVertices] Not enough memory");
+			return false;
+		}
+
+		//update face indexes
+		{
+			unsigned newFaceCount = 0;
+			for (unsigned i = 0; i < faceCount; ++i)
+			{
+				CCCoreLib::VerticesIndexes* tri = getTriangleVertIndexes(i);
+				tri->i1 = static_cast<unsigned>(equivalentIndexes[tri->i1]) - vertCount;
+				tri->i2 = static_cast<unsigned>(equivalentIndexes[tri->i2]) - vertCount;
+				tri->i3 = static_cast<unsigned>(equivalentIndexes[tri->i3]) - vertCount;
+
+				//very small triangles (or flat ones) may be implicitly removed by vertex fusion!
+				if (tri->i1 != tri->i2 && tri->i1 != tri->i3 && tri->i2 != tri->i3)
+				{
+					if (newFaceCount != i)
+						swapTriangles(i, newFaceCount);
+					++newFaceCount;
+				}
+			}
+
+			if (newFaceCount == 0)
+			{
+				ccLog::Warning("[MergeDuplicatedVertices] After vertex fusion, all triangles would collapse! We'll keep the non-fused version...");
+				delete newVertices;
+				newVertices = nullptr;
+			}
+			else
+			{
+				resize(newFaceCount);
+			}
+		}
+
+		// update the mesh vertices
+		int childPos = getChildIndex(m_associatedCloud);
+		if (childPos >= 0)
+		{
+			removeChild(childPos);
+		}
+		else
+		{
+			delete m_associatedCloud;
+			m_associatedCloud = nullptr;
+		}
+		setAssociatedCloud(newVertices);
+		if (childPos >= 0)
+		{
+			addChild(m_associatedCloud);
+		}
+		vertCount = m_associatedCloud->size();
+		ccLog::Print("[MergeDuplicatedVertices] Remaining vertices after auto-removal of duplicate ones: %i", vertCount);
+		ccLog::Print("[MergeDuplicatedVertices] Remaining faces after auto-removal of duplicate ones: %i", size());
+		return false;
+	}
+	catch (const std::bad_alloc&)
+	{
+		ccLog::Warning("[MergeDuplicatedVertices] Not enough memory: could not remove duplicated vertices!");
+	}
+
+	return false;
+}

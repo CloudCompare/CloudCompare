@@ -313,7 +313,7 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* entity)
 			ccHObject::Container meshes;
 			if (cloud->filterChildren(meshes,false,CC_TYPES::MESH) != 0)
 			{
-				for (unsigned i=0; i<meshes.size(); ++i)
+				for (unsigned i = 0; i < meshes.size(); ++i)
 					if (ccHObjectCaster::ToGenericMesh(meshes[i])->getAssociatedCloud() == cloud)
 					{
 						ccLog::Warning(QString("[Graphical Segmentation Tool] Can't segment mesh vertices '%1' directly! Select its child mesh instead!").arg(entity->getName()));
@@ -326,7 +326,7 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* entity)
 		m_toSegment.insert(cloud);
 
 		//automatically add cloud's children
-		for (unsigned i=0; i<entity->getChildrenNumber(); ++i)
+		for (unsigned i = 0; i < entity->getChildrenNumber(); ++i)
 			result |= addEntity(entity->getChild(i));
 	}
 	else if (entity->isKindOf(CC_TYPES::MESH))
@@ -371,7 +371,7 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* entity)
 	else if (entity->isA(CC_TYPES::HIERARCHY_OBJECT))
 	{
 		//automatically add entity's children
-		for (unsigned i=0;i<entity->getChildrenNumber();++i)
+		for (unsigned i = 0; i < entity->getChildrenNumber(); ++i)
 			result |= addEntity(entity->getChild(i));
 	}
 
@@ -417,14 +417,14 @@ void ccGraphicalSegmentationTool::updatePolyLine(int x, int y, Qt::MouseButtons 
 		CCVector3* B = const_cast<CCVector3*>(m_polyVertices->getPointPersistentPtr(1));
 		CCVector3* C = const_cast<CCVector3*>(m_polyVertices->getPointPersistentPtr(2));
 		CCVector3* D = const_cast<CCVector3*>(m_polyVertices->getPointPersistentPtr(3));
-		*B = CCVector3(A->x,P.y,0);
+		*B = CCVector3(A->x, P.y, 0);
 		*C = P;
-		*D = CCVector3(P.x,A->y,0);
+		*D = CCVector3(P.x, A->y, 0);
 
 		if (vertCount != 4)
 		{
 			m_segmentationPoly->clear();
-			if (!m_segmentationPoly->addPointIndex(0,4))
+			if (!m_segmentationPoly->addPointIndex(0, 4))
 			{
 				ccLog::Error("Out of memory!");
 				allowPolylineExport(false);
@@ -438,7 +438,7 @@ void ccGraphicalSegmentationTool::updatePolyLine(int x, int y, Qt::MouseButtons 
 		if (vertCount < 2)
 			return;
 		//we replace last point by the current one
-		CCVector3* lastP = const_cast<CCVector3*>(m_polyVertices->getPointPersistentPtr(vertCount-1));
+		CCVector3* lastP = const_cast<CCVector3*>(m_polyVertices->getPointPersistentPtr(vertCount - 1));
 		*lastP = P;
 	}
 
@@ -454,6 +454,12 @@ void ccGraphicalSegmentationTool::addPointToPolyline(int x, int y)
 	if (!m_associatedWin)
 	{
 		assert(false);
+		return;
+	}
+
+	if (x < 0 || y < 0 || x >= m_associatedWin->qtWidth() || y >= m_associatedWin->qtHeight())
+	{
+		//ignore clicks outside of the 3D view
 		return;
 	}
 
@@ -532,6 +538,10 @@ void ccGraphicalSegmentationTool::addPointToPolyline(int x, int y)
 		}
 	}
 
+	//DGM: to increase the poll rate of the mouse movements in ccGLWindow::mouseMoveEvent
+	//we have to completely grab the mouse focus!
+	//(the only way to take back the control is to right-click now...)
+	m_associatedWin->grabMouse();
 	m_associatedWin->redraw(true, false);
 }
 
@@ -561,7 +571,10 @@ void ccGraphicalSegmentationTool::closeRectangle()
 	m_state &= (~RUNNING);
 
 	if (m_associatedWin)
+	{
+		m_associatedWin->releaseMouse();
 		m_associatedWin->redraw(true, false);
+	}
 }
 
 void ccGraphicalSegmentationTool::closePolyLine(int, int)
@@ -569,6 +582,11 @@ void ccGraphicalSegmentationTool::closePolyLine(int, int)
 	//only for polyline in RUNNING mode
 	if ((m_state & POLYLINE) == 0 || (m_state & RUNNING) == 0)
 		return;
+
+	if (m_associatedWin)
+	{
+		m_associatedWin->releaseMouse();
+	}
 
 	assert(m_segmentationPoly);
 	unsigned vertCount = m_segmentationPoly->size();

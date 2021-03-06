@@ -470,28 +470,28 @@ void ccColorScaleEditorDialog::changeSelectedStepValue(double value)
 			{
 				const ColorScaleElementSlider* slider = m_scaleWidget->getStep(i);
 				double absolutePos = (i == selectedIndex ? value : m_minAbsoluteVal + slider->getRelativePos() * (m_maxAbsoluteVal - m_minAbsoluteVal));
-				newSliders->push_back(new ColorScaleElementSlider(absolutePos,slider->getColor()));
+				newSliders->elements().push_back(new ColorScaleElementSlider(absolutePos,slider->getColor()));
 			}
 		}
 
 		//update min and max boundaries
 		{
 			newSliders->sort();
-			m_minAbsoluteVal = newSliders->front()->getRelativePos(); //absolute in fact!
-			m_maxAbsoluteVal = newSliders->back()->getRelativePos(); //absolute in fact!
+			m_minAbsoluteVal = newSliders->elements().front()->getRelativePos(); //absolute in fact!
+			m_maxAbsoluteVal = newSliders->elements().back()->getRelativePos(); //absolute in fact!
 		}
 
 		//convert absolute pos to relative ones
 		int newSelectedIndex = -1;
 		{
-			double range = std::max(m_maxAbsoluteVal-m_minAbsoluteVal,1e-12);
-			for (int i=0;i<newSliders->size();++i)
+			double range = std::max(m_maxAbsoluteVal - m_minAbsoluteVal, 1e-12);
+			for (int i = 0; i < newSliders->size(); ++i)
 			{
-				double absoluteVal = newSliders->at(i)->getRelativePos();
+				double absoluteVal = newSliders->element(i)->getRelativePos();
 				if (absoluteVal == value)
 					newSelectedIndex = i;
 				double relativePos = (absoluteVal-m_minAbsoluteVal)/range;
-				newSliders->at(i)->setRelativePos(relativePos);
+				newSliders->element(i)->setRelativePos(relativePos);
 			}
 		}
 

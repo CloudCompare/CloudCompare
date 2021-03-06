@@ -37,7 +37,7 @@ static ViewPortList GetSelectedViewPorts( const ccHObject::Container &selectedEn
 	
 	for ( ccHObject *object : selectedEntities )
 	{
-		if ( object->getClassID() == CC_TYPES::VIEWPORT_2D_OBJECT )
+		if ( object->getClassID() == static_cast<CC_CLASS_ENUM>(CC_TYPES::VIEWPORT_2D_OBJECT) )
 		{
 			viewports.push_back( static_cast<cc2DViewportObject*>(object) );
 		}

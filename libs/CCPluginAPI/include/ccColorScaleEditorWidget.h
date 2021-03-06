@@ -61,14 +61,20 @@ protected:
 };
 
 //! Set of color scale elements (widgets)
-class CCPLUGIN_LIB_API ColorScaleElementSliders : public QList<ColorScaleElementSlider*>
+class CCPLUGIN_LIB_API ColorScaleElementSliders
 {
 public:
+
+	//! Type of the set of elements
+	using Set = QList<ColorScaleElementSlider*>;
 
 	//! Adds a slider element and sort the whole set
 	/** Should be used instead of push_back/push_front!
 	**/
 	void addSlider(ColorScaleElementSlider* slider);
+
+	//! Returns the size (shortcut)
+	inline int size() const { return m_list.size(); }
 
 	//! Sorts the set
 	void sort();
@@ -84,6 +90,21 @@ public:
 
 	//! Returns the index of a given slider
 	int indexOf(ColorScaleElementSlider* slider);
+
+	//! Returns a given element
+	inline ColorScaleElementSlider* element(int index) { return m_list.at(index); }
+	//! Returns a given element (const version)
+	inline const ColorScaleElementSlider* element(int index) const { return m_list.at(index); }
+
+	//! Return the set of elements
+	inline Set& elements() { return m_list; }
+	//! Return the set of elements (const version)
+	inline const Set& elements() const { return m_list; }
+
+protected:
+
+	//! Set of elements
+	Set m_list;
 };
 
 //! Shared set of color scale elements (widgets)
@@ -246,7 +267,7 @@ public:
 	inline int getStepCount() const { return (m_sliders ? m_sliders->size() : 0); }
 
 	//! Returns a given slider (pointer on)
-	inline const ColorScaleElementSlider* getStep(int index) { return m_sliders ? m_sliders->at(index) : nullptr; }
+	inline const ColorScaleElementSlider* getStep(int index) { return m_sliders ? m_sliders->elements().at(index) : nullptr; }
 
 	//! Sets a given slider color
 	void setStepColor(int index, QColor color);

@@ -149,7 +149,7 @@ LASFilter::LASFilter()
 
 bool LASFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
 {
-	if (type == CC_TYPES::POINT_CLOUD)
+	if (type == static_cast<CC_CLASS_ENUM>(CC_TYPES::POINT_CLOUD))
 	{
 		multiple = false;
 		exclusive = true;

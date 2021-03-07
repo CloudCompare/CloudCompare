@@ -256,7 +256,7 @@
               </sizepolicy>
              </property>
              <property name="toolTip">
-              <string>Interpolate scalar field(s)</string>
+              <string>interpolate SF(s)</string>
              </property>
              <property name="text">
               <string>interpolate SF(s)</string>

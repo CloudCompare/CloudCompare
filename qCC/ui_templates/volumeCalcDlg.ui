@@ -168,7 +168,7 @@
             <string>Swap</string>
            </property>
            <property name="text">
-            <string>swap</string>
+            <string>Swap</string>
            </property>
            <property name="icon">
             <iconset resource="../icons.qrc">

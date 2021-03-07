@@ -1115,7 +1115,7 @@ QTreeView::branch:open:has-children:has-siblings  {
      <normaloff>:/CC/images/ccSamplePoints.png</normaloff>:/CC/images/ccSamplePoints.png</iconset>
    </property>
    <property name="text">
-    <string>Sample Points</string>
+    <string>Sample points</string>
    </property>
    <property name="toolTip">
     <string>Sample points on a mesh</string>

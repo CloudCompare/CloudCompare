@@ -256,7 +256,7 @@
               </sizepolicy>
              </property>
              <property name="toolTip">
-              <string>Interpolate scalar field(s)</string>
+              <string>interpolate SF(s)</string>
              </property>
              <property name="text">
               <string>interpolate SF(s)</string>
@@ -670,7 +670,7 @@ replaced by the cell's average height!</string>
               <item row="1" column="0">
                <widget class="QLabel" name="label_10">
                 <property name="text">
-                 <string>Step</string>
+                 <string>step</string>
                 </property>
                </widget>
               </item>

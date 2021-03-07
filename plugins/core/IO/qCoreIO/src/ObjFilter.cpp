@@ -150,7 +150,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 			//reset save dialog
 			unsigned numTriangleNormals = normsTable->currentSize();
 			if (pDlg)
-				pDlg->setInfo(QObject::tr("Writing $1 triangle normals").arg(numTriangleNormals));
+				pDlg->setInfo(QObject::tr("Writing %1 triangle normals").arg(numTriangleNormals));
 			nprogress.scale(numTriangleNormals);
 			nprogress.reset();
 

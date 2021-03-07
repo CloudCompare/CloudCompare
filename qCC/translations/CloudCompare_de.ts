@@ -9,12 +9,12 @@
         <translation>Über CloudCompare</translation>
     </message>
     <message>
-        <location filename="../ui_templates/aboutDlg.ui" line="38"/>
+        <location filename="../ui_templates/aboutDlg.ui" line="39"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;img src=&quot;:/CC/Icons/images/icon/cc_icon_64.png&quot;/&gt;&lt;br/&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;CloudCompare &lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600; font-style:italic;&quot;&gt;&lt;/span&gt;&lt;br/&gt;Version: %1&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;a href=&quot;http://www.cloudcompare.org/donate&quot;&gt;&lt;img src=&quot;:/CC/images/donate.png&quot; width=&quot;200&quot;/&gt;&lt;/a&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;a href=&quot;http://www.cloudcompare.org&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;www.cloudcompare.org&lt;br/&gt;&lt;/span&gt;&lt;/a&gt;License: GNU GPL (General Public Licence)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;img src=&quot;:/CC/Icons/images/icon/cc_icon_64.png&quot;/&gt;&lt;br/&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;CloudCompare &lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600; font-style:italic;&quot;&gt;&lt;/span&gt;&lt;br/&gt;Version: %1&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;a href=&quot;http://www.cloudcompare.org/donate&quot;&gt;&lt;img src=&quot;:/CC/images/donate.png&quot; width=&quot;200&quot;/&gt;&lt;/a&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;a href=&quot;http://www.cloudcompare.org&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;www.cloudcompare.org&lt;br/&gt;&lt;/span&gt;&lt;/a&gt;Lizenz: GNU GPL (General Public Licence)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../ui_templates/aboutDlg.ui" line="78"/>
+        <location filename="../ui_templates/aboutDlg.ui" line="79"/>
         <source>OK</source>
         <translation>OK</translation>
     </message>
@@ -520,13 +520,13 @@ Sei P ein 3D-Punkt, so sei der transformierte Punkt P&apos; so, dass: P&apos; = 
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openAsciiFileDlg.ui" line="28"/>
-        <source>Filename:</source>
-        <translation>Dateiname:</translation>
+        <source>Source</source>
+        <translation type="unfinished">Quelle</translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openAsciiFileDlg.ui" line="50"/>
-        <source>Here are the first lines of this file. Choose an attribute for each column (one cloud at a time):</source>
-        <translation>Dies sind die ersten Zeilen der Datei. Wählen sie ein Attribut für jede Spalte (jede Punktwolke für sich):</translation>
+        <source>Choose an attribute for each column:</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openAsciiFileDlg.ui" line="60"/>
@@ -660,8 +660,8 @@ Anderenfalls werden die Beschriftungen in 3D angezeigt.</translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/saveAsciiFileDlg.ui" line="79"/>
-        <source>tabulation</source>
-        <translation>Tabulator</translation>
+        <source>tab</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/saveAsciiFileDlg.ui" line="87"/>
@@ -1272,7 +1272,7 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;.SF NS Text&apos;; font-size:13pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt;&quot;&gt;	&lt;/span&gt;&lt;span style=&quot; font-family:&apos;SimSun&apos;; font-size:11pt; font-weight:600;&quot;&gt;CSF Plugin Instruction&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8pt; font-weight:600;&quot;&gt;Cloth Simulation Filter (CSF)&lt;/span&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8pt;&quot;&gt; is a tool to extract of ground points in discrete return LiDAR pointclouds. The detailed theory and algorithms could be found in the following paper:&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a name=&quot;OLE_LINK22&quot;&gt;&lt;/a&gt;&lt;span style=&quot; font-family:&apos;Arial,sans-serif&apos;; font-size:8pt; color:#000000;&quot;&gt;Z&lt;/span&gt;&lt;span style=&quot; font-family:&apos;Arial,sans-serif&apos;; font-size:8pt; color:#000000;&quot;&gt;hang W, Qi J, Wan P, Wang H, Xie D, Wang X, Yan G. An Easy-to-Use Airborne LiDAR Data Filtering Method Based on Cloth Simulation. &lt;/span&gt;&lt;span style=&quot; font-family:&apos;Arial,sans-serif&apos;; font-size:8pt; font-style:italic; color:#000000;&quot;&gt;Remote Sensing&lt;/span&gt;&lt;span style=&quot; font-family:&apos;Arial,sans-serif&apos;; font-size:8pt; color:#000000;&quot;&gt;. 2016; 8(6):501.&lt;/span&gt;&lt;span style=&quot; font-family:&apos;SimSun&apos;; font-size:8pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;justify&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a name=&quot;OLE_LINK22&quot;&gt;&lt;/a&gt;&lt;span style=&quot; font-family:&apos;Arial,sans-serif&apos;; font-size:8pt; color:#000000;&quot;&gt;Z&lt;/span&gt;&lt;span style=&quot; font-family:&apos;Arial,sans-serif&apos;; font-size:8pt; color:#000000;&quot;&gt;hang W, Qi J, Wan P, Wang H, Xie D, Wang X, Yan G. An Easy-to-Use Airborne LiDAR Data Filtering Method Based on Cloth Simulation.&#xa0;&lt;/span&gt;&lt;span style=&quot; font-family:&apos;Arial,sans-serif&apos;; font-size:8pt; font-style:italic; color:#000000;&quot;&gt;Remote Sensing&lt;/span&gt;&lt;span style=&quot; font-family:&apos;Arial,sans-serif&apos;; font-size:8pt; color:#000000;&quot;&gt;. 2016; 8(6):501.&lt;/span&gt;&lt;span style=&quot; font-family:&apos;SimSun&apos;; font-size:8pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Microsoft YaHei UI,Tahoma&apos;; font-size:8pt; color:#000000; background-color:#cce8cf;&quot;&gt;And please cite the paper, If you use Cloth Simulation Filter (CSF) in your work.&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Microsoft YaHei UI,Tahoma&apos;; font-size:8pt; color:#000000; background-color:#cce8cf;&quot;&gt;You can download the paper from &lt;/span&gt;&lt;a href=&quot;https://www.researchgate.net/profile/Wuming_Zhang2)&quot;&gt;&lt;span style=&quot; font-family:&apos;Microsoft YaHei UI,Tahoma&apos;; font-size:8pt; text-decoration: underline; color:#0000ff; background-color:#cce8cf;&quot;&gt;https://www.researchgate.net/profile/Wuming_Zhang2 .&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;p align=&quot;justify&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Microsoft YaHei UI,Tahoma&apos;; font-size:8pt; color:#000000; background-color:#cce8cf;&quot;&gt;You can also visit the homepage : &lt;/span&gt;&lt;a href=&quot;http://ramm.bnu.edu.cn/researchers/wumingzhang/english/default_contributions.htm&quot;&gt;&lt;span style=&quot; font-family:&apos;Microsoft YaHei UI,Tahoma&apos;; font-size:8pt; text-decoration: underline; color:#0000ff; background-color:#cce8cf;&quot;&gt;http://ramm.bnu.edu.cn/researchers/wumingzhang/english/default_contributions.htm&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:&apos;Microsoft YaHei UI,Tahoma&apos;; font-size:8pt; color:#000000; background-color:#cce8cf;&quot;&gt; for more information.&lt;/span&gt;&lt;/p&gt;
@@ -1282,22 +1282,7 @@ p, li { white-space: pre-wrap; }
 &lt;p align=&quot;center&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; background-color:#cce8cf;&quot;&gt;(&lt;/span&gt;&lt;a href=&quot;http://ramm.bnu.edu.cn/&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; text-decoration: underline; color:#0000ff;&quot;&gt;http://ramm.bnu.edu.cn/&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; background-color:#cce8cf;&quot;&gt;)&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt;&quot;&gt;Wuming Zhang; Jianbo Qi; Peng Wan; Hongtao Wang&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt;&quot;&gt;contact us: &lt;/span&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; background-color:#cce8cf;&quot;&gt;2009zwm@gmail.com; wpqjbzwm@126.com&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;.SF NS Text&apos;; font-size:13pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt;&quot;&gt;	&lt;/span&gt;&lt;span style=&quot; font-family:&apos;SimSun&apos;; font-size:11pt; font-weight:600;&quot;&gt;CSF Plugin-Einführung&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8pt; font-weight:600;&quot;&gt;Gewebe-Simulations-Filter (CSF)&lt;/span&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8pt;&quot;&gt; ist ein Werkzeug zur Extraktion von Bodenpunkten in diskreten LiDAR-Punktwolken. Die detaillierte Theorie und die Algorithmen finden Sie im folgenden Beitrag:&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a name=&quot;OLE_LINK22&quot;&gt;&lt;/a&gt;&lt;span style=&quot; font-family:&apos;Arial,sans-serif&apos;; font-size:8pt; color:#000000;&quot;&gt;Z&lt;/span&gt;&lt;span style=&quot; font-family:&apos;Arial,sans-serif&apos;; font-size:8pt; color:#000000;&quot;&gt;hang W, Qi J, Wan P, Wang H, Xie D, Wang X, Yan G. An Easy-to-Use Airborne LiDAR Data Filtering Method Based on Cloth Simulation. &lt;/span&gt;&lt;span style=&quot; font-family:&apos;Arial,sans-serif&apos;; font-size:8pt; font-style:italic; color:#000000;&quot;&gt;Remote Sensing&lt;/span&gt;&lt;span style=&quot; font-family:&apos;Arial,sans-serif&apos;; font-size:8pt; color:#000000;&quot;&gt;. 2016; 8(6):501.&lt;/span&gt;&lt;span style=&quot; font-family:&apos;SimSun&apos;; font-size:8pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Microsoft YaHei UI,Tahoma&apos;; font-size:8pt; color:#000000; background-color:#cce8cf;&quot;&gt;Und bitte zitieren Sie das Papier, wenn Sie Cloth Simulation Filter (CSF) in Ihrer Arbeit verwenden.&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Microsoft YaHei UI,Tahoma&apos;; font-size:8pt; color:#000000; background-color:#cce8cf;&quot;&gt;Sie können das Papier herunterladen von: &lt;/span&gt;&lt;a href=&quot;https://www.researchgate.net/profile/Wuming_Zhang2)&quot;&gt;&lt;span style=&quot; font-family:&apos;Microsoft YaHei UI,Tahoma&apos;; font-size:8pt; text-decoration: underline; color:#0000ff; background-color:#cce8cf;&quot;&gt;https://www.researchgate.net/profile/Wuming_Zhang2 .&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Microsoft YaHei UI,Tahoma&apos;; font-size:8pt; color:#000000; background-color:#cce8cf;&quot;&gt;Sie können auch die Homepage besuchen: &lt;/span&gt;&lt;a href=&quot;http://ramm.bnu.edu.cn/researchers/wumingzhang/english/default_contributions.htm&quot;&gt;&lt;span style=&quot; font-family:&apos;Microsoft YaHei UI,Tahoma&apos;; font-size:8pt; text-decoration: underline; color:#0000ff; background-color:#cce8cf;&quot;&gt;http://ramm.bnu.edu.cn/researchers/wumingzhang/english/default_contributions.htm&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:&apos;Microsoft YaHei UI,Tahoma&apos;; font-size:8pt; color:#000000; background-color:#cce8cf;&quot;&gt; für weitere Informationen.&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Microsoft YaHei UI,Tahoma&apos;; font-size:8pt; color:#000000; background-color:#cce8cf;&quot;&gt;Eine mex-Version für die Programmierung in Matlab finden Sie unter File Exchange auf der Mathworks-Website: &lt;/span&gt;&lt;a href=&quot;http://www.mathworks.com/matlabcentral/fileexchange/58139-csf--ground-filtering-of-point-cloud-based-on-cloth-simulation&quot;&gt;&lt;span style=&quot; font-family:&apos;SimSun&apos;; font-size:9pt; text-decoration: underline; color:#0000ff;&quot;&gt;http://www.mathworks.com/matlabcentral/fileexchange/58139-csf--ground-filtering-of-point-cloud-based-on-cloth-simulation&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Microsoft YaHei UI,Tahoma&apos;; font-size:8pt; color:#000000; background-color:#cce8cf;&quot;&gt; Copyright &lt;/span&gt;&lt;span style=&quot; font-family:&apos;Arial,Helvetica,sans-serif&apos;; font-size:8.25pt; color:#333333; background-color:#e5eaee;&quot;&gt;©&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; background-color:#cce8cf;&quot;&gt;RAMM laboratory, School of Geography, Beijing Normal University&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; background-color:#cce8cf;&quot;&gt;(&lt;/span&gt;&lt;a href=&quot;http://ramm.bnu.edu.cn/&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; text-decoration: underline; color:#0000ff;&quot;&gt;http://ramm.bnu.edu.cn/&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; background-color:#cce8cf;&quot;&gt;)&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt;&quot;&gt;Wuming Zhang; Jianbo Qi; Peng Wan; Hongtao Wang&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt;&quot;&gt;kontaktieren Sie uns: &lt;/span&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; background-color:#cce8cf;&quot;&gt;2009zwm@gmail.com; wpqjbzwm@126.com&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCSF/ui/CSFDlg.ui" line="58"/>
@@ -1859,8 +1844,8 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoTrainingDialog.ui" line="88"/>
-        <source>Points belonging to class #1 </source>
-        <translation>Punkte zugehörig zu Klasse #1</translation>
+        <source>Points belonging to class #1</source>
+        <translation type="unfinished">Punkte zugehörig zu Klasse #1</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoTrainingDialog.ui" line="101"/>
@@ -2151,21 +2136,12 @@ Die Normalen der Ausgabefacetten können zufällig orientiert sein
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-weight:600; color:#1f497d;&quot;&gt;Multi-scale dimensionality classification (CANUPO)&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-style:italic; color:#1f497d;&quot;&gt;Brodu and Lague, 3D Terrestrial LiDAR data classification of complex natural scenes using a multi-scale dimensionality criterion, ISPRS j. of Photogram. Rem. Sens., 2012&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-style:italic; color:#1f497d;&quot;&gt;Brodu and Lague, 3D Terrestrial LiDAR data classification of complex natural scenes using a multi-scale dimensionality criterion, ISPRS j. of Photogram.&#xa0;Rem. Sens., 2012&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-style:italic; color:#1f497d; background-color:#ffffff;&quot;&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;Funded by Université Européenne de Bretagne, Centre National de la Recherche Scientifique and EEC Marie-Curie actions&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d;&quot;&gt;Enjoy!&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-weight:600; color:#1f497d;&quot;&gt;Mehrskalige Dimensionalitätsklassifizierung (CANUPO)&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-style:italic; color:#1f497d;&quot;&gt;Brodu and Lague, 3D Terrestrial LiDAR data classification of complex natural scenes using a multi-scale dimensionality criterion, ISPRS j. of Photogram. Rem. Sens., 2012&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-style:italic; color:#1f497d; background-color:#ffffff;&quot;&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;Gegründet von der Université Européenne de Bretagne, Centre National de la Recherche Scientifique and EEC Marie-Curie actions&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d;&quot;&gt;Viel Spaß mit!&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2843,32 +2819,32 @@ um fortgeschrittenen Benutzern die Einstellung der allgemeinen Parameter zu erle
 <context>
     <name>ComponentType</name>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1111"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1145"/>
         <source>Array</source>
         <translation>Feld</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1114"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1148"/>
         <source>Name</source>
         <translation>Name</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1114"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1148"/>
         <source>undefined</source>
         <translation>undefiniert</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1117"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1151"/>
         <source>Elements</source>
         <translation>Elemente</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1120"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1154"/>
         <source>Capacity</source>
         <translation>Kapazität</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1123"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1157"/>
         <source>Memory</source>
         <translation>Speicher</translation>
     </message>
@@ -3105,21 +3081,12 @@ p, li { white-space: pre-wrap; }
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-weight:600; color:#1f497d;&quot;&gt;Point cloud comparison with M3C2&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-style:italic; color:#1f497d;&quot;&gt;Lague et al., Accurate 3D comparison of complex topography with terrestrial laser scanner, ISPRS j. of Photogram. Rem. Sens., 2013&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-style:italic; color:#1f497d;&quot;&gt;Lague et al., Accurate 3D comparison of complex topography with terrestrial laser scanner, ISPRS j. of Photogram.&#xa0;Rem. Sens., 2013&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-style:italic; color:#1f497d; background-color:#ffffff;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2,serif&apos;; font-size:8pt; color:#aa007f; background-color:#ffffff;&quot;&gt;This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;arial,sans-serif&apos;; font-size:10pt; font-style:italic; color:#222222; background-color:#ffffff;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;Funded by Université Européenne de Bretagne, Centre National de la Recherche Scientifique and EEC Marie-Curie actions&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-weight:600; color:#1f497d;&quot;&gt;Punktwolkenvergleich mit M3C2&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-style:italic; color:#1f497d;&quot;&gt;Lague et al., Accurate 3D comparison of complex topography with terrestrial laser scanner, ISPRS j. of Photogram. Rem. Sens., 2013&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-style:italic; color:#1f497d; background-color:#ffffff;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2,serif&apos;; font-size:8pt; color:#aa007f; background-color:#ffffff;&quot;&gt;Dieses Programm wird in der Hoffnung verteilt, dass es nützlich ist, aber OHNE JEGLICHE GARANTIE; sogar ohne die stillschweigende Garantie der MARKTREIFE oder der EIGNUNG FÜR EINEN BESTIMMTEN ZWECK. Siehe die GNU General Public License für weitere Details.&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;arial,sans-serif&apos;; font-size:10pt; font-style:italic; color:#222222; background-color:#ffffff;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;Gefördert durch Université Européenne de Bretagne, Centre National de la Recherche Scientifique and EEC Marie-Curie actions&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -4675,173 +4642,6 @@ Hinweis: Die Diagonale wird zum Zeitpunkt des Ladens nicht getestet.</translatio
     </message>
 </context>
 <context>
-    <name>HeightGridGenerationDialog</name>
-    <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="17"/>
-        <source>Height grid generation</source>
-        <translation>Höhengitter-Erzeugung</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="26"/>
-        <source>Grid</source>
-        <translation>Gitter</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="32"/>
-        <source>step</source>
-        <translation>Schritt</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="39"/>
-        <source>size of step of the grid generated (in the same units as the coordinates of the point cloud)</source>
-        <translation>Schrittweite des erzeugten Gitters (in denselben Einheiten wie die Koordinaten der Punktwolke)</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="61"/>
-        <source>Edit grid</source>
-        <translation>Gitter bearbeiten</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="71"/>
-        <source>Projection</source>
-        <translation>Projektion</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="79"/>
-        <source>type</source>
-        <translation>Typ</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="86"/>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="174"/>
-        <source>choose the height (z coordinate) projected : maximum = highest point in the cell or average)</source>
-        <translation>Wählen Sie die Höhe (z-Koordinate) projiziert: Maximum = höchster Punkt in der Zelle(oder Durchschnitt)</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="93"/>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="227"/>
-        <source>minimum height</source>
-        <translation>Minimalhöhe</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="98"/>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="232"/>
-        <source>average height</source>
-        <translation>Durchschnittliche Höhe</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="103"/>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="237"/>
-        <source>maximum height</source>
-        <translation>Maximalhöhe</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="115"/>
-        <source>direction</source>
-        <translation>Richtung</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="164"/>
-        <source>interpolate scalar field(s)</source>
-        <translation>Interpoliere Skalare(s) Feld(er)</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="181"/>
-        <source>minimum value</source>
-        <translation>Kleinster Wert</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="186"/>
-        <source>average value</source>
-        <translation>Mittelwert</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="191"/>
-        <source>maximum value</source>
-        <translation>Größter Wert</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="205"/>
-        <source>Empty cells</source>
-        <translation>Leere Zellen</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="211"/>
-        <source>Fill with</source>
-        <translation>Füllen mit</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="218"/>
-        <source>choose the value to fill the cells in which no point is projected : minimum value over the whole point cloud or average value (over the whole cloud also)</source>
-        <translation>Wählen Sie den Wert zum Füllen der Zellen, in die kein Punkt projiziert wird: Minimalwert über die gesamte Punktwolke oder Durchschnittswert (auch über die gesamte Punktwolke)</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="222"/>
-        <source>leave empty</source>
-        <translation>Leer lassen</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="242"/>
-        <source>user specified value</source>
-        <translation>Benutzerdefinierter Wert</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="278"/>
-        <source>Generate</source>
-        <translation>Erzeugen</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="284"/>
-        <source>Grid as a point cloud</source>
-        <translation>Gitter als Punktwolke</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="293"/>
-        <source>Adds a scalar field with the grid density (= number of points falling in each cell)</source>
-        <translation>Fügt ein skalares Feld mit der Gitterdichte (= Anzahl der Punkte, die in jede Zelle fallen) hinzu</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="296"/>
-        <source>save per-cell count as SF</source>
-        <translation>Zählung pro Zelle als SF speichern</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="303"/>
-        <source>Keeps the nearest point in each cell instead of the cell center</source>
-        <translation>Hält den nächstgelegenen Punkt in jeder Zelle anstelle der Zellmitte</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="306"/>
-        <source>resample original cloud</source>
-        <translation>Original-Punktwolke neu anordnen</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="319"/>
-        <source>Grid as a raster (geotiff)</source>
-        <translation>Gitter als Raster (GeoTiff)</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="326"/>
-        <source>image is automatically generated in the application directory</source>
-        <translation>Bild wird automatisch im Applikationsverzeichnis erzeugt</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="329"/>
-        <source>Grid as an image</source>
-        <translation>Gitter als Bild</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="336"/>
-        <source>file is automatically generated in the application directory</source>
-        <translation>Datei wird automatisch im Applikationsverzeichnis erzeugt</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/heightGridGenerationDlg.ui" line="339"/>
-        <source>Grid as a matrix (text file)</source>
-        <translation>Gitter als Matrix (Textdatei)</translation>
-    </message>
-</context>
-<context>
     <name>HistogramDialog</name>
     <message>
         <location filename="../ui_templates/histogramDlg.ui" line="14"/>
@@ -5625,2258 +5425,4021 @@ Parameter</translation>
         <translation>Sprach-Übersetzung</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="122"/>
-        <location filename="../ui_templates/mainWindow.ui" line="863"/>
+        <location filename="../ui_templates/mainWindow.ui" line="123"/>
+        <location filename="../ui_templates/mainWindow.ui" line="872"/>
         <source>&amp;Help</source>
         <translation>&amp;Hilfe</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="132"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1802"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2869"/>
+        <location filename="../ui_templates/mainWindow.ui" line="133"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1811"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2878"/>
         <source>Edit</source>
         <translation>Bearbeiten</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="136"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1654"/>
+        <location filename="../ui_templates/mainWindow.ui" line="137"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1663"/>
         <source>Scalar fields</source>
         <translation>Skalare Felder</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="165"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1978"/>
+        <location filename="../ui_templates/mainWindow.ui" line="166"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1987"/>
         <source>Colors</source>
         <translation>Farben</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="181"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1964"/>
+        <location filename="../ui_templates/mainWindow.ui" line="182"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1973"/>
         <source>Normals</source>
         <translation>Normalen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="185"/>
+        <location filename="../ui_templates/mainWindow.ui" line="186"/>
         <source>Orient normals</source>
         <translation>Ausrichtung der Normalen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="192"/>
+        <location filename="../ui_templates/mainWindow.ui" line="193"/>
         <source>Convert to</source>
         <translation>Umwandeln in</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="207"/>
+        <location filename="../ui_templates/mainWindow.ui" line="208"/>
         <source>Octree</source>
         <translation>Oktree</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="215"/>
+        <location filename="../ui_templates/mainWindow.ui" line="216"/>
         <source>Mesh</source>
         <translation>Netz</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="219"/>
+        <location filename="../ui_templates/mainWindow.ui" line="220"/>
         <source>Scalar Field</source>
         <translation>Skalares Feld</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="243"/>
+        <location filename="../ui_templates/mainWindow.ui" line="244"/>
         <source>Sensors</source>
         <translation>Sensoren</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="247"/>
+        <location filename="../ui_templates/mainWindow.ui" line="248"/>
         <source>Terrestrial Laser Sensor = Ground Based Lidar</source>
         <translation>Terrestrischer Laserscanner = Bodengestütztes LIDAR</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="250"/>
+        <location filename="../ui_templates/mainWindow.ui" line="251"/>
         <source>TLS/GBL</source>
         <translation>TLS/GBL</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="264"/>
+        <location filename="../ui_templates/mainWindow.ui" line="265"/>
         <source>Camera</source>
         <translation>Kamera</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="286"/>
+        <location filename="../ui_templates/mainWindow.ui" line="287"/>
         <source>Toggle (recursive)</source>
         <translation>Umschalten (rekursiv)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="298"/>
+        <location filename="../ui_templates/mainWindow.ui" line="299"/>
         <source>Waveform</source>
         <translation>Wellenform</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="315"/>
+        <location filename="../ui_templates/mainWindow.ui" line="316"/>
         <source>Grid</source>
         <translation>Gitter</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="356"/>
+        <location filename="../ui_templates/mainWindow.ui" line="365"/>
         <source>3D &amp;Views</source>
         <translation>3D-&amp;Anzeige</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="374"/>
+        <location filename="../ui_templates/mainWindow.ui" line="383"/>
         <source>Tools</source>
         <translation>Werkzeuge</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="378"/>
+        <location filename="../ui_templates/mainWindow.ui" line="387"/>
         <source>Segmentation</source>
         <translation>Unterteilung</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="389"/>
+        <location filename="../ui_templates/mainWindow.ui" line="398"/>
         <source>Projection</source>
         <translation>Projektion</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="399"/>
+        <location filename="../ui_templates/mainWindow.ui" line="408"/>
         <source>Statistics</source>
         <translation>Statistik</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="406"/>
+        <location filename="../ui_templates/mainWindow.ui" line="415"/>
         <source>Distances</source>
         <translation>Abstand</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="415"/>
+        <location filename="../ui_templates/mainWindow.ui" line="424"/>
+        <location filename="../mainwindow.cpp" line="3684"/>
         <source>Registration</source>
         <translation>Registrierung</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="428"/>
+        <location filename="../ui_templates/mainWindow.ui" line="437"/>
         <source>Other</source>
         <translation>Andere</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="435"/>
+        <location filename="../ui_templates/mainWindow.ui" line="444"/>
         <source>Sand box (research)</source>
         <translation>Sandkasten (Forschung)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="458"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2887"/>
+        <location filename="../ui_templates/mainWindow.ui" line="467"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2896"/>
         <source>Fit</source>
         <translation>Ausrichtung</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="467"/>
+        <location filename="../ui_templates/mainWindow.ui" line="476"/>
         <source>Clean</source>
         <translation>Bereinigen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="474"/>
+        <location filename="../ui_templates/mainWindow.ui" line="483"/>
         <source>Volume</source>
         <translation>Volumen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="480"/>
+        <location filename="../ui_templates/mainWindow.ui" line="489"/>
         <source>Batch export</source>
         <translation>Batch-Export</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="525"/>
+        <location filename="../ui_templates/mainWindow.ui" line="534"/>
         <source>DB Tree</source>
         <translation>Datenbank-Baum</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="579"/>
-        <location filename="../ui_templates/mainWindow.ui" line="582"/>
+        <location filename="../ui_templates/mainWindow.ui" line="588"/>
+        <location filename="../ui_templates/mainWindow.ui" line="591"/>
         <source>Viewing tools</source>
         <translation>Anzeige-Werkzeuge</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="633"/>
-        <location filename="../ui_templates/mainWindow.ui" line="962"/>
+        <location filename="../ui_templates/mainWindow.ui" line="642"/>
+        <location filename="../ui_templates/mainWindow.ui" line="971"/>
         <source>Console</source>
         <translation>Konsole</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="673"/>
-        <location filename="../ui_templates/mainWindow.ui" line="676"/>
+        <location filename="../ui_templates/mainWindow.ui" line="682"/>
+        <location filename="../ui_templates/mainWindow.ui" line="685"/>
         <source>Main tools</source>
         <translation>Haupt-Werkzeuge</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="713"/>
-        <location filename="../ui_templates/mainWindow.ui" line="716"/>
+        <location filename="../ui_templates/mainWindow.ui" line="722"/>
+        <location filename="../ui_templates/mainWindow.ui" line="725"/>
         <source>Scalar field tools</source>
         <translation>Skalares-Feld-Werkzeuge</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="746"/>
+        <location filename="../ui_templates/mainWindow.ui" line="755"/>
         <source>Properties</source>
         <translation>Eigenschaften</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="793"/>
+        <location filename="../ui_templates/mainWindow.ui" line="802"/>
         <source>&amp;Open</source>
         <translation>&amp;Öffnen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="796"/>
+        <location filename="../ui_templates/mainWindow.ui" line="805"/>
         <source>Open</source>
         <translation>Öffnen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="799"/>
+        <location filename="../ui_templates/mainWindow.ui" line="808"/>
         <source>Ctrl+O</source>
         <translation>Strg+O</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="808"/>
+        <location filename="../ui_templates/mainWindow.ui" line="817"/>
         <source>&amp;Save</source>
         <translation>&amp;Speichern</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="811"/>
+        <location filename="../ui_templates/mainWindow.ui" line="820"/>
         <source>Save current entity</source>
         <translation>Aktuelle Entität speichern</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="814"/>
+        <location filename="../ui_templates/mainWindow.ui" line="823"/>
         <source>Ctrl+S</source>
         <translation>Strg+S</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="822"/>
+        <location filename="../ui_templates/mainWindow.ui" line="831"/>
         <source>&amp;Quit</source>
         <translation>&amp;Beenden</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="825"/>
-        <location filename="../mainwindow.cpp" line="5928"/>
+        <location filename="../ui_templates/mainWindow.ui" line="834"/>
+        <location filename="../mainwindow.cpp" line="5985"/>
         <source>Quit</source>
         <translation>Beenden</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="837"/>
+        <location filename="../ui_templates/mainWindow.ui" line="846"/>
         <source>&amp;Full screen</source>
         <translation>&amp;Vollbildmodus</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="840"/>
-        <location filename="../ui_templates/mainWindow.ui" line="843"/>
+        <location filename="../ui_templates/mainWindow.ui" line="849"/>
+        <location filename="../ui_templates/mainWindow.ui" line="852"/>
         <source>Switch to full screen</source>
         <translation>In den Vollbildmodus wechseln</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="846"/>
+        <location filename="../ui_templates/mainWindow.ui" line="855"/>
         <source>F9</source>
         <translation>F9</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="858"/>
+        <location filename="../ui_templates/mainWindow.ui" line="867"/>
         <source>Display settings</source>
         <translation>Anzeige-Einstellungen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="866"/>
+        <location filename="../ui_templates/mainWindow.ui" line="875"/>
         <source>Help</source>
         <translation>Hilfe</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="869"/>
+        <location filename="../ui_templates/mainWindow.ui" line="878"/>
         <source>F1</source>
         <translation>F1</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="874"/>
+        <location filename="../ui_templates/mainWindow.ui" line="883"/>
         <source>&amp;About ...</source>
         <translation>&amp;Über...</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="877"/>
+        <location filename="../ui_templates/mainWindow.ui" line="886"/>
         <source>About</source>
         <translation>Über</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="886"/>
+        <location filename="../ui_templates/mainWindow.ui" line="895"/>
         <source>Set unique</source>
         <translation>Einheitlich machen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="889"/>
-        <location filename="../ui_templates/mainWindow.ui" line="892"/>
+        <location filename="../ui_templates/mainWindow.ui" line="898"/>
+        <location filename="../ui_templates/mainWindow.ui" line="901"/>
         <source>Set a unique color</source>
         <translation>Einheitliche Farbe setzen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="895"/>
+        <location filename="../ui_templates/mainWindow.ui" line="904"/>
         <source>Alt+C</source>
         <translation>Alt+C</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="900"/>
+        <location filename="../ui_templates/mainWindow.ui" line="909"/>
         <source>Height Ramp</source>
         <translation>Höhen-Keil</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="903"/>
-        <location filename="../ui_templates/mainWindow.ui" line="906"/>
+        <location filename="../ui_templates/mainWindow.ui" line="912"/>
+        <location filename="../ui_templates/mainWindow.ui" line="915"/>
         <source>Apply a color ramp along X, Y or Z</source>
         <translation>Farbkeil entlang X, Y oder Z anwenden</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="915"/>
-        <location filename="../ui_templates/mainWindow.ui" line="941"/>
+        <location filename="../ui_templates/mainWindow.ui" line="924"/>
+        <location filename="../ui_templates/mainWindow.ui" line="950"/>
         <source>Compute</source>
         <translation>Berechnen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="918"/>
-        <location filename="../ui_templates/mainWindow.ui" line="921"/>
+        <location filename="../ui_templates/mainWindow.ui" line="927"/>
+        <location filename="../ui_templates/mainWindow.ui" line="930"/>
         <source>Compute unsigned normals (least squares approx.)</source>
         <translation>Vorzeichenlose Normalen berechnen (kleinste Quadrate approximiert)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="926"/>
+        <location filename="../ui_templates/mainWindow.ui" line="935"/>
         <source>Invert</source>
         <translation>Umkehren</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="929"/>
-        <location filename="../ui_templates/mainWindow.ui" line="932"/>
+        <location filename="../ui_templates/mainWindow.ui" line="938"/>
+        <location filename="../ui_templates/mainWindow.ui" line="941"/>
         <source>Invert normals</source>
         <translation>Normalen umkehren</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="944"/>
-        <location filename="../ui_templates/mainWindow.ui" line="947"/>
+        <location filename="../ui_templates/mainWindow.ui" line="953"/>
+        <location filename="../ui_templates/mainWindow.ui" line="956"/>
         <source>Compute octree</source>
         <translation>Oktree berechnen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="965"/>
+        <location filename="../ui_templates/mainWindow.ui" line="974"/>
         <source>F8</source>
         <translation>F8</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="973"/>
+        <location filename="../ui_templates/mainWindow.ui" line="982"/>
         <source>Cl&amp;ose</source>
         <translation>&amp;Schliessen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="976"/>
+        <location filename="../ui_templates/mainWindow.ui" line="985"/>
         <source>Ctrl+F4</source>
         <translation>Strg+F4</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="981"/>
+        <location filename="../ui_templates/mainWindow.ui" line="990"/>
         <source>Close &amp;All</source>
         <translation>&amp;Alle Schliessen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="986"/>
+        <location filename="../ui_templates/mainWindow.ui" line="995"/>
         <source>&amp;Tile</source>
         <translation>&amp;Kachel</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="991"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1000"/>
         <source>&amp;Cascade</source>
         <translation>&amp;Kaskade</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="996"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1005"/>
         <source>Pre&amp;vious</source>
         <translation>Vor&amp;heriges</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1001"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1010"/>
         <source>Ne&amp;xt</source>
         <translation>Nä&amp;chstes</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1006"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1015"/>
         <source>New</source>
         <translation>Neu</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1009"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1018"/>
         <source>Ctrl+F3</source>
         <translation>Strg+F3</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1018"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1027"/>
         <source>Clone</source>
         <translation>Duplizieren</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1021"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1030"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Clone the selected entities&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;(yes Claire ... these are Nyan sheep!)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Klonen Sie die ausgewählten Objekte&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;(ja Claire ... das sind Nyan-Schafe!)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1030"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1039"/>
         <source>Merge</source>
         <translation>Vereinigen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1033"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1042"/>
         <source>Merge multiple clouds</source>
         <translation>Mehrere Punktwolken vereinigen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1042"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1225"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1051"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1234"/>
         <source>Delete</source>
         <translation>Löschen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1045"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1054"/>
         <source>Del</source>
         <translation>Entf</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1057"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1066"/>
         <source>Fine registration (ICP)</source>
         <translation>Fein-Registrierung (ICP)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1060"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1063"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1069"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1072"/>
         <source>Finely registers already (roughly) aligned entities (clouds or meshes)</source>
         <translation>Feinregistrierung von bereits (grob) ausgerichteten Objekten (Punktwolken oder Gitternetze)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1072"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1081"/>
         <source>Cloud/Cloud Dist.</source>
         <translation>Punktwolken/Punktwolken-Abstand</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1075"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1078"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1084"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1087"/>
         <source>Compute cloud/cloud distance</source>
         <translation>Punktwolken/Punktwolken-Abstand berechnen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1087"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1096"/>
         <source>Cloud/Mesh Dist</source>
         <translation>Punktwolken/Netz-Abstand</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1090"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1093"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1099"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1102"/>
         <source>Compute cloud/mesh distance</source>
         <translation>Punktwolken/Netz-Abstand berechnen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1102"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1111"/>
         <source>Local Statistical test</source>
         <translation>Lokaler Statistiktest</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1105"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1108"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1114"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1117"/>
         <source>Apply a local statistical test to separate noise from true differences</source>
         <translation>Wenden Sie einen lokalen statistischen Test an, um Rauschen von echten Unterschieden zu trennen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1117"/>
-        <source>Sample Points</source>
-        <translation>Punkte abtasten</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1120"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1123"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1129"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1132"/>
         <source>Sample points on a mesh</source>
         <translation>Punkte auf einem Netz abtasten</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1132"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1141"/>
         <source>Label Connected Comp.</source>
         <translation>Beschriftung verbundener Komponenten</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1135"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1138"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1144"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1147"/>
         <source>Label connected components</source>
         <translation>Beschriftung verbundener Komponenten</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1147"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1156"/>
         <source>Segment</source>
         <translation>Abschnitt</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1150"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1159"/>
         <source>T</source>
         <translation>T</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1171"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1180"/>
         <source>Show histogram</source>
         <translation>Zeige Histogramm</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1180"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1189"/>
         <source>Compute stat. params</source>
         <translation>Statistische Parameter berechnen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1183"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1186"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2585"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2588"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1192"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1195"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2594"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2597"/>
         <source>Fits a statistical model on the active scalar field</source>
         <translation>Ein statistisches Modell auf dem aktiven Skalaren Feld einpassen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1195"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1204"/>
         <source>Filter By Value</source>
         <translation>Filter nach Wert</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1198"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1201"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1207"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1210"/>
         <source>Filter points by value</source>
         <translation>Filter Punkte nach Wert</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1210"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1219"/>
         <source>Gaussian filter</source>
         <translation>Gauß-Filter</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1213"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1216"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1222"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1225"/>
         <source>Compute gaussian filter</source>
         <translation>Gauß-Filter berechnen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1228"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1237"/>
         <source>Delete Scalar Field</source>
         <translation>Skalares Feld löschen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1231"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1234"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1240"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1243"/>
         <source>Delete current scalar field</source>
         <translation>Aktuelles Skalares Feld löschen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1243"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1252"/>
         <source>Arithmetic</source>
         <translation>Arithmetik</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1246"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1255"/>
         <source>SF arithmetic</source>
         <translation>SF-Arithmetik</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1249"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1252"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1258"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1261"/>
         <source>Add, subtract, multiply or divide two scalar fields</source>
         <translation>Addiere, subtrahiere, multipliziere oder teile zwei Skalare Felder</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1257"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1266"/>
         <source>Colorize</source>
         <translation>Einfärben</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1260"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1263"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1269"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1272"/>
         <source>Colorize entity (lightness values are unchanged)</source>
         <translation>Entität einfärben (Helligkeitswerte werden nicht verändert)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1268"/>
-        <location filename="../ui_templates/mainWindow.ui" line="3069"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1277"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3078"/>
         <source>Smooth</source>
         <translation>Glätten</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1271"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1274"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1280"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1283"/>
         <source>Smooth mesh scalar field</source>
         <translation>Glätte das Skalare Feld des Netzes</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1279"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1288"/>
         <source>Enhance</source>
         <translation>Verbessern</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1282"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1285"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1291"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1294"/>
         <source>Enhance Scalar Field</source>
         <translation>Skalares Feld verbessern</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1294"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1309"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1303"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1318"/>
         <source>Clear</source>
         <translation>Löschen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1297"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1300"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1306"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1309"/>
         <source>Clear colors</source>
         <translation>Farben löschen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1312"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1315"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1321"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1324"/>
         <source>Delete normals</source>
         <translation>Normalen löschen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1320"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1329"/>
         <source>Resample</source>
         <translation>Neu Abtasten</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1323"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1326"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1332"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1335"/>
         <source>Resample entity with octree</source>
         <translation>Taste die Entität mit einem Oktree neu ab</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1331"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1340"/>
         <source>Delaunay 2.5D (XY plane)</source>
         <translation>Delaunay 2,5D (XY-Ebene)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1334"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1337"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1343"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1346"/>
         <source>Compute &quot;2D1/2&quot; mesh by projecting points on the XY plane</source>
         <translation>Berechne das 2.5D-Netz durch Projektion der Punkte auf die XY-Ebene</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1342"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1351"/>
         <source>Delaunay 2.5D (best fitting plane)</source>
         <translation>Delaunay 2,5D (Best-angepasste-Ebene)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1345"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1348"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1354"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1357"/>
         <source>Compute &quot;2D1/2&quot; mesh by projecting points on the (least squares) best fitting plane</source>
         <translation>Berechne das 2.5D-Netz durch Projektion der Punkte auf die best-angepasste (kleinste Quadrate) Ebene</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1353"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1362"/>
         <source>Measure surface</source>
         <translation>Oberfläche messen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1356"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1359"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1365"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1368"/>
         <source>Measure mesh surface</source>
         <translation>Netz-Oberfläche messen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1364"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1373"/>
         <source>Closest Point Set</source>
         <translation>Nächste Punkt-Sammlung</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1367"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1370"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1376"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1379"/>
         <source>Compute closest point set</source>
         <translation>Nächste Punkt-Sammlung berechnen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1375"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1384"/>
         <source>Delete all (!)</source>
         <translation>Alles löschen (!)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1378"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1381"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1387"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1390"/>
         <source>Delete all scalar fields</source>
         <translation>Alle Skalaren Felder löschen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1386"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1395"/>
         <source>Multiply</source>
         <translation>Multiplizieren</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1389"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1392"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1398"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1401"/>
         <source>Multiply scalar field by a constant</source>
         <translation>Skalares Feld mit einer Konstanten multiplizieren</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1400"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1409"/>
         <source>K-Means</source>
         <translation>K-Mittelwerte</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1403"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1406"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1412"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1415"/>
         <source>classify point (K-Means applied on a scalar field)</source>
         <translation>Punkte klassifizieren (K-Mittelwert auf ein Skalares Feld angewendet)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1414"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1423"/>
         <source>Front propagation</source>
         <translation>Ausbreitungsfront</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1417"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1420"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1426"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1429"/>
         <source>Classify points by propagating a front on a scalar field</source>
         <translation>Punkte durch Ausbreitung einer Front auf einem Skalarfeld klassifizieren</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1425"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1434"/>
         <source>Multiply/Scale</source>
         <translation>Multiplizieren/Skalieren</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1428"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1431"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1437"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1440"/>
         <source>Multiply coordinates (separately)</source>
         <translation>Koordinaten (separat) multiplizieren</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1436"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1445"/>
         <source>Match bounding-box centers</source>
         <translation>Begrenzungs-Box-Zentrum anpassen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1439"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1442"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1448"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1451"/>
         <source>Synchronize selected entities bbox centers</source>
         <translation>Ausgewählte Entitäten synchronisieren Bounding-Box-Zentren</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1447"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1456"/>
         <source>Unroll</source>
         <translation>Abwickeln</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1450"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1453"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1459"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1462"/>
         <source>Unroll entity on a cylinder or a cone</source>
         <translation>Entität auf einem Zylinder oder Kegel abwickeln</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1462"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1471"/>
         <source>Gradient</source>
         <translation>Gradient</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1471"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1480"/>
         <source>Zoom &amp; Center</source>
         <translation>Zoomen und Zentrieren</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1474"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1483"/>
         <source>ZoomCenter</source>
         <translation>Zoom-Zentrum</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1477"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1480"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1486"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1489"/>
         <source>Zoom and center on selected entities (Z)</source>
         <translation>Auf gewählte Entitäten Zoomen und Zentrieren</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1483"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1492"/>
         <source>Z</source>
         <translation>Z</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1492"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1501"/>
         <source>Top View</source>
         <translation>Ansicht Oben</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1495"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1498"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1504"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1507"/>
         <source>Set top view</source>
         <translation>Ansicht Oben setzen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1513"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1522"/>
         <source>Front View</source>
         <translation>Ansicht Vorne</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1516"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1519"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1525"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1528"/>
         <source>Set front view</source>
         <translation>Ansicht Vorne setzen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1534"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1543"/>
         <source>Back View</source>
         <translation>Ansicht Hinten</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1537"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1540"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1546"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1549"/>
         <source>Set back view</source>
         <translation>Ansicht Hinten setzen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1555"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1564"/>
         <source>Left Side View</source>
         <translation>Ansicht Links</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1558"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1561"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1567"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1570"/>
         <source>Set left side view</source>
         <translation>Ansicht Links setzen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1576"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1585"/>
         <source>Right Side View</source>
         <translation>Ansicht Rechts</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1579"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1582"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1588"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1591"/>
         <source>Set right side view</source>
         <translation>Ansicht Rechts setzen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1597"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1606"/>
         <source>Bottom View</source>
         <translation>Ansicht Unten</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1600"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1603"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1609"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1612"/>
         <source>Set bottom view</source>
         <translation>Ansicht Unten setzen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1620"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1629"/>
         <source>Main</source>
         <translation>Haupt</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1623"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1626"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1632"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1635"/>
         <source>Show/hide main toolbar</source>
         <translation>Haupt-Werkzeugleiste anzeigen/verbergen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1637"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1646"/>
         <source>View</source>
         <translation>Ansicht</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1640"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1643"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1649"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1652"/>
         <source>Show/hide view toolbar</source>
         <translation>Ansichts-Werkzeugleiste anzeigen/verbergen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1657"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1660"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1666"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1669"/>
         <source>Show/hide scalar fields toolbar</source>
         <translation>Skalare Felder-Werkzeugleiste anzeigen/verbergen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1665"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1674"/>
         <source>Toggle Sun Light</source>
         <translation>Sonnenlicht umschalten</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1668"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1671"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1677"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1680"/>
         <source>Toggle sun light (active window)</source>
         <translation>Sonnenlicht umschalten (aktives Fenster)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1674"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1683"/>
         <source>F6</source>
         <translation>F6</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1682"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1691"/>
         <source>Toggle Custom Light</source>
         <translation>Benutzerdefiniertes Licht umschalten</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1685"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1688"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1694"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1697"/>
         <source>Toggle custom light (active window)</source>
         <translation>Benutzerdefiniertes Licht umschalten (aktives Fenster)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1691"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1700"/>
         <source>F7</source>
         <translation>F7</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1703"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1712"/>
         <source>Global Zoom</source>
         <translation>Allgemeiner Zoom</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1712"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1721"/>
         <source>Toggle Centered Perspective</source>
         <translation>Zentrierte Perspektive umschalten</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1715"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1718"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1724"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1727"/>
         <source>Toggle perspective view (centered on objects) in current window</source>
         <translation>Perspektive umschalten im aktuellen Fenster (auf Objekte zentriert)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1721"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1730"/>
         <source>F3</source>
         <translation>F3</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1733"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1742"/>
         <source>Toggle Viewer Based Perspective</source>
         <translation>Betrachter-basierte Perspektive umschalten</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1736"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1739"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1745"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1748"/>
         <source>Toggle perspective view (centered on viewer) in current window</source>
         <translation>Perspektive umschalten im aktuellen Fenster (auf Anzeige zentriert)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1742"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1751"/>
         <source>F4</source>
         <translation>F4</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1754"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1763"/>
         <source>Refresh</source>
         <translation>Aktualisieren</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1757"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1766"/>
         <source>F5</source>
         <translation>F5</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1765"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1774"/>
         <source>Test Frame Rate</source>
         <translation>Frame-Rate testen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1770"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1779"/>
         <source>Render to File</source>
         <translation>In Datei rendern</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2373"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2382"/>
         <source>X</source>
         <translation>X</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2388"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2397"/>
         <source>From Scalar fields</source>
         <translation>Aus Skalarem Feld</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2534"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2543"/>
         <source>E</source>
         <translation>E</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2975"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2984"/>
         <source>Lock rotation about arbitrary axis</source>
         <translation>Drehung auf die Querachse einschränken</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2980"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1126"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2989"/>
         <source>Sample points</source>
         <translation>Punkte abtasten</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2985"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2994"/>
         <source>None (English)</source>
         <translation>Keine (Englisch)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2990"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2999"/>
         <source>Compute geometric features</source>
         <translation>Geometrische Merkmale berechnen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2993"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3002"/>
         <source>Compute geometric features (density, curvature, roughness, etc.)</source>
         <translation>Geometrische Merkmale berechnen (Dichte, Krümmung, Rauheit, etc.)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2998"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3007"/>
         <source>Move bounding-box min corner to origin</source>
         <translation>Verschiebe die kleinste Ecke des Begrenzungsrahmens auf den Ursprung</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3001"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3010"/>
         <source>Move the bounding-box min corner to the origin</source>
         <translation>Verschiebe die kleinste Ecke des Begrenzungsrahmens auf den Ursprung</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3006"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3015"/>
         <source>Move bounding-box max corner to origin</source>
         <translation>Verschiebe die größte Ecke des Begrenzungsrahmens auf den Ursprung</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3009"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3018"/>
         <source>Move the bounding-box max corner to the origin</source>
         <translation>Verschiebe die größte Ecke des Begrenzungsrahmens auf den Ursprung</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3014"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3023"/>
         <source>Move bounding-box center to origin</source>
         <translation>Verschiebe den Mittelpunkt des Begrenzungsrahmens auf den Ursprung</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3017"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3026"/>
         <source>Move the bounding-box center to the origin</source>
         <translation>Verschiebe den Mittelpunkt des Begrenzungsrahmens auf den Ursprung</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3022"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3031"/>
         <source>Flip</source>
         <translation>Vertauschen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3025"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3034"/>
         <source>Flip the selected plane</source>
         <translation>Vertausche die gewählte Ebene</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3030"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3039"/>
         <source>Compare</source>
         <translation>Vergleichen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3033"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3042"/>
         <source>Compare two planes (angle + distance)</source>
         <translation>Vergleiche zwei Ebenen (Winkel + Abstand)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3038"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3047"/>
         <source>Flip triangles</source>
         <translation>Dreiecke spiegeln</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3041"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3050"/>
         <source>Flip triangles (if vertices are ordered in the non-direct order)</source>
         <translation>Dreiecke spiegeln (wenn Scheitelpunkte in nicht direkter Reihenfolge angeordnet sind)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3050"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3059"/>
         <source>Cloud/Primitive Dist</source>
         <translation>Punktwolken/einfacher Abstand</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3053"/>
-        <location filename="../ui_templates/mainWindow.ui" line="3056"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3062"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3065"/>
         <source>Compute cloud/Primitive distance</source>
         <translation>Punktwolken/einfacher Abstand berechnen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3061"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3070"/>
         <source>Export normals to SF(s)</source>
         <translation>Exportiere Normalen in SF(s)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3064"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3073"/>
         <source>Export normals to one or several scalar fields</source>
         <translation>Exportiere Normalen in ein oder mehrere Skalare Felder</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1784"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1793"/>
         <source>Convert to RGB</source>
         <translation>In RGB umwandeln</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1787"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1796"/>
         <source>Convert current scalar field to RGB colors</source>
         <translation>Konvertiere aktuelles Skalares Feld nach RGB-Farben</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1792"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1801"/>
         <source>Create/show depth buffer</source>
         <translation>Erzeuge/Zeige Tiefenspeicher</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1797"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1806"/>
         <source>Export depth buffer</source>
         <translation>Exportiere Tiefenspeicher</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1811"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1820"/>
         <source>Rasterize (and contour plot)</source>
         <translation>Rastern (und Konturplotten)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1814"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1823"/>
         <source>Convert a cloud to 2D raster (and optionally generate the contour plot)</source>
         <translation>Konvertiert eine Punktwolke in ein 2D-Raster (und erstellt optional einen Konturplot)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1819"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1828"/>
         <source>Auto align clouds</source>
         <translation>Punktwolken automatisch Ausrichten</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1822"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1825"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1831"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1834"/>
         <source>Tries to automatically register (roughly) two points clouds</source>
         <translation>Versucht die (grobe) automatische Registrierung von zwei Punktwolken</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1834"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1843"/>
         <source>Subsample</source>
         <translation>Teilabtastung</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1837"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1840"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1846"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1849"/>
         <source>Subsample a point cloud</source>
         <translation>Punktwolke teilweise abtasten</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1848"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1857"/>
         <source>Load shader</source>
         <translation>Schattierer laden</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1924"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2890"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1933"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2899"/>
         <source>Fit a plane on a set of point</source>
         <translation>Ebene an Hand von Punkten anpassen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2528"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2537"/>
         <source>Export cloud info</source>
         <translation>Punktwolken-Informationen exportieren</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2531"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2540"/>
         <source>Export cloud info to a CSV file (name, size, barycenter, scalar fields info, etc.)</source>
         <translation>Punktwolken-Informationen in eine CSV-Datei exportieren (Name, Größe, Schwerpunkt, Skalare Felder-Informationen, etc.)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2557"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2566"/>
         <source>Reset all GUI element positions</source>
         <translation>Anordnung der Elemente der grafischen Benutzeroberfläche zurücksetzen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2560"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2569"/>
         <source>Reset all GUI element positions (after restart)</source>
         <translation>Anordnung der Elemente der grafischen Benutzeroberfläche zurücksetzen (nach Neustart)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2623"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2632"/>
         <source>Lock rotation about an axis</source>
         <translation>Drehung um eine Achse einschränken</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2626"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2635"/>
         <source>Lock 3D camera rotation about an axis</source>
         <translation>Drehung der Kamera um eine Achse einschränken</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2662"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2671"/>
         <source>Extract sections / Unfold</source>
         <translation>Schnitte extrahieren/abwickeln</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2665"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2674"/>
         <source>Extract cloud sections along polylines or unfold a cloud along a polyline</source>
         <translation>Punktwolken entlang von Polylinien extrahieren oder eine Punktwolke entlang einer Polylinie auffalten</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2725"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2734"/>
         <source>Distance map</source>
         <translation>Abstands-Karte</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2805"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2814"/>
         <source>Convert to grey scale</source>
         <translation>In Graustufen umwandeln</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2808"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2817"/>
         <source>Convert RGB colors to grey scale colors</source>
         <translation>RGB-Farben in Grauwerte umwandeln</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2817"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2826"/>
         <source>Trace Polyline</source>
         <translation>Polylinie erzeugen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2820"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2829"/>
         <source>Trace a polyline by point picking</source>
         <translation>Polylinie erzeugen durch Punkt-Auswahl</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2823"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2832"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3114"/>
         <source>Ctrl+P</source>
         <translation>Strg+P</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2831"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2840"/>
         <source>Enable Qt warnings in Console</source>
         <translation>Qt-Warnungen in der Konsole aktivieren</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2836"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2845"/>
         <source>Global Shift settings</source>
         <translation>Einstellungen der globalen Transformations-Parameter</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2839"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2848"/>
         <source>Set Global Shift &amp; Scale mechanism parameters</source>
         <translation>Globale Verschiebungs- &amp; Maßstabs-Parameter setzen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2847"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2856"/>
         <source>Camera link</source>
         <translation>Kamera-Verbindung</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2850"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2859"/>
         <source>Link the cameras of all 3D views
 (so that they all move in the same way and at the same time)</source>
         <translation>Verknüpfen Sie die Kameras aller 3D-Ansichten
 (damit sie sich alle auf die gleiche Weise und zur gleichen Zeit bewegen)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2856"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2865"/>
         <source>2D Waveform viewer</source>
         <translation>2D-Wellenform-Ansicht</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2864"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2873"/>
         <source>Create a plane</source>
         <translation>Erzeuge eine Ebene</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2872"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2881"/>
         <source>Edit the plane parameters</source>
         <translation>Ebenen-Parameter bearbeiten</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2877"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2886"/>
         <source>Create surface between two polylines</source>
         <translation>Fläche zwischen zwei Polylinien erzeugen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2882"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2891"/>
         <source>Surface between 2 polylines</source>
         <translation>Fläche zwischen zwei Polylinien</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2895"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2904"/>
         <source>Enhance with intensities</source>
         <translation>Mit Intensitäten verbessern</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2900"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2909"/>
         <source>Mesh scan grids</source>
         <translation>Scan-Gitter vermaschen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2903"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2912"/>
         <source>Mesh scan grids (structured point clouds)</source>
         <translation>Scan-Gitter vermaschen (strukturierte Punktwolke)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2918"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2927"/>
         <source>Auto-pick rotation center</source>
         <translation>Drehzentrum automatisch wählen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2921"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2930"/>
         <source>Auto-pick rotation center (rotation is always placed at the middle of the screen if possible)</source>
         <translation>Drehzentrum automatisch wählen (Drehung wird immer um die Mitte des Bildschirms ausgeführt, sofern möglich)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2924"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2933"/>
         <source>Shift+P</source>
         <translation>Umschalt+P</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2935"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2944"/>
         <source>Show cursor coordinates</source>
         <translation>Mauszeiger-Koordinaten anzeigen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2938"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2947"/>
         <source>Show cursor coordinates (2D and 3D if possible)</source>
         <translation>Mauszeiger-Koordinaten anzeigen (2D und 3D, wenn möglich)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2943"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2952"/>
         <source>Delete scan grids</source>
         <translation>Scan-Gitter löschen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2946"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2955"/>
         <source>Delete the underlying scan grids</source>
         <translation>Die darunterliegenden Scan-Gitter löschen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2951"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2960"/>
         <source>Compress FWF data</source>
         <translation>FWF-Daten komprimieren</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2954"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2963"/>
         <source>Compress the associated FWF data (maybe interesting after interactive segmentation for instance)</source>
         <translation>Komprimieren der zugehörigen FWF-Daten (vielleicht interessant, z. B. nach interaktiver Segmentierung)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2962"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2971"/>
         <source>Interpolate scalar-field(s) from another cloud or mesh</source>
         <translation>Interpoliere Skalare(s) Feld(er) aus einer anderen Punktwolke oder Netz</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2967"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2976"/>
         <source>Export plane info</source>
         <translation>Ebenen-Informationen exportieren</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2970"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2979"/>
         <source>Export plane info to a CSV file (name, width, height, center, normal, dip and dip direction, etc.)</source>
         <translation>Ebenen-Informationen in eine CSV-Datei exportieren (Name, Breite, Höhe, Zentrum, Normalen, Neigung und Neigungsrichtung, etc.)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1856"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1865"/>
         <source>Delete shader</source>
         <translation>Schattierer löschen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1865"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1874"/>
         <source>Point picking</source>
         <translation>Punkt-Auswahl</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1868"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1871"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1877"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1880"/>
         <source>Point picking (point information, distance between 2 points, angles between 3 points, etc.)</source>
         <translation>Punkt-Auswahl (Punkt-Informationen, Abstand zwischen zwei Punkten, Winkel zwischen drei Punkten, etc.)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1876"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1885"/>
         <source>Bounding box P.C.A. fit</source>
         <translation>Begrenzungs-Rahmen P. C. A.-Einpassung</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1879"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1882"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1888"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1891"/>
         <source>Makes BB fit principal components (rotates entity!)</source>
         <translation>Begrenzungsrahmen auf die Hauptkomponenten einpassen (dreht Entität!)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1891"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1900"/>
         <source>Camera settings</source>
         <translation>Kamera-Einstellungen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1900"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1909"/>
         <source>Point list picking</source>
         <translation>Punktlisten-Auswahl</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1903"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1912"/>
         <source>Pick several points (and export them to ASCII file, a new cloud, etc.)</source>
         <translation>Verschiedene Punkte auswählen (und exportiere diese in eine ASCII-Datei, neue Punktwolke, etc.)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1908"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1917"/>
         <source>Curvature</source>
         <translation>Krümmung</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1916"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1925"/>
         <source>Roughness</source>
         <translation>Rauheit</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="305"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1921"/>
+        <location filename="../ui_templates/mainWindow.ui" line="306"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1930"/>
         <source>Plane</source>
         <translation>Surface</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="322"/>
+        <location filename="../ui_templates/mainWindow.ui" line="323"/>
+        <location filename="../mainwindow.cpp" line="9253"/>
         <source>Polyline</source>
         <translation>Polylinie</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1162"/>
+        <location filename="../ui_templates/mainWindow.ui" line="330"/>
+        <source>Cloud</source>
+        <translation type="unfinished">Punktwolke</translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1171"/>
         <source>Translate/Rotate</source>
         <translation>Translation/Rotation</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1775"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1784"/>
         <source>About Plugins...</source>
         <translation>Über Plugins...</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1929"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1938"/>
         <source>Rename</source>
         <translation>Umbenennen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1934"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1943"/>
         <source>2.5D quadric</source>
         <translation>2,5D-Quadrik</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1939"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1948"/>
+        <location filename="../mainwindow.cpp" line="8256"/>
         <source>SNE test</source>
         <translation>SNE-Test</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1942"/>
-        <location filename="../ui_templates/mainWindow.ui" line="1945"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1951"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1954"/>
         <source>Spherical Neighbourhood Extraction test</source>
         <translation>Sphärischer-Nachbarschafts-Extraktions-Test</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1950"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1959"/>
         <source>Visibility</source>
         <translation>Sichtbarkeit</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1953"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1962"/>
         <source>Toggle selected entities visibility (recursive)</source>
         <translation>Ausgewählte Entitäten-Sichtbarkeit (rekursiv) umschalten</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1956"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1965"/>
         <source>V</source>
         <translation>V</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1967"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1976"/>
         <source>Toggle selected entities normals (recursive)</source>
         <translation>Ausgewählte Entitäten-Normalen (rekursiv) umschalten</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1970"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1979"/>
         <source>N</source>
         <translation>N</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1981"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1990"/>
         <source>Toggle selected entities colors (recursive)</source>
         <translation>Ausgewählte Entitäten-Farben (rekursiv) umschalten</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1984"/>
+        <location filename="../ui_templates/mainWindow.ui" line="1993"/>
         <source>C</source>
         <translation>C</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1992"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2001"/>
         <source>SF</source>
         <translation>SF</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1995"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2004"/>
         <source>Toggle selected entities SF (recursive)</source>
         <translation>Ausgewählte Skalare Felder der Entitäten (rekursiv) umschalten</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1998"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2007"/>
         <source>S</source>
         <translation>S</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2006"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2015"/>
         <source>Apply transformation</source>
         <translation>Transformation anwenden</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2009"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2018"/>
         <source>Apply rotation and/or translation</source>
         <translation>Drehung und/ oder Verschiebung anwenden</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2012"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2021"/>
         <source>Ctrl+T</source>
         <translation>Strg+T</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2017"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2026"/>
         <source>Smooth (Laplacian)</source>
         <translation>Glätten (Laplace)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2022"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2031"/>
         <source>HSV colors</source>
         <translation>HSV-Farben</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2031"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2040"/>
         <source>Save viewport as object</source>
         <translation>Speichere Ansichtspunkt als Objekt</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2034"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2043"/>
         <source>Ctrl+V</source>
         <translation>Strg+V</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2046"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2055"/>
         <source>Pick rotation center</source>
         <translation>Drehpunkt wählen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2049"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2058"/>
         <source>P</source>
         <translation>P</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2057"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2066"/>
         <source>Compute Ranges</source>
         <translation>Berechnen der Bereiche</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2060"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2069"/>
         <source>Compute ranges from sensor</source>
         <translation>Berechnen der Bereiche vom Sensor</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2069"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2078"/>
         <source>Bilateral filter</source>
         <translation>Beidseitiger Filter</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2072"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2081"/>
         <source>Compute bilateral filter</source>
         <translation>Beidseitigen Filter berechnen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2077"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2086"/>
         <source>Compute Scattering Angles</source>
         <translation>Berechnen von Streuwinkeln</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2080"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2089"/>
         <source>Compute laser beam scattering angle for a cloud with normals</source>
         <translation>Berechnen des Streuwinkels des Laserstrahls für eine Punktwolke mit Normalen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2085"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2094"/>
         <source>Toggle color scale</source>
         <translation>Farbskala umschalten</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2088"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2091"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2097"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2100"/>
         <source>Toggle active scalar field color scale</source>
         <translation>Farbskala des aktiven Skalaren Feldes umschalten</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2094"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2103"/>
         <source>Shift+C</source>
         <translation>Umschalt+C</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2102"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2111"/>
         <source>Show previous SF</source>
         <translation>Vorheriges SF anzeigen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2105"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2108"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2114"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2117"/>
         <source>Show previous scalar field for active entity</source>
         <translation>Zeige das vorherige Skalare Feld für die aktive Entität</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2111"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2120"/>
         <source>Shift+Up</source>
         <translation>Umschalt+Aufwärts</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2119"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2128"/>
         <source>Show next SF</source>
         <translation>Nächstes SF anzeigen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2122"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2125"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2131"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2134"/>
         <source>Show next scalar field for active entity</source>
         <translation>Zeige das nächste Skalare Feld für die aktive Entität</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2128"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2137"/>
         <source>Shift+Down</source>
         <translation>Umschalt+Abwärts</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2137"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2146"/>
         <source>Align (point pairs picking)</source>
         <translation>Ausrichten (Punkte-Paar wählen)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2140"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2143"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2149"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2152"/>
         <source>Aligns two clouds by picking (at least 4) equivalent point pairs</source>
         <translation>Zwei Punktwolken mit (mindestens) vier Punktpaaren ausrichten</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2152"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2161"/>
         <source>Add constant SF</source>
         <translation>Konstantes SF hinzufügen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2157"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2166"/>
         <source>Export coordinate(s) to SF(s)</source>
         <translation>Koordinate(n) in SF(s) exportieren</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2160"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2169"/>
         <source>Export X, Y and/or Z coordinates to scalar field(s)</source>
         <translation>Exportiere die X-, Y- und/oder Z-Koordinate in ein Skalares Feld</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2165"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2174"/>
         <source>Subdivide</source>
         <translation>Unterteilen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2170"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2179"/>
         <source>3D name</source>
         <translation>3D-Name</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2173"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2182"/>
         <source>Toggle selected entities 3D name display (recursive)</source>
         <translation>Ausgewählte Entitäten 3D-Namensanzeige umschalten (rekursiv)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2176"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2185"/>
         <source>D</source>
         <translation>D</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2188"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2197"/>
         <source>Primitive factory</source>
         <translation>Primitive Fabrik</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2193"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2202"/>
         <source>Materials/textures</source>
         <translation>Materialien/Texturen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2196"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2205"/>
         <source>Toggle selected entities materials/textures (recursive)</source>
         <translation>Materialien/Texturen der ausgewählten Entitäten umschalten</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2199"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2208"/>
         <source>M</source>
         <translation>M</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2211"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2220"/>
         <source>Orthographic projection</source>
         <translation>Orthographische Projektion</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2214"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2217"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2223"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2226"/>
         <source>Set orthographic projection for current 3D View</source>
         <translation>Orthographische Projektion für aktuelle 3D-Ansicht setzen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2226"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2235"/>
         <source>Object-centered perspective</source>
         <translation>Objekt-zentrierte Perspektive</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2229"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2232"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2238"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2241"/>
         <source>Set object-centered perspective for current 3D View</source>
         <translation>Objekt-zentrierte Perspektive für aktuelle 3D-Ansicht setzen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2241"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2250"/>
         <source>Viewer-based perspective</source>
         <translation>Ansicht-basierte Perspektive</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2244"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2247"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2253"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2256"/>
         <source>Set viewer-based perspective for current 3D View</source>
         <translation>Ansicht-basierte Perspektive für aktuelle 3D-Ansicht setzen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2256"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2265"/>
         <source>Always visible</source>
         <translation>Immer sichtbar</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2259"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2262"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2268"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2271"/>
         <source>Pivot always visible</source>
         <translation>Pivot immer sichtbar</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2271"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2280"/>
         <source>Rotation only</source>
         <translation>Nur Drehung</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2274"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2277"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2283"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2286"/>
         <source>Pivot visible when rotating</source>
         <translation>Pivot bei Drehung sichtbar</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2286"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2295"/>
         <source>Never visible</source>
         <translation>Niemals sichtbar</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2289"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2292"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2298"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2301"/>
         <source>Pivot never visible</source>
         <translation>Pivot niemals sichtbar</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2301"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2310"/>
         <source>Iso 1</source>
         <translation>Iso 1</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2304"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2307"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2313"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2316"/>
         <source>Set view to &apos;front&apos; isometric</source>
         <translation>Ansicht auf „vordere“ Isometrie setzen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2322"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2331"/>
         <source>Iso 2</source>
         <translation>Iso 2</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2325"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2328"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2334"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2337"/>
         <source>Set view to &apos;back&apos; isometric</source>
         <translation>Ansicht auf „hintere“ Isometrie setzen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2343"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2352"/>
         <source>Convert texture/material to RGB</source>
         <translation>Materialien/Texturen nach RGB konvertieren</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2352"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2361"/>
         <source>Color Scales Manager</source>
         <translation>Farbskalen-Manager</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2355"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2364"/>
         <source>Open Color Scales Manager dialog</source>
         <translation>Farbskalen-Manager-Dialog öffnen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2367"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2370"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2376"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2379"/>
         <source>Cross Section</source>
         <translation>Querschnitt</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2378"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2387"/>
         <source>Edit global shift and scale</source>
         <translation>Globale Transformations-Parameter und den Maßstab bearbeiten</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2383"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2392"/>
         <source>Convert to Scalar field</source>
         <translation>In Skalares Feld umwandeln</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2393"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2402"/>
+        <location filename="../mainwindow.cpp" line="922"/>
         <source>Compute Kd-tree</source>
         <translation>Kd-Baum berechnen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2398"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2407"/>
         <source>test</source>
         <translation>Test</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2403"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2412"/>
         <source>Add point indexes as SF</source>
         <translation>Punkt-Indizes als Skalares Feld hinzufügen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2406"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2415"/>
         <source>Adds a scalar field with ordered integers for each point in the cloud</source>
         <translation>Fügt ein Skalares Feld mit geordneten Ganzzahlen für jeden Punkt in der Punktwolke hinzu</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2411"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2420"/>
         <source>2D polygon (facet)</source>
         <translation>2D-Polygon (Facette)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2416"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2425"/>
         <source>Adjust zoom</source>
         <translation>Zoom anpassen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2419"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2428"/>
         <source>Adjusts zoom with a given pixel/unit ratio (orthographic projection only)</source>
         <translation>Passt den Zoom mit einem bestimmten Pixel/Einheit-Verhältnis an (nur orthografische Projektion)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2424"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2433"/>
         <source>Set SF as coordinate(s)</source>
         <translation>Setze das SF als Koordinate(n)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2427"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2436"/>
         <source>Set SF as coordinate(s) (X, Y or Z)</source>
         <translation>Setze das SF als Koordinate(n) (X, Y oder Z)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2432"/>
-        <location filename="../mainwindow.cpp" line="9792"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2441"/>
+        <location filename="../mainwindow.cpp" line="10035"/>
         <source>Close all</source>
         <translation>Alles schliessen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2435"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2444"/>
         <source>Remove all entities currently loaded in the DB tree</source>
         <translation>Entfernt alle geladenen Entitäten aus dem DB-Baum</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2440"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2449"/>
         <source>Edit global scale</source>
         <translation>Globalen Maßstab bearbeiten</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2449"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2458"/>
         <source>View from sensor</source>
         <translation>Ansicht vom Sensor</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2454"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2463"/>
         <source>Find biggest inner rectangle (2D)</source>
         <translation>Größtes inneres Rechteck finden (2D)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2459"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2464"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2861"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2468"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2473"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2870"/>
         <source>Create</source>
         <translation>Erzeugen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2469"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2478"/>
         <source>Compute points visibility (with octree)</source>
         <translation>Sichtbarkeit der Punkte berechnen (mit Oktree)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2474"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2483"/>
         <source>Project Uncertainty</source>
         <translation>Projekt-Unsicherheit</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2479"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2488"/>
         <source>With Minimum Spanning Tree</source>
         <translation>Mit dem kleinstem aufspannenden Baum</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2484"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2493"/>
         <source>With Fast Marching</source>
         <translation>Mit schnellem Marsch</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2489"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2498"/>
         <source>CNE test</source>
         <translation>CNE-Test</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2492"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2495"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2501"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2504"/>
         <source>Cylindrical Neighbourhood Extraction test</source>
         <translation>Zylindrischer Nachbarschafts-Extraktionstest</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2500"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2509"/>
         <source>Approximate (dist. to nearest neighbor)</source>
         <translation>Annäherung (Abstand zum nächsten Nachbar)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2505"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2514"/>
         <source>Density</source>
         <translation>Dichte</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2508"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2517"/>
         <source>Compute density</source>
         <translation>Dichte berechnen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2513"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2522"/>
+        <location filename="../mainwindow.cpp" line="2783"/>
         <source>Remove duplicate points</source>
         <translation>Doppelte Punkte entfernen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2518"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2527"/>
         <source>Crop</source>
         <translation>Beschneiden</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2523"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2532"/>
         <source>Dip/Dip direction SFs</source>
         <translation>Neigung/Neigungsrichtung des SFs</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2539"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2959"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2548"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2968"/>
         <source>Interpolate from another entity</source>
         <translation>Aus einer anderen Entität interpolieren</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2542"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2551"/>
         <source>Interpolate colors from another entity (cloud or mesh) - color is taken from the nearest neighbor</source>
         <translation>Interpoliere die Farben aus einer anderen Entität (Punktwolke oder Netz) - die Farbe wird vom nächsten Nachbar genommen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2547"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2556"/>
         <source>Distance map to best-fit 3D quadric</source>
         <translation>Abstandskarte der am besten passenden 3D-Quadrik</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2552"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2561"/>
         <source>Levels</source>
         <translation>Ebenen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2565"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2574"/>
         <source>Convert to random RGB</source>
         <translation>In RGB-Zufallswerte umwandeln</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2570"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2579"/>
         <source>Noise filter</source>
         <translation>Rausch-Filter</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2573"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2582"/>
         <source>Noise filter (remove the points far from the - approximate - local surface)</source>
         <translation>Rausch-Filter (entferne Punkte, die weit von der - genährten - Oberfläche entfernt sind)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2582"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2591"/>
         <source>Compute stat. params (active SF)</source>
         <translation>Statistische Parameter berechnen (aktives SF)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2593"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2602"/>
         <source>Measure volume</source>
         <translation>Volumen messen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2598"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2607"/>
         <source>Flag vertices by type</source>
         <translation>Scheitelpunkte nach Typ kennzeichnen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2601"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2610"/>
         <source>Flag vertices by type: normal (0), border (1), non-manifold (2)</source>
         <translation>Scheitelpunkte nach Typ kennzeichnen: Normale (0), Kante (1), nicht verzweigt (2)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2606"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2615"/>
         <source>Activation (not recursive)</source>
         <translation>Aktivierung (nicht rekursiv)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2609"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2618"/>
         <source>Enable/disable selected entities (not recursive)</source>
         <translation>Ausgewählte Entitäten aktivieren/deaktivieren (nicht rekursiv)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2612"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2621"/>
         <source>A</source>
         <translation>A</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2629"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2638"/>
         <source>L</source>
         <translation>L</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2637"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2646"/>
         <source>Create cloud from selected entities centers</source>
         <translation>Punktwolke aus Zentren der gewählten Entitäten erzeugen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2642"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2651"/>
         <source>Compute best registration RMS matrix</source>
         <translation>Berechnen der besten Registrierungs-RMS-Matrix</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2645"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2654"/>
         <source>Computes the best registration between all couples among multiple entities and save the resulting RMS in a matrix (CSV) file</source>
         <translation>Die beste Registrierung zwischen allen Paaren unter mehreren Entitäten berechnen und den resultierenden RMS in einer Matrixdatei (CSV) speichern</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2650"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2659"/>
         <source>Enter bubble-view mode</source>
         <translation>Blasen-Ansichtsmodus aktivieren</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2653"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2662"/>
         <source>B</source>
         <translation>B</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2670"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2679"/>
         <source>Contour plot (polylines) to mesh</source>
         <translation>Konturplot (Polylinien) auf Netz</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2673"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2682"/>
         <source>Contour plot (set of polylines) to a 2.5D mesh</source>
         <translation>Konturplot (Mehrere Polylinien) auf ein 2,5D-Netz</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2682"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2691"/>
         <source>Level</source>
         <translation>Ebene</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2685"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2694"/>
         <source>Pick three points to make a cloud or mesh &apos;level&apos;</source>
         <translation>Drei Punkte für die Ausrichtung der Punktwolke oder des Netzes auswählen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2690"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2699"/>
+        <location filename="../mainwindow.cpp" line="9190"/>
         <source>Sphere</source>
         <translation>Kugel</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2693"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2702"/>
         <source>Fits a sphere on the selected cloud</source>
         <translation>Eine Kugel auf die ausgewählte Punktwolke einpassen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2698"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2707"/>
         <source>Match scales</source>
         <translation>Massstäbe angleichen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2703"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2712"/>
         <source>Zoom in</source>
         <translation>Hereinzoomen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2706"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2715"/>
         <source>Zoom in (current 3D view)</source>
         <translation>Hereinzoomen (aktuelle 3D-Ansicht)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2709"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2718"/>
         <source>+</source>
         <extracomment>Zoom in shortcut</extracomment>
         <translation>+</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2714"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2723"/>
         <source>Zoom out</source>
         <translation>Herauszoomen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2717"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2726"/>
         <source>Zoom out (current 3D view)</source>
         <translation>Herauszoomen (aktuelle 3D-Ansicht)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2720"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2729"/>
         <source>=</source>
         <extracomment>Zoom in shortcut</extracomment>
         <translation>=</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2734"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2743"/>
         <source>SOR filter</source>
         <translation>SOR-Filter</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2737"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2746"/>
         <source>Statistical Outlier Filter (remove the points far from their neighbors)</source>
         <translation>Statistischer Ausreißerfilter (entfernt die Punkte, die weit von ihren Nachbarn entfernt sind)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2749"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2758"/>
         <source>actionEnableStereo</source>
         <translation>actionEnableStereo</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2752"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2761"/>
         <source>Enable stereo mode (with red-blue or red-cyan glasses)</source>
         <translation>Stereo-Modus aktivieren (mit rot-blau- oder rot-cyan-Brille)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2755"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2764"/>
         <source>F10</source>
         <translation>F10</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2763"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2772"/>
         <source>Compute points visibility (with depth buffer)</source>
         <translation>Sichtbarkeit der Punkte berechnen (mit Tiefenpuffer)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2768"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2777"/>
         <source>Compute 2.5D volume</source>
         <translation>2.5D-Volumen berechnen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2780"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2789"/>
         <source>Full screen (3D view)</source>
         <translation>Vollbildmodus (3D-Ansicht)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2783"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2792"/>
         <source>Exclusive full screen (3D view)</source>
         <translation>Ausschließlich Vollbild (3D-Ansicht)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2786"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2795"/>
         <source>F11</source>
         <translation>F11</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2794"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2803"/>
         <source>Enable Visual Debug Traces</source>
         <translation>Grafische Debug-Verfolgung aktivieren</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2797"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2806"/>
         <source>Enables visual debug traces (active 3D view)</source>
         <translation>Grafische Debug-Verfolgung aktivieren (aktives 3D-Fenster)</translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2800"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2809"/>
         <source>Ctrl+D</source>
         <translation>Strg+D</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="218"/>
-        <location filename="../mainwindow.cpp" line="5913"/>
-        <location filename="../mainwindow.cpp" line="6117"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3083"/>
+        <source>Reset all VBOs</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="3086"/>
+        <source>Reset all VBOs (unload GPU memory)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="3091"/>
+        <source>Create single point cloud</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="3094"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3097"/>
+        <source>Create a cloud with a single point</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="3105"/>
+        <source>Paste from clipboard</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="3108"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3111"/>
+        <source>Paste from ASCII/text data stored in the clipboard</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="222"/>
+        <location filename="../mainwindow.cpp" line="5970"/>
+        <location filename="../mainwindow.cpp" line="6174"/>
         <source>Enter Full Screen</source>
         <translation>Vollbildmodus aktivieren</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2537"/>
+        <location filename="../mainwindow.cpp" line="245"/>
+        <source>Set current view mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="261"/>
+        <source>Set pivot visibility</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="303"/>
+        <source>Ready</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="310"/>
+        <source>CloudCompare started!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="917"/>
+        <source>Selected one and only one point cloud or mesh!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="922"/>
+        <source>Max error per leaf cell:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="956"/>
+        <source>An error occurred</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="974"/>
+        <source>Resample with octree</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="974"/>
+        <source>Points (approx.)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1006"/>
+        <source>Could not compute octree for cloud &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1046"/>
+        <source>[ResampleWithOctree] Errors occurred during the process, result may be incomplete</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1146"/>
+        <location filename="../mainwindow.cpp" line="1492"/>
+        <source>Original</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1151"/>
+        <source>Suggested</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1185"/>
+        <source>[ApplyTransformation] Process cancelled by user</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1201"/>
+        <source>[ApplyTransformation] Cloud &apos;%1&apos; global shift/scale information has been updated: shift = (%2,%3,%4) / scale = %5</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1220"/>
+        <source>[ApplyTransformation] Applied transformation matrix:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1222"/>
+        <location filename="../mainwindow.cpp" line="3642"/>
+        <location filename="../mainwindow.cpp" line="3824"/>
+        <location filename="../mainwindow.cpp" line="5274"/>
+        <location filename="../mainwindow.cpp" line="5321"/>
+        <source>Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the &apos;Edit &gt; Apply transformation&apos; tool</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1267"/>
+        <source>[Apply scale] Entity &apos;%1&apos; can&apos;t be scaled this way</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1311"/>
+        <source>Big coordinates</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1312"/>
+        <source>Resutling coordinates will be too big (original precision may be lost!). Proceed anyway?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1335"/>
+        <source>[Apply scale] No eligible entities (point clouds or meshes) were selected!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1510"/>
+        <source>[Global Shift/Scale] New shift: (%1, %2, %3)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1511"/>
+        <source>[Global Shift/Scale] New scale: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1542"/>
+        <source>[Global Shift/Scale] To preserve its original position, the entity &apos;%1&apos; has been translated of (%2 ; %3 ; %4) and rescaled of a factor %5</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1562"/>
+        <source>This method is for test purpose only</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1563"/>
+        <source>Cloud(s) are going to be rotated while still displayed in their previous position! Proceed?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1647"/>
+        <location filename="../mainwindow.cpp" line="1676"/>
+        <source>Not enough memory to flag the vertices of mesh &apos;%1&apos;!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1670"/>
+        <source>[Mesh Quality] Mesh &apos;%1&apos; edges: %2 total (normal: %3 / on hole borders: %4 / non-manifold: %5)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1694"/>
+        <source>[Mesh Quality] SF flags: %1 (NORMAL) / %2 (BORDER) / (%3) NON-MANIFOLD</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1699"/>
+        <source>Error(s) occurred! Check the console...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1716"/>
+        <source>[Mesh Volume] Mesh &apos;%1&apos;: V=%2 (cube units)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1724"/>
+        <source>[Mesh Volume] The above volume might be invalid (mesh has holes)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1728"/>
+        <source>[Mesh Volume] The above volume might be invalid (mesh has non-manifold edges)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1733"/>
+        <source>[Mesh Volume] The above volume might be invalid (not enough memory to check if the mesh is closed)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1756"/>
+        <source>[Mesh Surface] Mesh &apos;%1&apos;: S=%2 (square units)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1759"/>
+        <source>[Mesh Surface] Average triangle surface: %1 (square units)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1775"/>
+        <source>Select at least one sensor</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1793"/>
+        <location filename="../mainwindow.cpp" line="1857"/>
+        <location filename="../mainwindow.cpp" line="2204"/>
+        <source>Select a cloud on which to project the uncertainty:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1815"/>
+        <location filename="../mainwindow.cpp" line="1882"/>
+        <location filename="../mainwindow.cpp" line="2213"/>
+        <location filename="../mainwindow.cpp" line="2222"/>
+        <location filename="../mainwindow.cpp" line="3377"/>
+        <location filename="../mainwindow.cpp" line="3954"/>
+        <location filename="../mainwindow.cpp" line="4367"/>
+        <location filename="../mainwindow.cpp" line="4425"/>
+        <location filename="../mainwindow.cpp" line="4474"/>
+        <location filename="../mainwindow.cpp" line="4543"/>
+        <location filename="../mainwindow.cpp" line="4900"/>
+        <location filename="../mainwindow.cpp" line="4923"/>
+        <location filename="../mainwindow.cpp" line="4936"/>
+        <location filename="../mainwindow.cpp" line="4944"/>
+        <location filename="../mainwindow.cpp" line="5035"/>
+        <location filename="../mainwindow.cpp" line="5143"/>
+        <location filename="../mainwindow.cpp" line="5367"/>
+        <location filename="../mainwindow.cpp" line="7544"/>
+        <location filename="../mainwindow.cpp" line="8223"/>
+        <location filename="../mainwindow.cpp" line="8348"/>
+        <location filename="../mainwindow.cpp" line="8376"/>
+        <location filename="../mainwindow.cpp" line="8455"/>
+        <location filename="../mainwindow.cpp" line="8514"/>
+        <location filename="../mainwindow.cpp" line="8566"/>
+        <location filename="../mainwindow.cpp" line="8610"/>
+        <location filename="../mainwindow.cpp" line="9572"/>
+        <source>Not enough memory!</source>
+        <translation type="unfinished">Nicht genug Arbeitsspeicher!</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1843"/>
+        <source>Select one and only one GBL sensor!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1864"/>
+        <source>The cloud must have normals!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1928"/>
+        <location filename="../mainwindow.cpp" line="2109"/>
+        <source>Select one and only one sensor!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="1947"/>
+        <source>[doActionSetViewFromSensor] Viewport applied</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2030"/>
+        <source>Failed to create sensor</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2166"/>
+        <source>Can&apos;t modify this kind of sensor!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2184"/>
+        <source>Select one and only one camera (projective) sensor!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2198"/>
+        <source>Sensor has no associated uncertainty model! (Brown, etc.)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2233"/>
+        <source>[%1] Uncertainty (%2)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2239"/>
+        <location filename="../mainwindow.cpp" line="2268"/>
+        <location filename="../mainwindow.cpp" line="7947"/>
+        <source>An error occurred! (see console)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2262"/>
+        <source>[%1] Uncertainty (3D)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2297"/>
+        <source>Select one and only one camera sensor!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2307"/>
+        <location filename="../mainwindow.cpp" line="2495"/>
+        <source>Select a cloud to filter:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2320"/>
+        <source>Failed to compute the octree!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2330"/>
+        <source>Failed to intersect sensor frustum with octree!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2340"/>
+        <source>No point fell inside the frustum!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2350"/>
+        <location filename="../mainwindow.cpp" line="2541"/>
+        <source>Failed to allocate memory for output scalar field!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2404"/>
+        <source>Internal error: sensor (&apos;%1&apos;) parent is not a point cloud!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2425"/>
+        <location filename="../mainwindow.cpp" line="8704"/>
+        <location filename="../mainwindow.cpp" line="8784"/>
+        <location filename="../mainwindow.cpp" line="8888"/>
+        <source>Select output file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2466"/>
+        <source>saving</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2470"/>
+        <source>[I/O] File &apos;%1&apos; saved successfully</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2485"/>
+        <source>Select one and only one GBL/TLS sensor!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2507"/>
+        <source>Depth buffer</source>
+        <translation type="unfinished">Tiefen-Speicher</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2508"/>
+        <source>Sensor has no depth buffer: do you want to compute it now?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2529"/>
+        <source>Sensor has no depth buffer (and no associated cloud?)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2554"/>
         <source>Compute visibility</source>
         <translation>Sichtbarkeit berechnen</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2538"/>
+        <location filename="../mainwindow.cpp" line="2555"/>
         <source>Points: %L1</source>
         <translation>Punkte: %L1</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3879"/>
+        <location filename="../mainwindow.cpp" line="2582"/>
+        <source>Visibility computed for cloud &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2583"/>
+        <source>	Visible = %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2584"/>
+        <source>	Hidden = %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2585"/>
+        <source>	Out of range = %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2586"/>
+        <source>	Out of fov = %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2659"/>
+        <source>[doActionSamplePointsOnMesh] Errors occurred during the process! Result may be incomplete!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2710"/>
+        <source>[doActionSamplePointsOnPolyline] Errors occurred during the process! Result may be incomplete!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2764"/>
+        <source>[doActionSmoohPolyline] Errors occurred during the process! Result may be incomplete!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2783"/>
+        <source>Min distance between points:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2810"/>
+        <source>Couldn&apos;t create temporary scalar field! Not enough memory?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2840"/>
+        <source>Cloud &apos;%1&apos; has no duplicate points</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2844"/>
+        <source>Cloud &apos;%1&apos; has %2 duplicate point(s)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2868"/>
+        <source>An error occurred! (Not enough memory?)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2876"/>
+        <location filename="../mainwindow.cpp" line="3020"/>
+        <location filename="../mainwindow.cpp" line="5463"/>
+        <location filename="../mainwindow.cpp" line="5584"/>
+        <source>Previously selected entities (sources) have been hidden!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2900"/>
+        <source>Entity [%1] has no active scalar field !</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3069"/>
+        <location filename="../mainwindow.cpp" line="7897"/>
+        <source>Select only one cloud or one mesh!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3099"/>
+        <source>No active scalar field on entity &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3191"/>
+        <source>Subdivide mesh</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3191"/>
+        <source>Max area per triangle:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3215"/>
+        <source>[Subdivide] An error occurred while trying to subdivide mesh &apos;%1&apos; (not enough memory?)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3228"/>
+        <source>[Subdivide] Failed to subdivide mesh &apos;%1&apos; (not enough memory?)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3233"/>
+        <source>[Subdivide] Works only on real meshes!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3259"/>
+        <source>[Flip triangles] Works only on real meshes!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3274"/>
+        <location filename="../mainwindow.cpp" line="3277"/>
+        <source>Smooth mesh</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3274"/>
+        <source>Iterations:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3277"/>
+        <source>Smoothing factor:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3298"/>
+        <source>Failed to apply Laplacian smoothing to mesh &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3366"/>
+        <source>Only meshes with standard vertices are handled for now! Can&apos;t merge entity &apos;%1&apos;...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3371"/>
+        <source>Entity &apos;%1&apos; is neither a cloud nor a mesh, can&apos;t merge it!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3383"/>
+        <source>Select only clouds or meshes!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3388"/>
+        <source>Can&apos;t mix point clouds and meshes!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3423"/>
+        <source>Original cloud index</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3423"/>
+        <source>Do you want to generate a scalar field with the original cloud index?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3432"/>
+        <source>Couldn&apos;t allocate a new scalar field for storing the original cloud index! Try to free some memory ...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3475"/>
+        <location filename="../mainwindow.cpp" line="3528"/>
+        <source>Fusion failed! (not enough memory?)</source>
+        <translation type="unfinished">Vereinigen fehlgeschlagen! (nicht genug Arbeitsspeicher)</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3561"/>
+        <source>Select 2 point clouds or meshes!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3579"/>
+        <source>Invalid minimum RMS decrease value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3585"/>
+        <source>Minimum RMS decrease value is too small.
+%1 will be used instead (numerical accuracy limit).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3627"/>
+        <source>Final RMS: %1 (computed on %2 points)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3640"/>
+        <source>[Register] Applied transformation matrix:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3647"/>
+        <source>Scale: %1 (already integrated in above matrix!)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3653"/>
+        <source>[Register] Scale: fixed (1.0)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3654"/>
+        <source>Scale: fixed (1.0)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3659"/>
+        <source>Theoretical overlap: %1%</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3664"/>
+        <source>This report has been output to Console (F8)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3685"/>
+        <source>Data mesh vertices are locked (they may be shared with other meshes): Do you wish to clone this mesh to apply transformation?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3698"/>
+        <source>Doesn&apos;t work on sub-meshes yet!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3710"/>
+        <source>Failed to clone &apos;data&apos; mesh! (not enough memory?)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3739"/>
+        <source>[ICP] Aligned entity global shift has been updated to match the reference: (%1,%2,%3) [x%4]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3743"/>
+        <source>Drop shift information?</source>
+        <translation type="unfinished">Verschiebungs-Informationen streichen?</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3743"/>
+        <source>Aligned entity is shifted but reference cloud is not: drop global shift information?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3747"/>
+        <source>[ICP] Aligned entity global shift has been reset to match the reference!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3758"/>
+        <source>Registration info</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3770"/>
+        <source>Work in progress</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3771"/>
+        <source>This method is still under development: are you sure you want to use it? (a crash may likely happen)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3777"/>
+        <location filename="../mainwindow.cpp" line="3784"/>
+        <location filename="../mainwindow.cpp" line="5104"/>
+        <location filename="../mainwindow.cpp" line="5111"/>
+        <location filename="../mainwindow.cpp" line="8985"/>
+        <location filename="../mainwindow.cpp" line="8992"/>
+        <source>Select 2 point clouds!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3822"/>
+        <source>[Align] Resulting matrix:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3844"/>
+        <source>[Align] Registration failed!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3890"/>
+        <location filename="../mainwindow.cpp" line="8878"/>
+        <source>Select at least one point cloud!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3908"/>
         <source>Subsampling</source>
         <translation>Teilabtastung</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4707"/>
+        <location filename="../mainwindow.cpp" line="3921"/>
+        <source>[Subsampling] Failed to subsample cloud &apos;%1&apos;!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3948"/>
+        <source>[Subsampling] Not enough memory: colors, normals or scalar fields may be missing!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3963"/>
+        <source>Errors occurred (see console)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4021"/>
+        <source>[CreateComponentsClouds] Not enough memory to sort components by size!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4083"/>
+        <source>[createComponentsClouds] Failed to create component #%1! (not enough memory)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4095"/>
+        <source>No component was created! Check the minimum size...</source>
+        <translation type="unfinished">Es wurde keine Komponente erzeugt! Prüfen Sie die Minimalgröße...</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4104"/>
+        <source>[createComponentsClouds] %1 component(s) were created from cloud &apos;%2&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4113"/>
+        <source>[createComponentsClouds] Original cloud has been automatically hidden</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4167"/>
+        <location filename="../mainwindow.cpp" line="8292"/>
+        <source>Couldn&apos;t compute octree for cloud &apos;%1&apos;!</source>
+        <translation type="unfinished">Die Berechnung des Oktrees für Punktewolke „%1“ konnte nich ausgeführt werden!</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4180"/>
+        <source>Couldn&apos;t allocate a new scalar field for computing CC labels! Try to free some memory ...</source>
+        <translation type="unfinished">Konnte kein neues Skalares Feld für die Berechnung der Angeschlossenen-Komponenten-Beschriftung allokieren! Versuchen Sie etwas Speicher freizugeben...</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4212"/>
+        <source>Many components</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4212"/>
+        <source>Do you really expect up to %1 components?
+(this may take a lot of time to process and display)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4232"/>
+        <location filename="../mainwindow.cpp" line="4237"/>
+        <source>[doActionLabelConnectedComponents] Something went wrong while extracting CCs from cloud %1...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4296"/>
+        <source>Select 2 and only 2 polylines</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4305"/>
+        <source>Projection method</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4305"/>
+        <source>Use best fit plane (yes) or the current viewing direction (no)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4322"/>
+        <source>[Mesh two polylines] Failed to compute normals!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4332"/>
+        <source>Failed to create mesh (see Console)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4373"/>
+        <source>Select a group of polylines or multiple polylines (contour plot)!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4377"/>
+        <source>Projection dimension</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4377"/>
+        <source>Contour plot to mesh</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4410"/>
+        <source>Not enough segments!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4465"/>
+        <source>Third party library error: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4530"/>
+        <source>[Contour plot to mesh] Failed to compute normals!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4553"/>
+        <source>Select one or two point clouds!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4562"/>
+        <location filename="../mainwindow.cpp" line="4577"/>
+        <source>Select point clouds only!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4594"/>
+        <source>Select only one point cloud!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4601"/>
+        <source>Select a point cloud!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4639"/>
+        <location filename="../mainwindow.cpp" line="4697"/>
+        <source>Triangulate</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4639"/>
+        <source>Min triangle angle (in degrees)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4697"/>
+        <location filename="../mainwindow.cpp" line="8055"/>
+        <source>Max edge length (0 = no limit)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4725"/>
+        <source>Keep old normals?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4726"/>
+        <source>Cloud(s) already have normals. Do you want to update them (yes) or keep the old ones (no)?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4733"/>
         <source>Triangulation</source>
         <translation>Triangulation</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4708"/>
+        <location filename="../mainwindow.cpp" line="4734"/>
         <source>Triangulation in progress...</source>
         <translation>Triangulation wird berechnet...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5869"/>
+        <location filename="../mainwindow.cpp" line="4772"/>
+        <source>Error(s) occurred! See the Console messages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4802"/>
+        <source>[doActionFitQuadric] Quadric local coordinate system:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4804"/>
+        <source>[doActionFitQuadric] Quadric equation (in local coordinate system): </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4839"/>
+        <source>Failed to compute quadric on cloud &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4847"/>
+        <source>Error(s) occurred: see console</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4972"/>
+        <source>[DistanceMap] Cloud &apos;%1&apos;: no point falls inside the specified range</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4994"/>
+        <source>Distance to best fit quadric (3D)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4994"/>
+        <source>Steps (per dim.)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5023"/>
+        <source>Failed to get the center of gravity of cloud &apos;%1&apos;!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5044"/>
+        <location filename="../mainwindow.cpp" line="5137"/>
+        <source>Couldn&apos;t allocate a new scalar field for computing distances! Try to free some memory ...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5084"/>
+        <source>Distance map to 3D quadric</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5092"/>
+        <source>Failed to compute 3D quadric on cloud &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5115"/>
+        <location filename="../mainwindow.cpp" line="8996"/>
+        <location filename="../mainwindow.cpp" line="9070"/>
+        <source>Compared</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5116"/>
+        <location filename="../mainwindow.cpp" line="8997"/>
+        <location filename="../mainwindow.cpp" line="9071"/>
+        <source>Reference</source>
+        <translation type="unfinished">Referenz</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5126"/>
+        <source>Compared cloud must be a real point cloud!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5211"/>
+        <location filename="../mainwindow.cpp" line="11195"/>
+        <source>Select one point cloud!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5216"/>
+        <source>Dimension</source>
+        <translation type="unfinished">Dimension</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5216"/>
+        <source>Orthogonal dim (X=0 / Y=1 / Z=2)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5272"/>
+        <source>[Synchronize] Transformation matrix (%1):</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5319"/>
+        <source>[Synchronize] Transformation matrix (%1 --&gt; %2):</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5447"/>
+        <source>[doActionSORFilter] No points were removed from cloud &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5470"/>
+        <source>[doActionSORFilter] Not enough memory to create a clean version of cloud &apos;%1&apos;!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5482"/>
+        <source>[doActionSORFilter] Failed to apply the noise filter to cloud &apos;%1&apos;! (not enough memory?)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5486"/>
+        <source>[doActionSORFilter] Trying to apply the noise filter to null cloud</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5568"/>
+        <source>[doActionFilterNoise] No points were removed from cloud &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5591"/>
+        <source>[doActionFilterNoise] Not enough memory to create a clean version of cloud &apos;%1&apos;!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5603"/>
+        <source>[doActionFilterNoise] Failed to apply the noise filter to cloud &apos;%1&apos;! (not enough memory?)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5607"/>
+        <source>[doActionFilterNoise] Trying to apply the noise filter to null cloud</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5621"/>
+        <location filename="../mainwindow.cpp" line="6807"/>
+        <source>Select one and only one entity!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5637"/>
+        <source>Method can&apos;t be applied on locked vertices or virtual point clouds!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5662"/>
+        <source>Error</source>
+        <translation type="unfinished">Fehler</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5662"/>
+        <source>Invalid angular range</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5707"/>
+        <source>[Unroll] Original mesh has been automatically hidden</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5717"/>
+        <source>[Unroll] Original cloud has been automatically hidden</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5816"/>
+        <source>Failed to create the 3D view</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5864"/>
+        <source>New 3D View</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5896"/>
         <source>Restart</source>
         <translation>Neustart</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5870"/>
+        <location filename="../mainwindow.cpp" line="5897"/>
         <source>To finish the process, you&apos;ll have to close and restart CloudCompare</source>
         <translation>Um den Prozess abzuschliessen, müssen Sie CloudCompare schliessen und neu starten</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5909"/>
-        <location filename="../mainwindow.cpp" line="6113"/>
+        <location filename="../mainwindow.cpp" line="5921"/>
+        <source>All VBOs have been released (%1 Mb)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5924"/>
+        <source>You might want to disable the &apos;use VBOs&apos; option in the Display Settings to keep the GPU memory empty</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5929"/>
+        <source>No VBO allocated</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5966"/>
+        <location filename="../mainwindow.cpp" line="6170"/>
         <source>Exit Full Screen</source>
         <translation>Vollbildmodus beenden</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5929"/>
+        <location filename="../mainwindow.cpp" line="5986"/>
         <source>Are you sure you want to quit?</source>
         <translation>Wollen sie das Programm wirklich beenden?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6134"/>
+        <location filename="../mainwindow.cpp" line="6191"/>
         <source>Documentation</source>
         <translation>Dokumentation</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6135"/>
+        <location filename="../mainwindow.cpp" line="6192"/>
         <source>Please visit http://www.cloudcompare.org/doc</source>
         <translation>Bitte besuchen sie https://www.cloudcompare.org/doc</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6204"/>
+        <location filename="../mainwindow.cpp" line="6229"/>
+        <source>Select at least one entity (point cloud or mesh)!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="6261"/>
         <source>Select aligned entities</source>
         <translation>Ausgerichtete Entitäten auswählen</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6231"/>
+        <location filename="../mainwindow.cpp" line="6288"/>
         <source>Not enough memory</source>
         <translation>Nicht genug Arbeitsspeicher</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6237"/>
+        <location filename="../mainwindow.cpp" line="6294"/>
         <source>No aligned entity selected</source>
         <translation>Keine ausgerichtete Entität ausgewählt</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8473"/>
+        <location filename="../mainwindow.cpp" line="6307"/>
+        <source>[PointPairRegistration] Failed to create dedicated 3D view!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="6388"/>
+        <source>No cloud in selection!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="6402"/>
+        <source>[SectionExtraction] Failed to create dedicated 3D view!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="6472"/>
+        <source>No segmentable entity in active window!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="6542"/>
+        <source>[Segmentation] Label %1 depends on cloud %2 and will be removed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="6814"/>
+        <source>Select a cloud or a mesh</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="6820"/>
+        <source>Entity must be visible!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="6958"/>
+        <location filename="../mainwindow.cpp" line="7015"/>
+        <source>Unexpected error!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="6995"/>
+        <source>No entity eligible for manual transformation! (see console)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7000"/>
+        <source>Some entities were ignored! (see console)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7119"/>
+        <source>Orthographic mode only!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7172"/>
+        <source>All selected entities must be displayed in the same 3D view!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7183"/>
+        <source>Selected entities have no valid bounding-box!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7307"/>
+        <source>Can&apos;t start the picking mechanism (another tool is already using it)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7348"/>
+        <source>Picking operation aborted</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7378"/>
+        <source>The point picked was picked in the wrong window</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7405"/>
+        <source>[Level] Point is too close from the others!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7520"/>
+        <location filename="../mainwindow.cpp" line="7568"/>
+        <source>Stop the other picking operation first!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7528"/>
+        <location filename="../mainwindow.cpp" line="7576"/>
+        <source>No active 3D view!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7534"/>
+        <source>Select an entity!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7554"/>
+        <source>Pick three points on the floor plane (click the Level button or press Escape to cancel)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7584"/>
+        <source>Perspective mode is viewer-centered: can&apos;t use a point as rotation center!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7589"/>
+        <source>Pick a point to be used as rotation center (click on icon again to cancel)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7598"/>
+        <source>No cloud in database!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7660"/>
+        <source>Histogram</source>
+        <translation type="unfinished">Histogramm</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7666"/>
+        <location filename="../mainwindow.cpp" line="7701"/>
+        <source>Count</source>
+        <translation type="unfinished">Anzahl</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7687"/>
+        <source>Histogram [%1]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7698"/>
+        <source>%1 (%2 values) </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7730"/>
+        <source>[Crop] No eligible candidate found!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7782"/>
+        <source>[Crop] Selected entities have been hidden</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7784"/>
+        <source>Error(s) occurred! See the Console</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7803"/>
+        <source>An error occurred while cloning cloud %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7811"/>
+        <source>An error occurred while cloning primitive %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7819"/>
+        <source>An error occurred while cloning mesh %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7828"/>
+        <source>An error occurred while cloning polyline %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7837"/>
+        <source>An error occurred while cloning facet %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7850"/>
+        <source>An error occurred while cloning camera sensor %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7863"/>
+        <source>An error occurred while cloning GBL sensor %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7868"/>
+        <source>Entity &apos;%1&apos; can&apos;t be cloned (type not supported yet!)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7919"/>
+        <source>Constant #%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7924"/>
+        <source>New SF name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7924"/>
+        <source>SF name (must be unique)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7929"/>
+        <source>Invalid name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7934"/>
+        <source>Name already exists!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7938"/>
+        <source>Add constant value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7938"/>
+        <source>value</source>
+        <translation type="unfinished">Wert</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7964"/>
+        <source>New scalar field added to %1 (constant value: %2)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="8010"/>
+        <source>[Fit sphere] Failed to fit a sphere on cloud &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="8014"/>
+        <source>[Fit sphere] Cloud &apos;%1&apos;: center (%2,%3,%4) - radius = %5 [RMS = %6]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="8024"/>
+        <source>Sphere r=%1 [rms %2]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="8055"/>
+        <source>Fit facet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="8147"/>
+        <source>[Orientation] Entity &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="8148"/>
+        <source>	- plane fitting RMS: %f</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="8153"/>
+        <source>	- normal: (%f,%f,%f)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="8167"/>
+        <source>[Orientation] A matrix that would make this plane horizontal (normal towards Z+) is:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="8169"/>
+        <source>[Orientation] You can copy this matrix values (CTRL+C) and paste them in the &apos;Apply transformation tool&apos; dialog</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="8189"/>
+        <source>Failed to fit a plane/facet on entity &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="8251"/>
+        <source>Invalid kernel size!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="8256"/>
+        <source>Radius:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="8261"/>
+        <source>Spherical extraction test (%1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="8280"/>
+        <source>Failed to create scalar field on cloud &apos;%1&apos; (not enough memory?)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="8321"/>
+        <source>[SNE_TEST] Mean extraction time = %1 ms (radius = %2, mean(neighbours) = %3)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="8336"/>
+        <location filename="../mainwindow.cpp" line="8340"/>
+        <source>CNE Test</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="8336"/>
+        <source>radius</source>
+        <translation type="unfinished">Radius</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="8340"/>
+        <source>height</source>
+        <translation type="unfinished">Höhe</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="8344"/>
+        <source>cube</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="8429"/>
+        <source>[CNE_TEST] Mean extraction time = %1 ms (radius = %2, height = %3, mean(neighbours) = %4))</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="8433"/>
+        <source>Failed to compute octree!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="8452"/>
+        <source>centers</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="8484"/>
+        <source>No cloud in selection?!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="8521"/>
+        <source>Need at least two clouds!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="8573"/>
         <source>Testing all possible positions</source>
         <translation>Überprüfe alle möglichen Positionen</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8474"/>
+        <location filename="../mainwindow.cpp" line="8574"/>
         <source>%1 clouds and %2 positions</source>
         <translation>%1 Punktwolken und %2 Positionen</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9793"/>
+        <location filename="../mainwindow.cpp" line="8635"/>
+        <source>An error occurred while performing ICP!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="8671"/>
+        <source>Best case #%1 / #%2 - RMS = %3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="8675"/>
+        <source>[doActionComputeBestICPRmsMatrix] Comparison #%1 / #%2: min RMS = %3 (phi = %4 / theta = %5 deg.)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="8680"/>
+        <source>[doActionComputeBestICPRmsMatrix] Comparison #%1 / #%2: INVALID</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="8741"/>
+        <source>[doActionComputeBestICPRmsMatrix] Job done</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="8745"/>
+        <source>Failed to save output file?!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="8774"/>
+        <source>No plane in selection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="8799"/>
+        <location filename="../mainwindow.cpp" line="8902"/>
+        <source>Failed to open file for writing! (check file permissions)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="8849"/>
+        <source>[I/O] File &apos;%1&apos; successfully saved (%2 plane(s))</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="8977"/>
+        <source>[I/O] File &apos;%1&apos; successfully saved (%2 cloud(s))</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="9012"/>
+        <location filename="../mainwindow.cpp" line="9086"/>
+        <source>Failed to initialize comparison dialog</source>
+        <translation type="unfinished">Vergleichsdialog konnte nicht initialisiert werden</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="9029"/>
+        <source>Select 2 entities!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="9051"/>
+        <source>Select at least one mesh!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="9056"/>
+        <source>Select one mesh and one cloud or two meshes!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="9104"/>
+        <source>[Compute Primitive Distances] Cloud to %1 failed, error code = %2!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="9120"/>
+        <source>[Compute Primitive Distances] Select only a single Plane/Box/Sphere/Cylinder/Cone/Polyline Primitive</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="9136"/>
+        <source>[Compute Primitive Distances] Select at least one Plane/Box/Sphere/Cylinder/Cone/Polyline Primitive!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="9141"/>
+        <source>[Compute Primitive Distances] Select at least one cloud!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="9171"/>
+        <source>[Compute Primitive Distances] [Cloud: %1] Couldn&apos;t allocate a new scalar field for computing distances! Try to free some memory ...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="9179"/>
+        <source>[Compute Primitive Distances] [Cloud: %1] Not enough memory</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="9201"/>
+        <source>Bounded Plane</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="9209"/>
+        <source>Infinite Plane</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="9219"/>
+        <source>Cylinder</source>
+        <translation type="unfinished">Zylinder</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="9228"/>
+        <source>Cone</source>
+        <translation type="unfinished">Kegel</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="9240"/>
+        <source>Box</source>
+        <translation type="unfinished">Box</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="9260"/>
+        <source>[Compute Primitive Distances] Unsupported primitive type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="9289"/>
+        <source>[Compute Primitive Distances] [Primitive: %1] [Cloud: %2] [%3] Mean distance = %4 / std deviation = %5</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="9303"/>
+        <source>%1 error(s) occurred: refer to the Console (F8)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="9424"/>
+        <source>This version doesn&apos;t handle stereo glasses and headsets.
+Use the &apos;Stereo&apos; version instead.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="9450"/>
+        <source>[Stereo] F.O.V. forced to %1 deg.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="9488"/>
+        <source>Stereo mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="9489"/>
+        <source>Stereo-mode only works in perspective mode. Do you want to disable it?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="9558"/>
+        <source>Point coordinates</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="9575"/>
+        <source>Point #%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="9594"/>
+        <source>Clipboard is empty</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="9614"/>
+        <location filename="../mainwindow.cpp" line="9657"/>
+        <source>Clipboard</source>
+        <translation type="unfinished">Zwischenablage</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="9617"/>
+        <source>loading</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="9617"/>
+        <source>from the clipboard</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="9626"/>
+        <source>No cloud loaded</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="9670"/>
+        <source>Cloud #%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="9691"/>
+        <source>%1 cloud(s) loaded from the clipboard</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="9705"/>
+        <source>Lock rotation axis</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="9722"/>
+        <source>[ROTATION LOCKED]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="9841"/>
+        <source>Entity &apos;%1&apos; has been translated: (%2,%3,%4) and rescaled of a factor %5 [original position will be restored when saving]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="9883"/>
+        <source>[MainWindow::addToDB] Internal error: no associated DB?!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="9997"/>
+        <source>%1 file(s) loaded</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="10036"/>
         <source>Are you sure you want to remove all loaded entities?</source>
         <translation>Möchten Sie wirklich alle geladenen Entitäten entfernen?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9826"/>
+        <location filename="../mainwindow.cpp" line="10069"/>
         <source>Open file(s)</source>
         <translation>Datei(en) öffnen</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="10076"/>
+        <location filename="../mainwindow.cpp" line="10170"/>
+        <source>Can&apos;t save selected entity(ies) this way!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="10310"/>
+        <source>[I/O] First entity&apos;s name would make an invalid filename! Can&apos;t use it...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="10319"/>
         <source>Save file</source>
         <translation>Datei speichern</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="10334"/>
+        <source>[I/O] The following selected entities won&apos;t be saved:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="10366"/>
+        <source>[I/O] None of the selected entities can be saved this way...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="10980"/>
+        <location filename="../mainwindow.cpp" line="10985"/>
+        <location filename="../mainwindow.cpp" line="10990"/>
+        <source>Not yet implemented! Sorry ...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="11159"/>
+        <source>[Global Shift] Max abs. coord = %1 / max abs. diag = %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="11202"/>
+        <source>Cloud has no associated waveform information</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="11264"/>
+        <location filename="../mainwindow.cpp" line="11271"/>
+        <source>Select 2 planes!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="11279"/>
+        <source>Plane 1: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="11280"/>
+        <location filename="../mainwindow.cpp" line="11283"/>
+        <location filename="../mainwindow.cpp" line="11294"/>
+        <location filename="../mainwindow.cpp" line="11301"/>
+        <location filename="../mainwindow.cpp" line="11306"/>
+        <source>[Compare] </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="11282"/>
+        <source>Plane 2: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="11293"/>
+        <source>Angle P1/P2: %1 deg.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="11300"/>
+        <source>Distance Center(P1)/P2: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="11305"/>
+        <source>Distance Center(P2)/P1: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="11309"/>
+        <source>Plane comparison</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -8141,6 +9704,11 @@ Sollte nach einer der vorherigen Methoden verwendet werden!</translation>
         <translation>Orientierung</translation>
     </message>
     <message>
+        <location filename="../ui_templates/normalComputationDlg.ui" line="291"/>
+        <source>Use scan grid(s) whenever possible</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="376"/>
         <source>+ Barycenter</source>
         <translation>+ Schwerpunkt</translation>
@@ -8159,11 +9727,6 @@ Sollte nach einer der vorherigen Methoden verwendet werden!</translation>
         <location filename="../ui_templates/normalComputationDlg.ui" line="288"/>
         <source>Use scan grid(s) (robust method)</source>
         <translation>Scan-Raster benutzen (robuste Methode)</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/normalComputationDlg.ui" line="291"/>
-        <source>Use scan grid(s)  whenever possible</source>
-        <translation>Verwenden Sie, wann immer möglich, Scan-Raster</translation>
     </message>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="301"/>
@@ -8516,8 +10079,8 @@ Sie wird stattdessen in mehreren Kacheln auf die Festplatte geschrieben.</transl
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCV/ui/pcvDlg.ui" line="88"/>
-        <source>rays are cast from the whole sphere (instrad of the Z+ hemisphere)</source>
-        <translation>Strahlen werden von der gesamten Kugel geworfen (anstelle der Z+-Halbkugel)</translation>
+        <source>rays are cast from the whole sphere (instead of the Z+ hemisphere)</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCV/ui/pcvDlg.ui" line="91"/>
@@ -8579,8 +10142,8 @@ Sie wird stattdessen in mehreren Kacheln auf die Festplatte geschrieben.</transl
     </message>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="76"/>
-        <source>Whether the plane normal should point upward (Z+) or backward (Z-)</source>
-        <translation>Ob die Ebenennormale nach oben (Z+) oder nach unten (Z-) zeigen soll</translation>
+        <source>Whether the plane normal should point upward (Z+) or downward (Z-)</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="79"/>
@@ -9190,17 +10753,37 @@ p, li { white-space: pre-wrap; }
         <translation>Radius 2</translation>
     </message>
     <message>
-        <location filename="../ui_templates/primitiveFactoryDlg.ui" line="944"/>
+        <location filename="../ui_templates/primitiveFactoryDlg.ui" line="939"/>
+        <source>Coordinate System</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/primitiveFactoryDlg.ui" line="954"/>
+        <source>Reset Matrix</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/primitiveFactoryDlg.ui" line="961"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select an item in the DB Tree&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/primitiveFactoryDlg.ui" line="964"/>
+        <source>Get Selected Item Matrix</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/primitiveFactoryDlg.ui" line="979"/>
         <source>Initial precision</source>
         <translation>Anfängliche Genauigkeit</translation>
     </message>
     <message>
-        <location filename="../ui_templates/primitiveFactoryDlg.ui" line="980"/>
+        <location filename="../ui_templates/primitiveFactoryDlg.ui" line="1015"/>
         <source>Create</source>
         <translation>Erzeugen</translation>
     </message>
     <message>
-        <location filename="../ui_templates/primitiveFactoryDlg.ui" line="987"/>
+        <location filename="../ui_templates/primitiveFactoryDlg.ui" line="1022"/>
         <source>Close</source>
         <translation>Schliessen</translation>
     </message>
@@ -9319,16 +10902,6 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../main.cpp" line="137"/>
-        <source>Translation</source>
-        <translation>Übersetzung</translation>
-    </message>
-    <message>
-        <location filename="../main.cpp" line="137"/>
-        <source>Failed to load language file &apos;%1&apos;</source>
-        <translation>Sprachdatei „%1“ konnte nicht geladen werden</translation>
-    </message>
-    <message>
         <location filename="../cc2.5DimEditor.cpp" line="142"/>
         <source>invalid grid box</source>
         <translation>Ungültige Gitter-Box</translation>
@@ -9369,39 +10942,39 @@ p, li { white-space: pre-wrap; }
         <translation>Re-Skalierungs-Entität</translation>
     </message>
     <message>
-        <location filename="../ccVolumeCalcTool.cpp" line="619"/>
+        <location filename="../ccVolumeCalcTool.cpp" line="635"/>
         <source>Volume computation</source>
         <translation>Volumen-Berechnung</translation>
     </message>
     <message>
-        <location filename="../ccVolumeCalcTool.cpp" line="620"/>
+        <location filename="../ccVolumeCalcTool.cpp" line="636"/>
         <source>Cells: %1 x %2</source>
         <translation>Zellen: %1 x %2</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="172"/>
+        <location filename="../ccCommandLineCommands.cpp" line="174"/>
         <source>Unhandled format specifier (%1)</source>
         <translation>Unbehandelter Formatbezeichner (%1)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="177"/>
+        <location filename="../ccCommandLineCommands.cpp" line="179"/>
         <source>Missing file format specifier!</source>
         <translation>Fehlender Format-Spezifizierer!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="184"/>
+        <location filename="../ccCommandLineCommands.cpp" line="186"/>
         <source>Change cloud output format</source>
         <translation>Ändere Punktwolken-Ausgabe-Format</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="197"/>
+        <location filename="../ccCommandLineCommands.cpp" line="199"/>
         <source>Output export format (clouds) set to: %1</source>
         <translation>Punktwolken-Ausgabeformat zu %1 geändert</translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="223"/>
-        <location filename="../ccCommandLineCommands.cpp" line="375"/>
-        <location filename="../ccCommandLineCommands.cpp" line="418"/>
+        <location filename="../ccCommandLineCommands.cpp" line="355"/>
+        <location filename="../ccCommandLineCommands.cpp" line="398"/>
         <source>Missing parameter: extension after &apos;%1&apos;</source>
         <translation>Fehlender Parameter: Dateiendung nach „%1“</translation>
     </message>
@@ -9422,1339 +10995,1385 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="247"/>
-        <location filename="../ccCommandLineCommands.cpp" line="270"/>
-        <location filename="../ccCommandLineCommands.cpp" line="311"/>
-        <location filename="../ccCommandLineCommands.cpp" line="328"/>
+        <location filename="../ccCommandLineCommands.cpp" line="265"/>
+        <location filename="../ccCommandLineCommands.cpp" line="301"/>
+        <location filename="../ccCommandLineCommands.cpp" line="313"/>
         <source>Argument &apos;%1&apos; is only applicable to ASCII format!</source>
         <translation>Das Argument „%1“ kann nur auf das ASCII-Format angewendet werden!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="265"/>
+        <location filename="../ccCommandLineCommands.cpp" line="260"/>
         <source>Missing parameter: separator character after &apos;%1&apos;</source>
         <translation>Fehlender Parameter: Trennzeichen nach „%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="294"/>
+        <location filename="../ccCommandLineCommands.cpp" line="289"/>
         <source>Invalid separator! (&apos;%1&apos;)</source>
         <translation>Ungültiges Trennzeichen! („%1“)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="348"/>
+        <location filename="../ccCommandLineCommands.cpp" line="328"/>
         <source>Change mesh output format</source>
         <translation>Ändere das Netz-Ausgabeformat</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="361"/>
+        <location filename="../ccCommandLineCommands.cpp" line="341"/>
         <source>Output export format (meshes) set to: %1</source>
         <translation>Netz-Ausgabeformat zu %1 geändert</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="379"/>
+        <location filename="../ccCommandLineCommands.cpp" line="359"/>
         <source>New output extension for meshes: %1</source>
         <translation>Neue Dateiendung für Netze: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="391"/>
+        <location filename="../ccCommandLineCommands.cpp" line="371"/>
         <source>Change hierarchy output format</source>
         <translation>Ändere das Hierarchie-Ausgabeformat</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="404"/>
+        <location filename="../ccCommandLineCommands.cpp" line="384"/>
         <source>Output export format (hierarchy) set to: %1</source>
         <translation>Hierarchie-Ausgabeformat zu %1 geändert</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="422"/>
+        <location filename="../ccCommandLineCommands.cpp" line="402"/>
         <source>New output extension for hierarchies: %1</source>
         <translation>Neue Dateiendung für Hierarchien: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="434"/>
+        <location filename="../ccCommandLineCommands.cpp" line="414"/>
         <source>Load</source>
         <translation>Laden</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="439"/>
+        <location filename="../ccCommandLineCommands.cpp" line="419"/>
         <source>[LOADING]</source>
         <translation>[LADEN]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="442"/>
+        <location filename="../ccCommandLineCommands.cpp" line="422"/>
         <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerCommand.cpp" line="37"/>
         <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerCommand.cpp" line="59"/>
         <source>Missing parameter: filename after &quot;-%1&quot;</source>
         <translation>Fehlender Parameter: Dateiendung nach „-%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="460"/>
+        <location filename="../ccCommandLineCommands.cpp" line="440"/>
         <source>Missing parameter: number of lines after &apos;%1&apos;</source>
         <translation>Fehlender Parameter: Anzahl Zeilen nach „%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="467"/>
+        <location filename="../ccCommandLineCommands.cpp" line="447"/>
         <source>Invalid parameter: number of lines after &apos;%1&apos;</source>
         <translation>Ungültiger Parameter: Anzahl Zeilen nach „%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="470"/>
+        <location filename="../ccCommandLineCommands.cpp" line="450"/>
         <source>Will skip %1 lines</source>
         <translation>Es werden %1 Zeilen übersprungen</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="521"/>
+        <location filename="../ccCommandLineCommands.cpp" line="499"/>
         <source>No entity loaded (be sure to open at least one file with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>Keine Entität geladen (stellen Sie sicher, dass Sie mindestens eine Datei mit „-%1 [Punktwolken-Dateiname]“ vor „-%2“ öffnen)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="513"/>
+        <location filename="../ccCommandLineCommands.cpp" line="491"/>
         <source>Clears normals</source>
         <translation>Lösche Normalen</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="518"/>
+        <location filename="../ccCommandLineCommands.cpp" line="496"/>
         <source>[CLEAR NORMALS]</source>
         <translation>[BEREINIGE NORMALEN]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="564"/>
+        <location filename="../ccCommandLineCommands.cpp" line="606"/>
         <source>Compute normals with octree</source>
         <translation>Berechne die Normalen mit Hilfe eines Oktrees</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="569"/>
+        <location filename="../ccCommandLineCommands.cpp" line="611"/>
         <source>[OCTREE NORMALS CALCULATION]</source>
         <translation>[BERECHNUNG DER OKTREE-NORMALEN]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="572"/>
+        <location filename="../ccCommandLineCommands.cpp" line="614"/>
         <source>No point cloud to compute normals (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>Keine Punktwolke zur Berechnung der Normalen (öffnen Sie unbedingt eine mit „-%1 [Dateiname der Punktwolke]“ vor „-%2“)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="577"/>
+        <location filename="../ccCommandLineCommands.cpp" line="619"/>
         <source>Missing parameter: radius after &quot;-%1&quot;</source>
         <translation>Fehlender Parameter: Radius nach „-%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="588"/>
+        <location filename="../ccCommandLineCommands.cpp" line="630"/>
         <source>Invalid radius</source>
         <translation>Ungültiger Radius</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="591"/>
+        <location filename="../ccCommandLineCommands.cpp" line="633"/>
         <source>	Radius: %1</source>
         <translation>	Radius: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="651"/>
+        <location filename="../ccCommandLineCommands.cpp" line="693"/>
         <source>Invalid parameter: unknown orientation &apos;%1&apos;</source>
         <translation>Ungültiger Parameter: Unbekannte Orientierung nach „%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="656"/>
+        <location filename="../ccCommandLineCommands.cpp" line="698"/>
         <source>Missing orientation</source>
         <translation>Fehlende Orientierung</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="679"/>
+        <location filename="../ccCommandLineCommands.cpp" line="721"/>
         <source>Invalid parameter: unknown model &apos;%1&apos;</source>
         <translation>Ungültiger Parameter: Unbekanntes Modell „%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="684"/>
+        <location filename="../ccCommandLineCommands.cpp" line="726"/>
         <source>Missing model</source>
         <translation>Fehlendes Modell</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="708"/>
+        <location filename="../ccCommandLineCommands.cpp" line="750"/>
         <source>Failed to compute octree for cloud &apos;%1&apos;</source>
         <translation>Die Berechnung des Oktrees für Punktewolke „%1“ fehlgeschlagen</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="718"/>
+        <location filename="../ccCommandLineCommands.cpp" line="760"/>
         <source>Failed to determine best normal radius for cloud &apos;%1&apos;</source>
         <translation>Die Bestimmung des besten Normalen-Radius für die Punktwolke „%1“ ist fehlgeschlagen</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="720"/>
+        <location filename="../ccCommandLineCommands.cpp" line="762"/>
         <source>	Cloud %1 radius = %2</source>
         <translation>	Punktwolke %1 Radius = %2</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="723"/>
+        <location filename="../ccCommandLineCommands.cpp" line="765"/>
         <source>computeNormalsWithOctree started...</source>
         <translation>computeNormalsWithOctree gestartet...</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="727"/>
+        <location filename="../ccCommandLineCommands.cpp" line="769"/>
         <source>computeNormalsWithOctree success</source>
         <translation>computeNormalsWithOctree beendet</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="728"/>
+        <location filename="../ccCommandLineCommands.cpp" line="770"/>
         <source>cloud-&gt;hasNormals: %1</source>
         <translation>Punktwolke -&gt; enthält Normalen: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="732"/>
+        <location filename="../ccCommandLineCommands.cpp" line="774"/>
         <source>computeNormalsWithOctree failed</source>
         <translation>computeNormalsWithOctree fehlgeschlagen</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="735"/>
+        <location filename="../ccCommandLineCommands.cpp" line="777"/>
         <source>.OctreeNormal</source>
         <translation>.OctreeNormal</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="751"/>
+        <location filename="../ccCommandLineCommands.cpp" line="793"/>
         <source>Convert normals to dip and dip. dir.</source>
         <translation>Normalen in Neigungen und Neigungsrichtungen umwandeln</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="756"/>
+        <location filename="../ccCommandLineCommands.cpp" line="798"/>
         <source>[CONVERT NORMALS TO DIP/DIP DIR]</source>
         <translation>[NORMALEN IN NEIGUNGEN UND NEIGUNGSRICHTUNGEN UMWANDELN]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="759"/>
-        <location filename="../ccCommandLineCommands.cpp" line="802"/>
+        <location filename="../ccCommandLineCommands.cpp" line="801"/>
+        <location filename="../ccCommandLineCommands.cpp" line="844"/>
         <source>No input point cloud (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>Keine Eingabe-Punktwolke (stellen Sie sicher, dass Sie eine mit  „-%1 [Dateiname der Punktwolke]“ vor „-%2“ öffnen)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="768"/>
-        <location filename="../ccCommandLineCommands.cpp" line="811"/>
+        <location filename="../ccCommandLineCommands.cpp" line="560"/>
+        <location filename="../ccCommandLineCommands.cpp" line="810"/>
+        <location filename="../ccCommandLineCommands.cpp" line="853"/>
         <source>Cloud %1 has no normals</source>
         <translation>Punktwolke %1 hat keine Normalen</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="776"/>
+        <location filename="../ccCommandLineCommands.cpp" line="542"/>
+        <source>Invert normals</source>
+        <translation type="unfinished">Normalen umkehren</translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="547"/>
+        <source>[INVERT NORMALS]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="551"/>
+        <source>No input point cloud or mesh (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="587"/>
+        <source>Mesh %1 has no normals</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="818"/>
         <source>Failed to convert normals to dip and dip direction</source>
         <translation>Die Konvertierung der Normalen zu Neigung und Neigungsrichtungen ist fehlgeschlagen</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="794"/>
+        <location filename="../ccCommandLineCommands.cpp" line="836"/>
         <source>Convert normals to scalar fields</source>
         <translation>Normalen in Skalare Felder konvertieren</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="799"/>
+        <location filename="../ccCommandLineCommands.cpp" line="841"/>
         <source>[CONVERT NORMALS TO SCALAR FIELD(S)]</source>
         <translation>[NORMALEN IN SKALARE FELDER KONVERTIEREN]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="821"/>
+        <location filename="../ccCommandLineCommands.cpp" line="863"/>
         <source>Failed to convert normals to scalar fields</source>
         <translation>Normalen in Skalare Felder konvertieren fehlgeschlagen</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="838"/>
+        <location filename="../ccCommandLineCommands.cpp" line="880"/>
         <source>Subsample</source>
         <translation>Abtasten</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="843"/>
+        <location filename="../ccCommandLineCommands.cpp" line="885"/>
         <source>[SUBSAMPLING]</source>
         <translation>[ABTASTEN]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="846"/>
+        <location filename="../ccCommandLineCommands.cpp" line="888"/>
         <source>No point cloud to resample (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>Keine Punktwolke zur Neuabtastung (stellen Sie sicher, dass Sie eine mit „-%1 [Dateiname der Punktwolke]“ vor „-%2“ öffnen)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="851"/>
+        <location filename="../ccCommandLineCommands.cpp" line="893"/>
         <source>Missing parameter: resampling method after &quot;-%1&quot;</source>
         <translation>Fehlender Parameter: Neuabtastungs-Methode nach „%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="855"/>
+        <location filename="../ccCommandLineCommands.cpp" line="897"/>
         <source>	Method: </source>
         <translation>	Methode: </translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="860"/>
+        <location filename="../ccCommandLineCommands.cpp" line="902"/>
         <source>Missing parameter: number of points after &quot;-%1 RANDOM&quot;</source>
         <translation>Fehlender Parameter: Anzahl Punkte nach „-%1 RANDOM“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="867"/>
+        <location filename="../ccCommandLineCommands.cpp" line="909"/>
         <source>Invalid number of points for random resampling!</source>
         <translation>Ungültige Anzahl an Punkte für das zufällige Abtasten!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="869"/>
+        <location filename="../ccCommandLineCommands.cpp" line="911"/>
         <source>	Output points: %1</source>
         <translation>	Ausgabe-Punkte: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="874"/>
-        <location filename="../ccCommandLineCommands.cpp" line="931"/>
-        <location filename="../ccCommandLineCommands.cpp" line="997"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1105"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3858"/>
+        <location filename="../ccCommandLineCommands.cpp" line="916"/>
+        <location filename="../ccCommandLineCommands.cpp" line="973"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1039"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1147"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3941"/>
         <source>	Processing cloud #%1 (%2)</source>
         <translation>	Prozessiere Punktwolke #%1 (%2)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="879"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1005"/>
+        <location filename="../ccCommandLineCommands.cpp" line="921"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1047"/>
         <source>Subsampling process failed!</source>
         <translation>Abtast-Prozess fehlgeschlagen!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="881"/>
-        <location filename="../ccCommandLineCommands.cpp" line="939"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1007"/>
+        <location filename="../ccCommandLineCommands.cpp" line="923"/>
+        <location filename="../ccCommandLineCommands.cpp" line="981"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1049"/>
         <source>	Result: %1 points</source>
         <translation>	Ergebnis: %1 Punkte</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="890"/>
-        <location filename="../ccCommandLineCommands.cpp" line="948"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1016"/>
+        <location filename="../ccCommandLineCommands.cpp" line="932"/>
+        <location filename="../ccCommandLineCommands.cpp" line="990"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1058"/>
         <source>.subsampled</source>
         <translation>.subsampled</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="904"/>
-        <location filename="../ccCommandLineCommands.cpp" line="962"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1030"/>
+        <location filename="../ccCommandLineCommands.cpp" line="946"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1004"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1072"/>
         <source>_SUBSAMPLED</source>
         <translation>_SUBSAMPLED</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="910"/>
-        <location filename="../ccCommandLineCommands.cpp" line="968"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1036"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3068"/>
+        <location filename="../ccCommandLineCommands.cpp" line="952"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1010"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1078"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3151"/>
+        <location filename="../ccEntityAction.cpp" line="468"/>
+        <location filename="../ccEntityAction.cpp" line="945"/>
+        <location filename="../ccEntityAction.cpp" line="977"/>
+        <location filename="../ccEntityAction.cpp" line="1058"/>
+        <location filename="../ccEntityAction.cpp" line="1529"/>
         <source>Not enough memory!</source>
         <translation>Nicht genug Arbeitsspeicher!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="918"/>
+        <location filename="../ccCommandLineCommands.cpp" line="960"/>
         <source>Missing parameter: spatial step after &quot;-%1 SPATIAL&quot;</source>
         <translation>Fehlender Parameter: Räumliche Schritte nach „-%1 SPATIAL“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="924"/>
+        <location filename="../ccCommandLineCommands.cpp" line="966"/>
         <source>Invalid step value for spatial resampling!</source>
         <translation>Ungültige Schrittweite für das räumliche Abtasten!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="926"/>
+        <location filename="../ccCommandLineCommands.cpp" line="968"/>
         <source>	Spatial step: %1</source>
         <translation>	Schrittweite: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="976"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1018"/>
         <source>Missing parameter: octree level after &quot;-%1 OCTREE&quot;</source>
         <translation>Fehlender Parameter: Oktree-Niveau „-%1 OCTREE“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="983"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1075"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1025"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1117"/>
         <source>Invalid octree level!</source>
         <translation>Ungültiges Oktree-Niveau!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="985"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1077"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1027"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1119"/>
         <source>	Octree level: %1</source>
         <translation>	Oktree-Niveau: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1020"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1062"/>
         <source>OCTREE_LEVEL_%1_SUBSAMPLED</source>
         <translation>OCTREE_LEVEL_%1_SUBSAMPLED</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1048"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1090"/>
         <source>Unknown method!</source>
         <translation>Unbekannte Methode!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1055"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1097"/>
         <source>ExtractCCs</source>
         <translation>Extrahiere Angeschlossene Komponenten (CCs)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1060"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1102"/>
         <source>[CONNECTED COMPONENTS EXTRACTION]</source>
         <translation>(EXTRAKTION DER ANGESCHLOSSENEN KOMPONENTEN)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1063"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1105"/>
         <source>No point cloud loaded (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>Keine Punktwolke geladen (stellen Sie sicher, dass Sie eine mit  „-%1 [Dateiname der Punktwolke]“ vor „-%2“ öffnen)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1069"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1111"/>
         <source>Missing parameter: octree level after &quot;-%1&quot;</source>
         <translation>Fehlender Parameter: Oktree-Niveau „-%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1082"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1124"/>
         <source>Missing parameter: minimum number of points per component after &quot;-%1 [octree level]&quot;</source>
         <translation>Fehlender Parameter: Minimale Anzahl von Punkten pro Komponente nach „-%1 [octree level]“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1087"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1129"/>
         <source>Invalid min. number of points!</source>
         <translation>Ungültige Minimal-Anzahl von Punkten!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1089"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1131"/>
         <source>	Min number of points per component: %1</source>
         <translation>	Minimale Anzahl Punkte je Komponente: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1115"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1157"/>
         <source>Couldn&apos;t allocate a new scalar field for computing CC labels! Try to free some memory ...</source>
         <translation>Konnte kein neues Skalares Feld für die Berechnung der Angeschlossenen-Komponenten-Beschriftung allokieren! Versuchen Sie etwas Speicher freizugeben...</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1128"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1170"/>
         <source>No component found!</source>
         <translation>Keine Komponenten gefunden!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1140"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1182"/>
         <source>An error occurred (failed to finish the extraction)</source>
         <translation>Ein Fehler ist aufgetreten (die Extraktion konnte nicht fertig gestellt werden)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1162"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1203"/>
         <source>_COMPONENT_%1</source>
         <translation>_COMPONENT_%1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1176"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1217"/>
         <source>Failed to create component #%1! (not enough memory)</source>
         <translation>Komponente #%1 konnte nicht erstellt werden! (zu wenig Arbeitsspeicher)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1188"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1229"/>
         <source>No component was created! Check the minimum size...</source>
         <translation>Es wurde keine Komponente erzeugt! Prüfen Sie die Minimalgröße...</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1192"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1233"/>
         <source>%1 component(s) were created</source>
         <translation>%1 Komponente(n) wurde(n) erstellt</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1204"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3225"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3247"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1245"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3308"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3330"/>
         <location filename="../../plugins/core/Standard/qPCV/src/PCVCommand.cpp" line="216"/>
         <source>Not enough memory</source>
         <translation>Nicht genug Arbeitsspeicher</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1212"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1253"/>
         <source>Curvature</source>
         <translation>Krümmung</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1217"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1258"/>
         <source>[CURVATURE]</source>
         <translation>[KRÜMMUNG]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1221"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1262"/>
         <source>Missing parameter: curvature type after &quot;-%1&quot;</source>
         <translation>Fehlender Parameter: Krümmungs-Typ nach „-%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1240"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1281"/>
         <source>Invalid curvature type after &quot;-%1&quot;. Got &apos;%2&apos; instead of MEAN or GAUSS.</source>
         <translation>Ungültiger Krümmungs-Tpy nach „-%1“. „%2“ angegeben anstatt MITTELWERT oder GAUSS.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1245"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1286"/>
         <source>Missing parameter: kernel size after curvature type</source>
         <translation>Fehlender Parameter: Kernel-Größe nach Krümmungs-Typ</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1253"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1294"/>
         <source>Failed to read a numerical parameter: kernel size (after curvature type). Got &apos;%1&apos; instead.</source>
         <translation>Numerischer Parameter konnte nicht gelesen werden: Kernel-Größe (nach Krümmungs-Typ). Stattdessen „%1“ erhalten.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1255"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1522"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4824"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4953"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1296"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1563"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5009"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5138"/>
         <source>	Kernel size: %1</source>
         <translation>	Kernel: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1259"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1300"/>
         <source>No point cloud on which to compute curvature! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>Keine Punktwolke zur Berechnung der Krümmung (öffnen Sie unbedingt eine mit „-%1 [Dateiname der Punktwolke]“ vor „-%2“)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1273"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1314"/>
         <source>%1_CURVATURE_KERNEL_%2</source>
         <translation>%1_CURVATURE_KERNEL_%2</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1285"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1341"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1396"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1326"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1382"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1437"/>
         <source>Missing parameter: density type after &quot;-%1&quot; (KNN/SURFACE/VOLUME)</source>
         <translation>Fehlender Parameter: Dichte-Art nach „-%1“ (KNN/SURFACE/VOLUME)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1304"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1345"/>
         <source>Invalid parameter: density type is expected after &quot;-%1&quot; (KNN/SURFACE/VOLUME)</source>
         <translation>Ungültiger Parameter: Dichte-Tpy nach „-%1“.erwartet (KNN/SURFACE/VOLUME)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1311"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1352"/>
         <source>ApproxDensity</source>
         <translation>Angenommene Dichte</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1316"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1357"/>
         <source>[APPROX DENSITY]</source>
         <translation>[ANGENOMMENE DICHTE]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1319"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1360"/>
         <source>No point cloud on which to compute approx. density! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>Keine Punktwolke zur Berechnung der Angenommenen Dichte (öffnen Sie unbedingt eine mit „-%1 [Dateiname der Punktwolke]“ vor „-%2“)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1364"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1405"/>
         <source>Density</source>
         <translation>Dichte</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1369"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1410"/>
         <source>[DENSITY]</source>
         <translation>[DICHTE]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1373"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1414"/>
         <source>Missing parameter: sphere radius after &quot;-%1&quot;</source>
         <translation>Fehlender Parameter: Kugelradius nach „-%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1381"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1422"/>
         <source>Failed to read a numerical parameter: sphere radius (after &quot;-%1&quot;). Got &apos;%2&apos; instead.</source>
         <translation>Numerischer Parameter konnte nicht gelesen werden: Kugelradius (nach „-%1“). Stattdessen „%2“ erhalten.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1383"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1424"/>
         <source>	Sphere radius: %1</source>
         <translation>	Kugelradius: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1408"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1449"/>
         <source>No point cloud on which to compute density! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>Keine Punktwolke zur Berechnung der Dichte (öffnen Sie unbedingt eine mit „-%1 [Dateiname der Punktwolke]“ vor „-%2“)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1432"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1473"/>
         <source>SF gradient</source>
         <translation>SF-Gradient</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1437"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1478"/>
         <source>[SF GRADIENT]</source>
         <translation>[SF-GRADIENT]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1441"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1482"/>
         <source>Missing parameter: boolean (whether SF is euclidean or not) after &quot;-%1&quot;</source>
         <translation>Fehlender Parameter: Boolscher Wert (ob das Skalare Feld euklidisch ist, oder nicht) nach „-%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1452"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1704"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1493"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1745"/>
         <source>Invalid boolean value after &quot;-%1&quot;. Got &apos;%2&apos; instead of TRUE or FALSE.</source>
         <translation>Ungültiger Boolean-Wert nach „-%1“. „%2“ anstelle von TRUE oder FALSE erhalten.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1457"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1498"/>
         <source>No point cloud on which to compute SF gradient! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>Keine Punktwolke, auf der der SF-Gradient berechnet werden kann! (stellen Sie sicher, dass Sie eine mit „-%1 [Dateiname der Punktwolke]“ vor „-%2“ öffnen)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1469"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1720"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1510"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1761"/>
         <source>cmd.warning: cloud &apos;%1&apos; has no scalar field (it will be ignored)</source>
         <translation>cmd.warning: Punktwolke „%1“ enthält kein Skalares Feld (wird ignoriert)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1475"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1516"/>
         <source>cmd.warning: cloud &apos;%1&apos; has several scalar fields (the active one will be used by default, or the first one if none is active)</source>
         <translation>cmd.warning: Punktwolke „%1“ enthält mehrere Skalare Felder (der aktive wird standardmäßig verwendet, oder das erste, wenn keines aktiv ist)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1503"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1544"/>
         <source>Roughness</source>
         <translation>Rauheit</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1508"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1549"/>
         <source>[ROUGHNESS]</source>
         <translation>[RAUHEIT]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1512"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1553"/>
         <source>Missing parameter: kernel size after &quot;-%1&quot;</source>
         <translation>Fehlender Parameter: Kernel-Größe nach „-%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1520"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1561"/>
         <source>Failed to read a numerical parameter: kernel size (after &quot;-%1&quot;). Got &apos;%2&apos; instead.</source>
         <translation>Numerischer Parameter konnte nicht gelesen werden: Kernel-Größe (nach „-%1“). Stattdessen „%2“ erhalten.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1526"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1567"/>
         <source>No point cloud on which to compute roughness! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>Keine Punktwolke für die Berechnung der Rauheit! (stellen Sie sicher, dass Sie eine mit „-%1 [Dateiname der Punktwolke]“ vor „-%2“ öffnen)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1540"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1581"/>
         <source>ROUGHNESS_KERNEL_%2</source>
         <translation>ROUGHNESS_KERNEL_%2</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1550"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1591"/>
         <source>Apply Transformation</source>
         <translation>Transformation anwenden</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1555"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1596"/>
         <source>[APPLY TRANSFORMATION]</source>
         <translation>[TRANSFORMATION ANWENDEN]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1559"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1600"/>
         <source>Missing parameter: transformation file after &quot;-%1&quot;</source>
         <translation>Fehlender Parameter: Transformations-Datei nach „-%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1566"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1607"/>
         <source>Failed to read transformation matrix file &apos;%1&apos;!</source>
         <translation>Transformations-Matrix-Datei „%1“ konnte nicht gelesen werden!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1569"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1610"/>
         <source>Transformation:
 </source>
         <translation>Transformation:
 </translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1573"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1614"/>
         <source>No entity on which to apply the transformation! (be sure to open one with &quot;-%1 [filename]&quot; before &quot;-%2&quot;)</source>
         <translation>Keine Entität, auf die die Transformation angewendet werden soll! (stellen Sie sicher, dass Sie eine mit „-%1 [Dateiname]“ vor „-%2“ öffnen)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1608"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1649"/>
         <source>Drop global shift</source>
         <translation>Globale Verschiebung verwerfen</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1613"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1654"/>
         <source>[DROP GLOBAL SHIFT]</source>
         <translation>[GLOBAL-VERSCHIEBUNG VERWERFEN]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1617"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1658"/>
         <source>No loaded entity! (be sure to open one with &quot;-%1 [filename]&quot; before &quot;-%2&quot;)</source>
         <translation>Keine Entität geladen! (stellen Sie sicher, dass Sie eine mit  „-%1 [Dateiname]“ vor „-%2“ öffnen)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1640"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1681"/>
         <source>SF color scale</source>
         <translation>SF-Farbskala</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1645"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1686"/>
         <source>[SF COLOR SCALE]</source>
         <translation>[SF-FARBSKALA]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1649"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1690"/>
         <source>Missing parameter: color scale file after &quot;-%1&quot;</source>
         <translation>Fehlender Parameter: Farbskalen-Datei nach „-%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1658"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1699"/>
         <source>Failed to read color scale file &apos;%1&apos;!</source>
         <translation>Farbskala-Datei „%1“ konnte nicht gelesen werden!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1663"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1704"/>
         <source>No point cloud on which to change the SF color scale! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>Keine Punktwolke, an der Sie die SF-Farbskala ändern können! (stellen Sie sicher, dass Sie eine mit „-%1 [Dateiname der Punktwolke]“ vor „-%2“ öffnen)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1684"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1725"/>
         <source>SF convert to RGB</source>
         <translation>Konvertiere Skalares Feld nach RGB</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1689"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1730"/>
         <source>[SF CONVERT TO RGB]</source>
         <translation>[SF CONVERT TO RGB]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1693"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1734"/>
         <source>Missing parameter: boolean (whether to mix with existing colors or not) after &quot;-%1&quot;</source>
         <translation>Fehlender Parameter: Boolscher Wert (ob mit bestehenden Farben gemischt werden soll, oder nicht) nach „-%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1709"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1750"/>
         <source>No point cloud on which to convert SF to RGB! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>Keine Punktwolke, auf der SF nach RGB konvertiert werden kann! (stellen Sie sicher, dass Sie eine mit „-%1 [Punktwolke-Dateiname]“ vor „-%2“ öffnen)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1724"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1765"/>
         <source>cmd.warning: cloud &apos;%1&apos; has no active scalar field (it will be ignored)</source>
         <translation>cmd.warning: Punktwolke „%1“ enthält kein aktives Skalares Feld (wird ignoriert)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1738"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1779"/>
         <source>cmd.warning: cloud &apos;%1&apos; failed to convert SF to RGB</source>
         <translation>cmd.warning: Punktwolke „%1“ konnte SF nicht nach RGB konvertieren</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1754"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1795"/>
         <source>Filter by SF value</source>
         <translation>Nach SF-Wert filtern</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1771"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1814"/>
         <source>[FILTER BY VALUE]</source>
         <translation>[NACH WERT FILTERN]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1779"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1822"/>
         <source>Missing parameter: min value after &quot;-%1&quot;</source>
         <translation>Fehlender Parameter: Minimalwert nach „-%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1801"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1844"/>
+        <source>Missing parameter: N value (after &quot;-%1 N_SIGMA_MIN&quot;).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="1850"/>
+        <source>Failed to read a numerical parameter: N value (after &quot;N_SIGMA_MIN&quot;). Got &apos;%2&apos; instead.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="1858"/>
         <source>Failed to read a numerical parameter: min value (after &quot;-%1&quot;). Got &apos;%2&apos; instead.</source>
         <translation>Numerischer Parameter konnte nicht gelesen werden: Minimalwert (nach „-%1“). Stattdessen „%2“ erhalten.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1812"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1869"/>
         <source>Missing parameter: max value after &quot;-%1&quot; {min}</source>
         <translation>Fehlender Parameter: Maximalwert nach „-%1“ {min}</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1834"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1891"/>
+        <source>Missing parameter: N value (after &quot;-%1 N_SIGMA_MAX&quot;).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="1897"/>
+        <source>Failed to read a numerical parameter: N value (after &quot;N_SIGMA_MAX&quot;). Got &apos;%2&apos; instead.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="1905"/>
         <source>Failed to read a numerical parameter: max value (after min value). Got &apos;%1&apos; instead.</source>
         <translation>Numerischer Parameter konnte nicht gelesen werden: Maximalwert (nach Minimalwert). Stattdessen „%1“ erhalten.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1839"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1910"/>
         <source>	Interval: [%1 - %2]</source>
         <translation>	Intervall: [%1 - %2]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1843"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1914"/>
         <source>No point cloud on which to filter SF! (be sure to open one or generate one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>Keine Punktwolke, auf der SF gefiltert werden kann! (stellen Sie sicher, dass Sie eine öffnen oder eine mit „-%1 [Punktwolke-Dateiname]“ vor „-%2“ erzeugen)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1892"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1975"/>
         <source>		Cloud &apos;%1&apos; --&gt; %2/%3 points remaining</source>
         <translation>		Punktwolke „%1“ --&gt; %2/%3 verbleibende Punkte</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1898"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1981"/>
         <source>_FILTERED_[%1_%2]</source>
         <translation>_FILTERED_[%1_%2]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1916"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1999"/>
         <source>Compute mesh volume</source>
         <translation>Netzvolumen berechnen</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1921"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2004"/>
         <source>[COMPUTE MESH VOLUME]</source>
         <translation>[NETZVOLUMEN BERECHNEN]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1925"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2008"/>
         <source>No mesh loaded! Nothing to do...</source>
         <translation>Kein Netzt geladen! Nichts zu tun...</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1943"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2026"/>
         <source>Volume report file: %1</source>
         <translation>Volumen-Protokolldatei: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1947"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2030"/>
         <source>Missing argument: filename after &apos;%1&apos;</source>
         <translation>Fehlendes Argument: Dateiname nach „%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1959"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2042"/>
         <source>Failed to create/open volume report file</source>
         <translation>Die Volumen-Report-Datei konnte nicht erstellt/geöffnet werden</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1969"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2052"/>
         <source>Mesh &apos;%1&apos;</source>
         <translation>Netz „%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1972"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2055"/>
         <source> (#%2)</source>
         <translation> (#%2)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1975"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2058"/>
         <source>V = %2</source>
         <translation>V = %2</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1989"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2072"/>
         <source>Merge meshes</source>
         <translation>Netze vereinigen</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1994"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2077"/>
         <source>[MERGE MESHES]</source>
         <translation>[NETZE VEREINIGEN]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1998"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2081"/>
         <source>Less than 2 meshes are loaded! Nothing to do...</source>
         <translation>Weniger als zwei Netze sind geladen! Nichts zu tun...</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2019"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2102"/>
         <source>Can&apos;t merge mesh &apos;%1&apos; (unhandled type)</source>
         <translation>Netze „%1“ können nicht verbunden werden (unbekannter Typ)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2034"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2117"/>
         <source>Merge operation failed</source>
         <translation>Vereinigen fehlgeschlagen</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2043"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2126"/>
         <source>Result is empty</source>
         <translation>Ergebnis ist leer</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2049"/>
-        <location filename="../ccCommandLineCommands.cpp" line="2103"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2132"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2186"/>
         <source>_MERGED</source>
         <translation>_MERGED</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2066"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2149"/>
         <source>Merge clouds</source>
         <translation>Punktwolken vereinigen</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2071"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2154"/>
         <source>[MERGE CLOUDS]</source>
         <translation>[PUNKTWOLKEN VEREINIGEN]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2075"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2158"/>
         <source>Less than 2 clouds are loaded! Nothing to do...</source>
         <translation>Weniger als zwei Punktwolken sind geladen! Nichts zu tun...</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2095"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2178"/>
         <source>Fusion failed! (not enough memory?)</source>
         <translation>Vereinigen fehlgeschlagen! (nicht genug Arbeitsspeicher)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2116"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2199"/>
         <source>Set active SF</source>
         <translation>Aktives Skalares Feld setzen</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2123"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2206"/>
         <source>Missing parameter: scalar field index after &quot;-%1&quot;</source>
         <translation>Fehlender Parameter: Skalarer Feld-Index nach „-%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2131"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2214"/>
         <source>Failed to read a numerical parameter: S.F. index (after &quot;-%1&quot;). Got &apos;%2&apos; instead.</source>
         <translation>Numerischer Parameter konnte nicht gelesen werden: S.F-Index (nach „-%1“). Stattdessen „%2“ erhalten.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2133"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2216"/>
         <source>Set active S.F. index: %1</source>
         <translation>Aktiver SF-Index: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2137"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2220"/>
         <source>No point cloud loaded! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>Keine Punktwolke geladen! (stellen Sie sicher, dass Sie eine mit  „-%1 [Dateiname der Punktwolke]“ vor „-%2“ öffnen)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2150"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2233"/>
         <source>Cloud &apos;%1&apos; has less scalar fields than the index to select!</source>
         <translation>Punktwolke „%1“hat weniger Skalare Felder wie im Index ausgewählt!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2159"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2242"/>
         <source>Remove all SF</source>
         <translation>Entferne alle Skalaren Felder</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2191"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2274"/>
         <source>Remove RGB</source>
         <translation>Entferne RGB</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2224"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2307"/>
         <source>Remove normals</source>
         <translation>Entferne Normalen</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2261"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2344"/>
         <source>Remove scan grids</source>
         <translation>Entferne Scan-Raster</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2291"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2374"/>
         <source>Match B.B. centers</source>
         <translation>Begrenzungs-Box-Zentrum anpassen</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2296"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2379"/>
         <source>[MATCH B.B. CENTERS]</source>
         <translation>[FÜGE BEGRENZUNGS-RAHMEN-ZENTREN ZUSAMMEN]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2331"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2414"/>
         <source>Entity &apos;%1&apos; has been translated: (%2,%3,%4)</source>
         <translation>Entität „%1“ wurde übersetzt: (%2, %3, %4)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2346"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2429"/>
         <source>Match best fit plane</source>
         <translation>Am beten passende Ebene anpassen</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2351"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2434"/>
         <source>[COMPUTE BEST FIT PLANE]</source>
         <translation>[BERECHNE BESTE ANPASSUNGSEBENE]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2382"/>
-        <location filename="../ccCommandLineCommands.cpp" line="2509"/>
-        <location filename="../ccCommandLineCommands.cpp" line="2591"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3718"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2465"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2592"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2674"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3801"/>
         <source>No cloud available. Be sure to open one first!</source>
         <translation>Keine Punktwolke verfügbar. Bitte stellen Sie sicher, dass eine geöffnet wird!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2394"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2477"/>
         <source>Plane successfully fitted: rms = %1</source>
         <translation>Ebene erfolgreich angepasst: rms = %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2413"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2496"/>
         <source>%1/%2_BEST_FIT_PLANE_INFO</source>
         <translation>%1/%2_BEST_FIT_PLANE_INFO</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2416"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4427"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2499"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4612"/>
         <source>_%1</source>
         <translation>_%1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2418"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4428"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2501"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4613"/>
         <source>.txt</source>
         <translation>.txt</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2423"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2506"/>
         <source>Filename: %1</source>
         <translation>Dateiname: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2424"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2507"/>
         <source>Fitting RMS: %1</source>
         <translation>RMS anpassen: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2433"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2516"/>
         <source>Normal: (%1,%2,%3)</source>
         <translation>Normale: (%1,%2,%3)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2465"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2548"/>
         <source>Cloud &apos;%1&apos; has been transformed with the above matrix</source>
         <translation>Punktwolke „%1“ wurde mit der obigen Matrix transformiert</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2466"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2549"/>
         <source>_HORIZ</source>
         <translation>_HORIZ</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2479"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2562"/>
         <source>Failed to compute best fit plane for cloud &apos;%1&apos;</source>
         <translation>Die Berechnung best angepassten Ebene für Punktewolke „%1“ fehlgeschlagen</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2487"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2570"/>
         <source>Orient normals</source>
         <translation>Ausrichtung der Normalen</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2492"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2575"/>
         <source>[ORIENT NORMALS (MST)]</source>
         <translation>[NORMALEN ORIENTIEREN (MST)]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2496"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2579"/>
         <source>Missing parameter: number of neighbors after &quot;-%1&quot;</source>
         <translation>Fehlender Parameter: Anzahl der Nachbarn nach „-%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2504"/>
-        <location filename="../ccCommandLineCommands.cpp" line="2575"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2587"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2658"/>
         <source>Invalid parameter: number of neighbors (%1)</source>
         <translation>Ungültiger Parameter: Anzahl der Nachbarn (%1)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2532"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2615"/>
         <source>_NORMS_REORIENTED</source>
         <translation>_NORMS_REORIENTED</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2544"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2627"/>
         <source>Failed to orient the normals of cloud &apos;%1&apos;!</source>
         <translation>Die Normalen der Punktewolke „%1“ konnten nicht orientiert werden!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2558"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2641"/>
         <source>S.O.R. filter</source>
         <translation>S.O.R.-Filter</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2563"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2646"/>
         <source>[SOR FILTER]</source>
         <translation>[SOR-FILTER]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2567"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2650"/>
         <source>Missing parameter: number of neighbors mode after &quot;-%1&quot;</source>
         <translation>Fehlender Parameter: Anzahl des Nachbarschaftsmodus nach „-%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2580"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2663"/>
         <source>Missing parameter: sigma multiplier after number of neighbors (SOR)</source>
         <translation>Fehlender Parameter: Sigma-Multiplikator nach Anzahl der Nachbarn (SOR)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2586"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2669"/>
         <source>Invalid parameter: sigma multiplier (%1)</source>
         <translation>Ungültiger Parameter: Sigma-Multiplikator (%1)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2618"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2701"/>
         <source>.clean</source>
         <translation>.clean</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2632"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2715"/>
         <source>_SOR</source>
         <translation>_SOR</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2638"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2721"/>
         <source>Not enough memory to create a clean version of cloud &apos;%1&apos;!</source>
         <translation>Nicht genug Arbeitsspeicher um die bereinigte Version der Punktwolke „%1“ zu erstellen!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2647"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2730"/>
         <source>Failed to apply SOR filter on cloud &apos;%1&apos;! (not enough memory?)</source>
         <translation>Anwendung des SOR-Filters auf die Punktwolke „%1“ fehlgeschlagen! (nicht genug Arbeitsspeicher)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2661"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2744"/>
         <source>Extract vertices (as a standalone &apos;cloud&apos;)</source>
         <translation>Scheitelpunkte extrahieren (als eigenständige „Punktwolke“)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2666"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2749"/>
         <source>[EXTRACT VERTICES]</source>
         <translation>[SCHEITELPUNKTE EXTRAHIEREN]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2670"/>
-        <location filename="../ccCommandLineCommands.cpp" line="2754"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3317"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2753"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2837"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3400"/>
         <source>No mesh available. Be sure to open one first!</source>
         <translation>Kein Netz verfügbar. Unbedingt vorher eines öffnen!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2686"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2769"/>
         <source>.vertices</source>
         <translation>.vertices</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2712"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2795"/>
         <source>Sample mesh</source>
         <translation>Beispiel-Netz</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2717"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2800"/>
         <source>[SAMPLE POINTS ON MESH]</source>
         <translation>[PUNKTE FILTERN AUF EINEM NETZ]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2721"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2804"/>
         <source>Missing parameter: sampling mode after &quot;-%1&quot; (POINTS/DENSITY)</source>
         <translation>Fehlender Parameter: Abtast-Modus nach „-%1“ (Punkte/ Dichte)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2738"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2821"/>
         <source>Invalid parameter: unknown sampling mode &quot;%1&quot;</source>
         <translation>Ungültiger Parameter: unbekannte Abtast-Methode „%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2743"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2826"/>
         <source>Missing parameter: value after sampling mode</source>
         <translation>Fehlender Parameter: Wert nach Abtast-Modus</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2749"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2832"/>
         <source>Invalid parameter: value after sampling mode</source>
         <translation>Ungültiger Parameter: Wert nach Abtast-Modus</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2770"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2853"/>
         <source>Cloud sampling failed!</source>
         <translation>Punktwolken-Abtastung fehlgeschlagen!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2774"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2857"/>
         <source>Sampled cloud created: %1 points</source>
         <translation>Abgetastete Punktwolke erstellt: %1 Punkte</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2775"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2858"/>
         <source>_SAMPLED_POINTS</source>
         <translation>_SAMPLED_POINTS</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2798"/>
-        <location filename="../ccCommandLineCommands.cpp" line="2945"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3009"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2881"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3028"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3092"/>
         <source>Crop</source>
         <translation>Beschneiden</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2803"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2886"/>
         <source>[CROP]</source>
         <translation>[ZUSCHNITT]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2807"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2890"/>
         <source>Missing parameter: box extents after &quot;-%1&quot; (Xmin:Ymin:Zmin:Xmax:Ymax:Zmax)</source>
         <translation>Fehlender Parameter: Box erweitert nach „-%1“ (Xmin:Ymin:Zmin:Xmax:Ymax:Zmax)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2811"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2894"/>
         <source>No point cloud or mesh available. Be sure to open or generate one first!</source>
         <translation>Keine Punktwolke oder Netz vorhanden. Öffnen oder generieren Sie unbedingt zuerst eine!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2822"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2905"/>
         <source>Invalid parameter: box extents (expected format is &apos;Xmin:Ymin:Zmin:Xmax:Ymax:Zmax&apos;)</source>
         <translation>Ungültiger Parameter: Box erweitert (erwartetes Format ist: „Xmin:Ymin:Zmin:Xmax:Ymax:Zmax“)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2832"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2915"/>
         <source>Invalid parameter: box extents (component #%1 is not a valid number)</source>
         <translation>Ungültiger Parameter: Box erweitert (Komponente #%1 is keine gültige Zahl)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2950"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3033"/>
         <source>[COORD TO SF]</source>
         <translation>[KOORDINATEN IN SF]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2954"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3037"/>
         <source>Missing parameter after &quot;-%1&quot; (DIMENSION)</source>
         <translation>Fehlender Parameter nach „-%1“ (Dimension)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2958"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3022"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3287"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3041"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3105"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3370"/>
         <source>No point cloud available. Be sure to open or generate one first!</source>
         <translation>Keine Punktwolke verfügbar. Unbedingt vorher öffnen oder erzeugen!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2979"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3200"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3062"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3283"/>
         <source>Invalid parameter: dimension after &quot;-%1&quot; (expected: X, Y or Z)</source>
         <translation>Ungültiger Parameter: Dimension nach „-%1“ (erwartet: X, Y, Z)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2989"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3072"/>
         <source>_%1_TO_SF</source>
         <translation>_%1_TO_SF</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3001"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3084"/>
         <source>Failed to export coord. %1 to SF on cloud &apos;%2&apos;!</source>
         <translation>Die Koordinaten %1 konnten nicht auf das SF der Punktewolke „%2“ exportiert werden!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3014"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3097"/>
         <source>[CROP 2D]</source>
         <translation>[2D-ZUSCHNITT]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3018"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3101"/>
         <source>Missing parameter(s) after &quot;-%1&quot; (ORTHO_DIM N X1 Y1 X2 Y2 ... XN YN)</source>
         <translation>Fehlende(r) Parameter: nach „-%1“ (ORTHO_DIM N X1 Y1 X2 Y2 ... XN YN)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3047"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3130"/>
         <source>Invalid parameter: orthogonal dimension after &quot;-%1&quot; (expected: X, Y or Z)</source>
         <translation>Ungültiger Parameter: orthogonale Dimension nach „-%1“ (erwartet (X, Y oder Z)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3059"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3142"/>
         <source>Invalid parameter: number of vertices for the 2D polyline after &quot;-%1&quot;</source>
         <translation>Ungültiger Parameter: Anzahl der Scheitelpunkte für die 2D-Polylinie nach „-%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3075"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3158"/>
         <source>Missing parameter(s): vertex #%1 data and following</source>
         <translation>Fehlender Parameter: Scheitelpunkt #%1 Daten und Folgende</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3084"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3167"/>
         <source>Invalid parameter: X-coordinate of vertex #%1</source>
         <translation>Ungültiger Parameter: X-Koordinate des Scheitelpunkts #%1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3090"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3173"/>
         <source>Invalid parameter: Y-coordinate of vertex #%1</source>
         <translation>Ungültiger Parameter: Y-Koordinate des Scheitelpunkts #%1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3132"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3215"/>
         <source>.cropped</source>
         <translation>.cropped</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3145"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3228"/>
         <source>Not enough memory to crop cloud &apos;%1&apos;!</source>
         <translation>Nicht genug Arbeitsspeicher um die Punktwolke „%1“ zuzuschneiden!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3152"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3235"/>
         <source>No point of cloud &apos;%1&apos; falls inside the input box!</source>
         <translation>Kein Punkt der Punktwolke „%1“ liegt innerhalb des Eingabefeldes!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3157"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3240"/>
         <source>Crop process failed! (not enough memory)</source>
         <translation>Zuschneiden fehlgeschlagen! (nicht genug Arbeitsspeicher)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3165"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3248"/>
         <source>Color banding</source>
         <translation>Farbband</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3170"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3253"/>
         <source>[COLOR BANDING]</source>
         <translation>[FARBBAND]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3174"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3257"/>
         <source>Missing parameter(s) after &quot;-%1&quot; (DIM FREQUENCY)</source>
         <translation>Fehlende(r) Parameter: nach „-%1“ (DIM FREQUENCY)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3178"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3261"/>
         <source>No entity available. Be sure to open or generate one first!</source>
         <translation>Keine Entität verfügbar. Stellen Sie sicher, dass zuerst eine geöffnet oder erzeugt wird!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3212"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3295"/>
         <source>Invalid parameter: frequency after &quot;-%1 DIM&quot; (in Hz, integer value)</source>
         <translation>Ungültiger Parameter: Frequenz nach „-%1 DIM“ (in Hz, Ganzzahl)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3231"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3259"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3314"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3342"/>
         <source>COLOR_BANDING_%1_%2</source>
         <translation>COLOR_BANDING_%1_%2</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3254"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3337"/>
         <source>Vertices of mesh &apos;%1&apos; are locked (they may be shared by multiple entities for instance). Can&apos;t apply the current command on them.</source>
         <translation>Eckpunkte des Netzes „%1“ sind gesperrt (sie können z. B. von mehreren Objekten geteilt werden). Der aktuelle Befehl kann nicht auf sie angewendet werden.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3275"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3358"/>
         <source>[DISTANCE COMPUTATION]</source>
         <translation>[ABSTANDSBERECHNUNG]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3291"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3374"/>
         <source>No point cloud available. Will use the first mesh vertices as compared cloud.</source>
         <translation>Keine Punktwolke verfügbar. Es werden die ersten Netz-Scheitelpunkte als Vergleichs-Punktwolke verwendet.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3296"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3379"/>
         <source>Unhandled mesh vertices type</source>
         <translation>Unbehandelter Netz-Scheitelpunkt-Typ</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3304"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3387"/>
         <source>[C2M] Multiple point clouds loaded! Will take the first one by default.</source>
         <translation>[C2M] Mehrere Punktwolken geladen! Nimmt standardmäßig die erste.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3329"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3412"/>
         <source>Only one point cloud available. Be sure to open or generate a second one before performing C2C distance!</source>
         <translation>Es ist nur eine Punktwolke verfügbar. Öffnen oder erzeugen Sie unbedingt eine zweite, bevor Sie den C2C-Abstand durchführen!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3333"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3416"/>
         <source>More than 3 point clouds loaded! We take the second one as reference by default</source>
         <translation>Es wurden mehr als 3 Punktwolken geladen! Wir nehmen die zweite Punktwolke als Referenz</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3361"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3444"/>
         <source>Parameter &quot;-%1&quot; ignored: only for C2M distance!</source>
         <translation>Parameter „-%1“ wird ignoriert: nur für C2M-Abstand!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3371"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3387"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3454"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3470"/>
         <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerCommand.cpp" line="68"/>
         <source>Missing parameter: value after &quot;-%1&quot;</source>
         <translation>Fehlender Parameter: Wert nach „-%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3377"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3393"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3460"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3476"/>
         <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerCommand.cpp" line="72"/>
         <location filename="../../plugins/core/Standard/qCSF/include/qCSFCommands.h" line="143"/>
         <location filename="../../plugins/core/Standard/qCSF/include/qCSFCommands.h" line="154"/>
@@ -10765,478 +12384,499 @@ p, li { white-space: pre-wrap; }
         <translation>Ungültiger Parameter: Wert nach „-%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3405"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3488"/>
         <source>Parameter &quot;-%1&quot; ignored: only for C2C distance!</source>
         <translation>Parameter „-%1“ wird ignoriert: nur für C2C-Abstand!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3430"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3513"/>
         <source>Invalid parameter: unknown model type &quot;%1&quot;</source>
         <translation>Ungültiger Parameter: unbekannter Modell-Typ „%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3435"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3518"/>
         <source>Missing parameter: model type after &quot;-%1&quot; (LS/TRI/HF)</source>
         <translation>Fehlender Parameter: Modell-Typ nach „-%1“ (LS/TRI/HF)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3451"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3534"/>
         <source>Invalid parameter: unknown neighborhood type &quot;%1&quot;</source>
         <translation>Ungültiger Parameter: unbekannter Nachbarschafts-Typ „%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3456"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3539"/>
         <source>Missing parameter: expected neighborhood type after model type (KNN/SPHERE)</source>
         <translation>Fehlender Parameter: erwarteter Nachbarschafts-Typ nach Modell-Typ (KNN/KUGEL)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3466"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3549"/>
         <source>Invalid parameter: neighborhood size</source>
         <translation>Ungültiger Parameter: Nachbarschaftsgröße</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3471"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3554"/>
         <source>Missing parameter: expected neighborhood size after neighborhood type (neighbor count/sphere radius)</source>
         <translation>Fehlender Parameter: erwartete Nachbarschaftsgröße nach Nachbarschafts-Typ (Anzahl Nachbarn/Kugelradius)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3481"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4270"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3564"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4455"/>
         <source>Missing parameter: max thread count after &apos;%1&apos;</source>
         <translation>Fehlender Parameter: Maximale Thread-Anzahl nach „%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3488"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4277"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3571"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4462"/>
         <source>Invalid thread count! (after %1)</source>
         <translation>Ungültige Anzahl von Threads! (nach %1)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3506"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3589"/>
         <source>Failed to initialize comparison dialog</source>
         <translation>Vergleichsdialog konnte nicht initialisiert werden</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3561"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3644"/>
         <source>An error occurred during distances computation!</source>
         <translation>Ein Fehler ist während der Abstandsberechnung aufgetreten!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3569"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3652"/>
         <source>_MAX_DIST_%1</source>
         <translation>_MAX_DIST_%1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3587"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3670"/>
         <source>C2M distance</source>
         <translation>C2M-Abstand</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3591"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3674"/>
         <source>C2C distance</source>
         <translation>C2C-Abstand</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3595"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3678"/>
         <source>Statistical test</source>
         <translation>Statistischer Test</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3600"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3683"/>
         <source>[STATISTICAL TEST]</source>
         <translation>[STATISTISCHER TEST]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3607"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3690"/>
         <source>Missing parameter: distribution type after &quot;-%1&quot; (GAUSS/WEIBULL)</source>
         <translation>Fehlender Parameter: Verteilungs-Typ nach „-%1“ (GAUSS/WEIBULL)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3616"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3699"/>
         <source>Missing parameter: mean value after &quot;GAUSS&quot;</source>
         <translation>Fehlender Parameter: Mittelwert nach „GAUSS“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3622"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3705"/>
         <source>Invalid parameter: mean value after &quot;GAUSS&quot;</source>
         <translation>Ungültiger Parameter: Mittelwert nach „GAUSS“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3627"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3710"/>
         <source>Missing parameter: sigma value after &quot;GAUSS&quot; {mu}</source>
         <translation>Fehlender Parameter: Sigma-Wert nach „GAUSS“ {mu}</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3633"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3716"/>
         <source>Invalid parameter: sigma value after &quot;GAUSS&quot; {mu}</source>
         <translation>Ungültiger Parameter: Sigma-Wert nach „GAUSS“ {mu}</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3645"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3728"/>
         <source>Missing parameter: a value after &quot;WEIBULL&quot;</source>
         <translation>Fehlender Parameter: a-Wert hinter „WEIBULL“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3651"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3734"/>
         <source>Invalid parameter: a value after &quot;WEIBULL&quot;</source>
         <translation>Ungültiger Parameter: a-Wert hinter „WEIBULL“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3656"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3739"/>
         <source>Missing parameter: b value after &quot;WEIBULL&quot; {a}</source>
         <translation>Fehlender Parameter: b-Wert hinter „WEIBULL“ {a}</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3662"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3745"/>
         <source>Invalid parameter: b value after &quot;WEIBULL&quot; {a}</source>
         <translation>Ungültiger Parameter: b-Wert hinter „WEIBULL“ {a}</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3667"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3750"/>
         <source>Missing parameter: shift value after &quot;WEIBULL&quot; {a} {b}</source>
         <translation>Fehlender Parameter: Verschiebungswert hinter „WEIBULL“ {a} {b}</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3673"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3756"/>
         <source>Invalid parameter: shift value after &quot;WEIBULL&quot; {a} {b}</source>
         <translation>Ungültiger Parameter: Verschiebungswert hinter „WEIBULL“ {a} {b}</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3682"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3765"/>
         <source>Invalid parameter: unknown distribution &quot;%1&quot;</source>
         <translation>Ungültiger Parameter: unbekannte Verteilung „%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3691"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3774"/>
         <source>Missing parameter: p-value after distribution</source>
         <translation>Fehlender Parameter: p-Wert nach Verteilung</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3697"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3780"/>
         <source>Invalid parameter: p-value after distribution</source>
         <translation>Ungültiger Parameter: p-Wert nach Verteilung</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3706"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3789"/>
         <source>Missing parameter: neighbors after p-value</source>
         <translation>Fehlender Parameter: Nachbarn nach p-Wert</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3712"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3795"/>
         <source>Invalid parameter: neighbors after p-value</source>
         <translation>Ungültiger Parameter: Nachbarn nach p-Wert</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3747"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3830"/>
+        <location filename="../ccEntityAction.cpp" line="2380"/>
         <source>Couldn&apos;t allocate a new scalar field for computing chi2 distances! Try to free some memory ...</source>
         <translation>Konnte kein neues Skalarfeld für die Berechnung der chi2-Abstände allokieren! Versuchen Sie, etwas Speicher freizugeben...</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3759"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3842"/>
+        <location filename="../ccEntityAction.cpp" line="726"/>
+        <location filename="../ccEntityAction.cpp" line="845"/>
+        <location filename="../ccEntityAction.cpp" line="2392"/>
         <source>Couldn&apos;t compute octree for cloud &apos;%1&apos;!</source>
         <translation>Die Berechnung des Oktrees für Punktewolke „%1“ konnte nich ausgeführt werden!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3766"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3849"/>
+        <location filename="../ccEntityAction.cpp" line="2403"/>
         <source>[Chi2 Test] %1 test result = %2</source>
         <translation>[Chi2-Test] %1 Testerbegnis = %2</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3782"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3865"/>
         <source>_STAT_TEST_%1</source>
         <translation>_STAT_TEST_%1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3804"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3887"/>
         <source>Delaunay triangulation</source>
         <translation>Delaunay-Triangulation</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3809"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3892"/>
         <source>[DELAUNAY TRIANGULATION]</source>
         <translation>[DELAUNAY-TRIANGULATION]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3836"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3919"/>
         <source>Missing parameter: max edge length value after &apos;%1&apos;</source>
         <translation>Fehlender Parameter: Maximale Kantenlänge nach „%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3842"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3925"/>
         <source>Invalid value for max edge length! (after %1)</source>
         <translation>Ungültiger Wert für die maximale Kantenlänge! (nach %1)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3843"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3926"/>
         <source>Max edge length: %1</source>
         <translation>Maximale Kantenlänge: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3852"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3935"/>
         <source>Axis aligned: %1</source>
         <translation>Achsen ausgerichtet: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3869"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3952"/>
         <source>	Resulting mesh: #%1 faces, %2 vertices</source>
         <translation>	Resultierendes Netz: #%1 Flächen, %2 Scheitelpunkte</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3905"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3988"/>
         <source>SF arithmetic</source>
         <translation>SF-Arithmetik</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3910"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3993"/>
         <source>[SF ARITHMETIC]</source>
         <translation>[SF-ARITHMETIK]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3914"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3997"/>
         <source>Missing parameter(s): SF index and/or operation after &apos;%1&apos; (2 values expected)</source>
         <translation>Fehlende(r) Parameter: SF-Index und/oder Operation nach „%1“ (2 Werte erwartet)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3931"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4024"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4235"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4259"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4014"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4107"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4218"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4420"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4444"/>
         <source>Invalid SF index! (after %1)</source>
         <translation>Ungültiger SF-Index! (nach %1)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3941"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4034"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4024"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4117"/>
         <source>Unknown operation! (%1)</source>
         <translation>Unbekannte Operation! (%1)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3945"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4038"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4028"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4121"/>
         <source>Operation %1 can&apos;t be applied with %2</source>
         <translation>Operation %1 kann nicht mit %2 angewendet werden</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3957"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4067"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4040"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4150"/>
         <source>Failed top apply operation on cloud &apos;%1&apos;</source>
         <translation>Operation konnte nicht auf Punktwolke „%1“ ausgeführt werden</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3980"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4090"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4063"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4173"/>
         <source>Failed top apply operation on mesh &apos;%1&apos;</source>
         <translation>Operation konnte nicht auf Netz „%1“ ausgeführt werden</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3997"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4080"/>
         <source>SF operation</source>
         <translation>SF-Operationen</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4002"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4085"/>
         <source>[SF OPERATION]</source>
         <translation>[SF-OPERATIONEN]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4006"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4089"/>
         <source>Missing parameter(s): SF index and/or operation and/or scalar value after &apos;%1&apos; (3 values expected)</source>
         <translation>Fehlende(r) Parameter: SF-Index und/oder Operation und/oder Skalarer Wert nach „%1“ (3 Werte erwartet)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4049"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4132"/>
         <source>Invalid scalar value! (after %1)</source>
         <translation>Ungültiger Skalarwert! (nach %1)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4112"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4191"/>
+        <source>Rename SF</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4196"/>
+        <source>[RENAME SF]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4200"/>
+        <source>Missing parameter(s): SF index and/or scalar field name after &apos;%1&apos; (2 values expected)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4297"/>
         <source>[ICP]</source>
         <translation>[ICP]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4158"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4343"/>
         <source>Missing parameter: min error difference after &apos;%1&apos;</source>
         <translation>Fehlender Parameter: minimale Fehlerdifferenz nach „%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4164"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4349"/>
         <source>Invalid value for min. error difference! (after %1)</source>
         <translation>Ungültiger Wert für die minimale Fehlerdifferenz! (nach %1)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4174"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4359"/>
         <source>Missing parameter: number of iterations after &apos;%1&apos;</source>
         <translation>Fehlender Parameter: Anzahl Iterationen nach „%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4180"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4365"/>
         <source>Invalid number of iterations! (%1)</source>
         <translation>Ungültige Anzahl von Iterationen (%1)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4189"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4374"/>
         <source>Missing parameter: overlap percentage after &apos;%1&apos;</source>
         <translation>Fehlender Parameter: Prozentuale Überlappung nach „%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4196"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4381"/>
         <source>Invalid overlap value! (%1 --&gt; should be between 10 and 100)</source>
         <translation>Ungültiger Überlappungswert! (%1 --&gt; sollte zwischen 10 und 100 sein)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4206"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4391"/>
         <source>Missing parameter: random sampling limit value after &apos;%1&apos;</source>
         <translation>Fehlender Parameter: Zufälliger-Abtast-Grenzwert nach „%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4212"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4397"/>
         <source>Invalid random sampling limit! (after %1)</source>
         <translation>Ungültige Zufalls-Abtast-Grenze! (nach %1)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4222"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4246"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4407"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4431"/>
         <source>Missing parameter: SF index after &apos;%1&apos;</source>
         <translation>Fehlender Parameter: SF-Index nach „%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4310"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4495"/>
         <source>Invalid parameter: unknown rotation filter &quot;%1&quot;</source>
         <translation>Ungültiger Parameter: unbekannter Rotations-Filter „%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4315"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4500"/>
         <source>Missing parameter: rotation filter after &quot;-%1&quot; (XYZ/X/Y/Z/NONE)</source>
         <translation>Fehlender Parameter: Rotationsfilter nach „-%1“ (XYZ/X/Y/Z/NONE)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4347"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4532"/>
         <source>Not enough loaded entities (expect at least 2!)</source>
         <translation>Nicht genug Entitäten geladen (es werden mindestens 2 erwartet!)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4363"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4548"/>
         <source>Invalid SF index for data entity! (%1)</source>
         <translation>Ungültiger SF-Index für Daten-Entität! (%1)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4371"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4556"/>
         <source>[ICP] SF #%1 (data entity) will be used as weights</source>
         <translation>[ICP] SF #%1 (Dateneinheit) wird als Gewichte verwendet</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4381"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4566"/>
         <source>Invalid SF index for model entity! (%1)</source>
         <translation>Ungültiger SF-Index für Modell-Entität! (%1)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4389"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4574"/>
         <source>[ICP] SF #%1 (model entity) will be used as weights</source>
         <translation>[ICP] SF #%1 (Modell-Entität) wird als Gewicht verwendet</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4419"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4604"/>
         <source>Entity &apos;%1&apos; has been registered</source>
         <translation>Entität „%1“ wurde registriert</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4420"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4605"/>
         <source>RMS: %1</source>
         <translation>RMS: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4421"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4606"/>
         <source>Number of points used for final step: %1</source>
         <translation>Anzahl der für den letzten Schritt verwendeten Punkte: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4425"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4610"/>
         <source>%1/%2_REGISTRATION_MATRIX</source>
         <translation>%1/%2_REGISTRATION_MATRIX</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4436"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4621"/>
         <source>_REGISTERED</source>
         <translation>_REGISTERED</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4455"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4640"/>
         <source>Change PLY output format</source>
         <translation>Ändere das PLY-Ausgabeformat</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4746"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4931"/>
         <source>Clear</source>
         <translation>Bereinigen</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4757"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4942"/>
         <source>Clear clouds</source>
         <translation>Punktwolken bereinigen</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4767"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4952"/>
         <source>Pop clouds</source>
         <translation>Punktwolken hervorholen</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4777"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4962"/>
         <source>Clear meshes</source>
         <translation>Netze Bereinigen</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4787"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4972"/>
         <source>Pop meshes</source>
         <translation>Netze hervorholen</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4797"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4982"/>
         <source>No timestamp</source>
         <translation>Kein Zeitstempel</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4807"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4992"/>
         <source>1st order moment</source>
         <translation>Moment 1. Ordnung</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4814"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4999"/>
         <source>Missing parameter: kernel size</source>
         <translation>Fehlender Parameter: Kernel-Größe</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4822"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4951"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5007"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5136"/>
         <source>Failed to read a numerical parameter: kernel size. Got &apos;%1&apos; instead.</source>
         <translation>Numerischer Parameter konnte nicht gelesen werden: Kernel-Größe. Stattdessen „%1“ erhalten.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4828"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5013"/>
         <source>No point cloud on which to compute first order moment! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>Keine Punktwolke, auf der das Moment erster Ordnung berechnet werden kann! (stellen Sie sicher, dass Sie eine mit „-%1 [Dateiname der Punktwolke]“ vor „-%2“ öffnen)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4842"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5027"/>
         <source>MOMENT_KERNEL_%2</source>
         <translation>MOMENT_KERNEL_%2</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4851"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5036"/>
         <source>Feature</source>
         <translation>Merkmal</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4856"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5041"/>
         <source>[FEATURE]</source>
         <translation>[FEATURE]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4860"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5045"/>
         <source>Missing parameter: feature type after &quot;-%1&quot;</source>
         <translation>Fehlender Parameter: Feature-Typ nach „-%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4924"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5109"/>
         <source>Invalid feature type after &quot;-%1&quot;. Got &apos;%2&apos; instead of:
 - SUM_OF_EIGENVALUES
 - OMNIVARIANCE
@@ -11269,17 +12909,17 @@ p, li { white-space: pre-wrap; }
 - EIGENVALUE3</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4943"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5128"/>
         <source>Missing parameter: kernel size after feature type</source>
         <translation>Fehlender Parameter: Kernel-Größe nach Merkmals-Typ</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4957"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5142"/>
         <source>No point cloud on which to compute feature! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>Keine Punktwolke, auf der das Feature berechnet werden kann! (stellen Sie sicher, dass Sie eine mit „-%1 [Dateiname der Punktwolke]“ vor „-%2“ öffnen)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4971"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5156"/>
         <source>%1_FEATURE_KERNEL_%2</source>
         <translation>%1_FEATURE_KERNEL_%2</translation>
     </message>
@@ -11294,83 +12934,83 @@ p, li { white-space: pre-wrap; }
         <translation>FBX-Format: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4462"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4647"/>
         <source>Missing parameter: format (ASCII, BINARY_LE, or BINARY_BE) after &apos;%1&apos;</source>
         <translation>Fehlender Parameter: Format (ASCII, Binär_LE, oder Binär_BE) nach „%1“</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4485"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4670"/>
         <source>Invalid PLY format! (&apos;%1&apos;)</source>
         <translation>Ungültiges PLY-Format („%1“)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4492"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4677"/>
         <source>Compute structured cloud normals</source>
         <translation>Berechne strukturierte Normalen der Punktwolken</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4521"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4706"/>
         <source>A file starting with %1 does not have a closing %1</source>
         <translation>Eine Datei, die mit %1 beginnt, hat kein abschließendes %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4553"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4738"/>
         <source>Save clouds</source>
         <translation>Speichere Punktwolken</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4589"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4660"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4774"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4845"/>
         <source>Invalid parameter: specified %1 file names, but ALL_AT_ONCE is on</source>
         <translation>Ungültiger Parameter: angegebene %1 Dateinamen, aber ALL_AT_ONCE ist aktiviert</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4593"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4778"/>
         <source>Invalid parameter: specified %1 file names, but there are %2 clouds</source>
         <translation>Ungültiger Parameter: angegebene %1 Dateinamen, aber dort sind %2 Punktwolken</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4624"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4809"/>
         <source>Save meshes</source>
         <translation>Speichere Netz</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4664"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4849"/>
         <source>Invalid parameter: specified %1 file names, but there are %2 meshes</source>
         <translation>Ungültiger Parameter: angegebene %1 Dateinamen, aber dort sind %2 Netze</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4695"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4880"/>
         <source>Auto save state</source>
         <translation>Automatischer Speicherstatus</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4702"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4887"/>
         <source>Missing parameter: option after &apos;%1&apos; (%2/%3)</source>
         <translation>Fehlender Parameter: Optionen nach „%1“ (%2/%3)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4708"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4893"/>
         <source>Auto-save is enabled</source>
         <translation>Automatisches Speichern ist aktiviert</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4713"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4898"/>
         <source>Auto-save is disabled</source>
         <translation>Automatisches Speichern ist deaktiviert</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4718"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4903"/>
         <source>Unrecognized option after &apos;%1&apos; (%2 or %3 expected)</source>
         <translation>Nicht erkannte Option nach „%1“ (%2 oder %3 erwartet)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4725"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4910"/>
         <source>Set log file</source>
         <translation>Protokolldatei einstellen</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4732"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4917"/>
         <source>Missing parameter: filename after &apos;%1&apos;</source>
         <translation>Fehlender Parameter: Dateiname nach „%1“</translation>
     </message>
@@ -11408,7 +13048,7 @@ Punkte: %2</translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerFilter.cpp" line="632"/>
-        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="2377"/>
+        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="2385"/>
         <source>Images: %1</source>
         <translation>Bilder: %1</translation>
     </message>
@@ -11427,11 +13067,11 @@ Punkte: %2</translation>
         <location filename="../../plugins/core/IO/qAdditionalIO/src/PNFilter.cpp" line="171"/>
         <location filename="../../plugins/core/IO/qAdditionalIO/src/PVFilter.cpp" line="102"/>
         <location filename="../../plugins/core/IO/qAdditionalIO/src/PVFilter.cpp" line="168"/>
-        <location filename="../../plugins/core/IO/qPDALIO/src/LASFilter.cpp" line="304"/>
-        <location filename="../../plugins/core/IO/qPDALIO/src/LASFilter.cpp" line="1205"/>
-        <location filename="../../plugins/core/IO/qPDALIO/src/LASFilter.cpp" line="1275"/>
+        <location filename="../../plugins/core/IO/qPDALIO/src/LASFilter.cpp" line="308"/>
+        <location filename="../../plugins/core/IO/qPDALIO/src/LASFilter.cpp" line="1214"/>
+        <location filename="../../plugins/core/IO/qPDALIO/src/LASFilter.cpp" line="1284"/>
         <location filename="../../libs/qCC_db/src/ccGBLSensor.cpp" line="706"/>
-        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="5380"/>
+        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="5386"/>
         <source>Points: %L1</source>
         <translation>Punkte: %L1</translation>
     </message>
@@ -11505,28 +13145,28 @@ Quell-Punkte: %2</translation>
         <translation>Bereite polare Anzeige vor...</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qLASFWFIO/src/LASFWFFilter.cpp" line="448"/>
+        <location filename="../../plugins/core/IO/qLASFWFIO/src/LASFWFFilter.cpp" line="496"/>
         <source>Export LAS file</source>
         <translation>LAS-Datei exportieren</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qLASFWFIO/src/LASFWFFilter.cpp" line="449"/>
-        <location filename="../../plugins/core/IO/qLASFWFIO/src/LASFWFFilter.cpp" line="735"/>
+        <location filename="../../plugins/core/IO/qLASFWFIO/src/LASFWFFilter.cpp" line="497"/>
+        <location filename="../../plugins/core/IO/qLASFWFIO/src/LASFWFFilter.cpp" line="783"/>
         <source>Points: %1</source>
         <translation>Punkte: %1</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qLASFWFIO/src/LASFWFFilter.cpp" line="727"/>
+        <location filename="../../plugins/core/IO/qLASFWFIO/src/LASFWFFilter.cpp" line="775"/>
         <source>Reading %1 points</source>
         <translation>%1 Punkte lesen</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qLASFWFIO/src/LASFWFFilter.cpp" line="734"/>
+        <location filename="../../plugins/core/IO/qLASFWFIO/src/LASFWFFilter.cpp" line="782"/>
         <source>Import LAS file</source>
         <translation>LAS-Datei importieren</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qLASFWFIO/src/LASFWFFilter.cpp" line="1203"/>
+        <location filename="../../plugins/core/IO/qLASFWFIO/src/LASFWFFilter.cpp" line="1251"/>
         <source>No valid point in file</source>
         <translation>Kein gültiger Punkt in der Datei</translation>
     </message>
@@ -11598,34 +13238,34 @@ Points: %1</source>
 Punkte: %1</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="5163"/>
+        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="5169"/>
         <source>Normals computation</source>
         <translation>Berechne Normalen</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="5191"/>
+        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="5197"/>
         <source>Grid: %1 x %2</source>
         <translation>Gitter: %1 x %2</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="5379"/>
+        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="5385"/>
         <source>Orienting normals</source>
         <translation>Normalen Ausrichten</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="5641"/>
+        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="5647"/>
         <source>FWF amplitude</source>
         <translation>FWF-Amplitude</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="5642"/>
+        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="5648"/>
         <source>Determining min and max FWF values
 Points: </source>
         <translation>Bestimme minimale und maximal FWF-Werte
 Punkte: </translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccPolyline.cpp" line="618"/>
+        <location filename="../../libs/qCC_db/src/ccPolyline.cpp" line="646"/>
         <source>sampled</source>
         <translation>abgetastet</translation>
     </message>
@@ -11642,23 +13282,23 @@ Cells: %L2 x %L3</source>
 Zellen %L2 x %L3</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/AsciiFilter.cpp" line="210"/>
+        <location filename="../../libs/qCC_io/src/AsciiFilter.cpp" line="237"/>
         <source>Saving cloud [%1]</source>
         <translation>Speichere Punktwolke [%1]</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/AsciiFilter.cpp" line="211"/>
+        <location filename="../../libs/qCC_io/src/AsciiFilter.cpp" line="238"/>
         <source>Number of points: %1</source>
         <translation>Anzahl der Punkte: %1</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/AsciiFilter.cpp" line="812"/>
-        <source>Open ASCII file [%1]</source>
-        <translation>ASCII-Datei [%1] öffnen</translation>
+        <location filename="../../libs/qCC_io/src/AsciiFilter.cpp" line="840"/>
+        <source>Open ASCII data [%1]</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_io/src/AsciiFilter.cpp" line="813"/>
-        <location filename="../../libs/qCC_io/src/AsciiFilter.cpp" line="922"/>
+        <location filename="../../libs/qCC_io/src/AsciiFilter.cpp" line="841"/>
+        <location filename="../../libs/qCC_io/src/AsciiFilter.cpp" line="950"/>
         <source>Approximate number of points: %1</source>
         <translation>Ungefähre Anzahl an Punkten: %1</translation>
     </message>
@@ -11689,67 +13329,67 @@ Zellen %L2 x %L3</translation>
         <translation>Punktwolke %1/%2 (%3 Punkte)</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="518"/>
-        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="833"/>
+        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="521"/>
+        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="836"/>
         <source>Write E57 file</source>
         <translation>Schreibe E57-Datei</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="519"/>
-        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="1744"/>
+        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="522"/>
+        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="1751"/>
         <source>Scan #%1 - %2 points</source>
         <translation>Scan #%1 - %2 Punkte</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="834"/>
+        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="837"/>
         <source>Cloud #%1 - Images: %2</source>
         <translation>Punktwolke #%1 - Bilder: %2</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="1743"/>
-        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="2283"/>
-        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="2376"/>
+        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="1750"/>
+        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="2291"/>
+        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="2384"/>
         <source>Read E57 file</source>
         <translation>Lese E57-Datei</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="2284"/>
+        <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="2292"/>
         <source>Scans: %1</source>
         <translation>Scans: %1</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qPDALIO/src/LASFilter.cpp" line="303"/>
+        <location filename="../../plugins/core/IO/qPDALIO/src/LASFilter.cpp" line="307"/>
         <source>Save LAS file</source>
         <translation>Speichere LAS-Datei</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qPDALIO/src/LASFilter.cpp" line="401"/>
+        <location filename="../../plugins/core/IO/qPDALIO/src/LASFilter.cpp" line="410"/>
         <source>Original scale is too small for this cloud  </source>
         <translation>Original-Maßstab ist zu klein für diese Punktwolke  </translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qPDALIO/src/LASFilter.cpp" line="1204"/>
+        <location filename="../../plugins/core/IO/qPDALIO/src/LASFilter.cpp" line="1213"/>
         <source>Open LAS file</source>
         <translation>LAS-Datei öffnen</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qPDALIO/src/LASFilter.cpp" line="1251"/>
-        <location filename="../../plugins/core/IO/qPDALIO/src/LASFilter.cpp" line="1292"/>
+        <location filename="../../plugins/core/IO/qPDALIO/src/LASFilter.cpp" line="1260"/>
+        <location filename="../../plugins/core/IO/qPDALIO/src/LASFilter.cpp" line="1301"/>
         <source>LAS file</source>
         <translation>LAS-Datei</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qPDALIO/src/LASFilter.cpp" line="1252"/>
+        <location filename="../../plugins/core/IO/qPDALIO/src/LASFilter.cpp" line="1261"/>
         <source>Please wait... reading in progress</source>
         <translation>Bitte warten...es wird gelesen</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qPDALIO/src/LASFilter.cpp" line="1274"/>
+        <location filename="../../plugins/core/IO/qPDALIO/src/LASFilter.cpp" line="1283"/>
         <source>Tiling points</source>
         <translation>Kachel-Punkte</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qPDALIO/src/LASFilter.cpp" line="1293"/>
+        <location filename="../../plugins/core/IO/qPDALIO/src/LASFilter.cpp" line="1302"/>
         <source>Please wait... writing in progress</source>
         <translation>Bitte warten...es wird geschrieben</translation>
     </message>
@@ -11777,9 +13417,8 @@ Zellen %L2 x %L3</translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qCoreIO/src/ObjFilter.cpp" line="153"/>
-        <source>Writing $1 triangle normals</source>
-        <translatorcomment>Schreibe %1 Normalen der Dreiecke</translatorcomment>
-        <translation type="unfinished">Schreibe $1 Normalen der Dreiecke</translation>
+        <source>Writing %1 triangle normals</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qCoreIO/src/ObjFilter.cpp" line="182"/>
@@ -11808,7 +13447,7 @@ Zellen %L2 x %L3</translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qCoreIO/src/ObjFilter.cpp" line="542"/>
-        <location filename="../../plugins/core/IO/qCoreIO/src/STLFilter.cpp" line="629"/>
+        <location filename="../../plugins/core/IO/qCoreIO/src/STLFilter.cpp" line="434"/>
         <location filename="../../libs/qCC_io/src/PlyFilter.cpp" line="1700"/>
         <source>Loading in progress...</source>
         <translation>Es wird geladen...</translation>
@@ -11871,17 +13510,17 @@ Zellen %L2 x %L3</translation>
         <translation>Anzahl der Facetten: %1</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qCoreIO/src/STLFilter.cpp" line="628"/>
+        <location filename="../../plugins/core/IO/qCoreIO/src/STLFilter.cpp" line="433"/>
         <source>(ASCII) STL file</source>
         <translation>(ASCII) STL-Datei</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qCoreIO/src/STLFilter.cpp" line="955"/>
+        <location filename="../../plugins/core/IO/qCoreIO/src/STLFilter.cpp" line="735"/>
         <source>Loading binary STL file</source>
         <translation>Lade die binäre STL-Datei</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/IO/qCoreIO/src/STLFilter.cpp" line="956"/>
+        <location filename="../../plugins/core/IO/qCoreIO/src/STLFilter.cpp" line="736"/>
         <source>Loading %1 faces</source>
         <translation>Lade %1 Oberflächen</translation>
     </message>
@@ -11891,12 +13530,500 @@ Zellen %L2 x %L3</translation>
         <translation>Alle (*.*)</translation>
     </message>
     <message>
+        <location filename="../ccEntityAction.cpp" line="131"/>
+        <source>[SetColor] Can&apos;t set color for mesh &apos;%1&apos; (vertices are not accessible)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="192"/>
+        <source>[SetColor] Can&apos;t change color of entity &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="291"/>
+        <source>Select one and only one colored cloud or mesh!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="306"/>
+        <source>Selected entity has no colors!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="321"/>
+        <location filename="../ccEntityAction.cpp" line="333"/>
+        <location filename="../ccEntityAction.cpp" line="386"/>
+        <location filename="../ccEntityAction.cpp" line="398"/>
+        <source>Select 2 entities (clouds or meshes)!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="339"/>
+        <location filename="../ccEntityAction.cpp" line="404"/>
+        <source>None of the selected entities has per-point or per-vertex colors!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="344"/>
+        <source>Both entities have colors! Remove the colors on the entity you wish to import the colors to!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="360"/>
+        <source>Destination cloud (or vertices) must be a real point cloud!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="373"/>
+        <location filename="../ccEntityAction.cpp" line="507"/>
+        <source>An error occurred! (see console)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="410"/>
+        <source>Source</source>
+        <translation type="unfinished">Quelle</translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="410"/>
+        <source>Destination</source>
+        <translation type="unfinished">Zielort</translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="440"/>
+        <source>entity</source>
+        <translation type="unfinished">Entität</translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="457"/>
+        <source>No scalar field was selected</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="526"/>
+        <source>[convertTextureToColor] Mesh &apos;%1&apos; has no material/texture!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="533"/>
+        <source>Mesh already has colors</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="534"/>
+        <source>Mesh &apos;%1&apos; already has colors! Overwrite them?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="550"/>
+        <source>[convertTextureToColor] Failed to convert texture on mesh &apos;%1&apos;!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="566"/>
+        <source>Intensity range</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="566"/>
+        <source>Do you want to define the theoretical intensity range (yes)
+or use the actual one (no)?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="568"/>
+        <source>Min</source>
+        <translation type="unfinished">Min</translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="568"/>
+        <source>Max</source>
+        <translation type="unfinished">Max</translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="568"/>
+        <source>Theroetical intensity</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="591"/>
+        <source>[enhanceRGBWithIntensities] Entity &apos;%1&apos; has no RGB color!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="596"/>
+        <source>[enhanceRGBWithIntensities] Entity &apos;%1&apos; has no scalar field!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="612"/>
+        <source>Intensity scalar field</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="612"/>
+        <source>Choose scalar field</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="649"/>
+        <source>[enhanceRGBWithIntensities] Failed to apply the process on entity &apos;%1&apos;!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="667"/>
+        <location filename="../ccEntityAction.cpp" line="771"/>
+        <source>No eligible point cloud in selection!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="673"/>
+        <source>Gaussian filter</source>
+        <translation type="unfinished">Gauß-Filter</translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="716"/>
+        <location filename="../ccEntityAction.cpp" line="835"/>
+        <source>Failed to create scalar field for cloud &apos;%1&apos; (not enough memory?)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="751"/>
+        <source>Failed to compute entity [%1] octree! (not enough memory?)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="756"/>
+        <location filename="../ccEntityAction.cpp" line="872"/>
+        <source>Entity [%1] has no active scalar field!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="783"/>
+        <source>Spatial sigma</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="784"/>
+        <source>Scalar sigma</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="793"/>
+        <source>3*sigma = 98% attenuation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="794"/>
+        <source>Scalar field&apos;s sigma controls how much the filter behaves as a Gaussian Filter
+ sigma at +inf uses the whole range of scalars</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="885"/>
+        <source>Scalar Field to RGB</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="886"/>
+        <source>Mix with existing colors (if any)?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="931"/>
+        <source>Random colors</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="932"/>
+        <source>Number of random colors (will be regularly sampled over the SF interval):</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="1023"/>
+        <source>Cloud %1 has no displayed scalar field!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="1030"/>
+        <source>SF name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="1031"/>
+        <source>name:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="1033"/>
+        <source>unknown</source>
+        <translation type="unfinished">unbekannt</translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="1085"/>
+        <source>Export SF to coordinate(s)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="1120"/>
+        <source>SF --&gt; coordinate</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="1121"/>
+        <source>Enter the coordinate equivalent for NaN values:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="1130"/>
+        <source>[SetSFAsCoord] By default the coordinate equivalent for NaN values will be the minimum SF value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="1185"/>
+        <location filename="../ccEntityAction.cpp" line="1247"/>
+        <source>The process failed!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../ccEntityAction.cpp" line="1212"/>
         <source>Export normals to SF(s)</source>
         <translation>Exportiere Normalen in SF(s)</translation>
     </message>
     <message>
-        <location filename="../ccPointPairRegistrationDlg.cpp" line="386"/>
+        <location filename="../ccEntityAction.cpp" line="1241"/>
+        <source>Cloud &apos;%1&apos; has no normals</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="1287"/>
+        <source>An error occurred (see Console for more details)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="1336"/>
+        <source>[sfFromColor] Not enough memory to instantiate SF &apos;%1&apos; on cloud &apos;%2&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="1393"/>
+        <source>[sfFromColor] Failed to add scalar field &apos;%1&apos; to cloud &apos;%2&apos;?!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="1400"/>
+        <source>[sfFromColor] New scalar fields (%1) added to &apos;%2&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="1435"/>
+        <source>Mesh [%1] vertices have no activated scalar field!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="1451"/>
+        <location filename="../ccEntityAction.cpp" line="1769"/>
+        <location filename="../ccEntityAction.cpp" line="1833"/>
+        <source>Select at least one point cloud</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="1521"/>
+        <source>Can&apos;t compute normals on sub-meshes! Select the parent mesh instead</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="1682"/>
+        <source>Failed to compute or orient the normals on some clouds! (see console)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="1684"/>
+        <source>Failed to compute or orient the normals! (see console)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="1692"/>
+        <source>Mesh normals</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="1693"/>
+        <source>Compute per-vertex normals (smooth) or per-triangle (faceted)?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="1697"/>
+        <source>Per-vertex</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="1698"/>
+        <source>Per-triangle</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="1721"/>
+        <source>Failed to compute normals on mesh &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="1776"/>
+        <source>Orient normals (FM)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="1777"/>
+        <source>Octree level</source>
+        <translation type="unfinished">Oktree-Niveau</translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="1802"/>
+        <location filename="../ccEntityAction.cpp" line="1864"/>
+        <source>Cloud &apos;%1&apos; has no normals!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="1819"/>
+        <location filename="../ccEntityAction.cpp" line="1882"/>
+        <source>Process failed (check console)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="1823"/>
+        <location filename="../ccEntityAction.cpp" line="1886"/>
+        <source>Normals have been oriented: you may still have to globally invert the cloud normals however (Edit &gt; Normals &gt; Invert).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="1840"/>
+        <source>Neighborhood size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="1841"/>
+        <source>Neighbors</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="1875"/>
+        <source>Process failed on cloud &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="1937"/>
+        <location filename="../ccEntityAction.cpp" line="1949"/>
+        <source>[ccEntityAction::convertNormalsTo] Not enough memory!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="1981"/>
+        <source>[ccEntityAction::convertNormalsTo] Internal error: unhandled destination!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="2002"/>
+        <source>Error(s) occurred! (see console)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="2048"/>
+        <source>[doActionComputeOctree] No eligible entities in selection!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="2131"/>
+        <source>Octree computation on cloud &apos;%1&apos; failed!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="2175"/>
+        <source>[doActionClearNormals] Can&apos;t remove per-vertex normals on a sub mesh!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="2288"/>
+        <location filename="../ccEntityAction.cpp" line="2432"/>
+        <source>Distribution</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="2288"/>
+        <source>Choose distribution</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="2303"/>
+        <source>Local Statistical Test (Gauss)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="2306"/>
+        <source>Local Statistical Test (Weibull)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="2309"/>
+        <source>Invalid distribution!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="2432"/>
+        <source>Distribution Fitting</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="2484"/>
+        <source>mean = %1 / std.dev. = %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="2495"/>
+        <source>[Distribution fitting] Additional Weibull distrib. parameters: mode = %1 / skewness = %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="2506"/>
+        <source>[Distribution fitting] %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="2518"/>
+        <source>[Distribution fitting] Not enough memory!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="2529"/>
+        <source>[Distribution fitting] %1: Chi2 Distance = %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="2533"/>
+        <source>[Distribution fitting] Failed to compute Chi2 distance?!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="2556"/>
+        <source>Scalar field RMS = %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="2562"/>
+        <source>[Distribution fitting]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="2572"/>
+        <source>Count</source>
+        <translation type="unfinished">Anzahl</translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="2579"/>
+        <source>[Entity: %1]-[SF: %2] Couldn&apos;t compute distribution parameters!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccPointPairRegistrationDlg.cpp" line="413"/>
         <source>Whether the point is expressed in the entity original coordinate system (before being shifted by CC) or not</source>
         <translation>Ob der Punkt im ursprünglichen Koordinatensystem der Entität (vor der Verschiebung durch CC) ausgedrückt wird oder nicht</translation>
     </message>
@@ -11931,18 +14058,18 @@ Zellen %L2 x %L3</translation>
         <translation>Berechnung Fehlgeschlagen</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="58"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="59"/>
         <source>RANSAC</source>
         <translation>RANSAC</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="64"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="65"/>
         <source>No point cloud to attempt RANSAC on (be sure to open one with &quot;-O [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>Keine Punktwolke, um RANSAC zu versuchen (stellen Sie sicher, dass Sie eine mit „-O [Wolke Dateiname]“ vor „-%2“ öffnen)</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="102"/>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="487"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="491"/>
         <source>	%1 : %2</source>
         <translation>	%1:%2</translation>
     </message>
@@ -11985,41 +14112,41 @@ Zellen %L2 x %L3</translation>
         <translation>	Wahrscheinlichkeit: %1</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="256"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="260"/>
         <source>Missing parameter: primitive type after &quot;-%1 %2&quot;</source>
         <translation>Fehlender Parameter: Primitiver Typ nach „-%1 %2“</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="302"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="306"/>
         <source>No valid parameter: primitive type after &quot;-%1 %2&quot;</source>
         <translation>Kein gültiger Parameter: Primitiver Typ nach „-%1 %2“</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="323"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="327"/>
         <source>	Default Shape Search == %1</source>
         <translation>	Standard Form-Suche == %1</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="328"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="332"/>
         <source>	Default output == %1</source>
         <translation>	Standard-Ausgabe == %1</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="474"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="478"/>
         <source>
 Missing parameter: Directory after &quot;-%1 %2&quot;</source>
         <translation>
 Fehlender Parameter: Verzeichnis nach „-%1 %2“</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="481"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="485"/>
         <source>
 %1 Does not exist	creating path</source>
         <translation>
 %1 existiert nicht	Pfad erstellen</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="492"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="496"/>
         <source>
 %1 path could not be created, skipping %2</source>
         <translation>
@@ -12212,61 +14339,154 @@ Zellen: %2 x %3</translation>
         <translation>Torus</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="83"/>
-        <source>Advanced parameters</source>
-        <translation>Erweiterte Parameter</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="91"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="438"/>
         <source>max distance to primitive</source>
         <translation>Maximaler Abstand zur primitiven Form</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="98"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="445"/>
         <source>Maximum distance of samples to the ideal shape</source>
         <translation>Maximaler Abstand der Beispiele zur idealen Form</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="124"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="471"/>
         <source>sampling resolution</source>
         <translation>Sampling-Auflösung</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="131"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="478"/>
         <source>Should correspond to the distance between neighboring points in the data</source>
         <translation>Sollte dem Abstand zwischen benachbarten Punkten in den Daten entsprechen</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="157"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="504"/>
         <source>max normal deviation</source>
         <translation>Maximale Abweichung der Normalen</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="164"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="511"/>
         <source>Maximum deviation from the ideal shape normal vector (in degrees)</source>
         <translation>Maximale Abweichung vom Normalvektor der Idealform (in Grad)</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="190"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="537"/>
         <source>overlooking probability</source>
         <translation>Überprüfungswahrscheinlichkeit</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="197"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="544"/>
         <source>Probability that no better candidate was overlooked during sampling (the lower the better!)</source>
         <translation>Wahrscheinlichkeit, dass bei der Bemusterung kein besserer Kandidat übersehen wurde (je geringer, desto besser!)</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="223"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="383"/>
         <source>Min support points per primitive</source>
         <translation>Minimale Anzahl von Stützpunkten pro primitiver Form</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="230"/>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="233"/>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="236"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="86"/>
+        <source>Cone Advanced Parameters</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="100"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="241"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="310"/>
+        <source>Max Radius</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="130"/>
+        <source>Max Length</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="160"/>
+        <source>Max Angle</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="170"/>
+        <source>°</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="203"/>
+        <source>Sphere Advanced Parameters</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="211"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="280"/>
+        <source>Min Radius</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="272"/>
+        <source>Cylinder Advanced Parameters</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="341"/>
+        <source>Save leftover points into new cloud</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="348"/>
+        <source>Use Least Squares fitting on found shapes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="358"/>
+        <source>Will attempt to convert Spheres, Cones, Cylinders and Torus into a simpler shape (for example Cones may be simplified into a Cylinder, Plane, or Sphere)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="361"/>
+        <source>Attempt to simplify shapes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="390"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="393"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="396"/>
         <source>This is the minimal number of points required for a primitive</source>
         <translation>Dies ist die minimale Anzahl an Punkten für eine primitive Form</translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="430"/>
+        <source>Parameters</source>
+        <translation type="unfinished">Parameter</translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="568"/>
+        <source>Torus Advanced Parameters</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="576"/>
+        <source>Min Minor Radius</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="606"/>
+        <source>Max Minor Radius</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="636"/>
+        <source>Min Major Radius</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="666"/>
+        <source>Max Major Radius</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="697"/>
+        <source>Set Random color for each shape found</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -12336,6 +14556,7 @@ Zellen: %2 x %3</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="62"/>
+        <location filename="../ui_templates/rasterizeDlg.ui" line="673"/>
         <source>step</source>
         <translation>Schritt</translation>
     </message>
@@ -12408,10 +14629,6 @@ Zellen: %2 x %3</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="259"/>
-        <source>Interpolate scalar field(s)</source>
-        <translation>Interpoliere Skalare(s) Feld(er)</translation>
-    </message>
-    <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="262"/>
         <source>interpolate SF(s)</source>
         <translation>Interpoliere Skalare(s) Feld(er)</translation>
@@ -12671,11 +14888,6 @@ durch die durchschnittliche Höhe der Zelle ersetzt!</translation>
         <location filename="../ui_templates/rasterizeDlg.ui" line="653"/>
         <source>Start value</source>
         <translation>Startwert</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/rasterizeDlg.ui" line="673"/>
-        <source>Step</source>
-        <translation>Schritt</translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="693"/>
@@ -14002,21 +16214,12 @@ Multiplikator-Schwelle (nSigma)</translation>
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-weight:600; color:#1f497d;&quot;&gt;Classifier training based on multi-scale dimensionality (CANUPO)&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-style:italic; color:#1f497d;&quot;&gt;Brodu and Lague, 3D Terrestrial LiDAR data classification of complex natural scenes using a multi-scale dimensionality criterion, ISPRS j. of Photogram. Rem. Sens., 2012&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-style:italic; color:#1f497d;&quot;&gt;Brodu and Lague, 3D Terrestrial LiDAR data classification of complex natural scenes using a multi-scale dimensionality criterion, ISPRS j. of Photogram.&#xa0;Rem. Sens., 2012&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;Funded by Université Européenne de Bretagne, Centre National de la Recherche Scientifique and EEC Marie-Curie actions&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d;&quot;&gt;Enjoy!&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//DE&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color: #ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-weight:600; color:#1f497d;&quot;&gt;Klassifikator-Training basierend auf Multiskalen-Dimensionalität (CANUPO)&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family: &apos;Calibri,sans-serif&apos;; font-size:10pt; font-style:italic; color:#1f497d;&quot;&gt;Brodu und Lague, 3D Terrestrial LiDAR data classification of complex natural scenes using a multi-scale dimensionality criterion, ISPRS j. of Photogram. Rem. Sens., 2012&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family: &apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;Finanziert durch Université Européenne de Bretagne, Centre National de la Recherche Scientifique und EEC Marie-Curie Aktionen&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d;&quot;&gt;Freude! &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt; macos/deepLFree.translatedWithDeepL.text</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -14218,12 +16421,8 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="168"/>
-        <source>Swap</source>
-        <translation>Vertauschen</translation>
-    </message>
-    <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="171"/>
-        <source>swap</source>
+        <source>Swap</source>
         <translation>Vertauschen</translation>
     </message>
     <message>
@@ -14411,61 +16610,61 @@ Sie sollten die leeren Zellen füllen...</translation>
         <translation>Punkte: %L1</translation>
     </message>
     <message>
-        <location filename="../ccClippingBoxTool.cpp" line="1105"/>
+        <location filename="../ccClippingBoxTool.cpp" line="1104"/>
         <source>Failed to generate contour lines for cloud #%1</source>
         <translation>Die Erzeugung von Konturlinien für Punktwolke #%1 fehlgeschlagen</translation>
     </message>
     <message>
-        <location filename="../ccClippingBoxTool.cpp" line="1113"/>
-        <location filename="../ccClippingBoxTool.cpp" line="1218"/>
+        <location filename="../ccClippingBoxTool.cpp" line="1112"/>
+        <location filename="../ccClippingBoxTool.cpp" line="1217"/>
         <source>[ExtractSlicesAndContours] Process canceled by user</source>
         <translation>[ExtractSlicesAndContours] Vorgang wurde vom Benutzer abgebrochen</translation>
     </message>
     <message>
-        <location filename="../ccClippingBoxTool.cpp" line="1127"/>
+        <location filename="../ccClippingBoxTool.cpp" line="1126"/>
         <source>Envelope extraction</source>
         <translation>Hüllkurven-Extraktion</translation>
     </message>
     <message>
-        <location filename="../ccClippingBoxTool.cpp" line="1128"/>
+        <location filename="../ccClippingBoxTool.cpp" line="1127"/>
         <source>Envelope(s): %L1</source>
         <translation>Hüllkurve(n): %L1</translation>
     </message>
     <message>
-        <location filename="../ccClippingBoxTool.cpp" line="1203"/>
+        <location filename="../ccClippingBoxTool.cpp" line="1202"/>
         <source>%1: points are too far from each other! Increase the max edge length</source>
         <translation>%1: Punkte sind zu weit voneinander entfernt! Erhöhen Sie die maximale Kantenlänge</translation>
     </message>
     <message>
-        <location filename="../ccClippingBoxTool.cpp" line="1209"/>
+        <location filename="../ccClippingBoxTool.cpp" line="1208"/>
         <source>%1: envelope extraction failed!</source>
         <translation>%1: Hüllkurven-Extraktion fehlgeschlagen!</translation>
     </message>
     <message>
-        <location filename="../ccClippingBoxTool.cpp" line="1248"/>
+        <location filename="../ccClippingBoxTool.cpp" line="1247"/>
         <source>[ExtractSlicesAndContours] Warnings were issued during the process! (result may be incomplete)</source>
         <translation>[ExtractSlicesAndContours] Während des Prozesses wurden Warnungen ausgegeben! (Ergebnis kann unvollständig sein)</translation>
     </message>
     <message>
-        <location filename="../ccClippingBoxTool.cpp" line="1253"/>
+        <location filename="../ccClippingBoxTool.cpp" line="1252"/>
         <source>Not enough memory!</source>
         <translation>Nicht genug Arbeitsspeicher!</translation>
     </message>
     <message>
-        <location filename="../ccClippingBoxTool.cpp" line="1753"/>
-        <location filename="../ccClippingBoxTool.cpp" line="1757"/>
+        <location filename="../ccClippingBoxTool.cpp" line="1752"/>
+        <location filename="../ccClippingBoxTool.cpp" line="1756"/>
         <source>Process finished</source>
         <translation>Berechnung beendet</translation>
     </message>
     <message>
-        <location filename="../ccClippingBoxTool.cpp" line="1753"/>
+        <location filename="../ccClippingBoxTool.cpp" line="1752"/>
         <source>%1 slices have been generated.
 (you may have to close the tool and hide the initial cloud to see them...)</source>
         <translation>Es wurden %1 Schichten erzeugt.
 (Sie müssen eventuell das Werkzeug schließen und die Anfangswolke ausblenden, um sie zu sehen...)</translation>
     </message>
     <message>
-        <location filename="../ccClippingBoxTool.cpp" line="1757"/>
+        <location filename="../ccClippingBoxTool.cpp" line="1756"/>
         <source>The process has generated no output</source>
         <translation>Die Berechnung hat kein Ergebnis erzielt</translation>
     </message>
@@ -14486,22 +16685,22 @@ Sie sollten die leeren Zellen füllen...</translation>
 <context>
     <name>ccCompass</name>
     <message>
-        <location filename="../../plugins/core/Standard/qCompass/src/ccCompass.cpp" line="3433"/>
+        <location filename="../../plugins/core/Standard/qCompass/src/ccCompass.cpp" line="3428"/>
         <source>SVG Output file</source>
         <translation>SVG-Ausgabe-Datei</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qCompass/src/ccCompass.cpp" line="3433"/>
+        <location filename="../../plugins/core/Standard/qCompass/src/ccCompass.cpp" line="3428"/>
         <source>SVG files (*.svg)</source>
         <translation>SVG-Dateien (*.svg)</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qCompass/src/ccCompass.cpp" line="3452"/>
+        <location filename="../../plugins/core/Standard/qCompass/src/ccCompass.cpp" line="3447"/>
         <source>Output file</source>
         <translation>Ausgabe-Datei</translation>
     </message>
     <message>
-        <location filename="../../plugins/core/Standard/qCompass/src/ccCompass.cpp" line="3452"/>
+        <location filename="../../plugins/core/Standard/qCompass/src/ccCompass.cpp" line="3447"/>
         <source>CSV files (*.csv *.txt);;XML (*.xml)</source>
         <translation>Komma-getrennte Werte (*.csv);;XML-Dateien (*.xml)</translation>
     </message>
@@ -14555,17 +16754,17 @@ Sie sollten die leeren Zellen füllen...</translation>
 <context>
     <name>ccMaterialDB</name>
     <message>
-        <location filename="../../libs/qCC_db/src/ccMaterial.cpp" line="57"/>
+        <location filename="../../libs/qCC_db/include/ccMaterialDB.h" line="59"/>
         <source>File &apos;%1&apos; has been updated</source>
         <translation>Datei „%1“ wurde aktualisiert</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccMaterial.cpp" line="67"/>
+        <location filename="../../libs/qCC_db/include/ccMaterialDB.h" line="69"/>
         <source>Failed to load the new version of the file</source>
         <translation>Eine neue Version konnte nicht geladen werden</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccMaterial.cpp" line="72"/>
+        <location filename="../../libs/qCC_db/include/ccMaterialDB.h" line="74"/>
         <source>File &apos;%1&apos; has been deleted or renamed</source>
         <translation>Datei „%1“ wurde gelöscht oder umbenannt</translation>
     </message>
@@ -14713,32 +16912,37 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>ccPointPairRegistrationDlg</name>
     <message>
-        <location filename="../ccPointPairRegistrationDlg.cpp" line="843"/>
+        <location filename="../ccPointPairRegistrationDlg.cpp" line="594"/>
+        <source>Point/label already picked</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccPointPairRegistrationDlg.cpp" line="940"/>
         <source>Remove dual point</source>
         <translation>Doppelten Punkt entfernen</translation>
     </message>
     <message>
-        <location filename="../ccPointPairRegistrationDlg.cpp" line="843"/>
+        <location filename="../ccPointPairRegistrationDlg.cpp" line="940"/>
         <source>Remove the equivalent reference point as well?</source>
         <translation>Den äquivalenten Referenzpunkt ebenfalls entfernen?</translation>
     </message>
     <message>
-        <location filename="../ccPointPairRegistrationDlg.cpp" line="1406"/>
+        <location filename="../ccPointPairRegistrationDlg.cpp" line="1524"/>
         <source>[PointPairRegistration] Cloud %1: global shift has been updated to match the reference: (%1,%2,%3) [x%4]</source>
         <translation>[PointPairRegistration] Wolke %1: Die globale Verschiebung wurde aktualisiert, um mit der Referenz übereinzustimmen: (%1,%2,%3) [x%4]</translation>
     </message>
     <message>
-        <location filename="../ccPointPairRegistrationDlg.cpp" line="1412"/>
+        <location filename="../ccPointPairRegistrationDlg.cpp" line="1535"/>
         <source>Drop shift information?</source>
         <translation>Verschiebungs-Informationen streichen?</translation>
     </message>
     <message>
-        <location filename="../ccPointPairRegistrationDlg.cpp" line="1412"/>
+        <location filename="../ccPointPairRegistrationDlg.cpp" line="1535"/>
         <source>Aligned cloud is shifted but reference cloud is not: drop global shift information?</source>
         <translation>Ausgerichtete Wolke ist verschoben, aber Referenzwolke nicht: Globale Verschiebungsinformation fallen lassen?</translation>
     </message>
     <message>
-        <location filename="../ccPointPairRegistrationDlg.cpp" line="1420"/>
+        <location filename="../ccPointPairRegistrationDlg.cpp" line="1543"/>
         <source>[PointPairRegistration] Cloud %1: global shift has been reset to match the reference!</source>
         <translation>[PointPairRegistration] Wolke %1: Die globale Verschiebung wurde auf die Referenz zurückgesetzt!</translation>
     </message>
@@ -14746,679 +16950,714 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>ccPropertiesTreeDelegate</name>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="77"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="78"/>
         <source>None</source>
         <translation>Nichts</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="81"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="82"/>
         <source>Scalar field</source>
         <translation>Skalares Feld</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="84"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="85"/>
         <source>Default</source>
         <translation>Standard</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="85"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="86"/>
         <source>Default Width</source>
         <translation>Standard-Breite</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="202"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="203"/>
         <source>Property</source>
         <translation>Eigenschaft</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="203"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="204"/>
         <source>State/Value</source>
         <translation>Zustand/Wert</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="299"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="304"/>
         <source>Transformation history</source>
         <translation>Transformations-Verlauf</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="304"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="309"/>
         <source>Display transformation</source>
         <translation>Zeige die Transformation</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="392"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="397"/>
         <source>Meta data</source>
         <translation>Metadaten</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="420"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="425"/>
         <source>CC Object</source>
         <translation>CC-Objekt</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="423"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="909"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="428"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="943"/>
         <source>Name</source>
         <translation>Name</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="428"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="615"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="433"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="640"/>
         <source>Visible</source>
         <translation>Sichtbarkeit</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="434"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="439"/>
         <source>Normals</source>
         <translation>Normalen</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="438"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="443"/>
         <source>Show name (in 3D)</source>
         <translation>Zeige Name (in 3D)</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="443"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="448"/>
         <source>Colors</source>
         <translation>Farben</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="466"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="471"/>
         <source>Local box dimensions</source>
         <translation>Lokale Box-Dimensionen</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="466"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="471"/>
         <source>Box dimensions</source>
         <translation>Box-Dimensionen</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="476"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="481"/>
         <source>Box center</source>
         <translation>Box-Mittelpunkt</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="476"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="481"/>
         <source>Shifted box center</source>
         <translation>Verschobenes Box-Zentrum</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="484"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="489"/>
         <source>Global box center</source>
         <translation>Globales Box-Zentrum</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="491"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="496"/>
         <source>Info</source>
         <translation>Information</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="491"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="496"/>
         <source>Object ID: %1 - Children: %2</source>
         <translation>Objekt-ID: %1 - Kind: %2</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="496"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="501"/>
         <source>Current Display</source>
         <translation>Aktuelle Anzeige</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="510"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="515"/>
         <source>Global shift</source>
         <translation>Globale Verschiebung</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="513"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="518"/>
         <source>Global scale</source>
         <translation>Globaler Maßstab</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="523"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="530"/>
+        <source>Coordinate System</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="531"/>
+        <source>Origin</source>
+        <translation type="unfinished">Ursprung</translation>
+    </message>
+    <message>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="533"/>
+        <source>Planes Visible</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="534"/>
+        <source>Planes Stippled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="535"/>
+        <source>Axis Lines Visible</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="536"/>
+        <source>Axis width</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="537"/>
+        <source>Display scale</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="548"/>
         <source>Cloud</source>
         <translation>Punktwolke</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="526"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1273"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="551"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1307"/>
         <source>Points</source>
         <translation>Punkte</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="532"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="557"/>
         <source>Point size</source>
         <translation>Punktgröße</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="548"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="573"/>
         <source>Scan grids</source>
         <translation>Scan-Raster</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="552"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="577"/>
         <source>Scan grid</source>
         <translation>Scan-Raster</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="559"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="584"/>
         <source>Scan #%1</source>
         <translation>Scan #%1</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="559"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="584"/>
         <source>%1 x %2 (%3 points)</source>
         <translation>%1 x %2 (%3 Punkte) </translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="566"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="591"/>
         <source>Waveform</source>
         <translation>Wellenform</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="567"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="592"/>
         <source>Waves</source>
         <translation>Wellen</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="568"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="593"/>
         <source>Descriptors</source>
         <translation>Beschreibungen</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="571"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="596"/>
         <source>Data size</source>
         <translation>Datengröße</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="594"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="619"/>
         <source>Scalar Fields</source>
         <translation>Skalare Felder</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="594"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="619"/>
         <source>Scalar Field</source>
         <translation>Skalares Feld</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="597"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="930"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="622"/>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="964"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1081"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="998"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1115"/>
         <source>Count</source>
         <translation>Anzahl</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="600"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="625"/>
         <source>Active</source>
         <translation>Aktiv</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="609"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="634"/>
         <source>Current</source>
         <translation>Aktuelle</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="612"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="637"/>
         <source>Steps</source>
         <translation>Schritte</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="617"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="642"/>
         <source>SF display params</source>
         <translation>SF-Anzeige-Parameter</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="633"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="658"/>
         <source>Primitive</source>
         <translation>Primitive Form</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="636"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="661"/>
         <source>Type</source>
         <translation>Typ</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="641"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="666"/>
         <source>Drawing precision</source>
         <translation>Zeichnungsgenauigkeit</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="646"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="653"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="671"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="678"/>
         <source>Radius</source>
         <translation>Radius</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="650"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="864"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="675"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="898"/>
         <source>Height</source>
         <translation>Höhe</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="657"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="682"/>
         <source>Bottom radius</source>
         <translation>Unterer Radius</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="658"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="683"/>
         <source>Top radius</source>
         <translation>Oberer Radius</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="676"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="701"/>
         <source>Facet</source>
         <translation>Oberflächen</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="682"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="707"/>
         <source>Surface</source>
         <translation>Oberfläche</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="685"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="827"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="710"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="861"/>
         <source>RMS</source>
         <translation>Mittleres Rauschen (RMS)</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="688"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="713"/>
         <source>Center</source>
         <translation>Mittelpunkt</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="692"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="718"/>
         <source>Show contour</source>
         <translation>Kontur anzeigen</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="696"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="724"/>
         <source>Show polygon</source>
         <translation>Polygon anzeigen</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="707"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="736"/>
         <source>Normal</source>
         <translation>Normale</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="713"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="742"/>
         <source>Dip / Dip dir. (integer)</source>
         <translation>Neigung/Neigungsrichtung (Ganzzahl)</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="714"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="743"/>
         <source>Dip / Dip dir.</source>
         <translation>Neigung/Neigungsrichtung</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="717"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="746"/>
         <source>Show normal vector</source>
         <translation>Normalenvektor anzeigen</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="730"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="759"/>
         <source>Sub-mesh</source>
         <translation>Unter-Netz</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="730"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="759"/>
         <source>Mesh</source>
         <translation>Netz</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="733"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="762"/>
         <source>Faces</source>
         <translation>Flächen</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="737"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="766"/>
         <source>Materials/textures</source>
         <translation>Materialien/Texturen</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="740"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="769"/>
         <source>Wireframe</source>
         <translation>Drahtgitter</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="744"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="773"/>
         <source>Stippling</source>
         <translation>Stippling</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="760"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="794"/>
         <source>Polyline</source>
         <translation>Polylinie</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="763"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="797"/>
         <source>Vertices</source>
         <translation>Scheitelpunkte</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="766"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="800"/>
         <source>Length</source>
         <translation>Länge</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="769"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="803"/>
         <source>Line width</source>
         <translation>Linienbreite</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="783"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="817"/>
         <source>Octree</source>
         <translation>Oktree</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="786"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="820"/>
         <source>Display mode</source>
         <translation>Anzeige-Modus</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="789"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="823"/>
         <source>Display level</source>
         <translation>Anzeige-Niveau</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="791"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="825"/>
         <source>Current level</source>
         <translation>Aktuelles Niveau</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="799"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="833"/>
         <source>Cell size</source>
         <translation>Zellgröße</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="803"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="837"/>
         <source>Cell count</source>
         <translation>Anzahl Zellen</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="806"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="840"/>
         <source>Filled volume</source>
         <translation>Gefülltes Volumen</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="817"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="851"/>
         <source>Kd-tree</source>
         <translation>Kd-Baum</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="820"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="854"/>
         <source>Max Error</source>
         <translation>Größter Fehler</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="830"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="864"/>
         <source>Max dist @ 68%</source>
         <translation>Maximale Abweichung @ 68%</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="833"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="867"/>
         <source>Max dist @ 95%</source>
         <translation>Maximale Abweichung @ 95%</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="836"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="870"/>
         <source>Max dist @ 99%</source>
         <translation>Maximale Abweichung @ 99%</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="839"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="873"/>
         <source>Max distance</source>
         <translation>Maximale Abweichung</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="843"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="877"/>
         <source>unknown</source>
         <translation>unbekannt</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="846"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="880"/>
         <source>Error measure</source>
         <translation>Fehlermeldung</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="858"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="892"/>
         <source>Image</source>
         <translation>Bild</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="861"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="895"/>
         <source>Width</source>
         <translation>Breite</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="867"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="901"/>
         <source>Alpha</source>
         <translation>Alpha</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="871"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="905"/>
         <source>Sensor</source>
         <translation>Sensor</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="873"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="954"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="907"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="988"/>
         <source>Apply Viewport</source>
         <translation>Ansichtsfenster anwenden</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="885"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="919"/>
         <source>Label</source>
         <translation>Beschriftung</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="889"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="923"/>
         <source>Body</source>
         <translation>Körper</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="892"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="926"/>
         <source>Show 2D label</source>
         <translation>2D-Beschriftung anzeigen</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="895"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="929"/>
         <source>Show legend(s)</source>
         <translation>Legende anzeigen</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="906"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="940"/>
         <source>Viewport</source>
         <translation>Ansichtspunkt</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="909"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="943"/>
         <source>undefined</source>
         <translation>nicht definiert</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="912"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="946"/>
         <source>Apply viewport</source>
         <translation>Ansichtsfenster anwenden</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="915"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="949"/>
         <source>Update viewport</source>
         <translation>Ansichtspunkt aktualisieren</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="927"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="961"/>
         <source>Trans. buffer</source>
         <translation>Transformations-Puffer</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="933"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="967"/>
         <source>Show path</source>
         <translation>Dateipfad anzeigen</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="936"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="970"/>
         <source>Show trihedrons</source>
         <translation>Dreiecke anzeigen</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="939"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="973"/>
         <source>Scale</source>
         <translation>Massstab</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="951"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="985"/>
         <source>Drawing scale</source>
         <translation>Zeichnungsmassstab</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="957"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="991"/>
         <source>Position/Orientation</source>
         <translation>Position/Orientierung</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="961"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="995"/>
         <source>Associated positions</source>
         <translation>Verknüpfte Positionen</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="972"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1006"/>
         <source>Indices</source>
         <translation>Indices</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="975"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1009"/>
         <source>Active index</source>
         <translation>Aktiver Index</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="987"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1021"/>
         <source>TLS/GBL Sensor</source>
         <translation>TLS/GBL-Sensor</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="990"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1024"/>
         <source>Uncertainty</source>
         <translation>Unsicherheit</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="993"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1027"/>
         <source>Angular viewport (degrees)</source>
         <translation>Winkelansicht (Grad)</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="998"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1032"/>
         <source>Yaw span</source>
         <translation>Gierbereich</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1005"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1039"/>
         <source>Yaw step</source>
         <translation>Gierschritt</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1012"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1046"/>
         <source>Pitch span</source>
         <translation>Neigungsbereich</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1019"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1053"/>
         <source>Pitch step</source>
         <translation>Neigungsschritt</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1036"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1070"/>
         <source>Camera Sensor</source>
         <translation>Kamera-Sensor</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1041"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1075"/>
         <source>Vert. focal</source>
         <translation>Vertikaler Brennpunkt</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1044"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1078"/>
         <source>Array size</source>
         <translation>Feldgröße</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1047"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1081"/>
         <source>Principal point</source>
         <translation>Hauptpunkt</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1052"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1086"/>
         <source>Pixel size</source>
         <translation>Pixelgröße</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1056"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1090"/>
         <source>Field of view</source>
         <translation>Sichtfeld</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1059"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1093"/>
         <source>Skew</source>
         <translation>Schiefe</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1061"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1095"/>
         <source>Frustum display</source>
         <translation>Frustum-Anzeige</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1064"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1098"/>
         <source>Show lines</source>
         <translation>Zeilennummern anzeigen</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1065"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1099"/>
         <source>Show side planes</source>
         <translation>Seitenflächen anzeigen</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1078"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1112"/>
         <source>Material set</source>
         <translation>Material-Liste</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1095"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1129"/>
         <source>Array</source>
         <translation>Feld</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1099"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1133"/>
         <source>Shared</source>
         <translation>Geteilt</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1099"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1133"/>
         <source>No</source>
         <translation>Nein</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1099"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1133"/>
         <source>Yes (%1)</source>
         <translation>Ja (%1)</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1272"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1306"/>
         <source>Wire</source>
         <translation>Draht</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1274"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1308"/>
         <source>Plain cubes</source>
         <translation>Flache Würfel</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1406"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1416"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1426"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1440"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1450"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1460"/>
         <source>Apply</source>
         <translation>Anwenden</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1435"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1469"/>
         <source>Update</source>
         <translation>Aktualisieren</translation>
     </message>
@@ -15439,24 +17678,24 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>ccSectionExtractionTool</name>
     <message>
-        <location filename="../ccSectionExtractionTool.cpp" line="1560"/>
+        <location filename="../ccSectionExtractionTool.cpp" line="1556"/>
         <source>Unfold cloud(s)</source>
         <translation>Ungefaltete Punktwolke(n)</translation>
     </message>
     <message>
-        <location filename="../ccSectionExtractionTool.cpp" line="1561"/>
+        <location filename="../ccSectionExtractionTool.cpp" line="1557"/>
         <source>Number of segments: %1
 Number of points: %2</source>
         <translation>Anzahl der Segmente: %1
 Anzahl der Punkte: %2</translation>
     </message>
     <message>
-        <location filename="../ccSectionExtractionTool.cpp" line="1799"/>
+        <location filename="../ccSectionExtractionTool.cpp" line="1794"/>
         <source>Extract sections</source>
         <translation>Schnitte extrahieren</translation>
     </message>
     <message>
-        <location filename="../ccSectionExtractionTool.cpp" line="1800"/>
+        <location filename="../ccSectionExtractionTool.cpp" line="1795"/>
         <source>Number of sections: %1
 Number of points: %2</source>
         <translation>Anzahl der Schnitte: %1

@@ -83,7 +83,7 @@
         <item>
          <widget class="QComboBox" name="typeOfProjectionComboBox">
           <property name="toolTip">
-           <string>choose the height (z coordinate) projected : maximum = highest point in the cell or average)</string>
+           <string>choose the height (z coordinate) projected : maximum = highest point in the cell (or average)</string>
           </property>
           <property name="currentIndex">
            <number>1</number>

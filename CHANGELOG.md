@@ -6,6 +6,7 @@ v2.12 (???) - (in development)
 - New tools:
 	- Menu 'Edit > Cloud'
 		-  'Edit > Cloud > Create single point cloud': to create a cloud with a single point (set by the user)
+		-  'Edit > Cloud > Paste from clipboard' (shortcut: CTRL+P): to create a cloud from ASCII/test data stored in the clipboard
 
 - Improvements
     - RANSAC plugin

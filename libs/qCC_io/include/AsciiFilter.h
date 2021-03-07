@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,14 +17,15 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_ASCII_FILTER_HEADER
-#define CC_ASCII_FILTER_HEADER
-
 #include "FileIOFilter.h"
 
 //dialogs
 #include "AsciiOpenDlg.h"
 #include "AsciiSaveDlg.h"
+
+//Qt
+#include <QTextStream>
+#include <QByteArray>
 
 //! ASCII point cloud I/O filter
 class QCC_IO_LIB_API AsciiFilter : public FileIOFilter
@@ -35,12 +38,47 @@ public:
 
 	//inherited from FileIOFilter
 	CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
-
 	bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
 	CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
 
-	//! Loads an ASCII file with a predefined format
-	CC_FILE_ERROR loadCloudFromFormatedAsciiFile(	const QString& filename,
+	//! Loads a cloud from a QByteArray
+	CC_FILE_ERROR loadAsciiData(const QByteArray& data, QString sourceName, ccHObject& container, LoadParameters& parameters);
+
+public: // Default / persistent settings
+
+	//! Sets the default number of skipped lines (at loading time)
+	static void SetDefaultSkippedLineCount(int count);
+
+	//! Sets the default output coords precision (as saving time)
+	static void SetOutputCoordsPrecision(int prec);
+	//! Sets the default output scalar values precision (as saving time)
+	static void SetOutputSFPrecision(int prec);
+	//! Sets the default output separator (as saving time)
+	/** index can be:
+		- 0: space
+		- 1: comma
+		- 2: semicolon
+		- 3: tab
+	**/
+	static void SetOutputSeparatorIndex(int separatorIndex);
+	//! Sets whether color and SF should be swapped (default is color then SF)
+	static void SaveSFBeforeColor(bool state);
+	//! Sets whether fields names should be saved in a header line (default is false)
+	static void SaveColumnsNamesHeader(bool state);
+	//! Sets whether the number of points should be saved on the first line (default is false)
+	static void SavePointCountHeader(bool state);
+
+protected:
+	//! Loads an ASCII stream
+	CC_FILE_ERROR loadStream(	QTextStream& stream,
+								QString filenameOrTitle,
+								qint64 dataSize,
+								ccHObject& container,
+								LoadParameters& parameters);
+
+	//! Loads an ASCII stream with a predefined format
+	CC_FILE_ERROR loadCloudFromFormatedAsciiStream(	QTextStream& stream,
+													QString filenameOrTitle,
 													ccHObject& container,
 													const AsciiOpenDlg::Sequence& openSequence,
 													char separator,
@@ -51,15 +89,4 @@ public:
 													unsigned skipLines,
 													LoadParameters& parameters,
 													bool showLabelsIn2D = false);
-
-	//! Returns associated dialog (creates it if necessary)
-	static AsciiOpenDlg* GetOpenDialog(QWidget* parentWidget = nullptr);
-	//! Returns associated dialog (creates it if necessary)
-	static AsciiSaveDlg* GetSaveDialog(QWidget* parentWidget = nullptr);
-
-private:
-	//! Internal use only
-	CC_FILE_ERROR saveFile(ccHObject* entity, FILE *theFile);
 };
-
-#endif //CC_ASCII_FILTER_HEADER

@@ -52,13 +52,15 @@ public:
 	//! Returns separator
 	unsigned char getSeparator() const;
 
-	//! Set separator (index)
+	//! Sets separator (index)
 	/** 0 = space
 		1 = semicolon
 		2 = comma
 		3 = tab
 	**/
 	void setSeparatorIndex(int index);
+	//! Returns separator index
+	int getSeparatorIndex() const;
 
 	//! Returns coordinates precision
 	int coordsPrecision() const;
@@ -74,11 +76,6 @@ public:
 	bool swapColorAndSF() const;
 	//! Sets whether SF(s) and color should be swapped
 	void enableSwapColorAndSF(bool state);
-
-	//! Sets whether this dialog should appear or not by default
-	void setAutoShow(bool state) { m_autoShow = state; }
-	//! Returns whether this dialog automatically appears or not
-	bool autoShow() const { return m_autoShow; }
 
 	//! Sets whether to save colors as float values (instead of unsigned bytes)
 	void setSaveFloatColors(bool state);
@@ -102,10 +99,6 @@ protected:
 
 	//! Inits dialog state from persistent settings
 	void initFromPersistentSettings();
-
-	//! Whether this dialog should be automatically shown or not
-	bool m_autoShow;
-
 };
 
 #endif //CC_ASCII_SAVE_DIALOG_HEADER

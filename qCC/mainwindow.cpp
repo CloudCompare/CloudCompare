@@ -53,6 +53,7 @@
 //qCC_io
 #include <ccShiftAndScaleCloudDlg.h>
 #include <BinFilter.h>
+#include <AsciiFilter.h>
 #include <DepthMapFileFilter.h>
 
 //QCC_glWindow
@@ -143,6 +144,9 @@
 #ifdef CC_CORE_LIB_USES_TBB
 #include <tbb/tbb_stddef.h>
 #endif
+
+//Qt
+#include <QClipboard>
 
 //Qt UI files
 #include <ui_distanceMapDlg.h>
@@ -238,7 +242,7 @@ MainWindow::MainWindow()
 
 			m_viewModePopupButton->setMenu(menu);
 			m_viewModePopupButton->setPopupMode(QToolButton::InstantPopup);
-			m_viewModePopupButton->setToolTip("Set current view mode");
+			m_viewModePopupButton->setToolTip(tr("Set current view mode"));
 			m_viewModePopupButton->setStatusTip(m_viewModePopupButton->toolTip());
 			m_UI->toolBarView->insertWidget(m_UI->actionZoomAndCenter, m_viewModePopupButton);
 			m_viewModePopupButton->setEnabled(false);
@@ -254,7 +258,7 @@ MainWindow::MainWindow()
 
 			m_pivotVisibilityPopupButton->setMenu(menu);
 			m_pivotVisibilityPopupButton->setPopupMode(QToolButton::InstantPopup);
-			m_pivotVisibilityPopupButton->setToolTip("Set pivot visibility");
+			m_pivotVisibilityPopupButton->setToolTip(tr("Set pivot visibility"));
 			m_pivotVisibilityPopupButton->setStatusTip(m_pivotVisibilityPopupButton->toolTip());
 			m_UI->toolBarView->insertWidget(m_UI->actionZoomAndCenter,m_pivotVisibilityPopupButton);
 			m_pivotVisibilityPopupButton->setEnabled(false);
@@ -296,14 +300,14 @@ MainWindow::MainWindow()
 
 	updateUI();
 
-	QMainWindow::statusBar()->showMessage(QString("Ready"));
+	QMainWindow::statusBar()->showMessage(tr("Ready"));
 	
 #ifdef CC_CORE_LIB_USES_TBB
 	ccConsole::Print( QStringLiteral( "[TBB] Using Intel's Threading Building Blocks %1.%2" )
 					  .arg( QString::number( TBB_VERSION_MAJOR ), QString::number( TBB_VERSION_MINOR ) ) );
 #endif
 	
-	ccConsole::Print("CloudCompare started!");
+	ccConsole::Print(tr("CloudCompare started!"));
 }
 
 MainWindow::~MainWindow()
@@ -534,6 +538,15 @@ void MainWindow::connectActions()
 
 	//"Edit > Cloud" menu
 	connect(m_UI->actionCreateSinglePointCloud,		&QAction::triggered, this, &MainWindow::createSinglePointCloud);
+	connect(m_UI->actionPasteCloudFromClipboard,	&QAction::triggered, this, &MainWindow::createPointCloudFromClipboard);
+	//the 'Paste from clipboard' tool depends on the clipboard state
+	{
+		const QClipboard* clipboard = QApplication::clipboard();
+		assert(clipboard);
+		m_UI->actionPasteCloudFromClipboard->setEnabled(clipboard->mimeData()->hasText());
+		connect(clipboard, &QClipboard::dataChanged, [&]() { m_UI->actionPasteCloudFromClipboard->setEnabled(clipboard->mimeData()->hasText()); });
+	}
+
 
 	//"Edit > Mesh" menu
 	connect(m_UI->actionComputeMeshAA,				&QAction::triggered, this, &MainWindow::doActionComputeMeshAA);
@@ -901,12 +914,12 @@ void MainWindow::doActionComputeKdTree()
 
 	if (!cloud)
 	{
-		ccLog::Error("Selected one and only one point cloud or mesh!");
+		ccLog::Error(tr("Selected one and only one point cloud or mesh!"));
 		return;
 	}
 
 	bool ok;
-	s_kdTreeMaxErrorPerCell = QInputDialog::getDouble(this, "Compute Kd-tree", "Max error per leaf cell:", s_kdTreeMaxErrorPerCell, 1.0e-6, 1.0e6, 6, &ok);
+	s_kdTreeMaxErrorPerCell = QInputDialog::getDouble(this, tr("Compute Kd-tree"), tr("Max error per leaf cell:"), s_kdTreeMaxErrorPerCell, 1.0e-6, 1.0e6, 6, &ok);
 	if (!ok)
 		return;
 
@@ -921,7 +934,7 @@ void MainWindow::doActionComputeKdTree()
 	{
 		qint64 elapsedTime_ms = eTimer.elapsed();
 
-		ccConsole::Print("[doActionComputeKdTree] Timing: %2.3f s",static_cast<double>(elapsedTime_ms)/1.0e3);
+		ccConsole::Print("[doActionComputeKdTree] Timing: %2.3f s", elapsedTime_ms / 1.0e3);
 		cloud->setEnabled(true); //for mesh vertices!
 		cloud->addChild(kdtree);
 		kdtree->setDisplay(cloud->getDisplay());
@@ -940,7 +953,7 @@ void MainWindow::doActionComputeKdTree()
 	}
 	else
 	{
-		ccLog::Error("An error occurred!");
+		ccLog::Error(tr("An error occurred"));
 		delete kdtree;
 		kdtree = nullptr;
 	}
@@ -958,7 +971,7 @@ void MainWindow::doActionComputeOctree()
 void MainWindow::doActionResampleWithOctree()
 {
 	bool ok;
-	int pointCount = QInputDialog::getInt(this,"Resample with octree", "Points (approx.)", 1000000, 1, INT_MAX, 100000, &ok);
+	int pointCount = QInputDialog::getInt(this, tr("Resample with octree"), tr("Points (approx.)"), 1000000, 1, INT_MAX, 100000, &ok);
 	if (!ok)
 		return;
 
@@ -990,7 +1003,7 @@ void MainWindow::doActionResampleWithOctree()
 				octree = cloud->computeOctree(&pDlg);
 				if (!octree)
 				{
-					ccConsole::Error(QString("Could not compute octree for cloud '%1'").arg(cloud->getName()));
+					ccConsole::Error(tr("Could not compute octree for cloud '%1'").arg(cloud->getName()));
 					continue;
 				}
 			}
@@ -1030,7 +1043,7 @@ void MainWindow::doActionResampleWithOctree()
 	}
 
 	if (errors)
-		ccLog::Error("[ResampleWithOctree] Errors occurred during the process! Result may be incomplete!");
+		ccLog::Error(tr("[ResampleWithOctree] Errors occurred during the process, result may be incomplete"));
 
 	refreshAll();
 }
@@ -1130,12 +1143,12 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 							sasDlg.showPreserveShiftOnSave(true);
 
 							//add "original" entry
-							int index = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo("Original", globalShift, globalScale));
+							int index = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo(tr("Original"), globalShift, globalScale));
 							//sasDlg.setCurrentProfile(index);
 							//add "suggested" entry
 							CCVector3d suggestedShift = ccGlobalShiftManager::BestShift(Pg);
 							double suggestedScale = ccGlobalShiftManager::BestScale(Dg);
-							index = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo("Suggested", suggestedShift, suggestedScale));
+							index = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo(tr("Suggested"), suggestedShift, suggestedScale));
 							sasDlg.setCurrentProfile(index);
 							//add "last" entry (if available)
 							std::vector<ccGlobalShiftManager::ShiftInfo> lastInfos;
@@ -1169,7 +1182,7 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 							}
 							else if (sasDlg.cancelled())
 							{
-								ccLog::Warning("[ApplyTransformation] Process cancelled by user");
+								ccLog::Warning(tr("[ApplyTransformation] Process cancelled by user"));
 								return;
 							}
 						}
@@ -1185,7 +1198,7 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 					cloud->setGlobalScale(cloud->getGlobalScale() * scaleChange);
 					const CCVector3d& T = cloud->getGlobalShift();
 					double scale = cloud->getGlobalScale();
-					ccLog::Warning(QString("[ApplyTransformation] Cloud '%1' global shift/scale information has been updated: shift = (%2,%3,%4) / scale = %5").arg(cloud->getName()).arg(T.x).arg(T.y).arg(T.z).arg(scale));
+					ccLog::Warning(tr("[ApplyTransformation] Cloud '%1' global shift/scale information has been updated: shift = (%2,%3,%4) / scale = %5").arg(cloud->getName()).arg(T.x).arg(T.y).arg(T.z).arg(scale));
 				}
 			}
 		}
@@ -1204,9 +1217,9 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 	if (m_ccRoot)
 		m_ccRoot->selectEntities(selectedEntities);
 
-	ccLog::Print("[ApplyTransformation] Applied transformation matrix:");
+	ccLog::Print(tr("[ApplyTransformation] Applied transformation matrix:"));
 	ccLog::Print(transMat.toString(12,' ')); //full precision
-	ccLog::Print("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool");
+	ccLog::Print(tr("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool"));
 
 	//reselect previously selected entities!
 	if (m_ccRoot)
@@ -1251,7 +1264,7 @@ void MainWindow::doActionApplyScale()
 			}
 			if (!cloud || !cloud->isKindOf(CC_TYPES::POINT_CLOUD))
 			{
-				ccLog::Warning(QString("[Apply scale] Entity '%1' can't be scaled this way").arg(entity->getName()));
+				ccLog::Warning(tr("[Apply scale] Entity '%1' can't be scaled this way").arg(entity->getName()));
 				continue;
 			}
 			if (lockedVertices)
@@ -1295,8 +1308,8 @@ void MainWindow::doActionApplyScale()
 					{
 						if (QMessageBox::question(
 							this,
-							"Big coordinates",
-							"Resutling coordinates will be too big (original precision may be lost!). Proceed anyway?",
+							tr("Big coordinates"),
+							tr("Resutling coordinates will be too big (original precision may be lost!). Proceed anyway?"),
 							QMessageBox::Yes,
 							QMessageBox::No) == QMessageBox::Yes)
 						{
@@ -1319,7 +1332,7 @@ void MainWindow::doActionApplyScale()
 
 	if (candidates.empty())
 	{
-		ccConsole::Warning("[Apply scale] No eligible entities (point clouds or meshes) were selected!");
+		ccConsole::Warning(tr("[Apply scale] No eligible entities (point clouds or meshes) were selected!"));
 		return;
 	}
 
@@ -1476,7 +1489,7 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 	sasDlg.showNoButton(false);
 	sasDlg.setShiftFieldsPrecision(6);
 	//add "original" entry
-	int index = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo("Original", shift, scale));
+	int index = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo(tr("Original"), shift, scale));
 	sasDlg.setCurrentProfile(index);
 	//add "last" entry (if available)
 	std::vector<ccGlobalShiftManager::ShiftInfo> lastInfos;
@@ -1494,8 +1507,8 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 	scale = sasDlg.getScale();
 	bool preserveGlobalPos = sasDlg.keepGlobalPos();
 
-	ccLog::Print("[Global Shift/Scale] New shift: (%f, %f, %f)", shift.x, shift.y, shift.z);
-	ccLog::Print("[Global Shift/Scale] New scale: %f", scale);
+	ccLog::Print(tr("[Global Shift/Scale] New shift: (%1, %2, %3)").arg(shift.x).arg(shift.y).arg(shift.z));
+	ccLog::Print(tr("[Global Shift/Scale] New scale: %1").arg(scale));
 
 	//apply new shift
 	{
@@ -1526,7 +1539,7 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 					ent->applyGLTransformation_recursive(&transMat);
 					ent->prepareDisplayForRefresh_recursive();
 
-					ccLog::Warning(QString("[Global Shift/Scale] To preserve its original position, the entity '%1' has been translated of (%2,%3,%4) and rescaled of a factor %5")
+					ccLog::Warning(tr("[Global Shift/Scale] To preserve its original position, the entity '%1' has been translated of (%2 ; %3 ; %4) and rescaled of a factor %5")
 									.arg(ent->getName())
 									.arg(T.x)
 									.arg(T.y)
@@ -1546,8 +1559,8 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 void MainWindow::doComputeBestFitBB()
 {
 	if (QMessageBox::warning(	this,
-								"This method is for test purpose only",
-								"Cloud(s) are going to be rotated while still displayed in their previous position! Proceed?",
+								tr("This method is for test purpose only"),
+								tr("Cloud(s) are going to be rotated while still displayed in their previous position! Proceed?"),
 								QMessageBox::Yes | QMessageBox::No,
 								QMessageBox::No ) != QMessageBox::Yes)
 	{
@@ -1631,7 +1644,7 @@ void MainWindow::doActionFlagMeshVertices()
 					sfIdx = vertices->addScalarField(CC_DEFAULT_MESH_VERT_FLAGS_SF_NAME);
 					if (sfIdx < 0)
 					{
-						ccConsole::Warning(QString("Not enough memory to flag the vertices of mesh '%1'!").arg(mesh->getName()));
+						ccConsole::Warning(tr("Not enough memory to flag the vertices of mesh '%1'!").arg(mesh->getName()));
 						errors = true;
 						continue;
 					}
@@ -1654,13 +1667,13 @@ void MainWindow::doActionFlagMeshVertices()
 					success = true;
 
 					//display stats in the Console as well
-					ccConsole::Print(QString("[Mesh Quality] Mesh '%1' edges: %2 total (normal: %3 / on hole borders: %4 / non-manifold: %5)").arg(entity->getName()).arg(stats.edgesCount).arg(stats.edgesSharedByTwo).arg(stats.edgesNotShared).arg(stats.edgesSharedByMore));
+					ccConsole::Print(tr("[Mesh Quality] Mesh '%1' edges: %2 total (normal: %3 / on hole borders: %4 / non-manifold: %5)").arg(entity->getName()).arg(stats.edgesCount).arg(stats.edgesSharedByTwo).arg(stats.edgesNotShared).arg(stats.edgesSharedByMore));
 				}
 				else
 				{
 					vertices->deleteScalarField(sfIdx);
 					sfIdx = -1;
-					ccConsole::Warning(QString("Not enough memory to flag the vertices of mesh '%1'!").arg(mesh->getName()));
+					ccConsole::Warning(tr("Not enough memory to flag the vertices of mesh '%1'!").arg(mesh->getName()));
 					errors = true;
 				}
 			}
@@ -1678,12 +1691,12 @@ void MainWindow::doActionFlagMeshVertices()
 	{
 		//display reminder
 		forceConsoleDisplay();
-		ccConsole::Print(QString("[Mesh Quality] SF flags: %1 (NORMAL) / %2 (BORDER) / (%3) NON-MANIFOLD").arg(CCCoreLib::MeshSamplingTools::VERTEX_NORMAL).arg(CCCoreLib::MeshSamplingTools::VERTEX_BORDER).arg(CCCoreLib::MeshSamplingTools::VERTEX_NON_MANIFOLD));
+		ccConsole::Print(tr("[Mesh Quality] SF flags: %1 (NORMAL) / %2 (BORDER) / (%3) NON-MANIFOLD").arg(CCCoreLib::MeshSamplingTools::VERTEX_NORMAL).arg(CCCoreLib::MeshSamplingTools::VERTEX_BORDER).arg(CCCoreLib::MeshSamplingTools::VERTEX_NON_MANIFOLD));
 	}
 
 	if (errors)
 	{
-		ccConsole::Error("Error(s) occurred! Check the console...");
+		ccConsole::Error(tr("Error(s) occurred! Check the console..."));
 	}
 }
 
@@ -1700,7 +1713,7 @@ void MainWindow::doActionMeasureMeshVolume()
 				double V = CCCoreLib::MeshSamplingTools::computeMeshVolume(mesh);
 				//we force the console to display itself
 				forceConsoleDisplay();
-				ccConsole::Print(QString("[Mesh Volume] Mesh '%1': V=%2 (cube units)").arg(entity->getName()).arg(V));
+				ccConsole::Print(tr("[Mesh Volume] Mesh '%1': V=%2 (cube units)").arg(entity->getName()).arg(V));
 
 				//check that the mesh is closed
 				CCCoreLib::MeshSamplingTools::EdgeConnectivityStats stats;
@@ -1708,16 +1721,16 @@ void MainWindow::doActionMeasureMeshVolume()
 				{
 					if (stats.edgesNotShared != 0)
 					{
-						ccConsole::Warning(QString("[Mesh Volume] The above volume might be invalid (mesh has holes)"));
+						ccConsole::Warning(tr("[Mesh Volume] The above volume might be invalid (mesh has holes)"));
 					}
 					else if (stats.edgesSharedByMore != 0)
 					{
-						ccConsole::Warning(QString("[Mesh Volume] The above volume might be invalid (mesh has non-manifold edges)"));
+						ccConsole::Warning(tr("[Mesh Volume] The above volume might be invalid (mesh has non-manifold edges)"));
 					}
 				}
 				else
 				{
-					ccConsole::Warning(QString("[Mesh Volume] The above volume might be invalid (not enough memory to check if the mesh is closed)"));
+					ccConsole::Warning(tr("[Mesh Volume] The above volume might be invalid (not enough memory to check if the mesh is closed)"));
 				}
 			}
 			else
@@ -9566,6 +9579,113 @@ void MainWindow::createSinglePointCloud()
 	setSelectedInDB(cloud, true);
 }
 
+void MainWindow::createPointCloudFromClipboard()
+{
+	const QClipboard* clipboard = QApplication::clipboard();
+	assert(clipboard);
+	const QMimeData* mimeData = clipboard->mimeData();
+	if (!mimeData)
+	{
+		ccLog::Warning(tr("Clipboard is empty"));
+		return;
+	}
+
+	if (!mimeData->hasText())
+	{
+		ccLog::Error("ASCII/text data expected");
+		return;
+	}
+
+	// try to convert the data to a point cloud
+	FileIOFilter::LoadParameters parameters;
+	{
+		parameters.alwaysDisplayLoadDialog = true;
+		parameters.shiftHandlingMode = ccGlobalShiftManager::DIALOG_IF_NECESSARY;
+		parameters.parentWidget = this;
+	}
+
+	ccHObject container;
+	QByteArray data = mimeData->data("text/plain");
+	CC_FILE_ERROR result = AsciiFilter().loadAsciiData(data, tr("Clipboard"), container, parameters);
+	if (result != CC_FERR_NO_ERROR)
+	{
+		FileIOFilter::DisplayErrorMessage(result, tr("loading"), tr("from the clipboard"));
+		return;
+	}
+
+	// we only expect clouds
+	ccHObject::Container clouds;
+	if (container.filterChildren(clouds, true, CC_TYPES::POINT_CLOUD) == 0)
+	{
+		assert(false);
+		ccLog::Error("No cloud loaded");
+		return;
+	}
+
+	// detach the clouds from the loading container
+	for (ccHObject* cloud : clouds)
+	{
+		if (cloud)
+		{
+			container.removeDependencyWith(cloud);
+		}
+	}
+	container.removeAllChildren();
+
+	// retrieve or create the group to store the 'clipboard' clouds
+	ccHObject* clipboardGroup = nullptr;
+	{
+		static unsigned s_clipboardGroupID = 0;
+
+		if (s_clipboardGroupID != 0)
+		{
+			clipboardGroup = dbRootObject()->find(s_clipboardGroupID);
+			if (nullptr == clipboardGroup)
+			{
+				// can't find the previous group
+				s_clipboardGroupID = 0;
+			}
+		}
+
+		if (s_clipboardGroupID == 0)
+		{
+			clipboardGroup = new ccHObject(tr("Clipboard"));
+			s_clipboardGroupID = clipboardGroup->getUniqueID();
+			addToDB(clipboardGroup, false, false, false, false);
+		}
+	}
+	assert(clipboardGroup);
+
+	bool normalsDisplayedByDefault = ccOptions::Instance().normalsDisplayedByDefault;
+	for (ccHObject* cloud : clouds)
+	{
+		if (cloud)
+		{
+			clipboardGroup->addChild(cloud);
+			cloud->setName(tr("Cloud #%1").arg(clipboardGroup->getChildrenNumber()));
+
+			if (!normalsDisplayedByDefault)
+			{
+				// disable the normals on all loaded clouds!
+				static_cast<ccGenericPointCloud*>(cloud)->showNormals(false);
+			}
+		}
+	}
+
+	// eventually, we can add the clouds to the DB tree
+	for (size_t i = 0; i < clouds.size(); ++i)
+	{
+		ccHObject* cloud = clouds[i];
+		if (cloud)
+		{
+			bool lastCloud = (i + 1 == clouds.size());
+			addToDB(cloud, lastCloud, lastCloud, true, lastCloud);
+		}
+	}
+
+	QMainWindow::statusBar()->showMessage(tr("%1 cloud(s) loaded from the clipboard").arg(clouds.size()), 2000);
+}
+
 void MainWindow::toggleLockRotationAxis()
 {
 	ccGLWindow* win = getActiveGLWindow();
@@ -9817,7 +9937,7 @@ void MainWindow::addToDB(	const QStringList& filenames,
 							ccGLWindow* destWin/*=0*/)
 {
 	//to use the same 'global shift' for multiple files
-	CCVector3d loadCoordinatesShift(0,0,0);
+	CCVector3d loadCoordinatesShift(0, 0, 0);
 	bool loadCoordinatesTransEnabled = false;
 
 	FileIOFilter::LoadParameters parameters;
@@ -9829,10 +9949,7 @@ void MainWindow::addToDB(	const QStringList& filenames,
 		parameters.parentWidget = this;
 	}
 
-	//the same for 'addToDB' (if the first one is not supported, or if the scale remains too big)
-	CCVector3d addCoordinatesShift(0, 0, 0);
-
-	const ccOptions& options = ccOptions::Instance();
+	bool normalsDisplayedByDefault = ccOptions::Instance().normalsDisplayedByDefault;
 	FileIOFilter::ResetSesionCounter();
 
 	for ( const QString &filename : filenames )
@@ -9842,7 +9959,7 @@ void MainWindow::addToDB(	const QStringList& filenames,
 
 		if (newGroup)
 		{
-			if (!options.normalsDisplayedByDefault)
+			if (!normalsDisplayedByDefault)
 			{
 				//disable the normals on all loaded clouds!
 				ccHObject::Container clouds;

@@ -32,7 +32,6 @@
 AsciiSaveDlg::AsciiSaveDlg(QWidget* parent)
 	: QDialog(parent)
 	, m_ui(new Ui_AsciiSaveDialog)
-	, m_autoShow(true)
 {
 	m_ui->setupUi(this);
 
@@ -109,6 +108,11 @@ unsigned char AsciiSaveDlg::getSeparator() const
 void AsciiSaveDlg::setSeparatorIndex(int index)
 {
 	m_ui->separatorComboBox->setCurrentIndex(index);
+}
+
+int AsciiSaveDlg::getSeparatorIndex() const
+{
+	return m_ui->separatorComboBox->currentIndex();
 }
 
 int AsciiSaveDlg::coordsPrecision() const

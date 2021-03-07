@@ -25,7 +25,7 @@
      <item>
       <widget class="QLabel" name="label_3">
        <property name="text">
-        <string>Filename:</string>
+        <string>Source</string>
        </property>
       </widget>
      </item>
@@ -47,7 +47,7 @@
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>Here are the first lines of this file. Choose an attribute for each column (one cloud at a time):</string>
+      <string>Choose an attribute for each column:</string>
      </property>
     </widget>
    </item>

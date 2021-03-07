@@ -25,7 +25,6 @@
 
 //CClib
 #include <ScalarField.h>
-#include <Garbage.h>
 
 //qCC_db
 #include <cc2DLabel.h>
@@ -42,34 +41,49 @@
 //Qt
 #include <QScopedPointer>
 
-CCCoreLib::Garbage<QDialog> s_dialogGarbage;
-AsciiSaveDlg* s_saveDialog(nullptr);
-AsciiOpenDlg* s_openDialog(nullptr);
+// Semi-persistent parameters
+static int s_defaultSkippedLineCount = 0;
+static int s_outputCoordPrecision = 8;
+static int s_outputSFPrecision = 6;
+static int s_outputSeparatorIndex = 0;
+static bool s_saveSFBeforeColor = false;
+static bool s_saveColumnsNamesHeader = false;
+static bool s_savePointCountHeader = false;
 
-AsciiSaveDlg* AsciiFilter::GetSaveDialog(QWidget* parentWidget/*=0*/)
+void AsciiFilter::SetDefaultSkippedLineCount(int count)
 {
-	if (!s_saveDialog)
-	{
-		s_saveDialog = new AsciiSaveDlg(parentWidget);
-		if (!parentWidget)
-			s_dialogGarbage.add(s_saveDialog);
-	}
-
-	return s_saveDialog;
+	s_defaultSkippedLineCount = count;
 }
 
-AsciiOpenDlg* AsciiFilter::GetOpenDialog(QWidget* parentWidget/*=0*/)
+void AsciiFilter::SetOutputCoordsPrecision(int prec)
 {
-	if (!s_openDialog)
-	{
-		s_openDialog = new AsciiOpenDlg(parentWidget);
-		if (!parentWidget)
-			s_dialogGarbage.add(s_openDialog);
-	}
-
-	return s_openDialog;
+	s_outputCoordPrecision = prec;
 }
 
+void AsciiFilter::SetOutputSFPrecision(int prec)
+{
+	s_outputSFPrecision = prec;
+}
+
+void AsciiFilter::SetOutputSeparatorIndex(int separatorIndex)
+{
+	s_outputSeparatorIndex = separatorIndex;
+}
+
+void AsciiFilter::SaveSFBeforeColor(bool state)
+{
+	s_saveSFBeforeColor = state;
+}
+
+void AsciiFilter::SaveColumnsNamesHeader(bool state)
+{
+	s_saveColumnsNamesHeader = state;
+}
+
+void AsciiFilter::SavePointCountHeader(bool state)
+{
+	s_savePointCountHeader = state;
+}
 
 AsciiFilter::AsciiFilter()
 	: FileIOFilter( {
@@ -101,13 +115,29 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 {
 	assert(entity && !filename.isEmpty());
 
-	AsciiSaveDlg* saveDialog = GetSaveDialog(parameters.parentWidget);
-	assert(saveDialog);
+	AsciiSaveDlg saveDialog(parameters.parentWidget);
+
+	saveDialog.setCoordsPrecision(s_outputCoordPrecision);
+	saveDialog.setSfPrecision(s_outputSFPrecision);
+	saveDialog.setSeparatorIndex(s_outputSeparatorIndex);
+	saveDialog.enableSwapColorAndSF(s_saveSFBeforeColor);
+	saveDialog.enableSaveColumnsNamesHeader(s_saveColumnsNamesHeader);
+	saveDialog.enableSavePointCountHeader(s_savePointCountHeader);
 
 	//if the dialog shouldn't be shown, we'll simply take the default values!
-	if (parameters.alwaysDisplaySaveDialog && saveDialog->autoShow() && !saveDialog->exec())
+	static bool s_showDialog = true;
+	if (parameters.alwaysDisplaySaveDialog && s_showDialog)
 	{
-		return CC_FERR_CANCELED_BY_USER;
+		if (!saveDialog.exec())
+		{
+			return CC_FERR_CANCELED_BY_USER;
+		}
+		s_outputCoordPrecision = saveDialog.coordsPrecision();
+		s_outputSFPrecision = saveDialog.sfPrecision();
+		s_outputSeparatorIndex = saveDialog.getSeparatorIndex();
+		s_saveSFBeforeColor = saveDialog.swapColorAndSF();
+		s_saveColumnsNamesHeader = saveDialog.saveColumnsNamesHeader();
+		s_savePointCountHeader = saveDialog.savePointCountHeader();
 	}
 
 	if (!entity->isKindOf(CC_TYPES::POINT_CLOUD))
@@ -135,27 +165,24 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 			if (cloudCount > 1)
 			{
 				unsigned counter = 0;
-				//disable the save dialog so that it doesn't appear again!
-				AsciiSaveDlg* saveDialog = GetSaveDialog();
-				assert(saveDialog);
 
-				bool autoShow = saveDialog->autoShow();
-				saveDialog->setAutoShow(false);
+				bool autoShow = s_showDialog;
+				s_showDialog = false;
 
-				for (unsigned i=0; i<count; ++i)
+				for (unsigned i = 0; i < count; ++i)
 				{
 					ccHObject* child = entity->getChild(i);
 					if (child->isKindOf(CC_TYPES::POINT_CLOUD))
 					{
 						QString subFilename = path+QString("/");
-						subFilename += QString(baseName).replace("cloudname",child->getName(),Qt::CaseInsensitive);
+						subFilename += QString(baseName).replace("cloudname", child->getName(), Qt::CaseInsensitive);
 						counter++;
 						assert(counter <= cloudCount);
-						subFilename += QString("_%1").arg(cloudCount-counter,6,10,QChar('0'));
+						subFilename += QString("_%1").arg(cloudCount - counter, 6, 10, QChar('0'));
 						if (!extension.isEmpty())
 							subFilename += QString(".") + extension;
 						
-						CC_FILE_ERROR result = saveToFile(entity->getChild(i),subFilename,parameters);
+						CC_FILE_ERROR result = saveToFile(entity->getChild(i), subFilename, parameters);
 						if (result != CC_FERR_NO_ERROR)
 						{
 							return result;
@@ -172,7 +199,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 				}
 
 				//restore previous state
-				saveDialog->setAutoShow(autoShow);
+				s_showDialog = autoShow;
 
 				return CC_FERR_NO_ERROR;
 			}
@@ -213,20 +240,13 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 	}
 	CCCoreLib::NormalizedProgress nprogress(pDlg.data(), numberOfPoints);
 
-	//output precision
-	const int s_coordPrecision = saveDialog->coordsPrecision();
-	const int s_sfPrecision = saveDialog->sfPrecision(); 
-	const int s_nPrecision = 2 + sizeof(PointCoordinateType);
+	//non static parameters
+	int normalPrecision = 2 + sizeof(PointCoordinateType);
+	QChar separator = saveDialog.getSeparator();
+	bool saveFloatColors = saveDialog.saveFloatColors();
+	bool saveAlphaChannel = saveDialog.saveAlphaChannel();
 
-	//other parameters
-	bool saveColumnsHeader = saveDialog->saveColumnsNamesHeader();
-	bool savePointCountHeader = saveDialog->savePointCountHeader();
-	bool swapColorAndSFs = saveDialog->swapColorAndSF();
-	QChar separator(saveDialog->getSeparator());
-	bool saveFloatColors = saveDialog->saveFloatColors();
-	bool saveAlphaChannel = saveDialog->saveAlphaChannel();
-
-	if (saveColumnsHeader)
+	if (s_saveColumnsNamesHeader)
 	{
 		QString header("//");
 		header.append(AsciiHeaderColumns::X());
@@ -235,7 +255,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 		header.append(separator);
 		header.append(AsciiHeaderColumns::Z());
 
-		if (writeColors && !swapColorAndSFs)
+		if (writeColors && !s_saveSFBeforeColor)
 		{
 			header.append(separator);
 			header.append(saveFloatColors ? AsciiHeaderColumns::Rf() : AsciiHeaderColumns::R());
@@ -262,7 +282,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 			}
 		}
 
-		if (writeColors && swapColorAndSFs)
+		if (writeColors && s_saveSFBeforeColor)
 		{
 			header.append(separator);
 			header.append(saveFloatColors ? AsciiHeaderColumns::Rf() : AsciiHeaderColumns::R());
@@ -290,7 +310,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 		stream << header << "\n";
 	}
 
-	if (savePointCountHeader)
+	if (s_savePointCountHeader)
 	{
 		stream << QString::number(numberOfPoints) << "\n";
 	}
@@ -304,11 +324,11 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 		//write current point coordinates
 		const CCVector3* P = cloud->getPoint(i);
 		CCVector3d Pglobal = cloud->toGlobal3d<PointCoordinateType>(*P);
-		line.append(QString::number(Pglobal.x, 'f', s_coordPrecision));
+		line.append(QString::number(Pglobal.x, 'f', s_outputCoordPrecision));
 		line.append(separator);
-		line.append(QString::number(Pglobal.y, 'f', s_coordPrecision));
+		line.append(QString::number(Pglobal.y, 'f', s_outputCoordPrecision));
 		line.append(separator);
-		line.append(QString::number(Pglobal.z, 'f', s_coordPrecision));
+		line.append(QString::number(Pglobal.z, 'f', s_outputCoordPrecision));
 
 		QString colorLine;
 		if (writeColors)
@@ -344,7 +364,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 				}
 			}
 
-			if (!swapColorAndSFs)
+			if (!s_saveSFBeforeColor)
 			{
 				line.append(colorLine);
 			}
@@ -357,11 +377,11 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 			{
 				line.append(separator);
 				double sfVal = (*it)->getGlobalShift() + (*it)->getValue(i);
-				line.append(QString::number(sfVal, 'f', s_sfPrecision));
+				line.append(QString::number(sfVal, 'f', s_outputSFPrecision));
 			}
 		}
 
-		if (writeColors && swapColorAndSFs)
+		if (writeColors && s_saveSFBeforeColor)
 			line.append(colorLine);
 
 		if (writeNorms)
@@ -369,11 +389,11 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 			//add normal vector
 			const CCVector3& N = cloud->getPointNormal(i);
 			line.append(separator);
-			line.append(QString::number(N.x, 'f', s_nPrecision));
+			line.append(QString::number(N.x, 'f', normalPrecision));
 			line.append(separator);
-			line.append(QString::number(N.y, 'f', s_nPrecision));
+			line.append(QString::number(N.y, 'f', normalPrecision));
 			line.append(separator);
-			line.append(QString::number(N.z, 'f', s_nPrecision));
+			line.append(QString::number(N.z, 'f', normalPrecision));
 		}
 
 		stream << line << "\n";
@@ -392,21 +412,44 @@ CC_FILE_ERROR AsciiFilter::loadFile(const QString& filename,
 									ccHObject& container,
 									LoadParameters& parameters)
 {
-	//we get the size of the file to open
 	QFile file(filename);
 	if (!file.exists())
+	{
+		return CC_FERR_UNKNOWN_FILE;
+	}
+	if (!file.open(QFile::ReadOnly))
+	{
 		return CC_FERR_READING;
+	}
 
-	qint64 fileSize = file.size();
-	if (fileSize == 0)
+	QTextStream stream(&file);
+
+	return loadStream(stream, filename, file.size(), container, parameters);
+}
+
+CC_FILE_ERROR AsciiFilter::loadAsciiData(	const QByteArray& data,
+											QString sourceName,
+											ccHObject& container,
+											LoadParameters& parameters)
+{
+	QTextStream stream(data);
+
+	return loadStream(stream, sourceName, data.size(), container, parameters);
+}
+
+CC_FILE_ERROR AsciiFilter::loadStream(	QTextStream& stream,
+										QString filenameOrTitle,
+										qint64 dataSize,
+										ccHObject& container,
+										LoadParameters& parameters)
+{
+	if (dataSize == 0)
+	{
 		return CC_FERR_NO_LOAD;
+	}
 
-	//column attribution dialog
-	//DGM: we ask for the semi-persistent dialog as it may have
-	//been already initialized (by the command-line for instance)
-	AsciiOpenDlg* openDialog = GetOpenDialog(parameters.parentWidget);
-	assert(openDialog);
-	openDialog->setFilename(filename);
+	AsciiOpenDlg openDialog(parameters.parentWidget);
+	openDialog.setInput(filenameOrTitle, &stream);
 
 	bool forceDialogDisplay = parameters.alwaysDisplayLoadDialog;
 	//if we should try to avoid displaying the dialog
@@ -414,13 +457,13 @@ CC_FILE_ERROR AsciiFilter::loadFile(const QString& filename,
 	//if (!forceDialogDisplay)
 	//{
 	//	//we must check that the automatically guessed sequence is ok
-	//	if (!openDialog->safeSequence())
+	//	if (!openDialog.safeSequence())
 	//	{
 	//		forceDialogDisplay = true;
 	//	}
 	//}
 
-	if (openDialog->restorePreviousContext())
+	if (openDialog.restorePreviousContext())
 	{
 		//if we can/should use the previous sequence ('Apply all')
 		forceDialogDisplay = false;
@@ -435,44 +478,35 @@ CC_FILE_ERROR AsciiFilter::loadFile(const QString& filename,
 
 	QString dummyStr;
 	if (	forceDialogDisplay
-		|| !AsciiOpenDlg::CheckOpenSequence(openDialog->getOpenSequence(), dummyStr))
+		|| !AsciiOpenDlg::CheckOpenSequence(openDialog.getOpenSequence(), dummyStr))
 	{
 		//show the dialog
-		if (!openDialog->exec())
+		if (!openDialog.exec())
 		{
-			//release the 'source' dialog (so as to be sure to reset it next time)
-			assert(openDialog == s_openDialog);
-			s_dialogGarbage.destroy(s_openDialog);
-			openDialog = s_openDialog = nullptr;
-
 			//process was cancelled
 			return CC_FERR_CANCELED_BY_USER;
 		}
 	}
 
 	//we compute the approximate line number
-	double averageLineSize = openDialog->getAverageLineSize();
-	unsigned approximateNumberOfLines = static_cast<unsigned>(ceil(static_cast<double>(fileSize)/averageLineSize));
+	double averageLineSize = openDialog.getAverageLineSize();
+	unsigned approximateNumberOfLines = static_cast<unsigned>(ceil(dataSize / averageLineSize));
 
-	AsciiOpenDlg::Sequence openSequence = openDialog->getOpenSequence();
-	char separator = static_cast<char>(openDialog->getSeparator());
-	bool commaAsDecimal = openDialog->useCommaAsDecimal();
-	unsigned maxCloudSize = openDialog->getMaxCloudSize();
-	unsigned skipLineCount = openDialog->getSkippedLinesCount();
-	bool showLabelsIn2D = openDialog->showLabelsIn2D();
+	AsciiOpenDlg::Sequence openSequence = openDialog.getOpenSequence();
+	char separator = static_cast<char>(openDialog.getSeparator());
+	bool commaAsDecimal = openDialog.useCommaAsDecimal();
+	unsigned maxCloudSize = openDialog.getMaxCloudSize();
+	unsigned skipLineCount = openDialog.getSkippedLinesCount();
+	bool showLabelsIn2D = openDialog.showLabelsIn2D();
 
-	//release the 'source' dialog (so as to be sure to reset it next time)
-	assert(openDialog == s_openDialog);
-	s_dialogGarbage.destroy(s_openDialog);
-	openDialog = s_openDialog = nullptr;
-
-	return loadCloudFromFormatedAsciiFile(	filename,
+	return loadCloudFromFormatedAsciiStream(stream,
+											filenameOrTitle,
 											container,
 											openSequence,
 											separator,
 											commaAsDecimal,
 											approximateNumberOfLines,
-											fileSize,
+											dataSize,
 											maxCloudSize,
 											skipLineCount,
 											parameters,
@@ -753,7 +787,8 @@ cloudAttributesDescriptor prepareCloud(	const AsciiOpenDlg::Sequence &openSequen
 	return cloudDesc;
 }
 
-CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filename,
+CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiStream(QTextStream& stream,
+															QString filenameOrTitle,
 															ccHObject& container,
 															const AsciiOpenDlg::Sequence& openSequence,
 															char separator,
@@ -780,15 +815,8 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 		return CC_FERR_NOT_ENOUGH_MEMORY;
 	}
 
-	//we re-open the file (ASCII mode)
-	QFile file(filename);
-	if (!file.open(QFile::ReadOnly))
-	{
-		//we clear already initialized data
-		clearStructure(cloudDesc);
-		return CC_FERR_READING;
-	}
-	QTextStream stream(&file);
+	//just in case
+	stream.seek(0);
 
 	//we skip lines as defined on input
 	{
@@ -809,7 +837,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
-		pDlg->setMethodTitle(QObject::tr("Open ASCII file [%1]").arg(filename));
+		pDlg->setMethodTitle(QObject::tr("Open ASCII data [%1]").arg(filenameOrTitle));
 		pDlg->setInfo(QObject::tr("Approximate number of points: %1").arg(approximateNumberOfLines));
 		pDlg->start();
 	}
@@ -857,7 +885,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 
 			//we re-evaluate the average line size
 			{
-				double averageLineSize = static_cast<double>(file.pos()) / (pointsRead + skipLines);
+				double averageLineSize = static_cast<double>(stream.pos()) / (pointsRead + skipLines);
 				double newNbOfLinesApproximation = std::max(1.0, static_cast<double>(fileSize) / averageLineSize - static_cast<double>(skipLines));
 
 				//if approximation is smaller than actual one, we add 2% by default
@@ -1087,8 +1115,6 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 			break;
 		}
 	}
-
-	file.close();
 
 	if (cloudDesc.cloud)
 	{

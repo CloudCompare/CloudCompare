@@ -439,6 +439,8 @@ private:
 
 	//! Creates a cloud with a single point
 	void createSinglePointCloud();
+	//! Creates a cloud from the clipboard (ASCII) data
+	void createPointCloudFromClipboard();
 
 	inline void doActionMoveBBCenterToOrigin()    { doActionFastRegistration(MoveBBCenterToOrigin); }
 	inline void doActionMoveBBMinCornerToOrigin() { doActionFastRegistration(MoveBBMinCornerToOrigin); }

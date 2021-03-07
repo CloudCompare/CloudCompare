@@ -397,7 +397,7 @@ ccHObject* ccHObject::find(unsigned uniqueID) const
 	}
 	
 	//otherwise we are going to test all children recursively
-	for (unsigned i=0; i<getChildrenNumber(); ++i)
+	for (unsigned i = 0; i < getChildrenNumber(); ++i)
 	{
 		ccHObject* match = getChild(i)->find(uniqueID);
 		if (match)

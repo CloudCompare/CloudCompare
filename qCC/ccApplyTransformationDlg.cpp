@@ -19,7 +19,6 @@
 
 //Local
 #include "ccPersistentSettings.h"
-#include "ccAskTwoDoubleValuesDlg.h"
 #include "mainwindow.h"
 #include "ui_dipDirTransformationDlg.h"
 

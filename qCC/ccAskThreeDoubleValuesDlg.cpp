@@ -26,7 +26,7 @@ ccAskThreeDoubleValuesDlg::ccAskThreeDoubleValuesDlg(	const QString& vName1,
 														double defaultVal2,
 														double defaultVal3,
 														int precision/*=6*/,
-														const char* windowTitle/*=0*/,
+														const QString windowTitle/*=QString()*/,
 														QWidget* parent/*=0*/)
 	: QDialog(parent, Qt::Tool)
 	, Ui::AskThreeDoubleValuesDialog()
@@ -48,8 +48,10 @@ ccAskThreeDoubleValuesDlg::ccAskThreeDoubleValuesDlg(	const QString& vName1,
 	doubleSpinBox2->setDecimals(precision);
 	doubleSpinBox3->setDecimals(precision);
 
-	if (windowTitle)
+	if (!windowTitle.isEmpty())
+	{
 		setWindowTitle(windowTitle);
+	}
 }
 
 void ccAskThreeDoubleValuesDlg::showCheckbox(const QString& label, bool state, QString tooltip/*=QString()*/)

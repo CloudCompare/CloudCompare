@@ -17,14 +17,14 @@
 
 #include "ccAskTwoDoubleValuesDlg.h"
 
-ccAskTwoDoubleValuesDlg::ccAskTwoDoubleValuesDlg(	const char* vName1,
-													const char* vName2,
+ccAskTwoDoubleValuesDlg::ccAskTwoDoubleValuesDlg(	const QString& vName1,
+													const QString& vName2,
 													double minVal,
 													double maxVal,
 													double defaultVal1,
 													double defaultVal2,
 													int precision/*=6*/,
-													const char* windowTitle/*=0*/,
+													QString windowTitle/*=QString()*/,
 													QWidget* parent/*=0*/)
 	: QDialog(parent, Qt::Tool)
 	, Ui::AskTwoDoubleValuesDialog()
@@ -40,6 +40,8 @@ ccAskTwoDoubleValuesDlg::ccAskTwoDoubleValuesDlg(	const char* vName1,
 	doubleSpinBox1->setValue(defaultVal1);
 	doubleSpinBox2->setValue(defaultVal2);
 
-	if (windowTitle)
+	if (!windowTitle.isEmpty())
+	{
 		setWindowTitle(windowTitle);
+	}
 }

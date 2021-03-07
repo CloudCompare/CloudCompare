@@ -40,7 +40,7 @@ public:
 								double defaultVal2,
 								double defaultVal3,
 								int precision = 6,
-								const char* windowTitle = 0,
+								const QString windowTitle = QString(),
 								QWidget* parent = 0);
 
 	//! Enable the checkbox (bottom-left)

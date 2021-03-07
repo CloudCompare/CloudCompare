@@ -526,11 +526,14 @@ void MainWindow::connectActions()
 	});
 
 	//"Edit > Octree" menu
-	connect(m_UI->actionComputeOctree,		&QAction::triggered, this, &MainWindow::doActionComputeOctree);
-	connect(m_UI->actionResampleWithOctree,	&QAction::triggered, this, &MainWindow::doActionResampleWithOctree);
+	connect(m_UI->actionComputeOctree,				&QAction::triggered, this, &MainWindow::doActionComputeOctree);
+	connect(m_UI->actionResampleWithOctree,			&QAction::triggered, this, &MainWindow::doActionResampleWithOctree);
 
 	//"Edit > Grid" menu
-	connect(m_UI->actionDeleteScanGrid,		&QAction::triggered, this, &MainWindow::doActionDeleteScanGrids);
+	connect(m_UI->actionDeleteScanGrid,				&QAction::triggered, this, &MainWindow::doActionDeleteScanGrids);
+
+	//"Edit > Cloud" menu
+	connect(m_UI->actionCreateSinglePointCloud,		&QAction::triggered, this, &MainWindow::createSinglePointCloud);
 
 	//"Edit > Mesh" menu
 	connect(m_UI->actionComputeMeshAA,				&QAction::triggered, this, &MainWindow::doActionComputeMeshAA);
@@ -9527,6 +9530,40 @@ void MainWindow::toggleActiveWindowViewerBasedPerspective()
 		updateViewModePopUpMenu(win);
 		updatePivotVisibilityPopUpMenu(win);
 	}
+}
+
+void MainWindow::createSinglePointCloud()
+{
+	// ask the user to input the point coordinates
+	static CCVector3d s_lastPoint(0, 0, 0);
+	static size_t s_lastPointIndex = 0;
+	ccAskThreeDoubleValuesDlg axisDlg("x", "y", "z", -1.0e12, 1.0e12, s_lastPoint.x, s_lastPoint.y, s_lastPoint.z, 4, "Point coordinates", this);
+	if (axisDlg.buttonBox->button(QDialogButtonBox::Ok))
+		axisDlg.buttonBox->button(QDialogButtonBox::Ok)->setFocus();
+	if (!axisDlg.exec())
+		return;
+	s_lastPoint.x = axisDlg.doubleSpinBox1->value();
+	s_lastPoint.y = axisDlg.doubleSpinBox2->value();
+	s_lastPoint.z = axisDlg.doubleSpinBox3->value();
+
+	// create the cloud
+	ccPointCloud* cloud = new ccPointCloud();
+	if (!cloud->reserve(1))
+	{
+		delete cloud;
+		ccLog::Error("Not enough memory");
+		return;
+	}
+	cloud->setName(tr("Point #%1").arg(++s_lastPointIndex));
+	cloud->addPoint(CCVector3::fromArray(s_lastPoint.u));
+	cloud->setPointSize(5);
+
+	// add it to the DB tree
+	addToDB(cloud, true, true, true, true);
+
+	// select it
+	m_ccRoot->unselectAllEntities();
+	setSelectedInDB(cloud, true);
 }
 
 void MainWindow::toggleLockRotationAxis()

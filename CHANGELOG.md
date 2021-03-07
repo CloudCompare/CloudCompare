@@ -3,6 +3,10 @@ CloudCompare Version History
 
 v2.12 (???) - (in development)
 ----------------------
+- New tools:
+	- Menu 'Edit > Cloud'
+		-  'Edit > Cloud > Create single point cloud': to create a cloud with a single point (set by the user)
+
 - Improvements
     - RANSAC plugin
         - Can save all leftover points into a new cloud (leftovers were points not assigned to a shape)

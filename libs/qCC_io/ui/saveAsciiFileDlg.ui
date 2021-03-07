@@ -76,7 +76,7 @@
        </item>
        <item>
         <property name="text">
-         <string>tabulation</string>
+         <string>tab</string>
         </property>
        </item>
       </widget>

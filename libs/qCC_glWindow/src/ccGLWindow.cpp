@@ -2879,12 +2879,11 @@ void ccGLWindow::updateConstellationCenterAndZoom(const ccBBox* boundingBox/*=nu
 	}
 
 	//we compute the bounding-box diagonal length
-	double bbDiag = static_cast<double>(zoomedBox.getDiagNorm());
-
+	double bbDiag = zoomedBox.getDiagNorm();
 	if ( CCCoreLib::LessThanEpsilon( bbDiag ) )
 	{
-		ccLog::Warning("[ccGLWindow] Entity/DB has a null bounding-box! Can't zoom in...");
-		return;
+		ccLog::Warning("[ccGLWindow] Entity/DB has a null bounding-box!");
+		bbDiag = 1.0;
 	}
 
 	//we set the pivot point on the box center

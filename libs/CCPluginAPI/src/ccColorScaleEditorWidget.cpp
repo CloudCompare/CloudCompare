@@ -198,7 +198,7 @@ void ColorBarWidget::paintEvent(QPaintEvent* e)
 		else
 			contentRect.adjust(0, m_margin, -1, -m_margin);
 
-		assert(m_sliders->front()->getRelativePos() == 0.0 && m_sliders->back()->getRelativePos() == 1.0);
+		assert(m_sliders->elements().front()->getRelativePos() == 0.0 && m_sliders->elements().back()->getRelativePos() == 1.0);
 
 		//color gradient
 		{

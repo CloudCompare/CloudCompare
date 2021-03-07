@@ -437,6 +437,11 @@ private:
 	//! Creates a cloud with the (bounding-box) centers of all selected entities
 	void doActionCreateCloudFromEntCenters();
 
+	//! Creates a cloud with a single point
+	void createSinglePointCloud();
+	//! Creates a cloud from the clipboard (ASCII) data
+	void createPointCloudFromClipboard();
+
 	inline void doActionMoveBBCenterToOrigin()    { doActionFastRegistration(MoveBBCenterToOrigin); }
 	inline void doActionMoveBBMinCornerToOrigin() { doActionFastRegistration(MoveBBMinCornerToOrigin); }
 	inline void doActionMoveBBMaxCornerToOrigin() { doActionFastRegistration(MoveBBMaxCornerToOrigin); }

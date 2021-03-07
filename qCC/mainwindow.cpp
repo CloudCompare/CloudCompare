@@ -53,6 +53,7 @@
 //qCC_io
 #include <ccShiftAndScaleCloudDlg.h>
 #include <BinFilter.h>
+#include <AsciiFilter.h>
 #include <DepthMapFileFilter.h>
 
 //QCC_glWindow
@@ -143,6 +144,9 @@
 #ifdef CC_CORE_LIB_USES_TBB
 #include <tbb/tbb_stddef.h>
 #endif
+
+//Qt
+#include <QClipboard>
 
 //Qt UI files
 #include <ui_distanceMapDlg.h>
@@ -238,7 +242,7 @@ MainWindow::MainWindow()
 
 			m_viewModePopupButton->setMenu(menu);
 			m_viewModePopupButton->setPopupMode(QToolButton::InstantPopup);
-			m_viewModePopupButton->setToolTip("Set current view mode");
+			m_viewModePopupButton->setToolTip(tr("Set current view mode"));
 			m_viewModePopupButton->setStatusTip(m_viewModePopupButton->toolTip());
 			m_UI->toolBarView->insertWidget(m_UI->actionZoomAndCenter, m_viewModePopupButton);
 			m_viewModePopupButton->setEnabled(false);
@@ -254,7 +258,7 @@ MainWindow::MainWindow()
 
 			m_pivotVisibilityPopupButton->setMenu(menu);
 			m_pivotVisibilityPopupButton->setPopupMode(QToolButton::InstantPopup);
-			m_pivotVisibilityPopupButton->setToolTip("Set pivot visibility");
+			m_pivotVisibilityPopupButton->setToolTip(tr("Set pivot visibility"));
 			m_pivotVisibilityPopupButton->setStatusTip(m_pivotVisibilityPopupButton->toolTip());
 			m_UI->toolBarView->insertWidget(m_UI->actionZoomAndCenter,m_pivotVisibilityPopupButton);
 			m_pivotVisibilityPopupButton->setEnabled(false);
@@ -296,14 +300,14 @@ MainWindow::MainWindow()
 
 	updateUI();
 
-	QMainWindow::statusBar()->showMessage(QString("Ready"));
+	QMainWindow::statusBar()->showMessage(tr("Ready"));
 	
 #ifdef CC_CORE_LIB_USES_TBB
 	ccConsole::Print( QStringLiteral( "[TBB] Using Intel's Threading Building Blocks %1.%2" )
 					  .arg( QString::number( TBB_VERSION_MAJOR ), QString::number( TBB_VERSION_MINOR ) ) );
 #endif
 	
-	ccConsole::Print("CloudCompare started!");
+	ccConsole::Print(tr("CloudCompare started!"));
 }
 
 MainWindow::~MainWindow()
@@ -526,11 +530,23 @@ void MainWindow::connectActions()
 	});
 
 	//"Edit > Octree" menu
-	connect(m_UI->actionComputeOctree,		&QAction::triggered, this, &MainWindow::doActionComputeOctree);
-	connect(m_UI->actionResampleWithOctree,	&QAction::triggered, this, &MainWindow::doActionResampleWithOctree);
+	connect(m_UI->actionComputeOctree,				&QAction::triggered, this, &MainWindow::doActionComputeOctree);
+	connect(m_UI->actionResampleWithOctree,			&QAction::triggered, this, &MainWindow::doActionResampleWithOctree);
 
 	//"Edit > Grid" menu
-	connect(m_UI->actionDeleteScanGrid,		&QAction::triggered, this, &MainWindow::doActionDeleteScanGrids);
+	connect(m_UI->actionDeleteScanGrid,				&QAction::triggered, this, &MainWindow::doActionDeleteScanGrids);
+
+	//"Edit > Cloud" menu
+	connect(m_UI->actionCreateSinglePointCloud,		&QAction::triggered, this, &MainWindow::createSinglePointCloud);
+	connect(m_UI->actionPasteCloudFromClipboard,	&QAction::triggered, this, &MainWindow::createPointCloudFromClipboard);
+	//the 'Paste from clipboard' tool depends on the clipboard state
+	{
+		const QClipboard* clipboard = QApplication::clipboard();
+		assert(clipboard);
+		m_UI->actionPasteCloudFromClipboard->setEnabled(clipboard->mimeData()->hasText());
+		connect(clipboard, &QClipboard::dataChanged, [&]() { m_UI->actionPasteCloudFromClipboard->setEnabled(clipboard->mimeData()->hasText()); });
+	}
+
 
 	//"Edit > Mesh" menu
 	connect(m_UI->actionComputeMeshAA,				&QAction::triggered, this, &MainWindow::doActionComputeMeshAA);
@@ -898,12 +914,12 @@ void MainWindow::doActionComputeKdTree()
 
 	if (!cloud)
 	{
-		ccLog::Error("Selected one and only one point cloud or mesh!");
+		ccLog::Error(tr("Selected one and only one point cloud or mesh!"));
 		return;
 	}
 
 	bool ok;
-	s_kdTreeMaxErrorPerCell = QInputDialog::getDouble(this, "Compute Kd-tree", "Max error per leaf cell:", s_kdTreeMaxErrorPerCell, 1.0e-6, 1.0e6, 6, &ok);
+	s_kdTreeMaxErrorPerCell = QInputDialog::getDouble(this, tr("Compute Kd-tree"), tr("Max error per leaf cell:"), s_kdTreeMaxErrorPerCell, 1.0e-6, 1.0e6, 6, &ok);
 	if (!ok)
 		return;
 
@@ -918,7 +934,7 @@ void MainWindow::doActionComputeKdTree()
 	{
 		qint64 elapsedTime_ms = eTimer.elapsed();
 
-		ccConsole::Print("[doActionComputeKdTree] Timing: %2.3f s",static_cast<double>(elapsedTime_ms)/1.0e3);
+		ccConsole::Print("[doActionComputeKdTree] Timing: %2.3f s", elapsedTime_ms / 1.0e3);
 		cloud->setEnabled(true); //for mesh vertices!
 		cloud->addChild(kdtree);
 		kdtree->setDisplay(cloud->getDisplay());
@@ -937,7 +953,7 @@ void MainWindow::doActionComputeKdTree()
 	}
 	else
 	{
-		ccLog::Error("An error occurred!");
+		ccLog::Error(tr("An error occurred"));
 		delete kdtree;
 		kdtree = nullptr;
 	}
@@ -955,7 +971,7 @@ void MainWindow::doActionComputeOctree()
 void MainWindow::doActionResampleWithOctree()
 {
 	bool ok;
-	int pointCount = QInputDialog::getInt(this,"Resample with octree", "Points (approx.)", 1000000, 1, INT_MAX, 100000, &ok);
+	int pointCount = QInputDialog::getInt(this, tr("Resample with octree"), tr("Points (approx.)"), 1000000, 1, INT_MAX, 100000, &ok);
 	if (!ok)
 		return;
 
@@ -987,7 +1003,7 @@ void MainWindow::doActionResampleWithOctree()
 				octree = cloud->computeOctree(&pDlg);
 				if (!octree)
 				{
-					ccConsole::Error(QString("Could not compute octree for cloud '%1'").arg(cloud->getName()));
+					ccConsole::Error(tr("Could not compute octree for cloud '%1'").arg(cloud->getName()));
 					continue;
 				}
 			}
@@ -1027,7 +1043,7 @@ void MainWindow::doActionResampleWithOctree()
 	}
 
 	if (errors)
-		ccLog::Error("[ResampleWithOctree] Errors occurred during the process! Result may be incomplete!");
+		ccLog::Error(tr("[ResampleWithOctree] Errors occurred during the process, result may be incomplete"));
 
 	refreshAll();
 }
@@ -1127,12 +1143,12 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 							sasDlg.showPreserveShiftOnSave(true);
 
 							//add "original" entry
-							int index = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo("Original", globalShift, globalScale));
+							int index = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo(tr("Original"), globalShift, globalScale));
 							//sasDlg.setCurrentProfile(index);
 							//add "suggested" entry
 							CCVector3d suggestedShift = ccGlobalShiftManager::BestShift(Pg);
 							double suggestedScale = ccGlobalShiftManager::BestScale(Dg);
-							index = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo("Suggested", suggestedShift, suggestedScale));
+							index = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo(tr("Suggested"), suggestedShift, suggestedScale));
 							sasDlg.setCurrentProfile(index);
 							//add "last" entry (if available)
 							std::vector<ccGlobalShiftManager::ShiftInfo> lastInfos;
@@ -1166,7 +1182,7 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 							}
 							else if (sasDlg.cancelled())
 							{
-								ccLog::Warning("[ApplyTransformation] Process cancelled by user");
+								ccLog::Warning(tr("[ApplyTransformation] Process cancelled by user"));
 								return;
 							}
 						}
@@ -1182,13 +1198,13 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 					cloud->setGlobalScale(cloud->getGlobalScale() * scaleChange);
 					const CCVector3d& T = cloud->getGlobalShift();
 					double scale = cloud->getGlobalScale();
-					ccLog::Warning(QString("[ApplyTransformation] Cloud '%1' global shift/scale information has been updated: shift = (%2,%3,%4) / scale = %5").arg(cloud->getName()).arg(T.x).arg(T.y).arg(T.z).arg(scale));
+					ccLog::Warning(tr("[ApplyTransformation] Cloud '%1' global shift/scale information has been updated: shift = (%2,%3,%4) / scale = %5").arg(cloud->getName()).arg(T.x).arg(T.y).arg(T.z).arg(scale));
 				}
 			}
 		}
 
 		//we temporarily detach entity, as it may undergo
-		//"severe" modifications (octree deletion, etc.) --> see ccHObject::applyRigidTransformation
+		//'severe' modifications (octree deletion, etc.) --> see ccHObject::applyRigidTransformation
 		ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(entity);
 		entity->setGLTransformation(ccGLMatrix(transMat.data()));
 		//DGM FIXME: we only test the entity own bounding box (and we update its shift & scale info) but we apply the transformation to all its children?!
@@ -1201,9 +1217,9 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 	if (m_ccRoot)
 		m_ccRoot->selectEntities(selectedEntities);
 
-	ccLog::Print("[ApplyTransformation] Applied transformation matrix:");
+	ccLog::Print(tr("[ApplyTransformation] Applied transformation matrix:"));
 	ccLog::Print(transMat.toString(12,' ')); //full precision
-	ccLog::Print("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool");
+	ccLog::Print(tr("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool"));
 
 	//reselect previously selected entities!
 	if (m_ccRoot)
@@ -1248,7 +1264,7 @@ void MainWindow::doActionApplyScale()
 			}
 			if (!cloud || !cloud->isKindOf(CC_TYPES::POINT_CLOUD))
 			{
-				ccLog::Warning(QString("[Apply scale] Entity '%1' can't be scaled this way").arg(entity->getName()));
+				ccLog::Warning(tr("[Apply scale] Entity '%1' can't be scaled this way").arg(entity->getName()));
 				continue;
 			}
 			if (lockedVertices)
@@ -1292,8 +1308,8 @@ void MainWindow::doActionApplyScale()
 					{
 						if (QMessageBox::question(
 							this,
-							"Big coordinates",
-							"Resutling coordinates will be too big (original precision may be lost!). Proceed anyway?",
+							tr("Big coordinates"),
+							tr("Resutling coordinates will be too big (original precision may be lost!). Proceed anyway?"),
 							QMessageBox::Yes,
 							QMessageBox::No) == QMessageBox::Yes)
 						{
@@ -1316,7 +1332,7 @@ void MainWindow::doActionApplyScale()
 
 	if (candidates.empty())
 	{
-		ccConsole::Warning("[Apply scale] No eligible entities (point clouds or meshes) were selected!");
+		ccConsole::Warning(tr("[Apply scale] No eligible entities (point clouds or meshes) were selected!"));
 		return;
 	}
 
@@ -1334,7 +1350,7 @@ void MainWindow::doActionApplyScale()
 			}
 
 			//we temporarily detach entity, as it may undergo
-			//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::scale
+			//'severe' modifications (octree deletion, etc.) --> see ccPointCloud::scale
 			ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(cloud);
 
 			cloud->scale(	static_cast<PointCoordinateType>(scales.x),
@@ -1473,7 +1489,7 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 	sasDlg.showNoButton(false);
 	sasDlg.setShiftFieldsPrecision(6);
 	//add "original" entry
-	int index = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo("Original", shift, scale));
+	int index = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo(tr("Original"), shift, scale));
 	sasDlg.setCurrentProfile(index);
 	//add "last" entry (if available)
 	std::vector<ccGlobalShiftManager::ShiftInfo> lastInfos;
@@ -1491,8 +1507,8 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 	scale = sasDlg.getScale();
 	bool preserveGlobalPos = sasDlg.keepGlobalPos();
 
-	ccLog::Print("[Global Shift/Scale] New shift: (%f, %f, %f)", shift.x, shift.y, shift.z);
-	ccLog::Print("[Global Shift/Scale] New scale: %f", scale);
+	ccLog::Print(tr("[Global Shift/Scale] New shift: (%1, %2, %3)").arg(shift.x).arg(shift.y).arg(shift.z));
+	ccLog::Print(tr("[Global Shift/Scale] New scale: %1").arg(scale));
 
 	//apply new shift
 	{
@@ -1523,7 +1539,7 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 					ent->applyGLTransformation_recursive(&transMat);
 					ent->prepareDisplayForRefresh_recursive();
 
-					ccLog::Warning(QString("[Global Shift/Scale] To preserve its original position, the entity '%1' has been translated of (%2,%3,%4) and rescaled of a factor %5")
+					ccLog::Warning(tr("[Global Shift/Scale] To preserve its original position, the entity '%1' has been translated of (%2 ; %3 ; %4) and rescaled of a factor %5")
 									.arg(ent->getName())
 									.arg(T.x)
 									.arg(T.y)
@@ -1543,8 +1559,8 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 void MainWindow::doComputeBestFitBB()
 {
 	if (QMessageBox::warning(	this,
-								"This method is for test purpose only",
-								"Cloud(s) are going to be rotated while still displayed in their previous position! Proceed?",
+								tr("This method is for test purpose only"),
+								tr("Cloud(s) are going to be rotated while still displayed in their previous position! Proceed?"),
 								QMessageBox::Yes | QMessageBox::No,
 								QMessageBox::No ) != QMessageBox::Yes)
 	{
@@ -1594,7 +1610,7 @@ void MainWindow::doComputeBestFitBB()
 					trans.invert();
 
 					//we temporarily detach entity, as it may undergo
-					//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::applyRigidTransformation
+					//'severe' modifications (octree deletion, etc.) --> see ccPointCloud::applyRigidTransformation
 					ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(cloud);
 					static_cast<ccPointCloud*>(cloud)->applyRigidTransformation(trans);
 					putObjectBackIntoDBTree(cloud,objContext);
@@ -1628,7 +1644,7 @@ void MainWindow::doActionFlagMeshVertices()
 					sfIdx = vertices->addScalarField(CC_DEFAULT_MESH_VERT_FLAGS_SF_NAME);
 					if (sfIdx < 0)
 					{
-						ccConsole::Warning(QString("Not enough memory to flag the vertices of mesh '%1'!").arg(mesh->getName()));
+						ccConsole::Warning(tr("Not enough memory to flag the vertices of mesh '%1'!").arg(mesh->getName()));
 						errors = true;
 						continue;
 					}
@@ -1651,13 +1667,13 @@ void MainWindow::doActionFlagMeshVertices()
 					success = true;
 
 					//display stats in the Console as well
-					ccConsole::Print(QString("[Mesh Quality] Mesh '%1' edges: %2 total (normal: %3 / on hole borders: %4 / non-manifold: %5)").arg(entity->getName()).arg(stats.edgesCount).arg(stats.edgesSharedByTwo).arg(stats.edgesNotShared).arg(stats.edgesSharedByMore));
+					ccConsole::Print(tr("[Mesh Quality] Mesh '%1' edges: %2 total (normal: %3 / on hole borders: %4 / non-manifold: %5)").arg(entity->getName()).arg(stats.edgesCount).arg(stats.edgesSharedByTwo).arg(stats.edgesNotShared).arg(stats.edgesSharedByMore));
 				}
 				else
 				{
 					vertices->deleteScalarField(sfIdx);
 					sfIdx = -1;
-					ccConsole::Warning(QString("Not enough memory to flag the vertices of mesh '%1'!").arg(mesh->getName()));
+					ccConsole::Warning(tr("Not enough memory to flag the vertices of mesh '%1'!").arg(mesh->getName()));
 					errors = true;
 				}
 			}
@@ -1675,12 +1691,12 @@ void MainWindow::doActionFlagMeshVertices()
 	{
 		//display reminder
 		forceConsoleDisplay();
-		ccConsole::Print(QString("[Mesh Quality] SF flags: %1 (NORMAL) / %2 (BORDER) / (%3) NON-MANIFOLD").arg(CCCoreLib::MeshSamplingTools::VERTEX_NORMAL).arg(CCCoreLib::MeshSamplingTools::VERTEX_BORDER).arg(CCCoreLib::MeshSamplingTools::VERTEX_NON_MANIFOLD));
+		ccConsole::Print(tr("[Mesh Quality] SF flags: %1 (NORMAL) / %2 (BORDER) / (%3) NON-MANIFOLD").arg(CCCoreLib::MeshSamplingTools::VERTEX_NORMAL).arg(CCCoreLib::MeshSamplingTools::VERTEX_BORDER).arg(CCCoreLib::MeshSamplingTools::VERTEX_NON_MANIFOLD));
 	}
 
 	if (errors)
 	{
-		ccConsole::Error("Error(s) occurred! Check the console...");
+		ccConsole::Error(tr("Error(s) occurred! Check the console..."));
 	}
 }
 
@@ -1697,7 +1713,7 @@ void MainWindow::doActionMeasureMeshVolume()
 				double V = CCCoreLib::MeshSamplingTools::computeMeshVolume(mesh);
 				//we force the console to display itself
 				forceConsoleDisplay();
-				ccConsole::Print(QString("[Mesh Volume] Mesh '%1': V=%2 (cube units)").arg(entity->getName()).arg(V));
+				ccConsole::Print(tr("[Mesh Volume] Mesh '%1': V=%2 (cube units)").arg(entity->getName()).arg(V));
 
 				//check that the mesh is closed
 				CCCoreLib::MeshSamplingTools::EdgeConnectivityStats stats;
@@ -1705,16 +1721,16 @@ void MainWindow::doActionMeasureMeshVolume()
 				{
 					if (stats.edgesNotShared != 0)
 					{
-						ccConsole::Warning(QString("[Mesh Volume] The above volume might be invalid (mesh has holes)"));
+						ccConsole::Warning(tr("[Mesh Volume] The above volume might be invalid (mesh has holes)"));
 					}
 					else if (stats.edgesSharedByMore != 0)
 					{
-						ccConsole::Warning(QString("[Mesh Volume] The above volume might be invalid (mesh has non-manifold edges)"));
+						ccConsole::Warning(tr("[Mesh Volume] The above volume might be invalid (mesh has non-manifold edges)"));
 					}
 				}
 				else
 				{
-					ccConsole::Warning(QString("[Mesh Volume] The above volume might be invalid (not enough memory to check if the mesh is closed)"));
+					ccConsole::Warning(tr("[Mesh Volume] The above volume might be invalid (not enough memory to check if the mesh is closed)"));
 				}
 			}
 			else
@@ -1737,10 +1753,10 @@ void MainWindow::doActionMeasureMeshSurface()
 				double S = CCCoreLib::MeshSamplingTools::computeMeshArea(mesh);
 				//we force the console to display itself
 				forceConsoleDisplay();
-				ccConsole::Print(QString("[Mesh Surface] Mesh '%1': S=%2 (square units)").arg(entity->getName()).arg(S));
+				ccConsole::Print(tr("[Mesh Surface] Mesh '%1': S=%2 (square units)").arg(entity->getName()).arg(S));
 				if (mesh->size())
 				{
-					ccConsole::Print(QString("[Mesh Surface] Average triangle surface: %1 (square units)").arg(S / double(mesh->size())));
+					ccConsole::Print(tr("[Mesh Surface] Average triangle surface: %1 (square units)").arg(S / double(mesh->size())));
 				}
 			}
 			else
@@ -1756,7 +1772,7 @@ void MainWindow::doActionComputeDistancesFromSensor()
 	//we support more than just one sensor in selection
 	if (!haveSelection())
 	{
-		ccConsole::Error("Select at least a sensor.");
+		ccConsole::Error(tr("Select at least one sensor"));
 		return;
 	}
 
@@ -1774,7 +1790,7 @@ void MainWindow::doActionComputeDistancesFromSensor()
 
 		//get associated cloud
 		ccHObject* defaultCloud = sensor->getParent() && sensor->getParent()->isA(CC_TYPES::POINT_CLOUD) ? sensor->getParent() : nullptr;
-		ccPointCloud* cloud = askUserToSelectACloud(defaultCloud, "Select a cloud on which to project the uncertainty:");
+		ccPointCloud* cloud = askUserToSelectACloud(defaultCloud, tr("Select a cloud on which to project the uncertainty:"));
 		if (!cloud)
 		{
 			return;
@@ -1796,7 +1812,7 @@ void MainWindow::doActionComputeDistancesFromSensor()
 			sfIdx = cloud->addScalarField(defaultRangesSFname);
 			if (sfIdx < 0)
 			{
-				ccConsole::Error("Not enough memory!");
+				ccConsole::Error(tr("Not enough memory!"));
 				return;
 			}
 		}
@@ -1824,7 +1840,7 @@ void MainWindow::doActionComputeScatteringAngles()
 	//there should be only one sensor in current selection!
 	if (!haveOneSelection() || !m_selectedEntities[0]->isKindOf(CC_TYPES::GBL_SENSOR))
 	{
-		ccConsole::Error("Select one and only one GBL sensor!");
+		ccConsole::Error(tr("Select one and only one GBL sensor!"));
 		return;
 	}
 
@@ -1838,14 +1854,14 @@ void MainWindow::doActionComputeScatteringAngles()
 
 	//get associated cloud
 	ccHObject* defaultCloud = sensor->getParent() && sensor->getParent()->isA(CC_TYPES::POINT_CLOUD) ? sensor->getParent() : nullptr;
-	ccPointCloud* cloud = askUserToSelectACloud(defaultCloud, "Select a cloud on which to project the uncertainty:");
+	ccPointCloud* cloud = askUserToSelectACloud(defaultCloud, tr("Select a cloud on which to project the uncertainty:"));
 	if (!cloud)
 	{
 		return;
 	}
 	if (!cloud->hasNormals())
 	{
-		ccConsole::Error("The cloud must have normals!");
+		ccConsole::Error(tr("The cloud must have normals!"));
 		return;
 	}
 
@@ -1863,7 +1879,7 @@ void MainWindow::doActionComputeScatteringAngles()
 		sfIdx = cloud->addScalarField(defaultScatAnglesSFname);
 		if (sfIdx < 0)
 		{
-			ccConsole::Error("Not enough memory!");
+			ccConsole::Error(tr("Not enough memory!"));
 			return;
 		}
 	}
@@ -1909,7 +1925,7 @@ void MainWindow::doActionSetViewFromSensor()
 	//there should be only one sensor in current selection!
 	if (!haveOneSelection() || !m_selectedEntities[0]->isKindOf(CC_TYPES::SENSOR))
 	{
-		ccConsole::Error("Select one and only one sensor!");
+		ccConsole::Error(tr("Select one and only one sensor!"));
 		return;
 	}
 
@@ -1928,7 +1944,7 @@ void MainWindow::doActionSetViewFromSensor()
 
 	if (sensor->applyViewport(win))
 	{
-		ccConsole::Print("[doActionSetViewFromSensor] Viewport applied");
+		ccConsole::Print(tr("[doActionSetViewFromSensor] Viewport applied"));
 	}
 }
 
@@ -2011,7 +2027,7 @@ void MainWindow::doActionCreateGBLSensor()
 			}
 			else
 			{
-				ccLog::Error("Failed to create sensor");
+				ccLog::Error(tr("Failed to create sensor"));
 				delete sensor;
 				sensor = nullptr;
 			}
@@ -2090,7 +2106,7 @@ void MainWindow::doActionModifySensor()
 	//there should be only one point cloud with sensor in current selection!
 	if (!haveOneSelection() || !m_selectedEntities[0]->isKindOf(CC_TYPES::SENSOR))
 	{
-		ccConsole::Error("Select one and only one sensor!");
+		ccConsole::Error(tr("Select one and only one sensor!"));
 		return;
 	}
 
@@ -2128,7 +2144,7 @@ void MainWindow::doActionModifySensor()
 		}
 		else
 		{
-			//ccConsole::Warning(QString("Internal error: sensor ('%1') parent is not a point cloud!").arg(sensor->getName()));
+			//ccConsole::Warning(tr("Internal error: sensor ('%1') parent is not a point cloud!").arg(sensor->getName()));
 		}
 	}
 	//Camera sensors
@@ -2147,7 +2163,7 @@ void MainWindow::doActionModifySensor()
 	}
 	else
 	{
-		ccConsole::Error("Can't modify this kind of sensor!");
+		ccConsole::Error(tr("Can't modify this kind of sensor!"));
 		return;
 	}
 
@@ -2165,7 +2181,7 @@ void MainWindow::doActionProjectUncertainty()
 	//there should only be one sensor in the current selection!
 	if (!haveOneSelection() || !m_selectedEntities[0]->isKindOf(CC_TYPES::CAMERA_SENSOR))
 	{
-		ccConsole::Error("Select one and only one camera (projective) sensor!");
+		ccConsole::Error(tr("Select one and only one camera (projective) sensor!"));
 		return;
 	}
 
@@ -2179,13 +2195,13 @@ void MainWindow::doActionProjectUncertainty()
 	const ccCameraSensor::LensDistortionParameters::Shared& distParams = sensor->getDistortionParameters();
 	if (!distParams || distParams->getModel() != ccCameraSensor::BROWN_DISTORTION)
 	{
-		ccLog::Error("Sensor has no associated uncertainty model! (Brown, etc.)");
+		ccLog::Error(tr("Sensor has no associated uncertainty model! (Brown, etc.)"));
 		return;
 	}
 
 	//we need a cloud to project the uncertainty on!
 	ccHObject* defaultCloud = sensor->getParent() && sensor->getParent()->isA(CC_TYPES::POINT_CLOUD) ? sensor->getParent() : nullptr;
-	ccPointCloud* pointCloud = askUserToSelectACloud(defaultCloud, "Select a cloud on which to project the uncertainty:");
+	ccPointCloud* pointCloud = askUserToSelectACloud(defaultCloud, tr("Select a cloud on which to project the uncertainty:"));
 	if (!pointCloud)
 	{
 		return;
@@ -2194,7 +2210,7 @@ void MainWindow::doActionProjectUncertainty()
 	CCCoreLib::ReferenceCloud points(pointCloud);
 	if (!points.reserve(pointCloud->size()))
 	{
-		ccConsole::Error("Not enough memory!");
+		ccConsole::Error(tr("Not enough memory!"));
 		return;
 	}
 	points.addPointIndex(0,pointCloud->size());
@@ -2203,7 +2219,7 @@ void MainWindow::doActionProjectUncertainty()
 	std::vector< Vector3Tpl<ScalarType> > accuracy;
 	if (!sensor->computeUncertainty(&points, accuracy/*, false*/))
 	{
-		ccConsole::Error("Not enough memory!");
+		ccConsole::Error(tr("Not enough memory!"));
 		return;
 	}
 
@@ -2214,13 +2230,13 @@ void MainWindow::doActionProjectUncertainty()
 	for (unsigned d = 0; d < 3; ++d)
 	{
 		// add scalar field
-		QString sfName = QString("[%1] Uncertainty (%2)").arg(sensor->getName()).arg(dimChar[d]);
+		QString sfName = tr("[%1] Uncertainty (%2)").arg(sensor->getName()).arg(dimChar[d]);
 		int sfIdx = pointCloud->getScalarFieldIndexByName(qPrintable(sfName));
 		if (sfIdx < 0)
 			sfIdx = pointCloud->addScalarField(qPrintable(sfName));
 		if (sfIdx < 0)
 		{
-			ccLog::Error("An error occurred! (see console)");
+			ccLog::Error(tr("An error occurred! (see console)"));
 			return;
 		}
 
@@ -2243,13 +2259,13 @@ void MainWindow::doActionProjectUncertainty()
 
 	// add scalar field
 	{
-		QString sfName = QString("[%1] Uncertainty (3D)").arg(sensor->getName());
+		QString sfName = tr("[%1] Uncertainty (3D)").arg(sensor->getName());
 		int sfIdx = pointCloud->getScalarFieldIndexByName(qPrintable(sfName));
 		if (sfIdx < 0)
 			sfIdx = pointCloud->addScalarField(qPrintable(sfName));
 		if (sfIdx < 0)
 		{
-			ccLog::Error("An error occurred! (see console)");
+			ccLog::Error(tr("An error occurred! (see console)"));
 			return;
 		}
 
@@ -2278,7 +2294,7 @@ void MainWindow::doActionCheckPointsInsideFrustum()
 	//there should be only one camera sensor in the current selection!
 	if (!haveOneSelection() || !m_selectedEntities[0]->isKindOf(CC_TYPES::CAMERA_SENSOR))
 	{
-		ccConsole::Error("Select one and only one camera sensor!");
+		ccConsole::Error(tr("Select one and only one camera sensor!"));
 		return;
 	}
 
@@ -2288,7 +2304,7 @@ void MainWindow::doActionCheckPointsInsideFrustum()
 
 	//we need a cloud to filter!
 	ccHObject* defaultCloud = sensor->getParent() && sensor->getParent()->isA(CC_TYPES::POINT_CLOUD) ? sensor->getParent() : nullptr;
-	ccPointCloud* pointCloud = askUserToSelectACloud(defaultCloud, "Select a cloud to filter:");
+	ccPointCloud* pointCloud = askUserToSelectACloud(defaultCloud, tr("Select a cloud to filter:"));
 	if (!pointCloud)
 	{
 		return;
@@ -2301,7 +2317,7 @@ void MainWindow::doActionCheckPointsInsideFrustum()
 		octree = pointCloud->computeOctree();
 		if (!octree)
 		{
-			ccConsole::Error("Failed to compute the octree!");
+			ccConsole::Error(tr("Failed to compute the octree!"));
 			return;
 		}
 	}
@@ -2311,7 +2327,7 @@ void MainWindow::doActionCheckPointsInsideFrustum()
 	std::vector<unsigned> inCameraFrustum;
 	if (!octree->intersectWithFrustum(sensor, inCameraFrustum))
 	{
-		ccConsole::Error("Failed to intersect sensor frustum with octree!");
+		ccConsole::Error(tr("Failed to intersect sensor frustum with octree!"));
 	}
 	else
 	{
@@ -2321,7 +2337,7 @@ void MainWindow::doActionCheckPointsInsideFrustum()
 
 		if (inCameraFrustum.empty())
 		{
-			ccConsole::Error("No point fell inside the frustum!");
+			ccConsole::Error(tr("No point fell inside the frustum!"));
 			if (sfIdx >= 0)
 				pointCloud->deleteScalarField(sfIdx);
 		}
@@ -2331,7 +2347,7 @@ void MainWindow::doActionCheckPointsInsideFrustum()
 				sfIdx = pointCloud->addScalarField(sfName);
 			if (sfIdx < 0)
 			{
-				ccLog::Error("Failed to allocate memory for output scalar field!");
+				ccLog::Error(tr("Failed to allocate memory for output scalar field!"));
 				return;
 			}
 
@@ -2385,7 +2401,7 @@ void MainWindow::doActionShowDepthBuffer()
 				}
 				else
 				{
-					ccConsole::Error(QString("Internal error: sensor ('%1') parent is not a point cloud!").arg(sensor->getName()));
+					ccConsole::Error(tr("Internal error: sensor ('%1') parent is not a point cloud!").arg(sensor->getName()));
 					return;
 				}
 			}
@@ -2406,7 +2422,7 @@ void MainWindow::doActionExportDepthBuffer()
 	QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
 
 	QString filename = QFileDialog::getSaveFileName(this,
-													"Select output file",
+													tr("Select output file"),
 													currentPath,
 													DepthMapFileFilter::GetFileFilter(),
 													nullptr,
@@ -2447,11 +2463,11 @@ void MainWindow::doActionExportDepthBuffer()
 
 	if (result != CC_FERR_NO_ERROR)
 	{
-		FileIOFilter::DisplayErrorMessage(result,"saving",filename);
+		FileIOFilter::DisplayErrorMessage(result, tr("saving"), filename);
 	}
 	else
 	{
-		ccLog::Print(QString("[I/O] File '%1' saved successfully").arg(filename));
+		ccLog::Print(tr("[I/O] File '%1' saved successfully").arg(filename));
 	}
 
 	if (multEntities)
@@ -2466,7 +2482,7 @@ void MainWindow::doActionComputePointsVisibility()
 	//there should be only one camera sensor in the current selection!
 	if (!haveOneSelection() || !m_selectedEntities[0]->isKindOf(CC_TYPES::GBL_SENSOR))
 	{
-		ccConsole::Error("Select one and only one GBL/TLS sensor!");
+		ccConsole::Error(tr("Select one and only one GBL/TLS sensor!"));
 		return;
 	}
 
@@ -2476,7 +2492,7 @@ void MainWindow::doActionComputePointsVisibility()
 
 	//we need a cloud to filter!
 	ccHObject* defaultCloud = sensor->getParent() && sensor->getParent()->isA(CC_TYPES::POINT_CLOUD) ? sensor->getParent() : nullptr;
-	ccPointCloud* pointCloud = askUserToSelectACloud(defaultCloud, "Select a cloud to filter:");
+	ccPointCloud* pointCloud = askUserToSelectACloud(defaultCloud, tr("Select a cloud to filter:"));
 	if (!pointCloud)
 	{
 		return;
@@ -2488,8 +2504,8 @@ void MainWindow::doActionComputePointsVisibility()
 		{
 			//the sensor has no depth buffer, we'll ask the user if he wants to compute it first
 			if (QMessageBox::warning(	this,
-										"Depth buffer.",
-										"Sensor has no depth buffer: do you want to compute it now?",
+										tr("Depth buffer"),
+										tr("Sensor has no depth buffer: do you want to compute it now?"),
 										QMessageBox::Yes | QMessageBox::No,
 										QMessageBox::Yes ) == QMessageBox::No)
 			{
@@ -2510,7 +2526,7 @@ void MainWindow::doActionComputePointsVisibility()
 		}
 		else
 		{
-			ccConsole::Error("Sensor has no depth buffer (and no associated cloud?)");
+			ccConsole::Error(tr("Sensor has no depth buffer (and no associated cloud?)"));
 			return;
 		}
 	}
@@ -2522,7 +2538,7 @@ void MainWindow::doActionComputePointsVisibility()
 		sfIdx = pointCloud->addScalarField(sfName);
 	if (sfIdx < 0)
 	{
-		ccLog::Error("Failed to allocate memory for output scalar field!");
+		ccLog::Error(tr("Failed to allocate memory for output scalar field!"));
 		return;
 	}
 
@@ -2563,11 +2579,11 @@ void MainWindow::doActionComputePointsVisibility()
 			pointCloud->setCurrentDisplayedScalarField(sfIdx);
 			pointCloud->showSF(true);
 
-			ccConsole::Print(QString("Visibility computed for cloud '%1'").arg(pointCloud->getName()));
-			ccConsole::Print(QString("\tVisible = %1").arg(CCCoreLib::POINT_VISIBLE));
-			ccConsole::Print(QString("\tHidden = %1").arg(CCCoreLib::POINT_HIDDEN));
-			ccConsole::Print(QString("\tOut of range = %1").arg(CCCoreLib::POINT_OUT_OF_RANGE));
-			ccConsole::Print(QString("\tOut of fov = %1").arg(CCCoreLib::POINT_OUT_OF_FOV));
+			ccConsole::Print(tr("Visibility computed for cloud '%1'").arg(pointCloud->getName()));
+			ccConsole::Print(tr("\tVisible = %1").arg(CCCoreLib::POINT_VISIBLE));
+			ccConsole::Print(tr("\tHidden = %1").arg(CCCoreLib::POINT_HIDDEN));
+			ccConsole::Print(tr("\tOut of range = %1").arg(CCCoreLib::POINT_OUT_OF_RANGE));
+			ccConsole::Print(tr("\tOut of fov = %1").arg(CCCoreLib::POINT_OUT_OF_FOV));
 		}
 		pointCloud->redrawDisplay();
 	}
@@ -2640,7 +2656,7 @@ void MainWindow::doActionSamplePointsOnMesh()
 	}
 
 	if (errors)
-		ccLog::Error("[doActionSamplePointsOnMesh] Errors occurred during the process! Result may be incomplete!");
+		ccLog::Error(tr("[doActionSamplePointsOnMesh] Errors occurred during the process! Result may be incomplete!"));
 
 	refreshAll();
 }
@@ -2691,7 +2707,7 @@ void MainWindow::doActionSamplePointsOnPolyline()
 
 	if (errors)
 	{
-		ccLog::Error("[doActionSamplePointsOnPolyline] Errors occurred during the process! Result may be incomplete!");
+		ccLog::Error(tr("[doActionSamplePointsOnPolyline] Errors occurred during the process! Result may be incomplete!"));
 	}
 
 	refreshAll();
@@ -2745,7 +2761,7 @@ void MainWindow::doActionSmoohPolyline()
 
 	if (errors)
 	{
-		ccLog::Error("[doActionSmoohPolyline] Errors occurred during the process! Result may be incomplete!");
+		ccLog::Error(tr("[doActionSmoohPolyline] Errors occurred during the process! Result may be incomplete!"));
 	}
 
 	refreshAll();
@@ -2764,7 +2780,7 @@ void MainWindow::doRemoveDuplicatePoints()
 	double minDistanceBetweenPoints = settings.value(ccPS::DuplicatePointsMinDist(),1.0e-12).toDouble();
 
 	bool ok;
-	minDistanceBetweenPoints = QInputDialog::getDouble(this, "Remove duplicate points", "Min distance between points:", minDistanceBetweenPoints, 0, 1.0e8, 12, &ok);
+	minDistanceBetweenPoints = QInputDialog::getDouble(this, tr("Remove duplicate points"), tr("Min distance between points:"), minDistanceBetweenPoints, 0, 1.0e8, 12, &ok);
 	if (!ok)
 		return;
 
@@ -2791,7 +2807,7 @@ void MainWindow::doRemoveDuplicatePoints()
 				cloud->setCurrentScalarField(sfIdx);
 			else
 			{
-				ccConsole::Error("Couldn't create temporary scalar field! Not enough memory?");
+				ccConsole::Error(tr("Couldn't create temporary scalar field! Not enough memory?"));
 				break;
 			}
 
@@ -2821,11 +2837,11 @@ void MainWindow::doRemoveDuplicatePoints()
 
 				if (duplicateCount == 0)
 				{
-					ccConsole::Print(QString("Cloud '%1' has no duplicate points").arg(cloud->getName()));
+					ccConsole::Print(tr("Cloud '%1' has no duplicate points").arg(cloud->getName()));
 				}
 				else
 				{
-					ccConsole::Warning(QString("Cloud '%1' has %2 duplicate point(s)").arg(cloud->getName()).arg(duplicateCount));
+					ccConsole::Warning(tr("Cloud '%1' has %2 duplicate point(s)").arg(cloud->getName()).arg(duplicateCount));
 
 					ccPointCloud* filteredCloud = cloud->filterPointsByScalarValue(0, 0);
 					if (filteredCloud)
@@ -2849,7 +2865,7 @@ void MainWindow::doRemoveDuplicatePoints()
 			}
 			else
 			{
-				ccConsole::Error("An error occurred! (Not enough memory?)");
+				ccConsole::Error(tr("An error occurred! (Not enough memory?)"));
 			}
 
 			cloud->deleteScalarField(sfIdx);
@@ -2857,7 +2873,7 @@ void MainWindow::doRemoveDuplicatePoints()
 	}
 
 	if (!first)
-		ccConsole::Warning("Previously selected entities (sources) have been hidden!");
+		ccConsole::Warning(tr("Previously selected entities (sources) have been hidden!"));
 
 	refreshAll();
 }
@@ -2881,7 +2897,7 @@ void MainWindow::doActionFilterByValue()
 			}
 			else
 			{
-				ccConsole::Warning(QString("Entity [%1] has no active scalar field !").arg(entity->getName()));
+				ccConsole::Warning(tr("Entity [%1] has no active scalar field !").arg(entity->getName()));
 			}
 		}
 	}
@@ -3001,7 +3017,7 @@ void MainWindow::doActionFilterByValue()
 
 	if (!results.empty())
 	{
-		ccConsole::Warning("Previously selected entities (sources) have been hidden!");
+		ccConsole::Warning(tr("Previously selected entities (sources) have been hidden!"));
 		if (m_ccRoot)
 		{
 			m_ccRoot->selectEntities(results);
@@ -3050,7 +3066,7 @@ void MainWindow::doApplyActiveSFAction(int action)
 	{
 		if (haveSelection())
 		{
-			ccConsole::Error("Select only one cloud or one mesh!");
+			ccConsole::Error(tr("Select only one cloud or one mesh!"));
 		}
 		return;
 	}
@@ -3080,7 +3096,7 @@ void MainWindow::doApplyActiveSFAction(int action)
 				cloud->prepareDisplayForRefresh();
 			}
 			else
-				ccConsole::Warning(QString("No active scalar field on entity '%1'").arg(ent->getName()));
+				ccConsole::Warning(tr("No active scalar field on entity '%1'").arg(ent->getName()));
 			break;
 		case 1: //Activate previous SF
 			if (sfIdx >= 0)
@@ -3172,7 +3188,7 @@ static double s_subdivideMaxArea = 1.0;
 void MainWindow::doActionSubdivideMesh()
 {
 	bool ok;
-	s_subdivideMaxArea = QInputDialog::getDouble(this, "Subdivide mesh", "Max area per triangle:", s_subdivideMaxArea, 1e-6, 1e6, 8, &ok);
+	s_subdivideMaxArea = QInputDialog::getDouble(this, tr("Subdivide mesh"), tr("Max area per triangle:"), s_subdivideMaxArea, 1e-6, 1e6, 8, &ok);
 	if (!ok)
 		return;
 
@@ -3196,7 +3212,7 @@ void MainWindow::doActionSubdivideMesh()
 				}
 				catch(...)
 				{
-					ccLog::Error(QString("[Subdivide] An error occurred while trying to subdivide mesh '%1' (not enough memory?)").arg(mesh->getName()));
+					ccLog::Error(tr("[Subdivide] An error occurred while trying to subdivide mesh '%1' (not enough memory?)").arg(mesh->getName()));
 				}
 
 				if (subdividedMesh)
@@ -3209,12 +3225,12 @@ void MainWindow::doActionSubdivideMesh()
 				}
 				else
 				{
-					ccConsole::Warning(QString("[Subdivide] Failed to subdivide mesh '%1' (not enough memory?)").arg(mesh->getName()));
+					ccConsole::Warning(tr("[Subdivide] Failed to subdivide mesh '%1' (not enough memory?)").arg(mesh->getName()));
 				}
 			}
 			else if (!warningIssued)
 			{
-				ccLog::Warning("[Subdivide] Works only on real meshes!");
+				ccLog::Warning(tr("[Subdivide] Works only on real meshes!"));
 				warningIssued = true;
 			}
 		}
@@ -3240,7 +3256,7 @@ void MainWindow::doActionFlipMeshTriangles()
 			}
 			else if (!warningIssued)
 			{
-				ccLog::Warning("[Flip triangles] Works only on real meshes!");
+				ccLog::Warning(tr("[Flip triangles] Works only on real meshes!"));
 				warningIssued = true;
 			}
 		}
@@ -3255,10 +3271,10 @@ void MainWindow::doActionSmoothMeshLaplacian()
 	static double	s_laplacianSmooth_factor = 0.2;
 
 	bool ok;
-	s_laplacianSmooth_nbIter = QInputDialog::getInt(this, "Smooth mesh", "Iterations:", s_laplacianSmooth_nbIter, 1, 1000, 1, &ok);
+	s_laplacianSmooth_nbIter = QInputDialog::getInt(this, tr("Smooth mesh"), tr("Iterations:"), s_laplacianSmooth_nbIter, 1, 1000, 1, &ok);
 	if (!ok)
 		return;
-	s_laplacianSmooth_factor = QInputDialog::getDouble(this, "Smooth mesh", "Smoothing factor:", s_laplacianSmooth_factor, 0, 100, 3, &ok);
+	s_laplacianSmooth_factor = QInputDialog::getDouble(this, tr("Smooth mesh"), tr("Smoothing factor:"), s_laplacianSmooth_factor, 0, 100, 3, &ok);
 	if (!ok)
 		return;
 
@@ -3279,7 +3295,7 @@ void MainWindow::doActionSmoothMeshLaplacian()
 			}
 			else
 			{
-				ccConsole::Warning(QString("Failed to apply Laplacian smoothing to mesh '%1'").arg(mesh->getName()));
+				ccConsole::Warning(tr("Failed to apply Laplacian smoothing to mesh '%1'").arg(mesh->getName()));
 			}
 		}
 	}
@@ -3347,29 +3363,29 @@ void MainWindow::doActionMerge()
 				}
 				else
 				{
-					ccConsole::Warning(QString("Only meshes with standard vertices are handled for now! Can't merge entity '%1'...").arg(entity->getName()));
+					ccConsole::Warning(tr("Only meshes with standard vertices are handled for now! Can't merge entity '%1'...").arg(entity->getName()));
 				}
 			}
 			else
 			{
-				ccConsole::Warning(QString("Entity '%1' is neither a cloud nor a mesh, can't merge it!").arg(entity->getName()));
+				ccConsole::Warning(tr("Entity '%1' is neither a cloud nor a mesh, can't merge it!").arg(entity->getName()));
 			}
 		}
 	}
 	catch (const std::bad_alloc&)
 	{
-		ccLog::Error("Not enough memory!");
+		ccLog::Error(tr("Not enough memory!"));
 		return;
 	}
 
 	if (clouds.empty() && meshes.empty())
 	{
-		ccLog::Error("Select only clouds or meshes!");
+		ccLog::Error(tr("Select only clouds or meshes!"));
 		return;
 	}
 	if (!clouds.empty() && !meshes.empty())
 	{
-		ccLog::Error("Can't mix point clouds and meshes!");
+		ccLog::Error(tr("Can't mix point clouds and meshes!"));
 	}
 
 	//merge clouds?
@@ -3401,10 +3417,10 @@ void MainWindow::doActionMerge()
 				//we don't delete the first cloud (we'll merge the other one 'inside' it
 				firstCloud = pc;
 				//we still have to temporarily detach the first cloud, as it may undergo
-				//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::operator +=
+				//'severe' modifications (octree deletion, etc.) --> see ccPointCloud::operator +=
 				firstCloudContext = removeObjectTemporarilyFromDBTree(firstCloud);
 
-				if (QMessageBox::question(this, "Original cloud index", "Do you want to generate a scalar field with the original cloud index?") == QMessageBox::Yes)
+				if (QMessageBox::question(this, tr("Original cloud index"), tr("Do you want to generate a scalar field with the original cloud index?")) == QMessageBox::Yes)
 				{
 					int sfIdx = pc->getScalarFieldIndexByName(CC_ORIGINAL_CLOUD_INDEX_SF_NAME);
 					if (sfIdx < 0)
@@ -3413,7 +3429,7 @@ void MainWindow::doActionMerge()
 					}
 					if (sfIdx < 0)
 					{
-						ccConsole::Error("Couldn't allocate a new scalar field for storing the original cloud index! Try to free some memory ...");
+						ccConsole::Error(tr("Couldn't allocate a new scalar field for storing the original cloud index! Try to free some memory ..."));
 						return;
 					}
 					else
@@ -3456,7 +3472,7 @@ void MainWindow::doActionMerge()
 				}
 				else
 				{
-					ccConsole::Error("Fusion failed! (not enough memory?)");
+					ccConsole::Error(tr("Fusion failed! (not enough memory?)"));
 					break;
 				}
 				pc = nullptr;
@@ -3491,7 +3507,7 @@ void MainWindow::doActionMerge()
 	else if (!meshes.empty())
 	{
 		bool createSubMeshes = true;
-		//createSubMeshes = (QMessageBox::question(this, "Create sub-meshes", "Do you want to create sub-mesh entities corresponding to each source mesh? (requires more memory)", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes);
+		//createSubMeshes = (QMessageBox::question(this, tr("Create sub-meshes"), tr("Do you want to create sub-mesh entities corresponding to each source mesh? (requires more memory)"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes);
 
 		//meshes are merged
 		ccPointCloud* baseVertices = new ccPointCloud("vertices");
@@ -3509,7 +3525,7 @@ void MainWindow::doActionMerge()
 
 			if (!baseMesh->merge(mesh, createSubMeshes))
 			{
-				ccConsole::Error("Fusion failed! (not enough memory?)");
+				ccConsole::Error(tr("Fusion failed! (not enough memory?)"));
 				break;
 			}
 		}
@@ -3542,7 +3558,7 @@ void MainWindow::doActionRegister()
 		||	(!m_selectedEntities[0]->isKindOf(CC_TYPES::POINT_CLOUD) && !m_selectedEntities[0]->isKindOf(CC_TYPES::MESH))
 		||	(!m_selectedEntities[1]->isKindOf(CC_TYPES::POINT_CLOUD) && !m_selectedEntities[1]->isKindOf(CC_TYPES::MESH)) )
 	{
-		ccConsole::Error("Select 2 point clouds or meshes!");
+		ccConsole::Error(tr("Select 2 point clouds or meshes!"));
 		return;
 	}
 
@@ -3608,7 +3624,7 @@ void MainWindow::doActionRegister()
 									maxThreadCount,
 									this))
 	{
-		QString rmsString = QString("Final RMS: %1 (computed on %2 points)").arg(finalError).arg(finalPointCount);
+		QString rmsString = tr("Final RMS: %1 (computed on %2 points)").arg(finalError).arg(finalPointCount);
 		ccLog::Print(QString("[Register] ") + rmsString);
 
 		QStringList summary;
@@ -3621,31 +3637,31 @@ void MainWindow::doActionRegister()
 			summary << transMat.toString(3, '\t'); //low precision, just for display
 			summary << "----------------";
 
-			ccLog::Print("[Register] Applied transformation matrix:");
+			ccLog::Print(tr("[Register] Applied transformation matrix:"));
 			ccLog::Print(transMat.toString(12, ' ')); //full precision
-			ccLog::Print("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool");
+			ccLog::Print(tr("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool"));
 		}
 
 		if (adjustScale)
 		{
-			QString scaleString = QString("Scale: %1 (already integrated in above matrix!)").arg(finalScale);
+			QString scaleString = tr("Scale: %1 (already integrated in above matrix!)").arg(finalScale);
 			ccLog::Warning(QString("[Register] ") + scaleString);
 			summary << scaleString;
 		}
 		else
 		{
-			ccLog::Print(QString("[Register] Scale: fixed (1.0)"));
-			summary << "Scale: fixed (1.0)";
+			ccLog::Print(tr("[Register] Scale: fixed (1.0)"));
+			summary << tr("Scale: fixed (1.0)");
 		}
 
 		//overlap
 		summary << "----------------";
-		QString overlapString = QString("Theoretical overlap: %1%").arg(finalOverlap);
+		QString overlapString = tr("Theoretical overlap: %1%").arg(finalOverlap);
 		ccLog::Print(QString("[Register] ") + overlapString);
 		summary << overlapString;
 
 		summary << "----------------";
-		summary << "This report has been output to Console (F8)";
+		summary << tr("This report has been output to Console (F8)");
 
 		//cloud to move
 		ccGenericPointCloud* pc = nullptr;
@@ -3665,8 +3681,8 @@ void MainWindow::doActionRegister()
 				pc = nullptr;
 				//we ask the user about cloning the 'data' mesh
 				QMessageBox::StandardButton result = QMessageBox::question(	this,
-																			"Registration",
-																			"Data mesh vertices are locked (they may be shared with other meshes): Do you wish to clone this mesh to apply transformation?",
+																			tr("Registration"),
+																			tr("Data mesh vertices are locked (they may be shared with other meshes): Do you wish to clone this mesh to apply transformation?"),
 																			QMessageBox::Ok | QMessageBox::Cancel,
 																			QMessageBox::Ok);
 
@@ -3679,7 +3695,7 @@ void MainWindow::doActionRegister()
 					else
 					{
 						//FIXME TODO
-						ccLog::Error("Doesn't work on sub-meshes yet!");
+						ccLog::Error(tr("Doesn't work on sub-meshes yet!"));
 					}
 
 					if (newMesh)
@@ -3691,7 +3707,7 @@ void MainWindow::doActionRegister()
 					}
 					else
 					{
-						ccLog::Error("Failed to clone 'data' mesh! (not enough memory?)");
+						ccLog::Error(tr("Failed to clone 'data' mesh! (not enough memory?)"));
 					}
 				}
 			}
@@ -3701,7 +3717,7 @@ void MainWindow::doActionRegister()
 		if (pc)
 		{
 			//we temporarily detach cloud, as it may undergo
-			//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::applyRigidTransformation
+			//'severe' modifications (octree deletion, etc.) --> see ccPointCloud::applyRigidTransformation
 			ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(pc);
 			pc->applyRigidTransformation(transMat);
 			putObjectBackIntoDBTree(pc,objContext);
@@ -3720,26 +3736,26 @@ void MainWindow::doActionRegister()
 					const double& scale = refPc->getGlobalScale();
 					pc->setGlobalShift(Pshift);
 					pc->setGlobalScale(scale);
-					ccLog::Warning(QString("[ICP] Aligned entity global shift has been updated to match the reference: (%1,%2,%3) [x%4]").arg(Pshift.x).arg(Pshift.y).arg(Pshift.z).arg(scale));
+					ccLog::Warning(tr("[ICP] Aligned entity global shift has been updated to match the reference: (%1,%2,%3) [x%4]").arg(Pshift.x).arg(Pshift.y).arg(Pshift.z).arg(scale));
 				}
 				else if (pc->isShifted()) //we'll ask the user first before dropping the shift information on the aligned cloud
 				{
-					if (QMessageBox::question(this, "Drop shift information?", "Aligned entity is shifted but reference cloud is not: drop global shift information?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+					if (QMessageBox::question(this, tr("Drop shift information?"), tr("Aligned entity is shifted but reference cloud is not: drop global shift information?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
 					{
-						pc->setGlobalShift(0,0,0);
+						pc->setGlobalShift(0, 0, 0);
 						pc->setGlobalScale(1.0);
-						ccLog::Warning(QString("[ICP] Aligned entity global shift has been reset to match the reference!"));
+						ccLog::Warning(tr("[ICP] Aligned entity global shift has been reset to match the reference!"));
 					}
 				}
 			}
 
 			data->prepareDisplayForRefresh_recursive();
-			data->setName(data->getName()+QString(".registered"));
+			data->setName(data->getName() + QString(".registered"));
 			zoomOn(data);
 		}
 
 		//pop-up summary
-		QMessageBox::information(this, "Register info", summary.join("\n"));
+		QMessageBox::information(this, tr("Registration info"), summary.join("\n"));
 		forceConsoleDisplay();
 	}
 
@@ -3751,21 +3767,21 @@ void MainWindow::doActionRegister()
 void MainWindow::doAction4pcsRegister()
 {
 	if (QMessageBox::warning(	this,
-								"Work in progress",
-								"This method is still under development: are you sure you want to use it? (a crash may likely happen)",
+								tr("Work in progress"),
+								tr("This method is still under development: are you sure you want to use it? (a crash may likely happen)"),
 								QMessageBox::Yes,QMessageBox::No) == QMessageBox::No )
 								return;
 
 	if (m_selectedEntities.size() != 2)
 	{
-		ccConsole::Error("Select 2 point clouds!");
+		ccConsole::Error(tr("Select 2 point clouds!"));
 		return;
 	}
 
 	if (!m_selectedEntities[0]->isKindOf(CC_TYPES::POINT_CLOUD) ||
 		!m_selectedEntities[1]->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
-		ccConsole::Error("Select 2 point clouds!");
+		ccConsole::Error(tr("Select 2 point clouds!"));
 		return;
 	}
 
@@ -3803,9 +3819,9 @@ void MainWindow::doAction4pcsRegister()
 		{
 			ccGLMatrix transMat = FromCCLibMatrix<PointCoordinateType, float>(transform.R, transform.T);
 			forceConsoleDisplay();
-			ccConsole::Print("[Align] Resulting matrix:");
+			ccConsole::Print(tr("[Align] Resulting matrix:"));
 			ccConsole::Print(transMat.toString(12, ' ')); //full precision
-			ccConsole::Print("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool");
+			ccConsole::Print(tr("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool"));
 		}
 
 		ccPointCloud *newDataCloud = data->isA(CC_TYPES::POINT_CLOUD) ? static_cast<ccPointCloud*>(data)->cloneThis() : ccPointCloud::From(data, data);
@@ -3825,7 +3841,7 @@ void MainWindow::doAction4pcsRegister()
 	}
 	else
 	{
-		ccConsole::Warning("[Align] Registration failed!");
+		ccConsole::Warning(tr("[Align] Registration failed!"));
 	}
 
 	if (subModel)
@@ -3871,7 +3887,7 @@ void MainWindow::doActionSubsample()
 
 	if (clouds.empty())
 	{
-		ccConsole::Error("Select at least one point cloud!");
+		ccConsole::Error(tr("Select at least one point cloud!"));
 		return;
 	}
 
@@ -3902,7 +3918,7 @@ void MainWindow::doActionSubsample()
 			CCCoreLib::ReferenceCloud *sampledCloud = sDlg.getSampledCloud(cloud,&pDlg);
 			if (!sampledCloud)
 			{
-				ccConsole::Warning(QString("[Subsampling] Failed to subsample cloud '%1'!").arg(cloud->getName()));
+				ccConsole::Warning(tr("[Subsampling] Failed to subsample cloud '%1'!").arg(cloud->getName()));
 				errors = true;
 				continue;
 			}
@@ -3929,13 +3945,13 @@ void MainWindow::doActionSubsample()
 
 				if (warnings)
 				{
-					ccLog::Warning("[Subsampling] Not enough memory: colors, normals or scalar fields may be missing!");
+					ccLog::Warning(tr("[Subsampling] Not enough memory: colors, normals or scalar fields may be missing!"));
 					errors = true;
 				}
 			}
 			else
 			{
-				ccLog::Error("Not enough memory!");
+				ccLog::Error(tr("Not enough memory!"));
 				break;
 			}
 		}
@@ -3944,7 +3960,7 @@ void MainWindow::doActionSubsample()
 
 		if (errors)
 		{
-			ccLog::Error("Errors occurred (see console)");
+			ccLog::Error(tr("Errors occurred (see console)"));
 		}
 	}
 
@@ -4002,7 +4018,7 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 		}
 		catch (const std::bad_alloc&)
 		{
-			ccLog::Warning("[CreateComponentsClouds] Not enough memory to sort components by size!");
+			ccLog::Warning(tr("[CreateComponentsClouds] Not enough memory to sort components by size!"));
 			sortBysize = false;
 		}
 
@@ -4064,7 +4080,7 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 				}
 				else
 				{
-					ccConsole::Warning("[createComponentsClouds] Failed to create component #%i! (not enough memory)",ccGroup->getChildrenNumber()+1);
+					ccConsole::Warning(tr("[createComponentsClouds] Failed to create component #%1! (not enough memory)").arg(ccGroup->getChildrenNumber() + 1));
 				}
 			}
 
@@ -4076,7 +4092,7 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 
 		if (ccGroup->getChildrenNumber() == 0)
 		{
-			ccConsole::Error("No component was created! Check the minimum size...");
+			ccConsole::Error(tr("No component was created! Check the minimum size..."));
 			delete ccGroup;
 			ccGroup = nullptr;
 		}
@@ -4085,7 +4101,7 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 			ccGroup->setDisplay(cloud->getDisplay());
 			addToDB(ccGroup);
 
-			ccConsole::Print(QString("[createComponentsClouds] %1 component(s) were created from cloud '%2'").arg(ccGroup->getChildrenNumber()).arg(cloud->getName()));
+			ccConsole::Print(tr("[createComponentsClouds] %1 component(s) were created from cloud '%2'").arg(ccGroup->getChildrenNumber()).arg(cloud->getName()));
 		}
 
 		cloud->prepareDisplayForRefresh();
@@ -4094,7 +4110,7 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 		if (ccGroup)
 		{
 			cloud->setEnabled(false);
-			ccConsole::Warning("[createComponentsClouds] Original cloud has been automatically hidden");
+			ccConsole::Warning(tr("[createComponentsClouds] Original cloud has been automatically hidden"));
 		}
 	}
 }
@@ -4148,7 +4164,7 @@ void MainWindow::doActionLabelConnectedComponents()
 				theOctree = cloud->computeOctree(&pOctreeDlg);
 				if (!theOctree)
 				{
-					ccConsole::Error(QString("Couldn't compute octree for cloud '%1'!").arg(cloud->getName()));
+					ccConsole::Error(tr("Couldn't compute octree for cloud '%1'!").arg(cloud->getName()));
 					break;
 				}
 			}
@@ -4161,7 +4177,7 @@ void MainWindow::doActionLabelConnectedComponents()
 			}
 			if (sfIdx < 0)
 			{
-				ccConsole::Error("Couldn't allocate a new scalar field for computing CC labels! Try to free some memory ...");
+				ccConsole::Error(tr("Couldn't allocate a new scalar field for computing CC labels! Try to free some memory ..."));
 				break;
 			}
 			pc->setCurrentScalarField(sfIdx);
@@ -4193,7 +4209,7 @@ void MainWindow::doActionLabelConnectedComponents()
 				if (realComponentCount > 500)
 				{
 					//too many components
-					if (QMessageBox::warning(this, "Many components", QString("Do you really expect up to %1 components?\n(this may take a lot of time to process and display)").arg(realComponentCount), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
+					if (QMessageBox::warning(this, tr("Many components"), tr("Do you really expect up to %1 components?\n(this may take a lot of time to process and display)").arg(realComponentCount), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
 					{
 						//cancel
 						pc->deleteScalarField(sfIdx);
@@ -4213,12 +4229,12 @@ void MainWindow::doActionLabelConnectedComponents()
 				pc->getCurrentInScalarField()->computeMinAndMax();
 				if (!CCCoreLib::AutoSegmentationTools::extractConnectedComponents(cloud, components))
 				{
-					ccConsole::Warning(QString("[doActionLabelConnectedComponents] Something went wrong while extracting CCs from cloud %1...").arg(cloud->getName()));
+					ccConsole::Warning(tr("[doActionLabelConnectedComponents] Something went wrong while extracting CCs from cloud %1...").arg(cloud->getName()));
 				}
 			}
 			else
 			{
-				ccConsole::Warning(QString("[doActionLabelConnectedComponents] Something went wrong while extracting CCs from cloud %1...").arg(cloud->getName()));
+				ccConsole::Warning(tr("[doActionLabelConnectedComponents] Something went wrong while extracting CCs from cloud %1...").arg(cloud->getName()));
 			}
 
 			//we delete the CCs label scalar field (we don't need it anymore)
@@ -4277,7 +4293,7 @@ void MainWindow::doMeshTwoPolylines()
 	ccPolyline* p2 = ccHObjectCaster::ToPolyline(m_selectedEntities[1]);
 	if (!p1 || !p2)
 	{
-		ccConsole::Error("Select 2 and only 2 polylines");
+		ccConsole::Error(tr("Select 2 and only 2 polylines"));
 		return;
 	}
 
@@ -4286,7 +4302,7 @@ void MainWindow::doMeshTwoPolylines()
 	CCVector3 viewingDir(0, 0, 0);
 	if (p1->getDisplay())
 	{
-		useViewingDir = (QMessageBox::question(this, "Projection method", "Use best fit plane (yes) or the current viewing direction (no)", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No);
+		useViewingDir = (QMessageBox::question(this, tr("Projection method"), tr("Use best fit plane (yes) or the current viewing direction (no)"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No);
 		if (useViewingDir)
 		{
 			viewingDir = -CCVector3::fromArray(p1->getDisplay()->getViewportParameters().getViewDir().u);
@@ -4303,7 +4319,7 @@ void MainWindow::doMeshTwoPolylines()
 		}
 		else
 		{
-			ccLog::Warning("[Mesh two polylines] Failed to compute normals!");
+			ccLog::Warning(tr("[Mesh two polylines] Failed to compute normals!"));
 		}
 
 		if (mesh->getDisplay())
@@ -4313,7 +4329,7 @@ void MainWindow::doMeshTwoPolylines()
 	}
 	else
 	{
-		ccLog::Error("Failed to create mesh (see Console)");
+		ccLog::Error(tr("Failed to create mesh (see Console)"));
 		forceConsoleDisplay();
 	}
 }
@@ -4348,17 +4364,17 @@ void MainWindow::doConvertPolylinesToMesh()
 	}
 	catch (const std::bad_alloc&)
 	{
-		ccConsole::Error("Not enough memory!");
+		ccConsole::Error(tr("Not enough memory!"));
 		return;
 	}
 
 	if (polylines.empty())
 	{
-		ccConsole::Error("Select a group of polylines or multiple polylines (contour plot)!");
+		ccConsole::Error(tr("Select a group of polylines or multiple polylines (contour plot)!"));
 		return;
 	}
 
-	ccPickOneElementDlg poeDlg("Projection dimension", "Contour plot to mesh", this);
+	ccPickOneElementDlg poeDlg(tr("Projection dimension"), tr("Contour plot to mesh"), this);
 	poeDlg.addElement("X");
 	poeDlg.addElement("Y");
 	poeDlg.addElement("Z");
@@ -4391,7 +4407,7 @@ void MainWindow::doConvertPolylinesToMesh()
 	if (segmentCount < 2)
 	{
 		//not enough points/segments
-		ccLog::Error("Not enough segments!");
+		ccLog::Error(tr("Not enough segments!"));
 		return;
 	}
 
@@ -4406,7 +4422,7 @@ void MainWindow::doConvertPolylinesToMesh()
 	catch (const std::bad_alloc&)
 	{
 		//not enough memory
-		ccLog::Error("Not enough memory");
+		ccLog::Error(tr("Not enough memory!"));
 		return;
 	}
 
@@ -4446,7 +4462,7 @@ void MainWindow::doConvertPolylinesToMesh()
 	std::string errorStr;
 	if (!delaunayMesh->buildMesh(points2D, segments2D, errorStr))
 	{
-		ccLog::Error( QStringLiteral("Third party library error: %1").arg( QString::fromStdString( errorStr ) ) );
+		ccLog::Error( tr("Third party library error: %1").arg( QString::fromStdString( errorStr ) ) );
 		delete delaunayMesh;
 		return;
 	}
@@ -4455,7 +4471,7 @@ void MainWindow::doConvertPolylinesToMesh()
 	if (!vertices->reserve(vertexCount))
 	{
 		//not enough memory
-		ccLog::Error("Not enough memory");
+		ccLog::Error(tr("Not enough memory!"));
 		delete vertices;
 		delete delaunayMesh;
 		return;
@@ -4511,7 +4527,7 @@ void MainWindow::doConvertPolylinesToMesh()
 		}
 		else
 		{
-			ccLog::Warning("[Contour plot to mesh] Failed to compute normals!");
+			ccLog::Warning(tr("[Contour plot to mesh] Failed to compute normals!"));
 		}
 
 		if (mesh->getDisplay())
@@ -4524,7 +4540,7 @@ void MainWindow::doConvertPolylinesToMesh()
 	}
 	else
 	{
-		ccLog::Error("Not enough memory!");
+		ccLog::Error(tr("Not enough memory!"));
 		delete vertices;
 		vertices = nullptr;
 	}
@@ -4534,7 +4550,7 @@ void MainWindow::doCompute2HalfDimVolume()
 {
 	if (m_selectedEntities.empty() || m_selectedEntities.size() > 2)
 	{
-		ccConsole::Error("Select one or two point clouds!");
+		ccConsole::Error(tr("Select one or two point clouds!"));
 		return;
 	}
 
@@ -4543,7 +4559,7 @@ void MainWindow::doCompute2HalfDimVolume()
 		ccHObject* ent = m_selectedEntities[0];
 		if (!ent->isKindOf(CC_TYPES::POINT_CLOUD) )
 		{
-			ccConsole::Error("Select point clouds only!");
+			ccConsole::Error(tr("Select point clouds only!"));
 			return;
 		}
 		else
@@ -4558,7 +4574,7 @@ void MainWindow::doCompute2HalfDimVolume()
 		ccHObject* ent = m_selectedEntities[1];
 		if (!ent->isKindOf(CC_TYPES::POINT_CLOUD) )
 		{
-			ccConsole::Error("Select point clouds only!");
+			ccConsole::Error(tr("Select point clouds only!"));
 			return;
 		}
 		else
@@ -4575,14 +4591,14 @@ void MainWindow::doActionRasterize()
 {
 	if (!haveOneSelection())
 	{
-		ccConsole::Error("Select only one point cloud!");
+		ccConsole::Error(tr("Select only one point cloud!"));
 		return;
 	}
 
 	ccHObject* ent = m_selectedEntities[0];
 	if (!ent->isKindOf(CC_TYPES::POINT_CLOUD) )
 	{
-		ccConsole::Error("Select a point cloud!");
+		ccConsole::Error(tr("Select a point cloud!"));
 		return;
 	}
 
@@ -4620,7 +4636,7 @@ void MainWindow::doActionMeshScanGrids()
 	static double s_meshMinTriangleAngle_deg = 1.0;
 	{
 		bool ok = true;
-		double minAngle_deg = QInputDialog::getDouble(this, "Triangulate", "Min triangle angle (in degrees)", s_meshMinTriangleAngle_deg, 0, 90.0, 3, &ok);
+		double minAngle_deg = QInputDialog::getDouble(this, tr("Triangulate"), tr("Min triangle angle (in degrees)"), s_meshMinTriangleAngle_deg, 0, 90.0, 3, &ok);
 		if (!ok)
 			return;
 		s_meshMinTriangleAngle_deg = minAngle_deg;
@@ -4678,7 +4694,7 @@ void MainWindow::doActionComputeMesh(CCCoreLib::TRIANGULATION_TYPES type)
 	static double s_meshMaxEdgeLength = 0.0;
 	{
 		bool ok = true;
-		double maxEdgeLength = QInputDialog::getDouble(this, "Triangulate", "Max edge length (0 = no limit)", s_meshMaxEdgeLength, 0, 1.0e9, 8, &ok);
+		double maxEdgeLength = QInputDialog::getDouble(this, tr("Triangulate"), tr("Max edge length (0 = no limit)"), s_meshMaxEdgeLength, 0, 1.0e9, 8, &ok);
 		if (!ok)
 			return;
 		s_meshMaxEdgeLength = maxEdgeLength;
@@ -4706,8 +4722,8 @@ void MainWindow::doActionComputeMesh(CCCoreLib::TRIANGULATION_TYPES type)
 	if (hadNormals)
 	{
 		updateNormals = (QMessageBox::question(	this,
-												"Keep old normals?",
-												"Cloud(s) already have normals. Do you want to update them (yes) or keep the old ones (no)?",
+												tr("Keep old normals?"),
+												tr("Cloud(s) already have normals. Do you want to update them (yes) or keep the old ones (no)?"),
 												QMessageBox::Yes,
 												QMessageBox::No ) == QMessageBox::Yes);
 	}
@@ -4753,7 +4769,7 @@ void MainWindow::doActionComputeMesh(CCCoreLib::TRIANGULATION_TYPES type)
 
 	if (errors)
 	{
-		ccConsole::Error("Error(s) occurred! See the Console messages");
+		ccConsole::Error(tr("Error(s) occurred! See the Console messages"));
 	}
 
 	refreshAll();
@@ -4783,9 +4799,9 @@ void MainWindow::doActionFitQuadric()
 				quadric->copyGlobalShiftAndScale(*cloud);
 				addToDB(quadric);
 
-				ccConsole::Print(QString("[doActionFitQuadric] Quadric local coordinate system:"));
+				ccConsole::Print(tr("[doActionFitQuadric] Quadric local coordinate system:"));
 				ccConsole::Print(quadric->getTransformation().toString(12,' ')); //full precision
-				ccConsole::Print(QString("[doActionFitQuadric] Quadric equation (in local coordinate system): ") + quadric->getEquationString());
+				ccConsole::Print(tr("[doActionFitQuadric] Quadric equation (in local coordinate system): ") + quadric->getEquationString());
 				ccConsole::Print(QString("[doActionFitQuadric] RMS: %1").arg(rms));
 
 #if 0
@@ -4820,7 +4836,7 @@ void MainWindow::doActionFitQuadric()
 			}
 			else
 			{
-				ccConsole::Warning(QString("Failed to compute quadric on cloud '%1'").arg(cloud->getName()));
+				ccConsole::Warning(tr("Failed to compute quadric on cloud '%1'").arg(cloud->getName()));
 				errors = true;
 			}
 		}
@@ -4828,7 +4844,7 @@ void MainWindow::doActionFitQuadric()
 
 	if (errors)
 	{
-		ccConsole::Error("Error(s) occurred: see console");
+		ccConsole::Error(tr("Error(s) occurred: see console"));
 	}
 
 	refreshAll();
@@ -4881,7 +4897,7 @@ void MainWindow::doActionComputeDistanceMap()
 		if (!cdt.initGrid(Tuple3ui(steps, steps, steps)))
 		{
 			//not enough memory
-			ccLog::Error("Not enough memory!");
+			ccLog::Error(tr("Not enough memory!"));
 			return;
 		}
 
@@ -4904,7 +4920,7 @@ void MainWindow::doActionComputeDistanceMap()
 
 		if (!result)
 		{
-			ccLog::Error("Not enough memory!");
+			ccLog::Error(tr("Not enough memory!"));
 			return;
 		}
 
@@ -4917,7 +4933,7 @@ void MainWindow::doActionComputeDistanceMap()
 			unsigned pointCount = steps*steps*steps;
 			if (!gridCloud->reserve(pointCount))
 			{
-				ccLog::Error("Not enough memory!");
+				ccLog::Error(tr("Not enough memory!"));
 				delete gridCloud;
 				return;
 			}
@@ -4925,7 +4941,7 @@ void MainWindow::doActionComputeDistanceMap()
 			ccScalarField* sf = new ccScalarField("DT values");
 			if (!sf->reserveSafe(pointCount))
 			{
-				ccLog::Error("Not enough memory!");
+				ccLog::Error(tr("Not enough memory!"));
 				delete gridCloud;
 				sf->release();
 				return;
@@ -4953,7 +4969,7 @@ void MainWindow::doActionComputeDistanceMap()
 
 			if (gridCloud->size() == 0)
 			{
-				ccLog::Warning(QString("[DistanceMap] Cloud '%1': no point falls inside the specified range").arg(entity->getName()));
+				ccLog::Warning(tr("[DistanceMap] Cloud '%1': no point falls inside the specified range").arg(entity->getName()));
 				delete gridCloud;
 				gridCloud = nullptr;
 			}
@@ -4975,7 +4991,7 @@ void MainWindow::doActionComputeDistanceMap()
 void MainWindow::doActionComputeDistToBestFitQuadric3D()
 {
 	bool ok = true;
-	int steps = QInputDialog::getInt(this,"Distance to best fit quadric (3D)","Steps (per dim.)",50,10,10000,10,&ok);
+	int steps = QInputDialog::getInt(this, tr("Distance to best fit quadric (3D)"), tr("Steps (per dim.)"), 50, 10, 10000, 10, &ok);
 	if (!ok)
 		return;
 
@@ -5004,7 +5020,7 @@ void MainWindow::doActionComputeDistToBestFitQuadric3D()
 				const CCVector3* G = Yk.getGravityCenter();
 				if (!G)
 				{
-					ccConsole::Warning(QString("Failed to get the center of gravity of cloud '%1'!").arg(cloud->getName()));
+					ccConsole::Warning(tr("Failed to get the center of gravity of cloud '%1'!").arg(cloud->getName()));
 					continue;
 				}
 
@@ -5016,7 +5032,7 @@ void MainWindow::doActionComputeDistToBestFitQuadric3D()
 				ccPointCloud* newCloud = new ccPointCloud();
 				if (!newCloud->reserve(steps*steps*steps))
 				{
-					ccConsole::Error("Not enough memory!");
+					ccConsole::Error(tr("Not enough memory!"));
 				}
 
 				const char defaultSFName[] = "Dist. to 3D quadric";
@@ -5025,7 +5041,7 @@ void MainWindow::doActionComputeDistToBestFitQuadric3D()
 					sfIdx = newCloud->addScalarField(defaultSFName);
 				if (sfIdx < 0)
 				{
-					ccConsole::Error("Couldn't allocate a new scalar field for computing distances! Try to free some memory ...");
+					ccConsole::Error(tr("Couldn't allocate a new scalar field for computing distances! Try to free some memory ..."));
 					delete newCloud;
 					continue;
 				}
@@ -5065,7 +5081,7 @@ void MainWindow::doActionComputeDistToBestFitQuadric3D()
 					newCloud->setCurrentDisplayedScalarField(sfIdx);
 					newCloud->showSF(true);
 				}
-				newCloud->setName("Distance map to 3D quadric");
+				newCloud->setName(tr("Distance map to 3D quadric"));
 				newCloud->setDisplay(cloud->getDisplay());
 				newCloud->prepareDisplayForRefresh();
 
@@ -5073,7 +5089,7 @@ void MainWindow::doActionComputeDistToBestFitQuadric3D()
 			}
 			else
 			{
-				ccConsole::Warning(QString("Failed to compute 3D quadric on cloud '%1'").arg(cloud->getName()));
+				ccConsole::Warning(tr("Failed to compute 3D quadric on cloud '%1'").arg(cloud->getName()));
 			}
 		}
 	}
@@ -5085,19 +5101,19 @@ void MainWindow::doActionComputeCPS()
 {
 	if (m_selectedEntities.size() != 2)
 	{
-		ccConsole::Error("Select 2 point clouds!");
+		ccConsole::Error(tr("Select 2 point clouds!"));
 		return;
 	}
 
 	if (!m_selectedEntities[0]->isKindOf(CC_TYPES::POINT_CLOUD) ||
 		!m_selectedEntities[1]->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
-		ccConsole::Error("Select 2 point clouds!");
+		ccConsole::Error(tr("Select 2 point clouds!"));
 		return;
 	}
 
-	ccOrderChoiceDlg dlg(	m_selectedEntities[0], "Compared",
-							m_selectedEntities[1], "Reference",
+	ccOrderChoiceDlg dlg(	m_selectedEntities[0], tr("Compared"),
+							m_selectedEntities[1], tr("Reference"),
 							this );
 	if (!dlg.exec())
 		return;
@@ -5107,7 +5123,7 @@ void MainWindow::doActionComputeCPS()
 
 	if (!compCloud->isA(CC_TYPES::POINT_CLOUD)) //TODO
 	{
-		ccConsole::Error("Compared cloud must be a real point cloud!");
+		ccConsole::Error(tr("Compared cloud must be a real point cloud!"));
 		return;
 	}
 	ccPointCloud* cmpPC = static_cast<ccPointCloud*>(compCloud);
@@ -5118,13 +5134,13 @@ void MainWindow::doActionComputeCPS()
 		sfIdx = cmpPC->addScalarField(DEFAULT_CPS_TEMP_SF_NAME);
 	if (sfIdx < 0)
 	{
-		ccConsole::Error("Couldn't allocate a new scalar field for computing distances! Try to free some memory ...");
+		ccConsole::Error(tr("Couldn't allocate a new scalar field for computing distances! Try to free some memory ..."));
 		return;
 	}
 	cmpPC->setCurrentScalarField(sfIdx);
 	if (!cmpPC->enableScalarField())
 	{
-		ccConsole::Error("Not enough memory");
+		ccConsole::Error(tr("Not enough memory!"));
 		return;
 	}
 	//cmpPC->forEach(CCCoreLib::ScalarFieldTools::SetScalarValueToNaN); //now done by default by computeCloud2CloudDistance
@@ -5192,12 +5208,12 @@ void MainWindow::doActionFindBiggestInnerRectangle()
 	ccHObject* entity = haveOneSelection() ? m_selectedEntities[0] : nullptr;
 	if (!entity || !entity->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
-		ccConsole::Error("Select one point cloud!");
+		ccConsole::Error(tr("Select one point cloud!"));
 		return;
 	}
 
 	bool ok;
-	int dim = QInputDialog::getInt(this,"Dimension","Orthogonal dim (X=0 / Y=1 / Z=2)",s_innerRectDim,0,2,1,&ok);
+	int dim = QInputDialog::getInt(this, tr("Dimension"), tr("Orthogonal dim (X=0 / Y=1 / Z=2)"), s_innerRectDim, 0, 2, 1, &ok);
 	if (!ok)
 		return;
 	s_innerRectDim = dim;
@@ -5253,12 +5269,12 @@ void MainWindow::doActionFastRegistration(FastRegistrationMode mode)
 		glTrans.setTranslation(T);
 
 		forceConsoleDisplay();
-		ccConsole::Print(QString("[Synchronize] Transformation matrix (%1):").arg(entity->getName()));
+		ccConsole::Print(tr("[Synchronize] Transformation matrix (%1):").arg(entity->getName()));
 		ccConsole::Print(glTrans.toString(12, ' ')); //full precision
-		ccConsole::Print("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool");
+		ccConsole::Print(tr("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool"));
 
 		//we temporarily detach entity, as it may undergo
-		//"severe" modifications (octree deletion, etc.) --> see ccHObject::applyGLTransformation
+		//'severe' modifications (octree deletion, etc.) --> see ccHObject::applyGLTransformation
 		ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(entity);
 		entity->applyGLTransformation_recursive(&glTrans);
 		putObjectBackIntoDBTree(entity, objContext);
@@ -5300,12 +5316,12 @@ void MainWindow::doActionMatchBBCenters()
 		glTrans += T;
 
 		forceConsoleDisplay();
-		ccConsole::Print(QString("[Synchronize] Transformation matrix (%1 --> %2):").arg(entity->getName(),selectedEntities[0]->getName()));
+		ccConsole::Print(tr("[Synchronize] Transformation matrix (%1 --> %2):").arg(entity->getName(),selectedEntities[0]->getName()));
 		ccConsole::Print(glTrans.toString(12,' ')); //full precision
-		ccConsole::Print("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool");
+		ccConsole::Print(tr("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool"));
 
 		//we temporarily detach entity, as it may undergo
-		//"severe" modifications (octree deletion, etc.) --> see ccHObject::applyGLTransformation
+		//'severe' modifications (octree deletion, etc.) --> see ccHObject::applyGLTransformation
 		ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(entity);
 		entity->applyGLTransformation_recursive(&glTrans);
 		putObjectBackIntoDBTree(entity, objContext);
@@ -5348,7 +5364,7 @@ void MainWindow::doActionMatchScales()
 	}
 	catch (const std::bad_alloc&)
 	{
-		ccConsole::Error("Not enough memory!");
+		ccConsole::Error(tr("Not enough memory!"));
 		return;
 	}
 
@@ -5428,7 +5444,7 @@ void MainWindow::doActionSORFilter()
 		{
 			if (selection->size() == cloud->size())
 			{
-				ccLog::Warning(QString("[doActionSORFilter] No points were removed from cloud '%1'").arg(cloud->getName()));
+				ccLog::Warning(tr("[doActionSORFilter] No points were removed from cloud '%1'").arg(cloud->getName()));
 			}
 			else
 			{
@@ -5444,14 +5460,14 @@ void MainWindow::doActionSORFilter()
 					cloud->setEnabled(false);
 					if (firstCloud)
 					{
-						ccConsole::Warning("Previously selected entities (sources) have been hidden!");
+						ccConsole::Warning(tr("Previously selected entities (sources) have been hidden!"));
 						firstCloud = false;
 						m_ccRoot->selectEntity(cleanCloud, true);
 					}
 				}
 				else
 				{
-					ccConsole::Warning(QString("[doActionSORFilter] Not enough memory to create a clean version of cloud '%1'!").arg(cloud->getName()));
+					ccConsole::Warning(tr("[doActionSORFilter] Not enough memory to create a clean version of cloud '%1'!").arg(cloud->getName()));
 				}
 			}
 
@@ -5463,11 +5479,11 @@ void MainWindow::doActionSORFilter()
 			//no points fall inside selection!
 			if ( cloud != nullptr )
 			{
-				ccConsole::Warning(QString("[doActionSORFilter] Failed to apply the noise filter to cloud '%1'! (not enough memory?)").arg(cloud->getName()));
+				ccConsole::Warning(tr("[doActionSORFilter] Failed to apply the noise filter to cloud '%1'! (not enough memory?)").arg(cloud->getName()));
 			}
 			else
 			{
-				ccConsole::Warning( "[doActionSORFilter] Trying to apply the noise filter to null cloud" );
+				ccConsole::Warning(tr("[doActionSORFilter] Trying to apply the noise filter to null cloud"));
 			}
 		}
 	}
@@ -5549,14 +5565,14 @@ void MainWindow::doActionFilterNoise()
 		{
 			if (selection->size() == cloud->size())
 			{
-				ccLog::Warning(QString("[doActionFilterNoise] No points were removed from cloud '%1'").arg(cloud->getName()));
+				ccLog::Warning(tr("[doActionFilterNoise] No points were removed from cloud '%1'").arg(cloud->getName()));
 			}
 			else
 			{
 				ccPointCloud* cleanCloud = cloud->partialClone(selection);
 				if (cleanCloud)
 				{
-					cleanCloud->setName(cloud->getName()+QString(".clean"));
+					cleanCloud->setName(cloud->getName() + QString(".clean"));
 					cleanCloud->setDisplay(cloud->getDisplay());
 					if (cloud->getParent())
 						cloud->getParent()->addChild(cleanCloud);
@@ -5565,14 +5581,14 @@ void MainWindow::doActionFilterNoise()
 					cloud->setEnabled(false);
 					if (firstCloud)
 					{
-						ccConsole::Warning("Previously selected entities (sources) have been hidden!");
+						ccConsole::Warning(tr("Previously selected entities (sources) have been hidden!"));
 						firstCloud = false;
 						m_ccRoot->selectEntity(cleanCloud, true);
 					}
 				}
 				else
 				{
-					ccConsole::Warning(QString("[doActionFilterNoise] Not enough memory to create a clean version of cloud '%1'!").arg(cloud->getName()));
+					ccConsole::Warning(tr("[doActionFilterNoise] Not enough memory to create a clean version of cloud '%1'!").arg(cloud->getName()));
 				}
 			}
 
@@ -5584,11 +5600,11 @@ void MainWindow::doActionFilterNoise()
 			//no points fall inside selection!
 			if ( cloud != nullptr )
 			{
-				ccConsole::Warning(QString("[doActionFilterNoise] Failed to apply the noise filter to cloud '%1'! (not enough memory?)").arg(cloud->getName()));
+				ccConsole::Warning(tr("[doActionFilterNoise] Failed to apply the noise filter to cloud '%1'! (not enough memory?)").arg(cloud->getName()));
 			}
 			else
 			{
-				ccConsole::Warning( "[doActionFilterNoise] Trying to apply the noise filter to null cloud" );
+				ccConsole::Warning(tr("[doActionFilterNoise] Trying to apply the noise filter to null cloud"));
 			}
 		}
 	}
@@ -5602,7 +5618,7 @@ void MainWindow::doActionUnroll()
 	//there should be only one point cloud or one mesh!
 	if (!haveOneSelection())
 	{
-		ccConsole::Error("Select one and only one entity!");
+		ccConsole::Error(tr("Select one and only one entity!"));
 		return;
 	}
 
@@ -5618,7 +5634,7 @@ void MainWindow::doActionUnroll()
 	//for "real" point clouds only
 	if (!cloud || !cloud->isA(CC_TYPES::POINT_CLOUD))
 	{
-		ccConsole::Error("Method can't be applied on locked vertices or virtual point clouds!");
+		ccConsole::Error(tr("Method can't be applied on locked vertices or virtual point clouds!"));
 		return;
 	}
 	ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
@@ -5643,7 +5659,7 @@ void MainWindow::doActionUnroll()
 	unrollDlg.getAngleRange(startAngle_deg, stopAngle_deg);
 	if (startAngle_deg >= stopAngle_deg)
 	{
-		QMessageBox::critical(this, "Error", "Invalid angular range");
+		QMessageBox::critical(this, tr("Error"), tr("Invalid angular range"));
 		return;
 	}
 
@@ -5688,7 +5704,7 @@ void MainWindow::doActionUnroll()
 		{
 			ccMesh* mesh = ccHObjectCaster::ToMesh(m_selectedEntities[0]);
 			mesh->setEnabled(false);
-			ccConsole::Warning("[Unroll] Original mesh has been automatically hidden");
+			ccConsole::Warning(tr("[Unroll] Original mesh has been automatically hidden"));
 			ccMesh* outputMesh = mesh->cloneMesh(output);
 			outputMesh->addChild(output);
 			addToDB(outputMesh, true, true, false, true);
@@ -5698,7 +5714,7 @@ void MainWindow::doActionUnroll()
 		else
 		{
 			pc->setEnabled(false);
-			ccConsole::Warning("[Unroll] Original cloud has been automatically hidden");
+			ccConsole::Warning(tr("[Unroll] Original cloud has been automatically hidden"));
 			if (pc->getParent())
 			{
 				pc->getParent()->addChild(output);
@@ -5797,7 +5813,7 @@ ccGLWindow* MainWindow::new3DView( bool allowEntitySelection )
 	createGLWindow(view3D, viewWidget);
 	if (!viewWidget || !view3D)
 	{
-		ccLog::Error("Failed to create the 3D view");
+		ccLog::Error(tr("Failed to create the 3D view"));
 		assert(false);
 		return nullptr;
 	}
@@ -5845,7 +5861,7 @@ ccGLWindow* MainWindow::new3DView( bool allowEntitySelection )
 	viewWidget->setAttribute(Qt::WA_DeleteOnClose);
 	m_ccRoot->updatePropertiesView();
 
-	QMainWindow::statusBar()->showMessage(QString("New 3D View"), 2000);
+	QMainWindow::statusBar()->showMessage(tr("New 3D View"), 2000);
 
 	viewWidget->showMaximized();
 	viewWidget->update();
@@ -6210,7 +6226,7 @@ void MainWindow::activateRegisterPointPairTool()
 {
 	if (!haveSelection())
 	{
-		ccConsole::Error("Select at least one entity (point cloud or mesh)!");
+		ccConsole::Error(tr("Select at least one entity (point cloud or mesh)!"));
 		return;
 	}
 
@@ -6288,7 +6304,7 @@ void MainWindow::activateRegisterPointPairTool()
 	ccGLWindow* win = new3DView(true);
 	if (!win)
 	{
-		ccLog::Error("[PointPairRegistration] Failed to create dedicated 3D view!");
+		ccLog::Error(tr("[PointPairRegistration] Failed to create dedicated 3D view!"));
 		return;
 	}
 
@@ -6369,7 +6385,7 @@ void MainWindow::activateSectionExtractionMode()
 
 		if (validCount == 0)
 		{
-			ccConsole::Error("No cloud in selection!");
+			ccConsole::Error(tr("No cloud in selection!"));
 			return;
 		}
 	}
@@ -6383,7 +6399,7 @@ void MainWindow::activateSectionExtractionMode()
 	ccGLWindow* win = new3DView(false);
 	if (!win)
 	{
-		ccLog::Error("[SectionExtraction] Failed to create dedicated 3D view!");
+		ccLog::Error(tr("[SectionExtraction] Failed to create dedicated 3D view!"));
 		return;
 	}
 
@@ -6453,7 +6469,7 @@ void MainWindow::activateSegmentationMode()
 
 	if (m_gsTool->getNumberOfValidEntities() == 0)
 	{
-		ccConsole::Error("No segmentable entity in active window!");
+		ccConsole::Error(tr("No segmentable entity in active window!"));
 		return;
 	}
 
@@ -6523,7 +6539,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 
 							if (removeLabel && label->getParent())
 							{
-								ccLog::Warning(QString("[Segmentation] Label %1 depends on cloud %2 and will be removed").arg(label->getName(), cloud->getName()));
+								ccLog::Warning(tr("[Segmentation] Label %1 depends on cloud %2 and will be removed").arg(label->getName(), cloud->getName()));
 								ccHObject* labelParent = label->getParent();
 								ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(labelParent);
 								labelParent->removeChild(label);
@@ -6535,7 +6551,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 				} // if (cloud)
 
 				//we temporarily detach the entity, as it may undergo
-				//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::createNewCloudFromVisibilitySelection
+				//'severe' modifications (octree deletion, etc.) --> see ccPointCloud::createNewCloudFromVisibilitySelection
 				ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(entity);
 
 				//apply segmentation
@@ -6683,7 +6699,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 				}
 				else if (!deleteOriginalEntity)
 				{
-					//ccConsole::Error("An error occurred! (not enough memory?)");
+					//ccConsole::Error(tr("An error occurred! (not enough memory?)"));
 					putObjectBackIntoDBTree(entity,objContext);
 				}
 
@@ -6788,20 +6804,20 @@ void MainWindow::activatePointListPickingMode()
 	//there should be only one point cloud in current selection!
 	if (!haveOneSelection())
 	{
-		ccConsole::Error("Select one and only one entity!");
+		ccConsole::Error(tr("Select one and only one entity!"));
 		return;
 	}
 
 	ccHObject* entity = m_selectedEntities[0];
 	if (!entity->isKindOf(CC_TYPES::POINT_CLOUD) && !entity->isKindOf(CC_TYPES::MESH))
 	{
-		ccConsole::Error("Select a cloud or a mesh");
+		ccConsole::Error(tr("Select a cloud or a mesh"));
 		return;
 	}
 
 	if (!entity->isVisible() || !entity->isEnabled())
 	{
-		ccConsole::Error("Entity must be visible!");
+		ccConsole::Error(tr("Entity must be visible!"));
 		return;
 	}
 
@@ -6939,7 +6955,7 @@ void MainWindow::activateClippingBoxMode()
 	}
 	else
 	{
-		ccConsole::Error("Unexpected error!"); //indeed...
+		ccConsole::Error(tr("Unexpected error!")); //indeed...
 	}
 }
 
@@ -6976,12 +6992,12 @@ void MainWindow::activateTranslateRotateMode()
 
 	if (m_transTool->getNumberOfValidEntities() == 0)
 	{
-		ccConsole::Error("No entity eligible for manual transformation! (see console)");
+		ccConsole::Error(tr("No entity eligible for manual transformation! (see console)"));
 		return;
 	}
 	else if (rejectedEntities)
 	{
-		ccConsole::Error("Some entities were ignored! (see console)");
+		ccConsole::Error(tr("Some entities were ignored! (see console)"));
 	}
 
 	//try to activate "moving mode" in current GL window
@@ -6996,7 +7012,7 @@ void MainWindow::activateTranslateRotateMode()
 	}
 	else
 	{
-		ccConsole::Error("Unexpected error!"); //indeed...
+		ccConsole::Error(tr("Unexpected error!")); //indeed...
 	}
 }
 
@@ -7100,7 +7116,7 @@ void MainWindow::doActionAdjustZoom()
 	const ccViewportParameters& params = win->getViewportParameters();
 	if (params.perspectiveView)
 	{
-		ccConsole::Error("Orthographic mode only!");
+		ccConsole::Error(tr("Orthographic mode only!"));
 		return;
 	}
 
@@ -7153,7 +7169,7 @@ void MainWindow::zoomOnSelectedEntities()
 			}
 			else if (entity->getDisplay() != nullptr)
 			{
-				ccLog::Error("All selected entities must be displayed in the same 3D view!");
+				ccLog::Error(tr("All selected entities must be displayed in the same 3D view!"));
 				return;
 			}
 		}
@@ -7164,7 +7180,7 @@ void MainWindow::zoomOnSelectedEntities()
 		ccBBox box = tempGroup.getDisplayBB_recursive(false, win);
 		if (!box.isValid())
 		{
-			ccLog::Warning("Selected entities have no valid bounding-box!");
+			ccLog::Warning(tr("Selected entities have no valid bounding-box!"));
 		}
 		else
 		{
@@ -7288,7 +7304,7 @@ void MainWindow::enablePickingOperation(ccGLWindow* win, QString message)
 	assert(m_pickingHub);
 	if (!m_pickingHub->addListener(this))
 	{
-		ccLog::Error("Can't start the picking mechanism (another tool is already using it)");
+		ccLog::Error(tr("Can't start the picking mechanism (another tool is already using it)"));
 		return;
 	}
 
@@ -7329,7 +7345,7 @@ void MainWindow::cancelPreviousPickingOperation(bool aborted)
 	if (aborted)
 	{
 		s_pickingWindow->displayNewMessage(QString(), ccGLWindow::LOWER_LEFT_MESSAGE); //clear previous messages
-		s_pickingWindow->displayNewMessage("Picking operation aborted", ccGLWindow::LOWER_LEFT_MESSAGE);
+		s_pickingWindow->displayNewMessage(tr("Picking operation aborted"), ccGLWindow::LOWER_LEFT_MESSAGE);
 	}
 	s_pickingWindow->redraw(false);
 
@@ -7359,7 +7375,7 @@ void MainWindow::onItemPicked(const PickedItem& pi)
 
 	if (m_pickingHub->activeWindow() != s_pickingWindow)
 	{
-		ccLog::Warning("The point picked was picked in the wrong window");
+		ccLog::Warning(tr("The point picked was picked in the wrong window"));
 		return;
 	}
 
@@ -7371,7 +7387,7 @@ void MainWindow::onItemPicked(const PickedItem& pi)
 			//we only accept points picked on the right entity!
 			//if (obj != s_levelEntity)
 			//{
-			//	ccLog::Warning(QString("[Level] Only points picked on '%1' are considered!").arg(s_levelEntity->getName()));
+			//	ccLog::Warning(tr("[Level] Only points picked on '%1' are considered!").arg(s_levelEntity->getName()));
 			//	return;
 			//}
 
@@ -7386,7 +7402,7 @@ void MainWindow::onItemPicked(const PickedItem& pi)
 				const CCVector3* P = s_levelMarkersCloud->getPoint(i);
 				if ((pickedPoint - *P).norm() < 1.0e-6)
 				{
-					ccLog::Warning("[Level] Point is too close from the others!");
+					ccLog::Warning(tr("[Level] Point is too close from the others!"));
 					return;
 				}
 			}
@@ -7501,7 +7517,7 @@ void MainWindow::doLevel()
 		}
 		else
 		{
-			ccConsole::Error("Stop the other picking operation first!");
+			ccConsole::Error(tr("Stop the other picking operation first!"));
 		}
 		return;
 	}
@@ -7509,13 +7525,13 @@ void MainWindow::doLevel()
 	ccGLWindow* win = getActiveGLWindow();
 	if (!win)
 	{
-		ccConsole::Error("No active 3D view!");
+		ccConsole::Error(tr("No active 3D view!"));
 		return;
 	}
 
 	if (!haveOneSelection())
 	{
-		ccConsole::Error("Select an entity!");
+		ccConsole::Error(tr("Select an entity!"));
 		return;
 	}
 
@@ -7525,7 +7541,7 @@ void MainWindow::doLevel()
 		s_levelMarkersCloud = new ccPointCloud("Level points");
 		if (!s_levelMarkersCloud->reserve(3))
 		{
-			ccConsole::Error("Not enough memory!");
+			ccConsole::Error(tr("Not enough memory!"));
 			return;
 		}
 		win->addToOwnDB(s_levelMarkersCloud);
@@ -7535,7 +7551,7 @@ void MainWindow::doLevel()
 	s_levelLabels.clear();
 	s_currentPickingOperation = PICKING_LEVEL_POINTS;
 
-	enablePickingOperation(win,"Pick three points on the floor plane (click the Level button or press Escape to cancel)");
+	enablePickingOperation(win, tr("Pick three points on the floor plane (click the Level button or press Escape to cancel)"));
 }
 
 void MainWindow::doPickRotationCenter()
@@ -7549,7 +7565,7 @@ void MainWindow::doPickRotationCenter()
 		}
 		else
 		{
-			ccConsole::Error("Stop the other picking operation first!");
+			ccConsole::Error(tr("Stop the other picking operation first!"));
 		}
 		return;
 	}
@@ -7557,7 +7573,7 @@ void MainWindow::doPickRotationCenter()
 	ccGLWindow* win = getActiveGLWindow();
 	if (!win)
 	{
-		ccConsole::Error("No active 3D view!");
+		ccConsole::Error(tr("No active 3D view!"));
 		return;
 	}
 
@@ -7565,12 +7581,12 @@ void MainWindow::doPickRotationCenter()
 	bool perspectiveEnabled = win->getPerspectiveState(objectCentered);
 	if (perspectiveEnabled && !objectCentered)
 	{
-		ccLog::Error("Perspective mode is viewer-centered: can't use a point as rotation center!");
+		ccLog::Error(tr("Perspective mode is viewer-centered: can't use a point as rotation center!"));
 		return;
 	}
 
 	s_currentPickingOperation = PICKING_ROTATION_CENTER;
-	enablePickingOperation(win, "Pick a point to be used as rotation center (click on icon again to cancel)");
+	enablePickingOperation(win, tr("Pick a point to be used as rotation center (click on icon again to cancel)"));
 }
 
 ccPointCloud* MainWindow::askUserToSelectACloud(ccHObject* defaultCloudEntity/*=0*/, QString inviteMessage/*=QString()*/)
@@ -7579,7 +7595,7 @@ ccPointCloud* MainWindow::askUserToSelectACloud(ccHObject* defaultCloudEntity/*=
 	m_ccRoot->getRootEntity()->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD, true);
 	if (clouds.empty())
 	{
-		ccConsole::Error("No cloud in database!");
+		ccConsole::Error(tr("No cloud in database!"));
 		return nullptr;
 	}
 	//default selected index
@@ -7641,13 +7657,13 @@ void MainWindow::spawnHistogramDialog(const std::vector<unsigned>& histoValues, 
 {
 	ccHistogramWindowDlg* hDlg = new ccHistogramWindowDlg(this);
 	hDlg->setAttribute(Qt::WA_DeleteOnClose, true);
-	hDlg->setWindowTitle("Histogram");
+	hDlg->setWindowTitle(tr("Histogram"));
 
 	ccHistogramWindow* histogram = hDlg->window();
 	{
 		histogram->setTitle(title);
 		histogram->fromBinArray(histoValues, minVal, maxVal);
-		histogram->setAxisLabels(xAxisLabel, "Count");
+		histogram->setAxisLabels(xAxisLabel, tr("Count"));
 		histogram->refresh();
 	}
 
@@ -7668,7 +7684,7 @@ void MainWindow::showSelectedEntitiesHistogram()
 			{
 				ccHistogramWindowDlg* hDlg = new ccHistogramWindowDlg(this);
 				hDlg->setAttribute(Qt::WA_DeleteOnClose, true);
-				hDlg->setWindowTitle(QString("Histogram [%1]").arg(cloud->getName()));
+				hDlg->setWindowTitle(tr("Histogram [%1]").arg(cloud->getName()));
 
 				ccHistogramWindow* histogram = hDlg->window();
 				{
@@ -7679,10 +7695,10 @@ void MainWindow::showSelectedEntitiesHistogram()
 					numberOfClasses = std::max<unsigned>(4, numberOfClasses);
 					numberOfClasses = std::min<unsigned>(256, numberOfClasses);
 
-					histogram->setTitle(QString("%1 (%2 values) ").arg(sf->getName()).arg(numberOfPoints));
+					histogram->setTitle(tr("%1 (%2 values) ").arg(sf->getName()).arg(numberOfPoints));
 					bool showNaNValuesInGrey = sf->areNaNValuesShownInGrey();
 					histogram->fromSF(sf, numberOfClasses, true, showNaNValuesInGrey);
-					histogram->setAxisLabels(sf->getName(), "Count");
+					histogram->setAxisLabels(sf->getName(), tr("Count"));
 					histogram->refresh();
 				}
 				hDlg->show();
@@ -7711,7 +7727,7 @@ void MainWindow::doActionCrop()
 
 	if (candidates.empty())
 	{
-		ccConsole::Warning("[Crop] No eligible candidate found!");
+		ccConsole::Warning(tr("[Crop] No eligible candidate found!"));
 		return;
 	}
 
@@ -7763,9 +7779,9 @@ void MainWindow::doActionCrop()
 	}
 
 	if (successes)
-		ccLog::Warning("[Crop] Selected entities have been hidden");
+		ccLog::Warning(tr("[Crop] Selected entities have been hidden"));
 	if (errors)
-		ccLog::Error("Error(s) occurred! See the Console");
+		ccLog::Error(tr("Error(s) occurred! See the Console"));
 
 	refreshAll();
 	updateUI();
@@ -7784,7 +7800,7 @@ void MainWindow::doActionClone()
 			clone = ccHObjectCaster::ToGenericPointCloud(entity)->clone();
 			if (!clone)
 			{
-				ccConsole::Error(QString("An error occurred while cloning cloud %1").arg(entity->getName()));
+				ccConsole::Error(tr("An error occurred while cloning cloud %1").arg(entity->getName()));
 			}
 		}
 		else if (entity->isKindOf(CC_TYPES::PRIMITIVE))
@@ -7792,7 +7808,7 @@ void MainWindow::doActionClone()
 			clone = static_cast<ccGenericPrimitive*>(entity)->clone();
 			if (!clone)
 			{
-				ccConsole::Error(QString("An error occurred while cloning primitive %1").arg(entity->getName()));
+				ccConsole::Error(tr("An error occurred while cloning primitive %1").arg(entity->getName()));
 			}
 		}
 		else if (entity->isA(CC_TYPES::MESH))
@@ -7800,7 +7816,7 @@ void MainWindow::doActionClone()
 			clone = ccHObjectCaster::ToMesh(entity)->cloneMesh();
 			if (!clone)
 			{
-				ccConsole::Error(QString("An error occurred while cloning mesh %1").arg(entity->getName()));
+				ccConsole::Error(tr("An error occurred while cloning mesh %1").arg(entity->getName()));
 			}
 		}
 		else if (entity->isA(CC_TYPES::POLY_LINE))
@@ -7809,7 +7825,7 @@ void MainWindow::doActionClone()
 			clone = (poly ? new ccPolyline(*poly) : nullptr);
 			if (!clone)
 			{
-				ccConsole::Error(QString("An error occurred while cloning polyline %1").arg(entity->getName()));
+				ccConsole::Error(tr("An error occurred while cloning polyline %1").arg(entity->getName()));
 			}
 		}
 		else if (entity->isA(CC_TYPES::FACET))
@@ -7818,7 +7834,7 @@ void MainWindow::doActionClone()
 			clone = (facet ? facet->clone() : nullptr);
 			if (!clone)
 			{
-				ccConsole::Error(QString("An error occurred while cloning facet %1").arg(entity->getName()));
+				ccConsole::Error(tr("An error occurred while cloning facet %1").arg(entity->getName()));
 			}
 		}
 		else if (entity->isA(CC_TYPES::CAMERA_SENSOR))
@@ -7831,7 +7847,7 @@ void MainWindow::doActionClone()
 			}
 			if (!clone)
 			{
-				ccConsole::Error(QString("An error occurred while cloning camera sensor %1").arg(entity->getName()));
+				ccConsole::Error(tr("An error occurred while cloning camera sensor %1").arg(entity->getName()));
 			}
 		}
 		else if (entity->isA(CC_TYPES::GBL_SENSOR))
@@ -7844,12 +7860,12 @@ void MainWindow::doActionClone()
 			}
 			if (!clone)
 			{
-				ccConsole::Error(QString("An error occurred while cloning GBL sensor %1").arg(entity->getName()));
+				ccConsole::Error(tr("An error occurred while cloning GBL sensor %1").arg(entity->getName()));
 			}
 		}
 		else
 		{
-			ccLog::Warning(QString("Entity '%1' can't be cloned (type not supported yet!)").arg(entity->getName()));
+			ccLog::Warning(tr("Entity '%1' can't be cloned (type not supported yet!)").arg(entity->getName()));
 		}
 
 		if (clone)
@@ -7878,7 +7894,7 @@ void MainWindow::doActionAddConstantSF()
 	if (!haveOneSelection())
 	{
 		if (haveSelection())
-			ccConsole::Error("Select only one cloud or one mesh!");
+			ccConsole::Error(tr("Select only one cloud or one mesh!"));
 		return;
 	}
 
@@ -7900,26 +7916,26 @@ void MainWindow::doActionAddConstantSF()
 	unsigned trys = 1;
 	while (cloud->getScalarFieldIndexByName(qPrintable(defaultName)) >= 0 || trys > 99)
 	{
-		defaultName = QString("Constant #%1").arg(++trys);
+		defaultName = tr("Constant #%1").arg(++trys);
 	}
 
 	//ask for a name
 	bool ok;
-	QString sfName = QInputDialog::getText(this,"New SF name", "SF name (must be unique)", QLineEdit::Normal, defaultName, &ok);
+	QString sfName = QInputDialog::getText(this, tr("New SF name"), tr("SF name (must be unique)"), QLineEdit::Normal, defaultName, &ok);
 	if (!ok)
 		return;
 	if (sfName.isNull())
 	{
-		ccLog::Error("Invalid name");
+		ccLog::Error(tr("Invalid name"));
 		return;
 	}
 	if (cloud->getScalarFieldIndexByName(qPrintable(sfName)) >= 0)
 	{
-		ccLog::Error("Name already exists!");
+		ccLog::Error(tr("Name already exists!"));
 		return;
 	}
 
-	ScalarType sfValue = static_cast<ScalarType>(QInputDialog::getDouble(this, "Add constant value", "value", s_constantSFValue, -1.0e9, 1.0e9, 8, &ok));
+	ScalarType sfValue = static_cast<ScalarType>(QInputDialog::getDouble(this, tr("Add constant value"), tr("value"), s_constantSFValue, -1.0e9, 1.0e9, 8, &ok));
 	if (!ok)
 		return;
 
@@ -7928,7 +7944,7 @@ void MainWindow::doActionAddConstantSF()
 		sfIdx = cloud->addScalarField(qPrintable(sfName));
 	if (sfIdx < 0)
 	{
-		ccLog::Error("An error occurred! (see console)");
+		ccLog::Error(tr("An error occurred! (see console)"));
 		return;
 	}
 
@@ -7945,7 +7961,7 @@ void MainWindow::doActionAddConstantSF()
 			cloud->getDisplay()->redraw(false);
 	}
 
-	ccLog::Print(QString("New scalar field added to %1 (constant value: %2)").arg(cloud->getName()).arg(sfValue));
+	ccLog::Print(tr("New scalar field added to %1 (constant value: %2)").arg(cloud->getName()).arg(sfValue));
 }
 
 void MainWindow::doActionScalarFieldFromColor()
@@ -7991,11 +8007,11 @@ void MainWindow::doActionFitSphere()
 			&pDlg,
 			confidence) != CCCoreLib::GeometricalAnalysisTools::NoError)
 		{
-			ccLog::Warning(QString("[Fit sphere] Failed to fit a sphere on cloud '%1'").arg(cloud->getName()));
+			ccLog::Warning(tr("[Fit sphere] Failed to fit a sphere on cloud '%1'").arg(cloud->getName()));
 			continue;
 		}
 
-		ccLog::Print(QString("[Fit sphere] Cloud '%1': center (%2,%3,%4) - radius = %5 [RMS = %6]")
+		ccLog::Print(tr("[Fit sphere] Cloud '%1': center (%2,%3,%4) - radius = %5 [RMS = %6]")
 			.arg(cloud->getName())
 			.arg(center.x)
 			.arg(center.y)
@@ -8005,7 +8021,7 @@ void MainWindow::doActionFitSphere()
 
 		ccGLMatrix trans;
 		trans.setTranslation(center);
-		ccSphere* sphere = new ccSphere(radius, &trans, QString("Sphere r=%1 [rms %2]").arg(radius).arg(rms));
+		ccSphere* sphere = new ccSphere(radius, &trans, tr("Sphere r=%1 [rms %2]").arg(radius).arg(rms));
 		cloud->addChild(sphere);
 		//sphere->setDisplay(cloud->getDisplay());
 		sphere->prepareDisplayForRefresh();
@@ -8036,7 +8052,7 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 	{
 		bool ok = true;
 		static double s_polygonMaxEdgeLength = 0.0;
-		maxEdgeLength = QInputDialog::getDouble(this, "Fit facet", "Max edge length (0 = no limit)", s_polygonMaxEdgeLength, 0, 1.0e9, 8, &ok);
+		maxEdgeLength = QInputDialog::getDouble(this, tr("Fit facet"), tr("Max edge length (0 = no limit)"), s_polygonMaxEdgeLength, 0, 1.0e9, 8, &ok);
 		if (!ok)
 			return;
 		s_polygonMaxEdgeLength = maxEdgeLength;
@@ -8128,13 +8144,13 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 
 			if (plane)
 			{
-				ccConsole::Print(QString("[Orientation] Entity '%1'").arg(entity->getName()));
-				ccConsole::Print("\t- plane fitting RMS: %f", rms);
+				ccConsole::Print(tr("[Orientation] Entity '%1'").arg(entity->getName()));
+				ccConsole::Print(tr("\t- plane fitting RMS: %f").arg(rms));
 
 				//We always consider the normal with a positive 'Z' by default!
 				if (N.z < 0.0)
 					N *= -1.0;
-				ccConsole::Print("\t- normal: (%f,%f,%f)", N.x, N.y, N.z);
+				ccConsole::Print(tr("\t- normal: (%f,%f,%f)").arg(N.x).arg(N.y).arg(N.z));
 
 				//we compute strike & dip by the way
 				PointCoordinateType dip = 0.0f;
@@ -8148,9 +8164,9 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 				CCVector3 Gt = C;
 				makeZPosMatrix.applyRotation(Gt);
 				makeZPosMatrix.setTranslation(C-Gt);
-				ccConsole::Print("[Orientation] A matrix that would make this plane horizontal (normal towards Z+) is:");
+				ccConsole::Print(tr("[Orientation] A matrix that would make this plane horizontal (normal towards Z+) is:"));
 				ccConsole::Print(makeZPosMatrix.toString(12,' ')); //full precision
-				ccConsole::Print("[Orientation] You can copy this matrix values (CTRL+C) and paste them in the 'Apply transformation tool' dialog");
+				ccConsole::Print(tr("[Orientation] You can copy this matrix values (CTRL+C) and paste them in the 'Apply transformation tool' dialog"));
 
 				plane->setName(dipAndDipDirStr);
 				plane->applyGLTransformation_recursive(); //not yet in DB
@@ -8170,7 +8186,7 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 			}
 			else
 			{
-				ccConsole::Warning(QString("Failed to fit a plane/facet on entity '%1'").arg(entity->getName()));
+				ccConsole::Warning(tr("Failed to fit a plane/facet on entity '%1'").arg(entity->getName()));
 			}
 		}
 	}
@@ -8204,7 +8220,7 @@ void MainWindow::doComputeGeometricFeature()
 	radius = gfDlg.getRadius();
 	if (!gfDlg.getSelectedFeatures(s_selectedCharacteristics))
 	{
-		ccLog::Error("Not enough memory");
+		ccLog::Error(tr("Not enough memory!"));
 		return;
 	}
 
@@ -8232,17 +8248,17 @@ void MainWindow::doSphericalNeighbourhoodExtractionTest()
 	PointCoordinateType sphereRadius = ccLibAlgorithms::GetDefaultCloudKernelSize(m_selectedEntities);
 	if (sphereRadius < 0)
 	{
-		ccConsole::Error("Invalid kernel size!");
+		ccConsole::Error(tr("Invalid kernel size!"));
 		return;
 	}
 
 	bool ok;
-	double val = QInputDialog::getDouble(this, "SNE test", "Radius:", static_cast<double>(sphereRadius), DBL_MIN, 1.0e9, 8, &ok);
+	double val = QInputDialog::getDouble(this, tr("SNE test"), tr("Radius:"), static_cast<double>(sphereRadius), DBL_MIN, 1.0e9, 8, &ok);
 	if (!ok)
 		return;
 	sphereRadius = static_cast<PointCoordinateType>(val);
 
-	QString sfName = QString("Spherical extraction test") + QString(" (%1)").arg(sphereRadius);
+	QString sfName = tr("Spherical extraction test (%1)").arg(sphereRadius);
 
 	ccProgressDialog pDlg(true, this);
 	pDlg.setAutoClose(false);
@@ -8261,7 +8277,7 @@ void MainWindow::doSphericalNeighbourhoodExtractionTest()
 			sfIdx = cloud->addScalarField(qPrintable(sfName));
 		if (sfIdx < 0)
 		{
-			ccConsole::Error(QString("Failed to create scalar field on cloud '%1' (not enough memory?)").arg(cloud->getName()));
+			ccConsole::Error(tr("Failed to create scalar field on cloud '%1' (not enough memory?)").arg(cloud->getName()));
 			return;
 		}
 			
@@ -8273,7 +8289,7 @@ void MainWindow::doSphericalNeighbourhoodExtractionTest()
 			octree = cloud->computeOctree(&pDlg);
 			if (!octree)
 			{
-				ccConsole::Error(QString("Couldn't compute octree for cloud '%1'!").arg(cloud->getName()));
+				ccConsole::Error(tr("Couldn't compute octree for cloud '%1'!").arg(cloud->getName()));
 				return;
 			}
 		}
@@ -8302,7 +8318,7 @@ void MainWindow::doSphericalNeighbourhoodExtractionTest()
 			for (size_t k = 0; k < neihgboursCount; ++k)
 				cloud->setPointScalarValue(neighbours[k].pointIndex, static_cast<ScalarType>(sqrt(neighbours[k].squareDistd)));
 		}
-		ccConsole::Print("[SNE_TEST] Mean extraction time = %i ms (radius = %f, mean(neighbours) = %3.1f)", eTimer.elapsed(), sphereRadius, extractedPoints / static_cast<double>(samples));
+		ccConsole::Print(tr("[SNE_TEST] Mean extraction time = %1 ms (radius = %2, mean(neighbours) = %3)").arg(eTimer.elapsed()).arg(sphereRadius).arg(extractedPoints / static_cast<double>(samples), 0, 'f', 1));
 
 		sf->computeMinAndMax();
 		cloud->setCurrentDisplayedScalarField(sfIdx);
@@ -8317,19 +8333,19 @@ void MainWindow::doSphericalNeighbourhoodExtractionTest()
 void MainWindow::doCylindricalNeighbourhoodExtractionTest()
 {
 	bool ok;
-	double radius = QInputDialog::getDouble(this, "CNE Test", "radius", 0.02, 1.0e-6, 1.0e6, 6, &ok);
+	double radius = QInputDialog::getDouble(this, tr("CNE Test"), tr("radius"), 0.02, 1.0e-6, 1.0e6, 6, &ok);
 	if (!ok)
 		return;
 
-	double height = QInputDialog::getDouble(this, "CNE Test", "height", 0.05, 1.0e-6, 1.0e6, 6, &ok);
+	double height = QInputDialog::getDouble(this, tr("CNE Test"), tr("height"), 0.05, 1.0e-6, 1.0e6, 6, &ok);
 	if (!ok)
 		return;
 
-	ccPointCloud* cloud = new ccPointCloud("cube");
+	ccPointCloud* cloud = new ccPointCloud(tr("cube"));
 	const unsigned ptsCount = 1000000;
 	if (!cloud->reserve(ptsCount))
 	{
-		ccConsole::Error("Not enough memory!");
+		ccConsole::Error(tr("Not enough memory!"));
 		delete cloud;
 		return;
 	}
@@ -8357,7 +8373,7 @@ void MainWindow::doCylindricalNeighbourhoodExtractionTest()
 		sfIdx = cloud->addScalarField(DEFAULT_CNE_TEST_TEMP_SF_NAME);
 	if (sfIdx < 0)
 	{
-		ccConsole::Error("Not enough memory!");
+		ccConsole::Error(tr("Not enough memory!"));
 		delete cloud;
 		return;
 	}
@@ -8410,11 +8426,11 @@ void MainWindow::doCylindricalNeighbourhoodExtractionTest()
 				cloud->setPointScalarValue(cn.neighbours[k].pointIndex, static_cast<ScalarType>(sqrt(cn.neighbours[k].squareDistd)));
 			}
 		}
-		ccConsole::Print("[CNE_TEST] Mean extraction time = %i ms (radius = %f, height = %f, mean(neighbours) = %3.1f)", subTimer.elapsed(), radius, height, static_cast<double>(extractedPoints) / samples);
+		ccConsole::Print(tr("[CNE_TEST] Mean extraction time = %1 ms (radius = %2, height = %3, mean(neighbours) = %4))").arg(subTimer.elapsed()).arg(radius).arg(height).arg(static_cast<double>(extractedPoints) / samples, 0, 'f', 1));
 	}
 	else
 	{
-		ccConsole::Error("Failed to compute octree!");
+		ccConsole::Error(tr("Failed to compute octree!"));
 	}
 
 	ccScalarField* sf = static_cast<ccScalarField*>(cloud->getScalarField(sfIdx));
@@ -8433,10 +8449,10 @@ void MainWindow::doActionCreateCloudFromEntCenters()
 {
 	size_t selNum = getSelectedEntities().size();
 
-	ccPointCloud* centers = new ccPointCloud("centers");
+	ccPointCloud* centers = new ccPointCloud(tr("centers"));
 	if (!centers->reserve(static_cast<unsigned>(selNum)))
 	{
-		ccLog::Error("Not enough memory!");
+		ccLog::Error(tr("Not enough memory!"));
 		delete centers;
 		centers = nullptr;
 		return;
@@ -8465,7 +8481,7 @@ void MainWindow::doActionCreateCloudFromEntCenters()
 
 	if (centers->size() == 0)
 	{
-		ccLog::Error("No cloud in selection?!");
+		ccLog::Error(tr("No cloud in selection?!"));
 		delete centers;
 		centers = nullptr;
 	}
@@ -8495,14 +8511,14 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 	}
 	catch (const std::bad_alloc&)
 	{
-		ccLog::Error("Not enough memory!");
+		ccLog::Error(tr("Not enough memory!"));
 		return;
 	}
 
 	size_t cloudCount = clouds.size();
 	if (cloudCount < 2)
 	{
-		ccLog::Error("Need at least two clouds!");
+		ccLog::Error(tr("Need at least two clouds!"));
 		return;
 	}
 
@@ -8547,7 +8563,7 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 	}
 	catch (const std::bad_alloc&)
 	{
-		ccLog::Error("Not enough memory!");
+		ccLog::Error(tr("Not enough memory!"));
 		return;
 	}
 
@@ -8591,7 +8607,7 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 					ccPointCloud* B = clouds[j]->cloneThis();
 					if (!B)
 					{
-						ccLog::Error("Not enough memory!");
+						ccLog::Error(tr("Not enough memory!"));
 						return;
 					}
 
@@ -8616,7 +8632,7 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 						delete B;
 						if (bestB)
 							delete bestB;
-						ccLog::Error("An error occurred while performing ICP!");
+						ccLog::Error(tr("An error occurred while performing ICP!"));
 						return;
 					}
 
@@ -8652,16 +8668,16 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 				if (bestMatrixIndex >= 0)
 				{
 					assert(bestB);
-					ccHObject* group = new ccHObject(QString("Best case #%1 / #%2 - RMS = %3").arg(i+1).arg(j+1).arg(minRMS));
+					ccHObject* group = new ccHObject(tr("Best case #%1 / #%2 - RMS = %3").arg(i+1).arg(j+1).arg(minRMS));
 					group->addChild(bestB);
 					group->setDisplay_recursive(A->getDisplay());
 					addToDB(group);
-					ccLog::Print(QString("[doActionComputeBestICPRmsMatrix] Comparison #%1 / #%2: min RMS = %3 (phi = %4 / theta = %5 deg.)").arg(i+1).arg(j+1).arg(minRMS).arg(matrixAngles[bestMatrixIndex].first).arg(matrixAngles[bestMatrixIndex].second));
+					ccLog::Print(tr("[doActionComputeBestICPRmsMatrix] Comparison #%1 / #%2: min RMS = %3 (phi = %4 / theta = %5 deg.)").arg(i+1).arg(j+1).arg(minRMS).arg(matrixAngles[bestMatrixIndex].first).arg(matrixAngles[bestMatrixIndex].second));
 				}
 				else
 				{
 					assert(!bestB);
-					ccLog::Warning(QString("[doActionComputeBestICPRmsMatrix] Comparison #%1 / #%2: INVALID").arg(i+1).arg(j+1));
+					ccLog::Warning(tr("[doActionComputeBestICPRmsMatrix] Comparison #%1 / #%2: INVALID").arg(i+1).arg(j+1));
 				}
 
 				rmsMatrix[i*cloudCount + j] = minRMS;
@@ -8685,7 +8701,7 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 		QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
 
 		QString outputFilename = QFileDialog::getSaveFileName(	this,
-																"Select output file",
+																tr("Select output file"),
 																currentPath,
 																"*.csv",
 																nullptr,
@@ -8703,7 +8719,7 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 				stream << "RMS";
 				for ( ccPointCloud *cloud : clouds )
 				{
-					stream << ";";
+					stream << ';';
 					stream << cloud->getName();
 				}
 				stream << endl;
@@ -8713,20 +8729,20 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 			for (size_t j = 0; j < cloudCount; ++j)
 			{
 				stream << clouds[j]->getName();
-				stream << ";";
+				stream << ';';
 				for (size_t i = 0; i < cloudCount; ++i)
 				{
 					stream << rmsMatrix[j*cloudCount+i];
-					stream << ";";
+					stream << ';';
 				}
 				stream << endl;
 			}
 
-			ccLog::Print("[doActionComputeBestICPRmsMatrix] Job done");
+			ccLog::Print(tr("[doActionComputeBestICPRmsMatrix] Job done"));
 		}
 		else
 		{
-			ccLog::Error("Failed to save output file?!");
+			ccLog::Error(tr("Failed to save output file?!"));
 		}
 	}
 }
@@ -8755,7 +8771,7 @@ void MainWindow::doActionExportPlaneInfo()
 
 	if (planes.size() == 0)
 	{
-		ccLog::Error("No plane in selection");
+		ccLog::Error(tr("No plane in selection"));
 		return;
 	}
 
@@ -8765,7 +8781,7 @@ void MainWindow::doActionExportPlaneInfo()
 	QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
 
 	QString outputFilename = QFileDialog::getSaveFileName(	this,
-															"Select output file",
+															tr("Select output file"),
 															currentPath,
 															"*.csv",
 															nullptr,
@@ -8780,7 +8796,7 @@ void MainWindow::doActionExportPlaneInfo()
 	QFile csvFile(outputFilename);
 	if (!csvFile.open(QFile::WriteOnly | QFile::Text))
 	{
-		ccConsole::Error("Failed to open file for writing! (check file permissions)");
+		ccConsole::Error(tr("Failed to open file for writing! (check file permissions)"));
 		return;
 	}
 
@@ -8830,7 +8846,7 @@ void MainWindow::doActionExportPlaneInfo()
 		csvStream << endl;
 	}
 
-	ccConsole::Print(QString("[I/O] File '%1' successfully saved (%2 plane(s))").arg(outputFilename).arg(planes.size()));
+	ccConsole::Print(tr("[I/O] File '%1' successfully saved (%2 plane(s))").arg(outputFilename).arg(planes.size()));
 	csvFile.close();
 }
 
@@ -8859,7 +8875,7 @@ void MainWindow::doActionExportCloudInfo()
 
 	if (clouds.empty())
 	{
-		ccConsole::Error("Select at least one point cloud!");
+		ccConsole::Error(tr("Select at least one point cloud!"));
 		return;
 	}
 
@@ -8869,7 +8885,7 @@ void MainWindow::doActionExportCloudInfo()
 	QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
 
 	QString outputFilename = QFileDialog::getSaveFileName(	this,
-															"Select output file",
+															tr("Select output file"),
 															currentPath,
 															"*.csv",
 															nullptr,
@@ -8883,7 +8899,7 @@ void MainWindow::doActionExportCloudInfo()
 	QFile csvFile(outputFilename);
 	if (!csvFile.open(QFile::WriteOnly | QFile::Text))
 	{
-		ccConsole::Error("Failed to open file for writing! (check file permissions)");
+		ccConsole::Error(tr("Failed to open file for writing! (check file permissions)"));
 		return;
 	}
 
@@ -8925,15 +8941,15 @@ void MainWindow::doActionExportCloudInfo()
 			ccPointCloud* cloud = static_cast<ccPointCloud*>(entity);
 
 			CCVector3 G = *CCCoreLib::Neighbourhood(cloud).getGravityCenter();
-			csvStream << cloud->getName() << ";" /*"Name;"*/;
-			csvStream << cloud->size() << ";" /*"Points;"*/;
-			csvStream << G.x << ";" /*"meanX;"*/;
-			csvStream << G.y << ";" /*"meanY;"*/;
-			csvStream << G.z << ";" /*"meanZ;"*/;
+			csvStream << cloud->getName() << ';' /*"Name;"*/;
+			csvStream << cloud->size() << ';' /*"Points;"*/;
+			csvStream << G.x << ';' /*"meanX;"*/;
+			csvStream << G.y << ';' /*"meanY;"*/;
+			csvStream << G.z << ';' /*"meanZ;"*/;
 			for (unsigned j = 0; j < cloud->getNumberOfScalarFields(); ++j)
 			{
 				CCCoreLib::ScalarField* sf = cloud->getScalarField(j);
-				csvStream << sf->getName() << ";" /*"SF name;"*/;
+				csvStream << sf->getName() << ';' /*"SF name;"*/;
 
 				unsigned validCount = 0;
 				double sfSum = 0.0;
@@ -8948,17 +8964,17 @@ void MainWindow::doActionExportCloudInfo()
 						sfSum2 += val*val;
 					}
 				}
-				csvStream << validCount << ";" /*"SF valid values;"*/;
+				csvStream << validCount << ';' /*"SF valid values;"*/;
 				double mean = sfSum/validCount;
-				csvStream << mean << ";" /*"SF mean;"*/;
-				csvStream << sqrt(std::abs(sfSum2/validCount - mean*mean)) << ";" /*"SF std.dev.;"*/;
-				csvStream << sfSum << ";" /*"SF sum;"*/;
+				csvStream << mean << ';' /*"SF mean;"*/;
+				csvStream << sqrt(std::abs(sfSum2/validCount - mean*mean)) << ';' /*"SF std.dev.;"*/;
+				csvStream << sfSum << ';' /*"SF sum;"*/;
 			}
 			csvStream << endl;
 		}
 	}
 
-	ccConsole::Print(QString("[I/O] File '%1' successfully saved (%2 cloud(s))").arg(outputFilename).arg(clouds.size()));
+	ccConsole::Print(tr("[I/O] File '%1' successfully saved (%2 cloud(s))").arg(outputFilename).arg(clouds.size()));
 	csvFile.close();
 }
 
@@ -8966,19 +8982,19 @@ void MainWindow::doActionCloudCloudDist()
 {
 	if (getSelectedEntities().size() != 2)
 	{
-		ccConsole::Error("Select 2 point clouds!");
+		ccConsole::Error(tr("Select 2 point clouds!"));
 		return;
 	}
 
 	if (!m_selectedEntities[0]->isKindOf(CC_TYPES::POINT_CLOUD) ||
 		!m_selectedEntities[1]->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
-		ccConsole::Error("Select 2 point clouds!");
+		ccConsole::Error(tr("Select 2 point clouds!"));
 		return;
 	}
 
-	ccOrderChoiceDlg dlg(	m_selectedEntities[0], "Compared",
-							m_selectedEntities[1], "Reference",
+	ccOrderChoiceDlg dlg(	m_selectedEntities[0], tr("Compared"),
+							m_selectedEntities[1], tr("Reference"),
 							this );
 	if (!dlg.exec())
 		return;
@@ -8993,7 +9009,7 @@ void MainWindow::doActionCloudCloudDist()
 	m_compDlg = new ccComparisonDlg(compCloud, refCloud, ccComparisonDlg::CLOUDCLOUD_DIST, this);
 	if (!m_compDlg->initDialog())
 	{
-		ccConsole::Error("Failed to initialize comparison dialog");
+		ccConsole::Error(tr("Failed to initialize comparison dialog"));
 		delete m_compDlg;
 		m_compDlg = nullptr;
 		return;
@@ -9010,7 +9026,7 @@ void MainWindow::doActionCloudMeshDist()
 {
 	if (getSelectedEntities().size() != 2)
 	{
-		ccConsole::Error("Select 2 entities!");
+		ccConsole::Error(tr("Select 2 entities!"));
 		return;
 	}
 
@@ -9032,12 +9048,12 @@ void MainWindow::doActionCloudMeshDist()
 
 	if (meshNum == 0)
 	{
-		ccConsole::Error("Select at least one mesh!");
+		ccConsole::Error(tr("Select at least one mesh!"));
 		return;
 	}
 	else if (meshNum+cloudNum < 2)
 	{
-		ccConsole::Error("Select one mesh and one cloud or two meshes!");
+		ccConsole::Error(tr("Select one mesh and one cloud or two meshes!"));
 		return;
 	}
 
@@ -9051,8 +9067,8 @@ void MainWindow::doActionCloudMeshDist()
 	}
 	else
 	{
-		ccOrderChoiceDlg dlg(	m_selectedEntities[0], "Compared",
-								m_selectedEntities[1], "Reference",
+		ccOrderChoiceDlg dlg(	m_selectedEntities[0], tr("Compared"),
+								m_selectedEntities[1], tr("Reference"),
 								this );
 		if (!dlg.exec())
 			return;
@@ -9067,7 +9083,7 @@ void MainWindow::doActionCloudMeshDist()
 	m_compDlg = new ccComparisonDlg(compEnt, refMesh, ccComparisonDlg::CLOUDMESH_DIST, this);
 	if (!m_compDlg->initDialog())
 	{
-		ccConsole::Error("Failed to initialize comparison dialog");
+		ccConsole::Error(tr("Failed to initialize comparison dialog"));
 		delete m_compDlg;
 		m_compDlg = nullptr;
 		return;
@@ -9085,7 +9101,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 	ccHObject::Container clouds;
 	ccHObject* refEntity = nullptr;
 	CC_CLASS_ENUM entityType = CC_TYPES::OBJECT;
-	const char* errString = "[Compute Primitive Distances] Cloud to %s failed, error code = %i!";
+	QString errString = tr("[Compute Primitive Distances] Cloud to %1 failed, error code = %2!");
 
 	for (unsigned i = 0; i < getSelectedEntities().size(); ++i)
 	{
@@ -9101,7 +9117,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 			{
 				if (foundPrimitive)
 				{
-					ccConsole::Error("[Compute Primitive Distances] Select only a single Plane/Box/Sphere/Cylinder/Cone/Polyline Primitive");
+					ccConsole::Error(tr("[Compute Primitive Distances] Select only a single Plane/Box/Sphere/Cylinder/Cone/Polyline Primitive"));
 					return;
 				}
 				foundPrimitive = true;
@@ -9117,12 +9133,12 @@ void MainWindow::doActionCloudPrimitiveDist()
 
 	if (!foundPrimitive)
 	{
-		ccConsole::Error("[Compute Primitive Distances] Select at least one Plane/Box/Sphere/Cylinder/Cone/Polyline Primitive!");
+		ccConsole::Error(tr("[Compute Primitive Distances] Select at least one Plane/Box/Sphere/Cylinder/Cone/Polyline Primitive!"));
 		return;
 	}
 	if (clouds.size() <= 0)
 	{
-		ccConsole::Error("[Compute Primitive Distances] Select at least one cloud!");
+		ccConsole::Error(tr("[Compute Primitive Distances] Select at least one cloud!"));
 		return;
 	}
 		
@@ -9152,7 +9168,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 				sfIdx = compEnt->addScalarField(CC_TEMP_DISTANCES_DEFAULT_SF_NAME);
 				if (sfIdx < 0)
 				{
-					ccLog::Warning(QString("[Compute Primitive Distances] [Cloud: %1] Couldn't allocate a new scalar field for computing distances! Try to free some memory ...").arg(compEnt->getName()));
+					ccLog::Warning(tr("[Compute Primitive Distances] [Cloud: %1] Couldn't allocate a new scalar field for computing distances! Try to free some memory ...").arg(compEnt->getName()));
 					++errorCount;
 					continue;
 				}
@@ -9160,7 +9176,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 			compEnt->setCurrentScalarField(sfIdx);
 			if (!compEnt->enableScalarField())
 			{
-				ccLog::Warning(QString("[Compute Primitive Distances] [Cloud: %1] Not enough memory").arg(compEnt->getName()));
+				ccLog::Warning(tr("[Compute Primitive Distances] [Cloud: %1] Not enough memory").arg(compEnt->getName()));
 				++errorCount;
 				continue;
 			}
@@ -9171,7 +9187,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 				case CC_TYPES::SPHERE:
 				{
 					if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2SphereEquation(compEnt, refEntity->getOwnBB().getCenter(), static_cast<ccSphere*>(refEntity)->getRadius(), signedDist)))
-						ccConsole::Error(errString, "Sphere", returnCode);
+						ccConsole::Error(errString.arg(tr("Sphere")).arg(returnCode));
 					break;
 				}
 				case CC_TYPES::PLANE: 
@@ -9182,7 +9198,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 						CCCoreLib::SquareMatrix rotationTransform(plane->getTransformation().data(), true);
 						if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2RectangleEquation(compEnt, plane->getXWidth(), plane->getYWidth(), rotationTransform, plane->getCenter(), signedDist)))
 						{
-							ccConsole::Warning(errString, "Bounded Plane", returnCode);
+							ccConsole::Warning(errString.arg(tr("Bounded Plane")).arg(returnCode));
 							++errorCount;
 						}
 					}
@@ -9190,7 +9206,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 					{
 						if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2PlaneEquation(compEnt, static_cast<ccPlane*>(refEntity)->getEquation(), signedDist)))
 						{
-							ccConsole::Warning(errString, "Infinite Plane", returnCode);
+							ccConsole::Warning(errString.arg(tr("Infinite Plane")).arg(returnCode));
 							++errorCount;
 						}
 					}
@@ -9200,7 +9216,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 				{
 					if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2CylinderEquation(compEnt, static_cast<ccCylinder*>(refEntity)->getBottomCenter(), static_cast<ccCylinder*>(refEntity)->getTopCenter(), static_cast<ccCylinder*>(refEntity)->getBottomRadius(), signedDist)))
 					{
-						ccConsole::Warning(errString, "Cylinder", returnCode);
+						ccConsole::Warning(errString.arg(tr("Cylinder")).arg(returnCode));
 						++errorCount;
 					}
 					break;
@@ -9209,7 +9225,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 				{
 					if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2ConeEquation(compEnt, static_cast<ccCone*>(refEntity)->getLargeCenter(), static_cast<ccCone*>(refEntity)->getSmallCenter(), static_cast<ccCone*>(refEntity)->getLargeRadius(), static_cast<ccCone*>(refEntity)->getSmallRadius(), signedDist)))
 					{
-						ccConsole::Warning(errString, "Cone", returnCode);
+						ccConsole::Warning(errString.arg(tr("Cone")).arg(returnCode));
 						++errorCount;
 					}
 					break;
@@ -9221,7 +9237,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 					CCVector3 boxCenter = glTransform.getColumnAsVec3D(3);
 					if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2BoxEquation(compEnt, static_cast<ccBox*>(refEntity)->getDimensions(), rotationTransform, boxCenter, signedDist)))
 					{
-						ccConsole::Warning(errString, "Box", returnCode);
+						ccConsole::Warning(errString.arg(tr("Box")).arg(returnCode));
 						++errorCount;
 					}
 					break; 
@@ -9234,14 +9250,14 @@ void MainWindow::doActionCloudPrimitiveDist()
 					returnCode = CCCoreLib::DistanceComputationTools::computeCloud2PolylineEquation(compEnt, line);
 					if (!returnCode)
 					{
-						ccConsole::Warning(errString, "Polyline", returnCode);
+						ccConsole::Warning(errString.arg(tr("Polyline")).arg(returnCode));
 						++errorCount;
 					}
 					break;
 				}
 				default:
 				{
-					ccConsole::Error("[Compute Primitive Distances] Unsupported primitive type"); //Shouldn't ever reach here...
+					ccConsole::Error(tr("[Compute Primitive Distances] Unsupported primitive type")); //Shouldn't ever reach here...
 					break;
 				}
 			}
@@ -9270,7 +9286,12 @@ void MainWindow::doActionCloudPrimitiveDist()
 				ScalarType variance;				
 				sf->computeMinAndMax();
 				sf->computeMeanAndVariance(mean, &variance);
-				ccLog::Print("[Compute Primitive Distances] [Primitive: %s] [Cloud: %s] [%s] Mean distance = %f / std deviation = %f", qPrintable(refEntity->getName()), qPrintable(compEnt->getName()), qPrintable(sfName), mean, sqrt(variance));			
+				ccLog::Print(tr("[Compute Primitive Distances] [Primitive: %1] [Cloud: %2] [%3] Mean distance = %4 / std deviation = %5")
+					.arg(refEntity->getName())
+					.arg(compEnt->getName())
+					.arg(sfName)
+					.arg(mean)
+					.arg(sqrt(variance)));			
 			}
 			compEnt->setCurrentDisplayedScalarField(sfIdx);
 			compEnt->showSF(sfIdx >= 0);
@@ -9279,7 +9300,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 
 		if (errorCount != 0)
 		{
-			ccLog::Error(QString("%1 error(s) occurred: refer to the Console (F8).").arg(errorCount));
+			ccLog::Error(tr("%1 error(s) occurred: refer to the Console (F8)").arg(errorCount));
 		}
 
 		MainWindow::UpdateUI();
@@ -9396,11 +9417,11 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 			}
 
 			ccGLWindow::StereoParams params = smDlg.getParameters();
-			ccLog::Warning(QString("%1").arg(params.stereoStrength));
+			ccLog::Warning(QString::number(params.stereoStrength));
 #ifndef CC_GL_WINDOW_USE_QWINDOW
 			if (!params.isAnaglyph())
 			{
-				ccLog::Error("This version doesn't handle stereo glasses and headsets.\nUse the 'Stereo' version instead.");
+				ccLog::Error(tr("This version doesn't handle stereo glasses and headsets.\nUse the 'Stereo' version instead."));
 				//activation of the stereo mode failed: cancel selection
 				m_UI->actionEnableStereo->blockSignals(true);
 				m_UI->actionEnableStereo->setChecked(false);
@@ -9426,7 +9447,7 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 			{
 				//set the right FOV
 				double fov_deg = 2 * CCCoreLib::RadiansToDegrees( std::atan(params.screenWidth_mm / (2.0 * params.screenDistance_mm)) );
-				ccLog::Print(QString("[Stereo] F.O.V. forced to %1 deg.").arg(fov_deg));
+				ccLog::Print(tr("[Stereo] F.O.V. forced to %1 deg.").arg(fov_deg));
 				win->setFov(fov_deg);
 			}
 
@@ -9464,8 +9485,8 @@ bool MainWindow::checkStereoMode(ccGLWindow* win)
 		win->disableStereoMode();
 
 		if (QMessageBox::question(	this,
-									"Stereo mode",
-									"Stereo-mode only works in perspective mode. Do you want to disable it?",
+									tr("Stereo mode"),
+									tr("Stereo-mode only works in perspective mode. Do you want to disable it?"),
 									QMessageBox::Yes,
 									QMessageBox::No) == QMessageBox::No )
 		{
@@ -9529,6 +9550,147 @@ void MainWindow::toggleActiveWindowViewerBasedPerspective()
 	}
 }
 
+void MainWindow::createSinglePointCloud()
+{
+	// ask the user to input the point coordinates
+	static CCVector3d s_lastPoint(0, 0, 0);
+	static size_t s_lastPointIndex = 0;
+	ccAskThreeDoubleValuesDlg axisDlg("x", "y", "z", -1.0e12, 1.0e12, s_lastPoint.x, s_lastPoint.y, s_lastPoint.z, 4, tr("Point coordinates"), this);
+	if (axisDlg.buttonBox->button(QDialogButtonBox::Ok))
+		axisDlg.buttonBox->button(QDialogButtonBox::Ok)->setFocus();
+	if (!axisDlg.exec())
+		return;
+	s_lastPoint.x = axisDlg.doubleSpinBox1->value();
+	s_lastPoint.y = axisDlg.doubleSpinBox2->value();
+	s_lastPoint.z = axisDlg.doubleSpinBox3->value();
+
+	// create the cloud
+	ccPointCloud* cloud = new ccPointCloud();
+	if (!cloud->reserve(1))
+	{
+		delete cloud;
+		ccLog::Error(tr("Not enough memory!"));
+		return;
+	}
+	cloud->setName(tr("Point #%1").arg(++s_lastPointIndex));
+	cloud->addPoint(CCVector3::fromArray(s_lastPoint.u));
+	cloud->setPointSize(5);
+
+	// add it to the DB tree
+	addToDB(cloud, true, true, true, true);
+
+	// select it
+	m_ccRoot->unselectAllEntities();
+	setSelectedInDB(cloud, true);
+}
+
+void MainWindow::createPointCloudFromClipboard()
+{
+	const QClipboard* clipboard = QApplication::clipboard();
+	assert(clipboard);
+	const QMimeData* mimeData = clipboard->mimeData();
+	if (!mimeData)
+	{
+		ccLog::Warning(tr("Clipboard is empty"));
+		return;
+	}
+
+	if (!mimeData->hasText())
+	{
+		ccLog::Error("ASCII/text data expected");
+		return;
+	}
+
+	// try to convert the data to a point cloud
+	FileIOFilter::LoadParameters parameters;
+	{
+		parameters.alwaysDisplayLoadDialog = true;
+		parameters.shiftHandlingMode = ccGlobalShiftManager::DIALOG_IF_NECESSARY;
+		parameters.parentWidget = this;
+	}
+
+	ccHObject container;
+	QByteArray data = mimeData->data("text/plain");
+	CC_FILE_ERROR result = AsciiFilter().loadAsciiData(data, tr("Clipboard"), container, parameters);
+	if (result != CC_FERR_NO_ERROR)
+	{
+		FileIOFilter::DisplayErrorMessage(result, tr("loading"), tr("from the clipboard"));
+		return;
+	}
+
+	// we only expect clouds
+	ccHObject::Container clouds;
+	if (container.filterChildren(clouds, true, CC_TYPES::POINT_CLOUD) == 0)
+	{
+		assert(false);
+		ccLog::Error(tr("No cloud loaded"));
+		return;
+	}
+
+	// detach the clouds from the loading container
+	for (ccHObject* cloud : clouds)
+	{
+		if (cloud)
+		{
+			container.removeDependencyWith(cloud);
+		}
+	}
+	container.removeAllChildren();
+
+	// retrieve or create the group to store the 'clipboard' clouds
+	ccHObject* clipboardGroup = nullptr;
+	{
+		static unsigned s_clipboardGroupID = 0;
+
+		if (s_clipboardGroupID != 0)
+		{
+			clipboardGroup = dbRootObject()->find(s_clipboardGroupID);
+			if (nullptr == clipboardGroup)
+			{
+				// can't find the previous group
+				s_clipboardGroupID = 0;
+			}
+		}
+
+		if (s_clipboardGroupID == 0)
+		{
+			clipboardGroup = new ccHObject(tr("Clipboard"));
+			s_clipboardGroupID = clipboardGroup->getUniqueID();
+			addToDB(clipboardGroup, false, false, false, false);
+		}
+	}
+	assert(clipboardGroup);
+
+	bool normalsDisplayedByDefault = ccOptions::Instance().normalsDisplayedByDefault;
+	for (ccHObject* cloud : clouds)
+	{
+		if (cloud)
+		{
+			clipboardGroup->addChild(cloud);
+			cloud->setName(tr("Cloud #%1").arg(clipboardGroup->getChildrenNumber()));
+
+			if (!normalsDisplayedByDefault)
+			{
+				// disable the normals on all loaded clouds!
+				static_cast<ccGenericPointCloud*>(cloud)->showNormals(false);
+			}
+		}
+	}
+
+	// eventually, we can add the clouds to the DB tree
+	for (size_t i = 0; i < clouds.size(); ++i)
+	{
+		ccHObject* cloud = clouds[i];
+		if (cloud)
+		{
+			bool lastCloud = (i + 1 == clouds.size());
+			addToDB(cloud, lastCloud, lastCloud, true, lastCloud);
+		}
+	}
+
+	QMainWindow::statusBar()->showMessage(tr("%1 cloud(s) loaded from the clipboard").arg(clouds.size()), 2000);
+}
+
 void MainWindow::toggleLockRotationAxis()
 {
 	ccGLWindow* win = getActiveGLWindow();
@@ -9540,7 +9702,7 @@ void MainWindow::toggleLockRotationAxis()
 		static CCVector3d s_lastAxis(0.0, 0.0, 1.0);
 		if (isLocked)
 		{
-			ccAskThreeDoubleValuesDlg axisDlg("x", "y", "z", -1.0e12, 1.0e12, s_lastAxis.x, s_lastAxis.y, s_lastAxis.z, 4, "Lock rotation axis", this);
+			ccAskThreeDoubleValuesDlg axisDlg("x", "y", "z", -1.0e12, 1.0e12, s_lastAxis.x, s_lastAxis.y, s_lastAxis.z, 4, tr("Lock rotation axis"), this);
 			if (axisDlg.buttonBox->button(QDialogButtonBox::Ok))
 				axisDlg.buttonBox->button(QDialogButtonBox::Ok)->setFocus();
 			if (!axisDlg.exec())
@@ -9557,7 +9719,7 @@ void MainWindow::toggleLockRotationAxis()
 
 		if (isLocked)
 		{
-			win->displayNewMessage(QString("[ROTATION LOCKED]"), ccGLWindow::UPPER_CENTER_MESSAGE, false, 24 * 3600, ccGLWindow::ROTAION_LOCK_MESSAGE);
+			win->displayNewMessage(tr("[ROTATION LOCKED]"), ccGLWindow::UPPER_CENTER_MESSAGE, false, 24 * 3600, ccGLWindow::ROTAION_LOCK_MESSAGE);
 		}
 		else
 		{
@@ -9676,7 +9838,7 @@ void MainWindow::addToDB(	ccHObject* obj,
 				mat.data()[0] = mat.data()[5] = mat.data()[10] = static_cast<float>(scale);
 				mat.setTranslation(Pshift);
 				obj->applyGLTransformation_recursive(&mat);
-				ccConsole::Warning(QString("Entity '%1' has been translated: (%2,%3,%4) and rescaled of a factor %5 [original position will be restored when saving]").arg(obj->getName()).arg(Pshift.x,0,'f',2).arg(Pshift.y,0,'f',2).arg(Pshift.z,0,'f',2).arg(scale,0,'f',6));
+				ccConsole::Warning(tr("Entity '%1' has been translated: (%2,%3,%4) and rescaled of a factor %5 [original position will be restored when saving]").arg(obj->getName()).arg(Pshift.x,0,'f',2).arg(Pshift.y,0,'f',2).arg(Pshift.z,0,'f',2).arg(scale,0,'f',6));
 			}
 
 			//update 'global shift' and 'global scale' for ALL clouds recursively
@@ -9718,7 +9880,7 @@ void MainWindow::addToDB(	ccHObject* obj,
 	}
 	else
 	{
-		ccLog::Warning("[MainWindow::addToDB] Internal error: no associated db?!");
+		ccLog::Warning(tr("[MainWindow::addToDB] Internal error: no associated DB?!"));
 		assert(false);
 	}
 
@@ -9780,7 +9942,7 @@ void MainWindow::addToDB(	const QStringList& filenames,
 							ccGLWindow* destWin/*=0*/)
 {
 	//to use the same 'global shift' for multiple files
-	CCVector3d loadCoordinatesShift(0,0,0);
+	CCVector3d loadCoordinatesShift(0, 0, 0);
 	bool loadCoordinatesTransEnabled = false;
 
 	FileIOFilter::LoadParameters parameters;
@@ -9792,10 +9954,7 @@ void MainWindow::addToDB(	const QStringList& filenames,
 		parameters.parentWidget = this;
 	}
 
-	//the same for 'addToDB' (if the first one is not supported, or if the scale remains too big)
-	CCVector3d addCoordinatesShift(0, 0, 0);
-
-	const ccOptions& options = ccOptions::Instance();
+	bool normalsDisplayedByDefault = ccOptions::Instance().normalsDisplayedByDefault;
 	FileIOFilter::ResetSesionCounter();
 
 	for ( const QString &filename : filenames )
@@ -9805,7 +9964,7 @@ void MainWindow::addToDB(	const QStringList& filenames,
 
 		if (newGroup)
 		{
-			if (!options.normalsDisplayedByDefault)
+			if (!normalsDisplayedByDefault)
 			{
 				//disable the normals on all loaded clouds!
 				ccHObject::Container clouds;
@@ -9835,7 +9994,7 @@ void MainWindow::addToDB(	const QStringList& filenames,
 		}
 	}
 
-	QMainWindow::statusBar()->showMessage(QString("%1 file(s) loaded").arg(filenames.size()),2000);
+	QMainWindow::statusBar()->showMessage(tr("%1 file(s) loaded").arg(filenames.size()),2000);
 }
 
 void MainWindow::handleNewLabel(ccHObject* entity)
@@ -10008,7 +10167,7 @@ void MainWindow::doActionSaveFile()
 						+	static_cast<int>(hasSerializable);
 	if (stdSaveTypes == 0)
 	{
-		ccConsole::Error("Can't save selected entity(ies) this way!");
+		ccConsole::Error(tr("Can't save selected entity(ies) this way!"));
 		return;
 	}
 
@@ -10148,7 +10307,7 @@ void MainWindow::doActionSaveFile()
 
 		if (!IsValidFileName(defaultFileName))
 		{
-			ccLog::Warning("[I/O] First entity's name would make an invalid filename! Can't use it...");
+			ccLog::Warning(tr("[I/O] First entity's name would make an invalid filename! Can't use it..."));
 			defaultFileName = "project";
 		}
 
@@ -10172,7 +10331,7 @@ void MainWindow::doActionSaveFile()
 	//ignored items
 	if (hasOther)
 	{
-		ccConsole::Warning("[I/O] The following selected entities won't be saved:");
+		ccConsole::Warning(tr("[I/O] The following selected entities won't be saved:"));
 		for (unsigned i = 0; i < other.getChildrenNumber(); ++i)
 		{
 			ccConsole::Warning(QString("\t- %1s").arg(other.getChild(i)->getName()));
@@ -10204,7 +10363,7 @@ void MainWindow::doActionSaveFile()
 			}
 			else
 			{
-				ccLog::Warning("[I/O] None of the selected entities can be saved this way...");
+				ccLog::Warning(tr("[I/O] None of the selected entities can be saved this way..."));
 				result = CC_FERR_NO_SAVE;
 			}
 		}
@@ -10215,9 +10374,9 @@ void MainWindow::doActionSaveFile()
 		//if (hasSerializable)
 		//{
 		//	if (!hasOther)
-		//		ccConsole::Warning("[I/O] The following selected entites won't be saved:"); //display this warning only if not already done
+		//		ccConsole::Warning(tr("[I/O] The following selected entites won't be saved:")); //display this warning only if not already done
 		//	for (unsigned i = 0; i < otherSerializable.getChildrenNumber(); ++i)
-		//		ccConsole::Warning(QString("\t- %1").arg(otherSerializable.getChild(i)->getName()));
+		//		ccConsole::Warning(tr("\t- %1").arg(otherSerializable.getChild(i)->getName()));
 		//}
 
 		result = FileIOFilter::SaveToFile(	entitiesToSave.getChildrenNumber() > 1 ? &entitiesToSave : entitiesToSave.getChild(0),
@@ -10818,17 +10977,17 @@ void MainWindow::echoBaseViewMatRotation(const ccGLMatrixd& rotMat)
 
 void MainWindow::doActionLoadShader() //TODO
 {
-	ccConsole::Error("Not yet implemented! Sorry ...");
+	ccConsole::Error(tr("Not yet implemented! Sorry ..."));
 }
 
 void MainWindow::doActionKMeans()//TODO
 {
-	ccConsole::Error("Not yet implemented! Sorry ...");
+	ccConsole::Error(tr("Not yet implemented! Sorry ..."));
 }
 
 void MainWindow::doActionFrontPropagation() //TODO
 {
-	ccConsole::Error("Not yet implemented! Sorry ...");
+	ccConsole::Error(tr("Not yet implemented! Sorry ..."));
 }
 
 /************** STATIC METHODS ******************/
@@ -10942,7 +11101,7 @@ MainWindow::ccHObjectContext MainWindow::removeObjectTemporarilyFromDBTree(ccHOb
 	//mandatory (to call putObjectBackIntoDBTree)
 	context.parent = obj->getParent();
 
-	//remove the object's dependency to its father (in case it undergoes "severe" modifications)
+	//remove the object's dependency to its father (in case it undergoes 'severe' modifications)
 	if (context.parent)
 	{
 		context.parentFlags = context.parent->getDependencyFlagsWith(obj);
@@ -10997,7 +11156,7 @@ void MainWindow::doActionGlobalShiftSeetings()
 	ccGlobalShiftManager::SetMaxCoordinateAbsValue(maxAbsCoord);
 	ccGlobalShiftManager::SetMaxBoundgBoxDiagonal(maxAbsDiag);
 
-	ccLog::Print(QString("[Global Shift] Max abs. coord = %1 / max abs. diag = %2")
+	ccLog::Print(tr("[Global Shift] Max abs. coord = %1 / max abs. diag = %2")
 		.arg(ccGlobalShiftManager::MaxCoordinateAbsValue(), 0, 'e', 0)
 		.arg(ccGlobalShiftManager::MaxBoundgBoxDiagonal(), 0, 'e', 0));
 
@@ -11033,14 +11192,14 @@ void MainWindow::doActionShowWaveDialog()
 	ccHObject* entity = haveOneSelection() ? m_selectedEntities[0] : nullptr;
 	if (!entity || !entity->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
-		ccConsole::Error("Select one point cloud!");
+		ccConsole::Error(tr("Select one point cloud!"));
 		return;
 	}
 
 	ccPointCloud* cloud = static_cast<ccPointCloud*>(entity);
 	if (!cloud->hasFWF())
 	{
-		ccConsole::Error("Cloud has no associated waveform information");
+		ccConsole::Error(tr("Cloud has no associated waveform information"));
 		return;
 	}
 
@@ -11102,14 +11261,14 @@ void MainWindow::doActionComparePlanes()
 {
 	if (m_selectedEntities.size() != 2)
 	{
-		ccConsole::Error("Select 2 planes!");
+		ccConsole::Error(tr("Select 2 planes!"));
 		return;
 	}
 
 	if (!m_selectedEntities[0]->isKindOf(CC_TYPES::PLANE) ||
 		!m_selectedEntities[1]->isKindOf(CC_TYPES::PLANE))
 	{
-		ccConsole::Error("Select 2 planes!");
+		ccConsole::Error(tr("Select 2 planes!"));
 		return;
 	}
 
@@ -11117,11 +11276,11 @@ void MainWindow::doActionComparePlanes()
 	ccPlane* p2 = ccHObjectCaster::ToPlane(m_selectedEntities[1]);
 
 	QStringList info;
-	info << QString("Plane 1: %1").arg(p1->getName());
-	ccLog::Print(QString("[Compare] ") + info.last());
+	info << tr("Plane 1: %1").arg(p1->getName());
+	ccLog::Print(tr("[Compare] ") + info.last());
 
-	info << QString("Plane 2: %1").arg(p2->getName());
-	ccLog::Print(QString("[Compare] ") + info.last());
+	info << tr("Plane 2: %1").arg(p2->getName());
+	ccLog::Print(tr("[Compare] ") + info.last());
 
 	CCVector3 N1;
 	CCVector3 N2;
@@ -11131,22 +11290,22 @@ void MainWindow::doActionComparePlanes()
 	p2->getEquation(N2, d2);
 
 	double angle_rad = N1.angle_rad(N2);
-	info << QString("Angle P1/P2: %1 deg.").arg( CCCoreLib::RadiansToDegrees( angle_rad ) );
-	ccLog::Print(QString("[Compare] ") + info.last());
+	info << tr("Angle P1/P2: %1 deg.").arg( CCCoreLib::RadiansToDegrees( angle_rad ) );
+	ccLog::Print(tr("[Compare] ") + info.last());
 
 	PointCoordinateType planeEq1[4] = { N1.x, N1.y, N1.z, d1 };
 	PointCoordinateType planeEq2[4] = { N2.x, N2.y, N2.z, d2 };
 	CCVector3 C1 = p1->getCenter();
 	ScalarType distCenter1ToPlane2 = CCCoreLib::DistanceComputationTools::computePoint2PlaneDistance(&C1, planeEq2);
-	info << QString("Distance Center(P1)/P2: %1").arg(distCenter1ToPlane2);
-	ccLog::Print(QString("[Compare] ") + info.last());
+	info << tr("Distance Center(P1)/P2: %1").arg(distCenter1ToPlane2);
+	ccLog::Print(tr("[Compare] ") + info.last());
 
 	CCVector3 C2 = p2->getCenter();
 	ScalarType distCenter2ToPlane1 = CCCoreLib::DistanceComputationTools::computePoint2PlaneDistance(&C2, planeEq1);
-	info << QString("Distance Center(P2)/P1: %1").arg(distCenter2ToPlane1);
-	ccLog::Print(QString("[Compare] ") + info.last());
+	info << tr("Distance Center(P2)/P1: %1").arg(distCenter2ToPlane1);
+	ccLog::Print(tr("[Compare] ") + info.last());
 
 	//pop-up summary
-	QMessageBox::information(this, "Plane comparison", info.join("\n"));
+	QMessageBox::information(this, tr("Plane comparison"), info.join("\n"));
 	forceConsoleDisplay();
 }

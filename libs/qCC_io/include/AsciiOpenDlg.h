@@ -102,6 +102,7 @@ const char ASCII_OPEN_DLG_TYPES_NAMES[ASCII_OPEN_DLG_TYPES_COUNT][20] = {	"Ignor
 
 class QComboBox;
 class QPushButton;
+class QTextStream;
 class Ui_AsciiOpenDialog;
 
 //! Dialog for configuration of ASCII files opening sequence
@@ -119,10 +120,11 @@ public:
 	//! Default destructor
 	~AsciiOpenDlg() override;
 
-	//! Sets filename
+	//! Sets the input filename or text stream
 	/** \param filename filename
+		\param stream text stream
 	**/
-	void setFilename(const QString &filename);
+	void setInput(const QString &filename, QTextStream* stream = nullptr);
 
 	//! Restores the previous context ('Apply all' button)
 	/** \return whether a context was saved or not
@@ -221,6 +223,7 @@ protected:
 	QChar m_separator;
 	double m_averageLineSize;
 	QString m_filename;
+	QTextStream* m_stream;
 	QString m_headerLine;
 
 	enum ColumnType { TEXT = 0, UNKNOWN = 1, IGNORED = 2, VALID = 3 };

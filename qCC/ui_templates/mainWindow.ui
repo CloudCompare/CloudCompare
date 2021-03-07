@@ -325,10 +325,18 @@
      <addaction name="actionSamplePointsOnPolyline"/>
      <addaction name="actionSmoothPolyline"/>
     </widget>
+    <widget class="QMenu" name="menuCloud">
+     <property name="title">
+      <string>Cloud</string>
+     </property>
+     <addaction name="actionCreateSinglePointCloud"/>
+     <addaction name="actionPasteCloudFromClipboard"/>
+    </widget>
     <addaction name="menuColors"/>
     <addaction name="menuNormals"/>
     <addaction name="menuOctree"/>
     <addaction name="menuGrid"/>
+    <addaction name="menuCloud"/>
     <addaction name="menuMesh"/>
     <addaction name="menuPolyline"/>
     <addaction name="menuPlane"/>
@@ -3076,6 +3084,34 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="toolTip">
     <string>Reset all VBOs (unload GPU memory)</string>
+   </property>
+  </action>
+  <action name="actionCreateSinglePointCloud">
+   <property name="text">
+    <string>Create single point cloud</string>
+   </property>
+   <property name="toolTip">
+    <string>Create a cloud with a single point</string>
+   </property>
+   <property name="statusTip">
+    <string>Create a cloud with a single point</string>
+   </property>
+   <property name="whatsThis">
+    <string/>
+   </property>
+  </action>
+  <action name="actionPasteCloudFromClipboard">
+   <property name="text">
+    <string>Paste from clipboard</string>
+   </property>
+   <property name="toolTip">
+    <string>Paste from ASCII/text data stored in the clipboard</string>
+   </property>
+   <property name="statusTip">
+    <string>Paste from ASCII/text data stored in the clipboard</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
    </property>
   </action>
  </widget>

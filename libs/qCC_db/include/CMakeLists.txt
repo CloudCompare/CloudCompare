@@ -50,6 +50,7 @@ target_sources( ${PROJECT_NAME}
 		${CMAKE_CURRENT_LIST_DIR}/ccKdTree.h
 		${CMAKE_CURRENT_LIST_DIR}/ccLog.h
 		${CMAKE_CURRENT_LIST_DIR}/ccMaterial.h
+	    ${CMAKE_CURRENT_LIST_DIR}/ccMaterialDB.h
 		${CMAKE_CURRENT_LIST_DIR}/ccMaterialSet.h
 		${CMAKE_CURRENT_LIST_DIR}/ccMesh.h
 		${CMAKE_CURRENT_LIST_DIR}/ccMeshGroup.h

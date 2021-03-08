@@ -74,7 +74,7 @@ bool PCVCommand::Process(	const ccHObject::Container& candidates,
 		if (sfIdx < 0)
 		{
 			if (app)
-				app->dispToConsole("Couldn't allocate a new scalar field for computing PCV field! Try to free some memory...", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+				app->dispToConsole("Couldn't allocate a new scalar field for computing PCV field! Try to free some memory ...", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 			return false;
 		}
 		cloud->setCurrentScalarField(sfIdx);

@@ -606,7 +606,7 @@ bool ccViewer::checkStereoMode()
 		&&	m_glWindow->getViewportParameters().perspectiveView
 		&&	m_glWindow->stereoModeIsEnabled())
 	{
-		if (QMessageBox::question(this,"Stereo mode", "Stereo-mode only works in perspective mode. Do you want to disable it?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
+		if (QMessageBox::question(this,"Stereo mode", "Stereo-mode only works in perspective mode. Do you want to enable it?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
 		{
 			return false;
 		}

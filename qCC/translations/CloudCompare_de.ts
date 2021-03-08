@@ -521,12 +521,12 @@ Sei P ein 3D-Punkt, so sei der transformierte Punkt P&apos; so, dass: P&apos; = 
     <message>
         <location filename="../../libs/qCC_io/ui/openAsciiFileDlg.ui" line="28"/>
         <source>Source</source>
-        <translation type="unfinished">Quelle</translation>
+        <translation>Quelle:</translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openAsciiFileDlg.ui" line="50"/>
         <source>Choose an attribute for each column:</source>
-        <translation type="unfinished"></translation>
+        <translation>Wähle ein Attribut für jede Spalte:</translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openAsciiFileDlg.ui" line="60"/>
@@ -661,7 +661,7 @@ Anderenfalls werden die Beschriftungen in 3D angezeigt.</translation>
     <message>
         <location filename="../../libs/qCC_io/ui/saveAsciiFileDlg.ui" line="79"/>
         <source>tab</source>
-        <translation type="unfinished"></translation>
+        <translation>Tabulator</translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/saveAsciiFileDlg.ui" line="87"/>
@@ -1282,7 +1282,22 @@ p, li { white-space: pre-wrap; }
 &lt;p align=&quot;center&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; background-color:#cce8cf;&quot;&gt;(&lt;/span&gt;&lt;a href=&quot;http://ramm.bnu.edu.cn/&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; text-decoration: underline; color:#0000ff;&quot;&gt;http://ramm.bnu.edu.cn/&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; background-color:#cce8cf;&quot;&gt;)&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt;&quot;&gt;Wuming Zhang; Jianbo Qi; Peng Wan; Hongtao Wang&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt;&quot;&gt;contact us: &lt;/span&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; background-color:#cce8cf;&quot;&gt;2009zwm@gmail.com; wpqjbzwm@126.com&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//DE&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;.SF NS Text&apos;; font-size:13pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8. 25pt;&quot;&gt; &lt;/span&gt;&lt;span style=&quot; font-family:&apos;SimSun&apos;; font-size:11pt; font-weight:600;&quot;&gt;CSF-Plugin-Anleitung&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;justify&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size: 8pt; font-weight:600;&quot;&gt;Cloth Simulation Filter (CSF)&lt;/span&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8pt;&quot;&gt; ist ein Werkzeug zur Extraktion von Bodenpunkten in diskreten LiDAR-Punktwolken. Die detaillierte Theorie und Algorithmen finden Sie in der folgenden Arbeit:&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;justify&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a name=&quot;OLE_LINK22&quot;&gt;&lt;/a&gt;&lt;span style=&quot; font-family: &apos;Arial,sans-serif&apos;; font-size:8pt; color:#000000;&quot;&gt;Z&lt;/span&gt;&lt;span style=&quot; font-family:&apos;Arial,sans-serif&apos;; font-size:8pt; color:#000000;&quot;&gt;hang W, Qi J, Wan P, Wang H, Xie D, Wang X, Yan G. An Easy-to-Use Airborne LiDAR Data Filtering Method Based on Cloth Simulation. &lt;/span&gt;&lt;span style=&quot; font-family:&apos;Arial,sans-serif&apos;; font-size:8pt; font-style:italic; color:#000000;&quot;&gt;Remote Sensing&lt;/span&gt;&lt;span style=&quot; font-family:&apos;Arial,sans-serif&apos;; font-size:8pt; color:#000000;&quot;&gt;. 2016; 8(6):501.&lt;/span&gt;&lt;span style=&quot; font-family:&apos;SimSun&apos;; font-size:8pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;justify&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family: &apos;Microsoft YaHei UI,Tahoma&apos;; font-size:8pt; color:#000000; background-color:#cce8cf;&quot;&gt;Und bitte zitieren Sie das Papier, wenn Sie Cloth Simulation Filter (CSF) in Ihrer Arbeit verwenden. &lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;justify&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family: &apos;Microsoft YaHei UI,Tahoma&apos;; font-size:8pt; color:#000000; background-color:#cce8cf;&quot;&gt;Sie können das Paper herunterladen von &lt;/span&gt;&lt;a href=&quot;https://www. researchgate.net/profile/Wuming_Zhang2)&quot;&gt;&lt;span style=&quot; font-family:&apos;Microsoft YaHei UI,Tahoma&apos;; font-size:8pt; text-decoration: underline; color:#0000ff; background-color:#cce8cf;&quot;&gt;https://www.researchgate.net/profile/Wuming_Zhang2 .&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p align=&quot;justify&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family: &apos;Microsoft YaHei UI,Tahoma&apos;; font-size:8pt; color:#000000; background-color:#cce8cf;&quot;&gt;Sie können auch die Homepage besuchen: &lt;/span&gt;&lt;a href=&quot;http://ramm. bnu.edu.cn/researchers/wumingzhang/english/default_contributions. htm&quot;&gt;&lt;span style=&quot; font-family:&apos;Microsoft YaHei UI,Tahoma&apos;; font-size:8pt; text-decoration: underline; color:#0000ff; background-color:#cce8cf;&quot;&gt;http://ramm.bnu.edu. cn/researchers/wumingzhang/english/default_contributions.htm&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:&apos;Microsoft YaHei UI,Tahoma&apos;; font-size:8pt; color:#000000; background-color:#cce8cf;&quot;&gt; für weitere Informationen.&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;justify&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family: &apos;Microsoft YaHei UI,Tahoma&apos;; font-size:8pt; color:#000000; background-color:#cce8cf;&quot;&gt;Eine mex-Version zur Programmierung in Matlab finden Sie im File Exchange der Mathworks-Website :  &lt;/span&gt;&lt;a href=&quot;http://www.mathworks.com/matlabcentral/fileexchange/58139-csf--ground-filtering-of-point-cloud-based-on-cloth-simulation&quot;&gt;&lt;span style=&quot; font-family:&apos;SimSun&apos;; font-size:9pt; text-decoration: underline; color:#0000ff;&quot;&gt;http://www.mathworks.com/matlabcentral/fileexchange/58139-csf--ground-filtering-of-point-cloud-based-on-cloth-simulation&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family: &apos;Microsoft YaHei UI,Tahoma&apos;; font-size:8pt; color:#000000; background-color:#cce8cf;&quot;&gt; Copyright &lt;/span&gt;&lt;span style=&quot; font-family:&apos;Arial,Helvetica,sans-serif&apos;; font-size:8. 25pt; color:#333333; background-color:#e5eaee;&quot;&gt;©&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; background-color:#cce8cf;&quot;&gt;RAMM-Labor, School of Geography, Beijing Normal University&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; background-color:#cce8cf;&quot;&gt;(&lt;/span&gt;&lt;a href=&quot;http://ramm. bnu.edu.cn/&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; text-decoration: underline; color:#0000ff;&quot;&gt;http://ramm.bnu.edu.cn/&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; background-color:#cce8cf;&quot;&gt;)&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt;&quot;&gt;Wuming Zhang; Jianbo Qi; Peng Wan; Hongtao Wang&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt;&quot;&gt;Kontaktieren Sie uns: &lt;/span&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; background-color:#cce8cf;&quot;&gt;2009zwm@gmail.com; wpqjbzwm@126.com&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCSF/ui/CSFDlg.ui" line="58"/>
@@ -1845,7 +1860,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoTrainingDialog.ui" line="88"/>
         <source>Points belonging to class #1</source>
-        <translation type="unfinished">Punkte zugehörig zu Klasse #1</translation>
+        <translation>Punkte zugehörig zu Klasse #1</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoTrainingDialog.ui" line="101"/>
@@ -2141,7 +2156,16 @@ p, li { white-space: pre-wrap; }
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;Funded by Université Européenne de Bretagne, Centre National de la Recherche Scientifique and EEC Marie-Curie actions&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d;&quot;&gt;Enjoy!&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//DE&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color: #ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-weight:600; color:#1f497d;&quot;&gt;Mehrskalige Dimensionalitätsklassifikation (CANUPO)&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family: &apos;Calibri,sans-serif&apos;; font-size:10pt; font-style:italic; color:#1f497d;&quot;&gt;Brodu und Lague, 3D Terrestrial LiDAR data classification of complex natural scenes using a multi-scale dimensionality criterion, ISPRS j. of Photogram. Rem. Sens., 2012&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent: 0; text-indent:0px; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-style:italic; color:#1f497d; background-color:#ffffff;&quot;&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family: &apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;Finanziert durch Université Européenne de Bretagne, Centre National de la Recherche Scientifique und EEC Marie-Curie Aktionen&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d;&quot;&gt;Freude! &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt; macos/deepLFree.translatedWithDeepL.text</translation>
     </message>
 </context>
 <context>
@@ -3086,7 +3110,16 @@ p, li { white-space: pre-wrap; }
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2,serif&apos;; font-size:8pt; color:#aa007f; background-color:#ffffff;&quot;&gt;This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;arial,sans-serif&apos;; font-size:10pt; font-style:italic; color:#222222; background-color:#ffffff;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;Funded by Université Européenne de Bretagne, Centre National de la Recherche Scientifique and EEC Marie-Curie actions&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//DE&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color: #ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-weight:600; color:#1f497d;&quot;&gt;Punktwolkenvergleich mit M3C2&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent: 0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-style:italic; color:#1f497d;&quot;&gt;Lague et al. , Accurate 3D comparison of complex topography with terrestrial laser scanner, ISPRS j. of Photogram. Rem. Sens., 2013&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent: 0; text-indent:0px; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-style:italic; color:#1f497d; background-color:#ffffff;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2,serif&apos;; font-size: 8pt; color:#aa007f; background-color:#ffffff;&quot;&gt;Dieses Programm wird in der Hoffnung verteilt, dass es nützlich ist, aber OHNE JEGLICHE GARANTIE; sogar ohne die stillschweigende Garantie der MARKTGÄNGIGKEIT oder der EIGNUNG FÜR EINEN BESTIMMTEN ZWECK. Siehe die GNU General Public License für weitere Details.&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent: 0; text-indent:0px; font-family:&apos;arial,sans-serif&apos;; font-size:10pt; font-style:italic; color:#222222; background-color:#ffffff;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size: 10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;Finanziert von Université Européenne de Bretagne, Centre National de la Recherche Scientifique und EEC Marie-Curie actions&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt; macos/deepLFree.translatedWithDeepL.text</translation>
     </message>
 </context>
 <context>
@@ -6816,7 +6849,7 @@ Parameter</translation>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="330"/>
         <source>Cloud</source>
-        <translation type="unfinished">Punktwolke</translation>
+        <translation>Punktwolke</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1171"/>
@@ -7586,34 +7619,34 @@ Parameter</translation>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="3083"/>
         <source>Reset all VBOs</source>
-        <translation type="unfinished"></translation>
+        <translation>Alle VBOs zurücksetzen</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="3086"/>
         <source>Reset all VBOs (unload GPU memory)</source>
-        <translation type="unfinished"></translation>
+        <translation>Alle VBOs zurücksetzen (GPU-Speicher freigeben)</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="3091"/>
         <source>Create single point cloud</source>
-        <translation type="unfinished"></translation>
+        <translation>Erzeuge eine einzelne Punktwolke</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="3094"/>
         <location filename="../ui_templates/mainWindow.ui" line="3097"/>
         <source>Create a cloud with a single point</source>
-        <translation type="unfinished"></translation>
+        <translation>Erzeuge eine Punktwolke mit einem einzelnen Punkt</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="3105"/>
         <source>Paste from clipboard</source>
-        <translation type="unfinished"></translation>
+        <translation>Aus der Zwischenablage einfügen</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="3108"/>
         <location filename="../ui_templates/mainWindow.ui" line="3111"/>
         <source>Paste from ASCII/text data stored in the clipboard</source>
-        <translation type="unfinished"></translation>
+        <translation>In der Zwischenablage gespeicherte ASCII-/Textdaten einfügen</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="222"/>
@@ -7625,83 +7658,83 @@ Parameter</translation>
     <message>
         <location filename="../mainwindow.cpp" line="245"/>
         <source>Set current view mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Aktuellen Ansichts-Modus setzen</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="261"/>
         <source>Set pivot visibility</source>
-        <translation type="unfinished"></translation>
+        <translation>Pivot-Sichtbarkeit einstellen</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="303"/>
         <source>Ready</source>
-        <translation type="unfinished"></translation>
+        <translation>Bereit</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="310"/>
         <source>CloudCompare started!</source>
-        <translation type="unfinished"></translation>
+        <translation>CloudCompare gestartet!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="917"/>
         <source>Selected one and only one point cloud or mesh!</source>
-        <translation type="unfinished"></translation>
+        <translation>Wählen Sie eine und nur eine Punktwolke oder ein Netz aus!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="922"/>
         <source>Max error per leaf cell:</source>
-        <translation type="unfinished"></translation>
+        <translation>Maximaler Fehler pro Blätterzelle:</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="956"/>
         <source>An error occurred</source>
-        <translation type="unfinished"></translation>
+        <translation>Ein Fehler ist aufgetreten</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="974"/>
         <source>Resample with octree</source>
-        <translation type="unfinished"></translation>
+        <translation>Mit Oktree neu abtasten</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="974"/>
         <source>Points (approx.)</source>
-        <translation type="unfinished"></translation>
+        <translation>Punkte (genähert)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1006"/>
         <source>Could not compute octree for cloud &apos;%1&apos;</source>
-        <translation type="unfinished"></translation>
+        <translation>Oktree für Punktwolke „%1“ konnte nicht berechnet werden</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1046"/>
         <source>[ResampleWithOctree] Errors occurred during the process, result may be incomplete</source>
-        <translation type="unfinished"></translation>
+        <translation>[ResampleWithOctree] Während des Prozesses sind Fehler aufgetreten, das Ergebnis könnte unvollständig sein</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1146"/>
         <location filename="../mainwindow.cpp" line="1492"/>
         <source>Original</source>
-        <translation type="unfinished"></translation>
+        <translation>Original</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1151"/>
         <source>Suggested</source>
-        <translation type="unfinished"></translation>
+        <translation>Vorgeschlagen</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1185"/>
         <source>[ApplyTransformation] Process cancelled by user</source>
-        <translation type="unfinished"></translation>
+        <translation>[ApplyTransformation] Berechnung vom Nutzer abgebrochen</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1201"/>
         <source>[ApplyTransformation] Cloud &apos;%1&apos; global shift/scale information has been updated: shift = (%2,%3,%4) / scale = %5</source>
-        <translation type="unfinished"></translation>
+        <translation>ApplyTransformation] Globale Verschiebungs-/Skalierungsinformationen der Punktwolke „%1“ wurden aktualisiert: Verschiebung = (%2,%3,%4) / Skalierung = %5</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1220"/>
         <source>[ApplyTransformation] Applied transformation matrix:</source>
-        <translation type="unfinished"></translation>
+        <translation>[ApplyTransformation] Angewendete Transformations-Matrix:</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1222"/>
@@ -7710,115 +7743,115 @@ Parameter</translation>
         <location filename="../mainwindow.cpp" line="5274"/>
         <location filename="../mainwindow.cpp" line="5321"/>
         <source>Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the &apos;Edit &gt; Apply transformation&apos; tool</source>
-        <translation type="unfinished"></translation>
+        <translation>Hinweis: Kopieren (Strg+C) und anwenden - oder die Inverse - auf irgendeine Entität mit Werkzeug „Bearbeiten &gt; Transformation anwenden“</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1267"/>
         <source>[Apply scale] Entity &apos;%1&apos; can&apos;t be scaled this way</source>
-        <translation type="unfinished"></translation>
+        <translation>[Apply scale] Entität „%1“ kann auf diese Weise nicht skalliert werden</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1311"/>
         <source>Big coordinates</source>
-        <translation type="unfinished"></translation>
+        <translation>Große Koordinaten</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1312"/>
         <source>Resutling coordinates will be too big (original precision may be lost!). Proceed anyway?</source>
-        <translation type="unfinished"></translation>
+        <translation>Ergebnis-Koordinaten sind zu groß (Original-Genauigkeit kann verloren gehen!) Trotzdem fortsetzen?</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1335"/>
         <source>[Apply scale] No eligible entities (point clouds or meshes) were selected!</source>
-        <translation type="unfinished"></translation>
+        <translation>[Apply scale] Es wurden keine geeigneten Objekte (Punktwolken oder Netze) ausgewählt!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1510"/>
         <source>[Global Shift/Scale] New shift: (%1, %2, %3)</source>
-        <translation type="unfinished"></translation>
+        <translation>[Global Shift/Scale] Neue Verschiebung: (%1, %2, %3)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1511"/>
         <source>[Global Shift/Scale] New scale: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>[Global Shift/Scale] Neuer Maßstab: %1</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1542"/>
         <source>[Global Shift/Scale] To preserve its original position, the entity &apos;%1&apos; has been translated of (%2 ; %3 ; %4) and rescaled of a factor %5</source>
-        <translation type="unfinished"></translation>
+        <translation>[Global Shift/Scale] Um seine ursprüngliche Position zu erhalten, wurde das Objekt „%1“ um (%2,%3,%4) verschoben und um einen Faktor %5 skaliert</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1562"/>
         <source>This method is for test purpose only</source>
-        <translation type="unfinished"></translation>
+        <translation>Diese Funktion ist nur zu Testzwecken vorhanden</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1563"/>
         <source>Cloud(s) are going to be rotated while still displayed in their previous position! Proceed?</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Punktwolke(n) wird/werden gedreht, während sie noch in ihrer vorherigen Position angezeigt wird/werden! Fortfahren?</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1647"/>
         <location filename="../mainwindow.cpp" line="1676"/>
         <source>Not enough memory to flag the vertices of mesh &apos;%1&apos;!</source>
-        <translation type="unfinished"></translation>
+        <translation>Nicht genug Arbeitsspeicher um Scheitelpunkte des Netzes „%1“ zu markieren!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1670"/>
         <source>[Mesh Quality] Mesh &apos;%1&apos; edges: %2 total (normal: %3 / on hole borders: %4 / non-manifold: %5)</source>
-        <translation type="unfinished"></translation>
+        <translation>[Mesh Quality] Netz „%1“ Kanten: %2 gesamt (normal: %3 / auf Lochrändern: %4 / nicht-verzweigt: %5)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1694"/>
         <source>[Mesh Quality] SF flags: %1 (NORMAL) / %2 (BORDER) / (%3) NON-MANIFOLD</source>
-        <translation type="unfinished"></translation>
+        <translation>[Mesh Quality] SF-Markierungen %1 (Normale) / %2 (Kante) / (%3) nicht-verzweigt</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1699"/>
         <source>Error(s) occurred! Check the console...</source>
-        <translation type="unfinished"></translation>
+        <translation>Es sind Fehler aufgetreten! Prüfen Sie die Konsole...</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1716"/>
         <source>[Mesh Volume] Mesh &apos;%1&apos;: V=%2 (cube units)</source>
-        <translation type="unfinished"></translation>
+        <translation>[Mesh Volume] Netz „%1“: V=%2 (Kubik-Einheiten)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1724"/>
         <source>[Mesh Volume] The above volume might be invalid (mesh has holes)</source>
-        <translation type="unfinished"></translation>
+        <translation>[Mesh Volume] Das obige Volumen könnte ungültig sein (Netz hat Löcher)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1728"/>
         <source>[Mesh Volume] The above volume might be invalid (mesh has non-manifold edges)</source>
-        <translation type="unfinished"></translation>
+        <translation>[Mesh Volume] Das obige Volumen könnte ungültig sein (Netz hat nicht-verzweigte Kanten)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1733"/>
         <source>[Mesh Volume] The above volume might be invalid (not enough memory to check if the mesh is closed)</source>
-        <translation type="unfinished"></translation>
+        <translation>[Mesh Volume] Das obige Volumen könnte ungültig sein (nicht genug Arbeitsspeicher um zu überprüfen, ob das Netz geschlossen ist)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1756"/>
         <source>[Mesh Surface] Mesh &apos;%1&apos;: S=%2 (square units)</source>
-        <translation type="unfinished"></translation>
+        <translation>[Mesh Surface] Netz „%1“: F=%2 (Quadrat-Einheiten)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1759"/>
         <source>[Mesh Surface] Average triangle surface: %1 (square units)</source>
-        <translation type="unfinished"></translation>
+        <translation>[Mesh Surface] Durchschnittliche Dreiecksoberfläche: %1 (Quadrat-Einheiten)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1775"/>
         <source>Select at least one sensor</source>
-        <translation type="unfinished"></translation>
+        <translation>Wählen Sie mindestens einen Sensor</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1793"/>
         <location filename="../mainwindow.cpp" line="1857"/>
         <location filename="../mainwindow.cpp" line="2204"/>
         <source>Select a cloud on which to project the uncertainty:</source>
-        <translation type="unfinished"></translation>
+        <translation>Wählen Sie eine Punktwolke auf die die Unsicherheit projiziert wird:</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1815"/>
@@ -7848,102 +7881,102 @@ Parameter</translation>
         <location filename="../mainwindow.cpp" line="8610"/>
         <location filename="../mainwindow.cpp" line="9572"/>
         <source>Not enough memory!</source>
-        <translation type="unfinished">Nicht genug Arbeitsspeicher!</translation>
+        <translation>Nicht genug Arbeitsspeicher!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1843"/>
         <source>Select one and only one GBL sensor!</source>
-        <translation type="unfinished"></translation>
+        <translation>Wählen Sie einen und nur einen GBL-Sensor aus!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1864"/>
         <source>The cloud must have normals!</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Punktwolke muss Normalen enthalten!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1928"/>
         <location filename="../mainwindow.cpp" line="2109"/>
         <source>Select one and only one sensor!</source>
-        <translation type="unfinished"></translation>
+        <translation>Wählen Sie eine und nur einen Sensor aus!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1947"/>
         <source>[doActionSetViewFromSensor] Viewport applied</source>
-        <translation type="unfinished"></translation>
+        <translation>[doActionSetViewFromSensor] Ansichtsfenster angewendet</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2030"/>
         <source>Failed to create sensor</source>
-        <translation type="unfinished"></translation>
+        <translation>Sensor konnte nicht erstellt werden</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2166"/>
         <source>Can&apos;t modify this kind of sensor!</source>
-        <translation type="unfinished"></translation>
+        <translation>Diese Art von Sensor kann nicht modifiziert werden!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2184"/>
         <source>Select one and only one camera (projective) sensor!</source>
-        <translation type="unfinished"></translation>
+        <translation>Wählen Sie eine und nur einen (projizierenden) Kamera-Sensor aus!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2198"/>
         <source>Sensor has no associated uncertainty model! (Brown, etc.)</source>
-        <translation type="unfinished"></translation>
+        <translation>Sensor hat kein verbundenes Unsicherheits-Modell! (Brown, etc.)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2233"/>
         <source>[%1] Uncertainty (%2)</source>
-        <translation type="unfinished"></translation>
+        <translation>[%1] Unsicherheit (%2)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2239"/>
         <location filename="../mainwindow.cpp" line="2268"/>
         <location filename="../mainwindow.cpp" line="7947"/>
         <source>An error occurred! (see console)</source>
-        <translation type="unfinished"></translation>
+        <translation>Ein Fehler ist aufgetreten! (Siehe Konsole)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2262"/>
         <source>[%1] Uncertainty (3D)</source>
-        <translation type="unfinished"></translation>
+        <translation>[%1] Unsicherheit (3D)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2297"/>
         <source>Select one and only one camera sensor!</source>
-        <translation type="unfinished"></translation>
+        <translation>Wählen Sie eine und nur einen Kamera-Sensor aus!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2307"/>
         <location filename="../mainwindow.cpp" line="2495"/>
         <source>Select a cloud to filter:</source>
-        <translation type="unfinished"></translation>
+        <translation>Wählen Sie eine Punktwolke zur Filterung:</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2320"/>
         <source>Failed to compute the octree!</source>
-        <translation type="unfinished"></translation>
+        <translation>Berechnung des Oktrees fehlgeschlagen!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2330"/>
         <source>Failed to intersect sensor frustum with octree!</source>
-        <translation type="unfinished"></translation>
+        <translation>Sensor-Kegelstumpf mit Oktree nicht schneidbar!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2340"/>
         <source>No point fell inside the frustum!</source>
-        <translation type="unfinished"></translation>
+        <translation>Kein Punkt ist in den Kegelstumpf gefallen!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2350"/>
         <location filename="../mainwindow.cpp" line="2541"/>
         <source>Failed to allocate memory for output scalar field!</source>
-        <translation type="unfinished"></translation>
+        <translation>Speicherallokation für skalares Ausgangsfeld fehlgeschlagen!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2404"/>
         <source>Internal error: sensor (&apos;%1&apos;) parent is not a point cloud!</source>
-        <translation type="unfinished"></translation>
+        <translation>Interner Sensorfehler: („%1“) übergeordnetes Element ist keine Punktwolke!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2425"/>
@@ -7951,37 +7984,37 @@ Parameter</translation>
         <location filename="../mainwindow.cpp" line="8784"/>
         <location filename="../mainwindow.cpp" line="8888"/>
         <source>Select output file</source>
-        <translation type="unfinished"></translation>
+        <translation>Ausgabe-Datei wählen</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2466"/>
         <source>saving</source>
-        <translation type="unfinished"></translation>
+        <translation>speichern</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2470"/>
         <source>[I/O] File &apos;%1&apos; saved successfully</source>
-        <translation type="unfinished"></translation>
+        <translation>[I/O] Datei „%1“ wurde erfolgreich gespeichert</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2485"/>
         <source>Select one and only one GBL/TLS sensor!</source>
-        <translation type="unfinished"></translation>
+        <translation>Wählen Sie einen und nur einen GBL/TLS-Sensor aus!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2507"/>
         <source>Depth buffer</source>
-        <translation type="unfinished">Tiefen-Speicher</translation>
+        <translation>Tiefen-Speicher</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2508"/>
         <source>Sensor has no depth buffer: do you want to compute it now?</source>
-        <translation type="unfinished"></translation>
+        <translation>Sensor hat keinen Tiefen-Speicher: möchten Sie ihn jetzt berechnen?</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2529"/>
         <source>Sensor has no depth buffer (and no associated cloud?)</source>
-        <translation type="unfinished"></translation>
+        <translation>Sensor hat keinen Tiefen-Speicher: (und keine zugewiesene Punktwolke)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2554"/>
@@ -7996,67 +8029,67 @@ Parameter</translation>
     <message>
         <location filename="../mainwindow.cpp" line="2582"/>
         <source>Visibility computed for cloud &apos;%1&apos;</source>
-        <translation type="unfinished"></translation>
+        <translation>Sichtbarkeit für Punktwolke „%1“ berechnet</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2583"/>
         <source>	Visible = %1</source>
-        <translation type="unfinished"></translation>
+        <translation>	Sichtbar = %1</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2584"/>
         <source>	Hidden = %1</source>
-        <translation type="unfinished"></translation>
+        <translation>	Versteckt = %1</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2585"/>
         <source>	Out of range = %1</source>
-        <translation type="unfinished"></translation>
+        <translation>	Ausserhalb des Bereichs = %1</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2586"/>
         <source>	Out of fov = %1</source>
-        <translation type="unfinished"></translation>
+        <translation>	Ausserhalb des Blickfeldes (FOV) = %1</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2659"/>
-        <source>[doActionSamplePointsOnMesh] Errors occurred during the process! Result may be incomplete!</source>
-        <translation type="unfinished"></translation>
+        <source>[DoActionSamplePointsOnMesh] Errors occurred during the process! Result may be incomplete!</source>
+        <translation>[DoActionSamplePointsOnMesh] Während des Prozesses sind Fehler aufgetreten, das Ergebnis könnte unvollständig sein!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2710"/>
-        <source>[doActionSamplePointsOnPolyline] Errors occurred during the process! Result may be incomplete!</source>
-        <translation type="unfinished"></translation>
+        <source>[DoActionSamplePointsOnPolyline] Errors occurred during the process! Result may be incomplete!</source>
+        <translation>[DoActionSamplePointsOnPolyline] Während des Prozesses sind Fehler aufgetreten, das Ergebnis könnte unvollständig sein!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2764"/>
-        <source>[doActionSmoohPolyline] Errors occurred during the process! Result may be incomplete!</source>
-        <translation type="unfinished"></translation>
+        <source>[DoActionSmoohPolyline] Errors occurred during the process! Result may be incomplete!</source>
+        <translation>[DoActionSmoohPolyline] Während des Prozesses sind Fehler aufgetreten, das Ergebnis könnte unvollständig sein!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2783"/>
         <source>Min distance between points:</source>
-        <translation type="unfinished"></translation>
+        <translation>Mindestabstand zwischen den Punkten:</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2810"/>
         <source>Couldn&apos;t create temporary scalar field! Not enough memory?</source>
-        <translation type="unfinished"></translation>
+        <translation>Konnte kein temporäres Skalares Feld erzeugen! Nicht genug Arbeitsspeicher?</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2840"/>
         <source>Cloud &apos;%1&apos; has no duplicate points</source>
-        <translation type="unfinished"></translation>
+        <translation>Punktwolke „%1“ hat keine doppelten Punkte</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2844"/>
         <source>Cloud &apos;%1&apos; has %2 duplicate point(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>Punktwolke „%1“ hat %2 doppelte(n) Punkt(e)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2868"/>
         <source>An error occurred! (Not enough memory?)</source>
-        <translation type="unfinished"></translation>
+        <translation>Ein Fehler ist aufgetreten! (Zu wenig Arbeitsspeicher?)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2876"/>
@@ -8064,216 +8097,217 @@ Parameter</translation>
         <location filename="../mainwindow.cpp" line="5463"/>
         <location filename="../mainwindow.cpp" line="5584"/>
         <source>Previously selected entities (sources) have been hidden!</source>
-        <translation type="unfinished"></translation>
+        <translation>Vorher ausgewählte Entitäten (Quellen) wurden versteckt!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2900"/>
         <source>Entity [%1] has no active scalar field !</source>
-        <translation type="unfinished"></translation>
+        <translation>Entität [%1] hat kein aktives Skalares Feld!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3069"/>
         <location filename="../mainwindow.cpp" line="7897"/>
         <source>Select only one cloud or one mesh!</source>
-        <translation type="unfinished"></translation>
+        <translation>Wählen Sie nur eine Punktwolke oder nur ein Netz aus!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3099"/>
         <source>No active scalar field on entity &apos;%1&apos;</source>
-        <translation type="unfinished"></translation>
+        <translation>Kein aktives Skalares Feld für die Entität „%1“</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3191"/>
         <source>Subdivide mesh</source>
-        <translation type="unfinished"></translation>
+        <translation>Netz unterteilen</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3191"/>
         <source>Max area per triangle:</source>
-        <translation type="unfinished"></translation>
+        <translation>Maximale Fläche pro Dreieck:</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3215"/>
         <source>[Subdivide] An error occurred while trying to subdivide mesh &apos;%1&apos; (not enough memory?)</source>
-        <translation type="unfinished"></translation>
+        <translation>[Subdivide] Beim Versuch, das Netz „%1“ zu unterteilen, ist ein Fehler aufgetreten (nicht genug Arbeitsspeicher?)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3228"/>
         <source>[Subdivide] Failed to subdivide mesh &apos;%1&apos; (not enough memory?)</source>
-        <translation type="unfinished"></translation>
+        <translation>[Subdivide] Das Netz „%1“ konnte nicht unterteilet werden (nicht genug Arbeitsspeicher?)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3233"/>
         <source>[Subdivide] Works only on real meshes!</source>
-        <translation type="unfinished"></translation>
+        <translation>[Subdivide] Arbeitet nur mit echten Netzen!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3259"/>
         <source>[Flip triangles] Works only on real meshes!</source>
-        <translation type="unfinished"></translation>
+        <translation>[Flip triangles] Arbeitet nur mit echten Netzen!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3274"/>
         <location filename="../mainwindow.cpp" line="3277"/>
         <source>Smooth mesh</source>
-        <translation type="unfinished"></translation>
+        <translation>Glattes Netz</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3274"/>
         <source>Iterations:</source>
-        <translation type="unfinished"></translation>
+        <translation>Wiederholungen:</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3277"/>
         <source>Smoothing factor:</source>
-        <translation type="unfinished"></translation>
+        <translation>Glättungsgrad:</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3298"/>
         <source>Failed to apply Laplacian smoothing to mesh &apos;%1&apos;</source>
-        <translation type="unfinished"></translation>
+        <translation>Laplace-Glättung konnte nicht auf Netz „%1“ ausgeführt werden</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3366"/>
         <source>Only meshes with standard vertices are handled for now! Can&apos;t merge entity &apos;%1&apos;...</source>
-        <translation type="unfinished"></translation>
+        <translation>Nur Netze mit Standard-Scheitelpunkten können momentan bearbeitet werden! Entität „%1“ kann nicht zusammengeführt werden...</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3371"/>
         <source>Entity &apos;%1&apos; is neither a cloud nor a mesh, can&apos;t merge it!</source>
-        <translation type="unfinished"></translation>
+        <translation>Entität „%1“ ist weder eine Punktwolke, noch ein Netz. Kann nicht zusamengeführt werden!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3383"/>
         <source>Select only clouds or meshes!</source>
-        <translation type="unfinished"></translation>
+        <translation>Wählen Sie nur Punktwolken oder Netze aus!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3388"/>
         <source>Can&apos;t mix point clouds and meshes!</source>
-        <translation type="unfinished"></translation>
+        <translation>Punktwolke und Netze können nicht vermischt werden!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3423"/>
         <source>Original cloud index</source>
-        <translation type="unfinished"></translation>
+        <translation>Original-Punktwolken-Index</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3423"/>
         <source>Do you want to generate a scalar field with the original cloud index?</source>
-        <translation type="unfinished"></translation>
+        <translation>Möchten Sie ein Skalares Feld mit dem Original Punktwolken-Index erzeugen?</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3432"/>
         <source>Couldn&apos;t allocate a new scalar field for storing the original cloud index! Try to free some memory ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Konnte kein neues Skalares Feld für die Speicherung des ursprünglichen Punktwolken-Indexes zuweisen! Versuchen Sie, etwas Speicher freizugeben...</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3475"/>
         <location filename="../mainwindow.cpp" line="3528"/>
         <source>Fusion failed! (not enough memory?)</source>
-        <translation type="unfinished">Vereinigen fehlgeschlagen! (nicht genug Arbeitsspeicher)</translation>
+        <translation>Vereinigen fehlgeschlagen! (nicht genug Arbeitsspeicher)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3561"/>
         <source>Select 2 point clouds or meshes!</source>
-        <translation type="unfinished"></translation>
+        <translation>Wählen Sie zwei Punktwolken oder Netze aus!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3579"/>
         <source>Invalid minimum RMS decrease value</source>
-        <translation type="unfinished"></translation>
+        <translation>Ungültiger minimaler RMS-Verringerungs-Wert</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3585"/>
         <source>Minimum RMS decrease value is too small.
 %1 will be used instead (numerical accuracy limit).</source>
-        <translation type="unfinished"></translation>
+        <translation>Kleinster RMS-Verringerungs-Wert ist zu klein.
+%1 wird stattdessen benutzt (numerische Genauigkeitsgrenze).</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3627"/>
         <source>Final RMS: %1 (computed on %2 points)</source>
-        <translation type="unfinished"></translation>
+        <translation>Abschliessender RMS: %1 (berechnet aus %2 Punkten)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3640"/>
         <source>[Register] Applied transformation matrix:</source>
-        <translation type="unfinished"></translation>
+        <translation>[Register] Angewendete Transformations-Matrix:</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3647"/>
         <source>Scale: %1 (already integrated in above matrix!)</source>
-        <translation type="unfinished"></translation>
+        <translation>Maßstab: %1 (bereits in der obigen Matrix enthalten!)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3653"/>
         <source>[Register] Scale: fixed (1.0)</source>
-        <translation type="unfinished"></translation>
+        <translation>[Register] Maßstab: fixiert (1,0)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3654"/>
         <source>Scale: fixed (1.0)</source>
-        <translation type="unfinished"></translation>
+        <translation>Maßstab: fixiert (1,0)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3659"/>
         <source>Theoretical overlap: %1%</source>
-        <translation type="unfinished"></translation>
+        <translation>Theoretische Überlappung: %1%</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3664"/>
         <source>This report has been output to Console (F8)</source>
-        <translation type="unfinished"></translation>
+        <translation>Dieser Report wurde auf die Konsole (F8) ausgegeben</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3685"/>
         <source>Data mesh vertices are locked (they may be shared with other meshes): Do you wish to clone this mesh to apply transformation?</source>
-        <translation type="unfinished"></translation>
+        <translation>Daten-Netz-Scheitelpunkte sind gesperrt (sie sind möglicherweise mit anderen Netzen geteilt): Wollen Sie diese Netzt duplizieren um die Transformation anzuwenden?</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3698"/>
         <source>Doesn&apos;t work on sub-meshes yet!</source>
-        <translation type="unfinished"></translation>
+        <translation>Arbeitet bisher nicht auf Teil-Netzen!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3710"/>
         <source>Failed to clone &apos;data&apos; mesh! (not enough memory?)</source>
-        <translation type="unfinished"></translation>
+        <translation>„Daten“-Netz konnte nicht dupliziert werden! (zu wenig Arbeitsspeicher)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3739"/>
         <source>[ICP] Aligned entity global shift has been updated to match the reference: (%1,%2,%3) [x%4]</source>
-        <translation type="unfinished"></translation>
+        <translation>[ICP] Die globale Verschiebung der ausgerichteten Entität wurde aktualisiert, um mit der Referenz übereinzustimmen: (%1,%2,%3) [x%4]</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3743"/>
         <source>Drop shift information?</source>
-        <translation type="unfinished">Verschiebungs-Informationen streichen?</translation>
+        <translation>Verschiebungs-Informationen streichen?</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3743"/>
         <source>Aligned entity is shifted but reference cloud is not: drop global shift information?</source>
-        <translation type="unfinished"></translation>
+        <translation>Ausgerichtete Entität ist verschoben, aber Referenzwolke nicht: Globale Verschiebungsinformation streichen?</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3747"/>
         <source>[ICP] Aligned entity global shift has been reset to match the reference!</source>
-        <translation type="unfinished"></translation>
+        <translation>[ICP] Die globale Verschiebung der ausgerichteten Entität wurde zurückgesetzt, um mit der Referenz übereinzustimmen!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3758"/>
         <source>Registration info</source>
-        <translation type="unfinished"></translation>
+        <translation>Registrierung-Information</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3770"/>
         <source>Work in progress</source>
-        <translation type="unfinished"></translation>
+        <translation>In Arbeit</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3771"/>
         <source>This method is still under development: are you sure you want to use it? (a crash may likely happen)</source>
-        <translation type="unfinished"></translation>
+        <translation>Diese Funktion ist noch in Bearbeitung: sind Sie sicher, dass Sie sie benutzen möchten? (ein Absturz könnte passieren)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3777"/>
@@ -8283,23 +8317,23 @@ Parameter</translation>
         <location filename="../mainwindow.cpp" line="8985"/>
         <location filename="../mainwindow.cpp" line="8992"/>
         <source>Select 2 point clouds!</source>
-        <translation type="unfinished"></translation>
+        <translation>Wählen Sie zwei Punktwolken aus!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3822"/>
         <source>[Align] Resulting matrix:</source>
-        <translation type="unfinished"></translation>
+        <translation>[Align] Ergebniss-Matrix:</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3844"/>
         <source>[Align] Registration failed!</source>
-        <translation type="unfinished"></translation>
+        <translation>[Align] Registrierung fehlgeschlagen!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3890"/>
         <location filename="../mainwindow.cpp" line="8878"/>
         <source>Select at least one point cloud!</source>
-        <translation type="unfinished"></translation>
+        <translation>Wählen Sie mindestens eine Punktwolke!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3908"/>
@@ -8309,173 +8343,174 @@ Parameter</translation>
     <message>
         <location filename="../mainwindow.cpp" line="3921"/>
         <source>[Subsampling] Failed to subsample cloud &apos;%1&apos;!</source>
-        <translation type="unfinished"></translation>
+        <translation>[Subsampling] Die Punktwolke „%1“ konnte nicht teilweise abgetastet werden!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3948"/>
         <source>[Subsampling] Not enough memory: colors, normals or scalar fields may be missing!</source>
-        <translation type="unfinished"></translation>
+        <translation>[Subsampling] Nicht genug Arbeitsspeicher: Farben, Normalen oder Skalare Felder könnten fehlen!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3963"/>
         <source>Errors occurred (see console)</source>
-        <translation type="unfinished"></translation>
+        <translation>Ein Fehler ist aufgetreten! (Siehe Konsole)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4021"/>
         <source>[CreateComponentsClouds] Not enough memory to sort components by size!</source>
-        <translation type="unfinished"></translation>
+        <translation>[CreateComponentsClouds] Nicht genug Arbeitsspeicher um die Komponenten nach Größe zu sortieren!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4083"/>
-        <source>[createComponentsClouds] Failed to create component #%1! (not enough memory)</source>
-        <translation type="unfinished"></translation>
+        <source>[CreateComponentsClouds] Failed to create component #%1! (not enough memory)</source>
+        <translation>[CreateComponentsClouds] Komponente #%1 konnte nicht erstellt werden! (nicht genug Arbeitsspeicher)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4095"/>
         <source>No component was created! Check the minimum size...</source>
-        <translation type="unfinished">Es wurde keine Komponente erzeugt! Prüfen Sie die Minimalgröße...</translation>
+        <translation>Es wurde keine Komponente erzeugt! Prüfen Sie die Minimalgröße...</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4104"/>
-        <source>[createComponentsClouds] %1 component(s) were created from cloud &apos;%2&apos;</source>
-        <translation type="unfinished"></translation>
+        <source>[CreateComponentsClouds] %1 component(s) were created from cloud &apos;%2&apos;</source>
+        <translation>[CreateComponentsClouds] %1 Komponente(n) wurden aus der Punktwolke „%2“ erzeugt</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4113"/>
-        <source>[createComponentsClouds] Original cloud has been automatically hidden</source>
-        <translation type="unfinished"></translation>
+        <source>[CreateComponentsClouds] Original cloud has been automatically hidden</source>
+        <translation>[CreateComponentsClouds] Original-Punktwolke wurde automatisch versteckt</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4167"/>
         <location filename="../mainwindow.cpp" line="8292"/>
         <source>Couldn&apos;t compute octree for cloud &apos;%1&apos;!</source>
-        <translation type="unfinished">Die Berechnung des Oktrees für Punktewolke „%1“ konnte nich ausgeführt werden!</translation>
+        <translation>Oktree für Punktewolke „%1“ konnte nich berechnet werden!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4180"/>
         <source>Couldn&apos;t allocate a new scalar field for computing CC labels! Try to free some memory ...</source>
-        <translation type="unfinished">Konnte kein neues Skalares Feld für die Berechnung der Angeschlossenen-Komponenten-Beschriftung allokieren! Versuchen Sie etwas Speicher freizugeben...</translation>
+        <translation>Konnte kein neues Skalares Feld für die Berechnung der Angeschlossenen-Komponenten-Beschriftung allokieren! Versuchen Sie etwas Speicher freizugeben...</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4212"/>
         <source>Many components</source>
-        <translation type="unfinished"></translation>
+        <translation>Sehr viele Komponenten</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4212"/>
         <source>Do you really expect up to %1 components?
 (this may take a lot of time to process and display)</source>
-        <translation type="unfinished"></translation>
+        <translation>Erwarten Sie wirklich bis zu %1 Komponenten?
+(dies kann sehr viel Zeit für die Verarbeitung und Darstellung benötigen)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4232"/>
         <location filename="../mainwindow.cpp" line="4237"/>
-        <source>[doActionLabelConnectedComponents] Something went wrong while extracting CCs from cloud %1...</source>
-        <translation type="unfinished"></translation>
+        <source>[DoActionLabelConnectedComponents] Something went wrong while extracting CCs from cloud %1...</source>
+        <translation>[DoActionLabelConnectedComponents] Während des Extrahierens der CCs aus Punktwolke %1 sind Fehler aufgetreten...</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4296"/>
         <source>Select 2 and only 2 polylines</source>
-        <translation type="unfinished"></translation>
+        <translation>Wählen Sie zwei und nur zwei Polylinien</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4305"/>
         <source>Projection method</source>
-        <translation type="unfinished"></translation>
+        <translation>Projektionsmethode</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4305"/>
         <source>Use best fit plane (yes) or the current viewing direction (no)</source>
-        <translation type="unfinished"></translation>
+        <translation>Nutze die best eingepasste Ebene (ja) oder die aktuelle Ansichtsrichtung (nein)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4322"/>
         <source>[Mesh two polylines] Failed to compute normals!</source>
-        <translation type="unfinished"></translation>
+        <translation>[Mesh two polylines] Berechnung der normalen Fehlgeschlagen!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4332"/>
         <source>Failed to create mesh (see Console)</source>
-        <translation type="unfinished"></translation>
+        <translation>Netz-Berechnung fehlgeschlagen (siehe Konsole)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4373"/>
         <source>Select a group of polylines or multiple polylines (contour plot)!</source>
-        <translation type="unfinished"></translation>
+        <translation>Wählen Sie eine Gruppe von Polylinien oder mehrere Polylinien (Kontur-Plot)!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4377"/>
         <source>Projection dimension</source>
-        <translation type="unfinished"></translation>
+        <translation>Dimension der Projektion</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4377"/>
         <source>Contour plot to mesh</source>
-        <translation type="unfinished"></translation>
+        <translation>Kontur-Plot zu Netz</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4410"/>
         <source>Not enough segments!</source>
-        <translation type="unfinished"></translation>
+        <translation>Nicht genug Segmente!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4465"/>
         <source>Third party library error: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Dritthersteller-Bibliotheks-Fehler: %1</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4530"/>
         <source>[Contour plot to mesh] Failed to compute normals!</source>
-        <translation type="unfinished"></translation>
+        <translation>[Contour plot to mesh] Normalen konnten nicht berechnet werden!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4553"/>
         <source>Select one or two point clouds!</source>
-        <translation type="unfinished"></translation>
+        <translation>Wählen Sie eine oder zwei Punktwolken!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4562"/>
         <location filename="../mainwindow.cpp" line="4577"/>
         <source>Select point clouds only!</source>
-        <translation type="unfinished"></translation>
+        <translation>Wählen Sie nur Punktwolken!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4594"/>
         <source>Select only one point cloud!</source>
-        <translation type="unfinished"></translation>
+        <translation>Wählen Sie nur eine Punktwolke!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4601"/>
         <source>Select a point cloud!</source>
-        <translation type="unfinished"></translation>
+        <translation>Wählen Sie eine Punktwolke!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4639"/>
         <location filename="../mainwindow.cpp" line="4697"/>
         <source>Triangulate</source>
-        <translation type="unfinished"></translation>
+        <translation>Triangulieren</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4639"/>
         <source>Min triangle angle (in degrees)</source>
-        <translation type="unfinished"></translation>
+        <translation>Kleinster Dreieckswinkel (in Grad)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4697"/>
         <location filename="../mainwindow.cpp" line="8055"/>
         <source>Max edge length (0 = no limit)</source>
-        <translation type="unfinished"></translation>
+        <translation>Maximale Kantenlänge (0 = keine Beschränkung)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4725"/>
         <source>Keep old normals?</source>
-        <translation type="unfinished"></translation>
+        <translation>Alte Normalen behalten?</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4726"/>
         <source>Cloud(s) already have normals. Do you want to update them (yes) or keep the old ones (no)?</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Punktwolken haben bereits Normalen. Wollen Sie diese aktualisieren (ja) oder die alten behalten (nein)?</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4733"/>
@@ -8490,189 +8525,189 @@ Parameter</translation>
     <message>
         <location filename="../mainwindow.cpp" line="4772"/>
         <source>Error(s) occurred! See the Console messages</source>
-        <translation type="unfinished"></translation>
+        <translation>Es sind Fehler aufgetreten! Prüfen Sie die Konsole...</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4802"/>
-        <source>[doActionFitQuadric] Quadric local coordinate system:</source>
-        <translation type="unfinished"></translation>
+        <source>[DoActionFitQuadric] Quadric local coordinate system:</source>
+        <translation>[DoActionFitQuadric] Quadratisches lokales Koordinatensystem:</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4804"/>
-        <source>[doActionFitQuadric] Quadric equation (in local coordinate system): </source>
-        <translation type="unfinished"></translation>
+        <source>[DoActionFitQuadric] Quadric equation (in local coordinate system): </source>
+        <translation>[DoActionFitQuadric] Quadratische Gleichung (im lokalen Koordinatensystem): </translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4839"/>
         <source>Failed to compute quadric on cloud &apos;%1&apos;</source>
-        <translation type="unfinished"></translation>
+        <translation>Quadratische Gleichung konnte nicht auf Punktwolke „%1“ berechnet werden</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4847"/>
         <source>Error(s) occurred: see console</source>
-        <translation type="unfinished"></translation>
+        <translation>Fehler ist/sind aufgetreten! (Siehe Konsole)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4972"/>
         <source>[DistanceMap] Cloud &apos;%1&apos;: no point falls inside the specified range</source>
-        <translation type="unfinished"></translation>
+        <translation>[DistanceMap] Punktwolke „%1“: Keine Punkte innerhalb der festgelegten Reichweite</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4994"/>
         <source>Distance to best fit quadric (3D)</source>
-        <translation type="unfinished"></translation>
+        <translation>Abstand zur best angepassten Quadratischen Gleichung (3D)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4994"/>
         <source>Steps (per dim.)</source>
-        <translation type="unfinished"></translation>
+        <translation>Schitte (je Dimension)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5023"/>
         <source>Failed to get the center of gravity of cloud &apos;%1&apos;!</source>
-        <translation type="unfinished"></translation>
+        <translation>Der Schwerpunktd er Punktwolke  „%1“ wurde nicht erhalten!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5044"/>
         <location filename="../mainwindow.cpp" line="5137"/>
         <source>Couldn&apos;t allocate a new scalar field for computing distances! Try to free some memory ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Konnte kein neues Skalarfeld für die Berechnung der Abstände allokieren! Versuchen Sie, etwas Speicher freizugeben...</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5084"/>
         <source>Distance map to 3D quadric</source>
-        <translation type="unfinished"></translation>
+        <translation>Abstandskarte der am besten passenden 3D-Quadrik</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5092"/>
         <source>Failed to compute 3D quadric on cloud &apos;%1&apos;</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Berechnung der 3D-Quadrik für die Punktwolke „%1“ ist fehlgeschlagen</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5115"/>
         <location filename="../mainwindow.cpp" line="8996"/>
         <location filename="../mainwindow.cpp" line="9070"/>
         <source>Compared</source>
-        <translation type="unfinished"></translation>
+        <translation>Verglichen</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5116"/>
         <location filename="../mainwindow.cpp" line="8997"/>
         <location filename="../mainwindow.cpp" line="9071"/>
         <source>Reference</source>
-        <translation type="unfinished">Referenz</translation>
+        <translation>Referenz</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5126"/>
         <source>Compared cloud must be a real point cloud!</source>
-        <translation type="unfinished"></translation>
+        <translation>Vergleichende-Punktwolke muss eine echte Punktwolke sein!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5211"/>
         <location filename="../mainwindow.cpp" line="11195"/>
         <source>Select one point cloud!</source>
-        <translation type="unfinished"></translation>
+        <translation>Wählen Sie eine Punktwolke!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5216"/>
         <source>Dimension</source>
-        <translation type="unfinished">Dimension</translation>
+        <translation>Dimension</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5216"/>
         <source>Orthogonal dim (X=0 / Y=1 / Z=2)</source>
-        <translation type="unfinished"></translation>
+        <translation>Rechtwinklige Dimension (X=0 / Y=1 / Z=2)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5272"/>
         <source>[Synchronize] Transformation matrix (%1):</source>
-        <translation type="unfinished"></translation>
+        <translation>[Synchronize] Transformations-Matrix (%1):</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5319"/>
         <source>[Synchronize] Transformation matrix (%1 --&gt; %2):</source>
-        <translation type="unfinished"></translation>
+        <translation>[Synchronize] Transformations-Matrix (%1 --&gt; %2):</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5447"/>
-        <source>[doActionSORFilter] No points were removed from cloud &apos;%1&apos;</source>
-        <translation type="unfinished"></translation>
+        <source>[DoActionSORFilter] No points were removed from cloud &apos;%1&apos;</source>
+        <translation>[DoActionSORFilter] Es wurden keine Punkte aus der Punktwolke „%1“ entfernt</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5470"/>
-        <source>[doActionSORFilter] Not enough memory to create a clean version of cloud &apos;%1&apos;!</source>
-        <translation type="unfinished"></translation>
+        <source>[DoActionSORFilter] Not enough memory to create a clean version of cloud &apos;%1&apos;!</source>
+        <translation>[DoActionSORFilter] Nicht genug Arbeitsspeicher um die bereinigte Version der Punktwolke „%1“ zu erstellen!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5482"/>
-        <source>[doActionSORFilter] Failed to apply the noise filter to cloud &apos;%1&apos;! (not enough memory?)</source>
-        <translation type="unfinished"></translation>
+        <source>[DoActionSORFilter] Failed to apply the noise filter to cloud &apos;%1&apos;! (not enough memory?)</source>
+        <translation>[DoActionSORFilter] Anwendung des Rausch-Filters auf die Punktwolke „%1“ fehlgeschlagen! (Nicht genug Arbeitsspeicher?)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5486"/>
-        <source>[doActionSORFilter] Trying to apply the noise filter to null cloud</source>
-        <translation type="unfinished"></translation>
+        <source>[DoActionSORFilter] Trying to apply the noise filter to null cloud</source>
+        <translation>[DoActionSORFilter] Sie haben versucht den Rausch-Filter auf eine Null-Punktwolke anzuwenden</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5568"/>
-        <source>[doActionFilterNoise] No points were removed from cloud &apos;%1&apos;</source>
-        <translation type="unfinished"></translation>
+        <source>[DoActionFilterNoise] No points were removed from cloud &apos;%1&apos;</source>
+        <translation>[DoActionFilterNoise] Es wurden keine Punkte aus der Punktwolke „%1“ entfernt</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5591"/>
-        <source>[doActionFilterNoise] Not enough memory to create a clean version of cloud &apos;%1&apos;!</source>
-        <translation type="unfinished"></translation>
+        <source>[DoActionFilterNoise] Not enough memory to create a clean version of cloud &apos;%1&apos;!</source>
+        <translation>[DoActionFilterNoise] Nicht genug Arbeitsspeicher um die bereinigte Version der Punktwolke „%1“ zu erstellen!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5603"/>
-        <source>[doActionFilterNoise] Failed to apply the noise filter to cloud &apos;%1&apos;! (not enough memory?)</source>
-        <translation type="unfinished"></translation>
+        <source>[DoActionFilterNoise] Failed to apply the noise filter to cloud &apos;%1&apos;! (not enough memory?)</source>
+        <translation>[DoActionFilterNoise] Anwendung des Rausch-Filters auf die Punktwolke „%1“ fehlgeschlagen! (Nicht genug Arbeitsspeicher?)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5607"/>
-        <source>[doActionFilterNoise] Trying to apply the noise filter to null cloud</source>
-        <translation type="unfinished"></translation>
+        <source>[DoActionFilterNoise] Trying to apply the noise filter to null cloud</source>
+        <translation>[DoActionFilterNoise] Sie haben versucht den Rausch-Filter auf eine Null-Punktwolke anzuwenden</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5621"/>
         <location filename="../mainwindow.cpp" line="6807"/>
         <source>Select one and only one entity!</source>
-        <translation type="unfinished"></translation>
+        <translation>Wählen Sie eine und nur eine Entität aus!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5637"/>
         <source>Method can&apos;t be applied on locked vertices or virtual point clouds!</source>
-        <translation type="unfinished"></translation>
+        <translation>Methode kann nicht auf gesperrte Scheitelpunkte oder virtuelle Punktwolken angewendet werden!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5662"/>
         <source>Error</source>
-        <translation type="unfinished">Fehler</translation>
+        <translation>Fehler</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5662"/>
         <source>Invalid angular range</source>
-        <translation type="unfinished"></translation>
+        <translation>Ungültige Winkel-Reichweite</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5707"/>
         <source>[Unroll] Original mesh has been automatically hidden</source>
-        <translation type="unfinished"></translation>
+        <translation>[Unroll] Original-Netz wurde automatisch versteckt</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5717"/>
         <source>[Unroll] Original cloud has been automatically hidden</source>
-        <translation type="unfinished"></translation>
+        <translation>[Unroll] Original-Punktwolke wurde automatisch versteckt</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5816"/>
         <source>Failed to create the 3D view</source>
-        <translation type="unfinished"></translation>
+        <translation>3D-Ansicht konnte nicht erstellt werden</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5864"/>
         <source>New 3D View</source>
-        <translation type="unfinished"></translation>
+        <translation>Neue 3D-Ansicht</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5896"/>
@@ -8687,17 +8722,17 @@ Parameter</translation>
     <message>
         <location filename="../mainwindow.cpp" line="5921"/>
         <source>All VBOs have been released (%1 Mb)</source>
-        <translation type="unfinished"></translation>
+        <translation>Alle VBOs wurden veröffentlicht (%1 MB)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5924"/>
         <source>You might want to disable the &apos;use VBOs&apos; option in the Display Settings to keep the GPU memory empty</source>
-        <translation type="unfinished"></translation>
+        <translation>Sie können die Option „VBOs verwenden“ in den Anzeigeeinstellungen deaktivieren, um den GPU-Speicher leer zu halten</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5929"/>
         <source>No VBO allocated</source>
-        <translation type="unfinished"></translation>
+        <translation>Kein VBO zugewiesen</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5966"/>
@@ -8723,7 +8758,7 @@ Parameter</translation>
     <message>
         <location filename="../mainwindow.cpp" line="6229"/>
         <source>Select at least one entity (point cloud or mesh)!</source>
-        <translation type="unfinished"></translation>
+        <translation>Wählen Sie mindestens eine Entität (Punktwolke oder Netz)!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="6261"/>
@@ -8743,362 +8778,362 @@ Parameter</translation>
     <message>
         <location filename="../mainwindow.cpp" line="6307"/>
         <source>[PointPairRegistration] Failed to create dedicated 3D view!</source>
-        <translation type="unfinished"></translation>
+        <translation>[PointPairRegistration] 3D-Anzeige konnte nicht erstellt werden!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="6388"/>
         <source>No cloud in selection!</source>
-        <translation type="unfinished"></translation>
+        <translation>Keine Punktwolke in der Auswahl!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="6402"/>
         <source>[SectionExtraction] Failed to create dedicated 3D view!</source>
-        <translation type="unfinished"></translation>
+        <translation>[SectionExtraction] Dedizierte 3D-Ansicht konnte nicht erzeugt werden!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="6472"/>
         <source>No segmentable entity in active window!</source>
-        <translation type="unfinished"></translation>
+        <translation>Keine unterteilbare Entität im aktiven Fenster vorhanden!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="6542"/>
         <source>[Segmentation] Label %1 depends on cloud %2 and will be removed</source>
-        <translation type="unfinished"></translation>
+        <translation>[Segmentation] Beschriftung %1 basiert auf Punktwolke %2 und wird entfernt</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="6814"/>
         <source>Select a cloud or a mesh</source>
-        <translation type="unfinished"></translation>
+        <translation>Wählen Sie eine Punktwolke oder ein Netz</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="6820"/>
         <source>Entity must be visible!</source>
-        <translation type="unfinished"></translation>
+        <translation>Entität muss sichtbar sein!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="6958"/>
         <location filename="../mainwindow.cpp" line="7015"/>
         <source>Unexpected error!</source>
-        <translation type="unfinished"></translation>
+        <translation>Unerwarteter Fehler!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="6995"/>
         <source>No entity eligible for manual transformation! (see console)</source>
-        <translation type="unfinished"></translation>
+        <translation>Keine Entitäten berechtigt für eine manuelle Transformation! (Siehe Konsole)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7000"/>
         <source>Some entities were ignored! (see console)</source>
-        <translation type="unfinished"></translation>
+        <translation>Einige Entitäten werden ignoriert! (Siehe Konsole)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7119"/>
         <source>Orthographic mode only!</source>
-        <translation type="unfinished"></translation>
+        <translation>Nur orthographischer Modus!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7172"/>
         <source>All selected entities must be displayed in the same 3D view!</source>
-        <translation type="unfinished"></translation>
+        <translation>Alle gewählten Entitäten müssen in der gleichen 3D-Ansicht angezeigt werden!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7183"/>
         <source>Selected entities have no valid bounding-box!</source>
-        <translation type="unfinished"></translation>
+        <translation>Ausgewählte Entitäten haben keinen gültigen Umgrenzungsrahmen!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7307"/>
         <source>Can&apos;t start the picking mechanism (another tool is already using it)</source>
-        <translation type="unfinished"></translation>
+        <translation>Der Auswahl-Mechanismus kann nicht gestartet werden (ein anderes Werkzeug benutzt ihn gerade)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7348"/>
         <source>Picking operation aborted</source>
-        <translation type="unfinished"></translation>
+        <translation>Auswahl-Operation abgebrochen</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7378"/>
-        <source>The point picked was picked in the wrong window</source>
-        <translation type="unfinished"></translation>
+        <source>The point was picked in the wrong window</source>
+        <translation>Der Punkt wurde im falschen Fenster gepickt</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7405"/>
         <source>[Level] Point is too close from the others!</source>
-        <translation type="unfinished"></translation>
+        <translation>[Level] Punnkt ist zu nach an den anderen!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7520"/>
         <location filename="../mainwindow.cpp" line="7568"/>
         <source>Stop the other picking operation first!</source>
-        <translation type="unfinished"></translation>
+        <translation>Beendet die andere Punkt-Auswahl-Operation zuerst.</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7528"/>
         <location filename="../mainwindow.cpp" line="7576"/>
         <source>No active 3D view!</source>
-        <translation type="unfinished"></translation>
+        <translation>Keine aktive 3D-Ansicht!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7534"/>
         <source>Select an entity!</source>
-        <translation type="unfinished"></translation>
+        <translation>Wähle eine Entität!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7554"/>
         <source>Pick three points on the floor plane (click the Level button or press Escape to cancel)</source>
-        <translation type="unfinished"></translation>
+        <translation>Klicken Sie drei Punkte auf der Bodenebene (klicken Sie den Niveau-Knopf oder drücken Sie Esc zum abbrechen)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7584"/>
         <source>Perspective mode is viewer-centered: can&apos;t use a point as rotation center!</source>
-        <translation type="unfinished"></translation>
+        <translation>Perspetivischer Ansichtsmodus ist Ansichts-zentriert: es kann kein Punkt als Rotationszentrum benutzt werden!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7589"/>
         <source>Pick a point to be used as rotation center (click on icon again to cancel)</source>
-        <translation type="unfinished"></translation>
+        <translation>Wählen Sie einen Punkt als Rotations-Zentrum (erneut auf das Icon drücken zum abbrechen)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7598"/>
         <source>No cloud in database!</source>
-        <translation type="unfinished"></translation>
+        <translation>Kein Punkt in der Datenbank!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7660"/>
         <source>Histogram</source>
-        <translation type="unfinished">Histogramm</translation>
+        <translation>Histogramm</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7666"/>
         <location filename="../mainwindow.cpp" line="7701"/>
         <source>Count</source>
-        <translation type="unfinished">Anzahl</translation>
+        <translation>Anzahl</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7687"/>
         <source>Histogram [%1]</source>
-        <translation type="unfinished"></translation>
+        <translation>Histogramm [%1]</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7698"/>
         <source>%1 (%2 values) </source>
-        <translation type="unfinished"></translation>
+        <translation>%1 (%2 Werte) </translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7730"/>
         <source>[Crop] No eligible candidate found!</source>
-        <translation type="unfinished"></translation>
+        <translation>[Crop] Kein geeigneter Kandidat gefunden!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7782"/>
         <source>[Crop] Selected entities have been hidden</source>
-        <translation type="unfinished"></translation>
+        <translation>[Crop] Ausgewählte Entitäten wurden versteckt</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7784"/>
         <source>Error(s) occurred! See the Console</source>
-        <translation type="unfinished"></translation>
+        <translation>Fehler ist/sind aufgetreten! (Siehe Konsole)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7803"/>
         <source>An error occurred while cloning cloud %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Ein Fehler ist beim duplizieren der Punktwolke %1 aufgetreten!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7811"/>
         <source>An error occurred while cloning primitive %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Ein Fehler ist beim duplizieren der primitiven Form %1 aufgetreten!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7819"/>
         <source>An error occurred while cloning mesh %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Ein Fehler ist beim duplizieren des Netzes %1 aufgetreten!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7828"/>
         <source>An error occurred while cloning polyline %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Ein Fehler ist beim duplizieren der Polylinie %1 aufgetreten!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7837"/>
         <source>An error occurred while cloning facet %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Ein Fehler ist beim duplizieren der Facette %1 aufgetreten!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7850"/>
         <source>An error occurred while cloning camera sensor %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Ein Fehler ist beim duplizieren des Kamera-Sensors %1 aufgetreten!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7863"/>
         <source>An error occurred while cloning GBL sensor %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Ein Fehler ist beim duplizieren des GBL-Sensors %1 aufgetreten!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7868"/>
         <source>Entity &apos;%1&apos; can&apos;t be cloned (type not supported yet!)</source>
-        <translation type="unfinished"></translation>
+        <translation>Entität „%1“ kann nicht dupliziert werden (Typ noch nicht unterstützt!)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7919"/>
         <source>Constant #%1</source>
-        <translation type="unfinished"></translation>
+        <translation>Konstante #%1</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7924"/>
         <source>New SF name</source>
-        <translation type="unfinished"></translation>
+        <translation>Neurer Name für SF</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7924"/>
         <source>SF name (must be unique)</source>
-        <translation type="unfinished"></translation>
+        <translation>SF-Name (muss eindeutig sein)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7929"/>
         <source>Invalid name</source>
-        <translation type="unfinished"></translation>
+        <translation>Ungültiger Name</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7934"/>
         <source>Name already exists!</source>
-        <translation type="unfinished"></translation>
+        <translation>Name existiert bereits!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7938"/>
         <source>Add constant value</source>
-        <translation type="unfinished"></translation>
+        <translation>Konstanten Wert hinzufügen</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7938"/>
         <source>value</source>
-        <translation type="unfinished">Wert</translation>
+        <translation>Wert</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7964"/>
         <source>New scalar field added to %1 (constant value: %2)</source>
-        <translation type="unfinished"></translation>
+        <translation>Neues Skalares Feld zu %1 hinzugefügt (konstanter Wert: %2)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8010"/>
         <source>[Fit sphere] Failed to fit a sphere on cloud &apos;%1&apos;</source>
-        <translation type="unfinished"></translation>
+        <translation>[Fit sphere] Fehler beim Einpassen einer Kugel auf der Punktwolke „%1“</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8014"/>
         <source>[Fit sphere] Cloud &apos;%1&apos;: center (%2,%3,%4) - radius = %5 [RMS = %6]</source>
-        <translation type="unfinished"></translation>
+        <translation>[Fit sphere] Punktwolke „%1“: Zentrum (%2,%3,%4) - Radius = %5 [RMS = %6]</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8024"/>
         <source>Sphere r=%1 [rms %2]</source>
-        <translation type="unfinished"></translation>
+        <translation>Kugel r=%1 [rms %2]</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8055"/>
         <source>Fit facet</source>
-        <translation type="unfinished"></translation>
+        <translation>Facette einpassen</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8147"/>
         <source>[Orientation] Entity &apos;%1&apos;</source>
-        <translation type="unfinished"></translation>
+        <translation>[Orientation] Entität „%1“</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8148"/>
         <source>	- plane fitting RMS: %f</source>
-        <translation type="unfinished"></translation>
+        <translation>	- Ebene einpassen RMS: %f</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8153"/>
         <source>	- normal: (%f,%f,%f)</source>
-        <translation type="unfinished"></translation>
+        <translation>	- Normale: (%f,%f,%f)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8167"/>
         <source>[Orientation] A matrix that would make this plane horizontal (normal towards Z+) is:</source>
-        <translation type="unfinished"></translation>
+        <translation>[Orientation] Eine Matrix, die diese Ebene horizontal (normal zu Z+) machen würde, ist:</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8169"/>
         <source>[Orientation] You can copy this matrix values (CTRL+C) and paste them in the &apos;Apply transformation tool&apos; dialog</source>
-        <translation type="unfinished"></translation>
+        <translation>Orientierung] Sie können diese Matrixwerte kopieren (Strg+C) und im Dialog „Werkzeug Transformation anwenden“ einfügen</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8189"/>
         <source>Failed to fit a plane/facet on entity &apos;%1&apos;</source>
-        <translation type="unfinished"></translation>
+        <translation>Ebene/Facette kann nicht auf die Entität „%1“ eingepasst werden</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8251"/>
         <source>Invalid kernel size!</source>
-        <translation type="unfinished"></translation>
+        <translation>Ungültige Kernel-Größe!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8256"/>
         <source>Radius:</source>
-        <translation type="unfinished"></translation>
+        <translation>Radius:</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8261"/>
         <source>Spherical extraction test (%1)</source>
-        <translation type="unfinished"></translation>
+        <translation>Sphärischer Extraktionstest (%1)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8280"/>
         <source>Failed to create scalar field on cloud &apos;%1&apos; (not enough memory?)</source>
-        <translation type="unfinished"></translation>
+        <translation>Skalares Feld für Punktwolke „%1“ konnte nicht erstellt werden(zu wenig Arbeitsspeicher?)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8321"/>
-        <source>[SNE_TEST] Mean extraction time = %1 ms (radius = %2, mean(neighbours) = %3)</source>
-        <translation type="unfinished"></translation>
+        <source>[SNE_TEST] Mean extraction time = %1 ms (radius = %2, mean (neighbours) = %3)</source>
+        <translation>[SNE_TEST] Mittlere Extraktionszeit = %1 ms (Radius = %2, Mittelwert (Nachbarn) = %3)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8336"/>
         <location filename="../mainwindow.cpp" line="8340"/>
         <source>CNE Test</source>
-        <translation type="unfinished"></translation>
+        <translation>CNE-Test</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8336"/>
         <source>radius</source>
-        <translation type="unfinished">Radius</translation>
+        <translation>Radius</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8340"/>
         <source>height</source>
-        <translation type="unfinished">Höhe</translation>
+        <translation>Höhe</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8344"/>
         <source>cube</source>
-        <translation type="unfinished"></translation>
+        <translation>Würfel</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8429"/>
-        <source>[CNE_TEST] Mean extraction time = %1 ms (radius = %2, height = %3, mean(neighbours) = %4))</source>
-        <translation type="unfinished"></translation>
+        <source>[CNE_TEST] Mean extraction time = %1 ms (radius = %2, height = %3, mean (neighbours) = %4))</source>
+        <translation>[CNE_TEST] Mittlere Extraktionszeit = %1 ms (Radius = %2, Mittelwert (Nachbarn) = %3)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8433"/>
         <source>Failed to compute octree!</source>
-        <translation type="unfinished"></translation>
+        <translation>Berechnung des Oktrees fehlgeschlagen!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8452"/>
         <source>centers</source>
-        <translation type="unfinished"></translation>
+        <translation>Zentren</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8484"/>
         <source>No cloud in selection?!</source>
-        <translation type="unfinished"></translation>
+        <translation>Keine Punktwolke in der Auswahl?!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8521"/>
         <source>Need at least two clouds!</source>
-        <translation type="unfinished"></translation>
+        <translation>Es werden mindestens zwei Punktwolken benötigt!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8573"/>
@@ -9113,236 +9148,237 @@ Parameter</translation>
     <message>
         <location filename="../mainwindow.cpp" line="8635"/>
         <source>An error occurred while performing ICP!</source>
-        <translation type="unfinished"></translation>
+        <translation>Ein Fehler ist beim Berechnen des ICP aufgetreten!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8671"/>
         <source>Best case #%1 / #%2 - RMS = %3</source>
-        <translation type="unfinished"></translation>
+        <translation>Bester Fall #%1 / #%2 - RMS = %3</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8675"/>
-        <source>[doActionComputeBestICPRmsMatrix] Comparison #%1 / #%2: min RMS = %3 (phi = %4 / theta = %5 deg.)</source>
-        <translation type="unfinished"></translation>
+        <source>[DoActionComputeBestICPRmsMatrix] Comparison #%1 / #%2: min RMS = %3 (phi = %4 / theta = %5 deg.)</source>
+        <translation>[DoActionComputeBestICPRmsMatrix] Vergleich #%1 / #%2: minimales RMS = %3 (phi = %4 / theta = %5 Grad)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8680"/>
-        <source>[doActionComputeBestICPRmsMatrix] Comparison #%1 / #%2: INVALID</source>
-        <translation type="unfinished"></translation>
+        <source>[DoActionComputeBestICPRmsMatrix] Comparison #%1 / #%2: INVALID</source>
+        <translation>[DoActionComputeBestICPRmsMatrix] Vergleich #%1 / #%2: ungültig</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8741"/>
-        <source>[doActionComputeBestICPRmsMatrix] Job done</source>
-        <translation type="unfinished"></translation>
+        <source>[DoActionComputeBestICPRmsMatrix] Job done</source>
+        <translation>[DoActionComputeBestICPRmsMatrix] Berechnung erledigt</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8745"/>
         <source>Failed to save output file?!</source>
-        <translation type="unfinished"></translation>
+        <translation>Speichern der Ausgabedatei fehlgeschlagen?!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8774"/>
         <source>No plane in selection</source>
-        <translation type="unfinished"></translation>
+        <translation>Keine Ebene in der Auswahl</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8799"/>
         <location filename="../mainwindow.cpp" line="8902"/>
         <source>Failed to open file for writing! (check file permissions)</source>
-        <translation type="unfinished"></translation>
+        <translation>Datei konnte nicht zum Schreiben geöffnet werden! (Dateiberechtigungen prüfen)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8849"/>
         <source>[I/O] File &apos;%1&apos; successfully saved (%2 plane(s))</source>
-        <translation type="unfinished"></translation>
+        <translation>[I/O] Datei „%1“ erfolgreich gespeichert (%2 Ebene(n))</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8977"/>
         <source>[I/O] File &apos;%1&apos; successfully saved (%2 cloud(s))</source>
-        <translation type="unfinished"></translation>
+        <translation>[I/O] Datei „%1“ erfolgreich gespeichert (%2 Ebene(n))</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9012"/>
         <location filename="../mainwindow.cpp" line="9086"/>
         <source>Failed to initialize comparison dialog</source>
-        <translation type="unfinished">Vergleichsdialog konnte nicht initialisiert werden</translation>
+        <translation>Vergleichsdialog konnte nicht initialisiert werden</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9029"/>
         <source>Select 2 entities!</source>
-        <translation type="unfinished"></translation>
+        <translation>Wählen Sie zwei Entitäten!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9051"/>
         <source>Select at least one mesh!</source>
-        <translation type="unfinished"></translation>
+        <translation>Wählen Sie mindestens ein Netz</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9056"/>
         <source>Select one mesh and one cloud or two meshes!</source>
-        <translation type="unfinished"></translation>
+        <translation>Wählen Sie ein Netz und eine Punktwolke, oder zwei Netze!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9104"/>
         <source>[Compute Primitive Distances] Cloud to %1 failed, error code = %2!</source>
-        <translation type="unfinished"></translation>
+        <translation>[Compute Primitive Distances] Punktwolke zu %1 fehlgeschlagen, Fehlercode = %2!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9120"/>
         <source>[Compute Primitive Distances] Select only a single Plane/Box/Sphere/Cylinder/Cone/Polyline Primitive</source>
-        <translation type="unfinished"></translation>
+        <translation>[Compute Primitive Distances] Wählen Sie nur ein(e) einzelne(s) Ebene/Rahmen/Kugel/Zylinder/Kegel/Polylinien-Primitiv</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9136"/>
         <source>[Compute Primitive Distances] Select at least one Plane/Box/Sphere/Cylinder/Cone/Polyline Primitive!</source>
-        <translation type="unfinished"></translation>
+        <translation>[Compute Primitive Distances] Wählen Sie mindestens ein(e) einzelne(s) Ebene/Rahmen/Kugel/Zylinder/Kegel/Polylinien-Primitiv</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9141"/>
         <source>[Compute Primitive Distances] Select at least one cloud!</source>
-        <translation type="unfinished"></translation>
+        <translation>[Compute Primitive Distances] Wählen Sie mindestens eine Punktwolke!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9171"/>
         <source>[Compute Primitive Distances] [Cloud: %1] Couldn&apos;t allocate a new scalar field for computing distances! Try to free some memory ...</source>
-        <translation type="unfinished"></translation>
+        <translation>[Compute Primitive Distances] [Cloud: %1] Konnte kein neues Skalarfeld für die Berechnung von Abständen allokieren! Versuchen Sie, etwas Speicher freizugeben...</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9179"/>
         <source>[Compute Primitive Distances] [Cloud: %1] Not enough memory</source>
-        <translation type="unfinished"></translation>
+        <translation>[Compute Primitive Distances] [Cloud: %1] Nicht genug Arbeitsspeicher</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9201"/>
         <source>Bounded Plane</source>
-        <translation type="unfinished"></translation>
+        <translation>Begrenzte Ebene</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9209"/>
         <source>Infinite Plane</source>
-        <translation type="unfinished"></translation>
+        <translation>Unendliche Ebene</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9219"/>
         <source>Cylinder</source>
-        <translation type="unfinished">Zylinder</translation>
+        <translation>Zylinder</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9228"/>
         <source>Cone</source>
-        <translation type="unfinished">Kegel</translation>
+        <translation>Kegel</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9240"/>
         <source>Box</source>
-        <translation type="unfinished">Box</translation>
+        <translation>Rahmen</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9260"/>
         <source>[Compute Primitive Distances] Unsupported primitive type</source>
-        <translation type="unfinished"></translation>
+        <translation>[Compute Primitive Distances] Nicht unterstützter primitiver Typ</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9289"/>
         <source>[Compute Primitive Distances] [Primitive: %1] [Cloud: %2] [%3] Mean distance = %4 / std deviation = %5</source>
-        <translation type="unfinished"></translation>
+        <translation>[Compute Primitive Distances] [Primitive: %1] [Cloud: %2] [%3] Mittlerer Abstand = %4 / Standardabweichung = %5</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9303"/>
         <source>%1 error(s) occurred: refer to the Console (F8)</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 Fehler aufgetreten: siehe Konsole (F8)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9424"/>
         <source>This version doesn&apos;t handle stereo glasses and headsets.
 Use the &apos;Stereo&apos; version instead.</source>
-        <translation type="unfinished"></translation>
+        <translation>Diese Version kann keine Stereobrillen und Headsets verarbeiten.
+Verwenden Sie stattdessen die „Stereo“-Version.</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9450"/>
         <source>[Stereo] F.O.V. forced to %1 deg.</source>
-        <translation type="unfinished"></translation>
+        <translation>[Stereo] F.O.V. zu %1 Grad gezwungen</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9488"/>
         <source>Stereo mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Stereo-Modus</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9489"/>
-        <source>Stereo-mode only works in perspective mode. Do you want to disable it?</source>
-        <translation type="unfinished"></translation>
+        <source>Stereo-mode only works in perspective mode. Do you want to enable it?</source>
+        <translation>Stereo-Modus arbeitet nur im perspektivischen Modus. Wollen Sie ihn aktivieren?</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9558"/>
         <source>Point coordinates</source>
-        <translation type="unfinished"></translation>
+        <translation>Punkte-Koordinaten</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9575"/>
         <source>Point #%1</source>
-        <translation type="unfinished"></translation>
+        <translation>Punkt #%1</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9594"/>
         <source>Clipboard is empty</source>
-        <translation type="unfinished"></translation>
+        <translation>Zwischenablage ist leer</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9614"/>
         <location filename="../mainwindow.cpp" line="9657"/>
         <source>Clipboard</source>
-        <translation type="unfinished">Zwischenablage</translation>
+        <translation>Zwischenablage</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9617"/>
         <source>loading</source>
-        <translation type="unfinished"></translation>
+        <translation>laden</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9617"/>
         <source>from the clipboard</source>
-        <translation type="unfinished"></translation>
+        <translation>Aus der Zwischenablage</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9626"/>
         <source>No cloud loaded</source>
-        <translation type="unfinished"></translation>
+        <translation>Keine Punktwolke geladen</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9670"/>
         <source>Cloud #%1</source>
-        <translation type="unfinished"></translation>
+        <translation>Punktwolke #1</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9691"/>
         <source>%1 cloud(s) loaded from the clipboard</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 Punktwolke(n) aus der Zwischenablage geladen</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9705"/>
         <source>Lock rotation axis</source>
-        <translation type="unfinished"></translation>
+        <translation>Rotationsachse sperren</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9722"/>
         <source>[ROTATION LOCKED]</source>
-        <translation type="unfinished"></translation>
+        <translation>[ROTATION LOCKED]</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9841"/>
         <source>Entity &apos;%1&apos; has been translated: (%2,%3,%4) and rescaled of a factor %5 [original position will be restored when saving]</source>
-        <translation type="unfinished"></translation>
+        <translation>Entity „%1“ wurde übersetzt: (%2,%3,%4) und um den Faktor %5 neu skaliert [Originalposition wird beim Speichern wiederhergestellt]</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9883"/>
         <source>[MainWindow::addToDB] Internal error: no associated DB?!</source>
-        <translation type="unfinished"></translation>
+        <translation>[MainWindow::addToDB] Interner Fehler: keine zugewiesene Datenbank?!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9997"/>
         <source>%1 file(s) loaded</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 Datei(en) geladen</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="10036"/>
@@ -9357,12 +9393,12 @@ Use the &apos;Stereo&apos; version instead.</source>
     <message>
         <location filename="../mainwindow.cpp" line="10170"/>
         <source>Can&apos;t save selected entity(ies) this way!</source>
-        <translation type="unfinished"></translation>
+        <translation>Ausgewählte Entität(en) könne auf diese Weise nicht gespeichert werden!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="10310"/>
         <source>[I/O] First entity&apos;s name would make an invalid filename! Can&apos;t use it...</source>
-        <translation type="unfinished"></translation>
+        <translation>[I/O] Der Name der ersten Entität würde einen ungültigen Dateinamen ergeben! Kann es nicht verwenden...</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="10319"/>
@@ -9372,40 +9408,40 @@ Use the &apos;Stereo&apos; version instead.</source>
     <message>
         <location filename="../mainwindow.cpp" line="10334"/>
         <source>[I/O] The following selected entities won&apos;t be saved:</source>
-        <translation type="unfinished"></translation>
+        <translation>[I/O] Die folgenden ausgewählten Entitäten werden nicht gespeichert:</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="10366"/>
         <source>[I/O] None of the selected entities can be saved this way...</source>
-        <translation type="unfinished"></translation>
+        <translation>[I/O] Keine der ausgewählten Entitäten werden auf diese Weise gespeichert...</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="10980"/>
         <location filename="../mainwindow.cpp" line="10985"/>
         <location filename="../mainwindow.cpp" line="10990"/>
         <source>Not yet implemented! Sorry ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Bisher leider nicht implementiert!...</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="11159"/>
         <source>[Global Shift] Max abs. coord = %1 / max abs. diag = %2</source>
-        <translation type="unfinished"></translation>
+        <translation>[Global Shift] Maximale absolute Koordinate = %1 / maximale absolute Diagonale = %2</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="11202"/>
         <source>Cloud has no associated waveform information</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Punktwolke hat keine zugeordnete Wellenform-Informationen</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="11264"/>
         <location filename="../mainwindow.cpp" line="11271"/>
         <source>Select 2 planes!</source>
-        <translation type="unfinished"></translation>
+        <translation>Wählen Sie zwei Ebenen!</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="11279"/>
         <source>Plane 1: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Ebene 1: %1</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="11280"/>
@@ -9414,32 +9450,32 @@ Use the &apos;Stereo&apos; version instead.</source>
         <location filename="../mainwindow.cpp" line="11301"/>
         <location filename="../mainwindow.cpp" line="11306"/>
         <source>[Compare] </source>
-        <translation type="unfinished"></translation>
+        <translation>[Compare] </translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="11282"/>
         <source>Plane 2: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Ebene 2: %1</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="11293"/>
         <source>Angle P1/P2: %1 deg.</source>
-        <translation type="unfinished"></translation>
+        <translation>Winkel P1/P2: %1 Grad</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="11300"/>
         <source>Distance Center(P1)/P2: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Abstand Mitte (P1)/P2: %1</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="11305"/>
         <source>Distance Center(P2)/P1: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Abstand Mitte (P1)/P2: %1</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="11309"/>
         <source>Plane comparison</source>
-        <translation type="unfinished"></translation>
+        <translation>Ebenen-Vergleich</translation>
     </message>
 </context>
 <context>
@@ -9587,7 +9623,7 @@ Sollte nach einer der vorherigen Methoden verwendet werden!</translation>
     <message>
         <location filename="../ui_templates/noiseFilterDlg.ui" line="20"/>
         <source>Neighbors</source>
-        <translation>Nachbarschaften</translation>
+        <translation>Nachbarn</translation>
     </message>
     <message>
         <location filename="../ui_templates/noiseFilterDlg.ui" line="26"/>
@@ -9706,7 +9742,7 @@ Sollte nach einer der vorherigen Methoden verwendet werden!</translation>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="291"/>
         <source>Use scan grid(s) whenever possible</source>
-        <translation type="unfinished"></translation>
+        <translation>Scan-Raster benutzen wenn möglich</translation>
     </message>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="376"/>
@@ -10080,7 +10116,7 @@ Sie wird stattdessen in mehreren Kacheln auf die Festplatte geschrieben.</transl
     <message>
         <location filename="../../plugins/core/Standard/qPCV/ui/pcvDlg.ui" line="88"/>
         <source>rays are cast from the whole sphere (instead of the Z+ hemisphere)</source>
-        <translation type="unfinished"></translation>
+        <translation>Strahlen werden von der ganzen Kugel geworfen (statt von der Z+ Halbkugel)</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCV/ui/pcvDlg.ui" line="91"/>
@@ -10143,7 +10179,7 @@ Sie wird stattdessen in mehreren Kacheln auf die Festplatte geschrieben.</transl
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="76"/>
         <source>Whether the plane normal should point upward (Z+) or downward (Z-)</source>
-        <translation type="unfinished"></translation>
+        <translation>Ob die Ebenennormale nach oben (Z+) oder nach unten (Z-) zeigen soll</translation>
     </message>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="79"/>
@@ -10755,22 +10791,22 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="939"/>
         <source>Coordinate System</source>
-        <translation type="unfinished"></translation>
+        <translation>Koordinatensystem</translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="954"/>
         <source>Reset Matrix</source>
-        <translation type="unfinished"></translation>
+        <translation>Matrix zurücksetzen</translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="961"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select an item in the DB Tree&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Wählen Sie ein Element im Datenbank-Baum&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="964"/>
         <source>Get Selected Item Matrix</source>
-        <translation type="unfinished"></translation>
+        <translation>Matrix des ausgewählten Elements holen</translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="979"/>
@@ -11141,7 +11177,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="750"/>
         <source>Failed to compute octree for cloud &apos;%1&apos;</source>
-        <translation>Die Berechnung des Oktrees für Punktewolke „%1“ fehlgeschlagen</translation>
+        <translation>Oktree für Punktwolke „%1“ konnte nicht berechnet werden</translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="760"/>
@@ -11192,7 +11228,7 @@ p, li { white-space: pre-wrap; }
         <location filename="../ccCommandLineCommands.cpp" line="801"/>
         <location filename="../ccCommandLineCommands.cpp" line="844"/>
         <source>No input point cloud (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
-        <translation>Keine Eingabe-Punktwolke (stellen Sie sicher, dass Sie eine mit  „-%1 [Dateiname der Punktwolke]“ vor „-%2“ öffnen)</translation>
+        <translation>Keine Eingabe-Punktwolke (stellen Sie sicher, dass Sie eine mit „-%1 [Dateiname der Punktwolke]“ vor „-%2“ öffnen)</translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="560"/>
@@ -11204,22 +11240,22 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="542"/>
         <source>Invert normals</source>
-        <translation type="unfinished">Normalen umkehren</translation>
+        <translation>Normalen umkehren</translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="547"/>
         <source>[INVERT NORMALS]</source>
-        <translation type="unfinished"></translation>
+        <translation>[NORMALEN UMKEHREN]</translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="551"/>
         <source>No input point cloud or mesh (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
-        <translation type="unfinished"></translation>
+        <translation>Keine Eingabe-Punktwolke (stellen Sie sicher, dass Sie eine mit „-%1 [Dateiname der Punktwolke]“ vor „-%2“ öffnen)</translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="587"/>
         <source>Mesh %1 has no normals</source>
-        <translation type="unfinished"></translation>
+        <translation>Netz %1 hat keine Normalen</translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="818"/>
@@ -11385,7 +11421,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1105"/>
         <source>No point cloud loaded (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
-        <translation>Keine Punktwolke geladen (stellen Sie sicher, dass Sie eine mit  „-%1 [Dateiname der Punktwolke]“ vor „-%2“ öffnen)</translation>
+        <translation>Keine Punktwolke geladen (stellen Sie sicher, dass Sie eine mit „-%1 [Dateiname der Punktwolke]“ vor „-%2“ öffnen)</translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1111"/>
@@ -11667,7 +11703,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1658"/>
         <source>No loaded entity! (be sure to open one with &quot;-%1 [filename]&quot; before &quot;-%2&quot;)</source>
-        <translation>Keine Entität geladen! (stellen Sie sicher, dass Sie eine mit  „-%1 [Dateiname]“ vor „-%2“ öffnen)</translation>
+        <translation>Keine Entität geladen! (stellen Sie sicher, dass Sie eine mit „-%1 [Dateiname]“ vor „-%2“ öffnen)</translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1681"/>
@@ -11742,12 +11778,13 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1844"/>
         <source>Missing parameter: N value (after &quot;-%1 N_SIGMA_MIN&quot;).</source>
-        <translation type="unfinished"></translation>
+        <translation>Fehlender Parameter: N-Wert (nach „-%1 N_SIGMA_MIN“).</translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1850"/>
         <source>Failed to read a numerical parameter: N value (after &quot;N_SIGMA_MIN&quot;). Got &apos;%2&apos; instead.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Numerischer Parameter konnte nicht gelesen werden: N-Wert (nach „N_SIGMA_MIN“). Stattdessen „%1“ erhalten.</translatorcomment>
+        <translation>Numerischer Parameter konnte nicht gelesen werden: N-Wert (nach „N_SIGMA_MIN“). Stattdessen „%2“ erhalten.</translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1858"/>
@@ -11762,12 +11799,12 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1891"/>
         <source>Missing parameter: N value (after &quot;-%1 N_SIGMA_MAX&quot;).</source>
-        <translation type="unfinished"></translation>
+        <translation>Fehlender Parameter: N-Wert (nach „-%1 N_SIGMA_MAX“).</translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1897"/>
         <source>Failed to read a numerical parameter: N value (after &quot;N_SIGMA_MAX&quot;). Got &apos;%2&apos; instead.</source>
-        <translation type="unfinished"></translation>
+        <translation>Numerischer Parameter konnte nicht gelesen werden: N-Wert (nach „N_SIGMA_MAX“). Stattdessen „%2“ erhalten.</translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1905"/>
@@ -11918,7 +11955,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2220"/>
         <source>No point cloud loaded! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
-        <translation>Keine Punktwolke geladen! (stellen Sie sicher, dass Sie eine mit  „-%1 [Dateiname der Punktwolke]“ vor „-%2“ öffnen)</translation>
+        <translation>Keine Punktwolke geladen! (stellen Sie sicher, dass Sie eine mit „-%1 [Dateiname der Punktwolke]“ vor „-%2“ öffnen)</translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2233"/>
@@ -12557,7 +12594,7 @@ p, li { white-space: pre-wrap; }
         <location filename="../ccEntityAction.cpp" line="845"/>
         <location filename="../ccEntityAction.cpp" line="2392"/>
         <source>Couldn&apos;t compute octree for cloud &apos;%1&apos;!</source>
-        <translation>Die Berechnung des Oktrees für Punktewolke „%1“ konnte nich ausgeführt werden!</translation>
+        <translation>Oktree für Punktwolke „%1“ konnte nicht berechnet werden!</translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="3849"/>
@@ -12676,17 +12713,17 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="4191"/>
         <source>Rename SF</source>
-        <translation type="unfinished"></translation>
+        <translation>SF umbenennen</translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="4196"/>
         <source>[RENAME SF]</source>
-        <translation type="unfinished"></translation>
+        <translation>[SF UMBENENNEN]</translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="4200"/>
         <source>Missing parameter(s): SF index and/or scalar field name after &apos;%1&apos; (2 values expected)</source>
-        <translation type="unfinished"></translation>
+        <translation>Fehlende(r) Parameter: SF-Index und/oder Operation nach „%1“ (2 Werte erwartet)</translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="4297"/>
@@ -13294,7 +13331,7 @@ Zellen %L2 x %L3</translation>
     <message>
         <location filename="../../libs/qCC_io/src/AsciiFilter.cpp" line="840"/>
         <source>Open ASCII data [%1]</source>
-        <translation type="unfinished"></translation>
+        <translation>ASCII-Datei öffnen [%1]</translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/src/AsciiFilter.cpp" line="841"/>
@@ -13418,7 +13455,7 @@ Zellen %L2 x %L3</translation>
     <message>
         <location filename="../../plugins/core/IO/qCoreIO/src/ObjFilter.cpp" line="153"/>
         <source>Writing %1 triangle normals</source>
-        <translation type="unfinished"></translation>
+        <translation>Schreibe %1 Normalen der Dreiecke</translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qCoreIO/src/ObjFilter.cpp" line="182"/>
@@ -13532,22 +13569,22 @@ Zellen %L2 x %L3</translation>
     <message>
         <location filename="../ccEntityAction.cpp" line="131"/>
         <source>[SetColor] Can&apos;t set color for mesh &apos;%1&apos; (vertices are not accessible)</source>
-        <translation type="unfinished"></translation>
+        <translation>[SetColor] Farbe für Netz „%1“ kann nicht gesetzt werden (Scheitelpunkte sind nicht zugänglich)</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="192"/>
         <source>[SetColor] Can&apos;t change color of entity &apos;%1&apos;</source>
-        <translation type="unfinished"></translation>
+        <translation>[SetColor] Farbe für Entität „%1“ kann nicht geändert werden</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="291"/>
         <source>Select one and only one colored cloud or mesh!</source>
-        <translation type="unfinished"></translation>
+        <translation>Wählen Sie eine und nur eine gefärbte Punktwolke oder ein gefärbtes Netz aus!</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="306"/>
         <source>Selected entity has no colors!</source>
-        <translation type="unfinished"></translation>
+        <translation>Ausgewählte Entität enthält keine Farben!</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="321"/>
@@ -13555,235 +13592,237 @@ Zellen %L2 x %L3</translation>
         <location filename="../ccEntityAction.cpp" line="386"/>
         <location filename="../ccEntityAction.cpp" line="398"/>
         <source>Select 2 entities (clouds or meshes)!</source>
-        <translation type="unfinished"></translation>
+        <translation>Wählen Sie zwei Entitäten (Punktwolken oder Netze)!</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="339"/>
         <location filename="../ccEntityAction.cpp" line="404"/>
         <source>None of the selected entities has per-point or per-vertex colors!</source>
-        <translation type="unfinished"></translation>
+        <translation>Keine der ausgewählten Entitäten enthalten pro-Punkt oder pro-Scheitelpunkt-Farben!</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="344"/>
         <source>Both entities have colors! Remove the colors on the entity you wish to import the colors to!</source>
-        <translation type="unfinished"></translation>
+        <translation>Beide Entitäten haben Farben! Entfernen Sie die Farben der Entität in die Sie die Farben importieren möchten!</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="360"/>
         <source>Destination cloud (or vertices) must be a real point cloud!</source>
-        <translation type="unfinished"></translation>
+        <translation>Ziel-Punktwolke (oder Scheitelpunkte) muss eine echte Punktwolke sein!</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="373"/>
         <location filename="../ccEntityAction.cpp" line="507"/>
         <source>An error occurred! (see console)</source>
-        <translation type="unfinished"></translation>
+        <translation>Ein Fehler ist aufgetreten! (Siehe Konsole)</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="410"/>
         <source>Source</source>
-        <translation type="unfinished">Quelle</translation>
+        <translation>Quelle</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="410"/>
         <source>Destination</source>
-        <translation type="unfinished">Zielort</translation>
+        <translation>Zielort</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="440"/>
         <source>entity</source>
-        <translation type="unfinished">Entität</translation>
+        <translation>Entität</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="457"/>
         <source>No scalar field was selected</source>
-        <translation type="unfinished"></translation>
+        <translation>Kein Skalares Feld ausgewählt</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="526"/>
         <source>[convertTextureToColor] Mesh &apos;%1&apos; has no material/texture!</source>
-        <translation type="unfinished"></translation>
+        <translation>[convertTextureToColor] Netz „%1“ hat kein Material/Textur!</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="533"/>
         <source>Mesh already has colors</source>
-        <translation type="unfinished"></translation>
+        <translation>Netz hat bereits Farben</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="534"/>
         <source>Mesh &apos;%1&apos; already has colors! Overwrite them?</source>
-        <translation type="unfinished"></translation>
+        <translation>Netz „%1“ hat bereits Farben! Diese überschreiben?</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="550"/>
         <source>[convertTextureToColor] Failed to convert texture on mesh &apos;%1&apos;!</source>
-        <translation type="unfinished"></translation>
+        <translation>[convertTextureToColor] Textur kann nicht auf das Netz „%1“ angewendet werden!</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="566"/>
         <source>Intensity range</source>
-        <translation type="unfinished"></translation>
+        <translation>Intensitäts-Bereich</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="566"/>
         <source>Do you want to define the theoretical intensity range (yes)
 or use the actual one (no)?</source>
-        <translation type="unfinished"></translation>
+        <translation>Wollen Sie den theoretischen Intensitätsbereich definieren (ja)
+oder den tatsächlichen verwenden (nein)?</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="568"/>
         <source>Min</source>
-        <translation type="unfinished">Min</translation>
+        <translation>Min</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="568"/>
         <source>Max</source>
-        <translation type="unfinished">Max</translation>
+        <translation>Max</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="568"/>
         <source>Theroetical intensity</source>
-        <translation type="unfinished"></translation>
+        <translation>Theoretsiche Intensität</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="591"/>
-        <source>[enhanceRGBWithIntensities] Entity &apos;%1&apos; has no RGB color!</source>
-        <translation type="unfinished"></translation>
+        <source>[EnhanceRGBWithIntensities] Entity &apos;%1&apos; has no RGB color!</source>
+        <translation>[EnhanceRGBWithIntensities] Entität „%1“ hat keine RGB-Farben!</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="596"/>
-        <source>[enhanceRGBWithIntensities] Entity &apos;%1&apos; has no scalar field!</source>
-        <translation type="unfinished"></translation>
+        <source>[EnhanceRGBWithIntensities] Entity &apos;%1&apos; has no scalar field!</source>
+        <translation>[EnhanceRGBWithIntensities] Entität „%1“ hat kein Skalares Feld!</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="612"/>
         <source>Intensity scalar field</source>
-        <translation type="unfinished"></translation>
+        <translation>Intensitäts-Skalar-Feld</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="612"/>
         <source>Choose scalar field</source>
-        <translation type="unfinished"></translation>
+        <translation>Skalares Feld wählen</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="649"/>
-        <source>[enhanceRGBWithIntensities] Failed to apply the process on entity &apos;%1&apos;!</source>
-        <translation type="unfinished"></translation>
+        <source>[EnhanceRGBWithIntensities] Failed to apply the process on entity &apos;%1&apos;!</source>
+        <translation>[EnhanceRGBWithIntensities] Die Berechnung konnte nicht auf die Entität „%1“ angewendet werden!</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="667"/>
         <location filename="../ccEntityAction.cpp" line="771"/>
         <source>No eligible point cloud in selection!</source>
-        <translation type="unfinished"></translation>
+        <translation>Keine geeignete Punktwolke in der Auswahl!</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="673"/>
         <source>Gaussian filter</source>
-        <translation type="unfinished">Gauß-Filter</translation>
+        <translation>Gauß-Filter</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="716"/>
         <location filename="../ccEntityAction.cpp" line="835"/>
         <source>Failed to create scalar field for cloud &apos;%1&apos; (not enough memory?)</source>
-        <translation type="unfinished"></translation>
+        <translation>Skalares Feld für Punktwolke „%1“ konnte nicht erstellt werden(zu wenig Arbeitsspeicher?)</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="751"/>
         <source>Failed to compute entity [%1] octree! (not enough memory?)</source>
-        <translation type="unfinished"></translation>
+        <translation>Entität [%1] konnte nicht berechnet werden! (zu wenig Arbeitsspeicher?)</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="756"/>
         <location filename="../ccEntityAction.cpp" line="872"/>
         <source>Entity [%1] has no active scalar field!</source>
-        <translation type="unfinished"></translation>
+        <translation>Entität [%1] hat kein aktives Skalares Feld!</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="783"/>
         <source>Spatial sigma</source>
-        <translation type="unfinished"></translation>
+        <translation>Räumliches Sigma</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="784"/>
         <source>Scalar sigma</source>
-        <translation type="unfinished"></translation>
+        <translation>Skalares Sigma</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="793"/>
         <source>3*sigma = 98% attenuation</source>
-        <translation type="unfinished"></translation>
+        <translation>3*Sigma = 98% Dämpfung</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="794"/>
         <source>Scalar field&apos;s sigma controls how much the filter behaves as a Gaussian Filter
  sigma at +inf uses the whole range of scalars</source>
-        <translation type="unfinished"></translation>
+        <translation>Das Sigma des Skalarfeldes steuert, wie sehr sich der Filter wie ein Gauß-Filter verhält
+Sigma bei +inf verwendet den gesamten Bereich der Skalare</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="885"/>
         <source>Scalar Field to RGB</source>
-        <translation type="unfinished"></translation>
+        <translation>Skalares Feld zu RGB</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="886"/>
         <source>Mix with existing colors (if any)?</source>
-        <translation type="unfinished"></translation>
+        <translation>Vermischen mit bestehnden Farben (wenn diese existieren)?</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="931"/>
         <source>Random colors</source>
-        <translation type="unfinished"></translation>
+        <translation>Zufällige Farben</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="932"/>
         <source>Number of random colors (will be regularly sampled over the SF interval):</source>
-        <translation type="unfinished"></translation>
+        <translation>Anzahl zufälliger Farben (wird regulär über das SF-Intervall abgetastet):</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1023"/>
         <source>Cloud %1 has no displayed scalar field!</source>
-        <translation type="unfinished"></translation>
+        <translation>Punktwolke %1 enthält kein angezeigtes Skalares Feld!</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1030"/>
         <source>SF name</source>
-        <translation type="unfinished"></translation>
+        <translation>SF-Name</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1031"/>
         <source>name:</source>
-        <translation type="unfinished"></translation>
+        <translation>Name:</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1033"/>
         <source>unknown</source>
-        <translation type="unfinished">unbekannt</translation>
+        <translation>unbekannt</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1085"/>
         <source>Export SF to coordinate(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>SF in Koordinaten exportieren</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1120"/>
         <source>SF --&gt; coordinate</source>
-        <translation type="unfinished"></translation>
+        <translation>SF --&gt; Koordinaten</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1121"/>
         <source>Enter the coordinate equivalent for NaN values:</source>
-        <translation type="unfinished"></translation>
+        <translation>Geben Sie das Koordinaten-Äquivalent für NaN-Werte ein:</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1130"/>
         <source>[SetSFAsCoord] By default the coordinate equivalent for NaN values will be the minimum SF value</source>
-        <translation type="unfinished"></translation>
+        <translation>SetSFAsCoord] Standardmäßig wird als Koordinaten-Äquivalent für NaN-Werte der minimale SF-Wert verwendet</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1185"/>
         <location filename="../ccEntityAction.cpp" line="1247"/>
         <source>The process failed!</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Berechnung ist gescheitert!</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1212"/>
@@ -13793,234 +13832,234 @@ or use the actual one (no)?</source>
     <message>
         <location filename="../ccEntityAction.cpp" line="1241"/>
         <source>Cloud &apos;%1&apos; has no normals</source>
-        <translation type="unfinished"></translation>
+        <translation>Punktwolke %1 hat keine Normalen</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1287"/>
         <source>An error occurred (see Console for more details)</source>
-        <translation type="unfinished"></translation>
+        <translation>Ein Fehler ist aufgetreten! (Siehe Konsole für mehr Details)</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1336"/>
-        <source>[sfFromColor] Not enough memory to instantiate SF &apos;%1&apos; on cloud &apos;%2&apos;</source>
-        <translation type="unfinished"></translation>
+        <source>[SfFromColor] Not enough memory to instantiate SF &apos;%1&apos; on cloud &apos;%2&apos;</source>
+        <translation>[SfFromColor] Nicht genug Arbeitsspeicher, um SF „%1“ auf Punktwolke „%2“ zu instanziieren</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1393"/>
-        <source>[sfFromColor] Failed to add scalar field &apos;%1&apos; to cloud &apos;%2&apos;?!</source>
-        <translation type="unfinished"></translation>
+        <source>[SfFromColor] Failed to add scalar field &apos;%1&apos; to cloud &apos;%2&apos;?!</source>
+        <translation>[SfFromColor] Skalares Feld „%1“ konnte nicht auf Punktwolke „%2“ hinzugefügt werden?!</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1400"/>
-        <source>[sfFromColor] New scalar fields (%1) added to &apos;%2&apos;</source>
-        <translation type="unfinished"></translation>
+        <source>[SfFromColor] New scalar fields (%1) added to &apos;%2&apos;</source>
+        <translation>[SfFromColor] Neue Skalare Felder (%1) zu „%2“ hinzugefügt</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1435"/>
         <source>Mesh [%1] vertices have no activated scalar field!</source>
-        <translation type="unfinished"></translation>
+        <translation>Netz [%1] hat kein aktives Skalares Feld!</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1451"/>
         <location filename="../ccEntityAction.cpp" line="1769"/>
         <location filename="../ccEntityAction.cpp" line="1833"/>
         <source>Select at least one point cloud</source>
-        <translation type="unfinished"></translation>
+        <translation>Wählen Sie mindestens eine Punktwolke</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1521"/>
         <source>Can&apos;t compute normals on sub-meshes! Select the parent mesh instead</source>
-        <translation type="unfinished"></translation>
+        <translation>Normalen auf Unter-Netzen können nicht berechnet werden! Wählen Sie das übergeordnete Netz stattdessen</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1682"/>
         <source>Failed to compute or orient the normals on some clouds! (see console)</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Berechnung der Orientierung der Normalen ist für einige Punktwolken gescheitert! (Siehe Konsole)</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1684"/>
         <source>Failed to compute or orient the normals! (see console)</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Berechnung der Orientierung der Normalen gescheitert! (Siehe Konsole)</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1692"/>
         <source>Mesh normals</source>
-        <translation type="unfinished"></translation>
+        <translation>Normalen der Netze</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1693"/>
         <source>Compute per-vertex normals (smooth) or per-triangle (faceted)?</source>
-        <translation type="unfinished"></translation>
+        <translation>Berechnen Sie die Normalen pro Scheitelpunkt (glatt) oder pro Dreieck (facettiert)?</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1697"/>
         <source>Per-vertex</source>
-        <translation type="unfinished"></translation>
+        <translation>Je Scheitelpunkt</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1698"/>
         <source>Per-triangle</source>
-        <translation type="unfinished"></translation>
+        <translation>Je Dreieck</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1721"/>
         <source>Failed to compute normals on mesh &apos;%1&apos;</source>
-        <translation type="unfinished"></translation>
+        <translation>Berechnung der Normalen auf Netz „%1“ gescheitert</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1776"/>
         <source>Orient normals (FM)</source>
-        <translation type="unfinished"></translation>
+        <translation>Normalen orientieren (FM)</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1777"/>
         <source>Octree level</source>
-        <translation type="unfinished">Oktree-Niveau</translation>
+        <translation>Oktree-Niveau</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1802"/>
         <location filename="../ccEntityAction.cpp" line="1864"/>
         <source>Cloud &apos;%1&apos; has no normals!</source>
-        <translation type="unfinished"></translation>
+        <translation>Punktwolke „%1“ hat keine Normalen</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1819"/>
         <location filename="../ccEntityAction.cpp" line="1882"/>
         <source>Process failed (check console)</source>
-        <translation type="unfinished"></translation>
+        <translation>Prozess gescheitert (Prüfen Sie die Konsole)</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1823"/>
         <location filename="../ccEntityAction.cpp" line="1886"/>
         <source>Normals have been oriented: you may still have to globally invert the cloud normals however (Edit &gt; Normals &gt; Invert).</source>
-        <translation type="unfinished"></translation>
+        <translation>Normalen wurden orientiert: möglicherweise müssen Sie die Punktwolken-Normalen nochmals global invertieren (Bearbeiten &gt; Normalen &gt; Invertieren).</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1840"/>
         <source>Neighborhood size</source>
-        <translation type="unfinished"></translation>
+        <translation>Nachbarschafts-Größe</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1841"/>
         <source>Neighbors</source>
-        <translation type="unfinished"></translation>
+        <translation>Nachbarn</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1875"/>
         <source>Process failed on cloud &apos;%1&apos;</source>
-        <translation type="unfinished"></translation>
+        <translation>Operation konnte nicht auf Punktwolke „%1“ ausgeführt werden</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1937"/>
         <location filename="../ccEntityAction.cpp" line="1949"/>
         <source>[ccEntityAction::convertNormalsTo] Not enough memory!</source>
-        <translation type="unfinished"></translation>
+        <translation>[ccEntityAction::convertNormalsTo] Nicht genug Arbeitsspeicher!</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1981"/>
         <source>[ccEntityAction::convertNormalsTo] Internal error: unhandled destination!</source>
-        <translation type="unfinished"></translation>
+        <translation>[ccEntityAction::convertNormalsTo] Interner Fehler: unbehandeltes Ziel!</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="2002"/>
         <source>Error(s) occurred! (see console)</source>
-        <translation type="unfinished"></translation>
+        <translation>Fehler ist/sind aufgetreten! (Siehe Konsole)</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="2048"/>
-        <source>[doActionComputeOctree] No eligible entities in selection!</source>
-        <translation type="unfinished"></translation>
+        <source>[DoActionComputeOctree] No eligible entities in selection!</source>
+        <translation>[DoActionComputeOctree] Keine berechtigten Entitäten in der Auswahl!</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="2131"/>
         <source>Octree computation on cloud &apos;%1&apos; failed!</source>
-        <translation type="unfinished"></translation>
+        <translation>Oktree für Punktwolke „%1“ konnte nicht berechnet werden!</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="2175"/>
-        <source>[doActionClearNormals] Can&apos;t remove per-vertex normals on a sub mesh!</source>
-        <translation type="unfinished"></translation>
+        <source>[DoActionClearNormals] Can&apos;t remove per-vertex normals on a sub mesh!</source>
+        <translation>[DoActionClearNormals] Normalen pro Scheitelpunkt können nicht von einem Teil-Netz entfernt werden!</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="2288"/>
         <location filename="../ccEntityAction.cpp" line="2432"/>
         <source>Distribution</source>
-        <translation type="unfinished"></translation>
+        <translation>Verteilung</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="2288"/>
         <source>Choose distribution</source>
-        <translation type="unfinished"></translation>
+        <translation>Wähle die Verteilung</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="2303"/>
         <source>Local Statistical Test (Gauss)</source>
-        <translation type="unfinished"></translation>
+        <translation>Lokaler Statistiktest (Gauß)</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="2306"/>
         <source>Local Statistical Test (Weibull)</source>
-        <translation type="unfinished"></translation>
+        <translation>Lokaler Statistiktest (Weibull)</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="2309"/>
         <source>Invalid distribution!</source>
-        <translation type="unfinished"></translation>
+        <translation>Ungültige Verteilung!</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="2432"/>
         <source>Distribution Fitting</source>
-        <translation type="unfinished"></translation>
+        <translation>Verteilungs-Einpassung</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="2484"/>
         <source>mean = %1 / std.dev. = %2</source>
-        <translation type="unfinished"></translation>
+        <translation>Mittelwert = %1 / Standardabweichung = %2</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="2495"/>
         <source>[Distribution fitting] Additional Weibull distrib. parameters: mode = %1 / skewness = %2</source>
-        <translation type="unfinished"></translation>
+        <translation>[Distribution fitting] Zusätzliche Weibull-Verteilungs-Parameter: Modus = %1 / Schräglage = %2</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="2506"/>
         <source>[Distribution fitting] %1</source>
-        <translation type="unfinished"></translation>
+        <translation>[Distribution fitting] %1</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="2518"/>
         <source>[Distribution fitting] Not enough memory!</source>
-        <translation type="unfinished"></translation>
+        <translation>[Distribution fitting] Nicht genug Arbeitsspeicher!</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="2529"/>
         <source>[Distribution fitting] %1: Chi2 Distance = %2</source>
-        <translation type="unfinished"></translation>
+        <translation>[Distribution fitting] %1: Chi2-Abstand = %2</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="2533"/>
         <source>[Distribution fitting] Failed to compute Chi2 distance?!</source>
-        <translation type="unfinished"></translation>
+        <translation>[Distribution fitting] Chi2-Abstand konnte nicht berechnet werden?!</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="2556"/>
         <source>Scalar field RMS = %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Skalares Feld RMS = %1</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="2562"/>
         <source>[Distribution fitting]</source>
-        <translation type="unfinished"></translation>
+        <translation>[Distribution fitting]</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="2572"/>
         <source>Count</source>
-        <translation type="unfinished">Anzahl</translation>
+        <translation>Anzahl</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="2579"/>
         <source>[Entity: %1]-[SF: %2] Couldn&apos;t compute distribution parameters!</source>
-        <translation type="unfinished"></translation>
+        <translation>[Entität: %1]-[SF: %2] Verteilungs-Parameter können nicht berechnet werden!</translation>
     </message>
     <message>
         <location filename="../ccPointPairRegistrationDlg.cpp" line="413"/>
@@ -14055,7 +14094,7 @@ or use the actual one (no)?</source>
     <message>
         <location filename="../../plugins/core/Standard/qPCV/src/PCVCommand.cpp" line="226"/>
         <source>Process failed</source>
-        <translation>Berechnung Fehlgeschlagen</translation>
+        <translation>Der Prozess ist gescheitert!</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="59"/>
@@ -14386,65 +14425,65 @@ Zellen: %2 x %3</translation>
     <message>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="86"/>
         <source>Cone Advanced Parameters</source>
-        <translation type="unfinished"></translation>
+        <translation>Kegel: erweiterte Parameter</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="100"/>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="241"/>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="310"/>
         <source>Max Radius</source>
-        <translation type="unfinished"></translation>
+        <translation>Größter Radius</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="130"/>
         <source>Max Length</source>
-        <translation type="unfinished"></translation>
+        <translation>Größte Länge</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="160"/>
         <source>Max Angle</source>
-        <translation type="unfinished"></translation>
+        <translation>Größter Winkel</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="170"/>
         <source>°</source>
-        <translation type="unfinished"></translation>
+        <translation>°</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="203"/>
         <source>Sphere Advanced Parameters</source>
-        <translation type="unfinished"></translation>
+        <translation>Kugel: erweiterte Parameter</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="211"/>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="280"/>
         <source>Min Radius</source>
-        <translation type="unfinished"></translation>
+        <translation>Kleinster Radius</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="272"/>
         <source>Cylinder Advanced Parameters</source>
-        <translation type="unfinished"></translation>
+        <translation>Zylinder: erweiterte Parameter</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="341"/>
         <source>Save leftover points into new cloud</source>
-        <translation type="unfinished"></translation>
+        <translation>Restliche Punkte in neue Punktwolke speichern</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="348"/>
         <source>Use Least Squares fitting on found shapes</source>
-        <translation type="unfinished"></translation>
+        <translation>Verwenden Sie die Anpassung der kleinsten Quadrate für gefundene Formen</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="358"/>
         <source>Will attempt to convert Spheres, Cones, Cylinders and Torus into a simpler shape (for example Cones may be simplified into a Cylinder, Plane, or Sphere)</source>
-        <translation type="unfinished"></translation>
+        <translation>Versucht, Kugeln, Kegel, Zylinder und Torus in eine einfachere Form umzuwandeln (z. B. können Kegel in einen Zylinder, eine Ebene oder eine Kugel vereinfacht werden)</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="361"/>
         <source>Attempt to simplify shapes</source>
-        <translation type="unfinished"></translation>
+        <translation>Versuch, Formen zu vereinfachen</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="390"/>
@@ -14456,37 +14495,37 @@ Zellen: %2 x %3</translation>
     <message>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="430"/>
         <source>Parameters</source>
-        <translation type="unfinished">Parameter</translation>
+        <translation>Parameter</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="568"/>
         <source>Torus Advanced Parameters</source>
-        <translation type="unfinished"></translation>
+        <translation>Torus: erweiterte Parameter</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="576"/>
         <source>Min Minor Radius</source>
-        <translation type="unfinished"></translation>
+        <translation>Minimaler kleiner Radius</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="606"/>
         <source>Max Minor Radius</source>
-        <translation type="unfinished"></translation>
+        <translation>Maximaler kleiner Radius</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="636"/>
         <source>Min Major Radius</source>
-        <translation type="unfinished"></translation>
+        <translation>Minimaler großer Radius</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="666"/>
         <source>Max Major Radius</source>
-        <translation type="unfinished"></translation>
+        <translation>Maximaler großer Radius</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="697"/>
         <source>Set Random color for each shape found</source>
-        <translation type="unfinished"></translation>
+        <translation>Zufällige Farbe für jede gefundene Form setzen</translation>
     </message>
 </context>
 <context>
@@ -15944,7 +15983,7 @@ Multiplikator-Schwelle (nSigma)</translation>
     <message>
         <location filename="../ui_templates/statisticalTestDlg.ui" line="209"/>
         <source>Neighbors</source>
-        <translation>Nachbarschaften</translation>
+        <translation>Nachbarn</translation>
     </message>
 </context>
 <context>
@@ -16219,7 +16258,16 @@ p, li { white-space: pre-wrap; }
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;Funded by Université Européenne de Bretagne, Centre National de la Recherche Scientifique and EEC Marie-Curie actions&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d;&quot;&gt;Enjoy!&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//DE&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color: #ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-weight:600; color:#1f497d;&quot;&gt;Klassifikator-Training basierend auf Multiskalen-Dimensionalität (CANUPO)&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family: &apos;Calibri,sans-serif&apos;; font-size:10pt; font-style:italic; color:#1f497d;&quot;&gt;Brodu und Lague, 3D Terrestrial LiDAR data classification of complex natural scenes using a multi-scale dimensionality criterion, ISPRS j. of Photogram. Rem. Sens., 2012&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family: &apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;Finanziert durch Université Européenne de Bretagne, Centre National de la Recherche Scientifique und EEC Marie-Curie Aktionen&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d;&quot;&gt;Freude! &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt; macos/deepLFree.translatedWithDeepL.text</translation>
     </message>
 </context>
 <context>
@@ -16602,7 +16650,7 @@ Sie sollten die leeren Zellen füllen...</translation>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="689"/>
         <source>Cloud &apos;%1</source>
-        <translation>Punktwolke &apos;%1</translation>
+        <translation>Punktwolke „%1“</translation>
     </message>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="690"/>
@@ -16914,7 +16962,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ccPointPairRegistrationDlg.cpp" line="594"/>
         <source>Point/label already picked</source>
-        <translation type="unfinished"></translation>
+        <translation>Punkt/Beschriftung bereits ausgewählt</translation>
     </message>
     <message>
         <location filename="../ccPointPairRegistrationDlg.cpp" line="940"/>
@@ -16939,7 +16987,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ccPointPairRegistrationDlg.cpp" line="1535"/>
         <source>Aligned cloud is shifted but reference cloud is not: drop global shift information?</source>
-        <translation>Ausgerichtete Wolke ist verschoben, aber Referenzwolke nicht: Globale Verschiebungsinformation fallen lassen?</translation>
+        <translation>Ausgerichtete Wolke ist verschoben, aber Referenzwolke nicht: Globale Verschiebungsinformation streichen?</translation>
     </message>
     <message>
         <location filename="../ccPointPairRegistrationDlg.cpp" line="1543"/>
@@ -17079,37 +17127,37 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="530"/>
         <source>Coordinate System</source>
-        <translation type="unfinished"></translation>
+        <translation>Koordinatensystem</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="531"/>
         <source>Origin</source>
-        <translation type="unfinished">Ursprung</translation>
+        <translation>Ursprung</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="533"/>
         <source>Planes Visible</source>
-        <translation type="unfinished"></translation>
+        <translation>Ebenen sichtbar</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="534"/>
         <source>Planes Stippled</source>
-        <translation type="unfinished"></translation>
+        <translation>Ebenen gesprenkelt</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="535"/>
         <source>Axis Lines Visible</source>
-        <translation type="unfinished"></translation>
+        <translation>Achsenlinien sichtbar</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="536"/>
         <source>Axis width</source>
-        <translation type="unfinished"></translation>
+        <translation>Achsenbreite</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="537"/>
         <source>Display scale</source>
-        <translation type="unfinished"></translation>
+        <translation>Anzeige-Maßstab</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="548"/>

@@ -523,7 +523,7 @@ namespace ccEntityAction
 				
 				if (!mesh->hasMaterials())
 				{
-					ccLog::Warning(QObject::tr("[convertTextureToColor] Mesh '%1' has no material/texture!").arg(mesh->getName()));
+					ccLog::Warning(QObject::tr("[ConvertTextureToColor] Mesh '%1' has no material/texture!").arg(mesh->getName()));
 					continue;
 				}
 				else
@@ -547,7 +547,7 @@ namespace ccEntityAction
 					}
 					else
 					{
-						ccLog::Warning(QObject::tr("[convertTextureToColor] Failed to convert texture on mesh '%1'!").arg(mesh->getName()));
+						ccLog::Warning(QObject::tr("[ConvertTextureToColor] Failed to convert texture on mesh '%1'!").arg(mesh->getName()));
 					}
 				}
 			}
@@ -588,12 +588,12 @@ namespace ccEntityAction
 
 			if (!pc->hasColors())
 			{
-				ccLog::Warning(QObject::tr("[enhanceRGBWithIntensities] Entity '%1' has no RGB color!").arg(ent->getName()));
+				ccLog::Warning(QObject::tr("[EnhanceRGBWithIntensities] Entity '%1' has no RGB color!").arg(ent->getName()));
 				continue;
 			}
 			if (!pc->hasScalarFields())
 			{
-				ccLog::Warning(QObject::tr("[enhanceRGBWithIntensities] Entity '%1' has no scalar field!").arg(ent->getName()));
+				ccLog::Warning(QObject::tr("[EnhanceRGBWithIntensities] Entity '%1' has no scalar field!").arg(ent->getName()));
 				continue;
 			}
 
@@ -646,7 +646,7 @@ namespace ccEntityAction
 			}
 			else
 			{
-				ccLog::Warning(QObject::tr("[enhanceRGBWithIntensities] Failed to apply the process on entity '%1'!").arg(ent->getName()));
+				ccLog::Warning(QObject::tr("[EnhanceRGBWithIntensities] Failed to apply the process on entity '%1'!").arg(ent->getName()));
 			}
 		}
 
@@ -1333,7 +1333,7 @@ namespace ccEntityAction
 			{
 				if (sf && !sf->reserveSafe(count))
 				{
-					ccLog::Warning(QObject::tr("[sfFromColor] Not enough memory to instantiate SF '%1' on cloud '%2'").arg(sf->getName(), cloud->getName()));
+					ccLog::Warning(QObject::tr("[SfFromColor] Not enough memory to instantiate SF '%1' on cloud '%2'").arg(sf->getName(), cloud->getName()));
 					sf->release();
 					sf = nullptr;
 				}
@@ -1390,14 +1390,14 @@ namespace ccEntityAction
 				}
 				else
 				{
-					ccConsole::Warning(QObject::tr("[sfFromColor] Failed to add scalar field '%1' to cloud '%2'?!").arg(sf->getName(), cloud->getName()));
+					ccConsole::Warning(QObject::tr("[SfFromColor] Failed to add scalar field '%1' to cloud '%2'?!").arg(sf->getName(), cloud->getName()));
 					sf->release();
 					sf = nullptr;
 				}
 			}
 			
 			if (!fieldsStr.isEmpty())
-				ccLog::Print(QObject::tr("[sfFromColor] New scalar fields (%1) added to '%2'").arg(fieldsStr, cloud->getName()));
+				ccLog::Print(QObject::tr("[SfFromColor] New scalar fields (%1) added to '%2'").arg(fieldsStr, cloud->getName()));
 		}
 
 		return true;
@@ -2045,7 +2045,7 @@ namespace ccEntityAction
 
 		if (clouds.empty() || maxBoxSize < 0.0)
 		{
-			ccLog::Warning(QObject::tr("[doActionComputeOctree] No eligible entities in selection!"));
+			ccLog::Warning(QObject::tr("[DoActionComputeOctree] No eligible entities in selection!"));
 			return false;
 		}
 
@@ -2172,7 +2172,7 @@ namespace ccEntityAction
 						 && (mesh->getParent()->isA(CC_TYPES::MESH)/*|| mesh->getParent()->isKindOf(CC_TYPES::PRIMITIVE)*/) //TODO
 						 && ccHObjectCaster::ToMesh(mesh->getParent())->getAssociatedCloud() == mesh->getAssociatedCloud())
 					{
-						ccLog::Warning(QObject::tr("[doActionClearNormals] Can't remove per-vertex normals on a sub mesh!"));
+						ccLog::Warning(QObject::tr("[DoActionClearNormals] Can't remove normals per-vertex on a sub mesh!"));
 					}
 					else //mesh is alone, we can freely remove normals
 					{

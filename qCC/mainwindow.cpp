@@ -1944,7 +1944,7 @@ void MainWindow::doActionSetViewFromSensor()
 
 	if (sensor->applyViewport(win))
 	{
-		ccConsole::Print(tr("[doActionSetViewFromSensor] Viewport applied"));
+		ccConsole::Print(tr("[DoActionSetViewFromSensor] Viewport applied"));
 	}
 }
 
@@ -2707,7 +2707,7 @@ void MainWindow::doActionSamplePointsOnPolyline()
 
 	if (errors)
 	{
-		ccLog::Error(tr("[doActionSamplePointsOnPolyline] Errors occurred during the process! Result may be incomplete!"));
+		ccLog::Error(tr("[DoActionSamplePointsOnPolyline] Errors occurred during the process! Result may be incomplete!"));
 	}
 
 	refreshAll();
@@ -2761,7 +2761,7 @@ void MainWindow::doActionSmoohPolyline()
 
 	if (errors)
 	{
-		ccLog::Error(tr("[doActionSmoohPolyline] Errors occurred during the process! Result may be incomplete!"));
+		ccLog::Error(tr("[DoActionSmoohPolyline] Errors occurred during the process! Result may be incomplete!"));
 	}
 
 	refreshAll();
@@ -2897,7 +2897,7 @@ void MainWindow::doActionFilterByValue()
 			}
 			else
 			{
-				ccConsole::Warning(tr("Entity [%1] has no active scalar field !").arg(entity->getName()));
+				ccConsole::Warning(tr("Entity [%1] has no active scalar field!").arg(entity->getName()));
 			}
 		}
 	}
@@ -4080,7 +4080,7 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 				}
 				else
 				{
-					ccConsole::Warning(tr("[createComponentsClouds] Failed to create component #%1! (not enough memory)").arg(ccGroup->getChildrenNumber() + 1));
+					ccConsole::Warning(tr("[CreateComponentsClouds] Failed to create component #%1! (not enough memory)").arg(ccGroup->getChildrenNumber() + 1));
 				}
 			}
 
@@ -4101,7 +4101,7 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 			ccGroup->setDisplay(cloud->getDisplay());
 			addToDB(ccGroup);
 
-			ccConsole::Print(tr("[createComponentsClouds] %1 component(s) were created from cloud '%2'").arg(ccGroup->getChildrenNumber()).arg(cloud->getName()));
+			ccConsole::Print(tr("[CreateComponentsClouds] %1 component(s) were created from cloud '%2'").arg(ccGroup->getChildrenNumber()).arg(cloud->getName()));
 		}
 
 		cloud->prepareDisplayForRefresh();
@@ -4110,7 +4110,7 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 		if (ccGroup)
 		{
 			cloud->setEnabled(false);
-			ccConsole::Warning(tr("[createComponentsClouds] Original cloud has been automatically hidden"));
+			ccConsole::Warning(tr("[CreateComponentsClouds] Original cloud has been automatically hidden"));
 		}
 	}
 }
@@ -4229,12 +4229,12 @@ void MainWindow::doActionLabelConnectedComponents()
 				pc->getCurrentInScalarField()->computeMinAndMax();
 				if (!CCCoreLib::AutoSegmentationTools::extractConnectedComponents(cloud, components))
 				{
-					ccConsole::Warning(tr("[doActionLabelConnectedComponents] Something went wrong while extracting CCs from cloud %1...").arg(cloud->getName()));
+					ccConsole::Warning(tr("[DoActionLabelConnectedComponents] Something went wrong while extracting CCs from cloud %1...").arg(cloud->getName()));
 				}
 			}
 			else
 			{
-				ccConsole::Warning(tr("[doActionLabelConnectedComponents] Something went wrong while extracting CCs from cloud %1...").arg(cloud->getName()));
+				ccConsole::Warning(tr("[DoActionLabelConnectedComponents] Something went wrong while extracting CCs from cloud %1...").arg(cloud->getName()));
 			}
 
 			//we delete the CCs label scalar field (we don't need it anymore)
@@ -4799,10 +4799,10 @@ void MainWindow::doActionFitQuadric()
 				quadric->copyGlobalShiftAndScale(*cloud);
 				addToDB(quadric);
 
-				ccConsole::Print(tr("[doActionFitQuadric] Quadric local coordinate system:"));
+				ccConsole::Print(tr("[DoActionFitQuadric] Quadric local coordinate system:"));
 				ccConsole::Print(quadric->getTransformation().toString(12,' ')); //full precision
-				ccConsole::Print(tr("[doActionFitQuadric] Quadric equation (in local coordinate system): ") + quadric->getEquationString());
-				ccConsole::Print(QString("[doActionFitQuadric] RMS: %1").arg(rms));
+				ccConsole::Print(tr("[DoActionFitQuadric] Quadric equation (in local coordinate system): ") + quadric->getEquationString());
+				ccConsole::Print(QString("[DoActionFitQuadric] RMS: %1").arg(rms));
 
 #if 0
 				//test: project the input cloud on the quadric
@@ -5444,7 +5444,7 @@ void MainWindow::doActionSORFilter()
 		{
 			if (selection->size() == cloud->size())
 			{
-				ccLog::Warning(tr("[doActionSORFilter] No points were removed from cloud '%1'").arg(cloud->getName()));
+				ccLog::Warning(tr("[DoActionSORFilter] No points were removed from cloud '%1'").arg(cloud->getName()));
 			}
 			else
 			{
@@ -5467,7 +5467,7 @@ void MainWindow::doActionSORFilter()
 				}
 				else
 				{
-					ccConsole::Warning(tr("[doActionSORFilter] Not enough memory to create a clean version of cloud '%1'!").arg(cloud->getName()));
+					ccConsole::Warning(tr("[DoActionSORFilter] Not enough memory to create a clean version of cloud '%1'!").arg(cloud->getName()));
 				}
 			}
 
@@ -5479,11 +5479,11 @@ void MainWindow::doActionSORFilter()
 			//no points fall inside selection!
 			if ( cloud != nullptr )
 			{
-				ccConsole::Warning(tr("[doActionSORFilter] Failed to apply the noise filter to cloud '%1'! (not enough memory?)").arg(cloud->getName()));
+				ccConsole::Warning(tr("[DoActionSORFilter] Failed to apply the noise filter to cloud '%1'! (not enough memory?)").arg(cloud->getName()));
 			}
 			else
 			{
-				ccConsole::Warning(tr("[doActionSORFilter] Trying to apply the noise filter to null cloud"));
+				ccConsole::Warning(tr("[DoActionSORFilter] Trying to apply the noise filter to null cloud"));
 			}
 		}
 	}
@@ -5565,7 +5565,7 @@ void MainWindow::doActionFilterNoise()
 		{
 			if (selection->size() == cloud->size())
 			{
-				ccLog::Warning(tr("[doActionFilterNoise] No points were removed from cloud '%1'").arg(cloud->getName()));
+				ccLog::Warning(tr("[DoActionFilterNoise] No points were removed from cloud '%1'").arg(cloud->getName()));
 			}
 			else
 			{
@@ -5588,7 +5588,7 @@ void MainWindow::doActionFilterNoise()
 				}
 				else
 				{
-					ccConsole::Warning(tr("[doActionFilterNoise] Not enough memory to create a clean version of cloud '%1'!").arg(cloud->getName()));
+					ccConsole::Warning(tr("[DoActionFilterNoise] Not enough memory to create a clean version of cloud '%1'!").arg(cloud->getName()));
 				}
 			}
 
@@ -5600,11 +5600,11 @@ void MainWindow::doActionFilterNoise()
 			//no points fall inside selection!
 			if ( cloud != nullptr )
 			{
-				ccConsole::Warning(tr("[doActionFilterNoise] Failed to apply the noise filter to cloud '%1'! (not enough memory?)").arg(cloud->getName()));
+				ccConsole::Warning(tr("[DoActionFilterNoise] Failed to apply the noise filter to cloud '%1'! (not enough memory?)").arg(cloud->getName()));
 			}
 			else
 			{
-				ccConsole::Warning(tr("[doActionFilterNoise] Trying to apply the noise filter to null cloud"));
+				ccConsole::Warning(tr("[DoActionFilterNoise] Trying to apply the noise filter to null cloud"));
 			}
 		}
 	}
@@ -7375,7 +7375,7 @@ void MainWindow::onItemPicked(const PickedItem& pi)
 
 	if (m_pickingHub->activeWindow() != s_pickingWindow)
 	{
-		ccLog::Warning(tr("The point picked was picked in the wrong window"));
+		ccLog::Warning(tr("The point was picked in the wrong window"));
 		return;
 	}
 
@@ -8318,7 +8318,7 @@ void MainWindow::doSphericalNeighbourhoodExtractionTest()
 			for (size_t k = 0; k < neihgboursCount; ++k)
 				cloud->setPointScalarValue(neighbours[k].pointIndex, static_cast<ScalarType>(sqrt(neighbours[k].squareDistd)));
 		}
-		ccConsole::Print(tr("[SNE_TEST] Mean extraction time = %1 ms (radius = %2, mean(neighbours) = %3)").arg(eTimer.elapsed()).arg(sphereRadius).arg(extractedPoints / static_cast<double>(samples), 0, 'f', 1));
+		ccConsole::Print(tr("[SNE_TEST] Mean extraction time = %1 ms (radius = %2, mean (neighbours) = %3)").arg(eTimer.elapsed()).arg(sphereRadius).arg(extractedPoints / static_cast<double>(samples), 0, 'f', 1));
 
 		sf->computeMinAndMax();
 		cloud->setCurrentDisplayedScalarField(sfIdx);
@@ -8426,7 +8426,7 @@ void MainWindow::doCylindricalNeighbourhoodExtractionTest()
 				cloud->setPointScalarValue(cn.neighbours[k].pointIndex, static_cast<ScalarType>(sqrt(cn.neighbours[k].squareDistd)));
 			}
 		}
-		ccConsole::Print(tr("[CNE_TEST] Mean extraction time = %1 ms (radius = %2, height = %3, mean(neighbours) = %4))").arg(subTimer.elapsed()).arg(radius).arg(height).arg(static_cast<double>(extractedPoints) / samples, 0, 'f', 1));
+		ccConsole::Print(tr("[CNE_TEST] Mean extraction time = %1 ms (radius = %2, height = %3, mean (neighbours) = %4))").arg(subTimer.elapsed()).arg(radius).arg(height).arg(static_cast<double>(extractedPoints) / samples, 0, 'f', 1));
 	}
 	else
 	{
@@ -8672,12 +8672,12 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 					group->addChild(bestB);
 					group->setDisplay_recursive(A->getDisplay());
 					addToDB(group);
-					ccLog::Print(tr("[doActionComputeBestICPRmsMatrix] Comparison #%1 / #%2: min RMS = %3 (phi = %4 / theta = %5 deg.)").arg(i+1).arg(j+1).arg(minRMS).arg(matrixAngles[bestMatrixIndex].first).arg(matrixAngles[bestMatrixIndex].second));
+					ccLog::Print(tr("[DoActionComputeBestICPRmsMatrix] Comparison #%1 / #%2: min RMS = %3 (phi = %4 / theta = %5 deg.)").arg(i+1).arg(j+1).arg(minRMS).arg(matrixAngles[bestMatrixIndex].first).arg(matrixAngles[bestMatrixIndex].second));
 				}
 				else
 				{
 					assert(!bestB);
-					ccLog::Warning(tr("[doActionComputeBestICPRmsMatrix] Comparison #%1 / #%2: INVALID").arg(i+1).arg(j+1));
+					ccLog::Warning(tr("[DoActionComputeBestICPRmsMatrix] Comparison #%1 / #%2: INVALID").arg(i+1).arg(j+1));
 				}
 
 				rmsMatrix[i*cloudCount + j] = minRMS;
@@ -8738,7 +8738,7 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 				stream << endl;
 			}
 
-			ccLog::Print(tr("[doActionComputeBestICPRmsMatrix] Job done"));
+			ccLog::Print(tr("[DoActionComputeBestICPRmsMatrix] Job done"));
 		}
 		else
 		{

@@ -19,3 +19,6 @@
 [submodule "plugins/core/Standard/qJSonRPCPlugin"]
 	path = plugins/core/Standard/qJSonRPCPlugin
 	url = https://gitlab.com/theadib/JSonRPCPlugin.git
+[submodule "plugins/core/Standard/qCanupo/contrib/dlib"]
+	path = plugins/core/Standard/qCanupo/contrib/dlib
+	url = ../../davisking/dlib.git

@@ -5,7 +5,7 @@ if( PLUGIN_STANDARD_QCANUPO )
 	
 	AddPlugin( NAME ${PROJECT_NAME} )
 
-	set( DLIB_ROOT "" CACHE PATH "dlib library root directory" )
+	set( DLIB_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/contrib/dlib CACHE PATH "dlib library root directory" )
 	if ( NOT DLIB_ROOT )
 		message( FATAL_ERROR "No dlib library root specified (DLIB_ROOT)" )
 	else()
@@ -20,4 +20,10 @@ if( PLUGIN_STANDARD_QCANUPO )
 	add_subdirectory( include )
 	add_subdirectory( src )
 	add_subdirectory( ui )
+	
+	# Don't forget the DLIB 'source.cpp' file
+	target_sources( ${PROJECT_NAME}
+		PRIVATE
+		${DLIB_ROOT}/dlib/all/source.cpp
+	)
 endif()

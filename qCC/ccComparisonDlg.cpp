@@ -870,14 +870,14 @@ bool ccComparisonDlg::computeDistances()
 
 	if (result >= 0)
 	{
-		ccLog::Print("[ComputeDistances] Time: %3.2f s.",static_cast<double>(elapsedTime_ms)/1.0e3);
+		ccLog::Print("[ComputeDistances] Time: %3.2f s.", elapsedTime_ms / 1.0e3);
 
 		//display some statics about the computed distances
 		ScalarType mean;
 		ScalarType variance;
 		sf->computeMinAndMax();
 		sf->computeMeanAndVariance(mean, &variance);
-		ccLog::Print("[ComputeDistances] Mean distance = %f / std deviation = %f",mean,sqrt(variance));
+		ccLog::Print("[ComputeDistances] " + tr("Mean distance = %1 / std deviation = %2").arg(mean).arg(sqrt(variance)));
 
 		m_compCloud->setCurrentDisplayedScalarField(sfIdx);
 		m_compCloud->showSF(sfIdx >= 0);

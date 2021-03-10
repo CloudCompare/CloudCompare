@@ -8145,12 +8145,12 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 			if (plane)
 			{
 				ccConsole::Print(tr("[Orientation] Entity '%1'").arg(entity->getName()));
-				ccConsole::Print(tr("\t- plane fitting RMS: %f").arg(rms));
+				ccConsole::Print(tr("\t- plane fitting RMS: %1").arg(rms));
 
 				//We always consider the normal with a positive 'Z' by default!
 				if (N.z < 0.0)
 					N *= -1.0;
-				ccConsole::Print(tr("\t- normal: (%f,%f,%f)").arg(N.x).arg(N.y).arg(N.z));
+				ccConsole::Print(tr("\t- normal: (%1, %2, %3)").arg(N.x).arg(N.y).arg(N.z));
 
 				//we compute strike & dip by the way
 				PointCoordinateType dip = 0.0f;

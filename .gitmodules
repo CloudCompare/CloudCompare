@@ -21,4 +21,4 @@
 	url = https://gitlab.com/theadib/JSonRPCPlugin.git
 [submodule "plugins/core/Standard/qCanupo/contrib/dlib"]
 	path = plugins/core/Standard/qCanupo/contrib/dlib
-	url = ../../davisking/dlib.git
+	url = https://github.com/davisking/dlib.git

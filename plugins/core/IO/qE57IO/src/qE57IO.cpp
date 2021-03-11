@@ -20,9 +20,9 @@
 #include "E57Filter.h"
 
 
-qE57IO::qE57IO( QObject *parent ) :
-	QObject( parent ),
-	ccIOPluginInterface( ":/CC/plugin/qE57IO/info.json" )
+qE57IO::qE57IO( QObject *parent )
+	: QObject( parent )
+	, ccIOPluginInterface( ":/CC/plugin/qE57IO/info.json" )
 {
 }
 

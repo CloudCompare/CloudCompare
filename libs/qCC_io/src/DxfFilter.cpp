@@ -719,42 +719,24 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const QString& filename, co
 		return CC_FERR_NO_SAVE;
 
 	//get global bounding box
-	CCVector3d bbMinCorner;
-	CCVector3d bbMaxCorner;
+	ccHObject::GlobalBoundingBox globalBB;
 	{
 		ccHObject::Container* containers[3] = { &polylines, &meshes, &clouds };
 
 		bool firstEntity = true;
 		for (int j = 0; j < 3; ++j)
 		{
-			for (size_t i = 0; i < containers[j]->size(); ++i)
+			const ccHObject::Container& container = *containers[j];
+			for (size_t i = 0; i < container.size(); ++i)
 			{
-				CCVector3d minC;
-				CCVector3d maxC;
-				if (containers[j]->at(i)->getGlobalBB(minC, maxC))
-				{
-					//update global BB
-					if (firstEntity)
-					{
-						bbMinCorner = minC;
-						bbMaxCorner = maxC;
-						firstEntity = false;
-					}
-					else
-					{
-						bbMinCorner.x = std::min(bbMinCorner.x, minC.x);
-						bbMinCorner.y = std::min(bbMinCorner.y, minC.y);
-						bbMinCorner.z = std::min(bbMinCorner.z, minC.z);
-						bbMaxCorner.x = std::max(bbMaxCorner.x, maxC.x);
-						bbMaxCorner.y = std::max(bbMaxCorner.y, maxC.y);
-						bbMaxCorner.z = std::max(bbMaxCorner.z, maxC.z);
-					}
-				}
+				ccHObject::GlobalBoundingBox bb = container[i]->getOwnGlobalBB();
+				//update global BB
+				globalBB += bb;
 			}
 		}
 	}
 
-	CCVector3d diag = bbMaxCorner - bbMinCorner;
+	CCVector3d diag = globalBB.getDiagVec();
 	double baseSize = std::max(diag.x, diag.y);
 	double lineWidth = baseSize / 40.0;
 	double pageMargin = baseSize / 20.0;
@@ -782,6 +764,8 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const QString& filename, co
 		dxf.writeHeader(*dw);
 
 		//add dimensions
+		const CCVector3d& bbMinCorner = globalBB.minCorner();
+		const CCVector3d& bbMaxCorner = globalBB.maxCorner();
 		dw->dxfString(9, "$INSBASE");
 		dw->dxfReal(10, 0.0);
 		dw->dxfReal(20, 0.0);

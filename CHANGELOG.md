@@ -96,6 +96,7 @@ v2.12 (???) - (in development)
 	- When loading raster files, GDAL can sometimes report wrong min and max altitudes. This would then let CC think that invalid pixels are
 		present. And when telling CC to keep these invalid points, the altitude was actually already replaced by a strange one...
 	- CloudCompare was reporting truncated (integer) dip and dip direction values instead of rounded values
+	- the SHP I/O filter was writing the local bounding-box in the file header instead of the global one (if the saved entities were shifted)
 
 
 v2.11.3 (Anoia) - 08/09/2020

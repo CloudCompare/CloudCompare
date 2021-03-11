@@ -537,6 +537,22 @@ ccBBox ccHObject::getOwnBB(bool withGLFeatures/*=false*/)
 	return ccBBox();
 }
 
+ccHObject::GlobalBoundingBox ccHObject::getOwnGlobalBB(bool withGLFeatures/*=false*/)
+{
+	//by default this method returns the local bounding-box!
+	ccBBox box = getOwnBB(false);
+	return GlobalBoundingBox(CCVector3d::fromArray(box.minCorner().u), CCVector3d::fromArray(box.maxCorner().u));
+}
+
+bool ccHObject::getOwnGlobalBB(CCVector3d& minCorner, CCVector3d& maxCorner)
+{
+	//by default this method returns the local bounding-box!
+	ccBBox box = getOwnBB(false);
+	minCorner = CCVector3d::fromArray(box.minCorner().u);
+	maxCorner = CCVector3d::fromArray(box.maxCorner().u);
+	return box.isValid();
+}
+
 ccBBox ccHObject::getBB_recursive(bool withGLFeatures/*=false*/, bool onlyEnabledChildren/*=true*/)
 {
 	ccBBox box = getOwnBB(withGLFeatures);
@@ -546,6 +562,21 @@ ccBBox ccHObject::getBB_recursive(bool withGLFeatures/*=false*/, bool onlyEnable
 		if (!onlyEnabledChildren || child->isEnabled())
 		{
 			box += child->getBB_recursive(withGLFeatures,onlyEnabledChildren);
+		}
+	}
+
+	return box;
+}
+
+ccHObject::GlobalBoundingBox ccHObject::getGlobalBB_recursive(bool withGLFeatures/*=false*/, bool onlyEnabledChildren/*=true*/)
+{
+	GlobalBoundingBox box = getOwnGlobalBB(withGLFeatures);
+
+	for (auto child : m_children)
+	{
+		if (!onlyEnabledChildren || child->isEnabled())
+		{
+			box += child->getGlobalBB_recursive(withGLFeatures, onlyEnabledChildren);
 		}
 	}
 

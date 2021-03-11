@@ -19,7 +19,6 @@
 //Local
 #include "ccHObject.h"
 
-
 //! Shifted entity interface
 /** Shifted entities are entities which coordinates can be
 	(optionally) shifted so as to reduce their amplitude and
@@ -98,8 +97,8 @@ public:
 	}
 
 	//inherited from ccHObject
-	bool getGlobalBB(CCVector3d& minCorner, CCVector3d& maxCorner) override;
-
+	bool getOwnGlobalBB(CCVector3d& minCorner, CCVector3d& maxCorner) override;
+	GlobalBoundingBox getOwnGlobalBB(bool withGLFeatures = false) override;
 protected:
 
 	//! Serialization helper (output)

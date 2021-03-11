@@ -76,10 +76,18 @@ bool ccShiftedObject::loadShiftInfoFromFile(QFile& in)
 	return true;
 }
 
-bool ccShiftedObject::getGlobalBB(CCVector3d& minCorner, CCVector3d& maxCorner)
+bool ccShiftedObject::getOwnGlobalBB(CCVector3d& minCorner, CCVector3d& maxCorner)
 {
 	ccBBox box = getOwnBB(false);
 	minCorner = toGlobal3d(box.minCorner());
 	maxCorner = toGlobal3d(box.maxCorner());
 	return box.isValid();
+}
+
+ccHObject::GlobalBoundingBox ccShiftedObject::getOwnGlobalBB(bool withGLFeatures/*=false*/)
+{
+	ccBBox box = getOwnBB(false);
+	CCVector3d minCorner = toGlobal3d(box.minCorner());
+	CCVector3d maxCorner = toGlobal3d(box.maxCorner());
+	return GlobalBoundingBox(minCorner, maxCorner);
 }

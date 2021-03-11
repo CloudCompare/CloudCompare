@@ -311,7 +311,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	CCCoreLib::NormalizedProgress nProgress(pDlg.data(), numberOfPoints);
 
 	CCVector3d bbMin, bbMax;
-	if (!theCloud->getGlobalBB(bbMin, bbMax))
+	if (!theCloud->getOwnGlobalBB(bbMin, bbMax))
 	{
 		if (theCloud->size() != 0)
 		{

@@ -44,7 +44,8 @@
 
 using colorFieldType = double;
 
-namespace  {
+namespace
+{
 	constexpr char CC_E57_INTENSITY_FIELD_NAME[] = "Intensity";
 	constexpr char CC_E57_RETURN_INDEX_FIELD_NAME[] = "Return index";
 	constexpr char s_e57PoseKey[] = "E57_pose";
@@ -95,7 +96,6 @@ namespace  {
 		return QUuid::createUuid().toString();
 	}
 }
-
 
 E57Filter::E57Filter()
     : FileIOFilter( {
@@ -231,7 +231,7 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 	}
 	else
 	{
-		if (!cloud->getGlobalBB(bbMin, bbMax))
+		if (!cloud->getOwnGlobalBB(bbMin, bbMax))
 		{
 			ccLog::Error(QString("[E57Filter::SaveScan] Internal error: cloud '%1' has an invalid bounding box?!").arg(cloud->getName()));
 			return false;

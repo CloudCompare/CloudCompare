@@ -244,7 +244,7 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 		{
 			//header.SetDataFormatId(liblas::ePointFormat3);
 			CCVector3d bbMin, bbMax;
-			if (!cloud->getGlobalBB(bbMin, bbMax))
+			if (!cloud->getOwnGlobalBB(bbMin, bbMax))
 			{
 				return CC_FERR_NO_SAVE;
 			}

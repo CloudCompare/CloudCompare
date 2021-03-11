@@ -48,21 +48,22 @@
 //! Object angular velocity per mouse tick (in radians per ms per count)
 static const double c_3dmouseAngularVelocity = 1.0e-6;
 
-//unique instance
-static Mouse3DInput* s_mouseInputInstance = 0;
+// Unique instance
+static Mouse3DInput* s_mouseInputInstance = nullptr;
 
 #include <QAbstractNativeEventFilter>
 class RawInputEventFilter : public QAbstractNativeEventFilter
 {
 public:
-	virtual bool nativeEventFilter(const QByteArray& eventType, void* msg, long* result) Q_DECL_OVERRIDE
+	bool nativeEventFilter(const QByteArray& eventType, void* msg, long* result) override
 	{
 		if (!s_mouseInputInstance || !msg)
 		{
 			return false;
 		}
 
-		SiGetEventData eData;	//Platform-specific event data
+		// Platform-specific event data
+		SiGetEventData eData;
 #ifdef CC_WINDOWS
 		MSG* messageStruct = static_cast<MSG*>(msg);
 		SiGetEventWinInit(&eData, messageStruct->message, messageStruct->wParam, messageStruct->lParam);
@@ -70,26 +71,23 @@ public:
 		return s_mouseInputInstance->onSiEvent(&eData);
 	}
 };
+static RawInputEventFilter s_rawInputEventFilter;
 
 Mouse3DInput::Mouse3DInput(QObject* parent)
     : QObject(parent)
     , m_siHandle(SI_NO_HANDLE)
 {
-	//register current instance
-	assert(s_mouseInputInstance == 0);
+	// Register current instance
+	assert(s_mouseInputInstance == nullptr);
 	s_mouseInputInstance = this;
-
-	//setup event filter
-	static RawInputEventFilter s_rawInputEventFilter;
-	qApp->installNativeEventFilter(&s_rawInputEventFilter);
 }
 
 Mouse3DInput::~Mouse3DInput()
 {
-	//unregister current instance
+	// Unregister current instance
 	if (s_mouseInputInstance == this)
 	{
-		s_mouseInputInstance = 0;
+		s_mouseInputInstance = nullptr;
 	}
 }
 
@@ -101,32 +99,29 @@ bool Mouse3DInput::connect(QWidget* mainWidget, QString appName)
 		return false;
 	}
 
-	/*** Attempt to connect with the 3DxWare driver ***/
+	// Attempt to connect with the 3DxWare driver
 	assert(m_siHandle == SI_NO_HANDLE);
 
 	if (SiInitialize() == SPW_DLL_LOAD_ERROR)
 	{
-		ccLog::Warning("[3D Mouse] Could not load SiAppDll dll files");
+		ccLog::Warning(tr("[3D Mouse] Could not load SiAppDll dll files"));
 		return false;
 	}
 
-	//Platform-specific device data
+	// Platform-specific device data
 	SiOpenDataEx oData;
 	SiOpenWinInitEx(&oData, (HWND)mainWidget->winId() );
 	SiOpenWinAddHintBoolEnum(&oData, SI_HINT_USESV3DCMDS, SPW_TRUE);
-	//3DxWare device handle
+	// 3DxWare device handle
 	m_siHandle = SiOpenEx(qUtf16Printable(appName), SI_ANY_DEVICE, SI_NO_MASK, SI_EVENT, &oData);
 	
 	if (m_siHandle == SI_NO_HANDLE)
 	{
-		/* Get and display initialization error */
+		// Get and display initialization error
 		SiTerminate();
-		ccLog::Warning("[3D Mouse] Could not open a 3DxWare device");
+		ccLog::Warning(tr("[3D Mouse] Could not open a 3DxWare device"));
 		return false;
 	}
-
-	//to avoid drift
-	SiRezero(m_siHandle);
 
 	SiDevInfo info;
 	if (SiGetDeviceInfo(m_siHandle, &info) == SPW_NO_ERROR)
@@ -134,7 +129,7 @@ bool Mouse3DInput::connect(QWidget* mainWidget, QString appName)
 		//DGM: strangely, we get these wrong versions on real wireless devices?!
 		//if (info.majorVersion == 0 && info.minorVersion == 0)
 		//{
-		//	/* Not a real device */
+		//	// Not a real device
 		//	SiTerminate();
 		//	ccLog::Warning("[3D Mouse] Couldn't find a connected device");
 		//	return false;
@@ -142,15 +137,31 @@ bool Mouse3DInput::connect(QWidget* mainWidget, QString appName)
 
 		SiDeviceName name;
 		SiGetDeviceName(m_siHandle, &name);
-		ccLog::Print(QString("[3D Mouse] Device: %1 (%2 buttons) - firmware v%3.%4").arg(name.name).arg(info.numButtons).arg(info.majorVersion).arg(info.minorVersion));
+		ccLog::Print(tr("[3D Mouse] Device: %1 (%2 buttons) - firmware v%3.%4").arg(name.name).arg(info.numButtons).arg(info.majorVersion).arg(info.minorVersion));
+
+		if (info.numButtons == 0
+			&& info.majorVersion == 0
+			&& info.minorVersion == 0)
+		{
+			// notification only device = fake device
+			// can make CC interactions and mouse capture super slow!!!
+			ccLog::Print(tr("[3D Mouse] Notification-only device will be ignored"));
+			SiClose(m_siHandle);
+			SiTerminate();
+			m_siHandle = SI_NO_HANDLE;
+			return false;
+		}
 	}
 	else
 	{
-		ccLog::Warning("[3D Mouse] Failed to retrieve device info?!");
+		ccLog::Warning(tr("[3D Mouse] Failed to retrieve device info"));
 	}
 
-	//to avoid drift
+	// To avoid drift
 	SiRezero(m_siHandle);
+
+	// Setup event filter
+	qApp->installNativeEventFilter(&s_rawInputEventFilter);
 
 	return true;
 }
@@ -162,6 +173,7 @@ void Mouse3DInput::disconnectDriver()
 		SiClose(m_siHandle);
 		SiTerminate();
 		m_siHandle = SI_NO_HANDLE;
+		qApp->removeNativeEventFilter(&s_rawInputEventFilter);
 	}
 }
 

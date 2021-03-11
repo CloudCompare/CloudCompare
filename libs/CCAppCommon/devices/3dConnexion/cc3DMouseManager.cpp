@@ -27,10 +27,10 @@
 #include "Mouse3DInput.h"
 
 
-cc3DMouseManager::cc3DMouseManager( ccMainAppInterface *appInterface, QObject *parent ) :
-    QObject( parent ),
-    m_appInterface( appInterface ),
-    m3dMouseInput( nullptr )
+cc3DMouseManager::cc3DMouseManager( ccMainAppInterface *appInterface, QObject *parent )
+	: QObject( parent )
+    , m_appInterface( appInterface )
+    , m3dMouseInput( nullptr )
 {
     setupMenu();
 

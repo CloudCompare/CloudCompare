@@ -5,11 +5,12 @@ if( PLUGIN_STANDARD_QCANUPO )
 	
 	AddPlugin( NAME ${PROJECT_NAME} )
 
-	set( DLIB_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/contrib/dlib CACHE PATH "dlib library root directory" )
-	if ( NOT DLIB_ROOT )
-		message( FATAL_ERROR "No dlib library root specified (DLIB_ROOT)" )
+	unset( DLIB_ROOT CACHE ) #deprecated
+	set( DLIB_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/contrib/dlib CACHE PATH "dlib library root directory" )
+	if ( NOT DLIB_ROOT_DIR )
+		message( FATAL_ERROR "No dlib library root specified (DLIB_ROOT_DIR)" )
 	else()
-		include_directories( ${DLIB_ROOT} )
+		include_directories( ${DLIB_ROOT_DIR} )
 	endif()
 	
 	option( QCANUPO_COMPILE_PRIVATE_METHODS "Compile qCanupo plugin with private methods (CNRS/UEB only)" OFF )
@@ -24,6 +25,6 @@ if( PLUGIN_STANDARD_QCANUPO )
 	# Don't forget the DLIB 'source.cpp' file
 	target_sources( ${PROJECT_NAME}
 		PRIVATE
-		${DLIB_ROOT}/dlib/all/source.cpp
+		${DLIB_ROOT_DIR}/dlib/all/source.cpp
 	)
 endif()

@@ -590,7 +590,7 @@ const CCVector3d& ccPolyline::getGlobalShift() const
 	const ccPointCloud* pc = dynamic_cast<const ccPointCloud*>(m_theAssociatedCloud);
 	if (pc && pc->getParent() == this)
 	{
-		//auto transfer the global scale info to the vertices
+		//by default we use the vertices global shift info
 		return pc->getGlobalShift();
 	}
 	else
@@ -604,7 +604,7 @@ double ccPolyline::getGlobalScale() const
 	const ccPointCloud* pc = dynamic_cast<const ccPointCloud*>(m_theAssociatedCloud);
 	if (pc && pc->getParent() == this)
 	{
-		//auto transfer the global scale info to the vertices
+		//by default we use the vertices global scale info
 		return pc->getGlobalScale();
 	}
 	else

@@ -206,7 +206,9 @@ protected:
 	void updateCloudsBox();
 
 private: //members
-	Ui::SectionExtractionDlg	*m_UI;
+
+	//! Associated UI
+	Ui::SectionExtractionDlg* m_UI;
 	
 	//! Pool of active sections
 	SectionPool m_sections;

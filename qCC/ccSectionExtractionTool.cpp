@@ -687,7 +687,7 @@ void ccSectionExtractionTool::updatePolyLine(int x, int y, Qt::MouseButtons butt
 	if ((m_state & RUNNING) == 0)
 		return;
 
-	if (!m_editedPoly)
+	if (!m_editedPolyVertices)
 		return;
 
 	unsigned vertCount = m_editedPolyVertices->size();
@@ -727,13 +727,13 @@ void ccSectionExtractionTool::addPointToPolyline(int x, int y)
 		m_editedPoly->setColor(s_defaultEditedPolylineColor);
 		m_editedPoly->showColors(true);
 		m_editedPoly->set2DMode(true);
+		m_editedPoly->addChild(m_editedPolyVertices); //make sure the polyline is a parent of the polyline before copying the Global Shift & Scale info!
 		//copy (first) cloud shift & scale info!
 		if (!m_clouds.empty() && m_clouds.front().entity)
 		{
 			ccGenericPointCloud* cloud = m_clouds.front().entity;
 			m_editedPoly->copyGlobalShiftAndScale(*cloud);
 		}
-		m_editedPoly->addChild(m_editedPolyVertices);
 		m_associatedWin->addToOwnDB(m_editedPoly);
 	}
 

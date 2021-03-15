@@ -1079,7 +1079,7 @@ bool GenericItem::setOrientation(const CCVector3 &x, const CCVector3 &y, const C
 
 bool GenericItem::isOrientationValid(unsigned i) const
 {
-	return CCCoreLib::GreaterThanEpsilon( orientation[i].norm2() );
+	return CCCoreLib::GreaterThanSquareEpsilon( orientation[i].norm2() );
 }
 
 bool GenericItem::completeOrientation()

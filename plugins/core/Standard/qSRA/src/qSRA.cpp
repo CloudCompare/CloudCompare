@@ -294,7 +294,7 @@ static ccPolyline* GetConeProfile(ccCone* cone)
 		CCVector3 Z(0, 0, 0);
 		Z.u[revolDim] = CCCoreLib::PC_ONE;
 		ccGLMatrix axisTrans = ccGLMatrix::FromToRotation(y, Z);
-		assert( CCCoreLib::LessThanEpsilon( ((axisTrans * y) - Z).norm() ) );
+		assert(CCCoreLib::LessThanSquareEpsilon(((axisTrans * y) - Z).norm2d()));
 		ccGLMatrix polyMat = coneTrans * axisTrans;
 		polyline->setGLTransformation(polyMat);
 	}

@@ -653,8 +653,8 @@ bool ccSectionExtractionTool::addCloud(ccGenericPointCloud* inputCloud, bool alr
 		//test (on the first cloud) that the global shift & scale info is the same
 		if (!s_mixedShiftAndScaleInfo && it == m_clouds.begin())
 		{
-			if (cloud.entity->getGlobalScale() != inputCloud->getGlobalScale()
-				|| CCCoreLib::LessThanEpsilon( (cloud.entity->getGlobalShift() - inputCloud->getGlobalShift()).norm() ))
+			if (	cloud.entity->getGlobalScale() != inputCloud->getGlobalScale()
+				||	CCCoreLib::LessThanEpsilon((cloud.entity->getGlobalShift() - inputCloud->getGlobalShift()).norm()))
 			{
 				ccLog::Warning("[ccSectionExtractionTool] Clouds have different shift & scale information! Only the first one will be used");
 				s_mixedShiftAndScaleInfo = true;
@@ -1841,7 +1841,7 @@ void ccSectionExtractionTool::extractPoints()
 						seg2D.s = s;
 						s += seg2D.lAB;
 
-						if ( CCCoreLib::LessThanEpsilon( seg2D.lAB ) )
+						if (CCCoreLib::LessThanEpsilon(seg2D.lAB))
 						{
 							//ignore too small segments
 							continue;

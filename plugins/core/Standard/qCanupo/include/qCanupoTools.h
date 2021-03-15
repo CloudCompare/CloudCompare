@@ -62,9 +62,9 @@ public:
 	template<typename T> static bool Fpeq(T a, T b, T epsilon = static_cast<T>(1.0e-6))
 	{
 		if (b == 0)
-			return fabs(a) < epsilon;
+			return std::abs(a) < epsilon;
 
-		return fabs(a/b - 1) <= epsilon;
+		return std::abs(a/b - 1) <= epsilon;
 	}
 
 	//! Compares two vectors

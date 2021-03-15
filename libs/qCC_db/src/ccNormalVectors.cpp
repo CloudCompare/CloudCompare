@@ -330,7 +330,7 @@ PointCoordinateType ccNormalVectors::GuessBestRadius(	ccGenericPointCloud* cloud
 			}
 
 			double meanPop = static_cast<double>(totalCount) / sampleCount;
-			double stdDevPop = sqrt(fabs(static_cast<double>(totalSquareCount) / sampleCount - meanPop*meanPop));
+			double stdDevPop = sqrt(std::abs(static_cast<double>(totalSquareCount) / sampleCount - meanPop*meanPop));
 			double aboveMinPopRatio = static_cast<double>(aboveMinPopCount) / sampleCount;
 
 			ccLog::Print(QString("[GuessBestRadius] Radius = %1 -> samples population in [%2 ; %3] (mean %4 / std. dev. %5 / %6% above mininmum)")
@@ -342,7 +342,7 @@ PointCoordinateType ccNormalVectors::GuessBestRadius(	ccGenericPointCloud* cloud
 										.arg(aboveMinPopRatio * 100)
 						);
 
-			if (fabs(meanPop - aimedPop) < s_aimedPopRange)
+			if (std::abs(meanPop - aimedPop) < s_aimedPopRange)
 			{
 				//we have found a correct radius
 				bestRadius = radius;
@@ -373,7 +373,7 @@ PointCoordinateType ccNormalVectors::GuessBestRadius(	ccGenericPointCloud* cloud
 			else
 			{
 				//keep track of our best guess nevertheless
-				if (fabs(meanPop - aimedPop) < fabs(bestRadius - aimedPop))
+				if (std::abs(meanPop - aimedPop) < std::abs(bestRadius - aimedPop))
 				{
 					bestRadius = radius;
 				}
@@ -880,11 +880,11 @@ void ccNormalVectors::ConvertNormalToDipAndDipDir(const CCVector3& N, PointCoord
 
 		// Dip angle
 		//
-		// acos() returns values in [0, pi] but using fabs() all the normals
+		// acos() returns values in [0, pi] but using std::abs() all the normals
 		// are considered pointing upwards, so the actual result will be in
 		// [0, pi/2] as required by the definition of dip.
 		// We skip the division by r because the normal is a unit vector.
-		double dip_rad = acos(fabs(N.z));
+		double dip_rad = acos(std::abs(N.z));
 
 		dipDir_deg = static_cast<PointCoordinateType>(CCCoreLib::RadiansToDegrees( dipDir_rad ));
 		dip_deg = static_cast<PointCoordinateType>(CCCoreLib::RadiansToDegrees( dip_rad ));
@@ -914,7 +914,7 @@ CCVector3 ccNormalVectors::ConvertDipAndDipDirToNormal(PointCoordinateType dip_d
 	//internal consistency test
 	PointCoordinateType dip2, dipDir2;
 	ConvertNormalToDipAndDipDir(N, dip2, dipDir2);
-	assert(fabs(dip2 - dip_deg) < 1.0e-3 && (dip2 == 0 || fabs(dipDir2 - dipDir_deg) < 1.0e-3));
+	assert(std::abs(dip2 - dip_deg) < 1.0e-3 && (dip2 == 0 || std::abs(dipDir2 - dipDir_deg) < 1.0e-3));
 #endif
 
 	if (!upward)

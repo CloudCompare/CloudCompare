@@ -1781,7 +1781,7 @@ bool ccPointCloud::setRGBColorByHeight(unsigned char heightDim, ccColorScale::Sh
 
 	double minHeight = getOwnBB().minCorner().u[heightDim];
 	double height = getOwnBB().getDiagVec().u[heightDim];
-	if ( CCCoreLib::LessThanEpsilon( fabs(height) ) ) //flat cloud!
+	if (CCCoreLib::LessThanEpsilon(std::abs(height))) //flat cloud!
 	{
 		const ccColor::Rgb& col = colorScale->getColorByIndex(0);
 		return setColor(col);
@@ -1931,7 +1931,7 @@ void ccPointCloud::applyRigidTransformation(const ccGLMatrix& trans)
 
 void ccPointCloud::translate(const CCVector3& T)
 {
-	if ( CCCoreLib::LessThanEpsilon( fabs(T.x) + fabs(T.y) + fabs(T.z) ) )
+	if (CCCoreLib::LessThanEpsilon(std::abs(T.x) + std::abs(T.y) + std::abs(T.z)))
 		return;
 
 	unsigned count = size();
@@ -2159,7 +2159,7 @@ inline float GetSymmetricalNormalizedValue(const ScalarType& sfVal, const ccScal
 {
 	//normalized sf value
 	ScalarType relativeValue = 0;
-	if (fabs(sfVal) > saturationRange.start()) //we avoid the 'flat' SF case by the way
+	if (std::abs(sfVal) > saturationRange.start()) //we avoid the 'flat' SF case by the way
 	{
 		if (sfVal < 0)
 			relativeValue = (sfVal+saturationRange.start())/saturationRange.max();
@@ -3493,9 +3493,9 @@ bool ccPointCloud::interpolateColorsFrom(	ccGenericPointCloud* otherCloud,
 
 	CCVector3 dimSum = box.getDiagVec() + otherBox.getDiagVec();
 	CCVector3 dist = box.getCenter() - otherBox.getCenter();
-	if (	fabs(dist.x) > dimSum.x / 2
-		||	fabs(dist.y) > dimSum.y / 2
-		||	fabs(dist.z) > dimSum.z / 2)
+	if (	std::abs(dist.x) > dimSum.x / 2
+		||	std::abs(dist.y) > dimSum.y / 2
+		||	std::abs(dist.z) > dimSum.z / 2)
 	{
 		ccLog::Warning("[ccPointCloud::interpolateColorsFrom] Clouds are too far from each other! Can't proceed.");
 		return false;

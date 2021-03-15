@@ -197,7 +197,7 @@ int ccViewportParameters::ZNearCoefToIncrement(double coef, int iMax)
 	double id = -(iMax / 3.0) * log10(coef);
 	int i = static_cast<int>(id);
 	//cope with numerical inaccuracies
-	if (fabs(id - i) > fabs(id - (i + 1)))
+	if (std::abs(id - i) > std::abs(id - (i + 1)))
 	{
 		++i;
 	}

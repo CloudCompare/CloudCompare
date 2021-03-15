@@ -479,7 +479,7 @@ void Cloth::handle_slop_connected(	const std::vector<int>& edgePoints,
 		for (size_t i = 0; i < neibors[index].size(); i++)
 		{
 			int index_neibor = connected[neibors[index][i]].y*num_particles_width + connected[neibors[index][i]].x;
-			if (std::abs(heightvals[index_center] - heightvals[index_neibor]) < smoothThreshold && fabs(particles[index_neibor].pos.y - heightvals[index_neibor]) < heightThreshold)
+			if (std::abs(heightvals[index_center] - heightvals[index_neibor]) < smoothThreshold && std::abs(particles[index_neibor].pos.y - heightvals[index_neibor]) < heightThreshold)
 			{
 				Vec3 offsetVec(0, heightvals[index_neibor] - particles[index_neibor].pos.y, 0);
 				particles[index_neibor].offsetPos(offsetVec);

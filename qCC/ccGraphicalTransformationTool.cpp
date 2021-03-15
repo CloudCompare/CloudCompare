@@ -203,9 +203,9 @@ ccGLMatrixd ccGraphicalTransformationTool::arbitraryVectorTranslation(const CCVe
 {
 	double theta = 0;
 
-	if ( CCCoreLib::LessThanEpsilon( std::abs(vec.z) ) )
+	if (CCCoreLib::LessThanEpsilon(std::abs(vec.z)))
 	{
-		if ( CCCoreLib::LessThanEpsilon( std::abs(vec.y) ) )
+		if (CCCoreLib::LessThanEpsilon(std::abs(vec.y)))
 		{
 			theta = 0;
 		}
@@ -234,9 +234,9 @@ ccGLMatrixd ccGraphicalTransformationTool::arbitraryVectorTranslation(const CCVe
 	double phiDenominator = std::sqrt((vec.y * vec.y) + (vec.z * vec.z));
 	double phi = 0;
 
-	if ( CCCoreLib::LessThanEpsilon( phiDenominator ) )
+	if (CCCoreLib::LessThanEpsilon(phiDenominator))
 	{
-		if ( CCCoreLib::LessThanEpsilon( std::abs(vec.x) ) )
+		if (CCCoreLib::LessThanEpsilon(std::abs(vec.x)))
 		{
 			phi = 0;
 		}
@@ -264,7 +264,7 @@ ccGLMatrixd ccGraphicalTransformationTool::arbitraryVectorTranslation(const CCVe
 	ccGLMatrixd arbitraryVectorTranslationAdjust = xRotation * yRotation;
 
 	//special case 
-	if ( CCCoreLib::LessThanEpsilon( std::abs(vec.x) ) && CCCoreLib::LessThanEpsilon( std::abs(vec.y) ) && vec.z < 0)
+	if (CCCoreLib::LessThanEpsilon(std::abs(vec.x)) && CCCoreLib::LessThanEpsilon(std::abs(vec.y)) && vec.z < 0)
 	{
 		arbitraryVectorTranslationAdjust.scaleRotation(-1);
 	}

@@ -548,7 +548,7 @@ bool ccClipBox::move3D(const CCVector3d& uInput)
 		for (int i = 1; i < 3; ++i)
 		{
 			double dot = m_viewMatrix.getColumnAsVec3D(i).dot(RxU);
-			if (fabs(dot) > fabs(maxDot))
+			if (std::abs(dot) > std::abs(maxDot))
 			{
 				maxDot = dot;
 			}

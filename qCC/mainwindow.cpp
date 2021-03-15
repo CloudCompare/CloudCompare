@@ -1446,20 +1446,20 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 			}
 			else
 			{
-				globalBBmin = CCVector3d(	std::min(globalBBmin.x,Ag.x),
-											std::min(globalBBmin.y,Ag.y),
-											std::min(globalBBmin.z,Ag.z) );
-				globalBBmax = CCVector3d(	std::max(globalBBmax.x,Bg.x),
-											std::max(globalBBmax.y,Bg.y),
-											std::max(globalBBmax.z,Bg.z) );
+				globalBBmin = CCVector3d(	std::min(globalBBmin.x, Ag.x),
+											std::min(globalBBmin.y, Ag.y),
+											std::min(globalBBmin.z, Ag.z) );
+				globalBBmax = CCVector3d(	std::max(globalBBmax.x, Bg.x),
+											std::max(globalBBmax.y, Bg.y),
+											std::max(globalBBmax.z, Bg.z) );
 
 				if (uniqueShift)
 				{
-					uniqueShift = CCCoreLib::LessThanEpsilon( (shifted->getGlobalShift() - shift).norm() );
+					uniqueShift = CCCoreLib::LessThanEpsilon((shifted->getGlobalShift() - shift).norm());
 				}
 				if (uniqueScale)
 				{
-					uniqueScale = CCCoreLib::LessThanEpsilon( std::abs(shifted->getGlobalScale() - scale) );
+					uniqueScale = CCCoreLib::LessThanEpsilon(std::abs(shifted->getGlobalScale() - scale));
 				}
 			}
 
@@ -8533,9 +8533,9 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 		//init all possible transformations
 		static const double angularStep_deg = 45.0;
 		unsigned phiSteps = static_cast<unsigned>(360.0 / angularStep_deg);
-		assert( CCCoreLib::LessThanEpsilon( std::abs(360.0 - phiSteps * angularStep_deg) ) );
+		assert(CCCoreLib::LessThanEpsilon(std::abs(360.0 - phiSteps * angularStep_deg)));
 		unsigned thetaSteps = static_cast<unsigned>(180.0 / angularStep_deg);
-		assert( CCCoreLib::LessThanEpsilon( std::abs(180.0 - thetaSteps * angularStep_deg) ) );
+		assert(CCCoreLib::LessThanEpsilon(std::abs(180.0 - thetaSteps * angularStep_deg)));
 		unsigned rotCount = phiSteps * (thetaSteps - 1) + 2;
 		matrices.reserve(rotCount);
 		matrixAngles.reserve(rotCount);

@@ -258,7 +258,7 @@ static ccPolyline* GetConeProfile(ccCone* cone)
 	//we'll use the 'largest' axis dimension as 'revolution dimension'
 	int revolDim = 0;
 	for (int i = 1; i<3; ++i)
-		if (fabs(axis.u[i]) > fabs(axis.u[revolDim]))
+		if (std::abs(axis.u[i]) > std::abs(axis.u[revolDim]))
 			revolDim = i;
 
 	//the profile has only one segment

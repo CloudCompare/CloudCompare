@@ -440,7 +440,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 				if (cell.nbPoints > 1)
 				{
 					cell.avgHeight /= cell.nbPoints;
-					cell.stdDevHeight = sqrt(fabs(cell.stdDevHeight / cell.nbPoints - cell.avgHeight*cell.avgHeight));
+					cell.stdDevHeight = sqrt(std::abs(cell.stdDevHeight / cell.nbPoints - cell.avgHeight*cell.avgHeight));
 					if (hasColors && projectionType == PROJ_AVERAGE_VALUE)
 					{
 						cell.color /= cell.nbPoints;

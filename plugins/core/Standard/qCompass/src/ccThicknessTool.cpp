@@ -195,7 +195,7 @@ ccHObject* ccThicknessTool::buildGraphic(CCVector3 endPoint, float thickness)
 	graphic->addChild(verts); //store the verts
 	graphic->invalidateBoundingBox();
 	graphic->updateMetadata();
-	graphic->setName(QString::asprintf("%.3fT", std::fabs(thickness)));
+	graphic->setName(QString::asprintf("%.3fT", std::abs(thickness)));
 	graphic->showNameIn3D(ccCompass::drawName);
 
 	//return

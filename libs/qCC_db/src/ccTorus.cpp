@@ -31,11 +31,11 @@ ccTorus::ccTorus(	PointCoordinateType insideRadius,
 					unsigned precision/*=DEFAULT_DRAWING_PRECISION*/,
 					unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
 	: ccGenericPrimitive(name, transMat, uniqueID)
-	, m_insideRadius(fabs(insideRadius))
-	, m_outsideRadius(fabs(outsideRadius))
+	, m_insideRadius(std::abs(insideRadius))
+	, m_outsideRadius(std::abs(outsideRadius))
 	, m_rectSection(rectangularSection)
-	, m_rectSectionHeight(fabs(rectSectionHeight))
-	, m_angle_rad(fabs(angle_rad))
+	, m_rectSectionHeight(std::abs(rectSectionHeight))
+	, m_angle_rad(std::abs(angle_rad))
 {
 	setDrawingPrecision(std::max<unsigned>(precision,MIN_DRAWING_PRECISION)); //automatically calls updateRepresentation
 }
@@ -61,9 +61,9 @@ bool ccTorus::buildUp()
 		return false;
 
 	//invalid parameters?
-	if ((m_rectSection && CCCoreLib::LessThanEpsilon( m_rectSectionHeight ))
-			|| m_insideRadius >= m_outsideRadius
-			|| CCCoreLib::LessThanEpsilon( m_angle_rad ) )
+	if (	(m_rectSection && CCCoreLib::LessThanEpsilon(m_rectSectionHeight))
+		||	m_insideRadius >= m_outsideRadius
+		||	CCCoreLib::LessThanEpsilon(m_angle_rad))
 	{
 		return false;
 	}

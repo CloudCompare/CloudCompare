@@ -291,7 +291,7 @@ void ccPlaneEditDlg::updatePlane(ccPlane* plane)
 
 	//shall we transform (translate and / or rotate) the plane?
 	ccGLMatrix trans;
-	bool needToApplyRot = (fabs(N.dot(Nd) - CCCoreLib::PC_ONE) > std::numeric_limits<PointCoordinateType>::epsilon());
+	bool needToApplyRot = (std::abs(N.dot(Nd) - CCCoreLib::PC_ONE) > std::numeric_limits<PointCoordinateType>::epsilon());
 	bool needToApplyTrans = (needToApplyRot || ((C - Cd).norm2d() != 0));
 
 	if (needToApplyTrans)
@@ -302,7 +302,7 @@ void ccPlaneEditDlg::updatePlane(ccPlane* plane)
 	{
 		ccGLMatrix rotation;
 		//special case: plane parallel to XY
-		if (fabs(N.z) > CCCoreLib::PC_ONE - std::numeric_limits<PointCoordinateType>::epsilon())
+		if (std::abs(N.z) > CCCoreLib::PC_ONE - std::numeric_limits<PointCoordinateType>::epsilon())
 		{
 			ccGLMatrix rotX; rotX.initFromParameters( CCCoreLib::DegreesToRadians( -dip ), CCVector3(1, 0, 0), CCVector3(0, 0, 0) ); //plunge
 			ccGLMatrix rotZ; rotZ.initFromParameters( CCCoreLib::DegreesToRadians( dipDir ), CCVector3(0, 0, -1), CCVector3(0, 0, 0) );

@@ -1513,7 +1513,7 @@ void ccRasterizeTool::generateHillshade()
 
 						 double aspect_rad = 0;
 						 static const double s_zero = 1.0e-8;
-						 if (fabs(dz_dx) > s_zero)
+						 if (std::abs(dz_dx) > s_zero)
 						 {
 							 aspect_rad = atan2(dz_dy, -dz_dx);
 							 if (aspect_rad < 0)
@@ -1860,7 +1860,7 @@ void ccRasterizeTool::generateImage() const
 		}
 
 		double range = maxHeight - minHeight;
-		if ( CCCoreLib::LessThanEpsilon( range ) )
+		if (CCCoreLib::LessThanEpsilon(range))
 		{
 			range = 1.0;
 		}

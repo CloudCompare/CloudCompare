@@ -442,7 +442,7 @@ void AsciiOpenDlg::updateTable()
 							valueIsInteger[i]  = true;
 							valueIsBelow255[i] = true;
 						}
-						valueIsBelowOne[i] = valueIsBelowOne[i] && (fabs(value) <= 1.0);
+						valueIsBelowOne[i] = valueIsBelowOne[i] && (std::abs(value) <= 1.0);
 						valueIsInteger[i] = valueIsInteger[i] && !parts[i].contains(decimalPoint);
 						valueIsBelow255[i] = valueIsBelow255[i] && valueIsInteger[i] && (value >= 0.0 && value <= 255.0);
 					}

@@ -191,7 +191,7 @@ void PCVContext::setViewDirection(const CCVector3& V)
 	glLoadIdentity();
 
 	CCVector3 U(0, 0, 1);
-	if (1 - fabs(V.dot(U)) < 1.0e-4)
+	if (1 - std::abs(V.dot(U)) < 1.0e-4)
 	{
 		U.y = 1;
 		U.z = 0;

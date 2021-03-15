@@ -338,7 +338,7 @@ void Mouse3DInput::Apply(const std::vector<float>& motionData, ccGLWindow* win)
 		//ccLog::Print(QString("Mouse translation: (%1,%2,%3)").arg(X).arg(Y).arg(Z));
 
 		//Zoom: object moves closer/away (only for ortho. mode)
-		if (!viewParams.perspectiveView && CCCoreLib::GreaterThanEpsilon(fabs(Z)))
+		if (!viewParams.perspectiveView && CCCoreLib::GreaterThanEpsilon(std::abs(Z)))
 		{
 			ccViewportParameters viewParams = win->getViewportParameters();
 			viewParams.setFocalDistance(viewParams.getFocalDistance() / (1.0 - Z / 1.5));
@@ -347,9 +347,9 @@ void Mouse3DInput::Apply(const std::vector<float>& motionData, ccGLWindow* win)
 		}
 
 		//Zoom & Panning: camera moves right/left + up/down + backward/forward (only for perspective mode)
-		if (	CCCoreLib::GreaterThanEpsilon(fabs(X))
-		    ||	CCCoreLib::GreaterThanEpsilon(fabs(Y))
-		    ||	CCCoreLib::GreaterThanEpsilon(fabs(Z)) )
+		if (	CCCoreLib::GreaterThanEpsilon(std::abs(X))
+		    ||	CCCoreLib::GreaterThanEpsilon(std::abs(Y))
+		    ||	CCCoreLib::GreaterThanEpsilon(std::abs(Z)) )
 		{
 			if (viewParams.perspectiveView)
 			{
@@ -369,9 +369,9 @@ void Mouse3DInput::Apply(const std::vector<float>& motionData, ccGLWindow* win)
 	}
 
 	//rotation
-	if (	CCCoreLib::GreaterThanEpsilon(fabs(vec[3]))
-	    ||	CCCoreLib::GreaterThanEpsilon(fabs(vec[4]))
-	    ||	CCCoreLib::GreaterThanEpsilon(fabs(vec[5])) )
+	if (	CCCoreLib::GreaterThanEpsilon(std::abs(vec[3]))
+	    ||	CCCoreLib::GreaterThanEpsilon(std::abs(vec[4]))
+	    ||	CCCoreLib::GreaterThanEpsilon(std::abs(vec[5])) )
 	{
 		//ccLog::Print(QString("Mouse rotation: (%1,%2,%3)").arg(vec[3]).arg(vec[4]).arg(vec[5]));
 

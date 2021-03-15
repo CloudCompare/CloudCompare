@@ -279,8 +279,8 @@ void ccShiftAndScaleCloudDlg::updateLocalSystem()
 	}
 
 	//adaptive precision
-	double maxCoord = std::max(fabs(localPoint.x), fabs(localPoint.y));
-	maxCoord = std::max(fabs(localPoint.z), maxCoord);
+	double maxCoord = std::max(std::abs(localPoint.x), std::abs(localPoint.y));
+	maxCoord = std::max(std::abs(localPoint.z), maxCoord);
 	int digitsBeforeDec = static_cast<int>(floor(log10(maxCoord))) + 1;
 	int prec = std::max(0, 8 - digitsBeforeDec);
 

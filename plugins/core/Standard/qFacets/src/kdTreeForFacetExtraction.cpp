@@ -106,7 +106,7 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 		{
 			leaves[i]->userData = -1;
 			//check by the way that the plane normal is unit!
-			assert(static_cast<double>(fabs(CCVector3(leaves[i]->planeEq).norm2()) - 1.0) < 1.0e-6);
+			assert(static_cast<double>(std::abs(CCVector3(leaves[i]->planeEq).norm2()) - 1.0) < 1.0e-6);
 		}
 	}
 
@@ -225,7 +225,7 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 						assert(currentPointSet->getAssociatedCloud() == it->leaf->points->getAssociatedCloud());
 
 						//if the leaf orientation is too different
-						if (fabs(CCVector3(it->leaf->planeEq).dot(currentNormal)) < c_minCosNormAngle)
+						if (std::abs(CCVector3(it->leaf->planeEq).dot(currentNormal)) < c_minCosNormAngle)
 						{
 							it = candidates.erase(it);
 							//++it;

@@ -45,7 +45,7 @@ public:
 	static PointCoordinateType CommputeHDistBetweenFacets(const ccFacet* f1, const ccFacet* f2)
 	{
 		CCVector3 AB = f1->getCenter() - f2->getCenter();
-		return std::min(fabs(AB.dot(f1->getNormal())), fabs(AB.dot(f2->getNormal())));
+		return std::min(std::abs(AB.dot(f1->getNormal())), std::abs(AB.dot(f2->getNormal())));
 	}
 
 	//! Generates a given sub-family color

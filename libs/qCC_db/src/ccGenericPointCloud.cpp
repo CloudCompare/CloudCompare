@@ -433,8 +433,8 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 #endif
 				}
 
-				if (	fabs(Q2D.x - clickPos.x) <= pickWidth
-					&&	fabs(Q2D.y - clickPos.y) <= pickHeight)
+				if (	std::abs(Q2D.x - clickPos.x) <= pickWidth
+					&&	std::abs(Q2D.y - clickPos.y) <= pickHeight)
 				{
 					const double squareDist = CCVector3d(X.x - P->x, X.y - P->y, X.z - P->z).norm2d();
 					if (nearestPointIndex < 0 || squareDist < nearestSquareDist)

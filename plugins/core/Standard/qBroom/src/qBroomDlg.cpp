@@ -52,14 +52,14 @@ static bool Intersection(const ccGLMatrix& broomTrans, const CCVector3& A, const
 	CCVector3 N = broomTrans.getColumnAsVec3D(2);
 	CCVector3 O = broomTrans.getTranslationAsVec3D();
 
-	CCVector3 AB = B-A;
-	CCVector3 OA = A-O;
+	CCVector3 AB = B - A;
+	CCVector3 OA = A - O;
 	PointCoordinateType ABdotN = AB.dot(N);
 	PointCoordinateType OAdotN = OA.dot(N);
-	if (fabs(ABdotN) < std::numeric_limits<PointCoordinateType>::epsilon())
+	if (std::abs(ABdotN) < std::numeric_limits<PointCoordinateType>::epsilon())
 	{
 		//the plane and the line are parallel!
-		if (fabs(OAdotN) < std::numeric_limits<PointCoordinateType>::epsilon())
+		if (std::abs(OAdotN) < std::numeric_limits<PointCoordinateType>::epsilon())
 		{
 			//the line lies totally in the plane
 			I = O;
@@ -732,7 +732,7 @@ bool qBroomDlg::startAutomation()
 	P1 += BC.dot(Y) * Y;
 
 	//we make the broom orientation match with the most similar direction
-	if (fabs(X.dot(Xo)) < fabs(X.dot(Yo)))
+	if (std::abs(X.dot(Xo)) < std::abs(X.dot(Yo)))
 	{
 		CCVector3 temp = X;
 		X = Y;

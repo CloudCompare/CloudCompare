@@ -260,7 +260,7 @@ static bool ResolveNormalsWithMST(	ccPointCloud* cloud,
 					{
 						const CCVector3& N2 = cloud->getPointNormal(neighborIndex);
 						//dot product
-						float weight = std::max(0.0f, 1.0f - static_cast<float>(fabs(N1.dot(N2))));
+						float weight = std::max(0.0f, 1.0f - static_cast<float>(std::abs(N1.dot(N2))));
 
 						//distance
 						//float weight = sqrt(nNSS.pointsInNeighbourhood[j].squareDistd);
@@ -269,7 +269,7 @@ static bool ResolveNormalsWithMST(	ccPointCloud* cloud,
 						//const CCVector3* P2 = cloud->getPoint(static_cast<unsigned>(neighborIndex));
 						//CCVector3 uAB = *P2 - *P1;
 						//uAB.normalize();
-						//float weight = (fabs(CCVector3::vdot(uAB.u, N1) + fabs(CCVector3::vdot(uAB.u, N2)))) / 2;
+						//float weight = (std::abs(CCVector3::vdot(uAB.u, N1) + std::abs(CCVector3::vdot(uAB.u, N2)))) / 2;
 
 						priorityQueue.emplace( firstUnvisitedIndex, neighborIndex, weight );
 					}
@@ -354,7 +354,7 @@ static bool ResolveNormalsWithMST(	ccPointCloud* cloud,
 						{
 							const CCVector3& N2 = cloud->getPointNormal(neighborIndex);
 							//dot product
-							float weight = std::max(0.0f, 1.0f - static_cast<float>(fabs(N1.dot(N2))));
+							float weight = std::max(0.0f, 1.0f - static_cast<float>(std::abs(N1.dot(N2))));
 
 							//distance
 							//float weight = sqrt(nNSS.pointsInNeighbourhood[j].squareDistd);
@@ -363,7 +363,7 @@ static bool ResolveNormalsWithMST(	ccPointCloud* cloud,
 							//const CCVector3* P2 = cloud->getPoint(static_cast<unsigned>(neighborIndex));
 							//CCVector3 uAB = *P2 - *P1;
 							//uAB.normalize();
-							//float weight = (fabs(CCVector3::vdot(uAB.u, N1) + fabs(CCVector3::vdot(uAB.u, N2)))) / 2;
+							//float weight = (std::abs(CCVector3::vdot(uAB.u, N1) + std::abs(CCVector3::vdot(uAB.u, N2)))) / 2;
 
 							priorityQueue.emplace( v, neighborIndex, weight );
 						}
@@ -468,7 +468,7 @@ static bool ComputeMSTGraphAtLevel(	const CCCoreLib::DgmOctree::octreeCell& cell
 			{
 				const CCVector3& N2 = cloud->getPointNormal(neighborIndex);
 				//dot product
-				float weight = std::max(0.0f, 1.0f - static_cast<float>(fabs(N1.dot(N2))));
+				float weight = std::max(0.0f, 1.0f - static_cast<float>(std::abs(N1.dot(N2))));
 
 				//distance
 				//float weight = sqrt(nNSS.pointsInNeighbourhood[j].squareDistd);
@@ -477,7 +477,7 @@ static bool ComputeMSTGraphAtLevel(	const CCCoreLib::DgmOctree::octreeCell& cell
 				//const CCVector3* P2 = cloud->getPoint(static_cast<unsigned>(neighborIndex));
 				//CCVector3 uAB = *P2 - *P1;
 				//uAB.normalize();
-				//float weight = (fabs(CCVector3::vdot(uAB.u, N1) + fabs(CCVector3::vdot(uAB.u, N2)))) / 2;
+				//float weight = (std::abs(CCVector3::vdot(uAB.u, N1) + std::abs(CCVector3::vdot(uAB.u, N2)))) / 2;
 
 				graph->addEdge(index, neighborIndex, weight);
 			}

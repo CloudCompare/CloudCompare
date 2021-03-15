@@ -769,8 +769,8 @@ void StereogramDialog::updateFacetsFilter(bool enable)
 				PointCoordinateType dipDir = 0;
 				ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipDir);
 
-				double dDip = fabs(dip - dipFilter);
-				double dDipDir = fabs(dipDir - dipDirFilter);
+				double dDip = std::abs(dip - dipFilter);
+				double dDipDir = std::abs(dipDir - dipDirFilter);
 
 				visible = (	(	dDip	<= halfDipSpan		|| dDip		>= 360.0 - halfDipSpan)
 						&&	(	dDipDir	<= halfDipDirSpan	|| dDipDir	>= 360.0 - halfDipDirSpan) );
@@ -817,8 +817,8 @@ void StereogramDialog::updateFacetsFilter(bool enable)
 				PointCoordinateType dipDir = 0;
 				ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipDir);
 
-				double dDip = fabs(dip - dipFilter);
-				double dDipDir = fabs(dipDir - dipDirFilter);
+				double dDip = std::abs(dip - dipFilter);
+				double dDipDir = std::abs(dipDir - dipDirFilter);
 
 				bool visible = (	(	dDip	<= halfDipSpan		|| dDip		>= 360.0 - halfDipSpan)
 								&&	(	dDipDir	<= halfDipDirSpan	|| dDipDir	>= 360.0 - halfDipDirSpan) );
@@ -873,8 +873,8 @@ void StereogramDialog::exportCurrentSelection()
 			PointCoordinateType dipDir = 0;
 			ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipDir);
 
-			double dDip = fabs(dip - dipFilter);
-			double dDipDir = fabs(dipDir - dipDirFilter);
+			double dDip = std::abs(dip - dipFilter);
+			double dDipDir = std::abs(dipDir - dipDirFilter);
 
 			bool visible = (	(	dDip	<= halfDipSpan		|| dDip		>= 360.0 - halfDipSpan)
 							&&	(	dDipDir	<= halfDipDirSpan	|| dDipDir	>= 360.0 - halfDipDirSpan) );

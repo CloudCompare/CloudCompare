@@ -773,7 +773,7 @@ bool ccCameraSensor::fromImageCoordToGlobalCoord(const CCVector2& imageCoord, CC
 	trans.applyRotation(viewDir);
 	viewDir.normalize();
 
-	if ( CCCoreLib::LessThanEpsilon( fabs(viewDir.z) ) )
+	if (CCCoreLib::LessThanEpsilon(std::abs(viewDir.z)))
 	{
 		//viewing dir is parallel to the plane Z = Z0!
 		return false;
@@ -1503,7 +1503,7 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 		glFunc->glPushAttrib(GL_LINE_BIT);
 		glFunc->glLineWidth(2.0f);
 
-		float l = static_cast<float>(fabs(upperLeftPoint.z)/2);
+		float l = static_cast<float>(std::abs(upperLeftPoint.z)/2);
 
 		// right vector
 		ccGL::Color4v(glFunc, ccColor::red.rgba);

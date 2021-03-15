@@ -131,7 +131,7 @@ bool CommandCrossSection::process(ccCommandLineInterface &cmd)
 	}
 
 	//safety checks
-	if ( CCCoreLib::LessThanEpsilon( boxThickness.x )
+	if (	CCCoreLib::LessThanEpsilon( boxThickness.x )
 		 ||	CCCoreLib::LessThanEpsilon( boxThickness.y )
 		 ||	CCCoreLib::LessThanEpsilon( boxThickness.z )
 		 )
@@ -140,7 +140,7 @@ bool CommandCrossSection::process(ccCommandLineInterface &cmd)
 	}
 
 	CCVector3 repeatStep = boxThickness + CCVector3(repeatGap, repeatGap, repeatGap);
-	if ( (repeatDim[0] && CCCoreLib::LessThanEpsilon( repeatStep.x ) )
+	if (	(repeatDim[0] && CCCoreLib::LessThanEpsilon( repeatStep.x ) )
 		 ||	(repeatDim[1] && CCCoreLib::LessThanEpsilon( repeatStep.y ) )
 		 ||	(repeatDim[2] && CCCoreLib::LessThanEpsilon( repeatStep.z ) )
 		 )

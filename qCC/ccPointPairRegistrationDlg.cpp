@@ -745,7 +745,7 @@ bool ccPointPairRegistrationDlg::addAlignedPoint(CCVector3d& Pin, ccHObject* ent
 	for (unsigned i = 0; i < m_alignedPoints.size(); ++i)
 	{
 		CCVector3d Pi = m_alignedPoints.toGlobal3d<PointCoordinateType>(*m_alignedPoints.getPoint(i));
-		if ( CCCoreLib::LessThanEpsilon( (Pi-Pin).norm() ) )
+		if (CCCoreLib::LessThanSquareEpsilon((Pi - Pin).norm2d()))
 		{
 			ccLog::Error("Point already picked or too close to an already selected one!");
 			return false;
@@ -1003,7 +1003,7 @@ bool ccPointPairRegistrationDlg::addReferencePoint(CCVector3d& Pin, ccHObject* e
 	{
 		//express the 'Pi' point in the current global coordinate system
 		CCVector3d Pi = m_refPoints.toGlobal3d<PointCoordinateType>(*m_refPoints.getPoint(i));
-		if ( CCCoreLib::LessThanEpsilon( (Pi - Pin).norm() ) )
+		if (CCCoreLib::LessThanSquareEpsilon((Pi - Pin).norm2d()))
 		{
 			ccLog::Error("Point already picked or too close to an already selected one!");
 			return false;

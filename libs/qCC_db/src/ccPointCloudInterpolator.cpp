@@ -183,9 +183,9 @@ bool ccPointCloudInterpolator::InterpolateScalarFieldsFrom(	ccPointCloud* destCl
 
 	CCVector3 dimSum = box.getDiagVec() + otherBox.getDiagVec();
 	CCVector3 dist = box.getCenter() - otherBox.getCenter();
-	if (	fabs(dist.x) > dimSum.x / 2
-		||	fabs(dist.y) > dimSum.y / 2
-		||	fabs(dist.z) > dimSum.z / 2)
+	if (	std::abs(dist.x) > dimSum.x / 2
+		||	std::abs(dist.y) > dimSum.y / 2
+		||	std::abs(dist.z) > dimSum.z / 2)
 	{
 		ccLog::Warning("[InterpolateScalarFieldsFrom] Clouds are too far from each other! Can't proceed.");
 		return false;

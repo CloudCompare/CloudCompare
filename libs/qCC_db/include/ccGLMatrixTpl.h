@@ -137,16 +137,16 @@ public:
 		{
 			// "to" vector most nearly orthogonal to "from"
 			Vector3Tpl<T> x(0, 0, 0);
-			if (fabs(from.x) < fabs(from.y))
+			if (std::abs(from.x) < std::abs(from.y))
 			{
-				if (fabs(from.x) < fabs(from.z))
+				if (std::abs(from.x) < std::abs(from.z))
 					x.x = static_cast<T>(1);
 				else
 					x.z = static_cast<T>(1);
 			}
 			else
 			{
-				if (fabs(from.y) < fabs(from.z))
+				if (std::abs(from.y) < std::abs(from.z))
 					x.y = static_cast<T>(1);
 				else
 					x.z = static_cast<T>(1);
@@ -566,7 +566,7 @@ public:
 	{
 		T trace = CC_MAT_R11 + CC_MAT_R22 + CC_MAT_R33;
 		T cos_t = (trace - 1) / 2;
-		if (fabs(cos_t) <= 1)
+		if (std::abs(cos_t) <= 1)
 		{
 			alpha_rad = acos(cos_t); //result in [0;pi]
 		}
@@ -581,7 +581,7 @@ public:
 
 		//normalize axis
 		T n2 = axis3D.norm2();
-		if ( CCCoreLib::GreaterThanEpsilon( n2 ) )
+		if (CCCoreLib::GreaterThanEpsilon(n2))
 		{
 			axis3D /= sqrt(n2);
 		}
@@ -608,7 +608,7 @@ public:
 						T &psi_rad,
 						Vector3Tpl<T>& t3D) const
 	{
-		if (fabs(CC_MAT_R31) != 1)
+		if (std::abs(CC_MAT_R31) != 1)
 		{
 			theta_rad = -asin(CC_MAT_R31);
 			T cos_theta = cos(theta_rad);

@@ -59,7 +59,7 @@ float Classifier::classify2D_checkcondnum(const Point2D& P, const Point2D& R, fl
 	// consider each path segment as a mini-classifier
 	// the segment PR[Pt-->Refpt] and each path's segment cross
 	// iff each one classifies the end point of the other in different classes
-	Point2D PR = R-P;
+	Point2D PR = R - P;
 	Point2D u = PR; u.normalize();
 
 	unsigned numcross = 0;
@@ -68,30 +68,30 @@ float Classifier::classify2D_checkcondnum(const Point2D& P, const Point2D& R, fl
 	float closestSquareDist = -1.0f;
 
 	size_t segCount = path.size() - 1;
-	for (size_t i=0; i<segCount; ++i)
+	for (size_t i = 0; i < segCount; ++i)
 	{
 		//current path segment (or half-line!)
 		Point2D AP = P - path[i];
-		Point2D AB = path[i+1] - path[i];
+		Point2D AB = path[i + 1] - path[i];
 		Point2D v = AB; v.normalize();
 
-		condnumber = std::max<float>(condnumber, fabs(v.dot(u)));
+		condnumber = std::max<float>(condnumber, std::abs(v.dot(u)));
 
 		// Compute whether PR[Pt-->Refpt] and that segment cross
-		float denom = (u.x*v.y-v.x*u.y);
+		float denom = (u.x*v.y - v.x*u.y);
 		if (denom != 0)
 		{
 			// 1. check whether the given pt and the refpt are on different sides of the classifier line
 			//we search for alpha and beta so that
 			// P + alpha * PR = A + beta * AB
-			float alpha = (AP.y * v.x - AP.x * v.y)/denom;
+			float alpha = (AP.y * v.x - AP.x * v.y) / denom;
 			bool pathIntersects = (alpha >= 0 && alpha*alpha <= PR.norm2());
 			if (pathIntersects)
 			{
-				float beta = (AP.y * u.x - AP.x * u.y)/denom;
+				float beta = (AP.y * u.x - AP.x * u.y) / denom;
 
 				// first and last lines are projected to infinity
-				bool refSegIntersects = ((i == 0 || beta >= 0) && (i+1 == segCount || beta*beta < AB.norm2())); //not "beta*beta <= AB.norm2()" because the equality case will be managed by the next segment!
+				bool refSegIntersects = ((i == 0 || beta >= 0) && (i + 1 == segCount || beta * beta < AB.norm2())); //not "beta*beta <= AB.norm2()" because the equality case will be managed by the next segment!
 
 				// crossing iif each segment/line separates the other
 				if (refSegIntersects)
@@ -103,7 +103,7 @@ float Classifier::classify2D_checkcondnum(const Point2D& P, const Point2D& R, fl
 		// 1. projection of the point of the line
 		float squareDistToSeg = 0;
 		float distAH = v.dot(AP);
-		if ((i == 0 || distAH >= 0.0) && (i+1 == segCount || distAH <= AB.norm()))
+		if ((i == 0 || distAH >= 0.0) && (i + 1 == segCount || distAH <= AB.norm()))
 		{
 			// 2. Is the projection within the segment limit? yes => closest
 			Point2D PH = (path[i] + v * distAH) - P;
@@ -112,8 +112,8 @@ float Classifier::classify2D_checkcondnum(const Point2D& P, const Point2D& R, fl
 		else
 		{
 			// 3. otherwise closest is the minimum of the distance to the segment ends
-			Point2D BP = P - path[i+1];
-			squareDistToSeg = std::min( AP.norm2(), BP.norm2() );
+			Point2D BP = P - path[i + 1];
+			squareDistToSeg = std::min(AP.norm2(), BP.norm2());
 		}
 
 		if (closestSquareDist < 0 || squareDistToSeg < closestSquareDist)
@@ -132,8 +132,8 @@ float Classifier::classify2D(const Point2D& P) const
 {
 	float condpos = 0.0f;
 	float condneg = 0.0f;
-	float predpos = classify2D_checkcondnum(P,refPointPos,condpos);
-	float predneg = classify2D_checkcondnum(P,refPointNeg,condneg);
+	float predpos = classify2D_checkcondnum(P, refPointPos, condpos);
+	float predneg = classify2D_checkcondnum(P, refPointNeg, condneg);
 
 	// normal nearly aligned = bad conditionning, the lower the dot prod the better
 	return condpos < condneg ? predpos : -predneg;
@@ -148,17 +148,17 @@ Classifier::Point2D Classifier::project(const CorePointDesc& mscdata) const
 	//if we use a descriptor computed with more (bigger) scales.
 	//In this case we assume the matching scales are all at the end!
 	//(i.e. the smallest)
-	size_t weightCount = weightsAxis1.size()-1;
+	size_t weightCount = weightsAxis1.size() - 1;
 	size_t paramCount = mscdata.params.size();
 	assert(weightCount <= paramCount);
 	unsigned shift = static_cast<unsigned>(paramCount - weightCount);
 
-	Point2D P( weightsAxis1.back(), weightsAxis2.back() );
+	Point2D P(weightsAxis1.back(), weightsAxis2.back());
 
-	for (size_t i=0; i<weightCount; ++i)
+	for (size_t i = 0; i < weightCount; ++i)
 	{
-		P.x += weightsAxis1[i] * mscdata.params[shift+i];
-		P.y += weightsAxis2[i] * mscdata.params[shift+i];
+		P.x += weightsAxis1[i] * mscdata.params[shift + i];
+		P.y += weightsAxis2[i] * mscdata.params[shift + i];
 	}
 
 	return P;
@@ -170,12 +170,12 @@ float Classifier::classify(const CorePointDesc& mscdata) const
 	return classify2D(P);
 }
 
-bool Classifier::Load(	QString filename,
-						std::vector<Classifier>& classifiers,
-						std::vector<float>& scales,
-						QString& error,
-						FileHeader* header/*=0*/,
-						bool headerOnly/*=false*/)
+bool Classifier::Load(QString filename,
+	std::vector<Classifier>& classifiers,
+	std::vector<float>& scales,
+	QString& error,
+	FileHeader* header/*=0*/,
+	bool headerOnly/*=false*/)
 {
 	QFile file(filename);
 	if (!file.open(QIODevice::ReadOnly))
@@ -223,7 +223,7 @@ bool Classifier::Load(	QString filename,
 
 	// read scale values
 	{
-		for (unsigned s=0; s<nscales; ++s)
+		for (unsigned s = 0; s < nscales; ++s)
 			file.read(reinterpret_cast<char*>(&scales[s]), sizeof(float));
 	}
 
@@ -237,7 +237,7 @@ bool Classifier::Load(	QString filename,
 		header->dimPerScale = dimPerScale;
 		header->descID = descriptorID;
 	}
-	
+
 	if (headerOnly)
 	{
 		//we can stop here
@@ -258,8 +258,8 @@ bool Classifier::Load(	QString filename,
 	// read classifiers
 	try
 	{
-		const unsigned fdim = nscales*dimPerScale;
-		for (unsigned ci=0; ci<nclassifiers; ++ci)
+		const unsigned fdim = nscales * dimPerScale;
+		for (unsigned ci = 0; ci < nclassifiers; ++ci)
 		{
 			Classifier& classifier = classifiers[ci];
 
@@ -270,14 +270,14 @@ bool Classifier::Load(	QString filename,
 			file.read(reinterpret_cast<char*>(&classifier.class1), sizeof(int));
 			file.read(reinterpret_cast<char*>(&classifier.class2), sizeof(int));
 
-			classifier.weightsAxis1.resize(fdim+1);
+			classifier.weightsAxis1.resize(fdim + 1);
 			{
-				for (unsigned i=0; i<=fdim; ++i)
+				for (unsigned i = 0; i <= fdim; ++i)
 					file.read(reinterpret_cast<char*>(&classifier.weightsAxis1[i]), sizeof(float));
 			}
-			classifier.weightsAxis2.resize(fdim+1);
+			classifier.weightsAxis2.resize(fdim + 1);
 			{
-				for (unsigned i=0; i<=fdim; ++i)
+				for (unsigned i = 0; i <= fdim; ++i)
 					file.read(reinterpret_cast<char*>(&classifier.weightsAxis2[i]), sizeof(float));
 			}
 
@@ -285,7 +285,7 @@ bool Classifier::Load(	QString filename,
 			file.read(reinterpret_cast<char*>(&pathsize), sizeof(unsigned));
 			classifier.path.resize(pathsize);
 			{
-				for (unsigned i=0; i<pathsize; ++i)
+				for (unsigned i = 0; i < pathsize; ++i)
 				{
 					file.read(reinterpret_cast<char*>(&classifier.path[i].x), sizeof(float));
 					file.read(reinterpret_cast<char*>(&classifier.path[i].y), sizeof(float));
@@ -316,8 +316,8 @@ bool Classifier::Load(	QString filename,
 	return true;
 }
 
-bool Classifier::save(	QString filename,
-						QString& error)
+bool Classifier::save(QString filename,
+	QString& error)
 {
 	QFile file(filename);
 	if (!file.open(QIODevice::WriteOnly))
@@ -347,7 +347,7 @@ bool Classifier::save(	QString filename,
 
 	// write scale values
 	{
-		for (unsigned s=0; s<nscales; ++s)
+		for (unsigned s = 0; s < nscales; ++s)
 			file.write(reinterpret_cast<const char*>(&scales[s]), sizeof(float));
 	}
 
@@ -356,25 +356,25 @@ bool Classifier::save(	QString filename,
 	file.write(reinterpret_cast<const char*>(&nclassifiers), sizeof(unsigned));
 
 	// write classifier
-	const unsigned fdim = nscales*dimPerScale;
+	const unsigned fdim = nscales * dimPerScale;
 	file.write(reinterpret_cast<const char*>(&class1), sizeof(int));
 	file.write(reinterpret_cast<const char*>(&class2), sizeof(int));
 
 	//weightsAxis1
 	{
-		for (unsigned i=0; i<=fdim; ++i)
+		for (unsigned i = 0; i <= fdim; ++i)
 			file.write(reinterpret_cast<const char*>(&weightsAxis1[i]), sizeof(float));
 	}
 	//weightsAxis2
 	{
-		for (unsigned i=0; i<=fdim; ++i)
+		for (unsigned i = 0; i <= fdim; ++i)
 			file.write(reinterpret_cast<const char*>(&weightsAxis2[i]), sizeof(float));
 	}
 
 	unsigned pathsize = static_cast<unsigned>(path.size());
 	file.write(reinterpret_cast<const char*>(&pathsize), sizeof(unsigned));
 	{
-		for (unsigned i=0; i<pathsize; ++i)
+		for (unsigned i = 0; i < pathsize; ++i)
 		{
 			file.write(reinterpret_cast<const char*>(&path[i].x), sizeof(float));
 			file.write(reinterpret_cast<const char*>(&path[i].y), sizeof(float));

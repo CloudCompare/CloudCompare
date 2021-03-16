@@ -566,7 +566,7 @@ void qM3C2Tools::ComputeStatistics(CCCoreLib::DgmOctree::NeighboursSet& set, boo
 
 		assert(count > 1);
 		sum /= count;
-		sum2 = sqrt(fabs(sum2 / count - sum*sum));
+		sum2 = sqrt(std::abs(sum2 / count - sum*sum));
 
 		meanOrMedian = static_cast<ScalarType>(sum);
 		stdDevOrIQR = static_cast<ScalarType>(sum2);
@@ -698,7 +698,7 @@ bool qM3C2Tools::GuessBestParams(	ccPointCloud* cloud1,
 						ScalarType d = CCCoreLib::DistanceComputationTools::computePoint2PlaneDistance(P, lsPlane);
 						//we compute relative roughness
 						d /= scale;
-						sumRoughness += d*d;//fabs(d);
+						sumRoughness += d*d;//std::abs(d);
 						meanNormal += CCVector3d::fromArray(lsPlane);
 						validLSPlanes++;
 					}
@@ -722,7 +722,7 @@ bool qM3C2Tools::GuessBestParams(	ccPointCloud* cloud1,
 			//population stats
 			{
 				double meanPopulation = sumPopulation / static_cast<double>(probingCount);
-				double stdDevPopulation = sqrt(fabs(sumPopulation2 / static_cast<double>(probingCount)-meanPopulation*meanPopulation));
+				double stdDevPopulation = sqrt(std::abs(sumPopulation2 / static_cast<double>(probingCount)-meanPopulation*meanPopulation));
 
 				if (app)
 					app->dispToConsole(QString("[M3C2::auto] \tPopulation per cell: %1 +/- %2").arg(meanPopulation, 0, 'f', 1).arg(stdDevPopulation, 0, 'f', 1));
@@ -764,9 +764,9 @@ bool qM3C2Tools::GuessBestParams(	ccPointCloud* cloud1,
 						//mean normal
 						meanNormal.normalize();
 						unsigned char maxDim = 0;
-						if (fabs(meanNormal.x) < fabs(meanNormal.y))
+						if (std::abs(meanNormal.x) < std::abs(meanNormal.y))
 							maxDim = 1;
-						if (fabs(meanNormal.u[maxDim]) < fabs(meanNormal.z))
+						if (std::abs(meanNormal.u[maxDim]) < std::abs(meanNormal.z))
 							maxDim = 2;
 
 						params.preferredDimension = 2 * maxDim;

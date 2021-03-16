@@ -2880,7 +2880,7 @@ void ccGLWindow::updateConstellationCenterAndZoom(const ccBBox* boundingBox/*=nu
 
 	//we compute the bounding-box diagonal length
 	double bbDiag = zoomedBox.getDiagNorm();
-	if ( CCCoreLib::LessThanEpsilon( bbDiag ) )
+	if (CCCoreLib::LessThanEpsilon(bbDiag))
 	{
 		ccLog::Warning("[ccGLWindow] Entity/DB has a null bounding-box!");
 		bbDiag = 1.0;
@@ -5725,7 +5725,7 @@ void ccGLWindow::setGLCameraAspectRatio(float ar)
 
 void ccGLWindow::setFov(float fov_deg)
 {
-	if ( CCCoreLib::LessThanEpsilon( fov_deg ) || (fov_deg > 180.0f))
+	if (CCCoreLib::LessThanEpsilon(fov_deg) || (fov_deg > 180.0f))
 	{
 		ccLog::Warning("[ccGLWindow::setFov] Invalid FOV value!");
 		return;
@@ -5767,7 +5767,7 @@ float ccGLWindow::getFov() const
 
 void ccGLWindow::setBubbleViewFov(float fov_deg)
 {
-	if ( CCCoreLib::LessThanEpsilon( fov_deg ) || (fov_deg > 180.0f))
+	if (CCCoreLib::LessThanEpsilon(fov_deg) || (fov_deg > 180.0f))
 	{
 		return;
 	}

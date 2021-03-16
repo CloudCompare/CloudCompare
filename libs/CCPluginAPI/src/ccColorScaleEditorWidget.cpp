@@ -602,7 +602,7 @@ void ccColorScaleEditorWidget::onPointClicked(double relativePos)
 	const double maxDist = static_cast<double>(DEFAULT_SLIDER_SYMBOL_SIZE) / m_colorBarWidget->length();
 	for (int i = 0; i < m_sliders->size(); ++i)
 	{
-		if (fabs(m_sliders->element(i)->getRelativePos() - relativePos) < maxDist)
+		if (std::abs(m_sliders->element(i)->getRelativePos() - relativePos) < maxDist)
 		{
 			m_slidersWidget->select(i);
 			return;

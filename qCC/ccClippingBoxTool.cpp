@@ -519,7 +519,7 @@ static unsigned ComputeGridDimensions(	const ccBBox& localBox,
 	{
 		if (processDim[d])
 		{
-			if ( CCCoreLib::LessThanEpsilon( cellSizePlusGap.u[d] ) )
+			if (CCCoreLib::LessThanEpsilon(cellSizePlusGap.u[d]))
 			{
 				ccLog::Error("Box size (plus gap) is null! Can't apply repetitive process!");
 				return 0;
@@ -991,7 +991,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 				CCVector3 gridSize = clipBox.getOwnBB().getDiagVec();
 				ccGLMatrix globalTrans = localTrans.inverse();
 
-				assert(!CCCoreLib::LessThanEpsilon(levelSetGridStep));
+				assert(false == CCCoreLib::LessThanEpsilon(levelSetGridStep));
 				unsigned gridWidth = 1 + static_cast<unsigned>(gridSize.u[X] / levelSetGridStep + 0.5);
 				unsigned gridHeight = 1 + static_cast<unsigned>(gridSize.u[Y] / levelSetGridStep + 0.5);
 

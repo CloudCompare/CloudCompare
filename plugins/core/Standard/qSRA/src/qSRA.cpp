@@ -258,7 +258,7 @@ static ccPolyline* GetConeProfile(ccCone* cone)
 	//we'll use the 'largest' axis dimension as 'revolution dimension'
 	int revolDim = 0;
 	for (int i = 1; i<3; ++i)
-		if (fabs(axis.u[i]) > fabs(axis.u[revolDim]))
+		if (std::abs(axis.u[i]) > std::abs(axis.u[revolDim]))
 			revolDim = i;
 
 	//the profile has only one segment
@@ -294,7 +294,7 @@ static ccPolyline* GetConeProfile(ccCone* cone)
 		CCVector3 Z(0, 0, 0);
 		Z.u[revolDim] = CCCoreLib::PC_ONE;
 		ccGLMatrix axisTrans = ccGLMatrix::FromToRotation(y, Z);
-		assert( CCCoreLib::LessThanEpsilon( ((axisTrans * y) - Z).norm() ) );
+		assert(CCCoreLib::LessThanSquareEpsilon(((axisTrans * y) - Z).norm2d()));
 		ccGLMatrix polyMat = coneTrans * axisTrans;
 		polyline->setGLTransformation(polyMat);
 	}

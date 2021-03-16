@@ -454,7 +454,7 @@ bool DxfProfilesExporter::SaveVerticalProfiles(	const QSharedPointer<DistanceMap
 					{
 						double dh = polySteps[i].height - polySteps[lastStep].height;
 						double next_dh = polySteps[i + 1].height - polySteps[lastStep].height;
-						if (dh >= heightStep || (next_dh > heightStep && fabs(dh - heightStep) < fabs(next_dh - heightStep)))
+						if (dh >= heightStep || (next_dh > heightStep && std::abs(dh - heightStep) < std::abs(next_dh - heightStep)))
 						{
 							displayIt = true;
 						}
@@ -958,7 +958,7 @@ bool DxfProfilesExporter::SaveHorizontalProfiles(	const QSharedPointer<DistanceM
 					{
 						double dAngle = polySteps[i].angle_rad - polySteps[lastStep].angle_rad;
 						double next_dAngle = (i+1 == polySteps.size() ? polySteps[0].angle_rad + 2.0*M_PI : polySteps[i+1].angle_rad) - polySteps[lastStep].angle_rad;
-						if (dAngle >= angularStep_rad || (next_dAngle > angularStep_rad && fabs(dAngle - angularStep_rad) < fabs(next_dAngle - angularStep_rad)))
+						if (dAngle >= angularStep_rad || (next_dAngle > angularStep_rad && std::abs(dAngle - angularStep_rad) < std::abs(next_dAngle - angularStep_rad)))
 						{
 							displayIt = true;
 						}

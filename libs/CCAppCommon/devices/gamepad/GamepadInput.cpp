@@ -67,8 +67,8 @@ void GamepadInput::update(ccGLWindow* win)
 		//double Y = m_translation.y; //always 0
 		double Z = m_translation.z;
 
-		if (	CCCoreLib::GreaterThanEpsilon(fabs(X))
-			||	CCCoreLib::GreaterThanEpsilon(fabs(Z)))
+		if (	CCCoreLib::GreaterThanEpsilon(std::abs(X))
+			||	CCCoreLib::GreaterThanEpsilon(std::abs(Z)))
 		{
 			if (viewParams.perspectiveView)
 			{

@@ -228,7 +228,7 @@ float RefinePointClassif(	const Classifier& classifier,
 		}
 
 		//update confidence
-		float newConfidence = 1.0f / (exp(-fabs(distToBoundary)) + 1.0f); //in [0.5 ; 1]
+		float newConfidence = 1.0f / (exp(-std::abs(distToBoundary)) + 1.0f); //in [0.5 ; 1]
 		newConfidence = 2 * (newConfidence - 0.5f); //map to [0;1]
 
 		return newConfidence;
@@ -546,7 +546,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 							const Classifier& classifier = classifiers.front();
 							float distToBoundary = classifier.classify(coreDesc);
 
-							float confidence = 1.0f / (exp(-fabs(distToBoundary)) + 1.0f); //in [0.5 ; 1]
+							float confidence = 1.0f / (exp(-std::abs(distToBoundary)) + 1.0f); //in [0.5 ; 1]
 							confidence = 2 * (confidence - 0.5f); //map to [0;1]
 
 							//unreliable point
@@ -617,7 +617,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 								//int minclass = classifier.class1;
 								//int maxclass = classifier.class2;
 
-								float confidence = 1.0f / (exp(-fabs(distToBoundary)) + 1.0f); //in [0.5 ; 1]
+								float confidence = 1.0f / (exp(-std::abs(distToBoundary)) + 1.0f); //in [0.5 ; 1]
 								confidence = 2 * (confidence - 0.5f); //map to [0;1]
 
 								//unreliable point

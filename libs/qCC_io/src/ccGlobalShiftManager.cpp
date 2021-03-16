@@ -92,12 +92,12 @@ bool ccGlobalShiftManager::NeedShift(const CCVector3d& P)
 
 bool ccGlobalShiftManager::NeedShift(double d)
 {
-	return fabs(d) >= MAX_COORDINATE_ABS_VALUE;
+	return std::abs(d) >= MAX_COORDINATE_ABS_VALUE;
 }
 
 bool ccGlobalShiftManager::NeedRescale(double d)
 {
-	return fabs(d) >= MAX_DIAGONAL_LENGTH;
+	return std::abs(d) >= MAX_DIAGONAL_LENGTH;
 }
 
 bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
@@ -337,9 +337,9 @@ CCVector3d ccGlobalShiftManager::BestShift(const CCVector3d& P)
 		return CCVector3d(0, 0, 0);
 	}
 
-	CCVector3d shift(	fabs(P[0]) >= MAX_COORDINATE_ABS_VALUE ? -P[0] : 0,
-						fabs(P[1]) >= MAX_COORDINATE_ABS_VALUE ? -P[1] : 0,
-						fabs(P[2]) >= MAX_COORDINATE_ABS_VALUE ? -P[2] : 0 );
+	CCVector3d shift(	std::abs(P[0]) >= MAX_COORDINATE_ABS_VALUE ? -P[0] : 0,
+						std::abs(P[1]) >= MAX_COORDINATE_ABS_VALUE ? -P[1] : 0,
+						std::abs(P[2]) >= MAX_COORDINATE_ABS_VALUE ? -P[2] : 0 );
 
 	//round-off to the nearest hundred
 	shift.x = static_cast<int>(shift.x / 100) * 100.0;

@@ -246,14 +246,16 @@ ccGBLSensor::NormalGrid* ccGBLSensor::projectNormals(	CCCoreLib::GenericCloud* c
 	//sensor to world global transformation = sensor position * rigid transformation
 	ccIndexedTransformation sensorPos; //identity by default
 	if (m_posBuffer)
-		m_posBuffer->getInterpolatedTransformation(posIndex,sensorPos);
+		m_posBuffer->getInterpolatedTransformation(posIndex, sensorPos);
 	sensorPos *= m_rigidTransformation;
 
 	//poject each point + normal
 	{
+		CCVector3 sensorOrigin = sensorPos.getTranslationAsVec3D();
+
 		cloud->placeIteratorAtBeginning();
 		unsigned pointCount = cloud->size();
-		for (unsigned i=0; i<pointCount; ++i)
+		for (unsigned i = 0; i < pointCount; ++i)
 		{
 			const CCVector3* P = cloud->getNextPoint();
 			const CCVector3& N = theNorms[i];
@@ -263,39 +265,42 @@ ccGBLSensor::NormalGrid* ccGBLSensor::projectNormals(	CCCoreLib::GenericCloud* c
 			PointCoordinateType depth1;
 			projectPoint(*P, Q, depth1, m_activeIndex);
 
-			CCVector3 S;
-
-			CCVector3 U = *P - sensorPos.getTranslationAsVec3D();
+			CCVector3 U = *P - sensorOrigin;
 			PointCoordinateType distToSensor = U.norm();
 
-			if ( CCCoreLib::GreaterThanEpsilon( distToSensor ) )
+			CCVector3 S;
+			if (CCCoreLib::GreaterThanEpsilon(distToSensor))
 			{
-				PointCoordinateType squareS2D = (S.x*S.x + S.y*S.y);
-				if ( CCCoreLib::GreaterThanEpsilon( squareS2D ) )
-				{
-					//and point+normal
-					CCVector3 P2 = *P + CCVector3(N);
-					CCVector2 S2;
-					PointCoordinateType depth2;
-					projectPoint(P2, S2, depth2, m_activeIndex);
+				//project point + normal
+				CCVector3 P2 = *P + N;
+				CCVector2 Q2;
+				PointCoordinateType depth2;
+				projectPoint(P2, Q2, depth2, m_activeIndex);
 
+				S.x = (Q2.x - Q.x);
+				S.y = (Q2.y - Q.y);
+				PointCoordinateType squareS2D = (S.x*S.x + S.y*S.y);
+
+				if (CCCoreLib::GreaterThanSquareEpsilon(squareS2D))
+				{
 					//normal component along sensor viewing dir.
 					S.z = -N.dot(U) / distToSensor;
 
 					//deduce other normals components
 					PointCoordinateType coef = sqrt((CCCoreLib::PC_ONE - S.z*S.z) / squareS2D);
-					S.x = coef * (S2.x - Q.x);
-					S.y = coef * (S2.y - Q.y);
+					S.x *= coef;
+					S.y *= coef;
 				}
 				else
 				{
 					S.x = 0;
 					S.y = 0;
+					S.z = 1;
 				}
 			}
 			else
 			{
-				S = CCVector3(N);
+				S = N;
 			}
 
 			//project in Z-buffer

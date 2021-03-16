@@ -236,7 +236,7 @@ void ComputeM3C2DistForPoint(unsigned index)
 						qM3C2Tools::ComputeStatistics(cn1.neighbours, s_M3C2Params.useMedian, mean1, stdDev1);
 						validStats1 = true;
 						//do we have a sharp enough 'mean' to stop?
-						if (fabs(mean1) + 2 * stdDev1 < static_cast<double>(cn1.currentHalfLength))
+						if (std::abs(mean1) + 2 * stdDev1 < static_cast<double>(cn1.currentHalfLength))
 							break;
 					}
 					previousNeighbourCount = neighbourCount;
@@ -319,7 +319,7 @@ void ComputeM3C2DistForPoint(unsigned index)
 							qM3C2Tools::ComputeStatistics(cn2.neighbours, s_M3C2Params.useMedian, mean2, stdDev2);
 							validStats2 = true;
 							//do we have a sharp enough 'mean' to stop?
-							if (fabs(mean2) + 2 * stdDev2 < static_cast<double>(cn2.currentHalfLength))
+							if (std::abs(mean2) + 2 * stdDev2 < static_cast<double>(cn2.currentHalfLength))
 								break;
 						}
 						previousNeighbourCount = neighbourCount;

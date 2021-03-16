@@ -298,9 +298,9 @@ float FastMarchingForFacetExtraction::computeTCoefApprox(CCCoreLib::FastMarching
 		CCVector3 AB = dCell->C - oCell->C;
 		AB.normalize();
 
-		float psOri = fabs(static_cast<float>(AB.dot(oCell->N))); //ideal: 90 degrees
-		float psDest = fabs(static_cast<float>(AB.dot(dCell->N))); //ideal: 90 degrees
-		orientationConfidence = (psOri + psDest) / 2; //between 0 and 1 (ideal: 0)
+		PointCoordinateType psOri = std::abs(AB.dot(oCell->N)); //ideal: 90 degrees
+		PointCoordinateType psDest = std::abs(AB.dot(dCell->N)); //ideal: 90 degrees
+		orientationConfidence = static_cast<float>((psOri + psDest) / 2); //between 0 and 1 (ideal: 0)
 	}
 
 	//add reprojection error into balance

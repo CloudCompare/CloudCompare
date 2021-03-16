@@ -75,7 +75,7 @@ void ccRenderingTools::ShowDepthBuffer(ccGBLSensor* sensor, QWidget* parent/*=0*
 		if (count)
 		{
 			double avg = sumDist / count;
-			double stdDev = sqrt(fabs(sumDist2 / count - avg*avg));
+			double stdDev = sqrt(std::abs(sumDist2 / count - avg*avg));
 			//for better dynamics
 			maxDist = std::min(maxDist, static_cast<PointCoordinateType>(avg + 1.0 * stdDev));
 		}
@@ -85,7 +85,7 @@ void ccRenderingTools::ShowDepthBuffer(ccGBLSensor* sensor, QWidget* parent/*=0*
 	{
 		ccColorScale::Shared colorScale = ccColorScalesManager::GetDefaultScale();
 		assert(colorScale);
-		ScalarType coef = CCCoreLib::LessThanEpsilon( maxDist - minDist ) ? 0 : static_cast<ScalarType>(ccColorScale::MAX_STEPS - 1) / (maxDist - minDist);
+		ScalarType coef = CCCoreLib::LessThanEpsilon(maxDist - minDist) ? 0 : static_cast<ScalarType>(ccColorScale::MAX_STEPS - 1) / (maxDist - minDist);
 
 		const PointCoordinateType* _zBuff = depthBuffer.zBuff.data();
 		for (unsigned y = 0; y < depthBuffer.height; ++y)

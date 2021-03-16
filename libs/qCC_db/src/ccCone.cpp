@@ -32,11 +32,11 @@ ccCone::ccCone(PointCoordinateType bottomRadius,
 				unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
 
 	: ccGenericPrimitive(name, transMat, uniqueID)
-	, m_bottomRadius(fabs(bottomRadius))
-	, m_topRadius(fabs(topRadius))
+	, m_bottomRadius(std::abs(bottomRadius))
+	, m_topRadius(std::abs(topRadius))
 	, m_xOff(xOff)
 	, m_yOff(yOff)
-	, m_height(fabs(height))
+	, m_height(std::abs(height))
 {
 	setDrawingPrecision(std::max<unsigned>(precision, MIN_DRAWING_PRECISION)); //automatically calls buildUp & applyTransformationToVertices
 }
@@ -62,14 +62,14 @@ bool ccCone::buildUp()
 		return false;
 
 	//invalid dimensions?
-	if ( CCCoreLib::LessThanEpsilon( m_height ) || CCCoreLib::LessThanEpsilon( m_bottomRadius + m_topRadius ) )
+	if (CCCoreLib::LessThanEpsilon(m_height) || CCCoreLib::LessThanEpsilon(m_bottomRadius + m_topRadius))
 	{
 		return false;
 	}
 	
 	//topology
-	bool singlePointBottom = CCCoreLib::LessThanEpsilon( m_bottomRadius );
-	bool singlePointTop = CCCoreLib::LessThanEpsilon( m_topRadius );
+	bool singlePointBottom = CCCoreLib::LessThanEpsilon(m_bottomRadius);
+	bool singlePointTop = CCCoreLib::LessThanEpsilon(m_topRadius);
 	assert(!singlePointBottom || !singlePointTop);
 
 	unsigned steps = m_drawPrecision;

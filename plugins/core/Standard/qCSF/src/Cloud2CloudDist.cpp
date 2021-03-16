@@ -77,7 +77,7 @@ bool Cloud2CloudDist::Compute(const Cloth& cloth,
 				+ cloth.getParticle(col2, row2).pos.y * subdeltaX*subdeltaZ
 				+ cloth.getParticle(col1, row1).pos.y * subdeltaX*(1 - subdeltaZ);
 			double height_var = fxy - pc[i].y;
-			if (std::fabs(height_var) < class_threshold)
+			if (std::abs(height_var) < class_threshold)
 			{
 				groundIndexes.push_back(i);
 			}
@@ -157,7 +157,7 @@ bool Cloud2CloudDist::Compute(const Cloth& cloth,
 				//	search_min = y;
 				//}
 			}
-			if (std::fabs(search_min - pc[i].y) < class_threshold)
+			if (std::abs(search_min - pc[i].y) < class_threshold)
 			{
 				groundIndexes.push_back(i);
 			}
@@ -316,7 +316,7 @@ bool Cloud2CloudDist::Compute(	const Cloth& cloth,
 		//now classify the points
 		for (unsigned i = 0; i < pcPoints.size(); ++i)
 		{
-			if (std::fabs(pcPoints.getPointScalarValue(i) - pc[i].y) < class_threshold)
+			if (std::abs(pcPoints.getPointScalarValue(i) - pc[i].y) < class_threshold)
 			{
 				groundIndexes.push_back(i);
 			}

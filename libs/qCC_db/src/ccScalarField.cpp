@@ -84,7 +84,7 @@ ScalarType ccScalarField::normalize(ScalarType d) const
 		}
 		else //symmetric scale
 		{
-			if (fabs(d) <= m_saturationRange.start())
+			if (std::abs(d) <= m_saturationRange.start())
 				return static_cast<ScalarType>(0.5);
 			
 			if (d >= 0)
@@ -103,7 +103,7 @@ ScalarType ccScalarField::normalize(ScalarType d) const
 	}
 	else //log scale
 	{
-		ScalarType dLog = log10(std::max(static_cast<ScalarType>(fabs(d)), CCCoreLib::ZERO_TOLERANCE_SCALAR));
+		ScalarType dLog = log10(std::max(static_cast<ScalarType>(std::abs(d)), CCCoreLib::ZERO_TOLERANCE_SCALAR));
 		if (dLog <= m_logSaturationRange.start())
 			return 0;
 		else if (dLog >= m_logSaturationRange.stop())
@@ -224,7 +224,7 @@ void ccScalarField::updateSaturationBounds()
 	if (!m_colorScale || m_colorScale->isRelative()) //Relative scale (default)
 	{
 		ScalarType minAbsVal = (m_maxVal < 0 ? std::min(-m_maxVal, -m_minVal) : std::max<ScalarType>(m_minVal, 0));
-		ScalarType maxAbsVal = std::max(fabs(m_minVal), fabs(m_maxVal));
+		ScalarType maxAbsVal = std::max(std::abs(m_minVal), std::abs(m_maxVal));
 
 		if (m_symmetricalScale)
 		{
@@ -257,7 +257,7 @@ void ccScalarField::updateSaturationBounds()
 		//if (m_logScale)
 		{
 			ScalarType minAbsVal = static_cast<ScalarType>(maxVal < 0 ? std::min(-maxVal, -minVal) : std::max(minVal, 0.0));
-			ScalarType maxAbsVal = static_cast<ScalarType>(std::max(fabs(minVal), fabs(maxVal)));
+			ScalarType maxAbsVal = static_cast<ScalarType>(std::max(std::abs(minVal), std::abs(maxVal)));
 			ScalarType minSatLog = log10(std::max(minAbsVal, CCCoreLib::ZERO_TOLERANCE_SCALAR));
 			ScalarType maxSatLog = log10(std::max(maxAbsVal, CCCoreLib::ZERO_TOLERANCE_SCALAR));
 			m_logSaturationRange.setBounds(minSatLog, maxSatLog);

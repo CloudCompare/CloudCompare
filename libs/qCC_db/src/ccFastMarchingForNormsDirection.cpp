@@ -128,8 +128,8 @@ float ccFastMarchingForNormsDirection::computePropagationConfidence(DirectionCel
 	CCVector3 AB = destCell->C - originCell->C;
 	AB.normalize();
 
-	float psOri = fabs(static_cast<float>(AB.dot(originCell->N))); //ideal: 90 degrees
-	float psDest = fabs(static_cast<float>(AB.dot(destCell->N))); //ideal: 90 degrees
+	float psOri = std::abs(static_cast<float>(AB.dot(originCell->N))); //ideal: 90 degrees
+	float psDest = std::abs(static_cast<float>(AB.dot(destCell->N))); //ideal: 90 degrees
 	float oriConfidence = (psOri + psDest)/2; //between 0 and 1 (ideal: 0)
 	
 	return 1.0f - oriConfidence;

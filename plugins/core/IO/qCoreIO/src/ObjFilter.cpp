@@ -715,7 +715,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 							static_cast<PointCoordinateType>(tokens[2].toDouble()),
 							static_cast<PointCoordinateType>(tokens[3].toDouble()));
 
-				if (fabs(N.norm2() - 1.0) > 0.005)
+				if (std::abs(N.norm2d() - 1.0) > 0.005)
 				{
 					objWarnings[INVALID_NORMALS] = true;
 					N.normalize();

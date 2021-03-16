@@ -439,8 +439,8 @@ double DistanceMapGenerationTool::ConicalProjectN(double phi1, double phi2)
 	if (phi1 >= phi2)
 		return 1.0;
 
-	assert(fabs(phi1) < M_PI_DIV_2);
-	assert(fabs(phi2) < M_PI_DIV_2);
+	assert(std::abs(phi1) < M_PI_DIV_2);
+	assert(std::abs(phi2) < M_PI_DIV_2);
 
 	double tan_pl1 = tan(M_PI_DIV_4 - phi1 / 2);
 	double tan_pl2 = tan(M_PI_DIV_4 - phi2 / 2);
@@ -1119,7 +1119,7 @@ bool DistanceMapGenerationTool::ComputeSurfacesAndVolumes(	const QSharedPointer<
 				{
 					volume.total += /*volPart * */(r1*r1 + r2*r2 + r1*r2);
 					//volume of the gain (or loss) of matter
-					double diffVolume = /*volPart * */fabs(3.0*d * (r_th1 + r_th2 + d)); // = (r*r) * part - (r_th*r_th) * part = [(r_th+d)*(r_th+d)-r_th*r_th] * part
+					double diffVolume = /*volPart * */std::abs(3.0*d * (r_th1 + r_th2 + d)); // = (r*r) * part - (r_th*r_th) * part = [(r_th+d)*(r_th+d)-r_th*r_th] * part
 					if (d >= 0.0)
 						volume.positive += diffVolume;
 					else

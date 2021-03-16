@@ -1079,7 +1079,7 @@ bool GenericItem::setOrientation(const CCVector3 &x, const CCVector3 &y, const C
 
 bool GenericItem::isOrientationValid(unsigned i) const
 {
-	return CCCoreLib::GreaterThanEpsilon( orientation[i].norm2() );
+	return CCCoreLib::GreaterThanSquareEpsilon( orientation[i].norm2() );
 }
 
 bool GenericItem::completeOrientation()
@@ -1454,10 +1454,10 @@ bool SCylinder::setValue(Token t, PointCoordinateType value)
 	{
 	case PDMS_DIAMETER: diameter = value; break;
 	case PDMS_HEIGHT: height = value; break;
-	case PDMS_X_TOP_SHEAR: xtshear = value; if (fabs(xtshear) > 90.) return false; break;
-	case PDMS_Y_TOP_SHEAR: ytshear = value; if (fabs(ytshear) > 90.) return false; break;
-	case PDMS_X_BOTTOM_SHEAR: xbshear = value; if (fabs(xbshear) > 90.) return false; break;
-	case PDMS_Y_BOTTOM_SHEAR: ybshear = value; if (fabs(ybshear) > 90.) return false; break;
+	case PDMS_X_TOP_SHEAR: xtshear = value; if (std::abs(xtshear) > 90.) return false; break;
+	case PDMS_Y_TOP_SHEAR: ytshear = value; if (std::abs(ytshear) > 90.) return false; break;
+	case PDMS_X_BOTTOM_SHEAR: xbshear = value; if (std::abs(xbshear) > 90.) return false; break;
+	case PDMS_Y_BOTTOM_SHEAR: ybshear = value; if (std::abs(ybshear) > 90.) return false; break;
 	default: return false;
 	}
 	return true;
@@ -1517,7 +1517,7 @@ bool CTorus::setValue(Token t, PointCoordinateType value)
 {
 	switch (t)
 	{
-	case PDMS_ANGLE: angle = value; if (fabs(angle) > (2.*M_PI)) return false; break;
+	case PDMS_ANGLE: angle = value; if (std::abs(angle) > (2.*M_PI)) return false; break;
 	case PDMS_INSIDE_RADIUS: inside_radius = value; break;
 	case PDMS_OUTSIDE_RADIUS: outside_radius = value; break;
 	default: return false;
@@ -1572,7 +1572,7 @@ bool RTorus::setValue(Token t, PointCoordinateType value)
 {
 	switch (t)
 	{
-	case PDMS_ANGLE: angle = value; if (fabs(angle) > (2.*M_PI)) return false; break;
+	case PDMS_ANGLE: angle = value; if (std::abs(angle) > (2.*M_PI)) return false; break;
 	case PDMS_INSIDE_RADIUS: inside_radius = value; break;
 	case PDMS_OUTSIDE_RADIUS: outside_radius = value; break;
 	case PDMS_HEIGHT: height = value; break;
@@ -1652,7 +1652,7 @@ PointCoordinateType Dish::surface() const
 	if ( CCCoreLib::GreaterThanEpsilon( radius ) )
 	{
 		PointCoordinateType r = static_cast<PointCoordinateType>(0.5f*diameter);
-		if ( CCCoreLib::LessThanEpsilon( fabs(2 * height - diameter) ) )
+		if (CCCoreLib::LessThanEpsilon(std::abs(2 * height - diameter)))
 		{
 			return static_cast<PointCoordinateType>(2.0*M_PI)*PDMS_SQR(r);
 		}

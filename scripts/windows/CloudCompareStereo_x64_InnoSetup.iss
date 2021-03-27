@@ -54,10 +54,10 @@ Name: "StartMenuEntry" ; Description: "Install Faro I/O plugin (to load FWS/FLS 
 [Files]
 Source: "{#MyCCPath}\CloudCompare.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#MyCCPath}\*"; Excludes: "*.manifest,QBRGM*.dll,QFARO*.dll"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-; Uknown dependency support ;)
+; Unknown dependency support:)
 Source: "{#MyVCRedistPath}\vcredist_2013_x64.exe"; DestDir: {tmp}; Flags: deleteafterinstall 64bit;
-; DotProduct support
-Source: "{#MyVCRedistPath}\vcredist_2017_x64.exe"; DestDir: {tmp}; Flags: deleteafterinstall 64bit;
+; All other Visual Studio dependencies at once: 2015, 2017 and 2019
+Source: "{#MyVCRedistPath}\vcredist_all_x64.exe"; DestDir: {tmp}; Flags: deleteafterinstall 64bit;
 ; FARO LS support
 Source: "{#MyFaroRedistPath}\x64\{#MyFaroRedistExe}"; DestDir: {tmp}; Flags: deleteafterinstall 64bit; Check: WithFaro
 Source: "{#MyFaroRedistPath}\x64\{#MyAppExeName}.manifest"; DestDir: "{app}"; Flags: ignoreversion; Check: WithFaro
@@ -71,7 +71,7 @@ Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\{#MyAppName}"; Fil
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 Filename: "{tmp}\vcredist_2013_x64.exe"; Parameters: "/q"
-Filename: "{tmp}\vcredist_2017_x64.exe"; Parameters: "/q"
+Filename: "{tmp}\vcredist_all_x64.exe"; Parameters: "/q"
 Filename: "{tmp}\{#MyFaroRedistExe}"; Check: WithFaro
 
 [Code]

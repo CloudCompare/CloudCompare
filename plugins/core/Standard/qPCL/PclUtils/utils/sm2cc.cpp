@@ -61,7 +61,7 @@ struct _PointXYZInteger
     };
   };
 
-  PCL_MAKE_ALIGNED_OPERATOR_NEW
+  //PCL_MAKE_ALIGNED_OPERATOR_NEW
 };
 
 struct EIGEN_ALIGN16 PointXYZInteger : public _PointXYZInteger

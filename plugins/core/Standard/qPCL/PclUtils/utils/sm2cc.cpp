@@ -47,38 +47,36 @@ typedef pcl::PCLPointField PCLScalarField;
 //system
 #include <assert.h>
 
-// Custom PCL point type with integer coordinates
-struct _PointXYZInteger
+// Custom PCL point types
+template<typename T> struct PointXYZTpl
 {
   union EIGEN_ALIGN16
   {
-    std::int32_t data[3];
+    T data[3];
     struct
 	{
-      std::int32_t x;
-      std::int32_t y;
-      std::int32_t z;
+      T x;
+      T y;
+      T z;
     };
   };
-
-  //PCL_MAKE_ALIGNED_OPERATOR_NEW
 };
 
-struct EIGEN_ALIGN16 PointXYZInteger : public _PointXYZInteger
-{
-	PointXYZInteger()
-	{
-		x = y = z = 0;
-	}
-};
-
-POINT_CLOUD_REGISTER_POINT_STRUCT(	_PointXYZInteger,
+POINT_CLOUD_REGISTER_POINT_STRUCT(PointXYZTpl<std::int32_t>,
 									(std::int32_t, x, x)
 									(std::int32_t, y, y)
 									(std::int32_t, z, z) )
 
-POINT_CLOUD_REGISTER_POINT_WRAPPER(PointXYZInteger, _PointXYZInteger)
+POINT_CLOUD_REGISTER_POINT_STRUCT(PointXYZTpl<std::int16_t>,
+									(std::int16_t, x, x)
+									(std::int16_t, y, y)
+									(std::int16_t, z, z) )
 
+POINT_CLOUD_REGISTER_POINT_STRUCT(PointXYZTpl<double>,
+									(double, x, x)
+									(double, y, y)
+									(double, z, z) )
+	
 size_t GetNumberOfPoints(const PCLCloud& pclCloud)
 {
 	return static_cast<size_t>(pclCloud.width) * pclCloud.height;
@@ -93,7 +91,23 @@ bool ExistField(const PCLCloud& pclCloud, std::string name)
 	return false;
 }
 
-bool pcl2cc::CopyXYZ(const PCLCloud& pclCloud, ccPointCloud& ccCloud, bool hasIntegerCoordinates)
+template<class T> void PCLCloudToCCCloud(const PCLCloud& pclCloud, ccPointCloud& ccCloud)
+{
+	size_t pointCount = GetNumberOfPoints(pclCloud);
+
+	pcl::PointCloud<T> pcl_cloud;
+	FROM_PCL_CLOUD(pclCloud, pcl_cloud);
+	for (size_t i = 0; i < pointCount; ++i)
+	{
+		CCVector3 P(pcl_cloud.at(i).x,
+					pcl_cloud.at(i).y,
+					pcl_cloud.at(i).z);
+
+		ccCloud.addPoint(P);
+	}
+}
+
+bool pcl2cc::CopyXYZ(const PCLCloud& pclCloud, ccPointCloud& ccCloud, uint8_t coordinateType)
 {
 	size_t pointCount = GetNumberOfPoints(pclCloud);
 	if (pointCount == 0)
@@ -108,33 +122,24 @@ bool pcl2cc::CopyXYZ(const PCLCloud& pclCloud, ccPointCloud& ccCloud, bool hasIn
 	}
 
 	//add xyz to the input cloud taking xyz infos from the sm cloud
-	if (hasIntegerCoordinates)
+	switch (coordinateType)
 	{
-		pcl::PointCloud<PointXYZInteger> pcl_cloud;
-		FROM_PCL_CLOUD(pclCloud, pcl_cloud);
-		for (size_t i = 0; i < pointCount; ++i)
-		{
-			CCVector3 P(pcl_cloud.at(i).x,
-						pcl_cloud.at(i).y,
-						pcl_cloud.at(i).z);
-
-			ccCloud.addPoint(P);
-		}
-	}
-	else
-	{
-		pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-		FROM_PCL_CLOUD(pclCloud, *pcl_cloud);
-		//loop
-		for (size_t i = 0; i < pointCount; ++i)
-		{
-			CCVector3 P(pcl_cloud->at(i).x,
-						pcl_cloud->at(i).y,
-						pcl_cloud->at(i).z);
-
-			ccCloud.addPoint(P);
-		}
-	}
+		case pcl::PCLPointField::INT16:
+			PCLCloudToCCCloud<PointXYZTpl<std::int16_t>>(pclCloud, ccCloud);
+			break;
+		case pcl::PCLPointField::INT32:
+			PCLCloudToCCCloud<PointXYZTpl<std::int32_t>>(pclCloud, ccCloud);
+			break;
+		case pcl::PCLPointField::FLOAT32:
+			PCLCloudToCCCloud<pcl::PointXYZ>(pclCloud, ccCloud);
+			break;
+		case pcl::PCLPointField::FLOAT64:
+			PCLCloudToCCCloud<PointXYZTpl<double>>(pclCloud, ccCloud);
+			break;
+		default:
+			ccLog::Warning("[PCL] Unsupported coordinate type " + QString::number(coordinateType));
+			return false;
+	};
 
 	return true;
 }
@@ -324,6 +329,7 @@ ccPointCloud* pcl2cc::Convert(const PCLCloud& pclCloud)
 	//retrieve the valid fields
 	std::list<std::string> fields;
 	bool hasIntegerCoordinates = false;
+	uint8_t coordinateType = 0;
 	for (const auto& field : pclCloud.fields)
 	{
 		if (field.name != "_") //PCL padding fields
@@ -331,11 +337,10 @@ ccPointCloud* pcl2cc::Convert(const PCLCloud& pclCloud)
 			fields.push_back(field.name);
 		}
 
-		if (!hasIntegerCoordinates
-			&&	field.name == "x"
-			&&	field.datatype < pcl::PCLPointField::FLOAT32)
+		if (coordinateType == 0
+			&&	(field.name == "x" || field.name == "y" || field.name == "z"))
 		{
-			hasIntegerCoordinates = true;
+			coordinateType = field.datatype;
 		}
 	}
 
@@ -352,7 +357,7 @@ ccPointCloud* pcl2cc::Convert(const PCLCloud& pclCloud)
 	if (expectedPointCount != 0)
 	{
 		//push points inside
-		if (!CopyXYZ(pclCloud, *ccCloud, hasIntegerCoordinates))
+		if (!CopyXYZ(pclCloud, *ccCloud, coordinateType))
 		{
 			delete ccCloud;
 			return nullptr;

@@ -59,7 +59,7 @@ v2.12 (???) - (in development)
 		- new option '-RENAME_SF' ({scalar field index} {name}):
 			- To rename a scalar field
 	- PCD:
-		- CC can now load PCL files with integer xyz coordinates
+		- CC can now load PCL files with integer xyz coordinates (16 and 32 bits) as well as double coordinates
 	- STL:
 		- loading speed should be greatly improved (compared to v2.10 and v2.11)
 	- Global Shift & Scale:

@@ -33,7 +33,7 @@ public:
 
 public: // other related utility functions
 
-	static bool CopyXYZ(const PCLCloud& pclCloud, ccPointCloud& ccCloud, bool hasIntegerCoordinates);
+	static bool CopyXYZ(const PCLCloud& pclCloud, ccPointCloud& ccCloud, uint8_t coordinateType);
 	static bool CopyNormals(const PCLCloud& pclCloud, ccPointCloud& ccCloud);
 	static bool CopyRGB(const PCLCloud& pclCloud, ccPointCloud& ccCloud);
 	static bool CopyScalarField(const PCLCloud& pclCloud, const std::string& sfName, ccPointCloud& ccCloud, bool overwriteIfExist = true);

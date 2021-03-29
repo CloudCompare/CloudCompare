@@ -58,6 +58,8 @@ v2.12 (???) - (in development)
 			- Inverts the normals of the loaded entities (cloud or mesh, and per-triangle or per-vertex for meshes)
 		- new option '-RENAME_SF' ({scalar field index} {name}):
 			- To rename a scalar field
+	- PCD:
+		- CC can now load PCL files with integer xyz coordinates
 	- STL:
 		- loading speed should be greatly improved (compared to v2.10 and v2.11)
 	- Global Shift & Scale:

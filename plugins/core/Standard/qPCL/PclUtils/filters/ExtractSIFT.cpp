@@ -51,8 +51,8 @@
 	\note If a PointType with a scale field is passed as output type, scales will be returned together with the return cloud
 **/
 template <typename PointInT, typename PointOutT>
-int estimateSIFT(	const typename pcl::PointCloud<PointInT>::Ptr in_cloud,
-					typename pcl::PointCloud<PointOutT>::Ptr out_cloud,
+int EstimateSIFT(	const typename pcl::PointCloud<PointInT>::Ptr in_cloud,
+					typename pcl::PointCloud<PointOutT>& out_cloud,
 					int nr_octaves = 0,
 					float min_scale = 0,
 					int nr_scales_per_octave = 0,
@@ -71,7 +71,7 @@ int estimateSIFT(	const typename pcl::PointCloud<PointInT>::Ptr in_cloud,
 		keypoint_detector.setMinimumContrast(min_contrast);
 	}
 
-	keypoint_detector.compute(*out_cloud);
+	keypoint_detector.compute(out_cloud);
 	return 1;
 }
 
@@ -80,7 +80,7 @@ ExtractSIFT::ExtractSIFT()
 									"Extract SIFT Keypoints",
 									"Extract SIFT keypoints for clouds with intensity/RGB or any scalar field",
 									":/toolbar/PclUtils/icons/sift.png"))
-	, m_dialog(0)
+	, m_dialog(nullptr)
 	, m_nr_octaves(0)
 	, m_min_scale(0)
 	, m_nr_scales_per_octave(0)
@@ -93,7 +93,7 @@ ExtractSIFT::ExtractSIFT()
 ExtractSIFT::~ExtractSIFT()
 {
 	//we must delete parent-less dialogs ourselves!
-	if (m_dialog && m_dialog->parent() == 0)
+	if (m_dialog && m_dialog->parent() == nullptr)
 		delete m_dialog;
 }
 
@@ -133,7 +133,7 @@ int ExtractSIFT::openInputDialog()
 
 	//initialize the dialog object
 	if (!m_dialog)
-		m_dialog = new SIFTExtractDlg(m_app ? m_app->getMainWindow() : 0);
+		m_dialog = new SIFTExtractDlg(m_app ? m_app->getMainWindow() : nullptr);
 
 	//update the combo box
 	m_dialog->updateComboBox(fields);
@@ -154,7 +154,7 @@ void ExtractSIFT::getParametersFromDialog()
 	m_min_scale = static_cast<float>(m_dialog->minScale->value());
 	m_nr_scales_per_octave = m_dialog->scalesPerOctave->value();
 	m_use_min_contrast = m_dialog->useMinContrast->checkState();
-	m_min_contrast = m_use_min_contrast ? static_cast<float>(m_dialog->minContrast->value()) : 0;
+	m_min_contrast = m_use_min_contrast ? static_cast<float>(m_dialog->minContrast->value()) : 0.0f;
 	m_field_to_use = m_dialog->intensityCombo->currentText();
 
 	if (m_field_to_use == "rgb")
@@ -237,33 +237,31 @@ int ExtractSIFT::compute()
 		sm_cloud->fields.at(field_index).name = "intensity"; //we always use intensity as name... even if it is curvature or another field.
 	}
 
-	//initialize all possible clouds
-	pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_i (new pcl::PointCloud<pcl::PointXYZI>);
-	pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_rgb (new pcl::PointCloud<pcl::PointXYZRGB>);
-	pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud (new pcl::PointCloud<pcl::PointXYZ>);
-
 	//Now do the actual computation
+	pcl::PointCloud<pcl::PointXYZ> out_cloud;
 	if (m_mode == SCALAR_FIELD)
 	{
+		pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_i(new pcl::PointCloud<pcl::PointXYZI>);
 		FROM_PCL_CLOUD(*sm_cloud, *cloud_i);
-		estimateSIFT<pcl::PointXYZI, pcl::PointXYZ>(cloud_i, out_cloud, m_nr_octaves, m_min_scale, m_nr_scales_per_octave, m_min_contrast );
+		EstimateSIFT<pcl::PointXYZI, pcl::PointXYZ>(cloud_i, out_cloud, m_nr_octaves, m_min_scale, m_nr_scales_per_octave, m_min_contrast );
 	}
 	else if (m_mode == RGB)
 	{
+		pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_rgb(new pcl::PointCloud<pcl::PointXYZRGB>);
 		FROM_PCL_CLOUD(*sm_cloud, *cloud_rgb);
-		estimateSIFT<pcl::PointXYZRGB, pcl::PointXYZ>(cloud_rgb, out_cloud, m_nr_octaves, m_min_scale, m_nr_scales_per_octave, m_min_contrast );
+		EstimateSIFT<pcl::PointXYZRGB, pcl::PointXYZ>(cloud_rgb, out_cloud, m_nr_octaves, m_min_scale, m_nr_scales_per_octave, m_min_contrast );
 	}
 
-	PCLCloud::Ptr out_cloud_sm (new PCLCloud);
-	TO_PCL_CLOUD(*out_cloud, *out_cloud_sm);
+	PCLCloud out_cloud_sm;
+	TO_PCL_CLOUD(out_cloud, out_cloud_sm);
 
-	if ( out_cloud_sm->height * out_cloud_sm->width == 0)
+	if (out_cloud_sm.height * out_cloud_sm.width == 0)
 	{
 		//cloud is empty
 		return -53;
 	}
 
-	ccPointCloud* out_cloud_cc = sm2ccConverter(out_cloud_sm).getCloud();
+	ccPointCloud* out_cloud_cc = pcl2cc::Convert(out_cloud_sm);
 	if (!out_cloud_cc)
 	{
 		//conversion failed (not enough memory?)
@@ -291,28 +289,20 @@ int ExtractSIFT::compute()
 
 QString ExtractSIFT::getErrorMessage(int errorCode)
 {
-	switch(errorCode)
+	switch (errorCode)
 	{
-		//THESE CASES CAN BE USED TO OVERRIDE OR ADD FILTER-SPECIFIC ERRORS CODES
-		//ALSO IN DERIVED CLASSES DEFULAT MUST BE ""
-
+	//THESE CASES CAN BE USED TO OVERRIDE OR ADD FILTER-SPECIFIC ERRORS CODES
+	//ALSO IN DERIVED CLASSES DEFAULT MUST BE ""
 	case -51:
-		return QString("Selected entity does not have any suitable scalar field or RGB. Intensity scalar field or RGB are needed for computing SIFT");
+		return "Selected entity does not have any suitable scalar field or RGB. Intensity scalar field or RGB are needed for computing SIFT";
 	case -52:
-		return QString("Wrong Parameters. One or more parameters cannot be accepted");
+		return "Wrong Parameters. One or more parameters cannot be accepted";
 	case -53:
-		return QString("SIFT keypoint extraction does not returned any point. Try relaxing your parameters");
+		return "SIFT keypoint extraction does not returned any point. Try relaxing your parameters";
+	default:
+		//see below
+		break;
 	}
 
 	return BaseFilter::getErrorMessage(errorCode);
 }
-
-template int estimateSIFT<pcl::PointXYZI, pcl::PointXYZ> (	const pcl::PointCloud<pcl::PointXYZI>::Ptr in_cloud,
-															pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud,
-															int nr_octaves, float min_scale, int nr_scales_per_octave,
-															float min_contrast);
-
-template int estimateSIFT<pcl::PointXYZRGB, pcl::PointXYZ> (const pcl::PointCloud<pcl::PointXYZRGB>::Ptr in_cloud,
-															pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud,
-															int nr_octaves, float min_scale, int nr_scales_per_octave,
-															float min_contrast);

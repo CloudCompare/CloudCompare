@@ -152,44 +152,46 @@ CC_FILE_ERROR PcdFilter::loadFile(const QString& filename, ccHObject& container,
 	int data_type;
 	unsigned int data_idx;
 	size_t pointCount = -1;
-	PCLCloud::Ptr cloud_ptr_in(new PCLCloud);
+	PCLCloud inputCloud;
 	//Load the given file
 	pcl::PCDReader p;
 
-	p.readHeader(qPrintable(filename), *cloud_ptr_in, origin, orientation, pcd_version, data_type, data_idx);
-	if (cloud_ptr_in)
+	if (p.readHeader(qPrintable(filename), inputCloud, origin, orientation, pcd_version, data_type, data_idx) < 0)
 	{
-		pointCount = cloud_ptr_in->width * cloud_ptr_in->height;
-		ccLog::Print(QString("%1: Point Count: %2").arg(qPrintable(filename)).arg(pointCount));
-	}
-	if (pointCount > 0)
-	{
-		if (pcl::io::loadPCDFile(qPrintable(filename), *cloud_ptr_in, origin, orientation) < 0) //DGM: warning, toStdString doesn't preserve "local" characters
-		{
-			return CC_FERR_THIRD_PARTY_LIB_FAILURE;
-		}
-	}
-
-	if (!cloud_ptr_in) //loading failed?
 		return CC_FERR_THIRD_PARTY_LIB_FAILURE;
+	}
 
-	PCLCloud::Ptr cloud_ptr;
-	if (!cloud_ptr_in->is_dense) //data may contain NaNs --> remove them
+	pointCount = inputCloud.width * inputCloud.height;
+	ccLog::Print(QString("%1: Point Count: %2").arg(qPrintable(filename)).arg(pointCount));
+
+	if (pointCount == 0)
+	{
+		return CC_FERR_NO_LOAD;
+	}
+
+	if (pcl::io::loadPCDFile(qPrintable(filename), inputCloud, origin, orientation) < 0) //DGM: warning, toStdString doesn't preserve "local" characters
+	{
+		return CC_FERR_THIRD_PARTY_LIB_FAILURE;
+	}
+
+	ccPointCloud* ccCloud = nullptr;
+	if (!inputCloud.is_dense) //data may contain NaNs --> remove them
 	{
 		//now we need to remove NaNs
 		pcl::PassThrough<PCLCloud> passFilter;
-		passFilter.setInputCloud(cloud_ptr_in);
+		passFilter.setInputCloud(PCLCloud::Ptr(new PCLCloud(inputCloud)));
 
-		cloud_ptr = PCLCloud::Ptr(new PCLCloud);
-		passFilter.filter(*cloud_ptr);
+		PCLCloud filteredCloud;
+		passFilter.filter(filteredCloud);
+		
+		ccCloud = pcl2cc::Convert(filteredCloud);
 	}
 	else
 	{
-		cloud_ptr = cloud_ptr_in;
+		ccCloud = pcl2cc::Convert(inputCloud);
 	}
 
 	//convert to CC cloud
-	ccPointCloud* ccCloud = sm2ccConverter(cloud_ptr).getCloud();
 	if (!ccCloud)
 	{
 		ccLog::Warning("[PCL] An error occurred while converting PCD cloud to CloudCompare cloud!");

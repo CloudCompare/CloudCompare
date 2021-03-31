@@ -2206,12 +2206,20 @@ bool CommandSetActiveSF::process(ccCommandLineInterface &cmd)
 		return cmd.error(QObject::tr("Missing parameter: scalar field index after \"-%1\"").arg(COMMAND_SET_ACTIVE_SF));
 	}
 	
-	bool paramOk = false;
+	int sfIndex = -1;
+	bool ok = true;
 	QString sfIndexStr = cmd.arguments().takeFirst();
-	int sfIndex = sfIndexStr.toInt(&paramOk);
-	if (!paramOk)
+	if (sfIndexStr.toUpper() == OPTION_LAST)
 	{
-		return cmd.error(QObject::tr("Failed to read a numerical parameter: S.F. index (after \"-%1\"). Got '%2' instead.").arg(COMMAND_SET_ACTIVE_SF, sfIndexStr));
+		sfIndex = -2;
+	}
+	else
+	{
+		sfIndex = sfIndexStr.toInt(&ok);
+	}
+	if (!ok || sfIndex == -1)
+	{
+		return cmd.error(QObject::tr("Invalid SF index! (after %1)").arg(COMMAND_SET_ACTIVE_SF));
 	}
 	cmd.print(QObject::tr("Set active S.F. index: %1").arg(sfIndex));
 	
@@ -2224,9 +2232,9 @@ bool CommandSetActiveSF::process(ccCommandLineInterface &cmd)
 	{
 		if (cmd.clouds()[i].pc && cmd.clouds()[i].pc->hasScalarFields())
 		{
-			if (static_cast<int>(cmd.clouds()[i].pc->getNumberOfScalarFields()) > sfIndex)
+			if (sfIndex < static_cast<int>(cmd.clouds()[i].pc->getNumberOfScalarFields()))
 			{
-				cmd.clouds()[i].pc->setCurrentScalarField(sfIndex);
+				cmd.clouds()[i].pc->setCurrentScalarField(sfIndex < 0 ? static_cast<int>(cmd.clouds()[i].pc->getNumberOfScalarFields()) - 1 : sfIndex);
 			}
 			else
 			{

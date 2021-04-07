@@ -61,5 +61,5 @@ QString FileIO::createdBy()
 
 QString FileIO::createdDateTime()
 {
-	return QStringLiteral( "Created %1" ).arg( QDateTime::currentDateTime().toString( Qt::SystemLocaleShortDate ) );
+	return QStringLiteral( "Created %1" ).arg( QDateTime::currentDateTime().toString( Qt::ISODate ) );
 }

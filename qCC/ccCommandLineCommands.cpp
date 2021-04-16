@@ -6,6 +6,7 @@
 #include <NormalDistribution.h>
 #include <StatisticalTestingTools.h>
 #include <WeibullDistribution.h>
+#include <DistanceComputationTools.h>
 
 //qCC_db
 #include <ccHObjectCaster.h>
@@ -83,6 +84,7 @@ constexpr char COMMAND_COLOR_BANDING[]					= "CBANDING";
 constexpr char COMMAND_C2M_DIST[]						= "C2M_DIST";
 constexpr char COMMAND_C2M_DIST_FLIP_NORMALS[]			= "FLIP_NORMS";
 constexpr char COMMAND_C2C_DIST[]						= "C2C_DIST";
+constexpr char COMMAND_CLOSEST_POINT_SET[]              = "CLOSEST_POINT_SET";
 constexpr char COMMAND_C2C_SPLIT_XYZ[]					= "SPLIT_XYZ";
 constexpr char COMMAND_C2C_LOCAL_MODEL[]				= "MODEL";
 constexpr char COMMAND_C2X_MAX_DISTANCE[]				= "MAX_DIST";
@@ -3681,6 +3683,64 @@ CommandC2MDist::CommandC2MDist()
 CommandC2CDist::CommandC2CDist()
 	: CommandDist(false, QObject::tr("C2C distance"), COMMAND_C2C_DIST)
 {}
+
+CommandCPS::CommandCPS()
+    : ccCommandLineInterface::Command(QObject::tr("Closest Point Set"), COMMAND_CLOSEST_POINT_SET)
+{}
+
+bool CommandCPS::process(ccCommandLineInterface &cmd)
+{
+    cmd.print(QObject::tr("[CLOSEST POINT SET]"));
+
+    // COMPARED CLOUD / REFERENCE ENTITY
+    ccHObject* compPointCloud = nullptr;
+    ccHObject* refPointCloud = nullptr;
+
+    if (cmd.clouds().size() < 2)
+    {
+        return cmd.error(QObject::tr("At least two point clouds are needed to compute the closest point set!"));
+    }
+    else if (cmd.clouds().size() > 2)
+    {
+        cmd.warning(QObject::tr("More than 3 point clouds loaded! We take the second one as reference by default"));
+    }
+
+    compPointCloud = cmd.clouds().front().pc;
+    refPointCloud = cmd.clouds()[1].pc;
+
+    assert(compEntity && compCloud && refEntity);
+
+    ccGenericPointCloud* compCloud = ccHObjectCaster::ToGenericPointCloud(compPointCloud);
+    ccGenericPointCloud* refCloud = ccHObjectCaster::ToGenericPointCloud(refPointCloud);
+
+    CCCoreLib::ReferenceCloud CPSet(refCloud);
+    ccProgressDialog pDlg(true, nullptr);
+    CCCoreLib::DistanceComputationTools::Cloud2CloudDistanceComputationParams params;
+    params.CPSet = &CPSet;
+
+    // COMPUTE CLOUD 2 CLOUD DISTANCE, THIS INCLUDES THE CLOSEST POINT SET GENERATION
+    int result = CCCoreLib::DistanceComputationTools::computeCloud2CloudDistance(compCloud, refCloud, params, &pDlg);
+
+    if (result >= 0)
+    {
+        ccPointCloud* newCloud = nullptr;
+        // if the source cloud is a "true" cloud, the extracted CPS will also get its attributes
+        newCloud = refCloud->isA(CC_TYPES::POINT_CLOUD) ? static_cast<ccPointCloud*>(refCloud)->partialClone(&CPSet) : ccPointCloud::From(&CPSet, refCloud);
+        CLCloudDesc cloudDesc(
+                    newCloud,
+                    cmd.clouds()[0].basename + QObject::tr("_CPS_") + cmd.clouds()[1].basename,
+                    cmd.clouds()[0].path);
+        QString errorStr = cmd.exportEntity(cloudDesc, QString(), 0, ccCommandLineInterface::ExportOption::ForceNoTimestamp);
+        if (!errorStr.isEmpty())
+        {
+            cmd.error(errorStr);
+        }
+        //add cloud to the current pool
+        cmd.clouds().push_back(cloudDesc);
+    }
+
+    return true;
+}
 
 CommandStatTest::CommandStatTest()
 	: ccCommandLineInterface::Command(QObject::tr("Statistical test"), COMMAND_STAT_TEST)

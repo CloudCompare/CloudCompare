@@ -305,6 +305,13 @@ struct CommandC2CDist : public CommandDist
 	CommandC2CDist();
 };
 
+struct CommandCPS : public ccCommandLineInterface::Command
+{
+    CommandCPS();
+
+    bool process(ccCommandLineInterface& cmd) override;
+};
+
 struct CommandStatTest : public ccCommandLineInterface::Command
 {
 	CommandStatTest();

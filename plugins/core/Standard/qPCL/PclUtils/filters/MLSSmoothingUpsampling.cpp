@@ -55,7 +55,7 @@ int smooth_mls(	const typename pcl::PointCloud<PointInT>::Ptr &incloud,
 
 #ifdef _OPENMP
 	//create the smoothing object
-	pcl::MovingLeastSquaresOMP< PointInT, PointOutT > smoother;
+	pcl::MovingLeastSquares< PointInT, PointOutT > smoother;
 	int n_threads = omp_get_max_threads();
 	smoother.setNumberOfThreads(n_threads);
 #else

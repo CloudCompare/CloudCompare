@@ -278,16 +278,11 @@ void ccConsole::refresh()
 					if (m_parentWindow)
 						m_parentWindow->forceConsoleDisplay();
 				}
-				//Standard
-				else
-				{
 #ifdef QT_DEBUG
-					if (debugMessage)
-						item->setForeground(Qt::blue);
-					else
-#endif
-						item->setForeground(Qt::black);
+				else if (debugMessage) {
+					item->setForeground(Qt::blue);
 				}
+#endif
 
 				m_textDisplay->addItem(item);
 			}

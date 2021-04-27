@@ -16,10 +16,6 @@
   <property name="windowTitle">
    <string>About CloudCompare</string>
   </property>
-  <property name="styleSheet">
-   <string notr="true">background-color:white;
-color:black;</string>
-  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">

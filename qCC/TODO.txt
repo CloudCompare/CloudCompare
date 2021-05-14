@@ -25,7 +25,6 @@ Big ones:
 	- being able to work on portions of very big clouds while other portions are visible but in 'read-only' mode (http://www.cloudcompare.org/forum/viewtopic.php?t=1699)
 [*] Undo mechanism
 [*] Command line mode could be extended
-	- compute the closest point set (CPS) (https://www.cloudcompare.org/forum/viewtopic.php?t=3445)
 	- label Connected Components tool (http://www.cloudcompare.org/forum/viewtopic.php?t=933)
 	- extract a cross section from a point cloud using an existing polyline (loading in .bin or dxf format as in the interface) (http://www.danielgm.net/cc/forum/viewtopic.php?t=1515)
 	- save the plane orientation as a text file after best plane fitting
@@ -40,7 +39,6 @@ Big ones:
 [*] Volume calculation
 	- between clouds (from distances)
 	- between meshes (http://www.danielgm.net/cc/forum/viewtopic.php?t=1253)
-[*] Use PDAL instead of libLAS (http://www.cloudcompare.org/forum/viewtopic.php?t=437)
 
 qAnimation plugin:
 

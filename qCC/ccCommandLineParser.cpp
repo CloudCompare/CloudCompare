@@ -617,6 +617,7 @@ void ccCommandLineParser::registerBuiltInCommands()
 	registerCommand(Command::Shared(new CommandMatchBestFitPlane));
 	registerCommand(Command::Shared(new CommandOrientNormalsMST));
 	registerCommand(Command::Shared(new CommandSORFilter));
+	registerCommand(Command::Shared(new CommandNoiseFilter));
 	registerCommand(Command::Shared(new CommandSampleMesh));
 	registerCommand(Command::Shared(new CommandExtractVertices));
 	registerCommand(Command::Shared(new CommandCrossSection));

@@ -244,6 +244,13 @@ struct CommandSORFilter : public ccCommandLineInterface::Command
 	bool process(ccCommandLineInterface& cmd) override;
 };
 
+struct CommandNoiseFilter : public ccCommandLineInterface::Command
+{
+	CommandNoiseFilter();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
 struct CommandExtractVertices : public ccCommandLineInterface::Command
 {
 	CommandExtractVertices();

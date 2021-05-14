@@ -76,6 +76,12 @@ constexpr char COMMAND_BEST_FIT_PLANE_MAKE_HORIZ[]		= "MAKE_HORIZ";
 constexpr char COMMAND_BEST_FIT_PLANE_KEEP_LOADED[]		= "KEEP_LOADED";
 constexpr char COMMAND_ORIENT_NORMALS[]					= "ORIENT_NORMS_MST";
 constexpr char COMMAND_SOR_FILTER[]						= "SOR";
+constexpr char COMMAND_NOISE_FILTER[]					= "NOISE";
+constexpr char COMMAND_NOISE_FILTER_KNN[]				= "KNN";
+constexpr char COMMAND_NOISE_FILTER_RADIUS[]			= "RADIUS";
+constexpr char COMMAND_NOISE_FILTER_REL[]				= "REL";
+constexpr char COMMAND_NOISE_FILTER_ABS[]				= "ABS";
+constexpr char COMMAND_NOISE_FILTER_RIP[]				= "RIP";
 constexpr char COMMAND_SAMPLE_MESH[]					= "SAMPLE_MESH";
 constexpr char COMMAND_CROP[]							= "CROP";
 constexpr char COMMAND_CROP_OUTSIDE[]					= "OUTSIDE";
@@ -2737,7 +2743,7 @@ bool CommandSORFilter::process(ccCommandLineInterface &cmd)
 		else
 		{
 			//no points fall inside selection!
-			return cmd.error(QObject::tr("Failed to apply SOR filter on cloud '%1'! (not enough memory?)").arg(cloud->getName()));
+			return cmd.error(QObject::tr("Failed to apply SOR filter on cloud '%1'! (empty output or not enough memory?)").arg(cloud->getName()));
 		}
 	}
 	
@@ -2747,6 +2753,158 @@ bool CommandSORFilter::process(ccCommandLineInterface &cmd)
 		QCoreApplication::processEvents();
 	}
 	
+	return true;
+}
+
+CommandNoiseFilter::CommandNoiseFilter()
+	: ccCommandLineInterface::Command(QObject::tr("Noise filter"), COMMAND_NOISE_FILTER)
+{}
+
+bool CommandNoiseFilter::process(ccCommandLineInterface &cmd)
+{
+	cmd.print(QObject::tr("[NOISE FILTER]"));
+
+	if (cmd.arguments().size() < 4)
+	{
+		return cmd.error(QObject::tr("Missing parameters: 'KNN/RADIUS {value} REL/ABS {value}' expected after \"-%1\"").arg(COMMAND_NOISE_FILTER));
+	}
+
+	QString firstOption = cmd.arguments().takeFirst().toUpper();
+	int knn = -1;
+	double radius = std::numeric_limits<double>::quiet_NaN();
+
+	if (firstOption == COMMAND_NOISE_FILTER_KNN)
+	{
+		QString knnStr = cmd.arguments().takeFirst();
+		bool ok;
+		knn = knnStr.toInt(&ok);
+		if (!ok || knn <= 0)
+		{
+			return cmd.error(QObject::tr("Invalid parameter: number of neighbors after KNN (got '%1' instead)").arg(knnStr));
+		}
+	}
+	else if(firstOption == COMMAND_NOISE_FILTER_RADIUS)
+	{
+		QString radiusStr = cmd.arguments().takeFirst();
+		bool ok;
+		radius = radiusStr.toDouble(&ok);
+		if (!ok || radius <= 0)
+		{
+			return cmd.error(QObject::tr("Invalid parameter: radius after RADIUS (got '%1' instead)").arg(radiusStr));
+		}
+	}
+	else
+	{
+		return cmd.error(QObject::tr("Invalid parameter: KNN or RADIUS expected after \"-%1\"").arg(COMMAND_NOISE_FILTER));
+	}
+
+	QString secondOption = cmd.arguments().takeFirst().toUpper();
+	bool absoluteError = true;
+	if (secondOption == COMMAND_NOISE_FILTER_REL)
+	{
+		absoluteError = false;
+	}
+	else if (secondOption == COMMAND_NOISE_FILTER_ABS)
+	{
+		absoluteError = true;
+	}
+	else
+	{
+		return cmd.error(QObject::tr("Invalid parameter: REL or ABS expected"));
+	}
+
+	double error = std::numeric_limits<double>::quiet_NaN();
+	{
+		QString errorStr = cmd.arguments().takeFirst();
+		bool ok;
+		error = errorStr.toDouble(&ok);
+		if (!ok || error <= 0)
+		{
+			return cmd.error(QObject::tr("Invalid parameter: relative or absolute error expected after KNN (got '%1' instead)").arg(errorStr));
+		}
+	}
+
+	//optional arguments
+	bool removeIsolatedPoints = false;
+	if (!cmd.arguments().empty())
+	{
+		QString argument = cmd.arguments().front();
+		if (argument == COMMAND_NOISE_FILTER_RIP)
+		{
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
+			removeIsolatedPoints = true;
+		}
+	}
+
+	QScopedPointer<ccProgressDialog> progressDialog(nullptr);
+	if (!cmd.silentMode())
+	{
+		progressDialog.reset(new ccProgressDialog(false, cmd.widgetParent()));
+		progressDialog->setAutoClose(false);
+	}
+
+	for (size_t i = 0; i < cmd.clouds().size(); ++i)
+	{
+		ccPointCloud* cloud = cmd.clouds()[i].pc;
+		assert(cloud);
+
+		//computation
+		CCCoreLib::ReferenceCloud* selection = CCCoreLib::CloudSamplingTools::noiseFilter(cloud,
+			static_cast<PointCoordinateType>(radius),
+			error,
+			removeIsolatedPoints,
+			knn > 0,
+			knn,
+			absoluteError,
+			error,
+			nullptr,
+			progressDialog.data());
+
+		if (selection)
+		{
+			ccPointCloud* cleanCloud = cloud->partialClone(selection);
+			if (cleanCloud)
+			{
+				cleanCloud->setName(cloud->getName() + QObject::tr(".clean"));
+				if (cmd.autoSaveMode())
+				{
+					CLCloudDesc cloudDesc(cleanCloud, cmd.clouds()[i].basename, cmd.clouds()[i].path, cmd.clouds()[i].indexInFile);
+					QString errorStr = cmd.exportEntity(cloudDesc, "DENOISED");
+					if (!errorStr.isEmpty())
+					{
+						delete cleanCloud;
+						return cmd.error(errorStr);
+					}
+				}
+				//replace current cloud by this one
+				delete cmd.clouds()[i].pc;
+				cmd.clouds()[i].pc = cleanCloud;
+				cmd.clouds()[i].basename += QObject::tr("_DENOISED");
+				//delete cleanCloud;
+				//cleanCloud = 0;
+			}
+			else
+			{
+				return cmd.error(QObject::tr("Not enough memory to create a clean version of cloud '%1'!").arg(cloud->getName()));
+			}
+
+			delete selection;
+			selection = nullptr;
+		}
+		else
+		{
+			//no points fall inside selection!
+			return cmd.error(QObject::tr("Failed to apply Noise filter on cloud '%1'! (empty output or not enough memory?)").arg(cloud->getName()));
+		}
+	}
+
+	if (progressDialog)
+	{
+		progressDialog->close();
+		QCoreApplication::processEvents();
+	}
+
 	return true;
 }
 

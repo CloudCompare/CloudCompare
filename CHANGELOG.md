@@ -58,6 +58,11 @@ v2.12 (???) - (in development)
 			- Inverts the normals of the loaded entities (cloud or mesh, and per-triangle or per-vertex for meshes)
 		- new option '-RENAME_SF' ({scalar field index} {name}):
 			- To rename a scalar field
+		- new option '-NOISE KNN/RADIUS {value 1} REL/ABS {value 2} {RIP}':
+			- To apply the Noise filter to the loaded point clouds
+			- value 1: number of neighbors if KNN, radius if RADIUS
+			- value 2: relative error (standard deviation multiplier) if REL, absolute error if ABS
+			- RIP: remove isolated poins (optional)
 	- PCD:
 		- CC can now load PCL files with integer xyz coordinates (16 and 32 bits) as well as double coordinates
 	- STL:

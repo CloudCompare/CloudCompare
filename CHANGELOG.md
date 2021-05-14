@@ -99,6 +99,8 @@ v2.12 (???) - (in development)
 		present. And when telling CC to keep these invalid points, the altitude was actually already replaced by a strange one...
 	- CloudCompare was reporting truncated (integer) dip and dip direction values instead of rounded values
 	- the SHP I/O filter was writing the local bounding-box in the file header instead of the global one (if the saved entities were shifted)
+	- PLY files with point elements containing a 'list' property would be considered as face elements (preventing the user from loading the cloud).
+		It is now possible to load it if the 'list' is composed of floating point values.
 
 
 v2.11.3 (Anoia) - 08/09/2020

@@ -49,6 +49,10 @@
 
 using namespace CCCoreLib;
 
+static bool IsFloat(e_ply_type type)
+{
+	return (type == PLY_FLOAT32) || (type == PLY_FLOAT64) || (type == PLY_FLOAT) || (type == PLY_DOUBLE);
+}
 
 PlyFilter::PlyFilter()
 	: FileIOFilter( {
@@ -1005,7 +1009,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 				ply_get_property_info(lastProperty.prop, &lastProperty.propName, &lastProperty.type, &lastProperty.length_type, &lastProperty.value_type);
 				//printf("\tProperty: %s (%s)\n",lastProperty.propName,e_ply_type_names[lastProperty.type]);
 
-				if (lastProperty.type == 16) //PLY_LIST
+				if (lastProperty.type == PLY_LIST && !IsFloat(lastProperty.value_type)) //vertex lists should be of integer type
 				{
 					lastElement.isFace = true;
 				}
@@ -1023,7 +1027,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 					plyProperty& prop = lastElement.properties[i];
 					prop.elemIndex = static_cast<int>(meshElements.size());
 
-					if (prop.type == 16)
+					if (prop.type == PLY_LIST)
 					{
 						//multiple elements per face (vertex indexes, texture coordinates, etc.)
 						listProperties.push_back(prop);
@@ -1111,7 +1115,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 		{
 			plyProperty& pp = stdProperties[i - 1];
 			QString itemText = QString("%1 - %2 [%3]").arg(pointElements[pp.elemIndex].elementName,pp.propName,e_ply_type_names[pp.type]);
-			assert(pp.type != 16); //we don't want any PLY_LIST here
+			//assert(pp.type != PLY_LIST || pp.value_type == PLY_FLOAT); //we don't want any PLY_LIST here
 			stdPropsText << itemText;
 
 			QString elementName = QString(pointElements[pp.elemIndex].elementName).toUpper();
@@ -1156,7 +1160,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 		{
 			plyProperty& pp = listProperties[i];
 			QString itemText = QString("%1 - %2 [%3]").arg(meshElements[pp.elemIndex].elementName,pp.propName,e_ply_type_names[pp.type]);
-			assert(pp.type == 16); //we only want PLY_LIST here
+			assert(pp.type == PLY_LIST); //we only want PLY_LIST here
 			listPropsText << itemText;
 
 			QString elementName = QString(meshElements[pp.elemIndex].elementName).toUpper();
@@ -1624,7 +1628,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 	if (facesIndex > 0)
 	{
 		plyProperty& pp = listProperties[facesIndex - 1];
-		assert(pp.type == 16); //we only accept PLY_LIST here!
+		assert(pp.type == PLY_LIST); //we only accept PLY_LIST here!
 
 		mesh = new ccMesh(cloud);
 
@@ -1647,7 +1651,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 	if (texCoordsIndex > 0)
 	{
 		plyProperty& pp = listProperties[texCoordsIndex - 1];
-		assert(pp.type == 16); //we only accept PLY_LIST here!
+		assert(pp.type == PLY_LIST); //we only accept PLY_LIST here!
 
 		texCoords = new TextureCoordsContainer();
 		texCoords->link();

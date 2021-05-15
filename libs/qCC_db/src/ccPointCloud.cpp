@@ -1383,9 +1383,19 @@ bool ccPointCloud::resizeTheFWFTable()
 
 bool ccPointCloud::reserve(unsigned newNumberOfPoints)
 {
-	//reserve works only to enlarge the cloud
-	if (newNumberOfPoints < size())
+	if (newNumberOfPoints == size())
+	{
+		//nothing to do
+		return true;
+	}
+	else if (newNumberOfPoints < size())
+	{
+		//reserve works only to enlarge the cloud
 		return false;
+	}
+
+	//if we are changing the cloud contents, let's stop the LOD construction process
+	clearLOD();
 
 	//call parent method first (for points + scalar fields)
 	if (	!BaseClass::reserve(newNumberOfPoints)
@@ -1408,9 +1418,19 @@ bool ccPointCloud::reserve(unsigned newNumberOfPoints)
 
 bool ccPointCloud::resize(unsigned newNumberOfPoints)
 {
-	//can't reduce the size if the cloud if it is locked!
-	if (newNumberOfPoints < size() && isLocked())
+	if (newNumberOfPoints == size())
+	{
+		//nothing to do
+		return true;
+	}
+	else if (newNumberOfPoints < size() && isLocked())
+	{
+		//can't reduce the size if the cloud if it is locked!
 		return false;
+	}
+
+	//if we are changing the cloud contents, let's stop the LOD construction process
+	clearLOD();
 
 	//call parent method first (for points + scalar fields)
 	if (!BaseClass::resize(newNumberOfPoints))

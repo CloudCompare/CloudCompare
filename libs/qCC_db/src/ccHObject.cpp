@@ -943,9 +943,13 @@ void ccHObject::removeChild(int pos)
 	{
 		//delete object
 		if (child->isShareable())
+		{
 			dynamic_cast<CCShareable*>(child)->release();
+		}
 		else/* if (!child->isA(CC_TYPES::POINT_OCTREE))*/
+		{
 			delete child;
+		}
 	}
 	else if (child->getParent() == this)
 	{

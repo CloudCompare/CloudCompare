@@ -70,8 +70,8 @@ Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\{#MyAppName}"; Fil
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
-Filename: "{tmp}\vcredist_2013_x64.exe"; Parameters: "/q"
-Filename: "{tmp}\vcredist_all_x64.exe"; Parameters: "/q"
+Filename: "{tmp}\vcredist_2013_x64.exe"; Parameters: "/install /quiet /norestart"
+Filename: "{tmp}\vcredist_all_x64.exe"; Parameters: "/install /quiet /norestart"
 Filename: "{tmp}\{#MyFaroRedistExe}"; Check: WithFaro
 
 [Code]

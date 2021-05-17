@@ -42,7 +42,7 @@
 #endif
 
 
-qCork::qCork(QObject* parent/*=0*/)
+qCork::qCork(QObject* parent/*=nullptr*/)
 	: QObject(parent)
 	, ccStdPluginInterface(":/CC/plugin/qCork/info.json")
 	, m_action(nullptr)
@@ -75,7 +75,7 @@ void qCork::onNewSelection(const ccHObject::Container& selectedEntities)
 	}
 }
 
-bool ToCorkMesh(const ccMesh* in, CorkMesh& out, ccMainAppInterface* app = 0)
+bool ToCorkMesh(const ccMesh* in, CorkMesh& out, ccMainAppInterface* app = nullptr)
 {
 	if (!in || !in->getAssociatedCloud())
 	{
@@ -143,7 +143,7 @@ bool ToCorkMesh(const ccMesh* in, CorkMesh& out, ccMainAppInterface* app = 0)
 	return true;
 }
 
-ccMesh* FromCorkMesh(const CorkMesh& in, ccMainAppInterface* app = 0)
+ccMesh* FromCorkMesh(const CorkMesh& in, ccMainAppInterface* app = nullptr)
 {
 	const std::vector<CorkMesh::Tri>& inTris = in.getTris();
 	const std::vector<CorkVertex>& inVerts = in.getVerts();
@@ -152,7 +152,7 @@ ccMesh* FromCorkMesh(const CorkMesh& in, ccMainAppInterface* app = 0)
 	{
 		if (app)
 			app->dispToConsole("[Cork] Output mesh is empty?!", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
-		return 0;
+		return nullptr;
 	}
 
 	unsigned triCount = static_cast<unsigned>(inTris.size());
@@ -164,7 +164,7 @@ ccMesh* FromCorkMesh(const CorkMesh& in, ccMainAppInterface* app = 0)
 		if (app)
 			app->dispToConsole("[Cork] Not enough memory!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		delete vertices;
-		return 0;
+		return nullptr;
 	}
 
 	ccMesh* mesh = new ccMesh(vertices);
@@ -174,7 +174,7 @@ ccMesh* FromCorkMesh(const CorkMesh& in, ccMainAppInterface* app = 0)
 		if (app)
 			app->dispToConsole("[Cork] Not enough memory!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		delete mesh;
-		return 0;
+		return nullptr;
 	}
 
 	//import vertices
@@ -209,9 +209,9 @@ struct BoolOpParameters
 {
 	BoolOpParameters()
 		: operation(ccCorkDlg::UNION)
-		, corkA(0)
-		, corkB(0)
-		, app(0)
+		, corkA(nullptr)
+		, corkB(nullptr)
+		, app(nullptr)
 		, meshesAreOk(false)
 	{}
 
@@ -366,7 +366,7 @@ void qCork::doAction()
 		}
 
 		//just to be sure
-		s_params.app = 0;
+		s_params.app = nullptr;
 		s_params.corkA = s_params.corkB = 0;
 
 		pDlg.hide();

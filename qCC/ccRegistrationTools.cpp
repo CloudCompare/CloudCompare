@@ -302,7 +302,7 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
 	}
 	else if (result == CCCoreLib::ICPRegistrationTools::ICP_APPLY_TRANSFO)
 	{
-		transMat = FromCCLibMatrix<PointCoordinateType, float>(transform.R, transform.T, transform.s);
+		transMat = FromCCLibMatrix<double, float>(transform.R, transform.T, transform.s);
 		finalScale = transform.s;
 	}
 

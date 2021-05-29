@@ -3620,6 +3620,7 @@ void MainWindow::doActionRegister()
 									finalOverlap / 100.0,
 									useDataSFAsWeights,
 									useModelSFAsWeights,
+									false,
 									transformationFilters,
 									maxThreadCount,
 									this))
@@ -3817,7 +3818,7 @@ void MainWindow::doAction4pcsRegister()
 	{
 		//output resulting transformation matrix
 		{
-			ccGLMatrix transMat = FromCCLibMatrix<PointCoordinateType, float>(transform.R, transform.T);
+			ccGLMatrix transMat = FromCCLibMatrix<double, float>(transform.R, transform.T);
 			forceConsoleDisplay();
 			ccConsole::Print(tr("[Align] Resulting matrix:"));
 			ccConsole::Print(transMat.toString(12, ' ')); //full precision

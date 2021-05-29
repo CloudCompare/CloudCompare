@@ -686,7 +686,7 @@ ccPointCloud* ccPolyline::samplePoints(	bool densityBased,
 		alpha = std::max(alpha, 0.0); //just in case
 		alpha = std::min(alpha, 1.0);
 
-		CCVector3 P = A + alpha * AB;
+		CCVector3 P = A + static_cast<PointCoordinateType>(alpha) * AB;
 		cloud->addPoint(P);
 
 		//proceed to the next point

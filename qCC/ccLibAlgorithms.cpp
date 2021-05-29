@@ -678,24 +678,25 @@ namespace ccLibAlgorithms
 						int transformationFilters = 0; //CCCoreLib::RegistrationTools::SKIP_ROTATION;
 						
 						if (ccRegistrationTools::ICP(
-								 ent,
-								 refEntity,
-								 transMat,
-								 finalScale,
-								 finalError,
-								 finalPointCount,
-								 icpRmsDiff,
-								 0,
-								 50000,
-								 false,
-								 CCCoreLib::ICPRegistrationTools::MAX_ERROR_CONVERGENCE,
-								 true,
-								 icpFinalOverlap / 100.0,
-								 false,
-								 false,
-								 transformationFilters,
-								 0,
-								 parent))
+								ent,
+								refEntity,
+								transMat,
+								finalScale,
+								finalError,
+								finalPointCount,
+								icpRmsDiff,
+								0,
+								50000,
+								false,
+								CCCoreLib::ICPRegistrationTools::MAX_ERROR_CONVERGENCE,
+								true,
+								icpFinalOverlap / 100.0,
+								false,
+								false,
+								false,
+								transformationFilters,
+								0,
+								parent))
 						{
 							scales[i] = finalScale;
 						}

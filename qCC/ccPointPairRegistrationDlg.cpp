@@ -1279,8 +1279,8 @@ bool ccPointPairRegistrationDlg::callHornRegistration(CCCoreLib::PointProjection
 			{
 				const CCVector3* Ri = m_refPoints.getPoint(i);
 				const CCVector3* Li = m_alignedPoints.getPoint(i);
-				CCVector3 Lit = (trans.R.isValid() ? trans.R * (*Li) : (*Li))*trans.s + trans.T;
-				PointCoordinateType dist = (*Ri-Lit).norm();
+				CCVector3d Lit = trans.apply(*Li);
+				double dist = (Ri->toDouble() - Lit).norm();
 
 				QTableWidgetItem* itemA = new QTableWidgetItem();
 				itemA->setData(Qt::EditRole, dist);
@@ -1381,7 +1381,7 @@ void ccPointPairRegistrationDlg::align()
 			ccLog::Print(QString("[PointPairRegistration] Scale: fixed (1.0)"));
 		}
 
-		ccGLMatrix transMat = FromCCLibMatrix<PointCoordinateType, float>(trans.R, trans.T);
+		ccGLMatrix transMat = FromCCLibMatrix<double, float>(trans.R, trans.T);
 		//...virtually
 		for (auto it = m_alignedEntities.begin(); it != m_alignedEntities.end(); ++it)
 			it.key()->setGLTransformation(transMat);
@@ -1470,7 +1470,7 @@ void ccPointPairRegistrationDlg::apply()
 		{
 			trans.R.scale(trans.s);
 		}
-		ccGLMatrix transMat = FromCCLibMatrix<PointCoordinateType,float>(trans.R,trans.T);
+		ccGLMatrix transMat = FromCCLibMatrix<double, float>(trans.R, trans.T);
 		//...for real this time!
 		assert(!m_alignedEntities.empty());
 		//we temporarily detach entity, as it may undergo

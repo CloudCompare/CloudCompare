@@ -103,15 +103,15 @@ CC_FILE_ERROR PNFilter::saveToFile(ccHObject* entity, const QString& filename, c
 
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 
-	for (unsigned i=0; i<numberOfPoints; i++)
+	for (unsigned i = 0; i < numberOfPoints; i++)
 	{
 		//write point
 		{
 			const CCVector3* P = theCloud->getPoint(i);
 			
 			//conversion to float
-			CCVector3f Pfloat = CCVector3f::fromArray(P->u);
-			if (out.write(reinterpret_cast<const char*>(Pfloat.u),3*sizeof(float)) < 0)
+			CCVector3f Pfloat = P->toFloat();
+			if (out.write(reinterpret_cast<const char*>(Pfloat.u), 3 * sizeof(float)) < 0)
 			{
 				result = CC_FERR_WRITING;
 				break;
@@ -218,7 +218,7 @@ CC_FILE_ERROR PNFilter::loadFile(const QString& filename, ccHObject& container, 
 		}
 
 		//then the 3 components of the normal vector
-		if (in.read((char*)rBuff,3*sizeof(float))>=0)
+		if (in.read((char*)rBuff, 3 * sizeof(float)) >= 0)
 		{
 			loadedCloud->addNorm(CCVector3::fromArray(rBuff));
 		}

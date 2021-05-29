@@ -210,7 +210,7 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 		for (unsigned i = 0; i < pointCount; ++i)
 		{
 			const CCVector3* Plocal = cloud->getPointPersistentPtr(i);
-			CCVector3d Pg = CCVector3d::fromArray(Plocal->u) / globalScale;
+			CCVector3d Pg = Plocal->toDouble() / globalScale;
 			//Pg = shiftedPoseMat * Pg; //DGM: according to E57 specifications, the bounding-box is local
 			if (i != 0)
 			{
@@ -541,7 +541,7 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 		{
 			const CCVector3* P = cloud->getPointPersistentPtr(index);
 			//CCVector3d Pglobal = cloud->toGlobal3d<PointCoordinateType>(*P);
-			CCVector3d Pglobal = CCVector3d::fromArray(P->u) / globalScale;
+			CCVector3d Pglobal = P->toDouble() / globalScale;
 			if (hasPoseMat)
 			{
 				Pglobal = inversePoseMat * Pglobal;
@@ -1817,7 +1817,7 @@ static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 				}
 			}
 
-			const CCVector3 P = CCVector3::fromArray((Pd + Pshift).u);
+			const CCVector3 P = (Pd + Pshift).toPC();
 			cloud->addPoint(P);
 
 			if (hasNormals)

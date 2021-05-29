@@ -358,8 +358,8 @@ bool ccGraphicalTransformationTool::setAdvRotationAxis(ccHObject* rotateRef, rot
 	if (rotateRef->isA(CC_TYPES::POLY_LINE))
 	{
 		ccPolyline* line = static_cast<ccPolyline*>(rotateRef);
-		CCVector3d end = CCVector3d::fromArray((*line->getPoint(1)).u);
-		CCVector3d start = CCVector3d::fromArray((*line->getPoint(0)).u);
+		CCVector3d end = *line->getPoint(1);
+		CCVector3d start = *line->getPoint(0);
 		arbitraryVec = end - start;
 		rotComboBox->clear();
 		rotComboBox->insertItem(0, "Z", rotComboBoxItems::Z);
@@ -370,11 +370,11 @@ bool ccGraphicalTransformationTool::setAdvRotationAxis(ccHObject* rotateRef, rot
 	else if (rotateRef->isA(CC_TYPES::PLANE))
 	{
 		ccPlane* plane = static_cast<ccPlane*>(rotateRef);
-		arbitraryVec = CCVector3d::fromArray(plane->getNormal().u);
+		arbitraryVec = plane->getNormal();
 		rotComboBox->clear();
 		rotComboBox->insertItem(0, "Z", rotComboBoxItems::Z);
 		rotComboBox->insertItem(1, "None", rotComboBoxItems::NONE);
-		m_advRotationRefObjCenter = CCVector3d::fromArray(plane->getCenter().u);
+		m_advRotationRefObjCenter = plane->getCenter();
 	}
 	else if (rotateRef->isA(CC_TYPES::COORDINATESYSTEM))
 	{
@@ -383,19 +383,19 @@ bool ccGraphicalTransformationTool::setAdvRotationAxis(ccHObject* rotateRef, rot
 		{
 			case rotComboBoxItems::X:
 			{
-				arbitraryVec = CCVector3d::fromArray(cs->getYZplane().getNormal().u);
+				arbitraryVec = cs->getYZplane().getNormal();
 				break;
 			}
 			case rotComboBoxItems::Y:
 			{
-				arbitraryVec = CCVector3d::fromArray(cs->getZXplane().getNormal().u);
+				arbitraryVec = cs->getZXplane().getNormal();
 				break;
 			}
 			case rotComboBoxItems::Z:
 			default:
 			{
 				selectedAxis = rotComboBoxItems::Z;
-				arbitraryVec = CCVector3d::fromArray(cs->getXYplane().getNormal().u);
+				arbitraryVec = cs->getXYplane().getNormal();
 				break;
 			}
 		}
@@ -404,11 +404,11 @@ bool ccGraphicalTransformationTool::setAdvRotationAxis(ccHObject* rotateRef, rot
 		rotComboBox->insertItem(1, "Y", rotComboBoxItems::Y);
 		rotComboBox->insertItem(2, "Z", rotComboBoxItems::Z);
 		rotComboBox->insertItem(3, "None", rotComboBoxItems::NONE);		
-		m_advRotationRefObjCenter = CCVector3d::fromArray(cs->getOrigin().u);
+		m_advRotationRefObjCenter = cs->getOrigin();
 	}
 	else //Not a supported primitive for rotateRef
 	{
-		CCVector3d newCenter = CCVector3d::fromArray(m_toTransform.getBB_recursive().getCenter().u);
+		CCVector3d newCenter = m_toTransform.getBB_recursive().getCenter();
 		setRotationCenter(newCenter);
 		advRotateComboBox->setCurrentIndex(0);
 		return false;
@@ -441,7 +441,7 @@ bool ccGraphicalTransformationTool::setAdvRotationAxis(ccHObject* rotateRef, rot
 		{
 			m_position.applyRotation(arbitraryVec);
 		}
-		newCenter = CCVector3d::fromArray(m_toTransform.getBB_recursive().getCenter().u);
+		newCenter = m_toTransform.getBB_recursive().getCenter();
 	}
 	m_advRotationAxis = m_rotation.inverse() * arbitraryVec;
 	setRotationCenter(newCenter);
@@ -539,7 +539,7 @@ void ccGraphicalTransformationTool::advRotateRefUpdate(int index)
 			rotComboBox->insertItem(4, "None", rotComboBoxItems::NONE);
 			rotComboBox->setCurrentIndex(rotComboBoxItems::Z);
 		}
-		CCVector3d center = CCVector3d::fromArray(m_toTransform.getBB_recursive().getCenter().u);
+		CCVector3d center = m_toTransform.getBB_recursive().getCenter();
 		setRotationCenter(center);
 		m_advRotationRefObjCenter = CCVector3d(0, 0, 0);
 		m_advRotationAxis = CCVector3d(0, 0, 1);
@@ -743,7 +743,7 @@ bool ccGraphicalTransformationTool::start()
 
 	m_rotation.toIdentity();
 	m_translation = CCVector3d(0,0,0);
-	m_rotationCenter = CCVector3d::fromArray(m_toTransform.getBB_recursive().getCenter().u); //m_rotation center == selected entities center
+	m_rotationCenter = m_toTransform.getBB_recursive().getCenter(); //m_rotation center == selected entities center
 
 	//activate "moving mode" in associated GL window
 	m_associatedWin->setInteractionMode(ccGLWindow::MODE_TRANSFORM_ENTITIES);

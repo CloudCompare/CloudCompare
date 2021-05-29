@@ -3174,7 +3174,7 @@ bool ccMesh::interpolateNormals(const CCCoreLib::VerticesIndexes& vertIndexes, c
 		Nd.normalize();
 	}
 
-	N = CCVector3::fromArray(Nd.u);
+	N = Nd.toPC();
 
 	return true;
 }

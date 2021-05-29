@@ -1229,7 +1229,7 @@ CC_FILE_ERROR LASFWFFilter::loadFile(const QString& filename, ccHObject& contain
 				}
 			}
 
-			cloud->addPoint(CCVector3::fromArray((P + Pshift).u));
+			cloud->addPoint((P + Pshift).toPC());
 
 			if (progressDialog && !nProgress.oneStep())
 			{

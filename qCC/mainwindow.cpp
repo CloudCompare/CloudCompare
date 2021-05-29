@@ -1104,7 +1104,7 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 					//(in which case we won't bother the user about the fact
 					//that the transformed cloud will be too big...)
 					ccBBox localBBox = entity->getOwnBB();
-					CCVector3d Pl = CCVector3d::fromArray(localBBox.minCorner().u);
+					CCVector3d Pl = localBBox.minCorner();
 					double Dl = localBBox.getDiagNormd();
 
 					//the cloud was alright
@@ -1114,7 +1114,7 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 						//test if the translated cloud is not "too big" (in local coordinate space)
 						ccBBox rotatedBox = entity->getOwnBB() * transMat;
 						double Dl2 = rotatedBox.getDiagNorm();
-						CCVector3d Pl2 = CCVector3d::fromArray(rotatedBox.getCenter().u);
+						CCVector3d Pl2 = rotatedBox.getCenter();
 
 						bool needShift = ccGlobalShiftManager::NeedShift(Pl2);
 						bool needRescale = ccGlobalShiftManager::NeedRescale(Dl2);
@@ -1132,7 +1132,7 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 							//and we apply it to the cloud bounding-box
 							ccBBox rotatedBox = cloud->getOwnBB() * globalTransMat;
 							double Dg = rotatedBox.getDiagNorm();
-							CCVector3d Pg = CCVector3d::fromArray(rotatedBox.getCenter().u);
+							CCVector3d Pg = rotatedBox.getCenter();
 
 							//ask the user the right values!
 							ccShiftAndScaleCloudDlg sasDlg(Pl2, Dl2, Pg, Dg, this);
@@ -1469,7 +1469,7 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 		Pg = globalBBmin;
 		Dg = (globalBBmax - globalBBmin).norm();
 
-		Pl = CCVector3d::fromArray(localBB.minCorner().u);
+		Pl = localBB.minCorner();
 		Dl = (localBB.maxCorner() - localBB.minCorner()).normd();
 
 		if (!uniqueShift)
@@ -1519,7 +1519,7 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 			if (preserveGlobalPos)
 			{
 				//to preserve the global position of the cloud, we may have to translate and/or rescale the cloud
-				CCVector3d Ql = CCVector3d::fromArray(ent->getOwnBB().minCorner().u);
+				CCVector3d Ql = ent->getOwnBB().minCorner();
 				CCVector3d Qg = shifted->toGlobal3d(Ql);
 				CCVector3d Ql2 = Qg * scale + shift;
 				CCVector3d T = Ql2 - Ql;
@@ -4307,7 +4307,7 @@ void MainWindow::doMeshTwoPolylines()
 		useViewingDir = (QMessageBox::question(this, tr("Projection method"), tr("Use best fit plane (yes) or the current viewing direction (no)"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No);
 		if (useViewingDir)
 		{
-			viewingDir = -CCVector3::fromArray(p1->getDisplay()->getViewportParameters().getViewDir().u);
+			viewingDir = -p1->getDisplay()->getViewportParameters().getViewDir().toPC();
 		}
 	}
 
@@ -7432,7 +7432,7 @@ void MainWindow::onItemPicked(const PickedItem& pi)
 				CCVector3 Z = X.cross(Y);
 				//we choose 'Z' so that it points 'upward' relatively to the camera (assuming the user will be looking from the top)
 				CCVector3d viewDir = s_pickingWindow->getViewportParameters().getViewDir();
-				if (CCVector3d::fromArray(Z.u).dot(viewDir) > 0)
+				if (Z.toDouble().dot(viewDir) > 0)
 				{
 					Z = -Z;
 				}
@@ -7448,9 +7448,9 @@ void MainWindow::onItemPicked(const PickedItem& pi)
 				mat[2] = Z.x; mat[6] = Z.y; mat[10] = Z.z; mat[14] = 0;
 				mat[3] = 0  ; mat[7] = 0  ; mat[11] = 0  ; mat[15] = 1;
 
-				CCVector3d T = -CCVector3d::fromArray(A->u);
+				CCVector3d T = -A->toDouble();
 				trans.apply(T);
-				T += CCVector3d::fromArray(A->u);
+				T += *A;
 				trans.setTranslation(T);
 
 				assert(haveOneSelection() && m_selectedEntities.front() == s_levelEntity);
@@ -7473,7 +7473,7 @@ void MainWindow::onItemPicked(const PickedItem& pi)
 
 	case PICKING_ROTATION_CENTER:
 		{
-			CCVector3d newPivot = CCVector3d::fromArray(pickedPoint.u);
+			CCVector3d newPivot = pickedPoint;
 			//specific case: transformation tool is enabled
 			if (m_transTool && m_transTool->started())
 			{
@@ -9575,7 +9575,7 @@ void MainWindow::createSinglePointCloud()
 		return;
 	}
 	cloud->setName(tr("Point #%1").arg(++s_lastPointIndex));
-	cloud->addPoint(CCVector3::fromArray(s_lastPoint.u));
+	cloud->addPoint(s_lastPoint.toPC());
 	cloud->setPointSize(5);
 
 	// add it to the DB tree
@@ -9822,7 +9822,7 @@ void MainWindow::addToDB(	ccHObject* obj,
 		CCVector3 center = bBox.getCenter();
 		PointCoordinateType diag = bBox.getDiagNorm();
 
-		CCVector3d P = CCVector3d::fromArray(center.u);
+		CCVector3d P = center;
 		CCVector3d Pshift(0, 0, 0);
 		double scale = 1.0;
 		bool preserveCoordinateShift = true;

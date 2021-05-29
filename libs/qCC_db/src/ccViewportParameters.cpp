@@ -131,12 +131,12 @@ bool ccViewportParameters::fromFile(QFile& in, short dataVersion, int flags, Loa
 	{
 		CCVector3 _pivotPoint;
 		ccSerializationHelper::CoordsFromDataStream(inStream, flags, _pivotPoint.u, 3);
-		pivotPoint = CCVector3d::fromArray(_pivotPoint.u);
+		pivotPoint = _pivotPoint;
 		if (dataVersion >= 25) //after version 25 the camera center is saved as a separate point!
 		{
 			CCVector3 _cameraCenter;
 			ccSerializationHelper::CoordsFromDataStream(inStream, flags, _cameraCenter.u, 3);
-			cameraCenter = CCVector3d::fromArray(_cameraCenter.u);
+			cameraCenter = _cameraCenter;
 		}
 		else
 		{

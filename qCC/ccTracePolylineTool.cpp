@@ -251,7 +251,7 @@ ccPolyline* ccTracePolylineTool::polylineOverSampling(unsigned steps) const
 					if (nearestElementSquareDist < 0 || nearestSquareDist < nearestElementSquareDist)
 					{
 						nearestElementSquareDist = nearestSquareDist;
-						nearestPoint = CCVector3::fromArray(_nearestPoint.u);
+						nearestPoint = _nearestPoint.toPC();
 					}
 				}
 			}

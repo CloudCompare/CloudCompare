@@ -997,7 +997,7 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 				if (viewportParams.perspectiveView && viewportParams.zFar > 0)
 				{
 					//in perspective view, the actual scale depends on the distance to the camera!
-					double d = (camera.modelViewMat * CCVector3d::fromArray(P->u)).norm();
+					double d = (camera.modelViewMat * (*P)).norm();
 					double unitD = viewportParams.zFar / 2; //we consider that the 'standard' scale is at half the depth
 					scale = static_cast<float>(scale * sqrt(d / unitD)); //sqrt = empirical (probably because the marker size is already partly compensated by ccGLWindow::computeActualPixelSize())
 				}
@@ -1048,7 +1048,7 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 					{
 						//in perspective view, the actual scale depends on the distance to the camera!
 						const double* M = camera.modelViewMat.data();
-						double d = (camera.modelViewMat * CCVector3d::fromArray(P->u)).norm();
+						double d = (camera.modelViewMat * (*P)).norm();
 						double unitD = viewportParams.zFar / 2; //we consider that the 'standard' scale is at half the depth
 						scale = static_cast<float>(scale * sqrt(d / unitD)); //sqrt = empirical (probably because the marker size is already partly compensated by ccGLWindow::computeActualPixelSize())
 					}

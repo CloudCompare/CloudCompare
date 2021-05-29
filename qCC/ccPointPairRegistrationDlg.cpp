@@ -501,8 +501,8 @@ bool ccPointPairRegistrationDlg::convertToSphereCenter(CCVector3d& P, ccHObject*
 
 	//crop points inside a box centered on the current point
 	ccBBox box;
-	box.add(CCVector3::fromArray((P - CCVector3d(1, 1, 1)*searchRadius).u));
-	box.add(CCVector3::fromArray((P + CCVector3d(1, 1, 1)*searchRadius).u));
+	box.add((P - CCVector3d(1, 1, 1)*searchRadius).toPC());
+	box.add((P + CCVector3d(1, 1, 1)*searchRadius).toPC());
 	CCCoreLib::ReferenceCloud* part = cloud->crop(box,true);
 
 	bool success = false;
@@ -543,7 +543,7 @@ bool ccPointPairRegistrationDlg::convertToSphereCenter(CCVector3d& P, ccHObject*
 				else
 				{
 					sphereRadius = radius;
-					P = CCVector3d::fromArray(C.u);
+					P = C;
 					success = true;
 				}
 			}
@@ -577,15 +577,13 @@ void ccPointPairRegistrationDlg::onItemPicked(const PickedItem& pi)
 	if (!pi.entity)
 		return;
 
-	CCVector3d pIn = CCVector3d::fromArray(pi.P3D.u);
-
 	if (m_alignedEntities.contains(pi.entity))
 	{
-		addAlignedPoint(pIn, pi.entity, true); //picked points are always shifted by default
+		addAlignedPoint(pi.P3D.toDouble(), pi.entity, true); //picked points are always shifted by default
 	}
 	else if (m_referenceEntities.contains(pi.entity))
 	{
-		addReferencePoint(pIn, pi.entity, true); //picked points are always shifted by default
+		addReferencePoint(pi.P3D.toDouble(), pi.entity, true); //picked points are always shifted by default
 	}
 	else
 	{

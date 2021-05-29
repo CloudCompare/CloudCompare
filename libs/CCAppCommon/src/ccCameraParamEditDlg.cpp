@@ -271,7 +271,7 @@ void ccCameraParamEditDlg::onItemPicked(const PickedItem& pi)
 		return;
 	}
 
-	m_associatedWin->setPivotPoint(CCVector3d::fromArray(pi.P3D.u));
+	m_associatedWin->setPivotPoint(pi.P3D);
 	m_associatedWin->redraw();
 
 	pickPointAsPivot(false);
@@ -291,7 +291,7 @@ void ccCameraParamEditDlg::processPickedItem(ccHObject* entity, unsigned, int, i
 		return;
 	}
 
-	m_associatedWin->setPivotPoint(CCVector3d::fromArray(P.u));
+	m_associatedWin->setPivotPoint(P);
 	m_associatedWin->redraw();
 
 	pickPointAsPivot(false);

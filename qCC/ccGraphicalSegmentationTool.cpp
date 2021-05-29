@@ -961,7 +961,7 @@ void ccGraphicalSegmentationTool::doExportSegmentationPolyline()
 					CCVector3d Pd(half_w + Pscreen->x, half_h + Pscreen->y, 0/*Pscreen->z*/);
 					CCVector3d Q3D;
 					camera.unproject(Pd, Q3D);
-					*Pscreen = CCVector3::fromArray(Q3D.u);
+					*Pscreen = Q3D.toPC();
 				}
 				verticesPC->invalidateBoundingBox();
 			}

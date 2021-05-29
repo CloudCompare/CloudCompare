@@ -159,8 +159,8 @@ void cc2Point5DimEditor::update2DDisplayZoom(ccBBox& box)
 
 	//we set the pivot point on the box center
 	CCVector3 P = box.getCenter();
-	m_glWindow->setPivotPoint(CCVector3d::fromArray(P.u));
-	m_glWindow->setCameraPos(CCVector3d::fromArray(P.u));
+	m_glWindow->setPivotPoint(P);
+	m_glWindow->setCameraPos(P);
 
 	//we compute the pixel size (in world coordinates)
 	{

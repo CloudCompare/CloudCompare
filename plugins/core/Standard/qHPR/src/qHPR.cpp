@@ -102,7 +102,7 @@ CCCoreLib::ReferenceCloud* qHPR::removeHiddenPoints(CCCoreLib::GenericIndexedClo
 
 		for (unsigned i = 0; i < nbPoints; ++i)
 		{
-			CCVector3d P = CCVector3d::fromArray(theCloud->getPoint(i)->u) - viewPoint;
+			CCVector3d P = theCloud->getPoint(i)->toDouble() - viewPoint;
 			*_pt_array++ = static_cast<coordT>(P.x);
 			*_pt_array++ = static_cast<coordT>(P.y);
 			*_pt_array++ = static_cast<coordT>(P.z);
@@ -128,7 +128,7 @@ CCCoreLib::ReferenceCloud* qHPR::removeHiddenPoints(CCCoreLib::GenericIndexedClo
 		coordT* _pt_array = pt_array;
 		for (unsigned i = 0; i < nbPoints; ++i)
 		{
-			CCVector3d P = CCVector3d::fromArray(theCloud->getPoint(i)->u) - viewPoint;
+			CCVector3d P = theCloud->getPoint(i)->toDouble() - viewPoint;
 
 			double r = (maxRadius / P.norm()) - 1.0;
 			*_pt_array++ *= r;

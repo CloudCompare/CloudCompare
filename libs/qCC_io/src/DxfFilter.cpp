@@ -99,7 +99,7 @@ public:
 		}
 
 		P += m_globalShift;
-		return CCVector3::fromArray(P.u);
+		return P.toPC();
 	}
 
 	void applyGlobalShift()

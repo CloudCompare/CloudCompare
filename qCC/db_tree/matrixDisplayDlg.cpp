@@ -67,7 +67,7 @@ void MatrixDisplayDlg::fillDialogWith(const ccGLMatrix& mat)
 		CCVector3 t3D;
 		mat.getParameters(angle_rad, axis3D, t3D);
 
-		fillDialogWith(CCVector3d::fromArray(axis3D.u),angle_rad,CCVector3d::fromArray(t3D.u),precision);
+		fillDialogWith(axis3D, angle_rad, t3D, precision);
 	}
 }
 

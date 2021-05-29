@@ -50,6 +50,7 @@ static int		s_maxThreadCount = 0;
 static bool		s_pointsRemoval = false;
 static bool		s_useDataSFAsWeights = false;
 static bool		s_useModelSFAsWeights = false;
+static bool		s_useC2MSignedDistances = false;
 
 ccRegistrationDlg::ccRegistrationDlg(ccHObject *data, ccHObject *model, QWidget* parent/*=0*/)
 	: QDialog(parent, Qt::Tool)
@@ -99,6 +100,7 @@ ccRegistrationDlg::ccRegistrationDlg(ccHObject *data, ccHObject *model, QWidget*
 		pointsRemoval->setChecked(s_pointsRemoval);
 		checkBoxUseDataSFAsWeights->setChecked(s_useDataSFAsWeights && checkBoxUseDataSFAsWeights->isEnabled());
 		checkBoxUseModelSFAsWeights->setChecked(s_useModelSFAsWeights && checkBoxUseModelSFAsWeights->isEnabled());
+		useC2MSignedDistancesCheckBox->setChecked(s_useC2MSignedDistances && useC2MSignedDistancesCheckBox->isEnabled());
 	}
 
 	connect(swapButton, &QAbstractButton::clicked, this, &ccRegistrationDlg::swapModelAndData);
@@ -136,6 +138,7 @@ void ccRegistrationDlg::saveParameters() const
 	s_pointsRemoval = removeFarthestPoints();
 	s_useDataSFAsWeights = checkBoxUseDataSFAsWeights->isChecked();
 	s_useModelSFAsWeights = checkBoxUseModelSFAsWeights->isChecked();
+	s_useC2MSignedDistances = useC2MSignedDistancesCheckBox->isChecked();
 }
 
 ccHObject *ccRegistrationDlg::getDataEntity()
@@ -156,6 +159,11 @@ bool ccRegistrationDlg::useDataSFAsWeights() const
 bool ccRegistrationDlg::useModelSFAsWeights() const
 {
 	return checkBoxUseModelSFAsWeights->isEnabled() && checkBoxUseModelSFAsWeights->isChecked();
+}
+
+bool ccRegistrationDlg::useC2MSignedDistances() const
+{
+	return useC2MSignedDistancesCheckBox->isEnabled() && useC2MSignedDistancesCheckBox->isChecked();
 }
 
 bool ccRegistrationDlg::adjustScale() const
@@ -270,14 +278,16 @@ void ccRegistrationDlg::setColorsAndLabels()
 	dataEntity->prepareDisplayForRefresh_recursive();
 
 	checkBoxUseDataSFAsWeights->setEnabled(dataEntity->hasDisplayedScalarField());
-	checkBoxUseModelSFAsWeights->setEnabled(modelEntity->hasDisplayedScalarField());
+	checkBoxUseModelSFAsWeights->setEnabled(modelEntity->isKindOf(CC_TYPES::POINT_CLOUD) && modelEntity->hasDisplayedScalarField()); //only supported for clouds
+
+	useC2MSignedDistancesCheckBox->setEnabled(modelEntity->isKindOf(CC_TYPES::MESH)); //only supported if a mesh is the reference cloud
 
 	MainWindow::RefreshAllGLWindow(false);
 }
 
 void ccRegistrationDlg::swapModelAndData()
 {
-	std::swap(dataEntity,modelEntity);
+	std::swap(dataEntity, modelEntity);
+
 	setColorsAndLabels();
-	checkBoxUseModelSFAsWeights->setDisabled(modelEntity->isKindOf(CC_TYPES::MESH));
 }

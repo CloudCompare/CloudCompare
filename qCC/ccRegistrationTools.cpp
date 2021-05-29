@@ -58,6 +58,7 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
 								double finalOverlapRatio/*=1.0*/,
 								bool useDataSFAsWeights/*=false*/,
 								bool useModelSFAsWeights/*=false*/,
+								bool useC2MSignedDistances/*=false*/,
 								int filters/*=CCCoreLib::ICPRegistrationTools::SKIP_NONE*/,
 								int maxThreadCount/*=0*/,
 								QWidget* parent/*=0*/)
@@ -285,6 +286,7 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
 		params.dataWeights = dataWeights;
 		params.transformationFilters = filters;
 		params.maxThreadCount = maxThreadCount;
+		params.useC2MSignedDistances = useC2MSignedDistances;
 	}
 
 	result = CCCoreLib::ICPRegistrationTools::Register(	modelCloud,

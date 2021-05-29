@@ -88,6 +88,9 @@ public:
 	//! Whether to use model displayed SF as weights
 	bool useModelSFAsWeights() const;
 
+	//! Whether to use signed distances when the reference is a mesh
+	bool useC2MSignedDistances() const;
+
 	//! Returns whether to adjust the scale during optimization
 	/** This is useful for co-registration of lidar and photogrammetric clouds
 	for instance.

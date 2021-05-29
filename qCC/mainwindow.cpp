@@ -3591,6 +3591,7 @@ void MainWindow::doActionRegister()
 	bool removeFarthestPoints									= rDlg.removeFarthestPoints();
 	bool useDataSFAsWeights										= rDlg.useDataSFAsWeights();
 	bool useModelSFAsWeights									= rDlg.useModelSFAsWeights();
+	bool useC2MSignedDistances									= rDlg.useC2MSignedDistances();
 	bool adjustScale											= rDlg.adjustScale();
 	int transformationFilters									= rDlg.getTransformationFilters();
 	unsigned finalOverlap										= rDlg.getFinalOverlap();
@@ -3620,7 +3621,7 @@ void MainWindow::doActionRegister()
 									finalOverlap / 100.0,
 									useDataSFAsWeights,
 									useModelSFAsWeights,
-									false,
+									useC2MSignedDistances,
 									transformationFilters,
 									maxThreadCount,
 									this))

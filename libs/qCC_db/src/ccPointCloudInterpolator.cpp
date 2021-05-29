@@ -60,10 +60,6 @@ bool cellSFInterpolator(const CCCoreLib::DgmOctree::octreeCell& cell,
 		{
 			nNSS.minNumberOfNeighbors = params->knn;
 		}
-		else
-		{
-			nNSS.prepare(static_cast<PointCoordinateType>(params->radius), cell.parentOctree->getCellSize(cell.level));
-		}
 		cell.parentOctree->getCellPos(cell.truncatedCode, cell.level, nNSS.cellPos, true);
 		cell.parentOctree->computeCellCenter(nNSS.cellPos, cell.level, nNSS.cellCenter);
 	}

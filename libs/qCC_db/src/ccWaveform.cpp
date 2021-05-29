@@ -244,15 +244,15 @@ double ccWaveform::getRange(double& minVal, double& maxVal, const WaveformDescri
 CCVector3 ccWaveform::getSamplePos(float index, const CCVector3& P0, const WaveformDescriptor& descriptor) const
 {
 	float delta_ps = m_echoTime_ps - index * descriptor.samplingRate_ps;
-	return P0 + CCVector3::fromArray(m_beamDir.u) * delta_ps;
+	return P0 + m_beamDir.toPC() * static_cast<PointCoordinateType>(delta_ps);
 }
 
 void ccWaveform::applyRigidTransformation(const ccGLMatrix& trans)
 {
 	//we apply only the rotation
-	CCVector3 u = CCVector3::fromArray(m_beamDir.u);
+	CCVector3 u = m_beamDir.toPC();
 	trans.applyRotation(u);
-	m_beamDir = CCVector3f::fromArray(u.u);
+	m_beamDir = u.toFloat();
 }
 
 bool ccWaveform::toFile(QFile& out) const

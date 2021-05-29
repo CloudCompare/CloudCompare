@@ -301,7 +301,7 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 		ccRasterGrid grid;
 		{
 			//memory allocation
-			CCVector3d minCorner = CCVector3d::fromArray(gridBBox.minCorner().u);
+			CCVector3d minCorner = gridBBox.minCorner();
 			if (!grid.init(gridWidth, gridHeight, gridStep, minCorner))
 			{
 				//not enough memory

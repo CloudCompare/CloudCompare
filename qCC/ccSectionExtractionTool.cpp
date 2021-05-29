@@ -581,7 +581,7 @@ bool ccSectionExtractionTool::addPolyline(ccPolyline* inputPoly, bool alreadyInD
 				CCVector3d Pd(half_w + P.x, half_h + P.y, 0/*P.z*/);
 				CCVector3d Q3D;
 				camera.unproject(Pd, Q3D);
-				P = CCVector3::fromArray(Q3D.u);
+				P = Q3D.toPC();
 				P.u[vertDim] = defaultZ;
 			}
 

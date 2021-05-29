@@ -613,7 +613,7 @@ void qBroomDlg::updateAutomationAreaPolyline(int x, int y)
 		camera.project(P03D, C02D);
 		C02D.x -= camera.viewport[2] / 2.0;
 		C02D.y -= camera.viewport[3] / 2.0;
-		*const_cast<CCVector3*>(vertices->getPoint(static_cast<unsigned>(i))) = CCVector3::fromArray(C02D.u);
+		*const_cast<CCVector3*>(vertices->getPoint(static_cast<unsigned>(i))) = C02D.toPC();
 	}
 
 	//broom position/orientation
@@ -627,7 +627,7 @@ void qBroomDlg::updateAutomationAreaPolyline(int x, int y)
 		QPointF pos2D = m_glWindow->toCornerGLCoordinates(x, y);
 		camera.unproject(CCVector3(pos2D.x(), pos2D.y(), 0), M03D);
 		camera.unproject(CCVector3(pos2D.x(), pos2D.y(), 1), M13D);
- 		if (!Intersection(broomTrans, CCVector3::fromArray(M03D.u), CCVector3::fromArray(M13D.u), P3D))
+ 		if (!Intersection(broomTrans, M03D.toPC(), M13D.toPC(), P3D))
 		{
 			return;
 		}
@@ -640,7 +640,7 @@ void qBroomDlg::updateAutomationAreaPolyline(int x, int y)
 		camera.project(P3D, C12D);
 		C12D.x -= camera.viewport[2] / 2.0;
 		C12D.y -= camera.viewport[3] / 2.0;
-		*const_cast<CCVector3*>(vertices->getPoint(1)) = CCVector3::fromArray(C12D.u);
+		*const_cast<CCVector3*>(vertices->getPoint(1)) = C12D.toPC();
 	}
 	else if (m_autoArea.clickedPoints.size() == 2)
 	{
@@ -660,13 +660,13 @@ void qBroomDlg::updateAutomationAreaPolyline(int x, int y)
 		camera.project(P13D + dist * Yp, C2D);
 		C2D.x -= camera.viewport[2] / 2.0;
 		C2D.y -= camera.viewport[3] / 2.0;
-		*const_cast<CCVector3*>(vertices->getPoint(2)) = CCVector3::fromArray(C2D.u);
+		*const_cast<CCVector3*>(vertices->getPoint(2)) = C2D.toPC();
 
 		CCVector3d D2D;
 		camera.project(P03D + dist * Yp, D2D);
 		D2D.x -= camera.viewport[2] / 2.0;
 		D2D.y -= camera.viewport[3] / 2.0;
-		*const_cast<CCVector3*>(vertices->getPoint(3)) = CCVector3::fromArray(D2D.u);
+		*const_cast<CCVector3*>(vertices->getPoint(3)) = D2D.toPC();
 
 		if (m_autoArea.polyline->size() == 2)
 		{
@@ -793,8 +793,8 @@ bool qBroomDlg::startAutomation()
 	}
 
 	ccGLMatrix broomTrans = initialBroomTrans;
-	CCVector3d Xd = CCVector3d::fromArray(X.u);
-	CCVector3d Yd = CCVector3d::fromArray(Y.u);
+	CCVector3d Xd = X;
+	CCVector3d Yd = Y;
 
 	bool stickToTheFloor = stickCheckBox->isChecked();
 	bool animateAutomation = animateAutomationCheckBox->isChecked();
@@ -1277,7 +1277,7 @@ void qBroomDlg::onLeftButtonClicked(int x, int y)
 			QPointF pos2D = m_glWindow->toCornerGLCoordinates(x, y);
 			camera.unproject(CCVector3(pos2D.x(), pos2D.y(), 0), M03D);
 			camera.unproject(CCVector3(pos2D.x(), pos2D.y(), 1), M13D);
-			if (!Intersection(broomTrans, CCVector3::fromArray(M03D.u), CCVector3::fromArray(M13D.u), P3D))
+			if (!Intersection(broomTrans, M03D.toPC(), M13D.toPC(), P3D))
 			{
 				ccLog::Warning("Failed to project the clicked point on the bromm plane");
 				return;
@@ -1336,7 +1336,7 @@ void qBroomDlg::onLeftButtonClicked(int x, int y)
 				if (	camera.unproject(A2D, A3D)
 					&&	camera.unproject(B2D, B3D) )
 				{
-					m_hasLastMousePos3D = Intersection(m_boxes->getGLTransformation(), CCVector3::fromArray(A3D.u), CCVector3::fromArray(B3D.u), m_lastMousePos3D);
+					m_hasLastMousePos3D = Intersection(m_boxes->getGLTransformation(), A3D.toPC(), B3D.toPC(), m_lastMousePos3D);
 
 					//test
 					if (false && m_hasLastMousePos3D)
@@ -1429,19 +1429,19 @@ void qBroomDlg::onMouseMoved(int x, int y, Qt::MouseButtons button)
 				if (	camera.unproject(A2D, A3D)
 					&&	camera.unproject(B2D, B3D) )
 				{
-					hasMousePos3D = Intersection(m_boxes->getGLTransformation(), CCVector3::fromArray(A3D.u), CCVector3::fromArray(B3D.u), mousePos3D);
+					hasMousePos3D = Intersection(m_boxes->getGLTransformation(), A3D.toPC(), B3D.toPC(), mousePos3D);
 				}
 
 				if (m_hasLastMousePos3D && hasMousePos3D)
 				{
 
-					broomDelta = CCVector3d::fromArray((mousePos3D - m_lastMousePos3D).u);
+					broomDelta = (mousePos3D - m_lastMousePos3D).toPC();
 				}
 				else
 				{
 					//we can't bound the displacement to the floor "porperly"
 					//but we can remove the normal component (the broom stays on the floor)
-					CCVector3d Zbox = CCVector3d::fromArray(broomTrans.getColumn(2));
+					CCVector3d Zbox = broomTrans.getColumnAsVec3D(2);
 					broomDelta -= (broomDelta.dot(Zbox) * Zbox); //filter the Z component
 				}
 
@@ -1493,8 +1493,8 @@ bool qBroomDlg::moveBroom(ccGLMatrix& broomTrans, CCVector3d& broomDelta, bool s
 	if (stickToTheFloor)
 	{
 		//make sure the broom doesn't go too far too fast
-		CCVector3d Xbox = CCVector3d::fromArray(broomTrans.getColumn(0));
-		CCVector3d Ybox = CCVector3d::fromArray(broomTrans.getColumn(1));
+		CCVector3d Xbox = broomTrans.getColumnAsVec3D(0);
+		CCVector3d Ybox = broomTrans.getColumnAsVec3D(1);
 		double dx = broomDelta.dot(Xbox);
 		if (dx < -broom.length)
 			dx = -broom.length;
@@ -1511,7 +1511,7 @@ bool qBroomDlg::moveBroom(ccGLMatrix& broomTrans, CCVector3d& broomDelta, bool s
 	}
 
 	//translate the broom
-	broomTrans.setTranslation(broomTrans.getTranslationAsVec3D() + CCVector3::fromArray(broomDelta.u));
+	broomTrans.setTranslation(broomTrans.getTranslationAsVec3D() + broomDelta.toPC());
 
 	if (stickToTheFloor)
 	{

@@ -425,7 +425,7 @@ bool ccClipBox::move2D(int x, int y, int dx, int dy, int screenWidth, int screen
 	ccGLMatrixd transMat;
 	transMat.setTranslation(-C);
 	transMat = rotMat * transMat;
-	transMat.setTranslation(transMat.getTranslationAsVec3D() + CCVector3d::fromArray(C.u));
+	transMat.setTranslation(transMat.getTranslationAsVec3D() + C);
 
 	//rotateGL(transMat);
 	m_glTrans = ccGLMatrix(transMat.inverse().data()) * m_glTrans;
@@ -490,7 +490,7 @@ bool ccClipBox::move3D(const CCVector3d& uInput)
 				m_box.maxCorner().z = m_box.minCorner().z;
 			break;
 		case CROSS:
-			m_box += CCVector3::fromArray(u.u);
+			m_box += u.toPC();
 			break;
 		default:
 			assert(false);
@@ -566,7 +566,7 @@ bool ccClipBox::move3D(const CCVector3d& uInput)
 		ccGLMatrixd transMat;
 		transMat.setTranslation(-C);
 		transMat = rotMat * transMat;
-		transMat.setTranslation(transMat.getTranslationAsVec3D() + CCVector3d::fromArray(C.u));
+		transMat.setTranslation(transMat.getTranslationAsVec3D() + C);
 
 		m_glTrans = m_glTrans * ccGLMatrix(transMat.inverse().data());
 		enableGLTransformation(true);

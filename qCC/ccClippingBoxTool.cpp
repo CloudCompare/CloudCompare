@@ -172,7 +172,7 @@ void ccClippingBoxTool::editBox()
 		ccGLMatrixd transMat;
 		transMat.setTranslation(-C);
 		transMat = rotMat * transMat;
-		transMat.setTranslation(transMat.getTranslationAsVec3D() + CCVector3d::fromArray(C.u));
+		transMat.setTranslation(transMat.getTranslationAsVec3D() + C);
 
 		m_clipBox->setGLTransformation(ccGLMatrix(transMat.data()));
 	}

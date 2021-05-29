@@ -94,7 +94,7 @@ bool ccRasterGrid::ComputeGridSize(	unsigned char Z,
 	const unsigned char X = Z == 2 ? 0 : Z + 1;
 	const unsigned char Y = X == 2 ? 0 : X + 1;
 
-	CCVector3d boxDiag = CCVector3d::fromArray(box.maxCorner().u) - CCVector3d::fromArray(box.minCorner().u);
+	CCVector3d boxDiag = box.maxCorner().toDouble() - box.minCorner().toDouble();
 	if (boxDiag.u[X] <= 0 || boxDiag.u[Y] <= 0)
 	{
 		ccLog::Warning("[ccRasterGrid::ComputeGridSize] Invalid cloud bounding box!");
@@ -249,7 +249,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 		const CCVector3* P = cloud->getPoint(n);
 
 		//project it inside the grid
-		CCVector3d relativePos = CCVector3d::fromArray(P->u) - minCorner;
+		CCVector3d relativePos = P->toDouble() - minCorner;
 		int i = static_cast<int>(relativePos.u[X] / gridStep + 0.5);
 		int j = static_cast<int>(relativePos.u[Y] / gridStep + 0.5);
 
@@ -307,7 +307,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 				//we keep track of the point which is the closest to the cell center (in 2D)
 				CCVector2d C((i + 0.5) * gridStep, (j + 0.5) * gridStep);
 				const CCVector3* Q = cloud->getPoint(aCell.pointIndex); //former closest point
-				CCVector3d relativePosQ = CCVector3d::fromArray(Q->u) - minCorner;
+				CCVector3d relativePosQ = Q->toDouble() - minCorner;
 
 				double distToP = (C - CCVector2d(relativePos .u[X], relativePos .u[Y])).norm2();
 				double distToQ = (C - CCVector2d(relativePosQ.u[X], relativePosQ.u[Y])).norm2();

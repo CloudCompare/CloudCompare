@@ -476,7 +476,7 @@ CCVector3 qCanupo2DViewDialog::getClickPos(int x, int y) const
 	//DGM: the Z value is meaningless!
 	P3D.z = 0;
 
-	return CCVector3::fromArray(P3D.u);
+	return P3D.toPC();
 }
 
 int qCanupo2DViewDialog::getClosestVertex(int x, int y, CCVector3& P) const

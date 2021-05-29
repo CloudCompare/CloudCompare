@@ -1240,7 +1240,7 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 				}
 			}
 
-			CCVector3 PV = CCVector3::fromArray((P + Pshift).u);
+			CCVector3 PV = (P + Pshift).toPC();
 			vertices->addPoint(PV);
 		}
 	}

@@ -339,7 +339,7 @@ static bool DecodeCamera(QXmlStreamReader& stream, CameraDesc& camera)
 									attributes.value("y").toDouble(),
 									attributes.value("z").toDouble() };
 				//What is exactly the "reference" point?!
-				//camera.trans.setTranslation(CCVector3::fromArray(T.u));
+				//camera.trans.setTranslation(T.toPC());
 			}
 			stream.skipCurrentElement();
 		}

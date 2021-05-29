@@ -1583,7 +1583,7 @@ void ccDBRoot::alignCameraWithEntity(bool reverse)
 			return;
 		}
 		CCVector3 N = (B - A).cross(C - A);
-		planeNormal = CCVector3d::fromArray(N.u);
+		planeNormal = N;
 		planeVertDir = win->getViewportParameters().getUpDir();
 		center = (A + B + C) / 3;
 	}
@@ -1591,14 +1591,14 @@ void ccDBRoot::alignCameraWithEntity(bool reverse)
 	{
 		ccPlane* plane = static_cast<ccPlane*>(obj);
 		//3rd column = plane normal!
-		planeNormal = CCVector3d::fromArray(plane->getNormal().u);
-		planeVertDir = CCVector3d::fromArray(plane->getTransformation().getColumnAsVec3D(1).u);
+		planeNormal = plane->getNormal();
+		planeVertDir = plane->getTransformation().getColumnAsVec3D(1);
 		center = plane->getOwnBB().getCenter();
 	}
 	else if (obj->isA(CC_TYPES::FACET)) //facet
 	{
 		ccFacet* facet = static_cast<ccFacet*>(obj);
-		planeNormal = CCVector3d::fromArray(facet->getNormal().u);
+		planeNormal = facet->getNormal();
 		CCVector3d planeHorizDir(0, 1, 0);
 		CCCoreLib::CCMiscTools::ComputeBaseVectors(planeNormal,planeHorizDir,planeVertDir);
 		center = facet->getBB_recursive(false,false).getCenter();
@@ -1620,7 +1620,7 @@ void ccDBRoot::alignCameraWithEntity(bool reverse)
 		transMat.setTranslation(-center);
 		ccGLMatrixd viewMat = win->getViewportParameters().viewMat;
 		viewMat = viewMat * transMat;
-		viewMat.setTranslation(viewMat.getTranslationAsVec3D() + CCVector3d::fromArray(center.u));
+		viewMat.setTranslation(viewMat.getTranslationAsVec3D() + center);
 
 		ccLog::Print("[Align camera] Corresponding view matrix:");
 		ccLog::Print(viewMat.toString(12,' ')); //full precision

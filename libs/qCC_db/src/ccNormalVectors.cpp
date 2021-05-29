@@ -667,7 +667,6 @@ bool ccNormalVectors::ComputeNormsAtLevelWithQuadric(	const CCCoreLib::DgmOctree
 
 	CCCoreLib::DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
 	nNSS.level = cell.level;
-	nNSS.prepare(radius, cell.parentOctree->getCellSize(nNSS.level));
 	cell.parentOctree->getCellPos(cell.truncatedCode, cell.level, nNSS.cellPos, true);
 	cell.parentOctree->computeCellCenter(nNSS.cellPos, cell.level, nNSS.cellCenter);
 
@@ -722,7 +721,6 @@ bool ccNormalVectors::ComputeNormsAtLevelWithLS(const CCCoreLib::DgmOctree::octr
 
 	CCCoreLib::DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
 	nNSS.level = cell.level;
-	nNSS.prepare(radius, cell.parentOctree->getCellSize(nNSS.level));
 	cell.parentOctree->getCellPos(cell.truncatedCode, cell.level, nNSS.cellPos, true);
 	cell.parentOctree->computeCellCenter(nNSS.cellPos, cell.level, nNSS.cellCenter);
 

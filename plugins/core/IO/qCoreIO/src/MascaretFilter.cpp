@@ -249,8 +249,8 @@ CC_FILE_ERROR MascaretFilter::saveToFile(ccHObject* entity, const QString& filen
 		QString profileName = poly->getName();
 		profileName = MakeMascaretName(profileName);
 
-		CCVector3 C = CCVector3::fromArray(Cd.u);
-		CCVector3 U = CCVector3::fromArray(Ud.u);
+		CCVector3 C = Cd.toPC();
+		CCVector3 U = Ud.toPC();
 		U.normalize();
 
 		//write header

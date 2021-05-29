@@ -1114,7 +1114,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 				if (viewportParams.perspectiveView && viewportParams.zFar > 0)
 				{
 					//in perspective view, the actual scale depends on the distance to the camera!
-					double d = (camera.modelViewMat * CCVector3d::fromArray(P.u)).norm();
+					double d = (camera.modelViewMat * P).norm();
 					double unitD = viewportParams.zFar / 2; //we consider that the 'standard' scale is at half the depth
 					scale = static_cast<float>(scale * sqrt(d / unitD)); //sqrt = empirical (probably because the marker size is already partly compensated by ccGLWindow::computeActualPixelSize())
 				}
@@ -1862,7 +1862,7 @@ bool cc2DLabel::pointPicking(	const CCVector2d& clickPos,
 			}
 
 			// closest distance to XY
-			CCVector3d XP = (CCVector3d::fromArray(P.u) - X);
+			CCVector3d XP = (P.toDouble() - X);
 			double squareDist = (XP - XP.dot(xy) * xy).norm2();
 
 			if (squareDist <= pp.markerScale * pp.markerScale)

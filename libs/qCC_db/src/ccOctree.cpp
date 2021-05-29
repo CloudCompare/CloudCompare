@@ -554,8 +554,8 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 			return false;
 		}
 
-		rayAxis = CCVector3::fromArray((Y-X).u);
-		rayOrigin = CCVector3::fromArray(X.u);
+		rayAxis = (Y-X).toPC();
+		rayOrigin = X.toPC();
 
 		if (hasGLTrans)
 		{

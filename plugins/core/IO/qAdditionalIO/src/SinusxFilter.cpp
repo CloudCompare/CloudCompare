@@ -430,7 +430,7 @@ CC_FILE_ERROR SinusxFilter::loadFile(const QString& filename, ccHObject& contain
 									}
 								}
 
-								currentVertices->addPoint(CCVector3::fromArray((Pd + Pshift).u));
+								currentVertices->addPoint((Pd + Pshift).toPC());
 							}
 						}
 					}

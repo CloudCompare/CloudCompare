@@ -165,19 +165,19 @@ CC_FILE_ERROR STLFilter::saveToBINFile(ccGenericMesh* mesh, FILE *theFile, QWidg
 		CCVector3 N = (*B - *A).cross(*C - *A);
 
 		//REAL32[3] Normal vector
-		CCVector3f buffer = CCVector3f::fromArray(N.u); //convert to an explicit float array (as PointCoordinateType may be a double!)
+		CCVector3f buffer = N.toFloat(); //convert to an explicit float array (as PointCoordinateType may be a double!)
 		assert(sizeof(float) == 4);
 		if (fwrite((const void*)buffer.u, 4, 3, theFile) < 3)
 			return CC_FERR_WRITING;
 
 		//REAL32[3] Vertex 1,2 & 3
-		buffer = CCVector3f::fromArray(A->u); //convert to an explicit float array (as PointCoordinateType may be a double!)
+		buffer = A->toFloat(); //convert to an explicit float array (as PointCoordinateType may be a double!)
 		if (fwrite((const void*)buffer.u, 4, 3, theFile) < 3)
 			return CC_FERR_WRITING;
-		buffer = CCVector3f::fromArray(B->u); //convert to an explicit float array (as PointCoordinateType may be a double!)
+		buffer = B->toFloat(); //convert to an explicit float array (as PointCoordinateType may be a double!)
 		if (fwrite((const void*)buffer.u, 4, 3, theFile) < 3)
 			return CC_FERR_WRITING;
-		buffer = CCVector3f::fromArray(C->u); //convert to an explicit float array (as PointCoordinateType may be a double!)
+		buffer = C->toFloat(); //convert to an explicit float array (as PointCoordinateType may be a double!)
 		if (fwrite((const void*)buffer.u, 4, 3, theFile) < 3)
 			return CC_FERR_WRITING;
 
@@ -583,7 +583,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 				}
 			}
 
-			CCVector3 P = CCVector3::fromArray((Pd + Pshift).u);
+			CCVector3 P = (Pd + Pshift).toPC();
 
 			//cloud is already full?
 			if (vertices->capacity() == pointCount && !vertices->reserve(pointCount + s_defaultMemAllocCount))
@@ -774,7 +774,7 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 				}
 			}
 
-			CCVector3 P = CCVector3::fromArray((Pd + Pshift).u);
+			CCVector3 P = (Pd + Pshift).toPC();
 
 			//insert new point
 			vertIndexes[i] = pointCount++;

@@ -19,7 +19,9 @@ v2.12 (???) - (in development)
       - Single click picking can be disabled (can be very slow for very large point clouds) 
     - CommandLine mode new features
       - Added N_SIGMA_MIN and N_SIGMA_MAX options to the FILTER_SF command. Specify the option followed by a numeric value to filter by N * standardDeviation around the mean.
-
+	- ICP registration:
+		- new 'research' option to use signed distances when registering a cloud with a (reference) mesh
+		  (helfpul to prevent the cloud from sinking below the mesh surface if used in conjunction of a small overlap percentage)
 	- Clipping box tool:
 		- former 'contours' renamed 'envelopes' for the sake of clarity
 		- ability to extract the real contours of the points inside each slice (single slice mode or 'repeat' mode)

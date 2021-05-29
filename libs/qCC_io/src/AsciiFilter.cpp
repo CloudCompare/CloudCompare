@@ -1012,7 +1012,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiStream(QTextStream& stream,
 			}
 
 			//add point
-			cloudDesc.cloud->addPoint(CCVector3::fromArray((P + Pshift).u));
+			cloudDesc.cloud->addPoint((P + Pshift).toPC());
 
 			//Normal vector
 			if (cloudDesc.hasNorms)

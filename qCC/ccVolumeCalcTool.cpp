@@ -563,7 +563,7 @@ bool ccVolumeCalcTool::ComputeVolume(	ccRasterGrid& grid,
 	}
 
 	//memory allocation
-	CCVector3d minCorner = CCVector3d::fromArray(gridBox.minCorner().u);
+	CCVector3d minCorner = gridBox.minCorner();
 	if (!grid.init(gridWidth, gridHeight, gridStep, minCorner))
 	{
 		//not enough memory

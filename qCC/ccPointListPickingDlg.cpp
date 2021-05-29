@@ -540,7 +540,7 @@ void ccPointListPickingDlg::updateList()
 
 		const cc2DLabel::PickedPoint& PP = label->getPickedPoint(0);
 		CCVector3 P = PP.getPointPosition();
-		CCVector3d Pd = (showAbsolute ? PP.cloudOrVertices()->toGlobal3d(P) : CCVector3d::fromArray(P.u));
+		CCVector3d Pd = (showAbsolute ? PP.cloudOrVertices()->toGlobal3d(P) : P);
 
 		//point index in list
 		tableWidget->verticalHeaderItem( i )->setText( QStringLiteral( "%1" ).arg( i + startIndex ) );

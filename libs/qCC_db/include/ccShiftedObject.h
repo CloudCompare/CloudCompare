@@ -80,20 +80,20 @@ public:
 	template<typename T> inline CCVector3d toGlobal3d(const Vector3Tpl<T>& Plocal) const
 	{
 		// Pglobal = Plocal/scale - shift
-		return CCVector3d::fromArray(Plocal.u) / getGlobalScale() - getGlobalShift();
+		return Plocal.toDouble() / getGlobalScale() - getGlobalShift();
 	}
 
 	//! Returns the point projected into the local (shifted) coordinates system
 	template<typename T> inline CCVector3d toLocal3d(const Vector3Tpl<T>& Pglobal) const
 	{
 		// Plocal = (Pglobal + shift) * scale
-		return (CCVector3d::fromArray(Pglobal.u) + getGlobalShift()) * getGlobalScale();
+		return (Pglobal.toDouble() + getGlobalShift()) * getGlobalScale();
 	}
 	//! Returns the point projected into the local (shifted) coordinates system
 	template<typename T> inline CCVector3 toLocal3pc(const Vector3Tpl<T>& Pglobal) const
 	{
-		CCVector3d Plocal = CCVector3d::fromArray(Pglobal.u) * getGlobalScale() + getGlobalShift();
-		return CCVector3::fromArray(Plocal.u);
+		CCVector3d Plocal = Pglobal.toDouble() * getGlobalScale() + getGlobalShift();
+		return Plocal.toPC();
 	}
 
 	//inherited from ccHObject

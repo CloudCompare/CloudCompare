@@ -166,7 +166,7 @@ bool ccTorus::buildUp()
 			for (unsigned i=0; i<sectSteps; ++i)
 			{
 				double sectAngle_rad = i * sectStep_rad;
-				CCVector3 sectU = CCVector3::fromArray(CCVector3(cos(sectAngle_rad), 0.0, sin(sectAngle_rad)).u);
+				CCVector3 sectU(cos(sectAngle_rad), 0.0, sin(sectAngle_rad));
 				CCVector3 N(sweepU.x * sectU.x,
 							sweepU.y * sectU.x,
 							sectU.z);

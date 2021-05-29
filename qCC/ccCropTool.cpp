@@ -69,8 +69,8 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 	{
 		ccGenericMesh* mesh = static_cast<ccGenericMesh*>(entity);
 		CCCoreLib::ManualSegmentationTools::MeshCutterParams params;
-		params.bbMin = CCVector3d::fromArray(box.minCorner().u);
-		params.bbMax = CCVector3d::fromArray(box.maxCorner().u);
+		params.bbMin = box.minCorner();
+		params.bbMax = box.maxCorner();
 		params.generateOutsideMesh = !inside;
 		params.trackOrigIndexes = mesh->hasColors() || mesh->hasScalarFields() || mesh->hasMaterials();
 

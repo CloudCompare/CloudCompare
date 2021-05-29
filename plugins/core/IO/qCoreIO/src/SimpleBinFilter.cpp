@@ -218,7 +218,7 @@ CC_FILE_ERROR SimpleBinFilter::saveToFile(ccHObject* root, const QString& filena
 	{
 		//save the point coordinates
 		CCVector3d Pd = cloud->toGlobal3d(*cloud->getPoint(i));
-		CCVector3f coords = CCVector3f::fromArray((Pd - coordinatesShift).u);
+		CCVector3f coords = (Pd - coordinatesShift).toFloat();
 		dataStream << coords.x;
 		dataStream << coords.y;
 		dataStream << coords.z;
@@ -560,7 +560,7 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(const QString& filename, ccHObject& cont
 		dataStream >> Pf.y;
 		dataStream >> Pf.z;
 
-		CCVector3d Pd = coordinatesShift + CCVector3d::fromArray(Pf.u);
+		CCVector3d Pd = coordinatesShift + Pf;
 
 		if (i == 0)
 		{
@@ -597,7 +597,7 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(const QString& filename, ccHObject& cont
 			parameters.shiftHandlingMode = csModeBackup;
 		}
 
-		CCVector3 P = CCVector3::fromArray((Pd + descriptor.globalShift).u);
+		CCVector3 P = (Pd + descriptor.globalShift).toPC();
 		cloud->addPoint(P);
 
 		//and now for the scalar values

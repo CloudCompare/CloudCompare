@@ -3174,7 +3174,7 @@ bool ccMesh::interpolateNormals(const CCCoreLib::VerticesIndexes& vertIndexes, c
 		Nd.normalize();
 	}
 
-	N = CCVector3::fromArray(Nd.u);
+	N = Nd.toPC();
 
 	return true;
 }
@@ -3897,7 +3897,6 @@ static bool TagDuplicatedVertices(	const CCCoreLib::DgmOctree::octreeCell& cell,
 	CCCoreLib::DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
 	nNSS.level = cell.level;
 	static const PointCoordinateType c_defaultSearchRadius = static_cast<PointCoordinateType>(sqrt(CCCoreLib::ZERO_TOLERANCE_F));
-	nNSS.prepare(c_defaultSearchRadius, cell.parentOctree->getCellSize(nNSS.level));
 	cell.parentOctree->getCellPos(cell.truncatedCode, cell.level, nNSS.cellPos, true);
 	cell.parentOctree->computeCellCenter(nNSS.cellPos, cell.level, nNSS.cellCenter);
 

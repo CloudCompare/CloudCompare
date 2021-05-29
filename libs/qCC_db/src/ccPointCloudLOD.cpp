@@ -70,7 +70,7 @@ protected:
 				++node.pointCount;
 				const CCVector3* P = m_cloud.getPoint(cellCodes[codeIndex].theIndex);
 #ifdef COMPUTE_REAL_RADIUS
-				sumP += CCVector3d::fromArray(P->u);
+				sumP += *P;
 #else
 				bbox.add(*P);
 #endif
@@ -85,7 +85,7 @@ protected:
 				for (uint32_t i = 0; i < node.pointCount; ++i)
 				{
 					const CCVector3* P = m_cloud.getPoint(cellCodes[node.firstCodeIndex + i].theIndex);
-					double squareRadius = (CCVector3d::fromArray(P->u) - sumP).norm2();
+					double squareRadius = (P->toDouble() - sumP).norm2();
 					if (squareRadius > maxSquareRadius)
 					{
 						maxSquareRadius = squareRadius;
@@ -94,13 +94,13 @@ protected:
 				node.radius = static_cast<float>(sqrt(maxSquareRadius));
 			}
 			//update the center
-			node.center = CCVector3f::fromArray(sumP.u);
+			node.center = sumP.toFloat();
 #else
 			if (node.pointCount > 1)
 			{
 				node.radius = static_cast<float>(bbox.getDiagNormd());
 			}
-			node.center = CCVector3f::fromArray(bbox.getCenter().u);
+			node.center = bbox.getCenter().toFloat();
 #endif
 		}
 
@@ -139,7 +139,7 @@ protected:
 			{
 				++node.pointCount;
 				const CCVector3* P = m_cloud.getPoint(cellCodes[codeIndex].theIndex);
-				sumP += CCVector3d::fromArray(P->u);
+				sumP += *P;
 			}
 
 			//compute the radius
@@ -150,7 +150,7 @@ protected:
 				for (uint32_t i = 0; i < node.pointCount; ++i)
 				{
 					const CCVector3* P = m_cloud.getPoint(cellCodes[node.firstCodeIndex + i].theIndex);
-					double squareRadius = (CCVector3d::fromArray(P->u) - sumP).norm2();
+					double squareRadius = (P->toDouble() - sumP).norm2();
 					if (squareRadius > maxSquareRadius)
 					{
 						maxSquareRadius = squareRadius;
@@ -160,7 +160,7 @@ protected:
 			}
 
 			//update the center
-			node.center = CCVector3f::fromArray(sumP.u);
+			node.center = sumP.toFloat();
 		}
 
 		//return the node relative position

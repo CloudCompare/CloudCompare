@@ -2887,7 +2887,7 @@ void ccGLWindow::updateConstellationCenterAndZoom(const ccBBox* boundingBox/*=nu
 	}
 
 	//we set the pivot point on the box center
-	CCVector3d P = CCVector3d::fromArray(zoomedBox.getCenter().u);
+	CCVector3d P = zoomedBox.getCenter();
 	setPivotPoint(P, false, false);
 
 	//compute the right distance for the camera to see the whole bounding-box
@@ -3271,7 +3271,7 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(bool withGLfeatures, ProjectionM
 		if (box.isValid())
 		{
 			//get bbox center
-			bbCenter = CCVector3d::fromArray(box.getCenter().u);
+			bbCenter = box.getCenter();
 			//get half bbox diagonal length
 			bbHalfDiag = box.getDiagNormd() / 2;
 		}
@@ -4957,7 +4957,7 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 			getGLCameraParameters(camera);
 			CCVector3d Pd(0, 0, 0);
 			static_cast<ccGenericMesh*>(pickedEntity)->trianglePicking(static_cast<unsigned>(pickedItemIndex), clickedPos, camera, Pd, &PBC);
-			P = CCVector3::fromArray(Pd.u);
+			P = Pd.toPC();
 			pickedPoint = &P;
 			pickedBarycenter = &PBC;
 		}
@@ -5125,7 +5125,7 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 						{
 							nearestElementSquareDist = nearestSquareDist;
 							nearestElementIndex = nearestTriIndex;
-							nearestPoint = CCVector3::fromArray(P.u);
+							nearestPoint = P.toPC();
 							nearestEntity = mesh;
 							nearestPointBC = barycentricCoords;
 						}

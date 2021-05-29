@@ -5221,7 +5221,7 @@ bool ccPointCloud::computeNormalsWithGrids(	double minTriangleAngle_deg/*=1.0*/,
 		}
 
 		//the code below has been kindly provided by Romain Janvier
-		CCVector3 sensorOrigin = CCVector3::fromArray((scanGrid->sensorPosition.getTranslationAsVec3D()/* + m_globalShift*/).u);
+		CCVector3 sensorOrigin = (scanGrid->sensorPosition.getTranslationAsVec3D()/* + m_globalShift*/).toPC();
 
 		for (int j = 0; j < static_cast<int>(scanGrid->h) - 1; ++j)
 		{
@@ -5427,7 +5427,7 @@ bool ccPointCloud::orientNormalsWithGrids(ccProgressDialog* pDlg/*=0*/)
 		}
 
 		//ccGLMatrixd toSensorCS = scanGrid->sensorPosition.inverse();
-		CCVector3 sensorOrigin = CCVector3::fromArray((scanGrid->sensorPosition.getTranslationAsVec3D()/* + m_globalShift*/).u);
+		CCVector3 sensorOrigin = (scanGrid->sensorPosition.getTranslationAsVec3D()/* + m_globalShift*/).toPC();
 
 		const int* _indexGrid = scanGrid->indexes.data();
 		for (int j = 0; j < static_cast<int>(scanGrid->h); ++j)
@@ -5764,7 +5764,7 @@ bool ccPointCloud::enhanceRGBWithIntensitySF(int sfIdx, bool useCustomIntensityR
 ccMesh* ccPointCloud::triangulateGrid(const Grid& grid, double minTriangleAngle_deg/*=0.0*/) const
 {
 	//the code below has been kindly provided by Romain Janvier
-	CCVector3 sensorOrigin = CCVector3::fromArray((grid.sensorPosition.getTranslationAsVec3D()/* + m_globalShift*/).u);
+	CCVector3 sensorOrigin = (grid.sensorPosition.getTranslationAsVec3D()/* + m_globalShift*/).toPC();
 
 	ccMesh* mesh = new ccMesh(const_cast<ccPointCloud*>(this));
 	mesh->setName("Grid mesh");

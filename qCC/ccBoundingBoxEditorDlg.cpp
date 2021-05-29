@@ -533,9 +533,9 @@ void ccBoundingBoxEditorDlg::toClipboardClicked()
 		getBoxAxes(X, Y, Z);
 
 		ccGLMatrix matrix;
-		matrix.setColumn(0, CCVector3::fromArray(X.u));
-		matrix.setColumn(1, CCVector3::fromArray(Y.u));
-		matrix.setColumn(2, CCVector3::fromArray(Z.u));
+		matrix.setColumn(0, X.toPC());
+		matrix.setColumn(1, Y.toPC());
+		matrix.setColumn(2, Z.toPC());
 		matrix.setTranslation(C);
 
 		clipboard->setText(matrix.toString());

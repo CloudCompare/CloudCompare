@@ -52,6 +52,7 @@ public:
 					double finalOverlapRatio = 1.0,
 					bool useDataSFAsWeights = false,
 					bool useModelSFAsWeights = false,
+					bool useC2MSignedDistances = false,
 					int transformationFilters = CCCoreLib::ICPRegistrationTools::SKIP_NONE,
 					int maxThreadCount = 0,
 					QWidget* parent = nullptr);

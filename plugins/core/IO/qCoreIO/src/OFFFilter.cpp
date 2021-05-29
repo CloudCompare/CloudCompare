@@ -229,7 +229,7 @@ CC_FILE_ERROR OFFFilter::loadFile(const QString& filename, ccHObject& container,
 				}
 			}
 
-			CCVector3 P = CCVector3::fromArray((Pd + Pshift).u);
+			CCVector3 P = (Pd + Pshift).toPC();
 			vertices->addPoint(P);
 		}
 	}

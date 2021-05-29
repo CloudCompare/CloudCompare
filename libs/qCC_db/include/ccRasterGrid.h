@@ -168,7 +168,7 @@ struct QCC_DB_LIB_API ccRasterGrid
 	//! Computes the position of the cell that includes a given point
 	std::pair<int, int> computeCellPos(const CCVector3& P, unsigned char X, unsigned char Y) const
 	{
-		CCVector3d relativePos = CCVector3d::fromArray(P.u) - minCorner;
+		CCVector3d relativePos = P.toDouble() - minCorner;
 
 		//DGM: we use the 'PixelIsArea' convention
 		int i = static_cast<int>(relativePos.u[X] / gridStep + 0.5);

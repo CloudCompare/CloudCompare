@@ -89,7 +89,7 @@ void ccFitPlaneTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPoi
 		if (m_app->getActiveGLWindow())
 		{
 			CCVector3d viewDir = m_app->getActiveGLWindow()->getViewportParameters().getViewDir();
-			if (CCVector3d::fromArray(pPlane->getNormal().u).dot(viewDir) > 0)
+			if (pPlane->getNormal().toDouble().dot(viewDir) > 0)
 			{
 				pPlane->flip();
 			}

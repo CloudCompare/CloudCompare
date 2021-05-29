@@ -396,7 +396,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 						ccLog::Warning("[Bundler] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 					}
 				}
-				keypointsCloud->addPoint(CCVector3::fromArray((Pd + Pshift).u));
+				keypointsCloud->addPoint((Pd + Pshift).toPC());
 
 				//RGB
 				currentLine = stream.readLine();

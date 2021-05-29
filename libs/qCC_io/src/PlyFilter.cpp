@@ -552,7 +552,7 @@ static int vertex_cb(p_ply_argument argument)
 			}
 		}
 
-		cloud->addPoint(CCVector3::fromArray((s_Point + s_Pshift).u));
+		cloud->addPoint((s_Point + s_Pshift).toPC());
 		++s_PointCount;
 
 		s_PointDataCorrupted = false;

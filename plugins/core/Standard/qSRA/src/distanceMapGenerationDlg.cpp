@@ -597,7 +597,7 @@ void DistanceMapGenerationDlg::updateZoom(ccBBox& box)
 			P.x = box.minCorner().x * (1.0f - centerPos) + box.maxCorner().x * centerPos;
 		}
 
-		CCVector3d pivotPoint = CCVector3d::fromArray(P.u);
+		CCVector3d pivotPoint = P;
 		CCVector3d cameraCenter = pivotPoint;
 		cameraCenter.z += params.getFocalDistance();
 		params.setPivotPoint(pivotPoint, false);

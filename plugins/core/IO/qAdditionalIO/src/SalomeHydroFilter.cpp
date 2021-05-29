@@ -232,7 +232,7 @@ CC_FILE_ERROR SalomeHydroFilter::loadFile(const QString& filename, ccHObject& co
 						break;
 					}
 				}
-				currentVertices->addPoint(CCVector3::fromArray((P + Pshift).u));
+				currentVertices->addPoint((P + Pshift).toPC());
 			}
 			else
 			{

@@ -268,7 +268,7 @@ int IcmFilter::LoadCalibratedImages(ccHObject* entities, const QString& path, co
 			ccCameraSensor* sensor = new ccCameraSensor(params);
 
 			ccGLMatrix mat;
-			mat.initFromParameters(angle_rad,CCVector3::fromArray(axis),CCVector3::fromArray(t));
+			mat.initFromParameters(angle_rad, CCVector3::fromArray(axis), CCVector3::fromArray(t));
 			sensor->setRigidTransformation(mat);
 
 			sensor->setGraphicScale(globalBBox.getDiagNorm() / 20);

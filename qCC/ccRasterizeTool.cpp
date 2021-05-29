@@ -737,7 +737,7 @@ bool ccRasterizeTool::updateGrid(bool interpolateSF/*=false*/)
 	assert(gridStep != 0);
 
 	//memory allocation
-	CCVector3d minCorner = CCVector3d::fromArray(box.minCorner().u);
+	CCVector3d minCorner = box.minCorner();
 	if (!m_grid.init(gridWidth, gridHeight, gridStep, minCorner))
 	{
 		//not enough memory

@@ -1007,7 +1007,7 @@ bool ccGBLSensor::applyViewport(ccGenericGLDisplay* win/*=0*/)
 	}
 
 	//center camera on sensor
-	CCVector3d sensorCenterd = CCVector3d::fromArray(trans.getTranslation());
+	CCVector3d sensorCenterd = trans.getTranslationAsVec3D();
 	ccGLMatrixd viewMat = ccGLMatrixd::FromViewDirAndUpDir(sensorX, sensorZ);
 	viewMat.invert();
 	viewMat.setTranslation(sensorCenterd);

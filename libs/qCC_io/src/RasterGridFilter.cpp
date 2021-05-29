@@ -169,10 +169,10 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 				CCVector3d A = B + CCVector3d(rasterY * adfGeoTransform[2], rasterY * adfGeoTransform[5], 0);
 				CCVector3d D = C + CCVector3d(rasterY * adfGeoTransform[2], rasterY * adfGeoTransform[5], 0);
 
-				pc->addPoint(CCVector3::fromArray(A.u));
-				pc->addPoint(CCVector3::fromArray(B.u));
-				pc->addPoint(CCVector3::fromArray(C.u));
-				pc->addPoint(CCVector3::fromArray(D.u));
+				pc->addPoint(A.toPC());
+				pc->addPoint(B.toPC());
+				pc->addPoint(C.toPC());
+				pc->addPoint(D.toPC());
 
 				quad->addTriangle(0, 2, 1); //A C B
 				quad->addTriangle(0, 3, 2); //A D C

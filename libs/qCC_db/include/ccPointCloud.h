@@ -452,6 +452,9 @@ public: //other methods
 	//inherited from CCCoreLib::GenericCloud
 	unsigned char testVisibility(const CCVector3& P) const override;
 
+	//inherited from CCCoreLib::GenericIndexedCloud
+	const CCVector3* getNormal(unsigned pointIndex) const override; //equivalent to getPointNormal, but for CCCoreLib
+
 	//inherited from ccGenericPointCloud
 	const ccColor::Rgb* geScalarValueColor(ScalarType d) const override;
 	const ccColor::Rgb* getPointScalarValueColor(unsigned pointIndex) const override;

@@ -3868,12 +3868,12 @@ bool CommandCPS::process(ccCommandLineInterface &cmd)
     assert(compPointCloud && refPointCloud);
 
     ccProgressDialog pDlg(true, nullptr);
-    CCCoreLib::DistanceComputationTools::Cloud2CloudDistanceComputationParams params;
+    CCCoreLib::DistanceComputationTools::Cloud2CloudDistancesComputationParams params;
     CCCoreLib::ReferenceCloud closestPointSet(refPointCloud);
     params.CPSet = &closestPointSet;
 
     // COMPUTE CLOUD 2 CLOUD DISTANCE, THIS INCLUDES THE CLOSEST POINT SET GENERATION
-    int result = CCCoreLib::DistanceComputationTools::computeCloud2CloudDistance(compPointCloud, refPointCloud, params, &pDlg);
+    int result = CCCoreLib::DistanceComputationTools::computeCloud2CloudDistances(compPointCloud, refPointCloud, params, &pDlg);
 
     if (result >= 0)
     {

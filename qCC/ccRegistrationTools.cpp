@@ -155,22 +155,25 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
 		int result = -1;
 		if (modelMesh)
 		{
-			CCCoreLib::DistanceComputationTools::Cloud2MeshDistanceComputationParams c2mParams;
+			CCCoreLib::DistanceComputationTools::Cloud2MeshDistancesComputationParams c2mParams;
 			c2mParams.octreeLevel = gridLevel;
 			c2mParams.maxSearchDist = 0;
 			c2mParams.useDistanceMap = true;
 			c2mParams.signedDistances = false;
 			c2mParams.flipNormals = false;
 			c2mParams.multiThread = false;
-			result = CCCoreLib::DistanceComputationTools::computeCloud2MeshDistance(dataCloud, modelMesh, c2mParams, progressDlg.data());
+			result = CCCoreLib::DistanceComputationTools::computeCloud2MeshDistances(	dataCloud,
+																						modelMesh,
+																						c2mParams,
+																						progressDlg.data());
 		}
 		else
 		{
 			result = CCCoreLib::DistanceComputationTools::computeApproxCloud2CloudDistance(	dataCloud,
-																						modelCloud,
-																						gridLevel,
-																						-1,
-																						progressDlg.data());
+																							modelCloud,
+																							gridLevel,
+																							-1,
+																							progressDlg.data());
 		}
 
 		if (result < 0)

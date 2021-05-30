@@ -453,7 +453,7 @@ public: //other methods
 	unsigned char testVisibility(const CCVector3& P) const override;
 
 	//inherited from CCCoreLib::GenericIndexedCloud
-	virtual bool normalsAvailable() const { return hasNormals(); }
+	bool normalsAvailable() const override { return hasNormals(); }
 	const CCVector3* getNormal(unsigned pointIndex) const override; //equivalent to getPointNormal, but for CCCoreLib
 
 	//inherited from ccGenericPointCloud

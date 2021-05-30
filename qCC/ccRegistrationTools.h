@@ -43,18 +43,9 @@ public:
 					double& finalScale,
 					double& finalRMS,
 					unsigned& finalPointCount,
-					double minRMSDecrease,
-					unsigned maxIterationCount,
-					unsigned randomSamplingLimit,
-					bool removeFarthestPoints,
-					CCCoreLib::ICPRegistrationTools::CONVERGENCE_TYPE method,
-					bool adjustScale,
-					double finalOverlapRatio = 1.0,
+					const CCCoreLib::ICPRegistrationTools::Parameters& inputParameters,
 					bool useDataSFAsWeights = false,
 					bool useModelSFAsWeights = false,
-					bool useC2MSignedDistances = false,
-					int transformationFilters = CCCoreLib::ICPRegistrationTools::SKIP_NONE,
-					int maxThreadCount = 0,
 					QWidget* parent = nullptr);
 
 };

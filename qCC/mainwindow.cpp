@@ -77,7 +77,7 @@
 //dialogs
 #include "ccAboutDialog.h"
 #include "ccAdjustZoomDlg.h"
-#include "ccAlignDlg.h" //Aurelien BEY
+#include "ccAlignDlg.h"
 #include "ccApplication.h"
 #include "ccApplyTransformationDlg.h"
 #include "ccAskThreeDoubleValuesDlg.h"
@@ -101,18 +101,18 @@
 #include "ccPlaneEditDlg.h"
 #include "ccPointListPickingDlg.h"
 #include "ccPointPairRegistrationDlg.h"
-#include "ccPointPropertiesDlg.h" //Aurelien BEY
+#include "ccPointPropertiesDlg.h"
 #include "ccPrimitiveFactoryDlg.h"
 #include "ccPtsSamplingDlg.h"
 #include "ccRasterizeTool.h"
-#include "ccRegistrationDlg.h" //Aurelien BEY
+#include "ccRegistrationDlg.h"
 #include "ccRenderToFileDlg.h"
 #include "ccScaleDlg.h"
 #include "ccSectionExtractionTool.h"
 #include "ccSensorComputeDistancesDlg.h"
 #include "ccSensorComputeScatteringAnglesDlg.h"
 #include "ccSORFilterDlg.h"
-#include "ccSubsamplingDlg.h" //Aurelien BEY
+#include "ccSubsamplingDlg.h"
 #include "ccTracePolylineTool.h"
 #include "ccTranslationManager.h"
 #include "ccUnrollDlg.h"
@@ -3562,14 +3562,19 @@ void MainWindow::doActionRegister()
 		return;
 	}
 
-	ccHObject* data = static_cast<ccHObject*>(m_selectedEntities[1]);
-	ccHObject* model = static_cast<ccHObject*>(m_selectedEntities[0]);
+	ccHObject* data = static_cast<ccHObject*>(m_selectedEntities[0]);
+	ccHObject* model = static_cast<ccHObject*>(m_selectedEntities[1]);
+	if (data->isKindOf(CC_TYPES::MESH) && model->isKindOf(CC_TYPES::POINT_CLOUD))
+	{
+		//by default, prefer the mesh as the reference
+		std::swap(data, model);
+	}
 
 	ccRegistrationDlg rDlg(data, model, this);
 	if (!rDlg.exec())
 		return;
 
-	//DGM (23/01/09): model and data order may have changed!
+	//model and data order may have changed!
 	model = rDlg.getModelEntity();
 	data = rDlg.getDataEntity();
 
@@ -3586,17 +3591,22 @@ void MainWindow::doActionRegister()
 		rDlg.setMinRMSDecrease(minRMSDecrease);
 	}
 
-	unsigned maxIterationCount									= rDlg.getMaxIterationCount();
-	unsigned randomSamplingLimit								= rDlg.randomSamplingLimit();
-	bool removeFarthestPoints									= rDlg.removeFarthestPoints();
-	bool useDataSFAsWeights										= rDlg.useDataSFAsWeights();
-	bool useModelSFAsWeights									= rDlg.useModelSFAsWeights();
-	bool useC2MSignedDistances									= rDlg.useC2MSignedDistances();
-	bool adjustScale											= rDlg.adjustScale();
-	int transformationFilters									= rDlg.getTransformationFilters();
-	unsigned finalOverlap										= rDlg.getFinalOverlap();
-	CCCoreLib::ICPRegistrationTools::CONVERGENCE_TYPE method	= rDlg.getConvergenceMethod();
-	int maxThreadCount											= rDlg.getMaxThreadCount();
+	CCCoreLib::ICPRegistrationTools::Parameters parameters;
+	{
+		parameters.convType					= rDlg.getConvergenceMethod();
+		parameters.minRMSDecrease			= minRMSDecrease;
+		parameters.nbMaxIterations			= rDlg.getMaxIterationCount();
+		parameters.adjustScale				= rDlg.adjustScale();
+		parameters.filterOutFarthestPoints	= rDlg.removeFarthestPoints();
+		parameters.samplingLimit			= rDlg.randomSamplingLimit();
+		parameters.finalOverlapRatio		= rDlg.getFinalOverlap() / 100.0;
+		parameters.transformationFilters	= rDlg.getTransformationFilters();
+		parameters.maxThreadCount			= rDlg.getMaxThreadCount();
+		parameters.useC2MSignedDistances	= rDlg.useC2MSignedDistances();
+		parameters.normalsMatching			= rDlg.normalsMatchingOption();
+	}
+	bool useDataSFAsWeights		= rDlg.useDataSFAsWeights();
+	bool useModelSFAsWeights	= rDlg.useModelSFAsWeights();
 
 	//semi-persistent storage (for next call)
 	rDlg.saveParameters();
@@ -3612,25 +3622,19 @@ void MainWindow::doActionRegister()
 									finalScale,
 									finalError,
 									finalPointCount,
-									minRMSDecrease,
-									maxIterationCount,
-									randomSamplingLimit,
-									removeFarthestPoints,
-									method,
-									adjustScale,
-									finalOverlap / 100.0,
+									parameters,
 									useDataSFAsWeights,
 									useModelSFAsWeights,
-									useC2MSignedDistances,
-									transformationFilters,
-									maxThreadCount,
 									this))
 	{
-		QString rmsString = tr("Final RMS: %1 (computed on %2 points)").arg(finalError).arg(finalPointCount);
+		QString rmsString = tr("Final RMS*: %1 (computed on %2 points)").arg(finalError).arg(finalPointCount);
+		QString rmsDisclaimerString = tr("(* RMS is potentially weighted, depending on the selected options)");
 		ccLog::Print(QString("[Register] ") + rmsString);
+		ccLog::Print(QString("[Register] ") + rmsDisclaimerString);
 
 		QStringList summary;
 		summary << rmsString;
+		summary << rmsDisclaimerString;
 		summary << "----------------";
 
 		//transformation matrix
@@ -3644,7 +3648,7 @@ void MainWindow::doActionRegister()
 			ccLog::Print(tr("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool"));
 		}
 
-		if (adjustScale)
+		if (parameters.adjustScale)
 		{
 			QString scaleString = tr("Scale: %1 (already integrated in above matrix!)").arg(finalScale);
 			ccLog::Warning(QString("[Register] ") + scaleString);
@@ -3658,7 +3662,7 @@ void MainWindow::doActionRegister()
 
 		//overlap
 		summary << "----------------";
-		QString overlapString = tr("Theoretical overlap: %1%").arg(finalOverlap);
+		QString overlapString = tr("Theoretical overlap: %1%").arg(static_cast<int>(parameters.finalOverlapRatio * 100));
 		ccLog::Print(QString("[Register] ") + overlapString);
 		summary << overlapString;
 

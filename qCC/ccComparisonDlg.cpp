@@ -351,7 +351,7 @@ bool ccComparisonDlg::computeApproxDistances()
 	
 	case CLOUDMESH_DIST: //cloud-mesh
 		{
-			CCCoreLib::DistanceComputationTools::Cloud2MeshDistanceComputationParams c2mParams;
+			CCCoreLib::DistanceComputationTools::Cloud2MeshDistancesComputationParams c2mParams;
 			{
 				c2mParams.octreeLevel = DEFAULT_OCTREE_LEVEL;
 				c2mParams.maxSearchDist = 0;
@@ -360,11 +360,11 @@ bool ccComparisonDlg::computeApproxDistances()
 				c2mParams.flipNormals = false;
 				c2mParams.multiThread = false;
 			}
-			approxResult = CCCoreLib::DistanceComputationTools::computeCloud2MeshDistance(	m_compCloud,
-																						m_refMesh,
-																						c2mParams,
-																						progressDlg.data(),
-																						m_compOctree.data());
+			approxResult = CCCoreLib::DistanceComputationTools::computeCloud2MeshDistances(	m_compCloud,
+																							m_refMesh,
+																							c2mParams,
+																							progressDlg.data(),
+																							m_compOctree.data());
 		}
 		break;
 
@@ -705,8 +705,8 @@ bool ccComparisonDlg::computeDistances()
 	//multi-thread
 	bool multiThread = multiThreadedCheckBox->isChecked();
 
-	CCCoreLib::DistanceComputationTools::Cloud2CloudDistanceComputationParams c2cParams;
-	CCCoreLib::DistanceComputationTools::Cloud2MeshDistanceComputationParams  c2mParams;
+	CCCoreLib::DistanceComputationTools::Cloud2CloudDistancesComputationParams c2cParams;
+	CCCoreLib::DistanceComputationTools::Cloud2MeshDistancesComputationParams c2mParams;
 	c2cParams.maxThreadCount = c2mParams.maxThreadCount = maxThreadCountSpinBox->value();
 
 	int result = -1;
@@ -829,12 +829,12 @@ bool ccComparisonDlg::computeDistances()
 			c2cParams.CPSet = nullptr;
 		}
 		
-		result = CCCoreLib::DistanceComputationTools::computeCloud2CloudDistance(	m_compCloud,
-																				m_refCloud,
-																				c2cParams,
-																				progressDlg.data(),
-																				m_compOctree.data(),
-																				m_refOctree.data());
+		result = CCCoreLib::DistanceComputationTools::computeCloud2CloudDistances(	m_compCloud,
+																					m_refCloud,
+																					c2cParams,
+																					progressDlg.data(),
+																					m_compOctree.data(),
+																					m_refOctree.data());
 		break;
 
 	case CLOUDMESH_DIST: //cloud-mesh
@@ -854,11 +854,11 @@ bool ccComparisonDlg::computeDistances()
 			c2mParams.multiThread = multiThread;
 		}
 		
-		result = CCCoreLib::DistanceComputationTools::computeCloud2MeshDistance(	m_compCloud,
-																				m_refMesh,
-																				c2mParams,
-																				progressDlg.data(),
-																				m_compOctree.data());
+		result = CCCoreLib::DistanceComputationTools::computeCloud2MeshDistances(	m_compCloud,
+																					m_refMesh,
+																					c2mParams,
+																					progressDlg.data(),
+																					m_compOctree.data());
 		break;
 	}
 	qint64 elapsedTime_ms = eTimer.elapsed();

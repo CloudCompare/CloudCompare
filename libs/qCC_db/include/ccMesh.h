@@ -96,7 +96,6 @@ public:
 	//inherited methods (ccGenericMesh)
 	inline ccGenericPointCloud* getAssociatedCloud() const override { return m_associatedCloud; }
 	void refreshBB() override;
-	bool interpolateNormals(unsigned triIndex, const CCVector3& P, CCVector3& N) override;
 	bool interpolateNormalsBC(unsigned triIndex, const CCVector3d& w, CCVector3& N) override;
 	bool interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgb& C) override;
 	bool interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccColor::Rgb& C) override;
@@ -117,6 +116,8 @@ public:
 	void getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) const override;
 	unsigned size() const override;
 	void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) override;
+	bool normalsAvailable() const override  { return hasNormals(); }
+	bool interpolateNormals(unsigned triIndex, const CCVector3& P, CCVector3& N) override;
 
 	//const version of getTriangleVertIndexes
 	const virtual CCCoreLib::VerticesIndexes* getTriangleVertIndexes(unsigned triangleIndex) const;

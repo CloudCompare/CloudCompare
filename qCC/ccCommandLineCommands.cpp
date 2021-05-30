@@ -3868,12 +3868,12 @@ bool CommandCPS::process(ccCommandLineInterface &cmd)
     assert(compPointCloud && refPointCloud);
 
     ccProgressDialog pDlg(true, nullptr);
-    CCCoreLib::DistanceComputationTools::Cloud2CloudDistanceComputationParams params;
+    CCCoreLib::DistanceComputationTools::Cloud2CloudDistancesComputationParams params;
     CCCoreLib::ReferenceCloud closestPointSet(refPointCloud);
     params.CPSet = &closestPointSet;
 
     // COMPUTE CLOUD 2 CLOUD DISTANCE, THIS INCLUDES THE CLOSEST POINT SET GENERATION
-    int result = CCCoreLib::DistanceComputationTools::computeCloud2CloudDistance(compPointCloud, refPointCloud, params, &pDlg);
+    int result = CCCoreLib::DistanceComputationTools::computeCloud2CloudDistances(compPointCloud, refPointCloud, params, &pDlg);
 
     if (result >= 0)
     {
@@ -4802,24 +4802,31 @@ bool CommandICP::process(ccCommandLineInterface &cmd)
 	double finalError = 0.0;
 	double finalScale = 1.0;
 	unsigned finalPointCount = 0;
+
+	CCCoreLib::ICPRegistrationTools::Parameters parameters;
+	{
+		parameters.convType					= (iterationCount != 0 ? CCCoreLib::ICPRegistrationTools::MAX_ITER_CONVERGENCE : CCCoreLib::ICPRegistrationTools::MAX_ERROR_CONVERGENCE);
+		parameters.minRMSDecrease			= minErrorDiff;
+		parameters.nbMaxIterations			= iterationCount;
+		parameters.adjustScale				= adjustScale;
+		parameters.filterOutFarthestPoints	= enableFarthestPointRemoval;
+		parameters.samplingLimit			= randomSamplingLimit;
+		parameters.finalOverlapRatio		= overlap / 100.0;
+		parameters.transformationFilters	= transformationFilters;
+		parameters.maxThreadCount			= maxThreadCount;
+		parameters.useC2MSignedDistances	= false; //TODO
+		parameters.normalsMatching			= CCCoreLib::ICPRegistrationTools::NO_NORMAL; //TODO
+	}
+
 	if (ccRegistrationTools::ICP(	dataAndModel[0]->getEntity(),
 									dataAndModel[1]->getEntity(),
 									transMat,
 									finalScale,
 									finalError,
 									finalPointCount,
-									minErrorDiff,
-									iterationCount,
-									randomSamplingLimit,
-									enableFarthestPointRemoval,
-									iterationCount != 0 ? CCCoreLib::ICPRegistrationTools::MAX_ITER_CONVERGENCE : CCCoreLib::ICPRegistrationTools::MAX_ERROR_CONVERGENCE,
-									adjustScale,
-									overlap / 100.0,
+									parameters,
 									dataSFAsWeights >= 0,
 									modelSFAsWeights >= 0,
-									false,
-									transformationFilters,
-									maxThreadCount,
 									cmd.widgetParent()))
 	{
 		ccHObject* data = dataAndModel[0]->getEntity();

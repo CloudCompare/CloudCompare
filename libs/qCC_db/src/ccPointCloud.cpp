@@ -1510,6 +1510,13 @@ const CCVector3& ccPointCloud::getPointNormal(unsigned pointIndex) const
 	return ccNormalVectors::GetNormal(m_normals->getValue(pointIndex));
 }
 
+const CCVector3* ccPointCloud::getNormal(unsigned pointIndex) const
+{
+	assert(m_normals && pointIndex < m_normals->currentSize());
+
+	return &ccNormalVectors::GetNormal(m_normals->getValue(pointIndex));
+}
+
 void ccPointCloud::setPointColor(unsigned pointIndex, const ccColor::Rgba& col)
 {
 	assert(m_rgbaColors && pointIndex < m_rgbaColors->currentSize());
@@ -3459,13 +3466,13 @@ QSharedPointer<CCCoreLib::ReferenceCloud> ccPointCloud::computeCPSet(	ccGenericP
 	QSharedPointer<CCCoreLib::ReferenceCloud> CPSet;
 	CPSet.reset(new CCCoreLib::ReferenceCloud(&otherCloud));
 
-	CCCoreLib::DistanceComputationTools::Cloud2CloudDistanceComputationParams params;
+	CCCoreLib::DistanceComputationTools::Cloud2CloudDistancesComputationParams params;
 	{
 		params.CPSet = CPSet.data();
 		params.octreeLevel = octreeLevel;
 	}
 
-	//create temporary SF for the nearest neighors determination (computeCloud2CloudDistance)
+	//create temporary SF for the nearest neighors determination (computeCloud2CloudDistances)
 	//so that we can properly remove it afterwards!
 	static const char s_defaultTempSFName[] = "CPSetComputationTempSF";
 	int sfIdx = getScalarFieldIndexByName(s_defaultTempSFName);
@@ -3481,7 +3488,7 @@ QSharedPointer<CCCoreLib::ReferenceCloud> ccPointCloud::computeCPSet(	ccGenericP
 	int currentOutSFIndex = m_currentOutScalarFieldIndex;
 	setCurrentScalarField(sfIdx);
 
-	result = CCCoreLib::DistanceComputationTools::computeCloud2CloudDistance(this, &otherCloud, params, progressCb);
+	result = CCCoreLib::DistanceComputationTools::computeCloud2CloudDistances(this, &otherCloud, params, progressCb);
 
 	//restore previous parameters
 	setCurrentInScalarField(currentInSFIndex);

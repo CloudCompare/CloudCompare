@@ -675,8 +675,22 @@ namespace ccLibAlgorithms
 						double finalError = 0.0;
 						double finalScale = 1.0;
 						unsigned finalPointCount = 0;
-						int transformationFilters = 0; //CCCoreLib::RegistrationTools::SKIP_ROTATION;
 						
+						CCCoreLib::ICPRegistrationTools::Parameters parameters;
+						{
+							parameters.convType					= CCCoreLib::ICPRegistrationTools::MAX_ERROR_CONVERGENCE;
+							parameters.minRMSDecrease			= icpRmsDiff;
+							parameters.nbMaxIterations			= 0;
+							parameters.adjustScale				= true;
+							parameters.filterOutFarthestPoints	= false;
+							parameters.samplingLimit			= 50000;
+							parameters.finalOverlapRatio		= icpFinalOverlap / 100.0;
+							parameters.transformationFilters	= 0; //CCCoreLib::RegistrationTools::SKIP_ROTATION
+							parameters.maxThreadCount			= 0;
+							parameters.useC2MSignedDistances	= false;
+							parameters.normalsMatching			= CCCoreLib::ICPRegistrationTools::NO_NORMAL;
+						}
+
 						if (ccRegistrationTools::ICP(
 								ent,
 								refEntity,
@@ -684,18 +698,9 @@ namespace ccLibAlgorithms
 								finalScale,
 								finalError,
 								finalPointCount,
-								icpRmsDiff,
-								0,
-								50000,
-								false,
-								CCCoreLib::ICPRegistrationTools::MAX_ERROR_CONVERGENCE,
-								true,
-								icpFinalOverlap / 100.0,
+								parameters,
 								false,
 								false,
-								false,
-								transformationFilters,
-								0,
 								parent))
 						{
 							scales[i] = finalScale;

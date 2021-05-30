@@ -579,11 +579,13 @@ void ccPointPairRegistrationDlg::onItemPicked(const PickedItem& pi)
 
 	if (m_alignedEntities.contains(pi.entity))
 	{
-		addAlignedPoint(pi.P3D.toDouble(), pi.entity, true); //picked points are always shifted by default
+		CCVector3d P = pi.P3D.toDouble();
+		addAlignedPoint(P, pi.entity, true); //picked points are always shifted by default
 	}
 	else if (m_referenceEntities.contains(pi.entity))
 	{
-		addReferencePoint(pi.P3D.toDouble(), pi.entity, true); //picked points are always shifted by default
+		CCVector3d P = pi.P3D.toDouble();
+		addReferencePoint(P, pi.entity, true); //picked points are always shifted by default
 	}
 	else
 	{

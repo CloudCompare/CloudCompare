@@ -119,14 +119,6 @@ public:
 
 	//! Interpolates normal(s) inside a given triangle
 	/** \param triIndex triangle index
-		\param P point where to interpolate (should be inside the triangle!)
-		\param[out] N interpolated normal
-		\return success
-	**/
-	virtual bool interpolateNormals(unsigned triIndex, const CCVector3& P, CCVector3& N) = 0;
-
-	//! Interpolates normal(s) inside a given triangle
-	/** \param triIndex triangle index
 		\param w barycentric coordinates
 		\param[out] N interpolated normal
 		\return success
@@ -243,6 +235,9 @@ public:
 	void setGlobalScale(double scale) override;
 	const CCVector3d& getGlobalShift() const override;
 	double getGlobalScale() const override;
+
+	//inherited methods (GenericIndexedMesh)
+	bool normalsAvailable() const override { return hasNormals(); }
 
 protected:
 

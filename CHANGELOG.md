@@ -20,7 +20,9 @@ v2.12 (???) - (in development)
     - CommandLine mode new features
       - Added N_SIGMA_MIN and N_SIGMA_MAX options to the FILTER_SF command. Specify the option followed by a numeric value to filter by N * standardDeviation around the mean.
 	- ICP registration:
-		- new 'research' option to use signed distances when registering a cloud with a (reference) mesh
+	    - new option to take the normals into account (if both entites have normals)
+			(several matching modes are available: same side, opposite side, or double-sided)
+ 		- new 'research' option to use signed distances when registering a cloud with a (reference) mesh
 		  (helfpul to prevent the cloud from sinking below the mesh surface if used in conjunction of a small overlap percentage)
 	- Clipping box tool:
 		- former 'contours' renamed 'envelopes' for the sake of clarity

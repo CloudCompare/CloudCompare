@@ -365,30 +365,40 @@ CC_FILE_ERROR STLFilter::loadFile(const QString& filename, ccHObject& container,
 	mesh->mergeDuplicatedVertices(ccMesh::DefaultMergeDulicateVerticesLevel, parameters.parentWidget);
 	vertices = nullptr; //warning, after this point, 'vertices' is not valid anymore
 
-	NormsIndexesTableType* normals = mesh->getTriNormsTable();
-	if (normals)
+	ccGenericPointCloud* meshVertices = mesh->getAssociatedCloud();
+	if (mesh->size() != 0 && meshVertices) //their might not remain anymore triangle after 'mergeDuplicatedVertices'
 	{
-		//normals->link();
-		//mesh->addChild(normals); //automatically done by setTriNormsTable
-		mesh->showNormals(true);
+		NormsIndexesTableType* normals = mesh->getTriNormsTable();
+		if (normals)
+		{
+			//normals->link();
+			//mesh->addChild(normals); //automatically done by setTriNormsTable
+			mesh->showNormals(true);
+		}
+		else
+		{
+			//DGM: normals can be per-vertex or per-triangle so it's better to let the user do it himself later
+			//Moreover it's not always good idea if the user doesn't want normals (especially in ccViewer!)
+			//if (mesh->computeNormals())
+			//	mesh->showNormals(true);
+			//else
+			//	ccLog::Warning("[STL] Failed to compute per-vertex normals...");
+			ccLog::Warning("[STL] Mesh has no normal! You can manually compute them (select it then call \"Edit > Normals > Compute\")");
+		}
+
+		meshVertices->setEnabled(false);
+		meshVertices->setLocked(false); //DGM: no need to lock it as it is only used by one mesh!
+		mesh->addChild(meshVertices);
+
+		container.addChild(mesh);
 	}
 	else
 	{
-		//DGM: normals can be per-vertex or per-triangle so it's better to let the user do it himself later
-		//Moreover it's not always good idea if the user doesn't want normals (especially in ccViewer!)
-		//if (mesh->computeNormals())
-		//	mesh->showNormals(true);
-		//else
-		//	ccLog::Warning("[STL] Failed to compute per-vertex normals...");
-		ccLog::Warning("[STL] Mesh has no normal! You can manually compute them (select it then call \"Edit > Normals > Compute\")");
+		delete mesh;
+		mesh = nullptr;
+		return CC_FERR_NO_LOAD;
 	}
-	ccGenericPointCloud* meshVertices = mesh->getAssociatedCloud();
-	meshVertices->setEnabled(false);
-	meshVertices->setLocked(false); //DGM: no need to lock it as it is only used by one mesh!
-	mesh->addChild(meshVertices);
-
-	container.addChild(mesh);
-
+	
 	return CC_FERR_NO_ERROR;
 }
 

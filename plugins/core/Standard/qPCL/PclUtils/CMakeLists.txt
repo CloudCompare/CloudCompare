@@ -2,7 +2,7 @@ project( QPCL_PLUGIN_UTILS_LIB )
 
 find_package( Qt5 COMPONENTS Widgets REQUIRED )
 
-find_package( PCL 1.7 REQUIRED )
+find_package( PCL 1.9 REQUIRED )
 
 add_library( ${PROJECT_NAME} STATIC )
 

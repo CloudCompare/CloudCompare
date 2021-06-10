@@ -165,17 +165,17 @@ static ccCameraSensor* DecodeSensor(QXmlStreamReader& stream, int& sensorId)
 	if (!sensorAttributes.hasAttribute("type") || sensorAttributes.value("type") != "frame")
 	{
 		//unhandled sensor type
-		return 0;
+		return nullptr;
 	}
 	if (!sensorAttributes.hasAttribute("id"))
 	{
 		//invalid sensor?!
 		assert(false);
-    return 0;
+    return nullptr;
 	}
 	sensorId = sensorAttributes.value("id").toInt();
 
-	ccCameraSensor* sensor = 0;
+	ccCameraSensor* sensor = nullptr;
 	ccCameraSensor::IntrinsicParameters params;
 	bool hasPixelSize = false;
 
@@ -339,7 +339,7 @@ static bool DecodeCamera(QXmlStreamReader& stream, CameraDesc& camera)
 									attributes.value("y").toDouble(),
 									attributes.value("z").toDouble() };
 				//What is exactly the "reference" point?!
-				//camera.trans.setTranslation(CCVector3::fromArray(T.u));
+				//camera.trans.setTranslation(T.toPC());
 			}
 			stream.skipCurrentElement();
 		}
@@ -670,7 +670,7 @@ CC_FILE_ERROR PhotoScanFilter::loadFile(const QString& filename,
 		}
 	}
 
-	QScopedPointer<ccProgressDialog> progressDialog(0);
+	QScopedPointer<ccProgressDialog> progressDialog(nullptr);
 	if (parameters.parentWidget)
 	{
 		progressDialog.reset(new ccProgressDialog(parameters.parentWidget));
@@ -772,14 +772,14 @@ CC_FILE_ERROR PhotoScanFilter::loadFile(const QString& filename,
 	{
 		//no image?!
 		delete imageGroup;
-		imageGroup = 0;
+		imageGroup = nullptr;
 	}
 
 	//we can get rid of the original sensors
 	for (ccCameraSensor*& sensor : sensors)
 	{
 		delete sensor;
-		sensor = 0;
+		sensor = nullptr;
 	}
 	sensors.clear();
 
@@ -825,7 +825,7 @@ CC_FILE_ERROR PhotoScanFilter::loadFile(const QString& filename,
 			FileIOFilter::LoadParameters params;
 			params.alwaysDisplayLoadDialog = false;
 			params.autoComputeNormals = false;
-			params.parentWidget = 0;
+			params.parentWidget = nullptr;
 			CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 			ccHObject* newGroup = FileIOFilter::LoadFromFile(tempFilename, params, result);
 			if (newGroup)
@@ -880,7 +880,7 @@ CC_FILE_ERROR PhotoScanFilter::loadFile(const QString& filename,
 			FileIOFilter::LoadParameters params;
 			params.alwaysDisplayLoadDialog = false;
 			params.autoComputeNormals = false;
-			params.parentWidget = 0;
+			params.parentWidget = nullptr;
 
 			bool success = false;
 			if (!desc.texture.isEmpty() && desc.filename.endsWith("ply", Qt::CaseInsensitive))
@@ -918,7 +918,7 @@ CC_FILE_ERROR PhotoScanFilter::loadFile(const QString& filename,
 					}
 					newGroup->detatchAllChildren();
 					delete newGroup;
-					newGroup = 0;
+					newGroup = nullptr;
 				}
 			}
 

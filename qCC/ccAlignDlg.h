@@ -20,14 +20,18 @@
 
 #include <QDialog>
 
-#include <ui_alignDlg.h>
-
-#include <ReferenceCloud.h>
-
 class ccGenericPointCloud;
 
+namespace CCCoreLib {
+	class ReferenceCloud;
+}
+
+namespace Ui {
+	class AlignDialog;
+}
+
 //! Rough registration dialog
-class ccAlignDlg : public QDialog, public Ui::AlignDialog
+class ccAlignDlg : public QDialog
 {
 	Q_OBJECT
 
@@ -50,11 +54,10 @@ public:
 	CC_SAMPLING_METHOD getSamplingMethod();
 	bool isNumberOfCandidatesLimited();
 	unsigned getMaxNumberOfCandidates();
-	CCLib::ReferenceCloud *getSampledModel();
-	CCLib::ReferenceCloud *getSampledData();
+	CCCoreLib::ReferenceCloud *getSampledModel();
+	CCCoreLib::ReferenceCloud *getSampledData();
 
-
-protected slots:
+protected:
 	void swapModelAndData();
 	void modelSliderReleased();
 	void dataSliderReleased();
@@ -74,6 +77,7 @@ protected:
 
 	void setColorsAndLabels();
 
+	Ui::AlignDialog* m_ui;
 };
 
 #endif //CC_ALIGN_DLG_HEADER

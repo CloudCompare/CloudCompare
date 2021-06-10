@@ -91,7 +91,7 @@ CC_FILE_ERROR PNFilter::saveToFile(ccHObject* entity, const QString& filename, c
 						static_cast<float>(s_defaultNorm.z) };
 
 	//progress dialog
-	QScopedPointer<ccProgressDialog> pDlg(0);
+	QScopedPointer<ccProgressDialog> pDlg(nullptr);
 	if (pDlg)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); //cancel available
@@ -99,19 +99,19 @@ CC_FILE_ERROR PNFilter::saveToFile(ccHObject* entity, const QString& filename, c
 		pDlg->setInfo(QObject::tr("Points: %L1").arg( numberOfPoints ));
 		pDlg->start();
 	}
-	CCLib::NormalizedProgress nprogress(pDlg.data(), numberOfPoints);
+	CCCoreLib::NormalizedProgress nprogress(pDlg.data(), numberOfPoints);
 
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 
-	for (unsigned i=0; i<numberOfPoints; i++)
+	for (unsigned i = 0; i < numberOfPoints; i++)
 	{
 		//write point
 		{
 			const CCVector3* P = theCloud->getPoint(i);
 			
 			//conversion to float
-			CCVector3f Pfloat = CCVector3f::fromArray(P->u);
-			if (out.write(reinterpret_cast<const char*>(Pfloat.u),3*sizeof(float)) < 0)
+			CCVector3f Pfloat = P->toFloat();
+			if (out.write(reinterpret_cast<const char*>(Pfloat.u), 3 * sizeof(float)) < 0)
 			{
 				result = CC_FERR_WRITING;
 				break;
@@ -163,7 +163,7 @@ CC_FILE_ERROR PNFilter::loadFile(const QString& filename, ccHObject& container, 
 	unsigned numberOfPoints = static_cast<unsigned>(fileSize  / singlePointSize);
 
 	//progress dialog
-	QScopedPointer<ccProgressDialog> pDlg(0);
+	QScopedPointer<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); //cancel available
@@ -171,9 +171,9 @@ CC_FILE_ERROR PNFilter::loadFile(const QString& filename, ccHObject& container, 
 		pDlg->setInfo(QObject::tr("Points: %L1").arg( numberOfPoints ));
 		pDlg->start();
 	}
-	CCLib::NormalizedProgress nprogress(pDlg.data(), numberOfPoints);
+	CCCoreLib::NormalizedProgress nprogress(pDlg.data(), numberOfPoints);
 
-	ccPointCloud* loadedCloud = 0;
+	ccPointCloud* loadedCloud = nullptr;
 	//if the file is too big, it will be chuncked in multiple parts
 	unsigned chunkIndex = 0;
 	unsigned fileChunkPos = 0;
@@ -197,7 +197,7 @@ CC_FILE_ERROR PNFilter::loadFile(const QString& filename, ccHObject& container, 
 				result = CC_FERR_NOT_ENOUGH_MEMORY;
 				if (loadedCloud)
 					delete loadedCloud;
-				loadedCloud = 0;
+				loadedCloud = nullptr;
 				break;
 			}
 			loadedCloud->showNormals(true);
@@ -218,7 +218,7 @@ CC_FILE_ERROR PNFilter::loadFile(const QString& filename, ccHObject& container, 
 		}
 
 		//then the 3 components of the normal vector
-		if (in.read((char*)rBuff,3*sizeof(float))>=0)
+		if (in.read((char*)rBuff, 3 * sizeof(float)) >= 0)
 		{
 			loadedCloud->addNorm(CCVector3::fromArray(rBuff));
 		}

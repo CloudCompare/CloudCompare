@@ -27,14 +27,14 @@ class ccAskTwoDoubleValuesDlg : public QDialog, public Ui::AskTwoDoubleValuesDia
 	
 public:
 	//! Default constructor
-	ccAskTwoDoubleValuesDlg(const char* vName1,
-							const char* vName2,
+	ccAskTwoDoubleValuesDlg(const QString& vName1,
+							const QString& vName2,
 							double minVal,
 							double maxVal,
 							double defaultVal1,
 							double defaultVal2,
 							int precision = 6,
-							const char* windowTitle = 0,
+							QString windowTitle = QString(),
 							QWidget* parent = 0);
 };
 

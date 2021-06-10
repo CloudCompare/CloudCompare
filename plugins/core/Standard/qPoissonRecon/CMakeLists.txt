@@ -1,18 +1,14 @@
-cmake_minimum_required(VERSION 3.0)
+option( PLUGIN_STANDARD_QPOISSON_RECON "Install qPoissonRecon plugin" OFF )
 
-option( PLUGIN_STANDARD_QPOISSON_RECON "Check to install qPoissonRecon plugin" OFF )
-
-# CloudCompare 'PoissonRecon' plugin
-if (PLUGIN_STANDARD_QPOISSON_RECON)
+if( PLUGIN_STANDARD_QPOISSON_RECON )
 	project( QPOISSON_RECON_PLUGIN )
 		
-	include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
+	AddPlugin( NAME ${PROJECT_NAME} )
 
-	add_subdirectory (PoissonReconLib)
-
-	include( ../../../CMakePluginTpl.cmake )
+	add_subdirectory( extern/PoissonRecon EXCLUDE_FROM_ALL )
+	add_subdirectory( include )
+	add_subdirectory( src )
+	add_subdirectory( ui )
 	
 	target_link_libraries( ${PROJECT_NAME} QPOISSON_RECON_LIB )
-	include_directories( ${QPOISSON_RECON_LIB_SOURCE_DIR}/Src_CC_wrap )
-
 endif()

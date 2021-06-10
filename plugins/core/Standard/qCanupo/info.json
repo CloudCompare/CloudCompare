@@ -2,7 +2,7 @@
 	"type" : "Standard",
 	"core" : true,
 	"name" : "CANUPO",
-	"icon" : ":/CC/plugin/qCanupoPlugin/iconClassify.png",
+	"icon" : ":/CC/plugin/qCanupoPlugin/images/iconClassify.png",
 	"description" : "Train or apply a classifier on a point cloud.",
 	"authors" : [
 		{

@@ -47,7 +47,7 @@
       <string>pause</string>
      </property>
      <property name="icon">
-      <iconset resource="../icones.qrc">
+      <iconset resource="../icons.qrc">
        <normaloff>:/CC/images/smallPause.png</normaloff>:/CC/images/smallPause.png</iconset>
      </property>
      <property name="checkable">
@@ -67,7 +67,7 @@
       <string>load/save segmentation polyline</string>
      </property>
      <property name="icon">
-      <iconset resource="../icones.qrc">
+      <iconset resource="../icons.qrc">
        <normaloff>:/CC/images/dbPolylineSymbol.png</normaloff>:/CC/images/dbPolylineSymbol.png</iconset>
      </property>
      <property name="popupMode">
@@ -84,7 +84,7 @@
       <string>polyline selection</string>
      </property>
      <property name="icon">
-      <iconset resource="../icones.qrc">
+      <iconset resource="../icons.qrc">
        <normaloff>:/CC/images/smallPolygonSelect.png</normaloff>:/CC/images/smallPolygonSelect.png</iconset>
      </property>
      <property name="popupMode">
@@ -104,7 +104,7 @@
       <string>in</string>
      </property>
      <property name="icon">
-      <iconset resource="../icones.qrc">
+      <iconset resource="../icons.qrc">
        <normaloff>:/CC/images/smallSegmentIn.png</normaloff>:/CC/images/smallSegmentIn.png</iconset>
      </property>
     </widget>
@@ -121,7 +121,7 @@
       <string>out</string>
      </property>
      <property name="icon">
-      <iconset resource="../icones.qrc">
+      <iconset resource="../icons.qrc">
        <normaloff>:/CC/images/smallSegmentOut.png</normaloff>:/CC/images/smallSegmentOut.png</iconset>
      </property>
     </widget>
@@ -141,7 +141,7 @@
       <string>raz</string>
      </property>
      <property name="icon">
-      <iconset resource="../icones.qrc">
+      <iconset resource="../icons.qrc">
        <normaloff>:/CC/images/smallReset.png</normaloff>:/CC/images/smallReset.png</iconset>
      </property>
     </widget>
@@ -158,7 +158,7 @@
       <string>OK</string>
      </property>
      <property name="icon">
-      <iconset resource="../icones.qrc">
+      <iconset resource="../icons.qrc">
        <normaloff>:/CC/images/smallValidate.png</normaloff>:/CC/images/smallValidate.png</iconset>
      </property>
     </widget>
@@ -172,7 +172,7 @@
       <string>Confirm and delete hidden points</string>
      </property>
      <property name="icon">
-      <iconset resource="../icones.qrc">
+      <iconset resource="../icons.qrc">
        <normaloff>:/CC/images/smallTrash.png</normaloff>:/CC/images/smallTrash.png</iconset>
      </property>
     </widget>
@@ -189,7 +189,7 @@
       <string>Cancel</string>
      </property>
      <property name="icon">
-      <iconset resource="../icones.qrc">
+      <iconset resource="../icons.qrc">
        <normaloff>:/CC/images/smallCancel.png</normaloff>:/CC/images/smallCancel.png</iconset>
      </property>
     </widget>
@@ -197,31 +197,31 @@
   </layout>
   <action name="actionSetRectangularSelection">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/smallRectangleSelect.png</normaloff>:/CC/images/smallRectangleSelect.png</iconset>
    </property>
    <property name="text">
     <string>Rectangular selection</string>
    </property>
    <property name="toolTip">
-    <string>Activates rectangular selection</string>
+    <string>Activate rectangular selection</string>
    </property>
   </action>
   <action name="actionSetPolylineSelection">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/smallPolygonSelect.png</normaloff>:/CC/images/smallPolygonSelect.png</iconset>
    </property>
    <property name="text">
     <string>Polygonal selection</string>
    </property>
    <property name="toolTip">
-    <string>Activaites polyline selection</string>
+    <string>Activate polyline selection</string>
    </property>
   </action>
   <action name="actionUseExistingPolyline">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/dbPolylineSymbol.png</normaloff>:/CC/images/dbPolylineSymbol.png</iconset>
    </property>
    <property name="text">
@@ -233,7 +233,7 @@
   </action>
   <action name="actionExportSegmentationPolyline">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccSave.png</normaloff>:/CC/images/ccSave.png</iconset>
    </property>
    <property name="text">
@@ -245,7 +245,7 @@
   </action>
  </widget>
  <resources>
-  <include location="../icones.qrc"/>
+  <include location="../icons.qrc"/>
  </resources>
  <connections/>
 </ui>

@@ -28,7 +28,7 @@
         <string>Show/hide bounding box</string>
        </property>
        <property name="icon">
-        <iconset resource="../icones.qrc">
+        <iconset resource="../icons.qrc">
          <normaloff>:/CC/images/square.png</normaloff>:/CC/images/square.png</iconset>
        </property>
        <property name="checkable">
@@ -48,7 +48,7 @@
         <string>Show/hide interactors</string>
        </property>
        <property name="icon">
-        <iconset resource="../icones.qrc">
+        <iconset resource="../icons.qrc">
          <normaloff>:/CC/images/interactors.png</normaloff>:/CC/images/interactors.png</iconset>
        </property>
        <property name="checkable">
@@ -84,7 +84,7 @@
         <string>Restore the last clipping box used with this cloud</string>
        </property>
        <property name="icon">
-        <iconset resource="../icones.qrc">
+        <iconset resource="../icons.qrc">
          <normaloff>:/CC/images/restore.png</normaloff>:/CC/images/restore.png</iconset>
        </property>
       </widget>
@@ -104,7 +104,7 @@
         <string>Reset</string>
        </property>
        <property name="icon">
-        <iconset resource="../icones.qrc">
+        <iconset resource="../icons.qrc">
          <normaloff>:/CC/images/smallReset.png</normaloff>:/CC/images/smallReset.png</iconset>
        </property>
       </widget>
@@ -124,7 +124,7 @@
         <string>Close</string>
        </property>
        <property name="icon">
-        <iconset resource="../icones.qrc">
+        <iconset resource="../icons.qrc">
          <normaloff>:/CC/images/smallCancel.png</normaloff>:/CC/images/smallCancel.png</iconset>
        </property>
       </widget>
@@ -269,7 +269,7 @@
            <string>Extracts the contour as a polyline (concave hull)</string>
           </property>
           <property name="icon">
-           <iconset resource="../icones.qrc">
+           <iconset resource="../icons.qrc">
             <normaloff>:/CC/images/smallPolygonSelect.png</normaloff>:/CC/images/smallPolygonSelect.png</iconset>
           </property>
          </widget>
@@ -289,7 +289,7 @@
            <string>Removes last extracted contour</string>
           </property>
           <property name="icon">
-           <iconset resource="../icones.qrc">
+           <iconset resource="../icons.qrc">
             <normaloff>:/CC/images/smallRevert.png</normaloff>:/CC/images/smallRevert.png</iconset>
           </property>
          </widget>
@@ -330,7 +330,7 @@
            <string>Export selection as a new cloud</string>
           </property>
           <property name="icon">
-           <iconset resource="../icones.qrc">
+           <iconset resource="../icons.qrc">
             <normaloff>:/CC/images/ccClippingBoxSingleExport.png</normaloff>:/CC/images/ccClippingBoxSingleExport.png</iconset>
           </property>
          </widget>
@@ -341,7 +341,7 @@
            <string>Export multiple slices by repeating the process along one or several dimensions (+ contour extraction)</string>
           </property>
           <property name="icon">
-           <iconset resource="../icones.qrc">
+           <iconset resource="../icons.qrc">
             <normaloff>:/CC/images/ccClippingBoxMultExport.png</normaloff>:/CC/images/ccClippingBoxMultExport.png</iconset>
           </property>
          </widget>
@@ -410,7 +410,7 @@
          <string>Set 'left' view</string>
         </property>
         <property name="icon">
-         <iconset resource="../icones.qrc">
+         <iconset resource="../icons.qrc">
           <normaloff>:/CC/images/ccViewXpos.png</normaloff>:/CC/images/ccViewXpos.png</iconset>
         </property>
        </widget>
@@ -424,7 +424,7 @@
          <string>Set 'right' view</string>
         </property>
         <property name="icon">
-         <iconset resource="../icones.qrc">
+         <iconset resource="../icons.qrc">
           <normaloff>:/CC/images/ccViewXneg.png</normaloff>:/CC/images/ccViewXneg.png</iconset>
         </property>
        </widget>
@@ -438,7 +438,7 @@
          <string>Set 'front' view</string>
         </property>
         <property name="icon">
-         <iconset resource="../icones.qrc">
+         <iconset resource="../icons.qrc">
           <normaloff>:/CC/images/ccViewYpos.png</normaloff>:/CC/images/ccViewYpos.png</iconset>
         </property>
        </widget>
@@ -452,7 +452,7 @@
          <string>Set 'back' view</string>
         </property>
         <property name="icon">
-         <iconset resource="../icones.qrc">
+         <iconset resource="../icons.qrc">
           <normaloff>:/CC/images/ccViewYneg.png</normaloff>:/CC/images/ccViewYneg.png</iconset>
         </property>
        </widget>
@@ -466,7 +466,7 @@
          <string>Set 'down' view</string>
         </property>
         <property name="icon">
-         <iconset resource="../icones.qrc">
+         <iconset resource="../icons.qrc">
           <normaloff>:/CC/images/ccViewZneg.png</normaloff>:/CC/images/ccViewZneg.png</iconset>
         </property>
        </widget>
@@ -480,7 +480,7 @@
          <string>Set 'up' view</string>
         </property>
         <property name="icon">
-         <iconset resource="../icones.qrc">
+         <iconset resource="../icons.qrc">
           <normaloff>:/CC/images/ccViewZpos.png</normaloff>:/CC/images/ccViewZpos.png</iconset>
         </property>
        </widget>
@@ -689,7 +689,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../icones.qrc"/>
+  <include location="../icons.qrc"/>
  </resources>
  <connections/>
 </ui>

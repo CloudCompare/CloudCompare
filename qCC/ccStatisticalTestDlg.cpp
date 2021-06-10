@@ -16,6 +16,8 @@
 //##########################################################################
 
 #include "ccStatisticalTestDlg.h"
+#include "ui_statisticalTestDlg.h"
+
 
 ccStatisticalTestDlg::ccStatisticalTestDlg(	QString p1Label,
 											QString p2Label,
@@ -23,49 +25,56 @@ ccStatisticalTestDlg::ccStatisticalTestDlg(	QString p1Label,
 											QString windowTitle/*=QString()*/,
 											QWidget* parent/*=0*/)
 	: QDialog(parent, Qt::Tool)
-	, Ui::StatisticalTestDialog()
+	, m_ui( new Ui::StatisticalTestDialog )
 {
-	setupUi(this);
+	m_ui->setupUi(this);
 
-	param1Label->setText(p1Label);
-	param2Label->setText(p2Label);
+	m_ui->param1Label->setText(p1Label);
+	m_ui->param2Label->setText(p2Label);
 	if (!p3Label.isNull())
 	{
-		param3Label->setText(p3Label);
+		m_ui->param3Label->setText(p3Label);
 	}
 	else
 	{
-		param3Label->setVisible(false);
-		param3SpinBox->setVisible(false);
+		m_ui->param3Label->setVisible(false);
+		m_ui->param3SpinBox->setVisible(false);
 	}
 
-	neighborsSpinBox->setValue(16);
+	m_ui->neighborsSpinBox->setValue(16);
 
 	if (!windowTitle.isNull())
+	{
 		setWindowTitle(windowTitle);
+	}
+}
+
+ccStatisticalTestDlg::~ccStatisticalTestDlg()
+{
+	delete m_ui;
 }
 
 double ccStatisticalTestDlg::getParam1() const
 {
-	return param1SpinBox->value();
+	return m_ui->param1SpinBox->value();
 }
 
 double ccStatisticalTestDlg::getParam2() const
 {
-	return param2SpinBox->value();
+	return m_ui->param2SpinBox->value();
 }
 
 double ccStatisticalTestDlg::getParam3() const
 {
-	return param3SpinBox->value();
+	return m_ui->param3SpinBox->value();
 }
 
 int ccStatisticalTestDlg::getNeighborsNumber() const
 {
-	return neighborsSpinBox->value();
+	return m_ui->neighborsSpinBox->value();
 }
 
-double ccStatisticalTestDlg::getProba() const
+double ccStatisticalTestDlg::getProbability() const
 {
-	return probaSpinBox->value();
+	return m_ui->probaSpinBox->value();
 }

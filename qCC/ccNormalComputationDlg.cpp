@@ -69,18 +69,18 @@ ccNormalComputationDlg::ccNormalComputationDlg(bool withScanGrid, bool withSenso
 	}
 }
 
-void ccNormalComputationDlg::setLocalModel(CC_LOCAL_MODEL_TYPES  model)
+void ccNormalComputationDlg::setLocalModel(CCCoreLib::LOCAL_MODEL_TYPES  model)
 {
 	int index = -1;
 	switch (model)
 	{
-	case LS:
+	case CCCoreLib::LS:
 		index = 0;
 		break;
-	case QUADRIC:
+	case CCCoreLib::QUADRIC:
 		index = 1;
 		break;
-	case TRI:
+	case CCCoreLib::TRI:
 		index = 2;
 		break;
 	default:
@@ -90,20 +90,20 @@ void ccNormalComputationDlg::setLocalModel(CC_LOCAL_MODEL_TYPES  model)
 	localModelComboBox->setCurrentIndex(index);
 }
 
-CC_LOCAL_MODEL_TYPES ccNormalComputationDlg::getLocalModel() const
+CCCoreLib::LOCAL_MODEL_TYPES ccNormalComputationDlg::getLocalModel() const
 {
 	switch (localModelComboBox->currentIndex())
 	{
 	case 0:
-		return LS;
+		return CCCoreLib::LS;
 	case 1:
-		return QUADRIC;
+		return CCCoreLib::QUADRIC;
 	case 2:
-		return TRI;
+		return CCCoreLib::TRI;
 	}
 
 	assert(false);
-	return LS;
+	return CCCoreLib::LS;
 }
 
 void ccNormalComputationDlg::localModelChanged(int index)
@@ -122,7 +122,7 @@ void ccNormalComputationDlg::setCloud(ccPointCloud* cloud)
 {
 	m_cloud = cloud;
 
-	autoRadiusToolButton->setVisible(m_cloud != 0);
+	autoRadiusToolButton->setVisible(m_cloud != nullptr);
 }
 
 PointCoordinateType ccNormalComputationDlg::getRadius() const

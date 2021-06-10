@@ -41,7 +41,7 @@ static bool s_outputLevelsEnabled = false;
 ccColorLevelsDlg::ccColorLevelsDlg(QWidget* parent, ccGenericPointCloud* pointCloud)
 	: QDialog(parent, Qt::Tool)
 	, Ui::ColorLevelsDialog()
-	, m_histogram(0)
+	, m_histogram(nullptr)
 	, m_cloud(pointCloud)
 {
 	setupUi(this);
@@ -101,9 +101,9 @@ void ccColorLevelsDlg::updateHistogram()
 			return;
 		}
 
-		std::vector<unsigned>* histoValuesR = (histoValues[0].empty() ? 0 : histoValues);
-		std::vector<unsigned>* histoValuesG = (histoValues[1].empty() ? 0 : histoValues+1);
-		std::vector<unsigned>* histoValuesB = (histoValues[2].empty() ? 0 : histoValues+2);
+		std::vector<unsigned>* histoValuesR = (histoValues[0].empty() ? nullptr : histoValues);
+		std::vector<unsigned>* histoValuesG = (histoValues[1].empty() ? nullptr : histoValues+1);
+		std::vector<unsigned>* histoValuesB = (histoValues[2].empty() ? nullptr : histoValues+2);
 
 		switch(channelComboBox->currentIndex())
 		{

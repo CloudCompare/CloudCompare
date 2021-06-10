@@ -23,6 +23,7 @@
 // Qt
 #include <QPainter>
 #include <QMainWindow>
+#include <QMouseEvent>
 #include <QSpacerItem>
 
 //qCC_plugins
@@ -42,11 +43,11 @@ public:
 
 	//! Default constructor
 	FacetDensityGrid()
-		: grid(0)
+		: grid(nullptr)
 		, rSteps(0)
 		, ddSteps(0)
-		, step_deg(0)
 		, step_R(0)
+		, step_deg(0)
 	{
 		minMaxDensity[0] = minMaxDensity[1] = 0;
 	}
@@ -78,10 +79,10 @@ public:
 StereogramWidget::StereogramWidget(QWidget *parent)
 	: QLabel(QString(), parent)
 	, m_angularStep_deg(0)
-	, m_densityGrid(0)
+	, m_densityGrid(nullptr)
 	, m_meanDipDir_deg(-1.0)
 	, m_meanDip_deg(-1.0)
-	, m_densityColorScale(0)
+	, m_densityColorScale(nullptr)
 	, m_densityColorScaleSteps(ccColorScale::MAX_STEPS < 256 ? ccColorScale::MAX_STEPS : 256) //DGM: we can't pass a constant initializer (MAX_STEPS) by reference
 	, m_ticksFreq(3)
 	, m_showHSVRing(false)
@@ -114,7 +115,7 @@ bool StereogramWidget::init(double angularStep_deg,
 
 	if (m_densityGrid)
 		delete m_densityGrid;
-	m_densityGrid = 0;
+	m_densityGrid = nullptr;
 
 	if (!entity)
 		return false;
@@ -128,7 +129,7 @@ bool StereogramWidget::init(double angularStep_deg,
 	size_t count = 0;
 	ccHObject::Container facets;
 	ccHObject::Container planes;
-	ccPointCloud* cloud = 0;
+	ccPointCloud* cloud = nullptr;
 
 	//a set of facets or planes?
 	if (entity->isA(CC_TYPES::HIERARCHY_OBJECT))
@@ -154,7 +155,7 @@ bool StereogramWidget::init(double angularStep_deg,
 		return false;
 
 	//pDlg.setMaximum(static_cast<int>(count));
-	CCLib::NormalizedProgress nProgress(&pDlg,static_cast<unsigned>(count));
+	CCCoreLib::NormalizedProgress nProgress(&pDlg,static_cast<unsigned>(count));
 
 	//create the density grid
 	FacetDensityGrid* densityGrid = new FacetDensityGrid();
@@ -203,7 +204,8 @@ bool StereogramWidget::init(double angularStep_deg,
 			Nmean.z += static_cast<double>(N.z) * weight;
 			surfaceSum += weight;
 
-			PointCoordinateType dipDir = 0, dip = 0;
+			PointCoordinateType dipDir = 0;
+			PointCoordinateType dip = 0;
 			ccNormalVectors::ConvertNormalToDipAndDipDir(N,dip,dipDir);
 
 			//unsigned iDip = static_cast<unsigned>(floor(static_cast<double>(dip)/densityGrid->step_deg));
@@ -213,7 +215,7 @@ bool StereogramWidget::init(double angularStep_deg,
 			if (iDipDir == densityGrid->ddSteps)
 				iDipDir--;
 
-			double dip_rad = dip * CC_DEG_TO_RAD;
+			double dip_rad = CCCoreLib::DegreesToRadians( dip );
 			double R = sin(dip_rad) / (1.0 + cos(dip_rad));
 
 			unsigned iR = static_cast<unsigned>(floor(static_cast<double>(R)/densityGrid->step_R));
@@ -238,7 +240,8 @@ bool StereogramWidget::init(double angularStep_deg,
 				static_cast<PointCoordinateType>(Nmean.y),
 				static_cast<PointCoordinateType>(Nmean.z));
 
-			PointCoordinateType dipDir = 0, dip = 0;
+			PointCoordinateType dipDir = 0;
+			PointCoordinateType dip = 0;
 			ccNormalVectors::ConvertNormalToDipAndDipDir(N,dip,dipDir);
 
 			m_meanDipDir_deg = static_cast<double>(dipDir);
@@ -275,7 +278,7 @@ bool StereogramWidget::init(double angularStep_deg,
 	{
 		//not enough memory!
 		delete densityGrid;
-		densityGrid = 0;
+		densityGrid = nullptr;
 	}
 
 	//replace old grid by new one! (even in case of failure! See below)
@@ -300,7 +303,7 @@ void StereogramWidget::mousePressEvent(QMouseEvent* e)
 			{
 				//compute equivalent positions
 				m_clickDip_deg = std::min(90.0, 90.0 * sqrt(static_cast<double>(squareDistToCenter)) / static_cast<double>(m_radius));
-				m_clickDipDir_deg = atan2(static_cast<double>(AB.y()),static_cast<double>(AB.x())) * CC_RAD_TO_DEG;
+				m_clickDipDir_deg = CCCoreLib::RadiansToDegrees( atan2(static_cast<double>(AB.y()), static_cast<double>(AB.x())) );
 				if (m_clickDipDir_deg < 0)
 					m_clickDipDir_deg += 360.0;
 				m_clickDipDir_deg += 90.0; //stereogram starts at 12 o'clock (not 3)
@@ -437,8 +440,10 @@ void StereogramWidget::paintEvent(QPaintEvent* event)
 			double dipDir_deg = j * m_angularStep_deg / ticksFreq;
 			if (dipDir_deg < 360.0)
 			{
-				QPoint X(	 static_cast<int>(sin(dipDir_deg * CC_DEG_TO_RAD) * radius),
-							-static_cast<int>(cos(dipDir_deg * CC_DEG_TO_RAD) * radius) );
+				const double dipDir_rad = CCCoreLib::DegreesToRadians( dipDir_deg );
+				
+				QPoint X(	 static_cast<int>(sin( dipDir_rad ) * radius),
+							-static_cast<int>(cos( dipDir_rad ) * radius) );
 
 				if ((j % ticksFreq) == 0) //long ticks
 					painter.drawLine(center, center + X);
@@ -460,10 +465,12 @@ void StereogramWidget::paintEvent(QPaintEvent* event)
 		QPolygon poly(4);
 
 		const double* d = m_densityGrid->grid;
+		const double step_rad = CCCoreLib::DegreesToRadians( m_densityGrid->step_deg );
+		
 		for (unsigned j = 0; j < m_densityGrid->ddSteps; ++j)
 		{
-			double dipDir0_rad = (j    ) * m_densityGrid->step_deg * CC_DEG_TO_RAD;
-			double dipDir1_rad = (j + 1) * m_densityGrid->step_deg * CC_DEG_TO_RAD;
+			double dipDir0_rad = (j    ) * step_rad;
+			double dipDir1_rad = (j + 1) * step_rad;
 			double cos_dipDir0 = cos(dipDir0_rad);
 			double sin_dipDir0 = sin(dipDir0_rad);
 			double cos_dipDir1 = cos(dipDir1_rad);
@@ -502,16 +509,19 @@ void StereogramWidget::paintEvent(QPaintEvent* event)
 		pen.setWidth(2);
 		pen.setColor(Qt::red);
 		painter.setPen(pen);
+
+		const double meanDipDir_rad = CCCoreLib::DegreesToRadians( m_meanDipDir_deg );
+
 		//draw main direction
-		QPoint X(	 static_cast<int>(sin(m_meanDipDir_deg * CC_DEG_TO_RAD) * radius),
-					-static_cast<int>(cos(m_meanDipDir_deg * CC_DEG_TO_RAD) * radius) );
+		QPoint X(	 static_cast<int>(sin( meanDipDir_rad ) * radius),
+					-static_cast<int>(cos( meanDipDir_rad ) * radius) );
 		pen.setStyle(Qt::DashLine);
 		painter.setPen(pen);
 		painter.drawLine(center,center+X);
 
 		//draw orthogonal to main direction
-		QPoint Y(	static_cast<int>(cos(m_meanDipDir_deg * CC_DEG_TO_RAD) * radius),
-					static_cast<int>(sin(m_meanDipDir_deg * CC_DEG_TO_RAD) * radius) );
+		QPoint Y(	static_cast<int>(cos( meanDipDir_rad ) * radius),
+					static_cast<int>(sin( meanDipDir_rad ) * radius) );
 		pen.setStyle(Qt::SolidLine);
 		painter.setPen(pen);
 		painter.drawLine(center-Y,center+Y);
@@ -532,19 +542,21 @@ void StereogramWidget::paintEvent(QPaintEvent* event)
 		double R0 = radius * (std::max(0.0, m_clickDip_deg - m_clickDipSpan_deg / 2) / 90.0);
 		double R1 = radius * (std::min(90.0, m_clickDip_deg + m_clickDipSpan_deg / 2) / 90.0);
 
+		const double angle_rad = CCCoreLib::DegreesToRadians( m_clickDipDir_deg - m_clickDipDirSpan_deg / 2 );
+
 		//draw radial limits
 		{
-			QPoint X0(	 static_cast<int>(sin((m_clickDipDir_deg - m_clickDipDirSpan_deg / 2) * CC_DEG_TO_RAD) * R0),
-						-static_cast<int>(cos((m_clickDipDir_deg - m_clickDipDirSpan_deg / 2) * CC_DEG_TO_RAD) * R0));
-			QPoint X1(	 static_cast<int>(sin((m_clickDipDir_deg - m_clickDipDirSpan_deg / 2) * CC_DEG_TO_RAD) * R1),
-						-static_cast<int>(cos((m_clickDipDir_deg - m_clickDipDirSpan_deg / 2) * CC_DEG_TO_RAD) * R1));
+			QPoint X0(	 static_cast<int>(sin( angle_rad ) * R0),
+						-static_cast<int>(cos( angle_rad ) * R0));
+			QPoint X1(	 static_cast<int>(sin( angle_rad ) * R1),
+						-static_cast<int>(cos( angle_rad ) * R1));
 			painter.drawLine(center + X0, center + X1);
 		}
 		{
-			QPoint X0(	 static_cast<int>(sin((m_clickDipDir_deg + m_clickDipDirSpan_deg / 2) * CC_DEG_TO_RAD) * R0),
-						-static_cast<int>(cos((m_clickDipDir_deg + m_clickDipDirSpan_deg / 2) * CC_DEG_TO_RAD) * R0));
-			QPoint X1(	 static_cast<int>(sin((m_clickDipDir_deg + m_clickDipDirSpan_deg / 2) * CC_DEG_TO_RAD) * R1),
-						-static_cast<int>(cos((m_clickDipDir_deg + m_clickDipDirSpan_deg / 2) * CC_DEG_TO_RAD) * R1));
+			QPoint X0(	 static_cast<int>(sin( angle_rad ) * R0),
+						-static_cast<int>(cos( angle_rad ) * R0));
+			QPoint X1(	 static_cast<int>(sin( angle_rad ) * R1),
+						-static_cast<int>(cos( angle_rad ) * R1));
 			painter.drawLine(center + X0, center + X1);
 		}
 
@@ -566,11 +578,11 @@ void StereogramWidget::paintEvent(QPaintEvent* event)
 	}
 }
 
-StereogramDialog::StereogramDialog(ccMainAppInterface* app/*=0*/)
-	: QDialog(app ? app->getMainWindow() : 0)
+StereogramDialog::StereogramDialog(ccMainAppInterface* app)
+	: QDialog( app->getMainWindow() )
 	, Ui::StereogramDialog()
-	, m_classifWidget(0)
-	, m_colorScaleSelector(0)
+	, m_classifWidget(nullptr)
+	, m_colorScaleSelector(nullptr)
 	, m_app(app)
 	, m_facetGroupUniqueID(0)
 {
@@ -597,8 +609,8 @@ StereogramDialog::StereogramDialog(ccMainAppInterface* app/*=0*/)
 			m_colorScaleSelector->setSelectedScale(scale->getUuid());
 			m_classifWidget->setDensityColorScale(scale);
 		}
-		connect(m_colorScaleSelector, SIGNAL(colorScaleSelected(int)), this, SLOT(colorScaleChanged(int)));
-		connect(m_colorScaleSelector, SIGNAL(colorScaleEditorSummoned()), this, SLOT(spawnColorScaleEditor()));
+		connect(m_colorScaleSelector, &ccColorScaleSelector::colorScaleSelected, this, &StereogramDialog::colorScaleChanged);
+		connect(m_colorScaleSelector, &ccColorScaleSelector::colorScaleEditorSummoned, this, &StereogramDialog::spawnColorScaleEditor);
 		//add selector to group's layout
 		if (!colorRampGroupBox->layout())
 			colorRampGroupBox->setLayout(new QHBoxLayout());
@@ -611,18 +623,18 @@ StereogramDialog::StereogramDialog(ccMainAppInterface* app/*=0*/)
 		m_classifWidget->setDensityColorScale(ccColorScalesManager::GetDefaultScale());
 	}
 
-	connect(colorScaleStepsSpinBox,		SIGNAL(valueChanged(int)),				this,	SLOT(onDensityColorStepsChanged(int)));
-	connect(ticksFreqSpinBox,			SIGNAL(valueChanged(int)),				this,	SLOT(onTicksFreqChanged(int)));
-	connect(showHSVColorsCheckBox,		SIGNAL(toggled(bool)),					this,	SLOT(onHSVColorsToggled(bool)));
+	connect(colorScaleStepsSpinBox,		static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &StereogramDialog::onDensityColorStepsChanged);
+	connect(ticksFreqSpinBox,			static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &StereogramDialog::onTicksFreqChanged);
+	connect(showHSVColorsCheckBox,		&QAbstractButton::toggled, this, &StereogramDialog::onHSVColorsToggled);
 
 	//interactive filtering mechanism
-	connect(filterFacetsGroupBox,		SIGNAL(toggled(bool)),					this,	SLOT(onFilterEnabled(bool)));
-	connect(dipSpanDoubleSpinBox,		SIGNAL(valueChanged(double)),			this,	SLOT(onFilterSizeChanged(double)));
-	connect(dipDirSpanDoubleSpinBox,	SIGNAL(valueChanged(double)),			this,	SLOT(onFilterSizeChanged(double)));
-	connect(dipDoubleSpinBox,			SIGNAL(valueChanged(double)),			this,	SLOT(onFilterCenterChanged(double)));
-	connect(dipDirDoubleSpinBox,		SIGNAL(valueChanged(double)),			this,	SLOT(onFilterCenterChanged(double)));
-	connect(m_classifWidget,			SIGNAL(pointClicked(double, double)),	this,	SLOT(onPointClicked(double, double)));
-	connect(exportPushButton,			SIGNAL(clicked()),						this,	SLOT(exportCurrentSelection()));
+	connect(filterFacetsGroupBox,		&QGroupBox::toggled, this, &StereogramDialog::onFilterEnabled);
+	connect(dipSpanDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &StereogramDialog::onFilterSizeChanged);
+	connect(dipDirSpanDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &StereogramDialog::onFilterSizeChanged);
+	connect(dipDoubleSpinBox,			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &StereogramDialog::onFilterCenterChanged);
+	connect(dipDirDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &StereogramDialog::onFilterCenterChanged);
+	connect(m_classifWidget,			&StereogramWidget::pointClicked, this, &StereogramDialog::onPointClicked);
+	connect(exportPushButton,			&QAbstractButton::clicked, this, &StereogramDialog::exportCurrentSelection);
 }
 
 bool StereogramDialog::init(double angularStep_deg,
@@ -635,7 +647,8 @@ bool StereogramDialog::init(double angularStep_deg,
 	if (!m_classifWidget->init(angularStep_deg, facetGroup, resolution_deg))
 		return false;
 
-	double meanDipDir_deg, meanDip_deg;
+	double meanDipDir_deg = 0.0;
+	double meanDip_deg = 0.0;
 	//set stereogram subtitle (i.e. mean direction)
 	m_classifWidget->getMeanDir(meanDip_deg, meanDipDir_deg);
 	meanDirLabel->setText(	QString("[Mean] ")
@@ -726,7 +739,7 @@ void StereogramDialog::updateFacetsFilter(bool enable)
 
 	//try to find the associated entity
 	ccHObject* root = m_app->dbRootObject();
-	ccHObject* entity = (root ? root->find(m_facetGroupUniqueID) : 0);
+	ccHObject* entity = (root ? root->find(m_facetGroupUniqueID) : nullptr);
 	if (!entity)
 		return;
 
@@ -752,11 +765,12 @@ void StereogramDialog::updateFacetsFilter(bool enable)
 			if (enable)
 			{
 				CCVector3 N = facet->getNormal();
-				PointCoordinateType dip, dipDir;
+				PointCoordinateType dip = 0;
+				PointCoordinateType dipDir = 0;
 				ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipDir);
 
-				double dDip = fabs(dip - dipFilter);
-				double dDipDir = fabs(dipDir - dipDirFilter);
+				double dDip = std::abs(dip - dipFilter);
+				double dDipDir = std::abs(dipDir - dipDirFilter);
 
 				visible = (	(	dDip	<= halfDipSpan		|| dDip		>= 360.0 - halfDipSpan)
 						&&	(	dDipDir	<= halfDipDirSpan	|| dDipDir	>= 360.0 - halfDipDirSpan) );
@@ -799,16 +813,17 @@ void StereogramDialog::updateFacetsFilter(bool enable)
 			for (unsigned i = 0; i < static_cast<unsigned>(count); ++i)
 			{
 				CCVector3 N = cloud->getPointNormal(i);
-				PointCoordinateType dip, dipDir;
+				PointCoordinateType dip = 0;
+				PointCoordinateType dipDir = 0;
 				ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipDir);
 
-				double dDip = fabs(dip - dipFilter);
-				double dDipDir = fabs(dipDir - dipDirFilter);
+				double dDip = std::abs(dip - dipFilter);
+				double dDipDir = std::abs(dipDir - dipDirFilter);
 
 				bool visible = (	(	dDip	<= halfDipSpan		|| dDip		>= 360.0 - halfDipSpan)
 								&&	(	dDipDir	<= halfDipDirSpan	|| dDipDir	>= 360.0 - halfDipDirSpan) );
 
-				visTable[i] = (visible ? POINT_VISIBLE : POINT_HIDDEN);
+				visTable[i] = (visible ? CCCoreLib::POINT_VISIBLE : CCCoreLib::POINT_HIDDEN);
 			}
 		}
 		else
@@ -828,7 +843,7 @@ void StereogramDialog::exportCurrentSelection()
 
 	//try to find the associated entity
 	ccHObject* root = m_app->dbRootObject();
-	ccHObject* entity = (root ? root->find(m_facetGroupUniqueID) : 0);
+	ccHObject* entity = (root ? root->find(m_facetGroupUniqueID) : nullptr);
 	if (!entity)
 		return;
 
@@ -854,11 +869,12 @@ void StereogramDialog::exportCurrentSelection()
 			ccFacet* facet = static_cast<ccFacet*>(facets[i]);
 
 			CCVector3 N = facet->getNormal();
-			PointCoordinateType dip, dipDir;
+			PointCoordinateType dip = 0;
+			PointCoordinateType dipDir = 0;
 			ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipDir);
 
-			double dDip = fabs(dip - dipFilter);
-			double dDipDir = fabs(dipDir - dipDirFilter);
+			double dDip = std::abs(dip - dipFilter);
+			double dDipDir = std::abs(dipDir - dipDirFilter);
 
 			bool visible = (	(	dDip	<= halfDipSpan		|| dDip		>= 360.0 - halfDipSpan)
 							&&	(	dDipDir	<= halfDipDirSpan	|| dDipDir	>= 360.0 - halfDipDirSpan) );
@@ -878,7 +894,7 @@ void StereogramDialog::exportCurrentSelection()
 		else
 		{
 			delete newGroup;
-			newGroup = 0;
+			newGroup = nullptr;
 		}
 	}
 	//or a cloud?

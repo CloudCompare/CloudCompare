@@ -23,7 +23,7 @@
 #include "ccCommon.h"
 #include "ccPickingListener.h"
 
-//CCLib
+//CCCoreLib
 #include <CCGeom.h>
 
 //system

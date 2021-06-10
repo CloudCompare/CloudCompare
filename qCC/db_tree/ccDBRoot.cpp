@@ -222,6 +222,7 @@ private:
 			{ CC_TYPES::LABEL_2D, labelIndex },
 			{ CC_TYPES::VIEWPORT_2D_OBJECT, viewportObjIndex },
 			{ CC_TYPES::VIEWPORT_2D_LABEL, viewportLabelIndex },
+			{ CC_TYPES::COORDINATESYSTEM, geomIndex }
 		};
 	}
 	
@@ -1310,7 +1311,8 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 	while (!stream.atEnd())
 	{
 		//decode current item index data (row, col, data 'roles' map)
-		int srcRow, srcCol;
+		int srcRow = 0;
+		int srcCol = 0;
 		QMap<int, QVariant> roleDataMap;
 		stream >> srcRow >> srcCol >> roleDataMap;
 		if (!roleDataMap.contains(Qt::UserRole))
@@ -1553,7 +1555,9 @@ void ccDBRoot::alignCameraWithEntity(bool reverse)
 	{
 		cc2DLabel* label = static_cast<cc2DLabel*>(obj);
 		//work only with labels with 3 points or labels picked on a triangle!
-		CCVector3 A, B, C;
+		CCVector3 A;
+		CCVector3 B;
+		CCVector3 C;
 		if (label->size() == 3)
 		{
 			A = label->getPickedPoint(0).getPointPosition();
@@ -1579,24 +1583,24 @@ void ccDBRoot::alignCameraWithEntity(bool reverse)
 			return;
 		}
 		CCVector3 N = (B - A).cross(C - A);
-		planeNormal = CCVector3d::fromArray(N.u);
-		planeVertDir = win->getCurrentUpDir();
+		planeNormal = N;
+		planeVertDir = win->getViewportParameters().getUpDir();
 		center = (A + B + C) / 3;
 	}
 	else if (obj->isA(CC_TYPES::PLANE)) //plane
 	{
 		ccPlane* plane = static_cast<ccPlane*>(obj);
 		//3rd column = plane normal!
-		planeNormal = CCVector3d::fromArray(plane->getNormal().u);
-		planeVertDir = CCVector3d::fromArray(plane->getTransformation().getColumnAsVec3D(1).u);
+		planeNormal = plane->getNormal();
+		planeVertDir = plane->getTransformation().getColumnAsVec3D(1);
 		center = plane->getOwnBB().getCenter();
 	}
 	else if (obj->isA(CC_TYPES::FACET)) //facet
 	{
 		ccFacet* facet = static_cast<ccFacet*>(obj);
-		planeNormal = CCVector3d::fromArray(facet->getNormal().u);
+		planeNormal = facet->getNormal();
 		CCVector3d planeHorizDir(0, 1, 0);
-		CCLib::CCMiscTools::ComputeBaseVectors(planeNormal,planeHorizDir,planeVertDir);
+		CCCoreLib::CCMiscTools::ComputeBaseVectors(planeNormal,planeHorizDir,planeVertDir);
 		center = facet->getBB_recursive(false,false).getCenter();
 	}
 	else
@@ -1616,7 +1620,7 @@ void ccDBRoot::alignCameraWithEntity(bool reverse)
 		transMat.setTranslation(-center);
 		ccGLMatrixd viewMat = win->getViewportParameters().viewMat;
 		viewMat = viewMat * transMat;
-		viewMat.setTranslation(viewMat.getTranslationAsVec3D() + CCVector3d::fromArray(center.u));
+		viewMat.setTranslation(viewMat.getTranslationAsVec3D() + center);
 
 		ccLog::Print("[Align camera] Corresponding view matrix:");
 		ccLog::Print(viewMat.toString(12,' ')); //full precision

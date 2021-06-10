@@ -30,7 +30,7 @@
       - Unix Makefiles (Mac OS X)
       - CodeBlocks - Unix Makefiles (Mac OS X)
   - wait for CMake configuration/tests to finish...
-  - on the first run you may have to manually set the **QT5_ROOT_PATH** variable. Make it point to your installation of Qt (on Windows it's where the 'bin' folder lies - e.g. *Qt\5.6\msvc2013_64*)
+  - on the first run you may have to manually set the **QT5_ROOT_PATH** variable by clicking on `Add Entry`. Make it point to your installation of Qt (on Windows it's where the 'bin' folder lies - e.g. *Qt\5.6\msvc2013_64*)
 
 2. Before clicking on the 'Generate' button, you may want to set some more options. If you expand the `OPTION` group, you'll be able to set some general options:
   - `OPTION_BUILD_CCVIEWER`: whether or not to build the ccViewer side project (ON by default)

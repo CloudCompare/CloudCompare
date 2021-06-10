@@ -6,8 +6,8 @@
 
 #include "ccCropTool.h"
 
-//to read the 'Cross Section' tool XML parameters file
-#include <QXmlStreamReader>
+#include <QDir>
+#include <QXmlStreamReader>	// to read the 'Cross Section' tool XML parameters file
 
 
 constexpr char COMMAND_CROSS_SECTION[] = "CROSS_SECTION";
@@ -34,7 +34,8 @@ bool CommandCrossSection::process(ccCommandLineInterface &cmd)
 	QString xmlFilename = cmd.arguments().takeFirst();
 
 	//read the XML file
-	CCVector3 boxCenter(0, 0, 0), boxThickness(0, 0, 0);
+	CCVector3 boxCenter(0, 0, 0);
+	CCVector3 boxThickness(0, 0, 0);
 	bool repeatDim[3] = { false, false, false };
 	double repeatGap = 0.0;
 	bool inside = true;
@@ -130,19 +131,19 @@ bool CommandCrossSection::process(ccCommandLineInterface &cmd)
 	}
 
 	//safety checks
-	if (	boxThickness.x < ZERO_TOLERANCE
-	        ||	boxThickness.y < ZERO_TOLERANCE
-	        ||	boxThickness.z < ZERO_TOLERANCE
-	        )
+	if (	CCCoreLib::LessThanEpsilon( boxThickness.x )
+		 ||	CCCoreLib::LessThanEpsilon( boxThickness.y )
+		 ||	CCCoreLib::LessThanEpsilon( boxThickness.z )
+		 )
 	{
 		return cmd.error(QString("Invalid box thickness"));
 	}
 
 	CCVector3 repeatStep = boxThickness + CCVector3(repeatGap, repeatGap, repeatGap);
-	if (	(repeatDim[0] && repeatStep.x < ZERO_TOLERANCE)
-	        ||	(repeatDim[1] && repeatStep.y < ZERO_TOLERANCE)
-	        ||	(repeatDim[2] && repeatStep.z < ZERO_TOLERANCE)
-	        )
+	if (	(repeatDim[0] && CCCoreLib::LessThanEpsilon( repeatStep.x ) )
+		 ||	(repeatDim[1] && CCCoreLib::LessThanEpsilon( repeatStep.y ) )
+		 ||	(repeatDim[2] && CCCoreLib::LessThanEpsilon( repeatStep.z ) )
+		 )
 	{
 		return cmd.error(QString("Repeat gap can't be equal or smaller than 'minus' box width"));
 	}
@@ -345,7 +346,7 @@ bool CommandCrossSection::process(ccCommandLineInterface &cmd)
 								}
 
 								delete croppedEnt;
-								croppedEnt = 0;
+								croppedEnt = nullptr;
 
 								if (!errorStr.isEmpty())
 									return cmd.error(errorStr);

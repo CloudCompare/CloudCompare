@@ -1,26 +1,30 @@
-cmake_minimum_required(VERSION 3.0)
-
 option( PLUGIN_STANDARD_QCANUPO "Check to install qCanupo plugin" OFF )
 
-if (PLUGIN_STANDARD_QCANUPO)
-
-	#CloudCompare 'Canupo' plugin
+if( PLUGIN_STANDARD_QCANUPO )
 	project( QCANUPO_PLUGIN )
 	
-	include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
+	AddPlugin( NAME ${PROJECT_NAME} )
 
-	set( DLIB_ROOT "" CACHE PATH "DLib library root directory" )
-	if ( NOT DLIB_ROOT )
-		message( SEND_ERROR "No DLib library root specified (DLIB_ROOT)" )
+	unset( DLIB_ROOT CACHE ) #deprecated
+	set( DLIB_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/contrib/dlib CACHE PATH "dlib library root directory" )
+	if ( NOT DLIB_ROOT_DIR )
+		message( FATAL_ERROR "No dlib library root specified (DLIB_ROOT_DIR)" )
 	else()
-		include_directories( ${DLIB_ROOT} )
+		include_directories( ${DLIB_ROOT_DIR} )
 	endif()
 	
-	include( ../../../CMakePluginTpl.cmake )
-	
-	option( COMPILE_QCANUPO_WITH_PRIVATE_PARTS "Check to compile qCanupo plugin with private methods (CNRS/UEB only)" OFF )
-	if ( COMPILE_QCANUPO_WITH_PRIVATE_PARTS )
-		set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS COMPILE_PRIVATE_CANUPO )
+	option( QCANUPO_COMPILE_PRIVATE_METHODS "Compile qCanupo plugin with private methods (CNRS/UEB only)" OFF )
+	if( QCANUPO_COMPILE_PRIVATE_METHODS )
+		target_compile_definitions( ${PROJECT_NAME} PRIVATE COMPILE_PRIVATE_CANUPO )
 	endif()
-
+	
+	add_subdirectory( include )
+	add_subdirectory( src )
+	add_subdirectory( ui )
+	
+	# Don't forget the DLIB 'source.cpp' file
+	target_sources( ${PROJECT_NAME}
+		PRIVATE
+		${DLIB_ROOT_DIR}/dlib/all/source.cpp
+	)
 endif()

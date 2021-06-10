@@ -1,33 +1,34 @@
-cmake_minimum_required(VERSION 3.0)
-
-include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
-
-include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
-include_directories( ${CC_CORE_LIB_SOURCE_DIR}/include )
-include_directories( ${CC_FBO_LIB_SOURCE_DIR}/include )
-include_directories( ${QCC_DB_LIB_SOURCE_DIR} )
-if( MSVC )
-   include_directories( ${QCC_DB_LIB_SOURCE_DIR}/msvc )
-endif()
-include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
-
 project( QCC_IO_LIB )
 
-file( GLOB header_list *.h)
-file( GLOB source_list *.cpp *.c)
-file( GLOB ui_list ui_templates/*.ui )
+add_library( ${PROJECT_NAME} SHARED )
 
-set( CMAKE_CXX_VISIBILITY_PRESET hidden )
+include( cmake/GDALSupport.cmake )
 
-qt5_wrap_ui( generated_ui_list ${ui_list} )
-add_library( ${PROJECT_NAME} SHARED ${header_list} ${source_list} ${generated_ui_list} )
+add_subdirectory( include )
+add_subdirectory( src )
+add_subdirectory( ui )
 
-target_link_libraries( ${PROJECT_NAME} CC_CORE_LIB )
-target_link_libraries( ${PROJECT_NAME} CC_FBO_LIB )
-target_link_libraries( ${PROJECT_NAME} QCC_DB_LIB )
+option( OPTION_USE_DXF_LIB "Build with Ribbonsoft's DXF Lib (AutoCAD DXF files support)" ON )
+if( ${OPTION_USE_DXF_LIB} )
+	set( DXF_LIB_DIR "extern/dxflib" CACHE PATH "DXF lib path" )
+	add_subdirectory( "${DXF_LIB_DIR}" )
+	target_link_libraries( ${PROJECT_NAME} dxflib )	
+endif()
 
-# Qt
-target_link_libraries(${PROJECT_NAME} Qt5::Core)	
+option( OPTION_USE_SHAPE_LIB "Build with ShapeLib (SHP files support)" ON )
+if( ${OPTION_USE_SHAPE_LIB} )
+    set( SHAPELIB_LIB_DIR "extern/shapelib" CACHE PATH "shapelib lib path" )
+	add_subdirectory( "${SHAPELIB_LIB_DIR}" )
+	target_link_libraries( ${PROJECT_NAME} shapelib )	
+endif()
+
+target_link_libraries( ${PROJECT_NAME}
+	QCC_DB_LIB
+)
+
+if( OPTION_USE_GDAL )
+	target_link_GDAL( ${PROJECT_NAME} )
+endif()
 
 # contrib. libraries support
 target_link_contrib( ${PROJECT_NAME} )
@@ -35,20 +36,14 @@ target_link_contrib( ${PROJECT_NAME} )
 # Add custom preprocessor definitions
 target_compile_definitions( ${PROJECT_NAME} PRIVATE QCC_IO_LIBRARY_BUILD )
 
-if( APPLE )
-	set_target_properties( ${PROJECT_NAME} PROPERTIES
-		INSTALL_RPATH "." )
+set_target_properties( ${PROJECT_NAME} PROPERTIES
+    AUTOUIC ON # FIXME Remove after everything has moved to targets and we can set it globally
+	CXX_VISIBILITY_PRESET hidden
+)
+
+if ( BUILD_TESTING )
+	add_subdirectory( test ) 
 endif()
 
-# install (shared) lib to specified destinations
-if( WIN32 OR APPLE )
-	foreach( dest ${INSTALL_DESTINATIONS} )
-		install_shared( ${PROJECT_NAME} ${dest} 1 )
-	endforeach()
-else()
-	install_shared( ${PROJECT_NAME} ${CMAKE_INSTALL_LIBDIR}/cloudcompare 0 ) #default destination: /usr/lib
-endif()
+InstallSharedLibrary( TARGET ${PROJECT_NAME} )
 
-if(BUILD_TESTING)
-	add_subdirectory(Tests)
-endif()

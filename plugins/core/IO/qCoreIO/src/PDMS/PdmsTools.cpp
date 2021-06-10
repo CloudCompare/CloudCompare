@@ -25,8 +25,7 @@
 #include <cstring>
 #include <iostream>
 
-//qCC_db
-//#include <ccLog.h>
+#include "CCMath.h"
 
 using namespace PdmsTools;
 using namespace PdmsCommands;
@@ -110,7 +109,7 @@ PointCoordinateType NumericalValue::getValue() const
 	case PDMS_Y_TOP_SHEAR:
 	case PDMS_X_BOTTOM_SHEAR:
 	case PDMS_Y_BOTTOM_SHEAR:
-		return static_cast<PointCoordinateType>(CC_DEG_TO_RAD) * value;
+		return static_cast<PointCoordinateType>( CCCoreLib::DegreesToRadians( value ) );
 	default:
 		return value;
 	}
@@ -615,8 +614,8 @@ bool Orientation::axisFromCoords(const Coordinates &coords, CCVector3 &u)
 
 	if (coords.getNbComponents(true) == 2)
 	{
-		PointCoordinateType alpha = static_cast<PointCoordinateType>(CC_DEG_TO_RAD) * u[0];
-		PointCoordinateType beta = static_cast<PointCoordinateType>(CC_DEG_TO_RAD) * u[1];
+		PointCoordinateType alpha = static_cast<PointCoordinateType>( CCCoreLib::DegreesToRadians( u[0] ) );
+		PointCoordinateType beta = static_cast<PointCoordinateType>( CCCoreLib::DegreesToRadians( u[1] ) );
 		u[0] = cos(alpha)*cos(beta);
 		u[1] = sin(alpha)*cos(beta);
 		u[2] = sin(beta);
@@ -652,7 +651,9 @@ bool Orientation::execute(PdmsObjects::GenericItem* &item) const
 	}
 
 	//Get position point
-	CCVector3 x, y, z;
+	CCVector3 x;
+	CCVector3 y;
+	CCVector3 z;
 	if (!getAxes(x, y, z))
 		return false;
 
@@ -1078,7 +1079,7 @@ bool GenericItem::setOrientation(const CCVector3 &x, const CCVector3 &y, const C
 
 bool GenericItem::isOrientationValid(unsigned i) const
 {
-	return (orientation[i].norm2() > ZERO_TOLERANCE);
+	return CCCoreLib::GreaterThanSquareEpsilon( orientation[i].norm2() );
 }
 
 bool GenericItem::completeOrientation()
@@ -1453,10 +1454,10 @@ bool SCylinder::setValue(Token t, PointCoordinateType value)
 	{
 	case PDMS_DIAMETER: diameter = value; break;
 	case PDMS_HEIGHT: height = value; break;
-	case PDMS_X_TOP_SHEAR: xtshear = value; if (fabs(xtshear) > 90.) return false; break;
-	case PDMS_Y_TOP_SHEAR: ytshear = value; if (fabs(ytshear) > 90.) return false; break;
-	case PDMS_X_BOTTOM_SHEAR: xbshear = value; if (fabs(xbshear) > 90.) return false; break;
-	case PDMS_Y_BOTTOM_SHEAR: ybshear = value; if (fabs(ybshear) > 90.) return false; break;
+	case PDMS_X_TOP_SHEAR: xtshear = value; if (std::abs(xtshear) > 90.) return false; break;
+	case PDMS_Y_TOP_SHEAR: ytshear = value; if (std::abs(ytshear) > 90.) return false; break;
+	case PDMS_X_BOTTOM_SHEAR: xbshear = value; if (std::abs(xbshear) > 90.) return false; break;
+	case PDMS_Y_BOTTOM_SHEAR: ybshear = value; if (std::abs(ybshear) > 90.) return false; break;
 	default: return false;
 	}
 	return true;
@@ -1485,16 +1486,16 @@ std::pair<int, int> SCylinder::write(std::ostream &output, int nbtabs) const
 	output << "HEIGHT " << height << std::endl;
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "XTSHEAR " << (CC_RAD_TO_DEG)*xtshear << std::endl;
+	output << "XTSHEAR " << CCCoreLib::RadiansToDegrees( xtshear ) << std::endl;
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "XBSHEAR " << (CC_RAD_TO_DEG)*xbshear << std::endl;
+	output << "XBSHEAR " << CCCoreLib::RadiansToDegrees( xbshear ) << std::endl;
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "YTSHEAR " << (CC_RAD_TO_DEG)*ytshear << std::endl;
+	output << "YTSHEAR " << CCCoreLib::RadiansToDegrees( ytshear ) << std::endl;
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "YBSHEAR " << (CC_RAD_TO_DEG)*ybshear << std::endl;
+	output << "YBSHEAR " << CCCoreLib::RadiansToDegrees( ybshear ) << std::endl;
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << std::endl;
@@ -1516,7 +1517,7 @@ bool CTorus::setValue(Token t, PointCoordinateType value)
 {
 	switch (t)
 	{
-	case PDMS_ANGLE: angle = value; if (fabs(angle) > (2.*M_PI)) return false; break;
+	case PDMS_ANGLE: angle = value; if (std::abs(angle) > (2.*M_PI)) return false; break;
 	case PDMS_INSIDE_RADIUS: inside_radius = value; break;
 	case PDMS_OUTSIDE_RADIUS: outside_radius = value; break;
 	default: return false;
@@ -1550,7 +1551,7 @@ std::pair<int, int> CTorus::write(std::ostream &output, int nbtabs) const
 	output << "ROUTSIDE " << outside_radius << std::endl;
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "ANGLE " << static_cast<PointCoordinateType>(CC_RAD_TO_DEG)*angle << std::endl;
+	output << "ANGLE " << CCCoreLib::RadiansToDegrees( angle ) << std::endl;
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << std::endl;
@@ -1571,7 +1572,7 @@ bool RTorus::setValue(Token t, PointCoordinateType value)
 {
 	switch (t)
 	{
-	case PDMS_ANGLE: angle = value; if (fabs(angle) > (2.*M_PI)) return false; break;
+	case PDMS_ANGLE: angle = value; if (std::abs(angle) > (2.*M_PI)) return false; break;
 	case PDMS_INSIDE_RADIUS: inside_radius = value; break;
 	case PDMS_OUTSIDE_RADIUS: outside_radius = value; break;
 	case PDMS_HEIGHT: height = value; break;
@@ -1610,7 +1611,7 @@ std::pair<int, int> RTorus::write(std::ostream &output, int nbtabs) const
 	output << "HEIGHT " << height << std::endl;
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
-	output << "ANGLE " << static_cast<PointCoordinateType>(CC_RAD_TO_DEG)*angle << std::endl;
+	output << "ANGLE " << CCCoreLib::RadiansToDegrees( angle ) << std::endl;
 	for (i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << std::endl;
@@ -1648,11 +1649,13 @@ bool Dish::setValue(Token t, PointCoordinateType value)
 
 PointCoordinateType Dish::surface() const
 {
-	if (radius > ZERO_TOLERANCE)
+	if ( CCCoreLib::GreaterThanEpsilon( radius ) )
 	{
 		PointCoordinateType r = static_cast<PointCoordinateType>(0.5f*diameter);
-		if (fabs(2 * height - diameter) < ZERO_TOLERANCE)
+		if (CCCoreLib::LessThanEpsilon(std::abs(2 * height - diameter)))
+		{
 			return static_cast<PointCoordinateType>(2.0*M_PI)*PDMS_SQR(r);
+		}
 		if (2 * height > diameter)
 		{
 			PointCoordinateType a = acos(r / height);
@@ -1717,7 +1720,8 @@ bool Cone::setValue(Token t, PointCoordinateType value)
 
 PointCoordinateType Cone::surface() const
 {
-	PointCoordinateType r1, r2;
+	PointCoordinateType r1;
+	PointCoordinateType r2;
 	if (dtop < dbottom)
 	{
 		r1 = dtop;

@@ -18,7 +18,7 @@
 #ifndef CC_REGISTRATION_TOOLS_HEADER
 #define CC_REGISTRATION_TOOLS_HEADER
 
-//CCLib
+//CCCoreLib
 #include <RegistrationTools.h>
 
 //qCC_db
@@ -43,17 +43,9 @@ public:
 					double& finalScale,
 					double& finalRMS,
 					unsigned& finalPointCount,
-					double minRMSDecrease,
-					unsigned maxIterationCount,
-					unsigned randomSamplingLimit,
-					bool removeFarthestPoints,
-					CCLib::ICPRegistrationTools::CONVERGENCE_TYPE method,
-					bool adjustScale,
-					double finalOverlapRatio = 1.0,
+					const CCCoreLib::ICPRegistrationTools::Parameters& inputParameters,
 					bool useDataSFAsWeights = false,
 					bool useModelSFAsWeights = false,
-					int transformationFilters = CCLib::ICPRegistrationTools::SKIP_NONE,
-					int maxThreadCount = 0,
 					QWidget* parent = nullptr);
 
 };

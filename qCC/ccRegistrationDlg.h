@@ -20,7 +20,7 @@
 
 #include <QDialog>
 
-//CCLib
+//CCCoreLib
 #include <RegistrationTools.h>
 
 #include <ui_registrationDlg.h>
@@ -42,7 +42,7 @@ public:
 	virtual ~ccRegistrationDlg();
 
 	//shortcuts
-	typedef CCLib::ICPRegistrationTools::CONVERGENCE_TYPE ConvergenceMethod;
+	typedef CCCoreLib::ICPRegistrationTools::CONVERGENCE_TYPE ConvergenceMethod;
 
 	//! Returns convergence method
 	ConvergenceMethod getConvergenceMethod() const;
@@ -59,6 +59,14 @@ public:
 	/** Only valid if registration method is 'MAX_ERROR_REG'.
 	**/
 	double getMinRMSDecrease() const;
+
+	//! Returns the theoretical mininmum RMS decrease between two consecutive iterations
+	static double GetAbsoluteMinRMSDecrease();
+
+	//! Sets the minimum RMS decrease between two consecutive iterations
+	/** Only valid if registration method is 'MAX_ERROR_REG'.
+	**/
+	void setMinRMSDecrease(double value);
 
 	//! Returns whether farthest points should be ignored at each iteration
 	/** This is a trick to improve registration for slightly different clouds.
@@ -80,6 +88,12 @@ public:
 	//! Whether to use model displayed SF as weights
 	bool useModelSFAsWeights() const;
 
+	//! Whether to use signed distances when the reference is a mesh
+	bool useC2MSignedDistances() const;
+
+	//! Method to take normals into account
+	CCCoreLib::ICPRegistrationTools::NORMALS_MATCHING normalsMatchingOption() const;
+
 	//! Returns whether to adjust the scale during optimization
 	/** This is useful for co-registration of lidar and photogrammetric clouds
 	for instance.
@@ -87,7 +101,7 @@ public:
 	bool adjustScale() const;
 
 	//! Returns active transformation filters
-	/** See CCLib::RegistrationTools::TRANSFORMATION_FILTERS.
+	/** See CCCoreLib::RegistrationTools::TRANSFORMATION_FILTERS.
 	**/
 	int getTransformationFilters() const;
 
@@ -97,12 +111,12 @@ public:
 	//! Saves parameters for next call
 	void saveParameters() const;
 
-protected slots:
+protected:
 	void swapModelAndData();
 
 protected:
 
-	void setColorsAndLabels();
+	void updateGUI();
 
 	//! 'Model' entity
 	ccHObject* modelEntity;

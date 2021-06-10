@@ -65,12 +65,12 @@ public:
 	//! Whether to display or not the box axes
 	void showBoxAxes(bool state);
 
-public slots:
+public:
 
 	//overloaded from QDialog
 	virtual int	exec();
 
-protected slots:
+protected:
 
 	void squareModeActivated(bool);
 	void resetToDefault();

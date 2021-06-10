@@ -24,15 +24,11 @@
 //libE57Format
 #include <E57Format.h>
 
-//CCLib
-#include <ScalarField.h>
-
 //qCC_db
 #include <ccCameraSensor.h>
 #include <ccColorScalesManager.h>
 #include <ccGBLSensor.h>
 #include <ccImage.h>
-#include <ccLog.h>
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
@@ -40,8 +36,6 @@
 //Qt
 #include <QApplication>
 #include <QBuffer>
-#include <QMap>
-#include <QString>
 #include <QUuid>
 
 //system
@@ -49,12 +43,59 @@
 #include <string>
 
 using colorFieldType = double;
-//typedef boost::uint16_t colorFieldType;
 
-static const char CC_E57_INTENSITY_FIELD_NAME[] = "Intensity";
-static const char CC_E57_RETURN_INDEX_FIELD_NAME[] = "Return index";
-static const char s_e57PoseKey[] = "E57_pose";
+namespace
+{
+	constexpr char CC_E57_INTENSITY_FIELD_NAME[] = "Intensity";
+	constexpr char CC_E57_RETURN_INDEX_FIELD_NAME[] = "Return index";
+	constexpr char s_e57PoseKey[] = "E57_pose";
 
+	constexpr uint8_t VALID_DATA = 0;
+	constexpr uint8_t INVALID_DATA = 1;
+
+	unsigned s_absoluteScanIndex = 0;
+	bool s_cancelRequestedByUser = false;
+	
+	unsigned s_absoluteImageIndex = 0;
+	
+	ScalarType s_maxIntensity = 0;
+	ScalarType s_minIntensity = 0;
+	
+	//for coordinate shift handling
+	FileIOFilter::LoadParameters s_loadParameters;
+	
+	//Array chunks for reading/writing information out of E57 files
+	struct TempArrays
+	{
+		//points
+		std::vector<double> xData;
+		std::vector<double> yData;
+		std::vector<double> zData;
+		std::vector<int8_t> isInvalidData;
+	
+		//normals
+		std::vector<double> xNormData;
+		std::vector<double> yNormData;
+		std::vector<double> zNormData;
+	
+		//scalar field
+		std::vector<double>	intData;
+		std::vector<int8_t> isInvalidIntData;
+	
+		//scan index field
+		std::vector<int8_t> scanIndexData;
+	
+		//color
+		std::vector<colorFieldType> redData;
+		std::vector<colorFieldType> greenData;
+		std::vector<colorFieldType> blueData;
+	};
+	
+	inline QString GetNewGuid()
+	{
+		return QUuid::createUuid().toString();
+	}
+}
 
 E57Filter::E57Filter()
     : FileIOFilter( {
@@ -80,45 +121,13 @@ bool E57Filter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) con
 	return false;
 }
 
-//Array chunks for reading/writing information out of E57 files
-struct TempArrays
-{
-	//points
-	std::vector<double> xData;
-	std::vector<double> yData;
-	std::vector<double> zData;
-	std::vector<int8_t> isInvalidData;
-
-	//normals
-	std::vector<double> xNormData;
-	std::vector<double> yNormData;
-	std::vector<double> zNormData;
-
-	//scalar field
-	std::vector<double>	intData;
-	std::vector<int8_t> isInvalidIntData;
-
-	//scan index field
-	std::vector<int8_t> scanIndexData;
-
-	//color
-	std::vector<colorFieldType> redData;
-	std::vector<colorFieldType> greenData;
-	std::vector<colorFieldType> blueData;
-};
-
-static inline QString GetNewGuid()
-{
-	return QUuid::createUuid().toString();
-}
-
 //Helper: save pose information
 static void SavePoseInformation(e57::StructureNode& parentNode, const e57::ImageFile& imf, const ccGLMatrixd& poseMat)
 {
 	e57::StructureNode pose = e57::StructureNode(imf);
 	parentNode.set("pose", pose);
 
-	CCLib::SquareMatrixd transMat(poseMat.data(), true);
+	CCCoreLib::SquareMatrixd transMat(poseMat.data(), true);
 	double q[4];
 	if (transMat.toQuaternion(q))
 	{
@@ -139,9 +148,6 @@ static void SavePoseInformation(e57::StructureNode& parentNode, const e57::Image
 		pose.set("translation", translation);
 	}
 }
-
-static unsigned s_absoluteScanIndex = 0;
-static bool s_cancelRequestedByUser = false;
 
 static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile& imf, e57::VectorNode& data3D, QString& guidStr, ccProgressDialog* progressDlg = nullptr)
 {
@@ -196,14 +202,15 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 		}
 	}
 
-	CCVector3d bbMin, bbMax;
+	CCVector3d bbMin;
+	CCVector3d bbMax;
 	if (hasPoseMat)
 	{
 		//we have to compute the rotated cloud bounding-box!
 		for (unsigned i = 0; i < pointCount; ++i)
 		{
 			const CCVector3* Plocal = cloud->getPointPersistentPtr(i);
-			CCVector3d Pg = CCVector3d::fromArray(Plocal->u) / globalScale;
+			CCVector3d Pg = Plocal->toDouble() / globalScale;
 			//Pg = shiftedPoseMat * Pg; //DGM: according to E57 specifications, the bounding-box is local
 			if (i != 0)
 			{
@@ -224,7 +231,7 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 	}
 	else
 	{
-		if (!cloud->getGlobalBB(bbMin, bbMax))
+		if (!cloud->getOwnGlobalBB(bbMin, bbMax))
 		{
 			ccLog::Error(QString("[E57Filter::SaveScan] Internal error: cloud '%1' has an invalid bounding box?!").arg(cloud->getName()));
 			return false;
@@ -283,7 +290,8 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 				double minIndex = static_cast<double>(sf->getMin());
 				double maxIndex = static_cast<double>(sf->getMax());
 
-				double intMin, intMax;
+				double intMin = 0.0;
+				double intMax = 0.0;
 				double fracMin = modf(minIndex, &intMin);
 				double fracMax = modf(maxIndex, &intMax);
 
@@ -507,7 +515,7 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 	e57::CompressedVectorWriter writer = points.writer(dbufs);
 
 	//progress bar
-	CCLib::NormalizedProgress nprogress(progressDlg, pointCount);
+	CCCoreLib::NormalizedProgress nprogress(progressDlg, pointCount);
 	if (progressDlg)
 	{
 		progressDlg->setMethodTitle(QObject::tr("Write E57 file"));
@@ -533,7 +541,7 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 		{
 			const CCVector3* P = cloud->getPointPersistentPtr(index);
 			//CCVector3d Pglobal = cloud->toGlobal3d<PointCoordinateType>(*P);
-			CCVector3d Pglobal = CCVector3d::fromArray(P->u) / globalScale;
+			CCVector3d Pglobal = P->toDouble() / globalScale;
 			if (hasPoseMat)
 			{
 				Pglobal = inversePoseMat * Pglobal;
@@ -548,7 +556,7 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 				ScalarType sfVal = intensitySF->getValue(index);
 				arrays.intData[i] = static_cast<double>(sfVal);
 				if (!arrays.isInvalidIntData.empty())
-					arrays.isInvalidIntData[i] = ccScalarField::ValidValue(sfVal) ? 0 : 1;
+					arrays.isInvalidIntData[i] = ccScalarField::ValidValue(sfVal) ? VALID_DATA : INVALID_DATA;
 			}
 
 			if (hasNormals)
@@ -593,7 +601,6 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 	return true;
 }
 
-static unsigned s_absoluteImageIndex = 0;
 void SaveImage(const ccImage* image, const QString& scanGUID, e57::ImageFile& imf, e57::VectorNode& images2D)
 {
 	assert(image);
@@ -712,7 +719,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 
 	try
 	{
-		e57::ImageFile imf(qPrintable(filename), "w"); //DGM: warning, toStdString doesn't preserve "local" characters
+		e57::ImageFile imf(filename.toStdString(), "w");
 		if (!imf.isOpen())
 			return CC_FERR_WRITING;
 
@@ -724,7 +731,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 		/// We are using the E57 v1.0 data format standard fieldnames.
 		/// The standard fieldnames are used without an extension prefix (in the default namespace).
 		/// We explicitly register it for completeness (the reference implementaion would do it for us, if we didn't).
-		imf.extensionsAdd("", E57_V1_0_URI);
+		imf.extensionsAdd("", e57::E57_V1_0_URI);
 
 		// Set per-file properties.
 		/// Path names: "/formatName", "/majorVersion", "/minorVersion", "/coordinateMetadata"
@@ -823,7 +830,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 				if (imageCount != 0)
 				{
 					//progress bar
-					CCLib::NormalizedProgress nprogress(progressDlg.data(), imageCount);
+					CCCoreLib::NormalizedProgress nprogress(progressDlg.data(), imageCount);
 					if (progressDlg)
 					{
 						progressDlg->setMethodTitle(QObject::tr("Write E57 file"));
@@ -1402,7 +1409,7 @@ static bool GetPoseInformation(const e57::StructureNode& node, ccGLMatrixd& pose
 			quaternion[2] = e57::FloatNode(rotNode.get("y")).value();
 			quaternion[3] = e57::FloatNode(rotNode.get("z")).value();
 
-			CCLib::SquareMatrixd rotMat(3);
+			CCCoreLib::SquareMatrixd rotMat(3);
 			rotMat.initFromQuaternion(quaternion);
 			rotMat.toGlMatrix(poseMat.data());
 			validPoseMat = true;
@@ -1421,12 +1428,6 @@ static bool GetPoseInformation(const e57::StructureNode& node, ccGLMatrixd& pose
 	return validPoseMat;
 }
 
-static ScalarType s_maxIntensity = 0;
-static ScalarType s_minIntensity = 0;
-
-//for coordinate shift handling
-static FileIOFilter::LoadParameters s_loadParameters;
-
 static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDialog* progressDlg = nullptr)
 {
 	if (node.type() != e57::E57_STRUCTURE)
@@ -1436,8 +1437,12 @@ static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 	}
 	e57::StructureNode scanNode(node);
 
+	QString scanName("none");
+	if (scanNode.isDefined("name"))
+		scanName = QString::fromStdString( e57::StringNode(scanNode.get("name")).value() );
+
 	//log
-	ccLog::Print(QString("[E57] Reading new scan node (%1)").arg(scanNode.elementName().c_str()));
+	ccLog::Print(QString("[E57] Reading new scan node (%1) - %2").arg(scanNode.elementName().c_str()).arg(scanName));
 
 	if (!scanNode.isDefined("points"))
 	{
@@ -1488,7 +1493,7 @@ static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 
 	if (scanNode.isDefined("name"))
 	{		
-		cloud->setName( QString::fromStdString( e57::StringNode(scanNode.get("name")).value() ) );
+		cloud->setName(scanName);
 	}
 	
 	if (scanNode.isDefined("description"))
@@ -1529,10 +1534,10 @@ static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 		bool preserveCoordinateShift = true;
 		if (FileIOFilter::HandleGlobalShift(T, Tshift, preserveCoordinateShift, s_loadParameters))
 		{
+			poseMat.setTranslation((T + Tshift).u);
 			if (preserveCoordinateShift)
 			{
 				cloud->setGlobalShift(Tshift);
-				poseMat.setTranslation((T + Tshift).u);
 			}
 			poseMatWasShifted = true;
 			ccLog::Warning("[E57Filter::loadFile] Cloud %s has been recentered! Translation: (%.2f ; %.2f ; %.2f)", qPrintable(guidStr), Tshift.x, Tshift.y, Tshift.z);
@@ -1739,7 +1744,7 @@ static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 	e57::CompressedVectorReader dataReader = points.reader(dbufs);
 
 	//local progress bar
-	CCLib::NormalizedProgress nprogress(progressDlg, static_cast<unsigned>(pointCount / chunkSize));
+	CCCoreLib::NormalizedProgress nprogress(progressDlg, static_cast<unsigned>(pointCount / chunkSize));
 	if (progressDlg)
 	{
 		progressDlg->setMethodTitle(QObject::tr("Read E57 file"));
@@ -1812,7 +1817,7 @@ static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 				}
 			}
 
-			const CCVector3 P = CCVector3::fromArray((Pd + Pshift).u);
+			const CCVector3 P = (Pd + Pshift).toPC();
 			cloud->addPoint(P);
 
 			if (hasNormals)
@@ -1831,7 +1836,7 @@ static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 			if (!arrays.intData.empty())
 			{
 				assert(intensitySF);
-				if (!header.pointFields.isIntensityInvalidField || arrays.isInvalidIntData[i] != 0)
+				if (!header.pointFields.isIntensityInvalidField || arrays.isInvalidIntData[i] != INVALID_DATA)
 				{
 					//ScalarType intensity = (ScalarType)((arrays.intData[i] - intOffset)/intRange); //Normalize intensity to 0 - 1.
 					const ScalarType intensity = static_cast<ScalarType>(arrays.intData[i]);
@@ -1962,12 +1967,13 @@ static ccHObject* LoadImage(const e57::Node& node, QString& associatedData3DGuid
 	}
 	e57::StructureNode imageNode(node);
 
-	//log
-	ccLog::Print(QString("[E57] Reading new image node (%1)").arg(imageNode.elementName().c_str()));
-
-	e57::ustring name = "none";
+	QString imageName("none");
 	if (imageNode.isDefined("name"))
-		name = e57::StringNode(imageNode.get("name")).value();
+		imageName = QString::fromStdString(e57::StringNode(imageNode.get("name")).value());
+
+	//log
+	ccLog::Print(QString("[E57] Reading new image node (%1) - %2").arg(imageNode.elementName().c_str()).arg(imageName));
+
 	if (imageNode.isDefined("description"))
 		ccLog::Print(QString("[E57] Description: %1").arg(e57::StringNode(imageNode.get("description")).value().c_str()));
 
@@ -2006,7 +2012,7 @@ static ccHObject* LoadImage(const e57::Node& node, QString& associatedData3DGuid
 
 	if (!cameraRepresentation)
 	{
-		ccLog::Warning(QString("[E57] Image %1 has no associated camera representation!").arg(name.c_str()));
+		ccLog::Warning(QString("[E57] Image %1 has no associated camera representation!").arg(imageName));
 		return nullptr;
 	}
 	Image2DProjection cameraType = cameraRepresentation->getType();
@@ -2191,7 +2197,7 @@ static ccHObject* LoadImage(const e57::Node& node, QString& associatedData3DGuid
 
 	assert(imageObj);
 	imageObj->setData(qImage);
-	imageObj->setName(name.c_str());
+	imageObj->setName(imageName);
 
 	//don't forget image aspect ratio
 	if (cameraType == E57_CYLINDRICAL ||
@@ -2214,7 +2220,7 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 	try
 	{
-		e57::ImageFile imf( qPrintable(filename), "r", e57::CHECKSUM_POLICY_SPARSE ); //DGM: warning, toStdString doesn't preserve "local" characters
+		e57::ImageFile imf(filename.toStdString(), "r", e57::CHECKSUM_POLICY_SPARSE);
 		
 		if (!imf.isOpen())
 		{
@@ -2287,7 +2293,7 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 				progressDlg->start();
 				QApplication::processEvents();
 			}
-			CCLib::NormalizedProgress nprogress(progressDlg.data(), showGlobalProgress ? scanCount : 100);
+			CCCoreLib::NormalizedProgress nprogress(progressDlg.data(), showGlobalProgress ? scanCount : 100);
 
 			//static states
 			s_absoluteScanIndex = 0;
@@ -2352,6 +2358,7 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 			}
 		}
 
+		//we save parameters
 		parameters = s_loadParameters;
 
 		//Image data?
@@ -2379,7 +2386,7 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 					progressDlg->start();
 					QApplication::processEvents();
 				}
-				CCLib::NormalizedProgress nprogress(progressDlg.data(), imageCount);
+				CCCoreLib::NormalizedProgress nprogress(progressDlg.data(), imageCount);
 
 				for (unsigned i = 0; i < imageCount; ++i)
 				{

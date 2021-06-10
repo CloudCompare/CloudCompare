@@ -218,7 +218,9 @@ void ccBoundingBoxEditorDlg::saveBoxAndAccept()
 {
 	if (oriGroupBox->isVisible())
 	{
-		CCVector3d X, Y, Z;
+		CCVector3d X;
+		CCVector3d Y;
+		CCVector3d Z;
 		getBoxAxes(X, Y, Z);
 		X.normalize();
 		Y.normalize();
@@ -231,9 +233,9 @@ void ccBoundingBoxEditorDlg::saveBoxAndAccept()
 			return;
 		}
 
-		//if (	fabs(X.dot(Y)) > 1.0e-6 
-		//	||	fabs(Y.dot(Z)) > 1.0e-6 
-		//	||	fabs(Z.dot(X)) > 1.0e-6 )
+		//if (	std::abs(X.dot(Y)) > 1.0e-6 
+		//	||	std::abs(Y.dot(Z)) > 1.0e-6 
+		//	||	std::abs(Z.dot(X)) > 1.0e-6 )
 		//{
 		//	ccLog::Error("Invalid axes definition: vectors must be orthogonal");
 		//	return;
@@ -383,7 +385,7 @@ void ccBoundingBoxEditorDlg::reflectChanges(int dummy)
 
 		CCVector3 W = m_currentBBox.getDiagVec();
 		//if 'square mode' is on, all width values should be the same!
-		assert(!keepSquare() || fabs(W.x - W.y)*1.0e-6 < 1.0 && fabs(W.x - W.z)*1.0e-6 < 1.0);
+		assert(!keepSquare() || std::abs(W.x - W.y)*1.0e-6 < 1.0 && std::abs(W.x - W.z)*1.0e-6 < 1.0);
 		dxDoubleSpinBox->setValue(W.x);
 		dyDoubleSpinBox->setValue(W.y);
 		dzDoubleSpinBox->setValue(W.z);
@@ -442,10 +444,12 @@ void ccBoundingBoxEditorDlg::getBoxAxes(CCVector3d& X, CCVector3d& Y, CCVector3d
 
 void ccBoundingBoxEditorDlg::onAxisValueChanged(double)
 {
-	CCVector3d X, Y, Z;
+	CCVector3d X;
+	CCVector3d Y;
+	CCVector3d Z;
 	getBoxAxes(X, Y, Z);
 
-	QDoubleSpinBox* vecSpinBoxes[3] = { 0, 0, 0 };
+	QDoubleSpinBox* vecSpinBoxes[3] = { nullptr, nullptr, nullptr };
 	CCVector3d N(0, 0, 0);
 	if (oriXCheckBox->isChecked())
 	{
@@ -523,13 +527,15 @@ void ccBoundingBoxEditorDlg::toClipboardClicked()
 	{
 		CCVector3 C = m_currentBBox.getCenter();
 
-		CCVector3d X, Y, Z;
+		CCVector3d X;
+		CCVector3d Y;
+		CCVector3d Z;
 		getBoxAxes(X, Y, Z);
 
 		ccGLMatrix matrix;
-		matrix.setColumn(0, CCVector3::fromArray(X.u));
-		matrix.setColumn(1, CCVector3::fromArray(Y.u));
-		matrix.setColumn(2, CCVector3::fromArray(Z.u));
+		matrix.setColumn(0, X.toPC());
+		matrix.setColumn(1, Y.toPC());
+		matrix.setColumn(2, Z.toPC());
 		matrix.setTranslation(C);
 
 		clipboard->setText(matrix.toString());

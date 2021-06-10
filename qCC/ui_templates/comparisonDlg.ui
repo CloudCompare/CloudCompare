@@ -427,7 +427,7 @@ to help advanced users setting the general parameters</string>
                <string notr="true">...</string>
               </property>
               <property name="icon">
-               <iconset resource="../icones.qrc">
+               <iconset resource="../icons.qrc">
                 <normaloff>:/CC/images/ccHistogram.png</normaloff>:/CC/images/ccHistogram.png</iconset>
               </property>
              </widget>
@@ -501,8 +501,8 @@ to help advanced users setting the general parameters</string>
   </layout>
  </widget>
  <resources>
-  <include location="../icones.qrc"/>
-  <include location="../icones.qrc"/>
+  <include location="../icons.qrc"/>
+  <include location="../icons.qrc"/>
  </resources>
  <connections>
   <connection>
@@ -550,6 +550,22 @@ to help advanced users setting the general parameters</string>
     <hint type="destinationlabel">
      <x>317</x>
      <y>206</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>signedDistCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>flipNormalsCheckBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>71</x>
+     <y>155</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>273</x>
+     <y>155</y>
     </hint>
    </hints>
   </connection>

@@ -131,8 +131,10 @@ CC_FILE_ERROR PTXFilter::loadFile(	const QString& filename,
 
 	for (unsigned cloudIndex = 0; result == CC_FERR_NO_ERROR || result == CC_FERR_NO_LOAD; cloudIndex++)
 	{
-		unsigned width = 0, height = 0;
-		ccGLMatrixd sensorTransD, cloudTransD;
+		unsigned width = 0;
+		unsigned height = 0;
+		ccGLMatrixd sensorTransD;
+		ccGLMatrixd cloudTransD;
 
 		//read header
 		{
@@ -273,7 +275,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	const QString& filename,
 
 		//read points
 		{
-			CCLib::NormalizedProgress nprogress(pDlg.data(), gridSize);
+			CCCoreLib::NormalizedProgress nprogress(pDlg.data(), gridSize);
 			if (pDlg)
 			{
 				pDlg->setInfo(qPrintable(QString("Number of cells: %1").arg(gridSize)));
@@ -527,7 +529,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	const QString& filename,
 		{
 			ccHObject* obj = container.getChild(i);
 			assert(obj && obj->isA(CC_TYPES::POINT_CLOUD));
-			CCLib::ScalarField* sf = static_cast<ccPointCloud*>(obj)->getScalarField(0);
+			CCCoreLib::ScalarField* sf = static_cast<ccPointCloud*>(obj)->getScalarField(0);
 			if (sf)
 			{
 				ccScalarField* ccSF = static_cast<ccScalarField*>(sf);

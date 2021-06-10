@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>400</height>
+    <height>550</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -63,12 +63,40 @@ color: white;</string>
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="extractContoursGroupBox">
-     <property name="toolTip">
-      <string>Check that option if you wish to extract contour(s) form each slice</string>
+    <widget class="QGroupBox" name="extractSliceEntitiesGroupBox">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>30</height>
+      </size>
      </property>
      <property name="title">
-      <string>Extract contour(s)</string>
+      <string>Extract slice cloud(s) or mesh(es)</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_4">
+      <item>
+       <widget class="QCheckBox" name="randomColorCheckBox">
+        <property name="toolTip">
+         <string>If checked, a random color will be assigned to each slice (warning: will overwrite any existing color!)</string>
+        </property>
+        <property name="text">
+         <string>random colors per slice (will overwrite existing colors!)</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="extractEnvelopesGroupBox">
+     <property name="toolTip">
+      <string>Check that option if you wish to extract the envelope of each slice</string>
+     </property>
+     <property name="title">
+      <string>Extract envelope(s)</string>
      </property>
      <property name="checkable">
       <bool>true</bool>
@@ -82,12 +110,12 @@ color: white;</string>
         <item row="0" column="0">
          <widget class="QLabel" name="label_3">
           <property name="text">
-           <string>Contour type</string>
+           <string>Envelope type</string>
           </property>
          </widget>
         </item>
         <item row="0" column="1">
-         <widget class="QComboBox" name="contourTypeComboBox">
+         <widget class="QComboBox" name="envelopeTypeComboBox">
           <property name="toolTip">
            <string>Section type (lower or upper part, or both)</string>
           </property>
@@ -119,7 +147,7 @@ color: white;</string>
          </widget>
         </item>
         <item row="1" column="1">
-         <widget class="QDoubleSpinBox" name="maxEdgeLengthDoubleSpinBox">
+         <widget class="QDoubleSpinBox" name="maxEnvelopeEdgeLengthDoubleSpinBox">
           <property name="toolTip">
            <string>Max edge length (if 0, generates a unique and closed contour = convex hull)</string>
           </property>
@@ -134,7 +162,7 @@ color: white;</string>
        </layout>
       </item>
       <item>
-       <widget class="QCheckBox" name="multiPassCheckBox">
+       <widget class="QCheckBox" name="multiPassEnvelopeCheckBox">
         <property name="toolTip">
          <string>Multi-pass process where longer edges may be temporarily created to obtain a better fit... or a worst one ;)</string>
         </property>
@@ -144,7 +172,7 @@ color: white;</string>
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="projectOnBestFitCheckBox">
+       <widget class="QCheckBox" name="envProjectPointsOnBestFitCheckBox">
         <property name="toolTip">
          <string>Before extracting the contour, points can be projected along the repeat dimension (if only one is defined) or on the best fit plane</string>
         </property>
@@ -154,17 +182,17 @@ color: white;</string>
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="splitContourCheckBox">
+       <widget class="QCheckBox" name="splitEnvelopeCheckBox">
         <property name="toolTip">
          <string>split the generated contour(s) in smaller parts to avoid creating edges longer than the specified max edge length.</string>
         </property>
         <property name="text">
-         <string>split contour(s) on longer edges</string>
+         <string>split envelope(s) on longer edges</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="debugModeCheckBox">
+       <widget class="QCheckBox" name="envDebugModeCheckBox">
         <property name="toolTip">
          <string>Display a dialog with step-by-step execution of the algorithm (debug mode - very slow)</string>
         </property>
@@ -177,43 +205,129 @@ color: white;</string>
     </widget>
    </item>
    <item>
+    <widget class="QGroupBox" name="extractLevelSetGroupBox">
+     <property name="toolTip">
+      <string>Extract the point contours (via a rasterization process)</string>
+     </property>
+     <property name="title">
+      <string>Extract contours</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <layout class="QFormLayout" name="formLayout_2">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Grid step</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QDoubleSpinBox" name="lsGridStepDoubleSpinBox">
+        <property name="decimals">
+         <number>6</number>
+        </property>
+        <property name="minimum">
+         <double>0.000001000000000</double>
+        </property>
+        <property name="maximum">
+         <double>100000.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>1.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_11">
+        <property name="text">
+         <string>Min. vertex count</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QSpinBox" name="minLSVertexCountSpinBox">
+        <property name="toolTip">
+         <string>Min vertex count per iso-line (to ignore the smallest ones)</string>
+        </property>
+        <property name="minimum">
+         <number>3</number>
+        </property>
+        <property name="maximum">
+         <number>10000000</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <widget class="QGroupBox" name="otherOptionsGroupBox">
      <property name="title">
       <string>Other options</string>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
-         <widget class="QLabel" name="label">
-          <property name="text">
-           <string>Gap</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QDoubleSpinBox" name="gapDoubleSpinBox">
-          <property name="toolTip">
-           <string>Gap between the slices</string>
-          </property>
-          <property name="decimals">
-           <number>6</number>
-          </property>
-          <property name="maximum">
-           <double>1000000000.000000000000000</double>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="randomColorCheckBox">
-        <property name="toolTip">
-         <string>If checked, a random color will be assigned to each slice (warning: will overwrite any existing color!)</string>
-        </property>
+     <layout class="QFormLayout" name="formLayout_3">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label">
         <property name="text">
-         <string>random colors per slice (will overwrite existing color!)</string>
+         <string>Gap</string>
         </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QDoubleSpinBox" name="gapDoubleSpinBox">
+        <property name="toolTip">
+         <string>Gap between the slices</string>
+        </property>
+        <property name="decimals">
+         <number>6</number>
+        </property>
+        <property name="maximum">
+         <double>1000000000.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>Group generated entities by</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="groupByTypeComboBox">
+        <property name="currentIndex">
+         <number>3</number>
+        </property>
+        <item>
+         <property name="text">
+          <string>Type</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Origin entity</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Slice</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Origin entity, then slice</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Slice, then origin entity</string>
+         </property>
+        </item>
        </widget>
       </item>
      </layout>

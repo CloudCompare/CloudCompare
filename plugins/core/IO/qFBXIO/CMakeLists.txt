@@ -1,13 +1,9 @@
-cmake_minimum_required( VERSION 3.0 )
-
 option( PLUGIN_IO_QFBX "Install qFBXIO plugin to read & write AutoDesk FBX files" OFF )
 
-if ( PLUGIN_IO_QFBX )
+if( PLUGIN_IO_QFBX )
 	project( QFBX_IO_PLUGIN )
 
-	include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
-
-	set( CC_IS_IO_PLUGIN 1 )
+	AddPlugin( NAME ${PROJECT_NAME} TYPE io )
 
 	# FBX SDK
 	set( FBX_SDK_INCLUDE_DIR "" CACHE PATH "FBX SDK include directory" )
@@ -27,12 +23,9 @@ if ( PLUGIN_IO_QFBX )
 		include_directories( ${FBX_SDK_INCLUDE_DIR} )
 	endif()
 	
-	include_directories( src )
-
+	add_subdirectory( include )
 	add_subdirectory( src )
-	
-	include( ../../../CMakePluginTpl.cmake )
-	
+		
 	# Link FBX
 	# Release
 	if( FBX_SDK_LIBRARY_FILE )

@@ -90,7 +90,7 @@ public:
 	//! Returns the parent widget (if any)
 	inline QWidget* parentWidget() { return m_parentWidget; }
 
-public slots:
+public:
 
 	//! Refreshes console (display all messages still in queue)
 	void refresh();

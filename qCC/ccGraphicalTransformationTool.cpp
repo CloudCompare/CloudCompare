@@ -26,6 +26,7 @@
 #include <ccMesh.h>
 #include <ccPolyline.h>
 #include <ccPlane.h>
+#include <ccCoordinateSystem.h>
 #include <ccDBRoot.h>
 
 
@@ -43,6 +44,7 @@ ccGraphicalTransformationTool::ccGraphicalTransformationTool(QWidget* parent)
 	connect(advPushButton, &QPushButton::toggled, this, &ccGraphicalTransformationTool::advModeToggle);
 	connect(advTranslateComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccGraphicalTransformationTool::advTranslateRefUpdate);
 	connect(advRotateComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccGraphicalTransformationTool::advRotateRefUpdate);
+	connect(rotComboBox, static_cast<void (QComboBox::*)(int) > (&QComboBox::activated), this, &ccGraphicalTransformationTool::advRotateComboBoxUpdate);
 	connect(refAxisRadio, &QRadioButton::toggled, this, &ccGraphicalTransformationTool::advRefAxisRadioToggled);
 	connect(objCenterRadio, &QRadioButton::toggled, this, &ccGraphicalTransformationTool::advObjectAxisRadioToggled);
 	
@@ -86,17 +88,19 @@ void ccGraphicalTransformationTool::onShortcutTriggered(int key)
 void ccGraphicalTransformationTool::pause(bool state)
 {
 	if (!m_associatedWin)
+	{
 		return;
+	}
 
 	if (state)
 	{
-		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA());
+		m_associatedWin->setInteractionMode(ccGLWindow::MODE_TRANSFORM_CAMERA);
 		m_associatedWin->displayNewMessage("Transformation [PAUSED]",ccGLWindow::UPPER_CENTER_MESSAGE,false,3600,ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
 		m_associatedWin->displayNewMessage("Unpause to transform again",ccGLWindow::UPPER_CENTER_MESSAGE,true,3600,ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
 	}
 	else
 	{
-		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_ENTITIES());
+		m_associatedWin->setInteractionMode(ccGLWindow::MODE_TRANSFORM_ENTITIES);
 		updateDisplayMessage();
 	}
 
@@ -137,8 +141,8 @@ void ccGraphicalTransformationTool::advModeToggle(bool state)
 		this->setGeometry(this->x() , this->y(), 0, 0);
 		this->adjustSize(); //adjust size will minimize the display height with the dropdowns not visible
 		this->setGeometry(this->x() + (wPrev - 250), this->y(), 250, this->height());
-		advRotateRefUpdate(0); //index 0 is always the origin
-		advTranslateRefUpdate(0); //index 0 is always the origin
+		advRotateComboBox->setCurrentIndex(0); //index 0 is always the origin
+		advTranslateComboBox->setCurrentIndex(0); //index 0 is always the origin
 	}
 	//update mini-GUI
 	advPushButton->blockSignals(true);
@@ -158,10 +162,12 @@ void ccGraphicalTransformationTool::populateAdvModeItems()
 	{
 		ccHObject* root = mainWindow->dbRootObject();
 		ccHObject::Container polylines;
+		ccHObject::Container coordinateSystems;
 		if (root)
 		{
 			root->filterChildren(polylines, true, CC_TYPES::POLY_LINE);
-			root->filterChildren(m_planesAndLineSegments, true, CC_TYPES::PLANE);
+			root->filterChildren(coordinateSystems, true, CC_TYPES::COORDINATESYSTEM);
+			root->filterChildren(m_advancedModeObjectList, true, CC_TYPES::PLANE);
 		}
 		if (!polylines.empty())
 		{
@@ -170,17 +176,24 @@ void ccGraphicalTransformationTool::populateAdvModeItems()
 				ccPolyline* poly = static_cast<ccPolyline*>(polylines[i]);
 				if (poly->size() == 2) //only single segment polylines allowed
 				{
-					m_planesAndLineSegments.push_back(polylines[i]);
+					m_advancedModeObjectList.push_back(polylines[i]);
 				}
 			}
 		}
-		if (!m_planesAndLineSegments.empty())
+		if (!coordinateSystems.empty())
 		{
-			for (size_t i = 0; i < m_planesAndLineSegments.size(); ++i)
+			for (size_t i = 0; i < coordinateSystems.size(); i++)
 			{
-				QString item = QString("%1 (ID=%2)").arg(m_planesAndLineSegments[i]->getName()).arg(m_planesAndLineSegments[i]->getUniqueID());
-				advTranslateComboBox->insertItem(static_cast<int>(i) + 1, item, QVariant(m_planesAndLineSegments[i]->getUniqueID()));
-				advRotateComboBox->insertItem(static_cast<int>(i) + 1, item, QVariant(m_planesAndLineSegments[i]->getUniqueID()));
+				m_advancedModeObjectList.push_back(coordinateSystems[i]);
+			}
+		}
+		if (!m_advancedModeObjectList.empty())
+		{
+			for (size_t i = 0; i < m_advancedModeObjectList.size(); ++i)
+			{
+				QString item = QString("%1 (ID=%2)").arg(m_advancedModeObjectList[i]->getName()).arg(m_advancedModeObjectList[i]->getUniqueID());
+				advTranslateComboBox->insertItem(static_cast<int>(i) + 1, item, QVariant(m_advancedModeObjectList[i]->getUniqueID()));
+				advRotateComboBox->insertItem(static_cast<int>(i) + 1, item, QVariant(m_advancedModeObjectList[i]->getUniqueID()));
 			}
 		}
 	}
@@ -190,9 +203,9 @@ ccGLMatrixd ccGraphicalTransformationTool::arbitraryVectorTranslation(const CCVe
 {
 	double theta = 0;
 
-	if (std::abs(vec.z) < ZERO_TOLERANCE)
+	if (CCCoreLib::LessThanEpsilon(std::abs(vec.z)))
 	{
-		if (std::abs(vec.y) < ZERO_TOLERANCE)
+		if (CCCoreLib::LessThanEpsilon(std::abs(vec.y)))
 		{
 			theta = 0;
 		}
@@ -221,9 +234,9 @@ ccGLMatrixd ccGraphicalTransformationTool::arbitraryVectorTranslation(const CCVe
 	double phiDenominator = std::sqrt((vec.y * vec.y) + (vec.z * vec.z));
 	double phi = 0;
 
-	if (phiDenominator < ZERO_TOLERANCE)
+	if (CCCoreLib::LessThanEpsilon(phiDenominator))
 	{
-		if (std::abs(vec.x) < ZERO_TOLERANCE)
+		if (CCCoreLib::LessThanEpsilon(std::abs(vec.x)))
 		{
 			phi = 0;
 		}
@@ -251,7 +264,7 @@ ccGLMatrixd ccGraphicalTransformationTool::arbitraryVectorTranslation(const CCVe
 	ccGLMatrixd arbitraryVectorTranslationAdjust = xRotation * yRotation;
 
 	//special case 
-	if (std::abs(vec.x) < ZERO_TOLERANCE && std::abs(vec.y) < ZERO_TOLERANCE && vec.z < 0)
+	if (CCCoreLib::LessThanEpsilon(std::abs(vec.x)) && CCCoreLib::LessThanEpsilon(std::abs(vec.y)) && vec.z < 0)
 	{
 		arbitraryVectorTranslationAdjust.scaleRotation(-1);
 	}
@@ -315,7 +328,15 @@ bool ccGraphicalTransformationTool::setAdvTranslationTransform(ccHObject* transl
 		TxCheckBox->setEnabled(true);
 		TyCheckBox->setEnabled(true);
 		return true;
-	}	
+	}
+	else if (translateRef->isA(CC_TYPES::COORDINATESYSTEM))
+	{
+		ccCoordinateSystem* cs = static_cast<ccCoordinateSystem*>(translateRef);
+		m_advTranslationTransform = ccGLMatrixd(cs->getTransformation().data());
+		TxCheckBox->setEnabled(true);
+		TyCheckBox->setEnabled(true);
+		return true;
+	}
 	else
 	{
 		advTranslateComboBox->setCurrentIndex(0);
@@ -325,110 +346,106 @@ bool ccGraphicalTransformationTool::setAdvTranslationTransform(ccHObject* transl
 	}
 }
 
-bool ccGraphicalTransformationTool::setAdvRotationAxis(ccHObject* rotateRef)
+bool ccGraphicalTransformationTool::setAdvRotationAxis(ccHObject* rotateRef, rotComboBoxItems selectedAxis)
 {
-	if (!m_associatedWin)
+	if (!m_associatedWin || !rotateRef)
 	{
 		assert(false);
 		return false;
 	}
-	if (rotateRef == nullptr)
-	{
-		return false;
-	}
-	if (rotateRef->isA(CC_TYPES::POLY_LINE) && refAxisRadio->isChecked())
+	CCVector3d newCenter;
+	CCVector3d arbitraryVec;
+	if (rotateRef->isA(CC_TYPES::POLY_LINE))
 	{
 		ccPolyline* line = static_cast<ccPolyline*>(rotateRef);
-		CCVector3d end = CCVector3d::fromArray((*line->getPoint(1)).u);
-		CCVector3d start = CCVector3d::fromArray((*line->getPoint(0)).u);
-		CCVector3d arbitraryVec = end - start;
+		CCVector3d end = *line->getPoint(1);
+		CCVector3d start = *line->getPoint(0);
+		arbitraryVec = end - start;
 		rotComboBox->clear();
-		rotComboBox->insertItem(0, "Z"); //Z rotation only
-		rotComboBox->insertItem(1, "None");
-		rotComboBox->setCurrentIndex(0);
+		rotComboBox->insertItem(0, "Z", rotComboBoxItems::Z);
+		rotComboBox->insertItem(1, "None", rotComboBoxItems::NONE);
 		m_advRotationRefObjCenter = (start + end) / 2;
-		CCVector3d newCenter;
-		if (m_advRotateRefIsChild)
-		{
-			newCenter = m_advRotationRefObjCenter;
-			m_position.applyRotation(arbitraryVec);
-		}
-		else
-		{
-			newCenter = (m_rotation.inverse() * m_advRotationRefObjCenter - m_rotation.inverse() * m_position.getTranslationAsVec3D());
-		}
-		setRotationCenter(newCenter);
 		arbitraryVec.normalize();
-		m_advRotationAxis = m_rotation.inverse() * arbitraryVec;
-		return true;
 	}
-	else if (rotateRef->isA(CC_TYPES::POLY_LINE) && objCenterRadio->isChecked())
-	{
-		ccPolyline* line = static_cast<ccPolyline*>(rotateRef);
-		CCVector3d end = CCVector3d::fromArray((*line->getPoint(1)).u);
-		CCVector3d start = CCVector3d::fromArray((*line->getPoint(0)).u);
-		CCVector3d arbitraryVec = end - start;
-		rotComboBox->clear();
-		rotComboBox->insertItem(0, "Z"); //Z rotation only
-		rotComboBox->insertItem(1, "None");
-		rotComboBox->setCurrentIndex(0);
-		if (m_advRotateRefIsChild)
-		{
-			m_position.applyRotation(arbitraryVec);
-		}
-		arbitraryVec.normalize();
-		m_advRotationAxis = m_rotation.inverse() * arbitraryVec;
-		CCVector3d newCenter = CCVector3d::fromArray(m_toTransform.getBB_recursive().getCenter().u);
-		setRotationCenter(newCenter);
-		return true;
-	}
-	else if (rotateRef->isA(CC_TYPES::PLANE) && refAxisRadio->isChecked())
+	else if (rotateRef->isA(CC_TYPES::PLANE))
 	{
 		ccPlane* plane = static_cast<ccPlane*>(rotateRef);
-		CCVector3 planeNorm = plane->getNormal();
+		arbitraryVec = plane->getNormal();
 		rotComboBox->clear();
-		rotComboBox->insertItem(0, "Z"); //Z rotation only
-		rotComboBox->insertItem(1, "None");
-		rotComboBox->setCurrentIndex(0);
-		m_advRotationRefObjCenter = CCVector3d::fromArray(plane->getCenter().u);
-		CCVector3d newCenter;
-		if (m_advRotateRefIsChild)
-		{
-			newCenter = m_advRotationRefObjCenter;
-			m_position.applyRotation(planeNorm);
-		}
-		else
-		{
-			newCenter = (m_rotation.inverse() * m_advRotationRefObjCenter - m_rotation.inverse() * m_position.getTranslationAsVec3D());
-		}
-		m_advRotationAxis = m_rotation.inverse() * CCVector3d::fromArray(planeNorm.u);
-		setRotationCenter(newCenter);
-		return true;
+		rotComboBox->insertItem(0, "Z", rotComboBoxItems::Z);
+		rotComboBox->insertItem(1, "None", rotComboBoxItems::NONE);
+		m_advRotationRefObjCenter = plane->getCenter();
 	}
-	else if (rotateRef->isA(CC_TYPES::PLANE) && objCenterRadio->isChecked())
+	else if (rotateRef->isA(CC_TYPES::COORDINATESYSTEM))
 	{
-		ccPlane* plane = static_cast<ccPlane*>(rotateRef);
-		CCVector3 planeNorm = plane->getNormal();
+		ccCoordinateSystem* cs = static_cast<ccCoordinateSystem*>(rotateRef);
+		switch (selectedAxis)
+		{
+			case rotComboBoxItems::X:
+			{
+				arbitraryVec = cs->getYZplane().getNormal();
+				break;
+			}
+			case rotComboBoxItems::Y:
+			{
+				arbitraryVec = cs->getZXplane().getNormal();
+				break;
+			}
+			case rotComboBoxItems::Z:
+			default:
+			{
+				selectedAxis = rotComboBoxItems::Z;
+				arbitraryVec = cs->getXYplane().getNormal();
+				break;
+			}
+		}
 		rotComboBox->clear();
-		rotComboBox->insertItem(0, "Z"); //Z rotation only
-		rotComboBox->insertItem(1, "None");
-		rotComboBox->setCurrentIndex(0);
-		if (m_advRotateRefIsChild)
-		{
-			m_position.applyRotation(planeNorm);
-		}
-		m_advRotationAxis = m_rotation.inverse() * CCVector3d::fromArray(planeNorm.u);
-		CCVector3d newCenter = CCVector3d::fromArray(m_toTransform.getBB_recursive().getCenter().u);
-		setRotationCenter(newCenter);
-		return true;
+		rotComboBox->insertItem(0, "X", rotComboBoxItems::X);
+		rotComboBox->insertItem(1, "Y", rotComboBoxItems::Y);
+		rotComboBox->insertItem(2, "Z", rotComboBoxItems::Z);
+		rotComboBox->insertItem(3, "None", rotComboBoxItems::NONE);		
+		m_advRotationRefObjCenter = cs->getOrigin();
 	}
-	else
+	else //Not a supported primitive for rotateRef
 	{
-		CCVector3d newCenter = CCVector3d::fromArray(m_toTransform.getBB_recursive().getCenter().u);
+		CCVector3d newCenter = m_toTransform.getBB_recursive().getCenter();
 		setRotationCenter(newCenter);
 		advRotateComboBox->setCurrentIndex(0);
 		return false;
 	}
+
+	if (rotComboBox->findData(selectedAxis) == -1)
+	{
+		rotComboBox->setCurrentIndex(rotComboBox->findData(rotComboBoxItems::Z)); // Default to Z axis if passed an invalid axis selection
+	}
+	else
+	{
+		rotComboBox->setCurrentIndex(rotComboBox->findData(selectedAxis));
+	}
+
+	if (refAxisRadio->isChecked())
+	{
+		if (m_advRotateRefIsChild)
+		{
+			newCenter = m_advRotationRefObjCenter;
+			m_position.applyRotation(arbitraryVec);
+		}
+		else
+		{
+			newCenter = (m_rotation.inverse() * m_advRotationRefObjCenter - m_rotation.inverse() * m_position.getTranslationAsVec3D());
+		}
+	}
+	else if (objCenterRadio->isChecked())
+	{
+		if (m_advRotateRefIsChild)
+		{
+			m_position.applyRotation(arbitraryVec);
+		}
+		newCenter = m_toTransform.getBB_recursive().getCenter();
+	}
+	m_advRotationAxis = m_rotation.inverse() * arbitraryVec;
+	setRotationCenter(newCenter);
+	return true;
 }
 
 bool ccGraphicalTransformationTool::entityInTransformList(ccHObject* entity)
@@ -445,7 +462,7 @@ bool ccGraphicalTransformationTool::entityInTransformList(ccHObject* entity)
 
 void ccGraphicalTransformationTool::advTranslateRefUpdate(int index)
 {
-	if (index == 0 || m_planesAndLineSegments.empty()) // index 0 is always the origin
+	if (index == 0 || m_advancedModeObjectList.empty()) // index 0 is always the origin
 	{
 		TxCheckBox->setEnabled(true);
 		TyCheckBox->setEnabled(true);
@@ -459,9 +476,9 @@ void ccGraphicalTransformationTool::advTranslateRefUpdate(int index)
 		return;
 	}
 	int id = advTranslateComboBox->itemData(index).toInt();
-	for (size_t i = 0; i < m_planesAndLineSegments.size(); i++)
+	for (size_t i = 0; i < m_advancedModeObjectList.size(); i++)
 	{
-		if (id == m_planesAndLineSegments[i]->getUniqueID())
+		if (id == m_advancedModeObjectList[i]->getUniqueID())
 		{
 			MainWindow* mainWindow = MainWindow::TheInstance();
 			if (mainWindow)
@@ -470,7 +487,7 @@ void ccGraphicalTransformationTool::advTranslateRefUpdate(int index)
 				{
 					mainWindow->db()->unselectEntity(m_advTranslateRef);
 				}
-				m_advTranslateRef = m_planesAndLineSegments[i];
+				m_advTranslateRef = m_advancedModeObjectList[i];
 				m_advTranslateRefIsChild = entityInTransformList(m_advTranslateRef);
 				if (m_advTranslateRef != m_advRotateRef) // already selected
 				{
@@ -480,30 +497,49 @@ void ccGraphicalTransformationTool::advTranslateRefUpdate(int index)
 			if (!setAdvTranslationTransform(m_advTranslateRef))
 			{
 				ccLog::Error("Error calculating adv translation transform, cannot translate along selected item");
-				advTranslateRefUpdate(0);
+				advTranslateComboBox->setCurrentIndex(0);
 			}
 			return;
 		}
 	}
 	ccLog::Error("Error finding the selected object in DB Tree, cannot translate along selected object");
-	advTranslateRefUpdate(0);
+	advTranslateComboBox->setCurrentIndex(0);
+}
+
+void ccGraphicalTransformationTool::advRotateComboBoxUpdate(int index)
+{
+	if (!m_advMode || !m_advRotateRef)
+	{
+		return;
+	}
+	rotComboBoxItems selectedAxis = (rotComboBoxItems)rotComboBox->itemData(index).toInt();
+	if (selectedAxis == rotComboBoxItems::NONE)
+	{
+		return;
+	}
+	if (!setAdvRotationAxis(m_advRotateRef, selectedAxis))
+	{
+		ccLog::Error("Error setting adv rotation axis, cannot rotate around selected item");
+		advRotateComboBox->setCurrentIndex(0);
+	}
+
 }
 
 void ccGraphicalTransformationTool::advRotateRefUpdate(int index)
 {
-	if (index == 0 || m_planesAndLineSegments.empty()) // index 0 is always the origin
+	if (index == 0 || m_advancedModeObjectList.empty()) // index 0 is always the origin
 	{
 		if (m_advRotateRef != nullptr)
 		{
 			rotComboBox->clear();
-			rotComboBox->insertItem(0, "XYZ");
-			rotComboBox->insertItem(1, "X");
-			rotComboBox->insertItem(2, "Y");
-			rotComboBox->insertItem(3, "Z");
-			rotComboBox->insertItem(4, "None");
+			rotComboBox->insertItem(0, "XYZ", rotComboBoxItems::XYZ);
+			rotComboBox->insertItem(1, "X", rotComboBoxItems::X);
+			rotComboBox->insertItem(2, "Y", rotComboBoxItems::Y);
+			rotComboBox->insertItem(3, "Z", rotComboBoxItems::Z);
+			rotComboBox->insertItem(4, "None", rotComboBoxItems::NONE);
 			rotComboBox->setCurrentIndex(rotComboBoxItems::Z);
 		}
-		CCVector3d center = CCVector3d::fromArray(m_toTransform.getBB_recursive().getCenter().u);
+		CCVector3d center = m_toTransform.getBB_recursive().getCenter();
 		setRotationCenter(center);
 		m_advRotationRefObjCenter = CCVector3d(0, 0, 0);
 		m_advRotationAxis = CCVector3d(0, 0, 1);
@@ -519,9 +555,9 @@ void ccGraphicalTransformationTool::advRotateRefUpdate(int index)
 		return;
 	}
 	int id = advRotateComboBox->itemData(index).toInt();
-	for (size_t i = 0; i < m_planesAndLineSegments.size(); i++)
+	for (size_t i = 0; i < m_advancedModeObjectList.size(); i++)
 	{
-		if (id == m_planesAndLineSegments[i]->getUniqueID())
+		if (id == m_advancedModeObjectList[i]->getUniqueID())
 		{
 			MainWindow* mainWindow = MainWindow::TheInstance();
 			if (mainWindow)
@@ -530,7 +566,7 @@ void ccGraphicalTransformationTool::advRotateRefUpdate(int index)
 				{
 					mainWindow->db()->unselectEntity(m_advRotateRef);
 				}
-				m_advRotateRef = m_planesAndLineSegments[i];
+				m_advRotateRef = m_advancedModeObjectList[i];
 				if (m_advTranslateRef != m_advRotateRef) // already selected
 				{
 					mainWindow->db()->selectEntity(m_advRotateRef, true);
@@ -547,24 +583,24 @@ void ccGraphicalTransformationTool::advRotateRefUpdate(int index)
 					objCenterRadio->setEnabled(true);
 				}
 			}
-			if (!setAdvRotationAxis(m_advRotateRef))
+			if (!setAdvRotationAxis(m_advRotateRef, (rotComboBoxItems)rotComboBox->itemData(rotComboBox->currentIndex()).toInt()))
 			{
 				ccLog::Error("Error setting adv rotation axis, cannot rotate around selected item");
-				advRotateRefUpdate(0);
+				advRotateComboBox->setCurrentIndex(0);
 			}
 			return;
 		}
 	}
 	ccLog::Error("Error finding the selected object in DB Tree, cannot translate along selected object");
-	advRotateRefUpdate(0);
+	advRotateComboBox->setCurrentIndex(0);
 }
 
 void ccGraphicalTransformationTool::advRefAxisRadioToggled(bool state)
 {
 	if (state)
 	{
-		advRotateRefUpdate(advRotateComboBox->currentIndex()); //force an update
 		objCenterRadio->setChecked(false);
+		advRotateRefUpdate(advRotateComboBox->currentIndex()); //force an update
 	}
 }
 
@@ -572,8 +608,8 @@ void ccGraphicalTransformationTool::advObjectAxisRadioToggled(bool state)
 {
 	if (state)
 	{
-		advRotateRefUpdate(advRotateComboBox->currentIndex()); //force an update
 		refAxisRadio->setChecked(false);
+		advRotateRefUpdate(advRotateComboBox->currentIndex()); //force an update
 	}
 }
 
@@ -707,10 +743,10 @@ bool ccGraphicalTransformationTool::start()
 
 	m_rotation.toIdentity();
 	m_translation = CCVector3d(0,0,0);
-	m_rotationCenter = CCVector3d::fromArray(m_toTransform.getBB_recursive().getCenter().u); //m_rotation center == selected entities center
+	m_rotationCenter = m_toTransform.getBB_recursive().getCenter(); //m_rotation center == selected entities center
 
 	//activate "moving mode" in associated GL window
-	m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_ENTITIES());
+	m_associatedWin->setInteractionMode(ccGLWindow::MODE_TRANSFORM_ENTITIES);
 	m_associatedWin->setPickingMode(ccGLWindow::NO_PICKING);
 	//the user must not close this window!
 	m_associatedWin->setUnclosable(true);
@@ -718,10 +754,10 @@ bool ccGraphicalTransformationTool::start()
 	connect(m_associatedWin, &ccGLWindow::translation, this, &ccGraphicalTransformationTool::glTranslate);
 	m_associatedWin->displayNewMessage(QString(),ccGLWindow::UPPER_CENTER_MESSAGE); //clear the area
 	pauseButton->setChecked(false);
-	m_planesAndLineSegments.clear();
+	m_advancedModeObjectList.clear();
 	populateAdvModeItems();
-	advRotateRefUpdate(0);
-	advTranslateRefUpdate(0);
+	advRotateComboBox->setCurrentIndex(0);
+	advTranslateComboBox->setCurrentIndex(0);
 	updateDisplayMessage();
 	m_associatedWin->redraw(true, false);
 
@@ -733,7 +769,7 @@ void ccGraphicalTransformationTool::stop(bool state)
 	if (m_associatedWin)
 	{
 		//deactivate "moving mode" in associated GL window
-		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA());
+		m_associatedWin->setInteractionMode(ccGLWindow::MODE_TRANSFORM_CAMERA);
 		m_associatedWin->setPickingMode(ccGLWindow::DEFAULT_PICKING);
 		m_associatedWin->setUnclosable(false);
 		m_associatedWin->disconnect(this);
@@ -783,11 +819,22 @@ void ccGraphicalTransformationTool::glRotate(const ccGLMatrixd& rotMat)
 {
 	if (m_advMode && m_advRotateRef != nullptr)
 	{
-		if (rotComboBox->currentText() == "None")
+		rotComboBoxItems rotAxis = (rotComboBoxItems)rotComboBox->itemData(rotComboBox->currentIndex()).toInt();
+		double angle = 0;
+		switch (rotAxis)
 		{
+		case ccGraphicalTransformationTool::X:
+			angle = std::asin(rotMat.xRotation()(1, 2));
+			break;
+		case ccGraphicalTransformationTool::Y:
+			angle = std::asin(rotMat.yRotation()(2, 0));
+			break;
+		case ccGraphicalTransformationTool::Z:
+			angle = std::asin(rotMat.zRotation()(1, 0));
+			break;
+		default:
 			return;
 		}
-		double angle = std::asin(rotMat.zRotation()(1, 0));
 		m_rotation = m_rotation * arbitraryVectorRotation(angle, m_advRotationAxis);
 	}
 	else
@@ -877,7 +924,9 @@ void ccGraphicalTransformationTool::apply()
 		//convert matrix back and forth so as to be sure to get a 'true' rotation matrix
 		//DGM: we use Euler angles, as the axis/angle method (formerly used) is not robust
 		//enough! Shifts could be perceived by the user.
-		double phi_rad,theta_rad,psi_rad;
+		double phi_rad = 0.0;
+		double theta_rad = 0.0;
+		double psi_rad = 0.0;
 		CCVector3d t3D;
 		finalTrans.getParameters(phi_rad,theta_rad,psi_rad,t3D);
 		finalTransCorrected.initFromParameters(phi_rad,theta_rad,psi_rad,t3D);
@@ -940,7 +989,9 @@ void ccGraphicalTransformationTool::apply()
 	ccLog::Print(correctedFinalTrans.toString(12,' ')); //full precision
 #ifdef QT_DEBUG
 	{
-		float phi_rad,theta_rad,psi_rad;
+		float phi_rad = 0.0f;
+		float theta_rad = 0.0f;
+		float psi_rad = 0.0f;
 		CCVector3f t3D;
 		correctedFinalTrans.getParameters(phi_rad,theta_rad,psi_rad,t3D);
 		ccLog::Print(QString("Angles(%1,%2,%3) T(%5,%6,%7)").arg(phi_rad).arg(theta_rad).arg(psi_rad).arg(t3D.x).arg(t3D.y).arg(t3D.z));

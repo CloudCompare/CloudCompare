@@ -44,7 +44,7 @@ public:
 	virtual void stop(bool state) override;
 	virtual bool linkWith(ccGLWindow* win) override;
 
-protected slots:
+protected:
 
 	void onClose();
 	void activatePointPropertiesDisplay();

@@ -43,7 +43,7 @@
 
 //3D mouse handler
 #ifdef CC_3DXWARE_SUPPORT
-#include <devices/3dConnexion/Mouse3DInput.h>
+#include "Mouse3DInput.h"
 #endif
 
 //Camera parameters dialog
@@ -59,7 +59,7 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 
 #ifdef Q_OS_LINUX
 	 //we reset the whole stylesheet but we keep the StatusBar style
-	setStyleSheet("");	
+	setStyleSheet(QString());	
 	setStyleSheet("QStatusBar{background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,stop:0 rgb(200,200,200), stop:1 rgb(255,255,255));}");
 #endif
 	
@@ -150,7 +150,7 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 
 	//"Help" menu
 	connect(ui.actionAbout,							&QAction::triggered,					this,	&ccViewer::doActionAbout);
-	connect(ui.actionHelpShortctus,					&QAction::triggered,					this,	&ccViewer::doActionDisplayShortcuts);
+	connect(ui.actionHelpShortcuts,					&QAction::triggered,					this,	&ccViewer::doActionDisplayShortcuts);
 
 	loadPlugins();
 }
@@ -574,7 +574,7 @@ void ccViewer::showDisplayParameters()
 
 	clmDlg.exec();
 
-	disconnect(&clmDlg, 0, 0, 0);
+	disconnect(&clmDlg, nullptr, nullptr, nullptr);
 }
 
 void ccViewer::doActionEditCamera()
@@ -606,7 +606,7 @@ bool ccViewer::checkStereoMode()
 		&&	m_glWindow->getViewportParameters().perspectiveView
 		&&	m_glWindow->stereoModeIsEnabled())
 	{
-		if (QMessageBox::question(this,"Stereo mode", "Stereo-mode only works in perspective mode. Do you want to disable it?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
+		if (QMessageBox::question(this,"Stereo mode", "Stereo-mode only works in perspective mode. Do you want to enable it?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
 		{
 			return false;
 		}

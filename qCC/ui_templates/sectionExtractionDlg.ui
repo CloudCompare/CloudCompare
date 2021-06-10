@@ -32,7 +32,7 @@
       <string>Create polyline by clicking on the screen</string>
      </property>
      <property name="icon">
-      <iconset resource="../icones.qrc">
+      <iconset resource="../icons.qrc">
        <normaloff>:/CC/images/dbPolylineSymbol.png</normaloff>:/CC/images/dbPolylineSymbol.png</iconset>
      </property>
      <property name="checkable">
@@ -61,7 +61,7 @@
          <string>Import one or several polylines from DB</string>
         </property>
         <property name="icon">
-         <iconset resource="../icones.qrc">
+         <iconset resource="../icons.qrc">
           <normaloff>:/CC/images/dbHObjectSymbol.png</normaloff>:/CC/images/dbHObjectSymbol.png</iconset>
         </property>
        </widget>
@@ -75,7 +75,7 @@
          <string>Generate orthogonal sections along a path</string>
         </property>
         <property name="icon">
-         <iconset resource="../icones.qrc">
+         <iconset resource="../icons.qrc">
           <normaloff>:/CC/images/orthoSections.png</normaloff>:/CC/images/orthoSections.png</iconset>
         </property>
        </widget>
@@ -89,7 +89,7 @@
          <string>Extract points along active sections</string>
         </property>
         <property name="icon">
-         <iconset resource="../icones.qrc">
+         <iconset resource="../icons.qrc">
           <normaloff>:/CC/images/sectionExtraction.png</normaloff>:/CC/images/sectionExtraction.png</iconset>
         </property>
        </widget>
@@ -103,7 +103,7 @@
          <string>Unfold the points along the selected polyline</string>
         </property>
         <property name="icon">
-         <iconset resource="../icones.qrc">
+         <iconset resource="../icons.qrc">
           <normaloff>:/CC/images/unfoldSmall.png</normaloff>:/CC/images/unfoldSmall.png</iconset>
         </property>
        </widget>
@@ -117,7 +117,7 @@
          <string>Export manually defined sections to DB</string>
         </property>
         <property name="icon">
-         <iconset resource="../icones.qrc">
+         <iconset resource="../icons.qrc">
           <normaloff>:/CC/images/ccSave.png</normaloff>:/CC/images/ccSave.png</iconset>
         </property>
        </widget>
@@ -131,7 +131,7 @@
          <string>Undo last polyline(s) addition</string>
         </property>
         <property name="icon">
-         <iconset resource="../icones.qrc">
+         <iconset resource="../icons.qrc">
           <normaloff>:/CC/images/smallReset.png</normaloff>:/CC/images/smallReset.png</iconset>
         </property>
        </widget>
@@ -139,7 +139,7 @@
       <item>
        <widget class="QToolButton" name="cancelToolButton">
         <property name="icon">
-         <iconset resource="../icones.qrc">
+         <iconset resource="../icons.qrc">
           <normaloff>:/CC/images/smallCancel.png</normaloff>:/CC/images/smallCancel.png</iconset>
         </property>
        </widget>
@@ -156,7 +156,7 @@
          <string>OK</string>
         </property>
         <property name="icon">
-         <iconset resource="../icones.qrc">
+         <iconset resource="../icons.qrc">
           <normaloff>:/CC/images/smallValidate.png</normaloff>:/CC/images/smallValidate.png</iconset>
         </property>
        </widget>
@@ -196,7 +196,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../icones.qrc"/>
+  <include location="../icons.qrc"/>
  </resources>
  <connections>
   <connection>

@@ -56,10 +56,10 @@ protected:
 
 		int fontHeight = painter->fontMetrics().height();
 
-		if (!mData->isEmpty())
+		if (!data()->isEmpty())
 		{
-			double& key = mData->begin()->key;
-			double& value = mData->begin()->value;
+			double& key = data()->begin()->key;
+			double& value = data()->begin()->value;
 			QPointF P = coordsToPixels(key, value);
 			//apply a small shift
 			int margin = 5; //in pixels
@@ -89,12 +89,11 @@ class QCPColoredBars : public QCPBars
 
 public:
 
-	class QCPColoredBarData : public QCPBarData
+	class QCPColoredBarData : public QCPBarsData
 	{
 	public:
 		QCPColoredBarData()
-			: QCPBarData()
-			, color(Qt::blue)
+			: color(Qt::blue)
 		{}
 
 		QColor color;
@@ -114,7 +113,7 @@ public:
 	{
 		Q_ASSERT(colors.size() == key.size());
 
-		mData->clear(); //we duplicate the structures so that other stuff in QCPBarData works!
+		data()->clear(); //we duplicate the structures so that other stuff in QCPBarData works!
 
 		int n = qMin(key.size(), value.size());
 
@@ -126,14 +125,14 @@ public:
 			if (colors.size() > i)
 				newData.color = colors[i];
 			m_coloredData.insertMulti(newData.key, newData);
-			mData->insertMulti(newData.key, newData);
+			QCPBars::addData(newData.key,newData.value);
 		}
 	}
 
 	inline QRect rect() const { return clipRect(); }
 
 	// reimplemented virtual methods:
-	virtual void clearData() { QCPBars::clearData(); m_coloredData.clear(); }
+	virtual void clearData() { QCPBars::data().clear(); m_coloredData.clear(); }
 
 protected:
 
@@ -156,28 +155,28 @@ protected:
 			if (it.key()+mWidth*0.5 < mKeyAxis.data()->range().lower || it.key()-mWidth*0.5 > mKeyAxis.data()->range().upper)
 				continue;
 
-			QPolygonF barPolygon = getBarPolygon(it.key(), it.value().value);
+			QRectF barRect = getBarRect(it.key(), it.value().value);
 			// draw bar fill:
-			if (mainBrush().style() != Qt::NoBrush && mainBrush().color().alpha() != 0)
+			if (brush().style() != Qt::NoBrush && brush().color().alpha() != 0)
 			{
-				QBrush brush = mainBrush();
-				brush.setColor(it.value().color);
+				QBrush theBrush = brush();
+				theBrush.setColor(it.value().color);
 				
 				applyFillAntialiasingHint(painter);
 				painter->setPen(Qt::NoPen);
-				painter->setBrush(brush);
-				painter->drawPolygon(barPolygon);
+				painter->setBrush(theBrush);
+				painter->drawRect(barRect);
 			}
 			// draw bar line:
-			if (mainPen().style() != Qt::NoPen && mainPen().color().alpha() != 0)
+			if (pen().style() != Qt::NoPen && pen().color().alpha() != 0)
 			{
-				QPen pen = mainPen();
-				pen.setColor(it.value().color);
+				QPen thePen = pen();
+				thePen.setColor(it.value().color);
 
 				applyDefaultAntialiasingHint(painter);
-				painter->setPen(pen);
+				painter->setPen(thePen);
 				painter->setBrush(Qt::NoBrush);
-				painter->drawPolyline(barPolygon);
+				painter->drawPolyline(barRect);
 			}
 		}
 	}
@@ -229,13 +228,13 @@ public:
 
 	// reimplemented virtual methods:
 	virtual void clearData() {}
-	virtual double selectTest(const QPointF &pos, bool onlySelectable, QVariant *details=0) const { return -1; } //we don't use the QCP internal selection mechanism!
+	double selectTest(const QPointF &pos, bool onlySelectable, QVariant *details=0) const override { return -1; } //we don't use the QCP internal selection mechanism!
 
 protected:
 	// reimplemented virtual methods:
-	virtual void drawLegendIcon(QCPPainter *painter, const QRectF &rect) const {}
-	virtual QCPRange getKeyRange(bool &foundRange, SignDomain inSignDomain=sdBoth) const { foundRange = false; return QCPRange(); }
-	virtual QCPRange getValueRange(bool &foundRange, SignDomain inSignDomain=sdBoth) const { foundRange = false; return QCPRange(); }
+	void drawLegendIcon(QCPPainter *painter, const QRectF &rect) const override {}
+	QCPRange getKeyRange(bool &foundRange, QCP::SignDomain inSignDomain=QCP::sdBoth) const override { foundRange = false; return QCPRange(); }
+	QCPRange getValueRange(bool &foundRange, QCP::SignDomain inSignDomain=QCP::sdBoth, const QCPRange &inKeyRange=QCPRange()) const override { foundRange = false; return QCPRange(); }
 
 	// property members:
 	double mCurrentVal;
@@ -256,10 +255,10 @@ public:
 	{
 		mPen = QPen(QColor(80, 80, 80),Qt::SolidLine); // dark grey
 		mPen.setWidth(2);
-		mSelectedPen = mPen;
+		setPen( mPen );
 		
 		mBrush = QBrush(Qt::white,Qt::SolidPattern); // white
-		mSelectedBrush = mBrush;
+		setBrush( mBrush );
 	}
 
 protected:
@@ -303,14 +302,14 @@ protected:
 		}
 
 		//draw circle (handle)
-		if (mainPen().style() != Qt::NoPen && mainPen().color().alpha() != 0)
+		if (pen().style() != Qt::NoPen && pen().color().alpha() != 0)
 		{
 			//circle
 			QPoint C(mLeftSide ? rect.x()+rect.width() : rect.x(), rect.y()+rect.height()/2);
 			int r = rect.height() / 10;
 
-			painter->setPen(mainPen());
-			painter->setBrush(mainBrush());
+			painter->setPen(pen());
+			painter->setBrush(brush());
 			painter->drawEllipse(C,r,r);
 
 			painter->setPen(QPen(QColor(128, 128, 128, 128),Qt::SolidLine)); // semi-transparent grey
@@ -344,18 +343,18 @@ public:
 		mPen.setColor(QColor(128, 128, 0)); // dark yellow
 		mPen.setStyle(Qt::SolidLine);
 		mPen.setWidth(2);
-		mSelectedPen = mPen;
+		setPen( mPen );
 		
 		mBrush.setColor(QColor(255, 255, 0, 196)); // semi-transparent yellow
 		mBrush.setStyle(Qt::SolidPattern);
-		mSelectedBrush = mBrush;
+		setBrush( mBrush );
 	}
 
 	//! Sets triangle 'inside' color
 	void setColor(int r, int g, int b)
 	{
 		mBrush.setColor(QColor(r, g, b, 196)); // semi-transparent color
-		mSelectedBrush = mBrush;
+		setBrush( mBrush );
 	}
 	
 protected:
@@ -381,7 +380,7 @@ protected:
 		}
 
 		//draw triangle(handle)
-		if (mainPen().style() != Qt::NoPen && mainPen().color().alpha() != 0)
+		if (pen().style() != Qt::NoPen && pen().color().alpha() != 0)
 		{
 			//QPoint O(currentPos,rect.y() + rect.height() - r);
 			//QPoint T[3] = { O - QPoint(0,r), O + QPoint(r,r), O + QPoint(-r,r) };
@@ -389,8 +388,8 @@ protected:
 			QPoint O(currentPos,rect.y() + r);
 			QPoint T[3] = { O + QPoint(0,r), O - QPoint(r,r), O - QPoint(-r,r) };
 
-			painter->setPen(mainPen());
-			painter->setBrush(mainBrush());
+			painter->setPen(pen());
+			painter->setBrush(brush());
 			painter->drawPolygon(T,3);
 
 			//save last circle position

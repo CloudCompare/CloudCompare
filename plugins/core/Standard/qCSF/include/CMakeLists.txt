@@ -1,0 +1,19 @@
+
+target_sources( ${PROJECT_NAME}
+	PRIVATE
+		${CMAKE_CURRENT_LIST_DIR}/ccCSFDlg.h
+		${CMAKE_CURRENT_LIST_DIR}/Cloth.h
+		${CMAKE_CURRENT_LIST_DIR}/Cloud2CloudDist.h
+		${CMAKE_CURRENT_LIST_DIR}/CSF.h
+		${CMAKE_CURRENT_LIST_DIR}/Particle.h
+		${CMAKE_CURRENT_LIST_DIR}/wlPointCloud.h
+		${CMAKE_CURRENT_LIST_DIR}/qCSF.h
+		${CMAKE_CURRENT_LIST_DIR}/qCSFCommands.h
+		${CMAKE_CURRENT_LIST_DIR}/Rasterization.h
+		${CMAKE_CURRENT_LIST_DIR}/Vec3.h
+)
+
+target_include_directories( ${PROJECT_NAME}
+	PRIVATE
+		${CMAKE_CURRENT_SOURCE_DIR}
+)

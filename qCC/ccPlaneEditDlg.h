@@ -22,7 +22,7 @@
 #include <ui_planeEditDlg.h>
 #include "ccPickingListener.h"
 
-//CCLib
+//CCCoreLib
 #include <CCGeom.h>
 
 //Qt
@@ -55,14 +55,14 @@ public:
 	//! Inherited from ccPickingListener
 	virtual void onItemPicked(const PickedItem& pi);
 
-public slots:
+public:
 
 	void pickPointAsCenter(bool);
 	void onDipDirChanged(double);
 	void onDipDirModified(bool);
 	void onNormalChanged(double);
 
-protected slots:
+protected:
 
 	void saveParamsAndAccept();
 

@@ -26,7 +26,7 @@
    <string>CloudCompare</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../icones.qrc">
+   <iconset resource="../icons.qrc">
     <normaloff>:/CC/Icons/images/icon/cc_icon_16.png</normaloff>:/CC/Icons/images/icon/cc_icon_16.png</iconset>
   </property>
   <property name="autoFillBackground">
@@ -39,7 +39,7 @@
      <x>0</x>
      <y>0</y>
      <width>1024</width>
-     <height>31</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -73,7 +73,7 @@
       <string>Lights</string>
      </property>
      <property name="icon">
-      <iconset resource="../icones.qrc">
+      <iconset resource="../icons.qrc">
        <normaloff>:/CC/images/ccSunLight.png</normaloff>:/CC/images/ccSunLight.png</iconset>
      </property>
      <addaction name="actionToggleSunLight"/>
@@ -116,6 +116,7 @@
     <addaction name="menuToolbars"/>
     <addaction name="menuLanguage"/>
     <addaction name="actionResetGUIElementsPos"/>
+    <addaction name="actionResetAllVBOs"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -165,6 +166,7 @@
       <string>Colors</string>
      </property>
      <addaction name="actionSetUniqueColor"/>
+     <addaction name="actionColorFromScalarField"/>
      <addaction name="actionColorize"/>
      <addaction name="actionChangeColorLevels"/>
      <addaction name="actionSetColorGradient"/>
@@ -249,7 +251,7 @@
        <string>TLS/GBL</string>
       </property>
       <property name="icon">
-       <iconset resource="../icones.qrc">
+       <iconset resource="../icons.qrc">
         <normaloff>:/CC/images/dbGBLSensorSymbol.png</normaloff>:/CC/images/dbGBLSensorSymbol.png</iconset>
       </property>
       <addaction name="actionCreateGBLSensor"/>
@@ -263,7 +265,7 @@
        <string>Camera</string>
       </property>
       <property name="icon">
-       <iconset resource="../icones.qrc">
+       <iconset resource="../icons.qrc">
         <normaloff>:/CC/images/dbCamSensorSymbol.png</normaloff>:/CC/images/dbCamSensorSymbol.png</iconset>
       </property>
       <addaction name="actionCreateCameraSensor"/>
@@ -321,11 +323,20 @@
       <string>Polyline</string>
      </property>
      <addaction name="actionSamplePointsOnPolyline"/>
+     <addaction name="actionSmoothPolyline"/>
+    </widget>
+    <widget class="QMenu" name="menuCloud">
+     <property name="title">
+      <string>Cloud</string>
+     </property>
+     <addaction name="actionCreateSinglePointCloud"/>
+     <addaction name="actionPasteCloudFromClipboard"/>
     </widget>
     <addaction name="menuColors"/>
     <addaction name="menuNormals"/>
     <addaction name="menuOctree"/>
     <addaction name="menuGrid"/>
+    <addaction name="menuCloud"/>
     <addaction name="menuMesh"/>
     <addaction name="menuPolyline"/>
     <addaction name="menuPlane"/>
@@ -784,7 +795,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </widget>
   <action name="actionOpen">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccOpen.png</normaloff>:/CC/images/ccOpen.png</iconset>
    </property>
    <property name="text">
@@ -799,7 +810,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionSave">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccSave.png</normaloff>:/CC/images/ccSave.png</iconset>
    </property>
    <property name="text">
@@ -828,7 +839,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccFullScreen.png</normaloff>:/CC/images/ccFullScreen.png</iconset>
    </property>
    <property name="text">
@@ -849,7 +860,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionDisplayOptions">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/monitor.svg</normaloff>:/CC/images/monitor.svg</iconset>
    </property>
    <property name="text">
@@ -877,7 +888,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionSetUniqueColor">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/typeRgbCcolor.png</normaloff>:/CC/images/typeRgbCcolor.png</iconset>
    </property>
    <property name="text">
@@ -906,7 +917,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionComputeNormals">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/typeNormal.png</normaloff>:/CC/images/typeNormal.png</iconset>
    </property>
    <property name="text">
@@ -932,7 +943,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionComputeOctree">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/dbOctreeSymbol.png</normaloff>:/CC/images/dbOctreeSymbol.png</iconset>
    </property>
    <property name="text">
@@ -953,7 +964,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccConsole.png</normaloff>:/CC/images/ccConsole.png</iconset>
    </property>
    <property name="text">
@@ -1009,7 +1020,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionClone">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccClone.png</normaloff>:/CC/images/ccClone.png</iconset>
    </property>
    <property name="text">
@@ -1021,7 +1032,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionMerge">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccMerge.png</normaloff>:/CC/images/ccMerge.png</iconset>
    </property>
    <property name="text">
@@ -1033,7 +1044,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionDelete">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccDelete.png</normaloff>:/CC/images/ccDelete.png</iconset>
    </property>
    <property name="text">
@@ -1048,7 +1059,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionRegister">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccRegister.png</normaloff>:/CC/images/ccRegister.png</iconset>
    </property>
    <property name="text">
@@ -1063,7 +1074,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionCloudCloudDist">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccCloudCloudDistance.png</normaloff>:/CC/images/ccCloudCloudDistance.png</iconset>
    </property>
    <property name="text">
@@ -1078,7 +1089,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionCloudMeshDist">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccCloudMeshDistance.png</normaloff>:/CC/images/ccCloudMeshDistance.png</iconset>
    </property>
    <property name="text">
@@ -1093,7 +1104,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionStatisticalTest">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccStatTest.png</normaloff>:/CC/images/ccStatTest.png</iconset>
    </property>
    <property name="text">
@@ -1108,11 +1119,11 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionSamplePointsOnMesh">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccSamplePoints.png</normaloff>:/CC/images/ccSamplePoints.png</iconset>
    </property>
    <property name="text">
-    <string>Sample Points</string>
+    <string>Sample points</string>
    </property>
    <property name="toolTip">
     <string>Sample points on a mesh</string>
@@ -1123,7 +1134,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionLabelConnectedComponents">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccCCExtract.png</normaloff>:/CC/images/ccCCExtract.png</iconset>
    </property>
    <property name="text">
@@ -1138,11 +1149,14 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionSegment">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccSegment.png</normaloff>:/CC/images/ccSegment.png</iconset>
    </property>
    <property name="text">
     <string>Segment</string>
+   </property>
+   <property name="shortcut">
+    <string>T</string>
    </property>
   </action>
   <action name="actionTranslateRotate">
@@ -1150,7 +1164,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccInteractiveTransformation.png</normaloff>:/CC/images/ccInteractiveTransformation.png</iconset>
    </property>
    <property name="text">
@@ -1159,7 +1173,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionShowHistogram">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccHistogram.png</normaloff>:/CC/images/ccHistogram.png</iconset>
    </property>
    <property name="text">
@@ -1168,7 +1182,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionComputeStatParams">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccComputeStat.png</normaloff>:/CC/images/ccComputeStat.png</iconset>
    </property>
    <property name="text">
@@ -1183,7 +1197,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionFilterByValue">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccFilterByValue.png</normaloff>:/CC/images/ccFilterByValue.png</iconset>
    </property>
    <property name="text">
@@ -1198,7 +1212,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionGaussianFilter">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccGaussianFilter.png</normaloff>:/CC/images/ccGaussianFilter.png</iconset>
    </property>
    <property name="text">
@@ -1213,7 +1227,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionDeleteScalarField">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccDeleteSF.png</normaloff>:/CC/images/ccDeleteSF.png</iconset>
    </property>
    <property name="text">
@@ -1231,7 +1245,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionScalarFieldArithmetic">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccSfArithmetic.png</normaloff>:/CC/images/ccSfArithmetic.png</iconset>
    </property>
    <property name="text">
@@ -1282,7 +1296,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionClearColor">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccDelete.png</normaloff>:/CC/images/ccDelete.png</iconset>
    </property>
    <property name="text">
@@ -1297,7 +1311,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionClearNormals">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccDelete.png</normaloff>:/CC/images/ccDelete.png</iconset>
    </property>
    <property name="text">
@@ -1450,7 +1464,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionSFGradient">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccGradient.png</normaloff>:/CC/images/ccGradient.png</iconset>
    </property>
    <property name="text">
@@ -1459,7 +1473,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionZoomAndCenter">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/search.svg</normaloff>:/CC/images/search.svg</iconset>
    </property>
    <property name="text">
@@ -1480,7 +1494,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionSetViewTop">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccViewZpos.png</normaloff>:/CC/images/ccViewZpos.png</iconset>
    </property>
    <property name="text">
@@ -1501,7 +1515,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionSetViewFront">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccViewYpos.png</normaloff>:/CC/images/ccViewYpos.png</iconset>
    </property>
    <property name="text">
@@ -1522,7 +1536,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionSetViewBack">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccViewYneg.png</normaloff>:/CC/images/ccViewYneg.png</iconset>
    </property>
    <property name="text">
@@ -1543,7 +1557,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionSetViewLeft">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccViewXpos.png</normaloff>:/CC/images/ccViewXpos.png</iconset>
    </property>
    <property name="text">
@@ -1564,7 +1578,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionSetViewRight">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccViewXneg.png</normaloff>:/CC/images/ccViewXneg.png</iconset>
    </property>
    <property name="text">
@@ -1585,7 +1599,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionSetViewBottom">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccViewZneg.png</normaloff>:/CC/images/ccViewZneg.png</iconset>
    </property>
    <property name="text">
@@ -1691,7 +1705,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionGlobalZoom">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccGlobalZoom.png</normaloff>:/CC/images/ccGlobalZoom.png</iconset>
    </property>
    <property name="text">
@@ -1700,7 +1714,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionToggleCenteredPerspective">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccCenteredPerspective32.png</normaloff>:/CC/images/ccCenteredPerspective32.png</iconset>
    </property>
    <property name="text">
@@ -1721,7 +1735,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionToggleViewerBasedPerspective">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccViewerBasedPerspective32.png</normaloff>:/CC/images/ccViewerBasedPerspective32.png</iconset>
    </property>
    <property name="text">
@@ -1742,7 +1756,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionRefresh">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/smallReset.png</normaloff>:/CC/images/smallReset.png</iconset>
    </property>
    <property name="text">
@@ -1772,7 +1786,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionConvertToRGB">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/typeRgbCcolor.png</normaloff>:/CC/images/typeRgbCcolor.png</iconset>
    </property>
    <property name="text">
@@ -1799,7 +1813,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionRasterize">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccGrid.png</normaloff>:/CC/images/ccGrid.png</iconset>
    </property>
    <property name="text">
@@ -1822,7 +1836,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionSubsample">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccSampleCloud.png</normaloff>:/CC/images/ccSampleCloud.png</iconset>
    </property>
    <property name="text">
@@ -1853,7 +1867,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionPointPicking">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccPointPicking.png</normaloff>:/CC/images/ccPointPicking.png</iconset>
    </property>
    <property name="text">
@@ -1879,7 +1893,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionEditCamera">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/photo-camera.svg</normaloff>:/CC/images/photo-camera.svg</iconset>
    </property>
    <property name="text">
@@ -1888,7 +1902,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionPointListPicking">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccPointListPicking.png</normaloff>:/CC/images/ccPointListPicking.png</iconset>
    </property>
    <property name="text">
@@ -2019,7 +2033,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionSaveViewportAsObject">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/dbViewportSymbol.png</normaloff>:/CC/images/dbViewportSymbol.png</iconset>
    </property>
    <property name="text">
@@ -2034,7 +2048,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionPickRotationCenter">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccPickCenter.png</normaloff>:/CC/images/ccPickCenter.png</iconset>
    </property>
    <property name="text">
@@ -2057,7 +2071,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionBilateralFilter">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccBilateralFilter.png</normaloff>:/CC/images/ccBilateralFilter.png</iconset>
    </property>
    <property name="text">
@@ -2125,7 +2139,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionPointPairsAlign">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccAlign.png</normaloff>:/CC/images/ccAlign.png</iconset>
    </property>
    <property name="text">
@@ -2140,7 +2154,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionAddConstantSF">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccAddConstSF.png</normaloff>:/CC/images/ccAddConstSF.png</iconset>
    </property>
    <property name="text">
@@ -2176,7 +2190,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionPrimitiveFactory">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/dbMiscGeomSymbol.png</normaloff>:/CC/images/dbMiscGeomSymbol.png</iconset>
    </property>
    <property name="text">
@@ -2199,7 +2213,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionSetOrthoView">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccOrthoMode32.png</normaloff>:/CC/images/ccOrthoMode32.png</iconset>
    </property>
    <property name="text">
@@ -2214,7 +2228,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionSetCenteredPerspectiveView">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccCenteredPerspective32.png</normaloff>:/CC/images/ccCenteredPerspective32.png</iconset>
    </property>
    <property name="text">
@@ -2229,7 +2243,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionSetViewerPerspectiveView">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccViewerBasedPerspective32.png</normaloff>:/CC/images/ccViewerBasedPerspective32.png</iconset>
    </property>
    <property name="text">
@@ -2244,7 +2258,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionSetPivotAlwaysOn">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccPivotOn.png</normaloff>:/CC/images/ccPivotOn.png</iconset>
    </property>
    <property name="text">
@@ -2259,7 +2273,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionSetPivotRotationOnly">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccPivotAuto.png</normaloff>:/CC/images/ccPivotAuto.png</iconset>
    </property>
    <property name="text">
@@ -2274,7 +2288,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionSetPivotOff">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccPivotOff.png</normaloff>:/CC/images/ccPivotOff.png</iconset>
    </property>
    <property name="text">
@@ -2289,7 +2303,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionSetViewIso1">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccViewIso1.png</normaloff>:/CC/images/ccViewIso1.png</iconset>
    </property>
    <property name="text">
@@ -2310,7 +2324,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionSetViewIso2">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccViewIso2.png</normaloff>:/CC/images/ccViewIso2.png</iconset>
    </property>
    <property name="text">
@@ -2331,7 +2345,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionConvertTextureToColor">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/typeRgbCcolor.png</normaloff>:/CC/images/typeRgbCcolor.png</iconset>
    </property>
    <property name="text">
@@ -2340,7 +2354,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionOpenColorScalesManager">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/typeSF.png</normaloff>:/CC/images/typeSF.png</iconset>
    </property>
    <property name="text">
@@ -2355,7 +2369,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionCrossSection">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccClippingBox.png</normaloff>:/CC/images/ccClippingBox.png</iconset>
    </property>
    <property name="text">
@@ -2363,6 +2377,9 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="statusTip">
     <string>Cross Section</string>
+   </property>
+   <property name="shortcut">
+    <string>X</string>
    </property>
   </action>
   <action name="actionEditGlobalShiftAndScale">
@@ -2373,6 +2390,11 @@ QTreeView::branch:open:has-children:has-siblings  {
   <action name="actionScalarFieldFromColor">
    <property name="text">
     <string>Convert to Scalar field</string>
+   </property>
+  </action>
+  <action name="actionColorFromScalarField">
+   <property name="text">
+    <string>From Scalar fields</string>
    </property>
   </action>
   <action name="actionComputeKdTree">
@@ -2429,7 +2451,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionViewFromSensor">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/dbViewportSymbol.png</normaloff>:/CC/images/dbViewportSymbol.png</iconset>
    </property>
    <property name="text">
@@ -2517,6 +2539,9 @@ QTreeView::branch:open:has-children:has-siblings  {
    <property name="toolTip">
     <string>Export cloud info to a CSV file (name, size, barycenter, scalar fields info, etc.)</string>
    </property>
+   <property name="shortcut">
+    <string>E</string>
+   </property>
   </action>
   <action name="actionInterpolateColors">
    <property name="text">
@@ -2559,7 +2584,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionComputeStatParams2">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccComputeStat.png</normaloff>:/CC/images/ccComputeStat.png</iconset>
    </property>
    <property name="text">
@@ -2639,7 +2664,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionExtractSections">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/dbPolylineSymbol.png</normaloff>:/CC/images/dbPolylineSymbol.png</iconset>
    </property>
    <property name="text">
@@ -2659,7 +2684,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionLevel">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccLevel.png</normaloff>:/CC/images/ccLevel.png</iconset>
    </property>
    <property name="text">
@@ -2711,7 +2736,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionSORFilter">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccSORFilter.png</normaloff>:/CC/images/ccSORFilter.png</iconset>
    </property>
    <property name="text">
@@ -2726,7 +2751,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccStereo.png</normaloff>:/CC/images/ccStereo.png</iconset>
    </property>
    <property name="text">
@@ -2757,7 +2782,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccFullScreen.png</normaloff>:/CC/images/ccFullScreen.png</iconset>
    </property>
    <property name="text">
@@ -2794,7 +2819,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionTracePolyline">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccTracePolyline.png</normaloff>:/CC/images/ccTracePolyline.png</iconset>
    </property>
    <property name="text">
@@ -2895,7 +2920,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccPickCenterAuto.png</normaloff>:/CC/images/ccPickCenterAuto.png</iconset>
    </property>
    <property name="text">
@@ -3027,7 +3052,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionCloudPrimitiveDist">
    <property name="icon">
-    <iconset resource="../icones.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/ccCloudPrimitiveDistance.png</normaloff>:/CC/images/ccCloudPrimitiveDistance.png</iconset>
    </property>
    <property name="text">
@@ -3048,6 +3073,47 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Export normals to one or several scalar fields</string>
    </property>
   </action>
+  <action name="actionSmoothPolyline">
+   <property name="text">
+    <string>Smooth</string>
+   </property>
+  </action>
+  <action name="actionResetAllVBOs">
+   <property name="text">
+    <string>Reset all VBOs</string>
+   </property>
+   <property name="toolTip">
+    <string>Reset all VBOs (unload GPU memory)</string>
+   </property>
+  </action>
+  <action name="actionCreateSinglePointCloud">
+   <property name="text">
+    <string>Create single point cloud</string>
+   </property>
+   <property name="toolTip">
+    <string>Create a cloud with a single point</string>
+   </property>
+   <property name="statusTip">
+    <string>Create a cloud with a single point</string>
+   </property>
+   <property name="whatsThis">
+    <string/>
+   </property>
+  </action>
+  <action name="actionPasteCloudFromClipboard">
+   <property name="text">
+    <string>Paste from clipboard</string>
+   </property>
+   <property name="toolTip">
+    <string>Paste from ASCII/text data stored in the clipboard</string>
+   </property>
+   <property name="statusTip">
+    <string>Paste from ASCII/text data stored in the clipboard</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -3062,7 +3128,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../icones.qrc"/>
+  <include location="../icons.qrc"/>
  </resources>
  <connections>
   <connection>

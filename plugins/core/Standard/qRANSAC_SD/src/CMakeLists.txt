@@ -1,0 +1,6 @@
+
+target_sources( ${PROJECT_NAME}
+	PRIVATE
+		${CMAKE_CURRENT_LIST_DIR}/ccRansacSDDlg.cpp
+		${CMAKE_CURRENT_LIST_DIR}/qRANSAC_SD.cpp
+)

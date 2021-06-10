@@ -2,7 +2,7 @@
   "type": "Standard",
   "core" : true,
   "name": "RANSAC Shape Detection",
-  "icon": ":/CC/plugin/qRANSAC_SD/qRANSAC_SD.png",
+  "icon": ":/CC/plugin/qRANSAC_SD/images/qRANSAC_SD.png",
   "description": "Automatic RANSAC Shape Detection.",
   "authors": [
     {

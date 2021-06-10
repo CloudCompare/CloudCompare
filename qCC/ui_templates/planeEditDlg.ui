@@ -73,7 +73,7 @@
        <item row="2" column="0">
         <widget class="QCheckBox" name="upwardCheckBox">
          <property name="toolTip">
-          <string>Whether the plane normal should point upward (Z+) or backward (Z-)</string>
+          <string>Whether the plane normal should point upward (Z+) or downward (Z-)</string>
          </property>
          <property name="text">
           <string>upward</string>
@@ -237,7 +237,7 @@
          <string>Pick the plane center (click again to cancel)</string>
         </property>
         <property name="icon">
-         <iconset resource="../icones.qrc">
+         <iconset resource="../icons.qrc">
           <normaloff>:/CC/images/ccPointPicking.png</normaloff>:/CC/images/ccPointPicking.png</iconset>
         </property>
         <property name="checkable">
@@ -306,7 +306,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../icones.qrc"/>
+  <include location="../icons.qrc"/>
  </resources>
  <connections>
   <connection>

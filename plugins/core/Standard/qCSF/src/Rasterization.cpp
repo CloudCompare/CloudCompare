@@ -257,18 +257,18 @@ bool Rasterization::RasterTerrain(Cloth& cloth, const wl::PointCloud& pc, std::v
 #include <DistanceComputationTools.h>
 #include <QThread>
 
-static bool ComputeMaxNeighborAltitude(	const CCLib::DgmOctree::octreeCell& cell,
+static bool ComputeMaxNeighborAltitude(	const CCCoreLib::DgmOctree::octreeCell& cell,
 										void** additionalParameters,
-										CCLib::NormalizedProgress* nProgress = 0)
+										CCCoreLib::NormalizedProgress* nProgress = 0)
 {
 	//additional parameters
 	const wl::PointCloud& pc = *(const wl::PointCloud*)additionalParameters[0];
 	std::vector<double>& heightVal = *(std::vector<double>*)additionalParameters[1];
-	const CCLib::DgmOctree* cloudOctree = (CCLib::DgmOctree*)additionalParameters[2];
+	const CCCoreLib::DgmOctree* cloudOctree = (CCCoreLib::DgmOctree*)additionalParameters[2];
 	unsigned KNN = *(unsigned*)additionalParameters[3];
 
 	//structure for the nearest neighbor search
-	CCLib::DgmOctree::NearestNeighboursSearchStruct nNSS;
+	CCCoreLib::DgmOctree::NearestNeighboursSearchStruct nNSS;
 	nNSS.level = cell.level;
 	nNSS.minNumberOfNeighbors = KNN;
 	cloudOctree->getCellPos(cell.truncatedCode, cell.level, nNSS.cellPos, true);
@@ -304,7 +304,7 @@ static bool ComputeMaxNeighborAltitude(	const CCLib::DgmOctree::octreeCell& cell
 
 bool Rasterization::RasterTerrain(Cloth& cloth, const wl::PointCloud& pc, std::vector<double>& heightVal, unsigned KNN)
 {
-	CCLib::SimpleCloud particlePoints;
+	CCCoreLib::SimpleCloud particlePoints;
 	if (!particlePoints.reserve(static_cast<unsigned>(cloth.getSize())))
 	{
 		//not enough memory
@@ -328,7 +328,7 @@ bool Rasterization::RasterTerrain(Cloth& cloth, const wl::PointCloud& pc, std::v
 		fclose(fp);
 	}
 
-	CCLib::SimpleCloud pcPoints;
+	CCCoreLib::SimpleCloud pcPoints;
 	if (!pcPoints.reserve(static_cast<unsigned>(pc.size())))
 	{
 		//not enough memory
@@ -357,9 +357,9 @@ bool Rasterization::RasterTerrain(Cloth& cloth, const wl::PointCloud& pc, std::v
 		heightVal.resize(cloth.getSize(), std::numeric_limits<double>::quiet_NaN());
 
 		//we spatially 'synchronize' the cloud and particles octrees
-		CCLib::DgmOctree *cloudOctree = 0, *particleOctree = 0;
-		CCLib::DistanceComputationTools::SOReturnCode soCode =
-			CCLib::DistanceComputationTools::synchronizeOctrees
+		CCCoreLib::DgmOctree *cloudOctree = 0, *particleOctree = 0;
+		CCCoreLib::DistanceComputationTools::SOReturnCode soCode =
+			CCCoreLib::DistanceComputationTools::synchronizeOctrees
 			(
 				&particlePoints,
 				&pcPoints,
@@ -369,7 +369,7 @@ bool Rasterization::RasterTerrain(Cloth& cloth, const wl::PointCloud& pc, std::v
 				0
 			);
 
-		if (soCode != CCLib::DistanceComputationTools::SYNCHRONIZED && soCode != CCLib::DistanceComputationTools::DISJOINT)
+		if (soCode != CCCoreLib::DistanceComputationTools::SYNCHRONIZED && soCode != CCCoreLib::DistanceComputationTools::DISJOINT)
 		{
 			//not enough memory (or invalid input)
 			return false;

@@ -23,7 +23,6 @@
 
 //Qt
 #include <QDialog>
-#include <QFont>
 
 //qCC_db
 #include <ccScalarField.h>
@@ -31,10 +30,12 @@
 //QCustomPlot
 #include <qcustomplot.h>
 
-class QCPColoredBars;
-class QCPBarsWithText;
-class QCPHiddenArea;
 class QCPArrow;
+class QCPBarsWithText;
+class QCPColoredBars;
+class QCPHiddenArea;
+class QCPTextElement;
+
 class Ui_HistogramDialog;
 
 //! Histogram widget
@@ -112,10 +113,30 @@ public:
 	//! Returns the current histogram max value
 	inline double maxVal() const { return m_maxVal; }
 
-public: //SF interactor mode
-
+public: //Axis label display Options
+	enum class AxisDisplayOption {
+		None = 0x0,
+		XAxis = 0x01,
+		YAxis = 0x02,
+		All = XAxis | YAxis
+	};
+	Q_DECLARE_FLAGS(AxisDisplayOptions, AxisDisplayOption)
+	
+	//SF interactor mode
+	enum class SFInteractionMode {
+		None = 0x0,
+		DisplayRange = 0x01,
+		SaturationRange = 0x02,
+		All = DisplayRange | SaturationRange
+	};
+	Q_DECLARE_FLAGS(SFInteractionModes, SFInteractionMode)
+	
 	//! Enables SF interaction mode
-	void enableSFInteractionMode(bool state) { m_sfInteractionMode = state; }
+	void setSFInteractionMode( SFInteractionModes modes );
+	void setAxisDisplayOption(AxisDisplayOptions axisOptions);
+	// Used to disable automatic refresh after resize event
+	// Must refresh manually from client code if this is set to false
+	void setRefreshAfterResize(bool refreshAfterResize);
 
 	void setMinDispValue(double);
 	void setMaxDispValue(double);
@@ -158,7 +179,7 @@ protected: //attributes
 
 	//Title
 	QString m_titleStr;
-	QCPPlotTitle* m_titlePlot;
+	QCPTextElement* m_titlePlot;
 
 	//! Color scheme
 	HISTOGRAM_COLOR_SCHEME m_colorScheme;
@@ -173,6 +194,8 @@ protected: //attributes
 	/** Only possible with an associated scalar field.
 	**/
 	bool m_numberOfClassesCanBeChanged;
+
+	bool m_refreshAfterResize;
 
 	//histogram data
 	QCPColoredBars* m_histogram;
@@ -193,10 +216,12 @@ protected: //attributes
 	//! Rendering font
 	QFont m_renderingFont;
 
+	AxisDisplayOptions m_axisDisplayOptions;
+
 protected: //SF interactor mode
 
-	//! Whether SF interaction mode is enabled or not
-	bool m_sfInteractionMode;
+	//! Which SF interaction modes are enabled
+	SFInteractionModes m_sfInteractionModes;
 
 	//! Selectable items in "SF interaction" mode
 	enum SELECTABLE_ITEMS { NONE, LEFT_AREA, RIGHT_AREA, BOTH_AREAS, LEFT_ARROW, RIGHT_ARROW, BOTH_ARROWS };
@@ -205,13 +230,17 @@ protected: //SF interactor mode
 
 	//! Left greyed area
 	QCPHiddenArea* m_areaLeft;
+	double m_areaLeftlastValue;
 	//! Right greyed area
 	QCPHiddenArea* m_areaRight;
+	double m_areaRightlastValue;
 
 	//! Left arrow
 	QCPArrow* m_arrowLeft;
+	double m_arrowLeftlastValue;
 	//! Right arrow
 	QCPArrow* m_arrowRight;
+	double m_arrowRightlastValue;
 
 	//! Last mouse click
 	QPoint m_lastMouseClick;
@@ -234,7 +263,7 @@ public:
 	//! Exports histogram to a CSV file
 	bool exportToCSV(QString filename) const;
 
-protected slots:
+protected:
 
 	//! When the export to CSV file button is pressed
 	void onExportToCSV();

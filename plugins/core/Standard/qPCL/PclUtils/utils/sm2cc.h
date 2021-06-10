@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                       CLOUDCOMPARE PLUGIN: qPCL                        #
@@ -15,42 +17,25 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef Q_PCL_PLUGIN_SM2CC_H
-#define Q_PCL_PLUGIN_SM2CC_H
-
 //Local
 #include "PCLCloud.h"
 
-//system
-#include <list>
-
-class ccPointCloud;
+//qCC_db
+#include <ccPointCloud.h>
 
 //! PCL to CC cloud converter
-/** NOTE: THIS METHOD HAS SOME PROBLEMS. IT CANNOT CORRECTLY LOAD NON-FLOAT FIELDS!
-	THIS IS DUE TO THE FACT THE POINT TYPE WITH A SCALAR WE USE HERE IS FLOAT
-	IF YOU TRY TO LOAD A FIELD THAT IS INT YOU GET A PCL WARN!
-**/
-class sm2ccConverter
+class pcl2cc
 {
 public:
 
-	//! Default constructor
-	sm2ccConverter(PCLCloud::Ptr sm_cloud);
+	//! Converts a PCL point cloud to a ccPointCloud
+	static ccPointCloud* Convert(const PCLCloud& pclCloud);
 
-	//! Converts input cloud (see constructor) to a ccPointCloud
-	ccPointCloud* getCloud();
+public: // other related utility functions
 
-	bool addXYZ        (ccPointCloud *cloud);
-	bool addNormals    (ccPointCloud *cloud);
-	bool addRGB        (ccPointCloud *cloud);
-	bool addScalarField(ccPointCloud *cloud, const std::string& name, bool overwrite_if_exist = true);
-
-private:
-
-	//! Associated PCL cloud
-	PCLCloud::Ptr m_sm_cloud;
+	static bool CopyXYZ(const PCLCloud& pclCloud, ccPointCloud& ccCloud, uint8_t coordinateType);
+	static bool CopyNormals(const PCLCloud& pclCloud, ccPointCloud& ccCloud);
+	static bool CopyRGB(const PCLCloud& pclCloud, ccPointCloud& ccCloud);
+	static bool CopyScalarField(const PCLCloud& pclCloud, const std::string& sfName, ccPointCloud& ccCloud, bool overwriteIfExist = true);
 
 };
-
-#endif // Q_PCL_PLUGIN_SM2CC_H

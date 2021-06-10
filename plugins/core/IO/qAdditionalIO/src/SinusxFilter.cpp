@@ -270,7 +270,8 @@ CC_FILE_ERROR SinusxFilter::loadFile(const QString& filename, ccHObject& contain
 						bool ok = (tokens.size() == 3);
 						if (ok)
 						{
-							bool ok1 = true, ok2 = true;
+							bool ok1 = true;
+							bool ok2 = true;
 							int isConnected = tokens[1].toInt(&ok1);
 							int isClosed = tokens[2].toInt(&ok2);
 							ok = ok1 && ok2;
@@ -429,7 +430,7 @@ CC_FILE_ERROR SinusxFilter::loadFile(const QString& filename, ccHObject& contain
 									}
 								}
 
-								currentVertices->addPoint(CCVector3::fromArray((Pd + Pshift).u));
+								currentVertices->addPoint((Pd + Pshift).toPC());
 							}
 						}
 					}

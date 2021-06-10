@@ -25,6 +25,8 @@
 
 //PCL
 #include <pcl/surface/mls.h>
+#include <pcl/common/io.h> // for getFieldIndex
+#include <pcl/search/kdtree.h> // for KdTree
 
 //qCC_plugins
 #include <ccMainAppInterface.h>
@@ -41,7 +43,7 @@
 #endif
 
 template <typename PointInT, typename PointOutT>
-int smooth_mls(const typename pcl::PointCloud<PointInT>::Ptr &incloud,
+int smooth_mls(	const typename pcl::PointCloud<PointInT>::Ptr &incloud,
 				const MLSParameters &params,
 				typename pcl::PointCloud<PointOutT>::Ptr &outcloud
 #ifdef LP_PCL_PATCH_ENABLED
@@ -53,7 +55,7 @@ int smooth_mls(const typename pcl::PointCloud<PointInT>::Ptr &incloud,
 
 #ifdef _OPENMP
 	//create the smoothing object
-	pcl::MovingLeastSquaresOMP< PointInT, PointOutT > smoother;
+	pcl::MovingLeastSquares< PointInT, PointOutT > smoother;
 	int n_threads = omp_get_max_threads();
 	smoother.setNumberOfThreads(n_threads);
 #else
@@ -118,7 +120,6 @@ MLSSmoothingUpsampling::MLSSmoothingUpsampling()
 									":/toolbar/PclUtils/icons/mls_smoothing.png"))
 	, m_dialog(nullptr)
 	, m_dialogHasParent(false)
-	, m_parameters(new MLSParameters)
 {
 }
 
@@ -126,10 +127,9 @@ MLSSmoothingUpsampling::~MLSSmoothingUpsampling()
 {
 	//we must delete parent-less dialogs ourselves!
 	if (!m_dialogHasParent && m_dialog && m_dialog->parent() == nullptr)
+	{
 		delete m_dialog;
-
-	if (m_parameters)
-		delete m_parameters;
+	}
 }
 
 int MLSSmoothingUpsampling::compute()
@@ -178,15 +178,15 @@ int MLSSmoothingUpsampling::compute()
 	pcl::PointCloud<pcl::PointNormal>::Ptr normals (new pcl::PointCloud<pcl::PointNormal>);
 #ifdef LP_PCL_PATCH_ENABLED
 	pcl::PointIndicesPtr mapping_indices;
-	smooth_mls<pcl::PointXYZ, pcl::PointNormal> (pcl_cloud, *m_parameters, normals, mapping_indices);
+	smooth_mls<pcl::PointXYZ, pcl::PointNormal> (pcl_cloud, m_parameters, normals, mapping_indices);
 #else
-	smooth_mls<pcl::PointXYZ, pcl::PointNormal> (pcl_cloud, *m_parameters, normals);
+	smooth_mls<pcl::PointXYZ, pcl::PointNormal> (pcl_cloud, m_parameters, normals);
 #endif
 
 	PCLCloud::Ptr sm_normals (new PCLCloud);
 	TO_PCL_CLOUD(*normals, *sm_normals);
 
-	ccPointCloud* new_cloud = sm2ccConverter(sm_normals).getCloud();
+	ccPointCloud* new_cloud = pcl2cc::Convert(*sm_normals);
 	if (!new_cloud)
 	{
 		//conversion failed (not enough memory?)
@@ -204,8 +204,7 @@ int MLSSmoothingUpsampling::compute()
 #endif
 
 	//copy global shift & scale
-	new_cloud->setGlobalScale(cloud->getGlobalScale());
-	new_cloud->setGlobalShift(cloud->getGlobalShift());
+	new_cloud->copyGlobalShiftAndScale(*cloud);
 
 	//disable original cloud
 	cloud->setEnabled(false);
@@ -231,22 +230,22 @@ int MLSSmoothingUpsampling::openInputDialog()
 void MLSSmoothingUpsampling::getParametersFromDialog()
 {
 	//we need to read all the parameters and put them into m_parameters
-	m_parameters->search_radius_ = m_dialog->search_radius->value();
-	m_parameters->compute_normals_ = m_dialog->compute_normals->checkState() ;
-	m_parameters->polynomial_fit_ = m_dialog->use_polynomial->checkState();
-	m_parameters->order_ = m_dialog->polynomial_order->value();
-	m_parameters->sqr_gauss_param_ = m_dialog->squared_gaussian_parameter->value() ;
+	m_parameters.search_radius_ = m_dialog->search_radius->value();
+	m_parameters.compute_normals_ = m_dialog->compute_normals->checkState();
+	m_parameters.polynomial_fit_ = m_dialog->use_polynomial->checkState();
+	m_parameters.order_ = m_dialog->polynomial_order->value();
+	m_parameters.sqr_gauss_param_ = m_dialog->squared_gaussian_parameter->value();
 
 	int index_now = m_dialog->upsampling_method->currentIndex();
 	QVariant current_status = m_dialog->upsampling_method->itemData(index_now);
 	int status = current_status.toInt();
 
-	m_parameters->upsample_method_= ( MLSParameters::UpsamplingMethod) status;
+	m_parameters.upsample_method_ = static_cast<MLSParameters::UpsamplingMethod>(status);
 
-	m_parameters->upsampling_radius_ = m_dialog->upsampling_radius->value();
-	m_parameters->upsampling_step_ = m_dialog->upsampling_step_size->value() ;
-	m_parameters->step_point_density_ = m_dialog->step_point_density->value() ;
-	m_parameters->dilation_voxel_size_ = m_dialog->dilation_voxel_size->value() ;
+	m_parameters.upsampling_radius_ = m_dialog->upsampling_radius->value();
+	m_parameters.upsampling_step_ = m_dialog->upsampling_step_size->value();
+	m_parameters.step_point_density_ = m_dialog->step_point_density->value();
+	m_parameters.dilation_voxel_size_ = m_dialog->dilation_voxel_size->value();
 }
 
 template int smooth_mls<pcl::PointXYZ, pcl::PointNormal>(const pcl::PointCloud<pcl::PointXYZ>::Ptr &incloud,

@@ -32,7 +32,7 @@
      <item>
       <widget class="QToolButton" name="unstackAlignToolButton">
        <property name="icon">
-        <iconset resource="../icones.qrc">
+        <iconset resource="../icons.qrc">
          <normaloff>:/CC/images/ccUnstack.png</normaloff>:/CC/images/ccUnstack.png</iconset>
        </property>
       </widget>
@@ -40,7 +40,7 @@
      <item>
       <widget class="QToolButton" name="typeAlignToolButton">
        <property name="icon">
-        <iconset resource="../icones.qrc">
+        <iconset resource="../icons.qrc">
          <normaloff>:/CC/images/ccPencil.png</normaloff>:/CC/images/ccPencil.png</iconset>
        </property>
       </widget>
@@ -64,7 +64,7 @@
         <string>Pick spheres instead of single points (for clouds only)</string>
        </property>
        <property name="icon">
-        <iconset resource="../icones.qrc">
+        <iconset resource="../icons.qrc">
          <normaloff>:/CC/images/smallSphere.png</normaloff>:/CC/images/smallSphere.png</iconset>
        </property>
        <property name="checkable">
@@ -209,7 +209,7 @@
      <item>
       <widget class="QToolButton" name="unstackRefToolButton">
        <property name="icon">
-        <iconset resource="../icones.qrc">
+        <iconset resource="../icons.qrc">
          <normaloff>:/CC/images/ccUnstack.png</normaloff>:/CC/images/ccUnstack.png</iconset>
        </property>
       </widget>
@@ -217,7 +217,7 @@
      <item>
       <widget class="QToolButton" name="typeRefToolButton">
        <property name="icon">
-        <iconset resource="../icones.qrc">
+        <iconset resource="../icons.qrc">
          <normaloff>:/CC/images/ccPencil.png</normaloff>:/CC/images/ccPencil.png</iconset>
        </property>
       </widget>
@@ -516,7 +516,7 @@
         <string>to cloud</string>
        </property>
        <property name="icon">
-        <iconset resource="../icones.qrc">
+        <iconset resource="../icons.qrc">
          <normaloff>:/CC/images/smallValidate.png</normaloff>:/CC/images/smallValidate.png</iconset>
        </property>
       </widget>
@@ -533,7 +533,7 @@
         <string>stop</string>
        </property>
        <property name="icon">
-        <iconset resource="../icones.qrc">
+        <iconset resource="../icons.qrc">
          <normaloff>:/CC/images/smallCancel.png</normaloff>:/CC/images/smallCancel.png</iconset>
        </property>
       </widget>
@@ -543,7 +543,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../icones.qrc"/>
+  <include location="../icons.qrc"/>
  </resources>
  <connections>
   <connection>

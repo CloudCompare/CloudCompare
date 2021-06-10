@@ -21,17 +21,22 @@
 //Qt
 #include <QDialog>
 
-//CCLib
-#include <GenericProgressCallback.h>
-#include <ReferenceCloud.h>
-
-//GUI
-#include <ui_subsamplingDlg.h>
+//CCCoreLib
+#include <CCTypes.h>
 
 class ccGenericPointCloud;
 
+namespace CCCoreLib {
+	class GenericProgressCallback;
+	class ReferenceCloud;
+}
+
+namespace Ui {
+	class SubsamplingDialog;
+}
+
 //! Subsampling cloud dialog
-class ccSubsamplingDlg : public QDialog, public Ui::SubsamplingDialog
+class ccSubsamplingDlg : public QDialog
 {
 	Q_OBJECT
 
@@ -46,17 +51,18 @@ public:
 	};
 
 	//! Default constructor
-	ccSubsamplingDlg(unsigned maxPointCount, double maxCloudRadius, QWidget* parent = 0);
+	ccSubsamplingDlg(unsigned maxPointCount, double maxCloudRadius, QWidget* parent = nullptr);
+	~ccSubsamplingDlg();
 
 	//! Returns subsampled version of a cloud according to current parameters
 	/** Should be called only once the dialog has been validated.
 	**/
-	CCLib::ReferenceCloud* getSampledCloud(ccGenericPointCloud* cloud, CCLib::GenericProgressCallback* progressCb = 0);
+	CCCoreLib::ReferenceCloud* getSampledCloud(ccGenericPointCloud* cloud, CCCoreLib::GenericProgressCallback* progressCb = nullptr);
 
 	//! Enables the SF modulation option (SPATIAL method)
 	void enableSFModulation(ScalarType sfMin, ScalarType sfMax);
 
-protected slots:
+protected:
 
 	void sliderMoved(int sliderPos);
 	void samplingRateChanged(double value);
@@ -82,6 +88,7 @@ protected: //members
 	//! Scalar modulation (max SF value)
 	ScalarType m_sfMax;
 
+	Ui::SubsamplingDialog* m_ui;
 };
 
 #endif

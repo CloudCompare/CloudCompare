@@ -26,7 +26,7 @@
 #include "ccMainAppInterface.h"
 #include "ccPickingListener.h"
 
-//CCLib
+//CCCoreLib
 #include <AutoSegmentationTools.h>
 
 class QAction;
@@ -168,7 +168,7 @@ public:
 	//! Updates the 'Properties' view
 	void updatePropertiesView();
 	
-private slots:
+private:
 	//! Creates a new 3D GL sub-window
 	ccGLWindow* new3DView( bool allowEntitySelection );
 
@@ -244,11 +244,9 @@ private slots:
 	void addToDBAuto(const QStringList& filenames);
 
 	void echoMouseWheelRotate(float);
-	void echoCameraDisplaced(float ddx, float ddy);
 	void echoBaseViewMatRotation(const ccGLMatrixd& rotMat);
 	void echoCameraPosChanged(const CCVector3d&);
 	void echoPivotPointChanged(const CCVector3d&);
-	void echoPixelSizeChanged(float);
 
 	void doActionRenderToFile();
 
@@ -261,6 +259,7 @@ private slots:
 	void doActionInterpolateColors();
 	void doActionChangeColorLevels();
 	void doActionEnhanceRGBWithIntensities();
+	void doActionColorFromScalars();
 
 	void doActionSFGaussianFilter();
 	void doActionSFBilateralFilter();
@@ -297,6 +296,7 @@ private slots:
 	void doActionStatisticalTest();
 	void doActionSamplePointsOnMesh();
 	void doActionSamplePointsOnPolyline();
+	void doActionSmoohPolyline();
 	void doActionConvertTextureToColor();
 	void doActionLabelConnectedComponents();
 	void doActionComputeStatParams();
@@ -372,6 +372,7 @@ private slots:
 	void doActionAdjustZoom();
 	void doActionSaveViewportAsCamera();
 	void doActionResetGUIElementsPos();
+	void doActionResetAllVBOs();
 
 	//Shaders & plugins
 	void doActionLoadShader();
@@ -436,6 +437,11 @@ private slots:
 	//! Creates a cloud with the (bounding-box) centers of all selected entities
 	void doActionCreateCloudFromEntCenters();
 
+	//! Creates a cloud with a single point
+	void createSinglePointCloud();
+	//! Creates a cloud from the clipboard (ASCII) data
+	void createPointCloudFromClipboard();
+
 	inline void doActionMoveBBCenterToOrigin()    { doActionFastRegistration(MoveBBCenterToOrigin); }
 	inline void doActionMoveBBMinCornerToOrigin() { doActionFastRegistration(MoveBBMinCornerToOrigin); }
 	inline void doActionMoveBBMaxCornerToOrigin() { doActionFastRegistration(MoveBBMaxCornerToOrigin); }
@@ -467,7 +473,7 @@ private:
 
 	//! Creates point clouds from multiple 'components'
 	void createComponentsClouds(ccGenericPointCloud* cloud,
-								CCLib::ReferenceCloudContainer& components,
+								CCCoreLib::ReferenceCloudContainer& components,
 								unsigned minPointPerComponent,
 								bool randomColors,
 								bool selectComponents,
@@ -501,7 +507,7 @@ private:
 	//! Mesh computation fork
 	/** \param type triangulation type
 	**/
-	void doActionComputeMesh(CC_TRIANGULATION_TYPES type);
+	void doActionComputeMesh(CCCoreLib::TRIANGULATION_TYPES type);
 
 	//! Computes the orientation of an entity
 	/** Either fit a plane or a 'facet' (2D polygon)

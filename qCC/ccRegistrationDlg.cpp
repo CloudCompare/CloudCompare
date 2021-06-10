@@ -23,7 +23,7 @@
 //common
 #include <ccQtHelpers.h>
 
-//CCLib
+//CCCoreLib
 #include <DgmOctree.h>
 #include <CloudSamplingTools.h>
 #include <GeometricalAnalysisTools.h>
@@ -50,8 +50,10 @@ static int		s_maxThreadCount = 0;
 static bool		s_pointsRemoval = false;
 static bool		s_useDataSFAsWeights = false;
 static bool		s_useModelSFAsWeights = false;
+static bool		s_useC2MSignedDistances = false;
+static int		s_normalsMatchingOption = CCCoreLib::ICPRegistrationTools::NO_NORMAL;
 
-ccRegistrationDlg::ccRegistrationDlg(ccHObject *data, ccHObject *model, QWidget* parent/*=0*/)
+ccRegistrationDlg::ccRegistrationDlg(ccHObject *data, ccHObject *model, QWidget* parent/*=nullptr*/)
 	: QDialog(parent, Qt::Tool)
 	, Ui::RegistrationDialog()
 {
@@ -60,11 +62,13 @@ ccRegistrationDlg::ccRegistrationDlg(ccHObject *data, ccHObject *model, QWidget*
 	modelEntity = model;
 
 	setupUi(this);
+
 	QDoubleValidator* rmsValidator = new QDoubleValidator(rmsDifferenceLineEdit);
-	rmsValidator->setRange(1.0e-7, 1.0);
+	rmsValidator->setNotation(QDoubleValidator::ScientificNotation);
+	rmsValidator->setRange(GetAbsoluteMinRMSDecrease(), 1.0, 1);
 	rmsDifferenceLineEdit->setValidator(rmsValidator);
 
-	setColorsAndLabels();
+	updateGUI();
 
 	ccQtHelpers::SetButtonColor(dataColorButton, Qt::red);
 	ccQtHelpers::SetButtonColor(modelColorButton, Qt::yellow);
@@ -83,7 +87,7 @@ ccRegistrationDlg::ccRegistrationDlg(ccHObject *data, ccHObject *model, QWidget*
 		maxThreadCountSpinBox->setValue(s_maxThreadCount);
 		adjustScaleCheckBox->setChecked(s_adjustScale);
 		randomSamplingLimitSpinBox->setValue(s_randomSamplingLimit);
-		rmsDifferenceLineEdit->setText(QString::number(s_rmsDifference, 'e', 1));
+		setMinRMSDecrease(s_rmsDifference);
 		maxIterationCount->setValue(s_maxIterationCount);
 		if (s_useErrorDifferenceCriterion)
 			errorCriterion->setChecked(true);
@@ -95,8 +99,10 @@ ccRegistrationDlg::ccRegistrationDlg(ccHObject *data, ccHObject *model, QWidget*
 		TyCheckBox->setChecked(s_transCheckboxes[1]);
 		TzCheckBox->setChecked(s_transCheckboxes[2]);
 		pointsRemoval->setChecked(s_pointsRemoval);
-		checkBoxUseDataSFAsWeights->setChecked(s_useDataSFAsWeights && checkBoxUseDataSFAsWeights->isEnabled());
-		checkBoxUseModelSFAsWeights->setChecked(s_useModelSFAsWeights && checkBoxUseModelSFAsWeights->isEnabled());
+		checkBoxUseDataSFAsWeights->setChecked(s_useDataSFAsWeights);
+		checkBoxUseModelSFAsWeights->setChecked(s_useModelSFAsWeights);
+		useC2MSignedDistancesCheckBox->setChecked(s_useC2MSignedDistances);
+		normalsComboBox->setCurrentIndex(s_normalsMatchingOption);
 	}
 
 	connect(swapButton, &QAbstractButton::clicked, this, &ccRegistrationDlg::swapModelAndData);
@@ -134,6 +140,8 @@ void ccRegistrationDlg::saveParameters() const
 	s_pointsRemoval = removeFarthestPoints();
 	s_useDataSFAsWeights = checkBoxUseDataSFAsWeights->isChecked();
 	s_useModelSFAsWeights = checkBoxUseModelSFAsWeights->isChecked();
+	s_useC2MSignedDistances = useC2MSignedDistancesCheckBox->isChecked();
+	s_normalsMatchingOption = normalsComboBox->currentIndex();
 }
 
 ccHObject *ccRegistrationDlg::getDataEntity()
@@ -154,6 +162,23 @@ bool ccRegistrationDlg::useDataSFAsWeights() const
 bool ccRegistrationDlg::useModelSFAsWeights() const
 {
 	return checkBoxUseModelSFAsWeights->isEnabled() && checkBoxUseModelSFAsWeights->isChecked();
+}
+
+bool ccRegistrationDlg::useC2MSignedDistances() const
+{
+	return useC2MSignedDistancesCheckBox->isEnabled() && useC2MSignedDistancesCheckBox->isChecked();
+}
+
+CCCoreLib::ICPRegistrationTools::NORMALS_MATCHING ccRegistrationDlg::normalsMatchingOption() const
+{
+	if (normalsComboBox->isEnabled())
+	{
+		return static_cast<CCCoreLib::ICPRegistrationTools::NORMALS_MATCHING>(normalsComboBox->currentIndex());
+	}
+	else
+	{
+		return CCCoreLib::ICPRegistrationTools::NO_NORMAL;
+	}
 }
 
 bool ccRegistrationDlg::adjustScale() const
@@ -186,21 +211,41 @@ int ccRegistrationDlg::getMaxThreadCount() const
 	return maxThreadCountSpinBox->value();
 }
 
+double ccRegistrationDlg::GetAbsoluteMinRMSDecrease()
+{
+	return 1.0e-7;
+}
+
 double ccRegistrationDlg::getMinRMSDecrease() const
 {
 	bool ok = true;
 	double val = rmsDifferenceLineEdit->text().toDouble(&ok);
-	assert(ok);
+
+	if (!ok)
+	{
+		assert(false);
+		val = std::numeric_limits<double>::quiet_NaN();
+	}
 
 	return val;
+}
+
+void ccRegistrationDlg::setMinRMSDecrease(double value)
+{
+	if (std::isnan(value))
+	{
+		//last input value was invalid, restoring default
+		value = 1.0e-5;
+	}
+	rmsDifferenceLineEdit->setText(QString::number(value, 'E', 1));
 }
 
 ccRegistrationDlg::ConvergenceMethod ccRegistrationDlg::getConvergenceMethod() const
 {
 	if (errorCriterion->isChecked())
-		return CCLib::ICPRegistrationTools::MAX_ERROR_CONVERGENCE;
+		return CCCoreLib::ICPRegistrationTools::MAX_ERROR_CONVERGENCE;
 	else
-		return CCLib::ICPRegistrationTools::MAX_ITER_CONVERGENCE;
+		return CCCoreLib::ICPRegistrationTools::MAX_ITER_CONVERGENCE;
 }
 
 int ccRegistrationDlg::getTransformationFilters() const
@@ -209,13 +254,13 @@ int ccRegistrationDlg::getTransformationFilters() const
 	switch (rotComboBox->currentIndex())
 	{
 	case 1:
-		filters |= CCLib::RegistrationTools::SKIP_RYZ;
+		filters |= CCCoreLib::RegistrationTools::SKIP_RYZ;
 		break;
 	case 2:
-		filters |= CCLib::RegistrationTools::SKIP_RXZ;
+		filters |= CCCoreLib::RegistrationTools::SKIP_RXZ;
 		break;
 	case 3:
-		filters |= CCLib::RegistrationTools::SKIP_RXY;
+		filters |= CCCoreLib::RegistrationTools::SKIP_RXY;
 		break;
 	default:
 		//nothing to do
@@ -223,16 +268,16 @@ int ccRegistrationDlg::getTransformationFilters() const
 	}
 
 	if (!TxCheckBox->isChecked())
-		filters |= CCLib::RegistrationTools::SKIP_TX;
+		filters |= CCCoreLib::RegistrationTools::SKIP_TX;
 	if (!TyCheckBox->isChecked())
-		filters |= CCLib::RegistrationTools::SKIP_TY;
+		filters |= CCCoreLib::RegistrationTools::SKIP_TY;
 	if (!TzCheckBox->isChecked())
-		filters |= CCLib::RegistrationTools::SKIP_TZ;
+		filters |= CCCoreLib::RegistrationTools::SKIP_TZ;
 
 	return filters;
 }
 
-void ccRegistrationDlg::setColorsAndLabels()
+void ccRegistrationDlg::updateGUI()
 {
 	if (!modelEntity || !dataEntity)
 		return;
@@ -248,14 +293,17 @@ void ccRegistrationDlg::setColorsAndLabels()
 	dataEntity->prepareDisplayForRefresh_recursive();
 
 	checkBoxUseDataSFAsWeights->setEnabled(dataEntity->hasDisplayedScalarField());
-	checkBoxUseModelSFAsWeights->setEnabled(modelEntity->hasDisplayedScalarField());
+	checkBoxUseModelSFAsWeights->setEnabled(modelEntity->isKindOf(CC_TYPES::POINT_CLOUD) && modelEntity->hasDisplayedScalarField()); //only supported for clouds
+
+	useC2MSignedDistancesCheckBox->setEnabled(modelEntity->isKindOf(CC_TYPES::MESH)); //only supported if a mesh is the reference cloud
+	normalsComboBox->setEnabled(dataEntity->hasNormals() && modelEntity->hasNormals()); //only supported if both the aligned and the reference entities have normals
 
 	MainWindow::RefreshAllGLWindow(false);
 }
 
 void ccRegistrationDlg::swapModelAndData()
 {
-	std::swap(dataEntity,modelEntity);
-	setColorsAndLabels();
-	checkBoxUseModelSFAsWeights->setDisabled(modelEntity->isKindOf(CC_TYPES::MESH));
+	std::swap(dataEntity, modelEntity);
+
+	updateGUI();
 }

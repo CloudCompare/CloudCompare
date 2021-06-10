@@ -1,30 +1,15 @@
 
-set( CC_PLUGIN_CUSTOM_HEADER_LIST
-	${CC_PLUGIN_CUSTOM_HEADER_LIST} 
-	${CMAKE_CURRENT_SOURCE_DIR}/BundlerCommand.h
-	${CMAKE_CURRENT_SOURCE_DIR}/BundlerImportDlg.h
-	${CMAKE_CURRENT_SOURCE_DIR}/BundlerFilter.h
-	${CMAKE_CURRENT_SOURCE_DIR}/IcmFilter.h
-	${CMAKE_CURRENT_SOURCE_DIR}/PNFilter.h
-	${CMAKE_CURRENT_SOURCE_DIR}/PovFilter.h
-	${CMAKE_CURRENT_SOURCE_DIR}/PVFilter.h
-	${CMAKE_CURRENT_SOURCE_DIR}/SalomeHydroFilter.h
-	${CMAKE_CURRENT_SOURCE_DIR}/SinusxFilter.h
-	${CMAKE_CURRENT_SOURCE_DIR}/SoiFilter.h
-	PARENT_SCOPE
-)
-
-set( CC_PLUGIN_CUSTOM_SOURCE_LIST
-	${CC_PLUGIN_CUSTOM_SOURCE_LIST} 
-	${CMAKE_CURRENT_SOURCE_DIR}/BundlerCommand.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/BundlerImportDlg.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/BundlerFilter.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/IcmFilter.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/PNFilter.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/PovFilter.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/PVFilter.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/SalomeHydroFilter.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/SinusxFilter.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/SoiFilter.cpp
-	PARENT_SCOPE
+target_sources( ${PROJECT_NAME}
+    PRIVATE
+        ${CMAKE_CURRENT_LIST_DIR}/BundlerCommand.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/BundlerImportDlg.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/BundlerFilter.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/IcmFilter.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/PNFilter.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/PovFilter.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/PVFilter.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/qAdditionalIO.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/SalomeHydroFilter.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/SinusxFilter.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/SoiFilter.cpp
 )

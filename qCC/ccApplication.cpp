@@ -28,7 +28,7 @@
 #include "mainwindow.h"
 
 ccApplication::ccApplication( int &argc, char **argv, bool isCommandLine )
-	: ccApplicationBase( argc, argv, isCommandLine, QStringLiteral( "2.11 beta (Anoia)" ) )
+	: ccApplicationBase( argc, argv, isCommandLine, QStringLiteral( "2.12 alpha" ) )
 {
 	setApplicationName( "CloudCompare" );
 	

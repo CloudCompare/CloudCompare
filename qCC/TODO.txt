@@ -18,14 +18,13 @@ File I/O:
 
 Big ones:
 
+[*] Move to OpenGL 4+
+[*] Support cloud transparency (WIP)
 [*] Out of core support
 	- editable
 	- being able to work on portions of very big clouds while other portions are visible but in 'read-only' mode (http://www.cloudcompare.org/forum/viewtopic.php?t=1699)
 [*] Undo mechanism
 [*] Command line mode could be extended
-	- call the PCV plugin (https://github.com/CloudCompare/CloudCompare/issues/837)
-	- compute the closest point set (CPS) (https://www.cloudcompare.org/forum/viewtopic.php?t=3445)
-	- add the options to constrain ICP (rotation and/or translation) (http://www.cloudcompare.org/forum/viewtopic.php?t=2920)
 	- label Connected Components tool (http://www.cloudcompare.org/forum/viewtopic.php?t=933)
 	- extract a cross section from a point cloud using an existing polyline (loading in .bin or dxf format as in the interface) (http://www.danielgm.net/cc/forum/viewtopic.php?t=1515)
 	- save the plane orientation as a text file after best plane fitting
@@ -40,7 +39,6 @@ Big ones:
 [*] Volume calculation
 	- between clouds (from distances)
 	- between meshes (http://www.danielgm.net/cc/forum/viewtopic.php?t=1253)
-[*] Use PDAL instead of libLAS (http://www.cloudcompare.org/forum/viewtopic.php?t=437)
 
 qAnimation plugin:
 
@@ -53,6 +51,9 @@ qFacets plugin:
 [*] Add the facet perimeter to the set of exported values
 
 Various:
+[*] Being able to select the entities to load from a BIN file (https://www.cloudcompare.org/forum/viewtopic.php?t=5102)
+[*] Segment polylines with the scissors tool (https://www.cloudcompare.org/forum/viewtopic.php?t=4692)
+[*] Manual editing of each point of a polyline (https://www.cloudcompare.org/forum/viewtopic.php?t=4690)
 [*] Option to ADD a global shift at saving time via the command line (https://www.cloudcompare.org/forum/viewtopic.php?t=4307)
 [*] Let the user choose the color scale in the '2.5D Volume computation' tool (https://www.cloudcompare.org/forum/viewtopic.php?t=4196)
 [*] Update the two-point-distance label 'in real time' when the mouse hovers points (https://www.cloudcompare.org/forum/viewtopic.php?t=3765)
@@ -75,8 +76,6 @@ Various:
 [*] Smooth zoom (clik and drag the mouse while holding a key - https://github.com/cloudcompare/trunk/issues/382)
 [*] Add the distance 'units' as a parameter for the color ramp
 [*] Select points by color (https://github.com/cloudcompare/trunk/issues/363)
-[*] Divert the command line console to the system console (https://github.com/cloudcompare/trunk/issues/362)
-[*] Support cloud transparency
 [*] Median Calculation in Rasterize (http://www.cloudcompare.org/forum/viewtopic.php?t=1610)
 [*] Add key bindings to pan the active 3D view (so as to be able to pan even in segmentation / polyline tracing mode - http://www.cloudcompare.org/forum/viewtopic.php?t=1714)
 [*] Choose the columns to export for ASCII files (http://www.cloudcompare.org/forum/viewtopic.php?t=1449)
@@ -103,7 +102,6 @@ Various:
 [*] Let the user select and handle multiple clouds in the 'Clipping box' tool
 [*] Per-point size based on SF values (http://www.cloudcompare.org/forum/viewtopic.php?t=507)
 [*] Display ortho-rectified images as high-res textures (instead of point clouds!)
-[*] Run the PCV plugin on more than one file at a time (or batch process)
 [*] Add interactive measurement features to ccViewer
 [*] Support mesh transparency (and PLY 'alpha' property for instance)
 [*] Convert RGB colors/scalar field to texture when exporting to OBJ mesh file (http://www.danielgm.net/cc/forum/viewtopic.php?t=830)
@@ -180,3 +178,6 @@ From Andrew O.
 
 From 'dsims1980'
 [*] Spherical Parameterization of cloud or meshes is very useful for visual comparison of two models (http://www.cloudcompare.org/forum/viewtopic.php?t=581)
+
+Probably done (TBC)
+[*] Divert the command line console to the system console (https://github.com/cloudcompare/trunk/issues/362)

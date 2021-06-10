@@ -2,7 +2,7 @@
   "type": "Standard",
   "core" : true,
   "name": "PCV / ShadeVis",
-  "icon": ":/CC/plugin/qPCV/cc_ShadeVisIcon.png",
+  "icon": ":/CC/plugin/qPCV/images/PCVIcon.png",
   "description": "Ambient Occlusion for mesh or point cloud.",
   "authors": [
     {

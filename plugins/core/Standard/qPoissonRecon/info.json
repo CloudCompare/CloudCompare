@@ -2,7 +2,7 @@
   "type": "Standard",
   "core" : true,
   "name": "PoissonRecon",
-  "icon": ":/CC/plugin/qPoissonRecon/qPoissonRecon.png",
+  "icon": ":/CC/plugin/qPoissonRecon/images/qPoissonRecon.png",
   "description": "Poisson Surface Reconstruction.",
   "authors": [
     {

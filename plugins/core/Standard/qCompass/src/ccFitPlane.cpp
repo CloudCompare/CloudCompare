@@ -33,7 +33,8 @@ ccFitPlane::ccFitPlane(ccPlane* p)
 	if (N.z < 0.0)
 		N *= -1.0;
 	//calculate strike/dip/dip direction
-	float dip, dipdir;
+	float dip = 0.0f;
+	float dipdir = 0.0f;
 	ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipdir);
 	QString dipAndDipDirStr = QString("%1/%2").arg((int)dip, 2, 10, QChar('0')).arg((int)dipdir, 3, 10, QChar('0'));
 
@@ -58,10 +59,6 @@ ccFitPlane::ccFitPlane(ccPlane* p)
 	showNormalVector(ccCompass::drawNormals);
 }
 
-ccFitPlane::~ccFitPlane()
-{
-}
-
 void ccFitPlane::updateAttributes(float rms, float search_r)
 {
 	//calculate and store plane attributes
@@ -72,7 +69,9 @@ void ccFitPlane::updateAttributes(float rms, float search_r)
 		N *= -1.0;
 
 	//calculate strike/dip/dip direction
-	float strike, dip, dipdir;
+	float strike = 0.0f;
+	float dip = 0.0f;
+	float dipdir = 0.0f;
 	ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipdir);
 	//ccNormalVectors::ConvertNormalToStrikeAndDip(N, strike, dip); //n.b. this returns result using the british RHR?!?)
 
@@ -121,7 +120,7 @@ bool ccFitPlane::isFitPlane(ccHObject* object)
 	&& object->hasMetaData("Radius");*/
 }
 
-ccFitPlane* ccFitPlane::Fit(CCLib::GenericIndexedCloudPersist* cloud, double *rms)
+ccFitPlane* ccFitPlane::Fit(CCCoreLib::GenericIndexedCloudPersist* cloud, double *rms)
 {
 	ccPlane* p = ccPlane::Fit(cloud, rms);
 	if (p) //valid plane

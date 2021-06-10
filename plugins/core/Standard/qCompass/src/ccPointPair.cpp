@@ -83,7 +83,7 @@ void ccPointPair::drawMeOnly(CC_DRAW_CONTEXT& context)
 		//check sphere exists
 		if (!c_unitPointMarker)
 		{
-			c_unitPointMarker = QSharedPointer<ccSphere>(new ccSphere(1.0f, 0, "PointMarker", 6));
+			c_unitPointMarker = QSharedPointer<ccSphere>(new ccSphere(1.0f, nullptr, "PointMarker", 6));
 
 			c_unitPointMarker->showColors(true);
 			c_unitPointMarker->setVisible(true);
@@ -93,7 +93,7 @@ void ccPointPair::drawMeOnly(CC_DRAW_CONTEXT& context)
 		//check arrow parts exist
 		if (!c_bodyMarker)
 		{
-			c_bodyMarker = QSharedPointer<ccCylinder>(new ccCylinder(1.0f, 0.9f, 0, "UnitNormal", 12));
+			c_bodyMarker = QSharedPointer<ccCylinder>(new ccCylinder(1.0f, 0.9f, nullptr, "UnitNormal", 12));
 			c_bodyMarker->showColors(true);
 			c_bodyMarker->setVisible(true);
 			c_bodyMarker->setEnabled(true);
@@ -102,7 +102,7 @@ void ccPointPair::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 		if (!c_headMarker)
 		{
-			c_headMarker = QSharedPointer<ccCone>(new ccCone(2.5f, 0.0f, 0.1f, 0, 0, 0, "UnitNormalHead", 12));
+			c_headMarker = QSharedPointer<ccCone>(new ccCone(2.5f, 0.0f, 0.1f, 0, 0, nullptr, "UnitNormalHead", 12));
 			c_headMarker->showColors(true);
 			c_headMarker->setVisible(true);
 			c_headMarker->setEnabled(true);
@@ -113,7 +113,7 @@ void ccPointPair::drawMeOnly(CC_DRAW_CONTEXT& context)
 		//not sure what this does, but it looks like fun
 		CC_DRAW_CONTEXT markerContext = context; //build-up point maker own 'context'
 		markerContext.drawingFlags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the sphere doesn't push its own!
-		markerContext.display = 0;
+		markerContext.display = nullptr;
 
 		//get camera info
 		ccGLCameraParameters camera;
@@ -141,7 +141,7 @@ void ccPointPair::drawMeOnly(CC_DRAW_CONTEXT& context)
 			{
 				//in perspective view, the actual scale depends on the distance to the camera!
 				const double* M = camera.modelViewMat.data();
-				double d = (camera.modelViewMat * CCVector3d::fromArray(P->u)).norm();
+				double d = (camera.modelViewMat * (*P)).norm();
 				double unitD = viewportParams.zFar / 2; //we consider that the 'standard' scale is at half the depth
 				scale = static_cast<float>(scale * sqrt(d / unitD)); //sqrt = empirical (probably because the marker size is already partly compensated by ccGLWindow::computeActualPixelSize())
 			}
@@ -168,7 +168,7 @@ void ccPointPair::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glFunc->glMatrixMode(GL_MODELVIEW);
 			glFunc->glPushMatrix();
 			ccGL::Translate(glFunc, start.x, start.y, start.z); //start = 0,0,0
-			ccGLMatrix mat = ccGLMatrix::FromToRotation(CCVector3(0, 0, PC_ONE), dir); //end = 0,0,1
+			ccGLMatrix mat = ccGLMatrix::FromToRotation(CCVector3(0, 0, CCCoreLib::PC_ONE), dir); //end = 0,0,1
 			glFunc->glMultMatrixf(mat.data());
 			ccGL::Scale(glFunc, width, width, length);
 

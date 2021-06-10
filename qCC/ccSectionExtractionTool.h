@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,11 +17,8 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_SECTION_EXTRACTION_TOOL_HEADER
-#define CC_SECTION_EXTRACTION_TOOL_HEADER
-
 //Local
-#include "ccContourExtractor.h"
+#include "ccEnvelopeExtractor.h"
 #include "ccOverlayDialog.h"
 
 //qCC_db
@@ -97,20 +96,20 @@ protected:
 	void addUndoStep();
 
 	//! Convert one or several ReferenceCloud instances to a single cloud and add it to the main DB
-	bool extractSectionCloud(	const std::vector<CCLib::ReferenceCloud*>& refClouds,
+	bool extractSectionCloud(	const std::vector<CCCoreLib::ReferenceCloud*>& refClouds,
 								unsigned sectionIndex,
 								bool& cloudGenerated);
 
-	//! Extract the contour from a set of 2D points and add it to the main DB
-	bool extractSectionContour(	const ccPolyline* originalSection,
+	//! Extract the envelope from a set of 2D points and add it to the main DB
+	bool extractSectionEnvelope(const ccPolyline* originalSection,
 								const ccPointCloud* originalSectionCloud,
 								ccPointCloud* unrolledSectionCloud, //'2D' cloud with Z = 0
 								unsigned sectionIndex,
-								ccContourExtractor::ContourType type,
+								ccEnvelopeExtractor::EnvelopeType type,
 								PointCoordinateType maxEdgeLength,
 								bool multiPass,
-								bool splitContour,
-								bool& contourGenerated,
+								bool splitEnvelope,
+								bool& envelopeGenerated,
 								bool visualDebugMode = false);
 
 	//! Creates (if necessary) and returns a group to store entities in the main DB
@@ -207,7 +206,9 @@ protected:
 	void updateCloudsBox();
 
 private: //members
-	Ui::SectionExtractionDlg	*m_UI;
+
+	//! Associated UI
+	Ui::SectionExtractionDlg* m_UI;
 	
 	//! Pool of active sections
 	SectionPool m_sections;
@@ -232,5 +233,3 @@ private: //members
 	//! Global clouds bounding-box
 	ccBBox m_cloudsBox;
 };
-
-#endif //CC_SECTION_EXTRACTION_TOOL_HEADER

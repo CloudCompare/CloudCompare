@@ -34,17 +34,17 @@ namespace ccLibAlgorithms
 	//! Returns a default first guess for algorithms kernel size (several clouds)
 	PointCoordinateType GetDefaultCloudKernelSize(const ccHObject::Container& entities, unsigned knn = 12);
 	
-	/*** CCLib "standalone" algorithms ***/
+	/*** CCCoreLib "standalone" algorithms ***/
 
 	//! Geometric characteristic (with sub option)
 	struct GeomCharacteristic
 	{
-		GeomCharacteristic(CCLib::GeometricalAnalysisTools::GeomCharacteristic c, int option = 0)
+		GeomCharacteristic(CCCoreLib::GeometricalAnalysisTools::GeomCharacteristic c, int option = 0)
 			: charac(c)
 			, subOption(option)
 		{}
 		
-		CCLib::GeometricalAnalysisTools::GeomCharacteristic charac;
+		CCCoreLib::GeometricalAnalysisTools::GeomCharacteristic charac;
 		int subOption = 0;
 	};
 
@@ -58,18 +58,18 @@ namespace ccLibAlgorithms
 									QWidget* parent = nullptr);
 	
 	//! Computes a geometrical characteristic (see GeometricalAnalysisTools::GeomCharacteristic) on a set of entities
-	bool ComputeGeomCharacteristic(	CCLib::GeometricalAnalysisTools::GeomCharacteristic algo,
+	bool ComputeGeomCharacteristic(	CCCoreLib::GeometricalAnalysisTools::GeomCharacteristic algo,
 									int subOption,
 									PointCoordinateType radius,
 									ccHObject::Container& entities,
 									QWidget* parent = nullptr,
 									ccProgressDialog* progressDialog = nullptr);
 
-	//CCLib algorithms handled by the 'ApplyCCLibAlgorithm' method
+	//CCCoreLib algorithms handled by the 'ApplyCCCoreLibAlgorithm' method
 	enum CC_LIB_ALGORITHM { CCLIB_ALGO_SF_GRADIENT,
 	};
 	
-	//! Applies a standard CCLib algorithm (see CC_LIB_ALGORITHM) on a set of entities
+	//! Applies a standard CCCoreLib algorithm (see CC_LIB_ALGORITHM) on a set of entities
 	bool ApplyCCLibAlgorithm(	CC_LIB_ALGORITHM algo,
 								ccHObject::Container& entities,
 								QWidget* parent = 0,
@@ -78,7 +78,7 @@ namespace ccLibAlgorithms
 	//! Scale matching algorithms
 	enum ScaleMatchingAlgorithm { BB_MAX_DIM, BB_VOLUME, PCA_MAX_DIM, ICP_SCALE };
 	
-	//! Applies a standard CCLib algorithm (see CC_LIB_ALGORITHM) on a set of entities
+	//! Applies a standard CCCoreLib algorithm (see CC_LIB_ALGORITHM) on a set of entities
 	bool ApplyScaleMatchingAlgorithm(ScaleMatchingAlgorithm algo,
 												ccHObject::Container& entities,
 												double icpRmsDiff,

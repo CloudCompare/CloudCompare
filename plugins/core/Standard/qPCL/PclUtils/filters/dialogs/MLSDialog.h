@@ -30,7 +30,7 @@ class MLSDialog : public QDialog, public Ui::MLSDialog
 public:
 	explicit MLSDialog(QWidget *parent = 0);
 
-protected slots:
+protected:
 	void activateMenu(QString name);
 	void toggleMethods(bool status);
 	void updateSquaredGaussian(double radius);

@@ -126,7 +126,7 @@ CC_FILE_ERROR STLFilter::saveToBINFile(ccGenericMesh* mesh, FILE *theFile, QWidg
 		pDlg->start();
 		QApplication::processEvents();
 	}
-	CCLib::NormalizedProgress nprogress(pDlg.data(), faceCount);
+	CCCoreLib::NormalizedProgress nprogress(pDlg.data(), faceCount);
 
 	//header
 	{
@@ -156,7 +156,7 @@ CC_FILE_ERROR STLFilter::saveToBINFile(ccGenericMesh* mesh, FILE *theFile, QWidg
 	mesh->placeIteratorAtBeginning();
 	for (unsigned i = 0; i < faceCount; ++i)
 	{
-		CCLib::VerticesIndexes*tsi = mesh->getNextTriangleVertIndexes();
+		CCCoreLib::VerticesIndexes*tsi = mesh->getNextTriangleVertIndexes();
 
 		const CCVector3* A = vertices->getPointPersistentPtr(tsi->i1);
 		const CCVector3* B = vertices->getPointPersistentPtr(tsi->i2);
@@ -165,19 +165,19 @@ CC_FILE_ERROR STLFilter::saveToBINFile(ccGenericMesh* mesh, FILE *theFile, QWidg
 		CCVector3 N = (*B - *A).cross(*C - *A);
 
 		//REAL32[3] Normal vector
-		CCVector3f buffer = CCVector3f::fromArray(N.u); //convert to an explicit float array (as PointCoordinateType may be a double!)
+		CCVector3f buffer = N.toFloat(); //convert to an explicit float array (as PointCoordinateType may be a double!)
 		assert(sizeof(float) == 4);
 		if (fwrite((const void*)buffer.u, 4, 3, theFile) < 3)
 			return CC_FERR_WRITING;
 
 		//REAL32[3] Vertex 1,2 & 3
-		buffer = CCVector3f::fromArray(A->u); //convert to an explicit float array (as PointCoordinateType may be a double!)
+		buffer = A->toFloat(); //convert to an explicit float array (as PointCoordinateType may be a double!)
 		if (fwrite((const void*)buffer.u, 4, 3, theFile) < 3)
 			return CC_FERR_WRITING;
-		buffer = CCVector3f::fromArray(B->u); //convert to an explicit float array (as PointCoordinateType may be a double!)
+		buffer = B->toFloat(); //convert to an explicit float array (as PointCoordinateType may be a double!)
 		if (fwrite((const void*)buffer.u, 4, 3, theFile) < 3)
 			return CC_FERR_WRITING;
-		buffer = CCVector3f::fromArray(C->u); //convert to an explicit float array (as PointCoordinateType may be a double!)
+		buffer = C->toFloat(); //convert to an explicit float array (as PointCoordinateType may be a double!)
 		if (fwrite((const void*)buffer.u, 4, 3, theFile) < 3)
 			return CC_FERR_WRITING;
 
@@ -218,7 +218,7 @@ CC_FILE_ERROR STLFilter::saveToASCIIFile(ccGenericMesh* mesh, FILE *theFile, QWi
 		pDlg->start();
 		QApplication::processEvents();
 	}
-	CCLib::NormalizedProgress nprogress(pDlg.data(), faceCount);
+	CCCoreLib::NormalizedProgress nprogress(pDlg.data(), faceCount);
 
 	if (fprintf(theFile, "solid %s\n", qPrintable(mesh->getName())) < 0) //empty names are acceptable!
 	{
@@ -231,7 +231,7 @@ CC_FILE_ERROR STLFilter::saveToASCIIFile(ccGenericMesh* mesh, FILE *theFile, QWi
 	mesh->placeIteratorAtBeginning();
 	for (unsigned i = 0; i < faceCount; ++i)
 	{
-		CCLib::VerticesIndexes*tsi = mesh->getNextTriangleVertIndexes();
+		CCCoreLib::VerticesIndexes*tsi = mesh->getNextTriangleVertIndexes();
 
 		const CCVector3* A = vertices->getPointPersistentPtr(tsi->i1);
 		const CCVector3* B = vertices->getPointPersistentPtr(tsi->i2);
@@ -276,83 +276,6 @@ CC_FILE_ERROR STLFilter::saveToASCIIFile(ccGenericMesh* mesh, FILE *theFile, QWi
 	}
 
 	return CC_FERR_NO_ERROR;
-}
-
-const PointCoordinateType c_defaultSearchRadius = static_cast<PointCoordinateType>(sqrt(ZERO_TOLERANCE));
-static bool TagDuplicatedVertices(	const CCLib::DgmOctree::octreeCell& cell,
-									void** additionalParameters,
-									CCLib::NormalizedProgress* nProgress/*=0*/)
-{
-	std::vector<int>* equivalentIndexes = static_cast<std::vector<int>*>(additionalParameters[0]);
-
-	//we look for points very near to the others (only if not yet tagged!)
-
-	//structure for nearest neighbors search
-	CCLib::DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
-	nNSS.level = cell.level;
-	nNSS.prepare(c_defaultSearchRadius, cell.parentOctree->getCellSize(nNSS.level));
-	cell.parentOctree->getCellPos(cell.truncatedCode, cell.level, nNSS.cellPos, true);
-	cell.parentOctree->computeCellCenter(nNSS.cellPos, cell.level, nNSS.cellCenter);
-	//*/
-
-	unsigned n = cell.points->size(); //number of points in the current cell
-
-	//we already know some of the neighbours: the points in the current cell!
-	try
-	{
-		nNSS.pointsInNeighbourhood.resize(n);
-	}
-	catch (.../*const std::bad_alloc&*/) //out of memory
-	{
-		return false;
-	}
-
-	//init structure with cell points
-	{
-		CCLib::DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
-		for (unsigned i = 0; i < n; ++i, ++it)
-		{
-			it->point = cell.points->getPointPersistentPtr(i);
-			it->pointIndex = cell.points->getPointGlobalIndex(i);
-		}
-		nNSS.alreadyVisitedNeighbourhoodSize = 1;
-	}
-
-	//for each point in the cell
-	for (unsigned i = 0; i < n; ++i)
-	{
-		int thisIndex = static_cast<int>(cell.points->getPointGlobalIndex(i));
-		if (equivalentIndexes->at(thisIndex) < 0) //has no equivalent yet 
-		{
-			cell.points->getPoint(i, nNSS.queryPoint);
-
-			//look for neighbors in a (very small) sphere
-			//warning: there may be more points at the end of nNSS.pointsInNeighbourhood than the actual nearest neighbors (k)!
-			unsigned k = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS, c_defaultSearchRadius, false);
-
-			//if there are some very close points
-			if (k > 1)
-			{
-				for (unsigned j = 0; j < k; ++j)
-				{
-					//all the other points are equivalent to the query point
-					const unsigned& otherIndex = nNSS.pointsInNeighbourhood[j].pointIndex;
-					if (static_cast<int>(otherIndex) != thisIndex)
-						equivalentIndexes->at(otherIndex) = thisIndex;
-				}
-			}
-
-			//and the query point is always root
-			equivalentIndexes->at(thisIndex) = thisIndex;
-		}
-
-		if (nProgress && !nProgress->oneStep())
-		{
-			return false;
-		}
-	}
-
-	return true;
 }
 
 CC_FILE_ERROR STLFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
@@ -439,151 +362,43 @@ CC_FILE_ERROR STLFilter::loadFile(const QString& filename, ccHObject& container,
 	}
 
 	//remove duplicated vertices
-	//if (false)
+	mesh->mergeDuplicatedVertices(ccMesh::DefaultMergeDulicateVerticesLevel, parameters.parentWidget);
+	vertices = nullptr; //warning, after this point, 'vertices' is not valid anymore
+
+	ccGenericPointCloud* meshVertices = mesh->getAssociatedCloud();
+	if (mesh->size() != 0 && meshVertices) //their might not remain anymore triangle after 'mergeDuplicatedVertices'
 	{
-		try
+		NormsIndexesTableType* normals = mesh->getTriNormsTable();
+		if (normals)
 		{
-			std::vector<int> equivalentIndexes;
-			const int razValue = -1;
-			equivalentIndexes.resize(vertCount, razValue);
-			
-			QScopedPointer<ccProgressDialog> pDlg(nullptr);
-			if (parameters.parentWidget)
-			{
-				pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
-			}
-			ccOctree::Shared octree = ccOctree::Shared(new ccOctree(vertices));
-			if (!octree->build(pDlg.data()))
-			{
-				octree.clear();
-			}
-			if (octree)
-			{
-				void* additionalParameters[] = { static_cast<void*>(&equivalentIndexes) };
-				unsigned result = octree->executeFunctionForAllCellsAtLevel(10,
-																			TagDuplicatedVertices,
-																			additionalParameters,
-																			false,
-																			pDlg.data(),
-																			"Tag duplicated vertices");
-
-				octree.clear();
-
-				if (result != 0)
-				{
-					unsigned remainingCount = 0;
-					for (unsigned i = 0; i < vertCount; ++i)
-					{
-						int eqIndex = equivalentIndexes[i];
-						assert(eqIndex >= 0);
-						if (eqIndex == static_cast<int>(i)) //root point
-						{
-							int newIndex = static_cast<int>(vertCount + remainingCount); //We replace the root index by its 'new' index (+ vertCount, to differentiate it later)
-							equivalentIndexes[i] = newIndex;
-							++remainingCount;
-						}
-					}
-
-					ccPointCloud* newVertices = new ccPointCloud("vertices");
-					if (newVertices->reserve(remainingCount))
-					{
-						//copy root points in a new cloud
-						{
-							for (unsigned i = 0; i < vertCount; ++i)
-							{
-								int eqIndex = equivalentIndexes[i];
-								if (eqIndex >= static_cast<int>(vertCount)) //root point
-									newVertices->addPoint(*vertices->getPoint(i));
-								else
-									equivalentIndexes[i] = equivalentIndexes[eqIndex]; //and update the other indexes
-							}
-						}
-
-						//update face indexes
-						{
-							unsigned newFaceCount = 0;
-							for (unsigned i = 0; i < faceCount; ++i)
-							{
-								CCLib::VerticesIndexes* tri = mesh->getTriangleVertIndexes(i);
-								tri->i1 = static_cast<unsigned>(equivalentIndexes[tri->i1]) - vertCount;
-								tri->i2 = static_cast<unsigned>(equivalentIndexes[tri->i2]) - vertCount;
-								tri->i3 = static_cast<unsigned>(equivalentIndexes[tri->i3]) - vertCount;
-
-								//very small triangles (or flat ones) may be implicitly removed by vertex fusion!
-								if (tri->i1 != tri->i2 && tri->i1 != tri->i3 && tri->i2 != tri->i3)
-								{
-									if (newFaceCount != i)
-										mesh->swapTriangles(i, newFaceCount);
-									++newFaceCount;
-								}
-							}
-
-							if (newFaceCount == 0)
-							{
-								ccLog::Warning("[STL] After vertex fusion, all triangles would collapse! We'll keep the non-fused version...");
-								delete newVertices;
-								newVertices = nullptr;
-							}
-							else
-							{
-								mesh->resize(newFaceCount);
-							}
-						}
-
-						if (newVertices)
-						{
-							mesh->setAssociatedCloud(newVertices);
-							delete vertices;
-							vertices = newVertices;
-							vertCount = vertices->size();
-							ccLog::Print("[STL] Remaining vertices after auto-removal of duplicate ones: %i", vertCount);
-							ccLog::Print("[STL] Remaining faces after auto-removal of duplicate ones: %i", mesh->size());
-						}
-					}
-					else
-					{
-						ccLog::Warning("[STL] Not enough memory: couldn't removed duplicated vertices!");
-					}
-				}
-				else
-				{
-					ccLog::Warning("[STL] Duplicated vertices removal algorithm failed?!");
-				}
-			}
-			else
-			{
-				ccLog::Warning("[STL] Not enough memory: couldn't removed duplicated vertices!");
-			}
+			//normals->link();
+			//mesh->addChild(normals); //automatically done by setTriNormsTable
+			mesh->showNormals(true);
 		}
-		catch (const std::bad_alloc&)
+		else
 		{
-			ccLog::Warning("[STL] Not enough memory: couldn't removed duplicated vertices!");
+			//DGM: normals can be per-vertex or per-triangle so it's better to let the user do it himself later
+			//Moreover it's not always good idea if the user doesn't want normals (especially in ccViewer!)
+			//if (mesh->computeNormals())
+			//	mesh->showNormals(true);
+			//else
+			//	ccLog::Warning("[STL] Failed to compute per-vertex normals...");
+			ccLog::Warning("[STL] Mesh has no normal! You can manually compute them (select it then call \"Edit > Normals > Compute\")");
 		}
-	}
 
-	NormsIndexesTableType* normals = mesh->getTriNormsTable();
-	if (normals)
-	{
-		//normals->link();
-		//mesh->addChild(normals); //automatically done by setTriNormsTable
-		mesh->showNormals(true);
+		meshVertices->setEnabled(false);
+		meshVertices->setLocked(false); //DGM: no need to lock it as it is only used by one mesh!
+		mesh->addChild(meshVertices);
+
+		container.addChild(mesh);
 	}
 	else
 	{
-		//DGM: normals can be per-vertex or per-triangle so it's better to let the user do it himself later
-		//Moreover it's not always good idea if the user doesn't want normals (especially in ccViewer!)
-		//if (mesh->computeNormals())
-		//	mesh->showNormals(true);
-		//else
-		//	ccLog::Warning("[STL] Failed to compute per-vertex normals...");
-		ccLog::Warning("[STL] Mesh has no normal! You can manually compute them (select it then call \"Edit > Normals > Compute\")");
+		delete mesh;
+		mesh = nullptr;
+		return CC_FERR_NO_LOAD;
 	}
-	vertices->setEnabled(false);
-	vertices->setLocked(false); //DGM: no need to lock it as it is only used by one mesh!
-	mesh->addChild(vertices);
-
-	container.addChild(mesh);
-
+	
 	return CC_FERR_NO_ERROR;
 }
 
@@ -637,6 +452,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 
 	unsigned pointCount = 0;
 	unsigned faceCount = 0;
+	static const unsigned s_defaultMemAllocCount = 65536;
 	bool normalWarningAlreadyDisplayed = false;
 	NormsIndexesTableType* normals = mesh->getTriNormsTable();
 
@@ -777,43 +593,15 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 				}
 			}
 
-			CCVector3 P = CCVector3::fromArray((Pd + Pshift).u);
+			CCVector3 P = (Pd + Pshift).toPC();
 
-			//look for existing vertices at the same place! (STL format is so dumb...)
-			{
-				//int equivalentIndex = -1;
-				//if (pointCount>2)
-				//{
-				//	//brute force!
-				//	for (int j=(int)pointCountBefore-1; j>=0; j--)
-				//	{
-				//		const CCVector3* Pj = vertices->getPoint(j);
-				//		if (Pj->x == P.x &&
-				//			Pj->y == P.y &&
-				//			Pj->z == P.z)
-				//		{
-				//			equivalentIndex = j;
-				//			break;
-				//		}
-				//	}
-				//}
+			//cloud is already full?
+			if (vertices->capacity() == pointCount && !vertices->reserve(pointCount + s_defaultMemAllocCount))
+				return CC_FERR_NOT_ENOUGH_MEMORY;
 
-				////new point ?
-				//if (equivalentIndex < 0)
-				{
-					//cloud is already full?
-					if (vertices->capacity() == pointCount && !vertices->reserve(pointCount + 1000))
-						return CC_FERR_NOT_ENOUGH_MEMORY;
-
-					//insert new point
-					vertIndexes[i] = pointCount++;
-					vertices->addPoint(P);
-				}
-				//else
-				//{
-				//	vertIndexes[i] = (unsigned)equivalentIndex;
-				//}
-			}
+			//insert new point
+			vertIndexes[i] = pointCount++;
+			vertices->addPoint(P);
 		}
 
 		//we have successfully read the 3 vertices
@@ -822,7 +610,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 			//mesh is full?
 			if (mesh->capacity() == faceCount)
 			{
-				if (!mesh->reserve(faceCount + 1000))
+				if (!mesh->reserve(faceCount + s_defaultMemAllocCount))
 				{
 					result = CC_FERR_NOT_ENOUGH_MEMORY;
 					break;
@@ -939,6 +727,8 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 
 	if (!mesh->reserve(faceCount))
 		return CC_FERR_NOT_ENOUGH_MEMORY;
+	if (!vertices->reserve(3 * faceCount))
+		return CC_FERR_NOT_ENOUGH_MEMORY;
 	NormsIndexesTableType* normals = mesh->getTriNormsTable();
 	if (normals && (!normals->reserveSafe(faceCount) || !mesh->reservePerTriangleNormalIndexes()))
 	{
@@ -957,7 +747,7 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 		pDlg->start();
 		QApplication::processEvents();
 	}
-	CCLib::NormalizedProgress nProgress(pDlg.data(), faceCount);
+	CCCoreLib::NormalizedProgress nProgress(pDlg.data(), faceCount);
 
 	//current vertex shift
 	CCVector3d Pshift(0, 0, 0);
@@ -972,7 +762,6 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 
 		//3 vertices
 		unsigned vertIndexes[3];
-		//		unsigned pointCountBefore=pointCount;
 		for (unsigned i = 0; i < 3; ++i)
 		{
 			//REAL32[3] Vertex 1,2 & 3
@@ -995,43 +784,11 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 				}
 			}
 
-			CCVector3 P = CCVector3::fromArray((Pd + Pshift).u);
+			CCVector3 P = (Pd + Pshift).toPC();
 
-			//look for existing vertices at the same place! (STL format is so dumb...)
-			{
-				//int equivalentIndex = -1;
-				//if (pointCount>2)
-				//{
-				//	//brute force!
-				//	for (int j=static_cast<int>(pointCountBefore)-1; j>=0; j--)
-				//	{
-				//		const CCVector3* Pj = vertices->getPoint(j);
-				//		if (Pj->x == P.x &&
-				//			Pj->y == P.y &&
-				//			Pj->z == P.z)
-				//		{
-				//			equivalentIndex = j;
-				//			break;
-				//		}
-				//	}
-				//}
-
-				////new point ?
-				//if (equivalentIndex < 0)
-				{
-					//cloud is already full?
-					if (vertices->capacity() == pointCount && !vertices->reserve(pointCount + 1000))
-						return CC_FERR_NOT_ENOUGH_MEMORY;
-
-					//insert new point
-					vertIndexes[i] = pointCount++;
-					vertices->addPoint(P);
-				}
-				//else
-				//{
-				//	vertIndexes[i] = static_cast<unsigned>(equivalentIndex);
-				//}
-			}
+			//insert new point
+			vertIndexes[i] = pointCount++;
+			vertices->addPoint(P);
 		}
 
 		//UINT16 Attribute byte count (not used)

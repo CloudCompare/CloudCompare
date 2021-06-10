@@ -90,7 +90,7 @@
          <string>pause</string>
         </property>
         <property name="icon">
-         <iconset resource="../icones.qrc">
+         <iconset resource="../icons.qrc">
           <normaloff>:/CC/images/smallPause.png</normaloff>:/CC/images/smallPause.png</iconset>
         </property>
         <property name="checkable">
@@ -113,7 +113,7 @@
          <string notr="true">...</string>
         </property>
         <property name="icon">
-         <iconset resource="../icones.qrc">
+         <iconset resource="../icons.qrc">
           <normaloff>:/CC/images/smallReset.png</normaloff>:/CC/images/smallReset.png</iconset>
         </property>
        </widget>
@@ -130,7 +130,7 @@
          <string notr="true">...</string>
         </property>
         <property name="icon">
-         <iconset resource="../icones.qrc">
+         <iconset resource="../icons.qrc">
           <normaloff>:/CC/images/smallValidate.png</normaloff>:/CC/images/smallValidate.png</iconset>
         </property>
        </widget>
@@ -147,7 +147,7 @@
          <string notr="true">...</string>
         </property>
         <property name="icon">
-         <iconset resource="../icones.qrc">
+         <iconset resource="../icons.qrc">
           <normaloff>:/CC/images/smallCancel.png</normaloff>:/CC/images/smallCancel.png</iconset>
         </property>
        </widget>
@@ -399,7 +399,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../icones.qrc"/>
+  <include location="../icons.qrc"/>
  </resources>
  <connections/>
 </ui>

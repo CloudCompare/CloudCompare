@@ -18,8 +18,6 @@
 #ifndef CC_VOLUME_CALC_TOOL_HEADER
 #define CC_VOLUME_CALC_TOOL_HEADER
 
-#include <ui_volumeCalcDlg.h>
-
 //Local
 #include "cc2.5DimEditor.h"
 
@@ -29,16 +27,19 @@
 class ccGenericPointCloud;
 class ccPointCloud;
 class ccPolyline;
-class QComboBox;
+
+namespace Ui {
+	class VolumeCalcDialog;
+}
 
 //! Volume calculation tool (dialog)
-class ccVolumeCalcTool : public QDialog, public cc2Point5DimEditor, public Ui::VolumeCalcDialog
+class ccVolumeCalcTool : public QDialog, public cc2Point5DimEditor
 {
 	Q_OBJECT
 
 public:
 	//! Default constructor
-	ccVolumeCalcTool(ccGenericPointCloud* cloud1, ccGenericPointCloud* cloud2, QWidget* parent = 0);
+	ccVolumeCalcTool(ccGenericPointCloud* cloud1, ccGenericPointCloud* cloud2, QWidget* parent = nullptr);
 
 	//! Destructor
 	~ccVolumeCalcTool();
@@ -98,7 +99,7 @@ public:
 												bool exportToOriginalCS);
 
 	
-	protected slots:
+protected:
 
 	//! Accepts the dialog and save settings
 	void saveSettingsAndAccept();
@@ -146,6 +147,12 @@ public:
 	//! Sets the displayed number precision
 	void setDisplayedNumberPrecision(int);
 
+	//! Returns the ground cloud (or constant height)
+	std::pair<ccGenericPointCloud*, double> getGroundCloud() const;
+
+	//! Returns the ceil cloud (or constant height)
+	std::pair<ccGenericPointCloud*, double> getCeilCloud() const;
+
 protected: //standard methods
 
 	//Inherited from cc2Point5DimEditor
@@ -174,6 +181,8 @@ protected: //members
 	/** Only valid if clipboardPushButton is enabled
 	**/
 	ReportInfo m_lastReport;
+	
+	Ui::VolumeCalcDialog* m_ui;
 };
 
 #endif //CC_VOLUME_CALC_TOOL_HEADER

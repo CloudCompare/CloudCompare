@@ -16,9 +16,12 @@
 //##########################################################################
 
 #include "matrixDisplayDlg.h"
+#include "ui_matrixDisplayDlg.h"
+
+#include "CCMath.h"
 
 //local
-#include "../ccPersistentSettings.h"
+#include "ccPersistentSettings.h"
 
 //qCC_gl
 #include <ccGuiParameters.h>
@@ -27,20 +30,25 @@
 #include "ccFileUtils.h"
 
 //Qt
+#include <QClipboard>
 #include <QFileDialog>
 #include <QSettings>
-#include <QClipboard>
 
 MatrixDisplayDlg::MatrixDisplayDlg(QWidget* parent/*=0*/)
 	: QWidget(parent)
-	, Ui::MatrixDisplayDlg()
+	, m_ui( new Ui::MatrixDisplayDlg )
 {
-	setupUi(this);
+	m_ui->setupUi(this);
 
-	connect(exportToAsciiPushButton, &QAbstractButton::clicked, this, &MatrixDisplayDlg::exportToASCII);
-	connect(exportToClipboardPushButton, &QAbstractButton::clicked, this, &MatrixDisplayDlg::exportToClipboard);
+	connect(m_ui->exportToAsciiPushButton, &QAbstractButton::clicked, this, &MatrixDisplayDlg::exportToASCII);
+	connect(m_ui->exportToClipboardPushButton, &QAbstractButton::clicked, this, &MatrixDisplayDlg::exportToClipboard);
 
 	show();
+}
+
+MatrixDisplayDlg::~MatrixDisplayDlg()
+{
+	delete m_ui;
 }
 
 void MatrixDisplayDlg::fillDialogWith(const ccGLMatrix& mat)
@@ -50,15 +58,16 @@ void MatrixDisplayDlg::fillDialogWith(const ccGLMatrix& mat)
 	int precision = ccGui::Parameters().displayedNumPrecision;
 
 	//display as 4x4 matrix
-	maxTextEdit->setText(mat.toString(precision));
+	m_ui->maxTextEdit->setText(mat.toString(precision));
 
 	//display as rotation vector/angle
 	{
 		PointCoordinateType angle_rad;
-		CCVector3 axis3D, t3D;
+		CCVector3 axis3D;
+		CCVector3 t3D;
 		mat.getParameters(angle_rad, axis3D, t3D);
 
-		fillDialogWith(CCVector3d::fromArray(axis3D.u),angle_rad,CCVector3d::fromArray(t3D.u),precision);
+		fillDialogWith(axis3D, angle_rad, t3D, precision);
 	}
 }
 
@@ -69,12 +78,13 @@ void MatrixDisplayDlg::fillDialogWith(const ccGLMatrixd& mat)
 	int precision = ccGui::Parameters().displayedNumPrecision;
 
 	//display as 4x4 matrix
-	maxTextEdit->setText(mat.toString(precision));
+	m_ui->maxTextEdit->setText(mat.toString(precision));
 
 	//display as rotation vector/angle
 	{
 		double angle_rad;
-		CCVector3d axis3D, t3D;
+		CCVector3d axis3D;
+		CCVector3d t3D;
 		mat.getParameters(angle_rad, axis3D, t3D);
 
 		fillDialogWith(axis3D,angle_rad,t3D,precision);
@@ -84,23 +94,23 @@ void MatrixDisplayDlg::fillDialogWith(const ccGLMatrixd& mat)
 void MatrixDisplayDlg::fillDialogWith(const CCVector3d& axis, double angle_rad, const CCVector3d& T, int precision)
 {
 	//center position
-	QString centerStr = QString("%0 ; %1 ; %2").arg(T.x,0,'f',precision).arg(T.y,0,'f',precision).arg(T.z,0,'f',precision);
+	QString centerStr = QStringLiteral("%0 ; %1 ; %2").arg(T.x,0,'f',precision).arg(T.y,0,'f',precision).arg(T.z,0,'f',precision);
 	//rotation axis
-	QString axisStr = QString("%0 ; %1 ; %2").arg(axis.x,0,'f',precision).arg(axis.y,0,'f',precision).arg(axis.z,0,'f',precision);
+	QString axisStr = QStringLiteral("%0 ; %1 ; %2").arg(axis.x,0,'f',precision).arg(axis.y,0,'f',precision).arg(axis.z,0,'f',precision);
 	//rotation angle
-	QString angleStr = QString("%1 deg.").arg(angle_rad*CC_RAD_TO_DEG,0,'f',precision);
+	QString angleStr = QStringLiteral("%1 deg.").arg( CCCoreLib::RadiansToDegrees( angle_rad ), 0, 'f', precision );
 
-	axisLabel->setText(axisStr);
-	angleLabel->setText(angleStr);
-	centerLabel->setText(centerStr);
+	m_ui->axisLabel->setText(axisStr);
+	m_ui->angleLabel->setText(angleStr);
+	m_ui->centerLabel->setText(centerStr);
 }
 
 void MatrixDisplayDlg::clear()
 {
-	maxTextEdit->setText("Invalid transformation");
-	axisLabel->setText(QString());
-	angleLabel->setText(QString());
-	centerLabel->setText(QString());
+	m_ui->maxTextEdit->setText("Invalid transformation");
+	m_ui->axisLabel->setText(QString());
+	m_ui->angleLabel->setText(QString());
+	m_ui->centerLabel->setText(QString());
 	m_mat.toZero();
 }
 

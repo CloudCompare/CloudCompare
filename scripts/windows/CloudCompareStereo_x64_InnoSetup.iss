@@ -2,15 +2,15 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "CloudCompareStereo"
-#define MyAppVersion "2.10"
+#define MyAppVersion "2.12.alpha"
 #define MyAppPublisher "Daniel Girardeau-Montaut"
 #define MyAppURL "http://www.cloudcompare.org/"
 #define MyAppExeName "CloudCompare.exe"
 #define MyVCRedistPath "E:\These\C++\CloudCompare\vc_redist"
 #define MyFaroRedistPath "E:\These\C++\Faro\redist"
-#define MyFaroRedistExe "E1800_FARO_LS_SDK_7.1.1.81_x64_Setup.exe"
-#define MyCCPath "E:\These\C++\CloudCompare\bin_x64_msvc_2017\CloudCompareStereo"
-#define MyOutputDir "E:\These\C++\CloudCompare\bin_x64_msvc_2017"
+#define MyFaroRedistExe "FARO LS 2020.0.4.5330 Setup.exe"
+#define MyCCPath "E:\These\C++\CloudCompare\new_bin_x64_msvc_2017\CloudCompareStereo"
+#define MyOutputDir "E:\These\C++\CloudCompare\new_bin_x64_msvc_2017"
 #define MyCreationDate GetDateTimeString('mm_dd_yyyy', '', '')
 
 [Setup]
@@ -54,8 +54,10 @@ Name: "StartMenuEntry" ; Description: "Install Faro I/O plugin (to load FWS/FLS 
 [Files]
 Source: "{#MyCCPath}\CloudCompare.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#MyCCPath}\*"; Excludes: "*.manifest,QBRGM*.dll,QFARO*.dll"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-; DotProduct support
-Source: "{#MyVCRedistPath}\vcredist_2017_x64.exe"; DestDir: {tmp}; Flags: deleteafterinstall 64bit;
+; Unknown dependency support:)
+Source: "{#MyVCRedistPath}\vcredist_2013_x64.exe"; DestDir: {tmp}; Flags: deleteafterinstall 64bit;
+; All other Visual Studio dependencies at once: 2015, 2017 and 2019
+Source: "{#MyVCRedistPath}\vcredist_all_x64.exe"; DestDir: {tmp}; Flags: deleteafterinstall 64bit;
 ; FARO LS support
 Source: "{#MyFaroRedistPath}\x64\{#MyFaroRedistExe}"; DestDir: {tmp}; Flags: deleteafterinstall 64bit; Check: WithFaro
 Source: "{#MyFaroRedistPath}\x64\{#MyAppExeName}.manifest"; DestDir: "{app}"; Flags: ignoreversion; Check: WithFaro
@@ -68,7 +70,8 @@ Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\{#MyAppName}"; Fil
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
-Filename: "{tmp}\vcredist_2017_x64.exe"; Parameters: "/q"
+Filename: "{tmp}\vcredist_2013_x64.exe"; Parameters: "/install /quiet /norestart"
+Filename: "{tmp}\vcredist_all_x64.exe"; Parameters: "/install /quiet /norestart"
 Filename: "{tmp}\{#MyFaroRedistExe}"; Check: WithFaro
 
 [Code]

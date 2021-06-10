@@ -23,7 +23,7 @@
 #include "ccOverlayDialog.h"
 #include "ccPickingListener.h"
 
-//CCLib
+//CCCoreLib
 #include <PointProjectionTools.h>
 
 //qCC_db
@@ -78,7 +78,7 @@ public:
 	//! Inherited from ccPickingListener
 	void onItemPicked(const PickedItem& pi) override;
 
-protected slots:
+protected:
 
 	//! Slot called to change aligned entities visibility
 	void showAlignedEntities(bool);
@@ -111,14 +111,17 @@ protected:
 	//! Enables (or not) buttons depending on the number of points in both lists
 	void onPointCountChanged();
 
-	//! Calls Horn registration (CCLib::HornRegistrationTools)
-	bool callHornRegistration(CCLib::PointProjectionTools::Transformation& trans, double& rms, bool autoUpdateTab);
+	//! Calls Horn registration (CCCoreLib::HornRegistrationTools)
+	bool callHornRegistration(CCCoreLib::PointProjectionTools::Transformation& trans, double& rms, bool autoUpdateTab);
 
 	//! Clears the RMS rows
 	void clearRMSColumns();
 
 	//! Adds a point to one of the table (ref./aligned)
-	void addPointToTable(QTableWidget* tableWidget, int rowIndex, const CCVector3d& P, QString pointLabel);
+	void addPointToTable(	QTableWidget* tableWidget,
+							int rowIndex,
+							const CCVector3d& P,
+							QString pointLabel );
 
 	//! Converts a picked point to a sphere center (if necessary)
 	/** \param P input point (may be converted to a sphere center)
@@ -160,7 +163,15 @@ protected:
 
 		bool isShifted;
 		CCVector3d shift;
+		double scale = 1.0;
 	};
+
+	//! Removes a label (and restore its associated label if any)
+	void removeLabel(	ccPointCloud& points,
+						unsigned childIndex,
+						const EntityContexts& entities);
+
+protected: //members
 
 	//! Aligned entity
 	EntityContexts m_alignedEntities;

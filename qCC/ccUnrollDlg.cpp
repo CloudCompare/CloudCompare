@@ -16,67 +16,73 @@
 //##########################################################################
 
 #include "ccUnrollDlg.h"
+#include "ui_unrollDlg.h"
 
 //Qt
 #include <QSettings>
 
 ccUnrollDlg::ccUnrollDlg(QWidget* parent/*=0*/)
 	: QDialog(parent)
-	, Ui::UnrollDialog()
+	, m_ui( new Ui::UnrollDialog )
 {
-	setupUi(this);
+	m_ui->setupUi(this);
 
-	connect(checkBoxAuto,			 &QCheckBox::stateChanged,        this, &ccUnrollDlg::axisAutoStateChanged);
-	connect(comboBoxUnrollShapeType, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccUnrollDlg::shapeTypeChanged);
-	connect(comboBoxAxisDimension,   static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccUnrollDlg::axisDimensionChanged);
+	connect(m_ui->checkBoxAuto, &QCheckBox::stateChanged, this, &ccUnrollDlg::axisAutoStateChanged);
+	connect(m_ui->comboBoxUnrollShapeType, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccUnrollDlg::shapeTypeChanged);
+	connect(m_ui->comboBoxAxisDimension, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccUnrollDlg::axisDimensionChanged);
 
-	checkBoxAuto->setChecked(true);
+	m_ui->checkBoxAuto->setChecked(true);
 
-	shapeTypeChanged(comboBoxUnrollShapeType->currentIndex());
-	axisDimensionChanged(comboBoxAxisDimension->currentIndex());
+	shapeTypeChanged(m_ui->comboBoxUnrollShapeType->currentIndex());
+	axisDimensionChanged(m_ui->comboBoxAxisDimension->currentIndex());
+}
+
+ccUnrollDlg::~ccUnrollDlg()
+{
+	delete m_ui;
 }
 
 ccPointCloud::UnrollMode ccUnrollDlg::getType() const
 {
-	return static_cast<ccPointCloud::UnrollMode>(comboBoxUnrollShapeType->currentIndex());
+	return static_cast<ccPointCloud::UnrollMode>(m_ui->comboBoxUnrollShapeType->currentIndex());
 }
 
 int ccUnrollDlg::getAxisDimension() const
 {
-	return comboBoxAxisDimension->currentIndex();
+	return m_ui->comboBoxAxisDimension->currentIndex();
 }
  
 bool ccUnrollDlg::isAxisPositionAuto() const
 {
-	return (checkBoxAuto->checkState() == Qt::Checked);
+	return (m_ui->checkBoxAuto->checkState() == Qt::Checked);
 }
 
 void ccUnrollDlg::getAngleRange(double& start_deg, double& stop_deg) const
 {
-	start_deg = startAngleDoubleSpinBox->value();
-	stop_deg = stopAngleDoubleSpinBox->value();
+	start_deg = m_ui->startAngleDoubleSpinBox->value();
+	stop_deg = m_ui->stopAngleDoubleSpinBox->value();
 }
 
 CCVector3 ccUnrollDlg::getAxisPosition() const
 {
-	return CCVector3(	static_cast<PointCoordinateType>(doubleSpinBoxAxisX->value()),
-						static_cast<PointCoordinateType>(doubleSpinBoxAxisY->value()),
-						static_cast<PointCoordinateType>(doubleSpinBoxAxisZ->value()));
+	return CCVector3(	static_cast<PointCoordinateType>(m_ui->doubleSpinBoxAxisX->value()),
+						static_cast<PointCoordinateType>(m_ui->doubleSpinBoxAxisY->value()),
+						static_cast<PointCoordinateType>(m_ui->doubleSpinBoxAxisZ->value()));
 }
 
 double ccUnrollDlg::getRadius() const
 {
-	return radiusDoubleSpinBox->value();
+	return m_ui->radiusDoubleSpinBox->value();
 }
 
 double ccUnrollDlg::getConeHalfAngle() const
 {
-	return halfAngleDoubleSpinBox->value();
+	return m_ui->halfAngleDoubleSpinBox->value();
 }
 
 bool ccUnrollDlg::exportDeviationSF() const
 {
-	return exportDeviationSFCheckBox->isChecked();
+	return m_ui->exportDeviationSFCheckBox->isChecked();
 }
 
 void ccUnrollDlg::shapeTypeChanged(int index)
@@ -85,40 +91,40 @@ void ccUnrollDlg::shapeTypeChanged(int index)
 	{
 	case ccPointCloud::CYLINDER: //cylinder
 	{
-		angleFrame->setVisible(false);
-		autoCenterFrame->setVisible(true);
-		radiusFrame->setVisible(true);
-		groupBoxAxisPosition->setTitle("Axis position");
-		radiusLabel->setText("Radius");
-		axisAutoStateChanged(checkBoxAuto->checkState());
+		m_ui->angleFrame->setVisible(false);
+		m_ui->autoCenterFrame->setVisible(true);
+		m_ui->radiusFrame->setVisible(true);
+		m_ui->groupBoxAxisPosition->setTitle("Axis position");
+		m_ui->radiusLabel->setText("Radius");
+		axisAutoStateChanged(m_ui->checkBoxAuto->checkState());
 	}
 	break;
 	case ccPointCloud::CONE: //cone
 	{
-		angleFrame->setVisible(true);
-		autoCenterFrame->setVisible(false);
-		radiusFrame->setVisible(false);
-		radiusLabel->setText("Base radius");
-		groupBoxAxisPosition->setTitle("Cone apex");
+		m_ui->angleFrame->setVisible(true);
+		m_ui->autoCenterFrame->setVisible(false);
+		m_ui->radiusFrame->setVisible(false);
+		m_ui->radiusLabel->setText("Base radius");
+		m_ui->groupBoxAxisPosition->setTitle("Cone apex");
 		axisAutoStateChanged(Qt::Unchecked);
 		//may be disabled if we were in cylinder mode previously
-		doubleSpinBoxAxisX->setDisabled(false);
-		doubleSpinBoxAxisY->setDisabled(false);
-		doubleSpinBoxAxisZ->setDisabled(false);
+		m_ui->doubleSpinBoxAxisX->setDisabled(false);
+		m_ui->doubleSpinBoxAxisY->setDisabled(false);
+		m_ui->doubleSpinBoxAxisZ->setDisabled(false);
 	}
 	break;
 	case ccPointCloud::STRAIGHTENED_CONE: //straightened cone (fixed radius)
 	case ccPointCloud::STRAIGHTENED_CONE2: //straightened cone 2
 	{
-		angleFrame->setVisible(true);
-		radiusFrame->setVisible(true);
-		autoCenterFrame->setVisible(false);
-		groupBoxAxisPosition->setTitle("Cone apex");
+		m_ui->angleFrame->setVisible(true);
+		m_ui->radiusFrame->setVisible(true);
+		m_ui->autoCenterFrame->setVisible(false);
+		m_ui->groupBoxAxisPosition->setTitle("Cone apex");
 		axisAutoStateChanged(Qt::Unchecked);
 		//may be disabled if we were in cylinder mode previously
-		doubleSpinBoxAxisX->setDisabled(false);
-		doubleSpinBoxAxisY->setDisabled(false);
-		doubleSpinBoxAxisZ->setDisabled(false);
+		m_ui->doubleSpinBoxAxisX->setDisabled(false);
+		m_ui->doubleSpinBoxAxisY->setDisabled(false);
+		m_ui->doubleSpinBoxAxisZ->setDisabled(false);
 	}
 	break;
 	};
@@ -128,27 +134,28 @@ void ccUnrollDlg::axisAutoStateChanged(int checkState)
 {
 	if (checkState == Qt::Unchecked)
 	{
-		axisFrame->setEnabled(true);
-		axisDimensionChanged(comboBoxAxisDimension->currentIndex());
+		m_ui->axisFrame->setEnabled(true);
+		axisDimensionChanged(m_ui->comboBoxAxisDimension->currentIndex());
 	}
 	else
 	{
-		axisFrame->setEnabled(false);
+		m_ui->axisFrame->setEnabled(false);
 	}
 }
 
 void ccUnrollDlg::axisDimensionChanged(int index)
 {
 	//if axis is in auto mode, no need to change anything
-	if (comboBoxUnrollShapeType->currentIndex() != 0 || checkBoxAuto->checkState() == Qt::Checked)
+	if ( (m_ui->comboBoxUnrollShapeType->currentIndex() != 0)
+		 || (m_ui->checkBoxAuto->checkState() == Qt::Checked) )
 	{
 		return;
 	}
 
 	//in 'cylinder' mode, we hide the axis coordinate that is not needed
-	doubleSpinBoxAxisX->setDisabled(index == 0);
-	doubleSpinBoxAxisY->setDisabled(index == 1);
-	doubleSpinBoxAxisZ->setDisabled(index == 2);
+	m_ui->doubleSpinBoxAxisX->setDisabled(index == 0);
+	m_ui->doubleSpinBoxAxisY->setDisabled(index == 1);
+	m_ui->doubleSpinBoxAxisZ->setDisabled(index == 2);
 }
 
 //semi-persistent settings
@@ -161,17 +168,17 @@ void ccUnrollDlg::toPersistentSettings() const
 	QSettings settings;
 	settings.beginGroup("Unroll");
 	{
-		settings.setValue("shapeType",			comboBoxUnrollShapeType->currentIndex());
-		settings.setValue("axisDimension",		comboBoxAxisDimension->currentIndex());
-		settings.setValue("angle",				halfAngleDoubleSpinBox->value());
-		settings.setValue("radius",				radiusDoubleSpinBox->value());
-		settings.setValue("autoCenter",			checkBoxAuto->isChecked());
-		settings.setValue("exportDeviationSF",	exportDeviationSFCheckBox->isChecked());
+		settings.setValue("shapeType",			m_ui->comboBoxUnrollShapeType->currentIndex());
+		settings.setValue("axisDimension",		m_ui->comboBoxAxisDimension->currentIndex());
+		settings.setValue("angle",				m_ui->halfAngleDoubleSpinBox->value());
+		settings.setValue("radius",				m_ui->radiusDoubleSpinBox->value());
+		settings.setValue("autoCenter",			m_ui->checkBoxAuto->isChecked());
+		settings.setValue("exportDeviationSF",	m_ui->exportDeviationSFCheckBox->isChecked());
 
 		//save the axis center as semi-persistent only
-		s_axisCenter.x = doubleSpinBoxAxisX->value();
-		s_axisCenter.y = doubleSpinBoxAxisY->value();
-		s_axisCenter.z = doubleSpinBoxAxisZ->value();
+		s_axisCenter.x = m_ui->doubleSpinBoxAxisX->value();
+		s_axisCenter.y = m_ui->doubleSpinBoxAxisY->value();
+		s_axisCenter.z = m_ui->doubleSpinBoxAxisZ->value();
 
 		getAngleRange(s_startAngle_deg, s_stopAngle_deg);
 	}
@@ -183,26 +190,26 @@ void ccUnrollDlg::fromPersistentSettings()
 	QSettings settings;
 	settings.beginGroup("Unroll");
 	{
-		int shapeType   = settings.value("shapeType",     comboBoxUnrollShapeType->currentIndex()).toInt();
-		int axisDim     = settings.value("axisDimension", comboBoxAxisDimension->currentIndex()).toInt();
-		double angle    = settings.value("angle",         halfAngleDoubleSpinBox->value()).toDouble();
-		double radius   = settings.value("radius",        radiusDoubleSpinBox->value()).toDouble();
-		bool autoCenter = settings.value("autoCenter",    checkBoxAuto->isChecked()).toBool();
-		bool exportDeviationSF = settings.value("exportDeviationSF", exportDeviationSFCheckBox->isChecked()).toBool();
+		int shapeType   = settings.value("shapeType",     m_ui->comboBoxUnrollShapeType->currentIndex()).toInt();
+		int axisDim     = settings.value("axisDimension", m_ui->comboBoxAxisDimension->currentIndex()).toInt();
+		double angle    = settings.value("angle",         m_ui->halfAngleDoubleSpinBox->value()).toDouble();
+		double radius   = settings.value("radius",        m_ui->radiusDoubleSpinBox->value()).toDouble();
+		bool autoCenter = settings.value("autoCenter",    m_ui->checkBoxAuto->isChecked()).toBool();
+		bool exportDeviationSF = settings.value("exportDeviationSF", m_ui->exportDeviationSFCheckBox->isChecked()).toBool();
 
-		comboBoxUnrollShapeType->setCurrentIndex(shapeType);
-		comboBoxAxisDimension->setCurrentIndex(axisDim);
-		halfAngleDoubleSpinBox->setValue(angle);
-		radiusDoubleSpinBox->setValue(radius);
-		checkBoxAuto->setChecked(autoCenter);
-		exportDeviationSFCheckBox->setChecked(exportDeviationSF);
+		m_ui->comboBoxUnrollShapeType->setCurrentIndex(shapeType);
+		m_ui->comboBoxAxisDimension->setCurrentIndex(axisDim);
+		m_ui->halfAngleDoubleSpinBox->setValue(angle);
+		m_ui->radiusDoubleSpinBox->setValue(radius);
+		m_ui->checkBoxAuto->setChecked(autoCenter);
+		m_ui->exportDeviationSFCheckBox->setChecked(exportDeviationSF);
 
-		doubleSpinBoxAxisX->setValue(s_axisCenter.x);
-		doubleSpinBoxAxisY->setValue(s_axisCenter.y);
-		doubleSpinBoxAxisZ->setValue(s_axisCenter.z);
+		m_ui->doubleSpinBoxAxisX->setValue(s_axisCenter.x);
+		m_ui->doubleSpinBoxAxisY->setValue(s_axisCenter.y);
+		m_ui->doubleSpinBoxAxisZ->setValue(s_axisCenter.z);
 
-		startAngleDoubleSpinBox->setValue(s_startAngle_deg);
-		stopAngleDoubleSpinBox ->setValue(s_stopAngle_deg);
+		m_ui->startAngleDoubleSpinBox->setValue(s_startAngle_deg);
+		m_ui->stopAngleDoubleSpinBox ->setValue(s_stopAngle_deg);
 	}
 	settings.endGroup();
 }

@@ -70,7 +70,7 @@ protected:
 
 	MLSDialog* m_dialog;
 	bool m_dialogHasParent;
-	MLSParameters * m_parameters; //We directly store all the parameters here
+	MLSParameters m_parameters; //We directly store all the parameters here
 };
 
 #endif // MLSSMOOTHINGUPSAMPLING_H

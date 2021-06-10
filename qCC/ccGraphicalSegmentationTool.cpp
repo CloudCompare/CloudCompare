@@ -22,7 +22,7 @@
 #include "ccItemSelectionDlg.h"
 #include "ccReservedIDs.h"
 
-//CCLib
+//CCCoreLib
 #include <ManualSegmentationTools.h>
 #include <SquareMatrix.h>
 
@@ -51,8 +51,8 @@ ccGraphicalSegmentationTool::ccGraphicalSegmentationTool(QWidget* parent)
 	, Ui::GraphicalSegmentationDlg()
 	, m_somethingHasChanged(false)
 	, m_state(0)
-	, m_segmentationPoly(0)
-	, m_polyVertices(0)
+	, m_segmentationPoly(nullptr)
+	, m_polyVertices(nullptr)
 	, m_rectangularSelection(false)
 	, m_deleteHiddenParts(false)
 {
@@ -123,11 +123,11 @@ ccGraphicalSegmentationTool::~ccGraphicalSegmentationTool()
 {
 	if (m_segmentationPoly)
 		delete m_segmentationPoly;
-	m_segmentationPoly = 0;
+	m_segmentationPoly = nullptr;
 
 	if (m_polyVertices)
 		delete m_polyVertices;
-	m_polyVertices = 0;
+	m_polyVertices = nullptr;
 }
 
 void ccGraphicalSegmentationTool::onShortcutTriggered(int key)
@@ -185,7 +185,7 @@ bool ccGraphicalSegmentationTool::linkWith(ccGLWindow* win)
 		oldWin->disconnect(this);
 		if (m_segmentationPoly)
 		{
-			m_segmentationPoly->setDisplay(0);
+			m_segmentationPoly->setDisplay(nullptr);
 		}
 	}
 	
@@ -257,7 +257,7 @@ void ccGraphicalSegmentationTool::stop(bool accepted)
 											2,
 											ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
 
-		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA());
+		m_associatedWin->setInteractionMode(ccGLWindow::MODE_TRANSFORM_CAMERA);
 		m_associatedWin->setPickingMode(ccGLWindow::DEFAULT_PICKING);
 		m_associatedWin->setUnclosable(false);
 		m_associatedWin->removeFromOwnDB(m_segmentationPoly);
@@ -313,7 +313,7 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* entity)
 			ccHObject::Container meshes;
 			if (cloud->filterChildren(meshes,false,CC_TYPES::MESH) != 0)
 			{
-				for (unsigned i=0; i<meshes.size(); ++i)
+				for (unsigned i = 0; i < meshes.size(); ++i)
 					if (ccHObjectCaster::ToGenericMesh(meshes[i])->getAssociatedCloud() == cloud)
 					{
 						ccLog::Warning(QString("[Graphical Segmentation Tool] Can't segment mesh vertices '%1' directly! Select its child mesh instead!").arg(entity->getName()));
@@ -326,7 +326,7 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* entity)
 		m_toSegment.insert(cloud);
 
 		//automatically add cloud's children
-		for (unsigned i=0; i<entity->getChildrenNumber(); ++i)
+		for (unsigned i = 0; i < entity->getChildrenNumber(); ++i)
 			result |= addEntity(entity->getChild(i));
 	}
 	else if (entity->isKindOf(CC_TYPES::MESH))
@@ -371,7 +371,7 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* entity)
 	else if (entity->isA(CC_TYPES::HIERARCHY_OBJECT))
 	{
 		//automatically add entity's children
-		for (unsigned i=0;i<entity->getChildrenNumber();++i)
+		for (unsigned i = 0; i < entity->getChildrenNumber(); ++i)
 			result |= addEntity(entity->getChild(i));
 	}
 
@@ -417,14 +417,14 @@ void ccGraphicalSegmentationTool::updatePolyLine(int x, int y, Qt::MouseButtons 
 		CCVector3* B = const_cast<CCVector3*>(m_polyVertices->getPointPersistentPtr(1));
 		CCVector3* C = const_cast<CCVector3*>(m_polyVertices->getPointPersistentPtr(2));
 		CCVector3* D = const_cast<CCVector3*>(m_polyVertices->getPointPersistentPtr(3));
-		*B = CCVector3(A->x,P.y,0);
+		*B = CCVector3(A->x, P.y, 0);
 		*C = P;
-		*D = CCVector3(P.x,A->y,0);
+		*D = CCVector3(P.x, A->y, 0);
 
 		if (vertCount != 4)
 		{
 			m_segmentationPoly->clear();
-			if (!m_segmentationPoly->addPointIndex(0,4))
+			if (!m_segmentationPoly->addPointIndex(0, 4))
 			{
 				ccLog::Error("Out of memory!");
 				allowPolylineExport(false);
@@ -438,7 +438,7 @@ void ccGraphicalSegmentationTool::updatePolyLine(int x, int y, Qt::MouseButtons 
 		if (vertCount < 2)
 			return;
 		//we replace last point by the current one
-		CCVector3* lastP = const_cast<CCVector3*>(m_polyVertices->getPointPersistentPtr(vertCount-1));
+		CCVector3* lastP = const_cast<CCVector3*>(m_polyVertices->getPointPersistentPtr(vertCount - 1));
 		*lastP = P;
 	}
 
@@ -454,6 +454,12 @@ void ccGraphicalSegmentationTool::addPointToPolyline(int x, int y)
 	if (!m_associatedWin)
 	{
 		assert(false);
+		return;
+	}
+
+	if (x < 0 || y < 0 || x >= m_associatedWin->qtWidth() || y >= m_associatedWin->qtHeight())
+	{
+		//ignore clicks outside of the 3D view
 		return;
 	}
 
@@ -532,6 +538,10 @@ void ccGraphicalSegmentationTool::addPointToPolyline(int x, int y)
 		}
 	}
 
+	//DGM: to increase the poll rate of the mouse movements in ccGLWindow::mouseMoveEvent
+	//we have to completely grab the mouse focus!
+	//(the only way to take back the control is to right-click now...)
+	m_associatedWin->grabMouse();
 	m_associatedWin->redraw(true, false);
 }
 
@@ -561,7 +571,10 @@ void ccGraphicalSegmentationTool::closeRectangle()
 	m_state &= (~RUNNING);
 
 	if (m_associatedWin)
+	{
+		m_associatedWin->releaseMouse();
 		m_associatedWin->redraw(true, false);
+	}
 }
 
 void ccGraphicalSegmentationTool::closePolyLine(int, int)
@@ -569,6 +582,11 @@ void ccGraphicalSegmentationTool::closePolyLine(int, int)
 	//only for polyline in RUNNING mode
 	if ((m_state & POLYLINE) == 0 || (m_state & RUNNING) == 0)
 		return;
+
+	if (m_associatedWin)
+	{
+		m_associatedWin->releaseMouse();
+	}
 
 	assert(m_segmentationPoly);
 	unsigned vertCount = m_segmentationPoly->size();
@@ -630,6 +648,29 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside)
 	const double half_w = camera.viewport[2] / 2.0;
 	const double half_h = camera.viewport[3] / 2.0;
 
+	//check if the polyline is totally inside the frustum or not
+	bool polyInsideFrustum = true;
+	{
+		int vertexCount = static_cast<int>(m_segmentationPoly->size());
+#if defined(_OPENMP)
+#pragma omp parallel for
+#endif
+		for (int i = 0; i < vertexCount; ++i)
+		{
+			const CCVector3* P = m_segmentationPoly->getPoint(i);
+
+			CCVector3d Q2D;
+			bool pointInFrustum = false;
+			camera.project(*P, Q2D, &pointInFrustum);
+
+			if (!pointInFrustum)
+			{
+				polyInsideFrustum = false;
+			}
+		}
+	}
+	ccLog::PrintDebug("Polyline is fully inside frustrum: " + QString(polyInsideFrustum ? "Yes" : "No"));
+
 	//for each selected entity
 	for (QSet<ccHObject*>::const_iterator p = m_toSegment.constBegin(); p != m_toSegment.constEnd(); ++p)
 	{
@@ -639,27 +680,32 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside)
 		ccGenericPointCloud::VisibilityTableType& visibilityArray = cloud->getTheVisibilityArray();
 		assert(!visibilityArray.empty());
 
-		unsigned cloudSize = cloud->size();
+		int cloudSize = static_cast<int>(cloud->size());
 
 		//we project each point and we check if it falls inside the segmentation polyline
 #if defined(_OPENMP)
 #pragma omp parallel for
 #endif
-		for (int i = 0; i < static_cast<int>(cloudSize); ++i)
+		for (int i = 0; i < cloudSize; ++i)
 		{
-			if (visibilityArray[i] == POINT_VISIBLE)
+			if (visibilityArray[i] == CCCoreLib::POINT_VISIBLE)
 			{
 				const CCVector3* P3D = cloud->getPoint(i);
 
 				CCVector3d Q2D;
-				bool pointInFrustrum = camera.project(*P3D, Q2D, true);
+				bool pointInFrustum = false;
+				camera.project(*P3D, Q2D, &pointInFrustum);
 
-				CCVector2 P2D(	static_cast<PointCoordinateType>(Q2D.x-half_w),
-								static_cast<PointCoordinateType>(Q2D.y-half_h) );
-				
-				bool pointInside = pointInFrustrum && CCLib::ManualSegmentationTools::isPointInsidePoly(P2D, m_segmentationPoly);
+				bool pointInside = false;
+				if (pointInFrustum || !polyInsideFrustum) //we can only skip the test if the polyline is fully inside the frustum
+				{
+					CCVector2 P2D(	static_cast<PointCoordinateType>(Q2D.x - half_w),
+									static_cast<PointCoordinateType>(Q2D.y - half_h));
 
-				visibilityArray[i] = (keepPointsInside != pointInside ? POINT_HIDDEN : POINT_VISIBLE);
+					pointInside = CCCoreLib::ManualSegmentationTools::isPointInsidePoly(P2D, m_segmentationPoly);
+				}
+
+				visibilityArray[i] = (keepPointsInside != pointInside ?CCCoreLib:: POINT_HIDDEN : CCCoreLib::POINT_VISIBLE);
 			}
 		}
 	}
@@ -687,7 +733,7 @@ void ccGraphicalSegmentationTool::pauseSegmentationMode(bool state)
 			m_polyVertices->clear();
 			allowPolylineExport(false);
 		}
-		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA());
+		m_associatedWin->setInteractionMode(ccGLWindow::MODE_TRANSFORM_CAMERA);
 		m_associatedWin->displayNewMessage("Segmentation [PAUSED]", ccGLWindow::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
 		m_associatedWin->displayNewMessage("Unpause to segment again", ccGLWindow::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
 	}
@@ -796,7 +842,7 @@ void ccGraphicalSegmentationTool::doActionUseExistingPolyline()
 				}
 			}
 
-			CCLib::GenericIndexedCloudPersist* vertices = poly->getAssociatedCloud();
+			CCCoreLib::GenericIndexedCloudPersist* vertices = poly->getAssociatedCloud();
 			bool mode3D = !poly->is2DMode();
 
 			//viewing parameters (for conversion from 3D to 2D)
@@ -905,7 +951,7 @@ void ccGraphicalSegmentationTool::doExportSegmentationPolyline()
 			const double half_h = camera.viewport[3] / 2.0;
 
 			//project the 2D polyline in 3D
-			CCLib::GenericIndexedCloudPersist* vertices = poly->getAssociatedCloud();
+			CCCoreLib::GenericIndexedCloudPersist* vertices = poly->getAssociatedCloud();
 			ccPointCloud* verticesPC = dynamic_cast<ccPointCloud*>(vertices);
 			if (verticesPC)
 			{
@@ -915,7 +961,7 @@ void ccGraphicalSegmentationTool::doExportSegmentationPolyline()
 					CCVector3d Pd(half_w + Pscreen->x, half_h + Pscreen->y, 0/*Pscreen->z*/);
 					CCVector3d Q3D;
 					camera.unproject(Pd, Q3D);
-					*Pscreen = CCVector3::fromArray(Q3D.u);
+					*Pscreen = Q3D.toPC();
 				}
 				verticesPC->invalidateBoundingBox();
 			}

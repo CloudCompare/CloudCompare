@@ -1,21 +1,14 @@
-cmake_minimum_required(VERSION 3.0)
+option( PLUGIN_STANDARD_QHPR "Install qHPR plugin" OFF )
 
-option( PLUGIN_STANDARD_QHPR "Check to install qHPR plugin" OFF )
-
-# CloudCompare 'HPR' plugin
-if (PLUGIN_STANDARD_QHPR)
-    project( QHPR_PLUGIN )
-    	
-	include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
-
-	include_directories( src )
+if( PLUGIN_STANDARD_QHPR )
+	project( QHPR_PLUGIN )
+		
+	AddPlugin( NAME ${PROJECT_NAME} )
 	
+	add_subdirectory( extern/qhull EXCLUDE_FROM_ALL )
+	add_subdirectory( include )
 	add_subdirectory( src )
-	add_subdirectory( src/qhull/src2015.2 )
 	add_subdirectory( ui )
-	
-	include( ../../../CMakePluginTpl.cmake )
-    
-    target_link_libraries( ${PROJECT_NAME} qhull )
-    include_directories( ${QHULL_LIB_INCLUDE_DIR} )
+		
+	target_link_libraries( ${PROJECT_NAME} qhull )
 endif()

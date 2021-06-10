@@ -17,11 +17,11 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="planeTab">
       <attribute name="icon">
-       <iconset resource="../icones.qrc">
+       <iconset resource="../icons.qrc">
         <normaloff>:/CC/images/primPlane.gif</normaloff>:/CC/images/primPlane.gif</iconset>
       </attribute>
       <attribute name="title">
@@ -108,7 +108,7 @@
      </widget>
      <widget class="QWidget" name="boxTab">
       <attribute name="icon">
-       <iconset resource="../icones.qrc">
+       <iconset resource="../icons.qrc">
         <normaloff>:/CC/images/primBox.gif</normaloff>:/CC/images/primBox.gif</iconset>
       </attribute>
       <attribute name="title">
@@ -218,7 +218,7 @@
      </widget>
      <widget class="QWidget" name="sphereTab">
       <attribute name="icon">
-       <iconset resource="../icones.qrc">
+       <iconset resource="../icons.qrc">
         <normaloff>:/CC/images/primSphere.gif</normaloff>:/CC/images/primSphere.gif</iconset>
       </attribute>
       <attribute name="title">
@@ -381,7 +381,7 @@
      </widget>
      <widget class="QWidget" name="cylTab">
       <attribute name="icon">
-       <iconset resource="../icones.qrc">
+       <iconset resource="../icons.qrc">
         <normaloff>:/CC/images/primCylinder.gif</normaloff>:/CC/images/primCylinder.gif</iconset>
       </attribute>
       <attribute name="title">
@@ -468,7 +468,7 @@
      </widget>
      <widget class="QWidget" name="coneTab">
       <attribute name="icon">
-       <iconset resource="../icones.qrc">
+       <iconset resource="../icons.qrc">
         <normaloff>:/CC/images/primCone.gif</normaloff>:/CC/images/primCone.gif</iconset>
       </attribute>
       <attribute name="title">
@@ -655,7 +655,7 @@
      </widget>
      <widget class="QWidget" name="torusTab">
       <attribute name="icon">
-       <iconset resource="../icones.qrc">
+       <iconset resource="../icons.qrc">
         <normaloff>:/CC/images/primTorus.gif</normaloff>:/CC/images/primTorus.gif</iconset>
       </attribute>
       <attribute name="title">
@@ -807,7 +807,7 @@
      </widget>
      <widget class="QWidget" name="dishTab">
       <attribute name="icon">
-       <iconset resource="../icones.qrc">
+       <iconset resource="../icons.qrc">
         <normaloff>:/CC/images/primDish.gif</normaloff>:/CC/images/primDish.gif</iconset>
       </attribute>
       <attribute name="title">
@@ -934,6 +934,41 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="coordinateSystemTab">
+      <attribute name="title">
+       <string>Coordinate System</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_14">
+       <item row="0" column="0">
+        <layout class="QVBoxLayout" name="verticalLayout_3">
+         <item>
+          <widget class="QPlainTextEdit" name="csMatrixTextEdit"/>
+         </item>
+        </layout>
+       </item>
+       <item row="1" column="0">
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <item>
+          <widget class="QPushButton" name="csClearMatrixButton">
+           <property name="text">
+            <string>Reset Matrix</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="csSetMatrixBasedOnSelectedObjectButton">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select an item in the DB Tree&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="text">
+            <string>Get Selected Item Matrix</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
    <item>
@@ -1006,7 +1041,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../icones.qrc"/>
+  <include location="../icons.qrc"/>
  </resources>
  <connections/>
 </ui>

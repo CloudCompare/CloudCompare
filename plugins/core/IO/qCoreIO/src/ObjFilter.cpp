@@ -39,7 +39,7 @@
 #include <ccProgressDialog.h>
 #include <ccSubMesh.h>
 
-//CCLib
+//CCCoreLib
 #include <Delaunay2dMesh.h>
 
 //System
@@ -113,7 +113,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		pDlg->setAutoClose(false); //don't close dialogue when progress bar is full
 		pDlg->start();
 	}
-	CCLib::NormalizedProgress nprogress(pDlg.data(), nbPoints);
+	CCCoreLib::NormalizedProgress nprogress(pDlg.data(), nbPoints);
 
 	QTextStream stream(&file);
 	stream.setRealNumberNotation(QTextStream::FixedNotation);
@@ -150,7 +150,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 			//reset save dialog
 			unsigned numTriangleNormals = normsTable->currentSize();
 			if (pDlg)
-				pDlg->setInfo(QObject::tr("Writing $1 triangle normals").arg(numTriangleNormals));
+				pDlg->setInfo(QObject::tr("Writing %1 triangle normals").arg(numTriangleNormals));
 			nprogress.scale(numTriangleNormals);
 			nprogress.reset();
 
@@ -313,7 +313,9 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		st->placeIteratorAtBeginning();
 
 		int lastMtlIndex = -1;
-		int t1 = -1, t2 = -1, t3 = -1;
+		int t1 = -1;
+		int t2 = -1;
+		int t3 = -1;
 
 		for (unsigned i=0; i<triNum; ++i)
 		{
@@ -345,7 +347,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 				}
 			}
 
-			const CCLib::VerticesIndexes* tsi = st->getNextTriangleVertIndexes();
+			const CCCoreLib::VerticesIndexes* tsi = st->getNextTriangleVertIndexes();
 			//for per-triangle normals
 			unsigned i1 = tsi->i1 + 1;
 			unsigned i2 = tsi->i2 + 1;
@@ -641,7 +643,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 				}
 
 				//shifted point
-				CCVector3 P = CCVector3::fromArray((Pd + Pshift).u);
+				CCVector3 P = (Pd + Pshift).toPC();
 				vertices->addPoint(P);
 				++pointsRead;
 			}
@@ -713,7 +715,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 							static_cast<PointCoordinateType>(tokens[2].toDouble()),
 							static_cast<PointCoordinateType>(tokens[3].toDouble()));
 
-				if (fabs(N.norm2() - 1.0) > 0.005)
+				if (std::abs(N.norm2d() - 1.0) > 0.005)
 				{
 					objWarnings[INVALID_NORMALS] = true;
 					N.normalize();
@@ -912,14 +914,14 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 				{
 					try
 					{
-						CCLib::PointCloud contour;
+						CCCoreLib::PointCloud contour;
 						contour.reserve(static_cast<unsigned>(currentFace.size()));
 
 						for (const facetElement& fe : currentFace)
 						{
 							contour.addPoint(*vertices->getPoint(fe.vIndex));
 						}
-						CCLib::Delaunay2dMesh* dMesh = CCLib::Delaunay2dMesh::TesselateContour(&contour);
+						CCCoreLib::Delaunay2dMesh* dMesh = CCCoreLib::Delaunay2dMesh::TesselateContour(&contour);
 						if (dMesh)
 						{
 							//need more space?

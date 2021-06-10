@@ -62,7 +62,7 @@ CC_FILE_ERROR CSVMatrixFilter::loadFile(const QString& filename,
 									ccHObject& container,
 									LoadParameters& parameters)
 {
-	CSVMatrixOpenDialog openDlg(0);
+	CSVMatrixOpenDialog openDlg(nullptr);
 	openDlg.lineEditSeparator->setText(s_separator);
 	openDlg.xDoubleSpinBox->setValue(s_xSpacing);
 	openDlg.yDoubleSpinBox->setValue(s_ySpacing);
@@ -158,7 +158,7 @@ CC_FILE_ERROR CSVMatrixFilter::loadFile(const QString& filename,
 	if (result == CC_FERR_NO_ERROR)
 	{
 		//load as mesh
-		ccMesh* mesh = 0;
+		ccMesh* mesh = nullptr;
 		if (s_loadAsMesh)
 		{
 			cloud->setName("vertices");
@@ -168,7 +168,7 @@ CC_FILE_ERROR CSVMatrixFilter::loadFile(const QString& filename,
 			if (!mesh->reserve(triCount))
 			{
 				delete mesh;
-				mesh = 0;
+				mesh = nullptr;
 			}
 			else
 			{
@@ -238,7 +238,7 @@ CC_FILE_ERROR CSVMatrixFilter::loadFile(const QString& filename,
 						//assign texture coordinaetes and material to each triangle
 						for (unsigned i = 0; i < mesh->size(); ++i)
 						{
-							CCLib::VerticesIndexes* tsi = mesh->getTriangleVertIndexes(i);
+							CCCoreLib::VerticesIndexes* tsi = mesh->getTriangleVertIndexes(i);
 							mesh->addTriangleTexCoordIndexes(tsi->i1, tsi->i2, tsi->i3);
 							mesh->addTriangleMtlIndex(0);
 						}
@@ -249,7 +249,7 @@ CC_FILE_ERROR CSVMatrixFilter::loadFile(const QString& filename,
 					{
 						ccLog::Warning("[CSVMatrixFilter] Not enough memory to map the texture on the mesh!");
 						texCoords->release();
-						texCoords = 0;
+						texCoords = nullptr;
 					}
 				}
 				else
@@ -296,7 +296,7 @@ CC_FILE_ERROR CSVMatrixFilter::loadFile(const QString& filename,
 	else
 	{
 		delete cloud;
-		cloud = 0;
+		cloud = nullptr;
 	}
 
 	return result;

@@ -78,7 +78,7 @@ public:
 	**/
 	void removeAllEntities(bool unallocateVisibilityArrays);
 
-protected slots:
+protected:
 
 	void segmentIn();
 	void segmentOut();

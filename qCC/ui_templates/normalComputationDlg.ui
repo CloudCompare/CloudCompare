@@ -288,7 +288,7 @@
          <string>Use scan grid(s) (robust method)</string>
         </property>
         <property name="text">
-         <string>Use scan grid(s)  whenever possible</string>
+         <string>Use scan grid(s) whenever possible</string>
         </property>
        </widget>
       </item>

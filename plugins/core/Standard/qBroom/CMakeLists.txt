@@ -1,21 +1,11 @@
-cmake_minimum_required(VERSION 3.0)
+option( PLUGIN_STANDARD_QBROOM "Install qBroom plugin" OFF )
 
-option( PLUGIN_STANDARD_QBROOM "Check to install qBroom plugin" OFF )
-
-if (PLUGIN_STANDARD_QBROOM)
-
-	#CloudCompare 'Virtual broom' plugin
+if( PLUGIN_STANDARD_QBROOM )
 	project( QBROOM_PLUGIN )
 	
-	include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
-
-	include_directories( src )
+	AddPlugin( NAME ${PROJECT_NAME} )
 	
+	add_subdirectory( include )
 	add_subdirectory( src )
 	add_subdirectory( ui )
-	
-	include( ../../../CMakePluginTpl.cmake )
-	
-	include_directories( ${QBROOM_LIB_INCLUDE_DIR} )
-
 endif()

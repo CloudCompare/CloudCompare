@@ -25,7 +25,7 @@
 #include <QMessageBox>
 #include <QSettings>
 
-//CCLib
+//CCCoreLib
 #include <CCConst.h>
 
 //qCC_db
@@ -231,11 +231,10 @@ void ccPointListPickingDlg::exportToNewCloud()
 			cloud->setDisplay(m_associatedEntity->getDisplay());
 
 			//retrieve Shift & Scale values
-			ccGenericPointCloud* asCloud = ccHObjectCaster::ToGenericPointCloud(m_associatedEntity);
-			if (asCloud)
+			ccShiftedObject* shifted = ccHObjectCaster::ToShifted(m_associatedEntity);
+			if (shifted)
 			{
-				cloud->setGlobalShift(asCloud->getGlobalShift());
-				cloud->setGlobalScale(asCloud->getGlobalScale());
+				cloud->copyGlobalShiftAndScale(*shifted);
 			}
 			else
 			{
@@ -541,7 +540,7 @@ void ccPointListPickingDlg::updateList()
 
 		const cc2DLabel::PickedPoint& PP = label->getPickedPoint(0);
 		CCVector3 P = PP.getPointPosition();
-		CCVector3d Pd = (showAbsolute ? PP.cloudOrVertices()->toGlobal3d(P) : CCVector3d::fromArray(P.u));
+		CCVector3d Pd = (showAbsolute ? PP.cloudOrVertices()->toGlobal3d(P) : P);
 
 		//point index in list
 		tableWidget->verticalHeaderItem( i )->setText( QStringLiteral( "%1" ).arg( i + startIndex ) );

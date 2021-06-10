@@ -31,7 +31,7 @@
 
 #include <cassert>
 
-using namespace CCLib;
+using namespace CCCoreLib;
 
 using PdmsAndCCPair = std::pair<PdmsTools::PdmsObjects::GenericItem*, ccHObject*>;
 

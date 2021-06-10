@@ -1,6 +1,5 @@
 
-set( CC_PLUGIN_CUSTOM_UI_LIST
-	${CC_PLUGIN_CUSTOM_UI_LIST} 
-	${CMAKE_CURRENT_SOURCE_DIR}/animationDlg.ui
-	PARENT_SCOPE
+target_sources( ${PROJECT_NAME}
+	PRIVATE
+		${CMAKE_CURRENT_LIST_DIR}/animationDlg.ui
 )

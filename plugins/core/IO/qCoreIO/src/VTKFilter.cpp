@@ -136,7 +136,7 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		mesh->placeIteratorAtBeginning();
 		for (unsigned i = 0; i < triCount; ++i)
 		{
-			const CCLib::VerticesIndexes* tsi = mesh->getNextTriangleVertIndexes(); //DGM: getNextTriangleVertIndexes is faster for mesh groups!
+			const CCCoreLib::VerticesIndexes* tsi = mesh->getNextTriangleVertIndexes(); //DGM: getNextTriangleVertIndexes is faster for mesh groups!
 			outFile << "3 " << tsi->i1 << " " << tsi->i2 << " " << tsi->i3 << endl;
 		}
 	}
@@ -152,11 +152,12 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const QString& filename, 
 			outFile << "1 " << endl;
 	}
 
-	outFile << "POINT_DATA " << ptsCount << endl;
+	
 
 	// write normals
 	if (vertices->hasNormals())
 	{
+		outFile << "POINT_DATA " << ptsCount << endl;
 		outFile << "NORMALS Normals " << floatType << endl;
 		for (unsigned i = 0; i < ptsCount; ++i)
 		{
@@ -168,6 +169,7 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	// write colors
 	if (vertices->hasColors())
 	{
+		outFile << "POINT_DATA " << ptsCount << endl;
 		outFile << "COLOR_SCALARS RGB 3" << endl;
 		for (unsigned i = 0; i < ptsCount; ++i)
 		{
@@ -184,7 +186,7 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		for (unsigned i = 0; i < sfCount; ++i)
 		{
 			ccScalarField* sf = static_cast<ccScalarField*>(pointCloud->getScalarField(i));
-
+			outFile << "POINT_DATA " << ptsCount << endl;
 			outFile << "SCALARS " << QString(sf->getName()).replace(" ", "_") << (sizeof(ScalarType) == 4 ? " float" : " double") << " 1" << endl;
 			outFile << "LOOKUP_TABLE default" << endl;
 
@@ -198,6 +200,7 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	{
 		if (vertices->hasScalarFields())
 		{
+			outFile << "POINT_DATA " << ptsCount << endl;
 			outFile << "SCALARS ScalarField" << (sizeof(ScalarType) == 4 ? " float" : " double") << " 1" << endl;
 			outFile << "LOOKUP_TABLE default" << endl;
 
@@ -369,7 +372,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 							}
 						}
 
-						CCVector3 P = CCVector3::fromArray((Pd + Pshift).u);
+						CCVector3 P = (Pd + Pshift).toPC();
 						vertices->addPoint(P);
 
 						coordIndex = 0;
@@ -716,7 +719,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 					++iScal;
 				}
 			}
-			lastDataSize = 0; //lastDataSize is "consumed"
+			//lastDataSize = 0; //lastDataSize is "consumed"
 			acceptLookupTables = false;
 
 			if (sf)

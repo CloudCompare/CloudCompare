@@ -51,7 +51,7 @@
       <string/>
      </property>
      <property name="icon">
-      <iconset resource="../../qCC/icones.qrc">
+      <iconset resource="../../qCC/icons.qrc">
        <normaloff>:/CC/images/ccAddConstSF.png</normaloff>:/CC/images/ccAddConstSF.png</iconset>
      </property>
      <property name="popupMode">
@@ -306,7 +306,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../../qCC/icones.qrc"/>
+  <include location="../../qCC/icons.qrc"/>
  </resources>
  <connections/>
 </ui>

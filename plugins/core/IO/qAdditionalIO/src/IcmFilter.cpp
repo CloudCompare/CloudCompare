@@ -214,7 +214,7 @@ int IcmFilter::LoadCalibratedImages(ccHObject* entities, const QString& path, co
 			float fov_rad = 0;
 			sscanf(line,"\t fieldOfView %f\n",&fov_rad);
 
-			float fov_deg = fov_rad*static_cast<float>(CC_RAD_TO_DEG);
+			float fov_deg = CCCoreLib::RadiansToDegrees( fov_rad );
 			ccLog::Print("\t FOV=%f (degrees)",fov_deg);
 
 			//Position
@@ -245,7 +245,8 @@ int IcmFilter::LoadCalibratedImages(ccHObject* entities, const QString& path, co
 			ccLog::Print("\t Description: '%s'",desc);
 
 			//Orientation
-			float axis[3], angle_rad;
+			float axis[3]{ 0.0f, 0.0f, 0.0f };
+			float angle_rad = 0.0f;
 			if (!fgets(line, MAX_ASCII_FILE_LINE_LENGTH , fp))
 			{
 				ccLog::Error("[IcmFilter] Read error (orientation)!");
@@ -267,7 +268,7 @@ int IcmFilter::LoadCalibratedImages(ccHObject* entities, const QString& path, co
 			ccCameraSensor* sensor = new ccCameraSensor(params);
 
 			ccGLMatrix mat;
-			mat.initFromParameters(angle_rad,CCVector3::fromArray(axis),CCVector3::fromArray(t));
+			mat.initFromParameters(angle_rad, CCVector3::fromArray(axis), CCVector3::fromArray(t));
 			sensor->setRigidTransformation(mat);
 
 			sensor->setGraphicScale(globalBBox.getDiagNorm() / 20);

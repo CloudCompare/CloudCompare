@@ -27,10 +27,6 @@ ccThicknessTool::ccThicknessTool()
 {
 }
 
-ccThicknessTool::~ccThicknessTool()
-{
-}
-
 //called when the selection is changed while this tool is active
 void ccThicknessTool::onNewSelection(const ccHObject::Container& selectedEntities)
 {
@@ -199,7 +195,7 @@ ccHObject* ccThicknessTool::buildGraphic(CCVector3 endPoint, float thickness)
 	graphic->addChild(verts); //store the verts
 	graphic->invalidateBoundingBox();
 	graphic->updateMetadata();
-	graphic->setName(QString::asprintf("%.3fT", std::fabs(thickness)));
+	graphic->setName(QString::asprintf("%.3fT", std::abs(thickness)));
 	graphic->showNameIn3D(ccCompass::drawName);
 
 	//return
@@ -306,5 +302,5 @@ float ccThicknessTool::planeToPointDistance(ccPlane* plane, CCVector3 P)
 	pEq[3]= plane->getCenter().dot(plane->getNormal()); //a point on the plane dot the plane normal
 
 	//return distance
-	return CCLib::DistanceComputationTools::computePoint2PlaneDistance(&P, pEq);
+	return CCCoreLib::DistanceComputationTools::computePoint2PlaneDistance(&P, pEq);
 }

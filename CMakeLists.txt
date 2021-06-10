@@ -1,17 +1,6 @@
-cmake_minimum_required(VERSION 3.0)
-
-set (CC_CMAKE_SCRIPTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+cmake_minimum_required( VERSION 3.10 )
 
 project( CloudCompareProjects )
-
-option(BUILD_TESTING "" OFF)
-include(CTest)
-
-include( cmake/CMakePolicies.cmake )
-include( cmake/CMakeSetCompilerOptions.cmake )
-
-# Default debug suffix for libraries.
-set( CMAKE_DEBUG_POSTFIX "d" )
 
 # One shouldn't generate the BUILD project directly in the SOURCES folder!
 if ( ${CMAKE_CURRENT_BINARY_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR} )
@@ -21,9 +10,32 @@ if ( ${CMAKE_CURRENT_BINARY_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR} )
 	endif()
 endif()
 
-# Default install folders
-# (on Windows - msvc generator - the '_debug' suffix is automatically added for debug configurations)
-set( INSTALL_DESTINATIONS CloudCompare )
+# Add our cmake module path so we don't need relative paths for these
+list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/" )
+
+include( CMakePolicies )
+include( CMakeSetCompilerOptions )
+include( DeployQt )
+
+# CCViewer
+option( OPTION_BUILD_CCVIEWER "Check to compile CCViewer project" ON )
+
+# Quad buffer stereo support
+option( OPTION_GL_QUAD_BUFFER_SUPPORT "Check to compile CloudCompare and ccViewer with Quad Buffer support" OFF )
+
+if ( OPTION_GL_QUAD_BUFFER_SUPPORT )
+    # Add the define for all libs and applications
+	add_definitions( -DCC_GL_WINDOW_USE_QWINDOW )
+endif()
+
+# Testing
+option( BUILD_TESTING "Build tests for CC" OFF )
+if ( BUILD_TESTING )
+	include( CTest )
+endif()
+
+# Default debug suffix for libraries.
+set( CMAKE_DEBUG_POSTFIX "d" )
 
 # RPATH Linux/Unix: (dynamic) libs are put in a subdir of prefix/lib,
 # since they are only used by qCC/ccViewer
@@ -31,12 +43,6 @@ if( UNIX AND NOT APPLE )
 	include( GNUInstallDirs )
 	set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_FULL_LIBDIR}/cloudcompare")
 endif()
-
-# CCViewer
-OPTION( OPTION_BUILD_CCVIEWER "Check to compile CCViewer project" ON )
-
-# Quad buffer stereo support
-OPTION( OPTION_GL_QUAD_BUFFER_SUPPORT "Check to compile CloudCompare and ccViewer with Quad Buffer support" OFF )
 
 # Define target folders
 # (now that ccViewer can have its own plugins, qCC and ccViewer must fall in separate folders!
@@ -52,66 +58,36 @@ else()
 	set( CCVIEWER_DEST_FOLDER bin )
 endif()
 
-if (APPLE)
-	set( CLOUDCOMPARE_MAC_BASE_DIR ${CMAKE_INSTALL_PREFIX}/${CLOUDCOMPARE_DEST_FOLDER}/CloudCompare.app  CACHE INTERNAL "CloudCompare bundle dir")
-	set( CLOUDCOMPARE_MAC_FRAMEWORK_DIR ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Frameworks CACHE INTERNAL "CC framework dir" )
-	set( CLOUDCOMPARE_MAC_PLUGIN_DIR ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/PlugIns/ccPlugins CACHE INTERNAL "CC plugin dir" )
-	
-	set( CCVIEWER_MAC_BASE_DIR ${CMAKE_INSTALL_PREFIX}/${CCVIEWER_DEST_FOLDER}/ccViewer.app CACHE INTERNAL "ccViewer bundle dir")
-	set( CCVIEWER_MAC_FRAMEWORK_DIR ${CCVIEWER_MAC_BASE_DIR}/Contents/Frameworks CACHE INTERNAL "CCViewer framework dir" )
-	set( CCVIEWER_MAC_PLUGIN_DIR ${CCVIEWER_MAC_BASE_DIR}/Contents/PlugIns/ccPlugins CACHE INTERNAL "CCViewer plugin dir" )
-endif()
-
-# set default install folders
 if( WIN32 )
-    # (on Windows - msvc generator - the '_debug' suffix is automatically added for debug configurations)
     set( INSTALL_DESTINATIONS ${CLOUDCOMPARE_DEST_FOLDER} )
     
     if( ${OPTION_BUILD_CCVIEWER} )
         list( APPEND INSTALL_DESTINATIONS ${CCVIEWER_DEST_FOLDER} )
-    endif()
-elseif( APPLE )
-	set( INSTALL_DESTINATIONS "${CLOUDCOMPARE_MAC_FRAMEWORK_DIR}" )
-    
-    if( ${OPTION_BUILD_CCVIEWER} )
-        list( APPEND INSTALL_DESTINATIONS "${CCVIEWER_MAC_FRAMEWORK_DIR}" )
-    endif()
-elseif( UNIX )
-	set( INSTALL_DESTINATIONS ${CMAKE_INSTALL_PREFIX}/bin )
+	endif()
+elseif( UNIX AND NOT APPLE )
+        set( INSTALL_DESTINATIONS ${CMAKE_INSTALL_PREFIX})
 endif()
 
 # Load advanced scripts
-include( cmake/CMakeInclude.cmake )
-
-add_subdirectory( CC )
-
-# Propagate the choice to use doubles for ScalarType
-if ( ${USE_SCALAR_TYPE_DOUBLE} )
-	add_definitions( -DSCALAR_TYPE_DOUBLE )
-else()
-	add_definitions( -DSCALAR_TYPE_FLOAT )
-endif()
+include( CMakeInclude )
+include( Install )
 
 # Add external libraries
-include( cmake/CMakeExternalLibs.cmake )
+include( CMakeExternalLibs )
 
 # Contrib. libraries (mainly for I/O)
-include( contrib/AllSupport.cmake )
+include( AllSupport )
 
-# Libs requested by both qCC & ccViewer
-add_subdirectory( libs/CCFbo )
-add_subdirectory( libs/qCC_db ) # must always be included after CCFbo (dependency)
-add_subdirectory( libs/qCC_io ) # must always be included after qCC_db (dependency)
-add_subdirectory( libs/qCC_glWindow ) # must always be included after qCC_db (dependency)
-add_subdirectory( libs/qcustomplot )
+# Internal libs used by both CloudCompare & ccViewer
+add_subdirectory( libs )
 
-# load plugins (potentially used by qCC and ccViewer)
+# Plugins
 add_subdirectory( plugins )
 
 # qCC
 add_subdirectory( qCC )
 
 # CCViewer
-if( ${OPTION_BUILD_CCVIEWER} )
+if( OPTION_BUILD_CCVIEWER )
 	add_subdirectory( ccViewer )
 endif()

@@ -45,7 +45,7 @@
       <string>Activate compass mode to make structural measurements</string>
      </property>
      <property name="icon">
-      <iconset resource="../../../../qCC/icones.qrc">
+      <iconset resource="../../../../qCC/icons.qrc">
        <normaloff>:/CC/images/qCompass.png</normaloff>:/CC/images/qCompass.png</iconset>
      </property>
      <property name="checkable">
@@ -68,7 +68,7 @@
       <string>Activate map mode to define geological features</string>
      </property>
      <property name="icon">
-      <iconset resource="../../../../qCC/icones.qrc">
+      <iconset resource="../../../../qCC/icons.qrc">
        <normaloff>:/CC/images/mapIcon.png</normaloff>:/CC/images/mapIcon.png</iconset>
      </property>
      <property name="checkable">
@@ -105,7 +105,7 @@
       <string>Picking Tool. Use this to select GeoObjects or measurements.</string>
      </property>
      <property name="icon">
-      <iconset resource="../../../../qCC/icones.qrc">
+      <iconset resource="../../../../qCC/icons.qrc">
        <normaloff>:/CC/images/dbGBLSensorSymbol.png</normaloff>:/CC/images/dbGBLSensorSymbol.png</iconset>
      </property>
      <property name="checkable">
@@ -122,7 +122,7 @@
       <string>Plane Tool: Measure surface orientations</string>
      </property>
      <property name="icon">
-      <iconset resource="../../../../qCC/icones.qrc">
+      <iconset resource="../../../../qCC/icons.qrc">
        <normaloff>:/CC/images/ccSamplePoints.png</normaloff>:/CC/images/ccSamplePoints.png</iconset>
      </property>
      <property name="checkable">
@@ -148,7 +148,7 @@
       <string>Trace Tool: Measure orientation from structure trace</string>
      </property>
      <property name="icon">
-      <iconset resource="../../../../qCC/icones.qrc">
+      <iconset resource="../../../../qCC/icons.qrc">
        <normaloff>:/CC/images/orthoSections.png</normaloff>:/CC/images/orthoSections.png</iconset>
      </property>
      <property name="checkable">
@@ -168,7 +168,7 @@
       <string>Lineation Tool: Measure distances and directions</string>
      </property>
      <property name="icon">
-      <iconset resource="../../../../qCC/icones.qrc">
+      <iconset resource="../../../../qCC/icons.qrc">
        <normaloff>:/CC/images/smallPointDistance.png</normaloff>:/CC/images/smallPointDistance.png</iconset>
      </property>
      <property name="checkable">
@@ -185,7 +185,7 @@
       <string>Other Tools</string>
      </property>
      <property name="icon">
-      <iconset resource="../../../../qCC/icones.qrc">
+      <iconset resource="../../../../qCC/icons.qrc">
        <normaloff>:/CC/images/ccAddConstSF.png</normaloff>:/CC/images/ccAddConstSF.png</iconset>
      </property>
      <property name="checkable">
@@ -212,7 +212,7 @@
       <string>Change tool and visibility settings</string>
      </property>
      <property name="icon">
-      <iconset resource="../../../../qCC/icones.qrc">
+      <iconset resource="../../../../qCC/icons.qrc">
        <normaloff>:/CC/images/ccGear.png</normaloff>:/CC/images/ccGear.png</iconset>
      </property>
      <property name="checkable">
@@ -235,7 +235,7 @@
       <string>Undo last action</string>
      </property>
      <property name="icon">
-      <iconset resource="../../../../qCC/icones.qrc">
+      <iconset resource="../../../../qCC/icons.qrc">
        <normaloff>:/CC/images/smallRevert.png</normaloff>:/CC/images/smallRevert.png</iconset>
      </property>
      <property name="shortcut">
@@ -252,7 +252,7 @@
       <string>Save current label (added to cloud children)</string>
      </property>
      <property name="icon">
-      <iconset resource="../../../../qCC/icones.qrc">
+      <iconset resource="../../../../qCC/icons.qrc">
        <normaloff>:/CC/images/ccSave.png</normaloff>:/CC/images/ccSave.png</iconset>
      </property>
     </widget>
@@ -263,7 +263,7 @@
       <string>Show readme and help information</string>
      </property>
      <property name="icon">
-      <iconset resource="../../../../qCC/icones.qrc">
+      <iconset resource="../../../../qCC/icons.qrc">
        <normaloff>:/CC/images/ccConsole.png</normaloff>:/CC/images/ccConsole.png</iconset>
      </property>
     </widget>
@@ -274,7 +274,7 @@
       <string>Accept latest changes</string>
      </property>
      <property name="icon">
-      <iconset resource="../../../../qCC/icones.qrc">
+      <iconset resource="../../../../qCC/icons.qrc">
        <normaloff>:/CC/images/smallValidate.png</normaloff>:/CC/images/smallValidate.png</iconset>
      </property>
      <property name="shortcut">
@@ -288,7 +288,7 @@
       <string>Exit ccCompass plugin. Thanks for visiting :)</string>
      </property>
      <property name="icon">
-      <iconset resource="../../../../qCC/icones.qrc">
+      <iconset resource="../../../../qCC/icons.qrc">
        <normaloff>:/CC/images/smallCancel.png</normaloff>:/CC/images/smallCancel.png</iconset>
      </property>
      <property name="shortcut">
@@ -299,8 +299,8 @@
   </layout>
  </widget>
  <resources>
-  <include location="../../../../qCC/icones.qrc"/>
-  <include location="../../../../qCC/icones.qrc"/>
+  <include location="../../../../qCC/icons.qrc"/>
+  <include location="../../../../qCC/icons.qrc"/>
  </resources>
  <connections/>
 </ui>

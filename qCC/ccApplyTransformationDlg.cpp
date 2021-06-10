@@ -19,7 +19,6 @@
 
 //Local
 #include "ccPersistentSettings.h"
-#include "ccAskTwoDoubleValuesDlg.h"
 #include "mainwindow.h"
 #include "ui_dipDirTransformationDlg.h"
 
@@ -34,7 +33,7 @@
 #include <QFileInfo>
 #include <QClipboard>
 
-//CCLib
+//CCCoreLib
 #include <CCConst.h>
 
 static QString s_lastMatrix("1.00000000 0.00000000 0.00000000 0.00000000\n0.00000000 1.00000000 0.00000000 0.00000000\n0.00000000 0.00000000 1.00000000 0.00000000\n0.00000000 0.00000000 0.00000000 1.00000000");
@@ -48,7 +47,7 @@ class DipDirTransformationDialog : public QDialog, public Ui::DipDirTransformati
 	
 public:
 
-	DipDirTransformationDialog(QWidget* parent = 0) : QDialog(parent) { setupUi(this); }
+	DipDirTransformationDialog(QWidget* parent = nullptr) : QDialog(parent) { setupUi(this); }
 };
 
 ccApplyTransformationDlg::ccApplyTransformationDlg(QWidget* parent/*=0*/)
@@ -111,12 +110,13 @@ void ccApplyTransformationDlg::onMatrixTextChange()
 void ccApplyTransformationDlg::onRotAngleValueChanged(double)
 {
 	PointCoordinateType alpha = 0;
-	CCVector3 axis,t;
+	CCVector3 axis;
+	CCVector3 t;
 
 	axis.x	= static_cast<PointCoordinateType>(rxAxisDoubleSpinBox->value());
 	axis.y	= static_cast<PointCoordinateType>(ryAxisDoubleSpinBox->value());
 	axis.z	= static_cast<PointCoordinateType>(rzAxisDoubleSpinBox->value());
-	alpha	= static_cast<PointCoordinateType>(rAngleDoubleSpinBox->value() * CC_DEG_TO_RAD);
+	alpha	= static_cast<PointCoordinateType>( CCCoreLib::DegreesToRadians( rAngleDoubleSpinBox->value() ) );
 	t.x		= static_cast<PointCoordinateType>(txAxisDoubleSpinBox->value());
 	t.y		= static_cast<PointCoordinateType>(tyAxisDoubleSpinBox->value());
 	t.z		= static_cast<PointCoordinateType>(tzAxisDoubleSpinBox->value());
@@ -129,12 +129,14 @@ void ccApplyTransformationDlg::onRotAngleValueChanged(double)
 
 void ccApplyTransformationDlg::onEulerValueChanged(double)
 {
-	PointCoordinateType phi,theta,psi = 0;
+	PointCoordinateType phi = 0;
+	PointCoordinateType theta = 0;
+	PointCoordinateType psi = 0;
 	CCVector3 t;
 
-	phi		= static_cast<PointCoordinateType>(ePhiDoubleSpinBox->value() * CC_DEG_TO_RAD);
-	theta	= static_cast<PointCoordinateType>(eThetaDoubleSpinBox->value() * CC_DEG_TO_RAD);
-	psi		= static_cast<PointCoordinateType>(ePsiDoubleSpinBox->value() * CC_DEG_TO_RAD);
+	phi		= static_cast<PointCoordinateType>( CCCoreLib::DegreesToRadians( ePhiDoubleSpinBox->value() ) );
+	theta	= static_cast<PointCoordinateType>( CCCoreLib::DegreesToRadians( eThetaDoubleSpinBox->value() ) );
+	psi		= static_cast<PointCoordinateType>( CCCoreLib::DegreesToRadians( ePsiDoubleSpinBox->value() ) );
 	t.x		= static_cast<PointCoordinateType>(etxAxisDoubleSpinBox->value());
 	t.y		= static_cast<PointCoordinateType>(etyAxisDoubleSpinBox->value());
 	t.z		= static_cast<PointCoordinateType>(etzAxisDoubleSpinBox->value());
@@ -166,13 +168,14 @@ void ccApplyTransformationDlg::updateAll(const ccGLMatrix& mat, bool textForm/*=
 		tzAxisDoubleSpinBox->blockSignals(true);
 
 		PointCoordinateType alpha = 0;
-		CCVector3 axis,t;
+		CCVector3 axis;
+		CCVector3 t;
 		mat.getParameters(alpha,axis,t);
 
 		rxAxisDoubleSpinBox->setValue(axis.x);
 		ryAxisDoubleSpinBox->setValue(axis.y);
 		rzAxisDoubleSpinBox->setValue(axis.z);
-		rAngleDoubleSpinBox->setValue(alpha * CC_RAD_TO_DEG);
+		rAngleDoubleSpinBox->setValue( CCCoreLib::RadiansToDegrees( alpha ) );
 		txAxisDoubleSpinBox->setValue(t.x);
 		tyAxisDoubleSpinBox->setValue(t.y);
 		tzAxisDoubleSpinBox->setValue(t.z);
@@ -195,13 +198,15 @@ void ccApplyTransformationDlg::updateAll(const ccGLMatrix& mat, bool textForm/*=
 		etyAxisDoubleSpinBox->blockSignals(true);
 		etzAxisDoubleSpinBox->blockSignals(true);
 
-		PointCoordinateType phi,theta,psi = 0;
+		PointCoordinateType phi = 0;
+		PointCoordinateType theta = 0;
+		PointCoordinateType psi = 0;
 		CCVector3 t;
 		mat.getParameters(phi,theta,psi,t);
 
-		ePhiDoubleSpinBox   ->setValue(phi * CC_RAD_TO_DEG);
-		eThetaDoubleSpinBox ->setValue(theta * CC_RAD_TO_DEG);
-		ePsiDoubleSpinBox   ->setValue(psi * CC_RAD_TO_DEG);
+		ePhiDoubleSpinBox   ->setValue( CCCoreLib::RadiansToDegrees( phi ) );
+		eThetaDoubleSpinBox ->setValue( CCCoreLib::RadiansToDegrees( theta ) );
+		ePsiDoubleSpinBox   ->setValue( CCCoreLib::RadiansToDegrees( psi ) );
 		etxAxisDoubleSpinBox->setValue(t.x);
 		etyAxisDoubleSpinBox->setValue(t.y);
 		etzAxisDoubleSpinBox->setValue(t.z);

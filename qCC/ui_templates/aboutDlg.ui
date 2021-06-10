@@ -10,14 +10,11 @@
     <x>0</x>
     <y>0</y>
     <width>600</width>
-    <height>320</height>
+    <height>360</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>About CloudCompare</string>
-  </property>
-  <property name="styleSheet">
-   <string notr="true">background-color:white;</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -28,7 +25,7 @@
         <string/>
        </property>
        <property name="pixmap">
-        <pixmap resource="../icones.qrc">:/CC/images/imLogoV2Qt.png</pixmap>
+        <pixmap resource="../icons.qrc">:/CC/images/imLogoV2Qt.png</pixmap>
        </property>
       </widget>
      </item>
@@ -100,7 +97,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../icones.qrc"/>
+  <include location="../icons.qrc"/>
  </resources>
  <connections>
   <connection>

@@ -41,9 +41,9 @@
 #include <assert.h>
 
 cc2Point5DimEditor::cc2Point5DimEditor()
-	: m_bbEditorDlg(0)
-	, m_glWindow(0)
-	, m_rasterCloud(0)
+	: m_bbEditorDlg(nullptr)
+	, m_glWindow(nullptr)
+	, m_rasterCloud(nullptr)
 {
 }
 
@@ -54,7 +54,7 @@ cc2Point5DimEditor::~cc2Point5DimEditor()
 		if (m_glWindow)
 			m_glWindow->removeFromOwnDB(m_rasterCloud);
 		delete m_rasterCloud;
-		m_rasterCloud = 0;
+		m_rasterCloud = nullptr;
 	}
 }
 
@@ -88,7 +88,7 @@ void cc2Point5DimEditor::create2DView(QFrame* parentFrame)
 {
 	if (!m_glWindow)
 	{
-		QWidget* glWidget = 0;
+		QWidget* glWidget = nullptr;
 		CreateGLWindow(m_glWindow, glWidget, false, true);
 		assert(m_glWindow && glWidget);
 		
@@ -135,7 +135,8 @@ bool cc2Point5DimEditor::getGridSize(unsigned& gridWidth, unsigned& gridHeight) 
 
 QString cc2Point5DimEditor::getGridSizeAsString() const
 {
-	unsigned gridWidth = 0, gridHeight = 0;
+	unsigned gridWidth = 0;
+	unsigned gridHeight = 0;
 	if (!getGridSize(gridWidth, gridHeight))
 	{
 		return QObject::tr("invalid grid box");
@@ -156,10 +157,13 @@ void cc2Point5DimEditor::update2DDisplayZoom(ccBBox& box)
 
 	//equivalent to 'ccGLWindow::updateConstellationCenterAndZoom' but we take aspect ratio into account
 
+	//we set the pivot point on the box center
+	CCVector3 P = box.getCenter();
+	m_glWindow->setPivotPoint(P);
+	m_glWindow->setCameraPos(P);
+
 	//we compute the pixel size (in world coordinates)
 	{
-		ccViewportParameters params = m_glWindow->getViewportParameters();
-
 		double realGridWidth  = m_grid.width  * m_grid.gridStep;
 		double realGridHeight = m_grid.height * m_grid.gridStep;
 
@@ -184,18 +188,16 @@ void cc2Point5DimEditor::update2DDisplayZoom(ccBBox& box)
 			}
 		}
 
-		params.pixelSize = static_cast<float>(std::max(realGridWidth / screenWidth, realGridHeight / screenHeight));
-		params.zoom = 1.0f;
+		double targetWidth = realGridWidth;
+		if (realGridHeight / screenHeight > realGridWidth / screenWidth)
+		{
+			targetWidth = (realGridHeight * screenWidth) / screenHeight;
+		}
 
-		m_glWindow->setViewportParameters(params);
+		m_glWindow->setCameraFocalToFitWidth(static_cast<float>(targetWidth));
 		m_glWindow->setPointSize(pointSize);
 	}
 	
-	//we set the pivot point on the box center
-	CCVector3 P = box.getCenter();
-	m_glWindow->setPivotPoint(CCVector3d::fromArray(P.u));
-	m_glWindow->setCameraPos(CCVector3d::fromArray(P.u));
-
 	m_glWindow->invalidateViewport();
 	m_glWindow->invalidateVisualization();
 	m_glWindow->deprecate3DLayer();

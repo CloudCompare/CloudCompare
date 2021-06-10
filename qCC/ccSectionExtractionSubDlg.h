@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,11 +17,8 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_SECTION_EXTRACTION_SUB_DIALOG_HEADER
-#define CC_SECTION_EXTRACTION_SUB_DIALOG_HEADER
-
 //Local
-#include "ccContourExtractor.h"
+#include "ccEnvelopeExtractor.h"
 
 //Qt
 #include <QDialog>
@@ -44,27 +43,27 @@ public:
 	//! Returns the section thickness
 	double getSectionThickness() const;
 
-	//! Returns the max edge length (for contour generation)
+	//! Returns the max edge length (for envelope generation)
 	double getMaxEdgeLength() const;
-	//! Sets the max edge length (for contour generation)
+	//! Sets the max edge length (for envelope generation)
 	void setMaxEdgeLength(double l);
 	
-	//! Returns the contour type (for contour generation)
-	ccContourExtractor::ContourType getContourType() const;
+	//! Returns the envelope type (for envelope generation)
+	ccEnvelopeExtractor::EnvelopeType getEnvelopeType() const;
 
 	//! Whether to generate clouds or not
 	bool extractClouds() const;
 	//! Sets whether to generate clouds or not
 	void doExtractClouds(bool state);
-	//! Whether to generate contours or not
-	bool extractContours() const;
-	//! Sets whether to generate contours or not
-	void doExtractContours(bool state, ccContourExtractor::ContourType type);
+	//! Whether to generate envelopes or not
+	bool extractEnvelopes() const;
+	//! Sets whether to generate envelopes or not
+	void doExtractEnvelopes(bool state, ccEnvelopeExtractor::EnvelopeType type);
 
-	//! Whether to split the contours or not
-	bool splitContours() const;
-	//! Sets whether to split the contours or not
-	void doSplitContours(bool state);
+	//! Whether to split the envelopes or not
+	bool splitEnvelopes() const;
+	//! Sets whether to split the envelopes or not
+	void doSplitEnvelopes(bool state);
 
 	//! Whether to use multipass or not
 	bool useMultiPass() const;
@@ -74,7 +73,4 @@ public:
 
 	//! Whether visual debug mode is enabled or not
 	bool visualDebugMode() const;
-
 };
-
-#endif // CC_SECTION_EXTRACTION_SUB_DIALOG_HEADER

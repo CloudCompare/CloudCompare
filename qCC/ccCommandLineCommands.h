@@ -27,6 +27,13 @@ struct CommandChangeMeshOutputFormat : public CommandChangeOutputFormat
 	bool process(ccCommandLineInterface& cmd) override;
 };
 
+struct CommandChangeHierarchyOutputFormat : public CommandChangeOutputFormat
+{
+	CommandChangeHierarchyOutputFormat();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
 struct CommandLoad : public ccCommandLineInterface::Command
 {
 	CommandLoad();
@@ -44,6 +51,13 @@ struct CommandClearNormals : public ccCommandLineInterface::Command
 struct CommandOctreeNormal : public ccCommandLineInterface::Command
 {
 	CommandOctreeNormal();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
+struct CommandInvertNormal : public ccCommandLineInterface::Command
+{
+	CommandInvertNormal();
 
 	bool process(ccCommandLineInterface& cmd) override;
 };
@@ -181,6 +195,20 @@ struct CommandRemoveAllSF : public ccCommandLineInterface::Command
 	bool process(ccCommandLineInterface& cmd) override;
 };
 
+struct CommandRemoveRGB : public ccCommandLineInterface::Command
+{
+	CommandRemoveRGB();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
+struct CommandRemoveNormals : public ccCommandLineInterface::Command
+{
+	CommandRemoveNormals();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
 struct CommandRemoveScanGrids : public ccCommandLineInterface::Command
 {
 	CommandRemoveScanGrids();
@@ -212,6 +240,13 @@ struct CommandOrientNormalsMST : public ccCommandLineInterface::Command
 struct CommandSORFilter : public ccCommandLineInterface::Command
 {
 	CommandSORFilter();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
+struct CommandNoiseFilter : public ccCommandLineInterface::Command
+{
+	CommandNoiseFilter();
 
 	bool process(ccCommandLineInterface& cmd) override;
 };
@@ -277,6 +312,13 @@ struct CommandC2CDist : public CommandDist
 	CommandC2CDist();
 };
 
+struct CommandCPS : public ccCommandLineInterface::Command
+{
+    CommandCPS();
+
+    bool process(ccCommandLineInterface& cmd) override;
+};
+
 struct CommandStatTest : public ccCommandLineInterface::Command
 {
 	CommandStatTest();
@@ -301,6 +343,13 @@ struct CommandSFArithmetic : public ccCommandLineInterface::Command
 struct CommandSFOperation : public ccCommandLineInterface::Command
 {
 	CommandSFOperation();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
+struct CommandSFRename : public ccCommandLineInterface::Command
+{
+	CommandSFRename();
 
 	bool process(ccCommandLineInterface& cmd) override;
 };

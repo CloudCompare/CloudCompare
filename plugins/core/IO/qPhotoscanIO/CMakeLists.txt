@@ -1,27 +1,14 @@
-cmake_minimum_required(VERSION 3.0)
+option( PLUGIN_IO_QPHOTOSCAN "Install qPhotoscan I/O plugin" OFF )
 
-option( PLUGIN_IO_QPHOTOSCAN "Check to install qPhotoscan I/O plugin" OFF )
-
-# CloudCompare Photoscan I/O plugin
-if (PLUGIN_IO_QPHOTOSCAN)
-    
-	include ( ${CC_CMAKE_SCRIPTS_DIR}/CMakePolicies.cmake NO_POLICY_SCOPE )
-
-	include( src/contrib/QuazipLibSupport.cmake )
-	
+if( PLUGIN_IO_QPHOTOSCAN )
 	project( QPHOTOSCAN_IO_PLUGIN )
-    
-    set( CC_IS_IO_PLUGIN 1 )
-    
-	include_directories( src )
-	
+		
+	AddPlugin( NAME ${PROJECT_NAME} TYPE io )
+		
+	add_subdirectory( include )
 	add_subdirectory( src )
 
-	include( ../../../CMakePluginTpl.cmake )
+	add_subdirectory( extern/quazip EXCLUDE_FROM_ALL )
 	
-	# Zlib
-	target_link_libraries(${PROJECT_NAME} ${ZLIB_LIBRARIES})
-	# quazip
-	target_link_QUAZIP(${PROJECT_NAME})
-
+	target_link_libraries( ${PROJECT_NAME} quazip )
 endif()

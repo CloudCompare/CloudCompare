@@ -17,7 +17,7 @@
 
 #include "ccLibAlgorithms.h"
 
-//CCLib
+//CCCoreLib
 #include <ScalarFieldTools.h>
 
 //qCC_db
@@ -44,20 +44,20 @@
 
 namespace ccLibAlgorithms
 {
-	static QString GetDensitySFName(CCLib::GeometricalAnalysisTools::Density densityType, bool approx, double densityKernelSize = 0.0)
+	static QString GetDensitySFName(CCCoreLib::GeometricalAnalysisTools::Density densityType, bool approx, double densityKernelSize = 0.0)
 	{
 		QString sfName;
 		
 		//update the name with the density type
 		switch (densityType)
 		{
-			case CCLib::GeometricalAnalysisTools::DENSITY_KNN:
+			case CCCoreLib::GeometricalAnalysisTools::DENSITY_KNN:
 				sfName = CC_LOCAL_KNN_DENSITY_FIELD_NAME;
 				break;
-			case CCLib::GeometricalAnalysisTools::DENSITY_2D:
+			case CCCoreLib::GeometricalAnalysisTools::DENSITY_2D:
 				sfName = CC_LOCAL_SURF_DENSITY_FIELD_NAME;
 				break;
-			case CCLib::GeometricalAnalysisTools::DENSITY_3D:
+			case CCCoreLib::GeometricalAnalysisTools::DENSITY_3D:
 				sfName = CC_LOCAL_VOL_DENSITY_FIELD_NAME;
 				break;
 			default:
@@ -93,12 +93,12 @@ namespace ccLibAlgorithms
 			return sqrt(surfacePerPoint * knn);
 		}
 		
-		return -PC_ONE;
+		return -CCCoreLib::PC_ONE;
 	}
 	
 	PointCoordinateType GetDefaultCloudKernelSize(const ccHObject::Container& entities, unsigned knn/*=12*/)
 	{
-		PointCoordinateType sigma = -PC_ONE;
+		PointCoordinateType sigma = -CCCoreLib::PC_ONE;
 		
 		size_t selNum = entities.size();
 		//computation of a first sigma guess
@@ -163,7 +163,7 @@ namespace ccLibAlgorithms
 	}
 
 
-	bool ComputeGeomCharacteristic(	CCLib::GeometricalAnalysisTools::GeomCharacteristic c,
+	bool ComputeGeomCharacteristic(	CCCoreLib::GeometricalAnalysisTools::GeomCharacteristic c,
 									int subOption,
 									PointCoordinateType radius,
 									ccHObject::Container& entities,
@@ -179,50 +179,50 @@ namespace ccLibAlgorithms
 
 		switch (c)
 		{
-		case CCLib::GeometricalAnalysisTools::Feature:
+		case CCCoreLib::GeometricalAnalysisTools::Feature:
 		{
 			switch (subOption)
 			{
-			case CCLib::Neighbourhood::EigenValuesSum:
+			case CCCoreLib::Neighbourhood::EigenValuesSum:
 				sfName = "Eigenvalues sum";
 				break;
-			case CCLib::Neighbourhood::Omnivariance:
+			case CCCoreLib::Neighbourhood::Omnivariance:
 				sfName = "Omnivariance";
 				break;
-			case CCLib::Neighbourhood::EigenEntropy:
+			case CCCoreLib::Neighbourhood::EigenEntropy:
 				sfName = "Eigenentropy";
 				break;
-			case CCLib::Neighbourhood::Anisotropy:
+			case CCCoreLib::Neighbourhood::Anisotropy:
 				sfName = "Anisotropy";
 				break;
-			case CCLib::Neighbourhood::Planarity:
+			case CCCoreLib::Neighbourhood::Planarity:
 				sfName = "Planarity";
 				break;
-			case CCLib::Neighbourhood::Linearity:
+			case CCCoreLib::Neighbourhood::Linearity:
 				sfName = "Linearity";
 				break;
-			case CCLib::Neighbourhood::PCA1:
+			case CCCoreLib::Neighbourhood::PCA1:
 				sfName = "PCA1";
 				break;
-			case CCLib::Neighbourhood::PCA2:
+			case CCCoreLib::Neighbourhood::PCA2:
 				sfName = "PCA2";
 				break;
-			case CCLib::Neighbourhood::SurfaceVariation:
+			case CCCoreLib::Neighbourhood::SurfaceVariation:
 				sfName = "Surface variation";
 				break;
-			case CCLib::Neighbourhood::Sphericity:
+			case CCCoreLib::Neighbourhood::Sphericity:
 				sfName = "Sphericity";
 				break;
-			case CCLib::Neighbourhood::Verticality:
+			case CCCoreLib::Neighbourhood::Verticality:
 				sfName = "Verticality";
 				break;
-			case CCLib::Neighbourhood::EigenValue1:
+			case CCCoreLib::Neighbourhood::EigenValue1:
 				sfName = "1st eigenvalue";
 				break;
-			case CCLib::Neighbourhood::EigenValue2:
+			case CCCoreLib::Neighbourhood::EigenValue2:
 				sfName = "2nd eigenvalue";
 				break;
-			case CCLib::Neighbourhood::EigenValue3:
+			case CCCoreLib::Neighbourhood::EigenValue3:
 				sfName = "3rd eigenvalue";
 				break;
 			default:
@@ -235,17 +235,17 @@ namespace ccLibAlgorithms
 		}
 		break;
 
-		case CCLib::GeometricalAnalysisTools::Curvature:
+		case CCCoreLib::GeometricalAnalysisTools::Curvature:
 		{
 			switch (subOption)
 			{
-			case CCLib::Neighbourhood::GAUSSIAN_CURV:
+			case CCCoreLib::Neighbourhood::GAUSSIAN_CURV:
 				sfName = CC_CURVATURE_GAUSSIAN_FIELD_NAME;
 				break;
-			case CCLib::Neighbourhood::MEAN_CURV:
+			case CCCoreLib::Neighbourhood::MEAN_CURV:
 				sfName = CC_CURVATURE_MEAN_FIELD_NAME;
 				break;
-			case CCLib::Neighbourhood::NORMAL_CHANGE_RATE:
+			case CCCoreLib::Neighbourhood::NORMAL_CHANGE_RATE:
 				sfName = CC_CURVATURE_NORM_CHANGE_RATE_FIELD_NAME;
 				break;
 			default:
@@ -257,19 +257,19 @@ namespace ccLibAlgorithms
 		}
 		break;
 
-		case CCLib::GeometricalAnalysisTools::LocalDensity:
-			sfName = GetDensitySFName(static_cast<CCLib::GeometricalAnalysisTools::Density>(subOption), false, radius);
+		case CCCoreLib::GeometricalAnalysisTools::LocalDensity:
+			sfName = GetDensitySFName(static_cast<CCCoreLib::GeometricalAnalysisTools::Density>(subOption), false, radius);
 			break;
 
-		case CCLib::GeometricalAnalysisTools::ApproxLocalDensity:
-			sfName = GetDensitySFName(static_cast<CCLib::GeometricalAnalysisTools::Density>(subOption), true);
+		case CCCoreLib::GeometricalAnalysisTools::ApproxLocalDensity:
+			sfName = GetDensitySFName(static_cast<CCCoreLib::GeometricalAnalysisTools::Density>(subOption), true);
 			break;
 
-		case CCLib::GeometricalAnalysisTools::Roughness:
+		case CCCoreLib::GeometricalAnalysisTools::Roughness:
 			sfName = CC_ROUGHNESS_FIELD_NAME + QString(" (%1)").arg(radius);
 			break;
 
-		case CCLib::GeometricalAnalysisTools::MomentOrder1:
+		case CCCoreLib::GeometricalAnalysisTools::MomentOrder1:
 			sfName = CC_MOMENT_ORDER1_FIELD_NAME + QString(" (%1)").arg(radius);
 			break;
 
@@ -292,7 +292,7 @@ namespace ccLibAlgorithms
 			{
 				ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(entities[i]);
 
-				ccPointCloud* pc = 0;
+				ccPointCloud* pc = nullptr;
 				int sfIdx = -1;
 				if (cloud->isA(CC_TYPES::POINT_CLOUD))
 				{
@@ -325,9 +325,9 @@ namespace ccLibAlgorithms
 					}
 				}
 
-				CCLib::GeometricalAnalysisTools::ErrorCode result = CCLib::GeometricalAnalysisTools::ComputeCharactersitic(c, subOption, cloud, radius, pDlg, octree.data());
+				CCCoreLib::GeometricalAnalysisTools::ErrorCode result = CCCoreLib::GeometricalAnalysisTools::ComputeCharactersitic(c, subOption, cloud, radius, pDlg, octree.data());
 
-				if (result == CCLib::GeometricalAnalysisTools::NoError)
+				if (result == CCCoreLib::GeometricalAnalysisTools::NoError)
 				{
 					if (pc && sfIdx >= 0)
 					{
@@ -342,25 +342,25 @@ namespace ccLibAlgorithms
 					QString errorMessage;
 					switch (result)
 					{
-					case CCLib::GeometricalAnalysisTools::InvalidInput:
+					case CCCoreLib::GeometricalAnalysisTools::InvalidInput:
 						errorMessage = "Internal error (invalid input)";
 						break;
-					case CCLib::GeometricalAnalysisTools::NotEnoughPoints:
+					case CCCoreLib::GeometricalAnalysisTools::NotEnoughPoints:
 						errorMessage = "Not enough points";
 						break;
-					case CCLib::GeometricalAnalysisTools::OctreeComputationFailed:
+					case CCCoreLib::GeometricalAnalysisTools::OctreeComputationFailed:
 						errorMessage = "Failed to compute octree (not enough memory?)";
 						break;
-					case CCLib::GeometricalAnalysisTools::ProcessFailed:
+					case CCCoreLib::GeometricalAnalysisTools::ProcessFailed:
 						errorMessage = "Process failed";
 						break;
-					case CCLib::GeometricalAnalysisTools::UnhandledCharacteristic:
+					case CCCoreLib::GeometricalAnalysisTools::UnhandledCharacteristic:
 						errorMessage = "Internal error (unhandled characteristic)";
 						break;
-					case CCLib::GeometricalAnalysisTools::NotEnoughMemory:
+					case CCCoreLib::GeometricalAnalysisTools::NotEnoughMemory:
 						errorMessage = "Not enough memory";
 						break;
-					case CCLib::GeometricalAnalysisTools::ProcessCancelledByUser:
+					case CCCoreLib::GeometricalAnalysisTools::ProcessCancelledByUser:
 						errorMessage = "Process cancelled by user";
 						break;
 					default:
@@ -440,7 +440,7 @@ namespace ccLibAlgorithms
 		for (size_t i = 0; i < selNum; ++i)
 		{
 			//is the ith selected data is eligible for processing?
-			ccGenericPointCloud* cloud = 0;
+			ccGenericPointCloud* cloud = nullptr;
 			switch (algo)
 			{
 				case CCLIB_ALGO_SF_GRADIENT:
@@ -450,7 +450,7 @@ namespace ccLibAlgorithms
 					if (lockedVertices)
 					{
 						ccUtils::DisplayLockedVerticesWarning(entities[i]->getName(), selNum == 1);
-						cloud = 0;
+						cloud = nullptr;
 					}
 					if (cloud)
 					{
@@ -461,7 +461,7 @@ namespace ccLibAlgorithms
 							int outSfIdx = pc->getCurrentDisplayedScalarFieldIndex();
 							if (outSfIdx < 0)
 							{
-								cloud = 0;
+								cloud = nullptr;
 							}
 							else
 							{
@@ -472,7 +472,7 @@ namespace ccLibAlgorithms
 						}
 						else //if (!cloud->hasDisplayedScalarField()) //TODO: displayed but not necessarily set as OUTPUT!
 						{
-							cloud = 0;
+							cloud = nullptr;
 						}
 					}
 					break;
@@ -486,7 +486,7 @@ namespace ccLibAlgorithms
 			
 			if (cloud)
 			{
-				ccPointCloud* pc = 0;
+				ccPointCloud* pc = nullptr;
 				int sfIdx = -1;
 				if (cloud->isA(CC_TYPES::POINT_CLOUD))
 				{
@@ -531,7 +531,7 @@ namespace ccLibAlgorithms
 				switch(algo)
 				{
 				case CCLIB_ALGO_SF_GRADIENT:
-					result = CCLib::ScalarFieldTools::computeScalarFieldGradient(cloud,
+					result = CCCoreLib::ScalarFieldTools::computeScalarFieldGradient(cloud,
 						0, //auto --> FIXME: should be properly set by the user!
 						euclidean,
 						false,
@@ -554,7 +554,7 @@ namespace ccLibAlgorithms
 						pc->getCurrentInScalarField()->computeMinAndMax();
 					}
 					cloud->prepareDisplayForRefresh();
-					ccConsole::Print("[Algortihm] Timing: %3.2f s.", static_cast<double>(elapsedTime_ms) / 1000.0);
+					ccConsole::Print("[Algorithm] Timing: %3.2f s.", static_cast<double>(elapsedTime_ms) / 1000.0);
 				}
 				else
 				{
@@ -612,7 +612,7 @@ namespace ccLibAlgorithms
 		ccProgressDialog pDlg(true,parent);
 		pDlg.setMethodTitle(QObject::tr("Computing entities scales"));
 		pDlg.setInfo(QObject::tr("Entities: %1").arg(count));
-		CCLib::NormalizedProgress nProgress(&pDlg, 2 * count - 1);
+		CCCoreLib::NormalizedProgress nProgress(&pDlg, 2 * count - 1);
 		pDlg.start();
 		QApplication::processEvents();
 		
@@ -639,7 +639,7 @@ namespace ccLibAlgorithms
 						
 					case PCA_MAX_DIM:
 					{
-						CCLib::Neighbourhood Yk(cloud);
+						CCCoreLib::Neighbourhood Yk(cloud);
 						if (!Yk.getLSPlane())
 						{
 							ccLog::Warning(QString("[Scale Matching] Failed to perform PCA on entity '%1'!").arg(ent->getName()));
@@ -649,7 +649,8 @@ namespace ccLibAlgorithms
 						{
 							const CCVector3* X = Yk.getLSPlaneX();
 							const CCVector3* O = Yk.getGravityCenter();
-							double minX = 0,maxX = 0;
+							double minX = 0;
+							double maxX = 0;
 							for (unsigned j=0; j<cloud->size(); ++j)
 							{
 								double x = (*cloud->getPoint(j) - *O).dot(*X);
@@ -674,27 +675,33 @@ namespace ccLibAlgorithms
 						double finalError = 0.0;
 						double finalScale = 1.0;
 						unsigned finalPointCount = 0;
-						int transformationFilters = 0; //CCLib::RegistrationTools::SKIP_ROTATION;
 						
+						CCCoreLib::ICPRegistrationTools::Parameters parameters;
+						{
+							parameters.convType					= CCCoreLib::ICPRegistrationTools::MAX_ERROR_CONVERGENCE;
+							parameters.minRMSDecrease			= icpRmsDiff;
+							parameters.nbMaxIterations			= 0;
+							parameters.adjustScale				= true;
+							parameters.filterOutFarthestPoints	= false;
+							parameters.samplingLimit			= 50000;
+							parameters.finalOverlapRatio		= icpFinalOverlap / 100.0;
+							parameters.transformationFilters	= 0; //CCCoreLib::RegistrationTools::SKIP_ROTATION
+							parameters.maxThreadCount			= 0;
+							parameters.useC2MSignedDistances	= false;
+							parameters.normalsMatching			= CCCoreLib::ICPRegistrationTools::NO_NORMAL;
+						}
+
 						if (ccRegistrationTools::ICP(
-								 ent,
-								 refEntity,
-								 transMat,
-								 finalScale,
-								 finalError,
-								 finalPointCount,
-								 icpRmsDiff,
-								 0,
-								 50000,
-								 false,
-								 CCLib::ICPRegistrationTools::MAX_ERROR_CONVERGENCE,
-								 true,
-								 icpFinalOverlap / 100.0,
-								 false,
-								 false,
-								 transformationFilters,
-								 0,
-								 parent))
+								ent,
+								refEntity,
+								transMat,
+								finalScale,
+								finalError,
+								finalPointCount,
+								parameters,
+								false,
+								false,
+								parent))
 						{
 							scales[i] = finalScale;
 						}
@@ -749,7 +756,7 @@ namespace ccLibAlgorithms
 					continue;
 				
 				ccLog::Print(QString("[Scale Matching] Entity '%1' scale: %2").arg(entities[i]->getName()).arg(scales[i]));
-				if (scales[i] <= ZERO_TOLERANCE)
+				if (scales[i] <= CCCoreLib::ZERO_TOLERANCE_D)
 				{
 					ccLog::Warning("[Scale Matching] Entity scale is too small!");
 					continue;

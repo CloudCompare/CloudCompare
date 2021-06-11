@@ -1,4 +1,4 @@
-set(CHAISCRIPT_VERSION 5.8.6)
+set(CHAISCRIPT_VERSION 6.1.0)
 find_package(chaiscript ${CHAISCRIPT_VERSION} QUIET)
 
 if (NOT chaiscript_FOUND)

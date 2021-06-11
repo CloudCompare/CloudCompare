@@ -1,19 +1,12 @@
-
-set( CC_PLUGIN_CUSTOM_HEADER_LIST
-	${CC_PLUGIN_CUSTOM_HEADER_LIST} 
-	${CMAKE_CURRENT_SOURCE_DIR}/chaiScriptCodeEditorMainWindow.h
-	${CMAKE_CURRENT_SOURCE_DIR}/codeEditor.h
-	${CMAKE_CURRENT_SOURCE_DIR}/chaiScriptSyntaxHighlighter.h
-	
-	PARENT_SCOPE
+target_sources( ${PROJECT_NAME}
+	PRIVATE
+		${CMAKE_CURRENT_LIST_DIR}/chaiScriptCodeEditorMainWindow.cpp
+		${CMAKE_CURRENT_LIST_DIR}/codeEditor.cpp
+		${CMAKE_CURRENT_LIST_DIR}/chaiScriptSyntaxHighlighter.cpp
 )
 
-set( CC_PLUGIN_CUSTOM_SOURCE_LIST
-	${CC_PLUGIN_CUSTOM_SOURCE_LIST} 
-	${CMAKE_CURRENT_SOURCE_DIR}/chaiScriptCodeEditorMainWindow.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/codeEditor.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/chaiScriptSyntaxHighlighter.cpp
-	
-
-	PARENT_SCOPE
+target_include_directories( ${PROJECT_NAME}
+	PRIVATE
+		${CMAKE_CURRENT_SOURCE_DIR}
 )
+

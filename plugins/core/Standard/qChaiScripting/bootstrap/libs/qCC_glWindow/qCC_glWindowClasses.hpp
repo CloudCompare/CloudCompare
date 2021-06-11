@@ -43,9 +43,9 @@ namespace chaiscript
 					m->add(user_type<ccGLWindow>(), "ccGLWindow");
 					m->add(constructor<ccGLWindow(QSurfaceFormat*, ccGLWindowParent*, bool)>(), "ccGLWindow");
 
-					m->add(fun(&ccGLWindow::PAN_ONLY), "PAN_ONLY");
-					m->add(fun(&ccGLWindow::TRANSFORM_CAMERA), "TRANSFORM_CAMERA");
-					m->add(fun(&ccGLWindow::TRANSFORM_ENTITIES), "TRANSFORM_ENTITIES");
+					//m->add(fun(ccGLWindow::INTERACTION_FLAG::MODE_PAN_ONLY), "MODE_PAN_ONLY");
+					//m->add(fun(ccGLWindow::INTERACTION_FLAG::MODE_TRANSFORM_CAMERA), "MODE_TRANSFORM_CAMERA");
+					//m->add(fun(ccGLWindow::INTERACTION_FLAG::MODE_TRANSFORM_ENTITIES), "MODE_TRANSFORM_ENTITIES");
 #ifdef CC_GL_WINDOW_USE_QWINDOW
 					m->add(fun(&ccGLWindow::parentWidget), "parentWidget");
 					m->add(fun(&ccGLWindow::setParentWidget), "setParentWidget");
@@ -56,8 +56,8 @@ namespace chaiscript
 					
 					m->add(fun(&ccGLWindow::setSceneDB), "setSceneDB");
 					m->add(fun(&ccGLWindow::getSceneDB), "getSceneDB");
-					m->add(fun(static_cast<void(ccGLWindow::*)(int,int,const QString&, const QFont&)>(&ccGLWindow::renderText)), "renderText");
 					m->add(fun(static_cast<void(ccGLWindow::*)(double, double, double, const QString&, const QFont&)>(&ccGLWindow::renderText)), "renderText");
+					m->add(fun(static_cast<void(ccGLWindow::*)(int,int, const QString&, uint16_t, const QFont&)>(&ccGLWindow::renderText)), "renderText");
 					m->add(fun([](ccGLWindow* obj, int a, int b, const QString& c) {obj->renderText(a, b, c); }), "renderText");
 					m->add(fun([](ccGLWindow* obj, double a, double b, double c, const QString& d) {obj->renderText(a, b, c, d); }), "renderText");
 					m->add(fun(&ccGLWindow::toBeRefreshed), "toBeRefreshed");
@@ -96,11 +96,8 @@ namespace chaiscript
 					m->add(fun(&ccGLWindow::setCustomLight), "setCustomLight");
 					m->add(fun(&ccGLWindow::toggleCustomLight), "toggleCustomLight");
 					m->add(fun(&ccGLWindow::customLightEnabled), "customLightEnabled");
-					m->add(fun(&ccGLWindow::setZoom), "setZoom");
-					m->add(fun(&ccGLWindow::updateZoom), "updateZoom");
 					m->add(fun(&ccGLWindow::setPivotVisibility), "setPivotVisibility");
 					m->add(fun(&ccGLWindow::showPivotSymbol), "showPivotSymbol");
-					m->add(fun(&ccGLWindow::setPixelSize), "setPixelSize");
 					m->add(fun(&ccGLWindow::setPivotPoint), "setPivotPoint");
 					m->add(fun([](ccGLWindow* obj, const CCVector3d& a, bool b) {obj->setPivotPoint(a, b); }), "setPivotPoint");
 					m->add(fun([](ccGLWindow* obj, const CCVector3d& a) {obj->setPivotPoint(a); }), "setPivotPoint");
@@ -141,7 +138,6 @@ namespace chaiscript
 					m->add(fun(&ccGLWindow::setViewportParameters), "setViewportParameters");
 					m->add(fun(&ccGLWindow::setFov), "setFov");
 					m->add(fun(&ccGLWindow::getFov), "getFov");
-					m->add(fun(&ccGLWindow::setAspectRatio), "setAspectRatio");
 					m->add(fun(&ccGLWindow::setZNearCoef), "setZNearCoef");
 					m->add(fun(&ccGLWindow::invalidateVisualization), "invalidateVisualization");
 					m->add(fun(&ccGLWindow::renderToImage), "renderToImage");
@@ -160,12 +156,9 @@ namespace chaiscript
 					m->add(fun(&ccGLWindow::areShadersEnabled), "areShadersEnabled");
 					m->add(fun(&ccGLWindow::areGLFiltersEnabled), "areGLFiltersEnabled");
 					m->add(fun(&ccGLWindow::computeActualPixelSize), "computeActualPixelSize");
-					m->add(fun(&ccGLWindow::computePerspectiveZoom), "computePerspectiveZoom");
 					m->add(fun(&ccGLWindow::hasColorRampShader), "hasColorRampShader");
 					m->add(fun(&ccGLWindow::isRectangularPickingAllowed), "isRectangularPickingAllowed");
 					m->add(fun(&ccGLWindow::setRectangularPickingAllowed), "setRectangularPickingAllowed");
-					m->add(fun(&ccGLWindow::getCurrentViewDir), "getCurrentViewDir");
-					m->add(fun(&ccGLWindow::getCurrentUpDir), "getCurrentUpDir");
 					m->add(fun(&ccGLWindow::getDisplayParameters), "getDisplayParameters");
 					m->add(fun(&ccGLWindow::setDisplayParameters), "setDisplayParameters");
 					m->add(fun(&ccGLWindow::hasOverridenDisplayParameters), "hasOverridenDisplayParameters");
@@ -232,11 +225,9 @@ namespace chaiscript
 					m->add(fun(&ccGLWindow::itemPickedFast), "itemPickedFast");
 					m->add(fun(&ccGLWindow::fastPickingFinished), "fastPickingFinished");
 					m->add(fun(&ccGLWindow::viewMatRotated), "viewMatRotated");
-					m->add(fun(&ccGLWindow::cameraDisplaced), "cameraDisplaced");
 					m->add(fun(&ccGLWindow::mouseWheelRotated), "mouseWheelRotated");
 					m->add(fun(&ccGLWindow::perspectiveStateChanged), "perspectiveStateChanged");
 					m->add(fun(&ccGLWindow::baseViewMatChanged), "baseViewMatChanged");
-					m->add(fun(&ccGLWindow::pixelSizeChanged), "pixelSizeChanged");
 					m->add(fun(&ccGLWindow::fovChanged), "fovChanged");
 					m->add(fun(&ccGLWindow::zNearCoefChanged), "zNearCoefChanged");
 					m->add(fun(&ccGLWindow::pivotPointChanged), "pivotPointChanged");

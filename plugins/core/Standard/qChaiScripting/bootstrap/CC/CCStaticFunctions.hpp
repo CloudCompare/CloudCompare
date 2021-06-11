@@ -41,9 +41,9 @@ namespace chaiscript
 		{
 			ModulePtr bs_DistanceComputationTools(ModulePtr m = std::make_shared<Module>())
 			{
-				using namespace CCLib;
-				m->add(fun(&DistanceComputationTools::computeCloud2CloudDistance), "computeCloud2CloudDistance");
-				m->add(fun(&DistanceComputationTools::computeCloud2MeshDistance), "computeCloud2MeshDistance");
+				using namespace CCCoreLib;
+				m->add(fun(&DistanceComputationTools::computeCloud2CloudDistances), "computeCloud2CloudDistances");
+				m->add(fun(&DistanceComputationTools::computeCloud2MeshDistances), "computeCloud2MeshDistances");
 				m->add(fun(&DistanceComputationTools::computeApproxCloud2CloudDistance), "computeApproxCloud2CloudDistance");
 				m->add(fun(&DistanceComputationTools::computePoint2TriangleDistance), "computePoint2TriangleDistance");
 				m->add(fun(&DistanceComputationTools::computePoint2PlaneDistance), "computePoint2PlaneDistance");
@@ -69,21 +69,21 @@ namespace chaiscript
 			
 			ModulePtr bs_CCMiscTools(ModulePtr m = std::make_shared<Module>())
 			{
-				using namespace CCLib;
+				using namespace CCCoreLib;
 				m->add(fun(&CCMiscTools::EnlargeBox), "EnlargeBox");
 				m->add(fun(&CCMiscTools::MakeMinAndMaxCubical), "MakeMinAndMaxCubical");
 				m->add(fun(static_cast<void(*)(const CCVector3&,CCVector3&,	CCVector3&)>(&CCMiscTools::ComputeBaseVectors)), "ComputeBaseVectors");
 				m->add(fun(static_cast<void(*)(const CCVector3d&, CCVector3d&, CCVector3d&)>(&CCMiscTools::ComputeBaseVectors)), "ComputeBaseVectors");
 				m->add(fun(&CCMiscTools::TriBoxOverlap), "TriBoxOverlap");
 				m->add(fun(&CCMiscTools::TriBoxOverlapd), "TriBoxOverlapd");
-				chaiscript::bootstrap::array<CCVector3[3]>("triverts_Array", m);
-				chaiscript::bootstrap::array<CCVector3d[3]>("triverts_Array", m);
+				chaiscript::bootstrap::array<CCVector3[3]>("triverts_Array", *m);
+				chaiscript::bootstrap::array<CCVector3d[3]>("triverts_Array", *m);
 				return m;
 			}
 
 			ModulePtr bs_AutoSegmentationTools(ModulePtr m = std::make_shared<Module>())
 			{
-				using namespace CCLib;
+				using namespace CCCoreLib;
 				m->add(user_type<ReferenceCloudContainer>(), "ReferenceCloudContainer");
 				m->add(fun(&AutoSegmentationTools::labelConnectedComponents), "labelConnectedComponents");
 				m->add(fun([](GenericIndexedCloudPersist* theCloud, unsigned char l) {return AutoSegmentationTools::labelConnectedComponents(theCloud, l); }), "labelConnectedComponents");
@@ -102,7 +102,7 @@ namespace chaiscript
 
 			ModulePtr bs_CloudSamplingTools(ModulePtr m = std::make_shared<Module>())
 			{
-				using namespace CCLib;
+				using namespace CCCoreLib;
 				m->add(user_type<CloudSamplingTools::SFModulationParams>(), "SFModulationParams");
 				m->add(constructor<CloudSamplingTools::SFModulationParams(bool)>(), "SFModulationParams");
 				m->add(fun(&CloudSamplingTools::SFModulationParams::enabled), "enabled");
@@ -128,7 +128,7 @@ namespace chaiscript
 
 			ModulePtr bs_ErrorFunction(ModulePtr m = std::make_shared<Module>())
 			{
-				using namespace CCLib;
+				using namespace CCCoreLib;
 				m->add(fun(&ErrorFunction::erfc), "ErrorFunction_erfc");
 				m->add(fun(&ErrorFunction::erf), "ErrorFunction_erf");
 				return m;
@@ -136,7 +136,7 @@ namespace chaiscript
 
 			ModulePtr bs_GeometricalAnalysisTools(ModulePtr m = std::make_shared<Module>())
 			{
-				using namespace CCLib;
+				using namespace CCCoreLib;
 				m->add(fun(&GeometricalAnalysisTools::ComputeCharactersitic), "ComputeCharactersitic");
 				m->add(fun([](GeometricalAnalysisTools::GeomCharacteristic a, int b, GenericIndexedCloudPersist* c, PointCoordinateType d, GenericProgressCallback* e) {return GeometricalAnalysisTools::ComputeCharactersitic(a, b, c, d, e); }), "ComputeCharactersitic");
 				m->add(fun([](GeometricalAnalysisTools::GeomCharacteristic a, int b, GenericIndexedCloudPersist* c, PointCoordinateType d) {return GeometricalAnalysisTools::ComputeCharactersitic(a, b, c, d); }), "ComputeCharactersitic");
@@ -166,9 +166,9 @@ namespace chaiscript
 
 			ModulePtr bs_ManualSegmentationTools(ModulePtr m = std::make_shared<Module>())
 			{
-				using namespace CCLib;
+				using namespace CCCoreLib;
 				m->add(user_type<ManualSegmentationTools>(), "ManualSegmentationTools");
-				m->add(fun(static_cast<ReferenceCloud*(*)(GenericIndexedCloudPersist*, const CCLib::Polyline*, bool, const float* )> (&ManualSegmentationTools::segment)), "segment"); //TODO Add Default Params
+				m->add(fun(static_cast<ReferenceCloud*(*)(GenericIndexedCloudPersist*, const CCCoreLib::Polyline*, bool, const float* )> (&ManualSegmentationTools::segment)), "segment"); //TODO Add Default Params
 				m->add(fun(&ManualSegmentationTools::segmentReferenceCloud), "segmentReferenceCloud");
 				m->add(fun(static_cast<ReferenceCloud*(*)(GenericIndexedCloudPersist*, ScalarType, ScalarType, bool)> (&ManualSegmentationTools::segment)), "segment"); //TODO Add Default Params
 				m->add(fun(static_cast<bool(*)(const CCVector2&, const GenericIndexedCloud*)> (&ManualSegmentationTools::isPointInsidePoly)), "isPointInsidePoly");
@@ -197,7 +197,7 @@ namespace chaiscript
 
 			ModulePtr bs_StatisticalTestingTools(ModulePtr m = std::make_shared<Module>())
 			{
-				using namespace CCLib;
+				using namespace CCCoreLib;
 				m->add(fun(&StatisticalTestingTools::computeAdaptativeChi2Dist), "computeAdaptativeChi2Dist");
 				m->add(fun([](const GenericDistribution* a, const GenericCloud* b, unsigned c, unsigned& d, bool e, const ScalarType* f, const ScalarType* g, unsigned* h) {return StatisticalTestingTools::computeAdaptativeChi2Dist(a, b, c, d, e, f, g, h); }), "computeAdaptativeChi2Dist");
 				m->add(fun([](const GenericDistribution* a, const GenericCloud* b, unsigned c, unsigned& d, bool e, const ScalarType* f, const ScalarType* g) {return StatisticalTestingTools::computeAdaptativeChi2Dist(a, b, c, d, e, f, g); }), "computeAdaptativeChi2Dist");
@@ -216,7 +216,7 @@ namespace chaiscript
 
 			ModulePtr bs_ScalarFieldTools(ModulePtr m = std::make_shared<Module>())
 			{
-				using namespace CCLib;
+				using namespace CCCoreLib;
 
 				m->add(user_type<KMeanClass>(), "KMeanClass");
 				m->add(fun(&KMeanClass::mean), "mean");

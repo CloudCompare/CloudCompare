@@ -37,7 +37,7 @@ static ChaiScriptingPlugin* s_instance;
 using namespace chaiscript;
 ChaiScriptingPlugin::ChaiScriptingPlugin( QObject *parent )
 	: QObject( parent )
-	, ccStdPluginInterface( ":/CC/plugin/ChaiScriptingPlugin/info.json" )
+	, ccStdPluginInterface( ":/CC/plugin/qChaiScripting/info.json" )
 	, m_action( nullptr )
 {
 	if (!s_instance)
@@ -88,12 +88,15 @@ void ChaiScriptingPlugin::setupChaiScriptEngine()
 			paths.push_back(workingDir.absolutePath().toStdString());
 			paths.push_back((workingDir.absolutePath() + QDir::separator() + "chaiScripts" + QDir::separator()).toLocal8Bit().constData());
 			
-			chai = make_unique<chaiscript::ChaiScript>(chaiscript::Std_Lib::library(), paths, paths);;
+			chai = make_unique<chaiscript::ChaiScript>(paths, paths);;
 			if (systemBootstrap == nullptr)
 			{
 				systemBootstrap = chaiscript::cloudCompare::bootstrapSystem::bootstrap();
 			}
 			chai->add(systemBootstrap);
+			chai->add(chaiscript::bootstrap::standard_library::vector_type<ccHObject::Container>("Container"));
+			chai->add(chaiscript::bootstrap::standard_library::vector_type<std::vector<std::shared_ptr<ccHObject>>>("ContainerSTDShare"));
+			chai->add(chaiscript::bootstrap::standard_library::vector_type<FileIOFilter::FilterContainer>("FilterContainer"));
 			if (m_app)
 			{
 				chai->add_global(var(m_app), "m_app");
@@ -121,7 +124,7 @@ void ChaiScriptingPlugin::setupChaiScriptEngine()
 		ccLog::Error(ee.what());
 		if (ee.call_stack.size() > 0)
 		{
-			ccLog::Warning(QString("during evaluation at (%1, %2)").arg(ee.call_stack[0]->start().line).arg(ee.call_stack[0]->start().column));
+			ccLog::Warning(QString("during evaluation at (%1, %2)").arg(ee.call_stack[0].start().line).arg(ee.call_stack[0].start().column));
 		}
 		std::cout << std::endl;
 	}
@@ -166,7 +169,7 @@ void ChaiScriptingPlugin::executionCalled(const std::string& evalFileName, const
 		ccLog::Error(ee.what());
 		if (ee.call_stack.size() > 0)
 		{
-			ccLog::Warning(QString("during evaluation at (%1, %2)").arg(ee.call_stack[0]->start().line).arg(ee.call_stack[0]->start().column));
+			ccLog::Warning(QString("during evaluation at (%1, %2)").arg(ee.call_stack[0].start().line).arg(ee.call_stack[0].start().column));
 		}
 		std::cout << std::endl;
 	}
@@ -267,7 +270,8 @@ bool ChaiScriptingPlugin::loadChaiFile(const QString& file)
 		ccLog::Error(ee.what());
 		if (ee.call_stack.size() > 0)
 		{
-			ccLog::Warning(QString("during evaluation at (%1, %2)").arg(ee.call_stack[0]->start().line).arg(ee.call_stack[0]->start().column));
+			ccLog::Warning(ee.pretty_print().c_str());
+			ccLog::Warning(QString("during evaluation at (%1, %2)").arg(ee.call_stack[0].start().line).arg(ee.call_stack[0].start().column));
 		}
 		std::cout << std::endl;
 		return false;
@@ -382,7 +386,7 @@ void ChaiScriptingPlugin::onNewSelection(const ccHObject::Container& selectedEnt
 			ccLog::Error(ee.what());
 			if (ee.call_stack.size() > 0)
 			{
-				ccLog::Warning(QString("during evaluation at (%1, %2)").arg(ee.call_stack[0]->start().line).arg(ee.call_stack[0]->start().column));
+				ccLog::Warning(QString("during evaluation at (%1, %2)").arg(ee.call_stack[0].start().line).arg(ee.call_stack[0].start().column));
 			}
 			std::cout << std::endl;
 		}

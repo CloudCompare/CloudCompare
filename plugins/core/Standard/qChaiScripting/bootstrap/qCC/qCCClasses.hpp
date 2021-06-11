@@ -188,9 +188,6 @@ namespace chaiscript
 				m->add(fun(&ccCommandLineInterface::coordinatesShiftWasEnabled), "coordinatesShiftWasEnabled");
 				m->add(fun(&ccCommandLineInterface::formerCoordinatesShift), "formerCoordinatesShift");
 				m->add(fun(&ccCommandLineInterface::storeCoordinatesShiftParams), "storeCoordinatesShiftParams");
-				m->add(fun(&ccCommandLineInterface::COMMAND_OPEN_SHIFT_ON_LOAD), "COMMAND_OPEN_SHIFT_ON_LOAD");
-				m->add(fun(&ccCommandLineInterface::COMMAND_OPEN_SHIFT_ON_LOAD_AUTO), "COMMAND_OPEN_SHIFT_ON_LOAD_AUTO");
-				m->add(fun(&ccCommandLineInterface::COMMAND_OPEN_SHIFT_ON_LOAD_FIRST), "COMMAND_OPEN_SHIFT_ON_LOAD_FIRST");
 				m->add(fun(&ccCommandLineInterface::nextCommandIsGlobalShift), "nextCommandIsGlobalShift");
 				m->add(fun(&ccCommandLineInterface::processGlobalShiftCommand), "processGlobalShiftCommand");
 

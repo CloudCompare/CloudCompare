@@ -1,5 +1,4 @@
-#ifndef CHAISCRIPTING_PLUGIN_HEADER
-#define CHAISCRIPTING_PLUGIN_HEADER
+#pragma once
 
 //##########################################################################
 //#                                                                        #
@@ -27,17 +26,12 @@ static const char COMMAND_CHAIKILL[] = "KILLCHAI";
 class ChaiScriptingPlugin : public QObject, public ccStdPluginInterface
 {
 	Q_OBJECT
-	Q_INTERFACES(ccStdPluginInterface)
+	Q_INTERFACES(ccPluginInterface ccStdPluginInterface)
 	
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.ChaiScripting" FILE "info.json")
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qChaiScripting" FILE "info.json")
 	
 public:
 	static ChaiScriptingPlugin* TheInstance();
-	template<typename T, typename... Args>
-	std::unique_ptr<T> make_unique(Args&&... args)
-	{
-		return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
-	}
 
 
 	explicit ChaiScriptingPlugin( QObject *parent = nullptr );
@@ -132,4 +126,4 @@ private:
 	
 };
 
-#endif
+

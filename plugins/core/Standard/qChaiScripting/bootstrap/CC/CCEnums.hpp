@@ -36,21 +36,21 @@ namespace chaiscript
 
 			ModulePtr bs_CCConst(ModulePtr m = std::make_shared<Module>())
 			{
-				chaiscript::utility::add_class<CC_LOCAL_MODEL_TYPES>(*m,
-					"CC_LOCAL_MODEL_TYPES",
+				chaiscript::utility::add_class<CCCoreLib::LOCAL_MODEL_TYPES>(*m,
+					"LOCAL_MODEL_TYPES",
 					{
-						{ CC_LOCAL_MODEL_TYPES::NO_MODEL, "NO_MODEL" },
-						{ CC_LOCAL_MODEL_TYPES::LS, "LS" },
-						{ CC_LOCAL_MODEL_TYPES::TRI, "TRI" },
-						{ CC_LOCAL_MODEL_TYPES::QUADRIC, "QUADRIC" }
+						{ CCCoreLib::LOCAL_MODEL_TYPES::NO_MODEL, "NO_MODEL" },
+						{ CCCoreLib::LOCAL_MODEL_TYPES::LS, "LS" },
+						{ CCCoreLib::LOCAL_MODEL_TYPES::TRI, "TRI" },
+						{ CCCoreLib::LOCAL_MODEL_TYPES::QUADRIC, "QUADRIC" }
 					}
 				);
 
-				chaiscript::utility::add_class<CC_CHAMFER_DISTANCE_TYPE>(*m,
-					"CC_CHAMFER_DISTANCE_TYPE",
+				chaiscript::utility::add_class<CCCoreLib::CHAMFER_DISTANCE_TYPE>(*m,
+					"CHAMFER_DISTANCE_TYPE",
 					{
-						{ CC_CHAMFER_DISTANCE_TYPE::CHAMFER_111, "CHAMFER_111" },
-						{ CC_CHAMFER_DISTANCE_TYPE::CHAMFER_345, "CHAMFER_345" }
+						{ CCCoreLib::CHAMFER_DISTANCE_TYPE::CHAMFER_111, "CHAMFER_111" },
+						{ CCCoreLib::CHAMFER_DISTANCE_TYPE::CHAMFER_345, "CHAMFER_345" }
 					}
 				);
 
@@ -60,7 +60,7 @@ namespace chaiscript
 
 			ModulePtr bs_CloudSamplingToolsEnum(ModulePtr m = std::make_shared<Module>())
 			{
-				using namespace CCLib;
+				using namespace CCCoreLib;
 				chaiscript::utility::add_class<CloudSamplingTools::RESAMPLING_CELL_METHOD>(*m,
 					"RESAMPLING_CELL_METHOD",
 					{
@@ -82,7 +82,7 @@ namespace chaiscript
 
 			ModulePtr bs_DgmOctreeEnum(ModulePtr m = std::make_shared<Module>())
 			{
-				using namespace CCLib;
+				using namespace CCCoreLib;
 				chaiscript::utility::add_class<DgmOctree::RayCastProcess>(*m,
 					"RayCastProcess",
 					{

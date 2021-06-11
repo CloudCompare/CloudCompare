@@ -21,7 +21,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="../ChaiScriptingPlugin.qrc">
-    <normaloff>:/CC/plugin/ChaiScriptingPlugin/images/icon.png</normaloff>:/CC/plugin/ChaiScriptingPlugin/images/icon.png</iconset>
+    <normaloff>:/CC/plugin/qChaiScripting/images/icon.png</normaloff>:/CC/plugin/qChaiScripting/images/icon.png</iconset>
   </property>
   <property name="documentMode">
    <bool>true</bool>
@@ -185,7 +185,7 @@
   <action name="actionNew">
    <property name="icon">
     <iconset resource="../ChaiScriptingPlugin.qrc">
-     <normaloff>:/CC/plugin/ChaiScriptingPlugin/images/plus.png</normaloff>:/CC/plugin/ChaiScriptingPlugin/images/plus.png</iconset>
+     <normaloff>:/CC/plugin/qChaiScripting/images/plus.png</normaloff>:/CC/plugin/qChaiScripting/images/plus.png</iconset>
    </property>
    <property name="text">
     <string>&amp;New</string>
@@ -200,7 +200,7 @@
   <action name="actionOpen">
    <property name="icon">
     <iconset resource="../ChaiScriptingPlugin.qrc">
-     <normaloff>:/CC/plugin/ChaiScriptingPlugin/images/ccOpen.png</normaloff>:/CC/plugin/ChaiScriptingPlugin/images/ccOpen.png</iconset>
+     <normaloff>:/CC/plugin/qChaiScripting/images/ccOpen.png</normaloff>:/CC/plugin/qChaiScripting/images/ccOpen.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Open</string>
@@ -212,7 +212,7 @@
   <action name="actionSave">
    <property name="icon">
     <iconset resource="../ChaiScriptingPlugin.qrc">
-     <normaloff>:/CC/plugin/ChaiScriptingPlugin/images/ccSave.png</normaloff>:/CC/plugin/ChaiScriptingPlugin/images/ccSave.png</iconset>
+     <normaloff>:/CC/plugin/qChaiScripting/images/ccSave.png</normaloff>:/CC/plugin/qChaiScripting/images/ccSave.png</iconset>
    </property>
    <property name="text">
     <string>Save</string>
@@ -243,7 +243,7 @@
   <action name="actionRun">
    <property name="icon">
     <iconset resource="../ChaiScriptingPlugin.qrc">
-     <normaloff>:/CC/plugin/ChaiScriptingPlugin/images/arrow_right.png</normaloff>:/CC/plugin/ChaiScriptingPlugin/images/arrow_right.png</iconset>
+     <normaloff>:/CC/plugin/qChaiScripting/images/arrow_right.png</normaloff>:/CC/plugin/qChaiScripting/images/arrow_right.png</iconset>
    </property>
    <property name="text">
     <string>Run</string>
@@ -255,7 +255,7 @@
   <action name="actionCu_t">
    <property name="icon">
     <iconset resource="../ChaiScriptingPlugin.qrc">
-     <normaloff>:/CC/plugin/ChaiScriptingPlugin/images/ccSegment.png</normaloff>:/CC/plugin/ChaiScriptingPlugin/images/ccSegment.png</iconset>
+     <normaloff>:/CC/plugin/qChaiScripting/images/ccSegment.png</normaloff>:/CC/plugin/qChaiScripting/images/ccSegment.png</iconset>
    </property>
    <property name="text">
     <string>Cu&amp;t</string>
@@ -264,7 +264,7 @@
   <action name="action_Copy">
    <property name="icon">
     <iconset resource="../ChaiScriptingPlugin.qrc">
-     <normaloff>:/CC/plugin/ChaiScriptingPlugin/images/copy.png</normaloff>:/CC/plugin/ChaiScriptingPlugin/images/copy.png</iconset>
+     <normaloff>:/CC/plugin/qChaiScripting/images/copy.png</normaloff>:/CC/plugin/qChaiScripting/images/copy.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Copy</string>
@@ -273,7 +273,7 @@
   <action name="action_Paste">
    <property name="icon">
     <iconset resource="../ChaiScriptingPlugin.qrc">
-     <normaloff>:/CC/plugin/ChaiScriptingPlugin/images/paste.png</normaloff>:/CC/plugin/ChaiScriptingPlugin/images/paste.png</iconset>
+     <normaloff>:/CC/plugin/qChaiScripting/images/paste.png</normaloff>:/CC/plugin/qChaiScripting/images/paste.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Paste</string>
@@ -307,7 +307,7 @@
   <action name="actionComment">
    <property name="icon">
     <iconset resource="../ChaiScriptingPlugin.qrc">
-     <normaloff>:/CC/plugin/ChaiScriptingPlugin/images/comment.png</normaloff>:/CC/plugin/ChaiScriptingPlugin/images/comment.png</iconset>
+     <normaloff>:/CC/plugin/qChaiScripting/images/comment.png</normaloff>:/CC/plugin/qChaiScripting/images/comment.png</iconset>
    </property>
    <property name="text">
     <string>Comment</string>
@@ -319,7 +319,7 @@
   <action name="actionUncomment">
    <property name="icon">
     <iconset resource="../ChaiScriptingPlugin.qrc">
-     <normaloff>:/CC/plugin/ChaiScriptingPlugin/images/uncomment.png</normaloff>:/CC/plugin/ChaiScriptingPlugin/images/uncomment.png</iconset>
+     <normaloff>:/CC/plugin/qChaiScripting/images/uncomment.png</normaloff>:/CC/plugin/qChaiScripting/images/uncomment.png</iconset>
    </property>
    <property name="text">
     <string>Uncomment</string>
@@ -331,7 +331,7 @@
   <action name="actionIndent_More">
    <property name="icon">
     <iconset resource="../ChaiScriptingPlugin.qrc">
-     <normaloff>:/CC/plugin/ChaiScriptingPlugin/images/indent_more.png</normaloff>:/CC/plugin/ChaiScriptingPlugin/images/indent_more.png</iconset>
+     <normaloff>:/CC/plugin/qChaiScripting/images/indent_more.png</normaloff>:/CC/plugin/qChaiScripting/images/indent_more.png</iconset>
    </property>
    <property name="text">
     <string>Indent More</string>
@@ -340,7 +340,7 @@
   <action name="actionIndent_Less">
    <property name="icon">
     <iconset resource="../ChaiScriptingPlugin.qrc">
-     <normaloff>:/CC/plugin/ChaiScriptingPlugin/images/indent_less.png</normaloff>:/CC/plugin/ChaiScriptingPlugin/images/indent_less.png</iconset>
+     <normaloff>:/CC/plugin/qChaiScripting/images/indent_less.png</normaloff>:/CC/plugin/qChaiScripting/images/indent_less.png</iconset>
    </property>
    <property name="text">
     <string>Indent Less</string>

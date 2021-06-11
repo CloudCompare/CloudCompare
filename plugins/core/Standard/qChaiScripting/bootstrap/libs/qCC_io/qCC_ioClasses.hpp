@@ -75,7 +75,7 @@ namespace chaiscript
 					m->add(fun(&FileIOFilter::GetFilter), "GetFilter");
 					m->add(fun(&FileIOFilter::FindBestFilterForExtension), "FindBestFilterForExtension");
 					m->add(user_type<FileIOFilter::FilterContainer>(), "FilterContainer");
-					m->add(chaiscript::bootstrap::standard_library::vector_type<FileIOFilter::FilterContainer>("FilterContainer"));
+//					m->add(chaiscript::bootstrap::standard_library::vector_type<FileIOFilter::FilterContainer>("FilterContainer"));
 					m->add(fun(&FileIOFilter::GetFilters), "GetFilters");
 					m->add(fun(&FileIOFilter::UnregisterAll), "UnregisterAll");
 					m->add(fun(&FileIOFilter::unregister), "unregister");

@@ -184,8 +184,9 @@ namespace chaiscript
 					m->add(fun(&ccHObject::find), "find");
 					//m->add(chaiscript::user_type<ccHObject::Container>(), "Container");
 					m->add(chaiscript::vector_conversion<ccHObject::Container>());
-					m->add(chaiscript::bootstrap::standard_library::vector_type<ccHObject::Container>("Container"));
-					m->add(chaiscript::bootstrap::standard_library::vector_type<std::vector<std::shared_ptr<ccHObject>>>("ContainerSTDShare"));
+
+//					m->add(chaiscript::bootstrap::standard_library::vector_type<ccHObject::Container>("Container"));
+//					m->add(chaiscript::bootstrap::standard_library::vector_type<std::vector<std::shared_ptr<ccHObject>>>("ContainerSTDShare"));
 					
 					m->add(chaiscript::user_type<ccHObject::Shared>(), "Shared");
 					m->add(chaiscript::user_type<ccHObject::SharedContainer>(), "SharedContainer");
@@ -212,7 +213,6 @@ namespace chaiscript
 					m->add(fun(&ccHObject::getBB_recursive), "getBB_recursive");
 					m->add(fun(&ccHObject::getDisplayBB_recursive), "getDisplayBB_recursive");
 					m->add(fun(&ccHObject::getOwnFitBB), "getOwnFitBB");
-					m->add(fun(&ccHObject::getGlobalBB), "getGlobalBB");
 					m->add(fun(&ccHObject::drawBB), "drawBB");
 					m->add(fun(&ccHObject::draw), "draw");
 					m->add(fun(&ccHObject::getAbsoluteGLTransformation), "getAbsoluteGLTransformation");
@@ -392,7 +392,7 @@ namespace chaiscript
 					m->add(fun(&TexCoords2D::tx), "tx");
 					m->add(fun(&TexCoords2D::ty), "ty");
 					m->add(fun(&TexCoords2D::t), "t");
-					chaiscript::bootstrap::array<float[2]>("t_Array", m);
+					chaiscript::bootstrap::array<float[2]>("t_Array", *m);
 					return m;
 				}
 
@@ -909,7 +909,7 @@ namespace chaiscript
 					m->add(fun(&ccCameraSensor::OrthoRectifyAsImages), "OrthoRectifyAsImages");
 					m->add(fun(&ccCameraSensor::computeOrthoRectificationParams), "computeOrthoRectificationParams");
 					m->add(fun(static_cast<bool(ccCameraSensor::*)(const CCVector2&, const float, Vector3Tpl<ScalarType>&)const>(&ccCameraSensor::computeUncertainty)), "computeUncertainty");
-					m->add(fun(static_cast<bool(ccCameraSensor::*)(CCLib::ReferenceCloud*, std::vector<Vector3Tpl<ScalarType>>&)>(&ccCameraSensor::computeUncertainty)), "computeUncertainty");
+					m->add(fun(static_cast<bool(ccCameraSensor::*)(CCCoreLib::ReferenceCloud*, std::vector<Vector3Tpl<ScalarType>>&)>(&ccCameraSensor::computeUncertainty)), "computeUncertainty");
 					m->add(fun(static_cast<QImage(ccCameraSensor::*)(const QImage&)const>(&ccCameraSensor::undistort)), "undistort");
 					m->add(fun(static_cast<ccImage*(ccCameraSensor::*)(ccImage*, bool)const>(&ccCameraSensor::undistort)), "undistort");
 					m->add(fun(&ccCameraSensor::isGlobalCoordInFrustum), "isGlobalCoordInFrustum");
@@ -1119,7 +1119,7 @@ namespace chaiscript
 					m->add(chaiscript::base_class<ccDrawableObject, ccGenericMesh>());
 					m->add(chaiscript::base_class<ccHObject, ccGenericMesh>());
 					m->add(chaiscript::base_class<ccSerializableObject, ccGenericMesh>());
-					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccGenericMesh>());
+					m->add(chaiscript::base_class<CCCoreLib::GenericIndexedMesh, ccGenericMesh>());
 
 
 					return m;
@@ -1129,7 +1129,7 @@ namespace chaiscript
 				{
 					m->add(chaiscript::user_type<ccMesh>(), "ccMesh");
 					m->add(chaiscript::constructor<ccMesh(ccGenericPointCloud*)>(), "ccMesh");
-					m->add(chaiscript::constructor<ccMesh(CCLib::GenericIndexedMesh*, ccGenericPointCloud*)>(), "ccMesh");
+					m->add(chaiscript::constructor<ccMesh(CCCoreLib::GenericIndexedMesh*, ccGenericPointCloud*)>(), "ccMesh");
 					m->add(fun(&ccMesh::setAssociatedCloud), "setAssociatedCloud");
 					m->add(fun(&ccMesh::cloneMesh), "cloneMesh");
 					m->add(fun(&ccMesh::Triangulate), "Triangulate");
@@ -1243,7 +1243,7 @@ namespace chaiscript
 					m->add(fun(&ccMesh::getOwnBB), "getOwnBB");
 					m->add(fun(&ccMesh::getGLTransformationHistory), "getGLTransformationHistory");
 					
-					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccMesh>());
+					m->add(chaiscript::base_class<CCCoreLib::GenericIndexedMesh, ccMesh>());
 					m->add(chaiscript::base_class<ccHObject, ccMesh>());
 					m->add(chaiscript::base_class<ccObject, ccMesh>());
 					m->add(chaiscript::base_class<ccDrawableObject, ccMesh>());
@@ -1383,7 +1383,7 @@ namespace chaiscript
 					m->add(fun(&ccGenericPrimitive::getGLTransformationHistory), "getGLTransformationHistory");
 					
 					
-					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccGenericPrimitive>());
+					m->add(chaiscript::base_class<CCCoreLib::GenericIndexedMesh, ccGenericPrimitive>());
 					m->add(chaiscript::base_class<ccHObject, ccGenericPrimitive>());
 					m->add(chaiscript::base_class<ccObject, ccGenericPrimitive>());
 					m->add(chaiscript::base_class<ccSerializableObject, ccGenericPrimitive>());
@@ -1568,13 +1568,13 @@ namespace chaiscript
 					m->add(fun(&ccPlane::setAsTexture), "setAsTexture");
 					m->add(fun([](ccPlane* pln, ccMesh* msh, QImage i) {return pln->SetQuadTexture(msh, i); }), "SetQuadTexture");
 					m->add(fun(&ccPlane::SetQuadTexture), "SetQuadTexture");
-					m->add(fun([](ccPlane* pln, CCLib::GenericIndexedCloudPersist* cld) {pln->Fit(cld); }), "Fit");
+					m->add(fun([](ccPlane* pln, CCCoreLib::GenericIndexedCloudPersist* cld) {pln->Fit(cld); }), "Fit");
 					m->add(fun(&ccPlane::Fit), "Fit");
 					m->add(fun(static_cast<void(ccPlane::*)(CCVector3&, PointCoordinateType&)const>(&ccPlane::getEquation)), "getEquation");
 					m->add(fun(static_cast<const PointCoordinateType*(ccPlane::*)()>(&ccPlane::getEquation)), "getEquation");
 					m->add(fun(&ccPlane::flip), "flip");
 
-					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccPlane>());
+					m->add(chaiscript::base_class<CCCoreLib::GenericIndexedMesh, ccPlane>());
 					m->add(chaiscript::base_class<ccHObject, ccPlane>());
 					m->add(chaiscript::base_class<ccObject, ccPlane>());
 					m->add(chaiscript::base_class<ccDrawableObject, ccPlane>());
@@ -1721,7 +1721,7 @@ namespace chaiscript
 					m->add(fun(&ccSphere::getRadius), "getRadius");
 					m->add(fun(&ccSphere::setRadius), "setRadius");
 
-					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccSphere>());
+					m->add(chaiscript::base_class<CCCoreLib::GenericIndexedMesh, ccSphere>());
 					m->add(chaiscript::base_class<ccHObject, ccSphere>());
 					m->add(chaiscript::base_class<ccObject, ccSphere>());
 					m->add(chaiscript::base_class<ccSerializableObject, ccSphere>());
@@ -1882,7 +1882,7 @@ namespace chaiscript
 					m->add(fun(&ccCone::getLargeRadius), "getLargeRadius");
 					m->add(fun(&ccCone::isSnoutMode), "isSnoutMode");
 
-					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccCone>());
+					m->add(chaiscript::base_class<CCCoreLib::GenericIndexedMesh, ccCone>());
 					m->add(chaiscript::base_class<ccHObject, ccCone>());
 					m->add(chaiscript::base_class<ccObject, ccCone>());
 					m->add(chaiscript::base_class<ccSerializableObject, ccCone>());
@@ -2040,7 +2040,7 @@ namespace chaiscript
 					m->add(fun(&ccCylinder::getLargeRadius), "getLargeRadius");
 					m->add(fun(&ccCylinder::isSnoutMode), "isSnoutMode");
 
-					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccCylinder>());
+					m->add(chaiscript::base_class<CCCoreLib::GenericIndexedMesh, ccCylinder>());
 					m->add(chaiscript::base_class<ccHObject, ccCylinder>());
 					m->add(chaiscript::base_class<ccObject, ccCylinder>());
 					m->add(chaiscript::base_class<ccSerializableObject, ccCylinder>());
@@ -2187,7 +2187,7 @@ namespace chaiscript
 					m->add(fun(&ccDish::getGLTransformationHistory), "getGLTransformationHistory");
 					m->add(fun(&ccDish::getOwnFitBB), "getOwnFitBB");
 
-					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccDish>());
+					m->add(chaiscript::base_class<CCCoreLib::GenericIndexedMesh, ccDish>());
 					m->add(chaiscript::base_class<ccHObject, ccDish>());
 					m->add(chaiscript::base_class<ccObject, ccDish>());
 					m->add(chaiscript::base_class<ccSerializableObject, ccDish>());
@@ -2334,7 +2334,7 @@ namespace chaiscript
 					m->add(fun(&ccExtru::getThickness), "getThickness");
 					m->add(fun(&ccExtru::getProfile), "getProfile");
 
-					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccExtru>());
+					m->add(chaiscript::base_class<CCCoreLib::GenericIndexedMesh, ccExtru>());
 					m->add(chaiscript::base_class<ccHObject, ccExtru>());
 					m->add(chaiscript::base_class<ccObject, ccExtru>());
 					m->add(chaiscript::base_class<ccSerializableObject, ccExtru>());
@@ -2350,9 +2350,9 @@ namespace chaiscript
 				{
 					m->add(chaiscript::constructor<ccFacet(PointCoordinateType, QString)>(), "ccFacet");
 					m->add(fun([]() {return new ccFacet(); }), "create_ccFacet");
-					m->add(fun([](CCLib::GenericIndexedCloudPersist* cloud) {return ccFacet::Create(cloud); }), "create_ccFacet");
-					m->add(fun([](CCLib::GenericIndexedCloudPersist* cloud, PointCoordinateType maxEL) {return ccFacet::Create(cloud, maxEL); }), "create_ccFacet");
-					m->add(fun([](CCLib::GenericIndexedCloudPersist* cloud,PointCoordinateType maxEL, bool to) {return ccFacet::Create(cloud, maxEL, to); }), "create_ccFacet");
+					m->add(fun([](CCCoreLib::GenericIndexedCloudPersist* cloud) {return ccFacet::Create(cloud); }), "create_ccFacet");
+					m->add(fun([](CCCoreLib::GenericIndexedCloudPersist* cloud, PointCoordinateType maxEL) {return ccFacet::Create(cloud, maxEL); }), "create_ccFacet");
+					m->add(fun([](CCCoreLib::GenericIndexedCloudPersist* cloud,PointCoordinateType maxEL, bool to) {return ccFacet::Create(cloud, maxEL, to); }), "create_ccFacet");
 					m->add(fun(&ccFacet::Create), "Create");
 					m->add(fun(&ccFacet::showNormals), "showNormals");
 					m->add(fun(&ccFacet::isSerializable), "isSerializable");					
@@ -2465,8 +2465,8 @@ namespace chaiscript
 					m->add(fun(static_cast<CCVector3d(ccShiftedObject::*)(const Vector3Tpl<double>&)const>(&ccShiftedObject::toLocal3d)), "toLocal3d");
 					m->add(fun(static_cast<CCVector3(ccShiftedObject::*)(const Vector3Tpl<float>&)const>(&ccShiftedObject::toLocal3pc)), "toLocal3pc");
 					m->add(fun(static_cast<CCVector3(ccShiftedObject::*)(const Vector3Tpl<double>&)const>(&ccShiftedObject::toLocal3pc)), "toLocal3pc");
-					m->add(fun(&ccShiftedObject::getGlobalBB), "getGlobalBB");		
-
+					m->add(fun(static_cast<bool(ccShiftedObject::*)(CCVector3d&, CCVector3d&)>(&ccShiftedObject::getOwnGlobalBB)), "getOwnGlobalBB");
+					m->add(fun(static_cast<ccHObject::GlobalBoundingBox(ccShiftedObject::*)(bool)>(&ccShiftedObject::getOwnGlobalBB)), "getOwnGlobalBB");
 					m->add(chaiscript::base_class<ccHObject, ccShiftedObject>());
 					m->add(chaiscript::base_class<ccObject, ccShiftedObject>());
 					m->add(chaiscript::base_class<ccSerializableObject, ccShiftedObject>());
@@ -2543,7 +2543,7 @@ namespace chaiscript
 					m->add(chaiscript::base_class<ccSerializableObject, ccGenericPointCloud>());
 					m->add(chaiscript::base_class<ccDrawableObject, ccGenericPointCloud>());
 					m->add(chaiscript::base_class<ccShiftedObject, ccGenericPointCloud>());
-					m->add(chaiscript::base_class<CCLib::GenericIndexedCloudPersist, ccGenericPointCloud>());
+					m->add(chaiscript::base_class<CCCoreLib::GenericIndexedCloudPersist, ccGenericPointCloud>());
 
 
 					return m;
@@ -2581,8 +2581,8 @@ namespace chaiscript
 					m->add(fun(&ccPointCloud::hasMetaData), "hasMetaData");
 					m->add(fun(&ccPointCloud::metaData), "metaData");
 
-					//m->add(fun(static_cast<ccPointCloud*(ccPointCloud::*)(const CCLib::GenericIndexedCloud*, const ccGenericPointCloud*)>(&ccPointCloud::From)), "From");
-					//m->add(fun(static_cast<ccPointCloud* (ccPointCloud::*)(const CCLib::GenericCloud*, const ccGenericPointCloud*)>(&ccPointCloud::From)), "From");
+					//m->add(fun(static_cast<ccPointCloud*(ccPointCloud::*)(const CCCoreLib::GenericIndexedCloud*, const ccGenericPointCloud*)>(&ccPointCloud::From)), "From");
+					//m->add(fun(static_cast<ccPointCloud* (ccPointCloud::*)(const CCCoreLib::GenericCloud*, const ccGenericPointCloud*)>(&ccPointCloud::From)), "From");
 
 					m->add(fun(&ccPointCloud::partialClone), "partialClone");
 					m->add(fun(&ccPointCloud::cloneThis), "cloneThis");
@@ -2680,7 +2680,7 @@ namespace chaiscript
 					m->add(fun(&ccPointCloud::enableVisibilityCheck), "enableVisibilityCheck");
 					m->add(fun(&ccPointCloud::hasSensor), "hasSensor");
 					m->add(fun(&ccPointCloud::computeCPSet), "computeCPSet");
-					m->add(chaiscript::user_type<QSharedPointer<CCLib::ReferenceCloud>>(), "ReferenceCloud");
+					m->add(chaiscript::user_type<QSharedPointer<CCCoreLib::ReferenceCloud>>(), "ReferenceCloud");
 					m->add(fun(&ccPointCloud::interpolateColorsFrom), "interpolateColorsFrom");
 					m->add(fun(static_cast<void(ccPointCloud::*)(unsigned, const ccColor::Rgb&)> (&ccPointCloud::setPointColor)), "setPointColor");
 					m->add(fun(static_cast<void(ccPointCloud::*)(unsigned, const ccColor::Rgba&)> (&ccPointCloud::setPointColor)), "setPointColor");
@@ -2736,9 +2736,9 @@ namespace chaiscript
 					m->add(chaiscript::base_class<ccSerializableObject, ccPointCloud>());
 					m->add(chaiscript::base_class<ccDrawableObject, ccPointCloud>());
 					m->add(chaiscript::base_class<ccShiftedObject, ccPointCloud>());
-					m->add(chaiscript::base_class<CCLib::PointCloudTpl<ccGenericPointCloud, QString>, ccPointCloud>());
+					m->add(chaiscript::base_class<CCCoreLib::PointCloudTpl<ccGenericPointCloud, QString>, ccPointCloud>());
 					m->add(chaiscript::base_class<ccGenericPointCloud, ccPointCloud>());
-					m->add(chaiscript::base_class<CCLib::GenericIndexedCloudPersist, ccPointCloud>());
+					m->add(chaiscript::base_class<CCCoreLib::GenericIndexedCloudPersist, ccPointCloud>());
 
 					return m;
 				}
@@ -2764,7 +2764,7 @@ namespace chaiscript
 					m->add(chaiscript::base_class<ccDrawableObject, ccKdTree>());
 					m->add(chaiscript::base_class<ccHObject, ccKdTree>());
 					m->add(chaiscript::base_class<ccSerializableObject, ccKdTree>());
-					m->add(chaiscript::base_class<CCLib::TrueKdTree, ccKdTree>());
+					m->add(chaiscript::base_class<CCCoreLib::TrueKdTree, ccKdTree>());
 
 
 					return m;
@@ -2794,7 +2794,7 @@ namespace chaiscript
 					
 
 					m->add(chaiscript::base_class<QObject, ccOctree>());
-					m->add(chaiscript::base_class<CCLib::DgmOctree, ccOctree>());
+					m->add(chaiscript::base_class<CCCoreLib::DgmOctree, ccOctree>());
 					
 
 
@@ -2813,7 +2813,7 @@ namespace chaiscript
 					
 
 					//m->add(chaiscript::base_class<QObject, ccOctreeProxy>());
-					//m->add(chaiscript::base_class<CCLib::DgmOctree, ccOctreeProxy>());
+					//m->add(chaiscript::base_class<CCCoreLib::DgmOctree, ccOctreeProxy>());
 					m->add(chaiscript::base_class<ccHObject, ccOctreeProxy>());
 					m->add(chaiscript::base_class<ccObject, ccOctreeProxy>());
 					m->add(chaiscript::base_class<ccSerializableObject, ccOctreeProxy>());
@@ -2827,7 +2827,7 @@ namespace chaiscript
 				{
 					m->add(chaiscript::user_type<ccPolyline>(), "ccPolyline");
 
-					m->add(chaiscript::constructor<ccPolyline(CCLib::GenericIndexedCloudPersist*)>(), "ccPolyline");
+					m->add(chaiscript::constructor<ccPolyline(CCCoreLib::GenericIndexedCloudPersist*)>(), "ccPolyline");
 					m->add(chaiscript::constructor<ccPolyline(const ccPolyline&)>(), "ccPolyline");
 					m->add(fun(&ccPolyline::getClassID), "getClassID");
 					m->add(fun(&ccPolyline::isSerializable), "isSerializable");
@@ -2864,7 +2864,7 @@ namespace chaiscript
 				
 
 					
-					m->add(chaiscript::base_class<CCLib::Polyline, ccPolyline>());
+					m->add(chaiscript::base_class<CCCoreLib::Polyline, ccPolyline>());
 					m->add(chaiscript::base_class<ccHObject, ccPolyline>());
 					m->add(chaiscript::base_class<ccObject, ccPolyline>());
 					m->add(chaiscript::base_class<ccSerializableObject, ccPolyline>());
@@ -2937,7 +2937,7 @@ namespace chaiscript
 
 
 					m->add(chaiscript::base_class<ccGenericMesh, ccSubMesh>());
-					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccSubMesh>());
+					m->add(chaiscript::base_class<CCCoreLib::GenericIndexedMesh, ccSubMesh>());
 					m->add(chaiscript::base_class<ccHObject, ccSubMesh>());
 					m->add(chaiscript::base_class<ccObject, ccSubMesh>());
 					m->add(chaiscript::base_class<ccSerializableObject, ccSubMesh>());
@@ -3006,7 +3006,7 @@ namespace chaiscript
 					m->add(fun(&ccScalarField::getGlobalShift), "getGlobalShift");
 					m->add(fun(&ccScalarField::setGlobalShift), "setGlobalShift");
 
-					m->add(chaiscript::base_class<CCLib::ScalarField, ccScalarField>());
+					m->add(chaiscript::base_class<CCCoreLib::ScalarField, ccScalarField>());
 					m->add(chaiscript::base_class<ccSerializableObject, ccScalarField>());
 
 					return m;
@@ -3032,10 +3032,10 @@ namespace chaiscript
 					m->add(fun(&ccQuadric::getEquationString), "getEquationString");
 					m->add(fun(&ccQuadric::Fit), "Fit");
 
-					chaiscript::bootstrap::array<PointCoordinateType[6]>("eq_Array", m);
-					chaiscript::bootstrap::array<const PointCoordinateType[6]>("eq_Array", m);
+					chaiscript::bootstrap::array<PointCoordinateType[6]>("eq_Array", *m);
+					chaiscript::bootstrap::array<const PointCoordinateType[6]>("eq_Array", *m);
 
-					m->add(chaiscript::base_class<CCLib::GenericIndexedMesh, ccQuadric>());
+					m->add(chaiscript::base_class<CCCoreLib::GenericIndexedMesh, ccQuadric>());
 					m->add(chaiscript::base_class<ccHObject, ccQuadric>());
 					m->add(chaiscript::base_class<ccObject, ccQuadric>());
 					m->add(chaiscript::base_class<ccSerializableObject, ccQuadric>());
@@ -3065,7 +3065,7 @@ namespace chaiscript
 
 
 
-					m->add(chaiscript::base_class<CCLib::GenericProgressCallback, ccProgressDialog>());
+					m->add(chaiscript::base_class<CCCoreLib::GenericProgressCallback, ccProgressDialog>());
 					m->add(chaiscript::base_class<QProgressDialog, ccProgressDialog>());
 
 
@@ -3089,7 +3089,7 @@ namespace chaiscript
 
 
 
-					m->add(chaiscript::base_class<CCLib::GenericProgressCallback, ccProgressDialog>());
+					m->add(chaiscript::base_class<CCCoreLib::GenericProgressCallback, ccProgressDialog>());
 					m->add(chaiscript::base_class<QProgressDialog, ccProgressDialog>());
 
 
@@ -3159,7 +3159,7 @@ namespace chaiscript
 					m->add(fun(&ccFastMarchingForNormsDirection::updateResolvedTable), "updateResolvedTable");
 					m->add(fun(&ccFastMarchingForNormsDirection::propagate), "propagate");
 					
-					m->add(chaiscript::base_class<CCLib::FastMarching, ccFastMarchingForNormsDirection>());
+					m->add(chaiscript::base_class<CCCoreLib::FastMarching, ccFastMarchingForNormsDirection>());
 
 					return m;
 				}*/
@@ -3339,8 +3339,9 @@ namespace chaiscript
 					m->add(fun(static_cast<void (*)(QOpenGLFunctions_2_1*, const unsigned char*)>(&ccGL::Color3v)), "Color3v");
 					m->add(fun(static_cast<void (*)(QOpenGLFunctions_2_1*, const float*)>(&ccGL::Color3v)), "Color3v");
 					m->add(fun(&ccGL::Frustum), "Frustum");
-					m->add(fun(&ccGL::Perspective), "Perspective");
-					m->add(fun(&ccGL::Ortho), "Ortho");
+					m->add(fun(static_cast<ccGLMatrixd(*)(double, double, double)>(&ccGL::Ortho)), "Ortho");
+					m->add(fun(static_cast<ccGLMatrixd(*)(double, double, double, double, double, double)>(&ccGL::Ortho)), "Ortho");
+
 					m->add(fun(&ccGL::Project<float, float>), "Project");
 					m->add(fun(&ccGL::Project<float, double>), "Project");
 					m->add(fun(&ccGL::Project<double, double>), "Project");
@@ -3388,8 +3389,6 @@ namespace chaiscript
 					m->add(fun(&ccViewportParameters::isSerializable), "isSerializable");
 					m->add(fun(&ccViewportParameters::toFile), "toFile");
 					m->add(fun(&ccViewportParameters::fromFile), "fromFile");
-					m->add(fun(&ccViewportParameters::pixelSize), "pixelSize");
-					m->add(fun(&ccViewportParameters::zoom), "zoom");
 					m->add(fun(&ccViewportParameters::viewMat), "viewMat");
 					m->add(fun(&ccViewportParameters::defaultPointSize), "defaultPointSize");
 					m->add(fun(&ccViewportParameters::defaultLineWidth), "defaultLineWidth");
@@ -3398,11 +3397,6 @@ namespace chaiscript
 					m->add(fun(&ccViewportParameters::zNearCoef), "zNearCoef");
 					m->add(fun(&ccViewportParameters::zNear), "zNear");
 					m->add(fun(&ccViewportParameters::zFar), "zFar");
-					m->add(fun(&ccViewportParameters::pivotPoint), "pivotPoint");
-					m->add(fun(&ccViewportParameters::cameraCenter), "cameraCenter");
-					m->add(fun(&ccViewportParameters::fov), "fov");
-					m->add(fun(&ccViewportParameters::perspectiveAspectRatio), "perspectiveAspectRatio");
-					m->add(fun(&ccViewportParameters::orthoAspectRatio), "orthoAspectRatio");
 					m->add(fun(&ccViewportParameters::IncrementToZNearCoef), "IncrementToZNearCoef");
 					m->add(fun(&ccViewportParameters::ZNearCoefToIncrement), "ZNearCoefToIncrement");
 
@@ -3415,8 +3409,8 @@ namespace chaiscript
 				{
 					m->add(user_type<ccGLCameraParameters>(), "ccGLCameraParameters");
 					m->add(constructor<ccGLCameraParameters()>(), "ccGLCameraParameters");
-					m->add(fun(static_cast<bool(ccGLCameraParameters::*)(const CCVector3d&, CCVector3d&, bool)const>(&ccGLCameraParameters::project)), "project");
-					m->add(fun(static_cast<bool(ccGLCameraParameters::*)(const CCVector3&, CCVector3d&, bool)const>(&ccGLCameraParameters::project)), "project");
+					m->add(fun(static_cast<bool(ccGLCameraParameters::*)(const CCVector3d&, CCVector3d&, bool*)const>(&ccGLCameraParameters::project)), "project");
+					m->add(fun(static_cast<bool(ccGLCameraParameters::*)(const CCVector3&, CCVector3d&, bool*)const>(&ccGLCameraParameters::project)), "project");
 					m->add(fun(static_cast<bool(ccGLCameraParameters::*)(const CCVector3d&, CCVector3d&)const>(&ccGLCameraParameters::unproject)), "unproject");
 					m->add(fun(static_cast<bool(ccGLCameraParameters::*)(const CCVector3&, CCVector3d&)const>(&ccGLCameraParameters::unproject)), "unproject");
 					m->add(fun(&ccGLCameraParameters::modelViewMat), "modelViewMat");
@@ -3472,7 +3466,7 @@ namespace chaiscript
 					m->add(fun(&ccFlags::toByte), "toByte");
 					m->add(fun(&ccFlags::table), "table");
 				
-					chaiscript::bootstrap::array<bool[8]>("bool_table_Array", m);
+					chaiscript::bootstrap::array<bool[8]>("bool_table_Array", *m);
 
 
 					return m;
@@ -3520,7 +3514,7 @@ namespace chaiscript
 						{ fun(&ccColor::RgbTpl<T>::operator!=), "!=" },
 					}
 					);
-					chaiscript::bootstrap::array<T[3]>("rgb_Array", m);
+					chaiscript::bootstrap::array<T[3]>("rgb_Array", *m);
 				
 					return m;
 				}
@@ -3546,7 +3540,7 @@ namespace chaiscript
 						{ fun(&ccColor::RgbaTpl<T>::operator!=), "!=" },
 					}
 					);
-					chaiscript::bootstrap::array<T[4]>("rgba_Array", m);
+					chaiscript::bootstrap::array<T[4]>("rgba_Array", *m);
 					m->add(chaiscript::type_conversion<ccColor::RgbaTpl<T>, ccColor::RgbTpl<T>>());
 					return m;
 				}

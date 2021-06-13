@@ -581,7 +581,8 @@ bool FileIOFilter::HandleGlobalShift(	const CCVector3d& P,
 											&applyAll) )
 	{
 		//we save coordinates shift information
-		if (applyAll && loadParameters.coordinatesShiftEnabled && loadParameters.coordinatesShift)
+		if ((applyAll || loadParameters.shiftHandlingMode == ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT) //in command line mode, with the 'AUTO GLOBAL SHIFT' option, we want to retrieve the applied coordinate shift
+			&& loadParameters.coordinatesShiftEnabled && loadParameters.coordinatesShift)
 		{
 			*loadParameters.coordinatesShiftEnabled = true;
 			*loadParameters.coordinatesShift = Pshift;

@@ -111,6 +111,7 @@ v2.12 (???) - (in development)
 	- PLY files with point elements containing a 'list' property would be considered as face elements (preventing the user from loading the cloud).
 		It is now possible to load it if the 'list' is composed of floating point values.
 	- When merging two clouds, CC could crash is the LoD structure was currently being built at the same time on one of the clouds
+	- Command line mode: the '-GLOBA_SHIFT FIRST' option was not working properly
 
 
 v2.11.3 (Anoia) - 08/09/2020

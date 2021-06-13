@@ -235,10 +235,19 @@ public: //file I/O
 	//! File loading parameters
 	virtual CLLoadParameters& fileLoadingParams();
 
+	//! Global Shift options
+	struct GlobalShiftOptions
+	{
+		enum Mode { NO_GLOBAL_SHIFT, AUTO_GLOBAL_SHIFT, FIRST_GLOBAL_SHIFT, CUSTOM_GLOBAL_SHIFT	};
+
+		Mode mode = NO_GLOBAL_SHIFT;
+		CCVector3d customGlobalShift;
+	};
+
 	//! Loads a file with a specific filter
 	/** Automatically dispatches the entities between the clouds and meshes sets.
 	**/
-	virtual bool importFile(QString filename, FileIOFilter::Shared filter = FileIOFilter::Shared(nullptr)) = 0;
+	virtual bool importFile(QString filename, const GlobalShiftOptions& globalShiftOptions, FileIOFilter::Shared filter = FileIOFilter::Shared(nullptr)) = 0;
 
 	//! Returns the current cloud(s) export format
 	virtual QString cloudExportFormat() const = 0;
@@ -304,19 +313,13 @@ public: //access to data
 
 public: //Global shift management
 
-	//! Returns whether Global (coordinate) shift has already been defined
-	bool coordinatesShiftWasEnabled() const;
-	//! Returns the Global (coordinate) shift (if already defined)
-	const CCVector3d& formerCoordinatesShift() const;
-	//! Sets whether Global (coordinate) shift is defined or not
-	void storeCoordinatesShiftParams();
-
+	//! Returns whether the nex command is the '-GLOBAL_SHIFT' option
 	bool nextCommandIsGlobalShift() const;
 
 	//! Check the current command line argument stack against the 'COMMAND_OPEN_SHIFT_ON_LOAD' keyword and process the following commands if necessary
 	/** \warning This method assumes the 'COMMAND_OPEN_SHIFT_ON_LOAD' argument has already been removed from the argument stack
 	**/
-	bool processGlobalShiftCommand();
+	bool processGlobalShiftCommand(GlobalShiftOptions& options);
 
 protected: //members
 
@@ -340,11 +343,6 @@ protected: //members
 
 	//! File loading parameters
 	CLLoadParameters m_loadingParameters;
-
-	//! Whether Global (coordinate) shift has already been defined
-	bool m_coordinatesShiftWasEnabled;
-	//! Global (coordinate) shift (if already defined)
-	CCVector3d m_formerCoordinatesShift;
 };
 
 #endif //CC_COMMAND_LINE_INTERFACE_HEADER

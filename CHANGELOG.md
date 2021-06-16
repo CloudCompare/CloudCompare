@@ -71,6 +71,8 @@ v2.12 (???) - (in development)
 		- CC can now load PCL files with integer xyz coordinates (16 and 32 bits) as well as double coordinates
 	- STL:
 		- loading speed should be greatly improved (compared to v2.10 and v2.11)
+	- LAS (1.3/1.4):
+		- the 'LAS 1.3 or 1.4' filter (based on LibLas) will now preserve the Coordinate Reference System (if the LAS file is loaded and saved with this filter)
 	- Global Shift & Scale:
 		- the qRansacSD plugin can now transfer the Global Shift & Scale info to the created primitives
 		- The fit functions (Fit shpere, Fit plane, Fit facet and Fit quadric) as well

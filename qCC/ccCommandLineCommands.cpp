@@ -432,8 +432,7 @@ bool CommandLoad::process(ccCommandLineInterface &cmd)
 	
 	//optional parameters
 	int skipLines = 0;
-
-	bool coordinatesShiftWasEnabled = cmd.coordinatesShiftWasEnabled();
+	ccCommandLineInterface::GlobalShiftOptions globalShiftOptions;
 
 	while (!cmd.arguments().empty())
 	{
@@ -462,7 +461,7 @@ bool CommandLoad::process(ccCommandLineInterface &cmd)
 			//local option confirmed, we can move on
 			cmd.arguments().pop_front();
 
-			if (!cmd.processGlobalShiftCommand())
+			if (!cmd.processGlobalShiftCommand(globalShiftOptions))
 			{
 				//error message already issued
 				return false;
@@ -481,15 +480,9 @@ bool CommandLoad::process(ccCommandLineInterface &cmd)
 	
 	//open specified file
 	QString filename(cmd.arguments().takeFirst());
-	if (!cmd.importFile(filename))
+	if (!cmd.importFile(filename, globalShiftOptions))
 	{
 		return false;
-	}
-
-	if (!coordinatesShiftWasEnabled)
-	{
-		//store persistent parameters
-		cmd.storeCoordinatesShiftParams();
 	}
 
 	return true;

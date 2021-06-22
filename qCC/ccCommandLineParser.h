@@ -42,7 +42,7 @@ public:
 	bool error(const QString& message) const override; //must always return false!
 	bool saveClouds(QString suffix = QString(), bool allAtOnce = false, const QString* allAtOnceFileName = nullptr) override;
 	bool saveMeshes(QString suffix = QString(), bool allAtOnce = false, const QString* allAtOnceFileName = nullptr) override;
-	bool importFile(QString filename, FileIOFilter::Shared filter = FileIOFilter::Shared(nullptr)) override;
+	bool importFile(QString filename, const GlobalShiftOptions& globalShiftOptions, FileIOFilter::Shared filter = FileIOFilter::Shared(nullptr)) override;
 	QString cloudExportFormat() const override { return m_cloudExportFormat; }
 	QString cloudExportExt() const override { return m_cloudExportExt; }
 	QString meshExportFormat() const override { return m_meshExportFormat; }

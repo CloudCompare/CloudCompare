@@ -160,7 +160,6 @@ ccCommandLineInterface::ccCommandLineInterface()
 	, m_autoSaveMode(true)
 	, m_addTimestamp(true)
 	, m_precision(12)
-	, m_coordinatesShiftWasEnabled(false)
 {}
 
 bool ccCommandLineInterface::IsCommand(const QString &token, const char *command)
@@ -243,26 +242,17 @@ int ccCommandLineInterface::numericalPrecision() const
 	return m_precision;
 }
 
-bool ccCommandLineInterface::coordinatesShiftWasEnabled() const
-{
-	return m_coordinatesShiftWasEnabled;
-}
-
-const CCVector3d &ccCommandLineInterface::formerCoordinatesShift() const
-{
-	return m_formerCoordinatesShift;
-}
-
-void ccCommandLineInterface::storeCoordinatesShiftParams()
-{ m_coordinatesShiftWasEnabled = m_loadingParameters.m_coordinatesShiftEnabled; m_formerCoordinatesShift = m_loadingParameters.m_coordinatesShift; }
-
 bool ccCommandLineInterface::nextCommandIsGlobalShift() const
 {
 	return !arguments().empty() && IsCommand(arguments().front(), COMMAND_OPEN_SHIFT_ON_LOAD);
 }
 
-bool ccCommandLineInterface::processGlobalShiftCommand()
+bool ccCommandLineInterface::processGlobalShiftCommand(GlobalShiftOptions& options)
 {
+	// set default parameters in case of an early exit
+	options.mode = GlobalShiftOptions::NO_GLOBAL_SHIFT;
+	options.customGlobalShift = CCVector3d(0, 0, 0);
+
 	if (arguments().empty())
 	{
 		return error(QObject::tr("Missing parameter: global shift vector or %1 or %2 after '%3'")
@@ -271,21 +261,13 @@ bool ccCommandLineInterface::processGlobalShiftCommand()
 	
 	QString firstParam = arguments().takeFirst();
 	
-	m_loadingParameters.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG;
-	m_loadingParameters.m_coordinatesShiftEnabled = false;
-	m_loadingParameters.m_coordinatesShift = CCVector3d(0, 0, 0);
-	
 	if (firstParam.toUpper() == COMMAND_OPEN_SHIFT_ON_LOAD_AUTO)
 	{
-		//let CC handle the global shift automatically
-		m_loadingParameters.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT;
+		options.mode = GlobalShiftOptions::AUTO_GLOBAL_SHIFT;
 	}
 	else if (firstParam.toUpper() == COMMAND_OPEN_SHIFT_ON_LOAD_FIRST)
 	{
-		//use the first encountered global shift value (if any)
-		m_loadingParameters.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT;
-		m_loadingParameters.m_coordinatesShiftEnabled = m_coordinatesShiftWasEnabled;
-		m_loadingParameters.m_coordinatesShift = m_formerCoordinatesShift;
+		options.mode = GlobalShiftOptions::FIRST_GLOBAL_SHIFT;
 	}
 	else if (arguments().size() < 2)
 	{
@@ -305,9 +287,8 @@ bool ccCommandLineInterface::processGlobalShiftCommand()
 		if (!ok)
 			return error(QObject::tr("Invalid parameter: Z coordinate of the global shift vector after '%1'").arg(COMMAND_OPEN_SHIFT_ON_LOAD));
 		
-		//set the user defined shift vector as default shift information
-		m_loadingParameters.m_coordinatesShiftEnabled = true;
-		m_loadingParameters.m_coordinatesShift = shiftOnLoadVec;
+		options.mode = GlobalShiftOptions::CUSTOM_GLOBAL_SHIFT;
+		options.customGlobalShift = shiftOnLoadVec;
 	}
 	
 	return true;

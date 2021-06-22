@@ -77,6 +77,91 @@ struct ExtraLasField : LasField
 	I32 startIndex;
 };
 
+//! Projection VLR
+static const char ProjectionVLR[] = "LASF_Projection";
+
+//! VLR buffer header size (in bytes)
+static const uint16_t VLR_HEADER_SIZE = static_cast<uint16_t>(2 + 16 + 2 + 2 + 32);
+
+static QByteArray ToQByteArray(const LASvlr& vlr)
+{
+	QByteArray buffer;
+	uint16_t bufferSize = VLR_HEADER_SIZE + vlr.record_length_after_header;
+	buffer.resize(bufferSize);
+	if (buffer.size() == bufferSize)
+	{
+		char* bufferData = buffer.data();
+		// reserved short
+		*(uint16_t*)bufferData = vlr.reserved;
+		bufferData += 2;
+		// user_id
+		for (int j = 0; j < 16; ++j, ++bufferData)
+			*bufferData = vlr.user_id[j];
+		// record_id
+		*(uint16_t*)bufferData = vlr.record_id;
+		bufferData += 2;
+		// record_length_after_header
+		*(uint16_t*)bufferData = vlr.record_length_after_header;
+		bufferData += 2;
+		// description
+		for (int j = 0; j < 32; ++j, ++bufferData)
+			*bufferData = vlr.description[j];
+		// data
+		memcpy_s(bufferData, bufferSize - VLR_HEADER_SIZE, vlr.data, vlr.record_length_after_header);
+	}
+	else
+	{
+		buffer.clear(); //probably already the case, but just to be sure
+	}
+
+	return buffer;
+}
+
+static bool FromQByteArray(const QByteArray& buffer, LASvlr& vlr)
+{
+	if (buffer.size() <= VLR_HEADER_SIZE)
+	{
+		ccLog::Warning("[LAS] Invalid VLR buffer size");
+		return false;
+	}
+
+	const char* bufferData = buffer.data();
+	// reserved short
+	vlr.reserved = *(const uint16_t*)bufferData;
+	bufferData += 2;
+	// user_id
+	for (int j = 0; j < 16; ++j, ++bufferData)
+		vlr.user_id[j] = *bufferData;
+	// record_id
+	vlr.record_id = *(const uint16_t*)bufferData;
+	bufferData += 2;
+	// record_length_after_header
+	vlr.record_length_after_header = *(const uint16_t*)bufferData;
+	bufferData += 2;
+
+	// check consistency
+	if (vlr.record_length_after_header != buffer.size() - VLR_HEADER_SIZE)
+	{
+		ccLog::Warning("[LAS] Invalid VLR buffer size");
+		return false;
+	}
+
+	// description
+	for (int j = 0; j < 32; ++j, ++bufferData)
+		vlr.description[j] = *bufferData;
+
+	// data
+	vlr.data = new U8[vlr.record_length_after_header];
+	if (!vlr.data)
+	{
+		ccLog::Warning("[LAS] Not enough memory to restore VLR");
+		return false;
+	}
+
+	memcpy_s(vlr.data, vlr.record_length_after_header, buffer.data() + VLR_HEADER_SIZE, buffer.size() - VLR_HEADER_SIZE);
+	return true;
+}
+
 //! LAS Save dialog
 class LASSaveDlg : public QDialog, public Ui::SaveLASFileDialog
 {
@@ -441,6 +526,28 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 										(U8*)d,
 										FALSE,
 										"Waveform descriptor");
+				}
+			}
+
+			// LASF_Projection
+			if (cloud->hasMetaData(ProjectionVLR))
+			{
+				QByteArray buffer = cloud->getMetaData(ProjectionVLR).toByteArray();
+				if (!buffer.isEmpty())
+				{
+					LASvlr vlr;
+					if (FromQByteArray(buffer, vlr))
+					{
+						lasheader.add_vlr(ProjectionVLR, vlr.record_id, vlr.record_length_after_header, vlr.data, FALSE, vlr.description);
+					}
+					else
+					{
+						// warning message already issued
+					}
+				}
+				else
+				{
+					ccLog::Warning("[LAS_FWF] Invalid projection VLR meta-data. Can't restore Coordinate Reference System.");
 				}
 			}
 
@@ -1234,6 +1341,25 @@ CC_FILE_ERROR LASFWFFilter::loadFile(const QString& filename, ccHObject& contain
 			if (progressDialog && !nProgress.oneStep())
 			{
 				result = CC_FERR_CANCELED_BY_USER;
+				break;
+			}
+		}
+
+		for (uint32_t i = 0; i < lasreader.header.number_of_variable_length_records; ++i)
+		{
+			const LASvlr& vlr = lasreader.header.vlrs[i];
+			if (QString(vlr.user_id) == ProjectionVLR)
+			{
+				QByteArray buffer = ToQByteArray(vlr);
+
+				if (buffer.size() != 0)
+				{
+					cloud->setMetaData(ProjectionVLR, buffer);
+				}
+				else
+				{
+					ccLog::Warning("[LAS] Failed to save projection information (not enough memory)");
+				}
 				break;
 			}
 		}

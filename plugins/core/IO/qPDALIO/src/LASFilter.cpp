@@ -276,7 +276,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		case LAS_CLASSIF_VALUE:
 			hasClassification = true;
 			break;
-		
+
 		case LAS_CLASSIF_SYNTHETIC:
 		case LAS_CLASSIF_KEYPOINT:
 		case LAS_CLASSIF_WITHHELD:
@@ -285,7 +285,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 			else
 				hasClassification = true;
 			break;
-		
+
 		case LAS_CLASSIF_OVERLAP:
 			if (minPointFormat >= 6)
 				hasClassifFlags = true;
@@ -398,7 +398,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	{
 		if (!s_saveDlg)
 			s_saveDlg = QSharedPointer<LASSaveDlg>(new LASSaveDlg(nullptr));
-		
+
 		s_saveDlg->bestAccuracyLabel->setText(QString("(%1, %2, %3)").arg(optimalScale.x).arg(optimalScale.y).arg(optimalScale.z));
 
 		if (hasScaleMetaData)
@@ -652,7 +652,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		writer.setInput(f);
 		writer.setOptions(writerOptions);
 
-		//field count 
+		//field count
 		point_count_t tableSize = 3; //XYZ
 		if (hasColors)
 			tableSize += 3; //RGB
@@ -1052,7 +1052,7 @@ static bool ReadExtraBytesVlr(LasHeader &header, std::vector<ExtraDim>& extraDim
 	{
 		return false;
 	}
-	
+
 	size_t size = vlr->dataLen();
 	if (size % sizeof(ExtraBytesSpec) != 0)
 	{
@@ -1107,7 +1107,7 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 		{
 			ccPointCloud* emptyCloud = new ccPointCloud("empty");
 			container.addChild(emptyCloud);
-			//strange file ;) 
+			//strange file ;)
 			return CC_FERR_NO_ERROR; //Its still strange
 		}
 
@@ -1365,10 +1365,6 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 					QString wkt = QString::fromStdString(srs.getWKT());
 					ccLog::Print("[LAS] Spatial reference: " + wkt);
 					pointChunk.loadedCloud->setMetaData(s_LAS_SRS_Key, wkt);
-				}
-				else if (lasHeader.incompatibleSrs())
-				{
-					ccLog::Warning("[LAS] Incompatible spatial reference");
 				}
 				else
 				{

@@ -67,6 +67,7 @@ constexpr char COMMAND_MERGE_CLOUDS[]					= "MERGE_CLOUDS";
 constexpr char COMMAND_MERGE_MESHES[]                   = "MERGE_MESHES";
 constexpr char COMMAND_SET_ACTIVE_SF[]					= "SET_ACTIVE_SF";
 constexpr char COMMAND_REMOVE_ALL_SFS[]					= "REMOVE_ALL_SFS";
+constexpr char COMMAND_REMOVE_SF[]						= "REMOVE_SF";
 constexpr char COMMAND_REMOVE_SCAN_GRIDS[]				= "REMOVE_SCAN_GRIDS";
 constexpr char COMMAND_REMOVE_RGB[]						= "REMOVE_RGB";
 constexpr char COMMAND_REMOVE_NORMALS[]					= "REMOVE_NORMALS";
@@ -2251,11 +2252,11 @@ bool CommandSetActiveSF::process(ccCommandLineInterface &cmd)
 	return true;
 }
 
-CommandRemoveAllSF::CommandRemoveAllSF()
+CommandRemoveAllSFs::CommandRemoveAllSFs()
 	: ccCommandLineInterface::Command(QObject::tr("Remove all SF"), COMMAND_REMOVE_ALL_SFS)
 {}
 
-bool CommandRemoveAllSF::process(ccCommandLineInterface &cmd)
+bool CommandRemoveAllSFs::process(ccCommandLineInterface &cmd)
 {
 	//no argument required
 	for (auto &cloudDesc : cmd.clouds())
@@ -2280,6 +2281,83 @@ bool CommandRemoveAllSF::process(ccCommandLineInterface &cmd)
 		}
 	}
 	
+	return true;
+}
+
+CommandRemoveSF::CommandRemoveSF()
+	: ccCommandLineInterface::Command(QObject::tr("Remove a specific SF"), COMMAND_REMOVE_SF)
+{}
+
+bool CommandRemoveSF::removeSF(int sfIndex, ccPointCloud& pc)
+{
+	if (pc.getNumberOfScalarFields() > static_cast<unsigned>(sfIndex))
+	{
+		pc.deleteScalarField(sfIndex);
+		if (pc.getNumberOfScalarFields() == 0)
+		{
+			pc.showSF(false);
+		}
+		else if (pc.getCurrentDisplayedScalarFieldIndex() < 0)
+		{
+			pc.setCurrentDisplayedScalarField(static_cast<int>(pc.getNumberOfScalarFields()) - 1);
+		}
+
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool CommandRemoveSF::process(ccCommandLineInterface &cmd)
+{
+	if (cmd.arguments().empty())
+	{
+		return cmd.error(QObject::tr("Missing parameter: SF index after %1").arg(COMMAND_REMOVE_SF));
+	}
+
+	bool paramOk = false;
+	QString sfIndexStr = cmd.arguments().takeFirst();
+	int sfIndex = sfIndexStr.toInt(&paramOk);
+	if (!paramOk)
+	{
+		return cmd.error(QObject::tr("Failed to read a numerical parameter: SF index. Got '%1' instead.").arg(sfIndexStr));
+	}
+	cmd.print(QObject::tr("\tSF index: %1").arg(sfIndex));
+
+	if (sfIndex < 0)
+	{
+		return cmd.error(QObject::tr("Invalid SF index (positive value expected)"));
+	}
+
+	for (auto &cloudDesc : cmd.clouds())
+	{
+		if (cloudDesc.pc)
+		{
+			if (!removeSF(sfIndex, *cloudDesc.pc))
+			{
+				cmd.warning(QObject::tr("Cloud '%1' has not enough SFs").arg(cloudDesc.pc->getName()));
+			}
+		}
+	}
+
+	for (auto &meshDesc : cmd.meshes())
+	{
+		if (meshDesc.mesh)
+		{
+			ccGenericPointCloud* cloud = meshDesc.mesh->getAssociatedCloud();
+			if (cloud->isA(CC_TYPES::POINT_CLOUD))
+			{
+				ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
+				if (!removeSF(sfIndex, *pc))
+				{
+					cmd.warning(QObject::tr("Mesh '%1' vertices have not enough SFs").arg(meshDesc.mesh->getName()));
+				}
+			}
+		}
+	}
+
 	return true;
 }
 
@@ -5223,7 +5301,7 @@ bool CommandMoment::process(ccCommandLineInterface &cmd)
 {
 	if (cmd.arguments().empty())
 	{
-		return cmd.error(QObject::tr("Missing parameter: kernel size"));
+		return cmd.error(QObject::tr("Missing parameter: kernel size after %1").arg(COMMAND_MOMENT));
 	}
 
 	bool paramOk = false;

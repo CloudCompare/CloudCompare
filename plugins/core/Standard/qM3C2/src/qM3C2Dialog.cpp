@@ -684,16 +684,17 @@ void qM3C2Dialog::guessParams(bool fastMode/*=false*/)
 		return;
 
 	unsigned minPoints4Stats = getMinPointsForStats() * 6; //see article: ideal = 30 while default = 5
-	//Guessed parameters
-	qM3C2Tools::GuessedParams params;
-	params.preferredDimension = normOriPreferredComboBox->currentIndex();
 
+	qM3C2Tools::GuessedParams params;
 	if (qM3C2Tools::GuessBestParams(m_cloud1, m_cloud2, minPoints4Stats, params, fastMode, m_app))
 	{
 		normalScaleDoubleSpinBox->setValue(params.normScale);
 		cylDiameterDoubleSpinBox->setValue(params.projScale);
 		cylHalfHeightDoubleSpinBox->setValue(params.projDepth);
-		normOriPreferredComboBox->setCurrentIndex(params.preferredDimension);
+		if (params.preferredDimension >= 0 && params.preferredDimension < 3)
+		{
+			normOriPreferredComboBox->setCurrentIndex(params.preferredDimension * 2); //*2 because for each dimension, the preferred orientation is either + or -
+		}
 
 		minScaleDoubleSpinBox->setValue(params.normScale / 2);
 		stepScaleDoubleSpinBox->setValue(params.normScale / 2);

@@ -645,13 +645,13 @@ bool CommandOctreeNormal::process(ccCommandLineInterface &cmd)
 			if (!cmd.arguments().isEmpty())
 			{
 				QString orient_argument = cmd.arguments().takeFirst().toUpper();
-				if (orient_argument == "PLUS_ZERO")
+				if (orient_argument == "PLUS_ZERO" || orient_argument == "PLUS_ORIGIN")
 				{
-					orientation = ccNormalVectors::Orientation::PLUS_ZERO;
+					orientation = ccNormalVectors::Orientation::PLUS_ORIGIN;
 				}
-				else if (orient_argument == "MINUS_ZERO")
+				else if (orient_argument == "MINUS_ZERO" || orient_argument == "MINUS_ORIGIN")
 				{
-					orientation = ccNormalVectors::Orientation::MINUS_ZERO;
+					orientation = ccNormalVectors::Orientation::MINUS_ORIGIN;
 				}
 				else if (orient_argument == "PLUS_BARYCENTER")
 				{
@@ -688,6 +688,10 @@ bool CommandOctreeNormal::process(ccCommandLineInterface &cmd)
 				else if (orient_argument == "PREVIOUS")
 				{
 					orientation = ccNormalVectors::Orientation::PREVIOUS;
+				}
+				else if (orient_argument == "SENSOR_ORIGIN")
+				{
+					orientation = ccNormalVectors::Orientation::SENSOR_ORIGIN;
 				}
 				else
 				{

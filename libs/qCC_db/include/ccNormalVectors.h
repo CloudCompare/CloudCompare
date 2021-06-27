@@ -54,19 +54,19 @@ public:
 	//! 'Default' orientations
 	enum Orientation {
 
-		PLUS_X  = 0,
-		MINUS_X = 1,
-		PLUS_Y  = 2,
-		MINUS_Y = 3,
-		PLUS_Z  = 4,
-		MINUS_Z = 5,
-		PLUS_BARYCENTER  = 6,
-		MINUS_BARYCENTER = 7,
-		PLUS_ZERO  = 8,
-		MINUS_ZERO = 9,
-		PREVIOUS   = 10,
-		
-		UNDEFINED  = 255
+		PLUS_X           = 0,  //!< N.x always positive
+		MINUS_X          = 1,  //!< N.x always negative
+		PLUS_Y           = 2,  //!< N.y always positive
+		MINUS_Y          = 3,  //!< N.y always negative
+		PLUS_Z           = 4,  //!< N.z always positive
+		MINUS_Z          = 5,  //!< N.z always negative
+		PLUS_BARYCENTER  = 6,  //!< Normals always opposite to the cloud barycenter
+		MINUS_BARYCENTER = 7,  //!< Normals always towards the cloud barycenter
+		PLUS_ORIGIN      = 8,  //!< Normals always opposite to the origin
+		MINUS_ORIGIN     = 9,  //!< Normals always towards the origin
+		PREVIOUS         = 10, //!< Re-use previous normal (if any)
+		SENSOR_ORIGIN    = 11, //!< Use the associated sensor origin (if any, and if multiple, the first one will be used)
+		UNDEFINED        = 255 //!< Undefined (no orientation is required)
 	};
 
 	//! Computes normal at each point of a given cloud
@@ -84,8 +84,8 @@ public:
 									CCCoreLib::LOCAL_MODEL_TYPES localModel,
 									PointCoordinateType localRadius,
 									Orientation preferredOrientation = UNDEFINED,
-									CCCoreLib::GenericProgressCallback* progressCb = 0,
-									CCCoreLib::DgmOctree* inputOctree = 0);
+									CCCoreLib::GenericProgressCallback* progressCb = nullptr,
+									CCCoreLib::DgmOctree* inputOctree = nullptr);
 
 	//! Tries to guess a very naive 'local radius' for normals computation (see ComputeCloudNormals)
 	/** \param cloud point cloud on which to process the normals.
@@ -100,8 +100,8 @@ public:
 		\return the best radius (strictly positive value) or 0 if an error occurred
 	**/
 	static PointCoordinateType GuessBestRadius(	ccGenericPointCloud* cloud,
-												CCCoreLib::DgmOctree* cloudOctree = 0,
-												CCCoreLib::GenericProgressCallback* progressCb = 0);
+												CCCoreLib::DgmOctree* cloudOctree = nullptr,
+												CCCoreLib::GenericProgressCallback* progressCb = nullptr);
 
 	//! Updates normals orientation based on a preferred orientation
 	/** \param theCloud point cloud on which to process the normals.
@@ -216,11 +216,11 @@ protected:
 	std::vector<ccColor::Rgb> m_theNormalHSVColors;
 
 	//! Cellular method for octree-based normal computation
-	static bool ComputeNormsAtLevelWithQuadric(const CCCoreLib::DgmOctree::octreeCell& cell, void** additionalParameters, CCCoreLib::NormalizedProgress* nProgress = 0);
+	static bool ComputeNormsAtLevelWithQuadric(const CCCoreLib::DgmOctree::octreeCell& cell, void** additionalParameters, CCCoreLib::NormalizedProgress* nProgress = nullptr);
 	//! Cellular method for octree-based normal computation
-	static bool ComputeNormsAtLevelWithLS(const CCCoreLib::DgmOctree::octreeCell& cell, void** additionalParameters, CCCoreLib::NormalizedProgress* nProgress = 0);
+	static bool ComputeNormsAtLevelWithLS(const CCCoreLib::DgmOctree::octreeCell& cell, void** additionalParameters, CCCoreLib::NormalizedProgress* nProgress = nullptr);
 	//! Cellular method for octree-based normal computation
-	static bool ComputeNormsAtLevelWithTri(const CCCoreLib::DgmOctree::octreeCell& cell, void** additionalParameters, CCCoreLib::NormalizedProgress* nProgress = 0);
+	static bool ComputeNormsAtLevelWithTri(const CCCoreLib::DgmOctree::octreeCell& cell, void** additionalParameters, CCCoreLib::NormalizedProgress* nProgress = nullptr);
 };
 
  #endif //CC_NORMAL_VECTORS_HEADER

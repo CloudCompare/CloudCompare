@@ -20,6 +20,8 @@
 //Local
 #include "ccSingleton.h"
 #include "ccNormalCompressor.h"
+#include "ccHObjectCaster.h"
+#include "ccSensor.h"
 
 //CCCoreLib
 #include <CCGeom.h>
@@ -133,10 +135,10 @@ bool ccNormalVectors::UpdateNormalOrientations(	ccGenericPointCloud* theCloud,
 	assert(theCloud);
 
 	//preferred orientation
-	CCVector3 orientation(0,0,0);
-	CCVector3 barycenter(0,0,0);
-	bool useBarycenter = false;
-	bool positiveSign = true;
+	CCVector3 prefOrientation(0, 0, 0);
+	CCVector3 originPoint(0, 0, 0);
+	bool useOriginPoint = false;
+	bool fromOriginPoint = true;
 
 	switch (preferredOrientation)
 	{
@@ -150,26 +152,26 @@ bool ccNormalVectors::UpdateNormalOrientations(	ccGenericPointCloud* theCloud,
 			//0-5 = +/-X,Y,Z
 			assert(preferredOrientation >= 0 && preferredOrientation <= 5);
 
-			orientation.u[preferredOrientation >> 1] = ((preferredOrientation & 1) == 0 ? CCCoreLib::PC_ONE : -CCCoreLib::PC_ONE); //odd number --> inverse direction
+			prefOrientation.u[preferredOrientation >> 1] = ((preferredOrientation & 1) == 0 ? CCCoreLib::PC_ONE : -CCCoreLib::PC_ONE); //odd number --> inverse direction
 		}
 		break;
 
 	case PLUS_BARYCENTER:
 	case MINUS_BARYCENTER:
 		{
-			barycenter = CCCoreLib::GeometricalAnalysisTools::ComputeGravityCenter(theCloud);
-			ccLog::Print(QString("[UpdateNormalOrientations] Barycenter: (%1,%2,%3)").arg(barycenter.x).arg(barycenter.y).arg(barycenter.z));
-			useBarycenter = true;
-			positiveSign = (preferredOrientation == 6);
+			originPoint = CCCoreLib::GeometricalAnalysisTools::ComputeGravityCenter(theCloud);
+			ccLog::Print(QString("[UpdateNormalOrientations] Barycenter: (%1;%2;%3)").arg(originPoint.x).arg(originPoint.y).arg(originPoint.z));
+			useOriginPoint = true;
+			fromOriginPoint = (preferredOrientation == PLUS_BARYCENTER);
 		}
 		break;
 
-	case PLUS_ZERO:
-	case MINUS_ZERO:
+	case PLUS_ORIGIN:
+	case MINUS_ORIGIN:
 		{
-			//barycenter = CCVector3(0,0,0);
-			useBarycenter = true;
-			positiveSign = (preferredOrientation == 8);
+			originPoint = CCVector3(0, 0, 0);
+			useOriginPoint = true;
+			fromOriginPoint = (preferredOrientation == PLUS_ORIGIN);
 		}
 		break;
 
@@ -178,6 +180,32 @@ bool ccNormalVectors::UpdateNormalOrientations(	ccGenericPointCloud* theCloud,
 			if (!theCloud->hasNormals())
 			{
 				ccLog::Warning("[UpdateNormalOrientations] Can't orient the new normals with the previous ones... as the cloud has no normals!");
+				return false;
+			}
+		}
+		break;
+
+	case SENSOR_ORIGIN:
+		{
+			// look for the first sensor (child) with a valid origin
+			bool sensorFound = false;
+			for (unsigned i = 0; i < theCloud->getChildrenNumber(); ++i)
+			{
+				ccHObject* child = theCloud->getChild(i);
+				if (child && child->isKindOf(CC_TYPES::SENSOR))
+				{
+					ccSensor* sensor = ccHObjectCaster::ToSensor(child);
+					if (sensor->getActiveAbsoluteCenter(originPoint))
+					{
+						useOriginPoint = true;
+						fromOriginPoint = true;
+						break;
+					}
+				}
+			}
+			if (!sensorFound)
+			{
+				ccLog::Warning("[UpdateNormalOrientations] Could not found a valid sensor child");
 				return false;
 			}
 		}
@@ -196,22 +224,22 @@ bool ccNormalVectors::UpdateNormalOrientations(	ccGenericPointCloud* theCloud,
 
 		if (preferredOrientation == PREVIOUS)
 		{
-			orientation = theCloud->getPointNormal(i);
+			prefOrientation = theCloud->getPointNormal(i);
 		}
-		else if (useBarycenter)
+		else if (useOriginPoint)
 		{
-			if (positiveSign)
+			if (fromOriginPoint)
 			{
-				orientation = *(theCloud->getPoint(i)) - barycenter;
+				prefOrientation = *(theCloud->getPoint(i)) - originPoint;
 			}
 			else
 			{
-				orientation = barycenter - *(theCloud->getPoint(i));
+				prefOrientation = originPoint - *(theCloud->getPoint(i));
 			}
 		}
 
 		//we eventually check the sign
-		if (N.dot(orientation) < 0)
+		if (N.dot(prefOrientation) < 0)
 		{
 			//inverse normal and re-compress it
 			N *= -1;
@@ -236,8 +264,8 @@ PointCoordinateType ccNormalVectors::GuessNaiveRadius(ccGenericPointCloud* cloud
 }
 
 PointCoordinateType ccNormalVectors::GuessBestRadius(	ccGenericPointCloud* cloud,
-														CCCoreLib::DgmOctree* inputOctree/*=0*/,
-														CCCoreLib::GenericProgressCallback* progressCb/*=0*/)
+														CCCoreLib::DgmOctree* inputOctree/*=nullptr*/,
+														CCCoreLib::GenericProgressCallback* progressCb/*=nullptr*/)
 {
 	if (!cloud)
 	{
@@ -412,8 +440,8 @@ bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 											CCCoreLib::LOCAL_MODEL_TYPES localModel,
 											PointCoordinateType localRadius,
 											Orientation preferredOrientation/*=UNDEFINED*/,
-											CCCoreLib::GenericProgressCallback* progressCb/*=0*/,
-											CCCoreLib::DgmOctree* inputOctree/*=0*/)
+											CCCoreLib::GenericProgressCallback* progressCb/*=nullptr*/,
+											CCCoreLib::DgmOctree* inputOctree/*=nullptr*/)
 {
 	assert(theCloud);
 
@@ -659,7 +687,7 @@ bool ccNormalVectors::ComputeNormalWithTri(CCCoreLib::GenericIndexedCloudPersist
 
 bool ccNormalVectors::ComputeNormsAtLevelWithQuadric(	const CCCoreLib::DgmOctree::octreeCell& cell,
 														void** additionalParameters,
-														CCCoreLib::NormalizedProgress* nProgress/*=0*/)
+														CCCoreLib::NormalizedProgress* nProgress/*=nullptr*/)
 {
 	//additional parameters
 	NormsTableType* theNorms = static_cast<NormsTableType*>(additionalParameters[0]);
@@ -713,7 +741,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithQuadric(	const CCCoreLib::DgmOctree
 
 bool ccNormalVectors::ComputeNormsAtLevelWithLS(const CCCoreLib::DgmOctree::octreeCell& cell,
 												void** additionalParameters,
-												CCCoreLib::NormalizedProgress* nProgress/*=0*/)
+												CCCoreLib::NormalizedProgress* nProgress/*=nullptr*/)
 {
 	//additional parameters
 	NormsTableType* theNorms = static_cast<NormsTableType*>(additionalParameters[0]);
@@ -771,7 +799,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithLS(const CCCoreLib::DgmOctree::octr
 
 bool ccNormalVectors::ComputeNormsAtLevelWithTri(	const CCCoreLib::DgmOctree::octreeCell& cell,
 													void** additionalParameters,
-													CCCoreLib::NormalizedProgress* nProgress/*=0*/)
+													CCCoreLib::NormalizedProgress* nProgress/*=nullptr*/)
 {
 	//additional parameters
 	NormsTableType* theNorms = static_cast<NormsTableType*>(additionalParameters[0]);

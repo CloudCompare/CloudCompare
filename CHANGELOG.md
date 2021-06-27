@@ -33,6 +33,8 @@ v2.12 (???) - (in development)
 	- qAnimation:
 		- option to smooth the trajectory
 		- option to choose the video output codec/format
+	- qM3C2:
+		- new options to orient normals: with the previous normal (if any) or with the associated sensor origin
 	- ATI cards:
 		- the display should now be faster with ATI cards thanks to a smarter way to manage (2D text) textures
 	- Localization:
@@ -60,13 +62,18 @@ v2.12 (???) - (in development)
 			- N_SIGMA_MIN and N_SIGMA_MAX: specify the option followed by a numeric value to filter by N * standardDeviation around the mean.
 		- new option '-INVERT_NORMALS':
 			- Inverts the normals of the loaded entities (cloud or mesh, and per-triangle or per-vertex for meshes)
-		- new option '-RENAME_SF' ({scalar field index} {name}):
+		- new option '-RENAME_SF' {scalar field index} {name}:
 			- To rename a scalar field
+		- new option 'REMOVE_SF' {scalar field index}:
+			- To remove a specific scalar field
 		- new option '-NOISE KNN/RADIUS {value 1} REL/ABS {value 2} {RIP}':
 			- To apply the Noise filter to the loaded point clouds
 			- value 1: number of neighbors if KNN, radius if RADIUS
 			- value 2: relative error (standard deviation multiplier) if REL, absolute error if ABS
 			- RIP: remove isolated poins (optional)
+		- the 'OCTREE_NORMALS' option has been updated:
+			- MINUS_ZERO and PLUS_ZERO can now also be written MINUS_ORIGIN and PLUS_ORIGIN
+			- new sub-option '-ORIENT SENSOR_ORIGIN' (to use the sensor origin to orient the normals - a sensor must be associated to the cloud of course ;)
 	- PCD:
 		- CC can now load PCL files with integer xyz coordinates (16 and 32 bits) as well as double coordinates
 	- STL:

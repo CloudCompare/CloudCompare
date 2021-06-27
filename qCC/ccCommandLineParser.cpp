@@ -656,7 +656,8 @@ void ccCommandLineParser::registerBuiltInCommands()
 	registerCommand(Command::Shared(new CommandMergeClouds));
 	registerCommand(Command::Shared(new CommandMergeMeshes));
 	registerCommand(Command::Shared(new CommandSetActiveSF));
-	registerCommand(Command::Shared(new CommandRemoveAllSF));
+	registerCommand(Command::Shared(new CommandRemoveAllSFs));
+	registerCommand(Command::Shared(new CommandRemoveSF));
 	registerCommand(Command::Shared(new CommandRemoveRGB));
 	registerCommand(Command::Shared(new CommandRemoveNormals));
 	registerCommand(Command::Shared(new CommandRemoveScanGrids));

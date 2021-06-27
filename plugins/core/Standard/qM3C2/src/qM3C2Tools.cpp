@@ -194,9 +194,9 @@ bool qM3C2Normals::ComputeCorePointsNormals(CCCoreLib::GenericIndexedCloud* core
 											const std::vector<PointCoordinateType>& sortedRadii,
 											bool& invalidNormals,
 											int maxThreadCount/*=0*/,
-											ccScalarField* normalScale/*=0*/,
-											CCCoreLib::GenericProgressCallback* progressCb/*=0*/,
-											CCCoreLib::DgmOctree* inputOctree/*=0*/)
+											ccScalarField* normalScale/*=nullptr*/,
+											CCCoreLib::GenericProgressCallback* progressCb/*=nullptr*/,
+											CCCoreLib::DgmOctree* inputOctree/*=nullptr*/)
 {
 	assert(corePoints && sourceCloud && corePointsNormals);
 	assert(!sortedRadii.empty());
@@ -377,7 +377,7 @@ bool qM3C2Normals::UpdateNormalOrientationsWithCloud(	CCCoreLib::GenericIndexedC
 														NormsIndexesTableType& normsCodes,
 														CCCoreLib::GenericIndexedCloud* orientationCloud,
 														int maxThreadCount/*=0*/,
-														CCCoreLib::GenericProgressCallback* progressCb/*=0*/)
+														CCCoreLib::GenericProgressCallback* progressCb/*=nullptr*/)
 {
 	//input normals
 	unsigned count = normsCodes.currentSize();
@@ -578,7 +578,7 @@ bool qM3C2Tools::GuessBestParams(	ccPointCloud* cloud1,
 									unsigned minPoints4Stats,
 									qM3C2Tools::GuessedParams& params,
 									bool fastMode,
-									ccMainAppInterface* app/*=0*/,
+									ccMainAppInterface* app/*=nullptr*/,
 									unsigned probingCount/*=1000*/)
 {
 	//invalid parameters?
@@ -769,7 +769,7 @@ bool qM3C2Tools::GuessBestParams(	ccPointCloud* cloud1,
 						if (std::abs(meanNormal.u[maxDim]) < std::abs(meanNormal.z))
 							maxDim = 2;
 
-						params.preferredDimension = 2 * maxDim;
+						params.preferredDimension = maxDim;
 					}
 					else
 					{

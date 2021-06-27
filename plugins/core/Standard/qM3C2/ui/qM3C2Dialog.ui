@@ -532,15 +532,25 @@
                  <string notr="true">- (0,0,0)</string>
                 </property>
                </item>
+               <item>
+                <property name="text">
+                 <string>Existing</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Sensor origin</string>
+                </property>
+               </item>
               </widget>
              </item>
              <item row="1" column="0">
               <widget class="QRadioButton" name="normOriUseCloudRadioButton">
                <property name="toolTip">
-                <string>Sensor(s) position(s) as a cloud (one point per position)</string>
+                <string>Typically one or several sensor positions store as a cloud (one point per position)</string>
                </property>
                <property name="text">
-                <string>Use sensor position(s)</string>
+                <string>Use origin point(s)</string>
                </property>
               </widget>
              </item>

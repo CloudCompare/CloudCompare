@@ -689,10 +689,11 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 				if (usePreferredOrientation)
 				{
 					int preferredOrientation = dlg.normOriPreferredComboBox->currentIndex();
-					assert(preferredOrientation >= ccNormalVectors::MINUS_X && preferredOrientation <= ccNormalVectors::PLUS_ZERO);
-					if (!ccNormalVectors::UpdateNormalOrientations(s_M3C2Params.corePoints,
-						*s_M3C2Params.coreNormals,
-						static_cast<ccNormalVectors::Orientation>(preferredOrientation)))
+					assert(preferredOrientation >= ccNormalVectors::PLUS_X && preferredOrientation <= ccNormalVectors::SENSOR_ORIGIN);
+					if (!ccNormalVectors::UpdateNormalOrientations(	s_M3C2Params.corePoints,
+																	*s_M3C2Params.coreNormals,
+																	static_cast<ccNormalVectors::Orientation>(preferredOrientation))
+						)
 					{
 						errorMessage = "[M3C2] Failed to re-orient the normals (invalid parameter?)";
 						error = true;
@@ -703,11 +704,12 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 					ccPointCloud* orientationCloud = dlg.getNormalsOrientationCloud();
 					assert(orientationCloud);
 
-					if (!qM3C2Normals::UpdateNormalOrientationsWithCloud(s_M3C2Params.corePoints,
-						*s_M3C2Params.coreNormals,
-						orientationCloud,
-						maxThreadCount,
-						&pDlg))
+					if (!qM3C2Normals::UpdateNormalOrientationsWithCloud(	s_M3C2Params.corePoints,
+																			*s_M3C2Params.coreNormals,
+																			orientationCloud,
+																			maxThreadCount,
+																			&pDlg)
+						)
 					{
 						errorMessage = "[M3C2] Failed to re-orient the normals with input point cloud!";
 						error = true;

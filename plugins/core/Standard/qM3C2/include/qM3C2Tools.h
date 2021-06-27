@@ -57,16 +57,16 @@ public:
 											const std::vector<PointCoordinateType>& sortedRadii,
 											bool& invalidNormals,
 											int maxThreadCount = 0,
-											ccScalarField* normalScale = 0,
-											CCCoreLib::GenericProgressCallback* progressCb = 0,
-											CCCoreLib::DgmOctree* inputOctree = 0);
+											ccScalarField* normalScale = nullptr,
+											CCCoreLib::GenericProgressCallback* progressCb = nullptr,
+											CCCoreLib::DgmOctree* inputOctree = nullptr);
 	
 	//! Re-orients normal vectors so that they all 'look' towards the nearest point of another cloud
 	static bool UpdateNormalOrientationsWithCloud(	CCCoreLib::GenericIndexedCloud* normCloud,
 													NormsIndexesTableType& normsCodes,
 													CCCoreLib::GenericIndexedCloud* orientationCloud,
 													int maxThreadCount = 0,
-													CCCoreLib::GenericProgressCallback* progressCb = 0);
+													CCCoreLib::GenericProgressCallback* progressCb = nullptr);
 
 	//! Makes all normals horizontal
 	static void MakeNormalsHorizontal(NormsIndexesTableType& normsCodes);
@@ -90,10 +90,10 @@ public:
 	//! M3C2 parameters that can be guessed automatically by 'probing'
 	struct GuessedParams
 	{
-		int preferredDimension;
-		double normScale;
-		double projScale;
-		double projDepth;
+		int preferredDimension = -1;
+		double normScale = 0.0;
+		double projScale = 0.0;
+		double projDepth = 0.0;
 	};
 
 	//! Tries to guess some M3C2 parameters by randomly 'probing' the cloud
@@ -102,7 +102,7 @@ public:
 								unsigned minPoints4Stats,
 								GuessedParams& params,
 								bool fastMode,
-								ccMainAppInterface* app = 0,
+								ccMainAppInterface* app = nullptr,
 								unsigned probingCount = 1000);
 };
 

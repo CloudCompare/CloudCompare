@@ -5521,16 +5521,13 @@ bool ccPointCloud::orientNormalsTowardViewPoint( CCVector3 & VP, ccProgressDialo
 bool ccPointCloud::computeNormalsWithOctree(CCCoreLib::LOCAL_MODEL_TYPES model,
 											ccNormalVectors::Orientation preferredOrientation,
 											PointCoordinateType defaultRadius,
-											ccProgressDialog* pDlg/*=0*/)
+											ccProgressDialog* pDlg/*=nullptr*/)
 {
 	//compute the normals the 'old' way ;)
-	if (!getOctree())
+	if (!getOctree() && !computeOctree(pDlg))
 	{
-		if (!computeOctree(pDlg))
-		{
-			ccLog::Warning(QString("[computeNormals] Could not compute octree on cloud '%1'").arg(getName()));
-			return false;
-		}
+		ccLog::Warning(QString("[computeNormals] Could not compute octree for cloud '%1'").arg(getName()));
+		return false;
 	}
 
 	//computes cloud normals

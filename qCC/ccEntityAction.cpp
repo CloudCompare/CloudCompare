@@ -1645,14 +1645,14 @@ namespace ccEntityAction
 						// some points can belong to one sensor and some others can belongs to others sensors.
 						// so it's why here grid orientation has precedence over sensor orientation because in this
 						// case association is more explicit.
-						// Here we take the first valid viewpoint for now even if it's not a really good...
-						CCVector3 sensorPosition;
-						for (size_t i = 0; i < cloud->getChildrenNumber(); ++i)
+						// Here we take the first valid viewpoint for now even if it's not a good one...
+						for (unsigned i = 0; i < cloud->getChildrenNumber(); ++i)
 						{
-							ccHObject* child = cloud->getChild(static_cast<unsigned>(i));
+							ccHObject* child = cloud->getChild(i);
 							if (child && child->isKindOf(CC_TYPES::SENSOR))
 							{
 								ccSensor* sensor = ccHObjectCaster::ToSensor(child);
+								CCVector3 sensorPosition;
 								if (sensor->getActiveAbsoluteCenter(sensorPosition))
 								{
 									result = cloud->orientNormalsTowardViewPoint(sensorPosition, &pDlg);

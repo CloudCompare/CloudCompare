@@ -51,6 +51,7 @@ qFacets plugin:
 [*] Add the facet perimeter to the set of exported values
 
 Various:
+[*] Command line option to 'Export cloud info' (https://www.cloudcompare.org/forum/viewtopic.php?t=5243)
 [*] Being able to select the entities to load from a BIN file (https://www.cloudcompare.org/forum/viewtopic.php?t=5102)
 [*] Segment polylines with the scissors tool (https://www.cloudcompare.org/forum/viewtopic.php?t=4692)
 [*] Manual editing of each point of a polyline (https://www.cloudcompare.org/forum/viewtopic.php?t=4690)

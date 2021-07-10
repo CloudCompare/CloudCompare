@@ -275,11 +275,13 @@ void ccGraphicalSegmentationTool::reset()
 			ccHObjectCaster::ToGenericPointCloud(*p)->resetVisibilityArray();
 		}
 
-		if (m_associatedWin)
-			m_associatedWin->redraw(false);
 		m_somethingHasChanged = false;
 	}
-
+	if (m_associatedWin)
+	{
+		m_associatedWin->redraw(false);
+		m_associatedWin->releaseMouse();
+	}
 	razButton->setEnabled(false);
 	validButton->setEnabled(false);
 	validAndDeleteButton->setEnabled(false);

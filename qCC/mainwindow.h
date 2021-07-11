@@ -446,6 +446,9 @@ private:
 	inline void doActionMoveBBMinCornerToOrigin() { doActionFastRegistration(MoveBBMinCornerToOrigin); }
 	inline void doActionMoveBBMaxCornerToOrigin() { doActionFastRegistration(MoveBBMaxCornerToOrigin); }
 
+	//! Restores position and state of all GUI elements
+	void restoreGUIElementsPos();
+
 private:
 	//! Shortcut: asks the user to select one cloud
 	/** \param defaultCloudEntity a cloud to select by default (optional)
@@ -561,7 +564,7 @@ private:
 	QToolButton* m_pivotVisibilityPopupButton;
 
 	//! Flag: first time the window is made visible
-	bool m_FirstShow;
+	bool m_firstShow;
 
 	//! Point picking hub
 	ccPickingHub* m_pickingHub;

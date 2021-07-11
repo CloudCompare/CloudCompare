@@ -193,7 +193,7 @@ MainWindow::MainWindow()
 	, m_gamepadManager(nullptr)
 	, m_viewModePopupButton(nullptr)
 	, m_pivotVisibilityPopupButton(nullptr)
-	, m_FirstShow(true)
+	, m_firstShow(true)
 	, m_pickingHub(nullptr)
 	, m_cpeDlg(nullptr)
 	, m_gsTool(nullptr)
@@ -5936,46 +5936,43 @@ void MainWindow::doActionResetAllVBOs()
 	}
 }
 
-void MainWindow::showEvent(QShowEvent* event)
+void MainWindow::restoreGUIElementsPos()
 {
-	QMainWindow::showEvent( event );
-
-	if ( !m_FirstShow )
-	{
-		return;
-	}
-	
 	QSettings settings;
-	QVariant  geometry = settings.value(ccPS::MainWinGeom());
-	
-	if ( geometry.isValid() )
+
+	QVariant previousState = settings.value(ccPS::MainWinState());
+	if (previousState.isValid())
 	{
-		restoreGeometry(geometry.toByteArray());
-		restoreState(settings.value(ccPS::MainWinState()).toByteArray());
+		restoreState(previousState.toByteArray());
 	}
-	
-	m_FirstShow = false;
-	
-	if ( !geometry.isValid() )
+
+	//randomly makes CC freeze if restored on the second screen?!
+	//QVariant previousGeometry = settings.value(ccPS::MainWinGeom());
+	//if (previousGeometry.isValid())
+	//{
+	//	restoreGeometry(previousGeometry.toByteArray()); 
+	//}
+	//else
 	{
 		showMaximized();
 	}
-	
-	if ( isFullScreen() )
+
+	//if (isFullScreen())
+	//{
+	//	m_UI->actionFullScreen->setChecked(true);
+	//}
+}
+
+void MainWindow::showEvent(QShowEvent* event)
+{
+	if (m_firstShow)
 	{
-		m_UI->actionFullScreen->setChecked( true );
+		restoreGUIElementsPos();
+
+		m_firstShow = false;
 	}
-	
-#ifdef Q_OS_MAC
-	if ( isFullScreen() )
-	{
-		m_UI->actionFullScreen->setText( tr( "Exit Full Screen" ) );
-	}
-	else
-	{
-		m_UI->actionFullScreen->setText( tr( "Enter Full Screen" ) );
-	}
-#endif
+
+	QMainWindow::showEvent(event);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

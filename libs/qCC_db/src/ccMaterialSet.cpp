@@ -125,7 +125,7 @@ int ccMaterialSet::addMaterial(ccMaterial::CShared mtl, bool allowDuplicateNames
 //MTL PARSER INSPIRED FROM KIXOR.NET "objloader" (http://www.kixor.net/dev/objloader/)
 bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSet &materials, QStringList& errors)
 {
-	//open mtl file
+	// open mtl file
 	QString fullPathFilename = path + QString('/') + filename;
 	QFile file(fullPathFilename);
 	if (!file.open(QFile::ReadOnly))
@@ -134,7 +134,7 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 		return false;
 	}
 
-	//update path (if the input filename has already a relative path)
+	// update path (if the input filename has already a relative path)
 	path = QFileInfo(fullPathFilename).absolutePath();
 	
 	QTextStream stream(&file);
@@ -156,10 +156,10 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 			continue;
 		}
 
-		//start material
+		// start material
 		if (tokens.front() == "newmtl")
 		{
-			//push the previous material (if any)
+			// push the previous material (if any)
 			if (currentMaterial)
 			{
 				materials.addMaterial(currentMaterial);
@@ -175,7 +175,7 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 		}
 		else if (currentMaterial) //we already have a "current" material
 		{
-			//ambient
+			// ambient
 			if (tokens.front() == "Ka")
 			{
 				if (tokens.size() > 3)
@@ -188,7 +188,7 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 				}
 			}
 
-			//diff
+			// diff
 			else if (tokens.front() == "Kd")
 			{
 				if (tokens.size() > 3)
@@ -201,7 +201,7 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 				}
 			}
 
-			//specular
+			// specular
 			else if (tokens.front() == "Ks")
 			{
 				if (tokens.size() > 3)
@@ -213,13 +213,28 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 					currentMaterial->setSpecular(specular);
 				}
 			}
-			//shiny
+
+			// emission
+			else if (tokens.front() == "Ke")
+			{
+				if (tokens.size() > 3)
+				{
+					ccColor::Rgbaf emission(tokens[1].toFloat(),
+						tokens[2].toFloat(),
+						tokens[3].toFloat(),
+						1.0f);
+					currentMaterial->setEmission(emission);
+				}
+			}
+
+			// shiny
 			else if (tokens.front() == "Ns")
 			{
 				if (tokens.size() > 1)
 					currentMaterial->setShininess(tokens[1].toFloat());
 			}
-			//transparent
+
+			// transparency (inverse of)
 			else if (tokens.front() == "d")
 			{
 				if (tokens.size() > 1)
@@ -232,6 +247,8 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 					currentMaterial->setTransparency(d);
 				}
 			}
+
+			// transparency
 			else if (tokens.front() == "Tr")
 			{
 				if (tokens.size() > 1)
@@ -244,37 +261,43 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 					currentMaterial->setTransparency(1.0f - tokens[1].toFloat());
 				}
 			}
-			//reflection
+
+			// reflection
 			else if (tokens.front() == "r")
 			{
-				//ignored
+				// ignored
 				//if (tokens.size() > 1)
 				//	currentMaterial->reflect = tokens[1].toFloat();
 			}
-			//glossy
+
+			// glossy
 			else if (tokens.front() == "sharpness")
 			{
-				//ignored
+				// ignored
 				//if (tokens.size() > 1)
 				//	currentMaterial->glossy = tokens[1].toFloat();
 			}
-			//refract index
+
+			// refraction index
 			else if (tokens.front() == "Ni")
 			{
-				//ignored
+				// ignored
 				//if (tokens.size() > 1)
 				//	currentMaterial->refract_index = tokens[1].toFloat();
 			}
+
 			// illumination type
 			else if (tokens.front() == "illum")
 			{
-				//ignored
+				// ignored
 			}
-			// Transmission filter
+
+			// transmission filter
 			else if (tokens.front() == "Tf")
 			{
-				//ignored
+				// ignored
 			}
+
 			// texture map
 			else if (tokens.front() == "map_Ka"
 					|| tokens.front() == "map_Kd"
@@ -283,7 +306,7 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 				//DGM: in case there's hidden or space characters at the beginning of the line...
 				int shift = currentLine.indexOf("map_K",0);
 				QString textureFilename = (shift + 7 < currentLine.size() ? currentLine.mid(shift+7).trimmed() : QString());
-				//remove any quotes around the filename (Photoscan 1.4 bug)
+				// remove any quotes around the filename (Photoscan 1.4 bug)
 				if (textureFilename.startsWith("\""))
 				{
 					textureFilename = textureFilename.right(textureFilename.size() - 1);
@@ -310,7 +333,7 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 
 	file.close();
 
-	//don't forget to push the last material!
+	// don't forget to push the last material!
 	if (currentMaterial)
 		materials.addMaterial(currentMaterial);
 

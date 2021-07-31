@@ -309,7 +309,7 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 		if (octree)
 		{
 			//we can now use the octree to do faster point picking
-#ifdef QT_DEBUG
+#ifdef DEBUG_PICKING
 			CCCoreLib::ScalarField* sf = nullptr;
 			if (getClassID() == CC_TYPES::POINT_CLOUD)
 			{
@@ -331,7 +331,7 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 			ccOctree::PointDescriptor point;
 			if (octree->pointPicking(clickPos, camera, point, pickWidth))
 			{
-#ifdef QT_DEBUG
+#ifdef DEBUG_PICKING
 				if (sf)
 				{
 					sf->computeMinAndMax();

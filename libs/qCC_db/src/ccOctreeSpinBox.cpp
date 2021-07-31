@@ -50,7 +50,8 @@ void ccOctreeSpinBox::setCloud(ccGenericPointCloud* cloud)
 	else
 	{
 		ccBBox box = cloud->getOwnBB(false);
-		CCCoreLib::CCMiscTools::MakeMinAndMaxCubical(box.minCorner(), box.maxCorner());
+		//we make this bounding-box cubical (+0.1% growth to avoid round-off issues)
+		CCCoreLib::CCMiscTools::MakeMinAndMaxCubical(box.minCorner(), box.maxCorner(), 0.001);
 		m_octreeBoxWidth = box.getMaxBoxDim();
 		onValueChange(value());
 	}

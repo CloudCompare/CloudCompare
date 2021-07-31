@@ -4909,8 +4909,8 @@ void MainWindow::doActionComputeDistanceMap()
 
 		ccBBox box = entity->getOwnBB();
 		PointCoordinateType largestDim = box.getMaxBoxDim() + static_cast<PointCoordinateType>(margin);
-		PointCoordinateType cellDim = largestDim / steps;
 		CCVector3 minCorner = box.getCenter() - CCVector3(1, 1, 1) * (largestDim / 2);
+		PointCoordinateType cellDim = largestDim / steps + std::numeric_limits<PointCoordinateType>::epsilon(); //to avoid rounding issues when projecting triangles or points inside the grid
 
 		bool result = false;
 		if (entity->isKindOf(CC_TYPES::MESH))

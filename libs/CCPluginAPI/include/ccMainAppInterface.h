@@ -79,6 +79,9 @@ public:
 	//! Returns the unique ID generator
 	virtual ccUniqueIDGenerator::Shared getUniqueIDGenerator() = 0;
 
+	//! Attempts to load a file
+	virtual ccHObject* loadFile(QString filename, bool silent) = 0;
+
 	//! Adds an entity to the main db
 	/** \param obj entity
 		\param updateZoom updates active GL display zoom to fit the whole scene, including this new entity (addToDisplay must be true)

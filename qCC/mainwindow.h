@@ -138,6 +138,7 @@ public:
 	void forceConsoleDisplay() override;
 	ccHObject* dbRootObject() override;
 	inline  QMainWindow* getMainWindow() override { return this; }
+	ccHObject* loadFile(QString filename, bool silent) override;
 	inline  const ccHObject::Container& getSelectedEntities() const override { return m_selectedEntities; }
 	void createGLWindow(ccGLWindow*& window, QWidget*& widget) const override;
 	void destroyGLWindow(ccGLWindow*) const override;

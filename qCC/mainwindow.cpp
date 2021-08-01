@@ -9933,6 +9933,22 @@ void MainWindow::onExclusiveFullScreenToggled(bool state)
 	}
 }
 
+ccHObject* MainWindow::loadFile(QString filename, bool silent)
+{
+	FileIOFilter::LoadParameters parameters;
+	{
+		parameters.alwaysDisplayLoadDialog = silent ? false : true;
+		parameters.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT;
+		parameters.parentWidget = silent ? nullptr : this;
+	}
+
+	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
+	ccHObject* newGroup = FileIOFilter::LoadFromFile(filename, parameters, result);
+
+	return newGroup;
+
+}
+
 void MainWindow::addToDBAuto(const QStringList& filenames)
 {
 	ccGLWindow* win = qobject_cast<ccGLWindow*>(QObject::sender());

@@ -27,7 +27,11 @@ function( InstallSharedLibrary )
             if(UNIX AND NOT APPLE)
                 # this is a an hack to restore install ability on linux systems
                 # TODO this should not be the right way for managing install probably
-                set( destination "${destination}/${CMAKE_INSTALL_LIBDIR}/")
+                if (IS_ABSOLUTE ${CMAKE_INSTALL_LIBDIR})
+                    set( destination "${CMAKE_INSTALL_LIBDIR}")
+                else()
+                    set( destination "${destination}/${CMAKE_INSTALL_LIBDIR}/")
+                endif()
             endif()
 
 		_InstallSharedTarget(

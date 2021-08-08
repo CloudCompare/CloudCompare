@@ -38,7 +38,7 @@ public:
 
 	//! The order of inner-rotations of the sensor (body/mirrors)
 	/** Either the first rotation is made around the Z axis (yaw) then around the lateral
-		axis (pitch) as most scanners do today (Leica, Riegl, Faro, etc.). Othewise the
+		axis (pitch) as most scanners do today (Leica, Riegl, Faro, etc.). Otherwise the
 		opposite order is used (as the very old Mensi Soisic).
 	**/
 	enum ROTATION_ORDER {	YAW_THEN_PITCH = 0,
@@ -69,7 +69,7 @@ public:
 
 	//! Determines a 3D point "visibility" relatively to the sensor field of view
 	/** Relies on the sensor associated depth map (see ccGBLSensor::computeDepthBuffer).
-		The depth map is used to determine the "visiblity" of a 3D point relatively to
+		The depth map is used to determine the "visibility" of a 3D point relatively to
 		the laser scanner field of view. This can be useful for filtering out points
 		that shouldn't be compared while computing the distances between two point
 		clouds for instance (for more information on this	particular topic, refer to

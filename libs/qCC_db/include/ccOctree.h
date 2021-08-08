@@ -85,9 +85,9 @@ public: //RENDERING
 
 	//! Octree displaying methods
 	enum DisplayMode {
-		WIRE = 0,					/**< The octree is displayed as wired boxes (one box per cell) */
-		MEAN_POINTS = 1,			/**< The octree is displayed as points (one point per cell = the center of gravity of the points lying in it) */
-		MEAN_CUBES = 2				/**< The octree is displayed as plain 3D cubes (one cube per cell) */
+		WIRE = 0,			/**< The octree is displayed as wired boxes (one box per cell) */
+		MEAN_POINTS = 1,		/**< The octree is displayed as points (one point per cell = the center of gravity of the points lying in it) */
+		MEAN_CUBES = 2			/**< The octree is displayed as plain 3D cubes (one cube per cell) */
 	};
 	//! Returns the currently display mode
 	DisplayMode getDisplayMode() const { return m_displayMode; }

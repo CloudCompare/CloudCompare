@@ -731,7 +731,7 @@ void ccClipBox::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		//custom arrow 'context'
 		CC_DRAW_CONTEXT componentContext = context;
-		componentContext.drawingFlags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the arows don't push their own!
+		componentContext.drawingFlags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the arrows don't push their own!
 		componentContext.display = nullptr;
 
 		if (pushName) //2nd level = sub-item

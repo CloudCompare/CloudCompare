@@ -167,7 +167,7 @@ bool ccViewportParameters::fromFile(QFile& in, short dataVersion, int flags, Loa
 		inStream >> orthoAspectRatio;
 	}
 
-	//for older version, deduce the focal distance from the old paramters (pixelSize and zoom)
+	//for older version, deduce the focal distance from the old parameters (pixelSize and zoom)
 	if (dataVersion < 51 && zoom != 1.0f)
 	{
 		if (perspectiveView)

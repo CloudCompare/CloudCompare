@@ -38,7 +38,7 @@
 	v2.5 - 03/16/2013 - ccViewportParameters structure modified
 	v2.6 - 04/03/2013 - strictly positive scalar field removed and 'hidden' values marker is now NaN
 	v2.7 - 04/12/2013 - Customizable color scales
-	v2.8 - 07/12/2013 - Poylines are now supported
+	v2.8 - 07/12/2013 - Polylines are now supported
 	v2.9 - 08/14/2013 - ccMeshGroup removed, ccSubMesh added
 	v3.0 - 08/30/2013 - QObject's meta data structure added
 	v3.1 - 09/25/2013 - ccPolyline width added

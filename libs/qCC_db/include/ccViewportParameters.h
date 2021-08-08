@@ -56,7 +56,7 @@ public: //functions
 	const CCVector3d& getCameraCenter() const { return cameraCenter; }
 
 	//! Sets the 'focal' distance
-	/** \warning changes the camera cener position in object-centered view mode
+	/** \warning changes the camera center position in object-centered view mode
 	**/
 	void setFocalDistance(double distance);
 

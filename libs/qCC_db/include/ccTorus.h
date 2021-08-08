@@ -79,7 +79,7 @@ protected:
 	//! Inside radius
 	PointCoordinateType m_insideRadius;
 
-	//! Outisde radius
+	//! Outside radius
 	PointCoordinateType m_outsideRadius;
 
 	//! Whether torus has a rectangular (true) or circular (false) section

@@ -58,9 +58,9 @@ public:  //drawing and drawing options
 	//! Toggles visibility
 	inline virtual void toggleVisibility() { setVisible(!isVisible()); }
 
-	//! Returns whether visibilty is locked or not
+	//! Returns whether visibility is locked or not
 	inline virtual bool isVisiblityLocked() const { return m_lockedVisibility; }
-	//! Locks/unlocks visibilty
+	//! Locks/unlocks visibility
 	/** If visibility is locked, the user won't be able to modify it
 		(via the properties tree for instance).
 	**/
@@ -72,7 +72,7 @@ public:  //drawing and drawing options
 	inline virtual void setSelected(bool state) { m_selected = state; }
 
 	//! Returns main OpenGL parameters for this entity
-	/** These parameters are deduced from the visiblity states
+	/** These parameters are deduced from the visibility states
 		of its different features (points, normals, etc.).
 		\param params a glDrawParams structure
 	**/
@@ -217,7 +217,7 @@ public: //Transformation matrix management (for display only)
 	**/
 	virtual void resetGLTransformation();
 
-	//! Mutliplies (left) current GL transformation by a rotation matrix
+	//! Multiplies (left) current GL transformation by a rotation matrix
 	/** 'GLtrans = M * GLtrans'
 		Note: GL transformation is automatically enabled.
 		See ccDrawableObject::setGLTransformation.

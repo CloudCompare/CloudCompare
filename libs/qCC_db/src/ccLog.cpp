@@ -50,7 +50,7 @@ struct Message
 
 //message backup system
 static bool s_backupEnabled;
-//backuped messages
+//backed up messages
 static std::vector<Message> s_backupMessages;
 
 //unique console instance
@@ -98,7 +98,7 @@ void ccLog::RegisterInstance(ccLog* logInstance)
 	s_instance = logInstance;
 	if (s_instance)
 	{
-		//if we have a valid instance, we can now flush the backuped messages
+		//if we have a valid instance, we can now flush the backed up messages
 		for (const Message& message : s_backupMessages)
 		{
 			s_instance->logMessage(message.text, message.flags);

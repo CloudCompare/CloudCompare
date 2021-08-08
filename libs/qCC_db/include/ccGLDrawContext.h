@@ -114,9 +114,9 @@ struct ccGLDrawContext
 	unsigned minLODPointCount;
 	//! Current level for LOD display
 	unsigned char currentLODLevel;
-	//! Wheter more points are available or not at the current level
+	//! Whether more points are available or not at the current level
 	bool moreLODPointsAvailable;
-	//! Wheter higher levels are available or not
+	//! Whether higher levels are available or not
 	bool higherLODLevelsAvailable;
 
 	//! Whether to decimate big meshes when rotating the camera
@@ -153,7 +153,7 @@ struct ccGLDrawContext
 	//! Stereo pass index
 	unsigned stereoPassIndex;
 
-	//! Whether to draw rounded points (instead of sqaures)
+	//! Whether to draw rounded points (instead of squares)
 	bool drawRoundedPoints;
 
 	//Default constructor

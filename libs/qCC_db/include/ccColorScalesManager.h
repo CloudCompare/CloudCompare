@@ -53,7 +53,7 @@ public:
 							BROWN_YELLOW	=	11,		/**< Brown-Yellow */
 							YELLOW_BROWN	=	12,		/**< Yellow-Brown */
 							TOPO_LANDSERF	=	13,		/**< Topo Landserf (quartile) */
-							HIGH_CONTRAST	=	14		/**< High constrast */
+							HIGH_CONTRAST	=	14		/**< High contrast */
 	};
 
 	//! Returns a pre-defined color scale UUID

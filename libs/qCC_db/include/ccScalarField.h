@@ -101,20 +101,20 @@ public:
 	};
 
 	//! Access to the range of displayed values
-	/** Values outside of the [start;stop] intervale will either be grey
+	/** Values outside of the [start;stop] interval will either be grey
 		or invisible (see showNaNValuesInGrey).
 	**/
 	inline const Range& displayRange() const { return m_displayRange; }
 
 	//! Access to the range of saturation values
 	/** Relative color scales will only be applied to values inside the
-		[start;stop] intervale.
+		[start;stop] interval.
 	**/
 	inline const Range& saturationRange() const { return m_logScale ? m_logSaturationRange : m_saturationRange; }
 
 	//! Access to the range of log scale saturation values
 	/** Relative color scales will only be applied to values inside the
-		[start;stop] intervale.
+		[start;stop] interval.
 	**/
 	inline const Range& logSaturationRange() const { return m_logSaturationRange; }
 
@@ -193,7 +193,7 @@ public:
 	inline const Histogram& getHistogram() const { return m_histogram; }
 
 	//! Returns whether the scalar field in its current configuration MAY have 'hidden' values or not
-	/** 'Hidden' values are typically NaN values or values outside of the 'displayed' intervale
+	/** 'Hidden' values are typically NaN values or values outside of the 'displayed' interval
 		while those values are not displayed in grey (see ccScalarField::showNaNValuesInGrey).
 	**/
 	bool mayHaveHiddenValues() const;

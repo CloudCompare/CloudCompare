@@ -196,10 +196,10 @@ protected:
 	//! Width of the line
 	PointCoordinateType m_width;
 
-	//! Whether poyline should be considered as 2D (true) or 3D (false)
+	//! Whether polyline should be considered as 2D (true) or 3D (false)
 	bool m_mode2D;
 
-	//! Whether poyline should draws itself in background (false) or foreground (true)
+	//! Whether polyline should draws itself in background (false) or foreground (true)
 	bool m_foreground;
 	
 	//! Whether vertices should be displayed or not

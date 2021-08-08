@@ -124,7 +124,7 @@ bool ccMaterial::loadAndSetTexture(const QString& absoluteFilename)
 
 	if (s_materialDB.hasTexture(absoluteFilename))
 	{
-		//if the image is already in memory, we simply update the texture filename for this amterial
+		//if the image is already in memory, we simply update the texture filename for this material
 		m_textureFilename = absoluteFilename;
 		s_materialDB.increaseTextureCounter(absoluteFilename);
 	}

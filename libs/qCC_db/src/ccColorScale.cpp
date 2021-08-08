@@ -138,7 +138,7 @@ void ccColorScale::update()
 			{
 				const double relativePos = static_cast<double>(i) / (MAX_STEPS - 1);
 
-				//forward to the right intervale
+				//forward to the right interval
 				while (j+2 < stepCount && m_steps[j+1].getRelativePos() < relativePos)
 					++j;
 

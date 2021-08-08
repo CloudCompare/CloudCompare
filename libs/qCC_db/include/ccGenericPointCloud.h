@@ -49,7 +49,7 @@ class ccOctreeProxy;
 /** A generic point cloud can have multiples features:
 	- colors (RGB)
 	- normals (compressed)
-	- an octree strucutre
+	- an octree structure
 	- visibility information per point (to hide/display subsets of points)
 **/
 class QCC_DB_LIB_API ccGenericPointCloud : public ccShiftedObject,  public CCCoreLib::GenericIndexedCloudPersist
@@ -90,7 +90,7 @@ public:
 	***************************************************/
 
 	//! Clears the entity from all its points and features
-	/** Display parameters are also reseted to their default values.
+	/** Display parameters are also reset to their default values.
 	**/
 	virtual void clear();
 
@@ -170,28 +170,28 @@ public:
 	**/
 	using VisibilityTableType = std::vector<unsigned char>;
 	
-	//! Returns associated visiblity array
+	//! Returns associated visibility array
 	virtual inline VisibilityTableType& getTheVisibilityArray() { return m_pointsVisibility; }
 
-	//! Returns associated visiblity array (const version)
+	//! Returns associated visibility array (const version)
 	virtual inline const VisibilityTableType& getTheVisibilityArray() const { return m_pointsVisibility; }
 
-	//! Returns a ReferenceCloud equivalent to the visiblity array
+	//! Returns a ReferenceCloud equivalent to the visibility array
 	/** \param visTable visibility table (optional, otherwise the cloud's default one will be used)
 		\param silent don't issue warnings if no visible point is present
 		\return the visible points as a ReferenceCloud
 	**/
 	virtual CCCoreLib::ReferenceCloud* getTheVisiblePoints(const VisibilityTableType* visTable = nullptr, bool silent = false) const;
 	
-	//! Returns whether the visiblity array is allocated or not
+	//! Returns whether the visibility array is allocated or not
 	virtual bool isVisibilityTableInstantiated() const;
 
-	//! Resets the associated visiblity array
+	//! Resets the associated visibility array
 	/** Warning: allocates the array if it was not done yet!
 	**/
 	virtual bool resetVisibilityArray();
 
-	//! Inverts the visiblity array
+	//! Inverts the visibility array
 	virtual void invertVisibilityArray();
 
 	//! Erases the points visibility information
@@ -219,9 +219,9 @@ public:
 	//! Applies a rigid transformation (rotation + translation)
 	virtual void applyRigidTransformation(const ccGLMatrix& trans) = 0;
 
-	//! Crops the cloud inside (or outside) a boundig box
+	//! Crops the cloud inside (or outside) a bounding box
 	/** \warning Always returns a selection (potentially empty) if successful.
-		\param box croping box
+		\param box cropping box
 		\param inside whether selected points are inside or outside the box
 		\return points falling inside (or outside) as a selection
 	**/

@@ -1479,7 +1479,7 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 			//frustum area (planes)
 			if (m_frustumInfos.drawSidePlanes && m_frustumInfos.initFrustumHull())
 			{
-				//set the rigth display (just to be sure)
+				//set the right display (just to be sure)
 				m_frustumInfos.frustumHull->setDisplay(getDisplay());
 				m_frustumInfos.frustumHull->setTempColor(m_color);
 
@@ -2636,7 +2636,7 @@ void ccOctreeFrustumIntersector::computeFrustumIntersectionByLevel(unsigned char
 			// look if there is a separating plane
 			OctreeCellVisibility result = (parentResult == CELL_INSIDE_FRUSTUM ? CELL_INSIDE_FRUSTUM : separatingAxisTest(bbMin, bbMax, planesCoefficients, ptsFrustum, edges, center));
 
-			// if the cell is not outside the frustum, there is a kind of intersection (inside or intesecting)
+			// if the cell is not outside the frustum, there is a kind of intersection (inside or intersecting)
 			if (result != CELL_OUTSIDE_FRUSTUM)
 			{
 				if (result == CELL_INSIDE_FRUSTUM)

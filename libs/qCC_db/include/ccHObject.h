@@ -282,7 +282,7 @@ public: //display
 	//Inherited from ccDrawableObject
 	void draw(CC_DRAW_CONTEXT& context) override;
 
-	//! Returns the absolute transformation (i.e. the actual displayed GL transforamtion) of an entity
+	//! Returns the absolute transformation (i.e. the actual displayed GL transformation) of an entity
 	/** \param[out] trans absolute transformation
 		\return whether a GL transformation is actually enabled or not
 	**/
@@ -395,7 +395,7 @@ public: //display
 	//! Returns selection behavior
 	virtual inline SelectionBehavior getSelectionBehavior() const { return m_selectionBehavior; }
 
-	//! Returns object unqiue ID used for display
+	//! Returns object unique ID used for display
 	virtual inline unsigned getUniqueIDForDisplay() const { return getUniqueID(); }
 
 	//! Returns the transformation 'history' matrix

@@ -203,7 +203,7 @@ public:
 		sure to reserve the  necessary amount of memory with
 		this method. This method reserves memory for as many
 		normals indexes triplets as the number of triangles
-		in the mesh (effictively stored or reserved - a call to
+		in the mesh (effectively stored or reserved - a call to
 		ccMesh::reserve prior to this one is mandatory).
 		\return true if ok, false if there's not enough memory
 	**/
@@ -255,7 +255,7 @@ public:
 		to reserve the  necessary amount of memory with this
 		method. This method reserves memory for as many
 		material descriptors as the number of triangles in
-		the mesh (effictively stored or reserved - a call to
+		the mesh (effectively stored or reserved - a call to
 		ccMesh::reserve prior to this one is mandatory).
 		\return true if ok, false if there's not enough memory
 	**/
@@ -309,7 +309,7 @@ public:
 		sure to reserve the  necessary amount of memory with
 		this method. This method reserves memory for as many
 		tex coords indexes triplets as the number of triangles
-		in the mesh (effictively stored or reserved - a call to
+		in the mesh (effectively stored or reserved - a call to
 		ccMesh::reserve prior to this one is mandatory).
 		\return true if ok, false if there's not enough memory
 	**/

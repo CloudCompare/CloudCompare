@@ -98,12 +98,12 @@ public:
 	**/
 	virtual void deprecate3DLayer() = 0;
 
-	//! Returns defaul text display font
+	//! Returns default text display font
 	/** Warning: already takes rendering zoom into account!
 	**/
 	virtual QFont getTextDisplayFont() const = 0;
 
-	//! Returns defaul label display font
+	//! Returns default label display font
 	/** Warning: already takes rendering zoom into account!
 	**/
 	virtual QFont getLabelDisplayFont() const = 0;

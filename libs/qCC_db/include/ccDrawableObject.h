@@ -102,7 +102,7 @@ public: //scalar fields
 	inline virtual bool hasDisplayedScalarField() const { return false; }
 
 	//! Returns whether one or more scalar fields are instantiated
-	/** WARNING: doesn't mean a scalar field is currently displayed
+	/** \warning doesn't mean a scalar field is currently displayed
 		(see ccDrawableObject::hasDisplayedScalarField).
 	**/
 	inline virtual bool hasScalarFields() const  { return false; }

@@ -31,7 +31,7 @@ public: //construction
 
 	//! Default constructor
 	/** \param name object name (optional)
-		\param uniqueID unique ID (handle with care)
+	    \param uniqueID unique ID (handle with care)
 	**/
 	ccHObject(const QString& name = QString(), unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID);
 	//! Copy constructor
@@ -41,7 +41,7 @@ public: //construction
 	~ccHObject() override;
 
 	//! Static factory
-	/** Warning: objects depending on other structures (such as meshes 
+	/** \warning Objects depending on other structures (such as meshes
 		or polylines that should be linked with point clouds playing the
 		role of vertices) are returned 'naked'.
 		\param objectType object type
@@ -386,7 +386,7 @@ public: //display
 							 SELECTION_IGNORED };
 
 	//! Sets selection behavior (when displayed)
-	/** WARNING: SELECTION_FIT_BBOX relies on the
+	/** \warning SELECTION_FIT_BBOX relies on the
 		'ccDrawableObject::getFitBB' method (which
 		is not supported by all entities).
 	**/

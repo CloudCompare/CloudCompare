@@ -172,12 +172,12 @@ public: //meta-data keys
 	static QString MetaKeyAbscissa()		{ return "profile.abscissa"; }
 	//! Meta data key (prefix): intersection point between profile and its generatrix
 	/** Expected value: 3D vector
-		\warning: must be followed by '.x', '.y' or '.z'
+		\warning must be followed by '.x', '.y' or '.z'
 	**/
 	static QString MetaKeyPrefixCenter()	{ return "profile.center"; }
 	//! Meta data key (prefix): generatrix orientation at the point of intersection with the profile
 	/** Expected value: 3D vector
-		\warning: must be followed by '.x', '.y' or '.z'
+		\warning must be followed by '.x', '.y' or '.z'
 	**/
 	static QString MetaKeyPrefixDirection()	{ return "profile.direction"; }
 

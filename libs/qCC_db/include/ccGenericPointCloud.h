@@ -102,7 +102,7 @@ public:
 	//! Computes the cloud octree
 	/** The octree bounding-box is automatically defined as the smallest
 		3D cube that totally encloses the cloud.
-		WARNING: any previously attached octree will be deleted,
+		\warning any previously attached octree will be deleted,
 				 even if the new octree computation failed.
 		\param progressCb the caller can get some notification of the process progress through this callback mechanism (see CCCoreLib documentation)
 		\param autoAddChild whether to automatically add the computed octree as child of this cloud or not
@@ -128,35 +128,35 @@ public:
 	//! Returns color corresponding to a given scalar value
 	/** The returned value depends on the current scalar field display parameters.
 		It may even be 0 if the value shouldn't be displayed.
-		WARNING: scalar field must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
+		\warning scalar field must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
 	**/
 	virtual const ccColor::Rgb* geScalarValueColor(ScalarType d) const = 0;
 
 	//! Returns color corresponding to a given point associated scalar value
 	/** The returned value depends on the current scalar field display parameters.
 		It may even be 0 if the value shouldn't be displayed.
-		WARNING: scalar field must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
+		\warning scalar field must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
 	**/
 	virtual const ccColor::Rgb* getPointScalarValueColor(unsigned pointIndex) const = 0;
 
 	//! Returns scalar value associated to a given point
 	/** The returned value is taken from the current displayed scalar field
-		WARNING: scalar field must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
+		\warning scalar field must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
 	**/
 	virtual ScalarType getPointDisplayedDistance(unsigned pointIndex) const = 0;
 
 	//! Returns color corresponding to a given point
-	/** WARNING: color array must be enabled! (see ccDrawableObject::hasColors)
+	/** \warning color array must be enabled! (see ccDrawableObject::hasColors)
 	**/
 	virtual const ccColor::Rgba& getPointColor(unsigned pointIndex) const = 0;
 
 	//! Returns compressed normal corresponding to a given point
-	/** WARNING: normals array must be enabled! (see ccDrawableObject::hasNormals)
+	/** \warning normals array must be enabled! (see ccDrawableObject::hasNormals)
 	**/
 	virtual const CompressedNormType& getPointNormalIndex(unsigned pointIndex) const = 0;
 
 	//! Returns normal corresponding to a given point
-	/** WARNING: normals array must be enabled! (see ccDrawableObject::hasNormals)
+	/** \warning normals array must be enabled! (see ccDrawableObject::hasNormals)
 	**/
 	virtual const CCVector3& getPointNormal(unsigned pointIndex) const = 0;
 
@@ -228,7 +228,7 @@ public:
 	virtual CCCoreLib::ReferenceCloud* crop(const ccBBox& box, bool inside = true) = 0;
 
 	//! Multiplies all coordinates by constant factors (one per dimension)
-	/** WARNING: attached octree may be deleted.
+	/** \warning attached octree may be deleted.
 		\param fx multiplication factor along the X dimension
 		\param fy multiplication factor along the Y dimension
 		\param fz multiplication factor along the Z dimension

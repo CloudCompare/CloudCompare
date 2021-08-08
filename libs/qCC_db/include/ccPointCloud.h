@@ -195,7 +195,7 @@ public: //features allocation/resize
 		new size is inferior to the actual one, the last elements will be
 		deleted. Otherwise, the array is filled with zeros (default behavior)
 		or "white" colors (is fillWithWhite).
-		WARNING: don't try to "add" any element on a resized array...
+		\warning don't try to "add" any element on a resized array...
 		\param fillWithWhite whether to fill new array elements with zeros (false) or white color (true)
 		\return true if ok, false if there's not enough memory
 	**/
@@ -216,7 +216,7 @@ public: //features allocation/resize
 		of points in the cloud (effectively stored or reserved). If the
 		new size is inferior to the actual one, the last elements will be
 		deleted. Otherwise, the array is filled with blank elements.
-		WARNING: don't try to "add" any element on a resized array...
+		\warning don't try to "add" any element on a resized array...
 		\return true if ok, false if there's not enough memory
 	**/
 	bool resizeTheNormsTable();
@@ -493,22 +493,22 @@ public: //other methods
 								unsigned char octreeLevel = 0);
 
 	//! Sets a particular point color
-	/** WARNING: colors must be enabled.
+	/** \warning colors must be enabled.
 	**/
 	void setPointColor(unsigned pointIndex, const ccColor::Rgba& col);
 
 	//! Sets a particular point color
-	/** WARNING: colors must be enabled.
+	/** \warning colors must be enabled.
 	**/
 	inline void setPointColor(unsigned pointIndex, const ccColor::Rgb& col) { setPointColor(pointIndex, ccColor::Rgba(col, ccColor::MAX)); }
 
 	//! Sets a particular point compressed normal
-	/** WARNING: normals must be enabled.
+	/** \warning normals must be enabled.
 	**/
 	void setPointNormalIndex(unsigned pointIndex, CompressedNormType norm);
 
 	//! Sets a particular point normal (shortcut)
-	/** WARNING: normals must be enabled.
+	/** \warning normals must be enabled.
 		Normal is automatically compressed before storage.
 	**/
 	void setPointNormal(unsigned pointIndex, const CCVector3& N);
@@ -560,8 +560,9 @@ public: //other methods
 
 	//! Pushes an RGB color on stack (shortcut)
 	/** \param r red component
-		\param g green component
-		\param b blue component
+	    \param g green component
+	    \param b blue component
+	    \param a alpha component
 	**/
 	inline void addColor(ColorCompType r, ColorCompType g, ColorCompType b, ColorCompType a = ccColor::MAX) { addColor(ccColor::Rgba(r, g, b, a)); }
 

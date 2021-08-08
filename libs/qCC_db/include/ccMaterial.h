@@ -119,7 +119,7 @@ public:
 	GLuint getTextureID() const;
 
 	//! Helper: makes all active GL light sources neutral (i.e. 'gray')
-	/** WARNING: an OpenGL context must be active!
+	/** \warning an OpenGL context must be active!
 	**/
 	static void MakeLightsNeutral(const QOpenGLContext* context);
 

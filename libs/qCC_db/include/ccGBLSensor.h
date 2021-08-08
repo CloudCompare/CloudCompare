@@ -80,7 +80,7 @@ public:
 	unsigned char checkVisibility(const CCVector3& P) const override;
 
 	//! Computes angular parameters automatically (all but the angular steps!)
-	/** WARNING: this method uses the cloud global iterator.
+	/** \warning this method uses the cloud global iterator.
 	**/
 	bool computeAutoParameters(CCCoreLib::GenericCloud* theCloud);
 
@@ -179,7 +179,7 @@ public: //projection tools
 	using NormalGrid = std::vector<CCVector3>;
 
 	//! Projects a set of point cloud normals in the sensor world
-	/** WARNING: this method uses the cloud global iterator
+	/** \warning this method uses the cloud global iterator
 		\param cloud a point cloud
 		\param norms the normals vectors (should have the same size and order as the point cloud)
 		\param posIndex (optional) sensor position index (see ccIndexedTransformationBuffer)
@@ -193,7 +193,7 @@ public: //projection tools
 	using ColorGrid = std::vector<ccColor::Rgb>;
 
 	//! Projects a set of point cloud colors in the sensor frame defined by this instance
-	/** WARNING: this method uses the cloud global iterator
+	/** \warning this method uses the cloud global iterator
 		\param cloud a point cloud
 		\param rgbColors the RGB colors (should have the same size and order as the point cloud)
 		\return a set of RGB colors organized as a bidimensional grid (same size as the depth buffer)
@@ -204,7 +204,7 @@ public: //projection tools
 public: //depth buffer management
 
 	//! Projects a point cloud along the sensor point of view defined by this instance
-	/** WARNING: this method uses the cloud global iterator
+	/** \warning this method uses the cloud global iterator
 		\param cloud a point cloud
 		\param errorCode error code in case the returned cloud is 0
 		\param projectedCloud optional (empty) cloud to store the projected points

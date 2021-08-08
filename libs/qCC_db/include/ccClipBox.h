@@ -35,8 +35,8 @@ class QCC_DB_LIB_API ccClipBox : public QObject, public ccHObject, public ccInte
 public:
 
 	//! Default constructor
-	/** \parma name entity name (optional)
-		\param uniqueID unique ID (handle with care)
+	/** \param name entity name (optional)
+	    \param uniqueID unique ID (handle with care)
 	**/
 	ccClipBox(QString name = QString("Clipping box"), unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID);
 

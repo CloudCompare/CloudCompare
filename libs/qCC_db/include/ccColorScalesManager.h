@@ -49,7 +49,7 @@ public:
 							VERTEX_QUALITY	=	7,		/**< Mesh vertex quality (see CCCoreLib::MeshSamplingTools::VertexFlags) */
 							DIP_BRYW		=	8,		/**< Dip (0 - 90 degrees) (Brown-Red-Yellow-White) */
 							DIP_DIR_REPEAT	=	9,		/**< Dip direction (0 - 360 degrees) */
-							VIRIDIS			=	10,		/**< matplotlib library colorscale created by Stéfan van der Walt and Nathaniel Smith */
+							VIRIDIS			=	10,		/**< matplotlib library colorscale created by StÃ©fan van der Walt and Nathaniel Smith */
 							BROWN_YELLOW	=	11,		/**< Brown-Yellow */
 							YELLOW_BROWN	=	12,		/**< Yellow-Brown */
 							TOPO_LANDSERF	=	13,		/**< Topo Landserf (quartile) */

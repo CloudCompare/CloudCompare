@@ -75,14 +75,14 @@ public:
 										double maxIndexDistForInterpolation = DBL_MAX) const;
 	
 	//! [Display option] Returns whether trihedrons should be displayed or not (otherwise only points or a polyline)
-	bool triherdonsShown() const { return m_showTrihedrons; }
+	bool trihedronsShown() const { return m_showTrihedrons; }
 	//! [Display option] Sets whether trihedrons should be displayed or not (otherwise only points or a polyline)
-	void showTriherdons(bool state) { m_showTrihedrons = state; }
+	void showTrihedrons(bool state) { m_showTrihedrons = state; }
 
 	//! [Display option] Returns trihedron display size
-	float triherdonsDisplayScale() const { return m_trihedronsScale; }
+	float trihedronsDisplayScale() const { return m_trihedronsScale; }
 	//! [Display option] Sets trihedron display size
-	void setTriherdonsDisplayScale(float scale) { m_trihedronsScale = scale; }
+	void setTrihedronsDisplayScale(float scale) { m_trihedronsScale = scale; }
 
 	//! [Display option] Returns whether the path should be displayed as a polyline or not (otherwise only points)
 	bool isPathShownAsPolyline() const { return m_showAsPolyline; }

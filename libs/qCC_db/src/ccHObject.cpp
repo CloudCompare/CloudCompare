@@ -892,7 +892,7 @@ void ccHObject::detachChild(ccHObject* child)
 	}
 }
 
-void ccHObject::detatchAllChildren()
+void ccHObject::detachAllChildren()
 {
 	for (auto child : m_children)
 	{
@@ -1070,8 +1070,8 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& o
 			in.seek(originalFilePos);
 			//get custom object name and plugin name
 			QString childName = child->getName();
-			QString classId = child->getMetaData(ccCustomHObject::DefautMetaDataClassName()).toString();
-			QString pluginId = child->getMetaData(ccCustomHObject::DefautMetaDataPluginName()).toString();
+			QString classId = child->getMetaData(ccCustomHObject::DefaultMetaDataClassName()).toString();
+			QString pluginId = child->getMetaData(ccCustomHObject::DefaultMetaDataPluginName()).toString();
 			//dont' need this instance anymore
 			delete child;
 			child = nullptr;
@@ -1169,9 +1169,9 @@ bool ccHObject::toFile_MeOnly(QFile& out) const
 	if (out.write(reinterpret_cast<const char*>(&m_sfDisplayed), sizeof(bool)) < 0)
 		return WriteError();
 	//'colorIsOverridden' state (dataVersion>=20)
-	if (out.write(reinterpret_cast<const char*>(&m_colorIsOverriden), sizeof(bool)) < 0)
+	if (out.write(reinterpret_cast<const char*>(&m_colorIsOverridden), sizeof(bool)) < 0)
 		return WriteError();
-	if (m_colorIsOverriden)
+	if (m_colorIsOverridden)
 	{
 		//'tempColor' (dataVersion>=20)
 		if (out.write(reinterpret_cast<const char*>(m_tempColor.rgba), sizeof(ColorCompType)*3) < 0) //TODO: save the alpha channel?
@@ -1219,9 +1219,9 @@ bool ccHObject::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 	if (in.read(reinterpret_cast<char*>(&m_sfDisplayed), sizeof(bool)) < 0)
 		return ReadError();
 	//'colorIsOverridden' state (dataVersion>=20)
-	if (in.read(reinterpret_cast<char*>(&m_colorIsOverriden), sizeof(bool)) < 0)
+	if (in.read(reinterpret_cast<char*>(&m_colorIsOverridden), sizeof(bool)) < 0)
 		return ReadError();
-	if (m_colorIsOverriden)
+	if (m_colorIsOverridden)
 	{
 		//'tempColor' (dataVersion>=20)
 		if (in.read(reinterpret_cast<char*>(m_tempColor.rgba), sizeof(ColorCompType)*3) < 0)

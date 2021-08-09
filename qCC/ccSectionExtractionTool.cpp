@@ -91,9 +91,9 @@ ccSectionExtractionTool::ccSectionExtractionTool(QWidget* parent)
 	connect(m_UI->exportSectionsToolButton, &QAbstractButton::clicked, this, &ccSectionExtractionTool::exportSections);
 
 	//add shortcuts
-	addOverridenShortcut(Qt::Key_Space);  //space bar for the "pause" button
-	addOverridenShortcut(Qt::Key_Escape); //cancel current polyline edition
-	addOverridenShortcut(Qt::Key_Delete); //delete key to delete the selected polyline
+	addOverriddenShortcut(Qt::Key_Space);  //space bar for the "pause" button
+	addOverriddenShortcut(Qt::Key_Escape); //cancel current polyline edition
+	addOverriddenShortcut(Qt::Key_Delete); //delete key to delete the selected polyline
 
 	connect(this, &ccOverlayDialog::shortcutTriggered, this, &ccSectionExtractionTool::onShortcutTriggered);
 }

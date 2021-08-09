@@ -287,7 +287,7 @@ QCPPainter::QCPPainter() :
   mModes(pmDefault),
   mIsAntialiasing(false)
 {
-  // don't setRenderHint(QPainter::NonCosmeticDefautPen) here, because painter isn't active yet and
+  // don't setRenderHint(QPainter::NonCosmeticDefaultPen) here, because painter isn't active yet and
   // a call to begin() will follow
 }
 
@@ -29618,7 +29618,7 @@ QPen QCPItemPixmap::mainPen() const
   the coordinate axes of the graph and update its \a position to be on the graph's data. This means
   the key stays controllable via \ref setGraphKey, but the value will follow the graph data. If a
   QCPGraph is connected, note that setting the coordinates of the tracer item directly via \a
-  position will have no effect because they will be overriden in the next redraw (this is when the
+  position will have no effect because they will be overridden in the next redraw (this is when the
   coordinate update happens).
   
   If the specified key in \ref setGraphKey is outside the key bounds of the graph, the tracer will

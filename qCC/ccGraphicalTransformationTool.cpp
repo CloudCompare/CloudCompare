@@ -49,9 +49,9 @@ ccGraphicalTransformationTool::ccGraphicalTransformationTool(QWidget* parent)
 	connect(objCenterRadio, &QRadioButton::toggled, this, &ccGraphicalTransformationTool::advObjectAxisRadioToggled);
 	
 	//add shortcuts
-	addOverridenShortcut(Qt::Key_Space); //space bar for the "pause" button
-	addOverridenShortcut(Qt::Key_Escape); //escape key for the "cancel" button
-	addOverridenShortcut(Qt::Key_Return); //return key for the "ok" button
+	addOverriddenShortcut(Qt::Key_Space); //space bar for the "pause" button
+	addOverriddenShortcut(Qt::Key_Escape); //escape key for the "cancel" button
+	addOverriddenShortcut(Qt::Key_Return); //return key for the "ok" button
 	connect(this, &ccOverlayDialog::shortcutTriggered, this, &ccGraphicalTransformationTool::onShortcutTriggered);
 
 	objCenterRadio->setChecked(true);
@@ -615,7 +615,7 @@ void ccGraphicalTransformationTool::advObjectAxisRadioToggled(bool state)
 
 void ccGraphicalTransformationTool::clear()
 {
-	m_toTransform.detatchAllChildren();
+	m_toTransform.detachAllChildren();
 
 	m_rotation.toIdentity();
 	m_translation = CCVector3d(0,0,0);

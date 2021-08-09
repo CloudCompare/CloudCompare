@@ -2159,7 +2159,7 @@ void ccPointCloud::swapPoints(unsigned firstIndex, unsigned secondIndex)
 void ccPointCloud::getDrawingParameters(glDrawParams& params) const
 {
 	//color override
-	if (isColorOverriden())
+	if (isColorOverridden())
 	{
 		params.showColors	= true;
 		params.showNorms	= false;
@@ -2691,7 +2691,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glFunc->glEnable(GL_BLEND);
 		}
 
-		if (glParams.showColors && isColorOverriden())
+		if (glParams.showColors && isColorOverridden())
 		{
 			ccGL::Color4v(glFunc, m_tempColor.rgba);
 			glParams.showColors = false;
@@ -4797,7 +4797,7 @@ static bool CatchGLErrors(GLenum err, const char* context)
 
 bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams& glParams)
 {
-	if (isColorOverriden())
+	if (isColorOverridden())
 	{
 		//nothing to do (we don't display true colors, SF or normals!)
 		return false;

@@ -181,7 +181,7 @@ public: //children management
 		want to avoid deletion).
 	**/
 	//! Detaches all children
-	void detatchAllChildren();
+	void detachAllChildren();
 
 	void removeChild(ccHObject* child);
 	//! Removes a specific child given its index

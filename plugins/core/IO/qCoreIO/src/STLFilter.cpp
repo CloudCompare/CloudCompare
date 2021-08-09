@@ -362,7 +362,7 @@ CC_FILE_ERROR STLFilter::loadFile(const QString& filename, ccHObject& container,
 	}
 
 	//remove duplicated vertices
-	mesh->mergeDuplicatedVertices(ccMesh::DefaultMergeDulicateVerticesLevel, parameters.parentWidget);
+	mesh->mergeDuplicatedVertices(ccMesh::DefaultMergeDuplicateVerticesLevel, parameters.parentWidget);
 	vertices = nullptr; //warning, after this point, 'vertices' is not valid anymore
 
 	ccGenericPointCloud* meshVertices = mesh->getAssociatedCloud();

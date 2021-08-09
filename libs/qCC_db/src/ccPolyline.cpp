@@ -106,7 +106,7 @@ void ccPolyline::importParametersFrom(const ccPolyline& poly)
 	set2DMode(poly.m_mode2D);
 	setForeground(poly.m_foreground);
 	setVisible(poly.isVisible());
-	lockVisibility(poly.isVisiblityLocked());
+	lockVisibility(poly.isVisibilityLocked());
 	setColor(poly.m_rgbColor);
 	setWidth(poly.m_width);
 	showColors(poly.colorsShown());
@@ -194,7 +194,7 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 	if (pushName)
 		glFunc->glPushName(getUniqueIDForDisplay());
 
-	if (isColorOverriden())
+	if (isColorOverridden())
 		ccGL::Color4v(glFunc, getTempColor().rgba);
 	else if (colorsShown())
 		ccGL::Color3v(glFunc, m_rgbColor.rgb);
@@ -696,7 +696,7 @@ ccPointCloud* ccPolyline::samplePoints(	bool densityBased,
 
 	if (withRGB)
 	{
-		if (isColorOverriden())
+		if (isColorOverridden())
 		{
 			//we use the default 'temporary' color
 			cloud->setColor(getTempColor());

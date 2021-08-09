@@ -350,7 +350,7 @@ void ccCompass::tryLoading()
 		}
 
 		//remove them from the orignal parent
-		original->detatchAllChildren();
+		original->detachAllChildren();
 
 		//add new parent to scene graph
 		original->getParent()->addChild(replacement);

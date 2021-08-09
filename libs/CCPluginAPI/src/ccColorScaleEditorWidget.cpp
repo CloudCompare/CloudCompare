@@ -609,7 +609,7 @@ void ccColorScaleEditorWidget::onPointClicked(double relativePos)
 		}
 	}
 
-	//determine the new slider defaut color
+	//determine the new slider default color
 	QColor color = Qt::white;
 	if (m_sliders->size() > 1)
 	{

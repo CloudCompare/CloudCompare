@@ -45,11 +45,11 @@ public:
 	//! Returns the default key for the "class name" metadata
 	/** See ccHObject::New.
 	**/
-	static QString DefautMetaDataClassName() { return QString("class_name"); }
+	static QString DefaultMetaDataClassName() { return QString("class_name"); }
 	//! Returns the default key for the "plugin name" metadata
 	/** See ccHObject::New.
 	**/
-	static QString DefautMetaDataPluginName() { return QString("plugin_name"); }
+	static QString DefaultMetaDataPluginName() { return QString("plugin_name"); }
 };
 
 //! Custom leaf object

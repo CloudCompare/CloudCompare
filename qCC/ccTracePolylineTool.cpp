@@ -69,8 +69,8 @@ ccTracePolylineTool::ccTracePolylineTool(ccPickingHub* pickingHub, QWidget* pare
 	connect(m_ui->widthSpinBox,			static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &ccTracePolylineTool::onWidthSizeChanged);
 
 	//add shortcuts
-	addOverridenShortcut(Qt::Key_Escape); //escape key for the "cancel" button
-	addOverridenShortcut(Qt::Key_Return); //return key for the "apply" button
+	addOverriddenShortcut(Qt::Key_Escape); //escape key for the "cancel" button
+	addOverriddenShortcut(Qt::Key_Return); //return key for the "apply" button
 	connect(this, &ccTracePolylineTool::shortcutTriggered, this, &ccTracePolylineTool::onShortcutTriggered);
 
 	m_polyTipVertices = new ccPointCloud("Tip vertices", static_cast<unsigned>(ReservedIDs::TRACE_POLYLINE_TOOL_POLYLINE_TIP_VERTICES));

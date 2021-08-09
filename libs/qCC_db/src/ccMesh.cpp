@@ -1777,7 +1777,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		RGBAColorsTableType* rgbaColorsTable = nullptr;
 		if (glParams.showColors)
 		{
-			if (isColorOverriden())
+			if (isColorOverridden())
 			{
 				ccGL::Color4v(glFunc, m_tempColor.rgba);
 				glParams.showColors = false;

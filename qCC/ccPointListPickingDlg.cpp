@@ -396,7 +396,7 @@ void ccPointListPickingDlg::markerSizeChanged(int size)
 	if (guiParams.labelMarkerSize != static_cast<unsigned>(size))
 	{
 		guiParams.labelMarkerSize = static_cast<unsigned>(size);
-		m_associatedWin->setDisplayParameters(guiParams,m_associatedWin->hasOverridenDisplayParameters());
+		m_associatedWin->setDisplayParameters(guiParams,m_associatedWin->hasOverriddenDisplayParameters());
 		m_associatedWin->redraw();
 	}
 }

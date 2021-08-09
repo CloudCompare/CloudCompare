@@ -398,10 +398,10 @@ public:
 	void transformTriNormals(const ccGLMatrix& trans);
 
 	//! Default octree level for the 'mergeDuplicatedVertices' algorithm
-	static const unsigned char DefaultMergeDulicateVerticesLevel = 10;
+	static const unsigned char DefaultMergeDuplicateVerticesLevel = 10;
 
 	//! Merges duplicated vertices
-	bool mergeDuplicatedVertices(unsigned char octreeLevel = DefaultMergeDulicateVerticesLevel, QWidget* parentWidget = nullptr);
+	bool mergeDuplicatedVertices(unsigned char octreeLevel = DefaultMergeDuplicateVerticesLevel, QWidget* parentWidget = nullptr);
 
 protected: //methods
 

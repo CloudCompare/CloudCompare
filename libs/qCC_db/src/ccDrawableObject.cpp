@@ -43,7 +43,7 @@ ccDrawableObject::ccDrawableObject(const ccDrawableObject& object)
 	, m_normalsDisplayed(object.m_normalsDisplayed)
 	, m_sfDisplayed(object.m_sfDisplayed)
 	, m_tempColor(object.m_tempColor)
-	, m_colorIsOverriden(object.m_colorIsOverriden)
+	, m_colorIsOverridden(object.m_colorIsOverridden)
 	, m_glTrans(object.m_glTrans)
 	, m_glTransEnabled(object.m_glTransEnabled)
 	, m_showNameIn3D(object.m_showNameIn3D)
@@ -148,7 +148,7 @@ void ccDrawableObject::setTempColor(const ccColor::Rgb& col, bool autoActivate/*
 void ccDrawableObject::getDrawingParameters(glDrawParams& params) const
 {
 	//color override
-	if (isColorOverriden())
+	if (isColorOverridden())
 	{
 		params.showColors = true;
 		params.showNorms = hasNormals() && normalsShown()/*false*/;

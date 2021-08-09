@@ -129,7 +129,7 @@ ccFacet* ccFacet::clone() const
 	facet->m_showNormalVector = m_showNormalVector;
 	memcpy(facet->m_planeEquation, m_planeEquation, sizeof(PointCoordinateType)*4);
 	facet->setVisible(isVisible());
-	facet->lockVisibility(isVisiblityLocked());
+	facet->lockVisibility(isVisibilityLocked());
 	facet->setDisplay_recursive(getDisplay());
 
 	return facet;

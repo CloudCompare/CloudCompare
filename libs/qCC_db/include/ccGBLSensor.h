@@ -112,7 +112,7 @@ public: //setters and getters
 	inline PointCoordinateType getPitchStep() const { return m_deltaPhi; }
 
 	//! Returns whether the pitch angles are shifted (i.e. between [0 ; 2pi] instead of [-pi ; pi])
-	bool picthIsShifted() const { return m_pitchAnglesAreShifted; }
+	bool pitchIsShifted() const { return m_pitchAnglesAreShifted; }
 
 	//! Sets the yaw scanning limits
 	/** \param minTheta min yaw angle (in radians)

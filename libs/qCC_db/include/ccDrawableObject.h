@@ -59,7 +59,7 @@ public:  //drawing and drawing options
 	inline virtual void toggleVisibility() { setVisible(!isVisible()); }
 
 	//! Returns whether visibility is locked or not
-	inline virtual bool isVisiblityLocked() const { return m_lockedVisibility; }
+	inline virtual bool isVisibilityLocked() const { return m_lockedVisibility; }
 	//! Locks/unlocks visibility
 	/** If visibility is locked, the user won't be able to modify it
 		(via the properties tree for instance).
@@ -137,7 +137,7 @@ public: //Temporary color
 	//! Returns whether colors are currently overridden by a temporary (unique) color
 	/** See ccDrawableObject::setTempColor.
 	**/
-	inline virtual bool isColorOverriden() const { return m_colorIsOverriden; }
+	inline virtual bool isColorOverridden() const { return m_colorIsOverridden; }
 
 	//! Returns current temporary (unique) color
 	inline virtual const ccColor::Rgba& getTempColor() const { return m_tempColor; }
@@ -155,7 +155,7 @@ public: //Temporary color
 	virtual void setTempColor(const ccColor::Rgb& col, bool autoActivate = true);
 
 	//! Set temporary color activation state
-	inline virtual void enableTempColor(bool state) { m_colorIsOverriden = state; }
+	inline virtual void enableTempColor(bool state) { m_colorIsOverridden = state; }
 
 public: //associated display management
 
@@ -269,7 +269,7 @@ protected: //members
 	//! Temporary (unique) color
 	ccColor::Rgba m_tempColor;
 	//! Temporary (unique) color activation state
-	bool m_colorIsOverriden;
+	bool m_colorIsOverridden;
 
 	//! Current GL transformation
 	/** See ccDrawableObject::setGLTransformation.

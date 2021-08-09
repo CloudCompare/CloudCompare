@@ -804,7 +804,7 @@ public:
 			PointTable table;
 			BufferReader bufferReader;
 
-			writerOptions.add("filename", fileNames[i].toLocal8Bit().toStdString());
+			writerOptions.add("filename", fileNames[i].toStdString());
 			if (tilePointViews[i]->empty())
 				continue;
 			try

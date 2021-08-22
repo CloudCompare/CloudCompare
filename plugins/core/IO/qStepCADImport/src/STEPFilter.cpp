@@ -259,7 +259,7 @@ CC_FILE_ERROR STEPFilter::importStepFile(	ccHObject& container,
 	ccLog::Print("[STEP] Number of triangles (after tesselation) = " + QString::number(triCount));
 	ccLog::Print("[STEP] Number of vertices (after tesselation)  = " + QString::number(vertCount));
 
-	mesh->mergeDuplicatedVertices(ccMesh::DefaultMergeDulicateVerticesLevel, parameters.parentWidget);
+	mesh->mergeDuplicatedVertices(ccMesh::DefaultMergeDuplicateVerticesLevel, parameters.parentWidget);
 	vertices = nullptr; //warning, after this point, 'vertices' is not valid anymore
 
 	if (mesh->computePerTriangleNormals())

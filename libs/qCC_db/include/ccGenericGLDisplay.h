@@ -98,12 +98,12 @@ public:
 	**/
 	virtual void deprecate3DLayer() = 0;
 
-	//! Returns defaul text display font
+	//! Returns default text display font
 	/** Warning: already takes rendering zoom into account!
 	**/
 	virtual QFont getTextDisplayFont() const = 0;
 
-	//! Returns defaul label display font
+	//! Returns default label display font
 	/** Warning: already takes rendering zoom into account!
 	**/
 	virtual QFont getLabelDisplayFont() const = 0;
@@ -125,7 +125,7 @@ public:
 		\param y vertical position of string origin
 		\param align alignment position flags
 		\param bkgAlpha background transparency (0 by default)
-		\param rgbColor text color (optional)
+		\param color text color (optional)
 		\param font optional font (otherwise default one will be used)
 	**/
 	virtual void displayText(	QString text,
@@ -140,7 +140,7 @@ public:
 	/** This method should be called solely during 3D pass rendering (see paintGL).
 		\param str string
 		\param pos3D 3D position of string origin
-		\param rgbColor color (optional: if let to 0, default text rendering color is used)
+		\param color RGBA color (optional: if let to 0, default text rendering color is used)
 		\param font font (optional)
 	**/
 	virtual void display3DLabel(const QString& str,

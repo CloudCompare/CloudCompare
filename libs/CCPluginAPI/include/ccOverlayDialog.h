@@ -60,7 +60,7 @@ public:
 	//! Adds a keyboard shortcut (single key) that will be overridden from the associated window
 	/** When an overridden key is pressed, the shortcutTriggered(int) signal is emitted.
 	**/
-	void addOverridenShortcut(Qt::Key key);
+	void addOverriddenShortcut(Qt::Key key);
 
 	//! Returns whether the tool is currently started or not
 	bool started() const { return m_processing; }
@@ -73,7 +73,7 @@ signals:
 	void processFinished(bool accepted);
 
 	//! Signal emitted when an overridden key shortcut is pressed
-	/** See ccOverlayDialog::addOverridenShortcut
+	/** See ccOverlayDialog::addOverriddenShortcut
 	**/
 	void shortcutTriggered(int key);
 

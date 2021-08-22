@@ -50,7 +50,7 @@ public:
 
 	//! Interpolate scalar fields from another cloud
 	static bool InterpolateScalarFieldsFrom(ccPointCloud* destCloud,
-											ccPointCloud* srccloud,
+											ccPointCloud* srcCloud,
 											const std::vector<int>& sfIndexes,
 											const Parameters& params,
 											CCCoreLib::GenericProgressCallback* progressCb = 0,

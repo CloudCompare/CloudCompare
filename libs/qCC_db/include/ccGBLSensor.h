@@ -38,7 +38,7 @@ public:
 
 	//! The order of inner-rotations of the sensor (body/mirrors)
 	/** Either the first rotation is made around the Z axis (yaw) then around the lateral
-		axis (pitch) as most scanners do today (Leica, Riegl, Faro, etc.). Othewise the
+		axis (pitch) as most scanners do today (Leica, Riegl, Faro, etc.). Otherwise the
 		opposite order is used (as the very old Mensi Soisic).
 	**/
 	enum ROTATION_ORDER {	YAW_THEN_PITCH = 0,
@@ -69,7 +69,7 @@ public:
 
 	//! Determines a 3D point "visibility" relatively to the sensor field of view
 	/** Relies on the sensor associated depth map (see ccGBLSensor::computeDepthBuffer).
-		The depth map is used to determine the "visiblity" of a 3D point relatively to
+		The depth map is used to determine the "visibility" of a 3D point relatively to
 		the laser scanner field of view. This can be useful for filtering out points
 		that shouldn't be compared while computing the distances between two point
 		clouds for instance (for more information on this	particular topic, refer to
@@ -80,7 +80,7 @@ public:
 	unsigned char checkVisibility(const CCVector3& P) const override;
 
 	//! Computes angular parameters automatically (all but the angular steps!)
-	/** WARNING: this method uses the cloud global iterator.
+	/** \warning this method uses the cloud global iterator.
 	**/
 	bool computeAutoParameters(CCCoreLib::GenericCloud* theCloud);
 
@@ -112,7 +112,7 @@ public: //setters and getters
 	inline PointCoordinateType getPitchStep() const { return m_deltaPhi; }
 
 	//! Returns whether the pitch angles are shifted (i.e. between [0 ; 2pi] instead of [-pi ; pi])
-	bool picthIsShifted() const { return m_pitchAnglesAreShifted; }
+	bool pitchIsShifted() const { return m_pitchAnglesAreShifted; }
 
 	//! Sets the yaw scanning limits
 	/** \param minTheta min yaw angle (in radians)
@@ -179,7 +179,7 @@ public: //projection tools
 	using NormalGrid = std::vector<CCVector3>;
 
 	//! Projects a set of point cloud normals in the sensor world
-	/** WARNING: this method uses the cloud global iterator
+	/** \warning this method uses the cloud global iterator
 		\param cloud a point cloud
 		\param norms the normals vectors (should have the same size and order as the point cloud)
 		\param posIndex (optional) sensor position index (see ccIndexedTransformationBuffer)
@@ -193,7 +193,7 @@ public: //projection tools
 	using ColorGrid = std::vector<ccColor::Rgb>;
 
 	//! Projects a set of point cloud colors in the sensor frame defined by this instance
-	/** WARNING: this method uses the cloud global iterator
+	/** \warning this method uses the cloud global iterator
 		\param cloud a point cloud
 		\param rgbColors the RGB colors (should have the same size and order as the point cloud)
 		\return a set of RGB colors organized as a bidimensional grid (same size as the depth buffer)
@@ -204,7 +204,7 @@ public: //projection tools
 public: //depth buffer management
 
 	//! Projects a point cloud along the sensor point of view defined by this instance
-	/** WARNING: this method uses the cloud global iterator
+	/** \warning this method uses the cloud global iterator
 		\param cloud a point cloud
 		\param errorCode error code in case the returned cloud is 0
 		\param projectedCloud optional (empty) cloud to store the projected points

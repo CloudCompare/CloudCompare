@@ -49,7 +49,7 @@ class ccOctreeProxy;
 /** A generic point cloud can have multiples features:
 	- colors (RGB)
 	- normals (compressed)
-	- an octree strucutre
+	- an octree structure
 	- visibility information per point (to hide/display subsets of points)
 **/
 class QCC_DB_LIB_API ccGenericPointCloud : public ccShiftedObject,  public CCCoreLib::GenericIndexedCloudPersist
@@ -90,7 +90,7 @@ public:
 	***************************************************/
 
 	//! Clears the entity from all its points and features
-	/** Display parameters are also reseted to their default values.
+	/** Display parameters are also reset to their default values.
 	**/
 	virtual void clear();
 
@@ -102,7 +102,7 @@ public:
 	//! Computes the cloud octree
 	/** The octree bounding-box is automatically defined as the smallest
 		3D cube that totally encloses the cloud.
-		WARNING: any previously attached octree will be deleted,
+		\warning any previously attached octree will be deleted,
 				 even if the new octree computation failed.
 		\param progressCb the caller can get some notification of the process progress through this callback mechanism (see CCCoreLib documentation)
 		\param autoAddChild whether to automatically add the computed octree as child of this cloud or not
@@ -128,35 +128,35 @@ public:
 	//! Returns color corresponding to a given scalar value
 	/** The returned value depends on the current scalar field display parameters.
 		It may even be 0 if the value shouldn't be displayed.
-		WARNING: scalar field must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
+		\warning scalar field must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
 	**/
 	virtual const ccColor::Rgb* geScalarValueColor(ScalarType d) const = 0;
 
 	//! Returns color corresponding to a given point associated scalar value
 	/** The returned value depends on the current scalar field display parameters.
 		It may even be 0 if the value shouldn't be displayed.
-		WARNING: scalar field must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
+		\warning scalar field must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
 	**/
 	virtual const ccColor::Rgb* getPointScalarValueColor(unsigned pointIndex) const = 0;
 
 	//! Returns scalar value associated to a given point
 	/** The returned value is taken from the current displayed scalar field
-		WARNING: scalar field must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
+		\warning scalar field must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
 	**/
 	virtual ScalarType getPointDisplayedDistance(unsigned pointIndex) const = 0;
 
 	//! Returns color corresponding to a given point
-	/** WARNING: color array must be enabled! (see ccDrawableObject::hasColors)
+	/** \warning color array must be enabled! (see ccDrawableObject::hasColors)
 	**/
 	virtual const ccColor::Rgba& getPointColor(unsigned pointIndex) const = 0;
 
 	//! Returns compressed normal corresponding to a given point
-	/** WARNING: normals array must be enabled! (see ccDrawableObject::hasNormals)
+	/** \warning normals array must be enabled! (see ccDrawableObject::hasNormals)
 	**/
 	virtual const CompressedNormType& getPointNormalIndex(unsigned pointIndex) const = 0;
 
 	//! Returns normal corresponding to a given point
-	/** WARNING: normals array must be enabled! (see ccDrawableObject::hasNormals)
+	/** \warning normals array must be enabled! (see ccDrawableObject::hasNormals)
 	**/
 	virtual const CCVector3& getPointNormal(unsigned pointIndex) const = 0;
 
@@ -170,28 +170,28 @@ public:
 	**/
 	using VisibilityTableType = std::vector<unsigned char>;
 	
-	//! Returns associated visiblity array
+	//! Returns associated visibility array
 	virtual inline VisibilityTableType& getTheVisibilityArray() { return m_pointsVisibility; }
 
-	//! Returns associated visiblity array (const version)
+	//! Returns associated visibility array (const version)
 	virtual inline const VisibilityTableType& getTheVisibilityArray() const { return m_pointsVisibility; }
 
-	//! Returns a ReferenceCloud equivalent to the visiblity array
+	//! Returns a ReferenceCloud equivalent to the visibility array
 	/** \param visTable visibility table (optional, otherwise the cloud's default one will be used)
 		\param silent don't issue warnings if no visible point is present
 		\return the visible points as a ReferenceCloud
 	**/
 	virtual CCCoreLib::ReferenceCloud* getTheVisiblePoints(const VisibilityTableType* visTable = nullptr, bool silent = false) const;
 	
-	//! Returns whether the visiblity array is allocated or not
+	//! Returns whether the visibility array is allocated or not
 	virtual bool isVisibilityTableInstantiated() const;
 
-	//! Resets the associated visiblity array
+	//! Resets the associated visibility array
 	/** Warning: allocates the array if it was not done yet!
 	**/
 	virtual bool resetVisibilityArray();
 
-	//! Inverts the visiblity array
+	//! Inverts the visibility array
 	virtual void invertVisibilityArray();
 
 	//! Erases the points visibility information
@@ -219,16 +219,16 @@ public:
 	//! Applies a rigid transformation (rotation + translation)
 	virtual void applyRigidTransformation(const ccGLMatrix& trans) = 0;
 
-	//! Crops the cloud inside (or outside) a boundig box
+	//! Crops the cloud inside (or outside) a bounding box
 	/** \warning Always returns a selection (potentially empty) if successful.
-		\param box croping box
+		\param box cropping box
 		\param inside whether selected points are inside or outside the box
 		\return points falling inside (or outside) as a selection
 	**/
 	virtual CCCoreLib::ReferenceCloud* crop(const ccBBox& box, bool inside = true) = 0;
 
 	//! Multiplies all coordinates by constant factors (one per dimension)
-	/** WARNING: attached octree may be deleted.
+	/** \warning attached octree may be deleted.
 		\param fx multiplication factor along the X dimension
 		\param fy multiplication factor along the Y dimension
 		\param fz multiplication factor along the Z dimension

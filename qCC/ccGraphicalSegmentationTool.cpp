@@ -77,13 +77,13 @@ ccGraphicalSegmentationTool::ccGraphicalSegmentationTool(QWidget* parent)
 	connect(actionExportSegmentationPolyline,	&QAction::triggered,	this,	&ccGraphicalSegmentationTool::doExportSegmentationPolyline);
 
 	//add shortcuts
-	addOverridenShortcut(Qt::Key_Space);  //space bar for the "pause" button
-	addOverridenShortcut(Qt::Key_Escape); //escape key for the "cancel" button
-	addOverridenShortcut(Qt::Key_Return); //return key for the "apply" button
-	addOverridenShortcut(Qt::Key_Delete); //delete key for the "apply and delete" button
-	addOverridenShortcut(Qt::Key_Tab);    //tab key to switch between rectangular and polygonal selection modes
-	addOverridenShortcut(Qt::Key_I);      //'I' key for the "segment in" button
-	addOverridenShortcut(Qt::Key_O);      //'O' key for the "segment out" button
+	addOverriddenShortcut(Qt::Key_Space);  //space bar for the "pause" button
+	addOverriddenShortcut(Qt::Key_Escape); //escape key for the "cancel" button
+	addOverriddenShortcut(Qt::Key_Return); //return key for the "apply" button
+	addOverriddenShortcut(Qt::Key_Delete); //delete key for the "apply and delete" button
+	addOverriddenShortcut(Qt::Key_Tab);    //tab key to switch between rectangular and polygonal selection modes
+	addOverriddenShortcut(Qt::Key_I);      //'I' key for the "segment in" button
+	addOverriddenShortcut(Qt::Key_O);      //'O' key for the "segment out" button
 	connect(this, &ccOverlayDialog::shortcutTriggered, this, &ccGraphicalSegmentationTool::onShortcutTriggered);
 
 	QMenu* selectionModeMenu = new QMenu(this);

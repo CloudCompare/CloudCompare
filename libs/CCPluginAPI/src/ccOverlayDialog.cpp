@@ -125,7 +125,7 @@ void ccOverlayDialog::reject()
 	stop(false);
 }
 
-void ccOverlayDialog::addOverridenShortcut(Qt::Key key)
+void ccOverlayDialog::addOverriddenShortcut(Qt::Key key)
 {
 	m_overriddenKeys.push_back(key);
 }

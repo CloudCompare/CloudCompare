@@ -39,13 +39,13 @@ class ccSerializableObject
 {
 public:
 
-	//! Desctructor
+	//! Destructor
 	virtual ~ccSerializableObject() = default;
 
 	//! Returns whether object is serializable of not
 	virtual bool isSerializable() const { return false; }
 
-	//! Saves data to binay stream
+	//! Saves data to binary stream
 	/** \param out output file (already opened)
 		\return success
 	**/
@@ -59,10 +59,10 @@ public:
 		DF_SCALAR_VAL_32_BITS	= 2, /**< Scalar values are stored as 32 bits floats (otherwise 64 bits double) **/
 	};
 
-	//! Map of loaded uniqie IDs (old ID --> new ID)
+	//! Map of loaded unique IDs (old ID --> new ID)
 	typedef QMultiMap<unsigned, unsigned> LoadedIDMap;
 
-	//! Loads data from binay stream
+	//! Loads data from binary stream
 	/** \param in input file (already opened)
 		\param dataVersion file version
 		\param flags deserialization flags (see ccSerializableObject::DeserializationFlags)
@@ -276,7 +276,7 @@ public:
 			}
 
 			//array data (dataVersion>=20)
-			//--> saldy we can't read it as a block...
+			//--> sadly we can't read it as a block...
 			//we must convert each element, value by value!
 			FileComponentType dummyArray[N] = { 0 };
 

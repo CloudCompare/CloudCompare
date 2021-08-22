@@ -25,7 +25,7 @@
 #include <QMap>
 
 /**  Provides new objects with an external factory
-  *  This is intendend to be used into plugins.
+  *  This is intended to be used into plugins.
   *  Each plugin may define a new factory by subclassing this class.
   *  Factories are then stored in a unique container and used to load custom types.
  **/
@@ -54,10 +54,10 @@ public:
 		//! Shared pointer type
 		typedef QSharedPointer<Container> Shared;
 
-		//! Returns the unqiue static instance of the external factories container
+		//! Returns the unique static instance of the external factories container
 		static Container::Shared GetUniqueInstance();
 
-		//! Sets the unqiue static instance of the external factories container
+		//! Sets the unique static instance of the external factories container
 		/** A default static instance is provided for convenience but another user defined instance
 			can be declared here instead.
 		**/

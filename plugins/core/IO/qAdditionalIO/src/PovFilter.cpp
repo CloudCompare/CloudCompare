@@ -333,7 +333,7 @@ CC_FILE_ERROR PovFilter::loadFile(const QString& filename, ccHObject& container,
 				else
 				{
 					entities->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD);
-					entities->detatchAllChildren();
+					entities->detachAllChildren();
 					delete entities;
 				}
 				entities = nullptr;

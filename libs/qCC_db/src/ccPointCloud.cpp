@@ -709,7 +709,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				//assert(hasFWF()); //DGM: new waveforms are not pushed yet, so there might not be any in the cloud at the moment!
 				size_t lostWaveformCount = 0;
 
-				//map from old descritpor IDs to new ones
+				//map from old descriptor IDs to new ones
 				QMap<uint8_t, uint8_t> descriptorIDMap;
 
 				//first: copy the wave descriptors
@@ -961,7 +961,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 		m_grids.resize(0);
 	}
 
-	//has the cloud been recentered/rescaled?
+	//has the cloud been re-centered/rescaled?
 	{
 		if (addedCloud->isShifted())
 		{
@@ -1818,8 +1818,8 @@ bool ccPointCloud::setRGBColorByHeight(unsigned char heightDim, ccColorScale::Sh
 	for (unsigned i = 0; i < count; i++)
 	{
 		const CCVector3* Q = getPoint(i);
-		double realtivePos = (Q->u[heightDim] - minHeight) / height;
-		const ccColor::Rgb* col = colorScale->getColorByRelativePos(realtivePos);
+		double relativePos = (Q->u[heightDim] - minHeight) / height;
+		const ccColor::Rgb* col = colorScale->getColorByRelativePos(relativePos);
 		if (!col) //DGM: yes it happens if we encounter a point with NaN coordinates!!!
 		{
 			col = &ccColor::blackRGB;
@@ -2159,7 +2159,7 @@ void ccPointCloud::swapPoints(unsigned firstIndex, unsigned secondIndex)
 void ccPointCloud::getDrawingParameters(glDrawParams& params) const
 {
 	//color override
-	if (isColorOverriden())
+	if (isColorOverridden())
 	{
 		params.showColors	= true;
 		params.showNorms	= false;
@@ -2623,7 +2623,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 								//get the current viewport and OpenGL matrices
 								ccGLCameraParameters camera;
 								context.display->getGLCameraParameters(camera);
-								//relpace the viewport and matrices by the real ones
+								//replace the viewport and matrices by the real ones
 								glFunc->glGetIntegerv(GL_VIEWPORT, camera.viewport);
 								glFunc->glGetDoublev(GL_PROJECTION_MATRIX, camera.projectionMat.data());
 								glFunc->glGetDoublev(GL_MODELVIEW_MATRIX, camera.modelViewMat.data());
@@ -2691,7 +2691,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glFunc->glEnable(GL_BLEND);
 		}
 
-		if (glParams.showColors && isColorOverriden())
+		if (glParams.showColors && isColorOverridden())
 		{
 			ccGL::Color4v(glFunc, m_tempColor.rgba);
 			glParams.showColors = false;
@@ -2815,7 +2815,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 				if (colorRampShader)
 				{
-					//max available space for frament's shader uniforms
+					//max available space for fragment's shader uniforms
 					GLint maxBytes = 0;
 					glFunc->glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS, &maxBytes);
 					GLint maxComponents = (maxBytes >> 2) - 4; //leave space for the other uniforms!
@@ -3472,7 +3472,7 @@ QSharedPointer<CCCoreLib::ReferenceCloud> ccPointCloud::computeCPSet(	ccGenericP
 		params.octreeLevel = octreeLevel;
 	}
 
-	//create temporary SF for the nearest neighors determination (computeCloud2CloudDistances)
+	//create temporary SF for the nearest neighbors determination (computeCloud2CloudDistances)
 	//so that we can properly remove it afterwards!
 	static const char s_defaultTempSFName[] = "CPSetComputationTempSF";
 	int sfIdx = getScalarFieldIndexByName(s_defaultTempSFName);
@@ -4797,7 +4797,7 @@ static bool CatchGLErrors(GLenum err, const char* context)
 
 bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams& glParams)
 {
-	if (isColorOverriden())
+	if (isColorOverridden())
 	{
 		//nothing to do (we don't display true colors, SF or normals!)
 		return false;

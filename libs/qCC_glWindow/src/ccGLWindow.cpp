@@ -372,7 +372,7 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=0*/,
 	, m_pivotSymbolShown(false)
 	, m_allowRectangularEntityPicking(true)
 	, m_rectPickingPoly(nullptr)
-	, m_overridenDisplayParametersEnabled(false)
+	, m_overriddenDisplayParametersEnabled(false)
 	, m_displayOverlayEntities(true)
 	, m_silentInitialization(silentInitialization)
 	, m_bubbleViewModeEnabled(false)
@@ -659,19 +659,19 @@ void ccGLWindow::setInteractionMode(INTERACTION_FLAGS flags)
 
 const ccGui::ParamStruct& ccGLWindow::getDisplayParameters() const
 {
-	return m_overridenDisplayParametersEnabled ? m_overridenDisplayParameters : ccGui::Parameters();
+	return m_overriddenDisplayParametersEnabled ? m_overriddenDisplayParameters : ccGui::Parameters();
 }
 
 void ccGLWindow::setDisplayParameters(const ccGui::ParamStruct &params, bool thisWindowOnly)
 {
 	if (thisWindowOnly)
 	{
-		m_overridenDisplayParametersEnabled = true;
-		m_overridenDisplayParameters = params;
+		m_overriddenDisplayParametersEnabled = true;
+		m_overriddenDisplayParameters = params;
 	}
 	else
 	{
-		m_overridenDisplayParametersEnabled = false;
+		m_overriddenDisplayParametersEnabled = false;
 		ccGui::Set(params);
 	}
 }
@@ -977,7 +977,7 @@ bool ccGLWindow::initialize()
 #endif
 
 		//apply (potentially) updated parameters;
-		setDisplayParameters(params, hasOverridenDisplayParameters());
+		setDisplayParameters(params, hasOverriddenDisplayParameters());
 
 #if 0
 		//OpenGL 3.3+ rendering shader
@@ -1002,7 +1002,7 @@ bool ccGLWindow::initialize()
 				{
 					m_customRenderingShader = renderingShader;
 				}
-				setDisplayParameters(params,hasOverridenDisplayParameters());
+				setDisplayParameters(params,hasOverriddenDisplayParameters());
 			}
 		}
 #endif

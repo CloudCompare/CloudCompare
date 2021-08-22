@@ -473,7 +473,7 @@ void ccHObject::transferChildren(ccHObject& newParent, bool forceFatherDependent
 		int childDependencyFlags = child->getDependencyFlagsWith(this);
 		int fatherDependencyFlags = getDependencyFlagsWith(child);
 	
-		//we must explicitely remove any dependency with the child as we don't call 'detachChild'
+		//we must explicitly remove any dependency with the child as we don't call 'detachChild'
 		removeDependencyWith(child);
 		child->removeDependencyWith(this);
 
@@ -777,7 +777,7 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 	{
 		if (MACRO_Draw3D(context))
 		{
-			//we have to comute the 2D position during the 3D pass!
+			//we have to compute the 2D position during the 3D pass!
 			ccBBox bBox = getBB_recursive(true); //DGM: take the OpenGL features into account (as some entities are purely 'GL'!)
 			if (bBox.isValid())
 			{
@@ -892,7 +892,7 @@ void ccHObject::detachChild(ccHObject* child)
 	}
 }
 
-void ccHObject::detatchAllChildren()
+void ccHObject::detachAllChildren()
 {
 	for (auto child : m_children)
 	{
@@ -1059,19 +1059,19 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& o
 		//create corresponding child object
 		ccHObject* child = New(classID);
 
-		//specifc case of custom objects (defined by plugins)
+		//specific case of custom objects (defined by plugins)
 		if ((classID & CC_TYPES::CUSTOM_H_OBJECT) == CC_TYPES::CUSTOM_H_OBJECT)
 		{
 			//store current position
 			size_t originalFilePos = in.pos();
-			//we need to load the custom object as plain ccCustomHobject
+			//we need to load the custom object as plain ccCustomHObject
 			child->fromFileNoChildren(in, dataVersion, flags, oldToNewIDMap);
 			//go back to original position
 			in.seek(originalFilePos);
 			//get custom object name and plugin name
 			QString childName = child->getName();
-			QString classId = child->getMetaData(ccCustomHObject::DefautMetaDataClassName()).toString();
-			QString pluginId = child->getMetaData(ccCustomHObject::DefautMetaDataPluginName()).toString();
+			QString classId = child->getMetaData(ccCustomHObject::DefaultMetaDataClassName()).toString();
+			QString pluginId = child->getMetaData(ccCustomHObject::DefaultMetaDataPluginName()).toString();
 			//dont' need this instance anymore
 			delete child;
 			child = nullptr;
@@ -1168,10 +1168,10 @@ bool ccHObject::toFile_MeOnly(QFile& out) const
 	//'sfDisplayed' state (dataVersion>=20)
 	if (out.write(reinterpret_cast<const char*>(&m_sfDisplayed), sizeof(bool)) < 0)
 		return WriteError();
-	//'colorIsOverriden' state (dataVersion>=20)
-	if (out.write(reinterpret_cast<const char*>(&m_colorIsOverriden), sizeof(bool)) < 0)
+	//'colorIsOverridden' state (dataVersion>=20)
+	if (out.write(reinterpret_cast<const char*>(&m_colorIsOverridden), sizeof(bool)) < 0)
 		return WriteError();
-	if (m_colorIsOverriden)
+	if (m_colorIsOverridden)
 	{
 		//'tempColor' (dataVersion>=20)
 		if (out.write(reinterpret_cast<const char*>(m_tempColor.rgba), sizeof(ColorCompType)*3) < 0) //TODO: save the alpha channel?
@@ -1218,10 +1218,10 @@ bool ccHObject::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 	//'sfDisplayed' state (dataVersion>=20)
 	if (in.read(reinterpret_cast<char*>(&m_sfDisplayed), sizeof(bool)) < 0)
 		return ReadError();
-	//'colorIsOverriden' state (dataVersion>=20)
-	if (in.read(reinterpret_cast<char*>(&m_colorIsOverriden), sizeof(bool)) < 0)
+	//'colorIsOverridden' state (dataVersion>=20)
+	if (in.read(reinterpret_cast<char*>(&m_colorIsOverridden), sizeof(bool)) < 0)
 		return ReadError();
-	if (m_colorIsOverriden)
+	if (m_colorIsOverridden)
 	{
 		//'tempColor' (dataVersion>=20)
 		if (in.read(reinterpret_cast<char*>(m_tempColor.rgba), sizeof(ColorCompType)*3) < 0)

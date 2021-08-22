@@ -288,7 +288,7 @@ public: //coordinate systems conversion methods
 
 	//! Apply the Brown's lens correction to the real projection (through a lens) of a 3D point in the image
 	/**	\warning Only works with Brown's distortion model for now (see BrownDistortionParameters).
-		\param real real 2D coordinates of a pixel (asumming that this pixel coordinate is obtained after projection through a lens) (input) !! Note that the first index is (0,0) and the last (width-1,height-1) !!
+		\param real real 2D coordinates of a pixel (assuming that this pixel coordinate is obtained after projection through a lens) (input) !! Note that the first index is (0,0) and the last (width-1,height-1) !!
 		\param ideal after applying lens correction (output) --> !! Note that the first index is (0,0) and the last (width-1,height-1) !!
 	**/
 	bool fromRealImCoordToIdealImCoord(const CCVector2& real, CCVector2& ideal) const;
@@ -460,7 +460,7 @@ public: //misc
 
 	//! Compute the coefficients of the 6 planes frustum in the global coordinates system (normal vector are headed the frustum inside), the edges direction vectors and the frustum center
 	/** \param planeCoefficients coefficients of the six planes
-		\param edges direction vectors of the frustum edges (there are 12 edges but some of them are colinear)
+		\param edges direction vectors of the frustum edges (there are 12 edges but some of them are collinear)
 		\param ptsFrustum the 8 frustum corners in the global coordinates system
 		\param center center of the the frustum circumscribed sphere
 		\return success
@@ -554,7 +554,7 @@ public:
 		return CELL_OUTSIDE_FRUSTUM;
 	}
 
-	//! Compute intersection between the octree and a frustum and send back the indices of 3D points inside the frustum or in cells interescting it.
+	//! Compute intersection between the octree and a frustum and send back the indices of 3D points inside the frustum or in cells intersecting it.
 	/** Every cells of each level of the octree will be classified as INSIDE, OUTSIDE or INTERSECTING the frustum.
 		Their truncated code are then stored in m_cellsInFrustum (for cells INSIDE) or m_cellsIntersectFrustum (for
 		cells INTERSECTING).

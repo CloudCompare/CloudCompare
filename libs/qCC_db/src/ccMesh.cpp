@@ -997,7 +997,7 @@ ccMesh* ccMesh::TriangulateTwoPolylines(ccPolyline* p1, ccPolyline* p2, CCVector
 
 	delaunayMesh->linkMeshWith(vertices, false);
 
-	//remove the points oustide of the 'concave' hull
+	//remove the points outside of the 'concave' hull
 	{
 		//first compute the Convex hull
 		std::vector<CCCoreLib::PointProjectionTools::IndexedCCVector2> indexedPoints2D;
@@ -1777,7 +1777,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		RGBAColorsTableType* rgbaColorsTable = nullptr;
 		if (glParams.showColors)
 		{
-			if (isColorOverriden())
+			if (isColorOverridden())
 			{
 				ccGL::Color4v(glFunc, m_tempColor.rgba);
 				glParams.showColors = false;
@@ -3112,7 +3112,7 @@ void ccMesh::computeInterpolationWeights(const CCCoreLib::VerticesIndexes& vertI
 	const CCVector3 *B = m_associatedCloud->getPoint(vertIndexes.i2);
 	const CCVector3 *C = m_associatedCloud->getPoint(vertIndexes.i3);
 
-	//barcyentric intepolation weights
+	//barycentric interpolation weights
 	weights.x = sqrt(((P - *B).cross(*C - *B)).norm2d())/*/2*/;
 	weights.y = sqrt(((P - *C).cross(*A - *C)).norm2d())/*/2*/;
 	weights.z = sqrt(((P - *A).cross(*B - *A)).norm2d())/*/2*/;
@@ -3131,7 +3131,7 @@ bool ccMesh::interpolateNormals(unsigned triIndex, const CCVector3& P, CCVector3
 
 	const CCCoreLib::VerticesIndexes& tri = m_triVertIndexes->getValue(triIndex);
 
-	//intepolation weights
+	//interpolation weights
 	CCVector3d w;
 	computeInterpolationWeights(tri, P, w);
 
@@ -3188,7 +3188,7 @@ bool ccMesh::interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::R
 
 	const CCCoreLib::VerticesIndexes& tri = m_triVertIndexes->getValue(triIndex);
 
-	//intepolation weights
+	//interpolation weights
 	CCVector3d w;
 	computeInterpolationWeights(tri, P, w);
 
@@ -3204,7 +3204,7 @@ bool ccMesh::interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::R
 
 	const CCCoreLib::VerticesIndexes& tri = m_triVertIndexes->getValue(triIndex);
 
-	//intepolation weights
+	//interpolation weights
 	CCVector3d w;
 	computeInterpolationWeights(tri, P, w);
 
@@ -3370,7 +3370,7 @@ bool ccMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor
 	const TexCoords2D* T2 = (txInd.u[1] >= 0 ? &m_texCoords->getValue(txInd.u[1]) : nullptr);
 	const TexCoords2D* T3 = (txInd.u[2] >= 0 ? &m_texCoords->getValue(txInd.u[2]) : nullptr);
 
-	//intepolation weights
+	//interpolation weights
 	CCVector3d w;
 	computeInterpolationWeights(triIndex, P, w);
 
@@ -3470,7 +3470,7 @@ bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, uns
 	const CCVector3* B = vertices->getPoint(indexB);
 	const CCVector3* C = vertices->getPoint(indexC);
 
-	//do we need to sudivide this triangle?
+	//do we need to subdivide this triangle?
 	PointCoordinateType area = ((*B - *A)*(*C - *A)).norm() / 2;
 	if (area > s_maxSubdivideArea/*maxArea*/)
 	{
@@ -3741,7 +3741,7 @@ ccMesh* ccMesh::subdivide(PointCoordinateType maxArea) const
 				tri.i1 = indexes[i1];
 				tri.i2 = indexG;
 				tri.i3 = indexes[(i1 + 2) % 3];
-				//and add the other half (we can use pushSubdivide as the area should alredy be ok!)
+				//and add the other half (we can use pushSubdivide as the area should already be ok!)
 				if (!resultMesh->pushSubdivide(/*maxArea,*/indexes[i1], indexes[(i1 + 1) % 3], indexG))
 				{
 					ccLog::Error("[ccMesh::subdivide] Not enough memory!");
@@ -3803,7 +3803,7 @@ ccMesh* ccMesh::subdivide(PointCoordinateType maxArea) const
 				tri.i1 = indexA;
 				tri.i2 = indexG1;
 				tri.i3 = indexG3;
-				//and add the other 3 quarters (we can use pushSubdivide as the area should alredy be ok!)
+				//and add the other 3 quarters (we can use pushSubdivide as the area should already be ok!)
 				if (!resultMesh->pushSubdivide(/*maxArea, */indexB, indexG2, indexG1) ||
 					!resultMesh->pushSubdivide(/*maxArea, */indexC, indexG3, indexG2) ||
 					!resultMesh->pushSubdivide(/*maxArea, */indexG1, indexG2, indexG3))

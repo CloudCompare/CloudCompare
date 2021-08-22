@@ -73,7 +73,7 @@ public:
 	void setPositions(ccIndexedTransformationBuffer* positions)  { m_posBuffer = positions; }
 
 	//! Adds a new position (shortcut)
-	/** \warning: may be slow as this method may sort the positions
+	/** \warning may be slow as this method may sort the positions
 		after each call (if the new index is lower than the last one pushed)
 	**/
 	bool addPosition(ccGLMatrix& trans, double index);

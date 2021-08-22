@@ -192,9 +192,9 @@ ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
 	setAutoFillBackground(true);
 
 	//add shortcuts
-	addOverridenShortcut(Qt::Key_Escape); //escape key for the "cancel" button
-	addOverridenShortcut(Qt::Key_Return); //return key for the "apply" button
-	addOverridenShortcut(Qt::Key_Space); //space key also hits the "apply" button (easier for some)
+	addOverriddenShortcut(Qt::Key_Escape); //escape key for the "cancel" button
+	addOverriddenShortcut(Qt::Key_Return); //return key for the "apply" button
+	addOverriddenShortcut(Qt::Key_Space); //space key also hits the "apply" button (easier for some)
 	
 	connect(this, &ccOverlayDialog::shortcutTriggered, this, &ccCompassDlg::onShortcutTriggered);
 }

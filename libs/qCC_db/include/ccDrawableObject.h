@@ -58,9 +58,9 @@ public:  //drawing and drawing options
 	//! Toggles visibility
 	inline virtual void toggleVisibility() { setVisible(!isVisible()); }
 
-	//! Returns whether visibilty is locked or not
-	inline virtual bool isVisiblityLocked() const { return m_lockedVisibility; }
-	//! Locks/unlocks visibilty
+	//! Returns whether visibility is locked or not
+	inline virtual bool isVisibilityLocked() const { return m_lockedVisibility; }
+	//! Locks/unlocks visibility
 	/** If visibility is locked, the user won't be able to modify it
 		(via the properties tree for instance).
 	**/
@@ -72,7 +72,7 @@ public:  //drawing and drawing options
 	inline virtual void setSelected(bool state) { m_selected = state; }
 
 	//! Returns main OpenGL parameters for this entity
-	/** These parameters are deduced from the visiblity states
+	/** These parameters are deduced from the visibility states
 		of its different features (points, normals, etc.).
 		\param params a glDrawParams structure
 	**/
@@ -102,7 +102,7 @@ public: //scalar fields
 	inline virtual bool hasDisplayedScalarField() const { return false; }
 
 	//! Returns whether one or more scalar fields are instantiated
-	/** WARNING: doesn't mean a scalar field is currently displayed
+	/** \warning doesn't mean a scalar field is currently displayed
 		(see ccDrawableObject::hasDisplayedScalarField).
 	**/
 	inline virtual bool hasScalarFields() const  { return false; }
@@ -137,7 +137,7 @@ public: //Temporary color
 	//! Returns whether colors are currently overridden by a temporary (unique) color
 	/** See ccDrawableObject::setTempColor.
 	**/
-	inline virtual bool isColorOverriden() const { return m_colorIsOverriden; }
+	inline virtual bool isColorOverridden() const { return m_colorIsOverridden; }
 
 	//! Returns current temporary (unique) color
 	inline virtual const ccColor::Rgba& getTempColor() const { return m_tempColor; }
@@ -155,7 +155,7 @@ public: //Temporary color
 	virtual void setTempColor(const ccColor::Rgb& col, bool autoActivate = true);
 
 	//! Set temporary color activation state
-	inline virtual void enableTempColor(bool state) { m_colorIsOverriden = state; }
+	inline virtual void enableTempColor(bool state) { m_colorIsOverridden = state; }
 
 public: //associated display management
 
@@ -217,7 +217,7 @@ public: //Transformation matrix management (for display only)
 	**/
 	virtual void resetGLTransformation();
 
-	//! Mutliplies (left) current GL transformation by a rotation matrix
+	//! Multiplies (left) current GL transformation by a rotation matrix
 	/** 'GLtrans = M * GLtrans'
 		Note: GL transformation is automatically enabled.
 		See ccDrawableObject::setGLTransformation.
@@ -269,7 +269,7 @@ protected: //members
 	//! Temporary (unique) color
 	ccColor::Rgba m_tempColor;
 	//! Temporary (unique) color activation state
-	bool m_colorIsOverriden;
+	bool m_colorIsOverridden;
 
 	//! Current GL transformation
 	/** See ccDrawableObject::setGLTransformation.

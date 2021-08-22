@@ -57,7 +57,7 @@ const unsigned CC_MAX_NUMBER_OF_POINTS_PER_CLOUD = 2000000000; //we must keep it
 	- colors (RGB)
 	- normals (compressed)
 	- scalar fields
-	- an octree strucutre
+	- an octree structure
 	- per-point visibility information (to hide/display subsets of points)
 	- other children objects (meshes, calibrated pictures, etc.)
 **/
@@ -68,7 +68,7 @@ public:
 	using BaseClass = CCCoreLib::PointCloudTpl<ccGenericPointCloud, QString>;
 
 	//! Default constructor
-	/** Creates an empty cloud without any feature. Each of them shoud be
+	/** Creates an empty cloud without any feature. Each of them should be
 		specifically instantiated/created (once the points have been
 		added to this cloud, at least partially).
 		\param name cloud name (optional)
@@ -144,7 +144,7 @@ public: //clone, copy, etc.
 public: //features deletion/clearing
 
 	//! Clears the entity from all its points and features
-	/** Display parameters are also reseted to their default values.
+	/** Display parameters are also reset to their default values.
 	**/
 	void clear() override;
 
@@ -184,18 +184,18 @@ public: //features allocation/resize
 		be sure to reserve the necessary amount of memory
 		with this method. This method reserves memory for as
 		many colors as the number of points in the cloud
-		(effictively stored or reserved).
+		(effectively stored or reserved).
 		\return true if ok, false if there's not enough memory
 	**/
 	bool reserveTheRGBTable();
 
 	//! Resizes the RGB colors array
 	/** If possible, the colors array is resized to fit exactly the number
-		of points in the cloud (effictively stored or reserved). If the
+		of points in the cloud (effectively stored or reserved). If the
 		new size is inferior to the actual one, the last elements will be
 		deleted. Otherwise, the array is filled with zeros (default behavior)
 		or "white" colors (is fillWithWhite).
-		WARNING: don't try to "add" any element on a resized array...
+		\warning don't try to "add" any element on a resized array...
 		\param fillWithWhite whether to fill new array elements with zeros (false) or white color (true)
 		\return true if ok, false if there's not enough memory
 	**/
@@ -206,17 +206,17 @@ public: //features allocation/resize
 		be sure to reserve the necessary amount of memory
 		with this method. This method reserves memory for as
 		many normals as the number of points in the cloud
-		(effictively stored or reserved).
+		(effectively stored or reserved).
 		\return true if ok, false if there's not enough memory
 	**/
 	bool reserveTheNormsTable();
 
 	//! Resizes the compressed normals array
 	/** If possible, the normals array is resized to fit exactly the number
-		of points in the cloud (effictively stored or reserved). If the
+		of points in the cloud (effectively stored or reserved). If the
 		new size is inferior to the actual one, the last elements will be
 		deleted. Otherwise, the array is filled with blank elements.
-		WARNING: don't try to "add" any element on a resized array...
+		\warning don't try to "add" any element on a resized array...
 		\return true if ok, false if there's not enough memory
 	**/
 	bool resizeTheNormsTable();
@@ -230,7 +230,7 @@ public: //features allocation/resize
 
 	//! Resizes all the active features arrays
 	/** This method is meant to be called after having increased the cloud
-		population (if the final number of insterted point is lower than the
+		population (if the final number of inserted point is lower than the
 		reserved size). Otherwise, it fills all new elements with blank values.
 		\return true if ok, false if there's not enough memory
 	**/
@@ -340,7 +340,7 @@ public: //associated (scan) grid structure
 	size_t gridCount() const { return m_grids.size(); }
 	//! Returns an associated grid
 	inline Grid::Shared& grid(size_t gridIndex) { return m_grids[gridIndex]; }
-	//! Returns an associated grid (const verson)
+	//! Returns an associated grid (const version)
 	inline const Grid::Shared& grid(size_t gridIndex) const { return m_grids[gridIndex]; }
 	//! Adds an associated grid
 	inline bool addGrid(Grid::Shared grid) { try{ m_grids.push_back(grid); } catch (const std::bad_alloc&) { return false; } return true; }
@@ -493,22 +493,22 @@ public: //other methods
 								unsigned char octreeLevel = 0);
 
 	//! Sets a particular point color
-	/** WARNING: colors must be enabled.
+	/** \warning colors must be enabled.
 	**/
 	void setPointColor(unsigned pointIndex, const ccColor::Rgba& col);
 
 	//! Sets a particular point color
-	/** WARNING: colors must be enabled.
+	/** \warning colors must be enabled.
 	**/
 	inline void setPointColor(unsigned pointIndex, const ccColor::Rgb& col) { setPointColor(pointIndex, ccColor::Rgba(col, ccColor::MAX)); }
 
 	//! Sets a particular point compressed normal
-	/** WARNING: normals must be enabled.
+	/** \warning normals must be enabled.
 	**/
 	void setPointNormalIndex(unsigned pointIndex, CompressedNormType norm);
 
 	//! Sets a particular point normal (shortcut)
-	/** WARNING: normals must be enabled.
+	/** \warning normals must be enabled.
 		Normal is automatically compressed before storage.
 	**/
 	void setPointNormal(unsigned pointIndex, const CCVector3& N);
@@ -560,8 +560,9 @@ public: //other methods
 
 	//! Pushes an RGB color on stack (shortcut)
 	/** \param r red component
-		\param g green component
-		\param b blue component
+	    \param g green component
+	    \param b blue component
+	    \param a alpha component
 	**/
 	inline void addColor(ColorCompType r, ColorCompType g, ColorCompType b, ColorCompType a = ccColor::MAX) { addColor(ccColor::Rgba(r, g, b, a)); }
 
@@ -587,7 +588,7 @@ public: //other methods
 	**/
 	bool colorize(float r, float g, float b, float a = 1.0f);
 
-	//! Assigns color to points proportionnaly to their 'height'
+	//! Assigns color to points proportionally to their 'height'
 	/** Height is defined wrt to the specified dimension (heightDim).
 		Color array is automatically allocated if necessary.
 		\param heightDim ramp dimension (0:X, 1:Y, 2:Z)
@@ -711,7 +712,7 @@ public: //other methods
 
 	//! Crops the cloud inside (or outside) a 2D polyline
 	/** \warning Always returns a selection (potentially empty) if successful.
-		\param poly croping polyline
+		\param poly cropping polyline
 		\param orthoDim dimension orthogonal to the plane in which the segmentation should occur (X=0, Y=1, Z=2)
 		\param inside whether selected points are inside or outside the polyline
 		\return points falling inside (or outside) as a selection
@@ -848,7 +849,7 @@ protected: // VBO
 
 public: //Level of Detail (LOD)
 
-	//! Intializes the LOD structure
+	//! Initializes the LOD structure
 	/** \return success
 	**/
 	bool initLOD();

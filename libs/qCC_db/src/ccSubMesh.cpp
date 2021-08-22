@@ -414,7 +414,7 @@ bool ccSubMesh::addTriangleIndex(unsigned globalIndex)
 	}
 	catch (const std::bad_alloc&)
 	{
-		//not engough memory
+		//not enough memory
 		return false;
 	}
 
@@ -439,7 +439,7 @@ bool ccSubMesh::addTriangleIndex(unsigned firstIndex, unsigned lastIndex)
 	}
 	catch (const std::bad_alloc&)
 	{
-		//not engough memory
+		//not enough memory
 		return false;
 	}
 	
@@ -468,7 +468,7 @@ bool ccSubMesh::reserve(size_t n)
 	}
 	catch (const std::bad_alloc&)
 	{
-		//not engough memory
+		//not enough memory
 		return false;
 	}
 	return true;
@@ -482,7 +482,7 @@ bool ccSubMesh::resize(size_t n)
 	}
 	catch (const std::bad_alloc&)
 	{
-		//not engough memory
+		//not enough memory
 		return false;
 	}
 	return true;

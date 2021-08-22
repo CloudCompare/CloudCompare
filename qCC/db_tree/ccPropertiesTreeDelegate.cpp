@@ -428,7 +428,7 @@ void ccPropertiesTreeDelegate::fillWithHObject(ccHObject* _obj)
 	appendRow(ITEM( tr( "Name" ) ), ITEM(_obj->getName(), Qt::ItemIsEditable, OBJECT_NAME));
 
 	//visibility
-	if (!_obj->isVisiblityLocked())
+	if (!_obj->isVisibilityLocked())
 	{
 		appendRow(ITEM(tr("Visible")), CHECKABLE_ITEM(_obj->isVisible(), OBJECT_VISIBILITY));
 	}
@@ -967,7 +967,7 @@ void ccPropertiesTreeDelegate::fillWithTransBuffer(const ccIndexedTransformation
 	appendRow(ITEM( tr( "Show path" ) ), CHECKABLE_ITEM(_obj->isPathShownAsPolyline(), OBJECT_SHOW_TRANS_BUFFER_PATH));
 
 	//Show trihedrons
-	appendRow(ITEM( tr( "Show trihedrons" ) ), CHECKABLE_ITEM(_obj->triherdonsShown(), OBJECT_SHOW_TRANS_BUFFER_TRIHDERONS));
+	appendRow(ITEM( tr( "Show trihedrons" ) ), CHECKABLE_ITEM(_obj->trihedronsShown(), OBJECT_SHOW_TRANS_BUFFER_TRIHDERONS));
 
 	//Trihedrons scale
 	appendRow(ITEM( tr( "Scale" ) ), PERSISTENT_EDITOR(OBJECT_TRANS_BUFFER_TRIHDERONS_SCALE), true);
@@ -1923,7 +1923,7 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 	{
 		ccIndexedTransformationBuffer* buffer = ccHObjectCaster::ToTransBuffer(m_currentObject);
 		assert(buffer);
-		SetDoubleSpinBoxValue(editor, buffer ? buffer->triherdonsDisplayScale() : 0.0);
+		SetDoubleSpinBoxValue(editor, buffer ? buffer->trihedronsDisplayScale() : 0.0);
 		break;
 	}
 	case OBJECT_CLOUD_POINT_SIZE:
@@ -2118,7 +2118,7 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 	{
 		ccIndexedTransformationBuffer* buffer = ccHObjectCaster::ToTransBuffer(m_currentObject);
 		assert(buffer);
-		buffer->showTriherdons(item->checkState() == Qt::Checked);
+		buffer->showTrihedrons(item->checkState() == Qt::Checked);
 	}
 	redraw = true;
 	break;
@@ -2636,10 +2636,10 @@ void ccPropertiesTreeDelegate::trihedronsScaleChanged(double val)
 	ccIndexedTransformationBuffer* buffer = ccHObjectCaster::ToTransBuffer(m_currentObject);
 	assert(buffer);
 
-	if (buffer && buffer->triherdonsDisplayScale() != static_cast<float>(val))
+	if (buffer && buffer->trihedronsDisplayScale() != static_cast<float>(val))
 	{
-		buffer->setTriherdonsDisplayScale(static_cast<float>(val));
-		if (buffer->triherdonsShown())
+		buffer->setTrihedronsDisplayScale(static_cast<float>(val));
+		if (buffer->trihedronsShown())
 		{
 			updateDisplay();
 		}

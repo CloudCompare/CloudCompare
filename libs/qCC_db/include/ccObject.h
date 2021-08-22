@@ -178,7 +178,7 @@ public:
 
 	//! Default constructor
 	/** \param name object name (optional)
-		\param uniqueID unique ID (handle with care! Will be auto generated if equal to ccUniqueIDGenerator::InvalidUniqueID)
+	    \param uniqueID unique ID (handle with care! Will be auto generated if equal to ccUniqueIDGenerator::InvalidUniqueID)
 	**/
 	ccObject(const QString& name = QString(), unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID);
 
@@ -205,7 +205,7 @@ public:
 	virtual inline unsigned getUniqueID() const { return m_uniqueID; }
 
 	//! Changes unique ID
-	/** WARNING: HANDLE WITH CARE!
+	/** \warning HANDLE WITH CARE!
 		Updates persistent settings (last unique ID) if necessary.
 	**/
 	virtual void setUniqueID(unsigned ID);

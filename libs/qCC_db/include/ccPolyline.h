@@ -172,12 +172,12 @@ public: //meta-data keys
 	static QString MetaKeyAbscissa()		{ return "profile.abscissa"; }
 	//! Meta data key (prefix): intersection point between profile and its generatrix
 	/** Expected value: 3D vector
-		\warning: must be followed by '.x', '.y' or '.z'
+		\warning must be followed by '.x', '.y' or '.z'
 	**/
 	static QString MetaKeyPrefixCenter()	{ return "profile.center"; }
 	//! Meta data key (prefix): generatrix orientation at the point of intersection with the profile
 	/** Expected value: 3D vector
-		\warning: must be followed by '.x', '.y' or '.z'
+		\warning must be followed by '.x', '.y' or '.z'
 	**/
 	static QString MetaKeyPrefixDirection()	{ return "profile.direction"; }
 
@@ -196,10 +196,10 @@ protected:
 	//! Width of the line
 	PointCoordinateType m_width;
 
-	//! Whether poyline should be considered as 2D (true) or 3D (false)
+	//! Whether polyline should be considered as 2D (true) or 3D (false)
 	bool m_mode2D;
 
-	//! Whether poyline should draws itself in background (false) or foreground (true)
+	//! Whether polyline should draws itself in background (false) or foreground (true)
 	bool m_foreground;
 	
 	//! Whether vertices should be displayed or not

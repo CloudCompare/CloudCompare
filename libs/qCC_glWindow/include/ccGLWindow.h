@@ -471,7 +471,7 @@ public:
 	void setDisplayParameters(const ccGui::ParamStruct& params, bool thisWindowOnly = false);
 
 	//! Whether display parameters are overidden for this window
-	bool hasOverridenDisplayParameters() const { return m_overridenDisplayParametersEnabled; }
+	bool hasOverriddenDisplayParameters() const { return m_overriddenDisplayParametersEnabled; }
 
 	//! Default picking radius value
 	static const int DefaultPickRadius = 5;
@@ -1218,10 +1218,10 @@ protected: //members
 	ccPolyline* m_rectPickingPoly;
 
 	//! Overridden display parameter 
-	ccGui::ParamStruct m_overridenDisplayParameters;
+	ccGui::ParamStruct m_overriddenDisplayParameters;
 
 	//! Whether display parameters are overidden for this window
-	bool m_overridenDisplayParametersEnabled;
+	bool m_overriddenDisplayParametersEnabled;
 
 	//! Whether to display overlay entities or not (scale, tetrahedron, etc.)
 	bool m_displayOverlayEntities;

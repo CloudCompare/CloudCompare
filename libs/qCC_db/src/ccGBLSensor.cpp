@@ -249,7 +249,7 @@ ccGBLSensor::NormalGrid* ccGBLSensor::projectNormals(	CCCoreLib::GenericCloud* c
 		m_posBuffer->getInterpolatedTransformation(posIndex, sensorPos);
 	sensorPos *= m_rigidTransformation;
 
-	//poject each point + normal
+	//project each point + normal
 	{
 		CCVector3 sensorOrigin = sensorPos.getTranslationAsVec3D();
 
@@ -532,7 +532,7 @@ bool ccGBLSensor::computeAutoParameters(CCCoreLib::GenericCloud* theCloud)
 	PointCoordinateType maxYaw = 0;
 	PointCoordinateType maxDepth = 0;
 	{
-		//first project all points to compute the (yaw,ptich) ranges
+		//first project all points to compute the (yaw,pitch) ranges
 		theCloud->placeIteratorAtBeginning();
 		for (unsigned i = 0; i < pointCount; ++i)
 		{
@@ -632,7 +632,7 @@ bool ccGBLSensor::computeDepthBuffer(CCCoreLib::GenericCloud* theCloud, int& err
 	assert(theCloud);
 	if (!theCloud)
 	{
-		//invlalid input parameter
+		//invalid input parameter
 		errorCode = ERROR_BAD_INPUT;
 		return false;
 	}

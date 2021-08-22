@@ -534,7 +534,7 @@ class QUAZIP_EXPORT QuaZip {
      * The default codec is used by the constructors, so calling this function
      * won't affect the QuaZip instances already created at that moment.
      *
-     * The codec specified here can be overriden by calling setFileNameCodec().
+     * The codec specified here can be overridden by calling setFileNameCodec().
      * If neither function is called, QTextCodec::codecForLocale() will be used
      * to decode or encode file names. Use this function with caution if
      * the application uses other libraries that depend on QuaZIP. Those

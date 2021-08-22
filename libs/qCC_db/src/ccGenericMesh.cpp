@@ -298,7 +298,7 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		RGBAColorsTableType* rgbaColorsTable = nullptr;
 		if (glParams.showColors)
 		{
-			if (isColorOverriden())
+			if (isColorOverridden())
 			{
 				ccGL::Color4v(glFunc, m_tempColor.rgba);
 				glParams.showColors = false;
@@ -362,7 +362,7 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			}
 
 			//we can scan and process each chunk separately in an optimized way
-			//we mimic the way ccMesh beahves by using virtual chunks!
+			//we mimic the way ccMesh behaves by using virtual chunks!
 			size_t chunkCount = ccChunk::Count(displayedTriNum);
 			size_t chunkStart = 0;
 			for (size_t k = 0; k < chunkCount; ++k, chunkStart += ccChunk::SIZE)
@@ -894,7 +894,7 @@ void ccGenericMesh::computeInterpolationWeights(unsigned triIndex, const CCVecto
 	const CCVector3 *B = tri->_getB();
 	const CCVector3 *C = tri->_getC();
 
-	//barcyentric intepolation weights
+	//barycentric interpolation weights
 	weights.x = ((P-*B).cross(*C-*B)).normd()/*/2*/;
 	weights.y = ((P-*C).cross(*A-*C)).normd()/*/2*/;
 	weights.z = ((P-*A).cross(*B-*A)).normd()/*/2*/;

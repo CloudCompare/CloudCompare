@@ -31,7 +31,7 @@ public: //construction
 
 	//! Default constructor
 	/** \param name object name (optional)
-		\param uniqueID unique ID (handle with care)
+	    \param uniqueID unique ID (handle with care)
 	**/
 	ccHObject(const QString& name = QString(), unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID);
 	//! Copy constructor
@@ -41,7 +41,7 @@ public: //construction
 	~ccHObject() override;
 
 	//! Static factory
-	/** Warning: objects depending on other structures (such as meshes 
+	/** \warning Objects depending on other structures (such as meshes
 		or polylines that should be linked with point clouds playing the
 		role of vertices) are returned 'naked'.
 		\param objectType object type
@@ -181,7 +181,7 @@ public: //children management
 		want to avoid deletion).
 	**/
 	//! Detaches all children
-	void detatchAllChildren();
+	void detachAllChildren();
 
 	void removeChild(ccHObject* child);
 	//! Removes a specific child given its index
@@ -282,7 +282,7 @@ public: //display
 	//Inherited from ccDrawableObject
 	void draw(CC_DRAW_CONTEXT& context) override;
 
-	//! Returns the absolute transformation (i.e. the actual displayed GL transforamtion) of an entity
+	//! Returns the absolute transformation (i.e. the actual displayed GL transformation) of an entity
 	/** \param[out] trans absolute transformation
 		\return whether a GL transformation is actually enabled or not
 	**/
@@ -386,7 +386,7 @@ public: //display
 							 SELECTION_IGNORED };
 
 	//! Sets selection behavior (when displayed)
-	/** WARNING: SELECTION_FIT_BBOX relies on the
+	/** \warning SELECTION_FIT_BBOX relies on the
 		'ccDrawableObject::getFitBB' method (which
 		is not supported by all entities).
 	**/
@@ -395,7 +395,7 @@ public: //display
 	//! Returns selection behavior
 	virtual inline SelectionBehavior getSelectionBehavior() const { return m_selectionBehavior; }
 
-	//! Returns object unqiue ID used for display
+	//! Returns object unique ID used for display
 	virtual inline unsigned getUniqueIDForDisplay() const { return getUniqueID(); }
 
 	//! Returns the transformation 'history' matrix

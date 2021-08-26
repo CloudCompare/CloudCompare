@@ -124,8 +124,15 @@ jobs:
             .
 
       - name: Build
-        run: |
-          cmake --build build
+        run: cmake --build build --parallel
+
+      - name: Install (macOs)
+        if: matrix.config.os == 'macos-latest'
+        run: sudo cmake --install build
+
+      - name: Install (Windows)
+        if: matrix.config.os == 'windows-latest'
+        run: cmake --install build
 
   ubuntu-build:
     name: Ubuntu ${{ matrix.compiler }} SCALAR_DOUBLE=${{ matrix.scalar_double }}
@@ -217,3 +224,6 @@ jobs:
 
       - name: Test
         run: xvfb-run ctest --test-dir build
+
+      - name: Install
+        run: sudo cmake --install build

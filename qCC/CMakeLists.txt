@@ -115,13 +115,14 @@ else( UNIX )
 	endforeach()
 endif()
 
-# Translation
-add_subdirectory( translations )
 
 # Put together our Application bundle on macOS
 if( APPLE )    
     add_subdirectory( Mac )
 endif()
+
+# Translation
+add_subdirectory(translations)
 
 ## Shaders
 # Copy shader dirs into our shadow build directory

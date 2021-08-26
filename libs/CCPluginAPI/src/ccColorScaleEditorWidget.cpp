@@ -670,7 +670,7 @@ void ccColorScaleEditorWidget::setSliders(SharedColorScaleElementSliders sliders
 
 	for (int i = 0; i < sliders->size(); ++i)
 	{
-		ColorScaleElementSlider* slider = m_sliders->element(i);
+		ColorScaleElementSlider* slider = sliders->element(i);
 		m_slidersWidget->addNewSlider(slider->getRelativePos(), slider->getColor());
 	}
 

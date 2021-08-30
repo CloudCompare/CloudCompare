@@ -396,6 +396,11 @@
             <string>Use previous normal</string>
            </property>
           </item>
+          <item>
+           <property name="text">
+            <string>Sensor origin</string>
+           </property>
+          </item>
          </widget>
         </item>
        </layout>

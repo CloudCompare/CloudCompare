@@ -8,6 +8,10 @@ v2.12 (???) - (in development)
 		-  'Edit > Cloud > Create single point cloud': to create a cloud with a single point (set by the user)
 		-  'Edit > Cloud > Paste from clipboard' (shortcut: CTRL+P): to create a cloud from ASCII/test data stored in the clipboard
 
+- New command line options:
+    - Added N_SIGMA_MIN and N_SIGMA_MAX options to the FILTER_SF command.
+		- Specify the option followed by a numeric value to filter by N * standardDeviation around the mean.
+
 - Improvements
     - RANSAC plugin
         - Can save all leftover points into a new cloud (leftovers were points not assigned to a shape)
@@ -17,8 +21,6 @@ v2.12 (???) - (in development)
         - Ability to select min and max radii for various shapes (helps prevent giant spheres and cylinders from beating out the more likely plane feature)
     - Single Click Picking option added to display options menu
       - Single click picking can be disabled (can be very slow for very large point clouds) 
-    - CommandLine mode new features
-      - Added N_SIGMA_MIN and N_SIGMA_MAX options to the FILTER_SF command. Specify the option followed by a numeric value to filter by N * standardDeviation around the mean.
 	- ICP registration:
 	    - new option to take the normals into account (if both entites have normals)
 			(several matching modes are available: same side, opposite side, or double-sided)
@@ -35,6 +37,8 @@ v2.12 (???) - (in development)
 		- option to choose the video output codec/format
 	- qM3C2:
 		- new options to orient normals: with the previous normal (if any) or with the associated sensor origin
+	- Normal computation:
+		- New preferred orientation: sensor origin
 	- ATI cards:
 		- the display should now be faster with ATI cards thanks to a smarter way to manage (2D text) textures
 	- Localization:

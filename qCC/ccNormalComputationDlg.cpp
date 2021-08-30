@@ -197,7 +197,7 @@ ccNormalVectors::Orientation ccNormalComputationDlg::getPreferredOrientation() c
 {
 	int index = preferredOrientRadioButton->isChecked() ? preferredOrientationComboBox->currentIndex() : -1;
 
-	return (index >= 0 && index <= ccNormalVectors::PREVIOUS ? static_cast<ccNormalVectors::Orientation>(index) : ccNormalVectors::UNDEFINED);
+	return (index >= 0 && index <= ccNormalVectors::SENSOR_ORIGIN ? static_cast<ccNormalVectors::Orientation>(index) : ccNormalVectors::UNDEFINED);
 }
 
 void ccNormalComputationDlg::autoEstimateRadius()

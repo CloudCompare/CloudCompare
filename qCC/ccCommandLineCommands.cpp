@@ -773,7 +773,6 @@ bool CommandOctreeNormal::process(ccCommandLineInterface &cmd)
 		if(success)
 		{
 			cmd.print(QObject::tr("computeNormalsWithOctree success"));
-			cmd.print(QObject::tr("cloud->hasNormals: %1").arg(cloud->hasNormals()));
 		}
 		else
 		{

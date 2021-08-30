@@ -199,13 +199,14 @@ bool ccNormalVectors::UpdateNormalOrientations(	ccGenericPointCloud* theCloud,
 					{
 						useOriginPoint = true;
 						fromOriginPoint = true;
+						sensorFound = true;
 						break;
 					}
 				}
 			}
 			if (!sensorFound)
 			{
-				ccLog::Warning("[UpdateNormalOrientations] Could not found a valid sensor child");
+				ccLog::Warning("[UpdateNormalOrientations] Could not find a valid sensor child");
 				return false;
 			}
 		}

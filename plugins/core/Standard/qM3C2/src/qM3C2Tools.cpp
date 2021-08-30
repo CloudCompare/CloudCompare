@@ -597,8 +597,8 @@ bool qM3C2Tools::GuessBestParams(	ccPointCloud* cloud1,
 	{
 		double d1 = cloud1->getOwnBB().getDiagNormd();
 		double d2 = cloud2->getOwnBB().getDiagNormd();
-		double baseRadius = std::min(d1, d2) * 0.01;
-		params.normScale = params.projScale = baseRadius;
+		double baseDiameter = std::min(d1, d2) * 0.01;
+		params.normScale = params.projScale = baseDiameter;
 	}
 
 	//we could guess the max depth with a Distance Transform (as in the
@@ -640,7 +640,7 @@ bool qM3C2Tools::GuessBestParams(	ccPointCloud* cloud1,
 
 		//starting scale = smallest octree cell size!
 		PointCoordinateType baseScale = octree1->getCellSize(ccOctree::MAX_OCTREE_LEVEL);
-		PointCoordinateType scale = baseScale;
+		PointCoordinateType radius = baseScale;
 
 		bool hasBestNormLevel = false;
 		bool hasBestProjLevel = false;
@@ -650,9 +650,9 @@ bool qM3C2Tools::GuessBestParams(	ccPointCloud* cloud1,
 
 		while (!hasBestNormLevel || !hasBestProjLevel)
 		{
-			unsigned char level = octree1->findBestLevelForAGivenNeighbourhoodSizeExtraction(scale);
+			unsigned char level = octree1->findBestLevelForAGivenNeighbourhoodSizeExtraction(radius);
 			if (app)
-				app->dispToConsole(QString("[M3C2::auto] Test scale: %1 (level %2, %3 samples)").arg(scale).arg(level).arg(probingCount));
+				app->dispToConsole(QString("[M3C2::auto] Test scale: %1 (level %2, %3 samples)").arg(radius * 2).arg(level).arg(probingCount));
 
 			double sumPopulation = 0;
 			double sumPopulation2 = 0;
@@ -667,7 +667,7 @@ bool qM3C2Tools::GuessBestParams(	ccPointCloud* cloud1,
 
 				const CCVector3* P = cloud1->getPoint(pointIndex);
 				ccOctree::NeighboursSet neighbors;
-				octree1->getPointsInSphericalNeighbourhood(*P, scale, neighbors, level);
+				octree1->getPointsInSphericalNeighbourhood(*P, radius, neighbors, level);
 
 				size_t n = neighbors.size();
 				populations[i] = static_cast<unsigned>(n);
@@ -697,7 +697,7 @@ bool qM3C2Tools::GuessBestParams(	ccPointCloud* cloud1,
 					{
 						ScalarType d = CCCoreLib::DistanceComputationTools::computePoint2PlaneDistance(P, lsPlane);
 						//we compute relative roughness
-						d /= scale;
+						d /= radius;
 						sumRoughness += d*d;//std::abs(d);
 						meanNormal += CCVector3d::fromArray(lsPlane);
 						validLSPlanes++;
@@ -737,7 +737,7 @@ bool qM3C2Tools::GuessBestParams(	ccPointCloud* cloud1,
 					{
 						if (app)
 							app->dispToConsole(QString("[M3C2::auto] \tThis scale seems ok for projection!"));
-						params.projScale = scale;
+						params.projScale = radius * 2;
 						hasBestProjLevel = true;
 					}
 				}
@@ -755,11 +755,11 @@ bool qM3C2Tools::GuessBestParams(	ccPointCloud* cloud1,
 				if (validLSPlanes > 0.99 * static_cast<double>(probingCount)) //almost all neighbourhood must be large enough to fit a plane!
 				{
 					if (	bestMeanRoughness < 0
-						|| (meanRoughness < bestMeanRoughness && (!hasBestProjLevel || scale < 2.1 * params.projScale)) //DGM: don't increase the normal scale more than 2 times the projection scale (if possible)
+						|| (meanRoughness < bestMeanRoughness && (!hasBestProjLevel || 2.0 * radius < 2.1 * params.projScale)) //DGM: don't increase the normal scale more than 2 times the projection scale (if possible)
 						)
 					{
 						bestMeanRoughness = meanRoughness;
-						params.normScale = scale;
+						params.normScale = radius * 2;
 
 						//mean normal
 						meanNormal.normalize();
@@ -786,9 +786,9 @@ bool qM3C2Tools::GuessBestParams(	ccPointCloud* cloud1,
 				//if we have reach a big radius already and we don't have
 				//good scales, we stop anyway!
 				if (bestMeanRoughness < 0)
-					params.normScale = scale;
+					params.normScale = radius * 2;
 				if (!hasBestProjLevel)
-					params.projScale = scale;
+					params.projScale = radius * 2;
 				hasBestProjLevel = true;
 				hasBestNormLevel = true;
 				if (app)
@@ -796,8 +796,8 @@ bool qM3C2Tools::GuessBestParams(	ccPointCloud* cloud1,
 				break;
 			}
 
-			//scale += baseScale;
-			scale *= 2;
+			//radius += baseScale;
+			radius *= 2;
 			probingCount = std::max<unsigned>(10, probingCount - (probingCount / 10));
 		}
 	}

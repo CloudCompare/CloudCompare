@@ -123,6 +123,7 @@ v2.12 (???) - (in development)
 		It is now possible to load it if the 'list' is composed of floating point values.
 	- When merging two clouds, CC could crash is the LoD structure was currently being built at the same time on one of the clouds
 	- Command line mode: the '-GLOBA_SHIFT FIRST' option was not working properly
+	- the 'Guess parameters' option of the M3C2 plugin was suggesting radii while M3C2 scales are diameters (i.e. ideal values should have been twice as big)
 
 
 v2.11.3 (Anoia) - 08/09/2020

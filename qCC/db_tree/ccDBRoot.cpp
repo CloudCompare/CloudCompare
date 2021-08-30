@@ -332,13 +332,13 @@ void ccDBRoot::unloadAll()
 
 	while (m_treeRoot->getChildrenNumber() > 0)
 	{
-		int i = static_cast<int>(m_treeRoot->getChildrenNumber())-1;
+		int i = static_cast<int>(m_treeRoot->getChildrenNumber()) - 1;
 		ccHObject* object = m_treeRoot->getChild(i);
 		assert(object);
 
 		object->prepareDisplayForRefresh_recursive();
 
-		beginRemoveRows(index(object).parent(),i,i);
+		beginRemoveRows(index(object).parent(), i, i);
 		m_treeRoot->removeChild(i);
 		endRemoveRows();
 	}
@@ -615,14 +615,14 @@ void ccDBRoot::deleteSelectedEntities()
 	MainWindow::RefreshAllGLWindow(false);
 }
 
-QVariant ccDBRoot::data(const QModelIndex &index, int role) const
+QVariant ccDBRoot::data(const QModelIndex& idx, int role) const
 {
-	if (!index.isValid())
+	if (!idx.isValid())
 	{
 		return QVariant();
 	}
 
-	const ccHObject *item = static_cast<const ccHObject*>(index.internalPointer());
+	const ccHObject *item = static_cast<const ccHObject*>(idx.internalPointer());
 	assert(item);
 	if (!item)
 	{
@@ -712,9 +712,9 @@ QVariant ccDBRoot::data(const QModelIndex &index, int role) const
 	return QVariant();
 }
 
-bool ccDBRoot::setData(const QModelIndex &index, const QVariant &value, int role)
+bool ccDBRoot::setData(const QModelIndex& idx, const QVariant& value, int role)
 {
-	if (index.isValid())
+	if (idx.isValid())
 	{
 		if (role == Qt::EditRole)
 		{
@@ -723,7 +723,7 @@ bool ccDBRoot::setData(const QModelIndex &index, const QVariant &value, int role
 				return false;
 			}
 
-			ccHObject *item = static_cast<ccHObject*>(index.internalPointer());
+			ccHObject *item = static_cast<ccHObject*>(idx.internalPointer());
 			assert(item);
 			if (item)
 			{
@@ -738,14 +738,14 @@ bool ccDBRoot::setData(const QModelIndex &index, const QVariant &value, int role
 
 				reflectObjectPropChange(item);
 
-				emit dataChanged(index, index);
+				emit dataChanged(idx, idx);
 			}
 
 			return true;
 		}
 		else if (role == Qt::CheckStateRole)
 		{
-			ccHObject *item = static_cast<ccHObject*>(index.internalPointer());
+			ccHObject *item = static_cast<ccHObject*>(idx.internalPointer());
 			assert(item);
 			if (item)
 			{
@@ -807,14 +807,14 @@ QModelIndex ccDBRoot::index(ccHObject* object)
 	return createIndex(pos, 0, object);
 }
 
-QModelIndex ccDBRoot::parent(const QModelIndex &index) const
+QModelIndex ccDBRoot::parent(const QModelIndex& idx) const
 {
-	if (!index.isValid())
+	if (!idx.isValid())
 	{
 		return QModelIndex();
 	}
 
-	ccHObject *childItem = static_cast<ccHObject*>(index.internalPointer());
+	ccHObject *childItem = static_cast<ccHObject*>(idx.internalPointer());
 	if (!childItem)
 	{
 		assert(false);
@@ -1090,9 +1090,18 @@ void ccDBRoot::updatePropertiesView()
 	QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
 	QModelIndexList selectedIndexes = qism->selectedIndexes();
 	if (selectedIndexes.size() == 1)
+	{
 		showPropertiesView(static_cast<ccHObject*>(selectedIndexes[0].internalPointer()));
+	}
 	else
+	{
 		hidePropertiesView();
+	}
+
+	for (const QModelIndex& idx : selectedIndexes)
+	{
+		emit dataChanged(idx, idx);
+	}
 }
 
 void ccDBRoot::updateCCObject(ccHObject* object)
@@ -1102,7 +1111,7 @@ void ccDBRoot::updateCCObject(ccHObject* object)
 	QModelIndex idx = index(object);
 
 	if (idx.isValid())
-		emit dataChanged(idx,idx);
+		emit dataChanged(idx, idx);
 }
 
 void ccDBRoot::redrawCCObject(ccHObject* object)
@@ -1223,18 +1232,18 @@ Qt::DropActions ccDBRoot::supportedDropActions() const
 	return Qt::MoveAction;
 }
 
-Qt::ItemFlags ccDBRoot::flags(const QModelIndex &index) const
+Qt::ItemFlags ccDBRoot::flags(const QModelIndex& idx) const
 {
-	if (!index.isValid())
+	if (!idx.isValid())
 		return Qt::NoItemFlags;
 
-	Qt::ItemFlags defaultFlags = QAbstractItemModel::flags(index);
+	Qt::ItemFlags defaultFlags = QAbstractItemModel::flags(idx);
 
 	//common flags
 	defaultFlags |= (Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable);
 
 	//class type based filtering
-	const ccHObject *item = static_cast<const ccHObject*>(index.internalPointer());
+	const ccHObject *item = static_cast<const ccHObject*>(idx.internalPointer());
 	assert(item);
 	if (item && !item->isLocked()) //locked items cannot be drag-dropped
 	{
@@ -1270,13 +1279,13 @@ Qt::ItemFlags ccDBRoot::flags(const QModelIndex &index) const
 	return defaultFlags;
 }
 
-QMap<int,QVariant> ccDBRoot::itemData(const QModelIndex& index) const
+QMap<int,QVariant> ccDBRoot::itemData(const QModelIndex& idx) const
 {
-	QMap<int,QVariant> map = QAbstractItemModel::itemData(index);
+	QMap<int,QVariant> map = QAbstractItemModel::itemData(idx);
 
-	if (index.isValid())
+	if (idx.isValid())
 	{
-		const ccHObject* object = static_cast<const ccHObject*>(index.internalPointer());
+		const ccHObject* object = static_cast<const ccHObject*>(idx.internalPointer());
 		if (object)
 			map.insert(Qt::UserRole,QVariant(object->getUniqueID()));
 	}
@@ -2011,7 +2020,7 @@ void ccDBRoot::toggleSelectedEntitiesProperty(TOGGLE_PROPERTY prop)
 	//hide properties view
 	hidePropertiesView();
 
-	for (int i=0; i<selCount; ++i)
+	for (int i = 0; i < selCount; ++i)
 	{
 		ccHObject* item = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
 		if (!item)
@@ -2058,11 +2067,11 @@ void ccDBRoot::addEmptyGroup()
 	if (m_contextMenuPos.x() < 0 || m_contextMenuPos.y() < 0)
 		return;
 
-	QModelIndex index = m_dbTreeWidget->indexAt(m_contextMenuPos);
+	QModelIndex idx = m_dbTreeWidget->indexAt(m_contextMenuPos);
 	ccHObject* newGroup = new ccHObject("Group");
-	if (index.isValid())
+	if (idx.isValid())
 	{
-		ccHObject* parent = static_cast<ccHObject*>(index.internalPointer());
+		ccHObject* parent = static_cast<ccHObject*>(idx.internalPointer());
 		if (parent)
 			parent->addChild(newGroup);
 	}
@@ -2154,8 +2163,8 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 	//build custom context menu
 	QMenu menu;
 
-	QModelIndex index = m_dbTreeWidget->indexAt(menuPos);
-	if (index.isValid())
+	QModelIndex idx = m_dbTreeWidget->indexAt(menuPos);
+	if (idx.isValid())
 	{
 		QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
 
@@ -2304,19 +2313,19 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 	menu.exec(m_dbTreeWidget->mapToGlobal(menuPos));
 }
 
-QItemSelectionModel::SelectionFlags ccCustomQTreeView::selectionCommand(const QModelIndex& index, const QEvent* event/*=0*/) const
+QItemSelectionModel::SelectionFlags ccCustomQTreeView::selectionCommand(const QModelIndex& idx, const QEvent* event/*=0*/) const
 {
-	if (index.isValid())
+	if (idx.isValid())
 	{
 		//special case: labels can only be merged with labels!
 		QModelIndexList selectedIndexes = selectionModel()->selectedIndexes();
-		if (!selectedIndexes.empty() && !selectionModel()->isSelected(index))
+		if (!selectedIndexes.empty() && !selectionModel()->isSelected(idx))
 		{
-			ccHObject* selectedItem = static_cast<ccHObject*>(index.internalPointer());
+			ccHObject* selectedItem = static_cast<ccHObject*>(idx.internalPointer());
 			if (selectedItem && selectedItem->isA(CC_TYPES::LABEL_2D) != static_cast<ccHObject*>(selectedIndexes[0].internalPointer())->isA(CC_TYPES::LABEL_2D))
 				return QItemSelectionModel::ClearAndSelect;
 		}
 	}
 
-	return QTreeView::selectionCommand(index,event);
+	return QTreeView::selectionCommand(idx, event);
 }

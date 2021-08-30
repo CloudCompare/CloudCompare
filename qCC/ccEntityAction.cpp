@@ -2244,7 +2244,7 @@ namespace ccEntityAction
 		ccHObject baseEntities;
 		ConvertToGroup(selectedEntities, baseEntities, ccHObject::DP_NONE);
 		
-		for (unsigned i=0; i<baseEntities.getChildrenNumber(); ++i)
+		for (unsigned i = 0; i < baseEntities.getChildrenNumber(); ++i)
 		{
 			ccHObject* child = baseEntities.getChild(i);
 			switch(property)

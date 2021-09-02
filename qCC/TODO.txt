@@ -35,6 +35,7 @@ Big ones:
 		from appearing (will happen - even in 'silent mode' - if the file has more than 5 columns)
 	- export the history transformation (or the barycenter translation - see http://www.danielgm.net/cc/forum/viewtopic.php?t=1242)
 	- choose the format of STL output (acsii / binary - see http://www.danielgm.net/cc/forum/viewtopic.php?f=13)
+	- set a custom prefix for saved filenames (see https://www.cloudcompare.org/forum/viewtopic.php?p=23987)
 [*] Point cloud cleanup tools (http://www.cloudcompare.org/forum/viewtopic.php?t=191)
 [*] Volume calculation
 	- between clouds (from distances)

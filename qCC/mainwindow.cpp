@@ -6190,9 +6190,12 @@ void MainWindow::toggleExclusiveFullScreen(bool state)
 
 void MainWindow::doActionShowHelpDialog()
 {
-	QMessageBox::information( this,
-							  tr("Documentation"),
-							  tr("Please visit http://www.cloudcompare.org/doc") );
+	QMessageBox messageBox;
+	messageBox.setTextFormat(Qt::RichText);
+	messageBox.setWindowTitle("Documentation");
+	messageBox.setText("Please look at the <a href='http://www.cloudcompare.org/doc/wiki'>wiki</a>");
+	messageBox.setStandardButtons(QMessageBox::Ok);
+	messageBox.exec();
 }
 
 void MainWindow::freezeUI(bool state)

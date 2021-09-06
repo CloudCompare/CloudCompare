@@ -1141,7 +1141,7 @@ CCVector3 ccCameraSensor::computeUpperLeftPoint() const
 	CCVector3 upperLeftPoint;
 	upperLeftPoint.z = m_scale * ConvertFocalPixToMM(m_intrinsicParams.vertFocal_pix, m_intrinsicParams.pixelSize_mm[1]);
 	upperLeftPoint.y = upperLeftPoint.z * tan(halfFov);
-	upperLeftPoint.x = upperLeftPoint.z * tan(halfFov * ar);
+	upperLeftPoint.x = upperLeftPoint.y * ar;
 
 	return upperLeftPoint;
 }

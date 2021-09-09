@@ -1327,7 +1327,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 	case OBJECT_PRIMITIVE_PRECISION:
 	{
 		QSpinBox* spinBox = new QSpinBox(parent);
-		spinBox->setRange(4, 360);
+		spinBox->setRange(4, 1024);
 		spinBox->setSingleStep(4);
 
 		connect(spinBox, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),

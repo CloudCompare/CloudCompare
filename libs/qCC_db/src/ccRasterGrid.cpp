@@ -491,6 +491,81 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 	return true;
 }
 
+static void InterpolateOnBorder(const std::vector<uint8_t>& pointsOnBorder,
+	const CCVector2i P[3],
+	int i, int j,
+	int coord,
+	int dim,
+	ccRasterCell& cell,
+	ccRasterGrid& grid)
+{
+	uint8_t minIndex = pointsOnBorder[0];
+	uint8_t maxIndex = pointsOnBorder[1];
+
+	if (P[maxIndex][dim] < P[minIndex][dim])
+		std::swap(minIndex, maxIndex);
+
+	if (pointsOnBorder.size() == 3)
+	{
+		if (P[pointsOnBorder[2]][dim] < P[minIndex][dim])
+			minIndex = pointsOnBorder[2];
+		if (P[pointsOnBorder[2]][dim] > P[maxIndex][dim])
+			maxIndex = pointsOnBorder[2];
+	}
+
+	if (P[minIndex][dim] <= coord && coord <= P[maxIndex][dim])
+	{
+		double d = P[maxIndex][dim] - P[minIndex][dim];
+		if (d > 0)
+		{
+			//linear interpolation
+			double relativePos = (coord - P[minIndex][dim]) / static_cast<double>(d);
+
+			const ccRasterCell& A = grid.rows[P[minIndex].y][P[minIndex].x];
+			const ccRasterCell& B = grid.rows[P[maxIndex].y][P[maxIndex].x];
+			cell.h = (1.0 - relativePos) * A.h + relativePos * B.h;
+
+			//interpolate color as well!
+			if (grid.hasColors)
+			{
+				cell.color = (1.0 - relativePos) * A.color + relativePos * B.color;
+			}
+
+			//interpolate the SFs as well!
+			for (auto &gridSF : grid.scalarFields)
+			{
+				assert(!gridSF.empty());
+
+				double sfValA = gridSF[P[minIndex].x + P[minIndex].y * grid.width];
+				double sfValB = gridSF[P[maxIndex].x + P[maxIndex].y * grid.width];
+				assert(i + j * grid.width < gridSF.size());
+				gridSF[i + j * grid.width] = (1.0 - relativePos) * sfValA + relativePos * sfValB;
+			}
+
+		}
+		else //single point
+		{
+			const ccRasterCell& A = grid.rows[P[minIndex].y][P[minIndex].x];
+			cell.h = A.h;
+
+			if (grid.hasColors)
+			{
+				cell.color = A.color;
+			}
+
+			//interpolate the SFs as well!
+			for (auto &gridSF : grid.scalarFields)
+			{
+				assert(!gridSF.empty());
+
+				double sfValA = gridSF[P[minIndex].x + P[minIndex].y * grid.width];
+				assert(i + j * grid.width < gridSF.size());
+				gridSF[i + j * grid.width] = sfValA;
+			}
+		}
+	}
+}
+
 bool ccRasterGrid::interpolateEmptyCells()
 {
 	if (nonEmptyCellCount < 3)
@@ -550,31 +625,45 @@ bool ccRasterGrid::interpolateEmptyCells()
 	{
 		const CCCoreLib::VerticesIndexes* tsi = delaunayMesh.getNextTriangleVertIndexes();
 		//get the triangle bounding box (in grid coordinates)
-		int P[3][2];
+		CCVector2i P[3];
 		int xMin = 0;
 		int yMin = 0;
 		int xMax = 0;
 		int yMax = 0;
+		//std::vector< uint8_t> onBottomBorder;
+		std::vector< uint8_t> onTopBorder;
+		//std::vector< uint8_t> onLeftBorder;
+		std::vector< uint8_t> onRightBorder;
 		{
-			for (unsigned j = 0; j < 3; ++j)
+			for (uint8_t k = 0; k < 3; ++k)
 			{
-				const CCVector2& P2D = the2DPoints[tsi->i[j]];
-				P[j][0] = static_cast<int>(P2D.x);
-				P[j][1] = static_cast<int>(P2D.y);
+				const CCVector2& P2D = the2DPoints[tsi->i[k]];
+				P[k].x = static_cast<int>(P2D.x);
+				P[k].y = static_cast<int>(P2D.y);
+
+				//if (P[k].x == 0)
+				//	onLeftBorder.push_back(k);
+				if (static_cast<unsigned>(P[k].x + 1) == width)
+					onRightBorder.push_back(k);
+				//if (P[k].y == 0)
+				//	onBottomBorder.push_back(k);
+				if (static_cast<unsigned>(P[k].y + 1) == height)
+					onTopBorder.push_back(k);
 			}
-			xMin = std::min(std::min(P[0][0], P[1][0]), P[2][0]);
-			yMin = std::min(std::min(P[0][1], P[1][1]), P[2][1]);
-			xMax = std::max(std::max(P[0][0], P[1][0]), P[2][0]);
-			yMax = std::max(std::max(P[0][1], P[1][1]), P[2][1]);
+			xMin = std::min(std::min(P[0].x, P[1].x), P[2].x);
+			yMin = std::min(std::min(P[0].y, P[1].y), P[2].y);
+			xMax = std::max(std::max(P[0].x, P[1].x), P[2].x);
+			yMax = std::max(std::max(P[0].y, P[1].y), P[2].y);
 		}
+		
 		//now scan the cells
 		{
 			//pre-computation for barycentric coordinates
-			const double& valA = rows[P[0][1]][P[0][0]].h;
-			const double& valB = rows[P[1][1]][P[1][0]].h;
-			const double& valC = rows[P[2][1]][P[2][0]].h;
+			const double& valA = rows[P[0].y][P[0].x].h;
+			const double& valB = rows[P[1].y][P[1].x].h;
+			const double& valC = rows[P[2].y][P[2].x].h;
 
-			double det = static_cast<double>((P[1][1] - P[2][1])*(P[0][0] - P[2][0]) + (P[2][0] - P[1][0])*(P[0][1] - P[2][1]));
+			int det = (P[1].y - P[2].y) * (P[0].x - P[2].x) - (P[1].x - P[2].x) * (P[0].y - P[2].y);
 
 			for (int j = yMin; j <= yMax; ++j)
 			{
@@ -588,48 +677,82 @@ bool ccRasterGrid::interpolateEmptyCells()
 						//we test if it's included or not in the current triangle
 						//Point Inclusion in Polygon Test (inspired from W. Randolph Franklin - WRF)
 						bool inside = false;
-						for (int ti = 0; ti < 3; ++ti)
+						if (det != 0)
 						{
-							const int* P1 = P[ti];
-							const int* P2 = P[(ti + 1) % 3];
-							if ((P2[1] <= j && j < P1[1]) || (P1[1] <= j && j < P2[1]))
+							for (int ti = 0; ti < 3; ++ti)
 							{
-								int t = (i - P2[0])*(P1[1] - P2[1]) - (P1[0] - P2[0])*(j - P2[1]);
-								if (P1[1] < P2[1])
-									t = -t;
-								if (t < 0)
-									inside = !inside;
+								const CCVector2i& P1 = P[ti];
+								const CCVector2i& P2 = P[(ti + 1) % 3];
+								if ((P2.y <= j && j < P1.y) || (P1.y <= j && j < P2.y))
+								{
+									int t = (i - P2.x)*(P1.y - P2.y) - (P1.x - P2.x)*(j - P2.y);
+									if (P1.y < P2.y)
+										t = -t;
+									if (t < 0)
+										inside = !inside;
+								}
 							}
 						}
+
 						//can we interpolate?
 						if (inside)
 						{
-							double l1 = ((P[1][1] - P[2][1])*(i - P[2][0]) + (P[2][0] - P[1][0])*(j - P[2][1])) / det;
-							double l2 = ((P[2][1] - P[0][1])*(i - P[2][0]) + (P[0][0] - P[2][0])*(j - P[2][1])) / det;
+							double l1 = ((P[1].y - P[2].y)*(i - P[2].x) - (P[1].x - P[2].x)*(j - P[2].y)) / static_cast<double>(det);
+							double l2 = ((P[2].y - P[0].y)*(i - P[2].x) - (P[2].x - P[0].x)*(j - P[2].y)) / static_cast<double>(det);
 							double l3 = 1.0 - l1 - l2;
-
-							row[i].h = l1 * valA + l2 * valB + l3 * valC;
-							assert(std::isfinite(row[i].h));
-
-							//interpolate color as well!
-							if (hasColors)
+							if (l3 < 0.0 || l3 > 1.0)
 							{
-								const CCVector3d& colA = rows[P[0][1]][P[0][0]].color;
-								const CCVector3d& colB = rows[P[1][1]][P[1][0]].color;
-								const CCVector3d& colC = rows[P[2][1]][P[2][0]].color;
-								row[i].color = l1 * colA + l2 * colB + l3 * colC;
+								// shouldn't happen
+								assert(false);
+								inside = false;
 							}
-
-							//interpolate the SFs as well!
-							for (auto &gridSF : scalarFields)
+							else
 							{
-								assert(!gridSF.empty());
+								row[i].h = l1 * valA + l2 * valB + l3 * valC;
+								assert(std::isfinite(row[i].h));
 
-								const double& sfValA = gridSF[P[0][0] + P[0][1] * width];
-								const double& sfValB = gridSF[P[1][0] + P[1][1] * width];
-								const double& sfValC = gridSF[P[2][0] + P[2][1] * width];
-								assert(i + j * width < gridSF.size());
-								gridSF[i + j * width] = l1 * sfValA + l2 * sfValB + l3 * sfValC;
+								//interpolate color as well!
+								if (hasColors)
+								{
+									const CCVector3d& colA = rows[P[0].y][P[0].x].color;
+									const CCVector3d& colB = rows[P[1].y][P[1].x].color;
+									const CCVector3d& colC = rows[P[2].y][P[2].x].color;
+									row[i].color = l1 * colA + l2 * colB + l3 * colC;
+								}
+
+								//interpolate the SFs as well!
+								for (auto &gridSF : scalarFields)
+								{
+									assert(!gridSF.empty());
+
+									double sfValA = gridSF[P[0].x + P[0].y * width];
+									double sfValB = gridSF[P[1].x + P[1].y * width];
+									double sfValC = gridSF[P[2].x + P[2].y * width];
+									assert(i + j * width < gridSF.size());
+									gridSF[i + j * width] = l1 * sfValA + l2 * sfValB + l3 * sfValC;
+								}
+							}
+						}
+
+						// second test for the borders (only the top and right borders have this issue in fact)
+						if (!inside)
+						{
+							/*if (i == 0 && onLeftBorder.size() > 1)
+							{
+								InterpolateOnBorder(onLeftBorder, P, i, j, j, 1, row[i], *this);
+							}
+							else */if (static_cast<unsigned>(i + 1) == width && onRightBorder.size() > 1)
+							{
+								InterpolateOnBorder(onRightBorder, P, i, j, j, 1, row[i], *this);
+							}
+							
+							/*if (j == 0 && onBottomBorder.size() > 1)
+							{
+								InterpolateOnBorder(onBottomBorder, P, i, j, i, 0, row[i], *this);
+							}
+							else*/if (static_cast<unsigned>(j + 1) == height && onTopBorder.size() > 1)
+							{
+								InterpolateOnBorder(onTopBorder, P, i, j, i, 0, row[i], *this);
 							}
 						}
 					}

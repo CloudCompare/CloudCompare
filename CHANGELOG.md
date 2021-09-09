@@ -13,6 +13,8 @@ v2.12 (???) - (in development)
 		- Specify the option followed by a numeric value to filter by N * standardDeviation around the mean.
 
 - Improvements
+	- Rasterize
+		- Improved interpolation scheme on the raster borders
     - RANSAC plugin
         - Can save all leftover points into a new cloud (leftovers were points not assigned to a shape)
         - Can select whether to use Least Squares fitting on found shapes (some shapes take a very long time to process this step specifically Cones)

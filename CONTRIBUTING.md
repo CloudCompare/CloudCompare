@@ -112,58 +112,61 @@ Designing a new qCC plugin
 
 ## Introduction
 
-Designing a new plugin is an easy way to extend qCC (CloudCompare) functionalities, without the pain of having to modify its core and do all the connections. 
-One can easily design a new function, that may be applied on one or several entities currently loaded in CloudCompare. Moreover, the plugin can display its own dialog.
-A dummy plugin structure (the sources and the corresponding Code::Blocks project) is provided as a template.
+Designing a new plugin is an easy way to extend qCC (CloudCompare) functionalities,
+without the pain of having to modify its core and do all the connections.
 
-## First steps
+One can easily design a new function, that may be applied on one or several entities currently loaded in CloudCompare.
+Moreover, the plugin can display its own dialog.
 
-Here are the first mandatory steps to create a new plugin. In fact these following setps are basically meant to build up a working Code::Blocks project for your new plugin based on the qDummyPlugin template.
-The different plugins projects are located in the `plugins` folder. You should see a folder named `qDummyPlugin` inside.
-  1. Simply “copy” and paste the `qDummyPlugin` folder it in the same directory (trunk\plugins)
-  2. You should see now a new folder (“copy of qDummyPlugin” or “copie de qDummyPLugin” in French) 
-  3. Rename this directory with you own plugin name (for instance “qMyPlygin” for this tutorial).
-  4. browse to this directory
-  5. you should see the following files inside:
-    - `qDummyPlugin.h`  & `qDummyPlugin.cpp`: the source files
-    - `qDummyPlugin.qrc`: a Qt resource file (for icons, etc.)
-    - `icon.png`: a fake icon file
-    - `CMakeLists.txt`: CMake configuration script
-  6. Rename all the `qDummyPlugin.*` files with you own project name
-    - `qDummyPlugin.h`  => `qMyPlugin.h`
-    - `qDummyPlugin.cpp` => `qMyPlugin.cpp`
-  7. Edit the `CMakeLists.txt`:
-    - Replace all occurrences of `DUMMY` with your plugin name (don’t forget any or conflicts may occur with existing CMake variables
-    - If your plugin relies on additional libraries, you should also add them here. See for instance the equivalent files for the qHPR or qPCV plugins.
+Dummy plugin structures are provided to get you started.
 
-### Modifying the sources
-You can now begin with the real work: implementing the plugin action. There are some modifications that have to be done first however.
+## 1. Choose your type
 
-#### Header file
-Open the header file (`qMyPlugin.h`).
-  1. at the top of the file you should see first a standard `CloudCompare` header. You can change inside the plugin name (`qDummy` => `qMyPlugin`) and the copyright owner.
-  2. below this header, we have a standard C++ class declaration.
-    - you should modify the macro word `Q_DUMMY_PLUGIN_HEADER` with your own (for instance: `Q_MY_PLUGIN_ HEADER`). Do it on both lines.
-    - you should also update the class description (Doxygen style)
-    - and eventually rename the class itself (`qDummyPlugin`  `qMyPlugin`)
-  3. This is all that has to be done for the header file.
+There are 3 types of plugins:
+1. Standard: plugins that add actions, processing tools.
+2. IO: plugins that adds to CloudCompare the ability to read or write additional file formats.
+3. GL: plugins that do things with the OpenGL rendering.
 
-#### Source file
-Open the source file (`qMyPlugin.cpp`).
-  1. Same thing: you may update the header (plugin name and copyright owner).
-  2. then, read carefully all the comments (there are basically the same information as below):
-    - replace all occurrences of qDummyPlugin by your plugin class name (`qDummyPlugin`  `qMyPlugin`). You may use the `replacing tool` to do this (Menu `Search > Replace` or `CTRL+R`). Make sure the `Whole word` and `Match case` checkboxes are checked, and then click on the `Replace` button, and eventually on the `All` button. 
-    - now only two mandatory steps remain:
-      - update the `getDescription` method (especially, you should replace the `Dummy Plugin` string by your plugin name and the `Dummy Action` string by a short description of your plugin action).
-      - put your code in the `doAction` method (between the two  `/*** HERE STARTS THE MAIN PLUGIN ACTION ***/` delimiters).
-Whenever the user clicks on your plugin icon, CloudCompare will call this method.
-    - Optionally:
-      - You can access most of CloudCompare resources through the `m_app` member (an interface to the main application: data base, main window, 3D view(s), etc.).
-      - To determine which entities were selected when the user clicked on the icon(s) or if the icon should be enabled or not, you should add custom code to the `onNewSelection` method (this method is called whenever the selection changes).
+Each type of plugin has a dummy template ready that can be found in the `plugins/example` directory.
 
-Using CCLIb and CloudCompare database/algorithms
-All algorithms (in CCLib) and 3D entities (in CCLib, qCC_db, qCC_io and qCC_gl) are accessible inside the plugin. Check the doxygen documentation of those projects for more information.
+Once you know which type of plugin you wish to make, copy the plugin's template
+into the directory `plugins/private`. (Create the private folder if it does not exist).
+
+CloudCompare's CMake will scan this `plugins/private` directory to add your plugin to the list of
+buildable plugins.
+
+## 2. Renaming
+
+After copying the template the next steps involve renaming the folder, class name, etc
+to names of your choice.
+
+Here is a non-exhaustive list of things to be changed:
+
+- Rename the plugin's directory (e.g. from `ExamplePlugin` to `SuperPlugin`)
+- Rename the `.qrc` file to have the same name as your plugin's directory (e.g. `ExamplePlugin.qrc` -> `SuperPlugin.qrc`)
+- In the top-level `CMakeLists.txt` of your new plugin:
+  - Change the name of the option that controls whether your plugin should be built
+  - Change the name of the project
+- In the "main" `.cpp` and `.h` file (e.g. the `ExamplePlugin.cpp` and `ExamplePlugin.h`) change the class name
+- Rename the `.cpp` and `.h` files and don't forget to update the different `CMakeList.txt`.
+- Update the `info.json` file.
+- If your plugin relies on additional libraries, you can add them to the `CMakeList.txt` 
+  See for instance the equivalent files for the qHPR or qPCV plugins.
+
+This list may miss some elements that you should remove, searching/greping for `dummy` should show you the
+things left.
+
+Some guidance about what you should do is given in the form of comments
+inside the files of the template you started from.
+
+Don't forget to add the correct option to your CMake configuration to make sure you plugin gets built.
+
+## Resources
+You can now begin with the real work: implementing the plugin action.
+
+All algorithms (in CCLib) and 3D entities (in CCLib, qCC_db, qCC_io and qCC_gl) are accessible inside the plugin. Check
+the doxygen documentation of those projects for more information.
+
 - [CCLib doxygen documentation](http://www.cloudcompare.org/doc/CCLib/html/index.html)
 - [qCC doxygen documentation](http://www.cloudcompare.org/doc/qCC/html/index.html)  
-Once again, the other plugin projects are a good source of hints, as the CloudCompare project itself.
-
+  Once again, the other plugin projects are a good source of hints, as the CloudCompare project itself.

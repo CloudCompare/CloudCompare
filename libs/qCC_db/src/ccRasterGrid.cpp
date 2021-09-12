@@ -700,13 +700,13 @@ bool ccRasterGrid::interpolateEmptyCells()
 							double l1 = ((P[1].y - P[2].y)*(i - P[2].x) - (P[1].x - P[2].x)*(j - P[2].y)) / static_cast<double>(det);
 							double l2 = ((P[2].y - P[0].y)*(i - P[2].x) - (P[2].x - P[0].x)*(j - P[2].y)) / static_cast<double>(det);
 							double l3 = 1.0 - l1 - l2;
-							if (l3 < 0.0 || l3 > 1.0)
-							{
-								// shouldn't happen
-								assert(false);
-								inside = false;
-							}
-							else
+							//if (l3 < 0.0 || l3 > 1.0)
+							//{
+							//	// shouldn't happen
+							//	assert(false);
+							//	inside = false;
+							//}
+							//else
 							{
 								row[i].h = l1 * valA + l2 * valB + l3 * valC;
 								assert(std::isfinite(row[i].h));

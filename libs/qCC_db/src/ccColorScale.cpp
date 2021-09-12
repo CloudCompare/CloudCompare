@@ -64,7 +64,7 @@ void ccColorScale::generateNewUuid()
 	m_uuid = QUuid::createUuid().toString();
 }
 
-ccColorScale::Shared ccColorScale::copy(const QString& uuid = QString()) const
+ccColorScale::Shared ccColorScale::copy(const QString& uuid/*=QString()*/) const
 {
 	ccColorScale::Shared newCS(new ccColorScale(m_name, uuid));
 	try

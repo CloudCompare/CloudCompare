@@ -270,9 +270,9 @@ MainWindow::MainWindow()
 	//db-tree
 	{
 		m_ccRoot = new ccDBRoot(m_UI->dbTreeView, m_UI->propertiesTreeView, this);
-		connect(m_ccRoot, &ccDBRoot::selectionChanged,    this, &MainWindow::updateUIWithSelection);
-		connect(m_ccRoot, &ccDBRoot::dbIsEmpty,           [&]() { updateUIWithSelection(); updateMenus(); }); //we don't call updateUI because there's no need to update the properties dialog
-		connect(m_ccRoot, &ccDBRoot::dbIsNotEmptyAnymore, [&]() { updateUIWithSelection(); updateMenus(); }); //we don't call updateUI because there's no need to update the properties dialog
+		connect(m_ccRoot, &ccDBRoot::selectionChanged,    this, &MainWindow::updateUIWithSelection, Qt::QueuedConnection);
+		connect(m_ccRoot, &ccDBRoot::dbIsEmpty,           this, [=]() { updateUIWithSelection(); updateMenus(); }, Qt::QueuedConnection); //we don't call updateUI because there's no need to update the properties dialog
+		connect(m_ccRoot, &ccDBRoot::dbIsNotEmptyAnymore, this, [=]() { updateUIWithSelection(); updateMenus(); }, Qt::QueuedConnection); //we don't call updateUI because there's no need to update the properties dialog
 	}
 
 	//MDI Area

@@ -64,6 +64,28 @@ void ccColorScale::generateNewUuid()
 	m_uuid = QUuid::createUuid().toString();
 }
 
+ccColorScale::Shared ccColorScale::copy(const QString& uuid/*=QString()*/) const
+{
+	ccColorScale::Shared newCS(new ccColorScale(m_name, uuid));
+	try
+	{
+		newCS->m_relative = m_relative;
+		newCS->m_locked = m_locked;
+		newCS->m_absoluteMinValue = m_absoluteMinValue;
+		newCS->m_absoluteRange = m_absoluteRange;
+		newCS->m_steps = m_steps;
+		newCS->m_customLabels = m_customLabels;
+		newCS->update();
+	}
+	catch (const std::bad_alloc&)
+	{
+		ccLog::Warning("Not enough memory to copy the color scale");
+		return nullptr;
+	}
+
+	return newCS;
+}
+
 void ccColorScale::insert(const ccColorScaleElement& step, bool autoUpdate/*=true*/)
 {
 	if (m_locked)

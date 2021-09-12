@@ -105,6 +105,9 @@ public:
 	//! Destructor
 	~ccColorScale() override = default;
 
+	//! Creates a copy of this color scale (with a specified unique id)
+	ccColorScale::Shared copy(const QString& uuid = QString()) const;
+
 	//! Minimum number of steps
 	static constexpr unsigned MIN_STEPS = 2;
 

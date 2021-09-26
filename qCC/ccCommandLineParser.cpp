@@ -702,6 +702,7 @@ void ccCommandLineParser::registerBuiltInCommands()
 	registerCommand(Command::Shared(new CommandOctreeNormal));
 	registerCommand(Command::Shared(new CommandConvertNormalsToDipAndDipDir));
 	registerCommand(Command::Shared(new CommandConvertNormalsToSFs));
+	registerCommand(Command::Shared(new CommandConvertNormalsToHSV));
 	registerCommand(Command::Shared(new CommandClearNormals));
 	registerCommand(Command::Shared(new CommandInvertNormal));
 	registerCommand(Command::Shared(new CommandComputeMeshVolume));

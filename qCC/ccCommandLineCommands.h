@@ -76,6 +76,13 @@ struct CommandConvertNormalsToSFs : public ccCommandLineInterface::Command
 	bool process(ccCommandLineInterface& cmd) override;
 };
 
+struct CommandConvertNormalsToHSV : public ccCommandLineInterface::Command
+{
+	CommandConvertNormalsToHSV();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
 struct CommandSubsample : public ccCommandLineInterface::Command
 {
 	CommandSubsample();

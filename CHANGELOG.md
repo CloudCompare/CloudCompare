@@ -11,6 +11,8 @@ v2.12 (???) - (in development)
 - New command line options:
     - Added N_SIGMA_MIN and N_SIGMA_MAX options to the FILTER_SF command.
 		- Specify the option followed by a numeric value to filter by N * standardDeviation around the mean.
+	- NORMALS_TO_HSV
+		- To convert normals to HSV colors
 
 - Improvements
 	- Rasterize

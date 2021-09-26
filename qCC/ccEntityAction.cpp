@@ -1922,6 +1922,7 @@ namespace ccEntityAction
 								ccCloud->showSF(false);
 								ccCloud->showNormals(false);
 								ccCloud->showColors(true);
+								++successCount;
 							}
 						}
 						break;

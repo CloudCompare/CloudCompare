@@ -123,6 +123,7 @@ constexpr char COMMAND_INVERT_NORMALS[]					= "INVERT_NORMALS";
 constexpr char COMMAND_COMPUTE_OCTREE_NORMALS[]			= "OCTREE_NORMALS";
 constexpr char COMMAND_CONVERT_NORMALS_TO_DIP[]			= "NORMALS_TO_DIP";
 constexpr char COMMAND_CONVERT_NORMALS_TO_SFS[]			= "NORMALS_TO_SFS";
+constexpr char COMMAND_CONVERT_NORMALS_TO_HSV[]			= "NORMALS_TO_HSV";
 constexpr char COMMAND_CLEAR_NORMALS[]					= "CLEAR_NORMALS";
 constexpr char COMMAND_MESH_VOLUME[]                    = "MESH_VOLUME";
 constexpr char COMMAND_VOLUME_TO_FILE[]					= "TO_FILE";
@@ -836,7 +837,6 @@ bool CommandConvertNormalsToDipAndDipDir::process(ccCommandLineInterface &cmd)
 	return true;
 }
 
-
 CommandConvertNormalsToSFs::CommandConvertNormalsToSFs()
 	: ccCommandLineInterface::Command(QObject::tr("Convert normals to scalar fields"), COMMAND_CONVERT_NORMALS_TO_SFS)
 {}
@@ -871,6 +871,48 @@ bool CommandConvertNormalsToSFs::process(ccCommandLineInterface &cmd)
 		if (cmd.autoSaveMode())
 		{
 			QString errorStr = cmd.exportEntity(thisCloudDesc, "_NORM_TO_SF");
+			if (!errorStr.isEmpty())
+			{
+				return cmd.error(errorStr);
+			}
+		}
+	}
+
+	return true;
+}
+
+CommandConvertNormalsToHSV::CommandConvertNormalsToHSV()
+	: ccCommandLineInterface::Command(QObject::tr("Convert normals to HSV colors"), COMMAND_CONVERT_NORMALS_TO_HSV)
+{}
+
+bool CommandConvertNormalsToHSV::process(ccCommandLineInterface &cmd)
+{
+	cmd.print(QObject::tr("[CONVERT NORMALS TO HSV COLORS]"));
+	if (cmd.clouds().empty())
+	{
+		return cmd.error(QObject::tr("No input point cloud (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_CONVERT_NORMALS_TO_HSV));
+	}
+
+	for (CLCloudDesc& thisCloudDesc : cmd.clouds())
+	{
+		ccPointCloud* cloud = thisCloudDesc.pc;
+
+		if (!cloud->hasNormals())
+		{
+			cmd.warning(QObject::tr("Cloud %1 has no normals").arg(cloud->getName()));
+			continue;
+		}
+
+		ccHObject::Container container;
+		container.push_back(cloud);
+		if (!ccEntityAction::convertNormalsTo(container, ccEntityAction::NORMAL_CONVERSION_DEST::HSV_COLORS))
+		{
+			return cmd.error(QObject::tr("Failed to convert normals to HSV colors"));
+		}
+
+		if (cmd.autoSaveMode())
+		{
+			QString errorStr = cmd.exportEntity(thisCloudDesc, "_HSV");
 			if (!errorStr.isEmpty())
 			{
 				return cmd.error(errorStr);

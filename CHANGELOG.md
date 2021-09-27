@@ -14,7 +14,10 @@ v2.12 (???) - (in development)
 	- NORMALS_TO_HSV
 		- To convert normals to HSV colors
 	- RGB_CONVERT_TO_SF
-	- 	- To convert RGB colors to 5 scalar fields (red, green, blue, alpha, composite)
+	 	- To convert RGB colors to 5 scalar fields (red, green, blue, alpha, composite)
+
+- New file format:
+	- Google DRACO format .DRC (compressed point clouds and meshes - https://github.com/google/draco)
 
 - Improvements
 	- Rasterize

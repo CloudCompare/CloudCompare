@@ -1,5 +1,3 @@
-#pragma once
-
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -17,47 +15,22 @@
 //#                                                                        #
 //##########################################################################
 
-#include "CCAppCommon.h"
+#ifndef CC_DRC_FILTER_HEADER
+#define CC_DRC_FILTER_HEADER
 
-#include <QObject>
+#include <FileIOFilter.h>
 
-class QAction;
-class QMenu;
-
-class ccMainAppInterface;
-class Mouse3DInput;
-
-
-class CCAPPCOMMON_LIB_API cc3DMouseManager : public QObject
+//! Draco compressed cloud and mesh file I/O filter
+class DRCFilter : public FileIOFilter
 {
-	Q_OBJECT
-
 public:
-	cc3DMouseManager( ccMainAppInterface *appInterface, QObject *parent );
-	~cc3DMouseManager();
+	DRCFilter();
 
-	//! Gets the menu associated with the 3D mouse
-	QMenu	*menu() { return m_menu; }
+	//inherited from FileIOFilter
+	CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
 
-private:
-	void enableDevice(bool state, bool silent);
-	void releaseDevice();
-
-	void setupMenu();
-
-	void on3DMouseKeyUp(int key);
-	void on3DMouseCMDKeyUp(int cmd);
-	void on3DMouseKeyDown(int key);
-	void on3DMouseCMDKeyDown(int cmd);
-	void on3DMouseMove(std::vector<float> &vec);
-	void on3DMouseReleased();
-
-
-	ccMainAppInterface *m_appInterface;
-
-	Mouse3DInput *m3dMouseInput;
-
-	QMenu *m_menu;
-	QAction *m_actionEnable;
+	bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
+	CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
 };
 
+#endif //CC_DRC_FILTER_HEADER

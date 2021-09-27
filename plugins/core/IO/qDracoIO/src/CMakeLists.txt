@@ -1,0 +1,7 @@
+
+target_sources( ${PROJECT_NAME}
+	PRIVATE
+		${CMAKE_CURRENT_SOURCE_DIR}/DRCFilter.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/qDracoIO.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/SaveDracoFileDlg.cpp
+)

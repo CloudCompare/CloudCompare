@@ -6491,6 +6491,30 @@ void MainWindow::activateSegmentationMode()
 		updateOverlayDialogsPlacement();
 }
 
+static bool IsCloudVerticesOfMesh(ccGenericPointCloud* cloud, ccHObject* entity)
+{
+	if (entity && entity->isKindOf(CC_TYPES::MESH))
+	{
+		return (static_cast<ccGenericMesh*>(entity)->getAssociatedCloud() == cloud);
+	}
+	else
+	{
+		return false;
+	}
+}
+
+static bool IsCloudVerticesOfPolyline(ccGenericPointCloud* cloud, ccHObject* entity)
+{
+	if (entity && entity->isKindOf(CC_TYPES::POLY_LINE))
+	{
+		return (static_cast<ccPolyline*>(entity)->getAssociatedCloud() == cloud);
+	}
+	else
+	{
+		return false;
+	}
+}
+
 void MainWindow::deactivateSegmentationMode(bool state)
 {
 	bool deleteHiddenParts = false;
@@ -6502,7 +6526,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 
 		deleteHiddenParts = m_gsTool->deleteHiddenParts();
 
-		//aditional vertices of which visibility array should be manually reset
+		//additional vertices of which visibility array should be manually reset
 		std::unordered_set<ccGenericPointCloud*> verticesToReset;
 
 		QSet<ccHObject*>& segmentedEntities = m_gsTool->entities();
@@ -6510,21 +6534,84 @@ void MainWindow::deactivateSegmentationMode(bool state)
 		{
 			ccHObject* entity = (*p);
 
+			// check first if we can modify this entity directly or if there might be dire consequences...
+			bool canModify = true;
+			if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
+			{
+				ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(entity);
+				if (cloud->size() == 0)
+				{
+					//ignore this cloud
+					continue;
+				}
+
+				// check that the point cloud is not the vertices of a mesh or of a polyline
+				ccHObject* parent = entity->getParent();
+				if (parent)
+				{
+					if (IsCloudVerticesOfMesh(cloud, parent))
+					{
+						//we can't delete this cloud
+						ccLog::Warning("Cloud " + cloud->getName() + " seems to be the vertices of a mesh. We won't be able to modify it");
+						canModify = false;
+					}
+					else if (IsCloudVerticesOfPolyline(cloud, parent))
+					{
+						//we can't delete this cloud
+						ccLog::Warning("Cloud " + cloud->getName() + " seems to be the vertices of a polyine. We won't be able to modify it");
+						canModify = false;
+					}
+				}
+
+				if (true == canModify)
+				{
+					//now check the children
+					for (unsigned i = 0; i < cloud->getChildrenNumber(); ++i)
+					{
+						ccHObject* child = cloud->getChild(i);
+						if (IsCloudVerticesOfMesh(cloud, child))
+						{
+							//we can't delete this cloud
+							ccLog::Warning("Cloud " + cloud->getName() + " seems to be the vertices of a mesh. We won't be able to modify it");
+							canModify = false;
+						}
+						else if (IsCloudVerticesOfPolyline(cloud, child))
+						{
+							//we can't delete this cloud
+							ccLog::Warning("Cloud " + cloud->getName() + " seems to be the vertices of a polyine. We won't be able to modify it");
+							canModify = false;
+						}
+					}
+				}
+			}
+			else if (entity->isKindOf(CC_TYPES::MESH))
+			{
+				ccGenericMesh* mesh = static_cast<ccGenericMesh*>(entity);
+				if (mesh->size() == 0 || mesh->getAssociatedCloud()->size() == 0)
+				{
+					//ignore this mesh
+					continue;
+				}
+			}
+
 			if (entity->isKindOf(CC_TYPES::POINT_CLOUD) || entity->isKindOf(CC_TYPES::MESH))
 			{
 				//first, do the things that must absolutely be done BEFORE removing the entity from DB (even temporarily)
-				//bool lockedVertices;
-				ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity/*,&lockedVertices*/);
-				assert(cloud);
-				if (cloud)
+				ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
+				if (!cloud)
 				{
-					//assert(!lockedVertices); //in some cases we accept to segment meshes with locked vertices!
+					assert(false);
+					continue;
+				}
 
-					//specific case: labels (do this before temporarily removing 'entity' from DB!)
+				ccHObjectContext objContext;
+				if (canModify)
+				{
+					//specific case: remove dependent labels (do this before temporarily removing 'entity' from DB!)
 					ccHObject::Container labels;
 					if (m_ccRoot)
 					{
-						m_ccRoot->getRootEntity()->filterChildren(labels,true,CC_TYPES::LABEL_2D);
+						m_ccRoot->getRootEntity()->filterChildren(labels, true, CC_TYPES::LABEL_2D);
 					}
 					for (ccHObject::Container::iterator it = labels.begin(); it != labels.end(); ++it)
 					{
@@ -6550,27 +6637,32 @@ void MainWindow::deactivateSegmentationMode(bool state)
 								ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(labelParent);
 								labelParent->removeChild(label);
 								label = nullptr;
-								putObjectBackIntoDBTree(labelParent,objContext);
+								putObjectBackIntoDBTree(labelParent, objContext);
 							}
 						}
+						else
+						{
+							assert(false);
+						}
 					} //for each label
-				} // if (cloud)
 
-				//we temporarily detach the entity, as it may undergo
-				//'severe' modifications (octree deletion, etc.) --> see ccPointCloud::createNewCloudFromVisibilitySelection
-				ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(entity);
+					//we then temporarily detach the entity, as it may undergo
+					//'severe' modifications (octree deletion, etc.) --> see ccPointCloud::createNewCloudFromVisibilitySelection
+					objContext = removeObjectTemporarilyFromDBTree(entity);
+				
+				} // if (canModify)
 
 				//apply segmentation
 				ccHObject* segmentationResult = nullptr;
-				bool deleteOriginalEntity = deleteHiddenParts;
+				bool deleteOriginalEntity = (deleteHiddenParts && canModify);
 				if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
 				{
 					ccGenericPointCloud* genCloud = ccHObjectCaster::ToGenericPointCloud(entity);
-					ccGenericPointCloud* segmentedCloud = genCloud->createNewCloudFromVisibilitySelection(!deleteHiddenParts);
+					ccGenericPointCloud* segmentedCloud = genCloud->createNewCloudFromVisibilitySelection(canModify && !deleteHiddenParts);
 					if (segmentedCloud && segmentedCloud->size() == 0)
 					{
-						delete segmentationResult;
-						segmentationResult = nullptr;
+						delete segmentedCloud;
+						segmentedCloud = nullptr;
 					}
 					else
 					{
@@ -6583,11 +6675,11 @@ void MainWindow::deactivateSegmentationMode(bool state)
 				{
 					if (entity->isA(CC_TYPES::MESH))
 					{
-						segmentationResult = ccHObjectCaster::ToMesh(entity)->createNewMeshFromSelection(!deleteHiddenParts);
+						segmentationResult = ccHObjectCaster::ToMesh(entity)->createNewMeshFromSelection(canModify && !deleteHiddenParts);
 					}
 					else if (entity->isA(CC_TYPES::SUB_MESH))
 					{
-						segmentationResult = ccHObjectCaster::ToSubMesh(entity)->createNewSubMeshFromSelection(!deleteHiddenParts);
+						segmentationResult = ccHObjectCaster::ToSubMesh(entity)->createNewSubMeshFromSelection(canModify && !deleteHiddenParts);
 					}
 
 					deleteOriginalEntity |=  (ccHObjectCaster::ToGenericMesh(entity)->size() == 0);
@@ -6595,10 +6687,9 @@ void MainWindow::deactivateSegmentationMode(bool state)
 
 				if (segmentationResult)
 				{
-					assert(cloud);
-					if (cloud)
+					if (canModify)
 					{
-						//another specific case: sensors (on clouds)
+						//another specific case: remove sensors (on clouds)
 						for (unsigned i = 0; i < entity->getChildrenNumber(); ++i)
 						{
 							ccHObject* child = entity->getChild(i);
@@ -6613,7 +6704,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 									if (deleteOriginalEntity)
 									{
 										//either transfer
-										entity->transferChild(sensor,*segmentationResult);
+										entity->transferChild(sensor, *segmentationResult);
 									}
 									else
 									{
@@ -6627,7 +6718,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 									if (deleteOriginalEntity)
 									{
 										//either transfer
-										entity->transferChild(sensor,*segmentationResult);
+										entity->transferChild(sensor, *segmentationResult);
 									}
 									else
 									{
@@ -6643,15 +6734,25 @@ void MainWindow::deactivateSegmentationMode(bool state)
 							}
 						} //for each child
 					}
+					else
+					{
+						verticesToReset.insert(cloud);
+					}
 
 					//we must take care of the remaining part
 					if (!deleteHiddenParts)
 					{
-						//no need to put back the entity in DB if we delete it afterwards!
 						if (!deleteOriginalEntity)
 						{
 							entity->setName(entity->getName() + QString(".remaining"));
-							putObjectBackIntoDBTree(entity, objContext);
+							if (canModify)
+							{
+								putObjectBackIntoDBTree(entity, objContext);
+							}
+						}
+						else
+						{
+							//no need to put back the entity in DB if we delete it afterwards!
 						}
 					}
 					else
@@ -6670,8 +6771,6 @@ void MainWindow::deactivateSegmentationMode(bool state)
 								verticesToReset.insert(meshEntity->getAssociatedCloud());
 							}
 						}
-						assert(deleteOriginalEntity);
-						//deleteOriginalEntity = true;
 					}
 
 					if (segmentationResult->isA(CC_TYPES::SUB_MESH))
@@ -6706,7 +6805,10 @@ void MainWindow::deactivateSegmentationMode(bool state)
 				else if (!deleteOriginalEntity)
 				{
 					//ccConsole::Error(tr("An error occurred! (not enough memory?)"));
-					putObjectBackIntoDBTree(entity,objContext);
+					if (canModify)
+					{
+						putObjectBackIntoDBTree(entity, objContext);
+					}
 				}
 
 				if (deleteOriginalEntity)
@@ -6725,7 +6827,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 
 		//specific actions
 		{
-			for ( ccGenericPointCloud *cloud : verticesToReset )
+			for (ccGenericPointCloud *cloud : verticesToReset)
 			{
 				cloud->resetVisibilityArray();
 			}

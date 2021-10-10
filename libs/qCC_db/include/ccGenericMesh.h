@@ -230,6 +230,9 @@ public:
 	//! Computes the point that corresponds to the given uv (barycentric) coordinates
 	bool computePointPosition(unsigned triIndex, const CCVector2d& uv, CCVector3& P, bool warningIfOutside = true) const;
 
+	//! Helper to determine if the input cloud acts as vertices of a mesh
+	static bool IsCloudVerticesOfMesh(ccGenericPointCloud* cloud, ccGenericMesh** mesh = nullptr);
+
 	//inherited methods (ccShiftedObject)
 	void setGlobalShift(const CCVector3d& shift) override;
 	void setGlobalScale(double scale) override;

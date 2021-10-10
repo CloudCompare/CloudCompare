@@ -1178,3 +1178,41 @@ double ccGenericMesh::getGlobalScale() const
 {
 	return (getAssociatedCloud() ? getAssociatedCloud()->getGlobalScale() : ccShiftedObject::getGlobalScale());
 }
+
+bool ccGenericMesh::IsCloudVerticesOfMesh(ccGenericPointCloud* cloud, ccGenericMesh** mesh/*=nullptr*/)
+{
+	if (!cloud)
+	{
+		assert(false);
+		return false;
+	}
+	
+	// check whether the input point cloud acts as the vertices of a mesh
+	{
+		ccHObject* parent = cloud->getParent();
+		if (parent && parent->isKindOf(CC_TYPES::MESH) && static_cast<ccGenericMesh*>(parent)->getAssociatedCloud() == cloud)
+		{
+			if (mesh)
+			{
+				*mesh = static_cast<ccGenericMesh*>(parent);
+			}
+			return true;
+		}
+	}
+
+	// now check the children
+	for (unsigned i = 0; i < cloud->getChildrenNumber(); ++i)
+	{
+		ccHObject* child = cloud->getChild(i);
+		if (child && child->isKindOf(CC_TYPES::MESH) && static_cast<ccGenericMesh*>(child)->getAssociatedCloud() == cloud)
+		{
+			if (mesh)
+			{
+				*mesh = static_cast<ccGenericMesh*>(child);
+			}
+			return true;
+		}
+	}
+
+	return false;
+}

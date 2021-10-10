@@ -405,6 +405,14 @@ public: //display
 	//! Resets the transformation 'history' matrix
 	virtual inline void resetGLTransformationHistory() { m_glTransHistory.toIdentity(); }
 
+public:
+
+	//! Pushes the current display state (overridden)
+	bool pushDisplayState() override;
+
+	//! Pops the last pushed display state (overridden)
+	void popDisplayState(bool apply = true) override;
+
 protected:
 
 	//! Sets parent object

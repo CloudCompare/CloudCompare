@@ -691,9 +691,13 @@ bool CommandOctreeNormal::process(ccCommandLineInterface &cmd)
 				{
 					orientation = ccNormalVectors::Orientation::PREVIOUS;
 				}
-				else if (orient_argument == "SENSOR_ORIGIN")
+				else if (orient_argument == "PLUS_SENSOR_ORIGIN")
 				{
-					orientation = ccNormalVectors::Orientation::SENSOR_ORIGIN;
+					orientation = ccNormalVectors::Orientation::PLUS_SENSOR_ORIGIN;
+				}
+				else if (orient_argument == "MINUS_SENSOR_ORIGIN")
+				{
+					orientation = ccNormalVectors::Orientation::MINUS_SENSOR_ORIGIN;
 				}
 				else
 				{

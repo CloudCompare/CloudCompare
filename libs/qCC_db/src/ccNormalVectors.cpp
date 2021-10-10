@@ -185,7 +185,8 @@ bool ccNormalVectors::UpdateNormalOrientations(	ccGenericPointCloud* theCloud,
 		}
 		break;
 
-	case SENSOR_ORIGIN:
+	case MINUS_SENSOR_ORIGIN:
+	case PLUS_SENSOR_ORIGIN:
 		{
 			// look for the first sensor (child) with a valid origin
 			bool sensorFound = false;
@@ -198,7 +199,7 @@ bool ccNormalVectors::UpdateNormalOrientations(	ccGenericPointCloud* theCloud,
 					if (sensor->getActiveAbsoluteCenter(originPoint))
 					{
 						useOriginPoint = true;
-						fromOriginPoint = true;
+						fromOriginPoint = (preferredOrientation == PLUS_SENSOR_ORIGIN);
 						sensorFound = true;
 						break;
 					}

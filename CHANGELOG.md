@@ -81,7 +81,7 @@ v2.12 (???) - (in development)
 			- RIP: remove isolated poins (optional)
 		- the 'OCTREE_NORMALS' option has been updated:
 			- MINUS_ZERO and PLUS_ZERO can now also be written MINUS_ORIGIN and PLUS_ORIGIN
-			- new sub-option '-ORIENT SENSOR_ORIGIN' (to use the sensor origin to orient the normals - a sensor must be associated to the cloud of course ;)
+			- new sub-options '-ORIENT PLUS_SENSOR_ORIGIN' and '-ORIENT MINUS_SENSOR_ORIGIN' (to use the sensor origin to orient the normals - a sensor must be associated to the cloud of course ;)
 	- PCD:
 		- CC can now load PCL files with integer xyz coordinates (16 and 32 bits) as well as double coordinates
 	- STL:

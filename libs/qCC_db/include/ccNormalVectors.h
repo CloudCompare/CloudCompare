@@ -54,19 +54,20 @@ public:
 	//! 'Default' orientations
 	enum Orientation {
 
-		PLUS_X           = 0,  //!< N.x always positive
-		MINUS_X          = 1,  //!< N.x always negative
-		PLUS_Y           = 2,  //!< N.y always positive
-		MINUS_Y          = 3,  //!< N.y always negative
-		PLUS_Z           = 4,  //!< N.z always positive
-		MINUS_Z          = 5,  //!< N.z always negative
-		PLUS_BARYCENTER  = 6,  //!< Normals always opposite to the cloud barycenter
-		MINUS_BARYCENTER = 7,  //!< Normals always towards the cloud barycenter
-		PLUS_ORIGIN      = 8,  //!< Normals always opposite to the origin
-		MINUS_ORIGIN     = 9,  //!< Normals always towards the origin
-		PREVIOUS         = 10, //!< Re-use previous normal (if any)
-		SENSOR_ORIGIN    = 11, //!< Use the associated sensor origin (if any, and if multiple, the first one will be used)
-		UNDEFINED        = 255 //!< Undefined (no orientation is required)
+		PLUS_X				= 0,  //!< N.x always positive
+		MINUS_X				= 1,  //!< N.x always negative
+		PLUS_Y				= 2,  //!< N.y always positive
+		MINUS_Y				= 3,  //!< N.y always negative
+		PLUS_Z				= 4,  //!< N.z always positive
+		MINUS_Z				= 5,  //!< N.z always negative
+		PLUS_BARYCENTER		= 6,  //!< Normals always opposite to the cloud barycenter
+		MINUS_BARYCENTER	= 7,  //!< Normals always towards the cloud barycenter
+		PLUS_ORIGIN			= 8,  //!< Normals always opposite to the origin
+		MINUS_ORIGIN		= 9,  //!< Normals always towards the origin
+		PREVIOUS			= 10, //!< Re-use previous normal (if any)
+		PLUS_SENSOR_ORIGIN	= 11, //!< Normals opposite to the associated sensor origin (if any, and if multiple, the first one will be used)
+		MINUS_SENSOR_ORIGIN	= 12, //!< Normals towards the associated sensor origin (if any, and if multiple, the first one will be used)
+		UNDEFINED			= 255 //!< Undefined (no orientation is required)
 	};
 
 	//! Computes normal at each point of a given cloud

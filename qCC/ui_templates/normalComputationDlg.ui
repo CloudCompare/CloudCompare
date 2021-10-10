@@ -336,7 +336,7 @@
            <bool>false</bool>
           </property>
           <property name="currentIndex">
-           <number>4</number>
+           <number>0</number>
           </property>
           <property name="maxVisibleItems">
            <number>12</number>
@@ -373,22 +373,22 @@
           </item>
           <item>
            <property name="text">
-            <string>+ Barycenter</string>
+            <string>From barycenter</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>- Barycenter</string>
+            <string>Towards barycenter</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string notr="true">+ (0,0,0)</string>
+            <string notr="true">From origin (0,0,0)</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string notr="true">- (0,0,0)</string>
+            <string notr="true">Towards origin (0,0,0)</string>
            </property>
           </item>
           <item>
@@ -398,7 +398,12 @@
           </item>
           <item>
            <property name="text">
-            <string>Sensor origin</string>
+            <string>From sensor origin</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Towards sensor origin</string>
            </property>
           </item>
          </widget>

@@ -689,7 +689,7 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 				if (usePreferredOrientation)
 				{
 					int preferredOrientation = dlg.normOriPreferredComboBox->currentIndex();
-					assert(preferredOrientation >= ccNormalVectors::PLUS_X && preferredOrientation <= ccNormalVectors::SENSOR_ORIGIN);
+					assert(preferredOrientation >= ccNormalVectors::PLUS_X && preferredOrientation <= ccNormalVectors::MINUS_SENSOR_ORIGIN);
 					if (!ccNormalVectors::UpdateNormalOrientations(	s_M3C2Params.corePoints,
 																	*s_M3C2Params.coreNormals,
 																	static_cast<ccNormalVectors::Orientation>(preferredOrientation))

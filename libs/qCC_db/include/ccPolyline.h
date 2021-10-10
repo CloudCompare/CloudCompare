@@ -25,6 +25,7 @@
 #include "ccShiftedObject.h"
 
 class ccPointCloud;
+class ccGenericPointCloud;
 
 //! Colored polyline
 /** Extends the CCCoreLib::Polyline class
@@ -157,6 +158,16 @@ public:
 	ccPolyline* smoothChaikin(	PointCoordinateType ratio,
 								unsigned iterationCount) const;
 
+
+	//! Creates a polyline mesh with the selected vertices only
+	/** This method is called after a graphical segmentation.
+		It creates one or several new polylines with the segments having their two
+		vertices tagged as "visible" (see ccGenericPointCloud::visibilityArray).
+	**/
+	bool createNewPolylinesFromSelection(std::vector<ccPolyline*>& output);
+
+	//! Helper to determine if the input cloud acts as vertices of a polyline
+	static bool IsCloudVerticesOfPolyline(ccGenericPointCloud* cloud, ccPolyline** polyline = nullptr);
 
 public: //meta-data keys
 	

@@ -206,71 +206,109 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 		glFunc->glLineWidth(static_cast<GLfloat>(m_width));
 	}
 
-	//DGM: we do the 'GL_LINE_LOOP' manually as I have a strange bug
-	//on one on my graphic card with this mode!
-	//glBegin(m_isClosed ? GL_LINE_LOOP : GL_LINE_STRIP);
-	glFunc->glBegin(GL_LINE_STRIP);
-	for (unsigned i = 0; i < vertCount; ++i)
+	//vertices visibility
+	const ccGenericPointCloud::VisibilityTableType* _verticesVisibility = nullptr;
 	{
-		ccGL::Vertex3v(glFunc, getPoint(i)->u);
+		ccGenericPointCloud* verticesCloud = dynamic_cast<ccGenericPointCloud*>(getAssociatedCloud());
+		if (verticesCloud)
+		{
+			_verticesVisibility = &(verticesCloud->getTheVisibilityArray());
+		}
 	}
-	if (m_isClosed)
+	bool visFiltering = (_verticesVisibility && _verticesVisibility->size() >= vertCount);
+
+	if (visFiltering)
 	{
-		ccGL::Vertex3v(glFunc, getPoint(0)->u);
+		glFunc->glBegin(GL_LINES);
+		unsigned maxIndex = (m_isClosed ? vertCount : vertCount - 1);
+		for (unsigned i = 0; i < maxIndex; ++i)
+		{
+			if (_verticesVisibility->at(i) != CCCoreLib::POINT_VISIBLE) // segment is hidden
+				continue;
+			
+			unsigned nextIndex = ((i + 1) % vertCount);
+			if (_verticesVisibility->at(nextIndex) != CCCoreLib::POINT_VISIBLE) // segment is hidden
+				continue;
+
+			ccGL::Vertex3v(glFunc, getPoint(i)->u);
+			ccGL::Vertex3v(glFunc, getPoint(nextIndex)->u);
+		}
+		glFunc->glEnd();
 	}
-	glFunc->glEnd();
+	else
+	{
+		//DGM: we do the 'GL_LINE_LOOP' manually as I have a strange bug
+		//on one on my graphic cards with this mode!
+		//glBegin(m_isClosed ? GL_LINE_LOOP : GL_LINE_STRIP);
+		glFunc->glBegin(GL_LINE_STRIP);
+		for (unsigned i = 0; i < vertCount; ++i)
+		{
+			ccGL::Vertex3v(glFunc, getPoint(i)->u);
+		}
+		if (m_isClosed)
+		{
+			ccGL::Vertex3v(glFunc, getPoint(0)->u);
+		}
+		glFunc->glEnd();
+	}
 
 	//display arrow
 	if (m_showArrow && m_arrowIndex < vertCount && (m_arrowIndex > 0 || m_isClosed))
 	{
-		const CCVector3* P0 = getPoint(m_arrowIndex == 0 ? vertCount - 1 : m_arrowIndex - 1);
-		const CCVector3* P1 = getPoint(m_arrowIndex);
-		//direction of the last polyline chunk
-		CCVector3 u = *P1 - *P0;
-		u.normalize();
+		unsigned i0 = (m_arrowIndex == 0 ? vertCount - 1 : m_arrowIndex - 1);
+		unsigned i1 = m_arrowIndex;
 
-		if (m_mode2D)
+		if (!visFiltering || (_verticesVisibility->at(i0) == CCCoreLib::POINT_VISIBLE && _verticesVisibility->at(i1) == CCCoreLib::POINT_VISIBLE))
 		{
-			u *= -m_arrowLength;
-			static const PointCoordinateType s_defaultArrowAngle = CCCoreLib::DegreesToRadians( static_cast<PointCoordinateType>(15.0) );
-			static const PointCoordinateType cost = cos(s_defaultArrowAngle);
-			static const PointCoordinateType sint = sin(s_defaultArrowAngle);
-			CCVector3 A(cost * u.x - sint * u.y, sint * u.x + cost * u.y, 0);
-			CCVector3 B(cost * u.x + sint * u.y, -sint * u.x + cost * u.y, 0);
-			glFunc->glBegin(GL_POLYGON);
-			ccGL::Vertex3v(glFunc, (A + *P1).u);
-			ccGL::Vertex3v(glFunc, (B + *P1).u);
-			ccGL::Vertex3v(glFunc, (*P1).u);
-			glFunc->glEnd();
-		}
-		else
-		{
-			if (!c_unitArrow)
+			const CCVector3* P0 = getPoint(i0);
+			const CCVector3* P1 = getPoint(i1);
+			//direction of the last polyline chunk
+			CCVector3 u = *P1 - *P0;
+			u.normalize();
+
+			if (m_mode2D)
 			{
-				c_unitArrow = QSharedPointer<ccCone>(new ccCone(0.5, 0.0, 1.0));
-				c_unitArrow->showColors(true);
-				c_unitArrow->showNormals(false);
-				c_unitArrow->setVisible(true);
-				c_unitArrow->setEnabled(true);
+				u *= -m_arrowLength;
+				static const PointCoordinateType s_defaultArrowAngle = CCCoreLib::DegreesToRadians(static_cast<PointCoordinateType>(15.0));
+				static const PointCoordinateType cost = cos(s_defaultArrowAngle);
+				static const PointCoordinateType sint = sin(s_defaultArrowAngle);
+				CCVector3 A(cost * u.x - sint * u.y, sint * u.x + cost * u.y, 0);
+				CCVector3 B(cost * u.x + sint * u.y, -sint * u.x + cost * u.y, 0);
+				glFunc->glBegin(GL_POLYGON);
+				ccGL::Vertex3v(glFunc, (A + *P1).u);
+				ccGL::Vertex3v(glFunc, (B + *P1).u);
+				ccGL::Vertex3v(glFunc, (*P1).u);
+				glFunc->glEnd();
 			}
-			if (colorsShown())
-				c_unitArrow->setTempColor(m_rgbColor);
 			else
-				c_unitArrow->setTempColor(context.pointsDefaultCol);
-			//build-up unit arrow own 'context'
-			CC_DRAW_CONTEXT markerContext = context;
-			markerContext.drawingFlags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the sphere doesn't push its own!
-			markerContext.display = nullptr;
+			{
+				if (!c_unitArrow)
+				{
+					c_unitArrow = QSharedPointer<ccCone>(new ccCone(0.5, 0.0, 1.0));
+					c_unitArrow->showColors(true);
+					c_unitArrow->showNormals(false);
+					c_unitArrow->setVisible(true);
+					c_unitArrow->setEnabled(true);
+				}
+				if (colorsShown())
+					c_unitArrow->setTempColor(m_rgbColor);
+				else
+					c_unitArrow->setTempColor(context.pointsDefaultCol);
+				//build-up unit arrow own 'context'
+				CC_DRAW_CONTEXT markerContext = context;
+				markerContext.drawingFlags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the sphere doesn't push its own!
+				markerContext.display = nullptr;
 
-			glFunc->glMatrixMode(GL_MODELVIEW);
-			glFunc->glPushMatrix();
-			ccGL::Translate(glFunc, P1->x, P1->y, P1->z);
-			ccGLMatrix rotMat = ccGLMatrix::FromToRotation(u, CCVector3(0, 0, CCCoreLib::PC_ONE));
-			glFunc->glMultMatrixf(rotMat.inverse().data());
-			glFunc->glScalef(m_arrowLength, m_arrowLength, m_arrowLength);
-			ccGL::Translate(glFunc, 0.0, 0.0, -0.5);
-			c_unitArrow->draw(markerContext);
-			glFunc->glPopMatrix();
+				glFunc->glMatrixMode(GL_MODELVIEW);
+				glFunc->glPushMatrix();
+				ccGL::Translate(glFunc, P1->x, P1->y, P1->z);
+				ccGLMatrix rotMat = ccGLMatrix::FromToRotation(u, CCVector3(0, 0, CCCoreLib::PC_ONE));
+				glFunc->glMultMatrixf(rotMat.inverse().data());
+				glFunc->glScalef(m_arrowLength, m_arrowLength, m_arrowLength);
+				ccGL::Translate(glFunc, 0.0, 0.0, -0.5);
+				c_unitArrow->draw(markerContext);
+				glFunc->glPopMatrix();
+			}
 		}
 	}
 
@@ -288,7 +326,10 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 		glFunc->glBegin(GL_POINTS);
 		for (unsigned i = 0; i < vertCount; ++i)
 		{
-			ccGL::Vertex3v(glFunc, getPoint(i)->u);
+			if (!visFiltering || _verticesVisibility->at(i) == CCCoreLib::POINT_VISIBLE)
+			{
+				ccGL::Vertex3v(glFunc, getPoint(i)->u);
+			}
 		}
 		glFunc->glEnd();
 
@@ -296,7 +337,9 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 	}
 
 	if (pushName)
+	{
 		glFunc->glPopName();
+	}
 }
 
 void ccPolyline::setWidth(PointCoordinateType width)
@@ -820,4 +863,153 @@ ccPolyline* ccPolyline::smoothChaikin(PointCoordinateType ratio, unsigned iterat
 	}
 
 	return smoothPoly;
+}
+
+bool ccPolyline::IsCloudVerticesOfPolyline(ccGenericPointCloud* cloud, ccPolyline** polyline/*=nullptr*/)
+{
+	if (!cloud)
+	{
+		assert(false);
+		return false;
+	}
+
+	// check whether the input point cloud acts as the vertices of a polyline
+	{
+		ccHObject* parent = cloud->getParent();
+		if (parent && parent->isKindOf(CC_TYPES::POLY_LINE) && static_cast<ccPolyline*>(parent)->getAssociatedCloud() == cloud)
+		{
+			if (polyline)
+			{
+				*polyline = static_cast<ccPolyline*>(parent);
+			}
+			return true;
+		}
+	}
+
+	// now check the children
+	for (unsigned i = 0; i < cloud->getChildrenNumber(); ++i)
+	{
+		ccHObject* child = cloud->getChild(i);
+		if (child && child->isKindOf(CC_TYPES::POLY_LINE) && static_cast<ccPolyline*>(child)->getAssociatedCloud() == cloud)
+		{
+			if (polyline)
+			{
+				*polyline = static_cast<ccPolyline*>(child);
+			}
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool ccPolyline::createNewPolylinesFromSelection(std::vector<ccPolyline*>& output)
+{
+	if (!m_theAssociatedCloud)
+	{
+		assert(false);
+		return false;
+	}
+	unsigned vertCount = m_theAssociatedCloud->size();
+	
+	//vertices visibility
+	ccGenericPointCloud* verticesCloud = dynamic_cast<ccGenericPointCloud*>(getAssociatedCloud());
+	if (!verticesCloud)
+	{
+		// no visibility table instantiated
+		ccLog::Warning("[ccPolyline::createNewPolylinesFromSelection] Unsupported vertex cloud");
+		return false;
+	}
+	const ccGenericPointCloud::VisibilityTableType& verticesVisibility = verticesCloud->getTheVisibilityArray();
+	if (verticesVisibility.size() < vertCount)
+	{
+		// no visibility table instantiated
+		ccLog::Warning("[ccPolyline::createNewPolylinesFromSelection] No visibility table instantiated");
+		return false;
+	}
+
+	bool success = true;
+	{
+		ccPolyline* chunkPoly = nullptr;
+		ccPointCloud* chunkCloud = nullptr;
+
+		unsigned maxIndex = (m_isClosed ? vertCount : vertCount - 1);
+		for (unsigned i = 0; i < maxIndex; ++i)
+		{
+			unsigned nextIndex = ((i + 1) % vertCount);
+			bool kept = false;
+			if (verticesVisibility.at(i) == CCCoreLib::POINT_VISIBLE && verticesVisibility.at(nextIndex) == CCCoreLib::POINT_VISIBLE) // segment should be kept
+			{
+				kept = true;
+
+				const CCVector3* P0 = getPoint(i);
+				const CCVector3* P1 = getPoint(nextIndex);
+
+				// recreate a chunk if none is ready yet
+				static const unsigned DefaultPolySizeIncrement = 64;
+				if (!chunkPoly)
+				{
+					chunkCloud = new ccPointCloud("vertices");
+					chunkCloud->setEnabled(false);
+					chunkPoly = new ccPolyline(chunkCloud);
+					chunkPoly->addChild(chunkCloud);
+					if (!chunkPoly->reserve(DefaultPolySizeIncrement) || !chunkCloud->reserve(DefaultPolySizeIncrement))
+					{
+						delete chunkCloud;
+						success = false;
+						break;
+					}
+					chunkPoly->addPointIndex(0);
+					chunkCloud->addPoint(*P0);
+				}
+				else if (chunkPoly->size() == chunkPoly->capacity())
+				{
+					if (!chunkPoly->reserve(chunkPoly->size() + DefaultPolySizeIncrement) || !chunkCloud->reserve(chunkCloud->size() + DefaultPolySizeIncrement))
+					{
+						success = false;
+						break;
+					}
+				}
+
+				// add the next vertex
+				chunkPoly->addPointIndex(chunkCloud->size());
+				chunkCloud->addPoint(*P1);
+			}
+
+			if (!kept || i + 1 == maxIndex)
+			{
+				// store the active chunk (if any)
+				if (chunkPoly)
+				{
+					chunkPoly->importParametersFrom(*this);
+					chunkPoly->setName(getName() + QString(".segmented (part %1)").arg(output.size() + 1));
+					chunkCloud->shrinkToFit();
+					chunkPoly->resize(chunkPoly->size());
+					try
+					{
+						output.push_back(chunkPoly);
+					}
+					catch (const std::bad_alloc&)
+					{
+						success = false;
+						break;
+					}
+					chunkPoly = nullptr;
+				}
+			}
+		}
+	}
+
+	if (!success)
+	{
+		ccLog::Warning("[ccPolyline::createNewPolylinesFromSelection] Not enough memory");
+		// delete the already created polylines
+		for (ccPolyline* poly : output)
+		{
+			delete poly;
+		}
+		output.clear();
+	}
+
+	return success;
 }

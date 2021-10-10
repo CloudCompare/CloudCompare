@@ -33,6 +33,7 @@
 class ccPolyline;
 class ccPointCloud;
 class ccGLWindow;
+class ccMainAppInterface;
 
 //! Graphical segmentation mechanism (with polyline)
 class ccGraphicalSegmentationTool : public ccOverlayDialog, public Ui::GraphicalSegmentationDlg
@@ -51,7 +52,7 @@ public:
 		locked, or can't be segmented this way.
 		\return whether entity has been added to the pool or not
 	**/
-	bool addEntity(ccHObject* anObject);
+	bool addEntity(ccHObject* anObject, bool silent = false);
 	
 	//! Returns the number of entites currently in the the 'to be segmented' pool
 	unsigned getNumberOfValidEntities() const;
@@ -78,6 +79,9 @@ public:
 	**/
 	void removeAllEntities(bool unallocateVisibilityArrays);
 
+	//! Apply segmentation and update the database (helper)
+	bool applySegmentation(ccMainAppInterface* app, ccHObject::Container& newEntities);
+
 protected:
 
 	void segmentIn();
@@ -88,7 +92,7 @@ protected:
 	void applyAndDelete();
 	void cancel();
 	void addPointToPolyline(int x, int y);
-	void closePolyLine(int x=0, int y=0); //arguments for compatibility with ccGlWindow::rightButtonClicked signal
+	void closePolyLine(int x = 0, int y = 0); //arguments for compatibility with ccGlWindow::rightButtonClicked signal
 	void closeRectangle();
 	void updatePolyLine(int x, int y, Qt::MouseButtons buttons);
 	void pauseSegmentationMode(bool);
@@ -100,11 +104,13 @@ protected:
 	//! To capture overridden shortcuts (pause button, etc.)
 	void onShortcutTriggered(int);
 
-protected:
+	//! Prepare entity before removal
+	void prepareEntityForRemoval(ccHObject* entity, bool unallocateVisibilityArrays);
 
 	//! Whether to allow or not to exort the current segmentation polyline
 	void allowPolylineExport(bool state);
 
+protected:
 	//! Set of entities to be segmented
 	QSet<ccHObject*> m_toSegment;
 

@@ -35,6 +35,12 @@
 #include <ccHObjectCaster.h>
 #include <cc2DViewportObject.h>
 
+//for the helper (apply)
+#include <cc2DLabel.h>
+#include <ccCameraSensor.h>
+#include <ccGBLSensor.h>
+#include <ccSubMesh.h>
+
 //qCC_gl
 #include <ccGLWindow.h>
 
@@ -232,14 +238,55 @@ bool ccGraphicalSegmentationTool::start()
 	return ccOverlayDialog::start();
 }
 
-void ccGraphicalSegmentationTool::removeAllEntities(bool unallocateVisibilityArrays)
+void ccGraphicalSegmentationTool::prepareEntityForRemoval(ccHObject* entity, bool unallocateVisibilityArrays)
 {
+	if (!entity)
+	{
+		assert(false);
+		return;
+	}
+
+	// restore the display state of the entity
+	entity->popDisplayState();
+
 	if (unallocateVisibilityArrays)
 	{
-		for (QSet<ccHObject*>::const_iterator p = m_toSegment.constBegin(); p != m_toSegment.constEnd(); ++p)
+		ccGenericPointCloud* asCloud = ccHObjectCaster::ToGenericPointCloud(entity);
+		if (asCloud)
 		{
-			ccHObjectCaster::ToGenericPointCloud(*p)->unallocateVisibilityArray();
+			asCloud->unallocateVisibilityArray();
 		}
+	}
+
+	// specific case: we may have automatically hidden the mesh or the polyline associated to a cloud
+	if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
+	{
+		ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(entity);
+
+		ccGenericMesh* associatedMesh = nullptr;
+		if (ccGenericMesh::IsCloudVerticesOfMesh(cloud, &associatedMesh) && associatedMesh)
+		{
+			associatedMesh->popDisplayState();
+			return;
+		}
+
+		ccPolyline* associatedPolyline = nullptr;
+		if (ccPolyline::IsCloudVerticesOfPolyline(cloud, &associatedPolyline) && associatedPolyline)
+		{
+			associatedPolyline->popDisplayState();
+			return;
+		}
+	}
+}
+
+
+void ccGraphicalSegmentationTool::removeAllEntities(bool unallocateVisibilityArrays)
+{
+	for (QSet<ccHObject*>::const_iterator p = m_toSegment.constBegin(); p != m_toSegment.constEnd(); ++p)
+	{
+		ccHObject* entity = *p;
+
+		prepareEntityForRemoval(entity, unallocateVisibilityArrays);
 	}
 
 	m_toSegment.clear();
@@ -272,7 +319,11 @@ void ccGraphicalSegmentationTool::reset()
 	{
 		for (QSet<ccHObject*>::const_iterator p = m_toSegment.constBegin(); p != m_toSegment.constEnd(); ++p)
 		{
-			ccHObjectCaster::ToGenericPointCloud(*p)->resetVisibilityArray();
+			ccGenericPointCloud* asCloud = ccHObjectCaster::ToGenericPointCloud(*p);
+			if (asCloud)
+			{
+				asCloud->unallocateVisibilityArray();
+			}
 		}
 
 		m_somethingHasChanged = false;
@@ -288,7 +339,7 @@ void ccGraphicalSegmentationTool::reset()
 	loadSaveToolButton->setDefaultAction(actionUseExistingPolyline);
 }
 
-bool ccGraphicalSegmentationTool::addEntity(ccHObject* entity)
+bool ccGraphicalSegmentationTool::addEntity(ccHObject* entity, bool silent/*=false*/)
 {
 	if (!entity)
 	{
@@ -296,72 +347,186 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* entity)
 		return false;
 	}
 
-	if (!entity->isDisplayedIn(m_associatedWin))
+	if (!entity->isDisplayedIn(m_associatedWin) && !silent)
 	{
 		ccLog::Warning(QString("[Graphical Segmentation Tool] Entity [%1] is not visible in the active 3D view!").arg(entity->getName()));
 	}
 
-	bool result = false;
 	if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
 		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(entity);
 
+		ccGenericMesh* associatedMesh = nullptr;
+		if (ccGenericMesh::IsCloudVerticesOfMesh(cloud, &associatedMesh))
+		{
+			assert(nullptr != associatedMesh);
+			if (m_toSegment.contains(associatedMesh))
+			{
+				if (!silent)
+				{
+					ccLog::Warning(QString("[Graphical Segmentation Tool] The mesh associated to cloud %1 is already selected").arg(cloud->getName()));
+				}
+				return false;
+			}
+
+			// hide the associated mesh, as it will also be (graphically) segmented
+			associatedMesh->pushDisplayState();
+			associatedMesh->setVisible(false);
+		}
+
+		ccPolyline* associatedPolyline = nullptr;
+		if (ccPolyline::IsCloudVerticesOfPolyline(cloud, &associatedPolyline))
+		{
+			assert(nullptr != associatedPolyline);
+			if (m_toSegment.contains(associatedPolyline))
+			{
+				if (!silent)
+				{
+					ccLog::Warning(QString("[Graphical Segmentation Tool] The polyline associated to cloud %1 is already selected").arg(cloud->getName()));
+				}
+				return false;
+			}
+
+			// hide the associated polyline, as it will also be (graphically) segmented
+			associatedPolyline->pushDisplayState();
+			associatedPolyline->setVisible(false);
+		}
+
 		cloud->resetVisibilityArray();
 		m_toSegment.insert(cloud);
+		cloud->pushDisplayState();
+		cloud->setVisible(true);
+		cloud->setEnabled(true);
 
+		//DGM: not sure what was the idea behind the code below?
+		//
 		//automatically add cloud's children
-		for (unsigned i = 0; i < entity->getChildrenNumber(); ++i)
-		{
-			result |= addEntity(entity->getChild(i));
-		}
+		//for (unsigned i = 0; i < entity->getChildrenNumber(); ++i)
+		//{
+		//	ccHObject* child = entity->getChild(i);
+		//	if (child != associatedMesh && child != associatedPolyline) // we don't add the associated mesh or polyline (if any)
+		//	{
+		//		result |= addEntity(entity->getChild(i), /*silent=*/true);
+		//	}
+		//}
+		
+		return true;
 	}
 	else if (entity->isKindOf(CC_TYPES::MESH))
 	{
 		if (entity->isKindOf(CC_TYPES::PRIMITIVE))
 		{
-			ccLog::Warning("[ccGraphicalSegmentationTool] Can't segment primitives yet! Sorry...");
+			if (!silent)
+			{
+				ccLog::Warning("[ccGraphicalSegmentationTool] Can't segment primitives yet! Sorry...");
+			}
 			return false;
 		}
 		if (entity->isKindOf(CC_TYPES::SUB_MESH))
 		{
-			ccLog::Warning("[ccGraphicalSegmentationTool] Can't segment sub-meshes! Select the parent mesh...");
+			if (!silent)
+			{
+				ccLog::Warning("[ccGraphicalSegmentationTool] Can't segment sub-meshes! Select the parent mesh...");
+			}
 			return false;
 		}
-		else
+
+		ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(entity);
+		assert(mesh);
+
+		//DGM: the code below is useless since we don't allow CC_TYPES::SUB_MESH entities (see above)
+		//
+		// first, we must check that there's no mesh and at least one of its sub-mesh mixed in the current selection!
+		//for (QSet<ccHObject*>::const_iterator p = m_toSegment.constBegin(); p != m_toSegment.constEnd(); ++p)
+		//{
+		//	if ((*p)->isKindOf(CC_TYPES::MESH))
+		//	{
+		//		ccGenericMesh* otherMesh = ccHObjectCaster::ToGenericMesh(*p);
+		//		if (otherMesh->getAssociatedCloud() == mesh->getAssociatedCloud())
+		//		{
+		//			if ((otherMesh->isA(CC_TYPES::SUB_MESH) && mesh->isA(CC_TYPES::MESH))
+		//				|| (otherMesh->isA(CC_TYPES::MESH) && mesh->isA(CC_TYPES::SUB_MESH)))
+		//			{
+		//				if (!silent)
+		//				{
+		//					ccLog::Warning("[Graphical Segmentation Tool] Can't mix sub-meshes with their parent mesh!");
+		//				}
+		//				return false;
+		//			}
+		//		}
+		//	}
+		//}
+
+		ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
+		if (!vertices)
 		{
-			ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(entity);
-
-			//first, we must check that there's no mesh and at least one of its sub-mesh mixed in the current selection!
-			for (QSet<ccHObject*>::const_iterator p = m_toSegment.constBegin(); p != m_toSegment.constEnd(); ++p)
-			{
-				if ((*p)->isKindOf(CC_TYPES::MESH))
-				{
-					ccGenericMesh* otherMesh = ccHObjectCaster::ToGenericMesh(*p);
-					if (otherMesh->getAssociatedCloud() == mesh->getAssociatedCloud())
-					{
-						if ((otherMesh->isA(CC_TYPES::SUB_MESH) && mesh->isA(CC_TYPES::MESH))
-							|| (otherMesh->isA(CC_TYPES::MESH) && mesh->isA(CC_TYPES::SUB_MESH)))
-						{
-							ccLog::Warning("[Graphical Segmentation Tool] Can't mix sub-meshes with their parent mesh!");
-							return false;
-						}
-					}
-				}
-			}
-
-			mesh->getAssociatedCloud()->resetVisibilityArray();
-			m_toSegment.insert(mesh);
-			result = true;
+			assert(false);
+			return false;
 		}
+
+		// Make sure the vertices of this mesh are not already in the 'to segment' list
+		if (m_toSegment.contains(vertices))
+		{
+			//let's remove the vertices
+			mesh->pushDisplayState(); // just in case the vertices were inserted before the mesh)
+			vertices->popDisplayState();
+			m_toSegment.remove(vertices);
+		}
+
+		vertices->resetVisibilityArray();
+		m_toSegment.insert(mesh);
+		mesh->pushDisplayState();
+		mesh->setVisible(true);
+		mesh->setEnabled(true);
+
+		return true;
+	}
+	else if (entity->isKindOf(CC_TYPES::POLY_LINE))
+	{
+		ccPolyline* poly = ccHObjectCaster::ToPolyline(entity);
+		assert(poly);
+
+		ccGenericPointCloud* verticesCloud = dynamic_cast<ccGenericPointCloud*>(poly->getAssociatedCloud());
+		if (!verticesCloud)
+		{
+			assert(false);
+			return false;
+		}
+
+		// Make sure the vertices of this polyline are not already in the 'to segment' list
+		if (verticesCloud && m_toSegment.contains(verticesCloud))
+		{
+			//let's remove the vertices
+			poly->pushDisplayState(); // just in case the vertices were inserted before the polyline)
+			verticesCloud->popDisplayState();
+			m_toSegment.remove(verticesCloud);
+		}
+
+		verticesCloud->resetVisibilityArray();
+		m_toSegment.insert(poly);
+		poly->pushDisplayState();
+		poly->setVisible(true);
+		poly->setEnabled(true);
+
+		return true;
 	}
 	else if (entity->isA(CC_TYPES::HIERARCHY_OBJECT))
 	{
-		//automatically add entity's children
+		//automatically add the entities contained in the group
+		bool result = false;
 		for (unsigned i = 0; i < entity->getChildrenNumber(); ++i)
 			result |= addEntity(entity->getChild(i));
-	}
 
-	return result;
+		return result;
+	}
+	else
+	{
+		if (!silent)
+		{
+			ccLog::Warning("[ccGraphicalSegmentationTool] Can't segment entity " + entity->getName());
+		}
+		return false;
+	}
 }
 
 unsigned ccGraphicalSegmentationTool::getNumberOfValidEntities() const
@@ -1023,4 +1188,348 @@ void ccGraphicalSegmentationTool::cancel()
 	reset();
 	m_deleteHiddenParts = false;
 	stop(false);
+}
+
+bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccHObject::Container& newEntities)
+{
+	if (!app)
+	{
+		assert(false);
+		return false;
+	}
+
+	bool cantModifyPolylinesWarningIssued = false;
+
+	//additional vertices of which visibility array should be manually reset
+	std::unordered_set<ccGenericPointCloud*> verticesToReset;
+
+	for (QSet<ccHObject*>::iterator p = m_toSegment.begin(); p != m_toSegment.end(); )
+	{
+		ccHObject* entity = (*p);
+
+		// check first if we can modify this entity directly or if there might be dire consequences...
+		bool canModify = true;
+		if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
+		{
+			ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(entity);
+			if (cloud->size() == 0)
+			{
+				//ignore this cloud
+				continue;
+			}
+
+			// check that the point cloud is not the vertices of a mesh or of a polyline
+			if (ccGenericMesh::IsCloudVerticesOfMesh(cloud))
+			{
+				//we can't delete this cloud
+				ccLog::Warning("Cloud " + cloud->getName() + " seems to be the vertices of a mesh. We won't be able to modify it");
+				canModify = false;
+			}
+			else if (ccPolyline::IsCloudVerticesOfPolyline(cloud))
+			{
+				//we can't delete this cloud
+				ccLog::Warning("Cloud " + cloud->getName() + " seems to be the vertices of a polyine. We won't be able to modify it");
+				canModify = false;
+			}
+		}
+		else if (entity->isKindOf(CC_TYPES::MESH))
+		{
+			ccGenericMesh* mesh = static_cast<ccGenericMesh*>(entity);
+			if (mesh->size() == 0 || mesh->getAssociatedCloud()->size() == 0)
+			{
+				//ignore this mesh
+				continue;
+			}
+		}
+		else if (entity->isKindOf(CC_TYPES::POLY_LINE))
+		{
+			ccPolyline* poly = static_cast<ccPolyline*>(entity);
+			if (poly->size() == 0 || poly->getAssociatedCloud()->size() == 0)
+			{
+				//ignore this polyline
+				continue;
+			}
+
+			// can't modify polylines yet
+			if (!cantModifyPolylinesWarningIssued)
+			{
+				ccLog::Warning("Can't modify polylines. A new polyline will be created.");
+				cantModifyPolylinesWarningIssued = true;
+			}
+			canModify = false;
+		}
+
+		if (entity->isKindOf(CC_TYPES::POINT_CLOUD) || entity->isKindOf(CC_TYPES::MESH))
+		{
+			//first, do the things that must absolutely be done BEFORE removing the entity from DB (even temporarily)
+			ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
+			if (!cloud)
+			{
+				assert(false);
+				continue;
+			}
+
+			ccMainAppInterface::ccHObjectContext objContext;
+			if (canModify)
+			{
+				//specific case: remove dependent labels (do this before temporarily removing 'entity' from DB!)
+				ccHObject::Container labels;
+				
+				if (app->dbRootObject())
+				{
+					app->dbRootObject()->filterChildren(labels, true, CC_TYPES::LABEL_2D);
+				}
+				for (ccHObject::Container::iterator it = labels.begin(); it != labels.end(); ++it)
+				{
+					if ((*it)->isA(CC_TYPES::LABEL_2D)) //Warning: cc2DViewportLabel is also a kind of 'CC_TYPES::LABEL_2D'!
+					{
+						//we must search for all dependent labels and remove them!!!
+						//TODO: couldn't we be more clever and update the label instead?
+						cc2DLabel* label = static_cast<cc2DLabel*>(*it);
+						bool removeLabel = false;
+						for (unsigned i = 0; i < label->size(); ++i)
+						{
+							if (label->getPickedPoint(i).entity() == entity)
+							{
+								removeLabel = true;
+								break;
+							}
+						}
+
+						if (removeLabel && label->getParent())
+						{
+							ccLog::Warning(tr("[Segmentation] Label %1 depends on cloud %2 and will be removed").arg(label->getName(), cloud->getName()));
+							ccHObject* labelParent = label->getParent();
+							ccMainAppInterface::ccHObjectContext objContext = app->removeObjectTemporarilyFromDBTree(labelParent);
+							labelParent->removeChild(label);
+							label = nullptr;
+							app->putObjectBackIntoDBTree(labelParent, objContext);
+						}
+					}
+					else
+					{
+						assert(false);
+					}
+				} //for each label
+
+				//we then temporarily detach the entity, as it may undergo
+				//'severe' modifications (octree deletion, etc.) --> see ccPointCloud::createNewCloudFromVisibilitySelection
+				objContext = app->removeObjectTemporarilyFromDBTree(entity);
+
+			} // if (canModify)
+
+			//apply segmentation
+			ccHObject* segmentationResult = nullptr;
+			bool deleteOriginalEntity = (m_deleteHiddenParts && canModify);
+			if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
+			{
+				ccGenericPointCloud* genCloud = ccHObjectCaster::ToGenericPointCloud(entity);
+				ccGenericPointCloud* segmentedCloud = genCloud->createNewCloudFromVisibilitySelection(canModify && !m_deleteHiddenParts);
+				if (segmentedCloud && segmentedCloud->size() == 0)
+				{
+					delete segmentedCloud;
+					segmentedCloud = nullptr;
+				}
+				else
+				{
+					segmentationResult = segmentedCloud;
+				}
+
+				deleteOriginalEntity |= (genCloud->size() == 0);
+			}
+			else if (entity->isKindOf(CC_TYPES::MESH)/*|| entity->isA(CC_TYPES::PRIMITIVE)*/) //TODO
+			{
+				if (entity->isA(CC_TYPES::MESH))
+				{
+					segmentationResult = ccHObjectCaster::ToMesh(entity)->createNewMeshFromSelection(canModify && !m_deleteHiddenParts);
+				}
+				else if (entity->isA(CC_TYPES::SUB_MESH))
+				{
+					segmentationResult = ccHObjectCaster::ToSubMesh(entity)->createNewSubMeshFromSelection(canModify && !m_deleteHiddenParts);
+				}
+
+				deleteOriginalEntity |= (ccHObjectCaster::ToGenericMesh(entity)->size() == 0);
+			}
+
+			if (segmentationResult)
+			{
+				if (canModify)
+				{
+					//another specific case: remove sensors (on clouds)
+					for (unsigned i = 0; i < entity->getChildrenNumber(); ++i)
+					{
+						ccHObject* child = entity->getChild(i);
+						assert(child);
+						if (child && child->isKindOf(CC_TYPES::SENSOR))
+						{
+							if (child->isA(CC_TYPES::GBL_SENSOR))
+							{
+								ccGBLSensor* sensor = ccHObjectCaster::ToGBLSensor(entity->getChild(i));
+								//remove the associated depth buffer of the original sensor (derpecated)
+								sensor->clearDepthBuffer();
+								if (deleteOriginalEntity)
+								{
+									//either transfer
+									entity->transferChild(sensor, *segmentationResult);
+								}
+								else
+								{
+									//or copy
+									segmentationResult->addChild(new ccGBLSensor(*sensor));
+								}
+							}
+							else if (child->isA(CC_TYPES::CAMERA_SENSOR))
+							{
+								ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(entity->getChild(i));
+								if (deleteOriginalEntity)
+								{
+									//either transfer
+									entity->transferChild(sensor, *segmentationResult);
+								}
+								else
+								{
+									//or copy
+									segmentationResult->addChild(new ccCameraSensor(*sensor));
+								}
+							}
+							else
+							{
+								//unhandled sensor?!
+								assert(false);
+							}
+						}
+					} //for each child
+				}
+				else
+				{
+					verticesToReset.insert(cloud);
+				}
+
+				//we must take care of the remaining part
+				if (!m_deleteHiddenParts)
+				{
+					if (!deleteOriginalEntity)
+					{
+						entity->setName(entity->getName() + QString(".remaining"));
+						if (canModify)
+						{
+							app->putObjectBackIntoDBTree(entity, objContext);
+						}
+					}
+					else
+					{
+						//no need to put back the entity in DB if we delete it afterwards!
+					}
+				}
+				else
+				{
+					//keep original name(s)
+					segmentationResult->setName(entity->getName());
+					if (entity->isKindOf(CC_TYPES::MESH) && segmentationResult->isKindOf(CC_TYPES::MESH))
+					{
+						ccGenericMesh* meshEntity = ccHObjectCaster::ToGenericMesh(entity);
+						ccHObjectCaster::ToGenericMesh(segmentationResult)->getAssociatedCloud()->setName(meshEntity->getAssociatedCloud()->getName());
+
+						//specific case: if the sub mesh is deleted afterwards (see below)
+						//then its associated vertices won't be 'reset' by the segmentation tool!
+						if (m_deleteHiddenParts && meshEntity->isA(CC_TYPES::SUB_MESH))
+						{
+							verticesToReset.insert(meshEntity->getAssociatedCloud());
+						}
+					}
+				}
+
+				if (segmentationResult->isA(CC_TYPES::SUB_MESH))
+				{
+					//for sub-meshes, we have no choice but to use its parent mesh!
+					objContext.parent = static_cast<ccSubMesh*>(segmentationResult)->getAssociatedMesh();
+				}
+				else
+				{
+					//otherwise we look for first non-mesh or non-cloud parent
+					while (objContext.parent && (objContext.parent->isKindOf(CC_TYPES::MESH) || objContext.parent->isKindOf(CC_TYPES::POINT_CLOUD)))
+					{
+						objContext.parent = objContext.parent->getParent();
+					}
+				}
+
+				if (objContext.parent)
+				{
+					objContext.parent->addChild(segmentationResult); //FiXME: objContext.parentFlags?
+				}
+
+				segmentationResult->setDisplay_recursive(entity->getDisplay());
+				segmentationResult->prepareDisplayForRefresh_recursive();
+
+				app->addToDB(segmentationResult, false, true, false, false);
+
+				newEntities.push_back(segmentationResult);
+			}
+			else if (!deleteOriginalEntity)
+			{
+				//ccConsole::Error(tr("An error occurred! (not enough memory?)"));
+				if (canModify)
+				{
+					app->putObjectBackIntoDBTree(entity, objContext);
+				}
+			}
+
+			if (deleteOriginalEntity)
+			{
+				prepareEntityForRemoval(entity, false);
+
+				p = m_toSegment.erase(p);
+
+				delete entity;
+				entity = nullptr;
+			}
+			else
+			{
+				++p;
+			}
+		}
+		else if (entity->isKindOf(CC_TYPES::POLY_LINE))
+		{
+			ccPolyline* poly = static_cast<ccPolyline*>(entity);
+			ccHObject* polyParent = poly->getParent();
+			if (!polyParent)
+			{
+				polyParent = app->dbRootObject();
+			}
+			assert(polyParent);
+
+			std::vector<ccPolyline*> polylines;
+			if (poly->createNewPolylinesFromSelection(polylines))
+			{
+				for (ccPolyline* p : polylines)
+				{
+					p->setDisplay_recursive(poly->getDisplay());
+					if (polyParent)
+						polyParent->addChild(p);
+					app->addToDB(p, false, true, false, false);
+					newEntities.push_back(p);
+				}
+				poly->prepareDisplayForRefresh();
+			}
+
+			++p;
+		}
+		else
+		{
+			assert(false);
+			++p;
+		}
+	}
+
+	//specific actions
+	{
+		for (ccGenericPointCloud *cloud : verticesToReset)
+		{
+			cloud->resetVisibilityArray();
+		}
+	}
+
+	removeAllEntities(!m_deleteHiddenParts);
+
+	return true;
 }

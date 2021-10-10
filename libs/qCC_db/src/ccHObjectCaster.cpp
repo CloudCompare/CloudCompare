@@ -103,6 +103,16 @@ ccGenericPointCloud* ccHObjectCaster::ToGenericPointCloud(ccHObject* obj, bool* 
 				return vertices;
 			}
 		}
+		else if (obj->isKindOf(CC_TYPES::POLY_LINE))
+		{
+			ccPolyline* poly = static_cast<ccPolyline*>(obj);
+			ccGenericPointCloud* vertices = dynamic_cast<ccGenericPointCloud*>(poly->getAssociatedCloud());
+			if (lockedVertices)
+			{
+				*lockedVertices = true;
+			}
+			return vertices;
+		}
 	}
 
 	return nullptr;

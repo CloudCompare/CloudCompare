@@ -1949,8 +1949,8 @@ static ccHObject* LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 
 	if (sensor) //add the sensor at the end, after calling applyGLTransformation_recursive!
 	{
-		sensor->setVisible(false);
 		sensor->setEnabled(false);
+		sensor->setVisible(true);
 		sensor->setGraphicScale(cloud->getOwnBB().getDiagNorm() / 20);
 		cloud->addChild(sensor);
 	}

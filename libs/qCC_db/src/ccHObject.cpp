@@ -1254,3 +1254,48 @@ bool ccHObject::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 
 	return true;
 }
+
+struct HObjectDisplayState : ccDrawableObject::DisplayState
+{
+	HObjectDisplayState() {}
+
+	HObjectDisplayState(const ccHObject& obj)
+		: ccDrawableObject::DisplayState(obj)
+		, isEnabled(obj.isEnabled())
+	{}
+
+	bool isEnabled = false;
+};
+
+bool ccHObject::pushDisplayState()
+{
+	try
+	{
+		m_displayStateStack.emplace_back(new HObjectDisplayState(*this));
+	}
+	catch (const std::bad_alloc&)
+	{
+		ccLog::Warning("Not enough memory to push the current display state");
+		return false;
+	}
+
+	return true;
+}
+
+void ccHObject::popDisplayState(bool apply/*=true*/)
+{
+	if (!m_displayStateStack.empty())
+	{
+		const DisplayState::Shared state = m_displayStateStack.back();
+		if (state && apply)
+		{
+			HObjectDisplayState* hState = static_cast<HObjectDisplayState*>(state.data());
+			if (hState->isEnabled != isEnabled())
+			{
+				setEnabled(hState->isEnabled);
+			}
+			applyDisplayState(*state);
+		}
+		m_displayStateStack.pop_back();
+	}
+}

@@ -34,6 +34,9 @@ v2.12 (???) - (in development)
 		- former 'contours' renamed 'envelopes' for the sake of clarity
 		- ability to extract the real contours of the points inside each slice (single slice mode or 'repeat' mode)
 			(CC will rasterize the slice and apply the 'contour plot' extraction algorithm)
+	- Graphical Segmentation Tool (scissors):
+		- the tool can now segment polylines (it will only keep segments with both vertices visible)
+		- various improvements (visibility of segmented entities is forced for more clarity, etc.)
 	- qCompass:
 		- planes fitted with the 'Plane tool' should now always have the normal pointing towards the user instead of a random orientation
 	- qAnimation:

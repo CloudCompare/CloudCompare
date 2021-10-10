@@ -204,7 +204,7 @@ void ccDrawableObject::toggleClipPlanes(CC_DRAW_CONTEXT& context, bool enable)
 		}
 		planeCount = maxPlaneCount;
 	}
-	for (GLint i=0; i<planeCount; ++i)
+	for (GLint i = 0; i < planeCount; ++i)
 	{
 		GLenum planeIndex = GL_CLIP_PLANE0 + i;
 		if (enable)
@@ -218,3 +218,62 @@ void ccDrawableObject::toggleClipPlanes(CC_DRAW_CONTEXT& context, bool enable)
 		}
 	}
 }
+
+ccDrawableObject::DisplayState::DisplayState(const ccDrawableObject& dobj)
+	: visible(dobj.m_visible)
+	, colorsDisplayed(dobj.m_colorsDisplayed)
+	, normalsDisplayed(dobj.m_normalsDisplayed)
+	, sfDisplayed(dobj.m_sfDisplayed)
+	, colorIsOverridden(dobj.m_colorIsOverridden)
+	, showNameIn3D(dobj.m_showNameIn3D)
+	, display(dobj.m_currentDisplay)
+{
+}
+
+bool ccDrawableObject::pushDisplayState()
+{
+	try
+	{
+		m_displayStateStack.emplace_back(new DisplayState(*this));
+	}
+	catch (const std::bad_alloc&)
+	{
+		ccLog::Warning("Not enough memory to push the current display state");
+		return false;
+	}
+
+	return true;
+}
+
+void ccDrawableObject::popDisplayState(bool apply/*=true*/)
+{
+	if (!m_displayStateStack.empty())
+	{
+		const DisplayState::Shared state = m_displayStateStack.back();
+		if (state && apply)
+		{
+			applyDisplayState(*state);
+		}
+		m_displayStateStack.pop_back();
+	}
+}
+
+void ccDrawableObject::applyDisplayState(const DisplayState& state)
+{
+	if (state.visible != m_visible)
+		setVisible(state.visible);
+	if (state.colorsDisplayed != m_colorsDisplayed)
+		showColors(state.colorsDisplayed);
+	if (state.normalsDisplayed != m_normalsDisplayed)
+		showNormals(state.normalsDisplayed);
+	if (state.sfDisplayed != m_sfDisplayed)
+		showSF(state.sfDisplayed);
+	if (state.colorIsOverridden != m_colorIsOverridden)
+		enableTempColor(state.colorIsOverridden);
+	if (state.showNameIn3D != m_showNameIn3D)
+		showNameIn3D(state.showNameIn3D);
+	if (state.display != m_currentDisplay)
+		setDisplay(state.display);
+}
+
+

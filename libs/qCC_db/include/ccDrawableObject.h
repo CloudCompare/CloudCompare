@@ -246,6 +246,35 @@ public: //clipping planes
 	**/
 	virtual void toggleClipPlanes(CC_DRAW_CONTEXT& context, bool enable);
 
+
+public: //push and pop display state
+
+	//! Display state
+	struct DisplayState
+	{
+		DisplayState() {}
+		DisplayState(const ccDrawableObject& dobj);
+
+		using Shared = QSharedPointer<DisplayState>;
+
+		bool visible = false;
+		bool colorsDisplayed = false;
+		bool normalsDisplayed = false;
+		bool sfDisplayed = false;
+		bool colorIsOverridden = false;
+		bool showNameIn3D = false;
+		ccGenericGLDisplay* display = nullptr;
+	};
+
+	//! Pushes the current display state
+	virtual bool pushDisplayState();
+
+	//! Pops the last pushed display state
+	virtual void popDisplayState(bool apply = true);
+
+	//! Applies a display state
+	virtual void applyDisplayState(const DisplayState& state);
+
 protected: //members
 
 	//! Specifies whether the object is visible or not
@@ -290,6 +319,9 @@ protected: //members
 
 	//! Active clipping planes (used for display only)
 	ccClipPlaneSet m_clipPlanes;
+
+	//! The stack of pushed display states
+	std::vector<DisplayState::Shared> m_displayStateStack;
 };
 
 #endif //CC_DRAWABLE_OBJECT_HEADER

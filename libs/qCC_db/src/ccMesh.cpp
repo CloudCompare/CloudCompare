@@ -2543,8 +2543,6 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 	//shall we remove the selected faces from this mesh?
 	if (removeSelectedFaces)
 	{
-		ccLog::Warning("Remove faces!");
-
 		//we remove all fully visible faces
 		size_t lastTri = 0;
 		for (size_t i = 0; i < triNum; ++i)

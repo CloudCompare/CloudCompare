@@ -43,7 +43,7 @@ mkdir build & cd build
 cmake -DCMAKE_PREFIX_PATH=C:\Qt\5.15.2\msvc2019_64 ..
 
 # macOs
-mkdir build & cd build
+mkdir build && cd build
 cmake -DCMAKE_PREFIX_PATH=/usr/local/opt/qt@5 ..
 ```
 

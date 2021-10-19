@@ -80,7 +80,7 @@ ccColorScale::Shared ccColorScale::copy(const QString& uuid/*=QString()*/) const
 	catch (const std::bad_alloc&)
 	{
 		ccLog::Warning("Not enough memory to copy the color scale");
-		return nullptr;
+		return ccColorScale::Shared(nullptr);
 	}
 
 	return newCS;

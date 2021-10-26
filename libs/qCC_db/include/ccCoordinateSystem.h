@@ -70,9 +70,9 @@ public:
 	inline PointCoordinateType getDisplayScale() const { return m_DisplayScale; };
 	void setDisplayScale(PointCoordinateType size);
 
-	ccPlane getXYplane() const;
-	ccPlane getYZplane() const;
-	ccPlane getZXplane() const;
+	CCVector3 getXYPlaneNormal() const;
+	CCVector3 getYZPlaneNormal() const;
+	CCVector3 getZXPlaneNormal() const;
 
 	//! Default Display scale
 	static constexpr PointCoordinateType DEFAULT_DISPLAY_SCALE = 1.0;
@@ -95,9 +95,9 @@ protected:
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
 	virtual bool buildUp() override;
 
-	ccPlane createXYplane(const ccGLMatrix* transMat = nullptr) const;
-	ccPlane createYZplane(const ccGLMatrix* transMat = nullptr) const;
-	ccPlane createZXplane(const ccGLMatrix* transMat = nullptr) const;
+	ccPlane* createXYplane(const ccGLMatrix* transMat = nullptr) const;
+	ccPlane* createYZplane(const ccGLMatrix* transMat = nullptr) const;
+	ccPlane* createZXplane(const ccGLMatrix* transMat = nullptr) const;
 
 	//! CoordinateSystem options
 	PointCoordinateType m_DisplayScale;

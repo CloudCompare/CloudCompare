@@ -489,6 +489,10 @@ protected: //members
 	using triangleNormalsIndexesSet = ccArray<Tuple3i, 3, int>;
 	//! Mesh normals indexes (per-triangle)
 	triangleNormalsIndexesSet* m_triNormalIndexes;
+
+private:
+	//! Copy of a ccMesh instance is not supported (because of all the pointers to the members)
+	ccMesh(const ccMesh&) {}
 };
 
 #endif //CC_MESH_HEADER

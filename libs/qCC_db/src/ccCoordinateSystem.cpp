@@ -95,65 +95,62 @@ void ccCoordinateSystem::setDisplayScale(PointCoordinateType size)
 	}
 }
 
-ccPlane ccCoordinateSystem::getXYplane() const
+CCVector3 ccCoordinateSystem::getXYPlaneNormal() const
 {
-	ccPlane xyPlane = createXYplane(&m_transformation);
-	return xyPlane;
+	return m_transformation.getColumnAsVec3D(2);
 }
-ccPlane ccCoordinateSystem::getYZplane() const
+CCVector3 ccCoordinateSystem::getYZPlaneNormal() const
 {
-	ccPlane yzPlane = createYZplane(&m_transformation);
-	return yzPlane;
+	return m_transformation.getColumnAsVec3D(0);
 }
-ccPlane ccCoordinateSystem::getZXplane() const
+CCVector3 ccCoordinateSystem::getZXPlaneNormal() const
 {
-	ccPlane zxPlane = createZXplane(&m_transformation);
-	return zxPlane;
+	return m_transformation.getColumnAsVec3D(1);
 }
 
-ccPlane ccCoordinateSystem::createXYplane(const ccGLMatrix* transMat) const
+ccPlane* ccCoordinateSystem::createXYplane(const ccGLMatrix* transMat) const
 {
-	ccGLMatrix xyPlane_mtrx;
-	xyPlane_mtrx.toIdentity();
-	xyPlane_mtrx.setTranslation(CCVector3(m_DisplayScale / 2, m_DisplayScale / 2, 0.0));
+	ccGLMatrix xyPlaneMat;
+	xyPlaneMat.toIdentity();
+	xyPlaneMat.setTranslation(CCVector3(m_DisplayScale / 2, m_DisplayScale / 2, 0.0));
 	if (transMat)
 	{
-		xyPlane_mtrx = *transMat * xyPlane_mtrx;
+		xyPlaneMat = *transMat * xyPlaneMat;
 	}
-	ccPlane xyPlane(m_DisplayScale, m_DisplayScale, &xyPlane_mtrx);
-	xyPlane.setColor(ccColor::red);
+	ccPlane* xyPlane = new ccPlane(m_DisplayScale, m_DisplayScale, &xyPlaneMat);
+	xyPlane->setColor(ccColor::red);
 	return xyPlane;
 }
 
-ccPlane ccCoordinateSystem::createYZplane(const ccGLMatrix* transMat) const
+ccPlane* ccCoordinateSystem::createYZplane(const ccGLMatrix* transMat) const
 {
-	ccGLMatrix yzPlane_mtrx;
-	yzPlane_mtrx.initFromParameters(static_cast<PointCoordinateType>(1.57079633),
-		static_cast<PointCoordinateType>(0),
-		static_cast<PointCoordinateType>(1.57079633),
-		CCVector3(0.0, m_DisplayScale / 2, m_DisplayScale / 2));
+	ccGLMatrix yzPlaneMat;
+	yzPlaneMat.initFromParameters(	static_cast<PointCoordinateType>(M_PI_2),
+										static_cast<PointCoordinateType>(0),
+										static_cast<PointCoordinateType>(M_PI_2),
+										CCVector3(0.0, m_DisplayScale / 2, m_DisplayScale / 2));
 	if (transMat)
 	{
-		yzPlane_mtrx = *transMat * yzPlane_mtrx;
+		yzPlaneMat = *transMat * yzPlaneMat;
 	}
-	ccPlane yzPlane(m_DisplayScale, m_DisplayScale, &yzPlane_mtrx);
-	yzPlane.setColor(ccColor::green);
+	ccPlane* yzPlane = new ccPlane(m_DisplayScale, m_DisplayScale, &yzPlaneMat);
+	yzPlane->setColor(ccColor::green);
 	return yzPlane;
 }
 
-ccPlane ccCoordinateSystem::createZXplane(const ccGLMatrix* transMat) const
+ccPlane* ccCoordinateSystem::createZXplane(const ccGLMatrix* transMat) const
 {
-	ccGLMatrix zxPlane_mtrx;
-	zxPlane_mtrx.initFromParameters(static_cast<PointCoordinateType>(0),
-		static_cast<PointCoordinateType>(-1.57079633),
-		static_cast<PointCoordinateType>(-1.57079633),
+	ccGLMatrix zxPlaneMat;
+	zxPlaneMat.initFromParameters(static_cast<PointCoordinateType>(0),
+									static_cast<PointCoordinateType>(-M_PI_2),
+									static_cast<PointCoordinateType>(-M_PI_2),
 		CCVector3(m_DisplayScale / 2, 0, m_DisplayScale / 2));
 	if (transMat)
 	{
-		zxPlane_mtrx = *transMat * zxPlane_mtrx;
+		zxPlaneMat = *transMat * zxPlaneMat;
 	}
-	ccPlane zxPlane(m_DisplayScale, m_DisplayScale, &zxPlane_mtrx);
-	zxPlane.setColor(ccColor::FromRgbfToRgb(ccColor::Rgbf(0.0f, 0.7f, 1.0f)));
+	ccPlane* zxPlane = new ccPlane(m_DisplayScale, m_DisplayScale, &zxPlaneMat);
+	zxPlane->setColor(ccColor::FromRgbfToRgb(ccColor::Rgbf(0.0f, 0.7f, 1.0f)));
 	return zxPlane;
 }
 
@@ -177,10 +174,9 @@ bool ccCoordinateSystem::buildUp()
 		verts->clear();
 	}
 
-	*this += createXYplane();
-	*this += createYZplane();
-	*this += createZXplane();
-	
+	*this += *QScopedPointer<ccPlane>(createXYplane());
+	*this += *QScopedPointer<ccPlane>(createYZplane());
+	*this += *QScopedPointer<ccPlane>(createZXplane());
 
 	return (vertices() && vertices()->size() == 12 && this->size() == 6);
 }

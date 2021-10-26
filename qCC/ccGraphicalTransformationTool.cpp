@@ -383,19 +383,19 @@ bool ccGraphicalTransformationTool::setAdvRotationAxis(ccHObject* rotateRef, rot
 		{
 			case rotComboBoxItems::X:
 			{
-				arbitraryVec = cs->getYZplane().getNormal();
+				arbitraryVec = cs->getYZPlaneNormal();
 				break;
 			}
 			case rotComboBoxItems::Y:
 			{
-				arbitraryVec = cs->getZXplane().getNormal();
+				arbitraryVec = cs->getZXPlaneNormal();
 				break;
 			}
 			case rotComboBoxItems::Z:
 			default:
 			{
 				selectedAxis = rotComboBoxItems::Z;
-				arbitraryVec = cs->getXYplane().getNormal();
+				arbitraryVec = cs->getXYPlaneNormal();
 				break;
 			}
 		}

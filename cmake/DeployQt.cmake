@@ -47,8 +47,13 @@ function( DeployQt )
 		
 	if ( APPLE )
 		set( app_name "${name}.app" )
-		set( app_path "${CMAKE_CURRENT_BINARY_DIR}/${app_name}" )
-		set( temp_dir "${CMAKE_CURRENT_BINARY_DIR}/deployqt" )
+		if (CMAKE_CONFIGURATION_TYPES)
+			set(app_path "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/${app_name}")
+			set(temp_dir "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/deployqt")
+		else ()
+			set(app_path "${CMAKE_CURRENT_BINARY_DIR}/${app_name}")
+			set(temp_dir "${CMAKE_CURRENT_BINARY_DIR}/deployqt")
+		endif ()
 		set( temp_app_path "${temp_dir}/$<CONFIG>/${app_name}" )
 
 		add_custom_command(

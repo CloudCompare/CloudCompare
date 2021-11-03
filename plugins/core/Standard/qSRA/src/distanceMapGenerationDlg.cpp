@@ -227,6 +227,8 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 		m_window->setInteractionMode(ccGLWindow::INTERACT_PAN | ccGLWindow::INTERACT_CLICKABLE_ITEMS | ccGLWindow::INTERACT_ZOOM_CAMERA);
 		m_window->displayOverlayEntities(false);
 		m_window->showSF(displayColorScaleCheckBox->isChecked());
+		m_window->setSunLight(true);
+		m_window->setCustomLight(false);
 		//add window to the right side layout
 		mapFrame->setLayout(new QHBoxLayout());
 #ifdef CC_GL_WINDOW_USE_QWINDOW
@@ -1710,7 +1712,7 @@ void DistanceMapGenerationDlg::labelFontSizeChanged(int)
 	//update window font-size
 	ccGui::ParamStruct params = m_window->getDisplayParameters();
 	params.defaultFontSize = fontSize;
-	m_window->setDisplayParameters(params,true);
+	m_window->setDisplayParameters(params, true);
 
 	m_window->redraw();
 }
@@ -1723,7 +1725,7 @@ void DistanceMapGenerationDlg::labelPrecisionChanged(int prec)
 	//update numerical precision
 	ccGui::ParamStruct params = m_window->getDisplayParameters();
 	params.displayedNumPrecision = prec;
-	m_window->setDisplayParameters(params,true);
+	m_window->setDisplayParameters(params, true);
 
 	m_window->redraw();
 }

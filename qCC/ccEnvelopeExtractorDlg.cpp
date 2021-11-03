@@ -77,6 +77,8 @@ void ccEnvelopeExtractorDlg::init()
 		m_glWindow->setInteractionMode(ccGLWindow::INTERACT_PAN | ccGLWindow::INTERACT_ZOOM_CAMERA | ccGLWindow::INTERACT_CLICKABLE_ITEMS);
 		m_glWindow->setPickingMode(ccGLWindow::NO_PICKING);
 		m_glWindow->displayOverlayEntities(true);
+		m_glWindow->setSunLight(true);
+		m_glWindow->setCustomLight(false);
 		viewFrame->setLayout(new QHBoxLayout);
 		viewFrame->layout()->addWidget(glWidget);
 	}

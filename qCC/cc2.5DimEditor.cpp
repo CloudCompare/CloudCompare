@@ -105,7 +105,9 @@ void cc2Point5DimEditor::create2DView(QFrame* parentFrame)
 		m_glWindow->setInteractionMode(ccGLWindow::INTERACT_PAN | ccGLWindow::INTERACT_ZOOM_CAMERA | ccGLWindow::INTERACT_CLICKABLE_ITEMS);
 		m_glWindow->setPickingMode(ccGLWindow::NO_PICKING);
 		m_glWindow->displayOverlayEntities(true);
-		
+		m_glWindow->setSunLight(true);
+		m_glWindow->setCustomLight(false);
+
 		//add window to the input frame (if any)
 		if (parentFrame)
 		{

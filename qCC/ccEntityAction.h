@@ -46,6 +46,7 @@ namespace ccEntityAction
 	bool	exportNormalToSF(const ccHObject::Container &selectedEntities, QWidget *parent, bool* exportDimensions = nullptr);
 	bool	sfArithmetic(const ccHObject::Container &selectedEntities, QWidget *parent);
 	bool	sfFromColor(const ccHObject::Container &selectedEntities, QWidget *parent);
+	bool	sfFromColor(const ccHObject::Container &selectedEntities, bool exportR, bool exportG, bool exportB, bool exportAlpha, bool exportComposite);
 	bool	interpolateSFs(const ccHObject::Container &selectedEntities, ccMainAppInterface *parent);
 
 	bool	processMeshSF(const ccHObject::Container &selectedEntities, ccMesh::MESH_SCALAR_FIELD_PROCESS process, QWidget *parent);

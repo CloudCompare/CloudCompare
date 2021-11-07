@@ -350,18 +350,36 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		}
 	}
 
-	//Try to use the global shift if no LAS offset is defined
-	if (!hasOffsetMetaData && theCloud->isShifted())
+	if (!hasOffsetMetaData)
 	{
-		lasOffset = -theCloud->getGlobalShift(); //'global shift' is the opposite of LAS offset ;)
-		hasOffsetMetaData = true;
+		//Try to use the global shift if no LAS offset is defined
+		if (theCloud->isShifted())
+		{
+			lasOffset = -theCloud->getGlobalShift(); //'global shift' is the opposite of LAS offset ;)
+			hasOffsetMetaData = true;
+		}
+		else
+		{
+			//If we don't have any offset, let's use the min bounding-box corner
+			if (ccGlobalShiftManager::NeedShift(bbMax))
+			{
+				//we have no choice, we'll use the min bounding box
+				lasOffset.x = bbMin.x;
+				lasOffset.y = bbMin.y;
+				lasOffset.z = 0;
+			}
+		}
 	}
-
-	//If we don't have any offset, let's use the min bounding-box corner
-	if (!hasOffsetMetaData && ccGlobalShiftManager::NeedShift(bbMax))
+	else
 	{
-		//we have no choice, we'll use the min bounding box
-		lasOffset = bbMin;
+		//We should still check that the offset 'works'
+		if (ccGlobalShiftManager::NeedShift(bbMax - lasOffset))
+		{
+			ccLog::Warning("[LAS] The former LAS_OFFSET doesn't seem to be optimal. Using the minimum bounding-box corner instead.");
+			lasOffset.x = bbMin.x;
+			lasOffset.y = bbMin.y;
+			lasOffset.z = 0;
+		}
 	}
 
 	// maximum cloud 'extents' relatively to the 'offset' point

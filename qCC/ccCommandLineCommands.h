@@ -160,6 +160,13 @@ struct CommandSFConvertToRGB : public ccCommandLineInterface::Command
 	bool process(ccCommandLineInterface& cmd) override;
 };
 
+struct CommandRGBConvertToSF : public ccCommandLineInterface::Command
+{
+	CommandRGBConvertToSF();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
 struct CommandFilterBySFValue : public ccCommandLineInterface::Command
 {
 	CommandFilterBySFValue();

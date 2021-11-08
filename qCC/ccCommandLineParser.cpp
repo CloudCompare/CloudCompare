@@ -710,6 +710,7 @@ void ccCommandLineParser::registerBuiltInCommands()
 	registerCommand(Command::Shared(new CommandSFConvertToRGB));
 	registerCommand(Command::Shared(new CommandMoment));
 	registerCommand(Command::Shared(new CommandFeature));
+	registerCommand(Command::Shared(new CommandRGBConvertToSF));
 
 }
 

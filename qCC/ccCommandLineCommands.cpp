@@ -139,6 +139,7 @@ constexpr char COMMAND_POP_MESHES[]						= "POP_MESHES";
 constexpr char COMMAND_NO_TIMESTAMP[]					= "NO_TIMESTAMP";
 constexpr char COMMAND_MOMENT[]							= "MOMENT";
 constexpr char COMMAND_FEATURE[]						= "FEATURE";
+constexpr char COMMAND_RGB_CONVERT_TO_SF				= "RGB_CONVERT_TO_SF"
 
 //options / modifiers
 constexpr char COMMAND_MAX_THREAD_COUNT[]				= "MAX_TCOUNT";
@@ -1839,6 +1840,49 @@ bool CommandSFConvertToRGB::process(ccCommandLineInterface &cmd)
 		return false;
 	}
 	
+	return true;
+}
+
+CommandRGBConvertToSF::CommandRGBConvertToSF()
+	: ccCommandLineInterface::Command(QObject::tr("RGB convert to SF"), COMMAND_RGB_CONVERT_TO_SF)
+{}
+
+bool CommandRGBConvertToSF::process(ccCommandLineInterface &cmd)
+{
+	cmd.print(QObject::tr("[RGB CONVERT TO SF]"));
+	if (cmd.clouds().empty())
+	{
+		return cmd.error(QObject::tr("No point cloud on which to convert RGB to SF! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_RGB_CONVERT_TO_SF));
+	}
+
+	for (CLCloudDesc& thisCloudDesc : cmd.clouds())
+	{
+		ccPointCloud* cloud = thisCloudDesc.pc;
+
+		if (!cloud->hasColors())
+		{
+			cmd.warning(QObject::tr("Cloud %1 has no colors").arg(cloud->getName()));
+			continue;
+		}
+
+		ccHObject::Container container;
+		container.push_back(cloud);
+		if (!ccEntityAction::sfFromColors(container, exportR=False, exportG=False, exportB=False, exportAlpha=False, exportC=True)) //beta version, only composite
+		{
+			return cmd.error(QObject::tr("Failed to convert RGB to scalar fields"));
+		}
+        
+
+		if (cmd.autoSaveMode())
+		{
+			QString errorStr = cmd.exportEntity(thisCloudDesc, "_RGB_TO_SF");
+			if (!errorStr.isEmpty())
+			{
+				return cmd.error(errorStr);
+			}
+		}
+	}
+
 	return true;
 }
 

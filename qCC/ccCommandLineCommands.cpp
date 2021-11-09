@@ -139,7 +139,7 @@ constexpr char COMMAND_POP_MESHES[]						= "POP_MESHES";
 constexpr char COMMAND_NO_TIMESTAMP[]					= "NO_TIMESTAMP";
 constexpr char COMMAND_MOMENT[]							= "MOMENT";
 constexpr char COMMAND_FEATURE[]						= "FEATURE";
-constexpr char COMMAND_RGB_CONVERT_TO_SF				= "RGB_CONVERT_TO_SF"
+constexpr char COMMAND_RGB_CONVERT_TO_SF[]				= "RGB_CONVERT_TO_SF"
 
 //options / modifiers
 constexpr char COMMAND_MAX_THREAD_COUNT[]				= "MAX_TCOUNT";

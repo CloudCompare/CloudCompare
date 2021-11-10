@@ -1867,7 +1867,7 @@ bool CommandRGBConvertToSF::process(ccCommandLineInterface &cmd)
 
 		ccHObject::Container container;
 		container.push_back(cloud);
-		if (!ccEntityAction::sfFromColors(container, /*exportR=*/false, /*exportG=*/false, /*exportB=*/false, /*exportAlpha=*/false, /*exportC=*/true)) //beta version, only composite
+		if (!ccEntityAction::sfFromColor(container, /*exportR=*/false, /*exportG=*/false, /*exportB=*/false, /*exportAlpha=*/false, /*exportC=*/true)) //beta version, only composite
 		{
 			return cmd.error(QObject::tr("Failed to convert RGB to scalar fields"));
 		}

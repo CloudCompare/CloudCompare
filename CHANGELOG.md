@@ -13,6 +13,8 @@ v2.12 (???) - (in development)
 		- Specify the option followed by a numeric value to filter by N * standardDeviation around the mean.
 	- NORMALS_TO_HSV
 		- To convert normals to HSV colors
+	- RGB_CONVERT_TO_SF
+	- 	- To convert RGB colors to 5 scalar fields (red, green, blue, alpha, composite)
 
 - Improvements
 	- Rasterize

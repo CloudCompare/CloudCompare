@@ -635,6 +635,9 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 			++numberOfPointsInCell;
 		}
 
+		//round the timing to avoid increasing the octree level for super small differences (which is generally counter productive)
+		timings[level] = static_cast<int64_t>(timings[level] * 10) / 10.0;
+
 		////very high levels are unlikely (levelModifier ~ 0.85 @ level 20)
 		//{
 		//	double levelModifier = level < 12 ? 1.0 : exp(-pow(level-12,2)/(20*20));

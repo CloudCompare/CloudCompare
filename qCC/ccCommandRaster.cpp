@@ -34,6 +34,7 @@ constexpr char COMMAND_RASTER_FILL_CUSTOM_HEIGHT[]		= "CUSTOM_H";
 constexpr char COMMAND_RASTER_FILL_INTERPOLATE[]		= "INTERP";
 constexpr char COMMAND_RASTER_PROJ_TYPE[]				= "PROJ";
 constexpr char COMMAND_RASTER_SF_PROJ_TYPE[]			= "SF_PROJ";
+constexpr char COMMAND_RASTER_INTERP_MAX_EDGE_LENGTH[]	= "MAX_EDGE_LENGTH";
 constexpr char COMMAND_RASTER_PROJ_MIN[]				= "MIN";
 constexpr char COMMAND_RASTER_PROJ_MAX[]				= "MAX";
 constexpr char COMMAND_RASTER_PROJ_AVG[]				= "AVG";
@@ -114,6 +115,7 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 	ccRasterGrid::ProjectionType projectionType = ccRasterGrid::PROJ_AVERAGE_VALUE;
 	ccRasterGrid::ProjectionType sfProjectionType = ccRasterGrid::PROJ_AVERAGE_VALUE;
 	ccRasterGrid::EmptyCellFillOption emptyCellFillStrategy = ccRasterGrid::LEAVE_EMPTY;
+	double maxEdgeLength = 0.0;
 
 	while (!cmd.arguments().empty())
 	{
@@ -226,6 +228,18 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 
 			sfProjectionType = GetProjectionType(cmd.arguments().takeFirst().toUpper(), cmd);
 		}
+		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_RASTER_INTERP_MAX_EDGE_LENGTH))
+		{
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
+
+			bool ok = false;
+			maxEdgeLength = cmd.arguments().takeFirst().toDouble(&ok);
+			if (!ok || maxEdgeLength < 0.0)
+			{
+				return cmd.error(QString("Invalid max edge length value! (after %1)").arg(COMMAND_RASTER_INTERP_MAX_EDGE_LENGTH));
+			}
+		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_RASTER_RESAMPLE))
 		{
 			//local option confirmed, we can move on
@@ -319,6 +333,7 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 			                  vertDir,
 			                  projectionType,
 			                  emptyCellFillStrategy == ccRasterGrid::INTERPOLATE,
+			                  maxEdgeLength,
 			                  sfProjectionType,
 			                  pDlg.data()))
 			{
@@ -647,7 +662,9 @@ bool CommandVolume25D::process(ccCommandLineInterface &cmd)
 	            gridHeight,
 	            ccRasterGrid::PROJ_AVERAGE_VALUE,
 	            ccRasterGrid::LEAVE_EMPTY,
+				0.0,
 	            ccRasterGrid::LEAVE_EMPTY,
+				0.0,
 	            reportInfo,
 	            constHeight,
 	            constHeight,

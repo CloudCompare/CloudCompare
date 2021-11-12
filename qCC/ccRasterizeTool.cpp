@@ -84,13 +84,14 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent)
 	connect(m_UI->buttonBox,	&QDialogButtonBox::accepted,	this,	&ccRasterizeTool::testAndAccept);
 	connect(m_UI->buttonBox,	&QDialogButtonBox::rejected,	this,	&ccRasterizeTool::testAndReject);
 	
-	connect(m_UI->gridStepDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccRasterizeTool::updateGridInfo);
-	connect(m_UI->gridStepDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccRasterizeTool::gridOptionChanged);
-	connect(m_UI->emptyValueDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccRasterizeTool::gridOptionChanged);
-	connect(m_UI->dimensionComboBox,		static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),			this,	&ccRasterizeTool::projectionDirChanged);
-	connect(m_UI->heightProjectionComboBox,	static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),			this,	&ccRasterizeTool::projectionTypeChanged);
-	connect(m_UI->scalarFieldProjection,	static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),			this,	&ccRasterizeTool::sfProjectionTypeChanged);
-	connect(m_UI->fillEmptyCellsComboBox,	static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),			this,	&ccRasterizeTool::fillEmptyCellStrategyChanged);
+	connect(m_UI->gridStepDoubleSpinBox,	  static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccRasterizeTool::updateGridInfo);
+	connect(m_UI->gridStepDoubleSpinBox,	  static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccRasterizeTool::gridOptionChanged);
+	connect(m_UI->emptyValueDoubleSpinBox,	  static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccRasterizeTool::gridOptionChanged);
+	connect(m_UI->maxEdgeLengthDoubleSpinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,	&ccRasterizeTool::gridOptionChanged);
+	connect(m_UI->dimensionComboBox,		  static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),		this,	&ccRasterizeTool::projectionDirChanged);
+	connect(m_UI->heightProjectionComboBox,	  static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),		this,	&ccRasterizeTool::projectionTypeChanged);
+	connect(m_UI->scalarFieldProjection,	  static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),		this,	&ccRasterizeTool::sfProjectionTypeChanged);
+	connect(m_UI->fillEmptyCellsComboBox,	  static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),		this,	&ccRasterizeTool::fillEmptyCellStrategyChanged);
 	
 	connect(m_UI->resampleCloudCheckBox,		&QAbstractButton::toggled,	this,	&ccRasterizeTool::resampleOptionToggled);
 	connect(m_UI->updateGridPushButton,			&QAbstractButton::clicked,	this,	&ccRasterizeTool::updateGridAndDisplay);
@@ -351,10 +352,17 @@ void ccRasterizeTool::fillEmptyCellStrategyChanged(int)
 {
 	ccRasterGrid::EmptyCellFillOption fillEmptyCellsStrategy = getFillEmptyCellsStrategy(m_UI->fillEmptyCellsComboBox);
 
-	bool active = fillEmptyCellsStrategy == ccRasterGrid::FILL_CUSTOM_HEIGHT ||	fillEmptyCellsStrategy == ccRasterGrid::INTERPOLATE;
-	
-	m_UI->emptyValueDoubleSpinBox->setEnabled( active );
-	m_UI->emptyValueDoubleSpinBox->setVisible( active );
+	// empty cell value
+	{
+		bool active = (fillEmptyCellsStrategy == ccRasterGrid::FILL_CUSTOM_HEIGHT) || (fillEmptyCellsStrategy == ccRasterGrid::INTERPOLATE);
+		m_UI->emptyValueDoubleSpinBox->setEnabled(active);
+		m_UI->emptyValueDoubleSpinBox->setVisible(active);
+	}
+
+	// max edge length
+	{
+		m_UI->maxEdgeLengthDoubleSpinBox->setEnabled(fillEmptyCellsStrategy == ccRasterGrid::INTERPOLATE);
+	}
 
 	gridIsUpToDate(false);
 }
@@ -419,6 +427,7 @@ void ccRasterizeTool::loadSettings()
 	bool sfProj					= settings.value("SfProjEnabled",         m_UI->interpolateSFCheckBox->isChecked()).toBool();
 	int sfProjStrategy			= settings.value("SfProjStrategy",        m_UI->scalarFieldProjection->currentIndex()).toInt();
 	int fillStrategy			= settings.value("FillStrategy",          m_UI->fillEmptyCellsComboBox->currentIndex()).toInt();
+	double maxEdgeLength		= settings.value("MaxEdgeLength",         m_UI->maxEdgeLengthDoubleSpinBox->value()).toDouble();
 	double step					= settings.value("GridStep",              m_UI->gridStepDoubleSpinBox->value()).toDouble();
 	double emptyHeight			= settings.value("EmptyCellsHeight",      m_UI->emptyValueDoubleSpinBox->value()).toDouble();
 	bool genCountSF				= settings.value("GenerateCountSF",       m_UI->generateCountSFcheckBox->isChecked()).toBool();
@@ -438,6 +447,7 @@ void ccRasterizeTool::loadSettings()
 	m_UI->gridStepDoubleSpinBox->setValue(step);
 	m_UI->heightProjectionComboBox->setCurrentIndex(projType);
 	m_UI->fillEmptyCellsComboBox->setCurrentIndex(fillStrategy);
+	m_UI->maxEdgeLengthDoubleSpinBox->setValue(maxEdgeLength);
 	m_UI->emptyValueDoubleSpinBox->setValue(emptyHeight);
 	m_UI->dimensionComboBox->setCurrentIndex(projDim);
 	m_UI->interpolateSFCheckBox->setChecked(sfProj);
@@ -496,6 +506,7 @@ void ccRasterizeTool::saveSettings()
 	settings.setValue("SfProjEnabled", m_UI->interpolateSFCheckBox->isChecked());
 	settings.setValue("SfProjStrategy", m_UI->scalarFieldProjection->currentIndex());
 	settings.setValue("FillStrategy", m_UI->fillEmptyCellsComboBox->currentIndex());
+	settings.setValue("MaxEdgeLength", m_UI->maxEdgeLengthDoubleSpinBox->value());
 	settings.setValue("GridStep", m_UI->gridStepDoubleSpinBox->value());
 	settings.setValue("EmptyCellsHeight", m_UI->emptyValueDoubleSpinBox->value());
 	settings.setValue("GenerateCountSF", m_UI->generateCountSFcheckBox->isChecked());
@@ -687,7 +698,8 @@ bool ccRasterizeTool::updateGrid(bool interpolateSF/*=false*/)
 	//main parameters
 	ccRasterGrid::ProjectionType projectionType = getTypeOfProjection();
 	ccRasterGrid::ProjectionType interpolateSFs = interpolateSF ? getTypeOfSFInterpolation() : ccRasterGrid::INVALID_PROJECTION_TYPE;
-	bool fillEmptyCells = (getFillEmptyCellsStrategy(m_UI->fillEmptyCellsComboBox) == ccRasterGrid::INTERPOLATE);
+	bool interpolateEmptyCells = (getFillEmptyCellsStrategy(m_UI->fillEmptyCellsComboBox) == ccRasterGrid::INTERPOLATE);
+	double maxEdgeLength = m_UI->maxEdgeLengthDoubleSpinBox->value();
 
 	//cloud bounding-box --> grid size
 	ccBBox box = getCustomBBox();
@@ -753,7 +765,8 @@ bool ccRasterizeTool::updateGrid(bool interpolateSF/*=false*/)
 	if (!m_grid.fillWith(	m_cloud,
 							Z,
 							projectionType,
-							fillEmptyCells,
+							interpolateEmptyCells,
+							maxEdgeLength,
 							interpolateSFs,
 							&pDlg))
 	{

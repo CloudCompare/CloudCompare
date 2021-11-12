@@ -171,6 +171,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 								unsigned char Z,
 								ProjectionType projectionType,
 								bool doInterpolateEmptyCells,
+								double maxEdgeLength,
 								ProjectionType sfInterpolation/*=INVALID_PROJECTION_TYPE*/,
 								ccProgressDialog* progressDialog/*=0*/)
 {
@@ -480,7 +481,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 	//specific case: interpolate the empty cells
 	if (doInterpolateEmptyCells)
 	{
-		interpolateEmptyCells();
+		interpolateEmptyCells(maxEdgeLength * maxEdgeLength);
 	}
 
 	//computation of the average and extreme height values in the grid
@@ -566,7 +567,7 @@ static void InterpolateOnBorder(const std::vector<uint8_t>& pointsOnBorder,
 	}
 }
 
-bool ccRasterGrid::interpolateEmptyCells()
+bool ccRasterGrid::interpolateEmptyCells(double maxSquareEdgeLength)
 {
 	if (nonEmptyCellCount < 3)
 	{
@@ -624,6 +625,25 @@ bool ccRasterGrid::interpolateEmptyCells()
 	for (unsigned k = 0; k < triNum; ++k)
 	{
 		const CCCoreLib::VerticesIndexes* tsi = delaunayMesh.getNextTriangleVertIndexes();
+
+		if (maxSquareEdgeLength > 0.0)
+		{
+			const CCVector2& A2D = the2DPoints[tsi->i[0]];
+			const CCVector2& B2D = the2DPoints[tsi->i[1]];
+
+			if ((B2D - A2D).norm2() > maxSquareEdgeLength)
+			{
+				continue;
+			}
+
+			const CCVector2& C2D = the2DPoints[tsi->i[2]];
+			if (	(C2D - A2D).norm2() > maxSquareEdgeLength
+				||	(C2D - B2D).norm2() > maxSquareEdgeLength)
+			{
+				continue;
+			}
+		}
+
 		//get the triangle bounding box (in grid coordinates)
 		CCVector2i P[3];
 		int xMin = 0;

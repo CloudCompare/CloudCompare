@@ -127,12 +127,13 @@ struct QCC_DB_LIB_API ccRasterGrid
 
 	//! Fills the grid with a point cloud
 	/** Since version 2.8, we now use the "PixelIsArea" convention by default (as GDAL)
-	This means that the height is computed at the center of the grid cell.
+		This means that the height is computed at the center of the grid cell.
 	**/
 	bool fillWith(	ccGenericPointCloud* cloud,
 					unsigned char projectionDimension,
 					ProjectionType projectionType,
-					bool interpolateEmptyCells,
+					bool doInterpolateEmptyCells,
+					double maxEdgeLength,
 					ProjectionType sfInterpolation = INVALID_PROJECTION_TYPE,
 					ccProgressDialog* progressDialog = nullptr);
 
@@ -157,8 +158,9 @@ struct QCC_DB_LIB_API ccRasterGrid
 
 	//! Interpolates the empty cells
 	/** \warning The number of non empty cells must be up-to-date (see updateNonEmptyCellCount)
+		\param maxSquareEdgeLength Max (square) edge length to filter large triangles during the interpolation process
 	**/
-	bool interpolateEmptyCells();
+	bool interpolateEmptyCells(double maxSquareEdgeLength);
 
 	//! Sets valid
 	inline void setValid(bool state) { valid = state; }

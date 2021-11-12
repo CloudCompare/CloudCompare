@@ -19,6 +19,7 @@ v2.12 (???) - (in development)
 - Improvements
 	- Rasterize
 		- Improved interpolation scheme on the raster borders
+		- New 'max edge length' option when interpolating grid cells, to avoid using large triangles
     - RANSAC plugin
         - Can save all leftover points into a new cloud (leftovers were points not assigned to a shape)
         - Can select whether to use Least Squares fitting on found shapes (some shapes take a very long time to process this step specifically Cones)
@@ -69,6 +70,8 @@ v2.12 (???) - (in development)
 		- Command 'Rasterize':
 			- New output option '-OUTPUT_RASTER_Z_AND_SF' to explicitly export altitudes AND scalar fields.
 				The former '-OUTPUT_RASTER_Z' option will only export the altitudes as its name implies.
+			- New option '-MAX_EDGE_LENGTH' to set a maximum edge length when interpolating values
+				(to be used with the '-EMPTY_FILL INTERP')
 		- New sub-option for the RANSAC plugin command line option (-RANSAC)
 			- OUT_RANDOM_COLOR = generate random colors for the output clouds (false by default now)
         - New sub-option for the FILTER_SF command:

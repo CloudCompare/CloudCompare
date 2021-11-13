@@ -17,47 +17,19 @@
 //#                                                                        #
 //##########################################################################
 
-#include "CCAppCommon.h"
+#include <ccIOPluginInterface.h>
 
-#include <QObject>
-
-class QAction;
-class QMenu;
-
-class ccMainAppInterface;
-class Mouse3DInput;
-
-
-class CCAPPCOMMON_LIB_API cc3DMouseManager : public QObject
+class qDracoIO : public QObject, public ccIOPluginInterface
 {
 	Q_OBJECT
+	Q_INTERFACES( ccPluginInterface ccIOPluginInterface )
+
+	Q_PLUGIN_METADATA( IID "cccorp.cloudcompare.plugin.qDracoIO" FILE "../info.json" )
 
 public:
-	cc3DMouseManager( ccMainAppInterface *appInterface, QObject *parent );
-	~cc3DMouseManager();
+	explicit qDracoIO( QObject *parent = nullptr );
 
-	//! Gets the menu associated with the 3D mouse
-	QMenu	*menu() { return m_menu; }
+	void registerCommands( ccCommandLineInterface *cmd ) override;
 
-private:
-	void enableDevice(bool state, bool silent);
-	void releaseDevice();
-
-	void setupMenu();
-
-	void on3DMouseKeyUp(int key);
-	void on3DMouseCMDKeyUp(int cmd);
-	void on3DMouseKeyDown(int key);
-	void on3DMouseCMDKeyDown(int cmd);
-	void on3DMouseMove(std::vector<float> &vec);
-	void on3DMouseReleased();
-
-
-	ccMainAppInterface *m_appInterface;
-
-	Mouse3DInput *m3dMouseInput;
-
-	QMenu *m_menu;
-	QAction *m_actionEnable;
+	FilterList getFilters() override;
 };
-

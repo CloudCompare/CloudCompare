@@ -1,0 +1,17 @@
+{
+	"type" : "I/O",
+	"core" : true,
+	"name" : "Draco",
+	"description": "Add .drc read/write capability using the Draco library.",
+	"authors" : [
+		{
+			"name" : "Daniel Girardeau-Montaut"
+		}
+	],
+	"references" : [
+		{
+			"text" : "Draco github page",
+			"url" : "https://github.com/google/draco"
+		}
+	]
+}

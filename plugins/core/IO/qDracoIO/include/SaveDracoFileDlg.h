@@ -17,47 +17,33 @@
 //#                                                                        #
 //##########################################################################
 
-#include "CCAppCommon.h"
+#include <QDialog>
 
-#include <QObject>
+#include <qCC_io.h>
 
-class QAction;
-class QMenu;
+#include "ui_saveDracoFileDlg.h"
 
-class ccMainAppInterface;
-class Mouse3DInput;
-
-
-class CCAPPCOMMON_LIB_API cc3DMouseManager : public QObject
+//! DRACO file (https://github.com/google/draco) saving dialog
+class SaveDracoFileDlg : public QDialog, public Ui::SaveDracoFileDlg
 {
 	Q_OBJECT
 
 public:
-	cc3DMouseManager( ccMainAppInterface *appInterface, QObject *parent );
-	~cc3DMouseManager();
 
-	//! Gets the menu associated with the 3D mouse
-	QMenu	*menu() { return m_menu; }
+	//! Default constructor
+	explicit SaveDracoFileDlg(QWidget* parent = nullptr);
 
-private:
-	void enableDevice(bool state, bool silent);
-	void releaseDevice();
+	//! Destructor
+	virtual ~SaveDracoFileDlg() = default;
 
-	void setupMenu();
+	//! Resets default values
+	void reset();
 
-	void on3DMouseKeyUp(int key);
-	void on3DMouseCMDKeyUp(int cmd);
-	void on3DMouseKeyDown(int key);
-	void on3DMouseCMDKeyDown(int cmd);
-	void on3DMouseMove(std::vector<float> &vec);
-	void on3DMouseReleased();
+protected:
 
+	//! Inits dialog state from persistent settings
+	void initFromPersistentSettings();
 
-	ccMainAppInterface *m_appInterface;
-
-	Mouse3DInput *m3dMouseInput;
-
-	QMenu *m_menu;
-	QAction *m_actionEnable;
+	//! Saves dialog state from persistent settings
+	void saveToPersistentSettings();
 };
-

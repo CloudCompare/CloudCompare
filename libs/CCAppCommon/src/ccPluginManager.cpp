@@ -273,7 +273,7 @@ void ccPluginManager::loadFromPathsAndAddToList()
 		"*.dylib"
 #elif defined(Q_OS_WIN)
 		"*.dll"
-#elif defined(Q_OS_LINUX)
+#elif defined(Q_OS_UNIX)
 		"*.so"
 #else
 #error Need to specify the dynamic library extension for this OS.

@@ -71,7 +71,7 @@ public:
 	static QString Bf() { return "Bf"; }
 	static QString Af() { return "Af"; }
 
-	static QString Grey()   { return "Intensity"; }
+	static QString Grey()   { return "Grey"; }
 	static QString Scalar() { return "SF"; }
 	static QString RGB32i() { return "RGB32i"; }
 	static QString RGB32f() { return "RGB32f"; }

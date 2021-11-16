@@ -221,7 +221,7 @@ static bool CouldBeNz(const QString& colHeader) { return colHeader.startsWith(As
 static bool CouldBeGrey(const QString& colHeader) { return colHeader == AsciiHeaderColumns::Grey().toUpper(); }
 static bool CouldBeRGBi(const QString& colHeader) { return colHeader == AsciiHeaderColumns::RGB32i().toUpper(); }
 static bool CouldBeRGBf(const QString& colHeader) { return colHeader == AsciiHeaderColumns::RGB32f().toUpper(); }
-static bool CouldBeScal(const QString& colHeader) { return colHeader.contains("SCALAR"); }
+static bool CouldBeScal(const QString& colHeader) { return colHeader.contains("SCALAR") || colHeader.contains("INTENSITY"); }
 static bool CouldBeLabel(const QString& colHeader) { return colHeader.contains("LABEL") || colHeader.contains("NAME"); }
 
 static const unsigned MAX_COLUMNS = 512;				//maximum number of columns that can be handled

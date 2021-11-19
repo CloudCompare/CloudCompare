@@ -71,6 +71,7 @@ function( DeployQt )
 		install(
 			DIRECTORY ${temp_app_path}
 			DESTINATION "${deploy_path}"
+			USE_SOURCE_PERMISSIONS
 		)
 	elseif( WIN32 )	
 		set( app_name "${name}.exe" )

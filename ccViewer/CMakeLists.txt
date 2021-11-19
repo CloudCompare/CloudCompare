@@ -82,8 +82,10 @@ if( WIN32 )
 	endif()
 endif()
 
-# install program
-install_ext( TARGETS ccViewer ${CCVIEWER_DEST_FOLDER} "" )
+if (NOT APPLE)
+	# install program
+	install_ext( TARGETS ccViewer ${CCVIEWER_DEST_FOLDER} "" )
+endif()
 
 # Auxiliary files
 set( auxFiles bin_other/license.txt )

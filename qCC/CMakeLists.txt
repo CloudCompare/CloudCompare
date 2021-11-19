@@ -92,8 +92,12 @@ if( WIN32 )
 	endif()
 endif()
 
-# install program
-install_ext( TARGETS ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} "" )
+if (NOT APPLE)
+	# Install program.
+	# On macOs, the DeployQt step will install the bundle that contains the executable with
+	# library paths properly set, reinstalling the executable here would break the bundle.
+	install_ext( TARGETS ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} "" )
+endif()
 
 # Auxiliary files
 set( auxFiles  ${CloudCompareProjects_SOURCE_DIR}/CHANGELOG.md bin_other/license.txt bin_other/global_shift_list_template.txt )

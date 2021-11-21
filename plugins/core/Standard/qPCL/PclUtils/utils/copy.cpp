@@ -29,7 +29,7 @@ void copyScalarFields(const ccPointCloud *inCloud, ccPointCloud *outCloud, pcl::
 		return;
 	assert(in2outMapping->indices.size() == outCloud->size());
 
-	unsigned n_out = outCloud->size();
+	unsigned outCloudSize = outCloud->size();
 
 	unsigned sfCount = inCloud->getNumberOfScalarFields();
 	for (unsigned i = 0; i < sfCount; ++i)
@@ -37,7 +37,7 @@ void copyScalarFields(const ccPointCloud *inCloud, ccPointCloud *outCloud, pcl::
 		const CCCoreLib::ScalarField* field = inCloud->getScalarField(i);
 		const char* name = field->getName();
 
-		ccScalarField* new_field = 0;
+		ccScalarField* newSF = nullptr;
 
 		//we need to verify no scalar field with the same name exists in the output cloud
 		int id = outCloud->getScalarFieldIndexByName(name);
@@ -45,7 +45,7 @@ void copyScalarFields(const ccPointCloud *inCloud, ccPointCloud *outCloud, pcl::
 		{
 			if (overwrite)
 			{
-				new_field = static_cast<ccScalarField*>(outCloud->getScalarField(id));
+				newSF = static_cast<ccScalarField*>(outCloud->getScalarField(id));
 			}
 			else
 			{
@@ -54,31 +54,31 @@ void copyScalarFields(const ccPointCloud *inCloud, ccPointCloud *outCloud, pcl::
 		}
 		else
 		{
-			new_field = new ccScalarField(name);
+			newSF = new ccScalarField(name);
 
 			//resize the scalar field to the outcloud size
-			if (!new_field->resizeSafe(n_out))
+			if (!newSF->resizeSafe(outCloudSize))
 			{
 				//not enough memory!
-				new_field->release();
-				new_field = 0;
+				newSF->release();
+				newSF = nullptr;
 				continue;
 			}
 		}
 
 		//now perform point to point copy
-		for (unsigned j=0; j<n_out; ++j)
+		for (unsigned j = 0; j < outCloudSize; ++j)
 		{
-			new_field->setValue(j, field->getValue(in2outMapping->indices.at(j)));
+			newSF->setValue(j, field->getValue(in2outMapping->indices.at(j)));
 		}
 
 		//recompute stats
-		new_field->computeMinAndMax();
+		newSF->computeMinAndMax();
 
 		//now put back the scalar field to the outCloud
 		if (id < 0)
 		{
-			outCloud->addScalarField(new_field);
+			outCloud->addScalarField(newSF);
 		}
 	}
 
@@ -101,8 +101,8 @@ void copyRGBColors(const ccPointCloud *inCloud, ccPointCloud *outCloud, pcl::Poi
 	if (outCloud->reserveTheRGBTable())
 	{
 		//now perform point to point copy
-		unsigned n_out = outCloud->size();
-		for (unsigned j = 0; j < n_out; ++j)
+		unsigned outCloudSize = outCloud->size();
+		for (unsigned j = 0; j < outCloudSize; ++j)
 		{
 			outCloud->addColor(inCloud->getPointColor(in2outMapping->indices.at(j)));
 		}

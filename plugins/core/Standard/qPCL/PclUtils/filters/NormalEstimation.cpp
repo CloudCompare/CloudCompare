@@ -41,24 +41,21 @@ int ComputeNormals(	const typename pcl::PointCloud<PointInT>::Ptr incloud,
 					bool useKnn, //true if use knn, false if radius search
 					typename pcl::PointCloud<PointOutT>& outcloud)
 {
-	typename pcl::NormalEstimationOMP<PointInT, PointOutT> normal_estimator;
-	//typename pcl::PointCloud<PointOutT>::Ptr normals (new pcl::PointCloud<PointOutT>);
-
+	typename pcl::NormalEstimationOMP<PointInT, PointOutT> normalEstimator;
+	
 	if (useKnn) //use knn
 	{
-		int knn_radius = static_cast<int>(radius); //cast to int
-		normal_estimator.setKSearch(knn_radius);
+		normalEstimator.setKSearch(static_cast<int>(radius)); //cast to int
 	}
 	else //use radius search
 	{
-		normal_estimator.setRadiusSearch(radius);
+		normalEstimator.setRadiusSearch(radius);
 	}
 
-	normal_estimator.setInputCloud(incloud);
-	//normal_estimator.setNumberOfThreads(4);
-	normal_estimator.compute(outcloud);
+	normalEstimator.setInputCloud(incloud);
+	normalEstimator.compute(outcloud);
 
-	return 1;
+	return BaseFilter::Success;
 }
 
 NormalEstimation::NormalEstimation()
@@ -66,91 +63,100 @@ NormalEstimation::NormalEstimation()
 									"Estimate Normals and Curvature",
 									"Estimate Normals and Curvature for the selected entity",
 									":/toolbar/PclUtils/icons/normal_curvature.png"))
-	, m_dialog(nullptr)
-	, m_dialogHasParent(false)
 	, m_radius(0)
 	, m_knn_radius(10)
 	, m_useKnn(false)
-	, m_overwrite_curvature(false)
+	, m_overwrite_curvature(true)
 {
-	m_overwrite_curvature = true;
 }
 
 NormalEstimation::~NormalEstimation()
 {
-	//we must delete parent-less dialogs ourselves!
-	if (!m_dialogHasParent && m_dialog && m_dialog->parent() == nullptr)
-		delete m_dialog;
 }
 
-int NormalEstimation::openInputDialog()
+int NormalEstimation::getParametersFromDialog()
 {
-	if (!m_dialog)
-	{
-		m_dialog = new NormalEstimationDialog(m_app ? m_app->getMainWindow() : nullptr);
-		m_dialogHasParent = (m_dialog->parent() != nullptr);
-		
-		//initially these are invisible
-		m_dialog->surfaceComboBox->setVisible(false);
-		m_dialog->searchSurfaceCheckBox->setVisible(false);
-	}
+	NormalEstimationDialog dialog(m_app ? m_app->getMainWindow() : nullptr);
 
-	ccPointCloud* cloud = getSelectedEntityAsCCPointCloud();
+	//initially these are invisible
+	dialog.surfaceComboBox->setVisible(false);
+	dialog.searchSurfaceCheckBox->setVisible(false);
+
+	ccPointCloud* cloud = getFirstSelectedEntityAsCCPointCloud();
 	if (cloud)
 	{
 		ccBBox bBox = cloud->getOwnBB();
 		if (bBox.isValid())
-			m_dialog->radiusDoubleSpinBox->setValue(bBox.getDiagNorm() / 200);
+		{
+			dialog.radiusDoubleSpinBox->setValue(bBox.getDiagNorm() / 200.0);
+		}
 	}
 
-	return m_dialog->exec() ? 1 : 0;
-}
-
-void NormalEstimation::getParametersFromDialog()
-{
-	assert(m_dialog);
-	if (!m_dialog)
-		return;
+	if (!dialog.exec())
+	{
+		return CancelledByUser;
+	}
 
 	//fill in parameters from dialog
-	m_useKnn = m_dialog->useKnnCheckBox->isChecked();
-	m_overwrite_curvature = m_dialog->curvatureCheckBox->isChecked();
-	m_knn_radius = m_dialog->knnSpinBox->value();
-	m_radius = static_cast<float>(m_dialog->radiusDoubleSpinBox->value());
+	m_useKnn = dialog.useKnnCheckBox->isChecked();
+	m_overwrite_curvature = dialog.curvatureCheckBox->isChecked();
+	m_knn_radius = dialog.knnSpinBox->value();
+	m_radius = static_cast<float>(dialog.radiusDoubleSpinBox->value());
+
+	return Success;
 }
 
 int NormalEstimation::compute()
 {
 	//pointer to selected cloud
-	ccPointCloud* cloud = getSelectedEntityAsCCPointCloud();
+	ccPointCloud* cloud = getFirstSelectedEntityAsCCPointCloud();
 	if (!cloud)
-		return -1;
+		return InvalidInput;
+
+	//get xyz as a PCL cloud
+	pcl::PointCloud<pcl::PointXYZ>::Ptr xyzCloud = cc2smReader(cloud).getRawXYZ();
+	if (!xyzCloud)
+	{
+		return ComputationError;
+	}
+
+	//now compute the normals
+	pcl::PointCloud<pcl::PointNormal> rawCloudWithNormals;
+	int result = ComputeNormals<pcl::PointXYZ, pcl::PointNormal>(xyzCloud, m_useKnn ? m_knn_radius: m_radius, m_useKnn, rawCloudWithNormals);
+	if (result < 0)
+	{
+		return ComputationError;
+	}
 
 	//if we have normals delete them!
-	if (cloud->hasNormals())
-		cloud->unallocateNorms();
+	if (!cloud->hasNormals())
+	{
+		if (!cloud->resizeTheNormsTable())
+		{
+			return NotEnoughMemory;
+		}
+	}
 
-	//get xyz as pcl point cloud
-	pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud = cc2smReader(cloud).getXYZ2();
-	if (!pcl_cloud)
-		return -1;
+	//copy the notmals
+	unsigned pointCount = cloud->size();
+	for (unsigned i = 0; i < pointCount; ++i)
+	{
+		const pcl::PointNormal& point = rawCloudWithNormals[i];
+		CCVector3 N(static_cast<PointCoordinateType>(point.normal_x),
+					static_cast<PointCoordinateType>(point.normal_y),
+					static_cast<PointCoordinateType>(point.normal_z));
 
-	//create storage for normals
-	pcl::PointCloud<pcl::PointNormal> normals;
+		cloud->setPointNormal(i, N);
+	}
+	cloud->showNormals(true);
 
-	//now compute
-	int result = ComputeNormals<pcl::PointXYZ, pcl::PointNormal>(pcl_cloud, m_useKnn ? m_knn_radius: m_radius, m_useKnn, normals);
-	if (result < 0)
-		return -1;
-
-	PCLCloud::Ptr sm_normals (new PCLCloud);
-	TO_PCL_CLOUD(normals, *sm_normals);
-
-	pcl2cc::CopyNormals(*sm_normals, *cloud);
-	pcl2cc::CopyScalarField(*sm_normals, "curvature", *cloud, m_overwrite_curvature);
+	// FIXME: find a way to avoid converting to a PCLPointCloud2 just to get the curvature values!
+	PCLCloud::Ptr cloudWithNormals(new PCLCloud);
+	TO_PCL_CLOUD(rawCloudWithNormals, *cloudWithNormals);
+	pcl2cc::CopyScalarField(*cloudWithNormals, "curvature", *cloud, m_overwrite_curvature);
 
 	emit entityHasChanged(cloud);
 
-	return 1;
+	return Success;
 }
 

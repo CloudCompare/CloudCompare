@@ -43,9 +43,9 @@
 #endif
 
 template <typename PointInT, typename PointOutT>
-int smooth_mls(	const typename pcl::PointCloud<PointInT>::Ptr &incloud,
-				const MLSParameters &params,
-				typename pcl::PointCloud<PointOutT>::Ptr &outcloud
+static int SmoothMLS(	const typename pcl::PointCloud<PointInT>::Ptr &incloud,
+						const MLSParameters &params,
+						typename pcl::PointCloud<PointOutT>::Ptr &outcloud
 #ifdef LP_PCL_PATCH_ENABLED
 				, pcl::PointIndicesPtr &mapping_ids
 #endif
@@ -56,8 +56,7 @@ int smooth_mls(	const typename pcl::PointCloud<PointInT>::Ptr &incloud,
 #ifdef _OPENMP
 	//create the smoothing object
 	pcl::MovingLeastSquares< PointInT, PointOutT > smoother;
-	int n_threads = omp_get_max_threads();
-	smoother.setNumberOfThreads(n_threads);
+	smoother.setNumberOfThreads(omp_get_max_threads());
 #else
 	pcl::MovingLeastSquares< PointInT, PointOutT > smoother;
 #endif
@@ -110,7 +109,7 @@ int smooth_mls(	const typename pcl::PointCloud<PointInT>::Ptr &incloud,
 	mapping_ids = smoother.getCorrespondingIndices();
 #endif
 
-	return 1;
+	return BaseFilter::Success;
 }
 
 MLSSmoothingUpsampling::MLSSmoothingUpsampling()
@@ -118,140 +117,109 @@ MLSSmoothingUpsampling::MLSSmoothingUpsampling()
 									"Smooth using MLS, optionally upsample",
 									"Smooth the cloud using Moving Least Sqares algorithm, estimate normals and optionally upsample",
 									":/toolbar/PclUtils/icons/mls_smoothing.png"))
-	, m_dialog(nullptr)
-	, m_dialogHasParent(false)
 {
 }
 
 MLSSmoothingUpsampling::~MLSSmoothingUpsampling()
 {
-	//we must delete parent-less dialogs ourselves!
-	if (!m_dialogHasParent && m_dialog && m_dialog->parent() == nullptr)
-	{
-		delete m_dialog;
-	}
 }
 
 int MLSSmoothingUpsampling::compute()
 {
 	//pointer to selected cloud
-	ccPointCloud* cloud = getSelectedEntityAsCCPointCloud();
+	ccPointCloud* cloud = getFirstSelectedEntityAsCCPointCloud();
 	if (!cloud)
-		return -1;
+	{
+		return InvalidInput;
+	}
+
+	ccScalarField* sf = cloud->getCurrentDisplayedScalarField();
 
 	//get xyz in PCL format
-
-	std::list<std::string> req_fields;
-	try
+	pcl::PointCloud<pcl::PointXYZ>::Ptr xyzCloud = cc2smReader(cloud).getRawXYZ();
+	if (!xyzCloud)
 	{
-		req_fields.push_back("xyz"); // always needed
-		if (cloud->getCurrentDisplayedScalarField())
-		{
-			//keep the current scalar field (if any)
-			req_fields.push_back(cloud->getCurrentDisplayedScalarField()->getName());
-		}
+		return NotEnoughMemory;
 	}
-	catch (const std::bad_alloc&)
-	{
-		//not enough memory
-		return -1;
-	}
-
-	//take out the xyz info
-	PCLCloud::Ptr sm_cloud = cc2smReader(cloud).getAsSM(req_fields);
-	if (!sm_cloud)
-		return -1;
-
-	//Now change the name of the field to use to a standard name, only if in OTHER_FIELD mode
-	if (cloud->getCurrentDisplayedScalarField())
-	{
-		int field_index = pcl::getFieldIndex(*sm_cloud, cc2smReader::GetSimplifiedSFName(cloud->getCurrentDisplayedScalarField()->getName()));
-		if (field_index >= 0)
-			sm_cloud->fields.at(field_index).name = "scalar";
-	}
-
-	//get as pcl point cloud
-	pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud  (new pcl::PointCloud<pcl::PointXYZ>);
-	FROM_PCL_CLOUD(*sm_cloud, *pcl_cloud);
 
 	//create storage for outcloud
-	pcl::PointCloud<pcl::PointNormal>::Ptr normals (new pcl::PointCloud<pcl::PointNormal>);
+	pcl::PointCloud<pcl::PointNormal>::Ptr rawCloudWithNormals(new pcl::PointCloud<pcl::PointNormal>);
 #ifdef LP_PCL_PATCH_ENABLED
-	pcl::PointIndicesPtr mapping_indices;
-	smooth_mls<pcl::PointXYZ, pcl::PointNormal> (pcl_cloud, m_parameters, normals, mapping_indices);
+	pcl::PointIndicesPtr mappingIndices;
+	SmoothMLS<pcl::PointXYZ, pcl::PointNormal> (xyzCloud, m_parameters, rawCloudWithNormals, mappingIndices);
 #else
-	smooth_mls<pcl::PointXYZ, pcl::PointNormal> (pcl_cloud, m_parameters, normals);
+	SmoothMLS<pcl::PointXYZ, pcl::PointNormal> (xyzCloud, m_parameters, rawCloudWithNormals);
 #endif
 
-	PCLCloud::Ptr sm_normals (new PCLCloud);
-	TO_PCL_CLOUD(*normals, *sm_normals);
+	PCLCloud cloudWithNormals;
+	TO_PCL_CLOUD(*rawCloudWithNormals, cloudWithNormals);
 
-	ccPointCloud* new_cloud = pcl2cc::Convert(*sm_normals);
-	if (!new_cloud)
+	ccPointCloud* outputCCCloud = pcl2cc::Convert(cloudWithNormals);
+	if (!outputCCCloud)
 	{
 		//conversion failed (not enough memory?)
-		return -1;
+		return NotEnoughMemory;
 	}
 
-	new_cloud->setName(cloud->getName()+QString("_smoothed")); //original name + suffix
-	new_cloud->setDisplay(cloud->getDisplay());
+	outputCCCloud->setName(cloud->getName() + QString("_smoothed")); //original name + suffix
+	outputCCCloud->setDisplay(cloud->getDisplay());
 
 #ifdef LP_PCL_PATCH_ENABLED
 	//copy the original scalar fields here
-	copyScalarFields(cloud, new_cloud, mapping_indices, true);
+	copyScalarFields(cloud, outputCCCloud, mappingIndices, true);
 	//copy the original colors here
-	copyRGBColors(cloud, new_cloud, mapping_indices, true);
+	copyRGBColors(cloud, outputCCCloud, mappingIndices, true);
 #endif
 
 	//copy global shift & scale
-	new_cloud->copyGlobalShiftAndScale(*cloud);
+	outputCCCloud->copyGlobalShiftAndScale(*cloud);
 
 	//disable original cloud
 	cloud->setEnabled(false);
 	if (cloud->getParent())
-		cloud->getParent()->addChild(new_cloud);
-
-	emit newEntity(new_cloud);
-
-	return 1;
-}
-
-int MLSSmoothingUpsampling::openInputDialog()
-{
-	if (!m_dialog)
 	{
-		m_dialog = new MLSDialog(m_app ? m_app->getMainWindow() : nullptr);
-		m_dialogHasParent = (m_app->getMainWindow() != nullptr);
+		cloud->getParent()->addChild(outputCCCloud);
 	}
 
-	return m_dialog->exec() ? 1 : 0;
+	emit newEntity(outputCCCloud);
+
+	return Success;
 }
 
-void MLSSmoothingUpsampling::getParametersFromDialog()
+int MLSSmoothingUpsampling::getParametersFromDialog()
 {
-	//we need to read all the parameters and put them into m_parameters
-	m_parameters.search_radius_ = m_dialog->search_radius->value();
-	m_parameters.compute_normals_ = m_dialog->compute_normals->checkState();
-	m_parameters.polynomial_fit_ = m_dialog->use_polynomial->checkState();
-	m_parameters.order_ = m_dialog->polynomial_order->value();
-	m_parameters.sqr_gauss_param_ = m_dialog->squared_gaussian_parameter->value();
+	MLSDialog dialog(m_app ? m_app->getMainWindow() : nullptr);
 
-	int index_now = m_dialog->upsampling_method->currentIndex();
-	QVariant current_status = m_dialog->upsampling_method->itemData(index_now);
+	if (!dialog.exec())
+	{
+		return CancelledByUser;
+	}
+
+	//we need to read all the parameters and put them into m_parameters
+	m_parameters.search_radius_ = dialog.search_radius->value();
+	m_parameters.compute_normals_ = dialog.compute_normals->checkState();
+	m_parameters.polynomial_fit_ = dialog.use_polynomial->checkState();
+	m_parameters.order_ = dialog.polynomial_order->value();
+	m_parameters.sqr_gauss_param_ = dialog.squared_gaussian_parameter->value();
+
+	int index_now = dialog.upsampling_method->currentIndex();
+	QVariant current_status = dialog.upsampling_method->itemData(index_now);
 	int status = current_status.toInt();
 
 	m_parameters.upsample_method_ = static_cast<MLSParameters::UpsamplingMethod>(status);
 
-	m_parameters.upsampling_radius_ = m_dialog->upsampling_radius->value();
-	m_parameters.upsampling_step_ = m_dialog->upsampling_step_size->value();
-	m_parameters.step_point_density_ = m_dialog->step_point_density->value();
-	m_parameters.dilation_voxel_size_ = m_dialog->dilation_voxel_size->value();
+	m_parameters.upsampling_radius_ = dialog.upsampling_radius->value();
+	m_parameters.upsampling_step_ = dialog.upsampling_step_size->value();
+	m_parameters.step_point_density_ = dialog.step_point_density->value();
+	m_parameters.dilation_voxel_size_ = dialog.dilation_voxel_size->value();
+
+	return Success;
 }
 
-template int smooth_mls<pcl::PointXYZ, pcl::PointNormal>(const pcl::PointCloud<pcl::PointXYZ>::Ptr &incloud,
-	const MLSParameters &params,
-	pcl::PointCloud<pcl::PointNormal>::Ptr &outcloud
+template int SmoothMLS<pcl::PointXYZ, pcl::PointNormal>(	const pcl::PointCloud<pcl::PointXYZ>::Ptr &incloud,
+															const MLSParameters &params,
+															pcl::PointCloud<pcl::PointNormal>::Ptr &outcloud
 #ifdef LP_PCL_PATCH_ENABLED
-  ,	pcl::PointIndicesPtr &used_ids
+															,	pcl::PointIndicesPtr &used_ids
 #endif
   );

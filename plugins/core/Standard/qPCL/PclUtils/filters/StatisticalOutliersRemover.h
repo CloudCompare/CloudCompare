@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                       CLOUDCOMPARE PLUGIN: qPCL                        #
@@ -14,29 +16,21 @@
 //#                         COPYRIGHT: Luca Penasa                         #
 //#                                                                        #
 //##########################################################################
-//
-#ifndef STATISTICALOUTLIERSREMOVER_H
-#define STATISTICALOUTLIERSREMOVER_H
 
 #include "BaseFilter.h"
-
-class SORDialog;
 
 class StatisticalOutliersRemover : public BaseFilter
 {
 public:
 	StatisticalOutliersRemover();
-	virtual ~StatisticalOutliersRemover();
+	~StatisticalOutliersRemover() override;
 
 protected:
-	int compute();
-	int openInputDialog();
-	void getParametersFromDialog();
+	//inherited from BaseFilter
+	int compute() override;
+	int getParametersFromDialog() override;
 
-	SORDialog* m_dialog;
-	bool m_dialogHasParent;
-	int m_k;
+protected: //members
+	int m_kNN;
 	float m_std;
 };
-
-#endif // STATISTICALOUTLIERREMOVER_H

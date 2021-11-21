@@ -118,6 +118,47 @@ public: //HELPERS
 	static CCVector3 ComputeAverageNorm(CCCoreLib::ReferenceCloud* subset,
 										ccGenericPointCloud* sourceCloud);
 
+	//! Tries to guess a very naive 'local radius' for octree-based computation
+	/** \param cloud	point cloud on which to process the normals.
+		\return naive radius (one percent of the cloud largest dimension by default, unless the cloud have very few points)
+	**/
+	static PointCoordinateType GuessNaiveRadius(ccGenericPointCloud* cloud);
+
+	//! Parameters for the GuessBestRadius method
+	struct BestRadiusParams
+	{
+		int aimedPopulationPerCell = 16;	//!< Aimed poulation per octree cell
+		int aimedPopulationRange = 4;		//!< Aimed poulation range per octree cell
+		int minCellPopulation = 6;			//!< Minimum cell poulation
+		double minAboveMinRatio = 0.97;		//!< Ratio of cells above the 'minCellPopulation' thershold
+	};
+
+	//! Tries to guess the best 'local radius' for octree-based computation
+	/**	The ideal radius is determined by randomly sampling up to 200 points and looking at
+		their neighborhood.
+		\param cloud		point cloud on which to process the normals.
+		\param params		parameters
+		\param cloudOctree	input cloud octree (optional)
+		\param progressCb	progress notification (optional)
+		\return the best radius (strictly positive value) or 0 if an error occurred
+	**/
+	static PointCoordinateType GuessBestRadius(	ccGenericPointCloud* cloud,
+												const BestRadiusParams& params,
+												CCCoreLib::DgmOctree* cloudOctree = nullptr,
+												CCCoreLib::GenericProgressCallback* progressCb = nullptr);
+
+	//! Tries to guess the best 'local radius' for octree-based computation (auto-computes the octree if necessary)
+	/**	The ideal radius is determined by randomly sampling up to 200 points and looking at
+		their neighborhood.
+		\param cloud		point cloud on which to process the normals.
+		\param params		parameters
+		\param parentWidget	parent widget (for the progress dialog, if any has to be shown)
+		\return the best radius (strictly positive value) or 0 if an error occurred
+	**/
+	static PointCoordinateType GuessBestRadiusAutoComputeOctree(ccGenericPointCloud* cloud,
+																const BestRadiusParams& params,
+																QWidget* parentWidget = nullptr);
+
 signals:
 
 	//! Signal sent when the octree organization is modified (cleared, etc.)

@@ -766,7 +766,14 @@ bool CommandOctreeNormal::process(ccCommandLineInterface &cmd)
 		float thisCloudRadius = radius;
 		if (std::isnan(thisCloudRadius))
 		{
-			thisCloudRadius = ccNormalVectors::GuessBestRadius(cloud, cloud->getOctree().data());
+			ccOctree::BestRadiusParams params;
+			{
+				params.aimedPopulationPerCell = 16;
+				params.aimedPopulationRange = 4;
+				params.minCellPopulation = 6;
+				params.minAboveMinRatio = 0.97;
+			}
+			thisCloudRadius = ccOctree::GuessBestRadius(cloud, params, cloud->getOctree().data());
 			if (thisCloudRadius == 0)
 			{
 				return cmd.error(QObject::tr("Failed to determine best normal radius for cloud '%1'").arg(cloud->getName()));

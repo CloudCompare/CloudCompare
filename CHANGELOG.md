@@ -145,7 +145,6 @@ v2.12 (???) - (in development)
 	- the 'Guess parameters' option of the M3C2 plugin was suggesting radii while M3C2 scales are diameters (i.e. ideal values should have been twice as big)
 	- ASCII file load dialog: CC would assign an 'Intensity' column to the 'Grey' color role, which is rarely a good idea. It will now assign it to 'Scalar field' by default.
 
-
 v2.11.3 (Anoia) - 08/09/2020
 ----------------------
 - Bug fix:

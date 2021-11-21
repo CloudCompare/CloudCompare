@@ -29,9 +29,9 @@
 class SIFTExtractDlg : public QDialog, public Ui::SIFTExtractDlg
 {
 public:
-	explicit SIFTExtractDlg(QWidget* parent = 0);
+	explicit SIFTExtractDlg(QWidget* parent = nullptr);
 
-	void updateComboBox(const std::vector<std::string>& fields);
+	void updateComboBox(const QStringList& fields);
 
 };
 

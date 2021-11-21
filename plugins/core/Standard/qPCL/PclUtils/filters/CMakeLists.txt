@@ -3,12 +3,16 @@ target_sources( ${PROJECT_NAME}
 	PUBLIC
 		${CMAKE_CURRENT_LIST_DIR}/BaseFilter.h
 		${CMAKE_CURRENT_LIST_DIR}/ExtractSIFT.h
+		${CMAKE_CURRENT_LIST_DIR}/FastGlobalRegistration.h
+		${CMAKE_CURRENT_LIST_DIR}/FastGlobalRegistrationFilter.h
 		${CMAKE_CURRENT_LIST_DIR}/MLSSmoothingUpsampling.h
 		${CMAKE_CURRENT_LIST_DIR}/NormalEstimation.h
 		${CMAKE_CURRENT_LIST_DIR}/StatisticalOutliersRemover.h
 	PRIVATE
 		${CMAKE_CURRENT_LIST_DIR}/BaseFilter.cpp
 		${CMAKE_CURRENT_LIST_DIR}/ExtractSIFT.cpp
+		${CMAKE_CURRENT_LIST_DIR}/FastGlobalRegistration.cpp
+		${CMAKE_CURRENT_LIST_DIR}/FastGlobalRegistrationFilter.cpp
 		${CMAKE_CURRENT_LIST_DIR}/MLSSmoothingUpsampling.cpp
 		${CMAKE_CURRENT_LIST_DIR}/NormalEstimation.cpp
 		${CMAKE_CURRENT_LIST_DIR}/StatisticalOutliersRemover.cpp

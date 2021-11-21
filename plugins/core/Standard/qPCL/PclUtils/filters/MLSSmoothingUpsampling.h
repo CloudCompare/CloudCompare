@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                       CLOUDCOMPARE PLUGIN: qPCL                        #
@@ -14,13 +16,8 @@
 //#                         COPYRIGHT: Luca Penasa                         #
 //#                                                                        #
 //##########################################################################
-//
-#ifndef MLSSMOOTHINGUPSAMPLING_H
-#define MLSSMOOTHINGUPSAMPLING_H
 
 #include "BaseFilter.h"
-
-class MLSDialog;
 
 struct MLSParameters
 {
@@ -59,18 +56,13 @@ class MLSSmoothingUpsampling : public BaseFilter
 {
 public:
 	MLSSmoothingUpsampling();
-	virtual ~MLSSmoothingUpsampling();
+	~MLSSmoothingUpsampling() override;
 
 protected:
-
 	//inherited from BaseFilter
-	int openInputDialog();
-	int compute();
-	void getParametersFromDialog();
+	int compute() override;
+	int getParametersFromDialog() override;
 
-	MLSDialog* m_dialog;
-	bool m_dialogHasParent;
+protected:
 	MLSParameters m_parameters; //We directly store all the parameters here
 };
-
-#endif // MLSSMOOTHINGUPSAMPLING_H

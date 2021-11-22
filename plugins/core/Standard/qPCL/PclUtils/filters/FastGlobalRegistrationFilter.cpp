@@ -64,7 +64,7 @@ bool FastGlobalRegistrationFilter::checkSelected() const
 		&& m_selectedEntities[1]->isA(CC_TYPES::POINT_CLOUD);
 }
 
-static bool ComputeFeatures(ccPointCloud* cloud, fgr::Feature& features, double radius)
+static bool ComputeFeatures(ccPointCloud* cloud, fgr::Features& features, double radius)
 {
 	if (!cloud)
 	{
@@ -200,7 +200,7 @@ int FastGlobalRegistrationFilter::compute()
 	}
 
 	//compute the feature vector for each cloud
-	fgr::Feature alignedFeatures, referenceFeatures;
+	fgr::Features alignedFeatures, referenceFeatures;
 	if (	!ComputeFeatures(m_alignedCloud, alignedFeatures, m_featureRadius)
 		||	!ComputeFeatures(m_referenceCloud, referenceFeatures, m_featureRadius) )
 	{
@@ -226,7 +226,11 @@ int FastGlobalRegistrationFilter::compute()
 		fgrProcess.LoadFeature(alignedPoints, alignedFeatures);
 		fgrProcess.NormalizePoints();
 		fgrProcess.AdvancedMatching();
-		fgrProcess.OptimizePairwise(true);
+		if (!fgrProcess.OptimizePairwise(true))
+		{
+			ccLog::Error("Failed to perform pair-wise optimization (not enough points)");
+			return ComputationError;
+		}
 
 		Eigen::Matrix4f trans = fgrProcess.GetOutputTrans();
 		for (int i = 0; i < 16; ++i)

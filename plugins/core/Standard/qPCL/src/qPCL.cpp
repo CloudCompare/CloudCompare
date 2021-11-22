@@ -25,6 +25,7 @@
 
 //FILTERS
 #include <ExtractSIFT.h>
+#include <FastGlobalRegistrationFilter.h>
 #include <NormalEstimation.h>
 #include <MLSSmoothingUpsampling.h>
 
@@ -60,7 +61,7 @@ void qPCL::handleEntityChange(ccHObject* entity)
 void qPCL::handleErrorMessage(QString message)
 {
 	if (m_app)
-		m_app->dispToConsole(message,ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		m_app->dispToConsole(message, ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 }
 
 QList<QAction *> qPCL::getActions()
@@ -70,7 +71,8 @@ QList<QAction *> qPCL::getActions()
 		//ADD FILTERS
 		//addFilter( new LoadPCD() ); //Now integrated in CC (qPCLIO plugin)
 		//addFilter( new SavePCD() ); //Now integrated in CC (qPCLIO plugin)
-		addFilter( new NormalEstimation());
+		addFilter( new FastGlobalRegistrationFilter() );
+		addFilter( new NormalEstimation() );
 		//addFilter( new StatisticalOutliersRemover() ); //Now integrated in CC ('Tools > Clean > SOR filter')
 		addFilter( new MLSSmoothingUpsampling() );
 	}
@@ -110,6 +112,8 @@ int qPCL::addFilter(BaseFilter* filter)
 
 void qPCL::onNewSelection(const ccHObject::Container& selectedEntities)
 {
-	for (size_t i=0; i<m_filters.size(); ++i)
-		m_filters[i]->updateSelectedEntities(selectedEntities);
+	for (BaseFilter* filter : m_filters)
+	{
+		filter->updateSelectedEntities(selectedEntities);
+	}
 }

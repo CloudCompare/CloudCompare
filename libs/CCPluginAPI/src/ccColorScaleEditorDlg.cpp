@@ -71,7 +71,7 @@ ccColorScaleEditorDialog::ccColorScaleEditorDialog(	ccColorScalesManager* manage
 	m_ui->colorScaleEditorFrame->layout()->addWidget(m_scaleWidget);
 
 	//main combo box
-	connect(m_ui->rampComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::activated), this, &ccColorScaleEditorDialog::colorScaleChanged);
+	connect(m_ui->rampComboBox, qOverload<int>(&QComboBox::activated), this, &ccColorScaleEditorDialog::colorScaleChanged);
 
 	//import/export buttons
 	connect(m_ui->exportToolButton,		&QToolButton::clicked,				this,	&ccColorScaleEditorDialog::exportCurrentScale);
@@ -83,7 +83,7 @@ ccColorScaleEditorDialog::ccColorScaleEditorDialog(	ccColorScalesManager* manage
 	connect(m_ui->deleteToolButton,		&QToolButton::clicked,				this,	&ccColorScaleEditorDialog::deleteCurrentScale);
 	connect(m_ui->copyToolButton,		&QToolButton::clicked,				this,	&ccColorScaleEditorDialog::copyCurrentScale);
 	connect(m_ui->newToolButton,		&QToolButton::clicked,				this,	&ccColorScaleEditorDialog::createNewScale);
-	connect(m_ui->scaleModeComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::activated), this, &ccColorScaleEditorDialog::relativeModeChanged);
+	connect(m_ui->scaleModeComboBox, qOverload<int>(&QComboBox::activated), this, &ccColorScaleEditorDialog::relativeModeChanged);
 
 	//scale widget
 	connect(m_scaleWidget,		&ccColorScaleEditorWidget::stepSelected,this,	&ccColorScaleEditorDialog::onStepSelected);
@@ -92,7 +92,7 @@ ccColorScaleEditorDialog::ccColorScaleEditorDialog(	ccColorScalesManager* manage
 	//slider editor
 	connect(m_ui->deleteSliderToolButton,	&QToolButton::clicked,				this,	&ccColorScaleEditorDialog::deletecSelectedStep);
 	connect(m_ui->colorToolButton,			&QToolButton::clicked,				this,	&ccColorScaleEditorDialog::changeSelectedStepColor);
-	connect(m_ui->valueDoubleSpinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorScaleEditorDialog::changeSelectedStepValue);
+	connect(m_ui->valueDoubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccColorScaleEditorDialog::changeSelectedStepValue);
 
 	//labels list widget
 	connect(m_ui->customLabelsGroupBox,			&QGroupBox::toggled,			this, &ccColorScaleEditorDialog::toggleCustomLabelsList);

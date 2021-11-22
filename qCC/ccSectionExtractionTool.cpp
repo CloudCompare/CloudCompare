@@ -83,7 +83,7 @@ ccSectionExtractionTool::ccSectionExtractionTool(QWidget* parent)
 	connect(m_UI->cancelToolButton, &QAbstractButton::clicked, this, &ccSectionExtractionTool::cancel);
 	connect(m_UI->polylineToolButton, &QAbstractButton::toggled, this, &ccSectionExtractionTool::enableSectionEditingMode);
 	connect(m_UI->importFromDBToolButton, &QAbstractButton::clicked, this, &ccSectionExtractionTool::doImportPolylinesFromDB);
-	connect(m_UI->vertAxisComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccSectionExtractionTool::setVertDimension);
+	connect(m_UI->vertAxisComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &ccSectionExtractionTool::setVertDimension);
 
 	connect(m_UI->generateOrthoSectionsToolButton, &QAbstractButton::clicked, this, &ccSectionExtractionTool::generateOrthoSections);
 	connect(m_UI->extractPointsToolButton, &QAbstractButton::clicked, this, &ccSectionExtractionTool::extractPoints);

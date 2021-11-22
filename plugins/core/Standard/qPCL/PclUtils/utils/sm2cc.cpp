@@ -77,7 +77,7 @@ POINT_CLOUD_REGISTER_POINT_STRUCT(PointXYZTpl<double>,
 									(double, y, y)
 									(double, z, z) )
 	
-size_t GetNumberOfPoints(const PCLCloud& pclCloud)
+static size_t GetNumberOfPoints(const PCLCloud& pclCloud)
 {
 	return static_cast<size_t>(pclCloud.width) * pclCloud.height;
 }
@@ -211,19 +211,19 @@ bool pcl2cc::CopyScalarField(	const PCLCloud& pclCloud,
 			return false;
 	}
 
-	size_t pointCount = GetNumberOfPoints(pclCloud);
+	unsigned pointCount = ccCloud.size();
 
 	//create new scalar field
-	ccScalarField* cc_scalar_field = new ccScalarField(sfName.c_str());
-	if (!cc_scalar_field->reserveSafe(static_cast<unsigned>(pointCount)))
+	ccScalarField* newSF = new ccScalarField(sfName.c_str());
+	if (!newSF->reserveSafe(pointCount))
 	{
-		cc_scalar_field->release();
+		newSF->release();
 		return false;
 	}
 
 	//get PCL field
-	int field_index = pcl::getFieldIndex(pclCloud, sfName);
-	const PCLScalarField& pclField = pclCloud.fields[field_index];
+	int fieldIndex = pcl::getFieldIndex(pclCloud, sfName);
+	const PCLScalarField& pclField = pclCloud.fields[fieldIndex];
 	//temporary change the name of the given field to something else -> S5c4laR should be a pretty uncommon name,
 	const_cast<PCLScalarField&>(pclField).name = "S5c4laR";
 
@@ -231,91 +231,91 @@ bool pcl2cc::CopyScalarField(	const PCLCloud& pclCloud,
 	{
 	case PCLScalarField::FLOAT32:
 	{
-		pcl::PointCloud<FloatScalar>::Ptr pcl_scalar(new pcl::PointCloud<FloatScalar>);
-		FROM_PCL_CLOUD(pclCloud, *pcl_scalar);
+		pcl::PointCloud<FloatScalar> pclScalar;
+		FROM_PCL_CLOUD(pclCloud, pclScalar);
 
-		for (size_t i = 0; i < pointCount; ++i)
+		for (unsigned i = 0; i < pointCount; ++i)
 		{
-			ScalarType scalar = static_cast<ScalarType>(pcl_scalar->points[i].S5c4laR);
-			cc_scalar_field->addElement(scalar);
+			ScalarType scalar = static_cast<ScalarType>(pclScalar.points[i].S5c4laR);
+			newSF->addElement(scalar);
 		}
 	}
 	break;
 
 	case PCLScalarField::FLOAT64:
 	{
-		pcl::PointCloud<DoubleScalar>::Ptr pcl_scalar(new pcl::PointCloud<DoubleScalar>);
-		FROM_PCL_CLOUD(pclCloud, *pcl_scalar);
+		pcl::PointCloud<DoubleScalar> pclScalar;
+		FROM_PCL_CLOUD(pclCloud, pclScalar);
 
-		for (size_t i = 0; i < pointCount; ++i)
+		for (unsigned i = 0; i < pointCount; ++i)
 		{
-			ScalarType scalar = static_cast<ScalarType>(pcl_scalar->points[i].S5c4laR);
-			cc_scalar_field->addElement(scalar);
+			ScalarType scalar = static_cast<ScalarType>(pclScalar.points[i].S5c4laR);
+			newSF->addElement(scalar);
 		}
 	}
 	break;
 
 	case PCLScalarField::INT16:
 	{
-		pcl::PointCloud<ShortScalar>::Ptr pcl_scalar(new pcl::PointCloud<ShortScalar>);
-		FROM_PCL_CLOUD(pclCloud, *pcl_scalar);
+		pcl::PointCloud<ShortScalar> pclScalar;
+		FROM_PCL_CLOUD(pclCloud, pclScalar);
 
-		for (size_t i = 0; i < pointCount; ++i)
+		for (unsigned i = 0; i < pointCount; ++i)
 		{
-			ScalarType scalar = static_cast<ScalarType>(pcl_scalar->points[i].S5c4laR);
-			cc_scalar_field->addElement(scalar);
+			ScalarType scalar = static_cast<ScalarType>(pclScalar.points[i].S5c4laR);
+			newSF->addElement(scalar);
 		}
 	}
 	break;
 
 	case PCLScalarField::UINT16:
 	{
-		pcl::PointCloud<UShortScalar>::Ptr pcl_scalar(new pcl::PointCloud<UShortScalar>);
-		FROM_PCL_CLOUD(pclCloud, *pcl_scalar);
+		pcl::PointCloud<UShortScalar> pclScalar;
+		FROM_PCL_CLOUD(pclCloud, pclScalar);
 
-		for (size_t i = 0; i < pointCount; ++i)
+		for (unsigned i = 0; i < pointCount; ++i)
 		{
-			ScalarType scalar = static_cast<ScalarType>(pcl_scalar->points[i].S5c4laR);
-			cc_scalar_field->addElement(scalar);
+			ScalarType scalar = static_cast<ScalarType>(pclScalar.points[i].S5c4laR);
+			newSF->addElement(scalar);
 		}
 	}
 	break;
 
 	case PCLScalarField::UINT32:
 	{
-		pcl::PointCloud<UIntScalar>::Ptr pcl_scalar(new pcl::PointCloud<UIntScalar>);
-		FROM_PCL_CLOUD(pclCloud, *pcl_scalar);
+		pcl::PointCloud<UIntScalar> pclScalar;
+		FROM_PCL_CLOUD(pclCloud, pclScalar);
 
-		for (size_t i = 0; i < pointCount; ++i)
+		for (unsigned i = 0; i < pointCount; ++i)
 		{
-			ScalarType scalar = static_cast<ScalarType>(pcl_scalar->points[i].S5c4laR);
-			cc_scalar_field->addElement(scalar);
+			ScalarType scalar = static_cast<ScalarType>(pclScalar.points[i].S5c4laR);
+			newSF->addElement(scalar);
 		}
 	}
 	break;
 
 	case PCLScalarField::INT32:
 	{
-		pcl::PointCloud<IntScalar>::Ptr pcl_scalar(new pcl::PointCloud<IntScalar>);
-		FROM_PCL_CLOUD(pclCloud, *pcl_scalar);
+		pcl::PointCloud<IntScalar> pclScalar;
+		FROM_PCL_CLOUD(pclCloud, pclScalar);
 
-		for (size_t i = 0; i < pointCount; ++i)
+		for (unsigned i = 0; i < pointCount; ++i)
 		{
-			ScalarType scalar = static_cast<ScalarType>(pcl_scalar->points[i].S5c4laR);
-			cc_scalar_field->addElement(scalar);
+			ScalarType scalar = static_cast<ScalarType>(pclScalar.points[i].S5c4laR);
+			newSF->addElement(scalar);
 		}
 	}
 	break;
 
 	default:
 		ccLog::Warning(QString("[PCL] Field with an unmanaged type (= %1)").arg(pclField.datatype));
-		cc_scalar_field->release();
+		newSF->release();
 		return false;
 	}
 
-	cc_scalar_field->computeMinAndMax();
-	ccCloud.addScalarField(cc_scalar_field);
-	ccCloud.setCurrentDisplayedScalarField(0);
+	newSF->computeMinAndMax();
+	int sfIdex = ccCloud.addScalarField(newSF);
+	ccCloud.setCurrentDisplayedScalarField(sfIdex);
 	ccCloud.showSF(true);
 
 	//restore old name for the scalar field

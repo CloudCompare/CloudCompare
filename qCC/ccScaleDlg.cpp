@@ -31,7 +31,7 @@ ccScaleDlg::ccScaleDlg(QWidget* parent/*=0*/)
 	m_ui->setupUi(this);
 
 	connect(m_ui->sameForAllCheckBox, &QCheckBox::toggled, this, &ccScaleDlg::allDimsAtOnceToggled);
-	connect(m_ui->fxSpinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccScaleDlg::fxUpdated);
+	connect(m_ui->fxSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccScaleDlg::fxUpdated);
 
 	//restore semi-persistent parameters
 	m_ui->sameForAllCheckBox->setChecked(s_allAtOnce);

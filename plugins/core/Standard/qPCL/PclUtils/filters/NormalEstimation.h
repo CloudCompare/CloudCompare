@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                       CLOUDCOMPARE PLUGIN: qPCL                        #
@@ -14,35 +16,23 @@
 //#                         COPYRIGHT: Luca Penasa                         #
 //#                                                                        #
 //##########################################################################
-//
-#ifndef Q_PCL_PLUGIN_NORMALESTIMATION_HEADER
-#define Q_PCL_PLUGIN_NORMALESTIMATION_HEADER
 
 #include "BaseFilter.h"
-
-class NormalEstimationDialog;
 
 class NormalEstimation : public BaseFilter
 {
 public:
 	NormalEstimation();
-	virtual ~NormalEstimation();
-
-	//inherited from BaseFilter
-	virtual int compute();
+	~NormalEstimation() override;
 
 protected:
-
 	//inherited from BaseFilter
-	virtual int openInputDialog();
-	virtual void getParametersFromDialog();
+	int compute() override;
+	int getParametersFromDialog() override;
 
-	NormalEstimationDialog* m_dialog;
-	bool m_dialogHasParent;
+protected:
 	int m_knn_radius;
 	float m_radius;
 	bool m_useKnn;
 	bool m_overwrite_curvature;
 };
-
-#endif // Q_PCL_PLUGIN_NORMALESTIMATION_HEADER

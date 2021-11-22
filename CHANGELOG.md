@@ -8,6 +8,11 @@ v2.12 (???) - (in development)
 		-  'Edit > Cloud > Create single point cloud': to create a cloud with a single point (set by the user)
 		-  'Edit > Cloud > Paste from clipboard' (shortcut: CTRL+P): to create a cloud from ASCII/test data stored in the clipboard
 
+- New plugin:
+	- Fast Global Registration (see https://github.com/isl-org/FastGlobalRegistration)
+		- Automatic registration of point clouds (with normals) with no initial/rough alignment
+		- Based on: Q.-Y. Zhou, J. Park, and V. Koltun, "Fast Global Registration", ECCV, 2016
+
 - New command line options:
     - Added N_SIGMA_MIN and N_SIGMA_MAX options to the FILTER_SF command.
 		- Specify the option followed by a numeric value to filter by N * standardDeviation around the mean.
@@ -144,7 +149,6 @@ v2.12 (???) - (in development)
 	- Command line mode: the '-GLOBA_SHIFT FIRST' option was not working properly
 	- the 'Guess parameters' option of the M3C2 plugin was suggesting radii while M3C2 scales are diameters (i.e. ideal values should have been twice as big)
 	- ASCII file load dialog: CC would assign an 'Intensity' column to the 'Grey' color role, which is rarely a good idea. It will now assign it to 'Scalar field' by default.
-
 
 v2.11.3 (Anoia) - 08/09/2020
 ----------------------

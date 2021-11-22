@@ -120,7 +120,7 @@ AsciiOpenDlg::AsciiOpenDlg(QWidget* parent)
 	connect(m_ui->cancelButton,		&QPushButton::clicked,		this, &AsciiOpenDlg::reject);
 	connect(m_ui->lineEditSeparator, &QLineEdit::textChanged,	this, &AsciiOpenDlg::onSeparatorChange);
 	connect(m_ui->commaDecimalCheckBox, &QCheckBox::toggled,	this, &AsciiOpenDlg::commaDecimalCheckBoxToggled);
-	connect(m_ui->spinBoxSkipLines,	static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &AsciiOpenDlg::setSkippedLines);
+	connect(m_ui->spinBoxSkipLines,	qOverload<int>(&QSpinBox::valueChanged), this, &AsciiOpenDlg::setSkippedLines);
 
 	//shortcut buttons
 	connect(m_ui->toolButtonShortcutSpace,		&QToolButton::clicked, this, &AsciiOpenDlg::shortcutButtonPressed);
@@ -586,7 +586,7 @@ void AsciiOpenDlg::updateTable()
 				columnHeaderWidget->setItemIcon(ASCII_OPEN_DLG_Label, LabelIcon);
 				columnHeaderWidget->setItemIcon(ASCII_OPEN_DLG_Scalar, ScalarIcon);
 
-				connect(columnHeaderWidget, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &AsciiOpenDlg::columnsTypeHasChanged);
+				connect(columnHeaderWidget, qOverload<int>(&QComboBox::currentIndexChanged), this, &AsciiOpenDlg::columnsTypeHasChanged);
 			}
 
 			while (m_columnType.size() <= static_cast<size_t>(i))

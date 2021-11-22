@@ -117,8 +117,8 @@ qCanupo2DViewDialog::qCanupo2DViewDialog(	const CorePointDescSet* descriptors1,
 	connect(savePushButton,			&QAbstractButton::clicked, this, &qCanupo2DViewDialog::saveClassifier);
 	connect(donePushButton,			&QAbstractButton::clicked, this, &qCanupo2DViewDialog::checkBeforeAccept);
 	
-	connect(pointSizeSpinBox,		static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &qCanupo2DViewDialog::setPointSize);
-	connect(scalesCountSpinBox,		static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &qCanupo2DViewDialog::onScalesCountSpinBoxChanged);
+	connect(pointSizeSpinBox,		qOverload<int>(&QSpinBox::valueChanged), this, &qCanupo2DViewDialog::setPointSize);
+	connect(scalesCountSpinBox,		qOverload<int>(&QSpinBox::valueChanged), this, &qCanupo2DViewDialog::onScalesCountSpinBoxChanged);
 }
 
 qCanupo2DViewDialog::~qCanupo2DViewDialog()

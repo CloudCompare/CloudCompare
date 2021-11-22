@@ -2,7 +2,7 @@
 
 //##########################################################################
 //#                                                                        #
-//#                       CLOUDCOMPARE PLUGIN: qPCL                        #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
@@ -13,38 +13,52 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#                         COPYRIGHT: Luca Penasa                         #
+//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
 
-#include "BaseFilter.h"
+//Qt
+#include <QDialog>
 
-//! SIFT keypoints extraction
-class ExtractSIFT: public BaseFilter
+#include <ui_FastGlobalRegistrationDlg.h>
+
+class ccPointCloud;
+
+//! Fast Global Registration dialog
+class FastGlobalRegistrationDialog : public QDialog, public Ui::FastGlobalRegistrationDialog
 {
+	Q_OBJECT
+
 public:
-	ExtractSIFT();
-	~ExtractSIFT() override;
+
+	//! Default constructor
+	FastGlobalRegistrationDialog(	const std::vector<ccPointCloud*>& allClouds,
+									QWidget* parent = nullptr);
+
+	//! Default destructor
+	~FastGlobalRegistrationDialog() override;
+
+	//! Returns the feature descritor comptation radius
+	double getFeatureRadius() const;
+
+	//! Returns the 'reference' cloud
+	ccPointCloud* getReferenceCloud();
+
+	//! Saves parameters for next call
+	void saveParameters() const;
+
+protected:
+	void autoEstimateRadius();
+	void referenceEntityChanged(int index);
 
 protected:
 
-	//inherited from BaseFilter
-	int compute() override;
-	bool checkSelected() const override;
-	int getParametersFromDialog() override;
-	QString getErrorMessage(int errorCode) const override;
+	void updateGUI();
 
-	int checkParameters();
+	//! All clouds (input)
+	std::vector<ccPointCloud*> clouds;
 
-protected:
-	int m_nr_octaves;
-	float m_min_scale;
-	int m_nr_scales_per_octave;
-	float m_min_contrast;
-	bool m_use_min_contrast;
-	QString m_field_to_use;
-	std::string m_field_to_use_no_space;
-
-	enum Modes {RGB, SCALAR_FIELD};
-	Modes m_mode;
+	//! Reference cloud unique ID
+	unsigned referencesCloudUinqueID;
 };
+

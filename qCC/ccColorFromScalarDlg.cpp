@@ -153,20 +153,20 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
 	}
 	
 	//connect GUI elements
-	connect(m_ui->channelComboR, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccColorFromScalarDlg::onChannelChangedR);
-	connect(m_ui->channelComboG, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccColorFromScalarDlg::onChannelChangedG);
-	connect(m_ui->channelComboB, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccColorFromScalarDlg::onChannelChangedB);
-	connect(m_ui->channelComboA, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccColorFromScalarDlg::onChannelChangedA);
+	connect(m_ui->channelComboR, qOverload<int>(&QComboBox::currentIndexChanged), this, &ccColorFromScalarDlg::onChannelChangedR);
+	connect(m_ui->channelComboG, qOverload<int>(&QComboBox::currentIndexChanged), this, &ccColorFromScalarDlg::onChannelChangedG);
+	connect(m_ui->channelComboB, qOverload<int>(&QComboBox::currentIndexChanged), this, &ccColorFromScalarDlg::onChannelChangedB);
+	connect(m_ui->channelComboA, qOverload<int>(&QComboBox::currentIndexChanged), this, &ccColorFromScalarDlg::onChannelChangedA);
 
 	connect(m_ui->buttonBox->button(QDialogButtonBox::Apply), &QPushButton::clicked, this, &ccColorFromScalarDlg::onApply);
-	connect(m_ui->minInputSpinBoxR, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::minSpinChangedR);
-	connect(m_ui->maxInputSpinBoxR, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::maxSpinChangedR);
-	connect(m_ui->minInputSpinBoxG, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::minSpinChangedG);
-	connect(m_ui->maxInputSpinBoxG, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::maxSpinChangedG);
-	connect(m_ui->minInputSpinBoxB, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::minSpinChangedB);
-	connect(m_ui->maxInputSpinBoxB, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::maxSpinChangedB);
-	connect(m_ui->minInputSpinBoxA, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::minSpinChangedA);
-	connect(m_ui->maxInputSpinBoxA, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::maxSpinChangedA);
+	connect(m_ui->minInputSpinBoxR, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::minSpinChangedR);
+	connect(m_ui->maxInputSpinBoxR, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::maxSpinChangedR);
+	connect(m_ui->minInputSpinBoxG, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::minSpinChangedG);
+	connect(m_ui->maxInputSpinBoxG, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::maxSpinChangedG);
+	connect(m_ui->minInputSpinBoxB, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::minSpinChangedB);
+	connect(m_ui->maxInputSpinBoxB, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::maxSpinChangedB);
+	connect(m_ui->minInputSpinBoxA, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::minSpinChangedA);
+	connect(m_ui->maxInputSpinBoxA, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccColorFromScalarDlg::maxSpinChangedA);
 
 	connect(m_ui->reverseR, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleColors);
 	connect(m_ui->reverseG, &QCheckBox::stateChanged, this, &ccColorFromScalarDlg::toggleColors);

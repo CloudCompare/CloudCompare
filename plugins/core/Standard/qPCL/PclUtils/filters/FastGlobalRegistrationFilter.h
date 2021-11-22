@@ -13,38 +13,32 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#                         COPYRIGHT: Luca Penasa                         #
+//#                    COPYRIGHT: CloudCompare project                     #
 //#                                                                        #
 //##########################################################################
 
 #include "BaseFilter.h"
 
-//! SIFT keypoints extraction
-class ExtractSIFT: public BaseFilter
+//! Filter based on "Q.-Y. Zhou, J. Park, and V. Koltun, Fast Global Registration, ECCV, 2016."
+/** See https://github.com/isl-org/FastGlobalRegistration
+**/
+class FastGlobalRegistrationFilter : public BaseFilter
 {
 public:
-	ExtractSIFT();
-	~ExtractSIFT() override;
+	FastGlobalRegistrationFilter();
+	~FastGlobalRegistrationFilter() override;
 
 protected:
 
 	//inherited from BaseFilter
 	int compute() override;
-	bool checkSelected() const override;
 	int getParametersFromDialog() override;
+	bool checkSelected() const override;
 	QString getErrorMessage(int errorCode) const override;
 
-	int checkParameters();
+protected: // variables
 
-protected:
-	int m_nr_octaves;
-	float m_min_scale;
-	int m_nr_scales_per_octave;
-	float m_min_contrast;
-	bool m_use_min_contrast;
-	QString m_field_to_use;
-	std::string m_field_to_use_no_space;
-
-	enum Modes {RGB, SCALAR_FIELD};
-	Modes m_mode;
+	std::vector<ccPointCloud*> m_alignedClouds;
+	ccPointCloud* m_referenceCloud;
+	double m_featureRadius;
 };

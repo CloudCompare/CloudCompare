@@ -253,22 +253,22 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 		m_window->addToOwnDB(m_yLabels,false);
 	}
 
-	connect(projectionComboBox,			static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),			this, &DistanceMapGenerationDlg::projectionModeChanged);
-	connect(angularUnitComboBox,		static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),			this, &DistanceMapGenerationDlg::angularUnitChanged);
-	connect(xStepDoubleSpinBox,			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::updateGridSteps);
-	connect(hStepDoubleSpinBox,			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::updateGridSteps);
-	connect(latStepDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::updateGridSteps);
-	connect(xMinDoubleSpinBox,			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::updateGridSteps);
-	connect(xMaxDoubleSpinBox,			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::updateGridSteps);
-	connect(hMinDoubleSpinBox,			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::updateGridSteps);
-	connect(hMaxDoubleSpinBox,			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::updateGridSteps);
-	connect(latMinDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::updateGridSteps);
-	connect(latMaxDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::updateGridSteps);
-	connect(axisDimComboBox,			static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),			this, &DistanceMapGenerationDlg::updateProfileRevolDim);
-	connect(xOriginDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::updateProfileOrigin);
-	connect(yOriginDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::updateProfileOrigin);
-	connect(zOriginDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::updateProfileOrigin);
-	connect(baseRadiusDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::baseRadiusChanged);
+	connect(projectionComboBox,			qOverload<int>(&QComboBox::currentIndexChanged),			this, &DistanceMapGenerationDlg::projectionModeChanged);
+	connect(angularUnitComboBox,		qOverload<int>(&QComboBox::currentIndexChanged),			this, &DistanceMapGenerationDlg::angularUnitChanged);
+	connect(xStepDoubleSpinBox,			qOverload<double>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::updateGridSteps);
+	connect(hStepDoubleSpinBox,			qOverload<double>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::updateGridSteps);
+	connect(latStepDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::updateGridSteps);
+	connect(xMinDoubleSpinBox,			qOverload<double>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::updateGridSteps);
+	connect(xMaxDoubleSpinBox,			qOverload<double>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::updateGridSteps);
+	connect(hMinDoubleSpinBox,			qOverload<double>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::updateGridSteps);
+	connect(hMaxDoubleSpinBox,			qOverload<double>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::updateGridSteps);
+	connect(latMinDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::updateGridSteps);
+	connect(latMaxDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::updateGridSteps);
+	connect(axisDimComboBox,			qOverload<int>(&QComboBox::currentIndexChanged),			this, &DistanceMapGenerationDlg::updateProfileRevolDim);
+	connect(xOriginDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::updateProfileOrigin);
+	connect(yOriginDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::updateProfileOrigin);
+	connect(zOriginDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::updateProfileOrigin);
+	connect(baseRadiusDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this, &DistanceMapGenerationDlg::baseRadiusChanged);
 	
 	connect(heightUnitLineEdit,			&QLineEdit::editingFinished, this, &DistanceMapGenerationDlg::updateHeightUnits);
 	
@@ -279,10 +279,10 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 	connect(loadLabelsPushButton,		&QAbstractButton::clicked, this,	&DistanceMapGenerationDlg::loadOverlaySymbols);
 	connect(clearLabelsPushButton,		&QAbstractButton::clicked, this,	&DistanceMapGenerationDlg::clearOverlaySymbols);
 	
-	connect(symbolSizeSpinBox,			static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &DistanceMapGenerationDlg::overlaySymbolsSizeChanged);
-	connect(fontSizeSpinBox,			static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &DistanceMapGenerationDlg::labelFontSizeChanged);
-	connect(precisionSpinBox,			static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &DistanceMapGenerationDlg::labelPrecisionChanged);
-	connect(colorScaleStepsSpinBox,		static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &DistanceMapGenerationDlg::colorRampStepsChanged);
+	connect(symbolSizeSpinBox,			qOverload<int>(&QSpinBox::valueChanged), this, &DistanceMapGenerationDlg::overlaySymbolsSizeChanged);
+	connect(fontSizeSpinBox,			qOverload<int>(&QSpinBox::valueChanged), this, &DistanceMapGenerationDlg::labelFontSizeChanged);
+	connect(precisionSpinBox,			qOverload<int>(&QSpinBox::valueChanged), this, &DistanceMapGenerationDlg::labelPrecisionChanged);
+	connect(colorScaleStepsSpinBox,		qOverload<int>(&QSpinBox::valueChanged), this, &DistanceMapGenerationDlg::colorRampStepsChanged);
 	
 	connect(overlayGridGroupBox,		&QGroupBox::toggled,				this,	&DistanceMapGenerationDlg::toggleOverlayGrid);
 	connect(scaleXStepDoubleSpinBox,	&QAbstractSpinBox::editingFinished,	this,	&DistanceMapGenerationDlg::updateOverlayGrid);

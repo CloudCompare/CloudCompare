@@ -26,6 +26,7 @@
 #include "ccScalarField.h"
 #include "ccPointCloud.h"
 #include "ccBox.h"
+#include "ccProgressDialog.h"
 
 //CCCoreLib
 #include <Neighbourhood.h>
@@ -35,6 +36,9 @@
 #ifdef QT_DEBUG
 //#define DEBUG_PICKING_MECHANISM
 #endif
+
+//System
+#include <random>
 
 ccOctree::ccOctree(ccGenericPointCloud* aCloud)
 	: CCCoreLib::DgmOctree(aCloud)
@@ -731,4 +735,209 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 	}
 
 	return true;
+}
+
+PointCoordinateType ccOctree::GuessNaiveRadius(ccGenericPointCloud* cloud)
+{
+	if (!cloud)
+	{
+		assert(false);
+		return 0;
+	}
+
+	PointCoordinateType largestDim = cloud->getOwnBB().getMaxBoxDim();
+
+	return largestDim / std::min<unsigned>(100, std::max<unsigned>(1, cloud->size() / 100));
+}
+
+PointCoordinateType ccOctree::GuessBestRadiusAutoComputeOctree(	ccGenericPointCloud* cloud,
+																const BestRadiusParams& params,
+																QWidget* parentWidget/*=nullptr*/)
+{
+	if (!cloud)
+	{
+		assert(false);
+		return 0;
+	}
+
+	if (!cloud->getOctree())
+	{
+		ccProgressDialog pDlg(true, parentWidget);
+		if (!cloud->computeOctree(&pDlg))
+		{
+			ccLog::Error(tr("Could not compute octree for cloud '%1'").arg(cloud->getName()));
+			return 0;
+		}
+	}
+
+	return ccOctree::GuessBestRadius(cloud, params, cloud->getOctree().data());
+}
+
+
+PointCoordinateType ccOctree::GuessBestRadius(	ccGenericPointCloud* cloud,
+												const BestRadiusParams& params,
+												CCCoreLib::DgmOctree* inputOctree/*=nullptr*/,
+												CCCoreLib::GenericProgressCallback* progressCb/*=nullptr*/)
+{
+	if (!cloud)
+	{
+		assert(false);
+		return 0;
+	}
+
+	CCCoreLib::DgmOctree* octree = inputOctree;
+	if (!octree)
+	{
+		octree = new CCCoreLib::DgmOctree(cloud);
+		if (octree->build(progressCb) <= 0)
+		{
+			delete octree;
+			ccLog::Warning("[GuessBestRadius] Failed to compute the cloud octree");
+			return 0;
+		}
+	}
+
+	PointCoordinateType bestRadius = GuessNaiveRadius(cloud);
+	if (bestRadius == 0)
+	{
+		ccLog::Warning("[GuessBestRadius] The cloud has invalid dimensions");
+		return 0;
+	}
+
+	if (cloud->size() < 100)
+	{
+		//no need to do anything else for very small clouds!
+		return bestRadius;
+	}
+
+	//we are now going to sample the cloud so as to compute statistics on the density
+	{
+		const unsigned sampleCount = std::min<unsigned>(200, cloud->size() / 10);
+
+		double aimedPop = params.aimedPopulationPerCell;
+		PointCoordinateType radius = bestRadius;
+		PointCoordinateType lastRadius = radius;
+		double lastMeanPop = 0;
+
+		std::random_device rd;   // non-deterministic generator
+		std::mt19937 gen(rd());  // to seed mersenne twister.
+		std::uniform_int_distribution<unsigned> dist(0, cloud->size() - 1);
+
+		//we may have to do this several times
+		for (size_t attempt = 0; attempt < 10; ++attempt)
+		{
+			int totalCount = 0;
+			int totalSquareCount = 0;
+			int minPop = 0;
+			int maxPop = 0;
+			int aboveMinPopCount = 0;
+
+			unsigned char octreeLevel = octree->findBestLevelForAGivenNeighbourhoodSizeExtraction(radius);
+
+			for (size_t i = 0; i < sampleCount; ++i)
+			{
+				unsigned randomIndex = dist(gen);
+				assert(randomIndex < cloud->size());
+
+				const CCVector3* P = cloud->getPoint(randomIndex);
+				CCCoreLib::DgmOctree::NeighboursSet Yk;
+				int n = octree->getPointsInSphericalNeighbourhood(*P, radius, Yk, octreeLevel);
+				assert(n >= 1);
+
+				totalCount += n;
+				totalSquareCount += n * n;
+				if (i == 0)
+				{
+					minPop = maxPop = n;
+				}
+				else
+				{
+					if (n < minPop)
+						minPop = n;
+					else if (n > maxPop)
+						maxPop = n;
+				}
+
+				if (n >= params.minCellPopulation)
+				{
+					++aboveMinPopCount;
+				}
+			}
+
+			double meanPop = static_cast<double>(totalCount) / sampleCount;
+			double stdDevPop = sqrt(std::abs(static_cast<double>(totalSquareCount) / sampleCount - meanPop * meanPop));
+			double aboveMinPopRatio = static_cast<double>(aboveMinPopCount) / sampleCount;
+
+			ccLog::Print(QString("[GuessBestRadius] Radius = %1 -> samples population in [%2 ; %3] (mean %4 / std. dev. %5 / %6% above minimum)")
+				.arg(radius)
+				.arg(minPop)
+				.arg(maxPop)
+				.arg(meanPop)
+				.arg(stdDevPop)
+				.arg(aboveMinPopRatio * 100)
+			);
+
+			if (std::abs(meanPop - aimedPop) < params.aimedPopulationRange)
+			{
+				//we have found a correct radius
+				bestRadius = radius;
+
+				if (aboveMinPopRatio < params.minAboveMinRatio)
+				{
+					//ccLog::Warning("[GuessBestRadius] The cloud density is very inhomogeneous! You may have to increase the radius to get valid normals everywhere... but the result will be smoother");
+					aimedPop = params.aimedPopulationPerCell + (2.0*stdDevPop)/* * (1.0-aboveMinPopRatio)*/;
+					assert(aimedPop >= params.aimedPopulationPerCell);
+				}
+				else
+				{
+					break;
+				}
+			}
+
+			//otherwise we have to find a better estimate for the radius
+			PointCoordinateType newRadius = radius;
+			//(warning: we consider below that the number of points is proportional to the SURFACE of the neighborhood)
+			assert(meanPop >= 1.0);
+			if (attempt == 0)
+			{
+				//this is our best (only) guess for the moment
+				bestRadius = radius;
+
+				newRadius = radius * sqrt(aimedPop / meanPop);
+			}
+			else
+			{
+				//keep track of our best guess nevertheless
+				if (std::abs(meanPop - aimedPop) < std::abs(bestRadius - aimedPop))
+				{
+					bestRadius = radius;
+				}
+
+				double slope = (radius*radius - lastRadius * lastRadius) / (meanPop - lastMeanPop);
+				PointCoordinateType newSquareRadius = lastRadius * lastRadius + (aimedPop - lastMeanPop) * slope;
+				if (newSquareRadius > 0)
+				{
+					newRadius = sqrt(newSquareRadius);
+				}
+				else
+				{
+					//can't do any better!
+					break;
+				}
+			}
+
+			lastRadius = radius;
+			lastMeanPop = meanPop;
+
+			radius = newRadius;
+		}
+	}
+
+	if (octree && !inputOctree)
+	{
+		delete octree;
+		octree = nullptr;
+	}
+
+	return bestRadius;
 }

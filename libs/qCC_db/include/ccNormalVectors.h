@@ -88,22 +88,6 @@ public:
 									CCCoreLib::GenericProgressCallback* progressCb = nullptr,
 									CCCoreLib::DgmOctree* inputOctree = nullptr);
 
-	//! Tries to guess a very naive 'local radius' for normals computation (see ComputeCloudNormals)
-	/** \param cloud point cloud on which to process the normals.
-		\return naive radius (percentage of the cloud bounding-box)
-	**/
-	static PointCoordinateType GuessNaiveRadius(ccGenericPointCloud* cloud);
-
-	//! Tries to guess the best 'local radius' for normals computation (see ComputeCloudNormals)
-	/** \param cloud point cloud on which to process the normals.
-		\param cloudOctree input cloud octree (optional)
-		\param progressCb progress notification (optional)
-		\return the best radius (strictly positive value) or 0 if an error occurred
-	**/
-	static PointCoordinateType GuessBestRadius(	ccGenericPointCloud* cloud,
-												CCCoreLib::DgmOctree* cloudOctree = nullptr,
-												CCCoreLib::GenericProgressCallback* progressCb = nullptr);
-
 	//! Updates normals orientation based on a preferred orientation
 	/** \param theCloud point cloud on which to process the normals.
 		\param theNormsCodes array in which the normals indexes are stored

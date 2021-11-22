@@ -5,6 +5,7 @@
         <file>PclUtils/icons/pcl.png</file>
         <file>PclUtils/icons/sift.png</file>
         <file>PclUtils/icons/sor_outlier_remover.png</file>
+        <file>PclUtils/icons/fastGlobalRegistration.png</file>
         <file>info.json</file>
         <file>images/pcl.png</file>
     </qresource>

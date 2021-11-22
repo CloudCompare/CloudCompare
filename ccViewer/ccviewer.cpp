@@ -99,7 +99,7 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 #endif
 
 	//Signals & slots connection
-	connect(m_glWindow,								&ccGLWindow::filesDropped,				this, static_cast<void (ccViewer::*)(QStringList)>(&ccViewer::addToDB), Qt::QueuedConnection);
+	connect(m_glWindow,								&ccGLWindow::filesDropped,				this,	qOverload<QStringList>(&ccViewer::addToDB), Qt::QueuedConnection);
 	connect(m_glWindow,								&ccGLWindow::entitySelectionChanged,	this,	&ccViewer::selectEntity);
 	connect(m_glWindow,								&ccGLWindow::exclusiveFullScreenToggled,this,	&ccViewer::onExclusiveFullScreenToggled);
 	

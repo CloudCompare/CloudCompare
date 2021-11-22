@@ -42,6 +42,10 @@
 #include <iostream>
 #include <sstream>
 
+// Error codes
+static constexpr int NoSForRGB = -51;
+static constexpr int EmptyOutput = -52;
+
 //! Extract SIFT keypoints
 /** if only the point cloud is given PCL default parameters are used (that are not really good, so please give parameters)
 	\note Different types can be passed as input for this function:
@@ -51,12 +55,12 @@
 	\note If a PointType with a scale field is passed as output type, scales will be returned together with the return cloud
 **/
 template <typename PointInT, typename PointOutT>
-int EstimateSIFT(	const typename pcl::PointCloud<PointInT>::Ptr in_cloud,
-					typename pcl::PointCloud<PointOutT>& out_cloud,
-					int nr_octaves = 0,
-					float min_scale = 0,
-					int nr_scales_per_octave = 0,
-					float min_contrast = 0)
+static int EstimateSIFT(const typename pcl::PointCloud<PointInT>::Ptr in_cloud,
+						typename pcl::PointCloud<PointOutT>& out_cloud,
+						int nr_octaves = 0,
+						float min_scale = 0,
+						int nr_scales_per_octave = 0,
+						float min_contrast = 0)
 {
 	pcl::SIFTKeypoint< PointInT, PointOutT > keypoint_detector ;
 	keypoint_detector.setInputCloud(in_cloud);
@@ -72,7 +76,7 @@ int EstimateSIFT(	const typename pcl::PointCloud<PointInT>::Ptr in_cloud,
 	}
 
 	keypoint_detector.compute(out_cloud);
-	return 1;
+	return BaseFilter::Success;
 }
 
 ExtractSIFT::ExtractSIFT()
@@ -80,7 +84,6 @@ ExtractSIFT::ExtractSIFT()
 									"Extract SIFT Keypoints",
 									"Extract SIFT keypoints for clouds with intensity/RGB or any scalar field",
 									":/toolbar/PclUtils/icons/sift.png"))
-	, m_dialog(nullptr)
 	, m_nr_octaves(0)
 	, m_min_scale(0)
 	, m_nr_scales_per_octave(0)
@@ -92,70 +95,70 @@ ExtractSIFT::ExtractSIFT()
 
 ExtractSIFT::~ExtractSIFT()
 {
-	//we must delete parent-less dialogs ourselves!
-	if (m_dialog && m_dialog->parent() == nullptr)
-		delete m_dialog;
 }
 
-int ExtractSIFT::checkSelected()
+bool ExtractSIFT::checkSelected() const
 {
-	//do we have a selected cloud?
-	int have_cloud = isFirstSelectedCcPointCloud();
-	if (have_cloud != 1)
-		return -11;
-
-	//do we have at least a scalar field?
-	int have_sf = hasSelectedScalarField();
-	if (have_sf == 1)
-		return 1;
-
-	//also having rgb data will be enough
-	if (hasSelectedRGB() != 0)
-		return 1;
-
-	return -51;
-}
-
-int ExtractSIFT::openInputDialog()
-{
-	//do we have scalar fields?
-	std::vector<std::string> fields = getSelectedAvailableScalarFields();
-
-	//do we have rgb fields?
-	if (hasSelectedRGB() == 1)
+	ccPointCloud* cloud = getFirstSelectedEntityAsCCPointCloud();
+	if (!cloud)
 	{
-		//add rgb field
-		fields.push_back("rgb");
+		return false;
 	}
 
-	if (fields.empty()) //fields?
-		return -51;
-
-	//initialize the dialog object
-	if (!m_dialog)
-		m_dialog = new SIFTExtractDlg(m_app ? m_app->getMainWindow() : nullptr);
-
-	//update the combo box
-	m_dialog->updateComboBox(fields);
-
-	if (!m_dialog->exec())
-		return 0;
-
-	return 1;
+	//we need at least one scalar field or RGB colors
+	return cloud->hasScalarFields() || cloud->hasColors();
 }
 
-void ExtractSIFT::getParametersFromDialog()
+int ExtractSIFT::getParametersFromDialog()
 {
-	if (!m_dialog)
-		return;
+	ccPointCloud* cloud = getFirstSelectedEntityAsCCPointCloud();
+	if (!cloud)
+	{
+		assert(false);
+		return InvalidInput;
+	}
+
+	//do we have scalar fields?
+	unsigned fieldCount = cloud->getNumberOfScalarFields();
+	QStringList fieldNames;
+	fieldNames.reserve(fieldCount);
+	for (unsigned i = 0; i < fieldCount; i++)
+	{
+		fieldNames << cloud->getScalarFieldName(i);
+	}
+
+	//do we have rgb fields?
+	if (cloud->hasColors())
+	{
+		//add rgb field
+		fieldNames << "rgb";
+	}
+
+	if (fieldNames.empty())
+	{
+		//no scalar field or RGB?
+		assert(false);
+		return NoSForRGB;
+	}
+
+	//initialize the dialog object
+	SIFTExtractDlg dialog(m_app ? m_app->getMainWindow() : nullptr);
+
+	//update the combo box
+	dialog.updateComboBox(fieldNames);
+
+	if (!dialog.exec())
+	{
+		return CancelledByUser;
+	}
 
 	//get the parameters from the dialog
-	m_nr_octaves = m_dialog->nrOctaves->value();
-	m_min_scale = static_cast<float>(m_dialog->minScale->value());
-	m_nr_scales_per_octave = m_dialog->scalesPerOctave->value();
-	m_use_min_contrast = m_dialog->useMinContrast->checkState();
-	m_min_contrast = m_use_min_contrast ? static_cast<float>(m_dialog->minContrast->value()) : 0.0f;
-	m_field_to_use = m_dialog->intensityCombo->currentText();
+	m_nr_octaves = dialog.nrOctaves->value();
+	m_min_scale = static_cast<float>(dialog.minScale->value());
+	m_nr_scales_per_octave = dialog.scalesPerOctave->value();
+	m_use_min_contrast = dialog.useMinContrast->checkState();
+	m_min_contrast = m_use_min_contrast ? static_cast<float>(dialog.minContrast->value()) : 0.0f;
+	m_field_to_use = dialog.intensityCombo->currentText();
 
 	if (m_field_to_use == "rgb")
 	{
@@ -169,72 +172,61 @@ void ExtractSIFT::getParametersFromDialog()
 	QString fieldname(m_field_to_use);
 	fieldname.replace(' ', '_');
 	m_field_to_use_no_space = qPrintable(fieldname); //DGM: warning, toStdString doesn't preserve "local" characters
+
+	return checkParameters();
 }
 
 int ExtractSIFT::checkParameters()
 {
-	if ( (m_nr_octaves > 0) && (m_min_scale > 0) && (m_nr_scales_per_octave > 0))
+	if ((m_nr_octaves > 0) && (m_min_scale > 0) && (m_nr_scales_per_octave > 0))
 	{
 		if (m_use_min_contrast)
 		{
 			if (m_min_contrast > 0)
 			{
-				return 1;
+				return Success;
 			}
 			else
 			{
-				return -52;
+				return InvalidParameters;
 			}
 		}
 		else
 		{
-			return 1;
+			return Success;
 		}
 	}
 	else
 	{
-		return -52;
+		return InvalidParameters;
 	}
 }
 
 int ExtractSIFT::compute()
 {
-	ccPointCloud* cloud = getSelectedEntityAsCCPointCloud();
+	ccPointCloud* cloud = getFirstSelectedEntityAsCCPointCloud();
 	if (!cloud)
-		return -1;
-
-	std::list<std::string> req_fields;
-	try
 	{
-		req_fields.push_back("xyz"); // always needed
-		switch (m_mode)
-		{
-		case RGB:
-			req_fields.push_back("rgb");
-			break;
-		case SCALAR_FIELD:
-			req_fields.push_back(qPrintable(m_field_to_use)); //DGM: warning, toStdString doesn't preserve "local" characters
-			break;
-		default:
-			assert(false);
-			break;
-		}
+		return InvalidInput;
 	}
-	catch (const std::bad_alloc&)
+
+	QStringList scalarFields;
+	if (m_mode == SCALAR_FIELD)
 	{
-		//not enough memory
-		return -1;
+		scalarFields << m_field_to_use;
 	}
 	
-	PCLCloud::Ptr sm_cloud = cc2smReader(cloud).getAsSM(req_fields);
+	PCLCloud::Ptr sm_cloud = cc2smReader(cloud).getAsSM(true, false, m_mode == RGB, scalarFields);
 	if (!sm_cloud)
-		return -1;
+	{
+		return NotEnoughMemory;
+	}
 
 	//Now change the name of the field to use to a standard name, only if in OTHER_FIELD mode
 	if (m_mode == SCALAR_FIELD)
 	{
 		int field_index = pcl::getFieldIndex(*sm_cloud, m_field_to_use_no_space);
-		sm_cloud->fields.at(field_index).name = "intensity"; //we always use intensity as name... even if it is curvature or another field.
+		sm_cloud->fields[field_index].name = "intensity"; //we always use intensity as name... even if it is curvature or another field.
 	}
 
 	//Now do the actual computation
@@ -258,14 +250,14 @@ int ExtractSIFT::compute()
 	if (out_cloud_sm.height * out_cloud_sm.width == 0)
 	{
 		//cloud is empty
-		return -53;
+		return EmptyOutput;
 	}
 
 	ccPointCloud* out_cloud_cc = pcl2cc::Convert(out_cloud_sm);
 	if (!out_cloud_cc)
 	{
 		//conversion failed (not enough memory?)
-		return -1;
+		return NotEnoughMemory;
 	}
 
 	std::stringstream name;
@@ -280,25 +272,23 @@ int ExtractSIFT::compute()
 	out_cloud_cc->copyGlobalShiftAndScale(*cloud);
 
 	if (cloud->getParent())
+	{
 		cloud->getParent()->addChild(out_cloud_cc);
+	}
 
 	emit newEntity(out_cloud_cc);
 
-	return 1;
+	return Success;
 }
 
-QString ExtractSIFT::getErrorMessage(int errorCode)
+QString ExtractSIFT::getErrorMessage(int errorCode) const
 {
 	switch (errorCode)
 	{
-	//THESE CASES CAN BE USED TO OVERRIDE OR ADD FILTER-SPECIFIC ERRORS CODES
-	//ALSO IN DERIVED CLASSES DEFAULT MUST BE ""
-	case -51:
-		return "Selected entity does not have any suitable scalar field or RGB. Intensity scalar field or RGB are needed for computing SIFT";
-	case -52:
-		return "Wrong Parameters. One or more parameters cannot be accepted";
-	case -53:
-		return "SIFT keypoint extraction does not returned any point. Try relaxing your parameters";
+	case NoSForRGB:
+		return tr("Selected entity does not have any suitable scalar field or RGB. Intensity scalar field or RGB are needed for computing SIFT");
+	case EmptyOutput:
+		return tr("SIFT keypoint extraction did not return any point. Try relaxing your parameters");
 	default:
 		//see below
 		break;

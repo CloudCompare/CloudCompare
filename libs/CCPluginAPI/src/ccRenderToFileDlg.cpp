@@ -80,7 +80,7 @@ ccRenderToFileDlg::ccRenderToFileDlg(unsigned baseWidth, unsigned baseHeight, QW
 
 	connect(m_ui->chooseFileButton,	&QToolButton::clicked,			this, &ccRenderToFileDlg::chooseFile);
 	connect(m_ui->buttonBox,	 	&QDialogButtonBox::accepted,	this, &ccRenderToFileDlg::saveSettings);
-	connect(m_ui->zoomDoubleSpinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccRenderToFileDlg::updateInfo);
+	connect(m_ui->zoomDoubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccRenderToFileDlg::updateInfo);
 
 	updateInfo();
 }

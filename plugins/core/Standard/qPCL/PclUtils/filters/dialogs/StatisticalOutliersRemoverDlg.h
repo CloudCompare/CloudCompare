@@ -26,7 +26,7 @@
 class SORDialog : public QDialog, public Ui::StatisticalOutliersRemoverDlg
 {
 public:
-	explicit SORDialog(QWidget* parent = 0);
+	explicit SORDialog(QWidget* parent = nullptr);
 };
 
 #endif // Q_PCL_PLUGIN_STATISTICAL_OUTLIERS_REMOVER_DIALOG_HEADER

@@ -66,7 +66,7 @@ ccTracePolylineTool::ccTracePolylineTool(ccPickingHub* pickingHub, QWidget* pare
 	connect(m_ui->continueToolButton,	&QToolButton::clicked, this, &ccTracePolylineTool::continueEdition);
 	connect(m_ui->validButton,			&QToolButton::clicked, this, &ccTracePolylineTool::apply);
 	connect(m_ui->cancelButton,			&QToolButton::clicked, this, &ccTracePolylineTool::cancel);
-	connect(m_ui->widthSpinBox,			static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &ccTracePolylineTool::onWidthSizeChanged);
+	connect(m_ui->widthSpinBox,			qOverload<int>(&QSpinBox::valueChanged), this, &ccTracePolylineTool::onWidthSizeChanged);
 
 	//add shortcuts
 	addOverriddenShortcut(Qt::Key_Escape); //escape key for the "cancel" button

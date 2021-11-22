@@ -144,11 +144,11 @@ qAnimationDlg::qAnimationDlg(ccGLWindow* view3d, QWidget* parent)
 
 	connect ( autoStepDurationCheckBox,	&QAbstractButton::toggled,		this, &qAnimationDlg::onAutoStepsDurationToggled );
 	connect ( smoothTrajectoryGroupBox,	&QGroupBox::toggled,			this, &qAnimationDlg::onSmoothTrajectoryToggled );
-	connect ( smoothRatioDoubleSpinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),		this, &qAnimationDlg::onSmoothRatioChanged );
+	connect ( smoothRatioDoubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),		this, &qAnimationDlg::onSmoothRatioChanged );
 	
-	connect( fpsSpinBox,				static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &qAnimationDlg::onFPSChanged );
-	connect( totalTimeDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &qAnimationDlg::onTotalTimeChanged );
-	connect( stepTimeDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &qAnimationDlg::onStepTimeChanged );
+	connect( fpsSpinBox,				qOverload<int>(&QSpinBox::valueChanged), this, &qAnimationDlg::onFPSChanged );
+	connect( totalTimeDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged), this, &qAnimationDlg::onTotalTimeChanged );
+	connect( stepTimeDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged), this, &qAnimationDlg::onStepTimeChanged );
 	connect( loopCheckBox,				&QAbstractButton::toggled, this, &qAnimationDlg::onLoopToggled );
 
 	connect( browseButton,			&QAbstractButton::clicked,		this, &qAnimationDlg::onBrowseButtonClicked );

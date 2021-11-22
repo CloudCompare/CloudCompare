@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                       CLOUDCOMPARE PLUGIN: qPCL                        #
@@ -14,9 +16,6 @@
 //#                         COPYRIGHT: Luca Penasa                         #
 //#                                                                        #
 //##########################################################################
-//
-#ifndef Q_PCL_PLUGIN_BASEFILTER_HEADER
-#define Q_PCL_PLUGIN_BASEFILTER_HEADER
 
 //Qt
 #include <QObject>
@@ -37,28 +36,28 @@ class ccMainAppInterface;
 struct FilterDescription
 {
 public:
-	QString m_filter_name;
-	QString m_entry_name;
-	QString m_status_tip;
-	QIcon m_icon;
+	QString filterName;
+	QString entryName;
+	QString statusTip;
+	QIcon icon;
 
 	FilterDescription()
-		: m_filter_name("PCLFilter")
-		, m_entry_name("filter")
-		, m_status_tip("Compute something with PCL")
-		, m_icon(QIcon(QString::fromUtf8(":/toolbar/PclUtils/icons/pcl.png")) )
+		: filterName("PCLFilter")
+		, entryName("filter")
+		, statusTip("Compute something with PCL")
+		, icon(QIcon(QString::fromUtf8(":/toolbar/PclUtils/icons/pcl.png")) )
 	{}
 
 	FilterDescription(QString filterName, QString entryName, QString statusTip, QString icon)
-		: m_filter_name(filterName)
-		, m_entry_name(entryName)
-		, m_status_tip(statusTip)
-		, m_icon(QIcon(icon))
+		: filterName(filterName)
+		, entryName(entryName)
+		, statusTip(statusTip)
+		, icon(QIcon(icon))
 	{}
 };
 
 //! Base abstract class for each implemented PCL filter
-/** \note Remember to override compute(), at least
+/** \note Remember to override compute(), at the minimum
 	\author Luca Penasa
 **/
 class BaseFilter: public QObject
@@ -67,88 +66,44 @@ class BaseFilter: public QObject
 
 public:
 	/** \brief Default constructor
-	*	\param[in] desc a FilterDescription structure containing filter infos
-	*	\param[in] parent_plugin parent plugin (optional)
+	*	\param[in] desc		filter description
+	*	\param[in] app		application interface (optional)
 	*/
-	BaseFilter(FilterDescription desc = FilterDescription(), ccPluginInterface * parent_plugin = 0);
+	BaseFilter(FilterDescription desc, ccMainAppInterface* app = nullptr);
 
-	/** \brief Get the action associated with the button
-	* used in menu and toolbar creation
-	*/
-	QAction* getAction();
+	/** \brief Get the action associated with the button used in menu and toolbar creation
+	**/
+	inline QAction* getAction() { return m_action; }
 
 	//! Returns the error message corresponding to a given error code
 	/** Each filter have a set of possible error message to be used given bt getFilterErrorMessage()
 		Baseclass implementation provides some generic messages.
 		\note These messages can be replaced by re-implementing this method and handling the same
-			  codes BEFORE calling the baseclass method
+			  codes BEFORE calling the base class method
 	**/
-	virtual QString getErrorMessage(int errorCode);
+	virtual QString getErrorMessage(int errorCode) const;
 
-	//! Returns the status tip
-	/** Status tip is visualized in status bar when button is hovered.
-		used in QAction creation
-	**/
-	QString getStatusTip() const;
-
-
-	//! Returns the name of the filter
-	QString getFilterName() const;
-
-	//! Returns the entry name
-	/** Entry name is used when creating the corresponding QAction by initAction
-	**/
-	QString getEntryName() const;
-
-	//! Returns the icon associated with the button
-	QIcon getIcon() const;
+	//! Returns the filter description
+	const FilterDescription& getDescription() const { return m_desc; }
 
 	//! Sets whether to show a progressbar while computing or not
-	void setShowProgressBar(bool status) {m_show_progress = status;}
-
-	//! Returns a vector of strings representing the names of the available scalar fields
-	/** For the first selected entity.
-	**/
-	std::vector<std::string> getSelectedAvailableScalarFields();
+	inline void setShowProgressBar(bool status) { m_showProgress = status; }
 
 	//! Returns the first selected entity as a ccPointCloud
 	/** \return nullptr if no cloud is selected or if is not a ccPointCloud
 	**/
-	ccPointCloud * getSelectedEntityAsCCPointCloud() const;
+	ccPointCloud* getFirstSelectedEntityAsCCPointCloud() const;
 
-	//! Returns the first selected entity as a ccHObject
+	//! Returns the first selected entity (as a ccHObject)
 	/** \return nullptr if no object is selected
 	**/
-	ccHObject * getSelectedEntityAsCCHObject() const;
-
-	//! Get selected object that also have the provided metadata key
-	ccHObject::Container getSelectedThatHaveMetaData(const QString key) const;
-
-	//! Returns all the objects in db tree of type "type"
-	void getAllEntitiesOfType(CC_CLASS_ENUM type, ccHObject::Container& entities);
-
-	//! Returns all the existent hierarchical objects which have a specific metadata
-	/** May return an empty container if none found.
-	**/
-	void getAllEntitiesThatHaveMetaData(QString key, ccHObject::Container & entities);
+	ccHObject* getFirstSelectedEntity() const;
 
 	//! get all entities that are selected and that also are cc_point_cloud
-	void getSelectedEntitiesThatAreCCPointCloud(ccHObject::Container & entities);
+	void getSelectedEntitiesThatAreCCPointCloud(ccHObject::Container & entities) const;
 
 	//! get all entities that are selected and that also are of the specified type
-	void getSelectedEntitiesThatAre(CC_CLASS_ENUM  kind, ccHObject::Container & entities);
-
-	//! Returns 1 if the first selected entity has RGB info
-	int hasSelectedRGB();
-
-	//! Returns 1 if the first selected entity has at least one scalar field
-	int hasSelectedScalarField();
-
-	//! Returns 1 if the first selected entity has a scalar field with name field_name
-	int hasSelectedScalarField(std::string field_name);
-
-	//! Returns 1 if the first selected object is a ccPointCloud
-	int isFirstSelectedCcPointCloud();
+	void getSelectedEntitiesThatAre(CC_CLASS_ENUM kind, ccHObject::Container & entities) const;
 
 	//! Updates the internal copy of selected entities
 	/** 'selectedEntities' is a vector of pointers to selected entities.
@@ -162,29 +117,20 @@ public:
 	virtual int compute() = 0;
 
 	//! Sets associated CC application interface (to access DB)
-	void setMainAppInterface(ccMainAppInterface* app) { m_app = app; }
+	inline void setMainAppInterface(ccMainAppInterface* app) { m_app = app; }
 
 	//! Returns associated CC application interface for accessing to some of mainWindow methods
-	ccMainAppInterface * getMainAppInterface() { return m_app; }
+	ccMainAppInterface* getMainAppInterface() { return m_app; }
 
-	//! Returns the associated parent plugin interface
-	ccPluginInterface * getParentPlugin() const { return m_parent_plugin; }
+public: //default error codes (reserved between -10 and 1)
 
-protected:
-
-	//! Returns is called when the dialog window is accepted.
-	/** it can be overridden but normally should not be necessary
-		the parameters will be retrieved from the dialog
-		via the getParametersFromDialog() method
-		this always need to be overridden.
-	**/
-	//DGM: useless as dialogs are always modal
-	//virtual int dialogAccepted();
-
-	//! Called when action is triggered
-	/** \note performAction calls start() in base class
-	**/
-	int performAction();
+	static constexpr int Success = 1;				//!< Filter successful
+	static constexpr int CancelledByUser = 0;		//!< Process cancelled by user
+	static constexpr int InvalidInput = -1;			//!< Internal error: Generic computation error
+	static constexpr int ThreadAlreadyInUse = -2;	//!< Internal error: thread already in use
+	static constexpr int InvalidParameters = -3;	//!< Invalid parameters
+	static constexpr int ComputationError = -4;		//!< Generic computation error
+	static constexpr int NotEnoughMemory = -5;		//!< Not enough memory
 
 signals:
 
@@ -199,43 +145,26 @@ signals:
 
 protected:
 
+	//! Called when action is triggered
+	/** \note performAction calls getParametersFromDialog() and then start()
+	**/
+	void performAction();
+
 	//! Checks if current selection is compliant with the filter
 	/** If not, an error is returned and computation stops.
 		By default, baseclass method simply checks that selection
 		is composed of one and only one ccPointCloud.
 		This method should be overridden if necessary.
-		\return 1 if selection is compliant (error code otherwise)
+		\return true if selection is compliant (error code otherwise)
 	**/
-	virtual int checkSelected();
+	virtual bool checkSelected() const;
 
-	//! Opens the input dialog window. Where the user can supply parameters for the computation
+	//! Optional: can be used to open a dialog and retrieve some parameters.
 	/** Automatically called by performAction.
-		Does nothing by default. Must be overridden if a dialog
-		must be displayed.
-		\return 1 if dialog has been successfully executed, 0 if canceled, negative error code otherwise
+		Does nothing by default. Must be overridden if a dialog should be displayed.
+		\return 1 if dialog has been successfully executed, and parameters are correct, 0 if canceled, negative error code otherwise
 	**/
-	virtual int openInputDialog() { return 1; }
-
-	//! Opens the output dialog window. To be used when the computations have output to be shown in a dedicated dialog (as plots, histograms, etc)
-	/** Automatically called by performAction.
-		Does nothing by default. Must be overridden if a output dialog
-		must be displayed.
-		\return 1 if dialog has been successfully executed, 0 if canceled, negative error code otherwise
-	**/
-	virtual int openOutputDialog() { return 1; }
-
-	//! Collects parameters from the filter dialog (if openDialog is successful)
-	/** Automatically called by performAction.
-		Does nothing by default. Must be overridden if necessary.
-	**/
-	virtual void getParametersFromDialog() {}
-
-	//! Checks that the parameters retrieved by getParametersFromDialog are valid
-	/** Automatically called by performAction.
-		Does nothing by default. Must be overridden if necessary.
-		\return 1 if parameters are valid (error code otherwise)
-	*/
-	virtual int checkParameters() { return 1; }
+	virtual int getParametersFromDialog() { return 1; }
 
 	//! Starts computation
 	/** Automatically called by performAction.
@@ -245,59 +174,28 @@ protected:
 	**/
 	virtual int start();
 
-	//! Initializes the corresponding action
-	/** Action can be retrieved with getAction.
-	**/
-	virtual void initAction();
-
 	//! Emits the error corresponding to a given error code (see newErrorMessage)
 	/** Error messages are retrieved from getErrorMessage() and getFilterErrorMessage()
 		\param errCode Error code (identifies a given error message)
 	**/
 	void throwError(int errCode);
 
-	//! Forces the Ui to be updated
-	/** Simply calls m_q_parent->UpdateUI();
-	**/
-	//DGM: dirty! library has no access to GUI (see MVC architecture)
-	//virtual void updateUi();
-
-	//! The filter action (created by initAction)
-	QAction* m_action;
-
-	//! Pointer to the main window
-	/** Used for accessing qCC functionalities from filters
-	**/
-	//DGM: dirty! library has no access to GUI (see MVC architecture)
-	//MainWindow * m_q_parent;
-
-	//! Currently selected entities
-	/** Updated using updateSelectedEntities()
-		\note DGM: now called by qPCL! (see MVC architecture)
-	**/
-	ccHObject::Container m_selected;
-
-	//! Associated dialog
-	/** Created inside the derived class constructor
-	**/
-	//DGM: dirty! some siblings must define the same variable with a different type!
-	//QFileDialog * m_dialog;
+protected: //variables
 
 	//! Filter information
-	/** Contains all informations about the given filter, as name etc..
-		Passed to the BaseFilter class constructor.
+	/** Contains all pieces of information about the filter (name, etc.)
 	**/
 	FilterDescription m_desc;
+
+	//! The filter action
+	QAction* m_action;
+
+	//! Currently selected entities
+	ccHObject::Container m_selectedEntities;
 
 	//! Associated application interface
 	ccMainAppInterface* m_app;
 
-	//! associated parent plugin of the filter
-	ccPluginInterface * m_parent_plugin;
-
-	//! Do we want to show a progress bar when the filter works?
-	bool m_show_progress;
-
+	//! Do we want to show a progress bar while the filter is being applied
+	bool m_showProgress;
 };
-
-#endif

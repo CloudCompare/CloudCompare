@@ -24,13 +24,11 @@ SIFTExtractDlg::SIFTExtractDlg(QWidget* parent)
 	setupUi(this);
 }
 
-void SIFTExtractDlg::updateComboBox(const std::vector<std::string>& fields)
+void SIFTExtractDlg::updateComboBox(const QStringList& fields)
 {
 	intensityCombo->clear();
-	for (size_t i = 0; i < fields.size(); i++)
+	for (QString field : fields)
 	{
-		intensityCombo->addItem(QString(fields[i].c_str()));
+		intensityCombo->addItem(field);
 	}
 }
-
-

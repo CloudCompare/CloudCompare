@@ -25,8 +25,11 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 
+//Qt
+#include <QStringList>
+
 //system
-#include <list>
+#include <set>
 #include <string>
 
 class ccPointCloud;
@@ -35,39 +38,32 @@ class ccPointCloud;
 class cc2smReader
 {
 public:
-	explicit cc2smReader(const ccPointCloud* cc_cloud);
+	explicit cc2smReader(ccPointCloud* ccCloud);
 
-	PCLCloud::Ptr getGenericField(std::string field_name) const;
-
-	PCLCloud::Ptr getXYZ() const;
-	pcl::PointCloud<pcl::PointXYZ>::Ptr getXYZ2() const;
-
-	PCLCloud::Ptr getNormals() const;
-
-	PCLCloud::Ptr getColors() const;
-
-	enum Fields { COORD_X, COORD_Y, COORD_Z, NORM_X, NORM_Y, NORM_Z };
-	PCLCloud::Ptr getOneOf(Fields field) const;
-
-	PCLCloud::Ptr getFloatScalarField(const std::string& field_name) const;
-
-	PCLCloud::Ptr getAsSM(std::list<std::string>& requested_fields) const;
-
-	//! Converts all the data in a ccPointCloud to a sesor_msgs::PointCloud2
+	//! Converts the ccPointCloud to a pcl::PointCloud2 cloud
 	/** This is useful for saving a ccPointCloud into a PCD file.
 		For pcl filters other methods are suggested (to get only the necessary bits of data)
 	**/
 	PCLCloud::Ptr getAsSM() const;
+	PCLCloud::Ptr getAsSM(bool xyz, bool normals, bool rgbColors, const QStringList& scalarFields) const;
 
-	static std::string GetSimplifiedSFName(const std::string& ccSfName);
+	//! Converts the ccPointCloud to a 'pcl::PointXYZ' cloud
+	pcl::PointCloud<pcl::PointXYZ>::Ptr getRawXYZ() const;
+
+	//! Converts the ccPointCloud to a 'pcl::PointNormal' cloud
+	pcl::PointCloud<pcl::PointNormal>::Ptr getAsPointNormal() const;
+
+	static std::string GetSimplifiedSFName(const QString& ccSfName);
 
 protected:
-	
-	bool checkIfFieldExists(const std::string& field_name) const;
+
+	PCLCloud::Ptr getXYZ() const;
+	PCLCloud::Ptr getNormals() const;
+	PCLCloud::Ptr getColors() const;
+	PCLCloud::Ptr getFloatScalarField(const QString& sfName) const;
 
 	//! Associated cloud
-	const ccPointCloud* m_cc_cloud;
-
+	const ccPointCloud* m_ccCloud;
 };
 
 #endif // Q_PCL_PLUGIN_CC2SM_H

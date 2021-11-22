@@ -55,10 +55,10 @@ sfEditDlg::sfEditDlg(QWidget* parent/*=0*/)
 		m_associatedSFHisto->yAxis->ticker()->setTickCount(3);
 	}
 
-	connect(m_ui->minValSpinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,	&sfEditDlg::minValSBChanged);
-	connect(m_ui->maxValSpinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,	&sfEditDlg::maxValSBChanged);
-	connect(m_ui->minSatSpinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,	&sfEditDlg::minSatSBChanged);
-	connect(m_ui->maxSatSpinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,	&sfEditDlg::maxSatSBChanged);
+	connect(m_ui->minValSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this,	&sfEditDlg::minValSBChanged);
+	connect(m_ui->maxValSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this,	&sfEditDlg::maxValSBChanged);
+	connect(m_ui->minSatSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this,	&sfEditDlg::minSatSBChanged);
+	connect(m_ui->maxSatSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this,	&sfEditDlg::maxSatSBChanged);
 
 	connect(m_associatedSFHisto,	&ccHistogramWindow::sfMinDispValChanged,	this,	&sfEditDlg::minValHistoChanged);
 	connect(m_associatedSFHisto,	&ccHistogramWindow::sfMaxDispValChanged,	this,	&sfEditDlg::maxValHistoChanged);

@@ -102,10 +102,10 @@ qM3C2Dialog::qM3C2Dialog(ccPointCloud* cloud1, ccPointCloud* cloud2, ccMainAppIn
 	connect(swapCloudsToolButton,	&QAbstractButton::clicked,	this, &qM3C2Dialog::swapClouds);
 	connect(guessParamsPushButton,	&QAbstractButton::clicked,	this, &qM3C2Dialog::guessParamsSlow);
 
-	connect(projDestComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &qM3C2Dialog::projDestIndexChanged);
+	connect(projDestComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &qM3C2Dialog::projDestIndexChanged);
 
-	connect(cpOtherCloudComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &qM3C2Dialog::updateNormalComboBox);
-	connect(normalSourceComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &qM3C2Dialog::onUpdateNormalComboBoxChanged);
+	connect(cpOtherCloudComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &qM3C2Dialog::updateNormalComboBox);
+	connect(normalSourceComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &qM3C2Dialog::onUpdateNormalComboBoxChanged);
 	connect(cpUseCloud1RadioButton, &QAbstractButton::toggled, this, &qM3C2Dialog::updateNormalComboBox);
 	connect(cpSubsampleRadioButton, &QAbstractButton::toggled, this, &qM3C2Dialog::updateNormalComboBox);
 	connect(cpUseOtherCloudRadioButton, &QAbstractButton::toggled, this, &qM3C2Dialog::updateNormalComboBox);

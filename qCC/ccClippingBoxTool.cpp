@@ -78,9 +78,9 @@ ccClippingBoxTool::ccClippingBoxTool(QWidget* parent)
 	connect(showBoxToolButton,				&QToolButton::toggled,				this, &ccClippingBoxTool::toggleBox);
 	connect(showInteractorsToolButton,		&QToolButton::toggled,				this, &ccClippingBoxTool::toggleInteractors);
 
-	connect(thickXDoubleSpinBox,			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &ccClippingBoxTool::thicknessChanged);
-	connect(thickYDoubleSpinBox,			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &ccClippingBoxTool::thicknessChanged);
-	connect(thickZDoubleSpinBox,			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &ccClippingBoxTool::thicknessChanged);
+	connect(thickXDoubleSpinBox,			qOverload<double>(&QDoubleSpinBox::valueChanged),	this, &ccClippingBoxTool::thicknessChanged);
+	connect(thickYDoubleSpinBox,			qOverload<double>(&QDoubleSpinBox::valueChanged),	this, &ccClippingBoxTool::thicknessChanged);
+	connect(thickZDoubleSpinBox,			qOverload<double>(&QDoubleSpinBox::valueChanged),	this, &ccClippingBoxTool::thicknessChanged);
 
 	connect(minusXShiftToolButton,			&QToolButton::clicked,				this, &ccClippingBoxTool::shiftXMinus);
 	connect(plusXShiftToolButton,			&QToolButton::clicked,				this, &ccClippingBoxTool::shiftXPlus);

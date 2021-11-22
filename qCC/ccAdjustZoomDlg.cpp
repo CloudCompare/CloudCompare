@@ -59,9 +59,9 @@ ccAdjustZoomDlg::ccAdjustZoomDlg(ccGLWindow* win, QWidget* parent/*=0*/)
 		windowLabel->setText("Error");
 	}
 
-	connect(focalDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &ccAdjustZoomDlg::onFocalChanged);
-	connect(pixelSizeDoubleSpinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this, &ccAdjustZoomDlg::onPixelSizeChanged);
-	connect(pixelCountSpinBox,		static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),					this, &ccAdjustZoomDlg::onPixelCountChanged);
+	connect(focalDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this, &ccAdjustZoomDlg::onFocalChanged);
+	connect(pixelSizeDoubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),	this, &ccAdjustZoomDlg::onPixelSizeChanged);
+	connect(pixelCountSpinBox,		qOverload<int>(&QSpinBox::valueChanged),					this, &ccAdjustZoomDlg::onPixelCountChanged);
 }
 
 double ccAdjustZoomDlg::getFocalDistance() const

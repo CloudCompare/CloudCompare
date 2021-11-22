@@ -38,7 +38,7 @@ ccNormalComputationDlg::ccNormalComputationDlg(bool withScanGrid, bool withSenso
 	//by default, the 'auto' button is hidden (as long as setCloud is not called)
 	autoRadiusToolButton->setVisible(false);
 
-	connect(localModelComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccNormalComputationDlg::localModelChanged);
+	connect(localModelComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &ccNormalComputationDlg::localModelChanged);
 	connect(autoRadiusToolButton, &QToolButton::clicked,												this, &ccNormalComputationDlg::autoEstimateRadius);
 
 	if (withScanGrid)
@@ -202,26 +202,21 @@ ccNormalVectors::Orientation ccNormalComputationDlg::getPreferredOrientation() c
 
 void ccNormalComputationDlg::autoEstimateRadius()
 {
-	if (!m_cloud)
+	ccOctree::BestRadiusParams params;
 	{
-		assert(false);
-		return;
+		params.aimedPopulationPerCell = 16;
+		params.aimedPopulationRange = 4;
+		params.minCellPopulation = 6;
+		params.minAboveMinRatio = 0.97;
 	}
 
-	if (!m_cloud->getOctree())
-	{
-		ccProgressDialog pDlg(true, this);
-		if (!m_cloud->computeOctree(&pDlg))
-		{
-			ccLog::Error(QString("Could not compute octree for cloud '%1'").arg(m_cloud->getName()));
-			autoRadiusToolButton->setVisible(false);
-			return;
-		}
-	}
-
-	PointCoordinateType radius = ccNormalVectors::GuessBestRadius(m_cloud, m_cloud->getOctree().data());
+	PointCoordinateType radius = ccOctree::GuessBestRadiusAutoComputeOctree(m_cloud, params, this);
 	if (radius > 0)
 	{
 		radiusDoubleSpinBox->setValue(radius);
+	}
+	else
+	{
+		ccLog::Error("Failed to estimate the radius");
 	}
 }

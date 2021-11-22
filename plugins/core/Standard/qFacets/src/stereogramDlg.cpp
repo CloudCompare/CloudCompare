@@ -623,16 +623,16 @@ StereogramDialog::StereogramDialog(ccMainAppInterface* app)
 		m_classifWidget->setDensityColorScale(ccColorScalesManager::GetDefaultScale());
 	}
 
-	connect(colorScaleStepsSpinBox,		static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &StereogramDialog::onDensityColorStepsChanged);
-	connect(ticksFreqSpinBox,			static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &StereogramDialog::onTicksFreqChanged);
+	connect(colorScaleStepsSpinBox,		qOverload<int>(&QSpinBox::valueChanged), this, &StereogramDialog::onDensityColorStepsChanged);
+	connect(ticksFreqSpinBox,			qOverload<int>(&QSpinBox::valueChanged), this, &StereogramDialog::onTicksFreqChanged);
 	connect(showHSVColorsCheckBox,		&QAbstractButton::toggled, this, &StereogramDialog::onHSVColorsToggled);
 
 	//interactive filtering mechanism
 	connect(filterFacetsGroupBox,		&QGroupBox::toggled, this, &StereogramDialog::onFilterEnabled);
-	connect(dipSpanDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &StereogramDialog::onFilterSizeChanged);
-	connect(dipDirSpanDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &StereogramDialog::onFilterSizeChanged);
-	connect(dipDoubleSpinBox,			static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &StereogramDialog::onFilterCenterChanged);
-	connect(dipDirDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &StereogramDialog::onFilterCenterChanged);
+	connect(dipSpanDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged), this, &StereogramDialog::onFilterSizeChanged);
+	connect(dipDirSpanDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged), this, &StereogramDialog::onFilterSizeChanged);
+	connect(dipDoubleSpinBox,			qOverload<double>(&QDoubleSpinBox::valueChanged), this, &StereogramDialog::onFilterCenterChanged);
+	connect(dipDirDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged), this, &StereogramDialog::onFilterCenterChanged);
 	connect(m_classifWidget,			&StereogramWidget::pointClicked, this, &StereogramDialog::onPointClicked);
 	connect(exportPushButton,			&QAbstractButton::clicked, this, &StereogramDialog::exportCurrentSelection);
 }

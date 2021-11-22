@@ -28,7 +28,7 @@ class MLSDialog : public QDialog, public Ui::MLSDialog
 	Q_OBJECT
 
 public:
-	explicit MLSDialog(QWidget *parent = 0);
+	explicit MLSDialog(QWidget* parent = nullptr);
 
 protected:
 	void activateMenu(QString name);
@@ -38,7 +38,6 @@ protected:
 protected:
 	void updateCombo();
 	void deactivateAllMethods();
-
 };
 
 #endif // MLSDIALOG_H

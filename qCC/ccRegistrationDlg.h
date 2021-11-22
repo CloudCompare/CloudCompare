@@ -36,7 +36,7 @@ class ccRegistrationDlg : public QDialog, public Ui::RegistrationDialog
 public:
 
 	//! Default constructor
-	ccRegistrationDlg(ccHObject *data, ccHObject *model, QWidget* parent = 0);
+	ccRegistrationDlg(ccHObject* data, ccHObject* model, QWidget* parent = nullptr);
 
 	//! Default destructor
 	virtual ~ccRegistrationDlg();

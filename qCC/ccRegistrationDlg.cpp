@@ -53,7 +53,7 @@ static bool		s_useModelSFAsWeights = false;
 static bool		s_useC2MSignedDistances = false;
 static int		s_normalsMatchingOption = CCCoreLib::ICPRegistrationTools::NO_NORMAL;
 
-ccRegistrationDlg::ccRegistrationDlg(ccHObject *data, ccHObject *model, QWidget* parent/*=nullptr*/)
+ccRegistrationDlg::ccRegistrationDlg(ccHObject* data, ccHObject* model, QWidget* parent/*=nullptr*/)
 	: QDialog(parent, Qt::Tool)
 	, Ui::RegistrationDialog()
 {

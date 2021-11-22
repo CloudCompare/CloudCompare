@@ -26,44 +26,21 @@
       <string>Role assignation</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="1">
-       <widget class="QLabel" name="label_10">
-        <property name="toolTip">
-         <string>'data' entity</string>
-        </property>
-        <property name="text">
-         <string>aligned</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="QLineEdit" name="alignedLineEdit">
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;entity to align (will be displaced)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="statusTip">
-         <string>the data cloud is the entity to align with the model cloud : it will be displaced (red cloud)</string>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
+      <item row="2" column="0">
        <widget class="QToolButton" name="modelColorButton">
         <property name="enabled">
          <bool>false</bool>
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
+      <item row="1" column="0">
        <widget class="QToolButton" name="dataColorButton">
         <property name="enabled">
          <bool>false</bool>
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
+      <item row="2" column="1">
        <widget class="QLabel" name="label_9">
         <property name="toolTip">
          <string>'model' entity</string>
@@ -73,8 +50,21 @@
         </property>
        </widget>
       </item>
+      <item row="1" column="1">
+       <widget class="QLabel" name="label_10">
+        <property name="toolTip">
+         <string>'data' entity</string>
+        </property>
+        <property name="text">
+         <string>aligned</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QComboBox" name="referenceComboBox"/>
+      </item>
       <item row="1" column="2">
-       <widget class="QLineEdit" name="referenceLineEdit">
+       <widget class="QLineEdit" name="alignedLineEdit">
         <property name="toolTip">
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;reference entity (won't move)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
@@ -83,22 +73,6 @@
         </property>
         <property name="readOnly">
          <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="2">
-       <widget class="QPushButton" name="swapButton">
-        <property name="toolTip">
-         <string>press once to exchange model and data clouds</string>
-        </property>
-        <property name="statusTip">
-         <string>press once to exchange model and data clouds</string>
-        </property>
-        <property name="text">
-         <string>swap</string>
-        </property>
-        <property name="flat">
-         <bool>false</bool>
         </property>
        </widget>
       </item>
@@ -215,9 +189,6 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>alignedLineEdit</tabstop>
-  <tabstop>referenceLineEdit</tabstop>
-  <tabstop>swapButton</tabstop>
   <tabstop>buttonBox</tabstop>
   <tabstop>dataColorButton</tabstop>
   <tabstop>modelColorButton</tabstop>

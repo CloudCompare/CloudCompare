@@ -34,10 +34,11 @@ protected:
 	int compute() override;
 	int getParametersFromDialog() override;
 	bool checkSelected() const override;
+	QString getErrorMessage(int errorCode) const override;
 
 protected: // variables
 
-	ccPointCloud* m_alignedCloud;
+	std::vector<ccPointCloud*> m_alignedClouds;
 	ccPointCloud* m_referenceCloud;
 	double m_featureRadius;
 };

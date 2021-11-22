@@ -32,8 +32,7 @@ class FastGlobalRegistrationDialog : public QDialog, public Ui::FastGlobalRegist
 public:
 
 	//! Default constructor
-	FastGlobalRegistrationDialog(	ccPointCloud* aligned,
-									ccPointCloud* reference,
+	FastGlobalRegistrationDialog(	const std::vector<ccPointCloud*>& allClouds,
 									QWidget* parent = nullptr);
 
 	//! Default destructor
@@ -45,24 +44,21 @@ public:
 	//! Returns the 'reference' cloud
 	ccPointCloud* getReferenceCloud();
 
-	//! Returns the 'aligned' cloud
-	ccPointCloud* getAlignedCloud();
-
 	//! Saves parameters for next call
 	void saveParameters() const;
 
 protected:
 	void autoEstimateRadius();
-	void swapModelAndData();
+	void referenceEntityChanged(int index);
 
 protected:
 
 	void updateGUI();
 
-	//! 'Reference' entity
-	ccPointCloud* referenceCloud;
+	//! All clouds (input)
+	std::vector<ccPointCloud*> clouds;
 
-	//! 'Aligned' entity
-	ccPointCloud* alignedCloud;
+	//! Reference cloud unique ID
+	unsigned referencesCloudUinqueID;
 };
 

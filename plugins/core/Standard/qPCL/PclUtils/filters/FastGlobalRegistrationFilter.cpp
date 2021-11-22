@@ -38,12 +38,15 @@
 //Boost
 #include <boost/make_shared.hpp>
 
+// Error codes
+static constexpr int NoNormals = -11;
+
 FastGlobalRegistrationFilter::FastGlobalRegistrationFilter()
 	: BaseFilter(FilterDescription("Fast Global Registration",
 									"Fast Global Registration, by Zhou et al.",
-									"Attempts to automatically register two clouds with normals without initial alignment",
+									"Attempts to automatically register clouds (with normals) without initial alignment",
 									":/toolbar/PclUtils/icons/fastGlobalRegistration.png"))
-	, m_alignedCloud(nullptr)
+	, m_alignedClouds()
 	, m_referenceCloud(nullptr)
 	, m_featureRadius(0)
 {
@@ -53,15 +56,35 @@ FastGlobalRegistrationFilter::~FastGlobalRegistrationFilter()
 {
 }
 
+QString FastGlobalRegistrationFilter::getErrorMessage(int errorCode) const
+{
+	switch (errorCode)
+	{
+	case NoNormals:
+		return tr("Clouds must have normals");
+	default:
+		//see below
+		break;
+	}
+
+	return BaseFilter::getErrorMessage(errorCode);
+}
+
 bool FastGlobalRegistrationFilter::checkSelected() const
 {
-	if (m_selectedEntities.size() != 2)
+	if (m_selectedEntities.size() < 2)
 	{
 		return false;
 	}
 
-	return m_selectedEntities[0]->isA(CC_TYPES::POINT_CLOUD)
-		&& m_selectedEntities[1]->isA(CC_TYPES::POINT_CLOUD);
+	for (ccHObject* entity : m_selectedEntities)
+	{
+		//clouds only
+		if (!entity->isA(CC_TYPES::POINT_CLOUD))
+			return false;
+	}
+
+	return true;
 }
 
 static bool ComputeFeatures(ccPointCloud* cloud, fgr::Features& features, double radius)
@@ -148,37 +171,50 @@ static bool ConverFromTo(const ccPointCloud& cloud, fgr::Points& points)
 
 int FastGlobalRegistrationFilter::getParametersFromDialog()
 {
+	// just in case
+	m_alignedClouds.clear();
+	m_referenceCloud = nullptr;
+
 	//get selected pointclouds
-	ccHObject::Container clouds;
-	getSelectedEntitiesThatAreCCPointCloud(clouds);
-	if (clouds.size() != 2)
+	std::vector<ccPointCloud*> clouds;
+	clouds.reserve(m_selectedEntities.size());
+	for (ccHObject* entity : m_selectedEntities)
+	{
+		//clouds only
+		if (entity->isA(CC_TYPES::POINT_CLOUD))
+		{
+			ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
+			if (!cloud->hasNormals())
+			{
+				return NoNormals;
+			}
+			clouds.push_back(cloud);
+		}
+	}
+	if (clouds.size() < 2)
 	{
 		return InvalidInput;
 	}
 
-	ccPointCloud* alignedCloud = ccHObjectCaster::ToPointCloud(clouds[0]);
-	ccPointCloud* referenceCloud = ccHObjectCaster::ToPointCloud(clouds[1]);
-
-	if (!alignedCloud || !referenceCloud)
-	{
-		assert(false);
-		return InvalidInput;
-	}
-	if (!alignedCloud->hasNormals() || !referenceCloud->hasNormals())
-	{
-		ccLog::Error(tr("Clouds must have normals"));
-		return InvalidInput;
-	}
-
-	FastGlobalRegistrationDialog dialog(alignedCloud, referenceCloud, m_app ? m_app->getMainWindow() : nullptr);
+	FastGlobalRegistrationDialog dialog(clouds, m_app ? m_app->getMainWindow() : nullptr);
 
 	if (!dialog.exec())
 	{
 		return CancelledByUser;
 	}
 
-	m_alignedCloud = dialog.getAlignedCloud();
+	// retrieve the reference clouds (= all the others)
 	m_referenceCloud = dialog.getReferenceCloud();
+
+	// retrieve the aligned clouds (= all the others)
+	m_alignedClouds.reserve(clouds.size() - 1);
+	for (ccPointCloud* cloud : clouds)
+	{
+		if (cloud != m_referenceCloud)
+			m_alignedClouds.push_back(cloud);
+	}
+
+	// retrieve the feature radius
 	m_featureRadius = dialog.getFeatureRadius();
 
 	dialog.saveParameters();
@@ -188,70 +224,91 @@ int FastGlobalRegistrationFilter::getParametersFromDialog()
 
 int FastGlobalRegistrationFilter::compute()
 {
-	if (!m_alignedCloud || !m_referenceCloud || m_featureRadius <= 0)
+	if (m_alignedClouds.empty() || !m_referenceCloud || m_featureRadius <= 0)
 	{
 		assert(false);
 		return InvalidInput;
 	}
-	if (!m_alignedCloud->hasNormals() || !m_referenceCloud->hasNormals())
+	if (!m_referenceCloud->hasNormals())
 	{
 		assert(false);
 		return InvalidInput;
 	}
 
-	//compute the feature vector for each cloud
-	fgr::Features alignedFeatures, referenceFeatures;
-	if (	!ComputeFeatures(m_alignedCloud, alignedFeatures, m_featureRadius)
-		||	!ComputeFeatures(m_referenceCloud, referenceFeatures, m_featureRadius) )
+	//compute the feature vector for the reference cloud
+	fgr::Features referenceFeatures;
+	if (!ComputeFeatures(m_referenceCloud, referenceFeatures, m_featureRadius))
 	{
-		ccLog::Error("Failed to compute the point feature descriptors");
+		ccLog::Warning("Failed to compute the reference cloud feature descriptors");
 		return ComputationError;
 	}
 
-	//now we need to convert the clouds to vectors of Eigen::Vector3f
-	fgr::Points alignedPoints, referencePoints;
-	if (	!ConverFromTo(*m_alignedCloud, alignedPoints)
-		||	!ConverFromTo(*m_referenceCloud, referencePoints) )
+	//convert the reference cloud to vectors of Eigen::Vector3f
+	fgr::Points referencePoints;
+	if (!ConverFromTo(*m_referenceCloud, referencePoints))
 	{
-		ccLog::Error("Not enough memory");
 		return NotEnoughMemory;
 	}
 
-
-	ccGLMatrix ccTrans;
-	try
+	//now for each aligned cloud
+	for (ccPointCloud* alignedCloud : m_alignedClouds)
 	{
-		fgr::CApp fgrProcess;
-		fgrProcess.LoadFeature(referencePoints, referenceFeatures);
-		fgrProcess.LoadFeature(alignedPoints, alignedFeatures);
-		fgrProcess.NormalizePoints();
-		fgrProcess.AdvancedMatching();
-		if (!fgrProcess.OptimizePairwise(true))
+		if (!alignedCloud->hasNormals())
 		{
-			ccLog::Error("Failed to perform pair-wise optimization (not enough points)");
+			assert(false);
+			return InvalidInput;
+		}
+
+		//now compute the feature vector
+		fgr::Features alignedFeatures;
+		if (!ComputeFeatures(alignedCloud, alignedFeatures, m_featureRadius))
+		{
+			ccLog::Warning("Failed to compute the point feature descriptors");
 			return ComputationError;
 		}
 
-		Eigen::Matrix4f trans = fgrProcess.GetOutputTrans();
-		for (int i = 0; i < 16; ++i)
+		//now convert the cloud to vectors of Eigen::Vector3f
+		fgr::Points alignedPoints;
+		if (!ConverFromTo(*alignedCloud, alignedPoints))
 		{
-			// both ccGLMatrix and Eigen::Matrix4f should use column-major storage
-			ccTrans.data()[i] = trans.data()[i];
+			return NotEnoughMemory;
 		}
+
+		ccGLMatrix ccTrans;
+		try
+		{
+			fgr::CApp fgrProcess;
+			fgrProcess.LoadFeature(referencePoints, referenceFeatures);
+			fgrProcess.LoadFeature(alignedPoints, alignedFeatures);
+			fgrProcess.NormalizePoints();
+			fgrProcess.AdvancedMatching();
+			if (!fgrProcess.OptimizePairwise(true))
+			{
+				ccLog::Warning("Failed to perform pair-wise optimization (not enough points)");
+				return ComputationError;
+			}
+
+			Eigen::Matrix4f trans = fgrProcess.GetOutputTrans();
+			for (int i = 0; i < 16; ++i)
+			{
+				// both ccGLMatrix and Eigen::Matrix4f should use column-major storage
+				ccTrans.data()[i] = trans.data()[i];
+			}
+		}
+		catch (...)
+		{
+			ccLog::Warning("Failed to determine the Global Registration matrix");
+			return ComputationError;
+		}
+
+		alignedCloud->applyRigidTransformation(ccTrans);
+
+		ccLog::Print(tr("[Fast Global Registration] Resulting matrix for cloud %1").arg(alignedCloud->getName()));
+		ccLog::Print(ccTrans.toString(12, ' ')); //full precision
+		ccLog::Print(tr("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool"));
+
+		emit entityHasChanged(alignedCloud);
 	}
-	catch (...)
-	{
-		ccLog::Error("Failed to determine the Global Registration matrix");
-		return ComputationError;
-	}
-
-	m_alignedCloud->applyRigidTransformation(ccTrans);
-
-	ccLog::Print(tr("[Fast Global Registration] Resulting matrix:"));
-	ccLog::Print(ccTrans.toString(12, ' ')); //full precision
-	ccLog::Print(tr("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool"));
-
-	emit entityHasChanged(m_alignedCloud);
 
 	return Success;
 }

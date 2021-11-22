@@ -29,22 +29,29 @@
 
 static double s_featureRadius = 0;
 
-FastGlobalRegistrationDialog::FastGlobalRegistrationDialog(	ccPointCloud* aligned,
-															ccPointCloud* reference,
+FastGlobalRegistrationDialog::FastGlobalRegistrationDialog(	const std::vector<ccPointCloud*>& allClouds,
 															QWidget* parent/*=nullptr*/)
 	: QDialog(parent, Qt::Tool)
 	, Ui::FastGlobalRegistrationDialog()
+	, clouds(allClouds)
+	, referencesCloudUinqueID(ccUniqueIDGenerator::InvalidUniqueID)
 {
-	assert(aligned && reference);
-	alignedCloud = aligned;
-	referenceCloud = reference;
-
 	setupUi(this);
-
-	updateGUI();
 
 	ccQtHelpers::SetButtonColor(dataColorButton, Qt::red);
 	ccQtHelpers::SetButtonColor(modelColorButton, Qt::yellow);
+
+	for (ccPointCloud* cloud : clouds)
+	{
+		referenceComboBox->addItem(cloud->getName(), cloud->getUniqueID());
+	}
+
+	if (!clouds.empty())
+	{
+		referencesCloudUinqueID = clouds.front()->getUniqueID();
+	}
+
+	updateGUI();
 
 	//restore semi-persistent settings
 	{
@@ -52,38 +59,31 @@ FastGlobalRegistrationDialog::FastGlobalRegistrationDialog(	ccPointCloud* aligne
 		double previousRadius = s_featureRadius;
 		if (previousRadius == 0)
 		{
-			double alignedRadius = ccOctree::GuessNaiveRadius(alignedCloud);
-			double referenceRadius = ccOctree::GuessNaiveRadius(referenceCloud);
-			previousRadius = std::max(alignedRadius, referenceRadius);
+			for (ccPointCloud* cloud : clouds)
+			{
+				double radius = ccOctree::GuessNaiveRadius(cloud);
+				previousRadius = std::max(radius, previousRadius);
+			}
 		}
 
 		featureRadiusDoubleSpinBox->setValue(previousRadius);
 	}
 
 	connect(autoRadiusToolButton, &QToolButton::clicked, this, &FastGlobalRegistrationDialog::autoEstimateRadius);
-	connect(swapButton, &QAbstractButton::clicked, this, &FastGlobalRegistrationDialog::swapModelAndData);
+	connect(referenceComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &FastGlobalRegistrationDialog::referenceEntityChanged);
 }
 
 FastGlobalRegistrationDialog::~FastGlobalRegistrationDialog()
 {
-	if (referenceCloud)
+	for (ccPointCloud* cloud : clouds)
 	{
-		referenceCloud->enableTempColor(false);
-		referenceCloud->prepareDisplayForRefresh_recursive();
-	}
-	if (alignedCloud)
-	{
-		alignedCloud->enableTempColor(false);
-		alignedCloud->prepareDisplayForRefresh_recursive();
+		cloud->enableTempColor(false);
+		cloud->prepareDisplayForRefresh_recursive();
 	}
 
-	if (referenceCloud)
+	for (ccPointCloud* cloud : clouds)
 	{
-		referenceCloud->refreshDisplay();
-	}
-	if (alignedCloud)
-	{
-		alignedCloud->refreshDisplay();
+		cloud->refreshDisplay();
 	}
 }
 
@@ -94,12 +94,13 @@ void FastGlobalRegistrationDialog::saveParameters() const
 
 ccPointCloud* FastGlobalRegistrationDialog::getReferenceCloud()
 {
-	return referenceCloud;
-}
+	for (ccPointCloud* cloud : clouds)
+	{
+		if (cloud->getUniqueID() == referencesCloudUinqueID)
+			return cloud;
+	}
 
-ccPointCloud* FastGlobalRegistrationDialog::getAlignedCloud()
-{
-	return alignedCloud;
+	return nullptr;
 }
 
 double FastGlobalRegistrationDialog::getFeatureRadius() const
@@ -109,26 +110,55 @@ double FastGlobalRegistrationDialog::getFeatureRadius() const
 
 void FastGlobalRegistrationDialog::updateGUI()
 {
-	if (!referenceCloud || !alignedCloud)
+	if (clouds.size() < 2)
 		return;
+	
+	ccPointCloud* referenceCloud = getReferenceCloud();
+	if (!referenceCloud)
+	{
+		assert(false);
+		return;
+	}
 
-	referenceLineEdit->setText(referenceCloud->getName());
+	// aligned cloud(s)
+	ccPointCloud* alignedCloud = nullptr; //only one of them
+	int referenceCloudIndex = -1;
+	for (size_t i = 0; i< clouds.size(); ++i)
+	{
+		ccPointCloud* cloud = clouds[i];
+		if (cloud->getUniqueID() != referencesCloudUinqueID)
+		{
+			alignedCloud = cloud;
+			alignedCloud->setVisible(true);
+			alignedCloud->setTempColor(ccColor::red);
+			alignedCloud->prepareDisplayForRefresh_recursive();
+		}
+		else
+		{
+			referenceCloudIndex = static_cast<int>(i);
+		}
+	}
+	alignedLineEdit->setText(clouds.size() == 2 ? alignedCloud->getName() : tr("%1 other clouds").arg(clouds.size() - 1));
+
+	// reference cloud
 	referenceCloud->setVisible(true);
 	referenceCloud->setTempColor(ccColor::yellow);
 	referenceCloud->prepareDisplayForRefresh_recursive();
 
-	alignedLineEdit->setText(alignedCloud->getName());
-	alignedCloud->setVisible(true);
-	alignedCloud->setTempColor(ccColor::red);
-	alignedCloud->prepareDisplayForRefresh_recursive();
+	referenceComboBox->blockSignals(true);
+	referenceComboBox->setCurrentIndex(referenceCloudIndex);
+	referenceComboBox->blockSignals(false);
 
-	referenceCloud->refreshDisplay();
-	alignedCloud->refreshDisplay();
+	// refersh display(s)
+	for (ccPointCloud* cloud : clouds)
+	{
+		cloud->refreshDisplay();
+	}
 }
 
-void FastGlobalRegistrationDialog::swapModelAndData()
+void FastGlobalRegistrationDialog::referenceEntityChanged(int index)
 {
-	std::swap(alignedCloud, referenceCloud);
+	referencesCloudUinqueID = referenceComboBox->itemData(index).toUInt();
 
 	updateGUI();
 }
@@ -143,19 +173,17 @@ void FastGlobalRegistrationDialog::autoEstimateRadius()
 		params.minAboveMinRatio = 0.97;
 	}
 
-	PointCoordinateType alignedRadius = ccOctree::GuessBestRadiusAutoComputeOctree(alignedCloud, params, this);
-	if (alignedRadius < 0)
+	PointCoordinateType largestRadius = 0.0;
+	for (ccPointCloud* cloud : clouds)
 	{
-		ccLog::Error("Failed to estimate the radius");
-		return;
-	}
-	PointCoordinateType referenceRadius = ccOctree::GuessBestRadiusAutoComputeOctree(referenceCloud, params, this);
-	if (referenceRadius < 0)
-	{
-		ccLog::Error("Failed to estimate the radius");
-		return;
+		PointCoordinateType radius = ccOctree::GuessBestRadiusAutoComputeOctree(cloud, params, this);
+		if (radius < 0)
+		{
+			ccLog::Error(tr("Failed to estimate the radius for cloud %1").arg(cloud->getName()));
+			return;
+		}
+		largestRadius = std::max(largestRadius, radius);
 	}
 
-	PointCoordinateType largestRadius = std::max(alignedRadius, referenceRadius);
 	featureRadiusDoubleSpinBox->setValue(largestRadius);
 }

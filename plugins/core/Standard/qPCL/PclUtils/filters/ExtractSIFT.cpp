@@ -42,6 +42,7 @@
 #include <iostream>
 #include <sstream>
 
+// Error codes
 static constexpr int NoSForRGB = -51;
 static constexpr int EmptyOutput = -52;
 

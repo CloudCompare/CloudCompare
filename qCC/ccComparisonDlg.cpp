@@ -134,8 +134,8 @@ ccComparisonDlg::ccComparisonDlg(	ccHObject* compEntity,
 	connect(computeButton,			&QPushButton::clicked,					this,	&ccComparisonDlg::computeDistances);
 	connect(histoButton,			&QPushButton::clicked,					this,	&ccComparisonDlg::showHisto);
 	connect(maxDistCheckBox,		&QCheckBox::toggled,					this,	&ccComparisonDlg::maxDistUpdated);
-	connect(localModelComboBox, static_cast<void (QComboBox::*)(int)> (&QComboBox::currentIndexChanged),		this,	&ccComparisonDlg::locaModelChanged);
-	connect(maxSearchDistSpinBox, static_cast<void (QDoubleSpinBox::*)(double)> (&QDoubleSpinBox::valueChanged),this,	&ccComparisonDlg::maxDistUpdated);
+	connect(localModelComboBox, qOverload<int> (&QComboBox::currentIndexChanged),		this,	&ccComparisonDlg::locaModelChanged);
+	connect(maxSearchDistSpinBox, qOverload<double> (&QDoubleSpinBox::valueChanged),this,	&ccComparisonDlg::maxDistUpdated);
 }
 
 ccComparisonDlg::~ccComparisonDlg()

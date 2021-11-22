@@ -28,8 +28,8 @@ ccUnrollDlg::ccUnrollDlg(QWidget* parent/*=0*/)
 	m_ui->setupUi(this);
 
 	connect(m_ui->checkBoxAuto, &QCheckBox::stateChanged, this, &ccUnrollDlg::axisAutoStateChanged);
-	connect(m_ui->comboBoxUnrollShapeType, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccUnrollDlg::shapeTypeChanged);
-	connect(m_ui->comboBoxAxisDimension, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccUnrollDlg::axisDimensionChanged);
+	connect(m_ui->comboBoxUnrollShapeType, qOverload<int>(&QComboBox::currentIndexChanged), this, &ccUnrollDlg::shapeTypeChanged);
+	connect(m_ui->comboBoxAxisDimension, qOverload<int>(&QComboBox::currentIndexChanged), this, &ccUnrollDlg::axisDimensionChanged);
 
 	m_ui->checkBoxAuto->setChecked(true);
 

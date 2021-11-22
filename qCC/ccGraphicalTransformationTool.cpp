@@ -37,17 +37,17 @@ ccGraphicalTransformationTool::ccGraphicalTransformationTool(QWidget* parent)
 {
 	setupUi(this);
 
-	connect(pauseButton,    &QAbstractButton::toggled,	this, &ccGraphicalTransformationTool::pause);
-	connect(okButton,       &QAbstractButton::clicked,	this, &ccGraphicalTransformationTool::apply);
-	connect(razButton,	  &QAbstractButton::clicked,	this, &ccGraphicalTransformationTool::reset);
-	connect(cancelButton,   &QAbstractButton::clicked,	this, &ccGraphicalTransformationTool::cancel);
-	connect(advPushButton, &QPushButton::toggled, this, &ccGraphicalTransformationTool::advModeToggle);
-	connect(advTranslateComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccGraphicalTransformationTool::advTranslateRefUpdate);
-	connect(advRotateComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccGraphicalTransformationTool::advRotateRefUpdate);
-	connect(rotComboBox, static_cast<void (QComboBox::*)(int) > (&QComboBox::activated), this, &ccGraphicalTransformationTool::advRotateComboBoxUpdate);
-	connect(refAxisRadio, &QRadioButton::toggled, this, &ccGraphicalTransformationTool::advRefAxisRadioToggled);
-	connect(objCenterRadio, &QRadioButton::toggled, this, &ccGraphicalTransformationTool::advObjectAxisRadioToggled);
-	
+	connect(pauseButton,    &QAbstractButton::toggled, this, &ccGraphicalTransformationTool::pause);
+	connect(okButton,       &QAbstractButton::clicked, this, &ccGraphicalTransformationTool::apply);
+	connect(razButton,	    &QAbstractButton::clicked, this, &ccGraphicalTransformationTool::reset);
+	connect(cancelButton,   &QAbstractButton::clicked, this, &ccGraphicalTransformationTool::cancel);
+	connect(advPushButton,  &QPushButton::toggled,     this, &ccGraphicalTransformationTool::advModeToggle);
+	connect(refAxisRadio,   &QRadioButton::toggled,    this, &ccGraphicalTransformationTool::advRefAxisRadioToggled);
+	connect(objCenterRadio, &QRadioButton::toggled,    this, &ccGraphicalTransformationTool::advObjectAxisRadioToggled);
+	connect(advTranslateComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &ccGraphicalTransformationTool::advTranslateRefUpdate);
+	connect(advRotateComboBox,    qOverload<int>(&QComboBox::currentIndexChanged), this, &ccGraphicalTransformationTool::advRotateRefUpdate);
+	connect(rotComboBox,          qOverload<int>(&QComboBox::activated),           this, &ccGraphicalTransformationTool::advRotateComboBoxUpdate);
+
 	//add shortcuts
 	addOverriddenShortcut(Qt::Key_Space); //space bar for the "pause" button
 	addOverriddenShortcut(Qt::Key_Escape); //escape key for the "cancel" button

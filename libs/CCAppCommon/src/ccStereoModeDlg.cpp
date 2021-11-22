@@ -39,7 +39,7 @@ ccStereoModeDlg::ccStereoModeDlg(QWidget* parent)
 
 	glassTypeChanged(m_ui->glassTypeComboBox->currentIndex());
 
-	connect(m_ui->glassTypeComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ccStereoModeDlg::glassTypeChanged);
+	connect(m_ui->glassTypeComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &ccStereoModeDlg::glassTypeChanged);
 }
 
 ccStereoModeDlg::~ccStereoModeDlg()

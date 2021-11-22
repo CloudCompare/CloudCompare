@@ -6877,7 +6877,7 @@ void MainWindow::doActionEditCamera()
 		//m_cpeDlg->makeFrameless(); //does not work on linux
 
 		connect(m_mdiArea, &QMdiArea::subWindowActivated,
-				m_cpeDlg, static_cast<void (ccCameraParamEditDlg::*)(QMdiSubWindow *)>(&ccCameraParamEditDlg::linkWith));
+				m_cpeDlg, qOverload<QMdiSubWindow*>(&ccCameraParamEditDlg::linkWith));
 
 		registerOverlayDialog(m_cpeDlg, Qt::BottomLeftCorner);
 	}

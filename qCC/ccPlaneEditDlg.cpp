@@ -66,11 +66,11 @@ ccPlaneEditDlg::ccPlaneEditDlg(ccPickingHub* pickingHub, QWidget* parent)
 
 	connect(pickCenterToolButton,	&QCheckBox::toggled, this, &ccPlaneEditDlg::pickPointAsCenter);
 	connect(upwardCheckBox,			&QCheckBox::toggled, this, &ccPlaneEditDlg::onDipDirModified);
-	connect(dipDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccPlaneEditDlg::onDipDirChanged);
-	connect(dipDirDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccPlaneEditDlg::onDipDirChanged);
-	connect(nxDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccPlaneEditDlg::onNormalChanged);
-	connect(nyDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccPlaneEditDlg::onNormalChanged);
-	connect(nzDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &ccPlaneEditDlg::onNormalChanged);
+	connect(dipDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccPlaneEditDlg::onDipDirChanged);
+	connect(dipDirDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccPlaneEditDlg::onDipDirChanged);
+	connect(nxDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccPlaneEditDlg::onNormalChanged);
+	connect(nyDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccPlaneEditDlg::onNormalChanged);
+	connect(nzDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccPlaneEditDlg::onNormalChanged);
 
 	connect(buttonBox, &QDialogButtonBox::accepted, this, &ccPlaneEditDlg::saveParamsAndAccept);
 	connect(buttonBox, &QDialogButtonBox::rejected, this, &ccPlaneEditDlg::deleteLater);

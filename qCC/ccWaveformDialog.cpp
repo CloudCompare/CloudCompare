@@ -390,7 +390,7 @@ ccWaveDialog::ccWaveDialog(	ccPointCloud* cloud,
 		}
 	}
 
-	connect(m_gui->pointIndexSpinBox, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &ccWaveDialog::onPointIndexChanged);
+	connect(m_gui->pointIndexSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &ccWaveDialog::onPointIndexChanged);
 	connect(m_gui->logScaleCheckBox,		&QCheckBox::toggled,	this,	&ccWaveDialog::updateCurrentWaveform);
 	connect(m_gui->fixedAmplitudeCheckBox,	&QCheckBox::toggled,	this,	&ccWaveDialog::updateCurrentWaveform);
 	connect(m_gui->pointPickingToolButton,	&QToolButton::toggled,	this,	&ccWaveDialog::onPointPickingButtonToggled);

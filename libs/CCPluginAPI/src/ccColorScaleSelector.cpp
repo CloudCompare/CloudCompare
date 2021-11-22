@@ -75,7 +75,7 @@ void ccColorScaleSelector::init()
 			m_comboBox->addItem(scale.key(), scale.value());
 		}
 
-		connect(m_comboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::activated), this, &ccColorScaleSelector::colorScaleSelected);
+		connect(m_comboBox, qOverload<int>(&QComboBox::activated), this, &ccColorScaleSelector::colorScaleSelected);
 	}
 	//advanced tool button
 	if (m_button)

@@ -84,14 +84,14 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent)
 	connect(m_UI->buttonBox,	&QDialogButtonBox::accepted,	this,	&ccRasterizeTool::testAndAccept);
 	connect(m_UI->buttonBox,	&QDialogButtonBox::rejected,	this,	&ccRasterizeTool::testAndReject);
 	
-	connect(m_UI->gridStepDoubleSpinBox,	  static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccRasterizeTool::updateGridInfo);
-	connect(m_UI->gridStepDoubleSpinBox,	  static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccRasterizeTool::gridOptionChanged);
-	connect(m_UI->emptyValueDoubleSpinBox,	  static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),	this,	&ccRasterizeTool::gridOptionChanged);
-	connect(m_UI->maxEdgeLengthDoubleSpinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,	&ccRasterizeTool::gridOptionChanged);
-	connect(m_UI->dimensionComboBox,		  static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),		this,	&ccRasterizeTool::projectionDirChanged);
-	connect(m_UI->heightProjectionComboBox,	  static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),		this,	&ccRasterizeTool::projectionTypeChanged);
-	connect(m_UI->scalarFieldProjection,	  static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),		this,	&ccRasterizeTool::sfProjectionTypeChanged);
-	connect(m_UI->fillEmptyCellsComboBox,	  static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),		this,	&ccRasterizeTool::fillEmptyCellStrategyChanged);
+	connect(m_UI->gridStepDoubleSpinBox,	  qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccRasterizeTool::updateGridInfo);
+	connect(m_UI->gridStepDoubleSpinBox,	  qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccRasterizeTool::gridOptionChanged);
+	connect(m_UI->emptyValueDoubleSpinBox,	  qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccRasterizeTool::gridOptionChanged);
+	connect(m_UI->maxEdgeLengthDoubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this,	&ccRasterizeTool::gridOptionChanged);
+	connect(m_UI->dimensionComboBox,		  qOverload<int>(&QComboBox::currentIndexChanged),		this,	&ccRasterizeTool::projectionDirChanged);
+	connect(m_UI->heightProjectionComboBox,	  qOverload<int>(&QComboBox::currentIndexChanged),		this,	&ccRasterizeTool::projectionTypeChanged);
+	connect(m_UI->scalarFieldProjection,	  qOverload<int>(&QComboBox::currentIndexChanged),		this,	&ccRasterizeTool::sfProjectionTypeChanged);
+	connect(m_UI->fillEmptyCellsComboBox,	  qOverload<int>(&QComboBox::currentIndexChanged),		this,	&ccRasterizeTool::fillEmptyCellStrategyChanged);
 	
 	connect(m_UI->resampleCloudCheckBox,		&QAbstractButton::toggled,	this,	&ccRasterizeTool::resampleOptionToggled);
 	connect(m_UI->updateGridPushButton,			&QAbstractButton::clicked,	this,	&ccRasterizeTool::updateGridAndDisplay);
@@ -106,7 +106,7 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent)
 	
 	connect(m_UI->generateHillshadePushButton, &QAbstractButton::clicked,	this,	&ccRasterizeTool::generateHillshade);
 
-	connect(m_UI->activeLayerComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, [this] (int index)
+	connect(m_UI->activeLayerComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, [this] (int index)
 	{
 		activeLayerChanged( index );
 	});

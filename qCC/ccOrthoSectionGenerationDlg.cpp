@@ -27,7 +27,7 @@ ccOrthoSectionGenerationDlg::ccOrthoSectionGenerationDlg(QWidget* parent/*=0*/)
 {
 	setupUi(this);
 
-	connect(stepDoubleSpinBox, static_cast<void (QDoubleSpinBox::*)(double)> (&QDoubleSpinBox::valueChanged), this, &ccOrthoSectionGenerationDlg::onStepChanged);
+	connect(stepDoubleSpinBox, qOverload<double> (&QDoubleSpinBox::valueChanged), this, &ccOrthoSectionGenerationDlg::onStepChanged);
 }
 
 void ccOrthoSectionGenerationDlg::setPathLength(double l)

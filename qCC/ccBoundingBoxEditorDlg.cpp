@@ -58,25 +58,25 @@ ccBoundingBoxEditorDlg::ccBoundingBoxEditorDlg(QWidget* parent/*=0*/)
 	connect(fromClipboardPushButton,	&QPushButton::clicked,	this,	&ccBoundingBoxEditorDlg::fromClipboardClicked);
 	connect(toClipboardPushButton,		&QPushButton::clicked,	this,	&ccBoundingBoxEditorDlg::toClipboardClicked);
 
-	connect(pointTypeComboBox,	static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),				this,	&ccBoundingBoxEditorDlg::reflectChanges);
+	connect(pointTypeComboBox,	qOverload<int>(&QComboBox::currentIndexChanged),				this,	&ccBoundingBoxEditorDlg::reflectChanges);
 
-	connect(xDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),		this,	&ccBoundingBoxEditorDlg::updateCurrentBBox);
-	connect(yDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),		this,	&ccBoundingBoxEditorDlg::updateCurrentBBox);	
-	connect(zDoubleSpinBox,		static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),		this,	&ccBoundingBoxEditorDlg::updateCurrentBBox);	
+	connect(xDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),		this,	&ccBoundingBoxEditorDlg::updateCurrentBBox);
+	connect(yDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),		this,	&ccBoundingBoxEditorDlg::updateCurrentBBox);	
+	connect(zDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),		this,	&ccBoundingBoxEditorDlg::updateCurrentBBox);	
 
-	connect(dxDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),		this,	&ccBoundingBoxEditorDlg::updateXWidth);	
-	connect(dyDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),		this,	&ccBoundingBoxEditorDlg::updateYWidth);	
-	connect(dzDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),		this,	&ccBoundingBoxEditorDlg::updateZWidth);	
+	connect(dxDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),		this,	&ccBoundingBoxEditorDlg::updateXWidth);	
+	connect(dyDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),		this,	&ccBoundingBoxEditorDlg::updateYWidth);	
+	connect(dzDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),		this,	&ccBoundingBoxEditorDlg::updateZWidth);	
 
-	connect(xOriXDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),		this,	&ccBoundingBoxEditorDlg::onAxisValueChanged);
-	connect(xOriYDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),		this,	&ccBoundingBoxEditorDlg::onAxisValueChanged);
-	connect(xOriZDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),		this,	&ccBoundingBoxEditorDlg::onAxisValueChanged);
-	connect(yOriXDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),		this,	&ccBoundingBoxEditorDlg::onAxisValueChanged);
-	connect(yOriYDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),		this,	&ccBoundingBoxEditorDlg::onAxisValueChanged);
-	connect(yOriZDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),		this,	&ccBoundingBoxEditorDlg::onAxisValueChanged);
-	connect(zOriXDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),		this,	&ccBoundingBoxEditorDlg::onAxisValueChanged);
-	connect(zOriYDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),		this,	&ccBoundingBoxEditorDlg::onAxisValueChanged);
-	connect(zOriZDoubleSpinBox,	static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),		this,	&ccBoundingBoxEditorDlg::onAxisValueChanged);	
+	connect(xOriXDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),		this,	&ccBoundingBoxEditorDlg::onAxisValueChanged);
+	connect(xOriYDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),		this,	&ccBoundingBoxEditorDlg::onAxisValueChanged);
+	connect(xOriZDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),		this,	&ccBoundingBoxEditorDlg::onAxisValueChanged);
+	connect(yOriXDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),		this,	&ccBoundingBoxEditorDlg::onAxisValueChanged);
+	connect(yOriYDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),		this,	&ccBoundingBoxEditorDlg::onAxisValueChanged);
+	connect(yOriZDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),		this,	&ccBoundingBoxEditorDlg::onAxisValueChanged);
+	connect(zOriXDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),		this,	&ccBoundingBoxEditorDlg::onAxisValueChanged);
+	connect(zOriYDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),		this,	&ccBoundingBoxEditorDlg::onAxisValueChanged);
+	connect(zOriZDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),		this,	&ccBoundingBoxEditorDlg::onAxisValueChanged);	
 
 	defaultPushButton->setVisible(false);
 	lastPushButton->setVisible(s_lastBBox.isValid());

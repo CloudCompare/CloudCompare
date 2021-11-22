@@ -152,12 +152,12 @@ qBroomDlg::qBroomDlg(ccMainAppInterface* app/*=0*/)
 		connect(m_glWindow, &ccGLWindow::mouseMoved, this, &qBroomDlg::onMouseMoved);
 		connect(m_glWindow, &ccGLWindow::buttonReleased, this, &qBroomDlg::onButtonReleased);
 
-		connect(cleanHeightDoubleSpinBox,    static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &qBroomDlg::onCleanHeightChanged);
-		connect(broomLengthDoubleSpinBox,    static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &qBroomDlg::onDimensionChanged);
-		connect(broomWidthDoubleSpinBox,     static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &qBroomDlg::onDimensionChanged);
-		connect(broomThicknessDoubleSpinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &qBroomDlg::onDimensionChanged);
+		connect(cleanHeightDoubleSpinBox,    qOverload<double>(&QDoubleSpinBox::valueChanged), this, &qBroomDlg::onCleanHeightChanged);
+		connect(broomLengthDoubleSpinBox,    qOverload<double>(&QDoubleSpinBox::valueChanged), this, &qBroomDlg::onDimensionChanged);
+		connect(broomWidthDoubleSpinBox,     qOverload<double>(&QDoubleSpinBox::valueChanged), this, &qBroomDlg::onDimensionChanged);
+		connect(broomThicknessDoubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &qBroomDlg::onDimensionChanged);
 
-		connect(selectionModeComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &qBroomDlg::onSelectionModeChanged);
+		connect(selectionModeComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &qBroomDlg::onSelectionModeChanged);
 		connect(undoPushButton,        &QAbstractButton::clicked, this, &qBroomDlg::doUndo);
 		connect(undo10PushButton,      &QAbstractButton::clicked, this, &qBroomDlg::doUndo10);
 		connect(repositionPushButton,  &QAbstractButton::clicked, this, &qBroomDlg::onReposition);

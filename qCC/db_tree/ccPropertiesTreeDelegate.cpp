@@ -1214,7 +1214,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 			comboBox->addItem(glWindow->windowTitle());
 		}
 
-		connect(comboBox, static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
+		connect(comboBox, qOverload<const QString&>(&QComboBox::currentIndexChanged),
 				this, &ccPropertiesTreeDelegate::objectDisplayChanged);
 
 		outputWidget = comboBox;
@@ -1234,7 +1234,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 			comboBox->addItem(QString(cloud->getScalarFieldName(i)));
 		}
 
-		connect(comboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::activated),
+		connect(comboBox, qOverload<int>(&QComboBox::activated),
 				this, &ccPropertiesTreeDelegate::scalarFieldChanged);
 
 		outputWidget = comboBox;
@@ -1257,7 +1257,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		spinBox->setRange(ccColorScale::MIN_STEPS, ccColorScale::MAX_STEPS);
 		spinBox->setSingleStep(4);
 
-		connect(spinBox, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+		connect(spinBox, qOverload<int>(&QSpinBox::valueChanged),
 				this, &ccPropertiesTreeDelegate::colorRampStepsChanged);
 
 		outputWidget = spinBox;
@@ -1307,7 +1307,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		comboBox->addItem( tr( "Points" ), QVariant(ccOctree::MEAN_POINTS) );
 		comboBox->addItem( tr( "Plain cubes" ), QVariant(ccOctree::MEAN_CUBES) );
 
-		connect(comboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::activated),
+		connect(comboBox, qOverload<int>(&QComboBox::activated),
 				this, &ccPropertiesTreeDelegate::octreeDisplayModeChanged);
 
 		outputWidget = comboBox;
@@ -1318,7 +1318,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		QSpinBox* spinBox = new QSpinBox(parent);
 		spinBox->setRange(1, CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL);
 
-		connect(spinBox, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+		connect(spinBox, qOverload<int>(&QSpinBox::valueChanged),
 				this, &ccPropertiesTreeDelegate::octreeDisplayedLevelChanged);
 
 		outputWidget = spinBox;
@@ -1330,7 +1330,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		spinBox->setRange(4, 1024);
 		spinBox->setSingleStep(4);
 
-		connect(spinBox, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+		connect(spinBox, qOverload<int>(&QSpinBox::valueChanged),
 				this, &ccPropertiesTreeDelegate::primitivePrecisionChanged);
 
 		outputWidget = spinBox;
@@ -1343,7 +1343,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		spinBox->setRange(0, 1.0e6);
 		spinBox->setSingleStep(1.0);
 
-		connect(spinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+		connect(spinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
 				this, &ccPropertiesTreeDelegate::sphereRadiusChanged);
 
 		outputWidget = spinBox;
@@ -1356,7 +1356,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		spinBox->setRange(0, 1.0e6);
 		spinBox->setSingleStep(1.0);
 
-		connect(spinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+		connect(spinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
 				this, &ccPropertiesTreeDelegate::coneHeightChanged);
 
 		outputWidget = spinBox;
@@ -1369,7 +1369,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		spinBox->setRange(0, 1.0e6);
 		spinBox->setSingleStep(1.0);
 
-		connect(spinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+		connect(spinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
 				this, &ccPropertiesTreeDelegate::coneBottomRadiusChanged);
 
 		outputWidget = spinBox;
@@ -1382,7 +1382,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		spinBox->setRange(0, 1.0e6);
 		spinBox->setSingleStep(1.0);
 
-		connect(spinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+		connect(spinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
 				this, &ccPropertiesTreeDelegate::coneTopRadiusChanged);
 
 		outputWidget = spinBox;
@@ -1416,7 +1416,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		spinBox->setRange(minIndex, maxIndex);
 		spinBox->setSingleStep((maxIndex - minIndex) / 1000.0);
 
-		connect(spinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+		connect(spinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
 				this, &ccPropertiesTreeDelegate::sensorIndexChanged);
 
 		outputWidget = spinBox;
@@ -1429,7 +1429,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		spinBox->setDecimals(3);
 		spinBox->setSingleStep(1.0);
 
-		connect(spinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+		connect(spinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
 				this, &ccPropertiesTreeDelegate::trihedronsScaleChanged);
 
 		outputWidget = spinBox;
@@ -1489,7 +1489,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		spinBox->setDecimals(3);
 		spinBox->setSingleStep(1.0e-1);
 
-		connect(spinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+		connect(spinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
 				this, &ccPropertiesTreeDelegate::sensorScaleChanged);
 
 		outputWidget = spinBox;
@@ -1506,7 +1506,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 			comboBox->addItem(QString::number(i));
 		}
 
-		connect(comboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+		connect(comboBox, qOverload<int>(&QComboBox::currentIndexChanged),
 				this, &ccPropertiesTreeDelegate::cloudPointSizeChanged);
 
 		outputWidget = comboBox;
@@ -1523,7 +1523,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 			comboBox->addItem(QString::number(i));
 		}
 
-		connect(comboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+		connect(comboBox, qOverload<int>(&QComboBox::currentIndexChanged),
 				this, &ccPropertiesTreeDelegate::polyineWidthChanged);
 
 		outputWidget = comboBox;
@@ -1547,7 +1547,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 				comboBox->addItem( tr( s_sfColor ) );
 				comboBox->setItemIcon(comboBox->count() - 1, QIcon(QString::fromUtf8(":/CC/images/typeSF.png")));
 			}
-			connect(comboBox, static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
+			connect(comboBox, qOverload<const QString&>(&QComboBox::currentIndexChanged),
 					this, &ccPropertiesTreeDelegate::colorSourceChanged);
 		}
 
@@ -1569,7 +1569,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		{
 			comboBox->setCurrentIndex(static_cast<int>(cs->getAxisWidth()));
 		}
-		connect(comboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+		connect(comboBox, qOverload<int>(&QComboBox::currentIndexChanged),
 			this, &ccPropertiesTreeDelegate::coordinateSystemAxisWidthChanged);
 
 		outputWidget = comboBox;
@@ -1587,7 +1587,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 			spinBox->setValue(cs->getDisplayScale());
 		}
 		
-		connect(spinBox, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+		connect(spinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
 			this, &ccPropertiesTreeDelegate::coordinateSystemDisplayScaleChanged);
 
 		outputWidget = spinBox;

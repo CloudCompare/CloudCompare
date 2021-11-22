@@ -87,8 +87,8 @@ ccPointListPickingDlg::ccPointListPickingDlg(ccPickingHub* pickingHub, QWidget* 
 	connect(exportToNewCloud,		&QAction::triggered,		this,				&ccPointListPickingDlg::exportToNewCloud);
 	connect(exportToNewPolyline,	&QAction::triggered,		this,				&ccPointListPickingDlg::exportToNewPolyline);
 	
-	connect(markerSizeSpinBox,	static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),	this,	&ccPointListPickingDlg::markerSizeChanged);
-	connect(startIndexSpinBox,	static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),	this,	&ccPointListPickingDlg::startIndexChanged);
+	connect(markerSizeSpinBox,	qOverload<int>(&QSpinBox::valueChanged),	this,	&ccPointListPickingDlg::markerSizeChanged);
+	connect(startIndexSpinBox,	qOverload<int>(&QSpinBox::valueChanged),	this,	&ccPointListPickingDlg::startIndexChanged);
 	
 	connect(showGlobalCoordsCheckBox, &QAbstractButton::clicked, this, &ccPointListPickingDlg::updateList);
 

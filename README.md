@@ -22,6 +22,19 @@ of memory).
 
 More on CloudCompare [here](http://en.wikipedia.org/wiki/CloudCompare)
 
+Installation
+------------
+
+Linux:
+- Flathub: https://flathub.org/apps/details/org.cloudcompare.CloudCompare
+  ```
+  flatpak install flathub org.cloudcompare.CloudCompare
+  ```
+- snapcraft: https://snapcraft.io/cloudcompare
+  ```
+  sudo snap install cloudcompare
+  ```
+
 Compilation
 -----------
 

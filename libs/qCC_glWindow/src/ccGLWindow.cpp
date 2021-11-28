@@ -1963,7 +1963,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 				CONTEXT.glH = vp.Size.h;
 				modifiedViewport = true;
 
-				bindFBO(0);
+				bindFBO(nullptr);
 			}
 		}
 #endif //CC_OCULUS_SUPPORT
@@ -2247,7 +2247,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 
 		if (s_oculus.mirror.texture)
 		{
-			bindFBO(0);
+			bindFBO(nullptr);
 
 			assert(m_glExtFuncSupported);
 			m_glExtFunc.glBindFramebuffer(GL_READ_FRAMEBUFFER, s_oculus.mirror.fbo);

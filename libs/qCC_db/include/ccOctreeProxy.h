@@ -32,7 +32,7 @@ class QCC_DB_LIB_API ccOctreeProxy : public ccHObject
 public:
 
 	//! Default constructor
-	ccOctreeProxy(ccOctree::Shared octree = ccOctree::Shared(0), QString name = "Octree");
+	ccOctreeProxy(ccOctree::Shared octree = ccOctree::Shared(nullptr), QString name = "Octree");
 
 	//! Destructor
 	virtual ~ccOctreeProxy() = default;

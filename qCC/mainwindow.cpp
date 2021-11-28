@@ -6681,7 +6681,7 @@ void MainWindow::activatePointPickingMode()
 void MainWindow::deactivatePointPickingMode(bool state)
 {
 	//if (m_ppDlg)
-	//	m_ppDlg->linkWith(0);
+	//	m_ppDlg->linkWith(nullptr);
 
 	//we enable all GL windows
 	enableAll();

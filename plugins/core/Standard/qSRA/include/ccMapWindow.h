@@ -30,16 +30,16 @@ class ccMapWindow : public ccGLWindow
 public:
 
 	//! Default constructor
-	explicit ccMapWindow(ccGLWindowParent* parent = 0)
-		: ccGLWindow(0, parent, true)
-		, m_sfForRampDisplay(0)
+	explicit ccMapWindow(ccGLWindowParent* parent = nullptr)
+		: ccGLWindow(nullptr, parent, true)
+		, m_sfForRampDisplay(nullptr)
 		, m_showSF(true)
 	{}
 
 	//! Destructor
 	virtual ~ccMapWindow()
 	{
-		setAssociatedScalarField(0);
+		setAssociatedScalarField(nullptr);
 	}
 
 	//! Sets associated scalar-field

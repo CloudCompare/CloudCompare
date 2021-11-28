@@ -1072,7 +1072,7 @@ void ccGraphicalSegmentationTool::doExportSegmentationPolyline()
 	{
 		bool mode2D = false;
 #ifdef ALLOW_2D_OR_3D_EXPORT
-		QMessageBox messageBox(0);
+		QMessageBox messageBox(nullptr);
 		messageBox.setWindowTitle("Choose export type");
 		messageBox.setText("Export polyline in:\n - 2D (with coordinates relative to the screen)\n - 3D (with coordinates relative to the segmented entities)");
 		QPushButton* button2D = new QPushButton("2D");

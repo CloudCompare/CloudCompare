@@ -121,7 +121,7 @@ public:
 	static bool ComputeRadialDist(	ccPointCloud* cloud,
 									ccPolyline* profile,
 									bool storeRadiiAsSF = false,
-									ccMainAppInterface* app = 0);
+									ccMainAppInterface* app = nullptr);
 
 	//! "Distance" map cell
 	struct MapCell
@@ -215,7 +215,7 @@ public:
 											bool counterclockwise,
 											FillStrategyType fillStrategy,
 											EmptyCellFillOption emptyCellfillOption,
-											ccMainAppInterface* app = 0 );
+											ccMainAppInterface* app = nullptr);
 
 
 	//! Creates a conical projection (textured) mesh
@@ -270,7 +270,7 @@ public:
 									QString yUnit,
 									double xConversionFactor = 1.0,
 									double yConversionFactor = 1.0,
-									ccMainAppInterface* app = 0 );
+									ccMainAppInterface* app = nullptr);
 
 	//! Converts map to a QImage
 	static QImage ConvertMapToImage(	const QSharedPointer<Map>& map,

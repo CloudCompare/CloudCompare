@@ -63,7 +63,7 @@ public:
 	static ccColorScale::Shared GetDefaultScale(DEFAULT_SCALES scale = BGYR)
 	{
 		ccColorScalesManager* instance = GetUniqueInstance();
-		return instance ? instance->getDefaultScale(scale) : ccColorScale::Shared(0);
+		return instance ? instance->getDefaultScale(scale) : ccColorScale::Shared(nullptr);
 	}
 
 	//! Returns a pre-defined color scale

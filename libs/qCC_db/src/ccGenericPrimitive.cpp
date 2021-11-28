@@ -277,7 +277,7 @@ bool ccGenericPrimitive::init(unsigned vertCount, bool vertNormals, unsigned fac
 	//DGM: if we do this we'll have issues with the DB tree depending on where when we call this method!
 	//{
 	//	removeChild(m_triNormals);
-	//	setTriNormsTable(0);
+	//	setTriNormsTable(nullptr);
 	//	assert(!m_triNormals);
 	//}
 

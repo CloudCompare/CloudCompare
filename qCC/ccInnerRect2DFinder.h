@@ -42,8 +42,8 @@ protected:
 	//! 2D rectangle
 	struct Rect
 	{
-		Rect() : x0(0),y0(0),x1(0),y1(0) {}
-		Rect(double _x0, double _y0, double _x1, double _y1) : x0(_x0),y0(_y0),x1(_x1),y1(_y1) {}
+		Rect() : x0(0), y0(0), x1(0), y1(0) {}
+		Rect(double _x0, double _y0, double _x1, double _y1) : x0(_x0), y0(_y0), x1(_x1), y1(_y1) {}
 
 		double x0, y0, x1, y1;
 

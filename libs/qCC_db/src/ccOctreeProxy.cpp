@@ -29,7 +29,7 @@
 //#include <ScalarFieldTools.h>
 //#include <RayAndBox.h>
 
-ccOctreeProxy::ccOctreeProxy(	ccOctree::Shared octree/*=ccOctree::Shared(0)*/,
+ccOctreeProxy::ccOctreeProxy(	ccOctree::Shared octree/*=ccOctree::Shared(nullptr)*/,
 								QString name/*="Octree"*/)
 	: ccHObject(name)
 	, m_octree(octree)

@@ -240,7 +240,7 @@ bool DistanceMapGenerationTool::GetPoylineMetaData(	const ccPolyline* polyline, 
 bool DistanceMapGenerationTool::ComputeRadialDist(	ccPointCloud* cloud,
 													ccPolyline* profile,
 													bool storeRadiiAsSF/*=false*/,
-													ccMainAppInterface* app/*=0*/)
+													ccMainAppInterface* app/*=nullptr*/)
 {
 	//check input cloud and profile/polyline
 	if (!cloud || !profile)
@@ -410,7 +410,7 @@ bool DistanceMapGenerationTool::ComputeMinAndMaxLatitude_rad(	ccPointCloud* clou
 	const unsigned char X = (Z < 2 ? Z + 1 : 0);
 	const unsigned char Y = (X < 2 ? X + 1 : 0);
 
-	for (unsigned n=0; n<count; ++n)
+	for (unsigned n = 0; n < count; ++n)
 	{
 		const CCVector3* P = cloud->getPoint(n);
 		CCVector3 relativePos = cloudToSurfaceOrigin * (*P);
@@ -470,7 +470,7 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 																					bool counterclockwise,
 																					FillStrategyType fillStrategy,
 																					EmptyCellFillOption emptyCellfillOption,
-																					ccMainAppInterface* app/*=0*/)
+																					ccMainAppInterface* app/*=nullptr*/)
 {
 	assert(cloud && sf);
 	if (!cloud || !sf)
@@ -559,7 +559,7 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 	grid->counterclockwise = counterclockwise;
 	double ccw = (counterclockwise ? -1.0 : 1.0);
 
-	for (unsigned n=0; n<count; ++n)
+	for (unsigned n = 0; n < count; ++n)
 	{
 		//we skip invalid values
 		const ScalarType& val = sf->getValue(n);

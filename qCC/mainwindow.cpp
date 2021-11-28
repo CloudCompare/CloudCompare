@@ -3352,6 +3352,16 @@ void MainWindow::doActionMerge()
 			{
 				ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
 				clouds.push_back(cloud);
+
+				// check whether this cloud is an ancestor of the first cloud in the selection
+				if (clouds.size() > 1)
+				{
+					if (clouds.back()->isAncestorOf(clouds.front()))
+					{
+						// this way we are sure that the first cloud is not below any other cloud
+						std::swap(clouds.front(), clouds.back());
+					}
+				}
 			}
 			else if (entity->isKindOf(CC_TYPES::MESH))
 			{
@@ -3458,6 +3468,13 @@ void MainWindow::doActionMerge()
 						toRemove = parent;
 					else
 						toRemove = pc;
+
+					if (toRemove->getParent())
+					{
+						// we detach all the clouds (or group containing clouds) from their parent
+						// to avoid issues when deleting them later
+						toRemove->getParent()->detachChild(toRemove);
+					}
 
 					AddToRemoveList(toRemove, toBeRemoved);
 

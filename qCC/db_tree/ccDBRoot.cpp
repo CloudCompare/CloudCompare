@@ -907,6 +907,7 @@ void ccDBRoot::unselectAllEntities()
 	assert(selectionModel);
 
 	selectionModel->clear();
+	QCoreApplication::processEvents();
 }
 
 void ccDBRoot::selectEntity(ccHObject* obj, bool forceAdditiveSelection/*=false*/)

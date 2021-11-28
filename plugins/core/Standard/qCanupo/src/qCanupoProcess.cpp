@@ -326,7 +326,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 
 #ifdef COMPILE_PRIVATE_CANUPO
 	//whether to compute per scale roughness for each core point!
-	bool generateRoughnessSF = cDlg.generateRoughnessSFsCheckBox->isChecked();
+	bool generateRoughnessSF = params.generateRoughnessSF;
 	std::vector<ccScalarField*> coreRoughnessSFs;
 #endif
 
@@ -429,14 +429,15 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 					size_t scaleCount = scales.size();
 					coreRoughnessSFs.resize(scaleCount,0);
 					//for each scale
-					for (size_t s=0; s<scaleCount; ++s)
+					for (size_t s = 0; s < scaleCount; ++s)
 					{
 						QString sfName = QString(CANUPO_PER_LEVEL_ROUGHNESS_SF_NAME) + QString(" @ scale %1").arg(scales[s]);
 
 						coreRoughnessSFs[s] = new ccScalarField(qPrintable(sfName));
-						if (!coreRoughnessSFs[s]->resize(corePoints->size(),NAN_VALUE))
+						if (!coreRoughnessSFs[s]->resizeSafe(corePoints->size(), CCCoreLib::NAN_VALUE))
 						{
-							m_app->dispToConsole("Not enough memory to store per-level roughness!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+							if (app)
+								app->dispToConsole("Not enough memory to store per-level roughness!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 							generateRoughnessSF = false;
 							break;
 						}
@@ -457,7 +458,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 					&pDlg,
 					octree.data()
 #ifdef COMPILE_PRIVATE_CANUPO
-					, generateRoughnessSF ? &coreRoughnessSFs : 0
+					, generateRoughnessSF ? &coreRoughnessSFs : nullptr
 #endif
 					))
 				{
@@ -880,7 +881,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 								//SF with same name (if any) should have already been removed!
 								assert(cloud->getScalarFieldIndexByName(roughnessSFs[s]->getName()) < 0);
 
-								if (!roughnessSFs[s]->resize(cloud->size(), CCCoreLib::NAN_VALUE))
+								if (!roughnessSFs[s]->resizeSafe(cloud->size(), CCCoreLib::NAN_VALUE))
 								{
 									if (app)
 										app->dispToConsole("Not enough memory to store per-level roughness!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);

@@ -9,7 +9,7 @@ v2.12 (???) - (in development)
 		-  'Edit > Cloud > Paste from clipboard' (shortcut: CTRL+P): to create a cloud from ASCII/test data stored in the clipboard
 
 - New plugin:
-	- Fast Global Registration (see https://github.com/isl-org/FastGlobalRegistration)
+	- PCL > Fast Global Registration (see https://github.com/isl-org/FastGlobalRegistration)
 		- Automatic registration of point clouds (with normals) with no initial/rough alignment
 		- Based on: Q.-Y. Zhou, J. Park, and V. Koltun, "Fast Global Registration", ECCV, 2016
 

@@ -12,6 +12,7 @@
 #define MyCCPath "E:\These\C++\CloudCompare\new_bin_x64_msvc_2017\CloudCompareStereo"
 #define MyOutputDir "E:\These\C++\CloudCompare\new_bin_x64_msvc_2017"
 #define MyCreationDate GetDateTimeString('mm_dd_yyyy', '', '')
+#define CertificateSubject "Open Source Developer, Daniel Girardeau-Montaut"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
@@ -41,6 +42,8 @@ ArchitecturesAllowed=x64
 ; done in "64-bit mode" on x64, meaning it should use the native
 ; 64-bit Program Files directory and the 64-bit view of the registry.
 ArchitecturesInstallIn64BitMode=x64
+; Installer signing
+SignTool=signtool Sign /n "{#CertificateSubject}" /fd sha256 /t http://timestamp.digicert.com $f
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"

@@ -31,6 +31,7 @@
 #include <QtConcurrentRun>
 
 //Cork
+#define SUPPORT_TOPO_STREAM_OPERATORS
 #include <mesh/corkMesh.h>
 
 //system

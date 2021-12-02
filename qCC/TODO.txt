@@ -52,6 +52,7 @@ qFacets plugin:
 [*] Add the facet perimeter to the set of exported values
 
 Various:
+[*] Option to input the rotation pointfor the Translate/Rotate tool (https://www.cloudcompare.org/forum/viewtopic.php?p=24572)
 [*] Extract E57 images (as standard image files) via the command line (https://www.cloudcompare.org/forum/viewtopic.php?p=24493)
 [*] Compute the distance from sensor via the command line (https://www.cloudcompare.org/forum/viewtopic.php?t=3786)
 [*] Circular eraser in the Scissors tool (https://www.cloudcompare.org/forum/viewtopic.php?t=5319)

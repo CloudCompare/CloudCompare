@@ -258,9 +258,17 @@ static PCLCloud::Ptr SetOrAdd(PCLCloud::Ptr firstCloud, PCLCloud::Ptr secondClou
 
 	if (firstCloud)
 	{
-		PCLCloud::Ptr tempCloud(new PCLCloud); //temporary cloud
-		pcl::concatenateFields(*firstCloud, *secondCloud, *tempCloud);
-		return tempCloud;
+		try
+		{
+			PCLCloud::Ptr tempCloud(new PCLCloud); //temporary cloud
+			pcl::concatenateFields(*firstCloud, *secondCloud, *tempCloud);
+			return tempCloud;
+		}
+		catch (const std::bad_alloc&)
+		{
+			ccLog::Warning("Not enough memory");
+			return nullptr;
+		}
 	}
 	else
 	{
@@ -276,7 +284,7 @@ PCLCloud::Ptr cc2smReader::getAsSM(bool xyz, bool normals, bool rgbColors, const
 		return {};
 	}
 
-	PCLCloud::Ptr outputCloud(new PCLCloud);
+	PCLCloud::Ptr outputCloud;
 
 	unsigned pointCount = m_ccCloud->size();
 

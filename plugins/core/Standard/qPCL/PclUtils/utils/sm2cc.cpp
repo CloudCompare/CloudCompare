@@ -82,10 +82,10 @@ static size_t GetNumberOfPoints(const PCLCloud& pclCloud)
 	return static_cast<size_t>(pclCloud.width) * pclCloud.height;
 }
 
-bool ExistField(const PCLCloud& pclCloud, std::string name)
+static bool ExistField(const PCLCloud& pclCloud, std::string fieldName)
 {
-	for (const auto& field : pclCloud.fields)
-		if (field.name == name)
+	for (size_t index = 0; index < pclCloud.fields.size(); ++index)
+		if (pclCloud.fields[index].name == fieldName)
 			return true;
 
 	return false;

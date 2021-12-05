@@ -173,7 +173,7 @@ CC_FILE_ERROR PcdFilter::loadFile(const QString& filename, ccHObject& container,
 		}
 		ccLog::Print(QString("[PCL] PCD version: %1").arg(pcdVersion));
 
-		pcl::uindex_t pointCount = inputCloud->width * inputCloud->height;
+		unsigned pointCount = static_cast<unsigned>(inputCloud->width * inputCloud->height);
 		ccLog::Print(QString("[PCL] %1: Point Count: %2").arg(qPrintable(filename)).arg(pointCount));
 		if (pointCount == 0)
 		{

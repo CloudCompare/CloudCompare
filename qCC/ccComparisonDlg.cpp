@@ -537,6 +537,8 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 	bool maxDistanceDefined = maxDistCheckBox->isChecked();
 	PointCoordinateType maxDistance = static_cast<PointCoordinateType>(maxDistanceDefined ? maxSearchDistSpinBox->value() : 0);
 
+	uint64_t maxNeighbourhoodVolume = static_cast<uint64_t>(1) << (3 * MAX_OCTREE_LEVEL);
+
 	//for each level
 	for (int level = s_minOctreeLevel; level < MAX_OCTREE_LEVEL; ++level)
 	{
@@ -561,7 +563,7 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 
 		//scan the octree structure
 		const CCCoreLib::DgmOctree::cellsContainer& compCodes = m_compOctree->pointsAndTheirCellCodes();
-		for (CCCoreLib::DgmOctree::cellsContainer::const_iterator c=compCodes.begin(); c!=compCodes.end(); ++c)
+		for (CCCoreLib::DgmOctree::cellsContainer::const_iterator c = compCodes.begin(); c != compCodes.end(); ++c)
 		{
 			CCCoreLib::DgmOctree::CellCode truncatedCode = (c->theCode >> bitDec);
 
@@ -593,23 +595,23 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 							crossingMeshSurface *= crossingMeshSurface;
 
 							//neighborhood "volume" (in terms of cells)
-							double neighbourSize3 = neighbourSize*neighbourSize*neighbourSize;
+							double neighbourSize3 = (neighbourSize*neighbourSize*neighbourSize) / maxNeighbourhoodVolume;
 
 							//TIME = NEIGHBORS SEARCH + proportional factor * POINTS/TRIANGLES COMPARISONS
-							timings[level] += neighbourSize3 + 0.5 * numberOfPointsInCell * crossingMeshSurface/meanTriangleSurface;
+							timings[level] += neighbourSize3 + ((0.5 * numberOfPointsInCell) / maxNeighbourhoodVolume) * (crossingMeshSurface / meanTriangleSurface);
 						}
 						else
 						{
 							//we ignore the "central" cell
 							neighbourSize -= 1.0;
 							//neighborhood "volume" (in terms of cells)
-							double neighbourSize3 = neighbourSize*neighbourSize*neighbourSize;
+							double neighbourSize3 = (neighbourSize*neighbourSize*neighbourSize) / maxNeighbourhoodVolume;
 							//volume of the last "slice" (in terms of cells)
-							//=V(n)-V(n-1) = (2*n+1)^3 - (2*n-1)^3 = 24 * n^2 + 2 (si n>0)
-							double lastSliceCellNumber = (cellDist > 0 ? cellDist*cellDist * 24.0 + 2.0 : 1.0);
+							//=V(n)-V(n-1) = (2*n+1)^3 - (2*n-1)^3 = 24 * n^2 + 2 (if n > 0)
+							double lastSliceCellCount = (cellDist > 0 ? cellDist*cellDist * 24.0 + 2.0 : 1.0);
 							//TIME = NEIGHBORS SEARCH + proportional factor * POINTS/TRIANGLES COMPARISONS
 							//(we admit that the filled cells roughly correspond to the sqrt of the total number of cells)
-							timings[level] += neighbourSize3 + 0.1 * numberOfPointsInCell * sqrt(lastSliceCellNumber) * refListDensity;
+							timings[level] += neighbourSize3 + 0.1 * ((numberOfPointsInCell * sqrt(lastSliceCellCount) * refListDensity) / maxNeighbourhoodVolume);
 						}
 					}
 					//else
@@ -635,9 +637,6 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 			++numberOfPointsInCell;
 		}
 
-		//round the timing to avoid increasing the octree level for super small differences (which is generally counter productive)
-		timings[level] = static_cast<int64_t>(timings[level] * 10) / 10.0;
-
 		////very high levels are unlikely (levelModifier ~ 0.85 @ level 20)
 		//{
 		//	double levelModifier = level < 12 ? 1.0 : exp(-pow(level-12,2)/(20*20));
@@ -646,9 +645,10 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 		//	ccLog::PrintDebug(QString("[Distances] Level %1 - timing = %2 (modifier = %3)").arg(level).arg(timings[level]).arg(levelModifier));
 		//}
 
-		//ccLog::Print("[Timing] Level %i --> %f",level,timings[level]);
-		//timings[level] += (static_cast<qreal>(skippedCells)/1000)*skippedCells; //empirical correction for skipped cells (not taken into account while they actually require some processing time!)
-		if (timings[level] < timings[theBestOctreeLevel])
+		//ccLog::Print("[Timing] Level %i --> %2.12f", level, timings[level]);
+		
+		if (timings[level] * 1.05 < timings[theBestOctreeLevel]) //avoid increasing the octree level for super small differences (which is generally counter productive)
+
 		{
 			theBestOctreeLevel = level;
 		}

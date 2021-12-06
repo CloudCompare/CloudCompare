@@ -270,17 +270,18 @@ bool ccMesh::computePerTriangleNormals()
 		return false;
 	}
 
-	//if some normal indexes already exists, we remove them (easier)
-	if (m_triNormalIndexes)
-		removePerTriangleNormalIndexes();
-	setTriNormsTable(nullptr);
-
-	NormsIndexesTableType* normIndexes = new NormsIndexesTableType();
-	if (!normIndexes->reserveSafe(triCount))
+	NormsIndexesTableType* normIndexes = getTriNormsTable();
+	if (!normIndexes)
 	{
-		normIndexes->release();
-		ccLog::Warning("[ccMesh::computePerTriangleNormals] Not enough memory!");
-		return false;
+		//we need to instantiate the set of normal indexes
+		normIndexes = new NormsIndexesTableType();
+		if (!normIndexes->resizeSafe(triCount))
+		{
+			normIndexes->release();
+			ccLog::Warning("[ccMesh::computePerTriangleNormals] Not enough memory!");
+			return false;
+		}
+		setTriNormsTable(normIndexes);
 	}
 
 	//for each triangle
@@ -293,26 +294,27 @@ bool ccMesh::computePerTriangleNormals()
 			const CCVector3* C = m_associatedCloud->getPoint(tri.i3);
 
 			//compute face normal (right hand rule)
-			CCVector3 N = (*B-*A).cross(*C-*A);
+			CCVector3 N = (*B - *A).cross(*C - *A);
 
-			CompressedNormType nIndex = ccNormalVectors::GetNormIndex(N.u);
-			normIndexes->emplace_back(nIndex);
+			normIndexes->at(i) = ccNormalVectors::GetNormIndex(N.u);
 		}
 	}
 
 	//set the per-triangle normal indexes
+	if (!arePerTriangleNormalsEnabled())
 	{
 		if (!reservePerTriangleNormalIndexes())
 		{
-			normIndexes->release();
 			ccLog::Warning("[ccMesh::computePerTriangleNormals] Not enough memory!");
+			setTriNormsTable(nullptr);
 			return false;
 		}
+		m_triNormalIndexes->resize(triCount); //cannot fail
+	}
 
-		setTriNormsTable(normIndexes);
-
-		for (int i = 0; i < static_cast<int>(triCount); ++i)
-			addTriangleNormalIndexes(i, i, i);
+	for (unsigned i = 0; i < triCount; ++i)
+	{
+		setTriangleNormalIndexes(i, static_cast<int>(i), static_cast<int>(i), static_cast<int>(i));
 	}
 
 	//apply it also to sub-meshes!
@@ -578,7 +580,7 @@ bool ccMesh::laplacianSmooth(	unsigned nbIteration,
 	}
 
 	placeIteratorAtBeginning();
-	for(unsigned j=0; j<faceCount; j++)
+	for (unsigned j = 0; j < faceCount; j++)
 	{
 		const CCCoreLib::VerticesIndexes* tri = getNextTriangleVertIndexes();
 		edgesCount[tri->i1] += 2;

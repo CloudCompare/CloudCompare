@@ -105,9 +105,9 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 									Mode mode,
 									bool useInputCoordinatesShiftIfPossible,
 									CCVector3d& coordinatesShift,
-									bool* preserveCoordinateShift,
-									double* coordinatesScale,
-									bool* applyAll/*=0*/)
+									bool* preserveCoordinateShift/*=nullptr*/,
+									double* coordinatesScale/*=nullptr*/,
+									bool* applyAll/*=nullptr*/)
 {
 	assert(diagonal >= 0);
 	if (preserveCoordinateShift && !useInputCoordinatesShiftIfPossible)

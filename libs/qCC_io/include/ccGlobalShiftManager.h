@@ -46,9 +46,9 @@ public:
 						Mode mode,
 						bool useInputCoordinatesShiftIfPossible,
 						CCVector3d& coordinatesShift,
-						bool* preserveCoordinateShift,
-						double* coordinatesScale,
-						bool* applyAll = 0);
+						bool* preserveCoordinateShift = nullptr,
+						double* coordinatesScale = nullptr,
+						bool* applyAll = nullptr);
 
 	//! Returns whether a particular point (coordinates) is too big or not
 	static bool NeedShift(const CCVector3d& P);

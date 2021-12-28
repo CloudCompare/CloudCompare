@@ -670,7 +670,7 @@ ccMesh* ccMesh::cloneMesh(	ccGenericPointCloud* vertices/*=nullptr*/,
 		//let's check the real vertex count
 		try
 		{
-			usedVerts.resize(vertNum,0);
+			usedVerts.resize(vertNum, 0);
 		}
 		catch (const std::bad_alloc&)
 		{
@@ -693,8 +693,10 @@ ccMesh* ccMesh::cloneMesh(	ccGenericPointCloud* vertices/*=nullptr*/,
 		//we check that all points in 'associatedCloud' are used by this mesh
 		unsigned realVertCount = 0;
 		{
-			for (unsigned i=0; i<vertNum; ++i)
+			for (unsigned i = 0; i < vertNum; ++i)
+			{
 				usedVerts[i] = (usedVerts[i] == 1 ? realVertCount++ : vertNum);
+			}
 		}
 
 		//the associated cloud is already the exact vertices set --> nothing to change
@@ -708,10 +710,12 @@ ccMesh* ccMesh::cloneMesh(	ccGenericPointCloud* vertices/*=nullptr*/,
 			CCCoreLib::ReferenceCloud rc(m_associatedCloud);
 			if (rc.reserve(realVertCount))
 			{
-				for (unsigned i=0; i<vertNum; ++i)
+				for (unsigned i = 0; i < vertNum; ++i)
 				{
 					if (usedVerts[i] != vertNum)
+					{
 						rc.addPointIndex(i); //can't fail, see above
+					}
 				}
 
 				//and the associated vertices set

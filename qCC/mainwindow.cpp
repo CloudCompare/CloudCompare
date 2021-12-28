@@ -7620,8 +7620,7 @@ void MainWindow::doActionClone()
 		}
 		else if (entity->isA(CC_TYPES::POLY_LINE))
 		{
-			ccPolyline* poly = ccHObjectCaster::ToPolyline(entity);
-			clone = (poly ? new ccPolyline(*poly) : nullptr);
+			clone = ccHObjectCaster::ToPolyline(entity)->clone();
 			if (!clone)
 			{
 				ccConsole::Error(tr("An error occurred while cloning polyline %1").arg(entity->getName()));

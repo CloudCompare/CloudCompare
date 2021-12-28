@@ -51,8 +51,16 @@ ccPolyline::ccPolyline(const ccPolyline& poly)
 	: Polyline(nullptr)
 	, ccShiftedObject(poly)
 {
-	ccPointCloud* clone = nullptr;
-	initWith(clone, poly);
+	ccPointCloud* vertices = nullptr;
+	initWith(vertices, poly);
+}
+
+ccPolyline* ccPolyline::clone() const
+{
+	ccPolyline* clonedPoly = new ccPolyline(*this);
+	clonedPoly->setLocked(false); //there's no reason to keep the clone locked
+
+	return clonedPoly;
 }
 
 bool ccPolyline::initWith(ccPointCloud*& vertices, const ccPolyline& poly)

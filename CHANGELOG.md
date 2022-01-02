@@ -153,6 +153,7 @@ v2.12 (???) - (in development)
 	- Trying to merge several clouds, some being ancestors of the others, could lead to a crash
 	- Calling the Mesh > Smooth (Laplacian) tool on a mesh with the database tree unfloded could make CC crash
 	- Cloning the 'contour' part of a Facet would result in a locked polyline (that cannot be deleted or moved)
+	- When rendering the screen with a zoom > 1, the scale label was wrongly scaled as well
 
 v2.11.3 (Anoia) - 08/09/2020
 ----------------------

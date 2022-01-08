@@ -4452,9 +4452,9 @@ void ccGLWindow::doPicking()
 	int x = m_lastMousePos.x();
 	int y = m_lastMousePos.y();
 
-	if (x < 0 || y < 0)
+	if (x < 0 || y < 0 || x > width() || y > height())
 	{
-		assert(false);
+		// we can ignore clicks outside of the window
 		return;
 	}
 

@@ -322,7 +322,7 @@ void ccGraphicalSegmentationTool::reset()
 			ccGenericPointCloud* asCloud = ccHObjectCaster::ToGenericPointCloud(*p);
 			if (asCloud)
 			{
-				asCloud->unallocateVisibilityArray();
+				asCloud->resetVisibilityArray();
 			}
 		}
 
@@ -596,7 +596,7 @@ void ccGraphicalSegmentationTool::updatePolyLine(int x, int y, Qt::MouseButtons 
 	m_associatedWin->redraw(true, false);
 }
 
-void ccGraphicalSegmentationTool::addPointToPolyline(int x, int y)
+void ccGraphicalSegmentationTool::addPointToPolylineExt(int x, int y, bool allowClicksOutside)
 {
 	if ((m_state & STARTED) == 0)
 	{
@@ -608,7 +608,9 @@ void ccGraphicalSegmentationTool::addPointToPolyline(int x, int y)
 		return;
 	}
 
-	if (x < 0 || y < 0 || x >= m_associatedWin->qtWidth() || y >= m_associatedWin->qtHeight())
+	if (	!allowClicksOutside
+		&&	(x < 0 || y < 0 || x >= m_associatedWin->qtWidth() || y >= m_associatedWin->qtHeight())
+		)
 	{
 		//ignore clicks outside of the 3D view
 		return;
@@ -684,7 +686,7 @@ void ccGraphicalSegmentationTool::addPointToPolyline(int x, int y)
 		{
 			assert(false); //we shouldn't fall here?!
 			m_state &= (~RUNNING);
-			addPointToPolyline(x,y);
+			addPointToPolylineExt(x, y, allowClicksOutside);
 			return;
 		}
 	}
@@ -793,7 +795,15 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside)
 		return;
 	}
 
-	//viewing parameters
+	// we must close the polyline if we are in RUNNING mode
+	if ((m_state & POLYLINE) != 0 && (m_state & RUNNING) != 0)
+	{
+		QPoint mousePos = m_associatedWin->mapFromGlobal(QCursor::pos());
+		ccLog::Warning(QString("Polyline was not closed - we'll close it with the current mouse cursor position: (%1 ; %2)").arg(mousePos.x()).arg(mousePos.y()));
+		addPointToPolylineExt(mousePos.x(), mousePos.y(), true);
+		closePolyLine(0, 0);
+	}
+
 	ccGLCameraParameters camera;
 	m_associatedWin->getGLCameraParameters(camera);
 	const double half_w = camera.viewport[2] / 2.0;
@@ -803,9 +813,6 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside)
 	bool polyInsideFrustum = true;
 	{
 		int vertexCount = static_cast<int>(m_segmentationPoly->size());
-#if defined(_OPENMP)
-#pragma omp parallel for
-#endif
 		for (int i = 0; i < vertexCount; ++i)
 		{
 			const CCVector3* P = m_segmentationPoly->getPoint(i);
@@ -817,6 +824,7 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside)
 			if (!pointInFrustum)
 			{
 				polyInsideFrustum = false;
+				break;
 			}
 		}
 	}
@@ -856,7 +864,7 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside)
 					pointInside = CCCoreLib::ManualSegmentationTools::isPointInsidePoly(P2D, m_segmentationPoly);
 				}
 
-				visibilityArray[i] = (keepPointsInside != pointInside ?CCCoreLib:: POINT_HIDDEN : CCCoreLib::POINT_VISIBLE);
+				visibilityArray[i] = (keepPointsInside != pointInside ? CCCoreLib:: POINT_HIDDEN : CCCoreLib::POINT_VISIBLE);
 			}
 		}
 	}

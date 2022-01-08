@@ -91,7 +91,8 @@ protected:
 	void apply();
 	void applyAndDelete();
 	void cancel();
-	void addPointToPolyline(int x, int y);
+	inline void addPointToPolyline(int x, int y) { return addPointToPolylineExt(x, y, false); }
+	void addPointToPolylineExt(int x, int y, bool allowClicksOutside);
 	void closePolyLine(int x = 0, int y = 0); //arguments for compatibility with ccGlWindow::rightButtonClicked signal
 	void closeRectangle();
 	void updatePolyLine(int x, int y, Qt::MouseButtons buttons);

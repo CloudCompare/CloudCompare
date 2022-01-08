@@ -154,6 +154,8 @@ v2.12 (???) - (in development)
 	- Calling the Mesh > Smooth (Laplacian) tool on a mesh with the database tree unfloded could make CC crash
 	- Cloning the 'contour' part of a Facet would result in a locked polyline (that cannot be deleted or moved)
 	- When rendering the screen with a zoom > 1, the scale label was wrongly scaled as well
+	- Graphical segmentation: when using the shortcuts 'i' and 'o' to segment points inside or outside a polyline not yet closed (with a right click),
+		the overlay buttons would become transparent to clicks, and the not yet confirmed vertex of the polyline was not taken into account
 
 v2.11.3 (Anoia) - 08/09/2020
 ----------------------

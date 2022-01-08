@@ -512,7 +512,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 	}
 
 	//groups (starting index + name)
-	std::vector<std::pair<unsigned,QString> > groups;
+	std::vector<std::pair<unsigned, QString> > groups;
 
 	//materials
 	ccMaterialSet* materials = nullptr;

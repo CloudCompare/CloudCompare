@@ -166,13 +166,7 @@ void ComputeCorePointDescriptor(unsigned index)
 			}
 
 			bool invalidScale = false;
-			if (!s_computeCorePointsDescParams.computer->computeScaleParams(subset, radius, &(desc.params[i*dimPerScale]), invalidScale))
-			{
-				//an error occurred!
-				s_computeCorePointsDescParams.errorOccurred = true;
-				s_computeCorePointsDescParams.processCanceled = true; //to make the loop stop!
-				return;
-			}
+			s_computeCorePointsDescParams.computer->computeScaleParams(subset, radius, &(desc.params[i*dimPerScale]), invalidScale);
 
 			if (invalidScale)
 			{

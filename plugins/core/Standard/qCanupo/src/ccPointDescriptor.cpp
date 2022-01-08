@@ -74,7 +74,7 @@ public:
 	}
 
 	//inherited from ScaleParamsComputer
-	virtual bool computeScaleParams(CCCoreLib::ReferenceCloud& neighbors, double radius, float params[], bool& invalidScale)
+	void computeScaleParams(CCCoreLib::ReferenceCloud& neighbors, double radius, float params[], bool& invalidScale) override
 	{
 		//PCA analysis
 		if (neighbors.size() >= 3)
@@ -97,7 +97,12 @@ public:
 						totalVariance += sValues.u[j];
 					}
 				}
-				assert(totalVariance != 0);
+				if (totalVariance < CCCoreLib::ZERO_TOLERANCE_D)
+				{
+					invalidScale = true;
+					params[0] = m_defaultParams[0];
+					params[1] = m_defaultParams[1];
+				}
 				sValues /= totalVariance;
 
 				// Use barycentric coordinates : a for 1D, b for 2D and c for 3D
@@ -128,8 +133,6 @@ public:
 			params[0] = m_defaultParams[0];
 			params[1] = m_defaultParams[1];
 		}
-
-		return true;
 	}
 
 protected:
@@ -179,7 +182,7 @@ public:
 	}
 
 	//inherited from ScaleParamsComputer
-	virtual bool computeScaleParams(CCCoreLib::ReferenceCloud& neighbors, double radius, float params[], bool& invalidScale)
+	void computeScaleParams(CCCoreLib::ReferenceCloud& neighbors, double radius, float params[], bool& invalidScale) override
 	{
 		//PCA analysis
 		if (neighbors.size() >= 3)
@@ -187,7 +190,7 @@ public:
 			//first compute the mean SF value
 			unsigned validCount = 0;
 			double meanVal = 0;
-			for (unsigned i=0; i<neighbors.size(); ++i)
+			for (unsigned i = 0; i < neighbors.size(); ++i)
 			{
 				ScalarType val = neighbors.getPointScalarValue(i);
 				if (CCCoreLib::ScalarField::ValidValue(val))
@@ -208,7 +211,7 @@ public:
 				params[0] = m_defaultParams[0];
 				params[1] = m_defaultParams[1];
 				params[2] = m_defaultParams[2];
-				return true;
+				return;
 			}
 
 			CCCoreLib::Neighbourhood Z(&neighbors);
@@ -263,8 +266,6 @@ public:
 			params[1] = m_defaultParams[1];
 			params[2] = m_defaultParams[2];
 		}
-
-		return true;
 	}
 
 protected:
@@ -300,7 +301,7 @@ public:
 	}
 
 	//inherited from ScaleParamsComputer
-	virtual bool computeScaleParams(CCCoreLib::ReferenceCloud& neighbors, double radius, float params[], bool& invalidScale)
+	void computeScaleParams(CCCoreLib::ReferenceCloud& neighbors, double radius, float params[], bool& invalidScale) override
 	{
 		//Curvature
 		if (neighbors.size() >= 6)
@@ -317,8 +318,6 @@ public:
 			invalidScale = true;
 			params[0] = m_defaultParams[0];
 		}
-
-		return true;
 	}
 
 protected:
@@ -355,7 +354,7 @@ public:
 	}
 
 	//inherited from ScaleParamsComputer
-	virtual bool computeScaleParams(CCCoreLib::ReferenceCloud& neighbors, double radius, float params[], bool& invalidScale)
+	void computeScaleParams(CCCoreLib::ReferenceCloud& neighbors, double radius, float params[], bool& invalidScale) override
 	{
 		//Curvature
 		if (neighbors.size() >= ?)
@@ -375,8 +374,6 @@ public:
 			params[1] = m_defaultParams[1];
 			...
 		}
-
-		return true;
 	}
 
 protected:

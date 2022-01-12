@@ -74,6 +74,8 @@ v2.12 (???) - (in development)
 			- -CLASS_THRESHOLD [value]: double value of classification threshold (ex. 0.5)
 			- -EXPORT_GROUND: exports the ground as a .bin file
 			- -EXPORT_OFFGROUND: exports the off-ground as a .bin file
+	- Roughness computation:
+		- new option to set a 'up direction' to compute signed roughness values
 	- Command line:
 		- Command 'Rasterize':
 			- New output option '-OUTPUT_RASTER_Z_AND_SF' to explicitly export altitudes AND scalar fields.
@@ -82,7 +84,7 @@ v2.12 (???) - (in development)
 				(to be used with the '-EMPTY_FILL INTERP')
 		- New sub-option for the RANSAC plugin command line option (-RANSAC)
 			- OUT_RANDOM_COLOR = generate random colors for the output clouds (false by default now)
-        - New sub-option for the FILTER_SF command:
+        - New sub-option for the 'FILTER_SF' command:
 			- N_SIGMA_MIN and N_SIGMA_MAX: specify the option followed by a numeric value to filter by N * standardDeviation around the mean.
 		- new option '-INVERT_NORMALS':
 			- Inverts the normals of the loaded entities (cloud or mesh, and per-triangle or per-vertex for meshes)
@@ -98,6 +100,8 @@ v2.12 (???) - (in development)
 		- the 'OCTREE_NORMALS' option has been updated:
 			- MINUS_ZERO and PLUS_ZERO can now also be written MINUS_ORIGIN and PLUS_ORIGIN
 			- new sub-options '-ORIENT PLUS_SENSOR_ORIGIN' and '-ORIENT MINUS_SENSOR_ORIGIN' (to use the sensor origin to orient the normals - a sensor must be associated to the cloud of course ;)
+        - New sub-option for the 'ROUGH' command (Roughness):
+			- '-UP_DIR X Y Z' to specify a 'up direction' to compute signed roughness values.
 	- PCD:
 		- CC can now load PCL files with integer xyz coordinates (16 and 32 bits) as well as double coordinates
 		- CC can now load 'scan grids' corresponding to structured clouds (so as to compute robust normals for instance)

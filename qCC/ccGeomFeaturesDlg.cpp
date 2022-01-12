@@ -60,6 +60,31 @@ ccGeomFeaturesDlg::ccGeomFeaturesDlg(QWidget* parent/*=nullptr*/)
 	m_options.shrink_to_fit();
 }
 
+void ccGeomFeaturesDlg::setUpDirection(const CCVector3& upDir)
+{
+	upDirXDoubleSpinBox->setValue(upDir.x);
+	upDirYDoubleSpinBox->setValue(upDir.y);
+	upDirZDoubleSpinBox->setValue(upDir.z);
+	upDirGroupBox->setChecked(true);
+}
+
+CCVector3* ccGeomFeaturesDlg::getUpDirection() const
+{
+	if (roughnessCheckBox->isChecked() && upDirGroupBox->isChecked())
+	{
+		static CCVector3 UpDirection(0, 0, 1);
+		UpDirection.x = static_cast<PointCoordinateType>(upDirXDoubleSpinBox->value());
+		UpDirection.y = static_cast<PointCoordinateType>(upDirYDoubleSpinBox->value());
+		UpDirection.z = static_cast<PointCoordinateType>(upDirZDoubleSpinBox->value());
+		return &UpDirection;
+	}
+	else
+	{
+		return nullptr;
+	}
+}
+
+
 void ccGeomFeaturesDlg::setSelectedFeatures(const ccLibAlgorithms::GeomCharacteristicSet& features)
 {
 	reset();

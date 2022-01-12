@@ -118,6 +118,7 @@ namespace ccLibAlgorithms
 	bool ComputeGeomCharacteristics(const GeomCharacteristicSet& characteristics,
 									PointCoordinateType radius,
 									ccHObject::Container& entities,
+									const CCVector3* roughnessUpDir/*=nullptr*/,
 									QWidget* parent/*=nullptr*/)
 	{
 		//no feature case
@@ -135,6 +136,7 @@ namespace ccLibAlgorithms
 												characteristics.front().subOption,
 												radius,
 												entities,
+												roughnessUpDir,
 												parent);
 		}
 
@@ -152,6 +154,7 @@ namespace ccLibAlgorithms
 											g.subOption,
 											radius,
 											entities,
+											roughnessUpDir,
 											parent,
 											pDlg.data()))
 			{
@@ -167,6 +170,7 @@ namespace ccLibAlgorithms
 									int subOption,
 									PointCoordinateType radius,
 									ccHObject::Container& entities,
+									const CCVector3* roughnessUpDir/*=nullptr*/,
 									QWidget* parent/*= nullptr*/,
 									ccProgressDialog* progressDialog/*=nullptr*/)
 	{
@@ -325,7 +329,13 @@ namespace ccLibAlgorithms
 					}
 				}
 
-				CCCoreLib::GeometricalAnalysisTools::ErrorCode result = CCCoreLib::GeometricalAnalysisTools::ComputeCharactersitic(c, subOption, cloud, radius, pDlg, octree.data());
+				CCCoreLib::GeometricalAnalysisTools::ErrorCode result = CCCoreLib::GeometricalAnalysisTools::ComputeCharactersitic(	c,
+																																	subOption,
+																																	cloud,
+																																	radius,
+																																	roughnessUpDir,
+																																	pDlg,
+																																	octree.data());
 
 				if (result == CCCoreLib::GeometricalAnalysisTools::NoError)
 				{
@@ -334,6 +344,19 @@ namespace ccLibAlgorithms
 						pc->setCurrentDisplayedScalarField(sfIdx);
 						pc->showSF(sfIdx >= 0);
 						pc->getCurrentInScalarField()->computeMinAndMax();
+						if (c == CCCoreLib::GeometricalAnalysisTools::Roughness && roughnessUpDir != nullptr)
+						{
+							// signed roughness should be displayed with a symmetrical color scale
+							ccScalarField* sf = dynamic_cast<ccScalarField*>(pc->getCurrentInScalarField());
+							if (sf)
+							{
+								sf->setSymmetricalScale(true);
+							}
+							else
+							{
+								assert(false);
+							}
+						}
 					}
 					cloud->prepareDisplayForRefresh();
 				}

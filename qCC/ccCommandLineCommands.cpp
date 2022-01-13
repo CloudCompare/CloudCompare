@@ -58,6 +58,7 @@ constexpr char COMMAND_DENSITY_TYPE[]					= "TYPE";			//+ density type
 constexpr char COMMAND_APPROX_DENSITY[]					= "APPROX_DENSITY";
 constexpr char COMMAND_SF_GRADIENT[]					= "SF_GRAD";
 constexpr char COMMAND_ROUGHNESS[]						= "ROUGH";
+constexpr char COMMAND_ROUGHNESS_UP_DIR[]				= "UP_DIR";
 constexpr char COMMAND_APPLY_TRANSFORMATION[]			= "APPLY_TRANS";
 constexpr char COMMAND_DROP_GLOBAL_SHIFT[]				= "DROP_GLOBAL_SHIFT";
 constexpr char COMMAND_SF_COLOR_SCALE[]					= "SF_COLOR_SCALE";
@@ -1367,7 +1368,7 @@ bool CommandCurvature::process(ccCommandLineInterface &cmd)
 		entities[i] = cmd.clouds()[i].pc;
 	}
 	
-	if (ccLibAlgorithms::ComputeGeomCharacteristic(CCCoreLib::GeometricalAnalysisTools::Curvature, curvType, kernelSize, entities, cmd.widgetParent()))
+	if (ccLibAlgorithms::ComputeGeomCharacteristic(CCCoreLib::GeometricalAnalysisTools::Curvature, curvType, kernelSize, entities, nullptr, cmd.widgetParent()))
 	{
 		//save output
 		if (cmd.autoSaveMode() && !cmd.saveClouds(QObject::tr("%1_CURVATURE_KERNEL_%2").arg(curvTypeStr).arg(kernelSize)))
@@ -1448,7 +1449,7 @@ bool CommandApproxDensity::process(ccCommandLineInterface &cmd)
 		}
 	}
 	
-	if (ccLibAlgorithms::ComputeGeomCharacteristic(CCCoreLib::GeometricalAnalysisTools::ApproxLocalDensity, densityType, 0, entities, cmd.widgetParent()))
+	if (ccLibAlgorithms::ComputeGeomCharacteristic(CCCoreLib::GeometricalAnalysisTools::ApproxLocalDensity, densityType, 0, entities, nullptr, cmd.widgetParent()))
 	{
 		//save output
 		if (cmd.autoSaveMode() && !cmd.saveClouds("APPROX_DENSITY"))
@@ -1516,7 +1517,7 @@ bool CommandDensity::process(ccCommandLineInterface &cmd)
 		entities[i] = cmd.clouds()[i].pc;
 	}
 	
-	if (ccLibAlgorithms::ComputeGeomCharacteristic(CCCoreLib::GeometricalAnalysisTools::LocalDensity, densityType, kernelSize, entities, cmd.widgetParent()))
+	if (ccLibAlgorithms::ComputeGeomCharacteristic(CCCoreLib::GeometricalAnalysisTools::LocalDensity, densityType, kernelSize, entities, nullptr, cmd.widgetParent()))
 	{
 		//save output
 		if (cmd.autoSaveMode() && !cmd.saveClouds("DENSITY"))
@@ -1620,6 +1621,31 @@ bool CommandRoughness::process(ccCommandLineInterface &cmd)
 		return cmd.error(QObject::tr("Failed to read a numerical parameter: kernel size (after \"-%1\"). Got '%2' instead.").arg(COMMAND_ROUGHNESS, kernelStr));
 	}
 	cmd.print(QObject::tr("\tKernel size: %1").arg(kernelSize));
+
+	// optional argument
+	CCVector3 roughnessUpDir;
+	CCVector3* _roughnessUpDir = nullptr;
+	if (cmd.arguments().size() >= 4)
+	{
+		QString nextArg = cmd.arguments().first();
+		if (nextArg.startsWith('-') && nextArg.mid(1).toUpper() == COMMAND_ROUGHNESS_UP_DIR)
+		{
+			// option confirmed
+			cmd.arguments().takeFirst();
+			QString xStr = cmd.arguments().takeFirst();
+			QString yStr = cmd.arguments().takeFirst();
+			QString zStr = cmd.arguments().takeFirst();
+			bool okX = false, okY = false, okZ = false;
+			roughnessUpDir.x = static_cast<PointCoordinateType>(xStr.toDouble(&okX));
+			roughnessUpDir.y = static_cast<PointCoordinateType>(yStr.toDouble(&okY));
+			roughnessUpDir.z = static_cast<PointCoordinateType>(zStr.toDouble(&okZ));
+			if (!okX || !okY || !okZ)
+			{
+				return cmd.error(QObject::tr("Invalid 'up direction' vector after option -%1 (3 coordinates expected)").arg(COMMAND_ROUGHNESS_UP_DIR));
+			}
+			_roughnessUpDir = &roughnessUpDir;
+		}
+	}
 	
 	if (cmd.clouds().empty())
 	{
@@ -1634,7 +1660,7 @@ bool CommandRoughness::process(ccCommandLineInterface &cmd)
 		entities[i] = cmd.clouds()[i].pc;
 	}
 	
-	if (ccLibAlgorithms::ComputeGeomCharacteristic(CCCoreLib::GeometricalAnalysisTools::Roughness, 0, kernelSize, entities, cmd.widgetParent()))
+	if (ccLibAlgorithms::ComputeGeomCharacteristic(CCCoreLib::GeometricalAnalysisTools::Roughness, 0, kernelSize, entities, _roughnessUpDir, cmd.widgetParent()))
 	{
 		//save output
 		if (cmd.autoSaveMode() && !cmd.saveClouds(QObject::tr("ROUGHNESS_KERNEL_%2").arg(kernelSize)))
@@ -5422,7 +5448,7 @@ bool CommandMoment::process(ccCommandLineInterface &cmd)
 		entities[i] = cmd.clouds()[i].pc;
 	}
 
-	if (ccLibAlgorithms::ComputeGeomCharacteristic(CCCoreLib::GeometricalAnalysisTools::MomentOrder1, 0, kernelSize, entities, cmd.widgetParent()))
+	if (ccLibAlgorithms::ComputeGeomCharacteristic(CCCoreLib::GeometricalAnalysisTools::MomentOrder1, 0, kernelSize, entities, nullptr, cmd.widgetParent()))
 	{
 		//save output
 		if (cmd.autoSaveMode() && !cmd.saveClouds(QObject::tr("MOMENT_KERNEL_%2").arg(kernelSize)))
@@ -5551,7 +5577,7 @@ bool CommandFeature::process(ccCommandLineInterface &cmd)
 		entities[i] = cmd.clouds()[i].pc;
 	}
 
-	if (ccLibAlgorithms::ComputeGeomCharacteristic(CCCoreLib::GeometricalAnalysisTools::Feature, featureType, kernelSize, entities, cmd.widgetParent()))
+	if (ccLibAlgorithms::ComputeGeomCharacteristic(CCCoreLib::GeometricalAnalysisTools::Feature, featureType, kernelSize, entities, nullptr, cmd.widgetParent()))
 	{
 		//save output
 		if (cmd.autoSaveMode() && !cmd.saveClouds(QObject::tr("%1_FEATURE_KERNEL_%2").arg(featureTypeStr).arg(kernelSize)))

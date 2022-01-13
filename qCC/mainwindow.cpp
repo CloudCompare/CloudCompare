@@ -8006,12 +8006,20 @@ void MainWindow::doShowPrimitiveFactory()
 void MainWindow::doComputeGeometricFeature()
 {
 	static ccLibAlgorithms::GeomCharacteristicSet s_selectedCharacteristics;
+	static CCVector3 s_upDir(0, 0, 1);
+	static bool s_upDirDefined = false;
 
 	ccGeomFeaturesDlg gfDlg(this);
 	double radius = ccLibAlgorithms::GetDefaultCloudKernelSize(m_selectedEntities);
 	gfDlg.setRadius(radius);
+
+	// restore semi-persistent parameters
 	gfDlg.setSelectedFeatures(s_selectedCharacteristics);
-	
+	if (s_upDirDefined)
+	{
+		gfDlg.setUpDirection(s_upDir);
+	}
+
 	if (!gfDlg.exec())
 		return;
 
@@ -8022,7 +8030,16 @@ void MainWindow::doComputeGeometricFeature()
 		return;
 	}
 
-	ccLibAlgorithms::ComputeGeomCharacteristics(s_selectedCharacteristics, static_cast<PointCoordinateType>(radius), m_selectedEntities, this);
+	CCVector3* upDir = gfDlg.getUpDirection();
+
+	// remember semi-persistent parameters
+	s_upDirDefined = (upDir != nullptr);
+	if (s_upDirDefined)
+	{
+		s_upDir = *upDir;
+	}
+
+	ccLibAlgorithms::ComputeGeomCharacteristics(s_selectedCharacteristics, static_cast<PointCoordinateType>(radius), m_selectedEntities, upDir, this);
 
 	refreshAll();
 	updateUI();

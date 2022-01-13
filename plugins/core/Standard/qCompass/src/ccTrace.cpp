@@ -754,6 +754,7 @@ void ccTrace::buildCurvatureCost(QWidget* parent)
 		CCCoreLib::Neighbourhood::CurvatureType::MEAN_CURV,
 		m_cloud,
 		m_search_r,
+		nullptr,
 		&pDlg,
 		octree.data());
 

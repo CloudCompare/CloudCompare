@@ -55,6 +55,7 @@ namespace ccLibAlgorithms
 	bool ComputeGeomCharacteristics(const GeomCharacteristicSet& characteristics,
 									PointCoordinateType radius,
 									ccHObject::Container& entities,
+									const CCVector3* roughnessUpDir = nullptr,
 									QWidget* parent = nullptr);
 	
 	//! Computes a geometrical characteristic (see GeometricalAnalysisTools::GeomCharacteristic) on a set of entities
@@ -62,6 +63,7 @@ namespace ccLibAlgorithms
 									int subOption,
 									PointCoordinateType radius,
 									ccHObject::Container& entities,
+									const CCVector3* roughnessUpDir = nullptr,
 									QWidget* parent = nullptr,
 									ccProgressDialog* progressDialog = nullptr);
 

@@ -43,6 +43,11 @@ public:
 	//! Returns	the kernel radius (for 'precise' mode only)
 	double getRadius() const;
 
+	//! Sets the 'up direction' (and enables the group at the same time)
+	void setUpDirection(const CCVector3& upDir);
+	//! Returns the 'up direction' if any is defined (nullptr otherwise)
+	CCVector3* getUpDirection() const;
+
 	//! Reset the whole dialog
 	void reset();
 

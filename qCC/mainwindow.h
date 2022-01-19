@@ -269,6 +269,7 @@ private:
 	void doActionRenameSF();
 	void doActionOpenColorScalesManager();
 	void doActionAddIdField();
+    void doActionSplitCloudUsingSF();
 	void doActionSetSFAsCoord();
 	void doActionInterpolateScalarFields();
 

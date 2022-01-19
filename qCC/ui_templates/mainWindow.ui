@@ -39,7 +39,7 @@
      <x>0</x>
      <y>0</y>
      <width>1024</width>
-     <height>21</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -153,6 +153,7 @@
      <addaction name="actionExportNormalToSF"/>
      <addaction name="actionSetSFAsCoord"/>
      <addaction name="actionInterpolateSFs"/>
+     <addaction name="actionSplitCloudUsingSF"/>
      <addaction name="actionScalarFieldArithmetic"/>
      <addaction name="separator"/>
      <addaction name="actionOpenColorScalesManager"/>
@@ -3114,6 +3115,14 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Ctrl+P</string>
    </property>
   </action>
+  <action name="actionSplitCloudUsingSF">
+   <property name="text">
+    <string>Split cloud using SF</string>
+   </property>
+   <property name="toolTip">
+    <string>Split the selected cloud using the current scalar field. The field should be a positive integer.</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -3128,6 +3137,7 @@ QTreeView::branch:open:has-children:has-siblings  {
   </customwidget>
  </customwidgets>
  <resources>
+  <include location="../icons.qrc"/>
   <include location="../icons.qrc"/>
  </resources>
  <connections>

@@ -129,7 +129,12 @@ function( InstallPlugins )
 		
 		message( STATUS " Shader Destination: ${INSTALL_PLUGINS_SHADER_DEST_PATH}/${INSTALL_PLUGINS_SHADER_DEST_FOLDER}" )
 	endif()
-	
+
+	# Make CloudCompare/ccViewer depend on the plugins
+	# so that when building CloudCompare/ccViewer the plugins also get built
+	# instead of waiting for the `install` target to be ran for the plugins to get built
+	add_dependencies(${PROJECT_NAME} ${CC_PLUGIN_TARGET_LIST})
+
 	# Install the requested plugins in the DEST_FOLDER
 	foreach( plugin_target ${CC_PLUGIN_TARGET_LIST} )
 		get_target_property( plugin_type ${plugin_target} PLUGIN_TYPE )

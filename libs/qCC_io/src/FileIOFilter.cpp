@@ -562,10 +562,12 @@ bool FileIOFilter::HandleGlobalShift(	const CCVector3d& P,
 										LoadParameters& loadParameters,
 										bool useInputCoordinatesShiftIfPossible/*=false*/)
 {
-	bool shiftAlreadyEnabled = (loadParameters.coordinatesShiftEnabled && *loadParameters.coordinatesShiftEnabled && loadParameters.coordinatesShift);
+	bool shiftAlreadyEnabled = (	(nullptr != loadParameters._coordinatesShiftEnabled)
+								&&	(*loadParameters._coordinatesShiftEnabled)
+								&&	(nullptr != loadParameters._coordinatesShift) );
 	if (shiftAlreadyEnabled)
 	{
-		Pshift = *loadParameters.coordinatesShift;
+		Pshift = *loadParameters._coordinatesShift;
 		preserveCoordinateShift = loadParameters.preserveShiftOnSave;
 	}
 	
@@ -580,12 +582,17 @@ bool FileIOFilter::HandleGlobalShift(	const CCVector3d& P,
 											nullptr,
 											&applyAll) )
 	{
-		//we save coordinates shift information
-		if ((applyAll || loadParameters.shiftHandlingMode == ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT) //in command line mode, with the 'AUTO GLOBAL SHIFT' option, we want to retrieve the applied coordinate shift
-			&& loadParameters.coordinatesShiftEnabled && loadParameters.coordinatesShift)
+		// we save coordinates shift information
+		if (applyAll || loadParameters.shiftHandlingMode == ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT) //in command line mode, with the 'AUTO GLOBAL SHIFT' option, we want to retrieve the applied coordinate shift
 		{
-			*loadParameters.coordinatesShiftEnabled = true;
-			*loadParameters.coordinatesShift = Pshift;
+			if (nullptr != loadParameters._coordinatesShiftEnabled)
+			{
+				*loadParameters._coordinatesShiftEnabled = true;
+			}
+			if (nullptr != loadParameters._coordinatesShift)
+			{
+				*loadParameters._coordinatesShift = Pshift;
+			}
 			loadParameters.preserveShiftOnSave = preserveCoordinateShift;
 		}
 

@@ -568,7 +568,7 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(const QString& filename, ccHObject& cont
 			ccGlobalShiftManager::Mode csModeBackup = parameters.shiftHandlingMode;
 			bool useGlobalShift = false;
 			CCVector3d Pshift(0, 0, 0);
-			if ((descriptor.globalShift.norm2() != 0 || descriptor.globalScale != 1.0) && (!parameters.coordinatesShiftEnabled || !*parameters.coordinatesShiftEnabled))
+			if ((descriptor.globalShift.norm2() != 0 || descriptor.globalScale != 1.0) && ((nullptr == parameters._coordinatesShiftEnabled) || (false == *parameters._coordinatesShiftEnabled)))
 			{
 				if (csModeBackup != ccGlobalShiftManager::NO_DIALOG) //No dialog, practically means that we don't want any shift!
 				{

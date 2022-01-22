@@ -19,6 +19,10 @@
 #include "ccGlobalShiftManager.h"
 #include "ccShiftAndScaleCloudDlg.h"
 
+//Qt
+#include <QCoreApplication>
+#include <QFile>
+
 //qCC_db
 #include <ccHObject.h>
 
@@ -29,60 +33,66 @@
 double ccGlobalShiftManager::MAX_COORDINATE_ABS_VALUE = 1.0e4;
 double ccGlobalShiftManager::MAX_DIAGONAL_LENGTH = 1.0e6;
 
-//semi-persistent settings
+// default name for the Global Shift 'bookmarks' file
+static QString s_defaultGlobalShiftListFilename("global_shift_list.txt");
+
+// default and last input shift/scale entires (don't use it directly, use GetLast() instead)
 static std::vector<ccGlobalShiftManager::ShiftInfo> s_lastInfoBuffer;
+const std::vector<ccGlobalShiftManager::ShiftInfo>& ccGlobalShiftManager::GetLast()
+{
+	// the first time this method is called, load the default values from the 'bookmark' files
+	static bool s_firstTime = true;
+	if (s_firstTime)
+	{
+		assert(s_lastInfoBuffer.empty());
+		LoadInfoFromFile(QCoreApplication::applicationDirPath() + QString("/") + s_defaultGlobalShiftListFilename, s_lastInfoBuffer);
+		s_firstTime = false;
+	}
+
+	return s_lastInfoBuffer;
+}
+
+static bool IsDefaultShift(const CCVector3d& shift, double scale)
+{
+	return (scale == 1.0 && shift.norm2d() == 0);
+}
+
+static bool SameShift(const ccGlobalShiftManager::ShiftInfo& shiftInfo, const CCVector3d& shift, double scale)
+{
+	return (	(shiftInfo.shift - shift).norm() <= CCCoreLib::ZERO_TOLERANCE_D
+			&&	std::abs(shiftInfo.scale - scale) <= CCCoreLib::ZERO_TOLERANCE_D );
+}
 
 void ccGlobalShiftManager::StoreShift(const CCVector3d& shift, double scale, bool preserve/*=true*/)
 {
-	if (scale == 1.0 && shift.norm2d() == 0)
+	if (IsDefaultShift(shift, scale))
 	{
-		//default shift and scale are ignored
+		// default shift and scale are ignored
 		return;
 	}
 
-	for (const ccGlobalShiftManager::ShiftInfo& shiftInfo : s_lastInfoBuffer)
+	// check if it's already stored
+	for (const ShiftInfo& shiftInfo : s_lastInfoBuffer)
 	{
-		if (shiftInfo.scale == scale && (shiftInfo.shift - shift).norm2d() == 0)
+		if (SameShift(shiftInfo, shift, scale))
 		{
 			//we already know this one
 			return;
 		}
 	}
 
-	ccGlobalShiftManager::ShiftInfo info("Last input");
+	static unsigned lastInputIndex = 0;
+	ShiftInfo info("Previous input");
+	if (lastInputIndex != 0)
+	{
+		info.name += QString(" (%1)").arg(lastInputIndex);
+	}
+	++lastInputIndex;
+
 	info.scale = scale;
 	info.shift = shift;
 	info.preserve = preserve;
-	if (!s_lastInfoBuffer.empty())
-	{
-		info.name += QString(" (%1)").arg(s_lastInfoBuffer.size());
-	}
 	s_lastInfoBuffer.emplace_back(info);
-}
-
-bool ccGlobalShiftManager::GetLast(ShiftInfo& info)
-{
-	if (s_lastInfoBuffer.empty())
-	{
-		return false;
-	}
-	info = s_lastInfoBuffer.back();
-	return true;
-}
-
-bool ccGlobalShiftManager::GetLast(std::vector<ShiftInfo>& infos)
-{
-	try
-	{
-		infos = s_lastInfoBuffer;
-	}
-	catch (const std::bad_alloc&)
-	{
-		ccLog::Warning("[ccGlobalShiftManager::GetLast] Not enough memory");
-		return false;
-	}
-
-	return true;
 }
 
 bool ccGlobalShiftManager::NeedShift(const CCVector3d& P)
@@ -105,229 +115,201 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 									Mode mode,
 									bool useInputCoordinatesShiftIfPossible,
 									CCVector3d& coordinatesShift,
-									bool* preserveCoordinateShift/*=nullptr*/,
-									double* coordinatesScale/*=nullptr*/,
-									bool* applyAll/*=nullptr*/)
+									bool* _preserveCoordinateShift/*=nullptr*/,
+									double* _coordinatesScale/*=nullptr*/,
+									bool* _applyAll/*=nullptr*/)
 {
-	assert(diagonal >= 0);
-	if (preserveCoordinateShift && !useInputCoordinatesShiftIfPossible)
+	assert(diagonal >= 0.0);
+	bool preserveCoordinateShift = true;
+	if (useInputCoordinatesShiftIfPossible && _preserveCoordinateShift)
 	{
-		*preserveCoordinateShift = true;
+		// if shift info was provided as input
+		preserveCoordinateShift = *_preserveCoordinateShift;
 	}
-	if (applyAll)
+	if (_applyAll)
 	{
-		*applyAll = false;
+		*_applyAll = false;
 	}
 
 	//default scale
-	double scale = (coordinatesScale ? std::max(*coordinatesScale, CCCoreLib::ZERO_TOLERANCE_D) : 1.0);
+	double scale = 1.0;
 
-	bool needShift = NeedShift(P);
-	bool needRescale = NeedRescale(diagonal);
+	bool needShift = false;
+	bool needRescale = false;
 
-	//if we can't display a dialog and no usable shift is specified, there's nothing we can do...
-	if (mode == NO_DIALOG && !useInputCoordinatesShiftIfPossible)
+	// if shift info was provided as input (typically from a previous entity)
+	if (useInputCoordinatesShiftIfPossible)
 	{
+		if (nullptr != _coordinatesScale)
+		{
+			// use the input scale if specified
+			*_coordinatesScale = std::max(*_coordinatesScale, CCCoreLib::ZERO_TOLERANCE_D);
+			scale = *_coordinatesScale;
+		}
+		needShift = NeedShift(P*scale + coordinatesShift);
+		needRescale = NeedRescale(diagonal*scale);
+
+		if (mode == NO_DIALOG)
+		{
+			// we can apply the input shift only if it 'works'
+			return (!needShift && !needRescale);
+		}
+	}
+	else
+	{
+		// no shift by default
 		coordinatesShift = CCVector3d(0, 0, 0);
-		if (coordinatesScale)
+		if (nullptr != _coordinatesScale)
 		{
-			*coordinatesScale = 1.0;
-		}
-		if (preserveCoordinateShift)
-		{
-			*preserveCoordinateShift = false;
+			*_coordinatesScale = 1.0;
 		}
 
-		if (needShift || needRescale)
+		if (mode == NO_DIALOG)
 		{
-			ccLog::Warning("[ccGlobalShiftManager] Entity has very big coordinates: original accuracy may be lost! (you should apply a Global Shift or Scale)");
+			// it would be a bit strange to call this method with NO_DIALOG and no input shift
+			// but that's theoretically possible ;)
+			return false;
 		}
 
-		return false;
+		needShift = NeedShift(P);
+		needRescale = NeedRescale(diagonal);
 	}
 
-	//is shift necessary?
-	if ( needShift || useInputCoordinatesShiftIfPossible || needRescale || mode == ALWAYS_DISPLAY_DIALOG )
+	// after this point, we should either determine a new global shift
+	// or ask the user to review/provide one with a dialog
+	assert(mode != NO_DIALOG);
+
+	// if necessary, we can try with if a previously used shift works
+	int bestPreviousShiftIndex = -1;
+	if (needShift || needRescale)
 	{
-		//shift information already provided? (typically from a previous entity)
-		if (useInputCoordinatesShiftIfPossible && mode != ALWAYS_DISPLAY_DIALOG)
+		preserveCoordinateShift = true; // if we fall here, this means that even the provided input doesn't work
+		if (mode != NO_DIALOG_AUTO_SHIFT)
 		{
-			if (	mode == NO_DIALOG																//either we are in non interactive mode (which means that shift is 'forced' by caller)
-				||	(!NeedShift(P*scale + coordinatesShift) && !NeedRescale(diagonal*scale))		//or we are in interactive mode and existing shift is pertinent
-				)
-			{
-				//have we already stored shift info?
-				if (mode == NO_DIALOG_AUTO_SHIFT && !s_lastInfoBuffer.empty())
-				{
-					//in "auto shift" mode, we may want to use it (to synchronize multiple clouds!)
-					for (const ccGlobalShiftManager::ShiftInfo& shiftInfo : s_lastInfoBuffer)
-					{
-						if (!NeedShift(P*shiftInfo.scale + shiftInfo.shift) && !NeedRescale(diagonal*shiftInfo.scale))
-						{
-							coordinatesShift = shiftInfo.shift;
-							if (coordinatesScale)
-							{
-								*coordinatesScale = shiftInfo.scale;
-							}
-							if (preserveCoordinateShift)
-							{
-								*preserveCoordinateShift = shiftInfo.preserve;
-							}
-							return true;
-						}
-					}
-				}
-				
-				//save info for next time
-				if (coordinatesShift.norm2() != 0 || scale != 1.0)
-				{
-					StoreShift(coordinatesShift, scale);
-				}
-				//user should use the provided shift information
-				return true;
-			}
-			//--> otherwise we (should) ask for a better one
+			// at this point, we will display the dialog since the input info doesn't work
+			mode = ALWAYS_DISPLAY_DIALOG;
 		}
 
-		//let's deduce the right values (AUTO mode)
-		if (mode == NO_DIALOG_AUTO_SHIFT)
+		const std::vector<ShiftInfo>& lastInfoBuffer = ccGlobalShiftManager::GetLast();
+
+		// try to find an already used Global Shift that would work
+		for (size_t i = 0; i < lastInfoBuffer.size(); ++i)
 		{
-			//guess best shift & scale info from input point/diagonal
-			coordinatesShift = CCVector3d(0, 0, 0);
-			scale = 1.0;
-			if (needShift)
+			const ShiftInfo& shiftInfo = lastInfoBuffer[i];
+			needShift = NeedShift(P*shiftInfo.scale + shiftInfo.shift);
+			needRescale = NeedRescale(diagonal*shiftInfo.scale);
+			if (!needShift && !needRescale)
 			{
-				coordinatesShift = BestShift(P);
-				if (preserveCoordinateShift)
-				{
-					*preserveCoordinateShift = true;
-				}
-
+				// we found a valid candidate
+				coordinatesShift = shiftInfo.shift;
+				scale = shiftInfo.scale;
+				bestPreviousShiftIndex = static_cast<int>(i);
+				break;
 			}
-			if (coordinatesScale && needRescale)
-			{
-				*coordinatesScale = BestScale(diagonal);
-				if (preserveCoordinateShift)
-				{
-					*preserveCoordinateShift = true;
-				}
-
-				//save info for next time
-				scale = *coordinatesScale;
-			}
-
-			//save info for next time
-			StoreShift(coordinatesShift, 1.0, true);
-			return true;
 		}
+	}
 
-		//otherwise let's ask the user for those values
+	if (mode == NO_DIALOG_AUTO_SHIFT)
+	{
+		// since we can't display a dialog, we'll just use the best shift found so far
+		if (needShift)
+		{
+			coordinatesShift = BestShift(P);
+		}
+		if (needRescale)
+		{
+			scale = BestScale(diagonal);
+		}
+	}
+	// should we still display the dialog?
+	else if (	needShift
+			||	needRescale
+			||	mode == ALWAYS_DISPLAY_DIALOG)
+	{
 		ccShiftAndScaleCloudDlg sasDlg(P, diagonal);
-		if (!applyAll)
-		{
-			sasDlg.showApplyAllButton(false);
-		}
-		if (!coordinatesScale)
-		{
-			sasDlg.showScaleItems(false);
-		}
+		sasDlg.showApplyAllButton(_applyAll != nullptr);
+		sasDlg.showScaleItems(_coordinatesScale != nullptr);
+		sasDlg.showWarning(needShift || needRescale);
+		sasDlg.setPreserveShiftOnSave(preserveCoordinateShift);
+		sasDlg.showPreserveShiftOnSave(_preserveCoordinateShift != nullptr);
+		sasDlg.showTitle(needShift || needRescale);
 
-		scale = 1.0;
-		CCVector3d shift(0, 0, 0);
-		if (useInputCoordinatesShiftIfPossible)
-		{
-			//shift on load already provided? (typically from a previous file)
-			shift = coordinatesShift;
-			if (coordinatesScale)
-			{
-				scale = *coordinatesScale;
-			}
-			if (mode != ALWAYS_DISPLAY_DIALOG)
-			{
-				sasDlg.showWarning(true); //if we are here, it means that the provided shift isn't concordant
-			}
-		}
-		else
-		{
-			//guess best shift & scale info from input point/diagonal
-			if (needShift)
-			{
-				shift = BestShift(P);
-			}
-			if (needRescale)
-			{
-				scale = BestScale(diagonal);
-			}
-		}
+		// always add the "suggested" entry
+		CCVector3d suggestedShift = BestShift(P);
+		double suggestedScale = BestScale(diagonal);
+		int index = sasDlg.addShiftInfo(ShiftInfo("Suggested", suggestedShift, suggestedScale));
 
-		//add "suggested" entry
-		int index = sasDlg.addShiftInfo(ShiftInfo("Suggested", shift, scale));
-		sasDlg.setCurrentProfile(index);
-		//add "last" entry (if available)
-		if (!s_lastInfoBuffer.empty())
-		{
-			sasDlg.addShiftInfo(s_lastInfoBuffer);
+		const std::vector<ShiftInfo>& lastInfoBuffer = ccGlobalShiftManager::GetLast();
 
-			//use the very last one for preserve or not preserve
- 			sasDlg.setPreserveShiftOnSave(s_lastInfoBuffer.back().preserve);
-		}
-		sasDlg.showPreserveShiftOnSave(preserveCoordinateShift != nullptr);
-		//add entries from file (if any)
-		sasDlg.addFileInfo();
-		
-		//automatically make the first available shift that works
-		//(different than the suggested one) active
+		// potentially add the input shift if it's different from the others
+		if (	useInputCoordinatesShiftIfPossible
+			&& (!needShift && !needRescale)
+			&&	bestPreviousShiftIndex < 0 )
 		{
-			for (size_t i = static_cast<size_t>(std::max(0, index + 1)); i < sasDlg.infoCount(); ++i)
+			// let's check if the solution we found was part of the previous shifts anyway
+			for (size_t i = 0; i < lastInfoBuffer.size(); ++i)
 			{
-				ShiftInfo info;
-				if (sasDlg.getInfo(i, info))
+				const ShiftInfo& shiftInfo = lastInfoBuffer[i];
+				if ((	shiftInfo.shift - coordinatesShift).norm() <= CCCoreLib::ZERO_TOLERANCE_D
+					&&	std::abs(shiftInfo.scale - scale) <= CCCoreLib::ZERO_TOLERANCE_D )
 				{
-					//check if they work
-					if (	!NeedShift((CCVector3d(P) + info.shift) * info.scale )
-						&&  !NeedRescale(diagonal*info.scale) )
-					{
-						sasDlg.setCurrentProfile(static_cast<int>(i));
-						break;
-					}
+					// found the same shift
+					bestPreviousShiftIndex = static_cast<int>(i);
+					break;
 				}
 			}
+
+			if (bestPreviousShiftIndex < 0)
+			{
+				index = sasDlg.addShiftInfo(ShiftInfo("Input", coordinatesShift, scale));
+			}
 		}
-		sasDlg.showTitle(needShift || needRescale);
-		if (sasDlg.exec())
+		
+		// add the previous entries (if any)
+		if (!lastInfoBuffer.empty())
 		{
-			//save info for next time
-			StoreShift(sasDlg.getShift(), sasDlg.getScale(), sasDlg.preserveShiftOnSave());
-			
-			coordinatesShift = sasDlg.getShift();
-			if (coordinatesScale)
+			sasDlg.addShiftInfo(lastInfoBuffer);
+			if (bestPreviousShiftIndex >= 0)
 			{
-				*coordinatesScale = sasDlg.getScale();
+				index = bestPreviousShiftIndex + 1; // + 1 because of the 'suggested' shift
 			}
-			if (preserveCoordinateShift)
-			{
-				*preserveCoordinateShift = sasDlg.preserveShiftOnSave();
-			}
-			if (applyAll)
-			{
-				*applyAll = sasDlg.applyAll();
-			}
-			
-			return true;
+		}
+		sasDlg.setCurrentProfile(index);
+
+		if (!sasDlg.exec())
+		{
+			// process cancelled by the user
+			return false;
+		}
+
+		coordinatesShift = sasDlg.getShift();
+		if (_coordinatesScale)
+		{
+			scale = sasDlg.getScale();
+		}
+		if (_preserveCoordinateShift)
+		{
+			preserveCoordinateShift = sasDlg.preserveShiftOnSave();
+		}
+		if (_applyAll)
+		{
+			*_applyAll = sasDlg.applyAll();
 		}
 	}
 
-	coordinatesShift = CCVector3d(0, 0, 0);
-	if (coordinatesScale)
+	// save info for next time
+	StoreShift(coordinatesShift, scale, preserveCoordinateShift);
+
+	if (_coordinatesScale)
 	{
-		*coordinatesScale = 1.0;
+		*_coordinatesScale = scale;
 	}
-	if (preserveCoordinateShift)
+	if (_preserveCoordinateShift)
 	{
-		*preserveCoordinateShift = false;
+		*_preserveCoordinateShift = preserveCoordinateShift;
 	}
 
-	return false;
+	return true;
 }
 
 CCVector3d ccGlobalShiftManager::BestShift(const CCVector3d& P)
@@ -352,5 +334,71 @@ CCVector3d ccGlobalShiftManager::BestShift(const CCVector3d& P)
 double ccGlobalShiftManager::BestScale(double d)
 {
 	return d < MAX_DIAGONAL_LENGTH ? 1.0 : pow(10.0, -static_cast<double>(ceil(log(d / MAX_DIAGONAL_LENGTH))));
+}
+
+bool ccGlobalShiftManager::LoadInfoFromFile(QString filename, std::vector<ShiftInfo>& infos)
+{
+	QFile file(filename);
+	if (!file.open(QFile::Text | QFile::ReadOnly))
+		return false;
+
+	QTextStream stream(&file);
+	unsigned lineNumber = 0;
+
+	while (true)
+	{
+		//read next line
+		QString line = stream.readLine();
+		if (line.isEmpty())
+			break;
+		++lineNumber;
+
+		if (line.startsWith("//"))
+			continue;
+
+		//split line in 5 items
+		QStringList tokens = line.split(";", QString::SkipEmptyParts);
+		if (tokens.size() != 5)
+		{
+			//invalid file
+			ccLog::Warning(QString("[ccGlobalShiftManager::LoadInfoFromFile] File '%1' is malformed (5 items expected per line)").arg(filename));
+			return false;
+		}
+
+		//decode items
+		bool ok = true;
+		unsigned errors = 0;
+		ccGlobalShiftManager::ShiftInfo info;
+		info.name = tokens[0].trimmed();
+		info.shift.x = tokens[1].toDouble(&ok);
+		if (!ok) ++errors;
+		info.shift.y = tokens[2].toDouble(&ok);
+		if (!ok) ++errors;
+		info.shift.z = tokens[3].toDouble(&ok);
+		if (!ok) ++errors;
+		info.scale = tokens[4].toDouble(&ok);
+		if (!ok) ++errors;
+
+		//process errors
+		if (errors)
+		{
+			//invalid file
+			ccLog::Warning(QString("[ccGlobalShiftManager::LoadInfoFromFile] File '%1' is malformed (wrong item type encountered on line %2)").arg(filename).arg(lineNumber));
+			return false;
+		}
+
+		try
+		{
+			infos.push_back(info);
+		}
+		catch (const std::bad_alloc&)
+		{
+			//not enough memory
+			ccLog::Warning(QString("[ccGlobalShiftManager::LoadInfoFromFile] Not enough memory to read file '%1'").arg(filename));
+			return false;
+		}
+	}
+
+	return true;
 }
 

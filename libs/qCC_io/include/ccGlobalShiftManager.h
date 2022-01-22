@@ -46,9 +46,9 @@ public:
 						Mode mode,
 						bool useInputCoordinatesShiftIfPossible,
 						CCVector3d& coordinatesShift,
-						bool* preserveCoordinateShift = nullptr,
-						double* coordinatesScale = nullptr,
-						bool* applyAll = nullptr);
+						bool* _preserveCoordinateShift = nullptr,
+						double* _coordinatesScale = nullptr,
+						bool* _applyAll = nullptr);
 
 	//! Returns whether a particular point (coordinates) is too big or not
 	static bool NeedShift(const CCVector3d& P);
@@ -91,8 +91,15 @@ public: //Shift and scale info
 		ShiftInfo(QString str, const CCVector3d& T, double s = 1.0) : shift(T), scale(s), name(str), preserve(true) {}
 	};
 
-	static bool GetLast(ShiftInfo& info);
-	static bool GetLast(std::vector<ShiftInfo>& infos);
+	//! Returns the default and last input shift/scale entries
+	const static std::vector<ShiftInfo>& GetLast();
+
+	//! Tries to load ShiftInfo data from a (text) file
+	/** \param[in]  filename filename
+		\param[out] infos read information
+		\return success
+	**/
+	static bool LoadInfoFromFile(QString filename, std::vector<ShiftInfo>& infos);
 
 protected:
 	

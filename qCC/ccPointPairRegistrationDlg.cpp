@@ -58,7 +58,7 @@ static const int DEL_BUTTON_COL_INDEX	= 4;
 //minimum number of pairs to let the user click on the align button
 static const unsigned MIN_PAIRS_COUNT = 3;
 
-ccPointPairRegistrationDlg::ccPointPairRegistrationDlg(ccPickingHub* pickingHub, ccMainAppInterface* app, QWidget* parent/*=0*/)
+ccPointPairRegistrationDlg::ccPointPairRegistrationDlg(ccPickingHub* pickingHub, ccMainAppInterface* app, QWidget* parent/*=nullptr*/)
 	: ccOverlayDialog(parent)
 	, m_alignedPoints("aligned points")
 	, m_refPoints("reference points")
@@ -943,7 +943,7 @@ void ccPointPairRegistrationDlg::removeAlignedPoint(int index, bool autoRemoveDu
 	}
 }
 
-bool ccPointPairRegistrationDlg::addReferencePoint(CCVector3d& Pin, ccHObject* entity/*=0*/, bool shifted/*=true*/)
+bool ccPointPairRegistrationDlg::addReferencePoint(CCVector3d& Pin, ccHObject* entity/*=nullptr*/, bool shifted/*=true*/)
 {
 	assert(entity == nullptr || m_referenceEntities.contains(entity));
 
@@ -968,18 +968,11 @@ bool ccPointPairRegistrationDlg::addReferencePoint(CCVector3d& Pin, ccHObject* e
 			if (!shifted)
 			{
 				//test that the input point has not too big coordinates
-				bool shiftEnabled = false;
-				CCVector3d Pshift(0, 0, 0);
-				double scale = 1.0;
 				//we use the aligned shift by default (if any)
-				ccGenericPointCloud* alignedCloud = ccHObjectCaster::ToGenericPointCloud(entity);
-				if (alignedCloud && alignedCloud->isShifted())
-				{
-					Pshift = alignedCloud->getGlobalShift();
-					scale = alignedCloud->getGlobalScale();
-					shiftEnabled = true;
-				}
-				if (ccGlobalShiftManager::Handle(Pin, 0, ccGlobalShiftManager::DIALOG_IF_NECESSARY, shiftEnabled, Pshift,  nullptr, &scale))
+				bool shiftEnabled = m_alignedEntities.isShifted;
+				CCVector3d Pshift = m_alignedEntities.shift;
+				double scale = 1.0;
+				if (ccGlobalShiftManager::Handle(Pin, 0, ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT, shiftEnabled, Pshift,  nullptr, &scale))
 				{
 					m_refPoints.setGlobalShift(Pshift);
 					m_refPoints.setGlobalScale(scale);
@@ -1509,38 +1502,63 @@ void ccPointPairRegistrationDlg::apply()
 		summary << "Refer to Console (F8) for more details";
 		QMessageBox::information(this, "Align info", summary.join("\n"));
 
-		//don't forget global shift
+		//don't forget global shift:
+		//reference shift takes precedence on the aligned entities'
+		bool referenceIsShifted = false;
+		CCVector3d referenceShift(0, 0, 0);
+		double referenceScale = 1.0;
+		if (!m_referenceEntities.isEmpty())
+		{
+			referenceIsShifted = m_referenceEntities.isShifted;
+			referenceShift = m_referenceEntities.shift;
+			referenceScale = m_referenceEntities.scale;
+		}
+		else if (m_refPoints.isShifted())
+		{
+			// shift was automatically applied (temporarily, and for display purposes)
+			CCVector3d Pshift = m_refPoints.getGlobalShift();
+			double scale = m_refPoints.getGlobalScale();
+			CCVector3d Pin = m_refPoints.toGlobal3d(*m_refPoints.getPoint(0));
+			if (ccGlobalShiftManager::Handle(Pin, 0, ccGlobalShiftManager::ALWAYS_DISPLAY_DIALOG, true, Pshift, nullptr, &scale))
+			{
+				referenceIsShifted = true;
+				referenceShift = Pshift;
+				referenceScale = scale;
+			}
+		}
+
 		bool alwaysDropShift = false;
-		bool firstQuestion = true;
+		bool alwaysDropShiftQuestionAsked = false;
 		for (auto it = m_alignedEntities.begin(); it != m_alignedEntities.end(); ++it)
 		{
-			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(it.key());
-			if (cloud)
+			ccGenericPointCloud* alignedCloud = ccHObjectCaster::ToGenericPointCloud(it.key());
+			if (alignedCloud)
 			{
-				if (m_referenceEntities.isShifted)
+				if (referenceIsShifted)
 				{
-					cloud->setGlobalShift(m_referenceEntities.shift);
-					cloud->setGlobalScale(m_referenceEntities.scale);
+					alignedCloud->setGlobalShift(referenceShift);
+					alignedCloud->setGlobalScale(referenceScale);
 					ccLog::Warning(tr("[PointPairRegistration] Cloud %1: global shift has been updated to match the reference: (%1,%2,%3) [x%4]")
-						.arg(cloud->getName())
-						.arg(m_referenceEntities.shift.x)
-						.arg(m_referenceEntities.shift.y)
-						.arg(m_referenceEntities.shift.z)
-						.arg(m_referenceEntities.scale));
+						.arg(alignedCloud->getName())
+						.arg(referenceShift.x)
+						.arg(referenceShift.y)
+						.arg(referenceShift.z)
+						.arg(referenceScale));
 				}
-				else if (cloud->isShifted()) //we'll ask the user first before dropping the shift information on the aligned cloud
+				else if (alignedCloud->isShifted()) // the aligned cloud is shifted, but not the reference cloud
 				{
-					if (firstQuestion)
+					//we'll ask the user confirmation before dropping the shift information on the aligned cloud
+					if (!alwaysDropShiftQuestionAsked)
 					{
 						alwaysDropShift = (QMessageBox::question(this, tr("Drop shift information?"), tr("Aligned cloud is shifted but reference cloud is not: drop global shift information?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes);
-						firstQuestion = false;
+						alwaysDropShiftQuestionAsked = true;
 					}
 
 					if (alwaysDropShift)
 					{
-						cloud->setGlobalShift(0, 0, 0);
-						cloud->setGlobalScale(1.0);
-						ccLog::Warning(tr("[PointPairRegistration] Cloud %1: global shift has been reset to match the reference!").arg(cloud->getName()));
+						alignedCloud->setGlobalShift(0, 0, 0);
+						alignedCloud->setGlobalScale(1.0);
+						ccLog::Warning(tr("[PointPairRegistration] Cloud %1: global shift has been reset to match the reference!").arg(alignedCloud->getName()));
 					}
 				}
 			}

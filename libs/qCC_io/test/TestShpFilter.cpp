@@ -10,6 +10,14 @@
 #include "ccHObject.h"
 #include "ccPointCloud.h"
 
+static void SetDefaultLoadParameters(FileIOFilter::LoadParameters& params, CCVector3d& shift, bool& shiftEnabled)
+{
+	params.alwaysDisplayLoadDialog = false;
+	params.shiftHandlingMode = ccGlobalShiftManager::Mode::NO_DIALOG;
+	params._coordinatesShiftEnabled = &shiftEnabled;
+	params._coordinatesShift = &shift;
+	params.preserveShiftOnSave = true;
+}
 
 void TestShpFilter::readPolylineFile(const QString &filePath) const
 {
@@ -21,10 +29,10 @@ void TestShpFilter::readPolylineFile(const QString &filePath) const
 
 	QVERIFY(container.getChildrenNumber() == 2);
 
-	for (unsigned i(0); i < container.getChildrenNumber(); ++i)
+	for (unsigned i = 0; i < container.getChildrenNumber(); ++i)
 	{
 		ccHObject *child = container.getChild(i);
-		QVERIFY(child->getClassID() == CC_TYPES::POLY_LINE);
+		QVERIFY(child->isA(CC_TYPES::POLY_LINE));
 	}
 
 	auto *firstPolyline = static_cast<ccPolyline *>(container.getChild(0));
@@ -72,10 +80,10 @@ void TestShpFilter::readPolylineMFile(const QString &filePath) const
 
 	QVERIFY(container.getChildrenNumber() == 2);
 
-	for (unsigned i(0); i < container.getChildrenNumber(); ++i)
+	for (unsigned i = 0; i < container.getChildrenNumber(); ++i)
 	{
 		ccHObject *child = container.getChild(i);
-		QVERIFY(child->getClassID() == CC_TYPES::POLY_LINE);
+		QVERIFY(child->isA(CC_TYPES::POLY_LINE));
 	}
 
 	auto *firstPolyline = static_cast<ccPolyline *>(container.getChild(0));
@@ -131,10 +139,10 @@ void TestShpFilter::readPolylineZFile(const QString &filePath) const
 	QVERIFY(error == CC_FERR_NO_ERROR);
 
 	QVERIFY(container.getChildrenNumber() == 3);
-	for (unsigned i(0); i < container.getChildrenNumber(); ++i)
+	for (unsigned i = 0; i < container.getChildrenNumber(); ++i)
 	{
 		ccHObject *child = container.getChild(i);
-		QVERIFY(child->getClassID() == CC_TYPES::POLY_LINE);
+		QVERIFY(child->isA(CC_TYPES::POLY_LINE));
 	}
 
 	// 1st part of the polyline
@@ -181,7 +189,7 @@ void TestShpFilter::readMultiPointFile(const QString &filePath) const
 	QVERIFY(error == CC_FERR_NO_ERROR);
 
 	QVERIFY(container.getChildrenNumber() == 1);
-	QVERIFY(container.getChild(0)->getClassID() == CC_TYPES::POINT_CLOUD);
+	QVERIFY(container.getChild(0)->isA(CC_TYPES::POINT_CLOUD));
 
 	auto *cloud = static_cast<ccPointCloud *>(container.getChild(0));
 	QVERIFY(cloud->size() == 2);
@@ -206,19 +214,15 @@ void TestShpFilter::readMultiPointZFile(const QString &filePath) const
 
 	ccHObject container;
 	FileIOFilter::LoadParameters params;
-	params.alwaysDisplayLoadDialog = false;
-	params.shiftHandlingMode = ccGlobalShiftManager::Mode::NO_DIALOG;
-	params.coordinatesShiftEnabled = &shiftEnabled;
-	params.coordinatesShift = &shift;
-	params.preserveShiftOnSave = true;
+	SetDefaultLoadParameters(params, shift, shiftEnabled);
 	ShpFilter filter;
 
 	CC_FILE_ERROR error = filter.loadFile(filePath, container, params);
 	QVERIFY(error == CC_FERR_NO_ERROR);
 
 	QVERIFY(container.getChildrenNumber() == 1);
-	ccHObject *item = container.getFirstChild();
-	QVERIFY(item->getClassID() == CC_TYPES::POINT_CLOUD);
+	ccHObject* item = container.getFirstChild();
+	QVERIFY(item->isA(CC_TYPES::POINT_CLOUD));
 
 	auto *pointCloud = static_cast<ccPointCloud *>(item);
 	QVERIFY(pointCloud->size() == 4);
@@ -264,9 +268,9 @@ void TestShpFilter::readMultipatchFile(const QString &filePath) const
 
 	QVERIFY(container.getChildrenNumber() == 2);
 
-	for (unsigned i(0); i < container.getChildrenNumber(); ++i)
+	for (unsigned i = 0; i < container.getChildrenNumber(); ++i)
 	{
-		QVERIFY(container.getChild(i)->getClassID() == CC_TYPES::MESH);
+		QVERIFY(container.getChild(i)->isA(CC_TYPES::MESH));
 	}
 
 	constexpr unsigned expectedNumPoints = 10;
@@ -309,21 +313,17 @@ void TestShpFilter::readPolygonFile(const QString &filePath) const
 
 	ccHObject container;
 	FileIOFilter::LoadParameters params;
-	params.alwaysDisplayLoadDialog = false;
-	params.shiftHandlingMode = ccGlobalShiftManager::Mode::NO_DIALOG;
-	params.coordinatesShiftEnabled = &shiftEnabled;
-	params.coordinatesShift = &shift;
-	params.preserveShiftOnSave = true;
+	SetDefaultLoadParameters(params, shift, shiftEnabled);
 	ShpFilter filter;
 
 	CC_FILE_ERROR error = filter.loadFile(filePath, container, params);
 	QVERIFY(error == CC_FERR_NO_ERROR);
 
 	QVERIFY(container.getChildrenNumber() == 1);
-	ccHObject *item = container.getFirstChild();
-	QVERIFY(item->getClassID() == CC_TYPES::POLY_LINE);
+	ccHObject* item = container.getFirstChild();
+	QVERIFY(item->isA(CC_TYPES::POLY_LINE));
 
-	auto *poly = static_cast<ccPolyline *>(item);
+	auto poly = static_cast<ccPolyline *>(item);
 	QVERIFY(poly->size() == expectedNumPoints);
 	QVERIFY(!poly->isScalarFieldEnabled());
 	QVERIFY(!poly->is2DMode());
@@ -341,7 +341,7 @@ void TestShpFilter::readPolygonFile(const QString &filePath) const
 	                                  5391094.921049644, 5271679.246403368, 5352573.735679878, 5219675.646154184,
 	                                  5348721.617142901, 5789789.189626727};
 
-	for (unsigned i(0); i < expectedNumPoints; ++i)
+	for (unsigned i = 0; i < expectedNumPoints; ++i)
 	{
 		const CCVector3 *p = vertices->getPoint(i);
 		QCOMPARE(p->x, static_cast<ScalarType >(expectedXs[i] + shift.x));
@@ -358,18 +358,14 @@ void TestShpFilter::readPolygonZFile(const QString &filePath) const
 
 	ccHObject container;
 	FileIOFilter::LoadParameters params;
-	params.alwaysDisplayLoadDialog = false;
-	params.shiftHandlingMode = ccGlobalShiftManager::Mode::NO_DIALOG;
-	params.coordinatesShiftEnabled = &shiftEnabled;
-	params.coordinatesShift = &shift;
-	params.preserveShiftOnSave = true;
+	SetDefaultLoadParameters(params, shift, shiftEnabled);
 	ShpFilter filter;
 
 	CC_FILE_ERROR error = filter.loadFile(filePath, container, params);
 	QVERIFY(error == CC_FERR_NO_ERROR);
 
 	QVERIFY(container.getChildrenNumber() == 1);
-	QVERIFY(container.getFirstChild()->getClassID() == CC_TYPES::POLY_LINE);
+	QVERIFY(container.getFirstChild()->isA(CC_TYPES::POLY_LINE));
 
 	auto *polygon = static_cast<ccPolyline *>(container.getFirstChild());
 	QVERIFY(polygon->size() == 72); //File has 73 points, but cc reads 72 as its a polygon
@@ -483,11 +479,7 @@ void TestShpFilter::testWriteMultiPointZFile() const
 
 	ccHObject container;
 	FileIOFilter::LoadParameters params;
-	params.alwaysDisplayLoadDialog = false;
-	params.shiftHandlingMode = ccGlobalShiftManager::Mode::NO_DIALOG;
-	params.coordinatesShiftEnabled = &shiftEnabled;
-	params.coordinatesShift = &shift;
-	params.preserveShiftOnSave = true;
+	SetDefaultLoadParameters(params, shift, shiftEnabled);
 	ShpFilter filter;
 
 	CC_FILE_ERROR error = filter.loadFile(MULTIPOINT_Z, container, params);
@@ -512,11 +504,7 @@ void TestShpFilter::testWritePolygonFile() const
 
 	ccHObject container;
 	FileIOFilter::LoadParameters params;
-	params.alwaysDisplayLoadDialog = false;
-	params.shiftHandlingMode = ccGlobalShiftManager::Mode::NO_DIALOG;
-	params.coordinatesShiftEnabled = &shiftEnabled;
-	params.coordinatesShift = &shift;
-	params.preserveShiftOnSave = true;
+	SetDefaultLoadParameters(params, shift, shiftEnabled);
 	ShpFilter filter;
 
 	CC_FILE_ERROR error = filter.loadFile(POLYGON_FILE, container, params);
@@ -543,11 +531,7 @@ void TestShpFilter::testWritePolygonZFile() const
 
 	ccHObject container;
 	FileIOFilter::LoadParameters params;
-	params.alwaysDisplayLoadDialog = false;
-	params.shiftHandlingMode = ccGlobalShiftManager::Mode::NO_DIALOG;
-	params.coordinatesShiftEnabled = &shiftEnabled;
-	params.coordinatesShift = &shift;
-	params.preserveShiftOnSave = true;
+	SetDefaultLoadParameters(params, shift, shiftEnabled);
 	ShpFilter filter;
 
 	CC_FILE_ERROR error = filter.loadFile(POLYGONZ_FILE, container, params);
@@ -573,18 +557,14 @@ void TestShpFilter::readSinglePointZFile(const QString &filePath) const
 
 	ccHObject container;
 	FileIOFilter::LoadParameters params;
-	params.alwaysDisplayLoadDialog = false;
-	params.shiftHandlingMode = ccGlobalShiftManager::Mode::NO_DIALOG;
-	params.coordinatesShiftEnabled = &shiftEnabled;
-	params.coordinatesShift = &shift;
-	params.preserveShiftOnSave = true;
+	SetDefaultLoadParameters(params, shift, shiftEnabled);
 	ShpFilter filter;
 
 	CC_FILE_ERROR error = filter.loadFile(filePath, container, params);
 	QVERIFY(error == CC_FERR_NO_ERROR);
 
 	QVERIFY(container.getChildrenNumber() == 1);
-	QVERIFY(container.getFirstChild()->getClassID() == CC_TYPES::POINT_CLOUD);
+	QVERIFY(container.getFirstChild()->isA(CC_TYPES::POINT_CLOUD));
 
 	unsigned expectedNumPoints = 2;
 	auto *cloud = static_cast<ccPointCloud *>(container.getFirstChild());
@@ -594,7 +574,7 @@ void TestShpFilter::readSinglePointZFile(const QString &filePath) const
 	std::array<double, 2> expectedXs{1422464.3681007193, 1422459.0908050265};
 	std::array<double, 2> expectedYs{4188962.3364355816, 4188942.211755641};
 	std::array<double, 2> expectedZs{72.40956470558095, 72.58286959604922};
-	for (unsigned i(0); i < expectedNumPoints; ++i)
+	for (unsigned i = 0; i < expectedNumPoints; ++i)
 	{
 		const CCVector3 *p = cloud->getPoint(i);
 		QCOMPARE(p->x, static_cast<ScalarType>(expectedXs[i] + shift.x));

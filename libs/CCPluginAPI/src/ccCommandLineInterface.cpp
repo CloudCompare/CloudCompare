@@ -308,12 +308,12 @@ ccCommandLineInterface::Command::Command(const QString &name, const QString &key
 
 ccCommandLineInterface::CLLoadParameters::CLLoadParameters()
 	: FileIOFilter::LoadParameters()
-	, m_coordinatesShiftEnabled(false)
-	, m_coordinatesShift(0, 0, 0)
+	, coordinatesShiftEnabled(false)
+	, coordinatesShift(0, 0, 0)
 {
 	shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG;
 	alwaysDisplayLoadDialog = false;
 	autoComputeNormals = false;
-	coordinatesShiftEnabled = &m_coordinatesShiftEnabled;
-	coordinatesShift = &m_coordinatesShift;
+	_coordinatesShiftEnabled = &coordinatesShiftEnabled;
+	_coordinatesShift = &coordinatesShift;
 }

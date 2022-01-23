@@ -108,9 +108,6 @@ public:
 	//! Sets the current combo-box entry (profile)
 	void setCurrentProfile(int index);
 
-	//! Adds information from default file (if any)
-	bool addFileInfo();
-
     //! Sets the last shift and scale information
     static void SetLastInfo(const CCVector3d& shift, double scale);
 
@@ -142,13 +139,6 @@ protected:
 	void updateLocalSystem();
 	//! Updates info on the global coordinate system
 	void updateGlobalSystem();
-
-	//! Tries to load ShiftInfo data from a (text) file
-	/** Data is stored in m_defaultInfos.
-		\param filename filename
-		\return success
-	**/
-	bool loadInfoFromFile(QString filename);
 
 	//! Associated UI
 	Ui_GlobalShiftAndScaleDlg* m_ui;

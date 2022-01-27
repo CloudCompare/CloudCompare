@@ -187,7 +187,7 @@ QString ccCommandLineParser::getExportFilename(	const CLEntityDesc& entityDesc,
 	if (!entity)
 	{
 		assert(false);
-		warning("[ExportEntity] Internal error: invalid input entity!");
+		warning("[getExportFilename] Internal error: invalid input entity!");
 		return QString();
 	}
 

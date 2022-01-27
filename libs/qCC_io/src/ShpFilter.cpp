@@ -194,7 +194,7 @@ static int32_t SizeofMultiPointZ(unsigned numPoints) noexcept
 	return static_cast<int32_t>(recordSize);
 }
 
-static int32_t SizeofPolyLine(ESRI_SHAPE_TYPE polylineType, int32_t numPoints, int32_t numParts = 1)
+static int32_t SizeofPolyLine(ESRI_SHAPE_TYPE polylineType, bool hasSF, int32_t numPoints, int32_t numParts = 1)
 {
 	switch (polylineType)
 	{
@@ -223,7 +223,7 @@ static int32_t SizeofPolyLine(ESRI_SHAPE_TYPE polylineType, int32_t numPoints, i
 		recordSize += static_cast<size_t>(numPoints) * 8;
 	}
 
-	if (HasMeasurements(polylineType))
+	if (hasSF && HasMeasurements(polylineType))
 	{
 		recordSize += 2 * 8;
 		recordSize += static_cast<size_t>(numPoints) * 8;
@@ -700,37 +700,59 @@ static CC_FILE_ERROR ReadPoints(QDataStream& shpStream, int32_t numPoints, const
 	return CC_FERR_NO_ERROR;
 }
 
-static CC_FILE_ERROR ReadMeasures(QDataStream& shpStream, int32_t numPoints, std::vector<ScalarType>& scalarValues)
+static CC_FILE_ERROR ReadMeasures(QDataStream& shpStream, int32_t numPoints, std::vector<ScalarType>& scalarValues, int32_t recordSize, qint64 recordStart)
 {
-	//M boundaries
-	double mMin;
-	double mMax;
-	shpStream >> mMin >> mMax;
+	// warning: Measures might be optional
+	int64_t currentPos = shpStream.device()->pos();
+	int32_t readSize = static_cast<int32_t>(currentPos - recordStart);
+	int32_t expectedSize = readSize + (2 + numPoints) * sizeof(double); // 2 bounding values + 'numPoints' measurements
+	if (recordSize * 2 >= expectedSize) //recordSize is expressed as a number of 16-bit words
+	{
+		//M boundaries
+		double mMin;
+		double mMax;
+		shpStream >> mMin >> mMax;
 
-	if (IsESRINoData(mMin) && IsESRINoData(mMax))
-	{
-		shpStream.skipRawData(8 * numPoints);
-		return CC_FERR_NO_ERROR;
-	}
-
-	try
-	{
-		scalarValues.resize(numPoints, CCCoreLib::NAN_VALUE);
-	}
-	catch (const std::bad_alloc&)
-	{
-		return CC_FERR_NOT_ENOUGH_MEMORY;
-	}
-
-	//M values (an array of length NumPoints)
-	for (int32_t i = 0; i < numPoints; ++i)
-	{
-		double m;
-		shpStream >> m;
-		if (!IsESRINoData(m) && std::isfinite(m))
+		if (IsESRINoData(mMin) && IsESRINoData(mMax))
 		{
-			scalarValues[i] = static_cast<ScalarType>(m);
+			shpStream.skipRawData(8 * numPoints);
+			return CC_FERR_NO_ERROR;
 		}
+
+		try
+		{
+			scalarValues.resize(numPoints, CCCoreLib::NAN_VALUE);
+		}
+		catch (const std::bad_alloc&)
+		{
+			return CC_FERR_NOT_ENOUGH_MEMORY;
+		}
+
+		//M values (an array of length NumPoints)
+		for (int32_t i = 0; i < numPoints; ++i)
+		{
+			double m;
+			shpStream >> m;
+			if (!IsESRINoData(m) && std::isfinite(m))
+			{
+				scalarValues[i] = static_cast<ScalarType>(m);
+			}
+		}
+	}
+	else if (readSize <= recordSize * 2)
+	{
+		ccLog::WarningDebug("Entity has no measurements");
+		if (readSize < recordSize * 2)
+		{
+			//that would be strange, but the specifications don't say if everything should be ignored,
+			//or if boundaries can be present without the values...
+			shpStream.skipRawData(recordSize * 2 - readSize);
+		}
+	}
+	else if (readSize > recordSize * 2)
+	{
+		//we probably already have a problem!
+		assert(false);
 	}
 
 	return CC_FERR_NO_ERROR;
@@ -881,6 +903,8 @@ static CC_FILE_ERROR BuildPatches(
 
 static CC_FILE_ERROR LoadMultiPatch(QDataStream &shpStream,
                                     ccHObject &container,
+                                    int32_t recordSize,
+                                    int64_t recordStart,
                                     CCVector3d Pshift)
 {
 	// skip record bbox
@@ -923,7 +947,7 @@ static CC_FILE_ERROR LoadMultiPatch(QDataStream &shpStream,
 	}
 
 	std::vector<ScalarType> scalarValues;
-	error = ReadMeasures(shpStream, numPoints, scalarValues);
+	error = ReadMeasures(shpStream, numPoints, scalarValues, recordSize, recordStart);
 	if (error != CC_FERR_NO_ERROR)
 	{
 		return error;
@@ -1095,6 +1119,8 @@ static CC_FILE_ERROR LoadPolyline(QDataStream &shpStream,
                                   ccHObject &container,
                                   int32_t index,
                                   ESRI_SHAPE_TYPE shapeType,
+                                  int32_t recordSize,
+                                  int64_t recordStart,
                                   const CCVector3d &Pshift,
                                   bool preserveCoordinateShift,
                                   bool load2DPolyAs3DPoly = true)
@@ -1143,7 +1169,7 @@ static CC_FILE_ERROR LoadPolyline(QDataStream &shpStream,
 	std::vector<ScalarType> scalarValues;
 	if (HasMeasurements(shapeType))
 	{
-		error = ReadMeasures(shpStream, numPoints, scalarValues);
+		error = ReadMeasures(shpStream, numPoints, scalarValues, recordSize, recordStart);
 		if (error != CC_FERR_NO_ERROR)
 		{
 			return error;
@@ -1300,7 +1326,9 @@ static CC_FILE_ERROR SavePolyline(ccPolyline* poly,
 	int32_t numPoints = iRealVertexCount + (isClosed ? 1 : 0);
 	const int32_t numParts = 1;
 
-	recordSize = SizeofPolyLine(outputShapeType, numPoints, numParts);
+	bool hasSF = vertices->isScalarFieldEnabled();
+
+	recordSize = SizeofPolyLine(outputShapeType, hasSF, numPoints, numParts);
 
 	//write shape record in main SHP file
 	{
@@ -1386,28 +1414,16 @@ static CC_FILE_ERROR SavePolyline(ccPolyline* poly,
 		}
 	}
 
-	if (HasMeasurements(outputShapeType))
+	if (hasSF && HasMeasurements(outputShapeType)) //M values (for each part - just one here)
 	{
 		//M boundaries (16 bytes)
-		bool hasSF = vertices->isScalarFieldEnabled();
 		CCVector2d minMax = MinMaxOfEnabledScalarField(vertices);
 		out << minMax.x << minMax.y;
 
-		//M values (for each part - just one here)
-		if (hasSF)
+		for (int32_t i = 0; i < numPoints; ++i)
 		{
-			for (int32_t i = 0; i < numPoints; ++i)
-			{
-				ScalarType scalar = vertices->getPointScalarValue(i % iRealVertexCount);
-				out << (ccScalarField::ValidValue(scalar) ? ESRI_NO_DATA : static_cast<double>(scalar));
-			}
-		}
-		else
-		{
-			for (int32_t i = 0; i < numPoints; ++i)
-			{
-				out << ESRI_NO_DATA;
-			}
+			ScalarType scalar = vertices->getPointScalarValue(i % iRealVertexCount);
+			out << (ccScalarField::ValidValue(scalar) ? ESRI_NO_DATA : static_cast<double>(scalar));
 		}
 	}
 
@@ -1420,6 +1436,8 @@ static CC_FILE_ERROR LoadCloud(QDataStream &shpStream,
                                ccHObject &container,
                                int32_t index,
                                ESRI_SHAPE_TYPE shapeType,
+                               int32_t recordSize,
+                               int64_t recordStart,
                                const CCVector3d &Pshift,
                                bool preserveCoordinateShift)
 {
@@ -1472,49 +1490,71 @@ static CC_FILE_ERROR LoadCloud(QDataStream &shpStream,
 	//3D clouds or 2D clouds + measurement
 	if (HasMeasurements(shapeType))
 	{
-		//M boundaries
-		ccScalarField* sf = nullptr;
-		double mMin;
-		double mMax;
-		shpStream >> mMin >> mMax;
-
-		if (mMin != ESRI_NO_DATA && mMax != ESRI_NO_DATA)
+		// warning: Measures might be optional
+		int64_t currentPos = shpStream.device()->pos();
+		int32_t readSize = static_cast<int32_t>(currentPos - recordStart);
+		int32_t expectedSize = readSize + (2 + numPoints) * sizeof(double); // 2 bounding values + 'numPoints' measurements
+		if (recordSize * 2 >= expectedSize) //recordSize is expressed as a number of 16-bit words
 		{
-			sf = new ccScalarField("Measures");
-			if (!sf->reserveSafe(numPoints))
-			{
-				ccLog::Warning("[SHP] Not enough memory to load scalar values!");
-				sf->release();
-				sf = nullptr;
-			}
-		}
+			//M boundaries
+			ccScalarField* sf = nullptr;
+			double mMin;
+			double mMax;
+			shpStream >> mMin >> mMax;
 
-		//M values (an array of length NumPoints)
-		if (sf)
-		{
-			for (int32_t i = 0; i < numPoints; ++i)
+			if (mMin != ESRI_NO_DATA && mMax != ESRI_NO_DATA)
 			{
-				double m;
-				shpStream >> m;
-				ScalarType s = IsESRINoData(m) ? CCCoreLib::NAN_VALUE : static_cast<ScalarType>(m);
-				sf->addElement(s);
+				sf = new ccScalarField("Measures");
+				if (!sf->reserveSafe(numPoints))
+				{
+					ccLog::Warning("[SHP] Not enough memory to load scalar values!");
+					sf->release();
+					sf = nullptr;
+				}
 			}
-			bool allNans = std::all_of(sf->begin(), sf->end(), [](ScalarType s) { return std::isnan(s); });
-			if (!allNans)
+
+			//M values (an array of length NumPoints)
+			if (sf)
 			{
-				sf->computeMinAndMax();
-				int sfIdx = cloud->addScalarField(sf);
-				cloud->setCurrentDisplayedScalarField(sfIdx);
-				cloud->showSF(true);
+				for (int32_t i = 0; i < numPoints; ++i)
+				{
+					double m;
+					shpStream >> m;
+					ScalarType s = IsESRINoData(m) ? CCCoreLib::NAN_VALUE : static_cast<ScalarType>(m);
+					sf->addElement(s);
+				}
+				bool allNans = std::all_of(sf->begin(), sf->end(), [](ScalarType s) { return std::isnan(s); });
+				if (!allNans)
+				{
+					sf->computeMinAndMax();
+					int sfIdx = cloud->addScalarField(sf);
+					cloud->setCurrentDisplayedScalarField(sfIdx);
+					cloud->showSF(true);
+				}
+				else
+				{
+					sf->release();
+				}
 			}
 			else
 			{
-				sf->release();
+				shpStream.skipRawData(numPoints * 8);
 			}
 		}
-		else
+		else if (readSize <= recordSize * 2)
 		{
-			shpStream.skipRawData(numPoints * 8);
+			ccLog::WarningDebug("Entity has no measurements");
+			if (readSize < recordSize * 2)
+			{
+				//that would be strange, but the specifications don't say if everything should be ignored,
+				//or if boundaries can be present without the values...
+				shpStream.skipRawData(recordSize * 2 - readSize);
+			}
+		}
+		else if (readSize > recordSize * 2)
+		{
+			//we probably already have a problem!
+			assert(false);
 		}
 	}
 	container.addChild(cloud);
@@ -2011,7 +2051,7 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString &filename, ccHObject &container,
 			case ESRI_SHAPE_TYPE::POLYGON_M:
 			{
 				unsigned childCountBefore = container.getChildrenNumber();
-				error = LoadPolyline(shpStream, container, recordNumber, shapeType, Pshift, preserveCoordinateShift);
+				error = LoadPolyline(shpStream, container, recordNumber, shapeType, recordSize, recordStart, Pshift, preserveCoordinateShift);
 				if (error == CC_FERR_NO_ERROR && shapeType == ESRI_SHAPE_TYPE::POLYLINE)
 				{
 					unsigned childCountAfter = container.getChildrenNumber();
@@ -2031,7 +2071,7 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString &filename, ccHObject &container,
 			case ESRI_SHAPE_TYPE::MULTI_POINT_M:
 				is3DShape = true;
 			case ESRI_SHAPE_TYPE::MULTI_POINT:
-				error = LoadCloud(shpStream, container, recordNumber, shapeType, Pshift, preserveCoordinateShift);
+				error = LoadCloud(shpStream, container, recordNumber, shapeType, recordSize, recordStart, Pshift, preserveCoordinateShift);
 				break;
 			case ESRI_SHAPE_TYPE::POINT_Z:
 			case ESRI_SHAPE_TYPE::POINT_M:
@@ -2044,7 +2084,7 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString &filename, ccHObject &container,
 				}
 				break;
 			case ESRI_SHAPE_TYPE::MULTI_PATCH:
-				error = LoadMultiPatch(shpStream, container, Pshift);
+				error = LoadMultiPatch(shpStream, container, recordSize, recordStart, Pshift);
 			case ESRI_SHAPE_TYPE::NULL_SHAPE:
 				//ignored
 				break;

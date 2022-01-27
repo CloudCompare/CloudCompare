@@ -429,8 +429,8 @@ void ccPointListPickingDlg::exportToASCII(ExportFormat format)
 	settings.setValue("filename", filename);
 	settings.endGroup();
 
-	FILE* fp = fopen(qPrintable(filename), "wt");
-	if (!fp)
+	QFile fp(filename);
+	if (!fp.open(QFile::WriteOnly))
 	{
 		ccLog::Error(QString("Failed to open file '%1' for saving!").arg(filename));
 		return;
@@ -463,6 +463,8 @@ void ccPointListPickingDlg::exportToASCII(ExportFormat format)
 	//starting index
 	unsigned startIndex = static_cast<unsigned>(std::max(0, startIndexSpinBox->value()));
 
+	QTextStream stream(&fp);
+	stream.setRealNumberPrecision(12);
 	for (unsigned i = 0; i < count; ++i)
 	{
 		assert(labels[i]->size() == 1);
@@ -472,25 +474,23 @@ void ccPointListPickingDlg::exportToASCII(ExportFormat format)
 		switch (format)
 		{
 		case PLP_ASCII_EXPORT_IXYZ:
-			fprintf(fp, "%u,", i + startIndex);
+			stream << i + startIndex << ',';
 			break;
 		case PLP_ASCII_EXPORT_GXYZ:
-			fprintf(fp, "%u,", PP.index);
+			stream << PP.index << ',';
 			break;
 		case PLP_ASCII_EXPORT_LXYZ:
-			fprintf(fp, "%s,", qPrintable(labels[i]->getName()));
+			stream << labels[i]->getName() << ',';
 			break;
 		default:
 			//nothing to do
 			break;
 		}
 
-		fprintf(fp, "%.12f,%.12f,%.12f\n",	static_cast<double>(P.x) / scale - shift.x,
-		                                    static_cast<double>(P.y) / scale - shift.y,
-		                                    static_cast<double>(P.z) / scale - shift.z);
+		stream	<< static_cast<double>(P.x) / scale - shift.x << ','
+				<< static_cast<double>(P.y) / scale - shift.y << ','
+				<< static_cast<double>(P.z) / scale - shift.z << endl;
 	}
-
-	fclose(fp);
 
 	ccLog::Print(QString("[I/O] File '%1' saved successfully").arg(filename));
 }

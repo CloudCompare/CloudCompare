@@ -1164,7 +1164,7 @@ bool ccRasterizeTool::ExportGeoTiff(const QString& outputFilename,
 	}
 
 	char **papszOptions = nullptr;
-	GDALDataset* poDstDS = poDriver->Create(qPrintable(outputFilename),
+	GDALDataset* poDstDS = poDriver->Create(qUtf8Printable(outputFilename),
 											static_cast<int>(grid.width),
 											static_cast<int>(grid.height),
 											totalBands,
@@ -1947,8 +1947,8 @@ void ccRasterizeTool::generateASCIIMatrix() const
 	if (outputFilename.isNull())
 		return;
 
-	FILE* pFile = fopen(qPrintable(outputFilename), "wt");
-	if (!pFile)
+	QFile fp(outputFilename);
+	if (!fp.open(QFile::WriteOnly))
 	{
 		ccLog::Warning(QString("[ccHeightGridGeneration] Failed to write '%1' file!").arg(outputFilename));
 	}
@@ -1959,19 +1959,17 @@ void ccRasterizeTool::generateASCIIMatrix() const
 	double maxHeight = m_grid.maxHeight;
 	//get real values
 	getFillEmptyCellsStrategyExt(emptyCellsHeight, minHeight, maxHeight);
+	QTextStream stream(&fp);
+	stream.setRealNumberPrecision(8);
 	for (unsigned j = 0; j < m_grid.height; ++j)
 	{
 		const ccRasterGrid::Row& row = m_grid.rows[m_grid.height - 1 - j];
 		for (unsigned i = 0; i < m_grid.width; ++i)
 		{
-			fprintf(pFile, "%.8f ", std::isfinite(row[i].h) ? row[i].h : emptyCellsHeight);
+			stream << (std::isfinite(row[i].h) ? row[i].h : emptyCellsHeight) << ' ';
 		}
-
-		fprintf(pFile, "\n");
+		stream << endl;
 	}
-
-	fclose(pFile);
-	pFile = nullptr;
 
 	//save current export path to persistent settings
 	settings.setValue("savePathASCIIGrid", QFileInfo(outputFilename).absolutePath());

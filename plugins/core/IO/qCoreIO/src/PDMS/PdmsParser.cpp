@@ -275,20 +275,21 @@ void PdmsLexer::pushIntoDictionary(const char *str, Token token, int minSize)
 		dictionary[std::string(str).substr(0, minSize)] = token;
 }
 
-PdmsFileSession::PdmsFileSession(const std::string &filename)
+PdmsFileSession::PdmsFileSession(const QString& filename)
     : m_filename(filename)
     , m_currentLine(-1)
     , m_eol(false)
     , m_eof(false)
-    , m_file(nullptr)
 {}
 
 bool PdmsFileSession::initializeSession()
 {
 	PdmsLexer::initializeSession();
-	m_file = fopen(m_filename.c_str(), "r");
-	if (!m_file)
+	m_file.setFileName(m_filename);
+	if (!m_file.open(QFile::ReadOnly | QFile::Text))
+	{
 		return false;
+	}
 
 	m_currentLine = 1;
 	m_eol = false;
@@ -297,14 +298,14 @@ bool PdmsFileSession::initializeSession()
 	return true;
 }
 
+int PdmsFileSession::readChar()
+{
+	char c = 0;
+	return m_file.getChar(&c) ? c : EOF;
+}
+
 void PdmsFileSession::closeSession(bool destroyLoadedObject)
 {
-	if (m_file)
-	{
-		fclose(m_file);
-		m_file = nullptr;
-	}
-
 	PdmsLexer::closeSession(destroyLoadedObject);
 }
 
@@ -326,7 +327,7 @@ bool PdmsFileSession::moveForward()
 	unsigned n = 0;
 	while (!tokenFilled)
 	{
-		int car = getc(m_file);
+		int car = readChar();
 		switch (car)
 		{
 		case '\n':
@@ -374,7 +375,7 @@ void PdmsFileSession::skipComment()
 			int n = 0;
 			int car = 0;
 			do {
-				car = getc(m_file);
+				car = readChar();
 				if (car == '\t') car = ' ';
 				tokenBuffer[n] = car;
 				if (((n + 1) < c_max_buff_size) && ((car != ' ') || (n > 0 && tokenBuffer[n - 1] != ' '))) n++;
@@ -394,7 +395,7 @@ void PdmsFileSession::skipComment()
 		int n = 0;
 		int car = 0;
 		do {
-			car = getc(m_file);
+			car = readChar();
 			if (car == '\n') m_currentLine++;
 			if (car == '\n' || car == '\t') car = ' ';
 			if (car == '$') commentSymb = true;
@@ -458,7 +459,7 @@ void PdmsFileSession::skipHandleCommand()
 	//"HANDLE(...) does not lie in tokenBuffer, then search it in the file
 	while (!(opened > 0 && state == 0))
 	{
-		int car = getc(m_file);
+		int car = readChar();
 		if (car == '(') { opened++; state++; }
 		else if (car == ')') state--;
 	}
@@ -468,9 +469,9 @@ void PdmsFileSession::skipHandleCommand()
 void PdmsFileSession::printWarning(const char* str)
 {
 	if (currentToken == PDMS_EOS)
-		std::cerr << "[" << m_filename << "]@postprocessing : " << str << std::endl;
+		std::cerr << "[" << qPrintable(m_filename) << "]@postprocessing : " << str << std::endl;
 	else
-		std::cerr << "[" << m_filename << "]@[line " << m_currentLine << "]::[" << tokenBuffer << "] : " << str << std::endl;
+		std::cerr << "[" << qPrintable(m_filename) << "]@[line " << m_currentLine << "]::[" << tokenBuffer << "] : " << str << std::endl;
 }
 
 ///////////////////////////
@@ -598,9 +599,12 @@ bool PdmsParser::processCurrentToken()
 			currentCommand = PdmsCommands::Command::Create(currentToken);
 			if (!currentCommand)
 			{
-				session->printWarning("Unknown command");
-				assert(false);
-				return false;
+				if (currentToken == PDMS_INVALID_TOKEN || currentToken == PDMS_UNKNOWN)
+				{
+					session->printWarning("Unknown command");
+					assert(false);
+					return false;
+				}
 			}
 		}
 		break;

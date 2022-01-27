@@ -20,6 +20,9 @@
 
 #include "FileIOFilter.h"
 
+//Qt
+#include <QFile>
+
 class ccGenericMesh;
 class ccMesh;
 class ccPointCloud;
@@ -40,8 +43,8 @@ public:
 
 private:
 	//! Custom save method
-	CC_FILE_ERROR saveToASCIIFile(ccGenericMesh* mesh, FILE *theFile, QWidget* parentWidget = nullptr);
-	CC_FILE_ERROR saveToBINFile(ccGenericMesh* mesh, FILE *theFile, QWidget* parentWidget = nullptr);
+	CC_FILE_ERROR saveToASCIIFile(ccGenericMesh* mesh, QFile& theFile, QWidget* parentWidget = nullptr);
+	CC_FILE_ERROR saveToBINFile(ccGenericMesh* mesh, QFile& theFile, QWidget* parentWidget = nullptr);
 
 	//! Custom load method for ASCII files
 	CC_FILE_ERROR loadASCIIFile(QFile& fp,

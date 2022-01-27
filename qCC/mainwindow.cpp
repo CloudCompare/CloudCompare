@@ -5060,7 +5060,6 @@ void MainWindow::doActionComputeDistToBestFitQuadric3D()
 				ccScalarField* sf = static_cast<ccScalarField*>(newCloud->getScalarField(sfIdx));
 				assert(sf);
 
-				//FILE* fp = fopen("doActionComputeQuadric3D_trace.txt","wt");
 				for (int x = 0; x < steps; ++x)
 				{
 					CCVector3 P;
@@ -5080,11 +5079,9 @@ void MainWindow::doActionComputeDistToBestFitQuadric3D()
 																	+	l*Pc.x + m*Pc.y + n*Pc.z + d);
 
 							sf->addElement(dist);
-							//fprintf(fp,"%f %f %f %f\n",Pc.x,Pc.y,Pc.z,dist);
 						}
 					}
 				}
-				//fclose(fp);
 
 				if (sf)
 				{

@@ -123,6 +123,7 @@ v2.12 (???) - (in development)
 	    - the Global Shift, if defined, will now be used as LAS offset if no offset was previously set
 		- the PDAL LAS I/O filter and the libLAS I/O filter should now both handle LAS offset
 		  and scale the same way at export time.
+	- Better management of filenames with non latin characters (for raster files, STL files, PDMS scripts, Point List picking exported files)
 
 - New plugins
 	- MPlane: perform normal distance measurements against a defined plane (see https://www.cloudcompare.org/doc/wiki/index.php?title=MPlane_(plugin) )

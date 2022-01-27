@@ -152,7 +152,14 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 		if (mode == NO_DIALOG)
 		{
 			// we can apply the input shift only if it 'works'
-			return (!needShift && !needRescale);
+			if (!needShift && !needRescale)
+			{
+				return !IsDefaultShift(coordinatesShift, scale); // if it's the default shift, we don't need to apply anything (= false)
+			}
+			else
+			{
+				return false; // we can't apply the input shift
+			}
 		}
 	}
 	else
@@ -173,6 +180,13 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 
 		needShift = NeedShift(P);
 		needRescale = NeedRescale(diagonal);
+
+		if (	!needShift
+			&&	!needRescale
+			&&	mode != ALWAYS_DISPLAY_DIALOG)
+		{
+			return false; //no need to apply any shift
+		}
 	}
 
 	// after this point, we should either determine a new global shift

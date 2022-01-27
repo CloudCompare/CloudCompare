@@ -160,6 +160,7 @@ v2.12 (???) - (in development)
 	- When rendering the screen with a zoom > 1, the scale label was wrongly scaled as well
 	- Graphical segmentation: when using the shortcuts 'i' and 'o' to segment points inside or outside a polyline not yet closed (with a right click),
 		the overlay buttons would become transparent to clicks, and the not yet confirmed vertex of the polyline was not taken into account
+	- CloudCompare was not able to read shapefiles with missing measurements (while this field is generaly optional for polylines, polygons and point clouds)
 
 v2.11.3 (Anoia) - 08/09/2020
 ----------------------

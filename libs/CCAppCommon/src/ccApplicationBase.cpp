@@ -259,6 +259,6 @@ void ccApplicationBase::setupPaths()
 	// included and appdata ones.
 	if ( env.contains("CC_PLUGIN_PATH") )
 	{
-		m_PluginPaths << env.value("CC_PLUGIN_PATH");
+		m_PluginPaths << env.value("CC_PLUGIN_PATH").split(QDir::listSeparator());
 	}
 }

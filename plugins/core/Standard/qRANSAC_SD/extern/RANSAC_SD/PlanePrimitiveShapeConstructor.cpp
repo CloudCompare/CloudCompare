@@ -14,13 +14,13 @@ unsigned int PlanePrimitiveShapeConstructor::RequiredSamples() const
 }
 
 PrimitiveShape *PlanePrimitiveShapeConstructor::Construct(
-	const MiscLib::Vector< Vec3f > &points, const MiscLib::Vector< Vec3f > &) const
+	const std::vector< Vec3f > &points, const std::vector< Vec3f > &) const
 {
 	return new PlanePrimitiveShape(points[0], points[1], points[2]);
 }
 
 PrimitiveShape *PlanePrimitiveShapeConstructor::Construct(
-	const MiscLib::Vector< Vec3f > &samples) const
+	const std::vector< Vec3f > &samples) const
 {
 	Plane plane;
 	if(!plane.Init(samples))

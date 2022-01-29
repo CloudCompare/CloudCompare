@@ -2,7 +2,7 @@
 #define GfxTL__SCALARTYPEDEFERER_HEADER__
 #include <GfxTL/VectorXD.h>
 #include <GfxTL/Array.h>
-#include <MiscLib/Vector.h>
+#include <vector>
 #include <vector>
 #include <memory>
 
@@ -70,12 +70,6 @@ namespace GfxTL
 
 	template< class T >
 	struct ScalarTypeDeferer< std::unique_ptr< T > >
-	{
-		typedef T ScalarType;
-	};
-
-	template< class T, class A >
-	struct ScalarTypeDeferer< MiscLib::Vector< T, A > >
 	{
 		typedef T ScalarType;
 	};

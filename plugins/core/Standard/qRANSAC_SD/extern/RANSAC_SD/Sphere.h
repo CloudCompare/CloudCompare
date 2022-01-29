@@ -1,7 +1,7 @@
 #ifndef SPHERE_HEADER
 #define SPHERE_HEADER
 #include "basic.h"
-#include <MiscLib/Vector.h>
+#include <vector>
 #include <stdexcept>
 #include <GfxTL/HyperplaneCoordinateSystem.h>
 #include <utility>
@@ -10,7 +10,6 @@
 #include <istream>
 #include <stdio.h>
 #include <utility>
-#include <MiscLib/NoShrinkVector.h>
 #include "LevMarLSWeight.h"
 #include "LevMarFitting.h"
 
@@ -32,7 +31,7 @@ public:
 	Sphere(const Vec3f &center, float radius);
 	Sphere(const Vec3f &p1, const Vec3f &p2, const Vec3f &p3,
 		const Vec3f &p4);
-	bool Init(const MiscLib::Vector< Vec3f > &samples);
+	bool Init(const std::vector< Vec3f > &samples);
 	bool Init(const Vec3f &p1, const Vec3f &p2, const Vec3f &p3,
 		const Vec3f &p4);
 	bool Init2(const Vec3f &p1, const Vec3f &p2, const Vec3f &n1,
@@ -50,16 +49,16 @@ public:
 	float Radius() const;
 	void Radius(float radius) { m_radius = radius; }
 	bool LeastSquaresFit(const PointCloud &pc,
-		MiscLib::Vector< size_t >::const_iterator begin,
-		MiscLib::Vector< size_t >::const_iterator end);
+		std::vector< size_t >::const_iterator begin,
+		std::vector< size_t >::const_iterator end);
 	template< class IteratorT >
 	bool LeastSquaresFit(IteratorT begin, IteratorT end);
 	bool Fit(const PointCloud &pc,
-		MiscLib::Vector< size_t >::const_iterator begin,
-		MiscLib::Vector< size_t >::const_iterator end)
+		std::vector< size_t >::const_iterator begin,
+		std::vector< size_t >::const_iterator end)
 	{ return LeastSquaresFit(pc, begin, end); }
-	static bool Interpolate(const MiscLib::Vector< Sphere > &spheres,
-		const MiscLib::Vector< float > &weights, Sphere *is);
+	static bool Interpolate(const std::vector< Sphere > &spheres,
+		const std::vector< float > &weights, Sphere *is);
 	void Serialize(bool binary, std::ostream *o) const;
 	static size_t SerializedSize();
 	void Serialize(FILE *o) const;

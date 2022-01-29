@@ -1,12 +1,11 @@
 #ifndef _PLANE_H_
 #define _PLANE_H_
 #include "basic.h"
-#include <MiscLib/Vector.h>
+#include <vector>
 #include "PointCloud.h"
 #include <ostream>
 #include <istream>
 #include <stdio.h>
-#include <MiscLib/NoShrinkVector.h>
 #include <GfxTL/Plane.h>
 
 #ifndef DLL_LINKAGE
@@ -22,8 +21,8 @@ public:
 	Plane(Vec3f p1, Vec3f normal);
 	virtual ~Plane();
 	bool Init(Vec3f p1, Vec3f p2, Vec3f p3);
-	bool Init(const MiscLib::Vector< Vec3f > &samples);
-	bool InitAverage(const MiscLib::Vector< Vec3f > &samples);
+	bool Init(const std::vector< Vec3f > &samples);
+	bool InitAverage(const std::vector< Vec3f > &samples);
 	bool Init(bool binary, std::istream *i);
 	void Init(FILE *i);
 	void Init(float* array);
@@ -37,16 +36,16 @@ public:
 	bool equals (Plane plane);
 	float SignedDistToOrigin() const { return m_dist; }
 	bool Fit(const PointCloud &pc,
-		MiscLib::Vector< size_t >::const_iterator begin,
-		MiscLib::Vector< size_t >::const_iterator end)
+		std::vector< size_t >::const_iterator begin,
+		std::vector< size_t >::const_iterator end)
 	{ return LeastSquaresFit(pc, begin, end); }
 	bool LeastSquaresFit(const PointCloud &pc,
-		MiscLib::Vector< size_t >::const_iterator begin,
-		MiscLib::Vector< size_t >::const_iterator end);
+		std::vector< size_t >::const_iterator begin,
+		std::vector< size_t >::const_iterator end);
 	template< class IteratorT >
 	bool LeastSquaresFit(IteratorT begin, IteratorT end);
-	static bool Interpolate(const MiscLib::Vector< Plane > &planes,
-		const MiscLib::Vector< float > &weights, Plane *ip);
+	static bool Interpolate(const std::vector< Plane > &planes,
+		const std::vector< float > &weights, Plane *ip);
 	void Serialize(bool binary, std::ostream *o) const;
 	static size_t SerializedSize();
 	void Serialize(FILE *o) const;

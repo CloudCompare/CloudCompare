@@ -1,7 +1,7 @@
 #ifndef SCOREAACUBETREESTRATEGY_HEADER
 #define SCOREAACUBETREESTRATEGY_HEADER
 #include "basic.h"
-#include <MiscLib/Vector.h>
+#include <vector>
 #include <GfxTL/NullClass.h>
 #include <GfxTL/ScalarTypeDeferer.h>
 #include <MiscLib/Random.h>

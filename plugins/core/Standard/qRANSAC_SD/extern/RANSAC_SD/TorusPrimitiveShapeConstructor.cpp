@@ -27,10 +27,10 @@ unsigned int TorusPrimitiveShapeConstructor::RequiredSamples() const
 }
 
 PrimitiveShape *TorusPrimitiveShapeConstructor::Construct(
-	const MiscLib::Vector< Vec3f > &points,
-	const MiscLib::Vector< Vec3f > &normals) const
+	const std::vector< Vec3f > &points,
+	const std::vector< Vec3f > &normals) const
 {
-	MiscLib::Vector< Vec3f > samples;
+	std::vector< Vec3f > samples;
 	for(size_t i = 0; i < points.size(); ++i)
 		samples.push_back(points[i]);
 	for(size_t i = 0; i < normals.size(); ++i)
@@ -39,7 +39,7 @@ PrimitiveShape *TorusPrimitiveShapeConstructor::Construct(
 }
 
 PrimitiveShape *TorusPrimitiveShapeConstructor::Construct(
-	const MiscLib::Vector< Vec3f > &samples) const
+	const std::vector< Vec3f > &samples) const
 {
 	Torus torus;
 	if (!torus.Init(samples))

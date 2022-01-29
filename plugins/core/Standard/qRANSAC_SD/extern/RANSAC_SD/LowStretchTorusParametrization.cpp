@@ -22,15 +22,15 @@ void LowStretchTorusParametrization::Shape(const Torus &torus)
 
 void LowStretchTorusParametrization::WrapComponents(
 	const GfxTL::AABox< GfxTL::Vector2Df > &bbox, float epsilon,
-	size_t uextent, size_t vextent, MiscLib::Vector< int > *componentImg,
-	MiscLib::Vector< std::pair< int, size_t > > *labels) const
+	size_t uextent, size_t vextent, std::vector< int > *componentImg,
+	std::vector< std::pair< int, size_t > > *labels) const
 {
 	// there are wraps along both u and v direction
 	// the first pixel of each column/row is copied to the last element
 	// and components are merged accordingly
 
 	// relabel the components
-	MiscLib::Vector< std::pair< int, size_t > > tempLabels(*labels);
+	std::vector< std::pair< int, size_t > > tempLabels(*labels);
 
 	// first wrap along v (minor radius)
 	// but only if necessary
@@ -111,7 +111,7 @@ void LowStretchTorusParametrization::WrapComponents(
 	// condense labels
 	for (int i = static_cast<int>(tempLabels.size()) - 1; i > 0; --i)
 		tempLabels[i].first = ReduceLabel(i, tempLabels);
-	MiscLib::Vector< int > condensed(tempLabels.size());
+	std::vector< int > condensed(tempLabels.size());
 	labels->clear();
 	labels->reserve(condensed.size());
 	int count = 0;

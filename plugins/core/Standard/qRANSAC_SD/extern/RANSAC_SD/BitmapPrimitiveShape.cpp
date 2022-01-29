@@ -11,7 +11,7 @@ using namespace MiscLib;
 
 void BitmapPrimitiveShape::PreWrapBitmap(
 	const GfxTL::AABox< GfxTL::Vector2Df > &bbox, float epsilon,
-	size_t uextent, size_t vextent, MiscLib::Vector< char > *bmp) const
+	size_t uextent, size_t vextent, std::vector< char > *bmp) const
 {
 	// the default case is: do nothing
 }
@@ -19,8 +19,8 @@ void BitmapPrimitiveShape::PreWrapBitmap(
 void BitmapPrimitiveShape::WrapComponents(
 	const GfxTL::AABox< GfxTL::Vector2Df > &bbox,
 	float epsilon, size_t uextent, size_t vextent,
-	MiscLib::Vector< int > *componentImg,
-	MiscLib::Vector< std::pair< int, size_t > > *labels) const
+	std::vector< int > *componentImg,
+	std::vector< std::pair< int, size_t > > *labels) const
 {
 	// default: do nothing
 }
@@ -95,8 +95,8 @@ bool BitmapPrimitiveShape::Init(bool binary, std::istream *i)
 }
 
 size_t BitmapPrimitiveShape::AllConnectedComponents(const PointCloud &pc, float epsilon,
-	BitmapInfo& bitmapInfo, MiscLib::Vector< size_t > *indices, MiscLib::Vector< int >& componentsImg, 
-		MiscLib::Vector< std::pair< int, size_t > >& labels, bool doFiltering )
+	BitmapInfo& bitmapInfo, std::vector< size_t > *indices, std::vector< int >& componentsImg, 
+		std::vector< std::pair< int, size_t > >& labels, bool doFiltering )
 {
 	// first find the extent in the parametrization
 	// but remember the parametrized points for projection into a bitmap
@@ -105,7 +105,7 @@ size_t BitmapPrimitiveShape::AllConnectedComponents(const PointCloud &pc, float 
 		return 0;
 
 	// set up bitmap
-	MiscLib::Vector< std::pair< float, float > > extParams;
+	std::vector< std::pair< float, float > > extParams;
 
 	BuildBitmap(pc, &epsilon, indices->begin(), indices->end(), &bitmapInfo.params,
 		&bitmapInfo.bbox, &bitmapInfo.bitmap, &bitmapInfo.uextent, &bitmapInfo.vextent, &bitmapInfo.bmpIdx);
@@ -126,7 +126,7 @@ size_t BitmapPrimitiveShape::AllConnectedComponents(const PointCloud &pc, float 
 	// do a wrapping by copying pixels
 	PreWrapBitmap(bitmapInfo.bbox, epsilon, bitmapInfo.uextent, bitmapInfo.vextent, &bitmapInfo.bitmap);
 
-	MiscLib::Vector< char > tempBmp(bitmapInfo.bitmap.size()); // temporary bitmap object
+	std::vector< char > tempBmp(bitmapInfo.bitmap.size()); // temporary bitmap object
 	bool uwrap, vwrap;
 	WrapBitmap(bitmapInfo.bbox, epsilon, &uwrap, &vwrap);
 
@@ -154,17 +154,17 @@ size_t BitmapPrimitiveShape::AllConnectedComponents(const PointCloud &pc, float 
 
 size_t BitmapPrimitiveShape::ConnectedComponent(
 	const PointCloud &pc, float epsilon,
-	MiscLib::Vector< size_t > *indices, bool doFiltering, float* borderRatio )
+	std::vector< size_t > *indices, bool doFiltering, float* borderRatio )
 {
-	MiscLib::Vector< int > componentsImg;
-	MiscLib::Vector< std::pair< int, size_t > > labels;
+	std::vector< int > componentsImg;
+	std::vector< std::pair< int, size_t > > labels;
 
 	BitmapInfo bitmapInfo;
 	if( AllConnectedComponents( pc, epsilon, bitmapInfo, indices, componentsImg, labels, doFiltering ) <= 1 )
 		return 0;
 
 	size_t size = indices->size();
-	MiscLib::Vector< size_t >::iterator begin = indices->begin();
+	std::vector< size_t >::iterator begin = indices->begin();
 
 	// find the largest component
 	size_t maxComp = 1;
@@ -277,9 +277,9 @@ void BitmapPrimitiveShape::GenerateBitmapPoints(const PointCloud &pc,
 	float epsilon, size_t begin, size_t end, PointCloud *bmpPc) const
 {
 	// constructing the bitmap is similar to ConnectedComponent
-	MiscLib::Vector< std::pair< float, float > > params, extParams;
-	MiscLib::Vector< char > bitmap;
-	MiscLib::Vector< size_t > bmpIdx;
+	std::vector< std::pair< float, float > > params, extParams;
+	std::vector< char > bitmap;
+	std::vector< size_t > bmpIdx;
 	GfxTL::AABox< GfxTL::Vector2Df > bbox;
 	size_t uextent, vextent;
 	BuildBitmap(pc, &epsilon, IndexIterator(begin), IndexIterator(end), &params,
@@ -287,7 +287,7 @@ void BitmapPrimitiveShape::GenerateBitmapPoints(const PointCloud &pc,
 	m_extBbox = bbox;
 
 	//// do closing
-	//MiscLib::Vector< char > tempBmp(bitmap.size());
+	//std::vector< char > tempBmp(bitmap.size());
 	//DilateSquare(bitmap, uextent, vextent, false, false, &tempBmp);
 	//ErodeSquare(tempBmp, uextent, vextent, false, false, &bitmap);
 	//// do opening
@@ -324,20 +324,20 @@ void BitmapPrimitiveShape::BuildPolygons(const PointCloud &pc, float epsilon,
 
 	// constructing the bitmap is similar to ConnectedComponent
 	// -> use the same code
-	MiscLib::Vector< std::pair< float, float > > params;
-	MiscLib::Vector< char > bitmap;
-	MiscLib::Vector< size_t > bmpIdx;
+	std::vector< std::pair< float, float > > params;
+	std::vector< char > bitmap;
+	std::vector< size_t > bmpIdx;
 	BuildBitmap(pc, &epsilon, IndexIterator(begin), IndexIterator(end), &params,
 		bbox, &bitmap, uextent, vextent, &bmpIdx);
 
 	// do closing
-	MiscLib::Vector< char > tempBmp(bitmap.size());
+	std::vector< char > tempBmp(bitmap.size());
 	DilateCross(bitmap, *uextent, *vextent, false, false, &tempBmp);
 	ErodeCross(tempBmp, *uextent, *vextent, false, false, &bitmap);
 
 	// find connected components
-	MiscLib::Vector< int > componentsImg;
-	MiscLib::Vector< std::pair< int, size_t > > labels;
+	std::vector< int > componentsImg;
+	std::vector< std::pair< int, size_t > > labels;
 	Components(bitmap, *uextent, *vextent, false, false, &componentsImg,
 		&labels);
 	if(labels.size() <= 1) // found no connected component!

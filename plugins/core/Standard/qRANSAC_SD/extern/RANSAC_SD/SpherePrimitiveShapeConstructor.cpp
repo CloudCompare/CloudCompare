@@ -22,8 +22,8 @@ unsigned int SpherePrimitiveShapeConstructor::RequiredSamples() const
 }
 
 PrimitiveShape *SpherePrimitiveShapeConstructor::Construct(
-	const MiscLib::Vector< Vec3f > &points,
-	const MiscLib::Vector< Vec3f > &normals) const
+	const std::vector< Vec3f > &points,
+	const std::vector< Vec3f > &normals) const
 {
 	Sphere sphere;
 	if(!sphere.Init2(points[0], points[1], normals[0], normals[1]))//points[2], points[3]))
@@ -34,7 +34,7 @@ PrimitiveShape *SpherePrimitiveShapeConstructor::Construct(
 }
 
 PrimitiveShape *SpherePrimitiveShapeConstructor::Construct(
-	const MiscLib::Vector< Vec3f > &samples) const
+	const std::vector< Vec3f > &samples) const
 {
 	Sphere sphere;
 	if(!sphere.Init(samples))

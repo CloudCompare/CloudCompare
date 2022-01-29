@@ -21,8 +21,8 @@ unsigned int ConePrimitiveShapeConstructor::RequiredSamples() const
 }
 
 PrimitiveShape *ConePrimitiveShapeConstructor::Construct(
-	const MiscLib::Vector< Vec3f > &points,
-	const MiscLib::Vector< Vec3f > &normals) const
+	const std::vector< Vec3f > &points,
+	const std::vector< Vec3f > &normals) const
 {
 	Cone cone;
 	if (!cone.Init(points[0], points[1], points[2], normals[0], normals[1],
@@ -50,7 +50,7 @@ PrimitiveShape *ConePrimitiveShapeConstructor::Construct(
 }
 
 PrimitiveShape *ConePrimitiveShapeConstructor::Construct(
-	const MiscLib::Vector< Vec3f > &samples) const
+	const std::vector< Vec3f > &samples) const
 {
 	Cone cone;
 	if(!cone.Init(samples))

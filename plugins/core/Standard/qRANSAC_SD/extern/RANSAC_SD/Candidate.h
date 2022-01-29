@@ -3,11 +3,10 @@
 #include "ScoreComputer.h"
 #include <MiscLib/RefCountPtr.h>
 #include "PrimitiveShape.h"
-#include <MiscLib/Vector.h>
+#include <vector>
 #include <limits>
 #include <MiscLib/RefCounted.h>
 #include <MiscLib/Random.h>
-#include <MiscLib/NoShrinkVector.h>
 #include "Octree.h"
 #include <algorithm>
 
@@ -24,27 +23,27 @@ public:
 	void Shape(PrimitiveShape *shape) { m_shape = shape; }
 	float LowerBound() const { return m_lowerBound; }
 	float UpperBound() const { return m_upperBound; }
-	MiscLib::RefCounted< MiscLib::Vector< size_t > > *Indices() { return m_indices; }
-	void Indices(MiscLib::RefCounted< MiscLib::Vector< size_t > > *indices) { m_indices = indices; }
+	MiscLib::RefCounted< std::vector< size_t > > *Indices() { return m_indices; }
+	void Indices(MiscLib::RefCounted< std::vector< size_t > > *indices) { m_indices = indices; }
 	size_t ComputedSubsets() const { return m_subset; }
 	float ExpectedValue() const { return (m_lowerBound + m_upperBound) / 2.f; }
 	void SetSubset(size_t subset) { m_subset = subset; }
 	size_t Level() const { return m_level; }
 	void Reset();
 	template< class ScoreVisitorT >
-	bool ImproveBounds(const MiscLib::Vector< ImmediateOctreeType * > &octrees,
+	bool ImproveBounds(const std::vector< ImmediateOctreeType * > &octrees,
 		const PointCloud &pc, ScoreVisitorT &scoreVisitor,
 		size_t currentSize, float bitmapEpsilon,
 		size_t maxSubset, size_t minPoints = 500);
 	template< class ScoreVisitorT >
-	void RecomputeBounds(const MiscLib::Vector< ImmediateOctreeType * > &octrees,
+	void RecomputeBounds(const std::vector< ImmediateOctreeType * > &octrees,
 		const PointCloud &pc, ScoreVisitorT &scoreVisitor, size_t currentSize,
 		float epsilon, float normalThresh, float bitmapEpsilon);
-	void Reindex(const MiscLib::Vector< int > &newIndices, int minInvalidIndex,
-		size_t mergedSubsets, const MiscLib::Vector< size_t > &subsetSizes,
+	void Reindex(const std::vector< int > &newIndices, int minInvalidIndex,
+		size_t mergedSubsets, const std::vector< size_t > &subsetSizes,
 		const PointCloud &pc, size_t currentSize, float epsilon,
 		float normalThresh, float bitmapEpsilon);
-	void Reindex(const MiscLib::Vector< size_t > &reindex);
+	void Reindex(const std::vector< size_t > &reindex);
 	template< class ScoreVisitorT >
 	void GlobalScore(ScoreVisitorT &scoreVisitor,
 		const IndexedOctreeType &oct);
@@ -83,7 +82,7 @@ private:
 	size_t m_subset;
 	float m_lowerBound;
 	float m_upperBound;
-	MiscLib::RefCountPtr< MiscLib::RefCounted< MiscLib::Vector< size_t > > > m_indices;
+	MiscLib::RefCountPtr< MiscLib::RefCounted< std::vector< size_t > > > m_indices;
 	size_t m_level;
 	bool m_hasConnectedComponent;
 	size_t m_score;
@@ -116,7 +115,7 @@ void Candidate::Clone(Candidate *c) const
 	c->m_subset = m_subset;
 	c->m_lowerBound = m_lowerBound;
 	c->m_upperBound = m_upperBound;
-	c->m_indices = new MiscLib::RefCounted< MiscLib::Vector< size_t > >(*m_indices);
+	c->m_indices = new MiscLib::RefCounted< std::vector< size_t > >(*m_indices);
 	c->m_indices->Release();
 	c->m_level = m_level;
 	c->m_hasConnectedComponent = m_hasConnectedComponent;
@@ -152,7 +151,7 @@ void Candidate::Deduct(double totalSize, double sampleSize,
 }
 
 template< class ScoreVisitorT >
-bool Candidate::ImproveBounds(const MiscLib::Vector< ImmediateOctreeType * > &octrees,
+bool Candidate::ImproveBounds(const std::vector< ImmediateOctreeType * > &octrees,
 	const PointCloud &pc, ScoreVisitorT &scoreVisitor,
 	size_t currentSize, float bitmapEpsilon,
 	size_t maxSubset, size_t minPoints)
@@ -213,12 +212,12 @@ bool Candidate::ImproveBounds(const MiscLib::Vector< ImmediateOctreeType * > &oc
 }
 
 template< class ScoreVisitorT >
-void Candidate::RecomputeBounds(const MiscLib::Vector< ImmediateOctreeType * > &octrees,
+void Candidate::RecomputeBounds(const std::vector< ImmediateOctreeType * > &octrees,
 	const PointCloud &pc, ScoreVisitorT &scoreVisitor, size_t currentSize,
 	float epsilon, float normalThresh, float bitmapEpsilon)
 {
 	// run over indices and check if still unassigned
-	const MiscLib::Vector< int > &shapeIndex = scoreVisitor.GetShapeIndex();
+	const std::vector< int > &shapeIndex = scoreVisitor.GetShapeIndex();
 	size_t indicesSize = m_indices->size();
 	for(size_t i = 0; i < indicesSize;)
 	{

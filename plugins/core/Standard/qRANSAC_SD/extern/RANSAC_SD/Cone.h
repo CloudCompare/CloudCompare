@@ -13,7 +13,6 @@
 #if !defined(_WIN32) && !defined(WIN32)
 #include <unistd.h>
 #endif
-#include <MiscLib/NoShrinkVector.h>
 #include "LevMarLSWeight.h"
 #include "LevMarFitting.h"
 
@@ -50,8 +49,8 @@ public:
 	Cone(const Vec3f &center, const Vec3f &axisDir, float angle);
 	Cone(const Vec3f &p1, const Vec3f &p2, const Vec3f &p3,
 		const Vec3f &n1, const Vec3f &n2, const Vec3f &n3);
-	bool Init(const MiscLib::Vector< Vec3f > &samples);
-	bool InitAverage(const MiscLib::Vector< Vec3f > &samples);
+	bool Init(const std::vector< Vec3f > &samples);
+	bool InitAverage(const std::vector< Vec3f > &samples);
 	bool Init(const Vec3f &center, const Vec3f &axisDir, float angle);
 	bool Init(const Vec3f &p1, const Vec3f &p2, const Vec3f &p3,
 		const Vec3f &n1, const Vec3f &n2, const Vec3f &n3);
@@ -77,16 +76,16 @@ public:
 	void RotateAngularDirection(float radians);
 	inline float RadiusAtLength(float length) const;
 	bool LeastSquaresFit(const PointCloud &pc,
-		MiscLib::Vector< size_t >::const_iterator begin,
-		MiscLib::Vector< size_t >::const_iterator end);
+		std::vector< size_t >::const_iterator begin,
+		std::vector< size_t >::const_iterator end);
 	template< class IteratorT >
 	bool LeastSquaresFit(IteratorT begin, IteratorT end);
 	bool Fit(const PointCloud &pc,
-		MiscLib::Vector< size_t >::const_iterator begin,
-		MiscLib::Vector< size_t >::const_iterator end)
+		std::vector< size_t >::const_iterator begin,
+		std::vector< size_t >::const_iterator end)
 	{ return LeastSquaresFit(pc, begin, end); }
-	static bool	Interpolate(const MiscLib::Vector< Cone > &cones,
-		const MiscLib::Vector< float > &weights, Cone *ic);
+	static bool	Interpolate(const std::vector< Cone > &cones,
+		const std::vector< float > &weights, Cone *ic);
 	void Serialize(bool binary, std::ostream *o) const;
 	static size_t SerializedSize();
 	void Serialize(FILE *o) const;
@@ -98,7 +97,7 @@ public:
 	inline unsigned int Intersect(const Vec3f &p, const Vec3f &r,
 		float lambda[2], Vec3f interPts[2]) const;
 	ConeInfo GetInfo(const PointCloud& pc, size_t startingIndx, size_t endingIndx) const;
-	ConeInfo GetInfo(const MiscLib::Vector< Vec3f >& samples) const;
+	ConeInfo GetInfo(const std::vector< Vec3f >& samples) const;
 private:
 	template< class WeightT >
 	class LevMarCone

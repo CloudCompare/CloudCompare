@@ -146,7 +146,7 @@ public:
 			m_extent[i] = 0;
 	}
 
-	ArrayGrid(const MiscLib::Vector< unsigned int > &extent)
+	ArrayGrid(const std::vector< unsigned int > &extent)
 	{
 		Extent(&extent[0]);
 	}

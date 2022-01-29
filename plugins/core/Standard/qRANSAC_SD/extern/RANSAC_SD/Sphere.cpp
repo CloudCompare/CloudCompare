@@ -163,7 +163,7 @@ Sphere::Sphere(const Vec3f &p1, const Vec3f &p2, const Vec3f &p3,
 		throw InvalidTetrahedonError();
 }
 
-bool Sphere::Init(const MiscLib::Vector< Vec3f > &samples)
+bool Sphere::Init(const std::vector< Vec3f > &samples)
 {
 	if(samples.size() < 4)
 		return false;
@@ -355,16 +355,16 @@ void NormalizeSphereParams(float *param)
 {}
 
 bool Sphere::LeastSquaresFit(const PointCloud &pc,
-	MiscLib::Vector< size_t >::const_iterator begin,
-	MiscLib::Vector< size_t >::const_iterator end)
+	std::vector< size_t >::const_iterator begin,
+	std::vector< size_t >::const_iterator end)
 {
 	bool retVal = LeastSquaresFit(GfxTL::IndexIterate(begin, pc.begin()),
 		GfxTL::IndexIterate(end, pc.begin()));
 	return retVal;
 }
 
-bool Sphere::Interpolate(const MiscLib::Vector< Sphere > &spheres,
-	const MiscLib::Vector< float > &weights, Sphere *is)
+bool Sphere::Interpolate(const std::vector< Sphere > &spheres,
+	const std::vector< float > &weights, Sphere *is)
 {
 	Vec3f center(0, 0, 0);
 	float radius = 0;

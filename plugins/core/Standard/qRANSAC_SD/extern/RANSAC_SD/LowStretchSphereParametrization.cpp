@@ -20,12 +20,12 @@ void LowStretchSphereParametrization::Shape(const Sphere &sphere)
 
 void LowStretchSphereParametrization::WrapComponents(const GfxTL::AABox< GfxTL::Vector2Df > &bbox,
 	float epsilon, size_t uextent, size_t vextent,
-	MiscLib::Vector< int > *componentImg,
-	MiscLib::Vector< std::pair< int, size_t > > *labels) const
+	std::vector< int > *componentImg,
+	std::vector< std::pair< int, size_t > > *labels) const
 {
 	// wraps are necessary only in v direction
 	// relabel the components
-	MiscLib::Vector< std::pair< int, size_t > > tempLabels(*labels);
+	std::vector< std::pair< int, size_t > > tempLabels(*labels);
 	// wrap along v
 	float vstartPrev, vendPrev, vstart = 0, vend = 0, vstartNext = 0, vendNext = 0;
 	size_t vsPrev, vePrev, vs = 0, ve = 0, vsNext = 0, veNext = 0;
@@ -80,7 +80,7 @@ void LowStretchSphereParametrization::WrapComponents(const GfxTL::AABox< GfxTL::
 	// condense labels
 	for(int i = static_cast<int>(tempLabels.size()) - 1; i > 0; --i)
 		tempLabels[i].first = ReduceLabel(i, tempLabels);
-	MiscLib::Vector< int > condensed(tempLabels.size());
+	std::vector< int > condensed(tempLabels.size());
 	labels->clear();
 	labels->reserve(condensed.size());
 	int count = 0;

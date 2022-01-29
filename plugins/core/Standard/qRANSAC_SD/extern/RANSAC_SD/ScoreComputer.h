@@ -22,10 +22,10 @@ class LocalScoreComputer
 public:
 	template< class ShapeT >
 	static void Score(const ShapeT &shape, const PointCloud &pc, float epsilon,
-		float normalThresh, MiscLib::Vector< size_t >::const_iterator begin,
-		MiscLib::Vector< size_t >::const_iterator end,
+		float normalThresh, std::vector< size_t >::const_iterator begin,
+		std::vector< size_t >::const_iterator end,
 		std::pair< size_t, float > *score,
-		MiscLib::Vector< size_t > *indices = NULL)
+		std::vector< size_t > *indices = NULL)
 	{
 		Vec3f n;
 		size_t size = end - begin;

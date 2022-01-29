@@ -79,7 +79,7 @@ void TorusPrimitiveShape::Normal(const Vec3f &p, Vec3f *n) const
 
 unsigned int TorusPrimitiveShape::ConfidenceTests(unsigned int numTests,
 	float epsilon, float normalThresh, float rms, const PointCloud &pc,
-	const MiscLib::Vector< size_t > &indices) const
+	const std::vector< size_t > &indices) const
 {
 	return BasePrimitiveShape::ConfidenceTests< Torus >(numTests, epsilon,
 		normalThresh, rms, pc, indices);
@@ -96,8 +96,8 @@ void TorusPrimitiveShape::Description(std::string *s) const
 
 bool TorusPrimitiveShape::Fit(const PointCloud &pc, float epsilon,
 	float normalThresh,
-	MiscLib::Vector< size_t >::const_iterator begin,
-	MiscLib::Vector< size_t >::const_iterator end)
+	std::vector< size_t >::const_iterator begin,
+	std::vector< size_t >::const_iterator end)
 {
 	Torus fit = m_torus;
 	if(fit.LeastSquaresFit(pc, begin, end))
@@ -110,8 +110,8 @@ bool TorusPrimitiveShape::Fit(const PointCloud &pc, float epsilon,
 }
 
 PrimitiveShape *TorusPrimitiveShape::LSFit(const PointCloud &pc, float epsilon,
-	float normalThresh, MiscLib::Vector< size_t >::const_iterator begin,
-	MiscLib::Vector< size_t >::const_iterator end,
+	float normalThresh, std::vector< size_t >::const_iterator begin,
+	std::vector< size_t >::const_iterator end,
 	std::pair< size_t, float > *score) const
 {
 	Torus fit = m_torus;
@@ -167,14 +167,13 @@ void TorusPrimitiveShape::Visit(PrimitiveShapeVisitor *visitor) const
 }
 
 void TorusPrimitiveShape::SuggestSimplifications(const PointCloud &pc,
-	MiscLib::Vector< size_t >::const_iterator begin,
-	MiscLib::Vector< size_t >::const_iterator end, float distThresh,
-	MiscLib::Vector< MiscLib::RefCountPtr< PrimitiveShape > > *suggestions) const
+	float distThresh,
+	std::vector< MiscLib::RefCountPtr< PrimitiveShape > > *suggestions) const
 {
 	// sample the bounding box in parameter space at 25 locations
 	// these points are used to estimate the other shapes
 	// if the shapes succeed the suggestion is returned
-	MiscLib::Vector< Vec3f > samples(2 * 25);
+	std::vector< Vec3f > samples(2 * 25);
 	float uStep = (m_extBbox.Max()[0] - m_extBbox.Min()[0]) / 4;
 	float vStep = (m_extBbox.Max()[1] - m_extBbox.Min()[1]) / 4;
 	float u = m_extBbox.Min()[0];
@@ -393,11 +392,11 @@ void TorusPrimitiveShape::Parameters(const Vec3f &p,
 }
 
 void TorusPrimitiveShape::Parameters(
-	GfxTL::IndexedIterator< MiscLib::Vector< size_t >::iterator,
+	GfxTL::IndexedIterator< std::vector< size_t >::iterator,
 		PointCloud::const_iterator > begin,
-	GfxTL::IndexedIterator< MiscLib::Vector< size_t >::iterator,
+	GfxTL::IndexedIterator< std::vector< size_t >::iterator,
 		PointCloud::const_iterator > end,
-	MiscLib::Vector< std::pair< float, float > > *bmpParams) const
+	std::vector< std::pair< float, float > > *bmpParams) const
 {
 	ParametersImpl(begin, end, bmpParams);
 }
@@ -407,7 +406,7 @@ void TorusPrimitiveShape::Parameters(
 		PointCloud::const_iterator > begin,
 	GfxTL::IndexedIterator< IndexIterator,
 		PointCloud::const_iterator > end,
-	MiscLib::Vector< std::pair< float, float > > *bmpParams) const
+	std::vector< std::pair< float, float > > *bmpParams) const
 {
 	ParametersImpl(begin, end, bmpParams);
 }
@@ -419,7 +418,7 @@ bool TorusPrimitiveShape::InSpace(float u, float v, Vec3f *p, Vec3f *n) const
 
 void TorusPrimitiveShape::BitmapExtent(float epsilon,
 	GfxTL::AABox< GfxTL::Vector2Df > *bbox,
-	MiscLib::Vector< std::pair< float, float > > *params,
+	std::vector< std::pair< float, float > > *params,
 	size_t *uextent, size_t *vextent)
 {
 	*uextent = static_cast<size_t>(std::ceil((bbox->Max()[0] - bbox->Min()[0]) / epsilon));
@@ -444,8 +443,8 @@ void TorusPrimitiveShape::WrapBitmap(
 
 void TorusPrimitiveShape::WrapComponents(const GfxTL::AABox< GfxTL::Vector2Df > &bbox,
 	float epsilon, size_t uextent, size_t vextent,
-	MiscLib::Vector< int > *componentImg,
-	MiscLib::Vector< std::pair< int, size_t > > *labels) const
+	std::vector< int > *componentImg,
+	std::vector< std::pair< int, size_t > > *labels) const
 {
 	m_parametrization.WrapComponents(bbox, epsilon, uextent, vextent,
 		componentImg, labels);
@@ -453,7 +452,7 @@ void TorusPrimitiveShape::WrapComponents(const GfxTL::AABox< GfxTL::Vector2Df > 
 
 void TorusPrimitiveShape::SetExtent(
 	const GfxTL::AABox< GfxTL::Vector2Df > &bbox,
-	const MiscLib::Vector< int > &componentsImg, size_t uextent,
+	const std::vector< int > &componentsImg, size_t uextent,
 	size_t vextent, float epsilon, int label)
 {}
 

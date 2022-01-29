@@ -7,7 +7,7 @@
 #include <GfxTL/MathHelper.h>
 #include <GfxTL/AABox.h>
 #include <utility>
-#include <MiscLib/Vector.h>
+#include <vector>
 #include <iostream>
 
 class SimpleTorusParametrization
@@ -24,8 +24,8 @@ public:
 		float epsilon, bool *uwrap, bool *vwrap) const;
 	void WrapComponents(const GfxTL::AABox< GfxTL::Vector2Df > &bbox,
 		float epsilon, size_t uextent, size_t vextent,
-		MiscLib::Vector< int > *componentImg,
-		MiscLib::Vector< std::pair< int, size_t > > *labels) const {}
+		std::vector< int > *componentImg,
+		std::vector< std::pair< int, size_t > > *labels) const {}
 	static size_t SerializedSize();
 	void Serialize(std::ostream *o, bool binary) const;
 	void Deserialize(std::istream *i, bool binary);

@@ -5,12 +5,11 @@
 #define _USE_MATH_DEFINES
 #endif
 #include <cmath>
-#include <MiscLib/Vector.h>
+#include <vector>
 #include <limits>
 #include <GfxTL/VectorXD.h>
 #include "basic.h"
-#include <MiscLib/Vector.h>
-#include <MiscLib/AlignedAllocator.h>
+#include <vector>
 #undef min
 #undef max
 
@@ -58,7 +57,7 @@ struct DLL_LINKAGE Point {
 };
 
 class DLL_LINKAGE PointCloud
-: public MiscLib::Vector< Point >
+: public std::vector< Point >
 {
 public:
 	PointCloud();

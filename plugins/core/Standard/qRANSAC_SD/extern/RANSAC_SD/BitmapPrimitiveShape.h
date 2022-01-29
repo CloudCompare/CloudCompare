@@ -2,7 +2,7 @@
 #define BITMAPPRIMITIVESHAPE_HEADER
 #include "BasePrimitiveShape.h"
 #include <GfxTL/AABox.h>
-#include <MiscLib/Vector.h>
+#include <vector>
 #include <algorithm>
 #include <istream>
 #include <MiscLib/Performance.h>
@@ -20,10 +20,10 @@
 
 struct BitmapInfo
 {
-	MiscLib::Vector< std::pair< float, float > > params;
-	MiscLib::Vector< char > bitmap;
+	std::vector< std::pair< float, float > > params;
+	std::vector< char > bitmap;
 	GfxTL::AABox< GfxTL::Vector2Df > bbox;
-	MiscLib::Vector< size_t > bmpIdx;
+	std::vector< size_t > bmpIdx;
 	size_t uextent, vextent;
 };
 
@@ -33,10 +33,10 @@ class DLL_LINKAGE BitmapPrimitiveShape
 public:
 	bool Init(bool binary, std::istream *i);
 	size_t ConnectedComponent(const PointCloud &pc, float epsilon,
-		MiscLib::Vector< size_t > *indices, bool doFiltering = true, float* borderRatio = 0 );
+		std::vector< size_t > *indices, bool doFiltering = true, float* borderRatio = 0 );
 	size_t AllConnectedComponents(const PointCloud &pc, float epsilon, BitmapInfo& bitmapInfo,
-		MiscLib::Vector< size_t > *indices, MiscLib::Vector< int >& componentsImg, 
-		MiscLib::Vector< std::pair< int, size_t > >& labels, bool doFiltering = true );
+		std::vector< size_t > *indices, std::vector< int >& componentsImg, 
+		std::vector< std::pair< int, size_t > >& labels, bool doFiltering = true );
 	void TrimmingPolygons(const PointCloud &pc, float epsilon,
 		size_t begin, size_t end,
 		std::deque< ComponentPolygons > *polys) const;
@@ -47,19 +47,19 @@ public:
 	virtual void Parameters(const Vec3f &p,
 		std::pair< float, float > *param) const = 0;
 	virtual bool InSpace(float u, float v, Vec3f *p, Vec3f *n) const = 0;
-	virtual void Parameters(GfxTL::IndexedIterator< MiscLib::Vector< size_t >::iterator,
+	virtual void Parameters(GfxTL::IndexedIterator< std::vector< size_t >::iterator,
 			PointCloud::const_iterator > begin,
-		GfxTL::IndexedIterator< MiscLib::Vector< size_t >::iterator,
+		GfxTL::IndexedIterator< std::vector< size_t >::iterator,
 			PointCloud::const_iterator > end,
-		MiscLib::Vector< std::pair< float, float > > *bmpParams) const = 0;
+		std::vector< std::pair< float, float > > *bmpParams) const = 0;
 	virtual void Parameters(GfxTL::IndexedIterator< IndexIterator,
 			PointCloud::const_iterator > begin,
 		GfxTL::IndexedIterator< IndexIterator,
 			PointCloud::const_iterator > end,
-		MiscLib::Vector< std::pair< float, float > > *bmpParams) const = 0;
+		std::vector< std::pair< float, float > > *bmpParams) const = 0;
 	virtual void BitmapExtent(float epsilon,
 		GfxTL::AABox< GfxTL::Vector2Df > *bbox,
-		MiscLib::Vector< std::pair< float, float > > *params,
+		std::vector< std::pair< float, float > > *params,
 		size_t *uextent, size_t *vextent) = 0;
 	virtual void InBitmap(const std::pair< float, float > &param,
 		float epsilon, const GfxTL::AABox< GfxTL::Vector2Df > &bbox,
@@ -67,28 +67,28 @@ public:
 		std::pair< int, int > *inBmp) const = 0;
 	virtual void PreWrapBitmap(const GfxTL::AABox< GfxTL::Vector2Df > &bbox,
 		float epsilon, size_t uextent, size_t vextent,
-		MiscLib::Vector< char > *bmp) const;
+		std::vector< char > *bmp) const;
 	virtual void WrapBitmap(const GfxTL::AABox< GfxTL::Vector2Df > &bbox,
 		float epsilon, bool *uwrap, bool *vwrap) const = 0;
 	virtual void WrapComponents(const GfxTL::AABox< GfxTL::Vector2Df > &bbox,
 		float epsilon, size_t uextent, size_t vextent,
-		MiscLib::Vector< int > *componentImg,
-		MiscLib::Vector< std::pair< int, size_t > > *labels) const;
+		std::vector< int > *componentImg,
+		std::vector< std::pair< int, size_t > > *labels) const;
 	virtual bool InSpace(size_t u, size_t v, float epsilon,
 		const GfxTL::AABox< GfxTL::Vector2Df > &bbox, size_t uextent,
 		size_t vextent, Vec3f *p, Vec3f *n) const = 0;
 	template< class IteratorT >
 	void BuildBitmap(const PointCloud &pc, float *epsilon, IteratorT begin,
-		IteratorT end, MiscLib::Vector< std::pair< float, float > > *params,
+		IteratorT end, std::vector< std::pair< float, float > > *params,
 		GfxTL::AABox< GfxTL::Vector2Df > *bbox,
-		MiscLib::Vector< char > *bitmap, size_t *uextent, size_t *vextent,
-		MiscLib::Vector< size_t > *bmpIdx) const;
+		std::vector< char > *bitmap, size_t *uextent, size_t *vextent,
+		std::vector< size_t > *bmpIdx) const;
 	template< class IteratorT >
 	void BuildBitmap(const PointCloud &pc, float *epsilon, IteratorT begin,
-		IteratorT end, MiscLib::Vector< std::pair< float, float > > *params,
+		IteratorT end, std::vector< std::pair< float, float > > *params,
 		GfxTL::AABox< GfxTL::Vector2Df > *bbox,
-		MiscLib::Vector< char > *bitmap, size_t *uextent, size_t *vextent,
-		MiscLib::Vector< size_t > *bmpIdx, size_t border) const;
+		std::vector< char > *bitmap, size_t *uextent, size_t *vextent,
+		std::vector< size_t > *bmpIdx, size_t border) const;
 	void BuildPolygons(const PointCloud &pc, float epsilon, size_t begin,
 		size_t end, GfxTL::AABox< GfxTL::Vector2Df > *bbox,
 		size_t *uextent, size_t *vextent,
@@ -100,9 +100,9 @@ protected:
 
 template< class IteratorT >
 void BitmapPrimitiveShape::BuildBitmap(const PointCloud &pc, float *epsilon,
-	IteratorT begin, IteratorT end, MiscLib::Vector< std::pair< float, float > > *params,
-	GfxTL::AABox< GfxTL::Vector2Df > *bbox, MiscLib::Vector< char > *bitmap,
-	size_t *uextent, size_t *vextent, MiscLib::Vector< size_t > *bmpIdx) const
+	IteratorT begin, IteratorT end, std::vector< std::pair< float, float > > *params,
+	GfxTL::AABox< GfxTL::Vector2Df > *bbox, std::vector< char > *bitmap,
+	size_t *uextent, size_t *vextent, std::vector< size_t > *bmpIdx) const
 {
 	size_t size = end - begin;
 	params->resize(size);
@@ -151,9 +151,9 @@ void BitmapPrimitiveShape::BuildBitmap(const PointCloud &pc, float *epsilon,
 
 template< class IteratorT >
 void BitmapPrimitiveShape::BuildBitmap(const PointCloud &pc, float *epsilon,
-	IteratorT begin, IteratorT end, MiscLib::Vector< std::pair< float, float > > *params,
-	GfxTL::AABox< GfxTL::Vector2Df > *bbox, MiscLib::Vector< char > *bitmap,
-	size_t *uextent, size_t *vextent, MiscLib::Vector< size_t > *bmpIdx,
+	IteratorT begin, IteratorT end, std::vector< std::pair< float, float > > *params,
+	GfxTL::AABox< GfxTL::Vector2Df > *bbox, std::vector< char > *bitmap,
+	size_t *uextent, size_t *vextent, std::vector< size_t > *bmpIdx,
 	size_t border) const
 {
 	params->resize(end - begin);

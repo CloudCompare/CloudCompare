@@ -30,15 +30,15 @@ public:
 	void Normal(const Vec3f &p, Vec3f *n) const;
 	unsigned int ConfidenceTests(unsigned int numTests, float epsilon,
 		float normalThresh, float rms, const PointCloud &pc,
-		const MiscLib::Vector< size_t > &indices) const;
+		const std::vector< size_t > &indices) const;
 	void Description(std::string *s) const;
 	bool Fit(const PointCloud &pc, float epsilon, float normalThresh,
-		MiscLib::Vector< size_t >::const_iterator begin,
-		MiscLib::Vector< size_t >::const_iterator end);
+		std::vector< size_t >::const_iterator begin,
+		std::vector< size_t >::const_iterator end);
 	PrimitiveShape *LSFit(const PointCloud &pc, float epsilon,
 		float normalThresh,
-		MiscLib::Vector< size_t >::const_iterator begin,
-		MiscLib::Vector< size_t >::const_iterator end,
+		std::vector< size_t >::const_iterator begin,
+		std::vector< size_t >::const_iterator end,
 		std::pair< size_t, float > *score) const;
 	LevMarFunc< float > *SignedDistanceFunc() const;
 	void Serialize(std::ostream *o, bool binary = true) const;
@@ -54,20 +54,20 @@ public:
 
 	void Parameters(const Vec3f &p,
 		std::pair< float, float > *param) const;
-	void Parameters(GfxTL::IndexedIterator< MiscLib::Vector< size_t >::iterator,
+	void Parameters(GfxTL::IndexedIterator< std::vector< size_t >::iterator,
 			PointCloud::const_iterator > begin,
-		GfxTL::IndexedIterator< MiscLib::Vector< size_t >::iterator,
+		GfxTL::IndexedIterator< std::vector< size_t >::iterator,
 			PointCloud::const_iterator > end,
-		MiscLib::Vector< std::pair< float, float > > *bmpParams) const;
+		std::vector< std::pair< float, float > > *bmpParams) const;
 	void Parameters(GfxTL::IndexedIterator< IndexIterator,
 			PointCloud::const_iterator > begin,
 		GfxTL::IndexedIterator< IndexIterator,
 			PointCloud::const_iterator > end,
-		MiscLib::Vector< std::pair< float, float > > *bmpParams) const;
+		std::vector< std::pair< float, float > > *bmpParams) const;
 	bool InSpace(float u, float v, Vec3f *p, Vec3f *n) const;
 	void BitmapExtent(float epsilon,
 		GfxTL::AABox< GfxTL::Vector2Df > *bbox,
-		MiscLib::Vector< std::pair< float, float > > *params,
+		std::vector< std::pair< float, float > > *params,
 		size_t *uextent, size_t *vextent);
 	void InBitmap(const std::pair< float, float > &param, float epsilon,
 		const GfxTL::AABox< GfxTL::Vector2Df > &bbox, size_t uextent,
@@ -75,7 +75,7 @@ public:
 	void WrapBitmap(const GfxTL::AABox< GfxTL::Vector2Df > &bbox,
 		float epsilon, bool *uwrap, bool *vwrap) const;
 	void SetExtent(const GfxTL::AABox< GfxTL::Vector2Df > &bbox,
-		const MiscLib::Vector< int > &componentsImg, size_t uextent,
+		const std::vector< int > &componentsImg, size_t uextent,
 		size_t vextent, float epsilon, int label);
 	bool InSpace(size_t u, size_t v, float epsilon,
 		const GfxTL::AABox< GfxTL::Vector2Df > &bbox, size_t uextent,
@@ -87,7 +87,7 @@ public:
 private:
 	template< class IteratorT >
 	void ParametersImpl(IteratorT begin, IteratorT end,
-		MiscLib::Vector< std::pair< float, float > > *bmpParams) const;
+		std::vector< std::pair< float, float > > *bmpParams) const;
 
 private:
 	Plane m_plane;
@@ -96,7 +96,7 @@ private:
 
 template< class IteratorT >
 void PlanePrimitiveShape::ParametersImpl(IteratorT begin, IteratorT end,
-	MiscLib::Vector< std::pair< float, float > > *bmpParams) const
+	std::vector< std::pair< float, float > > *bmpParams) const
 {
 	bmpParams->resize(end - begin);
 	size_t j = 0;

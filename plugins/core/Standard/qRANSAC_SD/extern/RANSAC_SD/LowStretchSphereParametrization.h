@@ -7,7 +7,7 @@
 #include <GfxTL/MathHelper.h>
 #include <GfxTL/AABox.h>
 #include <utility>
-#include <MiscLib/Vector.h>
+#include <vector>
 
 class LowStretchSphereParametrization
 {
@@ -23,8 +23,8 @@ public:
 		float epsilon, bool *uwrap, bool *vwrap) const { *uwrap = false; *vwrap = false; }
 	void WrapComponents(const GfxTL::AABox< GfxTL::Vector2Df > &bbox,
 		float epsilon, size_t uextent, size_t vextent,
-		MiscLib::Vector< int > *componentImg,
-		MiscLib::Vector< std::pair< int, size_t > > *labels) const;
+		std::vector< int > *componentImg,
+		std::vector< std::pair< int, size_t > > *labels) const;
 	template< class IteratorT >
 	void Optimize(IteratorT begin, IteratorT end, float epsilon);
 	static size_t SerializedSize();
@@ -116,7 +116,7 @@ void LowStretchSphereParametrization::Optimize(IteratorT begin, IteratorT end,
 
 	// a rotation around the normal is searched
 	// for this find all the angles and then extract the largest gap
-	MiscLib::Vector< float > vangles;
+	std::vector< float > vangles;
 	for(IteratorT i = begin; i != end; ++i)
 	{
 		Vec3f s = *i - m_sphere->Center();

@@ -6,12 +6,11 @@
 #include <GfxTL/VectorXD.h>
 #include <utility>
 #include <string>
-#include <MiscLib/Vector.h>
+#include <vector>
 #include <deque>
 #include <iostream>
 #include "LevMarFunc.h"
 #include <stdio.h>
-#include <MiscLib/NoShrinkVector.h>
 #include <MiscLib/RefCountPtr.h>
 
 #ifndef DLL_LINKAGE
@@ -56,24 +55,24 @@ public:
 	// have been moved to the front of indices and their number is returned.
 	// The remaining indices are stored at the end of the indices array
 	virtual size_t ConnectedComponent(const PointCloud &pc, float epsilon,
-		MiscLib::Vector< size_t > *indices, bool doFiltering = true, float* borderRatio = 0 ) = 0;
+		std::vector< size_t > *indices, bool doFiltering = true, float* borderRatio = 0 ) = 0;
 	virtual unsigned int ConfidenceTests(unsigned int numTests,
 		float epsilon, float normalThresh, float rms, const PointCloud &pc,
-		const MiscLib::Vector< size_t > &indices) const = 0;
+		const std::vector< size_t > &indices) const = 0;
 	// returns descriptive string
 	virtual void Description(std::string *s) const = 0;
 	// refitting
 	virtual bool Fit(const PointCloud &pc, float epsilon,
 		float normalThresh,
-		MiscLib::Vector< size_t >::const_iterator begin,
-		MiscLib::Vector< size_t >::const_iterator end) = 0;
+		std::vector< size_t >::const_iterator begin,
+		std::vector< size_t >::const_iterator end) = 0;
 	virtual PrimitiveShape *LSFit(const PointCloud &pc, float epsilon,
-		float normalThresh, MiscLib::Vector< size_t >::const_iterator begin,
-		MiscLib::Vector< size_t >::const_iterator end,
+		float normalThresh, std::vector< size_t >::const_iterator begin,
+		std::vector< size_t >::const_iterator end,
 		std::pair< size_t, float > *score) const = 0;
 	virtual LevMarFunc< float > *SignedDistanceFunc() const = 0;
-	typedef MiscLib::Vector< GfxTL::VectorXD< 2, size_t > > BitmapPolygon;
-	typedef MiscLib::Vector< BitmapPolygon > ComponentPolygons;
+	typedef std::vector< GfxTL::VectorXD< 2, size_t > > BitmapPolygon;
+	typedef std::vector< BitmapPolygon > ComponentPolygons;
 	virtual void TrimmingPolygons(const PointCloud &pc, float epsilon,
 		size_t begin, size_t end,
 		std::deque< ComponentPolygons > *polys) const = 0;
@@ -91,9 +90,8 @@ public:
 	virtual void Transform(float scale, const Vec3f &translate) = 0;
 	virtual void Visit(PrimitiveShapeVisitor *visitor) const = 0;
 	virtual void SuggestSimplifications(const PointCloud &pc,
-		MiscLib::Vector< size_t >::const_iterator begin,
-		MiscLib::Vector< size_t >::const_iterator end, float distThresh,
-		MiscLib::Vector< MiscLib::RefCountPtr< PrimitiveShape > > *suggestions) const {}
+		float distThresh,
+		std::vector< MiscLib::RefCountPtr< PrimitiveShape > > *suggestions) const {}
 	virtual void OptimizeParametrization(const PointCloud &pc,
 		size_t begin, size_t end, float epsilon) {}
 	// gets the 2D parametrization coordinates of a point p in 3-space (it is projected first)
@@ -102,8 +100,8 @@ public:
 	// computes the point and normal in 3-space from coordinates in the parametrization
 	virtual bool InSpace(float u, float v, Vec3f *p, Vec3f *n) const = 0;
 	virtual bool CheckGeneratedShapeWithinLimits(const PointCloud& pc,
-		MiscLib::Vector< size_t >::const_iterator begin,
-		MiscLib::Vector< size_t >::const_iterator end) { return true; }
+		std::vector< size_t >::const_iterator begin,
+		std::vector< size_t >::const_iterator end) { return true; }
 };
 
 #endif

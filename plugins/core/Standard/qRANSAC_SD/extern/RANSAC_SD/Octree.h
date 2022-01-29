@@ -14,7 +14,7 @@
 #include <GfxTL/ShuffleIndicesTreeDataKernelStrategy.h>
 #include "ScoreAACubeTreeStrategy.h"
 #include "RebuildAACubeTreeStrategy.h"
-#include <MiscLib/Vector.h>
+#include <vector>
 
 typedef GfxTL::AACubeTree
 	<
@@ -37,7 +37,7 @@ typedef GfxTL::AACubeTree
 									GfxTL::ShuffleIndicesTreeDataKernelStrategy
 									<
 										GfxTL::ImmediateRangeTreeDataKernel< PointCloud >,
-										MiscLib::Vector< size_t >
+										std::vector< size_t >
 									>
 								>
 							>
@@ -68,7 +68,7 @@ typedef GfxTL::AACubeTree
 									GfxTL::NullTreeStrategy,
 									GfxTL::IteratedIndexedIteratorTreeDataKernel
 									<
-										MiscLib::Vector< size_t >::iterator,
+										std::vector< size_t >::iterator,
 										PointCloud::const_iterator
 									>
 								>

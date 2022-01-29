@@ -2,8 +2,7 @@
 #define RANSACSHAPEDETECTOR_HEADER
 #include "PointCloud.h"
 #include "PrimitiveShapeConstructor.h"
-#include <MiscLib/Vector.h>
-#include <MiscLib/NoShrinkVector.h>
+#include <vector>
 #include <utility>
 #include "Candidate.h"
 #include <MiscLib/RefCountPtr.h>
@@ -42,23 +41,23 @@ class DLL_LINKAGE RansacShapeDetector
 		virtual ~RansacShapeDetector();
 		void Add(PrimitiveShapeConstructor *c);
 		size_t Detect(PointCloud &pc, size_t begin, size_t end,
-			MiscLib::Vector< std::pair< MiscLib::RefCountPtr< PrimitiveShape >, size_t > > *shapes);
+			std::vector< std::pair< MiscLib::RefCountPtr< PrimitiveShape >, size_t > > *shapes);
 		void AutoAcceptSize(size_t s) { m_autoAcceptSize = s; }
 		size_t AutoAcceptSize() const { return m_autoAcceptSize; }
 		const Options &GetOptions() const { return m_options; }
 
 	private:
-		typedef MiscLib::Vector< PrimitiveShapeConstructor * > ConstructorsType;
-		typedef MiscLib::NoShrinkVector< Candidate > CandidatesType;
+		typedef std::vector< PrimitiveShapeConstructor * > ConstructorsType;
+		typedef std::vector< Candidate > CandidatesType;
 		bool DrawSamplesStratified(const IndexedOctreeType &oct,
 			size_t numSamples, size_t depth,
-			const MiscLib::Vector< int > &shapeIndex,
-			MiscLib::Vector< size_t > *samples,
+			const std::vector< int > &shapeIndex,
+			std::vector< size_t > *samples,
 			const IndexedOctreeType::CellType **node) const;
 		PrimitiveShape *Fit(bool allowDifferentShapes,
 			const PrimitiveShape &initialShape, const PointCloud &pc,
-			MiscLib::Vector< size_t >::const_iterator begin,
-			MiscLib::Vector< size_t >::const_iterator end,
+			std::vector< size_t >::const_iterator begin,
+			std::vector< size_t >::const_iterator end,
 			std::pair< size_t, float > *score) const;
 		float CandidateFailureProbability(float candidateSize,
 			size_t numberOfPoints, size_t drawnCandidates, size_t levels) const
@@ -78,25 +77,25 @@ class DLL_LINKAGE RansacShapeDetector
 		template< class ScoreVisitorT >
 		void GenerateCandidates(
 			const IndexedOctreeType &globalOctTree,
-			const MiscLib::Vector< ImmediateOctreeType * > &octrees,
+			const std::vector< ImmediateOctreeType * > &octrees,
 			const PointCloud &pc, ScoreVisitorT &scoreVisitor,
 			size_t currentSize, size_t numInvalid,
-			const MiscLib::Vector< double > &sampleLevelProbSum,
+			const std::vector< double > &sampleLevelProbSum,
 			size_t *drawnCandidates,
-			MiscLib::Vector< std::pair< float, size_t > > *sampleLevelScores,
+			std::vector< std::pair< float, size_t > > *sampleLevelScores,
 			float *bestExpectedValue,
 			CandidatesType *candidates) const;
 		template< class ScoreVisitorT >
 		bool FindBestCandidate(CandidatesType &candidates,
-			const MiscLib::Vector< ImmediateOctreeType * > &octrees,
+			const std::vector< ImmediateOctreeType * > &octrees,
 			const PointCloud &pc, ScoreVisitorT &scoreVisitor,
 			size_t currentSize, size_t drawnCandidates,
 			size_t numInvalid, size_t minSize, size_t numLevels,
 			float *maxForgottenCandidate, float *candidateFailProb) const;
 		size_t StatBucket(float score) const;
 		void UpdateLevelWeights(float factor,
-			const MiscLib::Vector< std::pair< float, size_t > > &levelScores,
-			MiscLib::Vector< double > *sampleLevelProbability) const;
+			const std::vector< std::pair< float, size_t > > &levelScores,
+			std::vector< double > *sampleLevelProbability) const;
 	private:
 		ConstructorsType m_constructors;
 		Options m_options;

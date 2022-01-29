@@ -59,10 +59,10 @@ size_t RansacShapeDetector::StatBucket(float score) const
  */
 
 void RansacShapeDetector::UpdateLevelWeights(float factor,
-	const MiscLib::Vector< std::pair< float, size_t > > &levelScores,
-	MiscLib::Vector< double > *sampleLevelProbability) const
+	const std::vector< std::pair< float, size_t > > &levelScores,
+	std::vector< double > *sampleLevelProbability) const
 {
-	MiscLib::Vector< double > newSampleLevelProbability(
+	std::vector< double > newSampleLevelProbability(
 		sampleLevelProbability->size());
 	double newSampleLevelProbabilitySum = 0;
 	for(size_t i = 0; i < newSampleLevelProbability.size(); ++i)
@@ -89,12 +89,12 @@ void RansacShapeDetector::UpdateLevelWeights(float factor,
 template< class ScoreVisitorT >
 void RansacShapeDetector::GenerateCandidates(
 	const IndexedOctreeType &globalOctree,
-	const MiscLib::Vector< ImmediateOctreeType * > &octrees,
+	const std::vector< ImmediateOctreeType * > &octrees,
 	const PointCloud &pc, ScoreVisitorT &scoreVisitor,
 	size_t currentSize, size_t numInvalid,
-	const MiscLib::Vector< double > &sampleLevelProbSum,
+	const std::vector< double > &sampleLevelProbSum,
 	size_t *drawnCandidates,
-	MiscLib::Vector< std::pair< float, size_t > > *sampleLevelScores,
+	std::vector< std::pair< float, size_t > > *sampleLevelScores,
 	float *bestExpectedValue,
 	CandidatesType *candidates) const
 {
@@ -117,7 +117,7 @@ void RansacShapeDetector::GenerateCandidates(
 			if(sampleLevelProbSum[sampleLevel] >= s)
 				break;
 		// draw samples on current sample level in octree
-		MiscLib::Vector< size_t > samples;
+		std::vector< size_t > samples;
 		const IndexedOctreeType::CellType *node;
 		if(!DrawSamplesStratified(globalOctree, m_reqSamples, sampleLevel,
 			scoreVisitorCopy.GetShapeIndex(), &samples, &node))
@@ -125,7 +125,7 @@ void RansacShapeDetector::GenerateCandidates(
 		++genCands;
 		// construct the candidates
 		size_t c = samples.size();
-		MiscLib::Vector< Vec3f > samplePoints(samples.size() << 1);
+		std::vector< Vec3f > samplePoints(samples.size() << 1);
 		for(size_t i = 0; i < samples.size(); ++i)
 		{
 			samplePoints[i] = globalOctree.at(samples[i]).pos;
@@ -156,7 +156,7 @@ void RansacShapeDetector::GenerateCandidates(
 				continue;
 			}
 			Candidate cand(shape, node->Level());
-			cand.Indices(new MiscLib::RefCounted< MiscLib::Vector< size_t > >);
+			cand.Indices(new MiscLib::RefCounted< std::vector< size_t > >);
 			cand.Indices()->Release();
 			shape->Release();
 			cand.ImproveBounds(octrees, pc, scoreVisitorCopy,
@@ -199,7 +199,7 @@ struct CandidateHeapPred
 
 template< class ScoreVisitorT >
 bool RansacShapeDetector::FindBestCandidate(CandidatesType &candidates,
-	const MiscLib::Vector< ImmediateOctreeType * > &octrees, const PointCloud &pc,
+	const std::vector< ImmediateOctreeType * > &octrees, const PointCloud &pc,
 	ScoreVisitorT &scoreVisitor, size_t currentSize,
 	size_t drawnCandidates, size_t numInvalid, size_t minSize, size_t numLevels,
 	float *maxForgottenCandidate, float *candidateFailProb) const
@@ -218,7 +218,7 @@ bool RansacShapeDetector::FindBestCandidate(CandidatesType &candidates,
 		*maxForgottenCandidate = 0;
 	}
 
-	MiscLib::Vector< Candidate * > candHeap;
+	std::vector< Candidate * > candHeap;
 	for(size_t i = candidates.size() - 1; i != -1; --i)
 	{
 		if(CandidateFailureProbability(
@@ -235,7 +235,7 @@ bool RansacShapeDetector::FindBestCandidate(CandidatesType &candidates,
 
 	std::make_heap(candHeap.begin(), candHeap.end(), CandidateHeapPred());
 
-	MiscLib::Vector< Candidate * > beatenCands;
+	std::vector< Candidate * > beatenCands;
 	Candidate *trial = candHeap.front();
 	std::pop_heap(candHeap.begin(), candHeap.end(), CandidateHeapPred());
 	candHeap.pop_back();
@@ -453,7 +453,7 @@ bool RansacShapeDetector::FindBestCandidate(CandidatesType &candidates,
 
 size_t
 RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
-	MiscLib::Vector< std::pair< RefCountPtr< PrimitiveShape >, size_t > > *shapes)
+	std::vector< std::pair< RefCountPtr< PrimitiveShape >, size_t > > *shapes)
 {
 	size_t pcSize = endIdx - beginIdx;
 	/*
@@ -477,7 +477,7 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 	bcube.Bound(pc.begin() + beginIdx, pc.begin() + endIdx); 
 
 	// construct stratified subsets
-	MiscLib::Vector< ImmediateOctreeType * > octrees(subsets);
+	std::vector< ImmediateOctreeType * > octrees(subsets);
 	for(size_t i = octrees.size(); i;)
 	{
 		--i;
@@ -485,7 +485,7 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 		if(i)
 		{
 			subsetSize = subsetSize >> 1;
-			MiscLib::Vector< size_t > subsetIndices(subsetSize);
+			std::vector< size_t > subsetIndices(subsetSize);
 			size_t bucketSize = pcSize / subsetSize;
 			for(size_t j = 0; j < subsetSize; ++j)
 			{
@@ -514,7 +514,7 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 	pcSize = endIdx - beginIdx;
 
 	// construct one global octree
-	MiscLib::Vector< size_t > globalOctreeIndices(pcSize);
+	std::vector< size_t > globalOctreeIndices(pcSize);
 	for(size_t i = 0; i < pcSize; ++i)
 		globalOctreeIndices[i] = i + beginIdx;
 	IndexedOctreeType globalOctree;
@@ -525,7 +525,7 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 	globalOctree.Build(bcube);
 	size_t globalOctTreeMaxNodeDepth = globalOctree.MaxDepth();
 
-	MiscLib::Vector< double > sampleLevelProbability(
+	std::vector< double > sampleLevelProbability(
 		globalOctTreeMaxNodeDepth + 1);
 	for(size_t i = 0; i < sampleLevelProbability.size(); ++i)
 		sampleLevelProbability[i] = 1.0 / sampleLevelProbability.size();
@@ -538,7 +538,7 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 		// last housekeeping
 	size_t numInvalid = 0; // number of points that have been assigned
 		// to a shape since the last housekeeping
-	MiscLib::Vector< int > shapeIndex(pc.size(), -1); // maintains for every
+	std::vector< int > shapeIndex(pc.size(), -1); // maintains for every
 		// point the index of the shape it has been assigned to or
 		// -1 if the point is not assigned yet
 	subsetScoreVisitor.SetShapeIndex(shapeIndex);
@@ -546,11 +546,11 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 	size_t currentSize = pcSize;
 	do
 	{
-		MiscLib::Vector< std::pair< float, size_t > > sampleLevelScores(
+		std::vector< std::pair< float, size_t > > sampleLevelScores(
 			sampleLevelProbability.size());
 		for(size_t i = 0; i < sampleLevelScores.size(); ++i)
 			sampleLevelScores[i] = std::make_pair(0.f, 0u);
-		MiscLib::Vector< double >sampleLevelProbSum(sampleLevelProbability.size());
+		std::vector< double >sampleLevelProbSum(sampleLevelProbability.size());
 		sampleLevelProbSum[0] = sampleLevelProbability[0];
 		for(size_t i = 1; i < sampleLevelProbSum.size() - 1; ++i)
 			sampleLevelProbSum[i] = sampleLevelProbability[i] + 
@@ -689,12 +689,12 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 				size_t begin = beginIdx, end = beginIdx + currentSize;
 				
 				// these hold the address ranges for the lately detected shapes
-				MiscLib::Vector< size_t > shapeIterators(numShapes);
+				std::vector< size_t > shapeIterators(numShapes);
 				size_t shapeIt = shapes->size() - numShapes;
 				for(size_t i = 0; i < numShapes; ++i, ++shapeIt)
 					shapeIterators[i] = end -= ((*shapes)[shapeIt]).second;
 
-				MiscLib::Vector< size_t > subsetSizes(octrees.size(), 0);
+				std::vector< size_t > subsetSizes(octrees.size(), 0);
 				for(size_t i = beginIdx, j = 0; i < beginIdx + currentSize; ++i)
 					if(shapeIndex[i] < 0)
 					{
@@ -756,7 +756,7 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 				if(mergedSubsets) // the octree for the first subset has to be constructed
 				{
 					//std::cout << "Attention: Merged " << mergedSubsets << " subsets!" << std::endl;
-					MiscLib::Vector< size_t > shuffleIndices(beginIdx + subsetSizes[0]),
+					std::vector< size_t > shuffleIndices(beginIdx + subsetSizes[0]),
 						reindex(beginIdx + subsetSizes[0]);
 					for(size_t i = 0; i < shuffleIndices.size(); ++i)
 						shuffleIndices[i] = i;
@@ -871,7 +871,7 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 		// 2) swap Points according to new addresses
 		size_t begin = beginIdx, end = beginIdx + currentSize;
 		// these hold the address ranges for the lately detected shapes
-		MiscLib::Vector< size_t > shapeIterators(numShapes);
+		std::vector< size_t > shapeIterators(numShapes);
 		int shapeIt = static_cast<int>(shapes->size() - numShapes);
 		for(size_t i = 0; i < numShapes; ++i, ++shapeIt)
 			shapeIterators[i] = end -= ((*shapes)[shapeIt]).second;
@@ -914,8 +914,8 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 
 bool RansacShapeDetector::DrawSamplesStratified(const IndexedOctreeType &oct,
 	size_t numSamples, size_t depth,
-	const MiscLib::Vector< int > &shapeIndex,
-	MiscLib::Vector< size_t > *samples,
+	const std::vector< int > &shapeIndex,
+	std::vector< size_t > *samples,
 	const IndexedOctreeType::CellType **node) const
 {
 	for(size_t tries = 0; tries < m_maxCandTries; tries++)
@@ -961,8 +961,8 @@ bool RansacShapeDetector::DrawSamplesStratified(const IndexedOctreeType &oct,
 
 PrimitiveShape *RansacShapeDetector::Fit(bool allowDifferentShapes,
 	const PrimitiveShape &initialShape, const PointCloud &pc,
-	MiscLib::Vector< size_t >::const_iterator begin,
-	MiscLib::Vector< size_t >::const_iterator end,
+	std::vector< size_t >::const_iterator begin,
+	std::vector< size_t >::const_iterator end,
 	std::pair< size_t, float > *score) const
 {
 	if (!m_constructors.size() || m_options.m_fitting != Options::LS_FITTING)
@@ -975,9 +975,9 @@ PrimitiveShape *RansacShapeDetector::Fit(bool allowDifferentShapes,
 			m_options.m_normalThresh, begin, end, score);
 		if (bestShape && m_options.m_allowSimplification)
 		{
-			MiscLib::Vector< MiscLib::RefCountPtr< PrimitiveShape > > suggestions;
+			std::vector< MiscLib::RefCountPtr< PrimitiveShape > > suggestions;
 			PointCloud tmpPC;
-			bestShape->SuggestSimplifications(tmpPC, nullptr, nullptr, m_options.m_epsilon, &suggestions);
+			bestShape->SuggestSimplifications(tmpPC, m_options.m_epsilon, &suggestions);
 			if (suggestions.size() > 0)
 			{
 				bool foundBestShape = false;

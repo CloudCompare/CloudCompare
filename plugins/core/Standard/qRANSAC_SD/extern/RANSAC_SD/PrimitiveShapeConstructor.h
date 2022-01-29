@@ -3,7 +3,7 @@
 #include "PrimitiveShape.h"
 #include "PointCloud.h"
 #include <MiscLib/RefCount.h>
-#include <MiscLib/Vector.h>
+#include <vector>
 #include <istream>
 #include <stdio.h>
 
@@ -25,10 +25,10 @@ class DLL_LINKAGE PrimitiveShapeConstructor
 	public:
 		virtual size_t Identifier() const = 0;
 		virtual unsigned int RequiredSamples() const = 0;
-		virtual PrimitiveShape *Construct(const MiscLib::Vector< Vec3f > &points,
-			const MiscLib::Vector< Vec3f > &normals) const = 0;
+		virtual PrimitiveShape *Construct(const std::vector< Vec3f > &points,
+			const std::vector< Vec3f > &normals) const = 0;
 		virtual PrimitiveShape *Construct(
-			const MiscLib::Vector< Vec3f > &samples) const = 0;
+			const std::vector< Vec3f > &samples) const = 0;
 		virtual PrimitiveShape *Deserialize(std::istream *i,
 			bool binary = true) const = 0;
 		virtual size_t SerializedSize() const = 0; // returns the serialized size excluding the identifier byte

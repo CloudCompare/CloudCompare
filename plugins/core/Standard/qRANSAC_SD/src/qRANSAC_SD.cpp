@@ -105,7 +105,7 @@ void qRansacSD::registerCommands(ccCommandLineInterface* cmd)
 	cmd->registerCommand(ccCommandLineInterface::Command::Shared(new CommandRANSAC));
 }
 
-static MiscLib::Vector< std::pair< MiscLib::RefCountPtr< PrimitiveShape >, size_t > >* s_shapes; // stores the detected shapes
+static std::vector< std::pair< MiscLib::RefCountPtr< PrimitiveShape >, size_t > >* s_shapes; // stores the detected shapes
 static size_t s_remainingPoints = 0;
 static RansacShapeDetector* s_detector = 0;
 static PointCloud* s_cloud = 0;
@@ -473,7 +473,7 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 
 	unsigned remaining = count;
 	typedef std::pair< MiscLib::RefCountPtr< PrimitiveShape >, size_t > DetectedShape;
-	MiscLib::Vector< DetectedShape > shapes; // stores the detected shapes
+	std::vector< DetectedShape > shapes; // stores the detected shapes
 
 	// run detection
 	// returns number of unassigned points
@@ -576,7 +576,7 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 		unsigned coneCount = 1;
 		unsigned torusCount = 1;
 		ccHObject* group = nullptr;
-		for (MiscLib::Vector<DetectedShape>::const_iterator it = shapes.begin(); it != shapes.end(); ++it)
+		for (std::vector<DetectedShape>::const_iterator it = shapes.begin(); it != shapes.end(); ++it)
 		{
 			const PrimitiveShape* shape = it->first;
 			unsigned shapePointsCount = static_cast<unsigned>(it->second);

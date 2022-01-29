@@ -71,7 +71,7 @@ void ConePrimitiveShape::Normal(const Vec3f &p, Vec3f *n) const
 
 unsigned int ConePrimitiveShape::ConfidenceTests(unsigned int numTests,
 	float epsilon, float normalThresh, float rms, const PointCloud &pc,
-	const MiscLib::Vector< size_t > &indices) const
+	const std::vector< size_t > &indices) const
 {
 	return BasePrimitiveShape::ConfidenceTests< Cone >(numTests, epsilon,
 		normalThresh, rms, pc, indices);
@@ -83,8 +83,8 @@ void ConePrimitiveShape::Description(std::string *s) const
 }
 
 bool ConePrimitiveShape::Fit(const PointCloud &pc, float epsilon,
-	float normalThresh, MiscLib::Vector< size_t >::const_iterator begin,
-	MiscLib::Vector< size_t >::const_iterator end)
+	float normalThresh, std::vector< size_t >::const_iterator begin,
+	std::vector< size_t >::const_iterator end)
 {
 	Cone fit = m_cone;
 	if(fit.LeastSquaresFit(pc, begin, end))
@@ -97,8 +97,8 @@ bool ConePrimitiveShape::Fit(const PointCloud &pc, float epsilon,
 }
 
 PrimitiveShape *ConePrimitiveShape::LSFit(const PointCloud &pc, float epsilon,
-	float normalThresh, MiscLib::Vector< size_t >::const_iterator begin,
-	MiscLib::Vector< size_t >::const_iterator end,
+	float normalThresh, std::vector< size_t >::const_iterator begin,
+	std::vector< size_t >::const_iterator end,
 	std::pair< size_t, float > *score) const
 {
 	Cone fit = m_cone;
@@ -157,10 +157,10 @@ void ConePrimitiveShape::Parameters(const Vec3f &p,
 }
 
 void ConePrimitiveShape::Parameters(GfxTL::IndexedIterator<
-		MiscLib::Vector< size_t >::iterator, PointCloud::const_iterator > begin,
-	GfxTL::IndexedIterator< MiscLib::Vector< size_t >::iterator,
+		std::vector< size_t >::iterator, PointCloud::const_iterator > begin,
+	GfxTL::IndexedIterator< std::vector< size_t >::iterator,
 		PointCloud::const_iterator > end,
-	MiscLib::Vector< std::pair< float, float > > *bmpParams) const
+	std::vector< std::pair< float, float > > *bmpParams) const
 {
 	ParametersImpl(begin, end, bmpParams);
 }
@@ -169,7 +169,7 @@ void ConePrimitiveShape::Parameters(GfxTL::IndexedIterator< IndexIterator,
 		PointCloud::const_iterator > begin,
 	GfxTL::IndexedIterator< IndexIterator,
 		PointCloud::const_iterator > end,
-	MiscLib::Vector< std::pair< float, float > > *bmpParams) const
+	std::vector< std::pair< float, float > > *bmpParams) const
 {
 	ParametersImpl(begin, end, bmpParams);
 }
@@ -206,14 +206,13 @@ void ConePrimitiveShape::Visit(PrimitiveShapeVisitor *visitor) const
 //}
 
 void ConePrimitiveShape::SuggestSimplifications(const PointCloud &pc,
-	MiscLib::Vector< size_t >::const_iterator begin,
-	MiscLib::Vector< size_t >::const_iterator end, float distThresh,
-	MiscLib::Vector< MiscLib::RefCountPtr< PrimitiveShape > > *suggestions) const
+	float distThresh,
+	std::vector< MiscLib::RefCountPtr< PrimitiveShape > > *suggestions) const
 {
 	// sample the bounding box in parameter space at 25 locations
 	// these points are used to estimate the other shapes
 	// if the shapes succeed the suggestion is returned
-	MiscLib::Vector< Vec3f > samples(2 * 25);
+	std::vector< Vec3f > samples(2 * 25);
 	float uStep = (m_extBbox.Max()[0] - m_extBbox.Min()[0]) / 4;
 	float vStep = (m_extBbox.Max()[1] - m_extBbox.Min()[1]) / 4;
 	float u = m_extBbox.Min()[0];
@@ -394,7 +393,7 @@ bool ConePrimitiveShape::Similar(float tolerance,
 
 void ConePrimitiveShape::BitmapExtent(float epsilon,
 	GfxTL::AABox< GfxTL::Vector2Df > *bbox,
-	MiscLib::Vector< std::pair< float, float > > *params,
+	std::vector< std::pair< float, float > > *params,
 	size_t *uextent, size_t *vextent)
 {
 	*uextent = static_cast<size_t>(std::ceil((bbox->Max()[0] - bbox->Min()[0]) / epsilon)); // no wrappig along u direction
@@ -403,7 +402,7 @@ void ConePrimitiveShape::BitmapExtent(float epsilon,
 	{
 		// try to reparameterize
 		// try to find cut in the outer regions
-		MiscLib::Vector< float > angularParams;//(params->size());
+		std::vector< float > angularParams;//(params->size());
 		angularParams.reserve(params->size());
 		float outer = 3.f * std::max(fabs(bbox->Min()[0]), fabs(bbox->Max()[0])) / 4.f;
 		for(size_t i = 0; i < params->size(); ++i)
@@ -456,7 +455,7 @@ void ConePrimitiveShape::InBitmap(const std::pair< float, float > &param,
 
 void ConePrimitiveShape::PreWrapBitmap(
 	const GfxTL::AABox< GfxTL::Vector2Df > &bbox, float epsilon,
-	size_t uextent, size_t vextent, MiscLib::Vector< char > *bmp) const
+	size_t uextent, size_t vextent, std::vector< char > *bmp) const
 {
 	if(m_cone.Angle() >= float(M_PI / 4))
 		return;
@@ -486,8 +485,8 @@ void ConePrimitiveShape::WrapBitmap(
 void ConePrimitiveShape::WrapComponents(
 	const GfxTL::AABox< GfxTL::Vector2Df > &bbox,
 	float epsilon, size_t uextent, size_t vextent,
-	MiscLib::Vector< int > *componentImg,
-	MiscLib::Vector< std::pair< int, size_t > > *labels) const
+	std::vector< int > *componentImg,
+	std::vector< std::pair< int, size_t > > *labels) const
 {
 	if(m_cone.Angle() >= float(M_PI / 4))
 		return;
@@ -504,7 +503,7 @@ void ConePrimitiveShape::WrapComponents(
 			(*componentImg)[v * uextent + u] = (*componentImg)[u]; // do the wrap
 	}
 	// relabel the components
-	MiscLib::Vector< std::pair< int, size_t > > tempLabels(*labels);
+	std::vector< std::pair< int, size_t > > tempLabels(*labels);
 	for(size_t u = 0; u < uextent; ++u)
 	{
 		float r = m_cone.RadiusAtLength(u * epsilon + bbox.Min()[0]);
@@ -548,7 +547,7 @@ void ConePrimitiveShape::WrapComponents(
 	// condense labels
 	for(int i = static_cast<int>(tempLabels.size()) - 1; i > 0; --i)
 		tempLabels[i].first = ReduceLabel(i, tempLabels);
-	MiscLib::Vector< int > condensed(tempLabels.size());
+	std::vector< int > condensed(tempLabels.size());
 	labels->clear();
 	labels->reserve(condensed.size());
 	int count = 0;
@@ -569,7 +568,7 @@ void ConePrimitiveShape::WrapComponents(
 }
 
 void ConePrimitiveShape::SetExtent(const GfxTL::AABox< GfxTL::Vector2Df > &bbox,
-	const MiscLib::Vector< int > &componentsImg, size_t uextent,
+	const std::vector< int > &componentsImg, size_t uextent,
 	size_t vextent, float epsilon, int label)
 {}
 

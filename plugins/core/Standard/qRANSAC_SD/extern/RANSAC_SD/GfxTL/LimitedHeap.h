@@ -4,7 +4,6 @@
 #include <functional>
 #include <vector>
 #include <GfxTL/FlatCopyVector.h>
-#include <GfxTL/StdContainerAdaptor.h>
 #include <functional>
 
 namespace GfxTL

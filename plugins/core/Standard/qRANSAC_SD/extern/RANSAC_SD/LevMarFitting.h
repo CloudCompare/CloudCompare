@@ -144,7 +144,7 @@ bool LevMar(IteratorT begin, IteratorT end, FuncT &func,
 #ifdef PRECISIONLEVMAR
 	subsets = 1;
 #endif
-	MiscLib::Vector< unsigned int > subsetSizes(subsets);
+	std::vector< unsigned int > subsetSizes(subsets);
 	for(size_t i = subsetSizes.size(); i;)
 	{
 		--i;

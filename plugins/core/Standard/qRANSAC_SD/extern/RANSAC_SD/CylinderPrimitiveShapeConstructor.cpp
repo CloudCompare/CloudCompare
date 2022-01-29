@@ -23,11 +23,11 @@ unsigned int CylinderPrimitiveShapeConstructor::RequiredSamples() const
 }
 
 PrimitiveShape *CylinderPrimitiveShapeConstructor::Construct(
-	const MiscLib::Vector< Vec3f > &points,
-	const MiscLib::Vector< Vec3f > &normals) const
+	const std::vector< Vec3f > &points,
+	const std::vector< Vec3f > &normals) const
 {
 	Cylinder cy;
-	MiscLib::Vector< Vec3f > samples(points);
+	std::vector< Vec3f > samples(points);
 	std::copy(normals.begin(), normals.end(), std::back_inserter(samples));
 	if (!cy.Init(samples))
 	{
@@ -41,7 +41,7 @@ PrimitiveShape *CylinderPrimitiveShapeConstructor::Construct(
 }
 
 PrimitiveShape *CylinderPrimitiveShapeConstructor::Construct(
-	const MiscLib::Vector< Vec3f > &samples) const
+	const std::vector< Vec3f > &samples) const
 {
 	Cylinder cy;
 	if (!cy.Init(samples))

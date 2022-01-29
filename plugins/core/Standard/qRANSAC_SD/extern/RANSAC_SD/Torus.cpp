@@ -59,7 +59,7 @@ static bool CircleFrom3Points(InIteratorT i, float *r,
 }
 
 // this function estimates the torus from four samples
-bool Torus::Init(const MiscLib::Vector< Vec3f > &samples)
+bool Torus::Init(const std::vector< Vec3f > &samples)
 {
 	if(samples.size() < 8)
 		return false;
@@ -74,7 +74,7 @@ bool Torus::Init(const MiscLib::Vector< Vec3f > &samples)
 	// spheres, cylinders, cones and tori" by Lukacs, Marshall and Martin 1997
 	// solve quadratic equation
 	size_t k = samples.size() >> 1;
-	MiscLib::Vector< GfxTL::Vector3Dd > dsamples;
+	std::vector< GfxTL::Vector3Dd > dsamples;
 	dsamples.reserve(samples.size());
 	for(size_t i = 0; i < samples.size(); ++i)
 		dsamples.push_back(GfxTL::Vector3Dd(samples[i][0], samples[i][1],
@@ -118,7 +118,7 @@ bool Torus::Init(const MiscLib::Vector< Vec3f > &samples)
 	normal2.normalize();
 
 	// at this point there are two possible solutions for the axis
-	MiscLib::Vector< GfxTL::Vector2Df > spin1, spin2;
+	std::vector< GfxTL::Vector2Df > spin1, spin2;
 	SpinImage(pos1, normal1, samples.begin(), samples.begin() + k,
 		std::back_inserter(spin1));
 	SpinImage(pos2, normal2, samples.begin(), samples.begin() + k,
@@ -172,7 +172,7 @@ bool Torus::Init(const MiscLib::Vector< Vec3f > &samples)
 	return true;
 }
 
-bool Torus::InitAverage(const MiscLib::Vector< Vec3f > &samples)
+bool Torus::InitAverage(const std::vector< Vec3f > &samples)
 {
 	if(samples.size() < 8)
 		return false;
@@ -187,7 +187,7 @@ bool Torus::InitAverage(const MiscLib::Vector< Vec3f > &samples)
 	// spheres, cylinders, cones and tori" by Lukacs, Marshall and Martin 1997
 	// solve quadratic equation
 	size_t k = samples.size() >> 1;
-	MiscLib::Vector< GfxTL::Vector3Dd > dsamples;
+	std::vector< GfxTL::Vector3Dd > dsamples;
 	dsamples.reserve(samples.size());
 	for(size_t i = 0; i < samples.size(); ++i)
 		dsamples.push_back(GfxTL::Vector3Dd(samples[i][0], samples[i][1],
@@ -251,7 +251,7 @@ bool Torus::InitAverage(const MiscLib::Vector< Vec3f > &samples)
 
 foundAxis:
 	// at this point there are two possible solutions for the axis
-	MiscLib::Vector< GfxTL::Vector2Df > spin1, spin2;
+	std::vector< GfxTL::Vector2Df > spin1, spin2;
 	SpinImage(pos1, normal1, samples.begin(), samples.begin() + k,
 		std::back_inserter(spin1));
 	SpinImage(pos2, normal2, samples.begin(), samples.begin() + k,
@@ -521,8 +521,8 @@ public:
 };
 
 bool Torus::LeastSquaresFit(const PointCloud &pc,
-	MiscLib::Vector< size_t >::const_iterator begin,
-	MiscLib::Vector< size_t >::const_iterator end)
+	std::vector< size_t >::const_iterator begin,
+	std::vector< size_t >::const_iterator end)
 {
 	float param[8];
 	for(size_t i = 0; i < 3; ++i)

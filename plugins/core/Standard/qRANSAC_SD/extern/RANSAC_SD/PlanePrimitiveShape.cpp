@@ -69,7 +69,7 @@ void PlanePrimitiveShape::Normal(const Vec3f &p, Vec3f *n) const
 
 unsigned int PlanePrimitiveShape::ConfidenceTests(unsigned int numTests,
 	float epsilon, float normalThresh, float rms, const PointCloud &pc,
-	const MiscLib::Vector< size_t > &indices) const
+	const std::vector< size_t > &indices) const
 {
 	return BasePrimitiveShape::ConfidenceTests< Plane >(numTests, epsilon,
 		normalThresh, rms, pc, indices);
@@ -81,8 +81,8 @@ void PlanePrimitiveShape::Description(std::string *s) const
 }
 
 bool PlanePrimitiveShape::Fit(const PointCloud &pc, float epsilon,
-	float normalThresh, MiscLib::Vector< size_t >::const_iterator begin,
-	MiscLib::Vector< size_t >::const_iterator end)
+	float normalThresh, std::vector< size_t >::const_iterator begin,
+	std::vector< size_t >::const_iterator end)
 {
 	Plane fit = m_plane;
 	//if(fit.LeastSquaresFit(pc, begin, end))
@@ -96,8 +96,8 @@ bool PlanePrimitiveShape::Fit(const PointCloud &pc, float epsilon,
 }
 
 PrimitiveShape *PlanePrimitiveShape::LSFit(const PointCloud &pc, float epsilon,
-	float normalThresh, MiscLib::Vector< size_t >::const_iterator begin,
-	MiscLib::Vector< size_t >::const_iterator end,
+	float normalThresh, std::vector< size_t >::const_iterator begin,
+	std::vector< size_t >::const_iterator end,
 	std::pair< size_t, float > *score) const
 {
 	Plane fit = m_plane;
@@ -170,11 +170,11 @@ void PlanePrimitiveShape::Parameters(const Vec3f &p,
 }
 
 void PlanePrimitiveShape::Parameters(
-	GfxTL::IndexedIterator< MiscLib::Vector< size_t >::iterator,
+	GfxTL::IndexedIterator< std::vector< size_t >::iterator,
 		PointCloud::const_iterator > begin,
-	GfxTL::IndexedIterator< MiscLib::Vector< size_t >::iterator,
+	GfxTL::IndexedIterator< std::vector< size_t >::iterator,
 		PointCloud::const_iterator > end,
-	MiscLib::Vector< std::pair< float, float > > *bmpParams) const
+	std::vector< std::pair< float, float > > *bmpParams) const
 {
 	ParametersImpl(begin, end, bmpParams);
 }
@@ -184,14 +184,14 @@ void PlanePrimitiveShape::Parameters(
 		PointCloud::const_iterator > begin,
 	GfxTL::IndexedIterator< IndexIterator,
 		PointCloud::const_iterator > end,
-	MiscLib::Vector< std::pair< float, float > > *bmpParams) const
+	std::vector< std::pair< float, float > > *bmpParams) const
 {
 	ParametersImpl(begin, end, bmpParams);
 }
 
 void PlanePrimitiveShape::BitmapExtent(float epsilon,
 	GfxTL::AABox< GfxTL::Vector2Df > *bbox,
-	MiscLib::Vector< std::pair< float, float > > *params,
+	std::vector< std::pair< float, float > > *params,
 	size_t *uextent, size_t *vextent)
 {
 	*uextent = size_t(std::ceil((bbox->Max()[0] - bbox->Min()[0]) / epsilon)) + 1;
@@ -214,7 +214,7 @@ void PlanePrimitiveShape::WrapBitmap(
 }
 
 void PlanePrimitiveShape::SetExtent(
-	const GfxTL::AABox< GfxTL::Vector2Df > &bbox, const MiscLib::Vector< int > &,
+	const GfxTL::AABox< GfxTL::Vector2Df > &bbox, const std::vector< int > &,
 	size_t, size_t, float, int)
 {}
 

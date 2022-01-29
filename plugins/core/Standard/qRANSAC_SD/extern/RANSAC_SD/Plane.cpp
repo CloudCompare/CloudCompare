@@ -37,21 +37,21 @@ bool Plane::Init(Vec3f p1, Vec3f p2, Vec3f p3)
 	return true;
 }
 
-bool Plane::Init(const MiscLib::Vector< Vec3f > &samples)
+bool Plane::Init(const std::vector< Vec3f > &samples)
 {
 	if(samples.size() < 6)
 		return false;
 	return Init(samples[0], samples[1], samples[2]);
 }
 
-bool Plane::InitAverage(const MiscLib::Vector< Vec3f > &samples)
+bool Plane::InitAverage(const std::vector< Vec3f > &samples)
 {
 	if(samples.size() < 1)
 		return false;
 	m_normal = Vec3f(0, 0, 0);
 	m_pos = Vec3f(0, 0, 0);
 	size_t c = samples.size() / 2;
-	MiscLib::Vector< GfxTL::Vector3Df > normals(c);
+	std::vector< GfxTL::Vector3Df > normals(c);
 	for(size_t i = 0; i < c; ++i)
 		normals[i] = GfxTL::Vector3Df(samples[i + c]);
 	GfxTL::Vector3Df meanNormal;
@@ -168,16 +168,16 @@ public:
 };
 
 bool Plane::LeastSquaresFit(const PointCloud &pc,
-	MiscLib::Vector< size_t >::const_iterator begin,
-	MiscLib::Vector< size_t >::const_iterator end)
+	std::vector< size_t >::const_iterator begin,
+	std::vector< size_t >::const_iterator end)
 {
 	LeastSquaresFit(GfxTL::IndexIterate(begin, pc.begin()),
 		GfxTL::IndexIterate(end, pc.begin()));
 	return true;
 }
 
-bool Plane::Interpolate(const MiscLib::Vector< Plane > &planes,
-	const MiscLib::Vector< float > &weights, Plane *ip)
+bool Plane::Interpolate(const std::vector< Plane > &planes,
+	const std::vector< float > &weights, Plane *ip)
 {
 	Vec3f normal(0, 0, 0);
 	Vec3f position(0, 0, 0);

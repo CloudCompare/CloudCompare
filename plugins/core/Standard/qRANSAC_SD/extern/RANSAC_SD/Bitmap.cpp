@@ -10,9 +10,9 @@
 using namespace MiscLib;
 extern MiscLib::performance_t totalTime_components;
 
-void DilateSquare(const MiscLib::Vector< char > &bitmap,
+void DilateSquare(const std::vector< char > &bitmap,
 	size_t uextent, size_t vextent, bool uwrap, bool vwrap,
-	MiscLib::Vector< char > *dilated)
+	std::vector< char > *dilated)
 {
 	// first pixel is special
 	(*dilated)[0] = bitmap[0] || bitmap[1] ||
@@ -151,9 +151,9 @@ void DilateSquare(const MiscLib::Vector< char > &bitmap,
 			bitmap[0];
 }
 
-void DilateCross(const MiscLib::Vector< char > &bitmap,
+void DilateCross(const std::vector< char > &bitmap,
 	size_t uextent, size_t vextent, bool uwrap, bool vwrap,
-	MiscLib::Vector< char > *dilated)
+	std::vector< char > *dilated)
 {
 	// first pixel is special
 	(*dilated)[0] = bitmap[0] || bitmap[1] ||
@@ -259,9 +259,9 @@ void DilateCross(const MiscLib::Vector< char > &bitmap,
 			bitmap[bitmap.size() - uextent];
 }
 
-void ErodeSquare(const MiscLib::Vector< char > &bitmap,
+void ErodeSquare(const std::vector< char > &bitmap,
 	size_t uextent, size_t vextent, bool uwrap, bool vwrap,
-	MiscLib::Vector< char > *eroded)
+	std::vector< char > *eroded)
 {
 	// first pixel is special
 	(*eroded)[0] = /*bitmap[0] && bitmap[1] &&
@@ -456,9 +456,9 @@ void ErodeSquare(const MiscLib::Vector< char > &bitmap,
 	}
 }
 
-void ErodeCross(const MiscLib::Vector< char > &bitmap,
+void ErodeCross(const std::vector< char > &bitmap,
 	size_t uextent, size_t vextent, bool uwrap, bool vwrap,
-	MiscLib::Vector< char > *eroded)
+	std::vector< char > *eroded)
 {
 	// first pixel is special
 	(*eroded)[0] = bitmap[0] && bitmap[1] &&
@@ -564,13 +564,13 @@ void ErodeCross(const MiscLib::Vector< char > &bitmap,
 			bitmap[bitmap.size() - uextent];
 }
 
-void PreWrappedComponents(const MiscLib::Vector< char > &bitmap, size_t uextent,
-	size_t vextent, MiscLib::Vector< int > *preWrappedComponentsImg,
-	MiscLib::Vector< int > *relabelComponentsImg,
-	const MiscLib::Vector< std::pair< int, size_t > > &inLabels,
-	MiscLib::Vector< std::pair< int, size_t > > *labels)
+void PreWrappedComponents(const std::vector< char > &bitmap, size_t uextent,
+	size_t vextent, std::vector< int > *preWrappedComponentsImg,
+	std::vector< int > *relabelComponentsImg,
+	const std::vector< std::pair< int, size_t > > &inLabels,
+	std::vector< std::pair< int, size_t > > *labels)
 {
-	MiscLib::Vector< std::pair< int, size_t > > tempLabels(inLabels);
+	std::vector< std::pair< int, size_t > > tempLabels(inLabels);
 	tempLabels.reserve(bitmap.size() / 2 + 1); // this is the maximum of possible tempLabels
 	if(!tempLabels.size())
 		tempLabels.push_back(std::make_pair(0, size_t(0)));
@@ -607,7 +607,7 @@ void PreWrappedComponents(const MiscLib::Vector< char > &bitmap, size_t uextent,
 	// reduce the tempLabels
 	for(int i = static_cast<int>(tempLabels.size()) - 1; i > 0; --i)
 		tempLabels[i].first = ReduceLabel(i, tempLabels);
-	MiscLib::Vector< int > condensed(tempLabels.size());
+	std::vector< int > condensed(tempLabels.size());
 	labels->clear();
 	labels->reserve(condensed.size());
 	int count = 0;
@@ -630,13 +630,13 @@ void PreWrappedComponents(const MiscLib::Vector< char > &bitmap, size_t uextent,
 			condensed[tempLabels[(*relabelComponentsImg)[i]].first];
 }
 
-void Components(const MiscLib::Vector< char > &bitmap,
+void Components(const std::vector< char > &bitmap,
 	size_t uextent, size_t vextent, bool uwrap, bool vwrap,
-	MiscLib::Vector< int > *componentsImg,
-	MiscLib::Vector< std::pair< int, size_t > > *labels)
+	std::vector< int > *componentsImg,
+	std::vector< std::pair< int, size_t > > *labels)
 {
 	componentsImg->resize(uextent * vextent);
-	MiscLib::Vector< std::pair< int, size_t > > tempLabels;
+	std::vector< std::pair< int, size_t > > tempLabels;
 	tempLabels.reserve(componentsImg->size() / 2 + 1); // this is the maximum of possible tempLabels
 	tempLabels.push_back(std::make_pair(0, size_t(0)));
 	// use an eight neighborhood
@@ -813,7 +813,7 @@ void Components(const MiscLib::Vector< char > &bitmap,
 	// reduce the tempLabels
 	for(int i = static_cast<int>(tempLabels.size()) - 1; i > 0; --i)
 		tempLabels[i].first = ReduceLabel(i, tempLabels);
-	MiscLib::Vector< int > condensed(tempLabels.size());
+	std::vector< int > condensed(tempLabels.size());
 	labels->clear();
 	labels->reserve(condensed.size());
 	int count = 0;
@@ -834,7 +834,7 @@ void Components(const MiscLib::Vector< char > &bitmap,
 }
 
 int Label(int n[], int size, int *curLabel,
-	MiscLib::Vector< std::pair< int, size_t > > *labels)
+	std::vector< std::pair< int, size_t > > *labels)
 {
 	// check if components are set
 	int count = 0, found;
@@ -871,7 +871,7 @@ int Label(int n[], int size, int *curLabel,
 }
 
 void AssociateLabel(int a, int b,
-	MiscLib::Vector< std::pair< int, size_t > > *labels)
+	std::vector< std::pair< int, size_t > > *labels)
 {
 	if(a > b)
 	{
@@ -891,14 +891,14 @@ void AssociateLabel(int a, int b,
 }
 
 int ReduceLabel(int a,
-	const MiscLib::Vector< std::pair< int, size_t > > &labels)
+	const std::vector< std::pair< int, size_t > > &labels)
 {
 	if(labels[a].first == a)
 		return labels[a].first;
 	return ReduceLabel(labels[a].first, labels);
 }
 
-bool IsEdge(const MiscLib::Vector< int > &componentImg, size_t uextent,
+bool IsEdge(const std::vector< int > &componentImg, size_t uextent,
 	size_t vextent, int label, bool uwrap, bool vwrap,
 	int startx, int starty, int dirx, int diry,
 	size_t *targetx, size_t *targety)
@@ -955,9 +955,9 @@ bool IsEdge(const MiscLib::Vector< int > &componentImg, size_t uextent,
 }
 
 // finds the loops around a connected component as polygons
-void ComponentLoops(const MiscLib::Vector< int > &componentImg, size_t uextent,
+void ComponentLoops(const std::vector< int > &componentImg, size_t uextent,
 	size_t vextent, int label, bool uwrap, bool vwrap,
-	MiscLib::Vector< MiscLib::Vector< GfxTL::VectorXD< 2, size_t > > > *polys)
+	std::vector< std::vector< GfxTL::VectorXD< 2, size_t > > > *polys)
 {
 	typedef GfxTL::VectorXD< 2, size_t > Vec2;
 	// find first point of component
@@ -1002,7 +1002,7 @@ void ComponentLoops(const MiscLib::Vector< int > &componentImg, size_t uextent,
 				y = static_cast<int>(vextent) - 1;
 			}
 		}
-		MiscLib::Vector< Vec2 > poly;
+		std::vector< Vec2 > poly;
 		// we initialize the path with an oriented edge
 		// since the black pixel is on the right the edge goes from
 		// bottom to top, i.e. from (x, y + 1) to (x, y)
@@ -1108,7 +1108,7 @@ void ComponentLoops(const MiscLib::Vector< int > &componentImg, size_t uextent,
 		file << std::endl;
 	}
 	file.close();
-	MiscLib::Vector< int > loopsImg((uextent + 1) * (vextent + 1), 0);
+	std::vector< int > loopsImg((uextent + 1) * (vextent + 1), 0);
 	std::ostringstream fn2;
 	fn2 << "ComponentLoopsOutput" << fname_int++ << ".txt";
 	for(size_t i = 0; i < polys->size(); ++i)

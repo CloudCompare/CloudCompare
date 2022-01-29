@@ -33,7 +33,7 @@ Cylinder::Cylinder(const Vec3f &pointA, const Vec3f &pointB,
 		throw ParallelNormalsError();
 }
 
-bool Cylinder::Init(const MiscLib::Vector< Vec3f > &samples)
+bool Cylinder::Init(const std::vector< Vec3f > &samples)
 {
 	if(samples.size() < 4)
 		return false;
@@ -80,12 +80,12 @@ bool Cylinder::Init(const MiscLib::Vector< Vec3f > &samples)
 	return true;
 }
 
-bool Cylinder::InitAverage(const MiscLib::Vector< Vec3f > &samples)
+bool Cylinder::InitAverage(const std::vector< Vec3f > &samples)
 {
 	if(samples.size() < 4)
 		return false;
 	// estimate axis from covariance of normal vectors
-	MiscLib::Vector< GfxTL::Vector3Df > normals;
+	std::vector< GfxTL::Vector3Df > normals;
 	size_t c = samples.size() / 2;
 	for(size_t i = c; i < samples.size(); ++i)
 	{
@@ -381,16 +381,16 @@ void NormalizeCylinderParams(float *param)
 }
 
 bool Cylinder::LeastSquaresFit(const PointCloud &pc,
-	MiscLib::Vector< size_t >::const_iterator begin,
-	MiscLib::Vector< size_t >::const_iterator end)
+	std::vector< size_t >::const_iterator begin,
+	std::vector< size_t >::const_iterator end)
 {
 	bool retVal = LeastSquaresFit(GfxTL::IndexIterate(begin, pc.begin()),
 		GfxTL::IndexIterate(end, pc.begin()));
 	return retVal;
 }
 
-bool Cylinder::Interpolate(const MiscLib::Vector< Cylinder > &cylinders,
-	const MiscLib::Vector< float > &weights, Cylinder *ic)
+bool Cylinder::Interpolate(const std::vector< Cylinder > &cylinders,
+	const std::vector< float > &weights, Cylinder *ic)
 {
 	Vec3f axisPos(0, 0, 0);
 	Vec3f axisDir(0, 0, 0);

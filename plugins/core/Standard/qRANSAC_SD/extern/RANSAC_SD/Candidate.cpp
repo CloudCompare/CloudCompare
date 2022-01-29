@@ -31,8 +31,8 @@ void Candidate::Reset()
 	m_score = 0;
 }
 
-void Candidate::Reindex(const MiscLib::Vector< int > &newIndices, int minInvalidIndex,
-	size_t mergedSubsets, const MiscLib::Vector< size_t > &subsetSizes,
+void Candidate::Reindex(const std::vector< int > &newIndices, int minInvalidIndex,
+	size_t mergedSubsets, const std::vector< size_t > &subsetSizes,
 	const PointCloud &pc, size_t currentSize, float epsilon, float normalThresh,
 	float bitmapEpsilon)
 {
@@ -66,7 +66,7 @@ void Candidate::Reindex(const MiscLib::Vector< int > &newIndices, int minInvalid
 	GetBounds(sampledPoints, currentSize);
 }
 
-void Candidate::Reindex(const MiscLib::Vector< size_t > &reindex)
+void Candidate::Reindex(const std::vector< size_t > &reindex)
 {
 	size_t reindexSize = reindex.size();
 	for(size_t i = 0; i < m_indices->size(); ++i)

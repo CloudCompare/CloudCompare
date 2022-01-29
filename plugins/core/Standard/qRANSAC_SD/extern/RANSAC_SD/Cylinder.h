@@ -3,13 +3,12 @@
 #include "basic.h"
 #include <stdexcept>
 #include <utility>
-#include <MiscLib/Vector.h>
+#include <vector>
 #include "PointCloud.h"
 #include <ostream>
 #include <istream>
 #include <GfxTL/HyperplaneCoordinateSystem.h>
 #include <stdio.h>
-#include <MiscLib/NoShrinkVector.h>
 #include "LevMarLSWeight.h"
 #include "LevMarFitting.h"
 
@@ -30,8 +29,8 @@ public:
 	Cylinder(const Vec3f &axisDir, const Vec3f &axisPos, float radius);
 	Cylinder(const Vec3f &pointA, const Vec3f &pointB,
 		const Vec3f &normalA, const Vec3f &normalB);
-	bool Init(const MiscLib::Vector< Vec3f > &samples);
-	bool InitAverage(const MiscLib::Vector< Vec3f > &samples);
+	bool Init(const std::vector< Vec3f > &samples);
+	bool InitAverage(const std::vector< Vec3f > &samples);
 	bool Init(const Vec3f &axisDir, const Vec3f &axisPos, float radius);
 	bool Init(const Vec3f &pointA, const Vec3f &pointB,
 		const Vec3f &normalA, const Vec3f &normalB);
@@ -55,16 +54,16 @@ public:
 	const Vec3f AngularDirection() const;
 	void RotateAngularDirection(float radians);
 	bool LeastSquaresFit(const PointCloud &pc,
-		MiscLib::Vector< size_t >::const_iterator begin,
-		MiscLib::Vector< size_t >::const_iterator end);
+		std::vector< size_t >::const_iterator begin,
+		std::vector< size_t >::const_iterator end);
 	template< class IteratorT >
 	bool LeastSquaresFit(IteratorT begin, IteratorT end);
 	bool Fit(const PointCloud &pc,
-		MiscLib::Vector< size_t >::const_iterator begin,
-		MiscLib::Vector< size_t >::const_iterator end)
+		std::vector< size_t >::const_iterator begin,
+		std::vector< size_t >::const_iterator end)
 	{ return LeastSquaresFit(pc, begin, end); }
-	static bool Interpolate(const MiscLib::Vector< Cylinder > &cylinders,
-		const MiscLib::Vector< float > &weights, Cylinder *ic);
+	static bool Interpolate(const std::vector< Cylinder > &cylinders,
+		const std::vector< float > &weights, Cylinder *ic);
 	void Serialize(bool binary, std::ostream *o) const;
 	static size_t SerializedSize();
 	void Serialize(FILE *o) const;

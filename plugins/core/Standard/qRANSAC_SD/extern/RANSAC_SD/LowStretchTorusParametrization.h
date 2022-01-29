@@ -8,7 +8,7 @@
 #include <GfxTL/AABox.h>
 #include <GfxTL/Frame.h>
 #include <utility>
-#include <MiscLib/Vector.h>
+#include <vector>
 
 class LowStretchTorusParametrization
 {
@@ -24,8 +24,8 @@ public:
 		float epsilon, bool *uwrap, bool *vwrap) const { *uwrap = false; *vwrap = false; }
 	void WrapComponents(const GfxTL::AABox< GfxTL::Vector2Df > &bbox,
 		float epsilon, size_t uextent, size_t vextent,
-		MiscLib::Vector< int > *componentImg,
-		MiscLib::Vector< std::pair< int, size_t > > *labels) const;
+		std::vector< int > *componentImg,
+		std::vector< std::pair< int, size_t > > *labels) const;
 	template< class IteratorT >
 	void Optimize(IteratorT begin, IteratorT end, float epsilon);
 	static size_t SerializedSize();
@@ -124,7 +124,7 @@ void LowStretchTorusParametrization::Optimize(IteratorT begin, IteratorT end,
 	// find a rotation along the major radius (u-direction) and minor radius (v-direction)
 	GfxTL::Frame< 3, float > nframe;
 	nframe.FromNormal(m_torus->AxisDirection());
-	MiscLib::Vector< float > uangles(end - begin), vangles(end - begin);
+	std::vector< float > uangles(end - begin), vangles(end - begin);
 	size_t j = 0;
 	for(IteratorT i = begin; i != end; ++i, ++j)
 	{

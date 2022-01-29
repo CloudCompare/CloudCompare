@@ -6,15 +6,8 @@ target_sources( ${PROJECT_NAME}
 		${CMAKE_CURRENT_LIST_DIR}/AACube.h
 		${CMAKE_CURRENT_LIST_DIR}/AACube.hpp
 		${CMAKE_CURRENT_LIST_DIR}/AACubeTree.h
-		${CMAKE_CURRENT_LIST_DIR}/AACubeTree.hpp
-		${CMAKE_CURRENT_LIST_DIR}/AAKdTree.h
-		${CMAKE_CURRENT_LIST_DIR}/AAKdTree.hpp
-		${CMAKE_CURRENT_LIST_DIR}/AAPlane.h
-		${CMAKE_CURRENT_LIST_DIR}/AAPlane.hpp
 		${CMAKE_CURRENT_LIST_DIR}/Array.h
-		${CMAKE_CURRENT_LIST_DIR}/ArrayArithmetic.h
 		${CMAKE_CURRENT_LIST_DIR}/BaseTree.h
-		${CMAKE_CURRENT_LIST_DIR}/BaseTree.hpp
 		${CMAKE_CURRENT_LIST_DIR}/BBoxBuildInformationTreeStrategy.h
 		${CMAKE_CURRENT_LIST_DIR}/BBoxDistanceKdTreeStrategy.h
 		${CMAKE_CURRENT_LIST_DIR}/BucketSizeMaxLevelSubdivisionTreeStrategy.h
@@ -26,7 +19,6 @@ target_sources( ${PROJECT_NAME}
 		${CMAKE_CURRENT_LIST_DIR}/CellRangeDataTreeStrategy.h
 		${CMAKE_CURRENT_LIST_DIR}/CellSizeDataTreeStrategy.h
 		${CMAKE_CURRENT_LIST_DIR}/Covariance.h
-		${CMAKE_CURRENT_LIST_DIR}/DynVectorKernel.h
 		${CMAKE_CURRENT_LIST_DIR}/FaceNeighborAACubeTreeStrategy.h
 		${CMAKE_CURRENT_LIST_DIR}/FlatCopyVector.h
 		${CMAKE_CURRENT_LIST_DIR}/Frame.h
@@ -38,8 +30,6 @@ target_sources( ${PROJECT_NAME}
 		${CMAKE_CURRENT_LIST_DIR}/IndexedTreeDataStrategy.h
 		${CMAKE_CURRENT_LIST_DIR}/Jacobi.h
 		${CMAKE_CURRENT_LIST_DIR}/KdTree.h
-		${CMAKE_CURRENT_LIST_DIR}/KdTree.hpp
-		${CMAKE_CURRENT_LIST_DIR}/L1Norm.h
 		${CMAKE_CURRENT_LIST_DIR}/L2Norm.h
 		${CMAKE_CURRENT_LIST_DIR}/LevelBuildInformationTreeStrategy.h
 		${CMAKE_CURRENT_LIST_DIR}/LimitedHeap.h
@@ -47,23 +37,17 @@ target_sources( ${PROJECT_NAME}
 		${CMAKE_CURRENT_LIST_DIR}/MatrixXX.h
 		${CMAKE_CURRENT_LIST_DIR}/MaxIntervalSplittingKdTreeStrategy.h
 		${CMAKE_CURRENT_LIST_DIR}/MaxLevelSubdivisionTreeStrategy.h
-		${CMAKE_CURRENT_LIST_DIR}/MaxNorm.h
 		${CMAKE_CURRENT_LIST_DIR}/Mean.h
 		${CMAKE_CURRENT_LIST_DIR}/NearestNeighbor.h
 		${CMAKE_CURRENT_LIST_DIR}/NearestNeighbors.h
 		${CMAKE_CURRENT_LIST_DIR}/NullClass.h
-		${CMAKE_CURRENT_LIST_DIR}/NullStrategy.h
-		${CMAKE_CURRENT_LIST_DIR}/NullStrategy.hpp
 		${CMAKE_CURRENT_LIST_DIR}/NullTreeStrategy.h
-		${CMAKE_CURRENT_LIST_DIR}/OnOff.h
-		${CMAKE_CURRENT_LIST_DIR}/Orientation.h
 		${CMAKE_CURRENT_LIST_DIR}/Plane.h
 		${CMAKE_CURRENT_LIST_DIR}/Plane.hpp
 		${CMAKE_CURRENT_LIST_DIR}/ScalarTypeConversion.h
 		${CMAKE_CURRENT_LIST_DIR}/ScalarTypeDeferer.h
 		${CMAKE_CURRENT_LIST_DIR}/ShuffleIndicesTreeDataKernelStrategy.h
 		${CMAKE_CURRENT_LIST_DIR}/SlidingMidpointSplittingKdTreeStrategy.h
-		${CMAKE_CURRENT_LIST_DIR}/StdContainerAdaptor.h
 		${CMAKE_CURRENT_LIST_DIR}/StdOverrides.h
 		${CMAKE_CURRENT_LIST_DIR}/Swap.h
 		${CMAKE_CURRENT_LIST_DIR}/VectorKernel.h

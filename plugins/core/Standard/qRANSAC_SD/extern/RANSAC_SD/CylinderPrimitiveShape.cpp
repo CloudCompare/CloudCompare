@@ -89,7 +89,7 @@ void CylinderPrimitiveShape::Normal(const Vec3f &p, Vec3f *n) const
 
 unsigned int CylinderPrimitiveShape::ConfidenceTests(unsigned int numTests,
 	float epsilon, float normalThresh, float rms, const PointCloud &pc,
-	const MiscLib::Vector< size_t > &indices) const
+	const std::vector< size_t > &indices) const
 {
 	return BasePrimitiveShape::ConfidenceTests< Cylinder >(numTests, epsilon,
 		normalThresh, rms, pc, indices);
@@ -101,8 +101,8 @@ void CylinderPrimitiveShape::Description(std::string *s) const
 }
 
 bool CylinderPrimitiveShape::Fit(const PointCloud &pc, float epsilon,
-	float normalThresh, MiscLib::Vector< size_t >::const_iterator begin,
-	MiscLib::Vector< size_t >::const_iterator end)
+	float normalThresh, std::vector< size_t >::const_iterator begin,
+	std::vector< size_t >::const_iterator end)
 
 {
 	Cylinder fit = m_cylinder;
@@ -116,8 +116,8 @@ bool CylinderPrimitiveShape::Fit(const PointCloud &pc, float epsilon,
 
 PrimitiveShape *CylinderPrimitiveShape::LSFit(const PointCloud &pc,
 	float epsilon, float normalThresh,
-	MiscLib::Vector< size_t >::const_iterator begin,
-	MiscLib::Vector< size_t >::const_iterator end,
+	std::vector< size_t >::const_iterator begin,
+	std::vector< size_t >::const_iterator end,
 	std::pair< size_t, float > *score) const
 {
 	Cylinder fit = m_cylinder;
@@ -171,14 +171,13 @@ void CylinderPrimitiveShape::Visit(PrimitiveShapeVisitor *visitor) const
 }
 
 void CylinderPrimitiveShape::SuggestSimplifications(const PointCloud &pc,
-	MiscLib::Vector< size_t >::const_iterator begin,
-	MiscLib::Vector< size_t >::const_iterator end, float distThresh,
-	MiscLib::Vector< MiscLib::RefCountPtr< PrimitiveShape > > *suggestions) const
+	float distThresh,
+	std::vector< MiscLib::RefCountPtr< PrimitiveShape > > *suggestions) const
 {
 	// sample the bounding box in parameter space at 25 locations
 	// these points are used to estimate the other shapes
 	// if the shapes succeed the suggestion is returned
-	MiscLib::Vector< Vec3f > samples(2 * 25);
+	std::vector< Vec3f > samples(2 * 25);
 	float uStep = (m_extBbox.Max()[0] - m_extBbox.Min()[0]) / 4;
 	float vStep = (m_extBbox.Max()[1] - m_extBbox.Min()[1]) / 4;
 	float u = m_extBbox.Min()[0];
@@ -319,11 +318,11 @@ void CylinderPrimitiveShape::Parameters(const Vec3f &p,
 }
 
 void CylinderPrimitiveShape::Parameters(
-	GfxTL::IndexedIterator< MiscLib::Vector< size_t >::iterator,
+	GfxTL::IndexedIterator< std::vector< size_t >::iterator,
 		PointCloud::const_iterator > begin,
-	GfxTL::IndexedIterator< MiscLib::Vector< size_t >::iterator,
+	GfxTL::IndexedIterator< std::vector< size_t >::iterator,
 		PointCloud::const_iterator > end,
-	MiscLib::Vector< std::pair< float, float > > *bmpParams) const
+	std::vector< std::pair< float, float > > *bmpParams) const
 {
 	ParametersImpl(begin, end, bmpParams);
 }
@@ -333,14 +332,14 @@ void CylinderPrimitiveShape::Parameters(
 		PointCloud::const_iterator > begin,
 	GfxTL::IndexedIterator< IndexIterator,
 		PointCloud::const_iterator > end,
-	MiscLib::Vector< std::pair< float, float > > *bmpParams) const
+	std::vector< std::pair< float, float > > *bmpParams) const
 {
 	ParametersImpl(begin, end, bmpParams);
 }
 
 void CylinderPrimitiveShape::BitmapExtent(float epsilon,
 	GfxTL::AABox< GfxTL::Vector2Df > *bbox,
-	MiscLib::Vector< std::pair< float, float > > *params,
+	std::vector< std::pair< float, float > > *params,
 	size_t *uextent, size_t *vextent)
 {
 	*uextent = size_t(std::ceil(
@@ -351,7 +350,7 @@ void CylinderPrimitiveShape::BitmapExtent(float epsilon,
 		// try to reparameterize
 		if(bbox->Min()[1] > epsilon && bbox->Max()[1] < 2 * M_PI * m_cylinder.Radius() - epsilon)
 			return; // there is no wrapping -> we can't do anything
-		MiscLib::Vector< float > angularParams(params->size());
+		std::vector< float > angularParams(params->size());
 		for(size_t i = 0; i < params->size(); ++i)
 			angularParams[i] = (*params)[i].second;
 		std::sort(angularParams.begin(), angularParams.end());
@@ -411,7 +410,7 @@ void CylinderPrimitiveShape::WrapBitmap(
 }
 
 void CylinderPrimitiveShape::PreWrapBitmap(const GfxTL::AABox< GfxTL::Vector2Df > &bbox,
-	float epsilon, size_t uextent, size_t vextent, MiscLib::Vector< char > *bmp) const
+	float epsilon, size_t uextent, size_t vextent, std::vector< char > *bmp) const
 {	
 	// wraps the bitmpap around the v-axis
 	// note: we do not check, if the cylinder is really wrapped around !
@@ -425,7 +424,7 @@ void CylinderPrimitiveShape::PreWrapBitmap(const GfxTL::AABox< GfxTL::Vector2Df 
 
 void CylinderPrimitiveShape::SetExtent(
 	const GfxTL::AABox< GfxTL::Vector2Df > &extBbox,
-	const MiscLib::Vector< int > &componentsImg, size_t uextent,
+	const std::vector< int > &componentsImg, size_t uextent,
 	size_t vextent, float epsilon, int label)
 {
 	if(extBbox.Min()[1] * m_cylinder.Radius() <= epsilon

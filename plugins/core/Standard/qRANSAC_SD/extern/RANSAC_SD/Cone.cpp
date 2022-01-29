@@ -39,7 +39,7 @@ Cone::Cone(const Vec3f &p1, const Vec3f &p2, const Vec3f &p3,
 		throw ParallelPlanesError();
 }
 
-bool Cone::Init(const MiscLib::Vector< Vec3f > &samples)
+bool Cone::Init(const std::vector< Vec3f > &samples)
 {
 	if(samples.size() < 6)
 		return false;
@@ -92,11 +92,11 @@ public:
 	void Normalize(ScalarType *) const {}
 };
 
-bool Cone::InitAverage(const MiscLib::Vector< Vec3f > &samples)
+bool Cone::InitAverage(const std::vector< Vec3f > &samples)
 {
 	// setup all the planes
 	size_t c = samples.size() / 2;
-	MiscLib::Vector< GfxTL::Vector4Df > planes(c);
+	std::vector< GfxTL::Vector4Df > planes(c);
 #ifdef DOPARALLEL
 	#pragma omp parallel for schedule(static)
 #endif
@@ -136,7 +136,7 @@ bool Cone::InitAverage(const MiscLib::Vector< Vec3f > &samples)
 	LevMar(planes.begin(), planes.end(), planeDistance,
 		(float *)m_center);
 
-	MiscLib::Vector< GfxTL::Vector3Df > spoints(c);
+	std::vector< GfxTL::Vector3Df > spoints(c);
 #ifdef DOPARALLEL
 	#pragma omp parallel for schedule(static)
 #endif
@@ -578,16 +578,16 @@ void NormalizeConeParams(float *param)
 }
 
 bool Cone::LeastSquaresFit(const PointCloud &pc,
-	MiscLib::Vector< size_t >::const_iterator begin,
-	MiscLib::Vector< size_t >::const_iterator end)
+	std::vector< size_t >::const_iterator begin,
+	std::vector< size_t >::const_iterator end)
 {
 	bool retVal = LeastSquaresFit(GfxTL::IndexIterate(begin, pc.begin()),
 		GfxTL::IndexIterate(end, pc.begin()));
 	return retVal;
 }
 
-bool Cone::Interpolate(const MiscLib::Vector< Cone > &cones,
-	const MiscLib::Vector< float > &weights, Cone *ic)
+bool Cone::Interpolate(const std::vector< Cone > &cones,
+	const std::vector< float > &weights, Cone *ic)
 {
 	Vec3f center(0, 0, 0);
 	Vec3f axisDir(0, 0, 0);
@@ -709,7 +709,7 @@ Cone::ConeInfo Cone::GetInfo(const PointCloud& pc, size_t startingIndx, size_t e
 	return rtrn;
 }
 
-Cone::ConeInfo Cone::GetInfo(const MiscLib::Vector< Vec3f >& samples) const
+Cone::ConeInfo Cone::GetInfo(const std::vector< Vec3f >& samples) const
 {
 	ConeInfo rtrn;
 	

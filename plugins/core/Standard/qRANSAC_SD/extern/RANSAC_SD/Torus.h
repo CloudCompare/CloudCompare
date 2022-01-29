@@ -1,7 +1,7 @@
 #ifndef TORUS_HEADER
 #define TORUS_HEADER
 #include "basic.h"
-#include <MiscLib/Vector.h>
+#include <vector>
 #include "PointCloud.h"
 #include <GfxTL/HyperplaneCoordinateSystem.h>
 #include <GfxTL/VectorXD.h>
@@ -9,7 +9,6 @@
 #include <ostream>
 #include <istream>
 #include <stdio.h>
-#include <MiscLib/NoShrinkVector.h>
 
 #ifndef DLL_LINKAGE
 #define DLL_LINKAGE
@@ -19,8 +18,8 @@ class DLL_LINKAGE Torus
 {
 public:
 	enum { RequiredSamples = 4 };
-	bool Init(const MiscLib::Vector< Vec3f > &samples);
-	bool InitAverage(const MiscLib::Vector< Vec3f > &samples);
+	bool Init(const std::vector< Vec3f > &samples);
+	bool InitAverage(const std::vector< Vec3f > &samples);
 	bool Init(bool binary, std::istream *i);
 	void Init(FILE *i);
 	void Init(float *array);
@@ -36,11 +35,11 @@ public:
 	const float MinorRadius() const { return m_rminor; }
 	const float MajorRadius() const { return m_rmajor; }
 	bool LeastSquaresFit(const PointCloud &pc,
-		MiscLib::Vector< size_t >::const_iterator begin,
-		MiscLib::Vector< size_t >::const_iterator end);
+		std::vector< size_t >::const_iterator begin,
+		std::vector< size_t >::const_iterator end);
 	bool Fit(const PointCloud &pc,
-		MiscLib::Vector< size_t >::const_iterator begin,
-		MiscLib::Vector< size_t >::const_iterator end)
+		std::vector< size_t >::const_iterator begin,
+		std::vector< size_t >::const_iterator end)
 	{ return LeastSquaresFit(pc, begin, end); }
 	bool IsAppleShaped() const { return m_appleShaped; }
 	float AppleCutOffAngle() const { return m_cutOffAngle; }

@@ -1,5 +1,5 @@
 #include "PointCloud.h"
-#include <MiscLib/Vector.h>
+#include <vector>
 #include <iostream>
 #include <iterator>
 #include <fstream>
@@ -26,8 +26,6 @@
 #include <GfxTL/Plane.h>
 #include <GfxTL/VectorXD.h>
 #include <GfxTL/IndexedIterator.h>
-#include <MiscLib/AlignedAllocator.h>
-#include <MiscLib/NoShrinkVector.h>
 
 typedef GfxTL::KdTree
 <
@@ -51,7 +49,7 @@ typedef GfxTL::KdTree
 									GfxTL::IndexedIteratorTreeDataKernel
 									<
 										PointCloud::const_iterator,
-										MiscLib::Vector< size_t >
+										std::vector< size_t >
 									>
 								>
 							>
@@ -180,7 +178,7 @@ void PointCloud::calcNormals ( float radius, unsigned int kNN, unsigned int maxT
 	GfxTL::LimitedHeap< GfxTL::NN< float > > nn;
 	KdTree3Df::NearestNeighborsAuxData< value_type > nnAux;
 	//GfxTL::AssumeUniqueLimitedHeap< GfxTL::NN< float > > nn;
-	MiscLib::NoShrinkVector< float > weights;
+	std::vector< float > weights;
 
 	vector<int> stats(91, 0);
 #ifdef PCA_NORMALS

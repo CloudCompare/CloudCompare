@@ -40,16 +40,16 @@ public:
 	void Normal(const Vec3f &p, Vec3f *n) const;
 	unsigned int ConfidenceTests(unsigned int numTests, float epsilon,
 		float normalThresh, float rms, const PointCloud &pc,
-		const MiscLib::Vector< size_t > &indices) const;
+		const std::vector< size_t > &indices) const;
 	void Description(std::string *s) const;
 	// refitting
 	bool Fit(const PointCloud &pc, float epsilon,
 		float normalThresh,
-		MiscLib::Vector< size_t >::const_iterator begin,
-		MiscLib::Vector< size_t >::const_iterator end);
+		std::vector< size_t >::const_iterator begin,
+		std::vector< size_t >::const_iterator end);
 	PrimitiveShape *LSFit(const PointCloud &pc, float epsilon,
-		float normalThresh, MiscLib::Vector< size_t >::const_iterator begin,
-		MiscLib::Vector< size_t >::const_iterator end,
+		float normalThresh, std::vector< size_t >::const_iterator begin,
+		std::vector< size_t >::const_iterator end,
 		std::pair< size_t, float > *score) const;
 	LevMarFunc< float > *SignedDistanceFunc() const;
 	void Serialize(std::ostream *o, bool binary = true) const;
@@ -60,9 +60,8 @@ public:
 	void Transform(float scale, const Vec3f &translate);
 	void Visit(PrimitiveShapeVisitor *visitor) const;
 	void SuggestSimplifications(const PointCloud &pc,
-		MiscLib::Vector< size_t >::const_iterator begin,
-		MiscLib::Vector< size_t >::const_iterator end, float distThresh,
-		MiscLib::Vector< MiscLib::RefCountPtr< PrimitiveShape > > *suggestions) const;
+		float distThresh,
+		std::vector< MiscLib::RefCountPtr< PrimitiveShape > > *suggestions) const;
 	void OptimizeParametrization(const PointCloud &pc,
 		size_t begin, size_t end, float epsilon);
 	bool Similar(float tolerance, const TorusPrimitiveShape &shape) const;
@@ -70,20 +69,20 @@ public:
 	// implementation of BitmapPrimitiveShape
 	void Parameters(const Vec3f &p,
 		std::pair< float, float > *param) const;
-	void Parameters(GfxTL::IndexedIterator< MiscLib::Vector< size_t >::iterator,
+	void Parameters(GfxTL::IndexedIterator< std::vector< size_t >::iterator,
 			PointCloud::const_iterator > begin,
-		GfxTL::IndexedIterator< MiscLib::Vector< size_t >::iterator,
+		GfxTL::IndexedIterator< std::vector< size_t >::iterator,
 			PointCloud::const_iterator > end,
-		MiscLib::Vector< std::pair< float, float > > *bmpParams) const;
+		std::vector< std::pair< float, float > > *bmpParams) const;
 	void Parameters(GfxTL::IndexedIterator< IndexIterator,
 			PointCloud::const_iterator > begin,
 		GfxTL::IndexedIterator< IndexIterator,
 			PointCloud::const_iterator > end,
-		MiscLib::Vector< std::pair< float, float > > *bmpParams) const;
+		std::vector< std::pair< float, float > > *bmpParams) const;
 	bool InSpace(float u, float v, Vec3f *p, Vec3f *n) const;
 	void BitmapExtent(float epsilon,
 		GfxTL::AABox< GfxTL::Vector2Df > *bbox,
-		MiscLib::Vector< std::pair< float, float > > *params,
+		std::vector< std::pair< float, float > > *params,
 		size_t *uextent, size_t *vextent);
 	void InBitmap(const std::pair< float, float > &param,
 		float epsilon, const GfxTL::AABox< GfxTL::Vector2Df > &bbox,
@@ -93,18 +92,18 @@ public:
 		float epsilon, bool *uwrap, bool *vwrap) const;
 	void WrapComponents(const GfxTL::AABox< GfxTL::Vector2Df > &bbox,
 		float epsilon, size_t uextent, size_t vextent,
-		MiscLib::Vector< int > *componentImg,
-		MiscLib::Vector< std::pair< int, size_t > > *labels) const;
+		std::vector< int > *componentImg,
+		std::vector< std::pair< int, size_t > > *labels) const;
 	void SetExtent(const GfxTL::AABox< GfxTL::Vector2Df > &bbox,
-		const MiscLib::Vector< int > &componentsImg, size_t uextent,
+		const std::vector< int > &componentsImg, size_t uextent,
 		size_t vextent, float epsilon, int label);
 	bool InSpace(size_t u, size_t v, float epsilon,
 		const GfxTL::AABox< GfxTL::Vector2Df > &bbox, size_t uextent,
 		size_t vextent, Vec3f *p, Vec3f *n) const;
 	const Torus &Internal() const { return m_torus; }
 	bool CheckGeneratedShapeWithinLimits(const PointCloud& pc,
-		MiscLib::Vector< size_t >::const_iterator begin,
-		MiscLib::Vector< size_t >::const_iterator end) override
+		std::vector< size_t >::const_iterator begin,
+		std::vector< size_t >::const_iterator end) override
 	{
 		if ((!m_allowAppleShaped && m_torus.IsAppleShaped()) || 
 			m_torus.MinorRadius() < m_minMinorRadius ||
@@ -120,7 +119,7 @@ public:
 private:
 	template< class IteratorT >
 	void ParametersImpl(IteratorT begin, IteratorT end,
-		MiscLib::Vector< std::pair< float, float > > *bmpParams) const;
+		std::vector< std::pair< float, float > > *bmpParams) const;
 
 private:
 	Torus m_torus;
@@ -134,7 +133,7 @@ private:
 
 template< class IteratorT >
 void TorusPrimitiveShape::ParametersImpl(IteratorT begin, IteratorT end,
-	MiscLib::Vector< std::pair< float, float > > *bmpParams) const
+	std::vector< std::pair< float, float > > *bmpParams) const
 {
 	bmpParams->resize(end - begin);
 	size_t j = 0;

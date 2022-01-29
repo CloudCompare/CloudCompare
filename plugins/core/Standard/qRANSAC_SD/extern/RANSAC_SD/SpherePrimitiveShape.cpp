@@ -210,7 +210,7 @@ void SpherePrimitiveShape::Normal(const Vec3f &p, Vec3f *n) const
 
 unsigned int SpherePrimitiveShape::ConfidenceTests(unsigned int numTests,
 	float epsilon, float normalThresh, float rms, const PointCloud &pc,
-	const MiscLib::Vector< size_t > &indices) const
+	const std::vector< size_t > &indices) const
 {
 	return BasePrimitiveShape::ConfidenceTests< Sphere >(numTests, epsilon,
 		normalThresh, rms, pc, indices);
@@ -222,8 +222,8 @@ void SpherePrimitiveShape::Description(std::string *s) const
 }
 
 bool SpherePrimitiveShape::Fit(const PointCloud &pc, float epsilon,
-	float normalThresh, MiscLib::Vector< size_t >::const_iterator begin,
-	MiscLib::Vector< size_t >::const_iterator end)
+	float normalThresh, std::vector< size_t >::const_iterator begin,
+	std::vector< size_t >::const_iterator end)
 {
 	// do LS-fitting
 	Sphere fit = m_sphere;
@@ -237,8 +237,8 @@ bool SpherePrimitiveShape::Fit(const PointCloud &pc, float epsilon,
 }
 
 PrimitiveShape *SpherePrimitiveShape::LSFit(const PointCloud &pc, float epsilon,
-	float normalThresh, MiscLib::Vector< size_t >::const_iterator begin,
-	MiscLib::Vector< size_t >::const_iterator end,
+	float normalThresh, std::vector< size_t >::const_iterator begin,
+	std::vector< size_t >::const_iterator end,
 	std::pair< size_t, float > *score) const
 {
 	// do LS-fitting
@@ -296,14 +296,13 @@ void SpherePrimitiveShape::Visit(PrimitiveShapeVisitor *visitor) const
 }
 
 void SpherePrimitiveShape::SuggestSimplifications(const PointCloud &pc,
-	MiscLib::Vector< size_t >::const_iterator begin,
-	MiscLib::Vector< size_t >::const_iterator end, float distThresh,
-	MiscLib::Vector< MiscLib::RefCountPtr< PrimitiveShape > > *suggestions) const
+	float distThresh,
+	std::vector< MiscLib::RefCountPtr< PrimitiveShape > > *suggestions) const
 {
 	// sample the bounding box in parameter space at 25 locations
 	// these points are used to estimate the other shapes
 	// if the shapes succeed the suggestion is returned
-	MiscLib::Vector< Vec3f > samples;
+	std::vector< Vec3f > samples;
 	samples.resize(2 * 25);
 	size_t c = samples.size() / 2;
 	float uStep = (m_extBbox.Max()[0] - m_extBbox.Min()[0]) / 4;
@@ -414,8 +413,8 @@ void SpherePrimitiveShape::SuggestSimplifications(const PointCloud &pc,
 }
 
 void SpherePrimitiveShape::OptimizeParametrization(const PointCloud &pc,
-	MiscLib::Vector< size_t >::const_iterator begin,
-	MiscLib::Vector< size_t >::const_iterator end, float epsilon)
+	std::vector< size_t >::const_iterator begin,
+	std::vector< size_t >::const_iterator end, float epsilon)
 {
 	m_parametrization.Optimize(GfxTL::IndexIterate(begin, pc.begin()),
 		GfxTL::IndexIterate(end, pc.begin()), epsilon);
@@ -442,11 +441,11 @@ void SpherePrimitiveShape::Parameters(const Vec3f &p,
 }
 
 void SpherePrimitiveShape::Parameters(
-	GfxTL::IndexedIterator< MiscLib::Vector< size_t >::iterator,
+	GfxTL::IndexedIterator< std::vector< size_t >::iterator,
 		PointCloud::const_iterator > begin,
-	GfxTL::IndexedIterator< MiscLib::Vector< size_t >::iterator,
+	GfxTL::IndexedIterator< std::vector< size_t >::iterator,
 		PointCloud::const_iterator > end,
-	MiscLib::Vector< std::pair< float, float > > *bmpParams) const
+	std::vector< std::pair< float, float > > *bmpParams) const
 {
 	ParametersImpl(begin, end, bmpParams);
 }
@@ -456,7 +455,7 @@ void SpherePrimitiveShape::Parameters(
 		PointCloud::const_iterator > begin,
 	GfxTL::IndexedIterator< IndexIterator,
 		PointCloud::const_iterator > end,
-	MiscLib::Vector< std::pair< float, float > > *bmpParams) const
+	std::vector< std::pair< float, float > > *bmpParams) const
 {
 	ParametersImpl(begin, end, bmpParams);
 }
@@ -468,7 +467,7 @@ bool SpherePrimitiveShape::InSpace(float u, float v, Vec3f *p, Vec3f *n) const
 
 void SpherePrimitiveShape::BitmapExtent(float epsilon,
 	GfxTL::AABox< GfxTL::Vector2Df > *bbox,
-	MiscLib::Vector< std::pair< float, float > > *params,
+	std::vector< std::pair< float, float > > *params,
 	size_t *uextent, size_t *vextent)
 {
 	*uextent = static_cast<size_t>(std::ceil((bbox->Max()[0] - bbox->Min()[0]) / epsilon));
@@ -493,8 +492,8 @@ void SpherePrimitiveShape::WrapBitmap(
 
 void SpherePrimitiveShape::WrapComponents(const GfxTL::AABox< GfxTL::Vector2Df > &bbox,
 	float epsilon, size_t uextent, size_t vextent,
-	MiscLib::Vector< int > *componentImg,
-	MiscLib::Vector< std::pair< int, size_t > > *labels) const
+	std::vector< int > *componentImg,
+	std::vector< std::pair< int, size_t > > *labels) const
 {
 	m_parametrization.WrapComponents(bbox, epsilon, uextent, vextent,
 		componentImg, labels);

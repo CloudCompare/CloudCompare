@@ -16,17 +16,17 @@ protected:
 	template< class ShapeT >
 	unsigned int ConfidenceTests(unsigned int numTests, float epsilon,
 		float normalThresh, float rms, const PointCloud &pc,
-		const MiscLib::Vector< size_t > &indices) const
+		const std::vector< size_t > &indices) const
 	{
 		unsigned int numFailures = 0;
 		// estimate shapes
 		const unsigned int numSamples = ShapeT::RequiredSamples;
 		if(numSamples >= indices.size())
 			return numTests;
-		MiscLib::Vector< ShapeT > shapes;
+		std::vector< ShapeT > shapes;
 		for(unsigned int i = 0; i < numTests; ++i)
 		{
-			MiscLib::Vector< size_t > sampleIndices;
+			std::vector< size_t > sampleIndices;
 			for(unsigned int j = 0; j < numSamples; ++j)
 			{
 				size_t idx;
@@ -38,7 +38,7 @@ protected:
 					!= sampleIndices.end());
 				sampleIndices.push_back(idx);
 			}
-			MiscLib::Vector< Vec3f > samples(numSamples << 1);
+			std::vector< Vec3f > samples(numSamples << 1);
 			for(unsigned int j = 0; j < numSamples; ++j)
 			{
 				samples[j] = pc[sampleIndices[j]].pos;
@@ -51,8 +51,8 @@ protected:
 				++numFailures;
 		}
 
-		MiscLib::Vector< size_t > scores(shapes.size(), 0);
-		//MiscLib::Vector< float > sse(shapes.size(), 0.f);
+		std::vector< size_t > scores(shapes.size(), 0);
+		//std::vector< float > sse(shapes.size(), 0.f);
 		Vec3f n;
 		for(size_t i = 0; i < indices.size(); ++i)
 		{

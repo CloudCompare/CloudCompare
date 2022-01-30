@@ -352,8 +352,14 @@ static int ply_read_header_magic(p_ply ply) {
 /* ----------------------------------------------------------------------
  * Read support functions
  * ---------------------------------------------------------------------- */
-p_ply ply_open(const char *name, p_ply_error_cb error_cb, 
-        long idata, void *pdata) {
+#ifdef _MSC_VER
+p_ply ply_open(const wchar_t *name,
+#else
+p_ply ply_open(const char *name,
+#endif
+        p_ply_error_cb error_cb,
+        long idata,
+       void *pdata) {
     FILE *fp = NULL; 
     p_ply ply = ply_alloc();
     if (error_cb == NULL) error_cb = ply_error_cb;
@@ -371,7 +377,11 @@ p_ply ply_open(const char *name, p_ply_error_cb error_cb,
         return NULL;
     }
     assert(name);
-    fp = fopen(name, "rb");
+#ifdef _MSC_VER
+	fp = _wfopen(name, L"rb");
+#else
+	fp = fopen(name, "rb");
+#endif
     if (!fp) {
         error_cb(ply, "Unable to open file");
         free(ply);
@@ -475,7 +485,12 @@ int ply_read(p_ply ply) {
 /* ----------------------------------------------------------------------
  * Write support functions
  * ---------------------------------------------------------------------- */
-p_ply ply_create(const char *name, e_ply_storage_mode storage_mode, 
+#ifdef _MSC_VER
+p_ply ply_create(const wchar_t *name,
+#else
+p_ply ply_create(const char *name,
+#endif
+        e_ply_storage_mode storage_mode, 
         p_ply_error_cb error_cb, long idata, void *pdata) {
     FILE *fp = NULL;
     p_ply ply = ply_alloc();
@@ -490,7 +505,11 @@ p_ply ply_create(const char *name, e_ply_storage_mode storage_mode,
         return NULL;
     }
     assert(name && storage_mode <= PLY_DEFAULT);
-    fp = fopen(name, "wb");
+#ifdef _MSC_VER
+	fp = _wfopen(name, L"wb");
+#else
+	fp = fopen(name, "wb");
+#endif
     if (!fp) {
         error_cb(ply, "Unable to create file");
         free(ply);

@@ -117,7 +117,11 @@ CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	QString fullBaseName = QFileInfo(filename).completeBaseName();
 
 	//main file (.POV)
+#ifdef _MSC_VER
+	FILE* mainFile = _wfopen(filename.toStdWString().c_str(), L"wt");
+#else
 	FILE* mainFile = fopen(qPrintable(filename),"wt");
+#endif
 	if (!mainFile)
 		return CC_FERR_WRITING;
 
@@ -197,7 +201,11 @@ CC_FILE_ERROR PovFilter::loadFile(const QString& filename, ccHObject& container,
 	assert(!filename.isEmpty());
 
 	//opening file
+#ifdef _MSC_VER
+	FILE* fp = _wfopen(filename.toStdWString().c_str(), L"rt");
+#else
 	FILE* fp = fopen(qPrintable(filename), "rt");
+#endif
 	if (!fp)
 		return CC_FERR_READING;
 

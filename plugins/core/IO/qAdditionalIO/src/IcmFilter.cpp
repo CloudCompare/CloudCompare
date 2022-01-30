@@ -55,7 +55,11 @@ CC_FILE_ERROR IcmFilter::loadFile(const QString& filename, ccHObject& container,
 	}
 
 	//ouverture du fichier
-	FILE *fp = fopen(qPrintable(filename), "rt");
+#ifdef _MSC_VER
+	FILE* fp = _wfopen(filename.toStdWString().c_str(), L"rt");
+#else
+	FILE* fp = fopen(qPrintable(filename), "rt");
+#endif
 	if (!fp)
 	{
 		return CC_FERR_READING;
@@ -162,7 +166,11 @@ int IcmFilter::LoadCalibratedImages(ccHObject* entities, const QString& path, co
 		ccLog::Warning(QString("[ICM] File '%1' contains special characters. It might be rejected by the I/O filter...").arg(completeImageDescFilename));
 	}
 
+#ifdef _MSC_VER
+	FILE* fp = _wfopen(completeImageDescFilename.toStdWString().c_str(), L"rt");
+#else
 	FILE* fp = fopen(qPrintable(completeImageDescFilename), "rt");
+#endif
 	if (fp == nullptr)
 	{
 		ccLog::Error(QString("[IcmFilter::loadCalibratedImages] Error opening file %1!").arg(completeImageDescFilename));

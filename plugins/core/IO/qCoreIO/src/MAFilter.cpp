@@ -137,7 +137,11 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const QString& filename, c
 	//	ccLog::Warning("No displayed scalar field! Values will all be 0!\n");
 
 	//open ASCII file for writing
+#ifdef _MSC_VER
+	FILE* fp = _wfopen(filename.toStdWString().c_str(), L"wt");
+#else
 	FILE* fp = fopen(qPrintable(filename) , "wt");
+#endif
 
 	if (!fp)
 		return CC_FERR_WRITING;

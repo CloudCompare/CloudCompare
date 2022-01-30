@@ -98,7 +98,11 @@ bool DxfProfilesExporter::SaveVerticalProfiles(	const QSharedPointer<DistanceMap
 	}
 
 	DL_Dxf dxf;
-	DL_WriterA* dw = dxf.out(qPrintable(filename), DL_VERSION_R12);
+#ifdef _WIN32
+	DL_WriterA* dw = dxf.out(filename.toStdWString(), DL_VERSION_R12);
+#else
+	DL_WriterA* dw = dxf.out(filename.toStdString(), DL_VERSION_R12);
+#endif
 	if (!dw)
 	{
 		if (app)
@@ -587,7 +591,11 @@ bool DxfProfilesExporter::SaveHorizontalProfiles(	const QSharedPointer<DistanceM
 	}
 
 	DL_Dxf dxf;
-	DL_WriterA* dw = dxf.out(qPrintable(filename), DL_VERSION_R12);
+#ifdef _WIN32
+	DL_WriterA* dw = dxf.out(filename.toStdWString(), DL_VERSION_R12);
+#else
+	DL_WriterA* dw = dxf.out(filename.toStdString(), DL_VERSION_R12);
+#endif
 	if (!dw)
 	{
 		if (app)

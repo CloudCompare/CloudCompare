@@ -741,13 +741,16 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const QString& filename, co
 	double lineWidth = baseSize / 40.0;
 	double pageMargin = baseSize / 20.0;
 
+	DL_Dxf dxf;
+#ifdef _WIN32
+	DL_WriterA* dw = dxf.out(filename.toStdWString(), DL_VERSION_R12);
+#else
 	if (CheckForSpecialChars(filename))
 	{
 		ccLog::Warning(QString("[DXF] Output filename contains special characters. It might be scrambled or rejected by the third party library..."));
 	}
-
-	DL_Dxf dxf;
-	DL_WriterA* dw = dxf.out(qPrintable(filename), DL_VERSION_R12);
+	DL_WriterA* dw = dxf.out(filename.toStdString(), DL_VERSION_R12);
+#endif
 	if (!dw)
 	{
 		return CC_FERR_WRITING;
@@ -1026,12 +1029,15 @@ CC_FILE_ERROR DxfFilter::loadFile(const QString& filename, ccHObject& container,
 	{
 		DxfImporter importer(&container, parameters);
 
+#ifdef _WIN32
+		if (DL_Dxf().in(filename.toStdWString(), &importer))
+#else
 		if (CheckForSpecialChars(filename))
 		{
 			ccLog::Warning("[DXF] Input file contains special characters. It might be rejected by the third party library...");
 		}
-
 		if (DL_Dxf().in(qPrintable(filename), &importer)) //DGM: warning, toStdString doesn't preserve "local" characters
+#endif
 		{
 			importer.applyGlobalShift(); //apply the (potential) global shift to shared clouds
 			if (container.getChildrenNumber() != 0)

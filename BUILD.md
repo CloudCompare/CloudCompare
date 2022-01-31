@@ -45,6 +45,10 @@ cmake -DCMAKE_PREFIX_PATH=C:\Qt\5.15.2\msvc2019_64 ..
 # macOs
 mkdir build && cd build
 cmake -DCMAKE_PREFIX_PATH=/usr/local/opt/qt@5 ..
+
+# Linux
+mkdir build && cd build
+cmake ..
 ```
 
 You can always take a look at how CloudCompare is being build on [GitHub's CI](.github/workflows/build.yml)

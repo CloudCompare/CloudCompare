@@ -23,16 +23,32 @@
 
 //! Mimic Qt's qApp for easy access to the application instance
 #define ccApp (static_cast<ccApplicationBase *>( QCoreApplication::instance() ))
-
+//! ccApplicationBase
+/*!
+ * ccApplicationBase provides a QApplication class with additional Constructor param isCommandLine and version
+ * The class also initialises openGL before instantiating the application class
+ */
 class CCAPPCOMMON_LIB_API ccApplicationBase : public QApplication
 {
 public:
 	//! This must be called before instantiating the application class so it
 	//! can setup OpenGL first.
 	static void	initOpenGL();
-	
+
+    //! ccApplicationBase Constructor
+	/*!
+	 * @param argc number of arguments
+	 * @param argv array of arguments
+	 * @param isCommandLine boolean to define the application as either a CL or GUI. If true its a commandline application
+	 * @param version string of the application version set by CloudCompare viewer or app
+	 */
 	ccApplicationBase( int &argc, char **argv, bool isCommandLine, const QString &version );
-	
+
+    //! isCommandLine
+    /*!
+     * Method that confirms if it is running via commandline or not
+     * @return bool
+     */
 	bool isCommandLine() const { return c_CommandLine; }
 	
 	QString versionStr() const;

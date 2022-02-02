@@ -27,6 +27,7 @@
 /*!
  * ccApplicationBase provides a QApplication class with additional Constructor param isCommandLine and version
  * The class also initialises openGL before instantiating the application class
+ * \see QApplication
  */
 class CCAPPCOMMON_LIB_API ccApplicationBase : public QApplication
 {
@@ -37,10 +38,10 @@ public:
 
     //! ccApplicationBase Constructor
 	/*!
-	 * @param argc number of arguments
-	 * @param argv array of arguments
-	 * @param isCommandLine boolean to define the application as either a CL or GUI. If true its a commandline application
-	 * @param version string of the application version set by CloudCompare viewer or app
+	 * @param argc argc must be greater than zero, this is set by QT
+	 * @param argv this contains the command line values, see QApplication, again this is set by QT
+	 * @param isCommandLine boolean to define the application as either a Commandline or GUI. If true its a commandline application
+	 * @param version string of the application version set by CloudCompare viewer or app.
 	 */
 	ccApplicationBase( int &argc, char **argv, bool isCommandLine, const QString &version );
 

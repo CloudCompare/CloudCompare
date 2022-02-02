@@ -1079,7 +1079,7 @@ namespace ccEntityAction
 		return true;
 	}
 	
-    bool    sfSplitCloud(const ccHObject::Container &selectedEntities, ccMainAppInterface *app)
+    bool sfSplitCloud(const ccHObject::Container &selectedEntities, ccMainAppInterface *app)
     {
         for (ccHObject* ent : selectedEntities)
         {
@@ -1139,6 +1139,20 @@ namespace ccEntityAction
                     group->addChild(pc); // add to group
                     app->addToDB(pc); // add to data base
                 }
+            }
+        }
+
+        return true;
+    }
+
+    bool sfSetClassificationField(const ccHObject::Container &selectedEntities)
+    {
+        for (ccHObject* ent : selectedEntities)
+        {
+            ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(ent);
+            if (cloud != nullptr)
+            {
+
             }
         }
 

@@ -602,6 +602,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionOpenColorScalesManager,		&QAction::triggered, this, &MainWindow::doActionOpenColorScalesManager);
 	connect(m_UI->actionAddIdField,					&QAction::triggered, this, &MainWindow::doActionAddIdField);
     connect(m_UI->actionSplitCloudUsingSF,          &QAction::triggered, this, &MainWindow::doActionSplitCloudUsingSF);
+    connect(m_UI->actionSetClassificationField,     &QAction::triggered, this, &MainWindow::doActionSetClassificationField);
 	connect(m_UI->actionSetSFAsCoord,				&QAction::triggered, this, &MainWindow::doActionSetSFAsCoord);
 	connect(m_UI->actionInterpolateSFs,				&QAction::triggered, this, &MainWindow::doActionInterpolateScalarFields);
 	connect(m_UI->actionDeleteScalarField, &QAction::triggered, this, [=]() {
@@ -3140,6 +3141,15 @@ void MainWindow::doActionAddIdField()
 void MainWindow::doActionSplitCloudUsingSF()
 {
     if (!ccEntityAction::sfSplitCloud(m_selectedEntities, this))
+        return;
+
+    refreshAll();
+    updateUI();
+}
+
+void MainWindow::doActionSetClassificationField()
+{
+    if (!ccEntityAction::sfSetClassificationField(m_selectedEntities))
         return;
 
     refreshAll();

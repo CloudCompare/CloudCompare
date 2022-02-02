@@ -154,6 +154,7 @@
      <addaction name="actionSetSFAsCoord"/>
      <addaction name="actionInterpolateSFs"/>
      <addaction name="actionSplitCloudUsingSF"/>
+     <addaction name="actionSetClassificationField"/>
      <addaction name="actionScalarFieldArithmetic"/>
      <addaction name="separator"/>
      <addaction name="actionOpenColorScalesManager"/>
@@ -3121,6 +3122,11 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="toolTip">
     <string>Split the selected cloud using the current scalar field. The field should be a positive integer.</string>
+   </property>
+  </action>
+  <action name="actionSetClassificationField">
+   <property name="text">
+    <string>Set classification field</string>
    </property>
   </action>
  </widget>

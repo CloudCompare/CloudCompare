@@ -48,8 +48,8 @@
 
 void ccApplicationBase::initOpenGL()
 {
-	//See http://doc.qt.io/qt-5/qopenglwidget.html#opengl-function-calls-headers-and-qopenglfunctions
-	/** Calling QSurfaceFormat::setDefaultFormat() before constructing the QApplication instance is mandatory
+	//! See http://doc.qt.io/qt-5/qopenglwidget.html#opengl-function-calls-headers-and-qopenglfunctions
+	/*! Calling QSurfaceFormat::setDefaultFormat() before constructing the QApplication instance is mandatory
 		on some platforms (for example, OS X) when an OpenGL core profile context is requested. This is to
 		ensure that resource sharing between contexts stays functional as all internal contexts are created
 		using the correct version and profile.
@@ -76,8 +76,8 @@ void ccApplicationBase::initOpenGL()
 		QSurfaceFormat::setDefaultFormat(format);
 	}
 
-	// The 'AA_ShareOpenGLContexts' attribute must be defined BEFORE the creation of the Q(Gui)Application
-	// DGM: this is mandatory to enable exclusive full screen for ccGLWidget (at least on Windows)
+	//! The 'AA_ShareOpenGLContexts' attribute must be defined BEFORE the creation of the Q(Gui)Application
+	//! DGM: this is mandatory to enable exclusive full screen for ccGLWidget (at least on Windows)
 	QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
 }
 
@@ -91,7 +91,7 @@ ccApplicationBase::ccApplicationBase(int &argc, char **argv, bool isCommandLine,
 	setupPaths();
 
 #ifdef Q_OS_WIN
-	//enables automatic scaling based on the monitor's pixel density
+	//! enables automatic scaling based on the monitor's pixel density
 	setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
 		
@@ -100,7 +100,7 @@ ccApplicationBase::ccApplicationBase(int &argc, char **argv, bool isCommandLine,
 	setAttribute( Qt::AA_DontShowIconsInMenus );
 #endif
 
-	// Force 'english' locale so as to get a consistent behavior everywhere
+	//! Force 'english' locale so as to get a consistent behavior everywhere
 	QLocale::setDefault( QLocale::English );
 
 #ifdef Q_OS_UNIX
@@ -174,7 +174,7 @@ void ccApplicationBase::setupPaths()
 {
 	QDir  appDir = QCoreApplication::applicationDirPath();
 
-	// Set up our shader and plugin paths
+	//! Set up our shader and plugin paths
 #if defined(Q_OS_MAC)
 	QDir  bundleDir = appDir;
 
@@ -227,7 +227,7 @@ void ccApplicationBase::setupPaths()
 #warning Need to specify the shader path for this OS.
 #endif
 
-	// If the environment variables are specified, overwrite the shader and translation paths.
+	//! If the environment variables are specified, overwrite the shader and translation paths.
 	QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
 
 	if ( env.contains("CC_SHADER_PATH") )
@@ -240,23 +240,23 @@ void ccApplicationBase::setupPaths()
 		m_TranslationPath = env.value("CC_TRANSLATION_PATH");
 	}
 
-	// Add any app data paths to plugin paths
-	// Plugins in these directories take precendence over the included ones
-	// This allows users to put plugins outside of the install directories.
+	//! Add any app data paths to plugin paths
+	//! Plugins in these directories take precendence over the included ones
+	//! This allows users to put plugins outside of the install directories.
 	const QStringList appDataPaths = QStandardPaths::standardLocations( QStandardPaths::AppDataLocation );
 
 	for ( const QString &appDataPath : appDataPaths )
 	{
 		QString path = appDataPath + "/plugins";
 
-		if (!m_PluginPaths.contains(path)) //avoid duplicate entries (can happen, at least on Windows)
+		if (!m_PluginPaths.contains(path)) //! avoid duplicate entries (can happen, at least on Windows)
 		{
 			m_PluginPaths << path;
 		}
 	}
 
-	// If the environment variable is specified, the path takes precedence over
-	// included and appdata ones.
+	//! If the environment variable is specified, the path takes precedence over
+	//! included and appdata ones.
 	if ( env.contains("CC_PLUGIN_PATH") )
 	{
 		m_PluginPaths << env.value("CC_PLUGIN_PATH").split(QDir::listSeparator());

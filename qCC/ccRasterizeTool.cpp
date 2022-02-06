@@ -1806,9 +1806,9 @@ void ccRasterizeTool::generateImage() const
 	double minHeight = m_grid.minHeight;
 	double maxHeight = m_grid.maxHeight;
 	//get real values
-	ccRasterGrid::EmptyCellFillOption fillEmptyCellsStrategy = getFillEmptyCellsStrategyExt(	emptyCellsHeight,
-																				minHeight,
-																				maxHeight);
+	ccRasterGrid::EmptyCellFillOption fillEmptyCellsStrategy = getFillEmptyCellsStrategyExt(emptyCellsHeight,
+																							minHeight,
+																							maxHeight);
 
 	QImage bitmap8(m_grid.width, m_grid.height, QImage::Format_Indexed8);
 	if (!bitmap8.isNull())

@@ -509,7 +509,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithQuadric(	const CCCoreLib::DgmOctree
 	NormsTableType* theNorms = static_cast<NormsTableType*>(additionalParameters[0]);
 	PointCoordinateType radius = *static_cast<PointCoordinateType*>(additionalParameters[1]);
 
-	CCCoreLib::DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
+	CCCoreLib::DgmOctree::NearestNeighboursSearchStruct nNSS;
 	nNSS.level = cell.level;
 	cell.parentOctree->getCellPos(cell.truncatedCode, cell.level, nNSS.cellPos, true);
 	cell.parentOctree->computeCellCenter(nNSS.cellPos, cell.level, nNSS.cellCenter);
@@ -563,7 +563,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithLS(const CCCoreLib::DgmOctree::octr
 	NormsTableType* theNorms = static_cast<NormsTableType*>(additionalParameters[0]);
 	PointCoordinateType radius = *static_cast<PointCoordinateType*>(additionalParameters[1]);
 
-	CCCoreLib::DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
+	CCCoreLib::DgmOctree::NearestNeighboursSearchStruct nNSS;
 	nNSS.level = cell.level;
 	cell.parentOctree->getCellPos(cell.truncatedCode, cell.level, nNSS.cellPos, true);
 	cell.parentOctree->computeCellCenter(nNSS.cellPos, cell.level, nNSS.cellCenter);

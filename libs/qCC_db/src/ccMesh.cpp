@@ -3898,7 +3898,7 @@ static bool TagDuplicatedVertices(	const CCCoreLib::DgmOctree::octreeCell& cell,
 	//we look for points very close to the others (only if not yet tagged!)
 
 	//structure for nearest neighbors search
-	CCCoreLib::DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
+	CCCoreLib::DgmOctree::NearestNeighboursSearchStruct nNSS;
 	nNSS.level = cell.level;
 	static const PointCoordinateType c_defaultSearchRadius = static_cast<PointCoordinateType>(sqrt(CCCoreLib::ZERO_TOLERANCE_F));
 	cell.parentOctree->getCellPos(cell.truncatedCode, cell.level, nNSS.cellPos, true);

@@ -56,7 +56,6 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 	try
 	{
 		GDALDataset* poDataset = static_cast<GDALDataset*>(GDALOpen(qUtf8Printable(filename), GA_ReadOnly ));
-
 		if( poDataset != nullptr )
 		{
 			ccLog::Print(QString("Raster file: '%1'").arg(filename));

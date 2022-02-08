@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/CC/plugin/qMeshBoolean">
+        <file>info.json</file>
+        <file>images/plugin_icon.png</file>
+        <file>images/csg_types.png</file>
+        <file>images/iconSwap.png</file>
+    </qresource>
+</RCC>

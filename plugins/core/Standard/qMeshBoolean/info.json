@@ -1,0 +1,29 @@
+{
+  "type": "Standard",
+  "core" : true,
+  "name": "Mesh Boolean",
+  "icon": ":/CC/plugin/qMeshBoolean/images/plugin_icon.png",
+  "description": "CSG operations on meshes",
+  "authors": [
+    {
+      "name": "Daniel Girardeau-Montaut",
+      "email": "daniel.girardeau@gmail.com"
+    }
+  ],
+  "maintainers": [
+    {
+      "name": "Daniel Girardeau-Montaut",
+      "email": "daniel.girardeau@gmail.com"
+    }
+  ],
+  "references": [
+    {
+      "text": "libigl Library",
+      "url": "https://libigl.github.io/"
+    },
+    {
+      "text": "Documentation",
+      "url": "http://www.cloudcompare.org/doc/wiki/index.php?title=MeshBoolean_(plugin)"
+    }
+  ]
+}

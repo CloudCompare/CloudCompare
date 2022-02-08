@@ -81,7 +81,7 @@ bool ToCorkMesh(const ccMesh* in, CorkMesh& out, ccMainAppInterface* app = nullp
 	if (!in || !in->getAssociatedCloud())
 	{
 		if (app)
-			app->dispToConsole("[Cork] Invalid input mesh!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			app->dispToConsole("Invalid input mesh!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		assert(false);
 		return false;
 	}
@@ -102,7 +102,7 @@ bool ToCorkMesh(const ccMesh* in, CorkMesh& out, ccMainAppInterface* app = nullp
 	catch (const std::bad_alloc&)
 	{
 		if (app)
-			app->dispToConsole("[Cork] Not enough memory!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			app->dispToConsole("Not enough memory!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return false;
 	}
 
@@ -163,7 +163,7 @@ ccMesh* FromCorkMesh(const CorkMesh& in, ccMainAppInterface* app = nullptr)
 	if (!vertices->reserve(vertCount))
 	{
 		if (app)
-			app->dispToConsole("[Cork] Not enough memory!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			app->dispToConsole("Not enough memory!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		delete vertices;
 		return nullptr;
 	}
@@ -173,7 +173,7 @@ ccMesh* FromCorkMesh(const CorkMesh& in, ccMainAppInterface* app = nullptr)
 	if (!mesh->reserve(triCount))
 	{
 		if (app)
-			app->dispToConsole("[Cork] Not enough memory!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			app->dispToConsole("Not enough memory!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		delete mesh;
 		return nullptr;
 	}
@@ -226,14 +226,20 @@ struct BoolOpParameters
 };
 static BoolOpParameters s_params;
 
-bool doPerformBooleanOp()
+static bool DoPerformBooleanOp()
 {
 	//invalid parameters
 	if (!s_params.corkA || !s_params.corkB)
+	{
+		assert(false);
 		return false;
+	}
 
 	try
 	{
+		QElapsedTimer timer;
+		timer.start();
+
 		//check meshes
 		s_params.meshesAreOk = true;
 		if (false)
@@ -286,14 +292,20 @@ bool doPerformBooleanOp()
 		default:
 			assert(false);
 			if (s_params.app)
-				s_params.app->dispToConsole("Unhandled operation?!", ccMainAppInterface::WRN_CONSOLE_MESSAGE); //DGM: can't issue an error message (i.e. with dialog) in another thread!
+				s_params.app->dispToConsole("[Cork] Unhandled operation?!", ccMainAppInterface::WRN_CONSOLE_MESSAGE); //DGM: can't issue an error message (i.e. with dialog) in another thread!
 			break;
+		}
+
+		if (s_params.app)
+		{
+			// display the duration time
+			s_params.app->dispToConsole(QString("[Cork] CSG operation duration: %1 s").arg(timer.elapsed() / 1000.0, 0, 'f', 2));
 		}
 	}
 	catch (const std::exception& e)
 	{
 		if (s_params.app)
-			s_params.app->dispToConsole(QString("Exception caught: %1").arg(e.what()), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+			s_params.app->dispToConsole(QString("[Cork] Exception caught: %1").arg(e.what()), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 		return false;
 	}
 
@@ -325,6 +337,10 @@ void qCork::doAction()
 	cDlg.setNames(meshA->getName(), meshB->getName());
 	if (!cDlg.exec())
 		return;
+
+	QElapsedTimer timer;
+	timer.start();
+
 	if (cDlg.isSwapped())
 		std::swap(meshA, meshB);
 
@@ -351,7 +367,7 @@ void qCork::doAction()
 		s_params.nameB = meshB->getName();
 		s_params.operation = cDlg.getSelectedOperation();
 
-		QFuture<bool> future = QtConcurrent::run(doPerformBooleanOp);
+		QFuture<bool> future = QtConcurrent::run(DoPerformBooleanOp);
 
 		//wait until process is finished!
 		while (!future.isFinished())
@@ -428,4 +444,10 @@ void qCork::doAction()
 
 	//currently selected entities appearance may have changed!
 	m_app->refreshAll();
+
+	if (m_app)
+	{
+		// display the duration time
+		m_app->dispToConsole(QString("[Cork] Total duration: %1 s").arg(timer.elapsed() / 1000.0, 0, 'f', 2));
+	}
 }

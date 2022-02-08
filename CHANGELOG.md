@@ -129,6 +129,7 @@ v2.12 (???) - (in development)
 	- Better management of filenames with non latin characters (for raster files, STL files, PDMS scripts, Point List picking exported files)
 	- Rasterize tool:
 		- RGB and scalar field based layers can now be exported to standard image formats
+	- 'X', 'Y' and 'Z' labels are now displayed next to the trihedron axes (in the bottom right corner)
 
 - New plugins
 	- MPlane: perform normal distance measurements against a defined plane (see https://www.cloudcompare.org/doc/wiki/index.php?title=MPlane_(plugin) )

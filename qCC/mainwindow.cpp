@@ -111,6 +111,7 @@
 #include "ccSectionExtractionTool.h"
 #include "ccSensorComputeDistancesDlg.h"
 #include "ccSensorComputeScatteringAnglesDlg.h"
+#include "ccSetClassificationField.h"
 #include "ccSORFilterDlg.h"
 #include "ccSubsamplingDlg.h"
 #include "ccTracePolylineTool.h"
@@ -3149,7 +3150,12 @@ void MainWindow::doActionSplitCloudUsingSF()
 
 void MainWindow::doActionSetClassificationField()
 {
-    if (!ccEntityAction::sfSetClassificationField(m_selectedEntities))
+    ccSetClassificationField setClassificationField(this);
+    if (setClassificationField.exec())
+    {
+        setClassificationField.setClassificationField(m_selectedEntities);
+    }
+    else
         return;
 
     refreshAll();

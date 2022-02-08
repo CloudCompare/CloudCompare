@@ -42,7 +42,6 @@ namespace ccEntityAction
 	bool	sfRename(const ccHObject::Container &selectedEntities, QWidget *parent);
 	bool	sfAddIdField(const ccHObject::Container &selectedEntities);
     bool	sfSplitCloud(const ccHObject::Container &selectedEntities, ccMainAppInterface *app);
-    bool    sfSetClassificationField(const ccHObject::Container &selectedEntities);
 	bool	sfSetAsCoord(const ccHObject::Container &selectedEntities, QWidget *parent);
 	bool	exportCoordToSF(const ccHObject::Container &selectedEntities, QWidget *parent);
 	bool	exportNormalToSF(const ccHObject::Container &selectedEntities, QWidget *parent, bool* exportDimensions = nullptr);

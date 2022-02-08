@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>251</width>
-    <height>26</height>
+    <width>307</width>
+    <height>27</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -123,6 +123,13 @@
      <property name="icon">
       <iconset resource="../icons.qrc">
        <normaloff>:/CC/images/smallSegmentOut.png</normaloff>:/CC/images/smallSegmentOut.png</iconset>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QToolButton" name="toolButton_class">
+     <property name="text">
+      <string>CLASS</string>
      </property>
     </widget>
    </item>
@@ -245,6 +252,7 @@
   </action>
  </widget>
  <resources>
+  <include location="../icons.qrc"/>
   <include location="../icons.qrc"/>
  </resources>
  <connections/>

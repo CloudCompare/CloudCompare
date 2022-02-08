@@ -1145,20 +1145,6 @@ namespace ccEntityAction
         return true;
     }
 
-    bool sfSetClassificationField(const ccHObject::Container &selectedEntities)
-    {
-        for (ccHObject* ent : selectedEntities)
-        {
-            ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(ent);
-            if (cloud != nullptr)
-            {
-
-            }
-        }
-
-        return true;
-    }
-
 	bool	sfSetAsCoord(const ccHObject::Container &selectedEntities, QWidget *parent)
 	{
 		ccExportCoordToSFDlg ectsDlg(parent);

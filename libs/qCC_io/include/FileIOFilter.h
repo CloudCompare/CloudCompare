@@ -63,8 +63,8 @@ public:
 		LoadParameters()
 			: shiftHandlingMode(ccGlobalShiftManager::DIALOG_IF_NECESSARY)
 			, alwaysDisplayLoadDialog(true)
-			, coordinatesShiftEnabled(nullptr)
-			, coordinatesShift(nullptr)
+			, _coordinatesShiftEnabled(nullptr)
+			, _coordinatesShift(nullptr)
 			, preserveShiftOnSave(true)
 			, autoComputeNormals(false)
 			, parentWidget(nullptr)
@@ -76,9 +76,9 @@ public:
 		//! Wether to always display a dialog (if any), even if automatic guess is possible
 		bool alwaysDisplayLoadDialog;
 		//! Whether shift on load has been applied after loading (optional)
-		bool* coordinatesShiftEnabled;
+		bool* _coordinatesShiftEnabled;
 		//! If applicable, applied shift on load (optional)
-		CCVector3d* coordinatesShift;
+		CCVector3d* _coordinatesShift;
 		//! If applicable, whether shift should be preserved or not (optional)
 		bool preserveShiftOnSave;
 		//! Whether normals should be computed at loading time (if possible - e.g. for gridded clouds) or not

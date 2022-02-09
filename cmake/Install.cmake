@@ -6,11 +6,11 @@
 #
 # Arguments:
 #	TARGET The name of the library target
-function( InstallSharedLibrary )
-	if( NOT INSTALL_DESTINATIONS )
+function(InstallSharedLibrary)
+	if(NOT INSTALL_DESTINATIONS)
 		return()
 	endif()
-	
+
 	cmake_parse_arguments(
 			INSTALL_SHARED_LIB
 			""
@@ -19,26 +19,20 @@ function( InstallSharedLibrary )
 			${ARGN}
 	)
 
-        # For readability
-        set( shared_lib_target "${INSTALL_SHARED_LIB_TARGET}" )
-	message( STATUS "Install shared library: ${shared_lib_target}")
+	# For readability
+	set(shared_lib_target "${INSTALL_SHARED_LIB_TARGET}")
+	message(STATUS "Install shared library: ${shared_lib_target}")
 
-        foreach( destination ${INSTALL_DESTINATIONS} )
-            if(UNIX AND NOT APPLE)
-                # this is a an hack to restore install ability on linux systems
-                # TODO this should not be the right way for managing install probably
-                if (IS_ABSOLUTE ${CMAKE_INSTALL_LIBDIR})
-                    set( destination "${CMAKE_INSTALL_LIBDIR}")
-                else()
-                    set( destination "${destination}/${CMAKE_INSTALL_LIBDIR}/")
-                endif()
-            endif()
+	foreach (destination ${INSTALL_DESTINATIONS})
+		if(UNIX AND NOT APPLE)
+			set(destination ${LINUX_INSTALL_SHARED_DESTINATION})
+		endif()
 
 		_InstallSharedTarget(
-			TARGET ${shared_lib_target}
-			DEST_PATH ${destination}
-		)		
-	endforeach()
+				TARGET ${shared_lib_target}
+				DEST_PATH ${destination}
+		)
+	endforeach ()
 endfunction()
 
 # InstallFiles should be called to install files that are not targets.
@@ -135,7 +129,12 @@ function( InstallPlugins )
 		
 		message( STATUS " Shader Destination: ${INSTALL_PLUGINS_SHADER_DEST_PATH}/${INSTALL_PLUGINS_SHADER_DEST_FOLDER}" )
 	endif()
-	
+
+	# Make CloudCompare/ccViewer depend on the plugins
+	# so that when building CloudCompare/ccViewer the plugins also get built
+	# instead of waiting for the `install` target to be ran for the plugins to get built
+	add_dependencies(${PROJECT_NAME} ${CC_PLUGIN_TARGET_LIST})
+
 	# Install the requested plugins in the DEST_FOLDER
 	foreach( plugin_target ${CC_PLUGIN_TARGET_LIST} )
 		get_target_property( plugin_type ${plugin_target} PLUGIN_TYPE )

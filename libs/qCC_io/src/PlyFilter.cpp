@@ -127,7 +127,11 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 	if (!vertices)
 		return CC_FERR_BAD_ENTITY_TYPE;
 
+#ifdef _WIN32
+	p_ply ply = ply_create(filename.toStdWString().c_str(), storageType, errorCallback, 0, nullptr);
+#else
 	p_ply ply = ply_create(qPrintable(filename), storageType, errorCallback, 0, nullptr);
+#endif
 	if (!ply)
 		return CC_FERR_THIRD_PARTY_LIB_FAILURE;
 
@@ -906,7 +910,11 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 	/****************/
 
 	//open a PLY file for reading
+#ifdef _WIN32
+	p_ply ply = ply_open(filename.toStdWString().c_str(), errorCallback, 0, nullptr);
+#else
 	p_ply ply = ply_open(qPrintable(filename), errorCallback, 0, nullptr);
+#endif
 	if (!ply)
 		return CC_FERR_THIRD_PARTY_LIB_FAILURE;
 	ccLog::PrintDebug(QString("[PLY] Opening file '%1' ...").arg(filename));

@@ -45,6 +45,10 @@ cmake -DCMAKE_PREFIX_PATH=C:\Qt\5.15.2\msvc2019_64 ..
 # macOs
 mkdir build && cd build
 cmake -DCMAKE_PREFIX_PATH=/usr/local/opt/qt@5 ..
+
+# Linux
+mkdir build && cd build
+cmake ..
 ```
 
 You can always take a look at how CloudCompare is being build on [GitHub's CI](.github/workflows/build.yml)
@@ -247,3 +251,5 @@ See [this post](http://www.danielgm.net/cc/forum/viewtopic.php?t=992) on the for
 ## Debugging plugins
 
 If you want to use or debug plugins in DEBUG mode while using a single configuration compiler/IDE (gcc, etc.) the you'll have to comment the automatic definition of the `QT_NO_DEBUG` macro in '/plugins/CMakePluginTpl.cmake' (see http://www.cloudcompare.org/forum/viewtopic.php?t=2070).
+
+If you wish to specify a custom directory to search for plugins, shaders, or translations, you may set the `CC_PLUGIN_PATH`, `CC_SHADER_PATH`, and `CC_TRANSLATION_PATH` environment variables. The paths may be relative to the current working directory or absolute.

@@ -39,9 +39,6 @@
 #include <float.h>
 #include <assert.h>
 
-//default name for the Global Shift List file
-static QString s_defaultGlobalShiftListFilename("global_shift_list.txt");
-
 ccShiftAndScaleCloudDlg::ccShiftAndScaleCloudDlg(const CCVector3d& Pg,
 												 double Dg/*=0*/,
 												 QWidget* parent/*=0*/)
@@ -147,90 +144,6 @@ void ccShiftAndScaleCloudDlg::displayMoreInfo()
 
 	dlg.exec();
 
-}
-
-bool ccShiftAndScaleCloudDlg::addFileInfo()
-{	
-	//try to load the 'global_shift_list.txt" file
-	return loadInfoFromFile(QDir::currentPath() + QString("/")+ s_defaultGlobalShiftListFilename);
-}
-
-bool ccShiftAndScaleCloudDlg::loadInfoFromFile(QString filename)
-{
-	QFile file(filename);
-	if (!file.open(QFile::Text | QFile::ReadOnly))
-		return false;
-
-	size_t originalSize = m_defaultInfos.size();
-
-	QTextStream stream(&file);
-	unsigned lineNumber = 0;
-
-	while (true)
-	{
-		//read next line
-		QString line = stream.readLine();
-		if (line.isEmpty())
-			break;
-		++lineNumber;
-
-		if (line.startsWith("//"))
-			continue;
-		
-		//split line in 5 items
-		QStringList tokens = line.split(";",QString::SkipEmptyParts);
-		if (tokens.size() != 5)
-		{
-			//invalid file
-			ccLog::Warning(QString("[ccShiftAndScaleCloudDlg::loadInfoFromFile] File '%1' is malformed (5 items expected per line)").arg(filename));
-			m_defaultInfos.resize(originalSize);
-			return false;
-		}
-
-		//decode items
-		bool ok = true;
-		unsigned errors = 0;
-		ccGlobalShiftManager::ShiftInfo info;
-		info.name = tokens[0].trimmed();
-		info.shift.x = tokens[1].toDouble(&ok);
-		if (!ok) ++errors;
-		info.shift.y = tokens[2].toDouble(&ok);
-		if (!ok) ++errors;
-		info.shift.z = tokens[3].toDouble(&ok);
-		if (!ok) ++errors;
-		info.scale = tokens[4].toDouble(&ok);
-		if (!ok) ++errors;
-		
-		//process errors
-		if (errors)
-		{
-			//invalid file
-			ccLog::Warning(QString("[ccShiftAndScaleCloudDlg::loadInfoFromFile] File '%1' is malformed (wrong item type encountered on line %2)").arg(filename).arg(lineNumber));
-			m_defaultInfos.resize(originalSize);
-			return false;
-		}
-
-		try
-		{
-			m_defaultInfos.push_back(info);
-		}
-		catch (const std::bad_alloc&)
-		{
-			//not enough memory
-			ccLog::Warning(QString("[ccShiftAndScaleCloudDlg::loadInfoFromFile] Not enough memory to read file '%1'").arg(filename));
-			m_defaultInfos.resize(originalSize);
-			return false;
-		}
-	}
-	
-	//now add the new entries in the combo-box
-	for (size_t i = originalSize; i < m_defaultInfos.size(); ++i)
-	{
-		m_ui->loadComboBox->addItem(m_defaultInfos[i].name);
-	}
-	m_ui->loadComboBox->setEnabled(m_defaultInfos.size() >= 2);
-
-	return true;
 }
 
 void ccShiftAndScaleCloudDlg::updateGlobalAndLocalSystems()

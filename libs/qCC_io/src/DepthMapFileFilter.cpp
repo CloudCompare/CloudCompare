@@ -128,7 +128,11 @@ CC_FILE_ERROR DepthMapFileFilter::saveToFile(const QString& filename, ccGBLSenso
 	}
 
 	//opening file
+#ifdef _MSC_VER
+	FILE* fp = _wfopen(filename.toStdWString().c_str(), L"wt");
+#else
 	FILE* fp = fopen(qPrintable(filename), "wt");
+#endif
 	if (!fp)
 	{
 		ccLog::Error(QString("[DepthMap] Can't open file '%1' for writing!").arg(filename));

@@ -74,10 +74,11 @@ constexpr float CC_GL_MAX_ZOOM_RATIO = 1.0e6f;
 constexpr float CC_GL_MIN_ZOOM_RATIO = 1.0e-6f;
 
 //Vaious overlay elements dimensions
-constexpr double CC_DISPLAYED_PIVOT_RADIUS_PERCENT = 0.8; //percentage of the smallest screen dimension
-constexpr double CC_DISPLAYED_CUSTOM_LIGHT_LENGTH = 10.0;
+constexpr double CC_DISPLAYED_PIVOT_RADIUS_PERCENT  = 0.8; //percentage of the smallest screen dimension
+constexpr double CC_DISPLAYED_CUSTOM_LIGHT_LENGTH   = 10.0;
 constexpr float  CC_DISPLAYED_TRIHEDRON_AXES_LENGTH = 25.0f;
-constexpr float  CC_DISPLAYED_CENTER_CROSS_LENGTH = 10.0f;
+constexpr float  CC_DISPLAYED_CENTER_CROSS_LENGTH   = 10.0f;
+constexpr double CC_TRIHEDRON_TEXT_MARGIN           = 5.0;
 
 //Max click duration for enabling picking mode (in ms)
 constexpr int CC_MAX_PICKING_CLICK_DURATION_MS = 200;
@@ -117,6 +118,9 @@ enum class RenderTextReservedIDs {
 	LineSizeLabel,
 	GLFilterLabel,
 	ScaleLabel,
+	trihedronX,
+	trihedronY,
+	trihedronZ,
 	StandardMessagePrefix = 1024
 };
 
@@ -319,8 +323,8 @@ struct ccGLWindow::PickingParameters
 };
 
 
-ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=0*/,
-						ccGLWindowParent* parent/*=0*/,
+ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=nullptr*/,
+						ccGLWindowParent* parent/*=nullptr*/,
 						bool silentInitialization/*=false*/)
 	: ccGLWindowParent(parent)
 #ifdef CC_GL_WINDOW_USE_QWINDOW
@@ -3137,7 +3141,7 @@ void ccGLWindow::drawScale(const ccColor::Rgbub& color)
 		//we can now safely apply the rendering zoom
 		scaleW_pix *= m_captureMode.zoomFactor;
 	}
-	float trihedronLength = CC_DISPLAYED_TRIHEDRON_AXES_LENGTH * m_captureMode.zoomFactor;
+	float trihedronLength = CC_DISPLAYED_TRIHEDRON_AXES_LENGTH * m_captureMode.zoomFactor + CC_TRIHEDRON_TEXT_MARGIN + fm.width('X');
 	float dW = 2.0f * trihedronLength + 20.0f;
 	float dH = std::max(fm.height() * 1.25f, trihedronLength + 5.0f);
 	float w = m_glViewport.width() / 2.0f - dW;
@@ -3180,15 +3184,25 @@ void ccGLWindow::drawTrihedron()
 	ccQOpenGLFunctions* glFunc = functions();
 	assert(glFunc);
 
-	float trihedronLength = CC_DISPLAYED_TRIHEDRON_AXES_LENGTH * m_captureMode.zoomFactor;
+	QFont textFont = getTextDisplayFont(); //we take rendering zoom into account!
+	QFontMetrics fm(textFont);
+	QRect rectX = fm.boundingRect('X');
+	float trihedronLength = CC_DISPLAYED_TRIHEDRON_AXES_LENGTH * m_captureMode.zoomFactor + CC_TRIHEDRON_TEXT_MARGIN + rectX.width();
 
-	float w = m_glViewport.width() / 2.0f - trihedronLength - 10.0f;
-	float h = m_glViewport.height() / 2.0f - trihedronLength - 5.0f;
+	float halfW = m_glViewport.width() / 2.0f;
+	float halfH = m_glViewport.height() / 2.0f;
+
+	float trihedronCenterX = halfW - trihedronLength - 10.0f;
+	float trihedronCenterY = halfH - trihedronLength - 5.0f;
 
 	glFunc->glMatrixMode(GL_MODELVIEW);
 	glFunc->glPushMatrix();
-	glFunc->glTranslatef(w, -h, 0.0f);
+	glFunc->glTranslatef(trihedronCenterX, -trihedronCenterY, 0.0f);
 	glFunc->glMultMatrixd(m_viewportParams.viewMat.data());
+
+	static const CCVector3d tipX(CC_DISPLAYED_TRIHEDRON_AXES_LENGTH, 0.0, 0.0);
+	static const CCVector3d tipY(0.0, CC_DISPLAYED_TRIHEDRON_AXES_LENGTH, 0.0);
+	static const CCVector3d tipZ(0.0, 0.0, CC_DISPLAYED_TRIHEDRON_AXES_LENGTH);
 
 	//on first call, compile the GL list once and for all
 	if (m_trihedronGLList == GL_INVALID_LIST_ID)
@@ -3206,13 +3220,13 @@ void ccGLWindow::drawTrihedron()
 		glFunc->glBegin(GL_LINES);
 		glFunc->glColor3f(1.0f, 0.0f, 0.0f);
 		glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
-		glFunc->glVertex3f(CC_DISPLAYED_TRIHEDRON_AXES_LENGTH, 0.0f, 0.0f);
+		glFunc->glVertex3dv(tipX.u);
 		glFunc->glColor3f(0.0f, 1.0f, 0.0f);
 		glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
-		glFunc->glVertex3f(0.0f, CC_DISPLAYED_TRIHEDRON_AXES_LENGTH, 0.0f);
+		glFunc->glVertex3dv(tipY.u);
 		glFunc->glColor3f(0.0f, 0.7f, 1.0f);
 		glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
-		glFunc->glVertex3f(0.0f, 0.0f, CC_DISPLAYED_TRIHEDRON_AXES_LENGTH);
+		glFunc->glVertex3dv(tipZ.u);
 		glFunc->glEnd();
 
 		glFunc->glPopAttrib(); //GL_LINE_BIT | GL_DEPTH_BUFFER_BIT
@@ -3243,6 +3257,48 @@ void ccGLWindow::drawTrihedron()
 	renderText(0, 0, CC_DISPLAYED_TRIHEDRON_AXES_LENGTH, zLabel, font);
 
 	glFunc->glPopMatrix();
+
+	// now display the X, Y and Z axis labels
+	{
+		//static const CCVector3d origin(0.0, 0.0, 0.0);
+		//CCVector3d origin2D = m_viewportParams.viewMat * origin;
+		CCVector3d origin2D = m_viewportParams.viewMat.getTranslationAsVec3D();
+		CCVector3d tipX2D = m_viewportParams.viewMat * tipX;
+		CCVector3d tipY2D = m_viewportParams.viewMat * tipY;
+		CCVector3d tipZ2D = m_viewportParams.viewMat * tipZ;
+
+		double radius = std::max(rectX.width(), rectX.height()) / 2.0 + CC_TRIHEDRON_TEXT_MARGIN;
+
+		CCVector2d toTrihedronOrigin(trihedronCenterX, -trihedronCenterY);
+		CCVector2d toCharOrigin(-(rectX.x() + rectX.width() / 2.0), rectX.y() + rectX.height() / 4.0); // rectX.height() should be divided by 2, but it looks better with 4 !
+
+		glFunc->glColor3f(1.0f, 0.0f, 0.0f);
+		{
+			CCVector2d dX(tipX2D.x - origin2D.x, tipX2D.y - origin2D.y);
+			dX.normalize();
+			dX *= radius;
+			CCVector2d posX = CCVector2d(tipX2D.x, tipX2D.y) + toTrihedronOrigin + toCharOrigin + dX;
+			renderText(static_cast<int>(halfW + posX.x), static_cast<int>(halfH - posX.y), "X", static_cast<uint16_t>(RenderTextReservedIDs::trihedronX), textFont);
+		}
+
+		glFunc->glColor3f(0.0f, 1.0f, 0.0f);
+		{
+			CCVector2d dY(tipY2D.x - origin2D.x, tipY2D.y - origin2D.y);
+			dY.normalize();
+			dY *= radius;
+			CCVector2d posY = CCVector2d(tipY2D.x, tipY2D.y) + toTrihedronOrigin + toCharOrigin + dY;
+			renderText(static_cast<int>(halfW + posY.x), static_cast<int>(halfH - posY.y), "Y", static_cast<uint16_t>(RenderTextReservedIDs::trihedronY), textFont);
+		}
+
+		glFunc->glColor3f(0.0f, 0.7f, 1.0f);
+		{
+			CCVector2d dZ(tipZ2D.x - origin2D.x, tipZ2D.y - origin2D.y);
+			dZ.normalize();
+			dZ *= radius;
+			CCVector2d posZ = CCVector2d(tipZ2D.x, tipZ2D.y) + toTrihedronOrigin + toCharOrigin + dZ;
+			renderText(static_cast<int>(halfW + posZ.x), static_cast<int>(halfH - posZ.y), "Z", static_cast<uint16_t>(RenderTextReservedIDs::trihedronZ), textFont);
+		}
+	}
 }
 
 void ccGLWindow::getVisibleObjectsBB(ccBBox& box) const
@@ -6951,7 +7007,7 @@ void ccGLWindow::renderText(int x, int y, const QString & str, uint16_t uniqueID
 	}
 }
 
-void ccGLWindow::renderText(double x, double y, double z, const QString & str, const QFont & font/*=QFont()*/)
+void ccGLWindow::renderText(double x, double y, double z, const QString& str, const QFont& font/*=QFont()*/)
 {
 	makeCurrent();
 

@@ -187,7 +187,7 @@ QString ccCommandLineParser::getExportFilename(	const CLEntityDesc& entityDesc,
 	if (!entity)
 	{
 		assert(false);
-		warning("[ExportEntity] Internal error: invalid input entity!");
+		warning("[getExportFilename] Internal error: invalid input entity!");
 		return QString();
 	}
 
@@ -380,8 +380,8 @@ bool ccCommandLineParser::importFile(QString filename, const GlobalShiftOptions&
 
 	//default Global Shift handling parameters
 	m_loadingParameters.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG;
-	m_loadingParameters.m_coordinatesShiftEnabled = false;
-	m_loadingParameters.m_coordinatesShift = CCVector3d(0, 0, 0);
+	m_loadingParameters.coordinatesShiftEnabled = false;
+	m_loadingParameters.coordinatesShift = CCVector3d(0, 0, 0);
 
 	switch (globalShiftOptions.mode)
 	{
@@ -393,14 +393,14 @@ bool ccCommandLineParser::importFile(QString filename, const GlobalShiftOptions&
 	case GlobalShiftOptions::FIRST_GLOBAL_SHIFT:
 		//use the first encountered global shift value (if any)
 		m_loadingParameters.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT;
-		m_loadingParameters.m_coordinatesShiftEnabled = s_firstCoordinatesShiftEnabled;
-		m_loadingParameters.m_coordinatesShift = s_firstGlobalShift;
+		m_loadingParameters.coordinatesShiftEnabled = s_firstCoordinatesShiftEnabled;
+		m_loadingParameters.coordinatesShift = s_firstGlobalShift;
 		break;
 
 	case GlobalShiftOptions::CUSTOM_GLOBAL_SHIFT:
 		//set the user defined shift vector as default shift information
-		m_loadingParameters.m_coordinatesShiftEnabled = true;
-		m_loadingParameters.m_coordinatesShift = globalShiftOptions.customGlobalShift;
+		m_loadingParameters.coordinatesShiftEnabled = true;
+		m_loadingParameters.coordinatesShift = globalShiftOptions.customGlobalShift;
 		break;
 
 	default:
@@ -430,8 +430,8 @@ bool ccCommandLineParser::importFile(QString filename, const GlobalShiftOptions&
 		if (s_firstTime)
 		{
 			// remember the first Global Shift parameters used
-			s_firstCoordinatesShiftEnabled = m_loadingParameters.m_coordinatesShiftEnabled;
-			s_firstGlobalShift = m_loadingParameters.m_coordinatesShift;
+			s_firstCoordinatesShiftEnabled = m_loadingParameters.coordinatesShiftEnabled;
+			s_firstGlobalShift = m_loadingParameters.coordinatesShift;
 			s_firstTime = false;
 		}
 	}

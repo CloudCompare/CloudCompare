@@ -107,12 +107,21 @@ DL_Dxf::~DL_Dxf() {
  * @retval true If \p file could be opened.
  * @retval false If \p file could not be opened.
  */
-bool DL_Dxf::in(const std::string& file, DL_CreationInterface* creationInterface) {
+#ifdef _MSC_VER
+bool DL_Dxf::in(const std::wstring& file,
+#else
+bool DL_Dxf::in(const std::string& file,
+#endif
+                DL_CreationInterface* creationInterface) {
     FILE *fp;
     firstCall = true;
     currentObjectType = DL_UNKNOWN;
 
-    fp = fopen(file.c_str(), "rt");
+#ifdef _MSC_VER
+	fp = _wfopen(file.c_str(), L"rt");
+#else
+	fp = fopen(file.c_str(), "rt");
+#endif
     if (fp) {
         std::locale oldLocale = std::locale::global(std::locale("C"));	// use dot in numbers
         while (readDxfGroups(fp, creationInterface)) {}
@@ -2308,18 +2317,19 @@ void DL_Dxf::endSequence(DL_CreationInterface* creationInterface) {
  *
  * @return Pointer to an ascii dxf writer object.
  */
-DL_WriterA* DL_Dxf::out(const char* file, DL_Codes::version version) {
-    char* f = new char[strlen(file)+1];
-    strcpy(f, file);
+#ifdef _MSC_VER
+DL_WriterA* DL_Dxf::out(const std::wstring& file,
+#else
+DL_WriterA* DL_Dxf::out(const std::string& file,
+#endif
+        DL_Codes::version version) {
     this->version = version;
 
-    DL_WriterA* dw = new DL_WriterA(f, version);
+    DL_WriterA* dw = new DL_WriterA(file, version);
     if (dw->openFailed()) {
         delete dw;
-        delete[] f;
         return NULL;
     } else {
-        delete[] f;
         return dw;
     }
 }

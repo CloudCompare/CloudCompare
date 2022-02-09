@@ -279,13 +279,24 @@ void ccRasterizeTool::projectionDirChanged(int dir)
 
 void ccRasterizeTool::activeLayerChanged(int layerIndex, bool autoRedraw/*=true*/)
 {
-	if (m_UI->activeLayerComboBox->itemData(layerIndex).toInt() == LAYER_SF && m_UI->activeLayerComboBox->itemText(layerIndex) != HILLSHADE_FIELD_NAME)
+	if (m_UI->activeLayerComboBox->itemData(layerIndex).toInt() == LAYER_SF)
 	{
-		m_UI->interpolateSFCheckBox->setChecked(true); //force the choice of a SF projection strategy
-		m_UI->interpolateSFCheckBox->setEnabled(false);
-		m_UI->generateImagePushButton->setEnabled(false);
-		m_UI->generateASCIIPushButton->setEnabled(false);
-		m_UI->projectContoursOnAltCheckBox->setEnabled(true);
+		if (m_UI->activeLayerComboBox->itemText(layerIndex) != HILLSHADE_FIELD_NAME)
+		{
+			m_UI->interpolateSFCheckBox->setChecked(true); //force the choice of a SF projection strategy
+			m_UI->interpolateSFCheckBox->setEnabled(false);
+			m_UI->generateImagePushButton->setEnabled(true);
+			m_UI->generateASCIIPushButton->setEnabled(false);
+			m_UI->projectContoursOnAltCheckBox->setEnabled(true);
+		}
+		else
+		{
+			//m_UI->interpolateSFCheckBox->setChecked(false); //we shouldn't change that as it only impacts the other fields
+			m_UI->interpolateSFCheckBox->setEnabled(false);
+			m_UI->generateImagePushButton->setEnabled(false);
+			m_UI->generateASCIIPushButton->setEnabled(false);
+			m_UI->projectContoursOnAltCheckBox->setEnabled(false);
+		}
 	}
 	else
 	{
@@ -1055,7 +1066,7 @@ bool ccRasterizeTool::ExportGeoTiff(const QString& outputFilename,
 									const ccBBox& gridBBox,
 									unsigned char Z,
 									double customHeightForEmptyCells/*=std::numeric_limits<double>::quiet_NaN()*/,
-									ccGenericPointCloud* originCloud/*=0*/,
+									ccGenericPointCloud* originCloud/*=nullptr*/,
 									int visibleSfIndex/*=-1*/)
 {
 #ifdef CC_GDAL_SUPPORT
@@ -1164,7 +1175,7 @@ bool ccRasterizeTool::ExportGeoTiff(const QString& outputFilename,
 	}
 
 	char **papszOptions = nullptr;
-	GDALDataset* poDstDS = poDriver->Create(qPrintable(outputFilename),
+	GDALDataset* poDstDS = poDriver->Create(qUtf8Printable(outputFilename),
 											static_cast<int>(grid.width),
 											static_cast<int>(grid.height),
 											totalBands,
@@ -1224,10 +1235,10 @@ bool ccRasterizeTool::ExportGeoTiff(const QString& outputFilename,
 		{
 			rgbBands[k]->SetStatistics(0, 255, 128, 0); //warning: arbitrary average and std. dev. values
 
-			for (unsigned j = 0; j<grid.height; ++j)
+			for (unsigned j = 0; j < grid.height; ++j)
 			{
 				const ccRasterGrid::Row& row = grid.rows[grid.height - 1 - j]; //the first row is the northest one (i.e. Ymax)
-				for (unsigned i = 0; i<grid.width; ++i)
+				for (unsigned i = 0; i < grid.width; ++i)
 				{
 					cLine[i] = (std::isfinite(row[i].h) ? static_cast<unsigned char>(std::max(0.0, std::min(255.0, row[i].color.u[k]))) : 0);
 				}
@@ -1464,22 +1475,22 @@ void ccRasterizeTool::generateHillshade()
 
 	//now we can compute the hillshade
 	int zenith_deg = m_UI->sunZenithSpinBox->value();
-	double zenith_rad = CCCoreLib::DegreesToRadians( static_cast<double>( zenith_deg ) );
+	double zenith_rad = CCCoreLib::DegreesToRadians(static_cast<double>(zenith_deg));
 
 	double cos_zenith_rad = cos(zenith_rad);
 	double sin_zenith_rad = sin(zenith_rad);
 
 	int azimuth_deg = m_UI->sunAzimuthSpinBox->value();
 	int azimuth_math = 360 - azimuth_deg + 90;
-	double azimuth_rad = CCCoreLib::DegreesToRadians( static_cast<double>( azimuth_math ) );
+	double azimuth_rad = CCCoreLib::DegreesToRadians(static_cast<double>(azimuth_math));
 
 	//for all cells
 	unsigned validCellIndex = 0;
 	for (unsigned j = (sparseSF ? 0 : 1); j < m_grid.height - 1; ++j)
 	{
 		const ccRasterGrid::Row& row = m_grid.rows[j];
-		
-		for (unsigned i=sparseSF ? 0 : 1; i<m_grid.width; ++i)
+
+		for (unsigned i = sparseSF ? 0 : 1; i < m_grid.width; ++i)
 		{
 			//valid height value
 			if (std::isfinite(row[i].h))
@@ -1490,10 +1501,10 @@ void ccRasterizeTool::generateHillshade()
 					int dz_dx_count = 0;
 					double dz_dy = 0.0;
 					int dz_dy_count = 0;
-				
-					for (int di=-1; di<=1; ++di)
+
+					for (int di = -1; di <= 1; ++di)
 					{
-						for (int dj=-1; dj<=1; ++dj)
+						for (int dj = -1; dj <= 1; ++dj)
 						{
 							const ccRasterCell& n = m_grid.rows[j - dj][i + di]; //-dj (instead of + dj) because we scan the grid in the reverse orientation! (from bottom to top)
 							if (n.h == n.h)
@@ -1516,38 +1527,38 @@ void ccRasterizeTool::generateHillshade()
 					}
 
 					//for now we only handle the cell that have 8 valid neighbors!
-					if (	dz_dx_count == 8
-						&&	dz_dy_count == 8)
+					if (dz_dx_count == 8
+						&& dz_dy_count == 8)
 					{
 						dz_dx /= (8.0 * m_grid.gridStep);
 						dz_dy /= (8.0 * m_grid.gridStep);
 
-						 double slope_rad = atan( /*z_factor **/sqrt(dz_dx*dz_dx + dz_dy*dz_dy) );
+						double slope_rad = atan( /*z_factor **/sqrt(dz_dx*dz_dx + dz_dy * dz_dy));
 
-						 double aspect_rad = 0;
-						 static const double s_zero = 1.0e-8;
-						 if (std::abs(dz_dx) > s_zero)
-						 {
-							 aspect_rad = atan2(dz_dy, -dz_dx);
-							 if (aspect_rad < 0)
-							 {
-								 aspect_rad += 2.0 * M_PI;
-							 }
-						 }
-						 else // dz_dx == 0
-						 {
-							 if (dz_dy > s_zero)
-							 {
-								 aspect_rad = 0.5 * M_PI;
-							 }
-							 else if (dz_dy < s_zero)
-							 {
-								 aspect_rad = 1.5 * M_PI;
-							 }
-						 }
+						double aspect_rad = 0;
+						static const double s_zero = 1.0e-8;
+						if (std::abs(dz_dx) > s_zero)
+						{
+							aspect_rad = atan2(dz_dy, -dz_dx);
+							if (aspect_rad < 0)
+							{
+								aspect_rad += 2.0 * M_PI;
+							}
+						}
+						else // dz_dx == 0
+						{
+							if (dz_dy > s_zero)
+							{
+								aspect_rad = 0.5 * M_PI;
+							}
+							else if (dz_dy < s_zero)
+							{
+								aspect_rad = 1.5 * M_PI;
+							}
+						}
 
-						 ScalarType hillshade = static_cast<ScalarType>(std::max(0.0, cos_zenith_rad * cos(slope_rad) + sin_zenith_rad * sin(slope_rad) * cos(azimuth_rad - aspect_rad)));
-						 hillshadeLayer->setValue(sparseSF ? validCellIndex : i + j * m_grid.width, hillshade);
+						ScalarType hillshade = static_cast<ScalarType>(std::max(0.0, cos_zenith_rad * cos(slope_rad) + sin_zenith_rad * sin(slope_rad) * cos(azimuth_rad - aspect_rad)));
+						hillshadeLayer->setValue(sparseSF ? validCellIndex : i + j * m_grid.width, hillshade);
 					}
 				}
 				++validCellIndex;
@@ -1799,101 +1810,159 @@ ccRasterGrid::EmptyCellFillOption ccRasterizeTool::getFillEmptyCellsStrategyExt(
 void ccRasterizeTool::generateImage() const
 {
 	if (!m_grid.isValid())
-		return;
-
-	//default values
-	double emptyCellsHeight = 0;
-	double minHeight = m_grid.minHeight;
-	double maxHeight = m_grid.maxHeight;
-	//get real values
-	ccRasterGrid::EmptyCellFillOption fillEmptyCellsStrategy = getFillEmptyCellsStrategyExt(	emptyCellsHeight,
-																				minHeight,
-																				maxHeight);
-
-	QImage bitmap8(m_grid.width, m_grid.height, QImage::Format_Indexed8);
-	if (!bitmap8.isNull())
 	{
-		bool addTransparentColor = (fillEmptyCellsStrategy == ccRasterGrid::LEAVE_EMPTY);
+		assert(false);
+		return;
+	}
 
-		//build a custom palette
-		QVector<QRgb> palette(256);
-		if (	m_rasterCloud
-			&&	m_rasterCloud->getCurrentDisplayedScalarField()
-			&&	m_rasterCloud->getCurrentDisplayedScalarField()->getColorScale())
+	bool exportRGB = (m_UI->activeLayerComboBox->currentData().toInt() == LAYER_RGB);
+	const ccRasterGrid::SF* gridSF = nullptr;
+	const CCCoreLib::ScalarField* cloudSF = nullptr;
+	if (!exportRGB && m_UI->activeLayerComboBox->currentData().toInt() == LAYER_SF && m_cloud->isA(CC_TYPES::POINT_CLOUD))
+	{
+		//the indexes in the 'm_grid.scalarFields' are the same as in the cloud
+		ccPointCloud* pc = static_cast<ccPointCloud*>(m_cloud);
+		int visibleSfIndex = pc->getScalarFieldIndexByName(qPrintable(m_UI->activeLayerComboBox->currentText()));
+		if (visibleSfIndex >= 0 && static_cast<size_t>(visibleSfIndex) < m_grid.scalarFields.size())
 		{
-			const ccColorScale::Shared& colorScale = m_rasterCloud->getCurrentDisplayedScalarField()->getColorScale();
-			unsigned steps = (addTransparentColor ? 255 : 256);
-			for (unsigned i = 0; i < steps; i++)
-			{
-				const ccColor::Rgb* col = colorScale->getColorByRelativePos(i / static_cast<double>(steps - 1), steps, &ccColor::lightGreyRGB);
-				palette[i] = qRgba(col->r, col->g, col->b, 255);
-			}
+			cloudSF = pc->getScalarField(visibleSfIndex);
+			gridSF = &(m_grid.scalarFields[visibleSfIndex]);
 		}
 		else
 		{
-			for (unsigned i = 0; i < 256; i++)
-			{
-				palette[i] = qRgba(i, i, i, 255);
-			}
+			ccLog::Error("Internal error: can't find the selected field");
+			return;
 		}
+	}
+
+	ccRasterGrid::EmptyCellFillOption fillEmptyCellsStrategy = ccRasterGrid::LEAVE_EMPTY;
 		
-		double maxColorComp = 255.99; //.99 --> to avoid round-off issues later!
-		if (addTransparentColor)
-		{
-			palette[255] = qRgba(255, 0, 255, 0); //magenta/transparent color for empty cells (in place of pure white)
-			maxColorComp = 254.99;
-		}
+	// exported field extreme values
+	double emptyCellsValue = std::numeric_limits<double>::quiet_NaN();
+	double minValue = 0.0;
+	double maxValue = 0.0;
+	if (cloudSF)
+	{
+		// override the default min and max values (based on the height values)
+		minValue = cloudSF->getMin();
+		maxValue = cloudSF->getMax();
+	}
+	else if (!exportRGB)
+	{
+		// retrieve height values
+		fillEmptyCellsStrategy = getFillEmptyCellsStrategyExt(	emptyCellsValue,
+																minValue,
+																maxValue);
+	}
 
-		bitmap8.setColorTable(palette);
-		//bitmap8.fill(255);
+	double valueRange = maxValue - minValue;
+	if (!exportRGB && CCCoreLib::LessThanEpsilon(valueRange))
+	{
+		ccLog::Warning("[Rasterize::generateImage] Exported field has a flat range");
+		valueRange = 1.0; // to simplify tests below
+	}
 
+	QImage outputImage(m_grid.width, m_grid.height, exportRGB ? QImage::Format_ARGB32 : QImage::Format_Indexed8);
+
+	if (!outputImage.isNull())
+	{
 		unsigned emptyCellColorIndex = 0;
-		switch (fillEmptyCellsStrategy)
-		{
-		case ccRasterGrid::LEAVE_EMPTY:
-			emptyCellColorIndex = 255; //should be transparent!
-			break;
-		case ccRasterGrid::FILL_MINIMUM_HEIGHT:
-			emptyCellColorIndex = 0;
-			break;
-		case ccRasterGrid::FILL_MAXIMUM_HEIGHT:
-			emptyCellColorIndex = 255;
-			break;
-		case ccRasterGrid::FILL_CUSTOM_HEIGHT:
-			{
-				double normalizedHeight = (emptyCellsHeight - minHeight) / (maxHeight - minHeight);
-				//min and max should have already been updated with custom empty cell height!
-				assert(normalizedHeight >= 0.0 && normalizedHeight <= 1.0);
-				emptyCellColorIndex = static_cast<unsigned>(floor(normalizedHeight*maxColorComp));
-			}
-			break;
-		case ccRasterGrid::FILL_AVERAGE_HEIGHT:
-		default:
-			assert(false);
-		}
+		double maxColorComp = 255.99; //.99 --> to avoid round-off issues later!
 
-		double range = maxHeight - minHeight;
-		if (CCCoreLib::LessThanEpsilon(range))
+		if (!exportRGB)
 		{
-			range = 1.0;
+			bool addTransparentColor = (cloudSF || fillEmptyCellsStrategy == ccRasterGrid::LEAVE_EMPTY);
+
+			//build a custom palette
+			QVector<QRgb> palette(256);
+			if (	m_rasterCloud
+				&&	m_rasterCloud->getCurrentDisplayedScalarField()
+				&&	m_rasterCloud->getCurrentDisplayedScalarField()->getColorScale())
+			{
+				const ccColorScale::Shared& colorScale = m_rasterCloud->getCurrentDisplayedScalarField()->getColorScale();
+				unsigned steps = (addTransparentColor ? 255 : 256);
+				for (unsigned i = 0; i < steps; i++)
+				{
+					const ccColor::Rgb* col = colorScale->getColorByRelativePos(i / static_cast<double>(steps - 1), steps, &ccColor::lightGreyRGB);
+					palette[i] = qRgba(col->r, col->g, col->b, 255);
+				}
+			}
+			else
+			{
+				for (unsigned i = 0; i < 256; i++)
+				{
+					palette[i] = qRgba(i, i, i, 255);
+				}
+			}
+
+			if (addTransparentColor)
+			{
+				palette[255] = qRgba(255, 0, 255, 0); //magenta/transparent color for empty cells (in place of pure white)
+				maxColorComp = 254.99;
+			}
+
+			outputImage.setColorTable(palette);
+
+			if (!cloudSF) //we are using height values
+			{
+				switch (fillEmptyCellsStrategy)
+				{
+				case ccRasterGrid::LEAVE_EMPTY:
+					emptyCellColorIndex = 255; //should be transparent!
+					break;
+				case ccRasterGrid::FILL_MINIMUM_HEIGHT:
+					emptyCellColorIndex = 0;
+					break;
+				case ccRasterGrid::FILL_MAXIMUM_HEIGHT:
+					emptyCellColorIndex = 255;
+					break;
+				case ccRasterGrid::FILL_CUSTOM_HEIGHT:
+					{
+						double normalizedHeight = (emptyCellsValue - minValue) / valueRange;
+						assert(normalizedHeight >= 0.0 && normalizedHeight <= 1.0);
+						emptyCellColorIndex = static_cast<unsigned>(floor(normalizedHeight*maxColorComp));
+					}
+					break;
+				case ccRasterGrid::FILL_AVERAGE_HEIGHT:
+				default:
+					assert(false);
+				}
+			}
+			else
+			{
+				emptyCellColorIndex = 255;
+			}
+			//outputImage.fill(emptyCellColorIndex);
 		}
 
 		// Filling the image with grid values
 		for (unsigned j = 0; j < m_grid.height; ++j)
 		{
 			const ccRasterGrid::Row& row = m_grid.rows[j];
+			const double* sfRow = (gridSF ? gridSF->data() + j * m_grid.width : nullptr);
 			for (unsigned i = 0; i < m_grid.width; ++i)
 			{
 				if (std::isfinite(row[i].h))
 				{
-					double normalizedHeight = (row[i].h - minHeight) / range;
-					assert(normalizedHeight >= 0.0 && normalizedHeight <= 1.0);
-					unsigned char val = static_cast<unsigned char>(floor(normalizedHeight*maxColorComp));
-					bitmap8.setPixel(i, m_grid.height - 1 - j, val);
+					if (exportRGB)
+					{
+						int r = static_cast<int>(std::max(0.0, std::min(255.0, row[i].color.u[0])));
+						int g = static_cast<int>(std::max(0.0, std::min(255.0, row[i].color.u[1])));
+						int b = static_cast<int>(std::max(0.0, std::min(255.0, row[i].color.u[2])));
+						outputImage.setPixel(i, m_grid.height - 1 - j, qRgba(r, g, b, 255));
+					}
+					else
+					{
+						double value = sfRow ? sfRow[i] : row[i].h;
+						double normalizedHeight = (value - minValue) / valueRange;
+						assert(normalizedHeight >= 0.0 && normalizedHeight <= 1.0);
+						unsigned char val = static_cast<unsigned char>(floor(normalizedHeight*maxColorComp));
+						outputImage.setPixel(i, m_grid.height - 1 - j, val);
+					}
 				}
 				else //NaN
 				{
-					bitmap8.setPixel(i, m_grid.height - 1 - j, emptyCellColorIndex);
+					outputImage.setPixel(i, m_grid.height - 1 - j, emptyCellColorIndex); //in RGBA mode, it should be 0
 				}
 			}
 		}
@@ -1904,8 +1973,8 @@ void ccRasterizeTool::generateImage() const
 			settings.beginGroup(ccPS::HeightGridGeneration());
 			QString imageSavePath = settings.value("savePathImage", ccFileUtils::defaultDocPath()).toString();
 
-			QString outputFilename = ImageFileFilter::GetSaveFilename(	"Save raster image",
-																		"raster_image",
+			QString outputFilename = ImageFileFilter::GetSaveFilename(	"Save raster as image",
+																		"image",
 																		imageSavePath,
 																		const_cast<ccRasterizeTool*>(this));
 
@@ -1915,7 +1984,7 @@ void ccRasterizeTool::generateImage() const
 				settings.setValue("savePathImage", QFileInfo(outputFilename).absolutePath());
 				settings.endGroup();
 
-				if (bitmap8.save(outputFilename))
+				if (outputImage.save(outputFilename))
 				{
 					ccLog::Print(QString("[Rasterize] Image '%1' successfully saved").arg(outputFilename));
 				}
@@ -1947,8 +2016,8 @@ void ccRasterizeTool::generateASCIIMatrix() const
 	if (outputFilename.isNull())
 		return;
 
-	FILE* pFile = fopen(qPrintable(outputFilename), "wt");
-	if (!pFile)
+	QFile fp(outputFilename);
+	if (!fp.open(QFile::WriteOnly))
 	{
 		ccLog::Warning(QString("[ccHeightGridGeneration] Failed to write '%1' file!").arg(outputFilename));
 	}
@@ -1959,19 +2028,17 @@ void ccRasterizeTool::generateASCIIMatrix() const
 	double maxHeight = m_grid.maxHeight;
 	//get real values
 	getFillEmptyCellsStrategyExt(emptyCellsHeight, minHeight, maxHeight);
+	QTextStream stream(&fp);
+	stream.setRealNumberPrecision(8);
 	for (unsigned j = 0; j < m_grid.height; ++j)
 	{
 		const ccRasterGrid::Row& row = m_grid.rows[m_grid.height - 1 - j];
 		for (unsigned i = 0; i < m_grid.width; ++i)
 		{
-			fprintf(pFile, "%.8f ", std::isfinite(row[i].h) ? row[i].h : emptyCellsHeight);
+			stream << (std::isfinite(row[i].h) ? row[i].h : emptyCellsHeight) << ' ';
 		}
-
-		fprintf(pFile, "\n");
+		stream << endl;
 	}
-
-	fclose(pFile);
-	pFile = nullptr;
 
 	//save current export path to persistent settings
 	settings.setValue("savePathASCIIGrid", QFileInfo(outputFilename).absolutePath());

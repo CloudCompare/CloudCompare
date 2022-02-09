@@ -8,10 +8,13 @@ v2.12 (???) - (in development)
 		-  'Edit > Cloud > Create single point cloud': to create a cloud with a single point (set by the user)
 		-  'Edit > Cloud > Paste from clipboard' (shortcut: CTRL+P): to create a cloud from ASCII/test data stored in the clipboard
 
-- New plugin:
+- New plugins:
 	- PCL > Fast Global Registration (see https://github.com/isl-org/FastGlobalRegistration)
 		- Automatic registration of point clouds (with normals) with no initial/rough alignment
 		- Based on: Q.-Y. Zhou, J. Park, and V. Koltun, "Fast Global Registration", ECCV, 2016
+	- qMeshBoolean
+		- Boolean operations on meshes, based on libigl (https://libigl.github.io/)
+		- Slower, but supposedly more robust than Cork
 
 - New command line options:
     - Added N_SIGMA_MIN and N_SIGMA_MAX options to the FILTER_SF command.
@@ -123,6 +126,10 @@ v2.12 (???) - (in development)
 	    - the Global Shift, if defined, will now be used as LAS offset if no offset was previously set
 		- the PDAL LAS I/O filter and the libLAS I/O filter should now both handle LAS offset
 		  and scale the same way at export time.
+	- Better management of filenames with non latin characters (for raster files, STL files, PDMS scripts, Point List picking exported files)
+	- Rasterize tool:
+		- RGB and scalar field based layers can now be exported to standard image formats
+	- 'X', 'Y' and 'Z' labels are now displayed next to the trihedron axes (in the bottom right corner)
 
 - New plugins
 	- MPlane: perform normal distance measurements against a defined plane (see https://www.cloudcompare.org/doc/wiki/index.php?title=MPlane_(plugin) )
@@ -160,6 +167,7 @@ v2.12 (???) - (in development)
 	- When rendering the screen with a zoom > 1, the scale label was wrongly scaled as well
 	- Graphical segmentation: when using the shortcuts 'i' and 'o' to segment points inside or outside a polyline not yet closed (with a right click),
 		the overlay buttons would become transparent to clicks, and the not yet confirmed vertex of the polyline was not taken into account
+	- CloudCompare was not able to read shapefiles with missing measurements (while this field is generaly optional for polylines, polygons and point clouds)
 
 v2.11.3 (Anoia) - 08/09/2020
 ----------------------

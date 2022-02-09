@@ -13,6 +13,7 @@ add_subdirectory( qPCV )
 add_subdirectory( qPoissonRecon )
 add_subdirectory( qRANSAC_SD )
 add_subdirectory( qSRA )
+add_subdirectory( qMeshBoolean )
 
 #plugins integrated as submodules
 set( submod_plugins

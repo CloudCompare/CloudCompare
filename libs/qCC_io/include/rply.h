@@ -72,7 +72,13 @@ int ply_get_ply_user_data(p_ply ply, void **pdata, long *idata);
  *
  * Returns 1 if successful, 0 otherwise
  * ---------------------------------------------------------------------- */
-p_ply ply_open(const char *name, p_ply_error_cb error_cb, long idata,
+#ifdef _MSC_VER
+p_ply ply_open(const wchar_t* name,
+#else
+p_ply ply_open(const char *name,
+#endif
+        p_ply_error_cb error_cb,
+        long idata,
         void *pdata);
 
 /* ----------------------------------------------------------------------
@@ -246,7 +252,12 @@ int ply_get_property_info(p_ply_property property, const char** name,
  *
  * Returns handle to PLY file if successful, NULL otherwise
  * ---------------------------------------------------------------------- */
-p_ply ply_create(const char *name, e_ply_storage_mode storage_mode,
+#ifdef _MSC_VER
+p_ply ply_create(const wchar_t *name,
+#else
+p_ply ply_create(const char *name,
+#endif
+        e_ply_storage_mode storage_mode,
         p_ply_error_cb error_cb, long idata, void *pdata);
 
 /* ----------------------------------------------------------------------

@@ -37,12 +37,6 @@ endif()
 # Default debug suffix for libraries.
 set( CMAKE_DEBUG_POSTFIX "d" )
 
-# RPATH Linux/Unix: (dynamic) libs are put in a subdir of prefix/lib,
-# since they are only used by qCC/ccViewer
-if( UNIX AND NOT APPLE )
-	include( GNUInstallDirs )
-	set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_FULL_LIBDIR}/cloudcompare")
-endif()
 
 # Define target folders
 # (now that ccViewer can have its own plugins, qCC and ccViewer must fall in separate folders!
@@ -65,7 +59,12 @@ if( WIN32 )
         list( APPEND INSTALL_DESTINATIONS ${CCVIEWER_DEST_FOLDER} )
 	endif()
 elseif( UNIX AND NOT APPLE )
-        set( INSTALL_DESTINATIONS ${CMAKE_INSTALL_PREFIX})
+	# RPATH Linux/Unix: (dynamic) libs are put in $prefix/$lib/cloudcompare,
+	# since they are only used by qCC/ccViewer
+	include( GNUInstallDirs )
+	set( LINUX_INSTALL_SHARED_DESTINATION "${CMAKE_INSTALL_FULL_LIBDIR}/cloudcompare" )
+	set( CMAKE_INSTALL_RPATH ${LINUX_INSTALL_SHARED_DESTINATION} )
+	set( INSTALL_DESTINATIONS ${CMAKE_INSTALL_PREFIX})
 endif()
 
 # Load advanced scripts

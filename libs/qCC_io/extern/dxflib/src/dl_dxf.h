@@ -124,7 +124,11 @@ public:
     DL_Dxf();
     ~DL_Dxf();
 
-    bool in(const std::string& file,
+#ifdef _MSC_VER
+	bool in(const std::wstring& file,
+#else
+	bool in(const std::string& file,
+#endif
             DL_CreationInterface* creationInterface);
     bool readDxfGroups(FILE* fp,
                        DL_CreationInterface* creationInterface);
@@ -214,7 +218,11 @@ public:
     
     //int  stringToInt(const char* s, bool* ok=NULL);
 
-    DL_WriterA* out(const char* file,
+#ifdef _MSC_VER
+    DL_WriterA* out(const std::wstring& file,
+#else
+	DL_WriterA* out(const std::string& file,
+#endif
                     DL_Codes::version version=DL_VERSION_2000);
 
     void writeHeader(DL_WriterA& dw);

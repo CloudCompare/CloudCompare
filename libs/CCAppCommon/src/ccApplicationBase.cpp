@@ -24,6 +24,7 @@
 #include <QSurfaceFormat>
 #include <QTranslator>
 #include <QtGlobal>
+#include <QProcessEnvironment>
 
 // CCCoreLib
 #include "CCPlatform.h"
@@ -226,6 +227,19 @@ void ccApplicationBase::setupPaths()
 #warning Need to specify the shader path for this OS.
 #endif
 
+	// If the environment variables are specified, overwrite the shader and translation paths.
+	QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+
+	if ( env.contains("CC_SHADER_PATH") )
+	{
+		m_ShaderPath = env.value("CC_SHADER_PATH");
+	}
+
+	if ( env.contains("CC_TRANSLATION_PATH") )
+	{
+		m_TranslationPath = env.value("CC_TRANSLATION_PATH");
+	}
+
 	// Add any app data paths to plugin paths
 	// Plugins in these directories take precendence over the included ones
 	// This allows users to put plugins outside of the install directories.
@@ -239,5 +253,12 @@ void ccApplicationBase::setupPaths()
 		{
 			m_PluginPaths << path;
 		}
+	}
+
+	// If the environment variable is specified, the path takes precedence over
+	// included and appdata ones.
+	if ( env.contains("CC_PLUGIN_PATH") )
+	{
+		m_PluginPaths << env.value("CC_PLUGIN_PATH").split(QDir::listSeparator());
 	}
 }

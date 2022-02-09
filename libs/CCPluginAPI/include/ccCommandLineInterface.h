@@ -228,8 +228,8 @@ public: //file I/O
 	{
 		CLLoadParameters();
 
-		bool m_coordinatesShiftEnabled;
-		CCVector3d m_coordinatesShift;
+		bool coordinatesShiftEnabled;
+		CCVector3d coordinatesShift;
 	};
 
 	//! File loading parameters

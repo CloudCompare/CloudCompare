@@ -1150,14 +1150,8 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 							double suggestedScale = ccGlobalShiftManager::BestScale(Dg);
 							index = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo(tr("Suggested"), suggestedShift, suggestedScale));
 							sasDlg.setCurrentProfile(index);
-							//add "last" entry (if available)
-							std::vector<ccGlobalShiftManager::ShiftInfo> lastInfos;
-							if (ccGlobalShiftManager::GetLast(lastInfos))
-							{
-								sasDlg.addShiftInfo(lastInfos);
-							}
-							//add entries from file (if any)
-							sasDlg.addFileInfo();
+							//add "last" entries (if any)
+							sasDlg.addShiftInfo(ccGlobalShiftManager::GetLast());
 
 							if (sasDlg.exec())
 							{
@@ -1491,14 +1485,8 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 	//add "original" entry
 	int index = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo(tr("Original"), shift, scale));
 	sasDlg.setCurrentProfile(index);
-	//add "last" entry (if available)
-	std::vector<ccGlobalShiftManager::ShiftInfo> lastInfos;
-	if (ccGlobalShiftManager::GetLast(lastInfos))
-	{
-		sasDlg.addShiftInfo(lastInfos);
-	}
-	//add entries from file (if any)
-	sasDlg.addFileInfo();
+	//add "last" entries (if any)
+	sasDlg.addShiftInfo(ccGlobalShiftManager::GetLast());
 
 	if (!sasDlg.exec())
 		return;
@@ -5072,7 +5060,6 @@ void MainWindow::doActionComputeDistToBestFitQuadric3D()
 				ccScalarField* sf = static_cast<ccScalarField*>(newCloud->getScalarField(sfIdx));
 				assert(sf);
 
-				//FILE* fp = fopen("doActionComputeQuadric3D_trace.txt","wt");
 				for (int x = 0; x < steps; ++x)
 				{
 					CCVector3 P;
@@ -5092,11 +5079,9 @@ void MainWindow::doActionComputeDistToBestFitQuadric3D()
 																	+	l*Pc.x + m*Pc.y + n*Pc.z + d);
 
 							sf->addElement(dist);
-							//fprintf(fp,"%f %f %f %f\n",Pc.x,Pc.y,Pc.z,dist);
 						}
 					}
 				}
-				//fclose(fp);
 
 				if (sf)
 				{
@@ -9780,8 +9765,8 @@ void MainWindow::addToDB(	const QStringList& filenames,
 	{
 		parameters.alwaysDisplayLoadDialog = true;
 		parameters.shiftHandlingMode = ccGlobalShiftManager::DIALOG_IF_NECESSARY;
-		parameters.coordinatesShift = &loadCoordinatesShift;
-		parameters.coordinatesShiftEnabled = &loadCoordinatesTransEnabled;
+		parameters._coordinatesShift = &loadCoordinatesShift;
+		parameters._coordinatesShiftEnabled = &loadCoordinatesTransEnabled;
 		parameters.parentWidget = this;
 	}
 

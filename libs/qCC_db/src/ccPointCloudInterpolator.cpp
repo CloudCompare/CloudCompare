@@ -53,7 +53,7 @@ bool cellSFInterpolator(const CCCoreLib::DgmOctree::octreeCell& cell,
 
 	//structure for nearest neighbors search
 	bool useKNN = (params->method == ccPointCloudInterpolator::Parameters::K_NEAREST_NEIGHBORS);
-	CCCoreLib::DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
+	CCCoreLib::DgmOctree::NearestNeighboursSearchStruct nNSS;
 	{
 		nNSS.level = cell.level;
 		if (useKNN)

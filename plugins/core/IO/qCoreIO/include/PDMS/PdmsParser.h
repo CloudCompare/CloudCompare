@@ -20,9 +20,11 @@
 
 #include "PdmsTools.h"
 
+//Qt
+#include <QString>
+#include <QFile>
 //system
 #include <map>
-#include <string>
 
 using namespace PdmsTools;
 
@@ -74,14 +76,14 @@ protected:
 class PdmsFileSession : public PdmsLexer
 {
 protected:
-	std::string m_filename;
+	QString m_filename;
 	int m_currentLine;
 	bool m_eol;
 	bool m_eof;
-	FILE* m_file;
+	QFile m_file;
 
 public:
-	PdmsFileSession(const std::string &filename);
+	PdmsFileSession(const QString& filename);
 	~PdmsFileSession() override { closeSession(); }
 	bool initializeSession() override;
 	void closeSession(bool destroyLoadedObject=false) override;
@@ -92,6 +94,7 @@ protected:
 	bool moveForward() override;
 	void skipComment() override;
 	void skipHandleCommand() override;
+	int readChar();
 };
 
 //PDMS Parser

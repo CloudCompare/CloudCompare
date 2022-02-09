@@ -38,10 +38,19 @@ bool ccSetClassificationField::setClassificationField(const ccHObject::Container
                 sf = cloud->getScalarField(idx);
             }
             else
+            {
                 sf = cloud->getScalarField(idx);
+            }
+
             for (unsigned index = 0; index < N; index++)
             {
                 sf->setValue(index, class_);
+            }
+
+            if (sf != nullptr)
+            {
+                sf->computeMinAndMax();
+                cloud->setCurrentDisplayedScalarField(idx);
             }
         }
     }

@@ -3240,22 +3240,6 @@ void ccGLWindow::drawTrihedron()
 
 	glFunc->glCallList(m_trihedronGLList);
 
-
-	QFont font = getTextDisplayFont(); //we take rendering zoom into account!
-	QFontMetrics fm(font);
-
-	glFunc->glColor3f(1.0f, 0.0f, 0.0f);
-	QString xLabel = "X";
-	renderText(CC_DISPLAYED_TRIHEDRON_AXES_LENGTH, 0, 0, xLabel, font);
-
-	glFunc->glColor3f(0.0f, 1.0f, 0.0f);
-	QString yLabel = "Y";
-	renderText(0, CC_DISPLAYED_TRIHEDRON_AXES_LENGTH, 0, yLabel, font);
-
-	glFunc->glColor3f(0.0f, 0.7f, 1.0f);
-	QString zLabel = "Z";
-	renderText(0, 0, CC_DISPLAYED_TRIHEDRON_AXES_LENGTH, zLabel, font);
-
 	glFunc->glPopMatrix();
 
 	// now display the X, Y and Z axis labels

@@ -156,7 +156,6 @@ PCLCloud::Ptr cc2smReader::getColors() const
 	try
 	{
 		PointCloud<OnlyRGB> rgbCloud;
-
 		unsigned pointCount = m_ccCloud->size();
 		rgbCloud.resize(pointCount);
 

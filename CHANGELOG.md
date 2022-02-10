@@ -108,6 +108,7 @@ v2.12 (???) - (in development)
 	- PCD:
 		- CC can now load PCL files with integer xyz coordinates (16 and 32 bits) as well as double coordinates
 		- CC can now load 'scan grids' corresponding to structured clouds (so as to compute robust normals for instance)
+		- the (standard ?) 16bytes alignment for the various fields has been removed, so as to drastically reduce the memory consumption and the output file size!
 	- STL:
 		- loading speed should be greatly improved (compared to v2.10 and v2.11)
 	- LAS (1.3/1.4):

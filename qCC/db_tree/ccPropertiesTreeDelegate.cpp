@@ -2367,8 +2367,11 @@ void ccPropertiesTreeDelegate::octreeDisplayedLevelChanged(int val)
 	{
 		octree->setDisplayedLevel(val);
 		updateDisplay();
-		//we must also reset the properties display!
+
+		//record item role to force the scroll focus (see 'createEditor').
 		m_lastFocusItemRole = OBJECT_OCTREE_LEVEL;
+
+		//we must also reset the properties display!
 		updateModel();
 	}
 }
@@ -2390,8 +2393,11 @@ void ccPropertiesTreeDelegate::primitivePrecisionChanged(int val)
 		primitive->setVisible(wasVisible);
 
 		updateDisplay();
-		//we must also reset the properties display!
+
+		//record item role to force the scroll focus (see 'createEditor').
 		m_lastFocusItemRole = OBJECT_PRIMITIVE_PRECISION;
+
+		//we must also reset the properties display!
 		updateModel();
 	}
 }
@@ -2414,8 +2420,11 @@ void ccPropertiesTreeDelegate::sphereRadiusChanged(double val)
 		sphere->setVisible(wasVisible);
 
 		updateDisplay();
-		//we must also reset the properties display!
+
+		//record item role to force the scroll focus (see 'createEditor').
 		m_lastFocusItemRole = OBJECT_SPHERE_RADIUS;
+
+		//we must also reset the properties display!
 		updateModel();
 	}
 }
@@ -2438,8 +2447,11 @@ void ccPropertiesTreeDelegate::coneHeightChanged(double val)
 		cone->setVisible(wasVisible);
 
 		updateDisplay();
-		//we must also reset the properties display!
+
+		//record item role to force the scroll focus (see 'createEditor').
 		m_lastFocusItemRole = OBJECT_CONE_HEIGHT;
+
+		//we must also reset the properties display!
 		updateModel();
 	}
 }
@@ -2462,8 +2474,11 @@ void ccPropertiesTreeDelegate::coneBottomRadiusChanged(double val)
 		cone->setVisible(wasVisible);
 
 		updateDisplay();
-		//we must also reset the properties display!
+
+		//record item role to force the scroll focus (see 'createEditor').
 		m_lastFocusItemRole = OBJECT_CONE_BOTTOM_RADIUS;
+
+		//we must also reset the properties display!
 		updateModel();
 	}
 }
@@ -2486,8 +2501,11 @@ void ccPropertiesTreeDelegate::coneTopRadiusChanged(double val)
 		cone->setVisible(wasVisible);
 
 		updateDisplay();
-		//we must also reset the properties display!
+
+		//record item role to force the scroll focus (see 'createEditor').
 		m_lastFocusItemRole = OBJECT_CONE_TOP_RADIUS;
+
+		//we must also reset the properties display!
 		updateModel();
 	}
 }

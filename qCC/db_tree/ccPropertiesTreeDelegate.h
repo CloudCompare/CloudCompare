@@ -209,6 +209,7 @@ private:
 	ccHObject* m_currentObject;
 	QStandardItemModel* m_model;
 	QAbstractItemView* m_view;
+	CC_PROPERTY_ROLE m_lastFocusItemRole;
 };
 
 #endif

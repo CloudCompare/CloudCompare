@@ -70,9 +70,30 @@
 #include <QSpinBox>
 #include <QStandardItemModel>
 #include <QToolButton>
+#include <QEvent>
 
 //System
 #include <cassert>
+
+class FilterMouseWheelNoFocusEvent : public QObject
+{
+public:
+	explicit FilterMouseWheelNoFocusEvent(QObject *parent)
+	{
+	}
+protected:
+	bool eventFilter(QObject* o, QEvent* e) override
+	{
+		const QWidget* widget = dynamic_cast<QWidget*>(o);
+		if (e->type() == QEvent::Wheel && widget && !widget->hasFocus())
+		{
+			e->ignore();
+			return true;
+		}
+		return QObject::eventFilter(o, e);
+	}
+};
+
 
 // Default 'None' string
 const char* ccPropertiesTreeDelegate::s_noneString = QT_TR_NOOP( "None" );
@@ -128,6 +149,7 @@ ccPropertiesTreeDelegate::ccPropertiesTreeDelegate(QStandardItemModel* model,
 	, m_currentObject(nullptr)
 	, m_model(model)
 	, m_view(view)
+	, m_lastFocusItemRole(OBJECT_NO_PROPERTY)
 {
 	assert(m_model && m_view);
 }
@@ -1600,6 +1622,11 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 	if (outputWidget)
 	{
 		outputWidget->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
+		outputWidget->installEventFilter(new FilterMouseWheelNoFocusEvent(outputWidget));
+		if (m_lastFocusItemRole == itemData)
+		{
+			outputWidget->setFocus(Qt::MouseFocusReason);
+		}
 	}
 	else
 	{
@@ -2340,6 +2367,10 @@ void ccPropertiesTreeDelegate::octreeDisplayedLevelChanged(int val)
 	{
 		octree->setDisplayedLevel(val);
 		updateDisplay();
+
+		//record item role to force the scroll focus (see 'createEditor').
+		m_lastFocusItemRole = OBJECT_OCTREE_LEVEL;
+
 		//we must also reset the properties display!
 		updateModel();
 	}
@@ -2362,6 +2393,10 @@ void ccPropertiesTreeDelegate::primitivePrecisionChanged(int val)
 		primitive->setVisible(wasVisible);
 
 		updateDisplay();
+
+		//record item role to force the scroll focus (see 'createEditor').
+		m_lastFocusItemRole = OBJECT_PRIMITIVE_PRECISION;
+
 		//we must also reset the properties display!
 		updateModel();
 	}
@@ -2385,6 +2420,10 @@ void ccPropertiesTreeDelegate::sphereRadiusChanged(double val)
 		sphere->setVisible(wasVisible);
 
 		updateDisplay();
+
+		//record item role to force the scroll focus (see 'createEditor').
+		m_lastFocusItemRole = OBJECT_SPHERE_RADIUS;
+
 		//we must also reset the properties display!
 		updateModel();
 	}
@@ -2408,6 +2447,10 @@ void ccPropertiesTreeDelegate::coneHeightChanged(double val)
 		cone->setVisible(wasVisible);
 
 		updateDisplay();
+
+		//record item role to force the scroll focus (see 'createEditor').
+		m_lastFocusItemRole = OBJECT_CONE_HEIGHT;
+
 		//we must also reset the properties display!
 		updateModel();
 	}
@@ -2431,6 +2474,10 @@ void ccPropertiesTreeDelegate::coneBottomRadiusChanged(double val)
 		cone->setVisible(wasVisible);
 
 		updateDisplay();
+
+		//record item role to force the scroll focus (see 'createEditor').
+		m_lastFocusItemRole = OBJECT_CONE_BOTTOM_RADIUS;
+
 		//we must also reset the properties display!
 		updateModel();
 	}
@@ -2454,6 +2501,10 @@ void ccPropertiesTreeDelegate::coneTopRadiusChanged(double val)
 		cone->setVisible(wasVisible);
 
 		updateDisplay();
+
+		//record item role to force the scroll focus (see 'createEditor').
+		m_lastFocusItemRole = OBJECT_CONE_TOP_RADIUS;
+
 		//we must also reset the properties display!
 		updateModel();
 	}

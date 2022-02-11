@@ -4,23 +4,42 @@
 //qCC_db
 #include <ccHObjectCaster.h>
 #include <ccPointCloud.h>
+#include <QSettings>
 
 ccSetClassificationField::ccSetClassificationField(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::ccSetClassificationField)
 {
     ui->setupUi(this);
+    readSettings();
 }
 
 ccSetClassificationField::~ccSetClassificationField()
 {
+    writeSettings();
     delete ui;
+}
+
+void ccSetClassificationField::readSettings()
+{
+    QSettings settings("osur", "ccSetClassificationField");
+
+    class_ = settings.value("class_", 0).toInt();
+    this->ui->spinBox_classification->setValue(class_);
+}
+
+void ccSetClassificationField::writeSettings()
+{
+    QSettings settings("osur", "ccSetClassificationField");
+
+    int class_ = settings.value("class_", 0).toInt();
+    this->ui->spinBox_classification->setValue(class_);
 }
 
 bool ccSetClassificationField::setClassificationField(const ccHObject::Container &selectedEntities)
 {
     QString errorMessage;
-    int class_ = getClass();
+    class_ = getClass(); // update the internal class_ value
     for (ccHObject* ent : selectedEntities)
     {
         ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(ent);
@@ -57,7 +76,6 @@ bool ccSetClassificationField::setClassificationField(const ccHObject::Container
 
     return true;
 }
-
 
 int ccSetClassificationField::getClass()
 {

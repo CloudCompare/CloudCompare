@@ -196,6 +196,14 @@ Then, the CloudCompare CMake project will request that you set the 3 following v
 If you want to compile CloudCompare (and ccViewer) with LAS/LAZ files support,
 you'll need [PDAL](https://pdal.io/).
 
+### qLASFWIO
+
+LAS/LAZ file support on Windows can also be achieved by compiling
+[LASlib](https://github.com/CloudCompare/LAStools) and setting the following variables:
+
+-   `LASLIB_INCLUDE_DIR`: LAStools/LASlib/inc
+-   `LASZIP_INCLUDE_DIR`: LAStools/LASzip/src
+-   `LASLIB_RELEASE_LIBRARY` or `LASLIB_DEBUG_LIBRARY`, depending on build type: the compiled library, e.g. `LAStools/LASlib/VC14/lib/x64/LASlibVC14.lib`
 
 ### GDAL support
 

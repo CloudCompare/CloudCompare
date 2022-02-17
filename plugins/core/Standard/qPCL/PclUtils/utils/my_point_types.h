@@ -25,7 +25,7 @@
 #include <pcl/io/boost.h> // for boost::uint8_t
 
 //! PCL custom point type used for reading RGB data
-struct EIGEN_ALIGN16 OnlyRGB
+struct OnlyRGB
 {
 	union
 	{
@@ -47,49 +47,49 @@ struct EIGEN_ALIGN16 OnlyRGB
 };
 
 //! PCL custom point type used for reading intensity data
-struct EIGEN_ALIGN16 PointI
+struct PointI
 {
 	float intensity;
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 };
 
-struct EIGEN_ALIGN16 FloatScalar
+struct FloatScalar
 {
 	float S5c4laR;
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 };
 
-struct EIGEN_ALIGN16 DoubleScalar
+struct DoubleScalar
 {
 	double S5c4laR;
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 };
 
-struct EIGEN_ALIGN16 IntScalar
+struct IntScalar
 {
 	int S5c4laR;
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 };
 
-struct EIGEN_ALIGN16 UIntScalar
+struct UIntScalar
 {
 	unsigned S5c4laR;
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 };
 
-struct EIGEN_ALIGN16 ShortScalar
+struct ShortScalar
 {
 	short S5c4laR;
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 };
 
-struct EIGEN_ALIGN16 UShortScalar
+struct UShortScalar
 {
 	unsigned short S5c4laR;
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -97,7 +97,7 @@ struct EIGEN_ALIGN16 UShortScalar
 };
 
 //! PCL custom point type used for reading intensity data
-struct EIGEN_ALIGN16 OnlyNormals
+struct OnlyNormals
 {
 	float normal_x;
 	float normal_y;
@@ -120,7 +120,7 @@ struct OnlyNormalsCurvature
 	};
 };
 
-struct EIGEN_ALIGN16 PointXYZScalar
+struct PointXYZScalar
 {
 	PCL_ADD_POINT4D;
 	float scalar;
@@ -128,7 +128,7 @@ struct EIGEN_ALIGN16 PointXYZScalar
 
 };						// enforce SSE padding for correct memory alignment
 
-struct EIGEN_ALIGN16 PointXYZScalarRGB
+struct PointXYZScalarRGB
 {
 	PCL_ADD_POINT4D;
 	float scalar;
@@ -151,7 +151,7 @@ struct EIGEN_ALIGN16 PointXYZScalarRGB
 
 };
 
-struct EIGEN_ALIGN16 PointXYZScalarRGBNormals
+struct PointXYZScalarRGBNormals
 {
 	PCL_ADD_NORMAL4D;
 	//PCL_ADD_RGB;

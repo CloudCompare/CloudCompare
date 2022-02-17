@@ -443,7 +443,7 @@ public:
 	
 	virtual void setShader(ccShader* shader);
 	virtual void setGlFilter(ccGlFilter* filter);
-	ccGlFilter* getGlFilter() { return m_activeGLFilter; }
+	inline ccGlFilter* getGlFilter() { return m_activeGLFilter; }
 
 	virtual bool areShadersEnabled() const;
 	virtual bool areGLFiltersEnabled() const;
@@ -454,13 +454,13 @@ public:
 	virtual double computeActualPixelSize() const;
 
 	//! Returns whether the ColorRamp shader is supported or not
-	bool hasColorRampShader() const { return m_colorRampShader != nullptr; }
+	inline bool hasColorRampShader() const { return m_colorRampShader != nullptr; }
 
 	//! Returns whether rectangular picking is allowed or not
-	bool isRectangularPickingAllowed() const { return m_allowRectangularEntityPicking; }
+	inline bool isRectangularPickingAllowed() const { return m_allowRectangularEntityPicking; }
 
 	//! Sets whether rectangular picking is allowed or not
-	void setRectangularPickingAllowed(bool state) { m_allowRectangularEntityPicking = state; }
+	inline void setRectangularPickingAllowed(bool state) { m_allowRectangularEntityPicking = state; }
 
 	//! Returns current parameters for this display (const version)
 	/** Warning: may return overridden parameters!
@@ -471,7 +471,7 @@ public:
 	void setDisplayParameters(const ccGui::ParamStruct& params, bool thisWindowOnly = false);
 
 	//! Whether display parameters are overidden for this window
-	bool hasOverriddenDisplayParameters() const { return m_overriddenDisplayParametersEnabled; }
+	inline bool hasOverriddenDisplayParameters() const { return m_overriddenDisplayParametersEnabled; }
 
 	//! Default picking radius value
 	static const int DefaultPickRadius = 5;
@@ -481,11 +481,14 @@ public:
 	//! Returns the current picking radius
 	inline int getPickingRadius() const { return m_pickRadius; }
 
-	//! Sets whether overlay entities (scale, tetrahedron, etc.) should be displayed or not
-	void displayOverlayEntities(bool state) { m_displayOverlayEntities = state; }
+	//! Sets whether overlay entities (scale and trihedron) should be displayed or not
+	inline void displayOverlayEntities(bool showScale, bool showTrihedron) { m_showScale = showScale; m_showTrihedron = showTrihedron; }
 
-	//! Returns whether overlay entities (scale, tetrahedron, etc.) are displayed or not
-	bool overlayEntitiesAreDisplayed() const { return m_displayOverlayEntities; }
+	//! Returns whether the scale bar is displayed or not
+	inline bool scaleIsDisplayed() const { return m_showScale; }
+
+	//! Returns whether the trihedron is displayed or not
+	inline bool trihedronIsDisplayed() const { return m_showTrihedron; }
 
 	//! Backprojects a 2D points on a 3D triangle
 	/** \warning Uses the current display parameters!
@@ -504,18 +507,18 @@ public:
 	inline int getUniqueID() const { return m_uniqueID; }
 
 	//! Returns the widget width (in pixels)
-	int qtWidth() const { return ccGLWindow::width(); }
+	inline int qtWidth() const { return ccGLWindow::width(); }
 	//! Returns the widget height (in pixels)
-	int qtHeight() const { return ccGLWindow::height(); }
+	inline int qtHeight() const { return ccGLWindow::height(); }
 	//! Returns the widget size (in pixels)
-	QSize qtSize() const { return ccGLWindowParent::size(); }
+	inline QSize qtSize() const { return ccGLWindowParent::size(); }
 
 	//! Returns the OpenGL context width
-	int glWidth() const { return m_glViewport.width(); }
+	inline int glWidth() const { return m_glViewport.width(); }
 	//! Returns the OpenGL context height
-	int glHeight() const { return m_glViewport.height(); }
+	inline int glHeight() const { return m_glViewport.height(); }
 	//! Returns the OpenGL context size
-	QSize glSize() const { return m_glViewport.size(); }
+	inline QSize glSize() const { return m_glViewport.size(); }
 
 public: //LOD
 
@@ -1223,8 +1226,11 @@ protected: //members
 	//! Whether display parameters are overidden for this window
 	bool m_overriddenDisplayParametersEnabled;
 
-	//! Whether to display overlay entities or not (scale, tetrahedron, etc.)
-	bool m_displayOverlayEntities;
+	//! Whether to display the scale bar
+	bool m_showScale;
+
+	//! Whether to display the trihedron
+	bool m_showTrihedron;
 
 	//! Whether initialization should be silent or not (i.e. no message to console)
 	bool m_silentInitialization;

@@ -121,7 +121,7 @@ qBroomDlg::qBroomDlg(ccMainAppInterface* app/*=0*/)
 		assert(m_glWindow && glWidget);
 
 		m_glWindow->setPerspectiveState(false, true);
-		m_glWindow->displayOverlayEntities(true);
+		m_glWindow->displayOverlayEntities(true, true);
 		m_glWindow->setInteractionMode(ccGLWindow::MODE_TRANSFORM_CAMERA);
 		m_glWindow->setPickingMode(ccGLWindow::NO_PICKING);
 		

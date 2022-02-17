@@ -377,7 +377,8 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=nullptr*/,
 	, m_allowRectangularEntityPicking(true)
 	, m_rectPickingPoly(nullptr)
 	, m_overriddenDisplayParametersEnabled(false)
-	, m_displayOverlayEntities(true)
+	, m_showScale(true)
+	, m_showTrihedron(true)
 	, m_silentInitialization(silentInitialization)
 	, m_bubbleViewModeEnabled(false)
 	, m_bubbleViewFov_deg(90.0f)
@@ -2589,7 +2590,6 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 	m_clickableItems.clear();
 
 	/*** overlay entities ***/
-	if (m_displayOverlayEntities)
 	{
 		//default overlay color
 		const ccColor::Rgbub& textCol = getDisplayParameters().textDefaultCol;
@@ -2597,13 +2597,16 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 		if (!m_captureMode.enabled || m_captureMode.renderOverlayItems)
 		{
 			//scale: only in ortho mode
-			if (!m_viewportParams.perspectiveView)
+			if (m_showScale && !m_viewportParams.perspectiveView)
 			{
 				drawScale(textCol);
 			}
 
-			//trihedron
-			drawTrihedron();
+			if (m_showTrihedron)
+			{
+				//trihedron
+				drawTrihedron();
+			}
 		}
 
 		if (!m_captureMode.enabled)
@@ -2667,6 +2670,7 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 						ll_currentHeight -= (messageHeight * 5) / 4; //add a 25% margin
 					}
 					break;
+					
 					case UPPER_CENTER_MESSAGE:
 					{
 						QRect rect = QFontMetrics(m_font).boundingRect(message.message);
@@ -2681,6 +2685,7 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 						uc_currentHeight += (rect.height() * 5) / 4; //add a 25% margin
 					}
 					break;
+					
 					case SCREEN_CENTER_MESSAGE:
 					{
 						QFont newFont(m_font); //no need to take zoom into account!
@@ -3141,7 +3146,7 @@ void ccGLWindow::drawScale(const ccColor::Rgbub& color)
 		//we can now safely apply the rendering zoom
 		scaleW_pix *= m_captureMode.zoomFactor;
 	}
-	float trihedronLength = CC_DISPLAYED_TRIHEDRON_AXES_LENGTH * m_captureMode.zoomFactor + CC_TRIHEDRON_TEXT_MARGIN + fm.width('X');
+	float trihedronLength = m_showTrihedron ? CC_DISPLAYED_TRIHEDRON_AXES_LENGTH * m_captureMode.zoomFactor + CC_TRIHEDRON_TEXT_MARGIN + fm.width('X') : 0.0;
 	float dW = 2.0f * trihedronLength + 20.0f;
 	float dH = std::max(fm.height() * 1.25f, trihedronLength + 5.0f);
 	float w = m_glViewport.width() / 2.0f - dW;
@@ -6243,7 +6248,7 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0f*/,
 	//current displayed scalar field color ramp (if any)
 	ccRenderingTools::DrawColorRamp(CONTEXT);
 
-	if (m_displayOverlayEntities && m_captureMode.renderOverlayItems)
+	if (m_captureMode.renderOverlayItems)
 	{
 		//scale: only in ortho mode
 		if (!m_viewportParams.perspectiveView)
@@ -6252,8 +6257,11 @@ QImage ccGLWindow::renderToImage(	float zoomFactor/*=1.0f*/,
 			drawScale(getDisplayParameters().textDefaultCol);
 		}
 
-		//trihedron
-		drawTrihedron();
+		if (m_showTrihedron)
+		{
+			//trihedron
+			drawTrihedron();
+		}
 	}
 
 	glFunc->glFlush();

@@ -225,7 +225,7 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 		m_window->setDisplayParameters(params,true);
 		m_window->setPerspectiveState(false,true);
 		m_window->setInteractionMode(ccGLWindow::INTERACT_PAN | ccGLWindow::INTERACT_CLICKABLE_ITEMS | ccGLWindow::INTERACT_ZOOM_CAMERA);
-		m_window->displayOverlayEntities(false);
+		m_window->displayOverlayEntities(false, false);
 		m_window->showSF(displayColorScaleCheckBox->isChecked());
 		m_window->setSunLight(true);
 		m_window->setCustomLight(false);

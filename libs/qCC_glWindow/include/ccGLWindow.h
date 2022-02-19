@@ -444,6 +444,7 @@ public:
 	virtual void setShader(ccShader* shader);
 	virtual void setGlFilter(ccGlFilter* filter);
 	inline ccGlFilter* getGlFilter() { return m_activeGLFilter; }
+	inline const ccGlFilter* getGlFilter() const { return m_activeGLFilter; }
 
 	virtual bool areShadersEnabled() const;
 	virtual bool areGLFiltersEnabled() const;
@@ -489,6 +490,15 @@ public:
 
 	//! Returns whether the trihedron is displayed or not
 	inline bool trihedronIsDisplayed() const { return m_showTrihedron; }
+
+	//! Computes the trihedron size (in pixels)
+	float computeTrihedronLength() const;
+
+	//! Returns the height of the 'GL filter' banner
+	int getGlFilterBannerHeight() const;
+
+	//! Returns the extents of the vertical area available for displaying the color ramp
+	void computeColorRampAreaLimits(int& yStart, int& yStop) const;
 
 	//! Backprojects a 2D points on a 3D triangle
 	/** \warning Uses the current display parameters!
@@ -600,7 +610,6 @@ public: //stereo mode
 
 	//! Returns whether the rotation axis is locaked or not
 	bool isRotationAxisLocked() const { return m_rotationAxisLocked; }
-
 
 public:
 
@@ -964,9 +973,6 @@ protected: //other methods
 	/** The orientation vector origin is the current pivot point!
 	**/
 	CCVector3d convertMousePositionToOrientation(int x, int y);
-
-	//! Returns the height of the 'GL filter' banner
-	int getGlFilterBannerHeight() const;
 
 	//! Draws the 'hot zone' (+/- icons for point size), 'leave bubble-view' button, etc.
 	void drawClickableItems(int xStart, int& yStart);

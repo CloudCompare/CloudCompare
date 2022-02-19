@@ -7515,7 +7515,7 @@ void MainWindow::doActionCrop()
 		return;
 	}
 
-	ccBoundingBoxEditorDlg bbeDlg(this);
+	ccBoundingBoxEditorDlg bbeDlg(false, false, this);
 	bbeDlg.setBaseBBox(baseBB, false);
 	bbeDlg.showInclusionWarning(false);
 	bbeDlg.setWindowTitle("Crop");

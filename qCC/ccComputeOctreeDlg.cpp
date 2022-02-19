@@ -23,7 +23,7 @@
 //qCC_db
 #include <ccOctree.h>
 
-ccComputeOctreeDlg::ccComputeOctreeDlg(const ccBBox& baseBBox, double minCellSize, QWidget* parent/*=0*/)
+ccComputeOctreeDlg::ccComputeOctreeDlg(const ccBBox& baseBBox, double minCellSize, QWidget* parent/*=nullptr*/)
 	: QDialog(parent)
 	, Ui::ComputeOctreeDialog()
 	, m_bbEditorDlg(nullptr)
@@ -47,7 +47,7 @@ ccComputeOctreeDlg::ccComputeOctreeDlg(const ccBBox& baseBBox, double minCellSiz
 	//custom bbox editor
 	if (baseBBox.isValid())
 	{
-		m_bbEditorDlg = new ccBoundingBoxEditorDlg(this);
+		m_bbEditorDlg = new ccBoundingBoxEditorDlg(false, false, this);
 		m_bbEditorDlg->setBaseBBox(baseBBox,true);
 		m_bbEditorDlg->forceKeepSquare(true);
 		connect(customBBToolButton, &QAbstractButton::clicked, m_bbEditorDlg, &ccBoundingBoxEditorDlg::exec);

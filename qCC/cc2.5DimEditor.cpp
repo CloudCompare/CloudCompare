@@ -65,6 +65,7 @@ bool cc2Point5DimEditor::showGridBoxEditor()
 		unsigned char projDim = getProjectionDimension();
 		assert(projDim < 3);
 		m_bbEditorDlg->set2DMode(true, projDim);
+		
 		if (m_bbEditorDlg->exec())
 		{
 			gridIsUpToDate(false);
@@ -79,7 +80,7 @@ void cc2Point5DimEditor::createBoundingBoxEditor(const ccBBox& gridBBox, QWidget
 {
 	if (!m_bbEditorDlg)
 	{
-		m_bbEditorDlg = new ccBoundingBoxEditorDlg(parent);
+		m_bbEditorDlg = new ccBoundingBoxEditorDlg(false, true, parent);
 		m_bbEditorDlg->setBaseBBox(gridBBox, false);
 	}
 }

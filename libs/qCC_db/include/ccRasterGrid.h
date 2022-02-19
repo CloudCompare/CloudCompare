@@ -80,6 +80,21 @@ struct QCC_DB_LIB_API ccRasterGrid
 
 
 	//! Initializes / resets the grid
+	/** We use the "Pixel-is-area" convention but 'min corner'
+		corresponds to the lower left cell CENTER.
+		-------------------
+		|     |     |     |
+		|  U  |  V  |  W  |
+		|     |     |     |
+		-------------------
+		|     |     |     |
+		|  X  |  Y  |  Z  |
+		|     |     |     |
+		-------------------
+
+		Here, w=3 and h=2, and minCorner=X
+
+	**/
 	bool init(	unsigned w,
 				unsigned h,
 				double gridStep,
@@ -126,7 +141,8 @@ struct QCC_DB_LIB_API ccRasterGrid
 	};
 
 	//! Fills the grid with a point cloud
-	/** Since version 2.8, we now use the "PixelIsArea" convention by default (as GDAL)
+	/** Since version 2.8, we are using the "PixelIsPoint" convention
+		(contrarily to what was written in the code comments so far!).
 		This means that the height is computed at the center of the grid cell.
 	**/
 	bool fillWith(	ccGenericPointCloud* cloud,
@@ -168,21 +184,18 @@ struct QCC_DB_LIB_API ccRasterGrid
 	inline bool isValid() const { return valid; }
 
 	//! Computes the position of the cell that includes a given point
-	std::pair<int, int> computeCellPos(const CCVector3& P, unsigned char X, unsigned char Y) const
+	inline CCVector2i computeCellPos(const CCVector3& P, unsigned char dimX, unsigned char dimY) const
 	{
-		CCVector3d relativePos = P.toDouble() - minCorner;
-
-		//DGM: we use the 'PixelIsArea' convention
-		int i = static_cast<int>(relativePos.u[X] / gridStep + 0.5);
-		int j = static_cast<int>(relativePos.u[Y] / gridStep + 0.5);
-
-		return {i, j};
+		//minCorner corresponds to the lower left cell CENTER
+		return CCVector2i(	static_cast<int>((P.u[dimX] - minCorner.u[dimX]) / gridStep + 0.5),
+							static_cast<int>((P.u[dimY] - minCorner.u[dimY]) / gridStep + 0.5) );
 	}
 
 	//! Computes the position of the center of a given cell
-	inline CCVector2d computeCellCenter(int i, int j, unsigned char X, unsigned char Y) const
+	inline CCVector2d computeCellCenter(int i, int j, unsigned char dimX, unsigned char dimY) const
 	{
-		return {minCorner.u[X] + (i + 0.5) * gridStep, minCorner.u[Y] + (j + 0.5) * gridStep};
+		//minCorner corresponds to the lower left cell CENTER
+		return CCVector2d(minCorner.u[dimX] + i * gridStep, minCorner.u[dimY] + j * gridStep);
 	}
 
 	//! Row

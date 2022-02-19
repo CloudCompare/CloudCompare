@@ -101,7 +101,7 @@ bool ccRasterGrid::ComputeGridSize(	unsigned char Z,
 		return false;
 	}
 
-	//DGM: we now use the 'PixelIsArea' convention (the height value is computed at the grid cell center)
+	//DGM: we use the 'PixelIsArea' convention but minCorner is the lower left cell CENTER
 	gridWidth = 1 + static_cast<unsigned>(boxDiag.u[X] / gridStep + 0.5);
 	gridHeight = 1 + static_cast<unsigned>(boxDiag.u[Y] / gridStep + 0.5);
 
@@ -250,13 +250,11 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 		const CCVector3* P = cloud->getPoint(n);
 
 		//project it inside the grid
-		CCVector3d relativePos = P->toDouble() - minCorner;
-		int i = static_cast<int>(relativePos.u[X] / gridStep + 0.5);
-		int j = static_cast<int>(relativePos.u[Y] / gridStep + 0.5);
+		CCVector2i cellPos = computeCellPos(*P, X, Y);
 
 		//we skip points that fall outside of the grid!
-		if (	i < 0 || i >= static_cast<int>(width)
-			||	j < 0 || j >= static_cast<int>(height) )
+		if (	cellPos.x < 0 || cellPos.x >= static_cast<int>(width)
+			||	cellPos.y < 0 || cellPos.y >= static_cast<int>(height) )
 		{
 			if (!nProgress.oneStep())
 			{
@@ -267,7 +265,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 		}
 
 		//update the cell statistics
-		ccRasterCell& aCell = rows[j][i];
+		ccRasterCell& aCell = rows[cellPos.y][cellPos.x];
 		if (aCell.nbPoints)
 		{
 			if (P->u[Z] < aCell.minHeight)
@@ -306,13 +304,15 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 			if (projectionType == PROJ_AVERAGE_VALUE)
 			{
 				//we keep track of the point which is the closest to the cell center (in 2D)
-				CCVector2d C((i + 0.5) * gridStep, (j + 0.5) * gridStep);
+				CCVector2d C = computeCellCenter(cellPos.x, cellPos.y, X, Y);
 				const CCVector3* Q = cloud->getPoint(aCell.pointIndex); //former closest point
-				CCVector3d relativePosQ = Q->toDouble() - minCorner;
 
-				double distToP = (C - CCVector2d(relativePos .u[X], relativePos .u[Y])).norm2();
-				double distToQ = (C - CCVector2d(relativePosQ.u[X], relativePosQ.u[Y])).norm2();
-				if (distToP < distToQ)
+				CCVector2d P2D(P->u[X], P->u[Y]);
+				CCVector2d Q2D(Q->u[X], Q->u[Y]);
+
+				double squareDistToP = (C - P2D).norm2();
+				double squareDistToQ = (C - Q2D).norm2();
+				if (squareDistToP < squareDistToQ)
 				{
 					aCell.pointIndex = n;
 				}
@@ -350,7 +350,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 			assert(pc);
 
 			//absolute position of the cell (e.g. in the 2D SF grid(s))
-			int pos = j * static_cast<int>(width)+i;
+			int pos = cellPos.y * static_cast<int>(width) + cellPos.x;
 			assert(pos < static_cast<int>(gridTotalSize));
 
 			for (size_t k = 0; k < scalarFields.size(); ++k)
@@ -1069,12 +1069,12 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 	unsigned nonEmptyCellIndex = 0;
 
 	//we work with doubles as the grid step can be much smaller than the cloud coordinates!
-	double Py = box.minCorner().u[Y]/* + gridStep / 2*/;
+	double Py = box.minCorner().u[Y]; //minCorner is the lower left cell CENTER
 
 	for (unsigned j = 0; j < height; ++j)
 	{
 		const ccRasterCell* aCell = rows[j].data();
-		double Px = box.minCorner().u[X]/* + gridStep / 2*/;
+		double Px = box.minCorner().u[X]; //minCorner is the lower left cell CENTER
 		
 		for (unsigned i = 0; i < width; ++i, ++aCell)
 		{

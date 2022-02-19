@@ -1082,14 +1082,15 @@ bool ccRasterizeTool::ExportGeoTiff(const QString& outputFilename,
 	const unsigned char X = Z == 2 ? 0 : Z + 1;
 	const unsigned char Y = X == 2 ? 0 : X + 1;
 
-	//global shift
-	assert(gridBBox.isValid());
-	double shiftX = gridBBox.minCorner().u[X];
-	double shiftY = gridBBox.maxCorner().u[Y];
-	double shiftZ = 0.0;
-
 	double stepX = grid.gridStep;
 	double stepY = grid.gridStep;
+
+	//global shift
+	assert(gridBBox.isValid());
+	double shiftX = gridBBox.minCorner().u[X] - stepX / 2; //we will declare the raster grid as 'Pixel-is-area'!
+	double shiftY = gridBBox.maxCorner().u[Y] + stepY / 2; //we will declare the raster grid as 'Pixel-is-area'!
+	double shiftZ = 0.0;
+
 	if (originCloud)
 	{
 		const CCVector3d& shift = originCloud->getGlobalShift();

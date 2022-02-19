@@ -31,10 +31,19 @@ class ccBoundingBoxEditorDlg : public QDialog, public Ui::BoundingBoxEditorDialo
 public:
 
 	//! Default constructor
-	explicit ccBoundingBoxEditorDlg(QWidget* parent = 0);
+	/** \param showBoxAxes			Whether to display the box axes or not
+		\param showRasterGridImage	Whether to display the raster grid image or not
+		\param parent				Parent widget
+	**/
+	explicit ccBoundingBoxEditorDlg(bool showBoxAxes, bool showRasterGridImage, QWidget* parent = nullptr);
 
 	//! Returns bounding box
-	const ccBBox& getBox() const { return m_currentBBox; }
+	inline const ccBBox& getBox() const { return m_currentBBox; }
+
+	//! Overrides the current bounding box
+	/** \param box bounding box
+	**/
+	void setBox(const ccBBox& box);
 
 	//! Sets the (minimal) base box
 	/** \param box base box
@@ -62,9 +71,6 @@ public:
 	//! Sets 2D mode (the line 'dim' will be hidden)
 	void set2DMode(bool state, unsigned char dim);
 
-	//! Whether to display or not the box axes
-	void showBoxAxes(bool state);
-
 public:
 
 	//overloaded from QDialog
@@ -77,6 +83,7 @@ protected:
 	void resetToLast();
 	void cancel();
 	void saveBoxAndAccept();
+	int computeBestDialogHeight(bool showBoxAxes, bool showRasterGridImage) const;
 
 	void updateXWidth(double);
 	void updateYWidth(double);

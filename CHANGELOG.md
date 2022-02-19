@@ -31,6 +31,10 @@ v2.12 (???) - (in development)
 	- Rasterize
 		- Improved interpolation scheme on the raster borders
 		- New 'max edge length' option when interpolating grid cells, to avoid using large triangles
+		- The rasterize tool grid is 'centered' on the raster (image) boundary pixels (the grid min corner coordinates
+			correspond to the lower left raster cell center, and the grid max corner coordinates correspond to the upper
+			right raster cell center). This has been made more explicit in the 'Edit grid' sub-dialog.
+
     - RANSAC plugin
         - Can save all leftover points into a new cloud (leftovers were points not assigned to a shape)
         - Can select whether to use Least Squares fitting on found shapes (some shapes take a very long time to process this step specifically Cones)
@@ -169,6 +173,7 @@ v2.12 (???) - (in development)
 	- Graphical segmentation: when using the shortcuts 'i' and 'o' to segment points inside or outside a polyline not yet closed (with a right click),
 		the overlay buttons would become transparent to clicks, and the not yet confirmed vertex of the polyline was not taken into account
 	- CloudCompare was not able to read shapefiles with missing measurements (while this field is generaly optional for polylines, polygons and point clouds)
+	- Rasterize tool: the exported geotiff files were (once again?!) shifted of half the cell size
 
 v2.11.3 (Anoia) - 08/09/2020
 ----------------------

@@ -59,17 +59,19 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 		if( poDataset != nullptr )
 		{
 			ccLog::Print(QString("Raster file: '%1'").arg(filename));
-			ccLog::Print( "Driver: %s/%s",
-				poDataset->GetDriver()->GetDescription(), 
-				poDataset->GetDriver()->GetMetadataItem( GDAL_DMD_LONGNAME ) );
+			ccLog::Print(	"Driver: %s/%s",
+							poDataset->GetDriver()->GetDescription(), 
+							poDataset->GetDriver()->GetMetadataItem( GDAL_DMD_LONGNAME ) );
 
 			int rasterCount = poDataset->GetRasterCount();
-			int rasterX = poDataset->GetRasterXSize();
-			int rasterY = poDataset->GetRasterYSize();
+			int rasterX     = poDataset->GetRasterXSize();
+			int rasterY     = poDataset->GetRasterYSize();
 			ccLog::Print( "Size is %dx%dx%d", rasterX, rasterY, rasterCount );
 
-			if( poDataset->GetProjectionRef() != nullptr )
-				ccLog::Print( "Projection is `%s'", poDataset->GetProjectionRef() );
+			if (poDataset->GetProjectionRef() != nullptr)
+			{
+				ccLog::Print("Projection is '%s'", poDataset->GetProjectionRef());
+			}
 
 			// See https://gdal.org/user/raster_data_model.html
 			// Xgeo = adfGeoTransform(0) + Xpixel * adfGeoTransform(1) + Yline * adfGeoTransform(2)
@@ -88,6 +90,9 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 				ccLog::Warning("Invalid pixel size! Forcing it to (1,1)");
 				adfGeoTransform[1] = adfGeoTransform[5] = 1.0;
 			}
+
+			const char* aeraOrPoint = poDataset->GetMetadataItem("AREA_OR_POINT");
+			ccLog::Print(QString("Pixel Type = ") + (aeraOrPoint ? aeraOrPoint : "AREA")); // Area by default
 
 			//first check if the raster actually has 'color' bands
 			int colorBands = 0;
@@ -183,7 +188,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 					delete pc;
 					return CC_FERR_NOT_ENOUGH_MEMORY;
 				}
-
+				
 				double z = 0.0 + Pshift.z;
 				for (int j = 0; j < rasterY; ++j)
 				{

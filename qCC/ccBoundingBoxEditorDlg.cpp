@@ -26,7 +26,56 @@
 //Box state at last dialog execution
 static ccBBox s_lastBBox;
 
-ccBoundingBoxEditorDlg::ccBoundingBoxEditorDlg(QWidget* parent/*=0*/)
+// Left 'point type' combo box indexes
+static const int MinCornerIndex = 0;
+static const int CenterIndex    = 1;
+static const int MaxCornerIndex = 2;
+
+//Helper
+static void MakeSquare(ccBBox& box, int pivotType, int defaultDim = -1)
+{
+	assert(defaultDim < 3);
+	assert(pivotType >= 0 && pivotType < 3);
+
+	CCVector3 W = box.getDiagVec();
+	if (W.x != W.y || W.x != W.z)
+	{
+		if (defaultDim < 0)
+		{
+			//we take the largest one!
+			defaultDim = 0;
+			if (W.u[1] > W.u[defaultDim])
+				defaultDim = 1;
+			if (W.u[2] > W.u[defaultDim])
+				defaultDim = 2;
+		}
+
+		CCVector3 newW(W.u[defaultDim], W.u[defaultDim], W.u[defaultDim]);
+		switch (pivotType)
+		{
+		case 0: //min corner
+		{
+			CCVector3 A = box.minCorner();
+			box = ccBBox(A, A + newW);
+		}
+		break;
+		case 1: //center
+		{
+			CCVector3 C = box.getCenter();
+			box = ccBBox(C - newW / 2.0, C + newW / 2.0);
+		}
+		break;
+		case 2: //max corner
+		{
+			CCVector3 B = box.maxCorner();
+			box = ccBBox(B - newW, B);
+		}
+		break;
+		}
+	}
+}
+
+ccBoundingBoxEditorDlg::ccBoundingBoxEditorDlg(bool showBoxAxes, bool showRasterGridImage, QWidget* parent/*=nullptr*/)
 	: QDialog(parent, Qt::Tool)
 	, Ui::BoundingBoxEditorDialog()
 	, m_baseBoxIsMinimal(false)
@@ -34,7 +83,9 @@ ccBoundingBoxEditorDlg::ccBoundingBoxEditorDlg(QWidget* parent/*=0*/)
 {
 	setupUi(this);
 
-	showBoxAxes(false);
+	oriGroupBox->setVisible(showBoxAxes);
+	rasterGridImageLabel->setVisible(showRasterGridImage);
+	resize(QSize(width(), computeBestDialogHeight(showBoxAxes, showRasterGridImage)));
 
 	xDoubleSpinBox->setMinimum(-1.0e9);
 	yDoubleSpinBox->setMinimum(-1.0e9);
@@ -81,50 +132,18 @@ ccBoundingBoxEditorDlg::ccBoundingBoxEditorDlg(QWidget* parent/*=0*/)
 	defaultPushButton->setVisible(false);
 	lastPushButton->setVisible(s_lastBBox.isValid());
 	checkBaseInclusion();
+
+	if (showRasterGridImage)
+	{
+		pointTypeComboBox->setCurrentIndex(MinCornerIndex);
+	}
 }
 
-//Helper
-void MakeSquare(ccBBox& box, int pivotType, int defaultDim = -1)
+void ccBoundingBoxEditorDlg::setBox(const ccBBox& box)
 {
-	assert(defaultDim<3);
-	assert(pivotType>=0 && pivotType<3);
-
-	CCVector3 W = box.getDiagVec();
-	if (W.x != W.y || W.x != W.z)
-	{
-		if (defaultDim < 0)
-		{
-			//we take the largest one!
-			defaultDim = 0;
-			if (W.u[1] > W.u[defaultDim])
-				defaultDim = 1;
-			if (W.u[2] > W.u[defaultDim])
-				defaultDim = 2;
-		}
-
-		CCVector3 newW(W.u[defaultDim], W.u[defaultDim], W.u[defaultDim]);
-		switch(pivotType)
-		{
-		case 0: //min corner
-			{
-				CCVector3 A = box.minCorner();
-				box = ccBBox(A, A + newW);
-			}
-			break;
-		case 1: //center
-			{
-				CCVector3 C = box.getCenter();
-				box = ccBBox(C - newW / 2.0, C + newW / 2.0);
-			}
-			break;
-		case 2: //max corner
-			{
-				CCVector3 B = box.maxCorner();
-				box = ccBBox(B-newW,B);
-			}
-			break;
-		}
-	}
+	m_currentBBox = box;
+	reflectChanges();
+	checkBaseInclusion();
 }
 
 bool ccBoundingBoxEditorDlg::keepSquare() const
@@ -143,7 +162,7 @@ void ccBoundingBoxEditorDlg::squareModeActivated(bool state)
 {
 	if (state)
 	{
-		MakeSquare(m_currentBBox,pointTypeComboBox->currentIndex());
+		MakeSquare(m_currentBBox, pointTypeComboBox->currentIndex());
 		reflectChanges();
 	}
 }
@@ -259,7 +278,7 @@ int	ccBoundingBoxEditorDlg::exec()
 void ccBoundingBoxEditorDlg::cancel()
 {
 	//restore init. box
-	m_currentBBox = m_initBBox;
+	setBox(m_initBBox);
 
 	reject();
 }
@@ -269,7 +288,7 @@ void ccBoundingBoxEditorDlg::updateXWidth(double value)
 	updateCurrentBBox(value);
 	if (keepSquare())
 	{
-		MakeSquare(m_currentBBox,pointTypeComboBox->currentIndex(),0);
+		MakeSquare(m_currentBBox, pointTypeComboBox->currentIndex(), 0);
 		reflectChanges();
 		//base box (if valid) should always be included!
 		if (m_baseBBox.isValid())
@@ -282,7 +301,7 @@ void ccBoundingBoxEditorDlg::updateYWidth(double value)
 	updateCurrentBBox(value);
 	if (keepSquare())
 	{
-		MakeSquare(m_currentBBox,pointTypeComboBox->currentIndex(),1);
+		MakeSquare(m_currentBBox, pointTypeComboBox->currentIndex(), 1);
 		reflectChanges();
 		//base box (if valid) should always be included!
 		if (m_baseBBox.isValid())
@@ -330,7 +349,9 @@ void ccBoundingBoxEditorDlg::updateCurrentBBox(double dummy)
 
 	//base box (if valid) should always be included!
 	if (m_baseBBox.isValid())
+	{
 		checkBaseInclusion();
+	}
 }
 
 void ccBoundingBoxEditorDlg::reflectChanges(int dummy)
@@ -343,7 +364,7 @@ void ccBoundingBoxEditorDlg::reflectChanges(int dummy)
 
 		switch (pointTypeComboBox->currentIndex())
 		{
-		case 0: //A = min corner
+		case MinCornerIndex: //A = min corner
 			{
 				const CCVector3& A = m_currentBBox.minCorner();
 				xDoubleSpinBox->setValue(A.x);
@@ -351,7 +372,7 @@ void ccBoundingBoxEditorDlg::reflectChanges(int dummy)
 				zDoubleSpinBox->setValue(A.z);
 			}
 			break;
-		case 1: //A = center
+		case CenterIndex: //A = center
 			{
 				CCVector3 C = m_currentBBox.getCenter();
 				xDoubleSpinBox->setValue(C.x);
@@ -359,7 +380,7 @@ void ccBoundingBoxEditorDlg::reflectChanges(int dummy)
 				zDoubleSpinBox->setValue(C.z);
 			}
 			break;
-		case 2: //A = max corner
+		case MaxCornerIndex: //A = max corner
 			{
 				const CCVector3& B = m_currentBBox.maxCorner();
 				xDoubleSpinBox->setValue(B.x);
@@ -396,11 +417,42 @@ void ccBoundingBoxEditorDlg::reflectChanges(int dummy)
 	}
 }
 
-void ccBoundingBoxEditorDlg::showBoxAxes(bool state)
+int ccBoundingBoxEditorDlg::computeBestDialogHeight(bool showBoxAxes, bool showRasterGridImage) const
 {
-	oriGroupBox->setVisible(state);
+	//we always keep space to display the grid
+	int height = gridFrame->height();
+	int blockCount = 1;
 
-	resize(QSize(600, state ? 400 : 250));
+	//we always keep space to display the warning label
+	{
+		height += warningLabel->height();
+		++blockCount;
+	}
+
+	if (showBoxAxes)
+	{
+		height += oriGroupBox->height();
+		++blockCount;
+	}
+
+	if (showRasterGridImage)
+	{
+		height += rasterGridImageLabel->height();
+		++blockCount;
+	}
+
+	//we always keep space to display the buttons
+	{
+		height += buttonFrame->height();
+		++blockCount;
+	}
+
+	if (layout())
+	{
+		height += layout()->contentsMargins().top() + layout()->spacing() * (blockCount - 1) + layout()->contentsMargins().bottom();
+	}
+
+	return height;
 }
 
 void ccBoundingBoxEditorDlg::setBoxAxes(const CCVector3& X, const CCVector3& Y, const CCVector3& Z)

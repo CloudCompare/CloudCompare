@@ -33,9 +33,9 @@ class ccComputeOctreeDlg : public QDialog, public Ui::ComputeOctreeDialog
 public:
 
 	//! Default constructor
-	ccComputeOctreeDlg(const ccBBox& baseBBox,
+	ccComputeOctreeDlg(	const ccBBox& baseBBox,
 						double minCellSize,
-						QWidget* parent = 0);
+						QWidget* parent = nullptr);
 
 	//! Computation mode
 	enum ComputationMode { DEFAULT, MIN_CELL_SIZE, CUSTOM_BBOX };

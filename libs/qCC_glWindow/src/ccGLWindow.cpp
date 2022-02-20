@@ -3278,9 +3278,9 @@ void ccGLWindow::drawTrihedron()
 	// now display the X, Y and Z axis labels
 	{
 		//static const CCVector3d origin(0.0, 0.0, 0.0);
-		static const CCVector3d tipX(trihedronEdgeLength, 0.0, 0.0);
-		static const CCVector3d tipY(0.0, trihedronEdgeLength, 0.0);
-		static const CCVector3d tipZ(0.0, 0.0, trihedronEdgeLength);
+		const CCVector3d tipX(trihedronEdgeLength, 0.0, 0.0);
+		const CCVector3d tipY(0.0, trihedronEdgeLength, 0.0);
+		const CCVector3d tipZ(0.0, 0.0, trihedronEdgeLength);
 
 		//CCVector3d origin2D = m_viewportParams.viewMat * origin;
 		CCVector3d origin2D = m_viewportParams.viewMat.getTranslationAsVec3D();

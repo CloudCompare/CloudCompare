@@ -22,7 +22,7 @@
 #include "ccPointCloud.h"
 
 ccBox::ccBox(	const CCVector3& dims,
-				const ccGLMatrix* transMat/*= 0*/,
+				const ccGLMatrix* transMat/*=nullptr*/,
 				QString name/*=QString("Box")*/)
 	: ccGenericPrimitive(name, transMat)
 	, m_dims(dims)

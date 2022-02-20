@@ -19,7 +19,7 @@
 #include "ui_sensorComputeScatteringAnglesDlg.h"
 
 
-ccSensorComputeScatteringAnglesDlg::ccSensorComputeScatteringAnglesDlg(QWidget* parent/*=0*/)
+ccSensorComputeScatteringAnglesDlg::ccSensorComputeScatteringAnglesDlg(QWidget* parent/*=nullptr*/)
 	: QDialog(parent, Qt::Tool)
 	, m_ui( new Ui::sensorComputeScatteringAnglesDlg )
 {

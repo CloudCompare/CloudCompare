@@ -16,7 +16,7 @@ ccPlanarEntityInterface::ccPlanarEntityInterface()
 static QSharedPointer<ccCylinder> c_unitNormalSymbol(nullptr);
 static QSharedPointer<ccCone> c_unitNormalHeadSymbol(nullptr);
 
-void ccPlanarEntityInterface::glDrawNormal(CC_DRAW_CONTEXT& context, const CCVector3& pos, float scale, const ccColor::Rgb* color/*=0*/)
+void ccPlanarEntityInterface::glDrawNormal(CC_DRAW_CONTEXT& context, const CCVector3& pos, float scale, const ccColor::Rgb* color/*=nullptr*/)
 {
 	//get the set of OpenGL functions (version 2.1)
 	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();

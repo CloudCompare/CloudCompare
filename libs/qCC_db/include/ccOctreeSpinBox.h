@@ -37,7 +37,7 @@ class QCC_DB_LIB_API ccOctreeSpinBox : public QSpinBox
 public:
 
 	//! Default constructor
-	explicit ccOctreeSpinBox(QWidget* parent = 0);
+	explicit ccOctreeSpinBox(QWidget* parent = nullptr);
 
 	//! Inits the dialog with a cloud (on which the octree has been or will be computed)
 	/** Alternative to ccOctreeSpinBox::setOctree

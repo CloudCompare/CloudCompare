@@ -35,7 +35,7 @@ public:
 						double maxRange,
 						double minVal = -1.0e9,
 						double maxVal = 1.0e9,
-						QWidget* parent = 0);
+						QWidget* parent = nullptr);
 
 	//! Mode
 	enum Mode { EXPORT, SPLIT, CANCEL };

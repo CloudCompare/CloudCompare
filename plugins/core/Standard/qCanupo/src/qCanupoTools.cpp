@@ -204,9 +204,9 @@ bool qCanupoTools::ComputeCorePointsDescriptors(CCCoreLib::GenericIndexedCloud* 
 												QString& error, //if any
 												unsigned descriptorID/*=DESC_DIMENSIONALITY*/,
 												int maxThreadCount/*=0*/,
-												CCCoreLib::GenericProgressCallback* progressCb/*=0*/,
-												CCCoreLib::DgmOctree* inputOctree/*=0*/,
-												std::vector<ccScalarField*>* roughnessSFs/*=0*/)
+												CCCoreLib::GenericProgressCallback* progressCb/*=nullptr*/,
+												CCCoreLib::DgmOctree* inputOctree/*=nullptr*/,
+												std::vector<ccScalarField*>* roughnessSFs/*=nullptr*/)
 {
 	assert(corePoints && sourceCloud);
 	assert(!sortedScales.empty());
@@ -510,8 +510,8 @@ bool qCanupoTools::TrainClassifier(	Classifier& classifier,
 									const CorePointDescSet& descriptors2,
 									const std::vector<float>& scales,
 									ccPointCloud* mscCloud,
-									const CorePointDescSet* evaluationDescriptors/*=0*/,
-									ccMainAppInterface* app/*=0*/)
+									const CorePointDescSet* evaluationDescriptors/*=nullptr*/,
+									ccMainAppInterface* app/*=nullptr*/)
 {
 	//fuse both descriptor sets in a single 'dlib' structure
 	size_t nsamples1 = descriptors1.size();

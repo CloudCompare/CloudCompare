@@ -74,8 +74,8 @@ namespace ccLibAlgorithms
 	//! Applies a standard CCCoreLib algorithm (see CC_LIB_ALGORITHM) on a set of entities
 	bool ApplyCCLibAlgorithm(	CC_LIB_ALGORITHM algo,
 								ccHObject::Container& entities,
-								QWidget* parent = 0,
-								void** additionalParameters = 0);
+								QWidget* parent = nullptr,
+								void** additionalParameters = nullptr);
 	
 	//! Scale matching algorithms
 	enum ScaleMatchingAlgorithm { BB_MAX_DIM, BB_VOLUME, PCA_MAX_DIM, ICP_SCALE };
@@ -86,7 +86,7 @@ namespace ccLibAlgorithms
 												double icpRmsDiff,
 												int icpFinalOverlap,
 												unsigned refEntityIndex = 0,
-												QWidget* parent = 0);
+												QWidget* parent = nullptr);
 }
 
 #endif

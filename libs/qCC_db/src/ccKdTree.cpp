@@ -372,7 +372,7 @@ protected:
 
 };
 
-bool ccKdTree::getNeighborLeaves(ccKdTree::BaseNode* cell, ccKdTree::LeafSet& neighbors, const int* userDataFilter/*=0*/)
+bool ccKdTree::getNeighborLeaves(ccKdTree::BaseNode* cell, ccKdTree::LeafSet& neighbors, const int* userDataFilter/*=nullptr*/)
 {
 	if (!m_root)
 		return false;

@@ -29,7 +29,7 @@
 #include <ccLog.h>
 #include <ccPointCloud.h>
 
-ccPointPickingGenericInterface::ccPointPickingGenericInterface(ccPickingHub* pickingHub, QWidget* parent/*=0*/)
+ccPointPickingGenericInterface::ccPointPickingGenericInterface(ccPickingHub* pickingHub, QWidget* parent/*=nullptr*/)
 	: ccOverlayDialog(parent)
 	, m_pickingHub(pickingHub)
 {

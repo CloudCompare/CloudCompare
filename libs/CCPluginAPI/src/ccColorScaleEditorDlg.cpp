@@ -49,8 +49,8 @@ static char s_defaultEmptyCustomListText[] = "(auto)";
 
 ccColorScaleEditorDialog::ccColorScaleEditorDialog(	ccColorScalesManager* manager,
 													ccMainAppInterface* mainApp,
-													ccColorScale::Shared currentScale/*=0*/,
-													QWidget* parent/*=0*/)
+													ccColorScale::Shared currentScale/*=ccColorScale::Shared(nullptr)*/,
+													QWidget* parent/*=nullptr*/)
 	: QDialog(parent)
 	, m_manager(manager)
 	, m_colorScale(currentScale)

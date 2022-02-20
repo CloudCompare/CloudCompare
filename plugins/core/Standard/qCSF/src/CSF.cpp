@@ -104,8 +104,8 @@ bool CSF::do_filtering(	std::vector<int>& groundIndexes,
 						std::vector<int>& offGroundIndexes,
 						bool exportClothMesh,
 						ccMesh* &clothMesh,
-						ccMainAppInterface* app/*=0*/,
-						QWidget* parent/*=0*/)
+						ccMainAppInterface* app/*=nullptr*/,
+						QWidget* parent/*=nullptr*/)
 {
 	//constants
 	static const double cloth_y_height = 0.05; //origin cloth height

@@ -78,7 +78,7 @@ static bool Intersection(const ccGLMatrix& broomTrans, const CCVector3& A, const
 
 }
 
-qBroomDlg::qBroomDlg(ccMainAppInterface* app/*=0*/)
+qBroomDlg::qBroomDlg(ccMainAppInterface* app/*=nullptr*/)
 	: QDialog(app ? app->getMainWindow() : nullptr, Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint)
 	, Ui::BroomDialog()
 	, m_glWindow(nullptr)
@@ -1572,7 +1572,7 @@ bool qBroomDlg::moveBroom(ccGLMatrix& broomTrans, CCVector3d& broomDelta, bool s
 	return true;
 }
 
-bool qBroomDlg::selectPoints(const ccGLMatrix& broomTrans, BroomDimensions* _broom/*=0*/)
+bool qBroomDlg::selectPoints(const ccGLMatrix& broomTrans, BroomDimensions* _broom/*=nullptr*/)
 {
 	//we will need the octree (intensively ;)
 	ccOctree::Shared octree = m_cloud.ref ? m_cloud.ref->getOctree() : ccOctree::Shared(nullptr);

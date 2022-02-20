@@ -34,7 +34,7 @@ class QCC_IO_LIB_API AsciiSaveDlg : public QDialog
 public:
 
 	//! Default constructor
-	explicit AsciiSaveDlg(QWidget* parent = 0);
+	explicit AsciiSaveDlg(QWidget* parent = nullptr);
 
 	//! Destructor
 	virtual ~AsciiSaveDlg();

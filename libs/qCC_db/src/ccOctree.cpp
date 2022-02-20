@@ -284,7 +284,7 @@ void ccOctree::draw(CC_DRAW_CONTEXT& context)
 
 bool ccOctree::DrawCellAsABox(	const CCCoreLib::DgmOctree::octreeCell& cell,
 								void** additionalParameters,
-								CCCoreLib::NormalizedProgress* nProgress/*=0*/)
+								CCCoreLib::NormalizedProgress* nProgress/*=nullptr*/)
 {
 	ccOctreeFrustumIntersector* ofi = static_cast<ccOctreeFrustumIntersector*>(additionalParameters[0]);
 	QOpenGLFunctions_2_1* glFunc     = static_cast<QOpenGLFunctions_2_1*>(additionalParameters[1]);
@@ -351,7 +351,7 @@ bool ccOctree::DrawCellAsABox(	const CCCoreLib::DgmOctree::octreeCell& cell,
 
 bool ccOctree::DrawCellAsAPoint(const CCCoreLib::DgmOctree::octreeCell& cell,
 								void** additionalParameters,
-								CCCoreLib::NormalizedProgress* nProgress/*=0*/)
+								CCCoreLib::NormalizedProgress* nProgress/*=nullptr*/)
 {
 	//variables additionnelles
 	glDrawParams* glParams			= reinterpret_cast<glDrawParams*>(additionalParameters[0]);
@@ -386,7 +386,7 @@ bool ccOctree::DrawCellAsAPoint(const CCCoreLib::DgmOctree::octreeCell& cell,
 
 bool ccOctree::DrawCellAsAPrimitive(const CCCoreLib::DgmOctree::octreeCell& cell,
 									void** additionalParameters,
-									CCCoreLib::NormalizedProgress* nProgress/*=0*/)
+									CCCoreLib::NormalizedProgress* nProgress/*=nullptr*/)
 {
 	//variables additionnelles
 	glDrawParams* glParams			= reinterpret_cast<glDrawParams*>(additionalParameters[0]);

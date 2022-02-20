@@ -33,7 +33,7 @@
 //system
 #include <assert.h>
 
-ccMapDlg::ccMapDlg(QWidget* parent/*=0*/)
+ccMapDlg::ccMapDlg(QWidget* parent/*=nullptr*/)
 	: ccOverlayDialog(parent)
 	, Ui::mapDlg()
 {

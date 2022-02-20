@@ -28,7 +28,7 @@ class ccNoiseFilterDlg : public QDialog, public Ui::NoiseFilterDialog
 public:
 
 	//! Default constructor
-	explicit ccNoiseFilterDlg(QWidget* parent = 0);
+	explicit ccNoiseFilterDlg(QWidget* parent = nullptr);
 };
 
 #endif //CC_NOISE_FILTER_DLG_HEADER

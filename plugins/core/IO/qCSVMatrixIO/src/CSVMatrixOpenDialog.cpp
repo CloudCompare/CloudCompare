@@ -24,7 +24,7 @@
 #include <QFileInfo>
 #include <QSettings>
 
-CSVMatrixOpenDialog::CSVMatrixOpenDialog(QWidget* parent/*=0*/)
+CSVMatrixOpenDialog::CSVMatrixOpenDialog(QWidget* parent/*=nullptr*/)
 	: QDialog(parent)
 	, Ui::CSVMatrixOpenDlg()
 {

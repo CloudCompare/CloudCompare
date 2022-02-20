@@ -29,7 +29,7 @@ public:
 	enum Algorithm { ALGO_KD_TREE, ALGO_FAST_MARCHING };
 
 	//! Default constructor
-	CellsFusionDlg(Algorithm algo, QWidget* parent = 0)
+	CellsFusionDlg(Algorithm algo, QWidget* parent = nullptr)
 		: QDialog(parent, Qt::Tool)
 		, Ui::CellsFusionDlg()
 	{

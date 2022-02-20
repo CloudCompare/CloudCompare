@@ -33,7 +33,7 @@ public:
 	enum IOMode { SHAPE_FILE_IO, ASCII_FILE_IO };
 
 	//! Default constructor
-	FacetsExportDlg(IOMode mode, QWidget* parent = 0);
+	FacetsExportDlg(IOMode mode, QWidget* parent = nullptr);
 
 protected:
 

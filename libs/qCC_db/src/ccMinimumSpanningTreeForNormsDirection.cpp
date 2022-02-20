@@ -410,7 +410,7 @@ static bool ResolveNormalsWithMST(	ccPointCloud* cloud,
 #ifdef WITH_GRAPH
 static bool ComputeMSTGraphAtLevel(	const CCCoreLib::DgmOctree::octreeCell& cell,
 									void** additionalParameters,
-									CCCoreLib::NormalizedProgress* nProgress/*=0*/)
+									CCCoreLib::NormalizedProgress* nProgress/*=nullptr*/)
 {
 	//parameters
 	Graph* graph = static_cast<Graph*>(additionalParameters[0]);
@@ -493,7 +493,7 @@ static bool ComputeMSTGraphAtLevel(	const CCCoreLib::DgmOctree::octreeCell& cell
 
 bool ccMinimumSpanningTreeForNormsDirection::OrientNormals(	ccPointCloud* cloud,
 															unsigned kNN/*=6*/,
-															ccProgressDialog* progressDlg/*=0*/)
+															ccProgressDialog* progressDlg/*=nullptr*/)
 {
 	assert(cloud);
 	if (!cloud->hasNormals())

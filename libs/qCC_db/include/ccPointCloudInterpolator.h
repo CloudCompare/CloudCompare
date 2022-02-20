@@ -53,7 +53,7 @@ public:
 											ccPointCloud* srcCloud,
 											const std::vector<int>& sfIndexes,
 											const Parameters& params,
-											CCCoreLib::GenericProgressCallback* progressCb = 0,
+											CCCoreLib::GenericProgressCallback* progressCb = nullptr,
 											unsigned char octreeLevel = 0);
 
 

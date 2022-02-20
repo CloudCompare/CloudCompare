@@ -37,7 +37,7 @@ class sfEditDlg : public QWidget
 public:
 
 	//! Default constructor
-	explicit sfEditDlg(QWidget* parent = 0);
+	explicit sfEditDlg(QWidget* parent = nullptr);
 
 	~sfEditDlg();
 	

@@ -19,7 +19,7 @@
 
 #include <DgmOctree.h>
 
-ccLabelingDlg::ccLabelingDlg(QWidget* parent/*=0*/)
+ccLabelingDlg::ccLabelingDlg(QWidget* parent/*=nullptr*/)
 	: QDialog(parent, Qt::Tool)
 	, Ui::LabelingDialog()
 {

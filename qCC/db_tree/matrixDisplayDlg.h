@@ -36,7 +36,7 @@ class MatrixDisplayDlg : public QWidget
 public:
 
 	//! Default constructor
-	explicit MatrixDisplayDlg(QWidget* parent = 0);
+	explicit MatrixDisplayDlg(QWidget* parent = nullptr);
 
 	~MatrixDisplayDlg();
 	

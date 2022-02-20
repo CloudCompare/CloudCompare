@@ -37,7 +37,7 @@ public:
 		\param uniqueID unique ID (handle with care)
 	**/
 	ccSphere(	PointCoordinateType radius,
-				const ccGLMatrix* transMat = 0,
+				const ccGLMatrix* transMat = nullptr,
 				QString name = QString("Sphere"),
 				unsigned precision = 24,
 				unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID);

@@ -32,7 +32,7 @@
 #include <ccProgressDialog.h>
 
 
-qCanupoPlugin::qCanupoPlugin(QObject* parent/*=0*/)
+qCanupoPlugin::qCanupoPlugin(QObject* parent/*=nullptr*/)
 	: QObject(parent)
 	, ccStdPluginInterface( ":/CC/plugin/qCanupoPlugin/info.json" )
 	, m_classifyAction(nullptr)

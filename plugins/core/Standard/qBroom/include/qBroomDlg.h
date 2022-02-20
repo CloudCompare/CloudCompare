@@ -51,7 +51,7 @@ class qBroomDlg : public QDialog, public Ui::BroomDialog
 public:
 
 	//! Default constructor
-	explicit qBroomDlg(ccMainAppInterface* app = 0);
+	explicit qBroomDlg(ccMainAppInterface* app = nullptr);
 
 	//! Destructor
 	virtual ~qBroomDlg();
@@ -126,7 +126,7 @@ protected: //methods
 	bool moveBroom(ccGLMatrix& broomTrans, CCVector3d& broomDelta, bool stickToTheFloor) const;
 
 	//! Select the points inside or above/below the broom
-	bool selectPoints(const ccGLMatrix& broomTrans, BroomDimensions* _broom = 0);
+	bool selectPoints(const ccGLMatrix& broomTrans, BroomDimensions* _broom = nullptr);
 
 	//! Automate the process
 	bool startAutomation();

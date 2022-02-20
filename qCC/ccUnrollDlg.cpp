@@ -21,7 +21,7 @@
 //Qt
 #include <QSettings>
 
-ccUnrollDlg::ccUnrollDlg(QWidget* parent/*=0*/)
+ccUnrollDlg::ccUnrollDlg(QWidget* parent/*=nullptr*/)
 	: QDialog(parent)
 	, m_ui( new Ui::UnrollDialog )
 {

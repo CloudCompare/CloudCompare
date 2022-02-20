@@ -28,7 +28,7 @@ class ccPtsSamplingDlg : public QDialog, public Ui::PointsSamplingDialog
 public:
 
 	//! Default constructor
-	explicit ccPtsSamplingDlg(QWidget* parent = 0);
+	explicit ccPtsSamplingDlg(QWidget* parent = nullptr);
 
 	bool generateNormals() const;
 	bool interpolateRGB() const;

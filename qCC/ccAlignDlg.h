@@ -43,7 +43,7 @@ public:
 								OCTREE
 	};
 
-	ccAlignDlg(ccGenericPointCloud *data, ccGenericPointCloud *model, QWidget* parent = 0);
+	ccAlignDlg(ccGenericPointCloud *data, ccGenericPointCloud *model, QWidget* parent = nullptr);
 	virtual ~ccAlignDlg();
 
 	unsigned getNbTries();

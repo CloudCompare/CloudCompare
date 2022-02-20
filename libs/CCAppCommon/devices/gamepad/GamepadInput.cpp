@@ -9,7 +9,7 @@
 //system
 #include <assert.h>
 
-GamepadInput::GamepadInput(QObject* parent/*=0*/)
+GamepadInput::GamepadInput(QObject* parent/*=nullptr*/)
 	: QGamepad(0, parent)
 	, m_hasPanning(false)
 	, m_hasRotation(false)

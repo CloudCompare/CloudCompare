@@ -22,7 +22,7 @@
 
 
 ccSphere::ccSphere(	PointCoordinateType radius,
-					const ccGLMatrix* transMat/*=0*/,
+					const ccGLMatrix* transMat/*=nullptr*/,
 					QString name/*=QString("Sphere")*/,
 					unsigned precision/*=DEFAULT_DRAWING_PRECISION*/,
 					unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)

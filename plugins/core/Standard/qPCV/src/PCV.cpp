@@ -206,12 +206,12 @@ bool PCV::GenerateRays(unsigned numberOfRays, std::vector<CCVector3>& rays, bool
 
 int PCV::Launch(unsigned numberOfRays,
 				GenericCloud* vertices,
-				GenericMesh* mesh/*=0*/,
+				GenericMesh* mesh/*=nullptr*/,
 				bool meshIsClosed/*=false*/,
 				bool mode360/*=true*/,
 				unsigned width/*=1024*/,
 				unsigned height/*=1024*/,
-				CCCoreLib::GenericProgressCallback* progressCb/*=0*/,
+				CCCoreLib::GenericProgressCallback* progressCb/*=nullptr*/,
 				const QString& entityName/*=QString()*/)
 {
 	//generates light directions
@@ -231,11 +231,11 @@ int PCV::Launch(unsigned numberOfRays,
 
 bool PCV::Launch(const std::vector<CCVector3>& rays,
 				 CCCoreLib::GenericCloud* vertices,
-				 CCCoreLib::GenericMesh* mesh/*=0*/,
+				 CCCoreLib::GenericMesh* mesh/*=nullptr*/,
 				 bool meshIsClosed/*=false*/,
 				 unsigned width/*=1024*/,
 				 unsigned height/*=1024*/,
-				 CCCoreLib::GenericProgressCallback* progressCb/*=0*/,
+				 CCCoreLib::GenericProgressCallback* progressCb/*=nullptr*/,
 				 const QString& entityName/*=QString()*/)
 {
 	if (rays.empty())

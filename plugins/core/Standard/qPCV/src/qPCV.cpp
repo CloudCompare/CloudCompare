@@ -43,7 +43,7 @@ static bool s_mode180CheckBoxState		= true;
 static bool s_closedMeshCheckBoxState	= false;
 
 
-qPCV::qPCV(QObject* parent/*=0*/)
+qPCV::qPCV(QObject* parent/*=nullptr*/)
 	: QObject(parent)
 	, ccStdPluginInterface(":/CC/plugin/qPCV/info.json")
 	, m_action(nullptr)

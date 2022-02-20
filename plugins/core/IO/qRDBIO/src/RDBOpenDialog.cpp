@@ -22,7 +22,7 @@
 #include <QFileInfo>
 #include <QSettings>
 
-RDBOpenDialog::RDBOpenDialog(QWidget* parent/*=0*/)
+RDBOpenDialog::RDBOpenDialog(QWidget* parent/*=nullptr*/)
 	: QDialog(parent)
 	, Ui::RDBOpenDlg()
 {

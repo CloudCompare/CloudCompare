@@ -253,7 +253,7 @@ class ccHistogramWindowDlg : public QDialog
 
 public:
 	//! Default constructor
-	explicit ccHistogramWindowDlg(QWidget* parent = 0);
+	explicit ccHistogramWindowDlg(QWidget* parent = nullptr);
 	//! Destructor
 	virtual ~ccHistogramWindowDlg();
 

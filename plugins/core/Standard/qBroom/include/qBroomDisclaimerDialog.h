@@ -32,7 +32,7 @@ class DisclaimerDialog : public QDialog, public Ui::DisclaimerDialog
 {
 public:
 	//! Default constructor
-	DisclaimerDialog(QWidget* parent = 0)
+	DisclaimerDialog(QWidget* parent = nullptr)
 		: QDialog(parent)
 		, Ui::DisclaimerDialog()
 	{

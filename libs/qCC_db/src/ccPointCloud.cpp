@@ -108,7 +108,7 @@ ccPointCloud* ccPointCloud::From(CCCoreLib::GenericCloud* cloud, const ccGeneric
 	return pc;
 }
 
-ccPointCloud* ccPointCloud::From(const CCCoreLib::GenericIndexedCloud* cloud, const ccGenericPointCloud* sourceCloud/*=0*/)
+ccPointCloud* ccPointCloud::From(const CCCoreLib::GenericIndexedCloud* cloud, const ccGenericPointCloud* sourceCloud/*=nullptr*/)
 {
 	ccPointCloud* pc = new ccPointCloud("Cloud");
 
@@ -178,7 +178,7 @@ void UpdateGridIndexes(const std::vector<int>& newIndexMap, std::vector<ccPointC
 	}
 }
 
-ccPointCloud* ccPointCloud::partialClone(const CCCoreLib::ReferenceCloud* selection, int* warnings/*=0*/) const
+ccPointCloud* ccPointCloud::partialClone(const CCCoreLib::ReferenceCloud* selection, int* warnings/*=nullptr*/) const
 {
 	if (warnings)
 	{
@@ -478,7 +478,7 @@ void ccPointCloud::setDisplay(ccGenericGLDisplay* win)
 }
 
 
-ccGenericPointCloud* ccPointCloud::clone(ccGenericPointCloud* destCloud/*=0*/, bool ignoreChildren/*=false*/)
+ccGenericPointCloud* ccPointCloud::clone(ccGenericPointCloud* destCloud/*=nullptr*/, bool ignoreChildren/*=false*/)
 {
 	if (destCloud && !destCloud->isA(CC_TYPES::POINT_CLOUD))
 	{
@@ -489,7 +489,7 @@ ccGenericPointCloud* ccPointCloud::clone(ccGenericPointCloud* destCloud/*=0*/, b
 	return cloneThis(static_cast<ccPointCloud*>(destCloud), ignoreChildren);
 }
 
-ccPointCloud* ccPointCloud::cloneThis(ccPointCloud* destCloud/*=0*/, bool ignoreChildren/*=false*/)
+ccPointCloud* ccPointCloud::cloneThis(ccPointCloud* destCloud/*=nullptr*/, bool ignoreChildren/*=false*/)
 {
 	ccPointCloud* result = destCloud ? destCloud : new ccPointCloud();
 
@@ -5048,7 +5048,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 	return true;
 }
 
-int ccPointCloud::VBO::init(int count, bool withColors, bool withNormals, bool* reallocated/*=0*/)
+int ccPointCloud::VBO::init(int count, bool withColors, bool withNormals, bool* reallocated/*=nullptr*/)
 {
 	//required memory
 	int totalSizeBytes = sizeof(PointCoordinateType) * count * 3;
@@ -5155,7 +5155,7 @@ void ccPointCloud::removeFromDisplay(const ccGenericGLDisplay* win)
 }
 
 bool ccPointCloud::computeNormalsWithGrids(	double minTriangleAngle_deg/*=1.0*/,
-											ccProgressDialog* pDlg/*=0*/)
+											ccProgressDialog* pDlg/*=nullptr*/)
 {
 	unsigned pointCount = size();
 	if (pointCount < 3)
@@ -5386,7 +5386,7 @@ bool ccPointCloud::computeNormalsWithGrids(	double minTriangleAngle_deg/*=1.0*/,
 	return true;
 }
 
-bool ccPointCloud::orientNormalsWithGrids(ccProgressDialog* pDlg/*=0*/)
+bool ccPointCloud::orientNormalsWithGrids(ccProgressDialog* pDlg/*=nullptr*/)
 {
 	unsigned pointCount = size();
 	if (pointCount == 0)
@@ -5580,13 +5580,13 @@ bool ccPointCloud::computeNormalsWithOctree(CCCoreLib::LOCAL_MODEL_TYPES model,
 }
 
 bool ccPointCloud::orientNormalsWithMST(unsigned kNN/*=6*/,
-										ccProgressDialog* pDlg/*=0*/)
+										ccProgressDialog* pDlg/*=nullptr*/)
 {
 	return ccMinimumSpanningTreeForNormsDirection::OrientNormals(this, kNN, pDlg);
 }
 
 bool ccPointCloud::orientNormalsWithFM(	unsigned char level,
-										ccProgressDialog* pDlg/*=0*/)
+										ccProgressDialog* pDlg/*=nullptr*/)
 {
 	return ccFastMarchingForNormsDirection::OrientNormals(this, level, pDlg);
 }
@@ -5655,7 +5655,7 @@ void ccPointCloud::clearFWFData()
 	m_fwfDescriptors.clear();
 }
 
-bool ccPointCloud::computeFWFAmplitude(double& minVal, double& maxVal, ccProgressDialog* pDlg/*=0*/) const
+bool ccPointCloud::computeFWFAmplitude(double& minVal, double& maxVal, ccProgressDialog* pDlg/*=nullptr*/) const
 {
 	minVal = maxVal = 0;
 	

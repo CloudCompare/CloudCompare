@@ -17,7 +17,7 @@
 
 #include "ccExportCoordToSFDlg.h"
 
-ccExportCoordToSFDlg::ccExportCoordToSFDlg(QWidget* parent/*=0*/)
+ccExportCoordToSFDlg::ccExportCoordToSFDlg(QWidget* parent/*=nullptr*/)
 	: QDialog(parent, Qt::Tool)
 	, Ui::ExportCoordToSFDlg()
 {

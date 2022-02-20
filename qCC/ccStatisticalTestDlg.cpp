@@ -23,7 +23,7 @@ ccStatisticalTestDlg::ccStatisticalTestDlg(	QString p1Label,
 											QString p2Label,
 											QString p3Label/*=QString()*/,
 											QString windowTitle/*=QString()*/,
-											QWidget* parent/*=0*/)
+											QWidget* parent/*=nullptr*/)
 	: QDialog(parent, Qt::Tool)
 	, m_ui( new Ui::StatisticalTestDialog )
 {

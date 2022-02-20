@@ -114,7 +114,7 @@ int FastMarchingForFacetExtraction::init(	ccGenericPointCloud* cloud,
 											ScalarType maxError,
 											CCCoreLib::DistanceComputationTools::ERROR_MEASURES errorMeasure,
 											bool useRetroProjectionError,
-											CCCoreLib::GenericProgressCallback* progressCb/*=0*/)
+											CCCoreLib::GenericProgressCallback* progressCb/*=nullptr*/)
 {
 	m_maxError = maxError;
 	m_errorMeasure = errorMeasure;
@@ -487,8 +487,8 @@ int FastMarchingForFacetExtraction::ExtractPlanarFacets(	ccPointCloud* theCloud,
 															ScalarType maxError,
 															CCCoreLib::DistanceComputationTools::ERROR_MEASURES errorMeasure,
 															bool useRetroProjectionError/*=true*/,
-															CCCoreLib::GenericProgressCallback* progressCb/*=0*/,
-															CCCoreLib::DgmOctree* _theOctree/*=0*/)
+															CCCoreLib::GenericProgressCallback* progressCb/*=nullptr*/,
+															CCCoreLib::DgmOctree* _theOctree/*=nullptr*/)
 {
 	assert(theCloud);
 

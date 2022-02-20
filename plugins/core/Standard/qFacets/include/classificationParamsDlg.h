@@ -28,7 +28,7 @@ class ClassificationParamsDlg : public QDialog, public Ui::ClassificationParamsD
 public:
 
 	//! Default constructor
-	ClassificationParamsDlg(QWidget* parent = 0)
+	ClassificationParamsDlg(QWidget* parent = nullptr)
 		: QDialog(parent, Qt::Tool)
 		, Ui::ClassificationParamsDlg()
 	{

@@ -39,7 +39,7 @@ class ccCSFDlg : public QDialog, public Ui::CSFDialog
 public:
 
 	//! Default constructor
-	explicit ccCSFDlg(QWidget* parent = 0);
+	explicit ccCSFDlg(QWidget* parent = nullptr);
 
 protected:
 

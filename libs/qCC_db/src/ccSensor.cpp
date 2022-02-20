@@ -199,7 +199,7 @@ bool ccSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedID
 	return true;
 }
 
-bool ccSensor::applyViewport(ccGenericGLDisplay* win/*=0*/)
+bool ccSensor::applyViewport(ccGenericGLDisplay* win/*=nullptr*/)
 {
 	//not supported by default, must be reimplemented by the child class
 	ccLog::Warning("[ccSensor::applyViewport] Unhandled sensor type!");

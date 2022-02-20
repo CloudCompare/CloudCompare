@@ -36,7 +36,7 @@ ccOrderChoiceDlg::ccOrderChoiceDlg(	ccHObject* firstEntity,
 									QString firstRole,
 									ccHObject* secondEntity,
 									QString secondRole,
-									ccMainAppInterface* app/*=0*/)
+									ccMainAppInterface* app/*=nullptr*/)
 	: QDialog(app ? app->getMainWindow() : nullptr, Qt::Tool)
 	, m_gui(new Ui_RoleChoiceDialog)
 	, m_app(app)

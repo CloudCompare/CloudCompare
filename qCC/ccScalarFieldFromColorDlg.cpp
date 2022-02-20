@@ -28,7 +28,7 @@
 #include <windows.h>
 #endif
 
-ccScalarFieldFromColorDlg::ccScalarFieldFromColorDlg(QWidget* parent/*=0*/)
+ccScalarFieldFromColorDlg::ccScalarFieldFromColorDlg(QWidget* parent/*=nullptr*/)
 	: QDialog(parent, Qt::Tool)
 	, Ui::scalarFieldFromColorDlg()
 {

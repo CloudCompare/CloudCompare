@@ -24,7 +24,7 @@
 ccDish::ccDish(	PointCoordinateType radius,
 				PointCoordinateType height,
 				PointCoordinateType radius2/*=0*/,
-				const ccGLMatrix* transMat/*=0*/,
+				const ccGLMatrix* transMat/*=nullptr*/,
 				QString name/*="Dish"*/,
 				unsigned precision/*=DEFAULT_DRAWING_PRECISION*/)
 	: ccGenericPrimitive(name,transMat)

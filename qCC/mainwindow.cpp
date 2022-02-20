@@ -7373,7 +7373,7 @@ void MainWindow::doPickRotationCenter()
 	enablePickingOperation(win, tr("Pick a point to be used as rotation center (click on icon again to cancel)"));
 }
 
-ccPointCloud* MainWindow::askUserToSelectACloud(ccHObject* defaultCloudEntity/*=0*/, QString inviteMessage/*=QString()*/)
+ccPointCloud* MainWindow::askUserToSelectACloud(ccHObject* defaultCloudEntity/*=nullptr*/, QString inviteMessage/*=QString()*/)
 {
 	ccHObject::Container clouds;
 	m_ccRoot->getRootEntity()->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD, true);
@@ -9755,7 +9755,7 @@ void MainWindow::addToDBAuto(const QStringList& filenames)
 
 void MainWindow::addToDB(	const QStringList& filenames,
 							QString fileFilter/*=QString()*/,
-							ccGLWindow* destWin/*=0*/)
+							ccGLWindow* destWin/*=nullptr*/)
 {
 	//to use the same 'global shift' for multiple files
 	CCVector3d loadCoordinatesShift(0, 0, 0);

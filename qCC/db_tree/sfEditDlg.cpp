@@ -34,7 +34,7 @@
 //! Default number of steps for spin-boxes
 const int SPIN_BOX_STEPS = 1000;
 
-sfEditDlg::sfEditDlg(QWidget* parent/*=0*/)
+sfEditDlg::sfEditDlg(QWidget* parent/*=nullptr*/)
 	: QWidget(parent)
 	, m_associatedSF(nullptr)
 	, m_associatedSFHisto(nullptr)

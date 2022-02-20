@@ -30,7 +30,7 @@
 //Plugins
 #include <ccMainAppInterface.h>
 
-ccPickingHub::ccPickingHub(ccMainAppInterface* app, QObject* parent/*=0*/)
+ccPickingHub::ccPickingHub(ccMainAppInterface* app, QObject* parent/*=nullptr*/)
 	: QObject(parent)
 	, m_app(app)
 	, m_activeGLWindow(nullptr)

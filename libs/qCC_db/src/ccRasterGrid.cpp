@@ -173,7 +173,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 								bool doInterpolateEmptyCells,
 								double maxEdgeLength,
 								ProjectionType sfInterpolation/*=INVALID_PROJECTION_TYPE*/,
-								ccProgressDialog* progressDialog/*=0*/)
+								ccProgressDialog* progressDialog/*=nullptr*/)
 {
 	if (!cloud)
 	{

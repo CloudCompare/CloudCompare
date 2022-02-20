@@ -41,7 +41,7 @@ public:
 								double defaultVal3,
 								int precision = 6,
 								const QString windowTitle = QString(),
-								QWidget* parent = 0);
+								QWidget* parent = nullptr);
 
 	//! Enable the checkbox (bottom-left)
 	void showCheckbox(const QString& label, bool state, QString tooltip = QString());

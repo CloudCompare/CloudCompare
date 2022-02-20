@@ -83,7 +83,7 @@ ImageFileFilter::ImageFileFilter()
 	}
 }
 
-QString ImageFileFilter::GetSaveFilename(const QString& dialogTitle, const QString& baseName, const QString& imageSavePath, QWidget* parentWidget/*=0*/)
+QString ImageFileFilter::GetSaveFilename(const QString& dialogTitle, const QString& baseName, const QString& imageSavePath, QWidget* parentWidget/*=nullptr*/)
 {
 	//add images output file filters
 	QString filters;
@@ -120,7 +120,7 @@ QString ImageFileFilter::GetSaveFilename(const QString& dialogTitle, const QStri
 	return outputFilename;
 }
 
-QString ImageFileFilter::GetLoadFilename(const QString& dialogTitle, const QString& imageLoadPath, QWidget* parentWidget/*=0*/)
+QString ImageFileFilter::GetLoadFilename(const QString& dialogTitle, const QString& imageLoadPath, QWidget* parentWidget/*=nullptr*/)
 {
 	//we grab the list of supported image file formats (for reading)
 	QList<QByteArray> formats = QImageReader::supportedImageFormats();

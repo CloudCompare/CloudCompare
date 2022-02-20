@@ -58,8 +58,8 @@ public:
 						std::vector<int>& offGroundIndexes,
 						bool exportClothMesh,
 						ccMesh* &clothMesh,
-						ccMainAppInterface* app = 0,
-						QWidget* parent = 0);
+						ccMainAppInterface* app = nullptr,
+						QWidget* parent = nullptr);
 
 private:
 	wl::PointCloud& point_cloud;

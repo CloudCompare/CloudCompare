@@ -57,7 +57,7 @@ public:
 										double heightStep,
 										double heightShift,
 										const Parameters& params,
-										ccMainAppInterface* app = 0 );
+										ccMainAppInterface* app = nullptr);
 
 	//! Exports horizontal profiles (of a surface of revolution's map) as a DXF file
 	static bool SaveHorizontalProfiles(	const QSharedPointer<DistanceMapGenerationTool::Map>& map,
@@ -69,7 +69,7 @@ public:
 										double radToUnitConvFactor,
 										QString angleUnit,
 										const Parameters& params,
-										ccMainAppInterface* app = 0 );
+										ccMainAppInterface* app = nullptr);
 };
 
 #endif //QSRA_DXF_PROFILES_EXPORTER_HEADER

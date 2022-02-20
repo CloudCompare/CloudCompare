@@ -35,8 +35,8 @@
 ccQuadric::ccQuadric(	CCVector2 minCorner,
 						CCVector2 maxCorner,
 						const PointCoordinateType eq[6],
-						const Tuple3ub* dims/*=0*/,
-						const ccGLMatrix* transMat/*=0*/,
+						const Tuple3ub* dims/*=nullptr*/,
+						const ccGLMatrix* transMat/*=nullptr*/,
 						QString name/*=QString("Quadric")*/,
 						unsigned precision/*=DEFAULT_DRAWING_PRECISION*/)
 	: ccGenericPrimitive(name,transMat)
@@ -141,7 +141,7 @@ ccGenericPrimitive* ccQuadric::clone() const
 	return finishCloneJob(new ccQuadric(m_minCorner,m_maxCorner,m_eq,&m_dims,&m_transformation,getName(),m_drawPrecision));
 }
 
-ccQuadric* ccQuadric::Fit(CCCoreLib::GenericIndexedCloudPersist *cloud, double* rms/*=0*/)
+ccQuadric* ccQuadric::Fit(CCCoreLib::GenericIndexedCloudPersist *cloud, double* rms/*=nullptr*/)
 {
 	//number of points
 	unsigned count = cloud->size();

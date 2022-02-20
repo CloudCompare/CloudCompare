@@ -20,7 +20,7 @@
 //System
 #include <assert.h>
 
-ccInterpolationDlg::ccInterpolationDlg(QWidget* parent/*=0*/)
+ccInterpolationDlg::ccInterpolationDlg(QWidget* parent/*=nullptr*/)
 	: QDialog(parent, Qt::Tool)
 	, Ui::InterpolationDlg()
 {

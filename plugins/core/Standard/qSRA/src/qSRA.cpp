@@ -46,7 +46,7 @@
 #include <algorithm>
 #include <vector>
 
-qSRA::qSRA(QObject* parent/*=0*/)
+qSRA::qSRA(QObject* parent/*=nullptr*/)
 	: QObject(parent)
 	, ccStdPluginInterface(":/CC/plugin/qSRA/info.json")
 	, m_doLoadProfile(nullptr)

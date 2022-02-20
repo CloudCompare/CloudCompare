@@ -708,10 +708,10 @@ using Hull2D = std::list<Vertex2D *>;
 ccPolyline* ccEnvelopeExtractor::ExtractFlatEnvelope(	CCCoreLib::GenericIndexedCloudPersist* points,
 														bool allowMultiPass,
 														PointCoordinateType maxEdgeLength/*=0*/,
-														const PointCoordinateType* preferredNormDim/*=0*/,
-														const PointCoordinateType* preferredUpDir/*=0*/,
+														const PointCoordinateType* preferredNormDim/*=nullptr*/,
+														const PointCoordinateType* preferredUpDir/*=nullptr*/,
 														EnvelopeType envelopeType/*=FULL*/,
-														std::vector<unsigned>* originalPointIndexes/*=0*/,
+														std::vector<unsigned>* originalPointIndexes/*=nullptr*/,
 														bool enableVisualDebugMode/*=false*/,
 														double maxAngleDeg/*=0.0*/)
 {

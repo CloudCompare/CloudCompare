@@ -44,7 +44,7 @@ static bool s_applyInPlace = false;
 static double s_previousConstValue = 1.0;
 
 ccScalarFieldArithmeticsDlg::ccScalarFieldArithmeticsDlg(	ccPointCloud* cloud,
-															QWidget* parent/*=0*/)
+															QWidget* parent/*=nullptr*/)
 	: QDialog(parent, Qt::Tool)
 	, m_ui( new Ui::SFArithmeticsDlg )
 {
@@ -187,8 +187,8 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 										Operation op,
 										int sf1Idx,
 										bool inplace,
-										SF2* sf2Desc/*=0*/,
-										QWidget* parent/*=0*/)
+										SF2* sf2Desc/*=nullptr*/,
+										QWidget* parent/*=nullptr*/)
 {
 	assert(cloud);
 

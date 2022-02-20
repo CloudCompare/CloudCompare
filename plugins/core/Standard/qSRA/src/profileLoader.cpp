@@ -29,7 +29,7 @@
 #include <QTextStream>
 #include <QFileInfo>
 
-ccPolyline* ProfileLoader::Load(QString filename, CCVector3& origin, ccMainAppInterface* app/*=0*/)
+ccPolyline* ProfileLoader::Load(QString filename, CCVector3& origin, ccMainAppInterface* app/*=nullptr*/)
 {
 	//load profile as a polyline
 	QFile file(filename);

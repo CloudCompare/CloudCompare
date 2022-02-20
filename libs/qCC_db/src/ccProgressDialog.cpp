@@ -23,7 +23,7 @@
 #include <QProgressBar>
 
 ccProgressDialog::ccProgressDialog(	bool showCancelButton,
-									QWidget *parent/*=0*/ )
+									QWidget* parent/*=nullptr*/ )
 	: QProgressDialog(parent)
 	, m_currentValue(0)
 	, m_lastRefreshValue(-1)

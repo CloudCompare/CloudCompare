@@ -229,7 +229,7 @@ public:
 	}
 };
 
-qPoissonRecon::qPoissonRecon(QObject* parent/*=0*/)
+qPoissonRecon::qPoissonRecon(QObject* parent/*=nullptr*/)
 	: QObject(parent)
 	, ccStdPluginInterface(":/CC/plugin/qPoissonRecon/info.json")
 	, m_action(nullptr)

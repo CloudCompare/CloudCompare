@@ -31,7 +31,7 @@ class ccInterpolationDlg : public QDialog, public Ui::InterpolationDlg
 public:
 
 	//! Default constructor
-	explicit ccInterpolationDlg(QWidget* parent = 0);
+	explicit ccInterpolationDlg(QWidget* parent = nullptr);
 
 	ccPointCloudInterpolator::Parameters::Method getInterpolationMethod() const;
 	void setInterpolationMethod(ccPointCloudInterpolator::Parameters::Method method);

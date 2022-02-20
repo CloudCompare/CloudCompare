@@ -17,7 +17,7 @@
 
 #include "ccNoiseFilterDlg.h"
 
-ccNoiseFilterDlg::ccNoiseFilterDlg(QWidget* parent/*=0*/)
+ccNoiseFilterDlg::ccNoiseFilterDlg(QWidget* parent/*=nullptr*/)
 	: QDialog(parent, Qt::Tool)
 	, Ui::NoiseFilterDialog()
 {

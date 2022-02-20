@@ -117,7 +117,7 @@ public:
 	bool fromByteArray(const QByteArray& data);
 
 	//! Loads structure of descriptors from an ".msc" file (see Brodu's version)
-	bool loadFromMSC(QString filename, QString& error, ccPointCloud* corePoints = 0);
+	bool loadFromMSC(QString filename, QString& error, ccPointCloud* corePoints = nullptr);
 
 	//! Returns associated scales
 	inline const std::vector<float>& scales() const { return m_scales; }

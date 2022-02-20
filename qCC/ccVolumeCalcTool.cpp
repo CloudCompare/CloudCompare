@@ -543,7 +543,7 @@ bool ccVolumeCalcTool::ComputeVolume(	ccRasterGrid& grid,
 										ccVolumeCalcTool::ReportInfo& reportInfo,
 										double groundHeight = std::numeric_limits<double>::quiet_NaN(),
 										double ceilHeight = std::numeric_limits<double>::quiet_NaN(),
-										QWidget* parentWidget/*=0*/)
+										QWidget* parentWidget/*=nullptr*/)
 {
 	if (	gridStep <= 1.0e-8
 		||	gridWidth == 0

@@ -33,7 +33,7 @@ class CCPLUGIN_LIB_API ccRenderToFileDlg : public QDialog
 public:
 
 	//! Default constructor
-	ccRenderToFileDlg(unsigned baseWidth, unsigned baseHeight, QWidget* parent = 0);
+	ccRenderToFileDlg(unsigned baseWidth, unsigned baseHeight, QWidget* parent = nullptr);
 
 	~ccRenderToFileDlg() override;
 	

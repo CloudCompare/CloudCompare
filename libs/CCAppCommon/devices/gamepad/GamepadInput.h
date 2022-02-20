@@ -38,7 +38,7 @@ class CCAPPCOMMON_LIB_API GamepadInput : public QGamepad
 public:
 
 	//! Default constructor
-	explicit GamepadInput(QObject* parent = 0);
+	explicit GamepadInput(QObject* parent = nullptr);
 	//! Destructor
 	virtual ~GamepadInput();
 

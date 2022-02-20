@@ -544,7 +544,7 @@ void ccMesh::transformTriNormals(const ccGLMatrix& trans)
 
 bool ccMesh::laplacianSmooth(	unsigned nbIteration,
 								PointCoordinateType factor,
-								ccProgressDialog* progressCb/*=0*/)
+								ccProgressDialog* progressCb/*=nullptr*/)
 {
 	if (!m_associatedCloud)
 		return false;
@@ -891,7 +891,7 @@ ccMesh* ccMesh::cloneMesh(	ccGenericPointCloud* vertices/*=nullptr*/,
 	return cloneMesh;
 }
 
-ccMesh* ccMesh::TriangulateTwoPolylines(ccPolyline* p1, ccPolyline* p2, CCVector3* projectionDir/*=0*/)
+ccMesh* ccMesh::TriangulateTwoPolylines(ccPolyline* p1, ccPolyline* p2, CCVector3* projectionDir/*=nullptr*/)
 {
 	if (!p1 || p1->size() == 0 || !p2 || p2->size() == 0)
 	{
@@ -3154,7 +3154,7 @@ bool ccMesh::interpolateNormalsBC(unsigned triIndex, const CCVector3d& w, CCVect
 	return interpolateNormals(tri, w, N, hasTriNormals() ? &m_triNormalIndexes->at(triIndex) : nullptr);
 }
 
-bool ccMesh::interpolateNormals(const CCCoreLib::VerticesIndexes& vertIndexes, const CCVector3d& w, CCVector3& N, const Tuple3i* triNormIndexes/*=0*/)
+bool ccMesh::interpolateNormals(const CCCoreLib::VerticesIndexes& vertIndexes, const CCVector3d& w, CCVector3& N, const Tuple3i* triNormIndexes/*=nullptr*/)
 {
 	CCVector3d Nd(0, 0, 0);
 	{
@@ -3891,7 +3891,7 @@ bool ccMesh::convertMaterialsToVertexColors()
 
 static bool TagDuplicatedVertices(	const CCCoreLib::DgmOctree::octreeCell& cell,
 									void** additionalParameters,
-									CCCoreLib::NormalizedProgress* nProgress/*=0*/)
+									CCCoreLib::NormalizedProgress* nProgress/*=nullptr*/)
 {
 	std::vector<int>* equivalentIndexes = static_cast<std::vector<int>*>(additionalParameters[0]);
 

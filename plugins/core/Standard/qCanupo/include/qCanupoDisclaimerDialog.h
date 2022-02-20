@@ -32,7 +32,7 @@ class TrainDisclaimerDialog : public QDialog, public Ui::TrainDisclaimerDialog
 {
 public:
 	//! Default constructor
-	TrainDisclaimerDialog(QWidget* parent = 0)
+	TrainDisclaimerDialog(QWidget* parent = nullptr)
 		: QDialog(parent)
 		, Ui::TrainDisclaimerDialog()
 	{
@@ -59,7 +59,7 @@ class ClassifyDisclaimerDialog : public QDialog, public Ui::ClassifyDisclaimerDi
 {
 public:
 	//! Default constructor
-	ClassifyDisclaimerDialog(QWidget* parent = 0)
+	ClassifyDisclaimerDialog(QWidget* parent = nullptr)
 		: QDialog(parent)
 		, Ui::ClassifyDisclaimerDialog()
 	{

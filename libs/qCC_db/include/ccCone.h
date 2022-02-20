@@ -51,7 +51,7 @@ public:
 			PointCoordinateType height,
 			PointCoordinateType xOff = 0,
 			PointCoordinateType yOff = 0,
-			const ccGLMatrix* transMat = 0,
+			const ccGLMatrix* transMat = nullptr,
 			QString name = QString("Cone"),
 			unsigned precision = DEFAULT_DRAWING_PRECISION,
 			unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID);

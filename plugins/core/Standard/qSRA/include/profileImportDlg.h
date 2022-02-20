@@ -28,7 +28,7 @@ class ProfileImportDlg : public QDialog, public Ui::ProfileImportDlg
 public:
 
 	//! Default constructor
-    explicit ProfileImportDlg(QWidget* parent = 0);
+    explicit ProfileImportDlg(QWidget* parent = nullptr);
 
 	//! Returns revolution axis dimension index
 	/** \return 0(X), 1(Y) or 2(Z).

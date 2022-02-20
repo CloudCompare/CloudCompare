@@ -31,7 +31,7 @@ public:
 	//! Main entry point
 	static bool OrientNormals(	ccPointCloud* cloud,
 								unsigned kNN = 6,
-								ccProgressDialog* progressDlg = 0);
+								ccProgressDialog* progressDlg = nullptr);
 };
 
 #endif //CC_MST_FOR_NORMS_DIRECTION_HEADER

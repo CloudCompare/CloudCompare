@@ -52,8 +52,8 @@ qCanupo2DViewDialog::qCanupo2DViewDialog(	const CorePointDescSet* descriptors1,
 											QString cloud2Name,
 											int class1/*=1*/,
 											int class2/*=2*/,
-											const CorePointDescSet* evaluationDescriptors/*=0*/,
-											ccMainAppInterface* app/*=0*/)
+											const CorePointDescSet* evaluationDescriptors/*=nullptr*/,
+											ccMainAppInterface* app/*=nullptr*/)
 	: QDialog(app ? app->getMainWindow() : nullptr)
 	, Ui::Canupo2DViewDialog()
 	, m_app(app)

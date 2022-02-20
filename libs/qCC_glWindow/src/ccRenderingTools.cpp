@@ -34,7 +34,7 @@
 
 #include <numeric>
 
-void ccRenderingTools::ShowDepthBuffer(ccGBLSensor* sensor, QWidget* parent/*=0*/, unsigned maxDim/*=1024*/)
+void ccRenderingTools::ShowDepthBuffer(ccGBLSensor* sensor, QWidget* parent/*=nullptr*/, unsigned maxDim/*=1024*/)
 {
 	if (!sensor)
 		return;

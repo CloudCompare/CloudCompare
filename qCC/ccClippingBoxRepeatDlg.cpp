@@ -23,7 +23,7 @@
 //system
 #include <assert.h>
 
-ccClippingBoxRepeatDlg::ccClippingBoxRepeatDlg(bool singleSliceMode/*=false*/, QWidget* parent/*=0*/)
+ccClippingBoxRepeatDlg::ccClippingBoxRepeatDlg(bool singleSliceMode/*=false*/, QWidget* parent/*=nullptr*/)
 	: QDialog(parent)
 {
 	setupUi(this);

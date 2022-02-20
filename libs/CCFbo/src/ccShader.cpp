@@ -25,7 +25,7 @@
 #include <string.h>
 #include <stdio.h>
 
-ccShader::ccShader(QObject* parent/*=0*/)
+ccShader::ccShader(QObject* parent/*=nullptr*/)
 	: QOpenGLShaderProgram(parent)
 {}
 

@@ -33,7 +33,7 @@ class ccSectionExtractionSubDlg : public QDialog, public Ui::SectionExtractionSu
 public:
 
 	//! Default constructor
-	explicit ccSectionExtractionSubDlg(QWidget* parent = 0);
+	explicit ccSectionExtractionSubDlg(QWidget* parent = nullptr);
 
 	//! Sets the number of active section(s)
 	void setActiveSectionCount(int count);

@@ -33,7 +33,7 @@
 //system
 #include <assert.h>
 
-ccCompassDlg::ccCompassDlg(QWidget* parent/*=0*/)
+ccCompassDlg::ccCompassDlg(QWidget* parent/*=nullptr*/)
 	: ccOverlayDialog(parent)
 	, Ui::compassDlg()
 {

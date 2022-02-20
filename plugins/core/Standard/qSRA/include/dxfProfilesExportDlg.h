@@ -28,7 +28,7 @@ class DxfProfilesExportDlg : public QDialog, public Ui::DxfProfilesExportDlg
 public:
 
 	//! Default constructor
-	explicit DxfProfilesExportDlg(QWidget* parent = 0);
+	explicit DxfProfilesExportDlg(QWidget* parent = nullptr);
 
 	//! Returns vert. profiles output filename (on completion)
 	QString getVertFilename() const;

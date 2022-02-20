@@ -42,8 +42,8 @@ public:
 									ScalarType maxError,
 									CCCoreLib::DistanceComputationTools::ERROR_MEASURES errorMeasure,
 									bool useRetroProjectionError = true,
-									CCCoreLib::GenericProgressCallback* progressCb = 0,
-									CCCoreLib::DgmOctree* _theOctree = 0);
+									CCCoreLib::GenericProgressCallback* progressCb = nullptr,
+									CCCoreLib::DgmOctree* _theOctree = nullptr);
 
 	//! Default constructor
 	FastMarchingForFacetExtraction();
@@ -70,7 +70,7 @@ public:
 				ScalarType maxError,
 				CCCoreLib::DistanceComputationTools::ERROR_MEASURES errorMeasure,
 				bool useRetroProjectionError,
-				CCCoreLib::GenericProgressCallback* progressCb = 0);
+				CCCoreLib::GenericProgressCallback* progressCb = nullptr);
 
 	//! Updates a list of point flags, indicating the points alreay processed
 	/** \return the number of newly flagged points

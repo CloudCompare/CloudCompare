@@ -677,7 +677,7 @@ public:
 	bool m_hasClipPlanes;
 };
 
-uint32_t ccPointCloudLOD::flagVisibility(const Frustum& frustum, ccClipPlaneSet* clipPlanes/*=0*/)
+uint32_t ccPointCloudLOD::flagVisibility(const Frustum& frustum, ccClipPlaneSet* clipPlanes/*=nullptr*/)
 {
 	if (m_state != INITIALIZED)
 	{

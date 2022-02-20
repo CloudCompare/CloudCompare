@@ -204,7 +204,7 @@ CCCoreLib::VerticesIndexes* ccSubMesh::getTriangleVertIndexes(unsigned triIndex)
 	return nullptr;
 }
 
-ccSubMesh* ccSubMesh::createNewSubMeshFromSelection(bool removeSelectedFaces, IndexMap* indexMap/*=0*/)
+ccSubMesh* ccSubMesh::createNewSubMeshFromSelection(bool removeSelectedFaces, IndexMap* indexMap/*=nullptr*/)
 {
 	ccGenericPointCloud* vertices = getAssociatedCloud();
 	assert(vertices && m_associatedMesh);

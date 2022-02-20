@@ -24,7 +24,7 @@ static bool s_allAtOnce = true;
 static bool s_keepInPlace = false;
 static bool s_rescaleGlobalShift = true;
 
-ccScaleDlg::ccScaleDlg(QWidget* parent/*=0*/)
+ccScaleDlg::ccScaleDlg(QWidget* parent/*=nullptr*/)
 	: QDialog(parent)
 	, m_ui( new Ui::ScaleDialog )
 {

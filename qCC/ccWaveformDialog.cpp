@@ -40,7 +40,7 @@
 //Gui
 #include "ui_waveDlg.h"
 
-ccWaveWidget::ccWaveWidget(QWidget* parent/*=0*/)
+ccWaveWidget::ccWaveWidget(QWidget* parent/*=nullptr*/)
 	: QCustomPlot(parent)
 	, m_titlePlot(nullptr)
 	, m_curve(nullptr)
@@ -357,7 +357,7 @@ void ccWaveWidget::mouseMoveEvent(QMouseEvent *event)
 
 ccWaveDialog::ccWaveDialog(	ccPointCloud* cloud,
 							ccPickingHub* pickingHub,
-							QWidget* parent/*=0*/)
+							QWidget* parent/*=nullptr*/)
 	: QDialog(parent, Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint)
 	, m_cloud(cloud)
 	, m_widget(new ccWaveWidget(this))

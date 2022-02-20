@@ -29,7 +29,7 @@
 #include <NormalEstimation.h>
 #include <MLSSmoothingUpsampling.h>
 
-qPCL::qPCL(QObject* parent/*=0*/)
+qPCL::qPCL(QObject* parent/*=nullptr*/)
     : QObject(parent)
     , ccStdPluginInterface(":/toolbar/info.json")
 {

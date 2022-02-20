@@ -51,7 +51,7 @@ public:
 			double angle_rad = 2.0*M_PI,
 			bool rectangularSection = false,
 			PointCoordinateType rectSectionHeight = 0,
-			const ccGLMatrix* transMat = 0,
+			const ccGLMatrix* transMat = nullptr,
 			QString name = QString("Torus"),
 			unsigned precision = DEFAULT_DRAWING_PRECISION,
 			unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID);

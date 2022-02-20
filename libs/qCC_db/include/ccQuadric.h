@@ -46,8 +46,8 @@ public:
 	ccQuadric(	CCVector2 minCorner,
 				CCVector2 maxCorner,
 				const PointCoordinateType eq[6],
-				const Tuple3ub* dims = 0,
-				const ccGLMatrix* transMat = 0,
+				const Tuple3ub* dims = nullptr,
+				const ccGLMatrix* transMat = nullptr,
 				QString name = QString("Quadric"),
 				unsigned precision = DEFAULT_DRAWING_PRECISION);
 
@@ -94,7 +94,7 @@ public:
 		\param[out] rms quadric fitting rms (optional)
 		\return quadric primitive (if successful)
 	**/
-	static ccQuadric* Fit(CCCoreLib::GenericIndexedCloudPersist * cloud, double* rms/*=0*/);
+	static ccQuadric* Fit(CCCoreLib::GenericIndexedCloudPersist * cloud, double* rms = nullptr);
 
 protected:
 

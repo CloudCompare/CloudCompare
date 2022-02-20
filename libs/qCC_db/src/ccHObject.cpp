@@ -121,7 +121,7 @@ void ccHObject::notifyGeometryUpdate()
 	}
 }
 
-ccHObject* ccHObject::New(CC_CLASS_ENUM objectType, const char* name/*=0*/)
+ccHObject* ccHObject::New(CC_CLASS_ENUM objectType, const char* name/*=nullptr*/)
 {
 	switch(objectType)
 	{
@@ -413,7 +413,7 @@ unsigned ccHObject::filterChildren(	Container& filteredChildren,
 									bool recursive/*=false*/,
 									CC_CLASS_ENUM filter/*=CC_TYPES::OBJECT*/,
 									bool strict/*=false*/,
-									ccGenericGLDisplay* inDisplay/*=0*/) const
+									ccGenericGLDisplay* inDisplay/*=nullptr*/) const
 {
 	for (auto child : m_children)
 	{
@@ -583,7 +583,7 @@ ccHObject::GlobalBoundingBox ccHObject::getGlobalBB_recursive(bool withGLFeature
 	return box;
 }
 
-ccBBox ccHObject::getDisplayBB_recursive(bool relative, const ccGenericGLDisplay* display/*=0*/)
+ccBBox ccHObject::getDisplayBB_recursive(bool relative, const ccGenericGLDisplay* display/*=nullptr*/)
 {
 	ccBBox box;
 

@@ -28,7 +28,7 @@ class ccExportCoordToSFDlg : public QDialog, public Ui::ExportCoordToSFDlg
 public:
 
 	//! Default constructor
-	explicit ccExportCoordToSFDlg(QWidget* parent = 0);
+	explicit ccExportCoordToSFDlg(QWidget* parent = nullptr);
 
 	//! Returns whether X dimension should be exported
 	bool exportX() const;

@@ -35,7 +35,7 @@
 #include <unistd.h>
 #endif
 
-ccEnvelopeExtractorDlg::ccEnvelopeExtractorDlg(QWidget* parent/*=0*/)
+ccEnvelopeExtractorDlg::ccEnvelopeExtractorDlg(QWidget* parent/*=nullptr*/)
 	: QDialog(parent, Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint)
 	, Ui::EnvelopeExtractorDlg()
 	, m_skipped(false)

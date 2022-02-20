@@ -188,9 +188,9 @@ void ccConsole::EnableQtMessages(bool state)
 	settings.endGroup();
 }
 
-void ccConsole::Init(	QListWidget* textDisplay/*=0*/,
-						QWidget* parentWidget/*=0*/,
-						MainWindow* parentWindow/*=0*/,
+void ccConsole::Init(	QListWidget* textDisplay/*=nullptr*/,
+						QWidget* parentWidget/*=nullptr*/,
+						MainWindow* parentWindow/*=nullptr*/,
 						bool redirectToStdOut/*=false*/)
 {
 	//should be called only once!

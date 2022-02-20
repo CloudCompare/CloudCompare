@@ -26,7 +26,7 @@ static bool s_lastTypeState = true;
 static bool s_lastTypeStrictState = true;
 static bool s_lastUseRegex = true;
 
-ccSelectChildrenDlg::ccSelectChildrenDlg(QWidget* parent/*=0*/)
+ccSelectChildrenDlg::ccSelectChildrenDlg(QWidget* parent/*=nullptr*/)
 	: QDialog(parent, Qt::Tool)
 	, mUI( new Ui::SelectChildrenDialog )
 {

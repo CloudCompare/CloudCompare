@@ -179,7 +179,7 @@ bool ccCommandLineParser::registerCommand(Command::Shared command)
 QString ccCommandLineParser::getExportFilename(	const CLEntityDesc& entityDesc,
 												QString extension/*=QString()*/,
 												QString suffix/*=QString()*/,
-												QString* baseOutputFilename/*=0*/,
+												QString* baseOutputFilename/*=nullptr*/,
 												bool forceNoTimestamp/*=false*/) const
 {
 	//fetch the real entity
@@ -528,7 +528,7 @@ bool ccCommandLineParser::importFile(QString filename, const GlobalShiftOptions&
 	return true;
 }
 
-bool ccCommandLineParser::saveClouds(QString suffix/*=QString()*/, bool allAtOnce/*=false*/, const QString* allAtOnceFileName/*=0*/)
+bool ccCommandLineParser::saveClouds(QString suffix/*=QString()*/, bool allAtOnce/*=false*/, const QString* allAtOnceFileName/*=nullptr*/)
 {
 	//all-at-once: all clouds in a single file
 	if (allAtOnce)
@@ -585,7 +585,7 @@ bool ccCommandLineParser::saveClouds(QString suffix/*=QString()*/, bool allAtOnc
 	return true;
 }
 
-bool ccCommandLineParser::saveMeshes(QString suffix/*=QString()*/, bool allAtOnce/*=false*/, const QString* allAtOnceFileName/*=0*/)
+bool ccCommandLineParser::saveMeshes(QString suffix/*=QString()*/, bool allAtOnce/*=false*/, const QString* allAtOnceFileName/*=nullptr*/)
 {
 	//all-at-once: all meshes in a single file
 	if (allAtOnce)
@@ -720,7 +720,7 @@ void ccCommandLineParser::cleanup()
 	removeMeshes();
 }
 
-int ccCommandLineParser::start(QDialog* parent/*=0*/)
+int ccCommandLineParser::start(QDialog* parent/*=nullptr*/)
 {
 	if (m_arguments.empty())
 	{

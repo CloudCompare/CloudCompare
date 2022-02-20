@@ -1250,7 +1250,7 @@ bool DistanceMapGenerationTool::SaveMapAsCSVMatrix( const QSharedPointer<Map>& m
 													QString yUnit,
 													double xConversionFactor/*=1.0*/,
 													double yConversionFactor/*=1.0*/,
-													ccMainAppInterface* app/*=0*/)
+													ccMainAppInterface* app/*=nullptr*/)
 {
 	if (!map)
 	{

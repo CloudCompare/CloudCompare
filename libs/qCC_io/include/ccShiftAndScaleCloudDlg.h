@@ -26,7 +26,7 @@ public:
 		\param Dg bounding box diagonal in the original coordinate system (or <= 0 to ignore)
 		\param parent parent widget
 	**/
-	ccShiftAndScaleCloudDlg(const CCVector3d& Pg, double Dg = 0, QWidget* parent = 0);
+	ccShiftAndScaleCloudDlg(const CCVector3d& Pg, double Dg = 0, QWidget* parent = nullptr);
 
 	//! Reverse mode constructor
 	/** \param Pl a point expressed in the local coordinate system
@@ -35,7 +35,7 @@ public:
 		\param Dg bounding box diagonal in the original coordinate system
 		\param parent parent widget
 	**/
-	ccShiftAndScaleCloudDlg(const CCVector3d& Pl, double Dl, const CCVector3d& Pg, double Dg, QWidget* parent = 0);
+	ccShiftAndScaleCloudDlg(const CCVector3d& Pl, double Dl, const CCVector3d& Pg, double Dg, QWidget* parent= nullptr);
 
 	//! Sets the Shift fields (X, Y and Z) precision (default should be 2)
 	void setShiftFieldsPrecision(int precision);

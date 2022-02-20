@@ -99,7 +99,7 @@ static double ConvertAngleToRad(double angle, DistanceMapGenerationDlg::ANGULAR_
 	return 0.0;
 }
 
-DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalarField* sf, ccPolyline* polyline, ccMainAppInterface* app/*=0*/)
+DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalarField* sf, ccPolyline* polyline, ccMainAppInterface* app/*=nullptr*/)
 	: QDialog(app ? app->getMainWindow() : nullptr)
 	, m_app(app)
 	, m_cloud(cloud)

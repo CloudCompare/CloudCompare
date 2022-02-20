@@ -34,7 +34,7 @@
 #include <QFileDialog>
 #include <QSettings>
 
-MatrixDisplayDlg::MatrixDisplayDlg(QWidget* parent/*=0*/)
+MatrixDisplayDlg::MatrixDisplayDlg(QWidget* parent/*=nullptr*/)
 	: QWidget(parent)
 	, m_ui( new Ui::MatrixDisplayDlg )
 {

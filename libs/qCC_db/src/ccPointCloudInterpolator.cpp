@@ -35,7 +35,7 @@ struct SFPair
 
 bool cellSFInterpolator(const CCCoreLib::DgmOctree::octreeCell& cell,
 						void** additionalParameters,
-						CCCoreLib::NormalizedProgress* nProgress/*=0*/)
+						CCCoreLib::NormalizedProgress* nProgress/*=nullptr*/)
 {
 	//additional parameters
 //	const ccPointCloud* srcCloud = reinterpret_cast<ccPointCloud*>(additionalParameters[0]);
@@ -164,7 +164,7 @@ bool ccPointCloudInterpolator::InterpolateScalarFieldsFrom(	ccPointCloud* destCl
 															ccPointCloud* srcCloud,
 															const std::vector<int>& inSFIndexes,
 															const Parameters& params,
-															CCCoreLib::GenericProgressCallback* progressCb/*=0*/,
+															CCCoreLib::GenericProgressCallback* progressCb/*=nullptr*/,
 															unsigned char octreeLevel/*=0*/)
 {
 	if (!destCloud || !srcCloud || srcCloud->size() == 0 || srcCloud->getNumberOfScalarFields() == 0)

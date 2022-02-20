@@ -38,7 +38,7 @@ public:
 	**/
 	ccPlane(PointCoordinateType xWidth,
 			PointCoordinateType yWidth,
-			const ccGLMatrix* transMat = 0,
+			const ccGLMatrix* transMat = nullptr,
 			QString name = QString("Plane"));
 
 	//! Simplified constructor
@@ -91,7 +91,7 @@ public:
 		\param[out] rms plane fitting rms (optional)
 		\return plane primitive (if successful)
 	**/
-	static ccPlane* Fit(CCCoreLib::GenericIndexedCloudPersist * cloud, double* rms = 0);
+	static ccPlane* Fit(CCCoreLib::GenericIndexedCloudPersist * cloud, double* rms = nullptr);
 
 	//! Returns the equation of the plane
 	/** Equation:

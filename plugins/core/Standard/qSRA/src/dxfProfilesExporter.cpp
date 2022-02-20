@@ -65,7 +65,7 @@ bool DxfProfilesExporter::SaveVerticalProfiles(	const QSharedPointer<DistanceMap
 												double heightStep,
 												double heightShift,
 												const Parameters& params,
-												ccMainAppInterface* app/*=0*/)
+												ccMainAppInterface* app/*=nullptr*/)
 {
 #ifdef CC_DXF_SUPPORT
 	assert(c_pageMargin_mm < c_profileMargin_mm);
@@ -554,7 +554,7 @@ bool DxfProfilesExporter::SaveHorizontalProfiles(	const QSharedPointer<DistanceM
 													double radToUnitConvFactor,
 													QString angleUnit,
 													const Parameters& params,
-													ccMainAppInterface* app/*= 0*/)
+													ccMainAppInterface* app/*=nullptr*/)
 {
 #ifdef CC_DXF_SUPPORT
 	assert(c_pageMargin_mm < c_profileMargin_mm);

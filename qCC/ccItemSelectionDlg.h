@@ -34,13 +34,13 @@ public: //static shortcuts
 	//! Static shortcut: unique selection mode
 	static int SelectEntity(const ccHObject::Container& entities,
 							int defaultSelectedIndex = 0,
-							QWidget* parent = 0,
+							QWidget* parent = nullptr,
 							QString label = QString());
 
 	//! Static shortcut: multi-selection mode
 	static bool SelectEntities(	const ccHObject::Container& entities,
 								std::vector<int>& indexes,
-								QWidget* parent = 0,
+								QWidget* parent = nullptr,
 								QString label = QString());
 
 
@@ -48,7 +48,7 @@ public:
 	
 	//! Default constructor
 	ccItemSelectionDlg(	bool multiSelectionEnabled,
-						QWidget* parent = 0,
+						QWidget* parent = nullptr,
 						QString itemName = "entities",
 						QString label = QString());
 

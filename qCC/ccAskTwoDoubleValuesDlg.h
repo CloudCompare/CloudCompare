@@ -35,7 +35,7 @@ public:
 							double defaultVal2,
 							int precision = 6,
 							QString windowTitle = QString(),
-							QWidget* parent = 0);
+							QWidget* parent = nullptr);
 };
 
 #endif //CC_ASK_TWO_DOUBLE_VALUES_DIALOG_HEADER

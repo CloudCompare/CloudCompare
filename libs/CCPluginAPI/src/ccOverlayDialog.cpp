@@ -31,7 +31,7 @@
 //system
 #include <cassert>
 
-ccOverlayDialog::ccOverlayDialog(QWidget* parent/*=0*/, Qt::WindowFlags flags/*=Qt::FramelessWindowHint | Qt::Tool*/)
+ccOverlayDialog::ccOverlayDialog(QWidget* parent/*=nullptr*/, Qt::WindowFlags flags/*=Qt::FramelessWindowHint | Qt::Tool*/)
 	: QDialog(parent, flags)
 	, m_associatedWin(nullptr)
 	, m_processing(false)
@@ -85,7 +85,7 @@ bool ccOverlayDialog::linkWith(ccGLWindow* win)
 	return true;
 }
 
-void ccOverlayDialog::onLinkedWindowDeletion(QObject* object/*=0*/)
+void ccOverlayDialog::onLinkedWindowDeletion(QObject* object/*=nullptr*/)
 {
 	if (m_processing)
 		stop(false);

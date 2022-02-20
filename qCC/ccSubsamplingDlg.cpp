@@ -28,7 +28,7 @@
 //Exponent of the 'log' scale used for 'SPACE' interval
 static const double SPACE_RANGE_EXPONENT = 0.05;
 
-ccSubsamplingDlg::ccSubsamplingDlg(unsigned maxPointCount, double maxCloudRadius, QWidget* parent/*=0*/)
+ccSubsamplingDlg::ccSubsamplingDlg(unsigned maxPointCount, double maxCloudRadius, QWidget* parent/*=nullptr*/)
 	: QDialog(parent, Qt::Tool)
 	, m_maxPointCount(maxPointCount)
 	, m_maxRadius(maxCloudRadius)
@@ -56,7 +56,7 @@ ccSubsamplingDlg::~ccSubsamplingDlg()
 	delete m_ui;
 }
 
-CCCoreLib::ReferenceCloud* ccSubsamplingDlg::getSampledCloud(ccGenericPointCloud* cloud, CCCoreLib::GenericProgressCallback* progressCb/*=0*/)
+CCCoreLib::ReferenceCloud* ccSubsamplingDlg::getSampledCloud(ccGenericPointCloud* cloud, CCCoreLib::GenericProgressCallback* progressCb/*=nullptr*/)
 {
 	if (!cloud || cloud->size() == 0)
 	{

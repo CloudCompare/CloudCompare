@@ -43,7 +43,7 @@
 //Gui
 #include "ui_histogramDlg.h"
 
-ccHistogramWindow::ccHistogramWindow(QWidget* parent/*=0*/)
+ccHistogramWindow::ccHistogramWindow(QWidget* parent/*=nullptr*/)
 	: QCustomPlot(parent)
 	, m_titlePlot(nullptr)
 	, m_colorScheme(USE_SOLID_COLOR)
@@ -946,7 +946,7 @@ void ccHistogramWindow::wheelEvent(QWheelEvent* e)
 	e->accept();
 }
 
-ccHistogramWindowDlg::ccHistogramWindowDlg(QWidget* parent/*=0*/)
+ccHistogramWindowDlg::ccHistogramWindowDlg(QWidget* parent/*=nullptr*/)
 	: QDialog(parent, Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint)
 	, m_win(new ccHistogramWindow(this))
 	, m_gui(new Ui_HistogramDialog)

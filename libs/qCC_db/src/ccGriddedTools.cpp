@@ -28,7 +28,7 @@ bool ccGriddedTools::DetectParameters(	const ccPointCloud* cloud,
 										const ccPointCloud::Grid::Shared grid,
 										GridParameters& parameters,
 										bool verbose/*=false*/,
-										ccGLMatrix* cloudToSensorTrans/*=0*/)
+										ccGLMatrix* cloudToSensorTrans/*=nullptr*/)
 {
 	if (!cloud || !grid)
 	{
@@ -305,7 +305,7 @@ bool ccGriddedTools::DetectParameters(	const ccPointCloud* cloud,
 	return true;
 }
 
-ccGBLSensor* ccGriddedTools::ComputeBestSensor(ccPointCloud* cloud, ccPointCloud::Grid::Shared grid, ccGLMatrix* cloudToSensorTrans/*=0*/)
+ccGBLSensor* ccGriddedTools::ComputeBestSensor(ccPointCloud* cloud, ccPointCloud::Grid::Shared grid, ccGLMatrix* cloudToSensorTrans/*=nullptr*/)
 {
 	GridParameters parameters;
 	if (!DetectParameters(cloud, grid, parameters, true, cloudToSensorTrans))

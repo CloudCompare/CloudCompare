@@ -104,8 +104,8 @@ public:
 								const CorePointDescSet& descriptors2,
 								const std::vector<float>& scales,
 								ccPointCloud* mscCloud,
-								const CorePointDescSet* evaluationDescriptors = 0,
-								ccMainAppInterface* app = 0);
+								const CorePointDescSet* evaluationDescriptors = nullptr,
+								ccMainAppInterface* app = nullptr);
 	
 	//! Classifer evaluation parameters
 	/** See original CANUPO paper ('5. Results' section).

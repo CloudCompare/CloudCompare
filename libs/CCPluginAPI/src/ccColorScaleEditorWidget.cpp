@@ -39,7 +39,10 @@ constexpr int DEFAULT_LABEL_HEIGHT = 12;
 /*** ColorScaleElementSlider ***/
 /*******************************/
 
-ColorScaleElementSlider::ColorScaleElementSlider(double relativePos/*=0.0*/, QColor color/*=Qt::black*/, QWidget* parent/*=0*/, Qt::Orientation orientation/*=Qt::Horizontal*/)
+ColorScaleElementSlider::ColorScaleElementSlider(	double relativePos/*=0.0*/,
+													QColor color/*=Qt::black*/,
+													QWidget* parent/*=nullptr*/,
+													Qt::Orientation orientation/*=Qt::Horizontal*/ )
 	: QWidget(parent)
 	, ccColorScaleElement(relativePos, color)
 	, m_selected(false)
@@ -146,7 +149,7 @@ int ColorScaleElementSliders::indexOf(ColorScaleElementSlider* slider)
 /*** ColorBarWidget ***/
 /**********************/
 
-ColorBarWidget::ColorBarWidget(SharedColorScaleElementSliders sliders, QWidget* parent/*=0*/, Qt::Orientation orientation/*=Qt::Horizontal*/)
+ColorBarWidget::ColorBarWidget(SharedColorScaleElementSliders sliders, QWidget* parent/*=nullptr*/, Qt::Orientation orientation/*=Qt::Horizontal*/)
 	: ColorScaleEditorBaseWidget(sliders, orientation, DEFAULT_MARGIN, parent)
 {
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
@@ -254,7 +257,7 @@ void ColorBarWidget::paintEvent(QPaintEvent* e)
 /*** SlidersWidget ***/
 /*********************/
 
-SlidersWidget::SlidersWidget(SharedColorScaleElementSliders sliders, QWidget* parent/*=0*/, Qt::Orientation orientation/*=Qt::Horizontal*/)
+SlidersWidget::SlidersWidget(SharedColorScaleElementSliders sliders, QWidget* parent/*=nullptr*/, Qt::Orientation orientation/*=Qt::Horizontal*/)
 	: ColorScaleEditorBaseWidget(sliders, orientation, DEFAULT_MARGIN, parent)
 {
 	setContentsMargins(0, 0, 0, 0);
@@ -459,7 +462,7 @@ void SlidersWidget::mouseDoubleClickEvent(QMouseEvent* e)
 /*** SliderLabelWidget ***/
 /*************************/
 
-SliderLabelWidget::SliderLabelWidget(SharedColorScaleElementSliders sliders, QWidget* parent/*=0*/, Qt::Orientation orientation/*=Qt::Horizontal*/)
+SliderLabelWidget::SliderLabelWidget(SharedColorScaleElementSliders sliders, QWidget* parent/*=nullptr*/, Qt::Orientation orientation/*=Qt::Horizontal*/)
 	: ColorScaleEditorBaseWidget(sliders, orientation, DEFAULT_MARGIN, parent)
 	, m_textColor(Qt::black)
 	, m_precision(6)
@@ -535,7 +538,7 @@ void SliderLabelWidget::paintEvent(QPaintEvent* e)
 /*** ccColorScaleEditorWidget ***/
 /********************************/
 
-ccColorScaleEditorWidget::ccColorScaleEditorWidget(QWidget* parent/*=0*/, Qt::Orientation orientation/*=Qt::Horizontal*/)
+ccColorScaleEditorWidget::ccColorScaleEditorWidget(QWidget* parent/*=nullptr*/, Qt::Orientation orientation/*=Qt::Horizontal*/)
 	: ColorScaleEditorBaseWidget(SharedColorScaleElementSliders(new ColorScaleElementSliders), orientation, 0, parent)
 {
 	//size and margin

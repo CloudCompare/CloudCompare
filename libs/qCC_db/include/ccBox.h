@@ -36,7 +36,7 @@ public:
 		\param name name
 	**/
 	ccBox(	const CCVector3& dims,
-			const ccGLMatrix* transMat = 0,
+			const ccGLMatrix* transMat = nullptr,
 			QString name = QString("Box"));
 
 	//! Simplified constructor

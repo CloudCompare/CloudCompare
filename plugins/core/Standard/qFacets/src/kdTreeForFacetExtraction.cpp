@@ -68,7 +68,7 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 											double maxAngle_deg,
 											PointCoordinateType overlapCoef/*=1*/,
 											bool closestFirst/*=true*/,
-											CCCoreLib::GenericProgressCallback* progressCb/*=0*/)
+											CCCoreLib::GenericProgressCallback* progressCb/*=nullptr*/)
 {
 	if (!kdTree)
 		return false;

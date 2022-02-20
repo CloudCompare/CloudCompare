@@ -38,7 +38,7 @@ class ccEnvelopeExtractorDlg : public QDialog, public Ui::EnvelopeExtractorDlg
 public:
 
 	//! Default constructor
-	explicit ccEnvelopeExtractorDlg(QWidget* parent = 0);
+	explicit ccEnvelopeExtractorDlg(QWidget* parent = nullptr);
 
 	//! Initializes the display
 	void init();

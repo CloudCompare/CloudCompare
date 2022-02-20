@@ -422,7 +422,7 @@ namespace ccLibAlgorithms
 	}
 
 
-	bool ApplyCCLibAlgorithm(CC_LIB_ALGORITHM algo, ccHObject::Container& entities, QWidget* parent/*=0*/, void** additionalParameters/*=0*/)
+	bool ApplyCCLibAlgorithm(CC_LIB_ALGORITHM algo, ccHObject::Container& entities, QWidget* parent/*=nullptr*/, void** additionalParameters/*=nullptr*/)
 	{
 		size_t selNum = entities.size();
 		if (selNum < 1)
@@ -600,7 +600,7 @@ namespace ccLibAlgorithms
 										double icpRmsDiff,
 										int icpFinalOverlap,
 										unsigned refEntityIndex/*=0*/,
-										QWidget* parent/*=0*/)
+										QWidget* parent/*=nullptr*/)
 	{
 		if (	entities.size() < 2
 			||	refEntityIndex >= entities.size())

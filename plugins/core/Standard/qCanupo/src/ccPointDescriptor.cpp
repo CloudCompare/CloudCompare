@@ -623,7 +623,7 @@ bool CorePointDescSet::setScales(const std::vector<float>& scales)
 }
 
 
-bool CorePointDescSet::loadFromMSC(QString filename, QString& error, ccPointCloud* corePoints/*=0*/)
+bool CorePointDescSet::loadFromMSC(QString filename, QString& error, ccPointCloud* corePoints/*=nullptr*/)
 {
 	error.clear();
 

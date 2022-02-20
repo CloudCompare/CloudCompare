@@ -76,7 +76,7 @@ public: //methods
 						std::vector<Classifier>& classifiers,
 						std::vector<float>& scales,
 						QString& error,
-						FileHeader* header = 0,
+						FileHeader* header = nullptr,
 						bool headerOnly = false);
 
 	//! Saves classifier as a CANUPO's classifier file (.prm)

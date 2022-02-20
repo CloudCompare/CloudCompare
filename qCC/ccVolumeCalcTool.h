@@ -92,7 +92,7 @@ public:
 								ccVolumeCalcTool::ReportInfo& reportInfo,
 								double groundHeight,
 								double ceilHeight,
-								QWidget* parentWidget = 0);
+								QWidget* parentWidget = nullptr);
 
 	//! Converts a (volume) grid to a point cloud
 	static ccPointCloud* ConvertGridToCloud(	ccRasterGrid& grid,

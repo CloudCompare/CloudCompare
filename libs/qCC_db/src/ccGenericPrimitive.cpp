@@ -22,7 +22,7 @@
 #include "ccPointCloud.h"
 
 ccGenericPrimitive::ccGenericPrimitive(	QString name/*=QString()*/,
-										const ccGLMatrix* transMat/*=0*/,
+										const ccGLMatrix* transMat/*=nullptr*/,
 										unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
 	: ccMesh(new ccPointCloud("vertices"), uniqueID)
 	, m_drawPrecision(0)

@@ -25,7 +25,7 @@ ccAskTwoDoubleValuesDlg::ccAskTwoDoubleValuesDlg(	const QString& vName1,
 													double defaultVal2,
 													int precision/*=6*/,
 													QString windowTitle/*=QString()*/,
-													QWidget* parent/*=0*/)
+													QWidget* parent/*=nullptr*/)
 	: QDialog(parent, Qt::Tool)
 	, Ui::AskTwoDoubleValuesDialog()
 {

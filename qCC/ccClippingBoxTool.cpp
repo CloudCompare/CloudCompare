@@ -563,7 +563,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 	bool projectOnBestFitPlane/*=false*/,
 	bool visualDebugMode/*=false*/,
 	bool generateRandomColors/*=false*/,
-	ccProgressDialog* progressDialog/*=0*/)
+	ccProgressDialog* progressDialog/*=nullptr*/)
 {
 	//check input
 	if (clouds.empty() && meshes.empty())

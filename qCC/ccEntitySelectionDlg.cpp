@@ -27,7 +27,7 @@
 ccEntitySelectionDialog::ccEntitySelectionDialog(	const ccHObject::Container& entities,
 													bool multiSelectionEnabled,
 													int defaultSelectedIndex/*=0*/,
-													QWidget* parent/*=0*/,
+													QWidget* parent/*=nullptr*/,
 													QString labelStr/*=QString()*/)
 	: QDialog(parent, Qt::Tool)
 	, m_ui(new Ui_EntitySelectionDialog)
@@ -116,7 +116,7 @@ void ccEntitySelectionDialog::getSelectedIndexes(std::vector<int>& indexes) cons
 
 int ccEntitySelectionDialog::SelectEntity(	const ccHObject::Container& entities,
 											int selectedIndex/*=0*/,
-											QWidget* parent/*=0*/,
+											QWidget* parent/*=nullptr*/,
 											QString label/*=QString()*/)
 {
 	ccEntitySelectionDialog epDlg(entities, false, selectedIndex, parent, label);
@@ -130,7 +130,7 @@ int ccEntitySelectionDialog::SelectEntity(	const ccHObject::Container& entities,
 
 bool ccEntitySelectionDialog::SelectEntities(	const ccHObject::Container& entities,
 												std::vector<int>& selectedIndexes,
-												QWidget* parent/*=0*/,
+												QWidget* parent/*=nullptr*/,
 												QString label/*=QString()*/)
 {
 	selectedIndexes.clear();

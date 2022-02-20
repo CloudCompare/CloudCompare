@@ -31,7 +31,7 @@ class ccClippingBoxRepeatDlg : public QDialog, public Ui::ClippingBoxRepeatDlg
 public:
 
 	//! Default constructor
-	ccClippingBoxRepeatDlg(bool singleSliceMode = false, QWidget* parent = 0);
+	ccClippingBoxRepeatDlg(bool singleSliceMode = false, QWidget* parent = nullptr);
 
 	//! Sets flat dimension (single slice mode only!)
 	void setFlatDim(unsigned char dim);

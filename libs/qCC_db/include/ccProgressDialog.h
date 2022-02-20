@@ -52,7 +52,7 @@ public:
 		\param parent parent widget
 	**/
 	ccProgressDialog(	bool cancelButton = false,
-						QWidget *parent = 0 );
+						QWidget* parent = nullptr );
 
 	//! Destructor (virtual)
 	virtual ~ccProgressDialog() {}

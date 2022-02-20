@@ -138,7 +138,7 @@ ccFacet* ccFacet::clone() const
 ccFacet* ccFacet::Create(	CCCoreLib::GenericIndexedCloudPersist* cloud,
 							PointCoordinateType maxEdgeLength/*=0*/,
 							bool transferOwnership/*=false*/,
-							const PointCoordinateType* planeEquation/*=0*/)
+							const PointCoordinateType* planeEquation/*=nullptr*/)
 {
 	assert(cloud);
 
@@ -177,7 +177,7 @@ ccFacet* ccFacet::Create(	CCCoreLib::GenericIndexedCloudPersist* cloud,
 }
 
 bool ccFacet::createInternalRepresentation(	CCCoreLib::GenericIndexedCloudPersist* points,
-											const PointCoordinateType* planeEquation/*=0*/)
+											const PointCoordinateType* planeEquation/*=nullptr*/)
 {
 	assert(points);
 	if (!points)

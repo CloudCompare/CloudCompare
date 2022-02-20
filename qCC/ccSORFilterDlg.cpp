@@ -19,7 +19,7 @@
 #include "ui_sorFilterDlg.h"
 
 
-ccSORFilterDlg::ccSORFilterDlg(QWidget* parent/*=0*/)
+ccSORFilterDlg::ccSORFilterDlg(QWidget* parent/*=nullptr*/)
 	: QDialog(parent, Qt::Tool)
 	, m_ui( new Ui::SorFilterDialog )
 {

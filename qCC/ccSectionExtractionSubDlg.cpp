@@ -20,7 +20,7 @@
 //system
 #include <assert.h>
 
-ccSectionExtractionSubDlg::ccSectionExtractionSubDlg(QWidget* parent/*=0*/)
+ccSectionExtractionSubDlg::ccSectionExtractionSubDlg(QWidget* parent/*=nullptr*/)
 	: QDialog(parent, Qt::Tool)
 	, Ui::SectionExtractionSubDlg()
 {

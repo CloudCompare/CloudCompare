@@ -77,7 +77,7 @@ PCVContext::~PCVContext()
 bool PCVContext::init(unsigned W,
 					  unsigned H,
 					  CCCoreLib::GenericCloud* cloud,
-					  CCCoreLib::GenericMesh* mesh/*=0*/,
+					  CCCoreLib::GenericMesh* mesh/*=nullptr*/,
 					  bool closedMesh/*=true*/)
 {
 	if (!QGLPixelBuffer::hasOpenGLPbuffers())

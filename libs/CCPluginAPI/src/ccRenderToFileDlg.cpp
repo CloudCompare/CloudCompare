@@ -33,7 +33,7 @@ namespace
 	double s_renderZoom = 1.0;
 }
 
-ccRenderToFileDlg::ccRenderToFileDlg(unsigned baseWidth, unsigned baseHeight, QWidget* parent/*=0*/)
+ccRenderToFileDlg::ccRenderToFileDlg(unsigned baseWidth, unsigned baseHeight, QWidget* parent/*=nullptr*/)
 	: QDialog(parent)
 	, w(baseWidth)
 	, h(baseHeight)

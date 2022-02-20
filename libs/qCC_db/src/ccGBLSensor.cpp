@@ -627,7 +627,7 @@ bool ccGBLSensor::computeAutoParameters(CCCoreLib::GenericCloud* theCloud)
 	return true;
 }
 
-bool ccGBLSensor::computeDepthBuffer(CCCoreLib::GenericCloud* theCloud, int& errorCode, ccPointCloud* projectedCloud/*=0*/)
+bool ccGBLSensor::computeDepthBuffer(CCCoreLib::GenericCloud* theCloud, int& errorCode, ccPointCloud* projectedCloud/*=nullptr*/)
 {
 	assert(theCloud);
 	if (!theCloud)
@@ -950,7 +950,7 @@ ccBBox ccGBLSensor::getOwnFitBB(ccGLMatrix& trans)
 					CCVector3( m_scale, m_scale, m_scale) );
 }
 
-bool ccGBLSensor::applyViewport(ccGenericGLDisplay* win/*=0*/)
+bool ccGBLSensor::applyViewport(ccGenericGLDisplay* win/*=nullptr*/)
 {
 	if (!win)
 	{

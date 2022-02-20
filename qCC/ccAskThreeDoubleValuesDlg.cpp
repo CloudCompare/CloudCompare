@@ -27,7 +27,7 @@ ccAskThreeDoubleValuesDlg::ccAskThreeDoubleValuesDlg(	const QString& vName1,
 														double defaultVal3,
 														int precision/*=6*/,
 														const QString windowTitle/*=QString()*/,
-														QWidget* parent/*=0*/)
+														QWidget* parent/*=nullptr*/)
 	: QDialog(parent, Qt::Tool)
 	, Ui::AskThreeDoubleValuesDialog()
 {

@@ -25,7 +25,7 @@
 #include <ccOctree.h>
 #include <ccGenericPointCloud.h>
 
-ccOctreeSpinBox::ccOctreeSpinBox(QWidget* parent/*=0*/)
+ccOctreeSpinBox::ccOctreeSpinBox(QWidget* parent/*=nullptr*/)
 	: QSpinBox(parent)
 	, m_octreeBoxWidth(0)
 {

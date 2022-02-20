@@ -34,7 +34,7 @@ public:
 	//! Default constructor
 	ccMatchScalesDlg(	const ccHObject::Container& entities,
 						int defaultSelectedIndex = 0,
-						QWidget* parent = 0);
+						QWidget* parent = nullptr);
 
 	//! Returns selected index
 	int getSelectedIndex() const;

@@ -352,7 +352,7 @@ bool QVideoEncoder::close()
 	return true;
 }
 
-bool QVideoEncoder::encodeImage(const QImage &image, int frameIndex, QString* errorString/*=0*/)
+bool QVideoEncoder::encodeImage(const QImage &image, int frameIndex, QString* errorString/*=nullptr*/)
 {
 	if (!isOpen())
 	{
@@ -407,7 +407,7 @@ bool QVideoEncoder::encodeImage(const QImage &image, int frameIndex, QString* er
 	return true;
 }
 
-bool QVideoEncoder::convertImage_sws(const QImage &image, QString* errorString/*=0*/)
+bool QVideoEncoder::convertImage_sws(const QImage &image, QString* errorString/*=nullptr*/)
 {
 	// Check if the image matches the size
 	if (image.width() != m_width || image.height() != m_height)

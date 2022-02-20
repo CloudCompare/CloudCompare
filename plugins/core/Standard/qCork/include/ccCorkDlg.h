@@ -28,7 +28,7 @@ class ccCorkDlg : public QDialog, public Ui::CorkDialog
 public:
 
 	//! Default constructor
-	explicit ccCorkDlg(QWidget* parent = 0);
+	explicit ccCorkDlg(QWidget* parent/*=nullptr*/);
 
 	//! Supported CSG operations
 	enum CSG_OPERATION { UNION, INTERSECT, DIFF, SYM_DIFF };

@@ -22,7 +22,7 @@
 #include <QListWidgetItem>
 
 ccItemSelectionDlg::ccItemSelectionDlg(	bool multiSelectionEnabled,
-										QWidget* parent/*=0*/,
+										QWidget* parent/*=nullptr*/,
 										QString itemName/*="entities"*/,
 										QString labelStr/*=QString()*/)
 	: QDialog(parent, Qt::Tool)
@@ -92,7 +92,7 @@ void ccItemSelectionDlg::getSelectedIndexes(std::vector<int>& indexes) const
 
 int ccItemSelectionDlg::SelectEntity(const ccHObject::Container& entities,
 									int selectedIndex/*=0*/,
-									QWidget* parent/*=0*/,
+									QWidget* parent/*=nullptr*/,
 									QString label/*=QString()*/)
 {
 	ccItemSelectionDlg epDlg(false, parent, tr("entity"), label);
@@ -116,7 +116,7 @@ int ccItemSelectionDlg::SelectEntity(const ccHObject::Container& entities,
 
 bool ccItemSelectionDlg::SelectEntities(const ccHObject::Container& entities,
 									  std::vector<int>& selectedIndexes,
-									  QWidget* parent/*=0*/,
+									  QWidget* parent/*=nullptr*/,
 									  QString label/*=QString()*/)
 {
 	selectedIndexes.clear();

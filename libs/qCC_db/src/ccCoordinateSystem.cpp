@@ -24,7 +24,7 @@
 
 ccCoordinateSystem::ccCoordinateSystem(PointCoordinateType displayScale, 
 									   PointCoordinateType axisWidth, 
-									   const ccGLMatrix* transMat/*= 0*/,
+									   const ccGLMatrix* transMat/*=nullptr*/,
 									   QString name/*=QString("CoordinateSystem")*/)
 	: ccGenericPrimitive(name, transMat), 
 	  m_DisplayScale(displayScale), 
@@ -36,7 +36,7 @@ ccCoordinateSystem::ccCoordinateSystem(PointCoordinateType displayScale,
 	showColors(true);
 }
 
-ccCoordinateSystem::ccCoordinateSystem(const ccGLMatrix* transMat/*= 0*/,
+ccCoordinateSystem::ccCoordinateSystem(const ccGLMatrix* transMat/*=nullptr*/,
 									   QString name/*=QString("CoordinateSystem")*/)
 	: ccGenericPrimitive(name, transMat), 
 	  m_DisplayScale(DEFAULT_DISPLAY_SCALE), 

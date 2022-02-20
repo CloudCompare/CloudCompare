@@ -17,7 +17,7 @@
 
 #include "ccPtsSamplingDlg.h"
 
-ccPtsSamplingDlg::ccPtsSamplingDlg(QWidget* parent/*=0*/)
+ccPtsSamplingDlg::ccPtsSamplingDlg(QWidget* parent/*=nullptr*/)
 	: QDialog(parent, Qt::Tool)
 	, Ui::PointsSamplingDialog()
 {

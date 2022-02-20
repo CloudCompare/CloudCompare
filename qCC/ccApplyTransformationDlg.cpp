@@ -50,7 +50,7 @@ public:
 	DipDirTransformationDialog(QWidget* parent = nullptr) : QDialog(parent) { setupUi(this); }
 };
 
-ccApplyTransformationDlg::ccApplyTransformationDlg(QWidget* parent/*=0*/)
+ccApplyTransformationDlg::ccApplyTransformationDlg(QWidget* parent/*=nullptr*/)
 	: QDialog(parent)
 	, Ui::ApplyTransformationDialog()
 {

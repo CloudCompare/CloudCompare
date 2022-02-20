@@ -28,7 +28,7 @@ class ccLabelingDlg : public QDialog, public Ui::LabelingDialog
 public:
 
 	//! Default constructor
-	explicit ccLabelingDlg(QWidget* parent = 0);
+	explicit ccLabelingDlg(QWidget* parent = nullptr);
 
 	//! Returns octree level (defines grid step)
 	int getOctreeLevel();

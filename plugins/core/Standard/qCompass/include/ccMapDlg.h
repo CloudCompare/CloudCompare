@@ -38,7 +38,7 @@ class ccMapDlg : public ccOverlayDialog, public Ui::mapDlg
 
 public:
 	//! Default constructor
-	explicit ccMapDlg(QWidget* parent = 0);
+	explicit ccMapDlg(QWidget* parent = nullptr);
 
 	//menus
 	QMenu *m_createObject_menu;

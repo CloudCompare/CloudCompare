@@ -74,7 +74,7 @@ public:
 	typedef std::unordered_set<Leaf*> LeafSet;
 
 	//! Returns the neighbor leaves around a given cell
-	bool getNeighborLeaves(BaseNode* cell, ccKdTree::LeafSet& neighbors, const int* userDataFilter = 0);
+	bool getNeighborLeaves(BaseNode* cell, ccKdTree::LeafSet& neighbors, const int* userDataFilter = nullptr);
 
 	//! Returns associated (generic) point cloud
 	inline ccGenericPointCloud* associatedGenericCloud() const { return m_associatedGenericCloud; }

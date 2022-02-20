@@ -174,7 +174,7 @@ bool Classifier::Load(QString filename,
 	std::vector<Classifier>& classifiers,
 	std::vector<float>& scales,
 	QString& error,
-	FileHeader* header/*=0*/,
+	FileHeader* header/*=nullptr*/,
 	bool headerOnly/*=false*/)
 {
 	QFile file(filename);

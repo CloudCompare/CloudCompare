@@ -33,7 +33,7 @@ class ccAdjustZoomDlg: public QDialog, public Ui::AdjustZoomDialog
 
 public:
 
-	ccAdjustZoomDlg(ccGLWindow* win, QWidget* parent = 0);
+	ccAdjustZoomDlg(ccGLWindow* win, QWidget* parent = nullptr);
 	virtual ~ccAdjustZoomDlg() = default;
 
 	//! Returns requested focal distance

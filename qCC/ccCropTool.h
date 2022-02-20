@@ -37,7 +37,7 @@ public:
 		\param meshRotation optional rotation (for meshes only)
 		\return cropped entity (if any)
 	**/
-	static ccHObject* Crop(ccHObject* entity, const ccBBox& box, bool inside = true, const ccGLMatrix* meshRotation = 0);
+	static ccHObject* Crop(ccHObject* entity, const ccBBox& box, bool inside = true, const ccGLMatrix* meshRotation = nullptr);
 
 };
 

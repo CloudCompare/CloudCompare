@@ -42,7 +42,7 @@ public:
 		\param[in] app main application handle for displaying messages (optional)
 		\return loaded polyline (or 0 if an error occurred)
 	**/
-	static ccPolyline* Load(QString filename, CCVector3& origin, ccMainAppInterface* app = 0);
+	static ccPolyline* Load(QString filename, CCVector3& origin, ccMainAppInterface* app = nullptr);
 
 };
 

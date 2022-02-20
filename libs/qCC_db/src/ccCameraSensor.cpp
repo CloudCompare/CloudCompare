@@ -343,7 +343,7 @@ void ccCameraSensor::setIntrinsicParameters(const IntrinsicParameters& params)
 	m_projectionMatrixIsValid = false;
 }
 
-bool ccCameraSensor::applyViewport(ccGenericGLDisplay* win/*=0*/)
+bool ccCameraSensor::applyViewport(ccGenericGLDisplay* win/*=nullptr*/)
 {
 	if (!win)
 	{
@@ -1730,9 +1730,9 @@ ccImage* ccCameraSensor::orthoRectifyAsImageDirect(	const ccImage* image,
 													PointCoordinateType Z0,
 													double& pixelSize,
 													bool undistortImages/*=true*/,
-													double* minCorner/*=0*/,
-													double* maxCorner/*=0*/,
-													double* realCorners/*=0*/) const
+													double* minCorner/*=nullptr*/,
+													double* maxCorner/*=nullptr*/,
+													double* realCorners/*=nullptr*/) const
 {
 	//first, we compute the ortho-rectified image corners
 	double corners[8];
@@ -1892,9 +1892,9 @@ ccImage* ccCameraSensor::orthoRectifyAsImage(	const ccImage* image,
 												CCCoreLib::GenericIndexedCloud* keypoints3D,
 												std::vector<KeyPoint>& keypointsImage,
 												double& pixelSize,
-												double* minCorner/*=0*/,
-												double* maxCorner/*=0*/,
-												double* realCorners/*=0*/) const
+												double* minCorner/*=nullptr*/,
+												double* maxCorner/*=nullptr*/,
+												double* realCorners/*=nullptr*/) const
 {
 	double a[3]{ 0.0, 0.0, 0.0 };
 	double b[3]{ 0.0, 0.0, 0.0 };
@@ -2050,9 +2050,9 @@ ccImage* ccCameraSensor::orthoRectifyAsImage(	const ccImage* image,
 bool ccCameraSensor::OrthoRectifyAsImages(	std::vector<ccImage*> images,
 											double a[], double b[], double c[],
 											unsigned maxSize,
-											QDir* outputDir/*=0*/,
-											std::vector<ccImage*>* result/*=0*/,
-											std::vector<std::pair<double,double> >* relativePos/*=0*/)
+											QDir* outputDir/*=nullptr*/,
+											std::vector<ccImage*>* result/*=nullptr*/,
+											std::vector<std::pair<double,double> >* relativePos/*=nullptr*/)
 {
 	size_t count = images.size();
 	if (count == 0)

@@ -2314,7 +2314,7 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 	menu.exec(m_dbTreeWidget->mapToGlobal(menuPos));
 }
 
-QItemSelectionModel::SelectionFlags ccCustomQTreeView::selectionCommand(const QModelIndex& idx, const QEvent* event/*=0*/) const
+QItemSelectionModel::SelectionFlags ccCustomQTreeView::selectionCommand(const QModelIndex& idx, const QEvent* event/*=nullptr*/) const
 {
 	if (idx.isValid())
 	{

@@ -61,7 +61,7 @@ public:
 									const ccPointCloud::Grid::Shared grid,
 									GridParameters& parameters,
 									bool verbose = false,
-									ccGLMatrix* cloudToSensorTrans = 0);
+									ccGLMatrix* cloudToSensorTrans = nullptr);
 
 	//! Determines the (TLS) sensor parameters from the relative position of gridded points
 	/** \param cloud cloud on which to compute the sensor parameters (should be a single grid)
@@ -71,7 +71,7 @@ public:
 	**/
 	static ccGBLSensor* ComputeBestSensor(	ccPointCloud* cloud,
 											ccPointCloud::Grid::Shared grid,
-											ccGLMatrix* cloudToSensorTrans = 0);
+											ccGLMatrix* cloudToSensorTrans = nullptr);
 };
 
 #endif

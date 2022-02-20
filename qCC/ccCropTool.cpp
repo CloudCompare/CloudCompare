@@ -30,7 +30,7 @@
 #include <ManualSegmentationTools.h>
 #include <SimpleMesh.h>
 
-ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=true*/, const ccGLMatrix* meshRotation/*=0*/)
+ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=true*/, const ccGLMatrix* meshRotation/*=nullptr*/)
 {
 	assert(entity);
 	if (!entity)

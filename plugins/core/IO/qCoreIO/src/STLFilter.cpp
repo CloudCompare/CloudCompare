@@ -111,7 +111,7 @@ CC_FILE_ERROR STLFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	return result;
 }
 
-CC_FILE_ERROR STLFilter::saveToBINFile(ccGenericMesh* mesh, QFile& theFile, QWidget* parentWidget/*=0*/)
+CC_FILE_ERROR STLFilter::saveToBINFile(ccGenericMesh* mesh, QFile& theFile, QWidget* parentWidget/*=nullptr*/)
 {
 	assert(theFile.isOpen() && mesh && mesh->size() != 0);
 	unsigned faceCount = mesh->size();
@@ -203,7 +203,7 @@ CC_FILE_ERROR STLFilter::saveToBINFile(ccGenericMesh* mesh, QFile& theFile, QWid
 	return CC_FERR_NO_ERROR;
 }
 
-CC_FILE_ERROR STLFilter::saveToASCIIFile(ccGenericMesh* mesh, QFile& theFile, QWidget* parentWidget/*=0*/)
+CC_FILE_ERROR STLFilter::saveToASCIIFile(ccGenericMesh* mesh, QFile& theFile, QWidget* parentWidget/*=nullptr*/)
 {
 	assert(theFile.isOpen() && mesh && mesh->size() != 0);
 	unsigned faceCount = mesh->size();

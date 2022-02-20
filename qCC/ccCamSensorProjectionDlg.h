@@ -30,7 +30,7 @@ class ccCamSensorProjectionDlg : public QDialog, public Ui::CamSensorProjectDial
 public:
 
 	//! Default constructor
-	explicit ccCamSensorProjectionDlg(QWidget* parent = 0);
+	explicit ccCamSensorProjectionDlg(QWidget* parent = nullptr);
 
 	void initWithCamSensor(const ccCameraSensor* sensor);
 	void updateCamSensor(ccCameraSensor* sensor);

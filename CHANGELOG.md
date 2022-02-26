@@ -34,7 +34,9 @@ v2.12 (???) - (in development)
 		- The rasterize tool grid is 'centered' on the raster (image) boundary pixels (the grid min corner coordinates
 			correspond to the lower left raster cell center, and the grid max corner coordinates correspond to the upper
 			right raster cell center). This has been made more explicit in the 'Edit grid' sub-dialog.
-
+	- Section extraction tool
+		- polylines (imported or drawn) can now be unselected when not in 'edition' mode. Just click anywhere else.
+		- the 'unfold' option can now be used on all the polylines at once if no polyline is selected.
     - RANSAC plugin
         - Can save all leftover points into a new cloud (leftovers were points not assigned to a shape)
         - Can select whether to use Least Squares fitting on found shapes (some shapes take a very long time to process this step specifically Cones)

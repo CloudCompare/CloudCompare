@@ -285,7 +285,8 @@ void ccSectionExtractionTool::selectPolyline(Section* poly, bool autoRefreshDisp
 	}
 
 	m_UI->generateOrthoSectionsToolButton->setEnabled(m_selectedPoly != nullptr);
-	m_UI->unfoldToolButton->setEnabled(m_selectedPoly != nullptr);
+	m_UI->extractPointsToolButton->setEnabled(!m_sections.empty());
+	m_UI->unfoldToolButton->setEnabled(!m_sections.empty());
 }
 
 void ccSectionExtractionTool::releasePolyline(Section* section)
@@ -337,20 +338,17 @@ void ccSectionExtractionTool::deleteSelectedPolyline()
 
 void ccSectionExtractionTool::entitySelected(ccHObject* entity)
 {
-	if (!entity)
-	{
-		return;
-	}
-
 	//look if this selected entity corresponds to an active polyline
 	for (auto & section : m_sections)
 	{
 		if (section.entity == entity)
 		{
 			selectPolyline(&section);
-			break;
+			return;
 		}
 	}
+
+	selectPolyline(nullptr);
 }
 
 bool ccSectionExtractionTool::start()
@@ -626,7 +624,9 @@ bool ccSectionExtractionTool::addPolyline(ccPolyline* inputPoly, bool alreadyInD
 	{
 		inputPoly->setDisplay_recursive(m_associatedWin);
 		if (!alreadyInDB)
+		{
 			m_associatedWin->addToOwnDB(inputPoly);
+		}
 	}
 
 	return true;
@@ -1035,7 +1035,12 @@ void ccSectionExtractionTool::generateOrthoSections()
 			if (!m_selectedPoly->isInDB)
 			{
 				ccHObject* destEntity = getExportGroup(s_polyExportGroupID, "Exported sections");
-				assert(destEntity);
+				if (!destEntity)
+				{
+					assert(false);
+					return;
+				}
+
 				destEntity->addChild(m_selectedPoly->entity);
 				m_selectedPoly->isInDB = true;
 				m_selectedPoly->entity->setDisplay_recursive(destEntity->getDisplay());
@@ -1145,13 +1150,21 @@ void ccSectionExtractionTool::generateOrthoSections()
 
 	poly->showArrow(false, 0, 0);
 	if (m_associatedWin)
+	{
 		m_associatedWin->redraw();
+	}
 }
 
 ccHObject* ccSectionExtractionTool::getExportGroup(unsigned& defaultGroupID, const QString& defaultName)
 {
 	MainWindow* mainWin = MainWindow::TheInstance();
-	ccHObject* root = mainWin ? mainWin->dbRootObject() : nullptr;
+	if (!mainWin)
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	ccHObject* root = mainWin->dbRootObject();
 	if (!root)
 	{
 		ccLog::Warning("Internal error (no MainWindow or DB?!)");
@@ -1200,7 +1213,11 @@ void ccSectionExtractionTool::exportSections()
 	}
 
 	ccHObject* destEntity = getExportGroup(s_polyExportGroupID, "Exported sections");
-	assert(destEntity);
+	if (!destEntity)
+	{
+		assert(false);
+		return;
+	}
 
 	MainWindow* mainWin = MainWindow::TheInstance();
 
@@ -1209,14 +1226,21 @@ void ccSectionExtractionTool::exportSections()
 	{
 		if (section.entity && !section.isInDB)
 		{
+			m_associatedWin->removeFromOwnDB(section.entity);
 			destEntity->addChild(section.entity);
 			section.isInDB = true;
-			section.entity->setDisplay_recursive(destEntity->getDisplay());
+			section.originalDisplay = destEntity->getDisplay();
+			//section.entity->setDisplay_recursive(destEntity->getDisplay());
 			mainWin->addToDB(section.entity, false, false);
 		}
 	}
 
 	ccLog::Print(QString("[ccSectionExtractionTool] %1 sections exported").arg(exportCount));
+
+	//if (m_associatedWin)
+	//{
+	//	m_associatedWin->redraw();
+	//}
 }
 
 bool ccSectionExtractionTool::extractSectionEnvelope(const ccPolyline* originalSection,
@@ -1329,14 +1353,20 @@ bool ccSectionExtractionTool::extractSectionEnvelope(const ccPolyline* originalS
 
 		//create output group if necessary
 		ccHObject* destEntity = getExportGroup(s_profileExportGroupID, "Extracted profiles");
-		assert(destEntity);
+		if (!destEntity)
+		{
+			assert(false);
+			return false;
+		}
 
 		for (size_t p = 0; p < parts.size(); ++p)
 		{
 			ccPolyline* envelopePart = parts[p];
 			QString name = QString("Section envelope #%1").arg(sectionIndex);
 			if (parts.size() > 1)
+			{
 				name += QString("(part %1/%2)").arg(p + 1).arg(parts.size());
+			}
 			envelopePart->setName(name);
 			envelopePart->copyGlobalShiftAndScale(*originalSectionCloud);
 			envelopePart->setColor(s_defaultEnvelopeColor);
@@ -1430,7 +1460,11 @@ bool ccSectionExtractionTool::extractSectionCloud(const std::vector<CCCoreLib::R
 	{
 		//create output group if necessary
 		ccHObject* destEntity = getExportGroup(s_cloudExportGroupID, "Extracted section clouds");
-		assert(destEntity);
+		if (!destEntity)
+		{
+			assert(false);
+			return false;
+		}
 
 		sectionCloud->setName(QString("Section cloud #%1").arg(sectionIndex));
 		sectionCloud->setDisplay(destEntity->getDisplay());
@@ -1461,17 +1495,15 @@ struct Segment
 
 void ccSectionExtractionTool::unfoldPoints()
 {
-	if (!m_selectedPoly || !m_selectedPoly->entity)
+	if (!m_selectedPoly)
 	{
-		assert(false);
-		return;
+		if (QMessageBox::No == QMessageBox::question(this, "No polyline selected", "Do you want to unfold all the polylines at once?"))
+		{
+			return;
+		}
 	}
-
-	ccPolyline* poly = m_selectedPoly->entity;
-	unsigned polyVertCount = poly->size();
-	if (polyVertCount < 2)
+	else if (!m_selectedPoly->entity)
 	{
-		ccLog::Error("Invalid polyline?!");
 		assert(false);
 		return;
 	}
@@ -1510,200 +1542,263 @@ void ccSectionExtractionTool::unfoldPoints()
 	//we consider half of the total thickness as points can be on both sides!
 	double maxSquareDistToPolyline = (thickness / 2) * (thickness / 2);
 
-	//prepare the computation of 2D distances
-	std::vector<Segment> segments;
-	unsigned polySegmentCount = poly->isClosed() ? polyVertCount : polyVertCount - 1;
+	std::vector<ccPolyline*> polylines;
+	try
 	{
-		try
+		if (m_selectedPoly)
 		{
-			segments.reserve(polySegmentCount);
+			polylines.reserve(1);
+			polylines.push_back(m_selectedPoly->entity);
 		}
-		catch (const std::bad_alloc&)
+		else
 		{
-			//not enough memory
-			ccLog::Error("Not enough memory");
-			return;
-		}
-
-		PointCoordinateType curvPos = 0;
-		for (unsigned j = 0; j < polySegmentCount; ++j)
-		{
-			//current polyline segment
-			const CCVector3* A = poly->getPoint(j);
-			const CCVector3* B = poly->getPoint((j + 1) % polyVertCount);
-
-			Segment s;
+			polylines.reserve(m_sections.size());
+			for (const auto& section : m_sections)
 			{
-				s.A = CCVector2(A->u[xDim], A->u[yDim]);
-				s.B = CCVector2(B->u[xDim], B->u[yDim]);
-				s.u = s.B - s.A;
-				s.d = s.u.norm();
-				if ( CCCoreLib::GreaterThanEpsilon( s.d ) )
-				{
-					s.curvPos = curvPos;
-					s.u /= s.d;
-					segments.push_back(s);
-				}
+				polylines.push_back(section.entity);
 			}
-
-			//update curvilinear pos
-			curvPos += (*B - *A).norm();
 		}
+	}
+	catch (const std::bad_alloc&)
+	{
+		ccLog::Error("Not enough memory");
+		return;
 	}
 
 	ccProgressDialog pdlg(true);
-	CCCoreLib::NormalizedProgress nprogress(&pdlg, totalPointCount);
+	CCCoreLib::NormalizedProgress nprogress(&pdlg, polylines.size() > 1 ? static_cast<unsigned>(polylines.size()) : totalPointCount);
 	pdlg.setMethodTitle(tr("Unfold cloud(s)"));
-	pdlg.setInfo(tr("Number of segments: %1\nNumber of points: %2").arg(polySegmentCount).arg(totalPointCount));
+	if (polylines.size() > 1)
+	{
+		pdlg.setInfo(tr("Number of polylines: %1\nNumber of points: %2").arg(polylines.size()).arg(totalPointCount));
+	}
 	pdlg.start();
 	QCoreApplication::processEvents();
 
 	unsigned exportedClouds = 0;
 
-	//for each cloud
-	for (auto & pc : m_clouds)
+	for (ccPolyline* poly : polylines)
 	{
-		ccGenericPointCloud* cloud = pc.entity;
-		if (!cloud)
+		unsigned polyVertCount = poly->size();
+		if (polyVertCount < 2)
 		{
 			assert(false);
+			ccLog::Warning("Invalid polyline (less than 2 vertices)");
 			continue;
 		}
 
-		CCCoreLib::ReferenceCloud unfoldedIndexes(cloud);
-		if (!unfoldedIndexes.reserve(cloud->size()))
+		//prepare the computation of 2D distances
+		std::vector<Segment> segments;
+		unsigned polySegmentCount = poly->isClosed() ? polyVertCount : polyVertCount - 1;
 		{
-			ccLog::Error("Not enough memory");
-			return;
-		}
-		std::vector<CCVector3> unfoldedPoints;
-		try
-		{
-			unfoldedPoints.reserve(cloud->size());
-		}
-		catch (const std::bad_alloc&)
-		{
-			ccLog::Error("Not enough memory");
-			return;
-		}
-
-		//now test each point and see if it's close to the current polyline (in 2D)
-		for (unsigned i = 0; i < cloud->size(); ++i)
-		{
-			const CCVector3* P = cloud->getPoint(i);
-			CCVector2 P2D(P->u[xDim], P->u[yDim]);
-
-			//test each segment
-			int closestSegment = -1;
-			PointCoordinateType minSquareDist = -CCCoreLib::PC_ONE;
-			for (unsigned j = 0; j < polySegmentCount; ++j)
+			try
 			{
-				const Segment& s = segments[j];
-				CCVector2 AP2D = P2D - s.A;
-
-				//longitudinal 'distance'
-				PointCoordinateType dotprod = s.u.dot(AP2D);
-
-				PointCoordinateType squareDist = 0;
-				if (dotprod < 0.0f)
-				{
-					//dist to nearest vertex
-					squareDist = AP2D.norm2();
-				}
-				else if (dotprod > s.d)
-				{
-					//dist to nearest vertex
-					squareDist = (P2D - s.B).norm2();
-				}
-				else
-				{
-					//orthogonal distance
-					squareDist = (AP2D - s.u*dotprod).norm2();
-				}
-
-				if (squareDist <= maxSquareDistToPolyline)
-				{
-					if (closestSegment < 0 || squareDist < minSquareDist)
-					{
-						minSquareDist = squareDist;
-						closestSegment = static_cast<int>(j);
-					}
-				}
+				segments.reserve(polySegmentCount);
 			}
-
-			if (closestSegment >= 0)
+			catch (const std::bad_alloc&)
 			{
-				const Segment& s = segments[closestSegment];
-
-				//we use the curvilinear position of the point in the X dimension (and Y is 0)
-				CCVector3 Q;
-				{
-					CCVector2 AP2D = P2D - s.A;
-					PointCoordinateType dotprod = s.u.dot(AP2D);
-					PointCoordinateType d = (AP2D - s.u*dotprod).norm();
-
-					//compute the sign of 'minDist'
-					PointCoordinateType crossprod = AP2D.y * s.u.x - AP2D.x * s.u.y;
-
-					Q.u[xDim] = s.curvPos + dotprod;
-					Q.u[yDim] = crossprod < 0 ? -d : d; //signed orthogonal distance to the polyline
-					Q.u[vertDim] = P->u[vertDim];
-				}
-
-				unfoldedIndexes.addPointIndex(i);
-				unfoldedPoints.push_back(Q);
-			}
-
-			if (!nprogress.oneStep())
-			{
-				ccLog::Warning("[Unfold] Process cancelled by the user");
+				//not enough memory
+				ccLog::Error("Not enough memory");
 				return;
 			}
 
-		} //for each point
-
-		if (unfoldedIndexes.size() != 0)
-		{
-			//assign the default global shift & scale info
-			ccPointCloud* unfoldedCloud = nullptr;
+			PointCoordinateType curvPos = 0;
+			for (unsigned j = 0; j < polySegmentCount; ++j)
 			{
-				if (cloud->isA(CC_TYPES::POINT_CLOUD))
-					unfoldedCloud = static_cast<ccPointCloud*>(cloud)->partialClone(&unfoldedIndexes);
-				else
-					unfoldedCloud = ccPointCloud::From(&unfoldedIndexes, cloud);
+				//current polyline segment
+				const CCVector3* A = poly->getPoint(j);
+				const CCVector3* B = poly->getPoint((j + 1) % polyVertCount);
+
+				Segment s;
+				{
+					s.A = CCVector2(A->u[xDim], A->u[yDim]);
+					s.B = CCVector2(B->u[xDim], B->u[yDim]);
+					s.u = s.B - s.A;
+					s.d = s.u.norm();
+					if (CCCoreLib::GreaterThanEpsilon(s.d))
+					{
+						s.curvPos = curvPos;
+						s.u /= s.d;
+						segments.push_back(s);
+					}
+				}
+
+				//update curvilinear pos
+				curvPos += (*B - *A).norm();
 			}
-			if (!unfoldedCloud)
+		}
+
+		if (polylines.size() == 1)
+		{
+			pdlg.setInfo(tr("Number of segments: %1\nNumber of points: %2").arg(polySegmentCount).arg(totalPointCount));
+		}
+		QCoreApplication::processEvents();
+
+		//for each cloud
+		for (auto & pc : m_clouds)
+		{
+			ccGenericPointCloud* cloud = pc.entity;
+			if (!cloud)
+			{
+				assert(false);
+				continue;
+			}
+
+			CCCoreLib::ReferenceCloud unfoldedIndexes(cloud);
+			if (!unfoldedIndexes.reserve(cloud->size()))
+			{
+				ccLog::Error("Not enough memory");
+				return;
+			}
+			std::vector<CCVector3> unfoldedPoints;
+			try
+			{
+				unfoldedPoints.reserve(cloud->size());
+			}
+			catch (const std::bad_alloc&)
 			{
 				ccLog::Error("Not enough memory");
 				return;
 			}
 
-			assert(unfoldedCloud->size() == unfoldedPoints.size());
-			CCVector3 C = box.minCorner();
-			C.u[vertDim] = 0;
-			C.u[xDim] = box.minCorner().u[xDim]; //we start at the bounding-box limit
-			for (unsigned i = 0; i < unfoldedCloud->size(); ++i)
+			//now test each point and see if it's close to the current polyline (in 2D)
+			for (unsigned i = 0; i < cloud->size(); ++i)
 			{
-				//update the points positions
-				*const_cast<CCVector3*>(unfoldedCloud->getPoint(i)) = unfoldedPoints[i] + C;
+				const CCVector3* P = cloud->getPoint(i);
+				CCVector2 P2D(P->u[xDim], P->u[yDim]);
+
+				//test each segment
+				int closestSegment = -1;
+				PointCoordinateType minSquareDist = -CCCoreLib::PC_ONE;
+				for (unsigned j = 0; j < polySegmentCount; ++j)
+				{
+					const Segment& s = segments[j];
+					CCVector2 AP2D = P2D - s.A;
+
+					//longitudinal 'distance'
+					PointCoordinateType dotprod = s.u.dot(AP2D);
+
+					PointCoordinateType squareDist = 0;
+					if (dotprod < 0.0f)
+					{
+						//dist to nearest vertex
+						squareDist = AP2D.norm2();
+					}
+					else if (dotprod > s.d)
+					{
+						//dist to nearest vertex
+						squareDist = (P2D - s.B).norm2();
+					}
+					else
+					{
+						//orthogonal distance
+						squareDist = (AP2D - s.u*dotprod).norm2();
+					}
+
+					if (squareDist <= maxSquareDistToPolyline)
+					{
+						if (closestSegment < 0 || squareDist < minSquareDist)
+						{
+							minSquareDist = squareDist;
+							closestSegment = static_cast<int>(j);
+						}
+					}
+				}
+
+				if (closestSegment >= 0)
+				{
+					const Segment& s = segments[closestSegment];
+
+					//we use the curvilinear position of the point in the X dimension (and Y is 0)
+					CCVector3 Q;
+					{
+						CCVector2 AP2D = P2D - s.A;
+						PointCoordinateType dotprod = s.u.dot(AP2D);
+						PointCoordinateType d = (AP2D - s.u*dotprod).norm();
+
+						//compute the sign of 'minDist'
+						PointCoordinateType crossprod = AP2D.y * s.u.x - AP2D.x * s.u.y;
+
+						Q.u[xDim] = s.curvPos + dotprod;
+						Q.u[yDim] = crossprod < 0 ? -d : d; //signed orthogonal distance to the polyline
+						Q.u[vertDim] = P->u[vertDim];
+					}
+
+					unfoldedIndexes.addPointIndex(i);
+					unfoldedPoints.push_back(Q);
+				}
+
+				if (polylines.size() == 1)
+				{
+					if (!nprogress.oneStep())
+					{
+						ccLog::Warning("[Unfold] Process cancelled by the user");
+						return;
+					}
+				}
+				else //multiple polylines: we don't display the progress, but we still check if the cancel button has been pressed
+				{
+					if (pdlg.isCancelRequested())
+					{
+						ccLog::Warning("[Unfold] Process cancelled by the user");
+						return;
+					}
+				}
+
+			} //for each point
+
+			if (unfoldedIndexes.size() != 0)
+			{
+				//assign the default global shift & scale info
+				ccPointCloud* unfoldedCloud = nullptr;
+				{
+					if (cloud->isA(CC_TYPES::POINT_CLOUD))
+						unfoldedCloud = static_cast<ccPointCloud*>(cloud)->partialClone(&unfoldedIndexes);
+					else
+						unfoldedCloud = ccPointCloud::From(&unfoldedIndexes, cloud);
+				}
+				if (!unfoldedCloud)
+				{
+					ccLog::Error("Not enough memory");
+					return;
+				}
+
+				assert(unfoldedCloud->size() == unfoldedPoints.size());
+				CCVector3 C = box.minCorner();
+				C.u[vertDim] = 0;
+				C.u[xDim] = box.minCorner().u[xDim]; //we start at the bounding-box limit
+				for (unsigned i = 0; i < unfoldedCloud->size(); ++i)
+				{
+					//update the points positions
+					*const_cast<CCVector3*>(unfoldedCloud->getPoint(i)) = unfoldedPoints[i] + C;
+				}
+				unfoldedCloud->invalidateBoundingBox();
+
+				unfoldedCloud->setName(cloud->getName() + ".unfolded");
+				unfoldedCloud->copyGlobalShiftAndScale(*cloud);
+
+				unfoldedCloud->shrinkToFit();
+				unfoldedCloud->setDisplay(pc.originalDisplay);
+				MainWindow::TheInstance()->addToDB(unfoldedCloud);
+
+				++exportedClouds;
 			}
-			unfoldedCloud->invalidateBoundingBox();
+			else
+			{
+				ccLog::Warning(QString("[Unfold] No point of the cloud '%1' were unfolded (check parameters)").arg(cloud->getName()));
+			}
 
-			unfoldedCloud->setName(cloud->getName() + ".unfolded");
-			unfoldedCloud->copyGlobalShiftAndScale(*cloud);
+		} //for each cloud
 
-			unfoldedCloud->shrinkToFit();
-			unfoldedCloud->setDisplay(pc.originalDisplay);
-			MainWindow::TheInstance()->addToDB(unfoldedCloud);
-
-			++exportedClouds;
-		}
-		else
+		if (polylines.size() != 1) //multiple polylines only
 		{
-			ccLog::Warning(QString("[Unfold] No point of the cloud '%1' were unfolded (check parameters)").arg(cloud->getName()));
+			if (!nprogress.oneStep())
+			{
+				ccLog::Warning("[Unfold] Process cancelled by the user");
+				return;
+			}
 		}
-
-	} //for each cloud
+	}
 
 	ccLog::Print(QString("[Unfold] %1 cloud(s) exported").arg(exportedClouds));
 }

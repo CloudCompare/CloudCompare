@@ -461,9 +461,6 @@ void ccPropertiesTreeDelegate::fillWithHObject(ccHObject* _obj)
 		appendRow(ITEM(tr("Normals")), CHECKABLE_ITEM(_obj->normalsShown(), OBJECT_NORMALS_SHOWN));
 	}
 
-	//name in 3D
-	appendRow(ITEM( tr( "Show name (in 3D)" ) ), CHECKABLE_ITEM(_obj->nameShownIn3D(), OBJECT_NAME_IN_3D));
-
 	//color source
 	if (_obj->hasColors() || _obj->hasScalarFields())
 	{
@@ -488,6 +485,9 @@ void ccPropertiesTreeDelegate::fillWithHObject(ccHObject* _obj)
 
 		if (box.isValid())
 		{
+			//name in 3D (we can't display a 3D name if the bounding-box is not valid!
+			appendRow(ITEM(tr("Show name (in 3D)")), CHECKABLE_ITEM(_obj->nameShownIn3D(), OBJECT_NAME_IN_3D));
+
 			//Box dimensions
 			CCVector3 bboxDiag = box.getDiagVec();
 			appendRow(ITEM(fitBBox ? tr( "Local box dimensions" ) : tr( "Box dimensions" )),

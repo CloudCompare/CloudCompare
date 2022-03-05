@@ -123,8 +123,8 @@ public: //(Mesh) materials
 
 public: //Name display in 3D
 
-	//! Sets whether name should be displayed in 3D
-	inline virtual void showNameIn3D(bool state) { m_showNameIn3D = state; }
+	//! Sets whether name should be displayed in 3D or not
+	inline virtual void showNameIn3D(bool state) { m_showNameIn3D = state; if (!state) m_nameIn3DPosIsValid = false; }
 
 	//! Returns whether name is displayed in 3D or not
 	inline virtual bool nameShownIn3D() const { return m_showNameIn3D; }
@@ -313,6 +313,8 @@ protected: //members
 	bool m_showNameIn3D;
 	//! Last 2D position of the '3D' name
 	CCVector3d m_nameIn3DPos;
+	//! Whether the last 2D position of the '3D' name is valid or not
+	bool m_nameIn3DPosIsValid;
 
 	//! Currently associated GL display
 	ccGenericGLDisplay* m_currentDisplay;

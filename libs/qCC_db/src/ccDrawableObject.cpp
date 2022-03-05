@@ -47,6 +47,7 @@ ccDrawableObject::ccDrawableObject(const ccDrawableObject& object)
 	, m_glTrans(object.m_glTrans)
 	, m_glTransEnabled(object.m_glTransEnabled)
 	, m_showNameIn3D(object.m_showNameIn3D)
+	, m_nameIn3DPosIsValid(object.m_nameIn3DPosIsValid)
 	, m_currentDisplay(object.m_currentDisplay)
 {
 }

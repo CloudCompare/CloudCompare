@@ -680,33 +680,17 @@ void ccHObject::drawBB(CC_DRAW_CONTEXT& context, const ccColor::Rgb& col)
 
 void ccHObject::drawNameIn3D(CC_DRAW_CONTEXT& context)
 {
-	if (!context.display)
-		return;
-
-	//we display it in the 2D layer in fact!
-	//ccBBox bBox = getBB_recursive();
-	//if (!bBox.isValid())
-	//	return;
-	
-	//ccGLMatrix trans;
-	//getAbsoluteGLTransformation(trans);
-
-	//ccGLCameraParameters camera;
-	//context.display->getGLCameraParameters(camera);
-
-	//CCVector3 C = bBox.getCenter();
-	//CCVector3d Q2D;
-	//camera.project(C, Q2D);
-
-	
-	QFont font = context.display->getTextDisplayFont(); //takes rendering zoom into account!
-	context.display->displayText(	getName(),
-									static_cast<int>(m_nameIn3DPos.x),
-									static_cast<int>(m_nameIn3DPos.y),
-									ccGenericGLDisplay::ALIGN_HMIDDLE | ccGenericGLDisplay::ALIGN_VMIDDLE,
-									0.75f,
-									nullptr,
-									&font);
+	if (context.display && m_nameIn3DPosIsValid)
+	{
+		QFont font = context.display->getTextDisplayFont(); //takes rendering zoom into account!
+		context.display->displayText(	getName(),
+										static_cast<int>(m_nameIn3DPos.x),
+										static_cast<int>(m_nameIn3DPos.y),
+										ccGenericGLDisplay::ALIGN_HMIDDLE | ccGenericGLDisplay::ALIGN_VMIDDLE,
+										0.75f,
+										nullptr,
+										&font);
+	}
 }
 
 void ccHObject::draw(CC_DRAW_CONTEXT& context)
@@ -787,7 +771,11 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 				glFunc->glGetDoublev(GL_MODELVIEW_MATRIX, camera.modelViewMat.data());
 
 				CCVector3 C = bBox.getCenter();
-				camera.project(C, m_nameIn3DPos);
+				m_nameIn3DPosIsValid = camera.project(C, m_nameIn3DPos);
+			}
+			else
+			{
+				m_nameIn3DPosIsValid = false;
 			}
 		}
 		else if (MACRO_Draw2D(context) && MACRO_Foreground(context))

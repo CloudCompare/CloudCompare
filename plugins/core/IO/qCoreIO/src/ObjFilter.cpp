@@ -279,7 +279,9 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	{
 		unsigned faceCount = 0;
 		for (ccHObject::Container::const_iterator it = subMeshes.begin(); it != subMeshes.end(); ++it)
+		{
 			faceCount += static_cast<ccSubMesh*>(*it)->size();
+		}
 
 		//if there's no face (i.e. no sub-mesh) or less face than the total mesh, we save the full mesh!
 		if (faceCount < mesh->size())
@@ -1307,6 +1309,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 						subTri->showMaterials(baseMesh->materialsShown());
 						subTri->showNormals(baseMesh->normalsShown());
 						subTri->showTriNorms(baseMesh->triNormsShown());
+						subTri->setEnabled(false);
 						//subTri->showColors(baseMesh->colorsShown());
 						//subTri->showWired(baseMesh->isShownAsWire());
 						baseMesh->addChild(subTri);
@@ -1318,7 +1321,6 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 						objWarnings[NOT_ENOUGH_MEMORY] = true;
 					}
 				}
-				baseMesh->setVisible(false);
 				vertices->setLocked(true);
 			}
 

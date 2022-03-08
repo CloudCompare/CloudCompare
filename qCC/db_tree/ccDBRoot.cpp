@@ -2183,14 +2183,12 @@ void ccDBRoot::setClassificationField()
             selectedClouds.push_back(cloud);
     }
 
-    ccSetClassificationField setClassificationField;
+    ccSetClassificationFieldDlg setClassificationField;
     if (setClassificationField.exec())
     {
         setClassificationField.setClassificationField(selectedClouds);
         updatePropertiesView();
     }
-    else
-        return;
 }
 
 void ccDBRoot::showContextMenu(const QPoint& menuPos)

@@ -924,15 +924,13 @@ void ccGraphicalSegmentationTool::pauseSegmentationMode(bool state)
 
 void ccGraphicalSegmentationTool::setClassificationField()
 {
-    int class_ = 0;
+    int pointClass = 0;
     // get the value of class_
-    ccSetClassificationField setClassificationField(this);
-    if (setClassificationField.exec())
-    {
-        class_ = setClassificationField.getClass();
-    }
-    else
+    ccSetClassificationFieldDlg setClassificationField(this);
+    if (!setClassificationField.exec())
         return;
+    else
+        pointClass = setClassificationField.getClass();
 
     // the following lines are very similar to the segment tool
 
@@ -1034,7 +1032,7 @@ void ccGraphicalSegmentationTool::setClassificationField()
                 }
 
                 if (pointInside)
-                    sf->setValue(i, class_);
+                    sf->setValue(i, pointClass);
             }
         }
         sf->computeMinAndMax();

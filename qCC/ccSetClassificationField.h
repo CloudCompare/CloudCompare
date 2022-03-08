@@ -8,28 +8,24 @@ namespace Ui {
 class ccSetClassificationField;
 }
 
-//namespace ccHObject{
-//class Container;
-//}
-
 #include <ccHObject.h>
 
-class ccSetClassificationField : public QDialog
+class ccSetClassificationFieldDlg : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit ccSetClassificationField(QWidget *parent = nullptr);
-    ~ccSetClassificationField();
+    explicit ccSetClassificationFieldDlg(QWidget *parent = nullptr);
+    ~ccSetClassificationFieldDlg() override;
     void readSettings(void);
     void writeSettings(void);
 
     bool setClassificationField(const ccHObject::Container &selectedEntities);
-    int getClass();
+    int getClass() const;
 
 private:
-    Ui::ccSetClassificationField *ui;
-    int class_;
+    Ui::ccSetClassificationField *m_ui;
+    int m_class;
 };
 
 #endif // CCSETCLASSIFICATIONFIELD_H

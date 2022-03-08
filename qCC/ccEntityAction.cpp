@@ -1087,42 +1087,26 @@ namespace ccEntityAction
             if (cloud != nullptr)
             {
                 ccScalarField *sf = cloud->getCurrentDisplayedScalarField();
-                if (sf == 0)
+                if (sf == nullptr)
                     return false;
 
                 // count integer values
                 size_t N = sf->size();
-                std::vector<int> classes;
+                std::set<int> classes;
                 for (size_t idx = 0; idx < N; idx++)
                 {
-                    int class_ = static_cast<int>(sf->getValue(idx));
-                    if (find(classes.begin(), classes.end(), class_) == classes.end())
-                        classes.emplace_back(class_);
+                    int pointClass = static_cast<int>(sf->getValue(idx));
+                    if (find(classes.begin(), classes.end(), pointClass) == classes.end())
+                        classes.emplace(pointClass);
                 }
                 ccLog::Print("[sfSplitCloud] " + QString::number(classes.size()) + " classes found in the current scalar field");
 
-                // create a group for the new clouds
-                ccHObject* group = new ccHObject(ent->getName());
-                ccHObject* parent = ent->getParent();
-                if (parent)
-                {
-                    parent->addChild(group);
-                }
-                else
-                {
-                    delete group;
-                    return false;
-                }
-
-                app->addToDB(group);
-
                 // create as many clouds as the number of classes
-                for(size_t c = 0; c < classes.size(); c++)
+                for(auto cloudClass : classes)
                 {
-                    int cloudClass = classes[c];
                     ccLog::Print("[sfSplitCloud] build cloud " + QString::number(cloudClass));
                     // create the reference cloud
-                    CCCoreLib::ReferenceCloud *referenceCloud = new CCCoreLib::ReferenceCloud(cloud);
+                    CCCoreLib::ReferenceCloud referenceCloud(cloud);
                     // add a scalar
                     // populate the cloud with the points which have the selected class
                     for(size_t index = 0; index < cloud->size(); index++)
@@ -1130,13 +1114,11 @@ namespace ccEntityAction
                         int pointClass = sf->getValue(index);
                         if (pointClass == cloudClass)
                         {
-                            referenceCloud->addPointIndex(index);
+                            referenceCloud.addPointIndex(index);
                         }
                     }
-                    ccPointCloud *pc = cloud->partialClone(referenceCloud);
-                    delete referenceCloud;
-                    pc->setName(group->getName() + "_" + QString::number(cloudClass));
-                    group->addChild(pc); // add to group
+                    ccPointCloud *pc = cloud->partialClone(&referenceCloud);
+                    pc->setName(ent->getName() + "_" + QString::number(cloudClass));
                     app->addToDB(pc); // add to data base
                 }
             }

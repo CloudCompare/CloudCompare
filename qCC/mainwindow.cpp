@@ -3150,14 +3150,11 @@ void MainWindow::doActionSplitCloudUsingSF()
 
 void MainWindow::doActionSetClassificationField()
 {
-    ccSetClassificationField setClassificationField(this);
-    if (setClassificationField.exec())
-    {
-        setClassificationField.setClassificationField(m_selectedEntities);
-    }
-    else
+    ccSetClassificationFieldDlg setClassificationField(this);
+    if (!setClassificationField.exec())
         return;
 
+    setClassificationField.setClassificationField(m_selectedEntities);
     refreshAll();
     updateUI();
 }

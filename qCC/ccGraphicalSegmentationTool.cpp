@@ -34,6 +34,7 @@
 #include <ccMesh.h>
 #include <ccHObjectCaster.h>
 #include <cc2DViewportObject.h>
+#include <ccSetClassificationField.h>
 
 //for the helper (apply)
 #include <cc2DLabel.h>
@@ -74,6 +75,7 @@ ccGraphicalSegmentationTool::ccGraphicalSegmentationTool(QWidget* parent)
 	connect(validAndDeleteButton,				&QToolButton::clicked,		this,	&ccGraphicalSegmentationTool::applyAndDelete);
 	connect(cancelButton,						&QToolButton::clicked,		this,	&ccGraphicalSegmentationTool::cancel);
 	connect(pauseButton,						&QToolButton::toggled,		this,	&ccGraphicalSegmentationTool::pauseSegmentationMode);
+    connect(toolButton_class,                   &QToolButton::clicked,      this,   &ccGraphicalSegmentationTool::setClassificationField);
 
 	//selection modes
 	connect(actionSetPolylineSelection,			&QAction::triggered,	this,	&ccGraphicalSegmentationTool::doSetPolylineSelection);
@@ -918,6 +920,123 @@ void ccGraphicalSegmentationTool::pauseSegmentationMode(bool state)
 	pauseButton->blockSignals(false);
 
 	m_associatedWin->redraw(!state);
+}
+
+void ccGraphicalSegmentationTool::setClassificationField()
+{
+    int pointClass = 0;
+    // get the value of class_
+    ccSetClassificationFieldDlg setClassificationField(this);
+    if (!setClassificationField.exec())
+        return;
+    else
+        pointClass = setClassificationField.getClass();
+
+    // the following lines are very similar to the segment tool
+
+    if (!m_associatedWin)
+        return;
+
+    if (!m_segmentationPoly)
+    {
+        ccLog::Error("No polyline defined!");
+        return;
+    }
+
+    if (!m_segmentationPoly->isClosed())
+    {
+        ccLog::Error("Define and/or close the segmentation polygon first! (right click to close)");
+        return;
+    }
+
+    // we must close the polyline if we are in RUNNING mode
+    if ((m_state & POLYLINE) != 0 && (m_state & RUNNING) != 0)
+    {
+        QPoint mousePos = m_associatedWin->mapFromGlobal(QCursor::pos());
+        ccLog::Warning(QString("Polyline was not closed - we'll close it with the current mouse cursor position: (%1 ; %2)").arg(mousePos.x()).arg(mousePos.y()));
+        addPointToPolylineExt(mousePos.x(), mousePos.y(), true);
+        closePolyLine(0, 0);
+    }
+
+    ccGLCameraParameters camera;
+    m_associatedWin->getGLCameraParameters(camera);
+    const double half_w = camera.viewport[2] / 2.0;
+    const double half_h = camera.viewport[3] / 2.0;
+
+    //check if the polyline is totally inside the frustum or not
+    bool polyInsideFrustum = true;
+    {
+        int vertexCount = static_cast<int>(m_segmentationPoly->size());
+        for (int i = 0; i < vertexCount; ++i)
+        {
+            const CCVector3* P = m_segmentationPoly->getPoint(i);
+
+            CCVector3d Q2D;
+            bool pointInFrustum = false;
+            camera.project(*P, Q2D, &pointInFrustum);
+
+            if (!pointInFrustum)
+            {
+                polyInsideFrustum = false;
+                break;
+            }
+        }
+    }
+    ccLog::PrintDebug("Polyline is fully inside frustrum: " + QString(polyInsideFrustum ? "Yes" : "No"));
+
+    //for each selected entity
+    for (QSet<ccHObject*>::const_iterator p = m_toSegment.constBegin(); p != m_toSegment.constEnd(); ++p)
+    {
+        ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(*p);
+        assert(cloud);
+
+        // check that the scalar field Classification exists
+        int idx = cloud->getScalarFieldIndexByName("Classification");
+        CCCoreLib::ScalarField *sf = nullptr;
+
+        // create the scalar field Classification if needed
+        if (idx == -1)
+        {
+            idx = cloud->addScalarField("Classification");
+            sf = cloud->getScalarField(idx);
+        }
+        else
+            sf = cloud->getScalarField(idx);
+
+        ccGenericPointCloud::VisibilityTableType& visibilityArray = cloud->getTheVisibilityArray();
+        assert(!visibilityArray.empty());
+
+        int cloudSize = static_cast<int>(cloud->size());
+
+        //we project each point and we check if it falls inside the segmentation polyline
+#if defined(_OPENMP)
+#pragma omp parallel for
+#endif
+        for (int i = 0; i < cloudSize; ++i)
+        {
+            if (visibilityArray[i] == CCCoreLib::POINT_VISIBLE)
+            {
+                const CCVector3* P3D = cloud->getPoint(i);
+
+                CCVector3d Q2D;
+                bool pointInFrustum = false;
+                camera.project(*P3D, Q2D, &pointInFrustum);
+
+                bool pointInside = false;
+                if (pointInFrustum || !polyInsideFrustum) //we can only skip the test if the polyline is fully inside the frustum
+                {
+                    CCVector2 P2D(	static_cast<PointCoordinateType>(Q2D.x - half_w),
+                                    static_cast<PointCoordinateType>(Q2D.y - half_h));
+
+                    pointInside = CCCoreLib::ManualSegmentationTools::isPointInsidePoly(P2D, m_segmentationPoly);
+                }
+
+                if (pointInside)
+                    sf->setValue(i, pointClass);
+            }
+        }
+        sf->computeMinAndMax();
+    }
 }
 
 void ccGraphicalSegmentationTool::doSetPolylineSelection()

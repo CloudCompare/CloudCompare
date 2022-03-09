@@ -97,6 +97,7 @@ protected:
 	void closeRectangle();
 	void updatePolyLine(int x, int y, Qt::MouseButtons buttons);
 	void pauseSegmentationMode(bool);
+    void setClassificationField();
 	void doSetPolylineSelection();
 	void doSetRectangularSelection();
 	void doActionUseExistingPolyline();

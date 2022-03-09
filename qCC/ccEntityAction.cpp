@@ -27,6 +27,7 @@
 #include <ScalarFieldTools.h>
 #include <StatisticalTestingTools.h>
 #include <WeibullDistribution.h>
+#include <ReferenceCloud.h>
 
 //qCC_db
 #include "ccColorScalesManager.h"
@@ -1078,6 +1079,54 @@ namespace ccEntityAction
 		return true;
 	}
 	
+    bool sfSplitCloud(const ccHObject::Container &selectedEntities, ccMainAppInterface *app)
+    {
+        for (ccHObject* ent : selectedEntities)
+        {
+            ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(ent);
+            if (cloud != nullptr)
+            {
+                ccScalarField *sf = cloud->getCurrentDisplayedScalarField();
+                if (sf == nullptr)
+                    return false;
+
+                // count integer values
+                size_t N = sf->size();
+                std::set<int> classes;
+                for (size_t idx = 0; idx < N; idx++)
+                {
+                    int pointClass = static_cast<int>(sf->getValue(idx));
+                    if (find(classes.begin(), classes.end(), pointClass) == classes.end())
+                        classes.emplace(pointClass);
+                }
+                ccLog::Print("[sfSplitCloud] " + QString::number(classes.size()) + " classes found in the current scalar field");
+
+                // create as many clouds as the number of classes
+                for(auto cloudClass : classes)
+                {
+                    ccLog::Print("[sfSplitCloud] build cloud " + QString::number(cloudClass));
+                    // create the reference cloud
+                    CCCoreLib::ReferenceCloud referenceCloud(cloud);
+                    // add a scalar
+                    // populate the cloud with the points which have the selected class
+                    for(size_t index = 0; index < cloud->size(); index++)
+                    {
+                        int pointClass = sf->getValue(index);
+                        if (pointClass == cloudClass)
+                        {
+                            referenceCloud.addPointIndex(index);
+                        }
+                    }
+                    ccPointCloud *pc = cloud->partialClone(&referenceCloud);
+                    pc->setName(ent->getName() + "_" + QString::number(cloudClass));
+                    app->addToDB(pc); // add to data base
+                }
+            }
+        }
+
+        return true;
+    }
+
 	bool	sfSetAsCoord(const ccHObject::Container &selectedEntities, QWidget *parent)
 	{
 		ccExportCoordToSFDlg ectsDlg(parent);

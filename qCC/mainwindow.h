@@ -269,6 +269,8 @@ private:
 	void doActionRenameSF();
 	void doActionOpenColorScalesManager();
 	void doActionAddIdField();
+    void doActionSplitCloudUsingSF();
+    void doActionSetClassificationField();
 	void doActionSetSFAsCoord();
 	void doActionInterpolateScalarFields();
 

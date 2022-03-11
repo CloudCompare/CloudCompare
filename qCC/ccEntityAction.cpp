@@ -1079,50 +1079,101 @@ namespace ccEntityAction
 		return true;
 	}
 	
-    bool sfSplitCloud(const ccHObject::Container &selectedEntities, ccMainAppInterface *app)
+    bool sfSplitCloud(const ccHObject::Container& selectedEntities, ccMainAppInterface* app)
     {
+		bool tooManyCloudsQuestionAsked = false;
+
         for (ccHObject* ent : selectedEntities)
         {
             ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(ent);
-            if (cloud != nullptr)
+			if (!cloud)
+			{
+				continue;
+			}
+            
+			ccScalarField* sf = cloud->getCurrentDisplayedScalarField();
+			if (sf == nullptr)
+			{
+				ccLog::Warning(QString("Cloud %1 has no active scalar field").arg(cloud->getName()));
+				return false;
+			}
+
+            // count integer values
+            size_t N = sf->size();
+            std::set<int> classes;
+            for (ScalarType sfValue : *sf)
             {
-                ccScalarField *sf = cloud->getCurrentDisplayedScalarField();
-                if (sf == nullptr)
-                    return false;
-
-                // count integer values
-                size_t N = sf->size();
-                std::set<int> classes;
-                for (size_t idx = 0; idx < N; idx++)
-                {
-                    int pointClass = static_cast<int>(sf->getValue(idx));
-                    if (find(classes.begin(), classes.end(), pointClass) == classes.end())
-                        classes.emplace(pointClass);
-                }
-                ccLog::Print("[sfSplitCloud] " + QString::number(classes.size()) + " classes found in the current scalar field");
-
-                // create as many clouds as the number of classes
-                for(auto cloudClass : classes)
-                {
-                    ccLog::Print("[sfSplitCloud] build cloud " + QString::number(cloudClass));
-                    // create the reference cloud
-                    CCCoreLib::ReferenceCloud referenceCloud(cloud);
-                    // add a scalar
-                    // populate the cloud with the points which have the selected class
-                    for(size_t index = 0; index < cloud->size(); index++)
-                    {
-                        int pointClass = sf->getValue(index);
-                        if (pointClass == cloudClass)
-                        {
-                            referenceCloud.addPointIndex(index);
-                        }
-                    }
-                    ccPointCloud *pc = cloud->partialClone(&referenceCloud);
-                    pc->setName(ent->getName() + "_" + QString::number(cloudClass));
-                    app->addToDB(pc); // add to data base
-                }
+				classes.insert(static_cast<int>(sfValue));
             }
-        }
+            ccLog::Print("[sfSplitCloud] " + QString::number(classes.size()) + " classe(s) found in the current scalar field");
+
+			if (classes.size() == 1)
+			{
+				ccLog::Warning(QString("[sfSplitCloud] Cloud %1: SF has only one value").arg(cloud->getName()));
+				continue;
+			}
+
+			if (classes.size() > 30 && app && app->getMainWindow() && !tooManyCloudsQuestionAsked) // only in GUI mode
+			{
+				// ask the user if creating this many clouds is expected
+				if (QMessageBox::No == QMessageBox::question(app->getMainWindow(), "Too many values", QString("Do you confirm that you want to create %1 clouds").arg(classes.size()), QMessageBox::Yes, QMessageBox::No))
+				{
+					ccLog::Warning("[sfSplitCloud] Process cancelled by the user");
+					return false;
+				}
+				tooManyCloudsQuestionAsked = true;
+			}
+
+			ccHObject* destObject = new ccHObject(cloud->getName() + " classes");
+			if (cloud->getParent())
+			{
+				cloud->getParent()->addChild(destObject);
+			}
+            
+			// create as many clouds as the number of classes
+			for (int pointClass : classes)
+            {
+                ccLog::Print("[sfSplitCloud] build cloud corresponding to class #" + QString::number(pointClass));
+                
+				try
+				{
+					// create the reference cloud
+					CCCoreLib::ReferenceCloud referenceCloud(cloud);
+					
+					// populate the cloud with the points which have the selected class
+					for (unsigned index = 0; index < static_cast<unsigned>(cloud->size()); index++)
+					{
+						if (static_cast<int>(sf->at(index)) == pointClass)
+						{
+							referenceCloud.addPointIndex(index);
+						}
+					}
+					ccPointCloud* pc = cloud->partialClone(&referenceCloud);
+					if (pc)
+					{
+						pc->setName("class #" + QString::number(pointClass));
+						destObject->addChild(pc);
+					}
+					else
+					{
+						ccLog::Warning("[sfSplitCloud] Failed to create cloud");
+					}
+				}
+				catch (const std::bad_alloc&)
+				{
+					delete destObject;
+					destObject = nullptr;
+					ccLog::Error(QT_TR_NOOP("Not enough memory"));
+					return false;
+				}
+			}
+		
+			// add to database
+			app->addToDB(destObject);
+
+			cloud->setEnabled(false);
+			cloud->prepareDisplayForRefresh();
+		}
 
         return true;
     }

@@ -39,7 +39,7 @@
      <x>0</x>
      <y>0</y>
      <width>1024</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -3118,10 +3118,11 @@ QTreeView::branch:open:has-children:has-siblings  {
   </action>
   <action name="actionSplitCloudUsingSF">
    <property name="text">
-    <string>Split cloud using SF</string>
+    <string>Split cloud (integer values)</string>
    </property>
    <property name="toolTip">
-    <string>Split the selected cloud using the current scalar field. The field should be a positive integer.</string>
+    <string>Split the selected cloud using the current scalar field.
+The active scalar field should have integer values.</string>
    </property>
   </action>
   <action name="actionSetClassificationField">

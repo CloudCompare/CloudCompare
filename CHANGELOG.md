@@ -8,6 +8,9 @@ v2.12 (???) - (in development)
 		-  'Edit > Cloud > Create single point cloud': to create a cloud with a single point (set by the user)
 		-  'Edit > Cloud > Paste from clipboard' (shortcut: CTRL+P): to create a cloud from ASCII/test data stored in the clipboard
 
+	- Menu 'Edit > Scalar fields > Split clouds (integer values)'
+		- Will split the cloud in multiple sub-clouds based on the (integer) values of its active scalar field. To be used with a classification SF typically.
+
 - New plugins:
 	- PCL > Fast Global Registration (see https://github.com/isl-org/FastGlobalRegistration)
 		- Automatic registration of point clouds (with normals) with no initial/rough alignment

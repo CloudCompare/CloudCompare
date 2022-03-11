@@ -45,7 +45,6 @@
 #include <ccPointCloud.h>
 #include <ccPolyline.h>
 #include <ccScalarField.h>
-#include <ccSetClassificationField.h>
 
 //CClib
 #include <CCMiscTools.h>
@@ -272,7 +271,6 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	m_alignCameraWithEntityReverse = new QAction("Align camera (reverse)", this);
 	m_enableBubbleViewMode = new QAction("Bubble-view", this);
 	m_editLabelScalarValue = new QAction("Edit scalar value", this);
-    m_setClassificationField = new QAction("Set classification field", this);
 
 	m_contextMenuPos = QPoint(-1,-1);
 
@@ -298,8 +296,6 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	connect(m_alignCameraWithEntityReverse,		&QAction::triggered,					this, &ccDBRoot::alignCameraWithEntityIndirect);
 	connect(m_enableBubbleViewMode,				&QAction::triggered,					this, &ccDBRoot::enableBubbleViewMode);
 	connect(m_editLabelScalarValue,				&QAction::triggered,					this, &ccDBRoot::editLabelScalarValue);
-    connect(m_setClassificationField,           &QAction::triggered,                    this, &ccDBRoot::setClassificationField);
-
 
 	//other DB tree signals/slots connection
 	connect(m_dbTreeWidget->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ccDBRoot::changeSelection);
@@ -2161,36 +2157,6 @@ void ccDBRoot::editLabelScalarValue()
 	}
 }
 
-void ccDBRoot::setClassificationField()
-{
-    QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
-    QModelIndexList selectedIndexes = qism->selectedIndexes();
-    if (selectedIndexes.empty())
-    {
-        return;
-    }
-    unsigned selCount = static_cast<unsigned>(selectedIndexes.size());
-
-    ccHObject::Container selectedClouds;
-    for (unsigned i = 0; i < selCount; ++i)
-    {
-        ccHObject* obj = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
-
-        ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(obj);
-
-        // keep only clouds in the selection
-        if (cloud != nullptr)
-            selectedClouds.push_back(cloud);
-    }
-
-    ccSetClassificationFieldDlg setClassificationField;
-    if (setClassificationField.exec())
-    {
-        setClassificationField.setClassificationField(selectedClouds);
-        updatePropertiesView();
-    }
-}
-
 void ccDBRoot::showContextMenu(const QPoint& menuPos)
 {
 	m_contextMenuPos = menuPos;
@@ -2332,9 +2298,6 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 				menu.addSeparator();
 				menu.addAction(m_editLabelScalarValue);
 			}
-
-            menu.addSeparator();
-            menu.addAction(m_setClassificationField);
 
 			menu.addSeparator();
 		}

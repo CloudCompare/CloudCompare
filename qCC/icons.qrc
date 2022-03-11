@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/CC">
+    <file>images/hashtag.png</file>
     <file>images/raster_grid.jpg</file>
     <file>images/donate.png</file>
     <file>images/ccPickCenterAuto.png</file>

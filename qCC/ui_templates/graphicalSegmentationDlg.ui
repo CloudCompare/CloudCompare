@@ -127,9 +127,20 @@
     </widget>
    </item>
    <item>
-    <widget class="QToolButton" name="toolButton_class">
-     <property name="text">
-      <string>CLASS</string>
+    <widget class="QToolButton" name="addClassToolButton">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="toolTip">
+      <string>Flags the points inside the polyline with a (integer) value.
+The classification SF will be updated (and created if none available).</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../icons.qrc">
+       <normaloff>:/CC/images/hashtag.png</normaloff>:/CC/images/hashtag.png</iconset>
      </property>
     </widget>
    </item>
@@ -252,7 +263,6 @@
   </action>
  </widget>
  <resources>
-  <include location="../icons.qrc"/>
   <include location="../icons.qrc"/>
  </resources>
  <connections/>

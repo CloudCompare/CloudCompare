@@ -86,7 +86,7 @@ protected:
 
 	void segmentIn();
 	void segmentOut();
-	void segment(bool);
+	void segment(bool keepPointsInside, ScalarType classificationValue = CCCoreLib::NAN_VALUE);
 	void reset();
 	void apply();
 	void applyAndDelete();
@@ -97,7 +97,7 @@ protected:
 	void closeRectangle();
 	void updatePolyLine(int x, int y, Qt::MouseButtons buttons);
 	void pauseSegmentationMode(bool);
-    void setClassificationField();
+    void setClassificationValue();
 	void doSetPolylineSelection();
 	void doSetRectangularSelection();
 	void doActionUseExistingPolyline();

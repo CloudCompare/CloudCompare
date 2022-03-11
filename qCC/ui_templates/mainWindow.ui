@@ -148,13 +148,13 @@
      <addaction name="actionRenameSF"/>
      <addaction name="separator"/>
      <addaction name="actionAddConstantSF"/>
+     <addaction name="actionAddClassificationSF"/>
      <addaction name="actionAddIdField"/>
      <addaction name="actionExportCoordToSF"/>
      <addaction name="actionExportNormalToSF"/>
      <addaction name="actionSetSFAsCoord"/>
      <addaction name="actionInterpolateSFs"/>
      <addaction name="actionSplitCloudUsingSF"/>
-     <addaction name="actionSetClassificationField"/>
      <addaction name="actionScalarFieldArithmetic"/>
      <addaction name="separator"/>
      <addaction name="actionOpenColorScalesManager"/>
@@ -3125,9 +3125,16 @@ QTreeView::branch:open:has-children:has-siblings  {
 The active scalar field should have integer values.</string>
    </property>
   </action>
-  <action name="actionSetClassificationField">
+  <action name="actionAddClassificationSF">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/CC/images/ccAddConstSF.png</normaloff>:/CC/images/ccAddConstSF.png</iconset>
+   </property>
    <property name="text">
-    <string>Set classification field</string>
+    <string>Add classification SF</string>
+   </property>
+   <property name="toolTip">
+    <string>Add classification SF (shorcut to 'Add constant SF')</string>
    </property>
   </action>
  </widget>

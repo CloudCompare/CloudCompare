@@ -97,7 +97,7 @@ namespace ccEntityAction
 	
 	//////////
 	// Colours
-	bool setColor(ccHObject::Container selectedEntities, bool colorize, QWidget *parent)
+	bool setColor(ccHObject::Container selectedEntities, bool colorize, QWidget* parent)
 	{
 		QColor colour = QColorDialog::getColor(Qt::white, parent, QString(), QColorDialog::ShowAlphaChannel);
 		
@@ -225,7 +225,7 @@ namespace ccEntityAction
 		return true;
 	}
 	
-	bool setColorGradient(const ccHObject::Container &selectedEntities, QWidget *parent)
+	bool setColorGradient(const ccHObject::Container &selectedEntities, QWidget* parent)
 	{	
 		ccColorGradientDlg dlg(parent);
 		if (!dlg.exec())
@@ -285,7 +285,7 @@ namespace ccEntityAction
 		return true;
 	}
 	
-	bool	changeColorLevels(const ccHObject::Container &selectedEntities, QWidget *parent)
+	bool	changeColorLevels(const ccHObject::Container &selectedEntities, QWidget* parent)
 	{
 		if (selectedEntities.size() != 1)
 		{
@@ -315,7 +315,7 @@ namespace ccEntityAction
 	}
 	
 	//! Interpolate colors from on entity and transfer them to another one
-	bool	interpolateColors(const ccHObject::Container &selectedEntities, QWidget *parent)
+	bool	interpolateColors(const ccHObject::Container &selectedEntities, QWidget* parent)
 	{
 		if (selectedEntities.size() != 2)
 		{
@@ -513,7 +513,7 @@ namespace ccEntityAction
 		return true;
 	}
 	
-	bool	convertTextureToColor(const ccHObject::Container& selectedEntities, QWidget *parent)
+	bool	convertTextureToColor(const ccHObject::Container& selectedEntities, QWidget* parent)
 	{	
 		for (ccHObject* ent : selectedEntities)
 		{
@@ -557,7 +557,7 @@ namespace ccEntityAction
 		return true;
 	}
 
-	bool	enhanceRGBWithIntensities(const ccHObject::Container& selectedEntities, QWidget *parent)
+	bool	enhanceRGBWithIntensities(const ccHObject::Container& selectedEntities, QWidget* parent)
 	{
 		QString defaultSFName("Intensity");
 
@@ -657,7 +657,7 @@ namespace ccEntityAction
 	//////////
 	// Scalar Fields
 	
-	bool sfGaussianFilter(const ccHObject::Container &selectedEntities, QWidget *parent)
+	bool sfGaussianFilter(const ccHObject::Container &selectedEntities, QWidget* parent)
 	{
 		if (selectedEntities.empty())
 			return false;
@@ -761,7 +761,7 @@ namespace ccEntityAction
 		return true;
 	}
 	
-	bool	sfBilateralFilter(const ccHObject::Container &selectedEntities, QWidget *parent)
+	bool	sfBilateralFilter(const ccHObject::Container &selectedEntities, QWidget* parent)
 	{
 		if (selectedEntities.empty())
 			return false;
@@ -877,7 +877,7 @@ namespace ccEntityAction
 		return true;
 	}
 	
-	bool sfConvertToRGB(const ccHObject::Container &selectedEntities, QWidget *parent)
+	bool sfConvertToRGB(const ccHObject::Container &selectedEntities, QWidget* parent)
 	{
 		//we first ask the user if the SF colors should be mixed with existing colors
 		bool mixWithExistingColors = false;
@@ -923,7 +923,7 @@ namespace ccEntityAction
 		return true;
 	}
 	
-	bool	sfConvertToRandomRGB(const ccHObject::Container &selectedEntities, QWidget *parent)
+	bool	sfConvertToRandomRGB(const ccHObject::Container &selectedEntities, QWidget* parent)
 	{
 		static int s_randomColorsNumber = 256;
 		
@@ -1009,7 +1009,7 @@ namespace ccEntityAction
 		return true;
 	}
 	
-	bool sfRename(const ccHObject::Container &selectedEntities, QWidget *parent)
+	bool sfRename(const ccHObject::Container &selectedEntities, QWidget* parent)
 	{
 		for (ccHObject* ent : selectedEntities)
 		{
@@ -1079,6 +1079,82 @@ namespace ccEntityAction
 		return true;
 	}
 	
+	bool sfAddConstant(ccPointCloud* cloud, QString sfName, bool integerValue, QWidget* parent)
+	{
+		if (!cloud)
+		{
+			assert(false);
+			return false;
+		}
+
+		if (sfName.isNull())
+		{
+			ccLog::Error(QT_TR_NOOP("Invalid name"));
+			return false;
+		}
+
+		if (cloud->getScalarFieldIndexByName(qPrintable(sfName)) >= 0)
+		{
+			ccLog::Error(QT_TR_NOOP("A SF with a similar name already exists!"));
+			return false;
+		}
+
+		ScalarType sfValue = 0;
+		bool ok = false;
+		if (integerValue)
+		{
+			static int s_constantIntSFValue = 0;
+			int iValue = QInputDialog::getInt(parent, QT_TR_NOOP("Add classification SF"), QT_TR_NOOP("value"), s_constantIntSFValue, -1000000, 1000000, 1, &ok);
+			if (ok)
+			{
+				s_constantIntSFValue = iValue;
+				sfValue = static_cast<ScalarType>(iValue);
+			}
+		}
+		else
+		{
+			static double s_constantDoubleSFValue = 0.0;
+			double dValue = static_cast<ScalarType>(QInputDialog::getDouble(parent, QT_TR_NOOP("Add constant value"), QT_TR_NOOP("value"), s_constantDoubleSFValue, -1.0e9, 1.0e9, 8, &ok));
+			if (ok)
+			{
+				s_constantDoubleSFValue = dValue;
+				sfValue = static_cast<ScalarType>(dValue);
+			}
+		}
+
+		if (!ok)
+		{
+			// cancelled by the user
+			return false;
+		}
+
+		int sfIdx = cloud->getScalarFieldIndexByName(qPrintable(sfName));
+		if (sfIdx < 0)
+			sfIdx = cloud->addScalarField(qPrintable(sfName));
+		if (sfIdx < 0)
+		{
+			ccLog::Error(QT_TR_NOOP("An error occurred! (see console)"));
+			return false;
+		}
+
+		CCCoreLib::ScalarField* sf = cloud->getScalarField(sfIdx);
+		assert(sf);
+		if (!sf)
+		{
+			assert(false);
+			return false;
+		}
+		
+		sf->fill(sfValue);
+		sf->computeMinAndMax();
+		cloud->setCurrentDisplayedScalarField(sfIdx);
+		cloud->showSF(true);
+
+		ccLog::Print(QObject::tr("New scalar field '%1' added to %2 (value = %3)").arg(sfName).arg(cloud->getName()).arg(sfValue));
+
+		return true;
+	}
+
     bool sfSplitCloud(const ccHObject::Container& selectedEntities, ccMainAppInterface* app)
     {
 		bool tooManyCloudsQuestionAsked = false;
@@ -1178,7 +1254,7 @@ namespace ccEntityAction
         return true;
     }
 
-	bool	sfSetAsCoord(const ccHObject::Container &selectedEntities, QWidget *parent)
+	bool	sfSetAsCoord(const ccHObject::Container &selectedEntities, QWidget* parent)
 	{
 		ccExportCoordToSFDlg ectsDlg(parent);
 		ectsDlg.warningLabel->setVisible(false);
@@ -1358,7 +1434,7 @@ namespace ccEntityAction
 		return true;
 	}
 
-	bool	sfArithmetic(const ccHObject::Container &selectedEntities, QWidget *parent)
+	bool	sfArithmetic(const ccHObject::Container &selectedEntities, QWidget* parent)
 	{
 		Q_ASSERT(!selectedEntities.empty());
 		
@@ -1393,7 +1469,7 @@ namespace ccEntityAction
 		return true;
 	}
 
-	bool	sfFromColor(const ccHObject::Container &selectedEntities, QWidget *parent)
+	bool	sfFromColor(const ccHObject::Container &selectedEntities, QWidget* parent)
 	{
 		ccScalarFieldFromColorDlg dialog(parent);
 		if (!dialog.exec())
@@ -1509,7 +1585,7 @@ namespace ccEntityAction
 		return true;
 	}
 	
-	bool	processMeshSF(const ccHObject::Container &selectedEntities, ccMesh::MESH_SCALAR_FIELD_PROCESS process, QWidget *parent)
+	bool	processMeshSF(const ccHObject::Container &selectedEntities, ccMesh::MESH_SCALAR_FIELD_PROCESS process, QWidget* parent)
 	{
 		for (ccHObject* ent : selectedEntities)
 		{
@@ -1550,7 +1626,7 @@ namespace ccEntityAction
 	//////////
 	// Normals
 	
-	bool	computeNormals(const ccHObject::Container &selectedEntities, QWidget *parent)
+	bool	computeNormals(const ccHObject::Container &selectedEntities, QWidget* parent)
 	{
 		if (selectedEntities.empty())
 		{
@@ -1868,7 +1944,7 @@ namespace ccEntityAction
 		return true;
 	}
 	
-	bool	orientNormalsFM(const ccHObject::Container &selectedEntities, QWidget *parent)
+	bool	orientNormalsFM(const ccHObject::Container &selectedEntities, QWidget* parent)
 	{
 		if (selectedEntities.empty())
 		{
@@ -2115,7 +2191,7 @@ namespace ccEntityAction
 	//////////
 	// Octree
 
-	bool computeOctree(const ccHObject::Container &selectedEntities, QWidget *parent)
+	bool computeOctree(const ccHObject::Container &selectedEntities, QWidget* parent)
 	{
 		ccBBox bbox;
 		std::unordered_set<ccGenericPointCloud*> clouds;
@@ -2245,7 +2321,7 @@ namespace ccEntityAction
 	//////////
 	// Properties
 	
-	bool	clearProperty(ccHObject::Container selectedEntities, CLEAR_PROPERTY property, QWidget *parent)
+	bool	clearProperty(ccHObject::Container selectedEntities, CLEAR_PROPERTY property, QWidget* parent)
 	{	
 		for (ccHObject* ent : selectedEntities)
 		{
@@ -2390,7 +2466,7 @@ namespace ccEntityAction
 	//////////
 	// Stats
 	
-	bool	statisticalTest(const ccHObject::Container &selectedEntities, QWidget *parent)
+	bool	statisticalTest(const ccHObject::Container &selectedEntities, QWidget* parent)
 	{
 		ccPickOneElementDlg poeDlg(QObject::tr("Distribution"), QObject::tr("Choose distribution"), parent);
 		poeDlg.addElement("Gauss");
@@ -2534,7 +2610,7 @@ namespace ccEntityAction
 		return true;
 	}
 	
-	bool	computeStatParams(const ccHObject::Container &selectedEntities, QWidget *parent)
+	bool	computeStatParams(const ccHObject::Container &selectedEntities, QWidget* parent)
 	{
 		ccPickOneElementDlg pDlg(QObject::tr("Distribution"), QObject::tr("Distribution Fitting"), parent);
 		pDlg.addElement("Gauss");

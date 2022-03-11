@@ -270,7 +270,6 @@ private:
 	void doActionOpenColorScalesManager();
 	void doActionAddIdField();
     void doActionSplitCloudUsingSF();
-    void doActionSetClassificationField();
 	void doActionSetSFAsCoord();
 	void doActionInterpolateScalarFields();
 
@@ -305,7 +304,7 @@ private:
 	void doActionComputeStatParams();
 	void doActionFilterByValue();
 	
-	// Picking opeations
+	// Picking operations
 	void enablePickingOperation(ccGLWindow* win, QString message);
 	void cancelPreviousPickingOperation(bool aborted);
 
@@ -323,6 +322,7 @@ private:
 	void doActionSmoothMeshSF();
 	void doActionEnhanceMeshSF();
 	void doActionAddConstantSF();
+	void doActionAddClassificationSF();
 	void doActionScalarFieldArithmetic();
 	void doActionScalarFieldFromColor();
 	void doActionOrientNormalsFM();
@@ -532,17 +532,23 @@ private:
 	void enableUIItems(dbTreeSelectionInfo& selInfo);
 
 	//! Updates the view mode pop-menu based for a given window (or an absence of!)
-	virtual void updateViewModePopUpMenu(ccGLWindow* win);
+	void updateViewModePopUpMenu(ccGLWindow* win);
 
 	//! Updates the pivot visibility pop-menu based for a given window (or an absence of!)
-	virtual void updatePivotVisibilityPopUpMenu(ccGLWindow* win);
+	void updatePivotVisibilityPopUpMenu(ccGLWindow* win);
 
 	//! Checks whether stereo mode can be stopped (if necessary) or not
 	bool checkStereoMode(ccGLWindow* win);
 
-	Ui::MainWindow	*m_UI;
+	//! Adds a single value SF to the active point cloud
+	void addConstantSF(ccPointCloud* cloud, QString sfName, bool integerValue);
+
+private: //members
+
+	//! Main UI
+	Ui::MainWindow* m_UI;
 	
-	//DB & DB Tree
+	//! DB tree
 	ccDBRoot* m_ccRoot;
 
 	//! Currently selected entities;

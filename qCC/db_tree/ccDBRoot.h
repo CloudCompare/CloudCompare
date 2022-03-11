@@ -216,7 +216,6 @@ private:
 	void alignCameraWithEntityIndirect() { alignCameraWithEntity(true); }
 	void enableBubbleViewMode();
 	void editLabelScalarValue();
-    void setClassificationField();
 
 signals:
 	void selectionChanged();
@@ -302,8 +301,6 @@ protected:
 	QAction* m_enableBubbleViewMode;
 	//! Context menu action: change current scalar value (via a 2D label)
 	QAction* m_editLabelScalarValue;
-    //! Context menu action: set current class
-    QAction* m_setClassificationField;
 
 	//! Last context menu pos
 	QPoint m_contextMenuPos;

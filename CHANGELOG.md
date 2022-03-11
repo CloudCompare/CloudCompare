@@ -11,6 +11,9 @@ v2.12 (???) - (in development)
 	- Menu 'Edit > Scalar fields > Split clouds (integer values)'
 		- Will split the cloud in multiple sub-clouds based on the (integer) values of its active scalar field. To be used with a classification SF typically.
 
+	- Menu 'Edit > Scalar fields > Add classification SF'
+		- Shortcut to 'Edit > Scalar fields > Add constant SF' to create a 'Classification' SF with a constant (integer) value
+
 - New plugins:
 	- PCL > Fast Global Registration (see https://github.com/isl-org/FastGlobalRegistration)
 		- Automatic registration of point clouds (with normals) with no initial/rough alignment
@@ -31,6 +34,9 @@ v2.12 (???) - (in development)
 	- Google DRACO format .DRC (compressed point clouds and meshes - https://github.com/google/draco)
 
 - Improvements
+	- Interactive segmentation tool
+		- New 'hashtag' icon to flag the points inside the polygon with a given class value (instead of segmenting the points).
+		- A 'Classification' SF will be added to the cloud if none already (otherwise the 'Classification' SF will be updated)
 	- Rasterize
 		- Improved interpolation scheme on the raster borders
 		- New 'max edge length' option when interpolating grid cells, to avoid using large triangles

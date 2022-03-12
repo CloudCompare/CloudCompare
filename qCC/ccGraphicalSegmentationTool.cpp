@@ -989,7 +989,7 @@ void ccGraphicalSegmentationTool::setClassificationValue()
 {
 	static int s_classValue = 0;
 	bool ok = false;
-	int iValue = QInputDialog::getInt(m_associatedWin, QT_TR_NOOP("Classification"), QT_TR_NOOP("value"), s_classValue, -1000000, 1000000, 1, &ok);
+	int iValue = QInputDialog::getInt(m_associatedWin->asWidget(), QT_TR_NOOP("Classification"), QT_TR_NOOP("value"), s_classValue, -1000000, 1000000, 1, &ok);
 	if (!ok)
 	{
 		return;

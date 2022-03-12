@@ -33,6 +33,7 @@
 #include <QTimer>
 
 #ifdef CC_GL_WINDOW_USE_QWINDOW
+#include <QHBoxLayout>
 #include <QWidget>
 #include <QWindow>
 #else
@@ -1353,6 +1354,62 @@ protected: //members
 	//! Fast pixel reading mechanism with PBO
 	PBOPicking m_pickingPBO;
 };
+
+#ifdef CC_GL_WINDOW_USE_QWINDOW
+
+//! Container widget for ccGLWindow
+class CCGLWINDOW_LIB_API ccGLWidget : public QWidget
+{
+	Q_OBJECT
+
+public:
+
+	ccGLWidget(ccGLWindow* window, QWidget* parent = nullptr)
+		: QWidget(parent)
+	{
+		setLayout(new QHBoxLayout);
+		layout()->setContentsMargins(0, 0, 0, 0);
+
+		if (window)
+		{
+			setAssociatedWindow(window);
+		}
+	}
+
+	virtual ~ccGLWidget()
+	{
+		if (m_associatedWindow)
+		{
+			m_associatedWindow->setParent(nullptr);
+			m_associatedWindow->close();
+		}
+	}
+
+	inline ccGLWindow* associatedWindow() const { return m_associatedWindow; }
+
+	void setAssociatedWindow(ccGLWindow* window)
+	{
+		if (window)
+		{
+			assert(layout() && layout()->count() == 0);
+			QWidget* container = QWidget::createWindowContainer(window, this);
+			layout()->addWidget(container);
+
+			m_associatedWindow = window;
+			m_associatedWindow->setParentWidget(container);
+		}
+		else
+		{
+			assert(false);
+		}
+	}
+
+protected:
+
+	ccGLWindow* m_associatedWindow;
+};
+
+#endif
 
 inline void CreateGLWindow(ccGLWindow*& window, QWidget*& widget, bool stereoMode = false, bool silentInitialization = false)
 {

@@ -135,8 +135,11 @@
       </sizepolicy>
      </property>
      <property name="toolTip">
-      <string>Flags the points inside the polyline with a (integer) value.
-The classification SF will be updated (and created if none available).</string>
+      <string>Set the class of points inside the polyline (C).
+The classification SF will be directly updated (and created if needed).</string>
+     </property>
+     <property name="statusTip">
+      <string>Set the class of points inside the polyline (C)</string>
      </property>
      <property name="icon">
       <iconset resource="../icons.qrc">

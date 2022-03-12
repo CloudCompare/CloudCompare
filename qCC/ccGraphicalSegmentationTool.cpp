@@ -92,6 +92,7 @@ ccGraphicalSegmentationTool::ccGraphicalSegmentationTool(QWidget* parent)
 	addOverriddenShortcut(Qt::Key_Tab);    //tab key to switch between rectangular and polygonal selection modes
 	addOverriddenShortcut(Qt::Key_I);      //'I' key for the "segment in" button
 	addOverriddenShortcut(Qt::Key_O);      //'O' key for the "segment out" button
+	addOverriddenShortcut(Qt::Key_C);      //'C' key for the "classify" button
 	connect(this, &ccOverlayDialog::shortcutTriggered, this, &ccGraphicalSegmentationTool::onShortcutTriggered);
 
 	QMenu* selectionModeMenu = new QMenu(this);
@@ -152,6 +153,10 @@ void ccGraphicalSegmentationTool::onShortcutTriggered(int key)
 
 	case Qt::Key_O:
 		outButton->click();
+		return;
+
+	case Qt::Key_C:
+		addClassToolButton->click();
 		return;
 
 	case Qt::Key_Return:

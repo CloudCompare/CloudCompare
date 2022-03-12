@@ -37,8 +37,9 @@ v2.12 (???) - (in development)
 	- New Display option:
 		- option to select the application style (Windows Vista, Windows, Fusion, etc.)
 	- Interactive segmentation tool
-		- New 'hashtag' icon to flag the points inside the polygon with a given class value (instead of segmenting the points).
+		- New option to flag the points inside the polygon with a given class value (instead of segmenting the points).
 		- A 'Classification' SF will be added to the cloud if none already (otherwise the 'Classification' SF will be updated)
+		- Shortcut: 'C'
 	- Rasterize
 		- Improved interpolation scheme on the raster borders
 		- New 'max edge length' option when interpolating grid cells, to avoid using large triangles

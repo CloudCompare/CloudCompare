@@ -10550,6 +10550,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionEditGlobalShiftAndScale->setEnabled(atLeastOneCloud || atLeastOneMesh || atLeastOnePolyline);
 	m_UI->actionCrop->setEnabled(atLeastOneCloud || atLeastOneMesh);
 	m_UI->actionSetUniqueColor->setEnabled(atLeastOneEntity/*atLeastOneCloud || atLeastOneMesh*/); //DGM: we can set color to a group now!
+	m_UI->actionSetColorGradient->setEnabled(atLeastOneCloud || atLeastOneMesh);
 	m_UI->actionColorize->setEnabled(atLeastOneEntity/*atLeastOneCloud || atLeastOneMesh*/); //DGM: we can set color to a group now!
 	m_UI->actionDeleteScanGrid->setEnabled(atLeastOneGrid);
 
@@ -10578,6 +10579,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionConvertToRandomRGB->setEnabled(atLeastOneSF);
 	m_UI->actionRenameSF->setEnabled(atLeastOneSF);
 	m_UI->actionAddIdField->setEnabled(atLeastOneCloud);
+	m_UI->actionSplitCloudUsingSF->setEnabled(atLeastOneSF);
 	m_UI->actionComputeStatParams->setEnabled(atLeastOneSF);
 	m_UI->actionComputeStatParams2->setEnabled(atLeastOneSF);
 	m_UI->actionShowHistogram->setEnabled(atLeastOneSF);
@@ -10597,6 +10599,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionSmoothMeshLaplacian->setEnabled(atLeastOneMesh);
 	m_UI->actionConvertTextureToColor->setEnabled(atLeastOneMesh);
 	m_UI->actionSubdivideMesh->setEnabled(atLeastOneMesh);
+	m_UI->actionFlipMeshTriangles->setEnabled(atLeastOneMesh);
 	m_UI->actionDistanceToBestFitQuadric3D->setEnabled(atLeastOneCloud);
 	m_UI->actionDistanceMap->setEnabled(atLeastOneMesh || atLeastOneCloud);
 
@@ -10643,6 +10646,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionUnroll->setEnabled(exactlyOneEntity);
 	m_UI->actionStatisticalTest->setEnabled(exactlyOneEntity && exactlyOneSF);
 	m_UI->actionAddConstantSF->setEnabled(exactlyOneCloud || exactlyOneMesh);
+	m_UI->actionAddClassificationSF->setEnabled(exactlyOneCloud || exactlyOneMesh);
 	m_UI->actionEditGlobalScale->setEnabled(exactlyOneCloud || exactlyOneMesh);
 	m_UI->actionComputeKdTree->setEnabled(exactlyOneCloud || exactlyOneMesh);
 	m_UI->actionShowWaveDialog->setEnabled(exactlyOneCloud);

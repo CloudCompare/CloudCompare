@@ -256,7 +256,7 @@ namespace ccEntityAction
 		for (ccHObject* ent : selectedEntities)
 		{
 			bool lockedVertices = false;
-			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
+			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent, &lockedVertices);
 			if (lockedVertices)
 			{
 				ccUtils::DisplayLockedVerticesWarning(ent->getName(), selectedEntities.size() == 1);

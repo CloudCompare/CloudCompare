@@ -35,7 +35,7 @@
         <x>0</x>
         <y>0</y>
         <width>496</width>
-        <height>411</height>
+        <height>409</height>
        </rect>
       </property>
       <attribute name="label">
@@ -375,7 +375,7 @@
         <x>0</x>
         <y>0</y>
         <width>496</width>
-        <height>411</height>
+        <height>409</height>
        </rect>
       </property>
       <attribute name="label">
@@ -460,7 +460,7 @@
         <x>0</x>
         <y>0</y>
         <width>496</width>
-        <height>411</height>
+        <height>409</height>
        </rect>
       </property>
       <attribute name="label">
@@ -603,275 +603,205 @@
         <x>0</x>
         <y>0</y>
         <width>496</width>
-        <height>411</height>
+        <height>409</height>
        </rect>
       </property>
       <attribute name="label">
        <string>Other options</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_8">
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_4">
-         <item>
-          <widget class="QLabel" name="label_11">
-           <property name="text">
-            <string>Default font size</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QSpinBox" name="defaultFontSizeSpinBox">
-           <property name="minimum">
-            <number>6</number>
-           </property>
-           <property name="maximum">
-            <number>96</number>
-           </property>
-           <property name="value">
-            <number>12</number>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_3">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_3">
-         <item>
-          <widget class="QLabel" name="label_14">
-           <property name="text">
-            <string>Displayed numbers precision</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QSpinBox" name="numberPrecisionSpinBox">
-           <property name="value">
-            <number>6</number>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_2">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_5">
-         <item>
-          <widget class="QLabel" name="label_17">
-           <property name="text">
-            <string>Perspective zooming speed</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QDoubleSpinBox" name="zoomSpeedDoubleSpinBox">
-           <property name="toolTip">
-            <string>Zoom/walk speed in perspective mode (default = 1.0)</string>
-           </property>
-           <property name="decimals">
-            <number>3</number>
-           </property>
-           <property name="maximum">
-            <double>1000.000000000000000</double>
-           </property>
-           <property name="singleStep">
-            <double>0.010000000000000</double>
-           </property>
-           <property name="value">
-            <double>1.000000000000000</double>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_4">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_9">
-         <item>
-          <widget class="QCheckBox" name="decimateCloudBox">
-           <property name="statusTip">
-            <string>Automatically decimate big point clouds when moved</string>
-           </property>
-           <property name="whatsThis">
-            <string>Automatically decimate big point clouds when moved</string>
-           </property>
-           <property name="text">
-            <string>Decimate clouds over</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QDoubleSpinBox" name="maxCloudSizeDoubleSpinBox">
-           <property name="toolTip">
-            <string>Minimum number of points to activate decimation</string>
-           </property>
-           <property name="prefix">
-            <string notr="true">&gt; </string>
-           </property>
-           <property name="suffix">
-            <string notr="true"> M.</string>
-           </property>
-           <property name="decimals">
-            <number>1</number>
-           </property>
-           <property name="minimum">
-            <double>0.100000000000000</double>
-           </property>
-           <property name="maximum">
-            <double>10000.000000000000000</double>
-           </property>
-           <property name="value">
-            <double>10.000000000000000</double>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_21">
-           <property name="text">
-            <string>points when moved</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_5">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_8">
-         <item>
-          <widget class="QCheckBox" name="decimateMeshBox">
-           <property name="statusTip">
-            <string>Automatically decimate big meshes when moved</string>
-           </property>
-           <property name="whatsThis">
-            <string>Automatically decimate big meshes when moved</string>
-           </property>
-           <property name="text">
-            <string>Decimate meshes over</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QDoubleSpinBox" name="maxMeshSizeDoubleSpinBox">
-           <property name="toolTip">
-            <string>Minimum number of triangles to activate decimation</string>
-           </property>
-           <property name="prefix">
-            <string notr="true">&gt; </string>
-           </property>
-           <property name="suffix">
-            <string notr="true"> M.</string>
-           </property>
-           <property name="decimals">
-            <number>1</number>
-           </property>
-           <property name="minimum">
-            <double>0.100000000000000</double>
-           </property>
-           <property name="maximum">
-            <double>10000.000000000000000</double>
-           </property>
-           <property name="singleStep">
-            <double>0.500000000000000</double>
-           </property>
-           <property name="value">
-            <double>2.500000000000000</double>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_19">
-           <property name="text">
-            <string>triangles when moved</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_7">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="QCheckBox" name="drawRoundedPointsCheckBox">
+      <layout class="QFormLayout" name="formLayout">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_11">
          <property name="text">
-          <string>Draw rounded points (slower)</string>
+          <string>Default font size</string>
          </property>
         </widget>
        </item>
-       <item>
-        <widget class="QCheckBox" name="useVBOCheckBox">
+       <item row="0" column="1">
+        <widget class="QSpinBox" name="defaultFontSizeSpinBox">
+         <property name="minimum">
+          <number>6</number>
+         </property>
+         <property name="maximum">
+          <number>96</number>
+         </property>
+         <property name="value">
+          <number>12</number>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_14">
          <property name="text">
-          <string>Try to load clouds on GPU for faster display</string>
+          <string>Displayed numbers precision</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QSpinBox" name="numberPrecisionSpinBox">
+         <property name="value">
+          <number>6</number>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_17">
+         <property name="text">
+          <string>Perspective mode zooming speed</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QDoubleSpinBox" name="zoomSpeedDoubleSpinBox">
+         <property name="toolTip">
+          <string>Zoom/walk speed in perspective mode (default = 1.0)</string>
+         </property>
+         <property name="decimals">
+          <number>3</number>
+         </property>
+         <property name="maximum">
+          <double>1000.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.010000000000000</double>
+         </property>
+         <property name="value">
+          <double>1.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QCheckBox" name="decimateCloudBox">
+         <property name="statusTip">
+          <string>Automatically decimate big point clouds when moved</string>
+         </property>
+         <property name="whatsThis">
+          <string>Automatically decimate big point clouds when moved</string>
+         </property>
+         <property name="text">
+          <string>When moved, decimate clouds over</string>
          </property>
          <property name="checked">
           <bool>true</bool>
          </property>
         </widget>
        </item>
-       <item>
+       <item row="3" column="1">
+        <widget class="QDoubleSpinBox" name="maxCloudSizeDoubleSpinBox">
+         <property name="toolTip">
+          <string>Minimum number of points to activate decimation</string>
+         </property>
+         <property name="prefix">
+          <string notr="true">&gt; </string>
+         </property>
+         <property name="suffix">
+          <string notr="true"> M. points</string>
+         </property>
+         <property name="decimals">
+          <number>1</number>
+         </property>
+         <property name="minimum">
+          <double>0.100000000000000</double>
+         </property>
+         <property name="maximum">
+          <double>10000.000000000000000</double>
+         </property>
+         <property name="value">
+          <double>10.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QCheckBox" name="decimateMeshBox">
+         <property name="statusTip">
+          <string>Automatically decimate big meshes when moved</string>
+         </property>
+         <property name="whatsThis">
+          <string>Automatically decimate big meshes when moved</string>
+         </property>
+         <property name="text">
+          <string>When moved, decimate meshes over</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QDoubleSpinBox" name="maxMeshSizeDoubleSpinBox">
+         <property name="toolTip">
+          <string>Minimum number of triangles to activate decimation</string>
+         </property>
+         <property name="prefix">
+          <string notr="true">&gt; </string>
+         </property>
+         <property name="suffix">
+          <string notr="true"> M. triangles</string>
+         </property>
+         <property name="decimals">
+          <number>1</number>
+         </property>
+         <property name="minimum">
+          <double>0.100000000000000</double>
+         </property>
+         <property name="maximum">
+          <double>10000.000000000000000</double>
+         </property>
+         <property name="singleStep">
+          <double>0.500000000000000</double>
+         </property>
+         <property name="value">
+          <double>2.500000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="label_22">
+         <property name="text">
+          <string>Auto-compute octree for picking</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="QComboBox" name="autoComputeOctreeComboBox">
+         <property name="toolTip">
+          <string>Octree computation can be long but the picking is then much faster</string>
+         </property>
+         <property name="currentIndex">
+          <number>1</number>
+         </property>
+         <item>
+          <property name="text">
+           <string>Always</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Ask each time</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Never</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="7" column="0">
+        <widget class="QCheckBox" name="autoDisplayNormalsCheckBox">
+         <property name="text">
+          <string>Automatically display normals at loading time (if any)</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="0">
+        <widget class="QCheckBox" name="drawRoundedPointsCheckBox">
+         <property name="text">
+          <string>Draw rounded points (slower)</string>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="0">
         <widget class="QCheckBox" name="showCrossCheckBox">
          <property name="toolTip">
           <string>A cross is displayed in the middle of the screen</string>
@@ -887,24 +817,17 @@
          </property>
         </widget>
        </item>
-       <item>
-        <widget class="QCheckBox" name="autoDisplayNormalsCheckBox">
+       <item row="11" column="0">
+        <widget class="QCheckBox" name="useVBOCheckBox">
          <property name="text">
-          <string>Automatically display normals at loading time (when available)</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QCheckBox" name="singleClickPickingCheckBox">
-         <property name="text">
-          <string>Single Click Object Picking (Can be slow on large point clouds)</string>
+          <string>Try to load clouds on GPU for faster display</string>
          </property>
          <property name="checked">
           <bool>true</bool>
          </property>
         </widget>
        </item>
-       <item>
+       <item row="12" column="0">
         <widget class="QCheckBox" name="useNativeDialogsCheckBox">
          <property name="text">
           <string>Use native load / save dialogs</string>
@@ -914,56 +837,7 @@
          </property>
         </widget>
        </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_10">
-         <item>
-          <widget class="QLabel" name="label_22">
-           <property name="text">
-            <string>Auto-compute octree for picking</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QComboBox" name="autoComputeOctreeComboBox">
-           <property name="toolTip">
-            <string>Octree computation can be long but the picking is then much faster</string>
-           </property>
-           <property name="currentIndex">
-            <number>1</number>
-           </property>
-           <item>
-            <property name="text">
-             <string>Always</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Ask each time</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Never</string>
-            </property>
-           </item>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_8">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </item>
-       <item>
+       <item row="13" column="0">
         <spacer name="verticalSpacer_3">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -975,6 +849,29 @@
           </size>
          </property>
         </spacer>
+       </item>
+       <item row="10" column="0">
+        <widget class="QCheckBox" name="singleClickPickingCheckBox">
+         <property name="toolTip">
+          <string>Can be slow on large point clouds</string>
+         </property>
+         <property name="text">
+          <string>Single Click Object Picking</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QLabel" name="label_19">
+         <property name="text">
+          <string>Application style</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <widget class="QComboBox" name="appStyleComboBox"/>
        </item>
       </layout>
      </widget>

@@ -26,6 +26,7 @@ namespace ccPS
 	inline const QString SaveFile                    () { return QStringLiteral( "SaveFile" ); }
 	inline const QString MainWinGeom                 () { return QStringLiteral( "mainWindowGeometry" ); }
 	inline const QString MainWinState                () { return QStringLiteral( "mainWindowState" ); }
+	inline const QString AppStyle                    () { return QStringLiteral( "AppStyle" ); }
 	inline const QString CurrentPath                 () { return QStringLiteral( "currentPath" ); }
 	inline const QString SelectedInputFilter         () { return QStringLiteral( "selectedInputFilter" ); }
 	inline const QString SelectedOutputFilterCloud   () { return QStringLiteral( "selectedOutputFilterCloud" ); }
@@ -41,4 +42,7 @@ namespace ccPS
 	inline const QString MaxAbsCoord                 () { return QStringLiteral( "MaxAbsCoord" ); }
 	inline const QString MaxAbsDiag                  () { return QStringLiteral( "MaxAbsDiag" ); }
 	inline const QString AutoPickRotationCenter      () { return QStringLiteral( "AutoPickRotationCenter" ); }
+	inline const QString Options                     () { return QStringLiteral( "Options" ); }
+	inline const QString Plugins                     () { return QStringLiteral( "Plugins" ); }
+	inline const QString Translation                 () { return QStringLiteral( "Translation" ); }
 };

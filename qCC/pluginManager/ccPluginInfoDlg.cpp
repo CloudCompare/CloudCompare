@@ -178,7 +178,7 @@ void ccPluginInfoDlg::setPluginList( const QList<ccPluginInterface *> &pluginLis
 				
 		item->setCheckable( true );
 		
-		if ( ccPluginManager::get().isEnabled( plugin ) )
+		if ( ccPluginManager::Get().isEnabled( plugin ) )
 		{
 			item->setCheckState( Qt::Checked );
 		}
@@ -235,7 +235,7 @@ void ccPluginInfoDlg::itemChanged( QStandardItem *item )
 	
 	if ( plugin != nullptr )
 	{
-		ccPluginManager::get().setPluginEnabled( plugin, checked );
+		ccPluginManager::Get().setPluginEnabled( plugin, checked );
 		
 		if ( m_UI->mWarningLabel->isHidden() )
 		{

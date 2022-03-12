@@ -24,9 +24,9 @@
 class ccPluginInterface;
 
 //! Simply a list of \see ccPluginInterface
-using ccPluginInterfaceList = QVector<ccPluginInterface *>;
+using ccPluginInterfaceList = QVector<ccPluginInterface*>;
 
-
+//! Plugin manager
 class CCAPPCOMMON_LIB_API ccPluginManager : public QObject
 {
 	Q_OBJECT
@@ -34,10 +34,10 @@ class CCAPPCOMMON_LIB_API ccPluginManager : public QObject
 public:
 	~ccPluginManager() override = default;
 	
-	static ccPluginManager& get();
+	static ccPluginManager& Get();
 	
 	void setPaths( const QStringList& paths );
-	QStringList pluginPaths();
+	QStringList pluginPaths() const;
 	
 	void loadPlugins();
 	
@@ -49,11 +49,12 @@ public:
 protected:
 	explicit ccPluginManager( QObject* parent = nullptr );
 
-private:
+private: // methods
 	void loadFromPathsAndAddToList();
 	
-	QStringList disabledPluginIIDs() const;
+	void getDisabledPluginIIDs(QStringList& disabledPlugins) const;
 	
+private: // members
 	QStringList m_pluginPaths;
 	ccPluginInterfaceList m_pluginList;
 };

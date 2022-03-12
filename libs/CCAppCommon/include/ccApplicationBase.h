@@ -29,25 +29,26 @@ class CCAPPCOMMON_LIB_API ccApplicationBase : public QApplication
 public:
 	//! This must be called before instantiating the application class so it
 	//! can setup OpenGL first.
-	static void	initOpenGL();
+	static void	InitOpenGL();
 	
 	ccApplicationBase( int &argc, char **argv, bool isCommandLine, const QString &version );
 	
-	bool isCommandLine() const { return c_CommandLine; }
+	inline bool isCommandLine() const { return m_isCommandLine; }
+	inline const QString& translationPath() const { return m_translationPath; }
+	inline const QString& versionStr() const { return m_versionStr; }
+	QString versionLongStr(bool includeOS) const;
 	
-	QString versionStr() const;
-	QString versionLongStr( bool includeOS ) const;
-	
-	const QString &translationPath() const;
-	
+	//! Set the application style (based on a QStyleFactory key)
+	bool setAppStyle(QString styleKey);
+
 private:
 	void setupPaths();
 		
-	const QString c_VersionStr;
+	const QString m_versionStr;
 	
-	QString	m_ShaderPath;
-	QString	m_TranslationPath;
-	QStringList m_PluginPaths;
+	QString	m_shaderPath;
+	QString	m_translationPath;
+	QStringList m_pluginPaths;
 	
-	const bool c_CommandLine;
+	const bool m_isCommandLine;
 };

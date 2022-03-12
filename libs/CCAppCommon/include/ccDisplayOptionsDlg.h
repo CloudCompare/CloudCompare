@@ -82,28 +82,32 @@ protected:
 	//! Refreshes dialog to reflect new parameters values
 	void refresh();
 
-	QColor lightDiffuseColor;
-	QColor lightAmbientColor;
-	QColor lightSpecularColor;
-	QColor meshFrontDiff;
-	QColor meshBackDiff;
-	QColor meshSpecularColor;
-	QColor pointsDefaultCol;
-	QColor textDefaultCol;
-	QColor backgroundCol;
-	QColor labelBackgroundCol;
-	QColor labelMarkerCol;
-	QColor bbDefaultCol;
+	// Colors
+	QColor m_lightDiffuseColor;
+	QColor m_lightAmbientColor;
+	QColor m_lightSpecularColor;
+	QColor m_meshFrontDiff;
+	QColor m_meshBackDiff;
+	QColor m_meshSpecularColor;
+	QColor m_pointsDefaultCol;
+	QColor m_textDefaultCol;
+	QColor m_backgroundCol;
+	QColor m_labelBackgroundCol;
+	QColor m_labelMarkerCol;
+	QColor m_bbDefaultCol;
 
 	//! Current GUI parameters
-	ccGui::ParamStruct parameters;
+	ccGui::ParamStruct m_parameters;
 	//! Current options
-	ccOptions options;
+	ccOptions m_options;
 
 	//! Old parameters (for restore)
-	ccGui::ParamStruct oldParameters;
+	ccGui::ParamStruct m_oldParameters;
 	//! Old options (for restore)
-	ccOptions oldOptions;
+	ccOptions m_oldOptions;
+
+	//! Default style (active when the dialog was first shown)
+	int m_defaultAppStyleIndex;
 	
 private:
 	Ui::DisplayOptionsDlg* m_ui;

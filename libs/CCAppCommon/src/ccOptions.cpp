@@ -17,6 +17,9 @@
 
 #include "ccOptions.h"
 
+// ccPluginAPI
+#include <ccPersistentSettings.h>
+
 //Qt
 #include <QSettings>
 
@@ -61,7 +64,7 @@ void ccOptions::reset()
 void ccOptions::fromPersistentSettings()
 {
 	QSettings settings;
-	settings.beginGroup("Options");
+	settings.beginGroup(ccPS::Options());
 	{
 		normalsDisplayedByDefault = settings.value("normalsDisplayedByDefault", false).toBool();
 		useNativeDialogs = settings.value("useNativeDialogs", true).toBool();
@@ -72,7 +75,7 @@ void ccOptions::fromPersistentSettings()
 void ccOptions::toPersistentSettings() const
 {
 	QSettings settings;
-	settings.beginGroup("Options");
+	settings.beginGroup(ccPS::Options());
 	{
 		settings.setValue("normalsDisplayedByDefault", normalsDisplayedByDefault);
 		settings.setValue("useNativeDialogs", useNativeDialogs);

@@ -41,10 +41,9 @@
 #include "ccviewer.h"
 #include "ccViewerApplication.h"
 
-
 int main(int argc, char *argv[])
 {
-	ccViewerApplication::initOpenGL();
+	ccViewerApplication::InitOpenGL();
 	
 	ccViewerApplication a(argc, argv, false);
 
@@ -64,7 +63,7 @@ int main(int argc, char *argv[])
 	}
 #endif
 	
-	QDir::setCurrent( workingDir.absolutePath() );
+	QDir::setCurrent(workingDir.absolutePath());
 	
 	if (!QGLFormat::hasOpenGL())
 	{
@@ -83,7 +82,7 @@ int main(int argc, char *argv[])
 	ccColorScalesManager::GetUniqueInstance(); //force pre-computed color tables initialization
 
 	ccViewer w;
-	a.setViewer( &w );
+	a.setViewer(&w);
 
 	//register minimal logger to display errors
 	ccViewerLog logger(&w);
@@ -97,7 +96,7 @@ int main(int argc, char *argv[])
 		//parse arguments
 		QStringList filenames;
 		int i = 1;
-		while ( i < argc)
+		while (i < argc)
 		{
 			QString argument = QString::fromLocal8Bit(argv[i++]);
 			QString upperArgument = argument.toUpper();

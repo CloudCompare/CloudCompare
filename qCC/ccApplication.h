@@ -27,7 +27,7 @@ class ccApplication : public ccApplicationBase
 
 public:
 	ccApplication( int &argc, char **argv, bool isCommandLine );
-	
+
 protected:
 	bool event( QEvent *inEvent ) override;
 };

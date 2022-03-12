@@ -51,7 +51,7 @@ ccPluginUIManager::ccPluginUIManager( ccMainAppInterface *appInterface, QWidget 
 
 void ccPluginUIManager::init()
 {
-	auto plugins = ccPluginManager::get().pluginList();
+	auto plugins = ccPluginManager::Get().pluginList();
 	
 	m_pluginMenu->setEnabled( false );
 	m_glFilterMenu->setEnabled( false );
@@ -72,7 +72,7 @@ void ccPluginUIManager::init()
 			continue;
 		}
 		
-		if ( !ccPluginManager::get().isEnabled( plugin ) )
+		if ( !ccPluginManager::Get().isEnabled( plugin ) )
 		{
 			m_plugins.push_back( plugin );
 			
@@ -292,7 +292,7 @@ void ccPluginUIManager::showAboutDialog() const
 {
 	ccPluginInfoDlg	about;
 	
-	about.setPluginPaths( ccPluginManager::get().pluginPaths() );
+	about.setPluginPaths( ccPluginManager::Get().pluginPaths() );
 	about.setPluginList( m_plugins );
 	
 	about.exec();

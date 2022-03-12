@@ -19,12 +19,14 @@
 
 //Qt
 #include <QDir>
+#include <QProcessEnvironment>
+#include <QSettings>
 #include <QStandardPaths>
 #include <QString>
+#include <QStyleFactory>
 #include <QSurfaceFormat>
 #include <QTranslator>
 #include <QtGlobal>
-#include <QProcessEnvironment>
 #include <QTextCodec>
 
 // CCCoreLib
@@ -36,18 +38,19 @@
 // qCC_glWindow
 #include "ccGLWindow.h"
 
-//Common
+// Common
 #include "ccApplicationBase.h"
 #include "ccPluginManager.h"
 #include "ccTranslationManager.h"
 
+// ccPluginAPI
+#include <ccPersistentSettings.h>
 
 #if (QT_VERSION < QT_VERSION_CHECK(5, 5, 0))
 #error CloudCompare does not support versions of Qt prior to 5.5
 #endif
 
-
-void ccApplicationBase::initOpenGL()
+void ccApplicationBase::InitOpenGL()
 {
 	//See http://doc.qt.io/qt-5/qopenglwidget.html#opengl-function-calls-headers-and-qopenglfunctions
 	/** Calling QSurfaceFormat::setDefaultFormat() before constructing the QApplication instance is mandatory
@@ -78,16 +81,16 @@ void ccApplicationBase::initOpenGL()
 	}
 
 	// The 'AA_ShareOpenGLContexts' attribute must be defined BEFORE the creation of the Q(Gui)Application
-	// DGM: this is mandatory to enable exclusive full screen for ccGLWidget (at least on Windows)
+	// DGM: this is mandatory to enable exclusive full screen for ccGLWindow (at least on Windows)
 	QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
 }
 
-ccApplicationBase::ccApplicationBase(int &argc, char **argv, bool isCommandLine, const QString &version)
-    : QApplication( argc, argv )
-    , c_VersionStr( version )
-	, c_CommandLine( isCommandLine )
+ccApplicationBase::ccApplicationBase(int& argc, char** argv, bool isCommandLine, const QString& version)
+	: QApplication(argc, argv)
+	, m_versionStr(version)
+	, m_isCommandLine(isCommandLine)
 {
-	setOrganizationName( "CCCorp" );
+	setOrganizationName("CCCorp");
 
 	setupPaths();
 
@@ -95,14 +98,14 @@ ccApplicationBase::ccApplicationBase(int &argc, char **argv, bool isCommandLine,
 	//enables automatic scaling based on the monitor's pixel density
 	setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
-		
+
 #ifdef Q_OS_MAC
 	// Mac OS X apps don't show icons in menus
-	setAttribute( Qt::AA_DontShowIconsInMenus );
+	setAttribute(Qt::AA_DontShowIconsInMenus);
 #endif
 
 	// Force 'english' locale so as to get a consistent behavior everywhere
-	QLocale::setDefault( QLocale::English );
+	QLocale::setDefault(QLocale::English);
 	QTextCodec* utf8Codec = QTextCodec::codecForName("UTF-8");
 	if (utf8Codec)
 	{
@@ -116,84 +119,85 @@ ccApplicationBase::ccApplicationBase(int &argc, char **argv, bool isCommandLine,
 #ifdef Q_OS_UNIX
 	// We reset the numeric locale for POSIX functions
 	// See https://doc.qt.io/qt-5/qcoreapplication.html#locale-settings
-	setlocale( LC_NUMERIC, "C" );
+	setlocale(LC_NUMERIC, "C");
 #endif
-	
-	ccGLWindow::setShaderPath( m_ShaderPath );
-	ccPluginManager::get().setPaths( m_PluginPaths );
-	
-	ccTranslationManager::get().registerTranslatorFile( QStringLiteral( "qt" ), m_TranslationPath );
-	ccTranslationManager::get().registerTranslatorFile( QStringLiteral( "CloudCompare" ), m_TranslationPath );
-	ccTranslationManager::get().loadTranslations();
-	
-	connect( this, &ccApplicationBase::aboutToQuit, [=](){ ccMaterial::ReleaseTextures(); } );
+
+	// restore the style from persistent settings
+	QSettings settings;
+	settings.beginGroup(ccPS::AppStyle());
+	{
+		QString styleKey = settings.value("style", QString()).toString();
+		if (!styleKey.isEmpty())
+		{
+			setAppStyle(styleKey);
+		}
+	}
+	settings.endGroup();
+
+	ccGLWindow::setShaderPath(m_shaderPath);
+	ccPluginManager::Get().setPaths(m_pluginPaths);
+
+	ccTranslationManager::Get().registerTranslatorFile(QStringLiteral("qt"), m_translationPath);
+	ccTranslationManager::Get().registerTranslatorFile(QStringLiteral("CloudCompare"), m_translationPath);
+	ccTranslationManager::Get().loadTranslations();
+
+	connect(this, &ccApplicationBase::aboutToQuit, [=]() { ccMaterial::ReleaseTextures(); });
 }
 
-QString ccApplicationBase::versionStr() const
+QString ccApplicationBase::versionLongStr(bool includeOS) const
 {
-	return c_VersionStr;
-}
-
-QString ccApplicationBase::versionLongStr( bool includeOS ) const
-{
-	QString verStr = c_VersionStr;
+	QString verStr = m_versionStr;
 
 #ifdef CC_GL_WINDOW_USE_QWINDOW
-	verStr += QStringLiteral( " Stereo" );
+	verStr += QStringLiteral(" Stereo");
 #endif
 
 #if defined(CC_ENV_64)
-	const QString arch( "64-bit" );
+	const QString arch("64-bit");
 #elif defined(CC_ENV_32)
-	const QString arch( "32-bit" );
+	const QString arch("32-bit");
 #else
-	const QString arch( "\?\?-bit" );
+	const QString arch("\?\?-bit");
 #endif
 
-	if ( includeOS )
+	if (includeOS)
 	{
 #if defined(CC_WINDOWS)
-		const QString platform( "Windows" );
+		const QString platform("Windows");
 #elif defined(CC_MAC_OS)
-		const QString platform( "macOS" );
+		const QString platform("macOS");
 #elif defined(CC_LINUX)
-		const QString platform( "Linux" );
+		const QString platform("Linux");
 #else
-		const QString platform( "Unknown OS" );
+		const QString platform("Unknown OS");
 #endif
-		verStr += QStringLiteral( " [%1 %2]" ).arg( platform, arch );
+		verStr += QStringLiteral(" [%1 %2]").arg(platform, arch);
 	}
 	else
 	{
-		verStr += QStringLiteral( " [%1]" ).arg( arch );
+		verStr += QStringLiteral(" [%1]").arg(arch);
 	}
 
 #ifdef QT_DEBUG
-	verStr += QStringLiteral( " [DEBUG]" );
+	verStr += QStringLiteral(" [DEBUG]");
 #endif
 
 	return verStr;
 }
 
-const QString &ccApplicationBase::translationPath() const
-{
-	return m_TranslationPath;
-}
-
 void ccApplicationBase::setupPaths()
 {
-	QDir  appDir = QCoreApplication::applicationDirPath();
+	QDir appDir = QCoreApplication::applicationDirPath();
 
 	// Set up our shader and plugin paths
 #if defined(Q_OS_MAC)
-	QDir  bundleDir = appDir;
-
-	if ( bundleDir.dirName() == "MacOS" )
+	QDir bundleDir = appDir;
+	if (bundleDir.dirName() == "MacOS")
 	{
 		bundleDir.cdUp();
 	}
 
-	m_PluginPaths << (bundleDir.absolutePath() + "/PlugIns/ccPlugins");
+	m_pluginPaths << (bundleDir.absolutePath() + "/PlugIns/ccPlugins");
 
 #if defined(CC_MAC_DEV_PATHS)
 	// Used for development only - this is the path where the plugins are built
@@ -203,72 +207,95 @@ void ccApplicationBase::setupPaths()
 	bundleDir.cdUp();
 	bundleDir.cdUp();
 
-	m_PluginPaths << (bundleDir.absolutePath() + "/ccPlugins");
-	m_ShaderPath = (bundleDir.absolutePath() + "/shaders");
-	m_TranslationPath = (bundleDir.absolutePath() + "/qCC/translations");
+	m_pluginPaths << (bundleDir.absolutePath() + "/ccPlugins");
+	m_shaderPath = (bundleDir.absolutePath() + "/shaders");
+	m_translationPath = (bundleDir.absolutePath() + "/qCC/translations");
 #else
-	m_ShaderPath = (bundleDir.absolutePath() + "/Shaders");
-	m_TranslationPath = (bundleDir.absolutePath() + "/translations");
+	m_shaderPath = (bundleDir.absolutePath() + "/Shaders");
+	m_translationPath = (bundleDir.absolutePath() + "/translations");
 #endif
 #elif defined(Q_OS_WIN)
-	m_PluginPaths << (appDir.absolutePath() + "/plugins");
-	m_ShaderPath = (appDir.absolutePath() + "/shaders");
-	m_TranslationPath = (appDir.absolutePath() + "/translations");
+	m_pluginPaths << (appDir.absolutePath() + "/plugins");
+	m_shaderPath = (appDir.absolutePath() + "/shaders");
+	m_translationPath = (appDir.absolutePath() + "/translations");
 #elif defined(Q_OS_LINUX)
 	// Shaders & plugins are relative to the bin directory where the executable is found
 	QDir  theDir = appDir;
 
-	if ( theDir.dirName() == "bin" )
+	if (theDir.dirName() == "bin")
 	{
 		theDir.cdUp();
 
-		m_PluginPaths << (theDir.absolutePath() + "/lib/cloudcompare/plugins");
-		m_ShaderPath = (theDir.absolutePath() + "/share/cloudcompare/shaders");
-		m_TranslationPath = (theDir.absolutePath() + "/share/cloudcompare/translations");
+		m_pluginPaths << (theDir.absolutePath() + "/lib/cloudcompare/plugins");
+		m_shaderPath = (theDir.absolutePath() + "/share/cloudcompare/shaders");
+		m_translationPath = (theDir.absolutePath() + "/share/cloudcompare/translations");
 	}
 	else
 	{
 		// Choose a reasonable default to look in
-		m_PluginPaths << "/usr/lib/cloudcompare/plugins";
-		m_ShaderPath = "/usr/share/cloudcompare/shaders";
-		m_TranslationPath = "/usr/share/cloudcompare/translations";
+		m_pluginPaths << "/usr/lib/cloudcompare/plugins";
+		m_shaderPath = "/usr/share/cloudcompare/shaders";
+		m_translationPath = "/usr/share/cloudcompare/translations";
 	}
 #else
-#warning Need to specify the shader path for this OS.
+	#warning Need to specify the shader path for this OS.
 #endif
 
 	// If the environment variables are specified, overwrite the shader and translation paths.
 	QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
 
-	if ( env.contains("CC_SHADER_PATH") )
+	if (env.contains("CC_SHADER_PATH"))
 	{
-		m_ShaderPath = env.value("CC_SHADER_PATH");
+		m_shaderPath = env.value("CC_SHADER_PATH");
 	}
 
-	if ( env.contains("CC_TRANSLATION_PATH") )
+	if (env.contains("CC_TRANSLATION_PATH"))
 	{
-		m_TranslationPath = env.value("CC_TRANSLATION_PATH");
+		m_translationPath = env.value("CC_TRANSLATION_PATH");
 	}
 
 	// Add any app data paths to plugin paths
 	// Plugins in these directories take precendence over the included ones
 	// This allows users to put plugins outside of the install directories.
-	const QStringList appDataPaths = QStandardPaths::standardLocations( QStandardPaths::AppDataLocation );
+	const QStringList appDataPaths = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation);
 
-	for ( const QString &appDataPath : appDataPaths )
+	for (const QString &appDataPath : appDataPaths)
 	{
 		QString path = appDataPath + "/plugins";
-
-		if (!m_PluginPaths.contains(path)) //avoid duplicate entries (can happen, at least on Windows)
+		if (!m_pluginPaths.contains(path)) //avoid duplicate entries (can happen, at least on Windows)
 		{
-			m_PluginPaths << path;
+			m_pluginPaths << path;
 		}
 	}
 
 	// If the environment variable is specified, the path takes precedence over
 	// included and appdata ones.
-	if ( env.contains("CC_PLUGIN_PATH") )
+	if (env.contains("CC_PLUGIN_PATH"))
 	{
-		m_PluginPaths << env.value("CC_PLUGIN_PATH").split(QDir::listSeparator());
+		m_pluginPaths << env.value("CC_PLUGIN_PATH").split(QDir::listSeparator());
 	}
 }
+
+bool ccApplicationBase::setAppStyle(QString styleKey)
+{
+	QStyle* style = QStyleFactory::create(styleKey);
+	if (!style)
+	{
+		ccLog::Warning("Invalid style key or style couldn't be created: " + styleKey);
+		return false;
+	}
+
+	ccLog::Print("Applying application style: " + styleKey);
+	setStyle(style);
+
+	// remember the style in persistent settings
+	QSettings settings;
+	settings.beginGroup(ccPS::AppStyle());
+	{
+		settings.setValue("style", styleKey);
+	}
+	settings.endGroup();
+
+	return true;
+}
+

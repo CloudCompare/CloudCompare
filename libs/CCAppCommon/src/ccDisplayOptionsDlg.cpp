@@ -16,13 +16,18 @@
 //##########################################################################
 
 #include "ccDisplayOptionsDlg.h"
+#include "ccApplicationBase.h"
+
 #include "ui_displayOptionsDlg.h"
 
 //local
 #include "ccQtHelpers.h"
 
+#include <ccLog.h>
+
 //Qt
 #include <QColorDialog>
+#include <QStyleFactory>
 
 #include <cassert>
 
@@ -32,6 +37,7 @@ constexpr double s_defaultMaxVBOCloudSizeM = 50.0;
 ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent)
 	: QDialog(parent, Qt::Tool)
 	, m_ui( new Ui::DisplayOptionsDlg )
+	, m_defaultAppStyleIndex(-1)
 {
 	m_ui->setupUi(this);
 
@@ -48,17 +54,17 @@ ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent)
 	connect(m_ui->pointsColorButton,		&QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::changePointsColor);
 	connect(m_ui->textColorButton,			&QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::changeTextColor);
 
-	connect(m_ui->doubleSidedCheckBox,             &QCheckBox::toggled, this, [&](bool state) { parameters.lightDoubleSided = state; });
-	connect(m_ui->enableGradientCheckBox,          &QCheckBox::toggled, this, [&](bool state) { parameters.drawBackgroundGradient = state; });
-	connect(m_ui->showCrossCheckBox,               &QCheckBox::toggled, this, [&](bool state) { parameters.displayCross = state; });
-	connect(m_ui->colorScaleShowHistogramCheckBox, &QCheckBox::toggled, this, [&](bool state) { parameters.colorScaleShowHistogram = state; });
-	connect(m_ui->useColorScaleShaderCheckBox,     &QCheckBox::toggled, this, [&](bool state) { parameters.colorScaleUseShader = state; });
-	connect(m_ui->decimateMeshBox,                 &QCheckBox::toggled, this, [&](bool state) { parameters.decimateMeshOnMove = state; });
-	connect(m_ui->decimateCloudBox,                &QCheckBox::toggled, this, [&](bool state) { parameters.decimateCloudOnMove = state; });
-	connect(m_ui->drawRoundedPointsCheckBox,       &QCheckBox::toggled, this, [&](bool state) { parameters.drawRoundedPoints = state; });
-	connect(m_ui->singleClickPickingCheckBox,	   &QCheckBox::toggled, this, [&](bool state) { parameters.singleClickPicking = state; });
-	connect(m_ui->autoDisplayNormalsCheckBox,      &QCheckBox::toggled, this, [&](bool state) { options.normalsDisplayedByDefault = state; });
-	connect(m_ui->useNativeDialogsCheckBox,        &QCheckBox::toggled, this, [&](bool state) { options.useNativeDialogs = state; });
+	connect(m_ui->doubleSidedCheckBox,             &QCheckBox::toggled, this, [&](bool state) { m_parameters.lightDoubleSided = state; });
+	connect(m_ui->enableGradientCheckBox,          &QCheckBox::toggled, this, [&](bool state) { m_parameters.drawBackgroundGradient = state; });
+	connect(m_ui->showCrossCheckBox,               &QCheckBox::toggled, this, [&](bool state) { m_parameters.displayCross = state; });
+	connect(m_ui->colorScaleShowHistogramCheckBox, &QCheckBox::toggled, this, [&](bool state) { m_parameters.colorScaleShowHistogram = state; });
+	connect(m_ui->useColorScaleShaderCheckBox,     &QCheckBox::toggled, this, [&](bool state) { m_parameters.colorScaleUseShader = state; });
+	connect(m_ui->decimateMeshBox,                 &QCheckBox::toggled, this, [&](bool state) { m_parameters.decimateMeshOnMove = state; });
+	connect(m_ui->decimateCloudBox,                &QCheckBox::toggled, this, [&](bool state) { m_parameters.decimateCloudOnMove = state; });
+	connect(m_ui->drawRoundedPointsCheckBox,       &QCheckBox::toggled, this, [&](bool state) { m_parameters.drawRoundedPoints = state; });
+	connect(m_ui->singleClickPickingCheckBox,	   &QCheckBox::toggled, this, [&](bool state) { m_parameters.singleClickPicking = state; });
+	connect(m_ui->autoDisplayNormalsCheckBox,      &QCheckBox::toggled, this, [&](bool state) { m_options.normalsDisplayedByDefault = state; });
+	connect(m_ui->useNativeDialogsCheckBox,        &QCheckBox::toggled, this, [&](bool state) { m_options.useNativeDialogs = state; });
 
 	connect(m_ui->useVBOCheckBox,	&QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::changeVBOUsage);
 
@@ -81,8 +87,33 @@ ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent)
 	connect(m_ui->resetButton,	&QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::reset);
 	connect(m_ui->cancelButton,	&QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::doReject);
 
-	oldParameters = parameters = ccGui::Parameters();
-	oldOptions = options = ccOptions::Instance();
+	// fill the application style combo-box
+	{
+		// store the default style (= the active one when the dialog is first shown)
+		QStyle* defaultStyle = ccApp->style();
+		QString defaultAppStyle;
+		if (defaultStyle)
+		{
+			defaultAppStyle = defaultStyle->objectName();
+		}
+
+		// fill the combo-box
+		QStringList appStyles = QStyleFactory::keys();
+		for (int i = 0; i < appStyles.size(); ++i)
+		{
+			const QString& style = appStyles[i];
+			m_ui->appStyleComboBox->addItem(style);
+
+			if (style.compare(defaultAppStyle, Qt::CaseInsensitive) == 0)
+			{
+				m_defaultAppStyleIndex = i;
+			}
+		}
+		m_ui->appStyleComboBox->setCurrentIndex(m_defaultAppStyleIndex);
+	}
+
+	m_oldParameters = m_parameters = ccGui::Parameters();
+	m_oldOptions = m_options = ccOptions::Instance();
 
 	refresh();
 
@@ -97,256 +128,255 @@ ccDisplayOptionsDlg::~ccDisplayOptionsDlg()
 
 void ccDisplayOptionsDlg::refresh()
 {
-	const ccColor::Rgbaf& ac = parameters.lightAmbientColor;
-	lightAmbientColor.setRgbF(ac.r, ac.g, ac.b, ac.a);
-	ccQtHelpers::SetButtonColor(m_ui->ambientColorButton, lightAmbientColor);
+	const ccColor::Rgbaf& ac = m_parameters.lightAmbientColor;
+	m_lightAmbientColor.setRgbF(ac.r, ac.g, ac.b, ac.a);
+	ccQtHelpers::SetButtonColor(m_ui->ambientColorButton, m_lightAmbientColor);
 
-	const ccColor::Rgbaf& dc = parameters.lightDiffuseColor;
-	lightDiffuseColor.setRgbF(dc.r, dc.g, dc.b, dc.a);
-	ccQtHelpers::SetButtonColor(m_ui->diffuseColorButton, lightDiffuseColor);
+	const ccColor::Rgbaf& dc = m_parameters.lightDiffuseColor;
+	m_lightDiffuseColor.setRgbF(dc.r, dc.g, dc.b, dc.a);
+	ccQtHelpers::SetButtonColor(m_ui->diffuseColorButton, m_lightDiffuseColor);
 
-	const ccColor::Rgbaf& sc = parameters.lightSpecularColor;
-	lightSpecularColor.setRgbF(sc.r, sc.g, sc.b, sc.a);
-	ccQtHelpers::SetButtonColor(m_ui->specularColorButton, lightSpecularColor);
+	const ccColor::Rgbaf& sc = m_parameters.lightSpecularColor;
+	m_lightSpecularColor.setRgbF(sc.r, sc.g, sc.b, sc.a);
+	ccQtHelpers::SetButtonColor(m_ui->specularColorButton, m_lightSpecularColor);
 
-	const ccColor::Rgbaf& mbc = parameters.meshBackDiff;
-	meshBackDiff.setRgbF(mbc.r, mbc.g, mbc.b, mbc.a);
-	ccQtHelpers::SetButtonColor(m_ui->meshBackColorButton, meshBackDiff);
+	const ccColor::Rgbaf& mbc = m_parameters.meshBackDiff;
+	m_meshBackDiff.setRgbF(mbc.r, mbc.g, mbc.b, mbc.a);
+	ccQtHelpers::SetButtonColor(m_ui->meshBackColorButton, m_meshBackDiff);
 
-	const ccColor::Rgbaf& mspec = parameters.meshSpecular;
-	meshSpecularColor.setRgbF(mspec.r, mspec.g, mspec.b, mspec.a);
-	ccQtHelpers::SetButtonColor(m_ui->meshSpecularColorButton, meshSpecularColor);
+	const ccColor::Rgbaf& mspec = m_parameters.meshSpecular;
+	m_meshSpecularColor.setRgbF(mspec.r, mspec.g, mspec.b, mspec.a);
+	ccQtHelpers::SetButtonColor(m_ui->meshSpecularColorButton, m_meshSpecularColor);
 
-	const ccColor::Rgbaf& mfc = parameters.meshFrontDiff;
-	meshFrontDiff.setRgbF(mfc.r, mfc.g, mfc.b, mfc.a);
-	ccQtHelpers::SetButtonColor(m_ui->meshFrontColorButton, meshFrontDiff);
+	const ccColor::Rgbaf& mfc = m_parameters.meshFrontDiff;
+	m_meshFrontDiff.setRgbF(mfc.r, mfc.g, mfc.b, mfc.a);
+	ccQtHelpers::SetButtonColor(m_ui->meshFrontColorButton, m_meshFrontDiff);
 
-	const ccColor::Rgba& bbc = parameters.bbDefaultCol;
-	bbDefaultCol.setRgb(bbc.r, bbc.g, bbc.b, bbc.a);
-	ccQtHelpers::SetButtonColor(m_ui->bbColorButton, bbDefaultCol);
+	const ccColor::Rgba& bbc = m_parameters.bbDefaultCol;
+	m_bbDefaultCol.setRgb(bbc.r, bbc.g, bbc.b, bbc.a);
+	ccQtHelpers::SetButtonColor(m_ui->bbColorButton, m_bbDefaultCol);
 
-	const ccColor::Rgbub& bgc = parameters.backgroundCol;
-	backgroundCol.setRgb(bgc.r, bgc.g, bgc.b);
-	ccQtHelpers::SetButtonColor(m_ui->bkgColorButton, backgroundCol);
+	const ccColor::Rgbub& bgc = m_parameters.backgroundCol;
+	m_backgroundCol.setRgb(bgc.r, bgc.g, bgc.b);
+	ccQtHelpers::SetButtonColor(m_ui->bkgColorButton, m_backgroundCol);
 
-	const ccColor::Rgba& lblbc = parameters.labelBackgroundCol;
-	labelBackgroundCol.setRgb(lblbc.r, lblbc.g, lblbc.b, lblbc.a);
-	ccQtHelpers::SetButtonColor(m_ui->labelBkgColorButton, labelBackgroundCol);
+	const ccColor::Rgba& lblbc = m_parameters.labelBackgroundCol;
+	m_labelBackgroundCol.setRgb(lblbc.r, lblbc.g, lblbc.b, lblbc.a);
+	ccQtHelpers::SetButtonColor(m_ui->labelBkgColorButton, m_labelBackgroundCol);
 
-	const ccColor::Rgba& lblmc = parameters.labelMarkerCol;
-	labelMarkerCol.setRgb(lblmc.r, lblmc.g, lblmc.b, lblmc.a);
-	ccQtHelpers::SetButtonColor(m_ui->labelMarkerColorButton, labelMarkerCol);
+	const ccColor::Rgba& lblmc = m_parameters.labelMarkerCol;
+	m_labelMarkerCol.setRgb(lblmc.r, lblmc.g, lblmc.b, lblmc.a);
+	ccQtHelpers::SetButtonColor(m_ui->labelMarkerColorButton, m_labelMarkerCol);
 
-	const ccColor::Rgba& pdc = parameters.pointsDefaultCol;
-	pointsDefaultCol.setRgb(pdc.r, pdc.g, pdc.b, pdc.a);
-	ccQtHelpers::SetButtonColor(m_ui->pointsColorButton, pointsDefaultCol);
+	const ccColor::Rgba& pdc = m_parameters.pointsDefaultCol;
+	m_pointsDefaultCol.setRgb(pdc.r, pdc.g, pdc.b, pdc.a);
+	ccQtHelpers::SetButtonColor(m_ui->pointsColorButton, m_pointsDefaultCol);
 
-	const ccColor::Rgba& tdc = parameters.textDefaultCol;
-	textDefaultCol.setRgb(tdc.r, tdc.g, tdc.b, tdc.a);
-	ccQtHelpers::SetButtonColor(m_ui->textColorButton, textDefaultCol);
+	const ccColor::Rgba& tdc = m_parameters.textDefaultCol;
+	m_textDefaultCol.setRgb(tdc.r, tdc.g, tdc.b, tdc.a);
+	ccQtHelpers::SetButtonColor(m_ui->textColorButton, m_textDefaultCol);
 
-	m_ui->doubleSidedCheckBox->setChecked(parameters.lightDoubleSided);
-	m_ui->enableGradientCheckBox->setChecked(parameters.drawBackgroundGradient);
-	m_ui->decimateMeshBox->setChecked(parameters.decimateMeshOnMove);
-	m_ui->maxMeshSizeDoubleSpinBox->setValue(parameters.minLoDMeshSize / 1000000.0);
-	m_ui->decimateCloudBox->setChecked(parameters.decimateCloudOnMove);
-	m_ui->drawRoundedPointsCheckBox->setChecked(parameters.drawRoundedPoints);
-	m_ui->maxCloudSizeDoubleSpinBox->setValue(parameters.minLoDCloudSize / 1000000.0);
-	m_ui->useVBOCheckBox->setChecked(parameters.useVBOs);
-	m_ui->showCrossCheckBox->setChecked(parameters.displayCross);
-	m_ui->singleClickPickingCheckBox->setChecked(parameters.singleClickPicking);
+	m_ui->doubleSidedCheckBox->setChecked(m_parameters.lightDoubleSided);
+	m_ui->enableGradientCheckBox->setChecked(m_parameters.drawBackgroundGradient);
+	m_ui->decimateMeshBox->setChecked(m_parameters.decimateMeshOnMove);
+	m_ui->maxMeshSizeDoubleSpinBox->setValue(m_parameters.minLoDMeshSize / 1000000.0);
+	m_ui->decimateCloudBox->setChecked(m_parameters.decimateCloudOnMove);
+	m_ui->drawRoundedPointsCheckBox->setChecked(m_parameters.drawRoundedPoints);
+	m_ui->maxCloudSizeDoubleSpinBox->setValue(m_parameters.minLoDCloudSize / 1000000.0);
+	m_ui->useVBOCheckBox->setChecked(m_parameters.useVBOs);
+	m_ui->showCrossCheckBox->setChecked(m_parameters.displayCross);
+	m_ui->singleClickPickingCheckBox->setChecked(m_parameters.singleClickPicking);
 
-	m_ui->colorScaleShowHistogramCheckBox->setChecked(parameters.colorScaleShowHistogram);
-	m_ui->useColorScaleShaderCheckBox->setChecked(parameters.colorScaleUseShader);
-	m_ui->useColorScaleShaderCheckBox->setEnabled(parameters.colorScaleShaderSupported);
-	m_ui->colorRampWidthSpinBox->setValue(parameters.colorScaleRampWidth);
+	m_ui->colorScaleShowHistogramCheckBox->setChecked(m_parameters.colorScaleShowHistogram);
+	m_ui->useColorScaleShaderCheckBox->setChecked(m_parameters.colorScaleUseShader);
+	m_ui->useColorScaleShaderCheckBox->setEnabled(m_parameters.colorScaleShaderSupported);
+	m_ui->colorRampWidthSpinBox->setValue(m_parameters.colorScaleRampWidth);
 
-	m_ui->defaultFontSizeSpinBox->setValue(parameters.defaultFontSize);
-	m_ui->labelFontSizeSpinBox->setValue(parameters.labelFontSize);
-	m_ui->numberPrecisionSpinBox->setValue(parameters.displayedNumPrecision);
-	m_ui->labelOpacitySpinBox->setValue(parameters.labelOpacity);
-	m_ui->labelMarkerSizeSpinBox->setValue(parameters.labelMarkerSize);
+	m_ui->defaultFontSizeSpinBox->setValue(m_parameters.defaultFontSize);
+	m_ui->labelFontSizeSpinBox->setValue(m_parameters.labelFontSize);
+	m_ui->numberPrecisionSpinBox->setValue(m_parameters.displayedNumPrecision);
+	m_ui->labelOpacitySpinBox->setValue(m_parameters.labelOpacity);
+	m_ui->labelMarkerSizeSpinBox->setValue(m_parameters.labelMarkerSize);
 
-	m_ui->zoomSpeedDoubleSpinBox->setValue(parameters.zoomSpeed);
+	m_ui->zoomSpeedDoubleSpinBox->setValue(m_parameters.zoomSpeed);
 	
-	m_ui->autoComputeOctreeComboBox->setCurrentIndex(parameters.autoComputeOctree);
+	m_ui->autoComputeOctreeComboBox->setCurrentIndex(m_parameters.autoComputeOctree);
 
-	m_ui->autoDisplayNormalsCheckBox->setChecked(options.normalsDisplayedByDefault);
-	m_ui->useNativeDialogsCheckBox->setChecked(options.useNativeDialogs);
+	m_ui->autoDisplayNormalsCheckBox->setChecked(m_options.normalsDisplayedByDefault);
+	m_ui->useNativeDialogsCheckBox->setChecked(m_options.useNativeDialogs);
 
 	update();
 }
 
 void ccDisplayOptionsDlg::changeLightDiffuseColor()
 {
-	QColor newCol = QColorDialog::getColor(lightDiffuseColor, this);
+	QColor newCol = QColorDialog::getColor(m_lightDiffuseColor, this);
 	if (!newCol.isValid())
 		return;
 
-	lightDiffuseColor = newCol;
-	ccQtHelpers::SetButtonColor(m_ui->diffuseColorButton, lightDiffuseColor);
-	parameters.lightDiffuseColor = ccColor::FromQColoraf(lightDiffuseColor);
+	m_lightDiffuseColor = newCol;
+	ccQtHelpers::SetButtonColor(m_ui->diffuseColorButton, m_lightDiffuseColor);
+	m_parameters.lightDiffuseColor = ccColor::FromQColoraf(m_lightDiffuseColor);
 }
 
 void ccDisplayOptionsDlg::changeLightAmbientColor()
 {
-	QColor newCol = QColorDialog::getColor(lightAmbientColor, this);
+	QColor newCol = QColorDialog::getColor(m_lightAmbientColor, this);
 	if (!newCol.isValid())
 		return;
 
-	lightAmbientColor = newCol;
-	ccQtHelpers::SetButtonColor(m_ui->ambientColorButton, lightAmbientColor);
-	parameters.lightAmbientColor = ccColor::FromQColoraf(lightAmbientColor);
+	m_lightAmbientColor = newCol;
+	ccQtHelpers::SetButtonColor(m_ui->ambientColorButton, m_lightAmbientColor);
+	m_parameters.lightAmbientColor = ccColor::FromQColoraf(m_lightAmbientColor);
 
 	update();
 }
 
 void ccDisplayOptionsDlg::changeLightSpecularColor()
 {
-	QColor newCol = QColorDialog::getColor(lightSpecularColor, this);
+	QColor newCol = QColorDialog::getColor(m_lightSpecularColor, this);
 	if (!newCol.isValid())
 		return;
 
-	lightSpecularColor = newCol;
-	ccQtHelpers::SetButtonColor(m_ui->specularColorButton, lightSpecularColor);
-	parameters.lightSpecularColor = ccColor::FromQColoraf(lightSpecularColor);
+	m_lightSpecularColor = newCol;
+	ccQtHelpers::SetButtonColor(m_ui->specularColorButton, m_lightSpecularColor);
+	m_parameters.lightSpecularColor = ccColor::FromQColoraf(m_lightSpecularColor);
 
 	update();
 }
 
 void ccDisplayOptionsDlg::changeMeshFrontDiffuseColor()
 {
-	QColor newCol = QColorDialog::getColor(meshFrontDiff, this, QString(), QColorDialog::ShowAlphaChannel);
+	QColor newCol = QColorDialog::getColor(m_meshFrontDiff, this, QString(), QColorDialog::ShowAlphaChannel);
 	if (!newCol.isValid())
 		return;
 
-	meshFrontDiff = newCol;
-	ccQtHelpers::SetButtonColor(m_ui->meshFrontColorButton, meshFrontDiff);
+	m_meshFrontDiff = newCol;
+	ccQtHelpers::SetButtonColor(m_ui->meshFrontColorButton, m_meshFrontDiff);
 
-	parameters.meshFrontDiff = ccColor::FromQColoraf(meshFrontDiff);
+	m_parameters.meshFrontDiff = ccColor::FromQColoraf(m_meshFrontDiff);
 
 	update();
 }
 
 void ccDisplayOptionsDlg::changeMeshBackDiffuseColor()
 {
-	QColor newCol = QColorDialog::getColor(meshBackDiff, this, QString(), QColorDialog::ShowAlphaChannel);
+	QColor newCol = QColorDialog::getColor(m_meshBackDiff, this, QString(), QColorDialog::ShowAlphaChannel);
 	if (!newCol.isValid())
 		return;
 
-	meshBackDiff = newCol;
-	ccQtHelpers::SetButtonColor(m_ui->meshBackColorButton, meshBackDiff);
-	parameters.meshBackDiff = ccColor::FromQColoraf(meshBackDiff);
+	m_meshBackDiff = newCol;
+	ccQtHelpers::SetButtonColor(m_ui->meshBackColorButton, m_meshBackDiff);
+	m_parameters.meshBackDiff = ccColor::FromQColoraf(m_meshBackDiff);
 
 	update();
 }
 
 void ccDisplayOptionsDlg::changeMeshSpecularColor()
 {
-	QColor newCol = QColorDialog::getColor(meshSpecularColor, this, QString(), QColorDialog::ShowAlphaChannel);
+	QColor newCol = QColorDialog::getColor(m_meshSpecularColor, this, QString(), QColorDialog::ShowAlphaChannel);
 	if (!newCol.isValid())
 		return;
 
-	meshSpecularColor = newCol;
-	ccQtHelpers::SetButtonColor(m_ui->meshSpecularColorButton, meshSpecularColor);
-	parameters.meshSpecular = ccColor::FromQColoraf(meshSpecularColor);
+	m_meshSpecularColor = newCol;
+	ccQtHelpers::SetButtonColor(m_ui->meshSpecularColorButton, m_meshSpecularColor);
+	m_parameters.meshSpecular = ccColor::FromQColoraf(m_meshSpecularColor);
 
 	update();
 }
 
 void ccDisplayOptionsDlg::changePointsColor()
 {
-	QColor newCol = QColorDialog::getColor(pointsDefaultCol, this, QString(), QColorDialog::ShowAlphaChannel);
+	QColor newCol = QColorDialog::getColor(m_pointsDefaultCol, this, QString(), QColorDialog::ShowAlphaChannel);
 	if (!newCol.isValid())
 		return;
 
-	pointsDefaultCol = newCol;
-	ccQtHelpers::SetButtonColor(m_ui->pointsColorButton, pointsDefaultCol);
-	parameters.pointsDefaultCol = ccColor::FromQColora(pointsDefaultCol);
+	m_pointsDefaultCol = newCol;
+	ccQtHelpers::SetButtonColor(m_ui->pointsColorButton, m_pointsDefaultCol);
+	m_parameters.pointsDefaultCol = ccColor::FromQColora(m_pointsDefaultCol);
 
 	update();
 }
 
 void ccDisplayOptionsDlg::changeBBColor()
 {
-	QColor newCol = QColorDialog::getColor(bbDefaultCol, this, QString(), QColorDialog::ShowAlphaChannel);
+	QColor newCol = QColorDialog::getColor(m_bbDefaultCol, this, QString(), QColorDialog::ShowAlphaChannel);
 	if (!newCol.isValid())
 		return;
 
-	bbDefaultCol = newCol;
-	ccQtHelpers::SetButtonColor(m_ui->bbColorButton, bbDefaultCol);
-	parameters.bbDefaultCol = ccColor::FromQColora(bbDefaultCol);
+	m_bbDefaultCol = newCol;
+	ccQtHelpers::SetButtonColor(m_ui->bbColorButton, m_bbDefaultCol);
+	m_parameters.bbDefaultCol = ccColor::FromQColora(m_bbDefaultCol);
 
 	update();
 }
 
 void ccDisplayOptionsDlg::changeTextColor()
 {
-	QColor newCol = QColorDialog::getColor(textDefaultCol, this, QString(), QColorDialog::ShowAlphaChannel);
+	QColor newCol = QColorDialog::getColor(m_textDefaultCol, this, QString(), QColorDialog::ShowAlphaChannel);
 	if (!newCol.isValid())
 		return;
 
-	textDefaultCol = newCol;
-	ccQtHelpers::SetButtonColor(m_ui->textColorButton, textDefaultCol);
-	parameters.textDefaultCol = ccColor::FromQColora(textDefaultCol);
+	m_textDefaultCol = newCol;
+	ccQtHelpers::SetButtonColor(m_ui->textColorButton, m_textDefaultCol);
+	m_parameters.textDefaultCol = ccColor::FromQColora(m_textDefaultCol);
 
 	update();
 }
 
 void ccDisplayOptionsDlg::changeBackgroundColor()
 {
-	QColor newCol = QColorDialog::getColor(backgroundCol, this);
+	QColor newCol = QColorDialog::getColor(m_backgroundCol, this);
 	if (!newCol.isValid())
 		return;
 
-	backgroundCol = newCol;
-	ccQtHelpers::SetButtonColor(m_ui->bkgColorButton, backgroundCol);
-	parameters.backgroundCol = ccColor::FromQColor(backgroundCol);
+	m_backgroundCol = newCol;
+	ccQtHelpers::SetButtonColor(m_ui->bkgColorButton, m_backgroundCol);
+	m_parameters.backgroundCol = ccColor::FromQColor(m_backgroundCol);
 
 	update();
 }
 
 void ccDisplayOptionsDlg::changeLabelBackgroundColor()
 {
-	QColor newCol = QColorDialog::getColor(labelBackgroundCol, this, QString(), QColorDialog::ShowAlphaChannel);
+	QColor newCol = QColorDialog::getColor(m_labelBackgroundCol, this, QString(), QColorDialog::ShowAlphaChannel);
 	if (!newCol.isValid())
 		return;
 
-	labelBackgroundCol = newCol;
-	ccQtHelpers::SetButtonColor(m_ui->labelBkgColorButton, labelBackgroundCol);
-	parameters.labelBackgroundCol = ccColor::FromQColora(labelBackgroundCol);
+	m_labelBackgroundCol = newCol;
+	ccQtHelpers::SetButtonColor(m_ui->labelBkgColorButton, m_labelBackgroundCol);
+	m_parameters.labelBackgroundCol = ccColor::FromQColora(m_labelBackgroundCol);
 
 	update();
 }
 
 void ccDisplayOptionsDlg::changeLabelMarkerColor()
 {
-	QColor newCol = QColorDialog::getColor(labelMarkerCol, this, QString(), QColorDialog::ShowAlphaChannel);
+	QColor newCol = QColorDialog::getColor(m_labelMarkerCol, this, QString(), QColorDialog::ShowAlphaChannel);
 	if (!newCol.isValid())
 		return;
 
-	labelMarkerCol = newCol;
-	ccQtHelpers::SetButtonColor(m_ui->labelMarkerColorButton, labelMarkerCol);
-
-	parameters.labelMarkerCol = ccColor::FromQColora(labelMarkerCol);
+	m_labelMarkerCol = newCol;
+	ccQtHelpers::SetButtonColor(m_ui->labelMarkerColorButton, m_labelMarkerCol);
+	m_parameters.labelMarkerCol = ccColor::FromQColora(m_labelMarkerCol);
 
 	update();
 }
 
 void ccDisplayOptionsDlg::changeMaxMeshSize(double val)
 {
-	parameters.minLoDMeshSize = static_cast<unsigned>(val * 1000000);
+	m_parameters.minLoDMeshSize = static_cast<unsigned>(val * 1000000);
 }
 
 void ccDisplayOptionsDlg::changeMaxCloudSize(double val)
 {
-	parameters.minLoDCloudSize = static_cast<unsigned>(val * 1000000);
+	m_parameters.minLoDCloudSize = static_cast<unsigned>(val * 1000000);
 }
 
 void ccDisplayOptionsDlg::changeVBOUsage()
 {
-	parameters.useVBOs = m_ui->useVBOCheckBox->isChecked();
-	if (parameters.useVBOs && m_ui->maxCloudSizeDoubleSpinBox->value() < s_defaultMaxVBOCloudSizeM)
+	m_parameters.useVBOs = m_ui->useVBOCheckBox->isChecked();
+	if (m_parameters.useVBOs && m_ui->maxCloudSizeDoubleSpinBox->value() < s_defaultMaxVBOCloudSizeM)
 	{
 		m_ui->maxCloudSizeDoubleSpinBox->setValue(s_defaultMaxVBOCloudSizeM);
 	}
@@ -356,46 +386,46 @@ void ccDisplayOptionsDlg::changeColorScaleRampWidth(int val)
 {
 	if (val < 2)
 		return;
-	parameters.colorScaleRampWidth = static_cast<unsigned>(val);
+	m_parameters.colorScaleRampWidth = static_cast<unsigned>(val);
 }
 
 void ccDisplayOptionsDlg::changeDefaultFontSize(int val)
 {
 	if (val < 0)
 		return;
-	parameters.defaultFontSize = static_cast<unsigned>(val);
+	m_parameters.defaultFontSize = static_cast<unsigned>(val);
 }
 
 void ccDisplayOptionsDlg::changeLabelFontSize(int val)
 {
 	if (val < 0)
 		return;
-	parameters.labelFontSize = static_cast<unsigned>(val);
+	m_parameters.labelFontSize = static_cast<unsigned>(val);
 }
 
 void ccDisplayOptionsDlg::changeNumberPrecision(int val)
 {
 	if (val < 0)
 		return;
-	parameters.displayedNumPrecision = static_cast<unsigned>(val);
+	m_parameters.displayedNumPrecision = static_cast<unsigned>(val);
 }
 
 void ccDisplayOptionsDlg::changeZoomSpeed(double val)
 {
-	parameters.zoomSpeed = val;
+	m_parameters.zoomSpeed = val;
 }
 
 void ccDisplayOptionsDlg::changeAutoComputeOctreeOption(int index)
 {
 	assert(index >= 0 && index < 3);
-	parameters.autoComputeOctree = static_cast<ccGui::ParamStruct::ComputeOctreeForPicking>(index);
+	m_parameters.autoComputeOctree = static_cast<ccGui::ParamStruct::ComputeOctreeForPicking>(index);
 }
 
 void ccDisplayOptionsDlg::changeLabelOpacity(int val)
 {
 	if (val < 0 || val > 100)
 		return;
-	parameters.labelOpacity = static_cast<unsigned>(val);
+	m_parameters.labelOpacity = static_cast<unsigned>(val);
 }
 
 void ccDisplayOptionsDlg::changeLabelMarkerSize(int val)
@@ -403,13 +433,13 @@ void ccDisplayOptionsDlg::changeLabelMarkerSize(int val)
 	if (val <= 0)
 		return;
 
-	parameters.labelMarkerSize = static_cast<unsigned>(val);
+	m_parameters.labelMarkerSize = static_cast<unsigned>(val);
 }
 
 void ccDisplayOptionsDlg::doReject()
 {
-	ccGui::Set(oldParameters);
-	ccOptions::Set(oldOptions);
+	ccGui::Set(m_oldParameters);
+	ccOptions::Set(m_oldOptions);
 
 	emit aspectHasChanged();
 
@@ -418,15 +448,23 @@ void ccDisplayOptionsDlg::doReject()
 
 void ccDisplayOptionsDlg::reset()
 {
-	parameters.reset();
-	options.reset();
+	m_parameters.reset();
+	m_options.reset();
+	m_ui->appStyleComboBox->setCurrentIndex(m_defaultAppStyleIndex);
+
 	refresh();
 }
 
 void ccDisplayOptionsDlg::apply()
 {
-	ccGui::Set(parameters);
-	ccOptions::Set(options);
+	ccGui::Set(m_parameters);
+	ccOptions::Set(m_options);
+
+	// application style
+	{
+		QString style = m_ui->appStyleComboBox->currentText();
+		ccApp->setAppStyle(style);
+	}
 
 	emit aspectHasChanged();
 }
@@ -435,8 +473,8 @@ void ccDisplayOptionsDlg::doAccept()
 {
 	apply();
 
-	parameters.toPersistentSettings();
-	options.toPersistentSettings();
+	m_parameters.toPersistentSettings();
+	m_options.toPersistentSettings();
 
 	accept();
 }

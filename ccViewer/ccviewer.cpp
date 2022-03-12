@@ -181,49 +181,48 @@ void ccViewer::loadPlugins()
 {
 	ui.menuPlugins->setEnabled(false);
 
-	ccPluginManager::get().loadPlugins();
+	ccPluginManager::Get().loadPlugins();
 
-	for ( ccPluginInterface *plugin : ccPluginManager::get().pluginList() )
+	for (ccPluginInterface* plugin : ccPluginManager::Get().pluginList())
 	{
-		if ( plugin == nullptr )
+		if (plugin == nullptr)
 		{
-			Q_ASSERT( false );
+			Q_ASSERT(false);
 			continue;
 		}
 
 		// is this a GL plugin?
-		if ( plugin->getType() == CC_GL_FILTER_PLUGIN )
+		if (plugin->getType() == CC_GL_FILTER_PLUGIN)
 		{
-			ccGLPluginInterface *glPlugin = static_cast<ccGLPluginInterface*>( plugin );
-			
+			ccGLPluginInterface* glPlugin = static_cast<ccGLPluginInterface*>(plugin);
+
 			const QString pluginName = glPlugin->getName();
-			
-			Q_ASSERT( !pluginName.isEmpty() );
-			
-			if ( pluginName.isEmpty() )
+
+			Q_ASSERT(!pluginName.isEmpty());
+
+			if (pluginName.isEmpty())
 			{
 				// should be unreachable - we have already checked for this in ccPlugins::Find()
 				continue;
 			}
-			
-			ccLog::Print( QStringLiteral( "Plugin name: [%1] (GL filter)" ).arg( pluginName ) );
 
-			QAction* action = new QAction( pluginName, this );
-			action->setToolTip( glPlugin->getDescription() );
-			action->setIcon( glPlugin->getIcon() );
-			
+			ccLog::Print(QStringLiteral("Plugin name: [%1] (GL filter)").arg(pluginName));
+
+			QAction* action = new QAction(pluginName, this);
+			action->setToolTip(glPlugin->getDescription());
+			action->setIcon(glPlugin->getIcon());
+
 			// store the plugin's interface pointer in the QAction data so we can access it in doEnableGLFilter()
 			QVariant v;
-	  
-			v.setValue( glPlugin );
-	  
-			action->setData( v );
+			v.setValue(glPlugin);
+
+			action->setData(v);
 
 			connect(action, &QAction::triggered, this, &ccViewer::doEnableGLFilter);
 
-			ui.menuPlugins->addAction( action );
-			ui.menuPlugins->setEnabled( true );
-			ui.menuPlugins->setVisible( true );
+			ui.menuPlugins->addAction(action);
+			ui.menuPlugins->setEnabled(true);
+			ui.menuPlugins->setVisible(true);
 		}
 	}
 }
@@ -245,41 +244,38 @@ void ccViewer::doEnableGLFilter()
 		return;
 	}
 
-	QAction *action = qobject_cast<QAction*>(sender());
+	QAction* action = qobject_cast<QAction*>(sender());
 
-	if ( action == nullptr )
+	if (action == nullptr)
 	{
-		Q_ASSERT( false );
+		Q_ASSERT(false);
 		return;
 	}
-	
+
 	ccGLPluginInterface	*plugin = action->data().value<ccGLPluginInterface *>();
-	
-	if ( plugin == nullptr )
+	if (plugin == nullptr)
 	{
 		return;
 	}
-
-	Q_ASSERT( plugin->getType() == CC_GL_FILTER_PLUGIN );
+	Q_ASSERT(plugin->getType() == CC_GL_FILTER_PLUGIN);
 
 	ccGlFilter* filter = plugin->getFilter();
-	
-	if ( filter != nullptr )
+	if (filter != nullptr)
 	{
-		if ( m_glWindow->areGLFiltersEnabled() )
+		if (m_glWindow->areGLFiltersEnabled())
 		{
-			m_glWindow->setGlFilter( filter );
-			
-			ccLog::Print( "Note: go to << Display > Shaders & Filters > No filter >> to disable GL filter" );
+			m_glWindow->setGlFilter(filter);
+
+			ccLog::Print("Note: go to << Display > Shaders & Filters > No filter >> to disable GL filter");
 		}
 		else
 		{
-			ccLog::Error( "GL filters not supported" );
+			ccLog::Error("GL filters not supported");
 		}
 	}
 	else
 	{
-		ccLog::Error( "Can't load GL filter (an error occurred)!" );
+		ccLog::Error("Can't load GL filter (an error occurred)!");
 	}
 }
 
@@ -307,12 +303,15 @@ void ccViewer::doActionDeleteSelectedEntity()
 			else
 			{
 				delete obj;
+				obj = nullptr;
 			}
 		}
 		else
 		{
-			for (unsigned i=0; i<obj->getChildrenNumber(); ++i)
+			for (unsigned i = 0; i < obj->getChildrenNumber(); ++i)
+			{
 				toCheck.push_back(obj->getChild(i));
+			}
 		}
 	}
 
@@ -365,7 +364,7 @@ void ccViewer::selectEntity(ccHObject* toSelect)
 
 		unsigned sfCount = (cloud ? cloud->getNumberOfScalarFields() : 0);
 		ui.menuSelectSF->setEnabled(hasSF && sfCount>1);
-		if (hasSF && sfCount>1)
+		if (hasSF && sfCount > 1)
 		{
 			int currentSFIndex = cloud->getCurrentDisplayedScalarFieldIndex();
 			//ui.menuSelectSF->clear();
@@ -430,15 +429,6 @@ void ccViewer::updateGLFrameGradient()
 	bool stereoModeEnabled = m_glWindow->stereoModeIsEnabled();
 	const ccColor::Rgbub& bkgCol = stereoModeEnabled ? s_black : m_glWindow->getDisplayParameters().backgroundCol;
 	const ccColor::Rgbub& forCol = stereoModeEnabled ? s_white : m_glWindow->getDisplayParameters().pointsDefaultCol;
-
-	//QOpenGLFunctions_2_1* glFunc = m_glWindow->context()->versionFunctions<QOpenGLFunctions_2_1>();
-	//if (!glFunc)
-	//{
-	//	return;
-	//}
-
-	//glFunc->glColor3ubv(bkgCol.rgb);
-	//glFunc->glColor3ub(255-forCol.r,255-forCol.g,255-forCol.b);
 
 	QString styleSheet = QString("QFrame{border: 2px solid white; border-radius: 10px; background: qlineargradient(x1:0, y1:0, x2:0, y2:1,stop:0 rgb(%1,%2,%3), stop:1 rgb(%4,%5,%6));}")
 								.arg(bkgCol.r)
@@ -618,7 +608,6 @@ bool ccViewer::checkStereoMode()
 
 	return true;
 }
-
 
 void ccViewer::setOrthoView()
 {

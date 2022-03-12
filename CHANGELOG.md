@@ -34,6 +34,8 @@ v2.12 (???) - (in development)
 	- Google DRACO format .DRC (compressed point clouds and meshes - https://github.com/google/draco)
 
 - Improvements
+	- New Display option:
+		- option to select the application style (Windows Vista, Windows, Fusion, etc.)
 	- Interactive segmentation tool
 		- New 'hashtag' icon to flag the points inside the polygon with a given class value (instead of segmenting the points).
 		- A 'Classification' SF will be added to the cloud if none already (otherwise the 'Classification' SF will be updated)

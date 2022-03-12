@@ -213,7 +213,7 @@ MainWindow::MainWindow()
 	
 	m_pluginUIManager = new ccPluginUIManager( this, this );
 	
-	ccTranslationManager::get().populateMenu( m_UI->menuLanguage, ccApp->translationPath() );
+	ccTranslationManager::Get().populateMenu( m_UI->menuLanguage, ccApp->translationPath() );
 	
 #ifdef Q_OS_MAC
 	m_UI->actionAbout->setMenuRole( QAction::AboutRole );

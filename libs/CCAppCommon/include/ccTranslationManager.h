@@ -18,59 +18,61 @@
 
 #include "CCAppCommon.h"
 
+//Qt
 #include <QMenu>
 #include <QPair>
 #include <QVector>
 
-
+//! Translation manager
 class CCAPPCOMMON_LIB_API ccTranslationManager : public QObject
 {
 	Q_OBJECT
-	
+
 public:
-	static ccTranslationManager &get();
-	
+	static ccTranslationManager& Get();
+
 	~ccTranslationManager() override = default;
-	
-	/** Register a file prefix for translation files.
-	 * The files should be named <prefix>_<lang>.ts where <lang> is the 2-letter ISO 639 
-	 * language code in lowercase.
-	 *  e.g. CloudCompare_fr.ts
-	 * @param prefix The prefix of the file to register
-	 * @param path The path to look for the files in
-	 */
-	void registerTranslatorFile( const QString &prefix, const QString &path );
-	
+
+	//! Register a file prefix for translation files.
+	/** The files should be named <prefix>_<lang>.ts where <lang> is the 2-letter ISO 639
+		language code in lowercase.
+		 e.g. CloudCompare_fr.ts
+		\param prefix	The prefix of the file to register
+		\param path		The path to look for the files in
+	**/
+	void registerTranslatorFile(const QString& prefix, const QString& path);
+
 	//! Using the translation file prefixes that were registered, load the actual translations
-	void loadTranslations();
-	
-	/** Using the translation file prefixes that were registered, load the actual
-	 * translation by the 2-letter ISO 639 language code in lowercase.
-	*/
+	inline void loadTranslations() { loadTranslation(languagePref()); }
+
+	//! Using the translation file prefixes that were registered, load the actual
+	//! translation by the 2-letter ISO 639 language code in lowercase.
 	void loadTranslation(QString language);
-	
+
 	//! Populate the menu with a list of languages found using files in 'pathToTranslationFiles'
-	void populateMenu( QMenu *menu, const QString &pathToTranslationFiles );
-	
+	void populateMenu(QMenu *menu, const QString &pathToTranslationFiles);
+
 protected:
 	explicit ccTranslationManager() = default;
 
-private:
-	struct CCAPPCOMMON_LIB_API TranslatorFile {
+private: // methods
+	struct CCAPPCOMMON_LIB_API TranslatorFile
+	{
 		QString	prefix;
 		QString path;
 	};
 	using TranslatorFileList = QVector<TranslatorFile>;
-	
+
 	using TranslationInfo = QPair<QString, QString>;
 	using LanguageList = QVector<TranslationInfo>;
-	
-	const QString languagePref();
-	
+
+	QString languagePref() const;
+
 	//! Generate a list of available languages based on the files in the "translation" directory.
-	LanguageList availableLanguages( const QString &appName, const QString &pathToTranslationFiles );
-	
-	void setLanguagePref( const QString &languageCode );
-	
+	LanguageList availableLanguages(const QString& appName, const QString& pathToTranslationFiles) const;
+
+	void setLanguagePref(const QString& languageCode);
+
+private: // members
 	TranslatorFileList	mTranslatorFileInfo;
 };

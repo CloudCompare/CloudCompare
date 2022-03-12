@@ -28,7 +28,7 @@
 #include <ccPointCloud.h>
 
 //qCC_gl
-#include <ccGLWidget.h>
+#include <ccGLWindow.h>
 
 //CCCoreLib
 #include <CCMath.h>

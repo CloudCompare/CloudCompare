@@ -2,7 +2,6 @@
 target_sources( ${PROJECT_NAME}
 	PRIVATE
 		${CMAKE_CURRENT_LIST_DIR}/ccGLUtils.h
-		${CMAKE_CURRENT_LIST_DIR}/ccGLWidget.h
 		${CMAKE_CURRENT_LIST_DIR}/ccGLWindow.h
 		${CMAKE_CURRENT_LIST_DIR}/ccGuiParameters.h
 		${CMAKE_CURRENT_LIST_DIR}/ccRenderingTools.h

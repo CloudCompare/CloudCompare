@@ -29,7 +29,7 @@
 #include <ccSphere.h>
 
 //qCC_gl
-#include <ccGLWidget.h>
+#include <ccGLWindow.h>
 
 //Qt
 #include <QSettings>

@@ -57,7 +57,7 @@
 #include <DepthMapFileFilter.h>
 
 //QCC_glWindow
-#include <ccGLWidget.h>
+#include <ccGLWindow.h>
 #include <ccRenderingTools.h>
 
 //local includes

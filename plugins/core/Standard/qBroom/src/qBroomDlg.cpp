@@ -33,7 +33,7 @@
 
 //qCC_fbo
 #include <ccGlFilter.h>
-#include <ccGLWidget.h>
+#include <ccGLWindow.h>
 
 //CCCoreLib
 #include <DgmOctreeReferenceCloud.h>

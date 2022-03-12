@@ -24,7 +24,7 @@
 #include <QMessageBox>
 
 //qCC_glWindow
-#include <ccGLWidget.h>
+#include <ccGLWindow.h>
 
 //common dialogs
 #include <ccCameraParamEditDlg.h>

@@ -64,7 +64,6 @@ using ccGLWindowParent = QWindow;
 using ccGLWindowParent = QOpenGLWidget;
 #endif
 
-
 //! OpenGL 3D view
 class CCGLWINDOW_LIB_API ccGLWindow : public ccGLWindowParent, public ccGenericGLDisplay
 {
@@ -1354,5 +1353,42 @@ protected: //members
 	//! Fast pixel reading mechanism with PBO
 	PBOPicking m_pickingPBO;
 };
+
+inline void CreateGLWindow(ccGLWindow*& window, QWidget*& widget, bool stereoMode = false, bool silentInitialization = false)
+{
+	QSurfaceFormat format = QSurfaceFormat::defaultFormat();
+	format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+	format.setStereo(stereoMode);
+
+	window = new ccGLWindow(&format, nullptr, silentInitialization);
+
+#ifdef CC_GL_WINDOW_USE_QWINDOW
+	widget = new ccGLWidget(window);
+#else
+	widget = window;
+#endif
+}
+
+inline ccGLWindow* GLWindowFromWidget(QWidget* widget)
+{
+#ifdef CC_GL_WINDOW_USE_QWINDOW
+	ccGLWidget* myWidget = qobject_cast<ccGLWidget*>(widget);
+	if (myWidget)
+	{
+		return myWidget->associatedWindow();
+	}
+#else
+	ccGLWindow* myWidget = qobject_cast<ccGLWindow*>(widget);
+	if (myWidget)
+	{
+		return myWidget;
+	}
+#endif
+	else
+	{
+		assert(false);
+		return nullptr;
+	}
+}
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(ccGLWindow::INTERACTION_FLAGS);

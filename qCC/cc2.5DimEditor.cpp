@@ -30,7 +30,7 @@
 #include <ccColorTypes.h>
 
 //qCC_gl
-#include <ccGLWidget.h>
+#include <ccGLWindow.h>
 
 //Qt
 #include <QFrame>

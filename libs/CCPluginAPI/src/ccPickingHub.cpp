@@ -22,7 +22,7 @@
 #include <QMessageBox>
 
 //qCC_gl
-#include <ccGLWidget.h>
+#include <ccGLWindow.h>
 
 //qCC_db
 #include <ccSphere.h>

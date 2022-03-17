@@ -136,6 +136,7 @@ ccComparisonDlg::ccComparisonDlg(	ccHObject* compEntity,
 	connect(maxDistCheckBox,		&QCheckBox::toggled,					this,	&ccComparisonDlg::maxDistUpdated);
 	connect(localModelComboBox, qOverload<int> (&QComboBox::currentIndexChanged),		this,	&ccComparisonDlg::locaModelChanged);
 	connect(maxSearchDistSpinBox, qOverload<double> (&QDoubleSpinBox::valueChanged),this,	&ccComparisonDlg::maxDistUpdated);
+    connect(split3DCheckBox,        &QCheckBox::toggled,                    this,   &ccComparisonDlg::enableCompute2D);
 }
 
 ccComparisonDlg::~ccComparisonDlg()
@@ -216,6 +217,11 @@ void ccComparisonDlg::maxDistUpdated()
 {
 	//the current 'best octree level' is depreacted
 	m_bestOctreeLevel = 0;
+}
+
+void ccComparisonDlg::enableCompute2D(bool state)
+{
+    compute2DCheckBox->setEnabled(state);
 }
 
 int ccComparisonDlg::getBestOctreeLevel()
@@ -685,6 +691,7 @@ bool ccComparisonDlg::computeDistances()
 	bool signedDistances = signedDistCheckBox->isEnabled() && signedDistCheckBox->isChecked();
 	bool flipNormals = (signedDistances ? flipNormalsCheckBox->isChecked() : false);
 	bool split3D = split3DCheckBox->isEnabled() && split3DCheckBox->isChecked();
+    bool mergeXY = compute2DCheckBox->isChecked();
 
 	//does the cloud has already a temporary scalar field that we can use?
 	int sfIdx = m_compCloud->getScalarFieldIndexByName(CC_TEMP_DISTANCES_DEFAULT_SF_NAME);
@@ -940,6 +947,28 @@ bool ccComparisonDlg::computeDistances()
 				}
 			}
 			ccLog::Warning("[ComputeDistances] Result has been split along each dimension (check the 3 other scalar fields with '_X', '_Y' and '_Z' suffix!)");
+            if (mergeXY)
+            {
+                ccLog::Warning("[ComputeDistances] compute 2D distance (xy plane)");
+                int sf2D = m_compCloud->getScalarFieldIndexByName(qPrintable(m_sfName + QString(" (XY)")));
+                if (sf2D >= 0)
+                    m_compCloud->deleteScalarField(sf2D);
+                sf2D = m_compCloud->addScalarField(qPrintable(m_sfName + QString(" (XY)")));
+                CCCoreLib::ScalarField* sf = m_compCloud->getScalarField(sf2D);
+                for (int idx = 0; idx < m_compCloud->size(); idx++)
+                {
+                    float d2D = pow(pow(c2cParams.splitDistances[0]->getValue(idx), 2) +  pow(c2cParams.splitDistances[1]->getValue(idx), 2), 0.5);
+                    sf->setValue(idx, d2D);
+                }
+                sf->computeMinAndMax();
+                // remove X and Y SF
+                int sfX = m_compCloud->getScalarFieldIndexByName(qPrintable(m_sfName + QString(" (X)")));
+                if (sfX >= 0)
+                    m_compCloud->deleteScalarField(sfX);
+                int sfY = m_compCloud->getScalarFieldIndexByName(qPrintable(m_sfName + QString(" (Y)")));
+                if (sfY >= 0)
+                    m_compCloud->deleteScalarField(sfY);
+            }
 		}
 	}
 	else

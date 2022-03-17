@@ -13,10 +13,10 @@ if( WIN32 )
 		add_subdirectory( ui )
 		
 		# Uses headers from the qPDALIO plugin...
-		target_include_directories( ${PROJECT_NAME}
-			PRIVATE
-				"${CMAKE_CURRENT_SOURCE_DIR}/../qPDALIO/include"
-		)
+                target_include_directories( ${PROJECT_NAME}
+                        PRIVATE
+                                "${CMAKE_CURRENT_SOURCE_DIR}/../qPDALIO/include"
+                )
  
 		include( cmake/LASLibSupport.cmake )
 		

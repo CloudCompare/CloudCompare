@@ -31,7 +31,7 @@ function( target_link_GDAL ) # ARGV0 = project name
 		file( GLOB GDAL_DLL_FILES ${GDAL_BIN_DIR}/gdal*.dll )
 message( ${GDAL_DLL_FILES} )
                 message( STATUS "GDAL VERSION: " ${GDAL_VERSION} )
-                if (GDAL_VERSION EQUAL 3.2)
+                if (GDAL_VERSION EQUAL 3.4)
                     set ( GDAL_DEP_DLL_FILES ${GDAL_BIN_DIR}/xerces-c_3_2.dll
                         ${GDAL_BIN_DIR}/libexpat.dll
                         ${GDAL_BIN_DIR}/LIBPQ.dll
@@ -42,7 +42,7 @@ message( ${GDAL_DLL_FILES} )
                         ${GDAL_BIN_DIR}/netcdf.dll
                         ${GDAL_BIN_DIR}/geotiff.dll
                         ${GDAL_BIN_DIR}/tiff.dll
-                        ${GDAL_BIN_DIR}/proj_8_0.dll
+                        ${GDAL_BIN_DIR}/proj_9_0.dll
                         ${GDAL_BIN_DIR}/sqlite3.dll
                         ${GDAL_BIN_DIR}/spatialite.dll
                         ${GDAL_BIN_DIR}/geos_c.dll
@@ -52,9 +52,7 @@ message( ${GDAL_DLL_FILES} )
                         ${GDAL_BIN_DIR}/libcurl.dll
                         ${GDAL_BIN_DIR}/libpng16.dll
                         ${GDAL_BIN_DIR}/openjp2.dll
-                        ${GDAL_BIN_DIR}/poppler.dll
                         ${GDAL_BIN_DIR}/iconv.dll
-                        ${GDAL_BIN_DIR}/libwebp.dll
                         ${GDAL_BIN_DIR}/tiledb.dll
                         ${GDAL_BIN_DIR}/freexl.dll
                         ${GDAL_BIN_DIR}/libssl-1_1-x64.dll
@@ -71,21 +69,19 @@ message( ${GDAL_DLL_FILES} )
                         ${GDAL_BIN_DIR}/geos.dll
                         ${GDAL_BIN_DIR}/libssh2.dll
                         ${GDAL_BIN_DIR}/freetype.dll
-                        ${GDAL_BIN_DIR}/aws-cpp-sdk-s3.dll
-                        ${GDAL_BIN_DIR}/aws-cpp-sdk-core.dll
-                        ${GDAL_BIN_DIR}/aws-cpp-sdk-identity-management.dll
                         ${GDAL_BIN_DIR}/libbz2.dll
                         ${GDAL_BIN_DIR}/liblz4.dll
                         ${GDAL_BIN_DIR}/krb5_64.dll
                         ${GDAL_BIN_DIR}/comerr64.dll
                         ${GDAL_BIN_DIR}/k5sprt64.dll
-                        ${GDAL_BIN_DIR}/aws-c-event-stream.dll
-                        ${GDAL_BIN_DIR}/aws-c-common.dll
-                        ${GDAL_BIN_DIR}/aws-cpp-sdk-cognito-identity.dll
-                        ${GDAL_BIN_DIR}/aws-cpp-sdk-sts.dll
-                        ${GDAL_BIN_DIR}/aws-checksums.dll
+                        ${GDAL_BIN_DIR}/libdeflate.dll
+                        ${GDAL_BIN_DIR}/jbig.dll
+                        ${GDAL_BIN_DIR}/Lerc.dll
+                        ${GDAL_BIN_DIR}/poppler.dll
+                        ${GDAL_BIN_DIR}/libwebp.dll
+                        ${GDAL_BIN_DIR}/lcms2.dll
                         # for pdal
-                        ${GDAL_BIN_DIR}/laszip3.dll
+                        #${GDAL_BIN_DIR}/laszip3.dll
                         )
                 elseif (GDAL_VERSION EQUAL 3.3)
                     set ( GDAL_DEP_DLL_FILES ${GDAL_BIN_DIR}/xerces-c_3_2.dll

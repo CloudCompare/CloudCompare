@@ -94,6 +94,7 @@ constexpr char COMMAND_C2M_DIST_FLIP_NORMALS[]			= "FLIP_NORMS";
 constexpr char COMMAND_C2C_DIST[]						= "C2C_DIST";
 constexpr char COMMAND_CLOSEST_POINT_SET[]              = "CLOSEST_POINT_SET";
 constexpr char COMMAND_C2C_SPLIT_XYZ[]					= "SPLIT_XYZ";
+constexpr char COMMAND_C2C_SPLIT_XY_Z[]                 = "SPLIT_XY_Z";
 constexpr char COMMAND_C2C_LOCAL_MODEL[]				= "MODEL";
 constexpr char COMMAND_C2X_MAX_DISTANCE[]				= "MAX_DIST";
 constexpr char COMMAND_C2X_OCTREE_LEVEL[]				= "OCTREE_LEVEL";
@@ -104,6 +105,10 @@ constexpr char COMMAND_DELAUNAY_BF[]					= "BEST_FIT";
 constexpr char COMMAND_DELAUNAY_MAX_EDGE_LENGTH[]		= "MAX_EDGE_LENGTH";
 constexpr char COMMAND_SF_ARITHMETIC[]					= "SF_ARITHMETIC";
 constexpr char COMMAND_SF_OP[]							= "SF_OP";
+constexpr char COMMAND_SF_OP_SF[]						= "SF_OP_SF";
+constexpr char COMMAND_SF_INTERP[]						= "SF_INTERP";
+constexpr char COMMAND_SF_INTERP_DEST_IS_FIRST[]		= "DEST_IS_FIRST";
+constexpr char COMMAND_SF_ADD_CONST[]                   = "SF_ADD_CONST";
 constexpr char COMMAND_RENAME_SF[]						= "RENAME_SF";
 constexpr char COMMAND_COORD_TO_SF[]					= "COORD_TO_SF";
 constexpr char COMMAND_EXTRACT_VERTICES[]				= "EXTRACT_VERTICES";
@@ -3835,6 +3840,7 @@ bool CommandDist::process(ccCommandLineInterface &cmd)
 	int maxThreadCount = 0;
 	
 	bool splitXYZ = false;
+    bool mergeXY = false;
 	int modelIndex = 0;
 	bool useKNN = true;
 	double nSize = 0;
@@ -3861,7 +3867,7 @@ bool CommandDist::process(ccCommandLineInterface &cmd)
 			
 			if (cmd.arguments().empty())
 			{
-				return cmd.error(QObject::tr("Missing parameter: value after \"-%1\"").arg(COMMAND_C2X_MAX_DISTANCE));
+                return cmd.error(QObject::tr("Missing parameter: value after \"-%1\"").arg(COMMAND_C2X_MAX_DISTANCE));
 			}
 			bool conversionOk = false;
 			maxDist = cmd.arguments().takeFirst().toDouble(&conversionOk);
@@ -3898,6 +3904,19 @@ bool CommandDist::process(ccCommandLineInterface &cmd)
 				cmd.warning(QObject::tr("Parameter \"-%1\" ignored: only for C2C distance!"));
 			}
 		}
+        else if (ccCommandLineInterface::IsCommand(argument, COMMAND_C2C_SPLIT_XY_Z))
+        {
+            //local option confirmed, we can move on
+            cmd.arguments().pop_front();
+
+            splitXYZ = true;
+            mergeXY = true;
+
+            if (m_cloud2meshDist)
+            {
+                cmd.warning(QObject::tr("Parameter \"-%1\" ignored: only for C2C distance!"));
+            }
+        }
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_C2C_LOCAL_MODEL))
 		{
 			//local option confirmed, we can move on
@@ -4032,6 +4051,8 @@ bool CommandDist::process(ccCommandLineInterface &cmd)
 			//	cmd.warning("'Split XYZ' option is ignored if max distance is defined!");
 			compDlg.split3DCheckBox->setChecked(true);
 		}
+        if (mergeXY)
+            compDlg.compute2DCheckBox->setChecked(true);
 		if (modelIndex != 0)
 		{
 			compDlg.localModelComboBox->setCurrentIndex(modelIndex);
@@ -4650,6 +4671,160 @@ bool CommandSFOperation::process(ccCommandLineInterface &cmd)
 	return true;
 }
 
+CommandSFOperationSF::CommandSFOperationSF()
+    : ccCommandLineInterface::Command(QObject::tr("SF (add, sub, mult, div) SF"), COMMAND_SF_OP_SF)
+{}
+
+bool CommandSFOperationSF::process(ccCommandLineInterface &cmd)
+{
+    cmd.print(QObject::tr("[SF OP [ADD | SUB | MULT | DIV] SF]"));
+
+    if (cmd.arguments().size() < 3)
+    {
+        return cmd.error(QObject::tr("Missing parameter(s): SF index and operation and SF index '%1' (3 values expected)").arg(COMMAND_SF_OP));
+    }
+
+    //read sf index 1
+    int sfIndex = -1;
+    bool ok = true;
+    QString sfIndexStr = cmd.arguments().takeFirst();
+    if (sfIndexStr.toUpper() == OPTION_LAST)
+    {
+        sfIndex = -2;
+    }
+    else
+    {
+        sfIndex = sfIndexStr.toInt(&ok);
+    }
+    if (!ok || sfIndex == -1)
+    {
+        return cmd.error(QObject::tr("Invalid SF index! (after %1)").arg(COMMAND_SF_OP));
+    }
+
+    //read operation type
+    ccScalarFieldArithmeticsDlg::Operation operation = ccScalarFieldArithmeticsDlg::INVALID;
+    {
+        QString opName = cmd.arguments().takeFirst();
+        operation = ccScalarFieldArithmeticsDlg::GetOperationByName(opName);
+        if (operation == ccScalarFieldArithmeticsDlg::INVALID)
+        {
+            return cmd.error(QObject::tr("Unknown operation! (%1)").arg(opName));
+        }
+        else if (operation > ccScalarFieldArithmeticsDlg::DIVIDE)
+        {
+            return cmd.error(QObject::tr("Operation %1 can't be applied with %2").arg(opName, COMMAND_SF_OP));
+        }
+    }
+
+    //read sf index 2
+    int sfIndex2 = -1;
+    ok = true;
+    sfIndexStr = cmd.arguments().takeFirst();
+    if (sfIndexStr.toUpper() == OPTION_LAST)
+    {
+        sfIndex2 = -2;
+    }
+    else
+    {
+        sfIndex2 = sfIndexStr.toInt(&ok);
+    }
+    if (!ok || sfIndex2 == -1)
+    {
+        return cmd.error(QObject::tr("Invalid SF index! (after %1)").arg(COMMAND_SF_OP));
+    }
+
+    ccScalarFieldArithmeticsDlg::SF2 sf2;
+    {
+        sf2.isConstantValue = false;
+        sf2.sfIndex = sfIndex2;
+    }
+
+    //apply operation on clouds
+    for (size_t i = 0; i < cmd.clouds().size(); ++i)
+    {
+        ccPointCloud* cloud = cmd.clouds()[i].pc;
+        if (cloud && cloud->getNumberOfScalarFields() != 0 && sfIndex < static_cast<int>(cloud->getNumberOfScalarFields()))
+        {
+            if (!ccScalarFieldArithmeticsDlg::Apply(cloud, operation, sfIndex < 0 ? static_cast<int>(cloud->getNumberOfScalarFields()) - 1 : sfIndex, true, &sf2))
+            {
+                return cmd.error(QObject::tr("Failed to apply operation on cloud '%1'").arg(cloud->getName()));
+            }
+            else if (cmd.autoSaveMode())
+            {
+                QString errorStr = cmd.exportEntity(cmd.clouds()[i], "SF_OP");
+                if (!errorStr.isEmpty())
+                {
+                    return cmd.error(errorStr);
+                }
+            }
+        }
+    }
+
+    return true;
+}
+
+CommandSFInterpolation::CommandSFInterpolation()
+    : ccCommandLineInterface::Command(QObject::tr("SF interpolation"), COMMAND_SF_INTERP)
+{}
+
+bool CommandSFInterpolation::process(ccCommandLineInterface &cmd)
+{
+    cmd.print(QObject::tr("[SF INTERPOLATION]"));
+
+    if (cmd.arguments().size() < 1)
+        return cmd.error(QObject::tr("Missing parameter(s): SF index after '%1' (1 value expected)").arg(COMMAND_SF_INTERP));
+
+    if (cmd.clouds().size() < 2)
+        return cmd.error(QObject::tr("Unexpected number of clouds for '%1' (2 clouds expected: first = source, second = dest)").arg(COMMAND_SF_INTERP));
+
+    //read sf index
+    int sfIndex = -1;
+    bool ok = true;
+    QString sfIndexStr = cmd.arguments().takeFirst();
+    if (sfIndexStr.toUpper() == OPTION_LAST)
+    {
+        cmd.print(QObject::tr("[OPTION_LAST]"));
+        sfIndex = -2;
+    }
+    else
+    {
+        sfIndex = sfIndexStr.toInt(&ok);
+    }
+
+    bool destIsFirst = false;
+    while (!cmd.arguments().empty())
+    {
+        QString argument = cmd.arguments().front();
+        if (ccCommandLineInterface::IsCommand(argument, COMMAND_SF_INTERP_DEST_IS_FIRST))
+        {
+            cmd.print(QObject::tr("[DEST_IS_FIRST]"));
+            //local option confirmed, we can move on
+            cmd.arguments().pop_front();
+            destIsFirst = true;
+        }
+        else
+        {
+            break; //as soon as we encounter an unrecognized argument, we break the local loop to go back to the main one!
+        }
+    }
+
+    ccPointCloud *source = cmd.clouds()[0].pc;
+    ccPointCloud *dst = cmd.clouds()[1].pc;
+    if (destIsFirst) // swap source and destination
+    {
+        source = cmd.clouds()[1].pc;
+        dst = cmd.clouds()[0].pc;
+    }
+
+    if (!ok || sfIndex == -1)
+        return cmd.error(QObject::tr("[CommandSFInterpolation::process] Invalid SF index! (after %1)").arg(COMMAND_SF_OP));
+    else
+    {
+        sfIndex = sfIndex < 0 ? source->getNumberOfScalarFields() - 1 : sfIndex;
+        cmd.print("SF to interpolate: index " + QString::number(sfIndex) + ", name " + source->getScalarField(sfIndex)->getName());
+        return ccEntityAction::interpolateSFs(source, dst, sfIndex, cmd.widgetParent());
+    }
+}
 
 CommandSFRename::CommandSFRename()
 	: ccCommandLineInterface::Command(QObject::tr("Rename SF"), COMMAND_RENAME_SF)
@@ -4750,6 +4925,69 @@ bool CommandSFRename::process(ccCommandLineInterface &cmd)
 	}
 
 	return true;
+}
+
+CommandSFAddConst::CommandSFAddConst()
+    : ccCommandLineInterface::Command(QObject::tr("SF add constant scalar field"), COMMAND_SF_ADD_CONST)
+{}
+
+bool CommandSFAddConst::process(ccCommandLineInterface &cmd)
+{
+    cmd.print(QObject::tr("[ADD CONST SF] Note: this operation is only done on clouds"));
+
+    if (cmd.arguments().size() < 2)
+    {
+        return cmd.error(QObject::tr("Missing parameter(s): SF name and value after '%1' (2 values expected)").arg(COMMAND_SF_ADD_CONST));
+    }
+
+    //read the SF name
+    QString sfName = cmd.arguments().takeFirst();
+
+    //read constant value
+    ScalarType value = 0.;
+    bool ok = true;
+    QString valueStr = cmd.arguments().takeFirst();
+    value = valueStr.toFloat(&ok);
+
+    if (!ok)
+    {
+        return cmd.error(QObject::tr("Invalid constant value! (after %1)").arg(COMMAND_SF_ADD_CONST));
+    }
+
+    //apply operation on clouds
+    for (CLCloudDesc& cloudDesc : cmd.clouds())
+    {
+        ccPointCloud* cloud = cloudDesc.pc;
+        if (cloud)
+        {
+            // check that there is no existing scalar field
+            int indexOfSFWithSameName = cloud->getScalarFieldIndexByName(qPrintable(sfName));
+            if (indexOfSFWithSameName >= 0)
+                return cmd.error("A SF with the same name is already defined on cloud " + cloud->getName());
+
+            // add the new scalar field
+            int sfIndex = cloud->addScalarField(qPrintable(sfName));
+            if (sfIndex == -1)
+            {
+                assert(false);
+                return cmd.error("Internal error: addScalarField failed");
+            }
+            CCCoreLib::ScalarField* sf = cloud->getScalarField(sfIndex);
+            for (int index = 0; index < cloud->size(); index++)
+                sf->setValue(index, value);
+
+            if (cmd.autoSaveMode())
+            {
+                QString errorStr = cmd.exportEntity(cloudDesc, "SF_ADDED");
+                if (!errorStr.isEmpty())
+                {
+                    return cmd.error(errorStr);
+                }
+            }
+        }
+    }
+
+    return true;
 }
 
 CommandICP::CommandICP()

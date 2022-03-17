@@ -516,6 +516,59 @@ namespace ccEntityAction
 		return true;
 	}
 	
+    //! Interpolate scalar fields from on entity and transfer them to another one without the dialog
+    bool	interpolateSFs(ccPointCloud *source, ccPointCloud *dest, int sfIndex, QWidget* parent)
+    {
+        if (!source || !dest)
+        {
+            ccConsole::Error(QObject::tr("Unexpected empty cloud pointers!"));
+            return false;
+        }
+
+        if (!source->hasScalarFields())
+        {
+            ccConsole::Error(QObject::tr("[ccEntityAction::interpolateSFs] The source cloud has no scalar field!"));
+            return false;
+        }
+
+        std::vector<int> sfIndexes;
+
+        unsigned sfCount = source->getNumberOfScalarFields();
+        if (sfIndex > sfCount)
+        {
+            ccConsole::Error(QObject::tr("[ccEntityAction::interpolateSFs] Invalid scalar field index!"));
+            return false;
+        }
+        else
+            sfIndexes.push_back(sfIndex);
+
+        //semi-persistent parameters
+        static ccPointCloudInterpolator::Parameters::Method s_interpMethod = ccPointCloudInterpolator::Parameters::NEAREST_NEIGHBOR;
+        static ccPointCloudInterpolator::Parameters::Algo s_interpAlgo = ccPointCloudInterpolator::Parameters::NORMAL_DIST;
+        static int s_interpKNN = 6;
+
+        ccInterpolationDlg iDlg(parent);
+        iDlg.setInterpolationMethod(s_interpMethod);
+        iDlg.setInterpolationAlgorithm(s_interpAlgo);
+        iDlg.knnSpinBox->setValue(s_interpKNN);
+        iDlg.radiusDoubleSpinBox->setValue(dest->getOwnBB().getDiagNormd() / 100);
+
+        //setup parameters
+        ccPointCloudInterpolator::Parameters params;
+        params.method = s_interpMethod = iDlg.getInterpolationMethod();
+        params.algo = s_interpAlgo = iDlg.getInterpolationAlgorithm();
+        params.knn = s_interpKNN = iDlg.knnSpinBox->value();
+        params.radius = iDlg.radiusDoubleSpinBox->value();
+        params.sigma = iDlg.kernelDoubleSpinBox->value();
+
+        ccProgressDialog pDlg(true, parent);
+
+        if (!ccPointCloudInterpolator::InterpolateScalarFieldsFrom(dest, source, sfIndexes, params, &pDlg))
+            ccConsole::Error(QObject::tr("[ccEntityAction::interpolateSFs] An error occurred! (see console)"));
+
+        return true;
+    }
+
 	bool	convertTextureToColor(const ccHObject::Container& selectedEntities, QWidget* parent)
 	{	
 		for (ccHObject* ent : selectedEntities)

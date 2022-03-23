@@ -1169,6 +1169,7 @@ bool ccGLWindow::event(QEvent* evt)
 	{
 		update();
 	}
+	break;
 #endif
 
 	default:

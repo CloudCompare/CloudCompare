@@ -359,11 +359,6 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 			}
 		}
 		
-		//sum the points heights
-		double Pz = P->u[Z];
-		aCell.avgHeight += Pz;
-		aCell.stdDevHeight += Pz * Pz;
-
 		//scalar fields
 		if (interpolateSF)
 		{
@@ -431,37 +426,52 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 		}
 	}
 
-	if (projectionType == PROJ_MEDIAN_VALUE)
+    std::vector<double> pointHeight;
+    //Now we can browse through all points belonging in each cell 
+    for (unsigned j = 0; j < height; ++j)
     {
-        std::vector<double> pointHeight;
-        //Now we can browse through all points belonging in each cell 
-        for (unsigned j = 0; j < height; ++j)
+        Row& row = rows[j];
+        for (unsigned i = 0; i < width; ++i)
         {
-            Row& row = rows[j];
-            for (unsigned i = 0; i < width; ++i)
+            ccRasterCell& aCell = row[i];
+            if (aCell.nbPoints)
             {
-                ccRasterCell& aCell = row[i];
-                if (row[i].nbPoints)
-                {
-                    pointHeight.reserve(aCell.nbPoints);
-                    //Start with first point in cell, and browse through every point using the linked ref listi, and collect point indexes
-                    void** pRef = aCell.pointRefHead;
-                    for (unsigned n = 0; n < aCell.nbPoints; ++n){
-                        unsigned pointIndex = ((unsigned long)pRef-(unsigned long)pointRefList)/sizeof(void*);
-                        const CCVector3* P = cloud->getPoint(pointIndex);
-                        pointHeight[n] = P->u[Z];
-                        pRef = (void**) *pRef;
-                    }
-                    std::sort(pointHeight.begin(), pointHeight.begin()+aCell.nbPoints, [](double a, double b) {
-                        return a>b;
-                    });
-                    if (aCell.nbPoints%2){ //Odd number
-                        aCell.medianHeight = pointHeight[aCell.nbPoints/2];
-                    }
-                    else{ //Even number
-                        aCell.medianHeight = ( pointHeight[(aCell.nbPoints/2)-1] + pointHeight[aCell.nbPoints/2] ) /2;
-                    }
+                pointHeight.reserve(aCell.nbPoints);
+                //Start with first point in cell, and browse through every point using the linked ref listi, and collect point indexes
+                void** pRef = aCell.pointRefHead;
+                for (unsigned n = 0; n < aCell.nbPoints; ++n){
+                    unsigned pointIndex = ((unsigned long)pRef-(unsigned long)pointRefList)/sizeof(void*);
+                    const CCVector3* P = cloud->getPoint(pointIndex);
+                    pointHeight[n] = P->u[Z];
+                    pRef = (void**) *pRef;
                 }
+                auto pointHeight_end = std::next(pointHeight.begin(), aCell.nbPoints);
+                // Sort points in cell on height
+                std::sort(pointHeight.begin(), pointHeight_end, [](double a, double b) {
+                    return a>b;
+                });
+                //Extract median value
+                if (aCell.nbPoints%2){ //Odd number
+                    aCell.medianHeight = pointHeight[aCell.nbPoints/2];
+                }
+                else{ //Even number
+                    aCell.medianHeight = ( pointHeight[(aCell.nbPoints/2)-1] + pointHeight[aCell.nbPoints/2] ) /2;
+                }
+                //Extract min/max value
+			    aCell.minHeight = pointHeight[0];
+			    aCell.maxHeight = pointHeight[aCell.nbPoints-1];
+
+                //Calculate average value
+                aCell.avgHeight = std::accumulate(pointHeight.begin(), pointHeight_end, 0.0) / aCell.nbPoints;
+                //Calculate std dev
+                //  Square all height values in place, and calc stddev as sqrt(  mean(val**2) / mean(val)**2 )
+                std::transform(pointHeight.begin(),pointHeight_end,pointHeight.begin(), [](double a){
+                        return a*a;
+                });
+                aCell.stdDevHeight = std::accumulate(pointHeight.begin(), pointHeight_end, 0.0) / aCell.nbPoints;
+		        aCell.stdDevHeight = sqrt(std::abs(aCell.stdDevHeight - aCell.avgHeight*aCell.avgHeight));
+                printf("%3d, %3d  avg=%f, med=%f stddev=%f\n",j,i,aCell.avgHeight,aCell.medianHeight,aCell.stdDevHeight );
+                
             }
         }
     }
@@ -528,8 +538,6 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 				ccRasterCell& cell = row[i];
 				if (cell.nbPoints > 1)
 				{
-					cell.avgHeight /= cell.nbPoints;
-					cell.stdDevHeight = sqrt(std::abs(cell.stdDevHeight / cell.nbPoints - cell.avgHeight*cell.avgHeight));
 					if (hasColors && projectionType == PROJ_AVERAGE_VALUE)
 					{
 						cell.color /= cell.nbPoints;
@@ -539,10 +547,6 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 					{
 						cell.color /= cell.nbPoints;
 					}
-				}
-				else
-				{
-					cell.stdDevHeight = 0;
 				}
 
 				if (cell.nbPoints != 0)

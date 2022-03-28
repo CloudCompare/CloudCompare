@@ -151,6 +151,7 @@ v2.12 (???) - (in development)
 	- 'X', 'Y' and 'Z' labels are now displayed next to the trihedron axes (in the bottom right corner)
 
 - New plugins
+	- qCloudLayers: manual classification plugin (see https://www.cloudcompare.org/doc/wiki/index.php?title=QCloudLayers_(plugin) )
 	- MPlane: perform normal distance measurements against a defined plane (see https://www.cloudcompare.org/doc/wiki/index.php?title=MPlane_(plugin) )
 	- Colorimetric Segmenter: color-based segmentation of point clouds (see https://gitlab.univ-nantes.fr/E164955Z/ptrans)
 	- Masonry Segmentation: segmentation of dense point clouds of masonry structures into their individual stones (see: https://github.com/CyberbuildLab/masonry-cc)

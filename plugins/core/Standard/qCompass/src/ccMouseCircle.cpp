@@ -17,6 +17,10 @@
 
 #include "ccMouseCircle.h"
 
+//Qt
+#include <QWheelEvent>
+
+//System
 #include <cmath>
 
 //! Unit circle
@@ -152,7 +156,7 @@ bool ccMouseCircle::eventFilter(QObject* obj, QEvent* event)
 
 	if (event->type() == QEvent::Wheel)
 	{
-		QWheelEvent* wheelEvent = static_cast<QWheelEvent *>(event);
+		QWheelEvent* wheelEvent = static_cast<QWheelEvent*>(event);
 
 		//is control down
 		if (wheelEvent->modifiers().testFlag(Qt::ControlModifier))

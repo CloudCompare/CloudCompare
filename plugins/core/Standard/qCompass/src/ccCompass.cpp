@@ -19,6 +19,7 @@
 #include <QCheckBox>
 #include <QDoubleValidator>
 #include <QFileDialog>
+#include <QMouseEvent>
 
 //CCCoreLib
 #include <Neighbourhood.h>

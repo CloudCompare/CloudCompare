@@ -22,10 +22,11 @@
 This is a custom 2DViewportLabel which takes up the entire viewport but is entirely transparent,
 except for a circle with radius r around the mouse. 
 */
-#include "ccStdPluginInterface.h"
+#include <ccStdPluginInterface.h>
 #include <ccGLWindow.h>
 #include <cc2DViewportObject.h>
-#include <qevent.h>
+
+#include <QEvent>
 #include <QPoint>
 #include <QObject>
 

@@ -45,6 +45,7 @@ struct DefaultFieldNames : public QMap<ccRasterGrid::ExportableFields, QString>
 		insert(ccRasterGrid::PER_CELL_AVG_HEIGHT,     "Average height");
 		insert(ccRasterGrid::PER_CELL_HEIGHT_STD_DEV, "Std. dev. height");
 		insert(ccRasterGrid::PER_CELL_HEIGHT_RANGE,   "Height range");
+		insert(ccRasterGrid::PER_CELL_MEDIAN_HEIGHT,  "Median height");
 	}
 };
 static DefaultFieldNames s_defaultFieldNames;
@@ -1003,6 +1004,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 			case PER_CELL_MIN_HEIGHT:
 			case PER_CELL_MAX_HEIGHT:
 			case PER_CELL_AVG_HEIGHT:
+			case PER_CELL_MEDIAN_HEIGHT:
 			case PER_CELL_HEIGHT_STD_DEV:
 			case PER_CELL_HEIGHT_RANGE:
 			{
@@ -1139,6 +1141,9 @@ ccPointCloud* ccRasterGrid::convertToCloud(	const std::vector<ExportableFields>&
 						break;
 					case PER_CELL_AVG_HEIGHT:
 						sVal = static_cast<ScalarType>(aCell->avgHeight);
+						break;
+					case PER_CELL_MEDIAN_HEIGHT:
+						sVal = static_cast<ScalarType>(aCell->medianHeight);
 						break;
 					case PER_CELL_HEIGHT_STD_DEV:
 						sVal = static_cast<ScalarType>(aCell->stdDevHeight);

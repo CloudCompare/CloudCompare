@@ -599,6 +599,16 @@ replaced by the cell's average height!</string>
                  </property>
                 </widget>
                </item>
+               <item row="3" column="0">
+                <widget class="QCheckBox" name="generateMedianHeightSFcheckBox">
+                 <property name="toolTip">
+                  <string>Adds a scalar field with the median height of the points inside the cell</string>
+                 </property>
+                 <property name="text">
+                  <string>median height</string>
+                 </property>
+                </widget>
+               </item>
               </layout>
              </widget>
             </item>

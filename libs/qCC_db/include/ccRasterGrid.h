@@ -34,8 +34,8 @@ class ccProgressDialog;
 
 struct QCC_DB_LIB_API ccIndexValueTuplet
 {
-    unsigned index;
-    double   val;
+	unsigned index;
+	double   val;
 };
 
 struct QCC_DB_LIB_API ccRasterCell
@@ -50,8 +50,8 @@ struct QCC_DB_LIB_API ccRasterCell
 		, nbPoints(0)
 		, pointIndex(0)
 		, color(0, 0, 0)
-        , pointRefHead(NULL)
-        , pointRefTail(NULL)
+		, pointRefHead(NULL)
+		, pointRefTail(NULL)
 	{}
 
 	//! Height value
@@ -72,10 +72,10 @@ struct QCC_DB_LIB_API ccRasterCell
 	unsigned pointIndex;
 	//! Color
 	CCVector3d color;
-    //! Pointer to first point reference for this cell
-    void** pointRefHead;
-    //! Pointer to last point reference for this cell
-    void** pointRefTail;
+	//! Pointer to first point reference for this cell
+	void** pointRefHead;
+	//! Pointer to last point reference for this cell
+	void** pointRefTail;
 
 };
 

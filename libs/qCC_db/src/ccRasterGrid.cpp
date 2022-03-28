@@ -285,136 +285,6 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
             aCell.pointRefTail = pointRefList+n;
         }
 
-
-		if (aCell.nbPoints)
-		{
-			if (P->u[Z] < aCell.minHeight)
-			{
-				aCell.minHeight = P->u[Z];
-				if (projectionType == PROJ_MINIMUM_VALUE)
-				{
-					//we keep track of the lowest point
-					aCell.pointIndex = n;
-
-					if (hasColors)
-					{
-						assert(cloud->hasColors());
-						const ccColor::Rgb& col = cloud->getPointColor(n);
-						aCell.color = CCVector3d(col.r, col.g, col.b);
-					}
-				}
-			}
-			else if (P->u[Z] > aCell.maxHeight)
-			{
-				aCell.maxHeight = P->u[Z];
-				if (projectionType == PROJ_MAXIMUM_VALUE)
-				{
-					//we keep track of the highest point
-					aCell.pointIndex = n;
-
-					if (hasColors)
-					{
-						assert(cloud->hasColors());
-						const ccColor::Rgb& col = cloud->getPointColor(n);
-						aCell.color = CCVector3d(col.r, col.g, col.b);
-					}
-				}
-			}
-
-			if (projectionType == PROJ_AVERAGE_VALUE)
-			{
-				//we keep track of the point which is the closest to the cell center (in 2D)
-				CCVector2d C = computeCellCenter(cellPos.x, cellPos.y, X, Y);
-				const CCVector3* Q = cloud->getPoint(aCell.pointIndex); //former closest point
-
-				CCVector2d P2D(P->u[X], P->u[Y]);
-				CCVector2d Q2D(Q->u[X], Q->u[Y]);
-
-				double squareDistToP = (C - P2D).norm2();
-				double squareDistToQ = (C - Q2D).norm2();
-				if (squareDistToP < squareDistToQ)
-				{
-					aCell.pointIndex = n;
-				}
-
-				if (hasColors)
-				{
-					assert(cloud->hasColors());
-					const ccColor::Rgb& col = cloud->getPointColor(n);
-					aCell.color += CCVector3d(col.r, col.g, col.b);
-				}
-
-			}
-		}
-		else
-		{
-			aCell.minHeight = aCell.maxHeight = P->u[Z];
-			aCell.pointIndex = n;
-
-			if (hasColors)
-			{
-				assert(cloud->hasColors());
-				const ccColor::Rgb& col = cloud->getPointColor(n);
-				aCell.color = CCVector3d(col.r, col.g, col.b);
-			}
-		}
-		
-		//scalar fields
-		if (interpolateSF)
-		{
-			assert(pc);
-
-			//absolute position of the cell (e.g. in the 2D SF grid(s))
-			int pos = cellPos.y * static_cast<int>(width) + cellPos.x;
-			assert(pos < static_cast<int>(gridTotalSize));
-
-			for (size_t k = 0; k < scalarFields.size(); ++k)
-			{
-				assert(!scalarFields[k].empty());
-
-				CCCoreLib::ScalarField* sf = pc->getScalarField(static_cast<unsigned>(k));
-				assert(sf && pos < scalarFields[k].size());
-
-				ScalarType sfValue = sf->getValue(n);
-
-				if (ccScalarField::ValidValue(sfValue))
-				{
-					SF::value_type formerValue = scalarFields[k][pos];
-					if (aCell.nbPoints && std::isfinite(formerValue))
-					{
-						switch (sfInterpolation)
-						{
-						case PROJ_MINIMUM_VALUE:
-							// keep the minimum value
-							scalarFields[k][pos] = std::min<SF::value_type>(formerValue, sfValue);
-							break;
-						case PROJ_AVERAGE_VALUE:
-							//we sum all values (we will divide them later)
-							scalarFields[k][pos] += sfValue;
-							break;
-						case PROJ_MEDIAN_VALUE:
-                            //TODO magnuan, replace with MEDIAN calculation
-							//we sum all values (we will divide them later)
-							scalarFields[k][pos] += sfValue;
-							break;
-						case PROJ_MAXIMUM_VALUE:
-							// keep the maximum value
-							scalarFields[k][pos] = std::max<SF::value_type>(formerValue, sfValue);
-							break;
-						default:
-							assert(false);
-							break;
-						}
-					}
-					else
-					{
-						//for the first (valid) point, we simply have to store its SF value (in any case)
-						scalarFields[k][pos] = sfValue;
-					}
-				}
-			}
-		}
-
 		//update the number of points in the cell
 		++aCell.nbPoints;
 
@@ -426,7 +296,9 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 		}
 	}
 
-    std::vector<double> pointHeight;
+    std::vector<ccIndexValueTuplet> cellPointIndexedHeight;
+    std::vector<double> cellPointHeight;
+    std::vector<ScalarType> cellPointSF; 
     //Now we can browse through all points belonging in each cell 
     for (unsigned j = 0; j < height; ++j)
     {
@@ -436,144 +308,180 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
             ccRasterCell& aCell = row[i];
             if (aCell.nbPoints)
             {
-                pointHeight.reserve(aCell.nbPoints);
-                //Start with first point in cell, and browse through every point using the linked ref listi, and collect point indexes
+                CCVector2i cellPos;
+                cellPos.x = i;
+                cellPos.y = j;
+                
+                //Assemble a list of all points in cell
+                //  Start with first point in cell, and browse through every point using the linked ref listi, and collect point indexes
+                cellPointIndexedHeight.reserve(aCell.nbPoints);
                 void** pRef = aCell.pointRefHead;
                 for (unsigned n = 0; n < aCell.nbPoints; ++n){
                     unsigned pointIndex = ((unsigned long)pRef-(unsigned long)pointRefList)/sizeof(void*);
                     const CCVector3* P = cloud->getPoint(pointIndex);
-                    pointHeight[n] = P->u[Z];
+                    cellPointIndexedHeight[n].index = pointIndex;
+                    cellPointIndexedHeight[n].val = P->u[Z];
                     pRef = (void**) *pRef;
                 }
-                auto pointHeight_end = std::next(pointHeight.begin(), aCell.nbPoints);
-                // Sort points in cell on height
-                std::sort(pointHeight.begin(), pointHeight_end, [](double a, double b) {
-                    return a>b;
+                auto cellPointIndexedHeight_end = std::next(cellPointIndexedHeight.begin(), aCell.nbPoints);
+                //Sorting indexed points in cell on height in ascending order
+                std::sort(cellPointIndexedHeight.begin(), cellPointIndexedHeight_end, [](ccIndexValueTuplet a, ccIndexValueTuplet b) {
+                    return a.val<b.val;
                 });
-                //Extract median value
-                if (aCell.nbPoints%2){ //Odd number
-                    aCell.medianHeight = pointHeight[aCell.nbPoints/2];
+
+                //Extract point values as simple vector to simplify used of std processing
+                cellPointHeight.reserve(aCell.nbPoints);
+                for (unsigned n=0; n < aCell.nbPoints ;n++){
+                    cellPointHeight[n] = cellPointIndexedHeight[n].val;
                 }
-                else{ //Even number
-                    aCell.medianHeight = ( pointHeight[(aCell.nbPoints/2)-1] + pointHeight[aCell.nbPoints/2] ) /2;
+                auto cellPointHeight_end = std::next(cellPointHeight.begin(), aCell.nbPoints);
+
+
+                //Compute standard statistics on height value
+                // Extract median value
+                if (aCell.nbPoints%2){
+                    aCell.medianHeight = cellPointHeight[aCell.nbPoints/2];
+                }
+                else{
+                    aCell.medianHeight = ( cellPointHeight[(aCell.nbPoints/2)-1] + cellPointHeight[aCell.nbPoints/2] ) /2;
                 }
                 //Extract min/max value
-			    aCell.minHeight = pointHeight[0];
-			    aCell.maxHeight = pointHeight[aCell.nbPoints-1];
-
+			    aCell.minHeight = cellPointHeight[0];
+			    aCell.maxHeight = cellPointHeight[aCell.nbPoints-1];
                 //Calculate average value
-                aCell.avgHeight = std::accumulate(pointHeight.begin(), pointHeight_end, 0.0) / aCell.nbPoints;
+                aCell.avgHeight = std::accumulate(cellPointHeight.begin(), cellPointHeight_end, 0.0) / aCell.nbPoints;
                 //Calculate std dev
                 //  Square all height values in place, and calc stddev as sqrt(  mean(val**2) / mean(val)**2 )
-                std::transform(pointHeight.begin(),pointHeight_end,pointHeight.begin(), [](double a){
+                std::transform(cellPointHeight.begin(),cellPointHeight_end,cellPointHeight.begin(), [](double a){
                         return a*a;
                 });
-                aCell.stdDevHeight = std::accumulate(pointHeight.begin(), pointHeight_end, 0.0) / aCell.nbPoints;
+                aCell.stdDevHeight = std::accumulate(cellPointHeight.begin(), cellPointHeight_end, 0.0) / aCell.nbPoints;
 		        aCell.stdDevHeight = sqrt(std::abs(aCell.stdDevHeight - aCell.avgHeight*aCell.avgHeight));
-                printf("%3d, %3d  avg=%f, med=%f stddev=%f\n",j,i,aCell.avgHeight,aCell.medianHeight,aCell.stdDevHeight );
+				
+                //Pick point index to report and set the right 'height' value
+                switch (projectionType)
+                {
+                case PROJ_MINIMUM_VALUE:
+					aCell.h = aCell.minHeight;
+					aCell.pointIndex = cellPointIndexedHeight[0].index;
+                    break;
+                case PROJ_AVERAGE_VALUE:
+                    aCell.h = aCell.avgHeight;
+                    break;
+                case PROJ_MEDIAN_VALUE:
+					aCell.h = aCell.medianHeight;
+					aCell.pointIndex = cellPointIndexedHeight[aCell.nbPoints/2].index;
+                    break;
+                case PROJ_MAXIMUM_VALUE:
+					aCell.h = aCell.maxHeight;
+					aCell.pointIndex = cellPointIndexedHeight[aCell.nbPoints-1].index;
+                    break;
+                default:
+                    assert(false);
+                    break;
+                }
+                // Average value, is a bit of a special case, here we report the index closest to cell center
+                if (projectionType == PROJ_AVERAGE_VALUE)
+                {
+                    //we keep track of the point which is the closest to the cell center (in 2D)
+                    CCVector2d C = computeCellCenter(cellPos.x, cellPos.y, X, Y);
+                    double minimum_squareDistToP;
+                    for (unsigned n=0; n < aCell.nbPoints ;n++)
+                    {    
+                        unsigned pointIndex = cellPointIndexedHeight[n].index;
+                        const CCVector3* P = cloud->getPoint(pointIndex); 
+                        CCVector2d P2D(P->u[X], P->u[Y]);
+                        double squareDistToP = (C - P2D).norm2();
+                        if ((squareDistToP < minimum_squareDistToP) || (n==0)){
+                            minimum_squareDistToP=squareDistToP;
+                            aCell.pointIndex = pointIndex;
+                        }
+                    }
+                }
+
+                // Handle if datasets has RGB-colors 
+                if (hasColors)
+                {
+                    assert(cloud->hasColors());
+			        if (projectionType == PROJ_AVERAGE_VALUE){
+                        //Average Color
+                        aCell.color = CCVector3d(0,0,0);
+                        for (unsigned n=0; n < aCell.nbPoints ;n++){
+                            unsigned pointIndex = cellPointIndexedHeight[n].index;
+                            const ccColor::Rgb& col = cloud->getPointColor(pointIndex);
+                            aCell.color += CCVector3d(col.r, col.g, col.b);
+                        }
+						aCell.color /= aCell.nbPoints;
+                    }
+                    else{  
+                        //Pick color from selected index
+                        const ccColor::Rgb& col = cloud->getPointColor(aCell.pointIndex);
+                        aCell.color = CCVector3d(col.r, col.g, col.b);
+                    }
+                }
                 
+                //Handle scalar fields
+                if (interpolateSF)
+                {
+                    assert(pc);
+                    //absolute position of the cell (e.g. in the 2D SF grid(s))
+                    int pos = cellPos.y * static_cast<int>(width) + cellPos.x;
+                    assert(pos < static_cast<int>(gridTotalSize));
+                    
+                    for (size_t k = 0; k < scalarFields.size(); ++k)
+                    {
+                        assert(!scalarFields[k].empty());
+                        CCCoreLib::ScalarField* sf = pc->getScalarField(static_cast<unsigned>(k));
+                        assert(sf && pos < scalarFields[k].size());
+                        // Set up vector of valid sf values for current cell 
+                        cellPointSF.reserve(aCell.nbPoints);
+                        unsigned validPoints=0;
+                        for (unsigned n=0; n < aCell.nbPoints ;n++){
+                            unsigned pointIndex = cellPointIndexedHeight[0].index;
+                            ScalarType sfValue = sf->getValue(pointIndex);
+                            if(std::isfinite(sfValue)){
+                                cellPointSF[validPoints] = sfValue;
+                                validPoints++;
+                            }
+                        }
+                        if (validPoints==0) continue;
+                        auto cellPointSF_end = std::next(cellPointSF.begin(), validPoints);
+                        
+                        // Sort valid scalar values for cell
+                        std::sort(cellPointSF.begin(), cellPointSF_end, [](ScalarType a, ScalarType b) {
+                            return a<b;
+                        });
+
+                        switch (sfInterpolation)
+                        {
+                            case PROJ_MINIMUM_VALUE:
+                                scalarFields[k][pos] = cellPointSF[0];
+                                break;
+                            case PROJ_AVERAGE_VALUE:
+                                scalarFields[k][pos] = std::accumulate(cellPointSF.begin(), cellPointSF_end, 0.0) / validPoints;
+                                break;
+                            case PROJ_MEDIAN_VALUE:
+                                if(validPoints%2){
+                                    scalarFields[k][pos] = cellPointSF[(validPoints/2)];
+                                }
+                                else{
+                                    scalarFields[k][pos] = (cellPointSF[(validPoints/2)-1] + cellPointSF[(validPoints/2)])/2;
+                                }
+                                break;
+                            case PROJ_MAXIMUM_VALUE:
+                                scalarFields[k][pos] = cellPointSF[validPoints-1]; 
+                                break;
+                            default:
+                                assert(false);
+                                break;
+                        }
+                    }
+                }
             }
         }
     }
     free(pointRefList);
 
-
-
-	//update SF grids for 'average' cases
-	if (sfInterpolation == PROJ_AVERAGE_VALUE)
-	{
-		for (auto &scalarField : scalarFields)
-		{
-			assert(!scalarField.empty());
-
-			double* _gridSF = scalarField.data();
-			for (unsigned j = 0; j < height; ++j)
-			{
-				Row& row = rows[j];
-				for (unsigned i = 0; i < width; ++i, ++_gridSF)
-				{
-					if (row[i].nbPoints > 1)
-					{
-						if (std::isfinite(*_gridSF)) //valid SF value
-						{
-							*_gridSF /= row[i].nbPoints;
-						}
-					}
-				}
-			}
-		}
-	}
-	if (sfInterpolation == PROJ_MEDIAN_VALUE)
-    //TODO magnuan, replace with MEDIAN calculation
-	{
-		for (auto &scalarField : scalarFields)
-		{
-			assert(!scalarField.empty());
-
-			double* _gridSF = scalarField.data();
-			for (unsigned j = 0; j < height; ++j)
-			{
-				Row& row = rows[j];
-				for (unsigned i = 0; i < width; ++i, ++_gridSF)
-				{
-					if (row[i].nbPoints > 1)
-					{
-						if (std::isfinite(*_gridSF)) //valid SF value
-						{
-							*_gridSF /= row[i].nbPoints;
-						}
-					}
-				}
-			}
-		}
-	}
-
-	//update the main grid (average height and std.dev. computation + current 'height' value)
-	{
-		for (unsigned j = 0; j < height; ++j)
-		{
-			Row& row = rows[j];
-			for (unsigned i = 0; i < width; ++i)
-			{
-				ccRasterCell& cell = row[i];
-				if (cell.nbPoints > 1)
-				{
-					if (hasColors && projectionType == PROJ_AVERAGE_VALUE)
-					{
-						cell.color /= cell.nbPoints;
-					}
-					if (hasColors && projectionType == PROJ_MEDIAN_VALUE)
-                    //TODO magnuan, replace with MEDIAN calculation
-					{
-						cell.color /= cell.nbPoints;
-					}
-				}
-
-				if (cell.nbPoints != 0)
-				{
-					//set the right 'height' value
-					switch (projectionType)
-					{
-					case PROJ_MINIMUM_VALUE:
-						cell.h = cell.minHeight;
-						break;
-					case PROJ_AVERAGE_VALUE:
-						cell.h = cell.avgHeight;
-						break;
-					case PROJ_MEDIAN_VALUE:
-						cell.h = cell.medianHeight;
-						break;
-					case PROJ_MAXIMUM_VALUE:
-						cell.h = cell.maxHeight;
-						break;
-					default:
-						assert(false);
-						break;
-					}
-				}
-			}
-		}
-	}
 
 	//compute the number of non empty cells
 	updateNonEmptyCellCount();

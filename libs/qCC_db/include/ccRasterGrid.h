@@ -31,6 +31,13 @@ class ccProgressDialog;
 
 
 //! Raster grid cell
+
+struct QCC_DB_LIB_API ccIndexValueTuplet
+{
+    unsigned index;
+    double   val;
+};
+
 struct QCC_DB_LIB_API ccRasterCell
 {
 	//! Default constructor

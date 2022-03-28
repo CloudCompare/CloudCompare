@@ -3306,32 +3306,30 @@ void MainWindow::doActionSmoothMeshLaplacian()
 // helper for doActionMerge
 void AddToRemoveList(ccHObject* toRemove, ccHObject::Container& toBeRemovedList)
 {
-	//is a parent or sibling already in the "toBeRemoved" list?
-	int j = 0;
-	int count = static_cast<int>(toBeRemovedList.size());
-	while (j < count)
+	// is a parent or sibling already in the "toBeRemoved" list?
+	size_t count = toBeRemovedList.size();
+	for (size_t j = 0; j < count;)
 	{
 		if (toBeRemovedList[j]->isAncestorOf(toRemove))
 		{
-			toRemove = nullptr;
-			break;
+			// nothing to do, we already have an ancestor
+			return;
 		}
 		else if (toRemove->isAncestorOf(toBeRemovedList[j]))
 		{
+			// we don't need to keep the children
 			toBeRemovedList[j] = toBeRemovedList.back();
 			toBeRemovedList.pop_back();
 			count--;
-			j++;
 		}
 		else
 		{
-			//forward
-			j++;
+			// forward
+			++j;
 		}
 	}
 
-	if (toRemove)
-		toBeRemovedList.push_back(toRemove);
+	toBeRemovedList.push_back(toRemove);
 }
 
 void MainWindow::doActionMerge()
@@ -3461,19 +3459,12 @@ void MainWindow::doActionMerge()
 					firstCloud->prepareDisplayForRefresh_recursive();
 
 					ccHObject* toRemove = nullptr;
-					//if the entity to remove is a group with a unique child, we can remove it as well
+					//if the entity to remove is inside a group with a unique child, we can remove the group as well
 					ccHObject* parent = pc->getParent();
 					if (parent && parent->isA(CC_TYPES::HIERARCHY_OBJECT) && parent->getChildrenNumber() == 1 && parent != firstCloudContext.parent)
 						toRemove = parent;
 					else
 						toRemove = pc;
-
-					if (toRemove->getParent())
-					{
-						// we detach all the clouds (or group containing clouds) from their parent
-						// to avoid issues when deleting them later
-						toRemove->getParent()->detachChild(toRemove);
-					}
 
 					AddToRemoveList(toRemove, toBeRemoved);
 
@@ -3502,16 +3493,24 @@ void MainWindow::doActionMerge()
 		}
 
 		//something to remove?
-		while (!toBeRemoved.empty())
+		for (ccHObject* toRemove : toBeRemoved)
 		{
-			if (toBeRemoved.back() && m_ccRoot)
+			if (firstCloud->isAncestorOf(toRemove))
 			{
-				m_ccRoot->removeElement(toBeRemoved.back());
+				// we cannot call 'removeElement' on a child of the first cloud, as it's temporarily detached from the DB tree!
+				if (toRemove->getParent())
+					toRemove->getParent()->removeChild(toRemove);
+				else
+					delete toRemove;
 			}
-			toBeRemoved.pop_back();
+			else
+			{
+				m_ccRoot->removeElement(toRemove);
+			}
 		}
+		toBeRemoved.clear();
 
-		//put back first cloud in DB
+		//eventually we can put back the first cloud in DB
 		if (firstCloud)
 		{
 			putObjectBackIntoDBTree(firstCloud, firstCloudContext);

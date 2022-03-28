@@ -398,6 +398,8 @@ ccRasterGrid::ProjectionType ccRasterizeTool::getTypeOfProjection() const
 		return ccRasterGrid::PROJ_AVERAGE_VALUE;
 	case 2:
 		return ccRasterGrid::PROJ_MAXIMUM_VALUE;
+	case 3:
+		return ccRasterGrid::PROJ_MEDIAN_VALUE;
 	default:
 		//shouldn't be possible for this option!
 		assert(false);
@@ -421,6 +423,8 @@ ccRasterGrid::ProjectionType ccRasterizeTool::getTypeOfSFInterpolation() const
 		return ccRasterGrid::PROJ_AVERAGE_VALUE;
 	case 2:
 		return ccRasterGrid::PROJ_MAXIMUM_VALUE;
+	case 3:
+		return ccRasterGrid::PROJ_MEDIAN_VALUE;
 	default:
 		//shouldn't be possible for this option!
 		assert(false);

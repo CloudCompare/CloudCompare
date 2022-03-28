@@ -244,6 +244,11 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 	//we always handle the colors (if any)
 	hasColors = cloud->hasColors();
 
+    //Array of pointers, each coresponding to a point in the cloud
+    // cloud->getPoint(n)  coresponds to (pointRefList+n)
+    // The pointers are used to chain together points, bellonging to the same cell 
+    void** pointRefList = (void**) calloc(pointCount, sizeof(void*));
+
 	for (unsigned n = 0; n < pointCount; ++n)
 	{
 		//for each point
@@ -259,6 +264,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 			if (!nProgress.oneStep())
 			{
 				//process cancelled by the user
+                free(pointRefList);
 				return false;
 			}
 			continue;
@@ -266,6 +272,20 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 
 		//update the cell statistics
 		ccRasterCell& aCell = rows[cellPos.y][cellPos.x];
+        
+        //Update linked list of point references
+        if (aCell.nbPoints == 0){
+            //If first point in cell, set head and tail to this reference
+            aCell.pointRefHead = pointRefList+n;
+            aCell.pointRefTail = pointRefList+n;
+        }
+        else{
+            //Else point previous tail ref to this, and reset tail
+            *(aCell.pointRefTail) = pointRefList+n;
+            aCell.pointRefTail = pointRefList+n;
+        }
+
+
 		if (aCell.nbPoints)
 		{
 			if (P->u[Z] < aCell.minHeight)
@@ -377,6 +397,11 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 							//we sum all values (we will divide them later)
 							scalarFields[k][pos] += sfValue;
 							break;
+						case PROJ_MEDIAN_VALUE:
+                            //TODO magnuan, replace with MEDIAN calculation
+							//we sum all values (we will divide them later)
+							scalarFields[k][pos] += sfValue;
+							break;
 						case PROJ_MAXIMUM_VALUE:
 							// keep the maximum value
 							scalarFields[k][pos] = std::max<SF::value_type>(formerValue, sfValue);
@@ -401,12 +426,75 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 		if (!nProgress.oneStep())
 		{
 			//process cancelled by user
+            free(pointRefList);
 			return false;
 		}
 	}
 
+	if (projectionType == PROJ_MEDIAN_VALUE)
+    {
+        std::vector<double> pointHeight;
+        //Now we can browse through all points belonging in each cell 
+        for (unsigned j = 0; j < height; ++j)
+        {
+            Row& row = rows[j];
+            for (unsigned i = 0; i < width; ++i)
+            {
+                ccRasterCell& aCell = row[i];
+                if (row[i].nbPoints)
+                {
+                    pointHeight.reserve(aCell.nbPoints);
+                    //Start with first point in cell, and browse through every point using the linked ref listi, and collect point indexes
+                    void** pRef = aCell.pointRefHead;
+                    for (unsigned n = 0; n < aCell.nbPoints; ++n){
+                        unsigned pointIndex = ((unsigned long)pRef-(unsigned long)pointRefList)/sizeof(void*);
+                        const CCVector3* P = cloud->getPoint(pointIndex);
+                        pointHeight[n] = P->u[Z];
+                        pRef = (void**) *pRef;
+                    }
+                    std::sort(pointHeight.begin(), pointHeight.begin()+aCell.nbPoints, [](double a, double b) {
+                        return a>b;
+                    });
+                    if (aCell.nbPoints%2){ //Odd number
+                        aCell.medianHeight = pointHeight[aCell.nbPoints/2];
+                    }
+                    else{ //Even number
+                        aCell.medianHeight = ( pointHeight[(aCell.nbPoints/2)-1] + pointHeight[aCell.nbPoints/2] ) /2;
+                    }
+                }
+            }
+        }
+    }
+    free(pointRefList);
+
+
+
 	//update SF grids for 'average' cases
 	if (sfInterpolation == PROJ_AVERAGE_VALUE)
+	{
+		for (auto &scalarField : scalarFields)
+		{
+			assert(!scalarField.empty());
+
+			double* _gridSF = scalarField.data();
+			for (unsigned j = 0; j < height; ++j)
+			{
+				Row& row = rows[j];
+				for (unsigned i = 0; i < width; ++i, ++_gridSF)
+				{
+					if (row[i].nbPoints > 1)
+					{
+						if (std::isfinite(*_gridSF)) //valid SF value
+						{
+							*_gridSF /= row[i].nbPoints;
+						}
+					}
+				}
+			}
+		}
+	}
+	if (sfInterpolation == PROJ_MEDIAN_VALUE)
+    //TODO magnuan, replace with MEDIAN calculation
 	{
 		for (auto &scalarField : scalarFields)
 		{
@@ -446,6 +534,11 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 					{
 						cell.color /= cell.nbPoints;
 					}
+					if (hasColors && projectionType == PROJ_MEDIAN_VALUE)
+                    //TODO magnuan, replace with MEDIAN calculation
+					{
+						cell.color /= cell.nbPoints;
+					}
 				}
 				else
 				{
@@ -462,6 +555,9 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 						break;
 					case PROJ_AVERAGE_VALUE:
 						cell.h = cell.avgHeight;
+						break;
+					case PROJ_MEDIAN_VALUE:
+						cell.h = cell.medianHeight;
 						break;
 					case PROJ_MAXIMUM_VALUE:
 						cell.h = cell.maxHeight;

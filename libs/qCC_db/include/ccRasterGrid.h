@@ -29,6 +29,7 @@ class ccGenericPointCloud;
 class ccPointCloud;
 class ccProgressDialog;
 
+
 //! Raster grid cell
 struct QCC_DB_LIB_API ccRasterCell
 {
@@ -42,12 +43,16 @@ struct QCC_DB_LIB_API ccRasterCell
 		, nbPoints(0)
 		, pointIndex(0)
 		, color(0, 0, 0)
+        , pointRefHead(NULL)
+        , pointRefTail(NULL)
 	{}
 
 	//! Height value
 	double h;
 	//! Average height value
 	double avgHeight;
+	//! Median height value
+	double medianHeight;
 	//! Height std.dev.
 	double stdDevHeight;
 	//! Min height value
@@ -60,6 +65,11 @@ struct QCC_DB_LIB_API ccRasterCell
 	unsigned pointIndex;
 	//! Color
 	CCVector3d color;
+    //! Pointer to first point reference for this cell
+    void** pointRefHead;
+    //! Pointer to last point reference for this cell
+    void** pointRefTail;
+
 };
 
 //! Raster grid type
@@ -137,6 +147,7 @@ struct QCC_DB_LIB_API ccRasterGrid
 	enum ProjectionType {	PROJ_MINIMUM_VALUE			= 0,
 							PROJ_AVERAGE_VALUE			= 1,
 							PROJ_MAXIMUM_VALUE			= 2,
+							PROJ_MEDIAN_VALUE			= 3,
 							INVALID_PROJECTION_TYPE		= 255,
 	};
 

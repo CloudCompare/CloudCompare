@@ -162,6 +162,11 @@
                <string>maximum value</string>
               </property>
              </item>
+             <item>
+              <property name="text">
+               <string>median value</string>
+              </property>
+             </item>
             </widget>
            </item>
            <item row="1" column="0">
@@ -226,6 +231,7 @@
  - minimum = lowest point in the cell
  - average = mean height of all points inside the cell
  - maximum = highest point in the cell</string>
+ - medain = median height of all points inside the cell
              </property>
              <property name="currentIndex">
               <number>0</number>
@@ -243,6 +249,11 @@
              <item>
               <property name="text">
                <string>maximum</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>median</string>
               </property>
              </item>
             </widget>

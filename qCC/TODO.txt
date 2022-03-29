@@ -41,6 +41,7 @@ Big ones:
 	- Rasterize tool
 		- set the active layer for raster generation (see https://www.cloudcompare.org/forum/viewtopic.php?t=5576)
 		- set the output raster filename (see https://www.cloudcompare.org/forum/viewtopic.php?t=5576)
+		- compute and export the population per cell (https://www.cloudcompare.org/forum/viewtopic.php?p=25085)
 [*] Point cloud cleanup tools (http://www.cloudcompare.org/forum/viewtopic.php?t=191)
 [*] Volume calculation
 	- between clouds (from distances)

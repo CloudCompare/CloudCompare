@@ -121,6 +121,7 @@ jobs:
             -DPLUGIN_STANDARD_QSRA=ON \
             -DPLUGIN_STANDARD_QRANSAC_SD=${{ matrix.config.compile_qransac }} \
             -DPLUGIN_STANDARD_QPCL=${{ matrix.config.compile_qpcl }} \
+            -DPLUGIN_STANDARD_QCLOUDLAYERS=ON \
             .
 
       - name: Build
@@ -217,6 +218,7 @@ jobs:
           -DPLUGIN_STANDARD_QSRA=ON
           -DPLUGIN_STANDARD_QRANSAC_SD=ON
           -DPLUGIN_STANDARD_QPCL=ON
+          -DPLUGIN_STANDARD_QCLOUDLAYERS=ON
           -DBUILD_TESTING=ON
 
       - name: Build

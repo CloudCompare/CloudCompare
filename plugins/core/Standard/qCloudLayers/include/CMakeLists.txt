@@ -6,7 +6,6 @@ target_sources( ${PROJECT_NAME}
 		${CMAKE_CURRENT_LIST_DIR}/ccCloudLayersDlg.h
 		${CMAKE_CURRENT_LIST_DIR}/ccAsprsModel.h
 		${CMAKE_CURRENT_LIST_DIR}/ccColorStyledDelegate.h
-		${CMAKE_CURRENT_LIST_DIR}/ccCheckBoxDelegate.h
 		${CMAKE_CURRENT_LIST_DIR}/ccCloudLayersHelper.h
 
 )

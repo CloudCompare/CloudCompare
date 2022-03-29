@@ -45,41 +45,14 @@ int ccAsprsModel::columnCount(const QModelIndex& parent) const
 	return LAST;
 }
 
-QVariant ccAsprsModel::data(const QModelIndex& index, int role) const
-{
-	if (!index.isValid() || (role != Qt::DisplayRole && role != Qt::EditRole))
-		return {};
-
-	const AsprsItem& item = m_data[index.row()];
-
-	switch (index.column())
-	{
-		case VISIBLE:
-			return item.visible;
-		case NAME:
-			return item.name;
-		case CODE:
-			return item.code;
-		case COLOR:
-			return item.color;
-		case COUNT:
-			return item.count;
-		default:
-			assert(false);
-			break;
-	}
-
-	return {};
-}
-
 QVariant ccAsprsModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
 	if (role != Qt::DisplayRole)
 		return {};
-	
+
 	if (orientation == Qt::Vertical)
 		return section;
-	
+
 	switch (section)
 	{
 	case VISIBLE:
@@ -100,66 +73,120 @@ QVariant ccAsprsModel::headerData(int section, Qt::Orientation orientation, int 
 	return {};
 }
 
+QVariant ccAsprsModel::data(const QModelIndex& index, int role) const
+{
+	if (!index.isValid())
+		return {};
+
+	const AsprsItem& item = m_data[index.row()];
+
+	// specific case for the VISIBLE column
+	if (index.column() == VISIBLE)
+	{
+		// we only provide the value for the 'CheckStateRole' role
+		if (role == Qt::CheckStateRole)
+		{
+			return item.visible ? Qt::Checked : Qt::Unchecked;
+		}
+		else
+		{
+			return {};
+		}
+	}
+
+	// for the others, we only provide the values for the 'Display' and 'Edit' roles
+	if (role != Qt::DisplayRole && role != Qt::EditRole)
+	{
+		return {};
+	}
+
+	switch (index.column())
+	{
+	case NAME:
+		return item.name;
+	case CODE:
+		return item.code;
+	case COLOR:
+		return item.color;
+	case COUNT:
+		return item.count;
+	default:
+		assert(false);
+		break;
+	}
+
+	return {};
+}
+
 bool ccAsprsModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
 	Q_UNUSED(role)
 
 	if (!index.isValid())
+	{
 		return false;
+	}
 
 	AsprsItem& item = m_data[index.row()];
 
 	switch (index.column())
 	{
-		case VISIBLE:
+	case VISIBLE:
+	{
+		if (role == Qt::CheckStateRole)
 		{
-			item.visible = value.toBool();
+			item.visible = static_cast<Qt::CheckState>(value.toInt()) == Qt::Checked;
 			emit colorChanged(item);
 		}
-		break;
-		
-		case NAME:
+		else
 		{
-			const QString name = value.toString();
-			if (!isNameExist(name))
-			{
-				item.name = name;
-				break;
-			}
-			else
-			{
-				return false;
-			}
+			return false;
 		}
-		
-		case CODE:
+	}
+	break;
+
+	case NAME:
+	{
+		QString name = value.toString();
+		if (!isNameExist(name))
 		{
-			const int code = value.toInt();
-			if (!isCodeExist(code))
-			{
-				const int oldCode = item.code;
-				item.code = code;
-				emit codeChanged(item, oldCode);
-				break;
-			}
-			else
-			{
-				return false;
-			}
+			item.name = name;
+			break;
 		}
-		
-		case COLOR:
+		else
 		{
-			item.color = value.value<QColor>();
-			emit colorChanged(item);
+			return false;
 		}
-		break;
-		
-		case COUNT:
+	}
+
+	case CODE:
+	{
+		int code = value.toInt();
+		if (!isCodeExist(code))
 		{
-			item.count = value.toInt();
+			int oldCode = item.code;
+			item.code = code;
+			emit codeChanged(item, oldCode);
+			break;
 		}
-		break;
+		else
+		{
+			return false;
+		}
+	}
+
+	case COLOR:
+	{
+		item.color = value.value<QColor>();
+		emit colorChanged(item);
+	}
+	break;
+
+	case COUNT:
+	{
+		item.count = value.toInt();
+	}
+	break;
 	}
 
 	emit dataChanged(index, index);
@@ -170,15 +197,21 @@ bool ccAsprsModel::setData(const QModelIndex& index, const QVariant& value, int 
 Qt::ItemFlags ccAsprsModel::flags(const QModelIndex& index) const
 {
 	if (!index.isValid())
-		return Qt::ItemIsEnabled;
-
-	Qt::ItemFlags flags = QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
-	if (index.column() == COLOR || index.column() == COUNT)
 	{
-		flags &= ~(Qt::ItemIsEditable);
+		return Qt::ItemIsEnabled;
 	}
-	
-	return flags;
+
+	Qt::ItemFlags f = QAbstractItemModel::flags(index);
+	if (index.column() == NAME || index.column() == CODE)
+	{
+		f |= (Qt::ItemIsEditable);
+	}
+	else if (index.column() == VISIBLE)
+	{
+		f |= (Qt::ItemIsUserCheckable);
+	}
+
+	return f;
 }
 
 QModelIndex ccAsprsModel::createNewItem()
@@ -221,7 +254,7 @@ static void ReadClass(const QSettings& settings, const QString& className, ccAsp
 {
 	QString cleanClassName = className;
 	cleanClassName.replace(QChar('/'), QChar('@'));
-	
+
 	QString readableClassName = className;
 	readableClassName.replace(QChar('@'), QChar('/'));
 
@@ -235,40 +268,40 @@ static void ReadClass(const QSettings& settings, const QString& className, ccAsp
 void ccAsprsModel::createDefaultItems()
 {
 	QSettings settings;
-	settings.beginGroup("qCloudLayers\\ASPRS");
+	settings.beginGroup("qCloudLayers/ASPRS");
 	{
-		AddClass(settings, "Not classified", 0, Qt::white);
-		AddClass(settings, "Unclassified", 1, Qt::lightGray);
-		AddClass(settings, "Ground", 2, qRgb(166, 116, 4));
-		AddClass(settings, "Low vegetation", 3, qRgb(38, 114, 0));
-		AddClass(settings, "Medium vegetation", 4, qRgb(69, 229, 0));
-		AddClass(settings, "High vegetation", 5, qRgb(204, 240, 123));
-		AddClass(settings, "Building", 6, qRgb(210, 104, 64));
-		AddClass(settings, "Low Noise", 7, qRgb(128, 78, 193));
-		AddClass(settings, "Model Keypoint", 8, qRgb(127, 0, 0));
-		AddClass(settings, "Water", 9, Qt::blue);
-		AddClass(settings, "Rail", 10, qRgb(254, 1, 0));
-		AddClass(settings, "Road surface", 11, qRgb(98, 2, 204));
-		AddClass(settings, "Overlap", 12, qRgb(233, 188, 203));
-		AddClass(settings, "Wire Shield/Neutral/Com", 13, qRgb(191, 231, 205));
-		AddClass(settings, "Wire Conductors/Phases", 14, qRgb(193, 230, 125));
-		AddClass(settings, "Transmission Tower", 15, qRgb(1, 0, 252));
-		AddClass(settings, "Wire Insulators", 16, qRgb(233, 243, 17));
-		AddClass(settings, "Bridge Deck", 17, qRgb(182, 102, 85));
-		AddClass(settings, "High Noise", 18, qRgb(255, 0, 254));
+		AddClass(settings, "Not classified",				 0, Qt::white);
+		AddClass(settings, "Unclassified",					 1, Qt::lightGray);
+		AddClass(settings, "Ground",						 2, qRgb(166, 116, 4));
+		AddClass(settings, "Low vegetation",				 3, qRgb(38, 114, 0));
+		AddClass(settings, "Medium vegetation",				 4, qRgb(69, 229, 0));
+		AddClass(settings, "High vegetation",				 5, qRgb(204, 240, 123));
+		AddClass(settings, "Building",						 6, Qt::yellow);
+		AddClass(settings, "Low Noise",						 7, Qt::red);
+		AddClass(settings, "Model Keypoint",				 8, Qt::magenta);
+		AddClass(settings, "Water",							 9, Qt::blue);
+		AddClass(settings, "Rail",							10, qRgb(85, 85, 0));
+		AddClass(settings, "Road surface",					11, Qt::darkGray);
+		AddClass(settings, "Overlap",						12, qRgb(255, 170, 255));
+		AddClass(settings, "Wire Shield/Neutral/Com",		13, qRgb(191, 231, 205));
+		AddClass(settings, "Wire Conductors/Phases",		14, qRgb(193, 230, 125));
+		AddClass(settings, "Transmission Tower",			15, Qt::darkBlue);
+		AddClass(settings, "Wire Insulators",				16, Qt::darkYellow);
+		AddClass(settings, "Bridge Deck",					17, Qt::darkCyan);
+		AddClass(settings, "High Noise",					18, Qt::darkRed);
 
-		AddClass(settings, "Conductor Attachment Points", 64, qRgb(0, 0, 0));
-		AddClass(settings, "Shield Attachment Points", 65, qRgb(0, 0, 0));
-		AddClass(settings, "Midspan Points", 66, qRgb(0, 0, 0));
-		AddClass(settings, "Structure Top Points", 67, qRgb(0, 0, 0));
-		AddClass(settings, "Structure Bottom Points", 68, qRgb(0, 0, 0));
+		AddClass(settings, "Conductor Attachment Points",	64, qRgb(25, 0, 51));
+		AddClass(settings, "Shield Attachment Points",		65, qRgb(51, 0, 102));
+		AddClass(settings, "Midspan Points",				66, qRgb(76, 0, 153));
+		AddClass(settings, "Structure Top Points",			67, qRgb(102, 0, 204));
+		AddClass(settings, "Structure Bottom Points",		68, qRgb(127, 0, 255));
 
-		AddClass(settings, "Guy Wire", 70, qRgb(0, 0, 0));
-		AddClass(settings, "Substation", 75, qRgb(0, 0, 0));
+		AddClass(settings, "Guy Wire",						70, qRgb(153, 51, 255));
+		AddClass(settings, "Substation",					75, qRgb(178, 102, 255));
 
-		AddClass(settings, "Misc Temporary", 81, qRgb(0, 0, 0));
-		AddClass(settings, "Misc Permanent", 82, qRgb(0, 0, 0));
-		AddClass(settings, "Misc Fences", 83, qRgb(0, 0, 0));
+		AddClass(settings, "Misc Temporary",				81, qRgb(204, 153, 255));
+		AddClass(settings, "Misc Permanent",				82, qRgb(229, 204, 255));
+		AddClass(settings, "Misc Fences",					83, qRgb(204, 204, 255));
 	}
 	settings.endGroup();
 	settings.sync();
@@ -279,7 +312,7 @@ void ccAsprsModel::createDefaultItems()
 void ccAsprsModel::load()
 {
 	QSettings settings;
-	settings.beginGroup("qCloudLayers\\ASPRS");
+	settings.beginGroup("qCloudLayers/ASPRS");
 
 	QStringList classes = settings.childGroups();
 
@@ -296,8 +329,8 @@ void ccAsprsModel::load()
 void ccAsprsModel::save() const
 {
 	QSettings settings;
-	settings.remove("qCloudLayers\\ASPRS");
-	settings.beginGroup("qCloudLayers\\ASPRS");
+	settings.remove("qCloudLayers/ASPRS");
+	settings.beginGroup("qCloudLayers/ASPRS");
 	{
 		for (int i = 0; i < m_data.length(); ++i)
 		{
@@ -341,7 +374,7 @@ ccAsprsModel::AsprsItem* ccAsprsModel::find(int code)
 	auto it = std::find_if(m_data.begin(), m_data.end(), [code](const ccAsprsModel::AsprsItem &item) { return item.code == code; });
 	return it != m_data.end() ? &(*it) : nullptr;
 }
-  
+
 int ccAsprsModel::indexOf(QString name) const
 {
 	auto it = std::find_if(m_data.begin(), m_data.end(), [name](const ccAsprsModel::AsprsItem &item) { return item.name == name; });

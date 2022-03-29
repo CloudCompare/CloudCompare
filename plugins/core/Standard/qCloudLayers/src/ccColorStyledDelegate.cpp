@@ -10,7 +10,7 @@ ccColorStyledDelegate::ccColorStyledDelegate(QObject* parent)
 
 void ccColorStyledDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
-	if (painter)
+	if (painter && index.model())
 	{
 		QColor color = index.model()->data(index, Qt::DisplayRole).value<QColor>();
 		painter->fillRect(option.rect, color);

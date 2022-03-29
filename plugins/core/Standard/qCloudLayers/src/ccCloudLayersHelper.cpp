@@ -9,6 +9,9 @@
 //QT
 #include <QStringList>
 
+//System
+#include <thread>
+
 ccCloudLayersHelper::ccCloudLayersHelper(ccMainAppInterface* app, ccPointCloud* cloud)
 	: m_app ( app )
 	, m_cloud( cloud )
@@ -16,7 +19,7 @@ ccCloudLayersHelper::ccCloudLayersHelper(ccMainAppInterface* app, ccPointCloud* 
 	, m_formerCloudColorsWereShown( false )
 	, m_formerCloudSFWasShown( false )
 	, m_scalarFieldIndex( 0 )
-	, m_modify( false )
+	, m_modified( false )
 	, m_parameters{}
 {
 	m_projectedPoints.resize(m_cloud->size());
@@ -96,6 +99,12 @@ void ccCloudLayersHelper::setScalarFieldIndex(int index)
 	m_scalarFieldIndex = index;
 }
 
+void ccCloudLayersHelper::keepCurrentSFVisible()
+{
+	m_formerCloudSFWasShown = true;
+	m_cloud->setCurrentDisplayedScalarField(m_scalarFieldIndex);
+}
+
 void ccCloudLayersHelper::setVisible(bool value)
 {
 	unsigned pointCount = m_cloud->size();
@@ -113,6 +122,8 @@ void ccCloudLayersHelper::apply(QList<ccAsprsModel::AsprsItem>& items)
 {
 	if (m_scalarFieldIndex >= m_cloud->getNumberOfScalarFields())
 		return;
+
+	m_cloud->setColor(ccColor::black);
 
 	for (int i = 0; i < items.size(); ++i)
 	{
@@ -302,7 +313,7 @@ void ccCloudLayersHelper::mouseMove(const CCVector2& center, float squareDist, s
 			++affected[outputCode];
 		}
 	
-		m_modify = true;
+		m_modified = true;
 	}
 	
 	m_cloud->redrawDisplay();

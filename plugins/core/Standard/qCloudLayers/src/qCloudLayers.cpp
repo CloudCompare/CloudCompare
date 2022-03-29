@@ -63,9 +63,12 @@ void qCloudLayers::doAction()
 	// get first selected cloud
 	ccPointCloud* cloud = static_cast<ccPointCloud*>(selectedEntities.front());
 
-	// speed up
-	cloud->unallocateVisibilityArray();
-	
+	if (!cloud->hasScalarFields())
+	{
+		ccLog::Error("Cloud has no scalar field");
+		return;
+	}
+
 	// set colors schema to RGB
 	m_app->updateUI();
 
@@ -80,6 +83,9 @@ void qCloudLayers::doAction()
 
 	m_cloudLayersDlg->linkWith(m_app->getActiveGLWindow());
 	m_cloudLayersDlg->setPointCloud(cloud);
+	
 	if (m_cloudLayersDlg->start())
+	{
 		m_app->updateOverlayDialogsPlacement();
+	}
 }

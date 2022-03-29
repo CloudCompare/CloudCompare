@@ -677,6 +677,8 @@ void StereogramDialog::closeEvent(QCloseEvent* e)
 	{
 		updateFacetsFilter(false);
 	}
+
+	QDialog::closeEvent(e);
 }
 
 void StereogramDialog::onFilterEnabled(bool state)

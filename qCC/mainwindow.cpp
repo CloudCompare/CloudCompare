@@ -5987,14 +5987,14 @@ void MainWindow::showEvent(QShowEvent* event)
 	QMainWindow::showEvent(event);
 }
 
-void MainWindow::closeEvent(QCloseEvent *event)
+void MainWindow::closeEvent(QCloseEvent* event)
 {
 	// If we don't have anything displayed, then just close...
 	if (m_ccRoot && (m_ccRoot->getRootEntity()->getChildrenNumber() == 0))
 	{
 		event->accept();
 	}
-	else	// ...otherwise confirm
+	else // ...otherwise confirm
 	{
 		QMessageBox message_box( QMessageBox::Question,
 								 tr("Quit"),

@@ -51,16 +51,16 @@ public:
 	DimensionalityScaleParamsComputer() : m_firstScale(true) {}
 
 	//inherited from ScaleParamsComputer
-	virtual unsigned getID() const { return DESC_DIMENSIONALITY; }
+	unsigned getID() const override { return DESC_DIMENSIONALITY; }
 
 	//inherited from ScaleParamsComputer
-	virtual QString getName() const { return "Dimensionality"; }
+	QString getName() const override { return "Dimensionality"; }
 
 	//inherited from ScaleParamsComputer
-	virtual unsigned dimPerScale() const { return 2; }
+	unsigned dimPerScale() const override { return 2; }
 
 	//inherited from ScaleParamsComputer
-	virtual void reset()
+	void reset() override
 	{
 		//a = 1/3, b = 1/3
 		//c = 1 - a - b = 1/3
@@ -154,19 +154,19 @@ public:
 	DimensionalityAndSFScaleParamsComputer() : m_firstScale(true) {}
 
 	//inherited from ScaleParamsComputer
-	virtual unsigned getID() const { return DESC_DIMENSIONALITY_SF; }
+	unsigned getID() const override { return DESC_DIMENSIONALITY_SF; }
 
 	//inherited from ScaleParamsComputer
-	virtual QString getName() const { return "Dimensionality + SF"; }
+	QString getName() const override { return "Dimensionality + SF"; }
 
 	//inherited from ScaleParamsComputer
-	virtual unsigned dimPerScale() const { return 3; }
+	unsigned dimPerScale() const override { return 3; }
 
 	//inherited from ScaleParamsComputer
-	virtual bool needSF() const { return true; }
+	bool needSF() const override { return true; }
 
 	//inherited from ScaleParamsComputer
-	virtual void reset()
+	void reset() override
 	{
 		//a = 1/3, b = 1/3
 		//c = 1 - a - b = 1/3
@@ -285,16 +285,16 @@ public:
 	CurvatureScaleParamsComputer() : m_firstScale(true) {}
 
 	//inherited from ScaleParamsComputer
-	virtual unsigned getID() const { return DESC_CURVATURE; }
+	unsigned getID() const override { return DESC_CURVATURE; }
 
 	//inherited from ScaleParamsComputer
-	virtual QString getName() const { return "Gaussian curvature"; }
+	QString getName() const override { return "Gaussian curvature"; }
 
 	//inherited from ScaleParamsComputer
-	virtual unsigned dimPerScale() const { return 1; }
+	unsigned dimPerScale() const override { return 1; }
 
 	//inherited from ScaleParamsComputer
-	virtual void reset()
+	void reset() override
 	{
 		m_defaultParams[0] = 0;
 		m_firstScale = true;
@@ -337,16 +337,16 @@ public:
 	CustomScaleParamsComputer() : m_firstScale(true) {}
 
 	//inherited from ScaleParamsComputer
-	virtual unsigned getID() const { return DESC_CUSTOM; }
+	unsigned getID() const override { return DESC_CUSTOM; }
 
 	//inherited from ScaleParamsComputer
-	virtual QString getName() const { return "Custom"; }
+	QString getName() const override { return "Custom"; }
 
 	//inherited from ScaleParamsComputer
-	virtual unsigned dimPerScale() const { return 1; }
+	unsigned dimPerScale() const override { return 1; }
 
 	//inherited from ScaleParamsComputer
-	virtual void reset()
+	void reset() override
 	{
 		//FIXME
 		m_defaultParams[0] = 0;

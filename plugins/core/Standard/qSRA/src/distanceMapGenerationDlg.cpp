@@ -330,10 +330,8 @@ void DistanceMapGenerationDlg::closeEvent(QCloseEvent* e)
 		//and the OpenGL context won't be valid anymore to unload the map texture
 		m_window->getOwnDB()->removeAllChildren();
 	}
-	if (e)
-	{
-		e->accept();
-	}
+
+	QDialog::closeEvent(e);
 }
 
 void DistanceMapGenerationDlg::updateMinAndMaxLimits()

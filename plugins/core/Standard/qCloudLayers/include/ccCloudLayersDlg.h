@@ -18,7 +18,7 @@
 //##########################################################################
 
 // local
-#include <ui_cccloudlayersdlg.h>
+#include <ui_ccCloudLayersDlg.h>
 #include "ccAsprsModel.h"
 #include "ccCloudLayersHelper.h"
 
@@ -40,8 +40,8 @@ public:
 	virtual ~ccCloudLayersDlg();
 
 	//! inherited from ccOverlayDialog
-	virtual bool start();
-	virtual void stop(bool accepted) override;
+	bool start() override;
+	void stop(bool accepted) override;
 	
 	void setPointCloud(ccPointCloud* cloud);
 	
@@ -52,7 +52,8 @@ private:
 	void saveSettings();
 	void loadSettings();
 
-	bool eventFilter(QObject *obj, QEvent *event) override;
+	bool eventFilter(QObject* obj, QEvent* event) override;
+	void reject() override;
 
 private Q_SLOTS:
 

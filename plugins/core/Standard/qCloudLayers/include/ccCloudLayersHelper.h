@@ -68,7 +68,7 @@ public:
 
 	void mouseMove(const CCVector2& center, float squareDist, std::map<ScalarType, int>& affected);
 	void projectCloud(const ccGLCameraParameters& camera);
-	bool hasChanges() const { return m_modify; }
+	bool hasChanges() const { return m_modified; }
 
 	struct Parameters
 	{
@@ -95,7 +95,7 @@ private: // variables
 	Parameters m_parameters;
 
 	unsigned m_scalarFieldIndex;
-	bool m_modify;
+	bool m_modified;
 
 	ccGLCameraParameters m_cameraParameters;
 	std::vector<CCVector2> m_projectedPoints;

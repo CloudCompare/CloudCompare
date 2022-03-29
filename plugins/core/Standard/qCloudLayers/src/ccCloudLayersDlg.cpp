@@ -107,6 +107,11 @@ void ccCloudLayersDlg::stop(bool accepted)
 	if (m_mouseCircle && m_mouseCircle->isVisible())
 		pauseClicked();
 
+	if (accepted && m_helper)
+	{
+		m_helper->keepCurrentSFVisible();
+	}
+
 	setPointCloud(nullptr);
 
 	if (m_app)

@@ -82,6 +82,8 @@ public:
 
 	inline ccPointCloud* cloud() { return m_cloud; }
 
+	void keepCurrentSFVisible();
+
 private: // methods
 	void project(ccGLCameraParameters camera, unsigned start, unsigned end);
 	static PointCoordinateType ComputeSquaredEuclideanDistance(const CCVector2& a, const CCVector2& b);

@@ -99,6 +99,12 @@ void ccCloudLayersHelper::setScalarFieldIndex(int index)
 	m_scalarFieldIndex = index;
 }
 
+void ccCloudLayersHelper::keepCurrentSFVisible()
+{
+	m_formerCloudSFWasShown = true;
+	m_cloud->setCurrentDisplayedScalarField(m_scalarFieldIndex);
+}
+
 void ccCloudLayersHelper::setVisible(bool value)
 {
 	unsigned pointCount = m_cloud->size();
@@ -116,6 +122,8 @@ void ccCloudLayersHelper::apply(QList<ccAsprsModel::AsprsItem>& items)
 {
 	if (m_scalarFieldIndex >= m_cloud->getNumberOfScalarFields())
 		return;
+
+	m_cloud->setColor(ccColor::black);
 
 	for (int i = 0; i < items.size(); ++i)
 	{

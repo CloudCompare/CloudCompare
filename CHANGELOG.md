@@ -1,7 +1,7 @@
 CloudCompare Version History
 ============================
 
-v2.12 (???) - (in development)
+v2.12 (Kyiv) - (30/03/2022)
 ----------------------
 - New tools:
 	- Menu 'Edit > Cloud'

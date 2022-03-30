@@ -50,8 +50,8 @@ struct QCC_DB_LIB_API ccRasterCell
 		, nbPoints(0)
 		, pointIndex(0)
 		, color(0, 0, 0)
-		, pointRefHead(NULL)
-		, pointRefTail(NULL)
+		, pointRefHead(nullptr)
+		, pointRefTail(nullptr)
 	{}
 
 	//! Height value

@@ -246,9 +246,18 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 	hasColors = cloud->hasColors();
 
 	//Array of pointers, each coresponding to a point in the cloud
-	// cloud->getPoint(n)  coresponds to (pointRefList+n)
+	// cloud->getPoint(n)  coresponds to (pointRefList.data()+n)
 	// The pointers are used to chain together points, bellonging to the same cell 
-	void** pointRefList = (void**) calloc(pointCount, sizeof(void*));
+	std::vector<void*> pointRefList;
+	try
+	{
+		pointRefList.resize(pointCount, nullptr);
+	}
+	catch (const std::bad_alloc)
+	{
+		ccLog::Error("Not enough memory");
+		return false;
+	}
 
 	for (unsigned n = 0; n < pointCount; ++n)
 	{
@@ -265,7 +274,6 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 			if (!nProgress.oneStep())
 			{
 				//process cancelled by the user
-				free(pointRefList);
 				return false;
 			}
 			continue;
@@ -278,14 +286,14 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 		if (aCell.nbPoints == 0)
 		{
 			//If first point in cell, set head and tail to this reference
-			aCell.pointRefHead = pointRefList + n;
-			aCell.pointRefTail = pointRefList + n;
+			aCell.pointRefHead = pointRefList.data() + n;
+			aCell.pointRefTail = pointRefList.data() + n;
 		}
 		else
 		{
 			//Else point previous tail ref to this, and reset tail
-			*(aCell.pointRefTail) = pointRefList + n;
-			aCell.pointRefTail = pointRefList + n;
+			*(aCell.pointRefTail) = pointRefList.data() + n;
+			aCell.pointRefTail = pointRefList.data() + n;
 		}
 
 		//update the number of points in the cell
@@ -294,7 +302,6 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 		if (!nProgress.oneStep())
 		{
 			//process cancelled by user
-			free(pointRefList);
 			return false;
 		}
 	}
@@ -321,7 +328,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 				void** pRef = aCell.pointRefHead;
 				for (unsigned n = 0; n < aCell.nbPoints; ++n)
 				{
-					unsigned pointIndex = ((unsigned long)pRef-(unsigned long)pointRefList)/sizeof(void*);
+					unsigned pointIndex = static_cast<unsigned>((pRef - pointRefList.data()) / sizeof(void*));
 					const CCVector3* P = cloud->getPoint(pointIndex);
 					cellPointIndexedHeight[n].index = pointIndex;
 					cellPointIndexedHeight[n].val = P->u[Z];
@@ -496,7 +503,6 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 			}
 		}
 	}
-	free(pointRefList);
 
 
 	//compute the number of non empty cells

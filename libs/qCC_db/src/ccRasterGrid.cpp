@@ -332,7 +332,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 					const CCVector3* P = cloud->getPoint(pointIndex);
 					cellPointIndexedHeight[n].index = pointIndex;
 					cellPointIndexedHeight[n].val = P->u[Z];
-					pRef = (void**) *pRef;
+					pRef = reinterpret_cast<void**> (*pRef);
 				}
 				auto cellPointIndexedHeightEnd = std::next(cellPointIndexedHeight.begin(), aCell.nbPoints);
 				//Sorting indexed points in cell on height in ascending order

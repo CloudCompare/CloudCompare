@@ -278,14 +278,14 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 		if (aCell.nbPoints == 0)
         {
 			//If first point in cell, set head and tail to this reference
-			aCell.pointRefHead = pointRefList+n;
-			aCell.pointRefTail = pointRefList+n;
+			aCell.pointRefHead = pointRefList + n;
+			aCell.pointRefTail = pointRefList + n;
 		}
 		else
         {
 			//Else point previous tail ref to this, and reset tail
-			*(aCell.pointRefTail) = pointRefList+n;
-			aCell.pointRefTail = pointRefList+n;
+			*(aCell.pointRefTail) = pointRefList + n;
+			aCell.pointRefTail = pointRefList + n;
 		}
 
 		//update the number of points in the cell
@@ -333,9 +333,9 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 					return a.val<b.val;
 				});
 
-				//Extract point values as simple vector to simplify used of std processing
+				//Extract point values as simple vector to simplify use of std processing
 				cellPointHeight.reserve(aCell.nbPoints);
-				for (unsigned n=0; n < aCell.nbPoints ;n++)
+				for (unsigned n = 0; n < aCell.nbPoints ;n++)
                 {
 					cellPointHeight[n] = cellPointIndexedHeight[n].val;
 				}
@@ -353,8 +353,8 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 					aCell.medianHeight = ( cellPointHeight[(aCell.nbPoints/2)-1] + cellPointHeight[aCell.nbPoints/2] ) /2;
 				}
 				//Extract min/max value
-				aCell.minHeight = cellPointHeight[0];
-				aCell.maxHeight = cellPointHeight[aCell.nbPoints-1];
+				aCell.minHeight = cellPointHeight.front();
+				aCell.maxHeight = cellPointHeight.back();
 				//Calculate average value
 				aCell.avgHeight = std::accumulate(cellPointHeight.begin(), cellPointHeight_end, 0.0) / aCell.nbPoints;
 				//Calculate std dev
@@ -370,7 +370,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 				{
 				case PROJ_MINIMUM_VALUE:
 					aCell.h = aCell.minHeight;
-					aCell.pointIndex = cellPointIndexedHeight[0].index;
+					aCell.pointIndex = cellPointIndexedHeight.front().index;
 					break;
 				case PROJ_AVERAGE_VALUE:
 					aCell.h = aCell.avgHeight;
@@ -381,7 +381,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 					break;
 				case PROJ_MAXIMUM_VALUE:
 					aCell.h = aCell.maxHeight;
-					aCell.pointIndex = cellPointIndexedHeight[aCell.nbPoints-1].index;
+					aCell.pointIndex = cellPointIndexedHeight.back().index;
 					break;
 				default:
 					assert(false);
@@ -392,16 +392,16 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 				{
 					//we keep track of the point which is the closest to the cell center (in 2D)
 					CCVector2d C = computeCellCenter(cellPos.x, cellPos.y, X, Y);
-					double minimum_squareDistToP;
-					for (unsigned n=0; n < aCell.nbPoints ;n++)
+					double minimumSquareDistToP = 0.0;
+					for (unsigned n = 0; n < aCell.nbPoints ;n++)
 					{	
 						unsigned pointIndex = cellPointIndexedHeight[n].index;
 						const CCVector3* P = cloud->getPoint(pointIndex); 
 						CCVector2d P2D(P->u[X], P->u[Y]);
 						double squareDistToP = (C - P2D).norm2();
-						if ((squareDistToP < minimum_squareDistToP) || (n==0))
+						if ((squareDistToP < minimumSquareDistToP) || (n == 0))
                         {
-							minimum_squareDistToP=squareDistToP;
+							minimumSquareDistToP=squareDistToP;
 							aCell.pointIndex = pointIndex;
 						}
 					}
@@ -415,7 +415,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
                     {
 						//Average Color
 						aCell.color = CCVector3d(0,0,0);
-						for (unsigned n=0; n < aCell.nbPoints ;n++)
+						for (unsigned n = 0; n < aCell.nbPoints ;n++)
                         {
 							unsigned pointIndex = cellPointIndexedHeight[n].index;
 							const ccColor::Rgb& col = cloud->getPointColor(pointIndex);
@@ -446,8 +446,8 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 						assert(sf && pos < scalarFields[k].size());
 						// Set up vector of valid sf values for current cell 
 						cellPointSF.reserve(aCell.nbPoints);
-						unsigned validPoints=0;
-						for (unsigned n=0; n < aCell.nbPoints ;n++)
+						unsigned validPoints = 0;
+						for (unsigned n = 0; n < aCell.nbPoints ;n++)
                         {
 							unsigned pointIndex = cellPointIndexedHeight[0].index;
 							ScalarType sfValue = sf->getValue(pointIndex);
@@ -457,7 +457,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 								validPoints++;
 							}
 						}
-						if (validPoints==0) continue;
+						if (validPoints == 0) continue;
 						auto cellPointSF_end = std::next(cellPointSF.begin(), validPoints);
 						
 						// Sort valid scalar values for cell

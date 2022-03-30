@@ -276,13 +276,13 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 		
 		//Update linked list of point references
 		if (aCell.nbPoints == 0)
-        {
+		{
 			//If first point in cell, set head and tail to this reference
 			aCell.pointRefHead = pointRefList + n;
 			aCell.pointRefTail = pointRefList + n;
 		}
 		else
-        {
+		{
 			//Else point previous tail ref to this, and reset tail
 			*(aCell.pointRefTail) = pointRefList + n;
 			aCell.pointRefTail = pointRefList + n;
@@ -320,7 +320,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 				cellPointIndexedHeight.reserve(aCell.nbPoints);
 				void** pRef = aCell.pointRefHead;
 				for (unsigned n = 0; n < aCell.nbPoints; ++n)
-                {
+				{
 					unsigned pointIndex = ((unsigned long)pRef-(unsigned long)pointRefList)/sizeof(void*);
 					const CCVector3* P = cloud->getPoint(pointIndex);
 					cellPointIndexedHeight[n].index = pointIndex;
@@ -336,7 +336,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 				//Extract point values as simple vector to simplify use of std processing
 				cellPointHeight.reserve(aCell.nbPoints);
 				for (unsigned n = 0; n < aCell.nbPoints ;n++)
-                {
+				{
 					cellPointHeight[n] = cellPointIndexedHeight[n].val;
 				}
 				auto cellPointHeight_end = std::next(cellPointHeight.begin(), aCell.nbPoints);
@@ -345,11 +345,11 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 				//Compute standard statistics on height value
 				// Extract median value
 				if (aCell.nbPoints%2)
-                {
+				{
 					aCell.medianHeight = cellPointHeight[aCell.nbPoints/2];
 				}
 				else
-                {
+				{
 					aCell.medianHeight = ( cellPointHeight[(aCell.nbPoints/2)-1] + cellPointHeight[aCell.nbPoints/2] ) /2;
 				}
 				//Extract min/max value
@@ -400,7 +400,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 						CCVector2d P2D(P->u[X], P->u[Y]);
 						double squareDistToP = (C - P2D).norm2();
 						if ((squareDistToP < minimumSquareDistToP) || (n == 0))
-                        {
+						{
 							minimumSquareDistToP=squareDistToP;
 							aCell.pointIndex = pointIndex;
 						}
@@ -412,11 +412,11 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 				{
 					assert(cloud->hasColors());
 					if (projectionType == PROJ_AVERAGE_VALUE)
-                    {
+					{
 						//Average Color
 						aCell.color = CCVector3d(0,0,0);
 						for (unsigned n = 0; n < aCell.nbPoints ;n++)
-                        {
+						{
 							unsigned pointIndex = cellPointIndexedHeight[n].index;
 							const ccColor::Rgb& col = cloud->getPointColor(pointIndex);
 							aCell.color += CCVector3d(col.r, col.g, col.b);
@@ -424,7 +424,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 						aCell.color /= aCell.nbPoints;
 					}
 					else
-                    {  
+					{  
 						//Pick color from selected index
 						const ccColor::Rgb& col = cloud->getPointColor(aCell.pointIndex);
 						aCell.color = CCVector3d(col.r, col.g, col.b);
@@ -448,11 +448,11 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 						cellPointSF.reserve(aCell.nbPoints);
 						unsigned validPoints = 0;
 						for (unsigned n = 0; n < aCell.nbPoints ;n++)
-                        {
+						{
 							unsigned pointIndex = cellPointIndexedHeight[n].index;
 							ScalarType sfValue = sf->getValue(pointIndex);
 							if(std::isfinite(sfValue))
-                            {
+							{
 								cellPointSF[validPoints] = sfValue;
 								validPoints++;
 							}
@@ -468,14 +468,14 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 						switch (sfInterpolation)
 						{
 							case PROJ_MINIMUM_VALUE:
-								scalarFields[k][pos] = cellPointSF[0];
+								scalarFields[k][pos] = cellPointSF.front();
 								break;
 							case PROJ_AVERAGE_VALUE:
 								scalarFields[k][pos] = std::accumulate(cellPointSF.begin(), cellPointSF_end, 0.0) / validPoints;
 								break;
 							case PROJ_MEDIAN_VALUE:
 								if(validPoints%2)
-                                {
+								{
 									scalarFields[k][pos] = cellPointSF[(validPoints/2)];
 								}
 								else{
@@ -483,7 +483,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 								}
 								break;
 							case PROJ_MAXIMUM_VALUE:
-								scalarFields[k][pos] = cellPointSF[validPoints-1]; 
+								scalarFields[k][pos] = cellPointSF.back(); 
 								break;
 							default:
 								assert(false);

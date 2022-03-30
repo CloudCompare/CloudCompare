@@ -490,10 +490,10 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 							}
 						}
 						if (validPoints == 0) continue;
-						auto cellPointSF_end = std::next(cellPointSF.begin(), validPoints);
+						auto cellPointSFEnd = std::next(cellPointSF.begin(), validPoints);
 						
 						// Sort valid scalar values for cell
-						std::sort(cellPointSF.begin(), cellPointSF_end, [](ScalarType a, ScalarType b) {
+						std::sort(cellPointSF.begin(), cellPointSFEnd, [](ScalarType a, ScalarType b) {
 							return a<b;
 						});
 
@@ -503,7 +503,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 								scalarFields[k][pos] = cellPointSF.front();
 								break;
 							case PROJ_AVERAGE_VALUE:
-								scalarFields[k][pos] = std::accumulate(cellPointSF.begin(), cellPointSF_end, 0.0) / validPoints;
+								scalarFields[k][pos] = std::accumulate(cellPointSF.begin(), cellPointSFEnd, 0.0) / validPoints;
 								break;
 							case PROJ_MEDIAN_VALUE:
 								if(validPoints%2)

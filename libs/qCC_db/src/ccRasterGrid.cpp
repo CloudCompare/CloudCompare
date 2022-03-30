@@ -306,9 +306,34 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 		}
 	}
 
+	// Find maximum needed size for storing per-cell data
+	unsigned maxNbPoints = 0;
+	for (unsigned j = 0; j < height; ++j)
+	{
+		Row& row = rows[j];
+		for (unsigned i = 0; i < width; ++i)
+		{
+			ccRasterCell& aCell = row[i];
+			maxNbPoints = std::max(maxNbPoints, aCell.nbPoints);
+		}
+	}
+
 	std::vector<ccIndexValueTuplet> cellPointIndexedHeight;
 	std::vector<double> cellPointHeight;
 	std::vector<ScalarType> cellPointSF; 
+	try			
+	{
+		cellPointIndexedHeight.resize(maxNbPoints);
+		cellPointHeight.resize(maxNbPoints);
+		cellPointSF.resize(maxNbPoints);
+	}
+	catch (const std::bad_alloc&)
+	{
+		//out of memory
+		ccLog::Warning("[Rasterize] Not enough memory to process cells!");
+		return false;
+	}
+
 	//Now we can browse through all points belonging in each cell 
 	for (unsigned j = 0; j < height; ++j)
 	{
@@ -324,7 +349,6 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 				
 				//Assemble a list of all points in cell
 				//  Start with first point in cell, and browse through every point using the linked ref list, and collect point indexes
-				cellPointIndexedHeight.reserve(aCell.nbPoints);
 				void** pRef = aCell.pointRefHead;
 				for (unsigned n = 0; n < aCell.nbPoints; ++n)
 				{
@@ -341,7 +365,6 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 				});
 
 				//Extract point values as simple vector to simplify use of std processing
-				cellPointHeight.reserve(aCell.nbPoints);
 				for (unsigned n = 0; n < aCell.nbPoints ;n++)
 				{
 					cellPointHeight[n] = cellPointIndexedHeight[n].val;
@@ -454,7 +477,6 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 						CCCoreLib::ScalarField* sf = pc->getScalarField(static_cast<unsigned>(k));
 						assert(sf && pos < scalarFields[k].size());
 						// Set up vector of valid sf values for current cell 
-						cellPointSF.reserve(aCell.nbPoints);
 						unsigned validPoints = 0;
 						for (unsigned n = 0; n < aCell.nbPoints ;n++)
 						{

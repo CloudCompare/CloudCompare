@@ -352,12 +352,13 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 				void** pRef = aCell.pointRefHead;
 				for (unsigned n = 0; n < aCell.nbPoints; ++n)
 				{
-					unsigned pointIndex = ( reinterpret_cast<unsigned long> (pRef) - reinterpret_cast<unsigned long>(pointRefList.data()) ) / sizeof(void*);
+					unsigned pointIndex = static_cast<unsigned>( pRef - pointRefList.data()) ;
 					const CCVector3* P = cloud->getPoint(pointIndex);
 					cellPointIndexedHeight[n].index = pointIndex;
 					cellPointIndexedHeight[n].val = P->u[Z];
 					pRef = reinterpret_cast<void**> (*pRef);
 				}
+
 				auto cellPointIndexedHeightEnd = std::next(cellPointIndexedHeight.begin(), aCell.nbPoints);
 				//Sorting indexed points in cell on height in ascending order
 				std::sort(cellPointIndexedHeight.begin(), cellPointIndexedHeightEnd, [](ccIndexValueTuplet a, ccIndexValueTuplet b){
@@ -526,6 +527,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 		}
 	}
 				
+
 
 	//compute the number of non empty cells
 	updateNonEmptyCellCount();

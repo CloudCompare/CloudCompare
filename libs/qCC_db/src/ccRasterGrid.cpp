@@ -316,7 +316,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 				cellPos.y = j;
 				
 				//Assemble a list of all points in cell
-				//  Start with first point in cell, and browse through every point using the linked ref listi, and collect point indexes
+				//  Start with first point in cell, and browse through every point using the linked ref list, and collect point indexes
 				cellPointIndexedHeight.reserve(aCell.nbPoints);
 				void** pRef = aCell.pointRefHead;
 				for (unsigned n = 0; n < aCell.nbPoints; ++n)
@@ -449,7 +449,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 						unsigned validPoints = 0;
 						for (unsigned n = 0; n < aCell.nbPoints ;n++)
                         {
-							unsigned pointIndex = cellPointIndexedHeight[0].index;
+							unsigned pointIndex = cellPointIndexedHeight[n].index;
 							ScalarType sfValue = sf->getValue(pointIndex);
 							if(std::isfinite(sfValue))
                             {

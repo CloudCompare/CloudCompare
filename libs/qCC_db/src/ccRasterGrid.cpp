@@ -327,9 +327,9 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 					cellPointIndexedHeight[n].val = P->u[Z];
 					pRef = (void**) *pRef;
 				}
-				auto cellPointIndexedHeight_end = std::next(cellPointIndexedHeight.begin(), aCell.nbPoints);
+				auto cellPointIndexedHeightEnd = std::next(cellPointIndexedHeight.begin(), aCell.nbPoints);
 				//Sorting indexed points in cell on height in ascending order
-				std::sort(cellPointIndexedHeight.begin(), cellPointIndexedHeight_end, [](ccIndexValueTuplet a, ccIndexValueTuplet b){
+				std::sort(cellPointIndexedHeight.begin(), cellPointIndexedHeightEnd, [](ccIndexValueTuplet a, ccIndexValueTuplet b){
 					return a.val<b.val;
 				});
 
@@ -339,7 +339,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 				{
 					cellPointHeight[n] = cellPointIndexedHeight[n].val;
 				}
-				auto cellPointHeight_end = std::next(cellPointHeight.begin(), aCell.nbPoints);
+				auto cellPointHeightEnd = std::next(cellPointHeight.begin(), aCell.nbPoints);
 
 
 				//Compute standard statistics on height value
@@ -356,13 +356,13 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 				aCell.minHeight = cellPointHeight.front();
 				aCell.maxHeight = cellPointHeight.back();
 				//Calculate average value
-				aCell.avgHeight = std::accumulate(cellPointHeight.begin(), cellPointHeight_end, 0.0) / aCell.nbPoints;
+				aCell.avgHeight = std::accumulate(cellPointHeight.begin(), cellPointHeightEnd, 0.0) / aCell.nbPoints;
 				//Calculate std dev
 				//  Square all height values in place, and calc stddev as sqrt(  mean(val**2) / mean(val)**2 )
-				std::transform(cellPointHeight.begin(),cellPointHeight_end,cellPointHeight.begin(), [](double a){
+				std::transform(cellPointHeight.begin(),cellPointHeightEnd,cellPointHeight.begin(), [](double a){
 						return a*a;
 				});
-				aCell.stdDevHeight = std::accumulate(cellPointHeight.begin(), cellPointHeight_end, 0.0) / aCell.nbPoints;
+				aCell.stdDevHeight = std::accumulate(cellPointHeight.begin(), cellPointHeightEnd, 0.0) / aCell.nbPoints;
 				aCell.stdDevHeight = sqrt(std::abs(aCell.stdDevHeight - aCell.avgHeight*aCell.avgHeight));
 				
 				//Pick point index to report and set the right 'height' value

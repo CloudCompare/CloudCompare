@@ -358,12 +358,14 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 				//Calculate average value
 				aCell.avgHeight = std::accumulate(cellPointHeight.begin(), cellPointHeightEnd, 0.0) / aCell.nbPoints;
 				//Calculate std dev
-				//  Square all height values in place, and calc stddev as sqrt(  mean(val**2) / mean(val)**2 )
-				std::transform(cellPointHeight.begin(),cellPointHeightEnd,cellPointHeight.begin(), [](double a){
-						return a*a;
-				});
-				aCell.stdDevHeight = std::accumulate(cellPointHeight.begin(), cellPointHeightEnd, 0.0) / aCell.nbPoints;
-				aCell.stdDevHeight = sqrt(std::abs(aCell.stdDevHeight - aCell.avgHeight*aCell.avgHeight));
+				double cellVariance = 0.0;
+				for (double h : cellPointHeight)
+				{
+					cellVariance += h*h;
+				}
+				cellVariance /= aCell.nbPoints;
+				aCell.stdDevHeight = sqrt(std::abs(cellVariance - aCell.avgHeight*aCell.avgHeight));
+
 				
 				//Pick point index to report and set the right 'height' value
 				switch (projectionType)

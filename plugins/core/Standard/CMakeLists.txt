@@ -1,6 +1,7 @@
 add_subdirectory( qAnimation )
 add_subdirectory( qBroom )
 add_subdirectory( qCanupo )
+add_subdirectory( qCloudLayers )
 add_subdirectory( qCompass )
 add_subdirectory( qCork )
 add_subdirectory( qCSF )

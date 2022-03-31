@@ -1,0 +1,21 @@
+﻿{
+	"type" : "Standard",
+	"name" : "Cloud layers",
+	"icon" : ":/CC/plugin/qCloudLayers/images/qCloudLayers.png",
+	"description": "",
+	"authors" : [
+		{
+			"name": "Wiggins Family LLC"
+		}
+	],
+	"maintainers" : [
+		{		
+		}		
+	],
+	"references" : [
+		{
+			"text" : "WigginsTech website",
+			"url" : "www.WigginsTech.com"
+		}		
+	]
+}

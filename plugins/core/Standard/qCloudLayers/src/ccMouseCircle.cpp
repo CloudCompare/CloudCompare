@@ -13,9 +13,9 @@
 //#                                                                        #
 //#                     COPYRIGHT: Sam Thiele  2017                        #
 //#                                                                        #
-//##########################################################################
+//#########################################################################
 
-#include "ccMouseCircle.h"
+#include "../include/ccMouseCircle.h"
 
 //Qt
 #include <QWheelEvent>
@@ -42,10 +42,12 @@ struct Circle
 };
 static Circle s_unitCircle;
 
-ccMouseCircle::ccMouseCircle(ccGLWindow* owner, QString name) 
+ccMouseCircle::ccMouseCircle(ccMainAppInterface* appInterface, ccGLWindow* owner, QString name)
 	: cc2DViewportObject(name.isEmpty() ? "label" : name)
+	, m_app(appInterface)
 	, m_radius(50)
-	, m_radiusStep(4)
+	, m_radiusStep(4)	
+	, m_allowScroll(true)
 {
 	setVisible(true);
 	setEnabled(false);
@@ -54,7 +56,7 @@ ccMouseCircle::ccMouseCircle(ccGLWindow* owner, QString name)
 	assert(owner); //check valid pointer
 	ccMouseCircle::m_owner = owner;
 	m_owner->installEventFilter(this);
-	m_owner->addToOwnDB(this, true);
+	m_owner->addToOwnDB(this, true);	
 }
 
 ccMouseCircle::~ccMouseCircle()
@@ -107,7 +109,7 @@ void ccMouseCircle::draw(CC_DRAW_CONTEXT& context)
 	//test viewport parameters
 	const ccViewportParameters& params = context.display->getViewportParameters();
 
-	ccLog::Print(QString("WidthAtFocalDist = %1 (= %2 x %3)").arg(params.computeWidthAtFocalDist()).arg(params.computeDistanceToWidthRatio()).arg(params.getFocalDistance()));
+	//ccLog::Print(QString("WidthAtFocalDist = %1 (= %2 x %3)").arg(params.computeWidthAtFocalDist()).arg(params.computeDistanceToWidthRatio()).arg(params.getFocalDistance()));
 	m_pixelSize = (context.glW != 0 ? params.computeWidthAtFocalDist() / context.glW : 0);
 
 	//get mouse position
@@ -130,10 +132,12 @@ void ccMouseCircle::draw(CC_DRAW_CONTEXT& context)
 		}
 		glFunc->glColor4ubv(ccColor::red.rgba);
 		glFunc->glBegin(GL_LINE_LOOP);
+		//glFunc->glBegin(GL_POLYGON);
 		for (int n = 0; n < Circle::Resolution; n++)
 		{
 			glFunc->glVertex2d(s_unitCircle.vertices[n][0] * m_radius + cx, s_unitCircle.vertices[n][1] * m_radius + cy);
 		}
+		
 		glFunc->glEnd();
 		glFunc->glPopAttrib();
 	}
@@ -154,18 +158,15 @@ bool ccMouseCircle::eventFilter(QObject* obj, QEvent* event)
 		}
 	}
 
-	if (event->type() == QEvent::Wheel)
+	if (event->type() == QEvent::Wheel && m_allowScroll)
 	{
-		QWheelEvent* wheelEvent = static_cast<QWheelEvent*>(event);
+		QWheelEvent* wheelEvent = static_cast<QWheelEvent *>(event);
+	
+		//adjust radius (+ avoid really small radius)
+		m_radius = std::max(m_radiusStep, m_radius - static_cast<int>(m_radiusStep * (wheelEvent->delta() / 100.0)));
 
-		//is control down
-		if (wheelEvent->modifiers().testFlag(Qt::ControlModifier))
-		{
-			//adjust radius (+ avoid really small radius)
-			m_radius = std::max(m_radiusStep, m_radius - static_cast<int>(m_radiusStep * (wheelEvent->delta() / 100.0)));
-			//repaint
-			m_owner->redraw(true, false);
-		}
+		//repaint
+		m_owner->redraw(true, false);
 	}
 	return false; //pass event to other listeners
 }

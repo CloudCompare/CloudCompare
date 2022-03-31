@@ -15,17 +15,18 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_MOUSE_CIRCLE_HEADER
-#define CC_MOUSE_CIRCLE_HEADER
+#pragma once
 
 /**
 This is a custom 2DViewportLabel which takes up the entire viewport but is entirely transparent,
 except for a circle with radius r around the mouse. 
 */
+
 #include <ccStdPluginInterface.h>
 #include <ccGLWindow.h>
 #include <cc2DViewportObject.h>
 
+//Qt
 #include <QEvent>
 #include <QPoint>
 #include <QObject>
@@ -34,7 +35,7 @@ class ccMouseCircle : public cc2DViewportObject, public QObject
 {
 public:
 	//constructor
-	explicit ccMouseCircle(ccGLWindow* owner, QString name = QString("MouseCircle"));
+	explicit ccMouseCircle(ccMainAppInterface* appInterface, ccGLWindow* owner, QString name = QString("MouseCircle"));
 
 	//deconstructor
 	~ccMouseCircle();
@@ -48,20 +49,25 @@ public:
 	//removes the link with the owner (no cleanup)
 	inline void ownerIsDead() { m_owner = nullptr; }
 
+	//sets whether scroll is allowed or not
+	inline void setAllowScroll(bool state) { m_allowScroll = state; }
+	
 protected:
 	//draws a circle of radius r around the mouse
 	void draw(CC_DRAW_CONTEXT& context) override;
 
 private:
+	ccMainAppInterface* m_app;
+
 	//ccGLWindow this overlay is attached to -> used to get mouse position & events
 	ccGLWindow* m_owner;
 	float m_pixelSize;
 
 	//event to get mouse-move updates & trigger repaint
 	bool eventFilter(QObject* obj, QEvent* event) override;
-
+	
 	int m_radius;
 	int m_radiusStep;
+	bool m_allowScroll;
 };
 
-#endif

@@ -2024,7 +2024,7 @@ void qBroomDlg::closeEvent(QCloseEvent* e)
 		}
 	}
 
-	e->accept();
+	QDialog::closeEvent(e);
 }
 
 void qBroomDlg::savePersistentSettings()

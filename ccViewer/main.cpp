@@ -45,6 +45,14 @@ int main(int argc, char *argv[])
 {
 	ccViewerApplication::InitOpenGL();
 	
+	// Convert the input arguments to QString before the application is initialized
+	// (as it will force utf8, which might prevent from properly reading filenmaes from the command line)
+	QStringList argumentsLocal8Bit;
+	for (int i = 0; i < argc; ++i)
+	{
+		argumentsLocal8Bit << QString::fromLocal8Bit(argv[i]);
+	}
+
 	ccViewerApplication a(argc, argv, false);
 
 #ifdef USE_VLD
@@ -98,7 +106,7 @@ int main(int argc, char *argv[])
 		int i = 1;
 		while (i < argc)
 		{
-			QString argument = QString::fromLocal8Bit(argv[i++]);
+			QString argument = argumentsLocal8Bit[i++];
 			QString upperArgument = argument.toUpper();
 
 			//Argument '-WIN X Y W H' (to set window size and position)
@@ -108,10 +116,10 @@ int main(int argc, char *argv[])
 				if (i + 3 < argc)
 				{
 					bool converionOk;
-					int x      = QString(argv[i    ]).toInt(&converionOk); ok &= converionOk;
-					int y      = QString(argv[i + 1]).toInt(&converionOk); ok &= converionOk;
-					int width  = QString(argv[i + 2]).toInt(&converionOk); ok &= converionOk;
-					int height = QString(argv[i + 3]).toInt(&converionOk); ok &= converionOk;
+					int x      = argumentsLocal8Bit[i    ].toInt(&converionOk); ok &= converionOk;
+					int y      = argumentsLocal8Bit[i + 1].toInt(&converionOk); ok &= converionOk;
+					int width  = argumentsLocal8Bit[i + 2].toInt(&converionOk); ok &= converionOk;
+					int height = argumentsLocal8Bit[i + 3].toInt(&converionOk); ok &= converionOk;
 					i += 4;
 
 					if (ok)

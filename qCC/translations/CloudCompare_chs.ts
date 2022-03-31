@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="ko_KR" sourcelanguage="en">
+<TS version="2.1">
 <context>
     <name>AboutDialog</name>
     <message>
         <location filename="../ui_templates/aboutDlg.ui" line="17"/>
         <source>About CloudCompare</source>
-        <translation>CloudCompare 정보</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/aboutDlg.ui" line="35"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;img src=&quot;:/CC/Icons/images/icon/cc_icon_64.png&quot;/&gt;&lt;br/&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;CloudCompare &lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600; font-style:italic;&quot;&gt;&lt;/span&gt;&lt;br/&gt;Version: %1&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;a href=&quot;http://www.cloudcompare.org/donate&quot;&gt;&lt;img src=&quot;:/CC/images/donate.png&quot; width=&quot;200&quot;/&gt;&lt;/a&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;a href=&quot;http://www.cloudcompare.org&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;www.cloudcompare.org&lt;br/&gt;&lt;/span&gt;&lt;/a&gt;License: GNU GPL (General Public Licence)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;img src=&quot;:/CC/Icons/images/icon/cc_icon_64.png&quot;/&gt;&lt;br/&gt;&lt;span style=&quot; font-size:14pt; font-weight:600;&quot;&gt;CloudCompare &lt;/span&gt;&lt;span style=&quot; font-size:14pt; font-weight:600; font-style:italic;&quot;&gt;&lt;/span&gt;&lt;br/&gt;Version: %1&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;a href=&quot;http://www.cloudcompare.org/donate&quot;&gt;&lt;img src=&quot;:/CC/images/donate.png&quot; width=&quot;200&quot;/&gt;&lt;/a&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;a href=&quot;http://www.cloudcompare.org&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;www.cloudcompare.org&lt;br/&gt;&lt;/span&gt;&lt;/a&gt;License: GNU GPL (General Public Licence)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/aboutDlg.ui" line="75"/>
         <source>OK</source>
-        <translation>확인</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -24,32 +24,32 @@
     <message>
         <location filename="../ui_templates/adjustZoomDlg.ui" line="14"/>
         <source>Adjust zoom</source>
-        <translation>확대/축소 조정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/adjustZoomDlg.ui" line="20"/>
         <source>Window</source>
-        <translation>윈도우</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/adjustZoomDlg.ui" line="49"/>
         <source>focal</source>
-        <translation>촛점</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/adjustZoomDlg.ui" line="77"/>
         <source>pixel size</source>
-        <translation>픽셀크기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/adjustZoomDlg.ui" line="86"/>
         <source> units</source>
-        <translation>단위</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/adjustZoomDlg.ui" line="115"/>
         <source> pixel(s)</source>
-        <translation>픽셀</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -57,154 +57,154 @@
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="14"/>
         <source>Clouds alignment</source>
-        <translation>클라우드 조정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="34"/>
         <source>Model and data</source>
-        <translation>모델 &amp; 데이터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="49"/>
         <source>Data:</source>
-        <translation>데이터:</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="56"/>
         <source>the data cloud is the entity to align with the model cloud: it will be displaced (green cloud)</source>
-        <translation>데이터 클라우드는 모델 클라우드에 맞춰 조정해야 하는 엔티티입니다: 데이터 클라우드는 교체됩니다 (녹색 클라우드).</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="77"/>
         <source>Model:</source>
-        <translation>모델:</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="84"/>
         <source>the model cloud is the reference: it won&apos;t move (red cloud)</source>
-        <translation>모델클라우드는 기준값입니다: 움직이지 않습니다 (적색클라우드)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="111"/>
         <location filename="../ui_templates/alignDlg.ui" line="114"/>
         <source>press once to exchange model and data clouds</source>
-        <translation>한번누르면 모델과 데이터클라우드가 변환됩니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="117"/>
         <source>swap</source>
-        <translation>스와프</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="144"/>
         <source>Alignment parameters</source>
-        <translation>선형파라미터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="152"/>
         <source>Number of trials:</source>
-        <translation>시도횟수:</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="159"/>
         <source>Number of 4 points bases tested to find the best rigid transform. Great values may lead to long computation time.</source>
-        <translation>가장 완벽한 변환을 찾기 위해 테스트한 4개의 기준 개수입니다. 값이 크면 계산시간이 길어집니다.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="182"/>
         <source>Overlap:</source>
-        <translation>중복도:</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="189"/>
         <source>Rough estimation of the two clouds overlap rate (between 0 and 1)</source>
-        <translation>2개의 클라우드의 중첩률 (0~1사이) 을 대략적으로 추정합니다.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="215"/>
         <source>Delta:</source>
-        <translation>d:</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="222"/>
         <source>Estimation of the distance wished between the two clouds after registration.</source>
-        <translation>정합후 2개의 클라우드간 희망거리 예상입니다.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="241"/>
         <location filename="../ui_templates/alignDlg.ui" line="244"/>
         <source>The computer will estimate the best delta parameter</source>
-        <translation>컴퓨터가 최상의 d 파라미터를 예살합니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="247"/>
         <source>Estimate</source>
-        <translation>예상</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="258"/>
         <source>For each attempt (see above parameter), candidate bases are found. If there are too much candidates, the program may take a long time to finish. Check this box to bound the number of candidates.</source>
-        <translation>각 시도별 (상단 파라미터 확인) 기준 후보군이 감지됩니다. 후보군이 너무 많으면 프로그램 완료까지 시간이 필요합니다. 이박스를 체크하면 후보군 갯수를 제한합니다.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="261"/>
         <source>Limit max. number of candidates</source>
-        <translation>최대한계, 후보군갯수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="268"/>
         <source>Maximal number of candidates allowed (check the left box to use this parameter)</source>
-        <translation>허용된 최대 후보군갯수 (좌측박스를 클릭하면 이 파라미터 사용)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="306"/>
         <source>Sampling</source>
-        <translation>샘플링</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="314"/>
         <source>Method:</source>
-        <translation>방식:</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="326"/>
         <source>Data</source>
-        <translation>데이터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="346"/>
         <location filename="../ui_templates/alignDlg.ui" line="466"/>
         <source>None</source>
-        <translation>없음</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="369"/>
         <location filename="../ui_templates/alignDlg.ui" line="489"/>
         <source>All</source>
-        <translation>전체</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="381"/>
         <location filename="../ui_templates/alignDlg.ui" line="384"/>
         <source>Move to the left (none) to decrease the number of points  to keep in the data cloud.</source>
-        <translation>좌 (없음)로 이동하면 데이터클라우드에 유지할 점갯수가 줄어듭니다.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="434"/>
         <location filename="../ui_templates/alignDlg.ui" line="554"/>
         <source>remaining points</source>
-        <translation>남은점</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="446"/>
         <source>Model</source>
-        <translation>모델</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/alignDlg.ui" line="501"/>
         <location filename="../ui_templates/alignDlg.ui" line="504"/>
         <source>Move to the left (none) to decrease the number of points  to keep in the model cloud.</source>
-        <translation>좌 (없음)로 이동하면 데이터클라우드에 유지할 점갯수가 줄어듭니다.</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -213,100 +213,99 @@
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="14"/>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="82"/>
         <source>Animation</source>
-        <translation>애니메이션</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="27"/>
         <source>Animation steps</source>
-        <translation>애니메이션 단계</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="42"/>
         <source>Loop</source>
-        <translation>망</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="90"/>
         <source>Total duration</source>
-        <translation>총기간</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="97"/>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="161"/>
         <source> sec.</source>
-        <translation> 초.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="115"/>
         <source>Automatic steps duration</source>
-        <translation>자동단계 기간</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="128"/>
         <source>Current step</source>
-        <translation>현재단계</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="137"/>
         <source>Index</source>
-        <translation>인덱스</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="151"/>
         <source>Duration</source>
-        <translation>기간</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="158"/>
         <source>Speed modifier for the current step</source>
-        <translation>현재단계의 속도편집기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="180"/>
         <source>Smooth trajectory</source>
-        <translation>부드러운 경로</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="189"/>
         <source>smooth ratio</source>
-        <translation>부드러운 비율</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="240"/>
         <source>Video output</source>
-        <translation>비디오출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="267"/>
         <source>Frame rate</source>
-        <translation>프레임율</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="274"/>
         <source>Number of frames per second</source>
-        <translation>초단 프레임갯수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="277"/>
         <source> fps</source>
-        <translation> fps</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="306"/>
         <source>Bitrate</source>
-        <translation>비트율</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="313"/>
         <source>Bitrate (in kbit/s)
 The higher the better the quality (but the bigger the file)</source>
-        <translation>비트율 (kbit/s)
-높아지면 갯수가 많아집니다 (하지만 파일이 커집니다)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="317"/>
         <source> kbps</source>
-        <translation> kbps</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="352"/>
@@ -316,76 +315,72 @@ reduce the flicker that is often present in animations). Super resolution is onl
 applied on the output video (= not visible in Preview mode)
 - Zoom: render the frame and the animation at a higher resolution (2, 3 or 4 times
 larger). You may have to increase the points size beforehand.</source>
-        <translation>- 슈퍼분해능: 더높은 해상도 (2, 3, 4 배 더큼)에서 프레임 렌더링,
-후 크기를 축소 (노이즈픽셀이 없어지고 애니메이션의 깜빡임이 줄어듬)합니다. 슈퍼해상도는
-비디오출력에만 적용됩니다 (= 프리뷰모드에서 보여지지 않음)
-- 확대/축소: 더 높은 해상도 (2, 3, 4 배 더큼)에서 프레임과 애니메이션을 렌더링합니다.
-점크기를 늘려야할 수 도 있습니다.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="364"/>
         <source>super resolution</source>
-        <translation>슈펴해상도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="369"/>
         <source>zoom</source>
-        <translation>확대/축소</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="377"/>
         <source>See combo-box tooltip</source>
-        <translation>콤보박스 툴팁 보기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="408"/>
         <source>Output file</source>
-        <translation>출력파일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="448"/>
         <source>Format</source>
-        <translation>포맷</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="462"/>
         <source>Preview the animation</source>
-        <translation>에니매이션 미리보기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="465"/>
         <source>Preview</source>
-        <translation>미리보기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="472"/>
         <source>Creates the animation file</source>
-        <translation>에니매이션 파일 생성</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="475"/>
         <source>Render</source>
-        <translation>렌더</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="482"/>
         <source>Export frames as individual images</source>
-        <translation>각이미지로 출력프레임</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="485"/>
         <source>Export frames</source>
-        <translation>출력프레임</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="494"/>
         <source>Start preview from selected step</source>
-        <translation>선택단계의 미리보기 시작</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/ui/animationDlg.ui" line="507"/>
         <source>Export trajectory on exit</source>
-        <translation>종점의 궤적출력</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -393,54 +388,53 @@ larger). You may have to increase the points size beforehand.</source>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="14"/>
         <source>Apply transformation</source>
-        <translation>변환적용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="24"/>
         <source>Matrix 4x4</source>
-        <translation>4x4 행렬</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="32"/>
         <source>Enter 4x4 matrix values:</source>
-        <translation>4x4 행렬값 입력:</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="52"/>
         <source>Load matrix from ascii file</source>
-        <translation>ASCII 파일에서 행렬로드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="55"/>
         <source>ASCII file</source>
-        <translation>ASCII 파일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="62"/>
         <source>Paste clipboard contents</source>
-        <translation>클립보드 목차 붙이기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="65"/>
         <source>clipboard</source>
-        <translation>클립보드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="72"/>
         <source>Inits the matrix from dip/dip direction values
 --&gt; assuming an initial position of (0,0)</source>
-        <translation>dip / dip 방향 값에서 행렬 chrlghk
--&gt; 초기위치 (0,0)을 예상합니다.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="76"/>
         <source>dip / dip direction</source>
-        <translation>dip / dip 방향</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="83"/>
         <source>help</source>
-        <translation>도움말</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="147"/>
@@ -453,56 +447,48 @@ R31   R32   R33   Tz
 Where R is a standard 3x3 rotation matrix and T is a translation vector.
 
 Let P be a 3D point, the transformed point P&apos; will be such that: P&apos; = R.P + T.</source>
-        <translation>행렬 형식:
-R11   R12   R13   Tx
-R21   R22   R23   Ty
-R31   R32   R33   Tz
-0       0       0       1
-
-여기서 R은 표준 3x3 회전 행렬이고 T는 변환 벡터입니다.
-
-P를 3D 점으로 설정하면 변환된 P&apos;는 P&apos; = R.P + T입니다.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="176"/>
         <source>Axis, Angle</source>
-        <translation>축, 각</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="182"/>
         <source>Rotation axis</source>
-        <translation>회전축</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="248"/>
         <source>Rotation angle (degrees)</source>
-        <translation>회전각 (degrees)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="263"/>
         <source> deg.</source>
-        <translation> deg.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="295"/>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="447"/>
         <source>Translation</source>
-        <translation>회전</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="375"/>
         <source>Euler angles</source>
-        <translation>오일러 각도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="381"/>
         <source>Angles</source>
-        <translation>각도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/applyTransformationDlg.ui" line="530"/>
         <source>Apply inverse transformation</source>
-        <translation>역변환 적용</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -510,12 +496,12 @@ P를 3D 점으로 설정하면 변환된 P&apos;는 P&apos; = R.P + T입니다.<
     <message>
         <location filename="../../libs/qCC_io/ui/openAsciiFileDlg.ui" line="20"/>
         <source>Open Ascii File</source>
-        <translation>ASCII 파일 열기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openAsciiFileDlg.ui" line="28"/>
         <source>Source</source>
-        <translation type="unfinished">소스</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openAsciiFileDlg.ui" line="50"/>
@@ -525,94 +511,93 @@ P를 3D 점으로 설정하면 변환된 P&apos;는 P&apos; = R.P + T입니다.<
     <message>
         <location filename="../../libs/qCC_io/ui/openAsciiFileDlg.ui" line="60"/>
         <source>Header:</source>
-        <translation>헤더:</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openAsciiFileDlg.ui" line="122"/>
         <source>Separator</source>
-        <translation>분리자</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openAsciiFileDlg.ui" line="148"/>
         <source>(ASCII code:%i)</source>
-        <translation>(ASCII 코드: %i)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openAsciiFileDlg.ui" line="157"/>
         <source>space</source>
-        <translation>Space</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openAsciiFileDlg.ui" line="160"/>
         <source>whitespace </source>
-        <translation>whitespace</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openAsciiFileDlg.ui" line="167"/>
         <source>comma</source>
-        <translation>comma</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openAsciiFileDlg.ui" line="177"/>
         <source>semicolon</source>
-        <translation>semicolon</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openAsciiFileDlg.ui" line="200"/>
         <source>use comma as decimal character</source>
-        <translation type="unfinished">콤마 분리자 사용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openAsciiFileDlg.ui" line="207"/>
         <source>Show labels in 2D (not recommended over 50).
 Otherwise labels are shown in 3D.</source>
-        <translation>2D 라벨보기 (50이상 비추천).
-그렇지않으면 라벨은 3D 표시됩니다.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openAsciiFileDlg.ui" line="211"/>
         <source>Show labels in 2D</source>
-        <translation>2D 라벨 보기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openAsciiFileDlg.ui" line="224"/>
         <source>Skip lines</source>
-        <translation type="unfinished">스킵할 라인</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openAsciiFileDlg.ui" line="238"/>
         <source>+ comment/header lines skipped: 0</source>
-        <translation type="unfinished">+ 주석/헤더 라인 스킵: 0</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openAsciiFileDlg.ui" line="264"/>
         <source>extract scalar field names from first line</source>
-        <translation>1번 라인에서 스칼라 필드명 추출</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openAsciiFileDlg.ui" line="301"/>
         <source>Max number of points per cloud</source>
-        <translation>클라우드당 최대 점갯수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openAsciiFileDlg.ui" line="308"/>
         <source> Million</source>
-        <translation> Million</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openAsciiFileDlg.ui" line="340"/>
         <source>Apply</source>
-        <translation>적용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openAsciiFileDlg.ui" line="347"/>
         <source>Apply all</source>
-        <translation>전체적용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openAsciiFileDlg.ui" line="354"/>
         <source>Cancel</source>
-        <translation>취소</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -620,37 +605,37 @@ Otherwise labels are shown in 3D.</source>
     <message>
         <location filename="../../libs/qCC_io/ui/saveAsciiFileDlg.ui" line="14"/>
         <source>Save ASCII file</source>
-        <translation>ASCII 파일 저장</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/saveAsciiFileDlg.ui" line="22"/>
         <source>coordinates precision</source>
-        <translation>좌표자릿수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/saveAsciiFileDlg.ui" line="39"/>
         <source>scalar precision</source>
-        <translation>스칼라 자릿수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/saveAsciiFileDlg.ui" line="56"/>
         <source>separator</source>
-        <translation>분리자</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/saveAsciiFileDlg.ui" line="64"/>
         <source>space</source>
-        <translation>space</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/saveAsciiFileDlg.ui" line="69"/>
         <source>semicolon</source>
-        <translation></translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/saveAsciiFileDlg.ui" line="74"/>
         <source>comma</source>
-        <translation>comma</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/saveAsciiFileDlg.ui" line="79"/>
@@ -660,53 +645,53 @@ Otherwise labels are shown in 3D.</source>
     <message>
         <location filename="../../libs/qCC_io/ui/saveAsciiFileDlg.ui" line="87"/>
         <source>order</source>
-        <translation>순서</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/saveAsciiFileDlg.ui" line="95"/>
         <source>[ASC] point, color, SF(s), normal</source>
-        <translation>[ASC] 점, 컬러, SF(s), normal</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/saveAsciiFileDlg.ui" line="100"/>
         <source>[PTS] point, SF(s), color, normal</source>
-        <translation>[PTS] 점, SF(s), 컬러, normal</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/saveAsciiFileDlg.ui" line="110"/>
         <source>Header</source>
-        <translation>헤더</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/saveAsciiFileDlg.ui" line="116"/>
         <source>columns title</source>
-        <translation>컬럼 제목</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/saveAsciiFileDlg.ui" line="123"/>
         <source>number of points (separate line)</source>
-        <translation>점갯수 (선분리)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/saveAsciiFileDlg.ui" line="133"/>
         <source>Colors</source>
-        <translation>컬러</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/saveAsciiFileDlg.ui" line="139"/>
         <location filename="../../libs/qCC_io/ui/saveAsciiFileDlg.ui" line="149"/>
         <source>Save RGB color components as floats values between 0 and 1</source>
-        <translation>RGB 색상 구성요소를 0에서 1 사이의 플롯값으로 저장합니다.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/saveAsciiFileDlg.ui" line="142"/>
         <source>Save colors as float values (0-1)</source>
-        <translation>컬러를 0-1 플롯값으로 저장</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/saveAsciiFileDlg.ui" line="152"/>
         <source>Save alpha channel</source>
-        <translation>알파채널 저장</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -714,12 +699,12 @@ Otherwise labels are shown in 3D.</source>
     <message>
         <location filename="../ui_templates/askOneDoubleValueDlg.ui" line="12"/>
         <source>Set Value</source>
-        <translation>값설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/askOneDoubleValueDlg.ui" line="20"/>
         <source>Value</source>
-        <translation>값</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -727,12 +712,12 @@ Otherwise labels are shown in 3D.</source>
     <message>
         <location filename="../ui_templates/askOneIntValueDlg.ui" line="12"/>
         <source>Set Value</source>
-        <translation>값설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/askOneIntValueDlg.ui" line="20"/>
         <source>Value</source>
-        <translation>값</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -740,12 +725,12 @@ Otherwise labels are shown in 3D.</source>
     <message>
         <location filename="../ui_templates/askOneStringDlg.ui" line="12"/>
         <source>Set Name</source>
-        <translation>이름설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/askOneStringDlg.ui" line="20"/>
         <source>Label</source>
-        <translation>라벨</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -753,22 +738,22 @@ Otherwise labels are shown in 3D.</source>
     <message>
         <location filename="../ui_templates/askThreeDoubleValuesDlg.ui" line="20"/>
         <source>Set Three Values</source>
-        <translation>3값 설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/askThreeDoubleValuesDlg.ui" line="28"/>
         <source>Value 1</source>
-        <translation>값 1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/askThreeDoubleValuesDlg.ui" line="54"/>
         <source>Value 2</source>
-        <translation>값 2</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/askThreeDoubleValuesDlg.ui" line="80"/>
         <source>Value 3</source>
-        <translation>값 3</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -776,17 +761,17 @@ Otherwise labels are shown in 3D.</source>
     <message>
         <location filename="../ui_templates/askTwoDoubleValuesDlg.ui" line="12"/>
         <source>Set Two Values</source>
-        <translation>2값 설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/askTwoDoubleValuesDlg.ui" line="20"/>
         <source>Value 1</source>
-        <translation>값 1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/askTwoDoubleValuesDlg.ui" line="46"/>
         <source>Value 2</source>
-        <translation>값 2</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -837,87 +822,87 @@ Otherwise labels are shown in 3D.</source>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="14"/>
         <source>Bounding Box Editor</source>
-        <translation>범위박스 에디터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="49"/>
         <source>Min corner</source>
-        <translation>최소코너</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="54"/>
         <source>Center</source>
-        <translation>중심</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="59"/>
         <source>Max corner</source>
-        <translation>최대코너</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="74"/>
         <source>Width</source>
-        <translation>너비</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="229"/>
         <source>Warning, this box doesn&apos;t include the cloud bounding-box!</source>
-        <translation>경고, 이박스에 클라우드 경계박스가 포함되지 않습니다!</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="245"/>
         <source>Orientation</source>
-        <translation>방위</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="335"/>
         <source>automatically compute Z if checked</source>
-        <translation>체크시 Z 자동계산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="351"/>
         <source>automatically compute Y if checked</source>
-        <translation>체크시 Y 자동계산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="364"/>
         <source>automatically compute X if checked</source>
-        <translation>체크시 X 자동계산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="548"/>
         <source>From clipboard</source>
-        <translation>클립보드 사용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="555"/>
         <source>To clipboard</source>
-        <translation>클립보드 저장</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="581"/>
         <source>keep square</source>
-        <translation>스퀘어 유지</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="601"/>
         <source>Default</source>
-        <translation>기본값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="608"/>
         <source>Last</source>
-        <translation>최근</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="615"/>
         <source>OK</source>
-        <translation>확인</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/boundingBoxEditorDlg.ui" line="622"/>
         <source>Cancel</source>
-        <translation>취소</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -925,132 +910,132 @@ Otherwise labels are shown in 3D.</source>
     <message>
         <location filename="../../plugins/core/Standard/qBroom/ui/broomDlg.ui" line="14"/>
         <source>CEA Broom Tool</source>
-        <translation>CEA Broom 도구</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qBroom/ui/broomDlg.ui" line="70"/>
         <source>Broom</source>
-        <translation>Broom</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qBroom/ui/broomDlg.ui" line="79"/>
         <source>Reposition</source>
-        <translation>재위치설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qBroom/ui/broomDlg.ui" line="89"/>
         <source>Automate</source>
-        <translation>자동화</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qBroom/ui/broomDlg.ui" line="96"/>
         <source>stick to the cloud</source>
-        <translation>클라우드에 붙이기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qBroom/ui/broomDlg.ui" line="106"/>
         <source>For a visual feedback of the ongoing automation process (slower)</source>
-        <translation>자동화 프로세스의 비쥬얼 피드백 (느려짐)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qBroom/ui/broomDlg.ui" line="109"/>
         <source>animated automation</source>
-        <translation>움직이는 자동화</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qBroom/ui/broomDlg.ui" line="125"/>
         <source>Broom dimensions</source>
-        <translation>Broom 치수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qBroom/ui/broomDlg.ui" line="134"/>
         <source>length</source>
-        <translation>길이</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qBroom/ui/broomDlg.ui" line="157"/>
         <source>width</source>
-        <translation>너비</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qBroom/ui/broomDlg.ui" line="183"/>
         <source>thickness</source>
-        <translation>두께</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qBroom/ui/broomDlg.ui" line="218"/>
         <source>Selection</source>
-        <translation>선택</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qBroom/ui/broomDlg.ui" line="227"/>
         <source>mode</source>
-        <translation>모드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qBroom/ui/broomDlg.ui" line="234"/>
         <source>height</source>
-        <translation>높이</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qBroom/ui/broomDlg.ui" line="261"/>
         <source>inside</source>
-        <translation>내부</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qBroom/ui/broomDlg.ui" line="266"/>
         <source>above</source>
-        <translation>상단</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qBroom/ui/broomDlg.ui" line="271"/>
         <source>below</source>
-        <translation>하단</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qBroom/ui/broomDlg.ui" line="276"/>
         <source>above and below</source>
-        <translation>상하단</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qBroom/ui/broomDlg.ui" line="287"/>
         <source>Undo</source>
-        <translation>실행취소</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qBroom/ui/broomDlg.ui" line="297"/>
         <source>Undo 10 steps</source>
-        <translation>10단계 실행취소</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qBroom/ui/broomDlg.ui" line="307"/>
         <source>View</source>
-        <translation>보기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qBroom/ui/broomDlg.ui" line="433"/>
         <source>Lost track: failed to stick to the cloud!</source>
-        <translation>트랙없음: 클라우드에 붙이기 실패!</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qBroom/ui/broomDlg.ui" line="459"/>
         <source>remove the selected points</source>
-        <translation>선택한점 제거</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qBroom/ui/broomDlg.ui" line="481"/>
         <source>Apply</source>
-        <translation>적용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qBroom/ui/broomDlg.ui" line="491"/>
         <source>Validate</source>
-        <translation>확인</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qBroom/ui/broomDlg.ui" line="498"/>
         <source>Cancel</source>
-        <translation>취소</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1058,77 +1043,77 @@ Otherwise labels are shown in 3D.</source>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="14"/>
         <source>Snavely&apos;s Bundler Import</source>
-        <translation>Snavely&apos;s Bundler 입력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="26"/>
         <source>Information</source>
-        <translation>정보</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="32"/>
         <source>File version:</source>
-        <translation>파일버전:</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="62"/>
         <source>keypoints:</source>
-        <translation>키포인트:</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="89"/>
         <source>Cameras:</source>
-        <translation>카메라:</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="125"/>
         <source>Import images</source>
-        <translation>이미지입력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="136"/>
         <source>Image list</source>
-        <translation>이미지목록</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="143"/>
         <source>List of the images corresponding to each camera</source>
-        <translation>각 카메라에 관련된 이미지목록</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="153"/>
         <source>Browse</source>
-        <translation>검색</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="180"/>
         <source>Image scale factor</source>
-        <translation>이미지 축척계수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="187"/>
         <source>Image scale factor (relatively to the keypoints). Useful if you want to use images bigger than the ones you used to generate the Bundler .out file and the keypoints.</source>
-        <translation>이미지 축척계수 (키포인트에 상대값). Bundler .out 파일 &amp; 키포인트로 생성된 값보다 큰이미지 사용시 유용합니다.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="190"/>
         <source>Image scale factor relatively to keypoints</source>
-        <translation>키포인트에 상대적인 이미지 축척계수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="205"/>
         <source>Orthorectification</source>
-        <translation>정사보정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="213"/>
         <source>To orthorectify images (as new images saved next to the original ones)</source>
-        <translation>To 정사보정 이미지 (원본이미지 옆에 새로운 이미지 저장)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="216"/>
         <source>generate 2D orthophotos</source>
-        <translation>2D 정사영상 생성</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="226"/>
@@ -1140,70 +1125,63 @@ Otherwise labels are shown in 3D.</source>
 - Direct = CC will only use Bundler&apos;s output information (camera extrinsic and intrinsic parameters).
   The camera distortion parameters can be applied or not. Pay attention that those parameters are
   sometimes very poorly estimated by Bundler.</source>
-        <translation>정사보정 방식:
-- 최적화 = CC는 키포인트를 사용하여 &apos;공선방정식&apos;의 파라미터를 최적화합니다
-  공선방정식은 이미지와 키포인트를 최적으로 맞추며
-  이미지를 수평면에 기본값으로 투영합니다. 이방식으로 이미지 왜곡을 보정합니다.
-  (예시 Bundler의 왜곡모델을 사용하지 않습니다)
-- 직접 = CC는 Bundler의 출력정보만을 사용합니다 (카메라의 왜부/내부 파라미터 사용).
-  카메라의 왜곡 파라미터가 적용되거나 적용되지 않습니다. 파라미터가 종종 Bundler에 의해 매우 나쁘게 나타날 수 있습니다.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="237"/>
         <source>Optimized</source>
-        <translation>최적화</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="242"/>
         <source>Direct with undistortion</source>
-        <translation>비왜곡 직접</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="247"/>
         <source>Direct</source>
-        <translation>직접</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="257"/>
         <source>To generate orthorectified versions of the images as clouds (warning: result mught be huge!).
 Warning: the &apos;Optimized&apos; method is used by default.</source>
-        <translation>이미지의 정사보정 버전을 클라우드로 생성 (경고: 결과가 매우 큽니다!)
-경고:&apos;최적화&apos;방식은 기본값입니다.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="261"/>
         <source>generate 2D &quot;orthoclouds&quot;</source>
-        <translation>2D&quot;정사클라우드&quot; 생성</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="270"/>
         <source>Vertical dimension:</source>
-        <translation>수직 치수:</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="277"/>
         <source>Keypoints vertical axis is X (1,0,0)</source>
-        <translation>키포인트 수직축은 X (1,0,0)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="287"/>
         <source>Keypoints vertical axis is Y (0,1,0)</source>
-        <translation>키포인트 수직축은 Y (0,1,0)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="297"/>
         <source>Keypoints vertical axis is Z (0,0,1)</source>
-        <translation>키포인트 수직축은 Z (0,0,1)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="310"/>
         <source>Input a 4x4 transformation matrix that transforms the keypoint vertical axis into (0,0,1)</source>
-        <translation>키포인트 수직축을 (0,0,1)로 변환하는 4x4 변환행렬 입력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="313"/>
         <source>Custom</source>
-        <translation>커스텀</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="322"/>
@@ -1216,79 +1194,69 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;0 0 1 0&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;0 0 0 1&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;1 0 0 0&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;0 1 0 0&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;0 0 1 0&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;0 0 0 1&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="340"/>
         <source>To generate a 3D model (mesh) colored with the input images.
 By default the keypoints are meshed, and points are sampled on this first mesh.
 The sampled points are then colored with the images and a final mesh is built on top of those points.</source>
-        <translation>입력한 이미지로 컬러 3D 모델 (메시)를 생성합니다.
-기본값으로 키포인트는 메시화되며 점은 1번 메시에 샘플링됩니다.
-샘플링된 점은 이미지로 컬러화되며 최종메시는 점을 위에 생성됩니다.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="345"/>
         <source>Colored model generation</source>
-        <translation>컬러모델 생성</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="398"/>
         <source>vertices: </source>
-        <translation>버텍스:</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="411"/>
         <source>Approximate number of vertices for the final mesh</source>
-        <translation>최종 메시의 대략적인 버텍스갯수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="447"/>
         <source>To use a cloud (or mesh) instead of the keypoints as base for the model generation</source>
-        <translation>키포인트 대신 클라우드 (또는 메쉬)를 모델 생성의 기준으로 사용합니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="450"/>
         <source>Use alternative keypoints</source>
-        <translation>대체 키포인트 사용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="479"/>
         <source>...</source>
-        <translation>...</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="496"/>
         <source>To keep images and their corresponding sensors in memory (i.e. as entities in the DB tree)</source>
-        <translation>이미지와 해당 센서를 메모리에 유지합니다 (즉, DB 트리의 엔티티로 유지)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="499"/>
         <source>keep images (and sensors) loaded</source>
-        <translation>로드된 이미지 (센서) 유지</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="522"/>
         <source>To undistort loaded images</source>
-        <translation>로드된 이미지의 왜곡을 제거합니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="525"/>
         <source>undistort images</source>
-        <translation>이미지 왜곡제거</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/ui/openBundlerFileDlg.ui" line="550"/>
         <source>Import keypoints</source>
-        <translation>키포인트 입력</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1296,7 +1264,7 @@ The sampled points are then colored with the images and a final mesh is built on
     <message>
         <location filename="../../plugins/core/Standard/qCSF/ui/CSFDlg.ui" line="14"/>
         <source>Cloth Simulation Filter</source>
-        <translation>Cloth 시뮬레이션 필터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCSF/ui/CSFDlg.ui" line="23"/>
@@ -1321,64 +1289,63 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../../plugins/core/Standard/qCSF/ui/CSFDlg.ui" line="58"/>
         <source>General parameter setting</source>
-        <translation>일반파라미터 설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCSF/ui/CSFDlg.ui" line="64"/>
         <source>Scenes</source>
-        <translation>Scenes</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCSF/ui/CSFDlg.ui" line="89"/>
         <source>Steep slope</source>
-        <translation>급경사</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCSF/ui/CSFDlg.ui" line="115"/>
         <source>Relief</source>
-        <translation>기복</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCSF/ui/CSFDlg.ui" line="141"/>
         <source>Flat</source>
-        <translation>평지</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCSF/ui/CSFDlg.ui" line="172"/>
         <source> Slope processing</source>
-        <translation> 경사 프로세싱</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCSF/ui/CSFDlg.ui" line="208"/>
         <source>Advanced parameter setting</source>
-        <translation>고급파라미터 설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCSF/ui/CSFDlg.ui" line="216"/>
         <source>Cloth resolution </source>
-        <translation>Cloth 해상도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCSF/ui/CSFDlg.ui" line="264"/>
         <source>Max iterations </source>
-        <translation>최대반복</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCSF/ui/CSFDlg.ui" line="300"/>
         <source>Classification threshold</source>
-        <translation>분류 임계값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCSF/ui/CSFDlg.ui" line="339"/>
         <source>Exports the cloth in its final state as a mesh
 (WARNING: ONLY FOR DEBUG PURPOSE - THIS IS NOT A DTM)</source>
-        <translation>최종살태를 메쉬로 Cloth 출력
-(경고: 디버그전용 - DTM이 아닙니다)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCSF/ui/CSFDlg.ui" line="343"/>
         <source>Export cloth mesh</source>
-        <translation>옷감 메시 출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCSF/ui/CSFDlg.ui" line="355"/>
@@ -1400,42 +1367,42 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../../plugins/core/IO/qCSVMatrixIO/ui/openCSVMatrixDlg.ui" line="14"/>
         <source>Open CSV Matrix</source>
-        <translation>CSV 행렬 열기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qCSVMatrixIO/ui/openCSVMatrixDlg.ui" line="20"/>
         <source>Grid</source>
-        <translation>그리드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qCSVMatrixIO/ui/openCSVMatrixDlg.ui" line="29"/>
         <source>Separator</source>
-        <translation>분리자</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qCSVMatrixIO/ui/openCSVMatrixDlg.ui" line="72"/>
         <source>X spacing</source>
-        <translation>X 간격</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qCSVMatrixIO/ui/openCSVMatrixDlg.ui" line="92"/>
         <source>Y spacing</source>
-        <translation>Y 간격</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qCSVMatrixIO/ui/openCSVMatrixDlg.ui" line="115"/>
         <source>Invert row order</source>
-        <translation>행순서 변경</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qCSVMatrixIO/ui/openCSVMatrixDlg.ui" line="122"/>
         <source>Load as mesh</source>
-        <translation>메쉬 로드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qCSVMatrixIO/ui/openCSVMatrixDlg.ui" line="131"/>
         <source>Use texture file</source>
-        <translation>텍스쳐파일 사용</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1443,97 +1410,97 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="14"/>
         <source>Sensor parameters</source>
-        <translation>센서 파라미터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="24"/>
         <source>Position + Orientation</source>
-        <translation type="unfinished">위치값 + 방위각</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="127"/>
         <source>sensor front direction (yaw = 0)</source>
-        <translation>센서 전방 (yaw = 0)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="130"/>
         <source>X (right)</source>
-        <translation>X (우측)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="140"/>
         <source>sensor lateral direction</source>
-        <translation>센서 측면방향</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="143"/>
         <source>Y (up)</source>
-        <translation>Y (상단)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="153"/>
         <source>sensor vertical direction (pitch = 0)</source>
-        <translation>센서 수직방향 (피치 = 0)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="156"/>
         <source>Z (inv. view dir.)</source>
-        <translation>Z (역뷰 방향)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="166"/>
         <source>sensor center</source>
-        <translation>센서중심</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="169"/>
         <source>Center</source>
-        <translation>중심</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="180"/>
         <source>Intrinsic params</source>
-        <translation>고유파라미터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="186"/>
         <source>vert. focal</source>
-        <translation>수직촛점</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="193"/>
         <source>vertical focal (in pixels)</source>
-        <translation>수직촛점 (픽셀)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="196"/>
         <source> pix</source>
-        <translation>픽셀</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="212"/>
         <source>vert. f.o.v.</source>
-        <translation>수직 F.O.V.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="219"/>
         <source>Vertical field of view (degrees)</source>
-        <translation>수직 FOV (degrees)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="222"/>
         <source> deg.</source>
-        <translation> deg.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="235"/>
         <source>array size</source>
-        <translation>배열크기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="244"/>
         <source>CCD array width (pixels)</source>
-        <translation>CCD 너비 (픽셀)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="247"/>
@@ -1541,83 +1508,82 @@ p, li { white-space: pre-wrap; }
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="435"/>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="464"/>
         <source> pix.</source>
-        <translation>픽셀</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="270"/>
         <source>CCD array height (pixels)</source>
-        <translation>CCD 높이 (픽셀)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="304"/>
         <source>Pixel size (metric units)</source>
-        <translation>픽셀크기 (m단위)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="307"/>
         <source>pixel size</source>
-        <translation>픽셀크기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="316"/>
         <source>CCD pixel width (metric units)</source>
-        <translation>CCD 픽셀너비 (m 단위)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="339"/>
         <source>CCD pixel height (metric units)</source>
-        <translation>CCD 픽셀높이 (m단위)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="370"/>
         <source>zNear</source>
-        <translation>zNear</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="377"/>
         <source>Near cutting plane (CCD pixel width (metric units - for display)</source>
-        <translation>Near cutting 평면 (CCD 픽셀너비 (m 단위 - 화면용)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="390"/>
         <source>zFar</source>
-        <translation>zFar</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="397"/>
         <source>Far cutting plane (CCD pixel width (metric units - for display)</source>
-        <translatorcomment>Far cutting 평면 (CCD 픽셀너비 (m 단위 - 화면용)</translatorcomment>
-        <translation></translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="413"/>
         <source>skew</source>
-        <translation>꼬임</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="420"/>
         <source>Skew parameter</source>
-        <translation>꼬임 파라미터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="432"/>
         <source>Principal point X coordinate (in pixels)</source>
-        <translation>주정 X좌표 (픽셀)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="461"/>
         <source>Principal point Y coordinate (in pixels)</source>
-        <translation>주점 Y 좌표 (픽셀)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="498"/>
         <source>principal point</source>
-        <translation>주점</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/camSensorProjectDlg.ui" line="506"/>
         <source>Distortion / uncertainty</source>
-        <translation>왜곡 / 불확실성</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1625,62 +1591,62 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupo2DViewDialog.ui" line="14"/>
         <source>CANUPO training (result)</source>
-        <translation type="unfinished">CANUPO training (결과)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupo2DViewDialog.ui" line="24"/>
         <source>You can manually edit the boundary ( left click: select or add vertex / long press: move / right click: remove vertex)</source>
-        <translation>왜곽선을 직접 편집할 수 있습니다 ( 좌클릭: 버텍스 선택 또는 추가 / 길게누름: 이동 / 우클릭: 버텍스 제거)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupo2DViewDialog.ui" line="50"/>
         <source>Legend</source>
-        <translation>범례</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupo2DViewDialog.ui" line="78"/>
         <source>Cloud1 name</source>
-        <translation>클라우드1 이름</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupo2DViewDialog.ui" line="107"/>
         <source>Cloud2 name</source>
-        <translation>클라우드2 이름</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupo2DViewDialog.ui" line="117"/>
         <source>Scales</source>
-        <translation>스케일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupo2DViewDialog.ui" line="126"/>
         <source>In order to get a faster classifier, you can decrease the number of scales used (keeping only the smallest)</source>
-        <translation>분류를 빠르게 하려면 사용된 스케일갯수를 줄입니다 (가장작은값만 유지)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupo2DViewDialog.ui" line="140"/>
         <source>reset boundary</source>
-        <translation>왜곽선 리셋</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupo2DViewDialog.ui" line="150"/>
         <source>statistics</source>
-        <translation>통계</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupo2DViewDialog.ui" line="157"/>
         <source>points size</source>
-        <translation>점크기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupo2DViewDialog.ui" line="189"/>
         <source>Save</source>
-        <translation>저장</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupo2DViewDialog.ui" line="196"/>
         <source>Done</source>
-        <translation>완료</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1688,27 +1654,27 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoClassifDialog.ui" line="14"/>
         <source>CANUPO Classification</source>
-        <translation>CANUPO 분류</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoClassifDialog.ui" line="24"/>
         <source>Classifier(s)</source>
-        <translation>분류자</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoClassifDialog.ui" line="30"/>
         <source>file</source>
-        <translation>파일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoClassifDialog.ui" line="42"/>
         <source>...</source>
-        <translation>...</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoClassifDialog.ui" line="51"/>
         <source>info</source>
-        <translation>정보</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoClassifDialog.ui" line="58"/>
@@ -1717,117 +1683,113 @@ p, li { white-space: pre-wrap; }
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#ff0000;&quot;&gt;No classifier loaded!&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#ff0000;&quot;&gt;분류자 로드안됨!&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoClassifDialog.ui" line="72"/>
         <source>Core points are points on which the computation is actually performed (result is then propagated to the neighboring points).</source>
-        <translation>코어점은 실제로 계산되는점입니다 (결과가 주변점으로 전파됩니다).</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoClassifDialog.ui" line="75"/>
         <source>Core points</source>
-        <translation>코어점</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoClassifDialog.ui" line="81"/>
         <source>Warning, might be quite long on more than 100 000 points...</source>
-        <translation>경고, 100 000점이상은 매우 길어집니다...</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoClassifDialog.ui" line="84"/>
         <source>use selected cloud</source>
-        <translation>선택한 클라우드 사용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoClassifDialog.ui" line="94"/>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoClassifDialog.ui" line="107"/>
         <source>Alternative core points cloud</source>
-        <translation>대체 코어 포인트클라우드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoClassifDialog.ui" line="97"/>
         <source>use other cloud</source>
-        <translation>다른 클라우드 사용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoClassifDialog.ui" line="114"/>
         <source>Subsampled version of the selected cloud</source>
-        <translation>선택한 클라우드의 하위 샘플버전</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoClassifDialog.ui" line="117"/>
         <source>subsample cloud</source>
-        <translation>하위샘플 클라우드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoClassifDialog.ui" line="127"/>
         <source>Min. distance between points</source>
-        <translation>점간 최소거리</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoClassifDialog.ui" line="140"/>
         <source>MSC files are generated by the original CANUPO tool (by N. Brodu)</source>
-        <translation type="unfinished">MSC 파일은 원본 CANUPO 툴로 생성됩니다 (N. Brodu)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoClassifDialog.ui" line="143"/>
         <source>from MSC file</source>
-        <translation>MSC 파일 사용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoClassifDialog.ui" line="184"/>
         <source>Advanced</source>
-        <translation>고급</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoClassifDialog.ui" line="193"/>
         <source>Use confidence threshold for classification</source>
-        <translation>분류시 신뢰 임계값 사용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoClassifDialog.ui" line="207"/>
         <source>threshold</source>
-        <translation>임계값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoClassifDialog.ui" line="214"/>
         <source>Points having a confidence under this threshold won&apos;t be classified (or a SF will be used)</source>
-        <translation>이 임계값보다 낮은 신뢰도를 갖는 점은 분류되지 않습니다 (또는 축척계수 사용)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoClassifDialog.ui" line="248"/>
         <source>Try to classify points with a low confidence based on the local SF values</source>
-        <translation>로컬 축척계수 기준으로 낮은 신뢰도로 점을 분류합니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoClassifDialog.ui" line="251"/>
         <source>use active SF to locally refine the classification</source>
-        <translation>사용 SF를 사용하여 지역적으로 분류를 세분화합니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoClassifDialog.ui" line="261"/>
         <source>For test purpose!</source>
-        <translation>테스트용!</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoClassifDialog.ui" line="264"/>
         <source>generate one SF per scale with &apos;x-y&apos;</source>
-        <translation>&apos;x-y&apos;를 사용하여 스케일당 하나의 SF를 생성합니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoClassifDialog.ui" line="271"/>
         <source>generate one SF per scale with roughness</source>
-        <translation>거칠기를 포함한 스케일당 하나의 SF를 생성합니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoClassifDialog.ui" line="299"/>
         <source>Max thread count</source>
-        <translation>최대 스레드 갯수</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1835,162 +1797,162 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoTrainingDialog.ui" line="14"/>
         <source>CANUPO Training</source>
-        <translation type="unfinished">CANUPO Training</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoTrainingDialog.ui" line="24"/>
         <source>Data</source>
-        <translation>데이터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoTrainingDialog.ui" line="30"/>
         <source>Role</source>
-        <translation>역할</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoTrainingDialog.ui" line="37"/>
         <source>Cloud</source>
-        <translation>클라우드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoTrainingDialog.ui" line="44"/>
         <source>Class label</source>
-        <translation>클래스 라벨</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoTrainingDialog.ui" line="51"/>
         <source>class #1</source>
-        <translation>클래스 #1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoTrainingDialog.ui" line="65"/>
         <source>class #2</source>
-        <translation>클래스 #2</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoTrainingDialog.ui" line="88"/>
         <source>Points belonging to class #1</source>
-        <translation type="unfinished">클래스 #1에 속한 점</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoTrainingDialog.ui" line="101"/>
         <source>Points belonging to class #2</source>
-        <translation>클래스 #2에 속한 점</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoTrainingDialog.ui" line="111"/>
         <source>Scales</source>
-        <translation>스케일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoTrainingDialog.ui" line="117"/>
         <source>ramp</source>
-        <translation>램프</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoTrainingDialog.ui" line="142"/>
         <source>Mininum scale</source>
-        <translation>최소스케일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoTrainingDialog.ui" line="145"/>
         <source>Min = </source>
-        <translation>최소 =</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoTrainingDialog.ui" line="167"/>
         <source>Step</source>
-        <translation>단계</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoTrainingDialog.ui" line="170"/>
         <source>Step = </source>
-        <translation>단계 =</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoTrainingDialog.ui" line="192"/>
         <source>Max scale</source>
-        <translation>최대스케일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoTrainingDialog.ui" line="195"/>
         <source>Max = </source>
-        <translation>최대 =</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoTrainingDialog.ui" line="217"/>
         <source>Inp</source>
-        <translation>Inp</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoTrainingDialog.ui" line="220"/>
         <source>list</source>
-        <translation>목록</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoTrainingDialog.ui" line="230"/>
         <source>Input scales as a list of values (separated by a space character)</source>
-        <translation>스케일을 값의 목록으로 입력 (공백 문자로 구분)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoTrainingDialog.ui" line="240"/>
         <source>Advanced</source>
-        <translation>고급</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoTrainingDialog.ui" line="246"/>
         <source>Classification parameter</source>
-        <translation>분류 파라미터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoTrainingDialog.ui" line="254"/>
         <source>Dimensionality</source>
-        <translation>차원수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoTrainingDialog.ui" line="262"/>
         <source>Max core points</source>
-        <translation>최대 코어점</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoTrainingDialog.ui" line="269"/>
         <source>Maximum number of core points computed on each class</source>
-        <translation>각 클래스에서 계산된 코어점의 최대 갯수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoTrainingDialog.ui" line="288"/>
         <source>Check this to add more points to the 2D classifier behavior representation</source>
-        <translation type="unfinished">체크시 더 많은점을 2D 분류자 동작에 추가합니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoTrainingDialog.ui" line="291"/>
         <source>Show classifier behavior on </source>
-        <translation>분류작업 보기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoTrainingDialog.ui" line="307"/>
         <source>Additional points that will be added to the 2D classifier behavior representation</source>
-        <translation>2D 분류자 동작에 추가되는 추가점입니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoTrainingDialog.ui" line="314"/>
         <source>If checked the original cloud will be used for descriptors computation (i.e. class clouds will be considered as core points of this cloud)</source>
-        <translation type="unfinished">체크시 원본 클라우드가 설명 계산에 사용됩니다 (즉 클래스 클라우드가 클라우드의 코어점으로 고려됩니다)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoTrainingDialog.ui" line="317"/>
         <source>Use original cloud for descriptors</source>
-        <translation>원본 클라우드를 설명으로 사용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoTrainingDialog.ui" line="333"/>
         <source>If set this cloud will be used for descriptors computation (i.e. class clouds will be considered as core points of this cloud)</source>
-        <translation>설정시 이 클라우드가 설명계산에 사용됩니다 (즉, 클래스 클라우드가 클라우드의 코어점으로 사용)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/qCanupoTrainingDialog.ui" line="384"/>
         <source>Max thread count</source>
-        <translation>최대 스레드 갯수</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1998,135 +1960,131 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/cellsFusionDlg.ui" line="14"/>
         <source>Cell Fusion Parameters</source>
-        <translation>셀퓨전 파라미터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/cellsFusionDlg.ui" line="20"/>
         <source>Fusion algorithm</source>
-        <translation>퓨전 알고리즘</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/cellsFusionDlg.ui" line="30"/>
         <source>Kd-tree</source>
-        <translation>Kd-트리</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/cellsFusionDlg.ui" line="35"/>
         <source>Fast Marching</source>
-        <translation>신속 매칭</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/cellsFusionDlg.ui" line="46"/>
         <source>Kd-tree cells fusion parameters</source>
-        <translation>Kd-트리 셀퓨전 파라미터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/cellsFusionDlg.ui" line="55"/>
         <source>Max angle between cells (in degrees).
 Kd-tree cells should be (roughly) planar.</source>
-        <translation>셀간 최대각도 (Deg).
-Kd-트리 셀은 대략 평면입니다.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/cellsFusionDlg.ui" line="59"/>
         <source>Max angle</source>
-        <translation>최대각도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/cellsFusionDlg.ui" line="66"/>
         <source> deg.</source>
-        <translation>deg.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/cellsFusionDlg.ui" line="82"/>
         <source>Max &apos;relative&apos; distance between cells (proportional to the cell size).
 The bigger the farther the merged cells can be.</source>
-        <translation>셀간 최대 &apos;상대&apos; 거리 (셀크기에 비례).
-커질수록 병합된 셀이 멀어집니다.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/cellsFusionDlg.ui" line="86"/>
         <source>Max relative distance</source>
-        <translation>최대상대거리</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/cellsFusionDlg.ui" line="115"/>
         <source>FM cells fusion parameters</source>
-        <translation>FM 셀 퓨전 파라미터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/cellsFusionDlg.ui" line="123"/>
         <source>Octree level</source>
-        <translation>옥트리 레벨</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/cellsFusionDlg.ui" line="130"/>
         <source>Octree Level (Fast Marching propagation process).</source>
-        <translation>옥트리 레벨 ( 신속 매칭 비례과정).</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/cellsFusionDlg.ui" line="151"/>
         <source>use retro-projection error for propagation (slower)</source>
-        <translation>비례 레트로 투영에서 사용 (느려짐)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/cellsFusionDlg.ui" line="161"/>
         <source>Facets</source>
-        <translation>측면</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/cellsFusionDlg.ui" line="167"/>
         <source>Min points per facet</source>
-        <translation>측면당 최소점</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/cellsFusionDlg.ui" line="174"/>
         <source>Octree Level (for point cloud shape approx.)</source>
-        <translation>옥트리 레벨 포인트클라우드 예상모양)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/cellsFusionDlg.ui" line="193"/>
         <source>Max edge length</source>
-        <translation>최대 엣지거리</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/cellsFusionDlg.ui" line="207"/>
         <source>Criterion for grouping several points in a single &apos;facet&apos;</source>
-        <translation>싱글 &apos;측면&apos;의 다수의 점 그룹화 임계값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/cellsFusionDlg.ui" line="214"/>
         <source>Max RMS</source>
-        <translation>최대 RMS</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/cellsFusionDlg.ui" line="219"/>
         <source>Max distance @ 68%</source>
-        <translation>최대거리 @ 68%</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/cellsFusionDlg.ui" line="224"/>
         <source>Max distance @ 95%</source>
-        <translation>최대거리 @ 95%</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/cellsFusionDlg.ui" line="229"/>
         <source>Max distance @ 99%</source>
-        <translation>최대거리 @ 99%</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/cellsFusionDlg.ui" line="234"/>
         <source>Max distance</source>
-        <translation>최대거리</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/cellsFusionDlg.ui" line="267"/>
         <source>Warning: cloud has no normals!
 Output facet normals may be randomly oriented
 (e.g. colors and classification may be jeopardized)</source>
-        <translation>경고: 클라우드에 노말이 없습니다!
-측면 노말 출력값은 무작위로 방향이 설정됩니다
-(예시 컬러 및 분류가 잘못될 수 있습니다)</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2134,17 +2092,17 @@ Output facet normals may be randomly oriented
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/classificationParamsDlg.ui" line="14"/>
         <source>Classification</source>
-        <translation>분류</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/classificationParamsDlg.ui" line="54"/>
         <source>angular step</source>
-        <translation>각도단계</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/classificationParamsDlg.ui" line="61"/>
         <source>max distance</source>
-        <translation>최대거리</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2152,7 +2110,7 @@ Output facet normals may be randomly oriented
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/classifyDisclaimerDlg.ui" line="14"/>
         <source>qCANUPO (disclaimer)</source>
-        <translation>qCANUPO (면책조항)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/classifyDisclaimerDlg.ui" line="48"/>
@@ -2166,16 +2124,7 @@ p, li { white-space: pre-wrap; }
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;Funded by Université Européenne de Bretagne, Centre National de la Recherche Scientifique and EEC Marie-Curie actions&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d;&quot;&gt;Enjoy!&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-weight:600; color:#1f497d;&quot;&gt;멀티스케일 차수 분류 (CANUPO)&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-style:italic; color:#1f497d;&quot;&gt;Brodu and Lague, 3D Terrestrial LiDAR data classification of complex natural scenes using a multi-scale dimensionality criterion, ISPRS j. of Photogram. Rem. Sens., 2012&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-style:italic; color:#1f497d; background-color:#ffffff;&quot;&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;Funded by Université Européenne de Bretagne, Centre National de la Recherche Scientifique and EEC Marie-Curie actions&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d;&quot;&gt;Enjoy!&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2183,49 +2132,44 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="20"/>
         <source>Clipping Box</source>
-        <translation>박스클리핑</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="28"/>
         <source>Show/hide bounding box</source>
-        <translation>경계박스 보기/숨기기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="48"/>
         <source>Show/hide interactors</source>
-        <translation>익터랙터 보기/숨기기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="84"/>
         <source>Restore the last clipping box used with this cloud</source>
-        <translation>이 클라우드에 사용된 최근 클리핑박스 복원</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="101"/>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="104"/>
         <source>Reset</source>
-        <translation>리셋</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="121"/>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="124"/>
         <source>Close</source>
-        <translation>닫기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="143"/>
         <source>Box thickness</source>
-        <translation>박스두께</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="215"/>
         <source>advanced</source>
-        <translation>고급</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/clippingBoxDlg.ui" line="303"/>
-        <source>Slices</source>
-        <translation>슬라이스</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="242"/>
@@ -2245,6 +2189,11 @@ p, li { white-space: pre-wrap; }
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../ui_templates/clippingBoxDlg.ui" line="303"/>
+        <source>Slices</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="327"/>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="330"/>
         <source>Export selection as new entities</source>
@@ -2260,132 +2209,132 @@ by repeating the process along one or several dimensions</source>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="408"/>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="411"/>
         <source>Set &apos;left&apos; view</source>
-        <translation>&apos;좌측&apos;뷰 설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="422"/>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="425"/>
         <source>Set &apos;right&apos; view</source>
-        <translation>&apos;우측&apos;뷰 설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="436"/>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="439"/>
         <source>Set &apos;front&apos; view</source>
-        <translation>&apos;전면&apos;뷰 설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="450"/>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="453"/>
         <source>Set &apos;back&apos; view</source>
-        <translation>&apos;후면&apos;뷰 설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="464"/>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="467"/>
         <source>Set &apos;down&apos; view</source>
-        <translation>&apos;하단&apos;뷰 설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="478"/>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="481"/>
         <source>Set &apos;up&apos; view</source>
-        <translation>&apos;상단&apos;뷰 설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="514"/>
         <source>Shift box</source>
-        <translation>박스이격</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="557"/>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="579"/>
         <source>Shift box along its X dimension</source>
-        <translation>X축을 따라 박스 이격</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="601"/>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="623"/>
         <source>Shift box along its Y dimension</source>
-        <translation>Y축을 따라 박스 이격</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="645"/>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="667"/>
         <source>Shift box along its Z dimension</source>
-        <translation>Z축을 따라 박스 이격</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>ClippingBoxRepeatDlg</name>
-    <message>
-        <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="20"/>
-        <source>The segmentation process will be repeated along the following dimensions (+/-)</source>
-        <translation>분할프로세스는 다음 차원을 따라 반복됩니다 (+/-)</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="23"/>
-        <source>Repeat dimensions</source>
-        <translation>차원반복</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="74"/>
-        <source>Extract slice cloud(s) or mesh(es)</source>
-        <translation>클라우드 또는 메시 슬라이스 추출</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="83"/>
-        <source>If checked, a random color will be assigned to each slice (warning: will overwrite any existing color!)</source>
-        <translation>체크시 무작위 컬러가 각 슬라이스에 적용됩니다 (경고: 기존컬러가 덮어쓰여집니다!)</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="86"/>
-        <source>random colors per slice (will overwrite existing colors!)</source>
-        <translation>슬라이스당 부작위컬러 (기존컬러가 덮어쓰여집니다!)</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="96"/>
-        <source>Check that option if you wish to extract the envelope of each slice</source>
-        <translation>각 슬라이스의 엔벨롭을 추출하려면 옵션체크</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="99"/>
-        <source>Extract envelope(s)</source>
-        <translation>엔벨롭 추출</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="113"/>
-        <source>Envelope type</source>
-        <translation>엔벨롭 종류</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="127"/>
-        <source>Lower</source>
-        <translation>하단</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="132"/>
-        <source>Upper</source>
-        <translation>상단</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="137"/>
-        <source>Full</source>
-        <translation>전체</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="145"/>
-        <source>Max edge length</source>
-        <translation>최대엣지거리</translation>
-    </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="14"/>
         <source>Slice extraction</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="20"/>
+        <source>The segmentation process will be repeated along the following dimensions (+/-)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="23"/>
+        <source>Repeat dimensions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="74"/>
+        <source>Extract slice cloud(s) or mesh(es)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="83"/>
+        <source>If checked, a random color will be assigned to each slice (warning: will overwrite any existing color!)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="86"/>
+        <source>random colors per slice (will overwrite existing colors!)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="96"/>
+        <source>Check that option if you wish to extract the envelope of each slice</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="99"/>
+        <source>Extract envelope(s)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="113"/>
+        <source>Envelope type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="120"/>
         <source>Envelope type (lower or upper part, or both)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="127"/>
+        <source>Lower</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="132"/>
+        <source>Upper</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="137"/>
+        <source>Full</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="145"/>
+        <source>Max edge length</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2396,57 +2345,57 @@ by repeating the process along one or several dimensions</source>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="167"/>
         <source>Multi-pass process where longer edges may be temporarily created to obtain a better fit... or a worst one ;)</source>
-        <translation>더 먼 엣지가 임시적으로 생성되어 더 좋은 맞춤 또는 최악의 값을 얻을 수 있는 멀티패스 과정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="170"/>
         <source>multi-pass</source>
-        <translation>멀티패스</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="177"/>
         <source>Before extracting the contour, points can be projected along the repeat dimension (if only one is defined) or on the best fit plane</source>
-        <translation>등고선 추출전 점이 반복치수 (하나만 정의된 경우)를 따라 투영되거나 가장 적합한 평면에 투영될 수 있습니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="180"/>
         <source>project slice(s) points on their best fit plane</source>
-        <translation>최상 맞춤면에 슬라이스 점이 투영됩니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="187"/>
         <source>split the generated contour(s) in smaller parts to avoid creating edges longer than the specified max edge length.</source>
-        <translation>생성된 등고선을 작은파트로 분리하여 특정 최대엣지거리보다 크게 생성되는 엣지를 피합니다. </translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="190"/>
         <source>split envelope(s) on longer edges</source>
-        <translation>더큰 엣지로 엔벨롭 분리</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="197"/>
         <source>Display a dialog with step-by-step execution of the algorithm (debug mode - very slow)</source>
-        <translation>알고리즘을 실행하는 단계별 대화창표시 (디버그 모드 - 매우 느림)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="200"/>
         <source>visual debug mode</source>
-        <translation>비쥬얼 디버그모드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="210"/>
         <source>Extract the point contours (via a rasterization process)</source>
-        <translation>점 등고선 추출 ( 라스터화 과정 사용)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="213"/>
         <source>Extract contours</source>
-        <translation>등고선 추출</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="225"/>
         <source>Grid step</source>
-        <translation>그리드단계</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="232"/>
@@ -2456,7 +2405,7 @@ by repeating the process along one or several dimensions</source>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="251"/>
         <source>Min. vertex count</source>
-        <translation>최소 버텍스 갯수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="258"/>
@@ -2466,22 +2415,22 @@ by repeating the process along one or several dimensions</source>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="274"/>
         <source>Other options</source>
-        <translation>그외 옵션</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="280"/>
         <source>Gap</source>
-        <translation>갭</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="287"/>
         <source>Gap between the slices</source>
-        <translation>슬라이스간 갭</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="300"/>
         <source>Group generated entities by</source>
-        <translation>생성된 엔티티그룹</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="307"/>
@@ -2491,27 +2440,27 @@ by repeating the process along one or several dimensions</source>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="314"/>
         <source>Type</source>
-        <translation>종류</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="319"/>
         <source>Origin entity</source>
-        <translation>원본 엔티티</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="324"/>
         <source>Slice</source>
-        <translation>슬라이스</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="329"/>
         <source>Origin entity, then slice</source>
-        <translation>원본 엔티티 그후 분리</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxRepeatDlg.ui" line="334"/>
         <source>Slice, then origin entity</source>
-        <translation>분리후 원본 엔티티</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2519,22 +2468,22 @@ by repeating the process along one or several dimensions</source>
     <message>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="14"/>
         <source>Color From Scalar Fields</source>
-        <translation>스칼라필드의 컬러</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="40"/>
         <source>Mapping type:</source>
-        <translation>매핑종류:</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="47"/>
         <source>To RGB</source>
-        <translation>RGB 까지</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="57"/>
         <source>To HSV</source>
-        <translation>HSV까지</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="118"/>
@@ -2543,7 +2492,7 @@ by repeating the process along one or several dimensions</source>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="460"/>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="618"/>
         <source>Red</source>
-        <translation>Red</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="138"/>
@@ -2555,7 +2504,7 @@ by repeating the process along one or several dimensions</source>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="609"/>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="613"/>
         <source>RGB</source>
-        <translation>RGB</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="152"/>
@@ -2564,7 +2513,7 @@ by repeating the process along one or several dimensions</source>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="465"/>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="623"/>
         <source>Green</source>
-        <translation>Green</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="157"/>
@@ -2573,7 +2522,7 @@ by repeating the process along one or several dimensions</source>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="470"/>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="628"/>
         <source>Blue</source>
-        <translation>Blue</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="165"/>
@@ -2581,7 +2530,7 @@ by repeating the process along one or several dimensions</source>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="478"/>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="636"/>
         <source>Minimum:</source>
-        <translation>최소:</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="188"/>
@@ -2589,7 +2538,7 @@ by repeating the process along one or several dimensions</source>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="501"/>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="659"/>
         <source>Fix</source>
-        <translation>고정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="195"/>
@@ -2597,7 +2546,7 @@ by repeating the process along one or several dimensions</source>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="508"/>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="669"/>
         <source>Reverse</source>
-        <translation>반전</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="215"/>
@@ -2605,12 +2554,12 @@ by repeating the process along one or several dimensions</source>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="528"/>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="689"/>
         <source>Maximum:</source>
-        <translation>최대:</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/colorFromScalarDlg.ui" line="589"/>
         <source>Alpha</source>
-        <translation>알파</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2618,47 +2567,47 @@ by repeating the process along one or several dimensions</source>
     <message>
         <location filename="../ui_templates/colorGradientDlg.ui" line="14"/>
         <source>Gradient color</source>
-        <translation>그라데이션 컬러</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/colorGradientDlg.ui" line="20"/>
         <source>Color ramp</source>
-        <translation>색상표</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/colorGradientDlg.ui" line="26"/>
         <source>Default</source>
-        <translation>기본값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/colorGradientDlg.ui" line="36"/>
         <source>Custom</source>
-        <translation>커스텀</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/colorGradientDlg.ui" line="61"/>
         <source>First color</source>
-        <translation>첫컬러</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/colorGradientDlg.ui" line="88"/>
         <source>Second color</source>
-        <translation>2번컬러</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/colorGradientDlg.ui" line="105"/>
         <source>Banding</source>
-        <translation>밴딩</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/colorGradientDlg.ui" line="136"/>
         <source>Period</source>
-        <translation>기간</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/colorGradientDlg.ui" line="180"/>
         <source>direction</source>
-        <translation>방향</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2666,42 +2615,42 @@ by repeating the process along one or several dimensions</source>
     <message>
         <location filename="../ui_templates/colorLevelsDlg.ui" line="14"/>
         <source>Change Color Levels</source>
-        <translation>컬러레벨 변경</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/colorLevelsDlg.ui" line="35"/>
         <source>Channel(s)</source>
-        <translation>채널</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/colorLevelsDlg.ui" line="43"/>
         <source>RGB</source>
-        <translation>RGB</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/colorLevelsDlg.ui" line="48"/>
         <source>Red</source>
-        <translation>Red</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/colorLevelsDlg.ui" line="53"/>
         <source>Green</source>
-        <translation>Green</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/colorLevelsDlg.ui" line="58"/>
         <source>Blue</source>
-        <translation>Blue</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/colorLevelsDlg.ui" line="96"/>
         <source>Input levels</source>
-        <translation>입력레벨</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/colorLevelsDlg.ui" line="172"/>
         <source>Output levels</source>
-        <translation>출력레벨</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2709,156 +2658,153 @@ by repeating the process along one or several dimensions</source>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="14"/>
         <source>Distance computation</source>
-        <translation>거리계산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="22"/>
         <source>Compared</source>
-        <translation>비교</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="36"/>
         <source>Reference</source>
-        <translation>기준</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="56"/>
         <source>General parameters</source>
-        <translation>일반파라미터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="64"/>
         <source>Level of subdivision used for computing the distances</source>
-        <translation>거리 계산에 사용되는 세분화레벨</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="67"/>
         <source>Octree level</source>
-        <translation>옥트리레벨</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="77"/>
         <location filename="../ui_templates/comparisonDlg.ui" line="90"/>
         <source>Acceleration: distances above this limit won&apos;t be computed accurately</source>
-        <translation>가속: 이 한계를 초과하는 거리는 정확하게 계산되지 않습니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="80"/>
         <source>max. distance</source>
-        <translation>최대거리</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="106"/>
         <location filename="../ui_templates/comparisonDlg.ui" line="109"/>
         <source>compute signed distances (slower)</source>
-        <translation>서명된 거리 계산 (느림)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="112"/>
         <source>signed distances</source>
-        <translation>사인된 거리</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="122"/>
         <source>flip normals</source>
-        <translation>노멀 접기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="131"/>
         <location filename="../ui_templates/comparisonDlg.ui" line="134"/>
         <source>Generate 3 supplementary scalar fields with distances along each dimension</source>
-        <translation>각 차원을 따라 거리를 포함한 보조 스칼라필드를 생성합니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="137"/>
         <source>split X,Y and Z components</source>
-        <translation>X,T,Z 구성요소 분할</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="144"/>
         <source>Use the sensor associated to the reference cloud to ignore the points in the compared cloud
 that could not have been seen (hidden/out of range/out of field of view).</source>
-        <translation>기준클라우드에 연결된 센서를 사용하여
-비교클라우드에서 볼 수 없었던 점 (숨은점/범위초과점/Fov 외부점)을 무시합니다.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="148"/>
         <source>use reference sensor to filter hidden points</source>
-        <translation>기준센서를 사용하여 숨은점을 필터링합니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="157"/>
         <source>multi-threaded</source>
-        <translation>멀티스레드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="201"/>
         <source>max thread count</source>
-        <translation>최대 스레드 갯수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="208"/>
         <source>Maximum number of threads/cores to be used
 (CC or your computer might not respond for a while if you use all available cores)</source>
-        <translation>사용한 최대 스캐드/코어 갯수
-(사용가능한 모든 코어를 사용한 경우 CC 또는 컴퓨터의 응답이 없을 수 있습니다)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="238"/>
         <source>Local modeling</source>
-        <translation>로컬모델링</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="246"/>
         <source>Local model</source>
-        <translation>로컬 모델</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="280"/>
         <source>Points (kNN)</source>
-        <translation>점 (kNN)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="304"/>
         <source>Radius (Sphere)</source>
-        <translation>반경 (구형)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="328"/>
         <source>faster but more ... approximate</source>
-        <translation>더 빠르지만 더 대략적인 값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="331"/>
         <source>use the same model for nearby points</source>
-        <translation>점근처에 동일모델을 사용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="355"/>
         <source>Approximate distances</source>
-        <translation>대략적인 거리</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="391"/>
         <source>Warning: approximate distances are only provided
 to help advanced users setting the general parameters</source>
-        <translation>경고: 고급 사용자가 일반 파라미터를 설정하는 데
- 도움이 되도록 대략적인 거리가 제공됩니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="478"/>
         <source>Compute</source>
-        <translation>계산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="488"/>
         <source>Ok</source>
-        <translation>확인</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="495"/>
         <source>Cancel</source>
-        <translation>취소</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2866,32 +2812,32 @@ to help advanced users setting the general parameters</source>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1167"/>
         <source>Array</source>
-        <translation>배열</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1170"/>
         <source>Name</source>
-        <translation>이름</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1170"/>
         <source>undefined</source>
-        <translation>미설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1173"/>
         <source>Elements</source>
-        <translation>요소</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1176"/>
         <source>Capacity</source>
-        <translation>용량</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1179"/>
         <source>Memory</source>
-        <translation>메모리</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2899,37 +2845,37 @@ to help advanced users setting the general parameters</source>
     <message>
         <location filename="../ui_templates/computeOctreeDlg.ui" line="14"/>
         <source>Compute Octree</source>
-        <translation>옥트리 계산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/computeOctreeDlg.ui" line="20"/>
         <source>Max subdivision level: ??</source>
-        <translation>최대 세분화 레벨: ??</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/computeOctreeDlg.ui" line="27"/>
         <source>Octree box</source>
-        <translation>옥트리박스</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/computeOctreeDlg.ui" line="33"/>
         <source>Default</source>
-        <translation>기본값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/computeOctreeDlg.ui" line="43"/>
         <source>Cell size at max level</source>
-        <translation>최대 레벨의 셀크기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/computeOctreeDlg.ui" line="63"/>
         <source>Custom bounding box</source>
-        <translation>커스텀 경계박스</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/computeOctreeDlg.ui" line="73"/>
         <source>Edit</source>
-        <translation>편집</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2937,67 +2883,65 @@ to help advanced users setting the general parameters</source>
     <message>
         <location filename="../../plugins/core/Standard/qCork/ui/corkDlg.ui" line="14"/>
         <source>Mesh Boolean Operations (CSG) with Cork</source>
-        <translation>Mesh Boolean Operations (CSG) with Cork</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCork/ui/corkDlg.ui" line="41"/>
         <source>A</source>
-        <translation>A</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCork/ui/corkDlg.ui" line="59"/>
         <source>B</source>
-        <translation>B</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCork/ui/corkDlg.ui" line="89"/>
         <source>Merge two objects into one</source>
-        <translation>2객체을 한개로 병합</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCork/ui/corkDlg.ui" line="92"/>
         <source>Union
 A+B</source>
-        <translation>유니온
-A+B</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCork/ui/corkDlg.ui" line="100"/>
         <source>Subtract one object from another</source>
-        <translation>한 개체를 다른 개체에서 뺍니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCork/ui/corkDlg.ui" line="103"/>
         <source>Difference
 A-B</source>
-        <translation>A-B 편차</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCork/ui/corkDlg.ui" line="111"/>
         <source>Return the portion common to both objects</source>
-        <translation>두 객체에 공통적인 부분을 리턴</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCork/ui/corkDlg.ui" line="114"/>
         <source>Intersection
 A n B</source>
-        <translation>교차점
-A n B</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCork/ui/corkDlg.ui" line="135"/>
         <source>Subtract one object from another (inverse result)</source>
-        <translation>한 개체를 다른 개체에서 뺍니다 (역계산)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCork/ui/corkDlg.ui" line="138"/>
         <source>Symmetric Difference</source>
-        <translation>대칭 편차</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCork/ui/corkDlg.ui" line="161"/>
         <source>Image courtesy of Autodesk(r)</source>
-        <translation>Autodesk 이미지 제공</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -3005,28 +2949,28 @@ A n B</translation>
     <message>
         <location filename="../ui_templates/dipDirTransformationDlg.ui" line="14"/>
         <source>Dip / dip dir. transformation</source>
-        <translation>Dip / Dip 방향 투영</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/dipDirTransformationDlg.ui" line="22"/>
         <source>Dip</source>
-        <translation>Dip</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/dipDirTransformationDlg.ui" line="29"/>
         <location filename="../ui_templates/dipDirTransformationDlg.ui" line="49"/>
         <source> deg.</source>
-        <translation> deg.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/dipDirTransformationDlg.ui" line="42"/>
         <source>Dip direction</source>
-        <translation>Dip 방향</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/dipDirTransformationDlg.ui" line="64"/>
         <source>rotate about selection center</source>
-        <translation>선택중심 회전</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -3034,7 +2978,7 @@ A n B</translation>
     <message>
         <location filename="../../plugins/core/Standard/qBroom/ui/disclaimerDlg.ui" line="14"/>
         <source>qBroom (disclaimer)</source>
-        <translation>qBroom (면책조항)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qBroom/ui/disclaimerDlg.ui" line="40"/>
@@ -3059,32 +3003,12 @@ Collision Engineering Associates, Inc.
 &lt;br/&gt;but WITHOUT ANY WARRANTY; without even the implied warranty of &lt;br/&gt;MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 &lt;br/&gt;See the GNU General Public License for more details.&lt;/p&gt;
 &lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p align=&quot;center&quot;&gt;
-Wesley Grimesrk가 제공한 플러그인입니다,
-&lt;br/&gt;
-Collision Engineering Associates, Inc.
-&lt;br/&gt;
-&lt;a href=&quot;https://cea-az.com/&quot;&gt;https://cea-az.com/&lt;/a&gt;
-&lt;/p&gt;
-&lt;p align=&quot;center&quot;&gt;
-&lt;b&gt;Please donate if you find this tool useful&lt;/b&gt;
-&lt;br/&gt;
-&lt;br/&gt;
-&lt;a href=&quot;https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;amp;hosted_button_id=DZAYQVLL8MMNL&quot;&gt;&lt;img src=&quot;:/CC/plugin/qBroom/btn_donateCC_LG.gif&quot; /&gt;&lt;/a&gt;
-&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot;font-size:8pt;&quot;&gt;This program is distributed in the hope that it will be useful,
-&lt;br/&gt;but WITHOUT ANY WARRANTY; without even the implied warranty of &lt;br/&gt;MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-&lt;br/&gt;See the GNU General Public License for more details.&lt;/p&gt;
-&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/disclaimerDlg.ui" line="20"/>
         <source>qFacets (disclaimer)</source>
-        <translation>qFacets (면책조항)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/disclaimerDlg.ui" line="58"/>
@@ -3100,23 +3024,12 @@ p, li { white-space: pre-wrap; }
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#0000ff;&quot;&gt;copyright BRGM&lt;/span&gt;&lt;span style=&quot; font-family:&apos;sans-serif&apos;; font-size:8pt; color:#0000ff; background-color:#ffffff;&quot;&gt;©&lt;/span&gt;&lt;span style=&quot; font-size:8pt; color:#0000ff;&quot;&gt; 2013&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a href=&quot;http://www.brgm.eu/&quot;&gt;&lt;span style=&quot; font-size:8pt; text-decoration: underline; color:#0000ff;&quot;&gt;http://www.brgm.eu&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Thomas Dewez – BRGM에서 지원받아 개발된 플러그인입니다.&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published bythe Free Software Foundation; version 2 or later of the License.&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#0000ff;&quot;&gt;copyright BRGM&lt;/span&gt;&lt;span style=&quot; font-family:&apos;sans-serif&apos;; font-size:8pt; color:#0000ff; background-color:#ffffff;&quot;&gt;©&lt;/span&gt;&lt;span style=&quot; font-size:8pt; color:#0000ff;&quot;&gt; 2013&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a href=&quot;http://www.brgm.eu/&quot;&gt;&lt;span style=&quot; font-size:8pt; text-decoration: underline; color:#0000ff;&quot;&gt;http://www.brgm.eu&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/disclaimerDlg.ui" line="14"/>
         <source>qM3C2 (disclaimer)</source>
-        <translation>qM3C2 (면책조항)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/disclaimerDlg.ui" line="48"/>
@@ -3130,16 +3043,7 @@ p, li { white-space: pre-wrap; }
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2,serif&apos;; font-size:8pt; color:#aa007f; background-color:#ffffff;&quot;&gt;This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;arial,sans-serif&apos;; font-size:10pt; font-style:italic; color:#222222; background-color:#ffffff;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;Funded by Université Européenne de Bretagne, Centre National de la Recherche Scientifique and EEC Marie-Curie actions&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-weight:600; color:#1f497d;&quot;&gt;M3C2 포인트클라우드 비교&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-style:italic; color:#1f497d;&quot;&gt;Lague et al., Accurate 3D comparison of complex topography with terrestrial laser scanner, ISPRS j. of Photogram. Rem. Sens., 2013&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-style:italic; color:#1f497d; background-color:#ffffff;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2,serif&apos;; font-size:8pt; color:#aa007f; background-color:#ffffff;&quot;&gt;This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;arial,sans-serif&apos;; font-size:10pt; font-style:italic; color:#222222; background-color:#ffffff;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;Funded by Université Européenne de Bretagne, Centre National de la Recherche Scientifique and EEC Marie-Curie actions&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -3147,41 +3051,39 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/distanceMapDlg.ui" line="14"/>
         <source>Distance Map</source>
-        <translation>거리지도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/distanceMapDlg.ui" line="22"/>
         <source>Steps</source>
-        <translation>단계</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/distanceMapDlg.ui" line="29"/>
         <source>Map steps (in each direction).
 The bigger the more accurate the map will be
 (but the more points will be created)</source>
-        <translation>지도단계 (각방향).
-커질수록 지도정확도가 높아집니다
-(하지만 더 많은 점이 생성됩니다)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/distanceMapDlg.ui" line="63"/>
         <source>Outer margin</source>
-        <translation>외곽 마진</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/distanceMapDlg.ui" line="70"/>
         <source>Margin added around the cloud bounding-box</source>
-        <translation>클라우드 한계박스 주변에 추가된 마진</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/distanceMapDlg.ui" line="87"/>
         <source>reduce result to the specified range</source>
-        <translation>결과를 특정거리로 줄이기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/distanceMapDlg.ui" line="90"/>
         <source>Range</source>
-        <translation>범위</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -3189,48 +3091,48 @@ The bigger the more accurate the map will be
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="14"/>
         <source>2D distance map (Surface of Revolution)</source>
-        <translation>2D 거리지도 (지면 리볼루션)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="53"/>
         <source>Projection</source>
-        <translation>투영</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="63"/>
         <source>Cylindrical</source>
-        <translation>실린더</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="68"/>
         <source>Conical (Lambert)</source>
-        <translation>원뿔형 (램버트)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="91"/>
         <source>Spanning ratio</source>
-        <translation>스패닝비율</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="136"/>
         <source>Map</source>
-        <translation>지도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="148"/>
         <source>Resolution</source>
-        <translation>해상도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="175"/>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="517"/>
         <source>angle (X)</source>
-        <translation>각도 (X)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="188"/>
         <source>Map angular step (horizontal)</source>
-        <translation>지도 각도단계 (수평)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="191"/>
@@ -3240,114 +3142,114 @@ The bigger the more accurate the map will be
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="806"/>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="879"/>
         <source>step = </source>
-        <translation>단계 =</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="216"/>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="530"/>
         <source>height (Y)</source>
-        <translation>높이 (Y)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="229"/>
         <source>Map height step (vertical)</source>
-        <translation>지도높이단계 (수직)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="260"/>
         <source>size</source>
-        <translation>크기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="280"/>
         <source>Map angles unit</source>
-        <translation>지도각도단계</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="287"/>
         <source>deg</source>
-        <translation>deg</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="292"/>
         <source>rad</source>
-        <translation>rad</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="297"/>
         <source>grad</source>
-        <translation>grad</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="317"/>
         <source>Map heights unit (for display only)</source>
-        <translation>지도높이 단위 (표시용)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="320"/>
         <source>m.</source>
-        <translation>m.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="330"/>
         <source>Counterclockwise unrolling</source>
-        <translation>반시계방향으로 롤링해제</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="333"/>
         <source>CCW</source>
-        <translation>CCW</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="340"/>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="557"/>
         <source>latitude</source>
-        <translation>위도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="347"/>
         <source>Map latitude step</source>
-        <translation>지도 위도 단계</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="378"/>
         <source>Limits</source>
-        <translation>한계</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="408"/>
         <source>Minimum map angle</source>
-        <translation>최소 지도각도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="433"/>
         <source>Minimum map height (relative to the generatrix origin)</source>
-        <translation>최소 지도높이 (일반적으로 생성된 원점에 상대적)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="464"/>
         <source>Maximum map angle</source>
-        <translation>최대 지도각도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="489"/>
         <source>Maximum map height (relative to the generatrix origin)</source>
-        <translation>최대 지도높이 (일반적으로 생성된 원점에 상대적)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="537"/>
         <source>Min</source>
-        <translation>최소</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="547"/>
         <source>Max</source>
-        <translation>최대</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="570"/>
         <source>Minimum map latitude (relative to the generatrix origin - always positive - in degrees)</source>
-        <translation>최소 지도위도 (일반적으로 생성된 원점에 상대적 - 항상 (+) deg)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="573"/>
@@ -3355,247 +3257,247 @@ The bigger the more accurate the map will be
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="780"/>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="882"/>
         <source> grad</source>
-        <translation>grad</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="601"/>
         <source>Maximum map latitude (relative to the generatrix origin - always positive - in degrees)</source>
-        <translation>최소 지도위도 (일반적으로 생성된 원점에 상대적 - 항상 (+) deg)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="629"/>
         <source>Filling</source>
-        <translation>채우기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="650"/>
         <source>strategy</source>
-        <translation>전략</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="657"/>
         <source>What to do when multiple values fall in the same grid cell?</source>
-        <translation>동일한 그리드 셀에 여러 값이 있을 경우 어떻게 해야 합니까?</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="664"/>
         <source>minimum value</source>
-        <translation>최소값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="669"/>
         <source>average value</source>
-        <translation>평균값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="674"/>
         <source>maximum value</source>
-        <translation>최대값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="682"/>
         <source>empty cells</source>
-        <translation>빈셀</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="689"/>
         <source>What to do when a grid cell remains empty?</source>
-        <translation>그리드 셀이 비어 있을 때 어떻게 해야 합니까?</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="693"/>
         <source>leave empty</source>
-        <translation>빈값으로 남기기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="698"/>
         <source>fill with zero</source>
-        <translation>0으로 채우기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="703"/>
         <source>interpolate</source>
-        <translation>보간</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="734"/>
         <source>Display</source>
-        <translation>표시</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="746"/>
         <source>Overlay grid</source>
-        <translation>그리드 오버레이</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="770"/>
         <source>Angle (X)</source>
-        <translation>각도 (X)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="799"/>
         <source>Height (Y)</source>
-        <translation>높이 (Y)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="809"/>
         <source> m.</source>
-        <translation> m.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="831"/>
         <source>Show X labels</source>
-        <translation>X 라벨 보기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="843"/>
         <source>Grid color</source>
-        <translation>그리드컬러</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="862"/>
         <source>Show Y labels</source>
-        <translation>Y 라벨 보기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="872"/>
         <source>Latitude</source>
-        <translation>위도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="904"/>
         <source>2D symbols</source>
-        <translation>2D 심볼</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="927"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Load a set of symbols / labels from a text file.&lt;br/&gt;On each line: &apos;Label X Y Z&apos; (expressed relatively to the profile origin)&lt;br/&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;(warning: the height values - along the revolution axis - must be expressed relative to the profile origin)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;텍스트 파일에서 기호/라벨 세트를 로드합니다.&lt;br/&gt;각 라인: &apos;라벨 X Y Z&apos; (프로파일 원점에 상대적으로 표현)&lt;br/&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;(경고: the height values - along the revolution axis - must be expressed relative to the profile origin)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="930"/>
         <source>Load</source>
-        <translation>로드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="940"/>
         <source>Clear</source>
-        <translation>지우기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="951"/>
         <source>Symbol size</source>
-        <translation>심볼크기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="987"/>
         <source>Symbol color</source>
-        <translation>심볼컬러</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="1006"/>
         <source>Color ramp</source>
-        <translation>색상표</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="1023"/>
         <source>Steps</source>
-        <translation>단계</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="1059"/>
         <source>Display color scale</source>
-        <translation>컬러스케일 표시</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="1083"/>
         <source>Font size</source>
-        <translation>폰트크기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="1125"/>
         <source>Displayed numbers precision (digits)</source>
-        <translation>표시된 숫자 자릿수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="1128"/>
         <source>Precision</source>
-        <translation>자릿수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="1167"/>
         <source>Generatrix</source>
-        <translation>모선</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="1173"/>
         <source>Axis</source>
-        <translation>축</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="1180"/>
         <source>Generatrix direction (in the 3D world)</source>
-        <translation>모선방향 (3D 월드)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="1205"/>
         <source>Origin (3D)</source>
-        <translation>원점 (3D)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="1260"/>
         <source>Base radius</source>
-        <translation>기준반경</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="1267"/>
         <source>Mean radius (for map display, export as a cloud, etc. )</source>
-        <translation>중간반경 (지도표시용, 클라우드로 출력등)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="1284"/>
         <source>Measures</source>
-        <translation>측정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="1290"/>
         <source>Surface and volume (approximate)</source>
-        <translation>지면 &amp; 체적 (평균)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="1307"/>
         <source>Update</source>
-        <translation>업데이트</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="1321"/>
         <source>Export map</source>
-        <translation>지도출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="1332"/>
         <source>ASCII grid</source>
-        <translation>ASCII 그리드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="1339"/>
         <source>Image</source>
-        <translation>이미지</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="1346"/>
         <source>DXF</source>
-        <translation>DXF</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="1370"/>
         <source>Cloud</source>
-        <translation>클라우드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/distanceMapGenerationDlg.ui" line="1377"/>
         <source>Mesh</source>
-        <translation>메시</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/src/distanceMapGenerationDlg.cpp" line="791"/>
@@ -3608,109 +3510,109 @@ The bigger the more accurate the map will be
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/dxfProfilesExportDlg.ui" line="14"/>
         <source>Export profiles to DXF</source>
-        <translation>프로파일을 DXF 출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/dxfProfilesExportDlg.ui" line="20"/>
         <source>Vertical profiles</source>
-        <translation>수직 프로파일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/dxfProfilesExportDlg.ui" line="31"/>
         <location filename="../../plugins/core/Standard/qSRA/ui/dxfProfilesExportDlg.ui" line="126"/>
         <source>File name</source>
-        <translation>파일명</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/dxfProfilesExportDlg.ui" line="52"/>
         <location filename="../../plugins/core/Standard/qSRA/ui/dxfProfilesExportDlg.ui" line="147"/>
         <source>Title</source>
-        <translation>타이틀</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/dxfProfilesExportDlg.ui" line="59"/>
         <source>VERTICAL PROFILE: DEVIATIONS</source>
-        <translation>수직프로파일: 편차</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/dxfProfilesExportDlg.ui" line="66"/>
         <source>(+ profile angle)</source>
-        <translation>(+ 프로파일 각도)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/dxfProfilesExportDlg.ui" line="77"/>
         <source>Angular steps</source>
-        <translation>각도단계</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/dxfProfilesExportDlg.ui" line="115"/>
         <source>Horizontal profiles</source>
-        <translation>수평 프로파일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/dxfProfilesExportDlg.ui" line="154"/>
         <source>HORIZONTAL PROFILE: DEVIATIONS</source>
-        <translation>수평프로파일:편차</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/dxfProfilesExportDlg.ui" line="161"/>
         <source>(+ profile height)</source>
-        <translation>(+ 프로파일 높이)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/dxfProfilesExportDlg.ui" line="172"/>
         <source>Height steps</source>
-        <translation>높이단계</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/dxfProfilesExportDlg.ui" line="210"/>
         <source>Deviation</source>
-        <translation>편차</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/dxfProfilesExportDlg.ui" line="218"/>
         <source>Values scaling (for labels only)</source>
-        <translation>값 스케일일 (라벨용)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/dxfProfilesExportDlg.ui" line="241"/>
         <source>Units</source>
-        <translation>단위</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/dxfProfilesExportDlg.ui" line="278"/>
         <source>Precision</source>
-        <translation>자릿수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/dxfProfilesExportDlg.ui" line="312"/>
         <source>Drawing magnification</source>
-        <translation>드로잉 배율</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/dxfProfilesExportDlg.ui" line="350"/>
         <source>Legend</source>
-        <translation>범례</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/dxfProfilesExportDlg.ui" line="356"/>
         <source>Theoretical profile name</source>
-        <translation>이론적인 프로파일명</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/dxfProfilesExportDlg.ui" line="363"/>
         <source>Theoretical</source>
-        <translation>이론</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/dxfProfilesExportDlg.ui" line="370"/>
         <source>Measured profile(s) name</source>
-        <translation>측정 프로파일명</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qSRA/ui/dxfProfilesExportDlg.ui" line="377"/>
         <source>Real</source>
-        <translation>실제</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -3718,22 +3620,22 @@ The bigger the more accurate the map will be
     <message>
         <location filename="../ui_templates/entitySelectionDlg.ui" line="14"/>
         <source>Entity selector</source>
-        <translation>엔티티 셀렉터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/entitySelectionDlg.ui" line="22"/>
         <source>Select an entity:</source>
-        <translation>엔티티선택:</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/entitySelectionDlg.ui" line="72"/>
         <source>select all</source>
-        <translation>전체선택</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/entitySelectionDlg.ui" line="79"/>
         <source>select none</source>
-        <translation>선택없음</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -3741,32 +3643,32 @@ The bigger the more accurate the map will be
     <message>
         <location filename="../ui_templates/envelopeExtractorDlg.ui" line="14"/>
         <source>Envelope Extractor Visual Debug</source>
-        <translation>Envelope Extractor Visual Debug</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/envelopeExtractorDlg.ui" line="44"/>
         <source>Message</source>
-        <translation>메세지</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/envelopeExtractorDlg.ui" line="57"/>
         <source>no message</source>
-        <translation>메세지없음</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/envelopeExtractorDlg.ui" line="64"/>
         <source>auto</source>
-        <translation>자동</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/envelopeExtractorDlg.ui" line="71"/>
         <source>Next</source>
-        <translation>다음</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/envelopeExtractorDlg.ui" line="78"/>
         <source>Skip</source>
-        <translation>스킵</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -3774,17 +3676,17 @@ The bigger the more accurate the map will be
     <message>
         <location filename="../ui_templates/exportCoordToSFDlg.ui" line="14"/>
         <source>Export coordinates to SF</source>
-        <translation>좌표를 SF로 출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/exportCoordToSFDlg.ui" line="29"/>
         <source>Export</source>
-        <translation>출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/exportCoordToSFDlg.ui" line="71"/>
         <source>Warning, already existing SF(s) with same name will be overwritten</source>
-        <translation>경고, 동일한 이름으로 기존의 SF가 덮어쓰여집니다</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -3805,32 +3707,32 @@ The bigger the more accurate the map will be
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/facetsExportDlg.ui" line="14"/>
         <source>Export facets</source>
-        <translation>측면출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/facetsExportDlg.ui" line="20"/>
         <source>Destination</source>
-        <translation>경로</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/facetsExportDlg.ui" line="39"/>
         <source>Vertical orientation (only for polygons)</source>
-        <translation>수직방향 (폴리곤만)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/facetsExportDlg.ui" line="47"/>
         <source>Native</source>
-        <translation>네이티브</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/facetsExportDlg.ui" line="54"/>
         <source>Mean normal</source>
-        <translation>중간 노말</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/facetsExportDlg.ui" line="64"/>
         <source>Custom</source>
-        <translation>커스톰</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -3838,42 +3740,42 @@ The bigger the more accurate the map will be
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/FastGlobalRegistrationDlg.ui" line="14"/>
         <source>Clouds registration</source>
-        <translation type="unfinished">클라우드 정합</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/FastGlobalRegistrationDlg.ui" line="26"/>
         <source>Role assignation</source>
-        <translation type="unfinished">역할할당</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/FastGlobalRegistrationDlg.ui" line="46"/>
         <source>&apos;model&apos; entity</source>
-        <translation type="unfinished">&apos;모델&apos; 엔티티</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/FastGlobalRegistrationDlg.ui" line="49"/>
         <source>reference</source>
-        <translation type="unfinished">기준</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/FastGlobalRegistrationDlg.ui" line="56"/>
         <source>&apos;data&apos; entity</source>
-        <translation type="unfinished">&apos;데이터&apos; 엔티티</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/FastGlobalRegistrationDlg.ui" line="59"/>
         <source>aligned</source>
-        <translation type="unfinished">맞춤</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/FastGlobalRegistrationDlg.ui" line="69"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;reference entity (won&apos;t move)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;기준 엔티티 (움직이지 않음)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/FastGlobalRegistrationDlg.ui" line="72"/>
         <source>the model cloud is the reference : it won&apos;t move (yellow cloud)</source>
-        <translation type="unfinished">모델클라우드는 기준값: 움직이지 않습니다 (황색컬러)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/FastGlobalRegistrationDlg.ui" line="106"/>
@@ -3883,7 +3785,7 @@ The bigger the more accurate the map will be
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/FastGlobalRegistrationDlg.ui" line="132"/>
         <source>auto</source>
-        <translation type="unfinished">자동</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/FastGlobalRegistrationDlg.cpp" line="141"/>
@@ -3919,49 +3821,48 @@ The bigger the more accurate the map will be
     <message>
         <location filename="../ui_templates/filterByValueDlg.ui" line="14"/>
         <source>Filter by value</source>
-        <translation>값별 출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/filterByValueDlg.ui" line="22"/>
         <source>Range</source>
-        <translation>범위</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/filterByValueDlg.ui" line="29"/>
         <source>Min range value</source>
-        <translation>최소범위값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/filterByValueDlg.ui" line="61"/>
         <source>Max range value</source>
-        <translation>최대범위값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/filterByValueDlg.ui" line="81"/>
         <source>Exports the points falling inside the specified range.</source>
-        <translation>지정된 범위 내에 있는 점을 출력합니다.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/filterByValueDlg.ui" line="84"/>
         <source>Export</source>
-        <translation>출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/filterByValueDlg.ui" line="91"/>
         <source>Creates two clouds: one with the points falling inside the specified range,
 the other with the points falling outside.</source>
-        <translation>2개의 클라우드 생성: 하나는 지정된 범위 내에 있는 점이고
-다른 하나는 외뷰에 있습니다.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/filterByValueDlg.ui" line="95"/>
         <source>Split</source>
-        <translation>분할</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/filterByValueDlg.ui" line="102"/>
         <source>Cancel</source>
-        <translation>취소</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -3969,103 +3870,103 @@ the other with the points falling outside.</source>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="14"/>
         <source>Sensor parameters</source>
-        <translation>센서 파라미터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="35"/>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="51"/>
         <source>theta=longitudinal (E-W) / phi=latitudinal (N-S)</source>
-        <translation>세타=세로 (E-W) / 파이=가로 (N-S)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="38"/>
         <source>rotation order</source>
-        <translation>회전순서</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="61"/>
         <source>yaw then pitch (default)</source>
-        <translation>yaw then pitch (기본값)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="66"/>
         <source>pitch then yaw</source>
-        <translation>pitch then yaw</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="90"/>
         <source>Position + Orientation</source>
-        <translation>위치값 + 방위각</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="96"/>
         <source>sensor front direction (yaw = 0)</source>
-        <translation>센서 전면방향 (yaw = 0)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="127"/>
         <source>sensor lateral direction</source>
-        <translation>센서 측면방향</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="158"/>
         <source>sensor vertical direction (pitch = 0)</source>
-        <translation>센서 수직방향 (피치 = 0)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="202"/>
         <source>sensor center</source>
-        <translation>센서중앙</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="234"/>
         <source>Angular steps</source>
-        <translation>각도단계</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="242"/>
         <source>Rotation around the vertical axis</source>
-        <translation>수직축으로 회전</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="245"/>
         <source>Yaw (degrees)</source>
-        <translation>Yaw (deg)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="272"/>
         <source>Rotation around the lateral axis</source>
-        <translation>측면축으로 회전</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="275"/>
         <source>Pitch (degrees)</source>
-        <translation>피치 (deg)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="314"/>
         <source>Other</source>
-        <translation>그외</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="322"/>
         <source>Depth buffer &apos;uncertainty&apos;</source>
-        <translation>깊이버퍼 &apos;불확실성&apos;</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="325"/>
         <source>Uncertainty</source>
-        <translation>불확실성</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="349"/>
         <source>Sensor max range</source>
-        <translation>센서 최대범위</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="352"/>
         <source>Max. range</source>
-        <translation>최대범위</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -4073,18 +3974,18 @@ the other with the points falling outside.</source>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="14"/>
         <source>Geometric features</source>
-        <translation>지오메트릭 피쳐</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="36"/>
         <source>Local neighborhood radius</source>
-        <translation>로컬 네이버후드 반경</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="79"/>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="85"/>
         <source>Roughness</source>
-        <translation>거칠기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="101"/>
@@ -4114,213 +4015,213 @@ the other with the points falling outside.</source>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="182"/>
         <source>Curvature</source>
-        <translation>곡률</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="188"/>
         <source>Mean curvature (unsigned)</source>
-        <translation>중간 곡률 (unsigned)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="191"/>
         <source>Mean</source>
-        <translation>중간</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="198"/>
         <source>Gaussian curvature (unsigned)</source>
-        <translation>가우시안 곡률 (unsigned)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="201"/>
         <source>Gaussian</source>
-        <translation>가우시안</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="208"/>
         <source>&apos;Speed&apos; of orientation change</source>
-        <translation>방위각설정 &apos;속도&apos; 변경</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="211"/>
         <source>Normal change rate</source>
-        <translation>노멀 변경율</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="221"/>
         <source>Density</source>
-        <translation>밀도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="227"/>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="230"/>
         <source>Number of neighbors</source>
-        <translation>네이버 갯수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="237"/>
         <source>Number of neighbors / neighborhood area</source>
-        <translation>네이버갯수 / 네비버후드 면적</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="240"/>
         <source>Surface density</source>
-        <translation>지면밀도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="247"/>
         <source>Number of neighbors / neighborhood volume</source>
-        <translation>네이버갯수 / 네비버후드 부피</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="250"/>
         <source>Volume density</source>
-        <translation>부피밀도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="260"/>
         <source>Moment</source>
-        <translation>순간</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="266"/>
         <source>1st order moment</source>
-        <translation>1번 순서순간</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="293"/>
         <source>Geometric features (based on local eigenvalues: (L1, L2, L3))</source>
-        <translation>지오메트릭 피쳐 (로컬 고유값 기반: (L1, L2, L3))</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="296"/>
         <source>Features</source>
-        <translation>피쳐</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="302"/>
         <source>L1 + L2 + L3</source>
-        <translation>L1 + L2 + L3</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="305"/>
         <source>Sum of eigenvalues</source>
-        <translation>고유값 합계</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="312"/>
         <source>(L1 * L2 * L3)^(1/3)</source>
-        <translation>(L1 * L2 * L3)^(1/3)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="315"/>
         <source>Ominvariance</source>
-        <translation>Ominvariance</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="322"/>
         <source>-( L1*ln(L1) + L2*ln(L2) + L3*ln(L3) )</source>
-        <translation>-( L1*ln(L1) + L2*ln(L2) + L3*ln(L3) )</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="325"/>
         <source>Eigenentropy</source>
-        <translation>자체엔트로피</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="332"/>
         <source>(L1 - L3)/L1</source>
-        <translation>(L1 - L3)/L1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="335"/>
         <source>Anisotropy</source>
-        <translation>이방성</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="342"/>
         <source>(L2 - L3)/L1</source>
-        <translation>(L2 - L3)/L1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="345"/>
         <source>Planarity</source>
-        <translation>평면형도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="352"/>
         <source>(L1 - L2)/L1</source>
-        <translation>(L1 - L2)/L1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="355"/>
         <source>Linearity</source>
-        <translation>직선성</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="362"/>
         <source>L1 / (L1 + L2 + L3)</source>
-        <translation>L1 / (L1 + L2 + L3)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="365"/>
         <source>PCA1</source>
-        <translation>PCA1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="372"/>
         <source>L2 / (L1 + L2 + L3)</source>
-        <translation>L2 / (L1 + L2 + L3)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="375"/>
         <source>PCA2</source>
-        <translation>PCA2</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="382"/>
         <source>L3 / (L1 + L2 + L3)</source>
-        <translation>L3 / (L1 + L2 + L3)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="385"/>
         <source>Surface variation</source>
-        <translation>지면변동</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="392"/>
         <source>L3 / L1</source>
-        <translation>L3 / L1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="395"/>
         <source>Sphericity</source>
-        <translation>구형도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="402"/>
         <source>1 - |Z.N|</source>
-        <translation>1 - |Z.N|</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="405"/>
         <source>Verticality</source>
-        <translation>수직성</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="412"/>
         <source>1st eigenvalue</source>
-        <translation>1번 고유값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="419"/>
         <source>2nd eigenvalue</source>
-        <translation>2번 고유값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/geomFeaturesDlg.ui" line="426"/>
         <source>3rd eigenvalue</source>
-        <translation>3번 고유값</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -4328,7 +4229,7 @@ the other with the points falling outside.</source>
     <message>
         <location filename="../../libs/qCC_io/ui/globalShiftAndScaleAboutDlg.ui" line="14"/>
         <source>Issue with big coordinates</source>
-        <translation>큰 좌표에 대한 이슈</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/globalShiftAndScaleAboutDlg.ui" line="20"/>
@@ -4359,33 +4260,7 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;Once you input a shift vector (and/or a scale factor) you&apos;ll be able to use it again while importing other clouds (&lt;/span&gt;&lt;span style=&quot; font-size:9pt; font-style:italic;&quot;&gt;it will correspond to the &amp;quot;Last input&amp;quot; entry of the combo-box above the shift fields&lt;/span&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;).&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9pt; color:#0055ff;&quot;&gt;However this information will only be stored during the active session of CloudCompare (it will be lost once you close the program). To keep the information persistent, you can edit the &lt;/span&gt;&lt;span style=&quot; font-size:9pt; font-style:italic; color:#0055ff;&quot;&gt;global_shift_list_template.txt&lt;/span&gt;&lt;span style=&quot; font-size:9pt; color:#0055ff;&quot;&gt; file next to CloudCompare&apos;s executable and follow the instructions inside. This is a good way to store persistent shift/scale information sets (kind of &amp;quot;bookmarks&amp;quot;).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;Why CloudCompare bugs me about too big coordinates?&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;큰 클라우드 사용시 메모리소모를 줄이기위해 ,CloudCompare는 좌표를 32비트로 저장합니다 (&lt;/span&gt;&lt;a href=&quot;http://en.wikipedia.org/wiki/Single-precision_floating-point_format&quot;&gt;&lt;span style=&quot; font-size:9pt; text-decoration: underline; color:#0000ff;&quot;&gt;single-precision floating-point format&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;). In effect this roughly corresponds to a &lt;/span&gt;&lt;span style=&quot; font-size:9pt; font-weight:600;&quot;&gt;relative&lt;/span&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt; precision of 10&lt;/span&gt;&lt;span style=&quot; font-size:9pt; vertical-align:super;&quot;&gt;-7&lt;/span&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;This is generally totally acceptable for an object of a few meters wide (in which case the precision will be around a few tenths of microns). However if the coordinates are of the order of 10&lt;/span&gt;&lt;span style=&quot; font-size:9pt; vertical-align:super;&quot;&gt;5&lt;/span&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt; or 10&lt;/span&gt;&lt;span style=&quot; font-size:9pt; vertical-align:super;&quot;&gt;6&lt;/span&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt; meters and you still expect a precision around a few microns this won&apos;t do (at all). Importing such coordinates in 32 bits format will result in a precision of several centimeters or worse!&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9pt; font-style:italic;&quot;&gt;You&apos;ll probably also observe very strange things in 3D as OpenGL doesn&apos;t like those big coordinates either.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt; font-style:italic;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;What can I do?&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt; font-weight:600;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;This &amp;quot;big coordinates&amp;quot; issue typically arises when an object of a few meters wide is expressed in a global geographic coordinate system. This happens also for other units (&lt;/span&gt;&lt;span style=&quot; font-size:9pt; font-style:italic;&quot;&gt;we used meters here as an example&lt;/span&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;).&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;As the absolute position of clouds is generally not used during a comparison process (and most of the other processings) the best solution to this big coordinates issue is to temporarily shift the data to a local coordinate system.  &lt;/span&gt;&lt;span style=&quot; font-size:9pt; font-weight:600;&quot;&gt;The inverse shift will be applied to the data at export time so that no information is lost.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;Another example: your cloud still represents a several meters wide object but its coordinates are expressed in microns (&lt;/span&gt;&lt;span style=&quot; font-size:9pt; font-style:italic;&quot;&gt;once again meters and microns are used as an example&lt;/span&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;). In this case you can apply a scaling factor so as to work in a more standard local coordinate system (&lt;/span&gt;&lt;span style=&quot; font-size:9pt; font-style:italic;&quot;&gt;e.g. in centimeters or meters&lt;/span&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;). In effect this is equivalent to changing the cloud units (temporarily). The inverse scaling factor will be applied at export time.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;Shift &amp;amp; Scale values&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;By default CloudCompare tries to guess the shift vector itself. But you can of course input your own version (especially if you work with several clouds and you want to shift them all in the same local coordinate system).&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;Once you input a shift vector (and/or a scale factor) you&apos;ll be able to use it again while importing other clouds (&lt;/span&gt;&lt;span style=&quot; font-size:9pt; font-style:italic;&quot;&gt;it will correspond to the &amp;quot;Last input&amp;quot; entry of the combo-box above the shift fields&lt;/span&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;).&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9pt; color:#0055ff;&quot;&gt;However this information will only be stored during the active session of CloudCompare (it will be lost once you close the program). To keep the information persistent, you can edit the &lt;/span&gt;&lt;span style=&quot; font-size:9pt; font-style:italic; color:#0055ff;&quot;&gt;global_shift_list_template.txt&lt;/span&gt;&lt;span style=&quot; font-size:9pt; color:#0055ff;&quot;&gt; file next to CloudCompare&apos;s executable and follow the instructions inside. This is a good way to store persistent shift/scale information sets (kind of bookmarks).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -4393,95 +4268,94 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../../libs/qCC_io/ui/globalShiftAndScaleDlg.ui" line="20"/>
         <source>Global shift/scale</source>
-        <translation>글로벌 이격/스케일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/globalShiftAndScaleDlg.ui" line="76"/>
         <source>Coordinates are too big (original precision may be lost)!</source>
-        <translation type="unfinished">좌표가 너무 큽니다 (원본 자릿수가 없어집니다)!</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/globalShiftAndScaleDlg.ui" line="86"/>
         <source>More information about this issue</source>
-        <translation>이 이슈의 더많은 정보</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/globalShiftAndScaleDlg.ui" line="132"/>
         <source>Do you wish to translate/rescale the entity?</source>
-        <translation>엔티티를 회전 (translate/rescale)하겠습니까?</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/globalShiftAndScaleDlg.ui" line="168"/>
         <source>shift/scale information is stored and used to restore the original coordinates at export time</source>
-        <translation type="unfinished">이격/스케일 정보가 저장되며 출력시 원본 좌표복원에 사용됩니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/globalShiftAndScaleDlg.ui" line="213"/>
         <source>This version corresponds to the input (or output) file</source>
-        <translation>이 버전은 입력(또는 출력) 파일에 해당됩니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/globalShiftAndScaleDlg.ui" line="237"/>
         <source>Point in original
 coordinate system (on disk)</source>
-        <translation type="unfinished">원본좌표의
-점 (디스크)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/globalShiftAndScaleDlg.ui" line="315"/>
         <source>diagonal = 3213132123.3215</source>
-        <translation>대각선 = 3213132123.3215</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/globalShiftAndScaleDlg.ui" line="423"/>
         <source>Shift</source>
-        <translation>이격</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/globalShiftAndScaleDlg.ui" line="450"/>
         <source>Scale</source>
-        <translation>스케일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/globalShiftAndScaleDlg.ui" line="563"/>
         <source>You can add default items to this list by placing a text file named &lt;span style=&quot; font-weight:600;&quot;&gt;global_shift_list.txt&lt;/span&gt; next to the application executable file. On each line you should define 5 items separated by semicolon characters: name ; ShiftX ; ShiftY ; ShiftZ ; scale</source>
-        <translation>기본 아이템을 시행가능 파일옆에 &lt;span style=&quot; font-weight:600;&quot;&gt;global_shift_list.txt&lt;/span&gt; 텍스트파일에 추가할 수 있습니다. 각 라인에서 세미콜론으로 분리된 5 아이템 (name ; ShiftX ; ShiftY ; ShiftZ ; scale)을 설정해야합니다.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/globalShiftAndScaleDlg.ui" line="605"/>
         <source>This version is the one CloudCompare will work with. Mind the digits!</source>
-        <translation>이 버전은 Cloudcomapre에서 사용할 수 있는 버전입니다. 자릿수를 주의하십시오!</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/globalShiftAndScaleDlg.ui" line="629"/>
         <source>Point in local
 coordinate system</source>
-        <translation>지역좌표의점</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/globalShiftAndScaleDlg.ui" line="707"/>
         <source>diagonal = 321313</source>
-        <translation>대각 = 321313</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/globalShiftAndScaleDlg.ui" line="730"/>
         <source>Warning: previously used shift and/or scale don&apos;t seem adapted to this entity</source>
-        <translation>경고: 이전에 사용된 이격/ 스케일이 이 엔티티에 적용되지 않습니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/globalShiftAndScaleDlg.ui" line="774"/>
         <source>Preserve global shift on save</source>
-        <translation>저장시 글로벌 이격을 유지합니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/globalShiftAndScaleDlg.ui" line="784"/>
         <source>The local coordinates will be changed so as to keep the global coordinates the same</source>
-        <translation>글로벌좌표를 동일하게 유지하도록 지역좌표가 변경됩니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/globalShiftAndScaleDlg.ui" line="787"/>
         <source>Keep original position fixed</source>
-        <translation>원본위치값 고정유지</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -4489,7 +4363,7 @@ coordinate system</source>
     <message>
         <location filename="../ui_templates/globalShiftSettingsDlg.ui" line="14"/>
         <source>Global Shift settings</source>
-        <translation>글로벌 이격설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/globalShiftSettingsDlg.ui" line="26"/>
@@ -4500,38 +4374,32 @@ As CloudCompare and most graphic cards work with 32 bits floating point values, 
 Here below you can set the limits above which the &apos;Global Shift &amp; Scale&apos; mechanism will be triggered.
 
 Note: the diagonal is not tested at loading time.</source>
-        <translation type="unfinished">글로벌 이격 &amp; 스케일 메카니즘은 큰좌표와 작업시 자릿수가 사라지는것을 막는 목적이 있습니다.
-
-CloudCompare와 대부분 그래픽카드는 32비트 플로팅 소숫점값으로 작업하므로 해상도와 계산정밀도가 제한됩니다. 숫자가 커지면 튼튼함이 줄어듭니다.
-
-아래에서 &apos;글로벌 이격 &amp; 스케일&apos; 메카니즘이 실행되는 한계를 설정할 수 있습니다.
-
-알림: 로딩시간에서 대각은 테스트되지 않습니다. </translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/globalShiftSettingsDlg.ui" line="42"/>
         <source>Global Shift &amp; Scale triggering limits:</source>
-        <translation>글로벌 이격 &amp; 스케일 실행 한계:</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/globalShiftSettingsDlg.ui" line="51"/>
         <source>Max absolute coordinate</source>
-        <translation>최대 절대좌표</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/globalShiftSettingsDlg.ui" line="58"/>
         <source>CloudCompare will suggest to apply a Global Shift to the loaded entities if their coordinates are above this limit</source>
-        <translation>CloudCompare는 좌표가 한계를 초과하는 로드된 엔티티에 글로벌 이격이적용을 제한합니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/globalShiftSettingsDlg.ui" line="80"/>
         <source>Max entity diagonal</source>
-        <translation>최대 엔티티 대각</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/globalShiftSettingsDlg.ui" line="87"/>
         <source>CloudCompare will suggest to apply a Global Scale to the loaded entities if their bounding-box diagonal is above this limit</source>
-        <translation>CloudCompare는 한계박스 대각선이 이 제한을 초과하는 경우 로드된 엔티티에 글로벌 스케일을 적용하도록 제안합니다.</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -4539,72 +4407,72 @@ CloudCompare와 대부분 그래픽카드는 32비트 플로팅 소숫점값으�
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="20"/>
         <source>Segmentation</source>
-        <translation>분할</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="62"/>
         <source>Pause segmentation (Space)</source>
-        <translation>분할멈춤 (스페이스)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="65"/>
         <source>Pause segmentation  (allow rotation/panning of 3D view)</source>
-        <translation>분할멈춤  (3D뷰의 회전/이동 허용)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="68"/>
         <source>pause</source>
-        <translation>멈춤</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="85"/>
         <source>Load / save segmentation polyline</source>
-        <translation>분할 폴리선 로드/ 저장</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="88"/>
         <source>load/save segmentation polyline</source>
-        <translation>분할 폴리선 로드/저장</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="102"/>
         <source>Polyline selection mode (Tab)</source>
-        <translation>폴리선 선택모드 (Tab)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="105"/>
         <source>polyline selection</source>
-        <translation>폴리선 선택</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="119"/>
         <source>Segment In (I)</source>
-        <translation>내부분할 (I)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="122"/>
         <source>Segment (keep points inside)</source>
-        <translation>분할 (내부점 유지)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="125"/>
         <source>in</source>
-        <translation>내향</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="136"/>
         <source>Segment Out (O)</source>
-        <translation>분할 외향 (O)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="139"/>
         <source>Segment (keep points outside)</source>
-        <translation>분할 (외부점 유지)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="142"/>
         <source>out</source>
-        <translation>외향</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="153"/>
@@ -4621,61 +4489,66 @@ The classification SF will be directly updated (and created if needed).</source>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="171"/>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="174"/>
         <source>Clear segmentation</source>
-        <translation>분할 지우기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="177"/>
         <source>raz</source>
-        <translation>raz</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="188"/>
         <source>Confirm segmentation (Enter)</source>
-        <translation>분할확인 (Enter)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="191"/>
         <source>Confirm segmentation</source>
-        <translation>분할 확인</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="194"/>
         <source>OK</source>
-        <translation>확인</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="205"/>
         <source>Confirm and delete hidden points (Del)</source>
-        <translation>숨은점 확인후 삭제 (Del)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="208"/>
         <source>Confirm and delete hidden points</source>
-        <translation>숨은점 확인후 삭제</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="219"/>
         <source>Cancel (Esc)</source>
-        <translation>취소 (Esc)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="222"/>
         <source>Cancel segentation</source>
-        <translation>분할취소</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="225"/>
         <source>Cancel</source>
-        <translation>취소</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="243"/>
         <source>Rectangular selection</source>
-        <translation>직사각형 선택</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="246"/>
         <source>Activate rectangular selection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="255"/>
+        <source>Polygonal selection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4684,29 +4557,24 @@ The classification SF will be directly updated (and created if needed).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="255"/>
-        <source>Polygonal selection</source>
-        <translation>폴리곤선택</translation>
-    </message>
-    <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="267"/>
         <source>Use existing polyline</source>
-        <translation>기존 폴리선 사용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="270"/>
         <source>Import polyline from DB for segmentation</source>
-        <translation>DB에서 분할할 폴리선 입력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="279"/>
         <source>Export segmentation polyline</source>
-        <translation>분할 폴리선 출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalSegmentationDlg.ui" line="282"/>
         <source>Export segmentation polyline as new entity</source>
-        <translation>신규 엔티티로 폴리선 분할 출력</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -4714,68 +4582,68 @@ The classification SF will be directly updated (and created if needed).</source>
     <message>
         <location filename="../ui_templates/graphicalTransformationDlg.ui" line="20"/>
         <source>Graphical Transformation</source>
-        <translation>그래픽변환</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalTransformationDlg.ui" line="84"/>
         <source>Pause segmentation</source>
-        <translation>분할멈춤</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalTransformationDlg.ui" line="87"/>
         <source>Pause transformation (allow rotation/panning of 3D view)</source>
-        <translation>분할멈춤 (3D 뷰로 회전/이동 허용)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalTransformationDlg.ui" line="90"/>
         <source>pause</source>
-        <translation>멈춤</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalTransformationDlg.ui" line="169"/>
         <source>Rotation</source>
-        <translation>회전</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalTransformationDlg.ui" line="209"/>
         <source>None</source>
-        <translation>없음</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalTransformationDlg.ui" line="289"/>
         <source>Advanced</source>
-        <translation>고급</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalTransformationDlg.ui" line="303"/>
         <source>Translate Along:</source>
-        <translation>따라 이동:</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalTransformationDlg.ui" line="317"/>
         <location filename="../ui_templates/graphicalTransformationDlg.ui" line="349"/>
         <source>Origin</source>
-        <translation>원점</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalTransformationDlg.ui" line="335"/>
         <source>Rotate Around:</source>
-        <translation>회전:</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalTransformationDlg.ui" line="365"/>
         <source>Rotation Axis Selection:</source>
-        <translation>회전축 선택:</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalTransformationDlg.ui" line="380"/>
         <source>Object Center</source>
-        <translation>객체중심</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/graphicalTransformationDlg.ui" line="393"/>
         <source>Reference Axis</source>
-        <translation>기준축</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -4783,17 +4651,17 @@ The classification SF will be directly updated (and created if needed).</source>
     <message>
         <location filename="../../plugins/core/Standard/qHPR/ui/hprDlg.ui" line="13"/>
         <source>HPR</source>
-        <translation>HPR</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qHPR/ui/hprDlg.ui" line="21"/>
         <source>Level</source>
-        <translation>레벨</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qHPR/ui/hprDlg.ui" line="28"/>
         <source>Octree Level (for point cloud shape approx.)</source>
-        <translation>옥트리 (대략적인 포인트클라우드 모양)</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -4801,17 +4669,17 @@ The classification SF will be directly updated (and created if needed).</source>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/HSVDialog.ui" line="20"/>
         <source>HSV color setting</source>
-        <translation>HSV 컬러설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/HSVDialog.ui" line="35"/>
         <source>Select the reference point </source>
-        <translation>기준점 선택</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/HSVDialog.ui" line="64"/>
         <source>Pick the plane center (click again to cancel)</source>
-        <translation>평면중심 선택 (다시클릭하면 취소)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/HSVDialog.ui" line="105"/>
@@ -4846,22 +4714,22 @@ The classification SF will be directly updated (and created if needed).</source>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/HSVDialog.ui" line="229"/>
         <source>Choose which points to keep </source>
-        <translation>유지할 점선택</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/HSVDialog.ui" line="235"/>
         <source>Retain</source>
-        <translation>유지</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/HSVDialog.ui" line="245"/>
         <source>Exclude</source>
-        <translation>제외</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/HSVDialog.ui" line="252"/>
         <source>Both</source>
-        <translation>두개</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -4869,17 +4737,17 @@ The classification SF will be directly updated (and created if needed).</source>
     <message>
         <location filename="../ui_templates/histogramDlg.ui" line="14"/>
         <source>Histogram</source>
-        <translation>히스토그램</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/histogramDlg.ui" line="60"/>
         <source>Export histogram to a CSV file (can be imported into Excel ;)</source>
-        <translation>CSV 파일로 히스토그램 출력 (엑셀로 입력가능 ;)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/histogramDlg.ui" line="71"/>
         <source>Export histogram to an image file</source>
-        <translation>이미지파일로 히스토그램 출력</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -4887,82 +4755,82 @@ The classification SF will be directly updated (and created if needed).</source>
     <message>
         <location filename="../../plugins/core/Standard/qHoughNormals/ui/qHoughNormalsDlg.ui" line="14"/>
         <source>Dialog</source>
-        <translation>대화창</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qHoughNormals/ui/qHoughNormalsDlg.ui" line="22"/>
         <source>Neighborhood size (K)</source>
-        <translation type="unfinished">네이버후드 크기 (K)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qHoughNormals/ui/qHoughNormalsDlg.ui" line="29"/>
         <source>Size of the neighborhood</source>
-        <translation>네이버후드 크기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qHoughNormals/ui/qHoughNormalsDlg.ui" line="48"/>
         <source>Number of planes (T)</source>
-        <translation>평면 갯수 (T)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qHoughNormals/ui/qHoughNormalsDlg.ui" line="55"/>
         <source>Plane number to draw</source>
-        <translation>그릴 평면 갯수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qHoughNormals/ui/qHoughNormalsDlg.ui" line="74"/>
         <source>Accumulator steps (nPhi)</source>
-        <translation type="unfinished">누적단계 (nPhi)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qHoughNormals/ui/qHoughNormalsDlg.ui" line="81"/>
         <source>Accumulator discretization parameter</source>
-        <translation>누적 이산화 파라미터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qHoughNormals/ui/qHoughNormalsDlg.ui" line="100"/>
         <source>Number of rotations (nRot)</source>
-        <translation>회전갯수 (nRot)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qHoughNormals/ui/qHoughNormalsDlg.ui" line="107"/>
         <source>Rotation number</source>
-        <translation>회전횟수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qHoughNormals/ui/qHoughNormalsDlg.ui" line="126"/>
         <source>Tolerance angle</source>
-        <translation>허용오차각도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qHoughNormals/ui/qHoughNormalsDlg.ui" line="133"/>
         <source>Angle parameter for cluster normal selection</source>
-        <translation>클라스터 노말 선택 각도 파라미터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qHoughNormals/ui/qHoughNormalsDlg.ui" line="136"/>
         <source> deg.</source>
-        <translation>deg.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qHoughNormals/ui/qHoughNormalsDlg.ui" line="155"/>
         <source>Neighborhood size for density estimation</source>
-        <translation>밀도 추정을 위한 네이버후드 크기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qHoughNormals/ui/qHoughNormalsDlg.ui" line="162"/>
         <source>Size of the neighborhood for density estimation</source>
-        <translation>밀도추정을 위한 네이버후드 크기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qHoughNormals/ui/qHoughNormalsDlg.ui" line="178"/>
         <source>use a density estimation of triplets generation</source>
-        <translation>트리플렛 생성할 밀도추정 사용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qHoughNormals/ui/qHoughNormalsDlg.ui" line="181"/>
         <source>Use density of triplets estimation</source>
-        <translation>트리플렛 밀도 예상 사용</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -4970,27 +4838,27 @@ The classification SF will be directly updated (and created if needed).</source>
     <message>
         <location filename="../../libs/qCC_io/ui/importDBFFieldDlg.ui" line="14"/>
         <source>Choose altitude field</source>
-        <translation>고도필드 선택</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/importDBFFieldDlg.ui" line="20"/>
         <source>Do you wish to use one of the DBF field as altitude?</source>
-        <translation>DBF 필드를 고도로 사용하겠습니까?</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/importDBFFieldDlg.ui" line="32"/>
         <source>Values scaling</source>
-        <translation>값 스케일링</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/importDBFFieldDlg.ui" line="72"/>
         <source>OK</source>
-        <translation>OK</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/importDBFFieldDlg.ui" line="79"/>
         <source>Ignore</source>
-        <translation>무시</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -4998,101 +4866,99 @@ The classification SF will be directly updated (and created if needed).</source>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="14"/>
         <source>Interpolation</source>
-        <translation>보간</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="20"/>
         <source>Neighbors extraction</source>
-        <translation>네이버후드 추출</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="26"/>
         <source>Radius of the sphere inside which neighbors will be extracted</source>
-        <translation>네이버를 추출할 구내의 반지름</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="39"/>
         <source>Extracts the neighbors inside a sphere</source>
-        <translation>구내 네이버 추출</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="42"/>
         <source>Radius (Sphere)</source>
-        <translation>반경 (구형)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="52"/>
         <source>Use only the nearest neighbor (fast)</source>
-        <translation>최근접 네이버만 사용 (신속)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="55"/>
         <source>Nearest neighbor</source>
-        <translation>최근접 네이버</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="62"/>
         <source>Use the &apos;k&apos; nearest neighbors
 (faster than &apos;radius&apos; based search, but more approximate)</source>
-        <translation>최인접 네이버 &apos;k&apos; 사용
-(&apos;반경&apos; 검색방법보다 빠르지만, 더 대략적인값)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="66"/>
         <source>Nearest neighbors</source>
-        <translation>최근접 네이버</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="76"/>
         <source>Number of neighbors to extract</source>
-        <translation>추출할 네이버 갯수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="95"/>
         <source>Interpolation algorithm</source>
-        <translation>보간 알고리즘</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="101"/>
         <source>Keep the median of the neighbors SF values</source>
-        <translation>네이버 SF값의 중간값 유지</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="104"/>
         <source>Median</source>
-        <translation>중간값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="114"/>
         <source>Keep the average of the neighbors SF values</source>
-        <translation>네이버 SF값의 평균값 유지</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="117"/>
         <source>Average</source>
-        <translation>평균값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="124"/>
         <source>Compute a weighted average of the neighbors SF values
 (the weights will follow a Normal distribution)</source>
-        <translation>네이버 SF값의 가중치 평균계산
-(가중치는 노멀 분배를 준수)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="128"/>
         <source>Normal distribution</source>
-        <translation>노말분배</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="163"/>
         <source>sigma</source>
-        <translation>시그마</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/interpolationDlg.ui" line="170"/>
         <source>Kernel of the Normal distribution</source>
-        <translation>노말분배 커널</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -5100,12 +4966,12 @@ The classification SF will be directly updated (and created if needed).</source>
     <message>
         <location filename="../ui_templates/itemSelectionDlg.ui" line="14"/>
         <source>Selection</source>
-        <translation>선택</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/itemSelectionDlg.ui" line="20"/>
         <source>Please select one %1:</source>
-        <translation>%1 선택:</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -5113,17 +4979,17 @@ The classification SF will be directly updated (and created if needed).</source>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/KmeansDlg.ui" line="14"/>
         <source>Kmeans clustering setting</source>
-        <translation>K클라스터 클라스터 설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/KmeansDlg.ui" line="22"/>
         <source>Number of colors</source>
-        <translation>컬러갯수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/KmeansDlg.ui" line="72"/>
         <source>Max number of iterations</source>
-        <translation>최대 반복갯수</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -5131,32 +4997,32 @@ The classification SF will be directly updated (and created if needed).</source>
     <message>
         <location filename="../ui_templates/labelingDlg.ui" line="20"/>
         <source>Connected Components</source>
-        <translation>연결된 구성요소</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/labelingDlg.ui" line="28"/>
         <source>Grid subdivision level: the greater, the finest</source>
-        <translation>그리드분할레벨: 커질수록 정밀합니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/labelingDlg.ui" line="31"/>
         <source>Octree Level</source>
-        <translation>옥트리 레벨</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/labelingDlg.ui" line="57"/>
         <source>Minimum number of points per component</source>
-        <translation>구성요소당 최소점갯수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/labelingDlg.ui" line="60"/>
         <source>Min. points per component</source>
-        <translation>구성요소당 최소점</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/labelingDlg.ui" line="91"/>
         <source>random colors (warning: overwrites existing ones)</source>
-        <translation type="unfinished">무작위 컬러 (경고: 기존값이 덮어쓰여집니다)</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -5164,199 +5030,199 @@ The classification SF will be directly updated (and created if needed).</source>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="14"/>
         <source>M3C2 distance</source>
-        <translation>M3C2 거리</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="28"/>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="802"/>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="925"/>
         <source>Cloud #1</source>
-        <translation>클라우드 #1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="41"/>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="792"/>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="930"/>
         <source>Cloud #2</source>
-        <translation>클라우드 #2</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="70"/>
         <source>Main parameters</source>
-        <translation>메인 파라미터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="76"/>
         <source>Scales</source>
-        <translation>스케일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="82"/>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="130"/>
         <source>diameter = </source>
-        <translation>직경 =</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="107"/>
         <source>Projection</source>
-        <translation>투영</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="120"/>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="302"/>
         <source>Normals</source>
-        <translation>노말</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="149"/>
         <source>max depth = </source>
-        <translation>최대깊이 =</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="174"/>
         <source>Core points</source>
-        <translation>코어점</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="180"/>
         <source>use cloud #1</source>
-        <translation>클라우드 #1 사용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="187"/>
         <source>use other cloud</source>
-        <translation>다른 클라우드 사용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="197"/>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="568"/>
         <source>Alternative core points cloud</source>
-        <translation>절대 코어 포인트클라우드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="204"/>
         <source>subsample cloud #1</source>
-        <translation>하위샘플 클라우드 #1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="214"/>
         <source>Min. distance between points</source>
-        <translation>점간 최소거리</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="239"/>
         <source>Registration error</source>
-        <translation>정합에러</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="249"/>
         <source>Registration error (RMS - to be input by the user)</source>
-        <translation>정합에러 (RMS - 사용자 입력)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="275"/>
         <source>Tries to guess some parameters automatically</source>
-        <translation>일부 파라미터를 자동으로 예상</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="278"/>
         <source>Guess params</source>
-        <translation>파라미터 예측</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="323"/>
         <source>Calculation mode</source>
-        <translation>계산모드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="331"/>
         <source>Default fixed scale calculation</source>
-        <translation>기본 고정 스케일계산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="334"/>
         <source>Default</source>
-        <translation>기본값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="344"/>
         <source>Automatically use the scale at which the cloud is the more &apos;flat&apos;</source>
-        <translation>클라우드가 더 &apos;평면&apos;인 스케일을 자동으로 사용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="347"/>
         <source>Multi-scale</source>
-        <translation>멀티스케일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="354"/>
         <source>Make the resulting normals purely Vertical</source>
-        <translation>노말결과를 완벽한 수직으로 생성</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="357"/>
         <source>Vertical</source>
-        <translation>수직</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="364"/>
         <source>Make the resulting normals purely Horizontal</source>
-        <translation>노말결과를 완벽한 수평으로 생성</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="367"/>
         <source>Horizontal</source>
-        <translation>수평</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="382"/>
         <source>Mininum scale</source>
-        <translation>최소스케일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="385"/>
         <source>Min = </source>
-        <translation>최소 = </translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="404"/>
         <source>Step</source>
-        <translation>단계</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="407"/>
         <source>Step = </source>
-        <translation>단계 = </translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="426"/>
         <source>Max scale</source>
-        <translation>최대스케일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="429"/>
         <source>Max = </source>
-        <translation>최대 =</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="451"/>
         <source>Use core points for normal calculation (instead of cloud #1)</source>
-        <translation>노멀계산의 코어점 사용 (클라우드 #1 대신)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="454"/>
         <source>Use core points for normal calculation</source>
-        <translation>노멀계산에 코어점 사용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="464"/>
         <source>Orientation</source>
-        <translation>방위각설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="470"/>
         <source>Preferred orientation</source>
-        <translation>선호 방위각설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="517"/>
@@ -5396,47 +5262,47 @@ The classification SF will be directly updated (and created if needed).</source>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="595"/>
         <source>Advanced</source>
-        <translation>고급</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="601"/>
         <source>Slower but it guarantees that all the cylinder will be explored</source>
-        <translation>느리지만 모든 실린더를 탐색할 수 있습니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="604"/>
         <source>Do not use multiple pass for depth</source>
-        <translation>깊이에 멀트패스 사용안함</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="611"/>
         <source>Search the points only in the &apos;positive&apos; side of the cylinder (relatively to the point normal)</source>
-        <translation>실린더의 (+) 면의 점만 검색 (점노말에 상대적)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="614"/>
         <source>Only search points in the positive half-space (relatively to the normal)</source>
-        <translation>(+) 반공간만 검색 (노말에 상대적)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="621"/>
         <source>Use median and interquatile range (instead of mean and std. dev.)</source>
-        <translation>중간값과 사분변위 사용 (중간값과 표준푠차 대신)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="643"/>
         <source>Specify minimum number of points for statistics computation</source>
-        <translation>통계계산에 최소 점갯수 지정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="703"/>
         <source>Max thread count</source>
-        <translation>최대 스레드 갯수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="747"/>
         <source>Precision maps</source>
-        <translation>정밀지도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="759"/>
@@ -5446,93 +5312,88 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;3D uncertainty-based topographic change detection with SfM photogrammetry: precision maps for ground control and directly georeferenced surveys&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Mike R. James, Stuart Robson and Mark W. Smith (&lt;/span&gt;&lt;a href=&quot;http://onlinelibrary.wiley.com/doi/10.1002/esp.4125/abstract&quot;&gt;&lt;span style=&quot; font-size:8pt; text-decoration: underline; color:#0000ff;&quot;&gt;DOI: 10.1002/esp.4125&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;3D uncertainty-based topographic change detection with SfM photogrammetry: precision maps for ground control and directly georeferenced surveys&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Mike R. James, Stuart Robson and Mark W. Smith (&lt;/span&gt;&lt;a href=&quot;http://onlinelibrary.wiley.com/doi/10.1002/esp.4125/abstract&quot;&gt;&lt;span style=&quot; font-size:8pt; text-decoration: underline; color:#0000ff;&quot;&gt;DOI: 10.1002/esp.4125&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="780"/>
         <source>Use precision information in scalar fields instead of roughness-based uncertainty estimates</source>
-        <translation>거칠기 기반 불확실성 추정치 대신 스칼라 필드의 정밀 정보 사용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="812"/>
         <source>Sigma(y)</source>
-        <translation>시그마(y)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="828"/>
         <source>Sigma(x)</source>
-        <translation>시그마(x)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="841"/>
         <source>Sigma(z)</source>
-        <translation>시그마(z)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="851"/>
         <source>Scale</source>
-        <translation>스케일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="858"/>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="877"/>
         <source>From SF units to cloud units</source>
-        <translation>SF 단위에 클라우드 단위</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="900"/>
         <source>Output</source>
-        <translation>출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="908"/>
         <source>Project core points on</source>
-        <translation>코어점 투영</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="935"/>
         <source>Keep original positions</source>
-        <translation>월본 위치값 유지</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="943"/>
         <source>use original cloud</source>
-        <translation>원본 클라우드 사용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="965"/>
         <source>Adds two scalar fields (std_cloud#1 and std_cloud#2)</source>
-        <translation>2개의 스칼라필드 추가 (std_cloud#1 and std_cloud#2)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="968"/>
         <source>Export standard deviation information</source>
-        <translation>표준편차정보 출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="975"/>
         <source>Adds one scalar field (point count per core point)</source>
-        <translation>1 스칼라필드 추가 (코어점당 점갯수)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="978"/>
         <source>Export point density at projection scale</source>
-        <translation>투영된 스케일에 점밀도 출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="1004"/>
         <source>Load parameters from file</source>
-        <translation>파일의 파라미터 로드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="1015"/>
         <source>Save parameters to file</source>
-        <translation>파일에 파라미터 저장</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -5540,89 +5401,87 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/MLSDialog.ui" line="14"/>
         <source>Moving Least Squares Smoothing and Reconstruction</source>
-        <translation>최소제곱 스무딩 및 재구성 이동</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/MLSDialog.ui" line="26"/>
         <source>Search Radius</source>
-        <translation>검색반경</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/MLSDialog.ui" line="49"/>
         <source>Compute Normals</source>
-        <translation>노말계산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/MLSDialog.ui" line="62"/>
         <source>Use Polynomial 
 (instead of tangent)</source>
-        <translation>다항식 사용 
-(접선 대신)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/MLSDialog.ui" line="73"/>
         <source>Polynomial Order</source>
-        <translation>다항식순서</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/MLSDialog.ui" line="90"/>
         <source>Squared Gaussian 
 Parameter</source>
-        <translation>가우스 제곱 
-파라미터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/MLSDialog.ui" line="114"/>
         <source>Upsampling Method</source>
-        <translation>업샘플링 방식</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/MLSDialog.ui" line="134"/>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/MLSDialog.cpp" line="42"/>
         <source>Sample Local Plane</source>
-        <translation>샘플 로컬평면</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/MLSDialog.ui" line="143"/>
         <source>Upsampling Radius</source>
-        <translation>업샘플링 반경</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/MLSDialog.ui" line="172"/>
         <source>Upsampling Step Size</source>
-        <translation>업샘플링 단계 크기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/MLSDialog.ui" line="201"/>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/MLSDialog.cpp" line="43"/>
         <source>Random Uniform Density</source>
-        <translation type="unfinished">무작위 균일밀도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/MLSDialog.ui" line="210"/>
         <source>Step Point Density</source>
-        <translation>단계점 밀도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/MLSDialog.ui" line="233"/>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/MLSDialog.cpp" line="44"/>
         <source>Voxel Grid Dilation</source>
-        <translation>복셀 그리드 확장</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/MLSDialog.ui" line="242"/>
         <source>Dilation Voxel Size</source>
-        <translation>확장 복셀 크기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/MLSDialog.ui" line="268"/>
         <source>Dilation Iterations</source>
-        <translation>확장반복</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/MLSDialog.cpp" line="41"/>
         <source>None</source>
-        <translation type="unfinished">없음</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -5630,7 +5489,7 @@ Parameter</source>
     <message>
         <location filename="../../plugins/core/Standard/qMPlane/ui/mplaneDlg.ui" line="20"/>
         <source>Dialog</source>
-        <translation>대화창</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -5638,551 +5497,557 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="26"/>
         <source>CloudCompare</source>
-        <translation>CloudCompare</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="47"/>
         <source>&amp;File</source>
-        <translation>파일(&amp;F)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="61"/>
         <source>&amp;Display</source>
-        <translation>표시(&amp;D)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="65"/>
         <source>Toolbars</source>
-        <translation>툴바</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="73"/>
         <source>Lights</source>
-        <translation>조명</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="84"/>
         <source>Active scalar field</source>
-        <translation>사용 스칼라필드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="92"/>
         <source>Language Translation</source>
-        <translation>언어선택</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="123"/>
         <location filename="../ui_templates/mainWindow.ui" line="874"/>
         <source>&amp;Help</source>
-        <translation>도움말(&amp;H)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="133"/>
         <location filename="../ui_templates/mainWindow.ui" line="1813"/>
         <location filename="../ui_templates/mainWindow.ui" line="2880"/>
         <source>Edit</source>
-        <translation>편집</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="137"/>
         <location filename="../ui_templates/mainWindow.ui" line="1665"/>
         <source>Scalar fields</source>
-        <translation>스칼라필드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="168"/>
         <location filename="../ui_templates/mainWindow.ui" line="1989"/>
         <source>Colors</source>
-        <translation>컬러</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="184"/>
         <location filename="../ui_templates/mainWindow.ui" line="1975"/>
         <source>Normals</source>
-        <translation>노멀</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="188"/>
         <source>Orient normals</source>
-        <translation>오리엔트 노멀</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="195"/>
         <source>Convert to</source>
-        <translation>변환</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="210"/>
         <source>Octree</source>
-        <translation>옥트리</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="218"/>
         <source>Mesh</source>
-        <translation>메쉬</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="222"/>
         <source>Scalar Field</source>
-        <translation>스칼라필드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="246"/>
         <source>Sensors</source>
-        <translation>센서</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="250"/>
         <source>Terrestrial Laser Sensor = Ground Based Lidar</source>
-        <translation>지상 레이저센서 = 지상기반 라이다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="253"/>
         <source>TLS/GBL</source>
-        <translation>TLS/GBL</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="267"/>
         <source>Camera</source>
-        <translation>카메라</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="289"/>
         <source>Toggle (recursive)</source>
-        <translation>변환 (반복)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="301"/>
         <source>Waveform</source>
-        <translation>웨이브폼</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="308"/>
         <location filename="../ui_templates/mainWindow.ui" line="1932"/>
         <source>Plane</source>
-        <translation>평면</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="318"/>
         <source>Grid</source>
-        <translation>그리드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="325"/>
         <location filename="../mainwindow.cpp" line="9062"/>
         <source>Polyline</source>
-        <translation>폴리선</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="332"/>
         <source>Cloud</source>
-        <translation type="unfinished">클라우드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="367"/>
         <source>3D &amp;Views</source>
-        <translation>3D 보기(&amp;V)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="385"/>
         <source>Tools</source>
-        <translation>도구</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="389"/>
         <source>Segmentation</source>
-        <translation>세분화</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="400"/>
         <source>Projection</source>
-        <translation>투영법</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="410"/>
         <source>Statistics</source>
-        <translation>통계</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="417"/>
         <source>Distances</source>
-        <translation>거리</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="426"/>
         <location filename="../mainwindow.cpp" line="3705"/>
         <source>Registration</source>
-        <translation>정합</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="439"/>
         <source>Other</source>
-        <translation>기타</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="446"/>
         <source>Sand box (research)</source>
-        <translation>샌드박스 (검색)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="469"/>
         <location filename="../ui_templates/mainWindow.ui" line="2898"/>
         <source>Fit</source>
-        <translation>맞춤</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="478"/>
         <source>Clean</source>
-        <translation type="unfinished">청소</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="485"/>
         <source>Volume</source>
-        <translation>부피</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="491"/>
         <source>Batch export</source>
-        <translation>배치출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="536"/>
         <source>DB Tree</source>
-        <translation>DB 트리</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="590"/>
         <location filename="../ui_templates/mainWindow.ui" line="593"/>
         <source>Viewing tools</source>
-        <translation>보기도구</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="644"/>
         <location filename="../ui_templates/mainWindow.ui" line="973"/>
         <source>Console</source>
-        <translation>콘솔</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="684"/>
         <location filename="../ui_templates/mainWindow.ui" line="687"/>
         <source>Main tools</source>
-        <translation>메인도구</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="724"/>
         <location filename="../ui_templates/mainWindow.ui" line="727"/>
         <source>Scalar field tools</source>
-        <translation>스칼라필드 도구</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="757"/>
         <source>Properties</source>
-        <translation>속성</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="804"/>
         <source>&amp;Open</source>
-        <translation>열기(&amp;O)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="807"/>
         <source>Open</source>
-        <translation>열기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="810"/>
         <source>Ctrl+O</source>
-        <translation>Ctrl+O</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="819"/>
         <source>&amp;Save</source>
-        <translation>저장(&amp;S)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="822"/>
         <source>Save current entity</source>
-        <translation>현재 엔티니 저장</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="825"/>
         <source>Ctrl+S</source>
-        <translation>Ctrl+S</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="833"/>
         <source>&amp;Quit</source>
-        <translation>종료(&amp;Q)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="836"/>
         <location filename="../mainwindow.cpp" line="6000"/>
         <source>Quit</source>
-        <translation>종료</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="848"/>
         <source>&amp;Full screen</source>
-        <translation>전체화면(&amp;F)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="851"/>
         <location filename="../ui_templates/mainWindow.ui" line="854"/>
         <source>Switch to full screen</source>
-        <translation>전체화면 변경</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="857"/>
         <source>F9</source>
-        <translation>F9</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="869"/>
         <source>Display settings</source>
-        <translation>화면설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="877"/>
         <source>Help</source>
-        <translation>도움말</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="880"/>
         <source>F1</source>
-        <translation>F1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="885"/>
         <source>&amp;About ...</source>
-        <translation>정보(&amp;A) ...</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="888"/>
         <source>About</source>
-        <translation>정보</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="897"/>
         <source>Set unique</source>
-        <translation>중복없이 설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="900"/>
         <location filename="../ui_templates/mainWindow.ui" line="903"/>
         <source>Set a unique color</source>
-        <translation>중복되지 않는 컬러설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="906"/>
         <source>Alt+C</source>
-        <translation>Alt+C</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="911"/>
         <source>Height Ramp</source>
-        <translation>높이램프</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="914"/>
         <location filename="../ui_templates/mainWindow.ui" line="917"/>
         <source>Apply a color ramp along X, Y or Z</source>
-        <translation>X, Y, Z를 따른 컬러램프 적용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="926"/>
         <location filename="../ui_templates/mainWindow.ui" line="952"/>
         <source>Compute</source>
-        <translation>계산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="929"/>
         <location filename="../ui_templates/mainWindow.ui" line="932"/>
         <source>Compute unsigned normals (least squares approx.)</source>
-        <translation>미적용 노멀 계산 (최소제곱 평균)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="937"/>
         <source>Invert</source>
-        <translation>반전</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="940"/>
         <location filename="../ui_templates/mainWindow.ui" line="943"/>
         <source>Invert normals</source>
-        <translation>역 노멀</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="955"/>
         <location filename="../ui_templates/mainWindow.ui" line="958"/>
         <source>Compute octree</source>
-        <translation>옥트리계산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="976"/>
         <source>F8</source>
-        <translation>F8</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="984"/>
         <source>Cl&amp;ose</source>
-        <translation>닫기(&amp;o)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="987"/>
         <source>Ctrl+F4</source>
-        <translation>Ctrl+F4</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="992"/>
         <source>Close &amp;All</source>
-        <translation>전체닫기(&amp;A)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="997"/>
         <source>&amp;Tile</source>
-        <translation type="unfinished">타일형(&amp;T)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1002"/>
         <source>&amp;Cascade</source>
-        <translation>상하형(&amp;C)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1007"/>
         <source>Pre&amp;vious</source>
-        <translation>이전(&amp;v)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1012"/>
         <source>Ne&amp;xt</source>
-        <translation>다음(&amp;x)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1017"/>
         <source>New</source>
-        <translation>신규</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1020"/>
         <source>Ctrl+F3</source>
-        <translation>Ctrl+F3</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1029"/>
         <source>Clone</source>
-        <translation>복제</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1032"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Clone the selected entities&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;(yes Claire ... these are Nyan sheep!)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;선택한 엔티티 복제&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;(yes Claire ... these are Nyan sheep!)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1041"/>
         <source>Merge</source>
-        <translation>병합</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1044"/>
         <source>Merge multiple clouds</source>
-        <translation>멀티 클라우드 병합</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1053"/>
         <location filename="../ui_templates/mainWindow.ui" line="1236"/>
         <source>Delete</source>
-        <translation>삭제</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1056"/>
         <source>Del</source>
-        <translation>Del</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1068"/>
         <source>Fine registration (ICP)</source>
-        <translation type="unfinished">정밀정합 (ICP)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1071"/>
         <location filename="../ui_templates/mainWindow.ui" line="1074"/>
         <source>Finely registers already (roughly) aligned entities (clouds or meshes)</source>
-        <translation>정밀한 정합 (대략) 엔티티 정렬 (클라우드 또는 메쉬)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1083"/>
         <source>Cloud/Cloud Dist.</source>
-        <translation>클라우드/클라우드 거리</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1086"/>
         <location filename="../ui_templates/mainWindow.ui" line="1089"/>
         <source>Compute cloud/cloud distance</source>
-        <translation>클라우드/클라우드 거리 계산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1098"/>
         <source>Cloud/Mesh Dist</source>
-        <translation>클라우드/메시 거리</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1101"/>
         <location filename="../ui_templates/mainWindow.ui" line="1104"/>
         <source>Compute cloud/mesh distance</source>
-        <translation>클라우드/메쉬 거리 계산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1113"/>
         <source>Local Statistical test</source>
-        <translation>로컬 통계 검증</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1116"/>
         <location filename="../ui_templates/mainWindow.ui" line="1119"/>
         <source>Apply a local statistical test to separate noise from true differences</source>
-        <translation>노이즈와 실제 차이를 구분하기 위해 로컬 통계검증을 적용</translation>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="1128"/>
+        <location filename="../ui_templates/mainWindow.ui" line="2991"/>
+        <source>Sample points</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1131"/>
         <location filename="../ui_templates/mainWindow.ui" line="1134"/>
         <source>Sample points on a mesh</source>
-        <translation>메쉬상 샘플점</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1143"/>
         <source>Label Connected Comp.</source>
-        <translation>구성요소에 연결된 라벨</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1146"/>
         <location filename="../ui_templates/mainWindow.ui" line="1149"/>
         <source>Label connected components</source>
-        <translation>구성요소에 연결된 라벨</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1158"/>
         <source>Segment</source>
-        <translation type="unfinished">분</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1161"/>
         <source>T</source>
-        <translation>T</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1173"/>
         <source>Translate/Rotate</source>
-        <translation>회전 (Translate/Rotate)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1182"/>
         <source>Show histogram</source>
-        <translation>히스토그램 보기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1191"/>
         <source>Compute stat. params</source>
-        <translation>통계파라미터 계산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1194"/>
@@ -6190,1542 +6055,1637 @@ Parameter</source>
         <location filename="../ui_templates/mainWindow.ui" line="2596"/>
         <location filename="../ui_templates/mainWindow.ui" line="2599"/>
         <source>Fits a statistical model on the active scalar field</source>
-        <translation>사용 스칼라필드에 통계모델 맞춤</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1206"/>
         <source>Filter By Value</source>
-        <translation>값별 필터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1209"/>
         <location filename="../ui_templates/mainWindow.ui" line="1212"/>
         <source>Filter points by value</source>
-        <translation>값별 점 필터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1221"/>
         <source>Gaussian filter</source>
-        <translation>가우시안 필터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1224"/>
         <location filename="../ui_templates/mainWindow.ui" line="1227"/>
         <source>Compute gaussian filter</source>
-        <translation>가우시안필터 계산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1239"/>
         <source>Delete Scalar Field</source>
-        <translation>스칼라필드 삭제</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1242"/>
         <location filename="../ui_templates/mainWindow.ui" line="1245"/>
         <source>Delete current scalar field</source>
-        <translation>현재 스칼라필드 삭제</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1254"/>
         <source>Arithmetic</source>
-        <translation>산술</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1257"/>
         <source>SF arithmetic</source>
-        <translation>SF 산술</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1260"/>
         <location filename="../ui_templates/mainWindow.ui" line="1263"/>
         <source>Add, subtract, multiply or divide two scalar fields</source>
-        <translation>2 스칼라필드 (+)(-)(X)(/)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1268"/>
         <source>Colorize</source>
-        <translation>컬러화</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1271"/>
         <location filename="../ui_templates/mainWindow.ui" line="1274"/>
         <source>Colorize entity (lightness values are unchanged)</source>
-        <translation>엔티티 컬러화 (밝기값 변환안됨)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1279"/>
         <location filename="../ui_templates/mainWindow.ui" line="3080"/>
         <source>Smooth</source>
-        <translation>스무스</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1282"/>
         <location filename="../ui_templates/mainWindow.ui" line="1285"/>
         <source>Smooth mesh scalar field</source>
-        <translation>메쉬스칼라필드 스무스</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1290"/>
         <source>Enhance</source>
-        <translation>강화</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1293"/>
         <location filename="../ui_templates/mainWindow.ui" line="1296"/>
         <source>Enhance Scalar Field</source>
-        <translation>스칼라필드 강화</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1305"/>
         <location filename="../ui_templates/mainWindow.ui" line="1320"/>
         <source>Clear</source>
-        <translation>지우기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1308"/>
         <location filename="../ui_templates/mainWindow.ui" line="1311"/>
         <source>Clear colors</source>
-        <translation>컬리지우기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1323"/>
         <location filename="../ui_templates/mainWindow.ui" line="1326"/>
         <source>Delete normals</source>
-        <translation>노멀삭제</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1331"/>
         <source>Resample</source>
-        <translation>리샘플</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1334"/>
         <location filename="../ui_templates/mainWindow.ui" line="1337"/>
         <source>Resample entity with octree</source>
-        <translation>옥트리로 엔티티 리샘플</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1342"/>
         <source>Delaunay 2.5D (XY plane)</source>
-        <translation type="unfinished">들로네 2.5D (XY 평면)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1345"/>
         <location filename="../ui_templates/mainWindow.ui" line="1348"/>
         <source>Compute &quot;2D1/2&quot; mesh by projecting points on the XY plane</source>
-        <translation>XY평면에 점을 투영하여 &quot;2D1/2&quot; 메쉬 계산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1353"/>
         <source>Delaunay 2.5D (best fitting plane)</source>
-        <translation type="unfinished">들로네 2.5D (최상맞춤 평면)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1356"/>
         <location filename="../ui_templates/mainWindow.ui" line="1359"/>
         <source>Compute &quot;2D1/2&quot; mesh by projecting points on the (least squares) best fitting plane</source>
-        <translation>점을 최상맞춤면 (최소제곱법)에 투영하여 &quot;2D1/2&quot; 메시 계산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1364"/>
         <source>Measure surface</source>
-        <translation>지면측정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1367"/>
         <location filename="../ui_templates/mainWindow.ui" line="1370"/>
         <source>Measure mesh surface</source>
-        <translation>메시면 측정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1375"/>
         <source>Closest Point Set</source>
-        <translation>최근접 점세트</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1378"/>
         <location filename="../ui_templates/mainWindow.ui" line="1381"/>
         <source>Compute closest point set</source>
-        <translation>최근접 점세트 계산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1386"/>
         <source>Delete all (!)</source>
-        <translation>전체삭제 (!)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1389"/>
         <location filename="../ui_templates/mainWindow.ui" line="1392"/>
         <source>Delete all scalar fields</source>
-        <translation>스칼라필드 전체삭제</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1397"/>
         <source>Multiply</source>
-        <translation>곱하기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1400"/>
         <location filename="../ui_templates/mainWindow.ui" line="1403"/>
         <source>Multiply scalar field by a constant</source>
-        <translation>일률적으로 스칼라필드 곱하기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1411"/>
         <source>K-Means</source>
-        <translation>K-평균</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1414"/>
         <location filename="../ui_templates/mainWindow.ui" line="1417"/>
         <source>classify point (K-Means applied on a scalar field)</source>
-        <translation>점분류(스칼라필드에 K-평균 적용)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1425"/>
         <source>Front propagation</source>
-        <translation>전방확산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1428"/>
         <location filename="../ui_templates/mainWindow.ui" line="1431"/>
         <source>Classify points by propagating a front on a scalar field</source>
-        <translation>스칼라필드에 전방확산으로 점분류</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1436"/>
         <source>Multiply/Scale</source>
-        <translation>곱하기/스케일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1439"/>
         <location filename="../ui_templates/mainWindow.ui" line="1442"/>
         <source>Multiply coordinates (separately)</source>
-        <translation>좌푝곱하시 (분리)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1447"/>
         <source>Match bounding-box centers</source>
-        <translation>경계박스 중심 매치</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1450"/>
         <location filename="../ui_templates/mainWindow.ui" line="1453"/>
         <source>Synchronize selected entities bbox centers</source>
-        <translation>선택한 엔티티 b박스 중심 동기화</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1458"/>
         <source>Unroll</source>
-        <translation>언롤</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1461"/>
         <location filename="../ui_templates/mainWindow.ui" line="1464"/>
         <source>Unroll entity on a cylinder or a cone</source>
-        <translation>실린더 또는 콘에 엔티티 언롤</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1473"/>
         <source>Gradient</source>
-        <translation>그라데이션</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1482"/>
         <source>Zoom &amp; Center</source>
-        <translation>확대/축소 &amp; 중심</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1485"/>
         <source>ZoomCenter</source>
-        <translation>확대중심</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1488"/>
         <location filename="../ui_templates/mainWindow.ui" line="1491"/>
         <source>Zoom and center on selected entities (Z)</source>
-        <translation type="unfinished">선택한 엔티티에서 확대/축소 &amp; 중심 (Z)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1494"/>
         <source>Z</source>
-        <translation>Z</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1503"/>
         <source>Top View</source>
-        <translation>상단뷰</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1506"/>
         <location filename="../ui_templates/mainWindow.ui" line="1509"/>
         <source>Set top view</source>
-        <translation>상단뷰 설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1524"/>
         <source>Front View</source>
-        <translation>전면뷰</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1527"/>
         <location filename="../ui_templates/mainWindow.ui" line="1530"/>
         <source>Set front view</source>
-        <translation>전면뷰 설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1545"/>
         <source>Back View</source>
-        <translation>우방뷰</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1548"/>
         <location filename="../ui_templates/mainWindow.ui" line="1551"/>
         <source>Set back view</source>
-        <translation>후방뷰설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1566"/>
         <source>Left Side View</source>
-        <translation>좌측뷰</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1569"/>
         <location filename="../ui_templates/mainWindow.ui" line="1572"/>
         <source>Set left side view</source>
-        <translation>좌측뷰설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1587"/>
         <source>Right Side View</source>
-        <translation>우측뷰</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1590"/>
         <location filename="../ui_templates/mainWindow.ui" line="1593"/>
         <source>Set right side view</source>
-        <translation>우측뷰설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1608"/>
         <source>Bottom View</source>
-        <translation>하단뷰</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1611"/>
         <location filename="../ui_templates/mainWindow.ui" line="1614"/>
         <source>Set bottom view</source>
-        <translation>하단뷰 설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1631"/>
         <source>Main</source>
-        <translation>메인</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1634"/>
         <location filename="../ui_templates/mainWindow.ui" line="1637"/>
         <source>Show/hide main toolbar</source>
-        <translation>메인툴바 보기/숨기기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1648"/>
         <source>View</source>
-        <translation>보기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1651"/>
         <location filename="../ui_templates/mainWindow.ui" line="1654"/>
         <source>Show/hide view toolbar</source>
-        <translation>보기툴바 보기/숨기기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1668"/>
         <location filename="../ui_templates/mainWindow.ui" line="1671"/>
         <source>Show/hide scalar fields toolbar</source>
-        <translation>스칼라필드 툴바 보기/숨기기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1676"/>
         <source>Toggle Sun Light</source>
-        <translation>태양광 변경</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1679"/>
         <location filename="../ui_templates/mainWindow.ui" line="1682"/>
         <source>Toggle sun light (active window)</source>
-        <translation>태양관 변경 (사용윈도우)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1685"/>
         <source>F6</source>
-        <translation>F6</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1693"/>
         <source>Toggle Custom Light</source>
-        <translation>커스텀라이트 변경</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1696"/>
         <location filename="../ui_templates/mainWindow.ui" line="1699"/>
         <source>Toggle custom light (active window)</source>
-        <translation>커스텀라이트 변경 (사용윈도우)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1702"/>
         <source>F7</source>
-        <translation>F7</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1714"/>
         <source>Global Zoom</source>
-        <translation>글로벌확대</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1723"/>
         <source>Toggle Centered Perspective</source>
-        <translation>센터뷰 변경</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1726"/>
         <location filename="../ui_templates/mainWindow.ui" line="1729"/>
         <source>Toggle perspective view (centered on objects) in current window</source>
-        <translation>현재 윈도우의 뷰변경 (객체 센터)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1732"/>
         <source>F3</source>
-        <translation>F3</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1744"/>
         <source>Toggle Viewer Based Perspective</source>
-        <translation>원근법 기반 뷰어전환</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1747"/>
         <location filename="../ui_templates/mainWindow.ui" line="1750"/>
         <source>Toggle perspective view (centered on viewer) in current window</source>
-        <translation>현재윈도우의 원근법뷰 변환 (뷰어센터)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1753"/>
         <source>F4</source>
-        <translation>F4</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1765"/>
         <source>Refresh</source>
-        <translation>갱신</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1768"/>
         <source>F5</source>
-        <translation>F5</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1776"/>
         <source>Test Frame Rate</source>
-        <translation>프라임율 테스트</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1781"/>
         <source>Render to File</source>
-        <translation>파일로 렌더</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1786"/>
         <source>About Plugins...</source>
-        <translation>플러그인정보...</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1795"/>
         <source>Convert to RGB</source>
-        <translation>RGB 변환</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1798"/>
         <source>Convert current scalar field to RGB colors</source>
-        <translation>현재스칼라필드를 RGB 컬러로 변환</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1803"/>
         <source>Create/show depth buffer</source>
-        <translation>깊이버퍼 생성/보기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1808"/>
         <source>Export depth buffer</source>
-        <translation type="unfinished">깊이버퍼 출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1822"/>
         <source>Rasterize (and contour plot)</source>
-        <translation type="unfinished">라스터화 (및 등고선플로팅)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1825"/>
         <source>Convert a cloud to 2D raster (and optionally generate the contour plot)</source>
-        <translation>클라우드를 2D 라스터로 변환 (옵션으로 등고선플롯 생성)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1830"/>
         <source>Auto align clouds</source>
-        <translation>자동 클라우드 맞춤</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1833"/>
         <location filename="../ui_templates/mainWindow.ui" line="1836"/>
         <source>Tries to automatically register (roughly) two points clouds</source>
-        <translation>2 포인트클라우드 자동정합 (대략적) 시도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1845"/>
         <source>Subsample</source>
-        <translation>하위샘플</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1848"/>
         <location filename="../ui_templates/mainWindow.ui" line="1851"/>
         <source>Subsample a point cloud</source>
-        <translation>하위샘플 포인트클라우드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1859"/>
         <source>Load shader</source>
-        <translation>쉐이더 로드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1867"/>
         <source>Delete shader</source>
-        <translation>쉐이더 삭제</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1876"/>
         <source>Point picking</source>
-        <translation>점획득</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1879"/>
         <location filename="../ui_templates/mainWindow.ui" line="1882"/>
         <source>Point picking (point information, distance between 2 points, angles between 3 points, etc.)</source>
-        <translation>점획득 (점정보, 2점간 거리, 3점간 각도등)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1887"/>
         <source>Bounding box P.C.A. fit</source>
-        <translation>경계박스 P.C.A. 맞춤</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1890"/>
         <location filename="../ui_templates/mainWindow.ui" line="1893"/>
         <source>Makes BB fit principal components (rotates entity!)</source>
-        <translation>BB를 주점요소에 맞추도록 만듭니다 (요소회전!).</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1902"/>
         <source>Camera settings</source>
-        <translation>카메라설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1911"/>
         <source>Point list picking</source>
-        <translation>점목록추출</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1914"/>
         <source>Pick several points (and export them to ASCII file, a new cloud, etc.)</source>
-        <translation>몇점 획득 (및 ASCII 파일, 신규클라우드로 출력)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1919"/>
         <source>Curvature</source>
-        <translation>곡률</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1927"/>
         <source>Roughness</source>
-        <translation>거칠기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1935"/>
         <location filename="../ui_templates/mainWindow.ui" line="2901"/>
         <source>Fit a plane on a set of point</source>
-        <translation>평면을 점세트에 맞춤</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1940"/>
         <source>Rename</source>
-        <translation>이름변경</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1945"/>
         <source>2.5D quadric</source>
-        <translation>2.5D 2차</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1950"/>
         <location filename="../mainwindow.cpp" line="8065"/>
         <source>SNE test</source>
-        <translation>SNE 테스트</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1953"/>
         <location filename="../ui_templates/mainWindow.ui" line="1956"/>
         <source>Spherical Neighbourhood Extraction test</source>
-        <translation>구면 인접영역 추출 테스트</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1961"/>
         <source>Visibility</source>
-        <translation>가시성</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1964"/>
         <source>Toggle selected entities visibility (recursive)</source>
-        <translation>선택한 요서 가시성 변경 (재귀)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1967"/>
         <source>V</source>
-        <translation>V</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1978"/>
         <source>Toggle selected entities normals (recursive)</source>
-        <translation>선택한 엔티티 노멀 변경 (재귀)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1981"/>
         <source>N</source>
-        <translation>N</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1992"/>
         <source>Toggle selected entities colors (recursive)</source>
-        <translation>선택한 엔티티컬러 변경 (재귀)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1995"/>
         <source>C</source>
-        <translation>C</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2003"/>
         <source>SF</source>
-        <translation>SF</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2006"/>
         <source>Toggle selected entities SF (recursive)</source>
-        <translation>선택한 엔티티 SF 변경 (재귀)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2009"/>
         <source>S</source>
-        <translation>S</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2017"/>
         <source>Apply transformation</source>
-        <translation>변환적용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2020"/>
         <source>Apply rotation and/or translation</source>
-        <translation>회전 (rotation 및 translation) 적용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2023"/>
         <source>Ctrl+T</source>
-        <translation>Ctrl+T</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2028"/>
         <source>Smooth (Laplacian)</source>
-        <translation>스무스 (라플라시안)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2033"/>
         <source>HSV colors</source>
-        <translation>HSV 컬러</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2042"/>
         <source>Save viewport as object</source>
-        <translation>객체 뷰포트 저장</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2045"/>
         <source>Ctrl+V</source>
-        <translation>Ctrl+V</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2057"/>
         <source>Pick rotation center</source>
-        <translation>회전중심 획득</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2060"/>
         <source>P</source>
-        <translation>P</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2068"/>
         <source>Compute Ranges</source>
-        <translation>거리계산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2071"/>
         <source>Compute ranges from sensor</source>
-        <translation>센서의 거리 계산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2080"/>
         <source>Bilateral filter</source>
-        <translation>양방향 필터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2083"/>
         <source>Compute bilateral filter</source>
-        <translation>양방향필터 계산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2088"/>
         <source>Compute Scattering Angles</source>
-        <translation>스캐터링 각도 계산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2091"/>
         <source>Compute laser beam scattering angle for a cloud with normals</source>
-        <translation>노멀 클라우드의 레이터빔 스캐터링 계산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2096"/>
         <source>Toggle color scale</source>
-        <translation>컬러스케일 변환</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2099"/>
         <location filename="../ui_templates/mainWindow.ui" line="2102"/>
         <source>Toggle active scalar field color scale</source>
-        <translation>사용 스칼라필드 컬러 스케일 변환</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2105"/>
         <source>Shift+C</source>
-        <translation>Shift+C</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2113"/>
         <source>Show previous SF</source>
-        <translation>이전 SF 보기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2116"/>
         <location filename="../ui_templates/mainWindow.ui" line="2119"/>
         <source>Show previous scalar field for active entity</source>
-        <translation>사용 엔티티의 이전 스칼라필드 보기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2122"/>
         <source>Shift+Up</source>
-        <translation>Shift+Up</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2130"/>
         <source>Show next SF</source>
-        <translation>다음 SF 보기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2133"/>
         <location filename="../ui_templates/mainWindow.ui" line="2136"/>
         <source>Show next scalar field for active entity</source>
-        <translation>사용 엔티티의 다음 스칼라필드 보기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2139"/>
         <source>Shift+Down</source>
-        <translation>Shift+Down</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2148"/>
         <source>Align (point pairs picking)</source>
-        <translation type="unfinished">맞춤 (점쌍 선택)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2151"/>
         <location filename="../ui_templates/mainWindow.ui" line="2154"/>
         <source>Aligns two clouds by picking (at least 4) equivalent point pairs</source>
-        <translation type="unfinished">동일한 점쌍 (최소 4개)을 선택하여 클라우드 두개를 맞춥니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2163"/>
         <source>Add constant SF</source>
-        <translation>일관적인 SF 추가</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2168"/>
         <source>Export coordinate(s) to SF(s)</source>
-        <translation>좌표를 SF로 출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2171"/>
         <source>Export X, Y and/or Z coordinates to scalar field(s)</source>
-        <translation>X,Y,Z 좌표를 스칼라필드로 출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2176"/>
         <source>Subdivide</source>
-        <translation>세분화</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2181"/>
         <source>3D name</source>
-        <translation>3D 이름</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2184"/>
         <source>Toggle selected entities 3D name display (recursive)</source>
-        <translation>선택한 엔티티를 3D 이름표시고 변경 (회기)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2187"/>
         <source>D</source>
-        <translation>D</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2199"/>
         <source>Primitive factory</source>
-        <translation>초기값 설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2204"/>
         <source>Materials/textures</source>
-        <translation>자재/텍스쳐</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2207"/>
         <source>Toggle selected entities materials/textures (recursive)</source>
-        <translation>선택한 엔티티 자재/텍스쳐 변경 (회기)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2210"/>
         <source>M</source>
-        <translation>M</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2222"/>
         <source>Orthographic projection</source>
-        <translation>직교투영</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2225"/>
         <location filename="../ui_templates/mainWindow.ui" line="2228"/>
         <source>Set orthographic projection for current 3D View</source>
-        <translation>현재 3D뷰의 직교투영 설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2237"/>
         <source>Object-centered perspective</source>
-        <translation>객체중심 뷰</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2240"/>
         <location filename="../ui_templates/mainWindow.ui" line="2243"/>
         <source>Set object-centered perspective for current 3D View</source>
-        <translation>현재 3D뷰를 객체중심뷰 설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2252"/>
         <source>Viewer-based perspective</source>
-        <translation>관점기반 뷰어</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2255"/>
         <location filename="../ui_templates/mainWindow.ui" line="2258"/>
         <source>Set viewer-based perspective for current 3D View</source>
-        <translation>현재 3D뷰의 관점기반 뷰어설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2267"/>
         <source>Always visible</source>
-        <translation>항상표시</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2270"/>
         <location filename="../ui_templates/mainWindow.ui" line="2273"/>
         <source>Pivot always visible</source>
-        <translation>피봇 항상표시</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2282"/>
         <source>Rotation only</source>
-        <translation>회전</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2285"/>
         <location filename="../ui_templates/mainWindow.ui" line="2288"/>
         <source>Pivot visible when rotating</source>
-        <translation>회전시 피봇표시</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2297"/>
         <source>Never visible</source>
-        <translation>표시안함</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2300"/>
         <location filename="../ui_templates/mainWindow.ui" line="2303"/>
         <source>Pivot never visible</source>
-        <translation>피봇표시안함</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2312"/>
         <source>Iso 1</source>
-        <translation>Iso 1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2315"/>
         <location filename="../ui_templates/mainWindow.ui" line="2318"/>
         <source>Set view to &apos;front&apos; isometric</source>
-        <translation type="unfinished">&apos;전면&apos; 등각뷰 설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2333"/>
         <source>Iso 2</source>
-        <translation>Iso 2</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2336"/>
         <location filename="../ui_templates/mainWindow.ui" line="2339"/>
         <source>Set view to &apos;back&apos; isometric</source>
-        <translation type="unfinished">&apos;후면&apos; 등각뷰 설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2354"/>
         <source>Convert texture/material to RGB</source>
-        <translation>텍스쳐/자재를 RGB로 변환</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2363"/>
         <source>Color Scales Manager</source>
-        <translation>컬러스케일 매니저</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2366"/>
         <source>Open Color Scales Manager dialog</source>
-        <translation>컬러스케일 매니저 대화창 열기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2378"/>
         <location filename="../ui_templates/mainWindow.ui" line="2381"/>
         <source>Cross Section</source>
-        <translation>횡단면</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2384"/>
         <source>X</source>
-        <translation>X</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2389"/>
         <source>Edit global shift and scale</source>
-        <translation>글로벌 이격 &amp; 스케일 편집</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2394"/>
         <source>Convert to Scalar field</source>
-        <translation>스칼라필드 변환</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2399"/>
         <source>From Scalar fields</source>
-        <translation>스칼라필드 사용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2404"/>
         <location filename="../mainwindow.cpp" line="924"/>
         <source>Compute Kd-tree</source>
-        <translation>Kd-트리 계산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2409"/>
         <source>test</source>
-        <translation>테스트</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2414"/>
         <source>Add point indexes as SF</source>
-        <translation>점 인덱스를 SF로 추가</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2417"/>
         <source>Adds a scalar field with ordered integers for each point in the cloud</source>
-        <translation>클라우드의 각 점에 대해 순서가 지정된 정수로 스칼라 필드 추가</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2422"/>
         <source>2D polygon (facet)</source>
-        <translation>2D 폴리곤 (벽면)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2427"/>
         <source>Adjust zoom</source>
-        <translation type="unfinished">확대/축소 조정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2430"/>
         <source>Adjusts zoom with a given pixel/unit ratio (orthographic projection only)</source>
-        <translation>주어진 픽셀/단위율로 확대/축소 조정 (정사영상 두영)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2435"/>
         <source>Set SF as coordinate(s)</source>
-        <translation>좌표 SF 설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2438"/>
         <source>Set SF as coordinate(s) (X, Y or Z)</source>
-        <translation>좌표 SF 설정 (X,Y,Z)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2443"/>
         <location filename="../mainwindow.cpp" line="9860"/>
         <source>Close all</source>
-        <translation>전체닫기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2446"/>
         <source>Remove all entities currently loaded in the DB tree</source>
-        <translation>DB 트리에 로드된 전체엔티티 제거</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2451"/>
         <source>Edit global scale</source>
-        <translation>글로벌 스케일 편집</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2460"/>
         <source>View from sensor</source>
-        <translation>센서에서 보기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2465"/>
         <source>Find biggest inner rectangle (2D)</source>
-        <translation>가장큰 내부 직사각형 검색 (2D)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2470"/>
         <location filename="../ui_templates/mainWindow.ui" line="2475"/>
         <location filename="../ui_templates/mainWindow.ui" line="2872"/>
         <source>Create</source>
-        <translation>생성</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2480"/>
         <source>Compute points visibility (with octree)</source>
-        <translation>점 가시성 (옥트리 포함) 계산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2485"/>
         <source>Project Uncertainty</source>
-        <translation>프로젝트 불확실성</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2490"/>
         <source>With Minimum Spanning Tree</source>
-        <translation>최소 이동트리 포함</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2495"/>
         <source>With Fast Marching</source>
-        <translation type="unfinished">신속 매칭 사용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2500"/>
         <source>CNE test</source>
-        <translation>CNE 테스트</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2503"/>
         <location filename="../ui_templates/mainWindow.ui" line="2506"/>
         <source>Cylindrical Neighbourhood Extraction test</source>
-        <translation>실린더 네이버후드 추출 테스트</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2511"/>
         <source>Approximate (dist. to nearest neighbor)</source>
-        <translation>대략 (최근접 네이버까지 거리)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2516"/>
         <source>Density</source>
-        <translation>밀도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2519"/>
         <source>Compute density</source>
-        <translation>밀도계산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2524"/>
         <location filename="../mainwindow.cpp" line="2773"/>
         <source>Remove duplicate points</source>
-        <translation>중복점 제거</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2529"/>
         <source>Crop</source>
-        <translation>자르기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2534"/>
         <source>Dip/Dip direction SFs</source>
-        <translation>Dip/Dip 거리 SF</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2539"/>
         <source>Export cloud info</source>
-        <translation>클라우드정보 출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2542"/>
         <source>Export cloud info to a CSV file (name, size, barycenter, scalar fields info, etc.)</source>
-        <translation>CSV 파일로 클라우드정보 출력 (이름, 크기, 바이센터, 스칼라 필드 정보 등)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2545"/>
         <source>E</source>
-        <translation>E</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2550"/>
         <location filename="../ui_templates/mainWindow.ui" line="2970"/>
         <source>Interpolate from another entity</source>
-        <translation type="unfinished">다른 엔티티로 보간</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2553"/>
         <source>Interpolate colors from another entity (cloud or mesh) - color is taken from the nearest neighbor</source>
-        <translation>다른 엔티니 (클라우드 또는 메시)에서 컬러 보간 - 컬러는 최근접 네이버에서 얻어짐</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2558"/>
         <source>Distance map to best-fit 3D quadric</source>
-        <translation>최상맞춤 사분면까지 거리지도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2563"/>
         <source>Levels</source>
-        <translation>레벨</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2568"/>
         <source>Reset all GUI element positions</source>
-        <translation>모든 GUI 요소 위치 리셋</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2571"/>
         <source>Reset all GUI element positions (after restart)</source>
-        <translation>모든 GUI 요소 위치 리셋 (재시작필요)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2576"/>
         <source>Convert to random RGB</source>
-        <translation type="unfinished">무작위 RGB 변환</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2581"/>
         <source>Noise filter</source>
-        <translation type="unfinished">노이즈 필터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2584"/>
         <source>Noise filter (remove the points far from the - approximate - local surface)</source>
-        <translation type="unfinished">노이즈 필터 (로컬 지면에서 먼 점 제거 - 대략)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2593"/>
         <source>Compute stat. params (active SF)</source>
-        <translation>상태파라미터 계산 (사용 SF)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2604"/>
         <source>Measure volume</source>
-        <translation>부피측정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2609"/>
         <source>Flag vertices by type</source>
-        <translation>종류별 버텍스 플래그</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2612"/>
         <source>Flag vertices by type: normal (0), border (1), non-manifold (2)</source>
-        <translation>종류별 버텍스 플래그: 노말 (0), 외곽선 (1), 비매니폴드(2)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2617"/>
         <source>Activation (not recursive)</source>
-        <translation>활성화 (비반복)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2620"/>
         <source>Enable/disable selected entities (not recursive)</source>
-        <translation>선택한 엔티티 활성/비활성 (비연속)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2623"/>
         <source>A</source>
-        <translation>A</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2634"/>
         <source>Lock rotation about an axis</source>
-        <translation>축의 회전고정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2637"/>
         <source>Lock 3D camera rotation about an axis</source>
-        <translation>축의 3D 카메라 회전고정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2640"/>
         <source>L</source>
-        <translation>L</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2648"/>
         <source>Create cloud from selected entities centers</source>
-        <translation>선택한 엔티티 중심에서 클라우드 생성</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2653"/>
         <source>Compute best registration RMS matrix</source>
-        <translation>최상 정합 RMS 행렬계산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2656"/>
         <source>Computes the best registration between all couples among multiple entities and save the resulting RMS in a matrix (CSV) file</source>
-        <translation>여러 엔티티 간에 모든 쌍의 최적의 정합 계산후 결과 RMS를 행렬 (CSV) 파일에 저장</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2661"/>
         <source>Enter bubble-view mode</source>
-        <translation>버블뷰 모드 입력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2664"/>
         <source>B</source>
-        <translation>B</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2673"/>
         <source>Extract sections / Unfold</source>
-        <translation>단면 추출 / 펼침</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2676"/>
         <source>Extract cloud sections along polylines or unfold a cloud along a polyline</source>
-        <translation>폴리선을 따라 클라우드 단면을 추출하거나 폴리선을 따라 클라우드를 펼칩니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2681"/>
         <source>Contour plot (polylines) to mesh</source>
-        <translation>등고선을 메시로 플로팅 (폴리선)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2684"/>
         <source>Contour plot (set of polylines) to a 2.5D mesh</source>
-        <translation>등고선을 2.5 메시로 플로팅 (폴리선 세트)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2693"/>
         <source>Level</source>
-        <translation>레벨</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2696"/>
         <source>Pick three points to make a cloud or mesh &apos;level&apos;</source>
-        <translation>3점을 선택하여 클라우드 또는 메시 &apos;레벨&apos; 생성</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2701"/>
         <location filename="../mainwindow.cpp" line="8999"/>
         <source>Sphere</source>
-        <translation>구면</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2704"/>
         <source>Fits a sphere on the selected cloud</source>
-        <translation>선택한 클라우드에 구면 맞춤</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2709"/>
         <source>Match scales</source>
-        <translation>스케일 맞춤</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2714"/>
         <source>Zoom in</source>
-        <translation>확대</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2717"/>
         <source>Zoom in (current 3D view)</source>
-        <translation>확대 (현재 3D 뷰)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2720"/>
         <source>+</source>
         <extracomment>Zoom in shortcut</extracomment>
-        <translation>+</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2725"/>
         <source>Zoom out</source>
-        <translation>축소</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2728"/>
         <source>Zoom out (current 3D view)</source>
-        <translation>축소 (현재 3D뷰)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2731"/>
         <source>=</source>
         <extracomment>Zoom in shortcut</extracomment>
-        <translation>=</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2736"/>
         <source>Distance map</source>
-        <translation>거리지도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2745"/>
         <source>SOR filter</source>
-        <translation>SOR 필터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2748"/>
         <source>Statistical Outlier Filter (remove the points far from their neighbors)</source>
-        <translation>통계 초과값 필터 (네이버에서 먼점 제거)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2760"/>
         <source>actionEnableStereo</source>
-        <translation>actionEnableStereo</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2763"/>
         <source>Enable stereo mode (with red-blue or red-cyan glasses)</source>
-        <translation type="unfinished">스테레오 모드 활성화 (레드-블루 또는 레드-사이언 안경 사용)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2766"/>
         <source>F10</source>
-        <translation>F10</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2774"/>
         <source>Compute points visibility (with depth buffer)</source>
-        <translation type="unfinished">점가시성 계산 (깊이버퍼 사용)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2779"/>
         <source>Compute 2.5D volume</source>
-        <translation>2.5D 부피 계산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2791"/>
         <source>Full screen (3D view)</source>
-        <translation>전체화면 (3D뷰)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2794"/>
         <source>Exclusive full screen (3D view)</source>
-        <translation>전체화면 제외 (3D뷰)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2797"/>
         <source>F11</source>
-        <translation>F11</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2805"/>
         <source>Enable Visual Debug Traces</source>
-        <translation>비쥬얼 디버그 트레이스 활성화</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2808"/>
         <source>Enables visual debug traces (active 3D view)</source>
-        <translation>비쥬얼 디버그 트레이스 활성화 (3D뷰 활성화)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2811"/>
         <source>Ctrl+D</source>
-        <translation>Ctrl+D</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2816"/>
         <source>Convert to grey scale</source>
-        <translation>그레이 스케일 변환</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2819"/>
         <source>Convert RGB colors to grey scale colors</source>
-        <translation>RGB 컬러를 그레이 스케일 컬러로 변환</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2828"/>
         <source>Trace Polyline</source>
-        <translation>폴리선 트레이스</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2831"/>
         <source>Trace a polyline by point picking</source>
-        <translation>점선택으로 폴리선 트레이스</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2834"/>
         <location filename="../ui_templates/mainWindow.ui" line="3116"/>
         <source>Ctrl+P</source>
-        <translation>Ctrl+P</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2842"/>
         <source>Enable Qt warnings in Console</source>
-        <translation>콘솔 Qt 경고 활성화</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2847"/>
         <source>Global Shift settings</source>
-        <translation>글로벌 이격 설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2850"/>
         <source>Set Global Shift &amp; Scale mechanism parameters</source>
-        <translation>글로벌 이격 &amp; 스케일 매카니즘 파라미터 설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2858"/>
         <source>Camera link</source>
-        <translation>카메라 링크</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2861"/>
         <source>Link the cameras of all 3D views
 (so that they all move in the same way and at the same time)</source>
-        <translation>전체 3D 뷰 카메라 링크
-(모두 같은 방식으로 동시에 움직입니다)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2867"/>
         <source>2D Waveform viewer</source>
-        <translation>2D 웨이브폼 뷰어</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2875"/>
         <source>Create a plane</source>
-        <translation>평면 생성</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2883"/>
         <source>Edit the plane parameters</source>
-        <translation>평면 파라미터 편집</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2888"/>
         <source>Create surface between two polylines</source>
-        <translation type="unfinished">2 x 폴리선 사이 지면 생성</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2893"/>
         <source>Surface between 2 polylines</source>
-        <translation type="unfinished">2 x 폴리선사이 지면</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2906"/>
         <source>Enhance with intensities</source>
-        <translation>강도향상</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2911"/>
         <source>Mesh scan grids</source>
-        <translation>메시 스캔그리드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2914"/>
         <source>Mesh scan grids (structured point clouds)</source>
-        <translation>메시 스캔그리드 (구조화된 포인트클라우드)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2929"/>
         <source>Auto-pick rotation center</source>
-        <translation>회전중심 자동선택</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2932"/>
         <source>Auto-pick rotation center (rotation is always placed at the middle of the screen if possible)</source>
-        <translation>회전중심 자동선택 (가능한 경우 화면 중앙에 항상 배치)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2935"/>
         <source>Shift+P</source>
-        <translation>Shift+P</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2946"/>
         <source>Show cursor coordinates</source>
-        <translation>커서좌표 보기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2949"/>
         <source>Show cursor coordinates (2D and 3D if possible)</source>
-        <translation>커서좌표 보기 (2D  및 3D)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2954"/>
         <source>Delete scan grids</source>
-        <translation>스캔그리드 삭제</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2957"/>
         <source>Delete the underlying scan grids</source>
-        <translation>기본 스캔그리드 삭제</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2962"/>
         <source>Compress FWF data</source>
-        <translation>FWF 데이터 압축</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2965"/>
         <source>Compress the associated FWF data (maybe interesting after interactive segmentation for instance)</source>
-        <translation>관련 FWF 데이터 압축 (예를 들어 대화형 분할일 가능성)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2973"/>
         <source>Interpolate scalar-field(s) from another cloud or mesh</source>
-        <translation>다른 클라우드 또는 메시에서 스칼라필드 보간</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2978"/>
         <source>Export plane info</source>
-        <translation>평면정보 출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2981"/>
         <source>Export plane info to a CSV file (name, width, height, center, normal, dip and dip direction, etc.)</source>
-        <translation>CSV 파일로 평면정보 출력 (이름, 너비, 높이, 중심, 노말,  dip and dip 방향등)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2986"/>
         <source>Lock rotation about arbitrary axis</source>
-        <translation>임의축 회전고정</translation>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="2996"/>
+        <source>None (English)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="3001"/>
+        <source>Compute geometric features</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="3004"/>
+        <source>Compute geometric features (density, curvature, roughness, etc.)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="3009"/>
+        <source>Move bounding-box min corner to origin</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="3012"/>
+        <source>Move the bounding-box min corner to the origin</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="3017"/>
+        <source>Move bounding-box max corner to origin</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="3020"/>
+        <source>Move the bounding-box max corner to the origin</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="3025"/>
+        <source>Move bounding-box center to origin</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="3028"/>
+        <source>Move the bounding-box center to the origin</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="3033"/>
+        <source>Flip</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="3036"/>
+        <source>Flip the selected plane</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="3041"/>
+        <source>Compare</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="3044"/>
+        <source>Compare two planes (angle + distance)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="3049"/>
+        <source>Flip triangles</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="3052"/>
+        <source>Flip triangles (if vertices are ordered in the non-direct order)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="3061"/>
+        <source>Cloud/Primitive Dist</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="3064"/>
+        <location filename="../ui_templates/mainWindow.ui" line="3067"/>
+        <source>Compute cloud/Primitive distance</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="3072"/>
+        <source>Export normals to SF(s)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/mainWindow.ui" line="3075"/>
+        <source>Export normals to one or several scalar fields</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="3085"/>
@@ -7781,112 +7741,10 @@ The active scalar field should have integer values.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/mainWindow.ui" line="1128"/>
-        <location filename="../ui_templates/mainWindow.ui" line="2991"/>
-        <source>Sample points</source>
-        <translation type="unfinished">샘플점</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="2996"/>
-        <source>None (English)</source>
-        <translation>없음 (영어)</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3001"/>
-        <source>Compute geometric features</source>
-        <translation>지오메트릭 피쳐 계산</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3004"/>
-        <source>Compute geometric features (density, curvature, roughness, etc.)</source>
-        <translation>지오메트릭 피쳐 계산 (밀도, 곡률, 거칠기 등)</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3009"/>
-        <source>Move bounding-box min corner to origin</source>
-        <translation>경계박스 최소코너를 원점이로 이동</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3012"/>
-        <source>Move the bounding-box min corner to the origin</source>
-        <translation>경계박스 최소코너를 원점이로 이동</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3017"/>
-        <source>Move bounding-box max corner to origin</source>
-        <translation>경계박스 최대코너를 원점으로 이동</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3020"/>
-        <source>Move the bounding-box max corner to the origin</source>
-        <translation>경계박스 최대코너를 원점으로 이동</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3025"/>
-        <source>Move bounding-box center to origin</source>
-        <translation>경계박스 중심을 원점으로 이동</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3028"/>
-        <source>Move the bounding-box center to the origin</source>
-        <translation>경계박스 중심을 원점으로 이동</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3033"/>
-        <source>Flip</source>
-        <translation>접기</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3036"/>
-        <source>Flip the selected plane</source>
-        <translation>선택한 평면 접기</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3041"/>
-        <source>Compare</source>
-        <translation>비교</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3044"/>
-        <source>Compare two planes (angle + distance)</source>
-        <translation>2면 비교 (각도 + 거리)</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3049"/>
-        <source>Flip triangles</source>
-        <translation>TIN 접기</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3052"/>
-        <source>Flip triangles (if vertices are ordered in the non-direct order)</source>
-        <translation>TIN 접기 (버텍트가 간접으로 정렬된 경우)</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3061"/>
-        <source>Cloud/Primitive Dist</source>
-        <translation>클라우드/초기 거리</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3064"/>
-        <location filename="../ui_templates/mainWindow.ui" line="3067"/>
-        <source>Compute cloud/Primitive distance</source>
-        <translation>클라우드/초기거리 비교</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3072"/>
-        <source>Export normals to SF(s)</source>
-        <translation>SF로 노말 출력</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/mainWindow.ui" line="3075"/>
-        <source>Export normals to one or several scalar fields</source>
-        <translation>하나 이상의 스칼라 필드에 노멀 출력</translation>
-    </message>
-    <message>
         <location filename="../mainwindow.cpp" line="222"/>
         <location filename="../mainwindow.cpp" line="6189"/>
         <source>Enter Full Screen</source>
-        <translation>전체화면 입력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="245"/>
@@ -8133,6 +7991,11 @@ The active scalar field should have integer values.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../mainwindow.cpp" line="1937"/>
+        <source>[DoActionSetViewFromSensor] Viewport applied</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../mainwindow.cpp" line="2020"/>
         <source>Failed to create sensor</source>
         <translation type="unfinished"></translation>
@@ -8231,7 +8094,7 @@ The active scalar field should have integer values.</source>
     <message>
         <location filename="../mainwindow.cpp" line="2497"/>
         <source>Depth buffer</source>
-        <translation type="unfinished">깊이버퍼</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2498"/>
@@ -8246,12 +8109,12 @@ The active scalar field should have integer values.</source>
     <message>
         <location filename="../mainwindow.cpp" line="2544"/>
         <source>Compute visibility</source>
-        <translation>가시성 계산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2545"/>
         <source>Points: %L1</source>
-        <translation>점: %L1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2572"/>
@@ -8281,6 +8144,16 @@ The active scalar field should have integer values.</source>
     <message>
         <location filename="../mainwindow.cpp" line="2649"/>
         <source>[doActionSamplePointsOnMesh] Errors occurred during the process! Result may be incomplete!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2700"/>
+        <source>[DoActionSamplePointsOnPolyline] Errors occurred during the process! Result may be incomplete!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2754"/>
+        <source>[DoActionSmoohPolyline] Errors occurred during the process! Result may be incomplete!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -8314,6 +8187,11 @@ The active scalar field should have integer values.</source>
         <location filename="../mainwindow.cpp" line="5481"/>
         <location filename="../mainwindow.cpp" line="5602"/>
         <source>Previously selected entities (sources) have been hidden!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="2890"/>
+        <source>Entity [%1] has no active scalar field!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -8418,7 +8296,7 @@ The active scalar field should have integer values.</source>
         <location filename="../mainwindow.cpp" line="3482"/>
         <location filename="../mainwindow.cpp" line="3543"/>
         <source>Fusion failed! (not enough memory?)</source>
-        <translation type="unfinished">퓨전 실패! (메모리부족?)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3576"/>
@@ -8434,6 +8312,16 @@ The active scalar field should have integer values.</source>
         <location filename="../mainwindow.cpp" line="3605"/>
         <source>Minimum RMS decrease value is too small.
 %1 will be used instead (numerical accuracy limit).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3645"/>
+        <source>Final RMS*: %1 (computed on %2 points)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="3646"/>
+        <source>(* RMS is potentially weighted, depending on the selected options)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -8489,7 +8377,7 @@ The active scalar field should have integer values.</source>
     <message>
         <location filename="../mainwindow.cpp" line="3764"/>
         <source>Drop shift information?</source>
-        <translation type="unfinished">이격정보 삭제?</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3764"/>
@@ -8545,7 +8433,7 @@ The active scalar field should have integer values.</source>
     <message>
         <location filename="../mainwindow.cpp" line="3929"/>
         <source>Subsampling</source>
-        <translation>하위샘플링</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="3942"/>
@@ -8568,20 +8456,35 @@ The active scalar field should have integer values.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../mainwindow.cpp" line="4104"/>
+        <source>[CreateComponentsClouds] Failed to create component #%1! (not enough memory)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../mainwindow.cpp" line="4116"/>
         <source>No component was created! Check the minimum size...</source>
-        <translation type="unfinished">구성요소가 생성되지 않습니다! 최소크가 확인...</translation>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4125"/>
+        <source>[CreateComponentsClouds] %1 component(s) were created from cloud &apos;%2&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4134"/>
+        <source>[CreateComponentsClouds] Original cloud has been automatically hidden</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4188"/>
         <location filename="../mainwindow.cpp" line="8101"/>
         <source>Couldn&apos;t compute octree for cloud &apos;%1&apos;!</source>
-        <translation type="unfinished">클라우드 &apos;%1&apos;의 옥트리를 계산할 수 없습니다!</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4201"/>
         <source>Couldn&apos;t allocate a new scalar field for computing CC labels! Try to free some memory ...</source>
-        <translation type="unfinished">CC 라벨 계산에 신규 스칼라필드를 할당할 수 없습니다! 메모리를 확보하십시오 ...</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4233"/>
@@ -8592,6 +8495,12 @@ The active scalar field should have integer values.</source>
         <location filename="../mainwindow.cpp" line="4233"/>
         <source>Do you really expect up to %1 components?
 (this may take a lot of time to process and display)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4253"/>
+        <location filename="../mainwindow.cpp" line="4258"/>
+        <source>[DoActionLabelConnectedComponents] Something went wrong while extracting CCs from cloud %1...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -8700,16 +8609,26 @@ The active scalar field should have integer values.</source>
     <message>
         <location filename="../mainwindow.cpp" line="4754"/>
         <source>Triangulation</source>
-        <translation>TIN</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4755"/>
         <source>Triangulation in progress...</source>
-        <translation>TIN 생성중...</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="4793"/>
         <source>Error(s) occurred! See the Console messages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4823"/>
+        <source>[DoActionFitQuadric] Quadric local coordinate system:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="4825"/>
+        <source>[DoActionFitQuadric] Quadric equation (in local coordinate system): </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -8763,14 +8682,14 @@ The active scalar field should have integer values.</source>
         <location filename="../mainwindow.cpp" line="8805"/>
         <location filename="../mainwindow.cpp" line="8879"/>
         <source>Compared</source>
-        <translation type="unfinished">비교</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5134"/>
         <location filename="../mainwindow.cpp" line="8806"/>
         <location filename="../mainwindow.cpp" line="8880"/>
         <source>Reference</source>
-        <translation type="unfinished">기준</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5144"/>
@@ -8786,7 +8705,7 @@ The active scalar field should have integer values.</source>
     <message>
         <location filename="../mainwindow.cpp" line="5234"/>
         <source>Dimension</source>
-        <translation type="unfinished">차수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5234"/>
@@ -8804,6 +8723,46 @@ The active scalar field should have integer values.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../mainwindow.cpp" line="5465"/>
+        <source>[DoActionSORFilter] No points were removed from cloud &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5488"/>
+        <source>[DoActionSORFilter] Not enough memory to create a clean version of cloud &apos;%1&apos;!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5500"/>
+        <source>[DoActionSORFilter] Failed to apply the noise filter to cloud &apos;%1&apos;! (not enough memory?)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5504"/>
+        <source>[DoActionSORFilter] Trying to apply the noise filter to null cloud</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5586"/>
+        <source>[DoActionFilterNoise] No points were removed from cloud &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5609"/>
+        <source>[DoActionFilterNoise] Not enough memory to create a clean version of cloud &apos;%1&apos;!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5621"/>
+        <source>[DoActionFilterNoise] Failed to apply the noise filter to cloud &apos;%1&apos;! (not enough memory?)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="5625"/>
+        <source>[DoActionFilterNoise] Trying to apply the noise filter to null cloud</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../mainwindow.cpp" line="5639"/>
         <location filename="../mainwindow.cpp" line="6601"/>
         <source>Select one and only one entity!</source>
@@ -8817,7 +8776,7 @@ The active scalar field should have integer values.</source>
     <message>
         <location filename="../mainwindow.cpp" line="5680"/>
         <source>Error</source>
-        <translation type="unfinished">에러</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5680"/>
@@ -8847,12 +8806,12 @@ The active scalar field should have integer values.</source>
     <message>
         <location filename="../mainwindow.cpp" line="5914"/>
         <source>Restart</source>
-        <translation>재시작</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5915"/>
         <source>To finish the process, you&apos;ll have to close and restart CloudCompare</source>
-        <translation>과정을 종료하려면 CloudCompare 종료후 재시작해야합니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="5939"/>
@@ -8870,14 +8829,14 @@ The active scalar field should have integer values.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6185"/>
-        <source>Exit Full Screen</source>
-        <translation>전체화면 종료</translation>
-    </message>
-    <message>
         <location filename="../mainwindow.cpp" line="6001"/>
         <source>Are you sure you want to quit?</source>
-        <translation>종료하시겠습니까?</translation>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="6185"/>
+        <source>Exit Full Screen</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="6247"/>
@@ -8887,17 +8846,17 @@ The active scalar field should have integer values.</source>
     <message>
         <location filename="../mainwindow.cpp" line="6279"/>
         <source>Select aligned entities</source>
-        <translation>정렬된 엔티티 선택</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="6306"/>
         <source>Not enough memory</source>
-        <translation>메모리 부족</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="6312"/>
         <source>No aligned entity selected</source>
-        <translation>정렬된 엔티티 선택안됨</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="6325"/>
@@ -8971,6 +8930,11 @@ The active scalar field should have integer values.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../mainwindow.cpp" line="7172"/>
+        <source>The point was picked in the wrong window</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../mainwindow.cpp" line="7199"/>
         <source>[Level] Point is too close from the others!</source>
         <translation type="unfinished"></translation>
@@ -9015,13 +8979,13 @@ The active scalar field should have integer values.</source>
     <message>
         <location filename="../mainwindow.cpp" line="7454"/>
         <source>Histogram</source>
-        <translation type="unfinished">히스토그램</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7460"/>
         <location filename="../mainwindow.cpp" line="7495"/>
         <source>Count</source>
-        <translation type="unfinished">갯수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="7481"/>
@@ -9129,6 +9093,16 @@ The active scalar field should have integer values.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../mainwindow.cpp" line="7940"/>
+        <source>	- plane fitting RMS: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="7945"/>
+        <source>	- normal: (%1, %2, %3)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../mainwindow.cpp" line="7959"/>
         <source>[Orientation] A matrix that would make this plane horizontal (normal towards Z+) is:</source>
         <translation type="unfinished"></translation>
@@ -9164,6 +9138,11 @@ The active scalar field should have integer values.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../mainwindow.cpp" line="8130"/>
+        <source>[SNE_TEST] Mean extraction time = %1 ms (radius = %2, mean (neighbours) = %3)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../mainwindow.cpp" line="8145"/>
         <location filename="../mainwindow.cpp" line="8149"/>
         <source>CNE Test</source>
@@ -9172,16 +9151,21 @@ The active scalar field should have integer values.</source>
     <message>
         <location filename="../mainwindow.cpp" line="8145"/>
         <source>radius</source>
-        <translation type="unfinished">반경</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8149"/>
         <source>height</source>
-        <translation type="unfinished">높이</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8153"/>
         <source>cube</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="8238"/>
+        <source>[CNE_TEST] Mean extraction time = %1 ms (radius = %2, height = %3, mean (neighbours) = %4))</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -9207,12 +9191,12 @@ The active scalar field should have integer values.</source>
     <message>
         <location filename="../mainwindow.cpp" line="8382"/>
         <source>Testing all possible positions</source>
-        <translation>가능한 모든 위차값 테스팅</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8383"/>
         <source>%1 clouds and %2 positions</source>
-        <translation>%1 클라우드 및 %2 위치값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8444"/>
@@ -9222,132 +9206,6 @@ The active scalar field should have integer values.</source>
     <message>
         <location filename="../mainwindow.cpp" line="8480"/>
         <source>Best case #%1 / #%2 - RMS = %3</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="1937"/>
-        <source>[DoActionSetViewFromSensor] Viewport applied</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="2700"/>
-        <source>[DoActionSamplePointsOnPolyline] Errors occurred during the process! Result may be incomplete!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="2754"/>
-        <source>[DoActionSmoohPolyline] Errors occurred during the process! Result may be incomplete!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="2890"/>
-        <source>Entity [%1] has no active scalar field!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="3645"/>
-        <source>Final RMS*: %1 (computed on %2 points)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="3646"/>
-        <source>(* RMS is potentially weighted, depending on the selected options)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="4104"/>
-        <source>[CreateComponentsClouds] Failed to create component #%1! (not enough memory)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="4125"/>
-        <source>[CreateComponentsClouds] %1 component(s) were created from cloud &apos;%2&apos;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="4134"/>
-        <source>[CreateComponentsClouds] Original cloud has been automatically hidden</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="4253"/>
-        <location filename="../mainwindow.cpp" line="4258"/>
-        <source>[DoActionLabelConnectedComponents] Something went wrong while extracting CCs from cloud %1...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="4823"/>
-        <source>[DoActionFitQuadric] Quadric local coordinate system:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="4825"/>
-        <source>[DoActionFitQuadric] Quadric equation (in local coordinate system): </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="5465"/>
-        <source>[DoActionSORFilter] No points were removed from cloud &apos;%1&apos;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="5488"/>
-        <source>[DoActionSORFilter] Not enough memory to create a clean version of cloud &apos;%1&apos;!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="5500"/>
-        <source>[DoActionSORFilter] Failed to apply the noise filter to cloud &apos;%1&apos;! (not enough memory?)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="5504"/>
-        <source>[DoActionSORFilter] Trying to apply the noise filter to null cloud</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="5586"/>
-        <source>[DoActionFilterNoise] No points were removed from cloud &apos;%1&apos;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="5609"/>
-        <source>[DoActionFilterNoise] Not enough memory to create a clean version of cloud &apos;%1&apos;!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="5621"/>
-        <source>[DoActionFilterNoise] Failed to apply the noise filter to cloud &apos;%1&apos;! (not enough memory?)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="5625"/>
-        <source>[DoActionFilterNoise] Trying to apply the noise filter to null cloud</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="7172"/>
-        <source>The point was picked in the wrong window</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="7940"/>
-        <source>	- plane fitting RMS: %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="7945"/>
-        <source>	- normal: (%1, %2, %3)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="8130"/>
-        <source>[SNE_TEST] Mean extraction time = %1 ms (radius = %2, mean (neighbours) = %3)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../mainwindow.cpp" line="8238"/>
-        <source>[CNE_TEST] Mean extraction time = %1 ms (radius = %2, height = %3, mean (neighbours) = %4))</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -9395,7 +9253,7 @@ The active scalar field should have integer values.</source>
         <location filename="../mainwindow.cpp" line="8821"/>
         <location filename="../mainwindow.cpp" line="8895"/>
         <source>Failed to initialize comparison dialog</source>
-        <translation type="unfinished">비교 대화창 초기화 실패</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="8838"/>
@@ -9455,17 +9313,17 @@ The active scalar field should have integer values.</source>
     <message>
         <location filename="../mainwindow.cpp" line="9028"/>
         <source>Cylinder</source>
-        <translation type="unfinished">실린더</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9037"/>
         <source>Cone</source>
-        <translation type="unfinished">콘</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9049"/>
         <source>Box</source>
-        <translation type="unfinished">박스</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9069"/>
@@ -9522,7 +9380,7 @@ Use the &apos;Stereo&apos; version instead.</source>
         <location filename="../mainwindow.cpp" line="9423"/>
         <location filename="../mainwindow.cpp" line="9466"/>
         <source>Clipboard</source>
-        <translation type="unfinished">클립보드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9426"/>
@@ -9577,12 +9435,12 @@ Use the &apos;Stereo&apos; version instead.</source>
     <message>
         <location filename="../mainwindow.cpp" line="9861"/>
         <source>Are you sure you want to remove all loaded entities?</source>
-        <translation>로드된 모든 엔티티를 제거하겠습니까?</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9894"/>
         <source>Open file(s)</source>
-        <translation>파일열기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="9995"/>
@@ -9597,7 +9455,7 @@ Use the &apos;Stereo&apos; version instead.</source>
     <message>
         <location filename="../mainwindow.cpp" line="10144"/>
         <source>Save file</source>
-        <translation>파일저장</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="10159"/>
@@ -9677,95 +9535,94 @@ Use the &apos;Stereo&apos; version instead.</source>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="14"/>
         <source>Match scales</source>
-        <translation>매치스케일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="20"/>
         <source>Choose the reference entity (its scale won&apos;t change)</source>
-        <translation>기준엔티티 선택 (스케일이 변경되지 않습니다)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="23"/>
         <source>Reference entity</source>
-        <translation>기준엔티티</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="35"/>
         <source>Matching criterion</source>
-        <translation>매치 기준값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="41"/>
         <source>The scaling ratio will be deduced from the largest bounding-box dimension</source>
-        <translation>스케일링 비율은 가장 큰 제한박스 차원에서 추론됩니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="44"/>
         <source>max bounding-box dimension</source>
-        <translation>최대 제한박스 차원</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="51"/>
         <source>The scaling ratio will be deduced from the bounding-box volume</source>
-        <translation>스케일링 비율은 제한박스 부피에서 추론됩니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="54"/>
         <source>bounding-box volume</source>
-        <translation>제한박스 부피</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="61"/>
         <source>The scaling ratio will be deduced from the principal cloud dimension (by PCA analysis)</source>
-        <translation>스케일링 비율은 이론 클라우드 차원( PCA 분석)에서 추론됩니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="64"/>
         <source>principal dimension (PCA)</source>
-        <translation>이론차원 (PCA)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="74"/>
         <source>The scaling ratio will be deduced from automatic registration (with unconstrained scale).
 Should be used after one of the previous methods!</source>
-        <translation>스케일링 비율은 자동정합 (무제한스케일)에서 추론됩니다.
-이전 방식 중 하나를 사용한 후에 사용해야 합니다!</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="78"/>
         <source>ICP (only the scale will be applied)</source>
-        <translation>ICP (스케일만 적용됩니다)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="91"/>
         <source>Parameters for ICP registration</source>
-        <translation>ICP 정합 파라미터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="94"/>
         <source>ICP parameters</source>
-        <translation>ICP 파라미터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="100"/>
         <source>RMS difference</source>
-        <translation>RMS 편차</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="113"/>
         <source>Set the minimum RMS improvement between 2 consecutive iterations (below which the registration process will stop).</source>
-        <translation>두 번의 연속 반복간 최소 RMS 개선 설정 (정합과정이 멈추는 하단).</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="129"/>
         <location filename="../ui_templates/matchScalesDlg.ui" line="154"/>
         <source>Rough estimation of the final overlap ratio of the data cloud (the smaller, the better the initial registration should be!)</source>
-        <translation>데이터 클라우드의 최종 중복 비율을 대략적으로 추정(작아질수록 초기정합이 더 좋아야합니다!)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="157"/>
         <source>Final overlap</source>
-        <translation>최종 중복도</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -9774,37 +9631,37 @@ Should be used after one of the previous methods!</source>
         <location filename="../ui_templates/matrixDisplayDlg.ui" line="23"/>
         <location filename="../ui_templates/matrixDisplayDlg.ui" line="45"/>
         <source>Matrix</source>
-        <translation>행렬</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/matrixDisplayDlg.ui" line="85"/>
         <source>Axis/Angle</source>
-        <translation>축/각도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/matrixDisplayDlg.ui" line="100"/>
         <source>Axis</source>
-        <translation>축</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/matrixDisplayDlg.ui" line="120"/>
         <source>Angle</source>
-        <translation>각도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/matrixDisplayDlg.ui" line="140"/>
         <source>Center</source>
-        <translation>중심</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/matrixDisplayDlg.ui" line="161"/>
         <source>Export</source>
-        <translation>출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/matrixDisplayDlg.ui" line="177"/>
         <source>Clipboard</source>
-        <translation>클립보드</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -9817,62 +9674,60 @@ Should be used after one of the previous methods!</source>
     <message>
         <location filename="../../plugins/core/Standard/qMeshBoolean/ui/meshBooleanDlg.ui" line="41"/>
         <source>A</source>
-        <translation type="unfinished">A</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qMeshBoolean/ui/meshBooleanDlg.ui" line="59"/>
         <source>B</source>
-        <translation type="unfinished">B</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qMeshBoolean/ui/meshBooleanDlg.ui" line="89"/>
         <source>Merge two objects into one</source>
-        <translation type="unfinished">2객체을 한개로 병합</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qMeshBoolean/ui/meshBooleanDlg.ui" line="92"/>
         <source>Union
 A+B</source>
-        <translation type="unfinished">유니온
-A+B</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qMeshBoolean/ui/meshBooleanDlg.ui" line="100"/>
         <source>Subtract one object from another</source>
-        <translation type="unfinished">한 개체를 다른 개체에서 뺍니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qMeshBoolean/ui/meshBooleanDlg.ui" line="103"/>
         <source>Difference
 A-B</source>
-        <translation type="unfinished">A-B 편차</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qMeshBoolean/ui/meshBooleanDlg.ui" line="111"/>
         <source>Return the portion common to both objects</source>
-        <translation type="unfinished">두 객체에 공통적인 부분을 리턴</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qMeshBoolean/ui/meshBooleanDlg.ui" line="114"/>
         <source>Intersection
 A n B</source>
-        <translation type="unfinished">교차점
-A n B</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qMeshBoolean/ui/meshBooleanDlg.ui" line="135"/>
         <source>Subtract one object from another (inverse result)</source>
-        <translation type="unfinished">한 개체를 다른 개체에서 뺍니다 (역계산)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qMeshBoolean/ui/meshBooleanDlg.ui" line="138"/>
         <source>Symmetric Difference</source>
-        <translation type="unfinished">대칭 편차</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qMeshBoolean/ui/meshBooleanDlg.ui" line="161"/>
         <source>Image courtesy of Autodesk(r)</source>
-        <translation type="unfinished">Autodesk 이미지 제공</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -9880,42 +9735,42 @@ A n B</translation>
     <message>
         <location filename="../ui_templates/noiseFilterDlg.ui" line="14"/>
         <source>Filter noise</source>
-        <translation>필터 노이즈</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/noiseFilterDlg.ui" line="20"/>
         <source>Neighbors</source>
-        <translation>네이버</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/noiseFilterDlg.ui" line="26"/>
         <source>Points (kNN)</source>
-        <translation>점 (kNN)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/noiseFilterDlg.ui" line="33"/>
         <source>Radius (Sphere)</source>
-        <translation>반경 (구면)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/noiseFilterDlg.ui" line="72"/>
         <source>Max error</source>
-        <translation>최대에러</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/noiseFilterDlg.ui" line="78"/>
         <source>Relative</source>
-        <translation>상대</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/noiseFilterDlg.ui" line="88"/>
         <source>Absolute</source>
-        <translation>절대</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/noiseFilterDlg.ui" line="121"/>
         <source>Remove isolated points</source>
-        <translation>분리된점 제거</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -9923,98 +9778,98 @@ A n B</translation>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="14"/>
         <source>Compute normals</source>
-        <translation>노멀 계산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="20"/>
         <source>Surface approximation</source>
-        <translation>예산 지형</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="29"/>
         <source>Local surface model</source>
-        <translation>로컬 지형모델</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="36"/>
         <source>Local surface estimation model</source>
-        <translation>로컬 지형 예상모델</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="43"/>
         <source>Plane</source>
-        <translation>평면</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="48"/>
         <source>Quadric</source>
-        <translation>4분</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="53"/>
         <source>Triangulation</source>
-        <translation>TIN</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="70"/>
         <source>Neighbors</source>
-        <translation>네이버</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="81"/>
         <source>Using scan grid(s) instead of the octree</source>
-        <translation>옥트리대신 스캔 그리드 사용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="84"/>
         <source>use scan grid(s) whenever possible</source>
-        <translation>가능하면 스캔 그리드 사용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="125"/>
         <source>min triangulation angle</source>
-        <translation>최소 TIN 각도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="128"/>
         <source>min angle</source>
-        <translation>최소각도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="138"/>
         <source>Min angle of local triangles (in degrees)</source>
-        <translation>로컬 TIN 최소각도 (deg)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="188"/>
         <source>Octree</source>
-        <translation>옥트리</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="223"/>
         <location filename="../ui_templates/normalComputationDlg.ui" line="233"/>
         <source>Radius of the sphere in which the neighbors will be extracted</source>
-        <translation>네이버를 추출할 구면의 반지름</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="226"/>
         <source>radius</source>
-        <translation>반경</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="255"/>
         <source>Auto</source>
-        <translation>자동</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="276"/>
         <source>Orientation</source>
-        <translation>방위각</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="288"/>
         <source>Use scan grid(s) (robust method)</source>
-        <translation>스캔그리드 사용 (튼튼한 방식)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="291"/>
@@ -10024,22 +9879,22 @@ A n B</translation>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="301"/>
         <source>Use sensor position to orient normals (if both grid and sensor are selected, &apos;grid&apos; has precedence over &apos;sensor&apos;)</source>
-        <translation>센서 위치를 사용하여 노말 방향설정 (그리드 및 센서 모두 선택시 &apos;그리드&apos;가 &apos;센서&apos;보다 우선)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="304"/>
         <source>Use sensor(s) whenever possible</source>
-        <translation>가능한경우 센서 사용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="313"/>
         <source>To give a hint on how to orient normals</source>
-        <translation>노말 방향성정 힌트보기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="316"/>
         <source>Use preferred orientation</source>
-        <translation>선호 방위각설정 사용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="376"/>
@@ -10054,7 +9909,7 @@ A n B</translation>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="396"/>
         <source>Use previous normal</source>
-        <translation>이전노말 사용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="401"/>
@@ -10069,17 +9924,17 @@ A n B</translation>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="418"/>
         <source>Generic 3D orientation algorithm</source>
-        <translation>일반 3D 방위각설정 알고리즘</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="421"/>
         <source>Use Minimum Spanning Tree</source>
-        <translation>최소 스패닝 트리 사용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/normalComputationDlg.ui" line="447"/>
         <source>Number of neighbors used to build the tree</source>
-        <translation>트리를 생성할 네이버후드 갯수</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -10087,27 +9942,27 @@ A n B</translation>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/NormalEstimationDlg.ui" line="20"/>
         <source>Neighborhood Search Radius</source>
-        <translation>네이버후드 검색반경</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/NormalEstimationDlg.ui" line="28"/>
         <source>Search Radius</source>
-        <translation>검색반경</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/NormalEstimationDlg.ui" line="58"/>
         <source>Use Knn Search</source>
-        <translation>Knn 검색사용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/NormalEstimationDlg.ui" line="77"/>
         <source>Overwrite Curvature</source>
-        <translation>곡률 덮어쓰기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/NormalEstimationDlg.ui" line="89"/>
         <source>Search Surface</source>
-        <translation>검색지형</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -10115,189 +9970,188 @@ A n B</translation>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="14"/>
         <source>Open LAS File</source>
-        <translation>LAS 파일 열기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="24"/>
         <source>Standard fields</source>
-        <translation>표준필드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="93"/>
         <source>Classification</source>
-        <translation>분류</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="103"/>
         <source>decompose</source>
-        <translation>분해</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="115"/>
         <source>Value</source>
-        <translation>값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="125"/>
         <source>Synthetic flag</source>
-        <translation>합성 플래스</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="135"/>
         <source>Key-point</source>
-        <translation>키포인트</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="145"/>
         <source>Withheld</source>
-        <translation>Withheld</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="155"/>
         <source>Overlap</source>
-        <translation>중복도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="168"/>
         <source>Time</source>
-        <translation>시간</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="178"/>
         <source>Point source ID</source>
-        <translation>점 소스번호</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="188"/>
         <source>Number of returns</source>
-        <translation>리턴갯수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="198"/>
         <source>Return number</source>
-        <translation>리턴갯수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="208"/>
         <source>Scan direction flag</source>
-        <translation>스캔방향 플래그</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="218"/>
         <source>Edge of flight line</source>
-        <translation>플라이트 엣지라인</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="228"/>
         <source>Scan angle rank</source>
-        <translation>스캔각도 랭크</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="238"/>
         <source>User data</source>
-        <translation>사용자 데이터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="250"/>
         <source>Intensity</source>
-        <translation>강도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="261"/>
         <source>Extended fields</source>
-        <translation>확장필드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="267"/>
         <source>Load additional field(s)</source>
-        <translation>추가필드 로드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="290"/>
         <source>Tiling</source>
-        <translation>타일링</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="296"/>
         <source>Tile input file</source>
-        <translation>타일입력 파일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="310"/>
         <source>Dimension</source>
-        <translation>차수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="342"/>
         <source>Tiles</source>
-        <translation>타일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="376"/>
         <source>x</source>
-        <translation>x</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="419"/>
         <source>Output path</source>
-        <translation>출력경로</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="431"/>
         <source>...</source>
-        <translation>...</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="443"/>
         <source>Warning: the cloud won&apos;t be loaded in memory.
 It will be saved as multiple tiles on the disk.</source>
-        <translation>경고: 클라우드는 메모리에 로드되지 않습니다.
-디스크에 여러 타일로 저장됩니다.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="471"/>
         <source>Info</source>
-        <translation>정보</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="477"/>
         <source>Points</source>
-        <translation>점</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="491"/>
         <source>Bounding-box</source>
-        <translation>경계박스</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="509"/>
         <source>Ignore fields with default values only</source>
-        <translation>기본값 필드 무시</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="519"/>
         <source>Force reading colors as 8-bit values (even if the standard is 16-bit)</source>
-        <translation>8비트값으로 판독색상 강제저장 (표준이 16비트 경우에도)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="522"/>
         <source>Force 8-bit colors</source>
-        <translation>강제 8비트 컬러</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="576"/>
         <source>Apply</source>
-        <translation>적용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="583"/>
         <source>Apply all</source>
-        <translation>전체적용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/ui/openLASFileDlg.ui" line="590"/>
         <source>Cancel</source>
-        <translation>취소</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -10305,57 +10159,57 @@ It will be saved as multiple tiles on the disk.</source>
     <message>
         <location filename="../ui_templates/orthoSectionGenerationDlg.ui" line="14"/>
         <source>Orthogonal sections generation</source>
-        <translation>직교단면 생성</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/orthoSectionGenerationDlg.ui" line="22"/>
         <source>Selected path length</source>
-        <translation>선택경로 길이</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/orthoSectionGenerationDlg.ui" line="25"/>
         <source>path length</source>
-        <translation>경로길이</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/orthoSectionGenerationDlg.ui" line="42"/>
         <source>sections</source>
-        <translation>단면</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/orthoSectionGenerationDlg.ui" line="52"/>
         <source>Number of sections that will be generated (depends on the &apos;step&apos; parameter)</source>
-        <translation>생성될 단면갯수 (&apos;단계&apos; 파라미터에 따름)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/orthoSectionGenerationDlg.ui" line="66"/>
         <source>step</source>
-        <translation>단계</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/orthoSectionGenerationDlg.ui" line="73"/>
         <source>Section generation step</source>
-        <translation>단면생성 단계</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/orthoSectionGenerationDlg.ui" line="89"/>
         <source>width</source>
-        <translation>너비</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/orthoSectionGenerationDlg.ui" line="96"/>
         <source>Total width of each orthogonal section (centered on the path line)</source>
-        <translation>각 직교단면 총너비 (경로라인에 중심)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/orthoSectionGenerationDlg.ui" line="114"/>
         <source>Automatically save then remove the generatrix polyline</source>
-        <translation>자동저장후 모선 폴리선 제거</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/orthoSectionGenerationDlg.ui" line="117"/>
         <source>auto save and remove generatrix</source>
-        <translation>자동저장후 모선제거</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -10363,27 +10217,27 @@ It will be saved as multiple tiles on the disk.</source>
     <message>
         <location filename="../../plugins/core/Standard/qPCV/ui/pcvDlg.ui" line="14"/>
         <source>ShadeVis</source>
-        <translation>ShadeVis</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCV/ui/pcvDlg.ui" line="30"/>
         <source>Light rays</source>
-        <translation>광선</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCV/ui/pcvDlg.ui" line="36"/>
         <source>Samples rays on a sphere</source>
-        <translation>구면의 광선 샘플링</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCV/ui/pcvDlg.ui" line="49"/>
         <source>Count</source>
-        <translation>갯수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCV/ui/pcvDlg.ui" line="56"/>
         <source>number of rays to cast</source>
-        <translation>캐스트할 광선갯수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCV/ui/pcvDlg.ui" line="88"/>
@@ -10393,37 +10247,37 @@ It will be saved as multiple tiles on the disk.</source>
     <message>
         <location filename="../../plugins/core/Standard/qPCV/ui/pcvDlg.ui" line="91"/>
         <source>Only northern hemisphere (+Z)</source>
-        <translation>N반구 (+Z)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCV/ui/pcvDlg.ui" line="104"/>
         <source>Use cloud normals as light rays</source>
-        <translation>클라우드 노멀을 광선으로 사용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCV/ui/pcvDlg.ui" line="117"/>
         <source>cloud</source>
-        <translation>클라우드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCV/ui/pcvDlg.ui" line="142"/>
         <source>Render context resolution</source>
-        <translation>렌더 컨텍스트 해상도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCV/ui/pcvDlg.ui" line="149"/>
         <source>rendering buffer resolution</source>
-        <translation>렝더링 버퍼 해상도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCV/ui/pcvDlg.ui" line="185"/>
         <source>Accelerates computation if the mesh is closed (no holes)</source>
-        <translation>메시가 근접하면 계산이 가속화 (구멍없음)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCV/ui/pcvDlg.ui" line="188"/>
         <source>closed mesh</source>
-        <translation>폐합메시</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -10431,22 +10285,22 @@ It will be saved as multiple tiles on the disk.</source>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="14"/>
         <source>Plane properties</source>
-        <translation>평면속성</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="24"/>
         <source>Dip / dip direction</source>
-        <translation>Dip / dip 방향</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="30"/>
         <source>dip</source>
-        <translation>dip</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="53"/>
         <source>dip direction</source>
-        <translation>dip 방향</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="76"/>
@@ -10456,47 +10310,47 @@ It will be saved as multiple tiles on the disk.</source>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="79"/>
         <source>upward</source>
-        <translation>상향</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="90"/>
         <source>Normal</source>
-        <translation>노말</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="148"/>
         <source>Dimensions</source>
-        <translation>차원</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="157"/>
         <source>width</source>
-        <translation>너비</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="164"/>
         <source>Plane width</source>
-        <translation>평면너비</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="183"/>
         <source>height</source>
-        <translation>높이</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="190"/>
         <source>Plane height</source>
-        <translation>평면높이</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="212"/>
         <source>Center</source>
-        <translation>중심</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/planeEditDlg.ui" line="237"/>
         <source>Pick the plane center (click again to cancel)</source>
-        <translation>평면중심 선택 (다시클릭하면 취소)</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -10504,102 +10358,102 @@ It will be saved as multiple tiles on the disk.</source>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="14"/>
         <source>Ply File Open</source>
-        <translation>플라이 파일 열기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="22"/>
         <source>Type</source>
-        <translation>종류</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="43"/>
         <source>Elements</source>
-        <translation>요소</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="69"/>
         <source>Properties</source>
-        <translation>속성</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="95"/>
         <source>Textures</source>
-        <translation>텍스쳐</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="131"/>
         <source>Point X</source>
-        <translation>점 X</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="141"/>
         <source>Point Y</source>
-        <translation>점 Y</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="151"/>
         <source>Point Z</source>
-        <translation>점 Z</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="161"/>
         <source>Red</source>
-        <translation>Red</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="171"/>
         <source>Green</source>
-        <translation>Green</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="181"/>
         <source>Blue</source>
-        <translation>Blue</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="191"/>
         <source>Intensity</source>
-        <translation>강도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="231"/>
         <source>Faces</source>
-        <translation>페이스</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="241"/>
         <source>Texture coordinates</source>
-        <translation>텍스쳐 좌표</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="254"/>
         <source>Scalar</source>
-        <translation>스칼라</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="261"/>
         <source>Texture index</source>
-        <translation>텍스쳐 인덱스</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="273"/>
         <source>Add Scalar field</source>
-        <translation>스칼라필드 추가</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="327"/>
         <source>Apply</source>
-        <translation>적용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="334"/>
         <source>Apply all</source>
-        <translation>전체적용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="341"/>
         <source>Cancel</source>
-        <translation>취소</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -10607,76 +10461,76 @@ It will be saved as multiple tiles on the disk.</source>
     <message>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="20"/>
         <source>Point list picking</source>
-        <translation>점목록 선택</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="31"/>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="34"/>
         <source>Remove last entry</source>
-        <translation>최근 입력값 제거</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="37"/>
         <source>remove last</source>
-        <translation>최근값 제거</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="48"/>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="51"/>
         <source>export to ASCII file</source>
-        <translation>ASCII 파일 출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="68"/>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="71"/>
         <source>Convert list to new cloud (and close dialog)</source>
-        <translation>목록을 새로운 클라우드로 변환 (및 대화창닫기)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="74"/>
         <source>to cloud</source>
-        <translation>- 클라우드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="85"/>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="88"/>
         <source>Close dialog (list will be lost)</source>
-        <translation>대화창닫기 (목록이 사라집니다)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="91"/>
         <source>stop</source>
-        <translation>정지</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="115"/>
         <source>count</source>
-        <translation>갯수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="168"/>
         <source>Index</source>
-        <translation>인덱스</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="193"/>
         <source>marker size</source>
-        <translation>메이커 크기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="226"/>
         <source>start index</source>
-        <translation>인덱스 시작</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="262"/>
         <source>Show global coordinates (instead of shifted ones)</source>
-        <translation>글로벌좌표 보기 (이격값 대신)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/pointListPickingDlg.ui" line="265"/>
         <source>show global coordinates</source>
-        <translation>글러벌좌표 보기</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -10684,44 +10538,44 @@ It will be saved as multiple tiles on the disk.</source>
     <message>
         <location filename="../ui_templates/pointPropertiesDlg.ui" line="14"/>
         <source>Points Properties</source>
-        <translation>점속성</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPropertiesDlg.ui" line="32"/>
         <location filename="../ui_templates/pointPropertiesDlg.ui" line="35"/>
         <source>Select one point and display its information</source>
         <comment>Display selected point properties</comment>
-        <translation>점선택후 정보보기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPropertiesDlg.ui" line="49"/>
         <location filename="../ui_templates/pointPropertiesDlg.ui" line="52"/>
         <source>Select 2 points and display segment information (length, etc.)</source>
         <comment>Compute point to point distance</comment>
-        <translation type="unfinished">2점 선택후 부분정보표시 (길이등)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPropertiesDlg.ui" line="69"/>
         <location filename="../ui_templates/pointPropertiesDlg.ui" line="72"/>
         <source>Select 3 points and display corresponding triangle information</source>
-        <translation type="unfinished">3점선택후 관련된 삼각정보 표시</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPropertiesDlg.ui" line="86"/>
         <location filename="../ui_templates/pointPropertiesDlg.ui" line="89"/>
         <source>Define a rectangular 2D label</source>
-        <translation>직사각형 2D 라벨 설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPropertiesDlg.ui" line="92"/>
         <source>2D zone</source>
-        <translation>2D 존</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPropertiesDlg.ui" line="103"/>
         <location filename="../ui_templates/pointPropertiesDlg.ui" line="106"/>
         <source>Save current label (added to cloud children)</source>
-        <translation>현재라벨 저장 (클라우드 칠드런에 추가)</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -10729,49 +10583,49 @@ It will be saved as multiple tiles on the disk.</source>
     <message>
         <location filename="../ui_templates/ptsSamplingDlg.ui" line="14"/>
         <source>Points Sampling on mesh</source>
-        <translation>메시이 점샘플링</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/ptsSamplingDlg.ui" line="32"/>
         <location filename="../ui_templates/ptsSamplingDlg.ui" line="55"/>
         <source>Total number of sampled points (approx.)</source>
-        <translation>샘픙링된 총갯수 (예상)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/ptsSamplingDlg.ui" line="35"/>
         <source>Points Number</source>
-        <translation>점넘버</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/ptsSamplingDlg.ui" line="45"/>
         <location filename="../ui_templates/ptsSamplingDlg.ui" line="77"/>
         <source>Density: pts/square unit</source>
-        <translation>강도: 점/square unit</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/ptsSamplingDlg.ui" line="48"/>
         <source>Density</source>
-        <translation>강도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/ptsSamplingDlg.ui" line="111"/>
         <source>generate normals</source>
-        <translation>노멀생성</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/ptsSamplingDlg.ui" line="123"/>
         <source>get colors</source>
-        <translation>컬러획득</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/ptsSamplingDlg.ui" line="130"/>
         <source>from RGB</source>
-        <translation>RGB 사용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/ptsSamplingDlg.ui" line="140"/>
         <source>or from material/texture if available</source>
-        <translation>또는 자재/텍스쳐 사용</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -10779,42 +10633,42 @@ It will be saved as multiple tiles on the disk.</source>
     <message>
         <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="14"/>
         <source>Poisson Surface Reconstruction</source>
-        <translation>포이송 지면복원</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="23"/>
         <source>Octree depth</source>
-        <translation>옥트리깊이</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="33"/>
         <source>The maximum depth of the tree that will be used for surface reconstruction</source>
-        <translation>지면복원에 사용할 트리의 최대깊이</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="49"/>
         <source>Resolution</source>
-        <translation>해상도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="78"/>
         <source>interpolate cloud colors</source>
-        <translation>클라우드컬러 보간</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="92"/>
         <source>Density</source>
-        <translation>강도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="98"/>
         <source>If this flag is enabled, the sampling density is output as a scalar field</source>
-        <translation>플래그 사용시 샘플링 밀도가 스칼라필드로 출력됩니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="101"/>
         <source>output density as SF</source>
-        <translation>SF로 강도출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="111"/>
@@ -10827,65 +10681,57 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;On the output mesh:&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;- Change the SF &apos;&lt;span style=&quot; font-style:italic;&quot;&gt;min displayed&apos;&lt;/span&gt;&apos; value (in the mesh properties) until the visible part meets your expectations&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;- Eventually export this mesh as a new one with &apos;&lt;span style=&quot; font-style:italic;&quot;&gt;Edit &amp;gt; Scalar fields &amp;gt; Filter by Value&lt;/span&gt;&apos; (you can delete the &apos;density&apos; scalar field afterwards) &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;밀도는 입력한 포인트클라우드를 최대한 맞도록 출력할 메시의 범위를 줄이는 데 유용합니다.&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;출력할 메시에서:&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;- SF &apos;&lt;span style=&quot; font-style:italic;&quot;&gt;최소표시&apos;&lt;/span&gt;&apos;값 (메시속성에서)을 기대한 만큼 보일때까지 변경합니다.&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;- 결국 이 메시를 &apos;&lt;span style=&quot; font-style:italic;&quot;&gt;값으로 스칼라필드 필터 편집&lt;/span&gt;&apos;와 함께 새로운 메시로 출력합니다 (이후 &apos;밀도&apos; 스칼라필드를 삭제할 수 있습니다) &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="127"/>
         <source>Advanced</source>
-        <translation>고급</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="133"/>
         <source>boundary</source>
-        <translation type="unfinished">경계</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="144"/>
         <source>Free</source>
-        <translation>자유</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="149"/>
         <source>Dirichlet</source>
-        <translation>디리클레</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="154"/>
         <source>Neumann</source>
-        <translation>노이만</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="162"/>
         <source>The importance that interpolation of the point samples is given in the formulation of the screened Poisson equation</source>
-        <translation>점 표본의 보간이 선별된 포아송 방정식의 공식에 주어지는 중요도입니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="165"/>
         <source>point weight</source>
-        <translation>점가중치</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="172"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Interpolation weight (twice the b-spline degree by default)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;보간 가중치 (기본값으로 b-spline degree 두배)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="185"/>
         <source>Enabling this flag has the reconstructor use linear interpolation to estimate the positions of iso-vertices.</source>
-        <translation>이 플래그를 활성화하면 재구성자가 선형 보간법을 사용하여 ISO-수직의 위치를 추정할 수 있습니다.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="188"/>
         <source>Linear fit</source>
-        <translation>선형맞춤</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="198"/>
@@ -10894,21 +10740,17 @@ as the octree construction is adapted to sampling density. For noise-free
 samples, small values in the range [1.0 - 5.0] can be used. For more noisy
 samples, larger values in the range [15.0 - 20.0] may be needed to provide
 a smoother, noise-reduced, reconstruction.</source>
-        <translation>옥트리 노드에 속해야 하는 최소 샘플 점개수가
-8진수 구조가 샘플링 밀도에 맞게 조정됩니다.
-노이즈가 없는 샘플에서 [1.0 - 5.0] 범위의 작은값이 사용됩니다.
-노이즈가 많은 샘플에서 더부드럽고, 노이즈가 적게 하기 위해 [15.0 - 20.0] 범위의
-더 큰 값이 필요할 수 있습니다.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="205"/>
         <source>samples per node</source>
-        <translation>노드당 샘플</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="212"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Minimum number of sample points that should fall within an octree node as the octree construction is adapted to sampling density.&lt;/p&gt;&lt;p&gt;For noise-free samples, small values in the range [1.0 - 5.0] can be used.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; color:#ff0000;&quot;&gt;For more noisy samples&lt;/span&gt;, larger values in the range [15.0 - 20.0] may be needed to provide a smoother, noise-reduced, reconstruction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;옥트리 노드에 속해야 하는 최소 샘플 점개수가 8진수 구조가 샘플링 밀도에 맞게 조정됩니다.&lt;/p&gt;&lt;p&gt;노이즈가 없는 샘플에서 [1.0 - 5.0] 범위의 작은값이 사용됩니다.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; color:#ff0000;&quot;&gt;노이즈가 많은 샘플에서&lt;/span&gt; 더부드럽고, 노이즈가 적게 하기 위해 [15.0 - 20.0] 범위의 더 큰 값이 필요할 수 있습니다.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -10916,149 +10758,149 @@ a smoother, noise-reduced, reconstruction.</source>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="14"/>
         <source>Primitive factory</source>
-        <translation type="unfinished">기본설정값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="28"/>
         <source>Plane</source>
-        <translation>평면</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="115"/>
         <source>Box</source>
-        <translation>박스</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="225"/>
         <source>Sphere</source>
-        <translation>구형</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="233"/>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="396"/>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="824"/>
         <source>radius</source>
-        <translation>반경</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="284"/>
         <source>Position</source>
-        <translation>위치값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="358"/>
         <source>Set position to origin</source>
-        <translation>원점의 위치값설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="361"/>
         <source>clear</source>
-        <translation>지우기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="368"/>
         <source>Try to interpret clipboard contents as position (&quot;x y z&quot;)</source>
-        <translation>클립보드 내용을 위치값 (&quot;x y z&quot;)으로 해석합니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="371"/>
         <source>clipboard</source>
-        <translation>클립보드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="388"/>
         <source>Cylinder</source>
-        <translation>실린더</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="419"/>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="531"/>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="847"/>
         <source>height</source>
-        <translation>높이</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="475"/>
         <source>Cone</source>
-        <translation>콘</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="485"/>
         <source>top radius</source>
-        <translation>상단반경</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="508"/>
         <source>bottom radius</source>
-        <translation>하단반경</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="556"/>
         <source>Snout mode</source>
-        <translation>스나우트모드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="568"/>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="571"/>
         <source>displacement of axes along X-axis</source>
-        <translation>X축 변위</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="574"/>
         <source>x offset</source>
-        <translation>X 옵셋</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="597"/>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="600"/>
         <source>displacement of axes along Y-axis</source>
-        <translation>Y축 변위</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="603"/>
         <source>y offset</source>
-        <translation>Y 옵셋</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="662"/>
         <source>Torus</source>
-        <translation>토러스</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="672"/>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="755"/>
         <source>inside radius</source>
-        <translation>반경내부</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="695"/>
         <source>outside radius</source>
-        <translation>반경외부</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="718"/>
         <source>angle (degrees)</source>
-        <translation>각도 (deg)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="743"/>
         <source>Rectangular section</source>
-        <translation>직사각 단면</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="814"/>
         <source>Dish</source>
-        <translation>디쉬</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="872"/>
         <source>Ellipsoid mode</source>
-        <translation>타원체모드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="884"/>
         <source>radius 2</source>
-        <translation>반경 2</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="939"/>
@@ -11083,17 +10925,17 @@ a smoother, noise-reduced, reconstruction.</source>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="979"/>
         <source>Initial precision</source>
-        <translation>초기 자릿수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="1015"/>
         <source>Create</source>
-        <translation>생성</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="1022"/>
         <source>Close</source>
-        <translation>닫기</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -11103,58 +10945,58 @@ a smoother, noise-reduced, reconstruction.</source>
         <location filename="../../plugins/core/Standard/qMasonry/qManualSeg/profileImportDlg.ui" line="14"/>
         <location filename="../../plugins/core/Standard/qSRA/ui/profileImportDlg.ui" line="14"/>
         <source>Import profile</source>
-        <translation>프로파일 입력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qMasonry/qAutoSeg/profileImportDlg.ui" line="44"/>
         <source>Operations</source>
-        <translation>작동</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qMasonry/qAutoSeg/profileImportDlg.ui" line="53"/>
         <source>Align wall to XZ (vertical)</source>
-        <translation>XZ 로 벽 정렬 (수직)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qMasonry/qAutoSeg/profileImportDlg.ui" line="60"/>
         <source>Automatic segmentation</source>
-        <translation>자동 세분화</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qMasonry/qAutoSeg/profileImportDlg.ui" line="67"/>
         <source>Mortar maps</source>
-        <translation>모르타르지도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qMasonry/qAutoSeg/profileImportDlg.ui" line="89"/>
         <source>Segmentation settings</source>
-        <translation>세분화 설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qMasonry/qAutoSeg/profileImportDlg.ui" line="97"/>
         <source>Estimated width of mortar joints (cm): </source>
-        <translation>예상 모르타르 조인트 너비 (cm):</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qMasonry/qAutoSeg/profileImportDlg.ui" line="132"/>
         <source>Window (only advanced users)</source>
-        <translation>윈도우 (고급사용자용)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qMasonry/qAutoSeg/profileImportDlg.ui" line="144"/>
         <source>Vertical (m):</source>
-        <translation>수직 (m):</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qMasonry/qAutoSeg/profileImportDlg.ui" line="177"/>
         <source>Horizontal (m):</source>
-        <translation>수평 (m):</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qMasonry/qManualSeg/profileImportDlg.ui" line="20"/>
         <location filename="../../plugins/core/Standard/qSRA/ui/profileImportDlg.ui" line="20"/>
         <source>Profile file</source>
-        <translation>프로파일 파일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qMasonry/qManualSeg/profileImportDlg.ui" line="43"/>
@@ -11176,35 +11018,19 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#787878;&quot;&gt;...&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt; color:#787878;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-style:italic; color:#ff0000;&quot;&gt;Note: accurate position of the profile origin on the rotation axis is only necessary for conical projection&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#787878;&quot;&gt;프로파일 파일의 예시:&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600; font-style:italic; color:#787878;&quot;&gt;(공란 삽입금지, 컬럼이름 변경금지)&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt; font-weight:600; color:#787878;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#787878;&quot;&gt;Xc	Yc	Zc	&lt;/span&gt;&lt;span style=&quot; font-size:8pt; color:#55aaff;&quot;&gt;(프로파일 원점)&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#787878;&quot;&gt;4667.000	10057.000	171.000	&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#787878;&quot;&gt;R		H	&lt;/span&gt;&lt;span style=&quot; font-size:8pt; color:#55aaff;&quot;&gt;(프로파일 버텍스의 반경과 높이)&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#787878;&quot;&gt;59.3235190427553	28.685&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#787878;&quot;&gt;58.8177164625621	30.142&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#787878;&quot;&gt;58.32550519856	31.594&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#787878;&quot;&gt;57.8404034801208	33.044&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; color:#787878;&quot;&gt;...&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt; color:#787878;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-style:italic; color:#ff0000;&quot;&gt;알림: 회전축 프로파일 원점의 정확한 위치는 원뿔투영법에서 필요합니다.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qMasonry/qManualSeg/profileImportDlg.ui" line="71"/>
         <location filename="../../plugins/core/Standard/qSRA/ui/profileImportDlg.ui" line="71"/>
         <source>profile axis</source>
-        <translation>프로파일축</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qMasonry/qManualSeg/profileImportDlg.ui" line="100"/>
         <location filename="../../plugins/core/Standard/qSRA/ui/profileImportDlg.ui" line="100"/>
         <source>height values are absolute (i.e. not relative to profile origin)</source>
-        <translation type="unfinished">절대 높이값 (프로파일 원점의 상대값 아님)</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -11212,69 +11038,69 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../cc2.5DimEditor.cpp" line="145"/>
         <source>invalid grid box</source>
-        <translation>잘못된 그리드박스</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="743"/>
         <source>Section extraction</source>
-        <translation>단면추출</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="744"/>
         <source>Section(s): %L1</source>
-        <translation>단면:%L1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="876"/>
         <source>Up to (%1 x %2 x %3) = %4 section(s)</source>
-        <translation>최대 (%1 x %2 x %3) = %4 단면</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="967"/>
         <source>Level(s): %L1</source>
-        <translation>레벨: %L1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="186"/>
         <source>Unhandled format specifier (%1)</source>
-        <translation>처리되지 않은 포맷 지정자 (%1)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="191"/>
         <source>Missing file format specifier!</source>
-        <translation>알수없는 포맷 지정자!</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="198"/>
         <source>Change cloud output format</source>
-        <translation>클라우드 출력포맷 변경</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="211"/>
         <source>Output export format (clouds) set to: %1</source>
-        <translation>출력포맷 (클라우드) 설정:%1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="235"/>
         <location filename="../ccCommandLineCommands.cpp" line="367"/>
         <location filename="../ccCommandLineCommands.cpp" line="410"/>
         <source>Missing parameter: extension after &apos;%1&apos;</source>
-        <translation>알수없는 파라미터:&apos;%1&apos;후 확장자</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="239"/>
         <source>New output extension for clouds: %1</source>
-        <translation>신규 클라우드 출력 확장자: %1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="248"/>
         <source>Missing parameter: precision value after &apos;%1&apos;</source>
-        <translation>알수없는 파라미터:&apos;%1&apos;후 자릿수값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="254"/>
         <source>Invalid value for precision! (%1)</source>
-        <translation>잘못된 자릿수값! (%1)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="259"/>
@@ -11282,209 +11108,99 @@ p, li { white-space: pre-wrap; }
         <location filename="../ccCommandLineCommands.cpp" line="313"/>
         <location filename="../ccCommandLineCommands.cpp" line="325"/>
         <source>Argument &apos;%1&apos; is only applicable to ASCII format!</source>
-        <translation>&apos;%1&apos; 인수는 ASCII 포맷에만 적용됩니다!</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="272"/>
         <source>Missing parameter: separator character after &apos;%1&apos;</source>
-        <translation>알수없는 파라미터: &apos;%1&apos;이후 분리문자</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="301"/>
         <source>Invalid separator! (&apos;%1&apos;)</source>
-        <translation>잘못된 분리자! (&apos;%1&apos;)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="340"/>
         <source>Change mesh output format</source>
-        <translation>메시출력포맷 변경</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="353"/>
         <source>Output export format (meshes) set to: %1</source>
-        <translation>출력포맷 (메시) %1 설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="371"/>
         <source>New output extension for meshes: %1</source>
-        <translation>신규 메시 출력확장자: %1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="383"/>
         <source>Change hierarchy output format</source>
-        <translation>계층출력포맷 변경</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="396"/>
         <source>Output export format (hierarchy) set to: %1</source>
-        <translation>출력포맷 (계층) %1 설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="414"/>
         <source>New output extension for hierarchies: %1</source>
-        <translation>신규 계층출력 확장자:%1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="426"/>
         <source>Load</source>
-        <translation>로드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="431"/>
         <source>[LOADING]</source>
-        <translation>[로딩]</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="434"/>
         <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerCommand.cpp" line="37"/>
         <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerCommand.cpp" line="59"/>
         <source>Missing parameter: filename after &quot;-%1&quot;</source>
-        <translation>없는 파라미터:  &quot;-%1&quot;이후 파일명</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="451"/>
         <source>Missing parameter: number of lines after &apos;%1&apos;</source>
-        <translation>알수없는 파라미터:&apos;%1&quot;이후 라인넘버</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="458"/>
         <source>Invalid parameter: number of lines after &apos;%1&apos;</source>
-        <translation>잘못된 파라미터:&apos;%1&quot; 이후 라인넘버</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="461"/>
         <source>Will skip %1 lines</source>
-        <translation>%1 라인을 스킵합니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="496"/>
         <source>Clears normals</source>
-        <translation>노멀 지우기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="501"/>
         <source>[CLEAR NORMALS]</source>
-        <translation>[노멀 지우기]</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="504"/>
         <source>No entity loaded (be sure to open at least one file with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
-        <translation>엔티티 로드안됨 (&quot;-%2&quot; 전에 &quot;-%1 [클라우드 파일명]이 포함된 파일 한개 이상을 열어야 합니다.)</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="611"/>
-        <source>Compute normals with octree</source>
-        <translation>옥트리를 포함한 노말 계산</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="616"/>
-        <source>[OCTREE NORMALS CALCULATION]</source>
-        <translation>[옥트리 노말 계산]</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="619"/>
-        <source>No point cloud to compute normals (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
-        <translation>노말을 계산할 포인트클라우드 없음 (&quot;-%2&quot; 전에 &quot;-%1 [클라우드 파일명]이 포함된 파일 한개 이상을 열어야 합니다.)</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="624"/>
-        <source>Missing parameter: radius after &quot;-%1&quot;</source>
-        <translation>없는 파라미터:&quot;-%1&quot; 이후 반경</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="635"/>
-        <source>Invalid radius</source>
-        <translation>잘못된 반경</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="638"/>
-        <source>	Radius: %1</source>
-        <translation>반경: %1</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="706"/>
-        <source>Invalid parameter: unknown orientation &apos;%1&apos;</source>
-        <translation>잘못된 파라미터: 알수없는 방위각 &apos;%1&apos;</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="711"/>
-        <source>Missing orientation</source>
-        <translation>없는 방위각</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="734"/>
-        <source>Invalid parameter: unknown model &apos;%1&apos;</source>
-        <translation>잘못된 파라미터:알수없는 모델 &apos;%1&apos;</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="739"/>
-        <source>Missing model</source>
-        <translation>잘못된 모델</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="763"/>
-        <source>Failed to compute octree for cloud &apos;%1&apos;</source>
-        <translation>클라우드 &apos;%1&apos; 옥트리 계산실패</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="780"/>
-        <source>Failed to determine best normal radius for cloud &apos;%1&apos;</source>
-        <translation>클라우드 &apos;%1&apos; 최상 노멀반경 설정실패</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="782"/>
-        <source>	Cloud %1 radius = %2</source>
-        <translation>클라우드 %1 반경 = %2</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="785"/>
-        <source>computeNormalsWithOctree started...</source>
-        <translation>computeNormalsWithOctree 시작...</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="789"/>
-        <source>computeNormalsWithOctree success</source>
-        <translation>computeNormalsWithOctree 완료</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="793"/>
-        <source>computeNormalsWithOctree failed</source>
-        <translation>computeNormalsWithOctree 실패</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="796"/>
-        <source>.OctreeNormal</source>
-        <translation>.OctreeNormal</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="812"/>
-        <source>Convert normals to dip and dip. dir.</source>
-        <translation>노멀은 dip and dip. 방향으로 변환</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="817"/>
-        <source>[CONVERT NORMALS TO DIP/DIP DIR]</source>
-        <translation>[노멀을 DIP/DIP 방향 변경]</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="820"/>
-        <location filename="../ccCommandLineCommands.cpp" line="862"/>
-        <location filename="../ccCommandLineCommands.cpp" line="906"/>
-        <source>No input point cloud (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
-        <translation>포인트클라우 입력없음 (&quot;-%2&quot; 전에 &quot;-%1 [클라우드 파일명]이 포함된 파일 한개 이상을 열어야 합니다.)</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="565"/>
-        <location filename="../ccCommandLineCommands.cpp" line="829"/>
-        <location filename="../ccCommandLineCommands.cpp" line="871"/>
-        <location filename="../ccCommandLineCommands.cpp" line="915"/>
-        <source>Cloud %1 has no normals</source>
-        <translation>클라우드 %1에 노말이 없음</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="547"/>
         <source>Invert normals</source>
-        <translation type="unfinished">역 노멀</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="552"/>
@@ -11497,29 +11213,139 @@ p, li { white-space: pre-wrap; }
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../ccCommandLineCommands.cpp" line="565"/>
+        <location filename="../ccCommandLineCommands.cpp" line="829"/>
+        <location filename="../ccCommandLineCommands.cpp" line="871"/>
+        <location filename="../ccCommandLineCommands.cpp" line="915"/>
+        <source>Cloud %1 has no normals</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../ccCommandLineCommands.cpp" line="592"/>
         <source>Mesh %1 has no normals</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../ccCommandLineCommands.cpp" line="611"/>
+        <source>Compute normals with octree</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="616"/>
+        <source>[OCTREE NORMALS CALCULATION]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="619"/>
+        <source>No point cloud to compute normals (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="624"/>
+        <source>Missing parameter: radius after &quot;-%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="635"/>
+        <source>Invalid radius</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="638"/>
+        <source>	Radius: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="706"/>
+        <source>Invalid parameter: unknown orientation &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="711"/>
+        <source>Missing orientation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="734"/>
+        <source>Invalid parameter: unknown model &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="739"/>
+        <source>Missing model</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="763"/>
+        <source>Failed to compute octree for cloud &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="780"/>
+        <source>Failed to determine best normal radius for cloud &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="782"/>
+        <source>	Cloud %1 radius = %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="785"/>
+        <source>computeNormalsWithOctree started...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="789"/>
+        <source>computeNormalsWithOctree success</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="793"/>
+        <source>computeNormalsWithOctree failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="796"/>
+        <source>.OctreeNormal</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="812"/>
+        <source>Convert normals to dip and dip. dir.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="817"/>
+        <source>[CONVERT NORMALS TO DIP/DIP DIR]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="820"/>
+        <location filename="../ccCommandLineCommands.cpp" line="862"/>
+        <location filename="../ccCommandLineCommands.cpp" line="906"/>
+        <source>No input point cloud (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../ccCommandLineCommands.cpp" line="837"/>
         <source>Failed to convert normals to dip and dip direction</source>
-        <translation>노멀을 dip and dip 방향 변환실패</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="854"/>
         <source>Convert normals to scalar fields</source>
-        <translation>노멀을 스칼라필드로 변환</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="859"/>
         <source>[CONVERT NORMALS TO SCALAR FIELD(S)]</source>
-        <translation>[노멀을 스칼라필드로 변환]</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="881"/>
         <source>Failed to convert normals to scalar fields</source>
-        <translation>노멀을 스칼라필드로 변환 실패</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="898"/>
@@ -11539,42 +11365,42 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="940"/>
         <source>Subsample</source>
-        <translation>하위샘플링</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="945"/>
         <source>[SUBSAMPLING]</source>
-        <translation>[하위샘플링]</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="948"/>
         <source>No point cloud to resample (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
-        <translation>리샘플링할 포인트클라우드 없음 (&quot;-%2&quot; 전에 &quot;-%1 [클라우드 파일명]이 포함된 파일 한개 이상을 열어야 합니다)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="953"/>
         <source>Missing parameter: resampling method after &quot;-%1&quot;</source>
-        <translation>없는 파라미터: &quot;-%1&quot;이후 리샘플링 방식</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="957"/>
         <source>	Method: </source>
-        <translation>	방식: </translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="962"/>
         <source>Missing parameter: number of points after &quot;-%1 RANDOM&quot;</source>
-        <translation>잘못된 파라미터: &quot;-%1 무작위&apos;후 점갯수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="969"/>
         <source>Invalid number of points for random resampling!</source>
-        <translation type="unfinished">무작위 리샘플링후 잘못된 점넘버!</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="971"/>
         <source>	Output points: %1</source>
-        <translation>	점출력: %1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="976"/>
@@ -11583,34 +11409,34 @@ p, li { white-space: pre-wrap; }
         <location filename="../ccCommandLineCommands.cpp" line="1207"/>
         <location filename="../ccCommandLineCommands.cpp" line="4360"/>
         <source>	Processing cloud #%1 (%2)</source>
-        <translation>	클라우드 #%1 (%2) 프로세싱</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="981"/>
         <location filename="../ccCommandLineCommands.cpp" line="1107"/>
         <source>Subsampling process failed!</source>
-        <translation>하위샘플링 프로세싱 실패!</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="983"/>
         <location filename="../ccCommandLineCommands.cpp" line="1041"/>
         <location filename="../ccCommandLineCommands.cpp" line="1109"/>
         <source>	Result: %1 points</source>
-        <translation>	결과: %1 점</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="992"/>
         <location filename="../ccCommandLineCommands.cpp" line="1050"/>
         <location filename="../ccCommandLineCommands.cpp" line="1118"/>
         <source>.subsampled</source>
-        <translation>.subsampled</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1006"/>
         <location filename="../ccCommandLineCommands.cpp" line="1064"/>
         <location filename="../ccCommandLineCommands.cpp" line="1132"/>
         <source>_SUBSAMPLED</source>
-        <translation>_SUBSAMPLED</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1012"/>
@@ -11623,119 +11449,119 @@ p, li { white-space: pre-wrap; }
         <location filename="../ccEntityAction.cpp" line="1059"/>
         <location filename="../ccEntityAction.cpp" line="1711"/>
         <source>Not enough memory!</source>
-        <translation>메모리 부족!</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1020"/>
         <source>Missing parameter: spatial step after &quot;-%1 SPATIAL&quot;</source>
-        <translation>없는 파라미터:&quot;-%1 공간&quot;후 공간 단계</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1026"/>
         <source>Invalid step value for spatial resampling!</source>
-        <translation>공간 리샘플링에 잘못된 단계값!</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1028"/>
         <source>	Spatial step: %1</source>
-        <translation>공간단계: %1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1078"/>
         <source>Missing parameter: octree level after &quot;-%1 OCTREE&quot;</source>
-        <translation>잘못된 파라미터:&quot;-%1 옥트리&quot;후 옥트리 레벨</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1085"/>
         <location filename="../ccCommandLineCommands.cpp" line="1177"/>
         <source>Invalid octree level!</source>
-        <translation>잘못된 옥트리 레벨!</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1087"/>
         <location filename="../ccCommandLineCommands.cpp" line="1179"/>
         <source>	Octree level: %1</source>
-        <translation>	옥트리 레벨: %1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1122"/>
         <source>OCTREE_LEVEL_%1_SUBSAMPLED</source>
-        <translation>OCTREE_LEVEL_%1_SUBSAMPLED</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1150"/>
         <source>Unknown method!</source>
-        <translation>알수없는 방식!</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1157"/>
         <source>ExtractCCs</source>
-        <translation>CC출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1162"/>
         <source>[CONNECTED COMPONENTS EXTRACTION]</source>
-        <translation>[연결 구성요소 추출]</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1165"/>
         <source>No point cloud loaded (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
-        <translation>로드된 포인트클라우드 없음 (&quot;-%2&quot; 전에 &quot;-%1 [클라우드 파일명]이 포함된 파일 한개 이상을 열어야 합니다)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1171"/>
         <source>Missing parameter: octree level after &quot;-%1&quot;</source>
-        <translation>없는 파라미터: &quot;-%1&quot;이후 옥트리 레벨</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1184"/>
         <source>Missing parameter: minimum number of points per component after &quot;-%1 [octree level]&quot;</source>
-        <translation>없는 파라미터:&quot;-%1 [옥트리 레벨]&quot;이후 구성요소당 최소 점갯수 </translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1189"/>
         <source>Invalid min. number of points!</source>
-        <translation>잘못된 최소 점갯수!</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1191"/>
         <source>	Min number of points per component: %1</source>
-        <translation>	구성요소: %1 당 최소 점갯수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1217"/>
         <source>Couldn&apos;t allocate a new scalar field for computing CC labels! Try to free some memory ...</source>
-        <translation>CC 라벨 계산에 신규 스칼라필드를 할당할 수 없습니다! 메모리를 확보하십시오 ...</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1230"/>
         <source>No component found!</source>
-        <translation>구성요서 없음!</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1242"/>
         <source>An error occurred (failed to finish the extraction)</source>
-        <translation>에러발생 (추출을 완료할 수 없습니다)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1263"/>
         <source>_COMPONENT_%1</source>
-        <translation>_COMPONENT_%1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1277"/>
         <source>Failed to create component #%1! (not enough memory)</source>
-        <translation>구성요소 #%1 생성할 수 없음 ! (메모리 부족)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1289"/>
         <source>No component was created! Check the minimum size...</source>
-        <translation>구성요소가 생성되지 않습니다! 최소크가 확인...</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1293"/>
         <source>%1 component(s) were created</source>
-        <translation>%1 구성요서 생성완료</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1305"/>
@@ -11743,37 +11569,37 @@ p, li { white-space: pre-wrap; }
         <location filename="../ccCommandLineCommands.cpp" line="3695"/>
         <location filename="../../plugins/core/Standard/qPCV/src/PCVCommand.cpp" line="216"/>
         <source>Not enough memory</source>
-        <translation>메모리 부족</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1313"/>
         <source>Curvature</source>
-        <translation>곡률</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1318"/>
         <source>[CURVATURE]</source>
-        <translation>[곡률]</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1322"/>
         <source>Missing parameter: curvature type after &quot;-%1&quot;</source>
-        <translation>알수없는 파라미터: &quot;-%1&quot; 이후 곡률종류</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1341"/>
         <source>Invalid curvature type after &quot;-%1&quot;. Got &apos;%2&apos; instead of MEAN or GAUSS.</source>
-        <translation>&quot;-%1&quot; 이후 잘못된 곡률종류. MEAN 또는 가우스가 아닌 &apos;%2&apos; 획득.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1346"/>
         <source>Missing parameter: kernel size after curvature type</source>
-        <translation>알수없는 파라미터: 곡률종류 이후 커널크기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1354"/>
         <source>Failed to read a numerical parameter: kernel size (after curvature type). Got &apos;%1&apos; instead.</source>
-        <translation>숫자파라미터 읽기 실패: 커널크기 (곡률종류 이후). 대신 &apos;%1&apos; 획득.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1356"/>
@@ -11781,131 +11607,131 @@ p, li { white-space: pre-wrap; }
         <location filename="../ccCommandLineCommands.cpp" line="5436"/>
         <location filename="../ccCommandLineCommands.cpp" line="5565"/>
         <source>	Kernel size: %1</source>
-        <translation>	커널 크기: %1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1360"/>
         <source>No point cloud on which to compute curvature! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
-        <translation>곡선을 계산한 포인트클라우드 없음! (&quot;-%2&quot; 전에 &quot;-%1 [클라우드 파일명]이 포함된 파일 한개 이상을 열어야 합니다)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1374"/>
         <source>%1_CURVATURE_KERNEL_%2</source>
-        <translation>%1_CURVATURE_KERNEL_%2</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1386"/>
         <location filename="../ccCommandLineCommands.cpp" line="1442"/>
         <location filename="../ccCommandLineCommands.cpp" line="1497"/>
         <source>Missing parameter: density type after &quot;-%1&quot; (KNN/SURFACE/VOLUME)</source>
-        <translation>잘못된 파라미터: &quot;-%1&quot; (KNN/지면/체적) 이후 밀도종류</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1405"/>
         <source>Invalid parameter: density type is expected after &quot;-%1&quot; (KNN/SURFACE/VOLUME)</source>
-        <translation type="unfinished">잘못된 파라미터: &quot;-%1&quot; (KNN/지면/체적) 이후 밀도종류가 추청됩니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1412"/>
         <source>ApproxDensity</source>
-        <translation>예상밀도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1417"/>
         <source>[APPROX DENSITY]</source>
-        <translation>[예상밀도]</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1420"/>
         <source>No point cloud on which to compute approx. density! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
-        <translation>대략적인 밀도를 계산할 포인트클라우드 없음 ! (&quot;-%2&quot; 전에 &quot;-%1 [클라우드 파일명]이 포함된 파일 한개 이상을 열어야 합니다)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1465"/>
         <source>Density</source>
-        <translation>밀도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1470"/>
         <source>[DENSITY]</source>
-        <translation>[밀도]</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1474"/>
         <source>Missing parameter: sphere radius after &quot;-%1&quot;</source>
-        <translation>알수없는 파라미터: &quot;-%1&quot; 이후 구면 반경</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1482"/>
         <source>Failed to read a numerical parameter: sphere radius (after &quot;-%1&quot;). Got &apos;%2&apos; instead.</source>
-        <translation>숫자 파라미터 구면반경 (&quot;-%1&quot; 이후) 읽기실패. &apos;%2&apos; 대신 얻음</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1484"/>
         <source>	Sphere radius: %1</source>
-        <translation>	구형반경: %1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1509"/>
         <source>No point cloud on which to compute density! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
-        <translation>밀도를 계산할 포인트클라우드가 없습니다! (&quot;-%2&quot; 전에 &quot;-%1 [클라우드 파일명]이 포함된 파일 한개 이상을 열어야 합니다)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1533"/>
         <source>SF gradient</source>
-        <translation>SF 그라데이션</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1538"/>
         <source>[SF GRADIENT]</source>
-        <translation>[SF 그라데이션]</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1542"/>
         <source>Missing parameter: boolean (whether SF is euclidean or not) after &quot;-%1&quot;</source>
-        <translation>알수없는 파라미터: &quot;-%1&quot; 이후 부울 (SF가 유클리드 여부)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1553"/>
         <location filename="../ccCommandLineCommands.cpp" line="1830"/>
         <source>Invalid boolean value after &quot;-%1&quot;. Got &apos;%2&apos; instead of TRUE or FALSE.</source>
-        <translation>&quot;-%1&quot; 이후 알수없는 부울값. TRUE 또는 FALSE 대신 &apos;%2&apos; 얻음</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1558"/>
         <source>No point cloud on which to compute SF gradient! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
-        <translation>SF 그라데이션을 계산할 포인트클라우드가 없습니다! (&quot;-%2&quot; 전에 &quot;-%1 [클라우드 파일명]이 포함된 파일 한개 이상을 열어야 합니다)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1570"/>
         <location filename="../ccCommandLineCommands.cpp" line="1846"/>
         <source>cmd.warning: cloud &apos;%1&apos; has no scalar field (it will be ignored)</source>
-        <translation>커맨드 경고: 클라우드 &apos;%1&apos;은(는) 스칼라필드가 아닙니다 (무시됩니다)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1576"/>
         <source>cmd.warning: cloud &apos;%1&apos; has several scalar fields (the active one will be used by default, or the first one if none is active)</source>
-        <translation>커맨드경고: 클라우드 &apos;%1&apos;은(는) 다수의 스칼라필드가 있습니다. (활성된것이 기본값으로 사용되거나 활성화사 없으면 1번값)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1604"/>
         <source>Roughness</source>
-        <translation>거칠기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1609"/>
         <source>[ROUGHNESS]</source>
-        <translation>[거칠기]</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1613"/>
         <source>Missing parameter: kernel size after &quot;-%1&quot;</source>
-        <translation>알수없는 파라미터: &quot;-%1&quot; 이후 커널크기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1621"/>
         <source>Failed to read a numerical parameter: kernel size (after &quot;-%1&quot;). Got &apos;%2&apos; instead.</source>
-        <translation>숫자 파라미터: 커널크기(&quot;-%1&quot; 이후)를 읽지 못했습니다. 대신 &apos;%2&apos; 얻었습니다.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1644"/>
@@ -11915,114 +11741,113 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1652"/>
         <source>No point cloud on which to compute roughness! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
-        <translation>거칠리를 계산할 포인트클라우드 없음! (&quot;-%2&quot; 전에 &quot;-%1 [클라우드 파일명]&quot;이 열려있어야합니다)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1666"/>
         <source>ROUGHNESS_KERNEL_%2</source>
-        <translation>ROUGHNESS_KERNEL_%2</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1676"/>
         <source>Apply Transformation</source>
-        <translation>변환적용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1681"/>
         <source>[APPLY TRANSFORMATION]</source>
-        <translation>[변환적용]</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1685"/>
         <source>Missing parameter: transformation file after &quot;-%1&quot;</source>
-        <translation>알수없는 파라미터: &quot;-%1&quot; 이후 변환파일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1692"/>
         <source>Failed to read transformation matrix file &apos;%1&apos;!</source>
-        <translation>변환 행렬파일 &apos;%1&apos; 읽기 실패!</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1695"/>
         <source>Transformation:
 </source>
-        <translation>변환:
-</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1699"/>
         <source>No entity on which to apply the transformation! (be sure to open one with &quot;-%1 [filename]&quot; before &quot;-%2&quot;)</source>
-        <translation>변환을 적용할 엔티티 없음! (&quot;-%2&quot; 전에 &quot;-%1 [파일명]&quot;이 열려있어야합니다)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1734"/>
         <source>Drop global shift</source>
-        <translation>글로벌 이격 드롭</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1739"/>
         <source>[DROP GLOBAL SHIFT]</source>
-        <translation>[글로벌 이격 드롭]</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1743"/>
         <source>No loaded entity! (be sure to open one with &quot;-%1 [filename]&quot; before &quot;-%2&quot;)</source>
-        <translation>로드된 엔티티 없음! (&quot;-%2&quot; 전에 &quot;-%1 [파일명]&quot;이 열려있어야합니다)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1766"/>
         <source>SF color scale</source>
-        <translation>SF 컬러 스케일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1771"/>
         <source>[SF COLOR SCALE]</source>
-        <translation>[SF 컬러 스케일]</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1775"/>
         <source>Missing parameter: color scale file after &quot;-%1&quot;</source>
-        <translation>알수없는 파라미터: &quot;-%1&quot; 이후 컬러스케일 파일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1784"/>
         <source>Failed to read color scale file &apos;%1&apos;!</source>
-        <translation>컬러 스케일 파일 &apos;%1&apos; 읽기 실패!</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1789"/>
         <source>No point cloud on which to change the SF color scale! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
-        <translation>SF 컬러스케일을 변경할 포인트클라우드가 없습니다! (&quot;-%2&quot; 전에 &quot;-%1 [클라우드 파일명]&quot;이 열려있어야합니다)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1810"/>
         <source>SF convert to RGB</source>
-        <translation>SF를 RGB 로 변환</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1815"/>
         <source>[SF CONVERT TO RGB]</source>
-        <translation>[SF를 RGB 로 변환]</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1819"/>
         <source>Missing parameter: boolean (whether to mix with existing colors or not) after &quot;-%1&quot;</source>
-        <translation>알 수 없는 파라미터:&quot;-%1&quot; 다음에 부울 (기존 색상과 혼합할지 여부)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1835"/>
         <source>No point cloud on which to convert SF to RGB! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
-        <translation>SF를 RGB로 변환하는 포인트클라우드 없음! (&quot;-%2&quot; 전에 &quot;-%1 [클라우드 파일명]&quot;이 열려있어야합니다)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1850"/>
         <source>cmd.warning: cloud &apos;%1&apos; has no active scalar field (it will be ignored)</source>
-        <translation>커맨드경고: 클라우드 &apos;%1&apos;에 사용중인 스칼라필드 없음 (무시됩니다)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1864"/>
         <source>cmd.warning: cloud &apos;%1&apos; failed to convert SF to RGB</source>
-        <translation>커맨드경고: 클라우드 &apos;%1&apos;에서 SF를 RGB로 변환못함</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1880"/>
@@ -12052,17 +11877,17 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1923"/>
         <source>Filter by SF value</source>
-        <translation>SF값 필터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1942"/>
         <source>[FILTER BY VALUE]</source>
-        <translation>[SF값 필터]</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1950"/>
         <source>Missing parameter: min value after &quot;-%1&quot;</source>
-        <translation>알수없는 파라미터:&quot;-%1&quot; 이후 최소값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1972"/>
@@ -12077,12 +11902,12 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1986"/>
         <source>Failed to read a numerical parameter: min value (after &quot;-%1&quot;). Got &apos;%2&apos; instead.</source>
-        <translation>숫자 파라미터 읽기 실패: 최소값 (&quot;-%1&quot; 이후). 대신 &apos;%2&apos;를 얻음.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="1997"/>
         <source>Missing parameter: max value after &quot;-%1&quot; {min}</source>
-        <translation>알수없는 파라미터: &quot;-%1&quot; 이후 최소값 {min}</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2019"/>
@@ -12097,866 +11922,138 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2033"/>
         <source>Failed to read a numerical parameter: max value (after min value). Got &apos;%1&apos; instead.</source>
-        <translation>숫자 파라미터 읽기 실패: 최대값 (최소값 이후). 대신 &apos;%1&apos;를 얻음.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2038"/>
         <source>	Interval: [%1 - %2]</source>
-        <translation>	간격: [%1 - %2]</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2042"/>
         <source>No point cloud on which to filter SF! (be sure to open one or generate one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
-        <translation>SF 컬러스케일을 변경할 포인트클라우드가 없습니다! (열려있거나 &quot;-%2&quot; 전에 &quot;-%1 [클라우드 파일명]&quot;을 생성해야합니다)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2103"/>
         <source>		Cloud &apos;%1&apos; --&gt; %2/%3 points remaining</source>
-        <translation>		클라우드 &apos;%1&apos; --&gt; %2/%3 점 남음</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2109"/>
         <source>_FILTERED_[%1_%2]</source>
-        <translation>_FILTERED_[%1_%2]</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2127"/>
         <source>Compute mesh volume</source>
-        <translation>메시부피 계산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2132"/>
         <source>[COMPUTE MESH VOLUME]</source>
-        <translation>[메시부피 계산]</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2136"/>
         <source>No mesh loaded! Nothing to do...</source>
-        <translation>메시로드안됨! 할일이 업습니다...</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2154"/>
         <source>Volume report file: %1</source>
-        <translation>부피 보고서파일: %1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2158"/>
         <source>Missing argument: filename after &apos;%1&apos;</source>
-        <translation>인수 누락: &apos;%1&apos; 이후의 파일 이름입니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2170"/>
         <source>Failed to create/open volume report file</source>
-        <translation>부피 보고서 파일 생성/열기 실패</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2180"/>
         <source>Mesh &apos;%1&apos;</source>
-        <translation>메시 &apos;%1&apos;</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2183"/>
         <source> (#%2)</source>
-        <translation> (#%2)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2186"/>
         <source>V = %2</source>
-        <translation>V = %2</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2200"/>
         <source>Merge meshes</source>
-        <translation>메시병합</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2205"/>
         <source>[MERGE MESHES]</source>
-        <translation>[메시병합]</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2209"/>
         <source>Less than 2 meshes are loaded! Nothing to do...</source>
-        <translation>2메시 미만이 로드됩니다! 할수 있는게 없습니다...</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2230"/>
         <source>Can&apos;t merge mesh &apos;%1&apos; (unhandled type)</source>
-        <translation>메시 &apos;%1&apos;을 합칠 수 없음 (제어할 수 없는 종류)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2245"/>
         <source>Merge operation failed</source>
-        <translation>병합작업 실패</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2254"/>
         <source>Result is empty</source>
-        <translation>결과가 없습니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2260"/>
         <location filename="../ccCommandLineCommands.cpp" line="2314"/>
         <source>_MERGED</source>
-        <translation>_병합</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2277"/>
         <source>Merge clouds</source>
-        <translation>클라우드 병합</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2282"/>
         <source>[MERGE CLOUDS]</source>
-        <translation>[클라우드 병합]</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2286"/>
         <source>Less than 2 clouds are loaded! Nothing to do...</source>
-        <translation>2개 미만 클라우드가 로드되었습니다! 할일이 없습니다...</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2306"/>
         <source>Fusion failed! (not enough memory?)</source>
-        <translation>퓨전 실패! (메모리부족?)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2327"/>
         <source>Set active SF</source>
-        <translation>사용 SF 설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2334"/>
         <source>Missing parameter: scalar field index after &quot;-%1&quot;</source>
-        <translation>알수없는 파라미터:&quot;-%1&quot; 이후 스칼라 인덱스</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5426"/>
-        <source>Missing parameter: kernel size after %1</source>
         <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2352"/>
-        <source>Set active S.F. index: %1</source>
-        <translation>사용 SF 인덱스 설정: %1</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2356"/>
-        <source>No point cloud loaded! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
-        <translation>포인트클라우드 로드안됨! (&quot;-%2&quot; 전에 &quot;-%1 [클라우드 파일 이름]이 있는 파일을 열어야 합니다.)</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2369"/>
-        <source>Cloud &apos;%1&apos; has less scalar fields than the index to select!</source>
-        <translation>클라우드 &apos;%1&apos;에는 선택할 색인보다 적은수의 스칼라필드가 있습니다!</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2378"/>
-        <source>Remove all SF</source>
-        <translation>전체 SF 제거</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2487"/>
-        <source>Remove RGB</source>
-        <translation>RGB 제거</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2520"/>
-        <source>Remove normals</source>
-        <translation>노말 제거</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2557"/>
-        <source>Remove scan grids</source>
-        <translation>스캔그리드 제거</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2587"/>
-        <source>Match B.B. centers</source>
-        <translation>B.B. 중심 매치</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2592"/>
-        <source>[MATCH B.B. CENTERS]</source>
-        <translation>[B.B. 중심 매치]</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2627"/>
-        <source>Entity &apos;%1&apos; has been translated: (%2,%3,%4)</source>
-        <translation>엔티티 &apos;%1&quot;이 이동되었습니다: (%2,%3,%4)</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2642"/>
-        <source>Match best fit plane</source>
-        <translation>최상 맞춤 평면 매치</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2647"/>
-        <source>[COMPUTE BEST FIT PLANE]</source>
-        <translation>[최상 맞춤 평면 매치]</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2678"/>
-        <location filename="../ccCommandLineCommands.cpp" line="2805"/>
-        <location filename="../ccCommandLineCommands.cpp" line="2887"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4220"/>
-        <source>No cloud available. Be sure to open one first!</source>
-        <translation>클라우드 없음. 파일을 먼저 열어야합니다!</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2690"/>
-        <source>Plane successfully fitted: rms = %1</source>
-        <translation>평면 맞춤완료: rms = %1</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2709"/>
-        <source>%1/%2_BEST_FIT_PLANE_INFO</source>
-        <translation>%1/%2_BEST_FIT_PLANE_INFO</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2712"/>
-        <location filename="../ccCommandLineCommands.cpp" line="5039"/>
-        <source>_%1</source>
-        <translation>_%1</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2714"/>
-        <location filename="../ccCommandLineCommands.cpp" line="5040"/>
-        <source>.txt</source>
-        <translation>.txt</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2719"/>
-        <source>Filename: %1</source>
-        <translation>파일명: %1</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2720"/>
-        <source>Fitting RMS: %1</source>
-        <translation>맞춤 RMS: %1</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2729"/>
-        <source>Normal: (%1,%2,%3)</source>
-        <translation>노말: (%1,%2,%3)</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2761"/>
-        <source>Cloud &apos;%1&apos; has been transformed with the above matrix</source>
-        <translation>위의 행렬로 클라우드 &apos;%1&apos;이(가) 변환되었습니다.</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2762"/>
-        <source>_HORIZ</source>
-        <translation>_수평</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2775"/>
-        <source>Failed to compute best fit plane for cloud &apos;%1&apos;</source>
-        <translation>클라우드 &apos;%1&apos; 최상맞춤 평면을 계산할 수 없습니다</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2783"/>
-        <source>Orient normals</source>
-        <translation>오리엔트 노말</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2788"/>
-        <source>[ORIENT NORMALS (MST)]</source>
-        <translation>[ORIENT NORMALS (MST)]</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2792"/>
-        <source>Missing parameter: number of neighbors after &quot;-%1&quot;</source>
-        <translation>알수없는 파라미터: &quot;-%1&quot; 이후 네이버 갯수</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2800"/>
-        <location filename="../ccCommandLineCommands.cpp" line="2871"/>
-        <source>Invalid parameter: number of neighbors (%1)</source>
-        <translation>잘못된 파라미터: 네이버 갯수 (%1)</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2828"/>
-        <source>_NORMS_REORIENTED</source>
-        <translation>_NORMS_REORIENTED</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2840"/>
-        <source>Failed to orient the normals of cloud &apos;%1&apos;!</source>
-        <translation>클라우드 &apos;%1&apos; 오리엔트 노말 실패!</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2854"/>
-        <source>S.O.R. filter</source>
-        <translation>S.O.R. 필터</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2859"/>
-        <source>[SOR FILTER]</source>
-        <translation>[SOR 필터]</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2863"/>
-        <source>Missing parameter: number of neighbors mode after &quot;-%1&quot;</source>
-        <translation>알수없는 파라미터: &quot;-%1&quot; 이후 네이버 모드 갯수</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2876"/>
-        <source>Missing parameter: sigma multiplier after number of neighbors (SOR)</source>
-        <translation>알수없는 파라미터: 네이버 갯수 이후 시그마 제곱 (SOR)</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2882"/>
-        <source>Invalid parameter: sigma multiplier (%1)</source>
-        <translation>잘못된 파라미터: 시그마 제곱 (%1)</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2914"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3066"/>
-        <source>.clean</source>
-        <translation>.clean</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2928"/>
-        <source>_SOR</source>
-        <translation>_SOR</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2934"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3086"/>
-        <source>Not enough memory to create a clean version of cloud &apos;%1&apos;!</source>
-        <translation>메모리가 부족하여 클라우드 &apos;%1&apos;의 클린 버전을 만들 수 없습니다!</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3109"/>
-        <source>Extract vertices (as a standalone &apos;cloud&apos;)</source>
-        <translation>버텍스 추출 (독립 실행형 &apos;클라우드&apos;로)</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3114"/>
-        <source>[EXTRACT VERTICES]</source>
-        <translation>[버텍스 추출]</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3118"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3202"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3765"/>
-        <source>No mesh available. Be sure to open one first!</source>
-        <translation>메시가 없습니다. 열려있는지 확인하십시오!</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3134"/>
-        <source>.vertices</source>
-        <translation>.vertices</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3160"/>
-        <source>Sample mesh</source>
-        <translation>샘플 메시</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3165"/>
-        <source>[SAMPLE POINTS ON MESH]</source>
-        <translation>[메시의 샘플점]</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3169"/>
-        <source>Missing parameter: sampling mode after &quot;-%1&quot; (POINTS/DENSITY)</source>
-        <translation>알수없는 파라미터: &quot;-%1&quot;이후 샘플링모드 (점/밀도)</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3186"/>
-        <source>Invalid parameter: unknown sampling mode &quot;%1&quot;</source>
-        <translation>잘못된 파라미터: 알수없는 샘플링 모드 &quot;%1&quot;</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3191"/>
-        <source>Missing parameter: value after sampling mode</source>
-        <translation>알수없는 파라미터: 샘플링모드후 값</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3197"/>
-        <source>Invalid parameter: value after sampling mode</source>
-        <translation>잘못된 파라미터: 샘플링모드이후 값</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3218"/>
-        <source>Cloud sampling failed!</source>
-        <translation>클라우드 샘플링 실패!</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3222"/>
-        <source>Sampled cloud created: %1 points</source>
-        <translation>샘픙링된 클라우드 생성완료: %1 점</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3223"/>
-        <source>_SAMPLED_POINTS</source>
-        <translation>_SAMPLED_POINTS</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3246"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3393"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3457"/>
-        <source>Crop</source>
-        <translation>자르기</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3251"/>
-        <source>[CROP]</source>
-        <translation>[자르기]</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3255"/>
-        <source>Missing parameter: box extents after &quot;-%1&quot; (Xmin:Ymin:Zmin:Xmax:Ymax:Zmax)</source>
-        <translation>파라미터가 누락: 박스가 &quot;-%1&quot; 이후 (Xmin:Ymin:Zmin:Xmax:Ymax:Zmax)로 확장됩니다</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3259"/>
-        <source>No point cloud or mesh available. Be sure to open or generate one first!</source>
-        <translation>사용가능한 포인트클라우드 또는 메시가 없습니다. 열려있는지 확인 또는 생성하십시오!</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3270"/>
-        <source>Invalid parameter: box extents (expected format is &apos;Xmin:Ymin:Zmin:Xmax:Ymax:Zmax&apos;)</source>
-        <translation>잘못된 파라미터: 박스범위 (예상포맷 &apos;Xmin:Ymin:Zmin:Xmax:Ymax:Zmax&apos;)</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3280"/>
-        <source>Invalid parameter: box extents (component #%1 is not a valid number)</source>
-        <translation>잘못된 파라미터: 박스범위 (구성요소 #%1은 올바른 번호가 아닙니다)</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3398"/>
-        <source>[COORD TO SF]</source>
-        <translation>[SF 좌표]</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3402"/>
-        <source>Missing parameter after &quot;-%1&quot; (DIMENSION)</source>
-        <translation>&quot;-%1&quot; 이후 빠진 파라미터 (치수)</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3406"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3470"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3735"/>
-        <source>No point cloud available. Be sure to open or generate one first!</source>
-        <translation>사용가능한 포인트클라우드가 없습니다. 열려있는지 확인 또는 생성하십시오!</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3427"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3648"/>
-        <source>Invalid parameter: dimension after &quot;-%1&quot; (expected: X, Y or Z)</source>
-        <translation>잘못된 파라미터: &quot;-%1&quot; 이후 치수 (예상: X, Y 또는 Z)</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3437"/>
-        <source>_%1_TO_SF</source>
-        <translation>_%1_TO_SF</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3449"/>
-        <source>Failed to export coord. %1 to SF on cloud &apos;%2&apos;!</source>
-        <translation>좌표출력실패. 클라우드&quot;%2&quot;에서 %1 ~ SF!</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3462"/>
-        <source>[CROP 2D]</source>
-        <translation>[2D 자르기]</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3466"/>
-        <source>Missing parameter(s) after &quot;-%1&quot; (ORTHO_DIM N X1 Y1 X2 Y2 ... XN YN)</source>
-        <translation>&quot;-%1&quot; 이후 없는 파라미터 (ORTHO_DIM N X1 Y1 X2 Y2 ... XN YN)</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3495"/>
-        <source>Invalid parameter: orthogonal dimension after &quot;-%1&quot; (expected: X, Y or Z)</source>
-        <translation>잘못된 파라미터: &quot;-%1&quot;이후 정사치수 (예상:X, Y 또는 Z)</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3507"/>
-        <source>Invalid parameter: number of vertices for the 2D polyline after &quot;-%1&quot;</source>
-        <translation>잘못된 파라미터: &quot;-%1&quot;이후 2D 폴리선의 버텍스 갯수</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3523"/>
-        <source>Missing parameter(s): vertex #%1 data and following</source>
-        <translation>알수없는 파라미터: 버텍스 #%1 데이터 및 다음</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3532"/>
-        <source>Invalid parameter: X-coordinate of vertex #%1</source>
-        <translation>잘못된 파라미터: 버텍스 #%1의 X 좌표</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3538"/>
-        <source>Invalid parameter: Y-coordinate of vertex #%1</source>
-        <translation>잘못된 파라미터: 버텍스 #%1의 Y 좌표</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3580"/>
-        <source>.cropped</source>
-        <translation>.cropped</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3593"/>
-        <source>Not enough memory to crop cloud &apos;%1&apos;!</source>
-        <translation>포인트클라우드 &apos;%1&apos;을(를) 자르기에 부족한 메모리!</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3600"/>
-        <source>No point of cloud &apos;%1&apos; falls inside the input box!</source>
-        <translation>클라우드 &apos;%1&apos;의 점이 입력박스 내부입니다!</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3605"/>
-        <source>Crop process failed! (not enough memory)</source>
-        <translation>자르기과정 실패! (메모리부족)</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3613"/>
-        <source>Color banding</source>
-        <translation>컬러발란스</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3618"/>
-        <source>[COLOR BANDING]</source>
-        <translation>[컬러발란스]</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3622"/>
-        <source>Missing parameter(s) after &quot;-%1&quot; (DIM FREQUENCY)</source>
-        <translation>&quot;-%1&quot; 이루 알수없는 파라미터 (DIM 주파수)</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3626"/>
-        <source>No entity available. Be sure to open or generate one first!</source>
-        <translation>사용가능한 엔티티가 없습니다. 열려있는지 확인 또는 생성하십시오!</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3660"/>
-        <source>Invalid parameter: frequency after &quot;-%1 DIM&quot; (in Hz, integer value)</source>
-        <translation>잘못된 파라미터: &quot;-%1 DIM&quot;이후 주파수 (수평 정수값)</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3679"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3707"/>
-        <source>COLOR_BANDING_%1_%2</source>
-        <translation>COLOR_BANDING_%1_%2</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3702"/>
-        <source>Vertices of mesh &apos;%1&apos; are locked (they may be shared by multiple entities for instance). Can&apos;t apply the current command on them.</source>
-        <translation>메시 &apos;%1&apos;의 버텍스가 잠겼습니다 (예를 들어 여러 엔티티로 공유될 수 있습니다.) 현재 명령을 적용할 수 없습니다.</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3723"/>
-        <source>[DISTANCE COMPUTATION]</source>
-        <translation>[거리계산]</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3739"/>
-        <source>No point cloud available. Will use the first mesh vertices as compared cloud.</source>
-        <translation>사용가능한 포인트클라우드가 없습니다. 1번 메세 버텍스를 비교 클라우드로 사용합니다.</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3744"/>
-        <source>Unhandled mesh vertices type</source>
-        <translation>제어할 수 없는 메시 버텍스 종류</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3752"/>
-        <source>[C2M] Multiple point clouds loaded! Will take the first one by default.</source>
-        <translation>[C2M] 멀티 포인트클라우드가 로드되었습니다! 기본으로 1번값을 사용합니다.</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3777"/>
-        <source>Only one point cloud available. Be sure to open or generate a second one before performing C2C distance!</source>
-        <translation>한개의 포인트클라우드만 사용가능합니다. 열렸거나 C2C 거리 실행전 2번을 생성합니다!</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3781"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4056"/>
-        <source>More than 3 point clouds loaded! We take the second one as reference by default</source>
-        <translation>3점 이상 포인트클라우가 로드됩니다! 기본으로 2번을 기준으로 사용합니다</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3809"/>
-        <source>Parameter &quot;-%1&quot; ignored: only for C2M distance!</source>
-        <translation>파라미터 &quot;-%1&quot; 무시: C2M 거리만 사용합니다!</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3819"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3835"/>
-        <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerCommand.cpp" line="68"/>
-        <source>Missing parameter: value after &quot;-%1&quot;</source>
-        <translation>알수없는 파라미터:  &quot;-%1&quot; 이후 값</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3825"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3841"/>
-        <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerCommand.cpp" line="72"/>
-        <location filename="../../plugins/core/Standard/qCSF/include/qCSFCommands.h" line="143"/>
-        <location filename="../../plugins/core/Standard/qCSF/include/qCSFCommands.h" line="154"/>
-        <location filename="../../plugins/core/Standard/qCSF/include/qCSFCommands.h" line="165"/>
-        <location filename="../../plugins/core/Standard/qPCV/src/PCVCommand.cpp" line="180"/>
-        <location filename="../../plugins/core/Standard/qPCV/src/PCVCommand.cpp" line="190"/>
-        <source>Invalid parameter: value after &quot;-%1&quot;</source>
-        <translation>잘못된 파라미터:  &quot;-%1&quot; 이후 값</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3853"/>
-        <source>Parameter &quot;-%1&quot; ignored: only for C2C distance!</source>
-        <translation>파라미터 &quot;-%1&quot; 무시: C@C 거리만!</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3878"/>
-        <source>Invalid parameter: unknown model type &quot;%1&quot;</source>
-        <translation>잘못된 파라미터: 알수없는 모델종류 &quot;%1&quot;</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3883"/>
-        <source>Missing parameter: model type after &quot;-%1&quot; (LS/TRI/HF)</source>
-        <translation>알수 없는 파라미:  &quot;-%1&quot; 이후 모델종류 (LS/TRI/HF)</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3899"/>
-        <source>Invalid parameter: unknown neighborhood type &quot;%1&quot;</source>
-        <translation>잘못된 파라미터: 알수없는 네이버후드 종류 &quot;%1&quot;</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3904"/>
-        <source>Missing parameter: expected neighborhood type after model type (KNN/SPHERE)</source>
-        <translation>파라미터 없음 : 모델종류 (KNN/SPHERE) 이후 예상되는 네이버후드 종류 </translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3914"/>
-        <source>Invalid parameter: neighborhood size</source>
-        <translation>잘못된 파라미터: 네이버후드 크기</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3919"/>
-        <source>Missing parameter: expected neighborhood size after neighborhood type (neighbor count/sphere radius)</source>
-        <translation>파리미터 없음: 네이버후드 종류 (네이버 갯수/구면반경)이후 예상되는 네이버후드 크기</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3929"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4874"/>
-        <source>Missing parameter: max thread count after &apos;%1&apos;</source>
-        <translation>파라미터 없음:&apos;%1&apos; 이후 최대 스리트 갯수</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3936"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4881"/>
-        <source>Invalid thread count! (after %1)</source>
-        <translation>잘못된 스리트 갯수! (%1 이후)</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3954"/>
-        <source>Failed to initialize comparison dialog</source>
-        <translation>비교 대화창 초기화 실패</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4009"/>
-        <source>An error occurred during distances computation!</source>
-        <translation>거리비교시 에러발생!</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4017"/>
-        <source>_MAX_DIST_%1</source>
-        <translation>_최대_거리_%1</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4035"/>
-        <source>C2M distance</source>
-        <translation>C2M 거리</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4039"/>
-        <source>C2C distance</source>
-        <translation>C2C 거리</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4043"/>
-        <source>Closest Point Set</source>
-        <translation type="unfinished">최근접 점세트</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4048"/>
-        <source>[CLOSEST POINT SET]</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4052"/>
-        <source>At least two point clouds are needed to compute the closest point set!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4097"/>
-        <source>Statistical test</source>
-        <translation>통계검증</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4102"/>
-        <source>[STATISTICAL TEST]</source>
-        <translation>[통계검증]</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4109"/>
-        <source>Missing parameter: distribution type after &quot;-%1&quot; (GAUSS/WEIBULL)</source>
-        <translation>알수없는 파라미터: &quot;-%1&quot; 이후 분배종류 (GAUSS/WEIBULL)</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4118"/>
-        <source>Missing parameter: mean value after &quot;GAUSS&quot;</source>
-        <translation>알 수 없는 파라미터: &quot;GAUSS&quot; 이후 중간값</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4124"/>
-        <source>Invalid parameter: mean value after &quot;GAUSS&quot;</source>
-        <translation>잘못된 파라미터: &quot;GAUSS&quot; 이후 중간값</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4129"/>
-        <source>Missing parameter: sigma value after &quot;GAUSS&quot; {mu}</source>
-        <translation>알 수 없는 파라미터: &quot;GAUSS&quot; 이후 시그마값 {mu}</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4135"/>
-        <source>Invalid parameter: sigma value after &quot;GAUSS&quot; {mu}</source>
-        <translation>잘못된 파라미터: &quot;GAUSS&quot; 이후 시그마값 {mu}</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4147"/>
-        <source>Missing parameter: a value after &quot;WEIBULL&quot;</source>
-        <translation>알 수 없는 파라미터: &quot;WEIBULL&quot; 이후 값</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4153"/>
-        <source>Invalid parameter: a value after &quot;WEIBULL&quot;</source>
-        <translation>잘못된 파라미터: &quot;WEIBULL&quot; 이후 값</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4158"/>
-        <source>Missing parameter: b value after &quot;WEIBULL&quot; {a}</source>
-        <translation>알 수 없는 파라미터: &quot;WEIBULL&quot; 이후 b 값 {a}</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4164"/>
-        <source>Invalid parameter: b value after &quot;WEIBULL&quot; {a}</source>
-        <translation>잘못된 파라미터: &quot;WEIBULL&quot; 이후 b 값 {a}</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4169"/>
-        <source>Missing parameter: shift value after &quot;WEIBULL&quot; {a} {b}</source>
-        <translation>알 수 없는 파라미터: &quot;WEIBULL&quot; 이후 이격값 {a} {b}</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4175"/>
-        <source>Invalid parameter: shift value after &quot;WEIBULL&quot; {a} {b}</source>
-        <translation>잘못된 파라미터: &quot;WEIBULL&quot; 이후 이격값 {a} {b}</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4184"/>
-        <source>Invalid parameter: unknown distribution &quot;%1&quot;</source>
-        <translation>잘못된 파라미터: 알수없는 분배 &quot;%1&quot;</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4193"/>
-        <source>Missing parameter: p-value after distribution</source>
-        <translation>알 수 없는 파라미터: 분배후 p값</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4199"/>
-        <source>Invalid parameter: p-value after distribution</source>
-        <translation>잘못된 파라미터: 분배후 p값</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4208"/>
-        <source>Missing parameter: neighbors after p-value</source>
-        <translation>알 수 없는 파라미터: p값후 네이버</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4214"/>
-        <source>Invalid parameter: neighbors after p-value</source>
-        <translation>잘못된 파라미터: p값후 네이버</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4249"/>
-        <location filename="../ccEntityAction.cpp" line="2565"/>
-        <source>Couldn&apos;t allocate a new scalar field for computing chi2 distances! Try to free some memory ...</source>
-        <translation>카이2 거리를 계산할 새로운 스칼라필드에 할당할 수 없습니다! 메모리를 늘리십시오...</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4261"/>
-        <location filename="../ccEntityAction.cpp" line="727"/>
-        <location filename="../ccEntityAction.cpp" line="846"/>
-        <location filename="../ccEntityAction.cpp" line="2577"/>
-        <source>Couldn&apos;t compute octree for cloud &apos;%1&apos;!</source>
-        <translation>클라우드 &apos;%1&apos;의 옥트리를 계산할 수 없습니다!</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4268"/>
-        <location filename="../ccEntityAction.cpp" line="2588"/>
-        <source>[Chi2 Test] %1 test result = %2</source>
-        <translation>[카이2 검증] %1 검증결과 = %2</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4284"/>
-        <source>_STAT_TEST_%1</source>
-        <translation>_STAT_TEST_%1</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4306"/>
-        <source>Delaunay triangulation</source>
-        <translation>들로네 삼각분할</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4311"/>
-        <source>[DELAUNAY TRIANGULATION]</source>
-        <translation>[들로네 삼각분할]</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4338"/>
-        <source>Missing parameter: max edge length value after &apos;%1&apos;</source>
-        <translation>알 수 없는 파라미터:&apos;%1&apos; 이후 최대 엣지 거리값</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4344"/>
-        <source>Invalid value for max edge length! (after %1)</source>
-        <translation>잘못된 최대엣지 거리값 ! (%1 이후) </translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4345"/>
-        <source>Max edge length: %1</source>
-        <translation>최대엣지 거리: %1</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4354"/>
-        <source>Axis aligned: %1</source>
-        <translation>축맞춤: %1</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4371"/>
-        <source>	Resulting mesh: #%1 faces, %2 vertices</source>
-        <translation>	메시 결과: #%1 페이스, %2 버텍스</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4407"/>
-        <source>SF arithmetic</source>
-        <translation>SF 산술</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4412"/>
-        <source>[SF ARITHMETIC]</source>
-        <translation>[SF 산술]</translation>
-    </message>
-    <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4416"/>
-        <source>Missing parameter(s): SF index and/or operation after &apos;%1&apos; (2 values expected)</source>
-        <translation>알수 없는 파라미터: &apos;%1&apos; 이후 SF 인텍스 작동 (2값 기대)</translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2350"/>
@@ -12966,7 +12063,27 @@ p, li { white-space: pre-wrap; }
         <location filename="../ccCommandLineCommands.cpp" line="4839"/>
         <location filename="../ccCommandLineCommands.cpp" line="4863"/>
         <source>Invalid SF index! (after %1)</source>
-        <translation>잘못된 SF 인텍스! (%1 이후)</translation>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="2352"/>
+        <source>Set active S.F. index: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="2356"/>
+        <source>No point cloud loaded! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="2369"/>
+        <source>Cloud &apos;%1&apos; has less scalar fields than the index to select!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="2378"/>
+        <source>Remove all SF</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2410"/>
@@ -13004,6 +12121,179 @@ p, li { white-space: pre-wrap; }
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../ccCommandLineCommands.cpp" line="2487"/>
+        <source>Remove RGB</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="2520"/>
+        <source>Remove normals</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="2557"/>
+        <source>Remove scan grids</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="2587"/>
+        <source>Match B.B. centers</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="2592"/>
+        <source>[MATCH B.B. CENTERS]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="2627"/>
+        <source>Entity &apos;%1&apos; has been translated: (%2,%3,%4)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="2642"/>
+        <source>Match best fit plane</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="2647"/>
+        <source>[COMPUTE BEST FIT PLANE]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="2678"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2805"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2887"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4220"/>
+        <source>No cloud available. Be sure to open one first!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="2690"/>
+        <source>Plane successfully fitted: rms = %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="2709"/>
+        <source>%1/%2_BEST_FIT_PLANE_INFO</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="2712"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5039"/>
+        <source>_%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="2714"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5040"/>
+        <source>.txt</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="2719"/>
+        <source>Filename: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="2720"/>
+        <source>Fitting RMS: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="2729"/>
+        <source>Normal: (%1,%2,%3)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="2761"/>
+        <source>Cloud &apos;%1&apos; has been transformed with the above matrix</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="2762"/>
+        <source>_HORIZ</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="2775"/>
+        <source>Failed to compute best fit plane for cloud &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="2783"/>
+        <source>Orient normals</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="2788"/>
+        <source>[ORIENT NORMALS (MST)]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="2792"/>
+        <source>Missing parameter: number of neighbors after &quot;-%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="2800"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2871"/>
+        <source>Invalid parameter: number of neighbors (%1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="2828"/>
+        <source>_NORMS_REORIENTED</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="2840"/>
+        <source>Failed to orient the normals of cloud &apos;%1&apos;!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="2854"/>
+        <source>S.O.R. filter</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="2859"/>
+        <source>[SOR FILTER]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="2863"/>
+        <source>Missing parameter: number of neighbors mode after &quot;-%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="2876"/>
+        <source>Missing parameter: sigma multiplier after number of neighbors (SOR)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="2882"/>
+        <source>Invalid parameter: sigma multiplier (%1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="2914"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3066"/>
+        <source>.clean</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="2928"/>
+        <source>_SOR</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="2934"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3086"/>
+        <source>Not enough memory to create a clean version of cloud &apos;%1&apos;!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../ccCommandLineCommands.cpp" line="2943"/>
         <source>Failed to apply SOR filter on cloud &apos;%1&apos;! (empty output or not enough memory?)</source>
         <translation type="unfinished"></translation>
@@ -13011,7 +12301,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2957"/>
         <source>Noise filter</source>
-        <translation type="unfinished">노이즈 필터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2962"/>
@@ -13059,48 +12349,578 @@ p, li { white-space: pre-wrap; }
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3109"/>
+        <source>Extract vertices (as a standalone &apos;cloud&apos;)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3114"/>
+        <source>[EXTRACT VERTICES]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3118"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3202"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3765"/>
+        <source>No mesh available. Be sure to open one first!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3134"/>
+        <source>.vertices</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3160"/>
+        <source>Sample mesh</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3165"/>
+        <source>[SAMPLE POINTS ON MESH]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3169"/>
+        <source>Missing parameter: sampling mode after &quot;-%1&quot; (POINTS/DENSITY)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3186"/>
+        <source>Invalid parameter: unknown sampling mode &quot;%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3191"/>
+        <source>Missing parameter: value after sampling mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3197"/>
+        <source>Invalid parameter: value after sampling mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3218"/>
+        <source>Cloud sampling failed!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3222"/>
+        <source>Sampled cloud created: %1 points</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3223"/>
+        <source>_SAMPLED_POINTS</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3246"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3393"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3457"/>
+        <source>Crop</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3251"/>
+        <source>[CROP]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3255"/>
+        <source>Missing parameter: box extents after &quot;-%1&quot; (Xmin:Ymin:Zmin:Xmax:Ymax:Zmax)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3259"/>
+        <source>No point cloud or mesh available. Be sure to open or generate one first!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3270"/>
+        <source>Invalid parameter: box extents (expected format is &apos;Xmin:Ymin:Zmin:Xmax:Ymax:Zmax&apos;)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3280"/>
+        <source>Invalid parameter: box extents (component #%1 is not a valid number)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3398"/>
+        <source>[COORD TO SF]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3402"/>
+        <source>Missing parameter after &quot;-%1&quot; (DIMENSION)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3406"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3470"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3735"/>
+        <source>No point cloud available. Be sure to open or generate one first!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3427"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3648"/>
+        <source>Invalid parameter: dimension after &quot;-%1&quot; (expected: X, Y or Z)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3437"/>
+        <source>_%1_TO_SF</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3449"/>
+        <source>Failed to export coord. %1 to SF on cloud &apos;%2&apos;!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3462"/>
+        <source>[CROP 2D]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3466"/>
+        <source>Missing parameter(s) after &quot;-%1&quot; (ORTHO_DIM N X1 Y1 X2 Y2 ... XN YN)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3495"/>
+        <source>Invalid parameter: orthogonal dimension after &quot;-%1&quot; (expected: X, Y or Z)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3507"/>
+        <source>Invalid parameter: number of vertices for the 2D polyline after &quot;-%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3523"/>
+        <source>Missing parameter(s): vertex #%1 data and following</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3532"/>
+        <source>Invalid parameter: X-coordinate of vertex #%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3538"/>
+        <source>Invalid parameter: Y-coordinate of vertex #%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3580"/>
+        <source>.cropped</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3593"/>
+        <source>Not enough memory to crop cloud &apos;%1&apos;!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3600"/>
+        <source>No point of cloud &apos;%1&apos; falls inside the input box!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3605"/>
+        <source>Crop process failed! (not enough memory)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3613"/>
+        <source>Color banding</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3618"/>
+        <source>[COLOR BANDING]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3622"/>
+        <source>Missing parameter(s) after &quot;-%1&quot; (DIM FREQUENCY)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3626"/>
+        <source>No entity available. Be sure to open or generate one first!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3660"/>
+        <source>Invalid parameter: frequency after &quot;-%1 DIM&quot; (in Hz, integer value)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3679"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3707"/>
+        <source>COLOR_BANDING_%1_%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3702"/>
+        <source>Vertices of mesh &apos;%1&apos; are locked (they may be shared by multiple entities for instance). Can&apos;t apply the current command on them.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3723"/>
+        <source>[DISTANCE COMPUTATION]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3739"/>
+        <source>No point cloud available. Will use the first mesh vertices as compared cloud.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3744"/>
+        <source>Unhandled mesh vertices type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3752"/>
+        <source>[C2M] Multiple point clouds loaded! Will take the first one by default.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3777"/>
+        <source>Only one point cloud available. Be sure to open or generate a second one before performing C2C distance!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3781"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4056"/>
+        <source>More than 3 point clouds loaded! We take the second one as reference by default</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3809"/>
+        <source>Parameter &quot;-%1&quot; ignored: only for C2M distance!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3819"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3835"/>
+        <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerCommand.cpp" line="68"/>
+        <source>Missing parameter: value after &quot;-%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3825"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3841"/>
+        <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerCommand.cpp" line="72"/>
+        <location filename="../../plugins/core/Standard/qCSF/include/qCSFCommands.h" line="143"/>
+        <location filename="../../plugins/core/Standard/qCSF/include/qCSFCommands.h" line="154"/>
+        <location filename="../../plugins/core/Standard/qCSF/include/qCSFCommands.h" line="165"/>
+        <location filename="../../plugins/core/Standard/qPCV/src/PCVCommand.cpp" line="180"/>
+        <location filename="../../plugins/core/Standard/qPCV/src/PCVCommand.cpp" line="190"/>
+        <source>Invalid parameter: value after &quot;-%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3853"/>
+        <source>Parameter &quot;-%1&quot; ignored: only for C2C distance!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3878"/>
+        <source>Invalid parameter: unknown model type &quot;%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3883"/>
+        <source>Missing parameter: model type after &quot;-%1&quot; (LS/TRI/HF)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3899"/>
+        <source>Invalid parameter: unknown neighborhood type &quot;%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3904"/>
+        <source>Missing parameter: expected neighborhood type after model type (KNN/SPHERE)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3914"/>
+        <source>Invalid parameter: neighborhood size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3919"/>
+        <source>Missing parameter: expected neighborhood size after neighborhood type (neighbor count/sphere radius)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3929"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4874"/>
+        <source>Missing parameter: max thread count after &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3936"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4881"/>
+        <source>Invalid thread count! (after %1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="3954"/>
+        <source>Failed to initialize comparison dialog</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4009"/>
+        <source>An error occurred during distances computation!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4017"/>
+        <source>_MAX_DIST_%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4035"/>
+        <source>C2M distance</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4039"/>
+        <source>C2C distance</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4043"/>
+        <source>Closest Point Set</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4048"/>
+        <source>[CLOSEST POINT SET]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4052"/>
+        <source>At least two point clouds are needed to compute the closest point set!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4097"/>
+        <source>Statistical test</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4102"/>
+        <source>[STATISTICAL TEST]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4109"/>
+        <source>Missing parameter: distribution type after &quot;-%1&quot; (GAUSS/WEIBULL)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4118"/>
+        <source>Missing parameter: mean value after &quot;GAUSS&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4124"/>
+        <source>Invalid parameter: mean value after &quot;GAUSS&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4129"/>
+        <source>Missing parameter: sigma value after &quot;GAUSS&quot; {mu}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4135"/>
+        <source>Invalid parameter: sigma value after &quot;GAUSS&quot; {mu}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4147"/>
+        <source>Missing parameter: a value after &quot;WEIBULL&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4153"/>
+        <source>Invalid parameter: a value after &quot;WEIBULL&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4158"/>
+        <source>Missing parameter: b value after &quot;WEIBULL&quot; {a}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4164"/>
+        <source>Invalid parameter: b value after &quot;WEIBULL&quot; {a}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4169"/>
+        <source>Missing parameter: shift value after &quot;WEIBULL&quot; {a} {b}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4175"/>
+        <source>Invalid parameter: shift value after &quot;WEIBULL&quot; {a} {b}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4184"/>
+        <source>Invalid parameter: unknown distribution &quot;%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4193"/>
+        <source>Missing parameter: p-value after distribution</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4199"/>
+        <source>Invalid parameter: p-value after distribution</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4208"/>
+        <source>Missing parameter: neighbors after p-value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4214"/>
+        <source>Invalid parameter: neighbors after p-value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4249"/>
+        <location filename="../ccEntityAction.cpp" line="2565"/>
+        <source>Couldn&apos;t allocate a new scalar field for computing chi2 distances! Try to free some memory ...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4261"/>
+        <location filename="../ccEntityAction.cpp" line="727"/>
+        <location filename="../ccEntityAction.cpp" line="846"/>
+        <location filename="../ccEntityAction.cpp" line="2577"/>
+        <source>Couldn&apos;t compute octree for cloud &apos;%1&apos;!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4268"/>
+        <location filename="../ccEntityAction.cpp" line="2588"/>
+        <source>[Chi2 Test] %1 test result = %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4284"/>
+        <source>_STAT_TEST_%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4306"/>
+        <source>Delaunay triangulation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4311"/>
+        <source>[DELAUNAY TRIANGULATION]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4338"/>
+        <source>Missing parameter: max edge length value after &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4344"/>
+        <source>Invalid value for max edge length! (after %1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4345"/>
+        <source>Max edge length: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4354"/>
+        <source>Axis aligned: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4371"/>
+        <source>	Resulting mesh: #%1 faces, %2 vertices</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4407"/>
+        <source>SF arithmetic</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4412"/>
+        <source>[SF ARITHMETIC]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="4416"/>
+        <source>Missing parameter(s): SF index and/or operation after &apos;%1&apos; (2 values expected)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../ccCommandLineCommands.cpp" line="4443"/>
         <location filename="../ccCommandLineCommands.cpp" line="4536"/>
         <source>Unknown operation! (%1)</source>
-        <translation>알수없는 작동! (%1)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="4447"/>
         <location filename="../ccCommandLineCommands.cpp" line="4540"/>
         <source>Operation %1 can&apos;t be applied with %2</source>
-        <translation>작동 %1을 %2에 적용할 수 없습니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="4459"/>
         <location filename="../ccCommandLineCommands.cpp" line="4569"/>
         <source>Failed top apply operation on cloud &apos;%1&apos;</source>
-        <translation>클라우드 &apos;%1&apos;에 탑 적용 실패</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="4482"/>
         <location filename="../ccCommandLineCommands.cpp" line="4592"/>
         <source>Failed top apply operation on mesh &apos;%1&apos;</source>
-        <translation>메시 &apos;%1&apos;에 탑 적용 실패</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="4499"/>
         <source>SF operation</source>
-        <translation>SF 작동</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="4504"/>
         <source>[SF OPERATION]</source>
-        <translation>[SF 작동]</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="4508"/>
         <source>Missing parameter(s): SF index and/or operation and/or scalar value after &apos;%1&apos; (3 values expected)</source>
-        <translation>알수없는 파라미터: &apos;%1&apos; 이루 SF 인텍스 작동 스칼라값 (3값 예상)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="4551"/>
         <source>Invalid scalar value! (after %1)</source>
-        <translation>잘못된 스칼라값! (%1 이후)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="4610"/>
@@ -13120,265 +12940,270 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="4716"/>
         <source>[ICP]</source>
-        <translation>[ICP]</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="4762"/>
         <source>Missing parameter: min error difference after &apos;%1&apos;</source>
-        <translation>잘못된 파라미터: &apos;%1&apos; 이후 최소 오차 </translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="4768"/>
         <source>Invalid value for min. error difference! (after %1)</source>
-        <translation>잘못된 최소 에러편차 값! (%1 이후)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="4778"/>
         <source>Missing parameter: number of iterations after &apos;%1&apos;</source>
-        <translation>잘못된 파라미터: &apos;%1&apos; 이후 반복횟수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="4784"/>
         <source>Invalid number of iterations! (%1)</source>
-        <translation>잘못된 반복갯수! (%1)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="4793"/>
         <source>Missing parameter: overlap percentage after &apos;%1&apos;</source>
-        <translation>잘못된 파라미터: &apos;%1&apos; 이후 중복 퍼센트</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="4800"/>
         <source>Invalid overlap value! (%1 --&gt; should be between 10 and 100)</source>
-        <translation>잘못된 중복도값! (%1 --&gt; 10과 100 사이값)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="4810"/>
         <source>Missing parameter: random sampling limit value after &apos;%1&apos;</source>
-        <translation type="unfinished">알 수 없는 파라미터: &apos;%1&apos; 이후 무작위 샘플링 한계값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="4816"/>
         <source>Invalid random sampling limit! (after %1)</source>
-        <translation>잘못된 랜점 샘플링 한계! (%1 이후)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="4826"/>
         <location filename="../ccCommandLineCommands.cpp" line="4850"/>
         <source>Missing parameter: SF index after &apos;%1&apos;</source>
-        <translation>알수 없는 파라미터: &apos;%1&apos; 이후 SF 인덱스</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="4914"/>
         <source>Invalid parameter: unknown rotation filter &quot;%1&quot;</source>
-        <translation>잘못된 파라미터: 알수없는 회전필터 &quot;%1&quot;</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="4919"/>
         <source>Missing parameter: rotation filter after &quot;-%1&quot; (XYZ/X/Y/Z/NONE)</source>
-        <translation>알수 없는 파라미터: &quot;-%1&quot;이루 회전필터 (XYZ/X/Y/Z/없음)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="4951"/>
         <source>Not enough loaded entities (expect at least 2!)</source>
-        <translation>로드된 엔티티 부족 (최소 2 예상!)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="4967"/>
         <source>Invalid SF index for data entity! (%1)</source>
-        <translation>잘못된 데이터 엔티티 SF 인덱스! (%1)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="4975"/>
         <source>[ICP] SF #%1 (data entity) will be used as weights</source>
-        <translation>[ICP] SF #%1 (데이터 엔티티)이(가) 가중치로 사용됩니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="4985"/>
         <source>Invalid SF index for model entity! (%1)</source>
-        <translation>잘못된 모델 엔티티 SF 인덱스! (%1)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="4993"/>
         <source>[ICP] SF #%1 (model entity) will be used as weights</source>
-        <translation>[ICP] SF #%1 (모델 엔티티)이(가) 가중치로 사용됩니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5031"/>
         <source>Entity &apos;%1&apos; has been registered</source>
-        <translation>엔티티 &apos;%1&apos;이 정합되었습니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5032"/>
         <source>RMS: %1</source>
-        <translation>RMS: %1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5033"/>
         <source>Number of points used for final step: %1</source>
-        <translation>최종 단계에 사용된 점갯수: %1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5037"/>
         <source>%1/%2_REGISTRATION_MATRIX</source>
-        <translation>%1/%2_REGISTRATION_MATRIX</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5048"/>
         <source>_REGISTERED</source>
-        <translation>_REGISTERED</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5067"/>
         <source>Change PLY output format</source>
-        <translation>PLY 출력포맷 변경</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5074"/>
         <source>Missing parameter: format (ASCII, BINARY_LE, or BINARY_BE) after &apos;%1&apos;</source>
-        <translation>알 수 없는 파라미터: &apos;%1&apos; 이후 포맷 (ASCII, BINARY_LE, or BINARY_BE) </translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5097"/>
         <source>Invalid PLY format! (&apos;%1&apos;)</source>
-        <translation>잘못된 PLY 포맷! (&apos;%1&apos;)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5104"/>
         <source>Compute structured cloud normals</source>
-        <translation>구성된 클라우드 노말 계산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5133"/>
         <source>A file starting with %1 does not have a closing %1</source>
-        <translation>%1로 시작하는 파일이 %1 폐합되지 않았습니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5165"/>
         <source>Save clouds</source>
-        <translation>클라우드 저장</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5201"/>
         <location filename="../ccCommandLineCommands.cpp" line="5272"/>
         <source>Invalid parameter: specified %1 file names, but ALL_AT_ONCE is on</source>
-        <translation>잘못된 파라미터: 특정 %1 파일명이지만 ALL_AT_ONCE 켜짐</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5205"/>
         <source>Invalid parameter: specified %1 file names, but there are %2 clouds</source>
-        <translation>잘못된 파라미터: 특정 %1 파일명이지만 %2 클라우가 있습니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5236"/>
         <source>Save meshes</source>
-        <translation>메시 저장</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5276"/>
         <source>Invalid parameter: specified %1 file names, but there are %2 meshes</source>
-        <translation>잘못된 파라미터: 특정 %1 파일면이지만 %2 메시가 있습니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5307"/>
         <source>Auto save state</source>
-        <translation>자동저장 상태</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5314"/>
         <source>Missing parameter: option after &apos;%1&apos; (%2/%3)</source>
-        <translation>알 수 없는 파라미터: &apos;%1&apos; (%2/%3) 이후 옵션</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5320"/>
         <source>Auto-save is enabled</source>
-        <translation>자동저장 활성화</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5325"/>
         <source>Auto-save is disabled</source>
-        <translation>자동저장 비활성</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5330"/>
         <source>Unrecognized option after &apos;%1&apos; (%2 or %3 expected)</source>
-        <translation>&apos;%1&apos; 이후 인식할 수 없는 옵션 (%2 또는 %3 예상)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5337"/>
         <source>Set log file</source>
-        <translation>로그파일 설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5344"/>
         <source>Missing parameter: filename after &apos;%1&apos;</source>
-        <translation>알 수 없는 파라미터: &apos;%1&quot; 이후 파일명</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5358"/>
         <source>Clear</source>
-        <translation>지우기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5369"/>
         <source>Clear clouds</source>
-        <translation>클라우드 지우기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5379"/>
         <source>Pop clouds</source>
-        <translation>팝클라우드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5389"/>
         <source>Clear meshes</source>
-        <translation>메시 지우기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5399"/>
         <source>Pop meshes</source>
-        <translation>팝메시</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5409"/>
         <source>No timestamp</source>
-        <translation>타임스탬프 없음</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5419"/>
         <source>1st order moment</source>
-        <translation>1번 순서</translation>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="5426"/>
+        <source>Missing parameter: kernel size after %1</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5434"/>
         <location filename="../ccCommandLineCommands.cpp" line="5563"/>
         <source>Failed to read a numerical parameter: kernel size. Got &apos;%1&apos; instead.</source>
-        <translation>숫자 파라미터:커널크기 읽기 실패. 대신 &apos;%1&apos; 얻음.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5440"/>
         <source>No point cloud on which to compute first order moment! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
-        <translation>1번 순서를 계산할 포인트클라우드가 없습니다! (&quot;-%2&quot; 전에 &quot;-%1 [클라우드 파일명]&quot;이 열려 있어야합니다)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5454"/>
         <source>MOMENT_KERNEL_%2</source>
-        <translation>MOMENT_KERNEL_%2</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5463"/>
         <source>Feature</source>
-        <translation>피쳐</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5468"/>
         <source>[FEATURE]</source>
-        <translation>[피쳐]</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5472"/>
         <source>Missing parameter: feature type after &quot;-%1&quot;</source>
-        <translation>알 수 없는 파라미터:&quot;-%1&quot;이후 피쳐종류</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5536"/>
@@ -13397,48 +13222,33 @@ p, li { white-space: pre-wrap; }
 - EIGENVALUE1
 - EIGENVALUE2
 - EIGENVALUE3</source>
-        <translation>&quot;-%1&quot; 이후 알수없는 피쳐종류. 대신 &apos;%2&apos; 얻음:
-- SUM_OF_EIGENVALUES
-- OMNIVARIANCE
-- EIGENTROPY
-- ANISOTROPY
-- PLANARITY
-- LINEARITY
-- PCA1
-- PCA2
-- SURFACE_VARIATION
-- SPHERICITY
-- VERTICALITY
-- EIGENVALUE1
-- EIGENVALUE2
-- EIGENVALUE3</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5555"/>
         <source>Missing parameter: kernel size after feature type</source>
-        <translation>알 수 없는 파라미터:피쳐 종류후 커넬크기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5569"/>
         <source>No point cloud on which to compute feature! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
-        <translation>피쳐를 계산할 포인트클라우드 없음! (&quot;-%2&quot; 전에 &quot;-%1 [클라우드 파일명]이 포함된 파일 한개를 열어야 합니다)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="5583"/>
         <source>%1_FEATURE_KERNEL_%2</source>
-        <translation>%1_FEATURE_KERNEL_%2</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccContourLinesGenerator.cpp" line="349"/>
         <source>Contour plot</source>
-        <translation>등고선 플로팅</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccContourLinesGenerator.cpp" line="350"/>
         <source>Levels: %1
 Cells: %2 x %3</source>
-        <translation>레벨: %1
-셀: %2 x %3</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="132"/>
@@ -13493,21 +13303,26 @@ Cells: %2 x %3</source>
     <message>
         <location filename="../ccEntityAction.cpp" line="411"/>
         <source>Source</source>
-        <translation type="unfinished">소스</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="411"/>
         <source>Destination</source>
-        <translation type="unfinished">경로</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="441"/>
         <source>entity</source>
-        <translation type="unfinished">엔티티</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="458"/>
         <source>No scalar field was selected</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="527"/>
+        <source>[ConvertTextureToColor] Mesh &apos;%1&apos; has no material/texture!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -13518,6 +13333,11 @@ Cells: %2 x %3</source>
     <message>
         <location filename="../ccEntityAction.cpp" line="535"/>
         <source>Mesh &apos;%1&apos; already has colors! Overwrite them?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="551"/>
+        <source>[ConvertTextureToColor] Failed to convert texture on mesh &apos;%1&apos;!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -13534,36 +13354,16 @@ or use the actual one (no)?</source>
     <message>
         <location filename="../ccEntityAction.cpp" line="569"/>
         <source>Min</source>
-        <translation type="unfinished">최소</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="569"/>
         <source>Max</source>
-        <translation type="unfinished">최대</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="569"/>
         <source>Theroetical intensity</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ccEntityAction.cpp" line="613"/>
-        <source>Intensity scalar field</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ccEntityAction.cpp" line="613"/>
-        <source>Choose scalar field</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ccEntityAction.cpp" line="527"/>
-        <source>[ConvertTextureToColor] Mesh &apos;%1&apos; has no material/texture!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ccEntityAction.cpp" line="551"/>
-        <source>[ConvertTextureToColor] Failed to convert texture on mesh &apos;%1&apos;!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -13574,6 +13374,16 @@ or use the actual one (no)?</source>
     <message>
         <location filename="../ccEntityAction.cpp" line="597"/>
         <source>[EnhanceRGBWithIntensities] Entity &apos;%1&apos; has no scalar field!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="613"/>
+        <source>Intensity scalar field</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="613"/>
+        <source>Choose scalar field</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -13590,7 +13400,7 @@ or use the actual one (no)?</source>
     <message>
         <location filename="../ccEntityAction.cpp" line="674"/>
         <source>Gaussian filter</source>
-        <translation type="unfinished">가우시안 필터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="717"/>
@@ -13668,7 +13478,7 @@ or use the actual one (no)?</source>
     <message>
         <location filename="../ccEntityAction.cpp" line="1034"/>
         <source>unknown</source>
-        <translation type="unfinished">알수없음</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1153"/>
@@ -13704,7 +13514,7 @@ or use the actual one (no)?</source>
     <message>
         <location filename="../ccEntityAction.cpp" line="1388"/>
         <source>Export normals to SF(s)</source>
-        <translation>SF로 노말 출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1417"/>
@@ -13729,16 +13539,6 @@ or use the actual one (no)?</source>
     <message>
         <location filename="../ccEntityAction.cpp" line="1582"/>
         <source>[SfFromColor] New scalar fields (%1) added to &apos;%2&apos;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ccEntityAction.cpp" line="2231"/>
-        <source>[DoActionComputeOctree] No eligible entities in selection!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ccEntityAction.cpp" line="2360"/>
-        <source>[DoActionClearNormals] Can&apos;t remove normals per-vertex on a sub mesh!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -13829,7 +13629,7 @@ or use the actual one (no)?</source>
     <message>
         <location filename="../ccEntityAction.cpp" line="2023"/>
         <source>Neighbors</source>
-        <translation type="unfinished">네이버</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="2057"/>
@@ -13853,8 +13653,18 @@ or use the actual one (no)?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../ccEntityAction.cpp" line="2231"/>
+        <source>[DoActionComputeOctree] No eligible entities in selection!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../ccEntityAction.cpp" line="2316"/>
         <source>Octree computation on cloud &apos;%1&apos; failed!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccEntityAction.cpp" line="2360"/>
+        <source>[DoActionClearNormals] Can&apos;t remove normals per-vertex on a sub mesh!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -13931,7 +13741,7 @@ or use the actual one (no)?</source>
     <message>
         <location filename="../ccEntityAction.cpp" line="2757"/>
         <source>Count</source>
-        <translation type="unfinished">갯수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="2764"/>
@@ -13941,80 +13751,79 @@ or use the actual one (no)?</source>
     <message>
         <location filename="../ccLibAlgorithms.cpp" line="636"/>
         <source>Computing entities scales</source>
-        <translation>엔티티 스케일 계산중</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccLibAlgorithms.cpp" line="637"/>
         <source>Entities: %1</source>
-        <translation>엔티티: %1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccLibAlgorithms.cpp" line="772"/>
         <source>Rescaling entities</source>
-        <translation>엔티티 리스케일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccPointPairRegistrationDlg.cpp" line="413"/>
         <source>Whether the point is expressed in the entity original coordinate system (before being shifted by CC) or not</source>
-        <translation>엔티티 원본좌표에서 점이 표현 (CC에서 이격되기전) 되는지 여부</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccVolumeCalcTool.cpp" line="656"/>
         <source>Volume computation</source>
-        <translation>체적계산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccVolumeCalcTool.cpp" line="657"/>
         <source>Cells: %1 x %2</source>
-        <translation>셀: %1 x %2</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerCommand.cpp" line="41"/>
         <source>Importing Bundler file: &apos;%1&apos;</source>
-        <translation>번들러파일: &apos;%1&apos; 입력중</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerCommand.cpp" line="87"/>
         <source>Missing parameter: vertices count after &quot;-%1&quot;</source>
-        <translation>알수 없는 파라미터: &quot;-%1&quot; 이후 버텍스 갯수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerCommand.cpp" line="91"/>
         <source>Invalid parameter: vertices count after &quot;-%1&quot;</source>
-        <translation>잘못된 파라미터: &quot;-%1&quot;이후 버텍스 갯수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerFilter.cpp" line="231"/>
         <source>Open Bundler file</source>
-        <translation>번들러파일 열기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerFilter.cpp" line="232"/>
         <source>Cameras: %1
 Points: %2</source>
-        <translation>카메라: %1
-점: %2</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerFilter.cpp" line="631"/>
         <source>Open &amp; process images</source>
-        <translation>이미지 열기후 프로세싱</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerFilter.cpp" line="632"/>
         <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="2385"/>
         <source>Images: %1</source>
-        <translation>이미지: %1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerFilter.cpp" line="651"/>
         <source>Preparing colored DTM</source>
-        <translation>컬러 DTM 준비중</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/src/PNFilter.cpp" line="98"/>
         <source>Save PN file</source>
-        <translation>PN 파일 저장</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/src/PNFilter.cpp" line="99"/>
@@ -14027,54 +13836,54 @@ Points: %2</source>
         <location filename="../../libs/qCC_db/src/ccGBLSensor.cpp" line="711"/>
         <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="5413"/>
         <source>Points: %L1</source>
-        <translation>점: %L1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/src/PNFilter.cpp" line="170"/>
         <source>Open PN file</source>
-        <translation>PN 파일 열기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/src/PVFilter.cpp" line="101"/>
         <source>Save PV file</source>
-        <translation>PV 파일 저장</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/src/PVFilter.cpp" line="167"/>
         <source>Open PV file</source>
-        <translation>PV 파일 열기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/src/SoiFilter.cpp" line="94"/>
         <source>Open SOI file</source>
-        <translation>SOI 파일 열기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qAdditionalIO/src/SoiFilter.cpp" line="95"/>
         <source>%1 scans / %2 points</source>
-        <translation>%1 스캔 / %2 점</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qCoreIO/src/MAFilter.cpp" line="155"/>
         <source>Save MA file</source>
-        <translation>MA 파일 저장</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qCoreIO/src/MAFilter.cpp" line="156"/>
         <source>Triangles = %1</source>
-        <translation>TIN = %1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qCoreIO/src/ObjFilter.cpp" line="111"/>
         <location filename="../../plugins/core/IO/qCoreIO/src/STLFilter.cpp" line="124"/>
         <location filename="../../plugins/core/IO/qCoreIO/src/STLFilter.cpp" line="216"/>
         <source>Saving mesh [%1]</source>
-        <translation>메시 저장중 [%1]</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qCoreIO/src/ObjFilter.cpp" line="112"/>
         <source>Writing %1 vertices</source>
-        <translation>%1 버텍스 쓰는중</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qCoreIO/src/ObjFilter.cpp" line="153"/>
@@ -14084,581 +13893,236 @@ Points: %2</source>
     <message>
         <location filename="../../plugins/core/IO/qCoreIO/src/ObjFilter.cpp" line="182"/>
         <source>Writing %1 vertex normals</source>
-        <translation>%1 버텍스 노말 쓰는중</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qCoreIO/src/ObjFilter.cpp" line="209"/>
         <source>Writing %1 materials</source>
-        <translation>%1 자재 쓰는중</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qCoreIO/src/ObjFilter.cpp" line="250"/>
         <source>Writing %1 texture coordinates</source>
-        <translation>%1 텍스쳐 좌표 쓰는중</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qCoreIO/src/ObjFilter.cpp" line="298"/>
         <source>Writing %1 triangles</source>
-        <translation>%1 TIN 쓰는중</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qCoreIO/src/ObjFilter.cpp" line="543"/>
         <source>OBJ file</source>
-        <translation>OBJ 파일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qCoreIO/src/ObjFilter.cpp" line="544"/>
         <location filename="../../plugins/core/IO/qCoreIO/src/STLFilter.cpp" line="441"/>
         <location filename="../../libs/qCC_io/src/PlyFilter.cpp" line="1712"/>
         <source>Loading in progress...</source>
-        <translation>로딩 진행중...</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qCoreIO/src/PTXFilter.cpp" line="119"/>
         <source>Loading PTX file</source>
-        <translation>PTX 파일 로딩</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qCoreIO/src/SimpleBinFilter.cpp" line="207"/>
         <location filename="../../plugins/core/IO/qCoreIO/src/SimpleBinFilter.cpp" line="516"/>
         <source>Simple BIN file</source>
-        <translation>심플 BIM 파일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qCoreIO/src/SimpleBinFilter.cpp" line="208"/>
         <source>Saving %1 points / %2 scalar field(s)</source>
-        <translation>%1 점 / %2 스칼라필드 저장중</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qCoreIO/src/SimpleBinFilter.cpp" line="517"/>
         <source>Loading %1 points / %2 scalar field(s)</source>
-        <translation>%1 점 / %2 스칼라필드 로딩중</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qCoreIO/src/STLFilter.cpp" line="125"/>
         <location filename="../../plugins/core/IO/qCoreIO/src/STLFilter.cpp" line="217"/>
         <source>Number of facets: %1</source>
-        <translation>측면갯수: %1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qCoreIO/src/STLFilter.cpp" line="440"/>
         <source>(ASCII) STL file</source>
-        <translation>(ASCII) STL 파일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qCoreIO/src/STLFilter.cpp" line="742"/>
         <source>Loading binary STL file</source>
-        <translation>바이너리 STL 파일 로딩중</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qCoreIO/src/STLFilter.cpp" line="743"/>
         <source>Loading %1 faces</source>
-        <translation>%1 면 로딩중</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="521"/>
         <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="836"/>
         <source>Write E57 file</source>
-        <translation>E57 파일 쓰기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="522"/>
         <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="1751"/>
         <source>Scan #%1 - %2 points</source>
-        <translation>스캔 #%1 - %2 점</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="837"/>
         <source>Cloud #%1 - Images: %2</source>
-        <translation>클라우드 #%1 - 이미지: %2</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="1750"/>
         <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="2291"/>
         <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="2384"/>
         <source>Read E57 file</source>
-        <translation>E57 파일 읽기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qE57IO/src/E57Filter.cpp" line="2292"/>
         <source>Scans: %1</source>
-        <translation>스캔: %1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qFBXIO/src/FBXCommand.cpp" line="44"/>
         <source>Missing parameter: FBX format (string) after &apos;%1&apos;</source>
-        <translation>알수없는 파라미터: &apos;%1&apos; 이후 FBX 포맷 (스트링)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qFBXIO/src/FBXCommand.cpp" line="47"/>
         <source>FBX format: %1</source>
-        <translation>FBX 포맷: %1</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/IO/qLASFWFIO/src/LASFWFFilter.cpp" line="640"/>
-        <source>Export LAS file</source>
-        <translation>LAS 파일 출력</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/IO/qLASFWFIO/src/LASFWFFilter.cpp" line="641"/>
-        <location filename="../../plugins/core/IO/qLASFWFIO/src/LASFWFFilter.cpp" line="927"/>
-        <source>Points: %1</source>
-        <translation>점: %1</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/IO/qLASFWFIO/src/LASFWFFilter.cpp" line="919"/>
-        <source>Reading %1 points</source>
-        <translation>%1 점 읽는중</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/IO/qLASFWFIO/src/LASFWFFilter.cpp" line="926"/>
-        <source>Import LAS file</source>
-        <translation>LAS 파일 입력</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/IO/qLASFWFIO/src/LASFWFFilter.cpp" line="1417"/>
-        <source>No valid point in file</source>
-        <translation>파일에 사용가능한 점없음</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/IO/qPDALIO/src/LASFilter.cpp" line="307"/>
-        <source>Save LAS file</source>
-        <translation>LAS 파일 저장</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qLASFWFIO/src/LASFWFFilter.cpp" line="459"/>
         <location filename="../../plugins/core/IO/qPDALIO/src/LASFilter.cpp" line="443"/>
         <source>Original scale is too small for this cloud  </source>
-        <translation>이 클라우드의 원본 스케일이 너무 작습니다</translation>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/IO/qLASFWFIO/src/LASFWFFilter.cpp" line="640"/>
+        <source>Export LAS file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/IO/qLASFWFIO/src/LASFWFFilter.cpp" line="641"/>
+        <location filename="../../plugins/core/IO/qLASFWFIO/src/LASFWFFilter.cpp" line="927"/>
+        <source>Points: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/IO/qLASFWFIO/src/LASFWFFilter.cpp" line="919"/>
+        <source>Reading %1 points</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/IO/qLASFWFIO/src/LASFWFFilter.cpp" line="926"/>
+        <source>Import LAS file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/IO/qLASFWFIO/src/LASFWFFilter.cpp" line="1417"/>
+        <source>No valid point in file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/IO/qPDALIO/src/LASFilter.cpp" line="307"/>
+        <source>Save LAS file</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/src/LASFilter.cpp" line="1156"/>
         <source>Open LAS file</source>
-        <translation>LAS 파일 열기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/src/LASFilter.cpp" line="1203"/>
         <location filename="../../plugins/core/IO/qPDALIO/src/LASFilter.cpp" line="1244"/>
         <source>LAS file</source>
-        <translation>LAS 파일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/src/LASFilter.cpp" line="1204"/>
         <source>Please wait... reading in progress</source>
-        <translation>기다리십시오... 읽는중</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/src/LASFilter.cpp" line="1226"/>
         <source>Tiling points</source>
-        <translation>타일링 점</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPDALIO/src/LASFilter.cpp" line="1245"/>
         <source>Please wait... writing in progress</source>
-        <translation>기다리십시오... 쓰는중</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/src/qCanupoProcess.cpp" line="534"/>
         <source>Remaining points to classify: %1
 Source points: %2</source>
-        <translation>분류에 남은점: %1
-원본점: %2</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/src/qCanupoProcess.cpp" line="535"/>
         <source>Classification</source>
-        <translation>분류</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/src/qCanupoProcess.cpp" line="903"/>
         <source>Core points: %1
 Source points: %2</source>
-        <translation>코어점: %1
-소스점: %2</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/src/qCanupoProcess.cpp" line="904"/>
         <source>Labelling</source>
-        <translation>라벨링</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/src/ccCompassImport.cpp" line="116"/>
         <source>Dip Field:</source>
         <comment>ccCompassImport</comment>
-        <translation>Dip 필드:</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/src/ccCompassImport.cpp" line="117"/>
         <source>Dip-Direction Field:</source>
         <comment>ccCompassImport</comment>
-        <translation>Dip-방향 필드:</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/src/ccCompassImport.cpp" line="118"/>
         <source>Plane Size</source>
         <comment>ccCompassImport</comment>
-        <translation>평면 크기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/src/ccCompassImport.cpp" line="224"/>
         <source>Trend Field:</source>
         <comment>ccCompassImport</comment>
-        <translation>트랜드필드:</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/src/ccCompassImport.cpp" line="225"/>
         <source>Plunge Field:</source>
         <comment>ccCompassImport</comment>
-        <translation>플런지 필드:</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/src/ccCompassImport.cpp" line="226"/>
         <source>Display Length</source>
         <comment>ccCompassImport</comment>
-        <translation>표시거리</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qFacets/src/qFacets.cpp" line="428"/>
-        <source>Facets creation</source>
-        <translation>측면생성</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qFacets/src/qFacets.cpp" line="429"/>
-        <source>Components: %1</source>
-        <translation>구성요소: %1</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qFacets/src/stereogramDlg.cpp" line="124"/>
-        <source>Stereogram</source>
-        <translation>스테레오그램</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qFacets/src/stereogramDlg.cpp" line="125"/>
-        <source>Preparing polar display...</source>
-        <translation>폴라표시 준비중...</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qM3C2/include/qM3C2Commands.h" line="72"/>
-        <source>_M3C2</source>
-        <translation>_M3C2</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qM3C2/src/qM3C2Process.cpp" line="800"/>
-        <source>M3C2 Distances Computation</source>
-        <translation>M3C2 거리계산</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qM3C2/src/qM3C2Process.cpp" line="801"/>
-        <source>Core points: %1</source>
-        <translation>코어점: %1</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qPCV/src/PCVCommand.cpp" line="60"/>
-        <source>Invalid object type</source>
-        <translation>잘못된 객체종류</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qPCV/src/PCVCommand.cpp" line="100"/>
-        <source>An error occurred during entity &apos;%1&apos; illumination!</source>
-        <translation>엔티티 &apos;%1&apos; 조명중 에러발생!</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qPCV/src/PCVCommand.cpp" line="114"/>
-        <source>Entity &apos;%1&apos; normals have been automatically disabled</source>
-        <translation>엔티티 &apos;%1&apos; 노말이 자동으로 비활성</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qPCV/src/PCVCommand.cpp" line="133"/>
-        <source>Process has been cancelled by the user</source>
-        <translation>사용자 프로세싱 취소</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qPCV/src/PCVCommand.cpp" line="203"/>
-        <source>Failed to generate the set of rays</source>
-        <translation>레이 세트 생성 실패</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qPCV/src/PCVCommand.cpp" line="226"/>
-        <source>Process failed</source>
-        <translation>프로세싱 실패</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="59"/>
-        <source>RANSAC</source>
-        <translation>RANSAC</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="65"/>
-        <source>No point cloud to attempt RANSAC on (be sure to open one with &quot;-O [cloud filename]&quot; before &quot;-%2&quot;)</source>
-        <translation>RANSAC 켜짐을 시도할 포인트클라우드가 없습니다 (&quot;-%2&quot; 전에 &quot;-%1 [클라우드 파일명]이 포함된 파일 한개 이상을 열어야 합니다.)</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="102"/>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="491"/>
-        <source>	%1 : %2</source>
-        <translation>	%1 : %2</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="107"/>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="122"/>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="137"/>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="152"/>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="167"/>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="182"/>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="197"/>
-        <source>Missing parameter: number after &quot;-%1 %2&quot;</source>
-        <translation>알수없는 파라미터: &quot;-%1 %2&quot; 이후 넘버</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="115"/>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="130"/>
-        <source>	Epsilon : %1</source>
-        <translation>	Epsilon : %1</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="145"/>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="160"/>
-        <source>	Bitmap Epsilon : %1</source>
-        <translation>	Bitmap Epsilon : %1</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="175"/>
-        <source>	support points: %1</source>
-        <translation>	지원점: %1</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="190"/>
-        <source>	Max Normal Deviation : %1</source>
-        <translation>	최대 노말편차 : %1</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="205"/>
-        <source>	Probability : %1</source>
-        <translation>	확률 : %1</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="260"/>
-        <source>Missing parameter: primitive type after &quot;-%1 %2&quot;</source>
-        <translation>알수없는 파라미터: &quot;-%1 %2&quot; 이후 초기화종류</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="306"/>
-        <source>No valid parameter: primitive type after &quot;-%1 %2&quot;</source>
-        <translation>잘못된 파라미터: &quot;-%1 %2&quot; 이후 초기화종류</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="327"/>
-        <source>	Default Shape Search == %1</source>
-        <translation>	기본 Shape 검색 == %1</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="332"/>
-        <source>	Default output == %1</source>
-        <translation>	기본출력 == %1</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="478"/>
-        <source>
-Missing parameter: Directory after &quot;-%1 %2&quot;</source>
-        <translation>
-알수없는 파라미터: &quot;-%1 %2&quot; 이후 디렉토리</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="485"/>
-        <source>
-%1 Does not exist	creating path</source>
-        <translation>
-%1이(가) 없습니다	경로생성</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="496"/>
-        <source>
-%1 path could not be created, skipping %2</source>
-        <translation>
-%1 경로가 생성되지 않았습니다, %2 스킵중</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qSRA/src/distanceMapGenerationTool.cpp" line="318"/>
-        <source>Cloud to profile radial distance</source>
-        <translation>클라우드 - 프로파일 방사거리</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qSRA/src/distanceMapGenerationTool.cpp" line="319"/>
-        <source>Polyline: %1 vertices
-Cloud: %2 points</source>
-        <translation>폴리선: %1 버텍스
-클라우드: %2 점</translation>
-    </message>
-    <message>
-        <location filename="../../libs/qCC_db/src/cc2DLabel.cpp" line="40"/>
-        <source>Center</source>
-        <translation>중심</translation>
-    </message>
-    <message>
-        <location filename="../../libs/qCC_db/src/ccGBLSensor.cpp" line="710"/>
-        <source>Depth buffer</source>
-        <translation>깊이버퍼</translation>
-    </message>
-    <message>
-        <location filename="../../libs/qCC_db/src/ccMesh.cpp" line="595"/>
-        <source>Laplacian smooth</source>
-        <translation>라플라시안 스무스</translation>
-    </message>
-    <message>
-        <location filename="../../libs/qCC_db/src/ccMesh.cpp" line="596"/>
-        <source>Iterations: %1
-Vertices: %2
-Faces: %3</source>
-        <translation>반복: %1
-버텍스: %2
-면: %3</translation>
-    </message>
-    <message>
-        <location filename="../../libs/qCC_db/src/ccMinimumSpanningTreeForNormsDirection.cpp" line="202"/>
-        <source>Orient normals (MST)</source>
-        <translation>오리엔트 노말 (MST)</translation>
-    </message>
-    <message>
-        <location filename="../../libs/qCC_db/src/ccMinimumSpanningTreeForNormsDirection.cpp" line="204"/>
-        <source>Compute Minimum spanning tree
-Points: %1
-Edges: %2</source>
-        <translation>최소 이동트리 계산
-점: %1
-엣지: %2</translation>
-    </message>
-    <message>
-        <location filename="../../libs/qCC_db/src/ccMinimumSpanningTreeForNormsDirection.cpp" line="206"/>
-        <source>Compute Minimum spanning tree
-Points: %1</source>
-        <translation>최소 이동트리 계산
-점: %1</translation>
-    </message>
-    <message>
-        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="5196"/>
-        <source>Normals computation</source>
-        <translation>노말 계산</translation>
-    </message>
-    <message>
-        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="5224"/>
-        <source>Grid: %1 x %2</source>
-        <translation>그리드: %1 x %2</translation>
-    </message>
-    <message>
-        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="5412"/>
-        <source>Orienting normals</source>
-        <translation>오리엔트 노말</translation>
-    </message>
-    <message>
-        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="5671"/>
-        <source>FWF amplitude</source>
-        <translation>FWF 진폭</translation>
-    </message>
-    <message>
-        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="5672"/>
-        <source>Determining min and max FWF values
-Points: </source>
-        <translation>최소/최대 FWF 값 설정
-점:</translation>
-    </message>
-    <message>
-        <location filename="../../libs/qCC_db/src/ccPolyline.cpp" line="697"/>
-        <source>sampled</source>
-        <translation>샘플</translation>
-    </message>
-    <message>
-        <location filename="../../libs/qCC_db/src/ccRasterGrid.cpp" line="231"/>
-        <source>Grid generation</source>
-        <translation>그리드생성</translation>
-    </message>
-    <message>
-        <location filename="../../libs/qCC_db/src/ccRasterGrid.cpp" line="232"/>
-        <source>Points: %L1
-Cells: %L2 x %L3</source>
-        <translation>점: %L1
-셀: %L2 x %L3</translation>
-    </message>
-    <message>
-        <location filename="../../libs/qCC_io/src/AsciiFilter.cpp" line="237"/>
-        <source>Saving cloud [%1]</source>
-        <translation>클라우드 [%1] 저장중</translation>
-    </message>
-    <message>
-        <location filename="../../libs/qCC_io/src/AsciiFilter.cpp" line="238"/>
-        <source>Number of points: %1</source>
-        <translation>점갯수: %1</translation>
-    </message>
-    <message>
-        <location filename="../../libs/qCC_io/src/AsciiFilter.cpp" line="840"/>
-        <source>Open ASCII data [%1]</source>
         <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../libs/qCC_io/src/AsciiFilter.cpp" line="841"/>
-        <location filename="../../libs/qCC_io/src/AsciiFilter.cpp" line="950"/>
-        <source>Approximate number of points: %1</source>
-        <translation>예상 점갯수: %1</translation>
-    </message>
-    <message>
-        <location filename="../../libs/qCC_io/src/BinFilter.cpp" line="175"/>
-        <location filename="../../libs/qCC_io/src/BinFilter.cpp" line="391"/>
-        <source>BIN file</source>
-        <translation>BIN 파일</translation>
-    </message>
-    <message>
-        <location filename="../../libs/qCC_io/src/BinFilter.cpp" line="176"/>
-        <source>Please wait... saving in progress</source>
-        <translation>기다리십시오... 읽는중</translation>
-    </message>
-    <message>
-        <location filename="../../libs/qCC_io/src/BinFilter.cpp" line="392"/>
-        <source>Loading: %1</source>
-        <translation>로딩: %1</translation>
-    </message>
-    <message>
-        <location filename="../../libs/qCC_io/src/BinFilter.cpp" line="1071"/>
-        <source>Open Bin file (old style)</source>
-        <translation>Bin 파일 열기 (이전 스타일)</translation>
-    </message>
-    <message>
-        <location filename="../../libs/qCC_io/src/BinFilter.cpp" line="1097"/>
-        <source>cloud %1/%2 (%3 points)</source>
-        <translation>클라우드 %1/%2 (%3 점)</translation>
-    </message>
-    <message>
-        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="273"/>
-        <source>All (*.*)</source>
-        <translation>전체 (*.*)</translation>
-    </message>
-    <message>
-        <location filename="../../libs/qCC_io/src/PlyFilter.cpp" line="1713"/>
-        <source>PLY file</source>
-        <translation>PLY 파일</translation>
-    </message>
-    <message>
-        <location filename="../../libs/qCC_io/src/ShpFilter.cpp" line="1295"/>
-        <source>[SHP] Polyline %1 does not have enough vertices to be saved as polygon entity</source>
-        <translation>[SHP] 폴리선 %1에 폴리곤 엔티티로 저장할 충분한 버텍스가 없습니다</translation>
-    </message>
-    <message>
-        <location filename="../../libs/qCC_io/src/ShpFilter.cpp" line="1304"/>
-        <source>[SHP] Polyline %1 does not have enough vertices to be saved as polyline entity</source>
-        <translation>[SHP] 폴리선 %1에 폴리선 엔티티로 저장할 충분한 버텍스가 없습니다</translation>
-    </message>
-    <message>
-        <location filename="../../libs/qCC_io/src/ShpFilter.cpp" line="1317"/>
-        <source>[SHP] Polyline %1 has too many points to be saved</source>
-        <translation>[SHP] 폴리선 %1에 저장되는 점이 너무 많습니다</translation>
-    </message>
-    <message>
-        <location filename="../../libs/qCC_io/src/ShpFilter.cpp" line="1997"/>
-        <source>Load SHP file</source>
-        <translation>SHP 파일 로드</translation>
-    </message>
-    <message>
-        <location filename="../../libs/qCC_io/src/ShpFilter.cpp" line="1998"/>
-        <source>File size: %1</source>
-        <translation>파일크기: %1</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCSF/include/qCSFCommands.h" line="255"/>
@@ -14687,8 +14151,340 @@ Cells: %L2 x %L3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../plugins/core/Standard/qFacets/src/qFacets.cpp" line="428"/>
+        <source>Facets creation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qFacets/src/qFacets.cpp" line="429"/>
+        <source>Components: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qFacets/src/stereogramDlg.cpp" line="124"/>
+        <source>Stereogram</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qFacets/src/stereogramDlg.cpp" line="125"/>
+        <source>Preparing polar display...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qM3C2/include/qM3C2Commands.h" line="72"/>
+        <source>_M3C2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qM3C2/src/qM3C2Process.cpp" line="800"/>
+        <source>M3C2 Distances Computation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qM3C2/src/qM3C2Process.cpp" line="801"/>
+        <source>Core points: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../../plugins/core/Standard/qM3C2/src/qM3C2Tools.cpp" line="632"/>
         <source>Please wait...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPCV/src/PCVCommand.cpp" line="60"/>
+        <source>Invalid object type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPCV/src/PCVCommand.cpp" line="100"/>
+        <source>An error occurred during entity &apos;%1&apos; illumination!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPCV/src/PCVCommand.cpp" line="114"/>
+        <source>Entity &apos;%1&apos; normals have been automatically disabled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPCV/src/PCVCommand.cpp" line="133"/>
+        <source>Process has been cancelled by the user</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPCV/src/PCVCommand.cpp" line="203"/>
+        <source>Failed to generate the set of rays</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPCV/src/PCVCommand.cpp" line="226"/>
+        <source>Process failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="59"/>
+        <source>RANSAC</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="65"/>
+        <source>No point cloud to attempt RANSAC on (be sure to open one with &quot;-O [cloud filename]&quot; before &quot;-%2&quot;)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="102"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="491"/>
+        <source>	%1 : %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="107"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="122"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="137"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="152"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="167"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="182"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="197"/>
+        <source>Missing parameter: number after &quot;-%1 %2&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="115"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="130"/>
+        <source>	Epsilon : %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="145"/>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="160"/>
+        <source>	Bitmap Epsilon : %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="175"/>
+        <source>	support points: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="190"/>
+        <source>	Max Normal Deviation : %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="205"/>
+        <source>	Probability : %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="260"/>
+        <source>Missing parameter: primitive type after &quot;-%1 %2&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="306"/>
+        <source>No valid parameter: primitive type after &quot;-%1 %2&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="327"/>
+        <source>	Default Shape Search == %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="332"/>
+        <source>	Default output == %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="478"/>
+        <source>
+Missing parameter: Directory after &quot;-%1 %2&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="485"/>
+        <source>
+%1 Does not exist	creating path</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/include/qRANSAC_SD_Commands.h" line="496"/>
+        <source>
+%1 path could not be created, skipping %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qSRA/src/distanceMapGenerationTool.cpp" line="318"/>
+        <source>Cloud to profile radial distance</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qSRA/src/distanceMapGenerationTool.cpp" line="319"/>
+        <source>Polyline: %1 vertices
+Cloud: %2 points</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libs/qCC_db/src/cc2DLabel.cpp" line="40"/>
+        <source>Center</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libs/qCC_db/src/ccGBLSensor.cpp" line="710"/>
+        <source>Depth buffer</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libs/qCC_db/src/ccMesh.cpp" line="595"/>
+        <source>Laplacian smooth</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libs/qCC_db/src/ccMesh.cpp" line="596"/>
+        <source>Iterations: %1
+Vertices: %2
+Faces: %3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libs/qCC_db/src/ccMinimumSpanningTreeForNormsDirection.cpp" line="202"/>
+        <source>Orient normals (MST)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libs/qCC_db/src/ccMinimumSpanningTreeForNormsDirection.cpp" line="204"/>
+        <source>Compute Minimum spanning tree
+Points: %1
+Edges: %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libs/qCC_db/src/ccMinimumSpanningTreeForNormsDirection.cpp" line="206"/>
+        <source>Compute Minimum spanning tree
+Points: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="5196"/>
+        <source>Normals computation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="5224"/>
+        <source>Grid: %1 x %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="5412"/>
+        <source>Orienting normals</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="5671"/>
+        <source>FWF amplitude</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="5672"/>
+        <source>Determining min and max FWF values
+Points: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libs/qCC_db/src/ccPolyline.cpp" line="697"/>
+        <source>sampled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libs/qCC_db/src/ccRasterGrid.cpp" line="231"/>
+        <source>Grid generation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libs/qCC_db/src/ccRasterGrid.cpp" line="232"/>
+        <source>Points: %L1
+Cells: %L2 x %L3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libs/qCC_io/src/AsciiFilter.cpp" line="237"/>
+        <source>Saving cloud [%1]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libs/qCC_io/src/AsciiFilter.cpp" line="238"/>
+        <source>Number of points: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libs/qCC_io/src/AsciiFilter.cpp" line="840"/>
+        <source>Open ASCII data [%1]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libs/qCC_io/src/AsciiFilter.cpp" line="841"/>
+        <location filename="../../libs/qCC_io/src/AsciiFilter.cpp" line="950"/>
+        <source>Approximate number of points: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libs/qCC_io/src/BinFilter.cpp" line="175"/>
+        <location filename="../../libs/qCC_io/src/BinFilter.cpp" line="391"/>
+        <source>BIN file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libs/qCC_io/src/BinFilter.cpp" line="176"/>
+        <source>Please wait... saving in progress</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libs/qCC_io/src/BinFilter.cpp" line="392"/>
+        <source>Loading: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libs/qCC_io/src/BinFilter.cpp" line="1071"/>
+        <source>Open Bin file (old style)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libs/qCC_io/src/BinFilter.cpp" line="1097"/>
+        <source>cloud %1/%2 (%3 points)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libs/qCC_io/src/FileIOFilter.cpp" line="273"/>
+        <source>All (*.*)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libs/qCC_io/src/PlyFilter.cpp" line="1713"/>
+        <source>PLY file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libs/qCC_io/src/ShpFilter.cpp" line="1295"/>
+        <source>[SHP] Polyline %1 does not have enough vertices to be saved as polygon entity</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libs/qCC_io/src/ShpFilter.cpp" line="1304"/>
+        <source>[SHP] Polyline %1 does not have enough vertices to be saved as polyline entity</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libs/qCC_io/src/ShpFilter.cpp" line="1317"/>
+        <source>[SHP] Polyline %1 has too many points to be saved</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libs/qCC_io/src/ShpFilter.cpp" line="1997"/>
+        <source>Load SHP file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../libs/qCC_io/src/ShpFilter.cpp" line="1998"/>
+        <source>File size: %1</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -14697,22 +14493,22 @@ Cells: %L2 x %L3</source>
     <message>
         <location filename="../../plugins/core/IO/qPhotoscanIO/extern/quazip/quazip/quazip/quagzipfile.cpp" line="60"/>
         <source>QIODevice::Append is not supported for GZIP</source>
-        <translation>QIODevice::GZIP에 첨부가 지원되지 않습니다.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPhotoscanIO/extern/quazip/quazip/quazip/quagzipfile.cpp" line="66"/>
         <source>Opening gzip for both reading and writing is not supported</source>
-        <translation>gzip의 읽기/쓰기 열기가 지원되지 않습니다.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPhotoscanIO/extern/quazip/quazip/quazip/quagzipfile.cpp" line="74"/>
         <source>You can open a gzip either for reading or for writing. Which is it?</source>
-        <translation>gzip을 열기/쓰기할 수 있습니다. 어니것을 하겠습니까?</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPhotoscanIO/extern/quazip/quazip/quazip/quagzipfile.cpp" line="80"/>
         <source>Could not gzopen() file</source>
-        <translation>gzopen() 파일할 수 없습니다</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -14720,12 +14516,12 @@ Cells: %L2 x %L3</source>
     <message>
         <location filename="../../plugins/core/IO/qPhotoscanIO/extern/quazip/quazip/quazip/quaziodevice.cpp" line="147"/>
         <source>QIODevice::Append is not supported for QuaZIODevice</source>
-        <translation>QIODevice::QuaZIODevice의 첨부가 지원되지 않습니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qPhotoscanIO/extern/quazip/quazip/quazip/quaziodevice.cpp" line="152"/>
         <source>QIODevice::ReadWrite is not supported for QuaZIODevice</source>
-        <translation>QIODevice::QuaZIODevice의 읽기쓰기가 지원되지 않습니다</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -14733,7 +14529,7 @@ Cells: %L2 x %L3</source>
     <message>
         <location filename="../../plugins/core/IO/qPhotoscanIO/extern/quazip/quazip/quazip/quazipfile.cpp" line="247"/>
         <source>ZIP/UNZIP API error %1</source>
-        <translation>ZIP/UNZIP API 에러 %1</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -14741,22 +14537,22 @@ Cells: %L2 x %L3</source>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/QuantiDialog.ui" line="14"/>
         <source>Histogram Clustering setting</source>
-        <translation>히스토그램 클러스팅 설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/QuantiDialog.ui" line="22"/>
         <source>Quantification index</source>
-        <translation>수량화 인덱스</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/QuantiDialog.ui" line="78"/>
         <source>Colors available :</source>
-        <translation>사용가능 컬러:</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/QuantiDialog.ui" line="104"/>
         <source>1</source>
-        <translation>1</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -14764,17 +14560,17 @@ Cells: %L2 x %L3</source>
     <message>
         <location filename="../../plugins/core/IO/qRDBIO/ui/openRDBDlg.ui" line="14"/>
         <source>Open Riegl RDB 2 file</source>
-        <translation>Riegl RDB 2 파일 열기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qRDBIO/ui/openRDBDlg.ui" line="20"/>
         <source>RDB Info</source>
-        <translation>RDB 정보</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qRDBIO/ui/openRDBDlg.ui" line="26"/>
         <source>Points</source>
-        <translation>점</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -14782,82 +14578,37 @@ Cells: %L2 x %L3</source>
     <message>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="14"/>
         <source>Ransac Shape Detection</source>
-        <translation>Ransac Shape Detection</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="24"/>
         <source>Primitives</source>
-        <translation>원시값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="30"/>
         <source>Plane</source>
-        <translation>평면</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="40"/>
         <source>Sphere</source>
-        <translation>구형</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="50"/>
         <source>Cylinder</source>
-        <translation>실린더</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="60"/>
         <source>Cone</source>
-        <translation>콘</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="70"/>
         <source>Torus</source>
-        <translation type="unfinished">토러스</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="438"/>
-        <source>max distance to primitive</source>
-        <translation>원시값까지 최대거리</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="445"/>
-        <source>Maximum distance of samples to the ideal shape</source>
-        <translation>샘플에서 이상적인 모양까지 최대거리</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="471"/>
-        <source>sampling resolution</source>
-        <translation>샘플링 해상도</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="478"/>
-        <source>Should correspond to the distance between neighboring points in the data</source>
-        <translation>데이터에서 인접점 사이의 거리에 해당해야 합니다</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="504"/>
-        <source>max normal deviation</source>
-        <translation>최대 노말편차</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="511"/>
-        <source>Maximum deviation from the ideal shape normal vector (in degrees)</source>
-        <translation>이상적인 노말벡터 최대편차 (deg)</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="537"/>
-        <source>overlooking probability</source>
-        <translation>확률 내려보기</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="544"/>
-        <source>Probability that no better candidate was overlooked during sampling (the lower the better!)</source>
-        <translation>표본 추출 중에 더 나은 후보가 없을 확률입니다 (낮을수록 좋습니다!).</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="383"/>
-        <source>Min support points per primitive</source>
-        <translation type="unfinished">최소 지원 초기값당 점</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="86"/>
@@ -14923,16 +14674,61 @@ Cells: %L2 x %L3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="383"/>
+        <source>Min support points per primitive</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="390"/>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="393"/>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="396"/>
         <source>This is the minimal number of points required for a primitive</source>
-        <translation>이 값은 초기값에 필요한 최소 점개수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="430"/>
         <source>Parameters</source>
-        <translation type="unfinished">파라미터</translation>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="438"/>
+        <source>max distance to primitive</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="445"/>
+        <source>Maximum distance of samples to the ideal shape</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="471"/>
+        <source>sampling resolution</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="478"/>
+        <source>Should correspond to the distance between neighboring points in the data</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="504"/>
+        <source>max normal deviation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="511"/>
+        <source>Maximum deviation from the ideal shape normal vector (in degrees)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="537"/>
+        <source>overlooking probability</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="544"/>
+        <source>Probability that no better candidate was overlooked during sampling (the lower the better!)</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qRANSAC_SD/ui/ransacSDDlg.ui" line="568"/>
@@ -14970,37 +14766,37 @@ Cells: %L2 x %L3</source>
     <message>
         <location filename="../ui_templates/rasterExportOptionsDlg.ui" line="14"/>
         <source>Raster export options</source>
-        <translation>라스터 출력 옵션</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterExportOptionsDlg.ui" line="35"/>
         <source>Raster dimensions:</source>
-        <translation>라스터 차원:</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterExportOptionsDlg.ui" line="64"/>
         <source>Export RGB colors</source>
-        <translation>RGB 컬러 출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterExportOptionsDlg.ui" line="71"/>
         <source>Export heights</source>
-        <translation>높이출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterExportOptionsDlg.ui" line="81"/>
         <source>Export active layer</source>
-        <translation>사용레이어 출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterExportOptionsDlg.ui" line="88"/>
         <source>Export all scalar fields</source>
-        <translation>모든 스칼라필드 출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterExportOptionsDlg.ui" line="95"/>
         <source>Export density (population per cell)</source>
-        <translation>밀도 (셀당갯수) 출력</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -15008,93 +14804,93 @@ Cells: %L2 x %L3</source>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="14"/>
         <source>Rasterize</source>
-        <translation>라스터화</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="46"/>
         <source>Grid</source>
-        <translation>그리드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="55"/>
         <source>size</source>
-        <translation>크기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="62"/>
         <location filename="../ui_templates/rasterizeDlg.ui" line="704"/>
         <source>step</source>
-        <translation>단계</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="78"/>
         <source>size of step of the grid generated (in the same units as the coordinates of the point cloud)</source>
-        <translation>생성된 그리드 단계 크기 (포인트클라우드의 좌표와 동일)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="100"/>
         <source>Edit grid</source>
-        <translation>그리드편집</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="109"/>
         <source>Active layer (or &apos;scalar field&apos;)</source>
-        <translation>사용 레이어 (또는&apos;스칼라필드&apos;)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="112"/>
         <source>active layer</source>
-        <translation>사용 레이어</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="122"/>
         <source>range</source>
-        <translation>범위</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="139"/>
         <source>Projection</source>
-        <translation>투영</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="145"/>
         <source>SF interpolation method</source>
-        <translation>SF 보간방식</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="152"/>
         <source>minimum value</source>
-        <translation>최소값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="157"/>
         <source>average value</source>
-        <translation>평균값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="162"/>
         <source>maximum value</source>
-        <translation>최대값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="170"/>
         <source>cell height</source>
-        <translation>셀높이</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="177"/>
         <source>direction</source>
-        <translation>방향</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="190"/>
         <source>Use the nearest point of the input cloud in each cell instead of the cell center</source>
-        <translation>셀 중심 대신 각 셀에 입력한 클라우드의 최근접점 사용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="193"/>
         <source>resample input cloud</source>
-        <translation>입력한 클라우드 리샘플</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="225"/>
@@ -15102,89 +14898,85 @@ Cells: %L2 x %L3</source>
  - minimum = lowest point in the cell
  - average = mean height of all points inside the cell
  - maximum = highest point in the cell</source>
-        <translation>셀당 높이계산 방식:
- - 최소 = 셀의 가장낮은 점
- - 평균 = 셀의 모든점의 중간높이점
- - 최대 = 셀의 가장높은 점</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="235"/>
         <source>minimum</source>
-        <translation>최소</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="240"/>
         <source>average</source>
-        <translation>평균</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="245"/>
         <source>maximum</source>
-        <translation>최대</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="259"/>
         <location filename="../ui_templates/rasterizeDlg.ui" line="262"/>
         <source>interpolate SF(s)</source>
-        <translation>SF 보간</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="278"/>
         <source>Warning: the original point&apos;s height will be
 replaced by the cell&apos;s average height!</source>
-        <translation>경고: 원점의 높이가 셀의
-평균높이로 대체됩니다!</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="292"/>
         <source>Empty cells</source>
-        <translation>빈셀</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="304"/>
         <source>Fill with</source>
-        <translation>채움</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="317"/>
         <source>choose the value to fill the cells in which no point is projected : minimum value over the whole point cloud or average value (over the whole cloud also)</source>
-        <translation>점이 투영되지 않는 셀을 채울 값 선택 : 전체 포인트클라우드에 대한 최소값 또는 평균값 (전체 클라우드에 대한 값)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="321"/>
         <source>leave empty</source>
-        <translation>비워놓기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="326"/>
         <source>minimum height</source>
-        <translation>최소높이</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="331"/>
         <location filename="../ui_templates/rasterizeDlg.ui" line="557"/>
         <source>average height</source>
-        <translation>평균높이</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="336"/>
         <source>maximum height</source>
-        <translation>최대높이</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="341"/>
         <source>user specified value</source>
-        <translation>사용자 지정값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="346"/>
         <source>interpolate</source>
-        <translation>보간</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="363"/>
         <source>Custom value for empty cells</source>
-        <translation>빈셀의 커스텀 값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="379"/>
@@ -15205,237 +14997,237 @@ replaced by the cell&apos;s average height!</source>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="425"/>
         <source>Update grid</source>
-        <translation>그리드 업데이트</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="458"/>
         <location filename="../ui_templates/rasterizeDlg.ui" line="831"/>
         <source>Export</source>
-        <translation>출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="475"/>
         <source>Export grid as a point cloud</source>
-        <translation>포인트클라우드로 그리드 출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="478"/>
         <source>Cloud</source>
-        <translation>클라우드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="485"/>
         <source>Export grid as a mesh</source>
-        <translation>메시로 그리드 출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="488"/>
         <source>Mesh</source>
-        <translation>메시</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="497"/>
         <source>Export per-cell statistics as SF(s):</source>
-        <translation>셀별 통계를 SF로 출력:</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="534"/>
         <source>Adds a scalar field with the grid density (= number of points inside each cell)</source>
-        <translation>그리드 밀도가 포함된 스칼라필드 추가 (= 각셀별 점갯수)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="537"/>
         <source>population</source>
-        <translation>모집단</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="544"/>
         <source>Adds a scalar field with the min. height of the points inside the cell</source>
-        <translation>셀내부의 점의 최소높이를 포함한 스칼라필드 추가</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="547"/>
         <source>min height</source>
-        <translation>최소높이</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="554"/>
         <source>Adds a scalar field with the average height of the points inside the cell</source>
-        <translation>셀내부의 점의 평균높이 스칼라필드 추가</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="564"/>
         <source>Adds a scalar field with the max. height of the points inside the cell</source>
-        <translation>셀내부의 점의 최대높이 스칼라필드 추가</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="567"/>
         <source>max height</source>
-        <translation>최대높이</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="574"/>
         <location filename="../ui_templates/rasterizeDlg.ui" line="584"/>
         <source>Adds a scalar field with the standard deviation of the heights of the points inside the cell</source>
-        <translation>셀내부의 점의 높이 표준편차 스칼라필드 추가</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="577"/>
         <source>height std. dev.</source>
-        <translation>높이 표준편차</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="587"/>
         <source>height range</source>
-        <translation>높이범위</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="619"/>
         <source>Export grid as a raster (geotiff)</source>
-        <translation>라스터로 그리드 출력 (geotiff)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="622"/>
         <source>Raster</source>
-        <translation>라스터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="629"/>
         <source>Export grid as an image</source>
-        <translation>이미지로 그리드 출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="632"/>
         <source>Image</source>
-        <translation>이미지</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="639"/>
         <source>Export grid as a matrix (text file)</source>
-        <translation>행렬로 그리드 출력 (텍스트파일)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="642"/>
         <source>Matrix</source>
-        <translation>행렬</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="652"/>
         <source>Contour plot</source>
-        <translation>등고선 플로팅</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="675"/>
         <source>The contour plot is computed on the active layer</source>
-        <translation>사용 레이어에서 등고선 플로팅 계산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="684"/>
         <source>Start value</source>
-        <translation>시작값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="724"/>
         <source>Min. vertex count</source>
-        <translation>최소 버텍스 갯수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="731"/>
         <source>Min vertex count per iso-line (to ignore the smallest ones)</source>
-        <translation>iso 라인당 최소 버텍스 갯수 (가장작은값 무시)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="744"/>
         <source>Line width</source>
-        <translation>선너비</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="751"/>
         <source>Default contour lines width</source>
-        <translation>기본 등고선 너비</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="768"/>
         <source>colorize</source>
-        <translation>컬러화</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="775"/>
         <source>ignore borders</source>
-        <translation>경계선 무시</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="803"/>
         <source>project contours on the altitude layer</source>
-        <translation>고도 레이어에 등고선 투영</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="815"/>
         <source>Remove all contour lines</source>
-        <translation>전체 등고선 라인 제거</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="818"/>
         <source>Clear</source>
-        <translation>지우기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="828"/>
         <source>Export contour lines to the DB tree</source>
-        <translation>DB 트리에 등고선라인 출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="838"/>
         <location filename="../ui_templates/rasterizeDlg.ui" line="941"/>
         <source>Generate</source>
-        <translation>생성</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="848"/>
         <source>Hillshade</source>
-        <translation>음영</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="865"/>
         <source>Hillshade is computed on the height layer</source>
-        <translation>높이레이어의 음영이 계산됩니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="874"/>
         <source>Sun zenith</source>
-        <translation>태양각도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="881"/>
         <source>Zenith angle (in degrees) = 90 - altitude angle</source>
-        <translation>태양각도 (deg) = 90 - 고도각</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="884"/>
         <location filename="../ui_templates/rasterizeDlg.ui" line="910"/>
         <source> deg.</source>
-        <translation>deg</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="900"/>
         <source>Sun azimuth</source>
-        <translation>태양방위</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="907"/>
         <source>Azimuth angle (in degrees)</source>
-        <translation>방위각 (deg)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="949"/>
         <location filename="../ui_templates/rasterizeDlg.ui" line="958"/>
         <source>Volume</source>
-        <translation>체적</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/rasterizeDlg.ui" line="972"/>
         <source>Non empty cells</source>
-        <translation>비어있지 않은 셀</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -15443,120 +15235,120 @@ replaced by the cell&apos;s average height!</source>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="14"/>
         <source>Clouds registration</source>
-        <translation>클라우드 정합</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="26"/>
         <source>Role assignation</source>
-        <translation>역할할당</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="32"/>
         <source>&apos;data&apos; entity</source>
-        <translation>&apos;데이터&apos; 엔티티</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="35"/>
         <source>aligned</source>
-        <translation>맞춤</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="42"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;entity to align (will be displaced)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;맞출 엔티티 (변위됨)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="45"/>
         <source>the data cloud is the entity to align with the model cloud : it will be displaced (red cloud)</source>
-        <translation>데이터 클라우드는 모델 클라우드와 일치하는 엔티티입니다. 데이터 클라우드는 교체됩니다(적색 클라우드)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="69"/>
         <source>&apos;model&apos; entity</source>
-        <translation>&apos;모델&apos; 엔티티</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="72"/>
         <source>reference</source>
-        <translation>기준</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="79"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;reference entity (won&apos;t move)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;기준 엔티티 (움직이지 않음)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="82"/>
         <source>the model cloud is the reference : it won&apos;t move (yellow cloud)</source>
-        <translation>모델클라우드는 기준값: 움직이지 않습니다 (황색컬러)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="92"/>
         <location filename="../ui_templates/registrationDlg.ui" line="95"/>
         <source>press once to exchange model and data clouds</source>
-        <translation>한번누르면 모델과 데이터클라우드가 변경됩니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="98"/>
         <source>swap</source>
-        <translation>스왑</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="115"/>
         <source>Parameters</source>
-        <translation>파라미터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="123"/>
         <location filename="../ui_templates/registrationDlg.ui" line="126"/>
         <source>By choosing this criterion, you can control the computation time.</source>
-        <translation>이 기준을 선택하면 계산시간을 관리할 수 있습니다.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="129"/>
         <source>Number of iterations</source>
-        <translation>반복횟수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="139"/>
         <source>Set the maximal number of step for the algorithm regsitration computation .</source>
-        <translation>알고리즘 정합계산의 최대 단계수 설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="158"/>
         <source>By choosing this criterion, you can control the quality of the result.</source>
-        <translation>이 기준을 선택하면 계산시간을 관리할 수 있습니다.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="161"/>
         <source>RMS difference</source>
-        <translation>RMS 편차</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="177"/>
         <source>Set the minimum RMS improvement between 2 consecutive iterations (below which the registration process will stop).</source>
-        <translation>2 연속되는 반복간 최소 RMS 개선설정 (정합과정이 멈추는 아래)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="193"/>
         <location filename="../ui_templates/registrationDlg.ui" line="206"/>
         <source>Rough estimation of the final overlap ratio of the data cloud (the smaller, the better the initial registration should be!)</source>
-        <translation>데이터 클라우드의 최종 중복율을 대략적 예상 (작을수록 초기정합이 좋아집니다!)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="199"/>
         <source>Final overlap</source>
-        <translation>최종 중복도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="249"/>
         <source>Whether to adjust the scale of the &apos;data&apos; entity</source>
-        <translation>&apos;데이터&apos; 엔티티의 스케일 조정 여부</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="252"/>
         <source>adjust scale</source>
-        <translation>스케일 조정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="280"/>
@@ -15591,34 +15383,33 @@ replaced by the cell&apos;s average height!</source>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="366"/>
         <source>max thread count</source>
-        <translation>최대 스레드 갯수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="373"/>
         <source>Maximum number of threads/cores to be used
 (CC or your computer might not respond for a while if you use all available cores)</source>
-        <translation>사용할 최대 스레드/코어 갯수
-(모든 코어 사용시 CC 또는 컴퓨터가 반응하지 않을 수 있습니다)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="404"/>
         <source>Research</source>
-        <translation>재검색</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="412"/>
         <source>Random sampling limit</source>
-        <translation>무작위 표본추출 한계</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="419"/>
         <source>Above this limit, clouds are randomly resampled at each iteration</source>
-        <translation>한계 이상시 각 반복시 클라우드가 무작위로 추출됩니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="444"/>
         <source>Rotation</source>
-        <translation>회전</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="484"/>
@@ -15628,24 +15419,24 @@ replaced by the cell&apos;s average height!</source>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="498"/>
         <source>Translation</source>
-        <translation>변환</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="575"/>
         <location filename="../ui_templates/registrationDlg.ui" line="578"/>
         <source>Chose this option to remove points that are likely to disturb the registration during the computation.</source>
-        <translation>옵션을 선택하면 계산시 정합을 방해할 수 있는 점을 제거합니다.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="581"/>
         <source>Enable farthest points removal</source>
-        <translation>가장먼점 제거 사용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="588"/>
         <location filename="../ui_templates/registrationDlg.ui" line="598"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use the displayed scalar field as weights (the bigger its associated scalar value/weight is, the more influence the point will have).&lt;/p&gt;&lt;p&gt;Note that only absolute distances are considered (i.e. minimal weight is 0).&lt;/p&gt;&lt;p&gt;Weights are automatically normalized.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;표시된 스칼라필드에 가중치 사용 (스칼라값/가중치가 커질수록 점에 영향이 커집니다.&lt;/p&gt;&lt;p&gt;절대 거리값이 고려됩니다 (즉 최소 가중치는 0입니다).&lt;/p&gt;&lt;p&gt;가중치가 자동으로 정규화됩니다.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/registrationDlg.ui" line="591"/>
@@ -15674,12 +15465,12 @@ the cloud from sinking under the mesh surface.</source>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/RgbDialog.ui" line="14"/>
         <source>RGB color setting</source>
-        <translation>RGB 컬러설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/RgbDialog.ui" line="22"/>
         <source>Choose the first point </source>
-        <translation>1번점 선택</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/RgbDialog.ui" line="38"/>
@@ -15703,37 +15494,37 @@ the cloud from sinking under the mesh surface.</source>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/RgbDialog.ui" line="112"/>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/RgbDialog.ui" line="165"/>
         <source>Pick the plane center (click again to cancel)</source>
-        <translation>평면중심 선택 (다시클릭하면 취소)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/RgbDialog.ui" line="129"/>
         <source>Choose the second point </source>
-        <translation>1번점 선택</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/RgbDialog.ui" line="244"/>
         <source>Choose which points to keep </source>
-        <translation>유지할 점 선택</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/RgbDialog.ui" line="250"/>
         <source>Retain</source>
-        <translation>유지</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/RgbDialog.ui" line="260"/>
         <source>Exclude</source>
-        <translation>제외</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/RgbDialog.ui" line="267"/>
         <source>Both</source>
-        <translation>두개</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/RgbDialog.ui" line="311"/>
         <source>Deviation from RGB limits  (%) :</source>
-        <translation>RGB 편차한계  (%) :</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -15741,22 +15532,22 @@ the cloud from sinking under the mesh surface.</source>
     <message>
         <location filename="../ui_templates/roleChoiceDlg.ui" line="14"/>
         <source>Choose role</source>
-        <translation>역할선택</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/roleChoiceDlg.ui" line="29"/>
         <source>Compared</source>
-        <translation>비교</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/roleChoiceDlg.ui" line="50"/>
         <source>Reference</source>
-        <translation>기준</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/roleChoiceDlg.ui" line="94"/>
         <source>Swap</source>
-        <translation>스왑</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -15764,77 +15555,77 @@ the cloud from sinking under the mesh surface.</source>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="14"/>
         <source>Scalar fields arithmetics</source>
-        <translation>스칼라필드 산술</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="28"/>
         <source>SF 1</source>
-        <translation>SF 1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="51"/>
         <source>operation</source>
-        <translation>작동</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="65"/>
         <source>plus</source>
-        <translation>플러스</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="70"/>
         <source>minus</source>
-        <translation>마이너스</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="75"/>
         <source>multiply</source>
-        <translation>곱하기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="80"/>
         <source>divided by</source>
-        <translation>나누기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="85"/>
         <source>square root</source>
-        <translation>제곱근</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="90"/>
         <source>power of 2</source>
-        <translation>2제곱</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="95"/>
         <source>power of 3</source>
-        <translation>3제곱</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="145"/>
         <source>integer part</source>
-        <translation>정수부</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="150"/>
         <source>inverse (1/x)</source>
-        <translation>역향 (1/x)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="164"/>
         <source>SF 2</source>
-        <translation>SF 2</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="202"/>
         <source>Update the first scalar field directly (instead of creating a new SF)</source>
-        <translation>최초 스칼라필드 직접 업데이트 (신규 SF 생성대신)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sfArithmeticsDlg.ui" line="205"/>
         <source>Update SF1 directly</source>
-        <translation>SF1 직접 업데이트</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -15842,52 +15633,52 @@ the cloud from sinking under the mesh surface.</source>
     <message>
         <location filename="../ui_templates/sfEditDlg.ui" line="17"/>
         <source>SF Values</source>
-        <translation>SF값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sfEditDlg.ui" line="42"/>
         <source>Display ranges</source>
-        <translation type="unfinished">표시범위</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sfEditDlg.ui" line="102"/>
         <source>displayed</source>
-        <translation>표시</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sfEditDlg.ui" line="155"/>
         <source>saturation</source>
-        <translation>포화</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sfEditDlg.ui" line="184"/>
         <source>Parameters</source>
-        <translation>파라미터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sfEditDlg.ui" line="190"/>
         <source>hidden otherwise...</source>
-        <translation>히든 그렇지않으면...</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sfEditDlg.ui" line="193"/>
         <source>show NaN/out of range values in grey</source>
-        <translation>회색으로 NaN/거리초과 보기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sfEditDlg.ui" line="203"/>
         <source>always show 0 in color scale</source>
-        <translation type="unfinished">컬러스케일에 항상 0 보기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sfEditDlg.ui" line="210"/>
         <source>symmetrical color scale</source>
-        <translation>시스템 컬러스케일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sfEditDlg.ui" line="217"/>
         <source>log scale</source>
-        <translation>로그스케일</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -15895,32 +15686,32 @@ the cloud from sinking under the mesh surface.</source>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/SIFTExtractDlg.ui" line="20"/>
         <source>SIFT Extraction</source>
-        <translation>SIFT 추출</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/SIFTExtractDlg.ui" line="28"/>
         <source>Intensity Field</source>
-        <translation>강도필드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/SIFTExtractDlg.ui" line="38"/>
         <source>Scales per Octave</source>
-        <translation>옥타브당 스케일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/SIFTExtractDlg.ui" line="55"/>
         <source>Minimum Scale</source>
-        <translation>최소스케일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/SIFTExtractDlg.ui" line="78"/>
         <source>Number of Octaves</source>
-        <translation>옥타브 갯수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/SIFTExtractDlg.ui" line="98"/>
         <source>Minimum Contrast</source>
-        <translation>최소명암</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -15973,75 +15764,74 @@ but the more accuracy will be lost)</source>
         <location filename="../../plugins/core/IO/qLASFWFIO/ui/saveLASFileDlg.ui" line="14"/>
         <location filename="../../plugins/core/IO/qPDALIO/ui/saveLASFileDlg.ui" line="14"/>
         <source>LAS/LAZ scale</source>
-        <translation>LAS/LAZ 스케일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qLASFWFIO/ui/saveLASFileDlg.ui" line="22"/>
         <location filename="../../plugins/core/IO/qPDALIO/ui/saveLASFileDlg.ui" line="22"/>
         <source>Choose the output LAS/LAZ scale/resolution:</source>
-        <translation>LAS/LAZ 스케일/해상도 출력 선택:</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qLASFWFIO/ui/saveLASFileDlg.ui" line="46"/>
         <location filename="../../plugins/core/IO/qPDALIO/ui/saveLASFileDlg.ui" line="46"/>
         <source>Optimal resolution</source>
-        <translation>최족화 해상도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qLASFWFIO/ui/saveLASFileDlg.ui" line="80"/>
         <location filename="../../plugins/core/IO/qPDALIO/ui/saveLASFileDlg.ui" line="80"/>
         <source>Ensures optimal accuracy (up to 10^-7 absolute)</source>
-        <translation>최적 정확도 보증 (최대 10^-7 절대)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qLASFWFIO/ui/saveLASFileDlg.ui" line="83"/>
         <location filename="../../plugins/core/IO/qPDALIO/ui/saveLASFileDlg.ui" line="83"/>
         <source>may decrease LAZ compression efficiency  </source>
-        <translation>LAZ 압축효율 낮힐 수 있음  </translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qLASFWFIO/ui/saveLASFileDlg.ui" line="95"/>
         <location filename="../../plugins/core/IO/qPDALIO/ui/saveLASFileDlg.ui" line="95"/>
         <source>Original resolution</source>
-        <translation>원본 해상도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qLASFWFIO/ui/saveLASFileDlg.ui" line="108"/>
         <location filename="../../plugins/core/IO/qPDALIO/ui/saveLASFileDlg.ui" line="108"/>
         <source>(0,0,0)</source>
-        <translation>(0,0,0)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qLASFWFIO/ui/saveLASFileDlg.ui" line="135"/>
         <location filename="../../plugins/core/IO/qPDALIO/ui/saveLASFileDlg.ui" line="135"/>
         <source>might not preserve data accuracy  
 (especially if you have transformed the original data)  </source>
-        <translation>데이터 정확도를 유지하지 못할 수 있습니다  
-(특히 원본 데이터를 변환한 경우)  </translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qLASFWFIO/ui/saveLASFileDlg.ui" line="148"/>
         <location filename="../../plugins/core/IO/qPDALIO/ui/saveLASFileDlg.ui" line="148"/>
         <source>Custom resolution</source>
-        <translation>커스텀 해상도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qLASFWFIO/ui/saveLASFileDlg.ui" line="197"/>
         <location filename="../../plugins/core/IO/qPDALIO/ui/saveLASFileDlg.ui" line="197"/>
         <source>bigger scale = best LAZ compression = lower resolution(*)  </source>
-        <translation>더큰 스케일 = 최상 LAZ 압축 = 낮은 해상도(*)  </translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qLASFWFIO/ui/saveLASFileDlg.ui" line="215"/>
         <location filename="../../plugins/core/IO/qPDALIO/ui/saveLASFileDlg.ui" line="215"/>
         <source>(*) potential accuracy loss if chosen too low  </source>
-        <translation>(*) 너무 낮게 선택하면 정확도가 저하될 수 있습니다  </translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qLASFWFIO/ui/saveLASFileDlg.ui" line="225"/>
         <location filename="../../plugins/core/IO/qPDALIO/ui/saveLASFileDlg.ui" line="225"/>
         <source>Save additional field(s)</source>
-        <translation>추가필드 저장</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -16049,32 +15839,32 @@ but the more accuracy will be lost)</source>
     <message>
         <location filename="../../plugins/core/IO/qCoreIO/ui/saveMascaretFileDlg.ui" line="14"/>
         <source>Save Mascaret profile</source>
-        <translation>마스카레 프로필 저장</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qCoreIO/ui/saveMascaretFileDlg.ui" line="20"/>
         <source>Reach/bief name</source>
-        <translation>리치/비프 이름</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qCoreIO/ui/saveMascaretFileDlg.ui" line="27"/>
         <source>Profile</source>
-        <translation>프로파일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qCoreIO/ui/saveMascaretFileDlg.ui" line="34"/>
         <source>Bed type</source>
-        <translation>베드종류</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qCoreIO/ui/saveMascaretFileDlg.ui" line="42"/>
         <source>B (bathy)</source>
-        <translation>B (해상)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/IO/qCoreIO/ui/saveMascaretFileDlg.ui" line="47"/>
         <source>T (topo)</source>
-        <translation>T (지형)</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -16082,37 +15872,37 @@ but the more accuracy will be lost)</source>
     <message>
         <location filename="../../libs/qCC_io/ui/saveSHPFileDlg.ui" line="14"/>
         <source>Save SHP file</source>
-        <translation>SHP 파일 저장</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/saveSHPFileDlg.ui" line="20"/>
         <source>3D polylines</source>
-        <translation>3D 폴리선</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/saveSHPFileDlg.ui" line="28"/>
         <source>Vertical dimension</source>
-        <translation>수직차원</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/saveSHPFileDlg.ui" line="62"/>
         <source>Save the 3D polylines as 2D ones (make sure to set the right &apos;vertical dimension&apos;)</source>
-        <translation>3D 폴리선을 2D로 저장 (&apos;수직치수&apos;로 설정되어 있는지 확인하십시오&apos;)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/saveSHPFileDlg.ui" line="65"/>
         <source>save as 2D polylines</source>
-        <translation>2D 폴리선으로 저장</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/saveSHPFileDlg.ui" line="72"/>
         <source>The height of each polyline (considered as constant!) will be saved as a field in the associated DBF file</source>
-        <translation>각 폴리선의 높이 (일률적!)가 관련 DBF 파일에 필드로 저장됩니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/saveSHPFileDlg.ui" line="75"/>
         <source>save (constant) height of polylines as a DBF field</source>
-        <translation>폴리선의 높이 (일률)가 DBF 필드로 저장</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -16120,13 +15910,7 @@ but the more accuracy will be lost)</source>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/ScalarDialog.ui" line="20"/>
         <source>Scalar color setting</source>
-        <translation>스칼라컬러설정</translation>
-    </message>
-    <message>
-        <location filename="../../plugins/core/Standard/qColorimetricSegmenter/ScalarDialog.ui" line="101"/>
-        <location filename="../../plugins/core/Standard/qColorimetricSegmenter/ScalarDialog.ui" line="185"/>
-        <source>Pick the plane center (click again to cancel)</source>
-        <translation>평면중심 선택 (다시하려면 취소)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/ScalarDialog.ui" line="34"/>
@@ -16134,40 +15918,46 @@ but the more accuracy will be lost)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../plugins/core/Standard/qColorimetricSegmenter/ScalarDialog.ui" line="101"/>
+        <location filename="../../plugins/core/Standard/qColorimetricSegmenter/ScalarDialog.ui" line="185"/>
+        <source>Pick the plane center (click again to cancel)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/ScalarDialog.ui" line="131"/>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/ScalarDialog.ui" line="257"/>
         <source>Value</source>
-        <translation type="unfinished">값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/ScalarDialog.ui" line="160"/>
         <source>Choose the second point </source>
-        <translation type="unfinished">1번점 선택</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/ScalarDialog.ui" line="275"/>
         <source>Choose which points to keep </source>
-        <translation>유지할 점 선택</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/ScalarDialog.ui" line="281"/>
         <source>Retain</source>
-        <translation>보관</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/ScalarDialog.ui" line="291"/>
         <source>Exclude</source>
-        <translation>제외</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/ScalarDialog.ui" line="298"/>
         <source>Both</source>
-        <translation>양측</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qColorimetricSegmenter/ScalarDialog.ui" line="336"/>
         <source>Deviation from limits (%) :</source>
-        <translation>한계의 편차 (%) :</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -16175,48 +15965,48 @@ but the more accuracy will be lost)</source>
     <message>
         <location filename="../ui_templates/scaleDlg.ui" line="14"/>
         <source>Scale / multiply</source>
-        <translation>스케일 / 곱하기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/scaleDlg.ui" line="22"/>
         <source>Scale(x)</source>
-        <translation>스케일(x)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/scaleDlg.ui" line="55"/>
         <source>Scale(y)</source>
-        <translation>스케일(y)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/scaleDlg.ui" line="88"/>
         <source>Scale(z)</source>
-        <translation>스케일(z)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/scaleDlg.ui" line="110"/>
         <location filename="../ui_templates/scaleDlg.ui" line="113"/>
         <source>Same scale for all dimensions</source>
-        <translation>모든 차원에 동일한 스케일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/scaleDlg.ui" line="120"/>
         <source>Whether the cloud (center) should stay at the same place or not (i.e. coordinates are multiplied directly)</source>
-        <translation>클라우드 (중심)가 동일한 위치에 유지 또는 아님 여부 (즉, 좌표에 직접 곱함)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/scaleDlg.ui" line="123"/>
         <source>Keep entity in place</source>
-        <translation>엔티티를 제자리에 유지</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/scaleDlg.ui" line="130"/>
         <source>To apply the same scale(s) to the &apos;Global Shift&apos; as well</source>
-        <translation>&apos;글로벌 시프트&apos;에도 동일한 스케일을 적용합니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/scaleDlg.ui" line="133"/>
         <source>Rescale Global shift</source>
-        <translation>글로벌 이격 스케일 재조정</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -16224,58 +16014,58 @@ but the more accuracy will be lost)</source>
     <message>
         <location filename="../ui_templates/sectionExtractionDlg.ui" line="14"/>
         <source>Section Extraction</source>
-        <translation>단면 추출</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionDlg.ui" line="32"/>
         <source>Create polyline by clicking on the screen</source>
-        <translation>화면을 클릭하여 폴리선 생성</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionDlg.ui" line="61"/>
         <source>Import one or several polylines from DB</source>
-        <translation>DB에서 한개이상 폴리선 입력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionDlg.ui" line="75"/>
         <source>Generate orthogonal sections along a path</source>
-        <translation>경로를 따라 직교단면 생성</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionDlg.ui" line="89"/>
         <source>Extract points along active sections</source>
-        <translation>사용단면을 따라 점 추출</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionDlg.ui" line="103"/>
         <source>Unfold the points along the selected polyline</source>
-        <translation>선택한 폴리선을 따라 점 펼침</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionDlg.ui" line="117"/>
         <source>Export manually defined sections to DB</source>
-        <translation>DB에 설정한 단면 직접 출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionDlg.ui" line="131"/>
         <source>Undo last polyline(s) addition</source>
-        <translation>최근폴리선 추가 취소</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionDlg.ui" line="150"/>
         <location filename="../ui_templates/sectionExtractionDlg.ui" line="153"/>
         <source>Close the tool</source>
-        <translation>도구닫기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionDlg.ui" line="156"/>
         <source>OK</source>
-        <translation>확인</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionDlg.ui" line="167"/>
         <source>Vert.</source>
-        <translation>연직</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -16283,116 +16073,114 @@ but the more accuracy will be lost)</source>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="14"/>
         <source>Extract Sections</source>
-        <translation>단면추출</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="23"/>
         <source>Active section(s)</source>
-        <translation>활성화 단면</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="37"/>
         <source>Sections thickness</source>
-        <translation>단면두께</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="44"/>
         <source>Thickness of each section (depends on the cloud density)</source>
-        <translation>각단면의 두께 (클라우드 밀도에 따라 다름)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="60"/>
         <source>To extract each section as a point cloud</source>
-        <translation>포인트클라우드처럼 각 단면 추출</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="63"/>
         <source>Extract section cloud(s)</source>
-        <translation>단면 클라우드 추출</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="75"/>
         <source>No parameter</source>
-        <translation>파라미터 없음</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="85"/>
         <source>To extract the contour of each section as a polyline</source>
-        <translation>각 단면을 폴리선으로 등고선 추출</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="88"/>
         <source>Extract section profile(s)</source>
-        <translation>단면 프로파일 추출</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="121"/>
         <source>type</source>
-        <translation>종류</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="128"/>
         <source>Section type (lower or upper part, or both)</source>
-        <translation>단면종류 (하단/상단, 둘다)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="132"/>
         <source>Lower</source>
-        <translation>하단</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="137"/>
         <source>Upper</source>
-        <translation>상단</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="142"/>
         <source>Both</source>
-        <translation>둘다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="150"/>
         <source>max edge length</source>
-        <translation>최대 엣지길이</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="157"/>
         <source>Max output polyline edge length (the smaller, the closer to the points the contour will be).
 Warning: if 0, generates the convex hull.</source>
-        <translation>최대 출력 폴리선 엣지 거리 (작을수록 등고선 점이 가까워집니다).
-경고: 0이면 볼록하게 생성됩니다.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="174"/>
         <source>Multi-pass process where longer edges may be temporarily created to obtain a better fit... or a worst one ;)</source>
-        <translation>더 좋은 적합성을 얻기위해 일시적으로 더 긴 엣지가 생생되는 멀티패스 프로세스입니다)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="177"/>
         <source>multi-pass</source>
-        <translation>멀티패스</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="184"/>
         <source>split the generated profile(s) in smaller parts to avoid creating too long edges (10 times the specified max edge length).
 Warning: may not be compatible with Mascaret export.</source>
-        <translation>작은 파트에서 프로파일을 분리하면 너무큰 엣지생성을 피할 수 있습니다 ( 최대 엣지거리 10배).
-경고: mASCARET 출력과 호환되지 않습니다.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="188"/>
         <source>split profile on longer edges</source>
-        <translation>긴 엣지에서 프로파일 분리</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="195"/>
         <source>Display a dialog with step-by-step execution of the algorithm (debug mode - very slow)</source>
-        <translation>알고리즘의 실행단계가 포함된 대화창 표시 (디버그 모드 - 매우느림)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sectionExtractionSubDlg.ui" line="198"/>
         <source>visual debug mode</source>
-        <translation>비쥬얼 디버그모드</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -16400,32 +16188,32 @@ Warning: may not be compatible with Mascaret export.</source>
     <message>
         <location filename="../ui_templates/selectChildrenDlg.ui" line="14"/>
         <source>Select children by type and/or name</source>
-        <translation>종류 또는 이름별 칠드런 선택</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/selectChildrenDlg.ui" line="20"/>
         <source>Select children...</source>
-        <translation>칠드런 선택...</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/selectChildrenDlg.ui" line="29"/>
         <source>of type</source>
-        <translation>/ 종류</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/selectChildrenDlg.ui" line="39"/>
         <source>with name</source>
-        <translation>- 이름</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/selectChildrenDlg.ui" line="64"/>
         <source>regex</source>
-        <translation>regex</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/selectChildrenDlg.ui" line="99"/>
         <source>strict</source>
-        <translation>strict</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -16433,17 +16221,17 @@ Warning: may not be compatible with Mascaret export.</source>
     <message>
         <location filename="../ui_templates/smoothPolylineDlg.ui" line="14"/>
         <source>Smooth polyline (Chaikin)</source>
-        <translation>스무드 폴리선 (Chaikin) </translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/smoothPolylineDlg.ui" line="20"/>
         <source>Ratio (strength)</source>
-        <translation>비율 (강도)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/smoothPolylineDlg.ui" line="43"/>
         <source>iterations</source>
-        <translation>반복</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -16451,31 +16239,29 @@ Warning: may not be compatible with Mascaret export.</source>
     <message>
         <location filename="../ui_templates/sorFilterDlg.ui" line="14"/>
         <source>Statistical Outlier Removal</source>
-        <translation>통계 초과값제거</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sorFilterDlg.ui" line="22"/>
         <source>Number of points to use for
 mean distance estimation</source>
-        <translation>평균예상거리
-를 사용할 점의 갯수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sorFilterDlg.ui" line="30"/>
         <source>Number of neighbors (used to compute the average distance of each point to its neighbors)</source>
-        <translation>네이버 갯수 ( 각점에서 네이버까지 평균거리 계산에 사용)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sorFilterDlg.ui" line="46"/>
         <source>Standard deviation
 multiplier threshold (nSigma)</source>
-        <translation>표준편차 제곱
-한계값 (nSigma)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sorFilterDlg.ui" line="74"/>
         <source>(max distance = average distance + nSigma * std. dev.)</source>
-        <translation>(최대거리 = 평균거리 + nSigma * 표쥰편차)</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -16483,26 +16269,24 @@ multiplier threshold (nSigma)</source>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/StatisticalOutliersRemoverDlg.ui" line="14"/>
         <source>Statistical Outliers Removal</source>
-        <translation>통계 초과값제거</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/StatisticalOutliersRemoverDlg.ui" line="22"/>
         <source>Number of points to use for 
 mean distance estimation</source>
-        <translation>평균예상거리
-를 사용할 점의 갯수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/StatisticalOutliersRemoverDlg.ui" line="47"/>
         <source>Standard deviation
  multiplier threshold (nSigma)</source>
-        <translation>표준편차 제곱
-한계값 (nSigma)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/StatisticalOutliersRemoverDlg.ui" line="72"/>
         <source>(max distance = average distance + nSigma * std. dev.)</source>
-        <translation>(최대거리 = 평균거리 + nSigma * 표쥰편차)</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -16510,47 +16294,47 @@ mean distance estimation</source>
     <message>
         <location filename="../ui_templates/statisticalTestDlg.ui" line="14"/>
         <source>Dialog</source>
-        <translation>대화창</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/statisticalTestDlg.ui" line="20"/>
         <source>Noise model</source>
-        <translation>노이즈모델</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/statisticalTestDlg.ui" line="26"/>
         <source>param1</source>
-        <translation>파라미터1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/statisticalTestDlg.ui" line="68"/>
         <source>param2</source>
-        <translation>파라미터2</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/statisticalTestDlg.ui" line="135"/>
         <source>param3</source>
-        <translation>파라미타3</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/statisticalTestDlg.ui" line="160"/>
         <source>false rejection probability</source>
-        <translation>가기각 확율</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/statisticalTestDlg.ui" line="163"/>
         <source>p(Chi2)</source>
-        <translation>p(Chi2)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/statisticalTestDlg.ui" line="206"/>
         <source>neighbors used to compute observed local dist.</source>
-        <translation>관측 로컬거리를 계산할 네이버</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/statisticalTestDlg.ui" line="209"/>
         <source>Neighbors</source>
-        <translation>네이버</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -16558,100 +16342,100 @@ mean distance estimation</source>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/stereogramDlg.ui" line="14"/>
         <source>Stereogram</source>
-        <translation>스테레오그램</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/stereogramDlg.ui" line="50"/>
         <source>dip direction: 0°</source>
-        <translation>dip 방향: 0°</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/stereogramDlg.ui" line="202"/>
         <source>[Mean] dip direction: 0° - dip 0°</source>
-        <translation>[중간값] dip 방향: 0° - dip 0°</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/stereogramDlg.ui" line="224"/>
         <source>Stereogram parameters</source>
-        <translation>스테레오그램 파라미터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/stereogramDlg.ui" line="256"/>
         <source>Display options</source>
-        <translation>표시옵션</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/stereogramDlg.ui" line="271"/>
         <source>Density color scale</source>
-        <translation>밀도 컬러 스케일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/stereogramDlg.ui" line="286"/>
         <source>Steps</source>
-        <translation>단계</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/stereogramDlg.ui" line="318"/>
         <source>Other</source>
-        <translation>그외</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/stereogramDlg.ui" line="335"/>
         <source>Ticks frequency</source>
-        <translation>주파수 체크</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/stereogramDlg.ui" line="371"/>
         <source>Show families color (on the stereogram outer edge)</source>
-        <translation>패밀리컬러 보기 (스테레오그램 외곽 엣지)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/stereogramDlg.ui" line="374"/>
         <source>Show families color</source>
-        <translation>패밀리컬러 보기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/stereogramDlg.ui" line="387"/>
         <source>Interactive filter</source>
-        <translation>상호교환 필터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/stereogramDlg.ui" line="405"/>
         <source>Filter facets by orientation</source>
-        <translation>방위각으로 옆면 필터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/stereogramDlg.ui" line="420"/>
         <source>Center</source>
-        <translation>중심</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/stereogramDlg.ui" line="427"/>
         <location filename="../../plugins/core/Standard/qFacets/ui/stereogramDlg.ui" line="474"/>
         <source>dip</source>
-        <translation>dip</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/stereogramDlg.ui" line="434"/>
         <location filename="../../plugins/core/Standard/qFacets/ui/stereogramDlg.ui" line="454"/>
         <source> deg.</source>
-        <translation> deg.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/stereogramDlg.ui" line="447"/>
         <location filename="../../plugins/core/Standard/qFacets/ui/stereogramDlg.ui" line="497"/>
         <source>dip dir.</source>
-        <translation>dip 방향</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/stereogramDlg.ui" line="467"/>
         <source>Span</source>
-        <translation>이동</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/stereogramDlg.ui" line="565"/>
         <source>Export</source>
-        <translation>출력</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -16659,23 +16443,23 @@ mean distance estimation</source>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/stereogramParamsDlg.ui" line="14"/>
         <source>Stereogram</source>
-        <translation>스테레오그램</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/stereogramParamsDlg.ui" line="22"/>
         <source>main sectors step</source>
-        <translation>메인 섹터 스텝</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/stereogramParamsDlg.ui" line="29"/>
         <location filename="../../plugins/core/Standard/qFacets/ui/stereogramParamsDlg.ui" line="55"/>
         <source> deg.</source>
-        <translation>deg.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qFacets/ui/stereogramParamsDlg.ui" line="48"/>
         <source>resolution</source>
-        <translation>해상도</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -16683,67 +16467,67 @@ mean distance estimation</source>
     <message>
         <location filename="../ui_templates/subsamplingDlg.ui" line="14"/>
         <source>Cloud sub sampling</source>
-        <translation>클라우드하위 샘플링</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/subsamplingDlg.ui" line="20"/>
         <source>Sampling parameters</source>
-        <translation>샘픙링 파라미터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/subsamplingDlg.ui" line="40"/>
         <source>method</source>
-        <translation>방식</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/subsamplingDlg.ui" line="54"/>
         <source>none</source>
-        <translation>없음</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/subsamplingDlg.ui" line="77"/>
         <source>all</source>
-        <translation>전체</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/subsamplingDlg.ui" line="89"/>
         <source>The more on the left, the less points will be kept</source>
-        <translation>좌측으로 이동할수록 적은점이 유지됩니다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/subsamplingDlg.ui" line="113"/>
         <source>value</source>
-        <translation>값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/subsamplingDlg.ui" line="166"/>
         <source>To modulate the sampling distance with a scalar field value</source>
-        <translation>스칼라필드값의 샘플링거리를 변조</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/subsamplingDlg.ui" line="169"/>
         <source>Use active SF</source>
-        <translation>액티브 SF 사용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/subsamplingDlg.ui" line="184"/>
         <source>SF value</source>
-        <translation>SF 값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/subsamplingDlg.ui" line="191"/>
         <source>Spacing value</source>
-        <translation>간격값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/subsamplingDlg.ui" line="198"/>
         <source>min</source>
-        <translation>최소</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/subsamplingDlg.ui" line="234"/>
         <source>max</source>
-        <translation>최대</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -16751,59 +16535,59 @@ mean distance estimation</source>
     <message>
         <location filename="../ui_templates/tracePolylineDlg.ui" line="20"/>
         <source>Segmentation</source>
-        <translation>분할</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/tracePolylineDlg.ui" line="41"/>
         <source>Width</source>
-        <translation>너비</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/tracePolylineDlg.ui" line="80"/>
         <source>Snap size</source>
-        <translation>스냅크기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/tracePolylineDlg.ui" line="110"/>
         <source>Oversample</source>
-        <translation>오버샘플링</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/tracePolylineDlg.ui" line="143"/>
         <source>Export current polyline to the main DB</source>
-        <translation>현재 폴리선을 메인 DB로 출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/tracePolylineDlg.ui" line="157"/>
         <source>Reset current polyline</source>
-        <translation>현재 폴리선 리셋</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/tracePolylineDlg.ui" line="171"/>
         <source>Continue the current polyline edition</source>
-        <translation>현재 폴리선 편집 계속</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/tracePolylineDlg.ui" line="178"/>
         <source>C</source>
         <extracomment>Shortcut for continue</extracomment>
-        <translation>C</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/tracePolylineDlg.ui" line="194"/>
         <source>Confirm polyline creation and exit</source>
-        <translation>폴리선 생성 및 종료 확인</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/tracePolylineDlg.ui" line="197"/>
         <source>OK</source>
-        <translation>확인</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/tracePolylineDlg.ui" line="214"/>
         <location filename="../ui_templates/tracePolylineDlg.ui" line="217"/>
         <source>Cancel</source>
-        <translation>취소</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -16811,7 +16595,7 @@ mean distance estimation</source>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/trainDisclaimerDlg.ui" line="14"/>
         <source>qCANUPO (disclaimer)</source>
-        <translation>qCANUPO (면책조항)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCanupo/ui/trainDisclaimerDlg.ui" line="48"/>
@@ -16825,16 +16609,7 @@ p, li { white-space: pre-wrap; }
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;Funded by Université Européenne de Bretagne, Centre National de la Recherche Scientifique and EEC Marie-Curie actions&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d;&quot;&gt;Enjoy!&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-weight:600; color:#1f497d;&quot;&gt;Classifier training based on multi-scale dimensionality (CANUPO)&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; font-style:italic; color:#1f497d;&quot;&gt;Brodu and Lague, 3D Terrestrial LiDAR data classification of complex natural scenes using a multi-scale dimensionality criterion, ISPRS j. of Photogram. Rem. Sens., 2012&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;Funded by Université Européenne de Bretagne, Centre National de la Recherche Scientifique and EEC Marie-Curie actions&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d; background-color:#ffffff;&quot;&gt;&lt;/p&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#ffffff;&quot;&gt;&lt;span style=&quot; font-family:&apos;Calibri,sans-serif&apos;; font-size:10pt; color:#1f497d;&quot;&gt;Enjoy!&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -16842,121 +16617,121 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/unrollDlg.ui" line="14"/>
         <source>Unroll</source>
-        <translation>펼치다</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/unrollDlg.ui" line="22"/>
         <source>Type</source>
-        <translation>종류</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/unrollDlg.ui" line="30"/>
         <source>Cylinder</source>
-        <translation>실린더</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/unrollDlg.ui" line="35"/>
         <source>Cone</source>
-        <translation>콘</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/unrollDlg.ui" line="40"/>
         <source>Straightened cone (fixed radius)</source>
-        <translation>일직선 콘 (고정반경)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/unrollDlg.ui" line="45"/>
         <source>Straightened cone</source>
-        <translation>일직선</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/unrollDlg.ui" line="66"/>
         <source>Deviation from the theoretical shape (i.e. cone or cylinder)</source>
-        <translation>이론적 형상의 편차 (즉 콘 또는 실린더)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/unrollDlg.ui" line="69"/>
         <source>Export deviation scalar field</source>
-        <translation>편차 스칼라필드 출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/unrollDlg.ui" line="78"/>
         <source>Shape</source>
-        <translation>모양</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/unrollDlg.ui" line="86"/>
         <source>Axis</source>
-        <translation>축</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/unrollDlg.ui" line="155"/>
         <location filename="../ui_templates/unrollDlg.ui" line="165"/>
         <source>Cone angle (0-180°)</source>
-        <translation>콘각도 (0-180°)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/unrollDlg.ui" line="158"/>
         <source>Half angle</source>
-        <translation>반각</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/unrollDlg.ui" line="171"/>
         <location filename="../ui_templates/unrollDlg.ui" line="455"/>
         <location filename="../ui_templates/unrollDlg.ui" line="497"/>
         <source> deg</source>
-        <translation> deg</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/unrollDlg.ui" line="218"/>
         <location filename="../ui_templates/unrollDlg.ui" line="231"/>
         <source>Cylinder (or cone base) radius</source>
-        <translation>실린더 (또는 콘 기반) 반경</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/unrollDlg.ui" line="221"/>
         <source>Radius</source>
-        <translation>반경</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/unrollDlg.ui" line="255"/>
         <source>Axis position</source>
-        <translation>축위치</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/unrollDlg.ui" line="407"/>
         <source>Auto (gravity center)</source>
-        <translation>자동 (중력중심)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/unrollDlg.ui" line="436"/>
         <source>Unroll range (can do multiple turns)</source>
-        <translation>거리펼침 (멀티회전가능)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/unrollDlg.ui" line="439"/>
         <source>Unroll range</source>
-        <translation>거리펼침</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/unrollDlg.ui" line="445"/>
         <source>Start angle</source>
-        <translation>시작각도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/unrollDlg.ui" line="452"/>
         <source>Starting angle (can be negative)</source>
-        <translation>시작각 ( -값)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/unrollDlg.ui" line="487"/>
         <source>Stop angle</source>
-        <translation>멈춤각도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/unrollDlg.ui" line="494"/>
         <source>Stop angle (can be negative)</source>
-        <translation>멈춤각도 ( -값 )</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -16964,75 +16739,24 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="20"/>
         <source>Volume calculation</source>
-        <translation>부피계산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="53"/>
         <source>Ground / Before</source>
-        <translation>지상 / 이전</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="62"/>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="231"/>
         <source>Source</source>
-        <translation>소스</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/volumeCalcDlg.ui" line="134"/>
-        <location filename="../ui_templates/volumeCalcDlg.ui" line="248"/>
-        <source>choose the value to fill the cells in which no point is projected : minimum value over the whole point cloud or average value (over the whole cloud also)</source>
-        <translation>점이 투영되지 않는 셀을 채울 값을 선택 : 전체 포인트클라우드의 최소값 또는 평균값 (전체 클라우드값)</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/volumeCalcDlg.ui" line="138"/>
-        <location filename="../ui_templates/volumeCalcDlg.ui" line="252"/>
-        <source>leave empty</source>
-        <translation>비워놓기</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/volumeCalcDlg.ui" line="143"/>
-        <location filename="../ui_templates/volumeCalcDlg.ui" line="257"/>
-        <location filename="../ui_templates/volumeCalcDlg.ui" line="480"/>
-        <source>minimum height</source>
-        <translation>최소높이</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/volumeCalcDlg.ui" line="148"/>
-        <location filename="../ui_templates/volumeCalcDlg.ui" line="262"/>
-        <location filename="../ui_templates/volumeCalcDlg.ui" line="485"/>
-        <source>average height</source>
-        <translation>평균높이</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/volumeCalcDlg.ui" line="153"/>
-        <location filename="../ui_templates/volumeCalcDlg.ui" line="267"/>
-        <location filename="../ui_templates/volumeCalcDlg.ui" line="490"/>
-        <source>maximum height</source>
-        <translation>최대높이</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/volumeCalcDlg.ui" line="158"/>
-        <location filename="../ui_templates/volumeCalcDlg.ui" line="272"/>
-        <source>user specified value</source>
-        <translation>사용자 특정값</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/volumeCalcDlg.ui" line="163"/>
-        <location filename="../ui_templates/volumeCalcDlg.ui" line="277"/>
-        <source>interpolate</source>
-        <translation>보간</translation>
-    </message>
-    <message>
-        <location filename="../ui_templates/volumeCalcDlg.ui" line="171"/>
-        <location filename="../ui_templates/volumeCalcDlg.ui" line="241"/>
-        <source>Empty cells</source>
-        <translation>빈셀</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="81"/>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="294"/>
         <source>Custom value for empty cells</source>
-        <translation>빈셀의 커스텀값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="100"/>
@@ -17054,61 +16778,111 @@ p, li { white-space: pre-wrap; }
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../ui_templates/volumeCalcDlg.ui" line="134"/>
+        <location filename="../ui_templates/volumeCalcDlg.ui" line="248"/>
+        <source>choose the value to fill the cells in which no point is projected : minimum value over the whole point cloud or average value (over the whole cloud also)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/volumeCalcDlg.ui" line="138"/>
+        <location filename="../ui_templates/volumeCalcDlg.ui" line="252"/>
+        <source>leave empty</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/volumeCalcDlg.ui" line="143"/>
+        <location filename="../ui_templates/volumeCalcDlg.ui" line="257"/>
+        <location filename="../ui_templates/volumeCalcDlg.ui" line="480"/>
+        <source>minimum height</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/volumeCalcDlg.ui" line="148"/>
+        <location filename="../ui_templates/volumeCalcDlg.ui" line="262"/>
+        <location filename="../ui_templates/volumeCalcDlg.ui" line="485"/>
+        <source>average height</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/volumeCalcDlg.ui" line="153"/>
+        <location filename="../ui_templates/volumeCalcDlg.ui" line="267"/>
+        <location filename="../ui_templates/volumeCalcDlg.ui" line="490"/>
+        <source>maximum height</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/volumeCalcDlg.ui" line="158"/>
+        <location filename="../ui_templates/volumeCalcDlg.ui" line="272"/>
+        <source>user specified value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/volumeCalcDlg.ui" line="163"/>
+        <location filename="../ui_templates/volumeCalcDlg.ui" line="277"/>
+        <source>interpolate</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/volumeCalcDlg.ui" line="171"/>
+        <location filename="../ui_templates/volumeCalcDlg.ui" line="241"/>
+        <source>Empty cells</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="202"/>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="205"/>
         <source>Swap</source>
-        <translation>스왑</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="225"/>
         <source>Ceil / After</source>
-        <translation>셀 / 이후</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="350"/>
         <source>Grid</source>
-        <translation>그리드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="371"/>
         <source>step</source>
-        <translation>단계</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="383"/>
         <source>size of step of the grid generated (in the same units as the coordinates of the point cloud)</source>
-        <translation>생성된 그리드 단계크기 (포인트클라우드 좌표와 동인한 단위)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="405"/>
         <source>Edit grid</source>
-        <translation>그리드편집</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="414"/>
         <source>size</source>
-        <translation>크기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="421"/>
         <source>Grid size corresponding to the current step / boundaries</source>
-        <translation>현재 단계 / 경계와 관련된 그리드크리</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="431"/>
         <source>projection dir.</source>
-        <translation>투영방향</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="438"/>
         <source>Projection direction (X, Y or Z)</source>
-        <translation>투영방향 (X, Y, Z)
-</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="463"/>
         <source>cell height</source>
-        <translation>셀높이</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="470"/>
@@ -17116,59 +16890,54 @@ p, li { white-space: pre-wrap; }
  - minimum = lowest point in the cell
  - average = mean height of all points inside the cell
  - maximum = highest point in the cell</source>
-        <translation>셀당 높이계산 방식:
- - 최소 = 셀의 가장 낮은점
- - 평균 = 셀의 모든점의 중간높이점
- - 최대 = 셀의 가장 높은점</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="501"/>
         <source>Update the grid / display / measurements</source>
-        <translation>그리드 / 화면 / 측정값 업데이트</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="507"/>
         <source>Update</source>
-        <translation>업데이트</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="517"/>
         <source>Results</source>
-        <translation>결과</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="526"/>
         <source>At least one of the cloud is sparse!
 You should fill the empty cells...</source>
-        <translation>최소 한개의 클라우드는 약합니다!
-빈셀을 채우십시오...</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="547"/>
         <source>Copy to clipboard</source>
-        <translation>클립보드에 복사</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="557"/>
         <source>Export the grid as a point cloud
 (warning, the points heights will be the difference of altitude!)</source>
-        <translation>그리드를 포인트클라우드로 출력
-(경고, 점높이가 고도편차가 됩니다!)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="561"/>
         <source>Export grid as a cloud</source>
-        <translation>클라우드로 그리드 출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="583"/>
         <source>Num. precision</source>
-        <translation>숫자 자릿수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/volumeCalcDlg.ui" line="590"/>
         <source>Numerical precision (output measurements, etc.)</source>
-        <translation>숫자 자릿수 (측정값 출력 등)</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -17176,32 +16945,32 @@ You should fill the empty cells...</source>
     <message>
         <location filename="../ui_templates/waveDlg.ui" line="14"/>
         <source>Waveform</source>
-        <translation>웨이브폼</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/waveDlg.ui" line="22"/>
         <source>Point index</source>
-        <translation>점인덱스</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/waveDlg.ui" line="32"/>
         <source>Pick a 3D point (click again to cancel)</source>
-        <translation>3D점 선택 (다시클릭하면 취소)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/waveDlg.ui" line="59"/>
         <source>log scale</source>
-        <translation>로그스케일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/waveDlg.ui" line="66"/>
         <source>fixed amplitude</source>
-        <translation>고정 진폭</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/waveDlg.ui" line="76"/>
         <source>Export wave as CSV file</source>
-        <translation>CSV 파일로 웨이즈 출력</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -17209,22 +16978,22 @@ You should fill the empty cells...</source>
     <message>
         <location filename="../ccAlignDlg.cpp" line="40"/>
         <source>None</source>
-        <translation>없음</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccAlignDlg.cpp" line="41"/>
         <source>Random</source>
-        <translation type="unfinished">무작위</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccAlignDlg.cpp" line="42"/>
         <source>Space</source>
-        <translation>공간</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccAlignDlg.cpp" line="43"/>
         <source>Octree</source>
-        <translation>옥트리</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -17232,76 +17001,75 @@ You should fill the empty cells...</source>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="673"/>
         <source>Preparing extraction</source>
-        <translation>추출 준비중</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="687"/>
         <source>Cloud &apos;%1</source>
-        <translation>클라우드&apos;%1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="688"/>
         <source>Points: %L1</source>
-        <translation>점: %L1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="1102"/>
         <source>Failed to generate contour lines for cloud #%1</source>
-        <translation>클라우드 #%1 등고선 생성실패</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="1110"/>
         <location filename="../ccClippingBoxTool.cpp" line="1215"/>
         <source>[ExtractSlicesAndContours] Process canceled by user</source>
-        <translation>[ExtractSlicesAndContours] 사용자 프로세싱 취소</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="1124"/>
         <source>Envelope extraction</source>
-        <translation>엔벨롭 추출</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="1125"/>
         <source>Envelope(s): %L1</source>
-        <translation>엔벨롭: %L1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="1200"/>
         <source>%1: points are too far from each other! Increase the max edge length</source>
-        <translation>%1:점간 거리가 너무 멉니다! 최대 엣지거리를 증가시키십시오</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="1206"/>
         <source>%1: envelope extraction failed!</source>
-        <translation>%1: 엔벨롭 추출실패!</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="1245"/>
         <source>[ExtractSlicesAndContours] Warnings were issued during the process! (result may be incomplete)</source>
-        <translation>[ExtractSlicesAndContours] 프로세싱시 경고가 있습니다! (결과가 완벽하지 않습니다)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="1250"/>
         <source>Not enough memory!</source>
-        <translation>메모리가 부족합니다!</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="1750"/>
         <location filename="../ccClippingBoxTool.cpp" line="1754"/>
         <source>Process finished</source>
-        <translation>프로세싱 완료</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="1750"/>
         <source>%1 slices have been generated.
 (you may have to close the tool and hide the initial cloud to see them...)</source>
-        <translation>%1 슬라이스가 생성되었습니다.
-(도구를 닫은후 초기 클라우드를 숨기면 볼 수 있습니다...)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccClippingBoxTool.cpp" line="1754"/>
         <source>The process has generated no output</source>
-        <translation>출력되지 않았습니다</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -17309,12 +17077,12 @@ You should fill the empty cells...</source>
     <message>
         <location filename="../../plugins/core/Standard/qCloudLayers/ui/ccCloudLayersDlg.ui" line="14"/>
         <source>Dialog</source>
-        <translation type="unfinished">대화창</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCloudLayers/ui/ccCloudLayersDlg.ui" line="31"/>
         <source>Scalar field</source>
-        <translation type="unfinished">스칼라필드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCloudLayers/ui/ccCloudLayersDlg.ui" line="61"/>
@@ -17367,12 +17135,12 @@ You should fill the empty cells...</source>
     <message>
         <location filename="../ccComparisonDlg.cpp" line="530"/>
         <source>Determining optimal octree level</source>
-        <translation>최적화 옥트리 레벨 설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccComparisonDlg.cpp" line="531"/>
         <source>Testing %1 levels...</source>
-        <translation>%1 레벨 테스트중...</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccComparisonDlg.cpp" line="883"/>
@@ -17385,22 +17153,22 @@ You should fill the empty cells...</source>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/src/ccCompass.cpp" line="3429"/>
         <source>SVG Output file</source>
-        <translation>SVG 출력파일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/src/ccCompass.cpp" line="3429"/>
         <source>SVG files (*.svg)</source>
-        <translation>SVG 파일 (*.svg)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/src/ccCompass.cpp" line="3448"/>
         <source>Output file</source>
-        <translation>출력파일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/src/ccCompass.cpp" line="3448"/>
         <source>CSV files (*.csv *.txt);;XML (*.xml)</source>
-        <translation>CSV 파일 (*.csv *.txt);;XML (*.xml)</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -17424,7 +17192,7 @@ You should fill the empty cells...</source>
         <location filename="../ccEntityAction.cpp" line="1107"/>
         <location filename="../ccEntityAction.cpp" line="1117"/>
         <source>value</source>
-        <translation type="unfinished">값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1117"/>
@@ -17447,7 +17215,7 @@ You should fill the empty cells...</source>
     <message>
         <location filename="../ccEntitySelectionDlg.cpp" line="40"/>
         <source>Select one or several entities:</source>
-        <translation>한개이상 엔티티 선택:</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -17460,12 +17228,12 @@ You should fill the empty cells...</source>
     <message>
         <location filename="../ccGraphicalSegmentationTool.cpp" line="1016"/>
         <source>Classification</source>
-        <translation type="unfinished">분류</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccGraphicalSegmentationTool.cpp" line="1016"/>
         <source>value</source>
-        <translation type="unfinished">값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccGraphicalSegmentationTool.cpp" line="1414"/>
@@ -17479,23 +17247,22 @@ You should fill the empty cells...</source>
         <location filename="../ccItemSelectionDlg.cpp" line="36"/>
         <source>Please select one or several %1:
 (press CTRL+A to select all)</source>
-        <translation>한개이상 %1 선택:
-CTRL +A를 눌러 전체선택)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccItemSelectionDlg.cpp" line="41"/>
         <source>Please select one %1</source>
-        <translation>%1 선택</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccItemSelectionDlg.cpp" line="98"/>
         <source>entity</source>
-        <translation>엔티티</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccItemSelectionDlg.cpp" line="124"/>
         <source>entities</source>
-        <translation>엔티티</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -17503,12 +17270,12 @@ CTRL +A를 눌러 전체선택)</translation>
     <message>
         <location filename="../../plugins/core/Standard/qMPlane/src/ccMPlaneDlgController.cpp" line="115"/>
         <source>Save Measurements</source>
-        <translation>측정값 저장</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qMPlane/src/ccMPlaneDlgController.cpp" line="116"/>
         <source>Comma-separated values (*.csv);;All Files (*)</source>
-        <translation>콤마-분리값 (*.csv);;전체파일 (*)</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -17516,17 +17283,17 @@ CTRL +A를 눌러 전체선택)</translation>
     <message>
         <location filename="../../libs/qCC_db/include/ccMaterialDB.h" line="59"/>
         <source>File &apos;%1&apos; has been updated</source>
-        <translation>파일 &apos;%1&apos; 업데이트완료</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_db/include/ccMaterialDB.h" line="69"/>
         <source>Failed to load the new version of the file</source>
-        <translation>파일의 신규버전 로드실패</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../libs/qCC_db/include/ccMaterialDB.h" line="74"/>
         <source>File &apos;%1&apos; has been deleted or renamed</source>
-        <translation>파일 &apos;%1&apos; 삭제 또는 이름변경</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -17542,22 +17309,22 @@ CTRL +A를 눌러 전체선택)</translation>
     <message>
         <location filename="../pluginManager/ui/ccPluginInfoDlg.ui" line="14"/>
         <source>Dialog</source>
-        <translation>대화창</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../pluginManager/ui/ccPluginInfoDlg.ui" line="33"/>
         <source>Filter list by plugin name</source>
-        <translation>플러그인 이름으로 필터목록</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../pluginManager/ui/ccPluginInfoDlg.ui" line="36"/>
         <source>🔍</source>
-        <translation>🔍</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../pluginManager/ui/ccPluginInfoDlg.ui" line="122"/>
         <source>Description</source>
-        <translation>설명</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../pluginManager/ui/ccPluginInfoDlg.ui" line="135"/>
@@ -17568,87 +17335,83 @@ CTRL +A를 눌러 전체선택)</translation>
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;.SF NS Text&apos;; font-size:13pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;.SF NS Text&apos;; font-size:13pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../pluginManager/ui/ccPluginInfoDlg.ui" line="145"/>
         <location filename="../pluginManager/ui/ccPluginInfoDlg.ui" line="289"/>
         <source>(none listed)</source>
-        <translation>(목록없음)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../pluginManager/ui/ccPluginInfoDlg.ui" line="162"/>
         <source>Plugins</source>
-        <translation>플러그인</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../pluginManager/ui/ccPluginInfoDlg.ui" line="175"/>
         <source>Maintainers</source>
-        <translation>유지보수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../pluginManager/ui/ccPluginInfoDlg.ui" line="215"/>
         <source>(CloudCompare Team)</source>
-        <translation>(CloudCompare 팀)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../pluginManager/ui/ccPluginInfoDlg.ui" line="256"/>
         <source>Authors</source>
-        <translation>제작자</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../pluginManager/ui/ccPluginInfoDlg.ui" line="272"/>
         <source>References</source>
-        <translation>참고자료</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../pluginManager/ui/ccPluginInfoDlg.ui" line="320"/>
         <source>CloudCompare looks for plugins in the following directories:</source>
-        <translation>CloudCompare이 사용하는 플러그인 디렉토리:</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="115"/>
         <source>About Plugins</source>
-        <translation>플러그인 정보</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="117"/>
         <source>Enabling/disabling plugins will take effect next time you run %1</source>
-        <translation>%1을(를) 다시 실행시 플러그인이 활성화/비활성됩니다.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="165"/>
         <source>%1 Plugin</source>
-        <translation>%1 플러그인</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="169"/>
         <source> (core)</source>
-        <translation>(코어)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="174"/>
         <source> (3rd Party)</source>
-        <translation>(타사)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="254"/>
         <source>(No plugin selected)</source>
-        <translation>(플러그인 미선택)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="291"/>
         <source>GL Shader</source>
-        <translation>GL 쉐이더</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../pluginManager/ccPluginInfoDlg.cpp" line="302"/>
         <source>I/O</source>
-        <translation>I/O</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -17656,25 +17419,25 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../pluginManager/ccPluginUIManager.cpp" line="303"/>
         <source>Remove Filter</source>
-        <translation>필터제거</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../pluginManager/ccPluginUIManager.cpp" line="308"/>
         <location filename="../pluginManager/ccPluginUIManager.cpp" line="319"/>
         <location filename="../pluginManager/ccPluginUIManager.cpp" line="355"/>
         <source>Plugins</source>
-        <translation>플러그인</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../pluginManager/ccPluginUIManager.cpp" line="312"/>
         <location filename="../pluginManager/ccPluginUIManager.cpp" line="361"/>
         <source>GL Filters</source>
-        <translation>GL 필터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../pluginManager/ccPluginUIManager.cpp" line="321"/>
         <source>Shaders &amp;&amp; Filters</source>
-        <translation>쉐이더 &amp;&amp; 필터</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -17687,32 +17450,32 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ccPointPairRegistrationDlg.cpp" line="940"/>
         <source>Remove dual point</source>
-        <translation>듀얼점 제거</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccPointPairRegistrationDlg.cpp" line="940"/>
         <source>Remove the equivalent reference point as well?</source>
-        <translation>등가 기준점도 제거하겠습니까?</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccPointPairRegistrationDlg.cpp" line="1541"/>
         <source>[PointPairRegistration] Cloud %1: global shift has been updated to match the reference: (%1,%2,%3) [x%4]</source>
-        <translation>[PointPairRegistration] 클라우드 %1: 기준에 매치되도록 글로벌 이격이 업데이트됩니다: (%1,%2,%3) [x%4]</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccPointPairRegistrationDlg.cpp" line="1553"/>
         <source>Drop shift information?</source>
-        <translation>이격정보 삭제?</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccPointPairRegistrationDlg.cpp" line="1553"/>
         <source>Aligned cloud is shifted but reference cloud is not: drop global shift information?</source>
-        <translation>맞추어진 클라우드가 이격되지만 기준클라우드는 아닙니다: 글로벌 이격정보 삭제?</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccPointPairRegistrationDlg.cpp" line="1561"/>
         <source>[PointPairRegistration] Cloud %1: global shift has been reset to match the reference!</source>
-        <translation>[PointPairRegistration] 클라우드 %1: 기준에 맞게 글로벌 이격이 리셋됩니다!</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -17720,129 +17483,129 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="99"/>
         <source>None</source>
-        <translation>없음</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="103"/>
         <source>Scalar field</source>
-        <translation>스칼라필드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="106"/>
         <source>Default</source>
-        <translation>기본값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="107"/>
         <source>Default Width</source>
-        <translation>기본값 너비</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="225"/>
         <source>Property</source>
-        <translation>속성</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="226"/>
         <source>State/Value</source>
-        <translation>상태/값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="326"/>
         <source>Transformation history</source>
-        <translation>변환 히스토리</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="331"/>
         <source>Display transformation</source>
-        <translation>투영표시</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="419"/>
         <source>Meta data</source>
-        <translation>메타데이터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="447"/>
         <source>CC Object</source>
-        <translation>CC 객체</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="450"/>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="965"/>
         <source>Name</source>
-        <translation>이름</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="455"/>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="662"/>
         <source>Visible</source>
-        <translation type="unfinished">표시</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="461"/>
         <source>Normals</source>
-        <translation>노멀</translation>
-    </message>
-    <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="489"/>
-        <source>Show name (in 3D)</source>
-        <translation type="unfinished">이름보기 (3D)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="467"/>
         <source>Colors</source>
-        <translation>컬러</translation>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="489"/>
+        <source>Show name (in 3D)</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="493"/>
         <source>Local box dimensions</source>
-        <translation>로컬박스 치수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="493"/>
         <source>Box dimensions</source>
-        <translation>박스치수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="503"/>
         <source>Shifted box center</source>
-        <translation>이격된 박스중심</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="503"/>
         <source>Box center</source>
-        <translation>박스중심</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="511"/>
         <source>Global box center</source>
-        <translation>글로벌 박스중심</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="518"/>
         <source>Info</source>
-        <translation>정보</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="518"/>
         <source>Object ID: %1 - Children: %2</source>
-        <translation>객체번호: %1 - 칠드런: %2</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="523"/>
         <source>Current Display</source>
-        <translation>현재표시</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="537"/>
         <source>Global shift</source>
-        <translation>글로벌 이격</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="540"/>
         <source>Global scale</source>
-        <translation>글로벌 스케일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="552"/>
@@ -17852,7 +17615,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="553"/>
         <source>Origin</source>
-        <translation type="unfinished">원점</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="555"/>
@@ -17882,68 +17645,68 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="570"/>
         <source>Cloud</source>
-        <translation>클라우드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="573"/>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1329"/>
         <source>Points</source>
-        <translation>점</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="579"/>
         <source>Point size</source>
-        <translation>점크기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="595"/>
         <source>Scan grids</source>
-        <translation>스캔그리드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="599"/>
         <source>Scan grid</source>
-        <translation>스캔그리드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="606"/>
         <source>Scan #%1</source>
-        <translation>스캔 #%1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="606"/>
         <source>%1 x %2 (%3 points)</source>
-        <translation>%1 x %2 (%3 점)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="613"/>
         <source>Waveform</source>
-        <translation>웨이브폼</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="614"/>
         <source>Waves</source>
-        <translation>웨이브</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="615"/>
         <source>Descriptors</source>
-        <translation>설명</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="618"/>
         <source>Data size</source>
-        <translation>데이터크기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="641"/>
         <source>Scalar Fields</source>
-        <translation>스칼라필드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="641"/>
         <source>Scalar Field</source>
-        <translation>스칼라필드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="644"/>
@@ -17951,483 +17714,483 @@ p, li { white-space: pre-wrap; }
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1020"/>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1137"/>
         <source>Count</source>
-        <translation>갯수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="647"/>
         <source>Active</source>
-        <translation>액티브</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="656"/>
         <source>Current</source>
-        <translation>현재</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="659"/>
         <source>Steps</source>
-        <translation>단계</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="664"/>
         <source>SF display params</source>
-        <translation type="unfinished">스칼라필드 표시 파라미터</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="680"/>
         <source>Primitive</source>
-        <translation>원시값</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="683"/>
         <source>Type</source>
-        <translation>종류</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="688"/>
         <source>Drawing precision</source>
-        <translation>드로잉 정밀도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="693"/>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="700"/>
         <source>Radius</source>
-        <translation>반경</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="697"/>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="920"/>
         <source>Height</source>
-        <translation>높이</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="704"/>
         <source>Bottom radius</source>
-        <translation>하단반경</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="705"/>
         <source>Top radius</source>
-        <translation>상단반경</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="723"/>
         <source>Facet</source>
-        <translation>측면</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="729"/>
         <source>Surface</source>
-        <translation>지면</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="732"/>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="883"/>
         <source>RMS</source>
-        <translation>RMS</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="735"/>
         <source>Center</source>
-        <translation>중심</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="740"/>
         <source>Show contour</source>
-        <translation>등고선 보기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="746"/>
         <source>Show polygon</source>
-        <translation>폴리곤 보기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="758"/>
         <source>Normal</source>
-        <translation>노멀</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="764"/>
         <source>Dip / Dip dir. (integer)</source>
-        <translation>Dip / Dip 방향 (정수)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="765"/>
         <source>Dip / Dip dir.</source>
-        <translation>Dip / Dip 방향</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="768"/>
         <source>Show normal vector</source>
-        <translation>노멀벡터 보기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="781"/>
         <source>Sub-mesh</source>
-        <translation>하쉬메시</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="781"/>
         <source>Mesh</source>
-        <translation>메시</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="784"/>
         <source>Faces</source>
-        <translation>페이스</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="788"/>
         <source>Materials/textures</source>
-        <translation>자재/텍스쳐</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="791"/>
         <source>Wireframe</source>
-        <translation>와이어프레임</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="795"/>
         <source>Stippling</source>
-        <translation>스티플링</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="816"/>
         <source>Polyline</source>
-        <translation>폴리선</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="819"/>
         <source>Vertices</source>
-        <translation>버틱스</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="822"/>
         <source>Length</source>
-        <translation>길이</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="825"/>
         <source>Line width</source>
-        <translation>선너비</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="839"/>
         <source>Octree</source>
-        <translation>옥트리</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="842"/>
         <source>Display mode</source>
-        <translation>표시모드</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="845"/>
         <source>Display level</source>
-        <translation>표시레벨</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="847"/>
         <source>Current level</source>
-        <translation>현재레벨</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="855"/>
         <source>Cell size</source>
-        <translation>셀크기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="859"/>
         <source>Cell count</source>
-        <translation>셀갯수</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="862"/>
         <source>Filled volume</source>
-        <translation>성토부피</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="873"/>
         <source>Kd-tree</source>
-        <translation>Kd-트리</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="876"/>
         <source>Max Error</source>
-        <translation>최대에러</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="886"/>
         <source>Max dist @ 68%</source>
-        <translation>최대거리 @ 68%</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="889"/>
         <source>Max dist @ 95%</source>
-        <translation>최대거리 @ 95%</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="892"/>
         <source>Max dist @ 99%</source>
-        <translation>최대거리 @ 99%</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="895"/>
         <source>Max distance</source>
-        <translation>최대거리</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="899"/>
         <source>unknown</source>
-        <translation>알수없음</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="902"/>
         <source>Error measure</source>
-        <translation>측정에러</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="914"/>
         <source>Image</source>
-        <translation>이미지</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="917"/>
         <source>Width</source>
-        <translation>너비</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="923"/>
         <source>Alpha</source>
-        <translation>알파</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="927"/>
         <source>Sensor</source>
-        <translation>센서</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="929"/>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1010"/>
         <source>Apply Viewport</source>
-        <translation>뷰포인트 적용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="941"/>
         <source>Label</source>
-        <translation>라벨</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="945"/>
         <source>Body</source>
-        <translation>바디</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="948"/>
         <source>Show 2D label</source>
-        <translation>2D 라벨 보기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="951"/>
         <source>Show legend(s)</source>
-        <translation>범례 보기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="962"/>
         <source>Viewport</source>
-        <translation>뷰포인트</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="965"/>
         <source>undefined</source>
-        <translation>미설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="968"/>
         <source>Apply viewport</source>
-        <translation>뷰포인트 적용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="971"/>
         <source>Update viewport</source>
-        <translation>뷰포인트 업데이트</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="983"/>
         <source>Trans. buffer</source>
-        <translation>트랜스 버퍼</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="989"/>
         <source>Show path</source>
-        <translation>경로보기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="992"/>
         <source>Show trihedrons</source>
-        <translation>삼면체 보기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="995"/>
         <source>Scale</source>
-        <translation>스케일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1007"/>
         <source>Drawing scale</source>
-        <translation>드로잉 스케일</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1013"/>
         <source>Position/Orientation</source>
-        <translation>위치/방향</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1017"/>
         <source>Associated positions</source>
-        <translation>관련위치</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1028"/>
         <source>Indices</source>
-        <translation>인덱스</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1031"/>
         <source>Active index</source>
-        <translation>사용 인덱스</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1043"/>
         <source>TLS/GBL Sensor</source>
-        <translation>TLS/GBL 센서</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1046"/>
         <source>Uncertainty</source>
-        <translation>불확실성</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1049"/>
         <source>Angular viewport (degrees)</source>
-        <translation>각도 뷰포인트 (deg)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1054"/>
         <source>Yaw span</source>
-        <translation>Yaw 스판</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1061"/>
         <source>Yaw step</source>
-        <translation>Yaw 단계</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1068"/>
         <source>Pitch span</source>
-        <translation>피치 스판</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1075"/>
         <source>Pitch step</source>
-        <translation>피치 단계</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1092"/>
         <source>Camera Sensor</source>
-        <translation>카메라센서</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1097"/>
         <source>Vert. focal</source>
-        <translation>수직촛점</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1100"/>
         <source>Array size</source>
-        <translation>배열크기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1103"/>
         <source>Principal point</source>
-        <translation>주점 (PP)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1108"/>
         <source>Pixel size</source>
-        <translation>픽셀크기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1112"/>
         <source>Field of view</source>
-        <translation>FOV</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1115"/>
         <source>Skew</source>
-        <translation>꼬임</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1117"/>
         <source>Frustum display</source>
-        <translation>Frustum 표시</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1120"/>
         <source>Show lines</source>
-        <translation>선보기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1121"/>
         <source>Show side planes</source>
-        <translation>사이드면 보기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1134"/>
         <source>Material set</source>
-        <translation>자재세트</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1151"/>
         <source>Array</source>
-        <translation>배열</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1155"/>
         <source>Shared</source>
-        <translation>공유</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1155"/>
         <source>No</source>
-        <translation>아니오</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1155"/>
         <source>Yes (%1)</source>
-        <translation>예 (%1)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1328"/>
         <source>Wire</source>
-        <translation>와이어</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1330"/>
         <source>Plain cubes</source>
-        <translation>평면큐브</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1462"/>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1472"/>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1482"/>
         <source>Apply</source>
-        <translation>적용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1491"/>
         <source>Update</source>
-        <translation>업데이트</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -18435,12 +18198,12 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ccRecentFiles.cpp" line="36"/>
         <source>Open Recent...</source>
-        <translation>최근열기...</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccRecentFiles.cpp" line="38"/>
         <source>Clear Menu</source>
-        <translation>메뉴지우기</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -18448,7 +18211,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ccSectionExtractionTool.cpp" line="1570"/>
         <source>Unfold cloud(s)</source>
-        <translation>클라우드 펼치기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccSectionExtractionTool.cpp" line="1573"/>
@@ -18460,20 +18223,18 @@ Number of points: %2</source>
         <location filename="../ccSectionExtractionTool.cpp" line="1633"/>
         <source>Number of segments: %1
 Number of points: %2</source>
-        <translation>분할갯수: %1
-좀갯수: %2</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccSectionExtractionTool.cpp" line="1889"/>
         <source>Extract sections</source>
-        <translation>단면추출</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccSectionExtractionTool.cpp" line="1890"/>
         <source>Number of sections: %1
 Number of points: %2</source>
-        <translation>단면갯수: %1
-점갯수: %2</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -18481,12 +18242,12 @@ Number of points: %2</source>
     <message>
         <location filename="../ui_templates/setClassificationFieldDlg.ui" line="14"/>
         <source>Dialog</source>
-        <translation type="unfinished">대화창</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/setClassificationFieldDlg.ui" line="22"/>
         <source>Classification</source>
-        <translation type="unfinished">분류</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -18494,62 +18255,62 @@ Number of points: %2</source>
     <message>
         <location filename="../ccSubsamplingDlg.cpp" line="42"/>
         <source>Random</source>
-        <translation>랜덤</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccSubsamplingDlg.cpp" line="43"/>
         <source>Space</source>
-        <translation>스페이스</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccSubsamplingDlg.cpp" line="44"/>
         <source>Octree</source>
-        <translation>옥트리</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccSubsamplingDlg.cpp" line="151"/>
         <source>none</source>
-        <translation>없음</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccSubsamplingDlg.cpp" line="152"/>
         <source>all</source>
-        <translation>전체</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccSubsamplingDlg.cpp" line="153"/>
         <source>remaining points</source>
-        <translation>남은 점</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccSubsamplingDlg.cpp" line="156"/>
         <source>large</source>
-        <translation>라지</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccSubsamplingDlg.cpp" line="157"/>
         <source>small</source>
-        <translation>스몰</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccSubsamplingDlg.cpp" line="158"/>
         <source>min. space between points</source>
-        <translation>점간 최소공간</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccSubsamplingDlg.cpp" line="161"/>
         <source>min</source>
-        <translation>최소</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccSubsamplingDlg.cpp" line="162"/>
         <source>max</source>
-        <translation>최대</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ccSubsamplingDlg.cpp" line="163"/>
         <source>subdivision level</source>
-        <translation>하위분할 레벨</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -18565,7 +18326,7 @@ Number of points: %2</source>
     <message>
         <location filename="../ui_templates/commandLineDlg.ui" line="14"/>
         <source>CloudCompare - command line mode</source>
-        <translation>CloudCompare - 커맨드라인 모드</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -18573,102 +18334,102 @@ Number of points: %2</source>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/ui/compassDlg.ui" line="20"/>
         <source>Compass</source>
-        <translation>나침반</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/ui/compassDlg.ui" line="38"/>
         <source>Mode:</source>
-        <translation>모드:</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/ui/compassDlg.ui" line="45"/>
         <source>Activate compass mode to make structural measurements</source>
-        <translation>나침반모드를 사용하여 구조물측정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/ui/compassDlg.ui" line="68"/>
         <source>Activate map mode to define geological features</source>
-        <translation>지도모드를 사용하여 지질학 피쳐 설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/ui/compassDlg.ui" line="92"/>
         <source>Tool:</source>
-        <translation>도구:</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/ui/compassDlg.ui" line="105"/>
         <source>Picking Tool. Use this to select GeoObjects or measurements.</source>
-        <translation>도구선택. 사용하여 지오객체 또는 측정값을 선택합니다.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/ui/compassDlg.ui" line="122"/>
         <source>Plane Tool: Measure surface orientations</source>
-        <translation>평면도구: 지면방향 측정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/ui/compassDlg.ui" line="148"/>
         <source>Trace Tool: Measure orientation from structure trace</source>
-        <translation>트레이스도구: 구조물 추적에서 방향 측정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/ui/compassDlg.ui" line="168"/>
         <source>Lineation Tool: Measure distances and directions</source>
-        <translation>선구조 도구: 거리와 방향을 측정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/ui/compassDlg.ui" line="185"/>
         <source>Other Tools</source>
-        <translation>그외 도구</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/ui/compassDlg.ui" line="212"/>
         <source>Change tool and visibility settings</source>
-        <translation>도구변경후 가시성 설정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/ui/compassDlg.ui" line="235"/>
         <source>Undo last action</source>
-        <translation>최근액션 취소</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/ui/compassDlg.ui" line="242"/>
         <source>Ctrl+Z</source>
-        <translation>Ctrl+Z</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/ui/compassDlg.ui" line="249"/>
         <source>Export interpretation and measurements</source>
-        <translation>해석 및 측정값 출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/ui/compassDlg.ui" line="252"/>
         <source>Save current label (added to cloud children)</source>
-        <translation>현재라벨 저장 (클라우드 칠드런에 추가)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/ui/compassDlg.ui" line="263"/>
         <source>Show readme and help information</source>
-        <translation>리드미와 도움말 정보 보기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/ui/compassDlg.ui" line="274"/>
         <source>Accept latest changes</source>
-        <translation>최신변경 허용</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/ui/compassDlg.ui" line="281"/>
         <source>Return</source>
-        <translation>리턴</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/ui/compassDlg.ui" line="288"/>
         <source>Exit ccCompass plugin. Thanks for visiting :)</source>
-        <translation>ccCompass 플러그인 종료. 방문해주셔서 감사합니다 :)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/ui/compassDlg.ui" line="295"/>
         <source>Esc</source>
-        <translation>Esc</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -18676,52 +18437,52 @@ Number of points: %2</source>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/ui/mapDlg.ui" line="20"/>
         <source>Map</source>
-        <translation>지도</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/ui/mapDlg.ui" line="38"/>
         <source>GeoObjects:</source>
-        <translation>지오객체:</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/ui/mapDlg.ui" line="48"/>
         <source>Create new GeoObject</source>
-        <translation>새로운 지오객체 생성</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/ui/mapDlg.ui" line="86"/>
         <source>No Selection</source>
-        <translation>선택없음</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/ui/mapDlg.ui" line="176"/>
         <source>Digitise to lower-contact of GeoObject</source>
-        <translation>지오객체의 하단 컨택트 디지타이즈</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/ui/mapDlg.ui" line="179"/>
         <source>Lower</source>
-        <translation>하단</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/ui/mapDlg.ui" line="259"/>
         <source>Digitise to upper-contact of GeoObject</source>
-        <translation>지오객체의 상단 컨택트 디지타이즈</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/ui/mapDlg.ui" line="262"/>
         <source>Upper</source>
-        <translation>상단</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/ui/mapDlg.ui" line="284"/>
         <source>Digitise to interior of geo-object</source>
-        <translation>지오객체의 인테리어 디지타이즈</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qCompass/ui/mapDlg.ui" line="287"/>
         <source>Interior</source>
-        <translation>인테리어</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -18729,97 +18490,97 @@ Number of points: %2</source>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="14"/>
         <source>Point list picking</source>
-        <translation>점목록 선택</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="25"/>
         <source>show &apos;to align&apos; entities</source>
-        <translation type="unfinished">&apos;맞춤&apos; 엔티티 보기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="64"/>
         <source>Pick spheres instead of single points (for clouds only)</source>
-        <translation>싱글점 대신 구면 선택 (클라우드)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="81"/>
         <source>search radius (or the spheres radius if you know it)</source>
-        <translation>검색반경 (또는 알고있는 경우 구면반경)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="106"/>
         <source>Max RMS (as a percentage of the radius)</source>
-        <translation>최대 RMS (반경의 퍼센터)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="184"/>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="294"/>
         <source>Error</source>
-        <translation>에러</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="202"/>
         <source>show &apos;reference&apos; entities</source>
-        <translation>&apos;기준&apos; 엔티티 보기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="309"/>
         <source>adjust scale</source>
-        <translation>스케일조정</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="335"/>
         <source>Rotation</source>
-        <translation>회전</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="351"/>
         <source>Constrains the rotation around a single axis (warning: experimental)</source>
-        <translation>1축주변 회전 제약 (경고: 실험단계)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="403"/>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="422"/>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="441"/>
         <source>Constrains the translation along particular axes (warning: experimental)</source>
-        <translation>특정축으로 변환 제약 (경고: 실험단계)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="458"/>
         <source>auto update zoom</source>
-        <translation>자동확대 업데이트</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="490"/>
         <source>align</source>
-        <translation>맞춤</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="500"/>
         <source>reset</source>
-        <translation>리셋</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="510"/>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="513"/>
         <source>Convert list to new cloud (and close dialog)</source>
-        <translation>목록을 새로운 클라우드로 변환 ( 및 대화창 닫기)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="516"/>
         <source>to cloud</source>
-        <translation>클라우드종점</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="527"/>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="530"/>
         <source>Close dialog (list will be lost)</source>
-        <translation>대화창닫기 (목록이 사라집니다)</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/pointPairRegistrationDlg.ui" line="533"/>
         <source>stop</source>
-        <translation>정지</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -18827,43 +18588,43 @@ Number of points: %2</source>
     <message>
         <location filename="../ui_templates/primitiveDistanceDlg.ui" line="14"/>
         <source>Distance to Primitive</source>
-        <translation>원기값까지 거리</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveDistanceDlg.ui" line="26"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;[NOTE]: This tool will measure each clouds points to either a plane, box, sphere, cylinder, or cone.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;[노트]: 이 도구는 각 클라우드 점을 평면, 상자, 구면, 실린더 또는 원뿔을 측정합니다.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveDistanceDlg.ui" line="45"/>
         <location filename="../ui_templates/primitiveDistanceDlg.ui" line="48"/>
         <source>compute signed distances</source>
-        <translation>사인된 거리 계산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveDistanceDlg.ui" line="51"/>
         <source>signed distances</source>
-        <translation>사인된 거리</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveDistanceDlg.ui" line="73"/>
         <source>flip normals</source>
-        <translation>노멀 접기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveDistanceDlg.ui" line="105"/>
         <source>Ok</source>
-        <translation>확인</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveDistanceDlg.ui" line="118"/>
         <source>Cancel</source>
-        <translation>취소</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/primitiveDistanceDlg.ui" line="143"/>
         <source>Treat planes as bounded</source>
-        <translation>평면을 경계로 처리</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -18872,8 +18633,7 @@ Number of points: %2</source>
         <location filename="../../plugins/core/Standard/qAnimation/src/qAnimation.cpp" line="73"/>
         <source>%1
 At least 2 viewports must be selected.</source>
-        <translation>%1
-최소 2 뷰포인트를 선택해야합니다.</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -18881,12 +18641,12 @@ At least 2 viewports must be selected.</source>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/src/qAnimationDlg.cpp" line="833"/>
         <source>Output animation file</source>
-        <translation>애니메이션파일 출력</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/src/qAnimationDlg.cpp" line="837"/>
         <source>Open Directory</source>
-        <translation>디렉토리 열기</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qAnimation/src/qAnimationDlg.cpp" line="1044"/>
@@ -18900,7 +18660,7 @@ At least 2 viewports must be selected.</source>
     <message>
         <location filename="../../plugins/core/Standard/qBroom/src/qBroomDlg.cpp" line="1911"/>
         <source>Error</source>
-        <translation>에러</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qBroom/src/qBroomDlg.cpp" line="1951"/>
@@ -18908,12 +18668,12 @@ At least 2 viewports must be selected.</source>
         <location filename="../../plugins/core/Standard/qBroom/src/qBroomDlg.cpp" line="1999"/>
         <location filename="../../plugins/core/Standard/qBroom/src/qBroomDlg.cpp" line="2070"/>
         <source>Not enough memory</source>
-        <translation>충분한 메모리 없음</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qBroom/src/qBroomDlg.cpp" line="2064"/>
         <source>Not enough memory to apply the last segmentation</source>
-        <translation>최근 분할에 적용할 메모리가 부족합니다</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -18945,7 +18705,7 @@ At least 2 viewports must be selected.</source>
     <message>
         <location filename="../../plugins/core/Standard/qPCV/src/PCVCommand.cpp" line="148"/>
         <source>No entity is loaded.</source>
-        <translation>로드된 엔티티가 없습니다.</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -18974,32 +18734,32 @@ At least 2 viewports must be selected.</source>
     <message>
         <location filename="../ui_templates/scalarFieldFromColorDlg.ui" line="14"/>
         <source>SF from RGB</source>
-        <translation>RGB의 SF</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/scalarFieldFromColorDlg.ui" line="20"/>
         <source>R Channel</source>
-        <translation>R 채널</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/scalarFieldFromColorDlg.ui" line="30"/>
         <source>G Channel</source>
-        <translation>G 채널</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/scalarFieldFromColorDlg.ui" line="40"/>
         <source>B Channel</source>
-        <translation>B 채널</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/scalarFieldFromColorDlg.ui" line="50"/>
         <source>Alpha Channel</source>
-        <translation>알파 채널</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/scalarFieldFromColorDlg.ui" line="57"/>
         <source>Composite = (R+ G+ B) / 3</source>
-        <translation>컴포지트 = (R + G + B) / 3</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -19007,12 +18767,12 @@ At least 2 viewports must be selected.</source>
     <message>
         <location filename="../ui_templates/sensorComputeDistancesDlg.ui" line="14"/>
         <source>Sensor range computation</source>
-        <translation>센서범위 계산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sensorComputeDistancesDlg.ui" line="20"/>
         <source>Squared distances</source>
-        <translation>거리제곱</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -19020,12 +18780,12 @@ At least 2 viewports must be selected.</source>
     <message>
         <location filename="../ui_templates/sensorComputeScatteringAnglesDlg.ui" line="14"/>
         <source>Compute scattering angles</source>
-        <translation>산란각도 계산</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui_templates/sensorComputeScatteringAnglesDlg.ui" line="20"/>
         <source>Convert angles to degree</source>
-        <translation>도분초(degree)로 각도변환</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>

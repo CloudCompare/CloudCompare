@@ -56,19 +56,19 @@ static void MakeSquare(ccBBox& box, int pivotType, int defaultDim = -1)
 		case 0: //min corner
 		{
 			CCVector3 A = box.minCorner();
-			box = ccBBox(A, A + newW);
+			box = ccBBox(A, A + newW, box.isValid());
 		}
 		break;
 		case 1: //center
 		{
 			CCVector3 C = box.getCenter();
-			box = ccBBox(C - newW / 2.0, C + newW / 2.0);
+			box = ccBBox(C - newW / 2.0, C + newW / 2.0, box.isValid());
 		}
 		break;
 		case 2: //max corner
 		{
 			CCVector3 B = box.maxCorner();
-			box = ccBBox(B - newW, B);
+			box = ccBBox(B - newW, B, box.isValid());
 		}
 		break;
 		}
@@ -334,13 +334,13 @@ void ccBoundingBoxEditorDlg::updateCurrentBBox(double dummy)
 	switch (pointTypeComboBox->currentIndex())
 	{
 	case 0: //A = min corner
-		m_currentBBox = ccBBox(A, A + W);
+		m_currentBBox = ccBBox(A, A + W, true);
 		break;
 	case 1: //A = center
-		m_currentBBox = ccBBox(A - W / 2.0, A + W / 2.0);
+		m_currentBBox = ccBBox(A - W / 2.0, A + W / 2.0, true);
 		break;
 	case 2: //A = max corner
-		m_currentBBox = ccBBox(A - W, A);
+		m_currentBBox = ccBBox(A - W, A, true);
 		break;
 	default:
 		assert(false);

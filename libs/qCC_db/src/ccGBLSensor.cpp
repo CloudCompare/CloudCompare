@@ -877,7 +877,7 @@ void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 		CCVector3 maxCorner( halfHeadSize, halfHeadSize, halfHeadSize);
 		minCorner *= m_scale;
 		maxCorner *= m_scale;
-		ccBBox bbHead(minCorner,maxCorner);
+		ccBBox bbHead(minCorner, maxCorner, true);
 		bbHead.draw(context, m_color);
 	}
 
@@ -947,7 +947,8 @@ ccBBox ccGBLSensor::getOwnFitBB(ccGLMatrix& trans)
 	trans = sensorPos;
 
 	return ccBBox(	CCVector3(-m_scale,-m_scale,-m_scale),
-					CCVector3( m_scale, m_scale, m_scale) );
+					CCVector3( m_scale, m_scale, m_scale),
+					true );
 }
 
 bool ccGBLSensor::applyViewport(ccGenericGLDisplay* win/*=nullptr*/)

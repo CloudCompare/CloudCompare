@@ -250,9 +250,11 @@ ccRegistrationDlg::ConvergenceMethod ccRegistrationDlg::getConvergenceMethod() c
 
 int ccRegistrationDlg::getTransformationFilters() const
 {
-	int filters = 0;
+	int filters = CCCoreLib::RegistrationTools::SKIP_NONE;
 	switch (rotComboBox->currentIndex())
 	{
+	case 0:
+		break;
 	case 1:
 		filters |= CCCoreLib::RegistrationTools::SKIP_RYZ;
 		break;
@@ -262,8 +264,11 @@ int ccRegistrationDlg::getTransformationFilters() const
 	case 3:
 		filters |= CCCoreLib::RegistrationTools::SKIP_RXY;
 		break;
+	case 4:
+		filters |= CCCoreLib::RegistrationTools::SKIP_ROTATION;
+		break;
 	default:
-		//nothing to do
+		assert(false);
 		break;
 	}
 

@@ -28,9 +28,7 @@
 //qCC_db
 #include <ccPolyline.h>
 #include <ccPointCloud.h>
-
-//Qt
-#include <QProgressDialog>
+#include <ccProgressDialog.h>
 
 //System
 #include <cassert>
@@ -93,19 +91,18 @@ ccTracePolylineTool::ccTracePolylineTool(ccPickingHub* pickingHub, QWidget* pare
 
 ccTracePolylineTool::~ccTracePolylineTool()
 {
+	//m_polyTipVertices is already a child of m_polyTip
 	if (m_polyTip)
 		delete m_polyTip;
-	//DGM: already a child of m_polyTip
-	//if (m_polyTipVertices)
-	//	delete m_polyTipVertices;
+	m_polyTip = nullptr;
 
+	//m_poly3DVertices is already a child of m_poly3D
 	if (m_poly3D)
 		delete m_poly3D;
-	//DGM: already a child of m_poly3D
-	//if (m_poly3DVertices)
-	//	delete m_poly3DVertices;
+	m_poly3D = nullptr;
 	
 	delete m_ui;
+	m_ui = nullptr;
 }
 
 void ccTracePolylineTool::onShortcutTriggered(int key)
@@ -152,16 +149,16 @@ ccPolyline* ccTracePolylineTool::polylineOverSampling(unsigned steps) const
 		return nullptr;
 	}
 
-	unsigned n_verts = m_poly3DVertices->size();
-	unsigned n_segments = m_poly3D->size() - (m_poly3D->isClosed() ? 0 : 1);
-	unsigned end_size = n_segments * steps + (m_poly3D->isClosed() ? 0 : 1);
+	unsigned vertexCount = m_poly3DVertices->size();
+	unsigned segmentCount = m_poly3D->size() - (m_poly3D->isClosed() ? 0 : 1);
+	unsigned endSize = segmentCount * steps + (m_poly3D->isClosed() ? 0 : 1);
 
 	ccPointCloud* newVertices = new ccPointCloud();
 	ccPolyline* newPoly = new ccPolyline(newVertices);
 	newPoly->addChild(newVertices);
 
-	if (	!newVertices->reserve(end_size)
-		||	!newPoly->reserve(end_size) )
+	if (	!newVertices->reserve(endSize)
+		||	!newPoly->reserve(endSize) )
 	{
 		ccLog::Warning("[ccTracePolylineTool::PolylineOverSampling] Not enough memory");
 		delete newPoly;
@@ -173,17 +170,20 @@ ccPolyline* ccTracePolylineTool::polylineOverSampling(unsigned steps) const
 	newPoly->importParametersFrom(*m_poly3D);
 	newPoly->setDisplay_recursive(m_poly3D->getDisplay());
 
-	QProgressDialog pDlg(QString("Oversampling"), "Cancel", 0, static_cast<int>(end_size), m_associatedWin ? m_associatedWin->asWidget() : nullptr);
+	ccProgressDialog pDlg(true, m_associatedWin ? m_associatedWin->asWidget() : nullptr);
+	pDlg.setWindowTitle("Oversampling");
+	pDlg.setMethodTitle(tr("Oversampling polyline: %1 vertices").arg(endSize));
+	pDlg.setRange(0, static_cast<int>(endSize));
 	pDlg.show();
 	QCoreApplication::processEvents();
 
-	for (unsigned i = 0; i < n_segments; ++i)
+	for (unsigned i = 0; i < segmentCount; ++i)
 	{
 		const CCVector3* p1 = m_poly3DVertices->getPoint(i);
 		newVertices->addPoint(*p1);
 
 
-		unsigned i2 = (i + 1) % n_verts;
+		unsigned i2 = (i + 1) % vertexCount;
 		CCVector2d clickPos1/* = m_segmentParams[i].clickPos*/;
 		{
 			//we actually retro-project the 3D point in the second vertex camera frame so as to get a proper behavior
@@ -273,7 +273,7 @@ ccPolyline* ccTracePolylineTool::polylineOverSampling(unsigned steps) const
 	//add last point
 	if (!m_poly3D->isClosed())
 	{
-		newVertices->addPoint(*m_poly3DVertices->getPoint(n_verts - 1));
+		newVertices->addPoint(*m_poly3DVertices->getPoint(vertexCount - 1));
 	}
 
 	newVertices->shrinkToFit();

@@ -889,7 +889,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 							int sliceIndex = ((k - indexMins[2]) * static_cast<int>(gridDim[1]) + (j - indexMins[1])) * static_cast<int>(gridDim[0]) + (i - indexMins[0]);
 
 							CCVector3 C = gridOrigin + CCVector3(i*cellSizePlusGap.x, j*cellSizePlusGap.y, k*cellSizePlusGap.z);
-							ccBBox cropBox(C, C + cellSize);
+							ccBBox cropBox(C, C + cellSize, true);
 
 							for (size_t mi = 0; mi != meshes.size(); ++mi)
 							{

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Repeat</string>
+   <string>Slice extraction</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -117,7 +117,7 @@ color: white;</string>
         <item row="0" column="1">
          <widget class="QComboBox" name="envelopeTypeComboBox">
           <property name="toolTip">
-           <string>Section type (lower or upper part, or both)</string>
+           <string>Envelope type (lower or upper part, or both)</string>
           </property>
           <property name="currentIndex">
            <number>2</number>
@@ -149,7 +149,7 @@ color: white;</string>
         <item row="1" column="1">
          <widget class="QDoubleSpinBox" name="maxEnvelopeEdgeLengthDoubleSpinBox">
           <property name="toolTip">
-           <string>Max edge length (if 0, generates a unique and closed contour = convex hull)</string>
+           <string>Max edge length (if 0, generates a unique and closed envelope = convex hull)</string>
           </property>
           <property name="decimals">
            <number>6</number>
@@ -228,6 +228,9 @@ color: white;</string>
       </item>
       <item row="0" column="1">
        <widget class="QDoubleSpinBox" name="lsGridStepDoubleSpinBox">
+        <property name="toolTip">
+         <string>Step of the internally generated grid obtained by rasterizing the points and exporting the contours</string>
+        </property>
         <property name="decimals">
          <number>6</number>
         </property>
@@ -252,7 +255,7 @@ color: white;</string>
       <item row="1" column="1">
        <widget class="QSpinBox" name="minLSVertexCountSpinBox">
         <property name="toolTip">
-         <string>Min vertex count per iso-line (to ignore the smallest ones)</string>
+         <string>Min vertex count per contour (to ignore the smallest ones)</string>
         </property>
         <property name="minimum">
          <number>3</number>
@@ -300,6 +303,9 @@ color: white;</string>
       </item>
       <item row="1" column="1">
        <widget class="QComboBox" name="groupByTypeComboBox">
+        <property name="toolTip">
+         <string>How generated slices, envelopes and contours will be regrouped in the DB tree</string>
+        </property>
         <property name="currentIndex">
          <number>3</number>
         </property>

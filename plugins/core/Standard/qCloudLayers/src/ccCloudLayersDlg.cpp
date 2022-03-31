@@ -74,7 +74,7 @@ void ccCloudLayersDlg::reject()
 {
 	if (m_helper && m_helper->hasChanges())
 	{
-		if (QMessageBox::question(m_associatedWin, "Cloud layers plugin", "The cloud has been modified, are you sure you want exit?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
+		if (QMessageBox::question(m_associatedWin->asWidget(), "Cloud layers plugin", "The cloud has been modified, are you sure you want exit?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
 		{
 			return;
 		}
@@ -253,7 +253,7 @@ void ccCloudLayersDlg::deleteClicked()
 	if (!select->hasSelection())
 		return;
 
-	if (QMessageBox::question(m_associatedWin, "Cloud layers plugin", "Are you sure you want to delete this record(s)?",
+	if (QMessageBox::question(m_associatedWin->asWidget(), "Cloud layers plugin", "Are you sure you want to delete this record(s)?",
 		QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
 	{
 		return;
@@ -341,7 +341,7 @@ void ccCloudLayersDlg::closeClicked()
 	{
 		if (m_helper->hasChanges())
 		{
-			if (QMessageBox::question(m_associatedWin, "Cloud layers plugin", "The cloud has been modified, are you sure you want exit?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
+			if (QMessageBox::question(m_associatedWin->asWidget(), "Cloud layers plugin", "The cloud has been modified, are you sure you want exit?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
 			{
 				return;
 			}

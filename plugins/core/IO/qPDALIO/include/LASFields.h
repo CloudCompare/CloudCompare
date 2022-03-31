@@ -141,7 +141,7 @@ struct LasField
 				lasFields.emplace_back(LAS_FLIGHT_LINE_EDGE, 0, 0, 1, 0); //1 bit: 0 or 1
 				lasFields.emplace_back(LAS_SCAN_ANGLE_RANK, 0, -90, 90, 0); //signed char: between -90 and +90
 				lasFields.emplace_back(LAS_USER_DATA, 0, 0, 255, 0); //unsigned char: between 0 and 255
-				lasFields.emplace_back(LAS_POINT_SOURCE_ID, 0, 0, 65535, 0); //16 bits: between 0 and 65536
+				lasFields.emplace_back(LAS_POINT_SOURCE_ID, 1, 0, 65535, 0); //16 bits: between 1 and 65536
 			}
 
 			//we are going to check now the existing cloud SFs
@@ -218,7 +218,8 @@ struct LasField
 		}
 	}
 
-	static uint8_t VersionMinorForPointFormat(uint8_t pointFormat) {
+	static uint8_t VersionMinorForPointFormat(uint8_t pointFormat)
+	{
 		return pointFormat >= 6 ? 4 : 2;
 	}
 
@@ -293,20 +294,48 @@ struct LasField
 		return minPointFormat;
 	}
 
-	static QString SanitizeString(QString str)
+	static QString SanitizeString(const QString& str)
 	{
-		QString sanitizedStr;
-		if (str.size() > 32)
+		QString sanitizedStr = str;
+		sanitizedStr.replace('=', "_eq_");
+		sanitizedStr.replace(' ', "__");
+
+		if (sanitizedStr.size() > 32)
 		{
-			sanitizedStr = str.left(32);
+			sanitizedStr = sanitizedStr.left(32);
 		}
-		else
-		{
-			sanitizedStr = str;
-		}
-		sanitizedStr.replace('=', '_');
 
 		return sanitizedStr;
+	}
+
+	static QString DesanitizeString(const QString& str)
+	{
+		QString desanitizedStr = str;
+		desanitizedStr.replace("_eq_", "=");
+		desanitizedStr.replace("__", " ");
+
+		return desanitizedStr;
+	}
+
+	double getSafeValue(unsigned index) const
+	{
+		if (sf)
+		{
+			ScalarType value = sf->getValue(index);
+
+			// PDAL doesn't accept NaN values
+			if (CCCoreLib::ScalarField::ValidValue(value))
+			{
+				return value;
+			}
+			else
+			{
+				return defaultValue;
+			}
+		}
+		
+		assert(false);
+		return defaultValue;
 	}
 
 	LAS_FIELDS type;

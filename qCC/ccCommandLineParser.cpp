@@ -55,9 +55,9 @@ bool ccCommandLineParser::error(const QString& message) const
 	return false;
 }
 
-int ccCommandLineParser::Parse(int nargs, char** args, ccPluginInterfaceList& plugins)
+int ccCommandLineParser::Parse(const QStringList& arguments, ccPluginInterfaceList& plugins)
 {
-	if (args == nullptr || nargs < 2)
+	if (arguments.size() < 2)
 	{
 		assert(false);
 		return EXIT_SUCCESS;
@@ -67,13 +67,8 @@ int ccCommandLineParser::Parse(int nargs, char** args, ccPluginInterfaceList& pl
 	QScopedPointer<ccCommandLineParser> parser(new ccCommandLineParser);
 	
 	parser->registerBuiltInCommands();
-	
-	for (int i = 1; i < nargs; ++i) //'i=1' because first argument is always program executable file!
-	{
-		parser->arguments().push_back(QString::fromLocal8Bit(args[i]));
-	}
-	
-	assert(!parser->arguments().empty());
+	parser->arguments() = arguments;
+	parser->arguments().pop_front(); //the first argument is always program executable file!
 
 	//specific command: silent mode (will prevent the console dialog from appearing!
 	if (ccCommandLineInterface::IsCommand(parser->arguments().front(), COMMAND_SILENT_MODE))
@@ -711,7 +706,7 @@ void ccCommandLineParser::registerBuiltInCommands()
 	registerCommand(Command::Shared(new CommandMoment));
 	registerCommand(Command::Shared(new CommandFeature));
 	registerCommand(Command::Shared(new CommandRGBConvertToSF));
-
+	registerCommand(Command::Shared(new CommandFlipTriangles));
 }
 
 void ccCommandLineParser::cleanup()

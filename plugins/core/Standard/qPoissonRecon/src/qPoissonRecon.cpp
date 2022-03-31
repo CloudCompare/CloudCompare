@@ -21,12 +21,13 @@
 #include "ui_poissonReconParamDlg.h"
 
 //Qt
-#include <QtGui>
+#include <QDialog>
 #include <QInputDialog>
+#include <QMainWindow>
+#include <QProgressDialog>
 #include <QtCore>
 #include <QtConcurrentRun>
-#include <QDialog>
-#include <QMainWindow>
+#include <QtGui>
 
 //PoissonRecon
 #include <PoissonReconLib.h>
@@ -226,6 +227,8 @@ public:
 		, Ui::PoissonReconParamDialog()
 	{
 		setupUi(this);
+
+		threadSpinBox->setRange(1, PoissonReconLib::Parameters::GetMaxThreadCount());
 	}
 };
 
@@ -271,6 +274,9 @@ bool doReconstruct()
 		return false;
 	}
 
+	QElapsedTimer timer;
+	timer.start();
+
 	MeshWrapper<PointCoordinateType> meshWrapper(*s_mesh, *s_meshVertices, s_densitySF);
 	PointCloudWrapper<PointCoordinateType> cloudWrapper(*s_cloud);
 	
@@ -278,6 +284,9 @@ bool doReconstruct()
 	{
 		return false;
 	}
+
+	qint64 elpased_msec = timer.elapsed();
+	ccLog::Print(QString("[PoissonRecon] Duration: %1 s").arg(elpased_msec / 1000.0, 0, 'f', 1));
 
 	return true;
 }
@@ -339,6 +348,7 @@ void qPoissonRecon::doAction()
 	prpDlg.importColorsCheckBox->setChecked(s_params.withColors);
 	prpDlg.densityCheckBox->setChecked(s_params.density);
 	prpDlg.weightDoubleSpinBox->setValue(s_params.pointWeight);
+	prpDlg.threadSpinBox->setValue(s_params.threads);
 	prpDlg.linearFitCheckBox->setChecked(s_params.linearFit);
 	switch (s_params.boundary)
 	{
@@ -369,6 +379,7 @@ void qPoissonRecon::doAction()
 	s_params.withColors = prpDlg.importColorsCheckBox->isChecked();
 	s_params.density = prpDlg.densityCheckBox->isChecked();
 	s_params.pointWeight = static_cast<float>(prpDlg.weightDoubleSpinBox->value());
+	s_params.threads = prpDlg.threadSpinBox->value();
 	s_params.linearFit = prpDlg.linearFitCheckBox->isChecked();
 	switch (prpDlg.boundaryComboBox->currentIndex())
 	{
@@ -401,10 +412,10 @@ void qPoissonRecon::doAction()
 	bool result = false;
 	{
 		//start message
-		m_app->dispToConsole(QString("[PoissonRecon] Job started (level %1)").arg(s_params.depth), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+		m_app->dispToConsole(QString("[PoissonRecon] Job started (level %1 - %2 threads)").arg(s_params.depth).arg(s_params.threads), ccMainAppInterface::STD_CONSOLE_MESSAGE);
 
 		//progress dialog (Qtconcurrent::run can't be canceled!)
-		QProgressDialog pDlg("Initialization", QString(), 0, 0, m_app->getMainWindow());
+		QProgressDialog pDlg(tr("Initialization"), QString(), 0, 0, m_app->getMainWindow());
 		pDlg.setWindowTitle("Poisson Reconstruction");
 		pDlg.show();
 		//QApplication::processEvents();

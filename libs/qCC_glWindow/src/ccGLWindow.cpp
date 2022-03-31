@@ -1164,7 +1164,12 @@ bool ccGLWindow::event(QEvent* evt)
 		evt->accept();
 	}
 	return true;
-
+#else
+	case QEvent::Resize:
+	{
+		update();
+	}
+	break;
 #endif
 
 	default:
@@ -3684,6 +3689,8 @@ void ccGLWindow::getContext(CC_DRAW_CONTEXT& CONTEXT)
 //		return "TRIANGLE_PICKING";
 //	case ccGLWindow::POINT_OR_TRIANGLE_PICKING:
 //		return "POINT_OR_TRIANGLE_PICKING";
+//	case POINT_OR_TRIANGLE_OR_LABEL_PICKING:
+//		return "POINT_OR_TRIANGLE_OR_LABEL_PICKING";
 //	case ccGLWindow::LABEL_PICKING:
 //		return "LABEL_PICKING";
 //	case ccGLWindow::DEFAULT_PICKING:
@@ -3713,6 +3720,7 @@ void ccGLWindow::setPickingMode(PICKING_MODE mode/*=DEFAULT_PICKING*/)
 		setCursor(QCursor(Qt::ArrowCursor));
 		break;
 	case POINT_OR_TRIANGLE_PICKING:
+	case POINT_OR_TRIANGLE_OR_LABEL_PICKING:
 	case TRIANGLE_PICKING:
 	case POINT_PICKING:
 		setCursor(QCursor(Qt::PointingHandCursor));
@@ -4058,6 +4066,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 					//&&	m_pickingMode != POINT_PICKING
 					//&&	m_pickingMode != TRIANGLE_PICKING
 					//&&	m_pickingMode != POINT_OR_TRIANGLE_PICKING
+					//&&	m_pickingMode != POINT_OR_TRIANGLE_OR_LABEL_PICKING
 					&& (	QApplication::keyboardModifiers() == Qt::NoModifier
 						||	QApplication::keyboardModifiers() == Qt::ControlModifier) )
 				{
@@ -4724,6 +4733,7 @@ void ccGLWindow::startPicking(PickingParameters& params)
 	}
 
 	if (	params.mode == POINT_OR_TRIANGLE_PICKING
+		||	params.mode == POINT_OR_TRIANGLE_OR_LABEL_PICKING
 		||	params.mode == POINT_PICKING
 		||	params.mode == TRIANGLE_PICKING
 		||	params.mode == LABEL_PICKING // = spawn a label on the clicked point or triangle
@@ -4758,10 +4768,11 @@ void ccGLWindow::processPickingResult(	const PickingParameters& params,
 		else
 			assert(false);
 	}
-	//3D point or triangle picking
+	//3D point or triangle or label picking
 	else if (	params.mode == POINT_PICKING
 			||	params.mode == TRIANGLE_PICKING
-			||	params.mode == POINT_OR_TRIANGLE_PICKING)
+			||	params.mode == POINT_OR_TRIANGLE_PICKING
+			||	params.mode == POINT_OR_TRIANGLE_OR_LABEL_PICKING)
 	{
 		assert(pickedEntity == nullptr || pickedItemIndex >= 0);
 		assert(nearestPoint && nearestPointBC);
@@ -5062,7 +5073,6 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 	//qint64 t0 = m_timer.elapsed();
 
 	CCVector2d clickedPos(params.centerX, glHeight() - 1 - params.centerY);
-
 	ccHObject* nearestEntity = nullptr;
 	int nearestElementIndex = -1;
 	double nearestElementSquareDist = -1.0;
@@ -5221,7 +5231,7 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 						}
 					}
 				}
-				else if (ent->isA(CC_TYPES::LABEL_2D))
+				else if (params.mode == PICKING_MODE::POINT_OR_TRIANGLE_OR_LABEL_PICKING && ent->isA(CC_TYPES::LABEL_2D))
 				{
 					cc2DLabel* label = static_cast<cc2DLabel*>(ent);
 

@@ -65,7 +65,7 @@ public:
 	//! Returns the max coordinate (absolute) value
 	static double MaxCoordinateAbsValue() { return MAX_COORDINATE_ABS_VALUE; }
 	//! Sets the max coordinate (absolute) value
-	static void SetMaxCoordinateAbsValue(double value) { MAX_COORDINATE_ABS_VALUE = value; }
+	static void SetMaxCoordinateAbsValue(double value) { MAX_COORDINATE_ABS_VALUE = std::max(value, 1.0); }
 
 	//! Returns max bounding-box diagonal
 	static double MaxBoundgBoxDiagonal() { return MAX_DIAGONAL_LENGTH; }

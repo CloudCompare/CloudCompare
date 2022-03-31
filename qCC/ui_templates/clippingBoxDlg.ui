@@ -239,7 +239,7 @@
      <item>
       <widget class="QGroupBox" name="contourGroupBox">
        <property name="title">
-        <string>Contour</string>
+        <string>Envelope/Contour</string>
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout">
         <property name="leftMargin">
@@ -263,10 +263,10 @@
            </size>
           </property>
           <property name="toolTip">
-           <string>Extracts the contour as a polyline (concave hull)</string>
+           <string>Extracts the envelope (concave hull) or contours as polylines</string>
           </property>
           <property name="statusTip">
-           <string>Extracts the contour as a polyline (concave hull)</string>
+           <string>Extracts the envelope (concave hull) or contours as polylines</string>
           </property>
           <property name="icon">
            <iconset resource="../icons.qrc">
@@ -283,10 +283,10 @@
            </size>
           </property>
           <property name="toolTip">
-           <string>Removes last extracted contour</string>
+           <string>Removes the last extracted envelope or contours</string>
           </property>
           <property name="statusTip">
-           <string>Removes last extracted contour</string>
+           <string>Removes the last extracted envelope or contours</string>
           </property>
           <property name="icon">
            <iconset resource="../icons.qrc">
@@ -324,10 +324,10 @@
            </size>
           </property>
           <property name="toolTip">
-           <string>Export selection as a new cloud</string>
+           <string>Export selection as new entities</string>
           </property>
           <property name="statusTip">
-           <string>Export selection as a new cloud</string>
+           <string>Export selection as new entities</string>
           </property>
           <property name="icon">
            <iconset resource="../icons.qrc">
@@ -338,7 +338,8 @@
         <item>
          <widget class="QToolButton" name="exportMultButton">
           <property name="toolTip">
-           <string>Export multiple slices by repeating the process along one or several dimensions (+ contour extraction)</string>
+           <string>Export multiple slices, envelopes or contours
+by repeating the process along one or several dimensions</string>
           </property>
           <property name="icon">
            <iconset resource="../icons.qrc">

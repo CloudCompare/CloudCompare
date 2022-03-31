@@ -336,14 +336,14 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 
 			//let the user choose between the original scale and the 'optimal' one (for accuracy, not for compression ;)
 			bool hasScaleMetaData = false;
-			CCVector3d lasScale(0, 0, 0);
-			lasScale.x = cloud->getMetaData(LAS_SCALE_X_META_DATA).toDouble(&hasScaleMetaData);
+			CCVector3d originalLasScale(0, 0, 0);
+			originalLasScale.x = cloud->getMetaData(LAS_SCALE_X_META_DATA).toDouble(&hasScaleMetaData);
 			if (hasScaleMetaData)
 			{
-				lasScale.y = cloud->getMetaData(LAS_SCALE_Y_META_DATA).toDouble(&hasScaleMetaData);
+				originalLasScale.y = cloud->getMetaData(LAS_SCALE_Y_META_DATA).toDouble(&hasScaleMetaData);
 				if (hasScaleMetaData)
 				{
-					lasScale.z = cloud->getMetaData(LAS_SCALE_Z_META_DATA).toDouble(&hasScaleMetaData);
+					originalLasScale.z = cloud->getMetaData(LAS_SCALE_Z_META_DATA).toDouble(&hasScaleMetaData);
 				}
 			}
 
@@ -385,9 +385,25 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 				if (ccGlobalShiftManager::NeedShift(bbMax - lasOffset))
 				{
 					ccLog::Warning("[LAS] The former LAS_OFFSET doesn't seem to be optimal. Using the minimum bounding-box corner instead.");
-					lasOffset.x = bbMin.x;
-					lasOffset.y = bbMin.y;
-					lasOffset.z = 0;
+					CCVector3d globaShift = cloud->getGlobalShift(); //'global shift' is the opposite of LAS offset ;)
+
+					if (ccGlobalShiftManager::NeedShift(bbMax + globaShift))
+					{
+						ccLog::Warning("[LAS] Using the minimum bounding-box corner instead.");
+						lasOffset.x = bbMin.x;
+						lasOffset.y = bbMin.y;
+						lasOffset.z = 0;
+						isShifted = false; //let's not use the current shift (but the bbox min corner)
+					}
+					else
+					{
+						ccLog::Warning("[LAS] Using the Global Shift instead.");
+						lasOffset = -globaShift;
+					}
+				}
+				else
+				{
+					isShifted = false; //let's not use the current shift (but the LAS offset)
 				}
 			}
 
@@ -410,9 +426,9 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 			if (hasScaleMetaData)
 			{
 				//we may not be able to use the previous LAS scale
-				canUseOriginalScale = (		lasScale.x >= optimalScale.x
-										&&	lasScale.y >= optimalScale.y
-										&&	lasScale.z >= optimalScale.z );
+				canUseOriginalScale = (		originalLasScale.x >= optimalScale.x
+										&&	originalLasScale.y >= optimalScale.y
+										&&	originalLasScale.z >= optimalScale.z );
 			}
 
 			//uniformize the value to make it less disturbing to some lastools users ;)
@@ -422,6 +438,8 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 				maxScale = pow(10.0, n);
 				optimalScale.x = optimalScale.y = optimalScale.z = maxScale;
 			}
+
+			CCVector3d lasScale = (canUseOriginalScale ? originalLasScale : optimalScale);
 
 			if (parameters.alwaysDisplaySaveDialog)
 			{
@@ -434,12 +452,13 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 
 				if (hasScaleMetaData)
 				{
-					QString text = QString("(%1, %2, %3)").arg(lasScale.x).arg(lasScale.y).arg(lasScale.z);
+					s_saveDlg->origAccuracyLabel->setText(QString("(%1, %2, %3)").arg(originalLasScale.x).arg(originalLasScale.y).arg(originalLasScale.z));
+
 					if (!canUseOriginalScale)
 					{
-						text += "[too small]";
+						s_saveDlg->labelOriginal->setText(QObject::tr("Original scale is too small for this cloud  ")); //add two whitespaces to avoid issues with italic characters justification
+						s_saveDlg->labelOriginal->setStyleSheet("color: red;");
 					}
-					s_saveDlg->origAccuracyLabel->setText(text);
 				}
 				else
 				{
@@ -465,15 +484,15 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 				{
 					lasScale = optimalScale;
 				}
+				else if (s_saveDlg->origRadioButton->isChecked())
+				{
+					lasScale = originalLasScale;
+				}
 				else if (s_saveDlg->customRadioButton->isChecked())
 				{
 					double s = s_saveDlg->customScaleDoubleSpinBox->value();
 					lasScale = CCVector3d(s, s, s);
 				}
-				//else
-				//{
-				//	lasScale = lasScale;
-				//}
 
 				size_t evlrIndex = 0;
 				for (size_t i = 0; i < extraFieldsToSave.size(); ++i)
@@ -669,29 +688,29 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 					assert(false);
 					break;
 				case LAS_INTENSITY:
-					laspoint.set_intensity(static_cast<U16>(it->sf->getValue(i)));
+					laspoint.set_intensity(static_cast<U16>(it->getSafeValue(i)));
 					break;
 				case LAS_RETURN_NUMBER:
-					laspoint.set_return_number(static_cast<U8>(it->sf->getValue(i)));
+					laspoint.set_return_number(static_cast<U8>(it->getSafeValue(i)));
 					break;
 				case LAS_NUMBER_OF_RETURNS:
-					laspoint.set_number_of_returns(static_cast<U8>(it->sf->getValue(i)));
+					laspoint.set_number_of_returns(static_cast<U8>(it->getSafeValue(i)));
 					break;
 				case LAS_SCAN_DIRECTION:
-					laspoint.set_scan_direction_flag(static_cast<U8>(it->sf->getValue(i)));
+					laspoint.set_scan_direction_flag(static_cast<U8>(it->getSafeValue(i)));
 					break;
 				case LAS_FLIGHT_LINE_EDGE:
-					laspoint.set_edge_of_flight_line(static_cast<U8>(it->sf->getValue(i)));
+					laspoint.set_edge_of_flight_line(static_cast<U8>(it->getSafeValue(i)));
 					break;
 				case LAS_CLASSIFICATION:
 					if (pointFormatSixOrAbove)
 					{
-						laspoint.set_extended_classification(static_cast<U8>(it->sf->getValue(i)));
+						laspoint.set_extended_classification(static_cast<U8>(it->getSafeValue(i)));
 					}
 					else
 					{
 						//we have to decompose the field so that LASlib handles it properly
-						U8 classif = static_cast<U8>(it->sf->getValue(i));
+						U8 classif = static_cast<U8>(it->getSafeValue(i));
 						laspoint.set_classification(classif & 31);
 						laspoint.set_synthetic_flag(classif & 32);
 						laspoint.set_keypoint_flag(classif & 64);
@@ -699,13 +718,13 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 					}
 					break;
 				case LAS_SCAN_ANGLE_RANK:
-					laspoint.set_scan_angle_rank(static_cast<U8>(it->sf->getValue(i)));
+					laspoint.set_scan_angle_rank(static_cast<U8>(it->getSafeValue(i)));
 					break;
 				case LAS_USER_DATA:
-					laspoint.set_user_data(static_cast<U8>(it->sf->getValue(i)));
+					laspoint.set_user_data(static_cast<U8>(it->getSafeValue(i)));
 					break;
 				case LAS_POINT_SOURCE_ID:
-					laspoint.set_point_source_ID(static_cast<U16>(it->sf->getValue(i)));
+					laspoint.set_point_source_ID(static_cast<U16>(it->getSafeValue(i)));
 					break;
 				case LAS_RED:
 				case LAS_GREEN:
@@ -713,32 +732,32 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 					assert(false);
 					break;
 				case LAS_TIME:
-					laspoint.set_gps_time(static_cast<F64>(it->sf->getValue(i)) + it->sf->getGlobalShift());
+					laspoint.set_gps_time(it->getSafeValue(i) + it->sf->getGlobalShift());
 					break;
 				case LAS_CLASSIF_VALUE:
 					if (pointFormatSixOrAbove)
 					{
-						laspoint.set_extended_classification(static_cast<U8>(it->sf->getValue(i))); //8 bits
+						laspoint.set_extended_classification(static_cast<U8>(it->getSafeValue(i))); //8 bits
 					}
 					else
 					{
-						laspoint.set_classification(static_cast<U8>(it->sf->getValue(i)) & 31); //5 first bits
+						laspoint.set_classification(static_cast<U8>(it->getSafeValue(i)) & 31); //5 first bits
 					}
 					break;
 				case LAS_CLASSIF_SYNTHETIC:
-					if (it->sf->getValue(i) != 0)
+					if (it->getSafeValue(i) != 0)
 						laspoint.set_synthetic_flag(1);
 					break;
 				case LAS_CLASSIF_KEYPOINT:
-					if (it->sf->getValue(i) != 0)
+					if (it->getSafeValue(i) != 0)
 						laspoint.set_keypoint_flag(1);
 					break;
 				case LAS_CLASSIF_WITHHELD:
-					if (it->sf->getValue(i) != 0)
+					if (it->getSafeValue(i) != 0)
 						laspoint.set_withheld_flag(1);
 					break;
 				case LAS_CLASSIF_OVERLAP:
-					if (it->sf->getValue(i) != 0)
+					if (it->getSafeValue(i) != 0)
 						laspoint.set_extended_overlap_flag(1);
 					break;
 				case LAS_INVALID:
@@ -789,7 +808,7 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 			//extra fields
 			for (const ExtraLasField& f : extraFieldsToSave)
 			{
-				ScalarType s = f.sf->getValue(i);
+				double s = f.getSafeValue(i);
 				if (f.isShifted)
 				{
 					double sd = s + f.sf->getGlobalShift();
@@ -1086,7 +1105,7 @@ CC_FILE_ERROR LASFWFFilter::loadFile(const QString& filename, ccHObject& contain
 		}
 
 		CCVector3d lasScale = CCVector3d(lasreader.header.x_scale_factor, lasreader.header.y_scale_factor, lasreader.header.z_scale_factor);
-		CCVector3d lasShift = -CCVector3d(lasreader.header.x_offset, lasreader.header.y_offset, lasreader.header.z_offset);
+		CCVector3d lasOffset = CCVector3d(lasreader.header.x_offset, lasreader.header.y_offset, lasreader.header.z_offset);
 
 		cloud->setMetaData(LAS_SCALE_X_META_DATA, QVariant(lasScale.x));
 		cloud->setMetaData(LAS_SCALE_Y_META_DATA, QVariant(lasScale.y));
@@ -1142,20 +1161,23 @@ CC_FILE_ERROR LASFWFFilter::loadFile(const QString& filename, ccHObject& contain
 			{
 				//backup input global parameters
 				ccGlobalShiftManager::Mode csModeBackup = parameters.shiftHandlingMode;
-				bool useLasShift = false;
-				//set the LAS shift as default shift (if none was provided)
-				if (lasShift.norm2() != 0 && ((nullptr == parameters._coordinatesShiftEnabled) || (false == *parameters._coordinatesShiftEnabled)))
+				bool useLasOffset = false;
+				//set the lasOffset as default if none was provided
+				if (lasOffset.norm2() != 0 && ((nullptr == parameters._coordinatesShiftEnabled) || (false == *parameters._coordinatesShiftEnabled)))
 				{
-					useLasShift = true;
-					Pshift = lasShift;
-					if (	csModeBackup != ccGlobalShiftManager::NO_DIALOG
-						&&	csModeBackup != ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT)
+					if (csModeBackup != ccGlobalShiftManager::NO_DIALOG) //No dialog, practically means that we don't want any shift!
 					{
-						parameters.shiftHandlingMode = ccGlobalShiftManager::ALWAYS_DISPLAY_DIALOG;
+						useLasOffset = true;
+						Pshift = -lasOffset;
+						if (csModeBackup != ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT)
+						{
+							parameters.shiftHandlingMode = ccGlobalShiftManager::ALWAYS_DISPLAY_DIALOG;
+						}
 					}
 				}
+
 				bool preserveCoordinateShift = true;
-				if (HandleGlobalShift(P, Pshift, preserveCoordinateShift, parameters, useLasShift))
+				if (HandleGlobalShift(P, Pshift, preserveCoordinateShift, parameters, useLasOffset))
 				{
 					if (preserveCoordinateShift)
 					{

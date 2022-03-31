@@ -68,7 +68,7 @@ bool cc2Point5DimEditor::showGridBoxEditor()
 		
 		if (m_bbEditorDlg->exec())
 		{
-			gridIsUpToDate(false);
+			gridIsUpToDate(false); // will call updateGridInfo
 			return true;
 		}
 	}
@@ -145,7 +145,7 @@ QString cc2Point5DimEditor::getGridSizeAsString() const
 		return QObject::tr("invalid grid box");
 	}
 
-	return QString("%1 x %2").arg(gridWidth).arg(gridHeight);
+	return QString("%1 x %2 (%3 cells)").arg(gridWidth).arg(gridHeight).arg(QLocale::system().toString(gridWidth * gridHeight));
 }
 
 ccBBox cc2Point5DimEditor::getCustomBBox() const

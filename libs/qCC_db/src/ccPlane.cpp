@@ -215,7 +215,7 @@ bool ccPlane::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDM
 ccBBox ccPlane::getOwnFitBB(ccGLMatrix& trans)
 {
 	trans = m_transformation;
-	return ccBBox(CCVector3(-m_xWidth / 2, -m_yWidth / 2, 0), CCVector3(m_xWidth / 2, m_yWidth / 2, 0));
+	return ccBBox(CCVector3(-m_xWidth / 2, -m_yWidth / 2, 0), CCVector3(m_xWidth / 2, m_yWidth / 2, 0), true);
 }
 
 ccMaterial::Shared ccPlane::setAsTexture(QImage image, QString imageFilename/*=QString()*/)

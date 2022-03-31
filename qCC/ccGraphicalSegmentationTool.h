@@ -96,8 +96,10 @@ protected:
 	void closePolyLine(int x = 0, int y = 0); //arguments for compatibility with ccGlWindow::rightButtonClicked signal
 	void closeRectangle();
 	void updatePolyLine(int x, int y, Qt::MouseButtons buttons);
+	void run();
+	void stopRunning();
 	void pauseSegmentationMode(bool);
-    void setClassificationValue();
+	void setClassificationValue();
 	void doSetPolylineSelection();
 	void doSetRectangularSelection();
 	void doActionUseExistingPolyline();

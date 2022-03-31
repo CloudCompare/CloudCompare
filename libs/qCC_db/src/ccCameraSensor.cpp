@@ -53,8 +53,8 @@ void ccCameraSensor::IntrinsicParameters::GetKinectDefaults(IntrinsicParameters&
 	//default Kinect parameters from:
 	// "Accuracy and Resolution of Kinect Depth Data for Indoor Mapping Applications"
 	// Kourosh Khoshelham and Sander Oude Elberink
-	constexpr float focal_mm		= static_cast<float>(5.45 * 1.0e-3);	// focal length (real distance in meter)
-	constexpr float pixelSize_mm	= static_cast<float>(9.3 * 1.0e-6);		// pixel size (real distance in meter)
+	constexpr float focal_mm		= static_cast<float>(5.45e-3);	// focal length (real distance in meter)
+	constexpr float pixelSize_mm	= static_cast<float>(9.3e-6);		// pixel size (real distance in meter)
 	
 	params.vertFocal_pix      = ConvertFocalMMToPix(focal_mm, pixelSize_mm);
 	params.pixelSize_mm[0]    = pixelSize_mm;
@@ -314,7 +314,7 @@ ccBBox ccCameraSensor::getOwnFitBB(ccGLMatrix& trans)
 	trans = sensorPos;
 
 	CCVector3 upperLeftPoint = computeUpperLeftPoint();
-	return ccBBox(-upperLeftPoint, CCVector3(upperLeftPoint.x, upperLeftPoint.y, 0));
+	return ccBBox(-upperLeftPoint, CCVector3(upperLeftPoint.x, upperLeftPoint.y, 0), true);
 }
 
 void ccCameraSensor::setVertFocal_pix(float vertFocal_pix)

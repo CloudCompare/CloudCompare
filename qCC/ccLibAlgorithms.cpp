@@ -639,7 +639,7 @@ namespace ccLibAlgorithms
 		pDlg.start();
 		QApplication::processEvents();
 		
-		for (unsigned i=0; i<count; ++i)
+		for (unsigned i = 0; i < count; ++i)
 		{
 			ccHObject* ent = entities[i];
 			//try to get the underlying cloud (or the vertices set for a mesh)
@@ -674,7 +674,7 @@ namespace ccLibAlgorithms
 							const CCVector3* O = Yk.getGravityCenter();
 							double minX = 0;
 							double maxX = 0;
-							for (unsigned j=0; j<cloud->size(); ++j)
+							for (unsigned j = 0; j < cloud->size(); ++j)
 							{
 								double x = (*cloud->getPoint(j) - *O).dot(*X);
 								if (j != 0)
@@ -708,7 +708,7 @@ namespace ccLibAlgorithms
 							parameters.filterOutFarthestPoints	= false;
 							parameters.samplingLimit			= 50000;
 							parameters.finalOverlapRatio		= icpFinalOverlap / 100.0;
-							parameters.transformationFilters	= 0; //CCCoreLib::RegistrationTools::SKIP_ROTATION
+							parameters.transformationFilters	= CCCoreLib::RegistrationTools::SKIP_NONE;
 							parameters.maxThreadCount			= 0;
 							parameters.useC2MSignedDistances	= false;
 							parameters.normalsMatching			= CCCoreLib::ICPRegistrationTools::NO_NORMAL;

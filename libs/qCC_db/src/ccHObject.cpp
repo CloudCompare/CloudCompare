@@ -541,7 +541,7 @@ ccHObject::GlobalBoundingBox ccHObject::getOwnGlobalBB(bool withGLFeatures/*=fal
 {
 	//by default this method returns the local bounding-box!
 	ccBBox box = getOwnBB(false);
-	return GlobalBoundingBox(box.minCorner(), box.maxCorner());
+	return GlobalBoundingBox(box.minCorner(), box.maxCorner(), box.isValid());
 }
 
 bool ccHObject::getOwnGlobalBB(CCVector3d& minCorner, CCVector3d& maxCorner)

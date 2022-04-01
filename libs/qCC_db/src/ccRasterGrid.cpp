@@ -385,13 +385,14 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 				}
 				//Extract min/max value
 				aCell.minHeight = cellPointHeight.front();
-				aCell.maxHeight = cellPointHeight.back();
+				aCell.maxHeight = cellPointHeight[aCell.nbPoints-1];
 				//Calculate average value
 				aCell.avgHeight = std::accumulate(cellPointHeight.begin(), cellPointHeightEnd, 0.0) / aCell.nbPoints;
 				//Calculate std dev
 				double cellVariance = 0.0;
-				for (double h : cellPointHeight)
+				for (unsigned n = 0; n < aCell.nbPoints ;n++)
 				{
+					double h = cellPointHeight[n];
 					cellVariance += h*h;
 				}
 				cellVariance /= aCell.nbPoints;
@@ -414,7 +415,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 					break;
 				case PROJ_MAXIMUM_VALUE:
 					aCell.h = aCell.maxHeight;
-					aCell.pointIndex = cellPointIndexedHeight.back().index;
+					aCell.pointIndex = cellPointIndexedHeight[aCell.nbPoints-1].index;
 					break;
 				default:
 					assert(false);
@@ -515,7 +516,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 								}
 								break;
 							case PROJ_MAXIMUM_VALUE:
-								scalarFields[k][pos] = cellPointSF.back(); 
+								scalarFields[k][pos] = cellPointSF[validPoints-1]; 
 								break;
 							default:
 								assert(false);

@@ -1,6 +1,15 @@
 CloudCompare Version History
 ============================
 
+v2.13 (?) - (??/??/????)
+----------------------
+- Improvements
+	- ICP registration:
+		- new option to prevent all rotations in the 'Research' tab ('None' option of the Rotation combo-box), to be consistent with the command line version
+
+- Bug fixes:
+	- The '-ICP -ROT NONE' command line option was not working as expected
+
 v2.12 (Kyiv) - (30/03/2022)
 ----------------------
 - New tools:

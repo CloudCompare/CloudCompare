@@ -4726,7 +4726,7 @@ bool CommandICP::process(ccCommandLineInterface &cmd)
 	int modelSFAsWeights = -1;
 	int dataSFAsWeights = -1;
 	int maxThreadCount = 0;
-	int transformationFilters = 0;
+	int transformationFilters = CCCoreLib::RegistrationTools::SKIP_NONE;
 	
 	while (!cmd.arguments().empty())
 	{
@@ -4891,23 +4891,23 @@ bool CommandICP::process(ccCommandLineInterface &cmd)
 				QString rotation = cmd.arguments().takeFirst().toUpper();
 				if (rotation == "XYZ")
 				{
-					transformationFilters = 0;
+					transformationFilters = CCCoreLib::RegistrationTools::SKIP_NONE;
 				}
 				else if (rotation == "X")
 				{
-					transformationFilters = 2;
+					transformationFilters = CCCoreLib::RegistrationTools::SKIP_RYZ;
 				}
 				else if (rotation == "Y")
 				{
-					transformationFilters = 4;
+					transformationFilters = CCCoreLib::RegistrationTools::SKIP_RXZ;
 				}
 				else if (rotation == "Z")
 				{
-					transformationFilters = 1;
+					transformationFilters = CCCoreLib::RegistrationTools::SKIP_RXY;
 				}
 				else if (rotation == "NONE")
 				{
-					transformationFilters = 7;
+					transformationFilters = CCCoreLib::RegistrationTools::SKIP_ROTATION;
 				}
 				else
 				{

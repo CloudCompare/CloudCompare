@@ -125,7 +125,6 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent)
 
 	if (m_cloud)
 	{
-		m_UI->cloudNameLabel->setText(QStringLiteral("<b>%1</b> (%2 points)").arg(m_cloud->getName(), QLocale::system().toString(m_cloud->size())));
 		if (m_cloud->hasScalarFields())
 		{
 			m_UI->interpolateSFCheckBox->setEnabled(true);
@@ -161,10 +160,8 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent)
 
 	loadSettings();
 
-	updateGridInfo();
+	gridIsUpToDate(false); // will call updateGridInfo
 
-	gridIsUpToDate(false);
-	
 	resize( minimumSize() );
 }
 
@@ -198,16 +195,29 @@ bool ccRasterizeTool::showGridBoxEditor()
 {
 	if (cc2Point5DimEditor::showGridBoxEditor())
 	{
-		updateGridInfo();
 		return true;
 	}
 
 	return false;
 }
 
-void ccRasterizeTool::updateGridInfo()
+void ccRasterizeTool::updateCloudName(bool withNonEmptyCells)
+{
+	QString str = QString("<b>%1</b> (%2 points").arg(m_cloud->getName(), QLocale::system().toString(m_cloud->size()));
+
+	if (withNonEmptyCells)
+		str += QString(" - %1 non-empty cells)").arg(QLocale::system().toString(m_grid.validCellCount));
+	else
+		str += ')';
+
+	m_UI->cloudNameLabel->setText(str);
+}
+
+void ccRasterizeTool::updateGridInfo(bool withNonEmptyCells/*=false*/)
 {
 	m_UI->gridWidthLabel->setText(getGridSizeAsString());
+	
+	updateCloudName(withNonEmptyCells);
 }
 
 double ccRasterizeTool::getGridStep() const
@@ -273,8 +283,7 @@ void ccRasterizeTool::sfProjectionTypeChanged(int index)
 
 void ccRasterizeTool::projectionDirChanged(int dir)
 {
-	updateGridInfo();
-	gridIsUpToDate(false);
+	gridIsUpToDate(false); // will call updateGridInfo
 }
 
 void ccRasterizeTool::activeLayerChanged(int layerIndex, bool autoRedraw/*=true*/)
@@ -550,6 +559,8 @@ void ccRasterizeTool::gridIsUpToDate(bool state)
 	m_UI->updateGridPushButton->setDisabled(state);
 
 	m_UI->tabWidget->setEnabled(state);
+
+	updateGridInfo(state);
 }
 
 ccPointCloud* ccRasterizeTool::convertGridToCloud(	const std::vector<ccRasterGrid::ExportableFields>& exportedFields,

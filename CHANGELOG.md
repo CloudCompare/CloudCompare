@@ -7,6 +7,10 @@ v2.13 (?) - (??/??/????)
 	- ICP registration:
 		- new option to prevent all rotations in the 'Research' tab ('None' option of the Rotation combo-box), to be consistent with the command line version
 
+	- Rasterize tool:
+		- the number of grid cells is now displayed (next to the grid size)
+		- the number of non-empty cells is now displayed (next to the cloud name and size)
+
 - Bug fixes:
 	- The '-ICP -ROT NONE' command line option was not working as expected
 

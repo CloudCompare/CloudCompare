@@ -125,16 +125,19 @@ private:
 	void gridOptionChanged();
 
 	//! Updates the gid info
-	void updateGridInfo();
+	void updateGridInfo(bool withNonEmptyCells = false);
 
 	//! Update the grid and the 2D display
 	void updateGridAndDisplay();
 
+	//! Update the cloud name (and non-empty cell number if required)
+	void updateCloudName(bool withNonEmptyCellNumber);
+
 	//! Exports the grid as an image
-	virtual void generateImage() const;
+	void generateImage() const;
 
 	//! Exports the grid as an ASCII matrix
-	virtual void generateASCIIMatrix() const;
+	void generateASCIIMatrix() const;
 
 private: //standard methods
 

@@ -1,4 +1,4 @@
-project( CloudCompare VERSION 2.12.0 )
+project( CloudCompare VERSION 2.12.1 )
 
 include( CMakePolicies NO_POLICY_SCOPE )
 

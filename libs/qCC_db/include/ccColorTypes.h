@@ -119,7 +119,7 @@ namespace ccColor
 
 	// Predefined colors (default type)
 	constexpr Rgb whiteRGB					(MAX, MAX, MAX);
-	constexpr Rgb lightGreyRGB				(static_cast<ColorCompType>(MAX*0.8), static_cast<ColorCompType>(MAX*0.8), static_cast<ColorCompType>(MAX*0.8));
+	constexpr Rgb lightGreyRGB				(static_cast<ColorCompType>(MAX*8/10), static_cast<ColorCompType>(MAX*8/10), static_cast<ColorCompType>(MAX*8/10));
 	constexpr Rgb darkGreyRGB				(MAX / 2, MAX / 2, MAX / 2);
 	constexpr Rgb redRGB					(MAX, 0, 0);
 	constexpr Rgb greenRGB					(0, MAX, 0);
@@ -133,7 +133,7 @@ namespace ccColor
 
 	// Predefined colors (default type)
 	constexpr Rgba white					(MAX, MAX, MAX, MAX);
-	constexpr Rgba lightGrey				(static_cast<ColorCompType>(MAX*0.8), static_cast<ColorCompType>(MAX*0.8), static_cast<ColorCompType>(MAX*0.8), MAX);
+	constexpr Rgba lightGrey				(static_cast<ColorCompType>(MAX*8/10), static_cast<ColorCompType>(MAX*8/10), static_cast<ColorCompType>(MAX*8/10), MAX);
 	constexpr Rgba darkGrey					(MAX / 2, MAX / 2, MAX / 2, MAX);
 	constexpr Rgba red						(MAX, 0, 0, MAX);
 	constexpr Rgba green					(0, MAX, 0, MAX);

@@ -89,5 +89,5 @@ ccHObject::GlobalBoundingBox ccShiftedObject::getOwnGlobalBB(bool withGLFeatures
 	ccBBox box = getOwnBB(false);
 	CCVector3d minCorner = toGlobal3d(box.minCorner());
 	CCVector3d maxCorner = toGlobal3d(box.maxCorner());
-	return GlobalBoundingBox(minCorner, maxCorner);
+	return GlobalBoundingBox(minCorner, maxCorner, box.isValid());
 }

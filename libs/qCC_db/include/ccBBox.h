@@ -35,7 +35,7 @@ public:
 	//! Default constructor
 	ccBBox() : CCCoreLib::BoundingBox() {}
 	//! Constructor from two vectors (lower min. and upper max. corners)
-	ccBBox(const CCVector3& bbMinCorner, const CCVector3& bbMaxCorner) : CCCoreLib::BoundingBox(bbMinCorner, bbMaxCorner) {}
+	ccBBox(const CCVector3& bbMinCorner, const CCVector3& bbMaxCorner, bool valid) : CCCoreLib::BoundingBox(bbMinCorner, bbMaxCorner, valid) {}
 	//! Constructor from two vectors (lower min. and upper max. corners)
 	ccBBox(const CCCoreLib::BoundingBox& bbox) : CCCoreLib::BoundingBox(bbox) {}
 

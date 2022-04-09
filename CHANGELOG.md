@@ -13,6 +13,7 @@ v2.13 (?) - (??/??/????)
 
 - Bug fixes:
 	- The '-ICP -ROT NONE' command line option was not working as expected
+	- When saving in a Shapefile the polyline exported from the Interactive Segmentation tool, an invalid global bounding-box was computed and saved by CC.
 
 v2.12 (Kyiv) - (30/03/2022)
 ----------------------

@@ -3299,7 +3299,7 @@ bool CommandCrop::process(ccCommandLineInterface &cmd)
 		}
 	}
 	
-	ccBBox cropBox(boxMin, boxMax);
+	ccBBox cropBox(boxMin, boxMax, true);
 	//crop clouds
 	{
 		for (size_t i = 0; i < cmd.clouds().size(); ++i)

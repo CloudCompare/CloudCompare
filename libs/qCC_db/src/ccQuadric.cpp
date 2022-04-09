@@ -324,5 +324,5 @@ bool ccQuadric::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 ccBBox ccQuadric::getOwnFitBB(ccGLMatrix& trans)
 {
 	trans = m_transformation;
-	return ccBBox(CCVector3(m_minCorner.x, m_minCorner.y, m_minZ), CCVector3(m_maxCorner.x, m_maxCorner.y, m_maxZ));
+	return ccBBox(CCVector3(m_minCorner.x, m_minCorner.y, m_minZ), CCVector3(m_maxCorner.x, m_maxCorner.y, m_maxZ), true);
 }

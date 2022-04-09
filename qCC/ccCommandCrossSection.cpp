@@ -317,7 +317,7 @@ bool CommandCrossSection::process(ccCommandLineInterface &cmd)
 						for (unsigned dz = 0; dz < steps[2]; ++dz)
 						{
 							CCVector3 C = C0 + CCVector3(dx*repeatStep.x, dy*repeatStep.y, dz*repeatStep.z);
-							ccBBox cropBox(C - boxThickness / 2, C + boxThickness / 2);
+							ccBBox cropBox(C - boxThickness / 2, C + boxThickness / 2, true);
 							cmd.print(QString("Box (%1;%2;%3) --> (%4;%5;%6)")
 							          .arg(cropBox.minCorner().x).arg(cropBox.minCorner().y).arg(cropBox.minCorner().z)
 							          .arg(cropBox.maxCorner().x).arg(cropBox.maxCorner().y).arg(cropBox.maxCorner().z)

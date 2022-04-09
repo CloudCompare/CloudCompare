@@ -2272,9 +2272,11 @@ namespace ccEntityAction
 				{
 					double cellSize = coDlg.getMinCellSize();
 					PointCoordinateType halfBoxWidth = static_cast<PointCoordinateType>(cellSize * (1 << ccOctree::MAX_OCTREE_LEVEL) / 2.0);
-					CCVector3 C = cloud->getOwnBB().getCenter();
+					ccBBox bbBox = cloud->getOwnBB();
+					CCVector3 C = bbBox.getCenter();
 					bbox = ccBBox(	C - CCVector3(halfBoxWidth, halfBoxWidth, halfBoxWidth),
-									C + CCVector3(halfBoxWidth, halfBoxWidth, halfBoxWidth));
+									C + CCVector3(halfBoxWidth, halfBoxWidth, halfBoxWidth),
+									bbBox.isValid() );
 				}
 				cloud->deleteOctree();
 				octree = ccOctree::Shared(new ccOctree(cloud));

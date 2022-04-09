@@ -326,27 +326,31 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	}
 
 	//let the user choose between the original scale and the 'optimal' one (for accuracy, not for compression ;)
-	bool hasScaleMetaData = false;
 	CCVector3d originalLasScale(0, 0, 0);
-	originalLasScale.x = theCloud->getMetaData(LAS_SCALE_X_META_DATA).toDouble(&hasScaleMetaData);
-	if (hasScaleMetaData)
+	bool hasScaleMetaData = false;
 	{
-		originalLasScale.y = theCloud->getMetaData(LAS_SCALE_Y_META_DATA).toDouble(&hasScaleMetaData);
+		originalLasScale.x = theCloud->getMetaData(LAS_SCALE_X_META_DATA).toDouble(&hasScaleMetaData);
 		if (hasScaleMetaData)
 		{
-			originalLasScale.z = theCloud->getMetaData(LAS_SCALE_Z_META_DATA).toDouble(&hasScaleMetaData);
+			originalLasScale.y = theCloud->getMetaData(LAS_SCALE_Y_META_DATA).toDouble(&hasScaleMetaData);
+			if (hasScaleMetaData)
+			{
+				originalLasScale.z = theCloud->getMetaData(LAS_SCALE_Z_META_DATA).toDouble(&hasScaleMetaData);
+			}
 		}
 	}
 
-	bool hasOffsetMetaData = false;
 	CCVector3d lasOffset(0, 0, 0);
-	lasOffset.x = theCloud->getMetaData(LAS_OFFSET_X_META_DATA).toDouble(&hasOffsetMetaData);
-	if (hasOffsetMetaData)
+	bool hasOffsetMetaData = false;
 	{
-		lasOffset.y = theCloud->getMetaData(LAS_OFFSET_Y_META_DATA).toDouble(&hasOffsetMetaData);
+		lasOffset.x = theCloud->getMetaData(LAS_OFFSET_X_META_DATA).toDouble(&hasOffsetMetaData);
 		if (hasOffsetMetaData)
 		{
-			lasOffset.z = theCloud->getMetaData(LAS_OFFSET_Z_META_DATA).toDouble(&hasOffsetMetaData);
+			lasOffset.y = theCloud->getMetaData(LAS_OFFSET_Y_META_DATA).toDouble(&hasOffsetMetaData);
+			if (hasOffsetMetaData)
+			{
+				lasOffset.z = theCloud->getMetaData(LAS_OFFSET_Z_META_DATA).toDouble(&hasOffsetMetaData);
+			}
 		}
 	}
 
@@ -376,9 +380,20 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		if (ccGlobalShiftManager::NeedShift(bbMax - lasOffset))
 		{
 			ccLog::Warning("[LAS] The former LAS_OFFSET doesn't seem to be optimal. Using the minimum bounding-box corner instead.");
-			lasOffset.x = bbMin.x;
-			lasOffset.y = bbMin.y;
-			lasOffset.z = 0;
+			CCVector3d globaShift = theCloud->getGlobalShift(); //'global shift' is the opposite of LAS offset ;)
+
+			if (ccGlobalShiftManager::NeedShift(bbMax + globaShift))
+			{
+				ccLog::Warning("[LAS] Using the minimum bounding-box corner instead.");
+				lasOffset.x = bbMin.x;
+				lasOffset.y = bbMin.y;
+				lasOffset.z = 0;
+			}
+			else
+			{
+				ccLog::Warning("[LAS] Using the previous Global Shift instead.");
+				lasOffset = -globaShift;
+			}
 		}
 	}
 

@@ -1164,7 +1164,12 @@ bool ccGLWindow::event(QEvent* evt)
 		evt->accept();
 	}
 	return true;
-
+#else
+	case QEvent::Resize:
+	{
+		update();
+	}
+	break;
 #endif
 
 	default:

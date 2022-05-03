@@ -223,7 +223,7 @@ bool ccPointPairRegistrationDlg::linkWith(ccGLWindow* win)
 
 	if (m_associatedWin)
 	{
-		if (!m_pickingHub->addListener(this, true))
+		if (!m_pickingHub->addListener(this, true, true, ccGLWindow::POINT_OR_TRIANGLE_OR_LABEL_PICKING))
 		{
 			ccLog::Error("Picking mechanism is already in use! Close the other tool first, and then restart this one.");
 			return false;

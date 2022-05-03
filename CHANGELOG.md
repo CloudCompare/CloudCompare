@@ -1,7 +1,7 @@
 CloudCompare Version History
 ============================
 
-v2.13 (?) - (??/??/????)
+v2.12.1 (Kyiv) - (??/??/????)
 ----------------------
 - Improvements
 	- ICP registration:
@@ -14,8 +14,9 @@ v2.13 (?) - (??/??/????)
 - Bug fixes:
 	- The '-ICP -ROT NONE' command line option was not working as expected
 	- When saving in a Shapefile the polyline exported from the Interactive Segmentation tool, an invalid global bounding-box was computed and saved by CC.
+	- Label markers were preventing the user from picking the points below (in the Point picking tool as well as other tools)
 
-v2.12 (Kyiv) - (30/03/2022)
+v2.12.0 (Kyiv) - (30/03/2022)
 ----------------------
 - New tools:
 	- Menu 'Edit > Cloud'

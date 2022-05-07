@@ -13,6 +13,9 @@ v2.12.1 (Kyiv) - (??/??/????)
 
 	- Most of the progress dialogs of CloudCompare should not steal the focus anymore (when loard multiple files in the background for instance)
 
+	- Segmentation tool:
+		- the icons are now visually disabled (grayed out) while drawing a polyline. Keyboard shortcuts are still working.
+
 - Bug fixes:
 	- The '-ICP -ROT NONE' command line option was not working as expected
 	- When saving in a Shapefile the polyline exported from the Interactive Segmentation tool, an invalid global bounding-box was computed and saved by CC.

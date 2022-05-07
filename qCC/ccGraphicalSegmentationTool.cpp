@@ -141,32 +141,41 @@ ccGraphicalSegmentationTool::~ccGraphicalSegmentationTool()
 
 void ccGraphicalSegmentationTool::onShortcutTriggered(int key)
 {
- 	switch(key)
+ 	switch (key)
 	{
 	case Qt::Key_Space:
-		pauseButton->toggle();
+		// toggle pause mode
+		pauseSegmentationMode(!pauseButton->isChecked());
+		//pauseButton->toggle();
 		return;
 
 	case Qt::Key_I:
-		inButton->click();
+		segmentIn();
 		return;
 
 	case Qt::Key_O:
-		outButton->click();
+		segmentOut();
 		return;
 
 	case Qt::Key_C:
-		addClassToolButton->click();
+		setClassificationValue();
 		return;
 
 	case Qt::Key_Return:
-		validButton->click();
+		if (m_somethingHasChanged)
+			apply();
+		//validButton->click();
 		return;
+
 	case Qt::Key_Delete:
-		validAndDeleteButton->click();
+		if (m_somethingHasChanged)
+			applyAndDelete();
+		//validAndDeleteButton->click();
 		return;
+
 	case Qt::Key_Escape:
-		cancelButton->click();
+		cancel();
+		//cancelButton->click();
 		return;
 
 	case Qt::Key_Tab:
@@ -645,7 +654,9 @@ void ccGraphicalSegmentationTool::addPointToPolylineExt(int x, int y, bool allow
 	{
 		//reset state
 		m_state = (ctrlKeyPressed ? RECTANGLE : POLYLINE);
-		m_state |= (STARTED | RUNNING);
+		m_state |= STARTED;
+		run();
+
 		//reset polyline
 		m_polyVertices->clear();
 		if (!m_polyVertices->reserve(2))
@@ -692,7 +703,7 @@ void ccGraphicalSegmentationTool::addPointToPolylineExt(int x, int y, bool allow
 		else //we must change mode
 		{
 			assert(false); //we shouldn't fall here?!
-			m_state &= (~RUNNING);
+			stopRunning();
 			addPointToPolylineExt(x, y, allowClicksOutside);
 			return;
 		}
@@ -728,7 +739,7 @@ void ccGraphicalSegmentationTool::closeRectangle()
 	}
 
 	//stop
-	m_state &= (~RUNNING);
+	stopRunning();
 
 	if (m_associatedWin)
 	{
@@ -763,7 +774,7 @@ void ccGraphicalSegmentationTool::closePolyLine(int, int)
 	}
 
 	//stop
-	m_state &= (~RUNNING);
+	stopRunning();
 
 	//set the default import/export icon to 'export' mode
 	loadSaveToolButton->setDefaultAction(actionExportSegmentationPolyline);
@@ -941,6 +952,18 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 	}
 }
 
+void ccGraphicalSegmentationTool::run()
+{
+	m_state |= RUNNING;
+	buttonsFrame->setEnabled(false); // we disable the buttons when running
+}
+
+void ccGraphicalSegmentationTool::stopRunning()
+{
+	m_state &= (~RUNNING);
+	buttonsFrame->setEnabled(true); // we restore the buttons when running is stopped
+}
+
 void ccGraphicalSegmentationTool::pauseSegmentationMode(bool state)
 {
 	assert(m_polyVertices && m_segmentationPoly);
@@ -950,6 +973,7 @@ void ccGraphicalSegmentationTool::pauseSegmentationMode(bool state)
 
 	if (state/*=activate pause mode*/)
 	{
+		stopRunning();
 		m_state = PAUSED;
 		if (m_polyVertices->size() != 0)
 		{
@@ -1121,8 +1145,9 @@ void ccGraphicalSegmentationTool::doActionUseExistingPolyline()
 				m_segmentationPoly->setClosed(poly->isClosed());
 				if (m_segmentationPoly->isClosed())
 				{
-					//stop (but we can't all pauseSegmentationMode as it would remove the current polyline)
-					m_state &= (~RUNNING);
+					//stop (but we can't call pauseSegmentationMode as it would remove the current polyline)
+					stopRunning();
+
 					allowPolylineExport(m_segmentationPoly->size() > 1);
 				}
 				else if (vertices->size())
@@ -1133,7 +1158,8 @@ void ccGraphicalSegmentationTool::doActionUseExistingPolyline()
 					m_polyVertices->addPoint(*m_polyVertices->getPoint(lastIndex));
 					m_segmentationPoly->addPointIndex(lastIndex + 1);
 					m_segmentationPoly->setClosed(true);
-					m_state |= (POLYLINE | RUNNING);
+					m_state |= POLYLINE;
+					run();
 				}
 				
 				m_rectangularSelection = false;

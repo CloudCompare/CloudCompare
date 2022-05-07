@@ -1,7 +1,7 @@
 CloudCompare Version History
 ============================
 
-v2.12.1 (Kyiv) - (??/??/????)
+v2.12.1 (Kyiv) - (07/05/2022)
 ----------------------
 - Improvements
 	- ICP registration:

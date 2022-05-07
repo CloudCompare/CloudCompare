@@ -629,9 +629,8 @@ bool qM3C2Tools::GuessBestParams(	ccPointCloud* cloud1,
 			}
 		}
 
-		QProgressDialog pDlg("Please wait...", "Cancel", 0, 0);
+		QProgressDialog pDlg(QObject::tr("Please wait..."), "Cancel", 0, 0);
 		pDlg.setWindowTitle("M3C2");
-		//pDlg.setModal(true);
 		pDlg.show();
 		QApplication::processEvents();
 

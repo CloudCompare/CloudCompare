@@ -1041,7 +1041,7 @@ void qAnimationDlg::preview()
 	int frameCount = static_cast<int>(fps * remainingTime);
 
 	//show progress dialog
-	QProgressDialog progressDialog(QString("Frames: %1").arg(frameCount), "Cancel", 0, frameCount, this);
+	QProgressDialog progressDialog(tr("Frames: %1").arg(frameCount), "Cancel", 0, frameCount, this);
 	progressDialog.setWindowTitle("Preview");
 	progressDialog.show();
 	progressDialog.setModal(true);
@@ -1195,7 +1195,7 @@ void qAnimationDlg::render(bool asSeparateFrames)
 	assert(renderingMode == SUPER_RESOLUTION || renderingMode == ZOOM);
 
 	//show progress dialog
-	QProgressDialog progressDialog(QString("Frames: %1").arg(frameCount), "Cancel", 0, frameCount, this);
+	QProgressDialog progressDialog(tr("Frames: %1").arg(frameCount), "Cancel", 0, frameCount, this);
 	progressDialog.setWindowTitle("Render");
 	progressDialog.show();
 	QApplication::processEvents();

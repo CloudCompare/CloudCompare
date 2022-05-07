@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>307</width>
-    <height>27</height>
+    <width>310</width>
+    <height>24</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,200 +19,218 @@
   <property name="windowTitle">
    <string>Segmentation</string>
   </property>
-  <layout class="QHBoxLayout">
+  <layout class="QHBoxLayout" name="horizontalLayout_2">
    <property name="spacing">
-    <number>2</number>
+    <number>0</number>
    </property>
    <property name="leftMargin">
-    <number>2</number>
+    <number>0</number>
    </property>
    <property name="topMargin">
-    <number>2</number>
+    <number>0</number>
    </property>
    <property name="rightMargin">
-    <number>2</number>
+    <number>0</number>
    </property>
    <property name="bottomMargin">
-    <number>2</number>
+    <number>0</number>
    </property>
    <item>
-    <widget class="QToolButton" name="pauseButton">
-     <property name="toolTip">
-      <string>Pause segmentation (Space)</string>
+    <widget class="QFrame" name="buttonsFrame">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
      </property>
-     <property name="statusTip">
-      <string>Pause segmentation  (allow rotation/panning of 3D view)</string>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
      </property>
-     <property name="text">
-      <string>pause</string>
-     </property>
-     <property name="icon">
-      <iconset resource="../icons.qrc">
-       <normaloff>:/CC/images/smallPause.png</normaloff>:/CC/images/smallPause.png</iconset>
-     </property>
-     <property name="checkable">
-      <bool>true</bool>
-     </property>
-     <property name="checked">
-      <bool>false</bool>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QToolButton" name="loadSaveToolButton">
-     <property name="toolTip">
-      <string>Load / save segmentation polyline</string>
-     </property>
-     <property name="text">
-      <string>load/save segmentation polyline</string>
-     </property>
-     <property name="icon">
-      <iconset resource="../icons.qrc">
-       <normaloff>:/CC/images/dbPolylineSymbol.png</normaloff>:/CC/images/dbPolylineSymbol.png</iconset>
-     </property>
-     <property name="popupMode">
-      <enum>QToolButton::MenuButtonPopup</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QToolButton" name="selectionModelButton">
-     <property name="toolTip">
-      <string>Polyline selection mode (Tab)</string>
-     </property>
-     <property name="text">
-      <string>polyline selection</string>
-     </property>
-     <property name="icon">
-      <iconset resource="../icons.qrc">
-       <normaloff>:/CC/images/smallPolygonSelect.png</normaloff>:/CC/images/smallPolygonSelect.png</iconset>
-     </property>
-     <property name="popupMode">
-      <enum>QToolButton::MenuButtonPopup</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QToolButton" name="inButton">
-     <property name="toolTip">
-      <string>Segment In (I)</string>
-     </property>
-     <property name="statusTip">
-      <string>Segment (keep points inside)</string>
-     </property>
-     <property name="text">
-      <string>in</string>
-     </property>
-     <property name="icon">
-      <iconset resource="../icons.qrc">
-       <normaloff>:/CC/images/smallSegmentIn.png</normaloff>:/CC/images/smallSegmentIn.png</iconset>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QToolButton" name="outButton">
-     <property name="toolTip">
-      <string>Segment Out (O)</string>
-     </property>
-     <property name="statusTip">
-      <string>Segment (keep points outside)</string>
-     </property>
-     <property name="text">
-      <string>out</string>
-     </property>
-     <property name="icon">
-      <iconset resource="../icons.qrc">
-       <normaloff>:/CC/images/smallSegmentOut.png</normaloff>:/CC/images/smallSegmentOut.png</iconset>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QToolButton" name="addClassToolButton">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="toolTip">
-      <string>Set the class of points inside the polyline (C).
+     <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0,0,0,0,0,0,0">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QToolButton" name="pauseButton">
+        <property name="toolTip">
+         <string>Pause segmentation (Space)</string>
+        </property>
+        <property name="statusTip">
+         <string>Pause segmentation  (allow rotation/panning of 3D view)</string>
+        </property>
+        <property name="text">
+         <string>pause</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icons.qrc">
+          <normaloff>:/CC/images/smallPause.png</normaloff>:/CC/images/smallPause.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="loadSaveToolButton">
+        <property name="toolTip">
+         <string>Load / save segmentation polyline</string>
+        </property>
+        <property name="text">
+         <string>load/save segmentation polyline</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icons.qrc">
+          <normaloff>:/CC/images/dbPolylineSymbol.png</normaloff>:/CC/images/dbPolylineSymbol.png</iconset>
+        </property>
+        <property name="popupMode">
+         <enum>QToolButton::MenuButtonPopup</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="selectionModelButton">
+        <property name="toolTip">
+         <string>Polyline selection mode (Tab)</string>
+        </property>
+        <property name="text">
+         <string>polyline selection</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icons.qrc">
+          <normaloff>:/CC/images/smallPolygonSelect.png</normaloff>:/CC/images/smallPolygonSelect.png</iconset>
+        </property>
+        <property name="popupMode">
+         <enum>QToolButton::MenuButtonPopup</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="inButton">
+        <property name="toolTip">
+         <string>Segment In (I)</string>
+        </property>
+        <property name="statusTip">
+         <string>Segment (keep points inside)</string>
+        </property>
+        <property name="text">
+         <string>in</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icons.qrc">
+          <normaloff>:/CC/images/smallSegmentIn.png</normaloff>:/CC/images/smallSegmentIn.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="outButton">
+        <property name="toolTip">
+         <string>Segment Out (O)</string>
+        </property>
+        <property name="statusTip">
+         <string>Segment (keep points outside)</string>
+        </property>
+        <property name="text">
+         <string>out</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icons.qrc">
+          <normaloff>:/CC/images/smallSegmentOut.png</normaloff>:/CC/images/smallSegmentOut.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="addClassToolButton">
+        <property name="toolTip">
+         <string>Set the class of points inside the polyline (C).
 The classification SF will be directly updated (and created if needed).</string>
-     </property>
-     <property name="statusTip">
-      <string>Set the class of points inside the polyline (C)</string>
-     </property>
-     <property name="icon">
-      <iconset resource="../icons.qrc">
-       <normaloff>:/CC/images/hashtag.png</normaloff>:/CC/images/hashtag.png</iconset>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QToolButton" name="razButton">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="toolTip">
-      <string>Clear segmentation</string>
-     </property>
-     <property name="statusTip">
-      <string>Clear segmentation</string>
-     </property>
-     <property name="text">
-      <string>raz</string>
-     </property>
-     <property name="icon">
-      <iconset resource="../icons.qrc">
-       <normaloff>:/CC/images/smallReset.png</normaloff>:/CC/images/smallReset.png</iconset>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QToolButton" name="validButton">
-     <property name="toolTip">
-      <string>Confirm segmentation (Enter)</string>
-     </property>
-     <property name="statusTip">
-      <string>Confirm segmentation</string>
-     </property>
-     <property name="text">
-      <string>OK</string>
-     </property>
-     <property name="icon">
-      <iconset resource="../icons.qrc">
-       <normaloff>:/CC/images/smallValidate.png</normaloff>:/CC/images/smallValidate.png</iconset>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QToolButton" name="validAndDeleteButton">
-     <property name="toolTip">
-      <string>Confirm and delete hidden points (Del)</string>
-     </property>
-     <property name="statusTip">
-      <string>Confirm and delete hidden points</string>
-     </property>
-     <property name="icon">
-      <iconset resource="../icons.qrc">
-       <normaloff>:/CC/images/smallTrash.png</normaloff>:/CC/images/smallTrash.png</iconset>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QToolButton" name="cancelButton">
-     <property name="toolTip">
-      <string>Cancel (Esc)</string>
-     </property>
-     <property name="statusTip">
-      <string>Cancel segentation</string>
-     </property>
-     <property name="text">
-      <string>Cancel</string>
-     </property>
-     <property name="icon">
-      <iconset resource="../icons.qrc">
-       <normaloff>:/CC/images/smallCancel.png</normaloff>:/CC/images/smallCancel.png</iconset>
-     </property>
+        </property>
+        <property name="statusTip">
+         <string>Set the class of points inside the polyline (C)</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icons.qrc">
+          <normaloff>:/CC/images/hashtag.png</normaloff>:/CC/images/hashtag.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="razButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="toolTip">
+         <string>Clear segmentation</string>
+        </property>
+        <property name="statusTip">
+         <string>Clear segmentation</string>
+        </property>
+        <property name="text">
+         <string>raz</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icons.qrc">
+          <normaloff>:/CC/images/smallReset.png</normaloff>:/CC/images/smallReset.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="validButton">
+        <property name="toolTip">
+         <string>Confirm segmentation (Enter)</string>
+        </property>
+        <property name="statusTip">
+         <string>Confirm segmentation</string>
+        </property>
+        <property name="text">
+         <string>OK</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icons.qrc">
+          <normaloff>:/CC/images/smallValidate.png</normaloff>:/CC/images/smallValidate.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="validAndDeleteButton">
+        <property name="toolTip">
+         <string>Confirm and delete hidden points (Del)</string>
+        </property>
+        <property name="statusTip">
+         <string>Confirm and delete hidden points</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icons.qrc">
+          <normaloff>:/CC/images/smallTrash.png</normaloff>:/CC/images/smallTrash.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="cancelButton">
+        <property name="toolTip">
+         <string>Cancel (Esc)</string>
+        </property>
+        <property name="statusTip">
+         <string>Cancel segentation</string>
+        </property>
+        <property name="text">
+         <string>Cancel</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icons.qrc">
+          <normaloff>:/CC/images/smallCancel.png</normaloff>:/CC/images/smallCancel.png</iconset>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
   </layout>

@@ -669,29 +669,29 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 					assert(false);
 					break;
 				case LAS_INTENSITY:
-					laspoint.set_intensity(static_cast<U16>(it->sf->getValue(i)));
+					laspoint.set_intensity(static_cast<U16>(it->getSafeValue(i)));
 					break;
 				case LAS_RETURN_NUMBER:
-					laspoint.set_return_number(static_cast<U8>(it->sf->getValue(i)));
+					laspoint.set_return_number(static_cast<U8>(it->getSafeValue(i)));
 					break;
 				case LAS_NUMBER_OF_RETURNS:
-					laspoint.set_number_of_returns(static_cast<U8>(it->sf->getValue(i)));
+					laspoint.set_number_of_returns(static_cast<U8>(it->getSafeValue(i)));
 					break;
 				case LAS_SCAN_DIRECTION:
-					laspoint.set_scan_direction_flag(static_cast<U8>(it->sf->getValue(i)));
+					laspoint.set_scan_direction_flag(static_cast<U8>(it->getSafeValue(i)));
 					break;
 				case LAS_FLIGHT_LINE_EDGE:
-					laspoint.set_edge_of_flight_line(static_cast<U8>(it->sf->getValue(i)));
+					laspoint.set_edge_of_flight_line(static_cast<U8>(it->getSafeValue(i)));
 					break;
 				case LAS_CLASSIFICATION:
 					if (pointFormatSixOrAbove)
 					{
-						laspoint.set_extended_classification(static_cast<U8>(it->sf->getValue(i)));
+						laspoint.set_extended_classification(static_cast<U8>(it->getSafeValue(i)));
 					}
 					else
 					{
 						//we have to decompose the field so that LASlib handles it properly
-						U8 classif = static_cast<U8>(it->sf->getValue(i));
+						U8 classif = static_cast<U8>(it->getSafeValue(i));
 						laspoint.set_classification(classif & 31);
 						laspoint.set_synthetic_flag(classif & 32);
 						laspoint.set_keypoint_flag(classif & 64);
@@ -699,13 +699,13 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 					}
 					break;
 				case LAS_SCAN_ANGLE_RANK:
-					laspoint.set_scan_angle_rank(static_cast<U8>(it->sf->getValue(i)));
+					laspoint.set_scan_angle_rank(static_cast<U8>(it->getSafeValue(i)));
 					break;
 				case LAS_USER_DATA:
-					laspoint.set_user_data(static_cast<U8>(it->sf->getValue(i)));
+					laspoint.set_user_data(static_cast<U8>(it->getSafeValue(i)));
 					break;
 				case LAS_POINT_SOURCE_ID:
-					laspoint.set_point_source_ID(static_cast<U16>(it->sf->getValue(i)));
+					laspoint.set_point_source_ID(static_cast<U16>(it->getSafeValue(i)));
 					break;
 				case LAS_RED:
 				case LAS_GREEN:
@@ -713,32 +713,32 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 					assert(false);
 					break;
 				case LAS_TIME:
-					laspoint.set_gps_time(static_cast<F64>(it->sf->getValue(i)) + it->sf->getGlobalShift());
+					laspoint.set_gps_time(it->getSafeValue(i) + it->sf->getGlobalShift());
 					break;
 				case LAS_CLASSIF_VALUE:
 					if (pointFormatSixOrAbove)
 					{
-						laspoint.set_extended_classification(static_cast<U8>(it->sf->getValue(i))); //8 bits
+						laspoint.set_extended_classification(static_cast<U8>(it->getSafeValue(i))); //8 bits
 					}
 					else
 					{
-						laspoint.set_classification(static_cast<U8>(it->sf->getValue(i)) & 31); //5 first bits
+						laspoint.set_classification(static_cast<U8>(it->getSafeValue(i)) & 31); //5 first bits
 					}
 					break;
 				case LAS_CLASSIF_SYNTHETIC:
-					if (it->sf->getValue(i) != 0)
+					if (it->getSafeValue(i) != 0)
 						laspoint.set_synthetic_flag(1);
 					break;
 				case LAS_CLASSIF_KEYPOINT:
-					if (it->sf->getValue(i) != 0)
+					if (it->getSafeValue(i) != 0)
 						laspoint.set_keypoint_flag(1);
 					break;
 				case LAS_CLASSIF_WITHHELD:
-					if (it->sf->getValue(i) != 0)
+					if (it->getSafeValue(i) != 0)
 						laspoint.set_withheld_flag(1);
 					break;
 				case LAS_CLASSIF_OVERLAP:
-					if (it->sf->getValue(i) != 0)
+					if (it->getSafeValue(i) != 0)
 						laspoint.set_extended_overlap_flag(1);
 					break;
 				case LAS_INVALID:
@@ -789,7 +789,7 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 			//extra fields
 			for (const ExtraLasField& f : extraFieldsToSave)
 			{
-				ScalarType s = f.sf->getValue(i);
+				double s = f.getSafeValue(i);
 				if (f.isShifted)
 				{
 					double sd = s + f.sf->getGlobalShift();

@@ -399,7 +399,7 @@ public:
 			{
 				memset(grid, 0, sizeof(FacetSet*)*gridSize);
 
-				QProgressDialog pDlg("Families classification", QString(), 0, static_cast<int>(facetCount));
+				QProgressDialog pDlg(QObject::tr("Families classification"), QString(), 0, static_cast<int>(facetCount));
 				pDlg.show();
 				QApplication::processEvents();
 
@@ -446,7 +446,7 @@ public:
 				{
 					unsigned familyIndex = 0;
 
-					QProgressDialog pDlg("Sub-families classification", QString(), 0, static_cast<int>(setCount));
+					QProgressDialog pDlg(QObject::tr("Sub-families classification"), QString(), 0, static_cast<int>(setCount));
 					pDlg.show();
 					QApplication::processEvents();
 

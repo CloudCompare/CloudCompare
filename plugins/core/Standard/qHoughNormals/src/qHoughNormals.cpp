@@ -129,7 +129,7 @@ void qHoughNormals::doAction()
 
 			int maxProgress = ne.maxProgressCounter();
 			int stepProgress = std::max(1, maxProgress / 100);
-			QProgressDialog pDlg("Computing normals...", QString(), 0, maxProgress, m_app->getMainWindow());
+			QProgressDialog pDlg(tr("Computing normals..."), QString(), 0, maxProgress, m_app->getMainWindow());
 			pDlg.show();
 			QCoreApplication::processEvents();
 			

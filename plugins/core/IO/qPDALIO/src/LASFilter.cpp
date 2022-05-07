@@ -397,7 +397,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		}
 	}
 
-	// maximum cloud 'extents' relatively to the 'offset' point
+	//maximum cloud 'extents' relatively to the 'offset' point
 	CCVector3d diagPos = bbMax - lasOffset;
 	CCVector3d diagNeg = lasOffset - bbMin;
 	CCVector3d diag(std::max(diagPos.x, diagNeg.x),
@@ -517,6 +517,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 
 	CC_FILE_ERROR callbackError = CC_FERR_NO_ERROR;
 	unsigned int ptsWritten = 0;
+
 	auto convertOne = [&](PointRef& point)
 	{
 		if (ptsWritten == numberOfPoints)
@@ -563,16 +564,16 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 				assert(false);
 				break;
 			case LAS_TIME:
-				point.setField(pdalId, lasField.sf->getValue(ptsWritten) + lasField.sf->getGlobalShift());
+				point.setField(pdalId, lasField.getSafeValue(ptsWritten) + lasField.sf->getGlobalShift());
 				break;
 			case LAS_CLASSIFICATION:
-				classification = static_cast<uint8_t>(static_cast<int>(lasField.sf->getValue(ptsWritten)) & 255);
+				classification = static_cast<uint8_t>(static_cast<int>(lasField.getSafeValue(ptsWritten)) & 255);
 				break;
 			case LAS_CLASSIF_VALUE:
-				classification = static_cast<uint8_t>(static_cast<int>(lasField.sf->getValue(ptsWritten)) & (minPointFormat < 6 ? 31 : 255));
+				classification = static_cast<uint8_t>(static_cast<int>(lasField.getSafeValue(ptsWritten)) & (minPointFormat < 6 ? 31 : 255));
 				break;
 			case LAS_CLASSIF_SYNTHETIC:
-				if (lasField.sf->getValue(ptsWritten) != 0)
+				if (lasField.getSafeValue(ptsWritten) != 0)
 				{
 					if (minPointFormat < 6)
 						classification |= 32; //bit #5 of the 'Classification' field
@@ -581,7 +582,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 				}
 				break;
 			case LAS_CLASSIF_KEYPOINT:
-				if (lasField.sf->getValue(ptsWritten) != 0)
+				if (lasField.getSafeValue(ptsWritten) != 0)
 				{
 					if (minPointFormat < 6)
 						classification |= 64; //bit #6 of the 'Classification' field
@@ -590,7 +591,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 				}
 				break;
 			case LAS_CLASSIF_WITHHELD:
-				if (lasField.sf->getValue(ptsWritten) != 0)
+				if (lasField.getSafeValue(ptsWritten) != 0)
 				{
 					if (minPointFormat < 6)
 						classification |= 128; //bit #7 of the 'Classification' field
@@ -599,7 +600,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 				}
 				break;
 			case LAS_CLASSIF_OVERLAP:
-				if (lasField.sf->getValue(ptsWritten) != 0)
+				if (lasField.getSafeValue(ptsWritten) != 0)
 				{
 					if (minPointFormat >= 6)
 						classFlags |= 8;      //bit #3 of the 'Classification Flags' field
@@ -610,7 +611,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 			case LAS_INVALID:
 				break;
 			default:
-				point.setField(pdalId, lasField.sf->getValue(ptsWritten));
+				point.setField(pdalId, lasField.getSafeValue(ptsWritten));
 				break;
 			}
 		}
@@ -622,7 +623,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		// extra las fields
 		for (const ExtraLasField::Shared &extraField : extraFieldsToSave)
 		{
-			point.setField(extraField->pdalId, extraField->sf->getValue(ptsWritten) + extraField->sf->getGlobalShift());
+			point.setField(extraField->pdalId, extraField->getSafeValue(ptsWritten) + extraField->sf->getGlobalShift());
 		}
 
 		nProgress.oneStep();

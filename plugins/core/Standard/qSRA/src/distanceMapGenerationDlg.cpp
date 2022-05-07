@@ -777,18 +777,18 @@ void DistanceMapGenerationDlg::updateMapTexture()
 	if (mode == PROJ_CYLINDRICAL)
 	{
 		//cylindrical projection: look for a plane
-		if (m_window->getOwnDB()->filterChildren(texturedEntities,false,CC_TYPES::PLANE) == 0)
+		if (m_window->getOwnDB()->filterChildren(texturedEntities, false, CC_TYPES::PLANE) == 0)
 			return;
 	}
 	else if (mode == PROJ_CONICAL)
 	{
 		//conical projection: look for a standard mesh
-		if (m_window->getOwnDB()->filterChildren(texturedEntities,false,CC_TYPES::MESH) == 0)
+		if (m_window->getOwnDB()->filterChildren(texturedEntities, false, CC_TYPES::MESH) == 0)
 			return;
 	}
 
 	//spawn "update" dialog
-	QProgressDialog progressDlg(QString("Updating..."),nullptr,0,0,nullptr,Qt::Popup);
+	QProgressDialog progressDlg(tr("Updating..."), QString(), 0, 0, nullptr, Qt::Popup);
 	progressDlg.setMinimumDuration(0);
 	progressDlg.setModal(true);
 	progressDlg.show();
@@ -799,7 +799,7 @@ void DistanceMapGenerationDlg::updateMapTexture()
 	if (!colorScale)
 	{
 		if (m_app)
-			m_app->dispToConsole(QString("No color scale chosen!"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			m_app->dispToConsole(QString("No color scale chosen!"), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
 	}
 
@@ -808,7 +808,7 @@ void DistanceMapGenerationDlg::updateMapTexture()
 	if (mapImage.isNull())
 	{
 		if (m_app)
-			m_app->dispToConsole(QString("Failed to create map texture! Not enough memory?"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			m_app->dispToConsole(QString("Failed to create map texture! Not enough memory?"), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
 	}
 

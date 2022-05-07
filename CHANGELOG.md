@@ -1,6 +1,10 @@
 CloudCompare Version History
 ============================
 
+v2.13.alpha (???) - (??/??/????)
+----------------------
+
+
 v2.12.1 (Kyiv) - (07/05/2022)
 ----------------------
 - Improvements
@@ -11,7 +15,7 @@ v2.12.1 (Kyiv) - (07/05/2022)
 		- the number of grid cells is now displayed (next to the grid size)
 		- the number of non-empty cells is now displayed (next to the cloud name and size)
 
-	- Most of the progress dialogs of CloudCompare should not steal the focus anymore (when loard multiple files in the background for instance)
+	- Most of the progress dialogs of CloudCompare should not steal the focus anymore (when loading multiple files in the background for instance)
 
 	- Segmentation tool:
 		- the icons are now visually disabled (grayed out) while drawing a polyline. Keyboard shortcuts are still working.
@@ -21,7 +25,7 @@ v2.12.1 (Kyiv) - (07/05/2022)
 	- When saving in a Shapefile the polyline exported from the Interactive Segmentation tool, an invalid global bounding-box was computed and saved by CC.
 	- Label markers were preventing the user from picking the points below (in the Point picking tool as well as other tools)
 	- LAS filters will now automatically convert NaN values to a default value when saving fields
-		(as NaN is not valid according to specifications and not accepted by most third party libarries and tools)
+		(as NaN is not valid according to specifications and not accepted by most third party libaries and tools)
 
 v2.12.0 (Kyiv) - (30/03/2022)
 ----------------------

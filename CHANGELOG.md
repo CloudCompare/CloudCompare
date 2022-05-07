@@ -17,6 +17,8 @@ v2.12.1 (Kyiv) - (??/??/????)
 	- The '-ICP -ROT NONE' command line option was not working as expected
 	- When saving in a Shapefile the polyline exported from the Interactive Segmentation tool, an invalid global bounding-box was computed and saved by CC.
 	- Label markers were preventing the user from picking the points below (in the Point picking tool as well as other tools)
+	- LAS filters will now automatically convert NaN values to a default value when saving fields
+		(as NaN is not valid according to specifications and not accepted by most third party libarries and tools)
 
 v2.12.0 (Kyiv) - (30/03/2022)
 ----------------------

@@ -28,6 +28,10 @@ ccProgressDialog::ccProgressDialog(	bool showCancelButton,
 	, m_currentValue(0)
 	, m_lastRefreshValue(-1)
 {
+	// Make sure the dialog doesn't steal focus
+	setAttribute(Qt::WA_ShowWithoutActivating);
+	setWindowFlag(Qt::WindowDoesNotAcceptFocus);
+	
 	setAutoClose(true);
 
 	resize(400, 200);

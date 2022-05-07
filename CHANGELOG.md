@@ -11,6 +11,8 @@ v2.12.1 (Kyiv) - (??/??/????)
 		- the number of grid cells is now displayed (next to the grid size)
 		- the number of non-empty cells is now displayed (next to the cloud name and size)
 
+	- Most of the progress dialogs of CloudCompare should not steal the focus anymore (when loard multiple files in the background for instance)
+
 - Bug fixes:
 	- The '-ICP -ROT NONE' command line option was not working as expected
 	- When saving in a Shapefile the polyline exported from the Interactive Segmentation tool, an invalid global bounding-box was computed and saved by CC.

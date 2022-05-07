@@ -136,11 +136,11 @@ int BaseFilter::start()
 		return ThreadAlreadyInUse;
 	}
 
-	QProgressDialog progressCb(tr("Operation in progress"), QString(), 0, 0);
+	QProgressDialog pDlg(tr("Operation in progress"), QString(), 0, 0);
 	if (m_showProgress)
 	{
-		progressCb.setWindowTitle(m_desc.filterName);
-		progressCb.show();
+		pDlg.setWindowTitle(m_desc.filterName);
+		pDlg.show();
 		QApplication::processEvents();
 	}
 
@@ -159,7 +159,7 @@ int BaseFilter::start()
 #endif
 		if (m_showProgress)
 		{
-			progressCb.setValue(++progress);
+			pDlg.setValue(++progress);
 		}
 	}
 	
@@ -169,7 +169,7 @@ int BaseFilter::start()
 
 	if (m_showProgress)
 	{
-		progressCb.close();
+		pDlg.close();
 		QApplication::processEvents();
 	}
 

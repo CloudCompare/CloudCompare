@@ -322,7 +322,7 @@ void qMeshBoolean::doAction()
 	//launch process
 	{
 		//run in a separate thread
-		QProgressDialog pDlg("Operation in progress", QString(), 0, 0, m_app->getMainWindow());
+		QProgressDialog pDlg(tr("Operation in progress"), QString(), 0, 0, m_app->getMainWindow());
 		pDlg.setWindowTitle("Mesh boolean");
 		pDlg.show();
 		QApplication::processEvents();

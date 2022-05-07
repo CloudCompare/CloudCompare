@@ -182,7 +182,7 @@ void qCSF::doAction()
 	//display the progress dialog
 	QProgressDialog pDlg;
 	pDlg.setWindowTitle("CSF");
-	pDlg.setLabelText("Computing....");
+	pDlg.setLabelText(tr("Computing...."));
 	pDlg.setCancelButton(nullptr);
 	pDlg.show();
 	QApplication::processEvents();

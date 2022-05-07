@@ -39,7 +39,6 @@
 #include <QApplication>
 #include <QtConcurrentRun>
 #include <QApplication>
-#include <QProgressDialog>
 #include <QMainWindow>
 
 //qCC_db
@@ -51,6 +50,7 @@
 #include <ccCylinder.h>
 #include <ccCone.h>
 #include <ccTorus.h>
+#include <ccProgressDialog.h>
 
 //CCCoreLib
 #include <ScalarField.h>
@@ -412,18 +412,13 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 
 	if (!hasNorms)
 	{
-		QProgressDialog* pDlg = nullptr;
+		ccProgressDialog* pDlg = nullptr;
 		if (!silent)
 		{
-			if (s_app)
-			{
-				pDlg = new QProgressDialog("Computing normals (please wait)", QString(), 0, 0, s_app->getMainWindow());
-			}
-			else
-			{
-				pDlg = new QProgressDialog("Computing normals (please wait)", QString(), 0, 0, nullptr);
-			}
+			pDlg = new ccProgressDialog(false, s_app ? s_app->getMainWindow() : nullptr);
 			pDlg->setWindowTitle("Ransac Shape Detection");
+			pDlg->setMethodTitle(tr("Computing normals (please wait)"));
+			pDlg->setRange(0, 0); // infinite loop
 			pDlg->show();
 		}
 		QApplication::processEvents();
@@ -491,18 +486,13 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 
 	{
 		//progress dialog (Qtconcurrent::run can't be canceled!)
-		QProgressDialog* pDlg = nullptr;
+		ccProgressDialog* pDlg = nullptr;
 		if (!silent)
 		{
-			if (s_app)
-			{
-				pDlg = new QProgressDialog("Operation in progress (please wait)", QString(), 0, 0, s_app->getMainWindow());
-			}
-			else
-			{
-				pDlg = new QProgressDialog("Operation in progress (please wait)", QString(), 0, 0, nullptr);
-			}
+			pDlg = new ccProgressDialog(false, s_app ? s_app->getMainWindow() : nullptr);
 			pDlg->setWindowTitle("Ransac Shape Detection");
+			pDlg->setMethodTitle(tr("Operation in progress (please wait)"));
+			pDlg->setRange(0, 0); // infinite progress
 			pDlg->show();
 		}
 

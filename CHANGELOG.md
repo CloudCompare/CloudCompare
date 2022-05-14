@@ -6,6 +6,10 @@ v2.13.alpha (???) - (??/??/????)
 - New command line option:
 	- FLIP_TRI (to flip the order of the triangle vertices of all opened meshes)
 
+- Imrpovements:
+	- The suggested global shift will now be rounded to the nearest thousand (so as to suggest values in kilometers, easier to manage)
+
+
 v2.12.1 (Kyiv) - (07/05/2022)
 ----------------------
 - Improvements

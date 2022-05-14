@@ -93,7 +93,6 @@ Various:
 [*] Add a check box to turn on and off gradient colors in the Color Scale Editor
 [*] Smooth zoom (clik and drag the mouse while holding a key - https://github.com/cloudcompare/trunk/issues/382)
 [*] Add the distance 'units' as a parameter for the color ramp
-[*] Select points by color (https://github.com/cloudcompare/trunk/issues/363)
 [*] Median Calculation in Rasterize (http://www.cloudcompare.org/forum/viewtopic.php?t=1610)
 [*] Add key bindings to pan the active 3D view (so as to be able to pan even in segmentation / polyline tracing mode - http://www.cloudcompare.org/forum/viewtopic.php?t=1714)
 [*] Choose the columns to export for ASCII files (http://www.cloudcompare.org/forum/viewtopic.php?t=1449)

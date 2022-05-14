@@ -141,6 +141,7 @@ constexpr char COMMAND_NO_TIMESTAMP[]					= "NO_TIMESTAMP";
 constexpr char COMMAND_MOMENT[]							= "MOMENT";
 constexpr char COMMAND_FEATURE[]						= "FEATURE";
 constexpr char COMMAND_RGB_CONVERT_TO_SF[]				= "RGB_CONVERT_TO_SF";
+constexpr char COMMAND_FLIP_TRIANGLES[]					= "FLIP_TRI";
 
 //options / modifiers
 constexpr char COMMAND_MAX_THREAD_COUNT[]				= "MAX_TCOUNT";
@@ -3153,6 +3154,50 @@ bool CommandExtractVertices::process(ccCommandLineInterface &cmd)
 	
 	cmd.removeMeshes(false);
 	
+	return true;
+}
+
+
+CommandFlipTriangles::CommandFlipTriangles()
+	: ccCommandLineInterface::Command(QObject::tr("Flip the vertices order of all opened mesh triangles"), COMMAND_FLIP_TRIANGLES)
+{}
+
+bool CommandFlipTriangles::process(ccCommandLineInterface &cmd)
+{
+	cmd.print(QObject::tr("[FLIP TRIANGLES]"));
+
+	if (cmd.meshes().empty())
+	{
+		cmd.warning(QObject::tr("No mesh available. Be sure to open one first!"));
+		return false;
+	}
+
+	for (size_t i = 0; i < cmd.meshes().size(); ++i)
+	{
+		auto& descriptor = cmd.meshes()[i];
+		ccGenericMesh* mesh = descriptor.mesh;
+
+		ccMesh* ccMesh = ccHObjectCaster::ToMesh(mesh);
+		if (ccMesh)
+		{
+			ccMesh->flipTriangles();
+		}
+
+		descriptor.basename += QObject::tr("_FLIPPED_TRIANGLES");
+
+		//save it as well
+		if (cmd.autoSaveMode())
+		{
+			QString errorStr = cmd.exportEntity(descriptor);
+			if (!errorStr.isEmpty())
+			{
+				return cmd.error(errorStr);
+			}
+		}
+	}
+
+	cmd.removeMeshes(false);
+
 	return true;
 }
 

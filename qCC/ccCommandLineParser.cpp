@@ -711,7 +711,7 @@ void ccCommandLineParser::registerBuiltInCommands()
 	registerCommand(Command::Shared(new CommandMoment));
 	registerCommand(Command::Shared(new CommandFeature));
 	registerCommand(Command::Shared(new CommandRGBConvertToSF));
-
+	registerCommand(Command::Shared(new CommandFlipTriangles));
 }
 
 void ccCommandLineParser::cleanup()

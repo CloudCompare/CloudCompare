@@ -3,7 +3,8 @@ CloudCompare Version History
 
 v2.13.alpha (???) - (??/??/????)
 ----------------------
-
+- New command line option:
+	- FLIP_TRI (to flip the order of the triangle vertices of all opened meshes)
 
 v2.12.1 (Kyiv) - (07/05/2022)
 ----------------------

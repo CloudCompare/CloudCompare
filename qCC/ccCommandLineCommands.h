@@ -281,6 +281,13 @@ struct CommandExtractVertices : public ccCommandLineInterface::Command
 	bool process(ccCommandLineInterface& cmd) override;
 };
 
+struct CommandFlipTriangles : public ccCommandLineInterface::Command
+{
+	CommandFlipTriangles();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
 struct CommandSampleMesh : public ccCommandLineInterface::Command
 {
 	CommandSampleMesh();

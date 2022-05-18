@@ -253,6 +253,8 @@ int ccRegistrationDlg::getTransformationFilters() const
 	int filters = CCCoreLib::RegistrationTools::SKIP_NONE;
 	switch (rotComboBox->currentIndex())
 	{
+	case 0:
+		break;
 	case 1:
 		filters |= CCCoreLib::RegistrationTools::SKIP_RYZ;
 		break;

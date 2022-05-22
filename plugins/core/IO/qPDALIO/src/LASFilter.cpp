@@ -989,142 +989,11 @@ struct LasCloudChunk
 	}
 };
 
-/*
-	The following functions until readExtraBytesVlr are copied from PDAL with slight modifications.
-*/
-
-using DT = Dimension::Type;
-const Dimension::Type lastypes[] = {
-    DT::None, DT::Unsigned8, DT::Signed8, DT::Unsigned16, DT::Signed16,
-    DT::Unsigned32, DT::Signed32, DT::Unsigned64, DT::Signed64,
-    DT::Float, DT::Double
+struct ExtraDimDescriptor
+{
+	std::string name;
+	pdal::Dimension::Type dimType;
 };
-
-
-void ExtraBytesIf::setType(uint8_t lastype)
-{
-	m_fieldCnt = 1;
-	while (lastype > 10)
-	{
-		m_fieldCnt++;
-		lastype -= 10;
-	}
-
-	m_type = lastypes[lastype];
-	if (m_type == Dimension::Type::None)
-		m_fieldCnt = 0;
-}
-
-
-void ExtraBytesIf::readFrom(const char *buf)
-{
-	LeExtractor extractor(buf, sizeof(ExtraBytesSpec));
-	uint16_t dummy16;
-	uint32_t dummy32;
-	uint64_t dummy64;
-	double dummyd;
-	uint8_t options;
-	uint8_t type;
-
-	uint8_t SCALE_MASK = 1 << 3;
-	uint8_t OFFSET_MASK = 1 << 4;
-
-	extractor >> dummy16 >> type >> options;
-	extractor.get(m_name, 32);
-	extractor >> dummy32;
-	for (size_t i = 0; i < 3; ++i)
-		extractor >> dummy64;  // No data field.
-	for (size_t i = 0; i < 3; ++i)
-		extractor >> dummyd;  // Min.
-	for (size_t i = 0; i < 3; ++i)
-		extractor >> dummyd;  // Max.
-	for (size_t i = 0; i < 3; ++i)
-		extractor >> m_scale[i];
-	for (size_t i = 0; i < 3; ++i)
-		extractor >> m_offset[i];
-	extractor.get(m_description, 32);
-
-	setType(type);
-	if (m_type == Dimension::Type::None)
-		m_size = options;
-	if (!(options & SCALE_MASK))
-		for (size_t i = 0; i < 3; ++i)
-			m_scale[i] = 1.0;
-	if (!(options & OFFSET_MASK))
-		for (size_t i = 0; i < 3; ++i)
-			m_offset[i] = 0.0;
-}
-
-
-std::vector<ExtraDim> ExtraBytesIf::toExtraDims()
-{
-	std::vector<ExtraDim> eds;
-
-	if (m_type == Dimension::Type::None)
-	{
-		ExtraDim ed(m_name, Dimension::Type::None);
-		ed.m_size = m_size;
-		eds.push_back(ed);
-	}
-	else if (m_fieldCnt == 1)
-	{
-		ExtraDim ed(m_name, m_type, m_scale[0], m_offset[0]);
-		eds.push_back(ed);
-	}
-	else
-	{
-		for (size_t i = 0; i < m_fieldCnt; ++i)
-		{
-			ExtraDim ed(m_name + std::to_string(i), m_type,
-			    m_scale[i], m_offset[i]);
-			eds.push_back(ed);
-		}
-	}
-	return eds;
-}
-
-static bool ReadExtraBytesVlr(LasHeader &header, std::vector<ExtraDim>& extraDims)
-{
-	const LasVLR *vlr = header.findVlr(SPEC_USER_ID, EXTRA_BYTES_RECORD_ID);
-	if (!vlr)
-	{
-		return false;
-	}
-
-	size_t size = vlr->dataLen();
-	if (size % sizeof(ExtraBytesSpec) != 0)
-	{
-		ccLog::Warning("[LAS] Bad size for extra bytes VLR. Ignoring.");
-		return false;
-	}
-	size_t count = size / sizeof(ExtraBytesSpec);
-	ccLog::PrintDebug("[LAS] VLR count: " + QString::number(count));
-
-	try
-	{
-		const char* pos = vlr->data();
-		for (size_t i = 0; i < count; ++i)
-		{
-			ExtraBytesIf eb;
-			eb.readFrom(pos);
-			pos += sizeof(ExtraBytesSpec);
-
-			std::vector<ExtraDim> eds = eb.toExtraDims();
-			for (const ExtraDim& ed : eds)
-			{
-				ccLog::PrintDebug(QString("[LAS] VLR #%1: %2").arg(i + 1).arg(QString::fromStdString(ed.m_name)));
-				extraDims.push_back(ed);
-			}
-		}
-	}
-	catch (const std::bad_alloc&)
-	{
-		ccLog::Warning("[LAS] Not enough memory to retrieve the extra bytes fields.");
-		return false;
-	}
-
-	return true;
-}
 
 CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
 {
@@ -1132,11 +1001,16 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 	{
 		Options las_opts;
 		las_opts.add("filename", filename.toStdString());
-
+		las_opts.add("use_eb_vlr", true);
 		LasReader lasReader;
 		lasReader.setOptions(las_opts);
 		FixedPointTable fields(100);
 		PointLayoutPtr layout(fields.layout());
+		if (nullptr == layout)
+		{
+			ccLog::Warning("PDAL failed to retrieve the file layout");
+			return CC_FERR_THIRD_PARTY_LIB_FAILURE;
+		}
 		lasReader.prepare(fields);
 		LasHeader lasHeader = lasReader.header();
 
@@ -1148,14 +1022,6 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 			//strange file ;)
 			return CC_FERR_NO_ERROR; //Its still strange
 		}
-
-		//The VLR record describing the extra bytes has been added to LAS 1.4 to formalize
-		//a process that has been used in prior versions of LAS.
-		//So PDAL doesn't read this VLR if the version is <= 1.3.
-		//The idea is to read the VLR manually, make a string of the names and data types,
-		//and pass that back to the PDAL reader.
-		std::vector<ExtraDim> extraDims;
-		ReadExtraBytesVlr(lasHeader, extraDims);
 
 		CCVector3d bbMin(lasHeader.minX(), lasHeader.minY(), lasHeader.minZ());
 		CCVector3d bbMax(lasHeader.maxX(), lasHeader.maxY(), lasHeader.maxZ());
@@ -1180,9 +1046,47 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 			s_lasOpenDlg->classifOverlapCheckBox->setVisible(false);
 		}
 
-		for (const ExtraDim& dim : extraDims)
+		std::vector<ExtraDimDescriptor> extraDims;
+		if (nullptr != layout)
 		{
-			s_lasOpenDlg->addEVLR(QString("%1").arg(QString::fromStdString(dim.m_name)));
+			for (const pdal::Dimension::Id pdalId : layout->dims())
+			{
+				switch (pdalId)
+				{
+				case pdal::Dimension::Id::Intensity:
+				case pdal::Dimension::Id::ReturnNumber:
+				case pdal::Dimension::Id::NumberOfReturns:
+				case pdal::Dimension::Id::ScanDirectionFlag:
+				case pdal::Dimension::Id::EdgeOfFlightLine:
+				case pdal::Dimension::Id::Classification:
+				case pdal::Dimension::Id::ScanAngleRank:
+				case pdal::Dimension::Id::UserData:
+				case pdal::Dimension::Id::PointSourceId:
+				case pdal::Dimension::Id::GpsTime:
+				case pdal::Dimension::Id::ScanChannel:
+				case pdal::Dimension::Id::Infrared:
+				case pdal::Dimension::Id::ClassFlags:
+				case pdal::Dimension::Id::PointId:
+				case pdal::Dimension::Id::X:
+				case pdal::Dimension::Id::Y:
+				case pdal::Dimension::Id::Z:
+				case pdal::Dimension::Id::Red:
+				case pdal::Dimension::Id::Green:
+				case pdal::Dimension::Id::Blue:
+					// standard fields
+					break;
+				default:
+					// extended fields
+					ExtraDimDescriptor dim;
+					dim.name = layout->dimName(pdalId);
+					dim.dimType = layout->dimType(pdalId);
+					extraDims.push_back(dim);
+
+					s_lasOpenDlg->addEVLR(QString("%1").arg(QString::fromStdString(dim.name)));
+					break;
+				}
+			}
+			extraDims.shrink_to_fit();
 		}
 
 		if (parameters.sessionStart)
@@ -1221,8 +1125,8 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 		{
 			if (s_lasOpenDlg->doLoadEVLR(i))
 			{
-				extraDimsArg += extraDims[i].m_name + "=" + interpretationName(extraDims[i].m_dimType.m_type) + ",";
-				extraNamesToLoad.push_back(extraDims[i].m_name);
+				extraDimsArg += extraDims[i].name + "=" + interpretationName(extraDims[i].dimType) + ",";
+				extraNamesToLoad.push_back(extraDims[i].name);
 			}
 		}
 

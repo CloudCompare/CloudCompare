@@ -10,6 +10,7 @@ v2.12.2 (Kyiv) - (22/05/2022)
 - Bug fixes:
 	- The LAS 1.3 or 1.4 filter was applying the Global Shift to the points even if the original 'LAS offset' was different. But it was declaring in the LAS file header that it has used the original LAS offset.
 		This would lead to a shifted LAS file with the wrong global coordinates.
+	- When double-clicking on a file with local characters in the Windows explorer, CC was not able to interpret the filename or file path correctly
 
 v2.12.1 (Kyiv) - (07/05/2022)
 ----------------------

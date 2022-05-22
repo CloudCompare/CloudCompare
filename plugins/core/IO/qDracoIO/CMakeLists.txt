@@ -14,9 +14,6 @@ if( PLUGIN_IO_QDRACO )
 		target_link_libraries( ${DRACO_LIBRARIES} )
 	endif()
 
-	message (${DRACO_INCLUDE_DIRS})
-	message (${DRACO_LIBRARIES})
-
 	add_subdirectory( include )
 	add_subdirectory( src )
 	add_subdirectory( ui )

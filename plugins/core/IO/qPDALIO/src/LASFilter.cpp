@@ -479,6 +479,10 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 			lasScale = CCVector3d(s, s, s);
 		}
 	}
+	else if (!hasScaleMetaData)
+	{
+		lasScale = optimalScale;
+	}
 
 	std::vector<ExtraLasField::Shared> extraFieldsToSave;
 	try
@@ -1421,7 +1425,7 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 				//backup input global parameters
 				ccGlobalShiftManager::Mode csModeBackup = parameters.shiftHandlingMode;
 				bool useLasOffset = false;
-				//set the lasOffset as default if none was provided
+				//set the LAS offset as default if none was provided
 				if (lasOffset.norm2() != 0 && ((nullptr == parameters._coordinatesShiftEnabled) || (false == *parameters._coordinatesShiftEnabled)))
 				{
 				    if (csModeBackup != ccGlobalShiftManager::NO_DIALOG) //No dialog, practically means that we don't want any shift!

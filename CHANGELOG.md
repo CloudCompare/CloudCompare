@@ -7,6 +7,10 @@ v2.12.2 (Kyiv) - (22/05/2022)
 	- CSF plugin:
 		- 'Cloth resolution' and 'Classification threshold' input precision has been increased from 0.1 to 0.001
 
+- Bug fixes:
+	- The LAS 1.3 or 1.4 filter was applying the Global Shift to the points even if the original 'LAS offset' was different. But it was declaring in the LAS file header that it has used the original LAS offset.
+		This would lead to a shifted LAS file with the wrong global coordinates.
+
 v2.12.1 (Kyiv) - (07/05/2022)
 ----------------------
 - Improvements

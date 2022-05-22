@@ -85,12 +85,12 @@ void ccColorLevelsDlg::updateHistogram()
 		std::vector<unsigned> histoValues[3];
 		try
 		{
-			for (int i=0; i<3; ++i)
+			for (int i = 0; i < 3; ++i)
 			{
 				if (	channelComboBox->currentIndex() == RGB
-					||	channelComboBox->currentIndex() == i+1 )
+					||	channelComboBox->currentIndex() == i + 1)
 				{
-					histoValues[i].resize(1 << (sizeof(ColorCompType)*8),0);
+					histoValues[i].resize(1 << (sizeof(ColorCompType) * 8), 0);
 				}
 			}
 		}
@@ -102,29 +102,29 @@ void ccColorLevelsDlg::updateHistogram()
 		}
 
 		std::vector<unsigned>* histoValuesR = (histoValues[0].empty() ? nullptr : histoValues);
-		std::vector<unsigned>* histoValuesG = (histoValues[1].empty() ? nullptr : histoValues+1);
-		std::vector<unsigned>* histoValuesB = (histoValues[2].empty() ? nullptr : histoValues+2);
+		std::vector<unsigned>* histoValuesG = (histoValues[1].empty() ? nullptr : histoValues + 1);
+		std::vector<unsigned>* histoValuesB = (histoValues[2].empty() ? nullptr : histoValues + 2);
 
-		switch(channelComboBox->currentIndex())
+		switch (channelComboBox->currentIndex())
 		{
 		case RGB:
 			m_histogram->setSolidColor(Qt::black);
-			m_histogram->setAxisLabels("R,G,B","");
+			m_histogram->setAxisLabels("R,G,B", QString());
 			//test: for now we send all data into the same histogram!
 			histoValuesG = histoValuesR;
 			histoValuesB = histoValuesR;
 			break;
 		case RED:
 			m_histogram->setSolidColor(Qt::red);
-			m_histogram->setAxisLabels("Red","");
+			m_histogram->setAxisLabels("Red", QString());
 			break;
 		case GREEN:
 			m_histogram->setSolidColor(Qt::green);
-			m_histogram->setAxisLabels("Green","");
+			m_histogram->setAxisLabels("Green", QString());
 			break;
 		case BLUE:
 			m_histogram->setSolidColor(Qt::blue);
-			m_histogram->setAxisLabels("Blue","");
+			m_histogram->setAxisLabels("Blue", QString());
 			break;
 		}
 
@@ -142,11 +142,11 @@ void ccColorLevelsDlg::updateHistogram()
 			}
 		}
 
-		for (int i=0; i<3; ++i)
+		for (int i = 0; i < 3; ++i)
 		{
-			if (channelComboBox->currentIndex() == RGB || channelComboBox->currentIndex() == i+1)
+			if (channelComboBox->currentIndex() == RGB || channelComboBox->currentIndex() == i + 1)
 			{
-				m_histogram->fromBinArray(histoValues[i],0.0,256.0);
+				m_histogram->fromBinArray(histoValues[i], 0.0, 256.0);
 				break;
 			}
 		}
@@ -176,9 +176,9 @@ void ccColorLevelsDlg::onApply()
 			) )
 	{
 
-		bool applyRGB[3] = {channelComboBox->currentIndex() == RGB || channelComboBox->currentIndex() == RED,
-						channelComboBox->currentIndex() == RGB || channelComboBox->currentIndex() == GREEN,
-						channelComboBox->currentIndex() == RGB || channelComboBox->currentIndex() == BLUE };
+		bool applyRGB[3] = {	channelComboBox->currentIndex() == RGB || channelComboBox->currentIndex() == RED,
+								channelComboBox->currentIndex() == RGB || channelComboBox->currentIndex() == GREEN,
+								channelComboBox->currentIndex() == RGB || channelComboBox->currentIndex() == BLUE };
 
 		//update display
 		ccPointCloud* pc = ccHObjectCaster::ToPointCloud(m_cloud);
@@ -198,7 +198,7 @@ void ccColorLevelsDlg::onApply()
 					if (qIn)
 					{
 						double u = (static_cast<double>(col.rgba[c]) - s_inputLevels[0]) / qIn;
-						newC = s_outputLevels[0] + u * pOut; 
+						newC = s_outputLevels[0] + u * pOut;
 					}
 					newRgb.rgba[c] = static_cast<ColorCompType>(std::max<double>(std::min<double>(newC, ccColor::MAX), 0.0));
 				}

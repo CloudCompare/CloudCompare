@@ -1,6 +1,12 @@
 CloudCompare Version History
 ============================
 
+v2.12.2 (Kyiv) - (22/05/2022)
+----------------------
+- Improvements:
+	- CSF plugin:
+		- 'Cloth resolution' and 'Classification threshold' input precision has been increased from 0.1 to 0.001
+
 v2.12.1 (Kyiv) - (07/05/2022)
 ----------------------
 - Improvements

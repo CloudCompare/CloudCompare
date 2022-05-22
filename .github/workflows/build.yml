@@ -19,7 +19,7 @@ jobs:
             generator: "Ninja",
             conda_library_dir: "Library",
             compile_qanimation_with_ffmpeg: "ON",
-            compile_qpcl: "ON",
+            compile_qpcl: "OFF",
             compile_qransac: "ON",
           }
           - {

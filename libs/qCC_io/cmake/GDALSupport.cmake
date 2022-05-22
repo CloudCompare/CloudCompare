@@ -29,7 +29,7 @@ function( target_link_GDAL ) # ARGV0 = project name
 		#install DLLs
 		message( STATUS "Looking for GDAL DLLs in: " ${GDAL_BIN_DIR} )
 		file( GLOB GDAL_DLL_FILES ${GDAL_BIN_DIR}/gdal*.dll )
-
+message( ${GDAL_DLL_FILES} )
                 message( STATUS "GDAL VERSION: " ${GDAL_VERSION} )
                 if (GDAL_VERSION EQUAL 3.2)
                     set ( GDAL_DEP_DLL_FILES ${GDAL_BIN_DIR}/xerces-c_3_2.dll
@@ -87,58 +87,93 @@ function( target_link_GDAL ) # ARGV0 = project name
                         # for pdal
                         ${GDAL_BIN_DIR}/laszip3.dll
                         )
-                elseif (GDAL_VERSION_3)
-			set (  GDAL_DEP_DLL_FILES	${GDAL_BIN_DIR}/ogdi.dll
-										${GDAL_BIN_DIR}/expat.dll
-										${GDAL_BIN_DIR}/libpq.dll
-										${GDAL_BIN_DIR}/szip.dll
-										${GDAL_BIN_DIR}/netcdf.dll
-										${GDAL_BIN_DIR}/sqlite3.dll
-										${GDAL_BIN_DIR}/spatialite.dll
-										${GDAL_BIN_DIR}/libmysql.dll
-										${GDAL_BIN_DIR}/geos.dll
-										${GDAL_BIN_DIR}/geos_c.dll
-										${GDAL_BIN_DIR}/libcurl.dll
-										${GDAL_BIN_DIR}/libpng16.dll
-										${GDAL_BIN_DIR}/liblzma.dll
-										${GDAL_BIN_DIR}/openjp2.dll
-										${GDAL_BIN_DIR}/proj_6_3.dll
-										${GDAL_BIN_DIR}/zstd.dll
-										${GDAL_BIN_DIR}/iconv-2.dll
-										${GDAL_BIN_DIR}/iconv.dll
-										${GDAL_BIN_DIR}/freexl.dll
-										${GDAL_BIN_DIR}/zlib1.dll
-										${GDAL_BIN_DIR}/libssl-1_1-x64.dll
-										${GDAL_BIN_DIR}/libcrypto-1_1-x64.dll
-										${GDAL_BIN_DIR}/hdf5_hl.dll
-										${GDAL_BIN_DIR}/hdf5.dll
-										${GDAL_BIN_DIR}/libxml2.dll
-										${GDAL_BIN_DIR}/lwgeom.dll
-										${GDAL_BIN_DIR}/xerces-c_3_2.dll
-			)
-		else()
-			set (  GDAL_DEP_DLL_FILES	${GDAL_BIN_DIR}/expat.dll
-										${GDAL_BIN_DIR}/libpq.dll
-										${GDAL_BIN_DIR}/szip.dll
-										${GDAL_BIN_DIR}/netcdf.dll
-										${GDAL_BIN_DIR}/sqlite3.dll
-										${GDAL_BIN_DIR}/spatialite.dll
-										${GDAL_BIN_DIR}/libmysql.dll
-										${GDAL_BIN_DIR}/geos.dll
-										${GDAL_BIN_DIR}/geos_c.dll
-										${GDAL_BIN_DIR}/libcurl.dll
-										${GDAL_BIN_DIR}/openjp2.dll
-										${GDAL_BIN_DIR}/proj.dll
-										${GDAL_BIN_DIR}/iconv.dll
-										${GDAL_BIN_DIR}/freexl.dll
-										${GDAL_BIN_DIR}/zlib1.dll
-										${GDAL_BIN_DIR}/hdf5_hl.dll
-										${GDAL_BIN_DIR}/hdf5.dll
-										${GDAL_BIN_DIR}/libxml2.dll
-										${GDAL_BIN_DIR}/xerces-c_3_1.dll
-										${GDAL_BIN_DIR}/ssleay32.dll
-										${GDAL_BIN_DIR}/libeay32.dll
-			)
+                elseif (GDAL_VERSION EQUAL 3.3)
+                    set ( GDAL_DEP_DLL_FILES ${GDAL_BIN_DIR}/xerces-c_3_2.dll
+                        ${GDAL_BIN_DIR}/cfitsio.dll
+                        ${GDAL_BIN_DIR}/freexl.dll
+                        ${GDAL_BIN_DIR}/geos.dll
+                        ${GDAL_BIN_DIR}/geos_c.dll
+                        ${GDAL_BIN_DIR}/iconv-2.dll
+                        ${GDAL_BIN_DIR}/hdf5.dll
+                        ${GDAL_BIN_DIR}/hdf5_cpp.dll
+                        ${GDAL_BIN_DIR}/hdf5_hl.dll
+                        ${GDAL_BIN_DIR}/hdf.dll
+                        ${GDAL_BIN_DIR}/libcrypto-1_1-x64.dll
+                        ${GDAL_BIN_DIR}/libcurl.dll
+                        ${GDAL_BIN_DIR}/libexpat.dll
+                        ${GDAL_BIN_DIR}/libkea.dll
+						${GDAL_BIN_DIR}/libmysql.dll
+                        ${GDAL_BIN_DIR}/libpq.dll
+                        ${GDAL_BIN_DIR}/libpng16.dll
+                        ${GDAL_BIN_DIR}/libssl-1_1-x64.dll
+                        ${GDAL_BIN_DIR}/libxml2.dll
+                        ${GDAL_BIN_DIR}/mfhdf.dll
+                        ${GDAL_BIN_DIR}/netcdf.dll
+                        ${GDAL_BIN_DIR}/openjp2.dll
+                        ${GDAL_BIN_DIR}/ogdi.dll
+                        ${GDAL_BIN_DIR}/proj_7_2.dll
+                        ${GDAL_BIN_DIR}/spatialite.dll
+                        ${GDAL_BIN_DIR}/sqlite3.dll
+                        ${GDAL_BIN_DIR}/szip.dll
+                        ${GDAL_BIN_DIR}/tiff.dll
+                        ${GDAL_BIN_DIR}/xdr.dll
+                        ${GDAL_BIN_DIR}/zlib.dll
+                        ${GDAL_BIN_DIR}/zstd.dll
+                        # for pdal
+                        #${GDAL_BIN_DIR}/laszip3.dll
+                        )
+				elseif (GDAL_VERSION_3)
+					set (  GDAL_DEP_DLL_FILES	${GDAL_BIN_DIR}/ogdi.dll
+						${GDAL_BIN_DIR}/expat.dll
+						${GDAL_BIN_DIR}/libpq.dll
+						${GDAL_BIN_DIR}/szip.dll
+						${GDAL_BIN_DIR}/netcdf.dll
+						${GDAL_BIN_DIR}/sqlite3.dll
+						${GDAL_BIN_DIR}/spatialite.dll
+						${GDAL_BIN_DIR}/libmysql.dll
+						${GDAL_BIN_DIR}/geos.dll
+						${GDAL_BIN_DIR}/geos_c.dll
+						${GDAL_BIN_DIR}/libcurl.dll
+						${GDAL_BIN_DIR}/libpng16.dll
+						${GDAL_BIN_DIR}/liblzma.dll
+						${GDAL_BIN_DIR}/openjp2.dll
+						${GDAL_BIN_DIR}/proj_6_3.dll
+						${GDAL_BIN_DIR}/zstd.dll
+						${GDAL_BIN_DIR}/iconv-2.dll
+						${GDAL_BIN_DIR}/iconv.dll
+						${GDAL_BIN_DIR}/freexl.dll
+						${GDAL_BIN_DIR}/zlib1.dll
+						${GDAL_BIN_DIR}/libssl-1_1-x64.dll
+						${GDAL_BIN_DIR}/libcrypto-1_1-x64.dll
+						${GDAL_BIN_DIR}/hdf5_hl.dll
+						${GDAL_BIN_DIR}/hdf5.dll
+						${GDAL_BIN_DIR}/libxml2.dll
+						${GDAL_BIN_DIR}/lwgeom.dll
+						${GDAL_BIN_DIR}/xerces-c_3_2.dll
+						)
+				else()
+					set (  GDAL_DEP_DLL_FILES	${GDAL_BIN_DIR}/expat.dll
+						${GDAL_BIN_DIR}/libpq.dll
+						${GDAL_BIN_DIR}/szip.dll
+						${GDAL_BIN_DIR}/netcdf.dll
+						${GDAL_BIN_DIR}/sqlite3.dll
+						${GDAL_BIN_DIR}/spatialite.dll
+						${GDAL_BIN_DIR}/libmysql.dll
+						${GDAL_BIN_DIR}/geos.dll
+						${GDAL_BIN_DIR}/geos_c.dll
+						${GDAL_BIN_DIR}/libcurl.dll
+						${GDAL_BIN_DIR}/openjp2.dll
+						${GDAL_BIN_DIR}/proj.dll
+						${GDAL_BIN_DIR}/iconv.dll
+						${GDAL_BIN_DIR}/freexl.dll
+						${GDAL_BIN_DIR}/zlib1.dll
+						${GDAL_BIN_DIR}/hdf5_hl.dll
+						${GDAL_BIN_DIR}/hdf5.dll
+						${GDAL_BIN_DIR}/libxml2.dll
+						${GDAL_BIN_DIR}/xerces-c_3_1.dll
+						${GDAL_BIN_DIR}/ssleay32.dll
+						${GDAL_BIN_DIR}/libeay32.dll
+					)
 		endif()
 		
 		#message( STATUS ${GDAL_DLL_FILES} )

@@ -460,7 +460,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 
 		for (const ExtraLasField::Shared &extraField : extraFields)
 		{
-			s_saveDlg->addEVLR(QString("%1").arg(extraField->getName()));
+			s_saveDlg->addEVLR(extraField->getName());
 		}
 
 		s_saveDlg->exec();
@@ -895,7 +895,7 @@ struct LasCloudChunk
 		return success;
 	}
 
-	void createFieldsToLoad(IdList extraFieldsToLoad, StringList extraNamesToLoad)
+	void createFieldsToLoad(const IdList& extraFieldsToLoad, const StringList& extraNamesToLoad)
 	{
 		//DGM: from now on, we only enable scalar fields when we detect a valid value!
 		if (s_lasOpenDlg->doLoad(LAS_CLASSIFICATION))
@@ -930,7 +930,7 @@ struct LasCloudChunk
 			lasFields.push_back(LasField::Shared(new LasField(LAS_POINT_SOURCE_ID, 0, 0, 65535))); //16 bits: between 0 and 65536
 
 		//extra fields
-		for (unsigned int i = 0; i < extraNamesToLoad.size(); ++i)
+		for (size_t i = 0; i < extraNamesToLoad.size(); ++i)
 		{
 			QString name = QString::fromStdString(extraNamesToLoad[i]);
 			ExtraLasField *eField = new ExtraLasField(name, extraFieldsToLoad[i]);
@@ -1082,7 +1082,8 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 					dim.dimType = layout->dimType(pdalId);
 					extraDims.push_back(dim);
 
-					s_lasOpenDlg->addEVLR(QString("%1").arg(QString::fromStdString(dim.name)));
+					QString desanitizedSFName = LasField::DesanitizeString(QString::fromStdString(dim.name));
+					s_lasOpenDlg->addEVLR(desanitizedSFName);
 					break;
 				}
 			}
@@ -1258,8 +1259,6 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 		}
 
 		CCCoreLib::NormalizedProgress nProgress(pDlg.data(), nbOfPoints);
-		ccPointCloud* loadedCloud = nullptr;
-		std::vector< LasField::Shared > fieldsToLoad;
 		CCVector3d Pshift(0, 0, 0);
 		bool preserveCoordinateShift = true;
 
@@ -1316,8 +1315,8 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 				pointChunk.createFieldsToLoad(extraDimensionsIds, extraNamesToLoad);
 			}
 
-			loadedCloud = pointChunk.loadedCloud;
-			fieldsToLoad = pointChunk.lasFields;
+			ccPointCloud* loadedCloud = pointChunk.loadedCloud;
+			std::vector<LasField::Shared>& fieldsToLoad = pointChunk.lasFields;
 
 			//first point check for 'big' coordinates
 			if (nbPointsRead == 0)
@@ -1496,7 +1495,7 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 					    ||	value != field->firstValue
 					    ||	(field->firstValue != field->defaultValue && field->firstValue >= field->minValue))
 					{
-						field->sf = new ccScalarField(qPrintable(field->getName()));
+						field->sf = new ccScalarField(qPrintable(LasField::DesanitizeString(field->getName())));
 						if (field->sf->reserveSafe(fileChunkSize))
 						{
 							field->sf->link();
@@ -1545,7 +1544,7 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 		for (auto &chunk : chunks)
 		{
 			chunk.addLasFieldsToCloud();
-			loadedCloud = chunk.getLoadedCloud();
+			ccPointCloud* loadedCloud = chunk.getLoadedCloud();
 
 			if (loadedCloud)
 			{

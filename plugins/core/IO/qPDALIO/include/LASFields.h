@@ -294,20 +294,27 @@ struct LasField
 		return minPointFormat;
 	}
 
-	static QString SanitizeString(QString str)
+	static QString SanitizeString(const QString& str)
 	{
-		QString sanitizedStr;
-		if (str.size() > 32)
+		QString sanitizedStr = str;
+		sanitizedStr.replace('=', "_eq_");
+		sanitizedStr.replace(' ', "__");
+
+		if (sanitizedStr.size() > 32)
 		{
-			sanitizedStr = str.left(32);
+			sanitizedStr = sanitizedStr.left(32);
 		}
-		else
-		{
-			sanitizedStr = str;
-		}
-		sanitizedStr.replace('=', '_');
 
 		return sanitizedStr;
+	}
+
+	static QString DesanitizeString(const QString& str)
+	{
+		QString desanitizedStr = str;
+		desanitizedStr.replace("_eq_", "=");
+		desanitizedStr.replace("__", " ");
+
+		return desanitizedStr;
 	}
 
 	double getSafeValue(unsigned index) const

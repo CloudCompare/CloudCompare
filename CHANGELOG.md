@@ -10,7 +10,7 @@ v2.13.alpha (???) - (??/??/????)
 	- The suggested global shift will now be rounded to the nearest thousand (so as to suggest values in kilometers, easier to manage)
 
 =======
-v2.12.2 (Kyiv) - (22/05/2022)
+v2.12.2 (Kyiv) - (23/05/2022)
 ----------------------
 - Improvements:
 	- CSF plugin:

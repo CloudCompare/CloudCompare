@@ -271,7 +271,7 @@ bool ccMesh::computePerTriangleNormals()
 	}
 
 	NormsIndexesTableType* normIndexes = getTriNormsTable();
-	if (!normIndexes)
+	if (!normIndexes || normIndexes->size() < triCount) //warning: the previous table size may not be big enough!
 	{
 		//we need to instantiate the set of normal indexes
 		normIndexes = new NormsIndexesTableType();

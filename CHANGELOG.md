@@ -1,7 +1,7 @@
 CloudCompare Version History
 ============================
 
-v2.12.2 (Kyiv) - (22/05/2022)
+v2.12.2 (Kyiv) - (23/05/2022)
 ----------------------
 - Improvements:
 	- CSF plugin:

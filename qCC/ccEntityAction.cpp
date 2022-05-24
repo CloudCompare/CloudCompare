@@ -99,10 +99,13 @@ namespace ccEntityAction
 	// Colours
 	bool setColor(ccHObject::Container selectedEntities, bool colorize, QWidget* parent)
 	{
-		QColor colour = QColorDialog::getColor(Qt::white, parent, QString(), QColorDialog::ShowAlphaChannel);
+		static QColor s_lastColor = Qt::white;
+		QColor colour = QColorDialog::getColor(s_lastColor, parent, QString(), QColorDialog::ShowAlphaChannel);
 		
 		if (!colour.isValid())
 			return false;
+
+		s_lastColor = colour;
 		
 		while (!selectedEntities.empty())
 		{

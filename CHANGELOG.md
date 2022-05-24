@@ -7,6 +7,9 @@ v2.13.alpha (???) - (??/??/????)
 	- FLIP_TRI (to flip the order of the triangle vertices of all opened meshes)
 
 - Improvements:
+	- Edit > Color > Set unique & Edit > Color > Colorize
+		- CC will now remember the last input color
+
 	- Global Shift:
 		- the suggested global shift will now be rounded to the nearest thousand (so as to suggest values in kilometers, easier to manage)
 

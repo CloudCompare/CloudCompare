@@ -29,15 +29,7 @@ class ccGenericPointCloud;
 class ccPointCloud;
 class ccProgressDialog;
 
-
 //! Raster grid cell
-
-struct QCC_DB_LIB_API ccIndexValueTuplet
-{
-	unsigned index;
-	double   val;
-};
-
 struct QCC_DB_LIB_API ccRasterCell
 {
 	//! Default constructor
@@ -72,9 +64,9 @@ struct QCC_DB_LIB_API ccRasterCell
 	unsigned pointIndex;
 	//! Color
 	CCVector3d color;
-	//! Pointer to first point reference for this cell
+	//! Pointer to first point reference for this cell (used to compute the median)
 	void** pointRefHead;
-	//! Pointer to last point reference for this cell
+	//! Pointer to last point reference for this cell (used to compute the median)
 	void** pointRefTail;
 
 };

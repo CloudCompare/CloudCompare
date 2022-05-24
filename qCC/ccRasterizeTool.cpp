@@ -241,6 +241,8 @@ bool ccRasterizeTool::exportAsSF(ccRasterGrid::ExportableFields field) const
 		return m_UI->generateStdDevHeightSFcheckBox->isChecked();
 	case ccRasterGrid::PER_CELL_HEIGHT_RANGE:
 		return m_UI->generateHeightRangeSFcheckBox->isChecked();
+	case ccRasterGrid::PER_CELL_MEDIAN_HEIGHT:
+		return m_UI->generateMedianHeightSFcheckBox->isChecked();
 	default:
 		assert(false);
 	};
@@ -407,6 +409,8 @@ ccRasterGrid::ProjectionType ccRasterizeTool::getTypeOfProjection() const
 		return ccRasterGrid::PROJ_AVERAGE_VALUE;
 	case 2:
 		return ccRasterGrid::PROJ_MAXIMUM_VALUE;
+	case 3:
+		return ccRasterGrid::PROJ_MEDIAN_VALUE;
 	default:
 		//shouldn't be possible for this option!
 		assert(false);
@@ -430,6 +434,8 @@ ccRasterGrid::ProjectionType ccRasterizeTool::getTypeOfSFInterpolation() const
 		return ccRasterGrid::PROJ_AVERAGE_VALUE;
 	case 2:
 		return ccRasterGrid::PROJ_MAXIMUM_VALUE;
+	case 3:
+		return ccRasterGrid::PROJ_MEDIAN_VALUE;
 	default:
 		//shouldn't be possible for this option!
 		assert(false);
@@ -850,6 +856,8 @@ ccPointCloud* ccRasterizeTool::generateCloud(bool autoExport/*=true*/) const
 			exportedFields.push_back(ccRasterGrid::PER_CELL_HEIGHT_STD_DEV);
 		if (exportAsSF(ccRasterGrid::PER_CELL_HEIGHT_RANGE))
 			exportedFields.push_back(ccRasterGrid::PER_CELL_HEIGHT_RANGE);
+		if (exportAsSF(ccRasterGrid::PER_CELL_MEDIAN_HEIGHT))
+			exportedFields.push_back(ccRasterGrid::PER_CELL_MEDIAN_HEIGHT);
 	}
 	catch (const std::bad_alloc&)
 	{

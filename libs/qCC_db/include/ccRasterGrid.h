@@ -42,12 +42,16 @@ struct QCC_DB_LIB_API ccRasterCell
 		, nbPoints(0)
 		, pointIndex(0)
 		, color(0, 0, 0)
+		, pointRefHead(nullptr)
+		, pointRefTail(nullptr)
 	{}
 
 	//! Height value
 	double h;
 	//! Average height value
 	double avgHeight;
+	//! Median height value
+	double medianHeight;
 	//! Height std.dev.
 	double stdDevHeight;
 	//! Min height value
@@ -60,6 +64,11 @@ struct QCC_DB_LIB_API ccRasterCell
 	unsigned pointIndex;
 	//! Color
 	CCVector3d color;
+	//! Pointer to first point reference for this cell (used to compute the median)
+	void** pointRefHead;
+	//! Pointer to last point reference for this cell (used to compute the median)
+	void** pointRefTail;
+
 };
 
 //! Raster grid type
@@ -114,6 +123,7 @@ struct QCC_DB_LIB_API ccRasterGrid
 							PER_CELL_AVG_HEIGHT,
 							PER_CELL_HEIGHT_STD_DEV,
 							PER_CELL_HEIGHT_RANGE,
+							PER_CELL_MEDIAN_HEIGHT,
 							PER_CELL_INVALID,
 	};
 
@@ -137,6 +147,7 @@ struct QCC_DB_LIB_API ccRasterGrid
 	enum ProjectionType {	PROJ_MINIMUM_VALUE			= 0,
 							PROJ_AVERAGE_VALUE			= 1,
 							PROJ_MAXIMUM_VALUE			= 2,
+							PROJ_MEDIAN_VALUE			= 3,
 							INVALID_PROJECTION_TYPE		= 255,
 	};
 

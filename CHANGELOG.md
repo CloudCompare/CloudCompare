@@ -7,6 +7,12 @@ v2.13.alpha (???) - (??/??/????)
 	- FLIP_TRI (to flip the order of the triangle vertices of all opened meshes)
 
 - Improvements:
+	- Rasterize:
+		- new option to compute the median height
+		- new option to compute the median scalar field value(s)
+		- new option to export the median height as a scalar field (attached to the exported cloud)
+		- new command line sub-option -MED (to be used with -PROJ or -SF_PROJ)
+
 	- Edit > Color > Set unique & Edit > Color > Colorize
 		- CC will now remember the last input color
 

@@ -38,6 +38,7 @@ constexpr char COMMAND_RASTER_INTERP_MAX_EDGE_LENGTH[]	= "MAX_EDGE_LENGTH";
 constexpr char COMMAND_RASTER_PROJ_MIN[]				= "MIN";
 constexpr char COMMAND_RASTER_PROJ_MAX[]				= "MAX";
 constexpr char COMMAND_RASTER_PROJ_AVG[]				= "AVG";
+constexpr char COMMAND_RASTER_PROJ_MED[]				= "MED";
 constexpr char COMMAND_RASTER_RESAMPLE[]				= "RESAMPLE";
 
 //2.5D Volume calculation specific commands
@@ -59,6 +60,10 @@ static ccRasterGrid::ProjectionType GetProjectionType(QString option, ccCommandL
 	else if (option == COMMAND_RASTER_PROJ_AVG)
 	{
 		return ccRasterGrid::PROJ_AVERAGE_VALUE;
+	}
+	else if (option == COMMAND_RASTER_PROJ_MED)
+	{
+		return ccRasterGrid::PROJ_MEDIAN_VALUE;
 	}
 	else
 	{

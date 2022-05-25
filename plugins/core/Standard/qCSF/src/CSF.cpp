@@ -99,8 +99,8 @@ bool CSF::readPointsFromFile(std::string filename)
 	return true;
 }
 
-bool CSF::do_filtering(	std::vector<int>& groundIndexes,
-						std::vector<int>& offGroundIndexes,
+bool CSF::do_filtering(	std::vector<unsigned>& groundIndexes,
+						std::vector<unsigned>& offGroundIndexes,
 						bool exportClothMesh,
 						ccMesh* &clothMesh,
 						ccMainAppInterface* app/*=nullptr*/,

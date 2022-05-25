@@ -197,8 +197,8 @@ struct CommandCSF : public ccCommandLineInterface::Command
 		csf.params.rigidness = csfRigidness;
 		csf.params.iterations = maxIteration;
 
-		std::vector<int> groundIndexes;
-		std::vector<int> offGroundIndexes;
+		std::vector<unsigned> groundIndexes;
+		std::vector<unsigned> offGroundIndexes;
 		ccMesh* clothMesh = nullptr;
 		if (!csf.do_filtering(groundIndexes, offGroundIndexes, false, clothMesh, nullptr, cmd.widgetParent()))
 		{

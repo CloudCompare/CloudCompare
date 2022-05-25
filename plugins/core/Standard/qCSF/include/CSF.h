@@ -54,8 +54,8 @@ public:
 	void saveOffGroundPoints(const std::vector<int>& grp, std::string path = "");
 	
 	//The main program: Do filtering
-	bool do_filtering(	std::vector<int>& groundIndexes,
-						std::vector<int>& offGroundIndexes,
+	bool do_filtering(	std::vector<unsigned>& groundIndexes,
+						std::vector<unsigned>& offGroundIndexes,
 						bool exportClothMesh,
 						ccMesh* &clothMesh,
 						ccMainAppInterface* app = nullptr,

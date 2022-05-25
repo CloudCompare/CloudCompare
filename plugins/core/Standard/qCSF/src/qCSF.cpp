@@ -201,8 +201,8 @@ void qCSF::doAction()
 	csf.params.rigidness = csf_rigidness;
 	csf.params.iterations = MaxIteration;
 	//to do filtering
-	std::vector<int> groundIndexes;
-	std::vector<int> offGroundIndexes;
+	std::vector<unsigned> groundIndexes;
+	std::vector<unsigned> offGroundIndexes;
 	ccMesh* clothMesh = nullptr;
 	if (!csf.do_filtering(groundIndexes, offGroundIndexes, ExportClothMesh, clothMesh, m_app))
 	{

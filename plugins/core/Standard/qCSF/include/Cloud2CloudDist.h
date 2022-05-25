@@ -40,8 +40,8 @@ public:
 	static bool Compute(const Cloth& cloth,
 						const wl::PointCloud& pc,
 						double class_threshold,
-						std::vector<int>& groundIndexes,
-						std::vector<int>& offGroundIndexes,
+						std::vector<unsigned>& groundIndexes,
+						std::vector<unsigned>& offGroundIndexes,
 						unsigned N = 3);
 };
 

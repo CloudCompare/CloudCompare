@@ -3113,7 +3113,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Paste from ASCII/text data stored in the clipboard</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+P</string>
+    <string>Alt+P</string>
    </property>
   </action>
   <action name="actionSplitCloudUsingSF">

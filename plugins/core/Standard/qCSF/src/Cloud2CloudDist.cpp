@@ -30,6 +30,7 @@
  
 //system
 #include <cmath>
+#include <limits>
 
 // For each lidar point, we find its neighbors in cloth particles by  Rounding operation.
 // use for neighbor particles to do bilinear interpolation.

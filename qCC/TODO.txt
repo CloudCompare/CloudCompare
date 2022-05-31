@@ -44,6 +44,7 @@ Big ones:
 		- compute and export the population per cell (https://www.cloudcompare.org/forum/viewtopic.php?p=25085)
 	- Colors level (https://www.cloudcompare.org/forum/viewtopic.php?t=5743)
 	- Fit > Sphere (https://www.cloudcompare.org/forum/viewtopic.php?p=25333)
+	- Edit > Colors > Enhance with intensities (https://www.cloudcompare.org/forum/viewtopic.php?t=5795)
 [*] Point cloud cleanup tools (http://www.cloudcompare.org/forum/viewtopic.php?t=191)
 [*] Volume calculation
 	- between clouds (from distances)

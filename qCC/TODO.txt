@@ -61,6 +61,7 @@ qFacets plugin:
 
 Various:
 [*] Add a 'circle' option in the Graphical Segmentation tool (https://www.cloudcompare.org/forum/viewtopic.php?t=5756)
+[*] Add a confirmation popup when exiting from the Segmentation tool with 'ESC' (https://www.cloudcompare.org/forum/viewtopic.php?t=5793)
 [*] Add a confirmation popup when deleting an entity in the DB tree (https://www.cloudcompare.org/forum/viewtopic.php?t=5756)
 [*] Shortcut to the 'Edit > Scalar fields > Export coordinate(s) to SF' (https://github.com/CloudCompare/CloudCompare/issues/1607)
 [*] Additional options to the Rasterize 'resample input cloud' mode (original mix/max position, average position - https://www.cloudcompare.org/forum/viewtopic.php?p=24953)

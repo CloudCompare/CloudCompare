@@ -60,7 +60,7 @@ public:
 		\param textDisplay text output widget (optional)
 		\param parentWidget parent widget (optional)
 		\param parentWindow parent window (if any - optional)
-		\param silentCommandLineMode will cause logmessage to printf (optional)
+		\param redirectToStdOut whether to redirect log messages to the system std::out output or not (optional)
 	**/
 	static void Init(	QListWidget* textDisplay = nullptr,
 						QWidget* parentWidget = nullptr,

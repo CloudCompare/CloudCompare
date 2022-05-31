@@ -378,6 +378,7 @@ public:
 
 	//! Sets point size
 	/** \param size point size (between MIN_POINT_SIZE_F and MAX_POINT_SIZE_F)
+		\param silent whether this function can log and/or display messages on the screen
 	**/
 	virtual void setPointSize(float size, bool silent = false);
 	
@@ -388,6 +389,7 @@ public:
 
 	//! Sets line width
 	/** \param width lines width (between MIN_LINE_WIDTH_F and MAX_LINE_WIDTH_F)
+		\param silent whether this function can log and/or display messages on the screen
 	**/
 	virtual void setLineWidth(float width, bool silent = false);
 
@@ -1009,7 +1011,6 @@ protected: //other methods
 
 		\param error GL error code
 		\param context name of the method/object that catched the error
-		\return true if an error occurred, false otherwise
 	**/
 	static void LogGLError(GLenum error, const char* context);
 

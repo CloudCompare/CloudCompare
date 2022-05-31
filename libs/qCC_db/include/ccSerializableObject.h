@@ -66,6 +66,7 @@ public:
 	/** \param in input file (already opened)
 		\param dataVersion file version
 		\param flags deserialization flags (see ccSerializableObject::DeserializationFlags)
+		\param oldToNewIDMap map to link old IDs with new IDs
 		\return success
 	**/
 	virtual bool fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) { return false; }

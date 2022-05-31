@@ -78,9 +78,11 @@ public:
 		\param outputSlices output slices (if successful)
 		\param extractEnvelopes whether to extract envelopes or not
 		\param maxEdgeLength max envelope edge length (the smaller, the tighter the envelope will be)
+		\param envelopeType envelope type
 		\param outputEnvelopes output envelopes (if successful)
 		\param extractLevelSet whether to extract the level set or not
 		\param levelSetGridStep the step of the grid from which the level set will be extraced
+		\param levelSetMinVertCount minimum number of vertex count per contour
 		\param levelSet level set (contour) lines (if any)
 		\param gap optional gap between each slice
 		\param multiPass multi-pass envelope extraction

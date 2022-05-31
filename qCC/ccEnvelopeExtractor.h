@@ -64,6 +64,7 @@ public:
 		\param envelopeType envelope type (FULL by default)
 		\param allowSplitting whether the polyline can be split or not
 		\param preferredNormDim to specifiy a preferred (normal) direction for the polyline extraction
+		\param preferredUpDir to specifiy a preferred up direction for the polyline extraction (preferredNormDim must be defined as well and must be normal to this 'up' direction)
 		\param enableVisualDebugMode whether to display a (debug) window to represent the algorithm process
 		\return success
 	**/

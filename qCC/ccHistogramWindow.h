@@ -62,7 +62,6 @@ public:
 		\param initialNumberOfClasses initial number of classes
 		\param numberOfClassesCanBeChanged whether to allow the user to modify the number of classes
 		\param showNaNValuesInGrey show NaN values (in gray)
-		\return success
 	**/
 	void fromSF(ccScalarField* sf,
 				unsigned initialNumberOfClasses = 0,
@@ -74,7 +73,6 @@ public:
 		\param histoValues array of bins
 		\param minVal minimum value
 		\param maxVal maximum value
-		\return success
 	**/
 	void fromBinArray(	const std::vector<unsigned>& histoValues,
 						double minVal,

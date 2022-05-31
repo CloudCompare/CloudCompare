@@ -31,19 +31,23 @@ public:
 
 	//! Default constructor
 	/** Coordinate System is essentially just a way to visualize a transform matrix.
+		\param displayScale global scale/size
+		\param axisWidth axes width
 		\param transMat optional 3D transformation (can be set afterwards with ccDrawableObject::setGLTransformation)
 		\param name name
 	**/
-	ccCoordinateSystem(PointCoordinateType displayScale, PointCoordinateType axisWidth, const ccGLMatrix* transMat = nullptr,
-		QString name = QString("CoordinateSystem"));
+	ccCoordinateSystem(	PointCoordinateType displayScale,
+						PointCoordinateType axisWidth,
+						const ccGLMatrix* transMat = nullptr,
+						QString name = QString("CoordinateSystem"));
 
 	//! Default constructor
 	/** Coordinate System is essentially just a way to visualize a transform matrix.
 		\param transMat optional 3D transformation (can be set afterwards with ccDrawableObject::setGLTransformation)
 		\param name name
 	**/
-	ccCoordinateSystem(const ccGLMatrix* transMat,
-		QString name = QString("CoordinateSystem"));
+	ccCoordinateSystem(	const ccGLMatrix* transMat,
+						QString name = QString("CoordinateSystem"));
 
 	//! Simplified constructor
 	/** For ccHObject factory only!

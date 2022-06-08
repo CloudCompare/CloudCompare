@@ -11,17 +11,18 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#                   COPYRIGHT: CloudCompare project                      #
 //#                                                                        #
 //##########################################################################
 
-#ifndef CCGRAPHICALSEGMENTATIONOPTIONSDLG_H
-#define CCGRAPHICALSEGMENTATIONOPTIONSDLG_H
-
-#include <ui_graphicalSegmentationOptionsDlg.h>
+#ifndef CC_GRAPHICAL_SEGMENTATION_OPTIONS_DLG_HEADER
+#define CC_GRAPHICAL_SEGMENTATION_OPTIONS_DLG_HEADER
 
 //Qt
 #include <QString>
+
+//GUI
+#include <ui_graphicalSegmentationOptionsDlg.h>
 
 class ccGraphicalSegmentationOptionsDlg : public QDialog, public Ui::GraphicalSegmentationOptionsDlg
 {
@@ -31,9 +32,9 @@ public:
 
 	//! Default constructor
 	ccGraphicalSegmentationOptionsDlg(const QString windowTitle = QString(),
-		QWidget* parent = 0);
+		QWidget* parent = nullptr);
 
 	void accept();
 };
 
-#endif // CCGRAPHICALSEGMENTATIONOPTIONSDLG_H
+#endif // CC_GRAPHICAL_SEGMENTATION_OPTIONS_DLG_HEADER

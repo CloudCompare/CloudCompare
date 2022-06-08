@@ -19,7 +19,7 @@
 #define CC_GRAPHICAL_SEGMENTATION_TOOLS_HEADER
 
 //Local
-#include <ccOverlayDialog.h>
+#include "ccOverlayDialog.h"
 
 //qCC_db
 #include <ccHObject.h>
@@ -88,7 +88,7 @@ protected:
 	void segmentOut();
 	void segment(bool keepPointsInside, ScalarType classificationValue = CCCoreLib::NAN_VALUE);
 	void reset();
-        void options();
+	void options();
 	void apply();
 	void applyAndDelete();
 	void cancel();

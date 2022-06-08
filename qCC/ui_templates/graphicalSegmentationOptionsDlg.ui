@@ -87,7 +87,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QLineEdit" name="text_remaining">
+           <widget class="QLineEdit" name="remainingTextLineEdit">
             <property name="toolTip">
              <string>Suffix added to the remaining cloud</string>
             </property>
@@ -130,7 +130,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QLineEdit" name="text_segmented">
+           <widget class="QLineEdit" name="segmentedTextLineEdit">
             <property name="toolTip">
              <string>Suffix added to the segmented cloud</string>
             </property>

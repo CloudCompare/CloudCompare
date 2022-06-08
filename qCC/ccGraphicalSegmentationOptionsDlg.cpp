@@ -11,16 +11,18 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#                   COPYRIGHT: CloudCompare project                      #
 //#                                                                        #
 //##########################################################################
 
+// Local
 #include "ccGraphicalSegmentationOptionsDlg.h"
 
+//Qt
 #include <QSettings>
 
 ccGraphicalSegmentationOptionsDlg::ccGraphicalSegmentationOptionsDlg(const QString windowTitle/*=QString()*/,
-	QWidget* parent/*=0*/)
+	QWidget* parent/*=nullptr*/)
 	: QDialog(parent, Qt::Tool)
 	, Ui::GraphicalSegmentationOptionsDlg()
 {
@@ -32,8 +34,8 @@ ccGraphicalSegmentationOptionsDlg::ccGraphicalSegmentationOptionsDlg(const QStri
 	QString segmentedSuffix = settings.value("Segmented", ".segmented").toString();
 	settings.endGroup();
 
-	text_remaining->setText(remainingSuffix);
-	text_segmented->setText(segmentedSuffix);
+	remainingTextLineEdit->setText(remainingSuffix);
+	segmentedTextLineEdit->setText(segmentedSuffix);
 
 	if (!windowTitle.isEmpty())
 	{
@@ -45,8 +47,8 @@ void ccGraphicalSegmentationOptionsDlg::accept()
 {
 	QSettings settings;
 	settings.beginGroup("SegmentationToolOptions");
-	settings.setValue("Remaining", text_remaining->text());
-	settings.setValue("Segmented", text_segmented->text());
+	settings.setValue("Remaining", remainingTextLineEdit->text());
+	settings.setValue("Segmented", segmentedTextLineEdit->text());
 	settings.endGroup();
 
 	QDialog::accept();

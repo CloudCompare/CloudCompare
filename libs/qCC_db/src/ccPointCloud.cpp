@@ -52,7 +52,6 @@
 #include <QElapsedTimer>
 #include <QSettings>
 
-
 //system
 #include <cassert>
 #include <queue>

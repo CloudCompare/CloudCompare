@@ -1289,7 +1289,6 @@ void ccGraphicalSegmentationTool::doExportSegmentationPolyline()
 void ccGraphicalSegmentationTool::options()
 {
 	ccGraphicalSegmentationOptionsDlg optionsDlg("Segmentation Options", this);
-
 	if (!optionsDlg.exec())
 		return;
 }

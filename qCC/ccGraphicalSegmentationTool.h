@@ -19,7 +19,7 @@
 #define CC_GRAPHICAL_SEGMENTATION_TOOLS_HEADER
 
 //Local
-#include "ccOverlayDialog.h"
+#include <ccOverlayDialog.h>
 
 //qCC_db
 #include <ccHObject.h>

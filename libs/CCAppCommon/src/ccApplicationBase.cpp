@@ -189,7 +189,7 @@ void ccApplicationBase::setupPaths()
 {
 	QDir appDir = QCoreApplication::applicationDirPath();
 
-	// Set up our shader and plugin paths
+        // Set up our shader and plugin paths
 #if defined(Q_OS_MAC)
 	QDir bundleDir = appDir;
 	if (bundleDir.dirName() == "MacOS")

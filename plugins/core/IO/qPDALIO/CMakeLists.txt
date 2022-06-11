@@ -3,24 +3,13 @@ option( PLUGIN_IO_QPDAL "Install qPDALIO plugin to read & write LAS files" OFF )
 if( PLUGIN_IO_QPDAL )
 	project( QPDAL_IO_PLUGIN )
  
-	find_package( PDAL 1.6 REQUIRED CONFIG )
+	find_package( PDAL 2.0 REQUIRED CONFIG )
 
 	AddPlugin( NAME ${PROJECT_NAME} TYPE io )
 	
-	add_subdirectory( include )
 	add_subdirectory( src )
 	add_subdirectory( ui )
 
-	if( PDAL_VERSION LESS 2.0 )
-		set( JSON_ROOT_DIR "" CACHE PATH "jsoncpp root dir (PDAL/vendor/jsoncpp/dist)" )
-		
-		if( NOT JSON_ROOT_DIR )
-			message( FATAL_ERROR "jsoncpp root dir is not specified (JSON_ROOT_DIR)" )
-		endif()
-
-		target_include_directories( ${PROJECT_NAME} PRIVATE ${JSON_ROOT_DIR} )
-	endif()
-	
 	target_link_libraries( ${PROJECT_NAME} ${PDAL_LIBRARIES} )
 
 	if( WIN32 )

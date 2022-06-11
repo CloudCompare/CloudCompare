@@ -17,21 +17,13 @@
 
 #include "qPDALIO.h"
 
-#include "LASFilter.h"
+#include "LasFilter.h"
 
+qPDALIO::qPDALIO(QObject *parent)
+    : QObject(parent), ccIOPluginInterface(":/CC/plugin/qPDALIO/info.json") {}
 
-qPDALIO::qPDALIO( QObject *parent ) :
-    QObject( parent ),
-    ccIOPluginInterface( ":/CC/plugin/qPDALIO/info.json" )
-{
-}
+void qPDALIO::registerCommands(ccCommandLineInterface *cmd) { Q_UNUSED(cmd); }
 
-void qPDALIO::registerCommands( ccCommandLineInterface *cmd )
-{
-	Q_UNUSED( cmd );
-}
-
-ccIOPluginInterface::FilterList qPDALIO::getFilters()
-{
-	return { FileIOFilter::Shared( new LASFilter ) };
+ccIOPluginInterface::FilterList qPDALIO::getFilters() {
+  return {FileIOFilter::Shared(new LasFilter)};
 }

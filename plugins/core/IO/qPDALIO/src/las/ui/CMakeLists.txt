@@ -1,0 +1,15 @@
+target_sources(${PROJECT_NAME}
+        PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/ExtraScalarFieldRow.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/ExtraScalarFieldForm.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/ExtraScalarFieldForm.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ExtraScalarFieldRow.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/LasScalarFieldForm.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/LasScalarFieldForm.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ScalarFieldRow.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/ScalarFieldRow.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/LasOpenDialog.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/LasOpenDialog.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/LasSaveDialog.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/LasSaveDialog.cpp
+        )

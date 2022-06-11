@@ -1,6 +1,3 @@
-#ifndef PDAL_IO_HEADER
-#define PDAL_IO_HEADER
-
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -14,25 +11,28 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: CloudCompare project                               #
+//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
 
-#include <ccIOPluginInterface.h>
+#ifndef CC_LAS_FILTER_HEADER
+#define CC_LAS_FILTER_HEADER
 
-class qPDALIO : public QObject, public ccIOPluginInterface
-{
-	Q_OBJECT
-	Q_INTERFACES( ccPluginInterface ccIOPluginInterface )
+#include "FileIOFilter.h"
 
-	Q_PLUGIN_METADATA( IID "cccorp.cloudcompare.plugin.qPDALIO" FILE "../info.json" )
-
+//! ASPRS LAS point cloud file I/O filter
+class LasFilter : public FileIOFilter {
 public:
-	explicit qPDALIO( QObject *parent = nullptr );
+  LasFilter();
 
-	void registerCommands( ccCommandLineInterface *cmd ) override;
+  // inherited from FileIOFilter
+  CC_FILE_ERROR loadFile(const QString &filename, ccHObject &container,
+                         LoadParameters &parameters) override;
 
-	FilterList getFilters() override;
+  bool canSave(CC_CLASS_ENUM type, bool &multiple,
+               bool &exclusive) const override;
+  CC_FILE_ERROR saveToFile(ccHObject *entity, const QString &filename,
+                           const SaveParameters &parameters) override;
 };
 
-#endif
+#endif // CC_LAS_FILTER_HEADER

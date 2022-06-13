@@ -1,6 +1,13 @@
 CloudCompare Version History
 ============================
 
+v2.12.3 (Kyiv) - (13/06/2022)
+----------------------
+
+- Bug fix:
+	- CloudCompare would still apply the Global Shift even though it was rejected by the user (which is a bad idea ;). But the entity
+		Global Shift would then be (0, 0, 0), resulting in the loss of the original coordinate system.
+
 v2.12.2 (Kyiv) - (23/05/2022)
 ----------------------
 - Improvements:

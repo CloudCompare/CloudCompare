@@ -31,9 +31,10 @@ v2.13.alpha (???) - (??/??/????)
 v2.12.3 (Kyiv) - (13/06/2022)
 ----------------------
 
-- Bug fix:
+- Bug fixes:
 	- CloudCompare would still apply the Global Shift even though it was rejected by the user (which is a bad idea ;). But the entity
 		Global Shift would then be (0, 0, 0), resulting in the loss of the original coordinate system.
+	- the scale in the lower-right part of the 3D view could have the wrong length (if the height of the window is larger than its width)
 
 v2.12.2 (Kyiv) - (23/05/2022)
 ----------------------

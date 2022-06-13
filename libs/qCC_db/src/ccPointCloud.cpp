@@ -50,6 +50,7 @@
 //Qt
 #include <QCoreApplication>
 #include <QElapsedTimer>
+#include <QSettings>
 
 //system
 #include <cassert>
@@ -3303,7 +3304,12 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool re
 		return nullptr;
 	}
 
-	result->setName(getName() + QString(".segmented"));
+	QSettings settings;
+	settings.beginGroup("SegmentationToolOptions");
+	QString segmentedSuffix = settings.value("Segmented", ".segmented").toString();
+	settings.endGroup();
+
+	result->setName(getName() + segmentedSuffix);
 
 	//shall the visible points be erased from this cloud?
 	if (removeSelectedPoints && !isLocked())

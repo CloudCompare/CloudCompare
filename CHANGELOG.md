@@ -24,6 +24,9 @@ v2.13.alpha (???) - (??/??/????)
 
 	- Edit > Cloud > Paste from clipboard:
 		- the shortcut has been changed to ALT+P (so as to not conflict with the already existing CTRL+P shortcut for the 'Trace polyline' tool)
+		
+	- Graphical Segmentation Tool:
+		- the user can now configure the name suffix for the remaining and segmented cloud 
 
 v2.12.2 (Kyiv) - (23/05/2022)
 ----------------------

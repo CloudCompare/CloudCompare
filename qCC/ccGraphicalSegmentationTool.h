@@ -88,6 +88,7 @@ protected:
 	void segmentOut();
 	void segment(bool keepPointsInside, ScalarType classificationValue = CCCoreLib::NAN_VALUE);
 	void reset();
+	void options();
 	void apply();
 	void applyAndDelete();
 	void cancel();

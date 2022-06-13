@@ -51,9 +51,20 @@
 #include "ui/LasOpenDialog.h"
 #include "ui/LasSaveDialog.h"
 
-Q_DECLARE_METATYPE(pdal::LasHeader)
+//class MyClass : public QObject {
+//  Q_OBJECT
+//public:
+//  explicit MyClass(pdal::LasHeader&& lasHeader) : lasHeaderPtr(new pdal::LasHeader(lasHeader)) {}
+//
+//  QSharedPointer<pdal::LasHeader> lasHeaderPtr;
+//
+//};
 
-Q_DECLARE_METATYPE(SavedExtraField)
+// since PDAL 2.4.0, the pdal::LasHeader does not have a default ctor, so it is not usable
+// in a QVariant via the Q_DECLARE_METATYPE, so we hide it behind a QSharedPointer
+using QSharedLasHeader = QSharedPointer<pdal::LasHeader>;
+Q_DECLARE_METATYPE(QSharedLasHeader);
+Q_DECLARE_METATYPE(SavedExtraField);
 
 LasFilter::LasFilter()
     : FileIOFilter({"LAS Filter [PDAL]",
@@ -95,11 +106,11 @@ CC_FILE_ERROR LasFilter::saveToFile(ccHObject *entity, const QString &filename,
 
   if (theCloud->hasMetaData("LAS_HEADER")) {
     auto lasHeader =
-        theCloud->getMetaData("LAS_HEADER").value<pdal::LasHeader>();
+        theCloud->getMetaData("LAS_HEADER").value<QSharedLasHeader>();
     QString version =
-        QString("1.%1").arg(QString::number(VersionMinorFromHeader(lasHeader)));
-    saveDialog.setVersionAndPointFormat(version, lasHeader.pointFormat());
-    saveDialog.setSavedScale(ScalesFromHeader(lasHeader));
+        QString("1.%1").arg(QString::number(VersionMinorFromHeader(*lasHeader)));
+    saveDialog.setVersionAndPointFormat(version, lasHeader->pointFormat());
+    saveDialog.setSavedScale(ScalesFromHeader(*lasHeader));
 
     auto savedExtra = theCloud->getMetaData("LAS_EXTRAS")
                           .value<std::vector<SavedExtraField>>();
@@ -130,9 +141,9 @@ CC_FILE_ERROR LasFilter::saveToFile(ccHObject *entity, const QString &filename,
 
   if (theCloud->hasMetaData("LAS_HEADER")) {
     auto lasHeader =
-        theCloud->getMetaData("LAS_HEADER").value<pdal::LasHeader>();
+        theCloud->getMetaData("LAS_HEADER").value<QSharedLasHeader>();
 
-    for (const pdal::LasVLR &vlr : lasHeader.vlrs()) {
+    for (const pdal::LasVLR &vlr : lasHeader->vlrs()) {
       if (vlr.dataLen() == 0) {
         continue;
       }
@@ -325,7 +336,8 @@ CC_FILE_ERROR LasFilter::loadFile(const QString &filename, ccHObject &container,
                "Scalar field does not have same size as point cloud");
   }
 
-  cloud->setMetaData("LAS_HEADER", QVariant::fromValue(lasHeader));
+  QSharedLasHeader headerPtr(new pdal::LasHeader(std::move(lasHeader)));
+  cloud->setMetaData("LAS_HEADER", QVariant::fromValue(headerPtr));
   cloud->setMetaData("LAS_EXTRAS", QVariant::fromValue(savedExtraFields));
 
   container.addChild(cloud.release());

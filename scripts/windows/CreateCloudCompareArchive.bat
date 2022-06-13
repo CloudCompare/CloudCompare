@@ -1,6 +1,6 @@
 @echo off
 set SRC_FOLDER=CloudCompare
-set DEST_FOLDER=CloudCompare_v2.12.2_bin_x64
+set DEST_FOLDER=CloudCompare_v2.12.3_bin_x64
 set SEVENZIP_FOLDER=C:\Program Files\7-Zip
 set SIGNTOOL_FOLDER="C:\Program Files (x86)\Windows Kits\10\bin\10.0.18362.0\x64"
 set CERTIFICATE_SUBJECT="Open Source Developer, Daniel Girardeau-Montaut"

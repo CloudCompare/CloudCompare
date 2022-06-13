@@ -599,5 +599,6 @@ bool FileIOFilter::HandleGlobalShift(	const CCVector3d& P,
 		return true;
 	}
 
+	Pshift = CCVector3d(0, 0, 0);
 	return false;
 }

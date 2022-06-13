@@ -154,11 +154,31 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 			// we can apply the input shift only if it 'works'
 			if (!needShift && !needRescale)
 			{
-				return !IsDefaultShift(coordinatesShift, scale); // if it's the default shift, we don't need to apply anything (= false)
+				bool isDefault = IsDefaultShift(coordinatesShift, scale);
+				if (isDefault)
+				{
+					// if it's the default shift, we don't need to apply anything (= false)
+					coordinatesShift = CCVector3d(0, 0, 0);
+					if (nullptr != _coordinatesScale)
+					{
+						*_coordinatesScale = 1.0;
+					}
+					return false;
+				}
+				else
+				{
+					return true;
+				}
 			}
 			else
 			{
-				return false; // we can't apply the input shift
+				// we can't apply the input shift
+				coordinatesShift = CCVector3d(0, 0, 0);
+				if (nullptr != _coordinatesScale)
+				{
+					*_coordinatesScale = 1.0;
+				}
+				return false;
 			}
 		}
 	}
@@ -293,6 +313,11 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 		if (!sasDlg.exec())
 		{
 			// process cancelled by the user
+			coordinatesShift = CCVector3d(0, 0, 0);
+			if (nullptr != _coordinatesScale)
+			{
+				*_coordinatesScale = 1.0;
+			}
 			return false;
 		}
 

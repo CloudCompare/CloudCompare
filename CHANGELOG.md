@@ -15,6 +15,9 @@ v2.12.3 (Kyiv) - (13/06/2022)
 		Global Shift would then be (0, 0, 0), resulting in the loss of the original coordinate system.
 	- the scale in the lower-right part of the 3D view could have the wrong length (if the height of the window is larger than its width)
 
+- Bug fixes:
+	- FBX: CloudCompare couldn't properly load the materials (textures) of meshes with quads
+
 v2.12.3 (Kyiv) - (13/06/2022)
 ----------------------
 

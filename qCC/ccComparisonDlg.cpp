@@ -949,11 +949,15 @@ bool ccComparisonDlg::computeDistances()
 			ccLog::Warning("[ComputeDistances] Result has been split along each dimension (check the 3 other scalar fields with '_X', '_Y' and '_Z' suffix!)");
             if (mergeXY)
             {
-                ccLog::Warning("[ComputeDistances] compute 2D distance (xy plane)");
+                ccLog::Warning("[ComputeDistances] compute 2D distances (xy plane)");
                 int sf2D = m_compCloud->getScalarFieldIndexByName(qPrintable(m_sfName + QString(" (XY)")));
-                if (sf2D >= 0)
-                    m_compCloud->deleteScalarField(sf2D);
-                sf2D = m_compCloud->addScalarField(qPrintable(m_sfName + QString(" (XY)")));
+                if (sf2D < 0)
+                    sf2D = m_compCloud->addScalarField(qPrintable(m_sfName + QString(" (XY)")));
+                if (sf2D < 0)
+                {
+                    ccLog::Error("[ComputeDistances] impossible to add XY scalar field");
+                    return 0;
+                }
                 CCCoreLib::ScalarField* sf = m_compCloud->getScalarField(sf2D);
                 for (int idx = 0; idx < m_compCloud->size(); idx++)
                 {
@@ -961,13 +965,6 @@ bool ccComparisonDlg::computeDistances()
                     sf->setValue(idx, d2D);
                 }
                 sf->computeMinAndMax();
-                // remove X and Y SF
-                int sfX = m_compCloud->getScalarFieldIndexByName(qPrintable(m_sfName + QString(" (X)")));
-                if (sfX >= 0)
-                    m_compCloud->deleteScalarField(sfX);
-                int sfY = m_compCloud->getScalarFieldIndexByName(qPrintable(m_sfName + QString(" (Y)")));
-                if (sfY >= 0)
-                    m_compCloud->deleteScalarField(sfY);
             }
 		}
 	}

@@ -382,7 +382,7 @@ namespace ccEntityAction
 		return true;
 	}
 
-	//! Interpolate scalar fields from on entity and transfer them to another one
+    //! Interpolate scalar fields from one entity and transfer them to another one
 	bool	interpolateSFs(const ccHObject::Container &selectedEntities, ccMainAppInterface* app)
 	{
 		if (selectedEntities.size() != 2)
@@ -516,12 +516,12 @@ namespace ccEntityAction
 		return true;
 	}
 	
-    //! Interpolate scalar fields from on entity and transfer them to another one without the dialog
+    //! Interpolate scalar fields from one entity and transfer them to another one without the dialog
     bool	interpolateSFs(ccPointCloud *source, ccPointCloud *dest, int sfIndex, QWidget* parent)
     {
         if (!source || !dest)
         {
-            ccConsole::Error(QObject::tr("Unexpected empty cloud pointers!"));
+            ccConsole::Error(QObject::tr("Unexpected null cloud pointers!"));
             return false;
         }
 
@@ -531,16 +531,15 @@ namespace ccEntityAction
             return false;
         }
 
-        std::vector<int> sfIndexes;
-
         unsigned sfCount = source->getNumberOfScalarFields();
         if (sfIndex > sfCount)
         {
             ccConsole::Error(QObject::tr("[ccEntityAction::interpolateSFs] Invalid scalar field index!"));
             return false;
         }
-        else
-            sfIndexes.push_back(sfIndex);
+
+        std::vector<int> sfIndexes(1);
+        sfIndexes.back() = sfIndex;
 
         //semi-persistent parameters
         static ccPointCloudInterpolator::Parameters::Method s_interpMethod = ccPointCloudInterpolator::Parameters::NEAREST_NEIGHBOR;

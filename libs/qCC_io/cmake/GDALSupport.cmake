@@ -122,6 +122,58 @@ message( ${GDAL_DLL_FILES} )
                         # for pdal
                         #${GDAL_BIN_DIR}/laszip3.dll
                         )
+                elseif (GDAL_VERSION EQUAL 3.4)
+                    set ( GDAL_DEP_DLL_FILES ${GDAL_BIN_DIR}/xerces-c_3_2.dll
+                        ${GDAL_BIN_DIR}/libexpat.dll
+                        ${GDAL_BIN_DIR}/LIBPQ.dll
+                        ${GDAL_BIN_DIR}/hdf.dll
+                        ${GDAL_BIN_DIR}/mfhdf.dll
+                        ${GDAL_BIN_DIR}/cfitsio.dll
+                        ${GDAL_BIN_DIR}/libjpeg.dll
+                        ${GDAL_BIN_DIR}/netcdf.dll
+                        ${GDAL_BIN_DIR}/geotiff.dll
+                        ${GDAL_BIN_DIR}/tiff.dll
+                        ${GDAL_BIN_DIR}/proj_9_0.dll
+                        ${GDAL_BIN_DIR}/sqlite3.dll
+                        ${GDAL_BIN_DIR}/spatialite.dll
+                        ${GDAL_BIN_DIR}/geos_c.dll
+                        ${GDAL_BIN_DIR}/hdf5.dll
+                        ${GDAL_BIN_DIR}/hdf5_cpp.dll
+                        ${GDAL_BIN_DIR}/libkea.dll
+                        ${GDAL_BIN_DIR}/libcurl.dll
+                        ${GDAL_BIN_DIR}/libpng16.dll
+                        ${GDAL_BIN_DIR}/openjp2.dll
+                        ${GDAL_BIN_DIR}/iconv.dll
+                        ${GDAL_BIN_DIR}/tiledb.dll
+                        ${GDAL_BIN_DIR}/freexl.dll
+                        ${GDAL_BIN_DIR}/libssl-1_1-x64.dll
+                        ${GDAL_BIN_DIR}/libcrypto-1_1-x64.dll
+                        ${GDAL_BIN_DIR}/gssapi64.dll
+                        ${GDAL_BIN_DIR}/xdr.dll
+                        ${GDAL_BIN_DIR}/hdf5_hl.dll
+                        ${GDAL_BIN_DIR}/zip.dll
+                        ${GDAL_BIN_DIR}/zlib.dll
+                        ${GDAL_BIN_DIR}/liblzma.dll
+                        ${GDAL_BIN_DIR}/zstd.dll
+                        ${GDAL_BIN_DIR}/libxml2.dll
+                        ${GDAL_BIN_DIR}/charset.dll
+                        ${GDAL_BIN_DIR}/geos.dll
+                        ${GDAL_BIN_DIR}/libssh2.dll
+                        ${GDAL_BIN_DIR}/freetype.dll
+                        ${GDAL_BIN_DIR}/libbz2.dll
+                        ${GDAL_BIN_DIR}/liblz4.dll
+                        ${GDAL_BIN_DIR}/krb5_64.dll
+                        ${GDAL_BIN_DIR}/comerr64.dll
+                        ${GDAL_BIN_DIR}/k5sprt64.dll
+                        ${GDAL_BIN_DIR}/libdeflate.dll
+                        ${GDAL_BIN_DIR}/jbig.dll
+                        ${GDAL_BIN_DIR}/Lerc.dll
+                        ${GDAL_BIN_DIR}/poppler.dll
+                        ${GDAL_BIN_DIR}/libwebp.dll
+                        ${GDAL_BIN_DIR}/lcms2.dll
+                        # for pdal
+                        #${GDAL_BIN_DIR}/laszip3.dll
+                        )
 				elseif (GDAL_VERSION_3)
 					set (  GDAL_DEP_DLL_FILES	${GDAL_BIN_DIR}/ogdi.dll
 						${GDAL_BIN_DIR}/expat.dll

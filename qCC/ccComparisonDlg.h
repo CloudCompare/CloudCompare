@@ -73,6 +73,7 @@ protected:
 	void showHisto();
 	void locaModelChanged(int);
 	void maxDistUpdated();
+    void enableCompute2D(bool);
 
 protected:
 

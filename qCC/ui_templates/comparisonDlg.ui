@@ -139,6 +139,16 @@
         </widget>
        </item>
        <item>
+        <widget class="QCheckBox" name="compute2DCheckBox">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>merge X and Y (compute distance in the xy plane)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QCheckBox" name="filterVisibilityCheckBox">
          <property name="toolTip">
           <string>Use the sensor associated to the reference cloud to ignore the points in the compared cloud

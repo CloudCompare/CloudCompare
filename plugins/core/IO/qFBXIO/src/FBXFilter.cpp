@@ -839,12 +839,12 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 				}
 				else
 				{
-					ccLog::Warning(QString("[FBX] Color field #%i of mesh '%1' will be ignored (unhandled type)").arg(l).arg(fbxMesh->GetName()));
+					ccLog::Warning(QString("[FBX] Color field #%1 of mesh '%2' will be ignored (unhandled type)").arg(l).arg(fbxMesh->GetName()));
 				}
 			}
 			else
 			{
-				ccLog::Warning(QString("[FBX] Color field #%i of mesh '%1' will be ignored (unhandled type)").arg(l).arg(fbxMesh->GetName()));
+				ccLog::Warning(QString("[FBX] Color field #%1 of mesh '%2' will be ignored (unhandled type)").arg(l).arg(fbxMesh->GetName()));
 			}
 		}
 	}
@@ -933,13 +933,13 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 	}
 
 	//materials
-	ccMaterialSet* materials = 0;
+	ccMaterialSet* materials = nullptr;
 	{
 		FbxNode* lNode = fbxMesh->GetNode();
 		int lMaterialCount = lNode ? lNode->GetMaterialCount() : 0;
 		for (int i = 0; i < lMaterialCount; i++)
 		{
-			FbxSurfaceMaterial *lBaseMaterial = lNode->GetMaterial(i);
+			FbxSurfaceMaterial* lBaseMaterial = lNode->GetMaterial(i);
 
 			bool isLambert = lBaseMaterial->GetClassId().Is(FbxSurfaceLambert::ClassId);
 			bool isPhong = lBaseMaterial->GetClassId().Is(FbxSurfacePhong::ClassId);
@@ -1249,49 +1249,30 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 	if (materials)
 	{
 		int fbxMatCount = fbxMesh->GetElementMaterialCount();
-		for (int i = 0; i < fbxMatCount; ++i)
-		{
-			FbxGeometryElementMaterial* lMaterialElement = fbxMesh->GetElementMaterial(i);
-			if (lMaterialElement->GetMappingMode() == FbxGeometryElement::eByPolygon
-			    &&	lMaterialElement->GetReferenceMode() == FbxGeometryElement::eIndexToDirect
-			    &&	lMaterialElement->GetIndexArray().GetCount() == fbxMesh->GetPolygonCount())
-			{
-				if (mesh->reservePerTriangleMtlIndexes())
-				{
-					int maxMaterialIndex = static_cast<int>(materials->size());
-					int matElemCount = lMaterialElement->GetIndexArray().GetCount();
-					for (int j = 0; j < matElemCount; ++j)
-					{
-						int mtlIndex = lMaterialElement->GetIndexArray().GetAt(j);
-						mesh->addTriangleMtlIndex(mtlIndex < maxMaterialIndex ? mtlIndex : -1);
-					}
-				}
-				else
-				{
-					ccLog::Warning("[FBX] Not enough memory to load materials!");
-				}
-				break;
-			}
-			else if (lMaterialElement->GetMappingMode() == FbxGeometryElement::eAllSame
-			    /*&&	lMaterialElement->GetReferenceMode() == FbxGeometryElement::eIndexToDirect*/)
-			{
-				int mtlIndex = 0;
-				if (lMaterialElement->GetReferenceMode() == FbxGeometryElement::eIndexToDirect)
-				{
-					assert(lMaterialElement->GetIndexArray().GetCount() > 0);
-					mtlIndex = lMaterialElement->GetIndexArray().GetAt(0);
-				}
 
-				if (mesh->reservePerTriangleMtlIndexes())
+		if (mesh->reservePerTriangleMtlIndexes())
+		{
+			for (int i = 0; i < polyCount; ++i)
+			{
+				// let's look for the material index
+				int matId = -1;
+				for (int l = 0; l < fbxMatCount; l++)
 				{
-					for (unsigned j = 0; j < mesh->size(); ++j)
+					FbxGeometryElementMaterial* lMaterialElement = fbxMesh->GetElementMaterial(l);
+					FbxSurfaceMaterial* lMaterial = nullptr;
+					lMaterial = fbxMesh->GetNode()->GetMaterial(lMaterialElement->GetIndexArray().GetAt(i));
+					int lMatId = lMaterialElement->GetIndexArray().GetAt(i);
+					if (lMatId >= 0 && static_cast<size_t>(lMatId) < materials->size())
 					{
-						mesh->addTriangleMtlIndex(mtlIndex);
+						matId = lMatId;
+						break;
 					}
 				}
-				else
+				mesh->addTriangleMtlIndex(matId);
+
+				if (fbxMesh->GetPolygonSize(i) == 4)
 				{
-					ccLog::Warning("[FBX] Not enough memory to load materials!");
+					mesh->addTriangleMtlIndex(matId);
 				}
 			}
 		}

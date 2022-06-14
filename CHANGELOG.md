@@ -36,6 +36,9 @@ v2.13.alpha (???) - (??/??/????)
 	- Graphical Segmentation Tool:
 		- the user can now configure the name suffix for the remaining and segmented cloud 
 
+- Bug fixes:
+	- FBX: CloudCompare couldn't properly load the materials (textures) of meshes with quads
+
 v2.12.3 (Kyiv) - (13/06/2022)
 ----------------------
 

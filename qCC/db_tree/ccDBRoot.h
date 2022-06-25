@@ -217,7 +217,7 @@ private:
 	void enableBubbleViewMode();
 	void editLabelScalarValue();
 
-signals:
+Q_SIGNALS:
 	void selectionChanged();
 	void dbIsEmpty();
 	void dbIsNotEmptyAnymore();

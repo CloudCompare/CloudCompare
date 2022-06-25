@@ -95,7 +95,7 @@ public:
 	//! Sets tracked center position
 	void setTrackedCenter(double dip_deg, double dipDir_deg);
 
-signals:
+Q_SIGNALS:
 
 	//! Signal emitted when the mouse (left) button is clicked
 	/** \param dip_deg dip angle (in degrees)

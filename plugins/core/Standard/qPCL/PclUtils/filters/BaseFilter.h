@@ -132,7 +132,7 @@ public: //default error codes (reserved between -10 and 1)
 	static constexpr int ComputationError = -4;		//!< Generic computation error
 	static constexpr int NotEnoughMemory = -5;		//!< Not enough memory
 
-signals:
+Q_SIGNALS:
 
 	//! Signal emitted when an entity is (visually) modified
 	void entityHasChanged(ccHObject*);

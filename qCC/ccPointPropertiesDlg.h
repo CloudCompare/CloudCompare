@@ -57,7 +57,7 @@ protected:
 	void processClickedPoint(int x, int y);
 	void close2DZone();
 
-signals:
+Q_SIGNALS:
 
 	//! Signal emitted when a new label is created
 	void newLabel(ccHObject*);

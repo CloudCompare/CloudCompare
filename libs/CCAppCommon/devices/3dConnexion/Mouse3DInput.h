@@ -248,7 +248,7 @@ public:
 	**/
 	bool onSiEvent(void* siGetEventData);
 
-signals:
+Q_SIGNALS:
 
 	void sigMove3d(std::vector<float>& motionData);
 	void sigReleased();

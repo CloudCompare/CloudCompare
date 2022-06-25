@@ -141,7 +141,7 @@ public: //Axis label display Options
 	void setMinSatValue(double);
 	void setMaxSatValue(double);
 
-signals:
+Q_SIGNALS:
 
 	void sfMinDispValChanged(double);
 	void sfMaxDispValChanged(double);

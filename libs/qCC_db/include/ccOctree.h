@@ -159,7 +159,7 @@ public: //HELPERS
 																const BestRadiusParams& params,
 																QWidget* parentWidget = nullptr);
 
-signals:
+Q_SIGNALS:
 
 	//! Signal sent when the octree organization is modified (cleared, etc.)
 	void updated();

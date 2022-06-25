@@ -41,7 +41,7 @@ public:
 	explicit ccDisplayOptionsDlg(QWidget* parent);
 	~ccDisplayOptionsDlg() override;
 
-signals:
+Q_SIGNALS:
 	void aspectHasChanged();
 
 protected:

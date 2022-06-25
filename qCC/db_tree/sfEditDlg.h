@@ -61,7 +61,7 @@ public:
 	void symmetricalScaleChanged(bool);
 	void logScaleChanged(bool);
 
-signals:
+Q_SIGNALS:
 
 	//! Signal emitted when the SF display parameters have changed
 	void entitySFHasChanged();

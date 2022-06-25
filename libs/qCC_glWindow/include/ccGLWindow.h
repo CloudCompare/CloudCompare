@@ -666,7 +666,7 @@ protected:
 	//! Performs standard picking at the last clicked mouse position (see m_lastMousePos)
 	void doPicking();
 
-signals:
+Q_SIGNALS:
 
 	//! Signal emitted when an entity is selected in the 3D view
 	void entitySelectionChanged(ccHObject* entity);

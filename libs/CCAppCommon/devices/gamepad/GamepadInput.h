@@ -48,7 +48,7 @@ public:
 	//! Updates a window with the current gamepad state
 	void update(ccGLWindow* win);
 
-signals:
+Q_SIGNALS:
 
 	void updated();
 

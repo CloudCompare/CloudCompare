@@ -76,7 +76,7 @@ protected:
 	void apply();
 	void applyAll();
 
-signals:
+Q_SIGNALS:
 	void fullyAccepted();
 
 protected:

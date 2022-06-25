@@ -814,7 +814,7 @@ bool ccGLWindow::initialize()
 		glFunc->glLoadIdentity();
 
 		//we emit the 'baseViewMatChanged' signal
-		emit baseViewMatChanged(m_viewportParams.viewMat);
+		Q_EMIT baseViewMatChanged(m_viewportParams.viewMat);
 
 		//set viewport and visu. as invalid
 		invalidateViewport();
@@ -1126,7 +1126,7 @@ bool ccGLWindow::event(QEvent* evt)
 					float pseudo_wheelDelta_deg = dist < m_touchBaseDist ? -15.0f : 15.0f;
 					onWheelEvent(pseudo_wheelDelta_deg);
 
-					emit mouseWheelRotated(pseudo_wheelDelta_deg);
+					Q_EMIT mouseWheelRotated(pseudo_wheelDelta_deg);
 				}
 				m_touchBaseDist = dist;
 				evt->accept();
@@ -2499,7 +2499,7 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingPara
 	//for connected items
 	if (m_currentLODState.level == 0)
 	{
-		emit drawing3D();
+		Q_EMIT drawing3D();
 	}
 
 	//update LOD information
@@ -2802,7 +2802,7 @@ void ccGLWindow::dropEvent(QDropEvent *event)
 
 		if (!fileNames.empty())
 		{
-			emit filesDropped(fileNames);
+			Q_EMIT filesDropped(fileNames);
 		}
 
 		event->acceptProposedAction();
@@ -2997,7 +2997,7 @@ void ccGLWindow::setFocalDistance(double focalDistance)
 
 		if (m_viewportParams.objectCenteredView)
 		{
-			emit cameraPosChanged(m_viewportParams.getCameraCenter());
+			Q_EMIT cameraPosChanged(m_viewportParams.getCameraCenter());
 		}
 
 		invalidateViewport();
@@ -3014,7 +3014,7 @@ void ccGLWindow::setCameraPos(const CCVector3d& P)
 
 		//ccLog::Print(QString("[ccGLWindow] Focal distance = %1").arg(m_viewportParams.getFocalDistance()));
 
-		emit cameraPosChanged(P);
+		Q_EMIT cameraPosChanged(P);
 
 		invalidateViewport();
 		invalidateVisualization();
@@ -3055,7 +3055,7 @@ void ccGLWindow::setPivotPoint(	const CCVector3d& P,
 	}
 
 	m_viewportParams.setPivotPoint(P, true);
-	emit pivotPointChanged(P);
+	Q_EMIT pivotPointChanged(P);
 
 	if (verbose)
 	{
@@ -3544,7 +3544,7 @@ void ccGLWindow::setBaseViewMat(ccGLMatrixd& mat)
 	invalidateVisualization();
 
 	//we emit the 'baseViewMatChanged' signal
-	emit baseViewMatChanged(m_viewportParams.viewMat);
+	Q_EMIT baseViewMatChanged(m_viewportParams.viewMat);
 }
 
 void ccGLWindow::getGLCameraParameters(ccGLCameraParameters& params)
@@ -3855,7 +3855,7 @@ void ccGLWindow::onItemPickedFast(ccHObject* pickedEntity, int pickedItemIndex, 
 		}
 	}
 
-	emit fastPickingFinished();
+	Q_EMIT fastPickingFinished();
 }
 
 void ccGLWindow::mousePressEvent(QMouseEvent *event)
@@ -3881,7 +3881,7 @@ void ccGLWindow::mousePressEvent(QMouseEvent *event)
 
 		if (m_interactionFlags & INTERACT_SIG_RB_CLICKED)
 		{
-			emit rightButtonClicked(event->x(), event->y());
+			Q_EMIT rightButtonClicked(event->x(), event->y());
 		}
 	}
 	else if (event->buttons() & Qt::LeftButton)
@@ -3896,7 +3896,7 @@ void ccGLWindow::mousePressEvent(QMouseEvent *event)
 
 		if (m_interactionFlags & INTERACT_SIG_LB_CLICKED)
 		{
-			emit leftButtonClicked(event->x(), event->y());
+			Q_EMIT leftButtonClicked(event->x(), event->y());
 		}
 	}
 	if (event->buttons() & Qt::MiddleButton)
@@ -3904,7 +3904,7 @@ void ccGLWindow::mousePressEvent(QMouseEvent *event)
 		//middle click = zooming
 		if (m_interactionFlags & INTERACT_SIG_MB_CLICKED)
 		{
-			emit middleButtonClicked(event->x(), event->y());
+			Q_EMIT middleButtonClicked(event->x(), event->y());
 		}
 	}
 	else
@@ -3956,7 +3956,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 
 	if (m_interactionFlags & INTERACT_SIG_MOUSE_MOVED)
 	{
-		emit mouseMoved(x, y, event->buttons());
+		Q_EMIT mouseMoved(x, y, event->buttons());
 		event->accept();
 	}
 
@@ -4030,7 +4030,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 
 				if (m_interactionFlags & INTERACT_TRANSFORM_ENTITIES)
 				{
-					emit translation(u);
+					Q_EMIT translation(u);
 				}
 				else if (m_customLightEnabled)
 				{
@@ -4309,7 +4309,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 					rotMat = m_viewportParams.viewMat.transposed() * rotMat * m_viewportParams.viewMat;
 
 					//feedback for 'interactive transformation' mode
-					emit rotation(rotMat);
+					Q_EMIT rotation(rotMat);
 				}
 				else
 				{
@@ -4319,7 +4319,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 					QApplication::changeOverrideCursor(QCursor(Qt::ClosedHandCursor));
 
 					//feedback for 'echo' mode
-					emit viewMatRotated(rotMat);
+					Q_EMIT viewMatRotated(rotMat);
 				}
 			}
 		}
@@ -4330,7 +4330,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 		float pseudo_wheelDelta_deg = static_cast<float>(-dy);
 		onWheelEvent(pseudo_wheelDelta_deg);
 
-		emit mouseWheelRotated(pseudo_wheelDelta_deg);
+		Q_EMIT mouseWheelRotated(pseudo_wheelDelta_deg);
 	}
 
 	m_mouseMoved = true;
@@ -4446,7 +4446,7 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 	if (m_interactionFlags & INTERACT_SIG_BUTTON_RELEASED)
 	{
 		event->accept();
-		emit buttonReleased();
+		Q_EMIT buttonReleased();
 	}
 
 	if (m_pivotSymbolShown)
@@ -4575,7 +4575,7 @@ void ccGLWindow::doPicking()
 					cc2DLabel* label = dynamic_cast<cc2DLabel*>(pickedObj);
 					if (label && !label->isSelected())
 					{
-						emit entitySelectionChanged(label);
+						Q_EMIT entitySelectionChanged(label);
 						QApplication::processEvents();
 					}
 				}
@@ -4667,7 +4667,7 @@ void ccGLWindow::wheelEvent(QWheelEvent* event)
 		float wheelDelta_deg = event->delta() / 8.0f;
 		onWheelEvent(wheelDelta_deg);
 
-		emit mouseWheelRotated(wheelDelta_deg);
+		Q_EMIT mouseWheelRotated(wheelDelta_deg);
 
 		doRedraw = true;
 	}
@@ -4758,13 +4758,13 @@ void ccGLWindow::processPickingResult(	const PickingParameters& params,
 	//standard "entity" picking
 	if (params.mode == ENTITY_PICKING)
 	{
-		emit entitySelectionChanged(pickedEntity);
+		Q_EMIT entitySelectionChanged(pickedEntity);
 	}
 	//rectangular "entity" picking
 	else if (params.mode == ENTITY_RECT_PICKING)
 	{
 		if (selectedIDs)
-			emit entitiesSelectionChanged(*selectedIDs);
+			Q_EMIT entitiesSelectionChanged(*selectedIDs);
 		else
 			assert(false);
 	}
@@ -4777,12 +4777,12 @@ void ccGLWindow::processPickingResult(	const PickingParameters& params,
 		assert(pickedEntity == nullptr || pickedItemIndex >= 0);
 		assert(nearestPoint && nearestPointBC);
 
-		emit itemPicked(pickedEntity, static_cast<unsigned>(pickedItemIndex), params.centerX, params.centerY, *nearestPoint, *nearestPointBC);
+		Q_EMIT itemPicked(pickedEntity, static_cast<unsigned>(pickedItemIndex), params.centerX, params.centerY, *nearestPoint, *nearestPointBC);
 	}
 	//fast picking (labels, interactors, etc.)
 	else if (params.mode == FAST_PICKING)
 	{
-		emit itemPickedFast(pickedEntity, pickedItemIndex, params.centerX, params.centerY);
+		Q_EMIT itemPickedFast(pickedEntity, pickedItemIndex, params.centerX, params.centerY);
 	}
 	else if (params.mode == LABEL_PICKING)
 	{
@@ -4813,7 +4813,7 @@ void ccGLWindow::processPickingResult(	const PickingParameters& params,
 				label->setDisplay(pickedEntity->getDisplay());
 				label->setPosition(	static_cast<float>(params.centerX + 20) / glWidth(),
 									static_cast<float>(params.centerY + 20) / glHeight());
-				emit newLabel(static_cast<ccHObject*>(label));
+				Q_EMIT newLabel(static_cast<ccHObject*>(label));
 				QApplication::processEvents();
 
 				toBeRefreshed();
@@ -5785,7 +5785,7 @@ void ccGLWindow::setPerspectiveState(bool state, bool objectCenteredView)
 
 	setCameraPos(m_viewportParams.getPivotPoint() + cameraCenterToPivot);
 
-	emit perspectiveStateChanged();
+	Q_EMIT perspectiveStateChanged();
 
 	//auto-save last perspective settings
 	{
@@ -5853,7 +5853,7 @@ void ccGLWindow::setFov(float fov_deg)
 								SCREEN_SIZE_MESSAGE);
 		}
 
-		emit fovChanged(m_viewportParams.fov_deg);
+		Q_EMIT fovChanged(m_viewportParams.fov_deg);
 	}
 }
 
@@ -5881,7 +5881,7 @@ void ccGLWindow::setBubbleViewFov(float fov_deg)
 			invalidateViewport();
 			invalidateVisualization();
 			deprecate3DLayer();
-			emit fovChanged(m_bubbleViewFov_deg);
+			Q_EMIT fovChanged(m_bubbleViewFov_deg);
 		}
 	}
 }
@@ -5916,7 +5916,7 @@ void ccGLWindow::setZNearCoef(double coef)
 								SCREEN_SIZE_MESSAGE);
 		}
 
-		emit zNearCoefChanged(coef);
+		Q_EMIT zNearCoefChanged(coef);
 	}
 }
 
@@ -5935,10 +5935,10 @@ void ccGLWindow::setViewportParameters(const ccViewportParameters& params)
 	invalidateVisualization();
 	deprecate3DLayer();
 
-	emit baseViewMatChanged(m_viewportParams.viewMat);
-	emit pivotPointChanged(m_viewportParams.getPivotPoint());
-	emit cameraPosChanged(m_viewportParams.getCameraCenter());
-	emit fovChanged(m_viewportParams.fov_deg);
+	Q_EMIT baseViewMatChanged(m_viewportParams.viewMat);
+	Q_EMIT pivotPointChanged(m_viewportParams.getPivotPoint());
+	Q_EMIT cameraPosChanged(m_viewportParams.getCameraCenter());
+	Q_EMIT fovChanged(m_viewportParams.fov_deg);
 }
 
 void ccGLWindow::rotateBaseViewMat(const ccGLMatrixd& rotMat)
@@ -5946,7 +5946,7 @@ void ccGLWindow::rotateBaseViewMat(const ccGLMatrixd& rotMat)
 	m_viewportParams.viewMat = rotMat * m_viewportParams.viewMat;
 
 	//we emit the 'baseViewMatChanged' signal
-	emit baseViewMatChanged(m_viewportParams.viewMat);
+	Q_EMIT baseViewMatChanged(m_viewportParams.viewMat);
 
 	invalidateVisualization();
 	deprecate3DLayer();
@@ -6021,7 +6021,7 @@ void ccGLWindow::setView(CC_VIEW_ORIENTATION orientation, bool forceRedraw/*=tru
 	deprecate3DLayer();
 
 	//we emit the 'baseViewMatChanged' signal
-	emit baseViewMatChanged(m_viewportParams.viewMat);
+	Q_EMIT baseViewMatChanged(m_viewportParams.viewMat);
 
 	if (forceRedraw)
 		redraw();
@@ -6877,7 +6877,7 @@ void ccGLWindow::toggleExclusiveFullScreen(bool state)
 	}
 	redraw();
 
-	emit exclusiveFullScreenToggled(state);
+	Q_EMIT exclusiveFullScreenToggled(state);
 }
 
 void ccGLWindow::renderText(int x, int y, const QString & str, uint16_t uniqueID/*=0*/, const QFont & font/*=QFont()*/)

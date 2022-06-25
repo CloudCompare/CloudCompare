@@ -307,7 +307,7 @@ int FastGlobalRegistrationFilter::compute()
 		ccLog::Print(ccTrans.toString(12, ' ')); //full precision
 		ccLog::Print(tr("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool"));
 
-		emit entityHasChanged(alignedCloud);
+		Q_EMIT entityHasChanged(alignedCloud);
 	}
 
 	return Success;

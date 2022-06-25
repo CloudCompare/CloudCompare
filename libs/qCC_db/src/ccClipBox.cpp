@@ -284,7 +284,7 @@ void ccClipBox::reset()
 	update();
 
 	//send 'modified' signal
-	emit boxModified(&m_box);
+	Q_EMIT boxModified(&m_box);
 }
 
 void ccClipBox::set(const ccBBox& extents, const ccGLMatrix& transformation)
@@ -295,7 +295,7 @@ void ccClipBox::set(const ccBBox& extents, const ccGLMatrix& transformation)
 	update();
 
 	//send 'modified' signal
-	emit boxModified(&m_box);
+	Q_EMIT boxModified(&m_box);
 }
 
 void ccClipBox::get(ccBBox& extents, ccGLMatrix& transformation)
@@ -498,7 +498,7 @@ bool ccClipBox::move3D(const CCVector3d& uInput)
 		}
 		
 		//send 'modified' signal
-		emit boxModified(&m_box);
+		Q_EMIT boxModified(&m_box);
 	}
 	else if (m_activeComponent == SPHERE)
 	{
@@ -589,7 +589,7 @@ void ccClipBox::setBox(const ccBBox& box)
 	update();
 
 	//send 'modified' signal
-	emit boxModified(&m_box);
+	Q_EMIT boxModified(&m_box);
 }
 
 void ccClipBox::shift(const CCVector3& v)
@@ -600,7 +600,7 @@ void ccClipBox::shift(const CCVector3& v)
 	update();
 
 	//send 'modified' signal
-	emit boxModified(&m_box);
+	Q_EMIT boxModified(&m_box);
 }
 
 void ccClipBox::flagPointsInside(	ccGenericPointCloud* cloud,

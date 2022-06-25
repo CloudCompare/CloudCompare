@@ -441,7 +441,7 @@ void ccDisplayOptionsDlg::doReject()
 	ccGui::Set(m_oldParameters);
 	ccOptions::Set(m_oldOptions);
 
-	emit aspectHasChanged();
+	Q_EMIT aspectHasChanged();
 
 	reject();
 }
@@ -466,7 +466,7 @@ void ccDisplayOptionsDlg::apply()
 		ccApp->setAppStyle(style);
 	}
 
-	emit aspectHasChanged();
+	Q_EMIT aspectHasChanged();
 }
 
 void ccDisplayOptionsDlg::doAccept()

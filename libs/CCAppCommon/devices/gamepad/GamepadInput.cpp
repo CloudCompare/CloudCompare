@@ -164,6 +164,6 @@ void GamepadInput::updateInternalState()
 
 	if (m_hasRotation || m_hasPanning || m_hasTranslation || m_zoom != 0)
 	{
-		emit updated();
+		Q_EMIT updated();
 	}
 }

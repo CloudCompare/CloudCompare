@@ -39,7 +39,7 @@ public:
 	//! Returns requested focal distance
 	double getFocalDistance() const;
 
-protected slots:
+protected Q_SLOTS:
 	void onFocalChanged(double);
 	void onPixelSizeChanged(double);
 	void onPixelCountChanged(int);

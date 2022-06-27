@@ -3438,7 +3438,7 @@ void ccCompass::exportToSVG()
 		filename += ".svg";
 	}
 
-	ccCompassExport::saveSVG( m_app, filename, zoom );
+	ccCompassExport::SaveSVG( m_app, filename, zoom );
 }
 
 //export interpretations to csv or xml
@@ -3455,10 +3455,10 @@ void ccCompass::onSave()
 	QFileInfo fi(filename);
 	if (fi.suffix() == "xml")
 	{
-		ccCompassExport::saveXML( m_app, filename );
+		ccCompassExport::SaveXML( m_app, filename );
 		
 		return;
 	}
 	
-	ccCompassExport::saveCSV( m_app, filename );
+	ccCompassExport::SaveCSV( m_app, filename );
 }

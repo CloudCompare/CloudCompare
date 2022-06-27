@@ -18,16 +18,16 @@
 #ifndef CCCOMPASSEXPORT_H
 #define CCCOMPASSEXPORT_H
 
-class QString;
+#include <QString>
 
 class ccMainAppInterface;
 
-
-namespace ccCompassExport
+class ccCompassExport
 {
-	void saveCSV( ccMainAppInterface *app, const QString &filename );
-	void saveSVG( ccMainAppInterface *app, const QString &filename, float zoom );
-	void saveXML( ccMainAppInterface *app, const QString &filename );
+public:
+	static void SaveCSV(ccMainAppInterface* app, const QString& filename);
+	static void SaveSVG(ccMainAppInterface* app, const QString& filename, float zoom);
+	static void SaveXML(ccMainAppInterface* app, const QString& filename);
 };
 
 #endif // CCCOMPASSEXPORT_H

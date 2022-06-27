@@ -202,7 +202,7 @@ void ccShiftAndScaleCloudDlg::updateLocalSystem()
 	m_ui->yDestLabel->setText(QString("y = %1").arg(localPoint.y, 0, 'f', prec));
 	m_ui->yDestLabel->setStyleSheet(ccGlobalShiftManager::NeedShift(localPoint.y) ? QString("color: red;") : QString());
 	m_ui->zDestLabel->setText(QString("z = %1").arg(localPoint.z, 0, 'f', prec));
-	m_ui->zDestLabel->setStyleSheet(ccGlobalShiftManager::NeedShift(localPoint.z) ? QString("color: red;") : QString());
+	m_ui->zDestLabel->setStyleSheet(ccGlobalShiftManager::NeedShift(localPoint.z) || (getShift().z != 0) ? QString("color: red;") : QString());
 
 	m_ui->diagDestLabel->setText(QString("diagonal = %1").arg(localDiagonal, 0, 'f', prec));
 	m_ui->diagDestLabel->setStyleSheet(ccGlobalShiftManager::NeedRescale(localDiagonal) ? QString("color: red;") : QString());

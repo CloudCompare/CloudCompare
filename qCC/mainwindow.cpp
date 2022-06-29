@@ -141,10 +141,6 @@
 #include "ccGamepadManager.h"
 #endif
 
-#ifdef CC_CORE_LIB_USES_TBB
-#include <tbb/tbb_stddef.h>
-#endif
-
 //Qt
 #include <QClipboard>
 
@@ -303,8 +299,8 @@ MainWindow::MainWindow()
 	QMainWindow::statusBar()->showMessage(tr("Ready"));
 	
 #ifdef CC_CORE_LIB_USES_TBB
-	ccConsole::Print( QStringLiteral( "[TBB] Using Intel's Threading Building Blocks %1.%2" )
-					  .arg( QString::number( TBB_VERSION_MAJOR ), QString::number( TBB_VERSION_MINOR ) ) );
+	ccConsole::Print( QStringLiteral( "[TBB] Using Intel's Threading Building Blocks %1" )
+					  .arg( QString( TBB_VERSION ) ) );
 #endif
 	
 	ccConsole::Print(tr("CloudCompare started!"));

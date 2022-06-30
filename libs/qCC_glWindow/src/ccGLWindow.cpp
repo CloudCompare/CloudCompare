@@ -3808,7 +3808,7 @@ void ccGLWindow::updateActiveItemsList(int x, int y, bool extendToSelectedLabels
 			if (!label->isSelected() || !extendToSelectedLabels)
 			{
 				//select it?
-				//emit entitySelectionChanged(label);
+				//Q_EMIT entitySelectionChanged(label);
 				//QApplication::processEvents();
 			}
 			else

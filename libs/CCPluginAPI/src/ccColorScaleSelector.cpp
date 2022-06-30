@@ -112,5 +112,5 @@ void ccColorScaleSelector::setSelectedScale(QString uuid)
 		return;
 	m_comboBox->setCurrentIndex(pos);
 
-	emit colorScaleSelected(pos);
+	Q_EMIT colorScaleSelected(pos);
 }

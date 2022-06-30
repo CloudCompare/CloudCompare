@@ -129,7 +129,7 @@ public:
 	//! Returns currently bound object
 	ccHObject* getCurrentObject();
 
-signals:
+Q_SIGNALS:
 	void ccObjectPropertiesChanged(ccHObject* hObject) const;
 	void ccObjectAppearanceChanged(ccHObject* hObject) const;
 	void ccObjectAndChildrenAppearanceChanged(ccHObject* hObject) const;

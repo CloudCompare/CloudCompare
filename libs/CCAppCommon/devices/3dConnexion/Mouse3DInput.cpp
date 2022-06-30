@@ -220,7 +220,7 @@ bool Mouse3DInput::onSiEvent(void* siGetEventData)
 
 	case SI_ZERO_EVENT:
 		//FIXME: too flickery!
-		emit sigReleased();
+		Q_EMIT sigReleased();
 		break;
 
 	case SI_BUTTON_EVENT:
@@ -271,27 +271,27 @@ bool Mouse3DInput::onSiEvent(void* siGetEventData)
 
 void Mouse3DInput::move3d(std::vector<float>& motionData)
 {
-	emit sigMove3d(motionData);
+	Q_EMIT sigMove3d(motionData);
 }
 
 void Mouse3DInput::on3dmouseKeyDown(int virtualKeyCode)
 {
-	emit sigOn3dmouseKeyDown(virtualKeyCode);
+	Q_EMIT sigOn3dmouseKeyDown(virtualKeyCode);
 }
 
 void Mouse3DInput::on3dmouseCMDKeyDown(int virtualCMDCode)
 {
-	emit sigOn3dmouseCMDKeyDown(virtualCMDCode);
+	Q_EMIT sigOn3dmouseCMDKeyDown(virtualCMDCode);
 }
 
 void Mouse3DInput::on3dmouseKeyUp(int virtualKeyCode)
 {
-	emit sigOn3dmouseKeyUp(virtualKeyCode);
+	Q_EMIT sigOn3dmouseKeyUp(virtualKeyCode);
 }
 
 void Mouse3DInput::on3dmouseCMDKeyUp(int virtualCMDCode)
 {
-	emit sigOn3dmouseCMDKeyUp(virtualCMDCode);
+	Q_EMIT sigOn3dmouseCMDKeyUp(virtualCMDCode);
 }
 
 void Mouse3DInput::GetMatrix(const std::vector<float>& vec, ccGLMatrixd& mat)

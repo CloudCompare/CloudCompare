@@ -95,7 +95,7 @@ int StatisticalOutliersRemover::compute()
 		cloud->getParent()->addChild(final_cloud);
 	}
 
-	emit newEntity(final_cloud);
+	Q_EMIT newEntity(final_cloud);
 
 	return Success;
 }

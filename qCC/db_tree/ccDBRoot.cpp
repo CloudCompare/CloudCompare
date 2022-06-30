@@ -343,7 +343,7 @@ void ccDBRoot::unloadAll()
 		endRemoveRows();
 	}
 
-	emit dbIsEmpty();
+	Q_EMIT dbIsEmpty();
 
 	updatePropertiesView();
 
@@ -414,7 +414,7 @@ void ccDBRoot::addElement(ccHObject* object, bool autoExpand/*=true*/)
 
 	if (wasEmpty && m_treeRoot->getChildrenNumber() != 0)
 	{
-		emit dbIsNotEmptyAnymore();
+		Q_EMIT dbIsNotEmptyAnymore();
 	}
 }
 
@@ -470,7 +470,7 @@ void ccDBRoot::removeElements(ccHObject::Container& objects)
 
 	if (m_treeRoot->getChildrenNumber() == 0)
 	{
-		emit dbIsEmpty();
+		Q_EMIT dbIsEmpty();
 	}
 }
 
@@ -513,7 +513,7 @@ void ccDBRoot::removeElement(ccHObject* object)
 
 	if (m_treeRoot->getChildrenNumber() == 0)
 	{
-		emit dbIsEmpty();
+		Q_EMIT dbIsEmpty();
 	}
 }
 
@@ -609,7 +609,7 @@ void ccDBRoot::deleteSelectedEntities()
 
 	if (m_treeRoot->getChildrenNumber() == 0)
 	{
-		emit dbIsEmpty();
+		Q_EMIT dbIsEmpty();
 	}
 
 	MainWindow::RefreshAllGLWindow(false);
@@ -738,7 +738,7 @@ bool ccDBRoot::setData(const QModelIndex& idx, const QVariant& value, int role)
 
 				reflectObjectPropChange(item);
 
-				emit dataChanged(idx, idx);
+				Q_EMIT dataChanged(idx, idx);
 			}
 
 			return true;
@@ -884,7 +884,7 @@ void ccDBRoot::changeSelection(const QItemSelection & selected, const QItemSelec
 
 	MainWindow::RefreshAllGLWindow();
 
-	emit selectionChanged();
+	Q_EMIT selectionChanged();
 }
 
 void ccDBRoot::unselectEntity(ccHObject* obj)
@@ -1101,7 +1101,7 @@ void ccDBRoot::updatePropertiesView()
 
 	for (const QModelIndex& idx : selectedIndexes)
 	{
-		emit dataChanged(idx, idx);
+		Q_EMIT dataChanged(idx, idx);
 	}
 }
 
@@ -1112,7 +1112,7 @@ void ccDBRoot::updateCCObject(ccHObject* object)
 	QModelIndex idx = index(object);
 
 	if (idx.isValid())
-		emit dataChanged(idx, idx);
+		Q_EMIT dataChanged(idx, idx);
 }
 
 void ccDBRoot::redrawCCObject(ccHObject* object)

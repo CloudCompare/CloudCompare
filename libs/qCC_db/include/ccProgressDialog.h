@@ -78,7 +78,7 @@ protected:
 	**/
 	void refresh();
 
-signals:
+Q_SIGNALS:
 
 	//! Schedules a call to refresh
 	void scheduleRefresh();

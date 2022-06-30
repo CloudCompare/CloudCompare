@@ -310,7 +310,7 @@ void StereogramWidget::mousePressEvent(QMouseEvent* e)
 				if (m_clickDipDir_deg >= 360.0)
 					m_clickDipDir_deg -= 360.0;
 
-				emit pointClicked(m_clickDip_deg, m_clickDipDir_deg);
+				Q_EMIT pointClicked(m_clickDip_deg, m_clickDipDir_deg);
 				e->accept();
 				return;
 			}
@@ -328,7 +328,7 @@ void StereogramWidget::enableMouseTracking(bool state, double dipSpan_deg/*=30*/
 		m_clickDipSpan_deg = dipSpan_deg;
 		m_clickDipDirSpan_deg = dipDirSpan_deg;
 		//to give to the parent dialog some feedback about the current marker position!
-		emit pointClicked(m_clickDip_deg, m_clickDipDir_deg);
+		Q_EMIT pointClicked(m_clickDip_deg, m_clickDipDir_deg);
 	}
 }
 

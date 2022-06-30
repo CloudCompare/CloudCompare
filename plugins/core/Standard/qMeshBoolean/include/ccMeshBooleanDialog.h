@@ -41,7 +41,7 @@ public:
 	//! Returns whether mesh order has been swappped or not
 	bool isSwapped() const { return m_isSwapped; }
 
-protected slots:
+protected Q_SLOTS:
 
 	void unionSelected();
 	void intersectSelected();

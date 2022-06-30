@@ -2014,7 +2014,7 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 	{
 	case OBJECT_NAME:
 		m_currentObject->setName(item->text());
-		emit ccObjectPropertiesChanged(m_currentObject);
+		Q_EMIT ccObjectPropertiesChanged(m_currentObject);
 		break;
 	case OBJECT_VISIBILITY:
 	{
@@ -2024,9 +2024,9 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 		if (objectWasDisplayed != objectIsDisplayed)
 		{
 			if (m_currentObject->isGroup())
-				emit ccObjectAndChildrenAppearanceChanged(m_currentObject);
+				Q_EMIT ccObjectAndChildrenAppearanceChanged(m_currentObject);
 			else
-				emit ccObjectAppearanceChanged(m_currentObject);
+				Q_EMIT ccObjectAppearanceChanged(m_currentObject);
 		}
 	}
 	break;
@@ -2203,11 +2203,11 @@ void ccPropertiesTreeDelegate::updateDisplay()
 	{
 		if (object->isGroup())
 		{
-			emit ccObjectAndChildrenAppearanceChanged(m_currentObject);
+			Q_EMIT ccObjectAndChildrenAppearanceChanged(m_currentObject);
 		}
 		else
 		{
-			emit ccObjectAppearanceChanged(m_currentObject);
+			Q_EMIT ccObjectAppearanceChanged(m_currentObject);
 		}
 	}
 }

@@ -181,7 +181,7 @@ int MLSSmoothingUpsampling::compute()
 		cloud->getParent()->addChild(outputCCCloud);
 	}
 
-	emit newEntity(outputCCCloud);
+	Q_EMIT newEntity(outputCCCloud);
 
 	return Success;
 }

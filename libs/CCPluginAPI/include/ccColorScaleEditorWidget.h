@@ -166,7 +166,7 @@ public:
 	//! Default constructor
 	ColorBarWidget(SharedColorScaleElementSliders sliders, QWidget* parent = nullptr, Qt::Orientation orientation = Qt::Horizontal);
 
-signals:
+Q_SIGNALS:
 
 	//! Signal emitted when the mouse (left) button is clicked
 	/** \param relativePos relative click position (between 0 and 1)
@@ -206,7 +206,7 @@ public:
 	//! Updates all sliders positions
 	void updateAllSlidersPos();
 
-signals:
+Q_SIGNALS:
 
 	//! Signal emitted when a slider is changed (position or color)
 	void sliderModified(int index);
@@ -307,7 +307,7 @@ public:
 	//inherited from ColorScaleEditorBaseWidget
 	void setSliders(SharedColorScaleElementSliders sliders) override;
 
-signals:
+Q_SIGNALS:
 
 	//! Signal emitted when a slider is selected
 	void stepSelected(int index);

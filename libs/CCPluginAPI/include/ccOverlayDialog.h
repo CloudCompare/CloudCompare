@@ -65,7 +65,7 @@ public:
 	//! Returns whether the tool is currently started or not
 	bool started() const { return m_processing; }
 
-signals:
+Q_SIGNALS:
 
 	//! Signal emitted when process is finished
 	/** \param accepted specifies how the process finished (accepted or not)

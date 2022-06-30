@@ -122,7 +122,7 @@ public:
 	//! Associated entity container
 	inline const ccHObject& getContainer() const { return m_entityContainer; }
 
-signals:
+Q_SIGNALS:
 
 	//! Signal sent each time the box is modified
 	void boxModified(const ccBBox* box);

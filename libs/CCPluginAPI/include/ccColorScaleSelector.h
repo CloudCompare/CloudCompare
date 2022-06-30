@@ -52,7 +52,7 @@ public:
 	//! Returns a given color scale by index
 	ccColorScale::Shared getScale(int index) const;
 
-signals:
+Q_SIGNALS:
 
 	//! Signal emitted when a color scale is selected
 	void colorScaleSelected(int);

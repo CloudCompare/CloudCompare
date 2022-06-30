@@ -115,7 +115,7 @@ void ccOverlayDialog::stop(bool accepted)
 
 	linkWith(nullptr);
 
-	emit processFinished(accepted);
+	Q_EMIT processFinished(accepted);
 }
 
 void ccOverlayDialog::reject()
@@ -138,7 +138,7 @@ bool ccOverlayDialog::eventFilter(QObject *obj, QEvent *e)
 
 		if (m_overriddenKeys.contains(keyEvent->key()))
 		{
-			emit shortcutTriggered(keyEvent->key());
+			Q_EMIT shortcutTriggered(keyEvent->key());
 			return true;
 		}
 		else
@@ -150,7 +150,7 @@ bool ccOverlayDialog::eventFilter(QObject *obj, QEvent *e)
 	{
 		if (e->type() == QEvent::Show)
 		{
-			emit shown();
+			Q_EMIT shown();
 		}
 		
 		// standard event processing

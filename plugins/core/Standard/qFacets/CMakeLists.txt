@@ -8,6 +8,7 @@ if( PLUGIN_STANDARD_QFACETS )
 	project( QFACETS_PLUGIN )
 
 	AddPlugin( NAME ${PROJECT_NAME} )
+	target_compile_definitions( ${PROJECT_NAME} PRIVATE QT_NO_KEYWORDS )
 		
 	add_subdirectory( include )
 	add_subdirectory( src )

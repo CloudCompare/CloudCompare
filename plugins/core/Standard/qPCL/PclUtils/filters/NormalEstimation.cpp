@@ -155,7 +155,7 @@ int NormalEstimation::compute()
 	TO_PCL_CLOUD(rawCloudWithNormals, *cloudWithNormals);
 	pcl2cc::CopyScalarField(*cloudWithNormals, "curvature", *cloud, m_overwrite_curvature);
 
-	emit entityHasChanged(cloud);
+	Q_EMIT entityHasChanged(cloud);
 
 	return Success;
 }

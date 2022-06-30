@@ -276,7 +276,7 @@ int ExtractSIFT::compute()
 		cloud->getParent()->addChild(out_cloud_cc);
 	}
 
-	emit newEntity(out_cloud_cc);
+	Q_EMIT newEntity(out_cloud_cc);
 
 	return Success;
 }

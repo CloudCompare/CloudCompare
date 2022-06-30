@@ -1584,7 +1584,7 @@ bool QCPLayerable::moveToLayer(QCPLayer *layer, bool prepend)
   if (mLayer)
     mLayer->addChild(this, prepend);
   if (mLayer != oldLayer)
-    emit layerChanged(mLayer);
+    Q_EMIT layerChanged(mLayer);
   return true;
 }
 
@@ -2772,7 +2772,7 @@ QCPDataSelection QCPDataSelection::inverse(const QCPDataRange &outerRange) const
   \ref QCP::srmNone. When the user drags the mouse across the plot, the current selection rect
   instance (\ref QCustomPlot::setSelectionRect) is forwarded these events and makes sure an
   according rect shape is drawn. At the begin, during, and after completion of the interaction, it
-  emits the corresponding signals \ref started, \ref changed, \ref canceled, and \ref accepted.
+  Q_EMITs the corresponding signals \ref started, \ref changed, \ref canceled, and \ref accepted.
   
   The QCustomPlot instance connects own slots to the current selection rect instance, in order to
   react to an accepted selection rect interaction accordingly.
@@ -2905,7 +2905,7 @@ void QCPSelectionRect::cancel()
   if (mActive)
   {
     mActive = false;
-    emit canceled(mRect, nullptr);
+    Q_EMIT canceled(mRect, nullptr);
   }
 }
 
@@ -2919,7 +2919,7 @@ void QCPSelectionRect::startSelection(QMouseEvent *event)
 {
   mActive = true;
   mRect = QRect(event->pos(), event->pos());
-  emit started(event);
+  Q_EMIT started(event);
 }
 
 /*! \internal
@@ -2931,7 +2931,7 @@ void QCPSelectionRect::startSelection(QMouseEvent *event)
 void QCPSelectionRect::moveSelection(QMouseEvent *event)
 {
   mRect.setBottomRight(event->pos());
-  emit changed(mRect, event);
+  Q_EMIT changed(mRect, event);
   layer()->replot();
 }
 
@@ -2945,7 +2945,7 @@ void QCPSelectionRect::endSelection(QMouseEvent *event)
 {
   mRect.setBottomRight(event->pos());
   mActive = false;
-  emit accepted(mRect, event);
+  Q_EMIT accepted(mRect, event);
 }
 
 /*! \internal
@@ -2959,7 +2959,7 @@ void QCPSelectionRect::keyPressEvent(QKeyEvent *event)
   if (event->key() == Qt::Key_Escape && mActive)
   {
     mActive = false;
-    emit canceled(mRect, event);
+    Q_EMIT canceled(mRect, event);
   }
 }
 
@@ -8370,7 +8370,7 @@ void QCPAxis::setScaleType(QCPAxis::ScaleType type)
     if (mScaleType == stLogarithmic)
       setRange(mRange.sanitizedForLogScale());
     mCachedMarginValid = false;
-    emit scaleTypeChanged(mScaleType);
+    Q_EMIT scaleTypeChanged(mScaleType);
   }
 }
 
@@ -8396,8 +8396,8 @@ void QCPAxis::setRange(const QCPRange &range)
   {
     mRange = range.sanitizedForLinScale();
   }
-  emit rangeChanged(mRange);
-  emit rangeChanged(mRange, oldRange);
+  Q_EMIT rangeChanged(mRange);
+  Q_EMIT rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -8415,7 +8415,7 @@ void QCPAxis::setSelectableParts(const SelectableParts &selectable)
   if (mSelectableParts != selectable)
   {
     mSelectableParts = selectable;
-    emit selectableChanged(mSelectableParts);
+    Q_EMIT selectableChanged(mSelectableParts);
   }
 }
 
@@ -8429,7 +8429,7 @@ void QCPAxis::setSelectableParts(const SelectableParts &selectable)
   
   This function can change the selection state of a part, independent of the \ref setSelectableParts setting.
   
-  emits the \ref selectionChanged signal when \a selected is different from the previous selection state.
+  Q_EMITs the \ref selectionChanged signal when \a selected is different from the previous selection state.
   
   \see SelectablePart, setSelectableParts, selectTest, setSelectedBasePen, setSelectedTickPen, setSelectedSubTickPen,
   setSelectedTickLabelFont, setSelectedLabelFont, setSelectedTickLabelColor, setSelectedLabelColor
@@ -8439,7 +8439,7 @@ void QCPAxis::setSelectedParts(const SelectableParts &selected)
   if (mSelectedParts != selected)
   {
     mSelectedParts = selected;
-    emit selectionChanged(mSelectedParts);
+    Q_EMIT selectionChanged(mSelectedParts);
   }
 }
 
@@ -8468,8 +8468,8 @@ void QCPAxis::setRange(double lower, double upper)
   {
     mRange = mRange.sanitizedForLinScale();
   }
-  emit rangeChanged(mRange);
-  emit rangeChanged(mRange, oldRange);
+  Q_EMIT rangeChanged(mRange);
+  Q_EMIT rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -8511,8 +8511,8 @@ void QCPAxis::setRangeLower(double lower)
   {
     mRange = mRange.sanitizedForLinScale();
   }
-  emit rangeChanged(mRange);
-  emit rangeChanged(mRange, oldRange);
+  Q_EMIT rangeChanged(mRange);
+  Q_EMIT rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -8533,8 +8533,8 @@ void QCPAxis::setRangeUpper(double upper)
   {
     mRange = mRange.sanitizedForLinScale();
   }
-  emit rangeChanged(mRange);
-  emit rangeChanged(mRange, oldRange);
+  Q_EMIT rangeChanged(mRange);
+  Q_EMIT rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -9120,8 +9120,8 @@ void QCPAxis::moveRange(double diff)
     mRange.lower *= diff;
     mRange.upper *= diff;
   }
-  emit rangeChanged(mRange);
-  emit rangeChanged(mRange, oldRange);
+  Q_EMIT rangeChanged(mRange);
+  Q_EMIT rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -9169,8 +9169,8 @@ void QCPAxis::scaleRange(double factor, double center)
     } else
       qDebug() << Q_FUNC_INFO << "Center of scaling operation doesn't lie in same logarithmic sign domain as range:" << center;
   }
-  emit rangeChanged(mRange);
-  emit rangeChanged(mRange, oldRange);
+  Q_EMIT rangeChanged(mRange);
+  Q_EMIT rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -11546,7 +11546,7 @@ void QCPAbstractPlottable::setValueAxis(QCPAxis *axis)
   QCP::SelectionType set via \ref setSelectable, the resulting selection will be adjusted
   accordingly (see \ref QCPDataSelection::enforceType).
   
-  emits the \ref selectionChanged signal when \a selected is different from the previous selection state.
+  Q_EMITs the \ref selectionChanged signal when \a selected is different from the previous selection state.
   
   \see setSelectable, selectTest
 */
@@ -11556,8 +11556,8 @@ void QCPAbstractPlottable::setSelection(QCPDataSelection selection)
   if (mSelection != selection)
   {
     mSelection = selection;
-    emit selectionChanged(selected());
-    emit selectionChanged(mSelection);
+    Q_EMIT selectionChanged(selected());
+    Q_EMIT selectionChanged(mSelection);
   }
 }
 
@@ -11603,11 +11603,11 @@ void QCPAbstractPlottable::setSelectable(QCP::SelectionType selectable)
     mSelectable = selectable;
     QCPDataSelection oldSelection = mSelection;
     mSelection.enforceType(mSelectable);
-    emit selectableChanged(mSelectable);
+    Q_EMIT selectableChanged(mSelectable);
     if (mSelection != oldSelection)
     {
-      emit selectionChanged(selected());
-      emit selectionChanged(mSelection);
+      Q_EMIT selectionChanged(selected());
+      Q_EMIT selectionChanged(mSelection);
     }
   }
 }
@@ -12992,7 +12992,7 @@ void QCPAbstractItem::setSelectable(bool selectable)
   if (mSelectable != selectable)
   {
     mSelectable = selectable;
-    emit selectableChanged(mSelectable);
+    Q_EMIT selectableChanged(mSelectable);
   }
 }
 
@@ -13006,7 +13006,7 @@ void QCPAbstractItem::setSelectable(bool selectable)
   
   This function can change the selection state even when \ref setSelectable was set to false.
   
-  emits the \ref selectionChanged signal when \a selected is different from the previous selection state.
+  Q_EMITs the \ref selectionChanged signal when \a selected is different from the previous selection state.
   
   \see setSelectable, selectTest
 */
@@ -13015,7 +13015,7 @@ void QCPAbstractItem::setSelected(bool selected)
   if (mSelected != selected)
   {
     mSelected = selected;
-    emit selectionChanged(mSelected);
+    Q_EMIT selectionChanged(mSelected);
   }
 }
 
@@ -13849,7 +13849,7 @@ void QCustomPlot::setAutoAddPlottableToLegend(bool on)
   need to check their selected state explicitly.
   
   If the selection state has changed by user interaction, the \ref selectionChangedByUser signal is
-  emitted. Each selectable object additionally emits an individual selectionChanged signal whenever
+  Q_EMITted. Each selectable object additionally Q_EMITs an individual selectionChanged signal whenever
   their selection state has changed, i.e. not only by user interaction.
   
   To allow multiple objects to be selected by holding the selection modifier (\ref
@@ -15128,7 +15128,7 @@ void QCustomPlot::replot(QCustomPlot::RefreshPriority refreshPriority)
     return;
   mReplotting = true;
   mReplotQueued = false;
-  emit beforeReplot();
+  Q_EMIT beforeReplot();
   
 # if QT_VERSION < QT_VERSION_CHECK(4, 8, 0)
   QTime replotTimer;
@@ -15161,7 +15161,7 @@ void QCustomPlot::replot(QCustomPlot::RefreshPriority refreshPriority)
   else
     mReplotTimeAverage = mReplotTime; // no previous replots to average with, so initialize with replot time
   
-  emit afterReplot();
+  Q_EMIT afterReplot();
   mReplotting = false;
 }
 
@@ -15504,7 +15504,7 @@ void QCustomPlot::resizeEvent(QResizeEvent *event)
 */
 void QCustomPlot::mouseDoubleClickEvent(QMouseEvent *event)
 {
-  emit mouseDoubleClick(event);
+  Q_EMIT mouseDoubleClick(event);
   mMouseHasMoved = false;
   mMousePressPos = event->pos();
   
@@ -15531,15 +15531,15 @@ void QCustomPlot::mouseDoubleClickEvent(QMouseEvent *event)
       int dataIndex = 0;
       if (!details.first().value<QCPDataSelection>().isEmpty())
         dataIndex = details.first().value<QCPDataSelection>().dataRange().begin();
-      emit plottableDoubleClick(ap, dataIndex, event);
+      Q_EMIT plottableDoubleClick(ap, dataIndex, event);
     } else if (QCPAxis *ax = qobject_cast<QCPAxis*>(candidates.first()))
-      emit axisDoubleClick(ax, details.first().value<QCPAxis::SelectablePart>(), event);
+      Q_EMIT axisDoubleClick(ax, details.first().value<QCPAxis::SelectablePart>(), event);
     else if (QCPAbstractItem *ai = qobject_cast<QCPAbstractItem*>(candidates.first()))
-      emit itemDoubleClick(ai, event);
+      Q_EMIT itemDoubleClick(ai, event);
     else if (QCPLegend *lg = qobject_cast<QCPLegend*>(candidates.first()))
-      emit legendDoubleClick(lg, nullptr, event);
+      Q_EMIT legendDoubleClick(lg, nullptr, event);
     else if (QCPAbstractLegendItem *li = qobject_cast<QCPAbstractLegendItem*>(candidates.first()))
-      emit legendDoubleClick(li->parentLegend(), li, event);
+      Q_EMIT legendDoubleClick(li->parentLegend(), li, event);
   }
   
   event->accept(); // in case QCPLayerable reimplementation manipulates event accepted state. In QWidget event system, QCustomPlot wants to accept the event.
@@ -15556,7 +15556,7 @@ void QCustomPlot::mouseDoubleClickEvent(QMouseEvent *event)
 */
 void QCustomPlot::mousePressEvent(QMouseEvent *event)
 {
-  emit mousePress(event);
+  Q_EMIT mousePress(event);
   // save some state to tell in releaseEvent whether it was a click:
   mMouseHasMoved = false;
   mMousePressPos = event->pos();
@@ -15606,7 +15606,7 @@ void QCustomPlot::mousePressEvent(QMouseEvent *event)
 */
 void QCustomPlot::mouseMoveEvent(QMouseEvent *event)
 {
-  emit mouseMove(event);
+  Q_EMIT mouseMove(event);
   
   if (!mMouseHasMoved && (mMousePressPos-event->pos()).manhattanLength() > 3)
     mMouseHasMoved = true; // moved too far from mouse press position, don't handle as click on mouse release
@@ -15635,7 +15635,7 @@ void QCustomPlot::mouseMoveEvent(QMouseEvent *event)
 */
 void QCustomPlot::mouseReleaseEvent(QMouseEvent *event)
 {
-  emit mouseRelease(event);
+  Q_EMIT mouseRelease(event);
   
   if (!mMouseHasMoved) // mouse hasn't moved (much) between press and release, so handle as click
   {
@@ -15650,15 +15650,15 @@ void QCustomPlot::mouseReleaseEvent(QMouseEvent *event)
       int dataIndex = 0;
       if (!mMouseSignalLayerableDetails.value<QCPDataSelection>().isEmpty())
         dataIndex = mMouseSignalLayerableDetails.value<QCPDataSelection>().dataRange().begin();
-      emit plottableClick(ap, dataIndex, event);
+      Q_EMIT plottableClick(ap, dataIndex, event);
     } else if (QCPAxis *ax = qobject_cast<QCPAxis*>(mMouseSignalLayerable))
-      emit axisClick(ax, mMouseSignalLayerableDetails.value<QCPAxis::SelectablePart>(), event);
+      Q_EMIT axisClick(ax, mMouseSignalLayerableDetails.value<QCPAxis::SelectablePart>(), event);
     else if (QCPAbstractItem *ai = qobject_cast<QCPAbstractItem*>(mMouseSignalLayerable))
-      emit itemClick(ai, event);
+      Q_EMIT itemClick(ai, event);
     else if (QCPLegend *lg = qobject_cast<QCPLegend*>(mMouseSignalLayerable))
-      emit legendClick(lg, nullptr, event);
+      Q_EMIT legendClick(lg, nullptr, event);
     else if (QCPAbstractLegendItem *li = qobject_cast<QCPAbstractLegendItem*>(mMouseSignalLayerable))
-      emit legendClick(li->parentLegend(), li, event);
+      Q_EMIT legendClick(li->parentLegend(), li, event);
     mMouseSignalLayerable = nullptr;
   }
   
@@ -15689,7 +15689,7 @@ void QCustomPlot::mouseReleaseEvent(QMouseEvent *event)
 */
 void QCustomPlot::wheelEvent(QWheelEvent *event)
 {
-  emit mouseWheel(event);
+  Q_EMIT mouseWheel(event);
   
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
   const QPointF pos = event->pos();
@@ -15756,7 +15756,7 @@ void QCustomPlot::updateLayout()
   mPlotLayout->update(QCPLayoutElement::upMargins);
   mPlotLayout->update(QCPLayoutElement::upLayout);
 
-  emit afterLayout();
+  Q_EMIT afterLayout();
 }
 
 /*! \internal
@@ -16098,7 +16098,7 @@ void QCustomPlot::processRectSelection(QRect rect, QMouseEvent *event)
   
   if (selectionStateChanged)
   {
-    emit selectionChangedByUser();
+    Q_EMIT selectionChangedByUser();
     replot(rpQueuedReplot);
   } else if (mSelectionRect)
     mSelectionRect->layer()->replot();
@@ -16175,7 +16175,7 @@ void QCustomPlot::processPointSelection(QMouseEvent *event)
   }
   if (selectionStateChanged)
   {
-    emit selectionChangedByUser();
+    Q_EMIT selectionChangedByUser();
     replot(rpQueuedReplot);
   }
 }
@@ -18796,7 +18796,7 @@ void QCPAbstractLegendItem::setSelectable(bool selectable)
   if (mSelectable != selectable)
   {
     mSelectable = selectable;
-    emit selectableChanged(mSelectable);
+    Q_EMIT selectableChanged(mSelectable);
   }
 }
 
@@ -18813,7 +18813,7 @@ void QCPAbstractLegendItem::setSelected(bool selected)
   if (mSelected != selected)
   {
     mSelected = selected;
-    emit selectionChanged(mSelected);
+    Q_EMIT selectionChanged(mSelected);
   }
 }
 
@@ -19211,7 +19211,7 @@ void QCPLegend::setSelectableParts(const SelectableParts &selectable)
   if (mSelectableParts != selectable)
   {
     mSelectableParts = selectable;
-    emit selectableChanged(mSelectableParts);
+    Q_EMIT selectableChanged(mSelectableParts);
   }
 }
 
@@ -19227,7 +19227,7 @@ void QCPLegend::setSelectableParts(const SelectableParts &selectable)
   This function can change the selection state of a part even when \ref setSelectableParts was set to a
   value that actually excludes the part.
   
-  emits the \ref selectionChanged signal when \a selected is different from the previous selection state.
+  Q_EMITs the \ref selectionChanged signal when \a selected is different from the previous selection state.
   
   Note that it doesn't make sense to set the selected state \ref spItems here when it wasn't set
   before, because there's no way to specify which exact items to newly select. Do this by calling
@@ -19257,7 +19257,7 @@ void QCPLegend::setSelectedParts(const SelectableParts &selected)
       }
     }
     mSelectedParts = newSelected;
-    emit selectionChanged(mSelectedParts);
+    Q_EMIT selectionChanged(mSelectedParts);
   }
 }
 
@@ -19856,7 +19856,7 @@ void QCPTextElement::setSelectable(bool selectable)
   if (mSelectable != selectable)
   {
     mSelectable = selectable;
-    emit selectableChanged(mSelectable);
+    Q_EMIT selectableChanged(mSelectable);
   }
 }
 
@@ -19872,7 +19872,7 @@ void QCPTextElement::setSelected(bool selected)
   if (mSelected != selected)
   {
     mSelected = selected;
-    emit selectionChanged(mSelected);
+    Q_EMIT selectionChanged(mSelected);
   }
 }
 
@@ -19979,7 +19979,7 @@ void QCPTextElement::mousePressEvent(QMouseEvent *event, const QVariant &details
 void QCPTextElement::mouseReleaseEvent(QMouseEvent *event, const QPointF &startPos)
 {
   if ((QPointF(event->pos())-startPos).manhattanLength() <= 3)
-    emit clicked(event);
+    Q_EMIT clicked(event);
 }
 
 /*!
@@ -19990,7 +19990,7 @@ void QCPTextElement::mouseReleaseEvent(QMouseEvent *event, const QPointF &startP
 void QCPTextElement::mouseDoubleClickEvent(QMouseEvent *event, const QVariant &details)
 {
   Q_UNUSED(details)
-  emit doubleClicked(event);
+  Q_EMIT doubleClicked(event);
 }
 
 /*! \internal
@@ -20231,7 +20231,7 @@ void QCPColorScale::setDataRange(const QCPRange &dataRange)
     mDataRange = dataRange;
     if (mColorAxis)
       mColorAxis.data()->setRange(mDataRange);
-    emit dataRangeChanged(mDataRange);
+    Q_EMIT dataRangeChanged(mDataRange);
   }
 }
 
@@ -20263,7 +20263,7 @@ void QCPColorScale::setDataScaleType(QCPAxis::ScaleType scaleType)
       mColorAxis.data()->setScaleType(mDataScaleType);
     if (mDataScaleType == QCPAxis::stLogarithmic)
       setDataRange(mDataRange.sanitizedForLogScale());
-    emit dataScaleTypeChanged(mDataScaleType);
+    Q_EMIT dataScaleTypeChanged(mDataScaleType);
   }
 }
 
@@ -20281,7 +20281,7 @@ void QCPColorScale::setGradient(const QCPColorGradient &gradient)
     mGradient = gradient;
     if (mAxisRect)
       mAxisRect.data()->mGradientImageInvalidated = true;
-    emit gradientChanged(mGradient);
+    Q_EMIT gradientChanged(mGradient);
   }
 }
 
@@ -26464,7 +26464,7 @@ void QCPColorMap::setDataRange(const QCPRange &dataRange)
     else
       mDataRange = dataRange.sanitizedForLinScale();
     mMapImageInvalidated = true;
-    emit dataRangeChanged(mDataRange);
+    Q_EMIT dataRangeChanged(mDataRange);
   }
 }
 
@@ -26479,7 +26479,7 @@ void QCPColorMap::setDataScaleType(QCPAxis::ScaleType scaleType)
   {
     mDataScaleType = scaleType;
     mMapImageInvalidated = true;
-    emit dataScaleTypeChanged(mDataScaleType);
+    Q_EMIT dataScaleTypeChanged(mDataScaleType);
     if (mDataScaleType == QCPAxis::stLogarithmic)
       setDataRange(mDataRange.sanitizedForLogScale());
   }
@@ -26502,7 +26502,7 @@ void QCPColorMap::setGradient(const QCPColorGradient &gradient)
   {
     mGradient = gradient;
     mMapImageInvalidated = true;
-    emit gradientChanged(mGradient);
+    Q_EMIT gradientChanged(mGradient);
   }
 }
 
@@ -31219,7 +31219,7 @@ void QCPPolarAxisRadial::setScaleType(QCPPolarAxisRadial::ScaleType type)
     if (mScaleType == stLogarithmic)
       setRange(mRange.sanitizedForLogScale());
     //mCachedMarginValid = false;
-    emit scaleTypeChanged(mScaleType);
+    Q_EMIT scaleTypeChanged(mScaleType);
   }
 }
 
@@ -31245,8 +31245,8 @@ void QCPPolarAxisRadial::setRange(const QCPRange &range)
   {
     mRange = range.sanitizedForLinScale();
   }
-  emit rangeChanged(mRange);
-  emit rangeChanged(mRange, oldRange);
+  Q_EMIT rangeChanged(mRange);
+  Q_EMIT rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -31264,7 +31264,7 @@ void QCPPolarAxisRadial::setSelectableParts(const SelectableParts &selectable)
   if (mSelectableParts != selectable)
   {
     mSelectableParts = selectable;
-    emit selectableChanged(mSelectableParts);
+    Q_EMIT selectableChanged(mSelectableParts);
   }
 }
 
@@ -31278,7 +31278,7 @@ void QCPPolarAxisRadial::setSelectableParts(const SelectableParts &selectable)
   
   This function can change the selection state of a part, independent of the \ref setSelectableParts setting.
   
-  emits the \ref selectionChanged signal when \a selected is different from the previous selection state.
+  Q_EMITs the \ref selectionChanged signal when \a selected is different from the previous selection state.
   
   \see SelectablePart, setSelectableParts, selectTest, setSelectedBasePen, setSelectedTickPen, setSelectedSubTickPen,
   setSelectedTickLabelFont, setSelectedLabelFont, setSelectedTickLabelColor, setSelectedLabelColor
@@ -31288,7 +31288,7 @@ void QCPPolarAxisRadial::setSelectedParts(const SelectableParts &selected)
   if (mSelectedParts != selected)
   {
     mSelectedParts = selected;
-    emit selectionChanged(mSelectedParts);
+    Q_EMIT selectionChanged(mSelectedParts);
   }
 }
 
@@ -31317,8 +31317,8 @@ void QCPPolarAxisRadial::setRange(double lower, double upper)
   {
     mRange = mRange.sanitizedForLinScale();
   }
-  emit rangeChanged(mRange);
-  emit rangeChanged(mRange, oldRange);
+  Q_EMIT rangeChanged(mRange);
+  Q_EMIT rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -31360,8 +31360,8 @@ void QCPPolarAxisRadial::setRangeLower(double lower)
   {
     mRange = mRange.sanitizedForLinScale();
   }
-  emit rangeChanged(mRange);
-  emit rangeChanged(mRange, oldRange);
+  Q_EMIT rangeChanged(mRange);
+  Q_EMIT rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -31382,8 +31382,8 @@ void QCPPolarAxisRadial::setRangeUpper(double upper)
   {
     mRange = mRange.sanitizedForLinScale();
   }
-  emit rangeChanged(mRange);
-  emit rangeChanged(mRange, oldRange);
+  Q_EMIT rangeChanged(mRange);
+  Q_EMIT rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -31895,8 +31895,8 @@ void QCPPolarAxisRadial::moveRange(double diff)
     mRange.lower *= diff;
     mRange.upper *= diff;
   }
-  emit rangeChanged(mRange);
-  emit rangeChanged(mRange, oldRange);
+  Q_EMIT rangeChanged(mRange);
+  Q_EMIT rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -31944,8 +31944,8 @@ void QCPPolarAxisRadial::scaleRange(double factor, double center)
     } else
       qDebug() << Q_FUNC_INFO << "Center of scaling operation doesn't lie in same logarithmic sign domain as range:" << center;
   }
-  emit rangeChanged(mRange);
-  emit rangeChanged(mRange, oldRange);
+  Q_EMIT rangeChanged(mRange);
+  Q_EMIT rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -32778,8 +32778,8 @@ void QCPPolarAxisAngular::moveRange(double diff)
   QCPRange oldRange = mRange;
   mRange.lower += diff;
   mRange.upper += diff;
-  emit rangeChanged(mRange);
-  emit rangeChanged(mRange, oldRange);
+  Q_EMIT rangeChanged(mRange);
+  Q_EMIT rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -32813,8 +32813,8 @@ void QCPPolarAxisAngular::scaleRange(double factor, double center)
   newRange.upper = (mRange.upper-center)*factor + center;
   if (QCPRange::validRange(newRange))
     mRange = newRange.sanitizedForLinScale();
-  emit rangeChanged(mRange);
-  emit rangeChanged(mRange, oldRange);
+  Q_EMIT rangeChanged(mRange);
+  Q_EMIT rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -33185,8 +33185,8 @@ void QCPPolarAxisAngular::setRange(const QCPRange &range)
   if (!QCPRange::validRange(range)) return;
   QCPRange oldRange = mRange;
   mRange = range.sanitizedForLinScale();
-  emit rangeChanged(mRange);
-  emit rangeChanged(mRange, oldRange);
+  Q_EMIT rangeChanged(mRange);
+  Q_EMIT rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -33204,7 +33204,7 @@ void QCPPolarAxisAngular::setSelectableParts(const SelectableParts &selectable)
   if (mSelectableParts != selectable)
   {
     mSelectableParts = selectable;
-    emit selectableChanged(mSelectableParts);
+    Q_EMIT selectableChanged(mSelectableParts);
   }
 }
 
@@ -33218,7 +33218,7 @@ void QCPPolarAxisAngular::setSelectableParts(const SelectableParts &selectable)
   
   This function can change the selection state of a part, independent of the \ref setSelectableParts setting.
   
-  emits the \ref selectionChanged signal when \a selected is different from the previous selection state.
+  Q_EMITs the \ref selectionChanged signal when \a selected is different from the previous selection state.
   
   \see SelectablePart, setSelectableParts, selectTest, setSelectedBasePen, setSelectedTickPen, setSelectedSubTickPen,
   setSelectedTickLabelFont, setSelectedLabelFont, setSelectedTickLabelColor, setSelectedLabelColor
@@ -33228,7 +33228,7 @@ void QCPPolarAxisAngular::setSelectedParts(const SelectableParts &selected)
   if (mSelectedParts != selected)
   {
     mSelectedParts = selected;
-    emit selectionChanged(mSelectedParts);
+    Q_EMIT selectionChanged(mSelectedParts);
   }
 }
 
@@ -33251,8 +33251,8 @@ void QCPPolarAxisAngular::setRange(double lower, double upper)
   mRange.lower = lower;
   mRange.upper = upper;
   mRange = mRange.sanitizedForLinScale();
-  emit rangeChanged(mRange);
-  emit rangeChanged(mRange, oldRange);
+  Q_EMIT rangeChanged(mRange);
+  Q_EMIT rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -33288,8 +33288,8 @@ void QCPPolarAxisAngular::setRangeLower(double lower)
   QCPRange oldRange = mRange;
   mRange.lower = lower;
   mRange = mRange.sanitizedForLinScale();
-  emit rangeChanged(mRange);
-  emit rangeChanged(mRange, oldRange);
+  Q_EMIT rangeChanged(mRange);
+  Q_EMIT rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -33304,8 +33304,8 @@ void QCPPolarAxisAngular::setRangeUpper(double upper)
   QCPRange oldRange = mRange;
   mRange.upper = upper;
   mRange = mRange.sanitizedForLinScale();
-  emit rangeChanged(mRange);
-  emit rangeChanged(mRange, oldRange);
+  Q_EMIT rangeChanged(mRange);
+  Q_EMIT rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -34569,11 +34569,11 @@ void QCPPolarGraph::setSelectable(QCP::SelectionType selectable)
     mSelectable = selectable;
     QCPDataSelection oldSelection = mSelection;
     mSelection.enforceType(mSelectable);
-    emit selectableChanged(mSelectable);
+    Q_EMIT selectableChanged(mSelectable);
     if (mSelection != oldSelection)
     {
-      emit selectionChanged(selected());
-      emit selectionChanged(mSelection);
+      Q_EMIT selectionChanged(selected());
+      Q_EMIT selectionChanged(mSelection);
     }
   }
 }
@@ -34592,7 +34592,7 @@ void QCPPolarGraph::setSelectable(QCP::SelectionType selectable)
   QCP::SelectionType set via \ref setSelectable, the resulting selection will be adjusted
   accordingly (see \ref QCPDataSelection::enforceType).
   
-  emits the \ref selectionChanged signal when \a selected is different from the previous selection state.
+  Q_EMITs the \ref selectionChanged signal when \a selected is different from the previous selection state.
   
   \see setSelectable, selectTest
 */
@@ -34602,8 +34602,8 @@ void QCPPolarGraph::setSelection(QCPDataSelection selection)
   if (mSelection != selection)
   {
     mSelection = selection;
-    emit selectionChanged(selected());
-    emit selectionChanged(mSelection);
+    Q_EMIT selectionChanged(selected());
+    Q_EMIT selectionChanged(mSelection);
   }
 }
 

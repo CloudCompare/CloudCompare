@@ -67,7 +67,7 @@ void ccProgressDialog::update(float percent)
 	if (value != m_currentValue)
 	{
 		m_currentValue = value;
-		emit scheduleRefresh();
+		Q_EMIT scheduleRefresh();
 		QCoreApplication::processEvents(); //we let the main thread breath (so that the call to 'refresh' can be performed)
 	}
 }

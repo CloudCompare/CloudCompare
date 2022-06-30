@@ -197,7 +197,7 @@ void sfEditDlg::minValSBChanged(double val)
 
 	m_associatedSFHisto->setMinDispValue(val);
 
-	emit entitySFHasChanged();
+	Q_EMIT entitySFHasChanged();
 
 	QApplication::processEvents();
 
@@ -210,7 +210,7 @@ void sfEditDlg::maxValSBChanged(double val)
 
 	m_associatedSFHisto->setMaxDispValue(val);
 
-	emit entitySFHasChanged();
+	Q_EMIT entitySFHasChanged();
 
 	QApplication::processEvents();
 }
@@ -222,7 +222,7 @@ void sfEditDlg::minSatSBChanged(double val)
 
 	m_associatedSFHisto->setMinSatValue(val);
 
-	emit entitySFHasChanged();
+	Q_EMIT entitySFHasChanged();
 
 	QApplication::processEvents();
 }
@@ -234,7 +234,7 @@ void sfEditDlg::maxSatSBChanged(double val)
 
 	m_associatedSFHisto->setMaxSatValue(val);
 
-	emit entitySFHasChanged();
+	Q_EMIT entitySFHasChanged();
 
 	QApplication::processEvents();
 }
@@ -248,7 +248,7 @@ void sfEditDlg::minValHistoChanged(double val)
 	m_ui->minValSpinBox->setValue(val);
 	m_ui->minValSpinBox->blockSignals(false);
 
-	emit entitySFHasChanged();
+	Q_EMIT entitySFHasChanged();
 
 	QApplication::processEvents();
 }
@@ -262,7 +262,7 @@ void sfEditDlg::maxValHistoChanged(double val)
 	m_ui->maxValSpinBox->setValue(val);
 	m_ui->maxValSpinBox->blockSignals(false);
 
-	emit entitySFHasChanged();
+	Q_EMIT entitySFHasChanged();
 
 	QApplication::processEvents();
 }
@@ -276,7 +276,7 @@ void sfEditDlg::minSatHistoChanged(double val)
 	m_ui->minSatSpinBox->setValue(val);
 	m_ui->minSatSpinBox->blockSignals(false);
 
-	emit entitySFHasChanged();
+	Q_EMIT entitySFHasChanged();
 
 	QApplication::processEvents();
 }
@@ -290,7 +290,7 @@ void sfEditDlg::maxSatHistoChanged(double val)
 	m_ui->maxSatSpinBox->setValue(val);
 	m_ui->maxSatSpinBox->blockSignals(false);
 
-	emit entitySFHasChanged();
+	Q_EMIT entitySFHasChanged();
 
 	QApplication::processEvents();
 }
@@ -303,7 +303,7 @@ void sfEditDlg::nanInGrayChanged(bool state)
 	if (m_associatedSF->areNaNValuesShownInGrey() != state)
 	{
 		m_associatedSF->showNaNValuesInGrey(state);
-		emit entitySFHasChanged();
+		Q_EMIT entitySFHasChanged();
 
 		//m_associatedSFHisto->refreshBars();
 	}
@@ -317,7 +317,7 @@ void sfEditDlg::alwaysShow0Changed(bool state)
 	if (m_associatedSF->isZeroAlwaysShown() != state)
 	{
 		m_associatedSF->alwaysShowZero(state);
-		emit entitySFHasChanged();
+		Q_EMIT entitySFHasChanged();
 
 		//m_associatedSFHisto->refreshBars();
 	}
@@ -332,7 +332,7 @@ void sfEditDlg::symmetricalScaleChanged(bool state)
 	{
 		m_associatedSF->setSymmetricalScale(state);
 		fillDialogWith(m_associatedSF); //the saturation sliders may need to be updated!
-		emit entitySFHasChanged();
+		Q_EMIT entitySFHasChanged();
 
 		//Saturation might change!
 		m_associatedSFHisto->refresh();
@@ -349,7 +349,7 @@ void sfEditDlg::logScaleChanged(bool state)
 	{
 		m_associatedSF->setLogScale(state);
 		fillDialogWith(m_associatedSF); //the saturation sliders + the symmetrical scale checkbox may need to be updated!
-		emit entitySFHasChanged();
+		Q_EMIT entitySFHasChanged();
 
 		//Saturation might change!
 		m_associatedSFHisto->refresh();

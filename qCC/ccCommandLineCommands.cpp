@@ -4973,7 +4973,7 @@ bool CommandSFAddConst::process(ccCommandLineInterface &cmd)
                 return cmd.error("Internal error: addScalarField failed");
             }
             CCCoreLib::ScalarField* sf = cloud->getScalarField(sfIndex);
-            for (int index = 0; index < cloud->size(); index++)
+            for (unsigned index = 0; index < cloud->size(); index++)
                 sf->setValue(index, value);
 
             if (cmd.autoSaveMode())

@@ -959,7 +959,7 @@ bool ccComparisonDlg::computeDistances()
                     return 0;
                 }
                 CCCoreLib::ScalarField* sf = m_compCloud->getScalarField(sf2D);
-                for (int idx = 0; idx < m_compCloud->size(); idx++)
+                for (unsigned idx = 0; idx < m_compCloud->size(); idx++)
                 {
                     float d2D = pow(pow(c2cParams.splitDistances[0]->getValue(idx), 2) +  pow(c2cParams.splitDistances[1]->getValue(idx), 2), 0.5);
                     sf->setValue(idx, d2D);

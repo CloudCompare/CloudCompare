@@ -532,7 +532,7 @@ namespace ccEntityAction
         }
 
         unsigned sfCount = source->getNumberOfScalarFields();
-        if (sfIndex > sfCount)
+        if (sfIndex > static_cast<int>(sfCount))
         {
             ccConsole::Error(QObject::tr("[ccEntityAction::interpolateSFs] Invalid scalar field index!"));
             return false;

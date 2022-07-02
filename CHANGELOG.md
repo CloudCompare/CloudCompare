@@ -18,6 +18,8 @@ v2.12.3 (Kyiv) - (13/06/2022)
 - Bug fixes:
 	- FBX: CloudCompare couldn't properly load the materials (textures) of meshes with quads
 	- the Compass plugin was exporting large coordinates with a too small precision
+	- the command line could ignore the input global shift (set with -GLOBAL_SHIFT) if it was not sufficient
+		to make the points coordinates small enough. This was not consistent with the previous behavior.
 
 v2.12.3 (Kyiv) - (13/06/2022)
 ----------------------

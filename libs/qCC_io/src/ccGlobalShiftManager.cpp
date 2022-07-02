@@ -146,40 +146,16 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 			*_coordinatesScale = std::max(*_coordinatesScale, CCCoreLib::ZERO_TOLERANCE_D);
 			scale = *_coordinatesScale;
 		}
-		needShift = NeedShift(P*scale + coordinatesShift);
-		needRescale = NeedRescale(diagonal*scale);
 
 		if (mode == NO_DIALOG)
 		{
-			// we can apply the input shift only if it 'works'
-			if (!needShift && !needRescale)
-			{
-				bool isDefault = IsDefaultShift(coordinatesShift, scale);
-				if (isDefault)
-				{
-					// if it's the default shift, we don't need to apply anything (= false)
-					coordinatesShift = CCVector3d(0, 0, 0);
-					if (nullptr != _coordinatesScale)
-					{
-						*_coordinatesScale = 1.0;
-					}
-					return false;
-				}
-				else
-				{
-					return true;
-				}
-			}
-			else
-			{
-				// we can't apply the input shift
-				coordinatesShift = CCVector3d(0, 0, 0);
-				if (nullptr != _coordinatesScale)
-				{
-					*_coordinatesScale = 1.0;
-				}
-				return false;
-			}
+			// without a dialog, we don't have the choice, we will use the input shift...
+			return true;
+		}
+		else
+		{
+			needShift = NeedShift(P*scale + coordinatesShift);
+			needRescale = NeedRescale(diagonal*scale);
 		}
 	}
 	else

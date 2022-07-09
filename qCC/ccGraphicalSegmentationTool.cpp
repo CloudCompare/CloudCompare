@@ -831,25 +831,22 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 	const double half_h = camera.viewport[3] / 2.0;
 
 	//check if the polyline is totally inside the frustum or not
-	bool polyInsideFrustum = true;
+	bool polyInsideViewport = true;
 	{
 		int vertexCount = static_cast<int>(m_segmentationPoly->size());
 		for (int i = 0; i < vertexCount; ++i)
 		{
-			const CCVector3* P = m_segmentationPoly->getPoint(i);
+			const CCVector3* P2D = m_segmentationPoly->getPoint(i);
 
-			CCVector3d Q2D;
-			bool pointInFrustum = false;
-			camera.project(*P, Q2D, &pointInFrustum);
-
-			if (!pointInFrustum)
+			if (P2D->x < -half_w || P2D->x > half_w
+				|| P2D->y < -half_h || P2D->y > half_h)
 			{
-				polyInsideFrustum = false;
+				polyInsideViewport = false;
 				break;
 			}
 		}
 	}
-	ccLog::PrintDebug("Polyline is fully inside frustrum: " + QString(polyInsideFrustum ? "Yes" : "No"));
+	ccLog::PrintDebug("Polyline is fully inside viewport: " + QString(polyInsideViewport ? "Yes" : "No"));
 
 	bool classificationMode = CCCoreLib::ScalarField::ValidValue(classificationValue);
 
@@ -906,9 +903,9 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 				CCVector3d Q2D;
 				bool pointInFrustum = false;
 				camera.project(*P3D, Q2D, &pointInFrustum);
-
+				
 				bool pointInside = false;
-				if (pointInFrustum || !polyInsideFrustum) //we can only skip the test if the polyline is fully inside the frustum
+				if (pointInFrustum || !polyInsideViewport) //we can only skip the test if the point is outside the viewport/frustum AND the polyline is fully inside the viewport
 				{
 					CCVector2 P2D(	static_cast<PointCoordinateType>(Q2D.x - half_w),
 									static_cast<PointCoordinateType>(Q2D.y - half_h));

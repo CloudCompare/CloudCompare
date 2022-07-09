@@ -4,22 +4,16 @@ CloudCompare Version History
 v2.12.4 (Kyiv) - (14/07/2022)
 ----------------------
 
-- Bug fix:
-	- CloudCompare 2.12.X (X<3) could miss some triangles when computing the Cloud-to-Mesh distances (resulting in slightly overestimated distances)
-
-v2.12.3 (Kyiv) - (13/06/2022)
-----------------------
-
 - Bug fixes:
+	- CloudCompare 2.12.X (X<4) could miss some triangles when computing the Cloud-to-Mesh distances (resulting in slightly overestimated distances)
 	- CloudCompare would still apply the Global Shift even though it was rejected by the user (which is a bad idea ;). But the entity
 		Global Shift would then be (0, 0, 0), resulting in the loss of the original coordinate system.
 	- the scale in the lower-right part of the 3D view could have the wrong length (if the height of the window is larger than its width)
-
-- Bug fixes:
 	- FBX: CloudCompare couldn't properly load the materials (textures) of meshes with quads
 	- the Compass plugin was exporting large coordinates with a too small precision
 	- the command line could ignore the input global shift (set with -GLOBAL_SHIFT) if it was not sufficient
 		to make the points coordinates small enough. This was not consistent with the previous behavior.
+	- the segmentation tool in Perspective mode could keep points behind the camera/viewpoint
 
 v2.12.3 (Kyiv) - (13/06/2022)
 ----------------------

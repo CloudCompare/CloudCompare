@@ -210,16 +210,17 @@ public: //GLU equivalent methods
 			return false;
 		}
 
-		if (inFrustum)
-		{
-			//Check if the point is inside the frustum
-			*inFrustum = (std::abs(Pp.x) <= Pp.w && std::abs(Pp.y) <= Pp.w && std::abs(Pp.z) <= Pp.w);
-		}
-
 		//Perspective division
 		Pp.x /= Pp.w;
 		Pp.y /= Pp.w;
 		Pp.z /= Pp.w;
+
+		if (inFrustum)
+		{
+			//Check if the point is inside the frustum
+			*inFrustum = (std::abs(Pp.x) <= 1.0 && std::abs(Pp.y) <= 1.0 && std::abs(Pp.z) <= 1.0);
+		}
+
 		//Window coordinates
 		//Map x, y to range 0-1
 		output2D.x = (1.0 + Pp.x) / 2 * viewport[2] + viewport[0];

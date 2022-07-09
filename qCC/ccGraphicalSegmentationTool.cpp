@@ -73,12 +73,12 @@ ccGraphicalSegmentationTool::ccGraphicalSegmentationTool(QWidget* parent)
 	connect(inButton,				&QToolButton::clicked, this, &ccGraphicalSegmentationTool::segmentIn);
 	connect(outButton,				&QToolButton::clicked, this, &ccGraphicalSegmentationTool::segmentOut);
 	connect(razButton,				&QToolButton::clicked, this, &ccGraphicalSegmentationTool::reset);
-	connect(optionsButton,		&QToolButton::clicked, this, &ccGraphicalSegmentationTool::options);
+	connect(optionsButton,			&QToolButton::clicked, this, &ccGraphicalSegmentationTool::options);
 	connect(validButton,			&QToolButton::clicked, this, &ccGraphicalSegmentationTool::apply);
 	connect(validAndDeleteButton,	&QToolButton::clicked, this, &ccGraphicalSegmentationTool::applyAndDelete);
 	connect(cancelButton,			&QToolButton::clicked, this, &ccGraphicalSegmentationTool::cancel);
 	connect(pauseButton,			&QToolButton::toggled, this, &ccGraphicalSegmentationTool::pauseSegmentationMode);
-	connect(addClassToolButton,	 &QToolButton::clicked, this, &ccGraphicalSegmentationTool::setClassificationValue);
+	connect(addClassToolButton,	 &	QToolButton::clicked, this, &ccGraphicalSegmentationTool::setClassificationValue);
 
 	//selection modes
 	connect(actionSetPolylineSelection,			&QAction::triggered,	this,	&ccGraphicalSegmentationTool::doSetPolylineSelection);
@@ -92,10 +92,10 @@ ccGraphicalSegmentationTool::ccGraphicalSegmentationTool(QWidget* parent)
 	addOverriddenShortcut(Qt::Key_Escape);	//escape key for the "cancel" button
 	addOverriddenShortcut(Qt::Key_Return);	//return key for the "apply" button
 	addOverriddenShortcut(Qt::Key_Delete);	//delete key for the "apply and delete" button
-	addOverriddenShortcut(Qt::Key_Tab);	//tab key to switch between rectangular and polygonal selection modes
-	addOverriddenShortcut(Qt::Key_I);	//'I' key for the "segment in" button
-	addOverriddenShortcut(Qt::Key_O);	//'O' key for the "segment out" button
-	addOverriddenShortcut(Qt::Key_C);	//'C' key for the "classify" button
+	addOverriddenShortcut(Qt::Key_Tab);		//tab key to switch between rectangular and polygonal selection modes
+	addOverriddenShortcut(Qt::Key_I);		//'I' key for the "segment in" button
+	addOverriddenShortcut(Qt::Key_O);		//'O' key for the "segment out" button
+	addOverriddenShortcut(Qt::Key_C);		//'C' key for the "classify" button
 	connect(this, &ccOverlayDialog::shortcutTriggered, this, &ccGraphicalSegmentationTool::onShortcutTriggered);
 
 	QMenu *selectionModeMenu = new QMenu(this);
@@ -833,25 +833,22 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 	const double half_h = camera.viewport[3] / 2.0;
 
 	//check if the polyline is totally inside the frustum or not
-	bool polyInsideFrustum = true;
+	bool polyInsideViewport = true;
 	{
 		int vertexCount = static_cast<int>(m_segmentationPoly->size());
 		for (int i = 0; i < vertexCount; ++i)
 		{
-			const CCVector3 *P = m_segmentationPoly->getPoint(i);
+			const CCVector3* P2D = m_segmentationPoly->getPoint(i);
 
-			CCVector3d Q2D;
-			bool pointInFrustum = false;
-			camera.project(*P, Q2D, &pointInFrustum);
-
-			if (!pointInFrustum)
+			if (P2D->x < -half_w || P2D->x > half_w
+				|| P2D->y < -half_h || P2D->y > half_h)
 			{
-				polyInsideFrustum = false;
+				polyInsideViewport = false;
 				break;
 			}
 		}
 	}
-	ccLog::PrintDebug("Polyline is fully inside frustrum: " + QString(polyInsideFrustum ? "Yes" : "No"));
+	ccLog::PrintDebug("Polyline is fully inside viewport: " + QString(polyInsideViewport ? "Yes" : "No"));
 
 	bool classificationMode = CCCoreLib::ScalarField::ValidValue(classificationValue);
 
@@ -861,17 +858,17 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 		ccGenericPointCloud *cloud = ccHObjectCaster::ToGenericPointCloud(*p);
 		assert(cloud);
 
-		ccGenericPointCloud::VisibilityTableType &visibilityArray = cloud->getTheVisibilityArray();
+		ccGenericPointCloud::VisibilityTableType& visibilityArray = cloud->getTheVisibilityArray();
 		assert(!visibilityArray.empty());
 
 		int cloudSize = static_cast<int>(cloud->size());
 
 		// if a classification value is set as input, this means that we want to label the
 		// set of points, and we don't want to segment it
-		CCCoreLib::ScalarField *classifSF = nullptr;
+		CCCoreLib::ScalarField* classifSF = nullptr;
 		if (classificationMode)
 		{
-			ccPointCloud *pc = ccHObjectCaster::ToPointCloud(*p);
+			ccPointCloud* pc = ccHObjectCaster::ToPointCloud(*p);
 			if (!pc)
 			{
 				ccLog::Warning("Can't apply classification to cloud " + (*p)->getName());
@@ -908,9 +905,9 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 				CCVector3d Q2D;
 				bool pointInFrustum = false;
 				camera.project(*P3D, Q2D, &pointInFrustum);
-
+				
 				bool pointInside = false;
-				if (pointInFrustum || !polyInsideFrustum) //we can only skip the test if the polyline is fully inside the frustum
+				if (pointInFrustum || !polyInsideViewport) //we can only skip the test if the point is outside the viewport/frustum AND the polyline is fully inside the viewport
 				{
 					CCVector2 P2D(	static_cast<PointCoordinateType>(Q2D.x - half_w),
 									static_cast<PointCoordinateType>(Q2D.y - half_h));

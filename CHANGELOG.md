@@ -41,6 +41,7 @@ v2.13.alpha (???) - (??/??/????)
 	- the Compass plugin was exporting large coordinates with a too small precision
 	- the command line could ignore the input global shift (set with -GLOBAL_SHIFT) if it was not sufficient
 		to make the points coordinates small enough. This was not consistent with the previous behavior.
+	- the segmentation tool in Perspective mode could keep points behind the camera/viewpoint
 
 v2.12.3 (Kyiv) - (13/06/2022)
 ----------------------

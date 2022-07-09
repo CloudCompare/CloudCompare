@@ -80,7 +80,7 @@ public:
 
 protected:
 
-	//! Slot called to change aligned entities visibility
+	//! Slot called to change to-be-aligned entities visibility
 	void showAlignedEntities(bool);
 	//! Slot called to change reference entities visibility
 	void showReferenceEntities(bool);
@@ -117,7 +117,7 @@ protected:
 	//! Clears the RMS rows
 	void clearRMSColumns();
 
-	//! Adds a point to one of the table (ref./aligned)
+	//! Adds a point to one of the table (ref./to-be-aligned)
 	void addPointToTable(	QTableWidget* tableWidget,
 							int rowIndex,
 							const CCVector3d& P,
@@ -173,13 +173,13 @@ protected:
 
 protected: //members
 
-	//! Aligned entity
+	//! To-be-aligned entities
 	EntityContexts m_alignedEntities;
 
-	//! Aligned points set
+	//! to-be-aligned points set
 	ccPointCloud m_alignedPoints;
 	
-	//! Reference entity (if any)
+	//! Reference entities (if any)
 	EntityContexts m_referenceEntities;
 
 	//! Reference points set

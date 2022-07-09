@@ -6272,7 +6272,7 @@ void MainWindow::activateRegisterPointPairTool()
 		else
 		{
 			std::vector<int> indexes;
-			if (!ccEntitySelectionDialog::SelectEntities(entities, indexes, this, tr("Select aligned entities")))
+			if (!ccEntitySelectionDialog::SelectEntities(entities, indexes, this, tr("Select to-be-aligned entities")))
 			{
 				//process cancelled by the user
 				return;
@@ -6305,7 +6305,7 @@ void MainWindow::activateRegisterPointPairTool()
 
 	if (alignedEntities.empty())
 	{
-		ccLog::Error(tr("No aligned entity selected"));
+		ccLog::Error(tr("No to-be-aligned entity selected"));
 		return;
 	}
 

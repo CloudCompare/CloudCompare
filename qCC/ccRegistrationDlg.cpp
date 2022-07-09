@@ -301,7 +301,7 @@ void ccRegistrationDlg::updateGUI()
 	checkBoxUseModelSFAsWeights->setEnabled(modelEntity->isKindOf(CC_TYPES::POINT_CLOUD) && modelEntity->hasDisplayedScalarField()); //only supported for clouds
 
 	useC2MSignedDistancesCheckBox->setEnabled(modelEntity->isKindOf(CC_TYPES::MESH)); //only supported if a mesh is the reference cloud
-	normalsComboBox->setEnabled(dataEntity->hasNormals() && modelEntity->hasNormals()); //only supported if both the aligned and the reference entities have normals
+	normalsComboBox->setEnabled(dataEntity->hasNormals() && modelEntity->hasNormals()); //only supported if both the to-be-aligned and the reference entities have normals
 
 	MainWindow::RefreshAllGLWindow(false);
 }

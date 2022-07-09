@@ -32,7 +32,7 @@
          <string>'data' entity</string>
         </property>
         <property name="text">
-         <string>aligned</string>
+         <string>to be aligned</string>
         </property>
        </widget>
       </item>
@@ -42,7 +42,7 @@
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;entity to align (will be displaced)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="statusTip">
-         <string>the data cloud is the entity to align with the model cloud : it will be displaced (red cloud)</string>
+         <string>Entity to align (will be displaced)</string>
         </property>
         <property name="readOnly">
          <bool>true</bool>
@@ -79,7 +79,7 @@
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;reference entity (won't move)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="statusTip">
-         <string>the model cloud is the reference : it won't move (yellow cloud)</string>
+         <string>Reference entity (won't move)</string>
         </property>
         <property name="readOnly">
          <bool>true</bool>

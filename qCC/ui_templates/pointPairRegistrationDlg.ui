@@ -22,7 +22,7 @@
         <string notr="true">background-color: red; color: white;</string>
        </property>
        <property name="text">
-        <string>show 'to align' entities</string>
+        <string>show 'to be aligned' entities</string>
        </property>
        <property name="checked">
         <bool>true</bool>

@@ -50,7 +50,7 @@
 #include <QToolButton>
 #include <QSettings>
 
-//default position of each columns in the aligned and ref. table widgets
+//default position of each columns in the to-be-aligned and ref. table widgets
 static const int XYZ_COL_INDEX			= 0;
 static const int RMS_COL_INDEX			= 3;
 static const int DEL_BUTTON_COL_INDEX	= 4;
@@ -60,7 +60,7 @@ static const unsigned MIN_PAIRS_COUNT = 3;
 
 ccPointPairRegistrationDlg::ccPointPairRegistrationDlg(ccPickingHub* pickingHub, ccMainAppInterface* app, QWidget* parent/*=nullptr*/)
 	: ccOverlayDialog(parent)
-	, m_alignedPoints("aligned points")
+	, m_alignedPoints("to-be-aligned points")
 	, m_refPoints("reference points")
 	, m_paused(false)
 	, m_pickingHub(pickingHub)
@@ -282,7 +282,7 @@ bool ccPointPairRegistrationDlg::init(	ccGLWindow* win,
 
 	if (alignedEntities.empty())
 	{
-		ccLog::Error("[PointPairRegistration] Need at least one aligned entity!");
+		ccLog::Error("[PointPairRegistration] Need at least one to-be-aligned entity!");
 		return false;
 	}
 
@@ -1162,7 +1162,7 @@ void ccPointPairRegistrationDlg::removeRefPoint(int index, bool autoRemoveDualPo
 	//auto-remove the other point?
 	if (	autoRemoveDualPoint
 		&&	index < static_cast<int>(m_alignedPoints.size())
-		&&	QMessageBox::question(nullptr, "Remove dual point", "Remove the equivalent aligned point as well?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+		&&	QMessageBox::question(nullptr, "Remove dual point", "Remove the equivalent to-be-aligned point as well?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
 	{
 		removeAlignedPoint(index, false);
 	}
@@ -1223,7 +1223,7 @@ bool ccPointPairRegistrationDlg::callHornRegistration(CCCoreLib::PointProjection
 	//call Horn registration method
 	if (!CCCoreLib::HornRegistrationTools::FindAbsoluteOrientation(&m_alignedPoints, &m_refPoints, trans, !adjustScale))
 	{
-		ccLog::Error("Registration failed! (points are aligned?)");
+		ccLog::Error("Registration failed! (points are all aligned?)");
 		return false;
 	}
 
@@ -1550,7 +1550,7 @@ void ccPointPairRegistrationDlg::apply()
 					//we'll ask the user confirmation before dropping the shift information on the aligned cloud
 					if (!alwaysDropShiftQuestionAsked)
 					{
-						alwaysDropShift = (QMessageBox::question(this, tr("Drop shift information?"), tr("Aligned cloud is shifted but reference cloud is not: drop global shift information?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes);
+						alwaysDropShift = (QMessageBox::question(this, tr("Drop shift information?"), tr("To-be-aligned cloud is shifted but reference cloud is not: drop global shift information?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes);
 						alwaysDropShiftQuestionAsked = true;
 					}
 

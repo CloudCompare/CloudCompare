@@ -2341,34 +2341,72 @@ bool CommandSetActiveSF::process(ccCommandLineInterface &cmd)
 	}
 	
 	int sfIndex = -1;
-	bool ok = true;
+	bool validSFIndex = true;
 	QString sfIndexStr = cmd.arguments().takeFirst();
 	if (sfIndexStr.toUpper() == OPTION_LAST)
 	{
 		sfIndex = -2;
+		cmd.print(QObject::tr("Set active S.F. index: LAST"));
 	}
 	else
 	{
-		sfIndex = sfIndexStr.toInt(&ok);
+		sfIndex = sfIndexStr.toInt(&validSFIndex);
+		if (!validSFIndex)
+		{
+			sfIndex = -1;
+			if (sfIndexStr.size() >= 2 && sfIndexStr.startsWith('\''))
+			{
+				while (!sfIndexStr.endsWith('\'') && !cmd.arguments().empty())
+				{
+					sfIndexStr.append(' ');
+					sfIndexStr.append(cmd.arguments().takeFirst());
+				}
+				if (!sfIndexStr.endsWith('\''))
+				{
+					return cmd.error(QObject::tr("Invalid SF name after %1! (missing closing simple quote)").arg(COMMAND_SET_ACTIVE_SF));
+				}
+				sfIndexStr = sfIndexStr.mid(1, sfIndexStr.size() - 2);
+			}
+			cmd.print(QObject::tr("Set active S.F. name: '%1'").arg(sfIndexStr));
+		}
 	}
-	if (!ok || sfIndex == -1)
+	if (!validSFIndex || sfIndex == -1)
 	{
-		return cmd.error(QObject::tr("Invalid SF index! (after %1)").arg(COMMAND_SET_ACTIVE_SF));
+		//this may be a scalar field name
+		//return cmd.error(QObject::tr("Invalid SF index! (after %1)").arg(COMMAND_SET_ACTIVE_SF));
 	}
-	cmd.print(QObject::tr("Set active S.F. index: %1").arg(sfIndex));
+	else
+	{
+		cmd.print(QObject::tr("Set active S.F. index: %1").arg(sfIndex));
+	}
 	
 	if (cmd.clouds().empty())
 	{
 		return cmd.error(QObject::tr("No point cloud loaded! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_SET_ACTIVE_SF));
 	}
 	
-	for (size_t i = 0; i<cmd.clouds().size(); ++i)
+	for (size_t i = 0; i < cmd.clouds().size(); ++i)
 	{
 		if (cmd.clouds()[i].pc && cmd.clouds()[i].pc->hasScalarFields())
 		{
 			if (sfIndex < static_cast<int>(cmd.clouds()[i].pc->getNumberOfScalarFields()))
 			{
-				cmd.clouds()[i].pc->setCurrentScalarField(sfIndex < 0 ? static_cast<int>(cmd.clouds()[i].pc->getNumberOfScalarFields()) - 1 : sfIndex);
+				int thisSFIndex = sfIndex;
+				if (sfIndex == -2)
+				{
+					thisSFIndex = static_cast<int>(cmd.clouds()[i].pc->getNumberOfScalarFields()) - 1;
+				}
+				else if (sfIndex == -1)
+				{
+					//check if this cloud has a scalar field with the input name
+					thisSFIndex = cmd.clouds()[i].pc->getScalarFieldIndexByName(qPrintable(sfIndexStr));
+					if (thisSFIndex < 0)
+					{
+						cmd.warning(QObject::tr("Cloud %1 has no SF named '%2'").arg(cmd.clouds()[i].pc->getName()).arg(sfIndexStr));
+						continue;
+					}
+				}
+				cmd.clouds()[i].pc->setCurrentScalarField(thisSFIndex);
 			}
 			else
 			{

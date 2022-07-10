@@ -41,6 +41,10 @@ v2.13.alpha (???) - (??/??/????)
 		- The shift value is now displayed as a property of the currently selected scalar field
 		- When using the standard LAS I/O filter (PDAL), the user can now set a custom shift for GPS time values
 
+	- Command line:
+		- It is now possible to pass a SF name after -SET_ACTIVE_SF  instead of the field index
+			(use simple quotes if the scalar field name has spaces in it)
+
 - Bug fixes:
 	- FBX: CloudCompare couldn't properly load the materials (textures) of meshes with quads
 	- the Compass plugin was exporting large coordinates with a too small precision

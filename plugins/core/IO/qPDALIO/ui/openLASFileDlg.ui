@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>387</width>
-    <height>461</height>
+    <height>500</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -524,6 +524,53 @@ It will be saved as multiple tiles on the disk.</string>
     </widget>
    </item>
    <item>
+    <widget class="QFrame" name="timeShiftFrame">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QCheckBox" name="autoTimeShiftCheckBox">
+        <property name="toolTip">
+         <string>Whether to automatically shift the GPS time (to avoid losing accuracy) or to use the specified shift otherwise</string>
+        </property>
+        <property name="text">
+         <string>automatic (GPS) time shift</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDoubleSpinBox" name="timeShiftDoubleSpinBox">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="maximum">
+         <double>100000000.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <spacer name="verticalSpacer_2">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -643,6 +690,22 @@ It will be saved as multiple tiles on the disk.</string>
     <hint type="destinationlabel">
      <x>120</x>
      <y>228</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>autoTimeShiftCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>timeShiftDoubleSpinBox</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>100</x>
+     <y>401</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>401</y>
     </hint>
    </hints>
   </connection>

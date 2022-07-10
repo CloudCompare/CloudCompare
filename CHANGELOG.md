@@ -36,6 +36,11 @@ v2.13.alpha (???) - (??/??/????)
 	- Graphical Segmentation Tool:
 		- the user can now configure the name suffix for the remaining and segmented cloud 
 
+	- LAS files:
+		- The default shift for (GPS) time values is now rounded to the nearest 10^5 value
+		- The shift value is now displayed as a property of the currently selected scalar field
+		- When using the standard LAS I/O filter (PDAL), the user can now set a custom shift for GPS time values
+
 - Bug fixes:
 	- FBX: CloudCompare couldn't properly load the materials (textures) of meshes with quads
 	- the Compass plugin was exporting large coordinates with a too small precision

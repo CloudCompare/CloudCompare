@@ -71,6 +71,9 @@ public:
 	//! Resets the "apply all" flag (if set)
 	void resetApplyAll();
 
+	//! Returns the timeshift (if any)
+	bool getTimeShift(double& timeShift) const;
+
 protected:
 
 	void onApplyAll();

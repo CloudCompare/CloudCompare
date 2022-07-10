@@ -1357,10 +1357,11 @@ CC_FILE_ERROR LASFWFFilter::loadFile(const QString& filename, ccHObject& contain
 							if (field->type == LAS_TIME || (field->type == LAS_EXTRA && static_cast<ExtraLasField*>(field.data())->isShifted))
 							{
 								//we use the first value as 'global shift' (otherwise we will lose accuracy)
-								field->sf->setGlobalShift(field->firstValue);
-								value -= field->firstValue;
-								ccLog::Warning("[LAS] Time SF has been shifted to prevent a loss of accuracy (%.2f)", field->firstValue);
-								field->firstValue = 0;
+								double timeShift = static_cast<int64_t>(field->firstValue / 10000.0) * 10000.0;
+								field->sf->setGlobalShift(timeShift);
+								value -= timeShift;
+								ccLog::Warning("[LAS] Time SF has been shifted to prevent a loss of accuracy (%.2f)", timeShift);
+								field->firstValue = value;
 							}
 
 							ScalarType s = static_cast<ScalarType>(value);

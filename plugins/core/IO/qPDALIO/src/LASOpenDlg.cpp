@@ -213,3 +213,14 @@ bool LASOpenDlg::forced8bitRgbMode() const
 {
 	return force8bitRgbCheckBox->isChecked();
 }
+
+bool LASOpenDlg::getTimeShift(double& timeShift) const
+{
+	if (!timeShiftDoubleSpinBox->isEnabled())
+	{
+		return false;
+	}
+
+	timeShift = timeShiftDoubleSpinBox->value();
+	return true;
+}

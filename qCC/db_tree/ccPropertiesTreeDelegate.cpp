@@ -650,6 +650,13 @@ void ccPropertiesTreeDelegate::fillSFWithPointCloud(ccGenericPointCloud* _obj)
 		CCCoreLib::ScalarField* sf = cloud->getCurrentDisplayedScalarField();
 		if (sf)
 		{
+			//field shift
+			ccScalarField* ccSF = dynamic_cast<ccScalarField*>(sf);
+			if (ccSF)
+			{
+				appendRow(ITEM( tr( "Shift" ) ), ITEM(QString::number(ccSF->getGlobalShift(), 'f', 2)));
+			}
+
 			addSeparator("Color Scale");
 
 			//color scale selection combo box

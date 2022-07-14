@@ -1,6 +1,12 @@
 CloudCompare Version History
 ============================
 
+v2.12.4 (Kyiv) - (14/07/2022)
+----------------------
+
+- Bug fix:
+	- CloudCompare 2.12.X (X<3) could miss some triangles when computing the Cloud-to-Mesh distances (resulting in slightly overestimated distances)
+
 v2.12.3 (Kyiv) - (13/06/2022)
 ----------------------
 

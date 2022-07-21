@@ -1419,12 +1419,7 @@ bool ccPointCloud::reserve(unsigned newNumberOfPoints)
 
 bool ccPointCloud::resize(unsigned newNumberOfPoints)
 {
-	if (newNumberOfPoints == size())
-	{
-		//nothing to do
-		return true;
-	}
-	else if (newNumberOfPoints < size() && isLocked())
+	if (newNumberOfPoints < size() && isLocked())
 	{
 		//can't reduce the size if the cloud if it is locked!
 		return false;

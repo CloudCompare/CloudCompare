@@ -61,6 +61,7 @@ qFacets plugin:
 [*] Add the facet perimeter to the set of exported values
 
 Various:
+[*] Improve the CSF plugin with the method proposed in https://www.mdpi.com/2072-4292/13/15/2938 (https://www.cloudcompare.org/forum/viewtopic.php?t=5887)
 [*] Add a 'circle' option in the Graphical Segmentation tool (https://www.cloudcompare.org/forum/viewtopic.php?t=5756)
 [*] Add a confirmation popup when exiting from the Segmentation tool with 'ESC' (https://www.cloudcompare.org/forum/viewtopic.php?t=5793)
 [*] Add a confirmation popup when deleting an entity in the DB tree (https://www.cloudcompare.org/forum/viewtopic.php?t=5756)

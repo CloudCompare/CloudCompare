@@ -2800,9 +2800,9 @@ void MainWindow::doRemoveDuplicatePoints()
 			ccOctree::Shared octree = cloud->getOctree();
 
 			CCCoreLib::GeometricalAnalysisTools::ErrorCode result = CCCoreLib::GeometricalAnalysisTools::FlagDuplicatePoints(	cloud,
-																														minDistanceBetweenPoints,
-																														&pDlg,
-																														octree.data());
+																																minDistanceBetweenPoints,
+																																&pDlg,
+																																octree.data());
 
 			if (result == CCCoreLib::GeometricalAnalysisTools::NoError)
 			{
@@ -2846,6 +2846,10 @@ void MainWindow::doRemoveDuplicatePoints()
 						}
 						cloud->setEnabled(false);
 						m_ccRoot->selectEntity(filteredCloud, true);
+					}
+					else
+					{
+						ccConsole::Error(tr("Not enough memory to create the filtered cloud"));
 					}
 				}
 			}

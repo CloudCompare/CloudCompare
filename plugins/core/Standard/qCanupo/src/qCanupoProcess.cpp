@@ -235,6 +235,7 @@ float RefinePointClassif(	const Classifier& classifier,
 	}
 	catch (const std::bad_alloc&)
 	{
+		//not enough memory
 		return -1.0f;
 	}
 
@@ -1077,6 +1078,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 	}
 	catch (const std::bad_alloc&)
 	{
+		//not enough memory
 		if (app)
 			app->dispToConsole("Not enough memory", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return false;

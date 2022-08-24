@@ -119,7 +119,7 @@ struct LasField
 	virtual inline QString getName() const { return type < LAS_INVALID ? QString(LAS_FIELD_NAMES[type]) : QString(); }
 
 	//! Returns the (compliant) LAS fields in a point cloud
-    static bool GetLASFields(ccPointCloud* cloud, std::vector<LasField>& fieldsToSave, uint8_t& minPointFormat)
+	static bool GetLASFields(ccPointCloud* cloud, std::vector<LasField>& fieldsToSave, uint8_t& minPointFormat)
 	{
 		try
 		{

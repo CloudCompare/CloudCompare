@@ -45,6 +45,11 @@ v2.13.alpha (???) - (??/??/????)
 		- It is now possible to pass a SF name after -SET_ACTIVE_SF  instead of the field index
 			(use simple quotes if the scalar field name has spaces in it)
 
+- Bug fix:
+	- PCD: when transforming a cloud with a sensor (either manually, or via a registration tool, or via Edit > Apply Tranformation) and then exporting
+		the cloud to a PCD file, both the points AND the sensor were transformed, resulting in the PCD file coordinates to be in the wrong coordinate
+		system (as if the transformation had been applied twice)
+
 v2.12.4 (Kyiv) - (14/07/2022)
 ----------------------
 

@@ -44,7 +44,6 @@ const std::vector<ccGlobalShiftManager::ShiftInfo>& ccGlobalShiftManager::GetLas
 	static bool s_firstTime = true;
 	if (s_firstTime)
 	{
-		assert(s_lastInfoBuffer.empty());
 		LoadInfoFromFile(QCoreApplication::applicationDirPath() + QString("/") + s_defaultGlobalShiftListFilename, s_lastInfoBuffer);
 		s_firstTime = false;
 	}

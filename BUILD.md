@@ -244,6 +244,10 @@ Then, the CloudCompare CMake project will request that you set the following var
 
 # Other things 
 
+## linux
+
+With versions of CMake prior to 3.13, the compiled application might not work for all users (due to some libraries being linked from the /usr/local directory). See https://github.com/CloudCompare/CloudCompare/issues/1680.
+
 ## macOs
 
 If you are compiling and running locally, add `-DCC_MAC_DEV_PATHS` to the `CMAKE_CXX_FLAGS` in the `CMAKE` group. This

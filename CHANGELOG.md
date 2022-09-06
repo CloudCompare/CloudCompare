@@ -49,6 +49,7 @@ v2.13.alpha (???) - (??/??/????)
 	- PCD: when transforming a cloud with a sensor (either manually, or via a registration tool, or via Edit > Apply Tranformation) and then exporting
 		the cloud to a PCD file, both the points AND the sensor were transformed, resulting in the PCD file coordinates to be in the wrong coordinate
 		system (as if the transformation had been applied twice)
+	- The QTextStream::pos method is slow and unreliable. This could cause some issue when loading ASCII files.
 
 v2.12.4 (Kyiv) - (14/07/2022)
 ----------------------

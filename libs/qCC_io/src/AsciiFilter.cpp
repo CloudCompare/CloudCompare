@@ -817,6 +817,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiStream(QTextStream& stream,
 
 	//just in case
 	stream.seek(0);
+	qint64 charactersRead = 0;
 
 	//we skip lines as defined on input
 	{
@@ -828,6 +829,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiStream(QTextStream& stream,
 				//empty lines are ignored
 				continue;
 			}
+			charactersRead += currentLine.size();
 			++i;
 		}
 	}
@@ -870,6 +872,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiStream(QTextStream& stream,
 			//end of file
 			break;
 		}
+		charactersRead += currentLine.size();
 		++linesRead;
 
 		if (currentLine.isEmpty() || currentLine.startsWith("//"))
@@ -881,11 +884,11 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiStream(QTextStream& stream,
 		//if we have reached the max. number of points per cloud
 		if (pointsRead == nextLimit)
 		{
-			ccLog::PrintDebug("[ASCII] Point %i -> end of chunk (%i points)",pointsRead,cloudChunkSize);
+			ccLog::PrintDebug("[ASCII] Point %i -> end of chunk (%i points)", pointsRead, cloudChunkSize);
 
 			//we re-evaluate the average line size
 			{
-				double averageLineSize = static_cast<double>(stream.pos()) / (pointsRead + skipLines);
+				double averageLineSize = static_cast<double>(charactersRead) / (pointsRead + skipLines);
 				double newNbOfLinesApproximation = std::max(1.0, static_cast<double>(fileSize) / averageLineSize - static_cast<double>(skipLines));
 
 				//if approximation is smaller than actual one, we add 2% by default

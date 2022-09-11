@@ -288,7 +288,7 @@ MainWindow::MainWindow()
 
 	connectActions();
 
-	new3DView(true);
+	new3DView();
 
 	setupInputDevices();
 
@@ -5821,7 +5821,7 @@ void MainWindow::zoomOut()
 	}
 }
 
-ccGLWindow* MainWindow::new3DView( bool allowEntitySelection )
+ccGLWindow* MainWindow::new3DViewInternal( bool allowEntitySelection )
 {
 	assert(m_ccRoot && m_mdiArea);
 
@@ -6319,7 +6319,7 @@ void MainWindow::activateRegisterPointPairTool()
 		m_ccRoot->unselectAllEntities();
 	}
 
-	ccGLWindow* win = new3DView(true);
+	ccGLWindow* win = new3DView();
 	if (!win)
 	{
 		ccLog::Error(tr("[PointPairRegistration] Failed to create dedicated 3D view!"));
@@ -6414,7 +6414,7 @@ void MainWindow::activateSectionExtractionMode()
 		m_ccRoot->unselectAllEntities();
 	}
 
-	ccGLWindow* win = new3DView(false);
+	ccGLWindow* win = new3DViewInternal(false);
 	if (!win)
 	{
 		ccLog::Error(tr("[SectionExtraction] Failed to create dedicated 3D view!"));

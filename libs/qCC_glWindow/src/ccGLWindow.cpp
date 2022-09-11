@@ -359,6 +359,7 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=nullptr*/,
 	, m_activeFbo(nullptr)
 	, m_fbo(nullptr)
 	, m_fbo2(nullptr)
+	, m_pickingFbo(nullptr)
 	, m_alwaysUseFBO(false)
 	, m_updateFBO(true)
 	, m_colorRampShader(nullptr)
@@ -553,6 +554,9 @@ ccGLWindow::~ccGLWindow()
 
 	delete m_fbo2;
 	m_fbo2 = nullptr;
+
+	delete m_pickingFbo;
+	m_pickingFbo = nullptr;
 
 #ifdef CC_GL_WINDOW_USE_QWINDOW
 	if (m_context)
@@ -1197,7 +1201,7 @@ void ccGLWindow::setGLViewport(const QRect& rect)
 	{
 		makeCurrent();
 
-		functions()->glViewport(m_glViewport.x(), m_glViewport.y(), glWidth(), glHeight());
+		functions()->glViewport(m_glViewport.x(), m_glViewport.y(), m_glViewport.width(), m_glViewport.height());
 	}
 }
 
@@ -4822,8 +4826,6 @@ void ccGLWindow::processPickingResult(	const PickingParameters& params,
 	}
 }
 
-//DGM: WARNING: OpenGL picking with the picking buffer is depreacted.
-//We need to get rid of this code or change it to color-based selection...
 void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 {
 	if (!params.pickInLocalDB && !params.pickInSceneDB)
@@ -4858,23 +4860,18 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 	ccQOpenGLFunctions* glFunc = functions();
 	assert(glFunc);
 
-	//no need to clear display, we don't draw anything new!
-	//glFunc->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	if (!initFBOSafe(m_pickingFbo, glWidth(), glHeight()))
+	{
+		ccLog::Warning("[FBO] Initialization failed!");
+		//we must always emit a signal!
+		processPickingResult(params, nullptr, -1);
+		return;
+	}
+	bindFBO(m_pickingFbo);
 
-	//OpenGL picking buffer size (= max hits number per 'OpenGL' selection pass)
-	static const GLsizei CC_PICKING_BUFFER_SIZE = 65536;
-	//GL names picking buffer
-	static GLuint s_pickingBuffer[CC_PICKING_BUFFER_SIZE];
-
-	//setup selection buffers
-	memset(s_pickingBuffer, 0, sizeof(GLuint)*CC_PICKING_BUFFER_SIZE);
-	glFunc->glSelectBuffer(CC_PICKING_BUFFER_SIZE, s_pickingBuffer);
-	glFunc->glRenderMode(GL_SELECT);
-	glFunc->glInitNames();
-
-	//get viewport
-	GLint viewport[4] = { m_glViewport.left(), m_glViewport.top(), m_glViewport.width(), m_glViewport.height() };
-	//glFunc->glGetIntegerv(GL_VIEWPORT, viewport);
+	//we have to clear the display to be sure there's no color
+	glFunc->glClearColor(0, 0, 0, 255);
+	glFunc->glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 	//get context
 	CC_DRAW_CONTEXT CONTEXT;
@@ -4886,18 +4883,8 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 
 		//projection matrix
 		glFunc->glMatrixMode(GL_PROJECTION);
-		//restrict drawing to the picking area
-		{
-			double pickMatrix[16];
-			ccGL::PickMatrix(	static_cast<GLdouble>(params.centerX),
-								static_cast<GLdouble>(viewport[3] - params.centerY),
-								static_cast<GLdouble>(params.pickWidth),
-								static_cast<GLdouble>(params.pickWidth),
-								viewport,
-								pickMatrix);
-			glFunc->glLoadMatrixd(pickMatrix);
-		}
-		glFunc->glMultMatrixd(getProjectionMatrix().data());
+		
+		glFunc->glLoadMatrixd(getProjectionMatrix().data());
 
 		//model view matrix
 		glFunc->glMatrixMode(GL_MODELVIEW);
@@ -4907,7 +4894,7 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 		glFunc->glEnable(GL_DEPTH_TEST);
 
 		//display 3D objects
-		//DGM: all of them, even if we don't pick the own DB for instance, as they can hide the other objects!
+		//DGM: all of them, even if we don't pick the window own DB for instance, as they can hide the other objects!
 		if (m_globalDBRoot)
 			m_globalDBRoot->draw(CONTEXT);
 		if (m_winDBRoot)
@@ -4923,24 +4910,7 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 	{
 		CONTEXT.drawingFlags = CC_DRAW_2D | flags;
 
-		//we must first grab the 2D ortho view projection matrix
 		setStandardOrthoCenter();
-		glFunc->glMatrixMode(GL_PROJECTION);
-		double orthoProjMatd[OPENGL_MATRIX_SIZE];
-		glFunc->glGetDoublev(GL_PROJECTION_MATRIX, orthoProjMatd);
-		//restrict drawing to the picking area
-		{
-			double pickMatrix[16];
-			ccGL::PickMatrix(	static_cast<GLdouble>(params.centerX),
-								static_cast<GLdouble>(viewport[3] - params.centerY),
-								static_cast<GLdouble>(params.pickWidth),
-								static_cast<GLdouble>(params.pickWidth),
-								viewport,
-								pickMatrix);
-			glFunc->glLoadMatrixd(pickMatrix);
-		}
-		glFunc->glMultMatrixd(orthoProjMatd);
-		glFunc->glMatrixMode(GL_MODELVIEW);
 
 		glFunc->glPushAttrib(GL_DEPTH_BUFFER_BIT);
 		glFunc->glDisable(GL_DEPTH_TEST);
@@ -4957,66 +4927,127 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 		logGLError("ccGLWindow::startPicking.draw(2D)");
 	}
 
+	logGLError("ccGLWindow::startPicking.render");
 	glFunc->glFlush();
 
-	//back to the standard rendering mode
-	int hits = glFunc->glRenderMode(GL_RENDER);
-
-	logGLError("ccGLWindow::startPicking.render");
-
-	ccLog::PrintDebug("[Picking] hits: %i", hits);
-	if (hits < 0)
+	if (CONTEXT.entityPicking.getLastID() == 0)
 	{
-		ccLog::Warning("[Picking] Too many items inside the picking area! Try to zoom in...");
+		//no pickable entity displayed
 		//we must always emit a signal!
+		bindFBO(nullptr);
 		processPickingResult(params, nullptr, -1);
+		return;
 	}
 
-	//process hits
+	glFunc->glFinish();
+
+	ccHObject* pickedEntity = nullptr;
 	std::unordered_set<int> selectedIDs;
-	int pickedItemIndex = -1;
-	int selectedID = -1;
+
 	try
 	{
-		GLuint minMinDepth = (~0);
-		const GLuint* _selectBuf = s_pickingBuffer;
-
-		for (int i = 0; i < hits; ++i)
+		// crop the picking rectangle so that's it strictly inside the displayed window
+		int xTop = params.centerX - params.pickWidth / 2;
+		int xCenter = params.centerX;
+		int xWidth = params.pickWidth;
+		if (xTop < 0)
 		{
-			const GLuint& n = _selectBuf[0]; //number of names on stack
-			if (n) //if we draw anything outside of 'glPushName()... glPopName()' then it will appear here with as an empty set!
-			{
-				//n should be equal to 1 (CC_DRAW_ENTITY_NAMES mode) or 2 (CC_DRAW_POINT_NAMES/CC_DRAW_TRIANGLES_NAMES modes)!
-				assert(n == 1 || n == 2);
-				const GLuint& minDepth = _selectBuf[1];
-				//const GLuint& maxDepth = _selectBuf[2];
-				const GLuint& currentID = _selectBuf[3];
+			// crop pixels with negative X positions
+			xWidth += xTop;
+			xCenter += xTop;
+			xTop = 0;
+		}
+		xWidth = std::min(xWidth, static_cast<int>(glWidth()) - xTop);
+		if (xWidth <= 0)
+		{
+			bindFBO(nullptr);
+			processPickingResult(params, nullptr, -1);
+			return;
+		}
 
-				if (params.mode == ENTITY_RECT_PICKING)
+		int yTop = glHeight() - 1 - params.centerY - params.pickHeight / 2;
+		int yCenter = glHeight() - 1 - params.centerY;
+		int yWidth = params.pickHeight;
+		if (yTop < 0)
+		{
+			// crop pixels with negative Y positions
+			yWidth += yTop;
+			yCenter += yTop;
+			yTop = 0;
+		}
+		yWidth = std::min(yWidth, static_cast<int>(glHeight()) - yTop);
+		if (yWidth <= 0)
+		{
+			bindFBO(nullptr);
+			processPickingResult(params, nullptr, -1);
+			return;
+		}
+
+		int pixelCount = xWidth * yWidth;
+		std::vector<ccColor::Rgba> pickedPixels;
+		pickedPixels.resize(pixelCount, ccColor::black);
+
+		//read the pixel under the mouse
+		glFunc->glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+		glFunc->glReadPixels(xTop, yTop, xWidth, yWidth, GL_RGBA, GL_UNSIGNED_BYTE, pickedPixels.data());
+
+		bindFBO(nullptr);
+
+		//QImage testImage(xWidth, yWidth, QImage::Format_RGB888);
+
+		//process hits
+		int minSquareDistToCenter = -1;
+		ccColor::Rgba previousPixelColor(0, 0, 0, 0);
+
+		ccColor::Rgba* _pickedPixels = pickedPixels.data();
+		for (int j = 0; j < yWidth; ++j)
+		{
+			for (int i = 0; i < xWidth; ++i, ++_pickedPixels)
+			{
+				//testImage.setPixelColor(i, yWidth - 1 - j, QColor(_pickedPixels->r, _pickedPixels->g, _pickedPixels->b));
+				if (_pickedPixels->r != 0 || _pickedPixels->g != 0 || _pickedPixels->b != 0)
 				{
-					//pick them all!
-					selectedIDs.insert(currentID);
-				}
-				else
-				{
-					//if there are multiple hits, we keep only the nearest
-					if (selectedID < 0 || minDepth < minMinDepth)
+					if (params.mode == ENTITY_RECT_PICKING)
 					{
-						selectedID = currentID;
-						pickedItemIndex = (n > 1 ? _selectBuf[4] : -1);
-						minMinDepth = minDepth;
+						// avoid reprocessing the pixel corresponding to the same cloud over and over
+						if (_pickedPixels->r != previousPixelColor.r || _pickedPixels->g != previousPixelColor.g || _pickedPixels->b != previousPixelColor.b)
+						{
+							previousPixelColor = *_pickedPixels;
+							ccHObject* object = CONTEXT.entityPicking.objectFromColor(*_pickedPixels);
+							if (object)
+							{
+								selectedIDs.insert(object->getUniqueID());
+							}
+							else
+							{
+								assert(false);
+							}
+						}
+					}
+					else
+					{
+						int dX = i - xCenter;
+						int dY = j - yCenter;
+						int squareDistToCenter = dX * dX + dY * dY;
+						if (!pickedEntity || minSquareDistToCenter < squareDistToCenter)
+						{
+							minSquareDistToCenter = squareDistToCenter;
+							pickedEntity = CONTEXT.entityPicking.objectFromColor(*_pickedPixels);
+							assert(pickedEntity);
+						}
 					}
 				}
 			}
-
-			_selectBuf += (3 + n);
 		}
 
+		//testImage.save("C:\\Temp\\test.png");
+
 		//standard output is made through the 'selectedIDs' set
-		if (params.mode != ENTITY_RECT_PICKING
-			&&	selectedID != -1)
+		if (pickedEntity)
 		{
-			selectedIDs.insert(selectedID);
+			assert(params.mode != ENTITY_RECT_PICKING);
+			selectedIDs.insert(pickedEntity->getUniqueID());
 		}
 	}
 	catch (const std::bad_alloc&)
@@ -5025,47 +5056,7 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 		ccLog::Warning("[Picking] Not enough memory!");
 	}
 
-	ccHObject* pickedEntity = nullptr;
-	if (selectedID >= 0)
-	{
-		if (params.pickInSceneDB && m_globalDBRoot)
-		{
-			pickedEntity = m_globalDBRoot->find(selectedID);
-		}
-		if (!pickedEntity && params.pickInLocalDB && m_winDBRoot)
-		{
-			pickedEntity = m_winDBRoot->find(selectedID);
-		}
-	}
-
-	CCVector3 P(0, 0, 0);
-	CCVector3d PBC(0, 0, 0);
-	CCVector3* pickedPoint = nullptr;
-	CCVector3d* pickedBarycenter = nullptr;
-	if (pickedEntity && pickedItemIndex >= 0)
-	{
-		//we need to retrieve the point coordinates
-		//(and even the barycentric coordinates if the point is picked on a mesh!)
-		if (pickedEntity->isKindOf(CC_TYPES::POINT_CLOUD))
-		{
-			P = *(static_cast<ccGenericPointCloud*>(pickedEntity)->getPoint(pickedItemIndex));
-			pickedPoint = &P;
-		}
-		else if (pickedEntity->isKindOf(CC_TYPES::MESH))
-		{
-			CCVector2d clickedPos(params.centerX, glHeight() - 1 - params.centerY);
-			ccGLCameraParameters camera;
-			getGLCameraParameters(camera);
-			CCVector3d Pd(0, 0, 0);
-			static_cast<ccGenericMesh*>(pickedEntity)->trianglePicking(static_cast<unsigned>(pickedItemIndex), clickedPos, camera, Pd, &PBC);
-			P = Pd.toPC();
-			pickedPoint = &P;
-			pickedBarycenter = &PBC;
-		}
-	}
-
-	//we must always emit a signal!
-	processPickingResult(params, pickedEntity, pickedItemIndex, pickedPoint, pickedBarycenter, &selectedIDs);
+	processPickingResult(params, pickedEntity, -1, nullptr, nullptr, &selectedIDs);
 }
 
 void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
@@ -5182,12 +5173,12 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 					double nearestSquareDist = 0.0;
 
 					if (cloud->pointPicking(clickedPos,
-						camera,
-						nearestPointIndex,
-						nearestSquareDist,
-						params.pickWidth,
-						params.pickHeight,
-						autoComputeOctree && cloud->size() > MIN_POINTS_FOR_OCTREE_COMPUTATION))
+											camera,
+											nearestPointIndex,
+											nearestSquareDist,
+											params.pickWidth,
+											params.pickHeight,
+											autoComputeOctree && cloud->size() > MIN_POINTS_FOR_OCTREE_COMPUTATION))
 					{
 						if (nearestElementIndex < 0 || (nearestPointIndex >= 0 && nearestSquareDist < nearestElementSquareDist))
 						{

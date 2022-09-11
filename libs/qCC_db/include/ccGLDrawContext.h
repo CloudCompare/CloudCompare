@@ -19,6 +19,7 @@
 #define CC_GL_DRAW_CONTEXT_HEADER
 
 #include "ccIncludeGL.h"
+#include "ccColorBasedEntityPicking.h"
 
 //Local
 #include "ccMaterial.h"
@@ -155,6 +156,9 @@ struct ccGLDrawContext
 
 	//! Whether to draw rounded points (instead of squares)
 	bool drawRoundedPoints;
+
+	//! Entity picking mechanism
+	ccColorBasedEntityPicking entityPicking;
 
 	//Default constructor
 	ccGLDrawContext()

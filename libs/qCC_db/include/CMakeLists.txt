@@ -13,6 +13,7 @@ target_sources( ${PROJECT_NAME}
 		${CMAKE_CURRENT_LIST_DIR}/ccCameraSensor.h
 		${CMAKE_CURRENT_LIST_DIR}/ccChunk.h
 		${CMAKE_CURRENT_LIST_DIR}/ccClipBox.h
+		${CMAKE_CURRENT_LIST_DIR}/ccColorBasedEntityPicking.h
 		${CMAKE_CURRENT_LIST_DIR}/ccColorRampShader.h
 		${CMAKE_CURRENT_LIST_DIR}/ccColorScale.h
 		${CMAKE_CURRENT_LIST_DIR}/ccColorScalesManager.h

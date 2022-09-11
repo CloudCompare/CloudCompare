@@ -2557,9 +2557,10 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		//can't display a SF without... a SF... and an active color scale!
 		assert(!glParams.showSF || hasDisplayedScalarField());
 
-		//standard case: list names pushing
-		bool pushName = MACRO_DrawEntityNames(context);
-		if (pushName)
+		//color-based entity picking
+		bool entityPicking = MACRO_DrawEntityNames(context);
+		ccColor::Rgb pickingColor;
+		if (entityPicking)
 		{
 			//not fast at all!
 			if (MACRO_DrawFastNamesOnly(context))
@@ -2567,11 +2568,11 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				return;
 			}
 
-			glFunc->glPushName(getUniqueIDForDisplay());
+			pickingColor = context.entityPicking.registerEntity(this);
 			//minimal display for picking mode!
 			glParams.showNorms = false;
 			glParams.showColors = false;
-			if (glParams.showSF && m_currentDisplayedScalarField->areNaNValuesShownInGrey())
+			if (glParams.showSF && !m_currentDisplayedScalarField->mayHaveHiddenValues())
 			{
 				glParams.showSF = false; //--> we keep it only if SF 'NaN' values are potentially hidden
 			}
@@ -2579,7 +2580,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		// L.O.D. display
 		DisplayDesc toDisplay(0, size());
-		if (!pushName)
+		if (!entityPicking)
 		{
 			if (	context.decimateCloudOnMove
 				&&	toDisplay.count > context.minLODPointCount
@@ -2687,7 +2688,11 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glFunc->glEnable(GL_BLEND);
 		}
 
-		if (glParams.showColors && isColorOverridden())
+		if (entityPicking)
+		{
+			ccGL::Color3v(glFunc, pickingColor.rgb);
+		}
+		else if (glParams.showColors && isColorOverridden())
 		{
 			ccGL::Color4v(glFunc, m_tempColor.rgba);
 			glParams.showColors = false;
@@ -2748,29 +2753,45 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 				glFunc->glBegin(GL_POINTS);
 
-				for (unsigned j = toDisplay.startIndex; j < toDisplay.endIndex; j += toDisplay.decimStep)
+				if (!entityPicking)
 				{
-					//we must test each point visibility
-					unsigned pointIndex = toDisplay.indexMap ? toDisplay.indexMap->at(j) : j;
-					if (m_pointsVisibility.empty() || m_pointsVisibility[pointIndex] == CCCoreLib::POINT_VISIBLE)
+					for (unsigned j = toDisplay.startIndex; j < toDisplay.endIndex; j += toDisplay.decimStep)
 					{
-						if (glParams.showSF)
+						//we must test each point visibility
+						unsigned pointIndex = toDisplay.indexMap ? toDisplay.indexMap->at(j) : j;
+						if (m_pointsVisibility.empty() || m_pointsVisibility[pointIndex] == CCCoreLib::POINT_VISIBLE)
 						{
-							assert(pointIndex < m_currentDisplayedScalarField->currentSize());
-							const ccColor::Rgb* col = m_currentDisplayedScalarField->getValueColor(pointIndex);
-							//we force display of points hidden because of their scalar field value
-							//to be sure that the user doesn't miss them (during manual segmentation for instance)
-							glFunc->glColor3ubv(col ? col->rgb : ccColor::lightGreyRGB.rgb); //Make sure all points are visible. No alpha used on purpose 
+							if (glParams.showSF)
+							{
+								assert(pointIndex < m_currentDisplayedScalarField->currentSize());
+								const ccColor::Rgb* col = m_currentDisplayedScalarField->getValueColor(pointIndex);
+								//we force display of points hidden because of their scalar field value
+								//to be sure that the user doesn't miss them (during manual segmentation for instance)
+								glFunc->glColor3ubv(col ? col->rgb : ccColor::lightGreyRGB.rgb); //Make sure all points are visible. No alpha used on purpose 
+							}
+							else if (glParams.showColors)
+							{
+								glFunc->glColor4ubv(m_rgbaColors->getValue(pointIndex).rgba);
+							}
+							if (glParams.showNorms)
+							{
+								ccGL::Normal3v(glFunc, compressedNormals->getNormal(m_normals->getValue(pointIndex)).u);
+							}
+							ccGL::Vertex3v(glFunc, m_points[pointIndex].u);
 						}
-						else if (glParams.showColors)
+					}
+				}
+				else
+				{
+					for (unsigned j = toDisplay.startIndex; j < toDisplay.endIndex; j += toDisplay.decimStep)
+					{
+						//we must test each point visibility
+						unsigned pointIndex = toDisplay.indexMap ? toDisplay.indexMap->at(j) : j;
+						if (m_pointsVisibility.empty() || m_pointsVisibility[pointIndex] == CCCoreLib::POINT_VISIBLE)
 						{
-							glFunc->glColor4ubv(m_rgbaColors->getValue(pointIndex).rgba);
+							//in color-based picking mode, we only display the points
+							ccGL::Vertex3v(glFunc, m_points[pointIndex].u);
 						}
-						if (glParams.showNorms)
-						{
-							ccGL::Normal3v(glFunc, compressedNormals->getNormal(m_normals->getValue(pointIndex)).u);
-						}
-						ccGL::Vertex3v(glFunc, m_points[pointIndex].u);
 					}
 				}
 
@@ -2801,6 +2822,11 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					}
 					//FIXME: color ramp shader doesn't support log scale yet!
 					if (m_currentDisplayedScalarField->logScale())
+					{
+						colorRampShader = nullptr;
+					}
+					//the shader can't be used during color-based color picking
+					if (entityPicking)
 					{
 						colorRampShader = nullptr;
 					}
@@ -3086,6 +3112,20 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 								}
 							}
 						}
+						else if (entityPicking)
+						{
+							for (unsigned j = toDisplay.startIndex; j < toDisplay.endIndex; j += toDisplay.decimStep)
+							{
+								unsigned pointIndex = (toDisplay.indexMap ? toDisplay.indexMap->at(j) : j);
+								assert(pointIndex < m_currentDisplayedScalarField->currentSize());
+								const ccColor::Rgb* col = m_currentDisplayedScalarField->getValueColor(pointIndex);
+								if (col)
+								{
+									//for entity picking, don't change the color, we just need to know whether the point is visible
+									ccGL::Vertex3v(glFunc, m_points[pointIndex].u);
+								}
+							}
+						}
 						else
 						{
 							for (unsigned j = toDisplay.startIndex; j < toDisplay.endIndex; j += toDisplay.decimStep)
@@ -3186,11 +3226,6 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 
 		glFunc->glPopAttrib(); //GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT | GL_TRANSFORM_BIT | GL_POINT_BIT --> will switch the light off
-
-		if (pushName)
-		{
-			glFunc->glPopName();
-		}
 	}
 	else if (MACRO_Draw2D(context))
 	{

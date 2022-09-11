@@ -51,6 +51,7 @@ v2.13.alpha (???) - (??/??/????)
 		system (as if the transformation had been applied twice)
 	- The QTextStream::pos method is slow and unreliable. This could cause some issue when loading ASCII files.
 	- When creating a new 3D view, it was not possible to pick an entity displayed in it by clicking on it.
+	- When clicking on an entity in a 3D view while holding CTRL, it was only possible to select it, not to deselect it if it was already selected.
 
 v2.12.4 (Kyiv) - (14/07/2022)
 ----------------------

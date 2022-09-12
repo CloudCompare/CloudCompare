@@ -2558,9 +2558,9 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		assert(!glParams.showSF || hasDisplayedScalarField());
 
 		//color-based entity picking
-		bool entityPicking = MACRO_DrawEntityNames(context);
+		bool entityPickingMode = MACRO_DrawEntityNames(context);
 		ccColor::Rgb pickingColor;
-		if (entityPicking)
+		if (entityPickingMode)
 		{
 			//not fast at all!
 			if (MACRO_DrawFastNamesOnly(context))
@@ -2569,6 +2569,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			}
 
 			pickingColor = context.entityPicking.registerEntity(this);
+
 			//minimal display for picking mode!
 			glParams.showNorms = false;
 			glParams.showColors = false;
@@ -2580,7 +2581,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		// L.O.D. display
 		DisplayDesc toDisplay(0, size());
-		if (!entityPicking)
+		if (!entityPickingMode)
 		{
 			if (	context.decimateCloudOnMove
 				&&	toDisplay.count > context.minLODPointCount
@@ -2688,7 +2689,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glFunc->glEnable(GL_BLEND);
 		}
 
-		if (entityPicking)
+		if (entityPickingMode)
 		{
 			ccGL::Color3v(glFunc, pickingColor.rgb);
 		}
@@ -2753,7 +2754,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 				glFunc->glBegin(GL_POINTS);
 
-				if (!entityPicking)
+				if (!entityPickingMode)
 				{
 					for (unsigned j = toDisplay.startIndex; j < toDisplay.endIndex; j += toDisplay.decimStep)
 					{
@@ -2826,7 +2827,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						colorRampShader = nullptr;
 					}
 					//the shader can't be used during color-based color picking
-					if (entityPicking)
+					if (entityPickingMode)
 					{
 						colorRampShader = nullptr;
 					}
@@ -3112,7 +3113,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 								}
 							}
 						}
-						else if (entityPicking)
+						else if (entityPickingMode)
 						{
 							for (unsigned j = toDisplay.startIndex; j < toDisplay.endIndex; j += toDisplay.decimStep)
 							{

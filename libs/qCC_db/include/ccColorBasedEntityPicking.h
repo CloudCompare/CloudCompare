@@ -41,6 +41,7 @@ public:
 	void reset()
 	{
 		entities.clear();
+		ids.clear();
 		lastID = 0;
 	}
 
@@ -64,7 +65,12 @@ public:
 	//! Registeres an entity an returns its corresponding color
 	ccColor::Rgb registerEntity(ccHObject* obj)
 	{
+		if (ids.contains(obj))
+		{
+			return IDToColor(ids[obj]);
+		}
 		entities[++lastID] = obj;
+		ids[obj] = lastID;
 		return IDToColor(lastID);
 	}
 
@@ -78,6 +84,9 @@ protected:
 
 	//! ID/object association map
 	QMap<ID_TYPE, ccHObject*> entities;
+
+	//! object/ID association map
+	QMap<ccHObject*, ID_TYPE> ids;
 
 	//! Biggest ID value used during the last picking/rendering process
 	ID_TYPE lastID;

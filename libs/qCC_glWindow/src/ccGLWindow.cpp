@@ -3849,10 +3849,12 @@ void ccGLWindow::onItemPickedFast(ccHObject* pickedEntity, int pickedItemIndex, 
 			cc2DLabel* label = static_cast<cc2DLabel*>(pickedEntity);
 			m_activeItems.push_back(label);
 		}
-		else if (pickedEntity->isA(CC_TYPES::CLIPPING_BOX))
+		else if (pickedEntity->isA(CC_TYPES::CLIPPING_BOX_PART))
 		{
-			ccClipBox* cbox = static_cast<ccClipBox*>(pickedEntity);
-			cbox->setActiveComponent(pickedItemIndex);
+			ccClipBoxPart* cBoxPart = static_cast<ccClipBoxPart*>(pickedEntity);
+			ccClipBox* cbox = cBoxPart->clipBox();
+			assert(cbox);
+			cbox->setActiveComponent(cBoxPart->partID());
 			cbox->setClickedPoint(x, y, width(), height(), m_viewportParams.viewMat);
 
 			m_activeItems.push_back(cbox);

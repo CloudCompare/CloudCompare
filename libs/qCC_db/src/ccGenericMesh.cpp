@@ -237,14 +237,19 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		bool applyMaterials = (hasMaterials() && materialsShown());
 		bool showTextures = (hasTextures() && materialsShown() && !lodEnabled);
 
-		//GL name pushing
-		bool pushName = MACRO_DrawEntityNames(context);
-		if (pushName)
+		//color-based entity picking
+		bool entityPickingMode = MACRO_DrawEntityNames(context);
+		ccColor::Rgb pickingColor;
+		if (entityPickingMode)
 		{
 			//not fast at all!
 			if (MACRO_DrawFastNamesOnly(context))
+			{
 				return;
-			glFunc->glPushName(getUniqueIDForDisplay());
+			}
+
+			pickingColor = context.entityPicking.registerEntity(this);
+
 			//minimal display for picking mode!
 			glParams.showNorms = false;
 			glParams.showColors = false;
@@ -256,7 +261,7 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		//in the case we need to display scalar field colors
 		ccScalarField* currentDisplayedScalarField = nullptr;
-		bool greyForNanScalarValues = true;
+		bool sfMayHaveHiddenValues = false;
 		//unsigned colorRampSteps = 0;
 		ccColorScale::Shared colorScale(nullptr);
 
@@ -264,23 +269,26 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		{
 			assert(vertices->isA(CC_TYPES::POINT_CLOUD));
 			ccPointCloud* cloud = static_cast<ccPointCloud*>(vertices);
+			currentDisplayedScalarField = cloud->getCurrentDisplayedScalarField();
+			sfMayHaveHiddenValues = currentDisplayedScalarField ? currentDisplayedScalarField->mayHaveHiddenValues() : false;
 
-			greyForNanScalarValues = (cloud->getCurrentDisplayedScalarField() && cloud->getCurrentDisplayedScalarField()->areNaNValuesShownInGrey());
-			if (greyForNanScalarValues && pushName)
+			if (	!currentDisplayedScalarField
+				||	(entityPickingMode && !sfMayHaveHiddenValues)) //in picking mode, no need to take SF into account if we don't hide any points!
 			{
-				//in picking mode, no need to take SF into account if we don't hide any points!
+				currentDisplayedScalarField = nullptr;
 				glParams.showSF = false;
 			}
 			else
 			{
-				currentDisplayedScalarField = cloud->getCurrentDisplayedScalarField();
 				colorScale = currentDisplayedScalarField->getColorScale();
 				//colorRampSteps = currentDisplayedScalarField->getColorRampSteps();
 
-				assert(colorScale);
 				//get default color ramp if cloud has no scale associated?!
 				if (!colorScale)
+				{
+					assert(false);
 					colorScale = ccColorScalesManager::GetUniqueInstance()->getDefaultScale(ccColorScalesManager::BGYR);
+				}
 			}
 		}
 
@@ -309,9 +317,13 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				rgbaColorsTable = static_cast<ccPointCloud*>(vertices)->rgbaColors();
 			}
 		}
+		else if (entityPickingMode)
+		{
+			ccGL::Color3v(glFunc, pickingColor.rgb);
+		}
 		else
 		{
-			glFunc->glColor3fv(context.defaultMat->getDiffuseFront().rgba);
+			ccGL::Color4v(glFunc, context.defaultMat->getDiffuseFront().rgba);
 		}
 
 		if (glParams.showNorms)
@@ -337,8 +349,9 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			EnableGLStippleMask(context.qGLContext, true);
 		}
 
-		if (!visFiltering && !(applyMaterials || showTextures) && (!glParams.showSF || greyForNanScalarValues))
+		if (!visFiltering && !(applyMaterials || showTextures) && (!glParams.showSF || !sfMayHaveHiddenValues))
 		{
+			assert(!entityPickingMode || !glParams.showSF);
 			//the GL type depends on the PointCoordinateType 'size' (float or double)
 			GLenum GL_COORD_TYPE = sizeof(PointCoordinateType) == 4 ? GL_FLOAT : GL_DOUBLE;
 
@@ -521,6 +534,14 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 					rgb3 = currentDisplayedScalarField->getValueColor(tsi->i3);
 					if (!rgb3)
 						continue;
+
+					if (entityPickingMode)
+					{
+						//in picking mode, we don't want to apply the colors, just filter the invisible triangles
+						rgb1 = nullptr;
+						rgb2 = nullptr;
+						rgb3 = nullptr;
+					}
 				}
 				else if (glParams.showColors)
 				{
@@ -661,11 +682,6 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		{
 			glFunc->glDisable(GL_LIGHTING);
 			glFunc->glDisable(GL_RESCALE_NORMAL);
-		}
-
-		if (pushName)
-		{
-			glFunc->glPopName();
 		}
 	}
 }

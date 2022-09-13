@@ -231,17 +231,17 @@ void ccCoordinateSystem::drawMeOnly(CC_DRAW_CONTEXT& context)
 			return;
 
 		//color-based entity picking
-		bool entityPickingMode = MACRO_DrawEntityNames(context);
+		bool entityPickingMode = MACRO_EntityPicking(context);
 		ccColor::Rgb pickingColor;
 		if (entityPickingMode)
 		{
 			//not fast at all!
-			if (MACRO_DrawFastNamesOnly(context))
+			if (MACRO_FastEntityPicking(context))
 			{
 				return;
 			}
 			pickingColor = context.entityPicking.registerEntity(this);
-			ccGL::Color3v(glFunc, pickingColor.rgb);
+			ccGL::Color(glFunc, pickingColor);
 		}
 
 		glFunc->glPushMatrix();
@@ -256,15 +256,15 @@ void ccCoordinateSystem::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		glFunc->glBegin(GL_LINES);
 		if (!entityPickingMode)
-			ccGL::Color3v(glFunc, ccColor::red.rgba);
+			ccGL::Color(glFunc, ccColor::red);
 		glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
 		glFunc->glVertex3f(m_DisplayScale * 2, 0.0f, 0.0f);
 		if (!entityPickingMode)
-			ccGL::Color3v(glFunc, ccColor::green.rgba);
+			ccGL::Color(glFunc, ccColor::green);
 		glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
 		glFunc->glVertex3f(0.0f, m_DisplayScale * 2, 0.0f);
 		if (!entityPickingMode)
-			ccGL::Color3v(glFunc, ccColor::blue.rgba);
+			ccGL::Color(glFunc, ccColor::blueCC);
 		glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
 		glFunc->glVertex3f(0.0f, 0.0f, m_DisplayScale * 2);
 		glFunc->glEnd();

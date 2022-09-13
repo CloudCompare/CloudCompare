@@ -942,8 +942,7 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 		//check sphere exists
 		if (!c_unitPointMarker)
 		{
-			c_unitPointMarker = QSharedPointer<ccSphere>(new ccSphere(1.0f, nullptr, "PointMarker", 6));
-
+			c_unitPointMarker.reset(new ccSphere(1.0f, nullptr, "PointMarker", 6));
 			c_unitPointMarker->showColors(true);
 			c_unitPointMarker->setVisible(true);
 			c_unitPointMarker->setEnabled(true);
@@ -956,7 +955,7 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 		//not sure what this does, but it looks like fun
 		CC_DRAW_CONTEXT markerContext = context; //build-up point maker own 'context'
 		markerContext.display = nullptr;
-		markerContext.drawingFlags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the sphere doesn't push its own!
+		markerContext.drawingFlags &= (~CC_ENTITY_PICKING); //we must remove the 'entity picking flag' so that the sphere doesn't override the picking color!
 
 		//get camera info
 		ccGLCameraParameters camera;
@@ -966,22 +965,30 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		const ccViewportParameters& viewportParams = context.display->getViewportParameters();
 
-		//push name for picking
-		bool pushName = MACRO_DrawEntityNames(context);
-		if (pushName)
+		//color-based entity picking
+		bool entityPickingMode = MACRO_EntityPicking(context);
+		ccColor::Rgb pickingColor;
+		if (entityPickingMode)
 		{
-			glFunc->glPushName(getUniqueIDForDisplay());
+			//not fast at all!
+			if (MACRO_FastEntityPicking(context))
+			{
+				return;
+			}
+
+			pickingColor = context.entityPicking.registerEntity(this);
+
 			//minimal display for picking mode!
 			glParams.showNorms = false;
 			glParams.showColors = false;
 		}
 
 		//set draw colour
-		ccColor::Rgb color = getMeasurementColour();
+		ccColor::Rgb color = entityPickingMode ? pickingColor : getMeasurementColour();
 		c_unitPointMarker->setTempColor(color);
 
 		//get point size for drawing
-		float pSize;
+		float pSize = 1.0f;
 		glFunc->glGetFloatv(GL_POINT_SIZE, &pSize);
 
 		//draw key-points and structure normals (if assigned)
@@ -1018,7 +1025,7 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 					glFunc->glLineWidth(static_cast<GLfloat>(m_width));
 				}
 				glFunc->glBegin(GL_LINE_STRIP);
-				glFunc->glColor3f(color.r, color.g, color.b);
+				ccGL::Color(glFunc, color);
 				for (int p : seg)
 				{
 					ccGL::Vertex3v(glFunc, m_cloud->getPoint(p)->u);
@@ -1060,10 +1067,6 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 				}
 			}
 		}
-
-		//finish picking name
-		if (pushName)
-			glFunc->glPopName();
 	}
 }
 

@@ -439,7 +439,6 @@ public: //other methods
 
 	//inherited from ccHObject
 	void getDrawingParameters(glDrawParams& params) const override;
-	unsigned getUniqueIDForDisplay() const override;
 
 	//inherited from ccDrawableObject
 	bool hasColors() const override;

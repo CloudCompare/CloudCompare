@@ -395,9 +395,6 @@ public: //display
 	//! Returns selection behavior
 	virtual inline SelectionBehavior getSelectionBehavior() const { return m_selectionBehavior; }
 
-	//! Returns object unique ID used for display
-	virtual inline unsigned getUniqueIDForDisplay() const { return getUniqueID(); }
-
 	//! Returns the transformation 'history' matrix
 	virtual inline const ccGLMatrix& getGLTransformationHistory() const { return m_glTransHistory; }
 	//! Sets the transformation 'history' matrix (handle with care!)

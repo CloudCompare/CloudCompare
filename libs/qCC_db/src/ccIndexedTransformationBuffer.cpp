@@ -283,7 +283,7 @@ bool ccIndexedTransformationBuffer::fromFile_MeOnly(QFile& in, short dataVersion
 void ccIndexedTransformationBuffer::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
 	//no picking enabled on trans. buffers
-	if (MACRO_DrawEntityNames(context))
+	if (MACRO_EntityPicking(context))
 		return;
 	//only in 3D
 	if (!MACRO_Draw3D(context))
@@ -300,7 +300,7 @@ void ccIndexedTransformationBuffer::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 	//show path
 	{
-		ccGL::Color4v(glFunc, ccColor::green.rgba);
+		ccGL::Color(glFunc, ccColor::green);
 		glFunc->glBegin(count > 1 && m_showAsPolyline ? GL_LINE_STRIP : GL_POINTS); //show path as a polyline or points?
 		for (ccIndexedTransformationBuffer::const_iterator it=begin(); it!=end(); ++it)
 			glFunc->glVertex3fv(it->getTranslation());
@@ -321,15 +321,15 @@ void ccIndexedTransformationBuffer::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glFunc->glLineWidth(2.0f);
 
 			glFunc->glBegin(GL_LINES);
-			glFunc->glColor3f(1.0f,0.0f,0.0f);
-			glFunc->glVertex3f(0.0f,0.0f,0.0f);
-			glFunc->glVertex3f(m_trihedronsScale,0.0f,0.0f);
-			glFunc->glColor3f(0.0f,1.0f,0.0f);
-			glFunc->glVertex3f(0.0f,0.0f,0.0f);
-			glFunc->glVertex3f(0.0f,m_trihedronsScale,0.0f);
-			glFunc->glColor3f(0.0f,0.7f,1.0f);
-			glFunc->glVertex3f(0.0f,0.0f,0.0f);
-			glFunc->glVertex3f(0.0f,0.0f,m_trihedronsScale);
+			ccGL::Color(glFunc, ccColor::red);
+			glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
+			glFunc->glVertex3f(m_trihedronsScale, 0.0f, 0.0f);
+			ccGL::Color(glFunc, ccColor::green);
+			glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
+			glFunc->glVertex3f(0.0f, m_trihedronsScale, 0.0f);
+			ccGL::Color(glFunc, ccColor::blueCC);
+			glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
+			glFunc->glVertex3f(0.0f, 0.0f, m_trihedronsScale);
 			glFunc->glEnd();
 
 			glFunc->glPopAttrib(); //GL_LINE_BIT

@@ -238,12 +238,12 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		bool showTextures = (hasTextures() && materialsShown() && !lodEnabled);
 
 		//color-based entity picking
-		bool entityPickingMode = MACRO_DrawEntityNames(context);
+		bool entityPickingMode = MACRO_EntityPicking(context);
 		ccColor::Rgb pickingColor;
 		if (entityPickingMode)
 		{
 			//not fast at all!
-			if (MACRO_DrawFastNamesOnly(context))
+			if (MACRO_FastEntityPicking(context))
 			{
 				return;
 			}
@@ -308,7 +308,7 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		{
 			if (isColorOverridden())
 			{
-				ccGL::Color4v(glFunc, m_tempColor.rgba);
+				ccGL::Color(glFunc, m_tempColor);
 				glParams.showColors = false;
 			}
 			else
@@ -319,11 +319,11 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 		else if (entityPickingMode)
 		{
-			ccGL::Color3v(glFunc, pickingColor.rgb);
+			ccGL::Color(glFunc, pickingColor);
 		}
 		else
 		{
-			ccGL::Color4v(glFunc, context.defaultMat->getDiffuseFront().rgba);
+			ccGL::Color(glFunc, context.defaultMat->getDiffuseFront());
 		}
 
 		if (glParams.showNorms)
@@ -625,9 +625,9 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				if (N1)
 					ccGL::Normal3v(glFunc, N1);
 				if (rgb1)
-					glFunc->glColor3ubv(rgb1->rgb);
+					ccGL::Color(glFunc, *rgb1);
 				else if (rgba1)
-					glFunc->glColor4ubv(rgba1->rgba);
+					ccGL::Color(glFunc, *rgba1);
 				if (Tx1)
 					glFunc->glTexCoord2fv(Tx1->t);
 				ccGL::Vertex3v(glFunc, vertices->getPoint(tsi->i1)->u);
@@ -636,9 +636,9 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				if (N2)
 					ccGL::Normal3v(glFunc, N2);
 				if (rgb2)
-					glFunc->glColor3ubv(rgb2->rgb);
+					ccGL::Color(glFunc, *rgb2);
 				else if (rgba2)
-					glFunc->glColor4ubv(rgba2->rgba);
+					ccGL::Color(glFunc, *rgba2);
 				if (Tx2)
 					glFunc->glTexCoord2fv(Tx2->t);
 				ccGL::Vertex3v(glFunc, vertices->getPoint(tsi->i2)->u);
@@ -647,9 +647,9 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				if (N3)
 					ccGL::Normal3v(glFunc, N3);
 				if (rgb3)
-					glFunc->glColor3ubv(rgb3->rgb);
+					ccGL::Color(glFunc, *rgb3);
 				else if (rgba3)
-					glFunc->glColor4ubv(rgba3->rgba);
+					ccGL::Color(glFunc, *rgba3);
 				if (Tx3)
 					glFunc->glTexCoord2fv(Tx3->t);
 				ccGL::Vertex3v(glFunc, vertices->getPoint(tsi->i3)->u);

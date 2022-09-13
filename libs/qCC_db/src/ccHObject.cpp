@@ -737,7 +737,7 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 			(  m_selected || !MACRO_SkipUnselected(context) ))
 		{
 			//apply default color (in case of)
-			ccGL::Color4v(glFunc, context.pointsDefaultCol.rgba);
+			ccGL::Color(glFunc, context.pointsDefaultCol);
 
 			//enable clipping planes (if any)
 			bool useClipPlanes = (draw3D && !m_clipPlanes.empty());
@@ -757,7 +757,7 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 	}
 
 	//draw name - container objects are not visible but can still show a name
-	if (m_currentDisplay == context.display && m_showNameIn3D && !MACRO_DrawEntityNames(context))
+	if (m_currentDisplay == context.display && m_showNameIn3D && !MACRO_EntityPicking(context))
 	{
 		if (MACRO_Draw3D(context))
 		{
@@ -792,7 +792,7 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 	}
 	
 	//if the entity is currently selected, we draw its bounding-box
-	if (m_selected && draw3D && drawInThisContext && !MACRO_DrawEntityNames(context) && context.currentLODLevel == 0)
+	if (m_selected && draw3D && drawInThisContext && !MACRO_EntityPicking(context) && context.currentLODLevel == 0)
 	{
 		drawBB(context, context.bbDefaultCol);
 	}

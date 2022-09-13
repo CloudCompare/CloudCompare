@@ -314,7 +314,7 @@ bool ccClipBox::addAssociatedEntity(ccHObject* entity)
 	return true;
 }
 
-void ccClipBox::setActiveComponent(ccClipBox::Components id)
+void ccClipBox::setActiveComponent(Components id)
 {
 	m_activeComponent = id;
 }
@@ -652,7 +652,7 @@ void ccClipBox::drawMeOnly(CC_DRAW_CONTEXT& context)
 	}
 
 	//color-based entity picking
-	bool entityPickingMode = MACRO_DrawFastNamesOnly(context);
+	bool entityPickingMode = MACRO_FastEntityPicking(context);
 
 	//draw the interactors
 	{
@@ -664,7 +664,7 @@ void ccClipBox::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		//custom arrow 'context'
 		CC_DRAW_CONTEXT componentContext = context;
-		componentContext.drawingFlags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the arrows don't push their own!
+		componentContext.drawingFlags &= (~CC_ENTITY_PICKING); //we must remove the 'entity picking flag' so that the arrows don't push their own!
 		componentContext.display = nullptr;
 
 		//force the light on

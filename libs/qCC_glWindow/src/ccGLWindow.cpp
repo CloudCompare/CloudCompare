@@ -126,20 +126,20 @@ enum class RenderTextReservedIDs {
 
 //On some versions of Qt, QGLWidget::renderText seems to need glColorf instead of glColorub!
 // See https://bugreports.qt-project.org/browse/QTBUG-6217
-template<class QOpenGLFunctions> inline static void glColor3ubv_safe(QOpenGLFunctions* glFunc, const unsigned char* rgb)
+template<class QOpenGLFunctions> inline static void glColor3ubv_safe(QOpenGLFunctions* glFunc, const ccColor::Rgb& color)
 {
 	assert(glFunc);
-	glFunc->glColor3f(	rgb[0] / 255.0f,
-						rgb[1] / 255.0f,
-						rgb[2] / 255.0f);
+	glFunc->glColor3f(	color.r / 255.0f,
+						color.g / 255.0f,
+						color.b / 255.0f);
 }
-template<class QOpenGLFunctions> inline static void glColor4ubv_safe(QOpenGLFunctions* glFunc, const unsigned char* rgb)
+template<class QOpenGLFunctions> inline static void glColor4ubv_safe(QOpenGLFunctions* glFunc, const ccColor::Rgba& color)
 {
 	assert(glFunc);
-	glFunc->glColor4f(	rgb[0] / 255.0f,
-						rgb[1] / 255.0f,
-						rgb[2] / 255.0f,
-						rgb[3] / 255.0f);
+	glFunc->glColor4f(	color.r / 255.0f,
+						color.g / 255.0f,
+						color.b / 255.0f,
+						color.a / 255.0f);
 }
 
 //! Precomputed stuff for the 'hot zone'
@@ -152,7 +152,7 @@ struct HotZone
 	//text shift
 	int yTextBottomLineShift;
 	//default color
-	unsigned char color[3];
+	ccColor::Rgb color;
 
 	//bubble-view label rect.
 	QString bbv_label;
@@ -189,6 +189,7 @@ struct HotZone
 	explicit HotZone(ccGLWindow* win)
 		: textHeight(0)
 		, yTextBottomLineShift(0)
+		, color(133, 193, 39) //default color ("greenish")
 		, bbv_label("bubble-view mode")
 		, fs_label("fullscreen mode")
 		, psi_label("default point size")
@@ -197,11 +198,6 @@ struct HotZone
 		, iconSize(16)
 		, topCorner(0, 0)
 	{
-		//default color ("greenish")
-		color[0] = 133;
-		color[1] = 193;
-		color[2] = 39;
-
 		if (win)
 		{
 			font = win->font();
@@ -1847,7 +1843,7 @@ void ccGLWindow::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 				glFunc->glBegin(GL_QUADS);
 				{
 					//we use the default background color for gradient start
-					glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, bkgCol.rgb);
+					glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, bkgCol);
 					glFunc->glVertex2i(-w, h);
 					glFunc->glVertex2i(w, h);
 					//and the inverse of the text color for gradient stop
@@ -2131,7 +2127,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 		//draw black background
 		{
 			int height = (diagStrings.size() + 1) * 14;
-			glColor4ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::black.rgba);
+			glColor4ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::black);
 			glFunc->glBegin(GL_QUADS);
 			glFunc->glVertex2i(x, glHeight() - y);
 			glFunc->glVertex2i(x, glHeight() - (y + height));
@@ -2140,7 +2136,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 			glFunc->glEnd();
 		}
 
-		glColor4ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::yellow.rgba);
+		glColor4ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::yellow);
 		for (const QString &str : diagStrings)
 		{
 			renderText(x + 10, y + 10, str);
@@ -2644,7 +2640,7 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 
 				glFunc->glPopAttrib(); //GL_COLOR_BUFFER_BIT
 
-				glColor4ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::black.rgba);
+				glColor4ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::black);
 				renderText(	10,
 							borderHeight - CC_GL_FILTER_BANNER_MARGIN - CC_GL_FILTER_BANNER_MARGIN / 2,
 							QString("[GL filter] ") + m_activeGLFilter->getDescription(),
@@ -2657,7 +2653,7 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 			//current messages (if valid)
 			if (!m_messagesToDisplay.empty())
 			{
-				glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, textCol.rgb);
+				glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, textCol);
 
 				int ll_currentHeight = glHeight() - 10; //lower left
 				int uc_currentHeight = 10; //upper center
@@ -3112,7 +3108,7 @@ void ccGLWindow::drawCross()
 	glFunc->glLineWidth(1.0f);
 
 	//cross OpenGL drawing
-	glColor4ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::lightGrey.rgba);
+	glColor4ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::lightGrey);
 	glFunc->glBegin(GL_LINES);
 	glFunc->glVertex3f(0.0f, -CC_DISPLAYED_CENTER_CROSS_LENGTH, 0.0f);
 	glFunc->glVertex3f(0.0f, CC_DISPLAYED_CENTER_CROSS_LENGTH, 0.0f);
@@ -3201,7 +3197,7 @@ void ccGLWindow::drawScale(const ccColor::Rgbub& color)
 	glFunc->glLineWidth(1.0f);
 
 	//scale OpenGL drawing
-	glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, color.rgb);
+	glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, color);
 	glFunc->glBegin(GL_LINES);
 	glFunc->glVertex3f(w - scaleW_pix, -h, 0.0f);
 	glFunc->glVertex3f(w, -h, 0.0f);
@@ -3216,7 +3212,7 @@ void ccGLWindow::drawScale(const ccColor::Rgbub& color)
 	// display label
 	double textEquivalentWidth = RoundScale(scaleMaxW * pixelSize);
 	QString text = QString::number(textEquivalentWidth);
-	glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, color.rgb);
+	glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, color);
 	renderText(	glWidth() - static_cast<int>(scaleW_pix / 2 + dW) - fm.width(text) / 2,
 				glHeight() - static_cast<int>(dH / 2) + fm.height() / 3,
 				text,
@@ -3260,13 +3256,13 @@ void ccGLWindow::drawTrihedron()
 
 		//trihedron OpenGL drawing
 		glFunc->glBegin(GL_LINES);
-		glFunc->glColor3f(1.0f, 0.0f, 0.0f);
+		ccGL::Color(glFunc, ccColor::red);
 		glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
 		glFunc->glVertex3d(CC_DISPLAYED_TRIHEDRON_AXES_LENGTH, 0.0, 0.0);
-		glFunc->glColor3f(0.0f, 1.0f, 0.0f);
+		ccGL::Color(glFunc, ccColor::green);
 		glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
 		glFunc->glVertex3d(0.0, CC_DISPLAYED_TRIHEDRON_AXES_LENGTH, 0.0);
-		glFunc->glColor3f(0.0f, 0.7f, 1.0f);
+		ccGL::Color(glFunc, ccColor::blueCC);
 		glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
 		glFunc->glVertex3d(0.0, 0.0, CC_DISPLAYED_TRIHEDRON_AXES_LENGTH);
 		glFunc->glEnd();
@@ -3302,7 +3298,7 @@ void ccGLWindow::drawTrihedron()
 		CCVector2d toTrihedronOrigin(trihedronCenterX, -trihedronCenterY);
 		CCVector2d toCharOrigin(-(rectX.x() + rectX.width() / 2.0), rectX.y() + rectX.height() / 4.0); // rectX.height() should be divided by 2, but it looks better with 4 !
 
-		glFunc->glColor3f(1.0f, 0.0f, 0.0f);
+		ccGL::Color(glFunc, ccColor::red);
 		{
 			CCVector2d dX(tipX2D.x - origin2D.x, tipX2D.y - origin2D.y);
 			dX.normalize();
@@ -3311,7 +3307,7 @@ void ccGLWindow::drawTrihedron()
 			renderText(static_cast<int>(halfW + posX.x), static_cast<int>(halfH - posX.y), "X", static_cast<uint16_t>(RenderTextReservedIDs::trihedronX), textFont);
 		}
 
-		glFunc->glColor3f(0.0f, 1.0f, 0.0f);
+		ccGL::Color(glFunc, ccColor::green);
 		{
 			CCVector2d dY(tipY2D.x - origin2D.x, tipY2D.y - origin2D.y);
 			dY.normalize();
@@ -3320,7 +3316,7 @@ void ccGLWindow::drawTrihedron()
 			renderText(static_cast<int>(halfW + posY.x), static_cast<int>(halfH - posY.y), "Y", static_cast<uint16_t>(RenderTextReservedIDs::trihedronY), textFont);
 		}
 
-		glFunc->glColor3f(0.0f, 0.7f, 1.0f);
+		ccGL::Color(glFunc, ccColor::blueCC);
 		{
 			CCVector2d dZ(tipZ2D.x - origin2D.x, tipZ2D.y - origin2D.y);
 			dZ.normalize();
@@ -4842,10 +4838,10 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 	switch (params.mode)
 	{
 	case FAST_PICKING:
-		flags |= CC_DRAW_FAST_NAMES_ONLY;
+		flags |= CC_FAST_ENTITY_PICKING;
 	case ENTITY_PICKING:
 	case ENTITY_RECT_PICKING:
-		flags |= CC_DRAW_ENTITY_NAMES;
+		flags |= CC_ENTITY_PICKING;
 		break;
 	default:
 		//unhandled mode?!
@@ -5521,7 +5517,7 @@ void ccGLWindow::drawCustomLight()
 	ccQOpenGLFunctions* glFunc = functions();
 	assert(glFunc);
 
-	glFunc->glColor4ubv(ccColor::yellow.rgba);
+	ccGL::Color(glFunc, ccColor::yellow);
 	//ensure that the star size is constant (in pixels)
 	GLfloat d = static_cast<GLfloat>(CC_DISPLAYED_CUSTOM_LIGHT_LENGTH * computeActualPixelSize());
 
@@ -5652,6 +5648,8 @@ void ccGLWindow::drawPivot()
 		const float c_alpha = 0.6f;
 
 		//pivot symbol: 3 circles
+		static const ccColor::Rgba RedAlpha(ccColor::redRGB, c_alpha);
+		ccGL::Color(glFunc, RedAlpha);
 		glFunc->glColor4f(1.0f, 0.0f, 0.0f, c_alpha);
 		glDrawUnitCircle(context(), 0);
 		glFunc->glBegin(GL_LINES);
@@ -5659,14 +5657,16 @@ void ccGLWindow::drawPivot()
 		glFunc->glVertex3f(1.0f, 0.0f, 0.0f);
 		glFunc->glEnd();
 
-		glFunc->glColor4f(0.0f, 1.0f, 0.0f, c_alpha);
+		static const ccColor::Rgba GreenAlpha(ccColor::greenRGB, c_alpha);
+		ccGL::Color(glFunc, GreenAlpha);
 		glDrawUnitCircle(context(), 1);
 		glFunc->glBegin(GL_LINES);
 		glFunc->glVertex3f(0.0f, -1.0f, 0.0f);
 		glFunc->glVertex3f(0.0f, 1.0f, 0.0f);
 		glFunc->glEnd();
 
-		glFunc->glColor4f(0.0f, 0.7f, 1.0f, c_alpha);
+		static const ccColor::Rgba BlueCCAlpha(ccColor::blueCCRGB, c_alpha);
+		ccGL::Color(glFunc, BlueCCAlpha);
 		glDrawUnitCircle(context(), 2);
 		glFunc->glBegin(GL_LINES);
 		glFunc->glVertex3f(0.0f, 0.0f, -1.0f);
@@ -6451,7 +6451,7 @@ int ccGLWindow::getGlFilterBannerHeight() const
 
 void ccGLWindow::display3DLabel(const QString& str, const CCVector3& pos3D, const ccColor::Rgba* color/*=nullptr*/, const QFont& font/*=QFont()*/)
 {
-	glColor4ubv_safe<ccQOpenGLFunctions>(functions(), color ? color->rgba : getDisplayParameters().textDefaultCol.rgba);
+	glColor4ubv_safe<ccQOpenGLFunctions>(functions(), color ? *color : getDisplayParameters().textDefaultCol);
 	renderText(pos3D.x, pos3D.y, pos3D.z, str, font);
 }
 
@@ -6470,7 +6470,7 @@ void ccGLWindow::displayText(	QString text,
 	int y2 = y;
 
 	//actual text color
-	const unsigned char* rgba = (color ? color->rgba : getDisplayParameters().textDefaultCol.rgba);
+	const ccColor::Rgba& rgba = (color ? *color : getDisplayParameters().textDefaultCol);
 
 	QFont textFont = (font ? *font : m_font);
 
@@ -6502,11 +6502,11 @@ void ccGLWindow::displayText(	QString text,
 			glFunc->glEnable(GL_BLEND);
 
 			//inverted color with a bit of transparency
-			const float invertedCol[4] = {	(255 - rgba[0]) / 255.0f,
-											(255 - rgba[1]) / 255.0f,
-											(255 - rgba[2]) / 255.0f,
-											bkgAlpha };
-			glFunc->glColor4fv(invertedCol);
+			const ccColor::Rgbaf invertedCol(	(255 - rgba.r) / 255.0f,
+												(255 - rgba.g) / 255.0f,
+												(255 - rgba.b) / 255.0f,
+												bkgAlpha );
+			ccGL::Color(glFunc, invertedCol);
 
 			int xB = x2 - glWidth() / 2;
 			int yB = y2 - glHeight() / 2;
@@ -7013,7 +7013,7 @@ void ccGLWindow::renderText(int x, int y, const QString & str, uint16_t uniqueID
 			texture->setData(QOpenGLTexture::RGBA, QOpenGLTexture::UInt32_RGBA8_Rev, textImage.bits());
 			texture->bind();
 
-			glFunc->glColor4f(1.0f, 1.0f, 1.0f, 1.0f); //DGM: warning must be float colors to work properly?!
+			ccGL::Color(glFunc, ccColor::bright); //DGM: warning must be float colors to work properly?!
 			glFunc->glBegin(GL_QUADS);
 			float ratioW = textRect.width() / static_cast<float>(imageRect.width());
 			float ratioH = textRect.height() / static_cast<float>(imageRect.height());

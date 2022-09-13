@@ -1325,6 +1325,7 @@ protected: //members
 	//! Locked rotation axis
 	CCVector3d m_lockedRotationAxis;
 
+	//! Shared texture type
 	using SharedTexture = QSharedPointer< QOpenGLTexture>;
 
 	//! Reserved textures (for renderText)

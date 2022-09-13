@@ -2558,12 +2558,12 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		assert(!glParams.showSF || hasDisplayedScalarField());
 
 		//color-based entity picking
-		bool entityPickingMode = MACRO_DrawEntityNames(context);
+		bool entityPickingMode = MACRO_EntityPicking(context);
 		ccColor::Rgb pickingColor;
 		if (entityPickingMode)
 		{
 			//not fast at all!
-			if (MACRO_DrawFastNamesOnly(context))
+			if (MACRO_FastEntityPicking(context))
 			{
 				return;
 			}
@@ -2691,16 +2691,16 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		if (entityPickingMode)
 		{
-			ccGL::Color3v(glFunc, pickingColor.rgb);
+			ccGL::Color(glFunc, pickingColor);
 		}
 		else if (glParams.showColors && isColorOverridden())
 		{
-			ccGL::Color4v(glFunc, m_tempColor.rgba);
+			ccGL::Color(glFunc, m_tempColor);
 			glParams.showColors = false;
 		}
 		else
 		{
-			ccGL::Color4v(glFunc, context.pointsDefaultCol.rgba);
+			ccGL::Color(glFunc, context.pointsDefaultCol);
 		}
 
 		//in the case we need normals (i.e. lighting)
@@ -2768,11 +2768,11 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 								const ccColor::Rgb* col = m_currentDisplayedScalarField->getValueColor(pointIndex);
 								//we force display of points hidden because of their scalar field value
 								//to be sure that the user doesn't miss them (during manual segmentation for instance)
-								glFunc->glColor3ubv(col ? col->rgb : ccColor::lightGreyRGB.rgb); //Make sure all points are visible. No alpha used on purpose 
+								ccGL::Color(glFunc, col ? *col : ccColor::lightGreyRGB); //Make sure all points are visible. No alpha used on purpose 
 							}
 							else if (glParams.showColors)
 							{
-								glFunc->glColor4ubv(m_rgbaColors->getValue(pointIndex).rgba);
+								ccGL::Color(glFunc, m_rgbaColors->getValue(pointIndex));
 							}
 							if (glParams.showNorms)
 							{
@@ -3073,7 +3073,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 								const ccColor::Rgb* col = m_currentDisplayedScalarField->getValueColor(pointIndex);
 								if (col)
 								{
-									glFunc->glColor3ubv(col->rgb);
+									ccGL::Color(glFunc, *col);
 									ccGL::Normal3v(glFunc, compressedNormals->getNormal(m_normals->getValue(pointIndex)).u);
 									ccGL::Vertex3v(glFunc, m_points[pointIndex].u);
 								}
@@ -3136,7 +3136,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 								const ccColor::Rgb* col = m_currentDisplayedScalarField->getValueColor(pointIndex);
 								if (col)
 								{
-									glFunc->glColor3ubv(col->rgb);
+									ccGL::Color(glFunc, *col);
 									ccGL::Vertex3v(glFunc, m_points[pointIndex].u);
 								}
 							}
@@ -4681,14 +4681,6 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Load
 	releaseVBOs();
 
 	return true;
-}
-
-unsigned ccPointCloud::getUniqueIDForDisplay() const
-{
-	if (m_parent && m_parent->isA(CC_TYPES::FACET))
-		return m_parent->getUniqueID();
-	else
-		return getUniqueID();
 }
 
 CCCoreLib::ReferenceCloud* ccPointCloud::crop(const ccBBox& box, bool inside/*=true*/)

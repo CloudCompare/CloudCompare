@@ -85,7 +85,7 @@ public:
 	//! Sets currently active component
 	/** \param id component ID (see Components)
 	**/
-	void setActiveComponent(ccClipBox::Components id);
+	void setActiveComponent(Components id);
 
 	//inherited from ccHObject
 	inline CC_CLASS_ENUM getClassID() const override { return CC_TYPES::CLIPPING_BOX; }

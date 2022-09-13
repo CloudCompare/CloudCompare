@@ -138,12 +138,12 @@ void ccSNECloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			{
 				const ccColor::Rgb* col = m_currentDisplayedScalarField->getColor(m_currentDisplayedScalarField->getValue(p));
 				const ccColor::Rgba col4(col->r, col->g, col->b, 200);
-				glFunc->glColor4ubv(col4.rgba);
+				ccGL::Color(glFunc, col4);
 			}
 			else
 			{
-				const ccColor::Rgba col4(200, 200, 200, 200);
-				glFunc->glColor4ubv(col4.rgba);
+				static const ccColor::Rgba Col4(200, 200, 200, 200);
+				ccGL::Color(glFunc, Col4);
 			}
 
 			//get length from thickness (if defined)

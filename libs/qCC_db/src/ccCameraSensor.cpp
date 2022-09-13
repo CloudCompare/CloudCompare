@@ -1341,12 +1341,12 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 		return;
 
 	//color-based entity picking
-	bool entityPickingMode = MACRO_DrawEntityNames(context);
+	bool entityPickingMode = MACRO_EntityPicking(context);
 	ccColor::Rgb pickingColor;
 	if (entityPickingMode)
 	{
 		//not particularly fast
-		if (MACRO_DrawFastNamesOnly(context))
+		if (MACRO_FastEntityPicking(context))
 			return;
 		pickingColor = context.entityPicking.registerEntity(this);
 	}
@@ -1364,7 +1364,7 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 	const PointCoordinateType baseHalfWidth		= 1 * upperLeftPoint.x / 5;
 
 	glFunc->glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	ccGL::Color3v(glFunc, entityPickingMode ? pickingColor.rgb : m_color.rgb);
+	ccGL::Color(glFunc, entityPickingMode ? pickingColor : m_color);
 
 	//near plane
 	glFunc->glBegin(GL_LINE_LOOP);
@@ -1481,7 +1481,7 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 				m_frustumInfos.frustumHull->enableStippling(true);
 
 				CC_DRAW_CONTEXT frustumContext = context;
-				frustumContext.drawingFlags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the sphere doesn't push its own!
+				frustumContext.drawingFlags &= (~CC_ENTITY_PICKING); //we must remove the 'entity picking flag' so that the sphere doesn't override the picking color!
 				frustumContext.display = nullptr;
 				m_frustumInfos.frustumHull->draw(frustumContext);
 			}
@@ -1497,7 +1497,7 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		// right vector
 		if (!entityPickingMode)
-			ccGL::Color4v(glFunc, ccColor::red.rgba);
+			ccGL::Color(glFunc, ccColor::red);
 		glFunc->glBegin(GL_LINES);
 		glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
 		glFunc->glVertex3f(l, 0.0f, 0.0f);
@@ -1505,7 +1505,7 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		// up vector
 		if (!entityPickingMode)
-			ccGL::Color4v(glFunc, ccColor::green.rgba);
+			ccGL::Color(glFunc, ccColor::green);
 		glFunc->glBegin(GL_LINES);
 		glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
 		glFunc->glVertex3f(0.0f, l, 0.0f);
@@ -1513,7 +1513,7 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		// view vector
 		if (!entityPickingMode)
-			ccGL::Color4v(glFunc, ccColor::blue.rgba);
+			ccGL::Color(glFunc, ccColor::blue);
 		glFunc->glBegin(GL_LINES);
 		glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
 		glFunc->glVertex3f(0.0f, 0.0f, -l);

@@ -122,7 +122,7 @@ void ccImage::drawMeOnly(CC_DRAW_CONTEXT& context)
 		GLfloat dX = realWidth*zoomFactor;
 		GLfloat dY = m_height*zoomFactor;
 
-		glFunc->glColor4f(1, 1, 1, m_texAlpha);
+		glFunc->glColor4f(1.0f, 1.0f, 1.0f, m_texAlpha);
 		glFunc->glBegin(GL_QUADS);
 		glFunc->glTexCoord2f(0, 1); glFunc->glVertex2f(-dX, -dY);
 		glFunc->glTexCoord2f(1, 1); glFunc->glVertex2f( dX, -dY);

@@ -128,7 +128,7 @@ void ccMouseCircle::draw(CC_DRAW_CONTEXT& context)
 			glFunc->glLineStipple(1, 0xAAAA);
 			glFunc->glEnable(GL_LINE_STIPPLE);
 		}
-		glFunc->glColor4ubv(ccColor::red.rgba);
+		ccGL::Color(glFunc, ccColor::red);
 		glFunc->glBegin(GL_LINE_LOOP);
 		for (int n = 0; n < Circle::Resolution; n++)
 		{

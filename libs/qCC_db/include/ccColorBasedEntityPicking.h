@@ -33,7 +33,6 @@ public:
 	/** With 24 bits RGB, we can uniquely color up to 2^24 (= 16 777 216) different entities **/
 	typedef uint32_t ID_TYPE;
 
-
 	//! Default constructor
 	ccColorBasedEntityPicking() : lastID(0) {}
 

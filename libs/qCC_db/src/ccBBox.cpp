@@ -32,7 +32,7 @@ void ccBBox::draw(CC_DRAW_CONTEXT& context, const ccColor::Rgb& col) const
 	if ( glFunc == nullptr )
 		return;
 
-	ccGL::Color3v(glFunc, col.rgb);
+	ccGL::Color(glFunc, col);
 
 	glFunc->glBegin(GL_LINE_LOOP);
 	ccGL::Vertex3v(glFunc, m_bbMin.u);

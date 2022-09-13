@@ -933,7 +933,7 @@ protected: //other methods
 	**/
 	void startPicking(PickingParameters& params);
 
-	//! Performs the picking with OpenGL
+	//! Performs the picking with OpenGL (color-based)
 	void startOpenGLPicking(const PickingParameters& params);
 
 	//! Starts OpenGL picking process
@@ -1192,6 +1192,8 @@ protected: //members
 	ccFrameBufferObject* m_fbo;
 	//! Second default FBO (frame buffer object) - used for stereo rendering
 	ccFrameBufferObject* m_fbo2;
+	//! Picking FBO (frame buffer object)
+	ccFrameBufferObject* m_pickingFbo;
 	//! Whether to always use FBO or only for GL filters
 	bool m_alwaysUseFBO;
 	//! Whether FBO should be updated (or simply displayed as a texture = faster!)
@@ -1323,6 +1325,7 @@ protected: //members
 	//! Locked rotation axis
 	CCVector3d m_lockedRotationAxis;
 
+	//! Shared texture type
 	using SharedTexture = QSharedPointer< QOpenGLTexture>;
 
 	//! Reserved textures (for renderText)

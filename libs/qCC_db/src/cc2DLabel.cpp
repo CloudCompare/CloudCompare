@@ -1000,14 +1000,15 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 		return;
 	}
 
-	//standard case: list names pushing
-	bool pushName = MACRO_DrawEntityNames(context);
-	if (pushName)
+	//color-based entity picking
+	bool entityPickingMode = MACRO_EntityPicking(context);
+	ccColor::Rgb pickingColor;
+	if (entityPickingMode)
 	{
 		//not particularly fast
-		if (MACRO_DrawFastNamesOnly(context))
+		if (MACRO_FastEntityPicking(context))
 			return;
-		glFunc->glPushName(getUniqueIDForDisplay());
+		pickingColor = context.entityPicking.registerEntity(this);
 	}
 
 	//we always project the points in 2D (maybe useful later, even when displaying the label during the 2D pass!)
@@ -1020,7 +1021,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 	glFunc->glGetDoublev(GL_MODELVIEW_MATRIX, camera.modelViewMat.data());
 
 	//don't do this in picking mode!
-	if (!pushName)
+	if (!entityPickingMode)
 	{
 		for (size_t i = 0; i < count; i++)
 		{
@@ -1035,11 +1036,19 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 	{
 	case 3:
 	{
-		glFunc->glPushAttrib(GL_COLOR_BUFFER_BIT);
-		glFunc->glEnable(GL_BLEND);
-
 		//we draw the triangle
-		glFunc->glColor4ub(255, 255, 0, 128);
+		if (entityPickingMode)
+		{
+			ccGL::Color(glFunc, pickingColor);
+		}
+		else
+		{
+			glFunc->glPushAttrib(GL_COLOR_BUFFER_BIT);
+			glFunc->glEnable(GL_BLEND);
+
+			static ccColor::Rgba DefaultTriangleColor(255, 255, 0, 128);
+			ccGL::Color(glFunc, DefaultTriangleColor);
+		}
 		glFunc->glBegin(GL_TRIANGLES);
 		CCVector3 P3D = m_pickedPoints[0].getPointPosition();
 		ccGL::Vertex3v(glFunc, P3D.u);
@@ -1049,7 +1058,10 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 		ccGL::Vertex3v(glFunc, P3D.u);
 		glFunc->glEnd();
 
-		glFunc->glPopAttrib(); //GL_COLOR_BUFFER_BIT
+		if (!entityPickingMode)
+		{
+			glFunc->glPopAttrib(); //GL_COLOR_BUFFER_BIT
+		}
 		//loop = true;
 	}
 	case 2:
@@ -1062,9 +1074,9 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 
 		////we draw the segments
 		//if (isSelected())
-		//	ccGL::Color3v(glFunc, ccColor::red.rgba);
+		//	ccGL::Color(glFunc, ccColor::red);
 		//else
-		//	ccGL::Color3v(glFunc, ccColor::green.rgba);
+		//	ccGL::Color(glFunc, ccColor::green);
 		//
 		//glFunc->glBegin(GL_LINES);
 		//for (unsigned i=0; i<count; i++)
@@ -1087,7 +1099,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 		{
 			if (!c_unitPointMarker)
 			{
-				c_unitPointMarker = QSharedPointer<ccSphere>(new ccSphere(1.0f, nullptr, "PointMarker", 12));
+				c_unitPointMarker.reset(new ccSphere(1.0f, nullptr, "PointMarker", 12));
 				c_unitPointMarker->showColors(true);
 				c_unitPointMarker->setVisible(true);
 				c_unitPointMarker->setEnabled(true);
@@ -1095,10 +1107,12 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 
 			//build-up point maker own 'context'
 			CC_DRAW_CONTEXT markerContext = context;
-			markerContext.drawingFlags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the sphere doesn't push its own!
+			markerContext.drawingFlags &= (~CC_ENTITY_PICKING); //we must remove the 'entity picking flag' so that the sphere doesn't override the picking color!
 			markerContext.display = nullptr;
 
-			if (isSelected() && !pushName)
+			if (entityPickingMode)
+				c_unitPointMarker->setTempColor(pickingColor);
+			else if (isSelected())
 				c_unitPointMarker->setTempColor(ccColor::red);
 			else
 				c_unitPointMarker->setTempColor(context.labelDefaultMarkerCol);
@@ -1125,11 +1139,6 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 			}
 		}
 	}
-	}
-
-	if (pushName)
-	{
-		glFunc->glPopName();
 	}
 }
 
@@ -1222,11 +1231,12 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 		return;
 	}
 
-	//standard case: list names pushing
-	bool pushName = MACRO_DrawEntityNames(context);
-	if (pushName)
+	//color-based entity picking
+	bool entityPickingMode = MACRO_EntityPicking(context);
+	ccColor::Rgb pickingColor;
+	if (entityPickingMode)
 	{
-		glFunc->glPushName(getUniqueIDForDisplay());
+		pickingColor = context.entityPicking.registerEntity(this);
 	}
 
 	float halfW = context.glW / 2.0f;
@@ -1265,10 +1275,12 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 				glFunc->glLineWidth(c_sizeFactor * context.renderZoom);
 
 				//we draw the segments
-				if (isSelected())
-					ccGL::Color4v(glFunc, ccColor::red.rgba);
+				if (entityPickingMode)
+					ccGL::Color(glFunc, pickingColor);
+				else if (isSelected())
+					ccGL::Color(glFunc, ccColor::red);
 				else
-					ccGL::Color4v(glFunc, context.labelDefaultMarkerCol.rgba/*ccColor::green.rgba*/);
+					ccGL::Color(glFunc, context.labelDefaultMarkerCol/*ccColor::green*/);
 
 				glFunc->glBegin(count == 2 ? GL_LINES : GL_LINE_LOOP);
 				for (unsigned j = 0; j < count; ++j)
@@ -1280,7 +1292,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 			}
 
 			//no need to display the point(s) legend in picking mode
-			if (m_dispPointsLegend && !pushName)
+			if (m_dispPointsLegend && !entityPickingMode)
 			{
 				QFont font(context.display->getTextDisplayFont()); //takes rendering zoom into account!
 				//font.setPointSize(font.pointSize() + 2);
@@ -1296,13 +1308,13 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 					else if (count == 3)
 						title = ABC[j]; //for triangle-labels, we only display "A","B","C"
 
-					context.display->displayText(title,
-						static_cast<int>(m_pickedPoints[j].pos2D.x) + context.labelMarkerTextShift_pix,
-						static_cast<int>(m_pickedPoints[j].pos2D.y) + context.labelMarkerTextShift_pix,
-						ccGenericGLDisplay::ALIGN_DEFAULT,
-						context.labelOpacity / 100.0f,
-						&ccColor::white,
-						&font);
+					context.display->displayText(	title,
+													static_cast<int>(m_pickedPoints[j].pos2D.x) + context.labelMarkerTextShift_pix,
+													static_cast<int>(m_pickedPoints[j].pos2D.y) + context.labelMarkerTextShift_pix,
+													ccGenericGLDisplay::ALIGN_DEFAULT,
+													context.labelOpacity / 100.0f,
+													&ccColor::white,
+													&font);
 				}
 			}
 
@@ -1311,10 +1323,6 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 		else
 		{
 			//no need to draw anything (might be confusing)
-			if (pushName)
-			{
-				glFunc->glPopName();
-			}
 			return;
 		}
 	}
@@ -1322,10 +1330,6 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 	if (!m_dispIn2D)
 	{
 		//nothing to do
-		if (pushName)
-		{
-			glFunc->glPopName();
-		}
 		return;
 	}
 
@@ -1352,7 +1356,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 	int titleHeight = 0;
 	QFont bodyFont;
 	QFont titleFont;
-	if (!pushName)
+	if (!entityPickingMode)
 	{
 		/*** label border ***/
 		bodyFont = context.display->getLabelDisplayFont(); //takes rendering zoom into account!
@@ -1490,7 +1494,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 				catch (const std::bad_alloc&)
 				{
 					//not enough memory
-					assert(!pushName);
+					assert(!entityPickingMode);
 					return;
 				}
 
@@ -1542,27 +1546,35 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 	m_lastScreenPos[1] = yStart - m_labelROI.height();
 
 	//colors
-	bool highlighted = (!pushName && isSelected());
-	//default background color
-	unsigned char alpha = static_cast<unsigned char>((context.labelOpacity / 100.0) * 255);
-	ccColor::Rgbaub defaultBkgColor(context.labelDefaultBkgCol, alpha);
-	//default border color (mustn't be totally transparent!)
-	ccColor::Rgbaub defaultBorderColor(ccColor::red, 255);
-	if (!highlighted)
+	ccColor::Rgbaub defaultBkgColor(pickingColor, 255);
+	ccColor::Rgbaub defaultBorderColor(pickingColor, 255);
+	if (!entityPickingMode)
 	{
-		//apply only half of the transparency
-		unsigned char halfAlpha = static_cast<unsigned char>((50.0 + context.labelOpacity / 200.0) * 255);
-		defaultBorderColor = ccColor::Rgbaub(context.labelDefaultBkgCol, halfAlpha);
-	}
+		//default background color
+		unsigned char alpha = static_cast<unsigned char>((context.labelOpacity / 100.0) * 255);
+		defaultBkgColor = ccColor::Rgbaub(context.labelDefaultBkgCol, alpha);
+		if (isSelected())
+		{
+			//default border color (mustn't be totally transparent!)
+			defaultBorderColor = ccColor::Rgbaub(ccColor::red, 255);
+		}
+		else
+		{
+			//apply only half of the transparency
+			unsigned char halfAlpha = static_cast<unsigned char>((50.0 + context.labelOpacity / 200.0) * 255);
+			defaultBorderColor = ccColor::Rgbaub(context.labelDefaultBkgCol, halfAlpha);
+		}
 
-	glFunc->glPushAttrib(GL_COLOR_BUFFER_BIT);
-	glFunc->glEnable(GL_BLEND);
+		glFunc->glPushAttrib(GL_COLOR_BUFFER_BIT);
+		glFunc->glEnable(GL_BLEND);
+	}
 
 	glFunc->glMatrixMode(GL_MODELVIEW);
 	glFunc->glPushMatrix();
 	glFunc->glTranslatef(static_cast<GLfloat>(xStart - halfW), static_cast<GLfloat>(yStart - halfH), 0);
 
-	if (!pushName)
+	//display the arrow from the 2D rectangle to the 3D point
+	if (!entityPickingMode)
 	{
 		//compute arrow base position relatively to the label rectangle (for 0 to 8)
 		int arrowBaseConfig = 0;
@@ -1598,7 +1610,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 		//we make the arrow base start from the nearest corner
 		if (arrowBaseConfig != 4) //4 = label above point!
 		{
-			glFunc->glColor4ubv(defaultBorderColor.rgba);
+			ccGL::Color(glFunc, defaultBorderColor);
 			glFunc->glBegin(GL_TRIANGLE_FAN);
 			glFunc->glVertex2i(iArrowDestX, iArrowDestY);
 			switch (arrowBaseConfig)
@@ -1647,7 +1659,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 	}
 
 	//main rectangle
-	glFunc->glColor4ubv(defaultBkgColor.rgba);
+	ccGL::Color(glFunc, defaultBkgColor);
 	glFunc->glBegin(GL_QUADS);
 	glFunc->glVertex2i(m_labelROI.left(), -m_labelROI.top());
 	glFunc->glVertex2i(m_labelROI.left(), -m_labelROI.bottom());
@@ -1655,11 +1667,11 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 	glFunc->glVertex2i(m_labelROI.right(), -m_labelROI.top());
 	glFunc->glEnd();
 
-	//if (highlighted)
+	//border
 	{
 		glFunc->glPushAttrib(GL_LINE_BIT);
 		glFunc->glLineWidth(3.0f * context.renderZoom);
-		glFunc->glColor4ubv(defaultBorderColor.rgba);
+		ccGL::Color(glFunc, defaultBorderColor);
 		glFunc->glBegin(GL_LINE_LOOP);
 		glFunc->glVertex2i(m_labelROI.left(), -m_labelROI.top());
 		glFunc->glVertex2i(m_labelROI.left(), -m_labelROI.bottom());
@@ -1669,23 +1681,8 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 		glFunc->glPopAttrib(); //GL_LINE_BIT
 	}
 
-	//draw close button
-	//glFunc->glColor4ubv(ccColor::black.rgba);
-	//glFunc->glBegin(GL_LINE_LOOP);
-	//glFunc->glVertex2i(m_closeButtonROI.left(),-m_closeButtonROI.top());
-	//glFunc->glVertex2i(m_closeButtonROI.left(),-m_closeButtonROI.bottom());
-	//glFunc->glVertex2i(m_closeButtonROI.right(),-m_closeButtonROI.bottom());
-	//glFunc->glVertex2i(m_closeButtonROI.right(),-m_closeButtonROI.top());
-	//glFunc->glEnd();
-	//glFunc->glBegin(GL_LINES);
-	//glFunc->glVertex2i(m_closeButtonROI.left()+2,-m_closeButtonROI.top()+2);
-	//glFunc->glVertex2i(m_closeButtonROI.right()-2,-m_closeButtonROI.bottom()-2);
-	//glFunc->glVertex2i(m_closeButtonROI.right()-2,-m_closeButtonROI.top()+2);
-	//glFunc->glVertex2i(m_closeButtonROI.left()+2,-m_closeButtonROI.bottom()-2);
-	//glFunc->glEnd();
-
 	//display text
-	if (!pushName)
+	if (!entityPickingMode)
 	{
 		int xStartRel = margin;
 		int yStartRel = 0;
@@ -1740,11 +1737,11 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 						//draw background
 						int rgbIndex = (r % 3);
 						if (rgbIndex == 0)
-							glFunc->glColor4ubv(ccColor::red.rgba);
+							ccGL::Color(glFunc, ccColor::red);
 						else if (rgbIndex == 1)
-							glFunc->glColor4ubv(c_darkGreen.rgba);
+							ccGL::Color(glFunc, c_darkGreen);
 						else if (rgbIndex == 2)
-							glFunc->glColor4ubv(ccColor::blue.rgba);
+							ccGL::Color(glFunc, ccColor::blue);
 
 						glFunc->glBegin(GL_QUADS);
 						glFunc->glVertex2i(m_labelROI.left() + xCol, -m_labelROI.top() + yRow);
@@ -1792,14 +1789,12 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 		}
 	}
 
-	glFunc->glPopAttrib(); //GL_COLOR_BUFFER_BIT
+	if (!entityPickingMode)
+	{
+		glFunc->glPopAttrib(); //GL_COLOR_BUFFER_BIT
+	}
 
 	glFunc->glPopMatrix();
-
-	if (pushName)
-	{
-		glFunc->glPopName();
-	}
 }
 
 bool cc2DLabel::pointPicking(	const CCVector2d& clickPos,

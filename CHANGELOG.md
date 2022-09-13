@@ -45,11 +45,16 @@ v2.13.alpha (???) - (??/??/????)
 		- It is now possible to pass a SF name after -SET_ACTIVE_SF  instead of the field index
 			(use simple quotes if the scalar field name has spaces in it)
 
+	- New entity picking mechanism (to not rely on the deprecated OpenGL 'names' pushing mechanism)
+		- Should hopefully solve most of the random issues with picking
+
 - Bug fix:
 	- PCD: when transforming a cloud with a sensor (either manually, or via a registration tool, or via Edit > Apply Tranformation) and then exporting
 		the cloud to a PCD file, both the points AND the sensor were transformed, resulting in the PCD file coordinates to be in the wrong coordinate
 		system (as if the transformation had been applied twice)
 	- The QTextStream::pos method is slow and unreliable. This could cause some issue when loading ASCII files.
+	- When creating a new 3D view, it was not possible to pick an entity displayed in it by clicking on it.
+	- When clicking on an entity in a 3D view while holding CTRL, it was only possible to select it, not to deselect it if it was already selected.
 
 v2.12.4 (Kyiv) - (14/07/2022)
 ----------------------

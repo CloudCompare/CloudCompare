@@ -15,19 +15,7 @@
 //#                                                                        #
 //##########################################################################
 
-//Always first
-//#include "ccIncludeGL.h"
-
 #include "ccOctreeProxy.h"
-
-//Local
-//#include "ccCameraSensor.h"
-//#include "ccNormalVectors.h"
-//#include "ccBox.h"
-
-//CCCoreLib
-//#include <ScalarFieldTools.h>
-//#include <RayAndBox.h>
 
 ccOctreeProxy::ccOctreeProxy(	ccOctree::Shared octree/*=ccOctree::Shared(nullptr)*/,
 								QString name/*="Octree"*/)
@@ -67,20 +55,19 @@ void ccOctreeProxy::drawMeOnly(CC_DRAW_CONTEXT& context)
 	if (glFunc == nullptr)
 		return;
 
-	bool pushName = MACRO_DrawEntityNames(context);
-
-	if (pushName)
+	//color-based entity picking
+	bool entityPickingMode = MACRO_EntityPicking(context);
+	ccColor::Rgb pickingColor;
+	if (entityPickingMode)
 	{
 		//not fast at all!
-		if (MACRO_DrawFastNamesOnly(context))
+		if (MACRO_FastEntityPicking(context))
+		{
 			return;
-		glFunc->glPushName(getUniqueIDForDisplay());
+		}
+
+		pickingColor = context.entityPicking.registerEntity(this);
 	}
 
-	m_octree->draw(context);
-
-	if (pushName)
-	{
-		glFunc->glPopName();
-	}
+	m_octree->draw(context, entityPickingMode ? &pickingColor : nullptr);
 }

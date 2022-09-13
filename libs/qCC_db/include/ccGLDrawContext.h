@@ -19,6 +19,7 @@
 #define CC_GL_DRAW_CONTEXT_HEADER
 
 #include "ccIncludeGL.h"
+#include "ccColorBasedEntityPicking.h"
 
 //Local
 #include "ccMaterial.h"
@@ -49,10 +50,10 @@ enum CC_DRAWING_FLAGS
 	CC_SKIP_UNSELECTED						= 0x0010,
 	CC_SKIP_SELECTED						= 0x0020,
 	CC_SKIP_ALL								= 0x0030,		// = CC_SKIP_UNSELECTED | CC_SKIP_SELECTED
-	CC_DRAW_ENTITY_NAMES					= 0x0040,
+	CC_ENTITY_PICKING						= 0x0040,		// formerly named CC_DRAW_ENTITY_NAMES
 	//CC_FREE_FLAG							= 0x0080,		// UNUSED (formerly CC_DRAW_POINT_NAMES)
 	//CC_FREE_FLAG							= 0x0100,		// UNUSED (formerly CC_DRAW_TRI_NAMES)
-	CC_DRAW_FAST_NAMES_ONLY					= 0x0200,
+	CC_FAST_ENTITY_PICKING					= 0x0200,		// formerly named CC_DRAW_FAST_NAMES_ONLY
 	//CC_FREE_FLAG							= 0x03C0,		// UNUSED (formerly CC_DRAW_ANY_NAMES = CC_DRAW_ENTITY_NAMES | CC_DRAW_POINT_NAMES | CC_DRAW_TRI_NAMES)
 	CC_LOD_ACTIVATED						= 0x0400,
 	CC_VIRTUAL_TRANS_ENABLED				= 0x0800
@@ -61,8 +62,8 @@ enum CC_DRAWING_FLAGS
 // Drawing flags testing macros (see ccDrawableObject)
 #define MACRO_Draw2D(context)              (context.drawingFlags & CC_DRAW_2D)
 #define MACRO_Draw3D(context)              (context.drawingFlags & CC_DRAW_3D)
-#define MACRO_DrawEntityNames(context)     (context.drawingFlags & CC_DRAW_ENTITY_NAMES)
-#define MACRO_DrawFastNamesOnly(context)   (context.drawingFlags & CC_DRAW_FAST_NAMES_ONLY)
+#define MACRO_EntityPicking(context)       (context.drawingFlags & CC_ENTITY_PICKING)
+#define MACRO_FastEntityPicking(context)   (context.drawingFlags & CC_FAST_ENTITY_PICKING)
 #define MACRO_SkipUnselected(context)      (context.drawingFlags & CC_SKIP_UNSELECTED)
 #define MACRO_SkipSelected(context)        (context.drawingFlags & CC_SKIP_SELECTED)
 #define MACRO_LightIsEnabled(context)      (context.drawingFlags & CC_LIGHT_ENABLED)
@@ -155,6 +156,9 @@ struct ccGLDrawContext
 
 	//! Whether to draw rounded points (instead of squares)
 	bool drawRoundedPoints;
+
+	//! Entity picking mechanism
+	ccColorBasedEntityPicking entityPicking;
 
 	//Default constructor
 	ccGLDrawContext()

@@ -2557,21 +2557,23 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		//can't display a SF without... a SF... and an active color scale!
 		assert(!glParams.showSF || hasDisplayedScalarField());
 
-		//standard case: list names pushing
-		bool pushName = MACRO_DrawEntityNames(context);
-		if (pushName)
+		//color-based entity picking
+		bool entityPickingMode = MACRO_EntityPicking(context);
+		ccColor::Rgb pickingColor;
+		if (entityPickingMode)
 		{
 			//not fast at all!
-			if (MACRO_DrawFastNamesOnly(context))
+			if (MACRO_FastEntityPicking(context))
 			{
 				return;
 			}
 
-			glFunc->glPushName(getUniqueIDForDisplay());
+			pickingColor = context.entityPicking.registerEntity(this);
+
 			//minimal display for picking mode!
 			glParams.showNorms = false;
 			glParams.showColors = false;
-			if (glParams.showSF && m_currentDisplayedScalarField->areNaNValuesShownInGrey())
+			if (glParams.showSF && !m_currentDisplayedScalarField->mayHaveHiddenValues())
 			{
 				glParams.showSF = false; //--> we keep it only if SF 'NaN' values are potentially hidden
 			}
@@ -2579,7 +2581,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		// L.O.D. display
 		DisplayDesc toDisplay(0, size());
-		if (!pushName)
+		if (!entityPickingMode)
 		{
 			if (	context.decimateCloudOnMove
 				&&	toDisplay.count > context.minLODPointCount
@@ -2687,14 +2689,18 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glFunc->glEnable(GL_BLEND);
 		}
 
-		if (glParams.showColors && isColorOverridden())
+		if (entityPickingMode)
 		{
-			ccGL::Color4v(glFunc, m_tempColor.rgba);
+			ccGL::Color(glFunc, pickingColor);
+		}
+		else if (glParams.showColors && isColorOverridden())
+		{
+			ccGL::Color(glFunc, m_tempColor);
 			glParams.showColors = false;
 		}
 		else
 		{
-			ccGL::Color4v(glFunc, context.pointsDefaultCol.rgba);
+			ccGL::Color(glFunc, context.pointsDefaultCol);
 		}
 
 		//in the case we need normals (i.e. lighting)
@@ -2748,29 +2754,45 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 				glFunc->glBegin(GL_POINTS);
 
-				for (unsigned j = toDisplay.startIndex; j < toDisplay.endIndex; j += toDisplay.decimStep)
+				if (!entityPickingMode)
 				{
-					//we must test each point visibility
-					unsigned pointIndex = toDisplay.indexMap ? toDisplay.indexMap->at(j) : j;
-					if (m_pointsVisibility.empty() || m_pointsVisibility[pointIndex] == CCCoreLib::POINT_VISIBLE)
+					for (unsigned j = toDisplay.startIndex; j < toDisplay.endIndex; j += toDisplay.decimStep)
 					{
-						if (glParams.showSF)
+						//we must test each point visibility
+						unsigned pointIndex = toDisplay.indexMap ? toDisplay.indexMap->at(j) : j;
+						if (m_pointsVisibility.empty() || m_pointsVisibility[pointIndex] == CCCoreLib::POINT_VISIBLE)
 						{
-							assert(pointIndex < m_currentDisplayedScalarField->currentSize());
-							const ccColor::Rgb* col = m_currentDisplayedScalarField->getValueColor(pointIndex);
-							//we force display of points hidden because of their scalar field value
-							//to be sure that the user doesn't miss them (during manual segmentation for instance)
-							glFunc->glColor3ubv(col ? col->rgb : ccColor::lightGreyRGB.rgb); //Make sure all points are visible. No alpha used on purpose 
+							if (glParams.showSF)
+							{
+								assert(pointIndex < m_currentDisplayedScalarField->currentSize());
+								const ccColor::Rgb* col = m_currentDisplayedScalarField->getValueColor(pointIndex);
+								//we force display of points hidden because of their scalar field value
+								//to be sure that the user doesn't miss them (during manual segmentation for instance)
+								ccGL::Color(glFunc, col ? *col : ccColor::lightGreyRGB); //Make sure all points are visible. No alpha used on purpose 
+							}
+							else if (glParams.showColors)
+							{
+								ccGL::Color(glFunc, m_rgbaColors->getValue(pointIndex));
+							}
+							if (glParams.showNorms)
+							{
+								ccGL::Normal3v(glFunc, compressedNormals->getNormal(m_normals->getValue(pointIndex)).u);
+							}
+							ccGL::Vertex3v(glFunc, m_points[pointIndex].u);
 						}
-						else if (glParams.showColors)
+					}
+				}
+				else
+				{
+					for (unsigned j = toDisplay.startIndex; j < toDisplay.endIndex; j += toDisplay.decimStep)
+					{
+						//we must test each point visibility
+						unsigned pointIndex = toDisplay.indexMap ? toDisplay.indexMap->at(j) : j;
+						if (m_pointsVisibility.empty() || m_pointsVisibility[pointIndex] == CCCoreLib::POINT_VISIBLE)
 						{
-							glFunc->glColor4ubv(m_rgbaColors->getValue(pointIndex).rgba);
+							//in color-based picking mode, we only display the points
+							ccGL::Vertex3v(glFunc, m_points[pointIndex].u);
 						}
-						if (glParams.showNorms)
-						{
-							ccGL::Normal3v(glFunc, compressedNormals->getNormal(m_normals->getValue(pointIndex)).u);
-						}
-						ccGL::Vertex3v(glFunc, m_points[pointIndex].u);
 					}
 				}
 
@@ -2801,6 +2823,11 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					}
 					//FIXME: color ramp shader doesn't support log scale yet!
 					if (m_currentDisplayedScalarField->logScale())
+					{
+						colorRampShader = nullptr;
+					}
+					//the shader can't be used during color-based color picking
+					if (entityPickingMode)
 					{
 						colorRampShader = nullptr;
 					}
@@ -3046,7 +3073,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 								const ccColor::Rgb* col = m_currentDisplayedScalarField->getValueColor(pointIndex);
 								if (col)
 								{
-									glFunc->glColor3ubv(col->rgb);
+									ccGL::Color(glFunc, *col);
 									ccGL::Normal3v(glFunc, compressedNormals->getNormal(m_normals->getValue(pointIndex)).u);
 									ccGL::Vertex3v(glFunc, m_points[pointIndex].u);
 								}
@@ -3086,6 +3113,20 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 								}
 							}
 						}
+						else if (entityPickingMode)
+						{
+							for (unsigned j = toDisplay.startIndex; j < toDisplay.endIndex; j += toDisplay.decimStep)
+							{
+								unsigned pointIndex = (toDisplay.indexMap ? toDisplay.indexMap->at(j) : j);
+								assert(pointIndex < m_currentDisplayedScalarField->currentSize());
+								const ccColor::Rgb* col = m_currentDisplayedScalarField->getValueColor(pointIndex);
+								if (col)
+								{
+									//for entity picking, don't change the color, we just need to know whether the point is visible
+									ccGL::Vertex3v(glFunc, m_points[pointIndex].u);
+								}
+							}
+						}
 						else
 						{
 							for (unsigned j = toDisplay.startIndex; j < toDisplay.endIndex; j += toDisplay.decimStep)
@@ -3095,7 +3136,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 								const ccColor::Rgb* col = m_currentDisplayedScalarField->getValueColor(pointIndex);
 								if (col)
 								{
-									glFunc->glColor3ubv(col->rgb);
+									ccGL::Color(glFunc, *col);
 									ccGL::Vertex3v(glFunc, m_points[pointIndex].u);
 								}
 							}
@@ -3186,11 +3227,6 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 
 		glFunc->glPopAttrib(); //GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT | GL_TRANSFORM_BIT | GL_POINT_BIT --> will switch the light off
-
-		if (pushName)
-		{
-			glFunc->glPopName();
-		}
 	}
 	else if (MACRO_Draw2D(context))
 	{
@@ -4645,14 +4681,6 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Load
 	releaseVBOs();
 
 	return true;
-}
-
-unsigned ccPointCloud::getUniqueIDForDisplay() const
-{
-	if (m_parent && m_parent->isA(CC_TYPES::FACET))
-		return m_parent->getUniqueID();
-	else
-		return getUniqueID();
 }
 
 CCCoreLib::ReferenceCloud* ccPointCloud::crop(const ccBBox& box, bool inside/*=true*/)

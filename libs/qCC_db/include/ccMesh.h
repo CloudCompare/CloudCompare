@@ -88,7 +88,6 @@ public:
 	bool merge(const ccMesh* mesh, bool createSubMesh);
 
 	//inherited methods (ccHObject)
-	unsigned getUniqueIDForDisplay() const override;
 	ccBBox getOwnBB(bool withGLFeatures = false) override;
 	bool isSerializable() const override { return true; }
 	const ccGLMatrix& getGLTransformationHistory() const override;

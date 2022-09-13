@@ -32,12 +32,12 @@
 #include <cassert>
 
 //Components geometry
-static QSharedPointer<ccCylinder> c_arrowShaft(nullptr);
-static QSharedPointer<ccCone> c_arrowHead(nullptr);
-static QSharedPointer<ccSphere> c_centralSphere(nullptr);
-static QSharedPointer<ccTorus> c_torus(nullptr);
+static QSharedPointer<ccCylinder> c_arrowShaft   (nullptr);
+static QSharedPointer<ccCone>     c_arrowHead    (nullptr);
+static QSharedPointer<ccSphere>   c_centralSphere(nullptr);
+static QSharedPointer<ccTorus>    c_torus        (nullptr);
 
-void DrawUnitArrow(int ID, const CCVector3& start, const CCVector3& direction, PointCoordinateType scale, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
+void DrawUnitArrow(bool entityPickingMode, const CCVector3& start, const CCVector3& direction, PointCoordinateType scale, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
 {
 	//get the set of OpenGL functions (version 2.1)
 	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
@@ -45,11 +45,6 @@ void DrawUnitArrow(int ID, const CCVector3& start, const CCVector3& direction, P
 
 	if (glFunc == nullptr)
 		return;
-
-	if (ID > 0)
-	{
-		glFunc->glLoadName(ID);
-	}
 
 	glFunc->glMatrixMode(GL_MODELVIEW);
 	glFunc->glPushMatrix();
@@ -79,21 +74,23 @@ void DrawUnitArrow(int ID, const CCVector3& start, const CCVector3& direction, P
 	}
 
 	if (!c_arrowShaft)
-		c_arrowShaft = QSharedPointer<ccCylinder>(new ccCylinder(0.15f, 0.6f, nullptr, "ArrowShaft", 12, 0)); //we don't want to increase the unique ID counter for this 'invisible' entities
+		c_arrowShaft.reset(new ccCylinder(0.15f, 0.6f, nullptr, "ArrowShaft", 12, 0)); //we don't want to increase the unique ID counter for this 'invisible' entities
 	if (!c_arrowHead)
-		c_arrowHead = QSharedPointer<ccCone>(new ccCone(0.3f, 0, 0.4f, 0, 0, nullptr, "ArrowHead", 24, 0)); //we don't want to increase the unique ID counter for this 'invisible' entities
+		c_arrowHead.reset(new ccCone(0.3f, 0, 0.4f, 0, 0, nullptr, "ArrowHead", 24, 0)); //we don't want to increase the unique ID counter for this 'invisible' entities
 
 	glFunc->glTranslatef(0, 0, 0.3f);
 	c_arrowShaft->setTempColor(col);
+	c_arrowShaft->showNormals(!entityPickingMode);
 	c_arrowShaft->draw(context);
 	glFunc->glTranslatef(0, 0, 0.3f + 0.2f);
 	c_arrowHead->setTempColor(col);
+	c_arrowHead->showNormals(!entityPickingMode);
 	c_arrowHead->draw(context);
 
 	glFunc->glPopMatrix();
 }
 
-static void DrawUnitTorus(int ID, const CCVector3& center, const CCVector3& direction, PointCoordinateType scale, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
+static void DrawUnitTorus(bool entityPickingMode, const CCVector3& center, const CCVector3& direction, PointCoordinateType scale, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
 {
 	//get the set of OpenGL functions (version 2.1)
 	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
@@ -101,9 +98,6 @@ static void DrawUnitTorus(int ID, const CCVector3& center, const CCVector3& dire
 
 	if (glFunc == nullptr)
 		return;
-
-	if (ID > 0)
-		glFunc->glLoadName(ID);
 
 	glFunc->glMatrixMode(GL_MODELVIEW);
 	glFunc->glPushMatrix();
@@ -133,44 +127,17 @@ static void DrawUnitTorus(int ID, const CCVector3& center, const CCVector3& dire
 	}
 
 	if (!c_torus)
-		c_torus = QSharedPointer<ccTorus>(new ccTorus(0.2f, 0.4f, 2.0*M_PI, false, 0, nullptr, "Torus", 12, 0)); //we don't want to increase the unique ID counter for this 'invisible' entities
+		c_torus.reset(new ccTorus(0.2f, 0.4f, 2.0*M_PI, false, 0, nullptr, "Torus", 12, 0)); //we don't want to increase the unique ID counter for this 'invisible' entities
 
 	glFunc->glTranslatef(0, 0, 0.3f);
 	c_torus->setTempColor(col);
+	c_torus->showNormals(!entityPickingMode);
 	c_torus->draw(context);
 
 	glFunc->glPopMatrix();
 }
 
-//Unused function
-//static void DrawUnitSphere(int ID, const CCVector3& center, PointCoordinateType radius, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
-//{
-//	//get the set of OpenGL functions (version 2.1)
-//	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
-//	assert(glFunc != nullptr);
-//
-//	if (glFunc == nullptr)
-//		return;
-//
-//	if (ID > 0)
-//		glFunc->glLoadName(ID);
-//
-//	glFunc->glMatrixMode(GL_MODELVIEW);
-//	glFunc->glPushMatrix();
-//
-//	ccGL::Translate(glFunc, center.x, center.y, center.z);
-//	ccGL::Scale(glFunc, radius, radius, radius);
-//
-//	if (!c_centralSphere)
-//		c_centralSphere = QSharedPointer<ccSphere>(new ccSphere(1, 0, "CentralSphere", 24, 0)); //we don't want to increase the unique ID counter for this 'invisible' entities
-//
-//	c_centralSphere->setTempColor(col);
-//	c_centralSphere->draw(context);
-//
-//	glFunc->glPopMatrix();
-//}
-
-static void DrawUnitCross(int ID, const CCVector3& center, PointCoordinateType scale, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
+static void DrawUnitCross(bool entityPickingMode, const CCVector3& center, PointCoordinateType scale, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
 {
 	//get the set of OpenGL functions (version 2.1)
 	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
@@ -179,22 +146,13 @@ static void DrawUnitCross(int ID, const CCVector3& center, PointCoordinateType s
 	if (glFunc == nullptr)
 		return;
 
-	if (ID > 0)
-		glFunc->glLoadName(ID);
-
 	scale /= 2;
-	DrawUnitArrow(0, center, CCVector3(-1, 0, 0), scale, col, context);
-	DrawUnitArrow(0, center, CCVector3( 1, 0, 0), scale, col, context);
-	DrawUnitArrow(0, center, CCVector3( 0,-1, 0), scale, col, context);
-	DrawUnitArrow(0, center, CCVector3( 0, 1, 0), scale, col, context);
-	DrawUnitArrow(0, center, CCVector3( 0, 0,-1), scale, col, context);
-	DrawUnitArrow(0, center, CCVector3( 0, 0, 1), scale, col, context);
-}
-
-//default 'GetComponentIDFunction'
-unsigned GetComponentID(ccClipBox::Components)
-{
-	return ccUniqueIDGenerator::InvalidUniqueID;
+	DrawUnitArrow(entityPickingMode, center, CCVector3(-1, 0, 0), scale, col, context);
+	DrawUnitArrow(entityPickingMode, center, CCVector3( 1, 0, 0), scale, col, context);
+	DrawUnitArrow(entityPickingMode, center, CCVector3( 0,-1, 0), scale, col, context);
+	DrawUnitArrow(entityPickingMode, center, CCVector3( 0, 1, 0), scale, col, context);
+	DrawUnitArrow(entityPickingMode, center, CCVector3( 0, 0,-1), scale, col, context);
+	DrawUnitArrow(entityPickingMode, center, CCVector3( 0, 0, 1), scale, col, context);
 }
 
 ccClipBox::ccClipBox(QString name/*= QString("clipping box")*/, unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
@@ -204,11 +162,33 @@ ccClipBox::ccClipBox(QString name/*= QString("clipping box")*/, unsigned uniqueI
 	, m_activeComponent(NONE)
 {
 	setSelectionBehavior(SELECTION_IGNORED);
+
+	// declare parts (proxies)
+	m_parts.insert(X_MINUS_ARROW, new ccClipBoxPart(this, X_MINUS_ARROW));
+	m_parts.insert(X_PLUS_ARROW, new ccClipBoxPart(this, X_PLUS_ARROW));
+	m_parts.insert(Y_MINUS_ARROW, new ccClipBoxPart(this, Y_MINUS_ARROW));
+	m_parts.insert(Y_PLUS_ARROW, new ccClipBoxPart(this, Y_PLUS_ARROW));
+	m_parts.insert(Z_MINUS_ARROW, new ccClipBoxPart(this, Z_MINUS_ARROW));
+	m_parts.insert(Z_PLUS_ARROW, new ccClipBoxPart(this, Z_PLUS_ARROW));
+	m_parts.insert(CROSS, new ccClipBoxPart(this, CROSS));
+	m_parts.insert(X_MINUS_TORUS, new ccClipBoxPart(this, X_MINUS_TORUS));
+	m_parts.insert(Y_MINUS_TORUS, new ccClipBoxPart(this, Y_MINUS_TORUS));
+	m_parts.insert(Z_MINUS_TORUS, new ccClipBoxPart(this, Z_MINUS_TORUS));
+	m_parts.insert(X_PLUS_TORUS, new ccClipBoxPart(this, X_PLUS_TORUS));
+	m_parts.insert(Y_PLUS_TORUS, new ccClipBoxPart(this, Y_PLUS_TORUS));
+	m_parts.insert(Z_PLUS_TORUS, new ccClipBoxPart(this, Z_PLUS_TORUS));
 }
 
 ccClipBox::~ccClipBox()
 {
 	releaseAssociatedEntities();
+
+	for (auto& part : m_parts)
+	{
+		delete part;
+		part = nullptr;
+	}
+	m_parts.clear();
 }
 
 void ccClipBox::update()
@@ -334,55 +314,9 @@ bool ccClipBox::addAssociatedEntity(ccHObject* entity)
 	return true;
 }
 
-void ccClipBox::setActiveComponent(int id)
+void ccClipBox::setActiveComponent(Components id)
 {
-	switch(id)
-	{
-	case 1:
-		m_activeComponent = X_MINUS_ARROW;
-		break;
-	case 2:
-		m_activeComponent = X_PLUS_ARROW;
-		break;
-	case 3:
-		m_activeComponent = Y_MINUS_ARROW;
-		break;
-	case 4:
-		m_activeComponent = Y_PLUS_ARROW;
-		break;
-	case 5:
-		m_activeComponent = Z_MINUS_ARROW;
-		break;
-	case 6:
-		m_activeComponent = Z_PLUS_ARROW;
-		break;
-	case 7:
-		m_activeComponent = CROSS;
-		break;
-	case 8:
-		m_activeComponent = SPHERE;
-		break;
-	case 9:
-		m_activeComponent = X_MINUS_TORUS;
-		break;
-	case 10:
-		m_activeComponent = Y_MINUS_TORUS;
-		break;
-	case 11:
-		m_activeComponent = Z_MINUS_TORUS;
-		break;
-	case 12:
-		m_activeComponent = X_PLUS_TORUS;
-		break;
-	case 13:
-		m_activeComponent = Y_PLUS_TORUS;
-		break;
-	case 14:
-		m_activeComponent = Z_PLUS_TORUS;
-		break;
-	default:
-		m_activeComponent = NONE;
-	}
+	m_activeComponent = id;
 }
 
 static CCVector3d PointToVector(int x, int y, int screenWidth, int screenHeight)
@@ -410,6 +344,8 @@ static CCVector3d PointToVector(int x, int y, int screenWidth, int screenHeight)
 	return v;
 }
 
+// 'move2D' was only possible with the sphere (now deprecated)
+#if 0
 bool ccClipBox::move2D(int x, int y, int dx, int dy, int screenWidth, int screenHeight)
 {
 	if (m_activeComponent != SPHERE || !m_box.isValid())
@@ -437,6 +373,7 @@ bool ccClipBox::move2D(int x, int y, int dx, int dy, int screenWidth, int screen
 
 	return true;
 }
+#endif
 
 void ccClipBox::setClickedPoint(int x, int y, int screenWidth, int screenHeight, const ccGLMatrixd& viewMatrix)
 {
@@ -500,11 +437,11 @@ bool ccClipBox::move3D(const CCVector3d& uInput)
 		//send 'modified' signal
 		Q_EMIT boxModified(&m_box);
 	}
-	else if (m_activeComponent == SPHERE)
-	{
-		//handled by move2D!
-		return false;
-	}
+	//else if (m_activeComponent == SPHERE)
+	//{
+	//	//handled by move2D!
+	//	return false;
+	//}
 	else if (m_activeComponent >= X_MINUS_TORUS && m_activeComponent <= Z_PLUS_TORUS)
 	{
 		//we guess the rotation order by comparing the current screen 'normal'
@@ -714,12 +651,8 @@ void ccClipBox::drawMeOnly(CC_DRAW_CONTEXT& context)
 		return;
 	}
 
-	//standard case: list names pushing (1st level)
-	bool pushName = MACRO_DrawEntityNames(context);
-	if (pushName)
-	{
-		glFunc->glPushName(getUniqueIDForDisplay());
-	}
+	//color-based entity picking
+	bool entityPickingMode = MACRO_FastEntityPicking(context);
 
 	//draw the interactors
 	{
@@ -731,43 +664,33 @@ void ccClipBox::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		//custom arrow 'context'
 		CC_DRAW_CONTEXT componentContext = context;
-		componentContext.drawingFlags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the arrows don't push their own!
+		componentContext.drawingFlags &= (~CC_ENTITY_PICKING); //we must remove the 'entity picking flag' so that the arrows don't push their own!
 		componentContext.display = nullptr;
 
-		if (pushName) //2nd level = sub-item
-		{
-			glFunc->glPushName(0); //fake ID, will be replaced by the arrows one if any
-		}
-
 		//force the light on
-		glFunc->glPushAttrib(GL_LIGHTING_BIT);
-		glFunc->glEnable(GL_LIGHT0);
-
-		DrawUnitArrow(X_MINUS_ARROW*pushName, CCVector3(minC.x, center.y, center.z), CCVector3(-1.0, 0.0, 0.0), scale, ccColor::red, componentContext);
-		DrawUnitArrow(X_PLUS_ARROW*pushName, CCVector3(maxC.x, center.y, center.z), CCVector3(1.0, 0.0, 0.0), scale, ccColor::red, componentContext);
-		DrawUnitArrow(Y_MINUS_ARROW*pushName, CCVector3(center.x, minC.y, center.z), CCVector3(0.0, -1.0, 0.0), scale, ccColor::green, componentContext);
-		DrawUnitArrow(Y_PLUS_ARROW*pushName, CCVector3(center.x, maxC.y, center.z), CCVector3(0.0, 1.0, 0.0), scale, ccColor::green, componentContext);
-		DrawUnitArrow(Z_MINUS_ARROW*pushName, CCVector3(center.x, center.y, minC.z), CCVector3(0.0, 0.0, -1.0), scale, ccColor::blue, componentContext);
-		DrawUnitArrow(Z_PLUS_ARROW*pushName, CCVector3(center.x, center.y, maxC.z), CCVector3(0.0, 0.0, 1.0), scale, ccColor::blue, componentContext);
-		DrawUnitCross(CROSS*pushName, minC - CCVector3(scale, scale, scale) / 2.0, scale, ccColor::yellow, componentContext);
-		//DrawUnitSphere(SPHERE*pushName, maxC + CCVector3(scale, scale, scale) / 2.0, scale / 2.0, ccColor::yellow, componentContext);
-		DrawUnitTorus(X_MINUS_TORUS*pushName, CCVector3(minC.x, center.y, center.z), CCVector3(-1.0, 0.0, 0.0), scale, c_lightRed, componentContext);
-		DrawUnitTorus(Y_MINUS_TORUS*pushName, CCVector3(center.x, minC.y, center.z), CCVector3(0.0, -1.0, 0.0), scale, c_lightGreen, componentContext);
-		DrawUnitTorus(Z_MINUS_TORUS*pushName, CCVector3(center.x, center.y, minC.z), CCVector3(0.0, 0.0, -1.0), scale, c_lightBlue, componentContext);
-		DrawUnitTorus(X_PLUS_TORUS*pushName, CCVector3(maxC.x, center.y, center.z), CCVector3(1.0, 0.0, 0.0), scale, c_lightRed, componentContext);
-		DrawUnitTorus(Y_PLUS_TORUS*pushName, CCVector3(center.x, maxC.y, center.z), CCVector3(0.0, 1.0, 0.0), scale, c_lightGreen, componentContext);
-		DrawUnitTorus(Z_PLUS_TORUS*pushName, CCVector3(center.x, center.y, maxC.z), CCVector3(0.0, 0.0, 1.0), scale, c_lightBlue, componentContext);
-
-		glFunc->glPopAttrib();
-
-		if (pushName)
+		if (!entityPickingMode)
 		{
-			glFunc->glPopName();
+			glFunc->glPushAttrib(GL_LIGHTING_BIT);
+			glFunc->glEnable(GL_LIGHT0);
 		}
-	}
 
-	if (pushName)
-	{
-		glFunc->glPopName();
+		DrawUnitArrow(entityPickingMode, CCVector3(minC.x, center.y, center.z), CCVector3(-1.0, 0.0, 0.0), scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[X_MINUS_ARROW]) : ccColor::red), componentContext);
+		DrawUnitArrow(entityPickingMode, CCVector3(maxC.x, center.y, center.z), CCVector3(1.0, 0.0, 0.0), scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[X_PLUS_ARROW]) : ccColor::red), componentContext);
+		DrawUnitArrow(entityPickingMode, CCVector3(center.x, minC.y, center.z), CCVector3(0.0, -1.0, 0.0), scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[Y_MINUS_ARROW]) : ccColor::green), componentContext);
+		DrawUnitArrow(entityPickingMode, CCVector3(center.x, maxC.y, center.z), CCVector3(0.0, 1.0, 0.0), scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[Y_PLUS_ARROW]) : ccColor::green), componentContext);
+		DrawUnitArrow(entityPickingMode, CCVector3(center.x, center.y, minC.z), CCVector3(0.0, 0.0, -1.0), scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[Z_MINUS_ARROW]) : ccColor::blue), componentContext);
+		DrawUnitArrow(entityPickingMode, CCVector3(center.x, center.y, maxC.z), CCVector3(0.0, 0.0, 1.0), scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[Z_PLUS_ARROW]) : ccColor::blue), componentContext);
+		DrawUnitCross(entityPickingMode, minC - CCVector3(scale, scale, scale) / 2.0, scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[CROSS]) : ccColor::yellow), componentContext);
+		DrawUnitTorus(entityPickingMode, CCVector3(minC.x, center.y, center.z), CCVector3(-1.0, 0.0, 0.0), scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[X_MINUS_TORUS]) : c_lightRed), componentContext);
+		DrawUnitTorus(entityPickingMode, CCVector3(center.x, minC.y, center.z), CCVector3(0.0, -1.0, 0.0), scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[Y_MINUS_TORUS]) : c_lightGreen), componentContext);
+		DrawUnitTorus(entityPickingMode, CCVector3(center.x, center.y, minC.z), CCVector3(0.0, 0.0, -1.0), scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[Z_MINUS_TORUS]) : c_lightBlue), componentContext);
+		DrawUnitTorus(entityPickingMode, CCVector3(maxC.x, center.y, center.z), CCVector3(1.0, 0.0, 0.0), scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[X_PLUS_TORUS]) : c_lightRed), componentContext);
+		DrawUnitTorus(entityPickingMode, CCVector3(center.x, maxC.y, center.z), CCVector3(0.0, 1.0, 0.0), scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[Y_PLUS_TORUS]) : c_lightGreen), componentContext);
+		DrawUnitTorus(entityPickingMode, CCVector3(center.x, center.y, maxC.z), CCVector3(0.0, 0.0, 1.0), scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[Z_PLUS_TORUS]) : c_lightBlue), componentContext);
+
+		if (!entityPickingMode)
+		{
+			glFunc->glPopAttrib(); //GL_LIGHTING_BIT
+		}
 	}
 }

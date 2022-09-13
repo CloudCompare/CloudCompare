@@ -32,6 +32,7 @@ namespace ccColor
 {
 	//! Max value of a single color component (default type)
 	constexpr ColorCompType MAX = 255;
+	constexpr int MAXi = 255;
 
 	//! RGB color structure
 	template <typename Type> class RgbTpl
@@ -119,11 +120,12 @@ namespace ccColor
 
 	// Predefined colors (default type)
 	constexpr Rgb whiteRGB					(MAX, MAX, MAX);
-	constexpr Rgb lightGreyRGB				(static_cast<ColorCompType>(MAX*8/10), static_cast<ColorCompType>(MAX*8/10), static_cast<ColorCompType>(MAX*8/10));
+	constexpr Rgb lightGreyRGB				(static_cast<ColorCompType>(MAXi * 8 / 10), static_cast<ColorCompType>(MAXi * 8 / 10), static_cast<ColorCompType>(MAXi * 8 / 10));
 	constexpr Rgb darkGreyRGB				(MAX / 2, MAX / 2, MAX / 2);
 	constexpr Rgb redRGB					(MAX, 0, 0);
 	constexpr Rgb greenRGB					(0, MAX, 0);
 	constexpr Rgb blueRGB					(0, 0, MAX);
+	constexpr Rgb blueCCRGB					(0, static_cast<ColorCompType>(MAXi * 7 / 10), 0);
 	constexpr Rgb darkBlueRGB				(0, 0, MAX / 2);
 	constexpr Rgb magentaRGB				(MAX, 0, MAX);
 	constexpr Rgb cyanRGB					(0, MAX, MAX);
@@ -133,11 +135,12 @@ namespace ccColor
 
 	// Predefined colors (default type)
 	constexpr Rgba white					(MAX, MAX, MAX, MAX);
-	constexpr Rgba lightGrey				(static_cast<ColorCompType>(MAX*8/10), static_cast<ColorCompType>(MAX*8/10), static_cast<ColorCompType>(MAX*8/10), MAX);
+	constexpr Rgba lightGrey				(static_cast<ColorCompType>(MAXi * 8 / 10), static_cast<ColorCompType>(MAXi * 8 / 10), static_cast<ColorCompType>(MAXi * 8 / 10), MAX);
 	constexpr Rgba darkGrey					(MAX / 2, MAX / 2, MAX / 2, MAX);
 	constexpr Rgba red						(MAX, 0, 0, MAX);
 	constexpr Rgba green					(0, MAX, 0, MAX);
 	constexpr Rgba blue						(0, 0, MAX, MAX);
+	constexpr Rgba blueCC					(0, static_cast<ColorCompType>(MAXi * 7 / 10), MAX, MAX);
 	constexpr Rgba darkBlue					(0, 0, MAX / 2, MAX);
 	constexpr Rgba magenta					(MAX, 0, MAX, MAX);
 	constexpr Rgba cyan						(0, MAX, MAX, MAX);
@@ -159,9 +162,9 @@ namespace ccColor
 
 	// Default foreground color (unsigned byte)
 	constexpr Rgbub defaultBkgColor			( 10, 102, 151);		// dark blue
-	constexpr Rgba defaultColor				(MAX, MAX, MAX, MAX);	// white
-	constexpr Rgba defaultLabelBkgColor		(MAX, MAX, MAX, MAX);	// white
-	constexpr Rgba defaultLabelMarkerColor	(MAX,   0, MAX, MAX);	// magenta
+	constexpr Rgba  defaultColor			(MAX, MAX, MAX, MAX);	// white
+	constexpr Rgba  defaultLabelBkgColor	(MAX, MAX, MAX, MAX);	// white
+	constexpr Rgba  defaultLabelMarkerColor	(MAX,   0, MAX, MAX);	// magenta
 
 	//! Colors generator
 	class Generator

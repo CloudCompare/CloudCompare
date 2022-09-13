@@ -1326,7 +1326,12 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 	if (!MACRO_Draw3D(context))
 		return;
 
-	//we draw a little 3d representation of the sensor and some of its attributes
+	ccIndexedTransformation sensorPos;
+	if (!getAbsoluteTransformation(sensorPos, m_activeIndex))
+	{
+		//no visible position for this index!
+		return;
+	}
 
 	//get the set of OpenGL functions (version 2.1)
 	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
@@ -1335,31 +1340,20 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 	if ( glFunc == nullptr )
 		return;
 
-	bool pushName = MACRO_DrawEntityNames(context);
-
-	if (pushName)
+	//color-based entity picking
+	bool entityPickingMode = MACRO_EntityPicking(context);
+	ccColor::Rgb pickingColor;
+	if (entityPickingMode)
 	{
 		//not particularly fast
-		if (MACRO_DrawFastNamesOnly(context))
+		if (MACRO_FastEntityPicking(context))
 			return;
-		glFunc->glPushName(getUniqueIDForDisplay());
+		pickingColor = context.entityPicking.registerEntity(this);
 	}
 
 	glFunc->glMatrixMode(GL_MODELVIEW);
 	glFunc->glPushMatrix();
-	{
-		ccIndexedTransformation sensorPos;
-		if (!getAbsoluteTransformation(sensorPos,m_activeIndex))
-		{
-			//no visible position for this index!
-			glFunc->glPopMatrix();
-			if (pushName)
-				glFunc->glPopName();
-			return;
-		}
-
-		glFunc->glMultMatrixf(sensorPos.data());
-	}
+	glFunc->glMultMatrixf(sensorPos.data());
 
 	CCVector3 upperLeftPoint = computeUpperLeftPoint();
 
@@ -1370,7 +1364,7 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 	const PointCoordinateType baseHalfWidth		= 1 * upperLeftPoint.x / 5;
 
 	glFunc->glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	ccGL::Color3v(glFunc, m_color.rgb);
+	ccGL::Color(glFunc, entityPickingMode ? pickingColor : m_color);
 
 	//near plane
 	glFunc->glBegin(GL_LINE_LOOP);
@@ -1481,46 +1475,45 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 			{
 				//set the right display (just to be sure)
 				m_frustumInfos.frustumHull->setDisplay(getDisplay());
-				m_frustumInfos.frustumHull->setTempColor(m_color);
-
-				//glFunc->glPushAttrib(GL_COLOR_BUFFER_BIT);
-				//glFunc->glEnable(GL_BLEND);
-				//glFunc->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-				//glFunc->glColor4ub(m_color.x, m_color.y, m_color.z, 76);
+				m_frustumInfos.frustumHull->setTempColor(entityPickingMode ? pickingColor : m_color);
 
 				m_frustumInfos.frustumHull->showWired(false);
 				m_frustumInfos.frustumHull->enableStippling(true);
-				m_frustumInfos.frustumHull->draw(context);
 
-				//glFunc->glPopAttrib();
+				CC_DRAW_CONTEXT frustumContext = context;
+				frustumContext.drawingFlags &= (~CC_ENTITY_PICKING); //we must remove the 'entity picking flag' so that the sphere doesn't override the picking color!
+				frustumContext.display = nullptr;
+				m_frustumInfos.frustumHull->draw(frustumContext);
 			}
 		}
 	}
 
-	//axis (for test)
-	if (!pushName)
+	//axis
 	{
 		glFunc->glPushAttrib(GL_LINE_BIT);
 		glFunc->glLineWidth(2.0f);
 
-		float l = static_cast<float>(std::abs(upperLeftPoint.z)/2);
+		float l = static_cast<float>(std::abs(upperLeftPoint.z) / 2);
 
 		// right vector
-		ccGL::Color4v(glFunc, ccColor::red.rgba);
+		if (!entityPickingMode)
+			ccGL::Color(glFunc, ccColor::red);
 		glFunc->glBegin(GL_LINES);
 		glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
 		glFunc->glVertex3f(l, 0.0f, 0.0f);
 		glFunc->glEnd();
 
 		// up vector
-		ccGL::Color4v(glFunc, ccColor::green.rgba);
+		if (!entityPickingMode)
+			ccGL::Color(glFunc, ccColor::green);
 		glFunc->glBegin(GL_LINES);
 		glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
 		glFunc->glVertex3f(0.0f, l, 0.0f);
 		glFunc->glEnd();
 
 		// view vector
-		ccGL::Color4v(glFunc, ccColor::blue.rgba);
+		if (!entityPickingMode)
+			ccGL::Color(glFunc, ccColor::blue);
 		glFunc->glBegin(GL_LINES);
 		glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
 		glFunc->glVertex3f(0.0f, 0.0f, -l);
@@ -1528,9 +1521,6 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		glFunc->glPopAttrib(); //GL_LINE_BIT
 	}
-
-	if (pushName)
-		glFunc->glPopName();
 
 	glFunc->glPopMatrix();
 }
@@ -1929,30 +1919,30 @@ ccImage* ccCameraSensor::orthoRectifyAsImage(	const ccImage* image,
 	//top-left
 	xi = -halfWidth;
 	yi = -halfHeight;
-	qi = 1.0 + c1*xi + c2*yi;
-	corners[0] = (a0 + a1*xi + a2*yi) / qi;
-	corners[1] = (b0 + b1*xi + b2*yi) / qi;
+	qi = 1.0 + c1 * xi + c2 * yi;
+	corners[0] = (a0 + a1 * xi + a2 * yi) / qi;
+	corners[1] = (b0 + b1 * xi + b2 * yi) / qi;
 
 	//top-right
-	xi =  halfWidth;
+	xi = halfWidth;
 	yi = -halfHeight;
-	qi = 1.0 + c1*xi + c2*yi;
-	corners[2] = (a0 + a1*xi + a2*yi) / qi;
-	corners[3] = (b0 + b1*xi + b2*yi) / qi;
+	qi = 1.0 + c1 * xi + c2 * yi;
+	corners[2] = (a0 + a1 * xi + a2 * yi) / qi;
+	corners[3] = (b0 + b1 * xi + b2 * yi) / qi;
 
 	//bottom-right
 	xi = halfWidth;
 	yi = halfHeight;
-	qi = 1.0 + c1*xi + c2*yi;
-	corners[4] = (a0 + a1*xi + a2*yi) / qi;
-	corners[5] = (b0 + b1*xi + b2*yi) / qi;
+	qi = 1.0 + c1 * xi + c2 * yi;
+	corners[4] = (a0 + a1 * xi + a2 * yi) / qi;
+	corners[5] = (b0 + b1 * xi + b2 * yi) / qi;
 
 	//bottom-left
 	xi = -halfWidth;
-	yi =  halfHeight;
-	qi = 1.0 + c1*xi + c2*yi;
-	corners[6] = (a0 + a1*xi + a2*yi) / qi;
-	corners[7] = (b0 + b1*xi + b2*yi) / qi;
+	yi = halfHeight;
+	qi = 1.0 + c1 * xi + c2 * yi;
+	corners[6] = (a0 + a1 * xi + a2 * yi) / qi;
+	corners[7] = (b0 + b1 * xi + b2 * yi) / qi;
 
 	if (realCorners)
 	{
@@ -2066,8 +2056,8 @@ bool ccCameraSensor::OrthoRectifyAsImages(	std::vector<ccImage*> images,
 	std::vector<double> maxCorners;
 	try
 	{
-		minCorners.resize(2*count);
-		maxCorners.resize(2*count);
+		minCorners.resize(2 * count);
+		maxCorners.resize(2 * count);
 	}
 	catch (const std::bad_alloc&)
 	{
@@ -2078,20 +2068,20 @@ bool ccCameraSensor::OrthoRectifyAsImages(	std::vector<ccImage*> images,
 	//max dimension of all (ortho-rectified) images, horizontally or vertically
 	double maxDimAllImages = 0;
 	//corners for the global set
-	double globalCorners[4] = { 0, 0, 0, 0};
+	double globalCorners[4] = { 0, 0, 0, 0 };
 
 	//compute output corners and max dimension for all images
-	for (size_t k=0; k<count; ++k)
+	for (size_t k = 0; k < count; ++k)
 	{
-		const double& a0 = a[k*3  ];
-		const double& a1 = a[k*3+1];
-		const double& a2 = a[k*3+2];
-		const double& b0 = b[k*3  ];
-		const double& b1 = b[k*3+1];
-		const double& b2 = b[k*3+2];
+		const double& a0 = a[k * 3];
+		const double& a1 = a[k * 3 + 1];
+		const double& a2 = a[k * 3 + 2];
+		const double& b0 = b[k * 3];
+		const double& b1 = b[k * 3 + 1];
+		const double& b2 = b[k * 3 + 2];
 		//const double& c0 = c[k*3];
-		const double& c1 = c[k*3+1];
-		const double& c2 = c[k*3+2];
+		const double& c1 = c[k * 3 + 1];
+		const double& c2 = c[k * 3 + 2];
 
 		//first, we compute the ortho-rectified image corners
 		double corners[8];
@@ -2105,39 +2095,39 @@ bool ccCameraSensor::OrthoRectifyAsImages(	std::vector<ccImage*> images,
 		//top-left
 		xi = -0.5*width;
 		yi = -0.5*height;
-		qi = 1.0+c1*xi+c2*yi;
-		corners[0] = (a0+a1*xi+a2*yi)/qi;
-		corners[1] = (b0+b1*xi+b2*yi)/qi;
+		qi = 1.0 + c1 * xi + c2 * yi;
+		corners[0] = (a0 + a1 * xi + a2 * yi) / qi;
+		corners[1] = (b0 + b1 * xi + b2 * yi) / qi;
 
 		//top-right
-		xi =  0.5*width;
+		xi = 0.5*width;
 		//yi = -0.5*height;
-		qi = 1.0+c1*xi+c2*yi;
-		corners[2] = (a0+a1*xi+a2*yi)/qi;
-		corners[3] = (b0+b1*xi+b2*yi)/qi;
+		qi = 1.0 + c1 * xi + c2 * yi;
+		corners[2] = (a0 + a1 * xi + a2 * yi) / qi;
+		corners[3] = (b0 + b1 * xi + b2 * yi) / qi;
 
 		//bottom-right
 		//xi =  0.5*width;
 		yi = 0.5*height;
-		qi = 1.0+c1*xi+c2*yi;
-		corners[4] = (a0+a1*xi+a2*yi)/qi;
-		corners[5] = (b0+b1*xi+b2*yi)/qi;
+		qi = 1.0 + c1 * xi + c2 * yi;
+		corners[4] = (a0 + a1 * xi + a2 * yi) / qi;
+		corners[5] = (b0 + b1 * xi + b2 * yi) / qi;
 
 		//bottom-left
-		xi =  -0.5*width;
+		xi = -0.5*width;
 		//yi = 0.5*height;
-		qi = 1.0+c1*xi+c2*yi;
-		corners[6] = (a0+a1*xi+a2*yi)/qi;
-		corners[7] = (b0+b1*xi+b2*yi)/qi;
+		qi = 1.0 + c1 * xi + c2 * yi;
+		corners[6] = (a0 + a1 * xi + a2 * yi) / qi;
+		corners[7] = (b0 + b1 * xi + b2 * yi) / qi;
 
 		//we look for min and max bounding box
-		double* minC = &minCorners[2*k];
-		double* maxC = &maxCorners[2*k];
+		double* minC = &minCorners[2 * k];
+		double* maxC = &maxCorners[2 * k];
 		maxC[0] = minC[0] = corners[0];
 		maxC[1] = minC[1] = corners[1];
-		for (unsigned k=1; k<4; ++k)
+		for (unsigned k = 1; k < 4; ++k)
 		{
-			const double* C = corners+2*k;
+			const double* C = corners + 2 * k;
 			//dimension: X
 			if (minC[0] > C[0])
 				minC[0] = C[0];
@@ -2161,11 +2151,11 @@ bool ccCameraSensor::OrthoRectifyAsImages(	std::vector<ccImage*> images,
 				globalCorners[3] = maxC[1];
 		}
 
-		double dx = maxC[0]-minC[0];
-		double dy = maxC[1]-minC[1];
-		double maxd = std::max(dx,dy);
+		double dx = maxC[0] - minC[0];
+		double dy = maxC[1] - minC[1];
+		double maxd = std::max(dx, dy);
 		if (maxd > maxDimAllImages)
-			maxDimAllImages=maxd;
+			maxDimAllImages = maxd;
 	}
 
 	//deduce pixel size
@@ -2189,12 +2179,12 @@ bool ccCameraSensor::OrthoRectifyAsImages(	std::vector<ccImage*> images,
 	}
 
 	//projet each image accordingly
-	for (size_t k=0; k<count; ++k)
+	for (size_t k = 0; k < count; ++k)
 	{
-		double* minC = &minCorners[2*k];
-		double* maxC = &maxCorners[2*k];
-		double dx = maxC[0]-minC[0];
-		double dy = maxC[1]-minC[1];
+		double* minC = &minCorners[2 * k];
+		double* maxC = &maxCorners[2 * k];
+		double dx = maxC[0] - minC[0];
+		double dy = maxC[1] - minC[1];
 
 		ccImage* image = images[k];
 		unsigned width = images[k]->getW();
@@ -2202,7 +2192,7 @@ bool ccCameraSensor::OrthoRectifyAsImages(	std::vector<ccImage*> images,
 		unsigned w = static_cast<unsigned>(ceil(dx / pixelSize));
 		unsigned h = static_cast<unsigned>(ceil(dy / pixelSize));
 
-		QImage orthoImage(w,h,QImage::Format_ARGB32);
+		QImage orthoImage(w, h, QImage::Format_ARGB32);
 		if (orthoImage.isNull()) //not enough memory!
 		{
 			//clear mem.
@@ -2219,17 +2209,17 @@ bool ccCameraSensor::OrthoRectifyAsImages(	std::vector<ccImage*> images,
 		}
 
 		//ortho rectification parameters
-		const double& a0 = a[k*3  ];
-		const double& a1 = a[k*3+1];
-		const double& a2 = a[k*3+2];
-		const double& b0 = b[k*3  ];
-		const double& b1 = b[k*3+1];
-		const double& b2 = b[k*3+2];
+		const double& a0 = a[k * 3];
+		const double& a1 = a[k * 3 + 1];
+		const double& a2 = a[k * 3 + 2];
+		const double& b0 = b[k * 3];
+		const double& b1 = b[k * 3 + 1];
+		const double& b2 = b[k * 3 + 2];
 		//const double& c0 = c[k*3];
-		const double& c1 = c[k*3+1];
-		const double& c2 = c[k*3+2];
+		const double& c1 = c[k * 3 + 1];
+		const double& c2 = c[k * 3 + 2];
 
-		for (unsigned i=0; i<w; ++i)
+		for (unsigned i = 0; i < w; ++i)
 		{
 			double xip = minC[0] + static_cast<double>(i)*pixelSize;
 			for (unsigned j = 0; j < h; ++j)
@@ -2406,7 +2396,7 @@ bool ccOctreeFrustumIntersector::build(CCCoreLib::DgmOctree* octree)
 
 	try
 	{
-		for (it=thePointsAndTheirCellCodes.begin(); it!=thePointsAndTheirCellCodes.end(); ++it)
+		for (it = thePointsAndTheirCellCodes.begin(); it != thePointsAndTheirCellCodes.end(); ++it)
 		{
 			CCCoreLib::DgmOctree::CellCode completeCode = it->theCode;
 			for (unsigned char level=1; level<=CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL; level++)
@@ -2497,7 +2487,7 @@ ccOctreeFrustumIntersector::separatingAxisTest(const CCVector3& bbMin,
 	//box corners
 	CCVector3 boxCorners[8];
 	{
-		for (unsigned i=0; i<8; i++)
+		for (unsigned i = 0; i < 8; i++)
 			boxCorners[i] = CCVector3(	(i & 4) ? bbMin.x : bbMax.x,
 										(i & 2) ? bbMin.y : bbMax.y,
 										(i & 1) ? bbMin.z : bbMax.z);
@@ -2563,7 +2553,7 @@ ccOctreeFrustumIntersector::separatingAxisTest(const CCVector3& bbMin,
 			float dMinBox = testVec.dot(boxCorners[0]);
 			float dMaxBox = dMinBox;
 			{
-				for (unsigned j=1; j<8; j++)
+				for (unsigned j = 1; j < 8; j++)
 				{
 					float d = testVec.dot(boxCorners[j]);
 					if (d > dMaxBox)
@@ -2577,7 +2567,7 @@ ccOctreeFrustumIntersector::separatingAxisTest(const CCVector3& bbMin,
 			float dMinFru = testVec.dot(frustumCorners[0]);
 			float dMaxFru = dMinFru;
 			{
-				for (unsigned j=1; j<8; j++)
+				for (unsigned j = 1; j < 8; j++)
 				{
 					float d = testVec.dot(frustumCorners[j]);
 					if (d > dMaxFru)
@@ -2619,7 +2609,7 @@ void ccOctreeFrustumIntersector::computeFrustumIntersectionByLevel(unsigned char
 	CCCoreLib::DgmOctree::CellCode baseTruncatedCode = (parentTruncatedCode << 3);
 
 	// test to do on the 8 child cells
-	for (unsigned i=0; i<8; i++)
+	for (unsigned i = 0; i < 8; i++)
 	{
 		// set truncated code of the current cell
 		CCCoreLib::DgmOctree::CellCode truncatedCode = baseTruncatedCode + i;
@@ -2661,7 +2651,7 @@ void ccOctreeFrustumIntersector::computeFrustumIntersectionWithOctree(	std::vect
 {
 	// clear old result
 	{
-		for (int i=0; i<=CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL; i++)
+		for (int i = 0; i <= CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL; i++)
 		{
 			m_cellsInFrustum[i].clear();
 			m_cellsIntersectFrustum[i].clear();
@@ -2683,7 +2673,7 @@ void ccOctreeFrustumIntersector::computeFrustumIntersectionWithOctree(	std::vect
 		if (m_associatedOctree->getPointsInCell(*it, level, &pointsInCell, true))
 		{
 			// all points are inside the frustum since the cell itself is completely inside
-			for (size_t i=0 ; i<pointsInCell.size() ; i++)
+			for (size_t i = 0; i < pointsInCell.size(); i++)
 				inCameraFrustum.push_back(pointsInCell.getPointGlobalIndex(static_cast<unsigned>(i)));
 		}
 	}
@@ -2698,11 +2688,11 @@ void ccOctreeFrustumIntersector::computeFrustumIntersectionWithOctree(	std::vect
 			size_t pointCount = pointsInCell.size();
 			size_t sizeBefore = pointsToTest.size();
 			pointsToTest.resize(pointCount + sizeBefore);
-			for (size_t i=0; i<pointCount; i++)
+			for (size_t i = 0; i < pointCount; i++)
 			{
 				unsigned currentIndice = pointsInCell.getPointGlobalIndex(static_cast<unsigned>(i));
 				const CCVector3* vec = pointsInCell.getPoint(static_cast<unsigned>(i));
-				pointsToTest[sizeBefore+i] = std::pair<unsigned, CCVector3>(currentIndice, *vec);
+				pointsToTest[sizeBefore + i] = std::pair<unsigned, CCVector3>(currentIndice, *vec);
 			}
 		}
 	}

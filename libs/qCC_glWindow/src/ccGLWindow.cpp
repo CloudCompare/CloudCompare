@@ -126,20 +126,20 @@ enum class RenderTextReservedIDs {
 
 //On some versions of Qt, QGLWidget::renderText seems to need glColorf instead of glColorub!
 // See https://bugreports.qt-project.org/browse/QTBUG-6217
-template<class QOpenGLFunctions> inline static void glColor3ubv_safe(QOpenGLFunctions* glFunc, const unsigned char* rgb)
+template<class QOpenGLFunctions> inline static void glColor3ubv_safe(QOpenGLFunctions* glFunc, const ccColor::Rgb& color)
 {
 	assert(glFunc);
-	glFunc->glColor3f(	rgb[0] / 255.0f,
-						rgb[1] / 255.0f,
-						rgb[2] / 255.0f);
+	glFunc->glColor3f(	color.r / 255.0f,
+						color.g / 255.0f,
+						color.b / 255.0f);
 }
-template<class QOpenGLFunctions> inline static void glColor4ubv_safe(QOpenGLFunctions* glFunc, const unsigned char* rgb)
+template<class QOpenGLFunctions> inline static void glColor4ubv_safe(QOpenGLFunctions* glFunc, const ccColor::Rgba& color)
 {
 	assert(glFunc);
-	glFunc->glColor4f(	rgb[0] / 255.0f,
-						rgb[1] / 255.0f,
-						rgb[2] / 255.0f,
-						rgb[3] / 255.0f);
+	glFunc->glColor4f(	color.r / 255.0f,
+						color.g / 255.0f,
+						color.b / 255.0f,
+						color.a / 255.0f);
 }
 
 //! Precomputed stuff for the 'hot zone'
@@ -152,7 +152,7 @@ struct HotZone
 	//text shift
 	int yTextBottomLineShift;
 	//default color
-	unsigned char color[3];
+	ccColor::Rgb color;
 
 	//bubble-view label rect.
 	QString bbv_label;
@@ -189,6 +189,7 @@ struct HotZone
 	explicit HotZone(ccGLWindow* win)
 		: textHeight(0)
 		, yTextBottomLineShift(0)
+		, color(133, 193, 39) //default color ("greenish")
 		, bbv_label("bubble-view mode")
 		, fs_label("fullscreen mode")
 		, psi_label("default point size")
@@ -197,11 +198,6 @@ struct HotZone
 		, iconSize(16)
 		, topCorner(0, 0)
 	{
-		//default color ("greenish")
-		color[0] = 133;
-		color[1] = 193;
-		color[2] = 39;
-
 		if (win)
 		{
 			font = win->font();
@@ -359,6 +355,7 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=nullptr*/,
 	, m_activeFbo(nullptr)
 	, m_fbo(nullptr)
 	, m_fbo2(nullptr)
+	, m_pickingFbo(nullptr)
 	, m_alwaysUseFBO(false)
 	, m_updateFBO(true)
 	, m_colorRampShader(nullptr)
@@ -553,6 +550,9 @@ ccGLWindow::~ccGLWindow()
 
 	delete m_fbo2;
 	m_fbo2 = nullptr;
+
+	delete m_pickingFbo;
+	m_pickingFbo = nullptr;
 
 #ifdef CC_GL_WINDOW_USE_QWINDOW
 	if (m_context)
@@ -1197,7 +1197,7 @@ void ccGLWindow::setGLViewport(const QRect& rect)
 	{
 		makeCurrent();
 
-		functions()->glViewport(m_glViewport.x(), m_glViewport.y(), glWidth(), glHeight());
+		functions()->glViewport(m_glViewport.x(), m_glViewport.y(), m_glViewport.width(), m_glViewport.height());
 	}
 }
 
@@ -1843,7 +1843,7 @@ void ccGLWindow::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 				glFunc->glBegin(GL_QUADS);
 				{
 					//we use the default background color for gradient start
-					glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, bkgCol.rgb);
+					glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, bkgCol);
 					glFunc->glVertex2i(-w, h);
 					glFunc->glVertex2i(w, h);
 					//and the inverse of the text color for gradient stop
@@ -2127,7 +2127,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 		//draw black background
 		{
 			int height = (diagStrings.size() + 1) * 14;
-			glColor4ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::black.rgba);
+			glColor4ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::black);
 			glFunc->glBegin(GL_QUADS);
 			glFunc->glVertex2i(x, glHeight() - y);
 			glFunc->glVertex2i(x, glHeight() - (y + height));
@@ -2136,7 +2136,7 @@ void ccGLWindow::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& re
 			glFunc->glEnd();
 		}
 
-		glColor4ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::yellow.rgba);
+		glColor4ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::yellow);
 		for (const QString &str : diagStrings)
 		{
 			renderText(x + 10, y + 10, str);
@@ -2640,7 +2640,7 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 
 				glFunc->glPopAttrib(); //GL_COLOR_BUFFER_BIT
 
-				glColor4ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::black.rgba);
+				glColor4ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::black);
 				renderText(	10,
 							borderHeight - CC_GL_FILTER_BANNER_MARGIN - CC_GL_FILTER_BANNER_MARGIN / 2,
 							QString("[GL filter] ") + m_activeGLFilter->getDescription(),
@@ -2653,7 +2653,7 @@ void ccGLWindow::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rende
 			//current messages (if valid)
 			if (!m_messagesToDisplay.empty())
 			{
-				glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, textCol.rgb);
+				glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, textCol);
 
 				int ll_currentHeight = glHeight() - 10; //lower left
 				int uc_currentHeight = 10; //upper center
@@ -3108,7 +3108,7 @@ void ccGLWindow::drawCross()
 	glFunc->glLineWidth(1.0f);
 
 	//cross OpenGL drawing
-	glColor4ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::lightGrey.rgba);
+	glColor4ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::lightGrey);
 	glFunc->glBegin(GL_LINES);
 	glFunc->glVertex3f(0.0f, -CC_DISPLAYED_CENTER_CROSS_LENGTH, 0.0f);
 	glFunc->glVertex3f(0.0f, CC_DISPLAYED_CENTER_CROSS_LENGTH, 0.0f);
@@ -3197,7 +3197,7 @@ void ccGLWindow::drawScale(const ccColor::Rgbub& color)
 	glFunc->glLineWidth(1.0f);
 
 	//scale OpenGL drawing
-	glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, color.rgb);
+	glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, color);
 	glFunc->glBegin(GL_LINES);
 	glFunc->glVertex3f(w - scaleW_pix, -h, 0.0f);
 	glFunc->glVertex3f(w, -h, 0.0f);
@@ -3212,7 +3212,7 @@ void ccGLWindow::drawScale(const ccColor::Rgbub& color)
 	// display label
 	double textEquivalentWidth = RoundScale(scaleMaxW * pixelSize);
 	QString text = QString::number(textEquivalentWidth);
-	glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, color.rgb);
+	glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, color);
 	renderText(	glWidth() - static_cast<int>(scaleW_pix / 2 + dW) - fm.width(text) / 2,
 				glHeight() - static_cast<int>(dH / 2) + fm.height() / 3,
 				text,
@@ -3256,13 +3256,13 @@ void ccGLWindow::drawTrihedron()
 
 		//trihedron OpenGL drawing
 		glFunc->glBegin(GL_LINES);
-		glFunc->glColor3f(1.0f, 0.0f, 0.0f);
+		ccGL::Color(glFunc, ccColor::red);
 		glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
 		glFunc->glVertex3d(CC_DISPLAYED_TRIHEDRON_AXES_LENGTH, 0.0, 0.0);
-		glFunc->glColor3f(0.0f, 1.0f, 0.0f);
+		ccGL::Color(glFunc, ccColor::green);
 		glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
 		glFunc->glVertex3d(0.0, CC_DISPLAYED_TRIHEDRON_AXES_LENGTH, 0.0);
-		glFunc->glColor3f(0.0f, 0.7f, 1.0f);
+		ccGL::Color(glFunc, ccColor::blueCC);
 		glFunc->glVertex3f(0.0f, 0.0f, 0.0f);
 		glFunc->glVertex3d(0.0, 0.0, CC_DISPLAYED_TRIHEDRON_AXES_LENGTH);
 		glFunc->glEnd();
@@ -3298,7 +3298,7 @@ void ccGLWindow::drawTrihedron()
 		CCVector2d toTrihedronOrigin(trihedronCenterX, -trihedronCenterY);
 		CCVector2d toCharOrigin(-(rectX.x() + rectX.width() / 2.0), rectX.y() + rectX.height() / 4.0); // rectX.height() should be divided by 2, but it looks better with 4 !
 
-		glFunc->glColor3f(1.0f, 0.0f, 0.0f);
+		ccGL::Color(glFunc, ccColor::red);
 		{
 			CCVector2d dX(tipX2D.x - origin2D.x, tipX2D.y - origin2D.y);
 			dX.normalize();
@@ -3307,7 +3307,7 @@ void ccGLWindow::drawTrihedron()
 			renderText(static_cast<int>(halfW + posX.x), static_cast<int>(halfH - posX.y), "X", static_cast<uint16_t>(RenderTextReservedIDs::trihedronX), textFont);
 		}
 
-		glFunc->glColor3f(0.0f, 1.0f, 0.0f);
+		ccGL::Color(glFunc, ccColor::green);
 		{
 			CCVector2d dY(tipY2D.x - origin2D.x, tipY2D.y - origin2D.y);
 			dY.normalize();
@@ -3316,7 +3316,7 @@ void ccGLWindow::drawTrihedron()
 			renderText(static_cast<int>(halfW + posY.x), static_cast<int>(halfH - posY.y), "Y", static_cast<uint16_t>(RenderTextReservedIDs::trihedronY), textFont);
 		}
 
-		glFunc->glColor3f(0.0f, 0.7f, 1.0f);
+		ccGL::Color(glFunc, ccColor::blueCC);
 		{
 			CCVector2d dZ(tipZ2D.x - origin2D.x, tipZ2D.y - origin2D.y);
 			dZ.normalize();
@@ -3845,10 +3845,12 @@ void ccGLWindow::onItemPickedFast(ccHObject* pickedEntity, int pickedItemIndex, 
 			cc2DLabel* label = static_cast<cc2DLabel*>(pickedEntity);
 			m_activeItems.push_back(label);
 		}
-		else if (pickedEntity->isA(CC_TYPES::CLIPPING_BOX))
+		else if (pickedEntity->isA(CC_TYPES::CLIPPING_BOX_PART))
 		{
-			ccClipBox* cbox = static_cast<ccClipBox*>(pickedEntity);
-			cbox->setActiveComponent(pickedItemIndex);
+			ccClipBoxPart* cBoxPart = static_cast<ccClipBoxPart*>(pickedEntity);
+			ccClipBox* cbox = cBoxPart->clipBox();
+			assert(cbox);
+			cbox->setActiveComponent(cBoxPart->partID());
 			cbox->setClickedPoint(x, y, width(), height(), m_viewportParams.viewMat);
 
 			m_activeItems.push_back(cbox);
@@ -4822,8 +4824,6 @@ void ccGLWindow::processPickingResult(	const PickingParameters& params,
 	}
 }
 
-//DGM: WARNING: OpenGL picking with the picking buffer is depreacted.
-//We need to get rid of this code or change it to color-based selection...
 void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 {
 	if (!params.pickInLocalDB && !params.pickInSceneDB)
@@ -4838,10 +4838,10 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 	switch (params.mode)
 	{
 	case FAST_PICKING:
-		flags |= CC_DRAW_FAST_NAMES_ONLY;
+		flags |= CC_FAST_ENTITY_PICKING;
 	case ENTITY_PICKING:
 	case ENTITY_RECT_PICKING:
-		flags |= CC_DRAW_ENTITY_NAMES;
+		flags |= CC_ENTITY_PICKING;
 		break;
 	default:
 		//unhandled mode?!
@@ -4858,23 +4858,18 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 	ccQOpenGLFunctions* glFunc = functions();
 	assert(glFunc);
 
-	//no need to clear display, we don't draw anything new!
-	//glFunc->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	if (!initFBOSafe(m_pickingFbo, glWidth(), glHeight()))
+	{
+		ccLog::Warning("[FBO] Initialization failed!");
+		//we must always emit a signal!
+		processPickingResult(params, nullptr, -1);
+		return;
+	}
+	bindFBO(m_pickingFbo);
 
-	//OpenGL picking buffer size (= max hits number per 'OpenGL' selection pass)
-	static const GLsizei CC_PICKING_BUFFER_SIZE = 65536;
-	//GL names picking buffer
-	static GLuint s_pickingBuffer[CC_PICKING_BUFFER_SIZE];
-
-	//setup selection buffers
-	memset(s_pickingBuffer, 0, sizeof(GLuint)*CC_PICKING_BUFFER_SIZE);
-	glFunc->glSelectBuffer(CC_PICKING_BUFFER_SIZE, s_pickingBuffer);
-	glFunc->glRenderMode(GL_SELECT);
-	glFunc->glInitNames();
-
-	//get viewport
-	GLint viewport[4] = { m_glViewport.left(), m_glViewport.top(), m_glViewport.width(), m_glViewport.height() };
-	//glFunc->glGetIntegerv(GL_VIEWPORT, viewport);
+	//we have to clear the display to be sure there's no color
+	glFunc->glClearColor(0, 0, 0, 255);
+	glFunc->glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 	//get context
 	CC_DRAW_CONTEXT CONTEXT;
@@ -4886,18 +4881,8 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 
 		//projection matrix
 		glFunc->glMatrixMode(GL_PROJECTION);
-		//restrict drawing to the picking area
-		{
-			double pickMatrix[16];
-			ccGL::PickMatrix(	static_cast<GLdouble>(params.centerX),
-								static_cast<GLdouble>(viewport[3] - params.centerY),
-								static_cast<GLdouble>(params.pickWidth),
-								static_cast<GLdouble>(params.pickWidth),
-								viewport,
-								pickMatrix);
-			glFunc->glLoadMatrixd(pickMatrix);
-		}
-		glFunc->glMultMatrixd(getProjectionMatrix().data());
+		
+		glFunc->glLoadMatrixd(getProjectionMatrix().data());
 
 		//model view matrix
 		glFunc->glMatrixMode(GL_MODELVIEW);
@@ -4907,7 +4892,7 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 		glFunc->glEnable(GL_DEPTH_TEST);
 
 		//display 3D objects
-		//DGM: all of them, even if we don't pick the own DB for instance, as they can hide the other objects!
+		//DGM: all of them, even if we don't pick the window own DB for instance, as they can hide the other objects!
 		if (m_globalDBRoot)
 			m_globalDBRoot->draw(CONTEXT);
 		if (m_winDBRoot)
@@ -4923,24 +4908,7 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 	{
 		CONTEXT.drawingFlags = CC_DRAW_2D | flags;
 
-		//we must first grab the 2D ortho view projection matrix
 		setStandardOrthoCenter();
-		glFunc->glMatrixMode(GL_PROJECTION);
-		double orthoProjMatd[OPENGL_MATRIX_SIZE];
-		glFunc->glGetDoublev(GL_PROJECTION_MATRIX, orthoProjMatd);
-		//restrict drawing to the picking area
-		{
-			double pickMatrix[16];
-			ccGL::PickMatrix(	static_cast<GLdouble>(params.centerX),
-								static_cast<GLdouble>(viewport[3] - params.centerY),
-								static_cast<GLdouble>(params.pickWidth),
-								static_cast<GLdouble>(params.pickWidth),
-								viewport,
-								pickMatrix);
-			glFunc->glLoadMatrixd(pickMatrix);
-		}
-		glFunc->glMultMatrixd(orthoProjMatd);
-		glFunc->glMatrixMode(GL_MODELVIEW);
 
 		glFunc->glPushAttrib(GL_DEPTH_BUFFER_BIT);
 		glFunc->glDisable(GL_DEPTH_TEST);
@@ -4957,66 +4925,127 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 		logGLError("ccGLWindow::startPicking.draw(2D)");
 	}
 
+	logGLError("ccGLWindow::startPicking.render");
 	glFunc->glFlush();
 
-	//back to the standard rendering mode
-	int hits = glFunc->glRenderMode(GL_RENDER);
-
-	logGLError("ccGLWindow::startPicking.render");
-
-	ccLog::PrintDebug("[Picking] hits: %i", hits);
-	if (hits < 0)
+	if (CONTEXT.entityPicking.getLastID() == 0)
 	{
-		ccLog::Warning("[Picking] Too many items inside the picking area! Try to zoom in...");
+		//no pickable entity displayed
 		//we must always emit a signal!
+		bindFBO(nullptr);
 		processPickingResult(params, nullptr, -1);
+		return;
 	}
 
-	//process hits
+	glFunc->glFinish();
+
+	ccHObject* pickedEntity = nullptr;
 	std::unordered_set<int> selectedIDs;
-	int pickedItemIndex = -1;
-	int selectedID = -1;
+
 	try
 	{
-		GLuint minMinDepth = (~0);
-		const GLuint* _selectBuf = s_pickingBuffer;
-
-		for (int i = 0; i < hits; ++i)
+		// crop the picking rectangle so that's it strictly inside the displayed window
+		int xTop = params.centerX - params.pickWidth / 2;
+		int xCenter = params.centerX;
+		int xWidth = params.pickWidth;
+		if (xTop < 0)
 		{
-			const GLuint& n = _selectBuf[0]; //number of names on stack
-			if (n) //if we draw anything outside of 'glPushName()... glPopName()' then it will appear here with as an empty set!
-			{
-				//n should be equal to 1 (CC_DRAW_ENTITY_NAMES mode) or 2 (CC_DRAW_POINT_NAMES/CC_DRAW_TRIANGLES_NAMES modes)!
-				assert(n == 1 || n == 2);
-				const GLuint& minDepth = _selectBuf[1];
-				//const GLuint& maxDepth = _selectBuf[2];
-				const GLuint& currentID = _selectBuf[3];
+			// crop pixels with negative X positions
+			xWidth += xTop;
+			xCenter += xTop;
+			xTop = 0;
+		}
+		xWidth = std::min(xWidth, static_cast<int>(glWidth()) - xTop);
+		if (xWidth <= 0)
+		{
+			bindFBO(nullptr);
+			processPickingResult(params, nullptr, -1);
+			return;
+		}
 
-				if (params.mode == ENTITY_RECT_PICKING)
+		int yTop = glHeight() - 1 - params.centerY - params.pickHeight / 2;
+		int yCenter = glHeight() - 1 - params.centerY;
+		int yWidth = params.pickHeight;
+		if (yTop < 0)
+		{
+			// crop pixels with negative Y positions
+			yWidth += yTop;
+			yCenter += yTop;
+			yTop = 0;
+		}
+		yWidth = std::min(yWidth, static_cast<int>(glHeight()) - yTop);
+		if (yWidth <= 0)
+		{
+			bindFBO(nullptr);
+			processPickingResult(params, nullptr, -1);
+			return;
+		}
+
+		int pixelCount = xWidth * yWidth;
+		std::vector<ccColor::Rgba> pickedPixels;
+		pickedPixels.resize(pixelCount, ccColor::black);
+
+		//read the pixel under the mouse
+		glFunc->glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+		glFunc->glReadPixels(xTop, yTop, xWidth, yWidth, GL_RGBA, GL_UNSIGNED_BYTE, pickedPixels.data());
+
+		bindFBO(nullptr);
+
+		//QImage testImage(xWidth, yWidth, QImage::Format_RGB888);
+
+		//process hits
+		int minSquareDistToCenter = -1;
+		ccColor::Rgba previousPixelColor(0, 0, 0, 0);
+
+		ccColor::Rgba* _pickedPixels = pickedPixels.data();
+		for (int j = 0; j < yWidth; ++j)
+		{
+			for (int i = 0; i < xWidth; ++i, ++_pickedPixels)
+			{
+				//testImage.setPixelColor(i, yWidth - 1 - j, QColor(_pickedPixels->r, _pickedPixels->g, _pickedPixels->b));
+				if (_pickedPixels->r != 0 || _pickedPixels->g != 0 || _pickedPixels->b != 0)
 				{
-					//pick them all!
-					selectedIDs.insert(currentID);
-				}
-				else
-				{
-					//if there are multiple hits, we keep only the nearest
-					if (selectedID < 0 || minDepth < minMinDepth)
+					if (params.mode == ENTITY_RECT_PICKING)
 					{
-						selectedID = currentID;
-						pickedItemIndex = (n > 1 ? _selectBuf[4] : -1);
-						minMinDepth = minDepth;
+						// avoid reprocessing the pixel corresponding to the same cloud over and over
+						if (_pickedPixels->r != previousPixelColor.r || _pickedPixels->g != previousPixelColor.g || _pickedPixels->b != previousPixelColor.b)
+						{
+							previousPixelColor = *_pickedPixels;
+							ccHObject* object = CONTEXT.entityPicking.objectFromColor(*_pickedPixels);
+							if (object)
+							{
+								selectedIDs.insert(object->getUniqueID());
+							}
+							else
+							{
+								assert(false);
+							}
+						}
+					}
+					else
+					{
+						int dX = i - xCenter;
+						int dY = j - yCenter;
+						int squareDistToCenter = dX * dX + dY * dY;
+						if (!pickedEntity || minSquareDistToCenter < squareDistToCenter)
+						{
+							minSquareDistToCenter = squareDistToCenter;
+							pickedEntity = CONTEXT.entityPicking.objectFromColor(*_pickedPixels);
+							assert(pickedEntity);
+						}
 					}
 				}
 			}
-
-			_selectBuf += (3 + n);
 		}
 
+		//testImage.save("C:\\Temp\\test.png");
+
 		//standard output is made through the 'selectedIDs' set
-		if (params.mode != ENTITY_RECT_PICKING
-			&&	selectedID != -1)
+		if (pickedEntity)
 		{
-			selectedIDs.insert(selectedID);
+			assert(params.mode != ENTITY_RECT_PICKING);
+			selectedIDs.insert(pickedEntity->getUniqueID());
 		}
 	}
 	catch (const std::bad_alloc&)
@@ -5025,47 +5054,7 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 		ccLog::Warning("[Picking] Not enough memory!");
 	}
 
-	ccHObject* pickedEntity = nullptr;
-	if (selectedID >= 0)
-	{
-		if (params.pickInSceneDB && m_globalDBRoot)
-		{
-			pickedEntity = m_globalDBRoot->find(selectedID);
-		}
-		if (!pickedEntity && params.pickInLocalDB && m_winDBRoot)
-		{
-			pickedEntity = m_winDBRoot->find(selectedID);
-		}
-	}
-
-	CCVector3 P(0, 0, 0);
-	CCVector3d PBC(0, 0, 0);
-	CCVector3* pickedPoint = nullptr;
-	CCVector3d* pickedBarycenter = nullptr;
-	if (pickedEntity && pickedItemIndex >= 0)
-	{
-		//we need to retrieve the point coordinates
-		//(and even the barycentric coordinates if the point is picked on a mesh!)
-		if (pickedEntity->isKindOf(CC_TYPES::POINT_CLOUD))
-		{
-			P = *(static_cast<ccGenericPointCloud*>(pickedEntity)->getPoint(pickedItemIndex));
-			pickedPoint = &P;
-		}
-		else if (pickedEntity->isKindOf(CC_TYPES::MESH))
-		{
-			CCVector2d clickedPos(params.centerX, glHeight() - 1 - params.centerY);
-			ccGLCameraParameters camera;
-			getGLCameraParameters(camera);
-			CCVector3d Pd(0, 0, 0);
-			static_cast<ccGenericMesh*>(pickedEntity)->trianglePicking(static_cast<unsigned>(pickedItemIndex), clickedPos, camera, Pd, &PBC);
-			P = Pd.toPC();
-			pickedPoint = &P;
-			pickedBarycenter = &PBC;
-		}
-	}
-
-	//we must always emit a signal!
-	processPickingResult(params, pickedEntity, pickedItemIndex, pickedPoint, pickedBarycenter, &selectedIDs);
+	processPickingResult(params, pickedEntity, -1, nullptr, nullptr, &selectedIDs);
 }
 
 void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
@@ -5182,12 +5171,12 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 					double nearestSquareDist = 0.0;
 
 					if (cloud->pointPicking(clickedPos,
-						camera,
-						nearestPointIndex,
-						nearestSquareDist,
-						params.pickWidth,
-						params.pickHeight,
-						autoComputeOctree && cloud->size() > MIN_POINTS_FOR_OCTREE_COMPUTATION))
+											camera,
+											nearestPointIndex,
+											nearestSquareDist,
+											params.pickWidth,
+											params.pickHeight,
+											autoComputeOctree && cloud->size() > MIN_POINTS_FOR_OCTREE_COMPUTATION))
 					{
 						if (nearestElementIndex < 0 || (nearestPointIndex >= 0 && nearestSquareDist < nearestElementSquareDist))
 						{
@@ -5528,7 +5517,7 @@ void ccGLWindow::drawCustomLight()
 	ccQOpenGLFunctions* glFunc = functions();
 	assert(glFunc);
 
-	glFunc->glColor4ubv(ccColor::yellow.rgba);
+	ccGL::Color(glFunc, ccColor::yellow);
 	//ensure that the star size is constant (in pixels)
 	GLfloat d = static_cast<GLfloat>(CC_DISPLAYED_CUSTOM_LIGHT_LENGTH * computeActualPixelSize());
 
@@ -5659,6 +5648,8 @@ void ccGLWindow::drawPivot()
 		const float c_alpha = 0.6f;
 
 		//pivot symbol: 3 circles
+		static const ccColor::Rgba RedAlpha(ccColor::redRGB, c_alpha);
+		ccGL::Color(glFunc, RedAlpha);
 		glFunc->glColor4f(1.0f, 0.0f, 0.0f, c_alpha);
 		glDrawUnitCircle(context(), 0);
 		glFunc->glBegin(GL_LINES);
@@ -5666,14 +5657,16 @@ void ccGLWindow::drawPivot()
 		glFunc->glVertex3f(1.0f, 0.0f, 0.0f);
 		glFunc->glEnd();
 
-		glFunc->glColor4f(0.0f, 1.0f, 0.0f, c_alpha);
+		static const ccColor::Rgba GreenAlpha(ccColor::greenRGB, c_alpha);
+		ccGL::Color(glFunc, GreenAlpha);
 		glDrawUnitCircle(context(), 1);
 		glFunc->glBegin(GL_LINES);
 		glFunc->glVertex3f(0.0f, -1.0f, 0.0f);
 		glFunc->glVertex3f(0.0f, 1.0f, 0.0f);
 		glFunc->glEnd();
 
-		glFunc->glColor4f(0.0f, 0.7f, 1.0f, c_alpha);
+		static const ccColor::Rgba BlueCCAlpha(ccColor::blueCCRGB, c_alpha);
+		ccGL::Color(glFunc, BlueCCAlpha);
 		glDrawUnitCircle(context(), 2);
 		glFunc->glBegin(GL_LINES);
 		glFunc->glVertex3f(0.0f, 0.0f, -1.0f);
@@ -6458,7 +6451,7 @@ int ccGLWindow::getGlFilterBannerHeight() const
 
 void ccGLWindow::display3DLabel(const QString& str, const CCVector3& pos3D, const ccColor::Rgba* color/*=nullptr*/, const QFont& font/*=QFont()*/)
 {
-	glColor4ubv_safe<ccQOpenGLFunctions>(functions(), color ? color->rgba : getDisplayParameters().textDefaultCol.rgba);
+	glColor4ubv_safe<ccQOpenGLFunctions>(functions(), color ? *color : getDisplayParameters().textDefaultCol);
 	renderText(pos3D.x, pos3D.y, pos3D.z, str, font);
 }
 
@@ -6477,7 +6470,7 @@ void ccGLWindow::displayText(	QString text,
 	int y2 = y;
 
 	//actual text color
-	const unsigned char* rgba = (color ? color->rgba : getDisplayParameters().textDefaultCol.rgba);
+	const ccColor::Rgba& rgba = (color ? *color : getDisplayParameters().textDefaultCol);
 
 	QFont textFont = (font ? *font : m_font);
 
@@ -6509,11 +6502,11 @@ void ccGLWindow::displayText(	QString text,
 			glFunc->glEnable(GL_BLEND);
 
 			//inverted color with a bit of transparency
-			const float invertedCol[4] = {	(255 - rgba[0]) / 255.0f,
-											(255 - rgba[1]) / 255.0f,
-											(255 - rgba[2]) / 255.0f,
-											bkgAlpha };
-			glFunc->glColor4fv(invertedCol);
+			const ccColor::Rgbaf invertedCol(	(255 - rgba.r) / 255.0f,
+												(255 - rgba.g) / 255.0f,
+												(255 - rgba.b) / 255.0f,
+												bkgAlpha );
+			ccGL::Color(glFunc, invertedCol);
 
 			int xB = x2 - glWidth() / 2;
 			int yB = y2 - glHeight() / 2;
@@ -7020,7 +7013,7 @@ void ccGLWindow::renderText(int x, int y, const QString & str, uint16_t uniqueID
 			texture->setData(QOpenGLTexture::RGBA, QOpenGLTexture::UInt32_RGBA8_Rev, textImage.bits());
 			texture->bind();
 
-			glFunc->glColor4f(1.0f, 1.0f, 1.0f, 1.0f); //DGM: warning must be float colors to work properly?!
+			ccGL::Color(glFunc, ccColor::bright); //DGM: warning must be float colors to work properly?!
 			glFunc->glBegin(GL_QUADS);
 			float ratioW = textRect.width() / static_cast<float>(imageRect.width());
 			float ratioH = textRect.height() / static_cast<float>(imageRect.height());

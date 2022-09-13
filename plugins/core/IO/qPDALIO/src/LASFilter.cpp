@@ -430,7 +430,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	if (parameters.alwaysDisplaySaveDialog)
 	{
 		if (!s_saveDlg)
-			s_saveDlg = QSharedPointer<LASSaveDlg>(new LASSaveDlg(nullptr));
+			s_saveDlg.reset(new LASSaveDlg(nullptr));
 
 		s_saveDlg->bestAccuracyLabel->setText(QString("(%1, %2, %3)").arg(optimalScale.x).arg(optimalScale.y).arg(optimalScale.z));
 
@@ -1039,7 +1039,7 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 
 		if (!s_lasOpenDlg)
 		{
-			s_lasOpenDlg = QSharedPointer<LASOpenDlg>(new LASOpenDlg());
+			s_lasOpenDlg.reset(new LASOpenDlg());
 		}
 
 		QuickInfo file_info = lasReader.preview();

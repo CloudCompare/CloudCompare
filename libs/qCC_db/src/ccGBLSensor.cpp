@@ -791,23 +791,29 @@ void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 	if (!MACRO_Draw3D(context))
 		return;
 	
-	//we draw a little 3d representation of the sensor
-	
+	ccIndexedTransformation sensorPos;
+	if (!getAbsoluteTransformation(sensorPos, m_activeIndex))
+	{
+		//no visible position for this index!
+		return;
+	}
+
 	//get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
 	assert( glFunc != nullptr );
-	
 	if ( glFunc == nullptr )
 		return;
 	
-	bool pushName = MACRO_DrawEntityNames(context);
-
-	if (pushName)
+	//color-based entity picking
+	bool entityPickingMode = MACRO_EntityPicking(context);
+	ccColor::Rgb pickingColor;
+	if (entityPickingMode)
 	{
 		//not particularly fast
-		if (MACRO_DrawFastNamesOnly(context))
+		if (MACRO_FastEntityPicking(context))
 			return;
-		glFunc->glPushName(getUniqueIDForDisplay());
+		pickingColor = context.entityPicking.registerEntity(this);
+		ccGL::Color(glFunc, pickingColor);
 	}
 
 	//DGM FIXME: this display routine is crap!
@@ -815,19 +821,7 @@ void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 	//apply rigid transformation
 	glFunc->glMatrixMode(GL_MODELVIEW);
 	glFunc->glPushMatrix();
-	{
-		ccIndexedTransformation sensorPos;
-		if (!getAbsoluteTransformation(sensorPos,m_activeIndex))
-		{
-			//no visible position for this index!
-			glFunc->glPopMatrix();
-			if (pushName)
-				glFunc->glPopName();
-			return;
-		}
-
-		glFunc->glMultMatrixf(sensorPos.data());
-	}
+	glFunc->glMultMatrixf(sensorPos.data());
 
 	//test: center as sphere
 	//{
@@ -837,10 +831,10 @@ void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 	//	sphere.setEnabled(true);
 
 	//	CC_DRAW_CONTEXT sphereContext = context;
-	//	sphereContext.drawingFlags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the sphere doesn't push its own!
+	//	sphereContext.drawingFlags &= (~CC_ENTITY_PICKING); //we must remove the 'entity picking flag' so that the sphere doesn't override the picking color!
 	//	sphereContext.display = 0;
 
-	//	sphere.setTempColor(ccColor::magenta);
+	//	sphere.setTempColor(entityPickingMode ? pickingColor : ccColor::magenta);
 	//	sphere.draw(sphereContext);
 	//}
 
@@ -853,18 +847,21 @@ void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 	//sensor axes
 	{
 		PointCoordinateType axisLength = halfHeadSize * m_scale;
-		ccGL::Color4v(glFunc, ccColor::red.rgba);
+		if (entityPickingMode)
+			ccGL::Color(glFunc, ccColor::red);
 		CCVector3 C(0, 0, 0);
 		glFunc->glBegin(GL_LINES);
 		ccGL::Vertex3v(glFunc, C.u);
 		ccGL::Vertex3(glFunc, C.x + axisLength, C.y, C.z);
 		glFunc->glEnd();
-		ccGL::Color4v(glFunc, ccColor::green.rgba);
+		if (entityPickingMode)
+			ccGL::Color(glFunc, ccColor::green);
 		glFunc->glBegin(GL_LINES);
 		ccGL::Vertex3v(glFunc, C.u);
 		ccGL::Vertex3(glFunc, C.x, C.y + axisLength, C.z);
 		glFunc->glEnd();
-		ccGL::Color4v(glFunc, ccColor::blue.rgba);
+		if (entityPickingMode)
+			ccGL::Color(glFunc, ccColor::blue);
 		glFunc->glBegin(GL_LINES);
 		ccGL::Vertex3v(glFunc, C.u);
 		ccGL::Vertex3(glFunc, C.x, C.y, C.z + axisLength);
@@ -878,13 +875,14 @@ void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 		minCorner *= m_scale;
 		maxCorner *= m_scale;
 		ccBBox bbHead(minCorner, maxCorner, true);
-		bbHead.draw(context, m_color);
+		bbHead.draw(context, entityPickingMode ? pickingColor : m_color);
 	}
 
 	//sensor legs
 	{
 		CCVector3 headConnect = /*headCenter*/ -CCVector3(0, 0, static_cast<PointCoordinateType>(halfHeadSize)*m_scale);
-		ccGL::Color3v(glFunc, m_color.rgb);
+		if (entityPickingMode)
+			ccGL::Color(glFunc, m_color);
 		glFunc->glBegin(GL_LINES);
 		ccGL::Vertex3v(glFunc, headConnect.u);
 		ccGL::Vertex3(glFunc, -m_scale, -m_scale, -m_scale);
@@ -896,9 +894,6 @@ void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 	}
 
 	glFunc->glPopAttrib(); //GL_LINE_BIT
-
-	if (pushName)
-		glFunc->glPopName();
 
 	glFunc->glPopMatrix();
 }

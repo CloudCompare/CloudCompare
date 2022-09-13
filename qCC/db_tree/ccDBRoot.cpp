@@ -940,14 +940,14 @@ void ccDBRoot::selectEntity(ccHObject* obj, bool forceAdditiveSelection/*=false*
 						}
 					}
 				}
-				selectionModel->select(selectedIndex,QItemSelectionModel::Toggle);
-				obj->setSelected(true);
+				selectionModel->select(selectedIndex, QItemSelectionModel::Toggle);
+				obj->setSelected(selectionModel->isSelected(selectedIndex));
 			}
 			else
 			{
 				if (selectionModel->isSelected(selectedIndex))	//nothing to do
 					return;
-				selectionModel->select(selectedIndex,QItemSelectionModel::ClearAndSelect);
+				selectionModel->select(selectedIndex, QItemSelectionModel::ClearAndSelect);
 				obj->setSelected(true);
 			}
 

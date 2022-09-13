@@ -126,7 +126,7 @@ void cc2DViewportLabel::drawMeOnly(CC_DRAW_CONTEXT& context)
 	glFunc->glEnable(GL_LINE_STIPPLE);
 
 	const ccColor::Rgba* defaultColor = m_selected ? &ccColor::red : &context.textDefaultCol;
-	glFunc->glColor4ubv(defaultColor->rgba);
+	ccGL::Color(glFunc, *defaultColor);
 
 	glFunc->glBegin(GL_LINE_LOOP);
 	glFunc->glVertex2d(dC.x + m_roi[0] * relativeZoom, dC.y + m_roi[1] * relativeZoom);

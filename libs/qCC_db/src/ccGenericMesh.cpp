@@ -237,14 +237,19 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		bool applyMaterials = (hasMaterials() && materialsShown());
 		bool showTextures = (hasTextures() && materialsShown() && !lodEnabled);
 
-		//GL name pushing
-		bool pushName = MACRO_DrawEntityNames(context);
-		if (pushName)
+		//color-based entity picking
+		bool entityPickingMode = MACRO_EntityPicking(context);
+		ccColor::Rgb pickingColor;
+		if (entityPickingMode)
 		{
 			//not fast at all!
-			if (MACRO_DrawFastNamesOnly(context))
+			if (MACRO_FastEntityPicking(context))
+			{
 				return;
-			glFunc->glPushName(getUniqueIDForDisplay());
+			}
+
+			pickingColor = context.entityPicking.registerEntity(this);
+
 			//minimal display for picking mode!
 			glParams.showNorms = false;
 			glParams.showColors = false;
@@ -256,7 +261,7 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		//in the case we need to display scalar field colors
 		ccScalarField* currentDisplayedScalarField = nullptr;
-		bool greyForNanScalarValues = true;
+		bool sfMayHaveHiddenValues = false;
 		//unsigned colorRampSteps = 0;
 		ccColorScale::Shared colorScale(nullptr);
 
@@ -264,23 +269,26 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		{
 			assert(vertices->isA(CC_TYPES::POINT_CLOUD));
 			ccPointCloud* cloud = static_cast<ccPointCloud*>(vertices);
+			currentDisplayedScalarField = cloud->getCurrentDisplayedScalarField();
+			sfMayHaveHiddenValues = currentDisplayedScalarField ? currentDisplayedScalarField->mayHaveHiddenValues() : false;
 
-			greyForNanScalarValues = (cloud->getCurrentDisplayedScalarField() && cloud->getCurrentDisplayedScalarField()->areNaNValuesShownInGrey());
-			if (greyForNanScalarValues && pushName)
+			if (	!currentDisplayedScalarField
+				||	(entityPickingMode && !sfMayHaveHiddenValues)) //in picking mode, no need to take SF into account if we don't hide any points!
 			{
-				//in picking mode, no need to take SF into account if we don't hide any points!
+				currentDisplayedScalarField = nullptr;
 				glParams.showSF = false;
 			}
 			else
 			{
-				currentDisplayedScalarField = cloud->getCurrentDisplayedScalarField();
 				colorScale = currentDisplayedScalarField->getColorScale();
 				//colorRampSteps = currentDisplayedScalarField->getColorRampSteps();
 
-				assert(colorScale);
 				//get default color ramp if cloud has no scale associated?!
 				if (!colorScale)
+				{
+					assert(false);
 					colorScale = ccColorScalesManager::GetUniqueInstance()->getDefaultScale(ccColorScalesManager::BGYR);
+				}
 			}
 		}
 
@@ -300,7 +308,7 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		{
 			if (isColorOverridden())
 			{
-				ccGL::Color4v(glFunc, m_tempColor.rgba);
+				ccGL::Color(glFunc, m_tempColor);
 				glParams.showColors = false;
 			}
 			else
@@ -309,9 +317,13 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				rgbaColorsTable = static_cast<ccPointCloud*>(vertices)->rgbaColors();
 			}
 		}
+		else if (entityPickingMode)
+		{
+			ccGL::Color(glFunc, pickingColor);
+		}
 		else
 		{
-			glFunc->glColor3fv(context.defaultMat->getDiffuseFront().rgba);
+			ccGL::Color(glFunc, context.defaultMat->getDiffuseFront());
 		}
 
 		if (glParams.showNorms)
@@ -337,8 +349,9 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			EnableGLStippleMask(context.qGLContext, true);
 		}
 
-		if (!visFiltering && !(applyMaterials || showTextures) && (!glParams.showSF || greyForNanScalarValues))
+		if (!visFiltering && !(applyMaterials || showTextures) && (!glParams.showSF || !sfMayHaveHiddenValues))
 		{
+			assert(!entityPickingMode || !glParams.showSF);
 			//the GL type depends on the PointCoordinateType 'size' (float or double)
 			GLenum GL_COORD_TYPE = sizeof(PointCoordinateType) == 4 ? GL_FLOAT : GL_DOUBLE;
 
@@ -521,6 +534,14 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 					rgb3 = currentDisplayedScalarField->getValueColor(tsi->i3);
 					if (!rgb3)
 						continue;
+
+					if (entityPickingMode)
+					{
+						//in picking mode, we don't want to apply the colors, just filter the invisible triangles
+						rgb1 = nullptr;
+						rgb2 = nullptr;
+						rgb3 = nullptr;
+					}
 				}
 				else if (glParams.showColors)
 				{
@@ -604,9 +625,9 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				if (N1)
 					ccGL::Normal3v(glFunc, N1);
 				if (rgb1)
-					glFunc->glColor3ubv(rgb1->rgb);
+					ccGL::Color(glFunc, *rgb1);
 				else if (rgba1)
-					glFunc->glColor4ubv(rgba1->rgba);
+					ccGL::Color(glFunc, *rgba1);
 				if (Tx1)
 					glFunc->glTexCoord2fv(Tx1->t);
 				ccGL::Vertex3v(glFunc, vertices->getPoint(tsi->i1)->u);
@@ -615,9 +636,9 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				if (N2)
 					ccGL::Normal3v(glFunc, N2);
 				if (rgb2)
-					glFunc->glColor3ubv(rgb2->rgb);
+					ccGL::Color(glFunc, *rgb2);
 				else if (rgba2)
-					glFunc->glColor4ubv(rgba2->rgba);
+					ccGL::Color(glFunc, *rgba2);
 				if (Tx2)
 					glFunc->glTexCoord2fv(Tx2->t);
 				ccGL::Vertex3v(glFunc, vertices->getPoint(tsi->i2)->u);
@@ -626,9 +647,9 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				if (N3)
 					ccGL::Normal3v(glFunc, N3);
 				if (rgb3)
-					glFunc->glColor3ubv(rgb3->rgb);
+					ccGL::Color(glFunc, *rgb3);
 				else if (rgba3)
-					glFunc->glColor4ubv(rgba3->rgba);
+					ccGL::Color(glFunc, *rgba3);
 				if (Tx3)
 					glFunc->glTexCoord2fv(Tx3->t);
 				ccGL::Vertex3v(glFunc, vertices->getPoint(tsi->i3)->u);
@@ -661,11 +682,6 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		{
 			glFunc->glDisable(GL_LIGHTING);
 			glFunc->glDisable(GL_RESCALE_NORMAL);
-		}
-
-		if (pushName)
-		{
-			glFunc->glPopName();
 		}
 	}
 }

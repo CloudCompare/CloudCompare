@@ -27,6 +27,8 @@
 //Qt
 #include <QObject>
 
+class ccClipBoxPart;
+
 //! Clipping box
 class QCC_DB_LIB_API ccClipBox : public QObject, public ccHObject, public ccInteractor
 {
@@ -57,34 +59,33 @@ public:
 	ccBBox getOwnBB(bool withGLFeatures = false) override;
 
 	//inherited from ccInteractor
-	bool move2D(int x, int y, int dx, int dy, int screenWidth, int screenHeight) override;
+	//bool move2D(int x, int y, int dx, int dy, int screenWidth, int screenHeight) override;
 	bool move3D(const CCVector3d& u) override;
 
 	//! Sets last clicked point (on screen)
 	void setClickedPoint(int x, int y, int screenWidth, int screenHeight, const ccGLMatrixd& viewMatrix);
 
 	//! Components
-	enum Components {	NONE			= 0,
-						X_MINUS_ARROW	= 1,
-						X_PLUS_ARROW	= 2,
-						Y_MINUS_ARROW	= 3,
-						Y_PLUS_ARROW	= 4,
-						Z_MINUS_ARROW	= 5,
-						Z_PLUS_ARROW	= 6,
-						CROSS			= 7,
-						SPHERE			= 8,
-						X_MINUS_TORUS	= 9,
-						Y_MINUS_TORUS	= 10,
-						Z_MINUS_TORUS	= 11,
-						X_PLUS_TORUS	= 12,
-						Y_PLUS_TORUS	= 13,
-						Z_PLUS_TORUS	= 14,
+	enum Components {	NONE = 0,
+						X_MINUS_ARROW,
+						X_PLUS_ARROW,
+						Y_MINUS_ARROW,
+						Y_PLUS_ARROW,
+						Z_MINUS_ARROW,
+						Z_PLUS_ARROW,
+						CROSS,
+						X_MINUS_TORUS,
+						Y_MINUS_TORUS,
+						Z_MINUS_TORUS,
+						X_PLUS_TORUS,
+						Y_PLUS_TORUS,
+						Z_PLUS_TORUS
 	};
 
 	//! Sets currently active component
 	/** \param id component ID (see Components)
 	**/
-	void setActiveComponent(int id);
+	void setActiveComponent(Components id);
 
 	//inherited from ccHObject
 	inline CC_CLASS_ENUM getClassID() const override { return CC_TYPES::CLIPPING_BOX; }
@@ -157,6 +158,40 @@ protected: //members
 
 	//! View matrix
 	ccGLMatrixd m_viewMatrix;
+
+	//! Sub-parts (proxies)
+	QMap<int, ccClipBoxPart*> m_parts;
+};
+
+//! Part of the clipping box (for picking)
+class QCC_DB_LIB_API ccClipBoxPart : public ccHObject
+{
+public:
+
+	//! Default constructor
+	/** \param color picking color
+		\param partID part ID
+	**/
+	ccClipBoxPart(ccClipBox* clipBox, ccClipBox::Components partID)
+		: m_clipBox(clipBox)
+		, m_partID(partID)
+	{}
+
+	//inherited from ccHObject
+	inline CC_CLASS_ENUM getClassID() const override { return CC_TYPES::CLIPPING_BOX_PART; }
+
+	//! Returns the corresponding part ID
+	inline ccClipBox::Components partID() const { return m_partID; }
+
+	//! Returns the associated clipping box
+	ccClipBox* clipBox() { return m_clipBox; }
+
+protected:
+
+	//! Associated clipping box
+	ccClipBox* m_clipBox;
+	//! Part number
+	ccClipBox::Components m_partID;
 };
 
 #endif //CC_CLIP_BOX_HEADER

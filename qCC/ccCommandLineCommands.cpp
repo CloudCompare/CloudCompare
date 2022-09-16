@@ -1790,25 +1790,55 @@ bool CommandSFColorScale::process(ccCommandLineInterface &cmd)
 		return cmd.error(QObject::tr("Failed to read color scale file '%1'!").arg(filename));
 	}
 	
-	if (cmd.clouds().empty())
+	if (cmd.clouds().empty() && cmd.meshes().empty())
 	{
-		return cmd.error(QObject::tr("No point cloud on which to change the SF color scale! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_SF_COLOR_SCALE));
+		return cmd.error(QObject::tr("No point cloud or mesh on which to set the SF color scale! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_SF_COLOR_SCALE));
 	}
 	
-	for (auto &cloud : cmd.clouds())
+	// clouds
+	if (!cmd.clouds().empty())
 	{
-		ccScalarField* sf = static_cast<ccScalarField*>(cloud.pc->getCurrentOutScalarField());
-		if (sf)
+		bool hasCandidateClouds = false;
+		for (auto &cloud : cmd.clouds())
 		{
-			sf->setColorScale(scale);
+			ccScalarField* sf = static_cast<ccScalarField*>(cloud.pc->getCurrentOutScalarField());
+			if (sf)
+			{
+				sf->setColorScale(scale);
+				hasCandidateClouds = true;
+			}
+		}
+
+		if (hasCandidateClouds && cmd.autoSaveMode() && !cmd.saveClouds("COLOR_SCALE"))
+		{
+			return false;
 		}
 	}
 	
-	if (cmd.autoSaveMode() && !cmd.saveClouds("COLOR_SCALE"))
+	// meshes
+	if (!cmd.meshes().empty())
 	{
-		return false;
+		bool hasCandidateMeshes = false;
+		for (auto& mesh : cmd.meshes())
+		{
+			ccPointCloud* vertices = dynamic_cast<ccPointCloud*>(mesh.mesh->getAssociatedCloud());
+			if (vertices)
+			{
+				ccScalarField* sf = static_cast<ccScalarField*>(vertices->getCurrentOutScalarField());
+				if (sf)
+				{
+					sf->setColorScale(scale);
+					hasCandidateMeshes = true;
+				}
+			}
+		}
+
+		if (hasCandidateMeshes && cmd.autoSaveMode() && !cmd.saveMeshes("COLOR_SCALE"))
+		{
+			return false;
+		}
 	}
-	
+
 	return true;
 }
 

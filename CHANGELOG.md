@@ -44,6 +44,7 @@ v2.13.alpha (???) - (??/??/????)
 	- Command line:
 		- It is now possible to pass a SF name after -SET_ACTIVE_SF  instead of the field index
 			(use simple quotes if the scalar field name has spaces in it)
+		- The -SF_COLOR_SCALE option now works on meshes (vertices) as well
 
 	- New entity picking mechanism (to not rely on the deprecated OpenGL 'names' pushing mechanism)
 		- Should hopefully solve most of the random issues with picking

@@ -411,8 +411,12 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=nullptr*/,
 		setFormat(*format);
 	}
 #endif
+
+	QString windowTitle = QString("3D View %1").arg(m_uniqueID);
+
 	//GL window title
-	setWindowTitle(QString("3D View %1").arg(m_uniqueID));
+	setWindowTitle(windowTitle);
+	setObjectName(windowTitle);
 
 	//GL window own DB
 	m_winDBRoot = new ccHObject(QString("DB.3DView_%1").arg(m_uniqueID));
@@ -590,6 +594,8 @@ void ccGLWindow::setParentWidget(QWidget* widget)
 		widget->setAcceptDrops(true);
 		widget->setAttribute(Qt::WA_AcceptTouchEvents, true);
 		widget->setAttribute(Qt::WA_OpaquePaintEvent, true);
+
+		m_parentWidget->setObjectName(windowTitle());
 	}
 }
 

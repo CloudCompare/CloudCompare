@@ -260,14 +260,6 @@ static void SetEnabled_recursive(ccHObject* ent)
 		SetEnabled_recursive(ent->getParent());
 }
 
-//static void SetVisible_recursive(ccHObject* ent)
-//{
-//	assert(ent);
-//	ent->setVisible(true);
-//	if (ent->getParent())
-//		SetVisible_recursive(ent->getParent());
-//}
-
 bool ccPointPairRegistrationDlg::init(	ccGLWindow* win,
 										const ccHObject::Container& alignedEntities,
 										const ccHObject::Container* referenceEntities/*=nullptr*/)
@@ -303,6 +295,7 @@ bool ccPointPairRegistrationDlg::init(	ccGLWindow* win,
 			{
 				sourceDisplay = it.key()->getDisplay();
 				if (sourceDisplay)
+					// we found a display
 					break;
 			}
 			if (!sourceDisplay && !m_referenceEntities.empty())
@@ -311,6 +304,7 @@ bool ccPointPairRegistrationDlg::init(	ccGLWindow* win,
 				{
 					sourceDisplay = it.key()->getDisplay();
 					if (sourceDisplay)
+						// we found a display
 						break;
 				}
 			}
@@ -318,6 +312,7 @@ bool ccPointPairRegistrationDlg::init(	ccGLWindow* win,
 			{
 				ccGlFilter* filter = static_cast<ccGLWindow*>(sourceDisplay)->getGlFilter();
 				if (filter)
+					// transfer the GL filter to the dedicated tool window
 					win->setGlFilter(filter->clone());
 			}
 		}
@@ -331,7 +326,7 @@ bool ccPointPairRegistrationDlg::init(	ccGLWindow* win,
 	for (auto it = m_alignedEntities.begin(); it != m_alignedEntities.end(); ++it)
 	{
 		ccHObject* aligned = it.key();
-		if (aligned->getDisplay())
+		if (!hasOriginViewportParams && aligned->getDisplay())
 		{
 			hasOriginViewportParams = true;
 			originViewportParams = aligned->getDisplay()->getViewportParameters();

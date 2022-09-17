@@ -110,6 +110,9 @@ public: //functions
 	//! Computes the pixel size at the 'focal' distance
 	double computePixelSize(int glWidth) const;
 
+	//! Logs the viewport parameters
+	void log() const;
+
 public: //variables
 
 	//! Visualization matrix (rotation only)

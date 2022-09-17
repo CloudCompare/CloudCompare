@@ -318,3 +318,22 @@ double ccViewportParameters::computePixelSize(int glWidth) const
 {
 	return (glWidth > 0 ? computeWidthAtFocalDist() / glWidth : 1.0);
 }
+
+void ccViewportParameters::log() const
+{
+	ccLog::Print("View Matrix");
+	ccLog::Print(viewMat.toString());
+	ccLog::Print(QString("Default point size: %1").arg(defaultPointSize));
+	ccLog::Print(QString("Default line width: %1").arg(defaultLineWidth));
+	ccLog::Print(QString("Perspective view: %1").arg(perspectiveView ? "yes" : "no"));
+	ccLog::Print(QString("Object-centered view: %1").arg(objectCenteredView ? "yes" : "no"));
+	ccLog::Print(QString("zNearCoef: %1").arg(zNearCoef));
+	ccLog::Print(QString("zNear: %1").arg(zNear));
+	ccLog::Print(QString("zFar: %1").arg(zFar));
+	ccLog::Print(QString("fov: %1 deg").arg(fov_deg));
+	ccLog::Print(QString("camera a.r.: %1").arg(cameraAspectRatio));
+	ccLog::Print(QString("focal distance: %1").arg(getFocalDistance()));
+	ccLog::Print(QString("pivot point:(%1 ; %2; %3)").arg(pivotPoint.x).arg(pivotPoint.y).arg(pivotPoint.z));
+	ccLog::Print(QString("camera center:(%1 ; %2; %3)").arg(cameraCenter.x).arg(cameraCenter.y).arg(cameraCenter.z));
+
+}

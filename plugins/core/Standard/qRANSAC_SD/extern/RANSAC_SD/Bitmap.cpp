@@ -1113,7 +1113,7 @@ void ComponentLoops(const MiscLib::Vector< int > &componentImg, size_t uextent,
 	fn2 << "ComponentLoopsOutput" << fname_int++ << ".txt";
 	for(size_t i = 0; i < polys->size(); ++i)
 		for(size_t j = 0; j < (*polys)[i].size(); ++j)
-			loopsImg[(*polys)[i][j][1] * (uextent + 1) + (*polys)[i][j][0]] = i + 1;
+			loopsImg[(*polys)[i][j][1] * (uextent + 1) + (*polys)[i][j][0]] = static_cast<int>(i) + 1;
 	file.open(fn2.str().c_str(), std::ios::out);
 	for(size_t j = 0; j < vextent + 1; ++j)
 	{

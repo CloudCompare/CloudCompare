@@ -5602,9 +5602,9 @@ void ccGLWindow::showPivotSymbol(bool state)
 
 void ccGLWindow::drawPivot()
 {
-	if (!m_viewportParams.objectCenteredView ||
-			(m_pivotVisibility == PIVOT_HIDE) ||
-			(m_pivotVisibility == PIVOT_SHOW_ON_MOVE && !m_pivotSymbolShown))
+	if (	!m_viewportParams.objectCenteredView
+		||	(m_pivotVisibility == PIVOT_HIDE)
+		||	(m_pivotVisibility == PIVOT_SHOW_ON_MOVE && !m_pivotSymbolShown))
 	{
 		return;
 	}
@@ -5651,12 +5651,11 @@ void ccGLWindow::drawPivot()
 		glFunc->glLineWidth(2.0f);
 
 		//default transparency
-		const float c_alpha = 0.6f;
+		const ColorCompType c_alpha = static_cast<ColorCompType>(ccColor::MAX * 0.6f);
 
 		//pivot symbol: 3 circles
 		static const ccColor::Rgba RedAlpha(ccColor::redRGB, c_alpha);
 		ccGL::Color(glFunc, RedAlpha);
-		glFunc->glColor4f(1.0f, 0.0f, 0.0f, c_alpha);
 		glDrawUnitCircle(context(), 0);
 		glFunc->glBegin(GL_LINES);
 		glFunc->glVertex3f(-1.0f, 0.0f, 0.0f);

@@ -125,7 +125,7 @@ namespace ccColor
 	constexpr Rgb redRGB					(MAX, 0, 0);
 	constexpr Rgb greenRGB					(0, MAX, 0);
 	constexpr Rgb blueRGB					(0, 0, MAX);
-	constexpr Rgb blueCCRGB					(0, static_cast<ColorCompType>(MAXi * 7 / 10), 0);
+	constexpr Rgb blueCCRGB					(0, static_cast<ColorCompType>(MAXi * 7 / 10), MAX);
 	constexpr Rgb darkBlueRGB				(0, 0, MAX / 2);
 	constexpr Rgb magentaRGB				(MAX, 0, MAX);
 	constexpr Rgb cyanRGB					(0, MAX, MAX);
@@ -134,19 +134,19 @@ namespace ccColor
 	constexpr Rgb yellowRGB					(MAX, MAX, 0);
 
 	// Predefined colors (default type)
-	constexpr Rgba white					(MAX, MAX, MAX, MAX);
-	constexpr Rgba lightGrey				(static_cast<ColorCompType>(MAXi * 8 / 10), static_cast<ColorCompType>(MAXi * 8 / 10), static_cast<ColorCompType>(MAXi * 8 / 10), MAX);
-	constexpr Rgba darkGrey					(MAX / 2, MAX / 2, MAX / 2, MAX);
-	constexpr Rgba red						(MAX, 0, 0, MAX);
-	constexpr Rgba green					(0, MAX, 0, MAX);
-	constexpr Rgba blue						(0, 0, MAX, MAX);
-	constexpr Rgba blueCC					(0, static_cast<ColorCompType>(MAXi * 7 / 10), MAX, MAX);
-	constexpr Rgba darkBlue					(0, 0, MAX / 2, MAX);
-	constexpr Rgba magenta					(MAX, 0, MAX, MAX);
-	constexpr Rgba cyan						(0, MAX, MAX, MAX);
-	constexpr Rgba orange					(MAX, MAX / 2, 0, MAX);
-	constexpr Rgba black					(0, 0, 0, MAX);
-	constexpr Rgba yellow					(MAX, MAX, 0, MAX);
+	constexpr Rgba white					(whiteRGB.r,     whiteRGB.g,     whiteRGB.b,     MAX);
+	constexpr Rgba lightGrey				(lightGreyRGB.r, lightGreyRGB.g, lightGreyRGB.b, MAX);
+	constexpr Rgba darkGrey					(darkGreyRGB.r,  darkGreyRGB.g,  darkGreyRGB.b,  MAX);
+	constexpr Rgba red						(redRGB.r,       redRGB.g,       redRGB.b,       MAX);
+	constexpr Rgba green					(greenRGB.r,     greenRGB.g,     greenRGB.b,     MAX);
+	constexpr Rgba blue						(blueRGB.r,      blueRGB.g,      blueRGB.b,      MAX);
+	constexpr Rgba blueCC					(blueCCRGB.r,    blueCCRGB.g,    blueCCRGB.b,    MAX);
+	constexpr Rgba darkBlue					(darkBlueRGB.r,  darkBlueRGB.g,  darkBlueRGB.b,  MAX);
+	constexpr Rgba magenta					(magentaRGB.r,   magentaRGB.g,   magentaRGB.b,   MAX);
+	constexpr Rgba cyan						(cyanRGB.r,      cyanRGB.g,      cyanRGB.b,      MAX);
+	constexpr Rgba orange					(orangeRGB.r,    orangeRGB.g,    orangeRGB.b,    MAX);
+	constexpr Rgba black					(blackRGB.r,     blackRGB.g,     blackRGB.b,     MAX);
+	constexpr Rgba yellow					(yellowRGB.r,    yellowRGB.g,    yellowRGB.b,    MAX);
 
 	// Predefined materials (float)
 	constexpr Rgbaf bright					(1.00f, 1.00f, 1.00f, 1.00f);

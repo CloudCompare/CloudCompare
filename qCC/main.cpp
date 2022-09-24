@@ -55,8 +55,7 @@
 #include <vld.h>
 #endif
 
-
-bool isCommandLine(int argc, char **argv)
+static bool IsCommandLine(int argc, char **argv)
 {
 #ifdef Q_OS_MAC
     // On macOS, when double-clicking the application, the Finder (sometimes!) adds a command-line parameter
@@ -73,11 +72,10 @@ bool isCommandLine(int argc, char **argv)
         }
     }
 
-    bool commandLine = (numRealArgs > 1) && (argv[1][0] == '-');
+    return (numRealArgs > 1) && (argv[1][0] == '-');
 #else
-    bool commandLine = (argc > 1) && (argv[1][0] == '-');
+    return (argc > 1) && (argv[1][0] == '-');
 #endif
-    return commandLine;
 }
 
 int main(int argc, char **argv)
@@ -94,7 +92,7 @@ int main(int argc, char **argv)
 	}
 #endif
 
-    bool commandLine = isCommandLine(argc, argv);
+    bool commandLine = IsCommandLine(argc, argv);
 
     // Convert the input arguments to QString before the application is initialized
     // (as it will force utf8, which might prevent from properly reading filenames from the command line)
@@ -125,7 +123,6 @@ int main(int argc, char **argv)
 	QGamepadManager::instance(); //potential workaround to bug https://bugreports.qt.io/browse/QTBUG-61553
 #endif
 
-
 	ccApplication app(argc, argv, commandLine);
 
 	//store the log message until a valid logging instance is registered
@@ -143,7 +140,7 @@ int main(int argc, char **argv)
             return EXIT_FAILURE;
         }
 
-        //splash screen
+        //init splash screen
         QPixmap pixmap(QString::fromUtf8(":/CC/images/imLogoV2Qt.png"));
         splash.reset(new QSplashScreen(pixmap, Qt::WindowStaysOnTopHint));
         splash->show();
@@ -182,7 +179,7 @@ int main(int argc, char **argv)
 	}
 	else
 	{
-		//main window init.
+		//main window initialization
 		MainWindow* mainWindow = MainWindow::TheInstance();
 		if (!mainWindow)
 		{
@@ -200,13 +197,13 @@ int main(int argc, char **argv)
 				.arg(ccGlobalShiftManager::MaxBoundgBoxDiagonal(), 0, 'e', 0));
 		}
 
+		if (splash)
+		{
+			splash->close();
+		}
+
 		if (argc > lastArgumentIndex)
 		{
-			if (splash)
-			{
-				splash->close();
-			}
-
 			//any additional argument is assumed to be a filename --> we try to load it/them
 			QStringList filenames;
 			for (int i = lastArgumentIndex; i < argc; ++i)
@@ -247,13 +244,9 @@ int main(int argc, char **argv)
 
 			mainWindow->addToDB(filenames);
 		}
-		else if (splash)
-		{
-            splash->close();
-		}
 
 		//change the default path to the application one (do this AFTER processing the command line)
-		QDir  workingDir = QCoreApplication::applicationDirPath();
+		QDir workingDir = QCoreApplication::applicationDirPath();
 		
 	#ifdef Q_OS_MAC
 		// This makes sure that our "working directory" is not within the application bundle	

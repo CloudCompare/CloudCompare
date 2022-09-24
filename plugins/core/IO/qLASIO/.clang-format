@@ -1,0 +1,14 @@
+---
+IndentWidth: 4
+Language: Cpp
+# Force pointers to the type for C++.
+PointerAlignment: Right
+BinPackArguments: false
+BinPackParameters: false
+ColumnLimit: 110
+AccessModifierOffset: -2
+SpaceBeforeParens: ControlStatements
+AllowShortLoopsOnASingleLine: false
+BreakBeforeBraces: Allman
+AllowShortBlocksOnASingleLine: Empty
+AllowShortFunctionsOnASingleLine: Empty

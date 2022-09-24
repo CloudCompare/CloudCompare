@@ -102,6 +102,7 @@ jobs:
             -DPLUGIN_IO_QCORE=ON \
             -DPLUGIN_IO_QE57=ON \
             -DPLUGIN_IO_QPHOTOSCAN=ON \
+            -DPLUGIN_IO_QLAS=ON \
             -DPLUGIN_IO_QPDAL=ON \
             -DPLUGIN_IO_QRDB=ON \
             -DPLUGIN_IO_QRDB_FETCH_DEPENDENCY=ON \
@@ -163,7 +164,7 @@ jobs:
           libboost-program-options-dev libboost-thread-dev
           libeigen3-dev
           libcgal-dev libcgal-qt5-dev libgdal-dev libpcl-dev
-          libdlib-dev libproj-dev libxerces-c-dev xvfb libpdal-dev libjsoncpp-dev
+          libdlib-dev libproj-dev libxerces-c-dev xvfb libpdal-dev libjsoncpp-dev liblaszip-dev
 
       - name: Setup GCC
         if: matrix.compiler == 'GCC'
@@ -199,6 +200,7 @@ jobs:
           -DPLUGIN_IO_QCORE=ON
           -DPLUGIN_IO_QE57=ON
           -DPLUGIN_IO_QPHOTOSCAN=ON
+          -DPLUGIN_IO_QLAS=ON
           -DPLUGIN_IO_QPDAL=ON
           -DPLUGIN_IO_QRDB=ON
           -DPLUGIN_IO_QRDB_FETCH_DEPENDENCY=ON

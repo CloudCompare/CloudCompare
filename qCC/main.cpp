@@ -55,6 +55,28 @@
 #include <vld.h>
 #endif
 
+static bool IsCommandLine(int argc, char **argv)
+{
+#ifdef Q_OS_MAC
+    // On macOS, when double-clicking the application, the Finder (sometimes!) adds a command-line parameter
+    // like "-psn_0_582385" which is a "process serial number".
+    // We need to recognize this and discount it when determining if we are running on the command line or not.
+
+    int numRealArgs = argc;
+
+    for ( int i = 1; i < argc; ++i )
+    {
+        if ( strncmp( argv[i], "-psn_", 5 ) == 0 )
+        {
+            --numRealArgs;
+        }
+    }
+
+    return (numRealArgs > 1) && (argv[1][0] == '-');
+#else
+    return (argc > 1) && (argv[1][0] == '-');
+#endif
+}
 
 int main(int argc, char **argv)
 {
@@ -70,46 +92,70 @@ int main(int argc, char **argv)
 	}
 #endif
 
-#ifdef Q_OS_MAC
-	// On macOS, when double-clicking the application, the Finder (sometimes!) adds a command-line parameter
-	// like "-psn_0_582385" which is a "process serial number".
-	// We need to recognize this and discount it when determining if we are running on the command line or not.
+    bool commandLine = IsCommandLine(argc, argv);
 
-	int numRealArgs = argc;
-	
-	for ( int i = 1; i < argc; ++i )
-	{
-		if ( strncmp( argv[i], "-psn_", 5 ) == 0 )
-		{
-			--numRealArgs;
-		}
-	}
-	
-	bool commandLine = (numRealArgs > 1) && (argv[1][0] == '-');
-#else
-	bool commandLine = (argc > 1) && (argv[1][0] == '-');
-#endif
-   
-	ccApplication::InitOpenGL();
+    // Convert the input arguments to QString before the application is initialized
+    // (as it will force utf8, which might prevent from properly reading filenames from the command line)
+    QStringList argumentsLocal8Bit;
+    for (int i = 0; i < argc; ++i)
+    {
+        argumentsLocal8Bit << QString::fromLocal8Bit(argv[i]);
+    }
+
+    //specific commands
+    int lastArgumentIndex = 1;
+    if (commandLine)
+    {
+        //translation file selection
+        if (argumentsLocal8Bit[lastArgumentIndex].toUpper() == "-LANG")
+        {
+            QString langFilename = argumentsLocal8Bit[2];
+
+            ccTranslationManager::Get().loadTranslation(langFilename);
+            commandLine = false;
+            lastArgumentIndex += 2;
+        }
+    }
+
+    ccApplication::InitOpenGL();
 
 #ifdef CC_GAMEPAD_SUPPORT
 	QGamepadManager::instance(); //potential workaround to bug https://bugreports.qt.io/browse/QTBUG-61553
 #endif
 
-	// Convert the input arguments to QString before the application is initialized
-	// (as it will force utf8, which might prevent from properly reading filenmaes from the command line)
-	QStringList argumentsLocal8Bit;
-	for (int i = 0; i < argc; ++i)
-	{
-		argumentsLocal8Bit << QString::fromLocal8Bit(argv[i]);
-	}
-	
 	ccApplication app(argc, argv, commandLine);
 
 	//store the log message until a valid logging instance is registered
 	ccLog::EnableMessageBackup(true);
-	
-	//restore some global parameters
+
+    //splash screen
+    QScopedPointer<QSplashScreen> splash(nullptr);
+
+    //standard mode
+    if (!commandLine)
+    {
+        if ((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_2_1) == 0)
+        {
+            QMessageBox::critical(nullptr, "Error", "This application needs OpenGL 2.1 at least to run!");
+            return EXIT_FAILURE;
+        }
+
+        //init splash screen
+        QPixmap pixmap(QString::fromUtf8(":/CC/images/imLogoV2Qt.png"));
+        splash.reset(new QSplashScreen(pixmap, Qt::WindowStaysOnTopHint));
+        splash->show();
+    }
+
+    //global structures initialization
+    FileIOFilter::InitInternalFilters(); //load all known I/O filters (plugins will come later!)
+    ccNormalVectors::GetUniqueInstance(); //force pre-computed normals array initialization
+    ccColorScalesManager::GetUniqueInstance(); //force pre-computed color tables initialization
+
+    //load the plugins
+    ccPluginManager& pluginManager = ccPluginManager::Get();
+    pluginManager.loadPlugins();
+
+    //restore some global parameters
 	{
 		QSettings settings;
 		settings.beginGroup(ccPS::GlobalShift());
@@ -123,50 +169,6 @@ int main(int argc, char **argv)
 		ccGlobalShiftManager::SetMaxBoundgBoxDiagonal(maxAbsDiag);
 	}
 
-	//specific commands
-	int lastArgumentIndex = 1;
-	if (commandLine)
-	{
-		//translation file selection
-		if (argumentsLocal8Bit[lastArgumentIndex].toUpper() == "-LANG")
-		{
-			QString langFilename = argumentsLocal8Bit[2];
-
-			ccTranslationManager::Get().loadTranslation(langFilename);
-			commandLine = false;
-			lastArgumentIndex += 2;
-		}
-	}
-
-	//splash screen
-	QScopedPointer<QSplashScreen> splash(nullptr);
-	QTimer splashTimer;
-
-	//standard mode
-	if (!commandLine)
-	{
-		if ((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_2_1) == 0)
-		{
-			QMessageBox::critical(nullptr, "Error", "This application needs OpenGL 2.1 at least to run!");
-			return EXIT_FAILURE;
-		}
-
-		//splash screen
-		QPixmap pixmap(QString::fromUtf8(":/CC/images/imLogoV2Qt.png"));
-		splash.reset(new QSplashScreen(pixmap, Qt::WindowStaysOnTopHint));
-		splash->show();
-		QApplication::processEvents();
-	}
-
-	//global structures initialization
-	FileIOFilter::InitInternalFilters(); //load all known I/O filters (plugins will come later!)
-	ccNormalVectors::GetUniqueInstance(); //force pre-computed normals array initialization
-	ccColorScalesManager::GetUniqueInstance(); //force pre-computed color tables initialization
-
-	//load the plugins
-	ccPluginManager& pluginManager = ccPluginManager::Get();
-	pluginManager.loadPlugins();
-	
 	int result = 0;
 
 	//command line mode
@@ -177,7 +179,7 @@ int main(int argc, char **argv)
 	}
 	else
 	{
-		//main window init.
+		//main window initialization
 		MainWindow* mainWindow = MainWindow::TheInstance();
 		if (!mainWindow)
 		{
@@ -195,13 +197,13 @@ int main(int argc, char **argv)
 				.arg(ccGlobalShiftManager::MaxBoundgBoxDiagonal(), 0, 'e', 0));
 		}
 
+		if (splash)
+		{
+			splash->close();
+		}
+
 		if (argc > lastArgumentIndex)
 		{
-			if (splash)
-			{
-				splash->close();
-			}
-
 			//any additional argument is assumed to be a filename --> we try to load it/them
 			QStringList filenames;
 			for (int i = lastArgumentIndex; i < argc; ++i)
@@ -242,16 +244,9 @@ int main(int argc, char **argv)
 
 			mainWindow->addToDB(filenames);
 		}
-		else if (splash)
-		{
-			//count-down to hide the timer (only effective once the application will have actually started!)
-			QObject::connect(&splashTimer, &QTimer::timeout, [&]() { if (splash) splash->close(); QCoreApplication::processEvents(); splash.reset(); });
-			splashTimer.setInterval(1000);
-			splashTimer.start();
-		}
 
 		//change the default path to the application one (do this AFTER processing the command line)
-		QDir  workingDir = QCoreApplication::applicationDirPath();
+		QDir workingDir = QCoreApplication::applicationDirPath();
 		
 	#ifdef Q_OS_MAC
 		// This makes sure that our "working directory" is not within the application bundle	
@@ -268,7 +263,7 @@ int main(int argc, char **argv)
 		//let's rock!
 		try
 		{
-			result = app.exec();
+			result = QApplication::exec();
 		}
 		catch (const std::exception& e)
 		{

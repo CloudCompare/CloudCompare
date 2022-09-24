@@ -102,7 +102,7 @@ void ccApplyTransformationDlg::onMatrixTextChange()
 	}
 
 	bool valid = false;
-	ccGLMatrix mat = ccGLMatrix::FromString(text,valid);
+	ccGLMatrix mat = ccGLMatrix::FromString(text, valid);
 	if (valid)
 		updateAll(mat, false, true, true); //no need to update the current form
 }
@@ -122,7 +122,7 @@ void ccApplyTransformationDlg::onRotAngleValueChanged(double)
 	t.z		= static_cast<PointCoordinateType>(tzAxisDoubleSpinBox->value());
 
 	ccGLMatrix mat;
-	mat.initFromParameters(alpha,axis,t);
+	mat.initFromParameters(alpha, axis, t);
 
 	updateAll(mat, true, false, true); //no need to update the current form
 }
@@ -142,7 +142,7 @@ void ccApplyTransformationDlg::onEulerValueChanged(double)
 	t.z		= static_cast<PointCoordinateType>(etzAxisDoubleSpinBox->value());
 
 	ccGLMatrix mat;
-	mat.initFromParameters(phi,theta,psi,t);
+	mat.initFromParameters(phi, theta, psi, t);
 
 	updateAll(mat, true, true, false); //no need to update the current form
 }
@@ -226,7 +226,7 @@ ccGLMatrixd ccApplyTransformationDlg::getTransformation() const
 	QString matText = matrixTextEdit->toPlainText();
 	//convert it to a ccGLMatrix
 	bool valid = false;
-	ccGLMatrixd mat = ccGLMatrixd::FromString(matText,valid);
+	ccGLMatrixd mat = ccGLMatrixd::FromString(matText, valid);
 	assert(valid);
 	//eventually invert it if necessary
 	if (inverseCheckBox->isChecked())
@@ -243,7 +243,7 @@ void ccApplyTransformationDlg::checkMatrixValidityAndAccept()
 	QString matText = matrixTextEdit->toPlainText();
 	//convert it to a ccGLMatrix
 	bool valid = false;
-	ccGLMatrix mat = ccGLMatrix::FromString(matText,valid);
+	ccGLMatrix mat = ccGLMatrix::FromString(matText, valid);
 
 	if (!valid)
 	{

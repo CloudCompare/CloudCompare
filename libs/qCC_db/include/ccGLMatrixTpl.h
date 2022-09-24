@@ -288,10 +288,10 @@ public:
 	}
 
 	//! Converts a 'text' matrix to a ccGLMatrix
-	/** \param[in] matText matrix text
+	/** \param[in] matText matrix in text format
 		\param[out] success whether input matrix text is valid or not
 	**/
-	static ccGLMatrixTpl<T> FromString(const QString &matText, bool& success)
+	static ccGLMatrixTpl<T> FromString(const QString& matText, bool& success)
 	{
 		QStringList valuesStr = matText.simplified().split(QChar(' '), QString::SkipEmptyParts);
 		if (valuesStr.size() != OPENGL_MATRIX_SIZE)

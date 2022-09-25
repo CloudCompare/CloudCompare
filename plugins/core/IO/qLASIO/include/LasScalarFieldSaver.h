@@ -27,12 +27,12 @@ struct laszip_point;
 class LasScalarFieldSaver
 {
   public:
-    LasScalarFieldSaver(std::vector<LasScalarField> standardFields,
-                        std::vector<LasExtraScalarField> extraFields);
+    LasScalarFieldSaver(std::vector<LasScalarField> &&standardFields,
+                        std::vector<LasExtraScalarField> &&extraFields);
 
-    void handleScalarFields(size_t i, laszip_point &point);
+    void handleScalarFields(size_t pointIndex, laszip_point &point);
 
-    void handleExtraFields(size_t i, laszip_point &point);
+    void handleExtraFields(size_t pointIndex, laszip_point &point);
 
   private:
     template <typename T> static void WriteScalarValueAs(ScalarType value, uint8_t *dest)

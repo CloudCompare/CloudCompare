@@ -67,7 +67,12 @@ static CCVector3d GetGlobalShift(FileIOFilter::LoadParameters &parameters,
         }
     }
 
-    FileIOFilter::HandleGlobalShift(firstPoint, shift, preserveCoordinateShift, parameters, useLasOffset);
+    bool result = FileIOFilter::HandleGlobalShift(firstPoint, shift, preserveCoordinateShift, parameters, useLasOffset);
+    if (!result)
+    {
+        preserveCoordinateShift = false;
+        shift = {0.0, 0.0, 0.0};
+    }
 
     // restore previous parameters
     parameters.shiftHandlingMode = csModeBackup;
@@ -513,7 +518,7 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject *entity,
     laszip_header laszipHeader = InitLaszipHeader(saveDialog, savedInfo, *pointCloud);
 
     std::vector<LasScalarField> fieldsToSave = saveDialog.fieldsToSave();
-    LasScalarFieldSaver fieldSaver(fieldsToSave, savedInfo.extraScalarFields);
+    LasScalarFieldSaver fieldSaver(std::move(fieldsToSave), std::move(savedInfo.extraScalarFields));
     std::unique_ptr<LasWaveformSaver> waveformSaver{nullptr};
     if (saveDialog.shouldSaveWaveform())
     {

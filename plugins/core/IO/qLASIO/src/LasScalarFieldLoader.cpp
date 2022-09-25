@@ -25,10 +25,10 @@
 #include <utility>
 
 // TODO take by move
-LasScalarFieldLoader::LasScalarFieldLoader(std::vector<LasScalarField> standardScalarFields,
-                                           std::vector<LasExtraScalarField> extraScalarFields,
+LasScalarFieldLoader::LasScalarFieldLoader(std::vector<LasScalarField>& standardScalarFields,
+                                           std::vector<LasExtraScalarField>& extraScalarFields,
                                            ccPointCloud &pointCloud)
-    : m_standardFields(std::move(standardScalarFields)), m_extraScalarFields(std::move(extraScalarFields))
+    : m_standardFields(standardScalarFields), m_extraScalarFields(extraScalarFields)
 {
     createScalarFieldsForExtraBytes(pointCloud);
 }

@@ -29,16 +29,18 @@
 /// Class with the logic on how to load LAS dimensions values
 /// from the LAS file into a ccPointCloud's scalar field.
 ///
-/// This also handle LAS extra scalar fields, as well as RGB.
+/// This also handles LAS extra scalar fields, as well as RGB.
 class LasScalarFieldLoader
 {
   public:
-    LasScalarFieldLoader(std::vector<LasScalarField> standardScalarFields,
-                         std::vector<LasExtraScalarField> extraScalarFields,
+    LasScalarFieldLoader(std::vector<LasScalarField> &standardScalarFields,
+                         std::vector<LasExtraScalarField> &extraScalarFields,
                          ccPointCloud &pointCloud);
 
     CC_FILE_ERROR handleScalarFields(ccPointCloud &pointCloud, const laszip_point &currentPoint);
 
+    /// In LAS files, the red, green and blue channels are normal LAS fields,
+    /// however in CloudCompare RGB is handled differently.
     CC_FILE_ERROR handleRGBValue(ccPointCloud &pointCloud, const laszip_point &currentPoint);
 
     CC_FILE_ERROR handleExtraScalarFields(ccPointCloud &pointCloud, const laszip_point &currentPoint);
@@ -58,10 +60,7 @@ class LasScalarFieldLoader
     template <typename T>
     CC_FILE_ERROR handleScalarField(LasScalarField &sfInfo, ccPointCloud &pointCloud, T currentValue);
 
-    /// Same thing as `handleScalarField` but for RGB.
-    ///
-    /// In LAS files, the red, green and blue channels are normal LAS fiels,
-    /// however in CloudCompare RGB is handled differently.
+    /// Same thing as `handleScalarField` but for Gps Time.
     CC_FILE_ERROR handleGpsTime(LasScalarField &sfInfo, ccPointCloud &pointCloud, double currentValue);
 
     /// creates the ccScalarFields that correspond to the LAS extra dimensions
@@ -84,8 +83,8 @@ class LasScalarFieldLoader
 
   private:
     unsigned char colorCompShift{0};
-    std::vector<LasScalarField> m_standardFields;
-    std::vector<LasExtraScalarField> m_extraScalarFields;
+    std::vector<LasScalarField> &m_standardFields;
+    std::vector<LasExtraScalarField>& m_extraScalarFields;
 
     union
     {

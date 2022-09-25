@@ -21,18 +21,18 @@
 
 #include <ccScalarField.h>
 
-LasScalarFieldSaver::LasScalarFieldSaver(std::vector<LasScalarField> standardFields,
-                                         std::vector<LasExtraScalarField> extraFields)
-    : m_standardFields(std::move(standardFields)), m_extraFields(std::move(extraFields))
+LasScalarFieldSaver::LasScalarFieldSaver(std::vector<LasScalarField> &&standardFields,
+                                         std::vector<LasExtraScalarField> &&extraFields)
+    : m_standardFields(standardFields), m_extraFields(extraFields)
 {
 }
 
-void LasScalarFieldSaver::handleScalarFields(size_t i, laszip_point &point)
+void LasScalarFieldSaver::handleScalarFields(size_t pointIndex, laszip_point &point)
 {
     for (const LasScalarField &field : m_standardFields)
     {
         Q_ASSERT_X(field.sf != nullptr, __func__, "LasScalarField has a null ptr to ccScalarField");
-        ScalarType value = field.sf->getValue(i);
+        ScalarType value = field.sf->getValue(pointIndex);
         value = std::max(field.range.min, value);
         value = std::min(field.range.max, value);
         switch (field.id)
@@ -159,7 +159,7 @@ void LasScalarFieldSaver::handleScalarFields(size_t i, laszip_point &point)
     }
 }
 
-void LasScalarFieldSaver::handleExtraFields(size_t i, laszip_point &point)
+void LasScalarFieldSaver::handleExtraFields(size_t pointIndex, laszip_point &point)
 {
     if (point.num_extra_bytes == 0 || point.extra_bytes == nullptr)
     {
@@ -179,7 +179,7 @@ void LasScalarFieldSaver::handleExtraFields(size_t i, laszip_point &point)
 
         for (size_t elemIndex{0}; elemIndex < extraField.numElements(); ++elemIndex)
         {
-            values[elemIndex] = (*extraField.scalarFields[elemIndex])[i];
+            values[elemIndex] = (*extraField.scalarFields[elemIndex])[pointIndex];
         }
 
         if (extraField.scaleIsRelevant() || extraField.offsetIsRelevant())

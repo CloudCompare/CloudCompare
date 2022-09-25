@@ -41,8 +41,8 @@ typedef laszip_vlr laszip_vlr_struct;
 /// so that each points have Color[0], Color[1], Color[2] as 
 /// in a single extra dimension definition.
 constexpr size_t MAX_ELEMENTS_IN_EXTRA_ARRAY_DIM = 3;
-#define LAS_VLR_HEADER_SIZE 54
-#define SCAN_ANGLE_SCALE 0.06
+constexpr size_t LAS_VLR_HEADER_SIZE = 54;
+constexpr double SCAN_ANGLE_SCALE = 0.06;
 
 /// This namespace regroups constants for all the names we use
 /// in CloudCompare's ScalarField system for the standard dimensions defined by the LAS Spec.
@@ -121,7 +121,7 @@ struct LasScalarField
         static Range ForBitSize(uint8_t numBits)
         {
             Range range(0.0, 0.0);
-            range.max = static_cast<ScalarType>(std::pow(2, numBits) - 1.0);
+            range.max = static_cast<ScalarType>((1 << static_cast<uint32_t>(numBits)) - 1);
             return range;
         }
 
@@ -130,7 +130,10 @@ struct LasScalarField
     };
 
   public: // Methods and Constructors
+    LasScalarField() = delete;
+
     explicit LasScalarField(LasScalarField::Id id, ccScalarField *sf = nullptr);
+
 
     const char *name() const;
 

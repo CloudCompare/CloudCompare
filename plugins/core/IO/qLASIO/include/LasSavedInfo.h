@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                CLOUDCOMPARE PLUGIN: LAS-IO Plugin                      #
@@ -15,15 +17,11 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef LASSAVEDINFO_H
-#define LASSAVEDINFO_H
-
 #include "LasDetails.h"
 
 #include <laszip/laszip_api.h>
 
 #include <QMetaType>
-#include <vector>
 
 /// Holds Meta-Information about the original file that we want to save
 /// to restore them when writing
@@ -38,18 +36,18 @@ struct LasSavedInfo
 
     LasSavedInfo(const LasSavedInfo &rhs);
     LasSavedInfo &operator=(LasSavedInfo rhs);
-    friend void swap(LasSavedInfo &lhs, LasSavedInfo &rhs) noexcept;
+    static void Swap(LasSavedInfo &lhs, LasSavedInfo &rhs) noexcept;
 
     virtual ~LasSavedInfo() noexcept;
 
-    laszip_U16 fileSourceId{};
-    laszip_U32 guidData1{};
-    laszip_U16 guidData2{};
-    laszip_U16 guidData3{};
-    laszip_CHAR guidData4[GUID_DATA_4_SIZE]{};
-    laszip_U8 versionMinor{};
-    laszip_U8 pointFormat{};
-    laszip_CHAR systemIdentifier[SYSTEM_IDENTIFIER_SIZE]{};
+    laszip_U16 fileSourceId{0};
+    laszip_U32 guidData1{0};
+    laszip_U16 guidData2{0};
+    laszip_U16 guidData3{0};
+    laszip_CHAR guidData4[GUID_DATA_4_SIZE]{0};
+    laszip_U8 versionMinor{0};
+    laszip_U8 pointFormat{0};
+    laszip_CHAR systemIdentifier[SYSTEM_IDENTIFIER_SIZE]{0};
     double xScale{0.0};
     double yScale{0.0};
     double zScale{0.0};
@@ -60,5 +58,3 @@ struct LasSavedInfo
 };
 
 Q_DECLARE_METATYPE(LasSavedInfo);
-
-#endif // LASSAVEDINFO_H

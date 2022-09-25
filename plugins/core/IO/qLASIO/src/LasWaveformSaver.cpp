@@ -14,9 +14,10 @@
 //#                   COPYRIGHT: Thomas Montaigu                           #
 //#                                                                        #
 //##########################################################################
-#include "LasWaveformSaver.h"
 
-#include <LasDetails.h>
+#include "LasWaveformSaver.h"
+#include "LasDetails.h"
+
 #include <ccPointCloud.h>
 
 LasWaveformSaver::LasWaveformSaver(const ccPointCloud &pointCloud) noexcept

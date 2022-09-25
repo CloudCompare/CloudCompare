@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                CLOUDCOMPARE PLUGIN: LAS-IO Plugin                      #
@@ -14,8 +16,6 @@
 //#                   COPYRIGHT: Thomas Montaigu                           #
 //#                                                                        #
 //##########################################################################
-#ifndef LASDETAILS_H
-#define LASDETAILS_H
 
 #include <CCTypes.h>
 #include <QtGlobal>
@@ -128,7 +128,7 @@ struct LasScalarField
     const char *name() const;
 
   public: // Static functions
-    constexpr static const char *NameFromId(LasScalarField::Id id);
+    static constexpr const char *NameFromId(LasScalarField::Id id);
     static LasScalarField::Id IdFromName(const char *name, unsigned int targetPointFormat);
     static LasScalarField::Range ValueRange(LasScalarField::Id id);
 
@@ -212,7 +212,6 @@ struct LasExtraScalarField
     explicit LasExtraScalarField(QDataStream &dataStream);
     void writeTo(QDataStream &dataStream) const;
 
-
   public: // Static Helper functions that works on collection of LasExtraScalarFields
     static std::vector<LasExtraScalarField> ParseExtraScalarFields(const laszip_header &laszipHeader);
     static std::vector<LasExtraScalarField> ParseExtraScalarFields(const laszip_vlr_struct &extraBytesVlr);
@@ -248,7 +247,7 @@ struct LasExtraScalarField
   public: // Data members
     // These fields are from the vlr itself
     DataType type{Undocumented};
-    uint8_t options{};
+    uint8_t options{0};
     char name[32] = "";
     char description[32] = "";
     uint8_t noData[3][8] = {0};
@@ -258,7 +257,7 @@ struct LasExtraScalarField
     double offsets[3] = {0.0};
 
     // These are added by us
-    unsigned int byteOffset = {0};
+    unsigned int byteOffset{0};
     ccScalarField *scalarFields[3] = {nullptr};
     // TODO explain better
     // This strings store the name of the field in CC,
@@ -309,15 +308,15 @@ inline bool HasNearInfrared(unsigned int pointFormatId)
 unsigned int SizeOfVlrs(const laszip_vlr_struct *vlrs, unsigned int numVlrs);
 
 /// Returns whether the vlr is the vlr for/of LASzip compression.
-bool isLaszipVlr(const laszip_vlr_struct &);
+bool IsLaszipVlr(const laszip_vlr_struct &);
 
 /// Returns whether the vlr describes extra bytes.
-bool isExtraBytesVlr(const laszip_vlr_struct &);
+bool IsExtraBytesVlr(const laszip_vlr_struct &);
 
 /// Header part of a LAS Extended VLR
-/// 
+///
 /// In a LAS file, EVLRs are stored after the points.
-/// 
+///
 /// We need this struct as Waveform data can be stored inside EVLRs.
 struct EvlrHeader
 {
@@ -340,7 +339,6 @@ struct EvlrHeader
     friend QDataStream &operator<<(QDataStream &stream, const EvlrHeader &hdr);
 };
 
-
 /// See `SelectBestVersion`
 struct LasVersion
 {
@@ -349,12 +347,10 @@ struct LasVersion
 };
 
 /// This function looks into the point cloud
-/// and returns a LAS version + point format 
+/// and returns a LAS version + point format
 /// that best matches what the point cloud contains
 /// as scalar fields.
 LasVersion SelectBestVersion(const ccPointCloud &cloud);
 
 /// Clones the content of the `src` vlr into the `dst` vlr.
-void cloneVlrInto(const laszip_vlr_struct &src, laszip_vlr_struct &dst);
-
-#endif // LASDETAILS_H
+void CloneVlrInto(const laszip_vlr_struct &src, laszip_vlr_struct &dst);

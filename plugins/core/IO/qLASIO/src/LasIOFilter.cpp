@@ -40,7 +40,7 @@
 #include <numeric>
 #include <utility>
 
-const char *LAS_METADATA_INFO_KEY = "LAS.savedInfo";
+constexpr const char *LAS_METADATA_INFO_KEY = "LAS.savedInfo";
 
 static CCVector3d GetGlobalShift(FileIOFilter::LoadParameters &parameters,
                                  bool &preserveCoordinateShift,
@@ -125,7 +125,7 @@ InitLaszipHeader(const LasSaveDialog &saveDialog, LasSavedInfo &savedInfo, ccPoi
         laszipHeader.vlrs = new laszip_vlr_struct[laszipHeader.number_of_variable_length_records];
         for (laszip_U32 i{0}; i < savedInfo.numVlrs; i++)
         {
-            cloneVlrInto(savedInfo.vlrs[i], laszipHeader.vlrs[i]);
+            CloneVlrInto(savedInfo.vlrs[i], laszipHeader.vlrs[i]);
         }
 
         LasExtraScalarField::InitExtraBytesVlr(

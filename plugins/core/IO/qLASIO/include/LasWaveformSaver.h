@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                CLOUDCOMPARE PLUGIN: LAS-IO Plugin                      #
@@ -14,8 +16,6 @@
 //#                   COPYRIGHT: Thomas Montaigu                           #
 //#                                                                        #
 //##########################################################################
-#ifndef CLOUDCOMPAREPROJECTS_LASWAVEFORMSAVER_H
-#define CLOUDCOMPAREPROJECTS_LASWAVEFORMSAVER_H
 
 #include <QByteArray>
 #include <QDataStream>
@@ -26,7 +26,6 @@ class ccPointCloud;
 
 struct LasWaveformSaver
 {
-
     LasWaveformSaver(const ccPointCloud &pointCloud) noexcept;
 
     void handlePoint(size_t index, laszip_point &point);
@@ -35,5 +34,3 @@ struct LasWaveformSaver
     QByteArray m_array;
     const ccPointCloud &m_pointCloud;
 };
-
-#endif // CLOUDCOMPAREPROJECTS_LASWAVEFORMSAVER_H

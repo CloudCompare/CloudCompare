@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                CLOUDCOMPARE PLUGIN: LAS-IO Plugin                      #
@@ -15,22 +17,18 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef LASSCALARFIELDLOADER_H
-#define LASSCALARFIELDLOADER_H
-
 #include "LasDetails.h"
 
 #include <FileIOFilter.h>
 #include <QFileInfo>
 
-#include <vector>
-
 #include <ccPointCloud.h>
+
 #include <laszip/laszip_api.h>
 
 /// Class with the logic on how to load LAS dimensions values
 /// from the LAS file into a ccPointCloud's scalar field.
-/// 
+///
 /// This also handle LAS extra scalar fields, as well as RGB.
 class LasScalarFieldLoader
 {
@@ -51,7 +49,6 @@ class LasScalarFieldLoader
     }
 
   private:
-
     /// Handles loading of LAS value into the scalar field that will be part
     /// of the pointCloud.
     ///
@@ -87,15 +84,13 @@ class LasScalarFieldLoader
 
   private:
     unsigned char colorCompShift{0};
-    std::vector<LasScalarField> m_standardFields{};
-    std::vector<LasExtraScalarField> m_extraScalarFields{};
+    std::vector<LasScalarField> m_standardFields;
+    std::vector<LasExtraScalarField> m_extraScalarFields;
 
     union
     {
         uint64_t unsignedValues[3];
         int64_t signedValues[3];
         double floatingValues[3];
-    } rawValues{};
+    } rawValues;
 };
-
-#endif // LASSCALARFIELDLOADER_H

@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                CLOUDCOMPARE PLUGIN: LAS-IO Plugin                      #
@@ -14,9 +16,6 @@
 //#                   COPYRIGHT: Thomas Montaigu                           #
 //#                                                                        #
 //##########################################################################
-
-#ifndef LASSAVEDIALOG_H
-#define LASSAVEDIALOG_H
 
 #include <QDialog>
 
@@ -65,5 +64,3 @@ class LasSaveDialog : public QDialog, public Ui::LASSaveDialog
     /// where the user (or us) selected the scalar field to use
     std::vector<std::pair<MappingLabel *, QComboBox *>> m_scalarFieldMapping;
 };
-
-#endif // LASSAVEDIALOG_H

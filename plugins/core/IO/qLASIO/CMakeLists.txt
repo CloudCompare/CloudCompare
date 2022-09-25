@@ -1,7 +1,7 @@
 option(PLUGIN_IO_QLAS "LAS IO plugin using laszip" OFF)
 
 if (PLUGIN_IO_QLAS)
-    project(qLASIO)
+    project(QLAS_IO_PLUGIN)
 
     AddPlugin(NAME ${PROJECT_NAME} TYPE io)
 

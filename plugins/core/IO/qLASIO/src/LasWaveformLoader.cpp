@@ -14,12 +14,13 @@
 //#                   COPYRIGHT: Thomas Montaigu                           #
 //#                                                                        #
 //##########################################################################
+
 #include <QDataStream>
 
 #include "LasDetails.h"
 #include "LasWaveformLoader.h"
 
-static bool parseWavepacketDescriptorVlr(const laszip_vlr_struct &vlr, WaveformDescriptor &descriptor)
+static bool ParseWavepacketDescriptorVlr(const laszip_vlr_struct &vlr, WaveformDescriptor &descriptor)
 {
     if (vlr.record_length_after_header < 26)
     {
@@ -52,10 +53,10 @@ static ccPointCloud::FWFDescriptorSet parseWaveformDescriptorVlrs(const laszip_v
     for (size_t i{0}; i < numVlrs; ++i)
     {
         const laszip_vlr_struct *vlr = &vlrs[i];
-        if (strcmp(vlr->user_id, "LASF_Spec") == 0 && 99 < vlr->record_id && vlr->record_id < 355)
+        if (vlr && strcmp(vlr->user_id, "LASF_Spec") == 0 && 99 < vlr->record_id && vlr->record_id < 355)
         {
             WaveformDescriptor descriptor;
-            if (!parseWavepacketDescriptorVlr(*vlr, descriptor))
+            if (!ParseWavepacketDescriptorVlr(*vlr, descriptor))
             {
                 ccLog::Warning("[LAS] Invalid Descriptor VLR");
             }
@@ -122,7 +123,7 @@ LasWaveformLoader::LasWaveformLoader(const laszip_header_struct &laszipHeader,
     else if (laszipHeader.global_encoding & 4)
     {
         QFileInfo info(lasFilename);
-        QString wdpFilename = QString("%1/%2.wdp").arg(info.path(), info.baseName());
+        QString wdpFilename = info.path() + "/" + info.completeBaseName() + ".wdp";
         fwfDataSource.setFileName(wdpFilename);
         if (!fwfDataSource.open(QFile::ReadOnly))
         {
@@ -192,11 +193,11 @@ void LasWaveformLoader::loadWaveform(ccPointCloud &pointCloud, const laszip_poin
     QDataStream stream(data);
     stream.setByteOrder(QDataStream::ByteOrder::LittleEndian);
 
-    uint8_t descriptorIndex;
-    quint64 byteOffset;
-    uint32_t byteCount;
-    float returnPointLocation;
-    float x_t, y_t, z_t;
+    uint8_t descriptorIndex = 0;
+    quint64 byteOffset = 0;
+    uint32_t byteCount = 0;
+    float returnPointLocation = 0;
+    float x_t = 0, y_t = 0, z_t = 0;
     stream >> descriptorIndex >> byteOffset >> byteCount >> returnPointLocation >> x_t >> y_t >> z_t;
 
     ccPointCloud::FWFDescriptorSet &cloudDescriptors = pointCloud.fwfDescriptors();

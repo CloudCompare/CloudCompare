@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                CLOUDCOMPARE PLUGIN: LAS-IO Plugin                      #
@@ -15,13 +17,7 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef LASSCALARFIELDSAVER_H
-#define LASSCALARFIELDSAVER_H
-
 #include "LasDetails.h"
-
-#include <limits>
-#include <vector>
 
 class ccPointCloud;
 struct laszip_point;
@@ -59,5 +55,3 @@ class LasScalarFieldSaver
     std::vector<LasScalarField> m_standardFields;
     std::vector<LasExtraScalarField> m_extraFields;
 };
-
-#endif // LASSCALARFIELDSAVER_H

@@ -30,9 +30,9 @@
 
 const char *AvailableVersions[3] = {"1.2", "1.3", "1.4"};
 
-const std::vector<unsigned int> PointFormatForV1_2 = {0, 1, 2, 3};
-const std::vector<unsigned int> PointFormatForV1_3 = {0, 1, 2, 3, 4, 5};
-const std::vector<unsigned int> PointFormatForV1_4 = {6, 7, 8, 9, 10};
+static const std::vector<unsigned int> PointFormatForV1_2 = {0, 1, 2, 3};
+static const std::vector<unsigned int> PointFormatForV1_3 = {0, 1, 2, 3, 4, 5};
+static const std::vector<unsigned int> PointFormatForV1_4 = {6, 7, 8, 9, 10};
 
 const std::vector<unsigned int> *PointFormatsAvailableForVersion(const char *version)
 {
@@ -57,7 +57,7 @@ const std::vector<unsigned int> *PointFormatsAvailableForVersion(const char *ver
     return nullptr;
 }
 
-static constexpr bool isPointFormatExtended(unsigned int pointFormat)
+static constexpr bool IsPointFormatExtended(unsigned int pointFormat)
 {
     return pointFormat >= 6;
 }
@@ -159,8 +159,7 @@ constexpr const char *LasScalarField::NameFromId(LasScalarField::Id id)
 
 LasScalarField::Id LasScalarField::IdFromName(const char *name, unsigned int targetPointFormat)
 {
-
-    bool isExtended = isPointFormatExtended(targetPointFormat);
+    bool isExtended = IsPointFormatExtended(targetPointFormat);
     if (strcmp(name, LasNames::Intensity) == 0)
     {
         return LasScalarField::Id::Intensity;
@@ -336,7 +335,7 @@ const char *LasScalarField::name() const
 std::vector<LasScalarField> LasScalarFieldForPointFormat(unsigned int pointFormatId)
 {
     std::vector<LasScalarField> scalarFields;
-    scalarFields.reserve(20);
+    scalarFields.reserve(16);
 
     if (pointFormatId >= 0 && pointFormatId <= 5)
     {
@@ -384,7 +383,7 @@ std::vector<LasScalarField> LasScalarFieldForPointFormat(unsigned int pointForma
     return scalarFields;
 }
 
-bool isLaszipVlr(const laszip_vlr_struct &vlr)
+bool IsLaszipVlr(const laszip_vlr_struct &vlr)
 {
     if (strcmp(vlr.user_id, "Laszip encoded") == 0 && vlr.record_id == 22204)
     {
@@ -393,7 +392,7 @@ bool isLaszipVlr(const laszip_vlr_struct &vlr)
     return false;
 }
 
-bool isExtraBytesVlr(const laszip_vlr_struct &vlr)
+bool IsExtraBytesVlr(const laszip_vlr_struct &vlr)
 {
     if (strcmp(vlr.user_id, "LASF_Spec") == 0 && vlr.record_id == 4)
     {
@@ -626,7 +625,7 @@ LasExtraScalarField::ParseExtraScalarFields(const laszip_header &laszipHeader)
 {
     auto *extraBytesVlr = std::find_if(laszipHeader.vlrs,
                                        laszipHeader.vlrs + laszipHeader.number_of_variable_length_records,
-                                       isExtraBytesVlr);
+                                       IsExtraBytesVlr);
     if (extraBytesVlr < laszipHeader.vlrs + laszipHeader.number_of_variable_length_records)
     {
         return LasExtraScalarField::ParseExtraScalarFields(*extraBytesVlr);
@@ -637,7 +636,7 @@ LasExtraScalarField::ParseExtraScalarFields(const laszip_header &laszipHeader)
 std::vector<LasExtraScalarField>
 LasExtraScalarField::ParseExtraScalarFields(const laszip_vlr_struct &extraBytesVlr)
 {
-    if (!isExtraBytesVlr(extraBytesVlr))
+    if (!IsExtraBytesVlr(extraBytesVlr))
     {
         return {};
     }
@@ -1085,7 +1084,7 @@ LasVersion SelectBestVersion(const ccPointCloud &cloud)
     }
 }
 
-void cloneVlrInto(const laszip_vlr_struct &src, laszip_vlr_struct &dst)
+void CloneVlrInto(const laszip_vlr_struct &src, laszip_vlr_struct &dst)
 {
     dst = src;
     dst.data = new laszip_U8[src.record_length_after_header];

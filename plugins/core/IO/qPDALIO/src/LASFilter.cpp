@@ -140,8 +140,8 @@ LASFilter::LASFilter()
                     3.0f,	// priority
                     QStringList{ "las", "laz" },
                     "las",
-                    QStringList{ "LAS cloud (*.las *.laz)" },
-                    QStringList{ "LAS cloud (*.las *.laz)" },
+                    QStringList{ "LAS cloud with PDAL (*.las *.laz)" },
+                    QStringList{ "LAS cloud with PDAL (*.las *.laz)" },
                     Import | Export
                     } )
 {

@@ -18,6 +18,7 @@
 #include "LasSavedInfo.h"
 
 #include <QtGlobal>
+
 #include <algorithm>
 #include <cstring>
 
@@ -30,7 +31,7 @@ LasSavedInfo::LasSavedInfo(const laszip_header &header)
     strncpy(guidData4, header.project_ID_GUID_data_4, 8);
     strncpy(systemIdentifier, header.system_identifier, 32);
     const auto vlrShouldBeCopied = [](const laszip_vlr_struct &vlr)
-    { return !isLaszipVlr(vlr) && !isExtraBytesVlr(vlr); };
+    { return !IsLaszipVlr(vlr) && !IsExtraBytesVlr(vlr); };
 
     numVlrs =
         std::count_if(header.vlrs, header.vlrs + header.number_of_variable_length_records, vlrShouldBeCopied);
@@ -43,7 +44,7 @@ LasSavedInfo::LasSavedInfo(const laszip_header &header)
         {
             if (vlrShouldBeCopied(header.vlrs[i]))
             {
-                cloneVlrInto(header.vlrs[i], vlrs[j]);
+                CloneVlrInto(header.vlrs[i], vlrs[j]);
                 j++;
             }
         }
@@ -52,7 +53,7 @@ LasSavedInfo::LasSavedInfo(const laszip_header &header)
 
 LasSavedInfo &LasSavedInfo::operator=(LasSavedInfo rhs)
 {
-    swap(*this, rhs);
+    LasSavedInfo::Swap(*this, rhs);
     return *this;
 }
 
@@ -70,7 +71,7 @@ LasSavedInfo::LasSavedInfo(const LasSavedInfo &rhs)
         vlrs = new laszip_vlr_struct[numVlrs];
         for (laszip_U32 i{0}; i < numVlrs; ++i)
         {
-            cloneVlrInto(rhs.vlrs[i], vlrs[i]);
+            CloneVlrInto(rhs.vlrs[i], vlrs[i]);
         }
     }
 }
@@ -80,7 +81,7 @@ LasSavedInfo::~LasSavedInfo() noexcept
     delete[] vlrs;
 }
 
-void swap(LasSavedInfo &lhs, LasSavedInfo &rhs) noexcept
+void LasSavedInfo::Swap(LasSavedInfo &lhs, LasSavedInfo &rhs) noexcept
 {
     std::swap(lhs.fileSourceId, rhs.fileSourceId);
     std::swap(lhs.guidData1, rhs.guidData1);

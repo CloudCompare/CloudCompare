@@ -45,7 +45,7 @@ static QString PrettyFormatNumber(int64_t numPoints)
     return num;
 }
 
-bool IsCheckedIn(const QString &name, const QListWidget &list)
+static bool IsCheckedIn(const QString &name, const QListWidget &list)
 {
     for (int i = 0; i < list.count(); ++i)
     {
@@ -58,7 +58,7 @@ bool IsCheckedIn(const QString &name, const QListWidget &list)
 }
 
 // TODO use std::remove_if
-template <typename T, typename Pred> void RemoveFalse(std::vector<T> &vec, Pred predicate)
+template <typename T, typename Pred> static void RemoveFalse(std::vector<T> &vec, Pred predicate)
 {
     auto firstFalse = std::partition(vec.begin(), vec.end(), predicate);
 

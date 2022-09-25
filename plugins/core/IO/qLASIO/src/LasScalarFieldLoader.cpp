@@ -375,6 +375,7 @@ void LasScalarFieldLoader::parseRawValues(const LasExtraScalarField &extraField,
         break;
     }
 }
+
 template <typename T>
 void LasScalarFieldLoader::handleOptionsFor(const LasExtraScalarField &extraField, T values[3])
 {

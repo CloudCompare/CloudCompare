@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                CLOUDCOMPARE PLUGIN: LAS-IO Plugin                      #
@@ -14,8 +16,6 @@
 //#                   COPYRIGHT: Thomas Montaigu                           #
 //#                                                                        #
 //##########################################################################
-#ifndef LASWAVEFORMLOADER_H
-#define LASWAVEFORMLOADER_H
 
 #include <QFileInfo>
 #include <QString>
@@ -26,7 +26,6 @@
 
 struct LasWaveformLoader
 {
-
     LasWaveformLoader(const laszip_header_struct &laszipHeader,
                       const QString &lasFilename,
                       ccPointCloud &pointCloud);
@@ -38,5 +37,3 @@ struct LasWaveformLoader
     bool isPointFormatExtended{false};
     ccPointCloud::FWFDescriptorSet descriptors;
 };
-
-#endif // LASWAVEFORMLOADER_H

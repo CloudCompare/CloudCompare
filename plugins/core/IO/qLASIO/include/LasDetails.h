@@ -34,6 +34,13 @@ struct laszip_header;
 struct laszip_vlr;
 typedef laszip_vlr laszip_vlr_struct;
 
+/// When the extra dimension in an array type, it can have
+/// at most 3 elements.
+/// 
+/// Eg: A Color extra array dimension with 3 elements,
+/// so that each points have Color[0], Color[1], Color[2] as 
+/// in a single extra dimension definition.
+constexpr size_t MAX_ELEMENTS_IN_EXTRA_ARRAY_DIM = 3;
 #define LAS_VLR_HEADER_SIZE 54
 #define SCAN_ANGLE_SCALE 0.06
 

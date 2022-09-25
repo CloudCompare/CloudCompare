@@ -89,8 +89,8 @@ class LasScalarFieldLoader
 
     union
     {
-        uint64_t unsignedValues[3];
-        int64_t signedValues[3];
-        double floatingValues[3];
+        uint64_t unsignedValues[MAX_ELEMENTS_IN_EXTRA_ARRAY_DIM];
+        int64_t signedValues[MAX_ELEMENTS_IN_EXTRA_ARRAY_DIM];
+        double floatingValues[MAX_ELEMENTS_IN_EXTRA_ARRAY_DIM];
     } rawValues;
 };

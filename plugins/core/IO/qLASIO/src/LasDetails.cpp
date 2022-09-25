@@ -412,6 +412,8 @@ unsigned int SizeOfVlrs(const laszip_vlr_struct *vlrs, unsigned int numVlrs)
 
 LasExtraScalarField::LasExtraScalarField(QDataStream &dataStream)
 {
+    dataStream.setByteOrder(QDataStream::ByteOrder::LittleEndian);
+
     uint8_t dataType;
     dataStream.skipRawData(2);
     dataStream >> dataType >> options;
@@ -429,6 +431,8 @@ LasExtraScalarField::LasExtraScalarField(QDataStream &dataStream)
 
 void LasExtraScalarField::writeTo(QDataStream &dataStream) const
 {
+    dataStream.setByteOrder(QDataStream::ByteOrder::LittleEndian);
+
     uint8_t emptyByte{0};
     dataStream << emptyByte << emptyByte;
     dataStream << typeCode() << options;

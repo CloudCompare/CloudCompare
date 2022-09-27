@@ -31,7 +31,7 @@ LasSavedInfo::LasSavedInfo(const laszip_header &header)
     strncpy(guidData4, header.project_ID_GUID_data_4, 8);
     strncpy(systemIdentifier, header.system_identifier, 32);
     const auto vlrShouldBeCopied = [](const laszip_vlr_struct &vlr)
-    { return !IsLaszipVlr(vlr) && !IsExtraBytesVlr(vlr); };
+    { return !LasDetails::IsLaszipVlr(vlr) && !LasDetails::IsExtraBytesVlr(vlr); };
 
     numVlrs =
         std::count_if(header.vlrs, header.vlrs + header.number_of_variable_length_records, vlrShouldBeCopied);
@@ -44,7 +44,7 @@ LasSavedInfo::LasSavedInfo(const laszip_header &header)
         {
             if (vlrShouldBeCopied(header.vlrs[i]))
             {
-                CloneVlrInto(header.vlrs[i], vlrs[j]);
+                LasDetails::CloneVlrInto(header.vlrs[i], vlrs[j]);
                 j++;
             }
         }
@@ -71,7 +71,7 @@ LasSavedInfo::LasSavedInfo(const LasSavedInfo &rhs)
         vlrs = new laszip_vlr_struct[numVlrs];
         for (laszip_U32 i{0}; i < numVlrs; ++i)
         {
-            CloneVlrInto(rhs.vlrs[i], vlrs[i]);
+            LasDetails::CloneVlrInto(rhs.vlrs[i], vlrs[i]);
         }
     }
 }

@@ -86,8 +86,8 @@ LasSaveDialog::LasSaveDialog(ccPointCloud *cloud, QWidget *parent)
             (void(QComboBox::*)(int))(&QComboBox::currentIndexChanged),
             this,
             &LasSaveDialog::handleSelectedPointFormatChange);
-
-    for (const char *versionStr : AvailableVersions)
+    
+    for (const char *versionStr : LasDetails::AvailableVersions())
     {
         versionComboBox->addItem(versionStr);
     }
@@ -109,7 +109,7 @@ LasSaveDialog::LasSaveDialog(ccPointCloud *cloud, QWidget *parent)
 /// of point format to match the ones supported by the version
 void LasSaveDialog::handleSelectedVersionChange(const QString &version)
 {
-    const std::vector<unsigned int> *pointFormats = PointFormatsAvailableForVersion(qPrintable(version));
+    const std::vector<unsigned int> *pointFormats = LasDetails::PointFormatsAvailableForVersion(qPrintable(version));
     if (pointFormats)
     {
         pointFormatComboBox->clear();
@@ -201,7 +201,7 @@ void LasSaveDialog::handleSelectedPointFormatChange(int index)
     }
 
     const std::vector<unsigned int> *pointFormats =
-        PointFormatsAvailableForVersion(qPrintable(versionComboBox->currentText()));
+        LasDetails::PointFormatsAvailableForVersion(qPrintable(versionComboBox->currentText()));
 
     if (!pointFormats)
     {
@@ -225,7 +225,7 @@ void LasSaveDialog::handleSelectedPointFormatChange(int index)
     }
 
     unsigned int selectedPointFormat = (*pointFormats)[index];
-    std::vector<LasScalarField> lasScalarFields = LasScalarFieldForPointFormat(selectedPointFormat);
+    std::vector<LasScalarField> lasScalarFields = LasScalarField::ForPointFormat(selectedPointFormat);
 
     int numDeltaFields = scalarFieldFormLayout->rowCount() - static_cast<int>(lasScalarFields.size());
 
@@ -270,7 +270,7 @@ void LasSaveDialog::handleSelectedPointFormatChange(int index)
     }
 
 
-    if (!HasRGB(selectedPointFormat) && !HasWaveform(selectedPointFormat))
+    if (!LasDetails::HasRGB(selectedPointFormat) && !LasDetails::HasWaveform(selectedPointFormat))
     {
         specialScalarFieldFrame->hide();
         waveformCheckBox->setCheckState(Qt::Unchecked);
@@ -279,7 +279,7 @@ void LasSaveDialog::handleSelectedPointFormatChange(int index)
     else
     {
         specialScalarFieldFrame->show();
-        if (HasRGB(selectedPointFormat))
+        if (LasDetails::HasRGB(selectedPointFormat))
         {
             rgbCheckBox->show();
             rgbCheckBox->setEnabled(m_cloud->hasColors());
@@ -290,7 +290,7 @@ void LasSaveDialog::handleSelectedPointFormatChange(int index)
             rgbCheckBox->hide();
         }
 
-        if (HasWaveform(selectedPointFormat))
+        if (LasDetails::HasWaveform(selectedPointFormat))
         {
             waveformCheckBox->show();
             waveformCheckBox->setEnabled(m_cloud->hasFWF());

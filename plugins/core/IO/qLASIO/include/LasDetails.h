@@ -24,6 +24,8 @@
 #include <limits>
 #include <string>
 #include <vector>
+#include <array>
+
 
 class ccPointCloud;
 class ccScalarField;
@@ -72,209 +74,32 @@ constexpr const char *OverlapFlag = "Overlap Flag";
 constexpr const char *NearInfrared = "Near Infrared";
 } // namespace LasNames
 
-/// class used to link a LAS field defined by the LAS standard to the CloudCompare
-/// scalar field that stores or will store the values.
-struct LasScalarField
+namespace LasDetails
 {
-    /// Enum used to uniquely identify LAS fields
-    /// with a clear distinction between 'normal' and 'extended' fields
-    /// which may have the same name (e.g. Classification)
-    enum Id
-    {
-        Intensity = 0,
-        ReturnNumber = 1,
-        NumberOfReturns = 2,
-        ScanDirectionFlag,
-        EdgeOfFlightLine,
-        Classification,
-        SyntheticFlag,
-        KeypointFlag,
-        WithheldFlag,
-        ScanAngleRank,
-        UserData,
-        PointSourceId,
-        GpsTime,
-        // Extended (LAS 1.4)
-        ExtendedScanAngle,
-        ExtendedScannerChannel,
-        OverlapFlag,
-        ExtendedClassification,
-        ExtendedReturnNumber,
-        ExtendedNumberOfReturns,
-        NearInfrared
-    };
-
-    struct Range
-    {
-
-        template <class T>
-        constexpr Range(T min_, T max_)
-            : min(static_cast<ScalarType>(min_)), max(static_cast<ScalarType>(max_))
-        {
-        }
-
-        template <class T> static constexpr Range ForType()
-        {
-            return Range(std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
-        }
-
-        static Range ForBitSize(uint8_t numBits)
-        {
-            Range range(0.0, 0.0);
-            range.max = static_cast<ScalarType>((1 << static_cast<uint32_t>(numBits)) - 1);
-            return range;
-        }
-
-        ScalarType min;
-        ScalarType max;
-    };
-
-  public: // Methods and Constructors
-    LasScalarField() = delete;
-
-    explicit LasScalarField(LasScalarField::Id id, ccScalarField *sf = nullptr);
-
-
-    const char *name() const;
-
-  public: // Static functions
-    static constexpr const char *NameFromId(LasScalarField::Id id);
-    static LasScalarField::Id IdFromName(const char *name, unsigned int targetPointFormat);
-    static LasScalarField::Range ValueRange(LasScalarField::Id id);
-
-    // TODO They should be private
-  public: // Members
-    /// The Id of the LAS field this relates to.
-    Id id;
-    /// Pointer to the 'linked' CloudCompare scalar field.
-    ///
-    /// When reading (loading points) values of the LAS field will be stored into the
-    /// scalar field pointed by sf.
-    ///
-    /// When writing (saving points) values of the scalar field pointed by sf will
-    /// be stored to the corresponding LAS field (using the Id).
-    ccScalarField *sf{nullptr};
-    Range range;
-};
-
-/// Returns point the formats available for the given version.
+/// Header part of a LAS Extended VLR
 ///
-/// If the version does not exists or is not supported a nullptr is returned.
+/// In a LAS file, EVLRs are stored after the points.
 ///
-/// \param version version string, must be "major.minor" e.g. "1.2"
-const std::vector<unsigned int> *PointFormatsAvailableForVersion(const char *version);
-
-/// Returns the scalar fields that correspond the the pointFormatId
-/// as per the LAS specification.
-std::vector<LasScalarField> LasScalarFieldForPointFormat(unsigned int pointFormatId);
-
-/// Array containing the available versions
-extern const char *AvailableVersions[3];
-
-/// This serves the same purpose as LasScalarField but for extra bytes
-struct LasExtraScalarField
+/// We need this struct as Waveform data can be stored inside EVLRs.
+struct EvlrHeader
 {
-    /// Data types available LAS Extra Field
-    enum DataType
-    {
-        Undocumented = 0,
-        u8,
-        i8,
-        u16,
-        i16,
-        u32,
-        i32,
-        u64,
-        i64,
-        f32,
-        f64,
-        u8_2,
-        i8_2,
-        u16_2,
-        i16_2,
-        u32_2,
-        i32_2,
-        u64_2,
-        i64_2,
-        f32_2,
-        f64_2,
-        u8_3,
-        i8_3,
-        u16_3,
-        i16_3,
-        u32_3,
-        i32_3,
-        u64_3,
-        i64_3,
-        f32_3,
-        f64_3,
-        Invalid
-    };
+    static constexpr size_t SIZE = 60;
+    static constexpr size_t USER_ID_SIZE = 16;
+    static constexpr size_t DESCRIPTION_SIZE = 32;
 
-    enum Kind
-    {
-        Signed,
-        Unsigned,
-        Floating
-    };
+    char userID[USER_ID_SIZE];
+    uint16_t recordID;
+    uint64_t recordLength;
+    char description[DESCRIPTION_SIZE];
 
-  public:
-    explicit LasExtraScalarField(QDataStream &dataStream);
-    void writeTo(QDataStream &dataStream) const;
+    EvlrHeader() = default;
 
-  public: // Static Helper functions that works on collection of LasExtraScalarFields
-    static std::vector<LasExtraScalarField> ParseExtraScalarFields(const laszip_header &laszipHeader);
-    static std::vector<LasExtraScalarField> ParseExtraScalarFields(const laszip_vlr_struct &extraBytesVlr);
-    static void InitExtraBytesVlr(laszip_vlr_struct &vlr,
-                                  const std::vector<LasExtraScalarField> &extraFields);
-    static void UpdateByteOffsets(std::vector<LasExtraScalarField> &extraFields);
-    static unsigned int TotalExtraBytesSize(const std::vector<LasExtraScalarField> &extraScalarFields);
-    static void MatchExtraBytesToScalarFields(std::vector<LasExtraScalarField> &extraScalarFields,
-                                              const ccPointCloud &pointCloud);
+    static EvlrHeader Waveform();
 
-  public: // methods
-    // LAS Spec integer value for the type
-    uint8_t typeCode() const;
+    bool isWaveFormDataPackets() const;
 
-    // Properties we can derive from the type attribute
-    unsigned int elementSize() const;
-    unsigned int numElements() const;
-    unsigned int byteSize() const;
-    Kind kind() const;
-    const char *typeName() const;
-
-    // Properties we can derive from the type options attribute
-    bool noDataIsRelevant() const;
-    bool minIsRelevant() const;
-    bool maxIsRelevant() const;
-    bool scaleIsRelevant() const;
-    bool offsetIsRelevant() const;
-
-    void resetScalarFieldsPointers();
-
-    static DataType DataTypeFromValue(uint8_t value);
-
-  public: // Data members
-    // These fields are from the vlr itself
-    DataType type{Undocumented};
-    uint8_t options{0};
-    char name[32] = "";
-    char description[32] = "";
-    uint8_t noData[3][8] = {0};
-    uint8_t mins[3][8] = {0};
-    uint8_t maxs[3][8] = {0};
-    double scales[3] = {0.0};
-    double offsets[3] = {0.0};
-
-    // These are added by us
-    unsigned int byteOffset{0};
-    ccScalarField *scalarFields[3] = {nullptr};
-    // TODO explain better
-    // This strings store the name of the field in CC,
-    // Extra fields name may clash with existing scalarfields name
-    // (eg: the user calls one of his extra field "Intensity")
-    // we have to alter the real name
-    std::string ccName{};
+    friend QDataStream &operator>>(QDataStream &stream, EvlrHeader &hdr);
+    friend QDataStream &operator<<(QDataStream &stream, const EvlrHeader &hdr);
 };
 
 /// Returns the size for the given point format id
@@ -323,31 +148,16 @@ bool IsLaszipVlr(const laszip_vlr_struct &);
 /// Returns whether the vlr describes extra bytes.
 bool IsExtraBytesVlr(const laszip_vlr_struct &);
 
-/// Header part of a LAS Extended VLR
+
+/// Returns point the formats available for the given version.
 ///
-/// In a LAS file, EVLRs are stored after the points.
+/// If the version does not exists or is not supported a nullptr is returned.
 ///
-/// We need this struct as Waveform data can be stored inside EVLRs.
-struct EvlrHeader
-{
-    static constexpr size_t SIZE = 60;
-    static constexpr size_t USER_ID_SIZE = 16;
-    static constexpr size_t DESCRIPTION_SIZE = 32;
+/// \param version version string, must be "major.minor" e.g. "1.2"
+const std::vector<unsigned int> *PointFormatsAvailableForVersion(const char *version);
 
-    char userID[USER_ID_SIZE];
-    uint16_t recordID;
-    uint64_t recordLength;
-    char description[DESCRIPTION_SIZE];
+const std::array<const char *, 3>& AvailableVersions();
 
-    EvlrHeader() = default;
-
-    static EvlrHeader Waveform();
-
-    bool isWaveFormDataPackets() const;
-
-    friend QDataStream &operator>>(QDataStream &stream, EvlrHeader &hdr);
-    friend QDataStream &operator<<(QDataStream &stream, const EvlrHeader &hdr);
-};
 
 /// See `SelectBestVersion`
 struct LasVersion
@@ -364,3 +174,6 @@ LasVersion SelectBestVersion(const ccPointCloud &cloud);
 
 /// Clones the content of the `src` vlr into the `dst` vlr.
 void CloneVlrInto(const laszip_vlr_struct &src, laszip_vlr_struct &dst);
+
+} // LasDetails
+

@@ -97,7 +97,7 @@ LasWaveformLoader::LasWaveformLoader(const laszip_header_struct &laszipHeader,
         }
 
         QDataStream stream(&fwfDataSource);
-        EvlrHeader evlrHeader;
+        LasDetails::EvlrHeader evlrHeader;
         stream >> evlrHeader;
         if (stream.status() == QDataStream::Status::ReadPastEnd)
         {
@@ -135,18 +135,18 @@ LasWaveformLoader::LasWaveformLoader(const laszip_header_struct &laszipHeader,
         }
         fwfDataCount = fwfDataSource.size();
 
-        if (fwfDataCount > EvlrHeader::SIZE)
+        if (fwfDataCount > LasDetails::EvlrHeader::SIZE)
         {
             QDataStream stream(&fwfDataSource);
-            EvlrHeader evlrHeader;
+            LasDetails::EvlrHeader evlrHeader;
             stream >> evlrHeader;
 
             if (evlrHeader.isWaveFormDataPackets())
             {
                 // this is a valid EVLR header, we can skip it
                 auto p = fwfDataSource.pos();
-                fwfDataCount -= EvlrHeader::SIZE;
-                fwfDataOffset = EvlrHeader::SIZE;
+                fwfDataCount -= LasDetails::EvlrHeader::SIZE;
+                fwfDataOffset = LasDetails::EvlrHeader::SIZE;
             }
             else
             {

@@ -93,15 +93,15 @@ InitLaszipHeader(const LasSaveDialog &saveDialog, LasSavedInfo &savedInfo, ccPoi
     laszipHeader.point_data_format = saveDialog.selectedPointFormat();
 
     // TODO global encoding wkt and other
-    if (HasWaveform(laszipHeader.point_data_format) && pointCloud.hasFWF())
+    if (LasDetails::HasWaveform(laszipHeader.point_data_format) && pointCloud.hasFWF())
     {
         // We always store FWF externally
         laszipHeader.global_encoding |= 0b0000'0100;
     }
 
-    laszipHeader.header_size = HeaderSize(laszipHeader.version_minor);
+    laszipHeader.header_size = LasDetails::HeaderSize(laszipHeader.version_minor);
     laszipHeader.offset_to_point_data = laszipHeader.header_size;
-    laszipHeader.point_data_record_length = PointFormatSize(laszipHeader.point_data_format);
+    laszipHeader.point_data_record_length = LasDetails::PointFormatSize(laszipHeader.point_data_format);
 
     CCVector3d lasScale = saveDialog.chosenScale();
     laszipHeader.x_scale_factor = lasScale.x;
@@ -130,7 +130,7 @@ InitLaszipHeader(const LasSaveDialog &saveDialog, LasSavedInfo &savedInfo, ccPoi
         laszipHeader.vlrs = new laszip_vlr_struct[laszipHeader.number_of_variable_length_records];
         for (laszip_U32 i{0}; i < savedInfo.numVlrs; i++)
         {
-            CloneVlrInto(savedInfo.vlrs[i], laszipHeader.vlrs[i]);
+            LasDetails::CloneVlrInto(savedInfo.vlrs[i], laszipHeader.vlrs[i]);
         }
 
         LasExtraScalarField::InitExtraBytesVlr(
@@ -139,7 +139,7 @@ InitLaszipHeader(const LasSaveDialog &saveDialog, LasSavedInfo &savedInfo, ccPoi
     }
 
     laszipHeader.offset_to_point_data +=
-        SizeOfVlrs(laszipHeader.vlrs, laszipHeader.number_of_variable_length_records);
+        LasDetails::SizeOfVlrs(laszipHeader.vlrs, laszipHeader.number_of_variable_length_records);
 
     if (pointCloud.isShifted())
     {
@@ -233,7 +233,7 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString &fileName, ccHObject &containe
     }
 
     std::vector<LasScalarField> availableScalarFields =
-        LasScalarFieldForPointFormat(laszipHeader->point_data_format);
+        LasScalarField::ForPointFormat(laszipHeader->point_data_format);
 
     std::vector<LasExtraScalarField> availableEXtraScalarFields =
         LasExtraScalarField::ParseExtraScalarFields(*laszipHeader);
@@ -272,7 +272,7 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString &fileName, ccHObject &containe
 
     LasScalarFieldLoader loader(availableScalarFields, availableEXtraScalarFields, *pointCloud);
     std::unique_ptr<LasWaveformLoader> waveformLoader{nullptr};
-    if (HasWaveform(laszipHeader->point_data_format))
+    if (LasDetails::HasWaveform(laszipHeader->point_data_format))
     {
         waveformLoader = std::make_unique<LasWaveformLoader>(*laszipHeader, fileName, *pointCloud);
     }
@@ -347,7 +347,7 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString &fileName, ccHObject &containe
             break;
         }
 
-        if (HasRGB(laszipHeader->point_data_format))
+        if (LasDetails::HasRGB(laszipHeader->point_data_format))
         {
             error = loader.handleRGBValue(*pointCloud, *laszipPoint);
             if (error != CC_FERR_NO_ERROR)
@@ -494,7 +494,7 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject *entity,
     LasSavedInfo savedInfo;
     if (!pointCloud->hasMetaData(LAS_METADATA_INFO_KEY))
     {
-        LasVersion v = SelectBestVersion(*pointCloud);
+        LasDetails::LasVersion v = LasDetails::SelectBestVersion(*pointCloud);
         savedInfo.pointFormat = v.pointFormat;
         savedInfo.versionMinor = v.minorVersion;
     }
@@ -522,7 +522,7 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject *entity,
     std::unique_ptr<LasWaveformSaver> waveformSaver{nullptr};
     if (saveDialog.shouldSaveWaveform())
     {
-        Q_ASSERT(HasWaveform(laszipHeader.point_data_format) && pointCloud->hasFWF());
+        Q_ASSERT(LasDetails::HasWaveform(laszipHeader.point_data_format) && pointCloud->hasFWF());
         waveformSaver = std::make_unique<LasWaveformSaver>(*pointCloud);
     }
 
@@ -553,7 +553,7 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject *entity,
 
     laszip_point laszipPoint{};
     int totalExtraByteSize =
-        laszipHeader.point_data_record_length - PointFormatSize(laszipHeader.point_data_format);
+        laszipHeader.point_data_record_length - LasDetails::PointFormatSize(laszipHeader.point_data_format);
     if (totalExtraByteSize > 0)
     {
         laszipPoint.num_extra_bytes = totalExtraByteSize;
@@ -581,7 +581,7 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject *entity,
 
         if (saveDialog.shouldSaveRGB())
         {
-            Q_ASSERT(HasRGB(laszipHeader.point_data_format) && pointCloud->hasColors());
+            Q_ASSERT(LasDetails::HasRGB(laszipHeader.point_data_format) && pointCloud->hasColors());
             const ccColor::Rgba &color = pointCloud->getPointColor(i);
             laszipPoint.rgb[0] = static_cast<laszip_U16>(color.r) << 8;
             laszipPoint.rgb[1] = static_cast<laszip_U16>(color.g) << 8;
@@ -638,7 +638,7 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject *entity,
         ccLog::Warning("[LAS] laszip error :'%s'", errorMsg);
     }
 
-    if (HasWaveform(laszipHeader.point_data_format) && pointCloud->hasFWF())
+    if (LasDetails::HasWaveform(laszipHeader.point_data_format) && pointCloud->hasFWF())
     {
         const ccPointCloud::SharedFWFDataContainer &fwfData = pointCloud->fwfData();
         QFileInfo info(filename);
@@ -653,7 +653,7 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject *entity,
         else
         {
             {
-                EvlrHeader header = EvlrHeader::Waveform();
+                LasDetails::EvlrHeader header = LasDetails::EvlrHeader::Waveform();
                 QDataStream stream(&fwfFile);
                 stream << header;
             }

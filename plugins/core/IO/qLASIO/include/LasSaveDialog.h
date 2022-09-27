@@ -22,6 +22,8 @@
 #include <CCGeom.h>
 
 #include "LasDetails.h"
+#include "LasScalarField.h"
+#include "LasExtraScalarField.h"
 #include "ui_lassavedialog.h"
 
 class QStringListModel;

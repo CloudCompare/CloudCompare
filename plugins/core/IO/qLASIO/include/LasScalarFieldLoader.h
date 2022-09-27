@@ -18,6 +18,8 @@
 //##########################################################################
 
 #include "LasDetails.h"
+#include "LasScalarField.h"
+#include "LasExtraScalarField.h"
 
 #include <FileIOFilter.h>
 #include <QFileInfo>

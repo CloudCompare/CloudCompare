@@ -18,6 +18,7 @@
 //##########################################################################
 
 #include "LasDetails.h"
+#include "LasExtraScalarField.h"
 
 #include <laszip/laszip_api.h>
 

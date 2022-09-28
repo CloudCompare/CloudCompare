@@ -422,8 +422,15 @@ public:
 
 	//! Sets current camera 'zNear' coefficient
 	/** zNear coef. is only used in perspective mode.
+		\return whether the coef was actually changed
 	**/
-	virtual void setZNearCoef(double coef);
+	virtual bool setZNearCoef(double coef);
+
+	//! Sets current camera 'zFar' coefficient
+	/** zFar coef. is only used in perspective mode.
+		\return whether the coef was actually changed
+	**/
+	virtual bool setZFarCoef(double coef);
 
 	//! Invalidate current visualization state
 	/** Forces view matrix update and 3D/FBO display.
@@ -712,6 +719,9 @@ Q_SIGNALS:
 
 	//! Signal emitted when the zNear coef changes
 	void zNearCoefChanged(float coef);
+
+	//! Signal emitted when the zFar coef changes
+	void zFarCoefChanged(float coef);
 
 	//! Signal emitted when the pivot point is changed
 	void pivotPointChanged(const CCVector3d&);

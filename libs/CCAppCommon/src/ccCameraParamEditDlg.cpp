@@ -65,6 +65,7 @@ ccCameraParamEditDlg::ccCameraParamEditDlg(QWidget* parent, ccPickingHub* pickin
 
 	connect(m_ui->fovDoubleSpinBox,			qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::fovChanged);
 	connect(m_ui->zNearHorizontalSlider,	&QAbstractSlider::sliderMoved,	this,	&ccCameraParamEditDlg::zNearSliderMoved);
+	connect(m_ui->zFarHorizontalSlider,		&QAbstractSlider::sliderMoved,	this,	&ccCameraParamEditDlg::zFarSliderMoved);
 
 	connect(m_ui->viewUpToolButton,		&QAbstractButton::clicked,	this,	&ccCameraParamEditDlg::setTopView);
 	connect(m_ui->viewDownToolButton,	&QAbstractButton::clicked,	this,	&ccCameraParamEditDlg::setBottomView);
@@ -186,8 +187,34 @@ void ccCameraParamEditDlg::zNearSliderMoved(int i)
 	if (!m_associatedWin)
 		return;
 
-	double zNearCoef = ccViewportParameters::IncrementToZNearCoef(i, m_ui->zNearHorizontalSlider->maximum() + 1);
+	if (i >= m_ui->zFarHorizontalSlider->value())
+	{
+		i = m_ui->zFarHorizontalSlider->value() - 1;
+		m_ui->zNearHorizontalSlider->blockSignals(true);
+		m_ui->zNearHorizontalSlider->setValue(i);
+		m_ui->zNearHorizontalSlider->blockSignals(false);
+	}
+
+	double zNearCoef = ccViewportParameters::IncrementToZNearCoef(i, m_ui->zNearHorizontalSlider->maximum());
 	m_associatedWin->setZNearCoef(zNearCoef);
+	m_associatedWin->redraw();
+}
+
+void ccCameraParamEditDlg::zFarSliderMoved(int i)
+{
+	if (!m_associatedWin)
+		return;
+
+	if (i <= m_ui->zNearHorizontalSlider->value())
+	{
+		i = m_ui->zNearHorizontalSlider->value() + 1;
+		m_ui->zFarHorizontalSlider->blockSignals(true);
+		m_ui->zFarHorizontalSlider->setValue(i);
+		m_ui->zFarHorizontalSlider->blockSignals(false);
+	}
+
+	double zFrCoef = ccViewportParameters::IncrementToZNearCoef(i, m_ui->zFarHorizontalSlider->maximum());
+	m_associatedWin->setZFarCoef(zFrCoef);
 	m_associatedWin->redraw();
 }
 
@@ -400,6 +427,7 @@ bool ccCameraParamEditDlg::linkWith(ccGLWindow* win)
 		connect(m_associatedWin,	&QObject::destroyed,					this,	&QWidget::hide);
 		connect(m_associatedWin,	&ccGLWindow::fovChanged,				this,	&ccCameraParamEditDlg::updateWinFov);
 		connect(m_associatedWin,	&ccGLWindow::zNearCoefChanged,			this,	&ccCameraParamEditDlg::updateZNearCoef);
+		connect(m_associatedWin,	&ccGLWindow::zFarCoefChanged,			this,	&ccCameraParamEditDlg::updateZFarCoef);
 
 		PushedMatricesMapType::iterator it = pushedMatrices.find(m_associatedWin);
 		m_ui->buttonsFrame->setEnabled(it != pushedMatrices.end());
@@ -495,8 +523,15 @@ void ccCameraParamEditDlg::initWith(ccGLWindow* win)
 	//update FOV
 	updateWinFov(win->getFov());
 
+	// we must set the zFar slider to the max value before setting the zNear slider (so that it's not blocked)
+	m_ui->zFarHorizontalSlider->blockSignals(true);
+	m_ui->zFarHorizontalSlider->setValue(m_ui->zFarHorizontalSlider->maximum());
+	m_ui->zFarHorizontalSlider->blockSignals(false);
+
 	//update zNearCoef
 	updateZNearCoef(params.zNearCoef);
+	//update zFarCoef
+	updateZFarCoef(params.zFarCoef);
 }
 
 void ccCameraParamEditDlg::updateCameraCenter(const CCVector3d& P)
@@ -544,8 +579,18 @@ void ccCameraParamEditDlg::updateZNearCoef(float zNearCoef)
 		return;
 
 	m_ui->zNearHorizontalSlider->blockSignals(true);
-	m_ui->zNearHorizontalSlider->setValue(ccViewportParameters::ZNearCoefToIncrement(zNearCoef, m_ui->zNearHorizontalSlider->maximum() + 1));
+	m_ui->zNearHorizontalSlider->setValue(std::min(m_ui->zFarHorizontalSlider->value(), ccViewportParameters::ZNearOrZFarCoefToIncrement(zNearCoef, m_ui->zNearHorizontalSlider->maximum())));
 	m_ui->zNearHorizontalSlider->blockSignals(false);
+}
+
+void ccCameraParamEditDlg::updateZFarCoef(float zFarCoef)
+{
+	if (!m_associatedWin)
+		return;
+
+	m_ui->zFarHorizontalSlider->blockSignals(true);
+	m_ui->zFarHorizontalSlider->setValue(std::max(m_ui->zNearHorizontalSlider->value(), ccViewportParameters::ZNearOrZFarCoefToIncrement(zFarCoef, m_ui->zFarHorizontalSlider->maximum())));
+	m_ui->zFarHorizontalSlider->blockSignals(false);
 }
 
 ccGLMatrixd ccCameraParamEditDlg::getMatrix()

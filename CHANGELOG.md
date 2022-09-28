@@ -49,6 +49,15 @@ v2.13.alpha (???) - (??/??/????)
 	- New entity picking mechanism (to not rely on the deprecated OpenGL 'names' pushing mechanism)
 		- Should hopefully solve most of the random issues with picking
 
+	- Camera parameters dialog:
+		- new setting: 'zFar relative position' to change the position of the far clipping plane
+			in perspective mode (due to the way near and far clipping planes are handled in CC, this
+			is only a relative position, and it cannot be set at any given depth).
+
+	- New shortcut:
+		- use 'ALT + SHIFT + mouse wheel' to change the zFar value (perspective mode)
+		  (reminder: use 'ALT + mouse wheel' to change the zNear value)
+
 - Bug fix:
 	- PCD: when transforming a cloud with a sensor (either manually, or via a registration tool, or via Edit > Apply Tranformation) and then exporting
 		the cloud to a PCD file, both the points AND the sensor were transformed, resulting in the PCD file coordinates to be in the wrong coordinate

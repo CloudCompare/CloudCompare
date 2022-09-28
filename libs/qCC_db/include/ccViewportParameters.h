@@ -66,8 +66,8 @@ public: //functions
 	//! Helper: converts an integer (increment) in [0 iMax] to a double (zNear) value in [0.001 1]
 	static double IncrementToZNearCoef(int i, int iMax);
 
-	//! Helper: converts a double (zNear) value in ]0 1] to integer increments in [0 iMax]
-	static int ZNearCoefToIncrement(double coef, int iMax);
+	//! Helper: converts a double (zNear or zFar) value in ]0 1] to integer increments in [0 iMax]
+	static int ZNearOrZFarCoefToIncrement(double coef, int iMax);
 
 	//! Computes the view matrix
 	ccGLMatrixd computeViewMatrix() const;
@@ -132,6 +132,8 @@ public: //variables
 
 	//! Theoretical perspective 'zNear' relative position
 	double zNearCoef;
+	//! Perspective 'zFar' corrective factor
+	double zFarCoef;
 	//! Actual perspective 'zNear' value
 	double zNear;
 	//! Actual perspective 'zFar' value

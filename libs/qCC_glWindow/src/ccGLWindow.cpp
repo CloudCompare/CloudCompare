@@ -3437,9 +3437,11 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(bool withGLfeatures, ProjectionM
 		//for the detph buffer is too high and the display is jeopardized, especially
 		//for entities with large coordinates)
 		//zNear = zFar * m_viewportParams.zNearCoef;
+		//zNear = std::max(bbHalfDiag * m_viewportParams.zNearCoef, zNear);
 		zNear = bbHalfDiag * m_viewportParams.zNearCoef; //we want a stable value!
-		//zNear = std::max(bbHalfDiag * m_viewportParams.zNearCoef, zNear); //we want a stable value!
-		zFar = std::max(zNear + CCCoreLib::ZERO_TOLERANCE_D, zFar);
+		//zFar(Max) = 1.0;
+		zFar = zNear + (zFar - zNear) * (m_viewportParams.zFarCoef - m_viewportParams.zNearCoef) / (1.0 - m_viewportParams.zNearCoef);
+		//zFar = std::max(zNear + CCCoreLib::ZERO_TOLERANCE_D, zNear + (zFar - zNear) * (m_viewportParams.zFarCoef - m_viewportParams.zNearCoef));
 
 		double xMax = zNear * m_viewportParams.computeDistanceToHalfWidthRatio();
 		double yMax = xMax * ar;
@@ -4643,13 +4645,23 @@ void ccGLWindow::wheelEvent(QWheelEvent* event)
 		if (m_viewportParams.perspectiveView)
 		{
 			//same shortcut as Meshlab: change the zNear value
-			static const int MAX_INCREMENT = 150;
-			int increment = ccViewportParameters::ZNearCoefToIncrement(m_viewportParams.zNearCoef, MAX_INCREMENT + 1);
-			int newIncrement = std::min(std::max(0, increment + (event->delta() < 0 ? -1 : 1)), MAX_INCREMENT); //the zNearCoef must be < 1! 
+			static const int MAX_INCREMENT = 300;
+			bool shiftPressed = (keyboardModifiers & Qt::ShiftModifier);
+			int increment = ccViewportParameters::ZNearOrZFarCoefToIncrement((shiftPressed ? m_viewportParams.zFarCoef : m_viewportParams.zNearCoef), MAX_INCREMENT);
+			int newIncrement = std::min(std::max(0, increment + (event->delta() < 0 ? -1 : 1)), MAX_INCREMENT); //zNearCoef or zFarCoef must be < 1! 
 			if (newIncrement != increment)
 			{
-				double newCoef = ccViewportParameters::IncrementToZNearCoef(newIncrement, MAX_INCREMENT + 1);
-				setZNearCoef(newCoef);
+				double newCoef = ccViewportParameters::IncrementToZNearCoef(newIncrement, MAX_INCREMENT);
+				if (shiftPressed)
+				{
+					if (CCCoreLib::LessThanEpsilon(newCoef) || !setZFarCoef(newCoef))
+						return;
+				}
+				else
+				{
+					if (CCCoreLib::LessThanEpsilon(1.0 - newCoef) || !setZNearCoef(newCoef))
+						return;
+				}
 				doRedraw = true;
 			}
 		}
@@ -5884,12 +5896,20 @@ void ccGLWindow::setBubbleViewFov(float fov_deg)
 	}
 }
 
-void ccGLWindow::setZNearCoef(double coef)
+bool ccGLWindow::setZNearCoef(double coef)
 {
 	if (coef <= 0.0 || coef >= 1.0)
 	{
 		ccLog::Warning("[ccGLWindow::setZNearCoef] Invalid coef. value!");
-		return;
+		return false;
+	}
+
+	//ccLog::Print(QString("[ccGLWindow::setZNearCoef] New coef = %1 / old coef = %2").arg(coef).arg(m_viewportParams.zNearCoef));
+
+	if (coef > m_viewportParams.zFarCoef)
+	{
+		ccLog::Warning(QString("[ccGLWindow::setZNearCoef] zNear coef (%1) can't be larger than zFar coef (%2)!").arg(coef).arg(m_viewportParams.zFarCoef));
+		return false;
 	}
 
 	if (m_viewportParams.zNearCoef != coef)
@@ -5915,7 +5935,54 @@ void ccGLWindow::setZNearCoef(double coef)
 		}
 
 		Q_EMIT zNearCoefChanged(coef);
+
+		return true;
 	}
+
+	return false;
+}
+
+bool ccGLWindow::setZFarCoef(double coef)
+{
+	if (coef <= 0.0 || coef > 1.0)
+	{
+		ccLog::Warning("[ccGLWindow::setZFarCoef] Invalid coef. value!");
+		return false;
+	}
+
+	//ccLog::Print(QString("[ccGLWindow::setZFarCoef] New coef = %1 / old coef = %2").arg(coef).arg(m_viewportParams.zFarCoef));
+
+	if (coef < m_viewportParams.zNearCoef)
+	{
+		ccLog::Warning(QString("[ccGLWindow::setZFarCoef] zFar coef (%1) can't be smaller than zNear coef (%2)!").arg(coef).arg(m_viewportParams.zNearCoef));
+		return false;
+	}
+
+	if (m_viewportParams.zFarCoef != coef)
+	{
+		//update param
+		m_viewportParams.zFarCoef = coef;
+		//and camera state (if perspective view is 'on')
+		if (m_viewportParams.perspectiveView)
+		{
+			//DGM: we update the projection matrix directly so as to get an up-to-date estimation of zNear
+			updateProjectionMatrix();
+
+			deprecate3DLayer();
+
+			displayNewMessage(QString("Far clipping = %1% of max depth (= %2)").arg(m_viewportParams.zFarCoef * 100.0, 0, 'f', 1).arg(m_viewportParams.zFar),
+				ccGLWindow::LOWER_LEFT_MESSAGE, //DGM HACK: we cheat and use the same 'slot' as the window size
+				false,
+				2,
+				SCREEN_SIZE_MESSAGE);
+		}
+
+		Q_EMIT zFarCoefChanged(coef);
+
+		return true;
+	}
+
+	return false;
 }
 
 void ccGLWindow::setViewportParameters(const ccViewportParameters& params)

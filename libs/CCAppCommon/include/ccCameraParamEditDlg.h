@@ -84,6 +84,8 @@ public:
 	void updateWinFov(float fov_deg);
 	//! Update the zNear coef.
 	void updateZNearCoef(float zNearCoef);
+	//! Update the zFar coef.
+	void updateZFarCoef(float zFarCoef);
 
 	void setFrontView();
 	void setBottomView();
@@ -103,6 +105,7 @@ public:
 	void dPhiValueChanged(double);
 
 	void zNearSliderMoved(int);
+	void zFarSliderMoved(int);
 	void pivotChanged();
 	void cameraCenterChanged();
 	void fovChanged(double);

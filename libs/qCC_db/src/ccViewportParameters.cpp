@@ -29,6 +29,7 @@ ccViewportParameters::ccViewportParameters()
 	, perspectiveView(false)
 	, objectCenteredView(true)
 	, zNearCoef(0.005)
+	, zFarCoef(1.0)
 	, zNear(0)
 	, zFar(0)
 	, fov_deg(50.0f)
@@ -47,6 +48,7 @@ ccViewportParameters::ccViewportParameters(const ccViewportParameters& params)
 	, perspectiveView(params.perspectiveView)
 	, objectCenteredView(params.objectCenteredView)
 	, zNearCoef(params.zNearCoef)
+	, zFarCoef(params.zFarCoef)
 	, zNear(params.zNear)
 	, zFar(params.zFar)
 	, fov_deg(params.fov_deg)
@@ -191,16 +193,11 @@ double ccViewportParameters::IncrementToZNearCoef(int i, int iMax)
 	return pow(10, -static_cast<double>((iMax - i) * 3) / iMax); //between 10^-3 and 1
 }
 
-int ccViewportParameters::ZNearCoefToIncrement(double coef, int iMax)
+int ccViewportParameters::ZNearOrZFarCoefToIncrement(double coef, int iMax)
 {
 	assert(coef >= 0 && coef <= 1.0);
 	double id = -(iMax / 3.0) * log10(coef);
-	int i = static_cast<int>(id);
-	//cope with numerical inaccuracies
-	if (std::abs(id - i) > std::abs(id - (i + 1)))
-	{
-		++i;
-	}
+	int i = static_cast<int>(std::round(id));
 	assert(i >= 0 && i <= iMax);
 	return iMax - i;
 }
@@ -328,6 +325,7 @@ void ccViewportParameters::log() const
 	ccLog::Print(QString("Perspective view: %1").arg(perspectiveView ? "yes" : "no"));
 	ccLog::Print(QString("Object-centered view: %1").arg(objectCenteredView ? "yes" : "no"));
 	ccLog::Print(QString("zNearCoef: %1").arg(zNearCoef));
+	ccLog::Print(QString("zFarCoef: %1").arg(zFarCoef));
 	ccLog::Print(QString("zNear: %1").arg(zNear));
 	ccLog::Print(QString("zFar: %1").arg(zFar));
 	ccLog::Print(QString("fov: %1 deg").arg(fov_deg));

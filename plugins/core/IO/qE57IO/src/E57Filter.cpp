@@ -1399,6 +1399,8 @@ static bool GetPoseInformation(const e57::StructureNode& node, ccGLMatrixd& pose
 	bool validPoseMat = false;
 	if (node.isDefined("pose"))
 	{
+		poseMat.toIdentity();
+
 		e57::StructureNode pose(node.get("pose"));
 		if (pose.isDefined("rotation"))
 		{
@@ -1411,8 +1413,15 @@ static bool GetPoseInformation(const e57::StructureNode& node, ccGLMatrixd& pose
 
 			CCCoreLib::SquareMatrixd rotMat(3);
 			rotMat.initFromQuaternion(quaternion);
-			rotMat.toGlMatrix(poseMat.data());
-			validPoseMat = true;
+			if (rotMat.computeDet() > 0.)
+			{
+				rotMat.toGlMatrix(poseMat.data());
+				validPoseMat = true;
+			}
+			else
+			{
+				ccLog::Warning("[E57Filter] Ignoring invalid pose rotation");
+			}
 		}
 
 		if (pose.isDefined("translation"))

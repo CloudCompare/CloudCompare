@@ -1399,9 +1399,7 @@ static bool GetPoseInformation(const e57::StructureNode& node, ccGLMatrixd& pose
 	bool validPoseMat = false;
 	if (node.isDefined("pose"))
 	{
-		CCCoreLib::SquareMatrixd rotMat(3);
-		rotMat.toIdentity();
-		rotMat.toGlMatrix(poseMat.data());
+		poseMat.toIdentity();
 
 		e57::StructureNode pose(node.get("pose"));
 		if (pose.isDefined("rotation"))
@@ -1413,6 +1411,7 @@ static bool GetPoseInformation(const e57::StructureNode& node, ccGLMatrixd& pose
 			quaternion[2] = e57::FloatNode(rotNode.get("y")).value();
 			quaternion[3] = e57::FloatNode(rotNode.get("z")).value();
 
+			CCCoreLib::SquareMatrixd rotMat(3);
 			rotMat.initFromQuaternion(quaternion);
 			if (rotMat.computeDet() > 0.)
 			{

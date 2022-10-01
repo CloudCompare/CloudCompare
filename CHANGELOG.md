@@ -3,16 +3,27 @@ CloudCompare Version History
 
 v2.13.alpha (???) - (??/??/????)
 ----------------------
-- New command line option:
-	- FLIP_TRI (to flip the order of the triangle vertices of all opened meshes)
-	- SPLIT_XY_Z 
-		- for commands C2C_DIST and C2M_DIST, to split the distance between the z component and the xy plane component
-	- SF_OP_SF
-		- to compute an arithmetic operation between two scalar fields (add, sub, mult, div)
-	- SF_INTERP with option DEST_IS_FIRST
-		- to interpolate a scalar field from one cloud to another cloud (use DEST_IS_FIRST if destination is first)
-	- SF_ADD_CONST
-		- to add a constant scalar field to a cloud
+- - New features:
+	- New command line option:
+		- FLIP_TRI (to flip the order of the triangle vertices of all opened meshes)
+		- SPLIT_XY_Z 
+			- for commands C2C_DIST and C2M_DIST, to split the distance between the z component and the xy plane component
+		- SF_OP_SF
+			- to compute an arithmetic operation between two scalar fields (add, sub, mult, div)
+		- SF_INTERP with option DEST_IS_FIRST
+			- to interpolate a scalar field from one cloud to another cloud (use DEST_IS_FIRST if destination is first)
+		- SF_ADD_CONST
+			- to add a constant scalar field to a cloud
+
+	- New display feature: near and far clipping planes in 3D views
+		- extension of the previously existing feature to set a near clipping plane
+		- can be enabled and modifed in the Camera Parameters dialog or via
+			CTRL + mouse wheel (near) or CTRL + SHIFT + mouse wheel (far)
+		- the user shall now input actual distances and not percentages
+		- works for all projection modes (orthographic and perspective)
+		- does not modify the rendering quality of the EDL or SSAO shaders
+		- taken into account when using interactive segmentation or point picking
+		- not compatible with the Cross Section tool
 
 - Improvements:
 	- Rasterize:
@@ -49,14 +60,12 @@ v2.13.alpha (???) - (??/??/????)
 	- New entity picking mechanism (to not rely on the deprecated OpenGL 'names' pushing mechanism)
 		- Should hopefully solve most of the random issues with picking
 
-	- Camera parameters dialog:
-		- new setting: 'zFar relative position' to change the position of the far clipping plane
-			in perspective mode (due to the way near and far clipping planes are handled in CC, this
-			is only a relative position, and it cannot be set at any given depth).
-
 	- New shortcut:
 		- use 'ALT + SHIFT + mouse wheel' to change the zFar value (perspective mode)
 		  (reminder: use 'ALT + mouse wheel' to change the zNear value)
+
+	- EDL shader:
+		- contrast and rendering quality improved
 
 - Bug fix:
 	- PCD: when transforming a cloud with a sensor (either manually, or via a registration tool, or via Edit > Apply Tranformation) and then exporting

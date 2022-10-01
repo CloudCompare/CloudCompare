@@ -63,9 +63,11 @@ ccCameraParamEditDlg::ccCameraParamEditDlg(QWidget* parent, ccPickingHub* pickin
 	connect(m_ui->eyDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::cameraCenterChanged);
 	connect(m_ui->ezDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::cameraCenterChanged);
 
-	connect(m_ui->fovDoubleSpinBox,			qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::fovChanged);
-	connect(m_ui->zNearHorizontalSlider,	&QAbstractSlider::sliderMoved,	this,	&ccCameraParamEditDlg::zNearSliderMoved);
-	connect(m_ui->zFarHorizontalSlider,		&QAbstractSlider::sliderMoved,	this,	&ccCameraParamEditDlg::zFarSliderMoved);
+	connect(m_ui->fovDoubleSpinBox,					qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::fovChanged);
+	connect(m_ui->nearClippingDepthDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::nearClippingDepthChanged);
+	connect(m_ui->farClippingDepthDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::farClippingDepthChanged);
+	connect(m_ui->nearClippingCheckBox,				&QCheckBox::toggled,								this,	&ccCameraParamEditDlg::nearClippingCheckBoxToggled);
+	connect(m_ui->farClippingCheckBox,				&QCheckBox::toggled,								this,	&ccCameraParamEditDlg::farClippingCheckBoxToggled);
 
 	connect(m_ui->viewUpToolButton,		&QAbstractButton::clicked,	this,	&ccCameraParamEditDlg::setTopView);
 	connect(m_ui->viewDownToolButton,	&QAbstractButton::clicked,	this,	&ccCameraParamEditDlg::setBottomView);
@@ -182,40 +184,76 @@ void ccCameraParamEditDlg::fovChanged(double value)
 	m_associatedWin->redraw();
 }
 
-void ccCameraParamEditDlg::zNearSliderMoved(int i)
+void ccCameraParamEditDlg::nearClippingDepthChanged(double depth)
 {
 	if (!m_associatedWin)
 		return;
 
-	if (i >= m_ui->zFarHorizontalSlider->value())
+	if (m_associatedWin->setNearClippingPlaneDepth(depth))
 	{
-		i = m_ui->zFarHorizontalSlider->value() - 1;
-		m_ui->zNearHorizontalSlider->blockSignals(true);
-		m_ui->zNearHorizontalSlider->setValue(i);
-		m_ui->zNearHorizontalSlider->blockSignals(false);
+		m_associatedWin->redraw();
 	}
-
-	double zNearCoef = ccViewportParameters::IncrementToZNearCoef(i, m_ui->zNearHorizontalSlider->maximum());
-	m_associatedWin->setZNearCoef(zNearCoef);
-	m_associatedWin->redraw();
 }
 
-void ccCameraParamEditDlg::zFarSliderMoved(int i)
+void ccCameraParamEditDlg::nearClippingCheckBoxToggled(bool state)
+{
+	if (state)
+	{
+		if (m_ui->nearClippingCheckBox->isChecked())
+		{
+			if (m_associatedWin && m_ui->nearClippingDepthDoubleSpinBox->value() <= 0)
+			{
+				// auto set the near clipping depth the first time
+				m_ui->nearClippingDepthDoubleSpinBox->setValue(m_associatedWin->getViewportParameters().zNear);
+			}
+			else
+			{
+				// force the window update
+				nearClippingDepthChanged(m_ui->nearClippingDepthDoubleSpinBox->value());
+			}
+		}
+	}
+	else
+	{
+		// disable the near clipping plane
+		nearClippingDepthChanged(std::numeric_limits<double>::quiet_NaN());
+	}
+}
+
+void ccCameraParamEditDlg::farClippingDepthChanged(double depth)
 {
 	if (!m_associatedWin)
 		return;
 
-	if (i <= m_ui->zNearHorizontalSlider->value())
+	if (m_associatedWin->setFarClippingPlaneDepth(depth))
 	{
-		i = m_ui->zNearHorizontalSlider->value() + 1;
-		m_ui->zFarHorizontalSlider->blockSignals(true);
-		m_ui->zFarHorizontalSlider->setValue(i);
-		m_ui->zFarHorizontalSlider->blockSignals(false);
+		m_associatedWin->redraw();
 	}
+}
 
-	double zFrCoef = ccViewportParameters::IncrementToZNearCoef(i, m_ui->zFarHorizontalSlider->maximum());
-	m_associatedWin->setZFarCoef(zFrCoef);
-	m_associatedWin->redraw();
+void ccCameraParamEditDlg::farClippingCheckBoxToggled(bool state)
+{
+	if (state)
+	{
+		if (m_ui->farClippingCheckBox->isChecked())
+		{
+			if (m_associatedWin && m_ui->farClippingDepthDoubleSpinBox->value() >= 1.0e6)
+			{
+				// auto set the far clipping depth the first time
+				m_ui->farClippingDepthDoubleSpinBox->setValue(m_associatedWin->getViewportParameters().zFar);
+			}
+			else
+			{
+				// force the window update
+				farClippingDepthChanged(m_ui->farClippingDepthDoubleSpinBox->value());
+			}
+		}
+	}
+	else
+	{
+		// disable the far clipping plane
+		farClippingDepthChanged(std::numeric_limits<double>::quiet_NaN());
+	}
 }
 
 void ccCameraParamEditDlg::pushCurrentMatrix()
@@ -426,8 +464,12 @@ bool ccCameraParamEditDlg::linkWith(ccGLWindow* win)
 		connect(m_associatedWin,	&ccGLWindow::perspectiveStateChanged,	this,	&ccCameraParamEditDlg::updateViewMode);
 		connect(m_associatedWin,	&QObject::destroyed,					this,	&QWidget::hide);
 		connect(m_associatedWin,	&ccGLWindow::fovChanged,				this,	&ccCameraParamEditDlg::updateWinFov);
-		connect(m_associatedWin,	&ccGLWindow::zNearCoefChanged,			this,	&ccCameraParamEditDlg::updateZNearCoef);
-		connect(m_associatedWin,	&ccGLWindow::zFarCoefChanged,			this,	&ccCameraParamEditDlg::updateZFarCoef);
+		connect(m_associatedWin,	&ccGLWindow::nearClippingDepthChanged,	this,	&ccCameraParamEditDlg::updateNearClippingDepth);
+		connect(m_associatedWin,	&ccGLWindow::farClippingDepthChanged,	this,	&ccCameraParamEditDlg::updateFarClippingDepth);
+
+		double increment = m_associatedWin->computeActualPixelSize();
+		m_ui->nearClippingDepthDoubleSpinBox->setSingleStep(increment);
+		m_ui->farClippingDepthDoubleSpinBox->setSingleStep(increment);
 
 		PushedMatricesMapType::iterator it = pushedMatrices.find(m_associatedWin);
 		m_ui->buttonsFrame->setEnabled(it != pushedMatrices.end());
@@ -523,15 +565,9 @@ void ccCameraParamEditDlg::initWith(ccGLWindow* win)
 	//update FOV
 	updateWinFov(win->getFov());
 
-	// we must set the zFar slider to the max value before setting the zNear slider (so that it's not blocked)
-	m_ui->zFarHorizontalSlider->blockSignals(true);
-	m_ui->zFarHorizontalSlider->setValue(m_ui->zFarHorizontalSlider->maximum());
-	m_ui->zFarHorizontalSlider->blockSignals(false);
-
-	//update zNearCoef
-	updateZNearCoef(params.zNearCoef);
-	//update zFarCoef
-	updateZFarCoef(params.zFarCoef);
+	//update the clipping depths
+	updateNearClippingDepth(params.nearClippingDepth);
+	updateFarClippingDepth(params.farClippingDepth);
 }
 
 void ccCameraParamEditDlg::updateCameraCenter(const CCVector3d& P)
@@ -573,24 +609,22 @@ void ccCameraParamEditDlg::updateWinFov(float fov_deg)
 	m_ui->fovDoubleSpinBox->blockSignals(false);
 }
 
-void ccCameraParamEditDlg::updateZNearCoef(float zNearCoef)
+void ccCameraParamEditDlg::updateNearClippingDepth(double depth)
 {
-	if (!m_associatedWin)
-		return;
+	m_ui->nearClippingDepthDoubleSpinBox->blockSignals(true);
+	m_ui->nearClippingDepthDoubleSpinBox->setValue(std::isnan(depth) ? 0.0 : depth);
+	m_ui->nearClippingDepthDoubleSpinBox->blockSignals(false);
 
-	m_ui->zNearHorizontalSlider->blockSignals(true);
-	m_ui->zNearHorizontalSlider->setValue(std::min(m_ui->zFarHorizontalSlider->value(), ccViewportParameters::ZNearOrZFarCoefToIncrement(zNearCoef, m_ui->zNearHorizontalSlider->maximum())));
-	m_ui->zNearHorizontalSlider->blockSignals(false);
+	m_ui->nearClippingCheckBox->setChecked(!std::isnan(depth));
 }
 
-void ccCameraParamEditDlg::updateZFarCoef(float zFarCoef)
+void ccCameraParamEditDlg::updateFarClippingDepth(double depth)
 {
-	if (!m_associatedWin)
-		return;
+	m_ui->farClippingDepthDoubleSpinBox->blockSignals(true);
+	m_ui->farClippingDepthDoubleSpinBox->setValue(std::isnan(depth) ? 1.0e6 : depth);
+	m_ui->farClippingDepthDoubleSpinBox->blockSignals(false);
 
-	m_ui->zFarHorizontalSlider->blockSignals(true);
-	m_ui->zFarHorizontalSlider->setValue(std::max(m_ui->zNearHorizontalSlider->value(), ccViewportParameters::ZNearOrZFarCoefToIncrement(zFarCoef, m_ui->zFarHorizontalSlider->maximum())));
-	m_ui->zFarHorizontalSlider->blockSignals(false);
+	m_ui->farClippingCheckBox->setChecked(!std::isnan(depth));
 }
 
 ccGLMatrixd ccCameraParamEditDlg::getMatrix()

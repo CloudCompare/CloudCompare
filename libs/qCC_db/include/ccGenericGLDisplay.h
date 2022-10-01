@@ -37,18 +37,48 @@ struct ccGLCameraParameters
 		, perspective(false)
 		, fov_deg(0.0f)
 		, pixelSize(0.0)
+		, nearClippingDepth(std::numeric_limits<double>::quiet_NaN())
+		, farClippingDepth(std::numeric_limits<double>::quiet_NaN())
 	{
 	}
 
 	//! Projects a 3D point in 2D (+ normalized 'z' coordinate)
-	inline bool project(const CCVector3d& input3D, CCVector3d& output2D, bool* inFrustum = nullptr) const { return ccGL::Project<double, double>(input3D, modelViewMat.data(), projectionMat.data(), viewport, output2D, inFrustum); }
+	inline bool project(const CCVector3d& input3D, CCVector3d& output2D, bool* inFrustum = nullptr) const
+	{
+		return ccGL::Project<double, double>(	input3D,
+												modelViewMat.data(),
+												projectionMat.data(),
+												viewport,
+												output2D,
+												inFrustum,
+												(inFrustum && !std::isnan(nearClippingDepth)) ? &nearClippingDepth : nullptr,
+												(inFrustum && !std::isnan(farClippingDepth)) ? &farClippingDepth : nullptr);
+	}
+	
 	//! Projects a 3D point in 2D (+ normalized 'z' coordinate)
-	inline bool project(const CCVector3& input3D, CCVector3d& output2D, bool* inFrustum = nullptr) const { return ccGL::Project<PointCoordinateType, double>(input3D, modelViewMat.data(), projectionMat.data(), viewport, output2D, inFrustum); }
+	inline bool project(const CCVector3& input3D, CCVector3d& output2D, bool* inFrustum = nullptr) const
+	{
+		return ccGL::Project<PointCoordinateType, double>(	input3D,
+															modelViewMat.data(),
+															projectionMat.data(),
+															viewport,
+															output2D,
+															inFrustum,
+															(inFrustum && !std::isnan(nearClippingDepth)) ? &nearClippingDepth : nullptr,
+															(inFrustum && !std::isnan(farClippingDepth)) ? &farClippingDepth : nullptr);
+	}
 
 	//! Unprojects a 2D point (+ normalized 'z' coordinate) in 3D
-	inline bool unproject(const CCVector3d& input2D, CCVector3d& output3D) const { return ccGL::Unproject<double, double>(input2D, modelViewMat.data(), projectionMat.data(), viewport, output3D); }
+	inline bool unproject(const CCVector3d& input2D, CCVector3d& output3D) const
+	{
+		return ccGL::Unproject<double, double>(input2D, modelViewMat.data(), projectionMat.data(), viewport, output3D);
+	}
+	
 	//! Unprojects a 2D point (+ normalized 'z' coordinate) in 3D
-	inline bool unproject(const CCVector3& input2D, CCVector3d& output3D) const { return ccGL::Unproject<PointCoordinateType, double>(input2D, modelViewMat.data(), projectionMat.data(), viewport, output3D); }
+	inline bool unproject(const CCVector3& input2D, CCVector3d& output3D) const
+	{
+		return ccGL::Unproject<PointCoordinateType, double>(input2D, modelViewMat.data(), projectionMat.data(), viewport, output3D);
+	}
 
 	//! Model view matrix (GL_MODELVIEW)
 	ccGLMatrixd modelViewMat;
@@ -62,6 +92,10 @@ struct ccGLCameraParameters
 	float fov_deg;
 	//! Pixel size (approximate if in perspective mode)
 	double pixelSize;
+	//! Near clipping depth
+	double nearClippingDepth;
+	//! Far clipping depth
+	double farClippingDepth;
 };
 
 //! Generic interface for GL displays

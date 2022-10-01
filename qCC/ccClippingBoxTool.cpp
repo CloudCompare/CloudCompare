@@ -292,6 +292,9 @@ bool ccClippingBoxTool::linkWith(ccGLWindow* win)
 {
 	if (m_associatedWin && m_clipBox)
 	{
+		// restore the the clipping planes
+		m_associatedWin->setClippingPlanesEnabled(true);
+
 		//remove clipping box from previous window
 		m_associatedWin->removeFromOwnDB(m_clipBox);
 		m_clipBox->disconnect(this);
@@ -315,6 +318,11 @@ bool ccClippingBoxTool::linkWith(ccGLWindow* win)
 			m_clipBox->setSelected(showInteractorsToolButton->isChecked());
 			connect(m_clipBox, &ccClipBox::boxModified, this, &ccClippingBoxTool::onBoxModified);
 		}
+
+		// the clipping box tool doesn't tak the clipping planes into account
+		// so we'll disable them temporarily
+		m_associatedWin->setClippingPlanesEnabled(false);
+
 		m_associatedWin->addToOwnDB(m_clipBox);
 	}
 	

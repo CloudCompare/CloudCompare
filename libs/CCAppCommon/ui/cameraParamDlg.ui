@@ -702,51 +702,45 @@
    <item>
     <layout class="QFormLayout" name="formLayout">
      <item row="0" column="0">
-      <widget class="QLabel" name="label_5">
-       <property name="toolTip">
-        <string>Relative position (zNear)</string>
-       </property>
+      <widget class="QCheckBox" name="nearClippingCheckBox">
        <property name="text">
-        <string>Near clipping plane</string>
+        <string>Near clipping depth</string>
        </property>
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QSlider" name="zNearHorizontalSlider">
-       <property name="minimum">
-        <number>0</number>
+      <widget class="QDoubleSpinBox" name="nearClippingDepthDoubleSpinBox">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="decimals">
+        <number>6</number>
        </property>
        <property name="maximum">
-        <number>300</number>
-       </property>
-       <property name="value">
-        <number>0</number>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <double>1000000.000000000000000</double>
        </property>
       </widget>
      </item>
      <item row="1" column="0">
-      <widget class="QLabel" name="label_6">
+      <widget class="QCheckBox" name="farClippingCheckBox">
        <property name="text">
-        <string>Far clipping plane</string>
+        <string>Far clipping depth</string>
        </property>
       </widget>
      </item>
      <item row="1" column="1">
-      <widget class="QSlider" name="zFarHorizontalSlider">
-       <property name="minimum">
-        <number>0</number>
+      <widget class="QDoubleSpinBox" name="farClippingDepthDoubleSpinBox">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="decimals">
+        <number>6</number>
        </property>
        <property name="maximum">
-        <number>300</number>
+        <double>1000000.000000000000000</double>
        </property>
        <property name="value">
-        <number>300</number>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <double>1000000.000000000000000</double>
        </property>
       </widget>
      </item>
@@ -810,6 +804,38 @@
     <hint type="destinationlabel">
      <x>286</x>
      <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>nearClippingCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>nearClippingDepthDoubleSpinBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>67</x>
+     <y>323</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>269</x>
+     <y>324</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>farClippingCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>farClippingDepthDoubleSpinBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>63</x>
+     <y>349</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>269</x>
+     <y>350</y>
     </hint>
    </hints>
   </connection>

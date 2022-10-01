@@ -61,8 +61,11 @@ struct LasExtraScalarField
     };
 
   public:
-    explicit LasExtraScalarField(QDataStream &dataStream);
-    void writeTo(QDataStream &dataStream) const;
+
+    LasExtraScalarField() = default;
+
+    friend QDataStream &operator>>(QDataStream &dataStream, LasExtraScalarField &extraScalarField);
+    friend QDataStream &operator<<(QDataStream &dataStream, const LasExtraScalarField &extraScalarField);
 
   public: // Static Helper functions that works on collection of LasExtraScalarFields
     static std::vector<LasExtraScalarField> ParseExtraScalarFields(const laszip_header &laszipHeader);

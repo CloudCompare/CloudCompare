@@ -32,23 +32,32 @@
 #include <CCGeom.h>
 #include <ccLog.h>
 
-//! Dialog to choose the LAS fields to load
+/// Dialog shown to the user when opening a LAS file 
 class LasOpenDialog : public QDialog, public Ui::LASOpenDialog
 {
     Q_OBJECT
 
   public:
-    //! Default constructor
+    /// Default constructor
     explicit LasOpenDialog(QWidget *parent = nullptr);
 
+    /// Set some informations about the file
+    /// to be displayed to the user.
     void setInfo(int versionMinor, int pointFormatId, int64_t numPoints);
 
+
+    /// Sets the list of standard LAS scalar fields as well as
+    /// user defined extra LAS scalar fields that are available in the file
+    /// the that the user is able to check which one should be loaded.
     void setAvailableScalarFields(const std::vector<LasScalarField> &scalarFields,
                                   const std::vector<LasExtraScalarField> &extraScalarFields);
 
+    /// Removes from the lists scalar fields and extra scalar fields
+    /// which the user unchecked from the list of fields to load.
     void filterOutNotChecked(std::vector<LasScalarField> &scalarFields,
                              std::vector<LasExtraScalarField> &extraScalarFields);
 
+  private:
     bool isChecked(const LasScalarField &lasScalarField) const;
 
     bool isChecked(const LasExtraScalarField &lasExtraScalarField) const;

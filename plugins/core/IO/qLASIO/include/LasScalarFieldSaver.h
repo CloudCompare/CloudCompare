@@ -29,11 +29,15 @@ struct laszip_point;
 class LasScalarFieldSaver
 {
   public:
+    /// Creates a new LasScalarFieldSaver that will save the given
+    /// stantard LAS fields and the LAS extra scalar fields
     LasScalarFieldSaver(std::vector<LasScalarField> &&standardFields,
                         std::vector<LasExtraScalarField> &&extraFields);
 
+    /// Saves the scalar fields values for pointIndex into the given laszip_point
     void handleScalarFields(size_t pointIndex, laszip_point &point);
 
+    /// Saves the extra scalar fields values for pointIndex into the given laszip_point
     void handleExtraFields(size_t pointIndex, laszip_point &point);
 
   private:

@@ -38,15 +38,21 @@ struct LasScalarField
         NearInfrared
     };
 
+    /// Represents an inclusive range of value from a minimum to a maximum.
+    ///
+    /// This is used to be able to detect and inform users from possible data loss.
     struct Range
     {
-
+        /// Creates a new Range given the min and max value.
+        ///
+        /// These values are converted to ScalarType
         template <class T>
         constexpr Range(T min_, T max_)
             : min(static_cast<ScalarType>(min_)), max(static_cast<ScalarType>(max_))
         {
         }
 
+        /// Shortcut to create a Range from a native type likue uint16_t
         template <class T> static constexpr Range ForType()
         {
             return Range(std::numeric_limits<T>::min(), std::numeric_limits<T>::max());
@@ -71,14 +77,21 @@ struct LasScalarField
     const char *name() const;
 
   public: // Static functions
+    /// Returns the name that correspond to the given LasScalarField::Id variant
     static constexpr const char *NameFromId(LasScalarField::Id id);
+    /// Returns the  LasScalarField::Id variant that correspond to the given name
+    /// 
+    /// Point Format is needed, as we have different Id for the same name depending on the point format.
+    /// For example: The "Classification" field has a different Id in fmt >= 6 as it allows to store more information.
+    /// 
+    /// Throws a logic_error if the name does not have a matching id
     static LasScalarField::Id IdFromName(const char *name, unsigned int targetPointFormat);
+    /// Returns the range of value the given field Id supports
     static LasScalarField::Range ValueRange(LasScalarField::Id id);
     /// Returns the scalar fields that correspond the the pointFormatId
     /// as per the LAS specification.
     static std::vector<LasScalarField> ForPointFormat(unsigned int pointFormatId);
 
-    // TODO They should be private
   public: // Members
     /// The Id of the LAS field this relates to.
     Id id;

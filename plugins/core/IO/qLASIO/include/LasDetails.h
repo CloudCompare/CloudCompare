@@ -139,7 +139,7 @@ inline bool HasNearInfrared(unsigned int pointFormatId)
 }
 
 /// Returns the number of bytes the vlrs amounts to.
-/// This includes the headers.
+/// This includes the headers of each vlrs.
 unsigned int SizeOfVlrs(const laszip_vlr_struct *vlrs, unsigned int numVlrs);
 
 /// Returns whether the vlr is the vlr for/of LASzip compression.

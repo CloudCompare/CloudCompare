@@ -42,16 +42,28 @@ class LasSaveDialog : public QDialog, public Ui::LASSaveDialog
     explicit LasSaveDialog(ccPointCloud *cloud, QWidget *parent = nullptr);
 
     void setVersionAndPointFormat(const QString &version, unsigned int pointFormat);
+    /// Set scale that would offer the user the best precision
     void setOptimalScale(const CCVector3d &optimalScale);
+    /// Set the scale that was used in the file the point cloud
+    /// to save comes from.
     void setSavedScale(const CCVector3d &savedScale);
+    /// Set the extra LAS scalar fields saved from the original file.
     void setExtraScalarFields(const std::vector<LasExtraScalarField> &extraScalarFields);
 
+    /// Returns the point format currently selected
     unsigned int selectedPointFormat() const;
+    /// Returns the minor version currently selected
     unsigned int selectedVersionMinor() const;
+    /// Returns the currently selected scale
     CCVector3d chosenScale() const;
+    /// Returns whether the user wants to save RGB
     bool shouldSaveRGB() const;
+    /// Returns whether the user wants to save the Waveforms
     bool shouldSaveWaveform() const;
-
+    /// Returns the vector of LAS scalar fields the user wants to save.
+    /// 
+    /// Each LAS scalar fields is mapped to an existing point cloud's ccScalarField.
+    /// The mapping is done by us and the user.
     std::vector<LasScalarField> fieldsToSave() const;
 
   public Q_SLOTS:

@@ -852,7 +852,7 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 
 	bool classificationMode = CCCoreLib::ScalarField::ValidValue(classificationValue);
 
-	//for each selected entity
+	// for each selected entity
 	for (QSet<ccHObject *>::const_iterator p = m_toSegment.constBegin(); p != m_toSegment.constEnd(); ++p)
 	{
 		ccGenericPointCloud *cloud = ccHObjectCaster::ToGenericPointCloud(*p);
@@ -892,7 +892,7 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 			pc->setCurrentDisplayedScalarField(sfIdx);
 		}
 
-		//we project each point and we check if it falls inside the segmentation polyline
+		// we project each point and we check if it falls inside the segmentation polyline
 #if defined(_OPENMP)
 		#pragma omp parallel for
 #endif
@@ -905,7 +905,7 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 				CCVector3d Q2D;
 				bool pointInFrustum = false;
 				camera.project(*P3D, Q2D, &pointInFrustum);
-				
+
 				bool pointInside = false;
 				if (pointInFrustum || !polyInsideViewport) //we can only skip the test if the point is outside the viewport/frustum AND the polyline is fully inside the viewport
 				{

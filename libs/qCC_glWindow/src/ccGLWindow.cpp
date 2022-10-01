@@ -45,6 +45,9 @@
 #include <QWheelEvent>
 #include <QOpenGLBuffer>
 
+//STL
+#include <array>
+
 #if defined( Q_OS_MAC ) || defined( Q_OS_LINUX )
 #include <QDir>
 #endif
@@ -285,8 +288,7 @@ struct ccGLWindow::ProjectionMetrics
 {
 	double zNear = 0.0;
 	double zFar = 0.0;
-	double cameraToBBCenterDist = 0.0;
-	double bbHalfDiag = 0.0;
+	ccBBox visibleObjectsBBox;
 };
 
 //! Picking parameters
@@ -335,8 +337,6 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=nullptr*/,
 	, m_lastMousePos(-1, -1)
 	, m_validModelviewMatrix(false)
 	, m_validProjectionMatrix(false)
-	, m_cameraToBBCenterDist(0.0)
-	, m_bbHalfDiag(0.0)
 	, m_LODEnabled(true)
 	, m_LODAutoDisable(false)
 	, m_shouldBeRefreshed(false)
@@ -397,6 +397,7 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=nullptr*/,
 	, m_rotationAxisLocked(false)
 	, m_lockedRotationAxis(0, 0, 1)
 	, m_texturePoolLastIndex(0)
+	, m_clippingPlanesEnabled(true)
 {
 	//start internal timer
 	m_timer.start();
@@ -964,7 +965,6 @@ bool ccGLWindow::initialize()
 				ccLog::Print(QString("[3D View %1] Stereo mode: %2").arg(m_uniqueID).arg(isStereoEnabled ? "supported" : "not supported"));
 			}
 		}
-
 
 #ifdef QT_DEBUG
 		//KHR extension (debug)
@@ -2447,6 +2447,25 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingPara
 		projectionMat = getProjectionMatrix();
 	}
 
+	//enable clipping planes
+	glFunc->glPushAttrib(GL_ENABLE_BIT);
+	if (m_clippingPlanesEnabled)
+	{
+		if (!std::isnan(m_viewportParams.nearClippingDepth))
+		{
+			double equation[4] = { 0.0, 0.0, -1.0, -m_viewportParams.nearClippingDepth };
+			glFunc->glClipPlane(GL_CLIP_PLANE0, equation);
+			glFunc->glEnable(GL_CLIP_PLANE0);
+		}
+
+		if (!std::isnan(m_viewportParams.farClippingDepth))
+		{
+			double equation[4] = { 0.0, 0.0, 1.0, m_viewportParams.farClippingDepth };
+			glFunc->glClipPlane(GL_CLIP_PLANE1, equation);
+			glFunc->glEnable(GL_CLIP_PLANE1);
+		}
+	}
+
 	//setup the projection matrix
 	{
 		glFunc->glMatrixMode(GL_PROJECTION);
@@ -2483,6 +2502,8 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingPara
 	{
 		m_winDBRoot->draw(CONTEXT);
 	}
+
+	glFunc->glPopAttrib(); // GL_ENABLE_BIT
 
 	//do this before drawing the pivot!
 	if (	m_autoPickPivotAtCenter
@@ -3360,86 +3381,114 @@ void ccGLWindow::invalidateViewport()
 
 ccGLMatrixd ccGLWindow::computeProjectionMatrix(bool withGLfeatures, ProjectionMetrics* metrics/*=nullptr*/, double* eyeOffset/*=nullptr*/) const
 {
-	double bbHalfDiag = 1.0;
-	CCVector3d bbCenter(0, 0, 0);
+	static const CCVector3 MinusOne(-CCCoreLib::PC_ONE / 2, -CCCoreLib::PC_ONE / 2, -CCCoreLib::PC_ONE / 2);
+	static const CCVector3 PlusOne(CCCoreLib::PC_ONE / 2, CCCoreLib::PC_ONE / 2, CCCoreLib::PC_ONE / 2);
+	ccBBox visibleObjectsBBox(MinusOne, PlusOne, true);
 
-	//compute center of visible objects constellation
+	// compute center of visible objects constellation
 	if (m_globalDBRoot || m_winDBRoot)
 	{
-		//get whole bounding-box
+		// get whole bounding-box
 		ccBBox box;
 		getVisibleObjectsBB(box);
 		if (box.isValid())
 		{
-			//get bbox center
-			bbCenter = box.getCenter();
-			//get half bbox diagonal length
-			bbHalfDiag = box.getDiagNormd() / 2;
+			visibleObjectsBBox = box;
 		}
 	}
 
-	CCVector3d cameraCenterToBBCenter = m_viewportParams.getCameraCenter() - bbCenter;
-	double cameraToBBCenterDist = cameraCenterToBBCenter.normd();
+	// get bbox center
+	CCVector3d bbCenter = visibleObjectsBBox.getCenter();
+	//get half bbox diagonal length
+	double bbHalfDiag = visibleObjectsBBox.getDiagNormd() / 2;
 
-	if (metrics)
+	// detrmine the min and max distance based on the current view matrix
+	ccGLMatrixd viewMatd = m_viewportParams.computeViewMatrix();
+
+	double zMin = std::numeric_limits<double>::quiet_NaN();
+	double zMax = zMin;
 	{
-		metrics->bbHalfDiag = bbHalfDiag;
-		metrics->cameraToBBCenterDist = cameraToBBCenterDist;
+		// apply the view matrix to all 8 corners
+		const CCVector3& bbMin = visibleObjectsBBox.minCorner();
+		const CCVector3& bbMax = visibleObjectsBBox.maxCorner();
+		std::array<CCVector3, 8> bbCorners
+		{
+			bbMin,
+			CCVector3(bbMin.x, bbMin.y, bbMax.z),
+			CCVector3(bbMin.x, bbMax.y, bbMin.z),
+			CCVector3(bbMax.x, bbMin.y, bbMin.z),
+			bbMax,
+			CCVector3(bbMax.x, bbMax.y, bbMin.z),
+			CCVector3(bbMax.x, bbMin.y, bbMax.z),
+			CCVector3(bbMin.x, bbMax.y, bbMax.z)
+		};
+
+		for (const CCVector3& P : bbCorners)
+		{
+			CCVector3d Pd = viewMatd * CCVector3d::fromArray(P.u);
+			double z = -Pd.z; // warning, the OpenGL camera looks toward -Z
+			if (std::isnan(zMin) || z < zMin)
+			{
+				zMin = z;
+			}
+			if (std::isnan(zMax) || z > zMax)
+			{
+				zMax = z;
+			}
+		}
 	}
 
-	//virtual pivot point (i.e. to handle viewer-based mode smoothly)
-	CCVector3d rotationCenter = m_viewportParams.getRotationCenter();
-
-	//compute the maximum distance between the pivot point and the farthest displayed object
-	double rotationCenterToFarthestObjectDist = 0.0;
+	// predict the minimum and maximum displayed depths
+	double zMinDisplayed = zMin;
+	double zMaxDisplayed = zMax;
 	{
-		//maximum distance between the pivot point and the farthest corner of the displayed objects bounding-box
-		rotationCenterToFarthestObjectDist = (bbCenter - rotationCenter).norm() + bbHalfDiag;
+		double pixelSize = computeActualPixelSize();
 
-		//(if enabled) the pivot symbol should always be visible in object-centere view mode
 		if (	m_pivotSymbolShown
 			&&	m_pivotVisibility != PIVOT_HIDE
 			&&	withGLfeatures
 			&&	m_viewportParams.objectCenteredView)
 		{
+			// take the pivot symbol into account
 			double pivotActualRadius_pix = CC_DISPLAYED_PIVOT_RADIUS_PERCENT * std::min(glWidth(), glHeight()) / 2.0;
-			double pivotSymbolScale = pivotActualRadius_pix * computeActualPixelSize();
-			rotationCenterToFarthestObjectDist = std::max(rotationCenterToFarthestObjectDist, pivotSymbolScale);
+			double pivotSymbolScale = pivotActualRadius_pix * pixelSize;
+			CCVector3d rotationCenterInCameraCS = viewMatd * m_viewportParams.getRotationCenter();
+			zMinDisplayed = std::min(zMinDisplayed, -rotationCenterInCameraCS.z - pivotSymbolScale);
+			zMaxDisplayed = std::max(zMaxDisplayed, -rotationCenterInCameraCS.z + pivotSymbolScale);
 		}
 
 		if (withGLfeatures && m_customLightEnabled)
 		{
-			//distance from custom light to pivot point
-			double distToCustomLight = (rotationCenter - CCVector3d::fromArray(m_customLightPos)).norm();
-			rotationCenterToFarthestObjectDist = std::max(rotationCenterToFarthestObjectDist, distToCustomLight);
+			// take the custom light into account
+			CCVector3d customLightPosInCameraCS = viewMatd * CCVector3d::fromArray(m_customLightPos);
+			double d = CC_DISPLAYED_CUSTOM_LIGHT_LENGTH * pixelSize;
+			zMinDisplayed = std::min(zMinDisplayed, -customLightPosInCameraCS.z - d);
+			zMaxDisplayed = std::max(zMaxDisplayed, -customLightPosInCameraCS.z + d);
 		}
-
-		rotationCenterToFarthestObjectDist *= 1.01; //for round-off issues
 	}
 
-	double cameraCenterToRotationCentertDist = 0;
-	if (m_viewportParams.objectCenteredView)
-	{
-		cameraCenterToRotationCentertDist = m_viewportParams.getFocalDistance();
-	}
-
-	//we deduce zFar
-	double zNear = cameraCenterToRotationCentertDist - rotationCenterToFarthestObjectDist;
-	double zFar = cameraCenterToRotationCentertDist + rotationCenterToFarthestObjectDist;
-
-	//compute the aspect ratio
+	// compute the aspect ratio
 	double ar = static_cast<double>(glHeight()) / glWidth();
+
+	double zNear = zMinDisplayed;
+	double zFar = zMaxDisplayed;
 
 	ccGLMatrixd projMatrix;
 	if (m_viewportParams.perspectiveView)
 	{
-		//DGM: the 'zNearCoef' must not be too small, otherwise the loss in accuracy
-		//for the detph buffer is too high and the display is jeopardized, especially
-		//for entities with large coordinates)
-		//zNear = zFar * m_viewportParams.zNearCoef;
-		zNear = bbHalfDiag * m_viewportParams.zNearCoef; //we want a stable value!
-		//zNear = std::max(bbHalfDiag * m_viewportParams.zNearCoef, zNear); //we want a stable value!
-		zFar = std::max(zNear + CCCoreLib::ZERO_TOLERANCE_D, zFar);
+		double minZFar = static_cast<double>(CCCoreLib::ZERO_TOLERANCE_F) / m_viewportParams.zNearCoef;
+		if (zFar < minZFar)
+		{
+			// no object in front of the camera! (or too small)
+			// use some default values
+			zFar = minZFar;
+			zNear = static_cast<double>(CCCoreLib::ZERO_TOLERANCE_F);
+		}
+		else
+		{
+			zNear = std::max(zMinDisplayed, zFar * m_viewportParams.zNearCoef);
+		}
+		zNear = std::min(zNear, zFar / 2);		// zNear can't be too close to zFar (for the EDL filter ;)
 
 		double xMax = zNear * m_viewportParams.computeDistanceToHalfWidthRatio();
 		double yMax = xMax * ar;
@@ -3472,12 +3521,11 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(bool withGLfeatures, ProjectionM
 	}
 	else
 	{
-		//zNear = std::max(zNear, 0.0);
-		zFar = std::max(zNear + CCCoreLib::ZERO_TOLERANCE_D, zFar);
+		zFar = std::max(zFar, zNear + static_cast<double>(CCCoreLib::ZERO_TOLERANCE_F));
 
 		//ccLog::Print(QString("cameraCenterToPivotDist = %0 / zNear = %1 / zFar = %2").arg(cameraCenterToPivotDist).arg(zNear).arg(zFar));
 
-		double xMax = std::abs(cameraCenterToRotationCentertDist) * m_viewportParams.computeDistanceToHalfWidthRatio();
+		double xMax = std::abs(m_viewportParams.getFocalDistance()) * m_viewportParams.computeDistanceToHalfWidthRatio();
 		double yMax = xMax * ar;
 
 		projMatrix = ccGL::Ortho(-xMax, xMax, -yMax, yMax, zNear, zFar);
@@ -3485,8 +3533,10 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(bool withGLfeatures, ProjectionM
 
 	if (metrics)
 	{
+		//ccLog::PrintDebug(QString("[%1 ; %2] R = %3").arg(zNear).arg(zFar).arg(zFar / zNear));
 		metrics->zNear = zNear;
 		metrics->zFar = zFar;
+		metrics->visibleObjectsBBox = visibleObjectsBBox;
 	}
 
 	return projMatrix;
@@ -3505,8 +3555,7 @@ void ccGLWindow::updateProjectionMatrix()
 
 	m_viewportParams.zNear = metrics.zNear;
 	m_viewportParams.zFar = metrics.zFar;
-	m_cameraToBBCenterDist = metrics.cameraToBBCenterDist;
-	m_bbHalfDiag = metrics.bbHalfDiag;
+	m_visibleObjectsBBox = metrics.visibleObjectsBBox;
 
 	m_validProjectionMatrix = true;
 }
@@ -3573,6 +3622,8 @@ void ccGLWindow::getGLCameraParameters(ccGLCameraParameters& params)
 	//other parameters
 	params.perspective = m_viewportParams.perspectiveView;
 	params.fov_deg = m_viewportParams.fov_deg;
+	params.nearClippingDepth = m_viewportParams.nearClippingDepth;
+	params.farClippingDepth = m_viewportParams.farClippingDepth;
 }
 
 const ccGLMatrixd& ccGLWindow::getModelViewMatrix()
@@ -4621,6 +4672,11 @@ void ccGLWindow::doPicking()
 	}
 }
 
+double ccGLWindow::computeDefaultIncrement() const
+{
+	return m_visibleObjectsBBox.getMaxBoxDim() / 250.0;
+}
+
 void ccGLWindow::wheelEvent(QWheelEvent* event)
 {
 	bool doRedraw = false;
@@ -4640,17 +4696,29 @@ void ccGLWindow::wheelEvent(QWheelEvent* event)
 	{
 		event->accept();
 
-		if (m_viewportParams.perspectiveView)
+		//same shortcut as Meshlab: change the zNear or zFar clipping planes
+		double increment = (event->delta() < 0 ? -1.0 : 1.0) * computeDefaultIncrement();
+		bool shiftPressed = (keyboardModifiers & Qt::ShiftModifier);
+		if (shiftPressed)
 		{
-			//same shortcut as Meshlab: change the zNear value
-			static const int MAX_INCREMENT = 150;
-			int increment = ccViewportParameters::ZNearCoefToIncrement(m_viewportParams.zNearCoef, MAX_INCREMENT + 1);
-			int newIncrement = std::min(std::max(0, increment + (event->delta() < 0 ? -1 : 1)), MAX_INCREMENT); //the zNearCoef must be < 1! 
-			if (newIncrement != increment)
+			//if ((increment < 0.0) || (!std::isnan(m_viewportParams.farClippingDepth)))
 			{
-				double newCoef = ccViewportParameters::IncrementToZNearCoef(newIncrement, MAX_INCREMENT + 1);
-				setZNearCoef(newCoef);
-				doRedraw = true;
+				double farClippingDepth = (std::isnan(m_viewportParams.farClippingDepth) ? m_viewportParams.zFar : m_viewportParams.farClippingDepth);
+				if (setFarClippingPlaneDepth(std::max(0.0, farClippingDepth + increment)))
+				{
+					doRedraw = true;
+				}
+			}
+		}
+		else
+		{
+			if ((increment > 0.0) || (!std::isnan(m_viewportParams.nearClippingDepth)))
+			{
+				double nearClippingDepth = (std::isnan(m_viewportParams.nearClippingDepth) ? m_viewportParams.zNear : m_viewportParams.nearClippingDepth);
+				if (setNearClippingPlaneDepth(std::max(0.0, nearClippingDepth + increment)))
+				{
+					doRedraw = true;
+				}
 			}
 		}
 	}
@@ -4699,21 +4767,17 @@ void ccGLWindow::onWheelEvent(float wheelDelta_deg)
 	else
 	{
 		double delta = 0.0;
-		if (m_viewportParams.objectCenteredView)
+		if (m_viewportParams.perspectiveView)
 		{
-			double cameraCenterToPivotDist = m_viewportParams.getFocalDistance();
-			delta = (std::abs(cameraCenterToPivotDist) / (wheelDelta_deg < 0.0 ? -20.0 : 20.0)) * getDisplayParameters().zoomSpeed;
+			delta = static_cast<double>(wheelDelta_deg * computeDefaultIncrement()) / 8.0 * getDisplayParameters().zoomSpeed;
+			double speedRatio = 10.0 * m_viewportParams.zNear / m_visibleObjectsBBox.getMaxBoxDim();
+			double speedCoef = std::min(16.0, exp(speedRatio));
+			delta *= speedCoef;
 		}
 		else
 		{
-			delta = static_cast<double>(wheelDelta_deg * computeActualPixelSize()) * getDisplayParameters().zoomSpeed;
-
-			//if we are (clearly) outisde of the displayed objects bounding-box
-			if (m_cameraToBBCenterDist > m_bbHalfDiag)
-			{
-				//we go faster if we are far from the entities
-				delta *= 1.0 + std::log(m_cameraToBBCenterDist / m_bbHalfDiag);
-			}
+			double cameraCenterToPivotDist = m_viewportParams.getFocalDistance();
+			delta = (std::abs(cameraCenterToPivotDist) / (wheelDelta_deg < 0.0 ? -20.0 : 20.0)) * getDisplayParameters().zoomSpeed;
 		}
 
 		CCVector3d v(0.0, 0.0, -delta);
@@ -5884,38 +5948,116 @@ void ccGLWindow::setBubbleViewFov(float fov_deg)
 	}
 }
 
-void ccGLWindow::setZNearCoef(double coef)
+bool ccGLWindow::setNearClippingPlaneDepth(double depth)
 {
-	if (coef <= 0.0 || coef >= 1.0)
+	QString message;
+	if (std::isnan(depth) || depth <= CCCoreLib::ZERO_TOLERANCE_F)
 	{
-		ccLog::Warning("[ccGLWindow::setZNearCoef] Invalid coef. value!");
-		return;
-	}
-
-	if (m_viewportParams.zNearCoef != coef)
-	{
-		//update param
-		m_viewportParams.zNearCoef = coef;
-		//and camera state (if perspective view is 'on')
-		if (m_viewportParams.perspectiveView)
+		if (!std::isnan(m_viewportParams.nearClippingDepth))
 		{
-			//invalidateViewport();
-			//invalidateVisualization();
-
-			//DGM: we update the projection matrix directly so as to get an up-to-date estimation of zNear
-			updateProjectionMatrix();
-
-			deprecate3DLayer();
-
-			displayNewMessage(	QString("Near clipping = %1% of max depth (= %2)").arg(m_viewportParams.zNearCoef * 100.0, 0, 'f', 1).arg(m_viewportParams.zNear),
-								ccGLWindow::LOWER_LEFT_MESSAGE, //DGM HACK: we cheat and use the same 'slot' as the window size
-								false,
-								2,
-								SCREEN_SIZE_MESSAGE);
+			m_viewportParams.nearClippingDepth = std::numeric_limits<double>::quiet_NaN();
+			message = QString("Near clipping plane disabled");
+		}
+		else
+		{
+			// nothing to do
+			return false;
+		}
+	}
+	else
+	{
+		if (depth < 0.0)
+		{
+			ccLog::Warning("[ccGLWindow::setNearClippingPlaneDepth] Invalid depth value!");
+			return false;
 		}
 
-		Q_EMIT zNearCoefChanged(coef);
+		if (depth > m_viewportParams.farClippingDepth)
+		{
+			ccLog::Warning(QString("[ccGLWindow::setNearClippingPlaneDepth] near clipping depth (%1) can't be larger than far clipping depth (%2)!").arg(depth).arg(m_viewportParams.farClippingDepth));
+			return false;
+		}
+
+		if (std::isnan(m_viewportParams.nearClippingDepth) || m_viewportParams.nearClippingDepth != depth)
+		{
+			//update param
+			m_viewportParams.nearClippingDepth = depth;
+			message = QString("Near clipping depth = %1").arg(depth);
+		}
+		else
+		{
+			// nothing to do
+			return false;
+		}
 	}
+
+	deprecate3DLayer();
+
+	displayNewMessage(	message,
+						ccGLWindow::LOWER_LEFT_MESSAGE, //DGM HACK: we cheat and use the same 'slot' as the window size
+						false,
+						2,
+						SCREEN_SIZE_MESSAGE);
+
+	Q_EMIT nearClippingDepthChanged(m_viewportParams.nearClippingDepth);
+
+	return true;
+}
+
+bool ccGLWindow::setFarClippingPlaneDepth(double depth)
+{
+	QString message;
+	if (std::isnan(depth) || depth >= 1.0e6)
+	{
+		if (!std::isnan(m_viewportParams.farClippingDepth))
+		{
+			m_viewportParams.farClippingDepth = std::numeric_limits<double>::quiet_NaN();
+			message = QString("Far clipping plane disabled");
+		}
+		else
+		{
+			// nothing to do
+			return false;
+		}
+	}
+	else
+	{
+		if (depth < 0.0)
+		{
+			ccLog::Warning("[ccGLWindow::setFarClippingPlaneDepth] Invalid depth value!");
+			return false;
+		}
+
+		if (depth < m_viewportParams.nearClippingDepth)
+		{
+			ccLog::Warning(QString("[ccGLWindow::setFarClippingPlaneDepth] far clipping depth (%1) can't be smaller than near clipping depth (%2)!").arg(depth).arg(m_viewportParams.nearClippingDepth));
+			return false;
+		}
+
+		if (std::isnan(m_viewportParams.farClippingDepth) || m_viewportParams.farClippingDepth != depth)
+		{
+			//update param
+			m_viewportParams.farClippingDepth = depth;
+			message = QString("Far clipping depth = %1").arg(depth);
+		}
+		else
+		{
+			// nothing to do
+			return false;
+		}
+	}
+
+	deprecate3DLayer();
+
+	displayNewMessage(	message,
+						ccGLWindow::LOWER_LEFT_MESSAGE, //DGM HACK: we cheat and use the same 'slot' as the window size
+						false,
+						2,
+						SCREEN_SIZE_MESSAGE);
+
+	Q_EMIT farClippingDepthChanged(m_viewportParams.farClippingDepth);
+
+	return true;
 }
 
 void ccGLWindow::setViewportParameters(const ccViewportParameters& params)
@@ -5946,6 +6088,7 @@ void ccGLWindow::rotateBaseViewMat(const ccGLMatrixd& rotMat)
 	//we emit the 'baseViewMatChanged' signal
 	Q_EMIT baseViewMatChanged(m_viewportParams.viewMat);
 
+	invalidateViewport();
 	invalidateVisualization();
 	deprecate3DLayer();
 }

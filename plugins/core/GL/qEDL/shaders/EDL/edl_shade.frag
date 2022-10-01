@@ -40,10 +40,9 @@ float fixDepth(float depth)
 	if (PerspectiveMode == 1)
 	{
 		//'1/z' depth-buffer transformation correction
-		float z_n = 2.0 * depth - 1.0;
-		depth = (2.0 * ZM * Zm) / ((ZM + Zm) - z_n * (ZM - Zm));
+		depth = (2.0 * ZM * Zm) / ((ZM + Zm) - (2.0 * depth - 1.0) * (ZM - Zm));
 		//eventually we want the depth to fall between 0 and 1
-		depth = depth / (ZM - Zm);
+		depth = (depth - Zm) / (ZM - Zm);
 	}
 
 	return clamp(1.0 - depth, 0.0, 1.0);

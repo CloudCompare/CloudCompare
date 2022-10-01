@@ -164,7 +164,6 @@ protected:
 
 	//! Clipping box
 	ccClipBox* m_clipBox;
-
 };
 
 #endif //CC_CLIPPING_BOX_TOOL_HEADER

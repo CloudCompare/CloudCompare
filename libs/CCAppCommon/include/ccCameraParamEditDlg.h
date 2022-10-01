@@ -82,8 +82,10 @@ public:
 	void updateViewMode();
 	//! Updates view f.o.v.
 	void updateWinFov(float fov_deg);
-	//! Update the zNear coef.
-	void updateZNearCoef(float zNearCoef);
+	//! Update the near clipping depth
+	void updateNearClippingDepth(double depth);
+	//! Update the far clipping depth
+	void updateFarClippingDepth(double depth);
 
 	void setFrontView();
 	void setBottomView();
@@ -102,7 +104,10 @@ public:
 	void dPsiValueChanged(double);
 	void dPhiValueChanged(double);
 
-	void zNearSliderMoved(int);
+	void nearClippingDepthChanged(double);
+	void nearClippingCheckBoxToggled(bool);
+	void farClippingDepthChanged(double);
+	void farClippingCheckBoxToggled(bool);
 	void pivotChanged();
 	void cameraCenterChanged();
 	void fovChanged(double);

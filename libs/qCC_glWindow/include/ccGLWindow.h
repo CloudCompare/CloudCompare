@@ -22,6 +22,7 @@
 #include <ccDrawableObject.h>
 #include <ccGenericGLDisplay.h>
 #include <ccGLUtils.h>
+#include <ccBBox.h>
 
 //qCC
 #include "ccGuiParameters.h"
@@ -420,10 +421,21 @@ public:
 	//! Sets current OpenGL camera aspect ratio (width/height)
 	virtual void setGLCameraAspectRatio(float ar);
 
-	//! Sets current camera 'zNear' coefficient
-	/** zNear coef. is only used in perspective mode.
+	//! Whether to allow near and far clipping planes or not
+	void setClippingPlanesEnabled(bool enabled) { m_clippingPlanesEnabled = enabled; }
+
+	//! Whether to near and far clipping planes are enabled or not
+	bool clippingPlanesEnabled() const { return m_clippingPlanesEnabled; }
+
+	//! Sets near clipping plane depth (or disable it if NaN)
+	/** \return whether the plane depth was actually changed
 	**/
-	virtual void setZNearCoef(double coef);
+	virtual bool setNearClippingPlaneDepth(double depth);
+
+	//! Sets far clipping plane depth (or disable it if NaN)
+	/** \return whether the plane depth was actually changed
+	**/
+	virtual bool setFarClippingPlaneDepth(double depth);
 
 	//! Invalidate current visualization state
 	/** Forces view matrix update and 3D/FBO display.
@@ -710,8 +722,11 @@ Q_SIGNALS:
 	//! Signal emitted when the f.o.v. changes
 	void fovChanged(float fov);
 
-	//! Signal emitted when the zNear coef changes
-	void zNearCoefChanged(float coef);
+	//! Signal emitted when the near clipping depth has been changed
+	void nearClippingDepthChanged(double depth);
+
+	//! Signal emitted when the far clipping depth has been changed
+	void farClippingDepthChanged(double depth);
 
 	//! Signal emitted when the pivot point is changed
 	void pivotPointChanged(const CCVector3d&);
@@ -1028,6 +1043,9 @@ protected: //other methods
 	//! Returns the approximate 3D position of the clicked pixel
 	bool getClick3DPos(int x, int y, CCVector3d& P3D, bool usePBO);
 
+	//! Computes the default increment (for moving the perspective camera, the cutting planes, etc.)
+	double computeDefaultIncrement() const;
+
 protected: //members
 
 #ifdef CC_GL_WINDOW_USE_QWINDOW
@@ -1072,10 +1090,8 @@ protected: //members
 	ccGLMatrixd m_projMatd;
 	//! Whether the projection matrix is valid (or need to be recomputed)
 	bool m_validProjectionMatrix;
-	//! Distance between the camera and the displayed objects bounding-box
-	double m_cameraToBBCenterDist;
-	//! Half size of the displayed objects bounding-box
-	double m_bbHalfDiag;
+	//! Bounding-box of the currently visible objects (updated by computeProjectionMatrix)
+	ccBBox m_visibleObjectsBBox;
 
 	//! GL viewport
 	QRect m_glViewport;
@@ -1358,6 +1374,9 @@ protected: //members
 
 	//! Fast pixel reading mechanism with PBO
 	PBOPicking m_pickingPBO;
+
+	//! Whether to near and far clipping planes are enabled or not
+	bool m_clippingPlanesEnabled;
 };
 
 #ifdef CC_GL_WINDOW_USE_QWINDOW

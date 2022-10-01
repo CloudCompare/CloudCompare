@@ -52,6 +52,10 @@ class LasScalarFieldLoader
         return m_standardFields;
     }
 
+    const std::vector<LasExtraScalarField>& extraFields() const {
+        return m_extraScalarFields;
+    }
+
   private:
     /// Handles loading of LAS value into the scalar field that will be part
     /// of the pointCloud.

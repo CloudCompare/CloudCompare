@@ -284,8 +284,6 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString &fileName, ccHObject &containe
     progressDialog.setMethodTitle("Loading LAS points");
     progressDialog.setInfo("Loading points");
     CCCoreLib::NormalizedProgress normProgress(&progressDialog, pointCount);
-    unsigned int numStepsForUpdate = 1 * pointCount / 100;
-    unsigned int lastProgressUpdate = 0;
     progressDialog.start();
 
     CC_FILE_ERROR error{CC_FERR_NO_ERROR};
@@ -361,11 +359,7 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString &fileName, ccHObject &containe
             waveformLoader->loadWaveform(*pointCloud, *laszipPoint);
         }
 
-        if ((i - lastProgressUpdate) == numStepsForUpdate)
-        {
-            normProgress.steps(i - lastProgressUpdate);
-            lastProgressUpdate += (i - lastProgressUpdate);
-        }
+        normProgress.oneStep();
     }
 
     for (const LasScalarField &field : loader.standardFields())
@@ -376,14 +370,15 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString &fileName, ccHObject &containe
             continue;
         }
         field.sf->computeMinAndMax();
+        field.sf->setSaturationStart(field.sf->getMin());
+        field.sf->setSaturationStop(field.sf->getMax());
+        field.sf->setMinDisplayed(field.sf->getMin());
+        field.sf->setMaxDisplayed(field.sf->getMax());
         switch (field.id)
         {
         case LasScalarField::Intensity:
             field.sf->setColorScale(ccColorScalesManager::GetDefaultScale(ccColorScalesManager::GREY));
-            field.sf->setSaturationStart(field.sf->getMin());
-            field.sf->setSaturationStop(field.sf->getMax());
-            field.sf->setMinDisplayed(field.sf->getMin());
-            field.sf->setMaxDisplayed(field.sf->getMax());
+            break;
         case LasScalarField::ReturnNumber:
         case LasScalarField::NumberOfReturns:
         case LasScalarField::ScanDirectionFlag:
@@ -414,6 +409,18 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString &fileName, ccHObject &containe
         case LasScalarField::ExtendedScanAngle:
             field.sf->setColorScale(ccColorScalesManager::GetDefaultScale(ccColorScalesManager::BGYR));
             break;
+        }
+    }
+
+    for (const LasExtraScalarField &field : loader.extraFields())
+    {
+        for (size_t i{0}; i < field.numElements(); ++i) {
+
+            field.scalarFields[i]->computeMinAndMax();
+            field.scalarFields[i]->setSaturationStart(field.scalarFields[i]->getMin());
+            field.scalarFields[i]->setSaturationStop(field.scalarFields[i]->getMax());
+            field.scalarFields[i]->setMinDisplayed(field.scalarFields[i]->getMin());
+            field.scalarFields[i]->setMaxDisplayed(field.scalarFields[i]->getMax());
         }
     }
 

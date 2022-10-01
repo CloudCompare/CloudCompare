@@ -14,40 +14,44 @@
 #include <vector>
 
 
-LasExtraScalarField::LasExtraScalarField(QDataStream &dataStream)
+QDataStream &operator>>(QDataStream &dataStream, LasExtraScalarField &extraScalarField)
 {
     dataStream.setByteOrder(QDataStream::ByteOrder::LittleEndian);
 
     uint8_t dataType;
     dataStream.skipRawData(2);
-    dataStream >> dataType >> options;
-    dataStream.readRawData(name, 32);
+    dataStream >> dataType >> extraScalarField.options;
+    dataStream.readRawData(extraScalarField.name, 32);
     dataStream.skipRawData(4);
-    dataStream.readRawData(reinterpret_cast<char *>(noData), 3 * 8);
-    dataStream.readRawData(reinterpret_cast<char *>(mins), 3 * 8);
-    dataStream.readRawData(reinterpret_cast<char *>(maxs), 3 * 8);
-    dataStream >> scales[0] >> scales[1] >> scales[2];
-    dataStream >> offsets[0] >> offsets[1] >> offsets[2];
-    dataStream.readRawData(reinterpret_cast<char *>(description), 32);
+    dataStream.readRawData(reinterpret_cast<char *>(extraScalarField.noData), 3 * 8);
+    dataStream.readRawData(reinterpret_cast<char *>(extraScalarField.mins), 3 * 8);
+    dataStream.readRawData(reinterpret_cast<char *>(extraScalarField.maxs), 3 * 8);
+    dataStream >> extraScalarField.scales[0] >> extraScalarField.scales[1] >> extraScalarField.scales[2];
+    dataStream >> extraScalarField.offsets[0] >> extraScalarField.offsets[1] >> extraScalarField.offsets[2];
+    dataStream.readRawData(reinterpret_cast<char *>(extraScalarField.description), 32);
 
-    type = DataTypeFromValue(dataType);
+    extraScalarField.type = LasExtraScalarField::DataTypeFromValue(dataType);
+
+    return dataStream;
 }
 
-void LasExtraScalarField::writeTo(QDataStream &dataStream) const
+QDataStream &operator<<(QDataStream &dataStream, const LasExtraScalarField &extraScalarField)
 {
     dataStream.setByteOrder(QDataStream::ByteOrder::LittleEndian);
 
     uint8_t emptyByte{0};
     dataStream << emptyByte << emptyByte;
-    dataStream << typeCode() << options;
-    dataStream.writeRawData(name, 32);
+    dataStream << extraScalarField.typeCode() << extraScalarField.options;
+    dataStream.writeRawData(extraScalarField.name, 32);
     dataStream << emptyByte << emptyByte << emptyByte << emptyByte;
-    dataStream.writeRawData(reinterpret_cast<const char *>(noData), 3 * 8);
-    dataStream.writeRawData(reinterpret_cast<const char *>(mins), 3 * 8);
-    dataStream.writeRawData(reinterpret_cast<const char *>(maxs), 3 * 8);
-    dataStream << scales[0] << scales[1] << scales[2];
-    dataStream << offsets[0] << offsets[1] << offsets[2];
-    dataStream.writeRawData(reinterpret_cast<const char *>(description), 32);
+    dataStream.writeRawData(reinterpret_cast<const char *>(extraScalarField.noData), 3 * 8);
+    dataStream.writeRawData(reinterpret_cast<const char *>(extraScalarField.mins), 3 * 8);
+    dataStream.writeRawData(reinterpret_cast<const char *>(extraScalarField.maxs), 3 * 8);
+    dataStream << extraScalarField.scales[0] << extraScalarField.scales[1] << extraScalarField.scales[2];
+    dataStream << extraScalarField.offsets[0] << extraScalarField.offsets[1] << extraScalarField.offsets[2];
+    dataStream.writeRawData(reinterpret_cast<const char *>(extraScalarField.description), 32);
+
+    return dataStream;
 }
 
 LasExtraScalarField::DataType LasExtraScalarField::DataTypeFromValue(uint8_t value)
@@ -258,7 +262,8 @@ LasExtraScalarField::ParseExtraScalarFields(const laszip_vlr_struct &extraBytesV
     unsigned int byteOffset{0};
     for (int j{0}; j < numExtraFields; ++j)
     {
-        LasExtraScalarField ebInfo(dataStream);
+        LasExtraScalarField ebInfo; 
+        dataStream >> ebInfo;
         ebInfo.byteOffset = byteOffset;
 
         if (ebInfo.type != DataType::Undocumented && ebInfo.type != ebInfo.DataType::Invalid)
@@ -362,7 +367,7 @@ void LasExtraScalarField::InitExtraBytesVlr(laszip_vlr_struct &vlr,
     QDataStream dataStream(&byteArray, QIODevice::WriteOnly);
     for (const LasExtraScalarField &extraScalarField : extraFields)
     {
-        extraScalarField.writeTo(dataStream);
+        dataStream << extraScalarField;
     }
     Q_ASSERT(byteArray.size() == vlr.record_length_after_header);
     std::copy(byteArray.begin(), byteArray.end(), vlr.data);

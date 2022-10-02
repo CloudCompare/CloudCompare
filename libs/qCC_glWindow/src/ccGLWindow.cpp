@@ -3490,7 +3490,8 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(bool withGLfeatures, ProjectionM
 		}
 		zNear = std::min(zNear, zFar / 2);		// zNear can't be too close to zFar (for the EDL filter ;)
 
-		double xMax = zNear * m_viewportParams.computeDistanceToHalfWidthRatio();
+		double distanceToHalfWidthRatio = (m_bubbleViewModeEnabled ? std::tan(CCCoreLib::DegreesToRadians(m_bubbleViewFov_deg / 2.0)) : m_viewportParams.computeDistanceToHalfWidthRatio());
+		double xMax = zNear * distanceToHalfWidthRatio;
 		double yMax = xMax * ar;
 
 		//DGM: we now take 'frustumAsymmetry' into account (for stereo rendering)
@@ -3621,7 +3622,7 @@ void ccGLWindow::getGLCameraParameters(ccGLCameraParameters& params)
 
 	//other parameters
 	params.perspective = m_viewportParams.perspectiveView;
-	params.fov_deg = m_viewportParams.fov_deg;
+	params.fov_deg = getFov();
 	params.nearClippingDepth = m_viewportParams.nearClippingDepth;
 	params.farClippingDepth = m_viewportParams.farClippingDepth;
 }
@@ -4727,9 +4728,9 @@ void ccGLWindow::wheelEvent(QWheelEvent* event)
 		event->accept();
 		
 		//same shortcut as Meshlab: change the fov value
-		float newFOV = (m_viewportParams.fov_deg + (event->delta() < 0 ? -1.0f : 1.0f));
+		float newFOV = (getFov() + (event->delta() < 0 ? -1.0f : 1.0f));
 		newFOV = std::min(std::max(1.0f, newFOV), 180.0f);
-		if (newFOV != m_viewportParams.fov_deg)
+		if (newFOV != getFov())
 		{
 			setFov(newFOV);
 			doRedraw = true;
@@ -6078,7 +6079,10 @@ void ccGLWindow::setViewportParameters(const ccViewportParameters& params)
 	Q_EMIT baseViewMatChanged(m_viewportParams.viewMat);
 	Q_EMIT pivotPointChanged(m_viewportParams.getPivotPoint());
 	Q_EMIT cameraPosChanged(m_viewportParams.getCameraCenter());
-	Q_EMIT fovChanged(m_viewportParams.fov_deg);
+	if (!m_bubbleViewModeEnabled)
+	{
+		Q_EMIT fovChanged(m_viewportParams.fov_deg);
+	}
 }
 
 void ccGLWindow::rotateBaseViewMat(const ccGLMatrixd& rotMat)

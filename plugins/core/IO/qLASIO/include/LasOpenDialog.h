@@ -48,7 +48,7 @@ class LasOpenDialog : public QDialog, public Ui::LASOpenDialog
 
     /// Sets the list of standard LAS scalar fields as well as
     /// user defined extra LAS scalar fields that are available in the file
-    /// the that the user is able to check which one should be loaded.
+    /// that the user is able to check which one should be loaded.
     void setAvailableScalarFields(const std::vector<LasScalarField> &scalarFields,
                                   const std::vector<LasExtraScalarField> &extraScalarFields);
 
@@ -56,6 +56,14 @@ class LasOpenDialog : public QDialog, public Ui::LASOpenDialog
     /// which the user unchecked from the list of fields to load.
     void filterOutNotChecked(std::vector<LasScalarField> &scalarFields,
                              std::vector<LasExtraScalarField> &extraScalarFields);
+
+    /// Returns whether the user wants to ignore (not load)
+    /// fields for which values are all default values.
+    bool shouldIgnoreFieldsWithDefaultValues() const;
+
+    /// Returns whether the user wants to treat the
+    /// rgb from the file as 8-bit components.
+    bool shouldForce8bitColors() const;
 
   private:
     bool isChecked(const LasScalarField &lasScalarField) const;

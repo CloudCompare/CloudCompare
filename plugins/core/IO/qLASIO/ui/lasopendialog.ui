@@ -188,6 +188,23 @@
              <item>
               <widget class="QListWidget" name="availableScalarFields"/>
              </item>
+             <item>
+              <widget class="QCheckBox" name="ignoreFieldsWithDefaultValuesCheckBox">
+               <property name="text">
+                <string>Ignore fields with default values only</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="force8bitColorsCheckBox">
+               <property name="text">
+                <string>Force 8-bit colors</string>
+               </property>
+              </widget>
+             </item>
             </layout>
            </widget>
            <widget class="QGroupBox" name="extraScalarFieldsFrame">

@@ -116,16 +116,24 @@ CC_FILE_ERROR LasScalarFieldLoader::handleScalarFields(ccPointCloud &pointCloud,
 
 CC_FILE_ERROR LasScalarFieldLoader::handleRGBValue(ccPointCloud &pointCloud, const laszip_point &currentPoint)
 {
-    if (!pointCloud.hasColors() && currentPoint.rgb[0] != 0)
+    uint16_t currentOredRGB = currentPoint.rgb[0] | currentPoint.rgb[1] | currentPoint.rgb[2];
+    if (!pointCloud.hasColors())
     {
+        if (m_ignoreFieldsWithDefaultValues && currentOredRGB == 0)
+        {
+            return CC_FERR_NO_ERROR;
+        }
+
         if (!pointCloud.reserveTheRGBTable())
         {
             return CC_FERR_NOT_ENOUGH_MEMORY;
         }
-        if ((currentPoint.rgb[0] | currentPoint.rgb[1] | currentPoint.rgb[2]) > 255)
+        if (!m_force8bitRgbMode && currentOredRGB > 255)
         {
-            colorCompShift = 8;
+            // LAS colors as on 16bits (as they should be)
+            m_colorCompShift = 8;
         }
+
         for (unsigned int j{0}; j < pointCloud.size() - 1; ++j)
         {
             auto red = static_cast<ColorCompType>(0);
@@ -137,9 +145,9 @@ CC_FILE_ERROR LasScalarFieldLoader::handleRGBValue(ccPointCloud &pointCloud, con
 
     if (pointCloud.hasColors())
     {
-        auto red = static_cast<ColorCompType>(currentPoint.rgb[0] >> colorCompShift);
-        auto green = static_cast<ColorCompType>(currentPoint.rgb[1] >> colorCompShift);
-        auto blue = static_cast<ColorCompType>(currentPoint.rgb[2] >> colorCompShift);
+        auto red = static_cast<ColorCompType>(currentPoint.rgb[0] >> m_colorCompShift);
+        auto green = static_cast<ColorCompType>(currentPoint.rgb[1] >> m_colorCompShift);
+        auto blue = static_cast<ColorCompType>(currentPoint.rgb[2] >> m_colorCompShift);
         pointCloud.addColor(ccColor::Rgb(red, green, blue));
     }
     return CC_FERR_NO_ERROR;
@@ -184,16 +192,20 @@ template <typename T>
 CC_FILE_ERROR
 LasScalarFieldLoader::handleScalarField(LasScalarField &sfInfo, ccPointCloud &pointCloud, T currentValue)
 {
-    if (!sfInfo.sf && currentValue != T{})
+    if (!sfInfo.sf)
     {
+        if (m_ignoreFieldsWithDefaultValues && currentValue == T{})
+        {
+            return CC_FERR_NO_ERROR;
+        }
         auto newSf = new ccScalarField(sfInfo.name());
         sfInfo.sf = newSf;
-        pointCloud.addScalarField(newSf);
         if (!newSf->reserveSafe(pointCloud.capacity()))
         {
             return CC_FERR_NOT_ENOUGH_MEMORY;
         }
         // addScalarField resizes the point scalarField
+        pointCloud.addScalarField(newSf);
         for (unsigned int j{0}; j < newSf->size() - 1; ++j)
         {
             newSf->setValue(j, static_cast<ScalarType>(T{}));
@@ -210,19 +222,22 @@ LasScalarFieldLoader::handleScalarField(LasScalarField &sfInfo, ccPointCloud &po
 CC_FILE_ERROR
 LasScalarFieldLoader::handleGpsTime(LasScalarField &sfInfo, ccPointCloud &pointCloud, double currentValue)
 {
-    if (!sfInfo.sf && currentValue != 0.0)
+    if (!sfInfo.sf)
     {
+        if (m_ignoreFieldsWithDefaultValues && currentValue == 0.0)
+        {
+            return CC_FERR_NO_ERROR;
+        }
         auto newSf = new ccScalarField(sfInfo.name());
         sfInfo.sf = newSf;
-        pointCloud.addScalarField(newSf);
         if (!newSf->reserveSafe(pointCloud.capacity()))
         {
             return CC_FERR_NOT_ENOUGH_MEMORY;
         }
-
+        // addScalarField resizes the point scalarField
+        pointCloud.addScalarField(newSf);
         newSf->setGlobalShift(currentValue);
 
-        // addScalarField resizes the point scalarField
         for (unsigned int j{0}; j < newSf->size() - 1; ++j)
         {
             newSf->setValue(j, static_cast<ScalarType>(0.0));

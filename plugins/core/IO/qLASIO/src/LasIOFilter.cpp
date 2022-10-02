@@ -276,6 +276,8 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString &fileName, ccHObject &containe
     }
 
     LasScalarFieldLoader loader(availableScalarFields, availableEXtraScalarFields, *pointCloud);
+    loader.setIgnoreFieldsWithDefaultValues(dialog.shouldIgnoreFieldsWithDefaultValues());
+    loader.setForce8bitRgbMode(dialog.shouldForce8bitColors());
     std::unique_ptr<LasWaveformLoader> waveformLoader{nullptr};
     if (LasDetails::HasWaveform(laszipHeader->point_data_format))
     {

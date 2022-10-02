@@ -47,6 +47,15 @@ class LasScalarFieldLoader
 
     CC_FILE_ERROR handleExtraScalarFields(ccPointCloud &pointCloud, const laszip_point &currentPoint);
 
+    void setIgnoreFieldsWithDefaultValues(bool state) {
+        m_ignoreFieldsWithDefaultValues = state;
+    }
+
+    void setForce8bitRgbMode(bool state)
+    {
+        m_force8bitRgbMode = state;
+    }
+
     const std::vector<LasScalarField> &standardFields() const
     {
         return m_standardFields;
@@ -88,7 +97,9 @@ class LasScalarFieldLoader
     template <typename T> void handleOptionsFor(const LasExtraScalarField &extraField, T values[3]);
 
   private:
-    unsigned char colorCompShift{0};
+    bool m_force8bitRgbMode{false};
+    bool m_ignoreFieldsWithDefaultValues{true};
+    unsigned char m_colorCompShift{0};
     std::vector<LasScalarField> &m_standardFields;
     std::vector<LasExtraScalarField>& m_extraScalarFields;
 

@@ -82,6 +82,8 @@ void LasOpenDialog::setInfo(int versionMinor, int pointFormatId, int64_t numPoin
     versionLabelValue->setText(QString("1.%1").arg(QString::number(versionMinor)));
     pointFormatLabelValue->setText(QString::number(pointFormatId));
     numPointsLabelValue->setText(PrettyFormatNumber(numPoints));
+
+    force8bitColorsCheckBox->setEnabled(LasDetails::HasRGB(pointFormatId));
 }
 
 void LasOpenDialog::setAvailableScalarFields(const std::vector<LasScalarField> &scalarFields,
@@ -117,6 +119,16 @@ void LasOpenDialog::filterOutNotChecked(std::vector<LasScalarField> &scalarField
 
     RemoveFalse(scalarFields, isFieldSelected);
     RemoveFalse(extraScalarFields, isFieldSelected);
+}
+
+bool LasOpenDialog::shouldIgnoreFieldsWithDefaultValues() const 
+{
+    return ignoreFieldsWithDefaultValuesCheckBox->isChecked();
+}
+
+bool LasOpenDialog::shouldForce8bitColors() const
+{
+    return force8bitColorsCheckBox->isChecked();
 }
 
 bool LasOpenDialog::isChecked(const LasExtraScalarField &lasExtraScalarField) const

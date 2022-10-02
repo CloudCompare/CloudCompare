@@ -105,6 +105,7 @@ constexpr char COMMAND_DELAUNAY_AA[]					= "AA";
 constexpr char COMMAND_DELAUNAY_BF[]					= "BEST_FIT";
 constexpr char COMMAND_DELAUNAY_MAX_EDGE_LENGTH[]		= "MAX_EDGE_LENGTH";
 constexpr char COMMAND_SF_ARITHMETIC[]					= "SF_ARITHMETIC";
+constexpr char COMMAND_SF_ARITHMETIC_IN_PLACE[]			= "IN_PLACE";
 constexpr char COMMAND_SF_OP[]							= "SF_OP";
 constexpr char COMMAND_SF_OP_SF[]						= "SF_OP_SF";
 constexpr char COMMAND_SF_INTERP[]						= "SF_INTERP";
@@ -4593,6 +4594,25 @@ bool CommandSFArithmetic::process(ccCommandLineInterface &cmd)
 			return cmd.error(QObject::tr("Operation %1 can't be applied with %2").arg(opName, COMMAND_SF_ARITHMETIC));
 		}
 	}
+
+	bool inPlace = false;
+
+	//read the optional arguments
+	while (!cmd.arguments().empty())
+	{
+		QString argument = cmd.arguments().front();
+		if (ccCommandLineInterface::IsCommand(argument, COMMAND_SF_ARITHMETIC_IN_PLACE))
+		{
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
+
+			inPlace = true;
+		}
+		else
+		{
+			break; //as soon as we encounter an unrecognized argument, we break the local loop to go back to the main one!
+		}
+	}
 	
 	//apply operation on clouds
 	for (size_t i = 0; i < cmd.clouds().size(); ++i)
@@ -4600,7 +4620,7 @@ bool CommandSFArithmetic::process(ccCommandLineInterface &cmd)
 		ccPointCloud* cloud = cmd.clouds()[i].pc;
 		if (cloud && cloud->getNumberOfScalarFields() != 0 && sfIndex < static_cast<int>(cloud->getNumberOfScalarFields()))
 		{
-			if (!ccScalarFieldArithmeticsDlg::Apply(cloud, operation, sfIndex < 0 ? static_cast<int>(cloud->getNumberOfScalarFields()) - 1 : sfIndex, false))
+			if (!ccScalarFieldArithmeticsDlg::Apply(cloud, operation, sfIndex < 0 ? static_cast<int>(cloud->getNumberOfScalarFields()) - 1 : sfIndex, inPlace))
 			{
 				return cmd.error(QObject::tr("Failed top apply operation on cloud '%1'").arg(cloud->getName()));
 			}
@@ -4623,7 +4643,7 @@ bool CommandSFArithmetic::process(ccCommandLineInterface &cmd)
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(mesh, &isLocked);
 		if (cloud && !isLocked && cloud->getNumberOfScalarFields() != 0 && sfIndex < static_cast<int>(cloud->getNumberOfScalarFields()))
 		{
-			if (!ccScalarFieldArithmeticsDlg::Apply(cloud, operation, sfIndex < 0 ? static_cast<int>(cloud->getNumberOfScalarFields()) - 1 : sfIndex, false))
+			if (!ccScalarFieldArithmeticsDlg::Apply(cloud, operation, sfIndex < 0 ? static_cast<int>(cloud->getNumberOfScalarFields()) - 1 : sfIndex, inPlace))
 			{
 				return cmd.error(QObject::tr("Failed top apply operation on mesh '%1'").arg(mesh->getName()));
 			}

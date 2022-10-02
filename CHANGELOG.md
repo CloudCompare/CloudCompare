@@ -57,6 +57,7 @@ v2.13.alpha (???) - (??/??/????)
 			(use simple quotes if the scalar field name has spaces in it)
 		- The -SF_COLOR_SCALE option now works on meshes (vertices) as well
 		- New sub-option for the -C2M_DIST command: -UNSIGNED, to compute unsigned distances
+		- New sub-option for the -SF_ARITHMETIC command: -IN_PLACE, to update the scalar field in place, without creating a new SF
 
 	- New entity picking mechanism (to not rely on the deprecated OpenGL 'names' pushing mechanism)
 		- Should hopefully solve most of the random issues with picking

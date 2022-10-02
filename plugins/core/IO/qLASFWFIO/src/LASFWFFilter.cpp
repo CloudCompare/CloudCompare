@@ -1163,12 +1163,13 @@ CC_FILE_ERROR LASFWFFilter::loadFile(const QString& filename, ccHObject& contain
 				ccGlobalShiftManager::Mode csModeBackup = parameters.shiftHandlingMode;
 				bool useLasOffset = false;
 				//set the lasOffset as default if none was provided
-				if (lasOffset.norm2() != 0 && ((nullptr == parameters._coordinatesShiftEnabled) || (false == *parameters._coordinatesShiftEnabled)))
+				CCVector3d lasOffsetXY(lasOffset.x, lasOffset.y, 0.0);
+				if (lasOffsetXY.norm2() != 0 && ((nullptr == parameters._coordinatesShiftEnabled) || (false == *parameters._coordinatesShiftEnabled)))
 				{
 					if (csModeBackup != ccGlobalShiftManager::NO_DIALOG) //No dialog, practically means that we don't want any shift!
 					{
 						useLasOffset = true;
-						Pshift = -lasOffset;
+						Pshift = -lasOffsetXY;
 						if (csModeBackup != ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT)
 						{
 							parameters.shiftHandlingMode = ccGlobalShiftManager::ALWAYS_DISPLAY_DIALOG;

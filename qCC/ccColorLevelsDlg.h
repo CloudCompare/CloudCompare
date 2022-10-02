@@ -36,6 +36,9 @@ public:
 	//! Default constructor
 	ccColorLevelsDlg(QWidget* parent, ccGenericPointCloud* pointCloud);
 
+	//! Scales some RGB fields of the input cloud
+	static bool ScaleColorFields(ccGenericPointCloud* cloud, int inputLevelMin, int inputLevelMax, int outputLevelMin, int outputLevelMax, const bool applyRGB[3]);
+
 protected:
 
 	void onChannelChanged(int);

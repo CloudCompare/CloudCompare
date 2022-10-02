@@ -29,6 +29,7 @@
 #include "ccLibAlgorithms.h"
 #include "ccRegistrationTools.h"
 #include "ccScalarFieldArithmeticsDlg.h"
+#include "ccColorLevelsDlg.h"
 
 //Qt
 #include "ccCommandLineCommands.h"
@@ -89,6 +90,7 @@ constexpr char COMMAND_CROP[]							= "CROP";
 constexpr char COMMAND_CROP_OUTSIDE[]					= "OUTSIDE";
 constexpr char COMMAND_CROP_2D[]						= "CROP2D";
 constexpr char COMMAND_COLOR_BANDING[]					= "CBANDING";
+constexpr char COMMAND_COLOR_LEVELS[]					= "CLEVELS";
 constexpr char COMMAND_C2M_DIST[]						= "C2M_DIST";
 constexpr char COMMAND_C2M_DIST_FLIP_NORMALS[]			= "FLIP_NORMS";
 constexpr char COMMAND_C2M_DIST_UNSIGNED[]				= "UNSIGNED";
@@ -3784,6 +3786,7 @@ bool CommandColorBanding::process(ccCommandLineInterface &cmd)
 	//process clouds
 	if (!cmd.clouds().empty())
 	{
+		bool hasclouds = false;
 		for (size_t i = 0; i < cmd.clouds().size(); ++i)
 		{
 			if (cmd.clouds()[i].pc)
@@ -3792,11 +3795,15 @@ bool CommandColorBanding::process(ccCommandLineInterface &cmd)
 				{
 					return cmd.error(QObject::tr("Not enough memory"));
 				}
+				else
+				{
+					hasclouds = true;
+				}
 			}
 		}
 		
 		//save output
-		if (cmd.autoSaveMode() && !cmd.saveClouds(QObject::tr("COLOR_BANDING_%1_%2").arg(dimStr).arg(freq)))
+		if (hasclouds && cmd.autoSaveMode() && !cmd.saveClouds(QObject::tr("COLOR_BANDING_%1_%2").arg(dimStr).arg(freq)))
 		{
 			return false;
 		}
@@ -3814,8 +3821,11 @@ bool CommandColorBanding::process(ccCommandLineInterface &cmd)
 				{
 					return cmd.error(QObject::tr("Not enough memory"));
 				}
-				cmd.meshes()[i].mesh->showColors(true);
-				hasMeshes = true;
+				else
+				{
+					cmd.meshes()[i].mesh->showColors(true);
+					hasMeshes = true;
+				}
 			}
 			else
 			{
@@ -3830,6 +3840,109 @@ bool CommandColorBanding::process(ccCommandLineInterface &cmd)
 		}
 	}
 	
+	return true;
+}
+
+CommandColorLevels::CommandColorLevels()
+	: ccCommandLineInterface::Command(QObject::tr("Color levels"), COMMAND_COLOR_LEVELS)
+{}
+
+bool CommandColorLevels::process(ccCommandLineInterface &cmd)
+{
+	cmd.print(QObject::tr("[COLOR LEVELS]"));
+
+	if (cmd.arguments().size() < 5)
+	{
+		return cmd.error(QObject::tr("Missing parameter(s) after \"-%1\" (COLOR-BANDS MIN-INPUT-LEVEL MAX-INPUT-LEVEL MIN-OUTPUT-LEVEL MAX-OUTPUT-LEVEL)").arg(COMMAND_COLOR_LEVELS));
+	}
+	if (cmd.clouds().empty() && cmd.meshes().empty())
+	{
+		return cmd.error(QObject::tr("No entity available. Be sure to open or generate one first!"));
+	}
+
+	//color bands
+	QString band = cmd.arguments().takeFirst().toUpper();
+	bool rgb[3] { band.contains('R'), band.contains('G'), band.contains('B') };
+	{
+		QString testBand = band;
+		testBand.remove('R');
+		testBand.remove('G');
+		testBand.remove('B');
+		if (!testBand.isEmpty())
+		{
+			return cmd.error(QObject::tr("Invalid parameter: bands after \"-%1\" (expected: any combination of R, G or B)").arg(COMMAND_COLOR_LEVELS));
+		}
+	}
+
+	//min level
+	int levels[4] = { 0 };
+	for (int i = 0; i < 4; ++i)
+	{
+		bool ok = true;
+		QString levelStr = cmd.arguments().takeFirst();
+		levels[i] = levelStr.toInt(&ok);
+		if (!ok || levels[i] < 0 || levels[i] > 255)
+		{
+			return cmd.error(QObject::tr("Invalid parameter: color level after \"-%1 COLOR-BANDS\" (integer value between 0 and 255 expected)").arg(COMMAND_COLOR_LEVELS));
+		}
+	}
+
+	//process clouds
+	if (!cmd.clouds().empty())
+	{
+		bool hasClouds = false;
+		for (size_t i = 0; i < cmd.clouds().size(); ++i)
+		{
+			if (cmd.clouds()[i].pc && cmd.clouds()[i].pc->hasColors())
+			{
+				if (!ccColorLevelsDlg::ScaleColorFields(cmd.clouds()[i].pc, levels[0], levels[1], levels[2], levels[3], rgb))
+				{
+					cmd.warning(QObject::tr("Failed to scale the color band(s) of cloud '%1'").arg(cmd.clouds()[i].pc->getName()));
+				}
+				else
+				{
+					hasClouds = true;
+				}
+			}
+		}
+
+		//save output
+		if (hasClouds && cmd.autoSaveMode() && !cmd.saveClouds(QObject::tr("COLOR_LEVELS_%1_%2_%3").arg(band).arg(levels[2]).arg(levels[3])))
+		{
+			return false;
+		}
+	}
+
+	if (!cmd.meshes().empty())
+	{
+		bool hasMeshes = false;
+		for (size_t i = 0; i < cmd.meshes().size(); ++i)
+		{
+			ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(cmd.meshes()[i].mesh);
+			if (cloud && cloud->hasColors())
+			{
+				if (!ccColorLevelsDlg::ScaleColorFields(cloud, levels[0], levels[1], levels[2], levels[3], rgb))
+				{
+					cmd.warning(QObject::tr("Failed to scale the color band(s) of mesh '%1'").arg(cmd.meshes()[i].mesh->getName()));
+				}
+				else
+				{
+					hasMeshes = true;
+				}
+			}
+			else if (cmd.meshes()[i].mesh->hasColors())
+			{
+				cmd.warning(QObject::tr("Vertices of mesh '%1' are locked (they may be shared by multiple entities for instance). Can't apply the current command on them.").arg(cmd.meshes()[i].mesh->getName()));
+			}
+		}
+
+		//save output
+		if (hasMeshes && cmd.autoSaveMode() && !cmd.saveMeshes(QObject::tr("COLOR_LEVELS_%1_%2_%3").arg(band).arg(levels[2]).arg(levels[3])))
+		{
+			return false;
+		}
+	}
+
 	return true;
 }
 

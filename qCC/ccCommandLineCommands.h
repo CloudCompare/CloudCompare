@@ -323,6 +323,13 @@ struct CommandColorBanding : public ccCommandLineInterface::Command
 	bool process(ccCommandLineInterface& cmd) override;
 };
 
+struct CommandColorLevels : public ccCommandLineInterface::Command
+{
+	CommandColorLevels();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
 struct CommandDist : public ccCommandLineInterface::Command
 {
 	CommandDist(bool cloud2meshDist, const QString& name, const QString& keyword);

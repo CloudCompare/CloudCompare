@@ -48,7 +48,7 @@ ccColorLevelsDlg::ccColorLevelsDlg(QWidget* parent, ccGenericPointCloud* pointCl
 
 	//connect GUI elements
 	connect(channelComboBox, qOverload<int>(&QComboBox::currentIndexChanged),	this,	&ccColorLevelsDlg::onChannelChanged);
-	connect(buttonBox->button(QDialogButtonBox::Apply), &QPushButton::clicked,							this,	&ccColorLevelsDlg::onApply);
+	connect(buttonBox->button(QDialogButtonBox::Apply), &QPushButton::clicked,	this,	&ccColorLevelsDlg::onApply);
 
 	//create histogram view
 	m_histogram = new ccHistogramWindow(this);
@@ -180,46 +180,12 @@ void ccColorLevelsDlg::onApply()
 								channelComboBox->currentIndex() == RGB || channelComboBox->currentIndex() == GREEN,
 								channelComboBox->currentIndex() == RGB || channelComboBox->currentIndex() == BLUE };
 
-		//update display
-		ccPointCloud* pc = ccHObjectCaster::ToPointCloud(m_cloud);
-
-		unsigned pointCount = m_cloud->size();
-		int qIn = s_inputLevels[1] - s_inputLevels[0];
-		int pOut = s_outputLevels[1] - s_outputLevels[0];
-		for (unsigned i = 0; i < pointCount; ++i)
-		{
-			const ccColor::Rgba& col = m_cloud->getPointColor(i);
-			ccColor::Rgba newRgb;
-			for (unsigned c = 0; c < 3; ++c)
-			{
-				if (applyRGB[c])
-				{
-					double newC = s_outputLevels[0];
-					if (qIn)
-					{
-						double u = (static_cast<double>(col.rgba[c]) - s_inputLevels[0]) / qIn;
-						newC = s_outputLevels[0] + u * pOut;
-					}
-					newRgb.rgba[c] = static_cast<ColorCompType>(std::max<double>(std::min<double>(newC, ccColor::MAX), 0.0));
-				}
-				else
-				{
-					newRgb.rgba[c] = col.rgba[c];
-				}
-			}
-			newRgb.a = col.a;
-
-			//set the new color
-			if (pc)
-			{
-				pc->setPointColor(i, newRgb);
-			}
-			else
-			{
-				//DGM FIXME: dirty!
-				const_cast<ccColor::Rgba&>(col) = newRgb;
-			}
-		}
+		ScaleColorFields(	m_cloud,
+							s_inputLevels[0],
+							s_inputLevels[1],
+							s_outputLevels[0],
+							s_outputLevels[1],
+							applyRGB );
 
 		//update display
 		m_cloud->getDisplay()->redraw();
@@ -234,4 +200,57 @@ void ccColorLevelsDlg::onApply()
 	maxInputSpinBox->setValue(255);
 	minOutputSpinBox->setValue(0);
 	maxOutputSpinBox->setValue(255);
+}
+
+bool ccColorLevelsDlg::ScaleColorFields(ccGenericPointCloud* cloud, int inputLevelMin, int inputLevelMax, int outputLevelMin, int outputLevelMax, const bool applyRGB[3])
+{
+	if (!cloud)
+	{
+		assert(false);
+		return false;
+	}
+	if (!cloud->hasColors())
+	{
+		ccLog::Warning("(ccColorLevelsDlg::ScaleColorFields] Cloud has no colors");
+		return false;
+	}
+
+	ccPointCloud* pc = ccHObjectCaster::ToPointCloud(cloud);
+
+	unsigned pointCount = cloud->size();
+	int qIn = inputLevelMax - inputLevelMin;
+	if (qIn == 0)
+	{
+		ccLog::Warning("(ccColorLevelsDlg::ScaleColorFields] Flat input range (input range can't be 0)");
+		return false;
+	}
+
+	int pOut = outputLevelMax - outputLevelMin;
+	double convRatio = pOut / static_cast<double>(qIn);
+	for (unsigned i = 0; i < pointCount; ++i)
+	{
+		const ccColor::Rgba& col = cloud->getPointColor(i);
+		ccColor::Rgba newRgb = col;
+		for (unsigned c = 0; c < 3; ++c)
+		{
+			if (applyRGB[c])
+			{
+				double newC = outputLevelMin + (static_cast<int>(col.rgba[c]) - inputLevelMin) * convRatio;
+				newRgb.rgba[c] = static_cast<ColorCompType>(std::max(std::min(newC, static_cast<double>(ccColor::MAX)), 0.0));
+			}
+		}
+
+		//set the new color
+		if (pc)
+		{
+			pc->setPointColor(i, newRgb);
+		}
+		else
+		{
+			//DGM FIXME: dirty!
+			const_cast<ccColor::Rgba&>(col) = newRgb;
+		}
+	}
+
+	return true;
 }

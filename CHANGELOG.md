@@ -14,6 +14,13 @@ v2.13.alpha (???) - (??/??/????)
 			- to interpolate a scalar field from one cloud to another cloud (use DEST_IS_FIRST if destination is first)
 		- SF_ADD_CONST
 			- to add a constant scalar field to a cloud
+		- CLEVELS
+			- to edit the color bands histogram of a cloud or a mesh (https://www.cloudcompare.org/doc/wiki/index.php/Colors%5CLevels)
+			- syntax: -CLEVELS BANDS INPUT_RANGE_MIN INPUT_RANGE_MAX OUTPUT_RANGE_MIN OUTPUT_RANGE_MAX
+				- band can be any mix of 'R', 'G' and 'B' (ex: 'G' or 'RB' or 'RGB')
+				- selected color component values will be scaled so that
+					[INPUT_RANGE_MIN INPUT_RANGE_MAX] becomes [OUTPUT_RANGE_MIN OUTPUT_RANGE_MAX]
+					(values ouside of the input range will also be scaled)
 
 	- New display feature: near and far clipping planes in 3D views
 		- extension of the previously existing feature to set a near clipping plane

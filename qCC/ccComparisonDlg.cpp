@@ -84,7 +84,7 @@ ccComparisonDlg::ccComparisonDlg(	ccHObject* compEntity,
 	{
 		//octree level
 		octreeLevelComboBox->addItem("AUTO");
-		for (int i=1; i<=CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL; ++i)
+		for (int i = 1; i <= CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL; ++i)
 			octreeLevelComboBox->addItem(QString::number(i));
 
 		//local model

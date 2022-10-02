@@ -91,6 +91,7 @@ constexpr char COMMAND_CROP_2D[]						= "CROP2D";
 constexpr char COMMAND_COLOR_BANDING[]					= "CBANDING";
 constexpr char COMMAND_C2M_DIST[]						= "C2M_DIST";
 constexpr char COMMAND_C2M_DIST_FLIP_NORMALS[]			= "FLIP_NORMS";
+constexpr char COMMAND_C2M_DIST_UNSIGNED[]				= "UNSIGNED";
 constexpr char COMMAND_C2C_DIST[]						= "C2C_DIST";
 constexpr char COMMAND_CLOSEST_POINT_SET[]              = "CLOSEST_POINT_SET";
 constexpr char COMMAND_C2C_SPLIT_XYZ[]					= "SPLIT_XYZ";
@@ -3903,6 +3904,7 @@ bool CommandDist::process(ccCommandLineInterface &cmd)
 	
 	//inner loop for Distance computation options
 	bool flipNormals = false;
+	bool unsignedDistances = false;
 	double maxDist = 0.0;
 	unsigned octreeLevel = 0;
 	int maxThreadCount = 0;
@@ -3925,7 +3927,19 @@ bool CommandDist::process(ccCommandLineInterface &cmd)
 			
 			if (!m_cloud2meshDist)
 			{
-				cmd.warning(QObject::tr("Parameter \"-%1\" ignored: only for C2M distance!"));
+				cmd.warning(QObject::tr("Parameter \"-%1\" ignored: only for C2M distance!").arg(COMMAND_C2M_DIST_FLIP_NORMALS));
+			}
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_C2M_DIST_UNSIGNED))
+		{
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
+
+			unsignedDistances = true;
+
+			if (!m_cloud2meshDist)
+			{
+				cmd.warning(QObject::tr("Parameter \"-%1\" ignored: only for C2M distance!").arg(COMMAND_C2M_DIST_UNSIGNED));
 			}
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_C2X_MAX_DISTANCE))
@@ -4104,10 +4118,8 @@ bool CommandDist::process(ccCommandLineInterface &cmd)
 	//C2M-only parameters
 	if (m_cloud2meshDist)
 	{
-		if (flipNormals)
-		{
-			compDlg.flipNormalsCheckBox->setChecked(true);
-		}
+		compDlg.flipNormalsCheckBox->setChecked(flipNormals);
+		compDlg.signedDistCheckBox->setChecked(unsignedDistances);
 	}
 	//C2C-only parameters
 	else

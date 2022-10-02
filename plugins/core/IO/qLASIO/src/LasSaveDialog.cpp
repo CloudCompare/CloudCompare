@@ -25,6 +25,7 @@
 
 constexpr int ExtraScalarFieldsTabIndex = 2;
 
+//! Widget to map a predefined scalar field 'role' with a particular scalar field (combo box)
 class MappingLabel : public QWidget
 {
   public:
@@ -32,6 +33,7 @@ class MappingLabel : public QWidget
         : QWidget(parent), m_nameLabel(new QLabel), m_statusLabel(new QLabel)
     {
         auto *layout = new QHBoxLayout;
+        layout->setMargin(0);
         layout->addWidget(m_nameLabel);
         layout->addWidget(m_statusLabel);
         setLayout(layout);
@@ -70,23 +72,30 @@ class MappingLabel : public QWidget
 };
 
 LasSaveDialog::LasSaveDialog(ccPointCloud *cloud, QWidget *parent)
-    : QDialog(parent), m_cloud(cloud), m_comboBoxModel(new QStringListModel)
+    : QDialog(parent), m_cloud(cloud), m_comboBoxModel(new QStringListModel),
+      m_optimalScale(std::numeric_limits<double>::quiet_NaN(),
+                     std::numeric_limits<double>::quiet_NaN(),
+                     std::numeric_limits<double>::quiet_NaN()),
+      m_originalScale(std::numeric_limits<double>::quiet_NaN(),
+                      std::numeric_limits<double>::quiet_NaN(),
+                      std::numeric_limits<double>::quiet_NaN())
 {
     setupUi(this);
-    origRadioButton_2->setEnabled(false);
-    customScaleDoubleSpinBox_2->setEnabled(true);
-    bestRadioButton_2->setChecked(true);
+    bestScaleRadioButton->setChecked(false);
+    originalScaleRadioButton->setEnabled(false);
+    customScaleRadioButton->setEnabled(true);
+    customScaleRadioButton->setChecked(true);
 
     connect(versionComboBox,
-            (void(QComboBox::*)(const QString &))(&QComboBox::currentIndexChanged),
+            (void (QComboBox::*)(const QString &))(&QComboBox::currentIndexChanged),
             this,
             &LasSaveDialog::handleSelectedVersionChange);
 
     connect(pointFormatComboBox,
-            (void(QComboBox::*)(int))(&QComboBox::currentIndexChanged),
+            (void (QComboBox::*)(int))(&QComboBox::currentIndexChanged),
             this,
             &LasSaveDialog::handleSelectedPointFormatChange);
-    
+
     for (const char *versionStr : LasDetails::AvailableVersions())
     {
         versionComboBox->addItem(versionStr);
@@ -109,7 +118,8 @@ LasSaveDialog::LasSaveDialog(ccPointCloud *cloud, QWidget *parent)
 /// of point format to match the ones supported by the version
 void LasSaveDialog::handleSelectedVersionChange(const QString &version)
 {
-    const std::vector<unsigned int> *pointFormats = LasDetails::PointFormatsAvailableForVersion(qPrintable(version));
+    const std::vector<unsigned int> *pointFormats =
+        LasDetails::PointFormatsAvailableForVersion(qPrintable(version));
     if (pointFormats)
     {
         pointFormatComboBox->clear();
@@ -214,6 +224,7 @@ void LasSaveDialog::handleSelectedPointFormatChange(int index)
     {
         auto *label = scalarFieldFormLayout->itemAt(i, QFormLayout::LabelRole);
         auto *field = scalarFieldFormLayout->itemAt(i, QFormLayout::FieldRole);
+
         if (label != nullptr && label->widget() != nullptr)
         {
             label->widget()->hide();
@@ -269,7 +280,6 @@ void LasSaveDialog::handleSelectedPointFormatChange(int index)
         }
     }
 
-
     if (!LasDetails::HasRGB(selectedPointFormat) && !LasDetails::HasWaveform(selectedPointFormat))
     {
         specialScalarFieldFrame->hide();
@@ -318,18 +328,30 @@ void LasSaveDialog::setVersionAndPointFormat(const QString &version, unsigned in
     }
 }
 
-void LasSaveDialog::setOptimalScale(const CCVector3d &optimalScale)
+void LasSaveDialog::setOptimalScale(const CCVector3d &scale, bool autoCheck /*=false*/)
 {
-    bestAccuracyLabel_2->setText(
-        QString("(%1, %2, %3)").arg(optimalScale.x).arg(optimalScale.y).arg(optimalScale.z));
+    m_optimalScale = scale;
+
+    bestScaleLabel->setText(QString("(%1, %2, %3)").arg(scale.x).arg(scale.y).arg(scale.z));
+
+    bestScaleRadioButton->setEnabled(true);
+    if (autoCheck)
+    {
+        bestScaleRadioButton->setChecked(true);
+    }
 }
 
-void LasSaveDialog::setSavedScale(const CCVector3d &savedScale)
+void LasSaveDialog::setOriginalScale(const CCVector3d &scale, bool autoCheck /*=true*/)
 {
-    origAccuracyLabel_2->setText(
-        QString("(%1, %2, %3)").arg(savedScale.x).arg(savedScale.y).arg(savedScale.z));
-    origRadioButton_2->setEnabled(true);
-    origRadioButton_2->setChecked(true);
+    m_originalScale = scale;
+
+    originalScaleLabel->setText(QString("(%1, %2, %3)").arg(scale.x).arg(scale.y).arg(scale.z));
+
+    originalScaleRadioButton->setEnabled(true);
+    if (autoCheck)
+    {
+        originalScaleRadioButton->setChecked(true);
+    }
 }
 
 void LasSaveDialog::setExtraScalarFields(const std::vector<LasExtraScalarField> &extraScalarFields)
@@ -374,33 +396,25 @@ bool LasSaveDialog::shouldSaveWaveform() const
 
 CCVector3d LasSaveDialog::chosenScale() const
 {
-    const auto vectorFromString = [](const QString &string) -> CCVector3d
+    if (bestScaleRadioButton->isChecked())
     {
-        QVector<QStringRef> splits = string.splitRef(',');
-        if (splits.size() == 3)
-        {
-            double x = splits[0].right(splits[0].size() - 1).toDouble();
-            double y = splits[1].toDouble();
-            double z = splits[2].left(splits[2].size() - 1).toDouble();
-            return {x, y, z};
-        }
-        return {};
-    };
-    if (bestRadioButton_2->isChecked())
-    {
-        QString text = bestAccuracyLabel_2->text();
-        return vectorFromString(text);
+        assert(std::isfinite(m_optimalScale.x) && std::isfinite(m_optimalScale.y) &&
+               std::isfinite(m_optimalScale.z));
+        return m_optimalScale;
     }
-    else if (origRadioButton_2->isChecked())
+    else if (originalScaleRadioButton->isChecked())
     {
-        QString text = origAccuracyLabel_2->text();
-        return vectorFromString(text);
+        assert(std::isfinite(m_originalScale.x) && std::isfinite(m_originalScale.y) &&
+               std::isfinite(m_originalScale.z));
+        return m_originalScale;
     }
-    else if (customRadioButton_2->isChecked())
+    else if (customScaleRadioButton->isChecked())
     {
-        double value = customScaleDoubleSpinBox_2->value();
-        return {value, value, value};
+        double customScale = customScaleDoubleSpinBox->value();
+        return {customScale, customScale, customScale};
     }
+
+    assert(false);
     return {};
 }
 

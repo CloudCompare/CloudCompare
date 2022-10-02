@@ -17,15 +17,18 @@
 //#                                                                        #
 //##########################################################################
 
+// CC
 #include <CCTypes.h>
+
+// Qt
 #include <QtGlobal>
 
+// System
+#include <array>
 #include <cmath>
 #include <limits>
 #include <string>
 #include <vector>
-#include <array>
-
 
 class ccPointCloud;
 class ccScalarField;
@@ -38,9 +41,9 @@ typedef laszip_vlr laszip_vlr_struct;
 
 /// When the extra dimension in an array type, it can have
 /// at most 3 elements.
-/// 
+///
 /// Eg: A Color extra array dimension with 3 elements,
-/// so that each points have Color[0], Color[1], Color[2] as 
+/// so that each points have Color[0], Color[1], Color[2] as
 /// in a single extra dimension definition.
 constexpr size_t MAX_ELEMENTS_IN_EXTRA_ARRAY_DIM = 3;
 constexpr size_t LAS_VLR_HEADER_SIZE = 54;
@@ -148,7 +151,6 @@ bool IsLaszipVlr(const laszip_vlr_struct &);
 /// Returns whether the vlr describes extra bytes.
 bool IsExtraBytesVlr(const laszip_vlr_struct &);
 
-
 /// Returns point the formats available for the given version.
 ///
 /// If the version does not exists or is not supported a nullptr is returned.
@@ -156,8 +158,7 @@ bool IsExtraBytesVlr(const laszip_vlr_struct &);
 /// \param version version string, must be "major.minor" e.g. "1.2"
 const std::vector<unsigned int> *PointFormatsAvailableForVersion(const char *version);
 
-const std::array<const char *, 3>& AvailableVersions();
-
+const std::array<const char *, 3> &AvailableVersions();
 
 /// See `SelectBestVersion`
 struct LasVersion
@@ -175,5 +176,4 @@ LasVersion SelectBestVersion(const ccPointCloud &cloud);
 /// Clones the content of the `src` vlr into the `dst` vlr.
 void CloneVlrInto(const laszip_vlr_struct &src, laszip_vlr_struct &dst);
 
-} // LasDetails
-
+} // namespace LasDetails

@@ -14,27 +14,29 @@
 //#                   COPYRIGHT: Thomas Montaigu                           #
 //#                                                                        #
 //##########################################################################
+
 #include "LasDetails.h"
 #include "LasScalarField.h"
 
+// LASzip
 #include <laszip/laszip_api.h>
 
+// CC
 #include <ccLog.h>
 #include <ccPointCloud.h>
 #include <ccScalarField.h>
 
+// Qt
 #include <QDataStream>
 
+// System
 #include <cstring>
 #include <stdexcept>
-
 
 static const std::vector<unsigned int> PointFormatForV1_2 = {0, 1, 2, 3};
 static const std::vector<unsigned int> PointFormatForV1_3 = {0, 1, 2, 3, 4, 5};
 static const std::vector<unsigned int> PointFormatForV1_4 = {6, 7, 8, 9, 10};
-static const std::array<const char*, 3> VersionsArray = {"1.2", "1.3", "1.4"};
-
-
+static const std::array<const char *, 3> VersionsArray = {"1.2", "1.3", "1.4"};
 
 namespace LasDetails
 {
@@ -82,10 +84,6 @@ QDataStream &operator<<(QDataStream &stream, const EvlrHeader &hdr)
 
     return stream;
 }
-
-
-
-
 
 uint16_t PointFormatSize(unsigned int pointFormat)
 {
@@ -162,7 +160,6 @@ unsigned int SizeOfVlrs(const laszip_vlr_struct *vlrs, unsigned int numVlrs)
                            { return vlr.record_length_after_header + header_size + size; });
 }
 
-
 const std::vector<unsigned int> *PointFormatsAvailableForVersion(const char *version)
 {
     if (version == nullptr)
@@ -186,7 +183,8 @@ const std::vector<unsigned int> *PointFormatsAvailableForVersion(const char *ver
     return nullptr;
 }
 
-const std::array<const char*, 3>& AvailableVersions() {
+const std::array<const char *, 3> &AvailableVersions()
+{
     return VersionsArray;
 }
 
@@ -304,6 +302,4 @@ void CloneVlrInto(const laszip_vlr_struct &src, laszip_vlr_struct &dst)
     std::copy(src.data, src.data + src.record_length_after_header, dst.data);
 }
 
-} // LasDetails
-
-
+} // namespace LasDetails

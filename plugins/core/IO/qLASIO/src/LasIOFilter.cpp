@@ -24,23 +24,27 @@
 #include "LasWaveformLoader.h"
 #include "LasWaveformSaver.h"
 
+// CC
 #include <GenericProgressCallback.h>
+#include <ccColorScalesManager.h>
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
 
+// Qt
 #include <QDate>
 #include <QElapsedTimer>
 #include <QFileInfo>
 
+// LASzip
 #include <laszip/laszip_api.h>
 
-#include <ccColorScalesManager.h>
+// System
 #include <memory>
 #include <numeric>
 #include <utility>
 
-constexpr const char *LAS_METADATA_INFO_KEY = "LAS.savedInfo";
+constexpr const char LAS_METADATA_INFO_KEY[] = "LAS.savedInfo";
 
 static CCVector3d GetGlobalShift(FileIOFilter::LoadParameters &parameters,
                                  bool &preserveCoordinateShift,
@@ -67,7 +71,8 @@ static CCVector3d GetGlobalShift(FileIOFilter::LoadParameters &parameters,
         }
     }
 
-    bool result = FileIOFilter::HandleGlobalShift(firstPoint, shift, preserveCoordinateShift, parameters, useLasOffset);
+    bool result =
+        FileIOFilter::HandleGlobalShift(firstPoint, shift, preserveCoordinateShift, parameters, useLasOffset);
     if (!result)
     {
         preserveCoordinateShift = false;
@@ -238,7 +243,7 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString &fileName, ccHObject &containe
     std::vector<LasExtraScalarField> availableEXtraScalarFields =
         LasExtraScalarField::ParseExtraScalarFields(*laszipHeader);
 
-    LasOpenDialog dialog;
+    LasOpenDialog dialog(parameters.parentWidget);
     dialog.setInfo(laszipHeader->version_minor, laszipHeader->point_data_format, pointCount);
     dialog.setAvailableScalarFields(availableScalarFields, availableEXtraScalarFields);
     dialog.exec();
@@ -280,7 +285,7 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString &fileName, ccHObject &containe
     QElapsedTimer timer;
     timer.start();
 
-    ccProgressDialog progressDialog(true);
+    ccProgressDialog progressDialog(true, parameters.parentWidget);
     progressDialog.setMethodTitle("Loading LAS points");
     progressDialog.setInfo("Loading points");
     CCCoreLib::NormalizedProgress normProgress(&progressDialog, pointCount);
@@ -414,7 +419,8 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString &fileName, ccHObject &containe
 
     for (const LasExtraScalarField &field : loader.extraFields())
     {
-        for (size_t i{0}; i < field.numElements(); ++i) {
+        for (size_t i{0}; i < field.numElements(); ++i)
+        {
 
             field.scalarFields[i]->computeMinAndMax();
             field.scalarFields[i]->setSaturationStart(field.scalarFields[i]->getMin());
@@ -493,11 +499,16 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject *entity,
     CCVector3 bbMin;
     pointCloud->getBoundingBox(bbMin, bbMax);
     CCVector3d diag = bbMax - bbMin;
+
+    LasSaveDialog saveDialog(pointCloud, parameters.parentWidget);
+
+    // compute optimal scale
     CCVector3d optimalScale(1.0e-9 * std::max<double>(diag.x, CCCoreLib::ZERO_TOLERANCE_D),
                             1.0e-9 * std::max<double>(diag.y, CCCoreLib::ZERO_TOLERANCE_D),
                             1.0e-9 * std::max<double>(diag.z, CCCoreLib::ZERO_TOLERANCE_D));
+    saveDialog.setOptimalScale(optimalScale);
 
-    LasSaveDialog saveDialog(pointCloud);
+    // retrieve the original scale (if any)
     LasSavedInfo savedInfo;
     if (!pointCloud->hasMetaData(LAS_METADATA_INFO_KEY))
     {
@@ -508,10 +519,9 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject *entity,
     else
     {
         savedInfo = qvariant_cast<LasSavedInfo>(pointCloud->getMetaData(LAS_METADATA_INFO_KEY));
-        saveDialog.setSavedScale(CCVector3d(savedInfo.xScale, savedInfo.yScale, savedInfo.zScale));
+        saveDialog.setOriginalScale(CCVector3d(savedInfo.xScale, savedInfo.yScale, savedInfo.zScale));
     }
 
-    saveDialog.setOptimalScale(optimalScale);
     saveDialog.setVersionAndPointFormat(QString("1.%1").arg(QString::number(savedInfo.versionMinor)),
                                         savedInfo.pointFormat);
     saveDialog.setExtraScalarFields(savedInfo.extraScalarFields);
@@ -567,7 +577,7 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject *entity,
         laszipPoint.extra_bytes = new laszip_U8[totalExtraByteSize];
     }
 
-    ccProgressDialog progressDialog(true);
+    ccProgressDialog progressDialog(true, parameters.parentWidget);
     progressDialog.setMethodTitle("Saving LAS points");
     progressDialog.setInfo("Saving points");
     CCCoreLib::NormalizedProgress normProgress(&progressDialog, pointCloud->size());

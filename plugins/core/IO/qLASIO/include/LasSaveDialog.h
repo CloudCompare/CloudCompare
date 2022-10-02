@@ -22,8 +22,8 @@
 #include <CCGeom.h>
 
 #include "LasDetails.h"
-#include "LasScalarField.h"
 #include "LasExtraScalarField.h"
+#include "LasScalarField.h"
 #include "ui_lassavedialog.h"
 
 class QStringListModel;
@@ -43,10 +43,10 @@ class LasSaveDialog : public QDialog, public Ui::LASSaveDialog
 
     void setVersionAndPointFormat(const QString &version, unsigned int pointFormat);
     /// Set scale that would offer the user the best precision
-    void setOptimalScale(const CCVector3d &optimalScale);
-    /// Set the scale that was used in the file the point cloud
+    void setOptimalScale(const CCVector3d &scale, bool autoCheck = false);
+    /// Set the scale that was used in the original file
     /// to save comes from.
-    void setSavedScale(const CCVector3d &savedScale);
+    void setOriginalScale(const CCVector3d &scale, bool autoCheck = true);
     /// Set the extra LAS scalar fields saved from the original file.
     void setExtraScalarFields(const std::vector<LasExtraScalarField> &extraScalarFields);
 
@@ -61,7 +61,7 @@ class LasSaveDialog : public QDialog, public Ui::LASSaveDialog
     /// Returns whether the user wants to save the Waveforms
     bool shouldSaveWaveform() const;
     /// Returns the vector of LAS scalar fields the user wants to save.
-    /// 
+    ///
     /// Each LAS scalar fields is mapped to an existing point cloud's ccScalarField.
     /// The mapping is done by us and the user.
     std::vector<LasScalarField> fieldsToSave() const;
@@ -74,6 +74,8 @@ class LasSaveDialog : public QDialog, public Ui::LASSaveDialog
   private:
     ccPointCloud *m_cloud{nullptr};
     QStringListModel *m_comboBoxModel{nullptr};
+    CCVector3d m_optimalScale;
+    CCVector3d m_originalScale;
     /// Contains the mapping from a LAS field name to a combo box
     /// where the user (or us) selected the scalar field to use
     std::vector<std::pair<MappingLabel *, QComboBox *>> m_scalarFieldMapping;

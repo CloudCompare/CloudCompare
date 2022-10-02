@@ -65,8 +65,21 @@ class LasOpenDialog : public QDialog, public Ui::LASOpenDialog
     /// rgb from the file as 8-bit components.
     bool shouldForce8bitColors() const;
 
+    /// Returns quiet_NaN if the time shift value should be
+    /// automatically found.
+    /// 
+    /// Otherwise, returns the value manually specified by the user.
+    double timeShiftValue() const;
+
   private:
     bool isChecked(const LasScalarField &lasScalarField) const;
 
     bool isChecked(const LasExtraScalarField &lasExtraScalarField) const;
+
+    /// Connected to the "automatic time shift" check box.
+    ///
+    /// Depending on if the user checks or unchecks the automatic time shift,
+    /// we need to enable / disable the double spin box that
+    /// is used to get the manually entered time shift.
+    void onAutomaticTimeShiftToggle(bool checked);
 };

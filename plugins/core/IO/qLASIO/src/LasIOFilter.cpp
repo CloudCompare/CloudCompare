@@ -278,6 +278,7 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString &fileName, ccHObject &containe
     LasScalarFieldLoader loader(availableScalarFields, availableEXtraScalarFields, *pointCloud);
     loader.setIgnoreFieldsWithDefaultValues(dialog.shouldIgnoreFieldsWithDefaultValues());
     loader.setForce8bitRgbMode(dialog.shouldForce8bitColors());
+    loader.setManualTimeShift(dialog.timeShiftValue());
     std::unique_ptr<LasWaveformLoader> waveformLoader{nullptr};
     if (LasDetails::HasWaveform(laszipHeader->point_data_format))
     {
@@ -385,7 +386,6 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString &fileName, ccHObject &containe
         {
         case LasScalarField::Intensity:
             field.sf->setColorScale(ccColorScalesManager::GetDefaultScale(ccColorScalesManager::GREY));
-            break;
         case LasScalarField::ReturnNumber:
         case LasScalarField::NumberOfReturns:
         case LasScalarField::ScanDirectionFlag:
@@ -417,18 +417,21 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString &fileName, ccHObject &containe
             field.sf->setColorScale(ccColorScalesManager::GetDefaultScale(ccColorScalesManager::BGYR));
             break;
         }
+
+        pointCloud->addScalarField(field.sf);
     }
 
     for (const LasExtraScalarField &field : loader.extraFields())
     {
         for (size_t i{0}; i < field.numElements(); ++i)
         {
-
+            Q_ASSERT(field.scalarFields[i] != nullptr);
             field.scalarFields[i]->computeMinAndMax();
             field.scalarFields[i]->setSaturationStart(field.scalarFields[i]->getMin());
             field.scalarFields[i]->setSaturationStop(field.scalarFields[i]->getMax());
             field.scalarFields[i]->setMinDisplayed(field.scalarFields[i]->getMin());
             field.scalarFields[i]->setMaxDisplayed(field.scalarFields[i]->getMax());
+            pointCloud->addScalarField(field.scalarFields[i]);
         }
     }
 

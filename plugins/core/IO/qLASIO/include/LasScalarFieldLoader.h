@@ -56,6 +56,12 @@ class LasScalarFieldLoader
         m_force8bitRgbMode = state;
     }
 
+    /// If nan, this value will be ignored and the time shift
+    /// will be taken using the first value encountered. 
+    void setManualTimeShift(double timeShift) {
+        m_manualTimeShiftValue = timeShift;
+    }
+
     const std::vector<LasScalarField> &standardFields() const
     {
         return m_standardFields;
@@ -99,6 +105,7 @@ class LasScalarFieldLoader
   private:
     bool m_force8bitRgbMode{false};
     bool m_ignoreFieldsWithDefaultValues{true};
+    double m_manualTimeShiftValue{std::numeric_limits<double>::quiet_NaN()};
     unsigned char m_colorCompShift{0};
     std::vector<LasScalarField> &m_standardFields;
     std::vector<LasExtraScalarField>& m_extraScalarFields;

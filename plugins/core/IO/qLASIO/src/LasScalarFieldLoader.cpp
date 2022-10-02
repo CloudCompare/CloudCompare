@@ -204,11 +204,10 @@ LasScalarFieldLoader::handleScalarField(LasScalarField &sfInfo, ccPointCloud &po
         {
             return CC_FERR_NOT_ENOUGH_MEMORY;
         }
-        // addScalarField resizes the point scalarField
-        pointCloud.addScalarField(newSf);
-        for (unsigned int j{0}; j < newSf->size() - 1; ++j)
+
+        for (unsigned int j{0}; j < pointCloud.size() - 1; ++j)
         {
-            newSf->setValue(j, static_cast<ScalarType>(T{}));
+            newSf->addElement(static_cast<ScalarType>(T{}));
         }
     }
 
@@ -220,7 +219,7 @@ LasScalarFieldLoader::handleScalarField(LasScalarField &sfInfo, ccPointCloud &po
 }
 
 CC_FILE_ERROR
-LasScalarFieldLoader::handleGpsTime(LasScalarField &sfInfo, ccPointCloud &pointCloud, double currentValue)
+LasScalarFieldLoader::handleGpsTime(LasScalarField &sfInfo, ccPointCloud &pointCloud, const double currentValue)
 {
     if (!sfInfo.sf)
     {
@@ -234,13 +233,36 @@ LasScalarFieldLoader::handleGpsTime(LasScalarField &sfInfo, ccPointCloud &pointC
         {
             return CC_FERR_NOT_ENOUGH_MEMORY;
         }
-        // addScalarField resizes the point scalarField
-        pointCloud.addScalarField(newSf);
-        newSf->setGlobalShift(currentValue);
-
-        for (unsigned int j{0}; j < newSf->size() - 1; ++j)
+        
+        double timeShift;
+        if (std::isnan(m_manualTimeShiftValue))
         {
-            newSf->setValue(j, static_cast<ScalarType>(0.0));
+            timeShift = static_cast<int64_t>(currentValue / 10000.0) * 10000.0;
+        }
+        else
+        {
+            timeShift = m_manualTimeShiftValue;
+        }
+        
+        double shiftedValue = currentValue - timeShift;
+        if (shiftedValue < 1.0e5)
+        {
+            ccLog::Warning("[LAS] Time SF has been shifted to prevent a loss of accuracy (%.2f)", timeShift);
+        }
+        else if (timeShift > 0.0)
+        {
+            ccLog::Warning("[LAS] Time SF has been shifted but accuracy may not be preserved (%.2f)",
+                           timeShift);
+        }
+        else
+        {
+            ccLog::Warning("[LAS] Time SF has not been shifted. Accuracy may not be preserved.");
+        }
+
+        newSf->setGlobalShift(timeShift);
+        for (unsigned int j{0}; j < pointCloud.size() - 1; ++j)
+        {
+            newSf->addElement(static_cast<ScalarType>(timeShift));
         }
     }
 
@@ -274,7 +296,6 @@ bool LasScalarFieldLoader::createScalarFieldsForExtraBytes(ccPointCloud &pointCl
             {
                 return false;
             }
-            pointCloud.addScalarField(extraField.scalarFields[0]);
             break;
         case 2:
         case 3:
@@ -286,7 +307,6 @@ bool LasScalarFieldLoader::createScalarFieldsForExtraBytes(ccPointCloud &pointCl
                 {
                     return false;
                 }
-                pointCloud.addScalarField(extraField.scalarFields[dimIndex]);
             }
             break;
         }

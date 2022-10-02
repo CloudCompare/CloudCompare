@@ -64,8 +64,8 @@ ccCameraParamEditDlg::ccCameraParamEditDlg(QWidget* parent, ccPickingHub* pickin
 	connect(m_ui->ezDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::cameraCenterChanged);
 
 	connect(m_ui->fovDoubleSpinBox,					qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::fovChanged);
-	connect(m_ui->nearClippingDepthDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::nearClippingDepthChanged);
-	connect(m_ui->farClippingDepthDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::farClippingDepthChanged);
+	connect(m_ui->nearClippingDepthDoubleSpinBox,	&QDoubleSpinBox::editingFinished,					[&] { nearClippingDepthChanged(m_ui->nearClippingDepthDoubleSpinBox->value()); });
+	connect(m_ui->farClippingDepthDoubleSpinBox,	&QDoubleSpinBox::editingFinished,					[&] { farClippingDepthChanged(m_ui->farClippingDepthDoubleSpinBox->value()); });
 	connect(m_ui->nearClippingCheckBox,				&QCheckBox::toggled,								this,	&ccCameraParamEditDlg::nearClippingCheckBoxToggled);
 	connect(m_ui->farClippingCheckBox,				&QCheckBox::toggled,								this,	&ccCameraParamEditDlg::farClippingCheckBoxToggled);
 
@@ -193,6 +193,10 @@ void ccCameraParamEditDlg::nearClippingDepthChanged(double depth)
 	{
 		m_associatedWin->redraw();
 	}
+	else
+	{
+		updateNearClippingDepth(m_associatedWin->getViewportParameters().nearClippingDepth);
+	}
 }
 
 void ccCameraParamEditDlg::nearClippingCheckBoxToggled(bool state)
@@ -228,6 +232,10 @@ void ccCameraParamEditDlg::farClippingDepthChanged(double depth)
 	if (m_associatedWin->setFarClippingPlaneDepth(depth))
 	{
 		m_associatedWin->redraw();
+	}
+	else
+	{
+		updateFarClippingDepth(m_associatedWin->getViewportParameters().farClippingDepth);
 	}
 }
 
@@ -585,9 +593,6 @@ void ccCameraParamEditDlg::updateCameraCenter(const CCVector3d& P)
 
 void ccCameraParamEditDlg::updatePivotPoint(const CCVector3d& P)
 {
-	if (!m_associatedWin)
-		return;
-
 	m_ui->rcxDoubleSpinBox->blockSignals(true);
 	m_ui->rcyDoubleSpinBox->blockSignals(true);
 	m_ui->rczDoubleSpinBox->blockSignals(true);
@@ -601,9 +606,6 @@ void ccCameraParamEditDlg::updatePivotPoint(const CCVector3d& P)
 
 void ccCameraParamEditDlg::updateWinFov(float fov_deg)
 {
-	if (!m_associatedWin)
-		return;
-
 	m_ui->fovDoubleSpinBox->blockSignals(true);
 	m_ui->fovDoubleSpinBox->setValue(fov_deg);
 	m_ui->fovDoubleSpinBox->blockSignals(false);

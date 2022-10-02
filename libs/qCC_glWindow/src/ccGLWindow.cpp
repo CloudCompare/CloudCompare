@@ -6079,6 +6079,8 @@ void ccGLWindow::setViewportParameters(const ccViewportParameters& params)
 	Q_EMIT baseViewMatChanged(m_viewportParams.viewMat);
 	Q_EMIT pivotPointChanged(m_viewportParams.getPivotPoint());
 	Q_EMIT cameraPosChanged(m_viewportParams.getCameraCenter());
+	Q_EMIT nearClippingDepthChanged(m_viewportParams.nearClippingDepth);
+	Q_EMIT farClippingDepthChanged(m_viewportParams.farClippingDepth);
 	if (!m_bubbleViewModeEnabled)
 	{
 		Q_EMIT fovChanged(m_viewportParams.fov_deg);

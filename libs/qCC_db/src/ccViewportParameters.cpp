@@ -82,6 +82,8 @@ bool ccViewportParameters::toFile(QFile& out) const
 	outStream << cameraCenter.z;
 	outStream << fov_deg;
 	outStream << cameraAspectRatio;
+	outStream << nearClippingDepth;
+	outStream << farClippingDepth;
 
 	return true;
 }
@@ -184,6 +186,17 @@ bool ccViewportParameters::fromFile(QFile& in, short dataVersion, int flags, Loa
 		}
 		setFocalDistance(focalDistance / zoom);
 		ccLog::Warning("[ccViewportParameters] Approximate focal distance (sorry, the parameters of viewport objects have changed!)");
+	}
+
+	// clipping depths
+	if (dataVersion < 53)
+	{
+		nearClippingDepth = farClippingDepth = std::numeric_limits<double>::quiet_NaN();
+	}
+	else
+	{
+		inStream >> nearClippingDepth;
+		inStream >> farClippingDepth;
 	}
 
 	return true;

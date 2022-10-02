@@ -35,11 +35,11 @@ ViewInterpolate::ViewInterpolate(const ccViewportParameters& viewParams1, const 
 {
 }
 
-void ViewInterpolate::setSmoothTrajectory(	ccPolyline* _smoothTrajectory,
-											ccPolyline* _smoothTrajectoryReversed,
-											unsigned i1,
-											unsigned i2,
-											PointCoordinateType length )
+void ViewInterpolate::setSmoothTrajectory(ccPolyline* _smoothTrajectory,
+	ccPolyline* _smoothTrajectoryReversed,
+	unsigned i1,
+	unsigned i2,
+	PointCoordinateType length)
 {
 	smoothTrajectory = _smoothTrajectory;
 	smoothTrajectoryReversed = _smoothTrajectoryReversed;
@@ -50,9 +50,26 @@ void ViewInterpolate::setSmoothTrajectory(	ccPolyline* _smoothTrajectory,
 }
 
 //helper function for interpolating between simple numerical types
-template <class T> T InterpolateNumber( T start, T end, double interpolationFraction )
+template <class T> T InterpolateNumber(T start, T end, double interpolationFraction)
 {
-    return static_cast < T > ( static_cast<double>(start) + (static_cast<double>(end) - static_cast<double>(start)) * interpolationFraction );
+	double dStart = static_cast<double>(start);
+	double dEnd = static_cast<double>(end);
+	if (std::isnan(dStart))
+	{
+		if (std::isnan(dEnd))
+		{
+			return std::numeric_limits<T>::quiet_NaN();
+		}
+		else
+		{
+			return (interpolationFraction < 0.5 ? std::numeric_limits<T>::quiet_NaN() : end);
+		}
+	}
+	else if (std::isnan(dEnd))
+	{
+		return (interpolationFraction < 0.5 ? start : std::numeric_limits<T>::quiet_NaN());
+	}
+	return static_cast<T> ( static_cast<double>(start) + (static_cast<double>(end) - static_cast<double>(start)) * interpolationFraction );
 }
 
 bool ViewInterpolate::interpolate(ccViewportParameters& interpView, double interpolate_fraction) const
@@ -70,6 +87,8 @@ bool ViewInterpolate::interpolate(ccViewportParameters& interpView, double inter
 		interpView.zNearCoef              = InterpolateNumber ( m_view1.zNearCoef, m_view2.zNearCoef, interpolate_fraction );
 		interpView.zNear                  = InterpolateNumber ( m_view1.zNear, m_view2.zNear, interpolate_fraction );
 		interpView.zFar                   = InterpolateNumber ( m_view1.zFar, m_view2.zFar, interpolate_fraction );
+		interpView.nearClippingDepth      = InterpolateNumber ( m_view1.nearClippingDepth, m_view2.nearClippingDepth, interpolate_fraction );
+		interpView.farClippingDepth       = InterpolateNumber ( m_view1.farClippingDepth, m_view2.farClippingDepth, interpolate_fraction );
 		interpView.fov_deg                = InterpolateNumber ( m_view1.fov_deg, m_view2.fov_deg, interpolate_fraction );
 		interpView.cameraAspectRatio      = InterpolateNumber ( m_view1.cameraAspectRatio, m_view2.cameraAspectRatio, interpolate_fraction );
 		interpView.viewMat                = ccGLMatrixd::Interpolate(interpolate_fraction, m_view1.viewMat, m_view2.viewMat );

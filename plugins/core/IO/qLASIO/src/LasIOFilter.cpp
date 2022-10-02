@@ -510,17 +510,15 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject *entity,
 
     // retrieve the original scale (if any)
     LasSavedInfo savedInfo;
-    if (!pointCloud->hasMetaData(LAS_METADATA_INFO_KEY))
-    {
-        LasDetails::LasVersion v = LasDetails::SelectBestVersion(*pointCloud);
-        savedInfo.pointFormat = v.pointFormat;
-        savedInfo.versionMinor = v.minorVersion;
-    }
-    else
+    if (pointCloud->hasMetaData(LAS_METADATA_INFO_KEY))
     {
         savedInfo = qvariant_cast<LasSavedInfo>(pointCloud->getMetaData(LAS_METADATA_INFO_KEY));
         saveDialog.setOriginalScale(CCVector3d(savedInfo.xScale, savedInfo.yScale, savedInfo.zScale));
     }
+
+    LasDetails::LasVersion v = LasDetails::SelectBestVersion(*pointCloud);
+    savedInfo.pointFormat = v.pointFormat;
+    savedInfo.versionMinor = v.minorVersion;
 
     saveDialog.setVersionAndPointFormat(QString("1.%1").arg(QString::number(savedInfo.versionMinor)),
                                         savedInfo.pointFormat);

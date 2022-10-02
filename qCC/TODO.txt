@@ -85,7 +85,6 @@ Various:
 [*] Set the Cross Section box using a plane entity (http://www.danielgm.net/cc/forum/viewtopic.php?t=2485)
 [*] Apply the qCSF plugin to more than one cloud at once (http://www.cloudcompare.org/forum/viewtopic.php?t=2242)
 [*] Add a shortcut to take a 'snapshot' of the current view (automatic filename and export dir?)
-[*] Drop the old (deprecated) OpenGL based picking for entities and lablels (http://www.danielgm.net/cc/forum/viewtopic.php?t=2009)
 [*] Add support for Gocad pointset files (= ASCII file with a specific header and decoration)
 [*] Read PTS files as multiple clouds (http://www.cloudcompare.org/forum/viewtopic.php?t=2004)
 [*] Generate side-by-side OpenGL views for Sony or Epson AR glasses (http://www.cloudcompare.org/forum/viewtopic.php?t=2011)
@@ -96,7 +95,6 @@ Various:
 [*] Spherical projection of 360 degrees images to color a point cloud (http://www.danielgm.net/cc/forum/viewtopic.php?t=1268&p=4709#p4709)
 [*] Load georeferenced images (ecw+ers, jpg+jgw) (http://www.cloudcompare.org/forum/viewtopic.php?t=1244)
 [*] Add a check box to turn on and off gradient colors in the Color Scale Editor
-[*] Smooth zoom (clik and drag the mouse while holding a key - https://github.com/cloudcompare/trunk/issues/382)
 [*] Add the distance 'units' as a parameter for the color ramp
 [*] Median Calculation in Rasterize (http://www.cloudcompare.org/forum/viewtopic.php?t=1610)
 [*] Add key bindings to pan the active 3D view (so as to be able to pan even in segmentation / polyline tracing mode - http://www.cloudcompare.org/forum/viewtopic.php?t=1714)
@@ -121,13 +119,15 @@ Various:
 [*] Properly segment meshes in the graphical segmentation tool
 [*] Import control points from ascii file (for point pair-based registration - http://www.cloudcompare.org/forum/viewtopic.php?t=585)
 [*] Reverse Unroll Feature (http://www.cloudcompare.org/forum/viewtopic.php?t=645)
-[*] Let the user select and handle multiple clouds in the 'Clipping box' tool
 [*] Per-point size based on SF values (http://www.cloudcompare.org/forum/viewtopic.php?t=507)
 [*] Display ortho-rectified images as high-res textures (instead of point clouds!)
 [*] Add interactive measurement features to ccViewer
 [*] Support mesh transparency (and PLY 'alpha' property for instance)
 [*] Convert RGB colors/scalar field to texture when exporting to OBJ mesh file (http://www.danielgm.net/cc/forum/viewtopic.php?t=830)
 [*] Overlay grid (for 3D views - http://www.cloudcompare.org/forum/viewtopic.php?t=926) 
+
+From Pablo V.
+[*] Improve the raster interpolation algorithm of the Rasterize tool (https://www.cloudcompare.org/forum/viewtopic.php?p=25155#p25155)
 
 From Dimitri L.
 [*] Access to the Rasterize tool through the command line (with XML parameter file)

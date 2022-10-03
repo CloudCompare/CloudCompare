@@ -28,7 +28,7 @@
 #include <ccScalarField.h>
 
 //QCustomPlot
-#include <qcustomplot.h>
+#include "ccQCustomPlot.h"
 
 class QCPArrow;
 class QCPBarsWithText;

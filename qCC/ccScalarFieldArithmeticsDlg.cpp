@@ -62,7 +62,7 @@ ccScalarFieldArithmeticsDlg::ccScalarFieldArithmeticsDlg(	ccPointCloud* cloud,
 	}
 	else
 	{
-		for (unsigned i=0; i<sfCount; ++i)
+		for (unsigned i = 0; i < sfCount; ++i)
 		{
 			sfLabels << QString(cloud->getScalarFieldName(i));
 		}
@@ -127,10 +127,10 @@ ccScalarFieldArithmeticsDlg::Operation ccScalarFieldArithmeticsDlg::getOperation
 
 ccScalarFieldArithmeticsDlg::Operation ccScalarFieldArithmeticsDlg::GetOperationByName(const QString& name)
 {
-	auto	lowerName = name.toLower();
+	auto lowerName = name.toLower();
 
 	//test all known names...
-	for (unsigned i=0; i<s_opCount; ++i)
+	for (unsigned i = 0; i < s_opCount; ++i)
 	{
 		if (lowerName == QString( s_opNames[i] ))
 		{
@@ -257,7 +257,12 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 				sf2Name = QString("(SF#%1)").arg(sf2Desc->sfIndex);
 			}
 		}
-		QString sfName = GetOperationName(op,sf1Name,sf2Name);
+		else if (sf2Desc && sf2Desc->isConstantValue)
+		{
+			sf2Name = QString("%1").arg(sf2Desc->constantValue);
+		}
+
+		QString sfName = GetOperationName(op, sf1Name, sf2Name);
 
 		sfIdx = cloud->getScalarFieldIndexByName(qPrintable(sfName));
 		if (sfIdx >= 0)

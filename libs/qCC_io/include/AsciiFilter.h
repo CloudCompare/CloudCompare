@@ -87,6 +87,7 @@ protected:
 													qint64 fileSize,
 													unsigned maxCloudSize,
 													unsigned skipLines,
+													double quaternionScale,
 													LoadParameters& parameters,
 													bool showLabelsIn2D = false);
 };

@@ -21,7 +21,6 @@
 #include "ccPlane.h"
 #include "ccPointCloud.h"
 
-
 ccCoordinateSystem::ccCoordinateSystem(PointCoordinateType displayScale, 
 									   PointCoordinateType axisWidth, 
 									   const ccGLMatrix* transMat/*=nullptr*/,
@@ -48,7 +47,6 @@ ccCoordinateSystem::ccCoordinateSystem(const ccGLMatrix* transMat/*=nullptr*/,
 	showColors(true);
 }
 
-
 ccCoordinateSystem::ccCoordinateSystem(QString name/*=QString("CoordinateSystem")*/)
 	: ccGenericPrimitive(name), 
 	  m_DisplayScale(DEFAULT_DISPLAY_SCALE), 
@@ -59,17 +57,6 @@ ccCoordinateSystem::ccCoordinateSystem(QString name/*=QString("CoordinateSystem"
 	updateRepresentation();
 	showColors(true);
 }
-
-void ccCoordinateSystem::ShowAxisPlanes(bool show)
-{
-	m_showAxisPlanes = show;
-}
-
-void ccCoordinateSystem::ShowAxisLines(bool show)
-{
-	m_showAxisLines = show;
-}
-
 
 void ccCoordinateSystem::setAxisWidth(PointCoordinateType size)
 {
@@ -84,8 +71,6 @@ void ccCoordinateSystem::setAxisWidth(PointCoordinateType size)
 	}
 }
 
-
-
 void ccCoordinateSystem::setDisplayScale(PointCoordinateType size)
 {
 	if (size >= MIN_DISPLAY_SCALE_F)
@@ -99,10 +84,12 @@ CCVector3 ccCoordinateSystem::getXYPlaneNormal() const
 {
 	return m_transformation.getColumnAsVec3D(2);
 }
+
 CCVector3 ccCoordinateSystem::getYZPlaneNormal() const
 {
 	return m_transformation.getColumnAsVec3D(0);
 }
+
 CCVector3 ccCoordinateSystem::getZXPlaneNormal() const
 {
 	return m_transformation.getColumnAsVec3D(1);
@@ -186,7 +173,6 @@ ccGenericPrimitive* ccCoordinateSystem::clone() const
 {
 	return finishCloneJob(new ccCoordinateSystem(m_DisplayScale, m_width, &m_transformation, getName()));
 }
-
 
 bool ccCoordinateSystem::toFile_MeOnly(QFile& out) const
 {

@@ -62,9 +62,10 @@ public:
 	virtual ccGenericPrimitive* clone() const override;
 	
 	inline bool axisPlanesAreShown() const { return m_showAxisPlanes; }
-	void ShowAxisPlanes(bool show);
+	void showAxisPlanes(bool show) { m_showAxisPlanes = show; }
+
 	inline bool axisLinesAreShown() const { return m_showAxisLines; }
-	void ShowAxisLines(bool show);
+	void showAxisLines(bool show) { m_showAxisLines = show; }
 	
 	//ccPlane get2AxisPlane(int axisNum);
 	inline CCVector3 getOrigin() const { return m_transformation.getTranslationAsVec3D(); };

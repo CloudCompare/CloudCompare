@@ -32,6 +32,12 @@ v2.13.alpha (???) - (??/??/????)
 		- taken into account when using interactive segmentation or point picking
 		- not compatible with the Cross Section tool
 
+	- ASCII files:
+		- ability to load quaternion coordinates (qw, qx, qy and qz) that will be loaded as individual 'Coordinate System' objects
+		- once 4 columns are assigned to one of the 4 quaternion components (w,x,y,z), the user can elect the display scale of the
+			'Coordinate System' objects
+
+
 - Improvements:
 	- Rasterize:
 		- new option to compute the median height

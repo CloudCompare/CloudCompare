@@ -4233,7 +4233,7 @@ bool CommandDist::process(ccCommandLineInterface &cmd)
 	if (m_cloud2meshDist)
 	{
 		compDlg.flipNormalsCheckBox->setChecked(flipNormals);
-		compDlg.signedDistCheckBox->setChecked(unsignedDistances);
+		compDlg.signedDistCheckBox->setChecked(!unsignedDistances);
 	}
 	//C2C-only parameters
 	else

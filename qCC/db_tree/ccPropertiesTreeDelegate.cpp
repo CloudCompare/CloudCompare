@@ -2062,7 +2062,7 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 		ccCoordinateSystem* cs = ccHObjectCaster::ToCoordinateSystem(m_currentObject);
 		if (cs)
 		{
-			cs->ShowAxisLines(item->checkState() == Qt::Checked);
+			cs->showAxisLines(item->checkState() == Qt::Checked);
 		}
 	}
 	redraw = true;
@@ -2072,7 +2072,7 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 		ccCoordinateSystem* cs = ccHObjectCaster::ToCoordinateSystem(m_currentObject);
 		if (cs)
 		{
-			cs->ShowAxisPlanes(item->checkState() == Qt::Checked);
+			cs->showAxisPlanes(item->checkState() == Qt::Checked);
 		}
 	}
 	redraw = true;

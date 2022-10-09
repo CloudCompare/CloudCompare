@@ -3571,14 +3571,14 @@ void MainWindow::doActionRegister()
 {
 	if (	m_selectedEntities.size() != 2
 		||	(!m_selectedEntities.front()->isKindOf(CC_TYPES::POINT_CLOUD) && !m_selectedEntities.front()->isKindOf(CC_TYPES::MESH))
-		||	(!m_selectedEntities[1]->isKindOf(CC_TYPES::POINT_CLOUD) && !m_selectedEntities[1]->isKindOf(CC_TYPES::MESH)) )
+		||	(!m_selectedEntities.back()->isKindOf(CC_TYPES::POINT_CLOUD) && !m_selectedEntities.back()->isKindOf(CC_TYPES::MESH)) )
 	{
 		ccConsole::Error(tr("Select 2 point clouds or meshes!"));
 		return;
 	}
 
 	ccHObject* data = static_cast<ccHObject*>(m_selectedEntities.front());
-	ccHObject* model = static_cast<ccHObject*>(m_selectedEntities[1]);
+	ccHObject* model = static_cast<ccHObject*>(m_selectedEntities.back());
 	if (data->isKindOf(CC_TYPES::MESH) && model->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
 		//by default, prefer the mesh as the reference
@@ -3740,21 +3740,38 @@ void MainWindow::doActionRegister()
 			//we temporarily detach cloud, as it may undergo
 			//'severe' modifications (octree deletion, etc.) --> see ccPointCloud::applyRigidTransformation
 			ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(pc);
-			pc->applyRigidTransformation(transMat);
-			putObjectBackIntoDBTree(pc,objContext);
+
+			// check if the 'model' entity is a child of the 'data' one (would be strange, but can still happen!)
+			bool modelIsChildOfData = data->isAncestorOf(model);
+			if (modelIsChildOfData)
+			{
+				if (pc->getChildrenNumber() != 0)
+				{
+					ccLog::Warning(tr("[ICP] The reference entity is a child of the aligned one! CC will move only the aligned entity, and not its children"));
+				}
+				pc->applyRigidTransformation(transMat);
+			}
+			else
+			{
+				// we can safely apply the transformation to all the children
+				pc->applyGLTransformation_recursive(&transMat);
+			}
+			putObjectBackIntoDBTree(pc, objContext);
 
 			//don't forget to update mesh bounding box also!
 			if (data->isKindOf(CC_TYPES::MESH))
+			{
 				ccHObjectCaster::ToGenericMesh(data)->refreshBB();
+			}
 
 			//don't forget global shift
-			ccGenericPointCloud* refPc = ccHObjectCaster::ToGenericPointCloud(model);
-			if (refPc)
+			ccGenericPointCloud* refPC = ccHObjectCaster::ToGenericPointCloud(model);
+			if (refPC)
 			{
-				if (refPc->isShifted())
+				if (refPC->isShifted())
 				{
-					const CCVector3d& Pshift = refPc->getGlobalShift();
-					const double& scale = refPc->getGlobalScale();
+					const CCVector3d& Pshift = refPC->getGlobalShift();
+					const double& scale = refPC->getGlobalScale();
 					pc->setGlobalShift(Pshift);
 					pc->setGlobalScale(scale);
 					ccLog::Warning(tr("[ICP] Aligned entity global shift has been updated to match the reference: (%1,%2,%3) [x%4]").arg(Pshift.x).arg(Pshift.y).arg(Pshift.z).arg(scale));
@@ -3800,14 +3817,14 @@ void MainWindow::doAction4pcsRegister()
 	}
 
 	if (!m_selectedEntities.front()->isKindOf(CC_TYPES::POINT_CLOUD) ||
-		!m_selectedEntities[1]->isKindOf(CC_TYPES::POINT_CLOUD))
+		!m_selectedEntities.back()->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
 		ccConsole::Error(tr("Select 2 point clouds!"));
 		return;
 	}
 
 	ccGenericPointCloud* model = ccHObjectCaster::ToGenericPointCloud(m_selectedEntities.front());
-	ccGenericPointCloud* data = ccHObjectCaster::ToGenericPointCloud(m_selectedEntities[1]);
+	ccGenericPointCloud* data = ccHObjectCaster::ToGenericPointCloud(m_selectedEntities.back());
 
 	ccAlignDlg aDlg(model, data);
 	if (!aDlg.exec())
@@ -4311,7 +4328,7 @@ void MainWindow::doMeshTwoPolylines()
 		return;
 
 	ccPolyline* p1 = ccHObjectCaster::ToPolyline(m_selectedEntities.front());
-	ccPolyline* p2 = ccHObjectCaster::ToPolyline(m_selectedEntities[1]);
+	ccPolyline* p2 = ccHObjectCaster::ToPolyline(m_selectedEntities.back());
 	if (!p1 || !p2)
 	{
 		ccConsole::Error(tr("Select 2 and only 2 polylines"));
@@ -5124,14 +5141,14 @@ void MainWindow::doActionComputeCPS()
 	}
 
 	if (!m_selectedEntities.front()->isKindOf(CC_TYPES::POINT_CLOUD) ||
-		!m_selectedEntities[1]->isKindOf(CC_TYPES::POINT_CLOUD))
+		!m_selectedEntities.back()->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
 		ccConsole::Error(tr("Select 2 point clouds!"));
 		return;
 	}
 
 	ccOrderChoiceDlg dlg(	m_selectedEntities.front(), tr("Compared"),
-							m_selectedEntities[1], tr("Reference"),
+							m_selectedEntities.back(), tr("Reference"),
 							this );
 	if (!dlg.exec())
 		return;
@@ -8796,14 +8813,14 @@ void MainWindow::doActionCloudCloudDist()
 	}
 
 	if (!m_selectedEntities.front()->isKindOf(CC_TYPES::POINT_CLOUD) ||
-		!m_selectedEntities[1]->isKindOf(CC_TYPES::POINT_CLOUD))
+		!m_selectedEntities.back()->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
 		ccConsole::Error(tr("Select 2 point clouds!"));
 		return;
 	}
 
 	ccOrderChoiceDlg dlg(	m_selectedEntities.front(), tr("Compared"),
-							m_selectedEntities[1], tr("Reference"),
+							m_selectedEntities.back(), tr("Reference"),
 							this );
 	if (!dlg.exec())
 		return;
@@ -8877,7 +8894,7 @@ void MainWindow::doActionCloudMeshDist()
 	else
 	{
 		ccOrderChoiceDlg dlg(	m_selectedEntities.front(), tr("Compared"),
-								m_selectedEntities[1], tr("Reference"),
+								m_selectedEntities.back(), tr("Reference"),
 								this );
 		if (!dlg.exec())
 			return;
@@ -11095,14 +11112,14 @@ void MainWindow::doActionComparePlanes()
 	}
 
 	if (!m_selectedEntities.front()->isKindOf(CC_TYPES::PLANE) ||
-		!m_selectedEntities[1]->isKindOf(CC_TYPES::PLANE))
+		!m_selectedEntities.back()->isKindOf(CC_TYPES::PLANE))
 	{
 		ccConsole::Error(tr("Select 2 planes!"));
 		return;
 	}
 
 	ccPlane* p1 = ccHObjectCaster::ToPlane(m_selectedEntities.front());
-	ccPlane* p2 = ccHObjectCaster::ToPlane(m_selectedEntities[1]);
+	ccPlane* p2 = ccHObjectCaster::ToPlane(m_selectedEntities.back());
 
 	QStringList info;
 	info << tr("Plane 1: %1").arg(p1->getName());

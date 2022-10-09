@@ -956,7 +956,7 @@ void ccGraphicalTransformationTool::apply()
 	//update GL transformation for all entities
 	ccGLMatrix correctedFinalTrans(finalTransCorrected.data());
 
-	for (unsigned i=0; i<m_toTransform.getChildrenNumber(); ++i)
+	for (unsigned i = 0; i < m_toTransform.getChildrenNumber(); ++i)
 	{
 		ccHObject* toTransform = m_toTransform.getChild(i);
 		toTransform->setGLTransformation(correctedFinalTrans);

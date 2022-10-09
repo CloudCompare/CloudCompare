@@ -5259,7 +5259,9 @@ void ccGLWindow::startCPUBasedPointPicking(const PickingParameters& params)
 					}
 				}
 				else if (ent->isKindOf(CC_TYPES::MESH)
-					&& !ent->isA(CC_TYPES::MESH_GROUP)) //we don't need to process mesh groups as their children will be processed later
+					&& !ent->isA(CC_TYPES::MESH_GROUP) //we don't need to process mesh groups as their children will be processed later
+					&& !ent->isA(CC_TYPES::COORDINATESYSTEM) // we ignore coordinate system entities
+					)
 				{
 					ignoreSubmeshes = true;
 

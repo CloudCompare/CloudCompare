@@ -46,6 +46,8 @@
 
 //Semi-persistent value for max. cloud size
 static double s_maxCloudSizeDoubleSpinBoxValue = (CC_MAX_NUMBER_OF_POINTS_PER_CLOUD / 1.0e6);
+//Semi-persistent value for C.S. entities (quaternion) scale
+static double s_csEntitiesScale = 1.0;
 
 //Max number of points/lines to detect a column as 'labels'
 static unsigned s_maxLabelCount = 256;
@@ -130,6 +132,9 @@ AsciiOpenDlg::AsciiOpenDlg(QWidget* parent)
 	m_ui->maxCloudSizeDoubleSpinBox->setMaximum(CC_MAX_NUMBER_OF_POINTS_PER_CLOUD / 1.0e6);
 	m_ui->maxCloudSizeDoubleSpinBox->setValue(s_maxCloudSizeDoubleSpinBoxValue);
 
+	m_ui->quaternionFrame->setVisible(false);
+	m_ui->quatCSScaleDoubleSpinBox->setValue(s_csEntitiesScale);
+
 	QSize screenSize = QApplication::desktop()->screenGeometry().size();
 	setMaximumSize(screenSize);
 }
@@ -203,9 +208,9 @@ void AsciiOpenDlg::setSkippedLines(int linesCount)
 	updateTable();
 }
 
-static bool CouldBeX (const QString& colHeader) { return colHeader.startsWith(AsciiHeaderColumns::X().toUpper()); }
-static bool CouldBeY (const QString& colHeader) { return colHeader.startsWith(AsciiHeaderColumns::Y().toUpper()); }
-static bool CouldBeZ (const QString& colHeader) { return colHeader.startsWith(AsciiHeaderColumns::Z().toUpper()); }
+static bool CouldBeX (const QString& colHeader) { return colHeader.startsWith(AsciiHeaderColumns::X().toUpper()) || colHeader == "TX"; }
+static bool CouldBeY (const QString& colHeader) { return colHeader.startsWith(AsciiHeaderColumns::Y().toUpper()) || colHeader == "TY"; }
+static bool CouldBeZ (const QString& colHeader) { return colHeader.startsWith(AsciiHeaderColumns::Z().toUpper()) || colHeader == "TZ"; }
 static bool CouldBeRf(const QString& colHeader) { return colHeader == AsciiHeaderColumns::Rf().toUpper(); }
 static bool CouldBeGf(const QString& colHeader) { return colHeader == AsciiHeaderColumns::Gf().toUpper(); }
 static bool CouldBeBf(const QString& colHeader) { return colHeader == AsciiHeaderColumns::Bf().toUpper(); }
@@ -222,6 +227,10 @@ static bool CouldBeGrey(const QString& colHeader) { return colHeader == AsciiHea
 static bool CouldBeRGBi(const QString& colHeader) { return colHeader == AsciiHeaderColumns::RGB32i().toUpper(); }
 static bool CouldBeRGBf(const QString& colHeader) { return colHeader == AsciiHeaderColumns::RGB32f().toUpper(); }
 static bool CouldBeScal(const QString& colHeader) { return colHeader.contains("SCALAR") || colHeader.contains("INTENSITY"); }
+static bool CouldBeQuatW(const QString& colHeader) { return colHeader.startsWith(AsciiHeaderColumns::QuatX().toUpper()) || colHeader == "QW" || colHeader == "Q0"; }
+static bool CouldBeQuatX(const QString& colHeader) { return colHeader.startsWith(AsciiHeaderColumns::QuatY().toUpper()) || colHeader == "QX"; }
+static bool CouldBeQuatY(const QString& colHeader) { return colHeader.startsWith(AsciiHeaderColumns::QuatZ().toUpper()) || colHeader == "QY"; }
+static bool CouldBeQuatZ(const QString& colHeader) { return colHeader.startsWith(AsciiHeaderColumns::QuatW().toUpper()) || colHeader == "QZ"; }
 static bool CouldBeLabel(const QString& colHeader) { return colHeader.contains("LABEL") || colHeader.contains("NAME"); }
 
 static const unsigned MAX_COLUMNS = 512;				//maximum number of columns that can be handled
@@ -552,6 +561,7 @@ void AsciiOpenDlg::updateTable()
 		static const QIcon GreyIcon		(QString::fromUtf8(":/CC/images/typeGrayColor.png"));
 		static const QIcon ScalarIcon	(QString::fromUtf8(":/CC/images/typeSF.png"));
 		static const QIcon LabelIcon	(QString::fromUtf8(":/CC/images/dbLabelSymbol.png"));
+		static const QIcon QuatIcon		(QString::fromUtf8(":/CC/images/typeQuaternion.png"));
 
 		int columnWidth = (m_ui->tableWidget->width() * 9) / (columnsCount * 10);
 		columnWidth = std::max(columnWidth, 80);
@@ -584,6 +594,10 @@ void AsciiOpenDlg::updateTable()
 				columnHeaderWidget->setItemIcon(ASCII_OPEN_DLG_RGB32i, RGBIcon);
 				columnHeaderWidget->setItemIcon(ASCII_OPEN_DLG_RGB32f, RGBIcon);
 				columnHeaderWidget->setItemIcon(ASCII_OPEN_DLG_Label, LabelIcon);
+				columnHeaderWidget->setItemIcon(ASCII_OPEN_DLG_QuatW, QuatIcon);
+				columnHeaderWidget->setItemIcon(ASCII_OPEN_DLG_QuatX, QuatIcon);
+				columnHeaderWidget->setItemIcon(ASCII_OPEN_DLG_QuatY, QuatIcon);
+				columnHeaderWidget->setItemIcon(ASCII_OPEN_DLG_QuatZ, QuatIcon);
 				columnHeaderWidget->setItemIcon(ASCII_OPEN_DLG_Scalar, ScalarIcon);
 
 				connect(columnHeaderWidget, qOverload<int>(&QComboBox::currentIndexChanged), this, &AsciiOpenDlg::columnsTypeHasChanged);
@@ -630,6 +644,7 @@ void AsciiOpenDlg::updateTable()
 		unsigned assignedXYZFlags = 0;
 		unsigned assignedNormFlags = 0;
 		unsigned assignedRGBFlags = 0;
+		unsigned assignedQuaternionFlags = 0;
 
 		//split header (if any)
 		QStringList headerParts = m_headerLine.simplified().split(m_separator, QString::SkipEmptyParts);
@@ -756,6 +771,34 @@ void AsciiOpenDlg::updateTable()
 						//Nz
 						columnHeaderWidget->setCurrentIndex(ASCII_OPEN_DLG_NZ);
 						assignedNormFlags |= Z_BIT; //update bit field accordingly
+						m_columnType[i] = VALID;
+					}
+					else if ((assignedQuaternionFlags & X_BIT) == 0 && CouldBeQuatX(colHeader))
+					{
+						//Qx
+						columnHeaderWidget->setCurrentIndex(ASCII_OPEN_DLG_QuatX);
+						assignedQuaternionFlags |= X_BIT; //update bit field accordingly
+						m_columnType[i] = VALID;
+					}
+					else if ((assignedQuaternionFlags & Y_BIT) == 0 && CouldBeQuatY(colHeader))
+					{
+						//Qy
+						columnHeaderWidget->setCurrentIndex(ASCII_OPEN_DLG_QuatY);
+						assignedQuaternionFlags |= Y_BIT; //update bit field accordingly
+						m_columnType[i] = VALID;
+					}
+					else if ((assignedQuaternionFlags & Z_BIT) == 0 && CouldBeQuatZ(colHeader))
+					{
+						//Qz
+						columnHeaderWidget->setCurrentIndex(ASCII_OPEN_DLG_QuatZ);
+						assignedQuaternionFlags |= Z_BIT; //update bit field accordingly
+						m_columnType[i] = VALID;
+					}
+					else if ((assignedQuaternionFlags & W_BIT) == 0 && CouldBeQuatW(colHeader))
+					{
+						//QW
+						columnHeaderWidget->setCurrentIndex(ASCII_OPEN_DLG_QuatW);
+						assignedQuaternionFlags |= W_BIT; //update bit field accordingly
 						m_columnType[i] = VALID;
 					}
 					else if (CouldBeGrey(colHeader))
@@ -950,6 +993,11 @@ void AsciiOpenDlg::updateTable()
 	m_ui->tableWidget->resizeColumnsToContents();
 }
 
+double AsciiOpenDlg::getQuaternionScale() const
+{
+	return m_ui->quatCSScaleDoubleSpinBox->value();
+}
+
 void AsciiOpenDlg::checkSelectedColumnsValidity()
 {
 	//check for invalid columns
@@ -958,6 +1006,8 @@ void AsciiOpenDlg::checkSelectedColumnsValidity()
 		assert(m_columnType.size() == static_cast<size_t>(m_columnsCount));
 		assert(m_ui->tableWidget->columnCount() >= static_cast<int>(m_columnsCount));
 		m_ui->show2DLabelsCheckBox->setEnabled(false);
+
+		unsigned quaternionFields = 0;
 		for (unsigned i = 0; i < m_columnsCount; i++)
 		{
 			QComboBox* columnHeaderWidget = static_cast<QComboBox*>(m_ui->tableWidget->cellWidget(0, i));
@@ -971,7 +1021,14 @@ void AsciiOpenDlg::checkSelectedColumnsValidity()
 				//text columns shouldn't be selected (other than for Labels)
 				m_selectedInvalidColumns |= true;
 			}
+			else if (columnHeaderWidget->currentIndex() >= ASCII_OPEN_DLG_QuatW && columnHeaderWidget->currentIndex() <= ASCII_OPEN_DLG_QuatZ)
+			{
+				++quaternionFields;
+			}
 		}
+
+		// we only show the 'quaternion' frame if all 4 fields are defined
+		m_ui->quaternionFrame->setVisible(quaternionFields >= 4);
 	}
 
 	m_ui->applyAllButton->setEnabled(!m_selectedInvalidColumns);
@@ -985,8 +1042,10 @@ bool AsciiOpenDlg::CheckOpenSequence(const AsciiOpenDlg::Sequence& sequence, QSt
 	//- apart from SFs, only one column assignment per property
 	std::vector<unsigned> counters(ASCII_OPEN_DLG_TYPES_COUNT, 0);
 	{
-		for (size_t i = 0; i < sequence.size(); i++)
-			++counters[sequence[i].type];
+		for (const SequenceItem& item : sequence)
+		{
+			++counters[item.type];
+		}
 	}
 
 	//check for doublons
@@ -1011,6 +1070,17 @@ bool AsciiOpenDlg::CheckOpenSequence(const AsciiOpenDlg::Sequence& sequence, QSt
 		return false;
 	}
 
+	// for quaternions, we need all 4 values
+	unsigned quaternionTotal =		counters[ASCII_OPEN_DLG_QuatW]
+								+	counters[ASCII_OPEN_DLG_QuatX]
+								+	counters[ASCII_OPEN_DLG_QuatY]
+								+	counters[ASCII_OPEN_DLG_QuatZ];
+	if (quaternionTotal != 0 && quaternionTotal != 4)
+	{
+		errorMessage = "Incomplete quaternion definition! (4 components expected)";
+		return false;
+	}
+
 	return true;
 }
 
@@ -1024,8 +1094,12 @@ bool AsciiOpenDlg::apply()
 	}
 	else
 	{
+		// save semi-persistent values
 		s_maxCloudSizeDoubleSpinBoxValue = m_ui->maxCloudSizeDoubleSpinBox->value();
+		s_csEntitiesScale = m_ui->quatCSScaleDoubleSpinBox->value();
+		
 		accept();
+		
 		return true;
 	}
 }
@@ -1101,7 +1175,7 @@ AsciiOpenDlg::Sequence AsciiOpenDlg::getOpenSequence() const
 		}
 
 		seq.reserve(m_columnsCount - 1);
-		for (unsigned i = 0; i<m_columnsCount; i++)
+		for (unsigned i = 0; i < m_columnsCount; i++)
 		{
 			const QComboBox* combo = static_cast<QComboBox*>(m_ui->tableWidget->cellWidget(0, i));
 			if (!combo) //yes, it happens if all lines are skipped!
@@ -1189,6 +1263,22 @@ bool AsciiOpenDlg::safeSequence() const
 				&&	!colHeader.contains("INT"))
 				return false;
 			break;
+		case ASCII_OPEN_DLG_QuatW:
+			if (!CouldBeQuatW(colHeader))
+				return false;
+			break;
+		case ASCII_OPEN_DLG_QuatX:
+			if (!CouldBeQuatX(colHeader))
+				return false;
+			break;
+		case ASCII_OPEN_DLG_QuatY:
+			if (!CouldBeQuatY(colHeader))
+				return false;
+			break;
+		case ASCII_OPEN_DLG_QuatZ:
+			if (!CouldBeQuatZ(colHeader))
+				return false;
+			break;
 		case ASCII_OPEN_DLG_Scalar:
 			//a SF name can be anything!
 			break;
@@ -1249,7 +1339,8 @@ void AsciiOpenDlg::columnsTypeHasChanged(int index)
 			if (index == int(ASCII_OPEN_DLG_X)  ||
 				index == int(ASCII_OPEN_DLG_NX) ||
 				index == int(ASCII_OPEN_DLG_R)  ||
-				index == int(ASCII_OPEN_DLG_Rf)
+				index == int(ASCII_OPEN_DLG_Rf) ||
+				index == int(ASCII_OPEN_DLG_QuatW)
 				)
 			{
 				//Auto select the next columns type
@@ -1283,6 +1374,19 @@ void AsciiOpenDlg::columnsTypeHasChanged(int index)
 						{
 							nextCombo->setCurrentIndex(ASCII_OPEN_DLG_Gf);
 							nextNextCombo->setCurrentIndex(ASCII_OPEN_DLG_Bf);
+						}
+						else if (index == int(ASCII_OPEN_DLG_QuatW))
+						{
+							if (i + 3 < m_columnsCount) // we need one more value for quaternions
+							{
+								QComboBox* nexNextNextCombo = static_cast<QComboBox*>(m_ui->tableWidget->cellWidget(0, i + 3));
+								if (nexNextNextCombo->currentIndex() == int(ASCII_OPEN_DLG_None))
+								{
+									nextCombo->setCurrentIndex(ASCII_OPEN_DLG_QuatX);
+									nextNextCombo->setCurrentIndex(ASCII_OPEN_DLG_QuatY);
+									nexNextNextCombo->setCurrentIndex(ASCII_OPEN_DLG_QuatZ);
+								}
+							}
 						}
 					}
 

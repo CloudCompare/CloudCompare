@@ -28,8 +28,6 @@
 //system
 #include <vector>
 
-const unsigned ASCII_OPEN_DLG_TYPES_COUNT = 20;
-
 enum CC_ASCII_OPEN_DLG_TYPES {	ASCII_OPEN_DLG_None			= 0,
 								ASCII_OPEN_DLG_X			= 1,
 								ASCII_OPEN_DLG_Y			= 2,
@@ -49,8 +47,14 @@ enum CC_ASCII_OPEN_DLG_TYPES {	ASCII_OPEN_DLG_None			= 0,
 								ASCII_OPEN_DLG_RGB32i		= 16, //RGBA as a single 32 bits integer (PCL style)
 								ASCII_OPEN_DLG_RGB32f		= 17, //RGBA as a single 32 bits float (PCL style)
 								ASCII_OPEN_DLG_Label		= 18,
-								ASCII_OPEN_DLG_Scalar		= ASCII_OPEN_DLG_TYPES_COUNT - 1, //should always be the last one! (see AsciiOpenDlg::CheckOpenSequence)
+								ASCII_OPEN_DLG_QuatW		= 19,
+								ASCII_OPEN_DLG_QuatX		= 20,
+								ASCII_OPEN_DLG_QuatY		= 21,
+								ASCII_OPEN_DLG_QuatZ		= 22,
+								ASCII_OPEN_DLG_Scalar		= 23, //should always be the last one! (see AsciiOpenDlg::CheckOpenSequence)
 };
+
+constexpr const unsigned ASCII_OPEN_DLG_TYPES_COUNT = ASCII_OPEN_DLG_Scalar + 1;
 
 //! Default ASCII header columns
 class AsciiHeaderColumns
@@ -76,6 +80,10 @@ public:
 	static QString RGB32i() { return "RGB32i"; }
 	static QString RGB32f() { return "RGB32f"; }
 	static QString Label()	{ return "Label"; }
+	static QString QuatW()  { return "QuatW"; }
+	static QString QuatX()  { return "QuatX"; }
+	static QString QuatY()  { return "QuatY"; }
+	static QString QuatZ()  { return "QuatZ"; }
 };
 
 const char ASCII_OPEN_DLG_TYPES_NAMES[ASCII_OPEN_DLG_TYPES_COUNT][20] = {	"Ignore",
@@ -97,6 +105,10 @@ const char ASCII_OPEN_DLG_TYPES_NAMES[ASCII_OPEN_DLG_TYPES_COUNT][20] = {	"Ignor
 																			"RGBAi",
 																			"RGBAf",
 																			"Label",
+																			"Quaternion W",
+																			"Quaternion X",
+																			"Quaternion Y",
+																			"Quaternion Z",
 																			"Scalar"
 																			};
 
@@ -190,6 +202,9 @@ public:
 
 	//! Resets the "apply all" flag (if set)
 	static void ResetApplyAll();
+
+	//! Returns the quaternion scale
+	double getQuaternionScale() const;
 
 public:
 	//! Slot called when separator changes

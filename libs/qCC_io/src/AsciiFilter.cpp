@@ -33,6 +33,7 @@
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
+#include <ccCoordinateSystem.h>
 
 //System
 #include <cassert>
@@ -498,6 +499,7 @@ CC_FILE_ERROR AsciiFilter::loadStream(	QTextStream& stream,
 	unsigned maxCloudSize = openDialog.getMaxCloudSize();
 	unsigned skipLineCount = openDialog.getSkippedLinesCount();
 	bool showLabelsIn2D = openDialog.showLabelsIn2D();
+	double quaternionScale = openDialog.getQuaternionScale();
 
 	return loadCloudFromFormatedAsciiStream(stream,
 											filenameOrTitle,
@@ -509,6 +511,7 @@ CC_FILE_ERROR AsciiFilter::loadStream(	QTextStream& stream,
 											dataSize,
 											maxCloudSize,
 											skipLineCount,
+											quaternionScale,
 											parameters,
 											showLabelsIn2D);
 }
@@ -516,7 +519,7 @@ CC_FILE_ERROR AsciiFilter::loadStream(	QTextStream& stream,
 struct cloudAttributesDescriptor
 {
 	ccPointCloud* cloud;
-	static const unsigned c_attribCount = 14;
+	static const unsigned c_attribCount = 18;
 	union
 	{
 		struct{	int xCoordIndex;
@@ -532,6 +535,10 @@ struct cloudAttributesDescriptor
 				int iRgbaIndex;
 				int fRgbaIndex;
 				int greyIndex;
+				int qwIndex;
+				int qxIndex;
+				int qyIndex;
+				int qzIndex;
 				int labelIndex;
 		};
 		int indexes[c_attribCount];
@@ -541,6 +548,7 @@ struct cloudAttributesDescriptor
 	bool hasNorms;
 	bool hasRGBColors;
 	bool hasFloatRGBColors[4];
+	bool hasQuaternion;
 
 	cloudAttributesDescriptor()
 	{
@@ -557,6 +565,7 @@ struct cloudAttributesDescriptor
 		hasNorms = false;
 		hasRGBColors = false;
 		hasFloatRGBColors[0] = hasFloatRGBColors[1] = hasFloatRGBColors[2] = hasFloatRGBColors[3] = false;
+		hasQuaternion = false;
 		
 		scalarIndexes.clear();
 		scalarFields.clear();
@@ -603,6 +612,7 @@ cloudAttributesDescriptor prepareCloud(	const AsciiOpenDlg::Sequence &openSequen
 	cloudDesc.cloud = cloud;
 
 	int seqSize = static_cast<int>(openSequence.size());
+	unsigned char quaternionComponents = 0;
 	for (int i = 0; i < seqSize; ++i)
 	{
 		switch (openSequence[i].type)
@@ -769,6 +779,22 @@ cloudAttributesDescriptor prepareCloud(	const AsciiOpenDlg::Sequence &openSequen
 				ccLog::Warning("Failed to allocate memory for colors! (skipped)");
 			}
 			break;
+		case ASCII_OPEN_DLG_QuatW:
+			cloudDesc.qwIndex = i;
+			cloudDesc.hasQuaternion = (++quaternionComponents == 4);
+			break;
+		case ASCII_OPEN_DLG_QuatX:
+			cloudDesc.qxIndex = i;
+			cloudDesc.hasQuaternion = (++quaternionComponents == 4);
+			break;
+		case ASCII_OPEN_DLG_QuatY:
+			cloudDesc.qyIndex = i;
+			cloudDesc.hasQuaternion = (++quaternionComponents == 4);
+			break;
+		case ASCII_OPEN_DLG_QuatZ:
+			cloudDesc.qzIndex = i;
+			cloudDesc.hasQuaternion = (++quaternionComponents == 4);
+			break;
 		case ASCII_OPEN_DLG_Label:
 			assert(cloudDesc.labelIndex < 0); //There Can Be Only One
 			cloudDesc.labelIndex = i;
@@ -797,6 +823,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiStream(QTextStream& stream,
 															qint64 fileSize,
 															unsigned maxCloudSize,
 															unsigned skipLines,
+															double quaternionScale,
 															LoadParameters& parameters,
 															bool showLabelsIn2D/*=false*/)
 {
@@ -1090,6 +1117,29 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiStream(QTextStream& stream,
 					D = static_cast<ScalarType>(locale.toDouble(parts[cloudDesc.scalarIndexes[j]]));
 					cloudDesc.scalarFields[j]->emplace_back(D);
 				}
+			}
+
+			//Quaternion
+			if (cloudDesc.hasQuaternion)
+			{
+				double quat[4] = { locale.toDouble(parts[cloudDesc.qwIndex]),
+									locale.toDouble(parts[cloudDesc.qxIndex]),
+									locale.toDouble(parts[cloudDesc.qyIndex]),
+									locale.toDouble(parts[cloudDesc.qzIndex])
+				};
+
+				ccGLMatrix mat = ccGLMatrix::FromQuaternion(quat);
+				mat.setTranslation(P.u);
+
+				ccCoordinateSystem* cs = new ccCoordinateSystem(ccCoordinateSystem::DEFAULT_DISPLAY_SCALE,
+																CCCoreLib::PC_ONE,
+																&mat,
+																QString("Quaternion #%1").arg(cloudDesc.cloud->size()));
+				cs->setVisible(true);
+				cs->showAxisPlanes(false);
+				cs->showAxisLines(true);
+				cs->setDisplayScale(static_cast<PointCoordinateType>(quaternionScale));
+				cloudDesc.cloud->addChild(cs);
 			}
 
 			//Label

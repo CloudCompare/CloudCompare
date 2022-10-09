@@ -139,6 +139,7 @@
     <file>images/typeXCoordinate.png</file>
     <file>images/typeYCoordinate.png</file>
     <file>images/typeZCoordinate.png</file>
+	<file>images/typeQuaternion.png</file>
     <file>images/ccTracePolyline.png</file>
     <file>images/qCompass.png</file>
     <file>images/mapIcon.png</file>

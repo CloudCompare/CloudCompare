@@ -980,6 +980,12 @@ void ccGraphicalSegmentationTool::pauseSegmentationMode(bool state)
 			m_polyVertices->clear();
 			allowPolylineExport(false);
 		}
+
+		if (m_associatedWin)
+		{
+			m_associatedWin->releaseMouse();
+		}
+
 		m_associatedWin->setInteractionMode(ccGLWindow::MODE_TRANSFORM_CAMERA);
 		m_associatedWin->displayNewMessage("Segmentation [PAUSED]", ccGLWindow::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
 		m_associatedWin->displayNewMessage("Unpause to segment again", ccGLWindow::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);

@@ -85,6 +85,8 @@ v2.13.alpha (???) - (??/??/????)
 	- When clicking on an entity in a 3D view while holding CTRL, it was only possible to select it, not to deselect it if it was already selected.
 	- When using the Align tool on an aligned entity with labels, the initial view point could be invalid
 	- Zooming in and out or changing the FOV in bubble view mode was not working anymore
+	- When pausing the graphical segmentation tool while a contour / polyline was started but not closed, the tool icons would not be clickable anymore
+		(forcing the user to exit the tool with ESC)
 
 v2.12.4 (Kyiv) - (14/07/2022)
 ----------------------

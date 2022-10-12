@@ -16,6 +16,7 @@
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
 #include <ccVolumeCalcTool.h>
+#include <ccSubMesh.h>
 
 //qCC_io
 #include <AsciiFilter.h>
@@ -1977,6 +1978,65 @@ enum USE_SPECIAL_SF_VALUE
 	USE_N_SIGMA_MAX
 };
 
+static std::pair<ScalarType, ScalarType> GetSFRange(const CCCoreLib::ScalarField& sf,
+													ScalarType minVal,
+													USE_SPECIAL_SF_VALUE useValForMin,
+													ScalarType maxVal,
+													USE_SPECIAL_SF_VALUE useValForMax)
+{
+	ScalarType thisMinVal = minVal;
+	{
+		switch (useValForMin)
+		{
+		case USE_MIN:
+			thisMinVal = sf.getMin();
+			break;
+		case USE_DISP_MIN:
+			thisMinVal = static_cast<const ccScalarField&>(sf).displayRange().start();
+			break;
+		case USE_SAT_MIN:
+			thisMinVal = static_cast<const ccScalarField&>(sf).saturationRange().start();
+			break;
+		case USE_N_SIGMA_MIN:
+			ScalarType mean;
+			ScalarType variance;
+			sf.computeMeanAndVariance(mean, &variance);
+			thisMinVal = mean - (sqrt(variance) * minVal);
+			break;
+		default:
+			//nothing to do
+			break;
+		}
+	}
+
+	ScalarType thisMaxVal = maxVal;
+	{
+		switch (useValForMax)
+		{
+		case USE_MAX:
+			thisMaxVal = sf.getMax();
+			break;
+		case USE_DISP_MAX:
+			thisMaxVal = static_cast<const ccScalarField&>(sf).displayRange().stop();
+			break;
+		case USE_SAT_MAX:
+			thisMaxVal = static_cast<const ccScalarField&>(sf).saturationRange().stop();
+			break;
+		case USE_N_SIGMA_MAX:
+			ScalarType mean;
+			ScalarType variance;
+			sf.computeMeanAndVariance(mean, &variance);
+			thisMaxVal = mean + (sqrt(variance) * maxVal);
+			break;
+		default:
+			//nothing to do
+			break;
+		}
+	}
+
+	return { thisMinVal, thisMaxVal };
+}
+
 bool CommandFilterBySFValue::process(ccCommandLineInterface &cmd)
 {
 	cmd.print(QObject::tr("[FILTER BY VALUE]"));
@@ -2077,82 +2137,33 @@ bool CommandFilterBySFValue::process(ccCommandLineInterface &cmd)
 	
 	cmd.print(QObject::tr("\tInterval: [%1 - %2]").arg(minValStr, maxValStr));
 	
-	if (cmd.clouds().empty())
+	if (cmd.clouds().empty() && cmd.meshes().empty())
 	{
-		return cmd.error(QObject::tr("No point cloud on which to filter SF! (be sure to open one or generate one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_FILTER_SF_BY_VALUE));
+		return cmd.error(QObject::tr("No point cloud nor mesh on which to filter SF! (be sure to open one or generate one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_FILTER_SF_BY_VALUE));
 	}
-	
+
+	// for each cloud
 	for (size_t i = 0; i < cmd.clouds().size(); ++i)
 	{
 		CCCoreLib::ScalarField* sf = cmd.clouds()[i].pc->getCurrentOutScalarField();
 		if (sf)
 		{
-			ScalarType thisMinVal = minVal;
-			{
-				switch (useValForMin)
-				{
-					case USE_MIN:
-						thisMinVal = sf->getMin();
-						break;
-					case USE_DISP_MIN:
-						thisMinVal = static_cast<ccScalarField*>(sf)->displayRange().start();
-						break;
-					case USE_SAT_MIN:
-						thisMinVal = static_cast<ccScalarField*>(sf)->saturationRange().start();
-						break;
-					case USE_N_SIGMA_MIN:
-						ScalarType mean;
-						ScalarType variance;
-						sf->computeMeanAndVariance(mean, &variance);
-						thisMinVal = mean - (sqrt(variance) * minVal);
-						break;
-					default:
-						//nothing to do
-						break;
-				}
-			}
+			std::pair<ScalarType, ScalarType> range = GetSFRange(*sf, minVal, useValForMin, maxVal, useValForMax);
 			
-			ScalarType thisMaxVal = maxVal;
-			{
-				switch (useValForMax)
-				{
-					case USE_MAX:
-						thisMaxVal = sf->getMax();
-						break;
-					case USE_DISP_MAX:
-						thisMaxVal = static_cast<ccScalarField*>(sf)->displayRange().stop();
-						break;
-					case USE_SAT_MAX:
-						thisMaxVal = static_cast<ccScalarField*>(sf)->saturationRange().stop();
-						break;
-					case USE_N_SIGMA_MAX:
-						ScalarType mean;
-						ScalarType variance;
-						sf->computeMeanAndVariance(mean, &variance);
-						thisMaxVal = mean + (sqrt(variance) * maxVal);
-						break;
-					default:
-						//nothing to do
-						break;
-				}
-			}
-			
-			ccPointCloud* fitleredCloud = cmd.clouds()[i].pc->filterPointsByScalarValue(thisMinVal, thisMaxVal);
+			ccPointCloud* fitleredCloud = cmd.clouds()[i].pc->filterPointsByScalarValue(range.first, range.second);
 			if (fitleredCloud)
 			{
 				cmd.print(QObject::tr("\t\tCloud '%1' --> %2/%3 points remaining").arg(cmd.clouds()[i].pc->getName()).arg(fitleredCloud->size()).arg(cmd.clouds()[i].pc->size()));
 				
-				CLCloudDesc resultDesc(fitleredCloud, cmd.clouds()[i].basename, cmd.clouds()[i].path, cmd.clouds()[i].indexInFile);
 				//replace current cloud by this one
 				delete cmd.clouds()[i].pc;
 				cmd.clouds()[i].pc = fitleredCloud;
-				cmd.clouds()[i].basename += QObject::tr("_FILTERED_[%1_%2]").arg(thisMinVal).arg(thisMaxVal);
+				cmd.clouds()[i].basename += QObject::tr("_FILTERED_[%1_%2]").arg(range.first).arg(range.second);
 				if (cmd.autoSaveMode())
 				{
-					QString errorStr = cmd.exportEntity(resultDesc);
+					QString errorStr = cmd.exportEntity(cmd.clouds()[i]);
 					if (!errorStr.isEmpty())
 					{
-						delete fitleredCloud;
 						return cmd.error(errorStr);
 					}
 				}
@@ -2160,6 +2171,55 @@ bool CommandFilterBySFValue::process(ccCommandLineInterface &cmd)
 		}
 	}
 	
+	// for each mesh
+	for (size_t i = 0; i < cmd.meshes().size(); ++i)
+	{
+		ccGenericMesh* mesh = cmd.meshes()[i].mesh;
+		ccPointCloud* pc = ccHObjectCaster::ToPointCloud(mesh);
+		if (!pc)
+		{
+			// strange mesh
+			continue;
+		}
+		
+		CCCoreLib::ScalarField* sf = pc->getCurrentOutScalarField();
+		if (sf)
+		{
+			std::pair<ScalarType, ScalarType> range = GetSFRange(*sf, minVal, useValForMin, maxVal, useValForMax);
+
+			pc->hidePointsByScalarValue(range.first, range.second);
+			ccGenericMesh* filteredMesh = nullptr;
+			if (mesh->isA(CC_TYPES::MESH)/*|| ent->isKindOf(CC_TYPES::PRIMITIVE)*/) //TODO
+				filteredMesh = ccHObjectCaster::ToMesh(mesh)->createNewMeshFromSelection(false);
+			else if (mesh->isA(CC_TYPES::SUB_MESH))
+				filteredMesh = ccHObjectCaster::ToSubMesh(mesh)->createNewSubMeshFromSelection(false);
+			else
+			{
+				cmd.warning("Unhandled mesh type for entitiy " + mesh->getName());
+				continue;
+			}
+
+			if (filteredMesh)
+			{
+				cmd.print(QObject::tr("\t\tMesh '%1' --> %2/%3 triangles remaining").arg(mesh->getName()).arg(filteredMesh->size()).arg(mesh->size()));
+
+				//replace current mesh by this one
+				delete mesh;
+				mesh = nullptr;
+				cmd.meshes()[i].mesh = filteredMesh;
+				cmd.meshes()[i].basename += QObject::tr("_FILTERED_[%1_%2]").arg(range.first).arg(range.second);
+				if (cmd.autoSaveMode())
+				{
+					QString errorStr = cmd.exportEntity(cmd.meshes()[i]);
+					if (!errorStr.isEmpty())
+					{
+						return cmd.error(errorStr);
+					}
+				}
+			}
+		}
+	}
+
 	return true;
 }
 

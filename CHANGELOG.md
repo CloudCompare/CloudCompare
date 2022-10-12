@@ -68,6 +68,7 @@ v2.13.alpha (???) - (??/??/????)
 		- It is now possible to pass a SF name after -SET_ACTIVE_SF  instead of the field index
 			(use simple quotes if the scalar field name has spaces in it)
 		- The -SF_COLOR_SCALE option now works on meshes (vertices) as well
+		- The -FILTER_SF option now works on meshes as well
 		- New sub-option for the -C2M_DIST command: -UNSIGNED, to compute unsigned distances
 		- New sub-option for the -SF_ARITHMETIC command: -IN_PLACE, to update the scalar field in place, without creating a new SF
 

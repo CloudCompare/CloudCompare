@@ -3597,6 +3597,7 @@ void ccGLWindow::setBaseViewMat(ccGLMatrixd& mat)
 {
 	m_viewportParams.viewMat = mat;
 
+	invalidateViewport();
 	invalidateVisualization();
 
 	//we emit the 'baseViewMatChanged' signal

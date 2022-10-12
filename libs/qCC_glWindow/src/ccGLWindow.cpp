@@ -6166,6 +6166,7 @@ void ccGLWindow::setView(CC_VIEW_ORIENTATION orientation, bool forceRedraw/*=tru
 	if (wasViewerBased)
 		setPerspectiveState(m_viewportParams.perspectiveView, false);
 
+	invalidateViewport();
 	invalidateVisualization();
 	deprecate3DLayer();
 

@@ -37,7 +37,6 @@ v2.13.alpha (???) - (??/??/????)
 		- once 4 columns are assigned to one of the 4 quaternion components (w,x,y,z), the user can elect the display scale of the
 			'Coordinate System' objects
 
-
 - Improvements:
 	- Rasterize:
 		- new option to compute the median height
@@ -96,6 +95,7 @@ v2.13.alpha (???) - (??/??/????)
 	- Zooming in and out or changing the FOV in bubble view mode was not working anymore
 	- When pausing the graphical segmentation tool while a contour / polyline was started but not closed, the tool icons would not be clickable anymore
 		(forcing the user to exit the tool with ESC)
+	- The 'Point List Picking' tool was not transferring the Global Shift information when exporting the list of points as a polyline
 
 v2.12.4 (Kyiv) - (14/07/2022)
 ----------------------

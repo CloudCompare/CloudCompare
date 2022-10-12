@@ -298,6 +298,11 @@ void ccPointListPickingDlg::exportToNewPolyline()
 		}
 		polyline->addChild(vertices);
 		polyline->setDisplay_recursive(m_associatedEntity->getDisplay());
+		ccShiftedObject* shifted = ccHObjectCaster::ToShifted(m_associatedEntity);
+		if (shifted)
+		{
+			polyline->copyGlobalShiftAndScale(*shifted);
+		}
 
 		MainWindow::TheInstance()->addToDB(polyline);
 	}

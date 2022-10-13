@@ -322,7 +322,7 @@ void ccConsole::logMessage(const QString& message, int level)
 		m_mutex.unlock();
 	}
 #ifdef QT_DEBUG
-	else
+	else if (!s_redirectToStdOut)
 	{
 		//Error
 		if (level & LOG_ERROR)

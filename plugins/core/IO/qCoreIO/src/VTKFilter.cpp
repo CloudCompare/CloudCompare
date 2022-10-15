@@ -844,7 +844,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 		mesh->addChild(vertices);
 		vertices->setEnabled(false);
 		vertices->setName("Vertices");
-		vertices->setLocked(true); //DGM: no need to lock it as it is only used by one mesh!
+		//vertices->setLocked(false); //DGM: no need to lock it as it is only used by one mesh!
 
 		//DGM: normals can be per-vertex or per-triangle so it's better to let the user do it himself later
 		//Moreover it's not always good idea if the user doesn't want normals (especially in ccViewer!)

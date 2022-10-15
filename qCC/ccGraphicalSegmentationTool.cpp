@@ -270,7 +270,7 @@ void ccGraphicalSegmentationTool::prepareEntityForRemoval(ccHObject *entity, boo
 
 	if (unallocateVisibilityArrays)
 	{
-		ccGenericPointCloud *asCloud = ccHObjectCaster::ToGenericPointCloud(entity);
+		ccGenericPointCloud* asCloud = ccHObjectCaster::ToGenericPointCloud(entity);
 		if (asCloud)
 		{
 			asCloud->unallocateVisibilityArray();
@@ -1486,10 +1486,11 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 				{
 					segmentationResult = ccHObjectCaster::ToMesh(entity)->createNewMeshFromSelection(canModify && !m_deleteHiddenParts);
 				}
-				else if (entity->isA(CC_TYPES::SUB_MESH))
-				{
-					segmentationResult = ccHObjectCaster::ToSubMesh(entity)->createNewSubMeshFromSelection(canModify && !m_deleteHiddenParts);
-				}
+				//DGM: the code below is useless since we don't allow CC_TYPES::SUB_MESH entities (see above)
+				//else if (entity->isA(CC_TYPES::SUB_MESH))
+				//{
+				//	segmentationResult = ccHObjectCaster::ToSubMesh(entity)->createNewSubMeshFromSelection(canModify && !m_deleteHiddenParts);
+				//}
 
 				deleteOriginalEntity |= (ccHObjectCaster::ToGenericMesh(entity)->size() == 0);
 			}
@@ -1577,21 +1578,23 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 						ccGenericMesh *meshEntity = ccHObjectCaster::ToGenericMesh(entity);
 						ccHObjectCaster::ToGenericMesh(segmentationResult)->getAssociatedCloud()->setName(meshEntity->getAssociatedCloud()->getName());
 
-						//specific case: if the sub mesh is deleted afterwards (see below)
-						//then its associated vertices won't be 'reset' by the segmentation tool!
-						if (m_deleteHiddenParts && meshEntity->isA(CC_TYPES::SUB_MESH))
-						{
-							verticesToReset.insert(meshEntity->getAssociatedCloud());
-						}
+						//DGM: the code below is useless since we don't allow CC_TYPES::SUB_MESH entities (see above)
+						////specific case: if the sub mesh is deleted afterward (see below)
+						////then its associated vertices won't be 'reset' by the segmentation tool!
+						//if (m_deleteHiddenParts && meshEntity->isA(CC_TYPES::SUB_MESH))
+						//{
+						//	verticesToReset.insert(meshEntity->getAssociatedCloud());
+						//}
 					}
 				}
 
-				if (segmentationResult->isA(CC_TYPES::SUB_MESH))
-				{
-					//for sub-meshes, we have no choice but to use its parent mesh!
-					objContext.parent = static_cast<ccSubMesh *>(segmentationResult)->getAssociatedMesh();
-				}
-				else
+				//DGM: the code below is useless since we don't allow CC_TYPES::SUB_MESH entities (see above)
+				//if (segmentationResult->isA(CC_TYPES::SUB_MESH))
+				//{
+				//	//for sub-meshes, we have no choice but to use its parent mesh!
+				//	objContext.parent = static_cast<ccSubMesh *>(segmentationResult)->getAssociatedMesh();
+				//}
+				//else
 				{
 					//otherwise we look for first non-mesh or non-cloud parent
 					while (objContext.parent && (objContext.parent->isKindOf(CC_TYPES::MESH) || objContext.parent->isKindOf(CC_TYPES::POINT_CLOUD)))

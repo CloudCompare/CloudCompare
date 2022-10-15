@@ -384,7 +384,7 @@ CC_FILE_ERROR STLFilter::loadFile(const QString& filename, ccHObject& container,
 		}
 
 		meshVertices->setEnabled(false);
-		meshVertices->setLocked(false); //DGM: no need to lock it as it is only used by one mesh!
+		//meshVertices->setLocked(true); //DGM: no need to lock it as it is only used by one mesh!
 		mesh->addChild(meshVertices);
 
 		container.addChild(mesh);

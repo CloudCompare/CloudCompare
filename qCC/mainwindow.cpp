@@ -2937,14 +2937,11 @@ void MainWindow::doActionFilterByValue()
 		{
 			ccHObject* ent = item.first;
 			ccPointCloud* pc = item.second;
-			//CCCoreLib::ScalarField* sf = pc->getCurrentDisplayedScalarField();
-			//assert(sf);
 
 			//we set as output (OUT) the currently displayed scalar field
 			int outSfIdx = pc->getCurrentDisplayedScalarFieldIndex();
 			assert(outSfIdx >= 0);
 			pc->setCurrentOutScalarField(outSfIdx);
-			//pc->setCurrentScalarField(outSfIdx);
 
 			ccHObject* resultInside = nullptr;
 			ccHObject* resultOutside = nullptr;
@@ -2969,10 +2966,6 @@ void MainWindow::doActionFilterByValue()
 			}
 			else if (ent->isKindOf(CC_TYPES::POINT_CLOUD))
 			{
-				//pc->hidePointsByScalarValue(minVal,maxVal);
-				//result = ccHObjectCaster::ToGenericPointCloud(ent)->hidePointsByScalarValue(false);
-				//pc->unallocateVisibilityArray();
-
 				//shortcut, as we know here that the point cloud is a "ccPointCloud"
 				resultInside = pc->filterPointsByScalarValue(minVal, maxVal, false);
 
@@ -3001,7 +2994,6 @@ void MainWindow::doActionFilterByValue()
 
 				results.push_back(resultOutside);
 			}
-			//*/
 		}
 	}
 

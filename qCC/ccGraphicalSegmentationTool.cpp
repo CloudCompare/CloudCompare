@@ -340,7 +340,7 @@ void ccGraphicalSegmentationTool::reset()
 			ccGenericPointCloud *asCloud = ccHObjectCaster::ToGenericPointCloud(*p);
 			if (asCloud)
 			{
-				asCloud->resetVisibilityArray();
+				asCloud->unallocateVisibilityArray();
 			}
 		}
 
@@ -410,7 +410,6 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject *entity, bool silent/*=fal
 			associatedPolyline->setVisible(false);
 		}
 
-		cloud->resetVisibilityArray();
 		m_toSegment.insert(cloud);
 		cloud->pushDisplayState();
 		cloud->setVisible(true);
@@ -491,7 +490,6 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject *entity, bool silent/*=fal
 			m_toSegment.remove(vertices);
 		}
 
-		vertices->resetVisibilityArray();
 		m_toSegment.insert(mesh);
 		mesh->pushDisplayState();
 		mesh->setVisible(true);
@@ -520,7 +518,6 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject *entity, bool silent/*=fal
 			m_toSegment.remove(verticesCloud);
 		}
 
-		verticesCloud->resetVisibilityArray();
 		m_toSegment.insert(poly);
 		poly->pushDisplayState();
 		poly->setVisible(true);
@@ -853,11 +850,18 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 	bool classificationMode = CCCoreLib::ScalarField::ValidValue(classificationValue);
 
 	// for each selected entity
+	int errorCount = 0;
 	for (QSet<ccHObject *>::const_iterator p = m_toSegment.constBegin(); p != m_toSegment.constEnd(); ++p)
 	{
-		ccGenericPointCloud *cloud = ccHObjectCaster::ToGenericPointCloud(*p);
+		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(*p);
 		assert(cloud);
 
+		// we enable the visibility array if not done already
+		if (!cloud->isVisibilityTableInstantiated() && !cloud->resetVisibilityArray())
+		{
+			++errorCount;
+			continue;
+		}
 		ccGenericPointCloud::VisibilityTableType& visibilityArray = cloud->getTheVisibilityArray();
 		assert(!visibilityArray.empty());
 
@@ -934,6 +938,18 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 		if (classifSF)
 		{
 			classifSF->computeMinAndMax();
+		}
+	}
+
+	if (errorCount != 0)
+	{
+		if (errorCount == m_toSegment.size())
+		{
+			ccLog::Error(tr("Not enough memory: no entity could be segmented"));
+		}
+		else
+		{
+			ccLog::Error(tr("Not enough memory: not all entities were segmented"));
 		}
 	}
 
@@ -1317,7 +1333,7 @@ void ccGraphicalSegmentationTool::cancel()
 	stop(false);
 }
 
-bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface *app, ccHObject::Container &newEntities)
+bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccHObject::Container& newEntities)
 {
 	if (!app)
 	{
@@ -1656,7 +1672,7 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface *app, ccH
 	{
 		for (ccGenericPointCloud *cloud : verticesToReset)
 		{
-			cloud->resetVisibilityArray();
+			cloud->unallocateVisibilityArray();
 		}
 	}
 

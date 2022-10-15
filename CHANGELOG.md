@@ -57,7 +57,8 @@ v2.13.alpha (???) - (??/??/????)
 		- the shortcut has been changed to ALT+P (so as to not conflict with the already existing CTRL+P shortcut for the 'Trace polyline' tool)
 		
 	- Graphical Segmentation Tool:
-		- the user can now configure the name suffix for the remaining and segmented cloud 
+		- the user can now configure the name suffix for the remaining and segmented cloud
+		- the display should be faster until the first segmentation is performed
 
 	- LAS files:
 		- The default shift for (GPS) time values is now rounded to the nearest 10^5 value

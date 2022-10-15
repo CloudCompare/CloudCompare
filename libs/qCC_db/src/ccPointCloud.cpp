@@ -1428,6 +1428,12 @@ bool ccPointCloud::resize(unsigned newNumberOfPoints)
 	//if we are changing the cloud contents, let's stop the LOD construction process
 	clearLOD();
 
+	if (newNumberOfPoints != size())
+	{
+		//unallocate the visibility array (just in case)
+		unallocateVisibilityArray();
+	}
+
 	//call parent method first (for points + scalar fields)
 	if (!BaseClass::resize(newNumberOfPoints))
 	{
@@ -2125,7 +2131,6 @@ void ccPointCloud::invertNormals()
 
 void ccPointCloud::swapPoints(unsigned firstIndex, unsigned secondIndex)
 {
-	assert(!isLocked());
 	assert(firstIndex < size() && secondIndex < size());
 
 	if (firstIndex == secondIndex)
@@ -3345,65 +3350,114 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool re
 	//shall the visible points be erased from this cloud?
 	if (removeSelectedPoints && !isLocked())
 	{
-		//we drop the octree before modifying this cloud's contents
-		deleteOctree();
-		clearLOD();
-
-		unsigned count = size();
-
-		//we have to take care of scan grids first
-		{
-			//we need a map between old and new indexes
-			std::vector<int> newIndexMap(size(), -1);
-			{
-				unsigned newIndex = 0;
-				for (unsigned i = 0; i < count; ++i)
-				{
-					if (m_pointsVisibility[i] != CCCoreLib::POINT_VISIBLE)
-					{
-						newIndexMap[i] = newIndex++;
-					}
-				}
-			}
-
-			//then update the indexes
-			UpdateGridIndexes(newIndexMap, m_grids);
-
-			//and reset the invalid (empty) ones
-			//(DGM: we don't erase them as they may still be useful?)
-			for (Grid::Shared &grid : m_grids)
-			{
-				if (grid->validCount == 0)
-				{
-					grid->indexes.resize(0);
-				}
-			}
-		}
-
-		//we remove all visible points
-		unsigned lastPoint = 0;
-		for (unsigned i = 0; i < count; ++i)
-		{
-			if (m_pointsVisibility[i] != CCCoreLib::POINT_VISIBLE)
-			{
-				if (i != lastPoint)
-				{
-					swapPoints(lastPoint, i);
-				}
-				++lastPoint;
-			}
-		}
-
-		unallocateVisibilityArray();
-
-		//TODO: handle associated meshes
-
-		resize(lastPoint);
-		
-		refreshBB(); //calls notifyGeometryUpdate + releaseVBOs
+		removeVisiblePoints(visTable);
 	}
 
 	return result;
+}
+
+bool ccPointCloud::removeVisiblePoints(VisibilityTableType* visTable/*=nullptr*/, std::vector<int>* newIndexes/*=nullptr*/)
+{
+	if (!visTable)
+	{
+		if (!isVisibilityTableInstantiated())
+		{
+			ccLog::Error("[removeVisiblePoints] Visibility table not instantiated!");
+			return false;
+		}
+		visTable = &m_pointsVisibility;
+	}
+	else
+	{
+		if (visTable->size() != size())
+		{
+			ccLog::Error("[removeVisiblePoints] Invalid input visibility table");
+			return false;
+		}
+	}
+
+	std::vector<int> localNewIndexes;
+	std::vector<int>* _newIndexes = nullptr;
+	try
+	{
+		if (newIndexes)
+		{
+			if (newIndexes->empty())
+			{
+				newIndexes->resize(size());
+			}
+			else if (newIndexes->size() != size())
+			{
+				ccLog::Error("[removeVisiblePoints] Input 'new indexes' has a wrong size");
+				return false;
+			}
+			_newIndexes = newIndexes;
+		}
+		else if (!m_grids.empty())
+		{
+			//we still need the mapping between old and new indexes
+			localNewIndexes.resize(size());
+			_newIndexes = &localNewIndexes;
+		}
+	}
+	catch (const std::bad_alloc&)
+	{
+		ccLog::Error("[removeVisiblePoints] Not enough memory");
+		return false;
+	}
+
+	//we drop the octree before modifying this cloud's contents
+	deleteOctree();
+	clearLOD();
+
+	//we remove all visible points
+	unsigned lastPointIndex = 0;
+	unsigned previousCount = size();
+	for (unsigned i = 0; i < previousCount; ++i)
+	{
+		if (visTable->at(i) != CCCoreLib::POINT_VISIBLE)
+		{
+			if (_newIndexes)
+			{
+				_newIndexes->at(i) = lastPointIndex;
+			}
+			if (i != lastPointIndex)
+			{
+				swapPoints(lastPointIndex, i);
+			}
+			++lastPointIndex;
+		}
+		else if (_newIndexes)
+		{
+			_newIndexes->at(i) = -1;
+		}
+	}
+
+	//we have to take care of scan grids
+	if (!m_grids.empty())
+	{
+		assert(_newIndexes);
+		//then update the indexes
+		UpdateGridIndexes(*_newIndexes, m_grids);
+
+		//and reset the invalid (empty) ones
+		//(DGM: we don't erase them as they may still be useful?)
+		for (Grid::Shared &grid : m_grids)
+		{
+			if (grid->validCount == 0)
+			{
+				grid->indexes.resize(0);
+			}
+		}
+	}
+
+	//TODO: handle associated meshes?
+
+	resize(lastPointIndex);
+
+	refreshBB(); //calls notifyGeometryUpdate + releaseVBOs
+
+	return true;
 }
 
 ccScalarField* ccPointCloud::getCurrentDisplayedScalarField() const

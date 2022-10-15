@@ -2178,7 +2178,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 		return nullptr;
 	}
 
-	const ccGenericPointCloud::VisibilityTableType& verticesVisibility = m_associatedCloud->getTheVisibilityArray();
+	ccGenericPointCloud::VisibilityTableType& verticesVisibility = m_associatedCloud->getTheVisibilityArray();
 	if (verticesVisibility.size() < m_associatedCloud->size())
 	{
 		ccLog::Error(QString("[Mesh %1] Internal error: vertex visibility table not instantiated!").arg(getName()));
@@ -2490,12 +2490,12 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 	ccHObject::Container subMeshes;
 	if (filterChildren(subMeshes, false, CC_TYPES::SUB_MESH) != 0)
 	{
-		ccLog::Warning("Has sub-meshes!");
+		ccLog::WarningDebug("Has sub-meshes!");
 
 		//create index map
-		ccSubMesh::IndexMap indexMap;
 		try
 		{
+			ccSubMesh::IndexMap indexMap;
 			indexMap.reserve(triNum);
 
 			//finish index map creation
@@ -2526,16 +2526,28 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 				ccSubMesh* subMesh = static_cast<ccSubMesh*>(subMeshes[i]);
 				ccSubMesh* subMesh2 = subMesh->createNewSubMeshFromSelection(removeSelectedFaces, &indexMap);
 
-				if (subMesh->size() == 0) //no more faces in current sub-mesh?
+				if (subMesh2)
 				{
-					detachChild(subMesh); //FIXME: removeChild instead?
-					subMesh = nullptr;
+					if (newMesh)
+					{
+						subMesh2->setEnabled(subMesh->isEnabled());
+						subMesh2->setVisible(subMesh->isVisible());
+						subMesh2->setAssociatedMesh(newMesh);
+						newMesh->addChild(subMesh2);
+					}
+					else
+					{
+						assert(false);
+						delete subMesh2;
+						subMesh2 = nullptr;
+					}
 				}
 
-				if (subMesh2 && newMesh)
+				if (subMesh->size() == 0) //no triangle left in current sub-mesh?
 				{
-					subMesh2->setAssociatedMesh(newMesh);
-					newMesh->addChild(subMesh2);
+					removeChild(subMesh);
+					subMeshes[i] = nullptr;
+					subMesh = nullptr;
 				}
 			}
 		}
@@ -2554,7 +2566,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 		}
 	}
 
-	//shall we remove the selected faces from this mesh?
+	//shall we remove the selected triangles from this mesh?
 	if (removeSelectedFaces)
 	{
 		//we remove all fully visible faces
@@ -2584,6 +2596,40 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 		}
 
 		resize(lastTri);
+		triNum = size();
+
+		m_associatedCloud->resetVisibilityArray();
+		for (size_t i = 0; i < triNum; ++i)
+		{
+			CCCoreLib::VerticesIndexes tsi = m_triVertIndexes->at(i);
+
+			// we hide the vertices we want to keep, since we will call 'removeVisiblePoints' afterward
+			verticesVisibility[tsi.i1] = CCCoreLib::POINT_HIDDEN;
+			verticesVisibility[tsi.i2] = CCCoreLib::POINT_HIDDEN;
+			verticesVisibility[tsi.i3] = CCCoreLib::POINT_HIDDEN;
+		}
+
+		std::vector<int> newIndexes;
+		if (m_associatedCloud->removeVisiblePoints(nullptr, &newIndexes))
+		{
+			// warning: from this point on, verticesVisibility is not valid anymore!
+			for (size_t i = 0; i < triNum; ++i)
+			{
+				CCCoreLib::VerticesIndexes& tsi = m_triVertIndexes->at(i);
+
+				// update each vertex index
+				for (int j = 0; j < 3; ++j)
+				{
+					tsi.i[j] = newIndexes[tsi.i[j]];
+					assert(tsi.i[j] >= 0);
+				}
+			}
+		}
+		else
+		{
+			ccLog::Warning("[createNewMeshFromSelection] Failed to remove unused vertices");
+		}
+
 		notifyGeometryUpdate();
 	}
 

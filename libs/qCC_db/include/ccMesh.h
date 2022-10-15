@@ -383,7 +383,8 @@ public:
 		This method will also update this mesh if removeSelectedFaces is true.
 		In this case, all "selected" triangles will be removed from this mesh's instance.
 
-		\param removeSelectedFaces specifies if the faces composed only of 'selected' vertices should be removed or not
+		\param	removeSelectedFaces specifies if the faces composed only of 'selected' vertices should be removed or not.
+				If true, the visibility array will be automatically unallocated on completion
 	**/
 	ccMesh* createNewMeshFromSelection(bool removeSelectedFaces);
 

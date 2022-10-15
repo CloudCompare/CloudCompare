@@ -215,7 +215,14 @@ public:
 		\return new point cloud with selected points
 	**/
 	virtual ccGenericPointCloud* createNewCloudFromVisibilitySelection(bool removeSelectedPoints = false, VisibilityTableType* visTable = nullptr, bool silent = false) = 0;
-	
+
+	//! Removes all the 'visible' points (as defined by the visibility array)
+	/** \param visTable visibility table (optional, otherwise the cloud's default one will be used)
+		\param newIndexes optional: stores the new indexes of the points (either an index >= 0 if kept, or -1 if not). Must have the same size as the original cloud.
+		\return success
+	**/
+	virtual bool removeVisiblePoints(VisibilityTableType* visTable = nullptr, std::vector<int>* newIndexes = nullptr) = 0;
+
 	//! Applies a rigid transformation (rotation + translation)
 	virtual void applyRigidTransformation(const ccGLMatrix& trans) = 0;
 

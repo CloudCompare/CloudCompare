@@ -59,6 +59,7 @@ v2.13.alpha (???) - (??/??/????)
 	- Graphical Segmentation Tool:
 		- the user can now configure the name suffix for the remaining and segmented cloud
 		- the display should be faster until the first segmentation is performed
+		- unused mesh vertices should now be properly removed from both the segmented and the remaining mesh parts
 
 	- LAS files:
 		- The default shift for (GPS) time values is now rounded to the nearest 10^5 value

@@ -464,8 +464,9 @@ public: //other methods
 	const CCVector3& getPointNormal(unsigned pointIndex) const override;
 	CCCoreLib::ReferenceCloud* crop(const ccBBox& box, bool inside = true) override;
 	void scale(PointCoordinateType fx, PointCoordinateType fy, PointCoordinateType fz, CCVector3 center = CCVector3(0,0,0)) override;
-	/** \warning if removeSelectedPoints is true, any attached octree will be deleted. **/
+	/** \warning if removeSelectedPoints is true, any attached octree will be deleted, as well as the visibility table. **/
 	ccGenericPointCloud* createNewCloudFromVisibilitySelection(bool removeSelectedPoints = false, VisibilityTableType* visTable = nullptr, bool silent = false) override;
+	bool removeVisiblePoints(VisibilityTableType* visTable = nullptr, std::vector<int>* newIndexes = nullptr) override;
 	void applyRigidTransformation(const ccGLMatrix& trans) override;
 	inline void refreshBB() override { invalidateBoundingBox(); }
 

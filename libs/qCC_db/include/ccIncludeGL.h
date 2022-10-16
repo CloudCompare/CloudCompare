@@ -233,9 +233,9 @@ public: //GLU equivalent methods
 		if (inFrustum)
 		{
 			//Check if the point is inside the frustum
-			if (nearClippingDepth && Pp.w < *nearClippingDepth)
+			if (nearClippingDepth && -Pm.z < *nearClippingDepth)
 				*inFrustum = false;
-			else if (farClippingDepth && Pp.w > *farClippingDepth)
+			else if (farClippingDepth && -Pm.z > *farClippingDepth)
 				*inFrustum = false;
 			else
 				*inFrustum = (std::abs(Pp.x) <= 1.0 && std::abs(Pp.y) <= 1.0 && std::abs(Pp.z) <= 1.0);

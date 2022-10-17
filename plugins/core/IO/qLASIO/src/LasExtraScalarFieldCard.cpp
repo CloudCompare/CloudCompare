@@ -3,13 +3,18 @@
 #include <ccPointCloud.h>
 #include <ccScalarField.h>
 
+constexpr size_t MAX_LEN_NAME = 32;
+constexpr size_t MAX_LEN_DESCRIPTION = 32;
+
+
 LasExtraScalarFieldCard::LasExtraScalarFieldCard(QWidget *parent) : QWidget(parent)
 {
     setupUi(this);
     scalarFieldCardFrame->setFrameShape(QFrame::Shape::Panel);
     scalarFieldCardFrame->setFrameShadow(QFrame::Shadow::Plain);
     scalarFieldCardFrame->setLineWidth(1);
-
+    nameEdit->setMaxLength(MAX_LEN_NAME);
+    descriptionEdit->setMaxLength(MAX_LEN_DESCRIPTION);
     connect(radioButton1,
             &QRadioButton::clicked,
             this,
@@ -256,10 +261,25 @@ bool LasExtraScalarFieldCard::fillField(LasExtraScalarField &field, const ccPoin
     }
 
     const std::string stdName = nameEdit->text().toStdString();
-    strncpy(field.name, stdName.c_str(), 32);
+    strncpy(field.name, stdName.c_str(), MAX_LEN_NAME);
 
     const std::string stdDescription = descriptionEdit->text().toStdString();
-    strncpy(field.description, stdDescription.c_str(), 32);
+    strncpy(field.description, stdDescription.c_str(), MAX_LEN_DESCRIPTION);
+
+    // since the corresponding line edits max length are properly set
+    // this should only happen in (rare) cases when converting from
+    // QString utf16 to bytes yields more bytes than chars if the users
+    // used  too many non ascii symbols
+    if (stdName.size() > MAX_LEN_DESCRIPTION)
+    {
+        ccLog::Warning("[LAS] Extra Scalar field name '%s' is too long and will be truncated",
+                       stdName.c_str());
+    }
+    if (stdDescription.size() > MAX_LEN_DESCRIPTION)
+    {
+        ccLog::Warning("[LAS] Extra scalar field description '%s' is too long and will be truncated",
+                       stdDescription.c_str());
+    }
 
     field.type = dataType();
 

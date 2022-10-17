@@ -310,6 +310,31 @@ bool LasExtraScalarField::offsetIsRelevant() const
     return options & 16;
 }
 
+void LasExtraScalarField::setScaleIsRelevant(bool isRelevant)
+{
+    if (isRelevant)
+    {
+        options |= 8;
+    } else
+    {
+        options &= ~8;
+    }
+}
+
+void LasExtraScalarField::setOffsetIsRelevant(bool isRelevant)
+{
+    if (isRelevant)
+    {
+        options |= 16;
+    }
+    else
+    {
+        options &= ~16;
+    }
+}
+
+
+
 LasExtraScalarField::Kind LasExtraScalarField::kind() const
 {
     switch (type)
@@ -477,6 +502,9 @@ void LasExtraScalarField::UpdateByteOffsets(vector<LasExtraScalarField> &extraFi
         byteOffset += extraScalarField.byteSize();
     }
 }
+
+
+
 void LasExtraScalarField::MatchExtraBytesToScalarFields(vector<LasExtraScalarField> &extraScalarFields,
                                                         const ccPointCloud &pointCloud)
 {

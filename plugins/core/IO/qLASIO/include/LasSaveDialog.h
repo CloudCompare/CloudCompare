@@ -31,6 +31,7 @@ class ccScalarField;
 class ccPointCloud;
 
 class MappingLabel;
+class LasExtraScalarFieldCard;
 
 /// This dialog is responsible for presenting to the user
 /// the different options when saving a point cloud to a LAS/LAZ file.
@@ -41,7 +42,7 @@ class LasSaveDialog : public QDialog, public Ui::LASSaveDialog
   public:
     explicit LasSaveDialog(ccPointCloud *cloud, QWidget *parent = nullptr);
 
-    void setVersionAndPointFormat(const QString &version, unsigned int pointFormat);
+    void setVersionAndPointFormat(const LasDetails::LasVersion versionAndFmt);
     /// Set scale that would offer the user the best precision
     void setOptimalScale(const CCVector3d &scale, bool autoCheck = false);
     /// Set the scale that was used in the original file
@@ -65,15 +66,26 @@ class LasSaveDialog : public QDialog, public Ui::LASSaveDialog
     /// Each LAS scalar fields is mapped to an existing point cloud's ccScalarField.
     /// The mapping is done by us and the user.
     std::vector<LasScalarField> fieldsToSave() const;
+    std::vector<LasExtraScalarField> extraFieldsToSave() const;
+
 
   public Q_SLOTS:
     void handleSelectedVersionChange(const QString &);
     void handleSelectedPointFormatChange(int index);
     void handleComboBoxChange(int index);
+    void addExtraScalarFieldCard();
+
+  private:
+    LasExtraScalarFieldCard *createCard() const;
+
 
   private:
     ccPointCloud *m_cloud{nullptr};
-    QStringListModel *m_comboBoxModel{nullptr};
+    /// Model that contains the list of scalar fields names
+    QStringListModel *m_scalarFieldsNamesModel{nullptr};
+    /// Model that contains the list of data type names the user can choose
+    /// for its extra scalar fields
+    QStringListModel *m_extraFieldsDataTypesModel{nullptr};
     CCVector3d m_optimalScale;
     CCVector3d m_originalScale;
     /// Contains the mapping from a LAS field name to a combo box

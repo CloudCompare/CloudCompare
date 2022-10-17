@@ -17,45 +17,22 @@
 //#                                                                        #
 //##########################################################################
 
-#include "LasDetails.h"
 #include "LasExtraScalarField.h"
+#include "ui_extra_scarlar_field_card.h"
 
-#include <laszip/laszip_api.h>
 
-#include <QMetaType>
-
-/// Holds Meta-Information about the original file that we want to save
-/// to restore them when writing
-struct LasSavedInfo
+class LasExtraScalarFieldCard : public QWidget, public Ui::ExtraScalarFieldCard
 {
-    static constexpr size_t GUID_DATA_4_SIZE = 8;
-    static constexpr size_t SYSTEM_IDENTIFIER_SIZE = 32;
+    Q_OBJECT
 
-    LasSavedInfo() = default;
+  public:
+    explicit LasExtraScalarFieldCard(QWidget *parent = nullptr);
 
-    explicit LasSavedInfo(const laszip_header &header);
+    void fillFrom(const LasExtraScalarField &field);
 
-    LasSavedInfo(const LasSavedInfo &rhs);
-    LasSavedInfo &operator=(LasSavedInfo rhs);
-    static void Swap(LasSavedInfo &lhs, LasSavedInfo &rhs) noexcept;
+    void reset();
 
-    virtual ~LasSavedInfo() noexcept;
+    LasExtraScalarField::DataType dataType() const;
 
-    laszip_U16 fileSourceId{0};
-    laszip_U32 guidData1{0};
-    laszip_U16 guidData2{0};
-    laszip_U16 guidData3{0};
-    laszip_CHAR guidData4[GUID_DATA_4_SIZE]{0};
-    laszip_U8 versionMinor{0};
-    laszip_U8 pointFormat{0};
-    laszip_CHAR systemIdentifier[SYSTEM_IDENTIFIER_SIZE]{0};
-    double xScale{0.0};
-    double yScale{0.0};
-    double zScale{0.0};
-
-    laszip_U32 numVlrs{0};
-    laszip_vlr_struct *vlrs{nullptr};
-    std::vector<LasExtraScalarField> extraScalarFields{};
+     bool fillField(LasExtraScalarField &field, const ccPointCloud &pointCloud) const;
 };
-
-Q_DECLARE_METATYPE(LasSavedInfo);

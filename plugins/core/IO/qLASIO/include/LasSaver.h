@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                CLOUDCOMPARE PLUGIN: LAS-IO Plugin                      #
@@ -15,22 +17,43 @@
 //#                                                                        #
 //##########################################################################
 
-#include "LasPlugin.h"
+#include "LasSaveDialog.h"
+#include "LasScalarFieldSaver.h"
+#include "LasWaveformSaver.h"
 
-#include "LasIOFilter.h"
-#include "LasVlr.h"
+#include <FileIOFilter.h>
 
-LasPlugin::LasPlugin(QObject *parent) : QObject(parent), ccIOPluginInterface(":/CC/plugin/LAS-IO/info.json")
+// LASzip
+#include <laszip/laszip_api.h>
+
+#include <memory>
+
+class LasSaveDialog;
+class ccPointCloud;
+
+class LasSaver
 {
-}
+  public:
+    LasSaver(ccPointCloud &cloud, const LasSaveDialog &saveDlg);
 
-ccIOPluginInterface::FilterList LasPlugin::getFilters()
-{
-    qRegisterMetaType<LasVlr>();
+    CC_FILE_ERROR open(const QString filePath);
 
-    QMetaType::registerConverter(&LasVlr::toString);
+    CC_FILE_ERROR saveNextPoint();
 
-    return {
-        FileIOFilter::Shared(new LasIOFilter),
-    };
-}
+    bool savesWaveforms() const;
+
+    ~LasSaver() noexcept;
+
+  private:
+    void initLaszipHeader(const LasSaveDialog &saveDialog);
+
+  private:
+    unsigned int m_currentPointIndex{0};
+    ccPointCloud &m_cloudToSave;
+    laszip_header m_laszipHeader{};
+    laszip_POINTER m_laszipWriter{nullptr};
+    LasScalarFieldSaver m_fieldsSaver{};
+    bool m_shouldSaveRGB{false};
+    std::unique_ptr<LasWaveformSaver> m_waveformSaver{nullptr};
+    laszip_point *m_laszipPoint{nullptr};
+};

@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                CLOUDCOMPARE PLUGIN: LAS-IO Plugin                      #
@@ -15,22 +17,34 @@
 //#                                                                        #
 //##########################################################################
 
-#include "LasPlugin.h"
+#include "LasDetails.h"
+#include "LasExtraScalarField.h"
 
-#include "LasIOFilter.h"
-#include "LasVlr.h"
+#include <laszip/laszip_api.h>
 
-LasPlugin::LasPlugin(QObject *parent) : QObject(parent), ccIOPluginInterface(":/CC/plugin/LAS-IO/info.json")
+#include <QMetaType>
+#include <QString>
+
+struct LasVlr
 {
-}
+    LasVlr() = default;
 
-ccIOPluginInterface::FilterList LasPlugin::getFilters()
-{
-    qRegisterMetaType<LasVlr>();
+    explicit LasVlr(const laszip_header &header);
 
-    QMetaType::registerConverter(&LasVlr::toString);
+    LasVlr(const LasVlr &rhs);
+    LasVlr &operator=(LasVlr rhs);
+    static void Swap(LasVlr &lhs, LasVlr &rhs) noexcept;
 
-    return {
-        FileIOFilter::Shared(new LasIOFilter),
-    };
-}
+    virtual ~LasVlr() noexcept;
+
+    laszip_U32 numVlrs{0};
+    laszip_vlr_struct *vlrs{nullptr};
+    std::vector<LasExtraScalarField> extraScalarFields{};
+
+    QString toString() const
+    {
+        return QString("Vlrs: %1").arg(numVlrs);
+    }
+};
+
+Q_DECLARE_METATYPE(LasVlr);

@@ -16,8 +16,10 @@
 //##########################################################################
 #include "LasSaveDialog.h"
 #include "LasDetails.h"
+#include "LasExtraScalarFieldCard.h"
 
 #include <QStringListModel>
+#include <QLayoutItem>
 
 #include <ccLog.h>
 #include <ccPointCloud.h>
@@ -72,7 +74,8 @@ class MappingLabel : public QWidget
 };
 
 LasSaveDialog::LasSaveDialog(ccPointCloud *cloud, QWidget *parent)
-    : QDialog(parent), m_cloud(cloud), m_comboBoxModel(new QStringListModel),
+    : QDialog(parent), m_cloud(cloud), m_scalarFieldsNamesModel(new QStringListModel),
+      m_extraFieldsDataTypesModel(new QStringListModel),
       m_optimalScale(std::numeric_limits<double>::quiet_NaN(),
                      std::numeric_limits<double>::quiet_NaN(),
                      std::numeric_limits<double>::quiet_NaN()),
@@ -111,7 +114,21 @@ LasSaveDialog::LasSaveDialog(ccPointCloud *cloud, QWidget *parent)
             cloudScalarFieldsNames << m_cloud->getScalarFieldName(i);
         }
     }
-    m_comboBoxModel->setStringList(cloudScalarFieldsNames);
+    m_scalarFieldsNamesModel->setStringList(cloudScalarFieldsNames);
+
+    QStringList extraFieldsDataTypeNames;
+    extraFieldsDataTypeNames << "uint8"
+                             << "uint16"
+                             << "uint32"
+                             << "uint64"
+                             << "int8"
+                             << "int16"
+                             << "int32"
+                             << "int64"
+                             << "float32"
+                             << "float64";
+    m_extraFieldsDataTypesModel->setStringList(extraFieldsDataTypeNames);
+    connect(addExtraScalarFieldButton, &QPushButton::clicked, this, &LasSaveDialog::addExtraScalarFieldCard);
 }
 
 /// When the selected version changes, we need to update the combo box
@@ -246,7 +263,7 @@ void LasSaveDialog::handleSelectedPointFormatChange(int index)
         for (int i{numDeltaFields}; i < 0; ++i)
         {
             auto *box = new QComboBox(this);
-            box->setModel(m_comboBoxModel);
+            box->setModel(m_scalarFieldsNamesModel);
             connect(box,
                     qOverload<int>(&QComboBox::currentIndexChanged),
                     this,
@@ -260,7 +277,7 @@ void LasSaveDialog::handleSelectedPointFormatChange(int index)
 
     Q_ASSERT(lasScalarFields.size() <= scalarFieldFormLayout->rowCount());
 
-    QStringList cloudScalarFieldsNames = m_comboBoxModel->stringList();
+    QStringList cloudScalarFieldsNames = m_scalarFieldsNamesModel->stringList();
     for (size_t i{0}; i < lasScalarFields.size(); ++i)
     {
         const LasScalarField &field = lasScalarFields[i];
@@ -313,12 +330,63 @@ void LasSaveDialog::handleSelectedPointFormatChange(int index)
     }
 }
 
-void LasSaveDialog::setVersionAndPointFormat(const QString &version, unsigned int pointFormat)
+LasExtraScalarFieldCard *LasSaveDialog::createCard() const
 {
-    int i = versionComboBox->findText(version);
+    auto *card = new LasExtraScalarFieldCard;
+    card->typeComboBox->setModel(m_extraFieldsDataTypesModel);
+    card->firstScalarFieldComboBox->setModel(m_scalarFieldsNamesModel);
+    card->secondScalarFieldComboBox->setModel(m_scalarFieldsNamesModel);
+    card->thirdScalarFieldComboBox->setModel(m_scalarFieldsNamesModel);
+    connect(card->removeButton, &QPushButton::clicked, card, &QWidget::hide);
+
+    return card;
+}
+
+void LasSaveDialog::addExtraScalarFieldCard()
+{
+
+#ifdef CC_CORE_LIB_USES_DOUBLE
+    const char *defaultType = "float64";
+#else
+    const char *defaultType = "float32";
+#endif
+    int defaultTypeIndex = m_extraFieldsDataTypesModel->stringList().indexOf(defaultType);
+    defaultTypeIndex = std::max(defaultTypeIndex, 0);
+
+
+    // Last member of the layout is a spacer
+
+    for (int i{0}; i < extraScalarFieldsLayout->count() - 1; ++i)
+    {
+        QLayoutItem *item = extraScalarFieldsLayout->itemAt(i);
+        QWidget *widget = item->widget();
+        if (widget && widget->isHidden())
+        {
+            extraScalarFieldsLayout->removeItem(item);
+            extraScalarFieldsLayout->insertItem(extraScalarFieldsLayout->count() - 1, item);
+            auto *card = qobject_cast<LasExtraScalarFieldCard *>(widget);
+            if (!card)
+            {
+                continue;
+            }
+
+            card->reset();
+            widget->show();
+            return;
+        }
+    }
+
+    auto *card = createCard();
+    extraScalarFieldsLayout->insertWidget(extraScalarFieldsLayout->count() - 1, card);
+}
+
+void LasSaveDialog::setVersionAndPointFormat(const LasDetails::LasVersion versionAndFmt)
+{
+    const QString versionStr = QString("1.%1").arg(QString::number(versionAndFmt.minorVersion));
+    int i = versionComboBox->findText(versionStr);
     if (i >= 0)
     {
-        QString fmtStr = QString::number(pointFormat);
+        QString fmtStr = QString::number(versionAndFmt.pointFormat);
         versionComboBox->setCurrentIndex(i);
         int j = pointFormatComboBox->findText(fmtStr);
         if (j >= 0)
@@ -358,20 +426,15 @@ void LasSaveDialog::setExtraScalarFields(const std::vector<LasExtraScalarField> 
 {
     if (extraScalarFields.empty())
     {
-        tabWidget->setTabEnabled(ExtraScalarFieldsTabIndex, false);
         return;
     }
-    tabWidget->setTabEnabled(ExtraScalarFieldsTabIndex, true);
 
-    QStringList extraFieldsName;
     for (const LasExtraScalarField &field : extraScalarFields)
     {
-        extraFieldsName << field.name;
+        auto *card = createCard();
+        extraScalarFieldsLayout->insertWidget(extraScalarFieldsLayout->count() - 1, card);
+        card->fillFrom(field);
     }
-
-    auto *model = new QStringListModel;
-    model->setStringList(extraFieldsName);
-    extraScalarFieldView->setModel(model);
 }
 
 unsigned int LasSaveDialog::selectedPointFormat() const
@@ -437,4 +500,32 @@ std::vector<LasScalarField> LasSaveDialog::fieldsToSave() const
     }
 
     return fields;
+}
+
+std::vector<LasExtraScalarField> LasSaveDialog::extraFieldsToSave() const {
+    std::vector<LasExtraScalarField> extraScalarFields;
+
+    for (int i{0}; i < extraScalarFieldsLayout->count() - 1; ++i)
+    {
+        QLayoutItem *item = extraScalarFieldsLayout->itemAt(i);
+        QWidget *widget = item->widget();
+        if (!widget || widget->isHidden())
+        {
+            continue;
+        }
+        auto *card = qobject_cast<LasExtraScalarFieldCard *>(widget);
+        if (!card)
+        {
+            continue;
+        }
+
+        LasExtraScalarField field;
+        if (!card->fillField(field, *m_cloud))
+        {
+            ccLog::Error("failed to convert scalar field info to something writable");
+            continue;
+        }
+        extraScalarFields.push_back(field);
+    }
+    return extraScalarFields;
 }

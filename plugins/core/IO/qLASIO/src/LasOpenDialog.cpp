@@ -77,6 +77,7 @@ LasOpenDialog::LasOpenDialog(QWidget *parent) : QDialog(parent)
     connect(cancelButton, &QPushButton::clicked, this, &QDialog::reject);
     connect(
         automaticTimeShiftCheckBox, &QCheckBox::toggled, this, &LasOpenDialog::onAutomaticTimeShiftToggle);
+    connect(applyAllButton, &QPushButton::clicked, this, &LasOpenDialog::onApplyAll);
 }
 
 void LasOpenDialog::setInfo(int versionMinor, int pointFormatId, int64_t numPoints)
@@ -156,4 +157,20 @@ bool LasOpenDialog::isChecked(const LasScalarField &lasScalarField) const
 
 void LasOpenDialog::onAutomaticTimeShiftToggle(bool checked) {
     manualTimeShiftSpinBox->setEnabled(!checked);
+}
+
+bool LasOpenDialog::shouldSkipDialog() const
+{
+    return m_shouldSkipDialog;
+}
+
+void LasOpenDialog::resetShouldSkipDialog()
+{
+    m_shouldSkipDialog = false;
+}
+
+void LasOpenDialog::onApplyAll()
+{
+    m_shouldSkipDialog = true;
+    accept();
 }

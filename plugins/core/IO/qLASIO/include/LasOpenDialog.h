@@ -71,6 +71,10 @@ class LasOpenDialog : public QDialog, public Ui::LASOpenDialog
     /// Otherwise, returns the value manually specified by the user.
     double timeShiftValue() const;
 
+    void resetShouldSkipDialog();
+
+    bool shouldSkipDialog() const;
+
   private:
     bool isChecked(const LasScalarField &lasScalarField) const;
 
@@ -78,8 +82,12 @@ class LasOpenDialog : public QDialog, public Ui::LASOpenDialog
 
     /// Connected to the "automatic time shift" check box.
     ///
-    /// Depending on if the user checks or unchecks the automatic time shift,
+    /// Depending on if the user checks or un-checks the automatic time shift,
     /// we need to enable / disable the double spin box that
     /// is used to get the manually entered time shift.
     void onAutomaticTimeShiftToggle(bool checked);
+
+    void onApplyAll();
+
+    bool m_shouldSkipDialog{false};
 };

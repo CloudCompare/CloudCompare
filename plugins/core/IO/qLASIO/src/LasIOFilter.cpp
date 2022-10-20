@@ -162,16 +162,41 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString &fileName, ccHObject &containe
     std::vector<LasExtraScalarField> availableEXtraScalarFields =
         LasExtraScalarField::ParseExtraScalarFields(*laszipHeader);
 
-    LasOpenDialog dialog(parameters.parentWidget);
+
+    std::unique_ptr<FileInfo> infoOfCurrentFile = std::make_unique<FileInfo>();
+    infoOfCurrentFile->version.minorVersion = laszipHeader->version_minor;
+    infoOfCurrentFile->version.pointFormat = laszipHeader->point_data_format;
+    infoOfCurrentFile->extraScalarFields = availableEXtraScalarFields;
+
+    bool fileContentIsDifferentFromPrevious =
+        (m_infoOfLastOpened && (*m_infoOfLastOpened != *infoOfCurrentFile));
+    if (!m_openDialog || fileContentIsDifferentFromPrevious)
+    {
+        m_openDialog.reset(new LasOpenDialog);
+    }
+    m_infoOfLastOpened = std::move(infoOfCurrentFile);
+    LasOpenDialog &dialog = *m_openDialog;
     dialog.setInfo(laszipHeader->version_minor, laszipHeader->point_data_format, pointCount);
     dialog.setAvailableScalarFields(availableScalarFields, availableEXtraScalarFields);
-    dialog.exec();
-    if (dialog.result() == QDialog::Rejected)
+
+    if (parameters.sessionStart)
     {
-        laszip_close_reader(laszipReader);
-        laszip_clean(laszipReader);
-        laszip_destroy(laszipReader);
-        return CC_FERR_CANCELED_BY_USER;
+        // we do this AFTER restoring the previous context because it may still be
+        // good that the previous configuration is restored even though the user needs
+        // to confirm it
+        dialog.resetShouldSkipDialog();
+    }
+
+    if (parameters.alwaysDisplayLoadDialog && !dialog.shouldSkipDialog())
+    {
+        dialog.exec();
+        if (dialog.result() == QDialog::Rejected)
+        {
+            laszip_close_reader(laszipReader);
+            laszip_clean(laszipReader);
+            laszip_destroy(laszipReader);
+            return CC_FERR_CANCELED_BY_USER;
+        }
     }
 
     dialog.filterOutNotChecked(availableScalarFields, availableEXtraScalarFields);
@@ -461,10 +486,13 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject *entity,
     }
     saveDialog.setExtraScalarFields(vlr.extraScalarFields);
 
-    saveDialog.exec();
-    if (saveDialog.result() == QDialog::Rejected)
+    if (parameters.alwaysDisplaySaveDialog)
     {
-        return CC_FERR_CANCELED_BY_USER;
+        saveDialog.exec();
+        if (saveDialog.result() == QDialog::Rejected)
+        {
+            return CC_FERR_CANCELED_BY_USER;
+        }
     }
 
     CC_FILE_ERROR error;

@@ -98,7 +98,7 @@ class LasScalarFieldLoader
     /// Loads the values for the LAS extra field of the current point from the dataStart source.
     ///
     /// The loaded values are stored into the member variable `rawValues`
-    void parseRawValues(const LasExtraScalarField &extraField, uint8_t *dataStart);
+    void parseRawValues(const LasExtraScalarField &extraField, const uint8_t *dataStart);
 
     template <typename T> void handleOptionsFor(const LasExtraScalarField &extraField, T values[3]);
 
@@ -112,8 +112,8 @@ class LasScalarFieldLoader
 
     union
     {
-        uint64_t unsignedValues[MAX_ELEMENTS_IN_EXTRA_ARRAY_DIM];
-        int64_t signedValues[MAX_ELEMENTS_IN_EXTRA_ARRAY_DIM];
-        double floatingValues[MAX_ELEMENTS_IN_EXTRA_ARRAY_DIM];
+        uint64_t unsignedValues[LasExtraScalarField::MAX_DIM_SIZE];
+        int64_t signedValues[LasExtraScalarField::MAX_DIM_SIZE];
+        double floatingValues[LasExtraScalarField::MAX_DIM_SIZE];
     } rawValues;
 };

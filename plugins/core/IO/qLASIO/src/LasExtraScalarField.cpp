@@ -13,7 +13,6 @@
 #include <stdexcept>
 #include <vector>
 
-
 QDataStream &operator>>(QDataStream &dataStream, LasExtraScalarField &extraScalarField)
 {
     dataStream.setByteOrder(QDataStream::ByteOrder::LittleEndian);
@@ -30,7 +29,9 @@ QDataStream &operator>>(QDataStream &dataStream, LasExtraScalarField &extraScala
     dataStream >> extraScalarField.offsets[0] >> extraScalarField.offsets[1] >> extraScalarField.offsets[2];
     dataStream.readRawData(reinterpret_cast<char *>(extraScalarField.description), 32);
 
-    extraScalarField.type = LasExtraScalarField::DataTypeFromValue(dataType);
+    auto type_and_dim_size = LasExtraScalarField::DataTypeFromValue(dataType);
+    extraScalarField.type = std::get<0>(type_and_dim_size);
+    extraScalarField.dimensions = std::get<1>(type_and_dim_size);
 
     return dataStream;
 }
@@ -54,77 +55,72 @@ QDataStream &operator<<(QDataStream &dataStream, const LasExtraScalarField &extr
     return dataStream;
 }
 
-LasExtraScalarField::DataType LasExtraScalarField::DataTypeFromValue(uint8_t value)
+std::tuple<LasExtraScalarField::DataType, LasExtraScalarField::DimensionSize>
+LasExtraScalarField::DataTypeFromValue(uint8_t value)
 {
+    if (value >= 31)
+    {
+        return {DataType::Invalid, DimensionSize::One};
+    }
+
+    if (value == 0)
+    {
+        return {DataType::Undocumented, DimensionSize::One};
+    }
+
+    DimensionSize dimSize = DimensionSize::One;
+
+    // value is now in range [1..30]
+
+    if (value >= 21)
+    {
+        value -= 20;
+        dimSize = DimensionSize::Three;
+    }
+
+    if (value >= 11)
+    {
+        value -= 10;
+        dimSize = DimensionSize::Two;  
+    }
+
+    // value is now be in range [1..10]
+    DataType dataType;
     switch (value)
     {
-    case 0:
-        return DataType::Undocumented;
     case 1:
-        return DataType::u8;
+        dataType = DataType::u8;
+        break;
     case 3:
-        return DataType::u16;
+        dataType = DataType::u16;
+        break;
     case 5:
-        return DataType::u32;
+        dataType = DataType::u32;
+        break;
     case 7:
-        return DataType::u64;
+        dataType = DataType::u64;
+        break;
     case 2:
-        return DataType::i8;
+        dataType = DataType::i8;
+        break;
     case 4:
-        return DataType::i16;
+        dataType = DataType::i16;
+        break;
     case 6:
-        return DataType::i32;
+        dataType = DataType::i32;
+        break;
     case 8:
-        return DataType::i64;
+        dataType = DataType::i64;
+        break;
     case 9:
-        return DataType::f32;
+        dataType = DataType::f32;
+        break;
     case 10:
-        return DataType::f64;
-    // Array types (2 elements)
-    case 11:
-        return DataType::u8_2;
-    case 13:
-        return DataType::u16_2;
-    case 15:
-        return DataType::u32_2;
-    case 17:
-        return DataType::u64_2;
-    case 12:
-        return DataType::i8_2;
-    case 14:
-        return DataType::i16_2;
-    case 16:
-        return DataType::i32_2;
-    case 18:
-        return DataType::i64_2;
-    case 19:
-        return DataType::f32_2;
-    case 20:
-        return DataType::f64_2;
-    // Array types (3 elements)
-    case 21:
-        return DataType::u8_3;
-    case 23:
-        return DataType::u16_3;
-    case 25:
-        return DataType::u32_3;
-    case 27:
-        return DataType::u64_3;
-    case 22:
-        return DataType::i8_3;
-    case 24:
-        return DataType::i16_3;
-    case 26:
-        return DataType::i32_3;
-    case 28:
-        return DataType::i64_3;
-    case 29:
-        return DataType::f32_3;
-    case 30:
-        return DataType::f64_3;
-    default:
-        return DataType::Invalid;
+        dataType = DataType::f64;
+        break;
     }
+
+    return {dataType, dimSize};
 }
 
 unsigned int LasExtraScalarField::elementSize() const
@@ -132,44 +128,24 @@ unsigned int LasExtraScalarField::elementSize() const
     switch (type)
     {
     case Undocumented:
-    case u8_3:
-    case u8_2:
     case u8:
         return sizeof(uint8_t);
-    case u16_3:
-    case u16_2:
     case u16:
         return sizeof(uint16_t);
-    case u32_3:
-    case u32_2:
     case u32:
         return sizeof(uint32_t);
-    case u64_3:
-    case u64_2:
     case u64:
         return sizeof(uint64_t);
-    case i8_3:
-    case i8_2:
     case i8:
         return sizeof(int8_t);
-    case i16_3:
-    case i16_2:
     case i16:
         return sizeof(int16_t);
-    case i32_3:
-    case i32_2:
     case i32:
         return sizeof(int32_t);
-    case i64_3:
-    case i64_2:
     case i64:
         return sizeof(int64_t);
-    case f32_3:
-    case f32_2:
     case f32:
         return sizeof(float);
-    case f64_3:
-    case f64_2:
     case f64:
         return sizeof(double);
     case Invalid:
@@ -187,49 +163,7 @@ unsigned int LasExtraScalarField::byteSize() const
 
 unsigned int LasExtraScalarField::numElements() const
 {
-    switch (type)
-    {
-    case u8:
-    case i8:
-    case u16:
-    case i16:
-    case u32:
-    case i32:
-    case f32:
-    case u64:
-    case i64:
-    case f64:
-        return 1;
-    case u8_2:
-    case i8_2:
-    case u16_2:
-    case i16_2:
-    case u32_2:
-    case i32_2:
-    case f32_2:
-    case u64_2:
-    case i64_2:
-    case f64_2:
-        return 2;
-    case u8_3:
-    case i8_3:
-    case i16_3:
-    case u16_3:
-    case u32_3:
-    case i32_3:
-    case f32_3:
-    case u64_3:
-    case i64_3:
-    case f64_3:
-        return 3;
-    case Undocumented:
-        return options;
-    case Invalid:
-        Q_ASSERT(false);
-        return 0;
-    }
-    Q_ASSERT_X(false, "numElements", "Unhandled data type");
-    return 0;
+    return static_cast<unsigned int>(dimensions);
 }
 
 std::vector<LasExtraScalarField>
@@ -345,34 +279,14 @@ LasExtraScalarField::Kind LasExtraScalarField::kind() const
     case LasExtraScalarField::u16:
     case LasExtraScalarField::u32:
     case LasExtraScalarField::u64:
-    case LasExtraScalarField::u8_2:
-    case LasExtraScalarField::u16_2:
-    case LasExtraScalarField::u32_2:
-    case LasExtraScalarField::u64_2:
-    case LasExtraScalarField::u8_3:
-    case LasExtraScalarField::u16_3:
-    case LasExtraScalarField::u32_3:
-    case LasExtraScalarField::u64_3:
         return Unsigned;
     case LasExtraScalarField::i8:
     case LasExtraScalarField::i16:
     case LasExtraScalarField::i32:
     case LasExtraScalarField::i64:
-    case LasExtraScalarField::i8_2:
-    case LasExtraScalarField::i16_2:
-    case LasExtraScalarField::i32_2:
-    case LasExtraScalarField::i64_2:
-    case LasExtraScalarField::i8_3:
-    case LasExtraScalarField::i16_3:
-    case LasExtraScalarField::i32_3:
-    case LasExtraScalarField::i64_3:
         return Signed;
     case LasExtraScalarField::f32:
     case LasExtraScalarField::f64:
-    case LasExtraScalarField::f32_2:
-    case LasExtraScalarField::f64_2:
-    case LasExtraScalarField::f32_3:
-    case LasExtraScalarField::f64_3:
         return Floating;
     }
     return Unsigned;
@@ -400,7 +314,10 @@ void LasExtraScalarField::InitExtraBytesVlr(laszip_vlr_struct &vlr,
 
 uint8_t LasExtraScalarField::typeCode() const
 {
-    return static_cast<uint8_t>(type);
+    Q_ASSERT(type != DataType::Invalid);
+    uint8_t code = static_cast<uint8_t>(type);
+    code += (10 * (numElements() - 1));
+    return code;
 }
 
 const char *LasExtraScalarField::typeName() const
@@ -429,46 +346,6 @@ const char *LasExtraScalarField::typeName() const
         return "f32";
     case f64:
         return "f64";
-    case u8_2:
-        return "u8[2]";
-    case u16_2:
-        return "u16[2]";
-    case u32_2:
-        return "u32[2]";
-    case u64_2:
-        return "u64[2]";
-    case i8_2:
-        return "i8[2]";
-    case i16_2:
-        return "i16[2]";
-    case i32_2:
-        return "i32[2]";
-    case i64_2:
-        return "i64[2]";
-    case f32_2:
-        return "f32[2]";
-    case f64_2:
-        return "f64[2]";
-    case u8_3:
-        return "u8[3]";
-    case u16_3:
-        return "u16[3]";
-    case u32_3:
-        return "u32[3]";
-    case u64_3:
-        return "u64[3]";
-    case i8_3:
-        return "i8[3]";
-    case i16_3:
-        return "i16[3]";
-    case i32_3:
-        return "i32[3]";
-    case i64_3:
-        return "i64[3]";
-    case f32_3:
-        return "f32[3]";
-    case f64_3:
-        return "f64[3]";
     case Invalid:
         return "Invalid";
     }

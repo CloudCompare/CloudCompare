@@ -33,11 +33,28 @@ typedef laszip_vlr laszip_vlr_struct;
 /// This serves the same purpose as LasScalarField but for extra bytes
 struct LasExtraScalarField
 {
+    /// When the extra dimension in an array type, it can have
+    /// at most 3 elements.
+    ///
+    /// Eg: A Color extra array dimension with 3 elements,
+    /// so that each points have Color[0], Color[1], Color[2] as
+    /// in a single extra dimension definition.
+    static constexpr unsigned MAX_DIM_SIZE = 3;
+    static constexpr unsigned MAX_NAME_SIZE = 32;
+    static constexpr unsigned MAX_DESCRIPTION_SIZE = 32;
+
+    enum class DimensionSize
+    {
+        One = 1,
+        Two = 2,
+        Three = 3,
+    };
+
     /// Data types available LAS Extra Field
     enum DataType
     {
         Undocumented = 0,
-        u8,
+        u8 = 1,
         i8,
         u16,
         i16,
@@ -47,26 +64,6 @@ struct LasExtraScalarField
         i64,
         f32,
         f64,
-        u8_2,
-        i8_2,
-        u16_2,
-        i16_2,
-        u32_2,
-        i32_2,
-        u64_2,
-        i64_2,
-        f32_2,
-        f64_2,
-        u8_3,
-        i8_3,
-        u16_3,
-        i16_3,
-        u32_3,
-        i32_3,
-        u64_3,
-        i64_3,
-        f32_3,
-        f64_3,
         Invalid
     };
 
@@ -117,23 +114,24 @@ struct LasExtraScalarField
 
     void resetScalarFieldsPointers();
 
-    static DataType DataTypeFromValue(uint8_t value);
+    static std::tuple<DataType, DimensionSize> DataTypeFromValue(uint8_t value);
 
   public: // Data members
-    // These fields are from the vlr itself
     DataType type{Undocumented};
+    DimensionSize dimensions{DimensionSize::One};
+    // These fields are from the vlr itself
     uint8_t options{0};
-    char name[32] = "";
-    char description[32] = "";
-    uint8_t noData[3][8] = {0};
-    uint8_t mins[3][8] = {0};
-    uint8_t maxs[3][8] = {0};
-    double scales[3] = {0.0};
-    double offsets[3] = {0.0};
+    char name[MAX_NAME_SIZE] = "";
+    char description[MAX_DESCRIPTION_SIZE] = "";
+    uint8_t noData[MAX_DIM_SIZE][8] = {0};
+    uint8_t mins[MAX_DIM_SIZE][8] = {0};
+    uint8_t maxs[MAX_DIM_SIZE][8] = {0};
+    double scales[MAX_DIM_SIZE] = {0.0};
+    double offsets[MAX_DIM_SIZE] = {0.0};
 
     // These are added by us
     unsigned int byteOffset{0};
-    ccScalarField *scalarFields[3] = {nullptr};
+    ccScalarField *scalarFields[MAX_DIM_SIZE] = {nullptr};
     // TODO explain better
     // This strings store the name of the field in CC,
     // Extra fields name may clash with existing scalarfields name

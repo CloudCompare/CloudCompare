@@ -166,7 +166,7 @@ void LasScalarFieldSaver::handleExtraFields(size_t pointIndex, laszip_point &poi
         return;
     }
 
-    ScalarType values[MAX_ELEMENTS_IN_EXTRA_ARRAY_DIM] = {0.0};
+    ScalarType values[LasExtraScalarField::MAX_DIM_SIZE] = {0.0};
 
     for (const LasExtraScalarField &extraField : m_extraFields)
     {
@@ -191,82 +191,46 @@ void LasScalarFieldSaver::handleExtraFields(size_t pointIndex, laszip_point &poi
             }
         }
 
-        // Notice that we rely on implicit fallthrough
-        switch (extraField.type)
+
+        for (unsigned i = 0; i < extraField.numElements(); i++)
         {
-        case LasExtraScalarField::u8_3:
-            WriteScalarValueAs<uint8_t>(values[2], dataStart + 2);
-        case LasExtraScalarField::u8_2:
-            WriteScalarValueAs<uint8_t>(values[1], dataStart + 1);
-        case LasExtraScalarField::u8:
-            WriteScalarValueAs<uint8_t>(values[0], dataStart);
-            break;
-        case LasExtraScalarField::u16_3:
-            WriteScalarValueAs<uint16_t>(values[2], dataStart + 4);
-        case LasExtraScalarField::u16_2:
-            WriteScalarValueAs<uint16_t>(values[1], dataStart + 2);
-        case LasExtraScalarField::u16:
-            WriteScalarValueAs<uint16_t>(values[0], dataStart);
-            break;
-        case LasExtraScalarField::u32_3:
-            WriteScalarValueAs<uint32_t>(values[2], dataStart + 8);
-        case LasExtraScalarField::u32_2:
-            WriteScalarValueAs<uint32_t>(values[1], dataStart + 4);
-        case LasExtraScalarField::u32:
-            WriteScalarValueAs<uint32_t>(values[0], dataStart);
-            break;
-        case LasExtraScalarField::u64_3:
-            WriteScalarValueAs<uint64_t>(values[2], dataStart + 16);
-        case LasExtraScalarField::u64_2:
-            WriteScalarValueAs<uint64_t>(values[1], dataStart + 8);
-        case LasExtraScalarField::u64:
-            WriteScalarValueAs<uint64_t>(values[0], dataStart);
-            break;
-        case LasExtraScalarField::i8_3:
-            WriteScalarValueAs<int8_t>(values[2], dataStart + 2);
-        case LasExtraScalarField::i8_2:
-            WriteScalarValueAs<int8_t>(values[1], dataStart + 1);
-        case LasExtraScalarField::i8:
-            WriteScalarValueAs<int8_t>(values[0], dataStart);
-            break;
-        case LasExtraScalarField::i16_3:
-            WriteScalarValueAs<int16_t>(values[2], dataStart + 4);
-        case LasExtraScalarField::i16_2:
-            WriteScalarValueAs<int16_t>(values[1], dataStart + 2);
-        case LasExtraScalarField::i16:
-            WriteScalarValueAs<int16_t>(values[0], dataStart);
-            break;
-        case LasExtraScalarField::i32_3:
-            WriteScalarValueAs<int32_t>(values[2], dataStart + 8);
-        case LasExtraScalarField::i32_2:
-            WriteScalarValueAs<int32_t>(values[1], dataStart + 4);
-        case LasExtraScalarField::i32:
-            WriteScalarValueAs<int32_t>(values[0], dataStart);
-            break;
-        case LasExtraScalarField::i64_3:
-            WriteScalarValueAs<int64_t>(values[2], dataStart + 16);
-        case LasExtraScalarField::i64_2:
-            WriteScalarValueAs<int64_t>(values[1], dataStart + 8);
-        case LasExtraScalarField::i64:
-            WriteScalarValueAs<int64_t>(values[0], dataStart);
-            break;
-        case LasExtraScalarField::f32_3:
-            WriteScalarValueAs<float>(values[2], dataStart + 8);
-        case LasExtraScalarField::f32_2:
-            WriteScalarValueAs<float>(values[1], dataStart + 4);
-        case LasExtraScalarField::f32:
-            WriteScalarValueAs<float>(values[0], dataStart);
-            break;
-        case LasExtraScalarField::f64_3:
-            WriteScalarValueAs<double>(values[2], dataStart + 16);
-        case LasExtraScalarField::f64_2:
-            WriteScalarValueAs<double>(values[1], dataStart + 8);
-        case LasExtraScalarField::f64:
-            WriteScalarValueAs<double>(values[0], dataStart);
-            break;
-        case LasExtraScalarField::Undocumented:
-        case LasExtraScalarField::Invalid:
-            break;
+            switch (extraField.type)
+            {
+            case LasExtraScalarField::u8:
+                WriteScalarValueAs<uint8_t>(values[i], dataStart);
+                break;
+            case LasExtraScalarField::u16:
+                WriteScalarValueAs<uint16_t>(values[i], dataStart);
+                break;
+            case LasExtraScalarField::u32:
+                WriteScalarValueAs<uint32_t>(values[i], dataStart);
+                break;
+            case LasExtraScalarField::u64:
+                WriteScalarValueAs<uint64_t>(values[i], dataStart);
+                break;
+            case LasExtraScalarField::i8:
+                WriteScalarValueAs<int8_t>(values[i], dataStart);
+                break;
+            case LasExtraScalarField::i16:
+                WriteScalarValueAs<int16_t>(values[i], dataStart);
+                break;
+            case LasExtraScalarField::i32:
+                WriteScalarValueAs<int32_t>(values[i], dataStart);
+                break;
+            case LasExtraScalarField::i64:
+                WriteScalarValueAs<int64_t>(values[i], dataStart);
+                break;
+            case LasExtraScalarField::f32:
+                WriteScalarValueAs<float>(values[i], dataStart);
+                break;
+            case LasExtraScalarField::f64:
+                WriteScalarValueAs<double>(values[i], dataStart);
+                break;
+            case LasExtraScalarField::Undocumented:
+            case LasExtraScalarField::Invalid:
+                break;
+            }
+            dataStart += extraField.elementSize();
         }
     }
 }

@@ -34,5 +34,27 @@ class LasExtraScalarFieldCard : public QWidget, public Ui::ExtraScalarFieldCard
 
     LasExtraScalarField::DataType dataType() const;
 
-     bool fillField(LasExtraScalarField &field, const ccPointCloud &pointCloud) const;
+    bool fillField(LasExtraScalarField &field, const ccPointCloud &pointCloud) const;
+
+  private:
+
+    //! Struct to aggregate together the user input related
+    // to one dimension of an extra scalar field definition.
+    struct ScalarFieldUserInputs
+    {
+        QComboBox *scalarFieldComboBox;
+        QDoubleSpinBox *scaleSpinBox;
+        QDoubleSpinBox *offsetSpinBox;
+    };
+
+    void onNumberOfElementsSelected(unsigned int numberOfElements);
+    void onRadioButton1Selected(bool _checked);
+    void onRadioButton2Selected(bool _checked);
+    void onRadioButton3Selected(bool _checked);
+
+    void onToggleAdvancedOptionsClicked();
+
+
+    // TODO remove this magic number that is all over 
+    ScalarFieldUserInputs m_scalarFieldsUserInputs[LasExtraScalarField::MAX_DIM_SIZE];
 };

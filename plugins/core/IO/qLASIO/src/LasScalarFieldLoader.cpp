@@ -331,83 +331,47 @@ template <typename T, typename V> V LasScalarFieldLoader::ParseValueOfTypeAs(con
     return static_cast<V>(*reinterpret_cast<const T *>(source));
 }
 
-void LasScalarFieldLoader::parseRawValues(const LasExtraScalarField &extraField, uint8_t *dataStart)
+void LasScalarFieldLoader::parseRawValues(const LasExtraScalarField &extraField, const uint8_t *dataStart)
 {
-    switch (extraField.type)
+    for (unsigned i{0}; i < extraField.numElements(); ++i)
     {
-    case LasExtraScalarField::Invalid:
-    case LasExtraScalarField::Undocumented:
-        break;
-    case LasExtraScalarField::u8_3:
-        rawValues.unsignedValues[2] = ParseValueOfTypeAs<uint8_t, uint64_t>(dataStart + 2);
-    case LasExtraScalarField::u8_2:
-        rawValues.unsignedValues[1] = ParseValueOfTypeAs<uint8_t, uint64_t>(dataStart + 1);
-    case LasExtraScalarField::u8:
-        rawValues.unsignedValues[0] = ParseValueOfTypeAs<uint8_t, uint64_t>(dataStart);
-        break;
-    case LasExtraScalarField::u16_3:
-        rawValues.unsignedValues[2] = ParseValueOfTypeAs<uint16_t, uint64_t>(dataStart + 4);
-    case LasExtraScalarField::u16_2:
-        rawValues.unsignedValues[1] = ParseValueOfTypeAs<uint16_t, uint64_t>(dataStart + 2);
-    case LasExtraScalarField::u16:
-        rawValues.unsignedValues[0] = ParseValueOfTypeAs<uint16_t, uint64_t>(dataStart);
-        break;
-    case LasExtraScalarField::u32_3:
-        rawValues.unsignedValues[2] = ParseValueOfTypeAs<uint32_t, uint64_t>(dataStart + 8);
-    case LasExtraScalarField::u32_2:
-        rawValues.unsignedValues[1] = ParseValueOfTypeAs<uint32_t, uint64_t>(dataStart + 4);
-    case LasExtraScalarField::u32:
-        rawValues.unsignedValues[0] = ParseValueOfTypeAs<uint32_t, uint64_t>(dataStart);
-        break;
-    case LasExtraScalarField::u64_3:
-        rawValues.unsignedValues[2] = ParseValueOfTypeAs<uint64_t, uint64_t>(dataStart + 16);
-    case LasExtraScalarField::u64_2:
-        rawValues.unsignedValues[1] = ParseValueOfTypeAs<uint64_t, uint64_t>(dataStart + 8);
-    case LasExtraScalarField::u64:
-        rawValues.unsignedValues[0] = ParseValueOfTypeAs<uint64_t, uint64_t>(dataStart);
-        break;
-    case LasExtraScalarField::i8_3:
-        rawValues.signedValues[2] = ParseValueOfTypeAs<int64_t, int64_t>(dataStart + 2);
-    case LasExtraScalarField::i8_2:
-        rawValues.signedValues[1] = ParseValueOfTypeAs<int8_t, int64_t>(dataStart + 1);
-    case LasExtraScalarField::i8:
-        rawValues.signedValues[0] = ParseValueOfTypeAs<int8_t, int64_t>(dataStart);
-        break;
-    case LasExtraScalarField::i16_3:
-        rawValues.signedValues[2] = ParseValueOfTypeAs<int16_t, int64_t>(dataStart + 4);
-    case LasExtraScalarField::i16_2:
-        rawValues.signedValues[1] = ParseValueOfTypeAs<int16_t, int64_t>(dataStart + 2);
-    case LasExtraScalarField::i16:
-        rawValues.signedValues[0] = ParseValueOfTypeAs<int16_t, int64_t>(dataStart);
-        break;
-    case LasExtraScalarField::i32_3:
-        rawValues.signedValues[2] = ParseValueOfTypeAs<int32_t, int64_t>(dataStart + 8);
-    case LasExtraScalarField::i32_2:
-        rawValues.signedValues[1] = ParseValueOfTypeAs<int32_t, int64_t>(dataStart + 4);
-    case LasExtraScalarField::i32:
-        rawValues.signedValues[0] = ParseValueOfTypeAs<int32_t, int64_t>(dataStart);
-        break;
-    case LasExtraScalarField::i64_3:
-        rawValues.signedValues[2] = ParseValueOfTypeAs<int64_t, int64_t>(dataStart + 16);
-    case LasExtraScalarField::i64_2:
-        rawValues.signedValues[1] = ParseValueOfTypeAs<int64_t, int64_t>(dataStart + 8);
-    case LasExtraScalarField::i64:
-        rawValues.signedValues[0] = ParseValueOfTypeAs<int64_t, int64_t>(dataStart);
-        break;
-    case LasExtraScalarField::f32_3:
-        rawValues.floatingValues[2] = ParseValueOfTypeAs<float, double>(dataStart + 8);
-    case LasExtraScalarField::f32_2:
-        rawValues.floatingValues[1] = ParseValueOfTypeAs<float, double>(dataStart + 4);
-    case LasExtraScalarField::f32:
-        rawValues.floatingValues[0] = ParseValueOfTypeAs<float, double>(dataStart);
-        break;
-    case LasExtraScalarField::f64_3:
-        rawValues.floatingValues[2] = ParseValueOfTypeAs<double, double>(dataStart + 16);
-    case LasExtraScalarField::f64_2:
-        rawValues.floatingValues[1] = ParseValueOfTypeAs<double, double>(dataStart + 8);
-    case LasExtraScalarField::f64:
-        rawValues.floatingValues[0] = ParseValueOfTypeAs<double, double>(dataStart);
-        break;
+        switch (extraField.type)
+        {
+        case LasExtraScalarField::Invalid:
+        case LasExtraScalarField::Undocumented:
+            break;
+        case LasExtraScalarField::u8:
+            rawValues.unsignedValues[i] = ParseValueOfTypeAs<uint8_t, uint64_t>(dataStart);
+            break;
+        case LasExtraScalarField::u16:
+            rawValues.unsignedValues[i] = ParseValueOfTypeAs<uint16_t, uint64_t>(dataStart);
+            break;
+        case LasExtraScalarField::u32:
+            rawValues.unsignedValues[i] = ParseValueOfTypeAs<uint32_t, uint64_t>(dataStart);
+            break;
+        case LasExtraScalarField::u64:
+            rawValues.unsignedValues[i] = ParseValueOfTypeAs<uint64_t, uint64_t>(dataStart);
+            break;
+        case LasExtraScalarField::i8:
+            rawValues.signedValues[i] = ParseValueOfTypeAs<int8_t, int64_t>(dataStart);
+            break;
+        case LasExtraScalarField::i16:
+            rawValues.signedValues[i] = ParseValueOfTypeAs<int16_t, int64_t>(dataStart);
+            break;
+        case LasExtraScalarField::i32:
+            rawValues.signedValues[i] = ParseValueOfTypeAs<int32_t, int64_t>(dataStart);
+            break;
+        case LasExtraScalarField::i64:
+            rawValues.signedValues[i] = ParseValueOfTypeAs<int64_t, int64_t>(dataStart);
+            break;
+        case LasExtraScalarField::f32:
+            rawValues.floatingValues[i] = ParseValueOfTypeAs<float, double>(dataStart);
+            break;
+        case LasExtraScalarField::f64:
+            rawValues.floatingValues[i] = ParseValueOfTypeAs<double, double>(dataStart);
+            break;
+        }
+        dataStart += extraField.elementSize();
     }
 }
 

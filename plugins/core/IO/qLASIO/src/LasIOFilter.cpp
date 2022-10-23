@@ -16,13 +16,13 @@
 //##########################################################################
 
 #include "LasIOFilter.h"
+#include "LasMetadata.h"
 #include "LasOpenDialog.h"
 #include "LasSaveDialog.h"
-#include "LasVlr.h"
-#include "LasMetadata.h"
 #include "LasSaver.h"
 #include "LasScalarFieldLoader.h"
 #include "LasScalarFieldSaver.h"
+#include "LasVlr.h"
 #include "LasWaveformLoader.h"
 #include "LasWaveformSaver.h"
 
@@ -85,8 +85,6 @@ static CCVector3d GetGlobalShift(FileIOFilter::LoadParameters &parameters,
     parameters.shiftHandlingMode = csModeBackup;
     return shift;
 }
-
-
 
 LasIOFilter::LasIOFilter()
     : FileIOFilter({"LAS IO Filter",
@@ -162,7 +160,6 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString &fileName, ccHObject &containe
     std::vector<LasExtraScalarField> availableEXtraScalarFields =
         LasExtraScalarField::ParseExtraScalarFields(*laszipHeader);
 
-
     std::unique_ptr<FileInfo> infoOfCurrentFile = std::make_unique<FileInfo>();
     infoOfCurrentFile->version.minorVersion = laszipHeader->version_minor;
     infoOfCurrentFile->version.pointFormat = laszipHeader->point_data_format;
@@ -201,7 +198,9 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString &fileName, ccHObject &containe
 
     dialog.filterOutNotChecked(availableScalarFields, availableEXtraScalarFields);
 
-    CCVector3d lasOffsets(laszipHeader->x_offset, laszipHeader->y_offset, laszipHeader->z_offset);
+    CCVector3d lasOffset(laszipHeader->x_offset,
+                         laszipHeader->y_offset,
+                         0.0 /*laszipHeader->z_offset*/); // it's never a good idea to shift along Z
 
     laszip_F64 laszipCoordinates[3];
     laszip_point *laszipPoint;
@@ -262,7 +261,7 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString &fileName, ccHObject &containe
         if (i == 0)
         {
             CCVector3d firstPoint(laszipCoordinates[0], laszipCoordinates[1], laszipCoordinates[2]);
-            shift = GetGlobalShift(parameters, preserveGlobalShift, lasOffsets, firstPoint);
+            shift = GetGlobalShift(parameters, preserveGlobalShift, lasOffset, firstPoint);
 
             if (preserveGlobalShift)
             {
@@ -470,7 +469,8 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject *entity,
     {
         // We do have a version we saved from the original file,
         // however we don't want to downgrade it.
-        if (bestVersion.minorVersion < savedVersion.minorVersion && bestVersion.pointFormat < savedVersion.pointFormat)
+        if (bestVersion.minorVersion < savedVersion.minorVersion &&
+            bestVersion.pointFormat < savedVersion.pointFormat)
         {
             bestVersion = savedVersion;
         }
@@ -500,7 +500,7 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject *entity,
     error = saver.open(filename);
     if (error != CC_FERR_NO_ERROR)
     {
-        return error; 
+        return error;
     }
     ccProgressDialog progressDialog(true, parameters.parentWidget);
     progressDialog.setMethodTitle("Saving LAS points");
@@ -509,7 +509,7 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject *entity,
     unsigned int numStepsForUpdate = 1 * pointCloud->size() / 100;
     unsigned int lastProgressUpdate = 0;
     progressDialog.start();
-    
+
     for (unsigned int i{0}; i < pointCloud->size(); ++i)
     {
         error = saver.saveNextPoint();
@@ -517,7 +517,7 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject *entity,
         {
             break;
         }
-    
+
         if ((i - lastProgressUpdate) == numStepsForUpdate)
         {
             normProgress.steps(i - lastProgressUpdate);
@@ -525,21 +525,21 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject *entity,
             QApplication::processEvents();
         }
     }
-    
+
     if (error == CC_FERR_THIRD_PARTY_LIB_FAILURE)
     {
         // laszip_get_error(laszipWriter, &errorMsg);
         // ccLog::Warning("[LAS] laszip error :'%s'", errorMsg);
         return error;
     }
-    
+
     if (saver.savesWaveforms())
     {
         const ccPointCloud::SharedFWFDataContainer &fwfData = pointCloud->fwfData();
         QFileInfo info(filename);
         QString wdpFilename = QString("%1/%2.wdp").arg(info.path(), info.baseName());
         QFile fwfFile(wdpFilename);
-    
+
         if (!fwfFile.open(QIODevice::WriteOnly))
         {
             ccLog::Error("[LAS] Failed to write waveform data");
@@ -556,6 +556,6 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject *entity,
             ccLog::Print(QString("[LAS] Successfully saved FWF in external file '%1'").arg(wdpFilename));
         }
     }
-    
+
     return error;
 }

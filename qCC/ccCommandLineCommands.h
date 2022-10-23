@@ -274,6 +274,13 @@ struct CommandNoiseFilter : public ccCommandLineInterface::Command
 	bool process(ccCommandLineInterface& cmd) override;
 };
 
+struct CommandRemoveDuplicatePoints : public ccCommandLineInterface::Command
+{
+    CommandRemoveDuplicatePoints();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
 struct CommandExtractVertices : public ccCommandLineInterface::Command
 {
 	CommandExtractVertices();

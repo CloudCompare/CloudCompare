@@ -170,11 +170,11 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString &fileName, ccHObject &containe
     if (!m_openDialog || fileContentIsDifferentFromPrevious)
     {
         m_openDialog.reset(new LasOpenDialog);
+        m_openDialog->setInfo(laszipHeader->version_minor, laszipHeader->point_data_format, pointCount);
+        m_openDialog->setAvailableScalarFields(availableScalarFields, availableEXtraScalarFields);
+        m_infoOfLastOpened = std::move(infoOfCurrentFile);
     }
-    m_infoOfLastOpened = std::move(infoOfCurrentFile);
     LasOpenDialog &dialog = *m_openDialog;
-    dialog.setInfo(laszipHeader->version_minor, laszipHeader->point_data_format, pointCount);
-    dialog.setAvailableScalarFields(availableScalarFields, availableEXtraScalarFields);
 
     if (parameters.sessionStart)
     {

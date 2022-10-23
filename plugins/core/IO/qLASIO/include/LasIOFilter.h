@@ -65,8 +65,11 @@ class LasIOFilter : public FileIOFilter
                 const auto &lhs = extraScalarFields[i];
                 const auto &rhs = other.extraScalarFields[i];
 
-                if (lhs.name != rhs.name || lhs.type != rhs.type || lhs.byteOffset != rhs.byteOffset ||
-                    lhs.numElements() || rhs.numElements() || lhs.options != rhs.options)
+                if (strncmp(lhs.name, rhs.name, LasExtraScalarField::MAX_NAME_SIZE) != 0 || 
+                    lhs.type != rhs.type || 
+                    lhs.byteOffset != rhs.byteOffset ||
+                    lhs.numElements() != rhs.numElements() ||
+                    lhs.options != rhs.options)
                 {
                     return false;
                 }

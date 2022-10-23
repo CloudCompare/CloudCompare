@@ -1098,8 +1098,8 @@ bool ccRasterizeTool::ExportGeoTiff(const QString& outputFilename,
 
 	//vertical dimension
 	assert(Z <= 2);
-	const unsigned char X = Z == 2 ? 0 : Z + 1;
-	const unsigned char Y = X == 2 ? 0 : X + 1;
+	const unsigned char X = (Z == 2 ? 0 : Z + 1);
+	const unsigned char Y = (X == 2 ? 0 : X + 1);
 
 	double stepX = grid.gridStep;
 	double stepY = grid.gridStep;
@@ -1412,7 +1412,7 @@ bool ccRasterizeTool::ExportGeoTiff(const QString& outputFilename,
 					const double* sfRow = sfGrid + (grid.height - 1 - j) * grid.width;
 					for (unsigned i = 0; i < grid.width; ++i)
 					{
-						scanline[i] = row[i].nbPoints ? sfRow[i] : sfNanValue;
+						scanline[i] = std::isfinite(sfRow[i]) ? sfRow[i] : sfNanValue;
 					}
 
 					if (poBand->RasterIO(	GF_Write,

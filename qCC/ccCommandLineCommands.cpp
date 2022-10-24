@@ -3255,11 +3255,14 @@ bool CommandRemoveDuplicatePoints::process(ccCommandLineInterface &cmd)
     double minDistanceBetweenPoints = std::numeric_limits<double>::epsilon();
 
     //get optional argument
-    if (!cmd.arguments().empty()) {
+    if (!cmd.arguments().empty())
+	{
         bool paramOk = false;
         double arg = cmd.arguments().front().toDouble(&paramOk);
-        if (paramOk) {
-            if (arg < minDistanceBetweenPoints) {
+        if (paramOk)
+		{
+            if (arg < minDistanceBetweenPoints)
+			{
                 return cmd.error(QObject::tr("Invalid argument: '%1'").arg(arg));
             }
 
@@ -3270,7 +3273,6 @@ bool CommandRemoveDuplicatePoints::process(ccCommandLineInterface &cmd)
 
     cmd.print(QObject::tr("Minimum distance between points: '%1'").arg(minDistanceBetweenPoints));
 
-    //
     QScopedPointer<ccProgressDialog> progressDialog(nullptr);
     if (!cmd.silentMode())
     {
@@ -3278,85 +3280,21 @@ bool CommandRemoveDuplicatePoints::process(ccCommandLineInterface &cmd)
         progressDialog->setAutoClose(false);
     }
 
-    //
-    static const char DEFAULT_DUPLICATE_TEMP_SF_NAME[] = "DuplicateFlags";
-
-    //
-    for (size_t i = 0; i < cmd.clouds().size(); ++i)
+    for (CLCloudDesc& desc : cmd.clouds())
     {
-        ccPointCloud* cloud = cmd.clouds()[i].pc;
-        assert(cloud);
+        assert(desc.pc);
+		ccPointCloud* filteredCloud = desc.pc->removeDuplicatePoints(minDistanceBetweenPoints, progressDialog.data());
+		if (!filteredCloud)
+		{
+			return cmd.error(QObject::tr("Process failed (see log)"));
+		}
 
-        //create temporary SF for 'duplicate flags'
-        int sfIdx = cloud->getScalarFieldIndexByName(DEFAULT_DUPLICATE_TEMP_SF_NAME);
-        if (sfIdx < 0)
-            sfIdx = cloud->addScalarField(DEFAULT_DUPLICATE_TEMP_SF_NAME);
-        if (sfIdx >= 0)
-            cloud->setCurrentScalarField(sfIdx);
-        else
-        {
-            return cmd.error(QObject::tr("Couldn't create temporary scalar field! Not enough memory?"));
-        }
-
-        ccOctree::Shared octree = cloud->getOctree();
-
-        CCCoreLib::GeometricalAnalysisTools::ErrorCode result = CCCoreLib::GeometricalAnalysisTools::FlagDuplicatePoints(cloud,
-                                                                                                                         minDistanceBetweenPoints,
-                                                                                                                         progressDialog.data(),
-                                                                                                                         octree.data());
-
-        if (result == CCCoreLib::GeometricalAnalysisTools::NoError)
-        {
-
-            //count the number of duplicate points!
-            CCCoreLib::ScalarField* flagSF = cloud->getScalarField(sfIdx);
-            unsigned duplicateCount = 0;
-            assert(flagSF);
-            if (flagSF)
-            {
-                for (unsigned j = 0; j < flagSF->currentSize(); ++j)
-                {
-                    if (flagSF->getValue(j) != 0)
-                    {
-                        ++duplicateCount;
-                    }
-                }
-            }
-
-            if (duplicateCount == 0)
-            {
-                cmd.print(QObject::tr("Cloud '%1' has no duplicate points").arg(cloud->getName()));
-            }
-            else
-            {
-                cmd.warning(QObject::tr("Cloud '%1' has %2 duplicate point(s)").arg(cloud->getName()).arg(duplicateCount));
-
-                ccPointCloud* filteredCloud = cloud->filterPointsByScalarValue(0, 0);
-                if (filteredCloud)
-                {
-                    sfIdx = filteredCloud->getScalarFieldIndexByName(DEFAULT_DUPLICATE_TEMP_SF_NAME);
-                    assert(sfIdx >= 0);
-                    filteredCloud->deleteScalarField(sfIdx);
-
-                    //replace current cloud by filtered one
-                    delete cmd.clouds()[i].pc;
-                    cmd.clouds()[i].pc = filteredCloud;
-                    cmd.clouds()[i].basename += QObject::tr("_REMOVED_DUPLICATE_POINTS");
-                }
-                else
-                {
-                    return cmd.error(QObject::tr("Not enough memory to create the filtered cloud"));
-                }
-            }
-        }
-        else
-        {
-            return cmd.error(QObject::tr("An error occurred! (Not enough memory?)"));
-        }
-
+		//replace current cloud by filtered one
+		delete desc.pc;
+		desc.pc = filteredCloud;
+		desc.basename += QObject::tr("_REMOVED_DUPLICATE_POINTS");
     }
 
-    //
     if (progressDialog)
     {
         progressDialog->close();

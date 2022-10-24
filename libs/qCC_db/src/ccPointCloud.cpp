@@ -6104,3 +6104,86 @@ bool ccPointCloud::exportNormalToSF(bool exportDims[3])
 
 	return true;
 }
+
+ccPointCloud* ccPointCloud::removeDuplicatePoints(double minDistanceBetweenPoints, ccProgressDialog* pDlg/*=nullptr*/)
+{
+	static const char DEFAULT_DUPLICATE_TEMP_SF_NAME[] = "DuplicateFlags";
+
+	//create temporary SF for 'duplicate flags'
+	int sfIdx = getScalarFieldIndexByName(DEFAULT_DUPLICATE_TEMP_SF_NAME);
+	if (sfIdx < 0)
+	{
+		sfIdx = addScalarField(DEFAULT_DUPLICATE_TEMP_SF_NAME);
+	}
+	if (sfIdx >= 0)
+	{
+		setCurrentScalarField(sfIdx);
+	}
+	else
+	{
+		ccLog::Warning(QObject::tr("Couldn't create temporary scalar field! Not enough memory?"));
+		return nullptr;
+	}
+
+	ccOctree::Shared octree = getOctree();
+
+	CCCoreLib::GeometricalAnalysisTools::ErrorCode result = CCCoreLib::GeometricalAnalysisTools::FlagDuplicatePoints(
+					this,
+					minDistanceBetweenPoints,
+					pDlg,
+					octree.data());
+
+	if (result != CCCoreLib::GeometricalAnalysisTools::NoError)
+	{
+		ccLog::Warning(QObject::tr("An error occurred! (Not enough memory?)"));
+		return nullptr;
+	}
+
+	//count the number of duplicate points
+	CCCoreLib::ScalarField* flagSF = getScalarField(sfIdx);
+	unsigned duplicateCount = 0;
+	if (flagSF)
+	{
+		for (unsigned j = 0; j < flagSF->currentSize(); ++j)
+		{
+			if (flagSF->getValue(j) != 0)
+			{
+				++duplicateCount;
+			}
+		}
+	}
+	else
+	{
+		assert(false);
+	}
+
+	if (duplicateCount == 0)
+	{
+		//the cloud has no duplicate points
+		ccLog::Print(QObject::tr("Cloud '%1' has no duplicate points").arg(getName()));
+		deleteScalarField(sfIdx);
+		return this;
+	}
+
+	ccLog::Warning(QObject::tr("Cloud '%1' has %2 duplicate point(s)").arg(getName()).arg(duplicateCount));
+
+	ccPointCloud* filteredCloud = filterPointsByScalarValue(0, 0);
+
+	deleteScalarField(sfIdx);
+
+	if (!filteredCloud)
+	{
+		ccLog::Warning(QObject::tr("Not enough memory to create the filtered cloud"));
+		return nullptr;
+	}
+	filteredCloud->setName(QString("%1.clean").arg(getName()));
+
+	// we must remove the scalar field from the new cloud as well!
+	{
+		int sfIdx2 = filteredCloud->getScalarFieldIndexByName(DEFAULT_DUPLICATE_TEMP_SF_NAME);
+		assert(sfIdx2 >= 0);
+		filteredCloud->deleteScalarField(sfIdx2);
+	}
+
+	return filteredCloud;
+}

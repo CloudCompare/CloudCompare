@@ -2773,97 +2773,43 @@ void MainWindow::doRemoveDuplicatePoints()
 	//save parameter
 	settings.setValue(ccPS::DuplicatePointsMinDist(), minDistanceBetweenPoints);
 
-	static const char DEFAULT_DUPLICATE_TEMP_SF_NAME[] = "DuplicateFlags";
-
 	ccProgressDialog pDlg(true, this);
 	pDlg.setAutoClose(false);
 
 	ccHObject::Container selectedEntities = getSelectedEntities(); //we have to use a local copy: 'unselectAllEntities' and 'selectEntity' will change the set of currently selected entities!
 
-	for (ccHObject *entity : selectedEntities)
+	for (ccHObject* entity : selectedEntities)
 	{
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
 		if (cloud)
 		{
-			//create temporary SF for 'duplicate flags'
-			int sfIdx = cloud->getScalarFieldIndexByName(DEFAULT_DUPLICATE_TEMP_SF_NAME);
-			if (sfIdx < 0)
-				sfIdx = cloud->addScalarField(DEFAULT_DUPLICATE_TEMP_SF_NAME);
-			if (sfIdx >= 0)
-				cloud->setCurrentScalarField(sfIdx);
-			else
+			ccPointCloud* filteredCloud = cloud->removeDuplicatePoints(minDistanceBetweenPoints, &pDlg);
+
+			if (!filteredCloud)
 			{
-				ccConsole::Error(tr("Couldn't create temporary scalar field! Not enough memory?"));
+				ccConsole::Error(tr("Process failed (see Console)"));
 				break;
 			}
 
-			ccOctree::Shared octree = cloud->getOctree();
-
-			CCCoreLib::GeometricalAnalysisTools::ErrorCode result = CCCoreLib::GeometricalAnalysisTools::FlagDuplicatePoints(	cloud,
-																																minDistanceBetweenPoints,
-																																&pDlg,
-																																octree.data());
-
-			if (result == CCCoreLib::GeometricalAnalysisTools::NoError)
+			if (filteredCloud != cloud) // otherwise the cloud has no duplicate point
 			{
-				//count the number of duplicate points!
-				CCCoreLib::ScalarField* flagSF = cloud->getScalarField(sfIdx);
-				unsigned duplicateCount = 0;
-				assert(flagSF);
-				if (flagSF)
+				filteredCloud->prepareDisplayForRefresh();
+				addToDB(filteredCloud);
+				if (first)
 				{
-					for (unsigned j = 0; j < flagSF->currentSize(); ++j)
-					{
-						if (flagSF->getValue(j) != 0)
-						{
-							++duplicateCount;
-						}
-					}
+					m_ccRoot->unselectAllEntities();
+					first = false;
 				}
-
-				if (duplicateCount == 0)
-				{
-					ccConsole::Print(tr("Cloud '%1' has no duplicate points").arg(cloud->getName()));
-				}
-				else
-				{
-					ccConsole::Warning(tr("Cloud '%1' has %2 duplicate point(s)").arg(cloud->getName()).arg(duplicateCount));
-
-					ccPointCloud* filteredCloud = cloud->filterPointsByScalarValue(0, 0);
-					if (filteredCloud)
-					{
-						int sfIdx2 = filteredCloud->getScalarFieldIndexByName(DEFAULT_DUPLICATE_TEMP_SF_NAME);
-						assert(sfIdx2 >= 0);
-						filteredCloud->deleteScalarField(sfIdx2);
-						filteredCloud->setName(QString("%1.clean").arg(cloud->getName()));
-						filteredCloud->setDisplay(cloud->getDisplay());
-						filteredCloud->prepareDisplayForRefresh();
-						addToDB(filteredCloud);
-						if (first)
-						{
-							m_ccRoot->unselectAllEntities();
-							first = false;
-						}
-						cloud->setEnabled(false);
-						m_ccRoot->selectEntity(filteredCloud, true);
-					}
-					else
-					{
-						ccConsole::Error(tr("Not enough memory to create the filtered cloud"));
-					}
-				}
+				cloud->setEnabled(false);
+				m_ccRoot->selectEntity(filteredCloud, true);
 			}
-			else
-			{
-				ccConsole::Error(tr("An error occurred! (Not enough memory?)"));
-			}
-
-			cloud->deleteScalarField(sfIdx);
 		}
 	}
 
 	if (!first)
+	{
 		ccConsole::Warning(tr("Previously selected entities (sources) have been hidden!"));
+	}
 
 	refreshAll();
 }

@@ -470,7 +470,6 @@ public: //other methods
 	void applyRigidTransformation(const ccGLMatrix& trans) override;
 	inline void refreshBB() override { invalidateBoundingBox(); }
 
-
 	//! Sets whether visibility check is enabled or not (e.g. during distances computation)
 	/** See ccPointCloud::testVisibility.
 	**/
@@ -666,10 +665,12 @@ public: //other methods
 		PointCoordinateType radius;	//!< unrolling cylinder radius (or cone base radius)
 		unsigned char axisDim;		//!< unrolling cylinder/cone axis (X=0, Y=1 or Z=2)
 	};
+
 	struct UnrollCylinderParams : public UnrollBaseParams
 	{
 		CCVector3 center;			//! A point belonging to the cylinder axis
 	};
+
 	struct UnrollConeParams : public UnrollBaseParams
 	{
 		CCVector3 apex;				//! Cone apex
@@ -686,7 +687,7 @@ public: //other methods
 		\param stopAngle_deg stop angle (in degrees)
 		\param progressCb for progress notification
 		\return the unrolled point cloud
-		**/
+	**/
 	ccPointCloud* unroll(	UnrollMode mode,
 							UnrollBaseParams* params,
 							bool exportDeviationSF = false,
@@ -742,6 +743,9 @@ public: //other methods
 
 	//! Returns the VBOs size (if any)
 	size_t vboSize() const;
+
+	//! Removes the duplicate points and return the corresponding cloud (if any, or the same cloud if there's no duplicate point)
+	ccPointCloud* removeDuplicatePoints(double minDistanceBetweenPoints, ccProgressDialog* pDlg = nullptr);
 
 protected:
 

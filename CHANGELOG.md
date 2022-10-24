@@ -21,6 +21,8 @@ v2.13.alpha (???) - (??/??/????)
 				- selected color component values will be scaled so that
 					[INPUT_RANGE_MIN INPUT_RANGE_MAX] becomes [OUTPUT_RANGE_MIN OUTPUT_RANGE_MAX]
 					(values ouside of the input range will also be scaled)
+        - RDP
+        	- removes duplicate points of all loaded clouds
 
 	- New display feature: near and far clipping planes in 3D views
 		- extension of the previously existing feature to set a near clipping plane

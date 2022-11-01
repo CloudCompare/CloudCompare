@@ -703,7 +703,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 	}
 	else
 	{
-		for (unsigned i=0; i<entity->getChildrenNumber(); ++i)
+		for (unsigned i = 0; i < entity->getChildrenNumber(); ++i)
 		{
 			if (entity->getChild(i)->isA(CC_TYPES::POINT_CLOUD))
 			{
@@ -744,9 +744,9 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 		e57::ustring libraryId;
 		e57::Utilities::getVersions(astmMajor, astmMinor, libraryId);
 
-		root.set("versionMajor", e57::IntegerNode(imf,astmMajor));
-		root.set("versionMinor", e57::IntegerNode(imf,astmMinor));
-		root.set("e57LibraryVersion", e57::StringNode(imf,libraryId));
+		root.set("versionMajor", e57::IntegerNode(imf, astmMajor));
+		root.set("versionMinor", e57::IntegerNode(imf, astmMinor));
+		root.set("e57LibraryVersion", e57::StringNode(imf, libraryId));
 
 		// Save a dummy string for coordinate system.
 		/// Really should be a valid WKT string identifying the coordinate reference system (CRS).
@@ -756,21 +756,21 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 		/// Path name: "/creationDateTime
 		e57::StructureNode creationDateTime = e57::StructureNode(imf);
 		creationDateTime.set("dateTimeValue", e57::FloatNode(imf, 0.0));
-		creationDateTime.set("isAtomicClockReferenced", e57::IntegerNode(imf,0));
+		creationDateTime.set("isAtomicClockReferenced", e57::IntegerNode(imf, 0));
 		root.set("creationDateTime", creationDateTime);
 
 		//3D data
-		e57::VectorNode data3D(imf,true);
+		e57::VectorNode data3D(imf, true);
 		root.set("data3D", data3D);
 
 		//Images
-		e57::VectorNode images2D(imf,true);
+		e57::VectorNode images2D(imf, true);
 		root.set("images2D", images2D);
 
 		//we store (temporarily) the saved scans associated with
 		//their unique GUID in a map (to retrieve them later if
 		//necessary - for example to associate them with images)
-		QMap<ccHObject*,QString> scansGUID;
+		QMap<ccHObject*, QString> scansGUID;
 		s_absoluteScanIndex = 0;
 
 		//progress dialog
@@ -844,7 +844,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 						assert(images[j]->isKindOf(CC_TYPES::IMAGE));
 						assert(scansGUID.contains(cloud));
 						QString scanGUID = scansGUID.value(cloud);
-						SaveImage(static_cast<ccImage*>(images[j]),scanGUID,imf,images2D);
+						SaveImage(static_cast<ccImage*>(images[j]), scanGUID, imf, images2D);
 						++s_absoluteImageIndex;
 						if (!nprogress.oneStep())
 						{
@@ -860,7 +860,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 
 		imf.close();
 	}
-	catch(const e57::E57Exception& e)
+	catch (const e57::E57Exception& e)
 	{
 		ccLog::Warning( QStringLiteral("[E57] Error: %1 (%2 line %3)")
 						.arg( e57::Utilities::errorCodeToString( e.errorCode() ).c_str() )
@@ -875,7 +875,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 		
 		result = CC_FERR_THIRD_PARTY_LIB_EXCEPTION;
 	}
-	catch(...)
+	catch (...)
 	{
 		ccLog::Warning("[E57] Unknown error");
 		result = CC_FERR_THIRD_PARTY_LIB_EXCEPTION;

@@ -103,6 +103,7 @@ v2.13.alpha (???) - (??/??/????)
 		(forcing the user to exit the tool with ESC)
 	- The 'Point List Picking' tool was not transferring the Global Shift information when exporting the list of points as a polyline
 	- Rasterize tool: interpolated scalar fields were not properly exported in geotiff files (the interpolated part was missing)
+	- the Registration tools (ICP and Point-pair based alignment) transformation filter mechanism would not let filter both translations and rotation at the same time
 
 v2.12.4 (Kyiv) - (14/07/2022)
 ----------------------

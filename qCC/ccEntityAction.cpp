@@ -30,14 +30,14 @@
 #include <ReferenceCloud.h>
 
 //qCC_db
-#include "ccColorScalesManager.h"
-#include "ccFacet.h"
-#include "ccGenericPrimitive.h"
-#include "ccOctreeProxy.h"
-#include "ccPointCloud.h"
-#include "ccPointCloudInterpolator.h"
-#include "ccPolyline.h"
-#include "ccSensor.h"
+#include <ccColorScalesManager.h>
+#include <ccFacet.h>
+#include <ccGenericPrimitive.h>
+#include <ccOctreeProxy.h>
+#include <ccPointCloud.h>
+#include <ccPointCloudInterpolator.h>
+#include <ccPolyline.h>
+#include <ccSensor.h>
 
 //qCC_gl
 #include "ccGuiParameters.h"
@@ -517,7 +517,7 @@ namespace ccEntityAction
 	}
 	
     //! Interpolate scalar fields from one entity and transfer them to another one without the dialog
-    bool	interpolateSFs(ccPointCloud *source, ccPointCloud *dest, int sfIndex, QWidget* parent)
+    bool	interpolateSFs(ccPointCloud *source, ccPointCloud *dest, int sfIndex, ccPointCloudInterpolator::Parameters& params, QWidget* parent)
     {
         if (!source || !dest)
         {
@@ -538,34 +538,17 @@ namespace ccEntityAction
             return false;
         }
 
-        std::vector<int> sfIndexes(1);
-        sfIndexes.back() = sfIndex;
-
-        //semi-persistent parameters
-        static ccPointCloudInterpolator::Parameters::Method s_interpMethod = ccPointCloudInterpolator::Parameters::NEAREST_NEIGHBOR;
-        static ccPointCloudInterpolator::Parameters::Algo s_interpAlgo = ccPointCloudInterpolator::Parameters::NORMAL_DIST;
-        static int s_interpKNN = 6;
-
-        ccInterpolationDlg iDlg(parent);
-        iDlg.setInterpolationMethod(s_interpMethod);
-        iDlg.setInterpolationAlgorithm(s_interpAlgo);
-        iDlg.knnSpinBox->setValue(s_interpKNN);
-        iDlg.radiusDoubleSpinBox->setValue(dest->getOwnBB().getDiagNormd() / 100);
-
-        //setup parameters
-        ccPointCloudInterpolator::Parameters params;
-        params.method = s_interpMethod = iDlg.getInterpolationMethod();
-        params.algo = s_interpAlgo = iDlg.getInterpolationAlgorithm();
-        params.knn = s_interpKNN = iDlg.knnSpinBox->value();
-        params.radius = iDlg.radiusDoubleSpinBox->value();
-        params.sigma = iDlg.kernelDoubleSpinBox->value();
 
         ccProgressDialog pDlg(true, parent);
 
-        if (!ccPointCloudInterpolator::InterpolateScalarFieldsFrom(dest, source, sfIndexes, params, &pDlg))
-            ccConsole::Error(QObject::tr("[ccEntityAction::interpolateSFs] An error occurred! (see console)"));
-
-        return true;
+		std::vector<int> sfIndexes({ sfIndex });
+		if (!ccPointCloudInterpolator::InterpolateScalarFieldsFrom(dest, source, sfIndexes, params, parent ? &pDlg : nullptr))
+		{
+			ccConsole::Error(QObject::tr("[ccEntityAction::interpolateSFs] An error occurred! (see console)"));
+			return false;
+		}
+        
+		return true;
     }
 
 	bool	convertTextureToColor(const ccHObject::Container& selectedEntities, QWidget* parent)

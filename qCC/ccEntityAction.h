@@ -1,5 +1,5 @@
-#ifndef CCENTITYACTION_H
-#define CCENTITYACTION_H
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -17,7 +17,9 @@
 //#                                                                        #
 //##########################################################################
 
-#include "ccMesh.h"
+//qCC_db
+#include <ccMesh.h>
+#include <ccPointCloudInterpolator.h>
 
 class QWidget;
 
@@ -49,7 +51,7 @@ namespace ccEntityAction
 	bool	sfFromColor(const ccHObject::Container &selectedEntities, QWidget* parent);
 	bool	sfFromColor(const ccHObject::Container &selectedEntities, bool exportR, bool exportG, bool exportB, bool exportAlpha, bool exportComposite);
     bool	interpolateSFs(const ccHObject::Container &selectedEntities, ccMainAppInterface *parent);
-    bool	interpolateSFs(ccPointCloud *source, ccPointCloud *dst, int sfIndex, QWidget* parent = nullptr);
+    bool	interpolateSFs(ccPointCloud *source, ccPointCloud *dst, int sfIndex, ccPointCloudInterpolator::Parameters& params, QWidget* parent = nullptr);
 	bool    sfAddConstant(ccPointCloud* cloud, QString sfName, bool integerValue, QWidget* parent);
 
 	bool	processMeshSF(const ccHObject::Container &selectedEntities, ccMesh::MESH_SCALAR_FIELD_PROCESS process, QWidget* parent);
@@ -95,5 +97,3 @@ namespace ccEntityAction
 	bool	statisticalTest(const ccHObject::Container &selectedEntities, QWidget* parent);
 	bool	computeStatParams(const ccHObject::Container &selectedEntities, QWidget* parent);
 }
-
-#endif

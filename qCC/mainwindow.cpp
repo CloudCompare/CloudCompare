@@ -493,12 +493,12 @@ void MainWindow::connectActions()
 	/*** MAIN MENU ***/
 
 	//"File" menu
-	connect(m_UI->actionOpen,					&QAction::triggered, this, &MainWindow::doActionLoadFile);
-	connect(m_UI->actionSave,					&QAction::triggered, this, &MainWindow::doActionSaveFile);
-	connect(m_UI->actionGlobalShiftSettings,	&QAction::triggered, this, &MainWindow::doActionGlobalShiftSeetings);
-	connect(m_UI->actionPrimitiveFactory,		&QAction::triggered, this, &MainWindow::doShowPrimitiveFactory);
-	connect(m_UI->actionCloseAll,				&QAction::triggered, this, &MainWindow::closeAll);
-	connect(m_UI->actionQuit,					&QAction::triggered, this, &QWidget::close);
+	connect(m_UI->actionOpen,						&QAction::triggered, this, &MainWindow::doActionLoadFile);
+	connect(m_UI->actionSave,						&QAction::triggered, this, &MainWindow::doActionSaveFile);
+	connect(m_UI->actionGlobalShiftSettings,		&QAction::triggered, this, &MainWindow::doActionGlobalShiftSeetings);
+	connect(m_UI->actionPrimitiveFactory,			&QAction::triggered, this, &MainWindow::doShowPrimitiveFactory);
+	connect(m_UI->actionCloseAll,					&QAction::triggered, this, &MainWindow::closeAll);
+	connect(m_UI->actionQuit,						&QAction::triggered, this, &QWidget::close);
 
 	//"Edit > Colors" menu
 	connect(m_UI->actionSetUniqueColor,				&QAction::triggered, this, &MainWindow::doActionSetUniqueColor);
@@ -509,7 +509,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionInterpolateColors,			&QAction::triggered, this, &MainWindow::doActionInterpolateColors);
 	connect(m_UI->actionEnhanceRGBWithIntensities,	&QAction::triggered, this, &MainWindow::doActionEnhanceRGBWithIntensities);
 	connect(m_UI->actionColorFromScalarField,       &QAction::triggered, this, &MainWindow::doActionColorFromScalars);
-	connect(m_UI->actionClearColor, &QAction::triggered, this, [=]() {
+	connect(m_UI->actionClearColor,					&QAction::triggered, this, [=]() {
 		clearSelectedEntitiesProperty( ccEntityAction::CLEAR_PROPERTY::COLORS );
 	});
 
@@ -521,7 +521,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionExportNormalToSF,			&QAction::triggered, this, &MainWindow::doActionExportNormalToSF);
 	connect(m_UI->actionOrientNormalsMST,			&QAction::triggered, this, &MainWindow::doActionOrientNormalsMST);
 	connect(m_UI->actionOrientNormalsFM,			&QAction::triggered, this, &MainWindow::doActionOrientNormalsFM);
-	connect(m_UI->actionClearNormals, &QAction::triggered, this, [=]() {
+	connect(m_UI->actionClearNormals,				&QAction::triggered, this, [=]() {
 		clearSelectedEntitiesProperty( ccEntityAction::CLEAR_PROPERTY::NORMALS );
 	});
 
@@ -601,10 +601,10 @@ void MainWindow::connectActions()
     connect(m_UI->actionSplitCloudUsingSF,          &QAction::triggered, this, &MainWindow::doActionSplitCloudUsingSF);
 	connect(m_UI->actionSetSFAsCoord,				&QAction::triggered, this, &MainWindow::doActionSetSFAsCoord);
 	connect(m_UI->actionInterpolateSFs,				&QAction::triggered, this, &MainWindow::doActionInterpolateScalarFields);
-	connect(m_UI->actionDeleteScalarField, &QAction::triggered, this, [=]() {
+	connect(m_UI->actionDeleteScalarField,			&QAction::triggered, this, [=]() {
 		clearSelectedEntitiesProperty( ccEntityAction::CLEAR_PROPERTY::CURRENT_SCALAR_FIELD );
 	});
-	connect(m_UI->actionDeleteAllSF, &QAction::triggered, this, [=]() {
+	connect(m_UI->actionDeleteAllSF,				&QAction::triggered, this, [=]() {
 		clearSelectedEntitiesProperty( ccEntityAction::CLEAR_PROPERTY::ALL_SCALAR_FIELDS );
 	});
 	
@@ -634,7 +634,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionRasterize,					&QAction::triggered, this, &MainWindow::doActionRasterize);
 	connect(m_UI->actionConvertPolylinesToMesh,		&QAction::triggered, this, &MainWindow::doConvertPolylinesToMesh);
 	//connect(m_UI->actionCreateSurfaceBetweenTwoPolylines, &QAction::triggered, this, &MainWindow::doMeshTwoPolylines); //DGM: already connected to actionMeshTwoPolylines
-	connect(m_UI->actionExportCoordToSF, &QAction::triggered, this, &MainWindow::doActionExportCoordToSF);
+	connect(m_UI->actionExportCoordToSF,			&QAction::triggered, this, &MainWindow::doActionExportCoordToSF);
 	
 	//"Tools > Registration" menu
 	connect(m_UI->actionMatchBBCenters,				&QAction::triggered, this, &MainWindow::doActionMatchBBCenters);
@@ -737,7 +737,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionAboutPlugins,				&QAction::triggered, m_pluginUIManager, &ccPluginUIManager::showAboutDialog);
 	connect(m_UI->actionEnableQtWarnings,			&QAction::toggled, this, &MainWindow::doEnableQtWarnings);
 
-	connect(m_UI->actionAbout,	&QAction::triggered, this, [this] () {
+	connect(m_UI->actionAbout,						&QAction::triggered, this, [this] () {
 		ccAboutDialog* aboutDialog = new ccAboutDialog(this);
 		aboutDialog->exec();
 	});

@@ -6,13 +6,12 @@ v2.13.alpha (???) - (??/??/????)
 - - New features:
 	- New command line option:
 		- FLIP_TRI (to flip the order of the triangle vertices of all opened meshes)
-		- SPLIT_XY_Z 
-			- for commands C2C_DIST and C2M_DIST, to split the distance between the z component and the xy plane component
-		- SF_OP_SF
+		- SF_OP_SF {SF 1} {operation} {SF 2}
 			- to compute an arithmetic operation between two scalar fields (add, sub, mult, div)
-		- SF_INTERP with option DEST_IS_FIRST
+			- works on clouds and meshes
+		- SF_INTERP {SF index} with sub-option -DEST_IS_FIRST
 			- to interpolate a scalar field from one cloud to another cloud (use DEST_IS_FIRST if destination is first)
-		- SF_ADD_CONST
+		- SF_ADD_CONST {SF name} {const value}
 			- to add a constant scalar field to a cloud
 		- CLEVELS
 			- to edit the color bands histogram of a cloud or a mesh (https://www.cloudcompare.org/doc/wiki/index.php/Colors%5CLevels)
@@ -21,8 +20,9 @@ v2.13.alpha (???) - (??/??/????)
 				- selected color component values will be scaled so that
 					[INPUT_RANGE_MIN INPUT_RANGE_MAX] becomes [OUTPUT_RANGE_MIN OUTPUT_RANGE_MAX]
 					(values ouside of the input range will also be scaled)
-        - RDP
+        - RDP {opt: min distance between points}
         	- removes duplicate points of all loaded clouds
+			- the min distance between points to consider them as duplicated can be set (1e-8 by default)
 
 	- New display feature: near and far clipping planes in 3D views
 		- extension of the previously existing feature to set a near clipping plane
@@ -73,6 +73,7 @@ v2.13.alpha (???) - (??/??/????)
 			(use simple quotes if the scalar field name has spaces in it)
 		- The -SF_COLOR_SCALE option now works on meshes (vertices) as well
 		- The -FILTER_SF option now works on meshes as well
+		- New sub-option for the -C2C_DIST and -C2M_DIST commands: -SPLIT_XY_Z to split the distance between the z component and the xy plane component
 		- New sub-option for the -C2M_DIST command: -UNSIGNED, to compute unsigned distances
 		- New sub-option for the -SF_ARITHMETIC command: -IN_PLACE, to update the scalar field in place, without creating a new SF
 

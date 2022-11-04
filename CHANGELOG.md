@@ -90,6 +90,9 @@ v2.13.alpha (???) - (??/??/????)
 	- ICP:
 		- the computed registration transformation will now be applied to the aligned entity and all its children (if any)
 
+	- STP:
+		- the triangles of meshes tesselated from STEP files should now all be properly oriented
+
 - Bug fix:
 	- PCD: when transforming a cloud with a sensor (either manually, or via a registration tool, or via Edit > Apply Tranformation) and then exporting
 		the cloud to a PCD file, both the points AND the sensor were transformed, resulting in the PCD file coordinates to be in the wrong coordinate

@@ -229,16 +229,15 @@ CC_FILE_ERROR STEPFilter::importStepFile(	ccHObject& container,
 		}
 
 		gp_Trsf nodeTransformation = location;
-		TColgp_Array1OfPnt nodes = facing.Nodes();
 		Poly_Array1OfTriangle tri = facing.Triangles();
 
 		for (int j = 1; j <= facing.NbTriangles(); j++)
 		{
 			Standard_Integer index1, index2, index3;
 			tri.Value(j).Get(index1, index2, index3);
-			gp_Pnt p1 = nodes.Value(index1).Transformed(nodeTransformation);
-			gp_Pnt p2 = nodes.Value(index2).Transformed(nodeTransformation);
-			gp_Pnt p3 = nodes.Value(index3).Transformed(nodeTransformation);
+			gp_Pnt p1 = facing.Node(index1).Transformed(nodeTransformation);
+			gp_Pnt p2 = facing.Node(index2).Transformed(nodeTransformation);
+			gp_Pnt p3 = facing.Node(index3).Transformed(nodeTransformation);
 
 			unsigned vertIndexes[3];
 			vertIndexes[0] = vertices->size();

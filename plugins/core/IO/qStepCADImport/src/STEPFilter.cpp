@@ -114,21 +114,21 @@ CC_FILE_ERROR STEPFilter::loadFile( const QString& fullFilename,
 		return CC_FERR_UNKNOWN_FILE;
 	}
 	
-	double linearDeflection = s_defaultLinearDeflection;
-	if (parameters.parentWidget)
+	if (parameters.sessionStart && parameters.parentWidget)
 	{
 		bool ok = false;
-		linearDeflection = QInputDialog::getDouble(parameters.parentWidget, "Linear deflection", "Linear deflection", s_defaultLinearDeflection, 1.0e-6, 1.0e-2, 6, &ok);
+		double linearDeflection = QInputDialog::getDouble(parameters.parentWidget, "Linear deflection", "Linear deflection", s_defaultLinearDeflection, 1.0e-6, 1.0e-2, 6, &ok);
 		if (!ok)
 		{
 			return CC_FERR_CANCELED_BY_USER;
 		}
+		SetDefaultLinearDeflection(linearDeflection);
 	}
 	
 	CC_FILE_ERROR error;
 	try
 	{
-		error = importStepFile(container, fullFilename, linearDeflection, parameters);
+		error = importStepFile(container, fullFilename, s_defaultLinearDeflection, parameters);
 	}
 	catch (Standard_Failure e)
 	{

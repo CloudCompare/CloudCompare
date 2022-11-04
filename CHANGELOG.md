@@ -92,6 +92,7 @@ v2.13.alpha (???) - (??/??/????)
 
 	- STP:
 		- the triangles of meshes tesselated from STEP files should now all be properly oriented
+		- the linear deflection is asked only once when multiple files are loaded at the same time
 
 - Bug fix:
 	- PCD: when transforming a cloud with a sensor (either manually, or via a registration tool, or via Edit > Apply Tranformation) and then exporting

@@ -5408,10 +5408,10 @@ void MainWindow::doActionSORFilter()
 
 		//computation
 		CCCoreLib::ReferenceCloud* selection = CCCoreLib::CloudSamplingTools::sorFilter(cloud,
-																				s_sorFilterKnn,
-																				s_sorFilterNSigma,
-																				nullptr,
-																				&pDlg);
+																						s_sorFilterKnn,
+																						s_sorFilterNSigma,
+																						cloud->getOctree().data(),
+																						&pDlg);
 
 		if (selection && cloud)
 		{
@@ -5524,15 +5524,15 @@ void MainWindow::doActionFilterNoise()
 
 		//computation
 		CCCoreLib::ReferenceCloud* selection = CCCoreLib::CloudSamplingTools::noiseFilter(	cloud,
-																					kernelRadius,
-																					s_noiseFilterNSigma,
-																					s_noiseFilterRemoveIsolatedPoints,
-																					s_noiseFilterUseKnn,
-																					s_noiseFilterKnn,
-																					s_noiseFilterUseAbsError,
-																					s_noiseFilterAbsError,
-																					nullptr,
-																					&pDlg);
+																							kernelRadius,
+																							s_noiseFilterNSigma,
+																							s_noiseFilterRemoveIsolatedPoints,
+																							s_noiseFilterUseKnn,
+																							s_noiseFilterKnn,
+																							s_noiseFilterUseAbsError,
+																							s_noiseFilterAbsError,
+																							cloud->getOctree().data(),
+																							&pDlg);
 
 		if (selection && cloud)
 		{

@@ -91,6 +91,9 @@ v2.13.alpha (???) - (??/??/????)
 		- use 'ALT + SHIFT + mouse wheel' to change the zFar value (perspective mode)
 		  (reminder: use 'ALT + mouse wheel' to change the zNear value)
 
+	- Cloning:
+		- ability to clone images
+
 	- EDL shader:
 		- contrast and rendering quality improved
 

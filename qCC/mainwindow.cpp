@@ -7578,8 +7578,7 @@ void MainWindow::doActionClone()
 		}
 		else if (entity->isA(CC_TYPES::FACET))
 		{
-			ccFacet* facet = ccHObjectCaster::ToFacet(entity);
-			clone = (facet ? facet->clone() : nullptr);
+			clone = ccHObjectCaster::ToFacet(entity);
 			if (!clone)
 			{
 				ccConsole::Error(tr("An error occurred while cloning facet %1").arg(entity->getName()));
@@ -7590,8 +7589,7 @@ void MainWindow::doActionClone()
 			ccCameraSensor* camera = ccHObjectCaster::ToCameraSensor(entity);
 			if (camera)
 			{
-				ccCameraSensor* cloned = new ccCameraSensor(*camera);
-				clone = (cloned ? cloned : nullptr);
+				clone = new ccCameraSensor(*camera);
 			}
 			if (!clone)
 			{
@@ -7603,12 +7601,23 @@ void MainWindow::doActionClone()
 			ccGBLSensor* sensor = ccHObjectCaster::ToGBLSensor(entity);
 			if (sensor)
 			{
-				ccGBLSensor* cloned = new ccGBLSensor(*sensor);
-				clone = (cloned ? cloned : nullptr);
+				clone = new ccGBLSensor(*sensor);
 			}
 			if (!clone)
 			{
 				ccConsole::Error(tr("An error occurred while cloning GBL sensor %1").arg(entity->getName()));
+			}
+		}
+		else if (entity->isA(CC_TYPES::IMAGE))
+		{
+			ccImage* image = ccHObjectCaster::ToImage(entity);
+			if (image)
+			{
+				clone = new ccImage(*image);
+			}
+			if (!clone)
+			{
+				ccConsole::Error(tr("An error occurred while cloning image %1").arg(entity->getName()));
 			}
 		}
 		else

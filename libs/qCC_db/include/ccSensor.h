@@ -41,7 +41,7 @@ public:
 	ccSensor(const QString& name);
 
 	//! Copy constructor
-	ccSensor(const ccSensor &sensor);
+	ccSensor(const ccSensor& sensor);
 
 	//inherited from ccHObject
 	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::SENSOR; }

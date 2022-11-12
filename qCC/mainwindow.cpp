@@ -7590,6 +7590,10 @@ void MainWindow::doActionClone()
 			if (camera)
 			{
 				clone = new ccCameraSensor(*camera);
+				if (camera->getParent())
+				{
+					camera->getParent()->addChild(clone);
+				}
 			}
 			if (!clone)
 			{
@@ -7602,6 +7606,10 @@ void MainWindow::doActionClone()
 			if (sensor)
 			{
 				clone = new ccGBLSensor(*sensor);
+				if (sensor->getParent())
+				{
+					sensor->getParent()->addChild(clone);
+				}
 			}
 			if (!clone)
 			{
@@ -7614,10 +7622,30 @@ void MainWindow::doActionClone()
 			if (image)
 			{
 				clone = new ccImage(*image);
+				if (image->getParent())
+				{
+					image->getParent()->addChild(clone);
+				}
 			}
 			if (!clone)
 			{
 				ccConsole::Error(tr("An error occurred while cloning image %1").arg(entity->getName()));
+			}
+		}
+		else if (entity->isA(CC_TYPES::LABEL_2D))
+		{
+			cc2DLabel* label = ccHObjectCaster::To2DLabel(entity);
+			if (label)
+			{
+				clone = new cc2DLabel(*label, true);
+				if (label->getParent())
+				{
+					label->getParent()->addChild(clone);
+				}
+			}
+			if (!clone)
+			{
+				ccConsole::Error(tr("An error occurred while cloning label %1").arg(entity->getName()));
 			}
 		}
 		else

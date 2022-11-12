@@ -25,6 +25,8 @@
 
 //Qt
 #include <QRect>
+//System
+#include <array>
 
 class ccGenericPointCloud;
 class ccGenericMesh;
@@ -36,6 +38,9 @@ public:
 
 	//! Default constructor
 	cc2DLabel(QString name = QString("label"));
+
+	//! Copy constructor
+	cc2DLabel(const cc2DLabel& label, bool copyPoints = true);
 
 	//inherited from ccObject
 	virtual QString getName() const override;
@@ -66,7 +71,7 @@ public:
 	void setPosition(float x, float y);
 
 	//! Returns relative position
-	inline const float* getPosition() const { return m_screenPos; }
+	inline const float* getPosition() const { return m_screenPos.data(); }
 
 	//! Clears label
 	void clear(bool ignoreDependencies = false);
@@ -274,11 +279,13 @@ protected:
 	//! Draws the entity only (not its children) - 3D version
 	void drawMeOnly3D(CC_DRAW_CONTEXT& context);
 
-	//! Picked points
-	std::vector<PickedPoint> m_pickedPoints;
-
 	//! Updates the label 'name'
 	void updateName();
+
+protected:
+
+	//! Picked points
+	std::vector<PickedPoint> m_pickedPoints;
 
 	//! Whether to show full label body or not
 	bool m_showFullBody;
@@ -296,10 +303,10 @@ protected:
 	//int m_closeButtonROI[4];
 
 	//! Label position (percentage of screen size)
-	float m_screenPos[2];
+	std::array<float, 2> m_screenPos;
 
 	//! Label position at last display (absolute)
-	int m_lastScreenPos[2];
+	std::array<int, 2> m_lastScreenPos;
 
 	//! Whether to display the point(s) legend
 	bool m_dispPointsLegend;

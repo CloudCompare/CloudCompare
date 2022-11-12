@@ -93,6 +93,7 @@ v2.13.alpha (???) - (??/??/????)
 
 	- Cloning:
 		- ability to clone images
+		- ability to clone 2D labels
 
 	- EDL shader:
 		- contrast and rendering quality improved

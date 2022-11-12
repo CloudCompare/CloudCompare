@@ -94,6 +94,7 @@ v2.13.alpha (???) - (??/??/????)
 	- Cloning:
 		- ability to clone images
 		- ability to clone 2D labels
+		- ability to clone 2D viewport labels
 		- ability to clone viewport objects
 
 	- EDL shader:

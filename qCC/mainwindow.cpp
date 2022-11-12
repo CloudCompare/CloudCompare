@@ -36,6 +36,7 @@
 //qCC_db
 #include <cc2DLabel.h>
 #include <cc2DViewportObject.h>
+#include <cc2DViewportLabel.h>
 #include <ccCameraSensor.h>
 #include <ccColorScalesManager.h>
 #include <ccCylinder.h>
@@ -7650,19 +7651,35 @@ void MainWindow::doActionClone()
 		}
 		else if (entity->isA(CC_TYPES::VIEWPORT_2D_OBJECT))
 		{
-			cc2DViewportObject* viewport = ccHObjectCaster::To2DViewportObject(entity);
-			if (viewport)
+		cc2DViewportObject* viewport = ccHObjectCaster::To2DViewportObject(entity);
+		if (viewport)
+		{
+			clone = new cc2DViewportObject(*viewport);
+			if (viewport->getParent())
 			{
-				clone = new cc2DViewportObject(*viewport);
-				if (viewport->getParent())
-				{
-					viewport->getParent()->addChild(clone);
-				}
+				viewport->getParent()->addChild(clone);
 			}
-			if (!clone)
+		}
+		if (!clone)
+		{
+			ccConsole::Error(tr("An error occurred while cloning viewport %1").arg(entity->getName()));
+		}
+		}
+		else if (entity->isA(CC_TYPES::VIEWPORT_2D_LABEL))
+		{
+		cc2DViewportLabel* viewportLabel = ccHObjectCaster::To2DViewportLabel(entity);
+		if (viewportLabel)
+		{
+			clone = new cc2DViewportLabel(*viewportLabel);
+			if (viewportLabel->getParent())
 			{
-				ccConsole::Error(tr("An error occurred while cloning viewport %1").arg(entity->getName()));
+				viewportLabel->getParent()->addChild(clone);
 			}
+		}
+		if (!clone)
+		{
+			ccConsole::Error(tr("An error occurred while cloning viewport %1").arg(entity->getName()));
+		}
 		}
 		else
 		{

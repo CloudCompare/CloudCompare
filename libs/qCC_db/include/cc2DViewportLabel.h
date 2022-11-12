@@ -20,6 +20,8 @@
 
 //Local
 #include "cc2DViewportObject.h"
+//System
+#include <array>
 
 //! 2D viewport label
 class QCC_DB_LIB_API cc2DViewportLabel : public cc2DViewportObject
@@ -29,12 +31,15 @@ public:
 	//! Default constructor
 	explicit cc2DViewportLabel(QString name = QString());
 
+	//! Copy constructor
+	explicit cc2DViewportLabel(const cc2DViewportLabel& viewportLabel);
+
 	//inherited from ccHObject
 	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::VIEWPORT_2D_LABEL; }
 	virtual bool isSerializable() const override { return true; }
 
 	//! Returns ROI (relative to screen)
-	const float* roi() const { return m_roi; }
+	const float* roi() const { return m_roi.data(); }
 
 	//! Sets ROI (relative to screen)
 	void setRoi(const float* roi);
@@ -51,7 +56,7 @@ protected:
 	//! label ROI
 	/** ROI is relative to screen
 	**/
-	float m_roi[4];
+	std::array<float, 4> m_roi;
 };
 
 #endif //CC_2D_VIEWPORT_LABEL_HEADER

@@ -47,7 +47,7 @@
 #include <numeric>
 #include <utility>
 
-constexpr const char LAS_METADATA_INFO_KEY[] = "LAS.savedInfo";
+static constexpr const char LAS_METADATA_INFO_KEY[] = "LAS.savedInfo";
 
 static CCVector3d GetGlobalShift(FileIOFilter::LoadParameters& parameters,
                                  bool&                         preserveCoordinateShift,
@@ -90,7 +90,7 @@ static CCVector3d GetGlobalShift(FileIOFilter::LoadParameters& parameters,
 
 LasIOFilter::LasIOFilter()
     : FileIOFilter({"LAS IO Filter",
-                    DEFAULT_PRIORITY, // priority
+                    3.0f, // priority (same as the old PDAL-based plugin)
                     QStringList{"las", "laz"},
                     "laz",
                     QStringList{"LAS file (*.las *.laz)"},

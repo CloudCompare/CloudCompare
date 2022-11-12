@@ -11,6 +11,11 @@
 LasSaver::LasSaver(ccPointCloud& cloud, Parameters& parameters)
     : m_cloudToSave(cloud)
 {
+	// restore the global encoding (if any) - must be done before calling initLaszipHeader
+	LasMetadata::LoadGlobalEncoding(cloud, m_laszipHeader.global_encoding);
+	// restore the project UUID (if any)
+	LasMetadata::LoadProjectUUID(cloud, m_laszipHeader);
+
 	initLaszipHeader(parameters);
 
 	LasExtraScalarField::UpdateByteOffsets(parameters.extraFields);
@@ -61,7 +66,8 @@ void LasSaver::initLaszipHeader(const Parameters& parameters)
 	if (LasDetails::HasWaveform(m_laszipHeader.point_data_format) && m_cloudToSave.hasFWF())
 	{
 		// We always store FWF externally
-		m_laszipHeader.global_encoding |= 0b0000'0100;
+		m_laszipHeader.global_encoding |= 0b0000'0100;    // bit 2 = Waveform Data Packets External
+		m_laszipHeader.global_encoding &= (~0b0000'0010); // bit 1 = Waveform Data Packets Internal (deprecated, we do this 'just in case')
 	}
 
 	m_laszipHeader.header_size              = LasDetails::HeaderSize(m_laszipHeader.version_minor);

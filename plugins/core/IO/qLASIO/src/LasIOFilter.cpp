@@ -552,8 +552,7 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 		saveDialog.setOriginalScale(originalScale, canUseOriginalScale, true);
 	}
 
-	// Find the best version for the file or try to use
-	// the one from original file
+	// Find the best version for the file or try to use the one from original file
 	LasDetails::LasVersion bestVersion = LasDetails::SelectBestVersion(*pointCloud);
 	LasDetails::LasVersion savedVersion;
 	if (LasMetadata::LoadLasVersionFrom(*pointCloud, savedVersion))

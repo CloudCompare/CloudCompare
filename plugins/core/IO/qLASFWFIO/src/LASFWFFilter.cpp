@@ -204,7 +204,7 @@ public:
 LASFWFFilter::LASFWFFilter()
     : FileIOFilter( {
                     "_LASFW Filter",
-                    3.5f,	// priority
+					DEFAULT_PRIORITY,	// deprecated: lower priority
                     QStringList{ "las", "laz" },
                     "las",
                     QStringList{ GetFileFilter() },

@@ -7648,6 +7648,22 @@ void MainWindow::doActionClone()
 				ccConsole::Error(tr("An error occurred while cloning label %1").arg(entity->getName()));
 			}
 		}
+		else if (entity->isA(CC_TYPES::VIEWPORT_2D_OBJECT))
+		{
+			cc2DViewportObject* viewport = ccHObjectCaster::To2DViewportObject(entity);
+			if (viewport)
+			{
+				clone = new cc2DViewportObject(*viewport);
+				if (viewport->getParent())
+				{
+					viewport->getParent()->addChild(clone);
+				}
+			}
+			if (!clone)
+			{
+				ccConsole::Error(tr("An error occurred while cloning viewport %1").arg(entity->getName()));
+			}
+		}
 		else
 		{
 			ccLog::Warning(tr("Entity '%1' can't be cloned (type not supported yet!)").arg(entity->getName()));

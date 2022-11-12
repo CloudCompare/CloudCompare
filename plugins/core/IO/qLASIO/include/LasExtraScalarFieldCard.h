@@ -20,41 +20,39 @@
 #include "LasExtraScalarField.h"
 #include "ui_extra_scarlar_field_card.h"
 
-
-class LasExtraScalarFieldCard : public QWidget, public Ui::ExtraScalarFieldCard
+class LasExtraScalarFieldCard : public QWidget
+    , public Ui::ExtraScalarFieldCard
 {
-    Q_OBJECT
+	Q_OBJECT
 
   public:
-    explicit LasExtraScalarFieldCard(QWidget *parent = nullptr);
+	explicit LasExtraScalarFieldCard(QWidget* parent = nullptr);
 
-    void fillFrom(const LasExtraScalarField &field);
+	void fillFrom(const LasExtraScalarField& field);
 
-    void reset();
+	void reset();
 
-    LasExtraScalarField::DataType dataType() const;
+	LasExtraScalarField::DataType dataType() const;
 
-    bool fillField(LasExtraScalarField &field, const ccPointCloud &pointCloud) const;
+	bool fillField(LasExtraScalarField& field, const ccPointCloud& pointCloud) const;
 
   private:
+	//! Struct to aggregate together the user input related
+	//! to one dimension of an extra scalar field definition.
+	struct ScalarFieldUserInputs
+	{
+		QComboBox*      scalarFieldComboBox{nullptr};
+		QDoubleSpinBox* scaleSpinBox{nullptr};
+		QDoubleSpinBox* offsetSpinBox{nullptr};
+	};
 
-    //! Struct to aggregate together the user input related
-    // to one dimension of an extra scalar field definition.
-    struct ScalarFieldUserInputs
-    {
-        QComboBox *scalarFieldComboBox;
-        QDoubleSpinBox *scaleSpinBox;
-        QDoubleSpinBox *offsetSpinBox;
-    };
+	void onNumberOfElementsSelected(unsigned numberOfElements);
+	void onRadioButton1Selected(bool);
+	void onRadioButton2Selected(bool);
+	void onRadioButton3Selected(bool);
 
-    void onNumberOfElementsSelected(unsigned int numberOfElements);
-    void onRadioButton1Selected(bool _checked);
-    void onRadioButton2Selected(bool _checked);
-    void onRadioButton3Selected(bool _checked);
+	void onToggleAdvancedOptionsClicked();
 
-    void onToggleAdvancedOptionsClicked();
-
-
-    // TODO remove this magic number that is all over 
-    ScalarFieldUserInputs m_scalarFieldsUserInputs[LasExtraScalarField::MAX_DIM_SIZE];
+  private:
+	ScalarFieldUserInputs m_scalarFieldsUserInputs[LasExtraScalarField::MAX_DIM_SIZE];
 };

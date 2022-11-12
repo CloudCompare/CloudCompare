@@ -17,20 +17,21 @@
 //#                                                                        #
 //##########################################################################
 
+// Qt
 #include <QByteArray>
 #include <QDataStream>
-
+// LASzip
 #include <laszip/laszip_api.h>
 
 class ccPointCloud;
 
 struct LasWaveformSaver
 {
-    LasWaveformSaver(const ccPointCloud &pointCloud) noexcept;
+	LasWaveformSaver(const ccPointCloud& pointCloud) noexcept;
 
-    void handlePoint(size_t index, laszip_point &point);
+	void handlePoint(size_t index, laszip_point& point);
 
   private:
-    QByteArray m_array;
-    const ccPointCloud &m_pointCloud;
+	QByteArray          m_array;
+	const ccPointCloud& m_pointCloud;
 };

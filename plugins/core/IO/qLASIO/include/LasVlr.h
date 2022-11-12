@@ -20,31 +20,34 @@
 #include "LasDetails.h"
 #include "LasExtraScalarField.h"
 
+// LASzip
 #include <laszip/laszip_api.h>
-
+// Qt
 #include <QMetaType>
 #include <QString>
 
 struct LasVlr
 {
-    LasVlr() = default;
+	LasVlr() = default;
+	explicit LasVlr(const laszip_header& header);
+	LasVlr(const LasVlr& rhs);
 
-    explicit LasVlr(const laszip_header &header);
+	LasVlr& operator=(LasVlr rhs);
 
-    LasVlr(const LasVlr &rhs);
-    LasVlr &operator=(LasVlr rhs);
-    static void Swap(LasVlr &lhs, LasVlr &rhs) noexcept;
+	static void Swap(LasVlr& lhs, LasVlr& rhs) noexcept;
 
-    virtual ~LasVlr() noexcept;
+	inline QString toString() const
+	{
+		return QString("VLRs: %1").arg(vlrs.size());
+	}
 
-    laszip_U32 numVlrs{0};
-    laszip_vlr_struct *vlrs{nullptr};
-    std::vector<LasExtraScalarField> extraScalarFields{};
+	inline laszip_U32 numVlrs() const
+	{
+		return static_cast<laszip_U32>(vlrs.size());
+	}
 
-    QString toString() const
-    {
-        return QString("Vlrs: %1").arg(numVlrs);
-    }
+	std::vector<laszip_vlr_struct>   vlrs;
+	std::vector<LasExtraScalarField> extraScalarFields;
 };
 
 Q_DECLARE_METATYPE(LasVlr);

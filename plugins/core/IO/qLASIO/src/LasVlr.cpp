@@ -16,68 +16,61 @@
 //##########################################################################
 
 #include "LasVlr.h"
+
 #include "LasMetadata.h"
 
+// Qt
 #include <QtGlobal>
-
+// qCC_db
 #include <ccPointCloud.h>
-
+// System
 #include <algorithm>
 #include <cstring>
 
-LasVlr::LasVlr(const laszip_header &header)
+LasVlr::LasVlr(const laszip_header& header)
 {
-    const auto vlrShouldBeCopied = [](const laszip_vlr_struct &vlr)
-    { return !LasDetails::IsLaszipVlr(vlr) && !LasDetails::IsExtraBytesVlr(vlr); };
+	const auto vlrShouldBeCopied = [](const laszip_vlr_struct& vlr)
+	{
+		return !LasDetails::IsLaszipVlr(vlr) && !LasDetails::IsExtraBytesVlr(vlr);
+	};
 
-    numVlrs =
-        std::count_if(header.vlrs, header.vlrs + header.number_of_variable_length_records, vlrShouldBeCopied);
-
-    if (numVlrs > 0)
-    {
-        vlrs = new laszip_vlr_struct[numVlrs];
-        laszip_U32 j{0};
-        for (laszip_U32 i{0}; i < header.number_of_variable_length_records; ++i)
-        {
-            if (vlrShouldBeCopied(header.vlrs[i]))
-            {
-                LasDetails::CloneVlrInto(header.vlrs[i], vlrs[j]);
-                j++;
-            }
-        }
-    }
+	ptrdiff_t numVlrs = std::count_if(header.vlrs, header.vlrs + header.number_of_variable_length_records, vlrShouldBeCopied);
+	if (numVlrs > 0)
+	{
+		vlrs.resize(numVlrs);
+		laszip_U32 j{0};
+		for (laszip_U32 i = 0; i < header.number_of_variable_length_records; ++i)
+		{
+			if (vlrShouldBeCopied(header.vlrs[i]))
+			{
+				LasDetails::CloneVlrInto(header.vlrs[i], vlrs[j]);
+				j++;
+			}
+		}
+	}
 }
 
-LasVlr &LasVlr::operator=(LasVlr rhs)
+LasVlr& LasVlr::operator=(LasVlr rhs)
 {
-    LasVlr::Swap(*this, rhs);
-    return *this;
+	LasVlr::Swap(*this, rhs);
+	return *this;
 }
 
-LasVlr::LasVlr(const LasVlr &rhs)
-    : numVlrs(rhs.numVlrs),
-      extraScalarFields(rhs.extraScalarFields)
+LasVlr::LasVlr(const LasVlr& rhs)
+    : extraScalarFields(rhs.extraScalarFields)
 {
-
-    if (numVlrs > 0)
-    {
-        vlrs = new laszip_vlr_struct[numVlrs];
-        for (laszip_U32 i{0}; i < numVlrs; ++i)
-        {
-            LasDetails::CloneVlrInto(rhs.vlrs[i], vlrs[i]);
-        }
-    }
+	if (rhs.numVlrs() != 0)
+	{
+		vlrs.resize(rhs.numVlrs());
+		for (laszip_U32 i = 0; i < rhs.numVlrs(); ++i)
+		{
+			LasDetails::CloneVlrInto(rhs.vlrs[i], vlrs[i]);
+		}
+	}
 }
 
-LasVlr::~LasVlr() noexcept
+void LasVlr::Swap(LasVlr& lhs, LasVlr& rhs) noexcept
 {
-    delete[] vlrs;
+	std::swap(lhs.vlrs, rhs.vlrs);
+	std::swap(lhs.extraScalarFields, rhs.extraScalarFields);
 }
-
-void LasVlr::Swap(LasVlr &lhs, LasVlr &rhs) noexcept
-{
-    std::swap(lhs.numVlrs, rhs.numVlrs);
-    std::swap(lhs.vlrs, rhs.vlrs);
-    std::swap(lhs.extraScalarFields, rhs.extraScalarFields);
-}
-

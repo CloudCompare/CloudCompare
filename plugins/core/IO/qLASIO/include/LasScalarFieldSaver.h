@@ -18,8 +18,8 @@
 //##########################################################################
 
 #include "LasDetails.h"
-#include "LasScalarField.h"
 #include "LasExtraScalarField.h"
+#include "LasScalarField.h"
 
 class ccPointCloud;
 struct laszip_point;
@@ -29,52 +29,53 @@ struct laszip_point;
 class LasScalarFieldSaver
 {
   public:
-    LasScalarFieldSaver() = default;
+	LasScalarFieldSaver() = default;
 
-    /// Creates a new LasScalarFieldSaver that will save the given
-    /// standard LAS fields and the LAS extra scalar fields
-    LasScalarFieldSaver(std::vector<LasScalarField> &&standardFields,
-                        std::vector<LasExtraScalarField> &&extraFields);
+	/// Creates a new LasScalarFieldSaver that will save the given
+	/// standard LAS fields and the LAS extra scalar fields
+	LasScalarFieldSaver(std::vector<LasScalarField>&&      standardFields,
+	                    std::vector<LasExtraScalarField>&& extraFields);
 
-    void setStandarFields(std::vector<LasScalarField> &&standardFields)
-    {
-        m_standardFields = standardFields;
-    }
+	inline void setStandarFields(std::vector<LasScalarField>&& standardFields)
+	{
+		m_standardFields = standardFields;
+	}
 
-    void setExtraFields(std::vector<LasExtraScalarField> &&extraFields)
-    {
-        m_extraFields = extraFields;
-    }
+	inline void setExtraFields(std::vector<LasExtraScalarField>&& extraFields)
+	{
+		m_extraFields = extraFields;
+	}
 
-    const std::vector<LasExtraScalarField>& extraFields() const
-    {
-        return m_extraFields;
-    }
+	inline const std::vector<LasExtraScalarField>& extraFields() const
+	{
+		return m_extraFields;
+	}
 
-    /// Saves the scalar fields values for pointIndex into the given laszip_point
-    void handleScalarFields(size_t pointIndex, laszip_point &point);
+	/// Saves the scalar fields values for pointIndex into the given laszip_point
+	void handleScalarFields(size_t pointIndex, laszip_point& point);
 
-    /// Saves the extra scalar fields values for pointIndex into the given laszip_point
-    void handleExtraFields(size_t pointIndex, laszip_point &point);
-
-  private:
-    template <typename T> static void WriteScalarValueAs(ScalarType value, uint8_t *dest)
-    {
-        if (value > std::numeric_limits<T>::max())
-        {
-            *reinterpret_cast<T *>(dest) = std::numeric_limits<T>::max();
-        }
-        else if (value < std::numeric_limits<T>::min())
-        {
-            *reinterpret_cast<T *>(dest) = std::numeric_limits<T>::min();
-        }
-        else
-        {
-            *reinterpret_cast<T *>(dest) = static_cast<T>(value);
-        }
-    }
+	/// Saves the extra scalar fields values for pointIndex into the given laszip_point
+	void handleExtraFields(size_t pointIndex, laszip_point& point);
 
   private:
-    std::vector<LasScalarField> m_standardFields;
-    std::vector<LasExtraScalarField> m_extraFields;
+	template <typename T>
+	static void WriteScalarValueAs(ScalarType value, uint8_t* dest)
+	{
+		if (value > std::numeric_limits<T>::max())
+		{
+			*reinterpret_cast<T*>(dest) = std::numeric_limits<T>::max();
+		}
+		else if (value < std::numeric_limits<T>::min())
+		{
+			*reinterpret_cast<T*>(dest) = std::numeric_limits<T>::min();
+		}
+		else
+		{
+			*reinterpret_cast<T*>(dest) = static_cast<T>(value);
+		}
+	}
+
+  private:
+	std::vector<LasScalarField>      m_standardFields;
+	std::vector<LasExtraScalarField> m_extraFields;
 };

@@ -21,11 +21,13 @@
 #include "LasScalarFieldSaver.h"
 #include "LasWaveformSaver.h"
 
+// qCC_db
 #include <FileIOFilter.h>
 
 // LASzip
 #include <laszip/laszip_api.h>
 
+// System
 #include <memory>
 
 class LasSaveDialog;
@@ -34,26 +36,27 @@ class ccPointCloud;
 class LasSaver
 {
   public:
-    LasSaver(ccPointCloud &cloud, const LasSaveDialog &saveDlg);
+	LasSaver(ccPointCloud& cloud, const LasSaveDialog& saveDlg);
+	~LasSaver() noexcept;
 
-    CC_FILE_ERROR open(const QString filePath);
+	CC_FILE_ERROR open(const QString filePath);
 
-    CC_FILE_ERROR saveNextPoint();
+	CC_FILE_ERROR saveNextPoint();
 
-    bool savesWaveforms() const;
+	bool savesWaveforms() const;
 
-    ~LasSaver() noexcept;
-
-  private:
-    void initLaszipHeader(const LasSaveDialog &saveDialog);
+	QString getLastError() const;
 
   private:
-    unsigned int m_currentPointIndex{0};
-    ccPointCloud &m_cloudToSave;
-    laszip_header m_laszipHeader{};
-    laszip_POINTER m_laszipWriter{nullptr};
-    LasScalarFieldSaver m_fieldsSaver{};
-    bool m_shouldSaveRGB{false};
-    std::unique_ptr<LasWaveformSaver> m_waveformSaver{nullptr};
-    laszip_point *m_laszipPoint{nullptr};
+	void initLaszipHeader(const LasSaveDialog& saveDialog);
+
+  private:
+	unsigned                          m_currentPointIndex{0};
+	ccPointCloud&                     m_cloudToSave;
+	laszip_header                     m_laszipHeader{};
+	laszip_POINTER                    m_laszipWriter{nullptr};
+	LasScalarFieldSaver               m_fieldsSaver;
+	bool                              m_shouldSaveRGB{false};
+	std::unique_ptr<LasWaveformSaver> m_waveformSaver{nullptr};
+	laszip_point*                     m_laszipPoint{nullptr};
 };

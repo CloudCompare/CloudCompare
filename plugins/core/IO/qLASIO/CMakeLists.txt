@@ -17,6 +17,6 @@ if (PLUGIN_IO_QLAS)
     add_subdirectory(ui)
 
     if (WIN32)
-        install(FILES ${LASZIP_DLL} DESTINATION ${CLOUDCOMPARE_DEST_FOLDER})
+        copy_files("${LASZIP_DLL}" "${CLOUDCOMPARE_DEST_FOLDER}")
     endif ()
 endif ()

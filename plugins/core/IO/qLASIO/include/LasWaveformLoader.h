@@ -17,23 +17,24 @@
 //#                                                                        #
 //##########################################################################
 
+// Qt
 #include <QFileInfo>
 #include <QString>
-
+// qCC_db
 #include <ccPointCloud.h>
-
+// LASzip
 #include <laszip/laszip_api.h>
 
 struct LasWaveformLoader
 {
-    LasWaveformLoader(const laszip_header_struct &laszipHeader,
-                      const QString &lasFilename,
-                      ccPointCloud &pointCloud);
+	LasWaveformLoader(const laszip_header_struct& laszipHeader,
+	                  const QString&              lasFilename,
+	                  ccPointCloud&               pointCloud);
 
-    void loadWaveform(ccPointCloud &pointCloud, const laszip_point &currentPoint) const;
+	void loadWaveform(ccPointCloud& pointCloud, const laszip_point& currentPoint) const;
 
-    unsigned int fwfDataCount{0};
-    unsigned int fwfDataOffset{0};
-    bool isPointFormatExtended{false};
-    ccPointCloud::FWFDescriptorSet descriptors;
+	unsigned                       fwfDataCount{0};
+	unsigned                       fwfDataOffset{0};
+	bool                           isPointFormatExtended{false};
+	ccPointCloud::FWFDescriptorSet descriptors;
 };

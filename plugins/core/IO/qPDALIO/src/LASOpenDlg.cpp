@@ -180,7 +180,7 @@ void LASOpenDlg::setInfos(	QString filename,
 	outputPathLineEdit->setText(QFileInfo(filename).absolutePath());
 
 	//number of points
-	pointCountLineEdit->setText(QLocale().toString(pointCount));
+	pointCountLineEdit->setText(QLocale().toString(static_cast<uint>(pointCount)));
 
 	//bounding-box
 	bbTextEdit->setText(QString("X = [%1 ; %2]\nY = [%3 ; %4]\nZ = [%5 ; %6]")

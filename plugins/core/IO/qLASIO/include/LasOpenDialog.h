@@ -44,7 +44,7 @@ class LasOpenDialog : public QDialog
 
 	/// Set some informations about the file
 	/// to be displayed to the user.
-	void setInfo(int versionMinor, int pointFormatId, int64_t numPoints);
+	void setInfo(int versionMinor, int pointFormatId, qulonglong numPoints);
 
 	/// Sets the list of standard LAS scalar fields as well as
 	/// user defined extra LAS scalar fields that are available in the file

@@ -17,17 +17,15 @@
 
 #include "LasOpenDialog.h"
 
+// Qt
+#include <QLocale>
+
 static QListWidgetItem* CreateItem(const char* name)
 {
 	auto item = new QListWidgetItem(name);
 	item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
 	item->setCheckState(Qt::Checked);
 	return item;
-}
-
-static QString PrettyFormatNumber(int64_t numPoints)
-{
-	return QLocale(QLocale::English).toString(numPoints);
 }
 
 static bool IsCheckedIn(const QString& name, const QListWidget& list)
@@ -103,11 +101,11 @@ void LasOpenDialog::doSelectAllESF(bool doSelect)
 	}
 }
 
-void LasOpenDialog::setInfo(int versionMinor, int pointFormatId, int64_t numPoints)
+void LasOpenDialog::setInfo(int versionMinor, int pointFormatId, qulonglong numPoints)
 {
 	versionLabelValue->setText(QString("1.%1").arg(QString::number(versionMinor)));
 	pointFormatLabelValue->setText(QString::number(pointFormatId));
-	numPointsLabelValue->setText(PrettyFormatNumber(numPoints));
+	numPointsLabelValue->setText(QLocale(QLocale::English).toString(numPoints));
 
 	force8bitColorsCheckBox->setEnabled(LasDetails::HasRGB(pointFormatId));
 	timeShiftLayout->setEnabled(LasDetails::HasGpsTime(pointFormatId));

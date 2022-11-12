@@ -206,7 +206,7 @@ LasScalarFieldLoader::handleScalarField(LasScalarField& sfInfo, ccPointCloud& po
 			return CC_FERR_NOT_ENOUGH_MEMORY;
 		}
 
-		for (unsigned j{0}; j < pointCloud.size() - 1; ++j)
+		for (unsigned j = 0; j < pointCloud.size() - 1; ++j)
 		{
 			newSf->addElement(static_cast<ScalarType>(T{}));
 		}
@@ -261,7 +261,7 @@ LasScalarFieldLoader::handleGpsTime(LasScalarField& sfInfo, ccPointCloud& pointC
 		}
 
 		newSf->setGlobalShift(timeShift);
-		for (unsigned j{0}; j < pointCloud.size() - 1; ++j)
+		for (unsigned j = 0; j < pointCloud.size() - 1; ++j)
 		{
 			newSf->addElement(static_cast<ScalarType>(timeShift));
 		}

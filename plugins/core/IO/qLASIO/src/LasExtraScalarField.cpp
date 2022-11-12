@@ -195,7 +195,7 @@ LasExtraScalarField::ParseExtraScalarFields(const laszip_vlr_struct& extraBytesV
 	int numExtraFields = extraBytesVlr.record_length_after_header / 192;
 
 	unsigned byteOffset{0};
-	for (int j{0}; j < numExtraFields; ++j)
+	for (int j = 0; j < numExtraFields; ++j)
 	{
 		LasExtraScalarField ebInfo;
 		dataStream >> ebInfo;

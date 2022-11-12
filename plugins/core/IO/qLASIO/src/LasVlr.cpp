@@ -38,7 +38,7 @@ LasVlr::LasVlr(const laszip_header& header)
 	if (numVlrs > 0)
 	{
 		vlrs.resize(numVlrs);
-		laszip_U32 j{0};
+		laszip_U32 j = 0;
 		for (laszip_U32 i = 0; i < header.number_of_variable_length_records; ++i)
 		{
 			if (vlrShouldBeCopied(header.vlrs[i]))

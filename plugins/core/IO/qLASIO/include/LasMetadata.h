@@ -51,4 +51,6 @@ namespace LasMetadata
 	bool LoadScaleFrom(const ccPointCloud& pointCloud, CCVector3d& scale);
 	bool LoadOffsetFrom(const ccPointCloud& pointCloud, CCVector3d& offset);
 	bool LoadLasVersionFrom(const ccPointCloud& pointCloud, LasDetails::LasVersion& version);
+	bool LoadGlobalEncoding(const ccPointCloud& pointCloud, uint16_t& outGlobalEncoding);
+	bool LoadProjectUUID(const ccPointCloud& pointCloud, laszip_header& header);
 } // namespace LasMetadata

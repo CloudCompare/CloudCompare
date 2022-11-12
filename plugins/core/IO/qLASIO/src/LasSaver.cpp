@@ -2,20 +2,19 @@
 
 #include "LasMetadata.h"
 
+//Qt
 #include <QDate>
+// qCC_db
 #include <ccGlobalShiftManager.h>
 #include <ccPointCloud.h>
 
-LasSaver::LasSaver(ccPointCloud& cloud, const LasSaveDialog& saveDlg)
+LasSaver::LasSaver(ccPointCloud& cloud, Parameters& parameters)
     : m_cloudToSave(cloud)
 {
-	initLaszipHeader(saveDlg);
+	initLaszipHeader(parameters);
 
-	std::vector<LasScalarField>      standardFields = saveDlg.fieldsToSave();
-	std::vector<LasExtraScalarField> extraFields    = saveDlg.extraFieldsToSave();
-
-	LasExtraScalarField::UpdateByteOffsets(extraFields);
-	unsigned totalExtraByteSize = LasExtraScalarField::TotalExtraBytesSize(extraFields);
+	LasExtraScalarField::UpdateByteOffsets(parameters.extraFields);
+	unsigned totalExtraByteSize = LasExtraScalarField::TotalExtraBytesSize(parameters.extraFields);
 
 	if (totalExtraByteSize > 0)
 	{
@@ -28,7 +27,7 @@ LasSaver::LasSaver(ccPointCloud& cloud, const LasSaveDialog& saveDlg)
 		{
 			vlrs[i] = m_laszipHeader.vlrs[i];
 		}
-		LasExtraScalarField::InitExtraBytesVlr(vlrs[newNumVlrs - 1], extraFields);
+		LasExtraScalarField::InitExtraBytesVlr(vlrs[newNumVlrs - 1], parameters.extraFields);
 
 		delete m_laszipHeader.vlrs;
 		m_laszipHeader.vlrs                              = vlrs;
@@ -37,26 +36,26 @@ LasSaver::LasSaver(ccPointCloud& cloud, const LasSaveDialog& saveDlg)
 		m_laszipHeader.offset_to_point_data += LasDetails::SizeOfVlrs(&m_laszipHeader.vlrs[newNumVlrs - 1], 1);
 	}
 
-	m_fieldsSaver.setStandarFields(std::move(standardFields));
-	m_fieldsSaver.setExtraFields(std::move(extraFields));
-	m_shouldSaveRGB = saveDlg.shouldSaveRGB() && cloud.hasColors();
+	m_fieldsSaver.setStandarFields(std::move(parameters.standardFields));
+	m_fieldsSaver.setExtraFields(std::move(parameters.extraFields));
+	m_shouldSaveRGB = parameters.shouldSaveRGB && cloud.hasColors();
 
-	if (saveDlg.shouldSaveWaveform())
+	if (parameters.shouldSaveWaveform)
 	{
 		assert(LasDetails::HasWaveform(m_laszipHeader.point_data_format) && cloud.hasFWF());
 		m_waveformSaver = std::make_unique<LasWaveformSaver>(cloud);
 	}
 }
 
-void LasSaver::initLaszipHeader(const LasSaveDialog& saveDialog)
+void LasSaver::initLaszipHeader(const Parameters& parameters)
 {
 	QDate currentDate                 = QDate::currentDate();
 	m_laszipHeader.file_creation_year = currentDate.year();
 	m_laszipHeader.file_creation_day  = currentDate.dayOfYear();
 
-	m_laszipHeader.version_major     = 1;
-	m_laszipHeader.version_minor     = saveDialog.selectedVersionMinor();
-	m_laszipHeader.point_data_format = saveDialog.selectedPointFormat();
+	m_laszipHeader.version_major     = parameters.versionMajor;
+	m_laszipHeader.version_minor     = parameters.versionMinor;
+	m_laszipHeader.point_data_format = parameters.pointFormat;
 
 	// TODO global encoding wkt and other
 	if (LasDetails::HasWaveform(m_laszipHeader.point_data_format) && m_cloudToSave.hasFWF())
@@ -81,66 +80,17 @@ void LasSaver::initLaszipHeader(const LasSaveDialog& saveDialog)
 		m_laszipHeader.offset_to_point_data += LasDetails::SizeOfVlrs(m_laszipHeader.vlrs, m_laszipHeader.number_of_variable_length_records);
 	}
 
-	CCVector3d lasScale           = saveDialog.chosenScale();
-	m_laszipHeader.x_scale_factor = lasScale.x;
-	m_laszipHeader.y_scale_factor = lasScale.y;
-	m_laszipHeader.z_scale_factor = lasScale.z;
+	// set LAS scale
+	m_laszipHeader.x_scale_factor = parameters.lasScale.x;
+	m_laszipHeader.y_scale_factor = parameters.lasScale.y;
+	m_laszipHeader.z_scale_factor = parameters.lasScale.z;
+
+	// set LAS offset
+	m_laszipHeader.x_offset = parameters.lasOffset.x;
+	m_laszipHeader.y_offset = parameters.lasOffset.y;
+	m_laszipHeader.z_offset = parameters.lasOffset.z;
 
 	strncpy(m_laszipHeader.generating_software, "CloudCompare", 32);
-
-	CCVector3d bbMin, bbMax;
-	m_cloudToSave.getOwnGlobalBB(bbMin, bbMax);
-	CCVector3d lasOffsets;
-	if (LasMetadata::LoadOffsetsFrom(m_cloudToSave, lasOffsets))
-	{
-		// Check that the saved offset still 'works'
-		if (ccGlobalShiftManager::NeedShift(bbMax - lasOffsets))
-		{
-			ccLog::Warning("[LAS] The former LAS_OFFSET doesn't seem to be optimal. Using the minimum "
-			               "bounding-box corner instead.");
-			CCVector3d globaShift =
-			    m_cloudToSave.getGlobalShift(); //'global shift' is the opposite of LAS offset ;)
-
-			if (ccGlobalShiftManager::NeedShift(bbMax + globaShift))
-			{
-				ccLog::Warning("[LAS] Using the minimum bounding-box corner instead.");
-				m_laszipHeader.x_offset = bbMin.x;
-				m_laszipHeader.y_offset = bbMin.y;
-				m_laszipHeader.z_offset = 0;
-			}
-			else
-			{
-				ccLog::Warning("[LAS] Using the previous Global Shift instead.");
-				m_laszipHeader.x_offset = -globaShift.x;
-				m_laszipHeader.y_offset = -globaShift.y;
-				m_laszipHeader.z_offset = -globaShift.z;
-			}
-		}
-		else
-		{
-			m_laszipHeader.x_offset = lasOffsets.x;
-			m_laszipHeader.y_offset = lasOffsets.y;
-			m_laszipHeader.z_offset = lasOffsets.z;
-		}
-	}
-	else
-	{
-		// This point cloud does not come from a LAS file,
-		// so we don't have saved offset for it.
-
-		if (m_cloudToSave.isShifted())
-		{
-			m_laszipHeader.x_offset = -m_cloudToSave.getGlobalShift().x;
-			m_laszipHeader.y_offset = -m_cloudToSave.getGlobalShift().y;
-			m_laszipHeader.z_offset = -m_cloudToSave.getGlobalShift().z;
-		}
-		else if (ccGlobalShiftManager::NeedShift(bbMax))
-		{
-			m_laszipHeader.x_offset = bbMin.x;
-			m_laszipHeader.y_offset = bbMin.y;
-			m_laszipHeader.z_offset = bbMin.z;
-		}
-	}
 }
 LasSaver::~LasSaver() noexcept
 {

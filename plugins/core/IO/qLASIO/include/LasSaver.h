@@ -17,7 +17,6 @@
 //#                                                                        #
 //##########################################################################
 
-#include "LasSaveDialog.h"
 #include "LasScalarFieldSaver.h"
 #include "LasWaveformSaver.h"
 
@@ -30,13 +29,25 @@
 // System
 #include <memory>
 
-class LasSaveDialog;
 class ccPointCloud;
 
 class LasSaver
 {
   public:
-	LasSaver(ccPointCloud& cloud, const LasSaveDialog& saveDlg);
+	struct Parameters
+	{
+		std::vector<LasScalarField>      standardFields;
+		std::vector<LasExtraScalarField> extraFields;
+		bool                             shouldSaveRGB{false};
+		bool                             shouldSaveWaveform{false};
+		uint8_t                          versionMajor{1};
+		uint8_t                          versionMinor{0};
+		uint8_t                          pointFormat{0};
+		CCVector3d                       lasScale;
+		CCVector3d                       lasOffset;
+	};
+
+	LasSaver(ccPointCloud& cloud, Parameters& parameters);
 	~LasSaver() noexcept;
 
 	CC_FILE_ERROR open(const QString filePath);
@@ -48,7 +59,7 @@ class LasSaver
 	QString getLastError() const;
 
   private:
-	void initLaszipHeader(const LasSaveDialog& saveDialog);
+	void initLaszipHeader(const Parameters& parameters);
 
   private:
 	unsigned                          m_currentPointIndex{0};

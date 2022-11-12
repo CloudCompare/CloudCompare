@@ -452,24 +452,104 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 
 	LasSaveDialog saveDialog(pointCloud, parameters.parentWidget);
 
-	// compute optimal scale
-	// optimal scale (for accuracy) --> 1e-9 because the maximum integer is
-	// roughly +/-2e+9
-	CCVector3 bbMax;
-	CCVector3 bbMin;
-	pointCloud->getBoundingBox(bbMin, bbMax);
-	CCVector3d diag = bbMax - bbMin;
+	CCVector3d bbMax, bbMin;
+	if (!pointCloud->getOwnGlobalBB(bbMin, bbMax))
+	{
+		if (pointCloud->size() != 0)
+		{
+			//it can only be acceptable if the cloud is empty
+			//(yes, some people expect to save empty clouds!)
+			return CC_FERR_NO_SAVE;
+		}
+		else
+		{
+			bbMax = bbMin = CCVector3d(0.0, 0.0, 0.0);
+		}
+	}
 
-	CCVector3d optimalScale(1.0e-9 * std::max<double>(diag.x, CCCoreLib::ZERO_TOLERANCE_D),
-	                        1.0e-9 * std::max<double>(diag.y, CCCoreLib::ZERO_TOLERANCE_D),
-	                        1.0e-9 * std::max<double>(diag.z, CCCoreLib::ZERO_TOLERANCE_D));
-	saveDialog.setOptimalScale(optimalScale);
+	// Determine the best LAS offset (required for determing the best LAS scale)
+	CCVector3d lasOffset;
+	if (LasMetadata::LoadOffsetFrom(*pointCloud, lasOffset))
+	{
+		// Check that the saved offset still 'works'
+		if (ccGlobalShiftManager::NeedShift(bbMax - lasOffset))
+		{
+			ccLog::Warning("[LAS] The former LAS offset doesn't seem to be optimal");
+			CCVector3d globaShift = pointCloud->getGlobalShift(); //'global shift' is the opposite of LAS offset ;)
+
+			if (ccGlobalShiftManager::NeedShift(bbMax + globaShift))
+			{
+				ccLog::Warning("[LAS] Using the minimum bounding-box corner (X, Y) instead");
+				lasOffset.x = bbMin.x;
+				lasOffset.y = bbMin.y;
+				lasOffset.z = 0;
+			}
+			else
+			{
+				ccLog::Warning("[LAS] Using the previous Global Shift instead");
+				lasOffset = -globaShift;
+			}
+		}
+		else
+		{
+			// keep the previous offset
+		}
+	}
+	else // This point cloud does not come from a LAS file, so we don't have saved offset for it.
+	{
+		ccLog::Print("[LAS] No LAS offset defined");
+		// Try to use the global shift if no LAS offset is defined
+		if (pointCloud->isShifted())
+		{
+			ccLog::Print("[LAS] Using the Global Shift as LAS offset");
+			lasOffset = -pointCloud->getGlobalShift();
+		}
+		else if (ccGlobalShiftManager::NeedShift(bbMax))
+		{
+			ccLog::Print("[LAS] Using the minimum bounding-box corner (X, Y) as LAS offset");
+			lasOffset.x = bbMin.x;
+			lasOffset.y = bbMin.y;
+			lasOffset.z = 0;
+		}
+	}
+
+	// Maximum cloud 'extents' relatively to the 'offset' point
+	CCVector3d diagPos = bbMax - lasOffset;
+	CCVector3d diagNeg = lasOffset - bbMin;
+	CCVector3d diag(std::max(diagPos.x, diagNeg.x),
+	                std::max(diagPos.y, diagNeg.y),
+	                std::max(diagPos.z, diagNeg.z));
+
+	// Optimal scale (for accuracy) --> 1e-9 because the maximum integer is roughly +/-2e+9
+	CCVector3d optimalScale(1.0e-9 * std::max<double>(diag.x, 1.0),
+	                        1.0e-9 * std::max<double>(diag.y, 1.0),
+	                        1.0e-9 * std::max<double>(diag.z, 1.0));
 
 	// See if we have a scale from an origin las file
-	CCVector3d originalScales;
-	if (LasMetadata::LoadScalesFrom(*pointCloud, originalScales))
+	CCVector3d originalScale;
+	bool       canUseOriginalScale = false;
+	bool       hasScaleMetaData    = LasMetadata::LoadScaleFrom(*pointCloud, originalScale);
+	if (hasScaleMetaData)
 	{
-		saveDialog.setOriginalScale(originalScales);
+		// We may not be able to use the previous LAS scale
+		canUseOriginalScale = (originalScale.x >= optimalScale.x
+		                       && originalScale.y >= optimalScale.y
+		                       && originalScale.z >= optimalScale.z);
+	}
+
+	// Uniformize the optimal scale to make it less disturbing to some lastools users ;)
+	{
+		double maxScale = std::max(optimalScale.x, std::max(optimalScale.y, optimalScale.z));
+		double n        = ceil(log10(maxScale)); //ceil because n should be negative
+		maxScale        = pow(10.0, n);
+		optimalScale.x = optimalScale.y = optimalScale.z = maxScale;
+	}
+	saveDialog.setOptimalScale(optimalScale);
+
+	if (hasScaleMetaData)
+	{
+		// If we can use the original scale, it will be come the default scale
+		saveDialog.setOriginalScale(originalScale, canUseOriginalScale, true);
 	}
 
 	// Find the best version for the file or try to use
@@ -505,20 +585,35 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 		}
 	}
 
-	CC_FILE_ERROR error;
-	LasSaver      saver(*pointCloud, saveDialog);
-	error = saver.open(filename);
+	LasSaver::Parameters params;
+	{
+		params.standardFields = saveDialog.fieldsToSave();
+		params.extraFields    = saveDialog.extraFieldsToSave();
+		params.shouldSaveRGB  = saveDialog.shouldSaveRGB();
+
+		saveDialog.selectedVersion(params.versionMajor, params.versionMinor);
+		params.pointFormat = saveDialog.selectedPointFormat();
+
+		params.lasScale  = saveDialog.chosenScale();
+		params.lasOffset = lasOffset;
+	}
+
+	LasSaver      saver(*pointCloud, params);
+	CC_FILE_ERROR error = saver.open(filename);
 	if (error != CC_FERR_NO_ERROR)
 	{
 		return error;
 	}
+
 	ccProgressDialog progressDialog(true, parameters.parentWidget);
 	progressDialog.setMethodTitle("Saving LAS points");
 	progressDialog.setInfo("Saving points");
-	CCCoreLib::NormalizedProgress normProgress(&progressDialog, pointCloud->size());
-	unsigned                      numStepsForUpdate  = 1 * pointCloud->size() / 100;
-	unsigned                      lastProgressUpdate = 0;
-	progressDialog.start();
+	QScopedPointer<CCCoreLib::NormalizedProgress> normProgress;
+	if (parameters.parentWidget)
+	{
+		normProgress.reset(new CCCoreLib::NormalizedProgress(&progressDialog, pointCloud->size()));
+		progressDialog.start();
+	}
 
 	for (unsigned i = 0; i < pointCloud->size(); ++i)
 	{
@@ -528,11 +623,10 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 			break;
 		}
 
-		if ((i - lastProgressUpdate) == numStepsForUpdate)
+		if (normProgress && !normProgress->oneStep())
 		{
-			normProgress.steps(i - lastProgressUpdate);
-			lastProgressUpdate += (i - lastProgressUpdate);
-			QApplication::processEvents();
+			error = CC_FERR_CANCELED_BY_USER;
+			break;
 		}
 	}
 

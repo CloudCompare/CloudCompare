@@ -60,31 +60,31 @@ namespace LasMetadata
 		return false;
 	}
 
-	bool LoadScalesFrom(const ccPointCloud& pointCloud, CCVector3d& scales)
+	bool LoadScaleFrom(const ccPointCloud& pointCloud, CCVector3d& scale)
 	{
 		bool hasScaleMetaData = false;
-		scales.x              = pointCloud.getMetaData(LasMetadata::X_SCALE).toDouble(&hasScaleMetaData);
+		scale.x               = pointCloud.getMetaData(LasMetadata::X_SCALE).toDouble(&hasScaleMetaData);
 		if (hasScaleMetaData)
 		{
-			scales.y = pointCloud.getMetaData(LasMetadata::Y_SCALE).toDouble(&hasScaleMetaData);
+			scale.y = pointCloud.getMetaData(LasMetadata::Y_SCALE).toDouble(&hasScaleMetaData);
 			if (hasScaleMetaData)
 			{
-				scales.z = pointCloud.getMetaData(LasMetadata::Z_SCALE).toDouble(&hasScaleMetaData);
+				scale.z = pointCloud.getMetaData(LasMetadata::Z_SCALE).toDouble(&hasScaleMetaData);
 			}
 		}
 		return hasScaleMetaData;
 	}
 
-	bool LoadOffsetsFrom(const ccPointCloud& pointCloud, CCVector3d& offsets)
+	bool LoadOffsetFrom(const ccPointCloud& pointCloud, CCVector3d& offset)
 	{
 		bool hasOffsetMetaData = false;
-		offsets.x              = pointCloud.getMetaData(LasMetadata::X_OFFSET).toDouble(&hasOffsetMetaData);
+		offset.x               = pointCloud.getMetaData(LasMetadata::X_OFFSET).toDouble(&hasOffsetMetaData);
 		if (hasOffsetMetaData)
 		{
-			offsets.y = pointCloud.getMetaData(LasMetadata::Y_OFFSET).toDouble(&hasOffsetMetaData);
+			offset.y = pointCloud.getMetaData(LasMetadata::Y_OFFSET).toDouble(&hasOffsetMetaData);
 			if (hasOffsetMetaData)
 			{
-				offsets.z = pointCloud.getMetaData(LasMetadata::Z_OFFSET).toDouble(&hasOffsetMetaData);
+				offset.z = pointCloud.getMetaData(LasMetadata::Z_OFFSET).toDouble(&hasOffsetMetaData);
 			}
 		}
 		return hasOffsetMetaData;

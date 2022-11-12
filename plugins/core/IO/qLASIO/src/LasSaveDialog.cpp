@@ -436,14 +436,20 @@ void LasSaveDialog::setOptimalScale(const CCVector3d& scale, bool autoCheck /*=f
 	}
 }
 
-void LasSaveDialog::setOriginalScale(const CCVector3d& scale, bool autoCheck /*=true*/)
+void LasSaveDialog::setOriginalScale(const CCVector3d& scale, bool canUseScale, bool autoCheck /*=true*/)
 {
 	m_originalScale = scale;
 
 	originalScaleLabel->setText(QString("(%1, %2, %3)").arg(scale.x).arg(scale.y).arg(scale.z));
 
-	originalScaleRadioButton->setEnabled(true);
-	if (autoCheck)
+	originalScaleRadioButton->setEnabled(canUseScale);
+	if (!canUseScale)
+	{
+		labelOriginal->setText(QObject::tr("Original scale is too small for this cloud  ")); //add two whitespaces to avoid issues with italic characters justification
+		labelOriginal->setStyleSheet("color: red;");
+		originalScaleRadioButton->setChecked(false);
+	}
+	else if (autoCheck)
 	{
 		originalScaleRadioButton->setChecked(true);
 	}
@@ -464,14 +470,26 @@ void LasSaveDialog::setExtraScalarFields(const std::vector<LasExtraScalarField>&
 	}
 }
 
-unsigned LasSaveDialog::selectedPointFormat() const
+uint8_t LasSaveDialog::selectedPointFormat() const
 {
-	return pointFormatComboBox->currentText().toUInt();
+	return static_cast<uint8_t>(std::min(pointFormatComboBox->currentText().toUInt(), 255u));
 }
 
-unsigned LasSaveDialog::selectedVersionMinor() const
+void LasSaveDialog::selectedVersion(uint8_t& versionMajor, uint8_t& versionMinor) const
 {
-	return versionComboBox->currentText().splitRef('.').at(1).toUInt();
+	versionMajor = 1;
+	versionMinor = 0;
+
+	QVector<QStringRef> tokens = versionComboBox->currentText().splitRef('.');
+	if (tokens.size() == 2)
+	{
+		versionMajor = static_cast<uint8_t>(std::min(tokens[0].toUInt(), 255u));
+		versionMinor = static_cast<uint8_t>(std::min(tokens[1].toUInt(), 255u));
+	}
+	else
+	{
+		assert(false);
+	}
 }
 
 bool LasSaveDialog::shouldSaveRGB() const

@@ -50,14 +50,14 @@ class LasSaveDialog : public QDialog
 	void setOptimalScale(const CCVector3d& scale, bool autoCheck = false);
 	/// Set the scale that was used in the original file
 	/// to save comes from.
-	void setOriginalScale(const CCVector3d& scale, bool autoCheck = true);
+	void setOriginalScale(const CCVector3d& scale, bool canUseScale, bool autoCheck = true);
 	/// Set the extra LAS scalar fields saved from the original file.
 	void setExtraScalarFields(const std::vector<LasExtraScalarField>& extraScalarFields);
 
 	/// Returns the point format currently selected
-	unsigned selectedPointFormat() const;
-	/// Returns the minor version currently selected
-	unsigned selectedVersionMinor() const;
+	uint8_t selectedPointFormat() const;
+	/// Returns the version currently selected
+	void selectedVersion(uint8_t& versionMajor, uint8_t& versionMinor) const;
 	/// Returns the currently selected scale
 	CCVector3d chosenScale() const;
 	/// Returns whether the user wants to save RGB

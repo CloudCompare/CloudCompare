@@ -48,7 +48,7 @@ namespace LasMetadata
 
 	void SaveMetadataInto(const laszip_header& header, ccPointCloud& pointCloud, const std::vector<LasExtraScalarField>& extraScalarFields);
 	bool LoadVlrs(const ccPointCloud& pointCloud, LasVlr& vlr);
-	bool LoadScalesFrom(const ccPointCloud& pointCloud, CCVector3d& scales);
-	bool LoadOffsetsFrom(const ccPointCloud& pointCloud, CCVector3d& offsets);
+	bool LoadScaleFrom(const ccPointCloud& pointCloud, CCVector3d& scale);
+	bool LoadOffsetFrom(const ccPointCloud& pointCloud, CCVector3d& offset);
 	bool LoadLasVersionFrom(const ccPointCloud& pointCloud, LasDetails::LasVersion& version);
 } // namespace LasMetadata

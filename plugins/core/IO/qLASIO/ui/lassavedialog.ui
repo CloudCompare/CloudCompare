@@ -159,7 +159,7 @@ font: italic;</string>
 font: italic;</string>
             </property>
             <property name="text">
-             <string>        might not preserve data accuracy (especially if you have transformed the origina cloud)                                                    </string>
+             <string>        might not preserve data accuracy (especially if you have transformed the original cloud)                                                    </string>
             </property>
            </widget>
           </item>

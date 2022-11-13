@@ -137,11 +137,11 @@ public:
 LASFilter::LASFilter()
     : FileIOFilter( {
                     "_PDAL LAS Filter",
-                    3.0f,	// priority
+                    DEFAULT_PRIORITY,	// deprecated: lower priority
                     QStringList{ "las", "laz" },
                     "las",
-                    QStringList{ "LAS cloud (*.las *.laz)" },
-                    QStringList{ "LAS cloud (*.las *.laz)" },
+                    QStringList{ "LAS cloud with PDAL (*.las *.laz)" },
+                    QStringList{ "LAS cloud with PDAL (*.las *.laz)" },
                     Import | Export
                     } )
 {

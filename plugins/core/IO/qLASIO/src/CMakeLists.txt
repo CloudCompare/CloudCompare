@@ -1,0 +1,19 @@
+
+target_sources(${PROJECT_NAME}
+        PRIVATE
+        ${CMAKE_CURRENT_LIST_DIR}/LasPlugin.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/LasIOFilter.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/LasOpenDialog.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/LasSaveDialog.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/LasScalarField.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/LasExtraScalarField.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/LasExtraScalarFieldCard.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/LasDetails.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/LasScalarFieldLoader.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/LasMetadata.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/LasScalarFieldSaver.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/LasWaveformLoader.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/LasWaveformSaver.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/LasVlr.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/LasSaver.cpp
+        )

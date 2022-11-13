@@ -489,56 +489,59 @@ void FileIOFilter::DisplayErrorMessage(CC_FILE_ERROR err, const QString& action,
 	case CC_FERR_NO_ERROR:
 		return; //no message will be displayed!
 	case CC_FERR_BAD_ARGUMENT:
-		errorStr = "bad argument (internal)";
+		errorStr = QObject::tr("bad argument (internal)");
 		break;
 	case CC_FERR_UNKNOWN_FILE:
-		errorStr = "unknown file";
+		errorStr = QObject::tr("unknown file");
 		break;
 	case CC_FERR_WRONG_FILE_TYPE:
-		errorStr = "wrong file type (check header)";
+		errorStr = QObject::tr("wrong file type (check header)");
 		break;
 	case CC_FERR_WRITING:
-		errorStr = "writing error (disk full/no access right?)";
+		errorStr = QObject::tr("writing error (disk full/no access right?)");
 		break;
 	case CC_FERR_READING:
-		errorStr = "reading error (no access right?)";
+		errorStr = QObject::tr("reading error (no access right?)");
 		break;
 	case CC_FERR_NO_SAVE:
-		errorStr = "nothing to save";
+		errorStr = QObject::tr("nothing to save");
 		break;
 	case CC_FERR_NO_LOAD:
-		errorStr = "nothing to load";
+		errorStr = QObject::tr("nothing to load");
 		break;
 	case CC_FERR_BAD_ENTITY_TYPE:
-		errorStr = "incompatible entity/file types";
+		errorStr = QObject::tr("incompatible entity/file types");
 		break;
 	case CC_FERR_CANCELED_BY_USER:
-		errorStr = "process canceled by user";
+		errorStr = QObject::tr("process canceled by user");
 		warning = true;
 		break;
 	case CC_FERR_NOT_ENOUGH_MEMORY:
-		errorStr = "not enough memory";
+		errorStr = QObject::tr("not enough memory");
 		break;
 	case CC_FERR_MALFORMED_FILE:
-		errorStr = "malformed file";
-		break;
-	case CC_FERR_BROKEN_DEPENDENCY_ERROR:
-		errorStr = "dependent entities missing (see Console)";
-		break;
-	case CC_FERR_FILE_WAS_WRITTEN_BY_UNKNOWN_PLUGIN:
-		errorStr = "the file was written by a plugin but none of the loaded plugins can deserialize it";
-		break;
-	case CC_FERR_THIRD_PARTY_LIB_FAILURE:
-		errorStr = "the third-party library in charge of saving/loading the file has failed to perform the operation";
-		break;
-	case CC_FERR_THIRD_PARTY_LIB_EXCEPTION:
-		errorStr = "the third-party library in charge of saving/loading the file has thrown an exception";
-		break;
-	case CC_FERR_NOT_IMPLEMENTED:
-		errorStr = "this function is not implemented yet!";
+		errorStr = QObject::tr("malformed file");
 		break;
 	case CC_FERR_CONSOLE_ERROR:
-		errorStr = "see console";
+		errorStr = QObject::tr("see console");
+		break;
+	case CC_FERR_BROKEN_DEPENDENCY_ERROR:
+		errorStr = QObject::tr("dependent entities missing (see Console)");
+		break;
+	case CC_FERR_FILE_WAS_WRITTEN_BY_UNKNOWN_PLUGIN:
+		errorStr = QObject::tr("the file was written by a plugin but none of the loaded plugins can deserialize it");
+		break;
+	case CC_FERR_THIRD_PARTY_LIB_FAILURE:
+		errorStr = QObject::tr("the third-party library in charge of saving/loading the file has failed to perform the operation");
+		break;
+	case CC_FERR_THIRD_PARTY_LIB_EXCEPTION:
+		errorStr = QObject::tr("the third-party library in charge of saving/loading the file has thrown an exception");
+		break;
+	case CC_FERR_NOT_IMPLEMENTED:
+		errorStr = QObject::tr("this function is not implemented yet!");
+		break;
+	case CC_FERR_INTERNAL:
+		errorStr = QObject::tr("internal error");
 		break;
 	default:
 		return; //no message will be displayed!

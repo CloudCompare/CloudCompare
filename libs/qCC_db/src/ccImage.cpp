@@ -57,6 +57,21 @@ ccImage::ccImage(const QImage& image, const QString& name)
 	setEnabled(true);
 }
 
+ccImage::ccImage(const ccImage& image, bool keepSensorLink/*=true*/)
+	: ccHObject(image)
+	, m_width(image.m_width)
+	, m_height(image.m_height)
+	, m_aspectRatio(image.m_aspectRatio)
+	, m_texAlpha(image.m_texAlpha)
+	, m_image(image.m_image)
+	, m_associatedSensor(nullptr)
+{
+	if (image.m_associatedSensor && keepSensorLink)
+	{
+		setAssociatedSensor(image.m_associatedSensor);
+	}
+}
+
 bool ccImage::load(const QString& filename, QString& error)
 {
 	QImageReader reader(filename);
@@ -151,7 +166,7 @@ void ccImage::setAssociatedSensor(ccCameraSensor* sensor)
 	m_associatedSensor = sensor;
 
 	if (m_associatedSensor)
-		m_associatedSensor->addDependency(this,DP_NOTIFY_OTHER_ON_DELETE);
+		m_associatedSensor->addDependency(this, DP_NOTIFY_OTHER_ON_DELETE);
 }
 
 void ccImage::onDeletionOf(const ccHObject* obj)

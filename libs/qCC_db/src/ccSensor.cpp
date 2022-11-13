@@ -27,7 +27,7 @@ ccSensor::ccSensor(const QString& name)
 	m_rigidTransformation.toIdentity();
 }
 
-ccSensor::ccSensor(const ccSensor &sensor)
+ccSensor::ccSensor(const ccSensor& sensor)
 	: ccHObject(sensor)
 	, m_posBuffer(nullptr)
 	, m_rigidTransformation(sensor.m_rigidTransformation)

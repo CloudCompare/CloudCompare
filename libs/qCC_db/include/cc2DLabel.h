@@ -25,6 +25,8 @@
 
 //Qt
 #include <QRect>
+//System
+#include <array>
 
 class ccGenericPointCloud;
 class ccGenericMesh;
@@ -36,6 +38,9 @@ public:
 
 	//! Default constructor
 	cc2DLabel(QString name = QString("label"));
+
+	//! Copy constructor
+	cc2DLabel(const cc2DLabel& label, bool copyPoints = true);
 
 	//inherited from ccObject
 	virtual QString getName() const override;
@@ -62,11 +67,14 @@ public:
 	virtual bool acceptClick(int x, int y, Qt::MouseButton button) override;
 	virtual bool move2D(int x, int y, int dx, int dy, int screenWidth, int screenHeight) override;
 
+	//! Relative position (percentage)
+	typedef std::array<float, 2> RelativePos;
+
 	//! Sets relative position
 	void setPosition(float x, float y);
 
 	//! Returns relative position
-	inline const float* getPosition() const { return m_screenPos; }
+	inline const RelativePos& getPosition() const { return m_screenPos; }
 
 	//! Clears label
 	void clear(bool ignoreDependencies = false);
@@ -182,8 +190,11 @@ public:
 	//! Adds a point to this label (direct - handle with care)
 	bool addPickedPoint(const PickedPoint& pp);
 
-	//! Returns a given point
+	//! Returns a given point (const version)
 	inline const PickedPoint& getPickedPoint(unsigned index) const { return m_pickedPoints[index]; }
+
+	//! Returns a given point
+	inline PickedPoint& getPickedPoint(unsigned index) { return m_pickedPoints[index]; }
 
 	//! Sets marker (relative) scale
 	/** Default value: 1.0
@@ -274,11 +285,13 @@ protected:
 	//! Draws the entity only (not its children) - 3D version
 	void drawMeOnly3D(CC_DRAW_CONTEXT& context);
 
-	//! Picked points
-	std::vector<PickedPoint> m_pickedPoints;
-
 	//! Updates the label 'name'
 	void updateName();
+
+protected:
+
+	//! Picked points
+	std::vector<PickedPoint> m_pickedPoints;
 
 	//! Whether to show full label body or not
 	bool m_showFullBody;
@@ -292,14 +305,14 @@ protected:
 	**/
 	QRect m_labelROI;
 
-	//! close button ROI
-	//int m_closeButtonROI[4];
-
 	//! Label position (percentage of screen size)
-	float m_screenPos[2];
+	RelativePos m_screenPos;
+
+	//! Absolute position (pixels)
+	typedef std::array<int, 2> AbsolutePos;
 
 	//! Label position at last display (absolute)
-	int m_lastScreenPos[2];
+	AbsolutePos m_lastScreenPos;
 
 	//! Whether to display the point(s) legend
 	bool m_dispPointsLegend;

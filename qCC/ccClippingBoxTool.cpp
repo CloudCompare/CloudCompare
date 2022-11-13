@@ -429,7 +429,14 @@ ccHObject* GetSlice(ccHObject* obj, ccClipBox* clipBox, bool silent)
 		}
 		clipBox->flagPointsInside(inputCloud, &selectionTable);
 		
-		ccGenericPointCloud* sliceCloud = inputCloud->createNewCloudFromVisibilitySelection(false, &selectionTable, true);
+		ccGenericPointCloud* sliceCloud = inputCloud->createNewCloudFromVisibilitySelection(false, &selectionTable, nullptr, true);
+
+		// specific case: all points were selected
+		if (sliceCloud == inputCloud)
+		{
+			sliceCloud = inputCloud->clone();
+		}
+
 		if (!sliceCloud)
 		{
 			if (!silent)
@@ -437,6 +444,7 @@ ccHObject* GetSlice(ccHObject* obj, ccClipBox* clipBox, bool silent)
 		}
 		else if (sliceCloud->size() == 0)
 		{
+			//ccLog::Warning("Empty slice"); // too many logs
 			delete sliceCloud;
 			sliceCloud = nullptr;
 		}

@@ -277,3 +277,226 @@ ccCoordinateSystem* ccHObjectCaster::ToCoordinateSystem(ccHObject* obj)
 {
 	return (obj && obj->isKindOf(CC_TYPES::COORDINATESYSTEM) ? static_cast<ccCoordinateSystem*>(obj) : nullptr);
 }
+
+bool ccHObjectCaster::CloneChildren(const ccHObject* sourceEntity,
+									ccHObject* destEntity,
+									std::vector<int>* newPointOrTriangleIndex/*=nullptr*/,
+									const ccHObject* sourceEntityProxy/*=nullptr*/,
+									ccHObject* destEntityProxy/*=nullptr*/)
+{
+	if (!sourceEntity || !destEntity)
+	{
+		assert(false);
+		return false;
+	}
+
+	bool sourceIsCloud = sourceEntity->isKindOf(CC_TYPES::POINT_CLOUD);
+	bool destIsCloud = destEntity->isKindOf(CC_TYPES::POINT_CLOUD);
+	bool sourceAndDestAreCloud = sourceIsCloud && destIsCloud;
+
+	bool sourceIsMesh = sourceEntity->isKindOf(CC_TYPES::MESH);
+	bool destIsMesh = destEntity->isKindOf(CC_TYPES::MESH);
+	bool sourceAndDestAreMeshes = sourceIsMesh && destIsMesh;
+
+	unsigned numberOfPointOrTriangle = 0;
+	if (sourceIsCloud)
+		numberOfPointOrTriangle = static_cast<const ccGenericPointCloud*>(sourceEntity)->size();
+	else if (sourceIsMesh)
+		numberOfPointOrTriangle = static_cast<const ccGenericMesh*>(sourceEntity)->size();
+
+	if (newPointOrTriangleIndex)
+	{
+		if (sourceEntity == destEntity)
+		{
+			ccLog::Warning("[ccHObjectCaster::CloneChildren] Providing a point/triangle correspondance map while the source and destination entities are the same");
+			// we can live with that...
+		}
+
+		if (!sourceAndDestAreCloud && !sourceAndDestAreMeshes)
+		{
+			ccLog::Warning("[ccHObjectCaster::CloneChildren] A point/triangle correspondance map can only work between 2 entities of the same type");
+			return false;
+		}
+
+		if (newPointOrTriangleIndex->size() != numberOfPointOrTriangle)
+		{
+			ccLog::Warning("[ccHObjectCaster::CloneChildren] Mismatch between the point/triangle correspondance map and the source entity size");
+			return false;
+		}
+	}
+
+	QMap<ccCameraSensor*, ccCameraSensor*> clonedCameraSensors;
+
+	const ccHObject* currentSourceEntity = (sourceEntityProxy ? sourceEntityProxy : sourceEntity);
+	ccHObject* currentDestEntity = (destEntityProxy ? destEntityProxy : destEntity);
+
+	// for each child
+	for (unsigned i = 0; i < currentSourceEntity->getChildrenNumber(); ++i)
+	{
+		ccHObject* child = currentSourceEntity->getChild(i);
+		
+		switch (child->getClassID())
+		{
+		// 2D Label
+		case CC_TYPES::LABEL_2D:
+		{
+			cc2DLabel* label = static_cast<cc2DLabel*>(child);
+			
+			// check if we can keep this label
+			bool keepThisLabel = true;
+			if (newPointOrTriangleIndex)
+			{
+				for (unsigned i = 0; i < label->size(); ++i)
+				{
+					const cc2DLabel::PickedPoint& pp = label->getPickedPoint(i);
+					if (pp.entity() == sourceEntity && newPointOrTriangleIndex->at(pp.index) < 0)
+					{
+						// this label relies on a point or triangle that has no correspondance in the destination entity
+						keepThisLabel = false;
+						break;
+					}
+				}
+			}
+
+			if (keepThisLabel)
+			{
+				cc2DLabel* clonedLabel = new cc2DLabel(*label, false);
+
+				for (unsigned i = 0; i < label->size(); ++i)
+				{
+					cc2DLabel::PickedPoint pp = label->getPickedPoint(i);
+					if (pp.entity() == sourceEntity)
+					{
+						if (sourceIsCloud)
+							pp._cloud = static_cast<ccGenericPointCloud*>(destEntity);
+						else
+							pp._mesh = static_cast<ccGenericMesh*>(destEntity);
+						
+						if (newPointOrTriangleIndex)
+						{
+							pp.index = static_cast<unsigned>(newPointOrTriangleIndex->at(pp.index)); // we've checked above that it's >= 0
+						}
+					}
+					clonedLabel->addPickedPoint(pp);
+				}
+				clonedLabel->setName(label->getName()); //the label name is overridden by calls to addPickedPoint
+				
+				currentDestEntity->addChild(clonedLabel);
+			}
+		}
+		break;
+
+		// Image
+		case CC_TYPES::IMAGE:
+		{
+			ccImage* image = static_cast<ccImage*>(child);
+			ccImage* clonedImage = new ccImage(*image, false);
+
+			ccCameraSensor* camSensor = image->getAssociatedSensor();
+			if (camSensor)
+			{
+				if (clonedCameraSensors.contains(camSensor))
+				{
+					// if we have already cloned the sensor on which this image depends,
+					// we can simply update the link
+					clonedImage->setAssociatedSensor(clonedCameraSensors[camSensor]);
+				}
+				else
+				{
+					// else we have to clone the sensor
+					ccCameraSensor* clonedCamSensor = new ccCameraSensor(*camSensor);
+					clonedCameraSensors.insert(camSensor, clonedCamSensor);
+
+					clonedImage->setAssociatedSensor(clonedCamSensor);
+					clonedImage->addChild(clonedCamSensor);
+				}
+			}
+
+			currentDestEntity->addChild(clonedImage);
+		}
+		break;
+
+		// Camera sensor
+		case CC_TYPES::CAMERA_SENSOR:
+		{
+			ccCameraSensor* camSensor = static_cast<ccCameraSensor*>(child);
+			ccCameraSensor* clonedCamSensor = new ccCameraSensor(*camSensor);
+			clonedCameraSensors.insert(camSensor, clonedCamSensor);
+
+			currentDestEntity->addChild(clonedCamSensor);
+		}
+		break;
+
+		// GBL sensor
+		case CC_TYPES::GBL_SENSOR:
+		{
+			ccGBLSensor* gblSensor = static_cast<ccGBLSensor*>(child);
+			ccGBLSensor* clonedGBLSensor = new ccGBLSensor(*gblSensor, false);
+
+			currentDestEntity->addChild(clonedGBLSensor);
+		}
+		break;
+
+		// 2D Viewport object
+		case CC_TYPES::VIEWPORT_2D_OBJECT:
+		{
+			cc2DViewportObject* viewportObject = static_cast<cc2DViewportObject*>(child);;
+			cc2DViewportObject* clonedViewportObject = new cc2DViewportObject(*viewportObject);
+			
+			currentDestEntity->addChild(clonedViewportObject);
+		}
+		break;
+
+		// 2D Viewport label
+		case CC_TYPES::VIEWPORT_2D_LABEL:
+		{
+			cc2DViewportLabel* viewportLabel = static_cast<cc2DViewportLabel*>(child);;
+			cc2DViewportLabel* clonedViewportLabel = new cc2DViewportLabel(*viewportLabel);
+
+			currentDestEntity->addChild(clonedViewportLabel);
+		}
+		break;
+
+		// Groups
+		case CC_TYPES::HIERARCHY_OBJECT:
+		{
+			ccHObject* newGroup = new ccHObject(*child);
+			// start (or proceed with) the recursion
+			if (CloneChildren(sourceEntity, destEntity, newPointOrTriangleIndex, child, newGroup))
+			{
+				if (newGroup->getChildrenNumber() != 0)
+				{
+					currentDestEntity->addChild(newGroup);
+				}
+				else
+				{
+					// empty group, no need to keep it
+					delete newGroup;
+					newGroup = nullptr;
+				}
+			}
+			else
+			{
+				// something bad happened
+				return false;
+			}
+		}
+		break;
+
+		// Meshes
+		case CC_TYPES::MESH:
+		{
+			// TODO
+		}
+		break;
+
+		default:
+		{
+			// nothing to do
+		}
+		break;
+		}
+	}
+
+	return true;
+}

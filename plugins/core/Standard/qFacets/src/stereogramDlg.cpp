@@ -909,15 +909,23 @@ void StereogramDialog::exportCurrentSelection()
 		ccGenericPointCloud* subset = cloud->createNewCloudFromVisibilitySelection();
 		if (subset)
 		{
-			if (subset->size() != 0)
+			if (subset == cloud)
 			{
-				subset->setName(cloud->getName() + selectionSuffix);
-				m_app->addToDB(subset);
+				ccLog::Warning("All points fall inside the selection");
 			}
 			else
 			{
-				delete subset;
-				subset = nullptr;
+				if (subset->size() != 0)
+				{
+					subset->setName(cloud->getName() + selectionSuffix);
+					m_app->addToDB(subset);
+				}
+				else
+				{
+					ccLog::Warning("No point falls inside the selection");
+					delete subset;
+					subset = nullptr;
+				}
 			}
 		}
 	}

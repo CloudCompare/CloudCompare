@@ -332,9 +332,10 @@ void ccPointPropertiesDlg::processClickedPoint(int x, int y)
 
 	if (m_rect2DLabel->isSelected()) //already closed? we start a new label
 	{
-		float roi[4] = {static_cast<float>(pos2D.x()),
-						static_cast<float>(pos2D.y()),
-						0,0};
+		cc2DViewportLabel::ROI roi{	static_cast<float>(pos2D.x()),
+									static_cast<float>(pos2D.y()),
+									0.0f,
+									0.0f};
 
 		if (m_associatedWin)
 		{
@@ -343,14 +344,14 @@ void ccPointPropertiesDlg::processClickedPoint(int x, int y)
 		m_rect2DLabel->setVisible(false);	//=invalid
 		m_rect2DLabel->setSelected(false);	//=not closed
 		m_rect2DLabel->setRoi(roi);
-		m_rect2DLabel->setName(""); //reset name before display!
+		m_rect2DLabel->setName(QString()); //reset name before display!
 	}
 	else //we close the existing one
 	{
-		float roi[4] = {m_rect2DLabel->roi()[0],
-						m_rect2DLabel->roi()[1],
-						static_cast<float>(pos2D.x()),
-						static_cast<float>(pos2D.y()) };
+		cc2DViewportLabel::ROI roi {m_rect2DLabel->roi()[0],
+									m_rect2DLabel->roi()[1],
+									static_cast<float>(pos2D.x()),
+									static_cast<float>(pos2D.y()) };
 		m_rect2DLabel->setRoi(roi);
 		m_rect2DLabel->setVisible(true);	//=valid
 		m_rect2DLabel->setSelected(true);	//=closed
@@ -382,17 +383,18 @@ void ccPointPropertiesDlg::update2DZone(int x, int y, Qt::MouseButtons buttons)
 
 	QPointF pos2D = m_associatedWin->toCenteredGLCoordinates(x, y);
 
-	float roi[4] = {	m_rect2DLabel->roi()[0],
-						m_rect2DLabel->roi()[1],
-						static_cast<float>(pos2D.x()),
-						static_cast<float>(pos2D.y()) };
+	cc2DViewportLabel::ROI roi {m_rect2DLabel->roi()[0],
+								m_rect2DLabel->roi()[1],
+								static_cast<float>(pos2D.x()),
+								static_cast<float>(pos2D.y()) };
 	m_rect2DLabel->setRoi(roi);
 	m_rect2DLabel->setVisible(true);
 
 	m_associatedWin->redraw(true, false);
 }
 
-static QString s_last2DLabelComment("");
+static QString s_last2DLabelComment;
+
 void ccPointPropertiesDlg::close2DZone()
 {
 	if (m_pickingMode != RECT_ZONE)

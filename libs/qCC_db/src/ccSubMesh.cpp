@@ -204,47 +204,91 @@ CCCoreLib::VerticesIndexes* ccSubMesh::getTriangleVertIndexes(unsigned triIndex)
 	return nullptr;
 }
 
-ccSubMesh* ccSubMesh::createNewSubMeshFromSelection(bool removeSelectedFaces, IndexMap* indexMap/*=nullptr*/)
+ccSubMesh* ccSubMesh::createNewSubMeshFromSelection(bool removeSelectedTriangles, IndexMap* newRemainingTriangleIndexes/*=nullptr*/)
 {
 	ccGenericPointCloud* vertices = getAssociatedCloud();
-	assert(vertices && m_associatedMesh);
 	if (!vertices || !m_associatedMesh)
 	{
+		assert(false);
 		return nullptr;
 	}
 
 	const ccGenericPointCloud::VisibilityTableType& verticesVisibility = vertices->getTheVisibilityArray();
 	if (verticesVisibility.size() < vertices->size())
 	{
-		ccLog::Error(QString("[Sub-mesh %1] Internal error: vertex visibility table not instantiated!").arg(getName()));
+		ccLog::Warning(QString("[Sub-mesh %1] Internal error: vertex visibility table not instantiated!").arg(getName()));
 		return nullptr;
 	}
 
-	//we count the number of remaining faces
+	std::vector<int> selectedTriangleIndexes;
+
 	size_t triNum = m_triIndexes.size();
-	size_t visibleFaces = 0;
+	try
+	{
+		selectedTriangleIndexes.reserve(triNum);
+	}
+	catch (const std::bad_alloc&)
+	{
+		ccLog::Warning(QString("[Sub-mesh %1] Not enough memory").arg(getName()));
+		return nullptr;
+	}
+
+	int validIndex = 0;
+	for (unsigned globalIndex : m_triIndexes)
+	{
+		const CCCoreLib::VerticesIndexes* tsi = m_associatedMesh->getTriangleVertIndexes(globalIndex);
+		//triangle is visible?
+		if (	verticesVisibility[tsi->i1] == CCCoreLib::POINT_VISIBLE
+			&&	verticesVisibility[tsi->i2] == CCCoreLib::POINT_VISIBLE
+			&&	verticesVisibility[tsi->i3] == CCCoreLib::POINT_VISIBLE)
+		{
+			selectedTriangleIndexes.push_back(++validIndex);
+		}
+		else
+		{
+			selectedTriangleIndexes.push_back(-1);
+		}
+	}
+
+	return createNewSubMeshFromSelection(removeSelectedTriangles, selectedTriangleIndexes, newRemainingTriangleIndexes);
+}
+
+ccSubMesh* ccSubMesh::createNewSubMeshFromSelection(bool removeSelectedTriangles,
+													const std::vector<int>& selectedTriangleIndexes,
+													IndexMap* newRemainingTriangleIndexes/*=nullptr*/)
+{
+	if (!m_associatedMesh)
+	{
+		assert(false);
+		return nullptr;
+	}
+	if (selectedTriangleIndexes.size() < m_associatedMesh->size())
+	{
+		ccLog::Error(QString("[Sub-mesh %1] Internal error: input triangle indexes vector size is invalid").arg(getName()));
+		return nullptr;
+	}
+
+	//we count the number of selected triangles
+	size_t selectedTriangleCount = 0;
 	{
 		for (unsigned globalIndex : m_triIndexes)
 		{
-			const CCCoreLib::VerticesIndexes* tsi = m_associatedMesh->getTriangleVertIndexes(globalIndex);
-			//triangle is visible?
-			if (   verticesVisibility[tsi->i1] == CCCoreLib::POINT_VISIBLE
-				&& verticesVisibility[tsi->i2] == CCCoreLib::POINT_VISIBLE
-				&& verticesVisibility[tsi->i3] == CCCoreLib::POINT_VISIBLE)
+			//triangle is selected?
+			if (selectedTriangleIndexes[globalIndex] >= 0)
 			{
-				++visibleFaces;
+				++selectedTriangleCount;
 			}
 		}
 	}
 
 	//nothing to do
-	if (visibleFaces == 0)
+	if (selectedTriangleCount == 0)
 	{
-		if (indexMap) //we still have to translate global indexes!
+		if (newRemainingTriangleIndexes) //we still have to translate global indexes!
 		{
 			for (unsigned& globalIndex : m_triIndexes)
 			{
-				globalIndex = indexMap->at(globalIndex);
+				globalIndex = newRemainingTriangleIndexes->at(globalIndex);
 			}
 		}
 		return nullptr;
@@ -259,40 +303,37 @@ ccSubMesh* ccSubMesh::createNewSubMeshFromSelection(bool removeSelectedFaces, In
 
 	//create sub-mesh
 	{
-		unsigned lastTri = 0;
-		for (size_t i = 0; i < triNum; ++i)
+		size_t triCount = m_triIndexes.size();
+
+		unsigned lastTriIndex = 0;
+		for (size_t i = 0; i < triCount; ++i)
 		{
 			unsigned globalIndex = m_triIndexes[i];
 			const CCCoreLib::VerticesIndexes* tsi = m_associatedMesh->getTriangleVertIndexes(globalIndex);
 
-			if (indexMap) //translate global index?
-				globalIndex = indexMap->at(globalIndex);
-
-			//triangle is visible?
-			if (	verticesVisibility[tsi->i1] == CCCoreLib::POINT_VISIBLE
-				&&	verticesVisibility[tsi->i2] == CCCoreLib::POINT_VISIBLE
-				&&	verticesVisibility[tsi->i3] == CCCoreLib::POINT_VISIBLE)
+			//triangle is selected?
+			if (selectedTriangleIndexes[globalIndex] >= 0)
 			{
-				newSubMesh->addTriangleIndex(globalIndex);
+				newSubMesh->addTriangleIndex(static_cast<unsigned>(selectedTriangleIndexes[globalIndex]));
 			}
-			else if (removeSelectedFaces) //triangle is not visible? It stays in the original mesh!
+			else if (removeSelectedTriangles) //triangle is not selected? It stays in the original mesh!
 			{
-				//we replace the current triangle by the 'last' valid one
-				assert(lastTri <= i);
-				m_triIndexes[lastTri++] = globalIndex;
+				//we replace the 'last' valid triangle by this one
+				assert(lastTriIndex <= i);
+				m_triIndexes[lastTriIndex++] = newRemainingTriangleIndexes ? newRemainingTriangleIndexes->at(globalIndex) : globalIndex;
 			}
 		}
 
 		//resize original mesh
-		if (removeSelectedFaces && lastTri < triNum)
+		if (removeSelectedTriangles && lastTriIndex < triCount)
 		{
-			resize(lastTri);
+			resize(lastTriIndex); // can't fail, always smaller
 			m_bBox.setValidity(false);
 			notifyGeometryUpdate();
 		}
 	}
 
-	if (newSubMesh->size())
+	if (newSubMesh->size() != 0)
 	{
 		newSubMesh->setName(getName() + QString(".part"));
 		newSubMesh->resize(newSubMesh->size());

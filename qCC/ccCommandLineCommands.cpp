@@ -2152,15 +2152,20 @@ bool CommandFilterBySFValue::process(ccCommandLineInterface &cmd)
 		{
 			std::pair<ScalarType, ScalarType> range = GetSFRange(*sf, minVal, useValForMin, maxVal, useValForMax);
 			
-			ccPointCloud* fitleredCloud = cmd.clouds()[i].pc->filterPointsByScalarValue(range.first, range.second);
+			ccPointCloud*& pc = cmd.clouds()[i].pc;
+			ccPointCloud* fitleredCloud = pc->filterPointsByScalarValue(range.first, range.second);
 			if (fitleredCloud)
 			{
-				cmd.print(QObject::tr("\t\tCloud '%1' --> %2/%3 points remaining").arg(cmd.clouds()[i].pc->getName()).arg(fitleredCloud->size()).arg(cmd.clouds()[i].pc->size()));
+				cmd.print(QObject::tr("\t\tCloud '%1' --> %2/%3 points remaining").arg(pc->getName()).arg(fitleredCloud->size()).arg(pc->size()));
 				
-				//replace current cloud by this one
-				delete cmd.clouds()[i].pc;
-				cmd.clouds()[i].pc = fitleredCloud;
+				if (fitleredCloud != pc)
+				{
+					//replace current cloud by this one
+					delete pc;
+					pc = fitleredCloud;
+				}
 				cmd.clouds()[i].basename += QObject::tr("_FILTERED_[%1_%2]").arg(range.first).arg(range.second);
+
 				if (cmd.autoSaveMode())
 				{
 					QString errorStr = cmd.exportEntity(cmd.clouds()[i]);
@@ -2206,9 +2211,12 @@ bool CommandFilterBySFValue::process(ccCommandLineInterface &cmd)
 				cmd.print(QObject::tr("\t\tMesh '%1' --> %2/%3 triangles remaining").arg(mesh->getName()).arg(filteredMesh->size()).arg(mesh->size()));
 
 				//replace current mesh by this one
-				delete mesh;
-				mesh = nullptr;
-				cmd.meshes()[i].mesh = filteredMesh;
+				if (filteredMesh != mesh) //it's technically possible to have the same pointer if all triangles were filtered (with 'createNewMeshFromSelection')
+				{
+					delete mesh;
+					mesh = nullptr;
+					cmd.meshes()[i].mesh = filteredMesh;
+				}
 				cmd.meshes()[i].basename += QObject::tr("_FILTERED_[%1_%2]").arg(range.first).arg(range.second);
 				if (cmd.autoSaveMode())
 				{

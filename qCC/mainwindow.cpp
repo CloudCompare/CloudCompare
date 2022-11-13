@@ -36,6 +36,7 @@
 //qCC_db
 #include <cc2DLabel.h>
 #include <cc2DViewportObject.h>
+#include <cc2DViewportLabel.h>
 #include <ccCameraSensor.h>
 #include <ccColorScalesManager.h>
 #include <ccCylinder.h>
@@ -2784,7 +2785,6 @@ void MainWindow::doRemoveDuplicatePoints()
 		if (cloud)
 		{
 			ccPointCloud* filteredCloud = cloud->removeDuplicatePoints(minDistanceBetweenPoints, &pDlg);
-
 			if (!filteredCloud)
 			{
 				ccConsole::Error(tr("Process failed (see Console)"));
@@ -2895,17 +2895,35 @@ void MainWindow::doActionFilterByValue()
 			{
 				pc->hidePointsByScalarValue(minVal, maxVal);
 				if (ent->isA(CC_TYPES::MESH)/*|| ent->isKindOf(CC_TYPES::PRIMITIVE)*/) //TODO
-					resultInside = ccHObjectCaster::ToMesh(ent)->createNewMeshFromSelection(false);
+					resultInside = ccHObjectCaster::ToMesh(ent)->createNewMeshFromSelection(false, nullptr, true);
 				else if (ent->isA(CC_TYPES::SUB_MESH))
 					resultInside = ccHObjectCaster::ToSubMesh(ent)->createNewSubMeshFromSelection(false);
 
-				if (mode == ccFilterByValueDlg::SPLIT)
+				if (resultInside == ent)
+				{
+					//specific case: all triangles were selected, nothing to do
+					ccLog::Warning(QString("Mesh %1 is fully inside the specified range").arg(ent->getName()));
+					resultInside = nullptr;
+				}
+				else if (mode == ccFilterByValueDlg::SPLIT)
 				{
 					pc->invertVisibilityArray();
 					if (ent->isA(CC_TYPES::MESH)/*|| ent->isKindOf(CC_TYPES::PRIMITIVE)*/) //TODO
-						resultOutside = ccHObjectCaster::ToMesh(ent)->createNewMeshFromSelection(false);
+						resultOutside = ccHObjectCaster::ToMesh(ent)->createNewMeshFromSelection(false, nullptr, true);
 					else if (ent->isA(CC_TYPES::SUB_MESH))
 						resultOutside = ccHObjectCaster::ToSubMesh(ent)->createNewSubMeshFromSelection(false);
+
+					if (resultOutside == ent)
+					{
+						//specific case: all triangles were selected, nothing to do
+						ccLog::Warning(QString("Mesh %1 is fully outside the specified range").arg(ent->getName()));
+						ent->setEnabled(false);
+						ent->prepareDisplayForRefresh();
+
+						delete resultInside; // we don't need it
+						resultInside = nullptr;
+						resultOutside = nullptr;
+					}
 				}
 
 				pc->unallocateVisibilityArray();
@@ -2914,10 +2932,27 @@ void MainWindow::doActionFilterByValue()
 			{
 				//shortcut, as we know here that the point cloud is a "ccPointCloud"
 				resultInside = pc->filterPointsByScalarValue(minVal, maxVal, false);
-
-				if (mode == ccFilterByValueDlg::SPLIT)
+				
+				if (resultInside == ent)
+				{
+					//specific case: all points were selected, nothing to do
+					ccLog::Warning(QString("Cloud %1 is fully inside the specified range").arg(ent->getName()));
+					resultInside = nullptr;
+				}
+				else if (mode == ccFilterByValueDlg::SPLIT)
 				{
 					resultOutside = pc->filterPointsByScalarValue(minVal, maxVal, true);
+					if (resultOutside == ent)
+					{
+						//specific case: all points were selected, nothing to do
+						ccLog::Warning(QString("Cloud %1 is fully outside the specified range").arg(ent->getName()));
+						ent->setEnabled(false);
+						ent->prepareDisplayForRefresh();
+
+						delete resultInside;
+						resultInside = nullptr;
+						resultOutside = nullptr;
+					}
 				}
 			}
 
@@ -3800,7 +3835,7 @@ void MainWindow::doAction4pcsRegister()
 			ccConsole::Print(tr("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool"));
 		}
 
-		ccPointCloud *newDataCloud = data->isA(CC_TYPES::POINT_CLOUD) ? static_cast<ccPointCloud*>(data)->cloneThis() : ccPointCloud::From(data, data);
+		ccPointCloud* newDataCloud = data->isA(CC_TYPES::POINT_CLOUD) ? static_cast<ccPointCloud*>(data)->cloneThis() : ccPointCloud::From(data, data);
 
 		if (data->getParent())
 			data->getParent()->addChild(newDataCloud);
@@ -6482,7 +6517,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 	}
 	else
 	{
-		m_gsTool->removeAllEntities(true);
+		m_gsTool->removeAllEntities();
 	}
 
 	//we enable all GL windows
@@ -7578,8 +7613,7 @@ void MainWindow::doActionClone()
 		}
 		else if (entity->isA(CC_TYPES::FACET))
 		{
-			ccFacet* facet = ccHObjectCaster::ToFacet(entity);
-			clone = (facet ? facet->clone() : nullptr);
+			clone = ccHObjectCaster::ToFacet(entity);
 			if (!clone)
 			{
 				ccConsole::Error(tr("An error occurred while cloning facet %1").arg(entity->getName()));
@@ -7590,8 +7624,11 @@ void MainWindow::doActionClone()
 			ccCameraSensor* camera = ccHObjectCaster::ToCameraSensor(entity);
 			if (camera)
 			{
-				ccCameraSensor* cloned = new ccCameraSensor(*camera);
-				clone = (cloned ? cloned : nullptr);
+				clone = new ccCameraSensor(*camera);
+				if (camera->getParent())
+				{
+					camera->getParent()->addChild(clone);
+				}
 			}
 			if (!clone)
 			{
@@ -7603,13 +7640,80 @@ void MainWindow::doActionClone()
 			ccGBLSensor* sensor = ccHObjectCaster::ToGBLSensor(entity);
 			if (sensor)
 			{
-				ccGBLSensor* cloned = new ccGBLSensor(*sensor);
-				clone = (cloned ? cloned : nullptr);
+				clone = new ccGBLSensor(*sensor);
+				if (sensor->getParent())
+				{
+					sensor->getParent()->addChild(clone);
+				}
 			}
 			if (!clone)
 			{
 				ccConsole::Error(tr("An error occurred while cloning GBL sensor %1").arg(entity->getName()));
 			}
+		}
+		else if (entity->isA(CC_TYPES::IMAGE))
+		{
+			ccImage* image = ccHObjectCaster::ToImage(entity);
+			if (image)
+			{
+				clone = new ccImage(*image);
+				if (image->getParent())
+				{
+					image->getParent()->addChild(clone);
+				}
+			}
+			if (!clone)
+			{
+				ccConsole::Error(tr("An error occurred while cloning image %1").arg(entity->getName()));
+			}
+		}
+		else if (entity->isA(CC_TYPES::LABEL_2D))
+		{
+			cc2DLabel* label = ccHObjectCaster::To2DLabel(entity);
+			if (label)
+			{
+				clone = new cc2DLabel(*label, true);
+				if (label->getParent())
+				{
+					label->getParent()->addChild(clone);
+				}
+			}
+			if (!clone)
+			{
+				ccConsole::Error(tr("An error occurred while cloning label %1").arg(entity->getName()));
+			}
+		}
+		else if (entity->isA(CC_TYPES::VIEWPORT_2D_OBJECT))
+		{
+		cc2DViewportObject* viewport = ccHObjectCaster::To2DViewportObject(entity);
+		if (viewport)
+		{
+			clone = new cc2DViewportObject(*viewport);
+			if (viewport->getParent())
+			{
+				viewport->getParent()->addChild(clone);
+			}
+		}
+		if (!clone)
+		{
+			ccConsole::Error(tr("An error occurred while cloning viewport %1").arg(entity->getName()));
+		}
+		}
+		else if (entity->isA(CC_TYPES::VIEWPORT_2D_LABEL))
+		{
+		cc2DViewportLabel* viewportLabel = ccHObjectCaster::To2DViewportLabel(entity);
+		if (viewportLabel)
+		{
+			clone = new cc2DViewportLabel(*viewportLabel);
+			if (viewportLabel->getParent())
+			{
+				viewportLabel->getParent()->addChild(clone);
+			}
+		}
+		if (!clone)
+		{
+			ccConsole::Error(tr("An error occurred while cloning viewport %1").arg(entity->getName()));
+		}
 		}
 		else
 		{

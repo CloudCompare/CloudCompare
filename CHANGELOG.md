@@ -47,6 +47,10 @@ v2.13.alpha (???) - (??/??/????)
 			the existing fields of a cloud and their destination in the LAS file
 
 - Improvements:
+	- Segmentation
+		- CC will now preserve some children entities (labels, sensors, etc.) when segmenting clouds or meshes:
+			with graphical segmentation, cross section tool (for clouds only), subsampling, filter by SF value, etc.
+
 	- Rasterize:
 		- new option to compute the median height
 		- new option to compute the median scalar field value(s)
@@ -90,6 +94,12 @@ v2.13.alpha (???) - (??/??/????)
 	- New shortcut:
 		- use 'ALT + SHIFT + mouse wheel' to change the zFar value (perspective mode)
 		  (reminder: use 'ALT + mouse wheel' to change the zNear value)
+
+	- Cloning:
+		- ability to clone images
+		- ability to clone 2D labels
+		- ability to clone 2D viewport labels
+		- ability to clone viewport objects
 
 	- EDL shader:
 		- contrast and rendering quality improved

@@ -35,10 +35,10 @@ if( PLUGIN_IO_QPDAL )
 		
 		file( GLOB PDAL_DLL_FILES ${PDAL_DLL_DIR}/pdal*.dll )
 		
-		copy_files( "${PDAL_DLL_FILES}" "${CLOUDCOMPARE_DEST_FOLDER}" )
+		copy_files( "${PDAL_DLL_FILES}" "${CLOUDCOMPARE_DEST_FOLDER}" 1 )
 		
 		if( ${OPTION_BUILD_CCVIEWER} )
-			copy_files( "${PDAL_DLL_FILES}" "${CCVIEWER_DEST_FOLDER}" )
+			copy_files( "${PDAL_DLL_FILES}" "${CCVIEWER_DEST_FOLDER}" 1 )
 		endif()
 		
 		unset( PDAL_DLL_DIR )

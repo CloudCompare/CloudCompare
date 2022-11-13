@@ -453,7 +453,9 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 	return (nearestPointIndex >= 0);
 }
 
-CCCoreLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints(const VisibilityTableType* visTable/*=nullptr*/, bool silent/*=false*/) const
+CCCoreLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints(const VisibilityTableType* visTable/*=nullptr*/,
+																	bool silent/*=false*/,
+																	CCCoreLib::ReferenceCloud* selection/*=nullptr*/) const
 {
 	if (!visTable)
 	{
@@ -464,7 +466,7 @@ CCCoreLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints(const Visibi
 	if (!visTable || visTable->size() != count)
 	{
 		assert(false);
-		ccLog::Warning("[ccGenericPointCloud::getTheVisiblePoints] No visibility table instantiated!");
+		ccLog::Warning("[ccGenericPointCloud::getTheVisiblePoints] Invalid visibility table!");
 		return nullptr;
 	}
 
@@ -481,7 +483,17 @@ CCCoreLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints(const Visibi
 	}
 
 	//we create an entity with the 'visible' vertices only
-	CCCoreLib::ReferenceCloud* rc = new CCCoreLib::ReferenceCloud(const_cast<ccGenericPointCloud*>(this));
+	CCCoreLib::ReferenceCloud* rc = nullptr;
+	if (selection)
+	{
+		assert(selection->getAssociatedCloud() == this && selection->size() == 0);
+		rc = selection;
+		rc->clear();
+	}
+	else
+	{
+		rc = new CCCoreLib::ReferenceCloud(const_cast<ccGenericPointCloud*>(this));
+	}
 
 	if (pointCount)
 	{

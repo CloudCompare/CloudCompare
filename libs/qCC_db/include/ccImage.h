@@ -37,6 +37,9 @@ public:
 	//! Constructor from QImage
 	ccImage(const QImage& image, const QString& name = QString("unknown"));
 
+	//! Copy constructor
+	ccImage(const ccImage& image, bool keepSensorLink = true);
+
 	//inherited methods (ccHObject)
 	virtual bool isSerializable() const override { return true; }
 
@@ -98,6 +101,8 @@ protected:
 
 	//! Updates aspect ratio
 	void updateAspectRatio();
+
+protected:
 
 	//! Image width (in pixels)
 	unsigned m_width;

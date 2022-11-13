@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,11 +17,11 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_HIERARCHY_OBJECT_CASTER_HEADER
-#define CC_HIERARCHY_OBJECT_CASTER_HEADER
-
 //Local
 #include "qCC_db.h"
+
+//System
+#include <vector>
 
 class cc2DLabel;
 class cc2DViewportLabel;
@@ -145,6 +147,20 @@ public:
 	//! Converts current object to ccCoordinateSystem (if possible)
 	static ccCoordinateSystem* ToCoordinateSystem(ccHObject* obj);
 
-};
+	//! Helper: clones the children of sourceEntity and set the resulting entities as children of destEntity
+	/** \warning: Not all children can be cloned this way. Only simple ones for now (labels, sensors, images, etc.).
+		\param sourceEntity				source entity
+		\param destEntity				destination entity (can be the same as the source entity)
+		\param newPointOrTriangleIndex	optional: provides a mapping of the entity elements (points or triangles)
+										between the source and the destination (-1 means no correspondance)
+		\param sourceEntityProxy		for internal use
+		\param destEntityProxy			for internal use
 
-#endif //CC_HIERARCHY_OBJECT_CASTER_HEADER
+		\return success
+	**/
+	static bool CloneChildren(	const ccHObject* sourceEntity,
+								ccHObject* destEntity,
+								std::vector<int>* newPointOrTriangleIndex = nullptr,
+								const ccHObject* sourceEntityProxy = nullptr,
+								ccHObject* destEntityProxy = nullptr );
+};

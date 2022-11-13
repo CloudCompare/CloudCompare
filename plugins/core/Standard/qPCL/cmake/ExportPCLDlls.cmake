@@ -16,13 +16,13 @@ function( export_PCL_dlls ) # 1 argument: ARGV0 = destination directory
 
 		#release DLLs
 		file( GLOB pcl_release_dlls ${PCL_DIR}/bin/*${PCL_RELEASE_SUFFIX}.dll  )
-		copy_files("${pcl_release_dlls}" "${ARGV0}") #mind the quotes!
+		copy_files("${pcl_release_dlls}" "${ARGV0}" 0) #mind the quotes!
 
 		#debug DLLs
 		if( CMAKE_CONFIGURATION_TYPES )
 			file( GLOB pcl_debug_dlls ${PCL_DIR}/bin/*${PCL_DEBUG_SUFFIX}.dll  )
 			foreach( filename ${pcl_debug_dlls} )
-				install( FILES ${filename} CONFIGURATIONS Debug DESTINATION ${ARGV0}_debug )
+				copy_files("${filename}" "${ARGV0}" 2) #mind the quotes!
 			endforeach()
 		endif()
 

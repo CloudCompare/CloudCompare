@@ -77,7 +77,7 @@ public:
 	/** \warning 'unallocateVisibilityArray' will be called on all point clouds
 		prior to be removed from the pool.
 	**/
-	void removeAllEntities(bool unallocateVisibilityArrays);
+	void removeAllEntities();
 
 	//! Apply segmentation and update the database (helper)
 	bool applySegmentation(ccMainAppInterface* app, ccHObject::Container& newEntities);

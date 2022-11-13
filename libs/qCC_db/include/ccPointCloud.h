@@ -118,10 +118,11 @@ public: //clone, copy, etc.
 	/** "Reference clouds" are a set of indexes referring to a real point cloud.
 		See CClib documentation for more information about ReferenceClouds.
 		Warning: the ReferenceCloud structure must refer to this cloud.
-		\param selection a ReferenceCloud structure (pointing to source)
-		\param[out] warnings [optional] to determine if warnings (CTOR_ERRORS) occurred during the duplication process
+		\param[in]  selection			a ReferenceCloud structure (pointing to source)
+		\param[out] warnings			[optional] to determine if warnings (CTOR_ERRORS) occurred during the duplication process
+		\param[in]  withChildEntities	whether child entities should be transferred as well (see ccHObjectCaster::CloneChildren)
 	**/
-	ccPointCloud* partialClone(const CCCoreLib::ReferenceCloud* selection, int* warnings = nullptr) const;
+	ccPointCloud* partialClone(const CCCoreLib::ReferenceCloud* selection, int* warnings = nullptr, bool withChildEntities = true) const;
 
 	//! Clones this entity
 	/** All the main features of the entity are cloned, except from the octree and
@@ -465,7 +466,11 @@ public: //other methods
 	CCCoreLib::ReferenceCloud* crop(const ccBBox& box, bool inside = true) override;
 	void scale(PointCoordinateType fx, PointCoordinateType fy, PointCoordinateType fz, CCVector3 center = CCVector3(0,0,0)) override;
 	/** \warning if removeSelectedPoints is true, any attached octree will be deleted, as well as the visibility table. **/
-	ccGenericPointCloud* createNewCloudFromVisibilitySelection(bool removeSelectedPoints = false, VisibilityTableType* visTable = nullptr, bool silent = false) override;
+	ccGenericPointCloud* createNewCloudFromVisibilitySelection(	bool removeSelectedPoints = false,
+																VisibilityTableType* visTable = nullptr,
+																std::vector<int>* newIndexesOfRemainingPoints = nullptr,
+																bool silent = false,
+																CCCoreLib::ReferenceCloud* selection = nullptr) override;
 	bool removeVisiblePoints(VisibilityTableType* visTable = nullptr, std::vector<int>* newIndexes = nullptr) override;
 	void applyRigidTransformation(const ccGLMatrix& trans) override;
 	inline void refreshBB() override { invalidateBoundingBox(); }
@@ -647,7 +652,7 @@ public: //other methods
 		\param minVal minimum value
 		\param maxVal maximum value
 		\param outside whether to select the points inside or outside of the specified interval
-		\return resulting cloud (remaining points)
+		\return resulting cloud (remaining points) or the cloud itself if all points fall inside the input range
 	**/
 	ccPointCloud* filterPointsByScalarValue(ScalarType minVal, ScalarType maxVal, bool outside = false);
 

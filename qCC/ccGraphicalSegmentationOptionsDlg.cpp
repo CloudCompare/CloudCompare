@@ -29,9 +29,9 @@ ccGraphicalSegmentationOptionsDlg::ccGraphicalSegmentationOptionsDlg(const QStri
 	setupUi(this);
 
 	QSettings settings;
-	settings.beginGroup("SegmentationToolOptions");
-	QString remainingSuffix = settings.value("Remaining", ".remaining").toString();
-	QString segmentedSuffix = settings.value("Segmented", ".segmented").toString();
+	settings.beginGroup(SegmentationToolOptionsKey());
+	QString remainingSuffix = settings.value(RemainingSuffixKey(), ".remaining").toString();
+	QString segmentedSuffix = settings.value(SegmentedSuffixKey(), ".segmented").toString();
 	settings.endGroup();
 
 	remainingTextLineEdit->setText(remainingSuffix);
@@ -46,9 +46,9 @@ ccGraphicalSegmentationOptionsDlg::ccGraphicalSegmentationOptionsDlg(const QStri
 void ccGraphicalSegmentationOptionsDlg::accept()
 {
 	QSettings settings;
-	settings.beginGroup("SegmentationToolOptions");
-	settings.setValue("Remaining", remainingTextLineEdit->text());
-	settings.setValue("Segmented", segmentedTextLineEdit->text());
+	settings.beginGroup(SegmentationToolOptionsKey());
+	settings.setValue(RemainingSuffixKey(), remainingTextLineEdit->text());
+	settings.setValue(SegmentedSuffixKey(), segmentedTextLineEdit->text());
 	settings.endGroup();
 
 	QDialog::accept();

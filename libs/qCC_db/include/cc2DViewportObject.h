@@ -30,6 +30,9 @@ public:
 	//! Default constructor
 	cc2DViewportObject(QString name = QString());
 
+	//! Copy constructor
+	cc2DViewportObject(const cc2DViewportObject& viewport);
+
 	//inherited from ccHObject
 	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::VIEWPORT_2D_OBJECT; }
 	virtual bool isSerializable() const override { return true; }

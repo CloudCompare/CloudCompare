@@ -32,15 +32,15 @@
 
 cc2DViewportLabel::cc2DViewportLabel(QString name/*=QString()*/)
 	: cc2DViewportObject(name)
+	, m_roi{0, 0, 0, 0}
 {
-	//label rectangle
-	memset(m_roi, 0, sizeof(float) * 4);
 	setVisible(false);
 }
 
-void cc2DViewportLabel::setRoi(const float* roi)
+cc2DViewportLabel::cc2DViewportLabel(const cc2DViewportLabel& viewportLabel)
+	: cc2DViewportObject(viewportLabel)
+	, m_roi(viewportLabel.m_roi)
 {
-	memcpy(m_roi, roi, sizeof(float) * 4);
 }
 
 bool cc2DViewportLabel::toFile_MeOnly(QFile& out) const
@@ -50,7 +50,7 @@ bool cc2DViewportLabel::toFile_MeOnly(QFile& out) const
 
 	//ROI (dataVersion>=21)
 	QDataStream outStream(&out);
-	for (int i = 0; i < 4; ++i)
+	for (size_t i = 0; i < m_roi.size(); ++i)
 		outStream << m_roi[i];
 
 	return true;
@@ -66,7 +66,7 @@ bool cc2DViewportLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags,
 
 	//ROI (dataVersion>=21)
 	QDataStream inStream(&in);
-	for (int i = 0; i < 4; ++i)
+	for (size_t i = 0; i < m_roi.size(); ++i)
 		inStream >> m_roi[i];
 
 	return true;

@@ -209,11 +209,8 @@ function( _InstallSharedTarget )
 		
 		set( target_shared_lib "${target_bin_dir}/${lib_prefix}${shared_target}${lib_postfix}${CMAKE_SHARED_LIBRARY_SUFFIX}" )
 				
-		if ( WIN32 )
-			copy_files( "${target_shared_lib}" "${full_path}" 1 )
-		else()
-			copy_files( "${target_shared_lib}" "${full_path}" )
-		endif()
+		copy_files( "${target_shared_lib}" "${full_path}" 1 )
+
 	else()	
 		if( WIN32 )
 			if( NOT CMAKE_CONFIGURATION_TYPES )

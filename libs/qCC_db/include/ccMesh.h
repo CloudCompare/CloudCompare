@@ -40,9 +40,9 @@ public:
 	explicit ccMesh(ccGenericPointCloud* vertices, unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID);
 
 	//! ccMesh constructor (from a CCCoreLib::GenericIndexedMesh)
-	/** The GenericIndexedMesh should refer to a known ccGenericPointCloud.
-		\param giMesh the GenericIndexedMesh
-		\param giVertices giMesh vertices
+	/** The GenericIndexedMesh must be associated to a valid ccGenericPointCloud instance.
+		\param giMesh		the mesh to 'copy'
+		\param giVertices	associated vertices (can technically be different from the input mesh vertices, but should have at least as many points)
 	**/
 	explicit ccMesh(CCCoreLib::GenericIndexedMesh* giMesh, ccGenericPointCloud* giVertices);
 
@@ -377,16 +377,22 @@ public:
 	ccMesh* subdivide(PointCoordinateType maxArea) const;
 
 	//! Creates a new mesh with the selected vertices only
-	/** This method is called after a graphical segmentation.
-		It creates a new mesh structure with the vertices that are
-		tagged as "visible" (see ccGenericPointCloud::visibilityArray).
+	/** This method is called after a graphical segmentation. It creates
+		a new mesh structure with the vertices that are tagged as "visible"
+		(see ccGenericPointCloud::visibilityArray).
 		This method will also update this mesh if removeSelectedFaces is true.
 		In this case, all "selected" triangles will be removed from this mesh's instance.
 
-		\param	removeSelectedFaces specifies if the faces composed only of 'selected' vertices should be removed or not.
-				If true, the visibility array will be automatically unallocated on completion
+		\param	removeSelectedTriangles			specifies if the faces composed only of 'selected' vertices should be removed or not.
+												If true, the visibility array will be automatically unallocated on completion
+		\param	newIndexesOfRemainingTriangles	the new indexes of the remaining triangles (if removeSelectedTriangles is true - optional).
+												Must be initially empty or have the same size as the original mesh.
+		\param	withChildEntities				whether child entities should be transferred as well (see ccHObjectCaster::CloneChildren)
+		\return	the new mesh (if successful) or itself if all vertices were visible/selected
 	**/
-	ccMesh* createNewMeshFromSelection(bool removeSelectedFaces);
+	ccMesh* createNewMeshFromSelection(	bool removeSelectedTriangles,
+										std::vector<int>* newIndexesOfRemainingTriangles = nullptr,
+										bool withChildEntities = false );
 
 	//! Swaps two triangles
 	/** Automatically updates internal structures (i.e. lookup tables for

@@ -49,12 +49,12 @@ if ( PLUGIN_IO_QSTEP )
 		list( APPEND OC_DLLS "${OPENCASCADE_TBB_DLL_DIR}/tbb.dll" )
 		list( APPEND OC_DLLS "${OPENCASCADE_TBB_DLL_DIR}/tbbmalloc.dll" )
 		
-		message( ${OC_DLLS} )
+		#message( ${OC_DLLS} )
 
-		copy_files( "${OC_DLLS}" "${CLOUDCOMPARE_DEST_FOLDER}" )
+		copy_files( "${OC_DLLS}" "${CLOUDCOMPARE_DEST_FOLDER}" 1 )
 		
 		if( ${OPTION_BUILD_CCVIEWER} )
-			copy_files( "${OC_DLLS}" "${CCVIEWER_DEST_FOLDER}" )
+			copy_files( "${OC_DLLS}" "${CCVIEWER_DEST_FOLDER}" 1 )
 		endif()
 		
 		unset( OC_DLLS )

@@ -150,16 +150,32 @@ ccHObject* cc2DLabel::PickedPoint::entity() const
 cc2DLabel::cc2DLabel(QString name/*=QString()*/)
 	: ccHObject(name.isEmpty() ? "label" : name)
 	, m_showFullBody(true)
+	, m_screenPos{ 0.05f, 0.5f }
+	, m_lastScreenPos{ 0, 0 }
 	, m_dispPointsLegend(false)
 	, m_dispIn2D(true)
 	, m_relMarkerScale(1.0f)
 {
-	m_screenPos[0] = m_screenPos[1] = 0.05f;
-
 	clear(false);
 
 	lockVisibility(false);
 	setEnabled(true);
+}
+
+cc2DLabel::cc2DLabel(const cc2DLabel& label, bool copyPoints/*=true*/)
+	: ccHObject(label)
+	, m_showFullBody(label.m_showFullBody)
+	, m_screenPos(label.m_screenPos)
+	, m_lastScreenPos(label.m_lastScreenPos)
+	, m_labelROI(label.m_labelROI)
+	, m_dispPointsLegend(label.m_dispPointsLegend)
+	, m_dispIn2D(label.m_dispIn2D)
+	, m_relMarkerScale(label.m_relMarkerScale)
+{
+	if (copyPoints)
+	{
+		m_pickedPoints = label.m_pickedPoints;
+	}
 }
 
 QString cc2DLabel::GetSFValueAsString(const LabelInfo1& info, int precision)
@@ -476,7 +492,7 @@ bool cc2DLabel::toFile_MeOnly(QFile& out) const
 	}
 
 	//Relative screen position (dataVersion >= 20)
-	if (out.write((const char*)m_screenPos, sizeof(float) * 2) < 0)
+	if (out.write((const char*)m_screenPos.data(), sizeof(float) * 2) < 0)
 		return WriteError();
 
 	//Collapsed state (dataVersion >= 20)
@@ -575,7 +591,7 @@ bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 	}
 
 	//Relative screen position (dataVersion >= 20)
-	if (in.read((char*)m_screenPos, sizeof(float) * 2) < 0)
+	if (in.read((char*)m_screenPos.data(), sizeof(float) * 2) < 0)
 		return ReadError();
 
 	//Collapsed state (dataVersion >= 20)
@@ -1527,15 +1543,6 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 
 		//main rectangle
 		m_labelROI = QRect(0, 0, dx, dy);
-
-		//close button
-		//m_closeButtonROI.right()   = dx-margin;
-		//m_closeButtonROI.left()    = m_closeButtonROI.right()-buttonSize;
-		//m_closeButtonROI.bottom()  = margin;
-		//m_closeButtonROI.top()     = m_closeButtonROI.bottom()+buttonSize;
-
-		//automatically elide the title
-		//title = titleFontMetrics.elidedText(title, Qt::ElideRight, m_closeButtonROI[0] - 2 * margin);
 	}
 
 	//draw label rectangle

@@ -3860,7 +3860,7 @@ void ccGLWindow::updateActiveItemsList(int x, int y, bool extendToSelectedLabels
 
 	if (m_activeItems.size() == 1)
 	{
-		ccInteractor* pickedObj = m_activeItems.front();
+		ccInteractor* pickedObj = *m_activeItems.begin();
 		cc2DLabel* label = dynamic_cast<cc2DLabel*>(pickedObj);
 		if (label)
 		{
@@ -3886,7 +3886,7 @@ void ccGLWindow::updateActiveItemsList(int x, int y, bool extendToSelectedLabels
 						cc2DLabel* l = static_cast<cc2DLabel*>(label);
 						if (l != label && l->isSelected())
 						{
-							m_activeItems.push_back(l);
+							m_activeItems.insert(l);
 						}
 					}
 				}
@@ -3902,7 +3902,7 @@ void ccGLWindow::onItemPickedFast(ccHObject* pickedEntity, int pickedItemIndex, 
 		if (pickedEntity->isA(CC_TYPES::LABEL_2D))
 		{
 			cc2DLabel* label = static_cast<cc2DLabel*>(pickedEntity);
-			m_activeItems.push_back(label);
+			m_activeItems.insert(label);
 		}
 		else if (pickedEntity->isA(CC_TYPES::CLIPPING_BOX_PART))
 		{
@@ -3912,7 +3912,7 @@ void ccGLWindow::onItemPickedFast(ccHObject* pickedEntity, int pickedItemIndex, 
 			cbox->setActiveComponent(cBoxPart->partID());
 			cbox->setClickedPoint(x, y, width(), height(), m_viewportParams.viewMat);
 
-			m_activeItems.push_back(cbox);
+			m_activeItems.insert(cbox);
 		}
 	}
 
@@ -4151,7 +4151,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 			const int retinaScale = devicePixelRatio();
 			u *= retinaScale;
 
-			for (auto &activeItem : m_activeItems)
+			for (auto& activeItem : m_activeItems)
 			{
 				if (activeItem->move2D(x * retinaScale, y * retinaScale, dx * retinaScale, dy * retinaScale, glWidth(), glHeight()))
 				{
@@ -4536,7 +4536,7 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 			updateActiveItemsList(event->x(), event->y(), false);
 			if (!m_activeItems.empty())
 			{
-				ccInteractor* item = m_activeItems.front();
+				ccInteractor* item = *m_activeItems.begin();
 				m_activeItems.clear();
 				if (item->acceptClick(event->x(), height() - 1 - event->y(), Qt::RightButton))
 				{
@@ -4632,7 +4632,7 @@ void ccGLWindow::doPicking()
 			{
 				if (m_activeItems.size() == 1)
 				{
-					ccInteractor* pickedObj = m_activeItems.front();
+					ccInteractor* pickedObj = *m_activeItems.begin();
 					cc2DLabel* label = dynamic_cast<cc2DLabel*>(pickedObj);
 					if (label && !label->isSelected())
 					{
@@ -4643,7 +4643,7 @@ void ccGLWindow::doPicking()
 
 				//interaction with item(s) such as labels, etc.
 				//DGM TODO: to activate only if some items take left clicks into account!
-				//for (std::list<ccInteractor*>::iterator it=m_activeItems.begin(); it!=m_activeItems.end(); ++it)
+				//for (std::set<ccInteractor*>::iterator it=m_activeItems.begin(); it!=m_activeItems.end(); ++it)
 				//if ((*it)->acceptClick(x,y,Qt::LeftButton))
 				//{
 				//	event->accept();
@@ -6138,6 +6138,15 @@ void ccGLWindow::setupProjectiveViewport(	const ccGLMatrixd& cameraMatrix,
 	setBaseViewMat(trans);
 
 	redraw();
+}
+
+void ccGLWindow::aboutToBeRemoved(ccDrawableObject* entity)
+{
+	ccInteractor* interactor = dynamic_cast<ccInteractor*>(entity);
+	if (interactor)
+	{
+		m_activeItems.erase(interactor);
+	}
 }
 
 void ccGLWindow::setCustomView(const CCVector3d& forward, const CCVector3d& up, bool forceRedraw/*=true*/)

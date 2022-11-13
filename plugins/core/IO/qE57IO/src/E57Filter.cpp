@@ -639,19 +639,19 @@ void SaveImage(const ccImage* image, const QString& scanGUID, e57::ImageFile& im
 		//acquisitionDateTime.set("isAtomicClockReferenced", e57::IntegerNode(imf, isAtomicClockReferenced));
 	}
 
-	// Create pose structure for scan (if any)
-	if (image->isA(CC_TYPES::CALIBRATED_IMAGE))
-	{
-		const ccCameraSensor* sensor = static_cast<const ccImage*>(image)->getAssociatedSensor();
-		if (sensor)
-		{
-			ccIndexedTransformation poseMat;
-			if (sensor->getActiveAbsoluteTransformation(poseMat))
-			{
-				SavePoseInformation(imageNode, imf, ccGLMatrixd(poseMat.data()));
-			}
-		}
-	}
+	// Create pose structure for image (if any)
+	//if (image->isA(CC_TYPES::IMAGE))
+	//{
+	//	const ccCameraSensor* sensor = static_cast<const ccImage*>(image)->getAssociatedSensor();
+	//	if (sensor)
+	//	{
+	//		ccIndexedTransformation poseMat;
+	//		if (sensor->getActiveAbsoluteTransformation(poseMat))
+	//		{
+	//			SavePoseInformation(imageNode, imf, ccGLMatrixd(poseMat.data()));
+	//		}
+	//	}
+	//}
 
 	//save image data as PNG
 	QByteArray ba;
@@ -665,8 +665,8 @@ void SaveImage(const ccImage* image, const QString& scanGUID, e57::ImageFile& im
 	e57::StructureNode cameraRepresentation = e57::StructureNode(imf);
 	QString cameraRepresentationStr("visualReferenceRepresentation");
 
-	e57::BlobNode blob(imf,imageSize);
-	cameraRepresentation.set("pngImage",blob);
+	e57::BlobNode blob(imf, imageSize);
+	cameraRepresentation.set("pngImage", blob);
 	cameraRepresentation.set("imageHeight", e57::IntegerNode(imf, image->getH()));
 	cameraRepresentation.set("imageWidth", e57::IntegerNode(imf, image->getW()));
 

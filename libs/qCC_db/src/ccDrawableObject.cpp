@@ -75,6 +75,7 @@ void ccDrawableObject::setDisplay(ccGenericGLDisplay* win)
 	if (win && m_currentDisplay != win)
 	{
 		win->invalidateViewport();
+		win->aboutToBeRemoved(this);
 		win->deprecate3DLayer();
 	}
 
@@ -91,6 +92,7 @@ void ccDrawableObject::removeFromDisplay(const ccGenericGLDisplay* win)
 	{
 		if (m_currentDisplay)
 		{
+			m_currentDisplay->aboutToBeRemoved(this);
 			m_currentDisplay->deprecate3DLayer();
 		}
 		setDisplay(nullptr);

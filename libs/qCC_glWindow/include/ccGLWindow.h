@@ -186,6 +186,7 @@ public:
 	QPointF toCenteredGLCoordinates(int x, int y) const override;
 	QPointF toCornerGLCoordinates(int x, int y) const override;
 	void setupProjectiveViewport(const ccGLMatrixd& cameraMatrix, float fov_deg = 0.0f, float ar = 1.0f, bool viewerBasedPerspective = true, bool bubbleViewMode = false) override;
+	void aboutToBeRemoved(ccDrawableObject* entity) override;
 #ifdef CC_GL_WINDOW_USE_QWINDOW
 	inline QWidget* asWidget() override { return m_parentWidget; }
 #else
@@ -971,7 +972,7 @@ protected: //other methods
 	//! Currently active items
 	/** Active items can be moved with mouse, etc.
 	**/
-	std::list<ccInteractor*> m_activeItems;
+	std::unordered_set<ccInteractor*> m_activeItems;
 
 	//! Inits FBO (frame buffer object)
 	bool initFBO(int w, int h);

@@ -27,7 +27,9 @@
 
 //Qt
 #include <QFont>
+
 class QWidget;
+class ccDrawableObject;
 
 //! OpenGL camera parameters
 struct ccGLCameraParameters
@@ -205,6 +207,9 @@ public:
 											float ar = 1.0f,
 											bool viewerBasedPerspective = true,
 											bool bubbleViewMode = false) = 0;
+
+	//! Warns the display that the enity is about to be removed
+	virtual void aboutToBeRemoved(ccDrawableObject* entity) = 0;
 
 	//! Returns this window as a proper Qt widget
 	virtual QWidget* asWidget() { return nullptr; }

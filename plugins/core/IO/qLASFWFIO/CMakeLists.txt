@@ -1,8 +1,10 @@
 # Windows only
 if( WIN32 )
-	option( PLUGIN_IO_QLAS_FWF "Check to install qLAS FWF I/O plugin" OFF )
+	option( PLUGIN_IO_QLAS_FWF "Check to install qLAS FWF I/O plugin (deprecated, prefer using qLAS I/O now)" OFF )
 	
 	if( PLUGIN_IO_QLAS_FWF )
+		message( WARNING "The qLAS_FWF plugin is now deprecated, prefer using qLAS instead" )
+	
 		#CloudCompare LAS FWF (i.e. version >= 1.3) I/O plugin
 		project( QLAS_FWF_IO_PLUGIN )
 		

@@ -1,6 +1,9 @@
-option( PLUGIN_IO_QPDAL "Install qPDALIO plugin to read & write LAS files" OFF )
+option( PLUGIN_IO_QPDAL "Install qPDALIO plugin to read & write LAS files (deprecated, prefer using qLAS I/O now)" OFF )
 
 if( PLUGIN_IO_QPDAL )
+
+	message( WARNING "The qPDAL plugin is now deprecated, prefer using qLAS instead" )
+
 	project( QPDAL_IO_PLUGIN )
  
 	find_package( PDAL 1.6 REQUIRED CONFIG )

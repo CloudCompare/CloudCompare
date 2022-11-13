@@ -209,16 +209,21 @@ public:
 	virtual void refreshBB() = 0;
 
 	//! Creates a new point cloud with only the 'visible' points (as defined by the visibility array)
-	/** \param removeSelectedPoints if true, exported point are also removed from the current point cloud
-		\param visTable visibility table (optional, otherwise the cloud's default one will be used)
-		\param silent don't issue a warning message if there's no point to keep
+	/** \param[in]  removeSelectedPoints if true, exported point are also removed from the current point cloud
+		\param[in]  visTable visibility table (optional, otherwise the cloud's default one will be used)
+		\param[out] newIndexesOfRemainingPoints the new indexes of the remaining points (if removeSelectedPoints is true - optional).
+		            Must be initially empty or have the same size as the original cloud.
+		\param[in]  silent don't issue a warning message if there's no point to keep
 		\return new point cloud with selected points
 	**/
-	virtual ccGenericPointCloud* createNewCloudFromVisibilitySelection(bool removeSelectedPoints = false, VisibilityTableType* visTable = nullptr, bool silent = false) = 0;
+	virtual ccGenericPointCloud* createNewCloudFromVisibilitySelection(	bool removeSelectedPoints = false,
+																		VisibilityTableType* visTable = nullptr,
+																		std::vector<int>* newIndexesOfRemainingPoints = nullptr,
+																		bool silent = false) = 0;
 
 	//! Removes all the 'visible' points (as defined by the visibility array)
 	/** \param visTable visibility table (optional, otherwise the cloud's default one will be used)
-		\param newIndexes optional: stores the new indexes of the points (either an index >= 0 if kept, or -1 if not). Must have the same size as the original cloud.
+		\param newIndexes optional: stores the new indexes of the points (either an index >= 0 if kept, or -1 if not). Must be initially empty or have the same size as the original cloud.
 		\return success
 	**/
 	virtual bool removeVisiblePoints(VisibilityTableType* visTable = nullptr, std::vector<int>* newIndexes = nullptr) = 0;

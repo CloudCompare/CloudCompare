@@ -76,7 +76,7 @@ ccGBLSensor::ccGBLSensor(ROTATION_ORDER rotOrder/*=YAW_THEN_PITCH*/)
 	setSelectionBehavior(SELECTION_FIT_BBOX);
 }
 
-ccGBLSensor::ccGBLSensor(const ccGBLSensor &sensor)
+ccGBLSensor::ccGBLSensor(const ccGBLSensor& sensor, bool copyDepthBuffer/*=false*/)
 	: ccSensor(sensor)
 	, m_phiMin(sensor.m_phiMin)
 	, m_phiMax(sensor.m_phiMax)
@@ -90,6 +90,10 @@ ccGBLSensor::ccGBLSensor(const ccGBLSensor &sensor)
 	, m_sensorRange(sensor.m_sensorRange)
 	, m_uncertainty(sensor.m_uncertainty)
 {
+	if (copyDepthBuffer)
+	{
+		m_depthBuffer = sensor.m_depthBuffer;
+	}
 }
 
 void ccGBLSensor::clearDepthBuffer()

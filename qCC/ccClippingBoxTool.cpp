@@ -429,7 +429,7 @@ ccHObject* GetSlice(ccHObject* obj, ccClipBox* clipBox, bool silent)
 		}
 		clipBox->flagPointsInside(inputCloud, &selectionTable);
 		
-		ccGenericPointCloud* sliceCloud = inputCloud->createNewCloudFromVisibilitySelection(false, &selectionTable, true);
+		ccGenericPointCloud* sliceCloud = inputCloud->createNewCloudFromVisibilitySelection(false, &selectionTable, nullptr, true);
 		if (!sliceCloud)
 		{
 			if (!silent)

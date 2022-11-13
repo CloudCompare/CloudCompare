@@ -383,10 +383,12 @@ public:
 		This method will also update this mesh if removeSelectedFaces is true.
 		In this case, all "selected" triangles will be removed from this mesh's instance.
 
-		\param	removeSelectedFaces specifies if the faces composed only of 'selected' vertices should be removed or not.
+		\param	removeSelectedTriangles specifies if the faces composed only of 'selected' vertices should be removed or not.
 				If true, the visibility array will be automatically unallocated on completion
+		\param	newIndexesOfRemainingTriangles the new indexes of the remaining triangles (if removeSelectedTriangles is true - optional).
+		            Must be initially empty or have the same size as the original mesh.
 	**/
-	ccMesh* createNewMeshFromSelection(bool removeSelectedFaces);
+	ccMesh* createNewMeshFromSelection(bool removeSelectedTriangles, std::vector<int>* newIndexesOfRemainingTriangles = nullptr);
 
 	//! Swaps two triangles
 	/** Automatically updates internal structures (i.e. lookup tables for

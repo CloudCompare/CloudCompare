@@ -118,10 +118,11 @@ public: //clone, copy, etc.
 	/** "Reference clouds" are a set of indexes referring to a real point cloud.
 		See CClib documentation for more information about ReferenceClouds.
 		Warning: the ReferenceCloud structure must refer to this cloud.
-		\param selection a ReferenceCloud structure (pointing to source)
-		\param[out] warnings [optional] to determine if warnings (CTOR_ERRORS) occurred during the duplication process
+		\param[in]  selection			a ReferenceCloud structure (pointing to source)
+		\param[out] warnings			[optional] to determine if warnings (CTOR_ERRORS) occurred during the duplication process
+		\param[in]  withChildEntities	whether child entities (labels, sensors, images, etc.) should be transferred as well
 	**/
-	ccPointCloud* partialClone(const CCCoreLib::ReferenceCloud* selection, int* warnings = nullptr) const;
+	ccPointCloud* partialClone(const CCCoreLib::ReferenceCloud* selection, int* warnings = nullptr, bool withChildEntities = true) const;
 
 	//! Clones this entity
 	/** All the main features of the entity are cloned, except from the octree and
@@ -465,7 +466,7 @@ public: //other methods
 	CCCoreLib::ReferenceCloud* crop(const ccBBox& box, bool inside = true) override;
 	void scale(PointCoordinateType fx, PointCoordinateType fy, PointCoordinateType fz, CCVector3 center = CCVector3(0,0,0)) override;
 	/** \warning if removeSelectedPoints is true, any attached octree will be deleted, as well as the visibility table. **/
-	ccGenericPointCloud* createNewCloudFromVisibilitySelection(bool removeSelectedPoints = false, VisibilityTableType* visTable = nullptr, bool silent = false) override;
+	ccGenericPointCloud* createNewCloudFromVisibilitySelection(bool removeSelectedPoints = false, VisibilityTableType* visTable = nullptr, std::vector<int>* newIndexesOfRemainingPoints = nullptr, bool silent = false) override;
 	bool removeVisiblePoints(VisibilityTableType* visTable = nullptr, std::vector<int>* newIndexes = nullptr) override;
 	void applyRigidTransformation(const ccGLMatrix& trans) override;
 	inline void refreshBB() override { invalidateBoundingBox(); }

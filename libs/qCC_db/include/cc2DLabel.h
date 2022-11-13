@@ -187,8 +187,11 @@ public:
 	//! Adds a point to this label (direct - handle with care)
 	bool addPickedPoint(const PickedPoint& pp);
 
-	//! Returns a given point
+	//! Returns a given point (const version)
 	inline const PickedPoint& getPickedPoint(unsigned index) const { return m_pickedPoints[index]; }
+
+	//! Returns a given point
+	inline PickedPoint& getPickedPoint(unsigned index) { return m_pickedPoints[index]; }
 
 	//! Sets marker (relative) scale
 	/** Default value: 1.0

@@ -46,6 +46,9 @@
 #include "ccPolyline.h"
 #include "ccProgressDialog.h"
 #include "ccScalarField.h"
+#include "ccCameraSensor.h"
+#include "cc2DViewportObject.h"
+#include "cc2DViewportLabel.h"
 
 //Qt
 #include <QCoreApplication>
@@ -179,7 +182,7 @@ void UpdateGridIndexes(const std::vector<int>& newIndexMap, std::vector<ccPointC
 	}
 }
 
-ccPointCloud* ccPointCloud::partialClone(const CCCoreLib::ReferenceCloud* selection, int* warnings/*=nullptr*/) const
+ccPointCloud* ccPointCloud::partialClone(const CCCoreLib::ReferenceCloud* selection, int* warnings/*=nullptr*/, bool withChildEntities/*=true*/) const
 {
 	if (warnings)
 	{
@@ -399,34 +402,169 @@ ccPointCloud* ccPointCloud::partialClone(const CCCoreLib::ReferenceCloud* select
 			}
 		}
 
-		//Meshes //TODO
-		/*Lib::GenericIndexedMesh* theMesh = source->_getMesh();
-		if (theMesh)
+		if (withChildEntities)
 		{
-		//REVOIR --> on pourrait le faire pour chaque sous-mesh non ?
-		CCCoreLib::GenericIndexedMesh* newTri = CCCoreLib::ManualSegmentationTools::segmentMesh(theMesh,selection,true,nullptr,this);
-		setMesh(newTri);
-		if (source->areMeshesDisplayed()) showTri();
-		}
+			QMap<ccHObject*, ccHObject*> clonedEntities;
 
-		//PoV & Scanners
-		bool importScanners = true;
-		if (source->isMultipleScansModeActivated())
-		if (activateMultipleScansMode())
-		{
-		scanIndexesTableType* _theScans = source->getTheScansIndexesArray();
-		for (i=0; i<n; ++i) cubeVertexesIndexes.setValue(i,_theScans->getValue(i));
-		}
-		else importScanners=false;
+			// specifc case: labels
+			{
+				ccHObject::Container labels2D;
+				filterChildren(labels2D, true, CC_TYPES::LABEL_2D);
+				if (!labels2D.empty())
+				{
+					// we need a mapping to know if any point is kept in the cloned version or not
+					std::vector<unsigned> newPointIndex;
+					try
+					{
+						newPointIndex.resize(size(), n);
+						for (unsigned i = 0; i < n; i++)
+						{
+							newPointIndex[selection->getPointGlobalIndex(i)] = i;
+						}
 
-		if (importScanners)
-		{
-		//on insere les objets "capteur" (pas de copie ici, la meme instance peut-etre partagee par plusieurs listes)
-		for (i=1;i<=source->getNumberOfSensors();++i)
-		setSensor(source->_getSensor(i),i);
+						for (ccHObject* labelEntity : labels2D)
+						{
+							cc2DLabel* label = static_cast<cc2DLabel*>(labelEntity);
+							// check if we can keep this label
+							bool keepThisLabel = true;
+							for (unsigned i = 0; i < label->size(); ++i)
+							{
+								const cc2DLabel::PickedPoint& pp = label->getPickedPoint(i);
+								if (pp.entity() == this && newPointIndex[pp.index] == n)
+								{
+									// this label relies on a point that is not used by the partial clone
+									keepThisLabel = false;
+									break;
+								}
+							}
+
+							if (keepThisLabel)
+							{
+								cc2DLabel* clonedLabel = new cc2DLabel(*label, false);
+								for (unsigned i = 0; i < label->size(); ++i)
+								{
+									cc2DLabel::PickedPoint pp = label->getPickedPoint(i);
+									if (pp.entity() == this)
+									{
+										pp._cloud = result;
+										pp.index = newPointIndex[pp.index];
+										assert(pp.index < n);
+									}
+									clonedLabel->addPickedPoint(pp);
+								}
+								result->addChild(clonedLabel);
+								//clonedEntities.insert(label, clonedLabel); // not used
+							}
+						}
+					}
+					catch (const std::bad_alloc&)
+					{
+						ccLog::Warning("Not enough memory to clones the 2D labels");
+					}
+				}
+			}
+
+			// specific case: camera sensors need to be processed before the images
+			{
+				ccHObject::Container cameraSensors;
+				filterChildren(cameraSensors, true, CC_TYPES::CAMERA_SENSOR);
+
+				// clone the camera sensors (if any)
+				if (!cameraSensors.empty())
+				{
+					for (ccHObject* sensor : cameraSensors)
+					{
+						ccCameraSensor* camSensor = static_cast<ccCameraSensor*>(sensor);
+						ccCameraSensor* cloned = new ccCameraSensor(*camSensor);
+
+						result->addChild(cloned);
+						clonedEntities.insert(camSensor, cloned);
+					}
+				}
+			}
+
+			// for the other children
+			for (unsigned i = 0; i < getChildrenNumber(); ++i)
+			{
+				ccHObject* child = getChild(i);
+				switch (child->getClassID())
+				{
+
+				// image
+				case CC_TYPES::IMAGE:
+				{
+					ccImage* image = static_cast<ccImage*>(child);
+					ccImage* cloned = new ccImage(*image, false);
+
+					ccCameraSensor* camSensor = image->getAssociatedSensor();
+					if (camSensor)
+					{
+						if (clonedEntities.contains(camSensor))
+						{
+							// if we have already cloned the sensor on which this image depends,
+							// we can simply update the link
+							cloned->setAssociatedSensor(static_cast<ccCameraSensor*>(clonedEntities[camSensor]));
+						}
+						else
+						{
+							// else we have to clone the sensor
+							ccCameraSensor* clonedSensor = new ccCameraSensor(*camSensor);
+							cloned->setAssociatedSensor(clonedSensor);
+							result->addChild(clonedSensor);
+							clonedEntities.insert(camSensor, clonedSensor);
+						}
+					}
+				}
+				break;
+
+				// GBL sensor
+				case CC_TYPES::GBL_SENSOR:
+				{
+					// simply clone the GBL sensor
+					ccGBLSensor* gblSensor = static_cast<ccGBLSensor*>(child);
+					ccGBLSensor* cloned = new ccGBLSensor(*gblSensor, false);
+					result->addChild(cloned);
+					//clonedEntities.insert(gblSensor, cloned); // not used
+				}
+				break;
+
+				// 2D Viewport object
+				case CC_TYPES::VIEWPORT_2D_OBJECT:
+				{
+					cc2DViewportObject* viewport = static_cast<cc2DViewportObject*>(child);;
+					cc2DViewportObject* cloned = new cc2DViewportObject(*viewport);
+					result->addChild(cloned);
+					//clonedEntities.insert(viewport, cloned); // not used
+				}
+				break;
+
+				// 2D Viewport labels
+				case CC_TYPES::VIEWPORT_2D_LABEL:
+				{
+					cc2DViewportLabel* viewportLabel = static_cast<cc2DViewportLabel*>(child);;
+					cc2DViewportLabel* cloned = new cc2DViewportLabel(*viewportLabel);
+					result->addChild(cloned);
+					//clonedEntities.insert(viewportLabel, cloned); // not used
+				}
+				break;
+
+				// Meshes
+				case CC_TYPES::MESH:
+				{
+					// TODO
+				}
+				break;
+
+				default:
+				{
+					// nothing to do
+				}
+				break;
+				}
+			}
 		}
-		*/
 	}
+
 	return result;
 }
 
@@ -3294,7 +3432,10 @@ void ccPointCloud::hidePointsByScalarValue(ScalarType minVal, ScalarType maxVal)
 	}
 }
 
-ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool removeSelectedPoints/*=false*/, VisibilityTableType* visTable/*=nullptr*/, bool silent/*=false*/)
+ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(	bool removeSelectedPoints/*=false*/,
+																			VisibilityTableType* visTable/*=nullptr*/,
+																			std::vector<int>* newIndexesOfRemainingPoints/*=nullptr*/,
+																			bool silent/*=false*/)
 {
 	if (!visTable)
 	{
@@ -3350,7 +3491,7 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool re
 	//shall the visible points be erased from this cloud?
 	if (removeSelectedPoints && !isLocked())
 	{
-		removeVisiblePoints(visTable);
+		removeVisiblePoints(visTable, newIndexesOfRemainingPoints);
 	}
 
 	return result;
@@ -3433,7 +3574,7 @@ bool ccPointCloud::removeVisiblePoints(VisibilityTableType* visTable/*=nullptr*/
 		}
 	}
 
-	//we have to take care of scan grids
+	// we have to take care of scan grids
 	if (!m_grids.empty())
 	{
 		assert(_newIndexes);
@@ -3450,8 +3591,6 @@ bool ccPointCloud::removeVisiblePoints(VisibilityTableType* visTable/*=nullptr*/
 			}
 		}
 	}
-
-	//TODO: handle associated meshes?
 
 	resize(lastPointIndex);
 

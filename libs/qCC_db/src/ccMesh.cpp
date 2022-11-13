@@ -2171,7 +2171,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 	}
 }
 
-ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
+ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedTriangles, std::vector<int>* newIndexesOfRemainingTriangles/*=nullptr*/)
 {
 	if (!m_associatedCloud)
 	{
@@ -2186,7 +2186,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 	}
 
 	//create vertices for the new mesh
-	ccGenericPointCloud* newVertices = m_associatedCloud->createNewCloudFromVisibilitySelection(false, nullptr, true);
+	ccGenericPointCloud* newVertices = m_associatedCloud->createNewCloudFromVisibilitySelection(false, nullptr, nullptr, true);
 	if (!newVertices)
 	{
 		ccLog::Error(QString("[Mesh %1] Failed to create segmented mesh vertices! (not enough memory)").arg(getName()));
@@ -2216,7 +2216,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 	}
 
 	//nothing to do
-	if (rc->size() == 0 || (removeSelectedFaces && rc->size() == m_associatedCloud->size()))
+	if (rc->size() == 0 || (removeSelectedTriangles && rc->size() == m_associatedCloud->size()))
 	{
 		return nullptr;
 	}
@@ -2512,7 +2512,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 						verticesVisibility[tsi.i2] != CCCoreLib::POINT_VISIBLE ||
 						verticesVisibility[tsi.i3] != CCCoreLib::POINT_VISIBLE)
 					{
-						indexMap.emplace_back(removeSelectedFaces ? newInvisibleIndex++ : static_cast<unsigned>(i));
+						indexMap.emplace_back(removeSelectedTriangles ? newInvisibleIndex++ : static_cast<unsigned>(i));
 					}
 					else
 					{
@@ -2524,7 +2524,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 			for (size_t i = 0; i < subMeshes.size(); ++i)
 			{
 				ccSubMesh* subMesh = static_cast<ccSubMesh*>(subMeshes[i]);
-				ccSubMesh* subMesh2 = subMesh->createNewSubMeshFromSelection(removeSelectedFaces, &indexMap);
+				ccSubMesh* subMesh2 = subMesh->createNewSubMeshFromSelection(removeSelectedTriangles, &indexMap);
 
 				if (subMesh2)
 				{
@@ -2567,8 +2567,32 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 	}
 
 	//shall we remove the selected triangles from this mesh?
-	if (removeSelectedFaces)
+	if (removeSelectedTriangles)
 	{
+		// shall we store the new indexes of the the remaining triangles?
+		if (newIndexesOfRemainingTriangles)
+		{
+			if (newIndexesOfRemainingTriangles->empty())
+			{
+				try
+				{
+					newIndexesOfRemainingTriangles->resize(size());
+				}
+				catch (const std::bad_alloc&)
+				{
+					ccLog::Error("Not enough memory");
+					return nullptr;
+				}
+			}
+			else if (newIndexesOfRemainingTriangles->size() != size())
+			{
+				ccLog::Error("[createNewMeshFromSelection] Input 'new indexes of remaining triangles' vector has a wrong size");
+				newIndexesOfRemainingTriangles = nullptr;
+				delete newMesh;
+				return nullptr;
+			}
+		}
+
 		//we remove all fully visible faces
 		size_t lastTri = 0;
 		for (size_t i = 0; i < triNum; ++i)
@@ -2591,7 +2615,15 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 					if (m_texCoordIndexes)
 						m_texCoordIndexes->setValue(lastTri, m_texCoordIndexes->getValue(i));
 				}
+				if (newIndexesOfRemainingTriangles)
+				{
+					newIndexesOfRemainingTriangles->at(i) = static_cast<int>(lastTri);
+				}
 				++lastTri;
+			}
+			else if (newIndexesOfRemainingTriangles)
+			{
+				newIndexesOfRemainingTriangles->at(i) = -1;
 			}
 		}
 

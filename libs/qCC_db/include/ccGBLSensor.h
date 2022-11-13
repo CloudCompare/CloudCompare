@@ -53,7 +53,7 @@ public:
 	/** \warning The depth buffer is not copied!
 		\param sensor sensor structure to copy
 	**/
-	ccGBLSensor(const ccGBLSensor& sensor);
+	ccGBLSensor(const ccGBLSensor& sensor, bool copyDepthBuffer = false);
 
 	//! Destructor
 	~ccGBLSensor() override = default;

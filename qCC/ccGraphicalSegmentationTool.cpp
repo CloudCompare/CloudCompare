@@ -1333,6 +1333,60 @@ void ccGraphicalSegmentationTool::cancel()
 	stop(false);
 }
 
+static void RemoveUnusedLabelsAndUpdateTheOthers(	std::set<cc2DLabel*>& watchedLabels,
+													ccHObject* entity,
+													const std::vector<int>& newIndexesOfRemainingPointsOrTriangles,
+													ccMainAppInterface* app )
+{
+	if (!app)
+	{
+		assert(false);
+		return;
+	}
+
+	std::set<cc2DLabel*>::iterator it = watchedLabels.begin();
+	while (it != watchedLabels.end())
+	{
+		cc2DLabel* label = *it;
+		assert(label);
+		for (unsigned i = 0; i < label->size(); ++i)
+		{
+			cc2DLabel::PickedPoint& pp = label->getPickedPoint(i);
+			if (pp.entity() == entity)
+			{
+				if (pp.index < newIndexesOfRemainingPointsOrTriangles.size()
+					&& newIndexesOfRemainingPointsOrTriangles[pp.index] >= 0)
+				{
+					// update the 'pointer'
+					pp.index = newIndexesOfRemainingPointsOrTriangles[pp.index];
+				}
+				else
+				{
+					// delete the label
+					ccHObject* labelParent = label->getParent();
+					ccMainAppInterface::ccHObjectContext parentContext;
+					bool saveContext = (labelParent != entity && !entity->isAncestorOf(labelParent));
+					if (saveContext)
+						parentContext = app->removeObjectTemporarilyFromDBTree(labelParent);
+					labelParent->removeChild(label);
+					if (saveContext)
+						app->putObjectBackIntoDBTree(labelParent, parentContext);
+
+					label = nullptr;
+					it = watchedLabels.erase(it);
+					break;
+				}
+			}
+		}
+
+		if (label)
+		{
+			// keep the label and move on
+			++it;
+		}
+	}
+}
+
 bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccHObject::Container& newEntities)
 {
 	if (!app)
@@ -1460,90 +1514,44 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 			// 'severe' modifications (octree deletion, etc.) --> see ccPointCloud::createNewCloudFromVisibilitySelection
 			ccMainAppInterface::ccHObjectContext objContext = app->removeObjectTemporarilyFromDBTree(entity);
 
+			bool removeSelectedElementsFromEntity = (canModify && !m_deleteHiddenParts);
+
 			// apply segmentation
 			ccHObject* segmentationResult = nullptr;
-			bool deleteOriginalEntity = (m_deleteHiddenParts && canModify);
-			bool isCloud = entity->isKindOf(CC_TYPES::POINT_CLOUD);
-			if (isCloud)
+			bool deleteOriginalEntity = (canModify && m_deleteHiddenParts);
+			if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
 			{
-				ccGenericPointCloud* genCloud = ccHObjectCaster::ToGenericPointCloud(entity);
+				ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(entity);
 
 				std::vector<int> newIndexesOfRemainingPoints;
-				bool removeSelectedPoints = canModify && !m_deleteHiddenParts;
-				ccGenericPointCloud* segmentedCloud = genCloud->createNewCloudFromVisibilitySelection(removeSelectedPoints, nullptr, &newIndexesOfRemainingPoints);
-				if (segmentedCloud && segmentedCloud->size() == 0)
+				ccGenericPointCloud* segmentedCloud = cloud->createNewCloudFromVisibilitySelection(	removeSelectedElementsFromEntity,
+																									nullptr,
+																									deleteOriginalEntity ? nullptr : &newIndexesOfRemainingPoints);
+				if (segmentedCloud)
 				{
-					// empty result: we ignore it
-					delete segmentedCloud;
-					segmentedCloud = nullptr;
-				}
-				else
-				{
-					if (segmentedCloud)
+					if (segmentedCloud->size() == 0)
 					{
-						if (segmentedCloud == genCloud)
-						{
-							//specific case: all points were selected, nothing to do
-							app->putObjectBackIntoDBTree(entity, objContext);
-							++p;
-							continue;
-						}
-						// update suffix
-						QSettings settings;
-						settings.beginGroup(ccGraphicalSegmentationOptionsDlg::SegmentationToolOptionsKey());
-						QString segmentedSuffix = settings.value(ccGraphicalSegmentationOptionsDlg::SegmentedSuffixKey(), ".segmented").toString();
-						settings.endGroup();
-
-						segmentedCloud->setName(genCloud->getName() + segmentedSuffix);
+						// empty result: we ignore it
+						delete segmentedCloud;
+						segmentedCloud = nullptr;
 					}
-
-					segmentationResult = segmentedCloud;
-				}
-
-				deleteOriginalEntity |= (genCloud->size() == 0);
-
-				if (!deleteOriginalEntity)
-				{
-					// be smart and keep only the necessary labels
-					std::set<cc2DLabel*>::iterator it = watchedLabels.begin();
-					while (it != watchedLabels.end())
+					else if (segmentedCloud == cloud)
 					{
-						cc2DLabel* label = *it;
-						assert(label);
-						for (unsigned i = 0; i < label->size(); ++i)
-						{
-							cc2DLabel::PickedPoint& pp = label->getPickedPoint(i);
-							if (pp.entity() == genCloud)
-							{
-								if (	pp.index < newIndexesOfRemainingPoints.size()
-									&&	newIndexesOfRemainingPoints[pp.index] >= 0 )
-								{
-									// update the 'pointer'
-									pp.index = newIndexesOfRemainingPoints[pp.index];
-								}
-								else
-								{
-									// delete the label
-									ccHObject* labelParent = label->getParent();
-									ccMainAppInterface::ccHObjectContext parentContext;
-									bool saveContext = (labelParent != entity && !entity->isAncestorOf(labelParent));
-									if (saveContext)
-										parentContext = app->removeObjectTemporarilyFromDBTree(labelParent);
-									labelParent->removeChild(label);
-									if (saveContext)
-										app->putObjectBackIntoDBTree(labelParent, parentContext);
+						//specific case: all points were selected, nothing to do
+						app->putObjectBackIntoDBTree(entity, objContext);
+						++p;
+						continue;
+					}
+					else // we have a new entity
+					{
+						segmentationResult = segmentedCloud;
 
-									label = nullptr;
-									it = watchedLabels.erase(it);
-									break;
-								}
-							}
-						}
+						deleteOriginalEntity |= (cloud->size() == 0);
 
-						if (label)
+						if (removeSelectedElementsFromEntity && !deleteOriginalEntity) // if we have removed points from the original entity
 						{
-							// keep the label and move on
-							++it;
+							// be smart and keep only the necessary labels
+							RemoveUnusedLabelsAndUpdateTheOthers(watchedLabels, cloud, newIndexesOfRemainingPoints, app);
 						}
 					}
 				}
@@ -1553,163 +1561,118 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 				ccMesh* mesh = ccHObjectCaster::ToMesh(entity);
 
 				std::vector<int> newIndexesOfRemainingTriangles;
-				segmentationResult = mesh->createNewMeshFromSelection(canModify && !m_deleteHiddenParts, &newIndexesOfRemainingTriangles, true);
+				ccMesh* segmentatedMesh = mesh->createNewMeshFromSelection(	removeSelectedElementsFromEntity,
+																			deleteOriginalEntity ? nullptr : &newIndexesOfRemainingTriangles,
+																			true );
 
-				if (segmentationResult == mesh)
+				if (segmentatedMesh)
 				{
-					//specific case: all triangles were selected, nothing to do
-					app->putObjectBackIntoDBTree(entity, objContext);
-					++p;
-					continue;
-				}
-
-				deleteOriginalEntity |= (mesh->size() == 0);
-
-				if (!deleteOriginalEntity)
-				{
-					// be smart and keep only the necessary labels
-					std::set< cc2DLabel*>::iterator it = watchedLabels.begin();
-					while (it != watchedLabels.end())
+					if (segmentatedMesh->size() == 0)
 					{
-						cc2DLabel* label = *it;
-						assert(label);
-						for (unsigned i = 0; i < label->size(); ++i)
-						{
-							cc2DLabel::PickedPoint& pp = label->getPickedPoint(i);
-							if (pp.entity() == mesh)
-							{
-								if (pp.index < newIndexesOfRemainingTriangles.size()
-									&& newIndexesOfRemainingTriangles[pp.index] >= 0)
-								{
-									// update the 'pointer'
-									pp.index = newIndexesOfRemainingTriangles[pp.index];
-								}
-								else
-								{
-									// delete the label
-									ccHObject* labelParent = label->getParent();
-									ccMainAppInterface::ccHObjectContext parentContext;
-									bool saveContext = (labelParent != entity && !entity->isAncestorOf(labelParent));
-									if (saveContext)
-										parentContext = app->removeObjectTemporarilyFromDBTree(labelParent);
-									labelParent->removeChild(label);
-									if (saveContext)
-										app->putObjectBackIntoDBTree(labelParent, parentContext);
+						// empty result: we ignore it
+						delete segmentatedMesh;
+						segmentatedMesh = nullptr;
+					}
+					else if (segmentatedMesh == mesh)
+					{
+						//specific case: all triangles were selected, nothing to do
+						app->putObjectBackIntoDBTree(entity, objContext);
+						++p;
+						continue;
+					}
+					else // we have a new entity
+					{
+						segmentationResult = segmentatedMesh;
 
-									label = nullptr;
-									it = watchedLabels.erase(it);
-									break;
-								}
-							}
-						}
+						deleteOriginalEntity |= (mesh->size() == 0);
 
-						if (label)
+						if (removeSelectedElementsFromEntity && !deleteOriginalEntity)
 						{
-							// keep the label and move on
-							++it;
+							// be smart and keep only the necessary labels
+							RemoveUnusedLabelsAndUpdateTheOthers(watchedLabels, mesh, newIndexesOfRemainingTriangles, app);
 						}
 					}
 				}
 			}
 			else
 			{
+				// we only expect clouds or meshes here
 				assert(false);
 			}
 
-			if (segmentationResult)
+			if (segmentationResult) //we have a result (= a new entity)
 			{
-				if (canModify)
+				// update suffix
 				{
-					//specific case: update sensors
-					for (unsigned i = 0; i < entity->getChildrenNumber(); ++i)
+					QSettings settings;
+					settings.beginGroup(ccGraphicalSegmentationOptionsDlg::SegmentationToolOptionsKey());
+					QString segmentedSuffix = settings.value(ccGraphicalSegmentationOptionsDlg::SegmentedSuffixKey(), ".segmented").toString();
+					settings.endGroup();
+
+					QString resultName = entity->getName();
+					if (!resultName.endsWith(segmentedSuffix))
 					{
-						ccHObject* child = entity->getChild(i);
-						if (child && child->isA(CC_TYPES::GBL_SENSOR))
+						resultName += segmentedSuffix;
+					}
+					segmentationResult->setName(resultName);
+
+					if (segmentationResult->isKindOf(CC_TYPES::MESH) && entity->isKindOf(CC_TYPES::MESH))
+					{
+						// update the mesh vertices as well
+						ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(entity);
+						ccGenericMesh* resultMesh = ccHObjectCaster::ToGenericMesh(segmentationResult);
+						QString verticesName = mesh->getAssociatedCloud()->getName();
+						if (!verticesName.endsWith(segmentedSuffix))
 						{
-							ccGBLSensor* sensor = ccHObjectCaster::ToGBLSensor(entity->getChild(i));
-							//remove the associated depth buffer of the original sensor (deprecated)
-							sensor->clearDepthBuffer();
-							assert(isCloud);
+							verticesName += segmentedSuffix;
 						}
+						resultMesh->getAssociatedCloud()->setName(verticesName);
 					}
 				}
 
-				if (deleteOriginalEntity)
+				if (removeSelectedElementsFromEntity && !deleteOriginalEntity) // if we were able to modify the original entity
 				{
-					// remove all labels that depend on this entity
-					std::set< cc2DLabel*>::iterator it = watchedLabels.begin();
-					while (it != watchedLabels.end())
+					// update the name of the original entity
+					QSettings settings;
+					settings.beginGroup(ccGraphicalSegmentationOptionsDlg::SegmentationToolOptionsKey());
+					QString remainingSuffix = settings.value(ccGraphicalSegmentationOptionsDlg::RemainingSuffixKey(), ".remaining").toString();
+					settings.endGroup();
+					if (!entity->getName().endsWith(remainingSuffix))
 					{
-						cc2DLabel* label = *it;
-						assert(label);
-						for (unsigned i = 0; i < label->size(); ++i)
-						{
-							cc2DLabel::PickedPoint& pp = label->getPickedPoint(i);
-							if (pp.entity() == entity)
-							{
-								// delete the label
-								ccHObject* labelParent = label->getParent();
-								ccMainAppInterface::ccHObjectContext parentContext;
-								bool saveContext = (labelParent != entity && !entity->isAncestorOf(labelParent));
-								if (saveContext)
-									parentContext = app->removeObjectTemporarilyFromDBTree(labelParent);
-								labelParent->removeChild(label);
-								if (saveContext)
-									app->putObjectBackIntoDBTree(labelParent, parentContext);
-
-								label = nullptr;
-								it = watchedLabels.erase(it);
-								break;
-							}
-						}
-
-						if (label)
-						{
-							// keep the label and move on
-							++it;
-						}
-					}
-				}
-
-				//we must take care of the remaining part
-				if (!m_deleteHiddenParts)
-				{
-					if (!deleteOriginalEntity)
-					{
-						QSettings settings;
-						settings.beginGroup(ccGraphicalSegmentationOptionsDlg::SegmentationToolOptionsKey());
-						QString remainingSuffix = settings.value(ccGraphicalSegmentationOptionsDlg::RemainingSuffixKey(), ".remaining").toString();
-						settings.endGroup();
 						entity->setName(entity->getName() + remainingSuffix);
-						if (canModify)
+					}
+					if (entity->isKindOf(CC_TYPES::MESH))
+					{
+						// update the mesh vertices as well
+						ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(entity);
+						QString verticesName = mesh->getAssociatedCloud()->getName();
+						if (!verticesName.endsWith(remainingSuffix))
 						{
-							app->putObjectBackIntoDBTree(entity, objContext);
+							mesh->getAssociatedCloud()->setName(verticesName + remainingSuffix);
 						}
 					}
-					else
+
+					//specific case: deprecate GBL sensors' depth buffer
+					ccHObject::Container gblSensors;
+					entity->filterChildren(gblSensors, false, CC_TYPES::GBL_SENSOR);
+					for (ccHObject* child : gblSensors)
 					{
-						//no need to put back the entity in DB if we delete it afterwards!
-					}
-				}
-				else
-				{
-					//keep original name(s)
-					segmentationResult->setName(entity->getName());
-					if (entity->isKindOf(CC_TYPES::MESH) && segmentationResult->isKindOf(CC_TYPES::MESH))
-					{
-						ccGenericMesh* meshEntity = ccHObjectCaster::ToGenericMesh(entity);
-						ccHObjectCaster::ToGenericMesh(segmentationResult)->getAssociatedCloud()->setName(meshEntity->getAssociatedCloud()->getName());
+						ccGBLSensor* sensor = ccHObjectCaster::ToGBLSensor(child);
+						//clear the associated depth buffer of the original sensor (deprecated)
+						sensor->clearDepthBuffer();
+						assert(entity->isKindOf(CC_TYPES::POINT_CLOUD));
 					}
 				}
 
 				//we look for first non-mesh or non-cloud parent
-				while (objContext.parent && (objContext.parent->isKindOf(CC_TYPES::MESH) || objContext.parent->isKindOf(CC_TYPES::POINT_CLOUD)))
+				ccHObject* resultParent = objContext.parent;
+				while (resultParent && (resultParent->isKindOf(CC_TYPES::MESH) || resultParent->isKindOf(CC_TYPES::POINT_CLOUD)))
 				{
-					objContext.parent = objContext.parent->getParent();
+					resultParent = resultParent->getParent();
 				}
-				if (objContext.parent)
+				if (resultParent)
 				{
-					objContext.parent->addChild(segmentationResult); //FiXME: objContext.parentFlags?
+					resultParent->addChild(segmentationResult);
 				}
 
 				segmentationResult->setDisplay_recursive(entity->getDisplay());
@@ -1719,27 +1682,54 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 
 				newEntities.push_back(segmentationResult);
 			}
-			else if (!deleteOriginalEntity)
+			
+			if (!deleteOriginalEntity)
 			{
-				//ccConsole::Error(tr("An error occurred! (not enough memory?)"));
-				if (canModify)
-				{
-					app->putObjectBackIntoDBTree(entity, objContext);
-				}
+				app->putObjectBackIntoDBTree(entity, objContext);
+				++p;
 			}
-
-			if (deleteOriginalEntity)
+			else
 			{
+				// remove all labels that depend on this entity
+				std::set<cc2DLabel*>::iterator it = watchedLabels.begin();
+				while (it != watchedLabels.end())
+				{
+					cc2DLabel* label = *it;
+					assert(label);
+					for (unsigned i = 0; i < label->size(); ++i)
+					{
+						cc2DLabel::PickedPoint& pp = label->getPickedPoint(i);
+						if (pp.entity() == entity)
+						{
+							// delete the label
+							ccHObject* labelParent = label->getParent();
+							ccMainAppInterface::ccHObjectContext parentContext;
+							bool saveContext = (labelParent != entity && !entity->isAncestorOf(labelParent));
+							if (saveContext)
+								parentContext = app->removeObjectTemporarilyFromDBTree(labelParent);
+							labelParent->removeChild(label);
+							if (saveContext)
+								app->putObjectBackIntoDBTree(labelParent, parentContext);
+
+							label = nullptr;
+							it = watchedLabels.erase(it);
+							break;
+						}
+					}
+
+					if (label)
+					{
+						// keep the label and move on
+						++it;
+					}
+				}
+
 				prepareEntityForRemoval(entity, false);
 
 				p = m_toSegment.erase(p);
 
-				delete entity; // TODO: should we wait that all entities are processed before remove it?
+				delete entity; // TODO: should we wait that all entities are processed before removing it?
 				entity = nullptr;
-			}
-			else
-			{
-				++p;
 			}
 		}
 		else if (entity->isKindOf(CC_TYPES::POLY_LINE))

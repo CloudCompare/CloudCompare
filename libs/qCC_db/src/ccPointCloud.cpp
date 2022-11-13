@@ -193,7 +193,12 @@ ccPointCloud* ccPointCloud::partialClone(const CCCoreLib::ReferenceCloud* select
 		return nullptr;
 	}
 
-	ccPointCloud* result = new ccPointCloud(getName() + QString(".extract"));
+	static constexpr const char* DefaultSuffix = ".extract";
+	QString cloneName = getName();
+	if (!cloneName.endsWith(DefaultSuffix)) // avoid adding a multitude of suffixes
+		cloneName += DefaultSuffix;
+
+	ccPointCloud* result = new ccPointCloud(cloneName);
 
 	//visibility
 	result->setVisible(isVisible());
@@ -3325,7 +3330,12 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(	bool r
 		return nullptr;
 	}
 
-	result->setName(getName() + ".segmented");
+	static constexpr const char* DefaultSuffix = ".segmented";
+	QString newName = getName();
+	if (!newName.endsWith(DefaultSuffix)) // avoid adding a multitude of suffixes
+		newName += DefaultSuffix;
+
+	result->setName(newName);
 
 	//shall the visible points be erased from this cloud?
 	if (removeSelectedPoints)

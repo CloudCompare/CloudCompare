@@ -29,7 +29,7 @@ function( target_link_GDAL ) # ARGV0 = project name
 		#install DLLs
 		message( STATUS "Looking for GDAL DLLs in: " ${GDAL_BIN_DIR} )
 		file( GLOB GDAL_DLL_FILES ${GDAL_BIN_DIR}/gdal*.dll )
-message( ${GDAL_DLL_FILES} )
+				#message( ${GDAL_DLL_FILES} )
                 message( STATUS "GDAL VERSION: " ${GDAL_VERSION} )
                 if (GDAL_VERSION EQUAL 3.2)
                     set ( GDAL_DEP_DLL_FILES ${GDAL_BIN_DIR}/xerces-c_3_2.dll
@@ -230,12 +230,12 @@ message( ${GDAL_DLL_FILES} )
 		
 		#message( STATUS ${GDAL_DLL_FILES} )
 		#message( STATUS ${GDAL_DEP_DLL_FILES} )
-		copy_files("${GDAL_DLL_FILES}" "${CLOUDCOMPARE_DEST_FOLDER}" ) #mind the quotes!
-		copy_files("${GDAL_DEP_DLL_FILES}" "${CLOUDCOMPARE_DEST_FOLDER}" ) #mind the quotes!
+		copy_files("${GDAL_DLL_FILES}" "${CLOUDCOMPARE_DEST_FOLDER}" 1 ) #mind the quotes!
+		copy_files("${GDAL_DEP_DLL_FILES}" "${CLOUDCOMPARE_DEST_FOLDER}" 1 ) #mind the quotes!
 		
 		if (${OPTION_BUILD_CCVIEWER})
-			copy_files("${GDAL_DLL_FILES}" "${CCVIEWER_DEST_FOLDER}" ) #mind the quotes!
-			copy_files("${GDAL_DEP_DLL_FILES}" "${CCVIEWER_DEST_FOLDER}" ) #mind the quotes!
+			copy_files("${GDAL_DLL_FILES}" "${CCVIEWER_DEST_FOLDER}" 1 ) #mind the quotes!
+			copy_files("${GDAL_DEP_DLL_FILES}" "${CCVIEWER_DEST_FOLDER}" 1 ) #mind the quotes!
 		endif()
 
 	endif()

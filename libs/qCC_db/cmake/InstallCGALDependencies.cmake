@@ -15,7 +15,7 @@ if( WIN32 )
 
 		file( GLOB GMP_DLL_FILES ${GMP_LIB_FOLDER}/*.dll )
 		foreach( dest ${INSTALL_DESTINATIONS} )
-			copy_files( "${GMP_DLL_FILES}" ${dest} ) # Mind the quotes!
+			copy_files( "${GMP_DLL_FILES}" ${dest} 1 ) # Mind the quotes!
 		endforeach()
 	
 		InstallFiles( FILES ${GMP_DLL_FILES} )

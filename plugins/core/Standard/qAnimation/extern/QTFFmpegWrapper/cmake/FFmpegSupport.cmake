@@ -102,7 +102,7 @@ function( export_ffmpeg_dlls ) # 1 argument: ARGV0 = destination directory
 			file( GLOB SW_DLLS ${FFMPEG_BINARY_DIR}/sw*.dll )
 			list( APPEND FFMPEG_DLL ${SW_DLLS} )
 
-			copy_files( "${FFMPEG_DLL}" "${ARGV0}" ) #mind the quotes
+			copy_files( "${FFMPEG_DLL}" "${ARGV0}" 1 ) #mind the quotes
 		else()
 			message( FATAL_ERROR "FFmpeg binary dir does not exist (FFMPEG_BINARY_DIR)" )
 		endif()

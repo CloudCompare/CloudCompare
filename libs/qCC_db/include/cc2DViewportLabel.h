@@ -38,11 +38,13 @@ public:
 	virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::VIEWPORT_2D_LABEL; }
 	virtual bool isSerializable() const override { return true; }
 
+	typedef std::array<float, 4> ROI;
+
 	//! Returns ROI (relative to screen)
-	const float* roi() const { return m_roi.data(); }
+	inline const ROI& roi() const { return m_roi; }
 
 	//! Sets ROI (relative to screen)
-	void setRoi(const float* roi);
+	inline void setRoi(const ROI& roi) { m_roi = roi; }
 
 protected:
 
@@ -54,9 +56,9 @@ protected:
 	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
 	//! label ROI
-	/** ROI is relative to screen
+	/** ROI is relative to the 3D display
 	**/
-	std::array<float, 4> m_roi;
+	ROI m_roi;
 };
 
 #endif //CC_2D_VIEWPORT_LABEL_HEADER

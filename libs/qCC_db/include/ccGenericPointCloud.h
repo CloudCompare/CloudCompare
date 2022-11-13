@@ -216,7 +216,7 @@ public:
 		            Must be initially empty or have the same size as the original cloud.
 		\param[in]  silent don't issue a warning message if there's no point to keep
 		\param[out] selection the corresponding point selection
-		\return new point cloud with 'visible' points
+		\return new point cloud with the 'visible' points (or the same cloud if all points are visible)
 	**/
 	virtual ccGenericPointCloud* createNewCloudFromVisibilitySelection(	bool removeSelectedPoints = false,
 																		VisibilityTableType* visTable = nullptr,

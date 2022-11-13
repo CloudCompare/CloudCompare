@@ -499,7 +499,7 @@ ccPointCloud* ccPointCloud::cloneThis(ccPointCloud* destCloud/*=nullptr*/, bool 
 	//import other parameters
 	result->importParametersFrom(this);
 
-	result->setName(getName()+QString(".clone"));
+	result->setName(getName() + QString(".clone"));
 
 	return result;
 }
@@ -973,6 +973,9 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 	//children (not yet reserved)
 	if (!ignoreChildren)
 	{
+		ccHObjectCaster::CloneChildren(addedCloud, this);
+
+		// we still miss the meshes
 		unsigned childrenCount = addedCloud->getChildrenNumber();
 		for (unsigned c = 0; c < childrenCount; ++c)
 		{
@@ -1005,44 +1008,6 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				{
 					ccLog::Warning(QString("[ccPointCloud::fusion] Not enough memory: failed to clone sub mesh %1!").arg(mesh->getName()));
 				}
-			}
-			else if (child->isKindOf(CC_TYPES::IMAGE))
-			{
-				//ccImage* image = static_cast<ccImage*>(child);
-
-				//DGM FIXME: take image ownership! (dirty)
-				addedCloud->transferChild(child, *this);
-			}
-			else if (child->isA(CC_TYPES::LABEL_2D))
-			{
-				//clone label and update points if necessary
-				cc2DLabel* label = static_cast<cc2DLabel*>(child);
-				cc2DLabel* newLabel = new cc2DLabel(label->getName());
-				for (unsigned j = 0; j < label->size(); ++j)
-				{
-					cc2DLabel::PickedPoint P = label->getPickedPoint(j);
-					if (P._cloud == addedCloud)
-					{
-						P._cloud = this;
-						P.index += pointCountBefore;
-					}
-					newLabel->addPickedPoint(P);
-				}
-				newLabel->displayPointLegend(label->isPointLegendDisplayed());
-				newLabel->setDisplayedIn2D(label->isDisplayedIn2D());
-				newLabel->setCollapsed(label->isCollapsed());
-				newLabel->setPosition(label->getPosition()[0], label->getPosition()[1]);
-				newLabel->setVisible(label->isVisible());
-				newLabel->setDisplay(getDisplay());
-				addChild(newLabel);
-			}
-			else if (child->isA(CC_TYPES::GBL_SENSOR))
-			{
-				//copy sensor object
-				ccGBLSensor* sensor = new ccGBLSensor(*static_cast<ccGBLSensor*>(child));
-				addChild(sensor);
-				sensor->setDisplay(getDisplay());
-				sensor->setVisible(child->isVisible());
 			}
 		}
 	}
@@ -3254,6 +3219,12 @@ ccPointCloud* ccPointCloud::filterPointsByScalarValue(ScalarType minVal, ScalarT
 
 	QSharedPointer<CCCoreLib::ReferenceCloud> c(CCCoreLib::ManualSegmentationTools::segment(this, minVal, maxVal, outside));
 
+	if (c && c->size() == size())
+	{
+		// specific case: all points fall within the specified range
+		return this;
+	}
+
 	return (c ? partialClone(c.data()) : nullptr);
 }
 
@@ -3305,6 +3276,23 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(	bool r
 		{
 			ccLog::Error(QString("[Cloud %1] Invalid input visibility table").arg(getName()));
 			return nullptr;
+		}
+	}
+
+	// count the number of visible points
+	{
+		unsigned visiblePoints = 0;
+		for (size_t i = 0; i < visTable->size(); ++i)
+		{
+			if (visTable->at(i) == CCCoreLib::POINT_VISIBLE)
+			{
+				++visiblePoints;
+			}
+		}
+		if (visiblePoints == size())
+		{
+			// all points are visible: nothing to do
+			return this;
 		}
 	}
 
@@ -6176,6 +6164,12 @@ ccPointCloud* ccPointCloud::removeDuplicatePoints(double minDistanceBetweenPoint
 	{
 		ccLog::Warning(QObject::tr("Not enough memory to create the filtered cloud"));
 		return nullptr;
+	}
+	else if (filteredCloud == this)
+	{
+		// we have tested above that there should be some duplicate points
+		assert(false);
+		return this;
 	}
 	filteredCloud->setName(QString("%1.clean").arg(getName()));
 

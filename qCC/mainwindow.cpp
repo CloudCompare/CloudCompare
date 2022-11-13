@@ -2785,7 +2785,6 @@ void MainWindow::doRemoveDuplicatePoints()
 		if (cloud)
 		{
 			ccPointCloud* filteredCloud = cloud->removeDuplicatePoints(minDistanceBetweenPoints, &pDlg);
-
 			if (!filteredCloud)
 			{
 				ccConsole::Error(tr("Process failed (see Console)"));
@@ -2900,13 +2899,31 @@ void MainWindow::doActionFilterByValue()
 				else if (ent->isA(CC_TYPES::SUB_MESH))
 					resultInside = ccHObjectCaster::ToSubMesh(ent)->createNewSubMeshFromSelection(false);
 
-				if (mode == ccFilterByValueDlg::SPLIT)
+				if (resultInside == ent)
+				{
+					//specific case: all triangles were selected, nothing to do
+					ccLog::Warning(QString("Mesh %1 is fully inside the specified range").arg(ent->getName()));
+					resultInside = nullptr;
+				}
+				else if (mode == ccFilterByValueDlg::SPLIT)
 				{
 					pc->invertVisibilityArray();
 					if (ent->isA(CC_TYPES::MESH)/*|| ent->isKindOf(CC_TYPES::PRIMITIVE)*/) //TODO
 						resultOutside = ccHObjectCaster::ToMesh(ent)->createNewMeshFromSelection(false, nullptr, true);
 					else if (ent->isA(CC_TYPES::SUB_MESH))
 						resultOutside = ccHObjectCaster::ToSubMesh(ent)->createNewSubMeshFromSelection(false);
+
+					if (resultOutside == ent)
+					{
+						//specific case: all triangles were selected, nothing to do
+						ccLog::Warning(QString("Mesh %1 is fully outside the specified range").arg(ent->getName()));
+						ent->setEnabled(false);
+						ent->prepareDisplayForRefresh();
+
+						delete resultInside; // we don't need it
+						resultInside = nullptr;
+						resultOutside = nullptr;
+					}
 				}
 
 				pc->unallocateVisibilityArray();
@@ -2915,10 +2932,27 @@ void MainWindow::doActionFilterByValue()
 			{
 				//shortcut, as we know here that the point cloud is a "ccPointCloud"
 				resultInside = pc->filterPointsByScalarValue(minVal, maxVal, false);
-
-				if (mode == ccFilterByValueDlg::SPLIT)
+				
+				if (resultInside == ent)
+				{
+					//specific case: all points were selected, nothing to do
+					ccLog::Warning(QString("Cloud %1 is fully inside the specified range").arg(ent->getName()));
+					resultInside = nullptr;
+				}
+				else if (mode == ccFilterByValueDlg::SPLIT)
 				{
 					resultOutside = pc->filterPointsByScalarValue(minVal, maxVal, true);
+					if (resultOutside == ent)
+					{
+						//specific case: all points were selected, nothing to do
+						ccLog::Warning(QString("Cloud %1 is fully outside the specified range").arg(ent->getName()));
+						ent->setEnabled(false);
+						ent->prepareDisplayForRefresh();
+
+						delete resultInside;
+						resultInside = nullptr;
+						resultOutside = nullptr;
+					}
 				}
 			}
 
@@ -3801,7 +3835,7 @@ void MainWindow::doAction4pcsRegister()
 			ccConsole::Print(tr("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool"));
 		}
 
-		ccPointCloud *newDataCloud = data->isA(CC_TYPES::POINT_CLOUD) ? static_cast<ccPointCloud*>(data)->cloneThis() : ccPointCloud::From(data, data);
+		ccPointCloud* newDataCloud = data->isA(CC_TYPES::POINT_CLOUD) ? static_cast<ccPointCloud*>(data)->cloneThis() : ccPointCloud::From(data, data);
 
 		if (data->getParent())
 			data->getParent()->addChild(newDataCloud);

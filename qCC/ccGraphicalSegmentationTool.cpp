@@ -1481,6 +1481,13 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 				{
 					if (segmentedCloud)
 					{
+						if (segmentedCloud == genCloud)
+						{
+							//specific case: all points were selected, nothing to do
+							app->putObjectBackIntoDBTree(entity, objContext);
+							++p;
+							continue;
+						}
 						// update suffix
 						QSettings settings;
 						settings.beginGroup(ccGraphicalSegmentationOptionsDlg::SegmentationToolOptionsKey());
@@ -1547,6 +1554,14 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 
 				std::vector<int> newIndexesOfRemainingTriangles;
 				segmentationResult = mesh->createNewMeshFromSelection(canModify && !m_deleteHiddenParts, &newIndexesOfRemainingTriangles, true);
+
+				if (segmentationResult == mesh)
+				{
+					//specific case: all triangles were selected, nothing to do
+					app->putObjectBackIntoDBTree(entity, objContext);
+					++p;
+					continue;
+				}
 
 				deleteOriginalEntity |= (mesh->size() == 0);
 

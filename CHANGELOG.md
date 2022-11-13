@@ -48,8 +48,8 @@ v2.13.alpha (???) - (??/??/????)
 
 - Improvements:
 	- Segmentation
-		- CC will now preserve some children entities (labels, sensors, etc.) when segmenting clouds or meshes
-			(with graphical segmentation, cross section tool, subsampling, filter by SF value, etc.)
+		- CC will now preserve some children entities (labels, sensors, etc.) when segmenting clouds or meshes:
+			with graphical segmentation, cross section tool (for clouds only), subsampling, filter by SF value, etc.
 
 	- Rasterize:
 		- new option to compute the median height

@@ -67,11 +67,14 @@ public:
 	virtual bool acceptClick(int x, int y, Qt::MouseButton button) override;
 	virtual bool move2D(int x, int y, int dx, int dy, int screenWidth, int screenHeight) override;
 
+	//! Relative position (percentage)
+	typedef std::array<float, 2> RelativePos;
+
 	//! Sets relative position
 	void setPosition(float x, float y);
 
 	//! Returns relative position
-	inline const float* getPosition() const { return m_screenPos.data(); }
+	inline const RelativePos& getPosition() const { return m_screenPos; }
 
 	//! Clears label
 	void clear(bool ignoreDependencies = false);
@@ -302,14 +305,14 @@ protected:
 	**/
 	QRect m_labelROI;
 
-	//! close button ROI
-	//int m_closeButtonROI[4];
-
 	//! Label position (percentage of screen size)
-	std::array<float, 2> m_screenPos;
+	RelativePos m_screenPos;
+
+	//! Absolute position (pixels)
+	typedef std::array<int, 2> AbsolutePos;
 
 	//! Label position at last display (absolute)
-	std::array<int, 2> m_lastScreenPos;
+	AbsolutePos m_lastScreenPos;
 
 	//! Whether to display the point(s) legend
 	bool m_dispPointsLegend;

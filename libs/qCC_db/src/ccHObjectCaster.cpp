@@ -360,25 +360,26 @@ bool ccHObjectCaster::CloneChildren(const ccHObject* sourceEntity,
 
 			if (keepThisLabel)
 			{
-				cc2DLabel* clonedLabel = new cc2DLabel(*label, newPointOrTriangleIndex == nullptr);
+				cc2DLabel* clonedLabel = new cc2DLabel(*label, false);
 
-				if (newPointOrTriangleIndex)
+				for (unsigned i = 0; i < label->size(); ++i)
 				{
-					for (unsigned i = 0; i < label->size(); ++i)
+					cc2DLabel::PickedPoint pp = label->getPickedPoint(i);
+					if (pp.entity() == sourceEntity)
 					{
-						cc2DLabel::PickedPoint pp = label->getPickedPoint(i);
-						if (pp.entity() == sourceEntity)
+						if (sourceIsCloud)
+							pp._cloud = static_cast<ccGenericPointCloud*>(destEntity);
+						else
+							pp._mesh = static_cast<ccGenericMesh*>(destEntity);
+						
+						if (newPointOrTriangleIndex)
 						{
-							if (sourceIsCloud)
-								pp._cloud = static_cast<ccGenericPointCloud*>(destEntity);
-							else
-								pp._mesh = static_cast<ccGenericMesh*>(destEntity);
 							pp.index = static_cast<unsigned>(newPointOrTriangleIndex->at(pp.index)); // we've checked above that it's >= 0
 						}
-						clonedLabel->addPickedPoint(pp);
 					}
-					clonedLabel->setName(label->getName()); //the label name is overridden by calls to addPickedPoint
+					clonedLabel->addPickedPoint(pp);
 				}
+				clonedLabel->setName(label->getName()); //the label name is overridden by calls to addPickedPoint
 				
 				currentDestEntity->addChild(clonedLabel);
 			}

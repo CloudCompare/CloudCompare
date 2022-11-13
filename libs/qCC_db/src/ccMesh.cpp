@@ -888,10 +888,14 @@ ccMesh* ccMesh::cloneMesh(	ccGenericPointCloud* vertices/*=nullptr*/,
 	cloneMesh->showColors(colorsShown());
 	cloneMesh->showSF(sfShown());
 	cloneMesh->showMaterials(materialsShown());
-	cloneMesh->setName(getName()+QString(".clone"));
 	cloneMesh->setVisible(isVisible());
 	cloneMesh->setEnabled(isEnabled());
 	cloneMesh->importParametersFrom(this);
+
+	// clone some children
+	ccHObjectCaster::CloneChildren(this, cloneMesh);
+
+	cloneMesh->setName(getName() + QString(".clone"));
 
 	return cloneMesh;
 }
@@ -2190,36 +2194,6 @@ ccMesh* ccMesh::createNewMeshFromSelection(	bool removeSelectedTriangles,
 	// we always need a map of the new triangle indexes
 	std::vector<int> triangleIndexMap;
 
-	try
-	{
-		triangleIndexMap.resize(triCount, -1);
-		
-		if (newIndexesOfRemainingTriangles)
-		{
-			if (removeSelectedTriangles)
-			{
-				if (newIndexesOfRemainingTriangles->empty())
-				{
-					newIndexesOfRemainingTriangles->resize(triCount);
-				}
-				else if (newIndexesOfRemainingTriangles->size() != triCount)
-				{
-					ccLog::Warning("[ccMesh::createNewMeshFromSelection] Input 'new indexes of reamining triangles' vector has a wrong size");
-					return nullptr;
-				}
-			}
-			else
-			{
-				ccLog::Warning("[ccMesh::createNewMeshFromSelection] A 'new indexes of reamining triangles' vector was provided while no triangle shall be removed");
-			}
-		}
-	}
-	catch (const std::bad_alloc&)
-	{
-		ccLog::Warning("[ccMesh::createNewMeshFromSelection] Not enough memory");
-		return nullptr;
-	}
-
 	//we create a new mesh with the current selection
 	ccMesh* newMesh = nullptr;
 	{
@@ -2233,6 +2207,11 @@ ccMesh* ccMesh::createNewMeshFromSelection(	bool removeSelectedTriangles,
 			ccLog::Warning("[ccMesh::createNewMeshFromSelection] Failed to create segmented mesh vertices! (not enough memory)");
 			return nullptr;
 		}
+		else if (newVertices == m_associatedCloud)
+		{
+			// nothing to do
+			return this;
+		}
 		else if (newVertices->size() == 0)
 		{
 			ccLog::Warning("[ccMesh::createNewMeshFromSelection] No visible point in selection");
@@ -2242,40 +2221,13 @@ ccMesh* ccMesh::createNewMeshFromSelection(	bool removeSelectedTriangles,
 		assert(newVertices);
 
 		assert(rc.size() != 0); // otherwise 'newVertices->size() == 0' (see above)
-
-		//specific case: all vertices/triangles are transferred
-		if (removeSelectedTriangles && rc.size() == m_associatedCloud->size())
-		{
-			delete newVertices;
-			return this;
-		}
-
-		// test
-		const auto& visArray = m_associatedCloud->getTheVisibilityArray();
-		for (unsigned i = 0; i < rc.size(); ++i)
-		{
-			unsigned globalIndex = rc.getPointGlobalIndex(i);
-			assert(visArray[globalIndex] == CCCoreLib::POINT_VISIBLE);
-		}
+		assert(rc.size() != m_associatedCloud->size()); // in this case createNewCloudFromVisibilitySelection would have return 'm_associatedCloud' itself
 
 		CCCoreLib::GenericIndexedMesh* selection = CCCoreLib::ManualSegmentationTools::segmentMesh(this, &rc, true, nullptr, newVertices, 0, &triangleIndexMap);
 		if (!selection)
 		{
 			ccLog::Warning("[ccMesh::createNewMeshFromSelection] Process failed: not enough memory?");
 			return nullptr;
-		}
-
-		// test
-		for (size_t i = 0; i < triangleIndexMap.size(); ++i)
-		{
-			if (triangleIndexMap[i] >= 0)
-			{
-				const auto tsi = getTriangleVertIndexes(static_cast<unsigned>(i));
-				for (unsigned j = 0; j < 3; ++j)
-				{
-					assert(visArray[tsi->i[j]] == CCCoreLib::POINT_VISIBLE);
-				}
-			}
 		}
 
 		newMesh = new ccMesh(selection, newVertices);
@@ -2606,10 +2558,31 @@ ccMesh* ccMesh::createNewMeshFromSelection(	bool removeSelectedTriangles,
 	// shall we remove the selected triangles from this mesh
 	if (removeSelectedTriangles)
 	{
+		if (newIndexesOfRemainingTriangles)
+		{
+			if (newIndexesOfRemainingTriangles->empty())
+			{
+				try
+				{
+					newIndexesOfRemainingTriangles->resize(triCount);
+				}
+				catch (const std::bad_alloc&)
+				{
+					ccLog::Warning("[ccMesh::createNewMeshFromSelection] Not enough memory");
+					return nullptr;
+				}
+			}
+			else if (newIndexesOfRemainingTriangles->size() != triCount)
+			{
+				ccLog::Warning("[ccMesh::createNewMeshFromSelection] Input 'new indexes of reamining triangles' vector has a wrong size");
+				return nullptr;
+			}
+		}
 		assert(!newIndexesOfRemainingTriangles || newIndexesOfRemainingTriangles->size() == triCount);
 
 		// we need to change the visibility status of some vertices that belong to partially 'invisible' triangles
 		auto& visArray = m_associatedCloud->getTheVisibilityArray();
+		assert(visArray.size() == m_associatedCloud->size());
 
 		size_t lastTri = 0;
 		for (size_t i = 0; i < triCount; ++i)
@@ -2675,6 +2648,10 @@ ccMesh* ccMesh::createNewMeshFromSelection(	bool removeSelectedTriangles,
 		notifyGeometryUpdate();
 
 		// TODO: should we take care of the children here?
+	}
+	else if (newIndexesOfRemainingTriangles)
+	{
+		ccLog::Warning("[ccMesh::createNewMeshFromSelection] A 'new indexes of reamining triangles' vector was provided while no triangle shall be removed");
 	}
 
 	m_associatedCloud->unallocateVisibilityArray();

@@ -43,11 +43,6 @@ cc2DViewportLabel::cc2DViewportLabel(const cc2DViewportLabel& viewportLabel)
 {
 }
 
-void cc2DViewportLabel::setRoi(const float* roi)
-{
-	memcpy(m_roi.data(), roi, sizeof(float) * 4);
-}
-
 bool cc2DViewportLabel::toFile_MeOnly(QFile& out) const
 {
 	if (!cc2DViewportObject::toFile_MeOnly(out))

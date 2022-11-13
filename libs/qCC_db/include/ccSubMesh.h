@@ -150,14 +150,18 @@ public:
 	/** \param removeSelectedTriangles specifies if the faces composed only of 'selected' vertices should be removed or not
 		\param selectedTriangleIndexes a map of the triangles indexes that will be used in the new sub msh (or -1 if they are discarded)
 		\param newRemainingTriangleIndexes if an index map is provided, it will be used to 'translate' global indexes of triangles remaining in the source sub-mesh
+		\return the new sub-mesh if successful
 	**/
-	ccSubMesh* createNewSubMeshFromSelection(bool removeSelectedTriangles, const std::vector<int>& selectedTriangleIndexes, IndexMap* newRemainingTriangleIndexes = nullptr);
+	ccSubMesh* createNewSubMeshFromSelection(	bool removeSelectedTriangles,
+												const std::vector<int>& selectedTriangleIndexes,
+												IndexMap* newRemainingTriangleIndexes = nullptr );
 
 	//! Creates a new sub mesh with the selected vertices only
 	/** Creates a new sub-mesh structure with the vertices that are tagged as "visible" (see ccGenericPointCloud::visibilityArray).
 		\param removeSelectedTriangles specifies if the faces composed only of 'selected' vertices should be removed or not
 		\param selectedTriangleIndexes a map of the triangles indexes that will be used in the new sub msh (or -1 if they are discarded)
 		\param newRemainingTriangleIndexes if an index map is provided, it will be used to 'translate' global indexes of triangles remaining in the source sub-mesh
+		\return the new sub-mesh if successful
 	**/
 	ccSubMesh* createNewSubMeshFromSelection(bool removeSelectedTriangles, IndexMap* newRemainingTriangleIndexes = nullptr);
 

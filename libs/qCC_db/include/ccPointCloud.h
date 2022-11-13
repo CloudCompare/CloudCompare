@@ -652,7 +652,7 @@ public: //other methods
 		\param minVal minimum value
 		\param maxVal maximum value
 		\param outside whether to select the points inside or outside of the specified interval
-		\return resulting cloud (remaining points)
+		\return resulting cloud (remaining points) or the cloud itself if all points fall inside the input range
 	**/
 	ccPointCloud* filterPointsByScalarValue(ScalarType minVal, ScalarType maxVal, bool outside = false);
 

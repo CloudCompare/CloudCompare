@@ -1543,15 +1543,6 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 
 		//main rectangle
 		m_labelROI = QRect(0, 0, dx, dy);
-
-		//close button
-		//m_closeButtonROI.right()   = dx-margin;
-		//m_closeButtonROI.left()    = m_closeButtonROI.right()-buttonSize;
-		//m_closeButtonROI.bottom()  = margin;
-		//m_closeButtonROI.top()     = m_closeButtonROI.bottom()+buttonSize;
-
-		//automatically elide the title
-		//title = titleFontMetrics.elidedText(title, Qt::ElideRight, m_closeButtonROI[0] - 2 * margin);
 	}
 
 	//draw label rectangle

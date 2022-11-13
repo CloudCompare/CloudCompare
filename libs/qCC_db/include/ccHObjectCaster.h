@@ -158,9 +158,9 @@ public:
 
 		\return success
 	**/
-	static bool ccHObjectCaster::CloneChildren(	const ccHObject* sourceEntity,
-												ccHObject* destEntity,
-												std::vector<int>* newPointOrTriangleIndex = nullptr,
-												const ccHObject* sourceEntityProxy = nullptr,
-												ccHObject* destEntityProxy = nullptr );
+	static bool CloneChildren(	const ccHObject* sourceEntity,
+								ccHObject* destEntity,
+								std::vector<int>* newPointOrTriangleIndex = nullptr,
+								const ccHObject* sourceEntityProxy = nullptr,
+								ccHObject* destEntityProxy = nullptr );
 };

@@ -253,7 +253,9 @@ ccSubMesh* ccSubMesh::createNewSubMeshFromSelection(bool removeSelectedTriangles
 	return createNewSubMeshFromSelection(removeSelectedTriangles, selectedTriangleIndexes, newRemainingTriangleIndexes);
 }
 
-ccSubMesh* ccSubMesh::createNewSubMeshFromSelection(bool removeSelectedTriangles, const std::vector<int>& selectedTriangleIndexes, IndexMap* newRemainingTriangleIndexes/*=nullptr*/)
+ccSubMesh* ccSubMesh::createNewSubMeshFromSelection(bool removeSelectedTriangles,
+													const std::vector<int>& selectedTriangleIndexes,
+													IndexMap* newRemainingTriangleIndexes/*=nullptr*/)
 {
 	if (!m_associatedMesh)
 	{

@@ -39,6 +39,13 @@ v2.13.alpha (???) - (??/??/????)
 		- once 4 columns are assigned to one of the 4 quaternion components (w,x,y,z), the user can elect the display scale of the
 			'Coordinate System' objects
 
+	- New unified plugin to load LAS files (by Thomas Montaigu)
+		- based on LASzip
+		- should work on all platforms (Windows, Linux, macOS)
+		- manages all versions of LAS files (1.0 to 1.4)
+		- gives much more control over extended fields (EVLR) as well as custom mapping between
+			the existing fields of a cloud and their destination in the LAS file
+
 - Improvements:
 	- Rasterize:
 		- new option to compute the median height

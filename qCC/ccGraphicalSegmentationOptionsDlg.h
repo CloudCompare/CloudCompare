@@ -31,10 +31,16 @@ class ccGraphicalSegmentationOptionsDlg : public QDialog, public Ui::GraphicalSe
 public:
 
 	//! Default constructor
-	ccGraphicalSegmentationOptionsDlg(const QString windowTitle = QString(),
-		QWidget* parent = nullptr);
+	ccGraphicalSegmentationOptionsDlg(const QString windowTitle = QString(), QWidget* parent = nullptr);
 
 	void accept();
+
+	//! Returns the QSettings key to store the segmentation tool options
+	static QString SegmentationToolOptionsKey() { return "SegmentationToolOptions"; }
+	//! Returns the QSettings key to store the 'remaining entity' suffix
+	static QString RemainingSuffixKey() { return "Remaining"; }
+	//! Returns the QSettings key to store the 'segmented entity' suffix
+	static QString SegmentedSuffixKey() { return "Segmented"; }
 };
 
 #endif // CC_GRAPHICAL_SEGMENTATION_OPTIONS_DLG_HEADER

@@ -120,7 +120,7 @@ public: //clone, copy, etc.
 		Warning: the ReferenceCloud structure must refer to this cloud.
 		\param[in]  selection			a ReferenceCloud structure (pointing to source)
 		\param[out] warnings			[optional] to determine if warnings (CTOR_ERRORS) occurred during the duplication process
-		\param[in]  withChildEntities	whether child entities (labels, sensors, images, etc.) should be transferred as well
+		\param[in]  withChildEntities	whether child entities should be transferred as well (see ccHObjectCaster::CloneChildren)
 	**/
 	ccPointCloud* partialClone(const CCCoreLib::ReferenceCloud* selection, int* warnings = nullptr, bool withChildEntities = true) const;
 
@@ -466,7 +466,11 @@ public: //other methods
 	CCCoreLib::ReferenceCloud* crop(const ccBBox& box, bool inside = true) override;
 	void scale(PointCoordinateType fx, PointCoordinateType fy, PointCoordinateType fz, CCVector3 center = CCVector3(0,0,0)) override;
 	/** \warning if removeSelectedPoints is true, any attached octree will be deleted, as well as the visibility table. **/
-	ccGenericPointCloud* createNewCloudFromVisibilitySelection(bool removeSelectedPoints = false, VisibilityTableType* visTable = nullptr, std::vector<int>* newIndexesOfRemainingPoints = nullptr, bool silent = false) override;
+	ccGenericPointCloud* createNewCloudFromVisibilitySelection(	bool removeSelectedPoints = false,
+																VisibilityTableType* visTable = nullptr,
+																std::vector<int>* newIndexesOfRemainingPoints = nullptr,
+																bool silent = false,
+																CCCoreLib::ReferenceCloud* selection = nullptr) override;
 	bool removeVisiblePoints(VisibilityTableType* visTable = nullptr, std::vector<int>* newIndexes = nullptr) override;
 	void applyRigidTransformation(const ccGLMatrix& trans) override;
 	inline void refreshBB() override { invalidateBoundingBox(); }

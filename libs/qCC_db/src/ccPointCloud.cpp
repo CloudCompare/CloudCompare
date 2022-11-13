@@ -46,9 +46,7 @@
 #include "ccPolyline.h"
 #include "ccProgressDialog.h"
 #include "ccScalarField.h"
-#include "ccCameraSensor.h"
-#include "cc2DViewportObject.h"
-#include "cc2DViewportLabel.h"
+#include "ccHObjectCaster.h"
 
 //Qt
 #include <QCoreApplication>
@@ -206,10 +204,10 @@ ccPointCloud* ccPointCloud::partialClone(const CCCoreLib::ReferenceCloud* select
 	result->importParametersFrom(this);
 
 	//from now on we will need some points to proceed ;)
-	unsigned n = selection->size();
-	if (n)
+	unsigned selectionSize = selection->size();
+	if (selectionSize != 0)
 	{
-		if (!result->reserveThePointsTable(n))
+		if (!result->reserveThePointsTable(selectionSize))
 		{
 			ccLog::Error("[ccPointCloud::partialClone] Not enough memory to duplicate cloud!");
 			delete result;
@@ -218,7 +216,7 @@ ccPointCloud* ccPointCloud::partialClone(const CCCoreLib::ReferenceCloud* select
 
 		//import points
 		{
-			for (unsigned i = 0; i < n; i++)
+			for (unsigned i = 0; i < selectionSize; i++)
 			{
 				result->addPoint(*getPointPersistentPtr(selection->getPointGlobalIndex(i)));
 			}
@@ -229,7 +227,7 @@ ccPointCloud* ccPointCloud::partialClone(const CCCoreLib::ReferenceCloud* select
 		{
 			if (result->reserveTheRGBTable())
 			{
-				for (unsigned i = 0; i < n; i++)
+				for (unsigned i = 0; i < selectionSize; i++)
 				{
 					result->addColor(getPointColor(selection->getPointGlobalIndex(i)));
 				}
@@ -248,7 +246,7 @@ ccPointCloud* ccPointCloud::partialClone(const CCCoreLib::ReferenceCloud* select
 		{
 			if (result->reserveTheNormsTable())
 			{
-				for (unsigned i = 0; i < n; i++)
+				for (unsigned i = 0; i < selectionSize; i++)
 				{
 					result->addNormIndex(getPointNormalIndex(selection->getPointGlobalIndex(i)));
 				}
@@ -269,7 +267,7 @@ ccPointCloud* ccPointCloud::partialClone(const CCCoreLib::ReferenceCloud* select
 			{
 				try
 				{
-					for (unsigned i = 0; i < n; i++)
+					for (unsigned i = 0; i < selectionSize; i++)
 					{
 						const ccWaveform& w = m_fwfWaveforms[selection->getPointGlobalIndex(i)];
 						if (!result->fwfDescriptors().contains(w.descriptorID()))
@@ -314,12 +312,12 @@ ccPointCloud* ccPointCloud::partialClone(const CCCoreLib::ReferenceCloud* select
 					{
 						ccScalarField* currentScalarField = static_cast<ccScalarField*>(result->getScalarField(sfIdx));
 						assert(currentScalarField);
-						if (currentScalarField->resizeSafe(n))
+						if (currentScalarField->resizeSafe(selectionSize))
 						{
 							currentScalarField->setGlobalShift(sf->getGlobalShift());
 
 							//we copy data to new SF
-							for (unsigned i = 0; i < n; i++)
+							for (unsigned i = 0; i < selectionSize; i++)
 								currentScalarField->setValue(i, sf->getValue(selection->getPointGlobalIndex(i)));
 
 							currentScalarField->computeMinAndMax();
@@ -355,20 +353,30 @@ ccPointCloud* ccPointCloud::partialClone(const CCCoreLib::ReferenceCloud* select
 			}
 		}
 
+		std::vector<int> newIndexMap;
+		if (gridCount() != 0 || withChildEntities)
+		{
+			//we need a map between old and new indexes
+			try
+			{
+				newIndexMap.resize(size(), -1);
+				for (unsigned i = 0; i < selectionSize; i++)
+				{
+					newIndexMap[selection->getPointGlobalIndex(i)] = i;
+				}
+			}
+			catch (const std::bad_alloc&)
+			{
+				ccLog::Warning("Not enough memory");
+			}
+		}
+
 		//scan grids
 		if (gridCount() != 0)
 		{
+			assert(newIndexMap.size() == size());
 			try
 			{
-				//we need a map between old and new indexes
-				std::vector<int> newIndexMap(size(), -1);
-				{
-					for (unsigned i = 0; i < n; i++)
-					{
-						newIndexMap[selection->getPointGlobalIndex(i)] = i;
-					}
-				}
-
 				//duplicate the grid structure(s)
 				std::vector<Grid::Shared> newGrids;
 				{
@@ -404,164 +412,8 @@ ccPointCloud* ccPointCloud::partialClone(const CCCoreLib::ReferenceCloud* select
 
 		if (withChildEntities)
 		{
-			QMap<ccHObject*, ccHObject*> clonedEntities;
-
-			// specifc case: labels
-			{
-				ccHObject::Container labels2D;
-				filterChildren(labels2D, true, CC_TYPES::LABEL_2D);
-				if (!labels2D.empty())
-				{
-					// we need a mapping to know if any point is kept in the cloned version or not
-					std::vector<unsigned> newPointIndex;
-					try
-					{
-						newPointIndex.resize(size(), n);
-						for (unsigned i = 0; i < n; i++)
-						{
-							newPointIndex[selection->getPointGlobalIndex(i)] = i;
-						}
-
-						for (ccHObject* labelEntity : labels2D)
-						{
-							cc2DLabel* label = static_cast<cc2DLabel*>(labelEntity);
-							// check if we can keep this label
-							bool keepThisLabel = true;
-							for (unsigned i = 0; i < label->size(); ++i)
-							{
-								const cc2DLabel::PickedPoint& pp = label->getPickedPoint(i);
-								if (pp.entity() == this && newPointIndex[pp.index] == n)
-								{
-									// this label relies on a point that is not used by the partial clone
-									keepThisLabel = false;
-									break;
-								}
-							}
-
-							if (keepThisLabel)
-							{
-								cc2DLabel* clonedLabel = new cc2DLabel(*label, false);
-								for (unsigned i = 0; i < label->size(); ++i)
-								{
-									cc2DLabel::PickedPoint pp = label->getPickedPoint(i);
-									if (pp.entity() == this)
-									{
-										pp._cloud = result;
-										pp.index = newPointIndex[pp.index];
-										assert(pp.index < n);
-									}
-									clonedLabel->addPickedPoint(pp);
-								}
-								result->addChild(clonedLabel);
-								//clonedEntities.insert(label, clonedLabel); // not used
-							}
-						}
-					}
-					catch (const std::bad_alloc&)
-					{
-						ccLog::Warning("Not enough memory to clones the 2D labels");
-					}
-				}
-			}
-
-			// specific case: camera sensors need to be processed before the images
-			{
-				ccHObject::Container cameraSensors;
-				filterChildren(cameraSensors, true, CC_TYPES::CAMERA_SENSOR);
-
-				// clone the camera sensors (if any)
-				if (!cameraSensors.empty())
-				{
-					for (ccHObject* sensor : cameraSensors)
-					{
-						ccCameraSensor* camSensor = static_cast<ccCameraSensor*>(sensor);
-						ccCameraSensor* cloned = new ccCameraSensor(*camSensor);
-
-						result->addChild(cloned);
-						clonedEntities.insert(camSensor, cloned);
-					}
-				}
-			}
-
-			// for the other children
-			for (unsigned i = 0; i < getChildrenNumber(); ++i)
-			{
-				ccHObject* child = getChild(i);
-				switch (child->getClassID())
-				{
-
-				// image
-				case CC_TYPES::IMAGE:
-				{
-					ccImage* image = static_cast<ccImage*>(child);
-					ccImage* cloned = new ccImage(*image, false);
-
-					ccCameraSensor* camSensor = image->getAssociatedSensor();
-					if (camSensor)
-					{
-						if (clonedEntities.contains(camSensor))
-						{
-							// if we have already cloned the sensor on which this image depends,
-							// we can simply update the link
-							cloned->setAssociatedSensor(static_cast<ccCameraSensor*>(clonedEntities[camSensor]));
-						}
-						else
-						{
-							// else we have to clone the sensor
-							ccCameraSensor* clonedSensor = new ccCameraSensor(*camSensor);
-							cloned->setAssociatedSensor(clonedSensor);
-							result->addChild(clonedSensor);
-							clonedEntities.insert(camSensor, clonedSensor);
-						}
-					}
-				}
-				break;
-
-				// GBL sensor
-				case CC_TYPES::GBL_SENSOR:
-				{
-					// simply clone the GBL sensor
-					ccGBLSensor* gblSensor = static_cast<ccGBLSensor*>(child);
-					ccGBLSensor* cloned = new ccGBLSensor(*gblSensor, false);
-					result->addChild(cloned);
-					//clonedEntities.insert(gblSensor, cloned); // not used
-				}
-				break;
-
-				// 2D Viewport object
-				case CC_TYPES::VIEWPORT_2D_OBJECT:
-				{
-					cc2DViewportObject* viewport = static_cast<cc2DViewportObject*>(child);;
-					cc2DViewportObject* cloned = new cc2DViewportObject(*viewport);
-					result->addChild(cloned);
-					//clonedEntities.insert(viewport, cloned); // not used
-				}
-				break;
-
-				// 2D Viewport labels
-				case CC_TYPES::VIEWPORT_2D_LABEL:
-				{
-					cc2DViewportLabel* viewportLabel = static_cast<cc2DViewportLabel*>(child);;
-					cc2DViewportLabel* cloned = new cc2DViewportLabel(*viewportLabel);
-					result->addChild(cloned);
-					//clonedEntities.insert(viewportLabel, cloned); // not used
-				}
-				break;
-
-				// Meshes
-				case CC_TYPES::MESH:
-				{
-					// TODO
-				}
-				break;
-
-				default:
-				{
-					// nothing to do
-				}
-				break;
-				}
-			}
+			assert(newIndexMap.size() == size());
+			ccHObjectCaster::CloneChildren(this, result, &newIndexMap);
 		}
 	}
 
@@ -3435,7 +3287,8 @@ void ccPointCloud::hidePointsByScalarValue(ScalarType minVal, ScalarType maxVal)
 ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(	bool removeSelectedPoints/*=false*/,
 																			VisibilityTableType* visTable/*=nullptr*/,
 																			std::vector<int>* newIndexesOfRemainingPoints/*=nullptr*/,
-																			bool silent/*=false*/)
+																			bool silent/*=false*/,
+																			CCCoreLib::ReferenceCloud* selection/*=nullptr*/)
 {
 	if (!visTable)
 	{
@@ -3459,7 +3312,7 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(	bool r
 	ccPointCloud* result = nullptr;
 	{
 		//we create a temporary entity with the visible points only
-		CCCoreLib::ReferenceCloud* rc = getTheVisiblePoints(visTable, silent);
+		CCCoreLib::ReferenceCloud* rc = getTheVisiblePoints(visTable, silent, selection);
 		if (!rc)
 		{
 			//a warning message has already been issued by getTheVisiblePoints!
@@ -3471,27 +3324,36 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(	bool r
 		result = partialClone(rc);
 
 		//don't need this one anymore
-		delete rc;
-		rc = nullptr;
+		if (rc != selection)
+		{
+			delete rc;
+			rc = nullptr;
+		}
 	}
 
 	if (!result)
 	{
-		ccLog::Warning("[ccPointCloud] Failed to generate a subset cloud");
+		ccLog::Warning("[ccPointCloud::createNewCloudFromVisibilitySelection] Failed to generate a subset cloud");
 		return nullptr;
 	}
 
-	QSettings settings;
-	settings.beginGroup("SegmentationToolOptions");
-	QString segmentedSuffix = settings.value("Segmented", ".segmented").toString();
-	settings.endGroup();
-
-	result->setName(getName() + segmentedSuffix);
+	result->setName(getName() + ".segmented");
 
 	//shall the visible points be erased from this cloud?
-	if (removeSelectedPoints && !isLocked())
+	if (removeSelectedPoints)
 	{
-		removeVisiblePoints(visTable, newIndexesOfRemainingPoints);
+		if (isLocked())
+		{
+			ccLog::Warning("[ccPointCloud::createNewCloudFromVisibilitySelection] Can't remove selected points as cloud is locked");
+			if (newIndexesOfRemainingPoints)
+			{
+				newIndexesOfRemainingPoints->clear();
+			}
+		}
+		else
+		{
+			removeVisiblePoints(visTable, newIndexesOfRemainingPoints);
+		}
 	}
 
 	return result;
@@ -3574,7 +3436,7 @@ bool ccPointCloud::removeVisiblePoints(VisibilityTableType* visTable/*=nullptr*/
 		}
 	}
 
-	// we have to take care of scan grids
+	//we have to take care of scan grids
 	if (!m_grids.empty())
 	{
 		assert(_newIndexes);

@@ -280,16 +280,16 @@ void ccGraphicalSegmentationTool::prepareEntityForRemoval(ccHObject *entity, boo
 	// specific case: we may have automatically hidden the mesh or the polyline associated to a cloud
 	if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
-		ccGenericPointCloud *cloud = static_cast<ccGenericPointCloud *>(entity);
+		ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud *>(entity);
 
-		ccGenericMesh *associatedMesh = nullptr;
+		ccGenericMesh* associatedMesh = nullptr;
 		if (ccGenericMesh::IsCloudVerticesOfMesh(cloud, &associatedMesh) && associatedMesh)
 		{
 			associatedMesh->popDisplayState();
 			return;
 		}
 
-		ccPolyline *associatedPolyline = nullptr;
+		ccPolyline* associatedPolyline = nullptr;
 		if (ccPolyline::IsCloudVerticesOfPolyline(cloud, &associatedPolyline) && associatedPolyline)
 		{
 			associatedPolyline->popDisplayState();
@@ -298,13 +298,13 @@ void ccGraphicalSegmentationTool::prepareEntityForRemoval(ccHObject *entity, boo
 	}
 }
 
-void ccGraphicalSegmentationTool::removeAllEntities(bool unallocateVisibilityArrays)
+void ccGraphicalSegmentationTool::removeAllEntities()
 {
 	for (QSet<ccHObject *>::const_iterator p = m_toSegment.constBegin(); p != m_toSegment.constEnd(); ++p)
 	{
 		ccHObject *entity = *p;
 
-		prepareEntityForRemoval(entity, unallocateVisibilityArrays);
+		prepareEntityForRemoval(entity, true);
 	}
 
 	m_toSegment.clear();
@@ -1343,9 +1343,6 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 
 	bool cantModifyPolylinesWarningIssued = false;
 
-	//additional vertices of which visibility array should be manually reset
-	std::unordered_set<ccGenericPointCloud*> verticesToReset;
-
 	// specific case: labels
 	std::set<cc2DLabel*> watchedLabels;
 	try
@@ -1390,27 +1387,37 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 
 		// check first if we can modify this entity directly or if there might be dire consequences...
 		bool canModify = true;
+		if (entity->isLocked())
+		{
+			//we can't delete this entity
+			ccLog::Warning("Entity " + entity->getName() + " is locked. We won't be able to modify it");
+			canModify = false;
+		}
+
 		if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
 		{
 			ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(entity);
 			if (cloud->size() == 0)
 			{
 				//ignore this cloud
+				ccLog::Warning("Cloud " + cloud->getName() + " is empty. We will ignore it");
 				continue;
 			}
-
-			// check that the point cloud is not the vertices of a mesh or of a polyline
-			if (ccGenericMesh::IsCloudVerticesOfMesh(cloud))
+			if (canModify)
 			{
-				//we can't delete this cloud
-				ccLog::Warning("Cloud " + cloud->getName() + " seems to be the vertices of a mesh. We won't be able to modify it");
-				canModify = false;
-			}
-			else if (ccPolyline::IsCloudVerticesOfPolyline(cloud))
-			{
-				//we can't delete this cloud
-				ccLog::Warning("Cloud " + cloud->getName() + " seems to be the vertices of a polyine. We won't be able to modify it");
-				canModify = false;
+				// check that the point cloud is not the vertices of a mesh or of a polyline
+				if (ccGenericMesh::IsCloudVerticesOfMesh(cloud))
+				{
+					//we can't delete this cloud
+					ccLog::Warning("Cloud " + cloud->getName() + " seems to be the vertices of a mesh. We won't be able to modify it");
+					canModify = false;
+				}
+				else if (ccPolyline::IsCloudVerticesOfPolyline(cloud))
+				{
+					//we can't delete this cloud
+					ccLog::Warning("Cloud " + cloud->getName() + " seems to be the vertices of a polyine. We won't be able to modify it");
+					canModify = false;
+				}
 			}
 		}
 		else if (entity->isA(CC_TYPES::MESH)) // TODO: sub-meshes and primitives are not handled for now
@@ -1419,6 +1426,7 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 			if (mesh->size() == 0 || mesh->getAssociatedCloud()->size() == 0)
 			{
 				//ignore this mesh
+				ccLog::Warning("Mesh " + mesh->getName() + " is empty. We will ignore it");
 				continue;
 			}
 		}
@@ -1428,6 +1436,7 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 			if (poly->size() == 0 || poly->getAssociatedCloud()->size() == 0)
 			{
 				//ignore this polyline
+				ccLog::Warning("Polyline " + poly->getName() + " is empty. We will ignore it");
 				continue;
 			}
 
@@ -1464,11 +1473,23 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 				ccGenericPointCloud* segmentedCloud = genCloud->createNewCloudFromVisibilitySelection(removeSelectedPoints, nullptr, &newIndexesOfRemainingPoints);
 				if (segmentedCloud && segmentedCloud->size() == 0)
 				{
+					// empty result: we ignore it
 					delete segmentedCloud;
 					segmentedCloud = nullptr;
 				}
 				else
 				{
+					if (segmentedCloud)
+					{
+						// update suffix
+						QSettings settings;
+						settings.beginGroup(ccGraphicalSegmentationOptionsDlg::SegmentationToolOptionsKey());
+						QString segmentedSuffix = settings.value(ccGraphicalSegmentationOptionsDlg::SegmentedSuffixKey(), ".segmented").toString();
+						settings.endGroup();
+
+						segmentedCloud->setName(genCloud->getName() + segmentedSuffix);
+					}
+
 					segmentationResult = segmentedCloud;
 				}
 
@@ -1477,7 +1498,7 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 				if (!deleteOriginalEntity)
 				{
 					// be smart and keep only the necessary labels
-					std::set< cc2DLabel*>::iterator it = watchedLabels.begin();
+					std::set<cc2DLabel*>::iterator it = watchedLabels.begin();
 					while (it != watchedLabels.end())
 					{
 						cc2DLabel* label = *it;
@@ -1497,11 +1518,13 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 								{
 									// delete the label
 									ccHObject* labelParent = label->getParent();
-									if (labelParent != entity)
-										ccMainAppInterface::ccHObjectContext objContext = app->removeObjectTemporarilyFromDBTree(labelParent);
+									ccMainAppInterface::ccHObjectContext parentContext;
+									bool saveContext = (labelParent != entity && !entity->isAncestorOf(labelParent));
+									if (saveContext)
+										parentContext = app->removeObjectTemporarilyFromDBTree(labelParent);
 									labelParent->removeChild(label);
-									if (labelParent != entity)
-										app->putObjectBackIntoDBTree(labelParent, objContext);
+									if (saveContext)
+										app->putObjectBackIntoDBTree(labelParent, parentContext);
 
 									label = nullptr;
 									it = watchedLabels.erase(it);
@@ -1518,13 +1541,12 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 					}
 				}
 			}
-			else //if (entity->isA(CC_TYPES::MESH)
+			else if (entity->isA(CC_TYPES::MESH))
 			{
-				std::vector<int> newIndexesOfRemainingTriangles;
-
 				ccMesh* mesh = ccHObjectCaster::ToMesh(entity);
 
-				segmentationResult = mesh->createNewMeshFromSelection(canModify && !m_deleteHiddenParts, &newIndexesOfRemainingTriangles);
+				std::vector<int> newIndexesOfRemainingTriangles;
+				segmentationResult = mesh->createNewMeshFromSelection(canModify && !m_deleteHiddenParts, &newIndexesOfRemainingTriangles, true);
 
 				deleteOriginalEntity |= (mesh->size() == 0);
 
@@ -1551,11 +1573,13 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 								{
 									// delete the label
 									ccHObject* labelParent = label->getParent();
-									if (labelParent != entity)
-										ccMainAppInterface::ccHObjectContext objContext = app->removeObjectTemporarilyFromDBTree(labelParent);
+									ccMainAppInterface::ccHObjectContext parentContext;
+									bool saveContext = (labelParent != entity && !entity->isAncestorOf(labelParent));
+									if (saveContext)
+										parentContext = app->removeObjectTemporarilyFromDBTree(labelParent);
 									labelParent->removeChild(label);
-									if (labelParent != entity)
-										app->putObjectBackIntoDBTree(labelParent, objContext);
+									if (saveContext)
+										app->putObjectBackIntoDBTree(labelParent, parentContext);
 
 									label = nullptr;
 									it = watchedLabels.erase(it);
@@ -1572,57 +1596,26 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 					}
 				}
 			}
+			else
+			{
+				assert(false);
+			}
 
 			if (segmentationResult)
 			{
 				if (canModify)
 				{
-					//another specific case: remove sensors (on clouds)
+					//specific case: update sensors
 					for (unsigned i = 0; i < entity->getChildrenNumber(); ++i)
 					{
 						ccHObject* child = entity->getChild(i);
-						assert(child);
-						if (child && child->isKindOf(CC_TYPES::SENSOR))
+						if (child && child->isA(CC_TYPES::GBL_SENSOR))
 						{
-							if (child->isA(CC_TYPES::GBL_SENSOR))
-							{
-								ccGBLSensor* sensor = ccHObjectCaster::ToGBLSensor(entity->getChild(i));
-								//remove the associated depth buffer of the original sensor (deprecated)
-								sensor->clearDepthBuffer();
-								assert(isCloud);
-							}
-							else if (child->isA(CC_TYPES::CAMERA_SENSOR) && !isCloud)
-							{
-								ccCameraSensor *sensor = ccHObjectCaster::ToCameraSensor(entity->getChild(i));
-								if (deleteOriginalEntity)
-								{
-									//either transfer
-									entity->transferChild(sensor, *segmentationResult);
-								}
-								else
-								{
-									//or copy
-									segmentationResult->addChild(new ccCameraSensor(*sensor));
-								}
-							}
-							else
-							{
-								//unhandled sensor?!
-								assert(false);
-							}
+							ccGBLSensor* sensor = ccHObjectCaster::ToGBLSensor(entity->getChild(i));
+							//remove the associated depth buffer of the original sensor (deprecated)
+							sensor->clearDepthBuffer();
+							assert(isCloud);
 						}
-					} //for each child
-				}
-				else
-				{
-					ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
-					if (cloud)
-					{
-						verticesToReset.insert(cloud);
-					}
-					else
-					{
-						assert(false);
 					}
 				}
 
@@ -1641,11 +1634,13 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 							{
 								// delete the label
 								ccHObject* labelParent = label->getParent();
-								if (labelParent != entity)
-									ccMainAppInterface::ccHObjectContext objContext = app->removeObjectTemporarilyFromDBTree(labelParent);
+								ccMainAppInterface::ccHObjectContext parentContext;
+								bool saveContext = (labelParent != entity && !entity->isAncestorOf(labelParent));
+								if (saveContext)
+									parentContext = app->removeObjectTemporarilyFromDBTree(labelParent);
 								labelParent->removeChild(label);
-								if (labelParent != entity)
-									app->putObjectBackIntoDBTree(labelParent, objContext);
+								if (saveContext)
+									app->putObjectBackIntoDBTree(labelParent, parentContext);
 
 								label = nullptr;
 								it = watchedLabels.erase(it);
@@ -1667,8 +1662,8 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 					if (!deleteOriginalEntity)
 					{
 						QSettings settings;
-						settings.beginGroup("SegmentationToolOptions");
-						QString remainingSuffix = settings.value("Remaining", ".remaining").toString();
+						settings.beginGroup(ccGraphicalSegmentationOptionsDlg::SegmentationToolOptionsKey());
+						QString remainingSuffix = settings.value(ccGraphicalSegmentationOptionsDlg::RemainingSuffixKey(), ".remaining").toString();
 						settings.endGroup();
 						entity->setName(entity->getName() + remainingSuffix);
 						if (canModify)
@@ -1724,7 +1719,7 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 
 				p = m_toSegment.erase(p);
 
-				delete entity;
+				delete entity; // TODO: should we wait that all entities are processed before remove it?
 				entity = nullptr;
 			}
 			else
@@ -1765,15 +1760,7 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 		}
 	}
 
-	//specific actions
-	{
-		for (ccGenericPointCloud* cloud : verticesToReset)
-		{
-			cloud->unallocateVisibilityArray();
-		}
-	}
-
-	removeAllEntities(!m_deleteHiddenParts);
+	removeAllEntities();
 
 	return true;
 }

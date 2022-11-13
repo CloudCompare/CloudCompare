@@ -179,9 +179,10 @@ public:
 	//! Returns a ReferenceCloud equivalent to the visibility array
 	/** \param visTable visibility table (optional, otherwise the cloud's default one will be used)
 		\param silent don't issue warnings if no visible point is present
+		\param selection input reference cloud to be used (optional)
 		\return the visible points as a ReferenceCloud
 	**/
-	virtual CCCoreLib::ReferenceCloud* getTheVisiblePoints(const VisibilityTableType* visTable = nullptr, bool silent = false) const;
+	virtual CCCoreLib::ReferenceCloud* getTheVisiblePoints(const VisibilityTableType* visTable = nullptr, bool silent = false, CCCoreLib::ReferenceCloud* selection = nullptr) const;
 	
 	//! Returns whether the visibility array is allocated or not
 	virtual bool isVisibilityTableInstantiated() const;
@@ -209,17 +210,19 @@ public:
 	virtual void refreshBB() = 0;
 
 	//! Creates a new point cloud with only the 'visible' points (as defined by the visibility array)
-	/** \param[in]  removeSelectedPoints if true, exported point are also removed from the current point cloud
+	/** \param[in]  removeSelectedPoints if true, 'visible' points are also removed from the current point cloud
 		\param[in]  visTable visibility table (optional, otherwise the cloud's default one will be used)
 		\param[out] newIndexesOfRemainingPoints the new indexes of the remaining points (if removeSelectedPoints is true - optional).
 		            Must be initially empty or have the same size as the original cloud.
 		\param[in]  silent don't issue a warning message if there's no point to keep
-		\return new point cloud with selected points
+		\param[out] selection the corresponding point selection
+		\return new point cloud with 'visible' points
 	**/
 	virtual ccGenericPointCloud* createNewCloudFromVisibilitySelection(	bool removeSelectedPoints = false,
 																		VisibilityTableType* visTable = nullptr,
 																		std::vector<int>* newIndexesOfRemainingPoints = nullptr,
-																		bool silent = false) = 0;
+																		bool silent = false,
+																		CCCoreLib::ReferenceCloud* selection = nullptr) = 0;
 
 	//! Removes all the 'visible' points (as defined by the visibility array)
 	/** \param visTable visibility table (optional, otherwise the cloud's default one will be used)

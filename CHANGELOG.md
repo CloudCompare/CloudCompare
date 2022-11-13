@@ -47,6 +47,10 @@ v2.13.alpha (???) - (??/??/????)
 			the existing fields of a cloud and their destination in the LAS file
 
 - Improvements:
+	- Segmentation
+		- CC will now preserve some children entities (labels, sensors, etc.) when segmenting clouds or meshes
+			(with graphical segmentation, cross section tool, subsampling, filter by SF value, etc.)
+
 	- Rasterize:
 		- new option to compute the median height
 		- new option to compute the median scalar field value(s)

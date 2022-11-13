@@ -2896,7 +2896,7 @@ void MainWindow::doActionFilterByValue()
 			{
 				pc->hidePointsByScalarValue(minVal, maxVal);
 				if (ent->isA(CC_TYPES::MESH)/*|| ent->isKindOf(CC_TYPES::PRIMITIVE)*/) //TODO
-					resultInside = ccHObjectCaster::ToMesh(ent)->createNewMeshFromSelection(false);
+					resultInside = ccHObjectCaster::ToMesh(ent)->createNewMeshFromSelection(false, nullptr, true);
 				else if (ent->isA(CC_TYPES::SUB_MESH))
 					resultInside = ccHObjectCaster::ToSubMesh(ent)->createNewSubMeshFromSelection(false);
 
@@ -2904,7 +2904,7 @@ void MainWindow::doActionFilterByValue()
 				{
 					pc->invertVisibilityArray();
 					if (ent->isA(CC_TYPES::MESH)/*|| ent->isKindOf(CC_TYPES::PRIMITIVE)*/) //TODO
-						resultOutside = ccHObjectCaster::ToMesh(ent)->createNewMeshFromSelection(false);
+						resultOutside = ccHObjectCaster::ToMesh(ent)->createNewMeshFromSelection(false, nullptr, true);
 					else if (ent->isA(CC_TYPES::SUB_MESH))
 						resultOutside = ccHObjectCaster::ToSubMesh(ent)->createNewSubMeshFromSelection(false);
 				}
@@ -6483,7 +6483,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 	}
 	else
 	{
-		m_gsTool->removeAllEntities(true);
+		m_gsTool->removeAllEntities();
 	}
 
 	//we enable all GL windows

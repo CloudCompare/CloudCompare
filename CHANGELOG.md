@@ -46,6 +46,10 @@ v2.13.alpha (???) - (??/??/????)
 		- gives much more control over extended fields (EVLR) as well as custom mapping between
 			the existing fields of a cloud and their destination in the LAS file
 
+	- Display > Restore window geometry on startup
+		- Option to control whether the previous window geometry (size and position) should be restored or not
+		
+
 - Improvements:
 	- Segmentation
 		- CC will now preserve some children entities (labels, sensors, etc.) when segmenting clouds or meshes:

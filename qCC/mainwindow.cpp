@@ -287,6 +287,14 @@ MainWindow::MainWindow()
 		connect(m_mdiArea, &QMdiArea::subWindowActivated, m_pickingHub, &ccPickingHub::onActiveWindowChanged);
 	}
 
+	// restore the state of the 'auto-restore' menu entry
+	// (do that before connecting the actions)
+	{
+		QSettings settings;
+		bool doNotAutoRestoreGeometry = settings.value(ccPS::DoNotRestoreWindowGeometry(), !m_UI->actionRestoreWindowOnStartup->isChecked()).toBool();
+		m_UI->actionRestoreWindowOnStartup->setChecked(!doNotAutoRestoreGeometry);
+	}
+
 	connectActions();
 
 	new3DView();
@@ -719,6 +727,7 @@ void MainWindow::connectActions()
 
 	//"Display" menu
 	connect(m_UI->actionResetGUIElementsPos,		&QAction::triggered, this, &MainWindow::doActionResetGUIElementsPos);
+	connect(m_UI->actionRestoreWindowOnStartup,		&QAction::toggled,   this, &MainWindow::doActionToggleRestoreWindowOnStartup);
 	connect(m_UI->actionResetAllVBOs,				&QAction::triggered, this, &MainWindow::doActionResetAllVBOs);
 
 	//"3D Views" menu
@@ -5908,6 +5917,12 @@ void MainWindow::doActionResetGUIElementsPos()
 	s_autoSaveGuiElementPos = false;
 }
 
+void MainWindow::doActionToggleRestoreWindowOnStartup(bool state)
+{
+	QSettings settings;
+	settings.setValue(ccPS::DoNotRestoreWindowGeometry(), !state);
+}
+
 void MainWindow::doActionResetAllVBOs()
 {
 	ccHObject::Container clouds;
@@ -5948,21 +5963,27 @@ void MainWindow::restoreGUIElementsPos()
 		restoreState(previousState.toByteArray());
 	}
 
-	//randomly makes CC freeze if restored on the second screen?!
-	//QVariant previousGeometry = settings.value(ccPS::MainWinGeom());
-	//if (previousGeometry.isValid())
-	//{
-	//	restoreGeometry(previousGeometry.toByteArray()); 
-	//}
-	//else
+	QVariant previousGeometry;
+	if (!settings.value(ccPS::DoNotRestoreWindowGeometry(), false).toBool())
+	{
+		previousGeometry = settings.value(ccPS::MainWinGeom());
+	}
+
+	if (previousGeometry.isValid())
+	{
+		restoreGeometry(previousGeometry.toByteArray()); 
+	}
+	else
 	{
 		showMaximized();
 	}
 
-	//if (isFullScreen())
-	//{
-	//	m_UI->actionFullScreen->setChecked(true);
-	//}
+	if (isFullScreen())
+	{
+		m_UI->actionFullScreen->blockSignals(true);
+		m_UI->actionFullScreen->setChecked(true);
+		m_UI->actionFullScreen->blockSignals(false);
+	}
 }
 
 void MainWindow::showEvent(QShowEvent* event)

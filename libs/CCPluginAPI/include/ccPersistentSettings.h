@@ -26,6 +26,7 @@ namespace ccPS
 	inline const QString SaveFile                    () { return QStringLiteral( "SaveFile" ); }
 	inline const QString MainWinGeom                 () { return QStringLiteral( "mainWindowGeometry" ); }
 	inline const QString MainWinState                () { return QStringLiteral( "mainWindowState" ); }
+	inline const QString DoNotRestoreWindowGeometry  () { return QStringLiteral( "doNotRestoreWindowGeometry" ); }
 	inline const QString AppStyle                    () { return QStringLiteral( "AppStyle" ); }
 	inline const QString CurrentPath                 () { return QStringLiteral( "currentPath" ); }
 	inline const QString SelectedInputFilter         () { return QStringLiteral( "selectedInputFilter" ); }

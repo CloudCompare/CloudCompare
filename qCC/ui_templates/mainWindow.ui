@@ -116,6 +116,7 @@
     <addaction name="menuToolbars"/>
     <addaction name="menuLanguage"/>
     <addaction name="actionResetGUIElementsPos"/>
+    <addaction name="actionRestoreWindowOnStartup"/>
     <addaction name="actionResetAllVBOs"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -3135,6 +3136,17 @@ The active scalar field should have integer values.</string>
    </property>
    <property name="toolTip">
     <string>Add classification SF (shorcut to 'Add constant SF')</string>
+   </property>
+  </action>
+  <action name="actionRestoreWindowOnStartup">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Restore window geometry on startup</string>
    </property>
   </action>
  </widget>

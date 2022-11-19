@@ -49,18 +49,18 @@ static const char CANUPO_PER_LEVEL_ADDITIONAL_SF_NAME[] = "CANUPO.(x-y)";
 static const char s_canupoMSCMetaData[] = "CanupoMSCData";
 
 //Tries to refine the classification (returns the new confidence if successful)
-float RefinePointClassif(	const Classifier& classifier,
-							const float confidence,
-							float& distToBoundary,
-							ccPointCloud* cloud,
-							ccOctree* octree,
-							unsigned char octreeLevel,
-							CCCoreLib::GenericIndexedCloudPersist* corePoints,
-							CCCoreLib::DgmOctree* corePointsOctree,
-							unsigned char coreOctreeLevel,
-							unsigned coreIndex,
-							PointCoordinateType largestRadius,
-							const std::vector<int>& corePointClasses
+static float RefinePointClassif(const Classifier& classifier,
+								const float confidence,
+								float& distToBoundary,
+								ccPointCloud* cloud,
+								ccOctree* octree,
+								unsigned char octreeLevel,
+								CCCoreLib::GenericIndexedCloudPersist* corePoints,
+								CCCoreLib::DgmOctree* corePointsOctree,
+								unsigned char coreOctreeLevel,
+								unsigned coreIndex,
+								PointCoordinateType largestRadius,
+								const std::vector<int>& corePointClasses
 	)
 {
 	CCCoreLib::ScalarField* sf = cloud->getCurrentDisplayedScalarField();
@@ -96,11 +96,11 @@ float RefinePointClassif(	const Classifier& classifier,
 			{
 				double maxSquareDist = 0;
 				CCCoreLib::ReferenceCloud Yk(corePoints);
-				if (corePointsOctree->findPointNeighbourhood(cloud->getPoint(currentPointIndex),
-					&Yk,
-					1,
-					coreOctreeLevel,
-					maxSquareDist) == 1)
+				if (corePointsOctree->findPointNeighbourhood(cloud->getPoint(	currentPointIndex),
+																				&Yk,
+																				1,
+																				coreOctreeLevel,
+																				maxSquareDist) == 1)
 				{
 					nearestCoreIndex = Yk.getPointGlobalIndex(0);
 				}

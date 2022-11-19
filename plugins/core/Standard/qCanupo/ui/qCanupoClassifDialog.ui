@@ -14,7 +14,7 @@
    <string>CANUPO Classification</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="qCanupo.qrc">
+   <iconset resource="../qCanupo.qrc">
     <normaloff>:/CC/plugin/qCanupoPlugin/images/iconClassify.png</normaloff>:/CC/plugin/qCanupoPlugin/images/iconClassify.png</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -352,7 +352,7 @@ p, li { white-space: pre-wrap; }
   </layout>
  </widget>
  <resources>
-  <include location="qCanupo.qrc"/>
+  <include location="../qCanupo.qrc"/>
  </resources>
  <connections>
   <connection>

@@ -48,7 +48,10 @@ v2.13.alpha (???) - (??/??/????)
 
 	- Display > Restore window geometry on startup
 		- Option to control whether the previous window geometry (size and position) should be restored or not
-		
+	
+	- Display > Display settings > Picking cursor ('Cross' or 'Pointing hand')
+		- Default mouse cursor for picking points will now be the cross
+		- This can be changed in the 'Display options' dialog
 
 - Improvements:
 	- Segmentation

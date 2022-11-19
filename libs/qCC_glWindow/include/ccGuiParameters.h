@@ -120,6 +120,9 @@ public:
 		//! can be slow with large point clouds/large number of objects
 		bool singleClickPicking;
 
+		//! Picking cursor
+		Qt::CursorShape pickingCursorShape;
+
 		//! Default constructor
 		ParamStruct();
 

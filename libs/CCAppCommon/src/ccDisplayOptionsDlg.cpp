@@ -81,6 +81,7 @@ ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent)
 	connect(m_ui->maxMeshSizeDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccDisplayOptionsDlg::changeMaxMeshSize);
 
 	connect(m_ui->autoComputeOctreeComboBox,	qOverload<int>(&QComboBox::currentIndexChanged), this, &ccDisplayOptionsDlg::changeAutoComputeOctreeOption);
+	connect(m_ui->pickingCursorComboBox,        qOverload<int>(&QComboBox::currentIndexChanged), this, &ccDisplayOptionsDlg::changePickingCursor);
 
 	connect(m_ui->okButton,		&QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::doAccept);
 	connect(m_ui->applyButton,	&QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::apply);
@@ -204,6 +205,18 @@ void ccDisplayOptionsDlg::refresh()
 
 	m_ui->autoDisplayNormalsCheckBox->setChecked(m_options.normalsDisplayedByDefault);
 	m_ui->useNativeDialogsCheckBox->setChecked(m_options.useNativeDialogs);
+
+	switch (m_parameters.pickingCursorShape)
+	{
+	default:
+		assert(false);
+	case Qt::CrossCursor:
+		m_ui->pickingCursorComboBox->setCurrentIndex(0);
+		break;
+	case Qt::PointingHandCursor:
+		m_ui->pickingCursorComboBox->setCurrentIndex(1);
+		break;
+	}
 
 	update();
 }
@@ -379,6 +392,22 @@ void ccDisplayOptionsDlg::changeVBOUsage()
 	if (m_parameters.useVBOs && m_ui->maxCloudSizeDoubleSpinBox->value() < s_defaultMaxVBOCloudSizeM)
 	{
 		m_ui->maxCloudSizeDoubleSpinBox->setValue(s_defaultMaxVBOCloudSizeM);
+	}
+}
+
+void ccDisplayOptionsDlg::changePickingCursor(int index)
+{
+	switch (index)
+	{
+	case 0:
+		m_parameters.pickingCursorShape = Qt::CrossCursor;
+		break;
+	case 1:
+		m_parameters.pickingCursorShape = Qt::PointingHandCursor;
+		break;
+	default:
+		assert(false);
+		break;
 	}
 }
 

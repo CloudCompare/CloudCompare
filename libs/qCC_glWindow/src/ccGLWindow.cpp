@@ -320,7 +320,6 @@ struct ccGLWindow::PickingParameters
 	bool pickInLocalDB;
 };
 
-
 ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=nullptr*/,
 						ccGLWindowParent* parent/*=nullptr*/,
 						bool silentInitialization/*=false*/)
@@ -3782,8 +3781,12 @@ void ccGLWindow::setPickingMode(PICKING_MODE mode/*=DEFAULT_PICKING*/)
 	case POINT_OR_TRIANGLE_OR_LABEL_PICKING:
 	case TRIANGLE_PICKING:
 	case POINT_PICKING:
-		setCursor(QCursor(Qt::PointingHandCursor));
-		break;
+	{
+		const ccGui::ParamStruct& displayParams = getDisplayParameters();
+		setCursor(QCursor(displayParams.pickingCursorShape));
+	}
+	break;
+	
 	default:
 		break;
 	}

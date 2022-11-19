@@ -61,6 +61,7 @@ protected:
 	void changeMaxCloudSize(double);
 	void changeVBOUsage();
 	void changeColorScaleRampWidth(int);
+	void changePickingCursor(int);
 
 	void changeDefaultFontSize(int);
 	void changeLabelFontSize(int);

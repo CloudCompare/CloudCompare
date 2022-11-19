@@ -645,7 +645,7 @@ public:
 	/** The request will be executed if not in auto refresh mode already
 	**/
 	void requestUpdate();
-
+	
 #ifdef CC_GL_WINDOW_USE_QWINDOW
 	//! For compatibility with the QOpenGLWidget version
 	inline void update() { paintGL(); }

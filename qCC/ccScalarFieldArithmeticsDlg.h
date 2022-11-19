@@ -59,6 +59,7 @@ public:
 						ATAN		= 15,
 						INT			= 16,
 						INVERSE		= 17,
+						SET			= 18,
 						/* Invalid enum. (always last) */
 						INVALID		= 255
 	};
@@ -83,15 +84,9 @@ public:
 	//! Secondary SF descriptor
 	struct SF2
 	{
-		SF2()
-			: isConstantValue(true)
-			, constantValue(0)
-			, sfIndex(-1)
-		{}
-
-		bool isConstantValue;
-		double constantValue;
-		int sfIndex;
+		bool isConstantValue = true;
+		double constantValue = 0.0;
+		int sfIndex = -1;
 	};
 
 	//! Applies operation on a given cloud
@@ -103,7 +98,12 @@ public:
 		\param parent parent widget (optional)
 		\return success
 	**/
-	static bool Apply(ccPointCloud* cloud, Operation op, int sf1Idx, bool inplace, SF2* sf2 = nullptr, QWidget* parent = nullptr);
+	static bool Apply(	ccPointCloud* cloud,
+						Operation op,
+						int sf1Idx,
+						bool inplace,
+						SF2* sf2 = nullptr,
+						QWidget* parent = nullptr);
 
 protected:
 	

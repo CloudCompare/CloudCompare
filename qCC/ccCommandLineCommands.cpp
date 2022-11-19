@@ -4944,7 +4944,7 @@ bool CommandSFOperation::process(ccCommandLineInterface& cmd)
 		{
 			return cmd.error(QObject::tr("Unknown operation! (%1)").arg(opName));
 		}
-		else if (operation > ccScalarFieldArithmeticsDlg::DIVIDE)
+		else if (operation > ccScalarFieldArithmeticsDlg::DIVIDE && operation != ccScalarFieldArithmeticsDlg::SET)
 		{
 			return cmd.error(QObject::tr("Operation %1 can't be applied with %2").arg(opName, COMMAND_SF_OP));
 		}

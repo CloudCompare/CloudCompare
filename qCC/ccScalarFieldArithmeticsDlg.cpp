@@ -34,9 +34,9 @@
 #include <cmath>
 
 //number of valid operations
-constexpr unsigned s_opCount = 18;
+constexpr unsigned s_opCount = 19;
 //operation names
-constexpr char s_opNames[s_opCount][12] = {"add", "sub", "mult", "div", "sqrt", "pow2", "pow3", "exp", "log", "log10", "cos", "sin", "tan", "acos", "asin", "atan", "int", "inverse" };
+constexpr char s_opNames[s_opCount][8] = {"add", "sub", "mult", "div", "sqrt", "pow2", "pow3", "exp", "log", "log10", "cos", "sin", "tan", "acos", "asin", "atan", "int", "inverse", "set" };
 
 //semi persitent
 static int s_previouslySelectedOperationIndex = 1;
@@ -92,13 +92,25 @@ ccScalarFieldArithmeticsDlg::~ccScalarFieldArithmeticsDlg()
 
 void ccScalarFieldArithmeticsDlg::onOperationIndexChanged(int index)
 {
-	m_ui->sf2ComboBox->setEnabled(index <= DIVIDE); //only the 4 first operations are	applied with 2 SFs
+	if (index == Operation::SET)
+	{
+		//force the last element of the SF2 field (= always the 'constant' field)
+		m_ui->sf2ComboBox->setCurrentIndex(m_ui->sf2ComboBox->count() - 1);
+		m_ui->sf2ComboBox->setEnabled(false);
+		m_ui->updateSF1CheckBox->setChecked(true);
+		m_ui->updateSF1CheckBox->setEnabled(false);
+	}
+	else
+	{
+		m_ui->sf2ComboBox->setEnabled(index <= DIVIDE); //only the 4 first operations are	applied with 2 SFs
+		m_ui->updateSF1CheckBox->setEnabled(true);
+	}
 }
 
 void ccScalarFieldArithmeticsDlg::onSF2IndexChanged(int index)
 {
 	//the last element is always the 'constant' field
-	m_ui->constantDoubleSpinBox->setEnabled(m_ui->sf2ComboBox->currentIndex()+1 == m_ui->sf2ComboBox->count());
+	m_ui->constantDoubleSpinBox->setEnabled(m_ui->sf2ComboBox->currentIndex() + 1 == m_ui->sf2ComboBox->count());
 }
 
 int ccScalarFieldArithmeticsDlg::getSF1Index()
@@ -153,6 +165,8 @@ QString ccScalarFieldArithmeticsDlg::GetOperationName(Operation op, const QStrin
 		return QString("%1 * %2").arg(sf1, sf2);
 	case DIVIDE:
 		return QString("%1 / %2").arg(sf1, sf2);
+	case SET:
+		return sf1;
 	default:
 		if (op != INVALID)
 			return QString("%1(%2)").arg(s_opNames[op], sf1);
@@ -176,7 +190,7 @@ bool ccScalarFieldArithmeticsDlg::apply(ccPointCloud* cloud)
 	s_applyInPlace = m_ui->updateSF1CheckBox->isChecked();
 
 	SF2 sf2Desc;
-	sf2Desc.isConstantValue = m_ui->constantDoubleSpinBox->isEnabled();
+	sf2Desc.isConstantValue = m_ui->constantDoubleSpinBox->isEnabled() || (sf1Idx == Operation::SET);
 	sf2Desc.constantValue = m_ui->constantDoubleSpinBox->value();
 	sf2Desc.sfIndex = sf2Desc.isConstantValue ? -1 : sf2Idx;
 
@@ -384,10 +398,10 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 					val = std::sqrt(val1);
 				break;
 			case POW2:
-				val = val1*val1;
+				val = val1 * val1;
 				break;
 			case POW3:
-				val = val1*val1*val1;
+				val = val1 * val1 * val1;
 				break;
 			case EXP:
 				val = std::exp(val1);
@@ -425,6 +439,9 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 				break;
 			case INVERSE:
 				val = CCCoreLib::LessThanEpsilon(std::abs(val1)) ? CCCoreLib::NAN_VALUE : static_cast<ScalarType>(1.0 / val1);
+				break;
+			case SET:
+				val = sf2Desc->constantValue;
 				break;
 			default:
 				assert(false);

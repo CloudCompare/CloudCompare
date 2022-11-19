@@ -52,7 +52,7 @@ Big ones:
 
 qAnimation plugin:
 
-[*] It would be great to specify the resolution.  I saw your comment and it just seems to make sense as this way you are not guessing.
+[*] It would be great to specify the resolution.
 [*] Have different levels of smoothing between each viewport.  This way the turns and translations are not as abrupt.
 [*] Generate side-by-side stereo animations (for Google cardboard, etc.) with the qAnimation plugin
 
@@ -61,6 +61,9 @@ qFacets plugin:
 [*] Add the facet perimeter to the set of exported values
 
 Various:
+[*] Voxel display mode (https://towardsdatascience.com/how-to-automate-voxel-modelling-of-3d-point-cloud-with-python-459f4d43a227)
+[*] Export images in the Rasterize tool with a custom color ramp (https://www.cloudcompare.org/forum/viewtopic.php?f=10&t=6023)
+[*] Create Height / Surface / Volume chart for bathymetry jobs (https://www.cloudcompare.org/forum/viewtopic.php?p=26787)
 [*] Add options to compute the local average and std.dev. (and maybe medoid) of a SF (https://www.cloudcompare.org/forum/viewtopic.php?t=5700)
 [*] Add a 'Set value' operation to the SF arithmetics tool (https://www.cloudcompare.org/forum/viewtopic.php?t=5933)
 [*] Improve the CSF plugin with the method proposed in https://www.mdpi.com/2072-4292/13/15/2938 (https://www.cloudcompare.org/forum/viewtopic.php?t=5887)

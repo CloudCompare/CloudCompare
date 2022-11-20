@@ -4842,8 +4842,6 @@ void ccGLWindow::processPickingResult(	const PickingParameters& params,
 	{
 		if (selectedIDs)
 			Q_EMIT entitiesSelectionChanged(*selectedIDs);
-		else
-			assert(false);
 	}
 	//3D point or triangle or label picking
 	else if (	params.mode == POINT_PICKING

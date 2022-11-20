@@ -77,42 +77,8 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent)
 	m_UI->generateRasterPushButton->setChecked(false);
 #endif
 
-	//force update
-	resampleOptionToggled(m_UI->resampleCloudCheckBox->isChecked());
-	fillEmptyCellStrategyChanged(0);
-
-	connect(m_UI->buttonBox,	&QDialogButtonBox::accepted,	this,	&ccRasterizeTool::testAndAccept);
-	connect(m_UI->buttonBox,	&QDialogButtonBox::rejected,	this,	&ccRasterizeTool::testAndReject);
-	
-	connect(m_UI->gridStepDoubleSpinBox,	  qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccRasterizeTool::updateGridInfo);
-	connect(m_UI->gridStepDoubleSpinBox,	  qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccRasterizeTool::gridOptionChanged);
-	connect(m_UI->emptyValueDoubleSpinBox,	  qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccRasterizeTool::gridOptionChanged);
-	connect(m_UI->maxEdgeLengthDoubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this,	&ccRasterizeTool::gridOptionChanged);
-	connect(m_UI->dimensionComboBox,		  qOverload<int>(&QComboBox::currentIndexChanged),		this,	&ccRasterizeTool::projectionDirChanged);
-	connect(m_UI->heightProjectionComboBox,	  qOverload<int>(&QComboBox::currentIndexChanged),		this,	&ccRasterizeTool::projectionTypeChanged);
-	connect(m_UI->scalarFieldProjection,	  qOverload<int>(&QComboBox::currentIndexChanged),		this,	&ccRasterizeTool::sfProjectionTypeChanged);
-	connect(m_UI->fillEmptyCellsComboBox,	  qOverload<int>(&QComboBox::currentIndexChanged),		this,	&ccRasterizeTool::fillEmptyCellStrategyChanged);
-	
-	connect(m_UI->resampleCloudCheckBox,		&QAbstractButton::toggled,	this,	&ccRasterizeTool::resampleOptionToggled);
-	connect(m_UI->updateGridPushButton,			&QAbstractButton::clicked,	this,	&ccRasterizeTool::updateGridAndDisplay);
-	connect(m_UI->generateCloudPushButton,		&QAbstractButton::clicked,	this,	[this](){ generateCloud(true); } );
-	connect(m_UI->generateImagePushButton,		&QAbstractButton::clicked,	this,	&ccRasterizeTool::generateImage);
-	connect(m_UI->generateRasterPushButton,		&QAbstractButton::clicked,	this,	&ccRasterizeTool::generateRaster);
-	connect(m_UI->generateASCIIPushButton,		&QAbstractButton::clicked,	this,	&ccRasterizeTool::generateASCIIMatrix);
-	connect(m_UI->generateMeshPushButton,		&QAbstractButton::clicked,	this,	&ccRasterizeTool::generateMesh);
-	connect(m_UI->generateContoursPushButton,	&QAbstractButton::clicked,	this,	&ccRasterizeTool::generateContours);
-	connect(m_UI->exportContoursPushButton,		&QAbstractButton::clicked,	this,	&ccRasterizeTool::exportContourLines);
-	connect(m_UI->clearContoursPushButton,		&QAbstractButton::clicked,	this,	&ccRasterizeTool::removeContourLines);
-	
-	connect(m_UI->generateHillshadePushButton, &QAbstractButton::clicked,	this,	&ccRasterizeTool::generateHillshade);
-
-	connect(m_UI->activeLayerComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, [this] (int index)
-	{
-		activeLayerChanged( index );
-	});
-
-	//custom bbox editor
-	ccBBox gridBBox = m_cloud ? m_cloud->getOwnBB() : ccBBox(); 
+	//custom bbox editor (needs to be setup first)
+	ccBBox gridBBox = m_cloud ? m_cloud->getOwnBB() : ccBBox();
 	if (gridBBox.isValid())
 	{
 		createBoundingBoxEditor(gridBBox, this);
@@ -122,6 +88,40 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent)
 	{
 		m_UI->editGridToolButton->setEnabled(false);
 	}
+
+	//force update
+	resampleOptionToggled(m_UI->resampleCloudCheckBox->isChecked());
+	fillEmptyCellStrategyChanged(0);
+
+	connect(m_UI->buttonBox,					&QDialogButtonBox::accepted,						this,	&ccRasterizeTool::testAndAccept);
+	connect(m_UI->buttonBox,					&QDialogButtonBox::rejected,						this,	&ccRasterizeTool::testAndReject);
+	
+	connect(m_UI->gridStepDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccRasterizeTool::updateGridInfo);
+	connect(m_UI->gridStepDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccRasterizeTool::gridOptionChanged);
+	connect(m_UI->emptyValueDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccRasterizeTool::gridOptionChanged);
+	connect(m_UI->maxEdgeLengthDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccRasterizeTool::gridOptionChanged);
+
+	connect(m_UI->dimensionComboBox,			qOverload<int>(&QComboBox::currentIndexChanged),	this,	&ccRasterizeTool::projectionDirChanged);
+	connect(m_UI->heightProjectionComboBox,		qOverload<int>(&QComboBox::currentIndexChanged),	this,	&ccRasterizeTool::projectionTypeChanged);
+	connect(m_UI->scalarFieldProjection,		qOverload<int>(&QComboBox::currentIndexChanged),	this,	&ccRasterizeTool::sfProjectionTypeChanged);
+	connect(m_UI->fillEmptyCellsComboBox,		qOverload<int>(&QComboBox::currentIndexChanged),	this,	&ccRasterizeTool::fillEmptyCellStrategyChanged);
+	connect(m_UI->stdDevLayerComboBox,			qOverload<int>(&QComboBox::currentIndexChanged),	this,	&ccRasterizeTool::stdDevLayerChanged);
+	connect(m_UI->activeLayerComboBox,			qOverload<int>(&QComboBox::currentIndexChanged),	this,	[this] (int index) { activeLayerChanged( index ); } );
+
+	connect(m_UI->resampleCloudCheckBox,		&QAbstractButton::toggled,							this,	&ccRasterizeTool::resampleOptionToggled);
+	connect(m_UI->updateGridPushButton,			&QAbstractButton::clicked,							this,	&ccRasterizeTool::updateGridAndDisplay);
+	connect(m_UI->generateCloudPushButton,		&QAbstractButton::clicked,							this,	[this] () { generateCloud(true); } );
+	connect(m_UI->generateImagePushButton,		&QAbstractButton::clicked,							this,	&ccRasterizeTool::generateImage);
+	connect(m_UI->generateRasterPushButton,		&QAbstractButton::clicked,							this,	&ccRasterizeTool::generateRaster);
+	connect(m_UI->generateASCIIPushButton,		&QAbstractButton::clicked,							this,	&ccRasterizeTool::generateASCIIMatrix);
+	connect(m_UI->generateMeshPushButton,		&QAbstractButton::clicked,							this,	&ccRasterizeTool::generateMesh);
+	connect(m_UI->generateContoursPushButton,	&QAbstractButton::clicked,							this,	&ccRasterizeTool::generateContours);
+	connect(m_UI->exportContoursPushButton,		&QAbstractButton::clicked,							this,	&ccRasterizeTool::exportContourLines);
+	connect(m_UI->clearContoursPushButton,		&QAbstractButton::clicked,							this,	&ccRasterizeTool::removeContourLines);
+	connect(m_UI->generateHillshadePushButton,	&QAbstractButton::clicked,							this,	&ccRasterizeTool::generateHillshade);
+
+	connect(m_UI->exportHeightStatsCheckBox,	&QCheckBox::toggled,								this,	&ccRasterizeTool::onStatExportTargetChanged);
+	connect(m_UI->exportSFStatsCheckBox,		&QCheckBox::toggled,								this,	&ccRasterizeTool::onStatExportTargetChanged);
 
 	if (m_cloud)
 	{
@@ -138,11 +138,13 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent)
 		}
 
 		//populate layer box
-		m_UI->activeLayerComboBox->addItem(ccRasterGrid::GetDefaultFieldName(ccRasterGrid::PER_CELL_HEIGHT), QVariant(LAYER_HEIGHT));
+		m_UI->activeLayerComboBox->addItem(ccRasterGrid::GetDefaultFieldName(ccRasterGrid::PER_CELL_VALUE), QVariant(LAYER_HEIGHT));
 		if (m_cloud->hasColors())
 		{
 			m_UI->activeLayerComboBox->addItem("RGB", QVariant(LAYER_RGB));
 		}
+
+		bool hasScalarFields = false;
 		if (cloud->isA(CC_TYPES::POINT_CLOUD) && cloud->hasScalarFields())
 		{
 			ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
@@ -150,10 +152,22 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent)
 			{
 				m_UI->activeLayerComboBox->addItem(pc->getScalarField(i)->getName(), QVariant(LAYER_SF));
 			}
+			hasScalarFields = true;
 		}
+		m_UI->exportSFStatsCheckBox->setEnabled(hasScalarFields);
 
 		m_UI->activeLayerComboBox->setEnabled(m_UI->activeLayerComboBox->count() > 1);
-
+		
+		//populate std. dev. layer box
+		if (cloud->isA(CC_TYPES::POINT_CLOUD) && cloud->hasScalarFields())
+		{
+			ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
+			for (unsigned i = 0; i < pc->getNumberOfScalarFields(); ++i)
+			{
+				m_UI->stdDevLayerComboBox->addItem(pc->getScalarField(i)->getName(), QVariant(LAYER_SF));
+			}
+		}
+		m_UI->stdDevLayerComboBox->setEnabled( (m_UI->stdDevLayerComboBox->count() != 0) && (getTypeOfProjection() == ccRasterGrid::PROJ_INVERSE_VAR_VALUE) );
 		//add window
 		create2DView(m_UI->mapFrame);
 	}
@@ -193,12 +207,7 @@ void ccRasterizeTool::removeContourLines()
 
 bool ccRasterizeTool::showGridBoxEditor()
 {
-	if (cc2Point5DimEditor::showGridBoxEditor())
-	{
-		return true;
-	}
-
-	return false;
+	return cc2Point5DimEditor::showGridBoxEditor();
 }
 
 void ccRasterizeTool::updateCloudName(bool withNonEmptyCells)
@@ -225,29 +234,30 @@ double ccRasterizeTool::getGridStep() const
 	return m_UI->gridStepDoubleSpinBox->value();
 }
 
-bool ccRasterizeTool::exportAsSF(ccRasterGrid::ExportableFields field) const
+void ccRasterizeTool::getExportedStats(std::vector<ccRasterGrid::ExportableFields>& stats) const
 {
-	switch (field)
-	{
-	case ccRasterGrid::PER_CELL_COUNT:
-		return m_UI->generateCountSFcheckBox->isChecked();
-	case ccRasterGrid::PER_CELL_MIN_HEIGHT:
-		return m_UI->generateMinHeightSFcheckBox->isChecked();
-	case ccRasterGrid::PER_CELL_MAX_HEIGHT:
-		return m_UI->generateMaxHeightSFcheckBox->isChecked();
-	case ccRasterGrid::PER_CELL_AVG_HEIGHT:
-		return m_UI->generateAvgHeightSFcheckBox->isChecked();
-	case ccRasterGrid::PER_CELL_HEIGHT_STD_DEV:
-		return m_UI->generateStdDevHeightSFcheckBox->isChecked();
-	case ccRasterGrid::PER_CELL_HEIGHT_RANGE:
-		return m_UI->generateHeightRangeSFcheckBox->isChecked();
-	case ccRasterGrid::PER_CELL_MEDIAN_HEIGHT:
-		return m_UI->generateMedianHeightSFcheckBox->isChecked();
-	default:
-		assert(false);
-	};
-	
-	return false;
+	stats.clear();
+
+	if (m_UI->generateStatisticsPopulationCheckBox->isChecked())
+		stats.push_back(ccRasterGrid::PER_CELL_COUNT);
+	if (m_UI->generateStatisticsMinCheckBox->isChecked())
+		stats.push_back(ccRasterGrid::PER_CELL_MIN_VALUE);
+	if (m_UI->generateStatisticsMaxCheckBox->isChecked())
+		stats.push_back(ccRasterGrid::PER_CELL_MAX_VALUE);
+	if (m_UI->generateStatisticsAverageCheckBox->isChecked())
+		stats.push_back(ccRasterGrid::PER_CELL_AVG_VALUE);
+	if (m_UI->generateStatisticsStdDevCheckBox->isChecked())
+		stats.push_back(ccRasterGrid::PER_CELL_VALUE_STD_DEV);
+	if (m_UI->generateStatisticsRangeCheckBox->isChecked())
+		stats.push_back(ccRasterGrid::PER_CELL_VALUE_RANGE);
+	if (m_UI->generateStatisticsMedianCheckBox->isChecked())
+		stats.push_back(ccRasterGrid::PER_CELL_MEDIAN_VALUE);
+	if (m_UI->generateStatisticsUniqueCheckBox->isChecked())
+		stats.push_back(ccRasterGrid::PER_CELL_UNIQUE_COUNT_VALUE);
+	if (m_UI->generateStatisticsPercentileCheckBox->isChecked())
+		stats.push_back(ccRasterGrid::PER_CELL_PERCENTILE_VALUE);
+
+	stats.shrink_to_fit();
 }
 
 bool ccRasterizeTool::resampleOriginalCloud() const
@@ -263,18 +273,32 @@ unsigned char ccRasterizeTool::getProjectionDimension() const
 	return static_cast<unsigned char>(dim);
 }
 
+int ccRasterizeTool::getStdDevLayerIndex() const
+{
+	return  m_UI->stdDevLayerComboBox->currentIndex();
+}
+
 void ccRasterizeTool::resampleOptionToggled(bool state)
 {
-	m_UI->warningResampleWithAverageLabel->setVisible(m_UI->resampleCloudCheckBox->isChecked() && getTypeOfProjection() == ccRasterGrid::PROJ_AVERAGE_VALUE);
+	m_UI->warningResampleWithAverageLabel->setVisible(m_UI->resampleCloudCheckBox->isChecked()
+		&& (	getTypeOfProjection() == ccRasterGrid::PROJ_AVERAGE_VALUE
+			||	getTypeOfProjection() == ccRasterGrid::PROJ_INVERSE_VAR_VALUE)
+	);
 	gridOptionChanged();
 }
 
 void ccRasterizeTool::projectionTypeChanged(int index)
 {
 	//we can't use the 'resample origin cloud' option with 'average height' projection
-	//resampleCloudCheckBox->setEnabled(index != PROJ_AVERAGE_VALUE);
+	//resampleCloudCheckBox->setEnabled(index != PROJ_AVERAGE_VALUE && index != PROJ_INVERSE_VAR_VALUE);
 	//DGM: now we can! We simply display a warning message
-	m_UI->warningResampleWithAverageLabel->setVisible(m_UI->resampleCloudCheckBox->isChecked() && index == ccRasterGrid::PROJ_AVERAGE_VALUE);
+	
+	m_UI->warningResampleWithAverageLabel->setVisible(m_UI->resampleCloudCheckBox->isChecked()
+		&& (	index == ccRasterGrid::PROJ_AVERAGE_VALUE
+			||	index == ccRasterGrid::PROJ_INVERSE_VAR_VALUE));
+
+	m_UI->stdDevLayerComboBox->setEnabled((m_UI->stdDevLayerComboBox->count() != 0) && (index == ccRasterGrid::PROJ_INVERSE_VAR_VALUE));
+
 	gridIsUpToDate(false);
 }
 
@@ -286,6 +310,11 @@ void ccRasterizeTool::sfProjectionTypeChanged(int index)
 void ccRasterizeTool::projectionDirChanged(int dir)
 {
 	gridIsUpToDate(false); // will call updateGridInfo
+}
+
+void ccRasterizeTool::stdDevLayerChanged(int index)
+{
+	gridIsUpToDate(false);
 }
 
 void ccRasterizeTool::activeLayerChanged(int layerIndex, bool autoRedraw/*=true*/)
@@ -399,6 +428,11 @@ double ccRasterizeTool::getCustomHeightForEmptyCells() const
 	return m_UI->emptyValueDoubleSpinBox->value();
 }
 
+double ccRasterizeTool::getStatisticsPercentileValue() const
+{
+	return m_UI->generateStatisticsPercentileDoubleSpinBox->value();
+}
+
 ccRasterGrid::ProjectionType ccRasterizeTool::getTypeOfProjection() const
 {
 	switch (m_UI->heightProjectionComboBox->currentIndex())
@@ -411,6 +445,8 @@ ccRasterGrid::ProjectionType ccRasterizeTool::getTypeOfProjection() const
 		return ccRasterGrid::PROJ_MAXIMUM_VALUE;
 	case 3:
 		return ccRasterGrid::PROJ_MEDIAN_VALUE;
+	case 4:
+		return ccRasterGrid::PROJ_INVERSE_VAR_VALUE;
 	default:
 		//shouldn't be possible for this option!
 		assert(false);
@@ -456,17 +492,24 @@ void ccRasterizeTool::loadSettings()
 	double maxEdgeLength		= settings.value("MaxEdgeLength",         m_UI->maxEdgeLengthDoubleSpinBox->value()).toDouble();
 	double step					= settings.value("GridStep",              m_UI->gridStepDoubleSpinBox->value()).toDouble();
 	double emptyHeight			= settings.value("EmptyCellsHeight",      m_UI->emptyValueDoubleSpinBox->value()).toDouble();
-	bool genCountSF				= settings.value("GenerateCountSF",       m_UI->generateCountSFcheckBox->isChecked()).toBool();
 	bool resampleCloud			= settings.value("ResampleOrigCloud",     m_UI->resampleCloudCheckBox->isChecked()).toBool();
 	int minVertexCount			= settings.value("MinVertexCount",        m_UI->minVertexCountSpinBox->value()).toInt();
 	bool ignoreBorders			= settings.value("IgnoreBorders",         m_UI->ignoreContourBordersCheckBox->isChecked()).toBool();
-	bool generateCountSF		= settings.value("generateCountSF",       m_UI->generateCountSFcheckBox->isChecked()).toBool();
-	bool generateMinHeightSF	= settings.value("generateMinHeightSF",   m_UI->generateMinHeightSFcheckBox->isChecked()).toBool();
-	bool generateMaxHeightSF	= settings.value("generateMaxHeightSF",   m_UI->generateMinHeightSFcheckBox->isChecked()).toBool();
-	bool generateAbgHeightSF	= settings.value("generateAvgHeightSF",   m_UI->generateAvgHeightSFcheckBox->isChecked()).toBool();
-	bool generateStdDevHeightSF	= settings.value("generateStdDevHeightSF",m_UI->generateStdDevHeightSFcheckBox->isChecked()).toBool();
-	bool generateHeightRangeSF	= settings.value("generateHeightRangeSF", m_UI->generateHeightRangeSFcheckBox->isChecked()).toBool();
 	bool projectContoursOnAlt	= settings.value("projectContoursOnAlt",  m_UI->projectContoursOnAltCheckBox->isChecked()).toBool();
+	
+	//Statistics checkboxes
+	bool generateHeightStatistics				= settings.value("GenerateHeightStatistics",			m_UI->exportHeightStatsCheckBox->isChecked()).toBool();
+	bool generateSFStatistics					= settings.value("GenerateSFStatistics",				m_UI->exportSFStatsCheckBox->isChecked()).toBool();
+	bool generateStatisticsPopulation			= settings.value("GenerateStatisticsPopulation",		m_UI->generateStatisticsPopulationCheckBox->isChecked()).toBool();
+	bool generateStatisticsMin					= settings.value("GenerateStatisticsMin",	   			m_UI->generateStatisticsMinCheckBox->isChecked()).toBool();
+	bool generateStatisticsMax					= settings.value("GenerateStatisticsMax",	   			m_UI->generateStatisticsMaxCheckBox->isChecked()).toBool();
+	bool generateStatisticsAverage				= settings.value("GenerateStatisticsAverage",	   		m_UI->generateStatisticsAverageCheckBox->isChecked()).toBool();
+	bool generateStatisticsStdDev				= settings.value("GenerateStatisticsStdDev",	   		m_UI->generateStatisticsStdDevCheckBox->isChecked()).toBool();
+	bool generateStatisticsRange				= settings.value("GenerateStatisticsRange",	   			m_UI->generateStatisticsRangeCheckBox->isChecked()).toBool();
+	bool generateStatisticsMedian				= settings.value("GenerateStatisticsMedian",	   		m_UI->generateStatisticsMedianCheckBox->isChecked()).toBool();
+	bool generateStatisticsUnique				= settings.value("GenerateStatisticsUnique",	   		m_UI->generateStatisticsUniqueCheckBox->isChecked()).toBool();
+	bool generateStatisticsPercentile			= settings.value("GenerateStatisticsPercentile",		m_UI->generateStatisticsPercentileCheckBox->isChecked()).toBool();
+	double generateStatisticsPercentileValue	= settings.value("GenerateStatisticsPercentileValue",	m_UI->generateStatisticsPercentileDoubleSpinBox->value()).toDouble();
 	
 	settings.endGroup();
 
@@ -478,17 +521,25 @@ void ccRasterizeTool::loadSettings()
 	m_UI->dimensionComboBox->setCurrentIndex(projDim);
 	m_UI->interpolateSFCheckBox->setChecked(sfProj);
 	m_UI->scalarFieldProjection->setCurrentIndex(sfProjStrategy);
-	m_UI->generateCountSFcheckBox->setChecked(genCountSF);
 	m_UI->resampleCloudCheckBox->setChecked(resampleCloud);
 	m_UI->minVertexCountSpinBox->setValue(minVertexCount);
 	m_UI->ignoreContourBordersCheckBox->setChecked(ignoreBorders);
-	m_UI->generateCountSFcheckBox->setChecked(generateCountSF);
-	m_UI->generateMinHeightSFcheckBox->setChecked(generateMinHeightSF);
-	m_UI->generateMinHeightSFcheckBox->setChecked(generateMaxHeightSF);
-	m_UI->generateAvgHeightSFcheckBox->setChecked(generateAbgHeightSF);
-	m_UI->generateStdDevHeightSFcheckBox->setChecked(generateStdDevHeightSF);
-	m_UI->generateHeightRangeSFcheckBox->setChecked(generateHeightRangeSF);
 	m_UI->projectContoursOnAltCheckBox->setChecked(projectContoursOnAlt);
+
+	//SF Statistics checkboxes
+	m_UI->exportHeightStatsCheckBox->setChecked(				generateHeightStatistics			);
+	m_UI->exportSFStatsCheckBox->setChecked(					generateSFStatistics				);
+	m_UI->generateStatisticsPopulationCheckBox->setChecked(		generateStatisticsPopulation		);
+    m_UI->generateStatisticsMinCheckBox->setChecked(			generateStatisticsMin				);
+    m_UI->generateStatisticsMaxCheckBox->setChecked(			generateStatisticsMax				);
+    m_UI->generateStatisticsAverageCheckBox->setChecked(		generateStatisticsAverage			);
+    m_UI->generateStatisticsStdDevCheckBox->setChecked(			generateStatisticsStdDev			);
+    m_UI->generateStatisticsRangeCheckBox->setChecked(			generateStatisticsRange				);
+    m_UI->generateStatisticsMedianCheckBox->setChecked(			generateStatisticsMedian			);
+    m_UI->generateStatisticsUniqueCheckBox->setChecked(			generateStatisticsUnique			);
+    m_UI->generateStatisticsPercentileCheckBox->setChecked(		generateStatisticsPercentile		);
+	m_UI->generateStatisticsPercentileDoubleSpinBox->setValue(	generateStatisticsPercentileValue	);
+
 }
 
 bool ccRasterizeTool::canClose()
@@ -535,17 +586,23 @@ void ccRasterizeTool::saveSettings()
 	settings.setValue("MaxEdgeLength", m_UI->maxEdgeLengthDoubleSpinBox->value());
 	settings.setValue("GridStep", m_UI->gridStepDoubleSpinBox->value());
 	settings.setValue("EmptyCellsHeight", m_UI->emptyValueDoubleSpinBox->value());
-	settings.setValue("GenerateCountSF", m_UI->generateCountSFcheckBox->isChecked());
 	settings.setValue("ResampleOrigCloud", m_UI->resampleCloudCheckBox->isChecked());
 	settings.setValue("MinVertexCount", m_UI->minVertexCountSpinBox->value());
 	settings.setValue("IgnoreBorders", m_UI->ignoreContourBordersCheckBox->isChecked());
-	settings.setValue("generateCountSF", m_UI->generateCountSFcheckBox->isChecked());
-	settings.setValue("generateMinHeightSF", m_UI->generateMinHeightSFcheckBox->isChecked());
-	settings.setValue("generateMaxHeightSF", m_UI->generateMinHeightSFcheckBox->isChecked());
-	settings.setValue("generateAvgHeightSF", m_UI->generateAvgHeightSFcheckBox->isChecked());
-	settings.setValue("generateStdDevHeightSF", m_UI->generateStdDevHeightSFcheckBox->isChecked());
-	settings.setValue("generateHeightRangeSF", m_UI->generateHeightRangeSFcheckBox->isChecked());
 	settings.setValue("projectContoursOnAlt", m_UI->projectContoursOnAltCheckBox->isChecked());
+
+	//SF Statistics checkboxes
+	settings.setValue("generateStatisticsPopulation",	   	m_UI->generateStatisticsPopulationCheckBox->isChecked());
+	settings.setValue("generateStatisticsMin",	   			m_UI->generateStatisticsMinCheckBox->isChecked());
+	settings.setValue("generateStatisticsMax",	   			m_UI->generateStatisticsMaxCheckBox->isChecked());
+	settings.setValue("generateStatisticsAverage",	   		m_UI->generateStatisticsAverageCheckBox->isChecked());
+	settings.setValue("generateStatisticsStdDev",	   		m_UI->generateStatisticsStdDevCheckBox->isChecked());
+	settings.setValue("generateStatisticsRange",	   		m_UI->generateStatisticsRangeCheckBox->isChecked());
+	settings.setValue("generateStatisticsMedian",	   		m_UI->generateStatisticsMedianCheckBox->isChecked());
+	settings.setValue("generateStatisticsUnique",	   		m_UI->generateStatisticsUniqueCheckBox->isChecked());
+	settings.setValue("generateStatisticsPercentile",	   	m_UI->generateStatisticsPercentileCheckBox->isChecked());
+	settings.setValue("generateStatisticsPercentileValue",	m_UI->generateStatisticsPercentileDoubleSpinBox->value());
+
 	settings.endGroup();
 }
 
@@ -569,12 +626,16 @@ void ccRasterizeTool::gridIsUpToDate(bool state)
 	updateGridInfo(state);
 }
 
-ccPointCloud* ccRasterizeTool::convertGridToCloud(	const std::vector<ccRasterGrid::ExportableFields>& exportedFields,
+ccPointCloud* ccRasterizeTool::convertGridToCloud(	bool exportHeightStats,
+													bool exportSFStats,
+													const std::vector<ccRasterGrid::ExportableFields>& exportedStatistics,
 													bool interpolateSF,
 													bool interpolateColors,
 													bool copyHillshadeSF,
 													const QString& activeSFName,
-													bool exportToOriginalCS) const
+													double percentileValue,
+													bool exportToOriginalCS,
+													ccProgressDialog* progressDialog/*=nullptr*/ ) const
 {
 	if (!m_cloud || !m_grid.isValid())
 		return nullptr;
@@ -589,7 +650,9 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(	const std::vector<ccRasterGri
 																							maxHeight);
 
 	//call parent method
-	ccPointCloud* cloudGrid = cc2Point5DimEditor::convertGridToCloud(	exportedFields,
+	ccPointCloud* cloudGrid = cc2Point5DimEditor::convertGridToCloud(	exportHeightStats,
+																		exportSFStats,
+																		exportedStatistics,
 																		interpolateSF,
 																		interpolateColors,
 																		/*resampleInputCloudXY=*/resampleOriginalCloud(),
@@ -597,7 +660,9 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(	const std::vector<ccRasterGri
 																		/*inputCloud=*/m_cloud,
 																		/*fillEmptyCells=*/fillEmptyCellsStrategy != ccRasterGrid::LEAVE_EMPTY,
 																		emptyCellsHeight,
-																		exportToOriginalCS);
+                                            							percentileValue,
+																		exportToOriginalCS,
+																		progressDialog );
 
 	//success?
 	if (cloudGrid)
@@ -626,7 +691,6 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(	const std::vector<ccRasterGri
 
 		//currently displayed SF
 		int activeSFIndex = cloudGrid->getScalarFieldIndexByName(qPrintable(activeSFName));
-		cloudGrid->showSF(activeSFIndex >= 0);
 		if (activeSFIndex < 0 && cloudGrid->getNumberOfScalarFields() != 0)
 		{
 			//if no SF is displayed, we should at least set a valid one (for later)
@@ -634,7 +698,8 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(	const std::vector<ccRasterGri
 		}
 		cloudGrid->setCurrentDisplayedScalarField(activeSFIndex);
 
-		cloudGrid->showColors(interpolateColors);
+		cloudGrid->showColors(interpolateColors && cloudGrid->hasColors());
+		cloudGrid->showSF(activeSFIndex >= 0);
 
 		//don't forget the original shift
 		cloudGrid->copyGlobalShiftAndScale(*m_cloud);
@@ -677,19 +742,23 @@ void ccRasterizeTool::updateGridAndDisplay()
 	if (success && m_glWindow)
 	{
 		//convert grid to point cloud
-		std::vector<ccRasterGrid::ExportableFields> exportedFields;
 		try
 		{
 			//we always compute the default 'height' layer
-			exportedFields.push_back(ccRasterGrid::PER_CELL_HEIGHT);
+			std::vector<ccRasterGrid::ExportableFields> exportedStatistics(1);
+			exportedStatistics.front() = ccRasterGrid::PER_CELL_VALUE;
 			//but we may also have to compute the 'original SF(s)' layer(s)
 			QString activeLayerName = m_UI->activeLayerComboBox->currentText();
-			m_rasterCloud = convertGridToCloud(	exportedFields,
+			m_rasterCloud = convertGridToCloud(	true,
+												false,
+												exportedStatistics,
 												/*interpolateSF=*/interpolateSF,
 												/*interpolateColors=*/activeLayerIsRGB,
 												/*copyHillshadeSF=*/false,
 												activeLayerName,
-												false);
+												getStatisticsPercentileValue(),
+												false,
+												nullptr );
 		}
 		catch (const std::bad_alloc&)
 		{
@@ -698,6 +767,10 @@ void ccRasterizeTool::updateGridAndDisplay()
 
 		if (m_rasterCloud)
 		{
+			//just in case
+			m_rasterCloud->setVisible(true);
+			m_rasterCloud->setEnabled(true);
+
 			m_glWindow->addToOwnDB(m_rasterCloud);
 			ccBBox box = m_rasterCloud->getDisplayBB_recursive(false, m_glWindow);
 			update2DDisplayZoom(box);
@@ -789,6 +862,8 @@ bool ccRasterizeTool::updateGrid(bool interpolateSF/*=false*/)
 	const unsigned char Z = getProjectionDimension();
 	assert(Z <= 2);
 
+    int zStdDevSfIndex = getStdDevLayerIndex();
+
 	ccProgressDialog pDlg(true, this);
 	if (!m_grid.fillWith(	m_cloud,
 							Z,
@@ -796,7 +871,8 @@ bool ccRasterizeTool::updateGrid(bool interpolateSF/*=false*/)
 							interpolateEmptyCells,
 							maxEdgeLength,
 							interpolateSFs,
-							&pDlg))
+							&pDlg,
+                            zStdDevSfIndex))
 	{
 		return false;
 	}
@@ -832,47 +908,48 @@ bool ccRasterizeTool::updateGrid(bool interpolateSF/*=false*/)
 	return true;
 }
 
-ccPointCloud* ccRasterizeTool::generateCloud(bool autoExport/*=true*/) const
+ccPointCloud* ccRasterizeTool::generateCloud(bool autoExport/*=true*/)
 {
 	if (!m_cloud || !m_grid.isValid())
 	{
 		return nullptr;
 	}
 
-	//look for fields to be exported
-	std::vector<ccRasterGrid::ExportableFields> exportedFields;
-	try
+
+
+	//look for statistics fields (min,max,median,etc) fields to be exported
+	std::vector<ccRasterGrid::ExportableFields> exportedStatistics;
+	bool exportHeightStats = m_UI->exportHeightStatsCheckBox->isChecked();
+	bool exportSFStats = m_UI->exportSFStatsCheckBox->isEnabled() && m_UI->exportSFStatsCheckBox->isChecked();
+	if (exportHeightStats || exportSFStats)
 	{
-		exportedFields.push_back(ccRasterGrid::PER_CELL_HEIGHT);
-		if (exportAsSF(ccRasterGrid::PER_CELL_COUNT))
-			exportedFields.push_back(ccRasterGrid::PER_CELL_COUNT);
-		if (exportAsSF(ccRasterGrid::PER_CELL_MIN_HEIGHT))
-			exportedFields.push_back(ccRasterGrid::PER_CELL_MIN_HEIGHT);
-		if (exportAsSF(ccRasterGrid::PER_CELL_MAX_HEIGHT))
-			exportedFields.push_back(ccRasterGrid::PER_CELL_MAX_HEIGHT);
-		if (exportAsSF(ccRasterGrid::PER_CELL_AVG_HEIGHT))
-			exportedFields.push_back(ccRasterGrid::PER_CELL_AVG_HEIGHT);
-		if (exportAsSF(ccRasterGrid::PER_CELL_HEIGHT_STD_DEV))
-			exportedFields.push_back(ccRasterGrid::PER_CELL_HEIGHT_STD_DEV);
-		if (exportAsSF(ccRasterGrid::PER_CELL_HEIGHT_RANGE))
-			exportedFields.push_back(ccRasterGrid::PER_CELL_HEIGHT_RANGE);
-		if (exportAsSF(ccRasterGrid::PER_CELL_MEDIAN_HEIGHT))
-			exportedFields.push_back(ccRasterGrid::PER_CELL_MEDIAN_HEIGHT);
+		try
+		{
+			getExportedStats(exportedStatistics);
+		}
+		catch (const std::bad_alloc&)
+		{
+			ccLog::Error("Not enough memory!");
+			return nullptr;
+		}
 	}
-	catch (const std::bad_alloc&)
-	{
-		ccLog::Error("Not enough memory!");
-		return nullptr;
-	}
+
+
 	QString activeLayerName = m_UI->activeLayerComboBox->currentText();
 	bool activeLayerIsSF = (m_UI->activeLayerComboBox->currentData().toInt() == LAYER_SF);
 	//bool activeLayerIsRGB = (activeLayerComboBox->currentData().toInt() == LAYER_RGB);
-	ccPointCloud* rasterCloud = convertGridToCloud(	exportedFields,
+
+	ccProgressDialog pDlg(true, this);
+	ccPointCloud* rasterCloud = convertGridToCloud(	exportHeightStats,
+													exportSFStats,
+													exportedStatistics,
 													/*interpolateSF=*/(getTypeOfSFInterpolation() != ccRasterGrid::INVALID_PROJECTION_TYPE) || activeLayerIsSF,
 													/*interpolateColors=*/true,
 													/*copyHillshadeSF=*/true,
 													activeLayerName,
-													true);
+													getStatisticsPercentileValue(),
+													true,
+                                                    &pDlg );
 
 	if (rasterCloud && autoExport)
 	{
@@ -904,7 +981,7 @@ ccPointCloud* ccRasterizeTool::generateCloud(bool autoExport/*=true*/) const
 	return rasterCloud;
 }
 
-void ccRasterizeTool::generateMesh() const
+void ccRasterizeTool::generateMesh()
 {
 	ccPointCloud* rasterCloud = generateCloud(false);
 	if (rasterCloud)
@@ -1527,7 +1604,7 @@ void ccRasterizeTool::generateHillshade()
 						for (int dj = -1; dj <= 1; ++dj)
 						{
 							const ccRasterCell& n = m_grid.rows[j - dj][i + di]; //-dj (instead of + dj) because we scan the grid in the reverse orientation! (from bottom to top)
-							if (n.h == n.h)
+							if (std::isfinite(n.h))
 							{
 								if (di != 0)
 								{
@@ -1547,17 +1624,16 @@ void ccRasterizeTool::generateHillshade()
 					}
 
 					//for now we only handle the cell that have 8 valid neighbors!
-					if (dz_dx_count == 8
-						&& dz_dy_count == 8)
+					if (dz_dx_count == 8 && dz_dy_count == 8)
 					{
-						dz_dx /= (8.0 * m_grid.gridStep);
-						dz_dy /= (8.0 * m_grid.gridStep);
+						dz_dx /= (8 * m_grid.gridStep);
+						dz_dy /= (8 * m_grid.gridStep);
 
 						double slope_rad = atan( /*z_factor **/sqrt(dz_dx*dz_dx + dz_dy * dz_dy));
 
 						double aspect_rad = 0;
-						static const double s_zero = 1.0e-8;
-						if (std::abs(dz_dx) > s_zero)
+						static const double s_Zero = 1.0e-8;
+						if (std::abs(dz_dx) > s_Zero)
 						{
 							aspect_rad = atan2(dz_dy, -dz_dx);
 							if (aspect_rad < 0)
@@ -1567,11 +1643,11 @@ void ccRasterizeTool::generateHillshade()
 						}
 						else // dz_dx == 0
 						{
-							if (dz_dy > s_zero)
+							if (dz_dy > s_Zero)
 							{
 								aspect_rad = 0.5 * M_PI;
 							}
-							else if (dz_dy < s_zero)
+							else if (dz_dy < s_Zero)
 							{
 								aspect_rad = 1.5 * M_PI;
 							}
@@ -2066,3 +2142,8 @@ void ccRasterizeTool::generateASCIIMatrix() const
 	ccLog::Print(QString("[Rasterize] Raster matrix '%1' successfully saved").arg(outputFilename));
 }
 
+void ccRasterizeTool::onStatExportTargetChanged(bool)
+{
+	m_UI->exportStatisticsFrame->setEnabled(	m_UI->exportHeightStatsCheckBox->isChecked()
+											||	(m_UI->exportSFStatsCheckBox->isEnabled() && m_UI->exportSFStatsCheckBox->isChecked()));
+}

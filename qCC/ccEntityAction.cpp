@@ -2699,6 +2699,14 @@ namespace ccEntityAction
 				// TODO report error?
 				continue;
 			}
+
+			//compute the number of valid values
+			size_t sfValidCount = sf->countValidValues();
+			if (sfValidCount == 0)
+			{
+				ccLog::Warning(QObject::tr("Scalar field '%1' of cloud %2 has no valid values").arg(sf->getName()).arg(pc->getName()));
+				continue;
+			}
 			
 			Q_ASSERT(!sf->empty());
 			
@@ -2735,7 +2743,7 @@ namespace ccEntityAction
 				description.prepend(QString("%1: ").arg(distrib->getName()));
 				ccConsole::Print(QObject::tr("[Distribution fitting] %1").arg(description));
 				
-				const unsigned numberOfClasses = static_cast<unsigned>(ceil(sqrt(static_cast<double>(pc->size()))));
+				const unsigned numberOfClasses = static_cast<unsigned>(ceil(sqrt(static_cast<double>(sfValidCount))));
 				std::vector<unsigned> histo;
 				std::vector<double> npis;
 				try
@@ -2752,7 +2760,7 @@ namespace ccEntityAction
 				//compute the Chi2 distance
 				{
 					unsigned finalNumberOfClasses = 0;
-					const double chi2dist = CCCoreLib::StatisticalTestingTools::computeAdaptativeChi2Dist(distrib, pc, 0, finalNumberOfClasses, false, nullptr, nullptr, histo.data(), npis.data());
+					const double chi2dist = CCCoreLib::StatisticalTestingTools::computeAdaptativeChi2Dist(distrib, pc, numberOfClasses, finalNumberOfClasses, false, nullptr, nullptr, histo.data(), npis.data());
 
 					if (chi2dist >= 0.0)
 					{
@@ -2769,22 +2777,17 @@ namespace ccEntityAction
 				{
 					unsigned n = pc->size();
 					double squareSum = 0;
-					unsigned counter = 0;
 					for (unsigned i = 0; i < n; ++i)
 					{
 						ScalarType v = pc->getPointScalarValue(i);
 						if (CCCoreLib::ScalarField::ValidValue(v))
 						{
 							squareSum += static_cast<double>(v) * v;
-							++counter;
 						}
 					}
 
-					if (counter != 0)
-					{
-						double rms = sqrt(squareSum / counter);
-						ccConsole::Print(QObject::tr("Scalar field RMS = %1").arg(rms));
-					}
+					double rms = sqrt(squareSum / sfValidCount);
+					ccConsole::Print(QObject::tr("Scalar field RMS = %1").arg(rms));
 				}
 
 				//show histogram

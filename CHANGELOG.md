@@ -118,6 +118,10 @@ v2.13.alpha (???) - (??/??/????)
 		- the triangles of meshes tesselated from STEP files should now all be properly oriented
 		- the linear deflection is asked only once when multiple files are loaded at the same time
 
+	- Camera sensor edition dialog
+		- the user can now control whether the input 'center' is in the world C.S. or in the camera C.S.
+			(or more exactly, it's the translation part of a 4x4 transformation matrix - which was the case by default in the previous versions)
+
 - Bug fix:
 	- PCD: when transforming a cloud with a sensor (either manually, or via a registration tool, or via Edit > Apply Tranformation) and then exporting
 		the cloud to a PCD file, both the points AND the sensor were transformed, resulting in the PCD file coordinates to be in the wrong coordinate

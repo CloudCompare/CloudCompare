@@ -24,6 +24,67 @@
        <string>Position + Orientation</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_2">
+       <item row="2" column="3">
+        <widget class="QLineEdit" name="y2rot">
+         <property name="text">
+          <string notr="true">1</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="5">
+        <widget class="QLineEdit" name="posZEdit">
+         <property name="text">
+          <string notr="true">0.0</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="5">
+        <widget class="QLabel" name="label_2">
+         <property name="toolTip">
+          <string>sensor center</string>
+         </property>
+         <property name="text">
+          <string>Center</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="3">
+        <widget class="QLineEdit" name="x2rot">
+         <property name="text">
+          <string notr="true">0</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="4">
+        <widget class="QLineEdit" name="x3rot">
+         <property name="text">
+          <string notr="true">0</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="4">
+        <widget class="QLabel" name="label_8">
+         <property name="toolTip">
+          <string>sensor vertical direction (pitch = 0)</string>
+         </property>
+         <property name="text">
+          <string>Z (inv. view dir.)</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="5">
+        <widget class="QLineEdit" name="posXEdit">
+         <property name="text">
+          <string notr="true">0.0</string>
+         </property>
+        </widget>
+       </item>
        <item row="3" column="2">
         <widget class="QLineEdit" name="z1rot">
          <property name="text">
@@ -31,7 +92,27 @@
          </property>
         </widget>
        </item>
-       <item row="4" column="3">
+       <item row="3" column="4">
+        <widget class="QLineEdit" name="z3rot">
+         <property name="text">
+          <string notr="true">1</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QLabel" name="label_6">
+         <property name="toolTip">
+          <string>sensor front direction (yaw = 0)</string>
+         </property>
+         <property name="text">
+          <string>X (right)</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="3">
         <spacer>
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -51,86 +132,10 @@
          </property>
         </widget>
        </item>
-       <item row="3" column="4">
-        <widget class="QLineEdit" name="z3rot">
-         <property name="text">
-          <string notr="true">1</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="4">
-        <widget class="QLineEdit" name="x3rot">
-         <property name="text">
-          <string notr="true">0</string>
-         </property>
-        </widget>
-       </item>
        <item row="1" column="2">
         <widget class="QLineEdit" name="x1rot">
          <property name="text">
           <string notr="true">1</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="2">
-        <widget class="QLineEdit" name="y1rot">
-         <property name="text">
-          <string notr="true">0</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="3">
-        <widget class="QLineEdit" name="x2rot">
-         <property name="text">
-          <string notr="true">0</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="3">
-        <widget class="QLineEdit" name="z2rot">
-         <property name="text">
-          <string notr="true">0</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="3">
-        <widget class="QLineEdit" name="y2rot">
-         <property name="text">
-          <string notr="true">1</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QLineEdit" name="posXEdit">
-         <property name="text">
-          <string notr="true">0.0</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QLineEdit" name="posYEdit">
-         <property name="text">
-          <string notr="true">0.0</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1">
-        <widget class="QLineEdit" name="posZEdit">
-         <property name="text">
-          <string notr="true">0.0</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="2">
-        <widget class="QLabel" name="label_6">
-         <property name="toolTip">
-          <string>sensor front direction (yaw = 0)</string>
-         </property>
-         <property name="text">
-          <string>X (right)</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
          </property>
         </widget>
        </item>
@@ -147,29 +152,37 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="4">
-        <widget class="QLabel" name="label_8">
-         <property name="toolTip">
-          <string>sensor vertical direction (pitch = 0)</string>
-         </property>
+       <item row="2" column="5">
+        <widget class="QLineEdit" name="posYEdit">
          <property name="text">
-          <string>Z (inv. view dir.)</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
+          <string notr="true">0.0</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="1">
-        <widget class="QLabel" name="label_2">
+       <item row="2" column="2">
+        <widget class="QLineEdit" name="y1rot">
+         <property name="text">
+          <string notr="true">0</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="3">
+        <widget class="QLineEdit" name="z2rot">
+         <property name="text">
+          <string notr="true">0</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="5">
+        <widget class="QCheckBox" name="inWorldCSCheckBox">
          <property name="toolTip">
-          <string>sensor center</string>
+          <string>center is expressed in the world coordinate system</string>
          </property>
          <property name="text">
-          <string>Center</string>
+          <string>in world C.S.</string>
          </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
+         <property name="checked">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -531,9 +544,6 @@
  </widget>
  <tabstops>
   <tabstop>propertiesTabWidget</tabstop>
-  <tabstop>posXEdit</tabstop>
-  <tabstop>posYEdit</tabstop>
-  <tabstop>posZEdit</tabstop>
   <tabstop>x1rot</tabstop>
   <tabstop>y1rot</tabstop>
   <tabstop>z1rot</tabstop>

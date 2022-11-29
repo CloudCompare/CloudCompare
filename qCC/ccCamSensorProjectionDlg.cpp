@@ -23,6 +23,9 @@
 //qCC_db
 #include <ccCameraSensor.h>
 
+//persistent parameters
+static bool s_inCameraCS = true;
+
 ccCamSensorProjectionDlg::ccCamSensorProjectionDlg(QWidget* parent)
 	: QDialog(parent)
 	, Ui::CamSensorProjectDialog()
@@ -42,6 +45,8 @@ ccCamSensorProjectionDlg::ccCamSensorProjectionDlg(QWidget* parent)
 	z1rot->setValidator(new ccCustomDoubleValidator(this));
 	z2rot->setValidator(new ccCustomDoubleValidator(this));
 	z3rot->setValidator(new ccCustomDoubleValidator(this));
+
+	inWorldCSCheckBox->setChecked(s_inCameraCS);
 }
 
 void ccCamSensorProjectionDlg::initWithCamSensor(const ccCameraSensor* sensor)
@@ -51,29 +56,36 @@ void ccCamSensorProjectionDlg::initWithCamSensor(const ccCameraSensor* sensor)
 
 	const int precision = sizeof(PointCoordinateType) == 8 ? 12 : 8;
 
+
 	/*** Position + Orientation ***/
 	{
 		//center
-		const float* C = sensor->getRigidTransformation().getTranslation();
-		posXEdit->setText(QString::number(C[0],'f',precision));
-		posYEdit->setText(QString::number(C[1],'f',precision));
-		posZEdit->setText(QString::number(C[2],'f',precision));
+		const ccGLMatrix& mat = sensor->getRigidTransformation();
+		CCVector3d C = mat.getTranslationAsVec3D();
+		if (inWorldCSCheckBox->isChecked())
+		{
+			mat.applyRotation(C);
+		}
+
+		posXEdit->setText(QString::number(C.x, 'f', precision));
+		posYEdit->setText(QString::number(C.y, 'f', precision));
+		posZEdit->setText(QString::number(C.z, 'f', precision));
 
 		//rotation matrix
 		const ccGLMatrix& rot = sensor->getRigidTransformation();
 		{
 			const float* mat = rot.data();
-			x1rot->setText(QString::number(mat[0] ,'f',precision));
-			y1rot->setText(QString::number(mat[1] ,'f',precision));
-			z1rot->setText(QString::number(mat[2] ,'f',precision));
+			x1rot->setText(QString::number(mat[0], 'f', precision));
+			y1rot->setText(QString::number(mat[1], 'f', precision));
+			z1rot->setText(QString::number(mat[2], 'f', precision));
 
-			x2rot->setText(QString::number(mat[4] ,'f',precision));
-			y2rot->setText(QString::number(mat[5] ,'f',precision));
-			z2rot->setText(QString::number(mat[6] ,'f',precision));
+			x2rot->setText(QString::number(mat[4], 'f', precision));
+			y2rot->setText(QString::number(mat[5], 'f', precision));
+			z2rot->setText(QString::number(mat[6], 'f', precision));
 
-			x3rot->setText(QString::number(mat[8] ,'f',precision));
-			y3rot->setText(QString::number(mat[9] ,'f',precision));
-			z3rot->setText(QString::number(mat[10],'f',precision));
+			x3rot->setText(QString::number(mat[8], 'f', precision));
+			y3rot->setText(QString::number(mat[9], 'f', precision));
+			z3rot->setText(QString::number(mat[10], 'f', precision));
 		}
 	}
 
@@ -82,7 +94,7 @@ void ccCamSensorProjectionDlg::initWithCamSensor(const ccCameraSensor* sensor)
 		const ccCameraSensor::IntrinsicParameters& iParams = sensor->getIntrinsicParameters();
 
 		focalDoubleSpinBox->setValue(iParams.vertFocal_pix);
-		fovDoubleSpinBox->setValue( CCCoreLib::RadiansToDegrees( iParams.vFOV_rad ) );
+		fovDoubleSpinBox->setValue(CCCoreLib::RadiansToDegrees(iParams.vFOV_rad));
 		arrayWSpinBox->setValue(iParams.arrayWidth);
 		arrayHSpinBox->setValue(iParams.arrayHeight);
 		pixWDoubleSpinBox->setValue(iParams.pixelSize_mm[0]);
@@ -146,29 +158,35 @@ void ccCamSensorProjectionDlg::updateCamSensor(ccCameraSensor* sensor)
 	/*** Position + Orientation ***/
 	{
 		//orientation matrix
-		ccGLMatrix rot;
+		ccGLMatrixd rot;
 		{
-			float* mat = rot.data();
-			mat[0]  = x1rot->text().toFloat();
-			mat[1]  = y1rot->text().toFloat();
-			mat[2]  = z1rot->text().toFloat();
+			double* mat = rot.data();
+			mat[0]  = x1rot->text().toDouble();
+			mat[1]  = y1rot->text().toDouble();
+			mat[2]  = z1rot->text().toDouble();
 
-			mat[4]  = x2rot->text().toFloat();
-			mat[5]  = y2rot->text().toFloat();
-			mat[6]  = z2rot->text().toFloat();
+			mat[4]  = x2rot->text().toDouble();
+			mat[5]  = y2rot->text().toDouble();
+			mat[6]  = z2rot->text().toDouble();
 
-			mat[8]  = x3rot->text().toFloat();
-			mat[9]  = y3rot->text().toFloat();
-			mat[10] = z3rot->text().toFloat();
+			mat[8]  = x3rot->text().toDouble();
+			mat[9]  = y3rot->text().toDouble();
+			mat[10] = z3rot->text().toDouble();
 		}
 
 		//center
-		CCVector3 C(static_cast<PointCoordinateType>(posXEdit->text().toDouble()),
+		CCVector3d C(static_cast<PointCoordinateType>(posXEdit->text().toDouble()),
 					static_cast<PointCoordinateType>(posYEdit->text().toDouble()),
 					static_cast<PointCoordinateType>(posZEdit->text().toDouble()));
+
+		if (inWorldCSCheckBox->isChecked())
+		{
+			rot.inverse().apply(C);
+		}
+
 		rot.setTranslation(C);
 
-		sensor->setRigidTransformation(rot);
+		sensor->setRigidTransformation(ccGLMatrix(rot.data()));
 	}
 
 	/*** Intrinsic parameters ***/
@@ -194,4 +212,6 @@ void ccCamSensorProjectionDlg::updateCamSensor(ccCameraSensor* sensor)
 
 	//read only for now
 
+	//it's a good time to save the persistent parameter(s)
+	s_inCameraCS = inWorldCSCheckBox->isChecked();
 }

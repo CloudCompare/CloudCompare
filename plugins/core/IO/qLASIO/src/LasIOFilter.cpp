@@ -589,6 +589,7 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 		params.standardFields = saveDialog.fieldsToSave();
 		params.extraFields    = saveDialog.extraFieldsToSave();
 		params.shouldSaveRGB  = saveDialog.shouldSaveRGB();
+		params.shouldSaveWaveform = saveDialog.shouldSaveWaveform();
 
 		saveDialog.selectedVersion(params.versionMajor, params.versionMinor);
 		params.pointFormat = saveDialog.selectedPointFormat();

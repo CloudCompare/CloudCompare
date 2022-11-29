@@ -691,10 +691,24 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 					laspoint.set_intensity(static_cast<U16>(it->getSafeValue(i)));
 					break;
 				case LAS_RETURN_NUMBER:
-					laspoint.set_return_number(static_cast<U8>(it->getSafeValue(i)));
+					if (pointFormatSixOrAbove)
+					{
+						laspoint.set_extended_return_number(static_cast<U8>(it->getSafeValue(i)));
+					}
+					else
+					{
+						laspoint.set_return_number(static_cast<U8>(it->getSafeValue(i)));
+					}
 					break;
 				case LAS_NUMBER_OF_RETURNS:
-					laspoint.set_number_of_returns(static_cast<U8>(it->getSafeValue(i)));
+					if (pointFormatSixOrAbove)
+					{
+						laspoint.set_extended_number_of_returns(static_cast<U8>(it->getSafeValue(i)));
+					}
+					else
+					{
+						laspoint.set_number_of_returns(static_cast<U8>(it->getSafeValue(i)));
+					}
 					break;
 				case LAS_SCAN_DIRECTION:
 					laspoint.set_scan_direction_flag(static_cast<U8>(it->getSafeValue(i)));
@@ -718,7 +732,14 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 					}
 					break;
 				case LAS_SCAN_ANGLE_RANK:
-					laspoint.set_scan_angle_rank(static_cast<U8>(it->getSafeValue(i)));
+					if (pointFormatSixOrAbove)
+					{
+						laspoint.set_extended_scan_angle(static_cast<I16>(it->getSafeValue(i)));
+					}
+					else
+					{
+						laspoint.set_scan_angle_rank(static_cast<U8>(it->getSafeValue(i)));
+					}
 					break;
 				case LAS_USER_DATA:
 					laspoint.set_user_data(static_cast<U8>(it->getSafeValue(i)));
@@ -1255,10 +1276,16 @@ CC_FILE_ERROR LASFWFFilter::loadFile(const QString& filename, ccHObject& contain
 					value = static_cast<double>(point.get_intensity());
 					break;
 				case LAS_RETURN_NUMBER:
-					value = static_cast<double>(point.get_return_number());
+					if (pointFormatSixOrAbove)
+						value = static_cast<double>(point.get_extended_return_number());
+					else
+						value = static_cast<double>(point.get_return_number());
 					break;
 				case LAS_NUMBER_OF_RETURNS:
-					value = static_cast<double>(point.get_number_of_returns());
+					if (pointFormatSixOrAbove)
+						value = static_cast<double>(point.get_extended_number_of_returns());
+					else
+						value = static_cast<double>(point.get_number_of_returns());
 					break;
 				case LAS_SCAN_DIRECTION:
 					value = static_cast<double>(point.get_scan_direction_flag());
@@ -1282,7 +1309,10 @@ CC_FILE_ERROR LASFWFFilter::loadFile(const QString& filename, ccHObject& contain
 					}
 					break;
 				case LAS_SCAN_ANGLE_RANK:
-					value = static_cast<double>(point.get_scan_angle_rank());
+					if (pointFormatSixOrAbove)
+						value = static_cast<double>(point.get_extended_scan_angle());
+					else
+						value = static_cast<double>(point.get_scan_angle_rank());
 					break;
 				case LAS_USER_DATA:
 					value = static_cast<double>(point.get_user_data());

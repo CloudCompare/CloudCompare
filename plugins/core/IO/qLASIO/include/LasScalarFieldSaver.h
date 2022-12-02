@@ -74,6 +74,16 @@ class LasScalarFieldSaver
 			*reinterpret_cast<T*>(dest) = static_cast<T>(value);
 		}
 	}
+	template <typename T>
+	static void WriteScalarValueAsFltDbl(ScalarType value, uint8_t* dest)
+	{
+		if (value > std::numeric_limits<T>::max())
+			*reinterpret_cast<T*>(dest) = std::numeric_limits<T>::max();
+		else if (value < -std::numeric_limits<T>::max())
+			*reinterpret_cast<T*>(dest) = -std::numeric_limits<T>::max();
+		else
+			*reinterpret_cast<T*>(dest) = static_cast<T>(value);
+	}
 
   private:
 	std::vector<LasScalarField>      m_standardFields;

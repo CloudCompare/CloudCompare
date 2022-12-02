@@ -218,10 +218,10 @@ void LasScalarFieldSaver::handleExtraFields(size_t pointIndex, laszip_point& poi
 				WriteScalarValueAs<int64_t>(values[i], dataStart);
 				break;
 			case LasExtraScalarField::f32:
-				WriteScalarValueAs<float>(values[i], dataStart);
+				WriteScalarValueAsFltDbl<float>(values[i], dataStart);
 				break;
 			case LasExtraScalarField::f64:
-				WriteScalarValueAs<double>(values[i], dataStart);
+				WriteScalarValueAsFltDbl<double>(values[i], dataStart);
 				break;
 			case LasExtraScalarField::Undocumented:
 			case LasExtraScalarField::Invalid:

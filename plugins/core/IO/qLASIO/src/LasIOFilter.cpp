@@ -573,6 +573,7 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 	{
 		LasExtraScalarField::MatchExtraBytesToScalarFields(vlr.extraScalarFields, *pointCloud);
 	}
+
 	saveDialog.setExtraScalarFields(vlr.extraScalarFields);
 
 	if (parameters.alwaysDisplaySaveDialog)
@@ -596,6 +597,50 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 
 		params.lasScale  = saveDialog.chosenScale();
 		params.lasOffset = lasOffset;
+	}
+
+	// In case of command line call, add automatically all remaining scalar fiels as extra scalar fields
+	if (!parameters.alwaysDisplaySaveDialog)
+	{
+		uint sfCount = pointCloud->getNumberOfScalarFields();
+		for (uint index = 0; index < sfCount; index++)
+		{
+			ccScalarField *sf = static_cast<ccScalarField*>(pointCloud->getScalarField(index));
+			const char* sfName = sf->getName();
+			bool found = false;
+			for (auto& el : params.standardFields)
+				if (strcmp(sfName, el.name()) == 0)
+					found = true;
+			for (auto& el : params.extraFields)
+				if (strcmp(sfName, el.scalarFields[0]->getName()) == 0)
+					found = true;
+			if (!found)
+			{
+				ccLog::Print("[LAS] scalar field " + QString(sfName) + " will be saved automatically in the extra fields of the output file");
+				LasExtraScalarField field;
+				const std::string stdName = sfName;
+				strncpy(field.name, stdName.c_str(), LasExtraScalarField::MAX_NAME_SIZE);
+
+				const std::string stdDescription = "";
+				strncpy(field.description, stdDescription.c_str(), LasExtraScalarField::MAX_DESCRIPTION_SIZE);
+
+				if (stdName.size() > LasExtraScalarField::MAX_NAME_SIZE)
+				{
+					ccLog::Warning("[LAS] Extra Scalar field name '%s' is too long and will be truncated",
+								   stdName.c_str());
+				}
+				if (stdDescription.size() > LasExtraScalarField::MAX_DESCRIPTION_SIZE)
+				{
+					ccLog::Warning("[LAS] Extra scalar field description '%s' is too long and will be truncated",
+								   stdDescription.c_str());
+				}
+
+				field.type = LasExtraScalarField::DataType::f32;
+				field.scalarFields[0] = sf;
+
+				params.extraFields.push_back(field);
+			}
+		}
 	}
 
 	LasSaver      saver(*pointCloud, params);

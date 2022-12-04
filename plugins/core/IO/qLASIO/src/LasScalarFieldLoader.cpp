@@ -88,7 +88,7 @@ CC_FILE_ERROR LasScalarFieldLoader::handleScalarFields(ccPointCloud&       point
 			break;
 		case LasScalarField::OverlapFlag:
 			error =
-			    handleScalarField(lasScalarField, pointCloud, currentPoint.extended_classification_flags & 8);
+			    handleScalarField(lasScalarField, pointCloud, currentPoint.extended_classification_flags & LasDetails::OVERLAP_FLAG_BIT_MASK);
 			break;
 		case LasScalarField::ExtendedClassification:
 			error = handleScalarField(lasScalarField, pointCloud, currentPoint.extended_classification);

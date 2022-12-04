@@ -137,6 +137,7 @@ CC_FILE_ERROR LasSaver::open(const QString filePath)
 		return CC_FERR_THIRD_PARTY_LIB_FAILURE;
 	}
 
+
 	return CC_FERR_NO_ERROR;
 }
 
@@ -155,11 +156,12 @@ CC_FILE_ERROR LasSaver::saveNextPoint()
 	laszip_CHAR* errorMsg{nullptr};
 
 	// reset point
-	int        totalExtraByteSize  = m_laszipPoint->num_extra_bytes;
-	laszip_U8* extra_bytes         = m_laszipPoint->extra_bytes;
-	*m_laszipPoint                 = {};
-	m_laszipPoint->extra_bytes     = extra_bytes;
-	m_laszipPoint->num_extra_bytes = totalExtraByteSize;
+	int        totalExtraByteSize      = m_laszipPoint->num_extra_bytes;
+	laszip_U8* extra_bytes             = m_laszipPoint->extra_bytes;
+	*m_laszipPoint                     = {};
+	m_laszipPoint->extra_bytes         = extra_bytes;
+	m_laszipPoint->num_extra_bytes     = totalExtraByteSize;
+	m_laszipPoint->extended_point_type = m_laszipHeader.point_data_format >= 6;
 
 	const CCVector3* point       = m_cloudToSave.getPoint(m_currentPointIndex);
 	const CCVector3d globalPoint = m_cloudToSave.toGlobal3d<PointCoordinateType>(*point);

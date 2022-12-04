@@ -415,9 +415,6 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 	{
 		laszip_get_error(laszipHeader, &errorMsg);
 		ccLog::Warning("[LAS] laszip error: '%s'", errorMsg);
-		laszip_close_reader(laszipReader);
-		laszip_clean(laszipReader);
-		laszip_destroy(laszipReader);
 	}
 
 	timer.elapsed();
@@ -427,6 +424,11 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 	int32_t seconds = elapsed / 1000;
 	elapsed -= seconds * 1000;
 	ccLog::Print(QString("[LAS] File loaded in %1m%2s%3ms").arg(minutes).arg(seconds).arg(elapsed));
+
+	laszip_close_reader(laszipReader);
+	laszip_clean(laszipReader);
+	laszip_destroy(laszipReader);
+
 	return error;
 }
 

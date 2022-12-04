@@ -128,7 +128,7 @@ void LasScalarFieldSaver::handleScalarFields(size_t pointIndex, laszip_point& po
 		case LasScalarField::OverlapFlag:
 			if (field.sf)
 			{
-				point.extended_classification_flags |= (static_cast<laszip_U8>(value) > 0) ? (1u << 5) : 0;
+				point.extended_classification_flags |= (static_cast<laszip_U8>(value) > 0) ? LasDetails::OVERLAP_FLAG_BIT_MASK : 0;
 			}
 			break;
 		case LasScalarField::ExtendedClassification:

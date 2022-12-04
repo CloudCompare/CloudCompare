@@ -72,6 +72,11 @@ namespace LasNames
 
 namespace LasDetails
 {
+	// The position of the overlap flag in the classification flags
+	// (valid for fmt >= 6)
+	constexpr unsigned OVERLAP_FLAG_BIT_POS  = 3;
+	constexpr unsigned OVERLAP_FLAG_BIT_MASK = 1 << OVERLAP_FLAG_BIT_POS;
+
 	/// Header part of a LAS Extended VLR
 	///
 	/// In a LAS file, EVLRs are stored after the points.

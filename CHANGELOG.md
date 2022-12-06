@@ -135,9 +135,10 @@ v2.13.alpha (???) - (??/??/????)
 		(forcing the user to exit the tool with ESC)
 	- The 'Point List Picking' tool was not transferring the Global Shift information when exporting the list of points as a polyline
 	- Rasterize tool: interpolated scalar fields were not properly exported in geotiff files (the interpolated part was missing)
-	- the Registration tools (ICP and Point-pair based alignment) transformation filter mechanism would not let filter both translations and rotation at the same time
-	- with a lot of NaN values in a scalar field, the Edit > Scalar field > Compute Stat Params tool could show wrong abscissa values below the histogram and curve.
+	- The Registration tools (ICP and Point-pair based alignment) transformation filter mechanism would not let filter both translations and rotation at the same time
+	- With a lot of NaN values in a scalar field, the Edit > Scalar field > Compute Stat Params tool could show wrong abscissa values below the histogram and curve.
 		(note that the average, standard deviation, RMS and Chi2 distance values displayed either above the histogram or in the Console were correct)
+	- When loading E57s file with large coordinates, and applying a Global Shift, the associated image sensors were not translated of the same Global Shift
 
 v2.12.4 (Kyiv) - (14/07/2022)
 ----------------------

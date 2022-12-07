@@ -610,10 +610,17 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 			bool found = false;
 			for (auto& el : params.standardFields)
 				if (strcmp(sfName, el.name()) == 0)
+				{
 					found = true;
-			for (auto& el : params.extraFields)
-				if (strcmp(sfName, el.scalarFields[0]->getName()) == 0)
-					found = true;
+					break;
+				}
+			if (!found)
+				for (auto& el : params.extraFields)
+					if (strcmp(sfName, el.scalarFields[0]->getName()) == 0)
+					{
+						found = true;
+						break;
+					}
 			if (!found)
 			{
 				ccLog::Print("[LAS] scalar field " + QString(sfName) + " will be saved automatically in the extra fields of the output file");
@@ -621,18 +628,10 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 				const std::string stdName = sfName;
 				strncpy(field.name, stdName.c_str(), LasExtraScalarField::MAX_NAME_SIZE);
 
-				const std::string stdDescription = "";
-				strncpy(field.description, stdDescription.c_str(), LasExtraScalarField::MAX_DESCRIPTION_SIZE);
-
 				if (stdName.size() > LasExtraScalarField::MAX_NAME_SIZE)
 				{
 					ccLog::Warning("[LAS] Extra Scalar field name '%s' is too long and will be truncated",
 								   stdName.c_str());
-				}
-				if (stdDescription.size() > LasExtraScalarField::MAX_DESCRIPTION_SIZE)
-				{
-					ccLog::Warning("[LAS] Extra scalar field description '%s' is too long and will be truncated",
-								   stdDescription.c_str());
 				}
 
 				field.type = LasExtraScalarField::DataType::f32;

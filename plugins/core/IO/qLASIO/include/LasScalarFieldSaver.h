@@ -65,9 +65,9 @@ class LasScalarFieldSaver
 		{
 			*reinterpret_cast<T*>(dest) = std::numeric_limits<T>::max();
 		}
-		else if (value < std::numeric_limits<T>::min())
+		else if (value < std::numeric_limits<T>::lowest())
 		{
-			*reinterpret_cast<T*>(dest) = std::numeric_limits<T>::min();
+			*reinterpret_cast<T*>(dest) = std::numeric_limits<T>::lowest();
 		}
 		else
 		{

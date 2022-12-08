@@ -139,6 +139,8 @@ v2.13.alpha (???) - (??/??/????)
 	- With a lot of NaN values in a scalar field, the Edit > Scalar field > Compute Stat Params tool could show wrong abscissa values below the histogram and curve.
 		(note that the average, standard deviation, RMS and Chi2 distance values displayed either above the histogram or in the Console were correct)
 	- When loading E57s file with large coordinates, and applying a Global Shift, the associated image sensors were not translated of the same Global Shift
+	- When applying the viewport of a calibrated image (= image with an associated sensor), the camera f.o.v. was applied instead of a smarter value,
+		taking the 3D view dimensions into account (resulting in a bad match between the 3D scene and the overlaid image)
 
 v2.12.4 (Kyiv) - (14/07/2022)
 ----------------------

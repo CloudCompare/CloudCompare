@@ -65,7 +65,7 @@ public:
 	ccBBox getOwnFitBB(ccGLMatrix& trans) override;
 
 	//inherited from ccSensor
-	bool applyViewport(ccGenericGLDisplay* win = nullptr) override;
+	bool applyViewport(ccGenericGLDisplay* win = nullptr) const override;
 
 	//! Determines a 3D point "visibility" relatively to the sensor field of view
 	/** Relies on the sensor associated depth map (see ccGBLSensor::computeDepthBuffer).

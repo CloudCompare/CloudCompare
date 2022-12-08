@@ -950,7 +950,7 @@ ccBBox ccGBLSensor::getOwnFitBB(ccGLMatrix& trans)
 					true );
 }
 
-bool ccGBLSensor::applyViewport(ccGenericGLDisplay* win/*=nullptr*/)
+bool ccGBLSensor::applyViewport(ccGenericGLDisplay* win/*=nullptr*/) const
 {
 	if (!win)
 	{

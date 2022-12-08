@@ -191,7 +191,10 @@ public: //general
 	ccBBox getOwnFitBB(ccGLMatrix& trans) override;
 
 	//inherited from ccSensor
-	bool applyViewport(ccGenericGLDisplay* win = nullptr) override;
+	bool applyViewport(ccGenericGLDisplay* win = nullptr) const override;
+
+	//! Applies the sensor viewport with respect to an image (assumed to be displayed on the 'foreground' 2D layer)
+	bool applyImageViewport(ccImage* image, ccGenericGLDisplay* win = nullptr) const;
 
 public: //getters and setters
 

@@ -2542,7 +2542,7 @@ void ccPropertiesTreeDelegate::applyImageViewport()
 	if (!image)
 		return;
 
-	if (image->getAssociatedSensor() && image->getAssociatedSensor()->applyViewport())
+	if (image->getAssociatedSensor() && image->getAssociatedSensor()->applyImageViewport(image))
 	{
 		ccLog::Print("[ApplyImageViewport] Viewport applied");
 	}

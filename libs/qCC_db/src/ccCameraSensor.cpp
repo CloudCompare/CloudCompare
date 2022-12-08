@@ -343,14 +343,20 @@ void ccCameraSensor::setIntrinsicParameters(const IntrinsicParameters& params)
 	m_projectionMatrixIsValid = false;
 }
 
-bool ccCameraSensor::applyViewport(ccGenericGLDisplay* win/*=nullptr*/)
+bool ccCameraSensor::applyViewport(ccGenericGLDisplay* win/*=nullptr*/) const
 {
+	if (m_intrinsicParams.arrayHeight <= 0)
+	{
+		ccLog::Warning("[ccCameraSensor::applyViewport] Sensor height is 0!");
+		return false;
+	}
+
 	if (!win)
 	{
 		win = getDisplay();
 		if (!win)
 		{
-			ccLog::Warning("[ccCameraSensor::applyViewport] No associated display!");
+			ccLog::Warning("[ccCameraSensor::applyViewport] No associated display");
 			return false;
 		}
 	}
@@ -361,17 +367,64 @@ bool ccCameraSensor::applyViewport(ccGenericGLDisplay* win/*=nullptr*/)
 		return false;
 	}
 
+	//aspect ratio
+	float ar = static_cast<float>(m_intrinsicParams.arrayWidth) / m_intrinsicParams.arrayHeight;
+	//fov
+	float fov_deg = CCCoreLib::RadiansToDegrees( m_intrinsicParams.vFOV_rad );
+	//camera position/orientation
+	ccGLMatrixd transd(trans.data());
+	win->setupProjectiveViewport(transd, fov_deg, ar);
+
+	return true;
+}
+
+bool ccCameraSensor::applyImageViewport(ccImage* image, ccGenericGLDisplay* win/*=nullptr*/) const
+{
 	if (m_intrinsicParams.arrayHeight <= 0)
 	{
 		ccLog::Warning("[ccCameraSensor::applyViewport] Sensor height is 0!");
 		return false;
 	}
 
-	//aspect ratio
-	float ar = static_cast<float>(m_intrinsicParams.arrayWidth) / m_intrinsicParams.arrayHeight;
-	//fov
-	float fov_deg = CCCoreLib::RadiansToDegrees( m_intrinsicParams.vFOV_rad );
+	if (!image)
+	{
+		ccLog::Warning("[ccCameraSensor::applyImageViewport] No image provided");
+		return applyViewport(win);
+	}
+
+	if (!win)
+	{
+		win = getDisplay();
+		if (!win)
+		{
+			ccLog::Warning("[ccCameraSensor::applyImageViewport] No associated display");
+			return false;
+		}
+	}
+
+	if (image->getDisplay() != win)
+	{
+		ccLog::Warning("[ccCameraSensor::applyImageViewport] Image display does not match with the provided or default display");
+		return applyViewport(win);
+	}
+
+	QSize screenSize = win->getScreenSize();
+	QSizeF displayedSize = image->computeDisplayedSize(screenSize.width(), screenSize.height());
+
+	//the image height (fully) fits the 3D view height
+	double screenAR = static_cast<double>(screenSize.width()) / screenSize.height();
+	double fOV_rad = 2 * atan((m_intrinsicParams.arrayHeight / (2 * m_intrinsicParams.vertFocal_pix)) * screenAR);
+	float fov_deg = CCCoreLib::RadiansToDegrees(fOV_rad);
+
 	//camera position/orientation
+	ccIndexedTransformation trans;
+	if (!getActiveAbsoluteTransformation(trans))
+	{
+		return false;
+	}
+
+	//image aspect ratio
+	float ar = static_cast<float>(m_intrinsicParams.arrayWidth) / m_intrinsicParams.arrayHeight;
 	ccGLMatrixd transd(trans.data());
 	win->setupProjectiveViewport(transd, fov_deg, ar);
 

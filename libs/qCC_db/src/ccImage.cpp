@@ -104,6 +104,18 @@ void ccImage::updateAspectRatio()
 	setAspectRatio(m_height != 0 ? static_cast<float>(m_width) / m_height : 1.0f);
 }
 
+QSizeF ccImage::computeDisplayedSize(int glWidth, int glHeight) const
+{
+	int realWidth = static_cast<int>(m_height * m_aspectRatio); //take aspect ratio into account!
+	float cw = realWidth > 0 ? static_cast<float>(glWidth) / realWidth : 0;
+	float ch = m_height > 0 ? static_cast<float>(glHeight) / m_height : 0;
+	float zoomFactor = (cw > ch ? ch : cw);
+	float dX = realWidth * zoomFactor;
+	float dY = m_height * zoomFactor;
+
+	return { dX, dY };
+}
+
 void ccImage::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
 	if (m_image.isNull())
@@ -130,19 +142,17 @@ void ccImage::drawMeOnly(CC_DRAW_CONTEXT& context)
 	texture.bind();
 	{
 		//we make the texture fit inside viewport
-		int realWidth = static_cast<int>(m_height * m_aspectRatio); //take aspect ratio into account!
-		GLfloat cw = static_cast<GLfloat>(context.glW) /realWidth;
-		GLfloat ch = static_cast<GLfloat>(context.glH) /m_height;
-		GLfloat zoomFactor = (cw > ch ? ch : cw) / 2;
-		GLfloat dX = realWidth*zoomFactor;
-		GLfloat dY = m_height*zoomFactor;
+		QSizeF displayedSize = computeDisplayedSize(context.glW, context.glH);
+
+		float w = static_cast<float>(displayedSize.width() / 2);
+		float h = static_cast<float>(displayedSize.height() / 2);
 
 		glFunc->glColor4f(1.0f, 1.0f, 1.0f, m_texAlpha);
 		glFunc->glBegin(GL_QUADS);
-		glFunc->glTexCoord2f(0, 1); glFunc->glVertex2f(-dX, -dY);
-		glFunc->glTexCoord2f(1, 1); glFunc->glVertex2f( dX, -dY);
-		glFunc->glTexCoord2f(1, 0); glFunc->glVertex2f( dX,  dY);
-		glFunc->glTexCoord2f(0, 0); glFunc->glVertex2f(-dX,  dY);
+		glFunc->glTexCoord2f(0, 1); glFunc->glVertex2f(-w, -h);
+		glFunc->glTexCoord2f(1, 1); glFunc->glVertex2f( w, -h);
+		glFunc->glTexCoord2f(1, 0); glFunc->glVertex2f( w,  h);
+		glFunc->glTexCoord2f(0, 0); glFunc->glVertex2f(-w,  h);
 		glFunc->glEnd();
 	}
 	texture.release();

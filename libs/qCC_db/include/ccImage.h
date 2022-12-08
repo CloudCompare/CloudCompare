@@ -91,6 +91,9 @@ public:
 	//inherited from ccHObject
 	virtual ccBBox getOwnFitBB(ccGLMatrix& trans) override;
 
+	//! Compute the displayed image size
+	QSizeF computeDisplayedSize(int glWidth, int glHeight) const;
+
 protected:
 
 	//inherited from ccHObject

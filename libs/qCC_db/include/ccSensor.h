@@ -123,7 +123,7 @@ public:
 	/** \param win 3D view to which to apply the sensor viewport (or the associated 'display' if 0)
 		\return success
 	**/
-	virtual bool applyViewport(ccGenericGLDisplay* win = nullptr);
+	virtual bool applyViewport(ccGenericGLDisplay* win = nullptr) const;
 
 	//inherited from ccHObject
 	void applyGLTransformation(const ccGLMatrix& trans) override;

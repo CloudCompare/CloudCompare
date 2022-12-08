@@ -118,9 +118,7 @@ namespace LasDetails
 	inline bool HasGpsTime(unsigned pointFormatId)
 	{
 		return pointFormatId == 1
-		       || pointFormatId == 3
-		       || pointFormatId == 5
-		       || pointFormatId >= 6;
+				|| pointFormatId >= 3;
 	}
 
 	/// Returns whether the point format supports RGB
@@ -128,9 +126,9 @@ namespace LasDetails
 	{
 		return pointFormatId == 2
 		       || pointFormatId == 3
-		       || pointFormatId == 4
-		       || pointFormatId == 5
-		       || pointFormatId >= 7;
+			   || pointFormatId == 7
+			   || pointFormatId == 8
+			   || pointFormatId == 10;
 	}
 
 	/// Returns whether the point format supports Waveforms
@@ -138,7 +136,7 @@ namespace LasDetails
 	{
 		return pointFormatId == 4
 		       || pointFormatId == 5
-		       || pointFormatId >= 8;
+			   || pointFormatId >= 9;
 	}
 
 	/// Returns whether the point format support Near Infrared

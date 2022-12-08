@@ -126,6 +126,7 @@ namespace LasDetails
 	{
 		return pointFormatId == 2
 		       || pointFormatId == 3
+			   || pointFormatId == 5
 			   || pointFormatId == 7
 			   || pointFormatId == 8
 			   || pointFormatId == 10;

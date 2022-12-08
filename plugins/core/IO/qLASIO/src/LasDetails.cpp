@@ -264,16 +264,14 @@ namespace LasDetails
 		{
 			bool hasGpsTime  = cloud.getScalarFieldIndexByName(LasNames::GpsTime) != -1;
 			int  pointFormat = 0;
+			int minorVersion = 2;
 			if (hasWaveform)
 			{
+				minorVersion = 3;
 				if (hasGpsTime)
-				{
 					pointFormat = 4;
-				}
 				else if (hasRGB)
-				{
 					pointFormat = 5;
-				}
 			}
 			else
 			{
@@ -286,7 +284,7 @@ namespace LasDetails
 					pointFormat += 2;
 				}
 			}
-			return {pointFormat, 2};
+			return {pointFormat, minorVersion};
 		}
 	}
 

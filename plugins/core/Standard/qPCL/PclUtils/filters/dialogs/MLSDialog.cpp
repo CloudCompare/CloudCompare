@@ -29,10 +29,8 @@ MLSDialog::MLSDialog(QWidget* parent)
 
 	updateCombo();
 
-	connect (upsampling_method, SIGNAL(currentIndexChanged(QString)), this, SLOT(activateMenu(QString)) );
-	connect (search_radius,     SIGNAL(valueChanged(double)),         this, SLOT(updateSquaredGaussian(double)) );
-
-	deactivateAllMethods();
+	connect (upsampling_method, qOverload<int>(&QComboBox::currentIndexChanged),  this, &MLSDialog::activateMenu);
+	connect (search_radius,     qOverload<double>(&QDoubleSpinBox::valueChanged), this, &MLSDialog::updateSquaredGaussian);
 }
 
 void MLSDialog::updateCombo()
@@ -42,43 +40,15 @@ void MLSDialog::updateCombo()
 	upsampling_method->addItem(tr("Sample Local Plane"), QVariant(MLSParameters::SAMPLE_LOCAL_PLANE));
 	upsampling_method->addItem(tr("Random Uniform Density"), QVariant(MLSParameters::RANDOM_UNIFORM_DENSITY));
 	upsampling_method->addItem(tr("Voxel Grid Dilation"), QVariant(MLSParameters::VOXEL_GRID_DILATION));
+	upsampling_method->setCurrentIndex(0);
+	activateMenu(0);
 }
 
-void MLSDialog::activateMenu(QString name)
+void MLSDialog::activateMenu(int index)
 {
-	deactivateAllMethods();
-
-	if (name == "Sample Local Plane")
-	{
-		sample_local_plane_method->setEnabled(true);
-	}
-	else if (name == "Random Uniform Density")
-	{
-		random_uniform_density_method->setEnabled(true);
-	}
-	else if (name == "Voxel Grid Dilation")
-	{
-		voxel_grid_dilation_method->setEnabled(true);
-	}
-	else
-	{
-		deactivateAllMethods();
-	}
-}
-
-void MLSDialog::deactivateAllMethods()
-{
-	sample_local_plane_method->setEnabled(false);
-	random_uniform_density_method->setEnabled(false);
-	voxel_grid_dilation_method->setEnabled(false);
-}
-
-void MLSDialog::toggleMethods(bool status)
-{
-	if (!status)
-	{
-		deactivateAllMethods();
-	}
+	sample_local_plane_method->setEnabled(index == 1);
+	random_uniform_density_method->setEnabled(index == 2);
+	voxel_grid_dilation_method->setEnabled(index == 3);
 }
 
 void MLSDialog::updateSquaredGaussian(double radius)

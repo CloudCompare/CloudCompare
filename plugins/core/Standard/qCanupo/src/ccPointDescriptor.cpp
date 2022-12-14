@@ -475,48 +475,56 @@ QByteArray CorePointDescSet::toByteArray() const
 
 	int totalSize = 4 * sizeof(int) /*header*/ + (scaleCount + descCount * scaleCount * m_dimPerScale) * sizeof(float) /*data*/;
 
-	QByteArray data(totalSize, Qt::Uninitialized);
-	
-	if (data.capacity() < totalSize) //not enough memory?
-		return data;
-
-	char* buffer = data.data();
-
-	//header
-	*reinterpret_cast<int*>(buffer) = scaleCount;
-	buffer += sizeof(int);
-	*reinterpret_cast<int*>(buffer) = descCount;
-	buffer += sizeof(int);
-	*reinterpret_cast<int*>(buffer) = static_cast<int>(m_descriptorID);
-	buffer += sizeof(int);
-	*reinterpret_cast<int*>(buffer) = static_cast<int>(m_dimPerScale);
-	buffer += sizeof(int);
-
-	//scales
+	try
 	{
-		for (int i=0; i<scaleCount; ++i)
-		{
-			*reinterpret_cast<float*>(buffer) = m_scales[i];
-			buffer += sizeof(float);
-		}
-	}
+		QByteArray data(totalSize, Qt::Uninitialized);
 
-	//descriptors
-	{
-		for (int j=0; j<descCount; ++j)
+		if (data.capacity() < totalSize) //not enough memory?
+			return {};
+
+		char* buffer = data.data();
+
+		//header
+		*reinterpret_cast<int*>(buffer) = scaleCount;
+		buffer += sizeof(int);
+		*reinterpret_cast<int*>(buffer) = descCount;
+		buffer += sizeof(int);
+		*reinterpret_cast<int*>(buffer) = static_cast<int>(m_descriptorID);
+		buffer += sizeof(int);
+		*reinterpret_cast<int*>(buffer) = static_cast<int>(m_dimPerScale);
+		buffer += sizeof(int);
+
+		//scales
 		{
-			const CorePointDesc& desc = at(j);
-			assert(desc.params.size() == scaleCount * m_dimPerScale);
-			for (size_t i=0; i<desc.params.size(); ++i)
+			for (int i = 0; i < scaleCount; ++i)
 			{
-				*reinterpret_cast<float*>(buffer) = desc.params[i];
+				*reinterpret_cast<float*>(buffer) = m_scales[i];
 				buffer += sizeof(float);
 			}
 		}
-	}
 
-	//first scales
-	return data;
+		//descriptors
+		{
+			for (int j = 0; j < descCount; ++j)
+			{
+				const CorePointDesc& desc = at(j);
+				assert(desc.params.size() == scaleCount * m_dimPerScale);
+				for (size_t i = 0; i < desc.params.size(); ++i)
+				{
+					*reinterpret_cast<float*>(buffer) = desc.params[i];
+					buffer += sizeof(float);
+				}
+			}
+		}
+
+		//first scales
+		return data;
+	}
+	catch (const std::bad_alloc&)
+	{
+		ccLog::Warning("Not enough memory to convert the core point descriptors to a QByteArray");
+		return {};
+	}
 }
 
 bool CorePointDescSet::fromByteArray(const QByteArray& data)
@@ -611,7 +619,7 @@ bool CorePointDescSet::setScales(const std::vector<float>& scales)
 		size_t scaleCount = m_scales.size();
 		
 		size_t paramPerDesc = scaleCount*m_dimPerScale;
-		for (size_t i=0; i<size(); ++i)
+		for (size_t i = 0; i < size(); ++i)
 			at(i).params.resize(paramPerDesc);
 	}
 	catch (const std::bad_alloc&)
@@ -654,7 +662,7 @@ bool CorePointDescSet::loadFromMSC(QString filename, QString& error, ccPointClou
 		catch (const std::bad_alloc&)
 		{
 			//not enough memory
-			error = "Not enough memory";
+			error = "Not enough memory to load core points";
 			return false;
 		}
 
@@ -676,16 +684,16 @@ bool CorePointDescSet::loadFromMSC(QString filename, QString& error, ccPointClou
 		catch (const std::bad_alloc&)
 		{
 			//not enough memory
-			error = "Not enough memory";
+			error = "Not enough memory to load scales";
 			return false;
 		}
 
-		for (int si=0; si<nscales_msc; ++si)
+		for (int si = 0; si < nscales_msc; ++si)
 			mscfile.read((char*)&scales[si], sizeof(float));
 		
 		if (!setScales(scales)) //automatically resize the descriptors 'params' structure
 		{
-			error = "Not enough memory";
+			error = "Not enough memory to load scales";
 			return false;
 		}
 	}

@@ -282,7 +282,7 @@ bool qCanupoTools::ComputeCorePointsDescriptors(CCCoreLib::GenericIndexedCloud* 
 		success = corePointsDescriptors.setScales(sortedScales); //automatically resizes the 'params' structure for each core point
 	if (!success)
 	{
-		error = "Not enough memory!";
+		error = "Not enough memory to compute core points!";
 		if (!inputOctree)
 			delete theOctree;
 		return false;
@@ -558,7 +558,7 @@ bool qCanupoTools::TrainClassifier(	Classifier& classifier,
 	catch (const std::bad_alloc&)
 	{
 		if (app)
-			app->dispToConsole("Not enough memory!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			app->dispToConsole("Not enough memory to prepare the samples!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return false;
 	}
 
@@ -612,7 +612,7 @@ bool qCanupoTools::TrainClassifier(	Classifier& classifier,
 		catch (...)
 		{
 			if (app)
-				app->dispToConsole("Oups, it seems the LDA classifier just crashed!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+				app->dispToConsole("Oops, it seems the LDA classifier just crashed!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 			return false;
 		}
 	}
@@ -627,7 +627,7 @@ bool qCanupoTools::TrainClassifier(	Classifier& classifier,
 		catch (const std::bad_alloc&)
 		{
 			if (app)
-				app->dispToConsole("Not enough memory!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+				app->dispToConsole("Not enough memory to project the samples!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 			return false;
 		}
 
@@ -641,7 +641,7 @@ bool qCanupoTools::TrainClassifier(	Classifier& classifier,
 		catch (...)
 		{
 			if (app)
-				app->dispToConsole("Oups, it seems the LDA classifier just crashed!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+				app->dispToConsole("Oops, it seems the LDA classifier just crashed!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 			return false;
 		}
 
@@ -679,7 +679,7 @@ bool qCanupoTools::TrainClassifier(	Classifier& classifier,
 		catch (const std::bad_alloc&)
 		{
 			if (app)
-				app->dispToConsole("Not enough memory!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+				app->dispToConsole("Not enough memory to compute 'reduced' samples!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 			return false;
 		}
 
@@ -703,7 +703,7 @@ bool qCanupoTools::TrainClassifier(	Classifier& classifier,
 	catch (...)
 	{
 		if (app)
-			app->dispToConsole("Oups, it seems the LDA classifier just crashed!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			app->dispToConsole("Oops, it seems the LDA classifier just crashed!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return false;
 	}
 
@@ -716,7 +716,7 @@ bool qCanupoTools::TrainClassifier(	Classifier& classifier,
 		catch (const std::bad_alloc&)
 		{
 			if (app)
-				app->dispToConsole("Not enough memory!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+				app->dispToConsole("Not enough memory to compute the classifier weights!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 			return false;
 		}
 		orthoTrainer.m_weights[fdim] = orthoTrainer.m_weights[fdim - 1];
@@ -739,7 +739,7 @@ bool qCanupoTools::TrainClassifier(	Classifier& classifier,
 		catch (const std::bad_alloc&)
 		{
 			if (app)
-				app->dispToConsole("Not enough memory!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+				app->dispToConsole("Not enough memory to project samples!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 			return false;
 		}
 
@@ -753,7 +753,7 @@ bool qCanupoTools::TrainClassifier(	Classifier& classifier,
 		catch (...)
 		{
 			if (app)
-				app->dispToConsole("Oups, it seems the LDA classifier just crashed!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+				app->dispToConsole("Oops, it seems the LDA classifier just crashed!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 			return false;
 		}
 
@@ -787,7 +787,7 @@ bool qCanupoTools::TrainClassifier(	Classifier& classifier,
 								orthoTrainer))
 		{
 			if (app)
-				app->dispToConsole("Not enough memory!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+				app->dispToConsole("Not enough memory to 'dilate' the classifier!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 			return false;
 		}
 	}

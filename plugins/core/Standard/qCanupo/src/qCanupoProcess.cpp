@@ -760,7 +760,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 						else
 						{
 							if (app)
-								app->dispToConsole("Not enough memory!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+								app->dispToConsole("Not enough memory (class label can't be created)!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 							break;
 						}
 					}
@@ -782,7 +782,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 						}
 					}
 
-					//optional: create 1 sf per scale with 'x-y'
+					//optional: create 1 SF per scale with 'x-y'
 					std::vector<ccScalarField*> scaleSFs;
 					bool generateAdditionalSF = params.generateAdditionalSF;
 					if (generateAdditionalSF && corePointsDescriptors.dimPerScale() != 2)
@@ -814,7 +814,6 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 						for (size_t s = 0; s < scaleCount; ++s)
 						{
 							QString sfName = QString(CANUPO_PER_LEVEL_ADDITIONAL_SF_NAME) + QString(" @ scale %1").arg(scales[s]);
-
 
 							//SF with same name (if any) should have already been removed!
 							assert(cloud->getScalarFieldIndexByName(qPrintable(sfName)) < 0);
@@ -1008,7 +1007,9 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 						cloud->setCurrentDisplayedScalarField(classLabelSFIdx);
 
 						if (confidenceSF)
+						{
 							confidenceSF->computeMinAndMax();
+						}
 
 						if (generateAdditionalSF)
 						{
@@ -1067,7 +1068,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 						else
 						{
 							if (app)
-								app->dispToConsole("[qCanupo] Failed to save MSC meta-dataa (not enough memory?)", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+								app->dispToConsole("[qCanupo] Failed to save MSC meta-data (not enough memory?)", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 						}
 					}
 				}

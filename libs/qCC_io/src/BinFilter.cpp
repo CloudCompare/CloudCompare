@@ -1056,7 +1056,7 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 
 	if (nbScansTotal > 99)
 	{
-		if (QMessageBox::question(nullptr, QString("Oups"), QString("Hum, do you really expect %1 point clouds?").arg(nbScansTotal), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
+		if (QMessageBox::question(nullptr, QString("Oops"), QString("Hum, do you really expect to load %1 point clouds?").arg(nbScansTotal), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
 			return CC_FERR_WRONG_FILE_TYPE;
 	}
 	else if (nbScansTotal == 0)

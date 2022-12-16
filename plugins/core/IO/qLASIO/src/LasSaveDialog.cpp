@@ -480,7 +480,8 @@ void LasSaveDialog::selectedVersion(uint8_t& versionMajor, uint8_t& versionMinor
 	versionMajor = 1;
 	versionMinor = 0;
 
-	QVector<QStringRef> tokens = versionComboBox->currentText().splitRef('.');
+	const QString versionString = versionComboBox->currentText();
+	QVector<QStringRef> tokens = versionString.splitRef('.');
 	if (tokens.size() == 2)
 	{
 		versionMajor = static_cast<uint8_t>(std::min(tokens[0].toUInt(), 255u));

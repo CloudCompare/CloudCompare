@@ -122,6 +122,9 @@ v2.13.alpha (???) - (??/??/????)
 		- the user can now control whether the input 'center' is in the world C.S. or in the camera C.S.
 			(or more exactly, it's the translation part of a 4x4 transformation matrix - which was the case by default in the previous versions)
 
+	- GBL sensor edition dialog
+		- CC will now remember the last parameters used to create a sensor (not to edit one though)
+
 - Bug fix:
 	- PCD: when transforming a cloud with a sensor (either manually, or via a registration tool, or via Edit > Apply Tranformation) and then exporting
 		the cloud to a PCD file, both the points AND the sensor were transformed, resulting in the PCD file coordinates to be in the wrong coordinate

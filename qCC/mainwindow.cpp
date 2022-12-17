@@ -1947,8 +1947,10 @@ void MainWindow::doActionSetViewFromSensor()
 void MainWindow::doActionCreateGBLSensor()
 {
 	ccGBLSensorProjectionDlg spDlg(this);
+	spDlg.initWithPrevious();
 	if (!spDlg.exec())
 		return;
+	spDlg.saveForNextTime();
 
 	//We create the corresponding sensor for each input cloud (in a perfect world, there should be only one ;)
 	for ( ccHObject *entity : getSelectedEntities() )

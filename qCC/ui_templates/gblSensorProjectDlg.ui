@@ -83,7 +83,7 @@
    <item row="1" column="0">
     <widget class="QTabWidget" name="propertiesTabWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tabOrientation">
       <attribute name="title">
@@ -258,7 +258,7 @@
             <double>0.000001000000000</double>
            </property>
            <property name="value">
-            <double>0.005000000000000</double>
+            <double>0.050000000000000</double>
            </property>
           </widget>
          </item>
@@ -288,7 +288,7 @@
             <double>0.000001000000000</double>
            </property>
            <property name="value">
-            <double>0.005000000000000</double>
+            <double>0.050000000000000</double>
            </property>
           </widget>
          </item>
@@ -384,6 +384,26 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>rotationOrderComboBox</tabstop>
+  <tabstop>propertiesTabWidget</tabstop>
+  <tabstop>posXEdit</tabstop>
+  <tabstop>posYEdit</tabstop>
+  <tabstop>posZEdit</tabstop>
+  <tabstop>x1rot</tabstop>
+  <tabstop>x2rot</tabstop>
+  <tabstop>x3rot</tabstop>
+  <tabstop>y1rot</tabstop>
+  <tabstop>y2rot</tabstop>
+  <tabstop>y3rot</tabstop>
+  <tabstop>z1rot</tabstop>
+  <tabstop>z2rot</tabstop>
+  <tabstop>z3rot</tabstop>
+  <tabstop>yawStepSpinBox</tabstop>
+  <tabstop>pitchStepSpinBox</tabstop>
+  <tabstop>uncertaintyDoubleSpinBox</tabstop>
+  <tabstop>maxRangeDoubleSpinBox</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
@@ -393,8 +413,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
+     <x>257</x>
+     <y>277</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>

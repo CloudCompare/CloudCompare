@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,9 +17,6 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_GBL_SENSOR_PROJECTION_DIALOG_HEADER
-#define CC_GBL_SENSOR_PROJECTION_DIALOG_HEADER
-
 #include <ui_gblSensorProjectDlg.h>
 
 class ccGBLSensor;
@@ -32,9 +31,9 @@ public:
 	//! Default constructor
 	explicit ccGBLSensorProjectionDlg(QWidget* parent = nullptr);
 
+	void initWithPrevious();
+	void saveForNextTime();
+
 	void initWithGBLSensor(const ccGBLSensor* sensor);
 	void updateGBLSensor(ccGBLSensor* sensor);
-
 };
-
-#endif //CC_GBL_SENSOR_PROJECTION_DIALOG_HEADER

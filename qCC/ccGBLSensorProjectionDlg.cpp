@@ -22,6 +22,10 @@
 
 //qCC_db
 #include <ccGBLSensor.h>
+//Qt 
+#include <QSharedPointer>
+
+static QSharedPointer<ccGBLSensor> s_previousSensor; //!< Previous sensor (if any)
 
 ccGBLSensorProjectionDlg::ccGBLSensorProjectionDlg(QWidget* parent)
 	: QDialog(parent)
@@ -42,6 +46,23 @@ ccGBLSensorProjectionDlg::ccGBLSensorProjectionDlg(QWidget* parent)
 	z1rot->setValidator(new ccCustomDoubleValidator(this));
 	z2rot->setValidator(new ccCustomDoubleValidator(this));
 	z3rot->setValidator(new ccCustomDoubleValidator(this));
+}
+
+void ccGBLSensorProjectionDlg::initWithPrevious()
+{
+	if (s_previousSensor)
+	{
+		initWithGBLSensor(s_previousSensor.data());
+	}
+}
+
+void ccGBLSensorProjectionDlg::saveForNextTime()
+{
+	if (!s_previousSensor)
+	{
+		s_previousSensor.reset(new ccGBLSensor);
+	}
+	updateGBLSensor(s_previousSensor.data());
 }
 
 void ccGBLSensorProjectionDlg::initWithGBLSensor(const ccGBLSensor* sensor)
@@ -65,32 +86,32 @@ void ccGBLSensorProjectionDlg::initWithGBLSensor(const ccGBLSensor* sensor)
 		const ccGLMatrix& rot = sensor->getRigidTransformation();
 		{
 			const float* mat = rot.data();
-			x1rot->setText(QString::number(mat[0] ,'f',precision));
-			y1rot->setText(QString::number(mat[1] ,'f',precision));
-			z1rot->setText(QString::number(mat[2] ,'f',precision));
+			x1rot->setText(QString::number(mat[0], 'f', precision));
+			y1rot->setText(QString::number(mat[1], 'f', precision));
+			z1rot->setText(QString::number(mat[2], 'f', precision));
 
-			x2rot->setText(QString::number(mat[4] ,'f',precision));
-			y2rot->setText(QString::number(mat[5] ,'f',precision));
-			z2rot->setText(QString::number(mat[6] ,'f',precision));
+			x2rot->setText(QString::number(mat[4], 'f', precision));
+			y2rot->setText(QString::number(mat[5], 'f', precision));
+			z2rot->setText(QString::number(mat[6], 'f', precision));
 
-			x3rot->setText(QString::number(mat[8] ,'f',precision));
-			y3rot->setText(QString::number(mat[9] ,'f',precision));
-			z3rot->setText(QString::number(mat[10],'f',precision));
+			x3rot->setText(QString::number(mat[8], 'f', precision));
+			y3rot->setText(QString::number(mat[9], 'f', precision));
+			z3rot->setText(QString::number(mat[10], 'f', precision));
 		}
 
 		//center
 		const float* C = sensor->getRigidTransformation().getTranslation();
-		posXEdit->setText(QString::number(C[0],'f',precision));
-		posYEdit->setText(QString::number(C[1],'f',precision));
-		posZEdit->setText(QString::number(C[2],'f',precision));
+		posXEdit->setText(QString::number(C[0], 'f', precision));
+		posYEdit->setText(QString::number(C[1], 'f', precision));
+		posZEdit->setText(QString::number(C[2], 'f', precision));
 	}
 
 	/*** Angular steps ***/
 	{
 		//pitch step
-		pitchStepSpinBox->setValue( CCCoreLib::RadiansToDegrees( sensor->getPitchStep() ) );
+		pitchStepSpinBox->setValue(CCCoreLib::RadiansToDegrees(sensor->getPitchStep()));
 		//yaw step
-		yawStepSpinBox->setValue( CCCoreLib::RadiansToDegrees( sensor->getYawStep() ) );
+		yawStepSpinBox->setValue(CCCoreLib::RadiansToDegrees(sensor->getYawStep()));
 	}
 
 	/*** Other ***/
@@ -119,16 +140,16 @@ void ccGBLSensorProjectionDlg::updateGBLSensor(ccGBLSensor* sensor)
 		ccGLMatrix rot;
 		{
 			float* mat = rot.data();
-			mat[0]  = x1rot->text().toFloat();
-			mat[1]  = y1rot->text().toFloat();
-			mat[2]  = z1rot->text().toFloat();
+			mat[0] = x1rot->text().toFloat();
+			mat[1] = y1rot->text().toFloat();
+			mat[2] = z1rot->text().toFloat();
 
-			mat[4]  = x2rot->text().toFloat();
-			mat[5]  = y2rot->text().toFloat();
-			mat[6]  = z2rot->text().toFloat();
+			mat[4] = x2rot->text().toFloat();
+			mat[5] = y2rot->text().toFloat();
+			mat[6] = z2rot->text().toFloat();
 
-			mat[8]  = x3rot->text().toFloat();
-			mat[9]  = y3rot->text().toFloat();
+			mat[8] = x3rot->text().toFloat();
+			mat[9] = y3rot->text().toFloat();
 			mat[10] = z3rot->text().toFloat();
 		}
 
@@ -144,9 +165,9 @@ void ccGBLSensorProjectionDlg::updateGBLSensor(ccGBLSensor* sensor)
 	/*** Angular steps ***/
 	{
 		//pitch step
-		sensor->setPitchStep(static_cast<PointCoordinateType>( CCCoreLib::DegreesToRadians( pitchStepSpinBox->value() ) ));
+		sensor->setPitchStep(static_cast<PointCoordinateType>(CCCoreLib::DegreesToRadians(pitchStepSpinBox->value())));
 		//yax step
-		sensor->setYawStep(static_cast<PointCoordinateType>( CCCoreLib::DegreesToRadians( yawStepSpinBox->value() ) ));
+		sensor->setYawStep(static_cast<PointCoordinateType>(CCCoreLib::DegreesToRadians(yawStepSpinBox->value())));
 	}
 
 	/*** Other ***/

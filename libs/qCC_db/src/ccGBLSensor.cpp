@@ -36,7 +36,7 @@ enum Errors {	ERROR_BAD_INPUT      = -1,
 				ERROR_PROC_CANCELLED = -3,
 				ERROR_DB_TOO_SMALL   = -4,
 };
-								
+
 QString ccGBLSensor::GetErrorString(int errorCode)
 {
 	switch (errorCode)
@@ -152,7 +152,7 @@ void ccGBLSensor::projectPoint(	const CCVector3& sourcePoint,
 	//sensor to world global transformation = sensor position * rigid transformation
 	ccIndexedTransformation sensorPos; //identity by default
 	if (m_posBuffer)
-		m_posBuffer->getInterpolatedTransformation(posIndex,sensorPos);
+		m_posBuffer->getInterpolatedTransformation(posIndex, sensorPos);
 	sensorPos *= m_rigidTransformation;
 
 	//apply (inverse) global transformation (i.e world to sensor)
@@ -164,24 +164,24 @@ void ccGBLSensor::projectPoint(	const CCVector3& sourcePoint,
 	case YAW_THEN_PITCH:
 	{
 		//yaw = angle around Z, starting from 0 in the '+X' direction
-		destPoint.x = atan2(P.y,P.x);
+		destPoint.x = atan2(P.y, P.x);
 		//pitch = angle around the lateral axis, between -pi (-Z) to pi (+Z) by default
-		destPoint.y = atan2(P.z,sqrt(P.x*P.x + P.y*P.y));
+		destPoint.y = atan2(P.z, sqrt(P.x*P.x + P.y*P.y));
 		break;
 	}
 	case PITCH_THEN_YAW:
 	{
 		//FIXME
 		//yaw = angle around Z, starting from 0 in the '+X' direction
-		destPoint.x = -atan2(sqrt(P.y*P.y + P.z*P.z),P.x);
+		destPoint.x = -atan2(sqrt(P.y*P.y + P.z*P.z), P.x);
 		//pitch = angle around the lateral axis, between -pi (-Z) to pi (+Z) by default
-		destPoint.y = -atan2(P.y,P.z);
+		destPoint.y = -atan2(P.y, P.z);
 		break;
 	}
 	default:
 		assert(false);
 	}
-	
+
 	//if the yaw angles are shifted
 	if (m_yawAnglesAreShifted && destPoint.x < 0)
 		destPoint.x += static_cast<PointCoordinateType>(2.0*M_PI);
@@ -371,7 +371,7 @@ ccGBLSensor::ColorGrid* ccGBLSensor::projectColors(	CCCoreLib::GenericCloud* clo
 			return nullptr;
 		}
 	}
-	
+
 	//final array
 	ColorGrid* colorGrid = new ColorGrid;
 	try
@@ -400,7 +400,7 @@ ccGBLSensor::ColorGrid* ccGBLSensor::projectColors(	CCCoreLib::GenericCloud* clo
 				unsigned y = 0;
 				if (convertToDepthMapCoords(Q.x, Q.y, x, y))
 				{
-					unsigned index = y*m_depthBuffer.width + x;
+					unsigned index = y * m_depthBuffer.width + x;
 
 					//accumulate color
 					const ccColor::Rgb& srcC = theColors[i];
@@ -430,7 +430,7 @@ ccGBLSensor::ColorGrid* ccGBLSensor::projectColors(	CCCoreLib::GenericCloud* clo
 				ccColor::Rgb& destC = colorGrid->at(i);
 				destC.r = static_cast<ColorCompType>(srcC.r / pointPerDMCell[i]);
 				destC.g = static_cast<ColorCompType>(srcC.g / pointPerDMCell[i]);
-				destC.b = static_cast<ColorCompType>(srcC.b / pointPerDMCell[i] );
+				destC.b = static_cast<ColorCompType>(srcC.b / pointPerDMCell[i]);
 			}
 		}
 	}
@@ -547,7 +547,7 @@ bool ccGBLSensor::computeAutoParameters(CCCoreLib::GenericCloud* theCloud)
 			projectPoint(*P, Q, depth, m_activeIndex);
 
 			//yaw
-			int angleYaw = static_cast<int>(CCCoreLib::RadiansToDegrees( Q.x ));
+			int angleYaw = static_cast<int>(CCCoreLib::RadiansToDegrees(Q.x));
 			assert(angleYaw >= -180 && angleYaw <= 180);
 			if (angleYaw == 180) //360 degrees warp
 				angleYaw = -180;
@@ -565,7 +565,7 @@ bool ccGBLSensor::computeAutoParameters(CCCoreLib::GenericCloud* theCloud)
 			}
 
 			//pitch
-			int anglePitch = static_cast<int>(CCCoreLib::RadiansToDegrees( Q.y ));
+			int anglePitch = static_cast<int>(CCCoreLib::RadiansToDegrees(Q.y));
 			assert(anglePitch >= -180 && anglePitch <= 180);
 			if (anglePitch == 180)
 				anglePitch = -180;
@@ -671,7 +671,7 @@ bool ccGBLSensor::computeDepthBuffer(CCCoreLib::GenericCloud* theCloud, int& err
 			return false;
 		}
 
-		unsigned zBuffSize = width*height;
+		unsigned zBuffSize = width * height;
 		try
 		{
 			assert(m_depthBuffer.zBuff.empty());
@@ -718,7 +718,7 @@ bool ccGBLSensor::computeDepthBuffer(CCCoreLib::GenericCloud* theCloud, int& err
 
 			for (unsigned i = 0; i < pointCount; ++i)
 			{
-				const CCVector3 *P = theCloud->getNextPoint();
+				const CCVector3* P = theCloud->getNextPoint();
 				CCVector2 Q;
 				PointCoordinateType depth;
 				projectPoint(*P, Q, depth, m_activeIndex);
@@ -794,7 +794,7 @@ void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
 	if (!MACRO_Draw3D(context))
 		return;
-	
+
 	ccIndexedTransformation sensorPos;
 	if (!getAbsoluteTransformation(sensorPos, m_activeIndex))
 	{
@@ -804,10 +804,10 @@ void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 	//get the set of OpenGL functions (version 2.1)
 	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
-	assert( glFunc != nullptr );
-	if ( glFunc == nullptr )
+	assert(glFunc != nullptr);
+	if (glFunc == nullptr)
 		return;
-	
+
 	//color-based entity picking
 	bool entityPickingMode = MACRO_EntityPicking(context);
 	ccColor::Rgb pickingColor;
@@ -851,20 +851,20 @@ void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 	//sensor axes
 	{
 		PointCoordinateType axisLength = halfHeadSize * m_scale;
-		if (entityPickingMode)
+		if (!entityPickingMode)
 			ccGL::Color(glFunc, ccColor::red);
 		CCVector3 C(0, 0, 0);
 		glFunc->glBegin(GL_LINES);
 		ccGL::Vertex3v(glFunc, C.u);
 		ccGL::Vertex3(glFunc, C.x + axisLength, C.y, C.z);
 		glFunc->glEnd();
-		if (entityPickingMode)
+		if (!entityPickingMode)
 			ccGL::Color(glFunc, ccColor::green);
 		glFunc->glBegin(GL_LINES);
 		ccGL::Vertex3v(glFunc, C.u);
 		ccGL::Vertex3(glFunc, C.x, C.y + axisLength, C.z);
 		glFunc->glEnd();
-		if (entityPickingMode)
+		if (!entityPickingMode)
 			ccGL::Color(glFunc, ccColor::blue);
 		glFunc->glBegin(GL_LINES);
 		ccGL::Vertex3v(glFunc, C.u);
@@ -911,7 +911,7 @@ ccBBox ccGBLSensor::getOwnBB(bool withGLFeatures/*=false*/)
 
 	//get sensor position
 	ccIndexedTransformation sensorPos;
-	if (!getAbsoluteTransformation(sensorPos,m_activeIndex))
+	if (!getAbsoluteTransformation(sensorPos, m_activeIndex))
 	{
 		return ccBBox();
 	}
@@ -923,14 +923,14 @@ ccBBox ccGBLSensor::getOwnBB(bool withGLFeatures/*=false*/)
 		return ccBBox();
 	}
 
-	cloud.addPoint(CCVector3(-m_scale,-m_scale,-m_scale));
-	cloud.addPoint(CCVector3(-m_scale,-m_scale, m_scale));
-	cloud.addPoint(CCVector3(-m_scale, m_scale,-m_scale));
-	cloud.addPoint(CCVector3(-m_scale, m_scale, m_scale));
-	cloud.addPoint(CCVector3( m_scale,-m_scale,-m_scale));
-	cloud.addPoint(CCVector3( m_scale,-m_scale, m_scale));
-	cloud.addPoint(CCVector3( m_scale, m_scale,-m_scale));
-	cloud.addPoint(CCVector3( m_scale, m_scale, m_scale));
+	cloud.addPoint(CCVector3(-m_scale, -m_scale, -m_scale));
+	cloud.addPoint(CCVector3(-m_scale, -m_scale,  m_scale));
+	cloud.addPoint(CCVector3(-m_scale,  m_scale, -m_scale));
+	cloud.addPoint(CCVector3(-m_scale,  m_scale,  m_scale));
+	cloud.addPoint(CCVector3( m_scale, -m_scale, -m_scale));
+	cloud.addPoint(CCVector3( m_scale, -m_scale,  m_scale));
+	cloud.addPoint(CCVector3( m_scale,  m_scale, -m_scale));
+	cloud.addPoint(CCVector3( m_scale,  m_scale,  m_scale));
 
 	cloud.applyRigidTransformation(sensorPos);
 	return cloud.getOwnBB(false);

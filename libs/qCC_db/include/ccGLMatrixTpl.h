@@ -1060,25 +1060,52 @@ public:
 	void invert()
 	{
 		//inverse scale as well!
-		//we use the first column == X (its norm should be 1 for an 'unscaled' matrix ;)
-		T s2 = getColumnAsVec3D(0).norm2();
+		//we use the columns norm (considering is should be 1 for an 'unscaled' matrix)
+		T sx2 = getColumnAsVec3D(0).norm2();
+		T sy2 = getColumnAsVec3D(1).norm2();
+		T sz2 = getColumnAsVec3D(2).norm2();
 
 		//we invert rotation
 		std::swap(CC_MAT_R21, CC_MAT_R12);
 		std::swap(CC_MAT_R31, CC_MAT_R13);
 		std::swap(CC_MAT_R32, CC_MAT_R23);
 
-		if (s2 != 0 && s2 != 1)
+		if (std::abs(sx2) > std::numeric_limits<T>::epsilon() && sx2 != 1)
 		{
-			scaleRotation(1 / s2);
+			CC_MAT_R11 /= sx2;
+			CC_MAT_R21 /= sx2;
+			CC_MAT_R31 /= sx2;
+		}
+		if (std::abs(sy2) > std::numeric_limits<T>::epsilon() && sy2 != 1)
+		{
+			CC_MAT_R12 /= sy2;
+			CC_MAT_R22 /= sy2;
+			CC_MAT_R32 /= sy2;
+		}
+		if (std::abs(sz2) > std::numeric_limits<T>::epsilon() && sz2 != 1)
+		{
+			CC_MAT_R13 /= sz2;
+			CC_MAT_R23 /= sz2;
+			CC_MAT_R33 /= sz2;
 		}
 
 		//eventually we invert translation
 		applyRotation(m_mat + 12);
-		CC_MAT_R14 = -CC_MAT_R14;
-		CC_MAT_R24 = -CC_MAT_R24;
-		CC_MAT_R34 = -CC_MAT_R34;
-
+		double w = CC_MAT_R44;
+		if (std::abs(w) > std::numeric_limits<T>::epsilon())
+		{
+			CC_MAT_R14 = -CC_MAT_R14 / w;
+			CC_MAT_R24 = -CC_MAT_R24 / w;
+			CC_MAT_R34 = -CC_MAT_R34 / w;
+			CC_MAT_R44 = 1.0 / w;
+		}
+		else
+		{
+			assert(false);
+			CC_MAT_R14 = -CC_MAT_R14;
+			CC_MAT_R24 = -CC_MAT_R24;
+			CC_MAT_R34 = -CC_MAT_R34;
+		}
 	}
 
 	//! Returns inverse transformation

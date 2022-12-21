@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                CLOUDCOMPARE PLUGIN: LAS-IO Plugin                      #
@@ -15,61 +17,54 @@
 //#                                                                        #
 //##########################################################################
 
-#include "LasVlr.h"
+#include <FileIOFilter.h>
+#include <QString>
+#include <laszip/laszip_api.h>
 
-#include "LasMetadata.h"
-
-// Qt
-#include <QtGlobal>
-// qCC_db
-#include <ccPointCloud.h>
-// System
-#include <algorithm>
-#include <cstring>
-
-LasVlr::LasVlr(const laszip_header& header)
+enum class LasTilingDimensions
 {
-	const auto vlrShouldBeCopied = [](const laszip_vlr_struct& vlr) {
-		return !LasDetails::IsLaszipVlr(vlr) && !LasDetails::IsExtraBytesVlr(vlr);
-	};
+	XY,
+	XZ,
+	YZ,
+};
 
-	ptrdiff_t numVlrs = std::count_if(header.vlrs, header.vlrs + header.number_of_variable_length_records, vlrShouldBeCopied);
-	if (numVlrs > 0)
+struct LasTilingOptions final
+{
+	QString             outputDir;
+	LasTilingDimensions dims;
+	unsigned            numTiles0;
+	unsigned            numTiles1;
+
+	inline size_t index0() const
 	{
-		vlrs.resize(numVlrs);
-		laszip_U32 j = 0;
-		for (laszip_U32 i = 0; i < header.number_of_variable_length_records; ++i)
+		switch (dims)
 		{
-			if (vlrShouldBeCopied(header.vlrs[i]))
-			{
-				LasDetails::CloneVlrInto(header.vlrs[i], vlrs[j]);
-				j++;
-			}
+		case LasTilingDimensions::XY:
+			Q_FALLTHROUGH();
+		case LasTilingDimensions::XZ:
+			return 0;
+		case LasTilingDimensions::YZ:
+			return 1;
 		}
+		return 0;
 	}
-}
 
-LasVlr& LasVlr::operator=(LasVlr rhs)
-{
-	LasVlr::Swap(*this, rhs);
-	return *this;
-}
-
-LasVlr::LasVlr(const LasVlr& rhs)
-    : extraScalarFields(rhs.extraScalarFields)
-{
-	if (rhs.numVlrs() != 0)
+	inline size_t index1() const
 	{
-		vlrs.resize(rhs.numVlrs());
-		for (laszip_U32 i = 0; i < rhs.numVlrs(); ++i)
+		switch (dims)
 		{
-			LasDetails::CloneVlrInto(rhs.vlrs[i], vlrs[i]);
+		case LasTilingDimensions::XY:
+			return 1;
+		case LasTilingDimensions::XZ:
+			Q_FALLTHROUGH();
+		case LasTilingDimensions::YZ:
+			return 2;
 		}
+		return 1;
 	}
-}
+};
 
-void LasVlr::Swap(LasVlr& lhs, LasVlr& rhs) noexcept
-{
-	std::swap(lhs.vlrs, rhs.vlrs);
-	std::swap(lhs.extraScalarFields, rhs.extraScalarFields);
-}
+/// Tiles the cloud that the reader reads into a grid described by the options.
+///
+/// This takes ownership of the reader and takes care of closing and deleting it
+CC_FILE_ERROR TileLasReader(laszip_POINTER laszipReader, const QString& originName, const LasTilingOptions& options);

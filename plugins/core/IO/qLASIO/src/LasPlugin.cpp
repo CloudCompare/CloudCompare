@@ -20,17 +20,19 @@
 #include "LasIOFilter.h"
 #include "LasVlr.h"
 
-LasPlugin::LasPlugin(QObject *parent) : QObject(parent), ccIOPluginInterface(":/CC/plugin/LAS-IO/info.json")
+LasPlugin::LasPlugin(QObject* parent)
+    : QObject(parent)
+    , ccIOPluginInterface(":/CC/plugin/LAS-IO/info.json")
 {
 }
 
 ccIOPluginInterface::FilterList LasPlugin::getFilters()
 {
-    qRegisterMetaType<LasVlr>();
+	qRegisterMetaType<LasVlr>();
 
-    QMetaType::registerConverter(&LasVlr::toString);
+	QMetaType::registerConverter(&LasVlr::toString);
 
-    return {
-        FileIOFilter::Shared(new LasIOFilter),
-    };
+	return {
+	    FileIOFilter::Shared(new LasIOFilter),
+	};
 }

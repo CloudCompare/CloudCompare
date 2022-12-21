@@ -47,8 +47,6 @@
 #include <numeric>
 #include <utility>
 
-static constexpr const char LAS_METADATA_INFO_KEY[] = "LAS.savedInfo";
-
 static CCVector3d GetGlobalShift(FileIOFilter::LoadParameters& parameters,
                                  bool&                         preserveCoordinateShift,
                                  const CCVector3d&             lasOffset,
@@ -97,6 +95,7 @@ LasIOFilter::LasIOFilter()
                     QStringList{"LAS file (*.las *.laz)"},
                     Import | Export})
 {
+	m_openDialog.resetShouldSkipDialog();
 }
 
 CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
@@ -150,15 +149,6 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 		return CC_FERR_NOT_IMPLEMENTED;
 	}
 
-	auto pointCloud = std::make_unique<ccPointCloud>(QFileInfo(fileName).fileName());
-	if (!pointCloud->reserve(pointCount))
-	{
-		laszip_close_reader(laszipReader);
-		laszip_clean(laszipReader);
-		laszip_destroy(laszipReader);
-		return CC_FERR_NOT_ENOUGH_MEMORY;
-	}
-
 	std::vector<LasScalarField> availableScalarFields = LasScalarField::ForPointFormat(laszipHeader->point_data_format);
 
 	std::vector<LasExtraScalarField> availableEXtraScalarFields = LasExtraScalarField::ParseExtraScalarFields(*laszipHeader);
@@ -169,27 +159,36 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 	infoOfCurrentFile->extraScalarFields        = availableEXtraScalarFields;
 
 	bool fileContentIsDifferentFromPrevious = (m_infoOfLastOpened && (*m_infoOfLastOpened != *infoOfCurrentFile));
-	if (!m_openDialog || fileContentIsDifferentFromPrevious)
+
+	m_openDialog.setInfo(laszipHeader->version_minor, laszipHeader->point_data_format, pointCount);
+	m_openDialog.setAvailableScalarFields(availableScalarFields, availableEXtraScalarFields);
+	m_infoOfLastOpened = std::move(infoOfCurrentFile);
+
+	// The idea is that when Loading a file (as opposed to tiling one)
+	// we want to show the dialog when the file structure is different from the previous
+	// (not same scalar fields, etc) even if the user asked to skip dialogs
+	// as we can't choose for him.
+	//
+	// For tiling even if the file is different from the previous,
+	// since we copy points without loading into CC we don't have to force the
+	// dialog to be re-shown.
+	if (m_openDialog.shouldSkipDialog() && m_openDialog.action() == LasOpenDialog::Action::Load && fileContentIsDifferentFromPrevious)
 	{
-		m_openDialog.reset(new LasOpenDialog);
-		m_openDialog->setInfo(laszipHeader->version_minor, laszipHeader->point_data_format, pointCount);
-		m_openDialog->setAvailableScalarFields(availableScalarFields, availableEXtraScalarFields);
-		m_infoOfLastOpened = std::move(infoOfCurrentFile);
+		m_openDialog.resetShouldSkipDialog();
 	}
-	LasOpenDialog& dialog = *m_openDialog;
 
 	if (parameters.sessionStart)
 	{
 		// we do this AFTER restoring the previous context because it may still
 		// be good that the previous configuration is restored even though the
 		// user needs to confirm it
-		dialog.resetShouldSkipDialog();
+		m_openDialog.resetShouldSkipDialog();
 	}
 
-	if (parameters.alwaysDisplayLoadDialog && !dialog.shouldSkipDialog())
+	if (parameters.alwaysDisplayLoadDialog && !m_openDialog.shouldSkipDialog())
 	{
-		dialog.exec();
-		if (dialog.result() == QDialog::Rejected)
+		m_openDialog.exec();
+		if (m_openDialog.result() == QDialog::Rejected)
 		{
 			laszip_close_reader(laszipReader);
 			laszip_clean(laszipReader);
@@ -198,7 +197,21 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 		}
 	}
 
-	dialog.filterOutNotChecked(availableScalarFields, availableEXtraScalarFields);
+	if (m_openDialog.action() == LasOpenDialog::Action::Tile)
+	{
+		return TileLasReader(laszipReader, fileName, m_openDialog.tilingOptions());
+	}
+
+	auto pointCloud = std::make_unique<ccPointCloud>(QFileInfo(fileName).fileName());
+	if (!pointCloud->reserve(pointCount))
+	{
+		laszip_close_reader(laszipReader);
+		laszip_clean(laszipReader);
+		laszip_destroy(laszipReader);
+		return CC_FERR_NOT_ENOUGH_MEMORY;
+	}
+
+	m_openDialog.filterOutNotChecked(availableScalarFields, availableEXtraScalarFields);
 
 	laszip_F64    laszipCoordinates[3] = {0};
 	laszip_point* laszipPoint{nullptr};
@@ -219,9 +232,9 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 	                            availableEXtraScalarFields,
 	                            *pointCloud);
 
-	loader.setIgnoreFieldsWithDefaultValues(dialog.shouldIgnoreFieldsWithDefaultValues());
-	loader.setForce8bitRgbMode(dialog.shouldForce8bitColors());
-	loader.setManualTimeShift(dialog.timeShiftValue());
+	loader.setIgnoreFieldsWithDefaultValues(m_openDialog.shouldIgnoreFieldsWithDefaultValues());
+	loader.setForce8bitRgbMode(m_openDialog.shouldForce8bitColors());
+	loader.setManualTimeShift(m_openDialog.timeShiftValue());
 	std::unique_ptr<LasWaveformLoader> waveformLoader{nullptr};
 	if (LasDetails::HasWaveform(laszipHeader->point_data_format))
 	{
@@ -415,10 +428,11 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 	{
 		laszip_get_error(laszipHeader, &errorMsg);
 		ccLog::Warning("[LAS] laszip error: '%s'", errorMsg);
-		laszip_close_reader(laszipReader);
-		laszip_clean(laszipReader);
-		laszip_destroy(laszipReader);
 	}
+
+	laszip_close_reader(laszipReader);
+	laszip_clean(laszipReader);
+	laszip_destroy(laszipReader);
 
 	timer.elapsed();
 	qint64  elapsed = timer.elapsed();
@@ -591,9 +605,9 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 		uint sfCount = pointCloud->getNumberOfScalarFields();
 		for (uint index = 0; index < sfCount; index++)
 		{
-			ccScalarField *sf = static_cast<ccScalarField*>(pointCloud->getScalarField(index));
-			const char* sfName = sf->getName();
-			bool found = false;
+			ccScalarField* sf     = static_cast<ccScalarField*>(pointCloud->getScalarField(index));
+			const char*    sfName = sf->getName();
+			bool           found  = false;
 			for (auto& el : params.standardFields)
 				if (strcmp(sfName, el.name()) == 0)
 				{
@@ -611,16 +625,16 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 			{
 				ccLog::Print("[LAS] scalar field " + QString(sfName) + " will be saved automatically in the extra fields of the output file");
 				LasExtraScalarField field;
-				const std::string stdName = sfName;
+				const std::string   stdName = sfName;
 				strncpy(field.name, stdName.c_str(), LasExtraScalarField::MAX_NAME_SIZE);
 
 				if (stdName.size() > LasExtraScalarField::MAX_NAME_SIZE)
 				{
 					ccLog::Warning("[LAS] Extra Scalar field name '%s' is too long and will be truncated",
-								   stdName.c_str());
+					               stdName.c_str());
 				}
 
-				field.type = LasExtraScalarField::DataType::f32;
+				field.type            = LasExtraScalarField::DataType::f32;
 				field.scalarFields[0] = sf;
 
 				params.extraFields.push_back(field);

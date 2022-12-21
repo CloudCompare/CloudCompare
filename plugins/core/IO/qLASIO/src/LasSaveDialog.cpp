@@ -189,8 +189,7 @@ void LasSaveDialog::handleComboBoxChange(int index)
 	size_t   senderIndex  = std::distance(m_scalarFieldMapping.begin(),
                                        std::find_if(m_scalarFieldMapping.begin(),
                                                     m_scalarFieldMapping.end(),
-                                                    [senderObject](const std::pair<MappingLabel*, QComboBox*>& pair)
-                                                    { return pair.second == senderObject; }));
+                                                    [senderObject](const std::pair<MappingLabel*, QComboBox*>& pair) { return pair.second == senderObject; }));
 
 	if (qobject_cast<QComboBox*>(senderObject)->itemText(index).isEmpty())
 	{
@@ -227,8 +226,7 @@ void LasSaveDialog::handleComboBoxChange(int index)
 
 	size_t numWarnings = std::count_if(m_scalarFieldMapping.begin(),
 	                                   m_scalarFieldMapping.end(),
-	                                   [](const std::pair<MappingLabel*, QComboBox*>& pair)
-	                                   { return pair.first->hasWarning(); });
+	                                   [](const std::pair<MappingLabel*, QComboBox*>& pair) { return pair.first->hasWarning(); });
 
 	if (numWarnings > 0)
 	{
@@ -480,8 +478,8 @@ void LasSaveDialog::selectedVersion(uint8_t& versionMajor, uint8_t& versionMinor
 	versionMajor = 1;
 	versionMinor = 0;
 
-	const QString versionString = versionComboBox->currentText();
-	QVector<QStringRef> tokens = versionString.splitRef('.');
+	const QString       versionString = versionComboBox->currentText();
+	QVector<QStringRef> tokens        = versionString.splitRef('.');
 	if (tokens.size() == 2)
 	{
 		versionMajor = static_cast<uint8_t>(std::min(tokens[0].toUInt(), 255u));

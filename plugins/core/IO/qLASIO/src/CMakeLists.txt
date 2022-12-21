@@ -14,6 +14,7 @@ target_sources(${PROJECT_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/LasScalarFieldSaver.cpp
         ${CMAKE_CURRENT_LIST_DIR}/LasWaveformLoader.cpp
         ${CMAKE_CURRENT_LIST_DIR}/LasWaveformSaver.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/LasTiler.cpp
         ${CMAKE_CURRENT_LIST_DIR}/LasVlr.cpp
         ${CMAKE_CURRENT_LIST_DIR}/LasSaver.cpp
         )

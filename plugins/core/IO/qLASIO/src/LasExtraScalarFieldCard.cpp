@@ -33,8 +33,7 @@ LasExtraScalarFieldCard::LasExtraScalarFieldCard(QWidget* parent)
 	connect(firstScalarFieldComboBox,
 	        &QComboBox::currentTextChanged,
 	        this,
-	        [this](const QString& text)
-	        {
+	        [this](const QString& text) {
 		        if (radioButton1->isChecked())
 		        {
 			        nameEdit->setText(text);

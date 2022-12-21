@@ -28,22 +28,7 @@
    </property>
    <item>
     <widget class="QFrame" name="mainFrame">
-     <layout class="QVBoxLayout" name="verticalLayout_3">
-      <property name="spacing">
-       <number>0</number>
-      </property>
-      <property name="leftMargin">
-       <number>9</number>
-      </property>
-      <property name="topMargin">
-       <number>0</number>
-      </property>
-      <property name="rightMargin">
-       <number>9</number>
-      </property>
-      <property name="bottomMargin">
-       <number>0</number>
-      </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
        <widget class="QFrame" name="topFrame">
         <property name="sizePolicy">
@@ -161,132 +146,328 @@
        </widget>
       </item>
       <item>
-       <widget class="QFrame" name="scalarFieldSelectionFrame">
-        <layout class="QVBoxLayout" name="verticalLayout_5">
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
-         <item>
-          <widget class="QSplitter" name="splitter">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <widget class="QGroupBox" name="scalarFieldFrame">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
+       <widget class="QTabWidget" name="actionTab">
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="loadingTab">
+         <attribute name="title">
+          <string>Loading</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="QFrame" name="scalarFieldSelectionFrame">
+            <layout class="QVBoxLayout" name="verticalLayout_7">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QSplitter" name="splitter">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <widget class="QGroupBox" name="scalarFieldFrame">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="title">
+                 <string>Standard Fields</string>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_8">
+                 <item>
+                  <widget class="QFrame" name="selectAllFrame">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="frameShape">
+                    <enum>QFrame::StyledPanel</enum>
+                   </property>
+                   <property name="frameShadow">
+                    <enum>QFrame::Raised</enum>
+                   </property>
+                   <layout class="QHBoxLayout" name="horizontalLayout_7">
+                    <property name="leftMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <spacer name="horizontalSpacer_3">
+                      <property name="orientation">
+                       <enum>Qt::Horizontal</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>225</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                    <item>
+                     <widget class="QToolButton" name="selectAllToolButton">
+                      <property name="text">
+                       <string>select all</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QToolButton" name="unselectAllToolButton">
+                      <property name="text">
+                       <string>unselect all</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QListWidget" name="availableScalarFields"/>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="ignoreFieldsWithDefaultValuesCheckBox">
+                   <property name="text">
+                    <string>Ignore fields with default values only</string>
+                   </property>
+                   <property name="checked">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="force8bitColorsCheckBox">
+                   <property name="text">
+                    <string>Force 8-bit colors</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <layout class="QHBoxLayout" name="timeShiftLayout">
+                   <item>
+                    <widget class="QCheckBox" name="automaticTimeShiftCheckBox">
+                     <property name="text">
+                      <string>Automatic GPS Time shift</string>
+                     </property>
+                     <property name="checked">
+                      <bool>true</bool>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QDoubleSpinBox" name="manualTimeShiftSpinBox">
+                     <property name="enabled">
+                      <bool>false</bool>
+                     </property>
+                     <property name="maximum">
+                      <double>100000000.000000000000000</double>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                </layout>
+               </widget>
+               <widget class="QGroupBox" name="extraScalarFieldsFrame">
+                <property name="title">
+                 <string>Extra Fields</string>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_9">
+                 <item>
+                  <widget class="QFrame" name="selectAllESFFrame">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="frameShape">
+                    <enum>QFrame::StyledPanel</enum>
+                   </property>
+                   <property name="frameShadow">
+                    <enum>QFrame::Raised</enum>
+                   </property>
+                   <layout class="QHBoxLayout" name="horizontalLayout_8">
+                    <property name="leftMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <spacer name="horizontalSpacer_">
+                      <property name="orientation">
+                       <enum>Qt::Horizontal</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>260</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                    <item>
+                     <widget class="QToolButton" name="selectAllESFToolButton">
+                      <property name="text">
+                       <string>select all</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QToolButton" name="unselectAllESFToolButton">
+                      <property name="text">
+                       <string>unselect all</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QListWidget" name="availableExtraScalarFields"/>
+                 </item>
+                </layout>
+               </widget>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tilingTab">
+         <attribute name="title">
+          <string>Tilling</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <widget class="QLabel" name="talingWarningLabel">
+            <property name="styleSheet">
+             <string notr="true">color: red;</string>
             </property>
-            <property name="title">
-             <string>Standard Fields</string>
+            <property name="text">
+             <string>Warning: the cloud won't be loaded in memory.
+It will be saved as multiple tiles on the disk.</string>
             </property>
-            <layout class="QVBoxLayout" name="verticalLayout_2">
-             <item>
-              <widget class="QFrame" name="selectAllFrame">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="frameShape">
-                <enum>QFrame::StyledPanel</enum>
-               </property>
-               <property name="frameShadow">
-                <enum>QFrame::Raised</enum>
-               </property>
-               <layout class="QHBoxLayout" name="horizontalLayout_2">
-                <property name="leftMargin">
-                 <number>0</number>
-                </property>
-                <property name="topMargin">
-                 <number>0</number>
-                </property>
-                <property name="rightMargin">
-                 <number>0</number>
-                </property>
-                <property name="bottomMargin">
-                 <number>0</number>
-                </property>
-                <item>
-                 <spacer name="horizontalSpacer_3">
-                  <property name="orientation">
-                   <enum>Qt::Horizontal</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0">
-                   <size>
-                    <width>225</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                 </spacer>
-                </item>
-                <item>
-                 <widget class="QToolButton" name="selectAllToolButton">
-                  <property name="text">
-                   <string>select all</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QToolButton" name="unselectAllToolButton">
-                  <property name="text">
-                   <string>unselect all</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </item>
-             <item>
-              <widget class="QListWidget" name="availableScalarFields"/>
-             </item>
-             <item>
-              <widget class="QCheckBox" name="ignoreFieldsWithDefaultValuesCheckBox">
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="tilingDimensionsLayout">
+            <item>
+             <widget class="QLabel" name="tilingDimensionLabel">
+              <property name="text">
+               <string>Dimension</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="tilingDimensioncomboBox">
+              <item>
                <property name="text">
-                <string>Ignore fields with default values only</string>
+                <string>XY</string>
                </property>
-               <property name="checked">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QCheckBox" name="force8bitColorsCheckBox">
+              </item>
+              <item>
                <property name="text">
-                <string>Force 8-bit colors</string>
+                <string>XZ</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>YZ</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="tilintTilesLayout">
+            <item>
+             <widget class="QLabel" name="tilingSpinBoxLabel">
+              <property name="text">
+               <string>Tiles</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSpinBox" name="tilingSpinBox0">
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <number>9999</number>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSpinBox" name="tilingSpinBox1">
+              <property name="minimum">
+               <number>1</number>
+              </property>
+              <property name="maximum">
+               <number>9999</number>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QFrame" name="tilingOutputPathFrame">
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Raised</enum>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_5">
+             <item>
+              <widget class="QLabel" name="label_6">
+               <property name="text">
+                <string>Output path</string>
                </property>
               </widget>
              </item>
              <item>
-              <layout class="QHBoxLayout" name="timeShiftLayout">
+              <layout class="QHBoxLayout" name="horizontalLayout_4">
                <item>
-                <widget class="QCheckBox" name="automaticTimeShiftCheckBox">
-                 <property name="text">
-                  <string>Automatic GPS Time shift</string>
-                 </property>
-                 <property name="checked">
-                  <bool>true</bool>
-                 </property>
-                </widget>
+                <widget class="QLineEdit" name="tilingOutputPathLineEdit"/>
                </item>
                <item>
-                <widget class="QDoubleSpinBox" name="manualTimeShiftSpinBox">
-                 <property name="enabled">
-                  <bool>false</bool>
-                 </property>
-                 <property name="maximum">
-                  <double>100000000.000000000000000</double>
+                <widget class="QToolButton" name="tilingBrowseToolButton">
+                 <property name="text">
+                  <string>...</string>
                  </property>
                 </widget>
                </item>
@@ -294,76 +475,22 @@
              </item>
             </layout>
            </widget>
-           <widget class="QGroupBox" name="extraScalarFieldsFrame">
-            <property name="title">
-             <string>Extra Fields</string>
+          </item>
+          <item>
+           <spacer name="verticalSpacer">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
             </property>
-            <layout class="QVBoxLayout" name="verticalLayout_4">
-             <item>
-              <widget class="QFrame" name="selectAllESFFrame">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="frameShape">
-                <enum>QFrame::StyledPanel</enum>
-               </property>
-               <property name="frameShadow">
-                <enum>QFrame::Raised</enum>
-               </property>
-               <layout class="QHBoxLayout" name="horizontalLayout_3">
-                <property name="leftMargin">
-                 <number>0</number>
-                </property>
-                <property name="topMargin">
-                 <number>0</number>
-                </property>
-                <property name="rightMargin">
-                 <number>0</number>
-                </property>
-                <property name="bottomMargin">
-                 <number>0</number>
-                </property>
-                <item>
-                 <spacer name="horizontalSpacer_4">
-                  <property name="orientation">
-                   <enum>Qt::Horizontal</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0">
-                   <size>
-                    <width>260</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                 </spacer>
-                </item>
-                <item>
-                 <widget class="QToolButton" name="selectAllESFToolButton">
-                  <property name="text">
-                   <string>select all</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QToolButton" name="unselectAllESFToolButton">
-                  <property name="text">
-                   <string>unselect all</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </item>
-             <item>
-              <widget class="QListWidget" name="availableExtraScalarFields"/>
-             </item>
-            </layout>
-           </widget>
-          </widget>
-         </item>
-        </layout>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
        </widget>
       </item>
       <item>

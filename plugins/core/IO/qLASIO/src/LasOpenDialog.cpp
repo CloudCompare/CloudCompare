@@ -18,7 +18,10 @@
 #include "LasOpenDialog.h"
 
 // Qt
+#include <QFileDialog>
 #include <QLocale>
+
+constexpr int TILLING_TAB_INDEX = 1;
 
 static QListWidgetItem* CreateItem(const char* name)
 {
@@ -62,15 +65,12 @@ LasOpenDialog::LasOpenDialog(QWidget* parent)
 	connect(cancelButton, &QPushButton::clicked, this, &QDialog::reject);
 	connect(automaticTimeShiftCheckBox, &QCheckBox::toggled, this, &LasOpenDialog::onAutomaticTimeShiftToggle);
 	connect(applyAllButton, &QPushButton::clicked, this, &LasOpenDialog::onApplyAll);
-	connect(selectAllToolButton, &QPushButton::clicked, [&]
-	        { doSelectAll(true); });
-	connect(unselectAllToolButton, &QPushButton::clicked, this, [&]
-	        { doSelectAll(false); });
-
-	connect(selectAllESFToolButton, &QPushButton::clicked, [&]
-	        { doSelectAllESF(true); });
-	connect(unselectAllESFToolButton, &QPushButton::clicked, this, [&]
-	        { doSelectAllESF(false); });
+	connect(selectAllToolButton, &QPushButton::clicked, [&] { doSelectAll(true); });
+	connect(unselectAllToolButton, &QPushButton::clicked, this, [&] { doSelectAll(false); });
+	connect(tilingBrowseToolButton, &QPushButton::clicked, this, &LasOpenDialog::onBrowseTilingOutputDir);
+	connect(actionTab, &QTabWidget::currentChanged, this, &LasOpenDialog::onCurrentTabChanged);
+	connect(selectAllESFToolButton, &QPushButton::clicked, [&] { doSelectAllESF(true); });
+	connect(unselectAllESFToolButton, &QPushButton::clicked, this, [&] { doSelectAllESF(false); });
 }
 
 void LasOpenDialog::doSelectAll(bool doSelect)
@@ -146,8 +146,7 @@ void LasOpenDialog::setAvailableScalarFields(const std::vector<LasScalarField>& 
 void LasOpenDialog::filterOutNotChecked(std::vector<LasScalarField>&      scalarFields,
                                         std::vector<LasExtraScalarField>& extraScalarFields)
 {
-	const auto isFieldSelected = [this](const auto& field)
-	{ return isChecked(field); };
+	const auto isFieldSelected = [this](const auto& field) { return isChecked(field); };
 
 	RemoveFalse(scalarFields, isFieldSelected);
 	RemoveFalse(extraScalarFields, isFieldSelected);
@@ -202,4 +201,65 @@ void LasOpenDialog::onApplyAll()
 {
 	m_shouldSkipDialog = true;
 	accept();
+}
+
+LasOpenDialog::Action LasOpenDialog::action() const
+{
+	if (actionTab->currentIndex() == TILLING_TAB_INDEX)
+	{
+		return Action::Tile;
+	}
+	else
+	{
+		return Action::Load;
+	}
+}
+
+LasTilingOptions LasOpenDialog::tilingOptions() const
+{
+	int index = tilingDimensioncomboBox->currentIndex();
+	if (index > 2)
+	{
+		index = 0;
+	}
+
+	const auto dimensions = static_cast<LasTilingDimensions>(index);
+
+	// Do these maxs for safety, but the UI should not allow
+	// users to enter values below 1
+	int numTiles0 = std::max(tilingSpinBox0->value(), 1);
+	int numTiles1 = std::max(tilingSpinBox0->value(), 1);
+
+	return LasTilingOptions{
+	    tilingOutputPathLineEdit->text(),
+	    dimensions,
+	    static_cast<unsigned>(numTiles0),
+	    static_cast<unsigned>(numTiles1),
+	};
+}
+
+void LasOpenDialog::onBrowseTilingOutputDir()
+{
+	const QString outputDir = QFileDialog::getExistingDirectory(this, "Select output directory for tiles");
+	tilingOutputPathLineEdit->setText(outputDir);
+}
+
+void LasOpenDialog::onCurrentTabChanged(int index)
+{
+	const static QString TILE_TEXT     = QStringLiteral("Tile");
+	const static QString TILE_ALL_TEXT = QStringLiteral("Tile All");
+
+	const static QString APPLY_TEXT     = QStringLiteral("Apply");
+	const static QString APPLY_ALL_TEXT = QStringLiteral("Apply All");
+
+	if (index == TILLING_TAB_INDEX)
+	{
+		applyButton->setText(TILE_TEXT);
+		applyAllButton->setText(TILE_ALL_TEXT);
+	}
+	else
+	{
+		applyButton->setText(APPLY_TEXT);
+		applyAllButton->setText(APPLY_ALL_TEXT);
+	}
 }

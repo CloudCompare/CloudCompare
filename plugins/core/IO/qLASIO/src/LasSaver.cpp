@@ -137,7 +137,6 @@ CC_FILE_ERROR LasSaver::open(const QString filePath)
 		return CC_FERR_THIRD_PARTY_LIB_FAILURE;
 	}
 
-
 	return CC_FERR_NO_ERROR;
 }
 

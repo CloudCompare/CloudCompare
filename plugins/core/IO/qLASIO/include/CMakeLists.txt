@@ -13,6 +13,7 @@ target_sources(${PROJECT_NAME}
         ${CMAKE_CURRENT_LIST_DIR}/LasScalarFieldLoader.h
         ${CMAKE_CURRENT_LIST_DIR}/LasScalarFieldSaver.h
         ${CMAKE_CURRENT_LIST_DIR}/LasWaveformLoader.h
+        ${CMAKE_CURRENT_LIST_DIR}/LasTiler.h
         ${CMAKE_CURRENT_LIST_DIR}/LasVlr.h
         ${CMAKE_CURRENT_LIST_DIR}/LasSaver.h
         ${CMAKE_CURRENT_LIST_DIR}/LasWaveformSaver.h

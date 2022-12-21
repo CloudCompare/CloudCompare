@@ -77,6 +77,6 @@ class LasIOFilter : public FileIOFilter
 		}
 	};
 
-	std::unique_ptr<FileInfo>      m_infoOfLastOpened;
-	std::unique_ptr<LasOpenDialog> m_openDialog;
+	std::unique_ptr<FileInfo> m_infoOfLastOpened;
+	LasOpenDialog             m_openDialog{};
 };

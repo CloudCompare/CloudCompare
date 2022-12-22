@@ -138,8 +138,6 @@ struct QCC_DB_LIB_API ccRasterGrid
 									ccGenericPointCloud* inputCloud,
 									unsigned char Z,
 									const ccBBox& box,
-									bool fillEmptyCells,
-									double emptyCellsHeight,
 									double percentileValue,
 									bool exportToOriginalCS,
 									ccProgressDialog* progressDialog = nullptr ) const;

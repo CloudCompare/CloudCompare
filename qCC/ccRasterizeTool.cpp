@@ -332,7 +332,7 @@ void ccRasterizeTool::activeLayerChanged(int layerIndex, bool autoRedraw/*=true*
 		else
 		{
 			//m_UI->interpolateSFCheckBox->setChecked(false); //we shouldn't change that as it only impacts the other fields
-			m_UI->interpolateSFCheckBox->setEnabled(false);
+			//m_UI->interpolateSFCheckBox->setEnabled(false);
 			m_UI->generateImagePushButton->setEnabled(false);
 			m_UI->generateASCIIPushButton->setEnabled(false);
 			m_UI->projectContoursOnAltCheckBox->setEnabled(false);
@@ -472,6 +472,8 @@ ccRasterGrid::ProjectionType ccRasterizeTool::getTypeOfSFInterpolation() const
 		return ccRasterGrid::PROJ_MAXIMUM_VALUE;
 	case 3:
 		return ccRasterGrid::PROJ_MEDIAN_VALUE;
+	case 4:
+		return ccRasterGrid::PROJ_INVERSE_VAR_VALUE;
 	default:
 		//shouldn't be possible for this option!
 		assert(false);
@@ -640,15 +642,6 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(	bool exportHeightStats,
 	if (!m_cloud || !m_grid.isValid())
 		return nullptr;
 
-	//default values
-	double emptyCellsHeight = 0;
-	double minHeight = m_grid.minHeight;
-	double maxHeight = m_grid.maxHeight;
-	//get real values
-	ccRasterGrid::EmptyCellFillOption fillEmptyCellsStrategy = getFillEmptyCellsStrategyExt(emptyCellsHeight,
-																							minHeight,
-																							maxHeight);
-
 	//call parent method
 	ccPointCloud* cloudGrid = cc2Point5DimEditor::convertGridToCloud(	exportHeightStats,
 																		exportSFStats,
@@ -658,8 +651,6 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(	bool exportHeightStats,
 																		/*resampleInputCloudXY=*/resampleOriginalCloud(),
 																		/*resampleInputCloudZ=*/getTypeOfProjection() != ccRasterGrid::PROJ_AVERAGE_VALUE,
 																		/*inputCloud=*/m_cloud,
-																		/*fillEmptyCells=*/fillEmptyCellsStrategy != ccRasterGrid::LEAVE_EMPTY,
-																		emptyCellsHeight,
                                             							percentileValue,
 																		exportToOriginalCS,
 																		progressDialog );
@@ -735,8 +726,8 @@ void ccRasterizeTool::updateGridAndDisplay()
 	}
 
 	bool activeLayerIsSF = (m_UI->activeLayerComboBox->currentData().toInt() == LAYER_SF);
-	bool activeLayerIsRGB = (m_UI->activeLayerComboBox->currentData().toInt() == LAYER_RGB);
-	bool interpolateSF = activeLayerIsSF || (getTypeOfSFInterpolation() != ccRasterGrid::INVALID_PROJECTION_TYPE);
+	bool interpolateSF = (getTypeOfSFInterpolation() != ccRasterGrid::INVALID_PROJECTION_TYPE) || activeLayerIsSF;
+	bool interpolateColors = m_cloud->hasColors();
 	bool success = updateGrid(interpolateSF);
 
 	if (success && m_glWindow)
@@ -752,8 +743,8 @@ void ccRasterizeTool::updateGridAndDisplay()
 			m_rasterCloud = convertGridToCloud(	true,
 												false,
 												exportedStatistics,
-												/*interpolateSF=*/interpolateSF,
-												/*interpolateColors=*/activeLayerIsRGB,
+												interpolateSF,
+												interpolateColors,
 												/*copyHillshadeSF=*/false,
 												activeLayerName,
 												getStatisticsPercentileValue(),
@@ -877,6 +868,11 @@ bool ccRasterizeTool::updateGrid(bool interpolateSF/*=false*/)
 		return false;
 	}
 
+	//fill empty cells (if necessary)
+	ccRasterGrid::EmptyCellFillOption fillEmptyCellsStrategy = getFillEmptyCellsStrategy(m_UI->fillEmptyCellsComboBox);
+	double customEmptyCellsHeight = getCustomHeightForEmptyCells();
+	m_grid.fillEmptyCells(fillEmptyCellsStrategy, customEmptyCellsHeight);
+
 	//update volume estimate
 	{
 		double hSum = 0;
@@ -900,7 +896,6 @@ bool ccRasterizeTool::updateGrid(bool interpolateSF/*=false*/)
 			m_UI->volumeLabel->setText(QString::number(hSum * cellArea));
 			m_UI->filledCellsPercentageLabel->setText(QString::number(static_cast<double>(100 * filledCellCount) / (m_grid.width * m_grid.height), 'f', 2) + " %");
 		}
-
 	}
 
 	ccLog::Print(QString("[Rasterize] Current raster grid:\n\tSize: %1 x %2\n\tHeight values: [%3 ; %4]").arg(m_grid.width).arg(m_grid.height).arg(m_grid.minHeight).arg(m_grid.maxHeight));
@@ -914,8 +909,6 @@ ccPointCloud* ccRasterizeTool::generateCloud(bool autoExport/*=true*/)
 	{
 		return nullptr;
 	}
-
-
 
 	//look for statistics fields (min,max,median,etc) fields to be exported
 	std::vector<ccRasterGrid::ExportableFields> exportedStatistics;
@@ -937,14 +930,16 @@ ccPointCloud* ccRasterizeTool::generateCloud(bool autoExport/*=true*/)
 
 	QString activeLayerName = m_UI->activeLayerComboBox->currentText();
 	bool activeLayerIsSF = (m_UI->activeLayerComboBox->currentData().toInt() == LAYER_SF);
+	bool interpolateSF = (getTypeOfSFInterpolation() != ccRasterGrid::INVALID_PROJECTION_TYPE) || activeLayerIsSF;
 	//bool activeLayerIsRGB = (activeLayerComboBox->currentData().toInt() == LAYER_RGB);
+	bool interpolateColors = m_cloud->hasColors();
 
 	ccProgressDialog pDlg(true, this);
 	ccPointCloud* rasterCloud = convertGridToCloud(	exportHeightStats,
 													exportSFStats,
 													exportedStatistics,
-													/*interpolateSF=*/(getTypeOfSFInterpolation() != ccRasterGrid::INVALID_PROJECTION_TYPE) || activeLayerIsSF,
-													/*interpolateColors=*/true,
+													interpolateSF,
+													interpolateColors,
 													/*copyHillshadeSF=*/true,
 													activeLayerName,
 													getStatisticsPercentileValue(),
@@ -1569,6 +1564,7 @@ void ccRasterizeTool::generateHillshade()
 	hillshadeLayer->fill(CCCoreLib::NAN_VALUE);
 
 	bool sparseSF = (hillshadeLayer->currentSize() != m_grid.height * m_grid.width);
+	bool resampleInputCloudXY = resampleOriginalCloud();
 
 	//now we can compute the hillshade
 	int zenith_deg = m_UI->sunZenithSpinBox->value();
@@ -1582,17 +1578,19 @@ void ccRasterizeTool::generateHillshade()
 	double azimuth_rad = CCCoreLib::DegreesToRadians(static_cast<double>(azimuth_math));
 
 	//for all cells
-	unsigned validCellIndex = 0;
-	for (unsigned j = (sparseSF ? 0 : 1); j < m_grid.height - 1; ++j)
+	unsigned nonEmptyCellIndex = 0;
+	unsigned validButEmptyCellIndex = 0;
+	for (unsigned j = 0; j < m_grid.height - 1; ++j)
 	{
 		const ccRasterGrid::Row& row = m_grid.rows[j];
 
-		for (unsigned i = sparseSF ? 0 : 1; i < m_grid.width; ++i)
+		for (unsigned i = 0; i < m_grid.width; ++i)
 		{
 			//valid height value
-			if (std::isfinite(row[i].h))
+			const ccRasterCell& cell = row[i];
+			if (std::isfinite(cell.h))
 			{
-				if (i != 0 && i + 1 != m_grid.width && j != 0)
+				if (j != 0 && i != 0 && i + 1 != m_grid.width)
 				{
 					double dz_dx = 0.0;
 					int dz_dx_count = 0;
@@ -1654,10 +1652,42 @@ void ccRasterizeTool::generateHillshade()
 						}
 
 						ScalarType hillshade = static_cast<ScalarType>(std::max(0.0, cos_zenith_rad * cos(slope_rad) + sin_zenith_rad * sin(slope_rad) * cos(azimuth_rad - aspect_rad)));
-						hillshadeLayer->setValue(sparseSF ? validCellIndex : i + j * m_grid.width, hillshade);
+						if (!resampleInputCloudXY)
+						{
+							hillshadeLayer->setValue(sparseSF ? nonEmptyCellIndex : i + j * m_grid.width, hillshade);
+						}
+						else // resampling mode
+						{
+							if (cell.nbPoints != 0)
+							{
+								// non-empty cells are at the beginning
+								hillshadeLayer->setValue(nonEmptyCellIndex, hillshade);
+							}
+							else
+							{
+								// interpolated cells are appended at the end
+								hillshadeLayer->setValue(m_grid.nonEmptyCellCount + validButEmptyCellIndex, hillshade);
+							}
+						}
 					}
 				}
-				++validCellIndex;
+
+				if (!resampleInputCloudXY || cell.nbPoints != 0)
+				{
+					++nonEmptyCellIndex;
+				}
+				else
+				{
+					++validButEmptyCellIndex;
+				}
+			}
+			else
+			{
+				if (cell.nbPoints)
+				{
+					// with inv. var. projection mode, it's possible to have a non empty cell with NaN height!
+					++nonEmptyCellIndex;
+				}
 			}
 		}
 	}

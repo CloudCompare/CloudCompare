@@ -367,8 +367,6 @@ ccPointCloud* ccVolumeCalcTool::ConvertGridToCloud(	ccRasterGrid& grid,
 											nullptr,
 											vertDim,
 											gridBox,
-											false,
-											std::numeric_limits<double>::quiet_NaN(),
 											0,
 											exportToOriginalCS);
 
@@ -412,8 +410,6 @@ ccPointCloud* ccVolumeCalcTool::convertGridToCloud(bool exportToOriginalCS) cons
 																false,
 																false,
 																nullptr,
-																false,
-																std::numeric_limits<double>::quiet_NaN(),
                                                                 0.0,
 																exportToOriginalCS,
 																nullptr );
@@ -748,7 +744,7 @@ bool ccVolumeCalcTool::ComputeVolume(	ccRasterGrid& grid,
 				for (unsigned j = 1; j < grid.width - 1; ++j)
 				{
 					ccRasterCell& cell = grid.rows[i][j];
-					if (cell.h == cell.h)
+					if (std::isfinite(cell.h))
 					{
 						for (unsigned k = i - 1; k <= i + 1; ++k)
 						{

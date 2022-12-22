@@ -60,13 +60,16 @@ v2.13.alpha (???) - (??/??/????)
 			with graphical segmentation, cross section tool (for clouds only), subsampling, filter by SF value, etc.
 
 	- Rasterize:
+		- various improvements and glitch fixes
+		- if a scalar field projection option is chosen, all SF and colors will be projected at once so that all fields are valid right away
+			(no need to 'update' the grid several times)
 		- new projection options (inside each cell)
 			- Median
 			- Inverse variance: the height or scalar value of each cell is equal to a weighted average of the points falling inside the cell.
 								The weights are equal to the inverse variance (= 1/std_dev^2). Standard deviation values (std_dev) are
 								obtained from an already existing scalar field, which must be selected by the user)
 		- statistics can now be computed on the altitudes and/or all scalar fields
-		- new statistics: median, percentile (with custom percentage) and 
+		- new statistics: median, percentile (with custom percentage) and nuùber of unique values inside a cell
 		- new command line sub-options (to be used with -PROJ or -SF_PROJ)
 			- -MED 
 			- -INV_VAR (+ std. dev. SF index or name)

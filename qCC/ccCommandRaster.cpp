@@ -438,8 +438,6 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 													cloudDesc.pc,
 													vertDir,
 													gridBBox,
-													emptyCellFillStrategy == ccRasterGrid::FILL_CUSTOM_HEIGHT,
-													customHeight,
 													0.0,
 													true,
 													nullptr

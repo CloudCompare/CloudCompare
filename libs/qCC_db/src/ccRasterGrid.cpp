@@ -873,7 +873,7 @@ bool ccRasterGrid::interpolateEmptyCells(double maxSquareEdgeLength)
 							//else
 							{
 								row[i].h = l1 * valA + l2 * valB + l3 * valC;
-								assert(std::isfinite(row[i].h));
+								//assert(std::isfinite(row[i].h));
 
 								//interpolate color as well!
 								if (hasColors)
@@ -982,44 +982,49 @@ void ccRasterGrid::updateCellStats()
 
 
 void ccRasterGrid::fillEmptyCells(	EmptyCellFillOption fillEmptyCellsStrategy,
-									double customCellHeight/*=0*/)
+									double customCellHeight/*=0.0*/)
 {
-	//fill empty cells (all but the 'INTERPOLATE' case)
-	if (	fillEmptyCellsStrategy != LEAVE_EMPTY
-		&&	fillEmptyCellsStrategy != INTERPOLATE)
+	//fill empty cells
+	if (fillEmptyCellsStrategy == LEAVE_EMPTY)
 	{
-		double defaultHeight = std::numeric_limits<double>::quiet_NaN();
-		switch (fillEmptyCellsStrategy)
-		{
-		case FILL_MINIMUM_HEIGHT:
-			defaultHeight = minHeight;
-			break;
-		case FILL_MAXIMUM_HEIGHT:
-			defaultHeight = maxHeight;
-			break;
-		case FILL_CUSTOM_HEIGHT:
-			defaultHeight = customCellHeight;
-			break;
-		case FILL_AVERAGE_HEIGHT:
-			defaultHeight = meanHeight;
-			break;
-		default:
-			assert(false);
-			break;
-		}
-		assert(defaultHeight != 0);
+		return;
+	}
 
-		for (unsigned i = 0; i < height; ++i)
+	double defaultHeight = std::numeric_limits<double>::quiet_NaN();
+	switch (fillEmptyCellsStrategy)
+	{
+	case FILL_MINIMUM_HEIGHT:
+		defaultHeight = minHeight;
+		break;
+	case FILL_MAXIMUM_HEIGHT:
+		defaultHeight = maxHeight;
+		break;
+	case FILL_CUSTOM_HEIGHT:
+	case INTERPOLATE: // we still fill the empty cells, as some cells may not be interpolated!
+		defaultHeight = customCellHeight;
+		break;
+	case FILL_AVERAGE_HEIGHT:
+		defaultHeight = meanHeight;
+		break;
+	default:
+		assert(false);
+		return;
+	}
+	assert(std::isfinite(defaultHeight));
+
+	for (unsigned i = 0; i < height; ++i)
+	{
+		for (unsigned j = 0; j < width; ++j)
 		{
-			for (unsigned j = 0; j < width; ++j)
+			if (!std::isfinite(rows[i][j].h)) //empty cell (NaN)
 			{
-				if (!std::isfinite(rows[i][j].h)) //empty cell (NaN)
-				{
-					rows[i][j].h = defaultHeight;
-				}
+				rows[i][j].h = defaultHeight;
 			}
 		}
 	}
+
+	// update grid stats
+	updateCellStats();
 }
 
 ccPointCloud* ccRasterGrid::convertToCloud(	bool exportHeightStats,
@@ -1032,8 +1037,6 @@ ccPointCloud* ccRasterGrid::convertToCloud(	bool exportHeightStats,
 											ccGenericPointCloud* inputCloud,
 											unsigned char Z,
 											const ccBBox& box,
-											bool fillEmptyCells,
-											double emptyCellsHeight,
 											double percentileValue,
 											bool exportToOriginalCS,
 											ccProgressDialog* progressDialog/*=nullptr*/ ) const
@@ -1050,8 +1053,8 @@ ccPointCloud* ccRasterGrid::convertToCloud(	bool exportHeightStats,
 		return nullptr;
 	}
 
-	unsigned pointsCount = (fillEmptyCells ? width * height : validCellCount);
-	if (pointsCount == 0)
+	unsigned pointCount = validCellCount;
+	if (pointCount == 0)
 	{
 		ccLog::Warning("[Rasterize] Empty grid!");
 		return nullptr;
@@ -1117,7 +1120,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(	bool exportHeightStats,
 			}
 		}
 
-		if (!interpolateSF && !fillEmptyCells)
+		if (!interpolateSF)
 		{
 			//DGM: we can't stop right away (even if we have already resampled the
 			//original cloud, we may have to create additional points and/or scalar fields)
@@ -1203,8 +1206,8 @@ ccPointCloud* ccRasterGrid::convertToCloud(	bool exportHeightStats,
 
 	if (resampleInputCloudXY)
 	{
-		//if the cloud already has colors and we add the empty cells, we must also add (black) colors
-		interpolateColors = (cloudGrid->hasColors() && fillEmptyCells);
+		//if the cloud already has colors and we filled some empty cells, we must also add (black) colors
+		interpolateColors = (cloudGrid->hasColors() && (validCellCount > nonEmptyCellCount));
 	}
 	else
 	{
@@ -1214,9 +1217,9 @@ ccPointCloud* ccRasterGrid::convertToCloud(	bool exportHeightStats,
 
 	//the resampled cloud already contains the points corresponding to 'filled' cells so we will only
 	//need to add the empty ones (if requested)
-	if (!resampleInputCloudXY || fillEmptyCells)
+	if (!resampleInputCloudXY || (validCellCount > nonEmptyCellCount))
 	{
-		if (!cloudGrid->reserve(pointsCount))
+		if (!cloudGrid->reserve(pointCount))
 		{
 			ccLog::Warning("[Rasterize] Not enough memory!");
 			delete cloudGrid;
@@ -1459,21 +1462,21 @@ ccPointCloud* ccRasterGrid::convertToCloud(	bool exportHeightStats,
 						{
 							if (aCell->nbPoints != 0)
 							{
-								//previously existing point
+								//overwrite existing value of an already existing point
 								assert(nonEmptyCellIndex < inputCloud->size());
 								assert(nonEmptyCellIndex < sf->size());
 								sf->setValue(nonEmptyCellIndex, sVal);
 							}
 							else
 							{
-								//new point
+								//new value for a new point (appended at the back of the SF)
 								assert(sf->size() < sf->capacity());
 								sf->addElement(sVal);
 							}
 						}
 						else
 						{
-							//new point
+							//new value for a new point (appended at the back of the SF)
 							assert(sf->size() < sf->capacity());
 							sf->addElement(sVal);
 						}
@@ -1482,41 +1485,6 @@ ccPointCloud* ccRasterGrid::convertToCloud(	bool exportHeightStats,
 					if (aCell->nbPoints != 0)
 					{
 						++nonEmptyCellIndex;
-					}
-				}
-				else if (fillEmptyCells) //empty cell
-				{
-					//even if we have resampled the original cloud, we must add the point
-					//corresponding to this empty cell
-					{
-						CCVector3 Pf;
-						Pf.u[outX] = static_cast<PointCoordinateType>(Px);
-						Pf.u[outY] = static_cast<PointCoordinateType>(Py);
-						Pf.u[outZ] = static_cast<PointCoordinateType>(emptyCellsHeight);
-
-						assert(cloudGrid->size() < cloudGrid->capacity());
-						cloudGrid->addPoint(Pf);
-
-						if (interpolateColors)
-						{
-							cloudGrid->addColor(ccColor::black);
-						}
-					}
-
-					for (size_t k = 0; k < totalNumberOfExportedFields; ++k)
-					{
-						CCCoreLib::ScalarField* sf = exportedSFs[k];
-
-						size_t statIndex = 0;
-						ScalarType sfVal = CCCoreLib::NAN_VALUE;
-						if (k < numberOfExportedHeightStatisticsFields && exportedStatistics[k] == PER_CELL_VALUE)
-						{
-							//we set the point height to the default height
-							sfVal = static_cast<ScalarType>(emptyCellsHeight);
-						}
-
-						assert(sf->size() < sf->capacity());
-						sf->addElement(sfVal);
 					}
 				}
 
@@ -1587,7 +1555,6 @@ ccPointCloud* ccRasterGrid::convertToCloud(	bool exportHeightStats,
 					assert(sf);
 					//set sf values
 					unsigned n = 0;
-					const ScalarType emptyCellSFValue = CCCoreLib::ScalarField::NaN();
 					const double* _sfGrid = scalarFields[k].data();
 					for (unsigned j = 0; j < height; ++j)
 					{
@@ -1599,15 +1566,11 @@ ccPointCloud* ccRasterGrid::convertToCloud(	bool exportHeightStats,
 								ScalarType s = static_cast<ScalarType>(*_sfGrid);
 								sf->setValue(n++, s);
 							}
-							else if (fillEmptyCells)
-							{
-								sf->setValue(n++, emptyCellSFValue);
-							}
 						}
 					}
 					sf->computeMinAndMax();
 					sf->importParametersFrom(formerSf);
-					assert(sf->currentSize() == pointsCount);
+					assert(sf->currentSize() == pointCount);
 				}
 
 				if (nProgress && !nProgress->oneStep())

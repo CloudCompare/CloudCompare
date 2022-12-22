@@ -90,8 +90,6 @@ protected: //raster grid related stuff
 										bool resampleInputCloudXY,
 										bool resampleInputCloudZ, //only considered if resampleInputCloudXY is true!
 										ccGenericPointCloud* inputCloud,
-										bool fillEmptyCells,
-										double emptyCellsHeight,
 										double percentileValue,
 										bool exportToOriginalCS,
 										ccProgressDialog* progressDialog = nullptr) const;

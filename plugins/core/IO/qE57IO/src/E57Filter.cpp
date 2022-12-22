@@ -1443,7 +1443,9 @@ static bool GetPoseInformation(const e57::StructureNode& node, ccGLMatrixd& pose
 struct LoadedScan
 {
 	ccPointCloud* entity = nullptr;
+	bool globalShiftApplied = false;
 	CCVector3d globalShift;
+	bool preserveCoordinateShift = false;
 };
 
 static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDialog* progressDlg = nullptr)
@@ -1542,6 +1544,8 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 	//scan "pose" relatively to the others
 	ccGLMatrixd poseMat;
 	const bool validPoseMat = GetPoseInformation(scanNode, poseMat);
+	bool preserveCoordinateShift = true;
+	bool globalShiftApplied = false;
 	bool poseMatWasShifted = false;
 	CCVector3d poseMatShift;
 	ccGBLSensor* sensor = nullptr;
@@ -1549,7 +1553,6 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 	if (validPoseMat)
 	{
 		const CCVector3d T = poseMat.getTranslationAsVec3D();
-		bool preserveCoordinateShift = true;
 		if (FileIOFilter::HandleGlobalShift(T, poseMatShift, preserveCoordinateShift, s_loadParameters))
 		{
 			poseMat.setTranslation((T + poseMatShift).u);
@@ -1558,6 +1561,7 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 				cloud->setGlobalShift(poseMatShift);
 			}
 			poseMatWasShifted = true;
+			globalShiftApplied = true;
 			ccLog::Warning("[E57Filter::loadFile] Cloud %s has been recentered! Translation: (%.2f ; %.2f ; %.2f)", qPrintable(guidStr), poseMatShift.x, poseMatShift.y, poseMatShift.z);
 		}
 
@@ -1822,9 +1826,9 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 			//first point: check for 'big' coordinates
 			if (realCount == 0 && !poseMatWasShifted)
 			{
-				bool preserveCoordinateShift = true;
 				if (FileIOFilter::HandleGlobalShift(Pd, Pshift, preserveCoordinateShift, s_loadParameters))
 				{
+					globalShiftApplied = true;
 					if (preserveCoordinateShift)
 					{
 						cloud->setGlobalShift(Pshift);
@@ -1971,7 +1975,7 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 		cloud->addChild(sensor);
 	}
 
-	return { cloud, poseMatWasShifted ? poseMatShift : Pshift };
+	return { cloud, globalShiftApplied, poseMatWasShifted ? poseMatShift : Pshift, preserveCoordinateShift };
 }
 
 //! Loaded image
@@ -2441,16 +2445,20 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 								parentScan = scans.value(associatedData3DGuid);
 						}
 
+						bool applySensorGlobalShift = false;
+						bool preserveCoordinateShift = true;
+						CCVector3d poseMatShift;
+
 						if (parentScan.entity)
 						{
 							parentScan.entity->addChild(image.entity);
 
-							if (image.sensor)
+							//we need to apply the scan Global Shift to the sensor (if any)
+							if (image.sensor && parentScan.globalShiftApplied)
 							{
-								//we also need to apply the Global Shift to the sensor (if any)
-								image.poseMat.setTranslation((image.poseMat.getTranslationAsVec3D() + parentScan.globalShift).u);
-								ccGLMatrix poseMatf = ccGLMatrix(image.poseMat.data());
-								image.sensor->setRigidTransformation(poseMatf);
+								applySensorGlobalShift = true;
+								poseMatShift = parentScan.globalShift;
+								preserveCoordinateShift = parentScan.preserveCoordinateShift;
 							}
 						}
 						else // no parent scan
@@ -2461,20 +2469,23 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 							{
 								//we may have to apply a Gloal Shift to the sensor (if any)
 								const CCVector3d T = image.poseMat.getTranslationAsVec3D();
-								bool preserveCoordinateShift = true;
-								CCVector3d poseMatShift;
-								if (FileIOFilter::HandleGlobalShift(T, poseMatShift, preserveCoordinateShift, s_loadParameters))
-								{
-									image.poseMat.setTranslation((T + poseMatShift).u);
-									if (preserveCoordinateShift)
-									{
-										image.sensor->setMetaData("Global Shift X", poseMatShift.x);
-										image.sensor->setMetaData("Global Shift Y", poseMatShift.y);
-										image.sensor->setMetaData("Global Shift Z", poseMatShift.z);
-									}
-									ccLog::Warning("[E57Filter::loadFile] Image %s has been recentered! Translation: (%.2f ; %.2f ; %.2f)", qPrintable(image.entity->getName()), poseMatShift.x, poseMatShift.y, poseMatShift.z);
-								}
+								applySensorGlobalShift = FileIOFilter::HandleGlobalShift(T, poseMatShift, preserveCoordinateShift, s_loadParameters);
 							}
+						}
+
+						if (image.sensor && applySensorGlobalShift)
+						{
+							image.poseMat.setTranslation((image.poseMat.getTranslationAsVec3D() + poseMatShift).u);
+							ccGLMatrix poseMatf = ccGLMatrix(image.poseMat.data());
+							image.sensor->setRigidTransformation(poseMatf);
+
+							if (preserveCoordinateShift)
+							{
+								image.sensor->setMetaData("Global Shift X", poseMatShift.x);
+								image.sensor->setMetaData("Global Shift Y", poseMatShift.y);
+								image.sensor->setMetaData("Global Shift Z", poseMatShift.z);
+							}
+							ccLog::Warning("[E57Filter::loadFile] Image %s has been recentered! Translation: (%.2f ; %.2f ; %.2f)", qPrintable(image.entity->getName()), poseMatShift.x, poseMatShift.y, poseMatShift.z);
 						}
 					}
 

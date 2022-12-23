@@ -61,6 +61,8 @@ qFacets plugin:
 [*] Add the facet perimeter to the set of exported values
 
 Various:
+[*] Rotate/translate tool: option to rotate entities of a small increment, with button or key (https://www.cloudcompare.org/forum/viewtopic.php?p=26986#p26986)
+[*] Scissors tool: option to inverse the segmentation or to remove visible points (https://www.cloudcompare.org/forum/viewtopic.php?p=26981)
 [*] Voxel display mode (https://towardsdatascience.com/how-to-automate-voxel-modelling-of-3d-point-cloud-with-python-459f4d43a227)
 [*] Export images in the Rasterize tool with a custom color ramp (https://www.cloudcompare.org/forum/viewtopic.php?f=10&t=6023)
 [*] Create Height / Surface / Volume chart for bathymetry jobs (https://www.cloudcompare.org/forum/viewtopic.php?p=26787)

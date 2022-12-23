@@ -207,15 +207,17 @@ void cc2Point5DimEditor::update2DDisplayZoom(ccBBox& box)
 	m_glWindow->redraw();
 }
 
-ccPointCloud* cc2Point5DimEditor::convertGridToCloud(	const std::vector<ccRasterGrid::ExportableFields>& exportedFields,
-														bool interpolateSF,
-														bool interpolateColors,
+ccPointCloud* cc2Point5DimEditor::convertGridToCloud(	bool exportHeightStats,
+														bool exportSFStats,
+														const std::vector<ccRasterGrid::ExportableFields>& exportedStatistics,
+														bool projectSFs,
+														bool projectColors,
 														bool resampleInputCloudXY,
 														bool resampleInputCloudZ,
 														ccGenericPointCloud* inputCloud,
-														bool fillEmptyCells,
-														double emptyCellsHeight,
-														bool exportToOriginalCS) const
+														double percentileValue,
+														bool exportToOriginalCS,
+														ccProgressDialog* progressDialog/*=nullptr*/) const
 {
 	//projection dimension
 	const unsigned char Z = getProjectionDimension();
@@ -225,17 +227,19 @@ ccPointCloud* cc2Point5DimEditor::convertGridToCloud(	const std::vector<ccRaster
 	ccBBox box = getCustomBBox();
 	assert(box.isValid());
 
-	return m_grid.convertToCloud(	exportedFields,
-									interpolateSF,
-									interpolateColors,
+	return m_grid.convertToCloud(	exportHeightStats,
+									exportSFStats,
+									exportedStatistics,
+									projectSFs,
+									projectColors,
 									resampleInputCloudXY,
 									resampleInputCloudZ,
 									inputCloud,
 									Z,
 									box,
-									fillEmptyCells,
-									emptyCellsHeight,
-									exportToOriginalCS);
+									percentileValue,
+									exportToOriginalCS,
+									progressDialog );
 }
 
 ccRasterGrid::EmptyCellFillOption cc2Point5DimEditor::getFillEmptyCellsStrategy(QComboBox* comboBox) const

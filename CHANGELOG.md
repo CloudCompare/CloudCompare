@@ -54,15 +54,25 @@ v2.13.alpha (???) - (??/??/????)
 		- This can be changed in the 'Display options' dialog
 
 - Improvements:
+
 	- Segmentation
 		- CC will now preserve some children entities (labels, sensors, etc.) when segmenting clouds or meshes:
 			with graphical segmentation, cross section tool (for clouds only), subsampling, filter by SF value, etc.
 
 	- Rasterize:
-		- new option to compute the median height
-		- new option to compute the median scalar field value(s)
-		- new option to export the median height as a scalar field (attached to the exported cloud)
-		- new command line sub-option -MED (to be used with -PROJ or -SF_PROJ)
+		- various improvements and glitch fixes
+		- if a scalar field projection option is chosen, all SF and colors will be projected at once so that all layers are valid right away
+			(no need to 'update' the grid several times)
+		- new projection options (inside each cell)
+			- Median
+			- Inverse variance: the height or scalar value of each cell is equal to a weighted average of the points falling inside the cell.
+								The weights are equal to the inverse variance (= 1/std_dev^2). Standard deviation values (std_dev) are
+								obtained from an already existing scalar field, which must be selected by the user)
+		- statistics can now be computed on the altitudes and/or all scalar fields
+		- new statistics: median, percentile (with custom percentage) and nuùber of unique values inside a cell
+		- new command line sub-options (to be used with -PROJ or -SF_PROJ)
+			- -MED 
+			- -INV_VAR (+ std. dev. SF index or name)
 
 	- Edit > Color > Set unique & Edit > Color > Colorize
 		- CC will now remember the last input color

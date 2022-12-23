@@ -35,25 +35,20 @@ struct QCC_DB_LIB_API ccRasterCell
 	//! Default constructor
 	ccRasterCell()
 		: h(std::numeric_limits<double>::quiet_NaN())
-		, avgHeight(0)
-		, stdDevHeight(0)
 		, minHeight(0)
 		, maxHeight(0)
 		, nbPoints(0)
-		, pointIndex(0)
+		, nearestPointIndex(0)
 		, color(0, 0, 0)
 		, pointRefHead(nullptr)
 		, pointRefTail(nullptr)
 	{}
 
+	//! Returns the list of all point indexes projected into this cell
+	void getPointIndexes(std::vector<unsigned>& indexes, const std::vector<void*>& pointRefList) const;
+
 	//! Height value
 	double h;
-	//! Average height value
-	double avgHeight;
-	//! Median height value
-	double medianHeight;
-	//! Height std.dev.
-	double stdDevHeight;
 	//! Min height value
 	PointCoordinateType minHeight;
 	//! Max height value
@@ -61,7 +56,7 @@ struct QCC_DB_LIB_API ccRasterCell
 	//! Number of points projected in this cell
 	unsigned nbPoints;
 	//! Nearest point index (if any)
-	unsigned pointIndex;
+	unsigned nearestPointIndex;
 	//! Color
 	CCVector3d color;
 	//! Pointer to first point reference for this cell (used to compute the median)
@@ -116,14 +111,16 @@ struct QCC_DB_LIB_API ccRasterGrid
 	void reset();
 
 	//! Exportable fields
-	enum ExportableFields { PER_CELL_HEIGHT,
+	enum ExportableFields { PER_CELL_VALUE,
 							PER_CELL_COUNT,
-							PER_CELL_MIN_HEIGHT,
-							PER_CELL_MAX_HEIGHT,
-							PER_CELL_AVG_HEIGHT,
-							PER_CELL_HEIGHT_STD_DEV,
-							PER_CELL_HEIGHT_RANGE,
-							PER_CELL_MEDIAN_HEIGHT,
+							PER_CELL_MIN_VALUE,
+							PER_CELL_MAX_VALUE,
+							PER_CELL_AVG_VALUE,
+							PER_CELL_VALUE_STD_DEV,
+							PER_CELL_VALUE_RANGE,
+							PER_CELL_MEDIAN_VALUE,
+							PER_CELL_PERCENTILE_VALUE,
+							PER_CELL_UNIQUE_COUNT_VALUE,
 							PER_CELL_INVALID,
 	};
 
@@ -131,23 +128,26 @@ struct QCC_DB_LIB_API ccRasterGrid
 	static QString GetDefaultFieldName(ExportableFields field);
 
 	//! Converts the grid to a cloud with scalar field(s)
-	ccPointCloud* convertToCloud(	const std::vector<ExportableFields>& exportedFields,
-									bool interpolateSF,
-									bool interpolateColors,
+	ccPointCloud* convertToCloud(	bool exportHeightStats,
+									bool exportSFStats,
+									const std::vector<ExportableFields>& exportedStatistics,
+									bool projectSFs,
+									bool projectColors,
 									bool resampleInputCloudXY,
 									bool resampleInputCloudZ, //only considered if resampleInputCloudXY is true!
 									ccGenericPointCloud* inputCloud,
 									unsigned char Z,
 									const ccBBox& box,
-									bool fillEmptyCells,
-									double emptyCellsHeight,
-									bool exportToOriginalCS) const;
+									double percentileValue,
+									bool exportToOriginalCS,
+									ccProgressDialog* progressDialog = nullptr ) const;
 
 	//! Types of projection
 	enum ProjectionType {	PROJ_MINIMUM_VALUE			= 0,
 							PROJ_AVERAGE_VALUE			= 1,
 							PROJ_MAXIMUM_VALUE			= 2,
 							PROJ_MEDIAN_VALUE			= 3,
+							PROJ_INVERSE_VAR_VALUE		= 4,
 							INVALID_PROJECTION_TYPE		= 255,
 	};
 
@@ -161,8 +161,9 @@ struct QCC_DB_LIB_API ccRasterGrid
 					ProjectionType projectionType,
 					bool doInterpolateEmptyCells,
 					double maxEdgeLength,
-					ProjectionType sfInterpolation = INVALID_PROJECTION_TYPE,
-					ccProgressDialog* progressDialog = nullptr);
+					ProjectionType sfProjectionType = INVALID_PROJECTION_TYPE,
+					ccProgressDialog* progressDialog = nullptr,
+					int zStdDevSfIndex = -1);
 
 	//! Option for handling empty cells
 	enum EmptyCellFillOption {	LEAVE_EMPTY				= 0,
@@ -173,9 +174,9 @@ struct QCC_DB_LIB_API ccRasterGrid
 								INTERPOLATE				= 5,
 	};
 
-	//! Fills the empty cell (for all strategies but 'INTERPOLATE')
+	//! Fills the empty cells
 	void fillEmptyCells(EmptyCellFillOption fillEmptyCellsStrategy,
-						double customCellHeight = 0);
+						double customCellHeight = 0.0);
 
 	//! Updates the number of non-empty cells
 	unsigned updateNonEmptyCellCount();
@@ -220,6 +221,12 @@ struct QCC_DB_LIB_API ccRasterGrid
 
 	//! Associated scalar fields
 	std::vector<SF> scalarFields;
+	
+    //! Array of pointers, each coresponding to a point in the cloud
+	/** 'cloud->getPoint(n)' coresponds to 'pointRefList[n]'
+		The pointers are used to chain points belonging to the same cell together.
+	**/
+	std::vector<void*> pointRefList;
 
 	//! Number of columns
 	unsigned width;
@@ -230,11 +237,11 @@ struct QCC_DB_LIB_API ccRasterGrid
 	//! Min corner (3D)
 	CCVector3d minCorner;
 
-	//! Min height (computed on the NON-EMPTY or INTERPOLATED cells)
+	//! Min height (computed on the NON-EMPTY or FILLED/INTERPOLATED cells)
 	double minHeight;
-	//! Max height (computed on the NON-EMPTY or INTERPOLATED cells)
+	//! Max height (computed on the NON-EMPTY or FILLED/INTERPOLATED cells)
 	double maxHeight;
-	//! Average height (computed on the NON-EMPTY or INTERPOLATED cells)
+	//! Average height (computed on the NON-EMPTY or FILLED/INTERPOLATED cells)
 	double meanHeight;
 	//! Number of NON-EMPTY cells
 	unsigned nonEmptyCellCount;

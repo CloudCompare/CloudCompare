@@ -39,6 +39,7 @@ constexpr char COMMAND_RASTER_PROJ_MIN[]				= "MIN";
 constexpr char COMMAND_RASTER_PROJ_MAX[]				= "MAX";
 constexpr char COMMAND_RASTER_PROJ_AVG[]				= "AVG";
 constexpr char COMMAND_RASTER_PROJ_MED[]				= "MED";
+constexpr char COMMAND_RASTER_PROJ_INVERSE_VAR[]		= "INV_VAR";
 constexpr char COMMAND_RASTER_RESAMPLE[]				= "RESAMPLE";
 
 //2.5D Volume calculation specific commands
@@ -47,30 +48,50 @@ constexpr char COMMAND_VOLUME_GROUND_IS_FIRST[]			= "GROUND_IS_FIRST";
 constexpr char COMMAND_VOLUME_CONST_HEIGHT[]			= "CONST_HEIGHT";
 
 
-static ccRasterGrid::ProjectionType GetProjectionType(QString option, ccCommandLineInterface &cmd)
+static bool ReadProjectionType(ccCommandLineInterface& cmd, ccRasterGrid::ProjectionType& projType, QString& stdDevSFDesc)
 {
+	QString option = cmd.arguments().takeFirst().toUpper();
+	stdDevSFDesc.clear();
+
 	if (option == COMMAND_RASTER_PROJ_MIN)
 	{
-		return ccRasterGrid::PROJ_MINIMUM_VALUE;
+		projType = ccRasterGrid::PROJ_MINIMUM_VALUE;
 	}
 	else if (option == COMMAND_RASTER_PROJ_MAX)
 	{
-		return ccRasterGrid::PROJ_MAXIMUM_VALUE;
+		projType = ccRasterGrid::PROJ_MAXIMUM_VALUE;
 	}
 	else if (option == COMMAND_RASTER_PROJ_AVG)
 	{
-		return ccRasterGrid::PROJ_AVERAGE_VALUE;
+		projType = ccRasterGrid::PROJ_AVERAGE_VALUE;
 	}
 	else if (option == COMMAND_RASTER_PROJ_MED)
 	{
-		return ccRasterGrid::PROJ_MEDIAN_VALUE;
+		projType = ccRasterGrid::PROJ_MEDIAN_VALUE;
+	}
+	else if (option == COMMAND_RASTER_PROJ_INVERSE_VAR)
+	{
+		projType = ccRasterGrid::PROJ_INVERSE_VAR_VALUE;
+
+		// we expect the std. dev. SF index as well
+		if (cmd.arguments().size() != 0)
+		{
+			stdDevSFDesc = cmd.arguments().takeFirst();
+		}
+		else
+		{
+			cmd.error(QString("Expecting the std. dev. SF index after %1").arg(option));
+			return false;
+		}
 	}
 	else
 	{
 		assert(false);
-		cmd.warning(QString("Unknown projection type: %1 (defaulting to 'average')").arg(option));
-		return ccRasterGrid::PROJ_AVERAGE_VALUE;
+		cmd.error(QString("Unknown projection type: %1").arg(option));
+		return false;
 	}
+
+	return true;
 }
 
 static ccRasterGrid::EmptyCellFillOption GetEmptyCellFillingStrategy(QString option, ccCommandLineInterface &cmd)
@@ -121,6 +142,7 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 	ccRasterGrid::ProjectionType sfProjectionType = ccRasterGrid::PROJ_AVERAGE_VALUE;
 	ccRasterGrid::EmptyCellFillOption emptyCellFillStrategy = ccRasterGrid::LEAVE_EMPTY;
 	double maxEdgeLength = 0.0;
+	QString projStdDevSFDesc, sfProjStdDevSFDesc;
 
 	while (!cmd.arguments().empty())
 	{
@@ -224,14 +246,20 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 			//local option confirmed, we can move on
 			cmd.arguments().pop_front();
 
-			projectionType = GetProjectionType(cmd.arguments().takeFirst().toUpper(), cmd);
+			if (!ReadProjectionType(cmd, projectionType, projStdDevSFDesc))
+			{
+				return false;
+			}
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_RASTER_SF_PROJ_TYPE))
 		{
 			//local option confirmed, we can move on
 			cmd.arguments().pop_front();
 
-			sfProjectionType = GetProjectionType(cmd.arguments().takeFirst().toUpper(), cmd);
+			if (!ReadProjectionType(cmd, sfProjectionType, sfProjStdDevSFDesc))
+			{
+				return false;
+			}
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_RASTER_INTERP_MAX_EDGE_LENGTH))
 		{
@@ -256,6 +284,21 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 		{
 			break;
 		}
+	}
+
+	// there can be only one (std. dev. SF ;)
+	QString stdDevSFDesc;
+	if (!projStdDevSFDesc.isEmpty())
+	{
+		if (!sfProjStdDevSFDesc.isEmpty() && projStdDevSFDesc != sfProjStdDevSFDesc)
+		{
+			cmd.warning("[Rasterize] Can't set 2 different std. dev. SF for inverse variance projection modes. The point projection SF will be used by default.");
+		}
+		stdDevSFDesc = projStdDevSFDesc;
+	}
+	else
+	{
+		stdDevSFDesc = sfProjStdDevSFDesc;
 	}
 
 	if (gridStep == 0)
@@ -288,6 +331,28 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 			assert(false);
 			continue;
 		}
+
+		int invVarProjSFIndex = -1;
+		if (projectionType == ccRasterGrid::PROJ_INVERSE_VAR_VALUE)
+		{
+			// let's check if the SF description is its name
+			invVarProjSFIndex = cloudDesc.pc->getScalarFieldIndexByName(qPrintable(stdDevSFDesc));
+			if (invVarProjSFIndex < 0)
+			{
+				// let's check if it's a (valid) index then
+				bool validValue = false;
+				invVarProjSFIndex = stdDevSFDesc.toInt(&validValue);
+				if (!validValue)
+				{
+					return cmd.error(QString("[Rasterize] Failed to recognize the std. dev. SF '%1' (neither an existing scalar field name nor a valid index)").arg(stdDevSFDesc));
+				}
+				else if (invVarProjSFIndex < 0 || static_cast<unsigned>(invVarProjSFIndex) >= cloudDesc.pc->getNumberOfScalarFields())
+				{
+					return cmd.error("[Rasterize] Invalid std. dev. SF index (negative or greater than the number of scalar fields in the cloud");
+				}
+			}
+		}
+
 		ccBBox gridBBox = cloudDesc.pc->getOwnBB();
 
 		//compute the grid size
@@ -334,13 +399,15 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 				pDlg.reset(new ccProgressDialog(true, cmd.widgetParent()));
 			}
 
-			if (grid.fillWith(cloudDesc.pc,
-			                  vertDir,
-			                  projectionType,
-			                  emptyCellFillStrategy == ccRasterGrid::INTERPOLATE,
-			                  maxEdgeLength,
-			                  sfProjectionType,
-			                  pDlg.data()))
+			if (grid.fillWith(	cloudDesc.pc,
+								vertDir,
+								projectionType,
+								emptyCellFillStrategy == ccRasterGrid::INTERPOLATE,
+								maxEdgeLength,
+								sfProjectionType,
+								pDlg.data(),
+								invVarProjSFIndex )
+				)
 			{
 				grid.fillEmptyCells(emptyCellFillStrategy, customHeight);
 				cmd.print(QString("[Rasterize] Raster grid: size: %1 x %2 / heights: [%3 ; %4]").arg(grid.width).arg(grid.height).arg(grid.minHeight).arg(grid.maxHeight));
@@ -354,30 +421,33 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 		//generate the result entity (cloud by default)
 		if (outputCloud || outputMesh)
 		{
-			std::vector<ccRasterGrid::ExportableFields> exportedFields;
+			ccPointCloud* rasterCloud = nullptr;
 			try
 			{
 				//we always compute the default 'height' layer
-				exportedFields.push_back(ccRasterGrid::PER_CELL_HEIGHT);
+				std::vector<ccRasterGrid::ExportableFields> exportedStatistics(1);
+				exportedStatistics.back() = ccRasterGrid::PER_CELL_VALUE;
+
+				rasterCloud = grid.convertToCloud(	true,
+													false,
+													exportedStatistics,
+													true,
+													true,
+													resample,
+													resample,
+													cloudDesc.pc,
+													vertDir,
+													gridBBox,
+													0.0,
+													true,
+													nullptr
+												);
+
 			}
 			catch (const std::bad_alloc&)
 			{
 				return cmd.error("Not enough memory");
 			}
-
-			ccPointCloud* rasterCloud = grid.convertToCloud(
-			                                exportedFields,
-			                                true,
-			                                true,
-			                                resample,
-			                                resample,
-			                                cloudDesc.pc,
-			                                vertDir,
-			                                gridBBox,
-			                                emptyCellFillStrategy == ccRasterGrid::FILL_CUSTOM_HEIGHT,
-			                                customHeight,
-			                                true
-			                                );
 
 			if (!rasterCloud)
 			{

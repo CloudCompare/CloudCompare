@@ -1,0 +1,17 @@
+# Configuration file for EditorConfig
+# More information is available under http://EditorConfig.org
+
+# Ignore any other files further up in the file system
+root = true
+
+# Configuration for all files
+[*]
+# Always end files with a blank line
+insert_final_newline = true
+# Force 4-column tabs for indentation
+indent_style = tab
+tab_width = 4
+# Force utf-8
+charset = "utf-8"
+# Remove whitespace characters at the end of line
+trim_trailing_whitespace = true

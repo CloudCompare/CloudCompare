@@ -72,13 +72,13 @@ public: //raster export
 private:
 
 	//! Exports the grid as a cloud
-	ccPointCloud* generateCloud(bool autoExport = true) const;
+	ccPointCloud* generateCloud(bool autoExport = true);
 
 	//! Exports the grid as a raster
 	void generateRaster() const;
 
 	//! Exports the grid as a mesh
-	void generateMesh() const;
+	void generateMesh();
 
 	//! Exports the (already generated) contour lines
 	void exportContourLines();
@@ -105,6 +105,9 @@ private:
 
 	//! Called when the projection direction changes
 	void projectionDirChanged(int);
+	
+	//! Called when the Std Dev layer changes
+	void stdDevLayerChanged(int);
 
 	//! Called when the projection type changes
 	void projectionTypeChanged(int);
@@ -139,6 +142,9 @@ private:
 	//! Exports the grid as an ASCII matrix
 	void generateASCIIMatrix() const;
 
+	//! Called when a statistics export target changes
+	void onStatExportTargetChanged(bool);
+
 private: //standard methods
 
 	//Inherited from cc2Point5DimEditor
@@ -146,22 +152,31 @@ private: //standard methods
 	unsigned char getProjectionDimension() const override;
 	ccRasterGrid::ProjectionType getTypeOfProjection() const override;
 
+	//! Returns the index of the std. dev. layer (field)
+	int getStdDevLayerIndex() const;
 	//! Returns user defined height for empty cells
 	double getCustomHeightForEmptyCells() const;
+
+    //! Returns user defined percentile value for SF statistics export
+    double getStatisticsPercentileValue() const;
 
 	//! Returns strategy for empty cell filling (extended version)
 	ccRasterGrid::EmptyCellFillOption getFillEmptyCellsStrategyExt(	double& emptyCellsHeight,
 																	double& minHeight,
 																	double& maxHeight) const;
 
-	//! Returns whether a given field count should be exported as SF (only if a cloud is generated!)
-	bool exportAsSF(ccRasterGrid::ExportableFields field) const;
+	//! Returns the list of statistics that should be computed on the height values or the scalar fields
+	void getExportedStats(std::vector<ccRasterGrid::ExportableFields>& stats) const;
+	
 
 	//! Returns whether the output cloud should use the original cloud or the grid as 'support'
 	bool resampleOriginalCloud() const;
 
-	//! Returns type of SF interpolation
-	ccRasterGrid::ProjectionType getTypeOfSFInterpolation() const;
+	//! Returns type of SF projection
+	ccRasterGrid::ProjectionType getTypeOfSFProjection() const;
+
+    //! Updates the std. dev. SF combox status depending on the current state of the other options
+	void updateStdDevLayerComboBox();
 
 	//Inherited from cc2Point5DimEditor
 	void gridIsUpToDate(bool state) override;
@@ -170,7 +185,7 @@ private: //standard methods
 	void loadSettings();
 
 	//! Updates the grid
-	bool updateGrid(bool interpolateSF = false);
+	bool updateGrid(bool projectSFs = false);
 
 	//! Tests if the dialog can be safely closed
 	bool canClose();
@@ -181,12 +196,16 @@ private: //standard methods
 protected: //raster grid related stuff
 
 	//! Converts the grid to a cloud with scalar field(s)
-	ccPointCloud* convertGridToCloud(	const std::vector<ccRasterGrid::ExportableFields>& exportedFields,
-										bool interpolateSF,
-										bool interpolateColors,
+	ccPointCloud* convertGridToCloud(	bool exportHeightStats,
+										bool exportSFStats,
+										const std::vector<ccRasterGrid::ExportableFields>& exportedStatistics,
+										bool projectSFs,
+										bool projectColors,
 										bool copyHillshadeSF,
 										const QString& activeSFName,
-										bool exportToOriginalCS) const;
+										double percentileValue,
+										bool exportToOriginalCS,
+										ccProgressDialog* progressDialog = nullptr ) const;
 
 private: //members
 
@@ -196,10 +215,14 @@ private: //members
 						LAYER_SF = 2
 	};
 
+    //! Associated Qt UI
 	Ui::RasterizeToolDialog* m_UI;
 	
 	//! Associated cloud
 	ccGenericPointCloud* m_cloud;
+
+    //! Whether the cloud has scalar fields
+	bool m_cloudHasScalarFields;
 
 	//! Contour lines
 	std::vector<ccPolyline*> m_contourLines;

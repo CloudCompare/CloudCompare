@@ -75,7 +75,7 @@
              <item>
               <widget class="QDoubleSpinBox" name="gridStepDoubleSpinBox">
                <property name="toolTip">
-                <string>size of step of the grid generated (in the same units as the coordinates of the point cloud)</string>
+                <string>grid cell size (in the same units as the coordinates of the point cloud)</string>
                </property>
                <property name="decimals">
                 <number>6</number>
@@ -114,7 +114,11 @@
             </widget>
            </item>
            <item row="3" column="1">
-            <widget class="QComboBox" name="activeLayerComboBox"/>
+            <widget class="QComboBox" name="activeLayerComboBox">
+             <property name="toolTip">
+              <string>Visible layer</string>
+             </property>
+            </widget>
            </item>
            <item row="4" column="0">
             <widget class="QLabel" name="label_7">
@@ -139,13 +143,62 @@
            <string>Projection</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_3">
-           <item row="2" column="1">
-            <widget class="QComboBox" name="scalarFieldProjection">
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_9">
+             <property name="text">
+              <string>direction</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QComboBox" name="dimensionComboBox">
              <property name="toolTip">
-              <string>SF interpolation method</string>
+              <string>Projection direction</string>
              </property>
              <property name="currentIndex">
-              <number>1</number>
+              <number>0</number>
+             </property>
+             <item>
+              <property name="text">
+               <string notr="true">X</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string notr="true">Y</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string notr="true">Z</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="8" column="0" colspan="2">
+            <widget class="QLabel" name="warningResampleWithAverageLabel">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">color:red;</string>
+             </property>
+             <property name="text">
+              <string>Warning: the original point's height will be
+replaced by the cell's average height!</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="1">
+            <widget class="QComboBox" name="scalarFieldProjection">
+             <property name="toolTip">
+              <string>SF projection method</string>
+             </property>
+             <property name="currentIndex">
+              <number>0</number>
              </property>
              <item>
               <property name="text">
@@ -167,6 +220,44 @@
                <string>median value</string>
               </property>
              </item>
+             <item>
+              <property name="text">
+               <string>inverse var</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_21">
+             <property name="text">
+              <string>Std. dev. layer</string>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="0">
+            <widget class="QCheckBox" name="projectSFCheckBox">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="toolTip">
+              <string>Project SF(s)</string>
+             </property>
+             <property name="text">
+              <string>project SF(s)</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QComboBox" name="stdDevLayerComboBox">
+             <property name="toolTip">
+              <string>Std. dev. scalar field used for inverse variance weighted average</string>
+             </property>
             </widget>
            </item>
            <item row="1" column="0">
@@ -176,62 +267,17 @@
              </property>
             </widget>
            </item>
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_9">
-             <property name="text">
-              <string>direction</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0">
-            <widget class="QCheckBox" name="resampleCloudCheckBox">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="toolTip">
-              <string>Use the nearest point of the input cloud in each cell instead of the cell center</string>
-             </property>
-             <property name="text">
-              <string>resample input cloud</string>
-             </property>
-             <property name="checked">
-              <bool>false</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QComboBox" name="dimensionComboBox">
-             <property name="currentIndex">
-              <number>0</number>
-             </property>
-             <item>
-              <property name="text">
-               <string notr="true">X</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string notr="true">Y</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string notr="true">Z</string>
-              </property>
-             </item>
-            </widget>
-           </item>
            <item row="1" column="1">
             <widget class="QComboBox" name="heightProjectionComboBox">
              <property name="toolTip">
-              <string>Per-cell height computation method:
- - minimum = lowest point in the cell
- - average = mean height of all points inside the cell
- - maximum = highest point in the cell</string>
- - medain = median height of all points inside the cell
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;Per-cell height computation method:&lt;ul&gt;
+&lt;li&gt;minimum = lowest point in the cell&lt;/li&gt;
+&lt;li&gt;average = mean height of all points inside the cell&lt;/li&gt;
+&lt;li&gt;maximum = highest point in the cell&lt;/li&gt;
+&lt;li&gt;median = median height of all points inside the cell&lt;/li&gt;
+&lt;li&gt;inverse var = inverse variance weighted average. Calculate variance from std. dev. SF.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/body&gt;&lt;/html&gt;</string>
              </property>
              <property name="currentIndex">
               <number>0</number>
@@ -256,10 +302,15 @@
                <string>median</string>
               </property>
              </item>
+             <item>
+              <property name="text">
+               <string>inverse var</string>
+              </property>
+             </item>
             </widget>
            </item>
-           <item row="2" column="0">
-            <widget class="QCheckBox" name="interpolateSFCheckBox">
+           <item row="7" column="0">
+            <widget class="QCheckBox" name="resampleCloudCheckBox">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -267,30 +318,13 @@
               </sizepolicy>
              </property>
              <property name="toolTip">
-              <string>interpolate SF(s)</string>
+              <string>Use the nearest point of the input cloud in each cell instead of the cell center</string>
              </property>
              <property name="text">
-              <string>interpolate SF(s)</string>
+              <string>resample input cloud</string>
              </property>
              <property name="checked">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="0" colspan="2">
-            <widget class="QLabel" name="warningResampleWithAverageLabel">
-             <property name="enabled">
               <bool>false</bool>
-             </property>
-             <property name="styleSheet">
-              <string notr="true">color:red;</string>
-             </property>
-             <property name="text">
-              <string>Warning: the original point's height will be
-replaced by the cell's average height!</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
              </property>
             </widget>
            </item>
@@ -325,7 +359,15 @@ replaced by the cell's average height!</string>
               </sizepolicy>
              </property>
              <property name="toolTip">
-              <string>choose the value to fill the cells in which no point is projected : minimum value over the whole point cloud or average value (over the whole cloud also)</string>
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;Strategy to fill empty cells:
+&lt;ul&gt;
+&lt;li&gt;minimum height&lt;/li&gt;
+&lt;li&gt;average height&lt;/li&gt;
+&lt;li&gt;maximum height&lt;/li&gt;
+&lt;li&gt;user specified height&lt;/li&gt;
+&lt;li&gt;interpolation&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/body&gt;&lt;/html&gt;</string>
              </property>
              <item>
               <property name="text">
@@ -359,6 +401,13 @@ replaced by the cell's average height!</string>
              </item>
             </widget>
            </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label">
+             <property name="text">
+              <string>Empty cell value</string>
+             </property>
+            </widget>
+           </item>
            <item row="1" column="1">
             <widget class="QDoubleSpinBox" name="emptyValueDoubleSpinBox">
              <property name="enabled">
@@ -381,13 +430,6 @@ replaced by the cell's average height!</string>
              </property>
              <property name="maximum">
               <double>999999999.000000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label">
-             <property name="text">
-              <string>Empty cell value</string>
              </property>
             </widget>
            </item>
@@ -503,14 +545,65 @@ replaced by the cell's average height!</string>
              </layout>
             </item>
             <item>
-             <widget class="QLabel" name="label_12">
-              <property name="text">
-               <string>Export per-cell statistics as SF(s):</string>
+             <widget class="QFrame" name="exportStatsFrame">
+              <property name="frameShape">
+               <enum>QFrame::StyledPanel</enum>
               </property>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_2">
+               <property name="leftMargin">
+                <number>0</number>
+               </property>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <property name="rightMargin">
+                <number>0</number>
+               </property>
+               <property name="bottomMargin">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="label_22">
+                 <property name="text">
+                  <string>Export statistics:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="exportHeightStatsCheckBox">
+                 <property name="toolTip">
+                  <string>When exporting to a cloud or a mesh,
+adds one scalar field for each metric checked below,
+applied to the height values</string>
+                 </property>
+                 <property name="text">
+                  <string>height</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="exportSFStatsCheckBox">
+                 <property name="toolTip">
+                  <string>When exporting to a cloud or a mesh,
+adds one scalar field for each metric checked below,
+applied to all existing scalar fields</string>
+                 </property>
+                 <property name="text">
+                  <string>scalar fields</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </widget>
             </item>
             <item>
-             <widget class="QFrame" name="exportCloudSFFrame">
+             <widget class="QFrame" name="exportStatisticsFrame">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
                 <horstretch>0</horstretch>
@@ -518,15 +611,12 @@ replaced by the cell's average height!</string>
                </sizepolicy>
               </property>
               <property name="frameShape">
-               <enum>QFrame::NoFrame</enum>
+               <enum>QFrame::StyledPanel</enum>
               </property>
               <property name="frameShadow">
                <enum>QFrame::Plain</enum>
               </property>
-              <layout class="QFormLayout" name="formLayout_4">
-               <property name="labelAlignment">
-                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-               </property>
+              <layout class="QGridLayout" name="gridLayout_2">
                <property name="leftMargin">
                 <number>6</number>
                </property>
@@ -539,10 +629,58 @@ replaced by the cell's average height!</string>
                <property name="bottomMargin">
                 <number>6</number>
                </property>
-               <item row="0" column="0">
-                <widget class="QCheckBox" name="generateCountSFcheckBox">
+               <property name="verticalSpacing">
+                <number>6</number>
+               </property>
+               <item row="3" column="1">
+                <widget class="QCheckBox" name="generateStatisticsPercentileCheckBox">
                  <property name="toolTip">
-                  <string>Adds a scalar field with the grid density (= number of points inside each cell)</string>
+                  <string>Percentile (customizable) of values in each cell</string>
+                 </property>
+                 <property name="text">
+                  <string>percentile</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="2">
+                <widget class="QDoubleSpinBox" name="generateStatisticsPercentileDoubleSpinBox">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                 <property name="toolTip">
+                  <string>Percentile value 0-99.99</string>
+                 </property>
+                 <property name="suffix">
+                  <string>%</string>
+                 </property>
+                 <property name="decimals">
+                  <number>2</number>
+                 </property>
+                 <property name="minimum">
+                  <double>0.000000000000000</double>
+                 </property>
+                 <property name="maximum">
+                  <double>99.989999999999995</double>
+                 </property>
+                 <property name="value">
+                  <double>50.000000000000000</double>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="1">
+                <widget class="QCheckBox" name="generateStatisticsMedianCheckBox">
+                 <property name="toolTip">
+                  <string>Median of values in each cell (= p50 percentile)</string>
+                 </property>
+                 <property name="text">
+                  <string>median</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="0">
+                <widget class="QCheckBox" name="generateStatisticsPopulationCheckBox">
+                 <property name="toolTip">
+                  <string>Number of points in each cell</string>
                  </property>
                  <property name="text">
                   <string>population</string>
@@ -550,80 +688,67 @@ replaced by the cell's average height!</string>
                 </widget>
                </item>
                <item row="0" column="1">
-                <widget class="QCheckBox" name="generateMinHeightSFcheckBox">
+                <widget class="QCheckBox" name="generateStatisticsAverageCheckBox">
                  <property name="toolTip">
-                  <string>Adds a scalar field with the min. height of the points inside the cell</string>
+                  <string>Average of values in each cell</string>
                  </property>
                  <property name="text">
-                  <string>min height</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="0">
-                <widget class="QCheckBox" name="generateAvgHeightSFcheckBox">
-                 <property name="toolTip">
-                  <string>Adds a scalar field with the average height of the points inside the cell</string>
-                 </property>
-                 <property name="text">
-                  <string>average height</string>
+                  <string>average</string>
                  </property>
                 </widget>
                </item>
                <item row="1" column="1">
-                <widget class="QCheckBox" name="generateMaxHeightSFcheckBox">
+                <widget class="QCheckBox" name="generateStatisticsStdDevCheckBox">
                  <property name="toolTip">
-                  <string>Adds a scalar field with the max. height of the points inside the cell</string>
+                  <string>Standard deviation of values in each cell</string>
                  </property>
                  <property name="text">
-                  <string>max height</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="0">
-                <widget class="QCheckBox" name="generateStdDevHeightSFcheckBox">
-                 <property name="toolTip">
-                  <string>Adds a scalar field with the standard deviation of the heights of the points inside the cell</string>
-                 </property>
-                 <property name="text">
-                  <string>height std. dev.</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="1">
-                <widget class="QCheckBox" name="generateHeightRangeSFcheckBox">
-                 <property name="toolTip">
-                  <string>Adds a scalar field with the standard deviation of the heights of the points inside the cell</string>
-                 </property>
-                 <property name="text">
-                  <string>height range</string>
+                  <string>std. dev.</string>
                  </property>
                 </widget>
                </item>
                <item row="3" column="0">
-                <widget class="QCheckBox" name="generateMedianHeightSFcheckBox">
+                <widget class="QCheckBox" name="generateStatisticsRangeCheckBox">
                  <property name="toolTip">
-                  <string>Adds a scalar field with the median height of the points inside the cell</string>
+                  <string>Range of values in each cell (= max - min)</string>
                  </property>
                  <property name="text">
-                  <string>median height</string>
+                  <string>range</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="0">
+                <widget class="QCheckBox" name="generateStatisticsMaxCheckBox">
+                 <property name="toolTip">
+                  <string>Maximum value in each cell</string>
+                 </property>
+                 <property name="text">
+                  <string>max</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QCheckBox" name="generateStatisticsMinCheckBox">
+                 <property name="toolTip">
+                  <string>Minimum value in each cell</string>
+                 </property>
+                 <property name="text">
+                  <string>min</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="2">
+                <widget class="QCheckBox" name="generateStatisticsUniqueCheckBox">
+                 <property name="toolTip">
+                  <string>Number of unique values in each cell</string>
+                 </property>
+                 <property name="text">
+                  <string>unique val.</string>
                  </property>
                 </widget>
                </item>
               </layout>
              </widget>
-            </item>
-            <item>
-             <spacer name="verticalSpacer">
-              <property name="orientation">
-               <enum>Qt::Vertical</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>20</width>
-                <height>40</height>
-               </size>
-              </property>
-             </spacer>
             </item>
             <item>
              <widget class="Line" name="line">
@@ -873,7 +998,7 @@ replaced by the cell's average height!</string>
              <number>0</number>
             </property>
             <item>
-             <widget class="QLabel" name="label_16">
+             <widget class="QLabel" name="label_17">
               <property name="font">
                <font>
                 <italic>true</italic>
@@ -890,7 +1015,7 @@ replaced by the cell's average height!</string>
             <item>
              <layout class="QFormLayout" name="formLayout_5">
               <item row="0" column="0">
-               <widget class="QLabel" name="label_17">
+               <widget class="QLabel" name="label_17b">
                 <property name="text">
                  <string>Sun zenith</string>
                 </property>
@@ -1061,7 +1186,7 @@ replaced by the cell's average height!</string>
  <resources/>
  <connections>
   <connection>
-   <sender>interpolateSFCheckBox</sender>
+   <sender>projectSFCheckBox</sender>
    <signal>toggled(bool)</signal>
    <receiver>scalarFieldProjection</receiver>
    <slot>setEnabled(bool)</slot>
@@ -1073,6 +1198,22 @@ replaced by the cell's average height!</string>
     <hint type="destinationlabel">
      <x>207</x>
      <y>308</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>generateStatisticsPercentileCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>generateStatisticsPercentileDoubleSpinBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>143</x>
+     <y>738</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>218</x>
+     <y>738</y>
     </hint>
    </hints>
   </connection>

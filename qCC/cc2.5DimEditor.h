@@ -82,15 +82,17 @@ protected: //raster grid related stuff
 	ccRasterGrid::EmptyCellFillOption getFillEmptyCellsStrategy(QComboBox* comboBox) const;
 
 	//! Shortcut to ccRasterGrid::convertToCloud
-	ccPointCloud* convertGridToCloud(	const std::vector<ccRasterGrid::ExportableFields>& exportedFields,
-										bool interpolateSF,
-										bool interpolateColors,
+	ccPointCloud* convertGridToCloud(	bool exportHeightStats,
+										bool exportSFStats,
+										const std::vector<ccRasterGrid::ExportableFields>& exportedStatistics,
+										bool projectSFs,
+										bool projectColors,
 										bool resampleInputCloudXY,
 										bool resampleInputCloudZ, //only considered if resampleInputCloudXY is true!
 										ccGenericPointCloud* inputCloud,
-										bool fillEmptyCells,
-										double emptyCellsHeight,
-										bool exportToOriginalCS) const;
+										double percentileValue,
+										bool exportToOriginalCS,
+										ccProgressDialog* progressDialog = nullptr) const;
 
 protected: //members
 

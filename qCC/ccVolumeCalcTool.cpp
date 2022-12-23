@@ -354,20 +354,21 @@ ccPointCloud* ccVolumeCalcTool::ConvertGridToCloud(	ccRasterGrid& grid,
 	try
 	{
 		//we only compute the default 'height' layer
-		std::vector<ccRasterGrid::ExportableFields> exportedFields;
-		exportedFields.push_back(ccRasterGrid::PER_CELL_HEIGHT);
+		std::vector<ccRasterGrid::ExportableFields> exportedStatistics(1);
+		exportedStatistics.front() = ccRasterGrid::PER_CELL_VALUE;
 
-		rasterCloud = grid.convertToCloud(exportedFields,
-			false,
-			false,
-			false,
-			false,
-			nullptr,
-			vertDim,
-			gridBox,
-			false,
-			std::numeric_limits<double>::quiet_NaN(),
-			exportToOriginalCS);
+		rasterCloud = grid.convertToCloud(	true,
+											false,
+											exportedStatistics,
+											false,
+											false,
+											false,
+											false,
+											nullptr,
+											vertDim,
+											gridBox,
+											0,
+											exportToOriginalCS);
 
 		if (rasterCloud && rasterCloud->hasScalarFields())
 		{
@@ -399,17 +400,19 @@ ccPointCloud* ccVolumeCalcTool::convertGridToCloud(bool exportToOriginalCS) cons
 	try
 	{
 		//we only compute the default 'height' layer
-		std::vector<ccRasterGrid::ExportableFields> exportedFields;
-		exportedFields.push_back(ccRasterGrid::PER_CELL_HEIGHT);
-		rasterCloud = cc2Point5DimEditor::convertGridToCloud(	exportedFields,
+		std::vector<ccRasterGrid::ExportableFields> exportedStatistics(1);
+		exportedStatistics.front() = ccRasterGrid::PER_CELL_VALUE;
+		rasterCloud = cc2Point5DimEditor::convertGridToCloud(	true,
+																false,
+                                                                exportedStatistics,
 																false,
 																false,
 																false,
 																false,
 																nullptr,
-																false,
-																std::numeric_limits<double>::quiet_NaN(),
-																exportToOriginalCS);
+                                                                0.0,
+																exportToOriginalCS,
+																nullptr );
 
 		if (rasterCloud)
 		{
@@ -723,9 +726,6 @@ bool ccVolumeCalcTool::ComputeVolume(	ccRasterGrid& grid,
 					cell.nbPoints = 0;
 				}
 
-				cell.avgHeight = (groundHeight + ceilHeight) / 2;
-				cell.stdDevHeight = 0;
-
 				if (pDlg && !nProgress.oneStep())
 				{
 					ccLog::Warning("[Volume] Process cancelled by the user");
@@ -744,7 +744,7 @@ bool ccVolumeCalcTool::ComputeVolume(	ccRasterGrid& grid,
 				for (unsigned j = 1; j < grid.width - 1; ++j)
 				{
 					ccRasterCell& cell = grid.rows[i][j];
-					if (cell.h == cell.h)
+					if (std::isfinite(cell.h))
 					{
 						for (unsigned k = i - 1; k <= i + 1; ++k)
 						{

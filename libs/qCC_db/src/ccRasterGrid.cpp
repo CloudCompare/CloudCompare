@@ -196,7 +196,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 								ProjectionType projectionType,
 								bool doInterpolateEmptyCells,
 								double maxEdgeLength,
-								ProjectionType sfInterpolation/*=INVALID_PROJECTION_TYPE*/,
+								ProjectionType sfProjection/*=INVALID_PROJECTION_TYPE*/,
 								ccProgressDialog* progressDialog/*=nullptr*/,
 								int zStdDevSfIndex/*=-1*/)
 {
@@ -220,9 +220,9 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 		pc = static_cast<ccPointCloud*>(cloud);
 	}
 
-	//do we need to interpolate scalar fields?
-	bool interpolateSF = (sfInterpolation != INVALID_PROJECTION_TYPE);
-	if (interpolateSF)
+	//do we need to project scalar fields?
+	bool projectSFs = (sfProjection != INVALID_PROJECTION_TYPE);
+	if (projectSFs)
 	{
 		if (pc && pc->hasScalarFields())
 		{
@@ -244,7 +244,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 		}
 		else
 		{
-			interpolateSF = false;
+			projectSFs = false;
 		}
 	}
 
@@ -536,8 +536,8 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 					}
 				}
 				
-				//if we should interpolate the scalar fields
-				if (interpolateSF)
+				//if we should project the scalar fields
+				if (projectSFs)
 				{
 					assert(pc);
 					//absolute position of the cell (e.g. in the 2D SF grid(s))
@@ -551,7 +551,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 
 						assert(sf && pos < scalarFields[k].size());
 
-						switch (sfInterpolation)
+						switch (sfProjection)
 						{
 						case PROJ_MINIMUM_VALUE:
 						case PROJ_MEDIAN_VALUE:
@@ -637,12 +637,12 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 }
 
 static void InterpolateOnBorder(const std::vector<uint8_t>& pointsOnBorder,
-	const CCVector2i P[3],
-	int i, int j,
-	int coord,
-	int dim,
-	ccRasterCell& cell,
-	ccRasterGrid& grid)
+								const CCVector2i P[3],
+								int i, int j,
+								int coord,
+								int dim,
+								ccRasterCell& cell,
+								ccRasterGrid& grid)
 {
 	uint8_t minIndex = pointsOnBorder[0];
 	uint8_t maxIndex = pointsOnBorder[1];
@@ -1000,7 +1000,7 @@ void ccRasterGrid::fillEmptyCells(	EmptyCellFillOption fillEmptyCellsStrategy,
 		defaultHeight = maxHeight;
 		break;
 	case FILL_CUSTOM_HEIGHT:
-	case INTERPOLATE: // we still fill the empty cells, as some cells may not be interpolated!
+	case INTERPOLATE: // we still fill the empty cells, as some cells may not be interpolated in the end!
 		defaultHeight = customCellHeight;
 		break;
 	case FILL_AVERAGE_HEIGHT:
@@ -1030,8 +1030,8 @@ void ccRasterGrid::fillEmptyCells(	EmptyCellFillOption fillEmptyCellsStrategy,
 ccPointCloud* ccRasterGrid::convertToCloud(	bool exportHeightStats,
 											bool exportSFStats,
 											const std::vector<ExportableFields>& exportedStatistics,
-											bool interpolateSF,
-											bool interpolateColors,
+											bool projectSFs,
+											bool projectColors,
 											bool resampleInputCloudXY,
 											bool resampleInputCloudZ,
 											ccGenericPointCloud* inputCloud,
@@ -1120,10 +1120,10 @@ ccPointCloud* ccRasterGrid::convertToCloud(	bool exportHeightStats,
 			}
 		}
 
-		if (!interpolateSF)
+		if (!projectSFs)
 		{
-			//DGM: we can't stop right away (even if we have already resampled the
-			//original cloud, we may have to create additional points and/or scalar fields)
+			//DGM: we can't stop right away: even if we have already resampled the
+			//original cloud, we may have to create additional points and/or scalar fields
 			//return cloudGrid;
 		}
 	}
@@ -1207,12 +1207,12 @@ ccPointCloud* ccRasterGrid::convertToCloud(	bool exportHeightStats,
 	if (resampleInputCloudXY)
 	{
 		//if the cloud already has colors and we filled some empty cells, we must also add (black) colors
-		interpolateColors = (cloudGrid->hasColors() && (validCellCount > nonEmptyCellCount));
+		projectColors = (cloudGrid->hasColors() && (validCellCount > nonEmptyCellCount));
 	}
 	else
 	{
-		//we need colors to interpolate them!
-		interpolateColors &= hasColors;
+		//we need colors to project them!
+		projectColors &= hasColors;
 	}
 
 	//the resampled cloud already contains the points corresponding to 'filled' cells so we will only
@@ -1226,11 +1226,11 @@ ccPointCloud* ccRasterGrid::convertToCloud(	bool exportHeightStats,
 			return nullptr;
 		}
 
-		if (interpolateColors && !cloudGrid->reserveTheRGBTable())
+		if (projectColors && !cloudGrid->reserveTheRGBTable())
 		{
-			ccLog::Warning("[Rasterize] Not enough memory to interpolate colors!");
+			ccLog::Warning("[Rasterize] Not enough memory to project colors!");
 			cloudGrid->unallocateColors();
-			interpolateColors = false;
+			projectColors = false;
 		}
 	}
 
@@ -1294,7 +1294,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(	bool exportHeightStats,
 
 			for (unsigned i = 0; i < width; ++i, ++aCell)
 			{
-				if (std::isfinite(aCell->h)) //valid cell (could have been interpolated)
+				if (std::isfinite(aCell->h)) //valid cell (could have been filled or interpolated)
 				{
 					//if we haven't resampled the original cloud, we must add the point
 					//corresponding to this non-empty cell
@@ -1308,7 +1308,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(	bool exportHeightStats,
 						assert(cloudGrid->size() < cloudGrid->capacity());
 						cloudGrid->addPoint(Pf);
 
-						if (interpolateColors)
+						if (projectColors)
 						{
 							ccColor::Rgb col(	static_cast<ColorCompType>(std::min(static_cast<double>(ccColor::MAX), aCell->color.x)),
 												static_cast<ColorCompType>(std::min(static_cast<double>(ccColor::MAX), aCell->color.y)),
@@ -1516,13 +1516,13 @@ ccPointCloud* ccRasterGrid::convertToCloud(	bool exportHeightStats,
 	//take care of former scalar fields
 	if (!resampleInputCloudXY)
 	{
-		//do we need to interpolate the original SFs?
-		if (interpolateSF && inputCloud && inputCloudAsPC)
+		//do we need to project the original SFs?
+		if (projectSFs && inputCloud && inputCloudAsPC)
 		{
 			QScopedPointer<CCCoreLib::NormalizedProgress> nProgress;
 			if (progressDialog)
 			{
-				progressDialog->setInfo(QObject::tr("Interpolating %1 fields").arg(scalarFields.size()));
+				progressDialog->setInfo(QObject::tr("Projecting %1 scalar fields").arg(scalarFields.size()));
 				progressDialog->setValue(0);
 				QCoreApplication::processEvents();
 				nProgress.reset(new CCCoreLib::NormalizedProgress(progressDialog, static_cast<unsigned>(scalarFields.size())));
@@ -1561,7 +1561,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(	bool exportHeightStats,
 						const ccRasterGrid::Row& row = rows[j];
 						for (unsigned i = 0; i < width; ++i, ++_sfGrid)
 						{
-							if (std::isfinite(row[i].h)) //valid cell (could have been interpolated)
+							if (std::isfinite(row[i].h)) //valid cell (could have been filled or interpolated)
 							{
 								ScalarType s = static_cast<ScalarType>(*_sfGrid);
 								sf->setValue(n++, s);

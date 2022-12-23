@@ -231,7 +231,7 @@ replaced by the cell's average height!</string>
             </widget>
            </item>
            <item row="6" column="0">
-            <widget class="QCheckBox" name="interpolateSFCheckBox">
+            <widget class="QCheckBox" name="projectSFCheckBox">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -242,7 +242,7 @@ replaced by the cell's average height!</string>
               <string>interpolate SF(s)</string>
              </property>
              <property name="text">
-              <string>interpolate SF(s)</string>
+              <string>project SF(s)</string>
              </property>
              <property name="checked">
               <bool>true</bool>
@@ -1168,7 +1168,7 @@ applied to all existing scalar fields</string>
  <resources/>
  <connections>
   <connection>
-   <sender>interpolateSFCheckBox</sender>
+   <sender>projectSFCheckBox</sender>
    <signal>toggled(bool)</signal>
    <receiver>scalarFieldProjection</receiver>
    <slot>setEnabled(bool)</slot>

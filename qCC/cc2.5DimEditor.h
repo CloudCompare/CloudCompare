@@ -85,8 +85,8 @@ protected: //raster grid related stuff
 	ccPointCloud* convertGridToCloud(	bool exportHeightStats,
 										bool exportSFStats,
 										const std::vector<ccRasterGrid::ExportableFields>& exportedStatistics,
-										bool interpolateSF,
-										bool interpolateColors,
+										bool projectSFs,
+										bool projectColors,
 										bool resampleInputCloudXY,
 										bool resampleInputCloudZ, //only considered if resampleInputCloudXY is true!
 										ccGenericPointCloud* inputCloud,

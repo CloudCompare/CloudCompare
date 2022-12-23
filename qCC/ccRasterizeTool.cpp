@@ -127,13 +127,13 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent)
 	{
 		if (m_cloud->hasScalarFields())
 		{
-			m_UI->interpolateSFCheckBox->setEnabled(true);
+			m_UI->projectSFCheckBox->setEnabled(true);
 			m_UI->scalarFieldProjection->setEnabled(true);
 		}
 		else
 		{
-			m_UI->interpolateSFCheckBox->setChecked(false);
-			m_UI->interpolateSFCheckBox->setEnabled(false);
+			m_UI->projectSFCheckBox->setChecked(false);
+			m_UI->projectSFCheckBox->setEnabled(false);
 			m_UI->scalarFieldProjection->setEnabled(false);
 		}
 
@@ -323,16 +323,16 @@ void ccRasterizeTool::activeLayerChanged(int layerIndex, bool autoRedraw/*=true*
 	{
 		if (m_UI->activeLayerComboBox->itemText(layerIndex) != HILLSHADE_FIELD_NAME)
 		{
-			m_UI->interpolateSFCheckBox->setChecked(true); //force the choice of a SF projection strategy
-			m_UI->interpolateSFCheckBox->setEnabled(false);
+			m_UI->projectSFCheckBox->setChecked(true); //force the choice of a SF projection strategy
+			m_UI->projectSFCheckBox->setEnabled(false);
 			m_UI->generateImagePushButton->setEnabled(true);
 			m_UI->generateASCIIPushButton->setEnabled(false);
 			m_UI->projectContoursOnAltCheckBox->setEnabled(true);
 		}
 		else
 		{
-			//m_UI->interpolateSFCheckBox->setChecked(false); //we shouldn't change that as it only impacts the other fields
-			//m_UI->interpolateSFCheckBox->setEnabled(false);
+			//m_UI->projectSFCheckBox->setChecked(false); //we shouldn't change that as it only impacts the other fields
+			//m_UI->projectSFCheckBox->setEnabled(false);
 			m_UI->generateImagePushButton->setEnabled(false);
 			m_UI->generateASCIIPushButton->setEnabled(false);
 			m_UI->projectContoursOnAltCheckBox->setEnabled(false);
@@ -340,8 +340,8 @@ void ccRasterizeTool::activeLayerChanged(int layerIndex, bool autoRedraw/*=true*
 	}
 	else
 	{
-		//m_UI->interpolateSFCheckBox->setChecked(false); //DGM: we can't force that, just let the user decide
-		m_UI->interpolateSFCheckBox->setEnabled(m_cloud && m_cloud->hasScalarFields()); //we need SF fields!
+		//m_UI->projectSFCheckBox->setChecked(false); //DGM: we can't force that, just let the user decide
+		m_UI->projectSFCheckBox->setEnabled(m_cloud && m_cloud->hasScalarFields()); //we need SF fields!
 		m_UI->generateImagePushButton->setEnabled(true);
 		m_UI->generateASCIIPushButton->setEnabled(true);
 		m_UI->projectContoursOnAltCheckBox->setEnabled(false);
@@ -455,11 +455,11 @@ ccRasterGrid::ProjectionType ccRasterizeTool::getTypeOfProjection() const
 	return ccRasterGrid::INVALID_PROJECTION_TYPE;
 }
 
-ccRasterGrid::ProjectionType ccRasterizeTool::getTypeOfSFInterpolation() const
+ccRasterGrid::ProjectionType ccRasterizeTool::getTypeOfSFProjection() const
 {
-	if (/*!m_UI->interpolateSFCheckBox->isEnabled() || */!m_UI->interpolateSFCheckBox->isChecked()) //DGM: the check-box might be disabled to actually 'force' the user to choose a projection type
+	if (/*!m_UI->projectSFCheckBox->isEnabled() || */!m_UI->projectSFCheckBox->isChecked()) //DGM: the check-box might be disabled to actually 'force' the user to choose a projection type
 	{
-		return ccRasterGrid::INVALID_PROJECTION_TYPE; //means that we don't want to keep SF values
+		return ccRasterGrid::INVALID_PROJECTION_TYPE; //means that we don't want to project SF values
 	}
 
 	switch (m_UI->scalarFieldProjection->currentIndex())
@@ -488,7 +488,7 @@ void ccRasterizeTool::loadSettings()
 	settings.beginGroup(ccPS::HeightGridGeneration());
 	int projType				= settings.value("ProjectionType",        m_UI->heightProjectionComboBox->currentIndex()).toInt();
 	int projDim					= settings.value("ProjectionDim",         m_UI->dimensionComboBox->currentIndex()).toInt();
-	bool sfProj					= settings.value("SfProjEnabled",         m_UI->interpolateSFCheckBox->isChecked()).toBool();
+	bool sfProj					= settings.value("SfProjEnabled",         m_UI->projectSFCheckBox->isChecked()).toBool();
 	int sfProjStrategy			= settings.value("SfProjStrategy",        m_UI->scalarFieldProjection->currentIndex()).toInt();
 	int fillStrategy			= settings.value("FillStrategy",          m_UI->fillEmptyCellsComboBox->currentIndex()).toInt();
 	double maxEdgeLength		= settings.value("MaxEdgeLength",         m_UI->maxEdgeLengthDoubleSpinBox->value()).toDouble();
@@ -521,7 +521,7 @@ void ccRasterizeTool::loadSettings()
 	m_UI->maxEdgeLengthDoubleSpinBox->setValue(maxEdgeLength);
 	m_UI->emptyValueDoubleSpinBox->setValue(emptyHeight);
 	m_UI->dimensionComboBox->setCurrentIndex(projDim);
-	m_UI->interpolateSFCheckBox->setChecked(sfProj);
+	m_UI->projectSFCheckBox->setChecked(sfProj);
 	m_UI->scalarFieldProjection->setCurrentIndex(sfProjStrategy);
 	m_UI->resampleCloudCheckBox->setChecked(resampleCloud);
 	m_UI->minVertexCountSpinBox->setValue(minVertexCount);
@@ -582,7 +582,7 @@ void ccRasterizeTool::saveSettings()
 	settings.beginGroup(ccPS::HeightGridGeneration());
 	settings.setValue("ProjectionType", m_UI->heightProjectionComboBox->currentIndex());
 	settings.setValue("ProjectionDim", m_UI->dimensionComboBox->currentIndex());
-	settings.setValue("SfProjEnabled", m_UI->interpolateSFCheckBox->isChecked());
+	settings.setValue("SfProjEnabled", m_UI->projectSFCheckBox->isChecked());
 	settings.setValue("SfProjStrategy", m_UI->scalarFieldProjection->currentIndex());
 	settings.setValue("FillStrategy", m_UI->fillEmptyCellsComboBox->currentIndex());
 	settings.setValue("MaxEdgeLength", m_UI->maxEdgeLengthDoubleSpinBox->value());
@@ -631,8 +631,8 @@ void ccRasterizeTool::gridIsUpToDate(bool state)
 ccPointCloud* ccRasterizeTool::convertGridToCloud(	bool exportHeightStats,
 													bool exportSFStats,
 													const std::vector<ccRasterGrid::ExportableFields>& exportedStatistics,
-													bool interpolateSF,
-													bool interpolateColors,
+													bool projectSFs,
+													bool projectColors,
 													bool copyHillshadeSF,
 													const QString& activeSFName,
 													double percentileValue,
@@ -646,8 +646,8 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(	bool exportHeightStats,
 	ccPointCloud* cloudGrid = cc2Point5DimEditor::convertGridToCloud(	exportHeightStats,
 																		exportSFStats,
 																		exportedStatistics,
-																		interpolateSF,
-																		interpolateColors,
+																		projectSFs,
+																		projectColors,
 																		/*resampleInputCloudXY=*/resampleOriginalCloud(),
 																		/*resampleInputCloudZ=*/getTypeOfProjection() != ccRasterGrid::PROJ_AVERAGE_VALUE,
 																		/*inputCloud=*/m_cloud,
@@ -689,7 +689,7 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(	bool exportHeightStats,
 		}
 		cloudGrid->setCurrentDisplayedScalarField(activeSFIndex);
 
-		cloudGrid->showColors(interpolateColors && cloudGrid->hasColors());
+		cloudGrid->showColors(projectColors && cloudGrid->hasColors());
 		cloudGrid->showSF(activeSFIndex >= 0);
 
 		//don't forget the original shift
@@ -726,9 +726,9 @@ void ccRasterizeTool::updateGridAndDisplay()
 	}
 
 	bool activeLayerIsSF = (m_UI->activeLayerComboBox->currentData().toInt() == LAYER_SF);
-	bool interpolateSF = (getTypeOfSFInterpolation() != ccRasterGrid::INVALID_PROJECTION_TYPE) || activeLayerIsSF;
-	bool interpolateColors = m_cloud->hasColors();
-	bool success = updateGrid(interpolateSF);
+	bool projectSFs = (getTypeOfSFProjection() != ccRasterGrid::INVALID_PROJECTION_TYPE) || activeLayerIsSF;
+	bool projectColors = m_cloud->hasColors();
+	bool success = updateGrid(projectSFs);
 
 	if (success && m_glWindow)
 	{
@@ -743,8 +743,8 @@ void ccRasterizeTool::updateGridAndDisplay()
 			m_rasterCloud = convertGridToCloud(	true,
 												false,
 												exportedStatistics,
-												interpolateSF,
-												interpolateColors,
+												projectSFs,
+												projectColors,
 												/*copyHillshadeSF=*/false,
 												activeLayerName,
 												getStatisticsPercentileValue(),
@@ -779,7 +779,7 @@ void ccRasterizeTool::updateGridAndDisplay()
 	gridIsUpToDate(success);
 }
 
-bool ccRasterizeTool::updateGrid(bool interpolateSF/*=false*/)
+bool ccRasterizeTool::updateGrid(bool projectSFs/*=false*/)
 {
 	if (!m_cloud)
 	{
@@ -789,7 +789,7 @@ bool ccRasterizeTool::updateGrid(bool interpolateSF/*=false*/)
 
 	//main parameters
 	ccRasterGrid::ProjectionType projectionType = getTypeOfProjection();
-	ccRasterGrid::ProjectionType interpolateSFs = interpolateSF ? getTypeOfSFInterpolation() : ccRasterGrid::INVALID_PROJECTION_TYPE;
+	ccRasterGrid::ProjectionType sfProjectionType = projectSFs ? getTypeOfSFProjection() : ccRasterGrid::INVALID_PROJECTION_TYPE;
 	bool interpolateEmptyCells = (getFillEmptyCellsStrategy(m_UI->fillEmptyCellsComboBox) == ccRasterGrid::INTERPOLATE);
 	double maxEdgeLength = m_UI->maxEdgeLengthDoubleSpinBox->value();
 
@@ -861,7 +861,7 @@ bool ccRasterizeTool::updateGrid(bool interpolateSF/*=false*/)
 							projectionType,
 							interpolateEmptyCells,
 							maxEdgeLength,
-							interpolateSFs,
+							sfProjectionType,
 							&pDlg,
                             zStdDevSfIndex))
 	{
@@ -930,16 +930,16 @@ ccPointCloud* ccRasterizeTool::generateCloud(bool autoExport/*=true*/)
 
 	QString activeLayerName = m_UI->activeLayerComboBox->currentText();
 	bool activeLayerIsSF = (m_UI->activeLayerComboBox->currentData().toInt() == LAYER_SF);
-	bool interpolateSF = (getTypeOfSFInterpolation() != ccRasterGrid::INVALID_PROJECTION_TYPE) || activeLayerIsSF;
+	bool projectSFs = (getTypeOfSFProjection() != ccRasterGrid::INVALID_PROJECTION_TYPE) || activeLayerIsSF;
 	//bool activeLayerIsRGB = (activeLayerComboBox->currentData().toInt() == LAYER_RGB);
-	bool interpolateColors = m_cloud->hasColors();
+	bool projectColors = m_cloud->hasColors();
 
 	ccProgressDialog pDlg(true, this);
 	ccPointCloud* rasterCloud = convertGridToCloud(	exportHeightStats,
 													exportSFStats,
 													exportedStatistics,
-													interpolateSF,
-													interpolateColors,
+													projectSFs,
+													projectColors,
 													/*copyHillshadeSF=*/true,
 													activeLayerName,
 													getStatisticsPercentileValue(),
@@ -1665,7 +1665,7 @@ void ccRasterizeTool::generateHillshade()
 							}
 							else
 							{
-								// interpolated cells are appended at the end
+								// filled or interpolated cells are appended at the end
 								hillshadeLayer->setValue(m_grid.nonEmptyCellCount + validButEmptyCellIndex, hillshade);
 							}
 						}

@@ -131,8 +131,8 @@ struct QCC_DB_LIB_API ccRasterGrid
 	ccPointCloud* convertToCloud(	bool exportHeightStats,
 									bool exportSFStats,
 									const std::vector<ExportableFields>& exportedStatistics,
-									bool interpolateSF,
-									bool interpolateColors,
+									bool projectSFs,
+									bool projectColors,
 									bool resampleInputCloudXY,
 									bool resampleInputCloudZ, //only considered if resampleInputCloudXY is true!
 									ccGenericPointCloud* inputCloud,
@@ -161,7 +161,7 @@ struct QCC_DB_LIB_API ccRasterGrid
 					ProjectionType projectionType,
 					bool doInterpolateEmptyCells,
 					double maxEdgeLength,
-					ProjectionType sfInterpolation = INVALID_PROJECTION_TYPE,
+					ProjectionType sfProjection = INVALID_PROJECTION_TYPE,
 					ccProgressDialog* progressDialog = nullptr,
 					int zStdDevSfIndex = -1);
 
@@ -174,9 +174,9 @@ struct QCC_DB_LIB_API ccRasterGrid
 								INTERPOLATE				= 5,
 	};
 
-	//! Fills the empty cell (for all strategies but 'INTERPOLATE')
+	//! Fills the empty cells
 	void fillEmptyCells(EmptyCellFillOption fillEmptyCellsStrategy,
-						double customCellHeight = 0);
+						double customCellHeight = 0.0);
 
 	//! Updates the number of non-empty cells
 	unsigned updateNonEmptyCellCount();
@@ -237,11 +237,11 @@ struct QCC_DB_LIB_API ccRasterGrid
 	//! Min corner (3D)
 	CCVector3d minCorner;
 
-	//! Min height (computed on the NON-EMPTY or INTERPOLATED cells)
+	//! Min height (computed on the NON-EMPTY or FILLED/INTERPOLATED cells)
 	double minHeight;
-	//! Max height (computed on the NON-EMPTY or INTERPOLATED cells)
+	//! Max height (computed on the NON-EMPTY or FILLED/INTERPOLATED cells)
 	double maxHeight;
-	//! Average height (computed on the NON-EMPTY or INTERPOLATED cells)
+	//! Average height (computed on the NON-EMPTY or FILLED/INTERPOLATED cells)
 	double meanHeight;
 	//! Number of NON-EMPTY cells
 	unsigned nonEmptyCellCount;

@@ -172,8 +172,8 @@ private: //standard methods
 	//! Returns whether the output cloud should use the original cloud or the grid as 'support'
 	bool resampleOriginalCloud() const;
 
-	//! Returns type of SF interpolation
-	ccRasterGrid::ProjectionType getTypeOfSFInterpolation() const;
+	//! Returns type of SF projection
+	ccRasterGrid::ProjectionType getTypeOfSFProjection() const;
 
 	//Inherited from cc2Point5DimEditor
 	void gridIsUpToDate(bool state) override;
@@ -182,7 +182,7 @@ private: //standard methods
 	void loadSettings();
 
 	//! Updates the grid
-	bool updateGrid(bool interpolateSF = false);
+	bool updateGrid(bool projectSFs = false);
 
 	//! Tests if the dialog can be safely closed
 	bool canClose();
@@ -196,8 +196,8 @@ protected: //raster grid related stuff
 	ccPointCloud* convertGridToCloud(	bool exportHeightStats,
 										bool exportSFStats,
 										const std::vector<ccRasterGrid::ExportableFields>& exportedStatistics,
-										bool interpolateSF,
-										bool interpolateColors,
+										bool projectSFs,
+										bool projectColors,
 										bool copyHillshadeSF,
 										const QString& activeSFName,
 										double percentileValue,

@@ -46,6 +46,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QSettings>
+#include <QStandardItemModel>
 
 #ifdef CC_GDAL_SUPPORT
 //GDAL
@@ -62,11 +63,30 @@
 
 constexpr char HILLSHADE_FIELD_NAME[] = "Hillshade";
 
+static void MakeComboBoxOptionInaccessible(QComboBox* comboBox, int index)
+{
+	if (!comboBox)
+	{
+		assert(false);
+		return;
+	}
+	
+	const QStandardItemModel* model = qobject_cast<const QStandardItemModel*>(comboBox->model());
+	QStandardItem* item = model ? model->item(index) : 0;
+	if (item)
+	{
+		item->setFlags(item->flags() & ~(Qt::ItemIsSelectable | Qt::ItemIsEnabled));
+		// visually disable by greying out - works only if combobox has been painted already and palette returns the wanted color
+		item->setData(comboBox->palette().color(QPalette::Disabled, QPalette::Text), Qt::TextColorRole); // clear item data in order to use default color
+	}
+}
+
 ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent)
 	: QDialog(parent, Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint)
 	, cc2Point5DimEditor()
 	, m_UI( new Ui::RasterizeToolDialog )
 	, m_cloud(cloud)
+	, m_cloudHasScalarFields(false)
 {
 	m_UI->setupUi(this);
 
@@ -125,18 +145,6 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent)
 
 	if (m_cloud)
 	{
-		if (m_cloud->hasScalarFields())
-		{
-			m_UI->projectSFCheckBox->setEnabled(true);
-			m_UI->scalarFieldProjection->setEnabled(true);
-		}
-		else
-		{
-			m_UI->projectSFCheckBox->setChecked(false);
-			m_UI->projectSFCheckBox->setEnabled(false);
-			m_UI->scalarFieldProjection->setEnabled(false);
-		}
-
 		//populate layer box
 		m_UI->activeLayerComboBox->addItem(ccRasterGrid::GetDefaultFieldName(ccRasterGrid::PER_CELL_VALUE), QVariant(LAYER_HEIGHT));
 		if (m_cloud->hasColors())
@@ -144,39 +152,41 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent)
 			m_UI->activeLayerComboBox->addItem("RGB", QVariant(LAYER_RGB));
 		}
 
-		bool hasScalarFields = false;
 		if (cloud->isA(CC_TYPES::POINT_CLOUD) && cloud->hasScalarFields())
 		{
 			ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
 			for (unsigned i = 0; i < pc->getNumberOfScalarFields(); ++i)
 			{
 				m_UI->activeLayerComboBox->addItem(pc->getScalarField(i)->getName(), QVariant(LAYER_SF));
+				//populate std. dev. layer box as well
+				m_UI->stdDevLayerComboBox->addItem(pc->getScalarField(i)->getName());
 			}
-			hasScalarFields = true;
+			m_cloudHasScalarFields = true;
 		}
-		m_UI->exportSFStatsCheckBox->setEnabled(hasScalarFields);
-
-		m_UI->activeLayerComboBox->setEnabled(m_UI->activeLayerComboBox->count() > 1);
 		
-		//populate std. dev. layer box
-		if (cloud->isA(CC_TYPES::POINT_CLOUD) && cloud->hasScalarFields())
-		{
-			ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
-			for (unsigned i = 0; i < pc->getNumberOfScalarFields(); ++i)
-			{
-				m_UI->stdDevLayerComboBox->addItem(pc->getScalarField(i)->getName(), QVariant(LAYER_SF));
-			}
-		}
-		m_UI->stdDevLayerComboBox->setEnabled( (m_UI->stdDevLayerComboBox->count() != 0) && (getTypeOfProjection() == ccRasterGrid::PROJ_INVERSE_VAR_VALUE) );
 		//add window
 		create2DView(m_UI->mapFrame);
 	}
 
+	if (!m_cloudHasScalarFields)
+	{
+		m_UI->projectSFCheckBox->setChecked(false);
+		MakeComboBoxOptionInaccessible(m_UI->heightProjectionComboBox, ccRasterGrid::PROJ_INVERSE_VAR_VALUE);
+		MakeComboBoxOptionInaccessible(m_UI->scalarFieldProjection, ccRasterGrid::PROJ_INVERSE_VAR_VALUE);
+	}
+
+	m_UI->projectSFCheckBox->setEnabled(m_cloudHasScalarFields);
+	m_UI->scalarFieldProjection->setEnabled(m_cloudHasScalarFields);
+	m_UI->stdDevLayerComboBox->setEnabled(m_cloudHasScalarFields); // real state will be set later (--> updateStdDevLayerComboBox)
+	m_UI->exportSFStatsCheckBox->setEnabled(m_cloudHasScalarFields);
+
 	loadSettings();
+
+	updateStdDevLayerComboBox();
 
 	gridIsUpToDate(false); // will call updateGridInfo
 
-	resize( minimumSize() );
+	resize(minimumSize());
 }
 
 ccRasterizeTool::~ccRasterizeTool()
@@ -212,12 +222,19 @@ bool ccRasterizeTool::showGridBoxEditor()
 
 void ccRasterizeTool::updateCloudName(bool withNonEmptyCells)
 {
-	QString str = QString("<b>%1</b> (%2 points").arg(m_cloud->getName(), QLocale::system().toString(m_cloud->size()));
-
-	if (withNonEmptyCells)
-		str += QString(" - %1 non-empty cells)").arg(QLocale::system().toString(m_grid.validCellCount));
+	QString str;
+	if (m_cloud)
+	{
+		str = QString("<b>%1</b> (%2 points").arg(m_cloud->getName(), QLocale::system().toString(m_cloud->size()));
+		if (withNonEmptyCells)
+			str += QString(" - %1 non-empty cells)").arg(QLocale::system().toString(m_grid.validCellCount));
+		else
+			str += ')';
+	}
 	else
-		str += ')';
+	{
+		str = "No cloud loaded";
+	}
 
 	m_UI->cloudNameLabel->setText(str);
 }
@@ -287,23 +304,34 @@ void ccRasterizeTool::resampleOptionToggled(bool state)
 	gridOptionChanged();
 }
 
+void ccRasterizeTool::updateStdDevLayerComboBox()
+{
+	m_UI->stdDevLayerComboBox->setEnabled(	m_UI->stdDevLayerComboBox->count() != 0
+										&& (m_UI->heightProjectionComboBox->currentIndex() == ccRasterGrid::PROJ_INVERSE_VAR_VALUE
+										||	m_UI->scalarFieldProjection->currentIndex() == ccRasterGrid::PROJ_INVERSE_VAR_VALUE) );
+}
+
 void ccRasterizeTool::projectionTypeChanged(int index)
 {
 	//we can't use the 'resample origin cloud' option with 'average height' projection
 	//resampleCloudCheckBox->setEnabled(index != PROJ_AVERAGE_VALUE && index != PROJ_INVERSE_VAR_VALUE);
 	//DGM: now we can! We simply display a warning message
-	
-	m_UI->warningResampleWithAverageLabel->setVisible(m_UI->resampleCloudCheckBox->isChecked()
+	m_UI->warningResampleWithAverageLabel->setVisible
+	(
+		m_UI->resampleCloudCheckBox->isChecked()
 		&& (	index == ccRasterGrid::PROJ_AVERAGE_VALUE
-			||	index == ccRasterGrid::PROJ_INVERSE_VAR_VALUE));
+			||	index == ccRasterGrid::PROJ_INVERSE_VAR_VALUE)
+	);
 
-	m_UI->stdDevLayerComboBox->setEnabled((m_UI->stdDevLayerComboBox->count() != 0) && (index == ccRasterGrid::PROJ_INVERSE_VAR_VALUE));
+	updateStdDevLayerComboBox();
 
 	gridIsUpToDate(false);
 }
 
 void ccRasterizeTool::sfProjectionTypeChanged(int index)
 {
+	updateStdDevLayerComboBox();
+
 	gridIsUpToDate(false);
 }
 
@@ -341,7 +369,7 @@ void ccRasterizeTool::activeLayerChanged(int layerIndex, bool autoRedraw/*=true*
 	else
 	{
 		//m_UI->projectSFCheckBox->setChecked(false); //DGM: we can't force that, just let the user decide
-		m_UI->projectSFCheckBox->setEnabled(m_cloud && m_cloud->hasScalarFields()); //we need SF fields!
+		m_UI->projectSFCheckBox->setEnabled(m_cloudHasScalarFields); //we need SF fields!
 		m_UI->generateImagePushButton->setEnabled(true);
 		m_UI->generateASCIIPushButton->setEnabled(true);
 		m_UI->projectContoursOnAltCheckBox->setEnabled(false);
@@ -516,31 +544,31 @@ void ccRasterizeTool::loadSettings()
 	settings.endGroup();
 
 	m_UI->gridStepDoubleSpinBox->setValue(step);
-	m_UI->heightProjectionComboBox->setCurrentIndex(projType);
+	m_UI->heightProjectionComboBox->setCurrentIndex(m_cloudHasScalarFields || projType != ccRasterGrid::PROJ_INVERSE_VAR_VALUE ? projType : 0);
 	m_UI->fillEmptyCellsComboBox->setCurrentIndex(fillStrategy);
 	m_UI->maxEdgeLengthDoubleSpinBox->setValue(maxEdgeLength);
 	m_UI->emptyValueDoubleSpinBox->setValue(emptyHeight);
 	m_UI->dimensionComboBox->setCurrentIndex(projDim);
-	m_UI->projectSFCheckBox->setChecked(sfProj);
-	m_UI->scalarFieldProjection->setCurrentIndex(sfProjStrategy);
+	m_UI->projectSFCheckBox->setChecked(m_cloudHasScalarFields && sfProj);
+	m_UI->scalarFieldProjection->setCurrentIndex(m_cloudHasScalarFields || sfProjStrategy != ccRasterGrid::PROJ_INVERSE_VAR_VALUE ? sfProjStrategy : 0);
 	m_UI->resampleCloudCheckBox->setChecked(resampleCloud);
 	m_UI->minVertexCountSpinBox->setValue(minVertexCount);
 	m_UI->ignoreContourBordersCheckBox->setChecked(ignoreBorders);
 	m_UI->projectContoursOnAltCheckBox->setChecked(projectContoursOnAlt);
 
 	//SF Statistics checkboxes
-	m_UI->exportHeightStatsCheckBox->setChecked(				generateHeightStatistics			);
-	m_UI->exportSFStatsCheckBox->setChecked(					generateSFStatistics				);
-	m_UI->generateStatisticsPopulationCheckBox->setChecked(		generateStatisticsPopulation		);
-    m_UI->generateStatisticsMinCheckBox->setChecked(			generateStatisticsMin				);
-    m_UI->generateStatisticsMaxCheckBox->setChecked(			generateStatisticsMax				);
-    m_UI->generateStatisticsAverageCheckBox->setChecked(		generateStatisticsAverage			);
-    m_UI->generateStatisticsStdDevCheckBox->setChecked(			generateStatisticsStdDev			);
-    m_UI->generateStatisticsRangeCheckBox->setChecked(			generateStatisticsRange				);
-    m_UI->generateStatisticsMedianCheckBox->setChecked(			generateStatisticsMedian			);
-    m_UI->generateStatisticsUniqueCheckBox->setChecked(			generateStatisticsUnique			);
-    m_UI->generateStatisticsPercentileCheckBox->setChecked(		generateStatisticsPercentile		);
-	m_UI->generateStatisticsPercentileDoubleSpinBox->setValue(	generateStatisticsPercentileValue	);
+	m_UI->exportHeightStatsCheckBox->setChecked(				generateHeightStatistics						);
+	m_UI->exportSFStatsCheckBox->setChecked(					generateSFStatistics && m_cloudHasScalarFields	);
+	m_UI->generateStatisticsPopulationCheckBox->setChecked(		generateStatisticsPopulation					);
+    m_UI->generateStatisticsMinCheckBox->setChecked(			generateStatisticsMin							);
+    m_UI->generateStatisticsMaxCheckBox->setChecked(			generateStatisticsMax							);
+    m_UI->generateStatisticsAverageCheckBox->setChecked(		generateStatisticsAverage						);
+    m_UI->generateStatisticsStdDevCheckBox->setChecked(			generateStatisticsStdDev						);
+    m_UI->generateStatisticsRangeCheckBox->setChecked(			generateStatisticsRange							);
+    m_UI->generateStatisticsMedianCheckBox->setChecked(			generateStatisticsMedian						);
+    m_UI->generateStatisticsUniqueCheckBox->setChecked(			generateStatisticsUnique						);
+    m_UI->generateStatisticsPercentileCheckBox->setChecked(		generateStatisticsPercentile					);
+	m_UI->generateStatisticsPercentileDoubleSpinBox->setValue(	generateStatisticsPercentileValue				);
 
 }
 
@@ -727,7 +755,7 @@ void ccRasterizeTool::updateGridAndDisplay()
 
 	bool activeLayerIsSF = (m_UI->activeLayerComboBox->currentData().toInt() == LAYER_SF);
 	bool projectSFs = (getTypeOfSFProjection() != ccRasterGrid::INVALID_PROJECTION_TYPE) || activeLayerIsSF;
-	bool projectColors = m_cloud->hasColors();
+	bool projectColors = m_cloud && m_cloud->hasColors();
 	bool success = updateGrid(projectSFs);
 
 	if (success && m_glWindow)
@@ -978,6 +1006,12 @@ ccPointCloud* ccRasterizeTool::generateCloud(bool autoExport/*=true*/)
 
 void ccRasterizeTool::generateMesh()
 {
+	if (!m_cloud)
+	{
+		assert(false);
+		return;
+	}
+
 	ccPointCloud* rasterCloud = generateCloud(false);
 	if (rasterCloud)
 	{
@@ -1706,7 +1740,12 @@ void ccRasterizeTool::generateHillshade()
 
 void ccRasterizeTool::addNewContour(ccPolyline* poly, double height, unsigned subIndex)
 {
-	assert(poly);
+	if (!m_cloud || !poly)
+	{
+		assert(false);
+		return;
+	}
+
 	if (poly->size() > 1)
 	{
 		poly->setName(QString("Contour line value = %1 (#%2)").arg(height).arg(subIndex));
@@ -1935,7 +1974,7 @@ ccRasterGrid::EmptyCellFillOption ccRasterizeTool::getFillEmptyCellsStrategyExt(
 
 void ccRasterizeTool::generateImage() const
 {
-	if (!m_grid.isValid())
+	if (!m_cloud || !m_grid.isValid())
 	{
 		assert(false);
 		return;

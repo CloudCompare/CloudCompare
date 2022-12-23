@@ -161,7 +161,7 @@ struct QCC_DB_LIB_API ccRasterGrid
 					ProjectionType projectionType,
 					bool doInterpolateEmptyCells,
 					double maxEdgeLength,
-					ProjectionType sfProjection = INVALID_PROJECTION_TYPE,
+					ProjectionType sfProjectionType = INVALID_PROJECTION_TYPE,
 					ccProgressDialog* progressDialog = nullptr,
 					int zStdDevSfIndex = -1);
 

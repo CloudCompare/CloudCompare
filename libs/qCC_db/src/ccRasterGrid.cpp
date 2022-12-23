@@ -196,7 +196,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 								ProjectionType projectionType,
 								bool doInterpolateEmptyCells,
 								double maxEdgeLength,
-								ProjectionType sfProjection/*=INVALID_PROJECTION_TYPE*/,
+								ProjectionType sfProjectionType/*=INVALID_PROJECTION_TYPE*/,
 								ccProgressDialog* progressDialog/*=nullptr*/,
 								int zStdDevSfIndex/*=-1*/)
 {
@@ -221,7 +221,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 	}
 
 	//do we need to project scalar fields?
-	bool projectSFs = (sfProjection != INVALID_PROJECTION_TYPE);
+	bool projectSFs = (sfProjectionType != INVALID_PROJECTION_TYPE);
 	if (projectSFs)
 	{
 		if (pc && pc->hasScalarFields())
@@ -355,9 +355,9 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 		return false;
 	}
    
-    // Set up pointer to Scalar field containing std. dev. values, if inverse variance is being used
+    // Find the right 'std. dev.' SF if inverse variance is being used
     CCCoreLib::ScalarField* zStdDevSF = nullptr;
-	if (projectionType == PROJ_INVERSE_VAR_VALUE)
+	if (projectionType == PROJ_INVERSE_VAR_VALUE || sfProjectionType == PROJ_INVERSE_VAR_VALUE)
 	{
 		if (zStdDevSfIndex >= 0)
 		{
@@ -469,7 +469,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 				case PROJ_AVERAGE_VALUE:
 				case PROJ_INVERSE_VAR_VALUE:
 					aCell.h = cellAvgHeight;
-					if (!std::isnan(aCell.h))
+					if (std::isfinite(aCell.h))
 					{
 						//we choose the point which is the closest to the cell center (in 2D)
 						CCVector2d C = computeCellCenter(i, j, X, Y);
@@ -551,7 +551,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 
 						assert(sf && pos < scalarFields[k].size());
 
-						switch (sfProjection)
+						switch (sfProjectionType)
 						{
 						case PROJ_MINIMUM_VALUE:
 						case PROJ_MEDIAN_VALUE:
@@ -587,6 +587,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 							}
 							else
 							{
+								assert(zStdDevSF);
 								double scalarFieldWeightedSum = 0.0;
 								double scalarFieldWeightSum = 0.0;
 								for (unsigned n = 0; n < aCell.nbPoints; n++)
@@ -873,7 +874,7 @@ bool ccRasterGrid::interpolateEmptyCells(double maxSquareEdgeLength)
 							//else
 							{
 								row[i].h = l1 * valA + l2 * valB + l3 * valC;
-								//assert(std::isfinite(row[i].h));
+								//assert(std::isfinite(row[i].h)); //it can happen with the inv. var. projection mode
 
 								//interpolate color as well!
 								if (hasColors)

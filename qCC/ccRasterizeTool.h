@@ -175,6 +175,9 @@ private: //standard methods
 	//! Returns type of SF projection
 	ccRasterGrid::ProjectionType getTypeOfSFProjection() const;
 
+    //! Updates the std. dev. SF combox status depending on the current state of the other options
+	void updateStdDevLayerComboBox();
+
 	//Inherited from cc2Point5DimEditor
 	void gridIsUpToDate(bool state) override;
 
@@ -212,10 +215,14 @@ private: //members
 						LAYER_SF = 2
 	};
 
+    //! Associated Qt UI
 	Ui::RasterizeToolDialog* m_UI;
 	
 	//! Associated cloud
 	ccGenericPointCloud* m_cloud;
+
+    //! Whether the cloud has scalar fields
+	bool m_cloudHasScalarFields;
 
 	//! Contour lines
 	std::vector<ccPolyline*> m_contourLines;

@@ -61,7 +61,7 @@ v2.13.alpha (???) - (??/??/????)
 
 	- Rasterize:
 		- various improvements and glitch fixes
-		- if a scalar field projection option is chosen, all SF and colors will be projected at once so that all fields are valid right away
+		- if a scalar field projection option is chosen, all SF and colors will be projected at once so that all layers are valid right away
 			(no need to 'update' the grid several times)
 		- new projection options (inside each cell)
 			- Median

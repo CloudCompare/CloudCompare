@@ -75,7 +75,7 @@
              <item>
               <widget class="QDoubleSpinBox" name="gridStepDoubleSpinBox">
                <property name="toolTip">
-                <string>size of step of the grid generated (in the same units as the coordinates of the point cloud)</string>
+                <string>grid cell size (in the same units as the coordinates of the point cloud)</string>
                </property>
                <property name="decimals">
                 <number>6</number>
@@ -114,7 +114,11 @@
             </widget>
            </item>
            <item row="3" column="1">
-            <widget class="QComboBox" name="activeLayerComboBox"/>
+            <widget class="QComboBox" name="activeLayerComboBox">
+             <property name="toolTip">
+              <string>Visible layer</string>
+             </property>
+            </widget>
            </item>
            <item row="4" column="0">
             <widget class="QLabel" name="label_7">
@@ -148,6 +152,9 @@
            </item>
            <item row="0" column="1">
             <widget class="QComboBox" name="dimensionComboBox">
+             <property name="toolTip">
+              <string>Projection direction</string>
+             </property>
              <property name="currentIndex">
               <number>0</number>
              </property>
@@ -188,7 +195,7 @@ replaced by the cell's average height!</string>
            <item row="6" column="1">
             <widget class="QComboBox" name="scalarFieldProjection">
              <property name="toolTip">
-              <string>SF interpolation method</string>
+              <string>SF projection method</string>
              </property>
              <property name="currentIndex">
               <number>0</number>
@@ -222,9 +229,6 @@ replaced by the cell's average height!</string>
            </item>
            <item row="2" column="0">
             <widget class="QLabel" name="label_21">
-             <property name="toolTip">
-              <string>Active layer std. dev. scalar field</string>
-             </property>
              <property name="text">
               <string>Std. dev. layer</string>
              </property>
@@ -239,7 +243,7 @@ replaced by the cell's average height!</string>
               </sizepolicy>
              </property>
              <property name="toolTip">
-              <string>interpolate SF(s)</string>
+              <string>Project SF(s)</string>
              </property>
              <property name="text">
               <string>project SF(s)</string>
@@ -250,7 +254,11 @@ replaced by the cell's average height!</string>
             </widget>
            </item>
            <item row="2" column="1">
-            <widget class="QComboBox" name="stdDevLayerComboBox"/>
+            <widget class="QComboBox" name="stdDevLayerComboBox">
+             <property name="toolTip">
+              <string>Std. dev. scalar field used for inverse variance weighted average</string>
+             </property>
+            </widget>
            </item>
            <item row="1" column="0">
             <widget class="QLabel" name="label_8">
@@ -262,12 +270,14 @@ replaced by the cell's average height!</string>
            <item row="1" column="1">
             <widget class="QComboBox" name="heightProjectionComboBox">
              <property name="toolTip">
-              <string>Per-cell height computation method:
- - minimum = lowest point in the cell
- - average = mean height of all points inside the cell
- - maximum = highest point in the cell
- - medain = median height of all points inside the cell
- - inverse var = inverse variance weighted mean. Calculate variance from Std.dev. SF field</string>
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;Per-cell height computation method:&lt;ul&gt;
+&lt;li&gt;minimum = lowest point in the cell&lt;/li&gt;
+&lt;li&gt;average = mean height of all points inside the cell&lt;/li&gt;
+&lt;li&gt;maximum = highest point in the cell&lt;/li&gt;
+&lt;li&gt;median = median height of all points inside the cell&lt;/li&gt;
+&lt;li&gt;inverse var = inverse variance weighted average. Calculate variance from std. dev. SF.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/body&gt;&lt;/html&gt;</string>
              </property>
              <property name="currentIndex">
               <number>0</number>
@@ -349,7 +359,15 @@ replaced by the cell's average height!</string>
               </sizepolicy>
              </property>
              <property name="toolTip">
-              <string>choose the value to fill the cells in which no point is projected : minimum value over the whole point cloud or average value (over the whole cloud also)</string>
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;Strategy to fill empty cells:
+&lt;ul&gt;
+&lt;li&gt;minimum height&lt;/li&gt;
+&lt;li&gt;average height&lt;/li&gt;
+&lt;li&gt;maximum height&lt;/li&gt;
+&lt;li&gt;user specified height&lt;/li&gt;
+&lt;li&gt;interpolation&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/body&gt;&lt;/html&gt;</string>
              </property>
              <item>
               <property name="text">

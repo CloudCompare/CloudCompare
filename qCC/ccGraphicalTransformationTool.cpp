@@ -95,8 +95,8 @@ void ccGraphicalTransformationTool::pause(bool state)
 	if (state)
 	{
 		m_associatedWin->setInteractionMode(ccGLWindow::MODE_TRANSFORM_CAMERA);
-		m_associatedWin->displayNewMessage("Transformation [PAUSED]",ccGLWindow::UPPER_CENTER_MESSAGE,false,3600,ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
-		m_associatedWin->displayNewMessage("Unpause to transform again",ccGLWindow::UPPER_CENTER_MESSAGE,true,3600,ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
+		m_associatedWin->displayNewMessage("Transformation [PAUSED]", ccGLWindow::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
+		m_associatedWin->displayNewMessage("Unpause to transform again", ccGLWindow::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
 	}
 	else
 	{
@@ -109,7 +109,7 @@ void ccGraphicalTransformationTool::pause(bool state)
 	pauseButton->setChecked(state);
 	pauseButton->blockSignals(false);
 
-	m_associatedWin->redraw(true, false);
+	m_associatedWin->redraw(false, false); //we have to redraw the 3D layer for labels!
 }
 
 void ccGraphicalTransformationTool::advModeToggle(bool state)
@@ -774,7 +774,7 @@ void ccGraphicalTransformationTool::stop(bool state)
 		m_associatedWin->setUnclosable(false);
 		m_associatedWin->disconnect(this);
 		m_associatedWin->displayNewMessage("[Rotation/Translation mode OFF]", ccGLWindow::UPPER_CENTER_MESSAGE, false, 2, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
-		m_associatedWin->redraw(true, false);
+		m_associatedWin->redraw(false, false); //we have to redraw the 3D layer for labels!
 	}
 
 	ccOverlayDialog::stop(state);

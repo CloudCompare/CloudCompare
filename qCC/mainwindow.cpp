@@ -6714,6 +6714,7 @@ void MainWindow::deactivatePointPickingMode(bool state)
 	freezeUI(false);
 
 	updateUI();
+	redrawAll();
 }
 
 void MainWindow::activateClippingBoxMode()

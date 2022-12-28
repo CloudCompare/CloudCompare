@@ -5070,6 +5070,7 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 
 		//process hits
 		int minSquareDistToCenter = -1;
+		ccColor::Rgba centerPixelColor(0, 0, 0, 0);
 		ccColor::Rgba previousPixelColor(0, 0, 0, 0);
 
 		ccColor::Rgba* _pickedPixels = pickedPixels.data();
@@ -5102,15 +5103,20 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 						int dX = i - xCenter;
 						int dY = j - yCenter;
 						int squareDistToCenter = dX * dX + dY * dY;
-						if (!pickedEntity || minSquareDistToCenter < squareDistToCenter)
+						if (minSquareDistToCenter < 0 || squareDistToCenter < minSquareDistToCenter )
 						{
 							minSquareDistToCenter = squareDistToCenter;
-							pickedEntity = CONTEXT.entityPicking.objectFromColor(*_pickedPixels);
-							assert(pickedEntity);
+							centerPixelColor = *_pickedPixels;
 						}
 					}
 				}
 			}
+		}
+
+		if (params.mode != ENTITY_RECT_PICKING && minSquareDistToCenter >= 0)
+		{
+			pickedEntity = CONTEXT.entityPicking.objectFromColor(centerPixelColor);
+			assert(pickedEntity);
 		}
 
 		//testImage.save("C:\\Temp\\test.png");

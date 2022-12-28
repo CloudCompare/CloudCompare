@@ -5019,8 +5019,8 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 	try
 	{
 		// crop the picking rectangle so that's it strictly inside the displayed window
-		int xTop = params.centerX - params.pickWidth / 2;
 		int xCenter = params.centerX;
+		int xTop = xCenter - params.pickWidth / 2;
 		int xWidth = params.pickWidth;
 		if (xTop < 0)
 		{
@@ -5037,8 +5037,8 @@ void ccGLWindow::startOpenGLPicking(const PickingParameters& params)
 			return;
 		}
 
-		int yTop = glHeight() - 1 - params.centerY - params.pickHeight / 2;
 		int yCenter = glHeight() - 1 - params.centerY;
+		int yTop = yCenter - params.pickHeight / 2;
 		int yWidth = params.pickHeight;
 		if (yTop < 0)
 		{

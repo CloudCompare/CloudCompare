@@ -747,7 +747,7 @@ bool ccGraphicalTransformationTool::start()
 
 	//activate "moving mode" in associated GL window
 	m_associatedWin->setInteractionMode(ccGLWindow::MODE_TRANSFORM_ENTITIES);
-	m_associatedWin->setPickingMode(ccGLWindow::NO_PICKING);
+	m_associatedWin->setPickingMode(ccGLWindow::NO_PICKING, Qt::OpenHandCursor);
 	//the user must not close this window!
 	m_associatedWin->setUnclosable(true);
 	connect(m_associatedWin, &ccGLWindow::rotation, this, &ccGraphicalTransformationTool::glRotate);
@@ -773,7 +773,7 @@ void ccGraphicalTransformationTool::stop(bool state)
 		m_associatedWin->setPickingMode(ccGLWindow::DEFAULT_PICKING);
 		m_associatedWin->setUnclosable(false);
 		m_associatedWin->disconnect(this);
-		m_associatedWin->displayNewMessage("[Rotation/Translation mode OFF]",ccGLWindow::UPPER_CENTER_MESSAGE,false,2,ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
+		m_associatedWin->displayNewMessage("[Rotation/Translation mode OFF]", ccGLWindow::UPPER_CENTER_MESSAGE, false, 2, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
 		m_associatedWin->redraw(true, false);
 	}
 

@@ -353,8 +353,10 @@ public:
 
 	//! Sets current picking mode
 	/** Picking can be applied to entities (default), points, triangles, etc.)
+		\param mode					picking mode
+		\param defaultCursorShape	default cursor shape for default, entity or no picking modes
 	**/
-	virtual void setPickingMode(PICKING_MODE mode = DEFAULT_PICKING);
+	virtual void setPickingMode(PICKING_MODE mode = DEFAULT_PICKING, Qt::CursorShape defaultCursorShape = Qt::ArrowCursor);
 
 	//! Returns current picking mode
 	inline virtual PICKING_MODE getPickingMode() const { return m_pickingMode; }
@@ -1378,6 +1380,9 @@ protected: //members
 
 	//! Whether to near and far clipping planes are enabled or not
 	bool m_clippingPlanesEnabled;
+
+	//! Default mouse cursor
+	Qt::CursorShape m_defaultCursorShape;
 };
 
 #ifdef CC_GL_WINDOW_USE_QWINDOW

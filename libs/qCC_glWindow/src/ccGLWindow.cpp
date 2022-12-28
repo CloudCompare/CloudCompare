@@ -397,6 +397,7 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=nullptr*/,
 	, m_lockedRotationAxis(0, 0, 1)
 	, m_texturePoolLastIndex(0)
 	, m_clippingPlanesEnabled(true)
+	, m_defaultCursorShape(Qt::ArrowCursor)
 {
 	//start internal timer
 	m_timer.start();
@@ -3759,7 +3760,7 @@ void ccGLWindow::getContext(CC_DRAW_CONTEXT& CONTEXT)
 //	return QString();
 //}
 
-void ccGLWindow::setPickingMode(PICKING_MODE mode/*=DEFAULT_PICKING*/)
+void ccGLWindow::setPickingMode(PICKING_MODE mode/*=DEFAULT_PICKING*/, Qt::CursorShape defaultCursorShape/*=Qt::ArrowCursor*/)
 {
 	//is the picking mode locked?
 	if (m_pickingModeLocked)
@@ -3775,7 +3776,7 @@ void ccGLWindow::setPickingMode(PICKING_MODE mode/*=DEFAULT_PICKING*/)
 		mode = ENTITY_PICKING;
 	case NO_PICKING:
 	case ENTITY_PICKING:
-		setCursor(QCursor(Qt::ArrowCursor));
+		m_defaultCursorShape = defaultCursorShape;
 		break;
 	case POINT_OR_TRIANGLE_PICKING:
 	case POINT_OR_TRIANGLE_OR_LABEL_PICKING:
@@ -3783,7 +3784,7 @@ void ccGLWindow::setPickingMode(PICKING_MODE mode/*=DEFAULT_PICKING*/)
 	case POINT_PICKING:
 	{
 		const ccGui::ParamStruct& displayParams = getDisplayParameters();
-		setCursor(QCursor(displayParams.pickingCursorShape));
+		m_defaultCursorShape = displayParams.pickingCursorShape;
 	}
 	break;
 	
@@ -3792,6 +3793,7 @@ void ccGLWindow::setPickingMode(PICKING_MODE mode/*=DEFAULT_PICKING*/)
 	}
 
 	m_pickingMode = mode;
+	setCursor(QCursor(m_defaultCursorShape));
 
 	//ccLog::Warning(QString("[%1] Picking mode set to: ").arg(m_uniqueID) + ToString(m_pickingMode));
 }
@@ -3940,7 +3942,7 @@ void ccGLWindow::mousePressEvent(QMouseEvent *event)
 			||	((QApplication::keyboardModifiers() & Qt::ControlModifier) && (m_interactionFlags & INTERACT_CTRL_PAN))
 			)
 		{
-			QApplication::setOverrideCursor(QCursor(Qt::SizeAllCursor));
+			setCursor(QCursor(Qt::SizeAllCursor));
 		}
 
 		if (m_interactionFlags & INTERACT_SIG_RB_CLICKED)
@@ -3955,7 +3957,7 @@ void ccGLWindow::mousePressEvent(QMouseEvent *event)
 		//left click = rotation
 		if (m_interactionFlags & INTERACT_ROTATE)
 		{
-			QApplication::setOverrideCursor(QCursor(Qt::PointingHandCursor));
+			setCursor(QCursor(Qt::ClosedHandCursor));
 		}
 
 		if (m_interactionFlags & INTERACT_SIG_LB_CLICKED)
@@ -4380,7 +4382,6 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 					rotateBaseViewMat(rotMat);
 
 					showPivotSymbol(true);
-					QApplication::changeOverrideCursor(QCursor(Qt::ClosedHandCursor));
 
 					//feedback for 'echo' mode
 					Q_EMIT viewMatRotated(rotMat);
@@ -4505,7 +4506,7 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 	//reset to default state
 	m_mouseButtonPressed = false;
 	m_mouseMoved = false;
-	QApplication::restoreOverrideCursor();
+	setCursor(m_defaultCursorShape);
 
 	if (m_interactionFlags & INTERACT_SIG_BUTTON_RELEASED)
 	{

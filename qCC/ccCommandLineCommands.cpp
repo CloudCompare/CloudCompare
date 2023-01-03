@@ -169,7 +169,7 @@ CommandChangeOutputFormat::CommandChangeOutputFormat(const QString& name, const 
     : ccCommandLineInterface::Command(name, keyword)
 {}
 
-QString CommandChangeOutputFormat::getFileFormatFilter(ccCommandLineInterface &cmd, QString &defaultExt)
+QString CommandChangeOutputFormat::getFileFormatFilter(ccCommandLineInterface& cmd, QString& defaultExt)
 {
 	QString fileFilter;
 	defaultExt.clear();
@@ -177,17 +177,17 @@ QString CommandChangeOutputFormat::getFileFormatFilter(ccCommandLineInterface &c
 	if (!cmd.arguments().isEmpty())
 	{
 		//test if the specified format corresponds to a known file type
-		QString argument = cmd.arguments().front().toUpper();
+		QString extension = cmd.arguments().front().toUpper();
 		cmd.arguments().pop_front();
 
 		const FileIOFilter::FilterContainer& filters = FileIOFilter::GetFilters();
 		
 		for (const auto & filter : filters)
 		{
-			if (argument == filter->getDefaultExtension().toUpper())
+			if (extension == filter->getDefaultExtension().toUpper())
 			{
-				//found
-				fileFilter = filter->getFileFilters(false).first(); //Take the first 'output' file filter by default (could we be smarter?)
+				//found a matching filter
+				fileFilter = filter->getFileFilters(false).first();
 				defaultExt = filter->getDefaultExtension();
 				break;
 			}
@@ -196,7 +196,7 @@ QString CommandChangeOutputFormat::getFileFormatFilter(ccCommandLineInterface &c
 		//haven't found anything?
 		if (fileFilter.isEmpty())
 		{
-			cmd.error(QObject::tr("Unhandled format specifier (%1)").arg(argument));
+			cmd.error(QObject::tr("Unhandled format specifier (%1)").arg(extension));
 		}
 	}
 	else

@@ -56,7 +56,7 @@ static unsigned s_sessionCounter = 0;
 constexpr float FileIOFilter::DEFAULT_PRIORITY;
 
 
-FileIOFilter::FileIOFilter( const FileIOFilter::FilterInfo &info ) :
+FileIOFilter::FileIOFilter( const FilterInfo &info ) :
 	m_filterInfo( info )
 {
 #ifdef QT_DEBUG	
@@ -237,7 +237,7 @@ FileIOFilter::Shared FileIOFilter::GetFilter(const QString& fileFilter, bool onI
 {
 	if (!fileFilter.isEmpty())
 	{
-		for (FilterContainer::const_iterator it=s_ioFilters.begin(); it!=s_ioFilters.end(); ++it)
+		for (FilterContainer::const_iterator it = s_ioFilters.begin(); it != s_ioFilters.end(); ++it)
 		{
 			QStringList otherFilters = (*it)->getFileFilters(onImport);
 			if (otherFilters.contains(fileFilter))
@@ -245,7 +245,7 @@ FileIOFilter::Shared FileIOFilter::GetFilter(const QString& fileFilter, bool onI
 		}
 	}
 
-	return Shared(nullptr);
+	return {};
 }
 
 const FileIOFilter::FilterContainer& FileIOFilter::GetFilters()
@@ -257,7 +257,7 @@ FileIOFilter::Shared FileIOFilter::FindBestFilterForExtension(const QString& ext
 {
 	const QString lowerExt = ext.toLower();
 	
-	for ( const auto &filter : s_ioFilters )
+	for (const auto& filter : s_ioFilters)
 	{
 		if ( filter->m_filterInfo.importExtensions.contains( lowerExt ) )
 		{
@@ -265,14 +265,14 @@ FileIOFilter::Shared FileIOFilter::FindBestFilterForExtension(const QString& ext
 		}
 	}
 
-	return FileIOFilter::Shared( nullptr );
+	return {};
 }
 
 QStringList FileIOFilter::ImportFilterList()
 {
 	QStringList	list{ QObject::tr( "All (*.*)" ) };
 	
-	for ( const auto &filter : s_ioFilters )
+	for (const auto& filter : s_ioFilters)
 	{
 		if ( filter->importSupported() )
 		{
@@ -384,7 +384,7 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 										CC_FILE_ERROR& result,
 										const QString& fileFilter )
 {
-	Shared filter(nullptr);
+	Shared filter;
 	
 	//if the right filter is specified by the caller
 	if (!fileFilter.isEmpty())
@@ -455,7 +455,7 @@ CC_FILE_ERROR FileIOFilter::SaveToFile(	ccHObject* entities,
 	}
 	else
 	{
-		DisplayErrorMessage(result,"saving",filename);
+		DisplayErrorMessage(result, "saving", filename);
 	}
 
 	return result;
@@ -469,7 +469,7 @@ CC_FILE_ERROR FileIOFilter::SaveToFile(	ccHObject* entities,
 	if (fileFilter.isEmpty())
 		return CC_FERR_BAD_ARGUMENT;
 
-	Shared filter = GetFilter(fileFilter,false);
+	Shared filter = GetFilter(fileFilter, false);
 	if (!filter)
 	{
 		ccLog::Error(QString("[Load] Internal error: no filter corresponds to filter '%1'").arg(fileFilter));
@@ -547,7 +547,7 @@ void FileIOFilter::DisplayErrorMessage(CC_FILE_ERROR err, const QString& action,
 		return; //no message will be displayed!
 	}
 
-	QString outputString = QString("An error occurred while %1 '%2': ").arg(action,filename) + errorStr;
+	QString outputString = QString("An error occurred while %1 '%2': ").arg(action, filename) + errorStr;
 	if (warning)
 		ccLog::Warning(outputString);
 	else

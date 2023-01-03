@@ -90,7 +90,7 @@ LasIOFilter::LasIOFilter()
     : FileIOFilter({"LAS IO Filter",
                     3.0f, // priority (same as the old PDAL-based plugin)
                     QStringList{"las", "laz"},
-                    "laz",
+                    "las",
                     QStringList{"LAS file (*.las *.laz)"},
                     QStringList{"LAS file (*.las *.laz)"},
                     Import | Export})

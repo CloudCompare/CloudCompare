@@ -660,7 +660,7 @@ void SaveImage(const ccImage* image, const QString& scanGUID, e57::ImageFile& im
 	{
 		QBuffer buffer(&ba);
 		buffer.open(QIODevice::WriteOnly);
-		image->data().save(&buffer, "PNG"); // writes image into ba in PNG format
+		image->data().save(&buffer, "JPG"); // writes image into ba in PNG format
 	}
 	int imageSize = ba.size();
 

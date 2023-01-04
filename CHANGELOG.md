@@ -96,6 +96,11 @@ v2.13.alpha (???) - (??/??/????)
 		- The shift value is now displayed as a property of the currently selected scalar field
 		- When using the standard LAS I/O filter (PDAL), the user can now set a custom shift for GPS time values
 
+	- E57 files:
+		- Images are now saved internally as JPEG files (faster and smaller)
+		- Sensors associated to images should now be properly shifted if the associated cloud is shifted,
+			or if they are not associated to a cloud
+
 	- Command line:
 		- It is now possible to pass a SF name after -SET_ACTIVE_SF  instead of the field index
 			(use simple quotes if the scalar field name has spaces in it)

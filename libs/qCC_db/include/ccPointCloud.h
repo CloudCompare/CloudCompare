@@ -288,7 +288,7 @@ public: //associated (scan) grid structure
 			, h(grid.h)
 			, validCount(grid.validCount)
 			, minValidIndex(grid.minValidIndex)
-			, maxValidIndex(grid.minValidIndex)
+			, maxValidIndex(grid.maxValidIndex)
 			, indexes(grid.indexes)
 			, colors(grid.colors)
 			, sensorPosition(grid.sensorPosition)

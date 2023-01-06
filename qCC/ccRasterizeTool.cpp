@@ -255,6 +255,7 @@ void ccRasterizeTool::getExportedStats(std::vector<ccRasterGrid::ExportableField
 {
 	stats.clear();
 
+	stats.push_back(ccRasterGrid::PER_CELL_VALUE);
 	if (m_UI->generateStatisticsPopulationCheckBox->isChecked())
 		stats.push_back(ccRasterGrid::PER_CELL_COUNT);
 	if (m_UI->generateStatisticsMinCheckBox->isChecked())

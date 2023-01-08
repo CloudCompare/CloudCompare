@@ -3749,6 +3749,11 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 
 	CCCoreLib::ReferenceCloud duplicatedPoints(const_cast<ccPointCloud*>(this));
 	std::vector<CCVector3> unrolledPoints;
+	std::vector<ScalarType> deviationValues;
+	std::vector<CCVector3> unrolledNormals;
+	bool withNormals = hasNormals();
+
+	try
 	{
 		//compute an estimate of the final point count
 		unsigned newSize = static_cast<unsigned>(std::ceil((stopAngle_deg - startAngle_deg) / 360.0 * size()));
@@ -3757,23 +3762,18 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 			ccLog::Error("Not enough memory");
 			return nullptr;
 		}
+		unrolledPoints.reserve(newSize);
 
-		try
+		if (withNormals)
 		{
-			unrolledPoints.reserve(newSize);
+			//for normals, we can simply store at most one unrolled normal per original one
+			unrolledNormals.resize(size());
 		}
-		catch (const std::bad_alloc&)
+		if (exportDeviationSF)
 		{
-			ccLog::Error("Not enough memory");
-			return nullptr;
+			//same thing for deviation values
+			deviationValues.resize(size());
 		}
-	}
-
-	std::vector<ScalarType> deviationValues;
-	if (exportDeviationSF)
-	try
-	{
-		deviationValues.resize(size());
 	}
 	catch (const std::bad_alloc&)
 	{
@@ -3781,23 +3781,6 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 		return nullptr;
 	}
 
-	std::vector<CCVector3> unrolledNormals;
-	bool withNormals = hasNormals();
-	if (withNormals)
-	{
-		//for normals, we can simply store at most one unrolled normal per original one
-		//same thing for deviation values
-		try
-		{
-			unrolledNormals.resize(size());
-		}
-		catch (const std::bad_alloc&)
-		{
-			//not enough memory
-			return nullptr;
-		}
-	}
-	
 	double startAngle_rad = CCCoreLib::DegreesToRadians( startAngle_deg );
 	double stopAngle_rad = CCCoreLib::DegreesToRadians( stopAngle_deg );
 
@@ -3886,8 +3869,8 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 			{
 			case CYLINDER:
 			{
-				PointCoordinateType delta2;
-				PointCoordinateType longitude2_rad;
+				PointCoordinateType delta2 = 0;
+				PointCoordinateType longitude2_rad = 0;
 				ProjectOnCylinder(AP2, dim, params->radius, delta2, longitude2_rad);
 
 				N2.u[dim.x] = static_cast<PointCoordinateType>((longitude2_rad - longitude_rad) * params->radius);
@@ -3898,9 +3881,9 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 
 			case STRAIGHTENED_CONE:
 			{
-				PointCoordinateType coneAbscissa2;
-				PointCoordinateType delta2;
-				PointCoordinateType longitude2_rad;
+				PointCoordinateType coneAbscissa2 = 0;
+				PointCoordinateType delta2 = 0;
+				PointCoordinateType longitude2_rad = 0;
 				ProjectOnCone(AP2, alpha_rad, dim, coneAbscissa2, delta2, longitude2_rad);
 				//we simply develop the cone as a cylinder
 				N2.u[dim.x] = static_cast<PointCoordinateType>((longitude2_rad - longitude_rad) * params->radius);
@@ -3911,9 +3894,9 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 
 			case STRAIGHTENED_CONE2:
 			{
-				PointCoordinateType coneAbscissa2;
-				PointCoordinateType delta2;
-				PointCoordinateType longitude2_rad;
+				PointCoordinateType coneAbscissa2 = 0;
+				PointCoordinateType delta2 = 0;
+				PointCoordinateType longitude2_rad = 0;
 				ProjectOnCone(AP2, alpha_rad, dim, coneAbscissa2, delta2, longitude2_rad);
 				//we simply develop the cone as a cylinder
 				N2.u[dim.x] = static_cast<PointCoordinateType>((longitude2_rad * coneAbscissa - longitude_rad * coneAbscissa2) * sin_alpha);
@@ -3924,9 +3907,9 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 
 			case CONE:
 			{
-				PointCoordinateType coneAbscissa2;
-				PointCoordinateType delta2;
-				PointCoordinateType longitude2_rad;
+				PointCoordinateType coneAbscissa2 = 0;
+				PointCoordinateType delta2 = 0;
+				PointCoordinateType longitude2_rad = 0;
 				ProjectOnCone(AP2, alpha_rad, dim, coneAbscissa2, delta2, longitude2_rad);
 				//unrolling
 				PointCoordinateType theta2_rad = longitude2_rad * sin_alpha; //sin_alpha is a bit arbitrary here. The aim is mostly to reduce the angular range
@@ -4077,82 +4060,6 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 
 	return clone;
 }
-
-
-//void ccPointCloud::unrollOnCone(PointCoordinateType baseRadius,
-//	double alpha_deg,
-//	const CCVector3& apex,
-//	unsigned char Z/*=2*/,
-//	CCCoreLib::GenericProgressCallback* progressCb/*=nullptr*/)
-//{
-//	assert(Z < 3);
-//	unsigned char X = (Z < 2 ? Z + 1 : 0);
-//	unsigned char Y = (X < 2 ? X + 1 : 0);
-//
-//	unsigned numberOfPoints = size();
-//
-//	CCCoreLib::NormalizedProgress nprogress(progressCb, numberOfPoints);
-//	if (progressCb)
-//	{
-//		if (progressCb->textCanBeEdited())
-//		{
-//			progressCb->setMethodTitle("Unroll (cone)");
-//			progressCb->setInfo(qPrintable(QString("Number of points = %1").arg(numberOfPoints)));
-//		}
-//		progressCb->update(0);
-//		progressCb->start();
-//	}
-//
-//	PointCoordinateType tan_alpha = static_cast<PointCoordinateType>(tan(CCCoreLib::DegreesToRadians(alpha_deg)));
-//	PointCoordinateType cos_alpha = static_cast<PointCoordinateType>(cos(CCCoreLib::DegreesToRadians(alpha_deg)));
-//	PointCoordinateType sin_alpha = static_cast<PointCoordinateType>(sin(CCCoreLib::DegreesToRadians(alpha_deg)));
-//
-//	for (unsigned i = 0; i < numberOfPoints; i++)
-//	{
-//		CCVector3* P = point(i);
-//		PointCoordinateType P0 = P->u[X] - apex.u[X];
-//		PointCoordinateType P1 = P->u[Y] - apex.u[Y];
-//		PointCoordinateType P2 = P->u[Z] - apex.u[Z];
-//
-//		PointCoordinateType u = sqrt(P0 * P0 + P1 * P1);
-//		PointCoordinateType lon = atan2(P0, P1);
-//
-//		//projection on the cone
-//		PointCoordinateType radialDist = (u + P2*tan_alpha);
-//		PointCoordinateType orthoDist = radialDist * cos_alpha;
-//		PointCoordinateType z2 = P2 - orthoDist*sin_alpha; //(P2 + u * tan_alpha) * q;
-//
-//		//we project point
-//		P->u[X] = lon*baseRadius;
-//		P->u[Y] = orthoDist;
-//		P->u[Z] = z2 / cos_alpha + apex.u[Z];
-//
-//		//and its normal if necessary
-//		if (hasNormals())
-//		{
-//			const CCVector3& N = ccNormalVectors::GetNormal(m_normals->getValue(i));
-//
-//			PointCoordinateType dX = cos(lon)*N.u[X] - sin(lon)*N.u[Y];
-//			PointCoordinateType dZ = sin(lon)*N.u[X] + cos(lon)*N.u[Y];
-//
-//			CCVector3 n2;
-//			n2.u[X] = dX;
-//			n2.u[Y] = cos_alpha*dZ - sin_alpha*N.u[Z];
-//			n2.u[Z] = sin_alpha*dZ + cos_alpha*N.u[Z];
-//			n2.normalize();
-//
-//			setPointNormal(i, n2);
-//		}
-//
-//		//process canceled by user?
-//		if (progressCb && !nprogress.oneStep())
-//		{
-//			break;
-//		}
-//	}
-//
-//	refreshBB(); //calls notifyGeometryUpdate + releaseVBOs
-//}
 
 int ccPointCloud::addScalarField(const char* uniqueName)
 {

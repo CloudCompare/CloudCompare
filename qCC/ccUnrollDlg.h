@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,19 +17,17 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_UNROLL_DLG_HEADER
-#define CC_UNROLL_DLG_HEADER
-
 #include <QDialog>
 
 //qCC_db
 #include <ccPointCloud.h>
 
-namespace Ui {
+namespace Ui
+{
 	class UnrollDialog;
 }
 
-//! Dialog: unroll clould on a cylinder or a cone
+//! Dialog: unroll a cloud on a cylinder or a cone
 class ccUnrollDlg : public QDialog
 {
 	Q_OBJECT
@@ -36,7 +36,7 @@ public:
 
 	//! Default constructor
 	explicit ccUnrollDlg(QWidget* parent = nullptr);
-	~ccUnrollDlg();
+	~ccUnrollDlg() override;
 	
 	ccPointCloud::UnrollMode getType() const;
 	int getAxisDimension() const;
@@ -56,9 +56,5 @@ protected:
 	void axisAutoStateChanged(int checkState);
 
 protected:
-	bool coneMode;
-
 	Ui::UnrollDialog* m_ui;
 };
-
-#endif

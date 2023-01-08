@@ -61,6 +61,8 @@ qFacets plugin:
 [*] Add the facet perimeter to the set of exported values
 
 Various:
+[*] Manage viewports as sensors to be able to move/edit them easily (https://www.cloudcompare.org/forum/posting.php?mode=reply&t=6112)
+[*] Option to automatically deleted the source cloud in the 'SF > Filter by value' tool (https://www.cloudcompare.org/forum/viewtopic.php?t=6113)
 [*] Rotate/translate tool: option to rotate entities of a small increment, with button or key (https://www.cloudcompare.org/forum/viewtopic.php?p=26986#p26986)
 [*] Scissors tool: option to inverse the segmentation or to remove visible points (https://www.cloudcompare.org/forum/viewtopic.php?p=26981)
 [*] Voxel display mode (https://towardsdatascience.com/how-to-automate-voxel-modelling-of-3d-point-cloud-with-python-459f4d43a227)

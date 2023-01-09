@@ -2587,26 +2587,6 @@ bool CommandRemoveSF::process(ccCommandLineInterface &cmd)
 		return cmd.error(QObject::tr("Missing parameter: SF index or SF name after %1").arg(COMMAND_REMOVE_SF));
 	}
 
-//	bool paramOk = false;
-//	QString sfIndexStr = cmd.arguments().takeFirst();
-//	int sfIndex = sfIndexStr.toInt(&paramOk);
-//	if (!paramOk)
-//	{
-//		return cmd.error(QObject::tr("Failed to read a numerical parameter: SF index. Got '%1' instead.").arg(sfIndexStr));
-//	}
-//	cmd.print(QObject::tr("\tSF index: %1").arg(sfIndex));
-
-//	if (sfIndex < 0)
-//	{
-//		return cmd.error(QObject::tr("Invalid SF index (positive value expected)"));
-//	}
-
-//	// <PLE>
-//	if (cmd.arguments().empty())
-//	{
-//		return cmd.error(QObject::tr("Missing parameter: scalar field index after \"-%1\"").arg(COMMAND_SET_ACTIVE_SF));
-//	}
-
 	int sfIndex = -1;
 	bool validSFIndex = true;
 	QString sfIndexStr = cmd.arguments().takeFirst();
@@ -2637,16 +2617,8 @@ bool CommandRemoveSF::process(ccCommandLineInterface &cmd)
 			cmd.print(QObject::tr("Set active SF name: '%1'").arg(sfIndexStr));
 		}
 	}
-	if (!validSFIndex || sfIndex == -1)
-	{
-		//this may be a scalar field name
-		//return cmd.error(QObject::tr("Invalid SF index! (after %1)").arg(COMMAND_SET_ACTIVE_SF));
-	}
-	else
-	{
-		cmd.print(QObject::tr("Set active SF index: %1").arg(sfIndex));
-	}
-	// </PLE>
+
+	cmd.print(QObject::tr("Set active SF index: %1").arg(sfIndex));
 
 	for (auto &cloudDesc : cmd.clouds())
 	{

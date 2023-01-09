@@ -1,3 +1,5 @@
+#pragma once
+
 //#######################################################################################
 //#                                                                                     #
 //#                              CLOUDCOMPARE PLUGIN: qCSF                              #
@@ -26,9 +28,6 @@
 //#                                                                                     #
 //#######################################################################################
 
-#ifndef _CSF_H_
-#define _CSF_H_
-
 #include "wlPointCloud.h"
 #include "Cloth.h"
 
@@ -37,23 +36,35 @@
 #include <string>
 
 class ccMainAppInterface;
+class ccPointCloud;
 class QWidget;
 class ccMesh;
 
 class CSF
 {
 public:
-	CSF(wl::PointCloud& cloud);
+
+	//! Parameters
+	struct Parameters
+	{
+		int k_nearest_points = 1;
+		bool smoothSlope = true;
+		double time_step = 0.65;
+		double class_threshold = 0.5;
+		double cloth_resolution = 1.5;
+		int rigidness = 3;
+		int iterations = 500;
+
+		//  constants
+		double clothYHeight = 0.05; // origin cloth height
+		int clothBuffer = 2; // cloth buffer (grid margin size)
+		double gravity = 0.2;
+	};
+
+	CSF(wl::PointCloud& cloud, const Parameters& params);
 	virtual ~CSF() = default;
 
-	//input PC from files
-	bool readPointsFromFile(std::string filename);
-
-	//save the ground points to file
-	void saveGroundPoints(const std::vector<int>& grp, std::string path = "");
-	void saveOffGroundPoints(const std::vector<int>& grp, std::string path = "");
-	
-	//The main program: Do filtering
+	//! The main program: Do filtering
 	bool do_filtering(	std::vector<unsigned>& groundIndexes,
 						std::vector<unsigned>& offGroundIndexes,
 						bool exportClothMesh,
@@ -61,30 +72,20 @@ public:
 						ccMainAppInterface* app = nullptr,
 						QWidget* parent = nullptr);
 
-private:
-	wl::PointCloud& point_cloud;
+	//! Shortcut for CloudCompare clouds
+	/** \return the ground and off-ground clouds if successful
+	**/
+	static bool Apply(	ccPointCloud* cloud,
+						const Parameters& params,
+						ccPointCloud*& groundCloud,
+						ccPointCloud*& offGroundCloud,
+						bool exportClothMesh,
+						ccMesh*& clothMesh,
+						ccMainAppInterface* app = nullptr);
 
 public:
- 
-	struct Parameters
-	{
-		//parameters
-		int k_nearest_points;
 
-		bool bSloopSmooth;
-
-		double time_step;
-
-		double class_threshold;
-
-		double cloth_resolution;
-
-		int rigidness;
-
-		int iterations;
-	};
-	
-	Parameters params;
+private:
+	Parameters m_params;
+	wl::PointCloud& m_pointCloud;
 };
-
-#endif

@@ -104,6 +104,7 @@ v2.13.alpha (???) - (??/??/????)
 	- Command line:
 		- It is now possible to pass a SF name after -SET_ACTIVE_SF  instead of the field index
 			(use simple quotes if the scalar field name has spaces in it)
+		- The -SET_ACTIVE_SF command can now be applied to the loaded meshes
 		- The -SF_COLOR_SCALE option now works on meshes (vertices) as well
 		- The -FILTER_SF option now works on meshes as well
 		- New sub-option for the -C2C_DIST and -C2M_DIST commands: -SPLIT_XY_Z to split the distance between the z component and the xy plane component
@@ -140,6 +141,9 @@ v2.13.alpha (???) - (??/??/????)
 	- GBL sensor edition dialog
 		- CC will now remember the last parameters used to create a sensor (not to edit one though)
 
+	- CSF plugin
+		- the CSF filter can now be applied on multiple clouds at once (both in the GUI and the command line version)
+
 - Bug fix:
 	- PCD: when transforming a cloud with a sensor (either manually, or via a registration tool, or via Edit > Apply Tranformation) and then exporting
 		the cloud to a PCD file, both the points AND the sensor were transformed, resulting in the PCD file coordinates to be in the wrong coordinate
@@ -160,6 +164,7 @@ v2.13.alpha (???) - (??/??/????)
 	- When applying the viewport of a calibrated image (= image with an associated sensor), the camera f.o.v. was applied instead of a smarter value,
 		taking the 3D view dimensions into account (resulting in a bad match between the 3D scene and the overlaid image)
 	- The PCL plugin's 'MLS' tool dialog was broken
+	- the CSF plugin command line could truncate the exported clouds filename if floating point values were present in this filename
 
 v2.12.4 (Kyiv) - (14/07/2022)
 ----------------------

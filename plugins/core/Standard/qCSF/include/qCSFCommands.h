@@ -51,7 +51,6 @@ static const char COMMAND_CSF_CLASS_THRESHOLD[] = "CLASS_THRESHOLD";
 static const char COMMAND_CSF_EXPORT_GROUND[] = "EXPORT_GROUND";
 static const char COMMAND_CSF_EXPORT_OFFGROUND[] = "EXPORT_OFFGROUND";
 
-
 struct CommandCSF : public ccCommandLineInterface::Command
 {
 	CommandCSF() : ccCommandLineInterface::Command("CSF", COMMAND_CSF) {}
@@ -60,39 +59,15 @@ struct CommandCSF : public ccCommandLineInterface::Command
 	{
 		cmd.print("[CSF]");
 
-		if (cmd.clouds().size() < 1) 
+		if (cmd.clouds().empty()) 
 		{
-			cmd.error("No cloud loaded (1 is expected)");
+			cmd.error("No cloud loaded");
 			return false;
-		}
-
-		ccPointCloud* pc = cmd.clouds()[0].pc;
-
-		//Convert CC point cloud to CSF type
-		unsigned count = pc->size();
-		wl::PointCloud csfPC;
-		try 
-		{
-			csfPC.reserve(count);
-		}
-		catch (const std::bad_alloc&) 
-		{
-			return cmd.error("Not enough memory!");
-		}
-
-		for (unsigned i = 0; i < count; i++) 
-		{
-			const CCVector3* P = pc->getPoint(i);
-			wl::Point tmpPoint;
-			tmpPoint.x = P->x;
-			tmpPoint.y = -P->z;
-			tmpPoint.z = P->y;
-			csfPC.push_back(tmpPoint);
 		}
 
 		//initial parameters
 		bool csfPostprocessing = false;
-		double clothResolution = 2;
+		double clothResolution = 2.0;
 		double classThreshold = 0.5;
 		int csfRigidness = 2;
 		int maxIteration = 500;
@@ -127,7 +102,8 @@ struct CommandCSF : public ccCommandLineInterface::Command
 					cmd.error("Unknown scene parameter. Defaulting to relief");
 					csfRigidness = 2;
 				}
-			}else if (ccCommandLineInterface::IsCommand(ARGUMENT, COMMAND_CSF_PROC_SLOPE)) 
+			}
+			else if (ccCommandLineInterface::IsCommand(ARGUMENT, COMMAND_CSF_PROC_SLOPE)) 
 			{
 				cmd.arguments().pop_front();
 				cmd.print("Slope processing turned on");
@@ -184,99 +160,82 @@ struct CommandCSF : public ccCommandLineInterface::Command
 				break;
 			}
 		}
-		
-		//instantiation a CSF class
-		CSF csf(csfPC);
 
-		//setup paramter
-		csf.params.k_nearest_points = 1;
-		csf.params.bSloopSmooth = csfPostprocessing;
-		csf.params.time_step = 0.65;
-		csf.params.class_threshold = classThreshold;
-		csf.params.cloth_resolution = clothResolution;
-		csf.params.rigidness = csfRigidness;
-		csf.params.iterations = maxIteration;
-
-		std::vector<unsigned> groundIndexes;
-		std::vector<unsigned> offGroundIndexes;
-		ccMesh* clothMesh = nullptr;
-		if (!csf.do_filtering(groundIndexes, offGroundIndexes, false, clothMesh, nullptr, cmd.widgetParent()))
+		//setup parameters
+		CSF::Parameters csfParams;
 		{
-			return cmd.error("Process failed");
+			csfParams.smoothSlope = csfPostprocessing;
+			csfParams.class_threshold = classThreshold;
+			csfParams.cloth_resolution = clothResolution;
+			csfParams.rigidness = csfRigidness;
+			csfParams.iterations = maxIteration;
 		}
 
-		cmd.print(QString("[CSF] %1% of points classified as ground points").arg((groundIndexes.size() * 100.0) / count, 0, 'f', 2));
+		std::vector<CLCloudDesc> newClouds;
 
-		//extract ground subset
-		ccPointCloud* groundpoint = nullptr;
+		for (CLCloudDesc& desc : cmd.clouds())
 		{
-			CCCoreLib::ReferenceCloud groundpc(pc);
-			if (groundpc.reserve(static_cast<unsigned>(groundIndexes.size()))) 
+			ccPointCloud* pc = desc.pc;
+
+			//Convert CC point cloud to CSF type
+			unsigned count = pc->size();
+			if (count == 0)
 			{
-				for (unsigned j = 0; j < groundIndexes.size(); ++j)
+				cmd.print(QString("Cloud %1 is empty").arg(pc->getName()));
+				continue;
+			}
+
+			ccPointCloud* groundCloud = nullptr;
+			ccPointCloud* offGroundCloud = nullptr;
+			ccMesh* clothMesh = nullptr;
+
+			if (!CSF::Apply(pc,
+							csfParams,
+							groundCloud,
+							offGroundCloud,
+							false,
+							clothMesh,
+							nullptr))
+			{
+				return cmd.error("Not enough memory");
+			}
+
+			//store ground subset
+			if (groundCloud)
+			{
+				//add cloud to the pool of new clouds
+				CLCloudDesc groundDesc(groundCloud, desc.basename + QString("_ground_points"), desc.path, -1);
+				newClouds.push_back(groundDesc);
+
+				if (exportGround)
 				{
-					groundpc.addPointIndex(groundIndexes[j]);
+					QString errorStr = cmd.exportEntity(groundDesc, QString(), nullptr, ccCommandLineInterface::ExportOption::ForceNoTimestamp);
+					if (!errorStr.isEmpty())
+					{
+						cmd.error(errorStr);
+					}
 				}
-				groundpoint = pc->partialClone(&groundpc);
 			}
-		}
-		if (!groundpoint)
-		{
-			cmd.print("Failed to extract the ground subset (not enough memory)");
-		}
-		
-		ccPointCloud* offgroundpoint = nullptr;
-		{
-			CCCoreLib::ReferenceCloud offgroundpc(pc);
-			if (offgroundpc.reserve(static_cast<unsigned>(offGroundIndexes.size())))
+
+			//store off-ground subset
+			if (offGroundCloud)
 			{
-				for (unsigned k = 0; k < offGroundIndexes.size(); ++k)
+				CLCloudDesc offgroundDesc(offGroundCloud, desc.basename + QString("_offground_points"), desc.path, -1);
+				newClouds.push_back(offgroundDesc);
+				if (exportOffground)
 				{
-					offgroundpc.addPointIndex(offGroundIndexes[k]);
+					QString errorStr = cmd.exportEntity(offgroundDesc, QString(), nullptr, ccCommandLineInterface::ExportOption::ForceNoTimestamp);
+					if (!errorStr.isEmpty())
+					{
+						cmd.error(errorStr);
+					}
 				}
-				offgroundpoint = pc->partialClone(&offgroundpc);
-			}
-		}
-		if (!offgroundpoint)
-		{
-			cmd.print("Failed to extract the off-ground subset (not enough memory)");
-			if (!groundpoint)
-			{
-				return false;
 			}
 		}
 
-		QString baseName = cmd.clouds()[0].basename;
-
+		// replace the original clouds by the new ones
 		cmd.removeClouds();
-		
-		if (groundpoint)
-		{
-			CLCloudDesc groundDesc(groundpoint, baseName + QObject::tr("_ground_points"), -1);//add cloud to the current pool
-			cmd.clouds().push_back(groundDesc);
-			if (exportGround)
-			{
-				QString errorStr = cmd.exportEntity(groundDesc, QString(), nullptr, ccCommandLineInterface::ExportOption::ForceNoTimestamp);
-				if (!errorStr.isEmpty())
-				{
-					cmd.error(errorStr);
-				}
-			}
-		}
-
-		if (offgroundpoint)
-		{
-			CLCloudDesc offgroundDesc(offgroundpoint, baseName + QObject::tr("_offground_points"), -1);
-			cmd.clouds().push_back(offgroundDesc);
-			if (exportOffground)
-			{
-				QString errorStr = cmd.exportEntity(offgroundDesc, QString(), nullptr, ccCommandLineInterface::ExportOption::ForceNoTimestamp);
-				if (!errorStr.isEmpty())
-				{
-					cmd.error(errorStr);
-				}
-			}
-		}
+		cmd.clouds() = newClouds;
 
 		return true;
 	}

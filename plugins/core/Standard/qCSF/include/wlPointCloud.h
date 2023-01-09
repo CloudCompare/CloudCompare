@@ -53,11 +53,12 @@ namespace wl
 		{}
 	};
 
-	class PointCloud : public std::vector < Point >
+	//! Point cloud
+	class PointCloud : public std::vector<Point>
 	{
 	public:
 		
-		void computeBoundingBox(Point& bbMin, Point& bbMax)
+		void computeBoundingBox(Point& bbMin, Point& bbMax) const
 		{
 			if (empty())
 			{
@@ -66,7 +67,7 @@ namespace wl
 			}
 
 			bbMin = bbMax = at(0);
-			for (std::size_t i = 1; i < size(); i++)
+			for (std::size_t i = 1; i < size(); ++i)
 			{
 				const wl::Point& P = at(i);
 				for (int d = 0; d < 3; ++d)

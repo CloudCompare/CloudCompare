@@ -62,7 +62,7 @@ Cloth::Cloth(	const Vec3& _origin_pos,
 {
 	particles.resize(num_particles_width*num_particles_height); //I am essentially using this vector as an array with room for num_particles_width*num_particles_height particles
 
-	double time_step2 = time_step*time_step;
+	double squareTimeStep = time_step * time_step;
 
 	// creating particles in a grid
 	for (int i = 0; i < num_particles_width; i++)
@@ -73,16 +73,16 @@ Cloth::Cloth(	const Vec3& _origin_pos,
 						origin_pos.y,
 						origin_pos.z + j * step_y);
 
-			particles[j*num_particles_width + i] = Particle(pos, time_step2); // insert particle in column i at j'th row
+			particles[j*num_particles_width + i] = Particle(pos, squareTimeStep); // insert particle in column i at j'th row
 			particles[j*num_particles_width + i].pos_x = i;
 			particles[j*num_particles_width + i].pos_y = j;
 		}
 	}
 
 	// Connecting immediate neighbor particles with constraints (distance 1 and sqrt(2) in the grid)
-	for (int x = 0; x<num_particles_width; x++)
+	for (int x = 0; x < num_particles_width; x++)
 	{
-		for (int y = 0; y<num_particles_height; y++)
+		for (int y = 0; y < num_particles_height; y++)
 		{
 			if (x < num_particles_width - 1)
 			{
@@ -136,8 +136,8 @@ ccMesh* Cloth::toMesh() const
 	vertices->setEnabled(false);
 	unsigned vertCount = static_cast<unsigned>(getSize());
 	unsigned triCount = static_cast<unsigned>((num_particles_height - 1) * (num_particles_width - 1) * 2);
-	if (!vertices->reserve(vertCount)
-		|| !mesh->reserve(triCount))
+	if (	!vertices->reserve(vertCount)
+		||	!mesh->reserve(triCount) )
 	{
 		//not enough memory to generate the cloth mesh
 		delete mesh;
@@ -157,7 +157,7 @@ ccMesh* Cloth::toMesh() const
 	//and create the triangles
 	for (int x = 0; x < num_particles_width - 1; ++x)
 	{
-		for (int y = 0; y < num_particles_height-1; ++y)
+		for (int y = 0; y < num_particles_height - 1; ++y)
 		{
 			// A ---------- B
 			// |            |
@@ -183,17 +183,14 @@ double Cloth::timeStep()
 	{
 		particles[i].timeStep();
 	}
-/*
-Instead of interating over all the constraints several times, we 
-compute the overall displacement of a particle accroding to the rigidness
-*/
 
+	//Instead of interating over all the constraints several times, we 
+	//compute the overall displacement of a particle accroding to the rigidness
 #pragma omp parallel for
 	for (int j = 0; j < particleCount; j++)
 	{
 		particles[j].satisfyConstraintSelf(constraint_iterations);
 	}
-
 
 //	for (int i = 0; i<constraint_iterations; i++) // iterate over all constraints several times
 //	{
@@ -204,7 +201,7 @@ compute the overall displacement of a particle accroding to the rigidness
 //		}
 //	}
 
-	double maxDiff = 0;
+	double maxDiff = 0.0;
 //#pragma omp parallel for //see https://github.com/CloudCompare/CloudCompare/issues/909
 	for (int i = 0; i < particleCount; i++)
 	{

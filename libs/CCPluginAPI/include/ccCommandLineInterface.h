@@ -186,10 +186,10 @@ public: //virtual methods
 	//! Exports a cloud or a mesh
 	/** \return error string (if any)
 	**/
-	virtual QString exportEntity(CLEntityDesc& entityDesc,
-		const QString &suffix = QString(),
-		QString* outputFilename = nullptr,
-		ccCommandLineInterface::ExportOptions options = ExportOption::NoOptions) = 0;
+	virtual QString exportEntity(	CLEntityDesc& entityDesc,
+									const QString &suffix = QString(),
+									QString* outputFilename = nullptr,
+									ccCommandLineInterface::ExportOptions options = ExportOption::NoOptions) = 0;
 
 	//! Saves all clouds
 	/** \param suffix optional suffix

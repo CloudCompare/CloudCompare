@@ -2481,9 +2481,9 @@ bool CommandSetActiveSF::process(ccCommandLineInterface& cmd)
 		cmd.print(QObject::tr("Set active S.F. index: %1").arg(sfIndex));
 	}
 	
-	if (cmd.clouds().empty())
+	if (cmd.clouds().empty() && cmd.meshes().empty())
 	{
-		return cmd.error(QObject::tr("No point cloud loaded! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_SET_ACTIVE_SF));
+		return cmd.error(QObject::tr("No point cloud nor mesh loaded! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_SET_ACTIVE_SF));
 	}
 	
 	for (CLCloudDesc& desc : cmd.clouds())
@@ -2516,6 +2516,37 @@ bool CommandSetActiveSF::process(ccCommandLineInterface& cmd)
 		}
 	}
 	
+	for (CLMeshDesc& desc : cmd.meshes())
+	{
+		ccPointCloud* pc = ccHObjectCaster::ToPointCloud(desc.mesh);
+		if (pc)
+		{
+			if (sfIndex < static_cast<int>(pc->getNumberOfScalarFields()))
+			{
+				int thisSFIndex = sfIndex;
+				if (sfIndex == -2)
+				{
+					thisSFIndex = static_cast<int>(pc->getNumberOfScalarFields()) - 1;
+				}
+				else if (sfIndex == -1)
+				{
+					//check if this cloud has a scalar field with the input name
+					thisSFIndex = pc->getScalarFieldIndexByName(qPrintable(sfIndexStr));
+					if (thisSFIndex < 0)
+					{
+						cmd.warning(QObject::tr("Mesh '%1' vertices have no SF named '%2'").arg(desc.mesh->getName()).arg(sfIndexStr));
+						continue;
+					}
+				}
+				pc->setCurrentScalarField(thisSFIndex);
+			}
+			else
+			{
+				cmd.warning(QObject::tr("Mesh '%1' vertices have less scalar fields than the index to select!").arg(desc.mesh->getName()));
+			}
+		}
+	}
+
 	return true;
 }
 

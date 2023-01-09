@@ -104,6 +104,7 @@ v2.13.alpha (???) - (??/??/????)
 	- Command line:
 		- It is now possible to pass a SF name after -SET_ACTIVE_SF  instead of the field index
 			(use simple quotes if the scalar field name has spaces in it)
+		- The -SET_ACTIVE_SF command can now be applied to the loaded meshes
 		- The -SF_COLOR_SCALE option now works on meshes (vertices) as well
 		- The -FILTER_SF option now works on meshes as well
 		- New sub-option for the -C2C_DIST and -C2M_DIST commands: -SPLIT_XY_Z to split the distance between the z component and the xy plane component

@@ -663,23 +663,27 @@ public: //other methods
 	**/
 	void hidePointsByScalarValue(ScalarType minVal, ScalarType maxVal);
 
+	//! Unrolling mode (see ccPointCloud::unroll)
 	enum UnrollMode { CYLINDER = 0, CONE = 1, STRAIGHTENED_CONE = 2, STRAIGHTENED_CONE2 = 3 };
 
+	//! Base unrolling parameters
 	struct UnrollBaseParams
 	{
-		PointCoordinateType radius;	//!< unrolling cylinder radius (or cone base radius)
-		unsigned char axisDim;		//!< unrolling cylinder/cone axis (X=0, Y=1 or Z=2)
+		PointCoordinateType radius;	//!< Unrolling cylinder radius (or cone base radius)
+		unsigned char axisDim;		//!< Unrolling cylinder/cone axis (X=0, Y=1 or Z=2)
 	};
 
+	//! Cylinder unrolling parameters
 	struct UnrollCylinderParams : public UnrollBaseParams
 	{
-		CCVector3 center;			//! A point belonging to the cylinder axis
+		CCVector3 center;			//!< A point belonging to the cylinder axis
 	};
 
+	//! Cone unrolling parameters
 	struct UnrollConeParams : public UnrollBaseParams
 	{
-		CCVector3 apex;				//! Cone apex
-		double coneAngle_deg;		//! Cone aperture angle (in degrees)
+		CCVector3 apex;				//!< Cone apex
+		double coneAngle_deg;		//!< Cone aperture angle (in degrees)
 	};
 
 	//! Unrolls the cloud and its normals on a cylinder or a cone
@@ -687,7 +691,7 @@ public: //other methods
 		apart that it can also handle the cloud normals.
 		\param mode unrolling mode
 		\param params unrolling parameters (must match the unrolling mode)
-		\param exportDeviationSF to export the deviation fro the ideal cone as a scalar field
+		\param exportDeviationSF to export the deviations from the ideal shape as a scalar field
 		\param startAngle_deg start angle (in degrees) - 0 corresponds to +X (east)
 		\param stopAngle_deg stop angle (in degrees)
 		\param progressCb for progress notification

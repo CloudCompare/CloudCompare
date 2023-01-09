@@ -904,7 +904,7 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 		{
 			if (visibilityArray[i] == CCCoreLib::POINT_VISIBLE)
 			{
-				const CCVector3 *P3D = cloud->getPoint(i);
+				const CCVector3* P3D = cloud->getPoint(i);
 
 				CCVector3d Q2D;
 				bool pointInFrustum = false;
@@ -1107,7 +1107,7 @@ void ccGraphicalSegmentationTool::doActionUseExistingPolyline()
 				return;
 			assert(index >= 0 && index < static_cast<int>(polylines.size()));
 			assert(polylines[index]->isA(CC_TYPES::POLY_LINE));
-			ccPolyline *poly = static_cast<ccPolyline *>(polylines[index]);
+			ccPolyline* poly = static_cast<ccPolyline*>(polylines[index]);
 
 			//look for an associated viewport
 			ccHObject::Container viewports;
@@ -1142,7 +1142,7 @@ void ccGraphicalSegmentationTool::doActionUseExistingPolyline()
 
 			//duplicate polyline 'a minima' (only points and indexes + closed state)
 			if (	m_polyVertices->reserve(vertices->size() + (poly->isClosed() ? 0 : 1))
-					&&	m_segmentationPoly->reserve(poly->size() + (poly->isClosed() ? 0 : 1)))
+				&&	m_segmentationPoly->reserve(poly->size() + (poly->isClosed() ? 0 : 1)))
 			{
 				for (unsigned i = 0; i < vertices->size(); ++i)
 				{

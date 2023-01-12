@@ -4851,9 +4851,9 @@ bool CommandSFArithmetic::process(ccCommandLineInterface& cmd)
 		{
 			return cmd.error(QObject::tr("Unknown operation! (%1)").arg(opName));
 		}
-		else if (operation <= ccScalarFieldArithmeticsDlg::DIVIDE)
+		else if (operation <= ccScalarFieldArithmeticsDlg::DIVIDE || operation == ccScalarFieldArithmeticsDlg::SET)
 		{
-			return cmd.error(QObject::tr("Operation %1 can't be applied with %2").arg(opName, COMMAND_SF_ARITHMETIC));
+			return cmd.error(QObject::tr("Operation %1 can't be applied with %2. Consider using the %3 command").arg(opName, COMMAND_SF_ARITHMETIC, COMMAND_SF_OP));
 		}
 	}
 
@@ -4964,7 +4964,7 @@ bool CommandSFOperation::process(ccCommandLineInterface& cmd)
 		}
 		else if (operation > ccScalarFieldArithmeticsDlg::DIVIDE && operation != ccScalarFieldArithmeticsDlg::SET)
 		{
-			return cmd.error(QObject::tr("Operation %1 can't be applied with %2").arg(opName, COMMAND_SF_OP));
+			return cmd.error(QObject::tr("Operation %1 can't be applied with %2. Consider using the %3 command").arg(opName, COMMAND_SF_OP, COMMAND_SF_ARITHMETIC));
 		}
 	}
 	

@@ -60,6 +60,7 @@ public:
 						INT			= 16,
 						INVERSE		= 17,
 						SET			= 18,
+						ABS			= 19,
 						/* Invalid enum. (always last) */
 						INVALID		= 255
 	};

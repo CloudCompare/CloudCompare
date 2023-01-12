@@ -34,9 +34,9 @@
 #include <cmath>
 
 //number of valid operations
-constexpr unsigned s_opCount = 19;
+constexpr unsigned s_opCount = 20;
 //operation names
-constexpr char s_opNames[s_opCount][8] = {"add", "sub", "mult", "div", "sqrt", "pow2", "pow3", "exp", "log", "log10", "cos", "sin", "tan", "acos", "asin", "atan", "int", "inverse", "set" };
+constexpr char s_opNames[s_opCount][8] = {"add", "sub", "mult", "div", "sqrt", "pow2", "pow3", "exp", "log", "log10", "cos", "sin", "tan", "acos", "asin", "atan", "int", "inverse", "set", "abs" };
 
 //semi persitent
 static int s_previouslySelectedOperationIndex = 1;
@@ -72,7 +72,7 @@ ccScalarFieldArithmeticsDlg::ccScalarFieldArithmeticsDlg(	ccPointCloud* cloud,
 
 		sfLabels << "[Constant value]";
 		m_ui->sf2ComboBox->addItems(sfLabels);
-		m_ui->sf2ComboBox->setCurrentIndex(std::min<unsigned>(1,sfCount-1));
+		m_ui->sf2ComboBox->setCurrentIndex(std::min<unsigned>(1, sfCount - 1));
 	}
 
 	//connect signals/slots
@@ -442,6 +442,9 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 				break;
 			case SET:
 				val = sf2Desc->constantValue;
+				break;
+			case ABS:
+				val = std::abs(val1);
 				break;
 			default:
 				assert(false);

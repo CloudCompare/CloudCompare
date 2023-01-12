@@ -101,6 +101,12 @@ v2.13.alpha (???) - (??/??/????)
 		- Sensors associated to images should now be properly shifted if the associated cloud is shifted,
 			or if they are not associated to a cloud
 
+	- SF Arithmetic tool:
+		- New operation: 'SET' (to set a constant value)
+			- this operation is also accessible via the command line (with the -SF_OP command)
+		- New operation: 'ABS' (to compute the absolue value)
+			- this operation is also accessible via the command line (with the -SF_ARITHMETIC command)
+
 	- Command line:
 		- It is now possible to pass a SF name after -SET_ACTIVE_SF  instead of the field index
 			(use simple quotes if the scalar field name has spaces in it)

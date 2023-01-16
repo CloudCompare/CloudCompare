@@ -1424,7 +1424,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(	bool exportHeightStats,
 								{
 									size_t index = static_cast<size_t>(percentileValue * cellPointVal.size() / 100.0);
 									assert(index < cellPointVal.size());
-									sVal = static_cast<ScalarType>(cellPointVal[std::max(index, cellPointVal.size() - 1)]);
+									sVal = static_cast<ScalarType>(cellPointVal[std::min(index, cellPointVal.size() - 1)]);
 								}
 								break;
 								case PER_CELL_UNIQUE_COUNT_VALUE:

@@ -209,7 +209,7 @@ QString ccCommandLineParser::getExportFilename(	const CLEntityDesc& entityDesc,
 
 	if (!extension.isEmpty())
 	{
-		outputFilename += QString(".%1").arg(extension);
+		outputFilename += '.' + extension;
 	}
 
 	if (baseOutputFilename)
@@ -219,11 +219,10 @@ QString ccCommandLineParser::getExportFilename(	const CLEntityDesc& entityDesc,
 
 	if (!entityDesc.path.isEmpty())
 	{
-		outputFilename.prepend(QString("%1/").arg(entityDesc.path));
+		outputFilename.prepend(entityDesc.path + '/');
 	}
 
 	return outputFilename;
-
 }
 
 QString ccCommandLineParser::exportEntity(	CLEntityDesc& entityDesc,
@@ -268,7 +267,12 @@ QString ccCommandLineParser::exportEntity(	CLEntityDesc& entityDesc,
 			format = m_hierarchyExportFormat;
 		}
 	}
-	QString outputFilename = getExportFilename(entityDesc, extension, suffix, baseOutputFilename, options.testFlag(ExportOption::ForceNoTimestamp));
+
+	QString outputFilename = getExportFilename(	entityDesc,
+												extension,
+												suffix,
+												baseOutputFilename,
+												options.testFlag(ExportOption::ForceNoTimestamp) );
 	if (outputFilename.isEmpty())
 	{
 		return QString();
@@ -347,6 +351,7 @@ void ccCommandLineParser::removeClouds(bool onlyLast/*=false*/)
 	{
 		delete m_clouds.back().pc;
 		m_clouds.pop_back();
+
 		if (onlyLast)
 			break;
 	}
@@ -356,9 +361,9 @@ void ccCommandLineParser::removeMeshes(bool onlyLast/*=false*/)
 {
 	while (!m_meshes.empty())
 	{
-		CLMeshDesc& desc = m_meshes.back();
-		delete desc.mesh;
+		delete m_meshes.back().mesh;
 		m_meshes.pop_back();
+
 		if (onlyLast)
 			break;
 	}

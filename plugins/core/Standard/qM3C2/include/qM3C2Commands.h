@@ -69,7 +69,7 @@ struct CommandM3C2 : public ccCommandLineInterface::Command
 
 		if (outputCloud)
 		{
-			CLCloudDesc cloudDesc(outputCloud, cmd.clouds()[0].basename + QObject::tr("_M3C2"), cmd.clouds()[0].path);
+			CLCloudDesc cloudDesc(outputCloud, cmd.clouds().front().basename + QObject::tr("_M3C2"), cmd.clouds().front().path);
 			if (cmd.autoSaveMode())
 			{
 				QString errorStr = cmd.exportEntity(cloudDesc, QString(), 0, ccCommandLineInterface::ExportOption::ForceNoTimestamp);

@@ -173,7 +173,8 @@ v2.13.alpha (???) - (??/??/????)
 	- When applying the viewport of a calibrated image (= image with an associated sensor), the camera f.o.v. was applied instead of a smarter value,
 		taking the 3D view dimensions into account (resulting in a bad match between the 3D scene and the overlaid image)
 	- The PCL plugin's 'MLS' tool dialog was broken
-	- the CSF plugin command line could truncate the exported clouds filename if floating point values were present in this filename
+	- The CSF plugin command line could truncate the exported clouds filename if floating point values were present in this filename
+	- The colors of the 'Compute Stat. Params' histogram could be wrong if the associated color scale was 'absolute'
 
 v2.12.4 (Kyiv) - (14/07/2022)
 ----------------------

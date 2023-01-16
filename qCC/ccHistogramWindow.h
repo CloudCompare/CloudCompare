@@ -78,6 +78,13 @@ public:
 						double minVal,
 						double maxVal);
 
+	//! Creates histogram from a bin array (each bin = number of elements per class)
+	/** Number of classes can't be modified.
+		\param histoValues array of bins
+		\param sf associated scalar field
+	**/
+	void fromBinArray(	const std::vector<unsigned>& histoValues,
+						ccScalarField* sf );
 	//! Sets overlay curve values
 	/** The curve will only appear over an histogram
 		\param curveValues curve points 'Y' coordinates only (regularly sampled between the min and max histogram values)

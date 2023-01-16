@@ -2795,13 +2795,11 @@ namespace ccEntityAction
 				hDlg->setWindowTitle(QObject::tr("[Distribution fitting]"));
 				
 				ccHistogramWindow* histogram = hDlg->window();
-				histogram->fromBinArray(histo, sf->getMin(), sf->getMax());
+				histogram->fromBinArray(histo, sf);
 				histo.clear();
 				histogram->setCurveValues(npis);
 				npis.clear();
 				histogram->setTitle(description);
-				histogram->setColorScheme(ccHistogramWindow::USE_CUSTOM_COLOR_SCALE);
-				histogram->setColorScale(sf->getColorScale());
 				histogram->setAxisLabels(sf->getName(), QObject::tr("Count"));
 				histogram->refresh();
 				

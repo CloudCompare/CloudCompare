@@ -183,6 +183,38 @@ void ccHistogramWindow::fromSF(	ccScalarField* sf,
 };
 
 void ccHistogramWindow::fromBinArray(	const std::vector<unsigned>& histoValues,
+										ccScalarField* sf )
+{
+	try
+	{
+		m_histoValues = histoValues;
+	}
+	catch (const std::bad_alloc&)
+	{
+		ccLog::Warning("[ccHistogramWindow::fromBinArray] Not enough memory!");
+		return;
+	}
+
+	if (sf && m_associatedSF != sf)
+	{
+		if (m_associatedSF)
+			m_associatedSF->release();
+		m_associatedSF = sf;
+		if (m_associatedSF)
+			m_associatedSF->link();
+	}
+
+	m_minVal = m_associatedSF ? m_associatedSF->getMin() : 0;
+	m_maxVal = m_associatedSF ? m_associatedSF->getMax() : 0;
+	m_numberOfClassesCanBeChanged = false;
+
+	//update max histogram value
+	m_maxHistoVal = getMaxHistoVal();
+
+	setColorScheme(USE_SF_SCALE);
+}
+
+void ccHistogramWindow::fromBinArray(	const std::vector<unsigned>& histoValues,
 										double minVal,
 										double maxVal)
 {
@@ -264,10 +296,10 @@ bool ccHistogramWindow::computeBinArrayFromSF(size_t binCount)
 	if (range > 0.0)
 	{
 		unsigned count = m_associatedSF->currentSize();
-		double step = range / static_cast<double>(binCount);
+		double step = range / binCount;
 		for (unsigned i = 0; i < count; ++i)
 		{
-			double val = static_cast<double>(m_associatedSF->getValue(i));
+			double val = m_associatedSF->getValue(i);
 
 			//we ignore values outside of [m_minVal,m_maxVal] (works fro NaN values as well)
 			if (/*ccScalarField::ValidValue(val) &&*/val >= m_minVal && val <= m_maxVal)
@@ -341,7 +373,7 @@ void ccHistogramWindow::refreshBars()
 		for (int i = 0; i < histoSize; ++i)
 		{
 			//we take the 'normalized' value at the middle of the class
-			double normVal = (static_cast<double>(i)+0.5) / histoSize;
+			double normVal = (i + 0.5) / histoSize;
 
 			keyData[i] = m_minVal + normVal * (m_maxVal - m_minVal);
 			valueData[i] = m_histoValues[i];
@@ -485,7 +517,7 @@ void ccHistogramWindow::refresh()
 		for (int i = 0; i < histoSize; ++i)
 		{
 			//we take the 'normalized' value at the middle of the class
-			double normVal = (static_cast<double>(i)+0.5) / histoSize;
+			double normVal = (i + 0.5) / histoSize;
 
 			totalSum += m_histoValues[i];
 			if (normVal < m_verticalIndicatorPositionPercent)
@@ -510,7 +542,16 @@ void ccHistogramWindow::refresh()
 				{
 					//use default gradient
 					assert(colorScale);
-					col = colorScale->getColorByRelativePos(normVal);
+					if (colorScale->isRelative())
+					{
+						col = colorScale->getColorByRelativePos(normVal);
+					}
+					else
+					{
+						double relativePos = colorScale->getRelativePosition(keyData[i]);
+
+						col = colorScale->getColorByRelativePos(std::max(0.0,std::min(1.0, relativePos)));
+					}
 				}
 				if (!col) //hidden values may have no associated color!
 				{
@@ -540,7 +581,7 @@ void ccHistogramWindow::refresh()
 		double step = (m_maxVal - m_minVal) / (curveSize - 1);
 		for (int i = 0; i < curveSize; ++i)
 		{
-			x[i] = m_minVal + (static_cast<double>(i)/*+0.5*/) * step;
+			x[i] = m_minVal + (i/* + 0.5*/) * step;
 			y[i] = m_curveValues[i];
 		}
 
@@ -627,7 +668,7 @@ void ccHistogramWindow::refresh()
 		unsigned bin = static_cast<unsigned>(m_verticalIndicatorPositionPercent * m_histoValues.size());
 		QString valueStr = QString("bin %0").arg(bin);
 		m_vertBar->setText(valueStr);
-		valueStr = QString("< %0 %").arg(100.0*static_cast<double>(partialSum) / static_cast<double>(totalSum), 0, 'f', 3);
+		valueStr = QString("< %0 %").arg((100.0 * partialSum) / totalSum, 0, 'f', 3);
 		m_vertBar->appendText(valueStr);
 		valueStr = QString("val = %0").arg(m_minVal + (m_maxVal - m_minVal)*m_verticalIndicatorPositionPercent, 0, 'f', precision);
 		m_vertBar->appendText(valueStr);

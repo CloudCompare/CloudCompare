@@ -42,7 +42,7 @@ function( target_link_GDAL ) # ARGV0 = project name
                         ${GDAL_BIN_DIR}/netcdf.dll
                         ${GDAL_BIN_DIR}/geotiff.dll
                         ${GDAL_BIN_DIR}/tiff.dll
-			${GDAL_BIN_DIR}/proj_8_1.dll
+                        ${GDAL_BIN_DIR}/proj_8_0.dll
                         ${GDAL_BIN_DIR}/sqlite3.dll
                         ${GDAL_BIN_DIR}/spatialite.dll
                         ${GDAL_BIN_DIR}/geos_c.dll
@@ -71,14 +71,19 @@ function( target_link_GDAL ) # ARGV0 = project name
                         ${GDAL_BIN_DIR}/geos.dll
                         ${GDAL_BIN_DIR}/libssh2.dll
                         ${GDAL_BIN_DIR}/freetype.dll
+                        ${GDAL_BIN_DIR}/aws-cpp-sdk-s3.dll
+                        ${GDAL_BIN_DIR}/aws-cpp-sdk-core.dll
+                        ${GDAL_BIN_DIR}/aws-cpp-sdk-identity-management.dll
                         ${GDAL_BIN_DIR}/libbz2.dll
                         ${GDAL_BIN_DIR}/liblz4.dll
                         ${GDAL_BIN_DIR}/krb5_64.dll
                         ${GDAL_BIN_DIR}/comerr64.dll
                         ${GDAL_BIN_DIR}/k5sprt64.dll
-			${GDAL_BIN_DIR}/libdeflate.dll
-			${GDAL_BIN_DIR}/Lerc.dll
-			${GDAL_BIN_DIR}/lcms2.dll
+                        ${GDAL_BIN_DIR}/aws-c-event-stream.dll
+                        ${GDAL_BIN_DIR}/aws-c-common.dll
+                        ${GDAL_BIN_DIR}/aws-cpp-sdk-cognito-identity.dll
+                        ${GDAL_BIN_DIR}/aws-cpp-sdk-sts.dll
+                        ${GDAL_BIN_DIR}/aws-checksums.dll
                         # for pdal
                         ${GDAL_BIN_DIR}/laszip3.dll
                         )
@@ -109,6 +114,7 @@ function( target_link_GDAL ) # ARGV0 = project name
                         ${GDAL_BIN_DIR}/proj_7_2.dll
                         ${GDAL_BIN_DIR}/spatialite.dll
                         ${GDAL_BIN_DIR}/sqlite3.dll
+                        ${GDAL_BIN_DIR}/szip.dll
                         ${GDAL_BIN_DIR}/tiff.dll
                         ${GDAL_BIN_DIR}/xdr.dll
                         ${GDAL_BIN_DIR}/zlib.dll

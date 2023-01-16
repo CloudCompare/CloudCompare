@@ -165,6 +165,51 @@ constexpr char OPTION_FILE_NAMES[]						= "FILE";
 constexpr char OPTION_ORIENT[]							= "ORIENT";
 constexpr char OPTION_MODEL[]							= "MODEL";
 
+bool GetSFIndexOrName(ccCommandLineInterface& cmd, int& sfIndex, QString& sfName)
+{
+	sfIndex = -1;
+	sfName.clear();
+	bool validSFIndexOrName = true;
+	sfName = cmd.arguments().takeFirst();
+	if (sfName.toUpper() == OPTION_LAST)
+	{
+		sfIndex = -2;
+		cmd.print(QObject::tr("Set active SF index: LAST"));
+	}
+	else
+	{
+		bool validInt = false;
+		sfIndex = sfName.toInt(&validInt);
+		if (!validInt)
+		{
+			sfIndex = -1;
+			if (sfName.size() >= 2 && sfName.startsWith('\''))
+			{
+				while (!sfName.endsWith('\'') && !cmd.arguments().empty())
+				{
+					sfName.append(' ');
+					sfName.append(cmd.arguments().takeFirst());
+				}
+				if (!sfName.endsWith('\''))
+				{
+					cmd.error(QObject::tr("Invalid SF name! (missing closing simple quote)"));
+					validSFIndexOrName = false;
+				}
+				else
+				{
+					sfName = sfName.mid(1, sfName.size() - 2);
+					cmd.print(QObject::tr("Set active SF name: '%1'").arg(sfName));
+					validSFIndexOrName = true;
+				}
+			}
+		}
+		else
+			cmd.print(QObject::tr("Set active SF index: %1").arg(sfIndex));
+	}
+
+	return validSFIndexOrName;
+}
+
 CommandChangeOutputFormat::CommandChangeOutputFormat(const QString& name, const QString& keyword)
     : ccCommandLineInterface::Command(name, keyword)
 {}
@@ -2441,45 +2486,10 @@ bool CommandSetActiveSF::process(ccCommandLineInterface& cmd)
 		return cmd.error(QObject::tr("Missing parameter: scalar field index after \"-%1\"").arg(COMMAND_SET_ACTIVE_SF));
 	}
 	
-	int sfIndex = -1;
-	bool validSFIndex = true;
-	QString sfIndexStr = cmd.arguments().takeFirst();
-	if (sfIndexStr.toUpper() == OPTION_LAST)
-	{
-		sfIndex = -2;
-		cmd.print(QObject::tr("Set active S.F. index: LAST"));
-	}
-	else
-	{
-		sfIndex = sfIndexStr.toInt(&validSFIndex);
-		if (!validSFIndex)
-		{
-			sfIndex = -1;
-			if (sfIndexStr.size() >= 2 && sfIndexStr.startsWith('\''))
-			{
-				while (!sfIndexStr.endsWith('\'') && !cmd.arguments().empty())
-				{
-					sfIndexStr.append(' ');
-					sfIndexStr.append(cmd.arguments().takeFirst());
-				}
-				if (!sfIndexStr.endsWith('\''))
-				{
-					return cmd.error(QObject::tr("Invalid SF name after %1! (missing closing simple quote)").arg(COMMAND_SET_ACTIVE_SF));
-				}
-				sfIndexStr = sfIndexStr.mid(1, sfIndexStr.size() - 2);
-			}
-			cmd.print(QObject::tr("Set active S.F. name: '%1'").arg(sfIndexStr));
-		}
-	}
-	if (!validSFIndex || sfIndex == -1)
-	{
-		//this may be a scalar field name
-		//return cmd.error(QObject::tr("Invalid SF index! (after %1)").arg(COMMAND_SET_ACTIVE_SF));
-	}
-	else
-	{
-		cmd.print(QObject::tr("Set active S.F. index: %1").arg(sfIndex));
-	}
+	int sfIndex;
+	QString sfName;
+	if(!GetSFIndexOrName(cmd, sfIndex, sfName))
+		return cmd.error("option -SET_ACTIVE_SF failed due to bad SF index or name");
 	
 	if (cmd.clouds().empty() && cmd.meshes().empty())
 	{
@@ -2500,10 +2510,10 @@ bool CommandSetActiveSF::process(ccCommandLineInterface& cmd)
 				else if (sfIndex == -1)
 				{
 					//check if this cloud has a scalar field with the input name
-					thisSFIndex = desc.pc->getScalarFieldIndexByName(qPrintable(sfIndexStr));
+					thisSFIndex = desc.pc->getScalarFieldIndexByName(qPrintable(sfName));
 					if (thisSFIndex < 0)
 					{
-						cmd.warning(QObject::tr("Cloud %1 has no SF named '%2'").arg(desc.pc->getName()).arg(sfIndexStr));
+						cmd.warning(QObject::tr("Cloud %1 has no SF named '%2'").arg(desc.pc->getName()).arg(sfName));
 						continue;
 					}
 				}
@@ -2531,10 +2541,10 @@ bool CommandSetActiveSF::process(ccCommandLineInterface& cmd)
 				else if (sfIndex == -1)
 				{
 					//check if this cloud has a scalar field with the input name
-					thisSFIndex = pc->getScalarFieldIndexByName(qPrintable(sfIndexStr));
+					thisSFIndex = pc->getScalarFieldIndexByName(qPrintable(sfName));
 					if (thisSFIndex < 0)
 					{
-						cmd.warning(QObject::tr("Mesh '%1' vertices have no SF named '%2'").arg(desc.mesh->getName()).arg(sfIndexStr));
+						cmd.warning(QObject::tr("Mesh '%1' vertices have no SF named '%2'").arg(desc.mesh->getName()).arg(sfName));
 						continue;
 					}
 				}
@@ -2615,28 +2625,30 @@ bool CommandRemoveSF::process(ccCommandLineInterface& cmd)
 		return cmd.error(QObject::tr("Missing parameter: SF index after %1").arg(COMMAND_REMOVE_SF));
 	}
 
-	bool paramOk = false;
-	QString sfIndexStr = cmd.arguments().takeFirst();
-	int sfIndex = sfIndexStr.toInt(&paramOk);
-	if (!paramOk)
-	{
-		return cmd.error(QObject::tr("Failed to read a numerical parameter: SF index. Got '%1' instead.").arg(sfIndexStr));
-	}
-	cmd.print(QObject::tr("\tSF index: %1").arg(sfIndex));
-
-	if (sfIndex < 0)
-	{
-		return cmd.error(QObject::tr("Invalid SF index (positive value expected)"));
-	}
+	int sfIndex;
+	QString sfName;
+	if(!GetSFIndexOrName(cmd, sfIndex, sfName))
+		return cmd.error("option -REMOVE_SF failed due to bad SF index or name");
 
 	for (auto& desc : cmd.clouds())
 	{
 		if (desc.pc)
 		{
-			if (!removeSF(sfIndex, *desc.pc))
+			int thisSFIndex = sfIndex;
+			if (sfIndex == -2)
+				thisSFIndex = static_cast<int>(desc.pc->getNumberOfScalarFields()) - 1;
+			else if (sfIndex == -1)
 			{
-				cmd.warning(QObject::tr("Cloud '%1' has not enough SFs").arg(desc.pc->getName()));
+				//check if this cloud has a scalar field with the input name
+				thisSFIndex = desc.pc->getScalarFieldIndexByName(qPrintable(sfName));
+				if (thisSFIndex < 0)
+				{
+					cmd.warning(QObject::tr("Cloud %1 has no SF named '%2'").arg(desc.pc->getName()).arg(sfName));
+					continue;
+				}
 			}
+			if (!removeSF(thisSFIndex, *desc.pc))
+				cmd.warning(QObject::tr("Cloud '%1' has not enough SFs").arg(desc.pc->getName()));
 		}
 	}
 
@@ -2648,10 +2660,22 @@ bool CommandRemoveSF::process(ccCommandLineInterface& cmd)
 			if (cloud->isA(CC_TYPES::POINT_CLOUD))
 			{
 				ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
-				if (!removeSF(sfIndex, *pc))
+
+				int thisSFIndex = sfIndex;
+				if (sfIndex == -2)
+					thisSFIndex = static_cast<int>(pc->getNumberOfScalarFields()) - 1;
+				else if (sfIndex == -1)
 				{
-					cmd.warning(QObject::tr("Mesh '%1' vertices have not enough SFs").arg(desc.mesh->getName()));
+					//check if this cloud has a scalar field with the input name
+					thisSFIndex = pc->getScalarFieldIndexByName(qPrintable(sfName));
+					if (thisSFIndex < 0)
+					{
+						cmd.warning(QObject::tr("Cloud %1 has no SF named '%2'").arg(pc->getName()).arg(sfName));
+						continue;
+					}
 				}
+				if (!removeSF(thisSFIndex, *pc))
+					cmd.warning(QObject::tr("Mesh '%1' vertices have not enough SFs").arg(desc.mesh->getName()));
 			}
 		}
 	}

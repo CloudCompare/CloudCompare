@@ -49,9 +49,9 @@ qCanupoClassifDialog::qCanupoClassifDialog(ccPointCloud* cloud, ccMainAppInterfa
 	generateRoughnessSFsCheckBox->setVisible(false);
 #endif
 
-	int maxThreadCount = QThread::idealThreadCount();
-	maxThreadCountSpinBox->setRange(1, maxThreadCount);
-	maxThreadCountSpinBox->setSuffix(QString(" / %1").arg(maxThreadCount));
+	static int MaxThreadCount = QThread::idealThreadCount();
+	maxThreadCountSpinBox->setRange(1, MaxThreadCount);
+	maxThreadCountSpinBox->setSuffix(QString(" / %1").arg(MaxThreadCount));
 
 	loadParamsFromPersistentSettings();
 
@@ -167,7 +167,7 @@ void qCanupoClassifDialog::loadParamsFromPersistentSettings()
 	bool useSF = settings.value("UseSF", useSFCheckBox->isChecked()).toBool();
 	bool additionalSF = settings.value("AdditionalSF", generateAdditionalSFsCheckBox->isChecked()).toBool();
 	bool roughnessSF = settings.value("RoughnessSF", generateRoughnessSFsCheckBox->isChecked()).toBool();
-	int maxThreadCount = settings.value("MaxThreadCount", maxThreadCountSpinBox->maximum()).toInt();
+	int maxThreadCount = settings.value("MaxThreadCount", std::max(1, QThread::idealThreadCount() - 1)).toInt(); // always leave one thread/core to let the application breath
 
 	//apply parameters
 

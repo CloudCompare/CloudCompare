@@ -514,6 +514,9 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 	//max thread count
 	int maxThreadCount = dlg.getMaxThreadCount();
 
+	if (app)
+		app->dispToConsole(QString("[M3C2] Will use %1 threads").arg(maxThreadCount == 0 ? "the max number of" : QString::number(maxThreadCount)), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+
 	//progress dialog
 	ccProgressDialog pDlg(parentWidget);
 
@@ -951,7 +954,7 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 
 				if (maxThreadCount == 0)
 				{
-					maxThreadCount = QThread::idealThreadCount();
+					maxThreadCount = std::max(1, QThread::idealThreadCount() - 1); // always leave one thread/core to let the application breath
 				}
 				assert(maxThreadCount > 0 && maxThreadCount <= QThread::idealThreadCount());
 				QThreadPool::globalInstance()->setMaxThreadCount(maxThreadCount);

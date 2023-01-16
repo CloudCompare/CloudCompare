@@ -46,7 +46,7 @@ static const char REGISTRATION_DISTS_SF[] = "RegistrationDistances";
 bool ccRegistrationTools::ICP(	ccHObject* data,
 								ccHObject* model,
 								ccGLMatrix& transMat,
-								double &finalScale,
+								double& finalScale,
 								double& finalRMS,
 								unsigned& finalPointCount,
 								const CCCoreLib::ICPRegistrationTools::Parameters& inputParameters,
@@ -265,6 +265,8 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
 			}
 		}
 	}
+
+	ccLog::Print(QString("[ICP] Will use %1 threads").arg(params.maxThreadCount));
 
 	CCCoreLib::ICPRegistrationTools::RESULT_TYPE result;
 	CCCoreLib::PointProjectionTools::Transformation transform;

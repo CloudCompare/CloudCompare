@@ -51,6 +51,8 @@
 
 const unsigned char DEFAULT_OCTREE_LEVEL = 7;
 
+static int s_maxThreadCount = std::max<int>(1, QThread::idealThreadCount() - 1);
+
 ccComparisonDlg::ccComparisonDlg(	ccHObject* compEntity,
 									ccHObject* refEntity,
 									CC_COMPARISON_TYPE cpType,
@@ -75,10 +77,10 @@ ccComparisonDlg::ccComparisonDlg(	ccHObject* compEntity,
 {
 	setupUi(this);
 
-	int maxThreadCount = QThread::idealThreadCount();
-	maxThreadCountSpinBox->setRange(1, maxThreadCount);
-	maxThreadCountSpinBox->setSuffix(QString(" / %1").arg(maxThreadCount));
-	maxThreadCountSpinBox->setValue(QThreadPool::globalInstance()->maxThreadCount());
+	static int MaxThreadCount = QThread::idealThreadCount();
+	maxThreadCountSpinBox->setRange(1, MaxThreadCount);
+	maxThreadCountSpinBox->setSuffix(QString(" / %1").arg(MaxThreadCount));
+	maxThreadCountSpinBox->setValue(s_maxThreadCount); // always leave one thread/core to let the application breath
 
 	//populate the combo-boxes
 	{
@@ -129,14 +131,14 @@ ccComparisonDlg::ccComparisonDlg(	ccHObject* compEntity,
 		filterVisibilityCheckBox->setEnabled(m_refCloud && m_refCloud->isA(CC_TYPES::POINT_CLOUD) && static_cast<ccPointCloud*>(m_refCloud)->hasSensor());
 	}
 
-	connect(cancelButton,			&QPushButton::clicked,					this,	&ccComparisonDlg::cancelAndExit);
-	connect(okButton,				&QPushButton::clicked,					this,	&ccComparisonDlg::applyAndExit);
-	connect(computeButton,			&QPushButton::clicked,					this,	&ccComparisonDlg::computeDistances);
-	connect(histoButton,			&QPushButton::clicked,					this,	&ccComparisonDlg::showHisto);
-	connect(maxDistCheckBox,		&QCheckBox::toggled,					this,	&ccComparisonDlg::maxDistUpdated);
-	connect(localModelComboBox, qOverload<int> (&QComboBox::currentIndexChanged),		this,	&ccComparisonDlg::locaModelChanged);
-	connect(maxSearchDistSpinBox, qOverload<double> (&QDoubleSpinBox::valueChanged),this,	&ccComparisonDlg::maxDistUpdated);
-    connect(split3DCheckBox,        &QCheckBox::toggled,                    this,   &ccComparisonDlg::enableCompute2D);
+	connect(cancelButton,			&QPushButton::clicked,								this,	&ccComparisonDlg::cancelAndExit);
+	connect(okButton,				&QPushButton::clicked,								this,	&ccComparisonDlg::applyAndExit);
+	connect(computeButton,			&QPushButton::clicked,								this,	&ccComparisonDlg::computeDistances);
+	connect(histoButton,			&QPushButton::clicked,								this,	&ccComparisonDlg::showHisto);
+	connect(maxDistCheckBox,		&QCheckBox::toggled,								this,	&ccComparisonDlg::maxDistUpdated);
+	connect(localModelComboBox,		qOverload<int>(&QComboBox::currentIndexChanged),	this,	&ccComparisonDlg::locaModelChanged);
+	connect(maxSearchDistSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccComparisonDlg::maxDistUpdated);
+    connect(split3DCheckBox,        &QCheckBox::toggled,								this,   &ccComparisonDlg::enableCompute2D);
 }
 
 ccComparisonDlg::~ccComparisonDlg()
@@ -717,7 +719,8 @@ bool ccComparisonDlg::computeDistances()
 
 	CCCoreLib::DistanceComputationTools::Cloud2CloudDistancesComputationParams c2cParams;
 	CCCoreLib::DistanceComputationTools::Cloud2MeshDistancesComputationParams c2mParams;
-	c2cParams.maxThreadCount = c2mParams.maxThreadCount = maxThreadCountSpinBox->value();
+	s_maxThreadCount = c2cParams.maxThreadCount = c2mParams.maxThreadCount = maxThreadCountSpinBox->value();
+	ccLog::Print(QString("[Distances] Will use %1 threads").arg(s_maxThreadCount));
 
 	int result = -1;
 	QScopedPointer<ccProgressDialog> progressDlg;
@@ -728,7 +731,7 @@ bool ccComparisonDlg::computeDistances()
 
 	QElapsedTimer eTimer;
 	eTimer.start();
-	switch(m_compType)
+	switch (m_compType)
 	{
 	case CLOUDCLOUD_DIST: //cloud-cloud
 

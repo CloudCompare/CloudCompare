@@ -392,7 +392,7 @@ bool Rasterization::RasterTerrain(Cloth& cloth, const wl::PointCloud& pc, std::v
 							true,
 							0,
 							"Rasterization",
-							QThread::idealThreadCount());
+							std::max(1, QThread::idealThreadCount() - 1)); // always leave one thread/core to let the application breath
 
 		delete cloudOctree;
 		cloudOctree = 0;

@@ -58,6 +58,10 @@ v2.13.alpha (???) - (??/??/????)
 
 - Improvements:
 
+	- multi-threading
+		- By default, CC will now use one less thread/core than the max number, so as to let the application breath
+		- (warning: some dialogs may keep the previous value as it's stored in the system registry)
+
 	- Segmentation
 		- CC will now preserve some children entities (labels, sensors, etc.) when segmenting clouds or meshes:
 			with graphical segmentation, cross section tool (for clouds only), subsampling, filter by SF value, etc.

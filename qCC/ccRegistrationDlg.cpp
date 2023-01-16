@@ -46,7 +46,7 @@ static bool     s_useErrorDifferenceCriterion = true;
 static int      s_finalOverlap = 100;
 static int      s_rotComboIndex = 0;
 static bool     s_transCheckboxes[3] = { true, true, true };
-static int		s_maxThreadCount = 0;
+static int		s_maxThreadCount = std::max(1, QThread::idealThreadCount() - 1); // always leave one thread/core to let the application breath
 static bool		s_pointsRemoval = false;
 static bool		s_useDataSFAsWeights = false;
 static bool		s_useModelSFAsWeights = false;
@@ -73,17 +73,13 @@ ccRegistrationDlg::ccRegistrationDlg(ccHObject* data, ccHObject* model, QWidget*
 	ccQtHelpers::SetButtonColor(dataColorButton, Qt::red);
 	ccQtHelpers::SetButtonColor(modelColorButton, Qt::yellow);
 
-	int idealThreadCount = QThread::idealThreadCount();
-	maxThreadCountSpinBox->setRange(1, idealThreadCount);
-	maxThreadCountSpinBox->setSuffix(QString(" / %1").arg(idealThreadCount));
+	static int MaxThreadCount = QThread::idealThreadCount();
+	maxThreadCountSpinBox->setRange(1, MaxThreadCount);
+	maxThreadCountSpinBox->setSuffix(QString(" / %1").arg(MaxThreadCount));
 
 	//restore semi-persistent settings
 	{
 		//semi-persistent options
-		if (s_maxThreadCount == 0)
-		{
-			s_maxThreadCount = idealThreadCount;
-		}
 		maxThreadCountSpinBox->setValue(s_maxThreadCount);
 		adjustScaleCheckBox->setChecked(s_adjustScale);
 		randomSamplingLimitSpinBox->setValue(s_randomSamplingLimit);

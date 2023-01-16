@@ -31,6 +31,11 @@
 //system
 #include <cassert>
 
+#if defined(_OPENMP)
+//OpenMP
+#include <omp.h>
+#endif
+
 //Components geometry
 static QSharedPointer<ccCylinder> c_arrowShaft   (nullptr);
 static QSharedPointer<ccCone>     c_arrowHead    (nullptr);
@@ -558,6 +563,10 @@ void ccClipBox::flagPointsInside(	ccGenericPointCloud* cloud,
 	}
 
 	int count = static_cast<int>(cloud->size());
+
+#if defined(_OPENMP)
+	omp_set_num_threads(std::max(1, omp_get_max_threads() - 1)); // always leave one thread/core to let the application breath
+#endif
 
 	if (m_glTransEnabled)
 	{

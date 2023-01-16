@@ -45,9 +45,9 @@ qCanupoTrainingDialog::qCanupoTrainingDialog(ccMainAppInterface* app)
 {
 	setupUi(this);
 
-	int maxThreadCount = QThread::idealThreadCount();
-	maxThreadCountSpinBox->setRange(1, maxThreadCount);
-	maxThreadCountSpinBox->setSuffix(QString(" / %1").arg(maxThreadCount));
+	static int MaxThreadCount = QThread::idealThreadCount();
+	maxThreadCountSpinBox->setRange(1, MaxThreadCount);
+	maxThreadCountSpinBox->setSuffix(QString(" / %1").arg(MaxThreadCount));
 
 	if (m_app)
 	{
@@ -231,7 +231,7 @@ void qCanupoTrainingDialog::loadParamsFromPersistentSettings()
 
 	unsigned maxPoints = settings.value("MaxPoints",maxPointsSpinBox->value()).toUInt();
 	int classifParam = settings.value("ClassifParam",paramComboBox->currentIndex()).toInt();
-	int maxThreadCount = settings.value("MaxThreadCount", maxThreadCountSpinBox->maximum()).toInt();
+	int maxThreadCount = settings.value("MaxThreadCount", std::max(1, QThread::idealThreadCount() - 1)).toInt(); // always leave one thread/core to let the application breath
 
 	//apply parameters
 

@@ -438,13 +438,16 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 						if (!coreRoughnessSFs[s]->resizeSafe(corePoints->size(), CCCoreLib::NAN_VALUE))
 						{
 							if (app)
-								app->dispToConsole("Not enough memory to store per-level roughness!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+								app->dispToConsole("Not enough memory to store per-level roughness!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 							generateRoughnessSF = false;
 							break;
 						}
 					}
 				}
 #endif
+				if (app)
+					app->dispToConsole(QString("[Canupo] Will use %1 threads").arg(params.maxThreadCount == 0 ? "the max number of" : QString::number(params.maxThreadCount)), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+
 				//computes the 'descriptors'
 				bool invalidDescriptors = false;
 				QString errorStr;

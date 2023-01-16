@@ -165,10 +165,10 @@ constexpr char OPTION_FILE_NAMES[]						= "FILE";
 constexpr char OPTION_ORIENT[]							= "ORIENT";
 constexpr char OPTION_MODEL[]							= "MODEL";
 
-bool get_SFIndex_SFName(ccCommandLineInterface& cmd, int& sfIndex, QString& sfName)
+bool GetSFIndexOrName(ccCommandLineInterface& cmd, int& sfIndex, QString& sfName)
 {
 	sfIndex = -1;
-	sfName = "";
+	sfName.clear();
 	bool validSFIndexOrName = true;
 	sfName = cmd.arguments().takeFirst();
 	if (sfName.toUpper() == OPTION_LAST)
@@ -178,7 +178,7 @@ bool get_SFIndex_SFName(ccCommandLineInterface& cmd, int& sfIndex, QString& sfNa
 	}
 	else
 	{
-		bool validInt;
+		bool validInt = false;
 		sfIndex = sfName.toInt(&validInt);
 		if (!validInt)
 		{
@@ -203,7 +203,8 @@ bool get_SFIndex_SFName(ccCommandLineInterface& cmd, int& sfIndex, QString& sfNa
 				}
 			}
 		}
-		cmd.print(QObject::tr("Set active SF index: %1").arg(sfIndex));
+		else
+			cmd.print(QObject::tr("Set active SF index: %1").arg(sfIndex));
 	}
 
 	return validSFIndexOrName;
@@ -2487,7 +2488,7 @@ bool CommandSetActiveSF::process(ccCommandLineInterface& cmd)
 	
 	int sfIndex;
 	QString sfName;
-	if(!get_SFIndex_SFName(cmd, sfIndex, sfName))
+	if(!GetSFIndexOrName(cmd, sfIndex, sfName))
 		return cmd.error("option -SET_ACTIVE_SF failed due to bad SF index or name");
 	
 	if (cmd.clouds().empty() && cmd.meshes().empty())
@@ -2626,7 +2627,7 @@ bool CommandRemoveSF::process(ccCommandLineInterface& cmd)
 
 	int sfIndex;
 	QString sfName;
-	if(!get_SFIndex_SFName(cmd, sfIndex, sfName))
+	if(!GetSFIndexOrName(cmd, sfIndex, sfName))
 		return cmd.error("option -REMOVE_SF failed due to bad SF index or name");
 
 	for (auto& desc : cmd.clouds())

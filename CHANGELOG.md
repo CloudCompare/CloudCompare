@@ -175,6 +175,9 @@ v2.13.alpha (???) - (??/??/????)
 	- The PCL plugin's 'MLS' tool dialog was broken
 	- The CSF plugin command line could truncate the exported clouds filename if floating point values were present in this filename
 	- The colors of the 'Compute Stat. Params' histogram could be wrong if the associated color scale was 'absolute'
+	- M3C2 plugin:
+		- the display was not always updated when M3C2 computation was done
+		- some parameters were not properly restored when re-opening the plugin dialog (e.g. the 'normal source')
 
 v2.12.4 (Kyiv) - (14/07/2022)
 ----------------------

@@ -110,8 +110,6 @@ qM3C2Dialog::qM3C2Dialog(ccPointCloud* cloud1, ccPointCloud* cloud2, ccMainAppIn
 	connect(cpSubsampleRadioButton, &QAbstractButton::toggled, this, &qM3C2Dialog::updateNormalComboBox);
 	connect(cpUseOtherCloudRadioButton, &QAbstractButton::toggled, this, &qM3C2Dialog::updateNormalComboBox);
 
-	loadParamsFromPersistentSettings();
-
 	setClouds(cloud1, cloud2);
 
 	if (m_app)
@@ -137,6 +135,8 @@ qM3C2Dialog::qM3C2Dialog(ccPointCloud* cloud1, ccPointCloud* cloud2, ccMainAppIn
 		//command line mode: we need to update the combo-box
 		updateNormalComboBox();
 	}
+
+	loadParamsFromPersistentSettings(); // must be done after updating the 'normal source' combox-box!
 }
 
 bool PopulateSFCombo(QComboBox* combo, const ccPointCloud& cloud, int defaultFieldIndex = -1, QString defaultField = QString())

@@ -329,6 +329,7 @@ private:
 	void doActionScalarFieldFromColor();
 	void doActionOrientNormalsFM();
 	void doActionOrientNormalsMST();
+	void doActionShiftPointsAlongNormals();
 	void doActionResampleWithOctree();
 	void doActionComputeMeshAA();
 	void doActionComputeMeshLS();

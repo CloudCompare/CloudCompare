@@ -6099,3 +6099,24 @@ ccPointCloud* ccPointCloud::removeDuplicatePoints(double minDistanceBetweenPoint
 
 	return filteredCloud;
 }
+
+bool ccPointCloud::shiftPointsAlongNormals(PointCoordinateType shift)
+{
+	if (!hasNormals())
+	{
+		ccLog::Warning("[ccGenericPointCloud::shiftPointsAlongNormals] Cloud has no normals");
+		return false;
+	}
+
+	for (unsigned i = 0; i < size(); ++i)
+	{
+		const CCVector3& N = getPointNormal(i);
+		const CCVector3* P = getPoint(i);
+
+		const_cast<CCVector3&>(*P) = *P + (shift * N);
+	}
+
+	invalidateBoundingBox();
+
+	return true;
+}

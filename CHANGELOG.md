@@ -53,6 +53,9 @@ v2.13.alpha (???) - (??/??/????)
 		- Default mouse cursor for picking points will now be the cross
 		- This can be changed in the 'Display options' dialog
 
+	- Edit > Normals > Shift points along normals
+		- to shift the points of a given quantity along their associated normal
+
 - Improvements:
 
 	- Segmentation

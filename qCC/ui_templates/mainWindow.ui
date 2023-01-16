@@ -204,6 +204,8 @@
      <addaction name="menuConvert_to"/>
      <addaction name="actionExportNormalToSF"/>
      <addaction name="separator"/>
+     <addaction name="actionShiftPointsAlongNormals"/>
+     <addaction name="separator"/>
      <addaction name="actionClearNormals"/>
     </widget>
     <widget class="QMenu" name="menuOctree">
@@ -3147,6 +3149,14 @@ The active scalar field should have integer values.</string>
    </property>
    <property name="text">
     <string>Restore window geometry on startup</string>
+   </property>
+  </action>
+  <action name="actionShiftPointsAlongNormals">
+   <property name="text">
+    <string>Shift points along normals</string>
+   </property>
+   <property name="toolTip">
+    <string>Shift the points of the selected cloud along their normals</string>
    </property>
   </action>
  </widget>

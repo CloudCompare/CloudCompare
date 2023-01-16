@@ -756,6 +756,9 @@ public: //other methods
 	//! Removes the duplicate points and return the corresponding cloud (if any, or the same cloud if there's no duplicate point)
 	ccPointCloud* removeDuplicatePoints(double minDistanceBetweenPoints, ccProgressDialog* pDlg = nullptr);
 
+	//! Shift the points of a given quantity along their normals
+	bool shiftPointsAlongNormals(PointCoordinateType shift);
+
 protected:
 
 	//inherited from ccHObject

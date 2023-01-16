@@ -530,6 +530,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionExportNormalToSF,			&QAction::triggered, this, &MainWindow::doActionExportNormalToSF);
 	connect(m_UI->actionOrientNormalsMST,			&QAction::triggered, this, &MainWindow::doActionOrientNormalsMST);
 	connect(m_UI->actionOrientNormalsFM,			&QAction::triggered, this, &MainWindow::doActionOrientNormalsFM);
+	connect(m_UI->actionShiftPointsAlongNormals,	&QAction::triggered, this, &MainWindow::doActionShiftPointsAlongNormals);
 	connect(m_UI->actionClearNormals,				&QAction::triggered, this, [=]() {
 		clearSelectedEntitiesProperty( ccEntityAction::CLEAR_PROPERTY::NORMALS );
 	});
@@ -5218,7 +5219,47 @@ void MainWindow::doActionOrientNormalsFM()
 	updateUI();
 }
 
-static int s_innerRectDim = 2;
+void MainWindow::doActionShiftPointsAlongNormals()
+{
+	std::vector<ccPointCloud*> candidates;
+	for (ccHObject* entity : m_selectedEntities)
+	{
+		if (entity && entity->isA(CC_TYPES::POINT_CLOUD))
+		{
+			ccPointCloud* pc = static_cast<ccPointCloud*>(entity);
+			if (pc->hasNormals())
+			{
+				candidates.push_back(pc);
+			}
+		}
+	}
+
+	if (candidates.empty())
+	{
+		ccConsole::Error(QObject::tr("Select at least one point cloud with normals"));
+		return;
+	}
+
+	// ask the user to define the shift value
+	static double s_shift = 0.0;
+	bool ok = false;
+	double shift = QInputDialog::getDouble(this, tr("Shift along normals"), tr("Shift quantity"), s_shift, -1.0e6, 1.0e6, 6, &ok);
+	if (!ok)
+	{
+		return;
+	}
+	// remember for next time
+	s_shift = shift;
+
+	for (ccPointCloud* pc : candidates)
+	{
+		pc->shiftPointsAlongNormals(static_cast<PointCoordinateType>(shift));
+		pc->prepareDisplayForRefresh();
+	}
+
+	refreshAll();
+}
+
 void MainWindow::doActionFindBiggestInnerRectangle()
 {
 	if (!haveSelection())
@@ -5232,6 +5273,7 @@ void MainWindow::doActionFindBiggestInnerRectangle()
 	}
 
 	bool ok;
+	static int s_innerRectDim = 2;
 	int dim = QInputDialog::getInt(this, tr("Dimension"), tr("Orthogonal dim (X=0 / Y=1 / Z=2)"), s_innerRectDim, 0, 2, 1, &ok);
 	if (!ok)
 		return;
@@ -10691,6 +10733,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 
 	m_UI->actionOrientNormalsMST->setEnabled(atLeastOneCloud && atLeastOneNormal);
 	m_UI->actionOrientNormalsFM->setEnabled(atLeastOneCloud && atLeastOneNormal);
+	m_UI->actionShiftPointsAlongNormals->setEnabled(atLeastOneCloud && atLeastOneNormal);
 	m_UI->actionClearNormals->setEnabled(atLeastOneNormal);
 	m_UI->actionInvertNormals->setEnabled(atLeastOneNormal);
 	m_UI->actionConvertNormalToHSV->setEnabled(atLeastOneNormal);

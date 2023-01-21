@@ -108,6 +108,9 @@ v2.13.alpha (???) - (??/??/????)
 		- Sensors associated to images should now be properly shifted if the associated cloud is shifted,
 			or if they are not associated to a cloud
 
+	- PLY dialog:
+		- the scalar fields are now displayed in a 'list widget' in case there are too many to fit in the screen
+
 	- SF Arithmetic tool:
 		- New operation: 'SET' (to set a constant value)
 			- this operation is also accessible via the command line (with the -SF_OP command)

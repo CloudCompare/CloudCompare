@@ -1256,7 +1256,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 			||	listPropsCount > assignedListProperties + 1
 			||	singlePropsCount > assignedSingleProperties + 1)
 		{
-			PlyOpenDlg pod/*(MainWindow::TheInstance())*/;
+			PlyOpenDlg pod(parameters.parentWidget);
 
 			pod.plyTypeEdit->setText(e_ply_storage_mode_names[storage_mode]);
 			pod.elementsEdit->setText(QString::number(pointElements.size()));
@@ -1288,8 +1288,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 
 				pod.iComboBox->setCurrentIndex(iIndex);
 
-				pod.sfComboBox->setCurrentIndex(sfPropIndexes.empty() ? 0 : sfPropIndexes.front());
-				for (size_t j = 1; j < sfPropIndexes.size(); ++j)
+				for (size_t j = 0; j < sfPropIndexes.size(); ++j)
 				{
 					pod.addSFComboBox(sfPropIndexes[j]);
 				}

@@ -264,57 +264,33 @@ public: //scalar-fields management
 public: //associated (scan) grid structure
 
 	//! Grid structure
-	struct Grid
+	struct QCC_DB_LIB_API Grid
 	{
 		//! Shared type
 		using Shared = QSharedPointer<Grid>;
 
 		//! Default constructor
-		Grid()
-			: w(0)
-			, h(0)
-			, validCount(0)
-			, minValidIndex(0)
-			, maxValidIndex(0)
-		{
-			sensorPosition.toIdentity();
-		}
+		Grid();
 
 		//! Copy constructor
 		/** \warning May throw a bad_alloc exception
 		**/
-		Grid(const Grid& grid)
-			: w(grid.w)
-			, h(grid.h)
-			, validCount(grid.validCount)
-			, minValidIndex(grid.minValidIndex)
-			, maxValidIndex(grid.maxValidIndex)
-			, indexes(grid.indexes)
-			, colors(grid.colors)
-			, sensorPosition(grid.sensorPosition)
-		{}
+		Grid(const Grid& grid);
+
+		//! Inits the grid
+		bool init(unsigned rowCount, unsigned colCount, bool withRGB = false);
+
+		//! Sets an index at a given position inside the grid
+		void setIndex(unsigned row, unsigned col, int index);
+
+		//! Sets a color at a given position inside the grid
+		void setColor(unsigned row, unsigned col, const ccColor::Rgb& rgb);
+
+		//! Updates the min and max valid indexes
+		void updateMinAndMaxValidIndexes();
 
 		//! Converts the grid to an RGB image (needs colors)
-		QImage toImage() const
-		{
-			if (colors.size() == w*h)
-			{
-				QImage image(w, h, QImage::Format_ARGB32);
-				for (unsigned j = 0; j < h; ++j)
-				{
-					for (unsigned i = 0; i < w; ++i)
-					{
-						const ccColor::Rgb& col = colors[j*w + i];
-						image.setPixel(i, j, qRgb(col.r, col.g, col.b));
-					}
-				}
-				return image;
-			}
-			else
-			{
-				return QImage();
-			}
-		}
+		QImage toImage() const;
 
 		//! Grid width
 		unsigned w;

@@ -84,7 +84,11 @@ namespace
 	
 		//scan index field
 		std::vector<int8_t> scanIndexData;
-	
+
+		//scan grid
+		std::vector<int32_t> rowIndex;
+		std::vector<int32_t> columnIndex;
+
 		//color
 		std::vector<colorFieldType> redData;
 		std::vector<colorFieldType> greenData;
@@ -1522,8 +1526,107 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 						  QString::fromStdString( e57::StringNode(scanNode.get("description")).value() ) ) );
 	}
 
+
+	int64_t gridRowCount = 0, gridColumnCount = 0;
+	{
+		if (scanNode.isDefined("indexBounds"))
+		{
+			e57::StructureNode indexBounds(scanNode.get("indexBounds"));
+			if (indexBounds.isDefined("columnMaximum"))
+			{
+				gridColumnCount = e57::IntegerNode(indexBounds.get("columnMaximum")).value() - e57::IntegerNode(indexBounds.get("columnMinimum")).value() + 1;
+			}
+
+			if (indexBounds.isDefined("rowMaximum"))
+			{
+				gridRowCount = e57::IntegerNode(indexBounds.get("rowMaximum")).value() - e57::IntegerNode(indexBounds.get("rowMinimum")).value() + 1;
+			}
+		}
+
+		bool bColumnIndex = false;
+		int64_t elementCount = 0;
+		int64_t groupPointCount = 0; // maximum point count per group
+		if (scanNode.isDefined("pointGroupingSchemes"))
+		{
+			e57::StructureNode pointGroupingSchemes(scanNode.get("pointGroupingSchemes"));
+			if (pointGroupingSchemes.isDefined("groupingByLine"))
+			{
+				e57::StructureNode groupingByLine(pointGroupingSchemes.get("groupingByLine"));
+
+				e57::CompressedVectorNode groups(groupingByLine.get("groups"));
+				int64_t groupCount = groups.childCount(); // total number of groups
+
+				e57::StringNode idElementName(groupingByLine.get("idElementName"));
+				if (idElementName.value().compare("columnIndex") == 0)
+				{
+					bColumnIndex = true;
+				}
+
+				e57::StructureNode lineGroupRecord(groups.prototype());
+				if (lineGroupRecord.isDefined("idElementValue"))
+					elementCount = e57::IntegerNode(lineGroupRecord.get("idElementValue")).maximum() - e57::IntegerNode(lineGroupRecord.get("idElementValue")).minimum() + 1;
+				else if (bColumnIndex)
+					elementCount = gridColumnCount;
+				else
+					elementCount = gridRowCount;
+
+				if (lineGroupRecord.isDefined("pointCount"))
+					groupPointCount = e57::IntegerNode(lineGroupRecord.get("pointCount")).maximum();
+				else if (bColumnIndex)
+					groupPointCount = gridRowCount;
+				else
+					groupPointCount = gridColumnCount;
+
+#if 0
+				if (groupCount != 0)
+				{
+					int64_t protoCount = lineGroupRecord.childCount();
+					std::vector<e57::SourceDestBuffer> groupSDBuffers;
+
+					std::vector<int64_t> idElementValue, startPointIndex, pointCount;
+					idElementValue.resize(groupCount);
+					startPointIndex.resize(groupCount);
+					pointCount.resize(groupCount);
+
+					for (int64_t protoIndex = 0; protoIndex < protoCount; protoIndex++)
+					{
+						e57::ustring name = lineGroupRecord.get(protoIndex).elementName();
+
+						if ((name.compare("idElementValue") == 0) && lineGroupRecord.isDefined("idElementValue") && (!idElementValue.empty()))
+							groupSDBuffers.push_back(e57::SourceDestBuffer(node.destImageFile(), "idElementValue", idElementValue.data(), static_cast<unsigned>(groupCount), true));
+						else if ((name.compare("startPointIndex") == 0) && lineGroupRecord.isDefined("startPointIndex") && (!startPointIndex.empty()))
+							groupSDBuffers.push_back(e57::SourceDestBuffer(node.destImageFile(), "startPointIndex", startPointIndex.data(), static_cast<unsigned>(groupCount), true));
+						else if ((name.compare("pointCount") == 0) && lineGroupRecord.isDefined("pointCount") && (!pointCount.empty()))
+							groupSDBuffers.push_back(e57::SourceDestBuffer(node.destImageFile(), "pointCount", pointCount.data(), static_cast<unsigned>(groupCount), true));
+					}
+
+					e57::CompressedVectorReader reader = groups.reader(groupSDBuffers);
+					reader.read();
+					reader.close();
+					//optional end
+				}
+#endif
+			}
+		}
+
+		// if indexBounds is not given
+		if (gridRowCount == 0)
+		{
+			if (bColumnIndex)
+				gridRowCount = groupPointCount;
+			else
+				gridRowCount = elementCount;
+		}
+		if (gridColumnCount == 0)
+		{
+			if (bColumnIndex)
+				gridColumnCount = elementCount;
+			else
+				gridColumnCount = groupPointCount;
+		}
+	}
+
 	/* //Ignored fields (for the moment)
-	if (scanNode.isDefined("indexBounds"))
 	if (scanNode.isDefined("originalGuids"))
 	if (scanNode.isDefined("sensorVendor"))
 	if (scanNode.isDefined("sensorModel"))
@@ -1534,7 +1637,6 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 	if (scanNode.isDefined("temperature"))
 	if (scanNode.isDefined("relativeHumidity"))
 	if (scanNode.isDefined("atmosphericPressure"))
-	if (scanNode.isDefined("pointGroupingSchemes"))
 	if (scanNode.isDefined("cartesianBounds"))
 	if (scanNode.isDefined("sphericalBounds"))
 	if (scan.isDefined("acquisitionStart"))
@@ -1581,6 +1683,26 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 		ccLog::Error("[E57] Not enough memory!");
 		delete cloud;
 		return {};
+	}
+
+	// scan grid
+	ccPointCloud::Grid::Shared scanGrid;
+	if (header.pointFields.rowIndexField && header.pointFields.columnIndexField && gridRowCount != 0 && gridColumnCount != 0)
+	{
+		scanGrid.reset(new ccPointCloud::Grid);
+		if (scanGrid->init(static_cast<unsigned>(gridRowCount), static_cast<unsigned>(gridColumnCount)))
+		{
+			arrays.rowIndex.resize(chunkSize);
+			dbufs.emplace_back(node.destImageFile(), "rowIndex", arrays.rowIndex.data(), chunkSize, true);
+			arrays.columnIndex.resize(chunkSize);
+			dbufs.emplace_back(node.destImageFile(), "columnIndex", arrays.columnIndex.data(), chunkSize, true);
+		}
+		else
+		{
+			ccLog::Warning("[E57] Not enough memory to load the scan grid");
+			scanGrid.clear();
+		}
+		
 	}
 
 	if (sphericalMode)
@@ -1778,14 +1900,25 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 	unsigned size = 0;
 	int64_t realCount = 0;
 	int64_t invalidCount = 0;
+	int col = 0, row = 0;
 	while ((size = dataReader.read()))
 	{
 		for (unsigned i = 0; i < size; ++i)
 		{
+			if (scanGrid)
+			{
+				col = arrays.columnIndex[i];
+				row = arrays.rowIndex[i];
+			}
+
 			//we skip invalid points!
 			if (!arrays.isInvalidData.empty() && arrays.isInvalidData[i] != 0)
 			{
 				++invalidCount;
+				if (scanGrid)
+				{
+					scanGrid->setIndex(row, col, -1);
+				}
 				continue;
 			}
 
@@ -1835,6 +1968,11 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 					}
 					ccLog::Warning("[E57Filter::loadFile] Cloud %s has been recentered! Translation: (%.2f ; %.2f ; %.2f)", qPrintable(guidStr), Pshift.x, Pshift.y, Pshift.z);
 				}
+			}
+
+			if (scanGrid)
+			{
+				scanGrid->setIndex(row, col, static_cast<int>(cloud->size()));
 			}
 
 			const CCVector3 P = (Pd + Pshift).toPC();
@@ -1929,6 +2067,17 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 		}
 		
 		cloud->resize(static_cast<unsigned>(realCount));
+	}
+
+	//Scan grid
+	if (scanGrid)
+	{
+		scanGrid->validCount = realCount;
+		scanGrid->minValidIndex = 0;
+		scanGrid->maxValidIndex = realCount - 1;
+		cloud->addGrid(scanGrid);
+
+		ccLog::Print(QString("[E57] Scan grid loaded for scan '%1' (%2 x %3)").arg(scanNode.elementName().c_str()).arg(scanGrid->w).arg(scanGrid->h));
 	}
 
 	//Scalar fields

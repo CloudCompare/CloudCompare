@@ -6120,3 +6120,119 @@ bool ccPointCloud::shiftPointsAlongNormals(PointCoordinateType shift)
 
 	return true;
 }
+
+ccPointCloud::Grid::Grid()
+	: w(0)
+	, h(0)
+	, validCount(0)
+	, minValidIndex(0)
+	, maxValidIndex(0)
+{
+	sensorPosition.toIdentity();
+}
+
+ccPointCloud::Grid::Grid(const Grid& grid)
+	: w(grid.w)
+	, h(grid.h)
+	, validCount(grid.validCount)
+	, minValidIndex(grid.minValidIndex)
+	, maxValidIndex(grid.maxValidIndex)
+	, indexes(grid.indexes)
+	, colors(grid.colors)
+	, sensorPosition(grid.sensorPosition)
+{}
+
+QImage ccPointCloud::Grid::toImage() const
+{
+	if (colors.size() == w * h)
+	{
+		QImage image(w, h, QImage::Format_ARGB32);
+		for (unsigned j = 0; j < h; ++j)
+		{
+			for (unsigned i = 0; i < w; ++i)
+			{
+				const ccColor::Rgb& col = colors[j*w + i];
+				image.setPixel(i, j, qRgb(col.r, col.g, col.b));
+			}
+		}
+		return image;
+	}
+	else
+	{
+		return QImage();
+	}
+}
+
+bool ccPointCloud::Grid::init(unsigned rowCount, unsigned colCount, bool withRGB/*=false*/)
+{
+	size_t scanSize = static_cast<size_t>(rowCount) * colCount;
+	try
+	{
+		indexes.resize(rowCount * colCount, -1);
+		if (withRGB)
+		{
+			colors.resize(scanSize, ccColor::Rgb(0, 0, 0));
+		}
+	}
+	catch (const std::bad_alloc&)
+	{
+		// not enough memory
+		return false;
+	}
+
+	w = colCount;
+	h = rowCount;
+
+	return true;
+}
+
+void ccPointCloud::Grid::setIndex(unsigned row, unsigned col, int index)
+{
+	assert(row < h);
+	assert(col < w);
+	assert(!indexes.empty());
+	indexes[row * w + col] = index;
+}
+
+void ccPointCloud::Grid::setColor(unsigned row, unsigned col, const ccColor::Rgb& rgb)
+{
+	assert(row < h);
+	assert(col < w);
+	assert(!colors.empty());
+	colors[row * w + col] = rgb;
+}
+
+void ccPointCloud::Grid::updateMinAndMaxValidIndexes()
+{
+	validCount = minValidIndex = maxValidIndex = 0;
+
+	if (!indexes.empty())
+	{
+		minValidIndex = std::numeric_limits<int>::max();
+		for (int index : indexes)
+		{
+			if (index < 0)
+			{
+				continue;
+			}
+
+			++validCount;
+
+			unsigned uIndex = static_cast<unsigned>(index);
+			if (uIndex < minValidIndex)
+			{
+				minValidIndex = uIndex;
+			}
+			else if (uIndex > maxValidIndex)
+			{
+				maxValidIndex = uIndex;
+			}
+		}
+
+		if (minValidIndex == std::numeric_limits<int>::max())
+		{
+			// empty grid!
+			minValidIndex = 0;
+		}
+	}
+}

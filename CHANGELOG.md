@@ -107,6 +107,9 @@ v2.13.alpha (???) - (??/??/????)
 		- Images are now saved internally as JPEG files (faster and smaller)
 		- Sensors associated to images should now be properly shifted if the associated cloud is shifted,
 			or if they are not associated to a cloud
+		- Scan grids ('groupingByLine' scheme) will now be loaded by CloudCompare.
+			This is useful to compute clean and fast normals.
+			(note that they are still not exported)
 
 	- PLY dialog:
 		- the scalar fields are now displayed in a 'list widget' in case there are too many to fit in the screen

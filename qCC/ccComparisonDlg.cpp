@@ -51,7 +51,7 @@
 
 const unsigned char DEFAULT_OCTREE_LEVEL = 7;
 
-static int s_maxThreadCount = std::max<int>(1, QThread::idealThreadCount() - 1);
+static int s_maxThreadCount = std::max<int>(1, QThread::idealThreadCount() - 1); // always leave one thread/core to let the application breath
 
 ccComparisonDlg::ccComparisonDlg(	ccHObject* compEntity,
 									ccHObject* refEntity,
@@ -80,7 +80,7 @@ ccComparisonDlg::ccComparisonDlg(	ccHObject* compEntity,
 	static int MaxThreadCount = QThread::idealThreadCount();
 	maxThreadCountSpinBox->setRange(1, MaxThreadCount);
 	maxThreadCountSpinBox->setSuffix(QString(" / %1").arg(MaxThreadCount));
-	maxThreadCountSpinBox->setValue(s_maxThreadCount); // always leave one thread/core to let the application breath
+	maxThreadCountSpinBox->setValue(s_maxThreadCount);
 
 	//populate the combo-boxes
 	{

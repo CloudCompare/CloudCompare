@@ -31,13 +31,19 @@ static QListWidgetItem* CreateItem(const char* name)
 	return item;
 }
 
-static bool IsCheckedIn(const QString& name, const QListWidget& list)
+static bool IsCheckedIn(const QString& name, const QListWidget* list)
 {
-	for (int i = 0; i < list.count(); ++i)
+	if (!list)
 	{
-		if (list.item(i)->text() == name)
+		assert(false);
+		return false;
+	}
+
+	for (int i = 0; i < list->count(); ++i)
+	{
+		if (list->item(i)->text() == name)
 		{
-			return list.item(i)->checkState() == Qt::Checked;
+			return list->item(i)->checkState() == Qt::Checked;
 		}
 	}
 	return false;
@@ -65,12 +71,16 @@ LasOpenDialog::LasOpenDialog(QWidget* parent)
 	connect(cancelButton, &QPushButton::clicked, this, &QDialog::reject);
 	connect(automaticTimeShiftCheckBox, &QCheckBox::toggled, this, &LasOpenDialog::onAutomaticTimeShiftToggle);
 	connect(applyAllButton, &QPushButton::clicked, this, &LasOpenDialog::onApplyAll);
-	connect(selectAllToolButton, &QPushButton::clicked, [&] { doSelectAll(true); });
-	connect(unselectAllToolButton, &QPushButton::clicked, this, [&] { doSelectAll(false); });
+	connect(selectAllToolButton, &QPushButton::clicked, [&]
+	        { doSelectAll(true); });
+	connect(unselectAllToolButton, &QPushButton::clicked, this, [&]
+	        { doSelectAll(false); });
 	connect(tilingBrowseToolButton, &QPushButton::clicked, this, &LasOpenDialog::onBrowseTilingOutputDir);
 	connect(actionTab, &QTabWidget::currentChanged, this, &LasOpenDialog::onCurrentTabChanged);
-	connect(selectAllESFToolButton, &QPushButton::clicked, [&] { doSelectAllESF(true); });
-	connect(unselectAllESFToolButton, &QPushButton::clicked, this, [&] { doSelectAllESF(false); });
+	connect(selectAllESFToolButton, &QPushButton::clicked, [&]
+	        { doSelectAllESF(true); });
+	connect(unselectAllESFToolButton, &QPushButton::clicked, this, [&]
+	        { doSelectAllESF(false); });
 }
 
 void LasOpenDialog::doSelectAll(bool doSelect)
@@ -114,6 +124,9 @@ void LasOpenDialog::setInfo(int versionMinor, int pointFormatId, qulonglong numP
 void LasOpenDialog::setAvailableScalarFields(const std::vector<LasScalarField>&      scalarFields,
                                              const std::vector<LasExtraScalarField>& extraScalarFields)
 {
+	availableScalarFields->clear();
+	availableExtraScalarFields->clear();
+
 	if (!scalarFields.empty())
 	{
 		scalarFieldFrame->show();
@@ -146,7 +159,8 @@ void LasOpenDialog::setAvailableScalarFields(const std::vector<LasScalarField>& 
 void LasOpenDialog::filterOutNotChecked(std::vector<LasScalarField>&      scalarFields,
                                         std::vector<LasExtraScalarField>& extraScalarFields)
 {
-	const auto isFieldSelected = [this](const auto& field) { return isChecked(field); };
+	const auto isFieldSelected = [this](const auto& field)
+	{ return isChecked(field); };
 
 	RemoveFalse(scalarFields, isFieldSelected);
 	RemoveFalse(extraScalarFields, isFieldSelected);
@@ -174,12 +188,12 @@ double LasOpenDialog::timeShiftValue() const
 
 bool LasOpenDialog::isChecked(const LasExtraScalarField& lasExtraScalarField) const
 {
-	return IsCheckedIn(lasExtraScalarField.name, *availableExtraScalarFields);
+	return IsCheckedIn(lasExtraScalarField.name, availableExtraScalarFields);
 }
 
 bool LasOpenDialog::isChecked(const LasScalarField& lasScalarField) const
 {
-	return IsCheckedIn(lasScalarField.name(), *availableScalarFields);
+	return IsCheckedIn(lasScalarField.name(), availableScalarFields);
 }
 
 void LasOpenDialog::onAutomaticTimeShiftToggle(bool checked)

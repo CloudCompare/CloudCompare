@@ -59,8 +59,8 @@ v2.13.alpha (???) - (??/??/????)
 - Improvements:
 
 	- multi-threading
-		- By default, CC will now use one less thread/core than the max number, so as to let the application breath
-		- (warning: some dialogs may keep the previous value as it's stored in the system registry)
+		- If possible, CC will now try to use less threads/cores than the maximum number, so as to let the application breath
+		  (warning: some dialogs may keep the previous value as it's stored in the system registry)
 
 	- Segmentation
 		- CC will now preserve some children entities (labels, sensors, etc.) when segmenting clouds or meshes:
@@ -107,6 +107,12 @@ v2.13.alpha (???) - (??/??/????)
 		- Images are now saved internally as JPEG files (faster and smaller)
 		- Sensors associated to images should now be properly shifted if the associated cloud is shifted,
 			or if they are not associated to a cloud
+		- Scan grids ('groupingByLine' scheme) will now be loaded by CloudCompare.
+			This is useful to compute clean and fast normals.
+			(note that they are still not exported)
+
+	- PLY dialog:
+		- the scalar fields are now displayed in a 'list widget' in case there are too many to fit in the screen
 
 	- SF Arithmetic tool:
 		- New operation: 'SET' (to set a constant value)

@@ -37,6 +37,9 @@
 #include <ccProgressDialog.h>
 #include <ccGBLSensor.h>
 
+//CCPluginAPI
+#include <ccQtHelpers.h>
+
 //Local
 #include "mainwindow.h"
 #include "ccCommon.h"
@@ -51,7 +54,7 @@
 
 const unsigned char DEFAULT_OCTREE_LEVEL = 7;
 
-static int s_maxThreadCount = std::max<int>(1, QThread::idealThreadCount() - 1);
+static int s_maxThreadCount = ccQtHelpers::GetMaxThreadCount();
 
 ccComparisonDlg::ccComparisonDlg(	ccHObject* compEntity,
 									ccHObject* refEntity,
@@ -77,10 +80,10 @@ ccComparisonDlg::ccComparisonDlg(	ccHObject* compEntity,
 {
 	setupUi(this);
 
-	static int MaxThreadCount = QThread::idealThreadCount();
+	static const int MaxThreadCount = QThread::idealThreadCount();
 	maxThreadCountSpinBox->setRange(1, MaxThreadCount);
 	maxThreadCountSpinBox->setSuffix(QString(" / %1").arg(MaxThreadCount));
-	maxThreadCountSpinBox->setValue(s_maxThreadCount); // always leave one thread/core to let the application breath
+	maxThreadCountSpinBox->setValue(s_maxThreadCount);
 
 	//populate the combo-boxes
 	{

@@ -31,7 +31,8 @@
 #include <ccScalarField.h>
 
 //qCC_plugins
-#include "ccMainAppInterface.h"
+#include <ccMainAppInterface.h>
+#include <ccQtHelpers.h>
 
 //Qt
 #include <QApplication>
@@ -331,7 +332,7 @@ bool qCanupoTools::ComputeCorePointsDescriptors(CCCoreLib::GenericIndexedCloud* 
 
 		if (maxThreadCount == 0)
 		{
-			maxThreadCount = std::max(1, QThread::idealThreadCount() - 1); // always leave one thread/core to let the application breath
+			maxThreadCount = ccQtHelpers::GetMaxThreadCount();
 		}
 		assert(maxThreadCount <= QThread::idealThreadCount());
 		QThreadPool::globalInstance()->setMaxThreadCount(maxThreadCount);

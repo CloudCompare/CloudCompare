@@ -20,6 +20,7 @@
 //Qt
 #include <QMessageBox>
 #include <QStringList>
+#include <QListWidgetItem>
 
 //qCC_db
 #include <ccLog.h>
@@ -67,8 +68,6 @@ PlyOpenDlg::PlyOpenDlg(QWidget* parent)
 		m_standardCombos.push_back(nxComboBox);
 		m_standardCombos.push_back(nyComboBox);
 		m_standardCombos.push_back(nzComboBox);
-
-		m_sfCombos.push_back(sfComboBox);
 
 		m_listCombos.push_back(facesComboBox);
 		m_listCombos.push_back(textCoordsComboBox);
@@ -359,23 +358,15 @@ bool PlyOpenDlg::restoreContext(PlyLoadingContext* context, int& unassignedProps
 	}
 	
 	//additional SF combos
-	assert(m_sfCombos.size() == 1);
 	{
-		m_sfCombos.front()->setCurrentIndex(0);
-		bool firstSF = true;
 		for (size_t i = 0; i < context->sfCombosProperties.size(); ++i)
 		{
 			//try to find it in the new property list!
-			int idx = m_sfCombos.front()->findText(context->sfCombosProperties[i]);
+			int idx = m_stdPropsText.lastIndexOf(context->sfCombosProperties[i]);
 			if (idx >= 0)
 			{
 				++assignedEntries;
-				//we use the default sf combo-box by default
-				if (firstSF)
-					m_sfCombos.front()->setCurrentIndex(idx);
-				else
-					addSFComboBox(idx);
-				firstSF = false;
+				addSFComboBox(idx);
 			}
 		}
 	}
@@ -458,12 +449,19 @@ bool PlyOpenDlg::canBeSkipped() const
 
 void PlyOpenDlg::addSFComboBox(int selectedIndex/*=0*/)
 {
-	//create a new combo-box
-	m_sfCombos.push_back(new QComboBox());
-	formLayout->addRow(QString("Scalar #%1").arg(m_sfCombos.size()), m_sfCombos.back());
+	//create a new item in the SF list
+	QString itemTitle = QString("Scalar #%1").arg(m_sfCombos.size());
+	QListWidgetItem* sfItem = new QListWidgetItem(itemTitle);
 
+	//create a new combo-box
+	QComboBox* sfCombo = new QComboBox;
 	//fill it with default items
-	m_sfCombos.back()->addItems(m_stdPropsText);
-	m_sfCombos.back()->setMaxVisibleItems(m_stdPropsText.size());
-	m_sfCombos.back()->setCurrentIndex(selectedIndex);
+	sfCombo->addItems(m_stdPropsText);
+	sfCombo->setMaxVisibleItems(m_stdPropsText.size());
+	sfCombo->setCurrentIndex(selectedIndex);
+
+	scalarFields->addItem(sfItem);
+	scalarFields->setItemWidget(sfItem, sfCombo);
+
+	m_sfCombos.push_back(sfCombo);
 }

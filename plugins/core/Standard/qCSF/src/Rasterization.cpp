@@ -27,8 +27,13 @@
 //#######################################################################################
 
 #include "Rasterization.h"
+
+// System
 #include <iostream>
 #include <queue>
+
+// CCPluginAPI
+#include <ccQtHelpers.h>
 
 using namespace std;
 
@@ -392,7 +397,7 @@ bool Rasterization::RasterTerrain(Cloth& cloth, const wl::PointCloud& pc, std::v
 							true,
 							0,
 							"Rasterization",
-							std::max(1, QThread::idealThreadCount() - 1)); // always leave one thread/core to let the application breath
+							ccQtHelpers::GetMaxThreadCount());
 
 		delete cloudOctree;
 		cloudOctree = 0;

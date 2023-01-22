@@ -16,7 +16,14 @@
 //#                                                                        #
 //##########################################################################
 
+// Qt
 #include <QAbstractButton>
+#include <QThread>
+
+#if defined(_OPENMP)
+//OpenMP
+#include <omp.h>
+#endif
 
 class ccQtHelpers
 {
@@ -34,5 +41,36 @@ public:
 								   );
 		}
 	}
-	
+
+	//! Returns the ideal number of threads/cores
+	static int GetMaxThreadCount(int idealThreadCount)
+	{
+		if (idealThreadCount <= 4)
+		{
+			return idealThreadCount;
+		}
+		else if (idealThreadCount <= 8)
+		{
+			return idealThreadCount - 1;
+		}
+		else
+		{
+			return idealThreadCount - 2;
+		}
+	}
+
+	//! Returns the ideal number of threads/cores with Qt Concurrent
+	static int GetMaxThreadCount()
+	{
+		return GetMaxThreadCount(QThread::idealThreadCount());
+	}
+
+#if defined(_OPENMP)
+	//! Returns the ideal number of threads/cores with OpenMP
+	static int GetMaxThreadCount_OMP()
+	{
+		return GetMaxThreadCount(omp_get_max_threads());
+	}
+#endif
+
 };

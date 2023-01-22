@@ -34,25 +34,33 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3
         with:
           submodules: true
+
+      - name: Setup (Windows)
+        if: matrix.config.os == 'windows-latest'
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
 
       # Turn off for now since GitHub Actions is broken (will eventually move to brew anyways)
       # - name: Conda Cache (macOS)
       #   if:  matrix.config.os == 'macos-latest'
-      #   uses: actions/cache@v1
+      #   uses: actions/cache@v3
       #   with:
       #     path: /Users/runner/miniconda3/envs/CloudCompareDev
       #     key: conda-cache-${{ runner.os }}-${{ hashFiles('.ci/conda.yml') }}
 
-      - name: Conda Cache (Windows)
-        if: matrix.config.os == 'windows-latest'
-        uses: actions/cache@v1
-        with:
-          path: C:\Miniconda3\envs\CloudCompareDev
-          key: conda-cache-${{ runner.os }}-${{ hashFiles('.ci/conda.yml') }}
+      # DGM: caching conda doesn't seem to work properly anymore
+      #- name: Conda Cache (Windows)
+      #  if: matrix.config.os == 'windows-latest'
+      #  uses: actions/cache@v3
+      #  with:
+      #    path: C:\Miniconda3\envs\CloudCompareDev
+      #    key: conda-cache-${{ runner.os }}-${{ hashFiles('.ci/conda.yml') }}
 
+      # DGM: without caching, using conda on Windows takes a long time...
       - name: Install Dependencies
         uses: conda-incubator/setup-miniconda@v2
         with:

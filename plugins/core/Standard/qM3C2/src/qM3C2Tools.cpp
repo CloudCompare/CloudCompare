@@ -33,7 +33,8 @@
 #include <ccProgressDialog.h>
 
 //qCC
-#include "ccMainAppInterface.h"
+#include <ccMainAppInterface.h>
+#include <ccQtHelpers.h>
 
 //Qt
 #include <QtCore>
@@ -292,7 +293,7 @@ bool qM3C2Normals::ComputeCorePointsNormals(CCCoreLib::GenericIndexedCloud* core
 
 		if (maxThreadCount == 0)
 		{
-			maxThreadCount = std::max(1, QThread::idealThreadCount() - 1); // always leave one thread/core to let the application breath
+			maxThreadCount = ccQtHelpers::GetMaxThreadCount();
 		}
 		QThreadPool::globalInstance()->setMaxThreadCount(maxThreadCount);
 		QtConcurrent::blockingMap(corePointsIndexes, ComputeCorePointNormal);
@@ -443,7 +444,7 @@ bool qM3C2Normals::UpdateNormalOrientationsWithCloud(	CCCoreLib::GenericIndexedC
 
 			if (maxThreadCount == 0)
 			{
-				maxThreadCount = std::max(1, QThread::idealThreadCount() - 1); // always leave one thread/core to let the application breath
+				maxThreadCount = ccQtHelpers::GetMaxThreadCount();
 			}
 			QThreadPool::globalInstance()->setMaxThreadCount(maxThreadCount);
 			QtConcurrent::blockingMap(pointIndexes, OrientPointNormalWithCloud);

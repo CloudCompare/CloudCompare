@@ -37,22 +37,6 @@ else()
 	target_compile_definitions( ${PROJECT_NAME} PRIVATE QT_NO_KEYWORDS )
 endif()
 
-if( WIN32 )
-	DeployQt(
-		TARGET
-			${PROJECT_NAME}
-		DEPLOY_PATH
-			${CLOUDCOMPARE_DEST_FOLDER}
-	)
-else()
-	DeployQt(
-		TARGET
-			${PROJECT_NAME}
-		DEPLOY_PATH
-			${PROJECT_NAME}
-	)
-endif()
-
 target_link_libraries( ${PROJECT_NAME}
     CCAppCommon
     QCustomPlot
@@ -166,5 +150,21 @@ else()
 		DEST_FOLDER "plugins"
 		SHADER_DEST_PATH "${CLOUDCOMPARE_DEST_FOLDER}"
 		SHADER_DEST_FOLDER "shaders"
+	)
+endif()
+
+if( WIN32 )
+	DeployQt(
+		TARGET
+			${PROJECT_NAME}
+		DEPLOY_PATH
+			${CLOUDCOMPARE_DEST_FOLDER}
+	)
+else()
+	DeployQt(
+		TARGET
+			${PROJECT_NAME}
+		DEPLOY_PATH
+			${PROJECT_NAME}
 	)
 endif()

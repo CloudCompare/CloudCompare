@@ -61,6 +61,7 @@ qFacets plugin:
 [*] Add the facet perimeter to the set of exported values
 
 Various:
+[*] Save multiple clouds in a LAS file (or other file types that normally only store one cloud - https://www.cloudcompare.org/forum/viewtopic.php?p=27131)
 [*] Manage viewports as sensors to be able to move/edit them easily (https://www.cloudcompare.org/forum/posting.php?mode=reply&t=6112)
 [*] Option to automatically deleted the source cloud in the 'SF > Filter by value' tool (https://www.cloudcompare.org/forum/viewtopic.php?t=6113)
 [*] Rotate/translate tool: option to rotate entities of a small increment, with button or key (https://www.cloudcompare.org/forum/viewtopic.php?p=26986#p26986)

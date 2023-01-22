@@ -26,6 +26,7 @@
 
 //qCC_plugins
 #include <ccMainAppInterface.h>
+#include <ccQtHelpers.h>
 
 //qCC_db
 #include <ccGenericPointCloud.h>
@@ -954,7 +955,7 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 
 				if (maxThreadCount == 0)
 				{
-					maxThreadCount = std::max(1, QThread::idealThreadCount() - 1); // always leave one thread/core to let the application breath
+					maxThreadCount = ccQtHelpers::GetMaxThreadCount();
 				}
 				assert(maxThreadCount > 0 && maxThreadCount <= QThread::idealThreadCount());
 				QThreadPool::globalInstance()->setMaxThreadCount(maxThreadCount);

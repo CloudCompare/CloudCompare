@@ -6131,17 +6131,6 @@ ccPointCloud::Grid::Grid()
 	sensorPosition.toIdentity();
 }
 
-ccPointCloud::Grid::Grid(const Grid& grid)
-	: w(grid.w)
-	, h(grid.h)
-	, validCount(grid.validCount)
-	, minValidIndex(grid.minValidIndex)
-	, maxValidIndex(grid.maxValidIndex)
-	, indexes(grid.indexes)
-	, colors(grid.colors)
-	, sensorPosition(grid.sensorPosition)
-{}
-
 QImage ccPointCloud::Grid::toImage() const
 {
 	if (colors.size() == w * h)

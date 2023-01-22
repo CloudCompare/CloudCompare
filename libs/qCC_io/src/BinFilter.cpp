@@ -1120,16 +1120,16 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 		}
 		else
 		{
-			sprintf(cloudName,"unnamed - Cloud #%u",k);
+			snprintf(cloudName, 256, "unnamed - Cloud #%u", k);
 		}
 
 		//Cloud name
 		char sfName[1024] = "unnamed";
 		if (header.sfName)
 		{
-			for (int i=0; i<1024; ++i)
+			for (int i = 0; i < 1024; ++i)
 			{
-				if (in.read(sfName+i,1) < 0)
+				if (in.read(sfName + i, 1) < 0)
 				{
 					//Console::print("[BinFilter::loadModelFromBinaryFile] Error reading the cloud name!\n");
 					return CC_FERR_READING;
@@ -1142,7 +1142,7 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 		}
 		else
 		{
-			strcpy(sfName,"Loaded scalar field");
+			strncpy(sfName, "Loaded scalar field", 1024);
 		}
 		
 		//Creation
@@ -1197,9 +1197,7 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 				container.addChild(loadedCloud);
 				fileChunkPos = lineRead;
 				fileChunkSize = std::min(nbOfPoints - lineRead, CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
-				char partName[sizeof(cloudName) + 16];
-				++parts;
-				sprintf(partName, "%s.part_%u", cloudName, parts);
+				QString partName = QString("%1.%2").arg(cloudName).arg(parts);
 				loadedCloud = new ccPointCloud(partName);
 				if (!loadedCloud->reserveThePointsTable(fileChunkSize))
 				{

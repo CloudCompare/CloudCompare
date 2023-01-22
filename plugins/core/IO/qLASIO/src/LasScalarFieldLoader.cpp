@@ -276,7 +276,6 @@ LasScalarFieldLoader::handleGpsTime(LasScalarField& sfInfo, ccPointCloud& pointC
 
 bool LasScalarFieldLoader::createScalarFieldsForExtraBytes(ccPointCloud& pointCloud)
 {
-	char name[50];
 	for (LasExtraScalarField& extraField : m_extraScalarFields)
 	{
 		switch (extraField.numElements())
@@ -284,7 +283,8 @@ bool LasScalarFieldLoader::createScalarFieldsForExtraBytes(ccPointCloud& pointCl
 		case 1:
 			if (pointCloud.getScalarFieldIndexByName(extraField.name) != -1)
 			{
-				sprintf(name, "%s (Extra)", extraField.name);
+				char name[LasExtraScalarField::MAX_NAME_SIZE + 8];
+				snprintf(name, LasExtraScalarField::MAX_NAME_SIZE + 8, "%s (Extra)", extraField.name);
 				extraField.scalarFields[0] = new ccScalarField(name);
 				extraField.ccName          = name;
 			}
@@ -302,7 +302,8 @@ bool LasScalarFieldLoader::createScalarFieldsForExtraBytes(ccPointCloud& pointCl
 		case 3:
 			for (unsigned dimIndex{0}; dimIndex < extraField.numElements(); ++dimIndex)
 			{
-				sprintf(name, "%s [%d]", extraField.name, dimIndex);
+				char name[LasExtraScalarField::MAX_NAME_SIZE + 8];
+				snprintf(name, LasExtraScalarField::MAX_NAME_SIZE + 8, "%s [%d]", extraField.name, dimIndex);
 				extraField.scalarFields[dimIndex] = new ccScalarField(name);
 				if (!extraField.scalarFields[dimIndex]->reserveSafe(pointCloud.capacity()))
 				{

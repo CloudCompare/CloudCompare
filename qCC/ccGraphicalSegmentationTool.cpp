@@ -55,11 +55,6 @@
 //System
 #include <assert.h>
 
-#if defined(_OPENMP)
-//OpenMP
-#include <omp.h>
-#endif
-
 ccGraphicalSegmentationTool::ccGraphicalSegmentationTool(QWidget* parent)
 	: ccOverlayDialog(parent)
 	, Ui::GraphicalSegmentationDlg()

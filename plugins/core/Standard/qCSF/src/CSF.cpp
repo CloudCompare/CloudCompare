@@ -49,8 +49,11 @@
 #include <sstream>
 #include <iostream>
 
+#if defined(_OPENMP)
 //OpenMP
 #include <omp.h>
+#endif
+
 
 CSF::CSF(wl::PointCloud& cloud, const Parameters& params)
 	: m_pointCloud(cloud)
@@ -116,8 +119,9 @@ bool CSF::do_filtering(	std::vector<unsigned>& groundIndexes,
 
 		double squareTimeStep = m_params.time_step * m_params.time_step;
 
-		omp_set_num_threads(std::max(1, omp_get_max_threads() - 1)); // always leave one thread/core to let the application breath
-
+#if defined(_OPENMP)
+        omp_set_num_threads(std::max(1, omp_get_max_threads() - 1)); // always leave one thread/core to let the application breath
+#endif
 
 		//do the filtering
 		QProgressDialog pDlg(parent);

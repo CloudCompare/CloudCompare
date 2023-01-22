@@ -403,7 +403,7 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 #else
 #if defined(_OPENMP)
 		omp_set_num_threads(omp_get_max_threads());
-#pragma omp parallel for
+		#pragma omp parallel for
 #endif
 		for (int i = 0; i < pointCount; ++i)
 #endif

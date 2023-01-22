@@ -69,9 +69,6 @@ PlyOpenDlg::PlyOpenDlg(QWidget* parent)
 		m_standardCombos.push_back(nyComboBox);
 		m_standardCombos.push_back(nzComboBox);
 
-		//m_sfCombos.push_back(sfComboBox);
-		//addSFComboBox();
-
 		m_listCombos.push_back(facesComboBox);
 		m_listCombos.push_back(textCoordsComboBox);
 

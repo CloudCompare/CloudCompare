@@ -17,8 +17,9 @@
 
 #include "qM3C2Dialog.h"
 
-//qCC
-#include "ccMainAppInterface.h"
+//CCPluginAPI
+#include <ccMainAppInterface.h>
+#include <ccQtHelpers.h>
 
 //qCC_db
 #include <ccFileUtils.h>
@@ -90,7 +91,7 @@ qM3C2Dialog::qM3C2Dialog(ccPointCloud* cloud1, ccPointCloud* cloud2, ccMainAppIn
 {
 	setupUi(this);
 
-	static int MaxThreadCount = QThread::idealThreadCount();
+	static const int MaxThreadCount = QThread::idealThreadCount();
 	maxThreadCountSpinBox->setRange(1, MaxThreadCount);
 	maxThreadCountSpinBox->setSuffix(QString(" / %1").arg(MaxThreadCount));
 
@@ -482,7 +483,7 @@ void qM3C2Dialog::loadParamsFrom(const QSettings& settings)
 	bool exportStdDevInfo = settings.value("ExportStdDevInfo", exportStdDevInfoCheckBox->isChecked()).toBool();
 	bool exportDensityAtProjScale = settings.value("ExportDensityAtProjScale", exportDensityAtProjScaleCheckBox->isChecked()).toBool();
 
-	int maxThreadCount = settings.value("MaxThreadCount", std::max(1, QThread::idealThreadCount() - 1)).toInt(); // always leave one thread/core to let the application breath
+	int maxThreadCount = settings.value("MaxThreadCount", ccQtHelpers::GetMaxThreadCount()).toInt();
 
 	bool usePrecisionMaps = settings.value("UsePrecisionMaps", precisionMapsGroupBox->isChecked()).toBool();
 	double pm1Scale = settings.value("PM1Scale", pm1ScaleDoubleSpinBox->value()).toDouble();

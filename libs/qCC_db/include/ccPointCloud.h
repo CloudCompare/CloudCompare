@@ -275,7 +275,7 @@ public: //associated (scan) grid structure
 		//! Copy constructor
 		/** \warning May throw a bad_alloc exception
 		**/
-		Grid(const Grid& grid);
+		Grid(const Grid& grid) = default;
 
 		//! Inits the grid
 		bool init(unsigned rowCount, unsigned colCount, bool withRGB = false);

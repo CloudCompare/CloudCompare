@@ -19,7 +19,6 @@
 #include "ccIncludeGL.h"
 
 #include "ccClipBox.h"
-//#include "ccReservedIDs.h"
 
 //Local
 #include "ccCone.h"
@@ -564,16 +563,13 @@ void ccClipBox::flagPointsInside(	ccGenericPointCloud* cloud,
 
 	int count = static_cast<int>(cloud->size());
 
-#if defined(_OPENMP)
-	omp_set_num_threads(std::max(1, omp_get_max_threads() - 1)); // always leave one thread/core to let the application breath
-#endif
-
 	if (m_glTransEnabled)
 	{
 		ccGLMatrix transMat = m_glTrans.inverse();
 
 #if defined(_OPENMP)
-#pragma omp parallel for
+		omp_set_num_threads(omp_get_max_threads());
+		#pragma omp parallel for
 #endif
 		for (int i = 0; i < count; ++i)
 		{
@@ -588,7 +584,8 @@ void ccClipBox::flagPointsInside(	ccGenericPointCloud* cloud,
 	else
 	{
 #if defined(_OPENMP)
-#pragma omp parallel for
+		omp_set_num_threads(omp_get_max_threads());
+		#pragma omp parallel for
 #endif
 		for (int i = 0; i < count; ++i)
 		{

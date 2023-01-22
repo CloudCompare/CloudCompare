@@ -55,6 +55,11 @@
 //System
 #include <assert.h>
 
+#if defined(_OPENMP)
+//OpenMP
+#include <omp.h>
+#endif
+
 ccGraphicalSegmentationTool::ccGraphicalSegmentationTool(QWidget* parent)
 	: ccOverlayDialog(parent)
 	, Ui::GraphicalSegmentationDlg()
@@ -898,6 +903,7 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 
 		// we project each point and we check if it falls inside the segmentation polyline
 #if defined(_OPENMP)
+        omp_set_num_threads(omp_get_max_threads());
 		#pragma omp parallel for
 #endif
 		for (int i = 0; i < cloudSize; ++i)

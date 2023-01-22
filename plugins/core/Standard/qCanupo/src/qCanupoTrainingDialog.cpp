@@ -22,7 +22,8 @@
 #include "ccPointDescriptor.h"
 
 //qCC_plugins
-#include "ccMainAppInterface.h"
+#include <ccMainAppInterface.h>
+#include <ccQtHelpers.h>
 
 //qCC_db
 #include <ccPointCloud.h>
@@ -45,7 +46,7 @@ qCanupoTrainingDialog::qCanupoTrainingDialog(ccMainAppInterface* app)
 {
 	setupUi(this);
 
-	static int MaxThreadCount = QThread::idealThreadCount();
+	static const int MaxThreadCount = QThread::idealThreadCount();
 	maxThreadCountSpinBox->setRange(1, MaxThreadCount);
 	maxThreadCountSpinBox->setSuffix(QString(" / %1").arg(MaxThreadCount));
 
@@ -231,7 +232,7 @@ void qCanupoTrainingDialog::loadParamsFromPersistentSettings()
 
 	unsigned maxPoints = settings.value("MaxPoints",maxPointsSpinBox->value()).toUInt();
 	int classifParam = settings.value("ClassifParam",paramComboBox->currentIndex()).toInt();
-	int maxThreadCount = settings.value("MaxThreadCount", std::max(1, QThread::idealThreadCount() - 1)).toInt(); // always leave one thread/core to let the application breath
+	int maxThreadCount = settings.value("MaxThreadCount", ccQtHelpers::GetMaxThreadCount()).toInt();
 
 	//apply parameters
 

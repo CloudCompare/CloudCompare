@@ -59,8 +59,8 @@ v2.13.alpha (???) - (??/??/????)
 - Improvements:
 
 	- multi-threading
-		- By default, CC will now use one less thread/core than the max number, so as to let the application breath
-		- (warning: some dialogs may keep the previous value as it's stored in the system registry)
+		- If possible, CC will now try to use less threads/cores than the maximum number, so as to let the application breath
+		  (warning: some dialogs may keep the previous value as it's stored in the system registry)
 
 	- Segmentation
 		- CC will now preserve some children entities (labels, sensors, etc.) when segmenting clouds or meshes:

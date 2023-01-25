@@ -1063,7 +1063,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(	bool exportHeightStats,
 
 	ccPointCloud* cloudGrid = nullptr;
 
-	ccPointCloud* inputCloudAsPC = inputCloud->isA(CC_TYPES::POINT_CLOUD) ? static_cast<ccPointCloud*>(inputCloud) : nullptr;
+	ccPointCloud* inputCloudAsPC = (inputCloud && inputCloud->isA(CC_TYPES::POINT_CLOUD)) ? static_cast<ccPointCloud*>(inputCloud) : nullptr;
 	
 	//if we 'resample' the input cloud, we actually resample it (one point in each cell)
 	//and we may have to change some things afterwards (height, scalar fields, etc.)

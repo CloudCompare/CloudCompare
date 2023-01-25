@@ -61,6 +61,8 @@ qFacets plugin:
 [*] Add the facet perimeter to the set of exported values
 
 Various:
+[*] Enable or Disable other clouds while using the scissors tool (for visual reference) (https://www.cloudcompare.org/forum/viewtopic.php?t=6143)
+[*] Being able to select only the visible or the enabled clouds with the  'Select children by type and/or name' feature (https://www.cloudcompare.org/forum/viewtopic.php?p=27159)
 [*] Save multiple clouds in a LAS file (or other file types that normally only store one cloud - https://www.cloudcompare.org/forum/viewtopic.php?p=27131)
 [*] Manage viewports as sensors to be able to move/edit them easily (https://www.cloudcompare.org/forum/posting.php?mode=reply&t=6112)
 [*] Option to automatically deleted the source cloud in the 'SF > Filter by value' tool (https://www.cloudcompare.org/forum/viewtopic.php?t=6113)

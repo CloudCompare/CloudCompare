@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-
-#ifndef CC_MATERIAL_SET_HEADER
-#define CC_MATERIAL_SET_HEADER
 
 //Local
 #include "ccHObject.h"
@@ -80,5 +79,3 @@ protected:
 	//! Default destructor (protected: use 'release' instead)
 	~ccMaterialSet() override = default;
 };
-
-#endif //CC_MATERIAL_SET_HEADER

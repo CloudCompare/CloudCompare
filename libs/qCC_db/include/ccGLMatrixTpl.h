@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-
-#ifndef CC_GL_MATRIX_TPL_HEADER
-#define CC_GL_MATRIX_TPL_HEADER
 
 //Local
 #include "ccSerializableObject.h"
@@ -1176,6 +1175,7 @@ public:
 		return true;
 	}
 
+	//inherited from ccSerializableObject
 	bool toFile(QFile& out, short dataVersion) const override
 	{
 		assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
@@ -1194,6 +1194,7 @@ public:
 		return true;
 	}
 
+	//inherited from ccSerializableObject
 	bool fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override
 	{
 		assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
@@ -1208,11 +1209,11 @@ public:
 		return true;
 	}
 
+	//inherited from ccSerializableObject
 	short minimumFileVersion() const override
 	{
 		return 20;
 	}
-
 
 protected:
 
@@ -1229,5 +1230,3 @@ protected:
 	//! Internal 4x4 GL-style matrix data
 	T m_mat[OPENGL_MATRIX_SIZE];
 };
-
-#endif //CC_GL_MATRIX_TPL_HEADER

@@ -62,7 +62,7 @@
          <string>Export color scale to a file</string>
         </property>
         <property name="icon">
-         <iconset resource="../icons.qrc">
+         <iconset resource="../../../qCC/icons.qrc">
           <normaloff>:/CC/images/ccSave.png</normaloff>:/CC/images/ccSave.png</iconset>
         </property>
        </widget>
@@ -73,7 +73,7 @@
          <string>Import color scale from a file</string>
         </property>
         <property name="icon">
-         <iconset resource="../icons.qrc">
+         <iconset resource="../../../qCC/icons.qrc">
           <normaloff>:/CC/images/ccOpen.png</normaloff>:/CC/images/ccOpen.png</iconset>
         </property>
        </widget>
@@ -266,7 +266,7 @@
       <item>
        <widget class="QToolButton" name="deleteSliderToolButton">
         <property name="icon">
-         <iconset resource="../icons.qrc">
+         <iconset resource="../../../qCC/icons.qrc">
           <normaloff>:/CC/images/smallTrash.png</normaloff>:/CC/images/smallTrash.png</iconset>
         </property>
        </widget>
@@ -356,6 +356,18 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
+       <widget class="QLabel" name="label_5">
+        <property name="font">
+         <font>
+          <italic>true</italic>
+         </font>
+        </property>
+        <property name="text">
+         <string>One numerical value per line (+ optionally a text label between double quotes)</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPlainTextEdit" name="customLabelsPlainTextEdit">
         <property name="plainText">
          <string>(auto)</string>
@@ -399,7 +411,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../icons.qrc"/>
+  <include location="../../../qCC/icons.qrc"/>
  </resources>
  <connections/>
 </ui>

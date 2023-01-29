@@ -258,7 +258,11 @@ bool ccColorScale::toFile(QFile& out, short dataVersion) const
 		//write each custom label
 		for (LabelSet::const_iterator it = m_customLabels.begin(); it != m_customLabels.end(); ++it)
 		{
-			outStream << *it;
+			outStream << it->value;
+			if (dataVersion >= 54)
+			{
+				outStream << it->text;
+			}
 		}
 	}
 
@@ -328,9 +332,15 @@ bool ccColorScale::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap
 			for (uint32_t i = 0; i < labelCount; ++i)
 			{
 				double label = 0.0;
-				inStream >> label;
+				QString text;
 
-				m_customLabels.insert(label);
+				inStream >> label;
+				if (dataVersion >= 54)
+				{
+					inStream >> text;
+				}
+
+				m_customLabels.insert({ label, text });
 			}
 		}
 		catch (const std::bad_alloc&)
@@ -347,7 +357,16 @@ short ccColorScale::minimumFileVersion() const
 {
 	if (!m_customLabels.empty())
 	{
-		// with custom labels --> version 40
+		for (LabelSet::const_iterator it = m_customLabels.begin(); it != m_customLabels.end(); ++it)
+		{
+			if (!it->text.isEmpty())
+			{
+				// custom labels with an overridding text --> version 54
+				return 54;
+			}
+		}
+
+		// with custom labels, but no overridding text --> version 40
 		return 40;
 	}
 	else
@@ -439,7 +458,11 @@ bool ccColorScale::saveAsXML(const QString& filename) const
 						{
 							stream.writeStartElement("label");
 							{
-								stream.writeAttribute("val", QString::number(*it,'g',12));
+								stream.writeAttribute("val", QString::number(it->value, 'g', 12));
+								if (!it->text.isEmpty())
+								{
+									stream.writeAttribute("text", it->text);
+								}
 							}
 							stream.writeEndElement(); //label
 						}
@@ -625,16 +648,36 @@ ccColorScale::Shared ccColorScale::LoadFromXML(const QString& filename)
 						dataError = true;
 						break;
 					}
+
+					double value = std::numeric_limits<double>::quiet_NaN();
+					QString text;
 					for (int i = 0; i < attributes.size(); ++i)
 					{
 						QString name = attributes[i].name().toString().toUpper();
 						if (name == "VAL")
 						{
-							QString value = attributes[i].value().toString();
-							scale->customLabels().insert(value.toDouble());
-							break;
+							QString valueStr = attributes[i].value().toString();
+							bool ok = false;
+							value = valueStr.toDouble(&ok);
+							if (!ok)
+							{
+								ccLog::Warning(QString("[ccColorScale::LoadFromXML] Invalid value:") + valueStr);
+								value = std::numeric_limits<double>::quiet_NaN();
+								dataError = true;
+							}
+						}
+						else if (name == "TEXT")
+						{
+							text = attributes[i].value().toString();
 						}
 					}
+
+					if (std::isfinite(value))
+					{
+						// we have a valid label
+						scale->m_customLabels.insert({ value, text });
+					}
+
 					stream.skipCurrentElement();
 				}
 			}

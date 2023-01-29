@@ -52,6 +52,13 @@
 #include <unistd.h>
 #endif
 
+//! Last saved file version
+static short s_lastSavedFileBinVersion = 0;
+
+short BinFilter::GetLastSavedFileVersion()
+{
+	return s_lastSavedFileBinVersion;
+}
 
 BinFilter::BinFilter()
 	: FileIOFilter( {
@@ -151,16 +158,18 @@ static ccHObject* s_container = nullptr;
 
 CC_FILE_ERROR _LoadFileV2()
 {
-	return (s_file && s_container ? BinFilter::LoadFileV2(*s_file,*s_container,s_flags) : CC_FERR_BAD_ARGUMENT);
+	return (s_file && s_container ? BinFilter::LoadFileV2(*s_file, *s_container, s_flags) : CC_FERR_BAD_ARGUMENT);
 }
 
 CC_FILE_ERROR _SaveFileV2()
 {
-	return (s_file && s_container ? BinFilter::SaveFileV2(*s_file,s_container) : CC_FERR_BAD_ARGUMENT);
+	return (s_file && s_container ? BinFilter::SaveFileV2(*s_file, s_container) : CC_FERR_BAD_ARGUMENT);
 }
 
 CC_FILE_ERROR BinFilter::saveToFile(ccHObject* root, const QString& filename, const SaveParameters& parameters)
 {
+	s_lastSavedFileBinVersion = 0;
+
 	if (!root || filename.isNull())
 		return CC_FERR_BAD_ARGUMENT;
 
@@ -230,7 +239,7 @@ CC_FILE_ERROR BinFilter::SaveFileV2(QFile& out, ccHObject* object)
 		firstBytes[3] = 48 + flags; //48 = ASCII("0")
 	}
 
-	if (out.write(firstBytes,4) < 0)
+	if (out.write(firstBytes, 4) < 0)
 		return CC_FERR_WRITING;
 
 	// Current BIN file version
@@ -332,10 +341,14 @@ CC_FILE_ERROR BinFilter::SaveFileV2(QFile& out, ccHObject* object)
 	if (result == CC_FERR_NO_ERROR)
 	{
 		short dataVersion = object->minimumFileVersion();
-		ccLog::Print(QString("[BIN] Output file version: %1 (automatically deduced from selected entities)").arg(dataVersion));
+		ccLog::Print(QString("[BIN] Output file version: %1.%2 (automatically deduced from selected entities)").arg(dataVersion / 10).arg(dataVersion % 10));
 
 		if (!object->toFile(out, dataVersion))
+		{
 			result = CC_FERR_CONSOLE_ERROR;
+		}
+
+		s_lastSavedFileBinVersion = dataVersion;
 	}
 
 	out.close();

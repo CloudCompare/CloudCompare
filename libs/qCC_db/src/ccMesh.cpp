@@ -3190,7 +3190,7 @@ bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMa
 
 short ccMesh::minimumFileVersion_MeOnly() const
 {
-	short minVersion = std::max(static_cast<short>(34), ccSerializationHelper::GenericArrayToFileMinVersion());
+	short minVersion = std::max(static_cast<short>(29), ccSerializationHelper::GenericArrayToFileMinVersion());
 	return std::max(minVersion, ccGenericMesh::minimumFileVersion_MeOnly());
 }
 

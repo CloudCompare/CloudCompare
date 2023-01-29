@@ -119,7 +119,9 @@ protected:
 	bool checkCustomLabelsList(bool showWarnings);
 
 	//! Exports the custom labels list
-	bool exportCustomLabelsList(ccColorScale::LabelSet& labels);
+	/** \return Error description (if any)
+	**/
+	QString exportCustomLabelsList(ccColorScale::LabelSet& labels) const;
 
 	//! Color scale manager
 	ccColorScalesManager* m_manager;

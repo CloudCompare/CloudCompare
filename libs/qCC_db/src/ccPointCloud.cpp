@@ -4125,7 +4125,7 @@ int ccPointCloud::addScalarField(ccScalarField* sf)
 bool ccPointCloud::toFile_MeOnly(QFile& out, short dataVersion) const
 {
 	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
-	if (dataVersion < 20)
+	if (dataVersion < 27)
 	{
 		assert(false);
 		return false;
@@ -4698,7 +4698,7 @@ short ccPointCloud::Grid::minimumFileVersion() const
 
 short ccPointCloud::minimumFileVersion_MeOnly() const
 {
-	short minVersion = std::max(static_cast<short>(20), ccGenericPointCloud::minimumFileVersion_MeOnly());
+	short minVersion = std::max(static_cast<short>(27), ccGenericPointCloud::minimumFileVersion_MeOnly());
 	minVersion = std::max(minVersion, ccSerializationHelper::GenericArrayToFileMinVersion());
 	if (m_rgbaColors)
 		minVersion = std::max(minVersion, m_rgbaColors->minimumFileVersion());

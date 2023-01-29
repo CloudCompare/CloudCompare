@@ -175,7 +175,7 @@ bool ccGenericPrimitive::toFile_MeOnly(QFile& out, short dataVersion) const
 		return false;
 
 	//'drawing precision' (dataVersion>=21))
-	if (out.write((const char*)&m_drawPrecision,sizeof(unsigned)) < 0)
+	if (out.write((const char*)&m_drawPrecision, sizeof(unsigned)) < 0)
 		return WriteError();
 
 	return true;
@@ -205,7 +205,7 @@ bool ccGenericPrimitive::fromFile_MeOnly(QFile& in, short dataVersion, int flags
 
 short ccGenericPrimitive::minimumFileVersion_MeOnly() const
 {
-	short minVersion = std::max(static_cast<short>(33), m_transformation.minimumFileVersion());
+	short minVersion = std::max(static_cast<short>(21), m_transformation.minimumFileVersion());
 	return std::max(minVersion, ccMesh::minimumFileVersion_MeOnly());
 }
 

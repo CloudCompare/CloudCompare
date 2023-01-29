@@ -64,8 +64,9 @@
 	v5.1 - 03/29/2019 - New camera management (viewports have changed)
 	v5.2 - 11/30/2020 - New ccCoordinateSystem added
 	v5.3 - 10/02/2022 - ccViewportParameters new members (near and far clipping planes)
+	v5.4 - 01/29/2023 - ccColorScale custom labels can be overridden by a string
 **/
-const unsigned c_currentDBVersion = 53; //5.3
+const unsigned c_currentDBVersion = 54; //5.4
 
 //! Default unique ID generator (using the system persistent settings as we did previously proved to be not reliable)
 static ccUniqueIDGenerator::Shared s_uniqueIDGenerator(new ccUniqueIDGenerator);

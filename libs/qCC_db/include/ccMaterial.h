@@ -148,8 +148,9 @@ public:
 	bool isSerializable() const override { return true; }
 	/** \warning Doesn't save the texture image!
 	**/
-	bool toFile(QFile& out) const override;
+	bool toFile(QFile& out, short dataVersion) const override;
 	bool fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	short minimumFileVersion() const override;
 
 	//! Returns unique identifier (UUID)
 	inline QString getUniqueIdentifier() const { return m_uniqueID; }

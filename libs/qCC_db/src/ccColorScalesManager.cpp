@@ -45,6 +45,7 @@ static const char c_csm_stepRelativePos[]		= "value";
 static const char c_csm_stepColor[]				= "color";
 static const char c_csm_customLabels[]			= "labels";
 static const char c_csm_customLabelValue[]		= "value";
+static const char c_csm_customLabelText[]		= "text";
 
 //matplotlib library colorscale created by Stéfan van der Walt and Nathaniel Smith
 double s_viridis[] =
@@ -398,7 +399,8 @@ void ccColorScalesManager::fromPersistentSettings()
 				{
 					settings.setArrayIndex(i);
 					double label = settings.value(c_csm_customLabelValue, 0.0).toDouble();
-					scale->customLabels().insert(label);
+					QString text = settings.value(c_csm_customLabelText, QString()).toString();
+					scale->customLabels().insert({ label, text });
 				}
 				settings.endArray();
 			}
@@ -465,7 +467,11 @@ void ccColorScalesManager::toPersistentSettings() const
 				for (ccColorScale::LabelSet::const_iterator itL = (*it)->customLabels().begin(); itL != (*it)->customLabels().end(); ++itL, ++i)
 				{
 					settings.setArrayIndex(i);
-					settings.setValue(c_csm_customLabelValue, *itL);
+					settings.setValue(c_csm_customLabelValue, itL->value);
+					if (!itL->text.isEmpty())
+					{
+						settings.setValue(c_csm_customLabelText, itL->text);
+					}
 				}
 			}
 			settings.endArray();

@@ -330,8 +330,13 @@ CC_FILE_ERROR BinFilter::SaveFileV2(QFile& out, ccHObject* object)
 	}
 
 	if (result == CC_FERR_NO_ERROR)
-		if (!object->toFile(out))
+	{
+		short dataVersion = object->minimumFileVersion();
+		ccLog::Print(QString("[BIN] Output file version: %1 (automatically deduced from selected entities)").arg(dataVersion));
+
+		if (!object->toFile(out, dataVersion))
 			result = CC_FERR_CONSOLE_ERROR;
+	}
 
 	out.close();
 

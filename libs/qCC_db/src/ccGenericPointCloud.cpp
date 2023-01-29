@@ -193,17 +193,26 @@ ccBBox ccGenericPointCloud::getOwnBB(bool withGLFeatures/*=false*/)
 	return box;
 }
 
-bool ccGenericPointCloud::toFile_MeOnly(QFile& out) const
+bool ccGenericPointCloud::toFile_MeOnly(QFile& out, short dataVersion) const
 {
-	if (!ccHObject::toFile_MeOnly(out))
+	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
+	if (dataVersion < 33)
+	{
+		assert(false);
 		return false;
+	}
 
-	//'global shift & scale' (dataVersion>=39)
+	if (!ccHObject::toFile_MeOnly(out, dataVersion))
+	{
+		return false;
+	}
+
+	//'global shift & scale' (dataVersion>=33)
 	saveShiftInfoToFile(out);
-	
+
 	//'visibility' array (dataVersion>=20)
 	bool hasVisibilityArray = isVisibilityTableInstantiated();
-	if (out.write((const char*)&hasVisibilityArray,sizeof(bool)) < 0)
+	if (out.write((const char*)&hasVisibilityArray, sizeof(bool)) < 0)
 		return WriteError();
 	if (hasVisibilityArray)
 	{
@@ -212,7 +221,7 @@ bool ccGenericPointCloud::toFile_MeOnly(QFile& out) const
 	}
 
 	//'point size' (dataVersion>=24)
-	if (out.write((const char*)&m_pointSize,1) < 0)
+	if (out.write((const char*)&m_pointSize, 1) < 0)
 		return WriteError();
 
 	return true;
@@ -229,7 +238,7 @@ bool ccGenericPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flag
 	if (dataVersion < 33)
 	{
 		//'coordinates shift' (dataVersion>=20)
-		if (in.read((char*)m_globalShift.u,sizeof(double)*3) < 0)
+		if (in.read((char*)m_globalShift.u, sizeof(double) * 3) < 0)
 			return ReadError();
 
 		m_globalScale = 1.0;
@@ -242,22 +251,26 @@ bool ccGenericPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flag
 	}
 
 	//'visibility' array (dataVersion>=20)
-	bool hasVisibilityArray = false;
-	if (in.read((char*)&hasVisibilityArray,sizeof(bool)) < 0)
-		return ReadError();
-	if (hasVisibilityArray)
 	{
-		if (!ccSerializationHelper::GenericArrayFromFile<unsigned char, 1, unsigned char>(m_pointsVisibility, in, dataVersion))
+		bool hasVisibilityArray = false;
+		if (in.read((char*)&hasVisibilityArray, sizeof(bool)) < 0)
 		{
-			unallocateVisibilityArray();
-			return false;
+			return ReadError();
+		}
+		if (hasVisibilityArray)
+		{
+			if (!ccSerializationHelper::GenericArrayFromFile<unsigned char, 1, unsigned char>(m_pointsVisibility, in, dataVersion))
+			{
+				unallocateVisibilityArray();
+				return false;
+			}
 		}
 	}
 
 	//'point size' (dataVersion>=24)
 	if (dataVersion >= 24)
 	{
-		if (in.read((char*)&m_pointSize,1) < 0)
+		if (in.read((char*)&m_pointSize, 1) < 0)
 			return WriteError();
 	}
 	else
@@ -266,6 +279,11 @@ bool ccGenericPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flag
 	}
 
 	return true;
+}
+
+short ccGenericPointCloud::minimumFileVersion_MeOnly() const
+{
+	return std::max(static_cast<short>(33), ccHObject::minimumFileVersion_MeOnly());
 }
 
 void ccGenericPointCloud::importParametersFrom(const ccGenericPointCloud* cloud)

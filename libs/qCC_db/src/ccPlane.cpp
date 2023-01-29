@@ -186,10 +186,19 @@ ccPlane* ccPlane::Fit(CCCoreLib::GenericIndexedCloudPersist *cloud, double* rms/
 	return plane;
 }
 
-bool ccPlane::toFile_MeOnly(QFile& out) const
+bool ccPlane::toFile_MeOnly(QFile& out, short dataVersion) const
 {
-	if (!ccGenericPrimitive::toFile_MeOnly(out))
+	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
+	if (dataVersion < 21)
+	{
+		assert(false);
 		return false;
+	}
+
+	if (!ccGenericPrimitive::toFile_MeOnly(out, dataVersion))
+	{
+		return false;
+	}
 
 	//parameters (dataVersion >= 21)
 	QDataStream outStream(&out);
@@ -210,6 +219,11 @@ bool ccPlane::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDM
 	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_yWidth, 1);
 
 	return true;
+}
+
+short ccPlane::minimumFileVersion_MeOnly() const
+{
+	return std::max(static_cast<short>(21), ccGenericPrimitive::minimumFileVersion_MeOnly());
 }
 
 ccBBox ccPlane::getOwnFitBB(ccGLMatrix& trans)

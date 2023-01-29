@@ -245,8 +245,9 @@ public:
 protected:
 
 	//inherited from ccHObject
-	bool toFile_MeOnly(QFile& out) const override;
+	bool toFile_MeOnly(QFile& out, short dataVersion) const override;
 	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	short minimumFileVersion_MeOnly() const override;
 
 	//Static arrays for OpenGL drawing
 	static CCVector3* GetVertexBuffer();

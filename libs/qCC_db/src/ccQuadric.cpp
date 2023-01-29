@@ -285,19 +285,28 @@ QString ccQuadric::getEquationString() const
 	return equationStr;
 }
 
-bool ccQuadric::toFile_MeOnly(QFile& out) const
+bool ccQuadric::toFile_MeOnly(QFile& out, short dataVersion) const
 {
-	if (!ccGenericPrimitive::toFile_MeOnly(out))
+	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
+	if (dataVersion < 35)
+	{
+		assert(false);
 		return false;
+	}
+
+	if (!ccGenericPrimitive::toFile_MeOnly(out, dataVersion))
+	{
+		return false;
+	}
 
 	//parameters (dataVersion>=35)
 	QDataStream outStream(&out);
 	outStream << m_minCorner.x;
     outStream << m_minCorner.y;
 	outStream << m_maxCorner.x;
-    outStream << m_maxCorner.y;
+	outStream << m_maxCorner.y;
 
-	for (unsigned i=0; i<6; ++i)
+	for (unsigned i = 0; i < 6; ++i)
 		outStream << m_eq[i];
 
 	return true;
@@ -319,6 +328,11 @@ bool ccQuadric::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 		ccSerializationHelper::CoordsFromDataStream(inStream, flags, m_eq + i, 1);
 
 	return true;
+}
+
+short ccQuadric::minimumFileVersion_MeOnly() const
+{
+	return std::max(static_cast<short>(35), ccGenericPrimitive::minimumFileVersion_MeOnly());
 }
 
 ccBBox ccQuadric::getOwnFitBB(ccGLMatrix& trans)

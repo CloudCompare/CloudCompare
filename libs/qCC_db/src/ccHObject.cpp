@@ -969,16 +969,21 @@ bool ccHObject::isSerializable() const
 	return (getClassID() == CC_TYPES::HIERARCHY_OBJECT);
 }
 
-bool ccHObject::toFile(QFile& out) const
+bool ccHObject::toFile(QFile& out, short dataVersion) const
 {
 	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
+	if (dataVersion < 23)
+	{
+		assert(false);
+		return false;
+	}
 
 	//write 'ccObject' header
-	if (!ccObject::toFile(out))
+	if (!ccObject::toFile(out, dataVersion))
 		return false;
 
 	//write own data
-	if (!toFile_MeOnly(out))
+	if (!toFile_MeOnly(out, dataVersion))
 		return false;
 
 	//(serializable) child count (dataVersion >= 20)
@@ -999,7 +1004,7 @@ bool ccHObject::toFile(QFile& out) const
 	{
 		if (child->isSerializable())
 		{
-			if (!child->toFile(out))
+			if (!child->toFile(out, dataVersion))
 				return false;
 		}
 	}
@@ -1008,8 +1013,11 @@ bool ccHObject::toFile(QFile& out) const
 	if (out.write(reinterpret_cast<const char*>(&m_selectionBehavior), sizeof(SelectionBehavior)) < 0)
 		return WriteError();
 
-	//write transformation history (dataVersion >= 45)
-	m_glTransHistory.toFile(out);
+	if (dataVersion >= 45)
+	{
+		//write transformation history (dataVersion >= 45)
+		m_glTransHistory.toFile(out, dataVersion);
+	}
 
 	return true;
 }
@@ -1123,6 +1131,21 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& o
 	return true;
 }
 
+short ccHObject::minimumFileVersion() const
+{
+	short minVersion = m_glTransHistory.isIdentity() ? 23 : 45;
+	minVersion = std::max(minVersion, ccObject::minimumFileVersion());
+	minVersion = std::max(minVersion, minimumFileVersion_MeOnly());
+
+	//write serializable children (if any)
+	for (auto child : m_children)
+	{
+		minVersion = std::max(minVersion, child->minimumFileVersion());
+	}
+
+	return minVersion;
+}
+
 bool ccHObject::fromFileNoChildren(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
 	assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
@@ -1135,52 +1158,81 @@ bool ccHObject::fromFileNoChildren(QFile& in, short dataVersion, int flags, Load
 	return fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap);
 }
 
-bool ccHObject::toFile_MeOnly(QFile& out) const
+bool ccHObject::toFile_MeOnly(QFile& out, short dataVersion) const
 {
 	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
+	if (dataVersion < 20)
+	{
+		assert(false);
+		return false;
+	}
 
 	/*** ccHObject takes in charge the ccDrawableObject properties (which is not a ccSerializableObject) ***/
 
 	//'visible' state (dataVersion>=20)
 	if (out.write(reinterpret_cast<const char*>(&m_visible), sizeof(bool)) < 0)
+	{
 		return WriteError();
+	}
 	//'lockedVisibility' state (dataVersion>=20)
 	if (out.write(reinterpret_cast<const char*>(&m_lockedVisibility), sizeof(bool)) < 0)
+	{
 		return WriteError();
+	}
 	//'colorsDisplayed' state (dataVersion>=20)
 	if (out.write(reinterpret_cast<const char*>(&m_colorsDisplayed), sizeof(bool)) < 0)
+	{
 		return WriteError();
+	}
 	//'normalsDisplayed' state (dataVersion>=20)
 	if (out.write(reinterpret_cast<const char*>(&m_normalsDisplayed), sizeof(bool)) < 0)
+	{
 		return WriteError();
+	}
 	//'sfDisplayed' state (dataVersion>=20)
 	if (out.write(reinterpret_cast<const char*>(&m_sfDisplayed), sizeof(bool)) < 0)
-		return WriteError();
-	//'colorIsOverridden' state (dataVersion>=20)
-	if (out.write(reinterpret_cast<const char*>(&m_colorIsOverridden), sizeof(bool)) < 0)
-		return WriteError();
-	if (m_colorIsOverridden)
 	{
-		//'tempColor' (dataVersion>=20)
-		if (out.write(reinterpret_cast<const char*>(m_tempColor.rgba), sizeof(ColorCompType)*3) < 0) //TODO: save the alpha channel?
+		return WriteError();
+	}
+	//'colorIsOverridden' state (dataVersion>=20)
+	{
+		if (out.write(reinterpret_cast<const char*>(&m_colorIsOverridden), sizeof(bool)) < 0)
+		{
+			return WriteError();
+		}
+		if (m_colorIsOverridden)
+		{
+			//'tempColor' (dataVersion>=20)
+			if (out.write(reinterpret_cast<const char*>(m_tempColor.rgba), sizeof(ColorCompType) * 3) < 0) //TODO: save the alpha channel?
+			{
+				return WriteError();
+			}
+		}
+	}
+	//'glTransEnabled' state (dataVersion>=20)
+	{
+		if (out.write(reinterpret_cast<const char*>(&m_glTransEnabled), sizeof(bool)) < 0)
+		{
+			return WriteError();
+		}
+
+		if (m_glTransEnabled)
+		{
+			if (!m_glTrans.toFile(out, dataVersion))
+			{
+				return false;
+			}
+		}
+	}
+
+	if (dataVersion >= 24)
+	{
+		//'showNameIn3D' state (dataVersion>=24)
+		if (out.write(reinterpret_cast<const char*>(&m_showNameIn3D), sizeof(bool)) < 0)
 		{
 			return WriteError();
 		}
 	}
-	//'glTransEnabled' state (dataVersion>=20)
-	if (out.write(reinterpret_cast<const char*>(&m_glTransEnabled), sizeof(bool)) < 0)
-		return WriteError();
-	if (m_glTransEnabled)
-	{
-		if (!m_glTrans.toFile(out))
-		{
-			return false;
-		}
-	}
-
-	//'showNameIn3D' state (dataVersion>=24)
-	if (out.write(reinterpret_cast<const char*>(&m_showNameIn3D), sizeof(bool)) < 0)
-		return WriteError();
 
 	return true;
 }
@@ -1241,6 +1293,11 @@ bool ccHObject::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 	}
 
 	return true;
+}
+
+short ccHObject::minimumFileVersion_MeOnly() const
+{
+	return m_showNameIn3D ? 24 : 20;
 }
 
 struct HObjectDisplayState : ccDrawableObject::DisplayState

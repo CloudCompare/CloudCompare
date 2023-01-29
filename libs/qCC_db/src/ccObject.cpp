@@ -136,20 +136,25 @@ void ccObject::setFlagState(CC_OBJECT_FLAG flag, bool state)
 		m_flags &= (~unsigned(flag));
 }
 
-bool ccObject::toFile(QFile& out) const
+bool ccObject::toFile(QFile& out, short dataVersion) const
 {
 	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
+	if (dataVersion < 34)
+	{
+		assert(false);
+		return false;
+	}
 
 	//class ID (dataVersion>=20)
 	//DGM: on 64 bits since version 34
 	uint64_t classID = static_cast<uint64_t>(getClassID());
-	if (out.write((const char*)&classID,8) < 0)
+	if (out.write((const char*)&classID, 8) < 0)
 		return WriteError();
 
 	//unique ID (dataVersion>=20)
 	//DGM: this ID will be useful to recreate dynamic links between entities!
 	uint32_t uniqueID = (uint32_t)m_uniqueID;
-	if (out.write((const char*)&uniqueID,4) < 0)
+	if (out.write((const char*)&uniqueID, 4) < 0)
 		return WriteError();
 
 	//name (dataVersion>=22)
@@ -160,7 +165,7 @@ bool ccObject::toFile(QFile& out) const
 
 	//flags (dataVersion>=20)
 	uint32_t objFlags = (uint32_t)m_flags;
-	if (out.write((const char*)&objFlags,4) < 0)
+	if (out.write((const char*)&objFlags, 4) < 0)
 		return WriteError();
 
 	//meta data (dataVersion>=30)
@@ -195,6 +200,11 @@ bool ccObject::toFile(QFile& out) const
 	return true;
 }
 
+short ccObject::minimumFileVersion() const
+{
+	return 34;
+}
+
 CC_CLASS_ENUM ccObject::ReadClassIDFromFile(QFile& in, short dataVersion)
 {
 	assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
@@ -204,14 +214,14 @@ CC_CLASS_ENUM ccObject::ReadClassIDFromFile(QFile& in, short dataVersion)
 	if (dataVersion < 34)
 	{
 		uint32_t _classID = 0;
-		if (in.read((char*)&_classID,4) < 0)
+		if (in.read((char*)&_classID, 4) < 0)
 			return ReadError();
 		classID = static_cast<CC_CLASS_ENUM>(_classID);
 	}
 	else
 	{
 		uint64_t _classID = 0;
-		if (in.read((char*)&_classID,8) < 0)
+		if (in.read((char*)&_classID, 8) < 0)
 			return ReadError();
 		classID = static_cast<CC_CLASS_ENUM>(_classID);
 	}
@@ -279,7 +289,7 @@ bool ccObject::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& ol
 	if (dataVersion < 22) //old style
 	{
 		char name[256];
-		if (in.read(name,256) < 0)
+		if (in.read(name, 256) < 0)
 			return ReadError();
 		setName(name);
 	}
@@ -291,7 +301,7 @@ bool ccObject::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& ol
 
 	//flags (dataVersion>=20)
 	uint32_t objFlags = 0;
-	if (in.read((char*)&objFlags,4) < 0)
+	if (in.read((char*)&objFlags, 4) < 0)
 		return ReadError();
 	m_flags = (unsigned)objFlags;
 
@@ -300,18 +310,18 @@ bool ccObject::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& ol
 	{
 		//count
 		uint32_t metaDataCount = 0;
-		if (in.read((char*)&metaDataCount,4) < 0)
+		if (in.read((char*)&metaDataCount, 4) < 0)
 			return ReadError();
 
 		//"key + value" pairs
-		for (uint32_t i=0; i<metaDataCount; ++i)
+		for (uint32_t i = 0; i < metaDataCount; ++i)
 		{
 			QDataStream inStream(&in);
 			QString key;
 			QVariant value;
 			inStream >> key;
 			inStream >> value;
-			setMetaData(key,value);
+			setMetaData(key, value);
 		}
 	}
 

@@ -137,14 +137,25 @@ bool ccSensor::getActiveAbsoluteRotation(ccGLMatrix& rotation) const
 	return true;
 }
 
-bool ccSensor::toFile_MeOnly(QFile& out) const
+bool ccSensor::toFile_MeOnly(QFile& out, short dataVersion) const
 {
-	if (!ccHObject::toFile_MeOnly(out))
+	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
+	if (dataVersion < 35)
+	{
+		assert(false);
 		return false;
+	}
+
+	if (!ccHObject::toFile_MeOnly(out, dataVersion))
+	{
+		return false;
+	}
 
 	//rigid transformation (dataVersion>=34)
-	if (!m_rigidTransformation.toFile(out))
+	if (!m_rigidTransformation.toFile(out, dataVersion))
+	{
 		return WriteError();
+	}
 
 	//various parameters (dataVersion>=35)
 	QDataStream outStream(&out);
@@ -152,14 +163,14 @@ bool ccSensor::toFile_MeOnly(QFile& out) const
 	outStream << m_scale;			//scale
 
 	//color (dataVersion>=35)
-	if (out.write((const char*)&m_color.rgb,sizeof(ColorCompType)*3) < 0)
+	if (out.write((const char*)&m_color.rgb, sizeof(ColorCompType) * 3) < 0)
 		return WriteError();
 
 	//we can't save the associated position buffer (as it may be shared by multiple sensors)
 	//so instead we save it's unique ID (dataVersion>=34)
 	//WARNING: the buffer must be saved in the same BIN file! (responsibility of the caller)
 	uint32_t bufferUniqueID = (m_posBuffer ? static_cast<uint32_t>(m_posBuffer->getUniqueID()) : 0);
-	if (out.write((const char*)&bufferUniqueID,4) < 0)
+	if (out.write((const char*)&bufferUniqueID, 4) < 0)
 		return WriteError();
 
 	return true;
@@ -197,6 +208,12 @@ bool ccSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedID
 	*(uint32_t*)(&m_posBuffer) = bufferUniqueID;
 
 	return true;
+}
+
+short ccSensor::minimumFileVersion_MeOnly() const
+{
+	short minVersion = std::max(static_cast<short>(35), m_rigidTransformation.minimumFileVersion());
+	return std::max(minVersion, ccHObject::minimumFileVersion_MeOnly());
 }
 
 bool ccSensor::applyViewport(ccGenericGLDisplay* win/*=nullptr*/) const

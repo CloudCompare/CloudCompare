@@ -102,8 +102,9 @@ public:
 
 	//inherited from ccSerializableObject
 	bool isSerializable() const override { return true; }
-	bool toFile(QFile& out) const override;
+	bool toFile(QFile& out, short dataVersion) const override;
 	bool fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	short minimumFileVersion() const override;
 
 protected:
 

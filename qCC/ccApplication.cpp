@@ -35,7 +35,7 @@ ccApplication::ccApplication( int &argc, char **argv, bool isCommandLine )
 	FileIO::setWriterInfo( applicationName(), versionStr() );
 }
 
-bool ccApplication::event(QEvent *inEvent)
+bool ccApplication::event(QEvent* inEvent)
 {
 #ifdef Q_OS_MAC
 	switch ( inEvent->type() )

@@ -306,7 +306,8 @@ protected:
 	virtual void setFlagState(CC_OBJECT_FLAG flag, bool state);
 
 	//inherited from ccSerializableObject
-	bool toFile(QFile& out) const override;
+	bool toFile(QFile& out, short dataVersion) const override;
+	short minimumFileVersion() const override;
 
 	//! Reimplemented from ccSerializableObject::fromFile
 	/** Be sure to call ccObject::ReadClassIDFromFile (once)

@@ -459,10 +459,19 @@ ccMaterialSet* ccMaterialSet::clone() const
 	return cloneSet;
 }
 
-bool ccMaterialSet::toFile_MeOnly(QFile& out) const
+bool ccMaterialSet::toFile_MeOnly(QFile& out, short dataVersion) const
 {
-	if (!ccHObject::toFile_MeOnly(out))
+	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
+	if (dataVersion < 37)
+	{
+		assert(false);
 		return false;
+	}
+
+	if (!ccHObject::toFile_MeOnly(out, dataVersion))
+	{
+		return false;
+	}
 
 	//Materials count (dataVersion>=20)
 	uint32_t count = (uint32_t)size();
@@ -475,7 +484,7 @@ bool ccMaterialSet::toFile_MeOnly(QFile& out) const
 	//Write each material
 	for (const auto &mtl : *this)
 	{
-		mtl->toFile(out);
+		mtl->toFile(out, dataVersion);
 
 		//remember its texture as well (if any)
 		QString texFilename = mtl->getTextureFilename();
@@ -543,3 +552,17 @@ bool ccMaterialSet::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Loa
 
 	return true;
 }
+
+short ccMaterialSet::minimumFileVersion_MeOnly() const
+{
+	if (empty())
+	{
+		return 37;
+	}
+	else
+	{
+		return std::max(static_cast<short>(37), at(0)->minimumFileVersion());
+	}
+
+}
+

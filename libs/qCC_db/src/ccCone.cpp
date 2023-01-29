@@ -309,10 +309,19 @@ PointCoordinateType ccCone::getLargeRadius() const
 	return m_bottomRadius;
 }
 
-bool ccCone::toFile_MeOnly(QFile& out) const
+bool ccCone::toFile_MeOnly(QFile& out, short dataVersion) const
 {
-	if (!ccGenericPrimitive::toFile_MeOnly(out))
+	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
+	if (dataVersion < 21)
+	{
+		assert(false);
 		return false;
+	}
+
+	if (!ccGenericPrimitive::toFile_MeOnly(out, dataVersion))
+	{
+		return false;
+	}
 
 	//parameters (dataVersion>=21)
 	QDataStream outStream(&out);
@@ -340,3 +349,9 @@ bool ccCone::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMa
 
 	return true;
 }
+
+short ccCone::minimumFileVersion_MeOnly() const
+{
+	return std::max(static_cast<short>(21), ccGenericPrimitive::minimumFileVersion_MeOnly());
+}
+

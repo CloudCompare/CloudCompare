@@ -27,13 +27,20 @@ cc2DViewportObject::cc2DViewportObject(const cc2DViewportObject& viewport)
 	, m_params(viewport.m_params)
 {}
 
-bool cc2DViewportObject::toFile_MeOnly(QFile& out) const
+bool cc2DViewportObject::toFile_MeOnly(QFile& out, short dataVersion) const
 {
-	if (!ccHObject::toFile_MeOnly(out))
+	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
+	if (dataVersion < 20)
+	{
+		assert(false);
+		return false;
+	}
+
+	if (!ccHObject::toFile_MeOnly(out, dataVersion))
 		return false;
 
 	//ccViewportParameters (dataVersion>=20)
-	if (!m_params.toFile(out))
+	if (!m_params.toFile(out, dataVersion))
 		return false;
 
 	return true;
@@ -49,4 +56,10 @@ bool cc2DViewportObject::fromFile_MeOnly(QFile& in, short dataVersion, int flags
 		return false;
 
 	return true;
+}
+
+short cc2DViewportObject::minimumFileVersion_MeOnly() const
+{
+	short minVersion = std::max(static_cast<short>(20), ccHObject::minimumFileVersion_MeOnly());
+	return std::max(minVersion, m_params.minimumFileVersion());
 }

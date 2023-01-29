@@ -320,12 +320,17 @@ void ccScalarField::setColorRampSteps(unsigned steps)
 	m_modified = true;
 }
 
-bool ccScalarField::toFile(QFile& out) const
+bool ccScalarField::toFile(QFile& out, short dataVersion) const
 {
 	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
+	if (dataVersion < 27)
+	{
+		assert(false);
+		return false;
+	}
 
 	//name (dataVersion>=20)
-	if (out.write(m_name,256) < 0)
+	if (out.write(m_name, 256) < 0)
 		return WriteError();
 
 	//data (dataVersion>=20)
@@ -375,7 +380,7 @@ bool ccScalarField::toFile(QFile& out) const
 			return WriteError();
 
 		if (m_colorScale)
-			if (!m_colorScale->toFile(out))
+			if (!m_colorScale->toFile(out, dataVersion))
 				return WriteError();
 	}
 
@@ -384,9 +389,12 @@ bool ccScalarField::toFile(QFile& out) const
 	if (out.write((const char*)&colorRampSteps, 4) < 0)
 		return WriteError();
 
-	//global shift (dataVersion>=42)
-	if (out.write((const char*)&m_globalShift, sizeof(double)) < 0)
-		return WriteError();
+	if (dataVersion >= 42)
+	{
+		//global shift (dataVersion>=42)
+		if (out.write((const char*)&m_globalShift, sizeof(double)) < 0)
+			return WriteError();
+	}
 
 	return true;
 }
@@ -394,9 +402,10 @@ bool ccScalarField::toFile(QFile& out) const
 bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
 	assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
-
 	if (dataVersion < 20)
+	{
 		return CorruptError();
+	}
 
 	//name (dataVersion >= 20)
 	if (in.read(m_name, 256) < 0)
@@ -618,6 +627,19 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMa
 	m_modified = true;
 
 	return true;
+}
+
+short ccScalarField::minimumFileVersion() const
+{
+	// we need verison 42 to save a non-zero global shift
+	short minVersion = (m_globalShift != 0 ? 42 : 27);
+
+	minVersion = std::max(minVersion, ccSerializationHelper::GenericArrayToFileMinVersion());
+	if (m_colorScale)
+	{
+		minVersion = std::max(minVersion, m_colorScale->minimumFileVersion());
+	}
+	return minVersion;
 }
 
 bool ccScalarField::mayHaveHiddenValues() const

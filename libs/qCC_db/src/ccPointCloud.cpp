@@ -4122,10 +4122,19 @@ int ccPointCloud::addScalarField(ccScalarField* sf)
 	return static_cast<int>(m_scalarFields.size()) - 1;
 }
 
-bool ccPointCloud::toFile_MeOnly(QFile& out) const
+bool ccPointCloud::toFile_MeOnly(QFile& out, short dataVersion) const
 {
-	if (!ccGenericPointCloud::toFile_MeOnly(out))
+	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
+	if (dataVersion < 27)
+	{
+		assert(false);
 		return false;
+	}
+
+	if (!ccGenericPointCloud::toFile_MeOnly(out, dataVersion))
+	{
+		return false;
+	}
 
 	//points array (dataVersion>=20)
 	if (!ccSerializationHelper::GenericArrayToFile<CCVector3, 3, PointCoordinateType>(m_points, out))
@@ -4139,7 +4148,7 @@ bool ccPointCloud::toFile_MeOnly(QFile& out) const
 		if (hasColorsArray)
 		{
 			assert(m_rgbaColors);
-			if (!m_rgbaColors->toFile(out))
+			if (!m_rgbaColors->toFile(out, dataVersion))
 				return false;
 		}
 	}
@@ -4152,7 +4161,7 @@ bool ccPointCloud::toFile_MeOnly(QFile& out) const
 		if (hasNormalsArray)
 		{
 			assert(m_normals);
-			if (!m_normals->toFile(out))
+			if (!m_normals->toFile(out, dataVersion))
 				return false;
 		}
 	}
@@ -4169,7 +4178,7 @@ bool ccPointCloud::toFile_MeOnly(QFile& out) const
 		{
 			ccScalarField* sf = static_cast<ccScalarField*>(getScalarField(i));
 			assert(sf);
-			if (!sf || !sf->toFile(out))
+			if (!sf || !sf->toFile(out, dataVersion))
 				return false;
 		}
 
@@ -4188,6 +4197,7 @@ bool ccPointCloud::toFile_MeOnly(QFile& out) const
 	}
 
 	//grid structures (dataVersion>=41)
+	if (dataVersion >= 41)
 	{
 		//number of grids
 		uint32_t count = static_cast<uint32_t>(this->gridCount());
@@ -4198,98 +4208,70 @@ bool ccPointCloud::toFile_MeOnly(QFile& out) const
 		for (uint32_t i = 0; i < count; ++i)
 		{
 			const Grid::Shared& g = grid(static_cast<unsigned>(i));
-			if (!g || g->indexes.empty())
-				continue;
-
-			//width
-			uint32_t w = static_cast<uint32_t>(g->w);
-			if (out.write((const char*)&w, 4) < 0)
-				return WriteError();
-			//height
-			uint32_t h = static_cast<uint32_t>(g->h);
-			if (out.write((const char*)&h, 4) < 0)
-				return WriteError();
-
-			//sensor matrix
-			if (!g->sensorPosition.toFile(out))
-				return WriteError();
-
-			//indexes
-			int* _index = g->indexes.data();
-			for (uint32_t j = 0; j < w*h; ++j, ++_index)
+			if (g && !g->indexes.empty())
 			{
-				int32_t index = static_cast<int32_t>(*_index);
-				if (out.write((const char*)&index, 4) < 0)
-					return WriteError();
-			}
-
-			//grid colors
-			bool hasColors = (g->colors.size() == g->indexes.size());
-			if (out.write((const char*)&hasColors, 1) < 0)
-				return WriteError();
-
-			if (hasColors)
-			{
-				for (uint32_t j = 0; j < g->colors.size(); ++j)
+				if (!g->toFile(out, dataVersion))
 				{
-					if (out.write((const char*)g->colors[j].rgb, 3) < 0)
-						return WriteError();
+					return false;
 				}
 			}
 		}
 	}
 
 	//Waveforms (dataVersion >= 44)
-	bool withFWF = hasFWF();
-	if (out.write((const char*)&withFWF, sizeof(bool)) < 0)
+	if (dataVersion >= 44)
 	{
-		return WriteError();
-	}
-	if (withFWF)
-	{
-		//first save the descriptors
-		uint32_t descriptorCount = static_cast<uint32_t>(m_fwfDescriptors.size());
-		if (out.write((const char*)&descriptorCount, 4) < 0)
+		bool withFWF = hasFWF();
+		if (out.write((const char*)&withFWF, sizeof(bool)) < 0)
 		{
 			return WriteError();
 		}
-		for (auto it = m_fwfDescriptors.begin(); it != m_fwfDescriptors.end(); ++it)
+		if (withFWF)
 		{
-			//write the key (descriptor ID)
-			if (out.write((const char*)&it.key(), 1) < 0)
+			//first save the descriptors
+			uint32_t descriptorCount = static_cast<uint32_t>(m_fwfDescriptors.size());
+			if (out.write((const char*)&descriptorCount, 4) < 0)
 			{
 				return WriteError();
 			}
-			//write the descriptor
-			if (!it.value().toFile(out))
+			for (auto it = m_fwfDescriptors.begin(); it != m_fwfDescriptors.end(); ++it)
 			{
-				return WriteError();
+				//write the key (descriptor ID)
+				if (out.write((const char*)&it.key(), 1) < 0)
+				{
+					return WriteError();
+				}
+				//write the descriptor
+				if (!it.value().toFile(out, dataVersion))
+				{
+					return WriteError();
+				}
 			}
-		}
 
-		//then the waveforms
-		uint32_t waveformCount = static_cast<uint32_t>(m_fwfWaveforms.size());
-		if (out.write((const char*)&waveformCount, 4) < 0)
-		{
-			return WriteError();
-		}
-		for (const ccWaveform& w : m_fwfWaveforms)
-		{
-			if (!w.toFile(out))
+			//then the waveforms
+			uint32_t waveformCount = static_cast<uint32_t>(m_fwfWaveforms.size());
+			if (out.write((const char*)&waveformCount, 4) < 0)
 			{
 				return WriteError();
 			}
-		}
+			for (const ccWaveform& w : m_fwfWaveforms)
+			{
+				if (!w.toFile(out, dataVersion))
+				{
+					return WriteError();
+				}
+			}
 
-		//eventually save the data
-		uint64_t dataSize = static_cast<uint64_t>(m_fwfData ? m_fwfData->size(): 0);
-		if (out.write((const char*)&dataSize, 8) < 0)
-		{
-			return WriteError();
-		}
-		if (m_fwfData && out.write((const char*)m_fwfData->data(), dataSize) < 0)
-		{
-			return WriteError();
+			//eventually save the data
+			uint64_t dataSize = static_cast<uint64_t>(m_fwfData ? m_fwfData->size() : 0);
+			if (out.write((const char*)&dataSize, 8) < 0)
+			{
+				return WriteError();
+			}
+			if (m_fwfData && out.write((const char*)m_fwfData->data(), dataSize) < 0)
+			{
+				return WriteError();
+			}
 		}
 	}
 
@@ -4328,9 +4310,9 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Load
 			unsigned nanPointsCount = 0;
 			for (unsigned i = 0; i < size(); ++i)
 			{
-				if (	point(i)->x != point(i)->x
-					||	point(i)->y != point(i)->y
-					||	point(i)->z != point(i)->z )
+				if (point(i)->x != point(i)->x
+					|| point(i)->y != point(i)->y
+					|| point(i)->z != point(i)->z)
 				{
 					*point(i) = CCVector3(0, 0, 0);
 					++nanPointsCount;
@@ -4474,77 +4456,9 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Load
 		{
 			Grid::Shared g(new Grid);
 
-			//width
-			uint32_t w = 0;
-			if (in.read((char*)&w, 4) < 0)
-				return ReadError();
-			//height
-			uint32_t h = 0;
-			if (in.read((char*)&h, 4) < 0)
-				return ReadError();
-
-			g->w = static_cast<unsigned>(w);
-			g->h = static_cast<unsigned>(h);
-
-			//sensor matrix
-			if (!g->sensorPosition.fromFile(in, dataVersion, flags, oldToNewIDMap))
-				return WriteError();
-
-			try
+			if (!g->fromFile(in, dataVersion, flags, oldToNewIDMap))
 			{
-				g->indexes.resize(w*h);
-			}
-			catch (const std::bad_alloc&)
-			{
-				return MemoryError();
-			}
-
-			//indexes
-			int* _index = g->indexes.data();
-			for (uint32_t j = 0; j < w*h; ++j, ++_index)
-			{
-				int32_t index = 0;
-				if (in.read((char*)&index, 4) < 0)
-					return ReadError();
-
-				*_index = index;
-				if (index >= 0)
-				{
-					//update min, max and count for valid indexes
-					if (g->validCount)
-					{
-						g->minValidIndex = std::min(static_cast<unsigned>(index), g->minValidIndex);
-						g->maxValidIndex = std::max(static_cast<unsigned>(index), g->maxValidIndex);
-					}
-					else
-					{
-						g->minValidIndex = g->maxValidIndex = index;
-					}
-					++g->validCount;
-				}
-			}
-
-			//grid colors
-			bool hasColors = false;
-			if (in.read((char*)&hasColors, 1) < 0)
-				return ReadError();
-
-			if (hasColors)
-			{
-				try
-				{
-					g->colors.resize(g->indexes.size());
-				}
-				catch (const std::bad_alloc&)
-				{
-					return MemoryError();
-				}
-
-				for (uint32_t j = 0; j < g->colors.size(); ++j)
-				{
-					if (in.read((char*)g->colors[j].rgb, 3) < 0)
-						return ReadError();
-				}
+				return false;
 			}
 
 			addGrid(g);
@@ -4641,6 +4555,178 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Load
 	releaseVBOs();
 
 	return true;
+}
+
+bool ccPointCloud::Grid::toFile(QFile& out, short dataVersion) const
+{
+	//grid (dataVersion>=41)
+	if (dataVersion < 41)
+	{
+		assert(false);
+		return false;
+	}
+
+	//width (dataVersion>=41)
+	uint32_t _w = static_cast<uint32_t>(w);
+	if (out.write((const char*)&_w, 4) < 0)
+		return WriteError();
+	//height (dataVersion>=41)
+	uint32_t _h = static_cast<uint32_t>(h);
+	if (out.write((const char*)&_h, 4) < 0)
+		return WriteError();
+
+	//sensor matrix (dataVersion>=41)
+	if (!sensorPosition.toFile(out, dataVersion))
+		return WriteError();
+
+	//indexes (dataVersion>=41)
+	const int* _index = indexes.data();
+	for (uint32_t j = 0; j < w*h; ++j, ++_index)
+	{
+		int32_t index = static_cast<int32_t>(*_index);
+		if (out.write((const char*)&index, 4) < 0)
+			return WriteError();
+	}
+
+	//grid colors (dataVersion>=41)
+	{
+		bool hasColors = (colors.size() == indexes.size());
+		if (out.write((const char*)&hasColors, 1) < 0)
+		{
+			return WriteError();
+		}
+
+		if (hasColors)
+		{
+			for (const ccColor::Rgb& col : colors)
+			{
+				if (out.write((const char*)col.rgb, 3) < 0)
+					return WriteError();
+			}
+		}
+	}
+
+	return true;
+}
+
+bool ccPointCloud::Grid::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+{
+	//width (dataVersion>=41)
+	uint32_t _w = 0;
+	if (in.read((char*)&_w, 4) < 0)
+		return ReadError();
+	//height (dataVersion>=41)
+	uint32_t _h = 0;
+	if (in.read((char*)&_h, 4) < 0)
+		return ReadError();
+
+	w = static_cast<unsigned>(_w);
+	h = static_cast<unsigned>(_h);
+
+	//sensor matrix (dataVersion>=41)
+	if (!sensorPosition.fromFile(in, dataVersion, flags, oldToNewIDMap))
+		return WriteError();
+
+	try
+	{
+		indexes.resize(w*h);
+	}
+	catch (const std::bad_alloc&)
+	{
+		return MemoryError();
+	}
+
+	//indexes (dataVersion>=41)
+	int* _index = indexes.data();
+	for (uint32_t j = 0; j < w*h; ++j, ++_index)
+	{
+		int32_t index = 0;
+		if (in.read((char*)&index, 4) < 0)
+			return ReadError();
+
+		*_index = index;
+		if (index >= 0)
+		{
+			//update min, max and count for valid indexes
+			if (validCount)
+			{
+				minValidIndex = std::min(static_cast<unsigned>(index), minValidIndex);
+				maxValidIndex = std::max(static_cast<unsigned>(index), maxValidIndex);
+			}
+			else
+			{
+				minValidIndex = maxValidIndex = index;
+			}
+			++validCount;
+		}
+	}
+
+	//grid colors (dataVersion>=41)
+	{
+		bool hasColors = false;
+		if (in.read((char*)&hasColors, 1) < 0)
+		{
+			return ReadError();
+		}
+
+		if (hasColors)
+		{
+			try
+			{
+				colors.resize(indexes.size());
+			}
+			catch (const std::bad_alloc&)
+			{
+				return MemoryError();
+			}
+
+			for (ccColor::Rgb& col : colors)
+			{
+				if (in.read((char*)col.rgb, 3) < 0)
+					return ReadError();
+			}
+		}
+	}
+
+	return true;
+}
+
+short ccPointCloud::Grid::minimumFileVersion() const
+{
+	return std::max(static_cast<short>(41), sensorPosition.minimumFileVersion());
+}
+
+short ccPointCloud::minimumFileVersion_MeOnly() const
+{
+	short minVersion = std::max(static_cast<short>(27), ccGenericPointCloud::minimumFileVersion_MeOnly());
+	minVersion = std::max(minVersion, ccSerializationHelper::GenericArrayToFileMinVersion());
+	if (m_rgbaColors)
+		minVersion = std::max(minVersion, m_rgbaColors->minimumFileVersion());
+	if (m_normals)
+		minVersion = std::max(minVersion, m_normals->minimumFileVersion());
+	if (hasScalarFields())
+		minVersion = std::max(minVersion, static_cast<ccScalarField*>(getScalarField(0))->minimumFileVersion()); // we assume they are all the same
+
+	if (gridCount() != 0)
+	{
+		minVersion = std::max(minVersion, static_cast<short>(41));
+		minVersion = std::max(minVersion, grid(0)->minimumFileVersion()); // we assume they are all the same
+	}
+
+	if (hasFWF())
+	{
+		minVersion = std::max(minVersion, static_cast<short>(44));
+		if (!m_fwfDescriptors.empty())
+		{
+			minVersion = std::max(minVersion, m_fwfDescriptors.begin()->minimumFileVersion()); // we assume they are all the same
+		}
+		if (!m_fwfWaveforms.empty())
+		{
+			minVersion = std::max(minVersion, m_fwfWaveforms.front().minimumFileVersion()); // we assume they are all the same
+		}
+	}
+
+	return minVersion;
 }
 
 CCCoreLib::ReferenceCloud* ccPointCloud::crop(const ccBBox& box, bool inside/*=true*/)

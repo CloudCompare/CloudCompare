@@ -22,8 +22,15 @@ bool WaveformDescriptor::operator != (const WaveformDescriptor& d) const
 		|| d.samplingRate_ps != samplingRate_ps;
 }
 
-bool WaveformDescriptor::toFile(QFile& out) const
+bool WaveformDescriptor::toFile(QFile& out, short dataVersion) const
 {
+	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
+	if (dataVersion < 44)
+	{
+		assert(false);
+		return false;
+	}
+
 	QDataStream outStream(&out);
 
 	//dataVersion >= 44
@@ -51,6 +58,11 @@ bool WaveformDescriptor::fromFile(QFile& in, short dataVersion, int flags, Loade
 	inStream >> bitsPerSample;
 
 	return true;
+}
+
+short WaveformDescriptor::minimumFileVersion() const
+{
+	return 44;
 }
 
 ccWaveform::ccWaveform(uint8_t descriptorID/*=0*/)
@@ -255,8 +267,15 @@ void ccWaveform::applyRigidTransformation(const ccGLMatrix& trans)
 	m_beamDir = u.toFloat();
 }
 
-bool ccWaveform::toFile(QFile& out) const
+bool ccWaveform::toFile(QFile& out, short dataVersion) const
 {
+	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
+	if (dataVersion < 46)
+	{
+		assert(false);
+		return false;
+	}
+
 	QDataStream outStream(&out);
 
 	//dataVersion >= 46
@@ -269,8 +288,12 @@ bool ccWaveform::toFile(QFile& out) const
 		outStream << m_beamDir.y;
 		outStream << m_beamDir.z;
 		outStream << m_echoTime_ps;
-		//dataVersion >= 47
-		outStream << m_returnIndex;
+
+		if (dataVersion >= 47)
+		{
+			//dataVersion >= 47
+			outStream << m_returnIndex;
+		}
 	}
 
 	return true;
@@ -281,7 +304,7 @@ bool ccWaveform::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& 
 	QDataStream inStream(&in);
 
 	if (dataVersion < 46)
-		return false;
+		return CorruptError();
 
 	//dataVersion >= 46
 	inStream >> m_descriptorID;
@@ -289,7 +312,7 @@ bool ccWaveform::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& 
 	{
 		inStream >> m_byteCount;
 
-		//for compilation on gcc/clang, we need to be 'more explicit'...
+		//for compilation with gcc/clang, we need to be 'more explicit'...
 		//(apparently uint64_t is not 'evidently' casted to quint64?!)
 		quint64 dataOffset;
 		inStream >> dataOffset;
@@ -312,4 +335,9 @@ bool ccWaveform::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& 
 	}
 
 	return true;
+}
+
+short ccWaveform::minimumFileVersion() const
+{
+	return m_returnIndex == 1 ? 46 : 47;
 }

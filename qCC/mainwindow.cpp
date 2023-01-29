@@ -10340,6 +10340,17 @@ void MainWindow::doActionSaveFile()
 		}
 	}
 
+	if (result == CC_FERR_NO_ERROR && selectedFilter == BinFilter::GetFileFilter())
+	{
+		//only for BIN files: display the compatible CC version
+		short fileVersion = BinFilter::GetLastSavedFileVersion();
+		if (0 != fileVersion)
+		{
+			QString minCCVersion = ccApplication::GetMinCCVersionForFileVersion(fileVersion);
+			ccLog::Print(QString("This file can be loaded by CloudCompare version %1 and later").arg(minCCVersion));
+		}
+	}
+
 	//update default filters
 	if (hasCloud)
 		settings.setValue(ccPS::SelectedOutputFilterCloud(),selectedFilter);

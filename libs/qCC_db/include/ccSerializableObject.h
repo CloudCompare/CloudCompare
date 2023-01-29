@@ -46,10 +46,18 @@ public:
 	virtual bool isSerializable() const { return false; }
 
 	//! Saves data to binary stream
-	/** \param out output file (already opened)
+	/** \param out			output file (already opened)
+		\param dataVersion	target file version
 		\return success
 	**/
-	virtual bool toFile(QFile& out) const { return false; }
+	virtual bool toFile(QFile& out, short dataVersion) const { return false; }
+
+	//! Returns the minimum file version required to save this instance
+	/** To be overridden
+		\param out output file (already opened)
+		\return success
+	**/
+	virtual short minimumFileVersion() const = 0;
 
 	//! Deserialization flags (bit-field)
 	enum DeserializationFlags
@@ -146,6 +154,9 @@ public:
 			}
 		}
 	}
+
+	//! Returns the minimum file version to save/load a 'generic array'
+	static short GenericArrayToFileMinVersion() { return 20;  }
 
 	//! Helper: saves a vector to file
 	/** \param data vector to save (must be allocated)

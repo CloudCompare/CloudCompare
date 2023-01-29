@@ -1017,9 +1017,16 @@ bool ccGBLSensor::applyViewport(ccGenericGLDisplay* win/*=nullptr*/) const
 	return true;
 }
 
-bool ccGBLSensor::toFile_MeOnly(QFile& out) const
+bool ccGBLSensor::toFile_MeOnly(QFile& out, short dataVersion) const
 {
-	if (!ccSensor::toFile_MeOnly(out))
+	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
+	if (dataVersion < 38)
+	{
+		assert(false);
+		return false;
+	}
+
+	if (!ccSensor::toFile_MeOnly(out, dataVersion))
 		return false;
 
 	//rotation order (dataVersion>=34)
@@ -1089,4 +1096,9 @@ bool ccGBLSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Loade
 	}
 
 	return true;
+}
+
+short ccGBLSensor::minimumFileVersion_MeOnly() const
+{
+	return std::max(static_cast<short>(38), ccSensor::minimumFileVersion_MeOnly());
 }

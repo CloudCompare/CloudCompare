@@ -575,10 +575,19 @@ void ccSubMesh::getBoundingBox(CCVector3& bbMin, CCVector3& bbMax)
 	bbMax = m_bBox.maxCorner();
 }
 
-bool ccSubMesh::toFile_MeOnly(QFile& out) const
+bool ccSubMesh::toFile_MeOnly(QFile& out, short dataVersion) const
 {
-	if (!ccGenericMesh::toFile_MeOnly(out))
+	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
+	if (dataVersion < 29)
+	{
+		assert(false);
 		return false;
+	}
+
+	if (!ccGenericMesh::toFile_MeOnly(out, dataVersion))
+	{
+		return false;
+	}
 
 	//we can't save the associated mesh here (as it may already be saved)
 	//so instead we save it's unique ID (dataVersion>=29)
@@ -614,3 +623,10 @@ bool ccSubMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 
 	return true;
 }
+
+short ccSubMesh::minimumFileVersion_MeOnly() const
+{
+	short minVersion = std::max(static_cast<short>(29), ccSerializationHelper::GenericArrayToFileMinVersion());
+	return std::max(minVersion, ccGenericMesh::minimumFileVersion_MeOnly());
+}
+

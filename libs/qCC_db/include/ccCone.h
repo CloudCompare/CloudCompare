@@ -111,9 +111,10 @@ public:
 protected:
 
 	//inherited from ccGenericPrimitive
-	virtual bool toFile_MeOnly(QFile& out) const override;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
-	virtual bool buildUp() override;
+	bool toFile_MeOnly(QFile& out, short dataVersion) const override;
+	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	short minimumFileVersion_MeOnly() const override;
+	bool buildUp() override;
 
 	//! Bottom radius
 	PointCoordinateType m_bottomRadius;

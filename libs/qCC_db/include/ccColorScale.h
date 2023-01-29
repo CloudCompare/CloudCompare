@@ -151,8 +151,30 @@ public:
 	//! Sets whether scale is locked or not
 	inline void setLocked(bool state) { m_locked = state; }
 
+	//! Color scale label (value + optional text)
+	struct Label
+	{
+		Label(double v)
+			: value(v)
+		{}
+
+		Label(double v, const QString& t)
+			: value(v)
+			, text(t)
+		{}
+
+		double value = 0.0;
+		QString text;
+
+		bool operator<(const Label& otherLabel) const
+		{
+			return value < otherLabel.value;
+		}
+
+	};
+
 	//! Type of a list of custom labels
-	using LabelSet = std::set<double>;
+	using LabelSet = std::set<Label>;
 
 	//! Returns the list of custom labels (if any)
 	inline LabelSet& customLabels() { return m_customLabels; }
@@ -272,8 +294,9 @@ public:
 
 	//inherited from ccSerializableObject
 	bool isSerializable() const override { return true; }
-	bool toFile(QFile& out) const override;
+	bool toFile(QFile& out, short dataVersion) const override;
 	bool fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	short minimumFileVersion() const override;
 
 protected:
 

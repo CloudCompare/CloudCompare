@@ -28,6 +28,9 @@ class ccApplication : public ccApplicationBase
 public:
 	ccApplication( int &argc, char **argv, bool isCommandLine );
 
+	//! Returns the minimum version of CC required to load a given file version
+	static QString GetMinCCVersionForFileVersion(short fileVersion);
+
 protected:
 	bool event( QEvent *inEvent ) override;
 };

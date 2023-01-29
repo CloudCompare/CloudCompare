@@ -207,31 +207,40 @@ bool ccIndexedTransformationBuffer::getInterpolatedTransformation(	double index,
 	return true;
 }
 
-bool ccIndexedTransformationBuffer::toFile_MeOnly(QFile& out) const
+bool ccIndexedTransformationBuffer::toFile_MeOnly(QFile& out, short dataVersion) const
 {
-	if (!ccHObject::toFile_MeOnly(out))
+	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
+	if (dataVersion < 34)
+	{
+		assert(false);
 		return false;
+	}
+
+	if (!ccHObject::toFile_MeOnly(out, dataVersion))
+	{
+		return false;
+	}
 
 	//vector size (dataVersion>=34)
 	uint32_t count = static_cast<uint32_t>(size());
-	if (out.write((const char*)&count,4) < 0)
+	if (out.write((const char*)&count, 4) < 0)
 		return WriteError();
 
 	//transformations (dataVersion>=34)
-	for (ccIndexedTransformationBuffer::const_iterator it=begin(); it!=end(); ++it)
-		if (!it->toFile(out))
+	for (const_iterator it = begin(); it != end(); ++it)
+		if (!it->toFile(out, dataVersion))
 			return false;
 
 	//display options
 	{
 		//Show polyline (dataVersion>=34)
-		if (out.write((const char*)&m_showAsPolyline,sizeof(bool)) < 0)
+		if (out.write((const char*)&m_showAsPolyline, sizeof(bool)) < 0)
 			return WriteError();
 		//Show trihedrons (dataVersion>=34)
-		if (out.write((const char*)&m_showTrihedrons,sizeof(bool)) < 0)
+		if (out.write((const char*)&m_showTrihedrons, sizeof(bool)) < 0)
 			return WriteError();
 		//Display scale (dataVersion>=34)
-		if (out.write((const char*)&m_trihedronsScale,sizeof(float)) < 0)
+		if (out.write((const char*)&m_trihedronsScale, sizeof(float)) < 0)
 			return WriteError();
 	}
 
@@ -278,6 +287,16 @@ bool ccIndexedTransformationBuffer::fromFile_MeOnly(QFile& in, short dataVersion
 	}
 
 	return true;
+}
+
+short ccIndexedTransformationBuffer::minimumFileVersion_MeOnly() const
+{
+	short minVersion = std::max(static_cast<short>(34), ccHObject::minimumFileVersion_MeOnly());
+	if (!empty())
+	{
+		minVersion = std::max(minVersion, front().minimumFileVersion()); // we assume they are all the same
+	}
+	return minVersion;
 }
 
 void ccIndexedTransformationBuffer::drawMeOnly(CC_DRAW_CONTEXT& context)

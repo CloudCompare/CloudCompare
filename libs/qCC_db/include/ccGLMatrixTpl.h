@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-
-#ifndef CC_GL_MATRIX_TPL_HEADER
-#define CC_GL_MATRIX_TPL_HEADER
 
 //Local
 #include "ccSerializableObject.h"
@@ -164,9 +163,9 @@ public:
 			{
 				for (unsigned j = 0; j < 3; j++)
 				{
-					mat[i*4+j] =  c3 * v.u[i] * u.u[j]
-								- c2 * v.u[i] * v.u[j]
-								- c1 * u.u[i] * u.u[j];
+					mat[i * 4 + j] = c3 * v.u[i] * u.u[j]
+								   - c2 * v.u[i] * v.u[j]
+								   - c1 * u.u[i] * u.u[j];
 				}
 				mat[i * 4 + i] += static_cast<T>(1);
 			}
@@ -454,6 +453,21 @@ public:
 
 	//! Sets matrix to identity
 	inline virtual void toIdentity() { toZero(); CC_MAT_R11 = CC_MAT_R22 = CC_MAT_R33 = CC_MAT_R44 = static_cast<T>(1); }
+
+	//! Returns whether this matrix is equal to identity
+	inline virtual bool isIdentity() const
+	{
+		for (unsigned l = 0; l < 4; ++l) //lines
+		{
+			for (unsigned c = 0; c < 4; ++c) //columns
+			{
+				if (m_mat[c * 4 + l] != static_cast<T>(l == c ? 1 : 0))
+					return false;
+			}
+		}
+
+		return true;
+	}
 
 	//! Clears translation
 	/** Translation is set to (0,0,0).
@@ -1156,18 +1170,31 @@ public:
 	}
 
 	//inherited from ccSerializableObject
-	bool isSerializable() const override { return true; }
-	bool toFile(QFile& out) const override
+	bool isSerializable() const override
+	{
+		return true;
+	}
+
+	//inherited from ccSerializableObject
+	bool toFile(QFile& out, short dataVersion) const override
 	{
 		assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
+		if (dataVersion < 20)
+		{
+			assert(false);
+			return false;
+		}
 
 		//data (dataVersion>=20)
 		if (out.write(reinterpret_cast<const char*>(m_mat), sizeof(T)*OPENGL_MATRIX_SIZE) < 0)
+		{
 			return WriteError();
+		}
 
 		return true;
 	}
 
+	//inherited from ccSerializableObject
 	bool fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override
 	{
 		assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
@@ -1180,6 +1207,12 @@ public:
 			return ReadError();
 
 		return true;
+	}
+
+	//inherited from ccSerializableObject
+	short minimumFileVersion() const override
+	{
+		return 20;
 	}
 
 protected:
@@ -1197,5 +1230,3 @@ protected:
 	//! Internal 4x4 GL-style matrix data
 	T m_mat[OPENGL_MATRIX_SIZE];
 };
-
-#endif //CC_GL_MATRIX_TPL_HEADER

@@ -96,9 +96,10 @@ protected:
 	void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
 	//inherited from ccGenericPrimitive
-	virtual bool toFile_MeOnly(QFile& out) const override;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
-	virtual bool buildUp() override;
+	bool toFile_MeOnly(QFile& out, short dataVersion) const override;
+	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	short minimumFileVersion_MeOnly() const override;
+	bool buildUp() override;
 
 	ccPlane* createXYplane(const ccGLMatrix* transMat = nullptr) const;
 	ccPlane* createYZplane(const ccGLMatrix* transMat = nullptr) const;

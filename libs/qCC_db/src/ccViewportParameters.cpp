@@ -61,10 +61,17 @@ ccViewportParameters::ccViewportParameters(const ccViewportParameters& params)
 {
 }
 
-bool ccViewportParameters::toFile(QFile& out) const
+bool ccViewportParameters::toFile(QFile& out, short dataVersion) const
 {
+	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
+	if (dataVersion < 51)
+	{
+		assert(false);
+		return false;
+	}
+
 	//base modelview matrix (dataVersion>=20)
-	if (!viewMat.toFile(out))
+	if (!viewMat.toFile(out, dataVersion))
 		return false;
 
 	//other parameters (dataVersion>=20)
@@ -82,8 +89,12 @@ bool ccViewportParameters::toFile(QFile& out) const
 	outStream << cameraCenter.z;
 	outStream << fov_deg;
 	outStream << cameraAspectRatio;
-	outStream << nearClippingDepth;
-	outStream << farClippingDepth;
+
+	if (dataVersion >= 53)
+	{
+		outStream << nearClippingDepth;
+		outStream << farClippingDepth;
+	}
 
 	return true;
 }
@@ -200,6 +211,14 @@ bool ccViewportParameters::fromFile(QFile& in, short dataVersion, int flags, Loa
 	}
 
 	return true;
+}
+
+short ccViewportParameters::minimumFileVersion() const
+{
+	// we need verison 53 to save a non-NaN near and far clipping depths
+	short minVersion = (std::isnan(nearClippingDepth) && std::isnan(farClippingDepth) ? 51 : 53);
+
+	return std::max(minVersion, viewMat.minimumFileVersion());
 }
 
 const CCVector3d& ccViewportParameters::getRotationCenter() const

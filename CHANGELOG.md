@@ -98,6 +98,14 @@ v2.13.alpha (???) - (??/??/????)
 		- the display should be faster until the first segmentation is performed
 		- unused mesh vertices should now be properly removed from both the segmented and the remaining mesh parts
 
+	- Color scales / Color scale editor
+		- it is now possible to override a custom label value by a text
+			(in the custom labels definition field, add a text between double quotes, after the numerical value)
+
+	- BIN files:
+		- CC is now able to create BIN files with the lowest version as possible (depending on the selected entities)
+			so that the resulting file may potentially be opened by earlier versions
+
 	- LAS files:
 		- The default shift for (GPS) time values is now rounded to the nearest 10^5 value
 		- The shift value is now displayed as a property of the currently selected scalar field

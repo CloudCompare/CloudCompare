@@ -2953,10 +2953,19 @@ int ccMesh::getTriangleMtlIndex(unsigned triangleIndex) const
 	return m_triMtlIndexes->at(triangleIndex);
 }
 
-bool ccMesh::toFile_MeOnly(QFile& out) const
+bool ccMesh::toFile_MeOnly(QFile& out, short dataVersion) const
 {
-	if (!ccGenericMesh::toFile_MeOnly(out))
+	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
+	if (dataVersion < 29)
+	{
+		assert(false);
 		return false;
+	}
+
+	if (!ccGenericMesh::toFile_MeOnly(out, dataVersion))
+	{
+		return false;
+	}
 
 	//we can't save the associated cloud here (as it may be shared by multiple meshes)
 	//so instead we save it's unique ID (dataVersion>=20)
@@ -3177,6 +3186,12 @@ bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMa
 	notifyGeometryUpdate();
 
 	return true;
+}
+
+short ccMesh::minimumFileVersion_MeOnly() const
+{
+	short minVersion = std::max(static_cast<short>(29), ccSerializationHelper::GenericArrayToFileMinVersion());
+	return std::max(minVersion, ccGenericMesh::minimumFileVersion_MeOnly());
 }
 
 void ccMesh::computeInterpolationWeights(unsigned triIndex, const CCVector3& P, CCVector3d& weights) const

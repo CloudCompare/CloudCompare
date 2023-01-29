@@ -361,8 +361,9 @@ public: //display
 
 	//inherited from ccSerializableObject
 	bool isSerializable() const override;
-	bool toFile(QFile& out) const override;
+	bool toFile(QFile& out, short dataVersion) const override;
 	bool fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	short minimumFileVersion() const override;
 
 	//! Custom version of ccSerializableObject::fromFile
 	/** This is used to load only the object's part of a stream (and not its children)
@@ -426,19 +427,26 @@ protected:
 
 	//! Save own object data
 	/** Called by 'toFile' (recursive scheme)
-		To be overloaded (but still called;) by subclass.
+		To be overloaded (but still called ;) by subclass.
+		\param out			output file
+		\param dataVersion	target file version
 	**/
-	virtual bool toFile_MeOnly(QFile& out) const;
+	virtual bool toFile_MeOnly(QFile& out, short dataVersion) const;
 
 	//! Loads own object data
 	/** Called by 'fromFile' (recursive scheme)
-		To be overloaded (but still called;) by subclass.
+		To be overloaded (but still called ;) by subclass.
 		\param in input file
 		\param dataVersion file version
 		\param flags deserialization flags (see ccSerializableObject::DeserializationFlags)
 		\param oldToNewIDMap map to link old IDs with new IDs
 	**/
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap);
+
+	//! Returns the minimum file version required to save this instance
+	/** To be overloaded (but still called ;) by subclass.
+	**/
+	virtual short minimumFileVersion_MeOnly() const;
 
 	//! Draws the entity name in 3D
 	/** Names is displayed at the center of the bounding box by default.

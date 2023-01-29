@@ -187,10 +187,19 @@ void ccImage::onDeletionOf(const ccHObject* obj)
 	ccHObject::onDeletionOf(obj);
 }
 
-bool ccImage::toFile_MeOnly(QFile& out) const
+bool ccImage::toFile_MeOnly(QFile& out, short dataVersion) const
 {
-	if (!ccHObject::toFile_MeOnly(out))
+	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
+	if (dataVersion < 38)
+	{
+		assert(false);
 		return false;
+	}
+
+	if (!ccHObject::toFile_MeOnly(out, dataVersion))
+	{
+		return false;
+	}
 
 	//we can't save the associated sensor here (as it may be shared by multiple images)
 	//so instead we save it's unique ID (dataVersion>=38)
@@ -226,7 +235,7 @@ bool ccImage::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDM
 	//we only store its unique ID (dataVersion >= 38) --> we hope we will find it at loading time (i.e. this
 	//is the responsibility of the caller to make sure that all dependencies are saved together)
 	uint32_t sensorUniqueID = 0;
-	if (in.read((char*)&sensorUniqueID,4) < 0)
+	if (in.read((char*)&sensorUniqueID, 4) < 0)
 		return ReadError();
 	//[DIRTY] WARNING: temporarily, we set the vertices unique ID in the 'm_associatedCloud' pointer!!!
 	*(uint32_t*)(&m_associatedSensor) = sensorUniqueID;
@@ -246,6 +255,11 @@ bool ccImage::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDM
 	inStream >> fakeString; //formerly: 'complete filename'
 
 	return true;
+}
+
+short ccImage::minimumFileVersion_MeOnly() const
+{
+	return std::max(static_cast<short>(38), ccHObject::minimumFileVersion_MeOnly());
 }
 
 ccBBox ccImage::getOwnFitBB(ccGLMatrix& trans)

@@ -166,10 +166,19 @@ void ccSphere::setRadius(PointCoordinateType radius)
 	applyTransformationToVertices();
 }
 
-bool ccSphere::toFile_MeOnly(QFile& out) const
+bool ccSphere::toFile_MeOnly(QFile& out, short dataVersion) const
 {
-	if (!ccGenericPrimitive::toFile_MeOnly(out))
+	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
+	if (dataVersion < 21)
+	{
+		assert(false);
 		return false;
+	}
+
+	if (!ccGenericPrimitive::toFile_MeOnly(out, dataVersion))
+	{
+		return false;
+	}
 
 	//parameters (dataVersion >= 21)
 	QDataStream outStream(&out);
@@ -188,6 +197,11 @@ bool ccSphere::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedID
 	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_radius, 1);
 
 	return true;
+}
+
+short ccSphere::minimumFileVersion_MeOnly() const
+{
+	return std::max(static_cast<short>(21), ccGenericPrimitive::minimumFileVersion_MeOnly());
 }
 
 void ccSphere::drawNameIn3D(CC_DRAW_CONTEXT& context)

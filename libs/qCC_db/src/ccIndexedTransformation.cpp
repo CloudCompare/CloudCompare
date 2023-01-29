@@ -162,15 +162,22 @@ ccIndexedTransformation ccIndexedTransformation::Interpolate(	double index,
 	return ccIndexedTransformation(mat, index);
 }
 
-bool ccIndexedTransformation::toFile(QFile& out) const
+bool ccIndexedTransformation::toFile(QFile& out, short dataVersion) const
 {
-	if (!ccGLMatrix::toFile(out))
+	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
+	if (dataVersion < 34)
+	{
+		assert(false);
 		return false;
-	
+	}
+
+	if (!ccGLMatrix::toFile(out, dataVersion))
+		return false;
+
 	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
 
 	//index (dataVersion>=34)
-	if (out.write((const char*)&m_index,sizeof(double)) < 0)
+	if (out.write((const char*)&m_index, sizeof(double)) < 0)
 		return WriteError();
 
 	return true;
@@ -183,12 +190,18 @@ bool ccIndexedTransformation::fromFile(QFile& in, short dataVersion, int flags, 
 
 	assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
 
-	if (dataVersion<34)
+	if (dataVersion < 34)
 		return CorruptError();
 
 	//index (dataVersion>=34)
-	if (in.read((char*)&m_index,sizeof(double)) < 0)
+	if (in.read((char*)&m_index, sizeof(double)) < 0)
 		return ReadError();
 
 	return true;
 }
+
+short ccIndexedTransformation::minimumFileVersion() const
+{
+	return std::max(static_cast<short>(34), ccGLMatrix::minimumFileVersion());
+}
+

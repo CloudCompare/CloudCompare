@@ -89,9 +89,16 @@ ccGenericPrimitive* ccBox::clone() const
 	return finishCloneJob(new ccBox(m_dims, &m_transformation, getName()));
 }
 
-bool ccBox::toFile_MeOnly(QFile& out) const
+bool ccBox::toFile_MeOnly(QFile& out, short dataVersion) const
 {
-	if (!ccGenericPrimitive::toFile_MeOnly(out))
+	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
+	if (dataVersion < 21)
+	{
+		assert(false);
+		return false;
+	}
+
+	if (!ccGenericPrimitive::toFile_MeOnly(out, dataVersion))
 		return false;
 
 	//parameters (dataVersion>=21)
@@ -113,4 +120,9 @@ bool ccBox::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap
 	ccSerializationHelper::CoordsFromDataStream(inStream, flags, m_dims.u, 3);
 
 	return true;
+}
+
+short ccBox::minimumFileVersion_MeOnly() const
+{
+	return std::max(static_cast<short>(21), ccGenericPrimitive::minimumFileVersion_MeOnly());
 }

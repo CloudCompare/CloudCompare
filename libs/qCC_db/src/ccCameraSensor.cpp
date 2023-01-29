@@ -462,13 +462,22 @@ void ccCameraSensor::computeProjectionMatrix()
 	m_projectionMatrixIsValid = true;
 }
 
-bool ccCameraSensor::toFile_MeOnly(QFile& out) const
+bool ccCameraSensor::toFile_MeOnly(QFile& out, short dataVersion) const
 {
-	if (!ccSensor::toFile_MeOnly(out))
+	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
+	if (dataVersion < 38)
+	{
+		assert(false);
 		return false;
+	}
+
+	if (!ccSensor::toFile_MeOnly(out, dataVersion))
+	{
+		return false;
+	}
 
 	//projection matrix (35 <= dataVersion < 38)
-	//if (!m_projectionMatrix.toFile(out))
+	//if (!m_projectionMatrix.toFile(out, dataVersion))
 	//	return WriteError();
 
 	/** various parameters (dataVersion>=35) **/
@@ -484,6 +493,7 @@ bool ccCameraSensor::toFile_MeOnly(QFile& out) const
 	outStream << m_intrinsicParams.vFOV_rad;
 	outStream << m_intrinsicParams.zNear_mm;
 	outStream << m_intrinsicParams.zFar_mm;
+	// dataVersion >= 43
 	outStream << m_intrinsicParams.principal_point[0];
 	outStream << m_intrinsicParams.principal_point[1];
 
@@ -493,7 +503,7 @@ bool ccCameraSensor::toFile_MeOnly(QFile& out) const
 
 	if (m_distortionParams)
 	{
-		switch(m_distortionParams->getModel())
+		switch (m_distortionParams->getModel())
 		{
 		case SIMPLE_RADIAL_DISTORTION:
 			{
@@ -577,7 +587,7 @@ bool ccCameraSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Lo
 
 	if (dataVersion >= 43)
 	{
-		//since version 43, we added the principal point
+		//we added the principal point in version 43
 		inStream >> m_intrinsicParams.principal_point[0];
 		inStream >> m_intrinsicParams.principal_point[1];
 	}
@@ -669,6 +679,11 @@ bool ccCameraSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Lo
 	}
 
 	return true;
+}
+
+short ccCameraSensor::minimumFileVersion_MeOnly() const
+{
+	return std::max(static_cast<short>(43), ccSensor::minimumFileVersion_MeOnly());
 }
 
 bool ccCameraSensor::fromLocalCoordToGlobalCoord(const CCVector3& localCoord, CCVector3& globalCoord) const

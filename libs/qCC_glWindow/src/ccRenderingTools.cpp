@@ -140,47 +140,53 @@ struct ScaleElement
 	}
 };
 
-
 //structure for recursive display of labels
-struct vlabel
+struct VLabel
 {
-	int yPos; 		/**< label center pos **/
-	int yMin; 		/**< label 'ROI' min **/
-	int yMax; 		/**< label 'ROI' max **/
-	double val; 	/**< label value **/
+	int yPos = 0; 				/**< label center pos **/
+	int yMin = 0; 				/**< label 'ROI' min **/
+	int yMax = 0; 				/**< label 'ROI' max **/
+	ccColorScale::Label label; 	/**< label value **/
 
 	//default constructor
-	vlabel(int y, int y1, int y2, double v) : yPos(y), yMin(y1), yMax(y2),val(v) { assert(y2>=y1); }
+	VLabel(int y, int y1, int y2, const ccColorScale::Label& l)
+		: yPos(y)
+		, yMin(y1)
+		, yMax(y2)
+		, label(l)
+	{
+		assert(y2 >= y1);
+	}
 };
 
-//! A set of 'vlabel' structures
-using vlabelSet = std::list<vlabel>;
+//! A set of 'VLabel' structures
+using VLabelSet = std::list<VLabel>;
 
 //helper: returns the neighbouring labels at a given position
 //(first: above label, second: below label)
 //Warning: set must be already sorted!
-using vlabelPair = std::pair<vlabelSet::iterator,vlabelSet::iterator>;
+using VLabelPair = std::pair<VLabelSet::iterator, VLabelSet::iterator>;
 
-static vlabelPair GetVLabelsAround(int y, vlabelSet& set)
+static VLabelPair GetVLabelsAround(int y, VLabelSet& set)
 {
 	if (set.empty())
 	{
-		return vlabelPair(set.end(), set.end());
+		return VLabelPair(set.end(), set.end());
 	}
 	else
 	{
-		vlabelSet::iterator it1 = set.begin();
+		VLabelSet::iterator it1 = set.begin();
 		if (y < it1->yPos)
 		{
-			return vlabelPair(set.end(), it1);
+			return VLabelPair(set.end(), it1);
 		}
-		vlabelSet::iterator it2 = it1; ++it2;
+		VLabelSet::iterator it2 = it1; ++it2;
 		for (; it2 != set.end(); ++it2, ++it1)
 		{
 			if (y <= it2->yPos) // '<=' to make sure the last label stays at the top!
-				return vlabelPair(it1,it2);
+				return VLabelPair(it1, it2);
 		}
-		return vlabelPair(it1,set.end());
+		return VLabelPair(it1, set.end());
 	}
 }
 
@@ -190,7 +196,7 @@ const double c_log10 = log(10.0);
 //Convert standard range to log scale
 void ConvertToLogScale(ScalarType& dispMin, ScalarType& dispMax)
 {
-	ScalarType absDispMin = (dispMax < 0 ? std::min(-dispMax, -dispMin) : std::max<ScalarType>(dispMin, 0)); 
+	ScalarType absDispMin = (dispMax < 0 ? std::min(-dispMax, -dispMin) : std::max<ScalarType>(dispMin, 0));
 	ScalarType absDispMax = std::max(std::abs(dispMin), std::abs(dispMax));
 	dispMin = std::log10(std::max(absDispMin, std::numeric_limits<ScalarType>::epsilon()));
 	dispMax = std::log10(std::max(absDispMax, std::numeric_limits<ScalarType>::epsilon()));
@@ -314,14 +320,14 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccSca
 	{
 		for (ccColorScale::LabelSet::iterator it = keyValues.begin(); it != keyValues.end(); ++it)
 		{
-			if (!std::isfinite(*it))
+			if (!std::isfinite(it->value))
 			{
-				bool minusInf = (*it < 0);
+				bool minusInf = (it->value < 0);
 				keyValues.erase(it);
 				if (minusInf)
-					keyValues.insert(-std::numeric_limits<ScalarType>::max());
+					keyValues.insert({ std::numeric_limits<ScalarType>::lowest(), "-Inf" });
 				else
-					keyValues.insert(std::numeric_limits<ScalarType>::max());
+					keyValues.insert({ std::numeric_limits<ScalarType>::max(), "+Inf" });
 				it = keyValues.begin(); //restart the process (easier than trying to be intelligent here ;)
 			}
 		}
@@ -337,7 +343,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccSca
 		{
 			for (ccColorScale::LabelSet::iterator it = keyValues.begin(); it != keyValues.end(); )
 			{
-				if (!sf->displayRange().isInRange(static_cast<ScalarType>(*it)) && (!alwaysShowZero || *it != 0)) //we keep zero if the user has explicitely asked for it!
+				if (!sf->displayRange().isInRange(static_cast<ScalarType>(it->value)) && (!alwaysShowZero || it->value != 0)) //we keep zero if the user has explicitely asked for it!
 				{
 					ccColorScale::LabelSet::iterator toDelete = it;
 					++it;
@@ -359,7 +365,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccSca
 
 			for (ccColorScale::LabelSet::iterator it = keyValues.begin(); it != keyValues.end(); )
 			{
-				if (*it >= dispMin && *it <= dispMax)
+				if (it->value >= dispMin && it->value <= dispMax)
 				{
 					++it;
 				}
@@ -437,8 +443,8 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccSca
 	glFunc->glPushAttrib(GL_DEPTH_BUFFER_BIT);
 	glFunc->glDisable(GL_DEPTH_TEST);
 
-	std::vector<double> sortedKeyValues(keyValues.begin(), keyValues.end());
-	double maxRange = sortedKeyValues.back() - sortedKeyValues.front();
+	std::vector<ccColorScale::Label> sortedKeyValues(keyValues.begin(), keyValues.end());
+	double maxRange = sortedKeyValues.back().value - sortedKeyValues.front().value;
 
 	const int borderWidth = 2 * renderZoom;
 
@@ -464,7 +470,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccSca
 			glFunc->glBegin(GL_LINES);
 			for (int j = 0; j <= scaleMaxHeight; ++j)
 			{
-				double baseValue = sortedKeyValues.front() + (j * maxRange) / scaleMaxHeight;
+				double baseValue = sortedKeyValues.front().value + (j * maxRange) / scaleMaxHeight;
 				double value = baseValue;
 				if (logScale)
 				{
@@ -517,7 +523,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccSca
 		else
 		{
 			//if there's a unique (visible) scalar value, we only draw a square!
-			double value = sortedKeyValues.front();
+			double value = sortedKeyValues.front().value;
 			if (logScale)
 				value = exp(value*c_log10);
 			
@@ -554,7 +560,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccSca
 	//display the labels
 	{
 		//list of labels to draw
-		vlabelSet drawnLabels;
+		VLabelSet drawnLabels;
 
 		//add first label
 		drawnLabels.emplace_back(0, 0, strHeight, sortedKeyValues.front());
@@ -572,15 +578,15 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccSca
 			const int minGap = strHeight;
 			for (size_t i = 1; i < keyValues.size() - 1; ++i)
 			{
-				int yScale = static_cast<int>((sortedKeyValues[i] - sortedKeyValues[0]) * scaleMaxHeight / maxRange);
-				vlabelPair nLabels = GetVLabelsAround(yScale, drawnLabels);
+				int yScale = static_cast<int>((sortedKeyValues[i].value - sortedKeyValues[0].value) * scaleMaxHeight / maxRange);
+				VLabelPair nLabels = GetVLabelsAround(yScale, drawnLabels);
 
 				assert(nLabels.first != drawnLabels.end() && nLabels.second != drawnLabels.end());
 				if (	(nLabels.first == drawnLabels.end() || nLabels.first->yMax <= yScale - minGap)
 					&&	(nLabels.second == drawnLabels.end() || nLabels.second->yMin >= yScale + minGap))
 				{
 					//insert it at the right place (so as to keep a sorted list!)
-					drawnLabels.insert(nLabels.second, vlabel(yScale, yScale - strHeight / 2, yScale + strHeight / 2, sortedKeyValues[i]));
+					drawnLabels.insert(nLabels.second, VLabel(yScale, yScale - strHeight / 2, yScale + strHeight / 2, sortedKeyValues[i]));
 				}
 			}
 		}
@@ -598,18 +604,18 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccSca
 			{
 				drawnLabelsBefore = drawnLabelsAfter;
 
-				vlabelSet::iterator it1 = drawnLabels.begin();
-				vlabelSet::iterator it2 = it1; ++it2;
+				VLabelSet::iterator it1 = drawnLabels.begin();
+				VLabelSet::iterator it2 = it1; ++it2;
 				for (; it2 != drawnLabels.end(); ++it2)
 				{
 					if (it1->yMax + 2 * minGap < it2->yMin)
 					{
 						//insert label
-						double val = (it1->val + it2->val) / 2.0;
-						int yScale = static_cast<int>((val - sortedKeyValues[0]) * scaleMaxHeight / maxRange);
+						double val = (it1->label.value + it2->label.value) / 2;
+						int yScale = static_cast<int>((val - sortedKeyValues[0].value) * scaleMaxHeight / maxRange);
 
 						//insert it at the right place (so as to keep a sorted list!)
-						drawnLabels.insert(it2, vlabel(yScale, yScale - strHeight / 2, yScale + strHeight / 2, val));
+						drawnLabels.insert(it2, VLabel(yScale, yScale - strHeight / 2, yScale + strHeight / 2, val));
 					}
 					it1 = it2;
 				}
@@ -629,9 +635,9 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccSca
 		const int xTick = xStart - halfW - tickSize - borderWidth;
 		const int yTick = halfH - yStart - scaleMaxHeight;
 
-		for (vlabelSet::iterator it = drawnLabels.begin(); it != drawnLabels.end(); ++it)
+		for (VLabelSet::iterator it = drawnLabels.begin(); it != drawnLabels.end(); ++it)
 		{
-			vlabelSet::iterator itNext = it;
+			VLabelSet::iterator itNext = it;
 			++itNext;
 			
 			//position
@@ -651,14 +657,22 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccSca
 				align |= ccGLWindow::ALIGN_VMIDDLE;
 			}
 
-			double value = it->val;
-			if (logScale)
+			QString numberStr;
+			if (it->label.text.isEmpty())
 			{
-				value = exp(value*c_log10);
+				double value = it->label.value;
+				if (logScale)
+				{
+					value = exp(value*c_log10);
+				}
+				numberStr = QString::number(value, numberFormat, displayParams.displayedNumPrecision);
+			}
+			else
+			{
+				numberStr = it->label.text;
 			}
 
 			//display label
-			QString numberStr = QString::number(value, numberFormat, displayParams.displayedNumPrecision);
 			win->displayText(	numberStr,
 								xText,
 								yText + it->yPos,

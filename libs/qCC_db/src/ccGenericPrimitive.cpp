@@ -158,17 +158,24 @@ const ccGenericPrimitive& ccGenericPrimitive::operator += (const ccGenericPrimit
 	return *this;
 }
 
-bool ccGenericPrimitive::toFile_MeOnly(QFile& out) const
+bool ccGenericPrimitive::toFile_MeOnly(QFile& out, short dataVersion) const
 {
-	if (!ccMesh::toFile_MeOnly(out))
+	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
+	if (dataVersion < 21)
+	{
+		assert(false);
+		return false;
+	}
+
+	if (!ccMesh::toFile_MeOnly(out, dataVersion))
 		return false;
 
 	//Transformation matrix backup (dataVersion>=21)
-	if (!m_transformation.toFile(out))
+	if (!m_transformation.toFile(out, dataVersion))
 		return false;
 
 	//'drawing precision' (dataVersion>=21))
-	if (out.write((const char*)&m_drawPrecision,sizeof(unsigned)) < 0)
+	if (out.write((const char*)&m_drawPrecision, sizeof(unsigned)) < 0)
 		return WriteError();
 
 	return true;
@@ -194,6 +201,12 @@ bool ccGenericPrimitive::fromFile_MeOnly(QFile& in, short dataVersion, int flags
 		return ReadError();
 
 	return true;
+}
+
+short ccGenericPrimitive::minimumFileVersion_MeOnly() const
+{
+	short minVersion = std::max(static_cast<short>(21), m_transformation.minimumFileVersion());
+	return std::max(minVersion, ccMesh::minimumFileVersion_MeOnly());
 }
 
 bool ccGenericPrimitive::setDrawingPrecision(unsigned steps)

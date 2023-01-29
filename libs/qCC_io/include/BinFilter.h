@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,11 +17,7 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_BIN_FILTER_HEADER
-#define CC_BIN_FILTER_HEADER
-
 #include "FileIOFilter.h"
-
 
 //! CloudCompare dedicated binary point cloud I/O filter
 class QCC_IO_LIB_API BinFilter : public FileIOFilter
@@ -30,6 +28,7 @@ public:
 	//static accessors
 	static inline QString GetFileFilter() { return "CloudCompare entities (*.bin)"; }
 	static inline QString GetDefaultExtension() { return "bin"; }
+	static short GetLastSavedFileVersion();
 
 	//inherited from FileIOFilter
 	CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
@@ -46,5 +45,3 @@ public:
 	//! new style BIN saving
 	static CC_FILE_ERROR SaveFileV2(QFile& out, ccHObject* object);
 };
-
-#endif //CC_BIN_FILTER_HEADER

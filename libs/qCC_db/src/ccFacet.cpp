@@ -403,17 +403,26 @@ void ccFacet::drawMeOnly(CC_DRAW_CONTEXT& context)
 	}
 }
 
-bool ccFacet::toFile_MeOnly(QFile& out) const
+bool ccFacet::toFile_MeOnly(QFile& out, short dataVersion) const
 {
-	if (!ccHObject::toFile_MeOnly(out))
+	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
+	if (dataVersion < 32)
+	{
+		assert(false);
 		return false;
+	}
+
+	if (!ccHObject::toFile_MeOnly(out, dataVersion))
+	{
+		return false;
+	}
 
 	//we can't save the origin points here (as it will be automatically saved as a child)
 	//so instead we save it's unique ID (dataVersion>=32)
 	//WARNING: the cloud must be saved in the same BIN file! (responsibility of the caller)
 	{
 		uint32_t originPointsUniqueID = (m_originPoints ? static_cast<uint32_t>(m_originPoints->getUniqueID()) : 0);
-		if (out.write((const char*)&originPointsUniqueID,4) < 0)
+		if (out.write((const char*)&originPointsUniqueID, 4) < 0)
 			return WriteError();
 	}
 
@@ -422,7 +431,7 @@ bool ccFacet::toFile_MeOnly(QFile& out) const
 	//WARNING: the cloud must be saved in the same BIN file! (responsibility of the caller)
 	{
 		uint32_t contourPointsUniqueID = (m_contourVertices ? static_cast<uint32_t>(m_contourVertices->getUniqueID()) : 0);
-		if (out.write((const char*)&contourPointsUniqueID,4) < 0)
+		if (out.write((const char*)&contourPointsUniqueID, 4) < 0)
 			return WriteError();
 	}
 
@@ -431,7 +440,7 @@ bool ccFacet::toFile_MeOnly(QFile& out) const
 	//WARNING: the polyline must be saved in the same BIN file! (responsibility of the caller)
 	{
 		uint32_t contourPolyUniqueID = (m_contourPolyline ? static_cast<uint32_t>(m_contourPolyline->getUniqueID()) : 0);
-		if (out.write((const char*)&contourPolyUniqueID,4) < 0)
+		if (out.write((const char*)&contourPolyUniqueID, 4) < 0)
 			return WriteError();
 	}
 
@@ -440,28 +449,28 @@ bool ccFacet::toFile_MeOnly(QFile& out) const
 	//WARNING: the mesh must be saved in the same BIN file! (responsibility of the caller)
 	{
 		uint32_t polygonMeshUniqueID = (m_polygonMesh ? static_cast<uint32_t>(m_polygonMesh->getUniqueID()) : 0);
-		if (out.write((const char*)&polygonMeshUniqueID,4) < 0)
+		if (out.write((const char*)&polygonMeshUniqueID, 4) < 0)
 			return WriteError();
 	}
 
 	//plane equation (dataVersion>=32)
-	if (out.write((const char*)&m_planeEquation,sizeof(PointCoordinateType)*4) < 0)
+	if (out.write((const char*)&m_planeEquation, sizeof(PointCoordinateType) * 4) < 0)
 		return WriteError();
 
 	//center (dataVersion>=32)
-	if (out.write((const char*)m_center.u,sizeof(PointCoordinateType)*3) < 0)
+	if (out.write((const char*)m_center.u, sizeof(PointCoordinateType) * 3) < 0)
 		return WriteError();
 
 	//RMS (dataVersion>=32)
-	if (out.write((const char*)&m_rms,sizeof(double)) < 0)
+	if (out.write((const char*)&m_rms, sizeof(double)) < 0)
 		return WriteError();
 
 	//surface (dataVersion>=32)
-	if (out.write((const char*)&m_surface,sizeof(double)) < 0)
+	if (out.write((const char*)&m_surface, sizeof(double)) < 0)
 		return WriteError();
 
-	//Max edge length (dataVersion>=31)
-	if (out.write((const char*)&m_maxEdgeLength,sizeof(PointCoordinateType)) < 0)
+	//Max edge length (dataVersion>=32)
+	if (out.write((const char*)&m_maxEdgeLength, sizeof(PointCoordinateType)) < 0)
 		return WriteError();
 
 	return true;
@@ -535,11 +544,16 @@ bool ccFacet::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDM
 	if (in.read((char*)&m_surface, sizeof(double)) < 0)
 		return ReadError();
 
-	//Max edge length (dataVersion>=31)
+	//Max edge length (dataVersion>=32)
 	if (in.read((char*)&m_maxEdgeLength, sizeof(PointCoordinateType)) < 0)
 		return WriteError();
 
 	return true;
+}
+
+short ccFacet::minimumFileVersion_MeOnly() const
+{
+	return std::max(static_cast<short>(32), ccHObject::minimumFileVersion_MeOnly());
 }
 
 void ccFacet::applyGLTransformation(const ccGLMatrix &trans)

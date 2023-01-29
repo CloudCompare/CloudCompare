@@ -43,9 +43,16 @@ cc2DViewportLabel::cc2DViewportLabel(const cc2DViewportLabel& viewportLabel)
 {
 }
 
-bool cc2DViewportLabel::toFile_MeOnly(QFile& out) const
+bool cc2DViewportLabel::toFile_MeOnly(QFile& out, short dataVersion) const
 {
-	if (!cc2DViewportObject::toFile_MeOnly(out))
+	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
+	if (dataVersion < 21)
+	{
+		assert(false);
+		return false;
+	}
+
+	if (!cc2DViewportObject::toFile_MeOnly(out, dataVersion))
 		return false;
 
 	//ROI (dataVersion>=21)
@@ -70,6 +77,11 @@ bool cc2DViewportLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags,
 		inStream >> m_roi[i];
 
 	return true;
+}
+
+short cc2DViewportLabel::minimumFileVersion_MeOnly() const
+{
+	return std::max(static_cast<short>(21), cc2DViewportObject::minimumFileVersion_MeOnly());
 }
 
 void cc2DViewportLabel::drawMeOnly(CC_DRAW_CONTEXT& context)

@@ -296,11 +296,15 @@ void ccColorScaleEditorDialog::setActiveScale(ccColorScale::Shared currentScale)
 		{
 			QString text;
 			size_t index = 0;
-			for (ccColorScale::LabelSet::const_iterator it=customLabels.begin(); it!=customLabels.end(); ++it, ++index)
+			for (ccColorScale::LabelSet::const_iterator it = customLabels.begin(); it != customLabels.end(); ++it, ++index)
 			{
 				if (index != 0)
 					text += QString("\n");
-				text += QString::number(*it,'f',6);
+				text += QString::number(it->value, 'f', 6);
+				if (!it->text.isEmpty())
+				{
+					text += " \"" + it->text + '\"';
+				}
 			}
 			m_ui->customLabelsPlainTextEdit->blockSignals(true);
 			m_ui->customLabelsPlainTextEdit->setPlainText(text);
@@ -504,63 +508,72 @@ void ccColorScaleEditorDialog::changeSelectedStepValue(double value)
 	}
 }
 
-bool ccColorScaleEditorDialog::exportCustomLabelsList(ccColorScale::LabelSet& labels)
+QString ccColorScaleEditorDialog::exportCustomLabelsList(ccColorScale::LabelSet& labels) const
 {
 	assert(m_ui->customLabelsGroupBox->isChecked());
 	labels.clear();
 
-	QString text = m_ui->customLabelsPlainTextEdit->toPlainText();
-	QStringList items = text.simplified().split(QChar(' '), QString::SkipEmptyParts);
-	if (items.size() < 2)
+	QString fullText = m_ui->customLabelsPlainTextEdit->toPlainText();
+	QStringList lines = fullText.split(QRegExp("[\r\n]"), QString::SkipEmptyParts);
+	if (lines.size() < 2)
 	{
-		assert(false);
-		return false;
+		return "Need at least 2 custom values";
 	}
 
 	try
 	{
-		for (int i=0; i<items.size(); ++i)
+		for (QString line : lines)
 		{
-			bool ok;
-			double d = items[i].toDouble(&ok);
+			QString text;
+			int firstQuoteIndex = line.indexOf('"');
+			if (firstQuoteIndex == 0)
+			{
+				return "Expecting a numerical value before the text label";
+			}
+			else if (firstQuoteIndex > 0)
+			{
+				int secondQuoteIndex = line.lastIndexOf('"');
+				if (secondQuoteIndex == firstQuoteIndex)
+				{
+					return "Missing double quote";
+				}
+
+				if (secondQuoteIndex > firstQuoteIndex + 1)
+				{
+					text = line.mid(firstQuoteIndex + 1, secondQuoteIndex - (firstQuoteIndex + 1));
+				}
+				line = line.left(firstQuoteIndex).trimmed();
+			}
+
+			bool ok = false;
+			double d = line.toDouble(&ok);
 			if (!ok)
 			{
-				return false;
+				return "Expecting a numerical value first";
 			}
-			labels.insert(d);
+
+			labels.insert({ d, text });
 		}
 	}
 	catch (const std::bad_alloc&)
 	{
-		ccLog::Error("Not enough memory to save the custom labels!");
 		labels.clear();
-		return false;
+		return "Not enough memory to save the custom labels";
 	}
 
-	return true;
+	return {};
 }
 
 bool ccColorScaleEditorDialog::checkCustomLabelsList(bool showWarnings)
 {
-	QString text = m_ui->customLabelsPlainTextEdit->toPlainText();
-	QStringList items = text.simplified().split(QChar(' '), QString::SkipEmptyParts);
-	if (items.size() < 2)
+	ccColorScale::LabelSet labels;
+	QString error = exportCustomLabelsList(labels);
+
+	if (!error.isEmpty())
 	{
 		if (showWarnings)
-			ccLog::Error("Not enough labels defined (2 at least are required)");
+			ccLog::Error(error);
 		return false;
-	}
-
-	for (int i=0; i<items.size(); ++i)
-	{
-		bool ok;
-		items[i].toDouble(&ok);
-		if (!ok)
-		{
-			if (showWarnings)
-				ccLog::Error(QString("Invalid label value: '%1'").arg(items[i]));
-			return false;
-		}
 	}
 
 	return true;
@@ -652,10 +665,10 @@ bool ccColorScaleEditorDialog::saveCurrentScale()
 	{
 		ccHObject::Container clouds;
 		m_mainApp->dbRootObject()->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD, true);
-		for (size_t i=0; i<clouds.size(); ++i)
+		for (size_t i = 0; i < clouds.size(); ++i)
 		{
 			ccPointCloud* cloud = static_cast<ccPointCloud*>(clouds[i]);
-			for (unsigned j=0; j<cloud->getNumberOfScalarFields(); ++j)
+			for (unsigned j = 0; j < cloud->getNumberOfScalarFields(); ++j)
 			{
 				ccScalarField* sf = static_cast<ccScalarField*>(cloud->getScalarField(j));
 				if (sf->getColorScale() == m_colorScale)
@@ -683,7 +696,11 @@ bool ccColorScaleEditorDialog::saveCurrentScale()
 	//save the custom labels
 	if (m_ui->customLabelsGroupBox->isChecked())
 	{
-		exportCustomLabelsList(m_colorScale->customLabels());
+		QString error = exportCustomLabelsList(m_colorScale->customLabels());
+		if (!error.isEmpty())
+		{
+			ccLog::Warning("Invalid custom labels defintion: " + error);
+		}
 	}
 	else
 	{

@@ -287,8 +287,15 @@ void ccMaterial::releaseTexture()
 	}
 }
 
-bool ccMaterial::toFile(QFile& out) const
+bool ccMaterial::toFile(QFile& out, short dataVersion) const
 {
+	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
+	if (dataVersion < 20)
+	{
+		assert(false);
+		return false;
+	}
+
 	QDataStream outStream(&out);
 
 	//material name (dataVersion >= 20)
@@ -348,6 +355,11 @@ bool ccMaterial::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& 
 	inStream >> m_shininessBack;
 
 	return true;
+}
+
+short ccMaterial::minimumFileVersion() const
+{
+	return 20;
 }
 
 bool ccMaterial::compare(const ccMaterial& mtl) const

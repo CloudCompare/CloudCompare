@@ -363,10 +363,19 @@ void ccPolyline::setWidth(PointCoordinateType width)
 	m_width = width;
 }
 
-bool ccPolyline::toFile_MeOnly(QFile& out) const
+bool ccPolyline::toFile_MeOnly(QFile& out, short dataVersion) const
 {
-	if (!ccHObject::toFile_MeOnly(out))
+	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
+	if (dataVersion < 31)
+	{
+		assert(false);
 		return false;
+	}
+
+	if (!ccHObject::toFile_MeOnly(out, dataVersion))
+	{
+		return false;
+	}
 
 	//we can't save the associated cloud here (as it may be shared by multiple polylines)
 	//so instead we save it's unique ID (dataVersion>=28)
@@ -394,8 +403,11 @@ bool ccPolyline::toFile_MeOnly(QFile& out) const
 			return WriteError();
 	}
 
-	//'global shift & scale' (dataVersion>=39)
-	saveShiftInfoToFile(out);
+	if (dataVersion >= 39)
+	{
+		//'global shift & scale' (dataVersion>=39)
+		saveShiftInfoToFile(out);
+	}
 
 	QDataStream outStream(&out);
 
@@ -461,7 +473,7 @@ bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Loaded
 	else
 	{
 		m_globalScale = 1.0;
-		m_globalShift = CCVector3d(0,0,0);
+		m_globalShift = CCVector3d(0, 0, 0);
 	}
 
 	QDataStream inStream(&in);
@@ -482,11 +494,17 @@ bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Loaded
 
 	//Width of the line (dataVersion>=31)
 	if (dataVersion >= 31)
-		ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_width,1);
+		ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_width, 1);
 	else
 		m_width = 0;
 
 	return true;
+}
+
+short ccPolyline::minimumFileVersion_MeOnly() const
+{
+	short minVersion = (isShifted() ? 39 : 31);
+	return std::max(minVersion, ccHObject::minimumFileVersion_MeOnly());
 }
 
 bool ccPolyline::split(	PointCoordinateType maxEdgeLength,

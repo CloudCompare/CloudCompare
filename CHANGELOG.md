@@ -154,6 +154,9 @@ v2.13.alpha (???) - (??/??/????)
 	- EDL shader:
 		- contrast and rendering quality improved
 
+	- PCV plugin:
+		- the number of rays and the context resolution can now be set to up to 65536
+
 	- ICP:
 		- the computed registration transformation will now be applied to the aligned entity and all its children (if any)
 

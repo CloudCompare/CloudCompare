@@ -10253,7 +10253,7 @@ void MainWindow::doActionSaveFile()
 		}
 
 		//we remove the extension
-		defaultFileName = QFileInfo(defaultFileName).baseName();
+		defaultFileName = QFileInfo(defaultFileName).completeBaseName();
 
 		if (!IsValidFileName(defaultFileName))
 		{

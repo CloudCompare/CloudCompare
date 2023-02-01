@@ -195,6 +195,7 @@ v2.13.alpha (???) - (??/??/????)
 		taking the 3D view dimensions into account (resulting in a bad match between the 3D scene and the overlaid image)
 	- The PCL plugin's 'MLS' tool dialog was broken
 	- The CSF plugin command line could truncate the exported clouds filename if floating point values were present in this filename
+	- The 'File > Save File' option could also truncate the cloud name when suggesting a default output filename
 	- The colors of the 'Compute Stat. Params' histogram could be wrong if the associated color scale was 'absolute'
 	- M3C2 plugin:
 		- the display was not always updated when M3C2 computation was done

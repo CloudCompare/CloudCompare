@@ -27,7 +27,7 @@ jobs:
             os: macos-latest,
             generator: "Ninja",
             conda_library_dir: ".",
-            compile_qanimation_with_ffmpeg: "OFF",
+            compile_qanimation_with_ffmpeg: "ON",
             compile_qpcl: "OFF",
             compile_qransac: "ON",
           }

@@ -74,6 +74,9 @@ public:
 
 protected:
 
+	//! rotComboBox enum
+	enum rotComboBoxItems { XYZ, X, Y, Z, NONE };
+
 	//! Applies transformation to selected entities
 	void apply();
 
@@ -99,6 +102,12 @@ protected:
 
 	//! Updates the axis center of rotation to the ref object in adv rotate/translate mode
 	void advRefAxisRadioToggled(bool state);
+	
+	//! Enable/disable incremental translation field in accordance to the state of tx/ty/tz checkboxes
+	void incrementalTranslationToggle();
+
+	//! Enable/disable incremental rotation field in accordance to the state of the rotComboBox
+	void incrementalRotationToggle(const rotComboBoxItems & selectedRotationItem);
 
 	//! Updates the axis center of rotation to the object center in adv rotate/translate mode
 	void advObjectAxisRadioToggled(bool state);
@@ -112,13 +121,11 @@ protected:
 	//! Applies rotation (graphically) to selected entities
 	void glRotate(const ccGLMatrixd&);
 
+	//! Applies rotation and translation factors set on incremental Spin boxes to selected entities
+	void incrementalTransform();
+
 	//! To capture overridden shortcuts (pause button, etc.)
 	void onShortcutTriggered(int);
-
-protected:
-
-	//! rotComboBox enum
-	enum rotComboBoxItems { XYZ, X, Y, Z, NONE };
 
 	//! Clear all variables and 'unlink' dialog
 	void clear();
@@ -132,7 +139,7 @@ protected:
 	//! Sets the translation transform used in advanced translate/rotate mode
 	bool setAdvTranslationTransform(ccHObject* translateRef);
 
-	//! Sets the rotation transform used in advaced translate/rotate mode
+	//! Sets the rotation transform used in advanced translate/rotate mode
 	bool setAdvRotationAxis(ccHObject* rotateRef, rotComboBoxItems selectedAxis);
 
 	//! Check if the entitry is in m_toTransform

@@ -55,6 +55,9 @@ v2.13.alpha (???) - (??/??/????)
 
 	- Edit > Normals > Shift points along normals
 		- to shift the points of a given quantity along their associated normal
+	
+	- Edit > Translate/Rotate: 
+		- In advanced section, added an option to rotate / translate entities of a small increment, with button or using left/right arrows (Thanks to [Lighpoint Scientific](https://lightpointdata.com)!)
 
 - Improvements:
 

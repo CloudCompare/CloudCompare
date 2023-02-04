@@ -36,17 +36,34 @@ ccGraphicalTransformationTool::ccGraphicalTransformationTool(QWidget* parent)
 	, m_toTransform("transformed")
 {
 	setupUi(this);
-
+	
+	rotComboBox->clear();
+	rotComboBox->insertItem(0, "XYZ", rotComboBoxItems::XYZ);
+	rotComboBox->insertItem(1, "X", rotComboBoxItems::X);
+	rotComboBox->insertItem(2, "Y", rotComboBoxItems::Y);
+	rotComboBox->insertItem(3, "Z", rotComboBoxItems::Z);
+	rotComboBox->insertItem(4, "None", rotComboBoxItems::NONE);
+	rotComboBox->setCurrentIndex(rotComboBoxItems::XYZ);
+	
 	connect(pauseButton,    &QAbstractButton::toggled, this, &ccGraphicalTransformationTool::pause);
 	connect(okButton,       &QAbstractButton::clicked, this, &ccGraphicalTransformationTool::apply);
 	connect(razButton,	    &QAbstractButton::clicked, this, &ccGraphicalTransformationTool::reset);
 	connect(cancelButton,   &QAbstractButton::clicked, this, &ccGraphicalTransformationTool::cancel);
+	connect(cancelButton,   &QAbstractButton::clicked, this, &ccGraphicalTransformationTool::cancel);
+	connect(cancelButton,   &QAbstractButton::clicked, this, &ccGraphicalTransformationTool::cancel);
+
+	connect(TxCheckBox,     &QCheckBox::clicked, this, &ccGraphicalTransformationTool::incrementalTranslationToggle);
+	connect(TyCheckBox,     &QCheckBox::clicked, this, &ccGraphicalTransformationTool::incrementalTranslationToggle);
+	connect(TzCheckBox,     &QCheckBox::clicked, this, &ccGraphicalTransformationTool::incrementalTranslationToggle);
+
 	connect(advPushButton,  &QPushButton::toggled,     this, &ccGraphicalTransformationTool::advModeToggle);
 	connect(refAxisRadio,   &QRadioButton::toggled,    this, &ccGraphicalTransformationTool::advRefAxisRadioToggled);
 	connect(objCenterRadio, &QRadioButton::toggled,    this, &ccGraphicalTransformationTool::advObjectAxisRadioToggled);
 	connect(advTranslateComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &ccGraphicalTransformationTool::advTranslateRefUpdate);
 	connect(advRotateComboBox,    qOverload<int>(&QComboBox::currentIndexChanged), this, &ccGraphicalTransformationTool::advRotateRefUpdate);
 	connect(rotComboBox,          qOverload<int>(&QComboBox::activated),           this, &ccGraphicalTransformationTool::advRotateComboBoxUpdate);
+	connect(incrementalForwardButton, &QAbstractButton::clicked, this, &ccGraphicalTransformationTool::incrementalTransform);
+	connect(incrementalBackwardButton, &QAbstractButton::clicked, this, &ccGraphicalTransformationTool::incrementalTransform);
 
 	//add shortcuts
 	addOverriddenShortcut(Qt::Key_Space); //space bar for the "pause" button
@@ -78,7 +95,7 @@ void ccGraphicalTransformationTool::onShortcutTriggered(int key)
 	case Qt::Key_Escape:
 		cancelButton->click();
 		return;
-
+	
 	default:
 		//nothing to do
 		break;
@@ -121,6 +138,14 @@ void ccGraphicalTransformationTool::advModeToggle(bool state)
 	rotAxisLabel->setVisible(state);
 	objCenterRadio->setVisible(state);
 	refAxisRadio->setVisible(state);
+	incrementalRotLabel->setVisible(state);
+	incrementalRotSpin->setVisible(state);
+	incrementalTransLabel->setVisible(state);
+	incrementalTransSpin->setVisible(state);
+	incrementalForwardButton->setVisible(state);
+	incrementalBackwardButton->setVisible(state);
+	IncrementalTransformLabel->setVisible(state);
+
 	m_advMode = state;
 	int wPrev = this->width();
 	if (state)
@@ -364,6 +389,8 @@ bool ccGraphicalTransformationTool::setAdvRotationAxis(ccHObject* rotateRef, rot
 		rotComboBox->clear();
 		rotComboBox->insertItem(0, "Z", rotComboBoxItems::Z);
 		rotComboBox->insertItem(1, "None", rotComboBoxItems::NONE);
+		rotComboBox->setCurrentIndex(rotComboBoxItems::Z);
+		incrementalRotationToggle(rotComboBoxItems::Z);
 		m_advRotationRefObjCenter = (start + end) / 2;
 		arbitraryVec.normalize();
 	}
@@ -374,6 +401,8 @@ bool ccGraphicalTransformationTool::setAdvRotationAxis(ccHObject* rotateRef, rot
 		rotComboBox->clear();
 		rotComboBox->insertItem(0, "Z", rotComboBoxItems::Z);
 		rotComboBox->insertItem(1, "None", rotComboBoxItems::NONE);
+		rotComboBox->setCurrentIndex(rotComboBoxItems::Z);
+		incrementalRotationToggle(rotComboBoxItems::Z);
 		m_advRotationRefObjCenter = plane->getCenter();
 	}
 	else if (rotateRef->isA(CC_TYPES::COORDINATESYSTEM))
@@ -403,7 +432,9 @@ bool ccGraphicalTransformationTool::setAdvRotationAxis(ccHObject* rotateRef, rot
 		rotComboBox->insertItem(0, "X", rotComboBoxItems::X);
 		rotComboBox->insertItem(1, "Y", rotComboBoxItems::Y);
 		rotComboBox->insertItem(2, "Z", rotComboBoxItems::Z);
-		rotComboBox->insertItem(3, "None", rotComboBoxItems::NONE);		
+		rotComboBox->insertItem(3, "None", rotComboBoxItems::NONE);	
+		rotComboBox->setCurrentIndex(rotComboBoxItems::Z);
+		incrementalRotationToggle(rotComboBoxItems::Z);
 		m_advRotationRefObjCenter = cs->getOrigin();
 	}
 	else //Not a supported primitive for rotateRef
@@ -508,11 +539,13 @@ void ccGraphicalTransformationTool::advTranslateRefUpdate(int index)
 
 void ccGraphicalTransformationTool::advRotateComboBoxUpdate(int index)
 {
+	rotComboBoxItems selectedAxis = (rotComboBoxItems)rotComboBox->itemData(index).toInt();
+	incrementalRotationToggle(selectedAxis);
 	if (!m_advMode || !m_advRotateRef)
 	{
 		return;
 	}
-	rotComboBoxItems selectedAxis = (rotComboBoxItems)rotComboBox->itemData(index).toInt();
+
 	if (selectedAxis == rotComboBoxItems::NONE)
 	{
 		return;
@@ -538,6 +571,7 @@ void ccGraphicalTransformationTool::advRotateRefUpdate(int index)
 			rotComboBox->insertItem(3, "Z", rotComboBoxItems::Z);
 			rotComboBox->insertItem(4, "None", rotComboBoxItems::NONE);
 			rotComboBox->setCurrentIndex(rotComboBoxItems::Z);
+			incrementalRotationToggle(rotComboBoxItems::Z);
 		}
 		CCVector3d center = m_toTransform.getBB_recursive().getCenter();
 		setRotationCenter(center);
@@ -601,6 +635,22 @@ void ccGraphicalTransformationTool::advRefAxisRadioToggled(bool state)
 	{
 		objCenterRadio->setChecked(false);
 		advRotateRefUpdate(advRotateComboBox->currentIndex()); //force an update
+	}
+}
+
+void ccGraphicalTransformationTool::incrementalTranslationToggle() {
+	const bool isIncrementalActive = TxCheckBox->isChecked() || TxCheckBox->isChecked() || TzCheckBox->isChecked();
+	incrementalTransLabel->setEnabled(isIncrementalActive);
+	incrementalTransSpin->setEnabled(isIncrementalActive);
+}
+
+void ccGraphicalTransformationTool::incrementalRotationToggle(const rotComboBoxItems & selectedRotationItem) {
+	if(selectedRotationItem == rotComboBoxItems::NONE || selectedRotationItem == rotComboBoxItems::XYZ) {
+		incrementalRotLabel->setDisabled(true);
+		incrementalRotSpin->setDisabled(true);
+	} else {
+		incrementalRotLabel->setEnabled(true);
+		incrementalRotSpin->setEnabled(true);
 	}
 }
 
@@ -823,18 +873,20 @@ void ccGraphicalTransformationTool::glRotate(const ccGLMatrixd& rotMat)
 		double angle = 0;
 		switch (rotAxis)
 		{
-		case ccGraphicalTransformationTool::X:
+		case rotComboBoxItems::X:
 			angle = std::asin(rotMat.xRotation()(1, 2));
 			break;
-		case ccGraphicalTransformationTool::Y:
+		case rotComboBoxItems::Y:
 			angle = std::asin(rotMat.yRotation()(2, 0));
 			break;
-		case ccGraphicalTransformationTool::Z:
+		case rotComboBoxItems::Z:
 			angle = std::asin(rotMat.zRotation()(1, 0));
 			break;
 		default:
 			return;
 		}
+		ccLog::Print(QString("Angles(%1)").arg(angle));
+
 		m_rotation = m_rotation * arbitraryVectorRotation(angle, m_advRotationAxis);
 	}
 	else
@@ -859,6 +911,49 @@ void ccGraphicalTransformationTool::glRotate(const ccGLMatrixd& rotMat)
 	}
 
 	updateAllGLTransformations();
+}
+
+void ccGraphicalTransformationTool::incrementalTransform() {
+	
+	//We check the sender to handle forward or backward transformation
+	QObject* senderButton = sender();
+	const bool isForwardTransform = senderButton == incrementalForwardButton;
+	
+	// The rotation part:
+	// No incremental rotation if rotComboBoxItems == XYZ or rotComboBoxItems == NONE because it has no sense
+	// it could be handled in the subsequent switch cases but it is somehiow more explicit to check
+	// if the SpinBox is enabled
+	if(incrementalRotSpin->isEnabled()) {
+		const double alpha = isForwardTransform ? CCCoreLib::DegreesToRadians(incrementalRotSpin->value()) : -CCCoreLib::DegreesToRadians(incrementalRotSpin->value());
+		if (m_advMode && m_advRotateRef != nullptr)
+		{
+			m_rotation = m_rotation * arbitraryVectorRotation(alpha, m_advRotationAxis);
+		} else {
+			ccGLMatrixd rotMat;
+			// compute rotation matrix from spinbox
+			switch ((rotComboBoxItems)rotComboBox->itemData(rotComboBox->currentIndex()).toInt())
+			{
+			case rotComboBoxItems::X:
+				rotMat.initFromParameters(alpha, CCVector3f(1.f,0.f,0.f), CCVector3f(0.f,0.f,0.f));
+				break;
+			case rotComboBoxItems::Y:
+				rotMat.initFromParameters(alpha, CCVector3f(0.f,1.f,0.f), CCVector3f(0.f,0.f,0.f));
+				break;
+			case rotComboBoxItems::Z:
+				rotMat.initFromParameters(alpha, CCVector3f(0.f,0.f,1.f), CCVector3f(0.f,0.f,0.f));
+				break;
+			default:
+				return;
+			}
+			m_rotation = rotMat * m_rotation;
+		}
+		updateAllGLTransformations();
+	}
+
+	// The translation part:
+	// we pass a vector with equal magnitude in the three components; gltranslate will handle the correct transform for us.
+	const double transMagnitude = isForwardTransform ? incrementalTransSpin->value() : -incrementalTransSpin->value() ;
+	glTranslate(CCVector3d(transMagnitude,transMagnitude,transMagnitude));
 }
 
 void ccGraphicalTransformationTool::reset()

@@ -225,28 +225,6 @@ CC_FILE_ERROR BinFilter::SaveFileV2(QFile& out, ccHObject* object)
 	//- 'original' version (file starts by the number of clouds - no header)
 	//- 'new' evolutive version, starts by 4 bytes ("CCB2") + save the current ccObject version
 
-	//header
-	//Since ver 2.5.2, the 4th character of the header corresponds to
-	//'deserialization flags' (see ccSerializableObject::DeserializationFlags)
-	char firstBytes[5] = "CCB2";
-	{
-		char flags = 0;
-		if (sizeof(PointCoordinateType) == 8)
-			flags |= static_cast<char>(ccSerializableObject::DF_POINT_COORDS_64_BITS);
-		if (sizeof(ScalarType) == 4)
-			flags |= static_cast<char>(ccSerializableObject::DF_SCALAR_VAL_32_BITS);
-		assert(flags <= 8);
-		firstBytes[3] = 48 + flags; //48 = ASCII("0")
-	}
-
-	if (out.write(firstBytes, 4) < 0)
-		return CC_FERR_WRITING;
-
-	// Current BIN file version
-	uint32_t binVersion_u32 = static_cast<uint32_t>(ccObject::GetCurrentDBVersion());
-	if (out.write((char*)&binVersion_u32, 4) < 0)
-		return CC_FERR_WRITING;
-
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 
 	//we check if all linked entities are in the sub tree we are going to save
@@ -338,18 +316,43 @@ CC_FILE_ERROR BinFilter::SaveFileV2(QFile& out, ccHObject* object)
 			toCheck.push_back(currentObject->getChild(i));
 	}
 
-	if (result == CC_FERR_NO_ERROR)
+	if (result != CC_FERR_NO_ERROR)
 	{
-		short dataVersion = object->minimumFileVersion();
-		ccLog::Print(QString("[BIN] Output file version: %1.%2 (automatically deduced from selected entities)").arg(dataVersion / 10).arg(dataVersion % 10));
-
-		if (!object->toFile(out, dataVersion))
-		{
-			result = CC_FERR_CONSOLE_ERROR;
-		}
-
-		s_lastSavedFileBinVersion = dataVersion;
+		return result;
 	}
+
+	//header
+	//Since ver 2.5.2, the 4th character of the header corresponds to
+	//'deserialization flags' (see ccSerializableObject::DeserializationFlags)
+	char firstBytes[5] = "CCB2";
+	{
+		char flags = 0;
+		if (sizeof(PointCoordinateType) == 8)
+			flags |= static_cast<char>(ccSerializableObject::DF_POINT_COORDS_64_BITS);
+		if (sizeof(ScalarType) == 4)
+			flags |= static_cast<char>(ccSerializableObject::DF_SCALAR_VAL_32_BITS);
+		assert(flags <= 8);
+		firstBytes[3] = 48 + flags; //48 = ASCII("0")
+	}
+
+	if (out.write(firstBytes, 4) < 0)
+		return CC_FERR_WRITING;
+
+	// Current BIN file version
+	short dataVersion = object->minimumFileVersion();
+	{
+		ccLog::Print(QString("[BIN] Output file version: %1.%2 (automatically deduced from selected entities)").arg(dataVersion / 10).arg(dataVersion % 10));
+		uint32_t binVersion_u32 = dataVersion;
+		if (out.write((char*)&binVersion_u32, 4) < 0)
+			return CC_FERR_WRITING;
+	}
+
+	if (!object->toFile(out, dataVersion))
+	{
+		result = CC_FERR_CONSOLE_ERROR;
+	}
+
+	s_lastSavedFileBinVersion = dataVersion;
 
 	out.close();
 

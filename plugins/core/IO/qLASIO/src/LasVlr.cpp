@@ -29,7 +29,8 @@
 
 LasVlr::LasVlr(const laszip_header& header)
 {
-	const auto vlrShouldBeCopied = [](const laszip_vlr_struct& vlr) {
+	const auto vlrShouldBeCopied = [](const laszip_vlr_struct& vlr)
+	{
 		return !LasDetails::IsLaszipVlr(vlr) && !LasDetails::IsExtraBytesVlr(vlr);
 	};
 

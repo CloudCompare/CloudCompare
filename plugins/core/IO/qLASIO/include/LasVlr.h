@@ -49,7 +49,7 @@ struct LasVlr
 
 	friend QDataStream& operator<<(QDataStream& arch, const LasVlr& object)
 	{
-		arch << object.vlrs.size();
+		arch << static_cast<quint64>(object.vlrs.size());
 		for (const laszip_vlr_struct& v : object.vlrs)
 		{
 			//arch << v;
@@ -61,7 +61,7 @@ struct LasVlr
 			arch.writeRawData((const char*)v.data, v.record_length_after_header);
 		}
 
-		arch << object.extraScalarFields.size();
+		arch << static_cast<quint64>(object.extraScalarFields.size());
 		for (const LasExtraScalarField& e : object.extraScalarFields)
 		{
 			//arch << e;
@@ -72,10 +72,10 @@ struct LasVlr
 
 	friend QDataStream& operator>>(QDataStream& arch, LasVlr& object)
 	{
-		size_t vlrSize = 0;
+		quint64 vlrSize = 0;
 		arch >> vlrSize;
 		object.vlrs.reserve(vlrSize);
-		for (size_t i = 0; i < vlrSize; ++i)
+		for (quint64 i = 0; i < vlrSize; ++i)
 		{
 			laszip_vlr_struct v;
 			//arch >> v;
@@ -92,10 +92,10 @@ struct LasVlr
 			object.vlrs.push_back(v);
 		}
 
-		size_t extraScalarFieldCount = 0;
+		quint64 extraScalarFieldCount = 0;
 		arch >> extraScalarFieldCount;
 		object.extraScalarFields.reserve(extraScalarFieldCount);
-		for (size_t i = 0; i < extraScalarFieldCount; ++i)
+		for (quint64 i = 0; i < extraScalarFieldCount; ++i)
 		{
 			LasExtraScalarField e;
 			//arch >> e;

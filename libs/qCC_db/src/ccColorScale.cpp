@@ -249,6 +249,7 @@ bool ccColorScale::toFile(QFile& out, short dataVersion) const
 	}
 
 	//custom labels (dataVersion>=40)
+	if (dataVersion >= 40)
 	{
 		//custom label count
 		uint32_t labelCount = static_cast<uint32_t>(m_customLabels.size());

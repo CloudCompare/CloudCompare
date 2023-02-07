@@ -24,14 +24,14 @@ LasPlugin::LasPlugin(QObject* parent)
     : QObject(parent)
     , ccIOPluginInterface(":/CC/plugin/LAS-IO/info.json")
 {
+	qRegisterMetaType<LasVlr>();
+	qRegisterMetaTypeStreamOperators<LasVlr>("LasVlr");
+
+	QMetaType::registerConverter(&LasVlr::toString);
 }
 
 ccIOPluginInterface::FilterList LasPlugin::getFilters()
 {
-	qRegisterMetaType<LasVlr>();
-
-	QMetaType::registerConverter(&LasVlr::toString);
-
 	return {
 	    FileIOFilter::Shared(new LasIOFilter),
 	};

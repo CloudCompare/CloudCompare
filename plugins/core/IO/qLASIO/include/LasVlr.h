@@ -23,6 +23,7 @@
 // LASzip
 #include <laszip/laszip_api.h>
 // Qt
+#include <QDataStream>
 #include <QMetaType>
 #include <QString>
 
@@ -44,6 +45,69 @@ struct LasVlr
 	inline laszip_U32 numVlrs() const
 	{
 		return static_cast<laszip_U32>(vlrs.size());
+	}
+
+	friend QDataStream& operator<<(QDataStream& arch, const LasVlr& object)
+	{
+		arch << object.vlrs.size();
+		for (const laszip_vlr_struct& v : object.vlrs)
+		{
+			//arch << v;
+			arch << v.reserved;
+			arch.writeRawData(v.user_id, 16 * sizeof(laszip_CHAR));
+			arch << v.record_id;
+			arch << v.record_length_after_header;
+			arch.writeRawData(v.description, 32 * sizeof(laszip_CHAR));
+			arch.writeRawData((const char*)v.data, v.record_length_after_header);
+		}
+
+		arch << object.extraScalarFields.size();
+		for (const LasExtraScalarField& e : object.extraScalarFields)
+		{
+			//arch << e;
+			arch.writeRawData((const char*)&e, sizeof(LasExtraScalarField));
+		}
+		return arch;
+	}
+
+	friend QDataStream& operator>>(QDataStream& arch, LasVlr& object)
+	{
+		size_t vlrSize = 0;
+		arch >> vlrSize;
+		object.vlrs.reserve(vlrSize);
+		for (size_t i = 0; i < vlrSize; ++i)
+		{
+			laszip_vlr_struct v;
+			//arch >> v;
+			arch >> v.reserved;
+			arch.readRawData((char*)v.user_id, 16 * sizeof(laszip_CHAR));
+			arch >> v.record_id;
+			arch >> v.record_length_after_header;
+			arch.readRawData((char*)v.description, 32 * sizeof(laszip_CHAR));
+			{
+				v.data = new laszip_U8[v.record_length_after_header]; // TODO: potential memory leak
+				arch.readRawData((char*)v.data, v.record_length_after_header);
+			}
+			//arch >> QByteArray((const char*)v.data, v.record_length_after_header);
+			object.vlrs.push_back(v);
+		}
+
+		size_t extraScalarFieldCount = 0;
+		arch >> extraScalarFieldCount;
+		object.extraScalarFields.reserve(extraScalarFieldCount);
+		for (size_t i = 0; i < extraScalarFieldCount; ++i)
+		{
+			LasExtraScalarField e;
+			//arch >> e;
+			{
+				char* data = (char*)&e;
+				uint  len  = sizeof(LasExtraScalarField);
+				arch.readRawData(data, len);
+			}
+			object.extraScalarFields.push_back(e);
+		}
+
+		return arch;
 	}
 
 	std::vector<laszip_vlr_struct>   vlrs;

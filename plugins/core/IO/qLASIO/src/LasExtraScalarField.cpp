@@ -357,7 +357,8 @@ unsigned LasExtraScalarField::TotalExtraBytesSize(const std::vector<LasExtraScal
 	return std::accumulate(extraScalarFields.begin(),
 	                       extraScalarFields.end(),
 	                       0,
-	                       [](unsigned sum, const LasExtraScalarField& field) { return sum + field.byteSize(); });
+	                       [](unsigned sum, const LasExtraScalarField& field)
+	                       { return sum + field.byteSize(); });
 }
 
 void LasExtraScalarField::resetScalarFieldsPointers()
@@ -410,10 +411,10 @@ void LasExtraScalarField::MatchExtraBytesToScalarFields(vector<LasExtraScalarFie
 		else
 		{
 			const char* nameToSearch;
-			if (!extraScalarField.ccName.empty())
+			if (extraScalarField.ccName[0] != 0)
 			{
 				// This field's name clashed with existing ccScalarField when created
-				nameToSearch = extraScalarField.ccName.c_str();
+				nameToSearch = extraScalarField.ccName;
 			}
 			else
 			{
@@ -433,8 +434,10 @@ void LasExtraScalarField::MatchExtraBytesToScalarFields(vector<LasExtraScalarFie
 	}
 	// Remove any Extra Scalar Field for which we could not get _all_ the corresponding
 	// ccScalarField
-	const auto notAllScalarFieldWereFound = [](const LasExtraScalarField& extraScalarField) {
-		const auto ptrIsNull = [](const ccScalarField* ptr) { return ptr == nullptr; };
+	const auto notAllScalarFieldWereFound = [](const LasExtraScalarField& extraScalarField)
+	{
+		const auto ptrIsNull = [](const ccScalarField* ptr)
+		{ return ptr == nullptr; };
 		return std::any_of(extraScalarField.scalarFields,
 		                   extraScalarField.scalarFields + extraScalarField.numElements(),
 		                   ptrIsNull);

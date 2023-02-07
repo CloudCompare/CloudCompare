@@ -33,7 +33,8 @@ LasExtraScalarFieldCard::LasExtraScalarFieldCard(QWidget* parent)
 	connect(firstScalarFieldComboBox,
 	        &QComboBox::currentTextChanged,
 	        this,
-	        [this](const QString& text) {
+	        [this](const QString& text)
+	        {
 		        if (radioButton1->isChecked())
 		        {
 			        nameEdit->setText(text);
@@ -76,7 +77,7 @@ void LasExtraScalarFieldCard::reset()
 
 void LasExtraScalarFieldCard::fillFrom(const LasExtraScalarField& field)
 {
-	assert(field.ccName.empty()); // TODO
+	assert(field.ccName[0] == 0); // TODO
 
 	nameEdit->setText(field.name);
 	switch (field.numElements())

@@ -1285,6 +1285,9 @@ ccPointCloud* ccRasterGrid::convertToCloud(	bool exportHeightStats,
 				exportedStatisticsNeedSorting = true;
 				l = exportedStatistics.size(); // early stop
 				break;
+			default:
+				// do nothing
+				break;
 			}
 		}
 		

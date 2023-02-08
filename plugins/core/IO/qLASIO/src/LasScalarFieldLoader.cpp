@@ -286,7 +286,7 @@ bool LasScalarFieldLoader::createScalarFieldsForExtraBytes(ccPointCloud& pointCl
 				char name[LasExtraScalarField::MAX_NAME_SIZE + 8];
 				snprintf(name, LasExtraScalarField::MAX_NAME_SIZE + 8, "%s (Extra)", extraField.name);
 				extraField.scalarFields[0] = new ccScalarField(name);
-				memcpy_s(extraField.ccName, LasExtraScalarField::MAX_NAME_SIZE + 8, name, LasExtraScalarField::MAX_NAME_SIZE + 8);
+				memcpy(extraField.ccName, name, LasExtraScalarField::MAX_NAME_SIZE + 8);
 			}
 			else
 			{

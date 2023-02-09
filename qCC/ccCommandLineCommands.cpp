@@ -1049,8 +1049,8 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 				result->setName(desc.pc->getName() + QObject::tr(".subsampled"));
 				if (cmd.autoSaveMode())
 				{
-					CLCloudDesc desc(result, desc.basename, desc.path, desc.indexInFile);
-					QString errorStr = cmd.exportEntity(desc, "RANDOM_SUBSAMPLED");
+					CLCloudDesc newDesc(result, desc.basename, desc.path, desc.indexInFile);
+					QString errorStr = cmd.exportEntity(newDesc, "RANDOM_SUBSAMPLED");
 					if (!errorStr.isEmpty())
 					{
 						delete result;
@@ -1106,8 +1106,8 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 				result->setName(desc.pc->getName() + QObject::tr(".subsampled"));
 				if (cmd.autoSaveMode())
 				{
-					CLCloudDesc desc(result, desc.basename, desc.path, desc.indexInFile);
-					QString errorStr = cmd.exportEntity(desc, "SPATIAL_SUBSAMPLED");
+					CLCloudDesc newDesc(result, desc.basename, desc.path, desc.indexInFile);
+					QString errorStr = cmd.exportEntity(newDesc, "SPATIAL_SUBSAMPLED");
 					if (!errorStr.isEmpty())
 					{
 						delete result;
@@ -1173,8 +1173,8 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 				result->setName(desc.pc->getName() + QObject::tr(".subsampled"));
 				if (cmd.autoSaveMode())
 				{
-					CLCloudDesc desc(result, desc.basename, desc.path, desc.indexInFile);
-					QString errorStr = cmd.exportEntity(desc, QObject::tr("OCTREE_LEVEL_%1_SUBSAMPLED").arg(octreeLevel));
+					CLCloudDesc newDesc(result, desc.basename, desc.path, desc.indexInFile);
+					QString errorStr = cmd.exportEntity(newDesc, QObject::tr("OCTREE_LEVEL_%1_SUBSAMPLED").arg(octreeLevel));
 					if (!errorStr.isEmpty())
 					{
 						delete result;
@@ -1314,17 +1314,17 @@ bool CommandExtractCCs::process(ccCommandLineInterface& cmd)
 						compCloud->copyGlobalShiftAndScale(*desc.pc);
 						compCloud->setName(QString(desc.pc->getName() + "_CC#%1").arg(j + 1));
 						
-						CLCloudDesc desc(compCloud, desc.basename + QObject::tr("_COMPONENT_%1").arg(++realIndex), desc.path);
+						CLCloudDesc newDesc(compCloud, desc.basename + QObject::tr("_COMPONENT_%1").arg(++realIndex), desc.path);
 						if (cmd.autoSaveMode())
 						{
-							QString errorStr = cmd.exportEntity(desc, QString(), nullptr, ccCommandLineInterface::ExportOption::ForceNoTimestamp);
+							QString errorStr = cmd.exportEntity(newDesc, QString(), nullptr, ccCommandLineInterface::ExportOption::ForceNoTimestamp);
 							if (!errorStr.isEmpty())
 							{
 								cmd.error(errorStr);
 							}
 						}
-						//add desc.pc to the current pool
-						cmd.clouds().push_back(desc);
+						//add newDesc to the current pool
+						cmd.clouds().push_back(newDesc);
 					}
 					else
 					{
@@ -3110,8 +3110,8 @@ bool CommandSORFilter::process(ccCommandLineInterface& cmd)
 				cleanCloud->setName(desc.pc->getName() + QObject::tr(".clean"));
 				if (cmd.autoSaveMode())
 				{
-					CLCloudDesc desc(cleanCloud, desc.basename, desc.path, desc.indexInFile);
-					QString errorStr = cmd.exportEntity(desc, "SOR");
+					CLCloudDesc newDesc(cleanCloud, desc.basename, desc.path, desc.indexInFile);
+					QString errorStr = cmd.exportEntity(newDesc, "SOR");
 					if (!errorStr.isEmpty())
 					{
 						delete cleanCloud;
@@ -3261,8 +3261,8 @@ bool CommandNoiseFilter::process(ccCommandLineInterface& cmd)
 				cleanCloud->setName(desc.pc->getName() + QObject::tr(".clean"));
 				if (cmd.autoSaveMode())
 				{
-					CLCloudDesc desc(cleanCloud, desc.basename, desc.path, desc.indexInFile);
-					QString errorStr = cmd.exportEntity(desc, "DENOISED");
+					CLCloudDesc newDesc(cleanCloud, desc.basename, desc.path, desc.indexInFile);
+					QString errorStr = cmd.exportEntity(newDesc, "DENOISED");
 					if (!errorStr.isEmpty())
 					{
 						delete cleanCloud;

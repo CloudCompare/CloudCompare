@@ -61,6 +61,7 @@ qFacets plugin:
 [*] Add the facet perimeter to the set of exported values
 
 Various:
+[*] Save or load preset format for the new LAS I/O plugin (https://www.cloudcompare.org/forum/viewtopic.php?t=6167)
 [*] Enable or Disable other clouds while using the scissors tool (for visual reference) (https://www.cloudcompare.org/forum/viewtopic.php?t=6143)
 [*] Being able to select only the visible or the enabled clouds with the  'Select children by type and/or name' feature (https://www.cloudcompare.org/forum/viewtopic.php?p=27159)
 [*] Save multiple clouds in a LAS file (or other file types that normally only store one cloud - https://www.cloudcompare.org/forum/viewtopic.php?p=27131)

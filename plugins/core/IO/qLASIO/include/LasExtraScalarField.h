@@ -136,5 +136,5 @@ class LasExtraScalarField
 	// Extra fields name may clash with existing scalar fields name
 	// (eg: the user calls one of his extra field "Intensity")
 	// we have to alter the real name
-	std::string ccName{};
+	char ccName[MAX_NAME_SIZE + 8] = {0};
 };

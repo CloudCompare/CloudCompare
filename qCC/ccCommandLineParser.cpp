@@ -67,8 +67,53 @@ int ccCommandLineParser::Parse(const QStringList& arguments, ccPluginInterfaceLi
 	QScopedPointer<ccCommandLineParser> parser(new ccCommandLineParser);
 	
 	parser->registerBuiltInCommands();
-	parser->arguments() = arguments;
-	parser->arguments().pop_front(); //the first argument is always program executable file!
+
+	// 'massage' the arguments to properly handle single quotes
+	{
+		bool insideSingleQuoteSection = false;
+		QString buffer;
+		static const QChar SingleQuote{ '\'' };
+		for (int currentArgIndex = 1; currentArgIndex < arguments.size(); ++currentArgIndex) 	// start from 1, as the first argument is always the executable file
+		{
+			QString arg = arguments[currentArgIndex];
+			// argument starts with a single quote
+			if (!insideSingleQuoteSection && arg.startsWith(SingleQuote))
+			{
+				if (arg.endsWith(SingleQuote))
+				{
+					// nothing to do, non*truncated argument
+				}
+				else
+				{
+					// we'll collect the next pieces to get the full argument
+					insideSingleQuoteSection = true;
+					buffer = arg.mid(1); // remove the single quote
+				}
+			}
+			else if (insideSingleQuoteSection)
+			{
+				buffer += QChar(' ') + arg; // append the current argument to the previous one(s)
+				if (arg.endsWith(SingleQuote))
+				{
+					insideSingleQuoteSection = false;
+					arg = buffer.left(buffer.length() - 1); // remove the single quote
+				}
+			}
+
+			if (!insideSingleQuoteSection)
+			{
+				parser->arguments().append(arg);
+			}
+		}
+
+		if (insideSingleQuoteSection)
+		{
+			// the single quote section was not closed...
+			parser->warning("Probably malformed command (missing closing simple quote)");
+			// ...still, we'll try to proceed
+			parser->arguments().append(buffer);
+		}
+	}
 
 	//specific command: silent mode (will prevent the console dialog from appearing!
 	if (ccCommandLineInterface::IsCommand(parser->arguments().front(), COMMAND_SILENT_MODE))
@@ -642,6 +687,7 @@ bool ccCommandLineParser::saveMeshes(QString suffix/*=QString()*/, bool allAtOnc
 
 void ccCommandLineParser::registerBuiltInCommands()
 {
+	registerCommand(Command::Shared(new CommandDebugCmdLine));
 	registerCommand(Command::Shared(new CommandLoad));
 	registerCommand(Command::Shared(new CommandSubsample));
 	registerCommand(Command::Shared(new CommandExtractCCs));

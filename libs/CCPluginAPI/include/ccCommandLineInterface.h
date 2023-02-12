@@ -313,7 +313,7 @@ public: //access to data
 
 public: //Global shift management
 
-	//! Returns whether the nex command is the '-GLOBAL_SHIFT' option
+	//! Returns whether the next command is the '-GLOBAL_SHIFT' option
 	bool nextCommandIsGlobalShift() const;
 
 	//! Check the current command line argument stack against the 'COMMAND_OPEN_SHIFT_ON_LOAD' keyword and process the following commands if necessary

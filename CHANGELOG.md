@@ -23,6 +23,9 @@ v2.13.alpha (???) - (??/??/????)
         - RDP {opt: min distance between points}
         	- removes duplicate points of all loaded clouds
 			- the min distance between points to consider them as duplicated can be set (1e-8 by default)
+		- DEBUG
+			- display various information to help one debug and tweak the command line
+			- can be placed at difference positions
 
 	- New display feature: near and far clipping planes in 3D views
 		- extension of the previously existing feature to set a near clipping plane

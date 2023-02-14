@@ -80,7 +80,7 @@ protected:
 			{
 				QPointF Pstart = P;
 				if (m_textOnTheLeft)
-					Pstart.setX(P.x() - painter->fontMetrics().width(m_text[i]));
+					Pstart.setX(P.x() - painter->fontMetrics().horizontalAdvance(m_text[i]));
 				painter->drawText(Pstart,m_text[i]);
 				P.setY(P.y() + fontHeight);
 			}

@@ -33,6 +33,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QSpinBox>
+#include <QScreen>
 #include <QTableWidget>
 #include <QTableWidgetItem>
 #include <QTextStream>
@@ -134,8 +135,7 @@ AsciiOpenDlg::AsciiOpenDlg(QWidget* parent)
 
 	m_ui->quaternionFrame->setVisible(false);
 	m_ui->quatCSScaleDoubleSpinBox->setValue(s_csEntitiesScale);
-
-	QSize screenSize = QApplication::desktop()->screenGeometry().size();
+	QSize screenSize = QGuiApplication::screens().at(QApplication::desktop()->screenNumber(this))->size();
 	setMaximumSize(screenSize);
 }
 

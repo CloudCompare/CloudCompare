@@ -3148,7 +3148,7 @@ void ccGLWindow::drawCross()
 
 float ccGLWindow::computeTrihedronLength() const
 {
-	return (CC_DISPLAYED_TRIHEDRON_AXES_LENGTH + CC_TRIHEDRON_TEXT_MARGIN) * m_captureMode.zoomFactor + QFontMetrics(getTextDisplayFont()).width('X');
+	return (CC_DISPLAYED_TRIHEDRON_AXES_LENGTH + CC_TRIHEDRON_TEXT_MARGIN) * m_captureMode.zoomFactor + QFontMetrics(getTextDisplayFont()).horizontalAdvance('X');
 }
 
 void ccGLWindow::computeColorRampAreaLimits(int& yStart, int& yStop) const
@@ -3240,7 +3240,7 @@ void ccGLWindow::drawScale(const ccColor::Rgbub& color)
 	double textEquivalentWidth = RoundScale(scaleMaxW * pixelSize);
 	QString text = QString::number(textEquivalentWidth);
 	glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, color);
-	renderText(	glWidth() - static_cast<int>(scaleW_pix / 2 + dW) - fm.width(text) / 2,
+	renderText(	glWidth() - static_cast<int>(scaleW_pix / 2 + dW) - fm.horizontalAdvance(text) / 2,
 				glHeight() - static_cast<int>(dH / 2) + fm.height() / 3,
 				text,
 				static_cast<uint16_t>(RenderTextReservedIDs::ScaleLabel),

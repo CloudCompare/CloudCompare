@@ -970,7 +970,7 @@ void ccHistogramWindow::wheelEvent(QWheelEvent* e)
 		return;
 	}
 
-	if (e->delta() < 0)
+	if (e->angleDelta().y() < 0)
 	{
 		if (m_histoValues.size() > 4)
 		{
@@ -978,7 +978,7 @@ void ccHistogramWindow::wheelEvent(QWheelEvent* e)
 			refresh();
 		}
 	}
-	else //if (e->delta() > 0)
+	else //if (e->angleDelta().y() > 0)
 	{
 		setNumberOfClasses(m_histoValues.size() + 4);
 		refresh();

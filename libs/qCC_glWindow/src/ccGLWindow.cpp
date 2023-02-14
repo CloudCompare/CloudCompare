@@ -4693,7 +4693,7 @@ void ccGLWindow::wheelEvent(QWheelEvent* event)
 		event->accept();
 
 		//same shortcut as Meshlab: change the point size
-		float sizeModifier = (event->delta() < 0 ? -1.0f : 1.0f);
+		float sizeModifier = (event->angleDelta().y() < 0 ? -1.0f : 1.0f);
 		setPointSize(m_viewportParams.defaultPointSize + sizeModifier);
 
 		doRedraw = true;
@@ -4703,7 +4703,7 @@ void ccGLWindow::wheelEvent(QWheelEvent* event)
 		event->accept();
 
 		//same shortcut as Meshlab: change the zNear or zFar clipping planes
-		double increment = (event->delta() < 0 ? -1.0 : 1.0) * computeDefaultIncrement();
+		double increment = (event->angleDelta().y() < 0 ? -1.0 : 1.0) * computeDefaultIncrement();
 		bool shiftPressed = (keyboardModifiers & Qt::ShiftModifier);
 		if (shiftPressed)
 		{
@@ -4733,7 +4733,7 @@ void ccGLWindow::wheelEvent(QWheelEvent* event)
 		event->accept();
 		
 		//same shortcut as Meshlab: change the fov value
-		float newFOV = (getFov() + (event->delta() < 0 ? -1.0f : 1.0f));
+		float newFOV = (getFov() + (event->angleDelta().y() < 0 ? -1.0f : 1.0f));
 		newFOV = std::min(std::max(1.0f, newFOV), 180.0f);
 		if (newFOV != getFov())
 		{
@@ -4745,8 +4745,8 @@ void ccGLWindow::wheelEvent(QWheelEvent* event)
 	{
 		event->accept();
 
-		//see QWheelEvent documentation ("distance that the wheel is rotated, in eighths of a degree")
-		float wheelDelta_deg = event->delta() / 8.0f;
+		//see QWheelEvent::angleDelta() documentation ("distance that the wheel is rotated, in eighths of a degree")
+		float wheelDelta_deg = event->angleDelta().y() / 8.0f;
 		onWheelEvent(wheelDelta_deg);
 
 		Q_EMIT mouseWheelRotated(wheelDelta_deg);

@@ -2182,7 +2182,7 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 							int index = -1;
 							for (int i = 0; i < candidateFields.size(); ++i)
 							{
-								if (lsfDlg.listWidget->isItemSelected(lsfDlg.listWidget->item(i)))
+								if (lsfDlg.listWidget->item(i)->isSelected())
 								{
 									index = candidateFields[i].first;
 									break;

@@ -1226,7 +1226,7 @@ struct Tab
 		{
 			int maxWidth = 0;
 			for (int j = 0; j < colContent[i].size(); ++j)
-				maxWidth = std::max(maxWidth, fm.width(colContent[i][j]));
+				maxWidth = std::max(maxWidth, fm.horizontalAdvance(colContent[i][j]));
 			colWidth[i] = maxWidth;
 			totalWidth += maxWidth;
 		}
@@ -1403,7 +1403,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 		//int buttonSize    = static_cast<int>(c_buttonSize * context.renderZoom);
 		{
 			//base box dimension
-			dx = std::max(dx, titleFontMetrics.width(title));
+			dx = std::max(dx, titleFontMetrics.horizontalAdvance(title));
 			dy += margin;		//top vertical margin
 			dy += titleHeight;	//title
 
@@ -1542,7 +1542,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 					dy += margin;	//vertical margin above separator
 					for (int j = 0; j < body.size(); ++j)
 					{
-						dx = std::max(dx, bodyFontMetrics.width(body[j]));
+						dx = std::max(dx, bodyFontMetrics.horizontalAdvance(body[j]));
 						dy += rowHeight; //body line height
 					}
 					dy += margin;	//vertical margin below text
@@ -1776,12 +1776,12 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 					if (labelCol)
 					{
 						//align characters in the middle
-						xShift = (tab.colWidth[c] - QFontMetrics(bodyFont).width(str)) / 2;
+						xShift = (tab.colWidth[c] - QFontMetrics(bodyFont).horizontalAdvance(str)) / 2;
 					}
 					else
 					{
 						//align digits on the right
-						xShift = tab.colWidth[c] - QFontMetrics(bodyFont).width(str);
+						xShift = tab.colWidth[c] - QFontMetrics(bodyFont).horizontalAdvance(str);
 					}
 
 					context.display->displayText(str,

@@ -292,7 +292,7 @@ public:
 	**/
 	static ccGLMatrixTpl<T> FromString(const QString& matText, bool& success)
 	{
-		QStringList valuesStr = matText.simplified().split(QChar(' '), QString::SkipEmptyParts);
+		QStringList valuesStr = matText.simplified().split(QChar(' '), Qt::SkipEmptyParts);
 		if (valuesStr.size() != OPENGL_MATRIX_SIZE)
 		{
 			success = false;

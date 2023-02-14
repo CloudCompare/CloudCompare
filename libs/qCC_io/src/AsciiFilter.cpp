@@ -984,7 +984,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiStream(QTextStream& stream,
 		}
 
 		//we split current line
-		QStringList parts = currentLine.simplified().split(separator, QString::SkipEmptyParts);
+		QStringList parts = currentLine.simplified().split(separator, Qt::SkipEmptyParts);
 
 		int nParts = parts.size();
 		if (nParts > maxPartIndex) //fake loop for easy break

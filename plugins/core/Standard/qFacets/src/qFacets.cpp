@@ -588,7 +588,7 @@ void GetFacetMetaData(ccFacet* facet, FacetMetaData& data)
 {
 	//try to get the facet index from the facet name!
 	{
-		QStringList tokens = facet->getName().split(" ", QString::SkipEmptyParts);
+		QStringList tokens = facet->getName().split(" ", Qt::SkipEmptyParts);
 		if (tokens.size() > 1 && tokens[0] == QString("facet"))
 		{
 			bool ok = true;

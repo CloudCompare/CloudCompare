@@ -199,7 +199,7 @@ CC_FILE_ERROR SalomeHydroFilter::loadFile(const QString& filename, ccHObject& co
 				}
 			}
 
-			QStringList parts = currentLine.simplified().split(QChar(' '), QString::SkipEmptyParts);
+			QStringList parts = currentLine.simplified().split(QChar(' '), Qt::SkipEmptyParts);
 			if (parts.size() == 3)
 			{
 				//(X,Y,Z)

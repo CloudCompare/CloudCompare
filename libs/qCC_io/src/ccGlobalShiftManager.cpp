@@ -383,7 +383,7 @@ bool ccGlobalShiftManager::LoadInfoFromFile(QString filename, std::vector<ShiftI
 			continue;
 
 		//split line in 5 items
-		QStringList tokens = line.split(";", QString::SkipEmptyParts);
+		QStringList tokens = line.split(";", Qt::SkipEmptyParts);
 		if (tokens.size() != 5)
 		{
 			//invalid file

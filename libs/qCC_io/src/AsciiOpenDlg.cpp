@@ -386,7 +386,7 @@ void AsciiOpenDlg::updateTable()
 		//we recognize "//" as the beginning of a comment
 		if (!currentLine.startsWith("//")/* || !currentLine.startsWith("#")*/)
 		{
-			QStringList parts = currentLine.simplified().split(m_separator, QString::SkipEmptyParts);
+			QStringList parts = currentLine.simplified().split(m_separator, Qt::SkipEmptyParts);
 			
 			if (lineCount < DISPLAYED_LINES)
 			{
@@ -647,7 +647,7 @@ void AsciiOpenDlg::updateTable()
 		unsigned assignedQuaternionFlags = 0;
 
 		//split header (if any)
-		QStringList headerParts = m_headerLine.simplified().split(m_separator, QString::SkipEmptyParts);
+		QStringList headerParts = m_headerLine.simplified().split(m_separator, Qt::SkipEmptyParts);
 		bool validHeader = (headerParts.size() >= static_cast<int>(columnsCount));
 		m_ui->extractSFNamesFrom1stLineCheckBox->setEnabled(validHeader); //can we consider the first ignored line as a header?
 		if (!validHeader)
@@ -1171,7 +1171,7 @@ AsciiOpenDlg::Sequence AsciiOpenDlg::getOpenSequence() const
 			&& m_ui->extractSFNamesFrom1stLineCheckBox->isEnabled()
 			&& m_ui->extractSFNamesFrom1stLineCheckBox->isChecked())
 		{
-			headerParts = m_headerLine.simplified().split(m_separator, QString::SkipEmptyParts);
+			headerParts = m_headerLine.simplified().split(m_separator, Qt::SkipEmptyParts);
 		}
 
 		seq.reserve(m_columnsCount - 1);
@@ -1199,7 +1199,7 @@ bool AsciiOpenDlg::safeSequence() const
 		return false;
 
 	AsciiOpenDlg::Sequence seq = getOpenSequence();
-	QStringList headerParts = m_headerLine.simplified().split(m_separator, QString::SkipEmptyParts);
+	QStringList headerParts = m_headerLine.simplified().split(m_separator, Qt::SkipEmptyParts);
 
 	//not enough column headers?
 	if (headerParts.size() < static_cast<int>(seq.size()))

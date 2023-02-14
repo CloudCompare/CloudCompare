@@ -149,7 +149,7 @@ CC_FILE_ERROR OFFFilter::loadFile(const QString& filename, ccHObject& container,
 		return CC_FERR_MALFORMED_FILE;
 
 	//check if the number of vertices/faces/etc. are on the first line (yes it happens :( )
-	QStringList tokens = currentLine.simplified().split(QChar(' '), QString::SkipEmptyParts);
+	QStringList tokens = currentLine.simplified().split(QChar(' '), Qt::SkipEmptyParts);
 	if (tokens.size() == 4)
 	{
 		tokens.removeAt(0);
@@ -163,7 +163,7 @@ CC_FILE_ERROR OFFFilter::loadFile(const QString& filename, ccHObject& container,
 			return CC_FERR_MALFORMED_FILE;
 
 		//read the number of vertices/faces
-		tokens = currentLine.simplified().split(QChar(' '), QString::SkipEmptyParts);
+		tokens = currentLine.simplified().split(QChar(' '), Qt::SkipEmptyParts);
 		if (tokens.size() < 2/*3*/) //should be 3 but we only use the 2 firsts...
 			return CC_FERR_MALFORMED_FILE;
 	}
@@ -190,7 +190,7 @@ CC_FILE_ERROR OFFFilter::loadFile(const QString& filename, ccHObject& container,
 		for (unsigned i = 0; i < vertCount; ++i)
 		{
 			currentLine = GetNextLine(stream);
-			tokens = currentLine.simplified().split(QChar(' '), QString::SkipEmptyParts);
+			tokens = currentLine.simplified().split(QChar(' '), Qt::SkipEmptyParts);
 			if (tokens.size() < 3)
 			{
 				delete vertices;
@@ -248,7 +248,7 @@ CC_FILE_ERROR OFFFilter::loadFile(const QString& filename, ccHObject& container,
 		for (unsigned i = 0; i < triCount; ++i)
 		{
 			currentLine = GetNextLine(stream);
-			tokens = currentLine.simplified().split(QChar(' '), QString::SkipEmptyParts);
+			tokens = currentLine.simplified().split(QChar(' '), Qt::SkipEmptyParts);
 			if (tokens.size() < 3)
 			{
 				delete mesh;

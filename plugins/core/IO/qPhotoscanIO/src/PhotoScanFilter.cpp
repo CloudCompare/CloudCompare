@@ -98,7 +98,7 @@ QString ToName(Sections section)
 
 template<typename T> bool DecodeRotation(const QString& rotationValues, ccGLMatrixTpl<T>& output)
 {
-	QStringList tokens = rotationValues.split(" ", QString::SkipEmptyParts);
+	QStringList tokens = rotationValues.split(" ", Qt::SkipEmptyParts);
 	if (tokens.size() != 9)
 	{
 		return false;
@@ -124,7 +124,7 @@ template<typename T> bool DecodeRotation(const QString& rotationValues, ccGLMatr
 
 template<typename T> bool DecodeTransformation(const QString& transformationValues, ccGLMatrixTpl<T>& output)
 {
-	QStringList tokens = transformationValues.split(" ", QString::SkipEmptyParts);
+	QStringList tokens = transformationValues.split(" ", Qt::SkipEmptyParts);
 	if (tokens.size() != 16)
 	{
 		return false;

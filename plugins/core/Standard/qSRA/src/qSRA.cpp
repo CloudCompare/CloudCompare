@@ -28,7 +28,6 @@
 #include <QFileInfo>
 #include <QFile>
 #include <QMessageBox>
-#include <QTextStream>
 #include <QMainWindow>
 
 //qCC_db

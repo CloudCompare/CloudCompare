@@ -107,7 +107,7 @@ CC_FILE_ERROR SalomeHydroFilter::saveToFile(ccHObject* entity, const QString& fi
 		
 		//a simple empty line is used as separator between each polyline!
 		if (i != 0)
-			outFile << endl;
+			outFile << Qt::endl;
 
 		for (unsigned j=0; j<vertCount; ++j)
 		{
@@ -117,7 +117,7 @@ CC_FILE_ERROR SalomeHydroFilter::saveToFile(ccHObject* entity, const QString& fi
 			CCVector3d Pg = poly->toGlobal3d(*P);
 			outFile << QString::number(Pg.x,'E',c_precision) << " ";
 			outFile << QString::number(Pg.y,'E',c_precision) << " ";
-			outFile << QString::number(Pg.z,'E',c_precision) << endl;
+			outFile << QString::number(Pg.z,'E',c_precision) << Qt::endl;
 		}
 
 		result = CC_FERR_NO_ERROR;

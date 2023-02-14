@@ -90,7 +90,7 @@ static int WritePlanes(ccHObject* rootObject, ccHObject* object, QTextStream& ou
 		}
 
 		//write length of trace associated with this plane
-		out << std::max(P->getXWidth(), P->getYWidth()) << endl;
+		out << std::max(P->getXWidth(), P->getYWidth()) << Qt::endl;
 		++n;
 	}
 	else if (object->isKindOf(CC_TYPES::PLANE)) //not one of our planes, but a plane anyway (so we'll export it)
@@ -127,7 +127,7 @@ static int WritePlanes(ccHObject* rootObject, ccHObject* object, QTextStream& ou
 			out << G.x << "," << G.y << "," << G.z;
 		}
 
-		out << endl;
+		out << Qt::endl;
 
 		++n;
 	}
@@ -197,7 +197,7 @@ static int WriteTraces(ccHObject* object, QTextStream& out, const QString& paren
 				out << endGlobal.z << ",";
 
 				out << cost << ",";
-				out << ccTrace::COST_MODE << endl;
+				out << ccTrace::COST_MODE << Qt::endl;
 			}
 		}
 		++n;
@@ -235,7 +235,7 @@ static int WriteLineations(ccHObject* object, QTextStream& out, const QString& p
 		out << name << ",";
 		out << object->getMetaData("Sx").toString() << "," << object->getMetaData("Sy").toString() << "," << object->getMetaData("Sz").toString() << ",";
 		out << object->getMetaData("Ex").toString() << "," << object->getMetaData("Ey").toString() << "," << object->getMetaData("Ez").toString() << ",";
-		out << object->getMetaData("Trend").toString() << "," << object->getMetaData("Plunge").toString() << "," << object->getMetaData("Length").toString() << endl;
+		out << object->getMetaData("Trend").toString() << "," << object->getMetaData("Plunge").toString() << "," << object->getMetaData("Length").toString() << Qt::endl;
 		++n;
 	}
 
@@ -282,7 +282,7 @@ int WriteTracesSVG(const ccGLCameraParameters& cameraParams, ccHObject* object, 
 		}
 
 		//end polyline
-		out << "\"/>" << endl;
+		out << "\"/>" << Qt::endl;
 
 		++n; //a polyline has been written
 	}
@@ -685,10 +685,10 @@ void ccCompassExport::SaveCSV(ccMainAppInterface* app, const QString& filename)
 		thickness_stream.setRealNumberPrecision(12);
 
 		//write headers
-		plane_stream << "Name,Strike,Dip,Dip_Dir,Cx,Cy,Cz,Nx,Ny,Nz,Sample_Radius,RMS,Gx,Gy,Gz,Length" << endl;
-		trace_stream << "Name,Trace_id,Point_id,Start_x,Start_y,Start_z,End_x,End_y,End_z,Cost,Cost_Mode" << endl;
-		lineation_stream << "Name,Sx,Sy,Sz,Ex,Ey,Ez,Trend,Plunge,Length" << endl;
-		thickness_stream << "Name,Sx,Sy,Sz,Ex,Ey,Ez,Trend,Plunge,Thickness" << endl;
+		plane_stream << "Name,Strike,Dip,Dip_Dir,Cx,Cy,Cz,Nx,Ny,Nz,Sample_Radius,RMS,Gx,Gy,Gz,Length" << Qt::endl;
+		trace_stream << "Name,Trace_id,Point_id,Start_x,Start_y,Start_z,End_x,End_y,End_z,Cost,Cost_Mode" << Qt::endl;
+		lineation_stream << "Name,Sx,Sy,Sz,Ex,Ey,Ez,Trend,Plunge,Length" << Qt::endl;
+		thickness_stream << "Name,Sx,Sy,Sz,Ex,Ey,Ez,Trend,Plunge,Thickness" << Qt::endl;
 
 		//write data for all objects in the db tree (n.b. we loop through the dbRoots children rathern than just passing db_root so the naming is correct)
 		for (unsigned i = 0; i < app->dbRootObject()->getChildrenNumber(); i++)
@@ -803,10 +803,10 @@ void ccCompassExport::SaveSVG(ccMainAppInterface *app, const QString &filename, 
 		int height = std::abs(static_cast<int>(app->getActiveGLWindow()->glHeight() * zoom));
 
 		//write svg header
-		svg_stream << QString::asprintf("<svg width=\"%d\" height=\"%d\">", width, height) << endl;
+		svg_stream << QString::asprintf("<svg width=\"%d\" height=\"%d\">", width, height) << Qt::endl;
 
 		//write the image
-		svg_stream << QString::asprintf("<image height = \"%d\" width = \"%d\" xlink:href = \"data:image/png;base64,", height, width) << ba.toBase64() << "\"/>" << endl;
+		svg_stream << QString::asprintf("<image height = \"%d\" width = \"%d\" xlink:href = \"data:image/png;base64,", height, width) << ba.toBase64() << "\"/>" << Qt::endl;
 
 		//recursively write traces
 		ccGLCameraParameters params;
@@ -823,7 +823,7 @@ void ccCompassExport::SaveSVG(ccMainAppInterface *app, const QString &filename, 
 		//TODO: write scale bar
 
 		//write end tag for svg file
-		svg_stream << "</svg>" << endl;
+		svg_stream << "</svg>" << Qt::endl;
 
 		//close file
 		svg_stream.flush();

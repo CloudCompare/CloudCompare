@@ -23,7 +23,6 @@
 //Qt
 #include <QFile>
 #include <QFileInfo>
-#include <QTextStream>
 #include <QIcon>
 #include <QComboBox>
 

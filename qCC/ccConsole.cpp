@@ -255,7 +255,7 @@ void ccConsole::refresh()
 			//destination: log file
 			if (m_logStream)
 			{
-				*m_logStream << it->first << endl;
+				*m_logStream << it->first << Qt::endl;
 			}
 
 			//destination: console widget

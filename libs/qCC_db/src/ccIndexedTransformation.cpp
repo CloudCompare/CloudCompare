@@ -56,7 +56,7 @@ bool ccIndexedTransformation::toAsciiFile(QString filename, int precision/*=12*/
 	//save transformation first (so that it can be loaded as a ccGLMatrix!)
 	for (unsigned i=0; i<4; ++i)
 	{
-		stream << m_mat[i] << " " << m_mat[i+4] << " " << m_mat[i+8] << " " << m_mat[i+12] << endl;
+		stream << m_mat[i] << " " << m_mat[i+4] << " " << m_mat[i+8] << " " << m_mat[i+12] << Qt::endl;
 	}
 	//save index next
 	stream << m_index;

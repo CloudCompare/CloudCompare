@@ -1033,7 +1033,7 @@ bool ccHistogramWindowDlg::exportToCSV(QString filename) const
 	stream.setRealNumberNotation(QTextStream::FixedNotation);
 
 	//header
-	stream << "Class; Value; Class start; Class end;" << endl;
+	stream << "Class; Value; Class start; Class end;" << Qt::endl;
 
 	//data
 	{
@@ -1051,7 +1051,7 @@ bool ccHistogramWindowDlg::exportToCSV(QString filename) const
 			stream << s_csvSep;
 			stream << minVal + step;	//max value
 			stream << s_csvSep;
-			stream << endl;
+			stream << Qt::endl;
 		}
 	}
 

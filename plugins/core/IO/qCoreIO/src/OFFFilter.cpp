@@ -89,12 +89,12 @@ CC_FILE_ERROR OFFFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	stream.setRealNumberPrecision(12); //TODO: ask the user?
 
 	//header: "OFF"
-	stream << "OFF" << endl;
+	stream << "OFF" << Qt::endl;
 
 	//2nd line: vertices count / faces count / edges count
 	unsigned vertCount = vertices->size();
 	unsigned triCount = mesh->size();
-	stream << vertCount << ' ' << triCount << ' ' << 0 << endl;
+	stream << vertCount << ' ' << triCount << ' ' << 0 << Qt::endl;
 
 	//save vertices
 	{
@@ -102,7 +102,7 @@ CC_FILE_ERROR OFFFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		{
 			const CCVector3* P = vertices->getPoint(i);
 			CCVector3d Pglobal = vertices->toGlobal3d<PointCoordinateType>(*P);
-			stream << Pglobal.x << ' ' << Pglobal.y << ' ' << Pglobal.z << endl;
+			stream << Pglobal.x << ' ' << Pglobal.y << ' ' << Pglobal.z << Qt::endl;
 		}
 	}
 
@@ -111,7 +111,7 @@ CC_FILE_ERROR OFFFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		for (unsigned i = 0; i < triCount; ++i)
 		{
 			const CCCoreLib::VerticesIndexes* tsi = mesh->getTriangleVertIndexes(i);
-			stream << "3 " << tsi->i1 << ' ' << tsi->i2 << ' ' << tsi->i3 << endl;
+			stream << "3 " << tsi->i1 << ' ' << tsi->i2 << ' ' << tsi->i3 << Qt::endl;
 		}
 	}
 

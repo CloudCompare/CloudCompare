@@ -18,7 +18,6 @@
 #include "PhotoScanFilter.h"
 
 //Qt
-#include <QTextStream>
 #include <QXmlStreamReader>
 #include <QStringRef>
 #include <QFileInfo>

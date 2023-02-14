@@ -758,7 +758,7 @@ bool CommandVolume25D::process(ccCommandLineInterface &cmd)
 			QFile txtFile(txtFilename);
 			txtFile.open(QIODevice::WriteOnly | QIODevice::Text);
 			QTextStream txtStream(&txtFile);
-			txtStream << reportInfo.toText() << endl;
+			txtStream << reportInfo.toText() << Qt::endl;
 			txtFile.close();
 		}
 

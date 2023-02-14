@@ -221,7 +221,7 @@ CC_FILE_ERROR STLFilter::saveToASCIIFile(ccGenericMesh* mesh, QFile& theFile, QW
 	CCCoreLib::NormalizedProgress nprogress(pDlg.data(), faceCount);
 
 	QTextStream stream(&theFile);
-	stream << "solid " << mesh->getName() << endl;
+	stream << "solid " << mesh->getName() << Qt::endl;
 	if (theFile.error() != QFile::NoError) //empty names are acceptable!
 	{
 		return CC_FERR_WRITING;
@@ -242,17 +242,17 @@ CC_FILE_ERROR STLFilter::saveToASCIIFile(ccGenericMesh* mesh, QFile& theFile, QW
 		CCVector3 N = (*B - *A).cross(*C - *A);
 
 		//%e = scientific notation
-		stream << "facet normal " << N.x << ' ' << N.y << ' ' << N.z << endl;
-		stream << "outer loop" << endl;
+		stream << "facet normal " << N.x << ' ' << N.y << ' ' << N.z << Qt::endl;
+		stream << "outer loop" << Qt::endl;
 
 		CCVector3d Aglobal = vertices->toGlobal3d<PointCoordinateType>(*A);
-		stream << "vertex " << Aglobal.x << ' ' << Aglobal.y << ' ' << Aglobal.z << endl;
+		stream << "vertex " << Aglobal.x << ' ' << Aglobal.y << ' ' << Aglobal.z << Qt::endl;
 		CCVector3d Bglobal = vertices->toGlobal3d<PointCoordinateType>(*B);
-		stream << "vertex " << Bglobal.x << ' ' << Bglobal.y << ' ' << Bglobal.z << endl;
+		stream << "vertex " << Bglobal.x << ' ' << Bglobal.y << ' ' << Bglobal.z << Qt::endl;
 		CCVector3d Cglobal = vertices->toGlobal3d<PointCoordinateType>(*C);
-		stream << "vertex " << Cglobal.x << ' ' << Cglobal.y << ' ' << Cglobal.z << endl;
-		stream << "endloop" << endl;
-		stream << "endfacet" << endl;
+		stream << "vertex " << Cglobal.x << ' ' << Cglobal.y << ' ' << Cglobal.z << Qt::endl;
+		stream << "endloop" << Qt::endl;
+		stream << "endfacet" << Qt::endl;
 
 		if (theFile.error() != QFile::NoError)
 		{
@@ -266,7 +266,7 @@ CC_FILE_ERROR STLFilter::saveToASCIIFile(ccGenericMesh* mesh, QFile& theFile, QW
 		}
 	}
 
-	stream << "endsolid " << mesh->getName() << endl;
+	stream << "endsolid " << mesh->getName() << Qt::endl;
 	if (theFile.error() != QFile::NoError)
 	{
 		return CC_FERR_WRITING;

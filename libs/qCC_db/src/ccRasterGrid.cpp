@@ -184,6 +184,21 @@ bool ccRasterGrid::init(unsigned w,
 	return true;
 }
 
+ccRasterGrid::InterpolationType ccRasterGrid::InterpolationTypeFromEmptyCellFillOption(EmptyCellFillOption option)
+{
+	switch (option)
+	{
+	case INTERPOLATE_DELAUNAY:
+		return InterpolationType::DELAUNAY;
+	case KRIGING:
+		return InterpolationType::KRIGING;
+	default:
+		break;
+	}
+
+	return InterpolationType::NONE;
+}
+
 //! Index and value
 struct IndexAndValue
 {
@@ -194,8 +209,8 @@ struct IndexAndValue
 bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 								unsigned char Z,
 								ProjectionType projectionType,
-								bool doInterpolateEmptyCells,
-								double maxEdgeLength,
+								InterpolationType emptyCellsInterpolation/*=InterpolationType::NONE*/,
+								void* const interpolationParams/*=nullptr*/,
 								ProjectionType sfProjectionType/*=INVALID_PROJECTION_TYPE*/,
 								ccProgressDialog* progressDialog/*=nullptr*/,
 								int zStdDevSfIndex/*=-1*/)
@@ -624,9 +639,42 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 	updateNonEmptyCellCount();
 
 	//specific case: interpolate the empty cells
-	if (doInterpolateEmptyCells)
+	switch (emptyCellsInterpolation)
 	{
-		interpolateEmptyCells(maxEdgeLength * maxEdgeLength);
+	case InterpolationType::NONE:
+		// do nothing
+		break;
+
+	case InterpolationType::DELAUNAY:
+	{
+		DelaunayInterpolationParams* const params = reinterpret_cast<DelaunayInterpolationParams* const>(interpolationParams);
+		if (params)
+		{
+			interpolateEmptyCells(params->maxEdgeLength * params->maxEdgeLength);
+		}
+		else
+		{
+			ccLog::Error("[Rasterize] Internal error: Delauny interpolation parameters are not set");
+		}
+	}
+	break;
+
+	case InterpolationType::KRIGING:
+	{
+#if 0
+		Kriging::KrigeParams* const params = reinterpret_cast<Kriging::KrigeParams* const>(interpolationParams);
+		if (params)
+		{
+			//TODO
+		}
+		else
+#endif
+		{
+			ccLog::Error("[Rasterize] Internal error: Krigin interpolation parameters are not set");
+		}
+	}
+	break;
+
 	}
 
 	//computation of the average and extreme height values in the grid
@@ -1001,7 +1049,7 @@ void ccRasterGrid::fillEmptyCells(	EmptyCellFillOption fillEmptyCellsStrategy,
 		defaultHeight = maxHeight;
 		break;
 	case FILL_CUSTOM_HEIGHT:
-	case INTERPOLATE: // we still fill the empty cells, as some cells may not be interpolated in the end!
+	case INTERPOLATE_DELAUNAY: // we still fill the empty cells, as some cells may not be interpolated in the end!
 		defaultHeight = customCellHeight;
 		break;
 	case FILL_AVERAGE_HEIGHT:

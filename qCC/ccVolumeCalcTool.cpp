@@ -229,7 +229,7 @@ void ccVolumeCalcTool::groundFillEmptyCellStrategyChanged(int)
 	m_ui->groundEmptyValueDoubleSpinBox->setEnabled( (m_ui->groundComboBox->currentIndex() == 0)
 													 || (fillEmptyCellsStrategy == ccRasterGrid::FILL_CUSTOM_HEIGHT) );
 
-	m_ui->groundMaxEdgeLengthDoubleSpinBox->setEnabled(fillEmptyCellsStrategy == ccRasterGrid::INTERPOLATE);
+	m_ui->groundMaxEdgeLengthDoubleSpinBox->setEnabled(fillEmptyCellsStrategy == ccRasterGrid::INTERPOLATE_DELAUNAY);
 
 	gridIsUpToDate(false);
 }
@@ -241,7 +241,7 @@ void ccVolumeCalcTool::ceilFillEmptyCellStrategyChanged(int)
 	m_ui->ceilEmptyValueDoubleSpinBox->setEnabled( (m_ui->ceilComboBox->currentIndex() == 0)
 												   ||	(fillEmptyCellsStrategy == ccRasterGrid::FILL_CUSTOM_HEIGHT) );
 
-	m_ui->ceilMaxEdgeLengthDoubleSpinBox->setEnabled(fillEmptyCellsStrategy == ccRasterGrid::INTERPOLATE);
+	m_ui->ceilMaxEdgeLengthDoubleSpinBox->setEnabled(fillEmptyCellsStrategy == ccRasterGrid::INTERPOLATE_DELAUNAY);
 
 	gridIsUpToDate(false);
 }
@@ -608,11 +608,28 @@ bool ccVolumeCalcTool::ComputeVolume(	ccRasterGrid& grid,
 			return SendError("Not enough memory", parentWidget);
 		}
 
+		ccRasterGrid::InterpolationType interpolationType = ccRasterGrid::InterpolationTypeFromEmptyCellFillOption(groundEmptyCellFillStrategy);
+		ccRasterGrid::DelaunayInterpolationParams dInterpParams;
+		void* interpolationParams = nullptr;
+		switch (interpolationType)
+		{
+		case ccRasterGrid::InterpolationType::DELAUNAY:
+			dInterpParams.maxEdgeLength = groundMaxEdgeLength;
+			interpolationParams = (void*)&dInterpParams;
+			break;
+		case ccRasterGrid::InterpolationType::KRIGING:
+			//TODO
+			break;
+		default:
+			// do nothing
+			break;
+		}
+
 		if (groundRaster.fillWith(	ground,
 									vertDim,
 									projectionType,
-									groundEmptyCellFillStrategy == ccRasterGrid::INTERPOLATE,
-									groundMaxEdgeLength,
+									interpolationType,
+									interpolationParams,
 									ccRasterGrid::INVALID_PROJECTION_TYPE,
 									pDlg.data()))
 		{
@@ -635,11 +652,28 @@ bool ccVolumeCalcTool::ComputeVolume(	ccRasterGrid& grid,
 			return SendError("Not enough memory", parentWidget);
 		}
 
+		ccRasterGrid::InterpolationType interpolationType = ccRasterGrid::InterpolationTypeFromEmptyCellFillOption(ceilEmptyCellFillStrategy);
+		ccRasterGrid::DelaunayInterpolationParams dInterpParams;
+		void* interpolationParams = nullptr;
+		switch (interpolationType)
+		{
+		case ccRasterGrid::InterpolationType::DELAUNAY:
+			dInterpParams.maxEdgeLength = ceilMaxEdgeLength;
+			interpolationParams = (void*)&dInterpParams;
+			break;
+		case ccRasterGrid::InterpolationType::KRIGING:
+			//TODO
+			break;
+		default:
+			// do nothing
+			break;
+		}
+
 		if (ceilRaster.fillWith(ceil,
 								vertDim,
 								projectionType,
-								ceilEmptyCellFillStrategy == ccRasterGrid::INTERPOLATE,
-								ceilMaxEdgeLength,
+								interpolationType,
+								interpolationParams,
 								ccRasterGrid::INVALID_PROJECTION_TYPE,
 								pDlg.data()))
 		{

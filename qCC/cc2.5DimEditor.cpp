@@ -263,7 +263,7 @@ ccRasterGrid::EmptyCellFillOption cc2Point5DimEditor::getFillEmptyCellsStrategy(
 	case 4:
 		return ccRasterGrid::FILL_CUSTOM_HEIGHT;
 	case 5:
-		return ccRasterGrid::INTERPOLATE;
+		return ccRasterGrid::INTERPOLATE_DELAUNAY;
 	default:
 		//shouldn't be possible for this option!
 		assert(false);

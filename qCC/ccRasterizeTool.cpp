@@ -434,14 +434,14 @@ void ccRasterizeTool::fillEmptyCellStrategyChanged(int)
 
 	// empty cell value
 	{
-		bool active = (fillEmptyCellsStrategy == ccRasterGrid::FILL_CUSTOM_HEIGHT) || (fillEmptyCellsStrategy == ccRasterGrid::INTERPOLATE);
+		bool active = (fillEmptyCellsStrategy == ccRasterGrid::FILL_CUSTOM_HEIGHT) || (fillEmptyCellsStrategy == ccRasterGrid::INTERPOLATE_DELAUNAY);
 		m_UI->emptyValueDoubleSpinBox->setEnabled(active);
 		m_UI->emptyValueDoubleSpinBox->setVisible(active);
 	}
 
 	// max edge length
 	{
-		m_UI->maxEdgeLengthDoubleSpinBox->setEnabled(fillEmptyCellsStrategy == ccRasterGrid::INTERPOLATE);
+		m_UI->maxEdgeLengthDoubleSpinBox->setEnabled(fillEmptyCellsStrategy == ccRasterGrid::INTERPOLATE_DELAUNAY);
 	}
 
 	gridIsUpToDate(false);
@@ -819,8 +819,23 @@ bool ccRasterizeTool::updateGrid(bool projectSFs/*=false*/)
 	//main parameters
 	ccRasterGrid::ProjectionType projectionType = getTypeOfProjection();
 	ccRasterGrid::ProjectionType sfProjectionType = projectSFs ? getTypeOfSFProjection() : ccRasterGrid::INVALID_PROJECTION_TYPE;
-	bool interpolateEmptyCells = (getFillEmptyCellsStrategy(m_UI->fillEmptyCellsComboBox) == ccRasterGrid::INTERPOLATE);
-	double maxEdgeLength = m_UI->maxEdgeLengthDoubleSpinBox->value();
+
+	ccRasterGrid::InterpolationType interpolationType = ccRasterGrid::InterpolationTypeFromEmptyCellFillOption(getFillEmptyCellsStrategy(m_UI->fillEmptyCellsComboBox));
+	ccRasterGrid::DelaunayInterpolationParams dInterpParams;
+	void* interpolationParams = nullptr;
+	switch (interpolationType)
+	{
+	case ccRasterGrid::InterpolationType::DELAUNAY:
+		dInterpParams.maxEdgeLength = m_UI->maxEdgeLengthDoubleSpinBox->value();
+		interpolationParams = (void*)&dInterpParams;
+		break;
+	case ccRasterGrid::InterpolationType::KRIGING:
+		//TODO
+		break;
+	default:
+		// do nothing
+		break;
+	}
 
 	//cloud bounding-box --> grid size
 	ccBBox box = getCustomBBox();
@@ -888,8 +903,8 @@ bool ccRasterizeTool::updateGrid(bool projectSFs/*=false*/)
 	if (!m_grid.fillWith(	m_cloud,
 							Z,
 							projectionType,
-							interpolateEmptyCells,
-							maxEdgeLength,
+							interpolationType,
+							interpolationParams,
 							sfProjectionType,
 							&pDlg,
                             zStdDevSfIndex))
@@ -1441,7 +1456,7 @@ bool ccRasterizeTool::ExportGeoTiff(const QString& outputFilename,
 			emptyCellHeight = grid.maxHeight;
 			break;
 		case ccRasterGrid::FILL_CUSTOM_HEIGHT:
-		case ccRasterGrid::INTERPOLATE:
+		case ccRasterGrid::INTERPOLATE_DELAUNAY:
 			emptyCellHeight = customHeightForEmptyCells;
 			break;
 		case ccRasterGrid::FILL_AVERAGE_HEIGHT:
@@ -1947,7 +1962,7 @@ ccRasterGrid::EmptyCellFillOption ccRasterizeTool::getFillEmptyCellsStrategyExt(
 		emptyCellsHeight = m_grid.maxHeight;
 		break;
 	case ccRasterGrid::FILL_CUSTOM_HEIGHT:
-	case ccRasterGrid::INTERPOLATE:
+	case ccRasterGrid::INTERPOLATE_DELAUNAY:
 		{
 			double customEmptyCellsHeight = getCustomHeightForEmptyCells();
 			//update min and max height by the way (only if there are invalid cells ;)

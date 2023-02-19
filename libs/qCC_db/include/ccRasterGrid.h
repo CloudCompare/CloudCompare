@@ -151,6 +151,18 @@ struct QCC_DB_LIB_API ccRasterGrid
 							INVALID_PROJECTION_TYPE		= 255,
 	};
 
+	//! Types of interpolation
+	enum class InterpolationType {	NONE = 0,
+									DELAUNAY = 1,
+									KRIGING = 2
+	};
+
+	//! Delaunay interpolation parameter(s)
+	struct DelaunayInterpolationParams
+	{
+		double maxEdgeLength = 1.0;
+	};
+
 	//! Fills the grid with a point cloud
 	/** Since version 2.8, we are using the "PixelIsPoint" convention
 		(contrarily to what was written in the code comments so far!).
@@ -159,8 +171,8 @@ struct QCC_DB_LIB_API ccRasterGrid
 	bool fillWith(	ccGenericPointCloud* cloud,
 					unsigned char projectionDimension,
 					ProjectionType projectionType,
-					bool doInterpolateEmptyCells,
-					double maxEdgeLength,
+					InterpolationType emptyCellsInterpolation = InterpolationType::NONE,
+					void* const interpolationParams = nullptr,
 					ProjectionType sfProjectionType = INVALID_PROJECTION_TYPE,
 					ccProgressDialog* progressDialog = nullptr,
 					int zStdDevSfIndex = -1);
@@ -171,8 +183,12 @@ struct QCC_DB_LIB_API ccRasterGrid
 								FILL_MAXIMUM_HEIGHT		= 2,
 								FILL_CUSTOM_HEIGHT		= 3,
 								FILL_AVERAGE_HEIGHT		= 4,
-								INTERPOLATE				= 5,
+								INTERPOLATE_DELAUNAY	= 5,
+								KRIGING					= 6,
 	};
+
+	//! Converts the empty cells fill option to the corresponding interpolation type
+	static InterpolationType InterpolationTypeFromEmptyCellFillOption(EmptyCellFillOption option);
 
 	//! Fills the empty cells
 	void fillEmptyCells(EmptyCellFillOption fillEmptyCellsStrategy,

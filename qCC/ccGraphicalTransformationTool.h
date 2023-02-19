@@ -103,10 +103,10 @@ protected:
 	//! Updates the axis center of rotation to the ref object in adv rotate/translate mode
 	void advRefAxisRadioToggled(bool state);
 	
-	//! Enable/disable incremental translation field in accordance to the state of tx/ty/tz checkboxes
+	//! Enables/disables incremental translation field in accordance with the state of tx/ty/tz checkboxes
 	void incrementalTranslationToggle();
 
-	//! Enable/disable incremental rotation field in accordance to the state of the rotComboBox
+	//! Enables/disables incremental rotation field in accordance with the state of the rotComboBox
 	void incrementalRotationToggle(const rotComboBoxItems & selectedRotationItem);
 
 	//! Updates the axis center of rotation to the object center in adv rotate/translate mode

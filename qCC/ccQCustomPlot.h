@@ -105,7 +105,7 @@ public:
 
 		QColor color;
 	};
-	typedef QMap<double, QCPColoredBarData> QCPColoredBarDataMap;
+	typedef QMultiMap<double, QCPColoredBarData> QCPColoredBarDataMap;
 
 	QCPColoredBars(QCPAxis *keyAxis, QCPAxis *valueAxis) : QCPBars(keyAxis,valueAxis) {}
 	
@@ -131,7 +131,7 @@ public:
 			newData.value = value[i];
 			if (colors.size() > i)
 				newData.color = colors[i];
-			m_coloredData.insertMulti(newData.key, newData);
+			m_coloredData.insert(newData.key, newData);
 			QCPBars::addData(newData.key,newData.value);
 		}
 	}

@@ -3402,7 +3402,7 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(bool withGLfeatures, ProjectionM
 	//get half bbox diagonal length
 	double bbHalfDiag = visibleObjectsBBox.getDiagNormd() / 2;
 
-	// detrmine the min and max distance based on the current view matrix
+	// determine the min and max distance based on the current view matrix
 	ccGLMatrixd viewMatd = m_viewportParams.computeViewMatrix();
 
 	double zMin = std::numeric_limits<double>::quiet_NaN();
@@ -3473,6 +3473,8 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(bool withGLfeatures, ProjectionM
 	double zNear = zMinDisplayed;
 	double zFar = zMaxDisplayed;
 
+	double epsilon = std::max(bbHalfDiag / 1000.0, 1.0e-6);
+
 	ccGLMatrixd projMatrix;
 	if (m_viewportParams.perspectiveView)
 	{
@@ -3482,13 +3484,20 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(bool withGLfeatures, ProjectionM
 			// no object in front of the camera! (or too small)
 			// use some default values
 			zFar = minZFar;
-			zNear = static_cast<double>(CCCoreLib::ZERO_TOLERANCE_F);
+			zNear = epsilon;
 		}
 		else
 		{
 			zNear = std::max(zMinDisplayed, zFar * m_viewportParams.zNearCoef);
 		}
-		zNear = std::min(zNear, zFar / 2);		// zNear can't be too close to zFar (for the EDL filter ;)
+
+		double delta = zFar / 2;
+		if (zFar - zNear < delta)
+		{
+			// zNear can't be too close to zFar (for the EDL filter ;)
+			zNear -= delta / 2;
+			zFar += delta / 2;
+		}
 
 		double distanceToHalfWidthRatio = (m_bubbleViewModeEnabled ? std::tan(CCCoreLib::DegreesToRadians(m_bubbleViewFov_deg / 2.0)) : m_viewportParams.computeDistanceToHalfWidthRatio());
 		double xMax = zNear * distanceToHalfWidthRatio;
@@ -3522,8 +3531,8 @@ ccGLMatrixd ccGLWindow::computeProjectionMatrix(bool withGLfeatures, ProjectionM
 	}
 	else
 	{
-		zFar = std::max(zFar, zNear + static_cast<double>(CCCoreLib::ZERO_TOLERANCE_F));
-
+		zFar += epsilon;
+		zNear -= epsilon;
 		//ccLog::Print(QString("cameraCenterToPivotDist = %0 / zNear = %1 / zFar = %2").arg(cameraCenterToPivotDist).arg(zNear).arg(zFar));
 
 		double xMax = std::abs(m_viewportParams.getFocalDistance()) * m_viewportParams.computeDistanceToHalfWidthRatio();

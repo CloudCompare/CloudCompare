@@ -82,6 +82,16 @@
        </item>
        <item>
         <property name="text">
+         <string>min</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>max</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
          <string>square root</string>
         </property>
        </item>

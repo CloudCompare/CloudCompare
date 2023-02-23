@@ -44,23 +44,25 @@ public:
 						MINUS		= 1,
 						MULTIPLY	= 2,
 						DIVIDE		= 3,
+						MIN			= 4,
+						MAX			= 5,
 						/* Operations requiring only one SF */
-						SQRT		= 4,
-						POW2		= 5,
-						POW3		= 6,
-						EXP			= 7,
-						LOG			= 8,
-						LOG10		= 9,
-						COS			= 10,
-						SIN			= 11,
-						TAN			= 12,
-						ACOS		= 13,
-						ASIN		= 14,
-						ATAN		= 15,
-						INT			= 16,
-						INVERSE		= 17,
-						SET			= 18,
-						ABS			= 19,
+						SQRT		= 6,
+						POW2		= 7,
+						POW3		= 8,
+						EXP			= 9,
+						LOG			= 10,
+						LOG10		= 11,
+						COS			= 12,
+						SIN			= 13,
+						TAN			= 14,
+						ACOS		= 15,
+						ASIN		= 16,
+						ATAN		= 17,
+						INT			= 18,
+						INVERSE		= 19,
+						SET			= 20,
+						ABS			= 21,
 						/* Invalid enum. (always last) */
 						INVALID		= 255
 	};
@@ -95,7 +97,7 @@ public:
 		\param op operation
 		\param sf1Idx first (or only) scalar field index
 		\param inplace whether the operation should be applied in place (SF1). Otherwise a new SF will be created.
-		\param sf2 secondary scalar field / value (only for PLUS, MINUS, MULTIPLY and DIVIDE operations)
+		\param sf2 secondary scalar field / value (only for PLUS, MINUS, MULTIPLY, DIVIDE, MIN and MAX operations)
 		\param parent parent widget (optional)
 		\return success
 	**/

@@ -130,6 +130,10 @@ v2.13.alpha (???) - (??/??/????)
 		- the scalar fields are now displayed in a 'list widget' in case there are too many to fit in the screen
 
 	- SF Arithmetic tool:
+		- New operation: 'MIN' (to get the minimum values between 2 scalar fields)
+			- this operation is also accessible via the command line (with the -SF_ARITHMETIC command)
+		- New operation: 'MAX' (to get the maximum values between 2 scalar fields)
+			- this operation is also accessible via the command line (with the -SF_ARITHMETIC command)
 		- New operation: 'SET' (to set a constant value)
 			- this operation is also accessible via the command line (with the -SF_OP command)
 		- New operation: 'ABS' (to compute the absolue value)

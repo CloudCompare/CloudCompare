@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/CC">
+    <file>images/gearIcon.png</file>
     <file>images/hashtag.png</file>
     <file>images/raster_grid.jpg</file>
     <file>images/donate.png</file>
@@ -139,7 +140,7 @@
     <file>images/typeXCoordinate.png</file>
     <file>images/typeYCoordinate.png</file>
     <file>images/typeZCoordinate.png</file>
-	<file>images/typeQuaternion.png</file>
+    <file>images/typeQuaternion.png</file>
     <file>images/ccTracePolyline.png</file>
     <file>images/qCompass.png</file>
     <file>images/mapIcon.png</file>

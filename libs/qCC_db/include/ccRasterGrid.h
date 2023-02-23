@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,12 +17,12 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_RASTER_GRID_HEADER
-#define CC_RASTER_GRID_HEADER
-
 //local
 #include "qCC_db.h"
 #include "ccBBox.h"
+
+//CCCoreLib
+#include <Kriging.h>
 
 //system
 #include <limits>
@@ -158,9 +160,17 @@ struct QCC_DB_LIB_API ccRasterGrid
 	};
 
 	//! Delaunay interpolation parameter(s)
-	struct DelaunayInterpolationParams
+	struct QCC_DB_LIB_API DelaunayInterpolationParams
 	{
 		double maxEdgeLength = 1.0;
+	};
+
+	//! Kriging parameters
+	struct QCC_DB_LIB_API KrigingParams
+	{
+		Kriging::KrigeParams params;
+		bool autoGuess = true;
+		int kNN = 8;
 	};
 
 	//! Fills the grid with a point cloud
@@ -172,7 +182,7 @@ struct QCC_DB_LIB_API ccRasterGrid
 					unsigned char projectionDimension,
 					ProjectionType projectionType,
 					InterpolationType emptyCellsInterpolation = InterpolationType::NONE,
-					void* const interpolationParams = nullptr,
+					void* interpolationParams = nullptr, // either nullptr, DelaunayInterpolationParams* or KrigingParams*
 					ProjectionType sfProjectionType = INVALID_PROJECTION_TYPE,
 					ccProgressDialog* progressDialog = nullptr,
 					int zStdDevSfIndex = -1);
@@ -205,6 +215,13 @@ struct QCC_DB_LIB_API ccRasterGrid
 		\param maxSquareEdgeLength Max (square) edge length to filter large triangles during the interpolation process
 	**/
 	bool interpolateEmptyCells(double maxSquareEdgeLength);
+
+	//! Interpolates the empty cells with the Kriging algorithm
+	bool fillGridCellsWithKriging(	unsigned char Z,
+									int knn,
+									Kriging::KrigeParams& krigeParams,
+									bool useInputParams,
+									ccProgressDialog* progressDialog = nullptr);
 
 	//! Sets valid
 	inline void setValid(bool state) { valid = state; }
@@ -270,5 +287,3 @@ struct QCC_DB_LIB_API ccRasterGrid
 	//! Whether the grid is valid/up-to-date
 	bool valid;
 };
-
-#endif //CC_RASTER_GRID_HEADER

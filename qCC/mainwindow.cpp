@@ -4626,7 +4626,7 @@ void MainWindow::doActionRasterize()
 	}
 
 	ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent);
-	ccRasterizeTool rasterizeTool(cloud,this);
+	ccRasterizeTool rasterizeTool(cloud, this);
 	rasterizeTool.exec();
 }
 

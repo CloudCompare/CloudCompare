@@ -102,11 +102,11 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 
 	//set all 'userData' to -1 (i.e. unfused cells)
 	{
-		for (size_t i=0; i<leaves.size(); ++i)
+		for (auto& leaf : leaves)
 		{
-			leaves[i]->userData = -1;
+			leaf->userData = -1;
 			//check by the way that the plane normal is unit!
-			assert(static_cast<double>(std::abs(CCVector3(leaves[i]->planeEq).norm2()) - 1.0) < 1.0e-6);
+			assert(static_cast<double>(std::abs(CCVector3(leaf->planeEq).norm2()) - 1.0) < 1.0e-6);
 		}
 	}
 
@@ -118,9 +118,8 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 	bool cancelled = false;
 	int macroIndex = 1; //starts at 1 (0 is reserved for cells already above the max error)
 	{
-		for (size_t i=0; i<leaves.size(); ++i)
+		for (auto& currentCell : leaves)
 		{
-			ccKdTree::Leaf* currentCell = leaves[i];
 			if (currentCell->error >= maxError)
 				currentCell->userData = 0; //0 = special group for cells already above the user defined threshold!
 
@@ -177,7 +176,7 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 
 					//add those (new) neighbors to the 'visitedNeighbors' set
 					//and to the candidates set by the way if they are not yet there
-					for (ccKdTree::LeafSet::iterator it=neighbors.begin(); it != neighbors.end(); ++it)
+					for (ccKdTree::LeafSet::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
 					{
 						ccKdTree::Leaf* neighbor = *it;
 						std::pair<ccKdTree::LeafSet::iterator,bool> ret = visitedNeighbors.insert(neighbor);
@@ -215,7 +214,7 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 					//we will keep track of the best fused 'couple' at each pass
 					std::list<Candidate>::iterator bestIt = candidates.end();
 					CCCoreLib::ReferenceCloud* bestFused = nullptr;
-					CCVector3 bestNormal(0,0,0);
+					CCVector3 bestNormal(0, 0, 0);
 					double bestError = -1.0;
 
 					unsigned skipCount = 0;

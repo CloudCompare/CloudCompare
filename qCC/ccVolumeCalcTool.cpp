@@ -618,7 +618,8 @@ bool ccVolumeCalcTool::ComputeVolume(	ccRasterGrid& grid,
 			interpolationParams = (void*)&dInterpParams;
 			break;
 		case ccRasterGrid::InterpolationType::KRIGING:
-			//TODO
+			// not supported yet
+			assert(false);
 			break;
 		default:
 			// do nothing
@@ -662,7 +663,8 @@ bool ccVolumeCalcTool::ComputeVolume(	ccRasterGrid& grid,
 			interpolationParams = (void*)&dInterpParams;
 			break;
 		case ccRasterGrid::InterpolationType::KRIGING:
-			//TODO
+			// not supported yet
+			assert(false);
 			break;
 		default:
 			// do nothing

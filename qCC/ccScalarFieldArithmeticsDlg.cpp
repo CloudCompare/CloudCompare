@@ -34,9 +34,9 @@
 #include <cmath>
 
 //number of valid operations
-constexpr unsigned s_opCount = 20;
+constexpr unsigned s_opCount = 22;
 //operation names
-constexpr char s_opNames[s_opCount][8] = {"add", "sub", "mult", "div", "sqrt", "pow2", "pow3", "exp", "log", "log10", "cos", "sin", "tan", "acos", "asin", "atan", "int", "inverse", "set", "abs" };
+constexpr char s_opNames[s_opCount][8] = {"add", "sub", "mult", "div", "min", "max", "sqrt", "pow2", "pow3", "exp", "log", "log10", "cos", "sin", "tan", "acos", "asin", "atan", "int", "inverse", "set", "abs" };
 
 //semi persitent
 static int s_previouslySelectedOperationIndex = 1;
@@ -102,7 +102,7 @@ void ccScalarFieldArithmeticsDlg::onOperationIndexChanged(int index)
 	}
 	else
 	{
-		m_ui->sf2ComboBox->setEnabled(index <= DIVIDE); //only the 4 first operations are	applied with 2 SFs
+		m_ui->sf2ComboBox->setEnabled(index <= MAX); //only the 6 first operations are	applied with 2 SFs
 		m_ui->updateSF1CheckBox->setEnabled(true);
 	}
 }
@@ -165,6 +165,10 @@ QString ccScalarFieldArithmeticsDlg::GetOperationName(Operation op, const QStrin
 		return QString("%1 * %2").arg(sf1, sf2);
 	case DIVIDE:
 		return QString("%1 / %2").arg(sf1, sf2);
+	case MIN:
+		return QString("min(%1, %2)").arg(sf1, sf2);
+	case MAX:
+		return QString("max(%1, %2)").arg(sf1, sf2);
 	case SET:
 		return sf1;
 	default:
@@ -234,7 +238,7 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 	}
 
 	CCCoreLib::ScalarField* sf2 = nullptr;
-	if (op <= DIVIDE)
+	if (op <= MAX)
 	{
 		if (!sf2Desc || (!sf2Desc->isConstantValue && sf2Desc->sfIndex >= static_cast<int>(sfCount)))
 		{
@@ -446,6 +450,25 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 			case ABS:
 				val = std::abs(val1);
 				break;
+			case MIN:
+			case MAX:
+			{
+				ScalarType val2 = 0;
+				if (sf2Desc->isConstantValue)
+				{
+					val2 = sf2Desc->constantValue;
+				}
+				else
+				{
+					val2 = sf2->getValue(i);
+				}
+				if (ccScalarField::ValidValue(val2))
+				{
+					val = op == MIN ? std::min(val1, val2) : std::max(val1, val2);
+				}
+			}
+			break;
+
 			default:
 				assert(false);
 				break;

@@ -1374,6 +1374,16 @@ void MainWindow::doActionApplyScale()
 													shift.z*scales.z) );
 			}
 
+			//specific case for polyline vertices
+			if (cloud->getParent() && cloud->getParent()->isA(CC_TYPES::POLY_LINE))
+			{
+				ccPolyline* poly = static_cast<ccPolyline*>(cloud->getParent());
+				if (poly->getAssociatedCloud() == cloud)
+				{
+					poly->invalidateBoundingBox();
+				}
+			}
+
 			ent->prepareDisplayForRefresh_recursive();
 		}
 	}

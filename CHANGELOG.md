@@ -73,7 +73,7 @@ v2.13.alpha (???) - (??/??/????)
 			with graphical segmentation, cross section tool (for clouds only), subsampling, filter by SF value, etc.
 
 	- Rasterize:
-		- new option to interpolate the grid with Kriging
+		- new option to fill the empty cells with Kriging
 		- various improvements and glitch fixes
 		- if a scalar field projection option is chosen, all SF and colors will be projected at once so that all layers are valid right away
 			(no need to 'update' the grid several times)
@@ -84,9 +84,12 @@ v2.13.alpha (???) - (??/??/????)
 								obtained from an already existing scalar field, which must be selected by the user)
 		- statistics can now be computed on the altitudes and/or all scalar fields
 		- new statistics: median, percentile (with custom percentage) and nuùber of unique values inside a cell
-		- new command line sub-options (to be used with -PROJ or -SF_PROJ)
-			- -MED 
-			- -INV_VAR (+ std. dev. SF index or name)
+		- new command line sub-options to be used after -PROJ or -SF_PROJ:
+			- MED 
+			- INV_VAR (+ std. dev. SF index or name)
+		- new command line sub-option:
+		    - -EMPTY_FILL KRIGING
+			- -KRIGING_KNN {value} (to set the number of neighbors for the Kriging algorithm)
 
 	- Edit > Color > Set unique & Edit > Color > Colorize
 		- CC will now remember the last input color
@@ -130,6 +133,10 @@ v2.13.alpha (???) - (??/??/????)
 		- the scalar fields are now displayed in a 'list widget' in case there are too many to fit in the screen
 
 	- SF Arithmetic tool:
+		- New operation: 'MIN' (to get the minimum values between 2 scalar fields)
+			- this operation is also accessible via the command line (with the -SF_ARITHMETIC command)
+		- New operation: 'MAX' (to get the maximum values between 2 scalar fields)
+			- this operation is also accessible via the command line (with the -SF_ARITHMETIC command)
 		- New operation: 'SET' (to set a constant value)
 			- this operation is also accessible via the command line (with the -SF_OP command)
 		- New operation: 'ABS' (to compute the absolue value)

@@ -557,6 +557,11 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 		//merge display parameters
 		showColors(colorsShown() || addedCloud->colorsShown());
 
+		if (hasColors())
+		{
+			m_rgbaColors->resize(pointCountBefore); // just in case
+		}
+
 		//if the added cloud has no color
 		if (!addedCloud->hasColors())
 		{
@@ -1805,6 +1810,7 @@ bool ccPointCloud::setColor(const ccColor::Rgba& col)
 			return false;
 
 	assert(m_rgbaColors);
+	m_rgbaColors->resize(size()); // reserve might have set a capacity larger than the cloud size!
 	m_rgbaColors->fill(col);
 
 	//update the grid colors as well!
